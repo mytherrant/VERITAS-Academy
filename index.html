@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>VÉRITAS v39 — Système de Gestion Scolaire Professionnel</title>
+<title>VÉRITAS v1.0 — Système de Gestion Scolaire Professionnel</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
@@ -969,7 +969,7 @@ body { font-size: 15px !important; }
   .vsec { padding: 32px 40px!important; }
 }
 
-/* Vidéo héro - conteneur responsive (v39.2 - remplit la cellule grid) */
+/* Vidéo héro - conteneur responsive (v1.0 - remplit la cellule grid) */
 .vhero-video-wrap {
   position: relative; width: 100%; height: 100%; overflow: hidden;
   background: #0F172A;
@@ -1099,7 +1099,7 @@ body { font-size: 15px !important; }
 .mgr-empty{background:#F8FAFF;border:2px dashed #C7D2FE;border-radius:16px;padding:32px;text-align:center;color:#9CA3AF;font-size:13px}
 
 /* ═══════════════════════════════════════════════════════════
-   VÉRITAS v39.2 DESIGN PREMIUM — Animations, 3D, Transitions
+   VÉRITAS v1.0.2 DESIGN PREMIUM — Animations, 3D, Transitions
    Inspiré du taste-skill (high-end design engineering)
    ═══════════════════════════════════════════════════════════ */
 
@@ -1842,7 +1842,7 @@ tr:hover td {
 </div>
 <!-- ═══ FOOTER PORTAIL VISITEUR ═══ -->
 <div style="background:#0D1B3E;padding:6px 16px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;border-top:1px solid rgba(255,201,60,.12)">
-  <span style="font-family:Poppins,sans-serif;font-size:10px;color:#FFC93C;font-weight:600">VÉRITAS v39</span>
+  <span style="font-family:Poppins,sans-serif;font-size:10px;color:#FFC93C;font-weight:600">VÉRITAS v1.0</span>
   <span style="font-size:10px;color:rgba(255,255,255,.35)">© Mythe Errant 2026</span>
   <span style="font-size:10px;color:rgba(255,255,255,.25)">Cameroun · MINESEC</span>
 </div>
@@ -1863,7 +1863,7 @@ tr:hover td {
         <div class="lsi"><div class="lsn" id="lStat1">—</div><div class="lsl">Élèves</div></div>
         <div class="lsi"><div class="lsn" id="lStat2">—</div><div class="lsl">Enseignants</div></div>
       </div>
-      <div class="lyr">© Mythe Errant 2026 · VÉRITAS v39</div>
+      <div class="lyr">© Mythe Errant 2026 · VÉRITAS v1.0</div>
     </div>
     <div class="lr">
       <div class="lrt">Connexion</div>
@@ -1908,7 +1908,7 @@ tr:hover td {
       <div class="sbu" id="sbu"></div>
     </div>
     <div class="sbnav" id="snav"></div>
-    <div class="sbft">VÉRITAS v39<div class="sbfi" id="sbfi"></div><div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:3px;letter-spacing:.5px">© Mythe Errant 2026</div></div>
+    <div class="sbft">VÉRITAS v1.0<div class="sbfi" id="sbfi"></div><div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:3px;letter-spacing:.5px">© Mythe Errant 2026</div></div>
   </div>
   <div class="main">
     <div class="tb">
@@ -2409,7 +2409,7 @@ function confirmProductOrder(title,price){
   DB.visitorOrders.push({id:gid(),bookTitle:title,nom:nom,tel:tel,date:today(),statut:'En attente',prix:finalPrice,promo:promo});
   save();
   var mov=document.querySelector('.mov');if(mov)mov.remove();
-  // v39.2 : ouvrir le modal de paiement unifié
+  // v1.0 : ouvrir le modal de paiement unifié
   setTimeout(function(){
     if(typeof openPaymentModal === 'function' && finalPrice > 0){
       openPaymentModal({
@@ -2466,7 +2466,7 @@ function confirmVisitorOrder(bid){
     date:today(),statut:'En attente',prix:finalPrix});
   save();
   const mov=document.querySelector('.mov');if(mov)mov.remove();
-  // v39.2 : ouvrir le modal de paiement unifié
+  // v1.0 : ouvrir le modal de paiement unifié
   setTimeout(function(){
     if(typeof openPaymentModal === 'function' && finalPrix > 0){
       openPaymentModal({
@@ -4680,7 +4680,7 @@ function consulterGratuit(itemId){
   viewResource(item, true); // true = free access
 }
 
-// v39.2 : Aperçu rapide d'un contenu e-learning (sans téléchargement)
+// v1.0 : Aperçu rapide d'un contenu e-learning (sans téléchargement)
 function previewElContent(itemId){
   var el=DB.elearning||defaultDB().elearning;
   var item=(el.contenus||[]).find(function(c){return c.id===itemId;});
@@ -4841,7 +4841,7 @@ function validerAbonnement(planId){
     'admin'
   );
   save();cm();
-  // v39.2 : ouvrir le modal de paiement unifié au lieu d'un simple toast+WhatsApp
+  // v1.0 : ouvrir le modal de paiement unifié au lieu d'un simple toast+WhatsApp
   var montant = plan ? (plan.prix||0) : 0;
   setTimeout(function(){
     if(typeof openPaymentModal === 'function' && montant > 0){
@@ -4886,7 +4886,7 @@ function validerCommandeContenu(itemId){
   var item=(DB.elearning.contenus||[]).find(function(c){return c.id===itemId;});
   DB.elearning.commandes.push({id:gid(),contenu:itemId,nom:nom,tel:tel,date:today(),statut:'En attente',prix:item?item.prix:0});
   save();cm();
-  // v39.2 : ouvrir le modal de paiement unifié
+  // v1.0 : ouvrir le modal de paiement unifié
   var montant = item ? (item.prix||0) : 0;
   setTimeout(function(){
     if(typeof openPaymentModal === 'function' && montant > 0){
@@ -5674,7 +5674,7 @@ function confirmerAchat(bid){
   const ref='BOOK-'+Math.floor(Math.random()*90000+10000);
   DB.bookPurchases.push({id:gid(),eid:s.id,bid,date:today(),mnt:b.prix,statut:'En attente de paiement',ref});
   save();cm();re();
-  // v39.2 : ouvrir directement le modal de paiement au lieu d'un simple toast
+  // v1.0 : ouvrir directement le modal de paiement au lieu d'un simple toast
   setTimeout(function(){
     if(typeof openPaymentModal === 'function'){
       openPaymentModal({
@@ -8053,7 +8053,7 @@ function mManageTicker(){
     '<button class="btn bo" onclick="cm()">Fermer</button>');
 }
 
-// ─── INTRO VIDEO (v39.2) ─────────────────────────────────────────
+// ─── INTRO VIDEO (v1.0) ─────────────────────────────────────────
 // Nouveau comportement : la vidéo remplit entièrement sa cellule (même dimension que le
 // panneau Hero de gauche). Overlay texte transparent posé sur la vidéo.
 // Autoplay : muet au démarrage (imposé par les navigateurs), bouton 🔊 pour activer le son.
@@ -10031,7 +10031,7 @@ function _importQCMDo(){
 // ══════════════════════════════════════════════════════════════════
 // JEUX & QUIZ — ŒUVRES LITTÉRAIRES AU PROGRAMME MINESEC
 // 3e, 2nde, 1ère, Terminale — QCM + Pendu + Vrai/Faux + Texte à trous
-// © Mythe Errant 2026 · VÉRITAS v39
+// © Mythe Errant 2026 · VÉRITAS v1.0
 // ══════════════════════════════════════════════════════════════════
 
 // ── BASE DE DONNÉES LITTÉRAIRE ─────────────────────────────────────
@@ -10484,7 +10484,7 @@ function _showLittCarte(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe||!oe.carte){toast("Carte non disponible","warn");return;}
   var c=oe.carte;
-  // ── v39.2 : rendu amélioré, items espacés sans chevauchement ──
+  // ── v1.0 : rendu amélioré, items espacés sans chevauchement ──
   var W=960, H=640, cx=W/2, cy=H/2;
   var svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;max-height:560px;border-radius:18px;background:radial-gradient(ellipse at center, #1A3878 0%, #0D1B3E 70%, #081024 100%);box-shadow:0 12px 40px rgba(0,0,0,.35)">';
   // Defs : filtre ombre portée, gradients
@@ -11337,7 +11337,7 @@ var JEUX_CATALOGUE=[
     {q:"Mongo Beti a d'abord publié sous le pseudonyme Eza ___.",ans:"Boto",exp:"'Ville Cruelle' fut publié en 1954 sous 'Eza Boto', avant l'adoption définitive de 'Mongo Beti'."},
    ]},
   // ══════════════════════════════════════════════════════════════
-  // ── NOUVEAUX JEUX v39.2 ── (Mathématiques, Sciences, Langues, Histoire du Cameroun)
+  // ── NOUVEAUX JEUX v1.0 ── (Mathématiques, Sciences, Langues, Histoire du Cameroun)
   // ══════════════════════════════════════════════════════════════
   {id:"j_verbes_ang",titre:"Verbes Irréguliers Anglais",emoji:"🇬🇧",matiere:"Anglais",niveau:"6eme-Tle",
    desc:"Trouvez le prétérit et le participe passé des verbes irréguliers fréquents",gratuit:true,type:"qcm",action:"lancerJVerbesAng",
@@ -12618,7 +12618,7 @@ if(typeof CanvasRenderingContext2D!=='undefined'&&!CanvasRenderingContext2D.prot
   };
 }
 // ═══════════════════════════════════════════════════════════════════
-// MOTEUR DE SIMULATIONS ANIMÉES — LABORATOIRES VIRTUELS v39.2
+// MOTEUR DE SIMULATIONS ANIMÉES — LABORATOIRES VIRTUELS v1.0
 // ═══════════════════════════════════════════════════════════════════
 window._sim={running:true,raf:0,t:0,params:{}};
 
@@ -14264,7 +14264,7 @@ if(typeof EPREUVES_DB==='undefined'){
      desc:"BAC série A 2024. Dissertation et commentaire de texte.",
      apercu:"Sujet 1 — « La liberté consiste-t-elle à faire ce que l'on veut ? »\nSujet 2 — « Le travail est-il une malédiction ? »\nSujet 3 — Commentaire d'un texte de Jean-Paul Sartre sur l'existentialisme."},
 
-    // ── ÉPREUVES SUPPLÉMENTAIRES v39.2 ──
+    // ── ÉPREUVES SUPPLÉMENTAIRES v1.0 ──
 
     // MATHS séquentielles
     {id:"ep_m5",titre:"Épreuve Maths 3ème — Séq. 1",matiere:"Mathématiques",classe:"3ème",seq:"Séquence 1",cat:"cat1",gratuit:true,
@@ -16621,7 +16621,7 @@ if(_origPgCVAdmin){
 }
 
 // ══════════════════════════════════════════════════════════════════
-// ── MODULE PAIEMENTS v39.2 (liens statiques) ─────────────────────
+// ── MODULE PAIEMENTS v1.0 (liens statiques) ─────────────────────
 // ══════════════════════════════════════════════════════════════════
 // Architecture côté client uniquement : affiche les instructions de paiement
 // et des liens/numéros pour MoMo, Orange Money, PayPal.me et Stripe Payment Link.
@@ -16872,7 +16872,7 @@ window.openPaymentModal = openPaymentModal;
 window.mPayAttempts = mPayAttempts;
 
 // ══════════════════════════════════════════════════════════════════
-// ── DIAGNOSTIC SYNTAX ERROR AMÉLIORÉ v39.2 ───────────────────────
+// ── DIAGNOSTIC SYNTAX ERROR AMÉLIORÉ v1.0 ───────────────────────
 // ══════════════════════════════════════════════════════════════════
 // Améliore la capture d'erreur pour localiser précisément les SyntaxError runtime
 (function(){
@@ -16914,7 +16914,7 @@ setTimeout(function(){initTickerFixed();},1200);
 setTimeout(function(){initTickerFixed();},3000);
 
 // ═══════════════════════════════════════════════════════════════
-// VÉRITAS v39.2 — DESIGN PREMIUM : Scroll Reveal, Ripple, Progress
+// VÉRITAS v1.0.2 — DESIGN PREMIUM : Scroll Reveal, Ripple, Progress
 // ═══════════════════════════════════════════════════════════════
 
 (function(){
