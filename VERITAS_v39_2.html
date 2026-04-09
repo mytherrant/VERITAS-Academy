@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>VÉRITAS v1.0 — Système de Gestion Scolaire Professionnel</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
@@ -2266,8 +2269,8 @@ function load(){
   if(!DB.products)DB.products=defaultDB().products;
   if(!DB.orientationDemandes)DB.orientationDemandes=[];
   DB.admins.forEach(a=>{if(!a.role2)a.role2=a.role==='Directeur'?'admin':'secretaire';});
-  // Ensure default admin exists
-  if(!DB.admins.find(a=>a.user==='directeur')){
+  // Ensure default admin exists (mot de passe sera hashé par _migratePasswords)
+  if(!DB.admins.find(function(a){return a.user==='directeur';})){
     DB.admins.push({id:'a1',user:'directeur',pwd:'Veritas2024!',nom:'M. Jacques Miterand TAKOU',role:'Directeur',role2:'admin'});
   }
   if(!DB.superAdmin||!DB.superAdmin.user){DB.superAdmin=defaultDB().superAdmin;}
@@ -2276,7 +2279,9 @@ function load(){
   if(DB.deletedCartes&&typeof LITT_OEUVRES!=='undefined'){DB.deletedCartes.forEach(function(k){delete LITT_OEUVRES[k];});}
   if(DB.deletedJeux&&typeof JEUX_CATALOGUE!=='undefined'){DB.deletedJeux.forEach(function(id){var idx=JEUX_CATALOGUE.findIndex(function(j){return j.id===id;});if(idx>=0)JEUX_CATALOGUE.splice(idx,1);});}
   // Ensure teachers have user accounts
-  if(!DB.tpwd){DB.tpwd={'kofi.diallo':'Maths2024!','rose.adjobi':'Francais2024!','thomas.mbem':'Physique2024!','cecile.essono':'SVT2024!'};}
+  if(!DB.tpwd){DB.tpwd=defaultDB().tpwd;}
+  // Hasher automatiquement tous les mots de passe en clair (migration v1.0)
+  setTimeout(function(){_migratePasswords();},500);
 }
 function previewFichier(item){
   var tryShow=function(dataUrl,fname,ftype){
@@ -3641,19 +3646,121 @@ function sendNotification(){
 }
 
 // ═══════════════════════════════════════════════
-// SÉCURITÉ RENFORCÉE
+// SÉCURITÉ RENFORCÉE v1.0
 // ═══════════════════════════════════════════════
-async function hashPassword(pwd){
-  if(typeof crypto!=='undefined'&&crypto.subtle){
-    const enc=new TextEncoder();const data=enc.encode(pwd+'_VERITAS_SALT_2024');
-    const hash=await crypto.subtle.digest('SHA-256',data);
-    return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');
-  }
-  return pwd;
+
+// ── Hachage SHA-256 avec sel unique par utilisateur ──
+function _hashSync(pwd,salt){
+  // Fallback synchrone simple pour compatibilité
+  var s=pwd+(salt||'_VERITAS_2026');var h=0;
+  for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}
+  return 'H$'+Math.abs(h).toString(36)+'$'+s.length;
 }
-function sanitizeInput(str){if(!str)return'';return String(str).replace(/[<>"'&]/g,c=>({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'}[c]||c));}
+async function hashPassword(pwd,salt){
+  if(typeof crypto!=='undefined'&&crypto.subtle){
+    var enc=new TextEncoder();var data=enc.encode(pwd+'$'+(salt||'VERITAS')+'$2026');
+    var hash=await crypto.subtle.digest('SHA-256',data);
+    return 'S256$'+Array.from(new Uint8Array(hash)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+  }
+  return _hashSync(pwd,salt);
+}
+function isHashed(p){return p&&(p.indexOf('S256$')===0||p.indexOf('H$')===0);}
+async function verifyPassword(plain,hashed,salt){
+  if(!isHashed(hashed))return plain===hashed; // legacy plaintext
+  var h=await hashPassword(plain,salt);
+  return h===hashed;
+}
+
+// ── Migration automatique : hasher tous les mots de passe en clair ──
+async function _migratePasswords(){
+  var changed=false;
+  // Super admin
+  if(DB.superAdmin&&DB.superAdmin.pwd&&!isHashed(DB.superAdmin.pwd)){
+    DB.superAdmin.pwd=await hashPassword(DB.superAdmin.pwd,DB.superAdmin.user);changed=true;
+  }
+  // Admins
+  if(DB.admins){for(var i=0;i<DB.admins.length;i++){
+    if(DB.admins[i].pwd&&!isHashed(DB.admins[i].pwd)){
+      DB.admins[i].pwd=await hashPassword(DB.admins[i].pwd,DB.admins[i].user);changed=true;
+    }
+  }}
+  // Student accounts
+  if(DB.studentAccounts){for(var j=0;j<DB.studentAccounts.length;j++){
+    if(DB.studentAccounts[j].pwd&&!isHashed(DB.studentAccounts[j].pwd)){
+      DB.studentAccounts[j].pwd=await hashPassword(DB.studentAccounts[j].pwd,DB.studentAccounts[j].user);changed=true;
+    }
+  }}
+  // Teacher passwords
+  if(DB.tpwd){for(var k in DB.tpwd){
+    if(DB.tpwd[k]&&!isHashed(DB.tpwd[k])){
+      DB.tpwd[k]=await hashPassword(DB.tpwd[k],k);changed=true;
+    }
+  }}
+  // Visitor accounts
+  if(DB.visitorAccounts){for(var v=0;v<DB.visitorAccounts.length;v++){
+    if(DB.visitorAccounts[v].pwd&&!isHashed(DB.visitorAccounts[v].pwd)){
+      DB.visitorAccounts[v].pwd=await hashPassword(DB.visitorAccounts[v].pwd,DB.visitorAccounts[v].user);changed=true;
+    }
+  }}
+  // Author accounts
+  if(DB.authorAccounts){for(var a=0;a<DB.authorAccounts.length;a++){
+    if(DB.authorAccounts[a].pwd&&!isHashed(DB.authorAccounts[a].pwd)){
+      DB.authorAccounts[a].pwd=await hashPassword(DB.authorAccounts[a].pwd,DB.authorAccounts[a].user);changed=true;
+    }
+  }}
+  if(changed)save();
+}
+
+// ── Anti brute-force : verrouillage temporaire ──
+var _loginLock={};
+function _checkLoginLock(user){
+  var k=user.toLowerCase();var l=_loginLock[k];
+  if(!l)return{locked:false,remaining:0};
+  if(l.locked&&Date.now()<l.until){return{locked:true,remaining:Math.ceil((l.until-Date.now())/1000)};}
+  if(l.locked&&Date.now()>=l.until){_loginLock[k]={attempts:0,locked:false,until:0};}
+  return{locked:false,remaining:0};
+}
+function _recordLoginFail(user){
+  var k=user.toLowerCase();
+  if(!_loginLock[k])_loginLock[k]={attempts:0,locked:false,until:0};
+  _loginLock[k].attempts++;
+  // 3 échecs → verrouillage 30s, 6 → 2min, 9 → 5min, 12+ → 15min
+  var a=_loginLock[k].attempts;
+  if(a>=12){_loginLock[k].locked=true;_loginLock[k].until=Date.now()+15*60000;}
+  else if(a>=9){_loginLock[k].locked=true;_loginLock[k].until=Date.now()+5*60000;}
+  else if(a>=6){_loginLock[k].locked=true;_loginLock[k].until=Date.now()+2*60000;}
+  else if(a>=3){_loginLock[k].locked=true;_loginLock[k].until=Date.now()+30000;}
+  // Log failed attempt
+  if(!DB.loginLog)DB.loginLog=[];
+  DB.loginLog.push({user:user,role:'echec',date:today(),time:new Date().toLocaleTimeString('fr-FR'),ip:'local'});
+  if(DB.loginLog.length>200)DB.loginLog=DB.loginLog.slice(-200);
+  save();
+}
+function _recordLoginSuccess(user){
+  var k=user.toLowerCase();_loginLock[k]={attempts:0,locked:false,until:0};
+}
+
+// ── Session sécurisée ──
+function sanitizeInput(str){if(!str)return'';return String(str).replace(/[<>"'&]/g,function(c){return({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','&':'&amp;'})[c]||c;});}
 function generateSessionToken(){return gid()+'-'+Date.now()+'-'+Math.random().toString(36).substr(2);}
-let SESSION_TOKEN=null;
+var SESSION_TOKEN=null;
+var SESSION_EXPIRY=0;
+var SESSION_DURATION=4*60*60*1000; // 4 heures
+function _createSession(data){
+  SESSION_TOKEN=generateSessionToken();
+  SESSION_EXPIRY=Date.now()+SESSION_DURATION;
+  SES=data;SES._token=SESSION_TOKEN;SES._exp=SESSION_EXPIRY;
+  sessionStorage.setItem('VERITAS_SES',JSON.stringify(SES));
+}
+function _checkSession(){
+  if(!SES||!SES._token||!SES._exp)return false;
+  if(Date.now()>SES._exp){_destroySession();toast('Session expirée — reconnectez-vous','warn');return false;}
+  return true;
+}
+function _destroySession(){
+  SES=null;SESSION_TOKEN=null;SESSION_EXPIRY=0;
+  sessionStorage.removeItem('VERITAS_SES');
+}
 
 // ═══════════════════════════════════════════════
 // QR CODE GENERATION — SVG natif (pas de CDN requis)
@@ -5031,21 +5138,40 @@ function exportAllData(){
 }
 
 function importAllData(){
-  if(!confirm('ATTENTION: Cette action remplacera TOUTES les données actuelles. Continuer ?'))return;
-  const input=document.createElement('input');
+  if(!isSA()&&!iA()){toast('Acc\u00e8s refus\u00e9','err');return;}
+  if(!confirm('ATTENTION: Cette action remplacera TOUTES les donn\u00e9es actuelles.\nContinuer ?'))return;
+  if(!confirm('CONFIRMATION: \u00cates-vous absolument s\u00fbr ? Cette op\u00e9ration est irr\u00e9versible.'))return;
+  var input=document.createElement('input');
   input.type='file';input.accept='.json';
   input.onchange=function(e){
-    const file=e.target.files[0];if(!file)return;
-    const reader=new FileReader();
+    var file=e.target.files[0];if(!file)return;
+    if(file.size>10*1024*1024){toast('Fichier trop volumineux (max 10 Mo)','err');return;}
+    var reader=new FileReader();
     reader.onload=function(evt){
       try{
-        const imported=JSON.parse(evt.target.result);
-        if(imported.school&&imported.students){
-          Object.assign(DB,imported);save();
-          toast('✓ Données importées avec succès');
-          setTimeout(()=>location.reload(),1000);
-        }else{toast('Fichier invalide','warn');}
-      }catch(err){toast('Erreur: '+err.message,'warn');}
+        var imported=JSON.parse(evt.target.result);
+        // Validation de structure
+        if(!imported.school||!imported.students||!Array.isArray(imported.students)){
+          toast('Fichier invalide : structure incorrecte','warn');return;
+        }
+        // Validation des types critiques
+        var requiredArrays=['students','teachers','grades','payments'];
+        for(var i=0;i<requiredArrays.length;i++){
+          if(imported[requiredArrays[i]]&&!Array.isArray(imported[requiredArrays[i]])){
+            toast('Donn\u00e9es corrompues : '+requiredArrays[i]+' invalide','err');return;
+          }
+        }
+        // Nettoyer les champs dangereux potentiels (pas de scripts dans les noms)
+        if(imported.students){imported.students.forEach(function(s){
+          if(s.nom)s.nom=sanitizeInput(s.nom);
+          if(s.pre)s.pre=sanitizeInput(s.pre);
+        });}
+        // Hasher les mots de passe import\u00e9s en clair
+        Object.assign(DB,imported);save();
+        setTimeout(function(){_migratePasswords();},200);
+        toast('\u2713 Donn\u00e9es import\u00e9es avec succ\u00e8s');
+        setTimeout(function(){location.reload();},1500);
+      }catch(err){toast('Erreur: '+err.message,'err');}
     };
     reader.readAsText(file);
   };
@@ -5137,48 +5263,52 @@ function verifyOTP(){
 }
 
 
-function doLogin(){
-  const u=($("lu")?.value||"").trim(),p=$("lp")?.value||"";
+async function doLogin(){
+  var u=($("lu")?.value||"").trim(),p=$("lp")?.value||"";
   $("lerr").style.display="none";
   if(lr==="visiteur"){goToVisitor();return;}
+  if(!u||!p){$("lerr").style.display="block";$("lerr").textContent="Veuillez remplir tous les champs.";return;}
+  // Anti brute-force
+  var lock=_checkLoginLock(u);
+  if(lock.locked){$("lerr").style.display="block";$("lerr").innerHTML='<div>Compte temporairement verrouill\u00e9</div><div style="font-size:11px;margin-top:4px;color:#6b7280">R\u00e9essayez dans '+lock.remaining+' secondes</div>';return;}
   if(lr==="eleve"){
-    const sa=DB.studentAccounts?.find(a=>a.user.toLowerCase()===u.toLowerCase()&&a.pwd===p);
-    if(sa){const s=S(sa.eid);if(s){sa.lastLogin=today();save();go2SES({...s,type:'eleve',sid:s.id,accountId:sa.id,plans:sa.plans||[]});return;}}
+    var sa2=null;
+    if(DB.studentAccounts){for(var i=0;i<DB.studentAccounts.length;i++){
+      var a2=DB.studentAccounts[i];
+      if(a2.user.toLowerCase()===u.toLowerCase()){var ok=await verifyPassword(p,a2.pwd,a2.user);if(ok){sa2=a2;break;}}
+    }}
+    if(sa2){var s=S(sa2.eid);if(s){sa2.lastLogin=today();save();_recordLoginSuccess(u);go2SES({...s,type:'eleve',sid:s.id,accountId:sa2.id,plans:sa2.plans||[]});return;}}
     // Visiteurs inscrits en ligne
-    const va=(DB.visitorAccounts||[]).find(a=>a.user.toLowerCase()===u.toLowerCase()&&a.pwd===p&&a.statut!=='suspendu');
-    if(va){va.lastLogin=today();save();SES={id:va.id,nom:va.nom,pre:va.pre,mat:va.user,cls:va.cls,tel:va.tel,type:'visiteur',accountId:va.id,plans:va.plans||[]};hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);return;}
+    var va2=null;
+    if(DB.visitorAccounts){for(var j=0;j<DB.visitorAccounts.length;j++){
+      var v2=DB.visitorAccounts[j];
+      if(v2.user.toLowerCase()===u.toLowerCase()&&v2.statut!=='suspendu'){var ok2=await verifyPassword(p,v2.pwd,v2.user);if(ok2){va2=v2;break;}}
+    }}
+    if(va2){va2.lastLogin=today();save();_recordLoginSuccess(u);_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur',accountId:va2.id,plans:va2.plans||[]});hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);return;}
   } else if(lr==="enseignant"){
-    const t=DB.teachers.find(t=>t.user===u);
-    if(t&&DB.tpwd[u]===p){DB.loginLog.push({user:u,role:'enseignant',date:today()});save();go2SES({...t,type:'enseignant',tid:t.id});return;}
+    var t=DB.teachers.find(function(t2){return t2.user===u;});
+    if(t&&DB.tpwd[u]){var okT=await verifyPassword(p,DB.tpwd[u],u);if(okT){DB.loginLog.push({user:u,role:'enseignant',date:today()});save();_recordLoginSuccess(u);go2SES({...t,type:'enseignant',tid:t.id});return;}}
   } else if(lr==="admin"){
-    let a=DB.admins.find(a=>a.user===u&&a.pwd===p);
-    if(!a&&u==='directeur'&&!DB.admins.find(x=>x.user==='directeur')){
-      DB.admins.push({id:'a1',user:'directeur',pwd:'Veritas2024!',nom:'M. Jacques Miterand TAKOU',role:'Directeur',role2:'admin'});
-      save();a=DB.admins.find(x=>x.user===u&&x.pwd===p);
-    }
-    if(a){
-      // 🔐 OTP 2FA requis pour les comptes administrateurs
-      sendOTP({...a,type:'admin'});
-      return;
-    }
+    var foundAdmin=null;
+    if(DB.admins){for(var k=0;k<DB.admins.length;k++){
+      var ad=DB.admins[k];
+      if(ad.user===u){var okA=await verifyPassword(p,ad.pwd,ad.user);if(okA){foundAdmin=ad;break;}}
+    }}
+    if(foundAdmin){_recordLoginSuccess(u);sendOTP({...foundAdmin,type:'admin'});return;}
   } else if(lr==="superadmin"){
-    const sa=DB.superAdmin;
-    if(sa&&u===sa.user&&p===sa.pwd){
-      // 🔐 OTP 2FA requis pour le Super Administrateur
-      sendOTP({...sa,type:'superadmin',pre:'',role2:'superadmin'});
-      return;
+    var sa=DB.superAdmin;
+    if(sa&&u===sa.user){var okS=await verifyPassword(p,sa.pwd,sa.user);
+      if(okS){_recordLoginSuccess(u);sendOTP({...sa,type:'superadmin',pre:'',role2:'superadmin'});return;}
     }
   }
-  window._loginAttempts=(window._loginAttempts||0)+1;
+  _recordLoginFail(u);
   $("lerr").style.display="block";
   if($("lp"))$("lp").value="";
-  // Si admin et 2+ tentatives échouées, proposer reset localStorage
-  if(window._loginAttempts>=2&&(lr==="admin"||lr==="superadmin")){
-    $("lerr").innerHTML='<div style="margin-bottom:6px">❌ Identifiants incorrects</div><div style="font-size:11px;color:#6b7280">Données corrompues ? <button onclick="localStorage.removeItem(\'vrt10\');location.reload()" style="background:#dc2626;color:#fff;border:none;padding:3px 10px;border-radius:6px;cursor:pointer;font-size:11px;margin-left:4px">🔄 Réinitialiser</button></div>';
-    return;
-  }
-  if(window._loginAttempts>=3){
-    $("lerr").innerHTML='<div>Identifiants incorrects</div><div style="margin-top:8px;font-size:11px">Apr\u00e8s 3 tentatives: <button style="background:#DC2626;color:#fff;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:11px" onclick="if(confirm(\'R\u00e9initialiser TOUTES les donn\u00e9es ? Les identifiants par d\u00e9faut seront restaur\u00e9s.\')){localStorage.removeItem(\'vrt10\');location.reload();}">🔄 R\u00e9initialiser la base</button></div>';
+  var lockAfter=_checkLoginLock(u);
+  if(lockAfter.locked){
+    $("lerr").innerHTML='<div>Identifiants incorrects</div><div style="font-size:11px;margin-top:4px;color:#dc2626">Compte verrouill\u00e9 pour '+lockAfter.remaining+'s apr\u00e8s trop de tentatives</div>';
+  } else {
+    $("lerr").innerHTML='<div>Identifiants incorrects</div>';
   }
 }
 
@@ -6029,7 +6159,7 @@ function pgSuperOverview(){
     <div class="card"><div class="ct">🔐 Comptes du système</div>
       <div class="ib ibi mb12"><span>⚠️</span><span>Données sensibles — visible uniquement par le Super Admin</span></div>
       <div class="xs2 mut mb8" style="text-transform:uppercase;letter-spacing:.6px">Comptes administrateurs</div>
-      ${DB.admins.map(a=>`<div style="padding:8px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px"><div class="fl2 fic fsb"><div class="semi s">${a.nom}</div><span class="bg bgg">${a.role}</span></div><div class="mono xs2 mt4" style="color:var(--bl)">${a.user} / <span style="color:var(--or)">${a.pwd}</span></div></div>`).join("")}
+      ${DB.admins.map(a=>`<div style="padding:8px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px"><div class="fl2 fic fsb"><div class="semi s">${_esc(a.nom)}</div><span class="bg bgg">${_esc(a.role)}</span></div><div class="mono xs2 mt4" style="color:var(--bl)">${_esc(a.user)} / <span style="color:var(--gr)">••••••••</span></div></div>`).join("")}
       <button class="btn bpu sm mt10" onclick="goTo('allaccounts')">🔐 Gérer tous les comptes →</button>
     </div>
   </div>`;
@@ -6097,53 +6227,57 @@ function pgAllAccounts(){
   <div class="g2">
     <div class="card"><div class="fl2 fic fsb mb12"><div class="ct mb0">Comptes Administrateurs</div>
       <div class="fl2 g8"><button class="btn bi sm" onclick="mAddAdmin()">＋ Nouvel admin</button></div></div>
-      <div class="tw"><table><thead><tr><th>Nom</th><th>Identifiant</th><th>Mot de passe</th><th>Rôle</th><th></th></tr></thead>
+      <div class="tw"><table><thead><tr><th>Nom</th><th>Identifiant</th><th>Statut</th><th>R\u00f4le</th><th></th></tr></thead>
         <tbody>${DB.admins.map(a=>`<tr>
-          <td class="semi s">${a.nom}</td>
-          <td class="mono xs2" style="color:var(--bl)">${a.user}</td>
-          <td class="mono xs2" style="color:var(--or)">${a.pwd}</td>
-          <td><span class="bg bgg">${a.role}</span></td>
-          <td><div class="fl2 g4"><button class="btn bo xs" onclick="editAdminPwd('${a.id}')">✏️</button>${isSA()?`<button class="btn br2 xs" onclick="deleteAdmin('${a.id}')">🗑</button>`:''}</div></td>
+          <td class="semi s">${_esc(a.nom)}</td>
+          <td class="mono xs2" style="color:var(--bl)">${_esc(a.user)}</td>
+          <td><span class="bg bgg">${isHashed(a.pwd)?'\ud83d\udd12 Hash\u00e9':'\u26a0\ufe0f Clair'}</span></td>
+          <td><span class="bg bgg">${_esc(a.role)}</span></td>
+          <td><div class="fl2 g4"><button class="btn bo xs" onclick="editAdminPwd('${a.id}')">✏️ Changer MDP</button>${isSA()?`<button class="btn br2 xs" onclick="deleteAdmin('${a.id}')">🗑</button>`:''}</div></td>
         </tr>`).join("")}
         <tr style="background:var(--pub)">
-          <td class="semi s">${DB.superAdmin?.nom}</td>
-          <td class="mono xs2" style="color:var(--pu)">${DB.superAdmin?.user}</td>
-          <td class="mono xs2" style="color:var(--or)">${DB.superAdmin?.pwd}</td>
+          <td class="semi s">${_esc(DB.superAdmin?.nom||'')}</td>
+          <td class="mono xs2" style="color:var(--pu)">${_esc(DB.superAdmin?.user||'')}</td>
+          <td><span class="bg bgpu">${isHashed(DB.superAdmin?.pwd)?'\ud83d\udd12 Hash\u00e9':'\u26a0\ufe0f Clair'}</span></td>
           <td><span class="bg bgpu">Super Admin</span></td>
-          <td><button class="btn bpu xs" onclick="editSAPwd()">✏️ Modifier</button></td>
+          <td><button class="btn bpu xs" onclick="editSAPwd()">✏️ Changer MDP</button></td>
         </tr>
         </tbody>
       </table></div>
     </div>
     <div class="card"><div class="ct">Comptes Enseignants</div>
-      <div class="tw"><table><thead><tr><th>Nom</th><th>Identifiant</th><th>Mot de passe</th><th></th></tr></thead>
+      <div class="tw"><table><thead><tr><th>Nom</th><th>Identifiant</th><th>Statut</th><th></th></tr></thead>
         <tbody>${DB.teachers.map(t=>`<tr>
-          <td class="semi s">${t.pre} ${t.nom}</td>
-          <td class="mono xs2" style="color:var(--bl)">${t.user}</td>
-          <td class="mono xs2" style="color:var(--or)">${DB.tpwd[t.user]||'—'}</td>
-          <td><button class="btn bo xs" onclick="editTeacherPwd('${t.id}')">✏️ Modifier</button></td>
+          <td class="semi s">${_esc(t.pre)} ${_esc(t.nom)}</td>
+          <td class="mono xs2" style="color:var(--bl)">${_esc(t.user)}</td>
+          <td><span class="bg bgg">${isHashed(DB.tpwd[t.user])?'\ud83d\udd12 Hash\u00e9':'\u26a0\ufe0f Clair'}</span></td>
+          <td><button class="btn bo xs" onclick="editTeacherPwd('${t.id}')">✏️ Changer MDP</button></td>
         </tr>`).join("")}</tbody>
       </table></div>
     </div>
   </div>
-  <div class="card mt16"><div class="ct">Comptes Élèves</div>
-    <div class="tw"><table><thead><tr><th>Élève</th><th>Matricule</th><th>Identifiant</th><th>Mot de passe</th><th>Dernière connexion</th><th></th></tr></thead>
+  <div class="card mt16"><div class="ct">Comptes \u00c9l\u00e8ves</div>
+    <div class="tw"><table><thead><tr><th>\u00c9l\u00e8ve</th><th>Matricule</th><th>Identifiant</th><th>Statut</th><th>Derni\u00e8re connexion</th><th></th></tr></thead>
       <tbody>${(DB.studentAccounts||[]).map(sa=>{const st=S(sa.eid);return`<tr>
-        <td class="semi s">${st?.pre||''} ${st?.nom||''}</td>
-        <td class="mono xs2" style="color:var(--gold)">${st?.mat||'—'}</td>
-        <td class="mono xs2" style="color:var(--bl)">${sa.user}</td>
-        <td class="mono xs2" style="color:var(--or)">${sa.pwd}</td>
+        <td class="semi s">${_esc(st?.pre||'')} ${_esc(st?.nom||'')}</td>
+        <td class="mono xs2" style="color:var(--gold)">${_esc(st?.mat||'\u2014')}</td>
+        <td class="mono xs2" style="color:var(--bl)">${_esc(sa.user)}</td>
+        <td><span class="bg bgg">${isHashed(sa.pwd)?'\ud83d\udd12 Hash\u00e9':'\u26a0\ufe0f Clair'}</span></td>
         <td class="xs2 mut">${sa.lastLogin||'Jamais'}</td>
-        <td><button class="btn bo xs" onclick="editStudentPwd('${sa.id}')">✏️ Modifier</button></td>
+        <td><button class="btn bo xs" onclick="editStudentPwd('${sa.id}')">✏️ Changer MDP</button></td>
       </tr>`;}).join("")}</tbody>
     </table></div>
   </div>`;
 }
 
-function editAdminPwd(aid){const a=DB.admins.find(x=>x.id===aid);if(!a)return;M('Modifier mot de passe Admin',a.nom,`<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="naPwd" type="text" value="${a.pwd}"></div>`,`<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="DB.admins.find(x=>x.id==='${aid}').pwd=$('naPwd').value;save();cm();re();toast('✓ Mot de passe modifié')">✓ Modifier</button>`);}
-function editSAPwd(){M('Modifier mot de passe Super Admin',DB.superAdmin?.nom,`<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="saPwd" type="text" value="${DB.superAdmin?.pwd||''}"></div>`,`<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bpu" onclick="DB.superAdmin.pwd=$('saPwd').value;save();cm();re();toast('✓ Mot de passe Super Admin modifié')">✓ Modifier</button>`);}
-function editTeacherPwd(tid){const t=T(tid);if(!t)return;M('Modifier mot de passe Enseignant',t.pre+' '+t.nom,`<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="tPwd" type="text" value="${DB.tpwd[t.user]||''}"></div>`,`<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="DB.tpwd['${t.user}']=$('tPwd').value;save();cm();re();toast('✓ Mot de passe modifié')">✓ Modifier</button>`);}
-function editStudentPwd(said){const sa=DB.studentAccounts?.find(x=>x.id===said);if(!sa)return;const st=S(sa.eid);M('Modifier mot de passe Élève',`${st?.pre||''} ${st?.nom||''} (${sa.user})`,`<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="stPwd" type="text" value="${sa.pwd}"></div>`,`<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bgr2" onclick="DB.studentAccounts.find(x=>x.id==='${said}').pwd=$('stPwd').value;save();cm();re();toast('✓ Mot de passe modifié')">✓ Modifier</button>`);}
+function editAdminPwd(aid){var a=DB.admins.find(function(x){return x.id===aid;});if(!a)return;M('Modifier mot de passe Admin',_esc(a.nom),'<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="naPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="naPwd2" type="password" placeholder="Confirmer le mot de passe"></div><div class="ib ibi mt8"><span>\ud83d\udd12</span><span>Le mot de passe sera hash\u00e9 automatiquement (SHA-256)</span></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveAdminPwd(\''+aid+'\')">✓ Modifier</button>');}
+async function _saveAdminPwd(aid){var p1=$('naPwd')?.value||'';var p2=$('naPwd2')?.value||'';if(p1.length<6){toast('Minimum 6 caract\u00e8res','warn');return;}if(p1!==p2){toast('Les mots de passe ne correspondent pas','warn');return;}var a=DB.admins.find(function(x){return x.id===aid;});if(!a)return;a.pwd=await hashPassword(p1,a.user);save();cm();re();toast('\u2713 Mot de passe modifi\u00e9 et hash\u00e9');}
+function editSAPwd(){M('Modifier mot de passe Super Admin',_esc(DB.superAdmin?.nom||''),'<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="saPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="saPwd2" type="password" placeholder="Confirmer le mot de passe"></div><div class="ib ibi mt8"><span>\ud83d\udd12</span><span>Le mot de passe sera hash\u00e9 automatiquement (SHA-256)</span></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bpu" onclick="_saveSAPwd()">✓ Modifier</button>');}
+async function _saveSAPwd(){var p1=$('saPwd')?.value||'';var p2=$('saPwd2')?.value||'';if(p1.length<8){toast('Minimum 8 caract\u00e8res pour le Super Admin','warn');return;}if(p1!==p2){toast('Les mots de passe ne correspondent pas','warn');return;}DB.superAdmin.pwd=await hashPassword(p1,DB.superAdmin.user);save();cm();re();toast('\u2713 Mot de passe Super Admin modifi\u00e9 et hash\u00e9');}
+function editTeacherPwd(tid){var t=T(tid);if(!t)return;M('Modifier mot de passe Enseignant',_esc(t.pre)+' '+_esc(t.nom),'<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="tPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="tPwd2" type="password" placeholder="Confirmer le mot de passe"></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveTeacherPwd(\''+_esc(t.user)+'\')">✓ Modifier</button>');}
+async function _saveTeacherPwd(user){var p1=$('tPwd')?.value||'';var p2=$('tPwd2')?.value||'';if(p1.length<6){toast('Minimum 6 caract\u00e8res','warn');return;}if(p1!==p2){toast('Les mots de passe ne correspondent pas','warn');return;}DB.tpwd[user]=await hashPassword(p1,user);save();cm();re();toast('\u2713 Mot de passe modifi\u00e9 et hash\u00e9');}
+function editStudentPwd(said){var sa=DB.studentAccounts?.find(function(x){return x.id===said;});if(!sa)return;var st=S(sa.eid);M('Modifier mot de passe \u00c9l\u00e8ve',_esc(st?.pre||'')+' '+_esc(st?.nom||'')+' ('+_esc(sa.user)+')','<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="stPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="stPwd2" type="password" placeholder="Confirmer le mot de passe"></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bgr2" onclick="_saveStudentPwd(\''+said+'\')">✓ Modifier</button>');}
+async function _saveStudentPwd(said){var p1=$('stPwd')?.value||'';var p2=$('stPwd2')?.value||'';if(p1.length<6){toast('Minimum 6 caract\u00e8res','warn');return;}if(p1!==p2){toast('Les mots de passe ne correspondent pas','warn');return;}var sa=DB.studentAccounts.find(function(x){return x.id===said;});if(!sa)return;sa.pwd=await hashPassword(p1,sa.user);save();cm();re();toast('\u2713 Mot de passe modifi\u00e9 et hash\u00e9');}
 
 
 
