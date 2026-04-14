@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Background circle border -->
+  <circle cx="200" cy="200" r="185" fill="none" stroke="#1B3A5C" stroke-width="5"/>
+  <!-- Top arc -->
+  <path d="M 45 200 A 155 155 0 0 1 355 200" fill="none" stroke="#1B3A5C" stroke-width="8" stroke-linecap="round"/>
+  <!-- 3 Stars -->
+  <g fill="#C8A84E">
+    <polygon points="200,38 206,54 223,54 209,64 214,80 200,71 186,80 191,64 177,54 194,54" transform="scale(1.1) translate(-20,-4)"/>
+    <polygon points="155,58 159,68 170,68 161,74 164,84 155,78 146,84 149,74 140,68 151,68"/>
+    <polygon points="245,58 249,68 260,68 251,74 254,84 245,78 236,84 239,74 230,68 241,68"/>
+  </g>
+  <!-- Left laurel -->
+  <g fill="#C8A84E" opacity="0.95">
+    <ellipse cx="88" cy="195" rx="14" ry="7" transform="rotate(-20,88,195)"/>
+    <ellipse cx="80" cy="175" rx="14" ry="7" transform="rotate(-30,80,175)"/>
+    <ellipse cx="76" cy="153" rx="14" ry="7" transform="rotate(-40,76,153)"/>
+    <ellipse cx="78" cy="131" rx="13" ry="7" transform="rotate(-50,78,131)"/>
+    <ellipse cx="85" cy="112" rx="13" ry="6" transform="rotate(-60,85,112)"/>
+    <ellipse cx="96" cy="96" rx="12" ry="6" transform="rotate(-70,96,96)"/>
+    <ellipse cx="110" cy="83" rx="12" ry="6" transform="rotate(-78,110,83)"/>
+    <ellipse cx="127" cy="74" rx="11" ry="5" transform="rotate(-85,127,74)"/>
+    <ellipse cx="102" cy="192" rx="12" ry="6" transform="rotate(15,102,192)"/>
+    <ellipse cx="96" cy="173" rx="12" ry="6" transform="rotate(5,96,173)"/>
+    <ellipse cx="94" cy="153" rx="12" ry="6" transform="rotate(-5,94,153)"/>
+    <ellipse cx="96" cy="133" rx="11" ry="6" transform="rotate(-15,96,133)"/>
+    <ellipse cx="102" cy="115" rx="11" ry="5" transform="rotate(-25,102,115)"/>
+    <ellipse cx="112" cy="100" rx="10" ry="5" transform="rotate(-38,112,100)"/>
+    <ellipse cx="126" cy="88" rx="10" ry="5" transform="rotate(-50,126,88)"/>
+    <path d="M 95,210 Q 72,150 140,68" fill="none" stroke="#C8A84E" stroke-width="3"/>
+  </g>
+  <!-- Right laurel -->
+  <g fill="#C8A84E" opacity="0.95">
+    <ellipse cx="312" cy="195" rx="14" ry="7" transform="rotate(20,312,195)"/>
+    <ellipse cx="320" cy="175" rx="14" ry="7" transform="rotate(30,320,175)"/>
+    <ellipse cx="324" cy="153" rx="14" ry="7" transform="rotate(40,324,153)"/>
+    <ellipse cx="322" cy="131" rx="13" ry="7" transform="rotate(50,322,131)"/>
+    <ellipse cx="315" cy="112" rx="13" ry="6" transform="rotate(60,315,112)"/>
+    <ellipse cx="304" cy="96" rx="12" ry="6" transform="rotate(70,304,96)"/>
+    <ellipse cx="290" cy="83" rx="12" ry="6" transform="rotate(78,290,83)"/>
+    <ellipse cx="273" cy="74" rx="11" ry="5" transform="rotate(85,273,74)"/>
+    <ellipse cx="298" cy="192" rx="12" ry="6" transform="rotate(-15,298,192)"/>
+    <ellipse cx="304" cy="173" rx="12" ry="6" transform="rotate(-5,304,173)"/>
+    <ellipse cx="306" cy="153" rx="12" ry="6" transform="rotate(5,306,153)"/>
+    <ellipse cx="304" cy="133" rx="11" ry="6" transform="rotate(15,304,133)"/>
+    <ellipse cx="298" cy="115" rx="11" ry="5" transform="rotate(25,298,115)"/>
+    <ellipse cx="288" cy="100" rx="10" ry="5" transform="rotate(38,288,100)"/>
+    <ellipse cx="274" cy="88" rx="10" ry="5" transform="rotate(50,274,88)"/>
+    <path d="M 305,210 Q 328,150 260,68" fill="none" stroke="#C8A84E" stroke-width="3"/>
+  </g>
+  <!-- Open book -->
+  <g transform="translate(200,175)">
+    <path d="M -45,10 L -45,-30 Q -45,-40 -35,-40 L -3,-40 Q 0,-40 0,-35 L 0,15 Q 0,10 -5,10 Z" fill="#1B3A5C"/>
+    <path d="M 45,10 L 45,-30 Q 45,-40 35,-40 L 3,-40 Q 0,-40 0,-35 L 0,15 Q 0,10 5,10 Z" fill="#1B3A5C"/>
+    <line x1="-35" y1="-28" x2="-8" y2="-28" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+    <line x1="-35" y1="-20" x2="-8" y2="-20" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+    <line x1="-35" y1="-12" x2="-8" y2="-12" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+    <line x1="-35" y1="-4" x2="-8" y2="-4" stroke="#fff" stroke-width="1.5" opacity="0.5"/>
+    <line x1="35" y1="-28" x2="8" y2="-28" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+    <line x1="35" y1="-20" x2="8" y2="-20" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+    <line x1="35" y1="-12" x2="8" y2="-12" stroke="#fff" stroke-width="1.5" opacity="0.6"/>
+    <line x1="35" y1="-4" x2="8" y2="-4" stroke="#fff" stroke-width="1.5" opacity="0.5"/>
+    <line x1="0" y1="-35" x2="0" y2="15" stroke="#fff" stroke-width="1" opacity="0.3"/>
+  </g>
+  <!-- VERITAS text -->
+  <text x="200" y="232" text-anchor="middle" font-family="Georgia,serif" font-weight="700" font-size="36" fill="#1B3A5C" letter-spacing="5">V&#201;RITAS</text>
+  <!-- Curved bottom text -->
+  <path id="bottomArc" d="M 52,250 A 165,165 0 0 0 348,250" fill="none"/>
+  <text font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="19.5" fill="#1B3A5C" letter-spacing="2">
+    <textPath xlink:href="#bottomArc" startOffset="50%" text-anchor="middle">CENTRE D&#x27;EXCELLENCE SCOLAIRE</textPath>
+  </text>
+</svg>
