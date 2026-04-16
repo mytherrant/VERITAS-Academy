@@ -1,0 +1,49 @@
+# ============================================================
+# VÉRITAS — Déploiement automatique vers LWS
+# Se déclenche à chaque push sur master
+# ============================================================
+name: 🚀 Déployer sur veritas-school.com
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'VERITAS_v1.0.html'
+      - 'index.html'
+      - 'Logo détouré.png'
+      - '.htaccess'
+
+  # Permet de lancer manuellement depuis GitHub
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: 📤 Upload vers LWS
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: 📋 Préparer les fichiers pour le déploiement
+        run: |
+          mkdir -p deploy
+          # Le fichier principal devient index.html sur le serveur
+          cp VERITAS_v1.0.html deploy/index.html
+          # Logo
+          cp "Logo détouré.png" deploy/
+          # .htaccess pour la sécurité et le cache
+          if [ -f .htaccess ]; then cp .htaccess deploy/; fi
+          echo "✅ Fichiers prêts :"
+          ls -lh deploy/
+
+      - name: 🚀 Déployer via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ftp.veritas-school.com
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASS }}
+          local-dir: ./deploy/
+          server-dir: ./htdocs/
+          dangerous-clean-slate: false
+          log-level: standard
