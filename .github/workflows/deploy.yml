@@ -12,6 +12,7 @@ on:
       - 'index.html'
       - 'Logo détouré.png'
       - '.htaccess'
+      - 'api/**'
 
   # Permet de lancer manuellement depuis GitHub
   workflow_dispatch:
@@ -27,15 +28,20 @@ jobs:
 
       - name: 📋 Préparer les fichiers pour le déploiement
         run: |
-          mkdir -p deploy
+          mkdir -p deploy/api deploy/uploads/video deploy/uploads/epreuve deploy/uploads/cours deploy/uploads/ressource deploy/uploads/image
           # Le fichier principal devient index.html sur le serveur
           cp VERITAS_v1.0.html deploy/index.html
           # Logo
           cp "Logo détouré.png" deploy/
           # .htaccess pour la sécurité et le cache
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
+          # API PHP
+          if [ -d api ]; then cp api/*.php deploy/api/; fi
+          if [ -f api/database_mysql.sql ]; then cp api/database_mysql.sql deploy/api/; fi
+          # Placeholder pour les dossiers uploads
+          touch deploy/uploads/.gitkeep
           echo "✅ Fichiers prêts :"
-          ls -lh deploy/
+          find deploy -type f | head -20
 
       - name: 🚀 Déployer via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
