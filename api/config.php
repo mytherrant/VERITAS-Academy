@@ -4,10 +4,10 @@
 // ============================================================
 
 // Paramètres MySQL (à remplir depuis phpMyAdmin LWS)
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'veritas_db');          // Nom de votre base MySQL sur LWS
-define('DB_USER', 'votre_user_mysql');    // Identifiant MySQL LWS
-define('DB_PASS', 'votre_mdp_mysql');     // Mot de passe MySQL LWS
+define('DB_HOST', '185.98.131.160');
+define('DB_NAME', 'verit2781684');
+define('DB_USER', 'verit2781684');
+define('DB_PASS', 'VOTRE_MOT_DE_PASSE_MYSQL');  // ← À CHANGER sur le serveur
 define('DB_CHARSET', 'utf8mb4');
 
 // Dossier d'upload pour les fichiers
