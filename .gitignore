@@ -22,3 +22,15 @@ npm-debug.log*
 # Temp
 /tmp/
 *.tmp
+
+# Node
+node_modules/
+veritas-backend/node_modules/
+veritas-backend/.env
+veritas-backend/uploads/*
+!veritas-backend/uploads/.gitkeep
+
+# Temp scripts
+_integrate.py
+_apply_formatting.py
+_eval_insert.js
