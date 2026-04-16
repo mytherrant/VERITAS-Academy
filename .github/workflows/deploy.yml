@@ -50,6 +50,6 @@ jobs:
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
           local-dir: ./deploy/
-          server-dir: /htdocs/
+          server-dir: htdocs/
           dangerous-clean-slate: false
           log-level: standard
