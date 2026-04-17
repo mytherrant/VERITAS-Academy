@@ -2499,9 +2499,31 @@ function previewFichier(item){
   else{toast('Aucun fichier à prévisualiser','warn');}
 }
 function openFichier(item){
-  if(item.fichierData&&item.fichierData.length>100){var a=document.createElement('a');a.href=item.fichierData;a.download=item.fichier||item.titre;a.click();}
-  else if(item.idbKey){idbGetFile(item.idbKey,function(rec){if(!rec){toast('Fichier introuvable','warn');return;}var a=document.createElement('a');a.href=rec.data;a.download=rec.name||item.fichier;a.click();});}
+  var fname=item.fichier||item.titre||'document';
+  var ftype=item.fileType||item.mime||'';
+  function _dl(dataUrl,name,type){
+    if(typeof _applyWatermarkAndDownload==='function'){
+      _applyWatermarkAndDownload(dataUrl,name,type);
+    }else{
+      var a=document.createElement('a');a.href=dataUrl;a.download=name;a.click();
+    }
+  }
+  if(item.fichierData&&item.fichierData.length>100){_dl(item.fichierData,fname,ftype);}
+  else if(item.idbKey){idbGetFile(item.idbKey,function(rec){if(!rec){toast('Fichier introuvable','warn');return;}_dl(rec.data,rec.name||fname,rec.type||ftype);});}
   else{toast('Aucun fichier attaché','warn');}
+}
+function _dlSoumission(sid){
+  // Cherche dans elearning.soumissions ET submissions globales
+  var s=(DB.elearning&&DB.elearning.soumissions||[]).find(function(x){return x.id===sid;})
+    ||(DB.submissions||[]).find(function(x){return x.id===sid;});
+  if(!s||!s.fichierData){toast('Fichier introuvable','warn');return;}
+  var fname=(s.titre||s.fichier||'document');
+  if(fname.indexOf('.')<0)fname+='.pdf';
+  if(typeof _applyWatermarkAndDownload==='function'){
+    _applyWatermarkAndDownload(s.fichierData,fname,'pdf');
+  }else{
+    var a=document.createElement('a');a.href=s.fichierData;a.download=fname;a.click();
+  }
 }
 var _idb=null;
 function getIDB(cb){
@@ -4754,7 +4776,7 @@ function pgElearningMgmt(){
       h+='<td><div class="fl2 g4">';
       h+='<button class="btn bgr2 sm" onclick="validerSoumission(\'+s.id+\')">&#9989; Publier</button>';
       h+='<button class="btn br2 sm" onclick="refuserSoumission(\'+s.id+\')">&#10060; Refuser</button>';
-      if(s.fichierData){h+='<a href="'+s.fichierData+'" download="'+s.titre+'.pdf" class="btn bo sm" style="text-decoration:none">&#128229;</a>';}
+      if(s.fichierData){h+='<button class="btn bo sm" onclick="_dlSoumission(\''+s.id+'\')">&#128229;</button>';}
       h+='</div></td></tr>';
     });
     h+='</tbody></table></div></div>';
