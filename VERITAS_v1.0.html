@@ -1863,6 +1863,146 @@ tr:hover td {
 /* Footer visiteur */
 .v-footer{transition:background .3s}
 .v-footer:hover{background:linear-gradient(135deg,#0D1B3E,#142554)!important}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE — PORTAIL VISITEUR
+   Cible : téléphones (< 768px) et tablettes portrait (< 900px)
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width:899px){
+  /* Container principal — scroll vertical, pas de flex-row */
+  #VISITOR{
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    height:100dvh!important;
+  }
+  /* ── Barre de connexion ── */
+  .vlogin-bar{
+    padding:5px 10px!important;
+    flex-wrap:nowrap!important;
+    gap:6px!important;
+  }
+  .vlogin-bar>span:first-child{font-size:11px!important}
+  .vlogin-btns{display:flex!important;gap:4px!important;flex-shrink:0!important}
+  /* ── Héro compact ── */
+  .vhero-content{
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    padding:8px 12px!important;
+    gap:8px!important;
+    align-items:center!important;
+  }
+  .vhero-logo{width:34px!important;height:34px!important;flex-shrink:0!important}
+  .vhero-title{font-size:15px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+  .vhero-sub{font-size:9px!important;white-space:nowrap!important}
+  #vHeroQuote{display:none!important}
+  /* ── Body : colonne (nav en haut, contenu en bas) ── */
+  .vbody{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    min-width:0!important;
+    overflow:visible!important;
+    height:auto!important;
+  }
+  /* ── Navigation : barre horizontale défilante ── */
+  .vnav{
+    display:flex!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
+    width:100%!important;
+    min-width:0!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:8px 8px!important;
+    gap:5px!important;
+    border-right:none!important;
+    border-bottom:1px solid rgba(255,255,255,.12)!important;
+    position:sticky!important;
+    top:0!important;
+    z-index:200!important;
+    scrollbar-width:none!important;
+    -ms-overflow-style:none!important;
+  }
+  .vnav::-webkit-scrollbar{display:none!important}
+  /* ── Boutons nav : pilules icône + texte courts ── */
+  .vnav-btn{
+    display:inline-flex!important;
+    align-items:center!important;
+    gap:4px!important;
+    white-space:nowrap!important;
+    flex-shrink:0!important;
+    padding:7px 11px!important;
+    font-size:12px!important;
+    border-radius:20px!important;
+    min-width:0!important;
+  }
+  .vnav-btn .material-icons-round{font-size:15px!important}
+  /* ── Zone contenu : pleine largeur ── */
+  #vContent{
+    width:100%!important;
+    flex:1!important;
+    height:auto!important;
+    min-height:50vh!important;
+    overflow-y:visible!important;
+    padding:0!important;
+  }
+  /* ── Sections ── */
+  .vsec{
+    padding:14px 12px 24px!important;
+    max-width:100%!important;
+  }
+  .vsec-title{font-size:20px!important;margin-bottom:10px!important}
+  /* ── Grilles → 1 colonne sur mobile ── */
+  .g2,.g3,.g4,.grid-auto-sm{
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+  /* ── Stats ── */
+  .vstats{
+    margin-left:0!important;
+    justify-content:center!important;
+    gap:8px!important;
+    flex-wrap:wrap!important;
+  }
+  .vstats-item{
+    min-width:70px!important;
+    padding:10px 8px!important;
+    flex:1!important;
+    max-width:120px!important;
+  }
+  .vstats-n{font-size:22px!important}
+  /* ── Hero vidéo ── */
+  #vHeroGrid{
+    grid-template-columns:1fr!important;
+    gap:12px!important;
+  }
+  .vhero-video-wrap{
+    min-height:220px!important;
+    border-radius:14px!important;
+  }
+  /* ── Footer ── */
+  #VISITOR>div:last-of-type{
+    padding:8px 12px!important;
+    justify-content:center!important;
+    flex-wrap:wrap!important;
+    gap:8px!important;
+    position:static!important;
+    width:100%!important;
+  }
+}
+/* ── Très petits téléphones (< 420px) ── */
+@media(max-width:420px){
+  .vnav-btn{
+    padding:6px 8px!important;
+    font-size:11px!important;
+  }
+  .vnav-btn span[style*="font-size:18px"]{display:none!important}
+  .vhero-title{font-size:13px!important}
+  .vsec{padding:10px 8px 20px!important}
+  .vstats{gap:6px!important}
+}
 </style>
 </head>
 <body>
