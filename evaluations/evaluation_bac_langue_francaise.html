@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Évaluation BAC – Langue Française</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #12100e;
+  --bg: #f4f0e6;
+  --cream: #faf7f2;
+  --white: #ffffff;
+  --gold: #a0720a;
+  --gold-lt: #c9921a;
+  --teal: #0e5c52;
+  --red: #7b1a1a;
+  --blue: #0d3460;
+  --violet: #3b1f6e;
+  --muted: #6b5c40;
+  --border: #d6cbb5;
+  --success: #eaf5ed;
+  --success-b: #3a7d56;
+  --warn: #fff8e7;
+  --warn-b: #c9921a;
+  --radius: 13px;
+  --shadow: 0 4px 22px rgba(18,16,14,.11);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Serif 4',Georgia,serif;background:var(--bg);color:var(--ink);min-height:100vh}
+
+/* HEADER */
+header{
+  background:linear-gradient(150deg,#0d3460 0%,#12100e 55%,#3b1f6e 100%);
+  color:#fff;padding:26px 18px 18px;text-align:center;position:relative;overflow:hidden;
+}
+header::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(-45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 20px);
+}
+.hdr-meta{display:flex;justify-content:space-between;max-width:860px;margin:0 auto 10px;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.65;position:relative}
+header h1{font-family:'Playfair Display',serif;font-size:clamp(1.25rem,4vw,1.9rem);font-weight:900;letter-spacing:-.01em;position:relative}
+header .sub{font-size:.82rem;opacity:.75;font-style:italic;margin-top:3px;position:relative}
+
+/* CHRONO BAR */
+#chrono-bar{
+  position:sticky;top:0;z-index:200;
+  background:var(--blue);color:#fff;
+  display:flex;align-items:center;gap:14px;padding:10px 18px;
+  box-shadow:0 2px 18px rgba(0,0,0,.22);
+}
+#chrono-display{
+  font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;
+  letter-spacing:.06em;min-width:90px;text-align:center;transition:color .3s;
+}
+#chrono-display.warn{color:#f5c842}
+#chrono-display.danger{color:#ff5555;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.chrono-track{flex:1;height:7px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden}
+.chrono-fill{height:100%;background:linear-gradient(90deg,#1a8c5a,#f5c842,#c0392b);border-radius:99px;transition:width 1s linear}
+.c-label{font-size:.7rem;opacity:.6;white-space:nowrap}
+.c-btn{background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 13px;font-family:'Source Serif 4',serif;font-size:.78rem;cursor:pointer;transition:background .2s}
+.c-btn:hover{background:rgba(255,255,255,.24)}
+.c-btn.stop{background:rgba(123,26,26,.45);border-color:#c0392b}
+
+/* MAIN */
+main{max-width:880px;margin:0 auto;padding:22px 15px 80px}
+
+/* CONTEXT CARD */
+.context-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:22px;box-shadow:var(--shadow);border-top:4px solid var(--gold)}
+.context-card h2{font-family:'Playfair Display',serif;font-size:1rem;color:var(--blue);margin-bottom:9px}
+.context-card p{font-size:.88rem;line-height:1.78;color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.pill{background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:4px 13px;font-size:.78rem;font-weight:600;color:var(--muted)}
+
+/* SECTION TABS */
+.sec-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:22px}
+@media(max-width:560px){.sec-tabs{grid-template-columns:1fr 1fr}}
+.sec-tab{background:var(--white);border:2px solid var(--border);border-radius:var(--radius);padding:12px 8px;text-align:center;cursor:pointer;transition:all .22s;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.sec-tab:hover{border-color:var(--gold);transform:translateY(-2px)}
+.sec-tab.active{border-color:var(--blue);background:var(--blue);color:#fff}
+.sec-tab .t-ico{font-size:1.4rem;display:block;margin-bottom:4px}
+.sec-tab .t-name{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;line-height:1.3}
+.sec-tab .t-pts{font-size:.68rem;margin-top:3px;opacity:.65}
+.sec-tab.active .t-pts{opacity:.7}
+
+/* PANELS */
+.panel{display:none;animation:fadeUp .32s ease}
+.panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* INNER TABS */
+nav.inner-nav{
+  display:flex;overflow-x:auto;background:var(--white);
+  border-bottom:2px solid var(--border);border-radius:var(--radius) var(--radius) 0 0;
+  padding:0 8px;gap:2px;position:sticky;top:47px;z-index:150;
+  box-shadow:0 2px 10px rgba(0,0,0,.06);margin-bottom:0;
+}
+nav.inner-nav button{
+  background:none;border:none;padding:11px 13px;
+  font-family:'Source Serif 4',serif;font-size:.8rem;font-weight:600;
+  color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;
+  margin-bottom:-2px;transition:all .2s;white-space:nowrap;display:flex;align-items:center;gap:5px;
+}
+nav.inner-nav button.active{color:var(--blue);border-bottom-color:var(--blue)}
+nav.inner-nav button:hover:not(.active){color:var(--ink)}
+
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;gap:10px;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--white)}
+.sec-hdr h2{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--blue)}
+.pts-badge{margin-left:auto;background:var(--gold);color:#fff;border-radius:99px;padding:3px 13px;font-size:.78rem;font-weight:700;white-space:nowrap}
+
+/* TEXT BOX */
+.text-box{
+  background:var(--cream);border:1.5px solid var(--border);border-left:5px solid var(--gold);
+  border-radius:0 0 var(--radius) var(--radius);padding:20px 22px;
+  font-size:.9rem;line-height:1.88;
+}
+.text-ctx{
+  background:var(--warn);border:1.5px solid var(--warn-b);border-radius:10px;
+  padding:10px 14px;font-size:.84rem;font-style:italic;color:#5a3a00;margin-bottom:14px;line-height:1.7;
+}
+.text-box p{margin-bottom:10px;text-align:justify}
+.text-source{font-style:italic;font-size:.8rem;color:var(--muted);margin-top:12px;padding-top:8px;border-top:1px solid var(--border)}
+.hl-orange{background:#fff3cd;border-radius:3px;padding:0 2px;font-weight:600}
+.hl-blue{background:#d4e6ff;border-radius:3px;padding:0 2px;font-weight:600}
+.hl-green{background:#d4f0db;border-radius:3px;padding:0 2px;font-weight:600}
+.hl-red{background:#f5d0d0;border-radius:3px;padding:0 2px;font-weight:600}
+
+/* QUESTION BLOCK */
+.q-block{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.q-block h3{font-family:'Playfair Display',serif;font-size:.98rem;color:var(--red);margin-bottom:11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.q-pts{background:var(--red);color:#fff;border-radius:99px;padding:2px 10px;font-size:.72rem;font-weight:700}
+.consigne{background:#f6f3ee;border-left:3px solid var(--gold);border-radius:7px;padding:10px 13px;font-size:.87rem;font-style:italic;line-height:1.78;margin-bottom:13px;color:var(--ink)}
+.consigne strong{font-style:normal;color:var(--red)}
+
+/* TEXTAREA */
+textarea{width:100%;min-height:110px;padding:12px;font-family:'Source Serif 4',serif;font-size:.87rem;line-height:1.78;border:1.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--ink);resize:vertical;outline:none;transition:border-color .2s}
+textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(13,52,96,.08)}
+
+/* BUTTONS */
+.btn-show{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-family:'Source Serif 4',serif;font-weight:600;font-size:.86rem;cursor:pointer;transition:background .2s;display:inline-flex;align-items:center;gap:7px;margin-top:12px}
+.btn-show:hover{background:#0a4a42}
+.btn-tip{background:var(--warn);color:#5a3a00;border:1.5px solid var(--warn-b);border-radius:8px;padding:8px 16px;font-family:'Source Serif 4',serif;font-weight:600;font-size:.82rem;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:6px;margin-top:10px;margin-right:8px}
+.btn-tip:hover{background:#fde9a0}
+
+/* CORRIGÉ */
+.corrige{display:none;background:var(--success);border:1.5px solid #a8d5b8;border-left:5px solid var(--success-b);border-radius:var(--radius);padding:18px 20px;margin-top:14px;animation:fadeUp .3s ease}
+.corrige.open{display:block}
+.corrige h4{font-family:'Playfair Display',serif;color:var(--teal);font-size:.97rem;margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.corrige p,.corrige li{font-size:.87rem;line-height:1.82}
+.corrige ul{padding-left:18px;margin-bottom:8px}
+.answer-box{background:var(--white);border:1px solid #a8d5b8;border-radius:9px;padding:13px 15px;margin:9px 0;font-size:.87rem;line-height:1.82}
+.answer-box .a-label{font-weight:700;color:var(--teal);font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.crit-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+@media(max-width:480px){.crit-grid{grid-template-columns:1fr}}
+.crit-item{background:var(--white);border:1px solid #c8e6d4;border-radius:8px;padding:10px 12px;font-size:.8rem}
+.crit-item .cl{font-weight:700;color:var(--teal);font-size:.78rem;margin-bottom:3px}
+
+/* TIP */
+.tip{background:var(--warn);border:1.5px solid var(--warn-b);border-radius:9px;padding:11px 15px;font-size:.84rem;line-height:1.72;margin:10px 0}
+.tip strong{color:#5a3a00}
+
+/* SCORE PANEL */
+#score-panel{position:fixed;bottom:18px;right:18px;z-index:300;background:var(--blue);color:#fff;border-radius:var(--radius);padding:13px 17px;box-shadow:0 8px 30px rgba(0,0,0,.22);min-width:148px;text-align:center}
+#score-panel .sl{font-size:.7rem;opacity:.65;letter-spacing:.08em;text-transform:uppercase}
+#score-panel .sn{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:900;color:#f5c842;line-height:1.1;margin:3px 0}
+#score-panel .ss{font-size:.72rem;opacity:.6}
+
+/* MODAL */
+#modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.6);align-items:center;justify-content:center}
+#modal.open{display:flex}
+.modal-box{background:#fff;border-radius:18px;padding:34px 28px;max-width:400px;width:90%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.32)}
+.modal-box h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--red);margin-bottom:9px}
+.modal-box p{font-size:.88rem;color:var(--muted);line-height:1.72;margin-bottom:14px}
+.modal-close{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-family:'Source Serif 4',serif;font-weight:600;cursor:pointer;display:block;margin:0 auto}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-meta">
+    <span>🇨🇲 MINESEC – OBC &nbsp;|&nbsp; BAC A – ABI – SB</span>
+    <span>Coeff. 2 &nbsp;|&nbsp; 20 pts</span>
+  </div>
+  <h1>Épreuve de Langue Française</h1>
+  <p class="sub">Durée : 2 heures &nbsp;·&nbsp; Évaluation interactive corrigée</p>
+</header>
+
+<!-- CHRONO -->
+<div id="chrono-bar">
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="c-label">⏱ Temps</div>
+    <div id="chrono-display">2:00:00</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+    <div class="chrono-track"><div class="chrono-fill" id="c-fill" style="width:100%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:.65rem;opacity:.55"><span>Début</span><span>1h</span><span>Fin</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <button class="c-btn" id="btn-pause" onclick="toggleChrono()">⏸ Pause</button>
+    <button class="c-btn stop" onclick="endExam()">⏹ Terminer</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- CONTEXT -->
+  <div class="context-card">
+    <h2>📋 Consignes & contexte de l'épreuve</h2>
+    <p>Le texte est un extrait du roman <em>Le Cimetière des bacheliers</em> de François Nkeme (2022). Il s'agit du témoignage de Bita, ami de Jérôme Ada, lors des funérailles de ce dernier au village. L'épreuve comporte <strong>quatre parties</strong> de 5 points chacune. Répondez à toutes les questions.</p>
+    <div class="pills">
+      <span class="pill">📖 4 parties</span>
+      <span class="pill">⏱ 2 heures</span>
+      <span class="pill">📊 Coeff. 2</span>
+      <span class="pill">🏆 20 points</span>
+    </div>
+  </div>
+
+  <!-- SECTION TABS -->
+  <div class="sec-tabs">
+    <div class="sec-tab active" onclick="showPanel('p-texte',this)">
+      <span class="t-ico">📄</span>
+      <span class="t-name">Texte</span>
+      <span class="t-pts">Support</span>
+    </div>
+    <div class="sec-tab" onclick="showPanel('p-comm',this)">
+      <span class="t-ico">💬</span>
+      <span class="t-name">I. Communication</span>
+      <span class="t-pts">5 pts</span>
+    </div>
+    <div class="sec-tab" onclick="showPanel('p-morph',this)">
+      <span class="t-ico">🔤</span>
+      <span class="t-name">II. Morphosyntaxe</span>
+      <span class="t-pts">5 pts</span>
+    </div>
+    <div class="sec-tab" onclick="showPanel('p-sem',this)">
+      <span class="t-ico">📚</span>
+      <span class="t-name">III. Sémantique</span>
+      <span class="t-pts">5 pts</span>
+    </div>
+  </div>
+  <div class="sec-tabs" style="grid-template-columns:1fr;max-width:200px;margin-top:-14px;margin-bottom:22px">
+    <div class="sec-tab" onclick="showPanel('p-style',this)">
+      <span class="t-ico">🎨</span>
+      <span class="t-name">IV. Stylistique & Rhétorique</span>
+      <span class="t-pts">5 pts</span>
+    </div>
+  </div>
+
+  <!-- ═══ TEXTE ═══ -->
+  <div class="panel active" id="p-texte">
+    <div class="sec-hdr"><h2>Texte support</h2><span class="pts-badge">François Nkeme, 2022</span></div>
+    <div class="text-box">
+      <div class="text-ctx">
+        <strong>Contexte :</strong> Jérôme Ada, après l'obtention du baccalauréat, s'est inscrit à la faculté de sciences de l'université de Yaoundé. S'étant heurté à la complexité de ce milieu universitaire, son rêve d'être astronaute s'est brisé et il s'est suicidé.
+      </div>
+      <p>Jérôme, <span class="hl-orange">votre fils n'a pas vécu sa dernière année dans ce village</span>. Par conséquent, il importe d'aller chercher sa mort ailleurs, dans un cimetière, le cimetière des bacheliers. Les villageois poussèrent une forte clameur. Ainsi, il y avait un cimetière pour les jeunes intellectuels à Ongola. Décidément, ils ignoraient les choses de la ville.</p>
+      <p><span class="hl-blue">Aujourd'hui, je vous le dis, votre fils est mort à l'université, c'est là-bas qu'on l'a mangé ; c'est là-bas que l'école l'a mangé.</span> <span class="hl-green">Lorsqu'il vous est arrivé, il ne restait plus que la peau et les os.</span> <span class="hl-red">Mes pères et mères, ne vous accusez point, c'est Ongola qui a tué votre fils.</span> Bita marqua une nouvelle pause. Les vieux qui quelques minutes avant admiraient les attributs de la sagesse des Blancs, furent frappés d'étonnement par la maîtrise du discours traditionnel.</p>
+      <p>— Comment Ongola a-t-il donc mangé notre fils ? Parle, parle vite ! dit le chef de village.</p>
+      <p>— Je vais parler... je vais vous dire toute la vérité que je sais... Je vous dispense de tout ce que vous savez : les réjouissances de sa mère après le bac ; les conditions difficiles de son départ à Ongola à cause du dénuement de sa famille. Je vais aller droit au but, en bon militaire, et je vous prie de me laisser raconter toute sa dernière année sans omettre un seul détail. C'est lorsque mon récit sera achevé que vous pourrez comprendre la lettre que Jérôme Ada, mon camarade a laissée à la postérité.</p>
+      <p>Déjà, depuis la classe de sixième, nous savions, nous ses camarades, qu'il voulait être le premier Camerounais à visiter l'espace. Il croyait si fort à son rêve qu'il étudiait nuit et jour pour le réaliser. Lorsque nos professeurs nous interrogeaient sur notre avenir, nous répondions avec joie : médecin, avocat ou pilote. Jérôme Ada faisait la moue et répondait toujours : je veux être le premier Camerounais à aller dans l'espace. Nous écumions de rage devant la prétention de ce gamin à peine sorti de l'âge des culottes courtes. Invariablement, il nous disait : « on verra bien qui de vous ou de moi aura raison ».</p>
+      <div class="text-source">François NKEME, <em>Le Cimetière des bacheliers</em>, Yaoundé, Proximité, 2022.</div>
+    </div>
+    <div class="tip" style="margin-top:14px">
+      <strong>🔍 Légende des surlignages :</strong>
+      <span class="hl-orange">Orange</span> = phrase présupposé/sous-entendu ·
+      <span class="hl-blue">Bleu</span> = passage focalisation ·
+      <span class="hl-green">Vert</span> = extrait morphosyntaxe ·
+      <span class="hl-red">Rouge</span> = extrait figure de style
+    </div>
+  </div>
+
+  <!-- ═══ I. COMMUNICATION ═══ -->
+  <div class="panel" id="p-comm">
+    <div class="sec-hdr"><h2>I. Communication</h2><span class="pts-badge">5 pts</span></div>
+
+    <!-- Q1a -->
+    <div class="q-block" style="margin-top:14px">
+      <h3>Question 1a <span class="q-pts">1,5 pt</span></h3>
+      <div class="consigne">En vous appuyant sur <strong>deux indices précis</strong>, identifiez le type de focalisation adopté dans le passage : <em>« Aujourd'hui, je vous le dis [...] c'est Ongola qui a tué votre fils. »</em></div>
+      <div class="tip"><strong>💡 Rappel :</strong> Focalisation zéro (narrateur omniscient) · Focalisation interne (narrateur = personnage, dit « je ») · Focalisation externe (narrateur observe de l'extérieur, sans accès aux pensées).</div>
+      <textarea placeholder="Identifiez le type de focalisation et relevez deux indices du texte..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-comm1a')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-comm1a">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Type de focalisation</div>
+          Il s'agit de la <strong>focalisation interne</strong> : le narrateur est également un personnage (Bita) qui s'exprime à la première personne et livre ce qu'il sait et ressent de l'intérieur.
+        </div>
+        <div class="answer-box">
+          <div class="a-label">Indice 1</div>
+          L'emploi du pronom personnel de la 1ʳᵉ personne du singulier : <em>« <strong>je</strong> vous le dis »</em> — le narrateur s'exprime en son nom propre, se positionnant comme acteur de la narration.
+        </div>
+        <div class="answer-box">
+          <div class="a-label">Indice 2</div>
+          L'adverbe déictique temporel <em>« <strong>Aujourd'hui</strong> »</em> ancre le discours dans la situation d'énonciation immédiate du personnage-narrateur, confirmant qu'il parle depuis sa propre perspective.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Type identifié (0,5 pt)</div>Focalisation interne correctement nommée.</div>
+          <div class="crit-item"><div class="cl">Indice 1 (0,5 pt)</div>Pronom « je » relevé et justifié.</div>
+          <div class="crit-item"><div class="cl">Indice 2 (0,5 pt)</div>Deuxième indice pertinent relevé et justifié.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q1b -->
+    <div class="q-block">
+      <h3>Question 1b <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Justifiez le recours à cette focalisation dans le passage.</div>
+      <textarea placeholder="Expliquez pourquoi l'auteur a choisi ce type de focalisation..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-comm1b')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-comm1b">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          Le recours à la focalisation interne se justifie par la volonté de l'auteur de donner au témoignage de Bita une force de <strong>vérité et d'authenticité</strong>. En faisant parler le narrateur à la première personne, François Nkeme implique directement le lecteur dans le drame vécu : Bita, ami intime de Jérôme, est le seul à détenir la vérité sur la mort du jeune bachelier. La focalisation interne permet en outre de susciter la <strong>compassion et l'empathie</strong> du lecteur envers les parents éplorés, tout en dénonçant avec force les failles du système universitaire.
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2a -->
+    <div class="q-block">
+      <h3>Question 2a <span class="q-pts">1,5 pt</span></h3>
+      <div class="consigne">Soit la phrase : <em>« Jérôme, <strong>votre fils n'a pas vécu sa dernière année dans ce village</strong>. »</em><br>Dégagez le <strong>présupposé</strong> et un <strong>sous-entendu</strong> dans cette phrase.</div>
+      <div class="tip"><strong>💡 Rappel :</strong> Le <strong>présupposé</strong> est une information posée comme allant de soi, nécessaire pour que la phrase ait un sens. Le <strong>sous-entendu</strong> est une information implicite déductible du contexte, non dite explicitement.</div>
+      <textarea placeholder="Rédigez le présupposé puis le sous-entendu..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-comm2a')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-comm2a">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Présupposé</div>
+          La phrase présuppose que <strong>Jérôme a vécu sa dernière année quelque part</strong> (ailleurs qu'au village) — c'est une information posée comme vraie et non contestable : il a forcément habité un lieu précis lors de sa dernière année. La négation (<em>« n'a pas vécu... dans ce village »</em>) confirme l'existence d'un autre lieu.
+        </div>
+        <div class="answer-box">
+          <div class="a-label">Sous-entendu</div>
+          Le sous-entendu est que <strong>c'est la ville (Ongola / l'université) qui est responsable de la mort de Jérôme</strong>. Sans le dire directement, Bita oriente les esprits vers l'idée que la mort ne vient pas du village mais de la vie universitaire à Yaoundé. Il prépare ainsi sa dénonciation du système éducatif.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Présupposé (0,75 pt)</div>Information implicite posée comme allée de soi, correctement identifiée.</div>
+          <div class="crit-item"><div class="cl">Sous-entendu (0,75 pt)</div>Information déduite du contexte, logiquement justifiée.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2b -->
+    <div class="q-block">
+      <h3>Question 2b <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Quelle intention de communication du locuteur ces contenus latents révèlent-ils ?</div>
+      <textarea placeholder="Expliquez l'intention communicative de Bita à travers ces implicites..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-comm2b')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-comm2b">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          Ces contenus latents révèlent l'intention de Bita de <strong>disculper la famille et le village</strong> tout en <strong>dressant un réquisitoire contre la ville et le système universitaire</strong>. En disant sans dire, Bita ménage la sensibilité des parents (il n'accuse pas brutalement) tout en préparant psychologiquement l'auditoire à entendre une vérité douloureuse. Son intention est à la fois <strong>persuasive</strong> (convaincre que c'est Ongola le coupable) et <strong>cathartique</strong> (libérer la famille de la culpabilité).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ II. MORPHOSYNTAXE ═══ -->
+  <div class="panel" id="p-morph">
+    <div class="sec-hdr"><h2>II. Morphosyntaxe</h2><span class="pts-badge">5 pts</span></div>
+
+    <!-- Q1a -->
+    <div class="q-block" style="margin-top:14px">
+      <h3>Question 1a <span class="q-pts">1,5 pt</span></h3>
+      <div class="consigne">Soit l'extrait : <em>« <span class="hl-green">Lorsqu'il vous est arrivé, il ne restait plus que la peau et les os.</span> »</em><br>Identifiez le <strong>temps et le mode</strong> de chaque verbe conjugué.</div>
+      <div class="tip"><strong>💡 Rappel :</strong> Identifiez d'abord chaque verbe conjugué (formes personnelles), puis leur temps (passé composé, imparfait, etc.) et leur mode (indicatif, subjonctif, impératif…).</div>
+      <textarea placeholder="Verbe 1 : ... → temps : ... mode : ...\nVerbe 2 : ... → temps : ... mode : ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-morph1a')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-morph1a">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Verbe 1 : « est arrivé »</div>
+          Temps : <strong>passé composé</strong> (auxiliaire être au présent de l'indicatif + participe passé <em>arrivé</em>).<br>
+          Mode : <strong>indicatif</strong>.
+        </div>
+        <div class="answer-box">
+          <div class="a-label">Verbe 2 : « restait »</div>
+          Temps : <strong>imparfait</strong> (radical <em>rest-</em> + terminaison <em>-ait</em>).<br>
+          Mode : <strong>indicatif</strong>.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Verbe 1 (0,75 pt)</div>Passé composé de l'indicatif, correctement nommé.</div>
+          <div class="crit-item"><div class="cl">Verbe 2 (0,75 pt)</div>Imparfait de l'indicatif, correctement nommé.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q1b -->
+    <div class="q-block">
+      <h3>Question 1b <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Donnez la <strong>valeur d'emploi</strong> de chacun de ces temps et de ce mode.</div>
+      <textarea placeholder="Valeur du passé composé ici : ...\nValeur de l'imparfait ici : ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-morph1b')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-morph1b">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Valeur du passé composé (« est arrivé »)</div>
+          Le passé composé exprime ici un <strong>fait accompli, ponctuel et antérieur</strong> au moment de l'énonciation. Il indique que l'arrivée du corps de Jérôme au village constitue un événement précis et révolu qui sert de repère temporel dans le récit.
+        </div>
+        <div class="answer-box">
+          <div class="a-label">Valeur de l'imparfait (« restait »)</div>
+          L'imparfait exprime ici un <strong>état duratif</strong> : il décrit l'état dans lequel se trouvait le corps de Jérôme au moment de son arrivée (état de maigreur extrême). C'est l'imparfait dit <strong>descriptif ou d'état</strong>, qui s'oppose au passé composé événementiel.
+        </div>
+        <div class="answer-box">
+          <div class="a-label">Valeur du mode (indicatif)</div>
+          L'indicatif présente les faits comme <strong>réels, certains et objectifs</strong>. Le narrateur affirme des faits avérés pour emporter la conviction de son auditoire.
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2a -->
+    <div class="q-block">
+      <h3>Question 2a <span class="q-pts">1,5 pt</span></h3>
+      <div class="consigne">Identifiez les <strong>types de phrase</strong> dans l'extrait : <em>« Comment Ongola a-t-il donc mangé notre fils ? Parle, parle vite ! dit le chef de village. »</em></div>
+      <div class="tip"><strong>💡 Rappel :</strong> Types de phrase : déclarative · interrogative · exclamative · injonctive/impérative. Ne pas confondre avec les formes (affirmative/négative).</div>
+      <textarea placeholder="Phrase 1 : ... → type : ...\nPhrase 2 : ... → type : ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-morph2a')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-morph2a">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Phrase 1 : « Comment Ongola a-t-il donc mangé notre fils ? »</div>
+          Type : <strong>phrase interrogative</strong> directe totale. Indices : inversion sujet-verbe (<em>a-t-il</em>), mot interrogatif <em>comment</em>, point d'interrogation final.
+        </div>
+        <div class="answer-box">
+          <div class="a-label">Phrase 2 : « Parle, parle vite ! »</div>
+          Type : <strong>phrase injonctive</strong> (ou impérative). Indices : verbe à l'impératif présent (<em>parle</em>), absence de sujet exprimé, point d'exclamation qui souligne l'urgence de l'ordre.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Phrase 1 (0,75 pt)</div>Interrogative identifiée + au moins un indice.</div>
+          <div class="crit-item"><div class="cl">Phrase 2 (0,75 pt)</div>Injonctive/impérative identifiée + au moins un indice.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2b -->
+    <div class="q-block">
+      <h3>Question 2b <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Que met en relief leur emploi dans l'extrait ?</div>
+      <textarea placeholder="Analysez l'effet produit par la combinaison de ces deux types de phrases..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-morph2b')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-morph2b">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          L'emploi conjoint de la phrase interrogative et de la phrase injonctive met en relief <strong>l'impatience et l'autorité du chef de village</strong>. La question exprime sa stupéfaction et son besoin urgent de comprendre la mort de Jérôme. L'injonction répétée (<em>« Parle, parle vite ! »</em>) traduit une <strong>tension émotionnelle extrême</strong> : le chef ne peut supporter l'ignorance de la vérité. Ensemble, ces deux types de phrases créent un effet de <strong>dramatisation</strong> qui révèle la douleur collective et l'autorité coutumière bousculée par ce drame.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ III. SÉMANTIQUE ═══ -->
+  <div class="panel" id="p-sem">
+    <div class="sec-hdr"><h2>III. Sémantique et Lexicologie</h2><span class="pts-badge">5 pts</span></div>
+
+    <!-- Q1a -->
+    <div class="q-block" style="margin-top:14px">
+      <h3>Question 1a <span class="q-pts">1,5 pt</span></h3>
+      <div class="consigne">Soit l'énoncé : <em>« Aujourd'hui, je vous le dis, [...] c'est là-bas que <span class="hl-blue">l'école l'a mangé</span>. »</em><br>Relevez une <strong>néologie de sens</strong> dans cet énoncé.</div>
+      <div class="tip"><strong>💡 Rappel :</strong> Une <strong>néologie de sens</strong> (ou néosémie) consiste à attribuer un sens nouveau à un mot qui existe déjà. À distinguer de la néologie de forme (création d'un mot nouveau).</div>
+      <textarea placeholder="Relevez le mot et expliquez son sens néologique..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-sem1a')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-sem1a">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Néologie de sens relevée</div>
+          Le verbe <strong>« mangé »</strong> dans <em>« l'école l'a mangé »</em> constitue une néologie de sens. Dans son emploi standard, <em>manger</em> signifie ingérer de la nourriture. Ici, il prend le sens nouveau de <strong>détruire, anéantir, broyer psychologiquement un être humain</strong>. Ce glissement sémantique est emprunté à l'imaginaire traditionnel africain où <em>« manger quelqu'un »</em> désigne le fait de le consumer spirituellement ou socialement jusqu'à sa perte.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Mot relevé (0,5 pt)</div>« mangé » ou « manger » correctement identifié.</div>
+          <div class="crit-item"><div class="cl">Sens ancien (0,5 pt)</div>Sens dénotatif standard rappelé.</div>
+          <div class="crit-item"><div class="cl">Sens nouveau (0,5 pt)</div>Sens néologique correctement explicité.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q1b -->
+    <div class="q-block">
+      <h3>Question 1b <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Quel effet de sens produit son emploi ?</div>
+      <textarea placeholder="Analysez l'effet produit par cette néologie de sens dans le texte..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-sem1b')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-sem1b">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          L'emploi néologique de « mangé » produit un <strong>effet de violence symbolique et de déshumanisation</strong>. Il assimile le système éducatif à un prédateur qui dévore ses victimes — les jeunes bacheliers — sans les nourrir réellement. Cette image cruelle renforce la <strong>dénonciation sociale</strong> de l'auteur : l'université, censée construire des hommes, les détruit. L'effet est aussi <strong>culturellement ancré</strong> : en recourant au registre traditionnel camerounais, Bita parle le langage du village pour rendre la mort de Jérôme compréhensible à ses parents.
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2a -->
+    <div class="q-block">
+      <h3>Question 2a <span class="q-pts">2 pts</span></h3>
+      <div class="consigne">Construisez, à partir du texte, le <strong>champ lexical de l'école</strong> et celui du <strong>rêve</strong>.</div>
+      <textarea placeholder="Champ lexical de l'école : ...\n\nChamp lexical du rêve : ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-sem2a')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-sem2a">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Champ lexical de l'école (1 pt)</div>
+          <em>baccalauréat, bacheliers, université, classe de sixième, professeurs, avenir, médecin, avocat, pilote, étudier, camarades, récit, lettre, postérité, faculté, intellectuels.</em>
+        </div>
+        <div class="answer-box">
+          <div class="a-label">Champ lexical du rêve (1 pt)</div>
+          <em>rêve, espace, astronaute, premier Camerounais, visiter l'espace, espoir (implicite), croyait, réaliser, on verra bien, avenir, joie, prétention, invariablement.</em>
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Champ école (1 pt)</div>Au moins 5-6 termes pertinents tirés du texte.</div>
+          <div class="crit-item"><div class="cl">Champ rêve (1 pt)</div>Au moins 5-6 termes pertinents tirés du texte.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2b -->
+    <div class="q-block">
+      <h3>Question 2b <span class="q-pts">0,5 pt</span></h3>
+      <div class="consigne">Comment justifiez-vous l'emploi conjoint de ces champs lexicaux ?</div>
+      <textarea style="min-height:80px" placeholder="Expliquez la relation entre ces deux champs lexicaux dans le texte..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-sem2b')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-sem2b">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          L'emploi conjoint des champs lexicaux de l'école et du rêve révèle le <strong>paradoxe central du roman</strong> : l'école, censée être le chemin vers la réalisation du rêve, devient au contraire son <strong>fossoyeur</strong>. Jérôme avait confié à l'institution scolaire la réalisation de son rêve d'astronaute — mais c'est précisément ce système qui l'a brisé. Les deux champs se trouvent ainsi dans une relation d'<strong>opposition ironique</strong> : le rêve meurt là où il devait naître.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ IV. STYLISTIQUE ═══ -->
+  <div class="panel" id="p-style">
+    <div class="sec-hdr"><h2>IV. Stylistique et Rhétorique</h2><span class="pts-badge">5 pts</span></div>
+
+    <!-- Q1a -->
+    <div class="q-block" style="margin-top:14px">
+      <h3>Question 1a <span class="q-pts">1,5 pt</span></h3>
+      <div class="consigne">Identifiez, à l'aide de <strong>deux indices précis</strong>, une tonalité dans le premier paragraphe du texte (<em>depuis « Jérôme, votre fils... » jusqu'à « ...les choses de la ville. »</em>).</div>
+      <div class="tip"><strong>💡 Rappel :</strong> La tonalité (ou registre) désigne l'atmosphère émotionnelle dominante d'un texte : lyrique, tragique, épique, pathétique, ironique, comique, polémique, didactique, etc.</div>
+      <textarea placeholder="Tonalité identifiée : ...\nIndice 1 : ...\nIndice 2 : ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-sty1a')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-sty1a">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Tonalité identifiée</div>
+          La tonalité dominante est <strong>pathétique</strong> (ou dramatique-tragique), visant à susciter l'émotion et la compassion du lecteur face à la mort tragique d'un jeune homme plein d'avenir.
+        </div>
+        <div class="answer-box">
+          <div class="a-label">Indice 1</div>
+          L'apostrophe directe aux parents : <em>« Jérôme, <strong>votre fils</strong> »</em> suivi du lieu de sa mort (<em>« cimetière des bacheliers »</em>) crée une forte charge émotionnelle — la mort est annoncée dès les premières lignes dans un cadre solennel et douloureux.
+        </div>
+        <div class="answer-box">
+          <div class="a-label">Indice 2</div>
+          La réaction des villageois : <em>« Les villageois poussèrent une <strong>forte clameur</strong> »</em> — cette clameur collective traduit une émotion de stupeur et de douleur partagée, amplifiant le registre pathétique par le recours à une réaction physique et collective de l'auditoire.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Tonalité (0,5 pt)</div>Pathétique (ou tragique / dramatique) correctement nommée.</div>
+          <div class="crit-item"><div class="cl">Indice 1 (0,5 pt)</div>Relevé précis et justifié.</div>
+          <div class="crit-item"><div class="cl">Indice 2 (0,5 pt)</div>Deuxième indice pertinent et justifié.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q1b -->
+    <div class="q-block">
+      <h3>Question 1b <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">En quoi cette tonalité reflète-t-elle l'intention de communication de l'auteur ?</div>
+      <textarea placeholder="Analysez le lien entre la tonalité pathétique et l'intention de l'auteur..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-sty1b')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-sty1b">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          La tonalité pathétique reflète l'intention de François Nkeme de <strong>dénoncer les défaillances du système éducatif camerounais</strong> tout en sensibilisant le lecteur à la détresse des familles rurales. En suscitant la pitié et l'empathie, l'auteur engage le lecteur émotionnellement avant de l'engager intellectuellement dans la réflexion sociale. La mort de Jérôme devient ainsi un <strong>cas emblématique</strong> d'une réalité collective douloureuse : celle de nombreux jeunes Camerounais dont les rêves se brisent face aux réalités de l'université. L'auteur cherche à <strong>provoquer une prise de conscience</strong> chez le lecteur en le touchant d'abord au cœur.
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2a -->
+    <div class="q-block">
+      <h3>Question 2a <span class="q-pts">1,5 pt</span></h3>
+      <div class="consigne">Identifiez la figure de style dans l'extrait : <em>« <span class="hl-red">Mes pères et mères, ne vous accusez point, c'est Ongola qui a tué votre fils.</span> »</em></div>
+      <div class="tip"><strong>💡 Figures à connaître :</strong> métaphore, comparaison, personnification, hyperbole, synecdoque, antithèse, oxymore, anaphore, gradation, euphémisme, litote, apostrophe, périphrase, ironie, allégorie…</div>
+      <textarea placeholder="Nommez la figure de style et relevez les deux éléments qui la constituent..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-sty2a')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-sty2a">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Figure de style principale : la personnification (ou métonymie)</div>
+          <strong>La personnification</strong> : la ville d'Ongola (lieu géographique, entité abstraite) est dotée de la capacité d'agir comme un être humain criminel — <em>« c'est Ongola qui a <strong>tué</strong> votre fils »</em>. Un lieu ne peut pas tuer : en lui prêtant cette action, Bita en fait un acteur responsable, un meurtrier.<br><br>
+          On peut également identifier une <strong>métonymie</strong> : Ongola désigne par métonymie l'ensemble du système universitaire et social de la capitale qui a conduit Jérôme à sa perte.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Figure nommée (0,75 pt)</div>Personnification et/ou métonymie correctement identifiée.</div>
+          <div class="crit-item"><div class="cl">Justification (0,75 pt)</div>Les deux éléments de la figure relevés et la transformation sémantique expliquée.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2b -->
+    <div class="q-block">
+      <h3>Question 2b <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Que met en évidence l'emploi de cette figure de style ?</div>
+      <textarea placeholder="Analysez l'effet produit par cette figure dans le texte..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-sty2b')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-sty2b">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          Cette figure met en évidence <strong>la responsabilité collective du milieu urbain et universitaire</strong> dans la mort de Jérôme Ada. En personnifiant Ongola comme un assassin, Bita <strong>exonère les parents</strong> de toute culpabilité et concentre la charge accusatrice sur la ville — symbole d'un système qui broie les jeunes talents ruraux plutôt que de les épanouir. L'effet est doublement <strong>cathartique</strong> (libère la famille) et <strong>polémique</strong> (dénonce la société). La figure traduit aussi le <strong>regard du village sur la ville</strong> : Ongola y est perçue comme une entité dangereuse, étrangère et prédatrice.
+        </div>
+      </div>
+    </div>
+
+    <!-- SYNTHÈSE -->
+    <div class="q-block" style="border-color:var(--gold);border-top:4px solid var(--gold)">
+      <h3>📊 Grille de notation complète</h3>
+      <div class="crit-grid" style="grid-template-columns:1fr 1fr;margin-top:10px">
+        <div class="crit-item" style="border-color:var(--warn-b)"><div class="cl" style="color:var(--gold)">I. Communication (5 pts)</div>Q1a : 1,5 pt · Q1b : 1 pt · Q2a : 1,5 pt · Q2b : 1 pt</div>
+        <div class="crit-item" style="border-color:var(--warn-b)"><div class="cl" style="color:var(--gold)">II. Morphosyntaxe (5 pts)</div>Q1a : 1,5 pt · Q1b : 1 pt · Q2a : 1,5 pt · Q2b : 1 pt</div>
+        <div class="crit-item" style="border-color:var(--warn-b)"><div class="cl" style="color:var(--gold)">III. Sémantique (5 pts)</div>Q1a : 1,5 pt · Q1b : 1 pt · Q2a : 2 pts · Q2b : 0,5 pt</div>
+        <div class="crit-item" style="border-color:var(--warn-b)"><div class="cl" style="color:var(--gold)">IV. Stylistique (5 pts)</div>Q1a : 1,5 pt · Q1b : 1 pt · Q2a : 1,5 pt · Q2b : 1 pt</div>
+      </div>
+      <div style="text-align:center;margin-top:14px;padding:14px;background:var(--blue);color:#fff;border-radius:10px;font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700">
+        Total : 20 points &nbsp;·&nbsp; Coefficient 2 &nbsp;·&nbsp; Durée : 2 heures
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- SCORE PANEL -->
+<div id="score-panel">
+  <div class="sl">📍 Section active</div>
+  <div class="sn" id="sn-display">—</div>
+  <div class="ss" id="ss-display">Choisissez une section</div>
+</div>
+
+<!-- MODAL -->
+<div id="modal">
+  <div class="modal-box">
+    <div style="font-size:2.8rem">⏰</div>
+    <h2>Temps écoulé !</h2>
+    <p>Les 2 heures de l'épreuve sont terminées. Consultez les corrigés pour auto-évaluer vos réponses.</p>
+    <p style="font-size:.82rem;margin-top:6px">« Le travail régulier est la clé du succès. » — Bonne continuation !</p>
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">Consulter les corrigés →</button>
+  </div>
+</div>
+
+<script>
+// ─── CHRONO 2h ───
+const TOTAL = 2*3600, panels = ['p-texte','p-comm','p-morph','p-sem','p-style'];
+let remaining = TOTAL, running = false, interval = null;
+
+function startChrono(){
+  running = true;
+  document.getElementById('btn-pause').textContent = '⏸ Pause';
+  interval = setInterval(()=>{
+    if(remaining<=0){clearInterval(interval);endExam();return}
+    remaining--;updateDisplay();
+  },1000);
+}
+function toggleChrono(){
+  if(running){running=false;clearInterval(interval);document.getElementById('btn-pause').textContent='▶ Reprendre'}
+  else startChrono();
+}
+function updateDisplay(){
+  const h=Math.floor(remaining/3600),m=Math.floor((remaining%3600)/60),s=remaining%60;
+  const d=document.getElementById('chrono-display');
+  d.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('c-fill').style.width=(remaining/TOTAL*100)+'%';
+  d.className='';
+  if(remaining<=1800)d.classList.add('warn');
+  if(remaining<=300)d.classList.add('danger');
+}
+function endExam(){clearInterval(interval);running=false;document.getElementById('modal').classList.add('open')}
+window.addEventListener('load',()=>{updateDisplay();startChrono()});
+
+// ─── PANELS ───
+const snNames={
+  'p-texte':['📄','Texte support'],
+  'p-comm':['💬','I. Communication'],
+  'p-morph':['🔤','II. Morphosyntaxe'],
+  'p-sem':['📚','III. Sémantique'],
+  'p-style':['🎨','IV. Stylistique']
+};
+function showPanel(id, el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sec-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  const [ico,name]=snNames[id]||['—','—'];
+  document.getElementById('sn-display').textContent=ico;
+  document.getElementById('ss-display').textContent=name;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── CORRIGÉ TOGGLE ───
+function toggleCorrige(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+  const btn=event.currentTarget;
+  btn.textContent=el.classList.contains('open')?'🔒 Masquer':'📗 Voir la réponse';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Évaluation BAC – Littérature & Culture Générale</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1209;
+  --parchment: #f5f0e8;
+  --cream: #faf7f2;
+  --gold: #b8860b;
+  --gold-light: #d4a820;
+  --red: #8b1a1a;
+  --green: #1a5c2e;
+  --blue-dark: #0d2f5c;
+  --muted: #6b5c40;
+  --border: #d4c9b0;
+  --success-bg: #edf7f0;
+  --danger-bg: #fdf0f0;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(26,18,9,.12);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Source Serif 4', Georgia, serif;
+  background: var(--parchment);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+header {
+  background: linear-gradient(160deg, #0d2f5c 0%, #1a1209 60%, #8b1a1a 100%);
+  color: #fff;
+  padding: 28px 20px 22px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M0 0h40v40H0z'/%3E%3Cpath d='M20 20m-18 0a18 18 0 1 1 36 0a18 18 0 1 1-36 0' stroke='%23fff' stroke-width='.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.header-top {
+  display: flex; justify-content: space-between; align-items: center;
+  max-width: 900px; margin: 0 auto 12px; position: relative;
+}
+.header-meta { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; opacity: .7; }
+header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.3rem, 4vw, 2rem);
+  font-weight: 900;
+  letter-spacing: -.01em;
+  margin-bottom: 4px;
+  position: relative;
+}
+header .subtitle { font-size: .85rem; opacity: .8; font-style: italic; }
+
+/* ── CHRONO ── */
+#chrono-bar {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--blue-dark);
+  color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 18px;
+  box-shadow: 0 2px 16px rgba(0,0,0,.2);
+  gap: 12px;
+}
+#chrono-display {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  min-width: 100px;
+  text-align: center;
+  transition: color .3s;
+}
+#chrono-display.warning { color: #f5a623; }
+#chrono-display.danger  { color: #ff4444; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+
+.chrono-progress { flex: 1; height: 6px; background: rgba(255,255,255,.2); border-radius: 99px; overflow: hidden; }
+.chrono-fill { height: 100%; background: linear-gradient(90deg, #1a8c5a, #f5a623, #c0392b); border-radius: 99px; transition: width 1s linear; }
+.chrono-label { font-size: .72rem; opacity: .7; white-space: nowrap; }
+
+.btn-chrono {
+  background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.25);
+  color: #fff; border-radius: 8px; padding: 6px 14px;
+  font-family: 'Source Serif 4', serif; font-size: .8rem; cursor: pointer;
+  transition: background .2s;
+}
+.btn-chrono:hover { background: rgba(255,255,255,.25); }
+.btn-chrono.danger-btn { background: rgba(139,26,26,.5); border-color: #c0392b; }
+
+/* ── MAIN CONTAINER ── */
+main { max-width: 900px; margin: 0 auto; padding: 24px 16px 80px; }
+
+/* ── INTRO CARD ── */
+.intro-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow);
+  border-top: 4px solid var(--gold);
+}
+.intro-card h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: var(--blue-dark);
+  margin-bottom: 10px;
+}
+.intro-card p { font-size: .9rem; line-height: 1.75; color: var(--muted); }
+.intro-card .info-row {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px;
+}
+.info-pill {
+  background: var(--parchment); border: 1px solid var(--border);
+  border-radius: 99px; padding: 5px 14px; font-size: .8rem; font-weight: 600; color: var(--muted);
+}
+
+/* ── SUBJECT SELECTOR ── */
+.subject-tabs {
+  display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px;
+}
+.subj-tab {
+  background: #fff; border: 2px solid var(--border);
+  border-radius: var(--radius); padding: 14px 12px;
+  text-align: center; cursor: pointer;
+  transition: all .22s; box-shadow: 0 2px 10px rgba(0,0,0,.05);
+}
+.subj-tab:hover { border-color: var(--gold); transform: translateY(-2px); }
+.subj-tab.active { border-color: var(--blue-dark); background: var(--blue-dark); color: #fff; }
+.subj-tab .tab-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem; font-weight: 900;
+  display: block; margin-bottom: 4px;
+  color: var(--gold-light);
+}
+.subj-tab.active .tab-num { color: #f5d680; }
+.subj-tab .tab-name { font-size: .75rem; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; opacity: .8; }
+.subj-tab .tab-pts { font-size: .72rem; margin-top: 4px; opacity: .6; }
+
+/* ── SUBJECT PANEL ── */
+.subject-panel { display: none; animation: fadeIn .3s ease; }
+.subject-panel.active { display: block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── SECTION HEADER ── */
+.sec-hdr {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px; padding-bottom: 12px;
+  border-bottom: 2px solid var(--border);
+}
+.sec-hdr h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem; color: var(--blue-dark);
+}
+.pts-badge {
+  margin-left: auto; background: var(--gold); color: #fff;
+  border-radius: 99px; padding: 4px 14px; font-size: .82rem; font-weight: 700;
+  white-space: nowrap;
+}
+
+/* ── TEXT DISPLAY ── */
+.text-box {
+  background: var(--cream);
+  border: 1.5px solid var(--border);
+  border-left: 5px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  margin-bottom: 20px;
+  font-size: .9rem; line-height: 1.85;
+  box-shadow: inset 0 1px 8px rgba(0,0,0,.04);
+}
+.text-box .text-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; font-weight: 700;
+  color: var(--blue-dark); margin-bottom: 12px;
+  padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.text-box p { margin-bottom: 10px; text-align: justify; }
+.text-source {
+  font-style: italic; font-size: .82rem; color: var(--muted);
+  margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--border);
+}
+
+/* ── THEATRE DIALOGUE ── */
+.dialogue { font-size: .88rem; line-height: 1.9; }
+.dialogue .speaker {
+  font-weight: 700; text-transform: uppercase;
+  font-size: .8rem; letter-spacing: .06em; color: var(--red);
+}
+.dialogue .didascalie { font-style: italic; color: var(--muted); font-size: .82rem; }
+.dialogue .line { margin-bottom: 8px; }
+
+/* ── QUESTION BLOCK ── */
+.question-block {
+  background: #fff; border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 20px 22px;
+  margin-bottom: 20px; box-shadow: var(--shadow);
+}
+.question-block h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1rem; color: var(--red);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+}
+.q-pts { background: var(--red); color: #fff; border-radius: 99px; padding: 2px 10px; font-size: .75rem; }
+.question-block .consigne {
+  font-size: .88rem; line-height: 1.8; color: var(--ink);
+  margin-bottom: 14px; padding: 10px 14px;
+  background: #f7f4ef; border-radius: 8px; border-left: 3px solid var(--gold);
+  font-style: italic;
+}
+
+/* ── TEXTAREA ── */
+textarea {
+  width: 100%; min-height: 140px; padding: 14px;
+  font-family: 'Source Serif 4', serif; font-size: .88rem; line-height: 1.8;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  background: var(--cream); color: var(--ink);
+  resize: vertical; outline: none; transition: border-color .2s;
+}
+textarea:focus { border-color: var(--blue-dark); box-shadow: 0 0 0 3px rgba(13,47,92,.08); }
+.word-counter {
+  text-align: right; font-size: .75rem; color: var(--muted);
+  margin-top: 4px; font-style: italic;
+}
+
+/* ── BUTTONS ── */
+.btn-primary {
+  background: var(--blue-dark); color: #fff;
+  border: none; border-radius: 8px; padding: 11px 24px;
+  font-family: 'Source Serif 4', serif; font-weight: 600; font-size: .9rem;
+  cursor: pointer; transition: background .2s; display: inline-flex; align-items: center; gap: 8px;
+}
+.btn-primary:hover { background: #0a2448; }
+.btn-secondary {
+  background: var(--parchment); color: var(--ink);
+  border: 1.5px solid var(--border); border-radius: 8px; padding: 9px 20px;
+  font-family: 'Source Serif 4', serif; font-weight: 600; font-size: .88rem;
+  cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-secondary:hover { border-color: var(--gold); }
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+/* ── CORRIGÉ ── */
+.corrige {
+  display: none;
+  background: var(--success-bg);
+  border: 1.5px solid #a8d5b8;
+  border-left: 5px solid var(--green);
+  border-radius: var(--radius);
+  padding: 20px 22px; margin-top: 16px;
+  animation: fadeIn .3s ease;
+}
+.corrige.active { display: block; }
+.corrige h4 {
+  font-family: 'Playfair Display', serif;
+  color: var(--green); font-size: 1rem; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.corrige p, .corrige li { font-size: .88rem; line-height: 1.8; }
+.corrige ul { padding-left: 20px; }
+.corrige .highlight {
+  background: #fff; border: 1px solid #a8d5b8;
+  border-radius: 8px; padding: 12px 14px; margin: 10px 0;
+  font-size: .87rem; line-height: 1.85;
+}
+.corrige .grid-crit {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;
+}
+@media(max-width:500px){ .corrige .grid-crit { grid-template-columns: 1fr; } }
+.crit-item {
+  background: #fff; border-radius: 8px; padding: 10px 12px;
+  border: 1px solid #c8e6d4; font-size: .82rem;
+}
+.crit-item .crit-label { font-weight: 700; color: var(--green); margin-bottom: 3px; font-size: .8rem; }
+
+/* ── PLAN BLOCK ── */
+.plan-block {
+  background: #fff; border: 1px solid #a8d5b8; border-radius: 8px;
+  padding: 14px 16px; margin: 10px 0; font-size: .85rem; line-height: 1.75;
+}
+.plan-block .plan-title { font-weight: 700; color: var(--blue-dark); margin-bottom: 6px; }
+.plan-block .plan-roman { color: var(--red); font-weight: 700; }
+
+/* ── TIPS ── */
+.tip-box {
+  background: #fff8e7; border: 1.5px solid #f5a623;
+  border-radius: 10px; padding: 12px 16px; margin: 12px 0; font-size: .85rem; line-height: 1.7;
+}
+.tip-box strong { color: #7a4a00; }
+
+/* ── SCORE TRACKER ── */
+#score-panel {
+  position: fixed; bottom: 20px; right: 20px; z-index: 300;
+  background: var(--blue-dark); color: #fff;
+  border-radius: var(--radius); padding: 14px 18px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.25);
+  min-width: 160px; text-align: center;
+}
+#score-panel .score-label { font-size: .72rem; opacity: .7; letter-spacing: .08em; text-transform: uppercase; }
+#score-panel .score-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem; font-weight: 900; color: var(--gold-light);
+  line-height: 1.1; margin: 4px 0;
+}
+#score-panel .score-sub { font-size: .75rem; opacity: .65; }
+
+/* ── MODAL (fin d'exam) ── */
+#modal-end {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.65); align-items: center; justify-content: center;
+}
+#modal-end.open { display: flex; }
+.modal-inner {
+  background: #fff; border-radius: 18px;
+  padding: 36px 32px; max-width: 420px; width: 90%;
+  text-align: center; box-shadow: 0 24px 80px rgba(0,0,0,.35);
+}
+.modal-inner h2 { font-family:'Playfair Display',serif; font-size:1.6rem; color:var(--red); margin-bottom:10px; }
+.modal-inner p { font-size:.9rem; color:var(--muted); margin-bottom:16px; line-height:1.7; }
+.modal-inner .final-score {
+  font-family:'Playfair Display',serif; font-size:3rem; font-weight:900;
+  color:var(--gold); margin:16px 0 6px;
+}
+
+/* ── TABS NAV ── */
+nav.sec-nav {
+  display: flex; overflow-x: auto; background: #fff;
+  border-bottom: 2px solid var(--border);
+  padding: 0 8px; gap: 2px; margin-bottom: 22px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  position: sticky; top: 47px; z-index: 150;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+}
+nav.sec-nav button {
+  background: none; border: none; padding: 12px 14px;
+  font-family: 'Source Serif 4', serif; font-size: .82rem; font-weight: 600;
+  color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent;
+  margin-bottom: -2px; transition: all .2s; white-space: nowrap; display: flex; align-items: center; gap: 5px;
+}
+nav.sec-nav button.active { color: var(--blue-dark); border-bottom-color: var(--blue-dark); }
+nav.sec-nav button:hover:not(.active) { color: var(--ink); }
+
+/* ── RESPONSIVE ── */
+@media(max-width:480px) {
+  .subject-tabs { grid-template-columns: 1fr; }
+  #score-panel { bottom: 10px; right: 10px; padding: 10px 14px; min-width: 130px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-top">
+    <div class="header-meta">🇨🇲 MINESEC – OBC</div>
+    <div class="header-meta">Coefficient : 3</div>
+  </div>
+  <h1>Épreuve de Littérature &amp; Culture Générale</h1>
+  <p class="subtitle">Baccalauréat A – ABJ – SH &nbsp;|&nbsp; Durée : 4 heures &nbsp;|&nbsp; Évaluation interactive</p>
+</header>
+
+<!-- CHRONO -->
+<div id="chrono-bar">
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="chrono-label">⏱ Temps restant</div>
+    <div id="chrono-display">4:00:00</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;gap:6px;">
+    <div class="chrono-progress"><div class="chrono-fill" id="chrono-fill" style="width:100%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:.68rem;opacity:.6;">
+      <span>Début</span><span>Mi-temps</span><span>Fin</span>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <button class="btn-chrono" id="btn-pause" onclick="toggleChrono()">⏸ Pause</button>
+    <button class="btn-chrono danger-btn" onclick="endExam()">⏹ Terminer</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- INTRO -->
+  <div class="intro-card">
+    <h2>📋 Consignes générales</h2>
+    <p>Le candidat traitera <strong>l'un des trois sujets au choix</strong>. Lisez attentivement chaque sujet avant de choisir. Soignez la présentation, l'orthographe et la cohérence de votre développement. Indiquez le numéro du sujet choisi en tête de votre copie.</p>
+    <div class="info-row">
+      <span class="info-pill">📝 3 sujets au choix</span>
+      <span class="info-pill">⏱ 4 heures</span>
+      <span class="info-pill">📊 Coeff. 3</span>
+      <span class="info-pill">🏆 20 points</span>
+      <span class="info-pill">🎯 Présentation : 2 pts</span>
+    </div>
+  </div>
+
+  <!-- SUBJECT SELECTOR -->
+  <div class="subject-tabs">
+    <div class="subj-tab active" onclick="selectSubject(1,this)">
+      <span class="tab-num">1</span>
+      <span class="tab-name">Contraction &amp; Discussion</span>
+      <span class="tab-pts">Résumé 9 pts · Discussion 9 pts</span>
+    </div>
+    <div class="subj-tab" onclick="selectSubject(2,this)">
+      <span class="tab-num">2</span>
+      <span class="tab-name">Commentaire composé</span>
+      <span class="tab-pts">18 pts + Présentation 2 pts</span>
+    </div>
+    <div class="subj-tab" onclick="selectSubject(3,this)">
+      <span class="tab-num">3</span>
+      <span class="tab-name">Dissertation</span>
+      <span class="tab-pts">18 pts + Présentation 2 pts</span>
+    </div>
+  </div>
+
+  <!-- ════════ SUJET 1 ════════ -->
+  <div class="subject-panel active" id="panel-1">
+    <nav class="sec-nav">
+      <button class="active" onclick="showSecTab('s1-texte',this,'s1')">📄 Texte</button>
+      <button onclick="showSecTab('s1-resume',this,'s1')">✍️ Résumé (9 pts)</button>
+      <button onclick="showSecTab('s1-discussion',this,'s1')">💬 Discussion (9 pts)</button>
+      <button onclick="showSecTab('s1-corrige',this,'s1')">📗 Corrigé complet</button>
+    </nav>
+
+    <!-- Texte -->
+    <div id="s1-texte" class="subject-panel active">
+      <div class="sec-hdr">
+        <h2>Texte support</h2>
+        <span class="pts-badge">588 mots</span>
+      </div>
+      <div class="text-box">
+        <div class="text-title">La femme rurale</div>
+        <p>Les problèmes du monde rural ont été débattus à l'occasion de la première édition du Salon africain de la femme rurale tenue du 13 au 18 novembre dernier à Yaoundé, sous le haut patronage de la première dame, Chantal Biya. Thème des travaux : « La femme rurale, mamelle nourricière de l'Afrique : comment capitaliser son savoir-faire pour en faire une meilleure productrice de richesse ? »</p>
+        <p>Si ce thème s'est appesanti sur un rouage essentiel du monde rural, à savoir, la femme rurale qui représente la majeure partie de la main-d'œuvre agricole, il a également eu le don d'évoquer les problématiques transversales qui freinent l'essor du monde rural en Afrique. L'exposition du savoir-faire des femmes à l'esplanade du Palais des sports de Yaoundé a donné un aperçu de ce que les femmes de nos contrées sont capables de produire et de transformer à leur petite échelle.</p>
+        <p>Dans des conditions généralement difficiles en effet, elles approvisionnent en produits vivriers et halieutiques nos villes et villages. Mais, elles peuvent faire mieux, c'est-à-dire, augmenter les quantités produites et créer de la valeur ajoutée, en maîtrisant les techniques de conservation et de transformation des matières premières pour conquérir des marchés avec des produits manufacturés.</p>
+        <p>Une question se pose cependant. Comment y parvenir alors que le monde rural africain est confronté à une kyrielle de difficultés ? Au Cameroun en tout cas, la situation n'est pas des plus reluisantes. Les femmes rurales comme les autres acteurs évoluant dans le même biotope font face aux problèmes d'enclavement qui rendent difficiles l'accès aux exploitations familiales et l'évacuation des produits vivriers vers les marchés. L'eau potable et l'énergie électrique n'y sont pas également la chose du monde la mieux partagée.</p>
+        <p>Sans électricité, entretenir des chaînes de froid et faire tourner de petites machines de transformation sont une gageure. Conséquence, on déplore des pertes post-récoltes énormes et le cap de la création de la valeur est difficilement franchi. Que dire des difficultés liées au financement des activités agro-pastorales ? Sans garanties solides présentées par les acteurs ruraux en quête d'argent, les banques commerciales classiques ainsi que les établissements de microfinance ne leur accordent que très peu de crédits, d'autant plus que ces institutions ne gèrent pour l'essentiel que des dépôts à vue. L'absence d'une banque agricole continue de plomber le financement adéquat du secteur.</p>
+        <p>Par ailleurs, l'accès à la terre dans la plupart des sociétés patriarcales est une autre équation à résoudre par les femmes rurales. Quand leurs conjoints décèdent, elles sont parfois expulsées et dépossédées par la belle famille. Et lorsqu'elles ne sont pas mariées, elles sont souvent victimes de la discrimination au sein même de leur propre famille. Pour produire en grande quantité, ces chevilles ouvrières manquent aussi d'intrants (semences à haut rendement, engrais chimiques ou organiques, fongicides, pesticides, machines agricoles pour labourer et récolter).</p>
+        <p>Dans ces conditions, le travail agricole devient pénible et peu attractif. Il n'intéresse pas beaucoup les jeunes qui sont nombreux à s'exiler vers les villes où ils grossissent les rangs des conducteurs de motos-taxis et des autres acteurs de l'économie informelle. Cet exode vide ainsi le monde rural de la force de travail qui devait être l'un de ses moteurs. Il n'est donc pas étonnant que la majorité de la population agricole soit constituée de femmes, la plupart des hommes concernés ayant la force déclinante.</p>
+        <div class="text-source">Rousseau-Joël FOUTE, « Monde rural : le nécessaire accompagnement », in <em>Cameroon Tribune</em> n°12986/9185.</div>
+      </div>
+    </div>
+
+    <!-- Résumé -->
+    <div id="s1-resume" class="subject-panel">
+      <div class="question-block">
+        <h3>✍️ Question 1 – Résumé <span class="q-pts">9 pts</span></h3>
+        <div class="consigne">Le texte ci-dessus comporte <strong>588 mots</strong>. Vous le résumerez en <strong>147 mots</strong>. Une marge de 15 mots en plus ou en moins sera tolérée (soit entre 132 et 162 mots). Vous indiquerez le nombre de mots utilisés à la fin de votre résumé.</div>
+        <div class="tip-box"><strong>💡 Méthode :</strong> Identifiez les idées essentielles de chaque paragraphe → reformulez sans citations directes → respectez l'ordre du texte → comptez vos mots. Le résumé doit représenter ¼ du texte original.</div>
+        <textarea id="res-textarea" placeholder="Rédigez votre résumé ici..." oninput="countWords(this,'res-count')"></textarea>
+        <div class="word-counter" id="res-count">0 mot(s)</div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="toggleCorrige('corrige-resume')">📗 Voir le corrigé</button>
+        </div>
+        <div class="corrige" id="corrige-resume">
+          <h4>📗 Corrigé – Résumé modèle (147 mots)</h4>
+          <div class="highlight">
+            Le Salon africain de la femme rurale, tenu à Yaoundé, a mis en lumière le rôle central des femmes dans la production agricole africaine et leur potentiel à accroître leur rendement par la maîtrise des techniques de transformation. Cependant, de nombreux obstacles freinent leur essor. L'enclavement des zones rurales complique l'accès aux exploitations et l'écoulement des produits. Le manque d'électricité engendre des pertes post-récoltes considérables et bloque la transformation. L'absence d'une banque agricole prive les femmes d'un financement adéquat. Dans les sociétés patriarcales, elles subissent une discrimination foncière, surtout au veuvage. La pénurie d'intrants rend le travail pénible et décourage les jeunes, qui fuient vers les villes, accentuant l'exode rural. Ainsi, les femmes demeurent le pilier d'un monde agricole en souffrance, attendant un accompagnement structurel.
+            <br><em style="color:var(--muted);font-size:.8rem">(147 mots)</em>
+          </div>
+          <div class="grid-crit">
+            <div class="crit-item"><div class="crit-label">📌 Idées essentielles (5 pts)</div>Toutes les idées du texte sont présentes et reformulées.</div>
+            <div class="crit-item"><div class="crit-label">📌 Reformulation (2 pts)</div>Pas de citations directes ni de copier-coller du texte.</div>
+            <div class="crit-item"><div class="crit-label">📌 Nombre de mots (1 pt)</div>Entre 132 et 162 mots, comptage indiqué.</div>
+            <div class="crit-item"><div class="crit-label">📌 Langue (1 pt)</div>Expression correcte, syntaxe claire, pas de fautes.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Discussion -->
+    <div id="s1-discussion" class="subject-panel">
+      <div class="question-block">
+        <h3>💬 Question 2 – Discussion <span class="q-pts">9 pts</span></h3>
+        <div class="consigne">S'intéressant au développement de l'agriculture, Rousseau-Joël FOUTE écrit : <em>« Le travail agricole [...] n'intéresse pas beaucoup les jeunes qui sont nombreux à s'exiler vers les villes »</em>.<br><br>Pensez-vous que les activités agricoles sont toujours dépourvues de tout intérêt chez tous les jeunes ? Vous répondrez à cette question dans une argumentation bien structurée et illustrée par des exemples tirés de vos observations de la vie quotidienne.</div>
+        <div class="tip-box"><strong>💡 Forme attendue :</strong> Introduction (contextualisation + thèse) → Développement (2 à 3 parties avec arguments + exemples) → Conclusion (synthèse + ouverture). La réponse attendue est <strong>nuancée</strong> : non, tous les jeunes ne rejettent pas l'agriculture.</div>
+        <textarea id="disc-textarea" placeholder="Rédigez votre argumentation ici..." style="min-height:220px" oninput="countWords(this,'disc-count')"></textarea>
+        <div class="word-counter" id="disc-count">0 mot(s)</div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="toggleCorrige('corrige-disc')">📗 Voir le corrigé</button>
+        </div>
+        <div class="corrige" id="corrige-disc">
+          <h4>📗 Corrigé – Plan détaillé de la discussion</h4>
+          <div class="plan-block">
+            <div class="plan-title">📌 Introduction</div>
+            <p>Contextualisation : l'agriculture, pilier de l'économie camerounaise et africaine, souffre d'une désaffection des jeunes génération selon FOUTE. Problématique : cette désaffection est-elle universelle et définitive ? Annonce de thèse : Non — un nombre croissant de jeunes s'engage aujourd'hui avec passion et innovation dans l'agriculture.</p>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title"><span class="plan-roman">I.</span> Il est vrai que beaucoup de jeunes désertent le monde rural</div>
+            <ul style="padding-left:18px;margin-top:6px;font-size:.86rem">
+              <li>Argument 1 : Les conditions difficiles (pénibilité, manque d'infrastructures, faibles revenus) rebutent la jeunesse.</li>
+              <li>Exemple : Exode rural visible dans les grandes villes camerounaises (Douala, Yaoundé) où les jeunes rejoignent l'économie informelle.</li>
+              <li>Argument 2 : Le système éducatif valorise peu les métiers agricoles.</li>
+            </ul>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title"><span class="plan-roman">II.</span> Mais de nombreux jeunes redécouvrent l'agriculture avec enthousiasme</div>
+            <ul style="padding-left:18px;margin-top:6px;font-size:.86rem">
+              <li>Argument 1 : L'agripreneuriat en essor — les jeunes diplômés créent des start-ups agricoles rentables.</li>
+              <li>Exemple : Jeunes agropreneurs au Cameroun cultivant le cacao bio, la fraise, l'avocat à des fins d'exportation.</li>
+              <li>Argument 2 : Les nouvelles technologies (drones agricoles, agriculture de précision) rendent l'agriculture attractive.</li>
+              <li>Exemple : Programmes ACEFA, FIDA au Cameroun formant des jeunes agriculteurs modernes.</li>
+            </ul>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title"><span class="plan-roman">III.</span> Des solutions existent pour réconcilier les jeunes avec l'agriculture</div>
+            <ul style="padding-left:18px;margin-top:6px;font-size:.86rem">
+              <li>Argument 1 : Valorisation de l'agriculture dans les programmes scolaires et professionnels.</li>
+              <li>Argument 2 : Financement et accompagnement des jeunes ruraux (banques agricoles, subventions).</li>
+              <li>Exemple : Initiatives présidentielles comme la « Révolution verte » dans plusieurs pays africains.</li>
+            </ul>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title">📌 Conclusion</div>
+            <p>Si le texte reflète une réalité préoccupante, elle n'est ni absolue ni irrémédiable. L'agriculture peut redevenir attractive pour la jeunesse si l'État et les partenaires accompagnent sa modernisation. <em>Ouverture :</em> La souveraineté alimentaire de l'Afrique dépendra des choix que font aujourd'hui ses jeunes.</p>
+          </div>
+          <div class="grid-crit" style="margin-top:14px">
+            <div class="crit-item"><div class="crit-label">Structure (3 pts)</div>Intro / Développement (2-3 parties) / Conclusion bien articulés.</div>
+            <div class="crit-item"><div class="crit-label">Arguments (3 pts)</div>Idées pertinentes, nuancées, bien développées.</div>
+            <div class="crit-item"><div class="crit-label">Exemples (2 pts)</div>Exemples concrets tirés de la vie quotidienne ou de l'actualité.</div>
+            <div class="crit-item"><div class="crit-label">Langue (1 pt)</div>Expression correcte, connecteurs logiques maîtrisés.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Corrigé complet S1 -->
+    <div id="s1-corrige" class="subject-panel">
+      <div class="question-block">
+        <h3>📗 Corrigé complet – Sujet 1</h3>
+        <p style="font-size:.9rem;line-height:1.8;margin-bottom:14px">Ce sujet évalue deux compétences distinctes :</p>
+        <div class="tip-box"><strong>Résumé (9 pts) :</strong> Comprendre, sélectionner et reformuler l'essentiel d'un texte. Exige fidélité aux idées du texte, reformulation personnelle, et respect du nombre de mots (132–162).</div>
+        <div class="tip-box" style="background:#edf7f0;border-color:#1a5c2e"><strong>Discussion (9 pts) :</strong> Argumenter de manière organisée en prenant position par rapport à une thèse. La réponse doit être nuancée — ni entièrement en accord, ni en désaccord total avec l'auteur.</div>
+        <div class="tip-box" style="background:#f0f4ff;border-color:#0d2f5c"><strong>Présentation (2 pts) :</strong> Écriture lisible, mise en page soignée, absence de ratures excessives, titre du sujet clairement indiqué.</div>
+        <div class="corrige active" style="margin-top:0">
+          <h4>⚠️ Erreurs fréquentes à éviter</h4>
+          <ul>
+            <li>Résumé : citer mot pour mot des passages du texte → <em>pénalité</em></li>
+            <li>Résumé : dépasser la fourchette de mots autorisée sans comptage → <em>points perdus</em></li>
+            <li>Discussion : ne développer qu'un seul point de vue → <em>manque de nuance</em></li>
+            <li>Discussion : absence d'exemples concrets → <em>argumentation peu convaincante</em></li>
+            <li>Général : fautes d'accord, barbarismes, phrases incomplètes → <em>perte sur la langue</em></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ SUJET 2 ════════ -->
+  <div class="subject-panel" id="panel-2">
+    <nav class="sec-nav">
+      <button class="active" onclick="showSecTab('s2-texte',this,'s2')">🎭 Texte</button>
+      <button onclick="showSecTab('s2-travail',this,'s2')">✍️ Mon commentaire</button>
+      <button onclick="showSecTab('s2-corrige',this,'s2')">📗 Corrigé complet</button>
+    </nav>
+
+    <!-- Texte S2 -->
+    <div id="s2-texte" class="subject-panel active">
+      <div class="sec-hdr">
+        <h2>Texte – Extrait de <em>Ngum a Jemea</em></h2>
+        <span class="pts-badge">David Mbanga Eyombwan</span>
+      </div>
+      <div class="text-box">
+        <div class="text-title">Acte IV, Scène 1 – Procès de Dualla Manga</div>
+        <div class="dialogue">
+          <div class="line"><span class="speaker">Niedermeyer :</span> Voilà ! C'est un aveu ! Vous reconnaissez avoir incité vos compatriotes à la révolte !</div>
+          <div class="line"><span class="speaker">Dualla Manga :</span> Je ne les ai pas incités à la révolte, je leur ai plutôt ouvert les yeux.</div>
+          <div class="line"><span class="speaker">Niedermeyer :</span> Et comment ?</div>
+          <div class="line"><span class="speaker">Dualla Manga :</span> Je leur ai dit que nous ne devons pas accepter ce que vous, vous ne sauriez accepter chez vous ! <span class="didascalie">(Lui posant la question.)</span> Le peuple allemand peut-il accepter qu'un autre peuple vienne, chez lui, et lui demander de quitter ses...</div>
+          <div class="line"><span class="speaker">Niedermeyer</span> <span class="didascalie">(L'interrompt en frappant fermement du poing sur la table.) :</span> Taisez-vous ! C'est moi qui pose les questions ! Quel avantage avez-vous tiré de votre activisme ?</div>
+          <div class="line"><span class="speaker">Dualla Manga :</span> Ma destitution, mon arrestation, mon incarcération, mon procès, et le verdict que vous allez prononcer.</div>
+          <div class="line"><span class="speaker">Niedermeyer :</span> En êtes-vous satisfait ?</div>
+          <div class="line"><span class="speaker">Dualla Manga :</span> Plus que satisfait, je suis comblé, car j'ai réussi à faire germer l'esprit patriotique dans le cœur des enfants de ce pays. Ils ont compris le sens de la Nation et l'ont prouvé en se rangeant derrière moi comme un seul homme. Vos brimades, vos bastonnades et vos prisons ne leur ont pas fait peur. Pouvais-je espérer meilleure satisfaction que celle-là ?</div>
+          <div class="line"><span class="speaker">Niedermeyer :</span> Ne vous lancez pas dans une autosatisfaction démesurée, vous n'avez pas eu le soutien de tous vos frères.</div>
+          <div class="line"><span class="speaker">Dualla Manga :</span> Une grande communauté ne peut manquer de traîtres. Je sais que quelques personnes véreuses ont été d'intelligence avec vous. Mais combien étaient-elles ? En réalité, une goutte d'eau dans la mer. Ce n'est pas à cause de ces quelques scélérats qui venaient vous rapporter nos secrets que vous pouvez prétendre que j'ai échoué. Loin de là ! Mon travail a produit des fruits. J'ai conduit ma barque à bon port ; et si ces traîtres sont momentanément couverts de gloire, les échos de leur déchéance me parviendront, même au séjour des morts ! Et qu'ils ne l'oublient pas : quiconque se transforme en Judas aura le sort de Judas.</div>
+          <div class="line"><span class="speaker">Niedermeyer :</span> Vous êtes foncièrement méchant ! Vous ne faites aucun cas de l'amour qui nous a fait quitter notre beau pays pour venir habiter cette forêt dense.</div>
+          <div class="line"><span class="speaker">Dualla Manga :</span> Forêt dense qui vous comble d'aise ! Si vous viviez dans votre « beau » pays, pourriez-vous vous permettre la belle vie que vous avez ici ? Auriez-vous à votre service cette pléiade de domestiques : cuisinier, blanchisseur, garçon de ménage, femme de chambre, nurse, et même quelqu'un qui s'occupe exclusivement de vos animaux domestiques ? Des employés qui reçoivent systématiquement vingt-cinq coups de lanière sur le derrière à la moindre peccadille, voire pour des fautes imaginaires ? Vous ne nous aimez pas. Ce que vous aimez, ce sont nos richesses que vous pillez.</div>
+        </div>
+        <div class="text-source">David MBANGA EYOMBWAN, <em>Ngum a Jemea</em>, IV, 1, PUCAC, 2017.</div>
+      </div>
+      <div class="tip-box"><strong>📌 Consigne :</strong> Sans dissocier le fond de la forme, vous ferez de ce texte un commentaire composé. En faisant attention aux didascalies, aux types de phrase, aux répliques des personnages, aux champs lexicaux, aux figures de style, etc., vous pourrez montrer comment l'incitation du peuple à la révolte par Dualla Manga débouche sur son sentiment de satisfaction de la mission accomplie.</div>
+    </div>
+
+    <!-- Travail S2 -->
+    <div id="s2-travail" class="subject-panel">
+      <div class="question-block">
+        <h3>✍️ Rédaction – Commentaire composé <span class="q-pts">18 pts + 2 pts présentation</span></h3>
+        <div class="tip-box"><strong>💡 Structure attendue :</strong> Introduction (présentation de l'œuvre + problématique + annonce du plan) → I. L'incitation patriotique (comment Dualla Manga a éveillé les consciences) → II. La satisfaction du héros (sa sérénité face au verdict) → Conclusion (portée du texte).</div>
+        <textarea id="cc-textarea" placeholder="Rédigez votre commentaire composé ici..." style="min-height:280px" oninput="countWords(this,'cc-count')"></textarea>
+        <div class="word-counter" id="cc-count">0 mot(s)</div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="toggleCorrige('corrige-cc')">📗 Voir le corrigé</button>
+        </div>
+        <div class="corrige" id="corrige-cc">
+          <h4>📗 Plan détaillé du commentaire composé</h4>
+          <div class="plan-block">
+            <div class="plan-title">📌 Introduction</div>
+            <p><em>Ngum a Jemea</em> (2017) de David Mbanga Eyombwan est une pièce de théâtre historique retraçant la résistance de Dualla Manga face à la colonisation allemande au Cameroun. Dans l'extrait proposé, tiré de l'Acte IV, Manga comparaît devant l'officier colonial Niedermeyer. Ce face-à-face judiciaire révèle comment l'action patriotique de Manga se mue en triomphe moral. Comment le dramaturge montre-t-il que l'incitation du peuple à la révolte débouche sur la satisfaction d'une mission accomplie ?<br><strong>Plan :</strong> I. Un militant convaincu qui assume son engagement. II. La fierté inébranlable d'un héros face à la répression coloniale.</p>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title"><span class="plan-roman">I.</span> Dualla Manga : un militant qui assume pleinement son engagement patriotique</div>
+            <ul style="padding-left:18px;margin-top:8px;font-size:.86rem;line-height:1.85">
+              <li><strong>A. Un lexique de la résistance et de l'éveil :</strong> « ouvert les yeux », « esprit patriotique », « sens de la Nation » → champ lexical de la conscience et de l'émancipation. Il refuse le terme « révolte » (connotation violente) et lui substitue « ouvrir les yeux » (éducation, éveil).</li>
+              <li><strong>B. Le renversement rhétorique :</strong> Manga retourne la question de Niedermeyer par une contre-question percutante (« Le peuple allemand peut-il accepter qu'un autre peuple vienne chez lui... »). Figure de l'antiphrase et de la comparaison implicite → il légitime sa résistance par le principe universel de souveraineté.</li>
+              <li><strong>C. Les didascalies révélatrices :</strong> Niedermeyer frappe le poing sur la table → violence de la domination coloniale. Il interrompt Manga → l'oppresseur ne peut entendre la vérité. Contraste avec le calme de Manga.</li>
+            </ul>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title"><span class="plan-roman">II.</span> La sérénité d'un héros comblé par son sacrifice</div>
+            <ul style="padding-left:18px;margin-top:8px;font-size:.86rem;line-height:1.85">
+              <li><strong>A. L'énumération comme trophée :</strong> « Ma destitution, mon arrestation, mon incarcération, mon procès, et le verdict... » → accumulation rythmée, anaphore du possessif « mon » → Manga réapproprie sa souffrance comme preuve de son engagement.</li>
+              <li><strong>B. La gradation ascendante de la satisfaction :</strong> « Plus que satisfait, je suis comblé » → hyperbole de la plénitude. Son bonheur n'est pas personnel mais collectif : il a fait « germer l'esprit patriotique ».</li>
+              <li><strong>C. La métaphore nautique et la référence biblique :</strong> « J'ai conduit ma barque à bon port » → métaphore du capitaine accompli. « Quiconque se transforme en Judas aura le sort de Judas » → référence intertextuelle biblique qui condamne la trahison et sacralise sa cause.</li>
+              <li><strong>D. Le démontage de l'idéologie coloniale :</strong> La réplique finale constitue un réquisitoire implacable — Manga expose la logique du pillage (liste des domestiques, violence des châtiments) → ironie cinglante sur l'« amour » colonial. Le mot « pillez » conclut avec une force accusatrice.</li>
+            </ul>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title">📌 Conclusion</div>
+            <p>Cet extrait est à la fois un acte de résistance et un testament moral. Par sa maîtrise rhétorique et sa sérénité face à la condamnation, Dualla Manga incarne le héros tragique dont la défaite apparente se révèle victoire spirituelle. Mbanga Eyombwan rappelle que la mémoire de la résistance est une force vive pour les générations actuelles.</p>
+          </div>
+          <div class="grid-crit" style="margin-top:14px">
+            <div class="crit-item"><div class="crit-label">Introduction / Conclusion (3 pts)</div>Contexte, problématique, annonce du plan, synthèse et ouverture.</div>
+            <div class="crit-item"><div class="crit-label">Axes / parties (6 pts)</div>2 axes bien articulés, sous-parties développées.</div>
+            <div class="crit-item"><div class="crit-label">Analyse des procédés (6 pts)</div>Figures de style, champs lexicaux, didascalies analysés avec précision.</div>
+            <div class="crit-item"><div class="crit-label">Langue (3 pts)</div>Style correct, vocabulaire d'analyse littéraire, transitions maîtrisées.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Corrigé complet S2 -->
+    <div id="s2-corrige" class="subject-panel">
+      <div class="question-block">
+        <h3>📗 Méthode du commentaire composé</h3>
+        <div class="corrige active" style="margin-top:0">
+          <h4>✅ Les étapes clés</h4>
+          <ul>
+            <li><strong>Lire le texte 2 à 3 fois</strong> en soulignant les faits de langue (figures de style, types de phrases, champ lexicaux, didascalies).</li>
+            <li><strong>Formuler une problématique</strong> qui répond à la question posée en consigne.</li>
+            <li><strong>Bâtir un plan en 2 axes</strong> (non pas résumé chronologique, mais regroupement thématique des procédés).</li>
+            <li><strong>Analyser</strong> : citer un extrait → nommer le procédé → interpréter son effet de sens.</li>
+            <li><strong>Ne pas dissocier fond et forme</strong> : chaque procédé formel doit être relié à une idée du texte.</li>
+          </ul>
+        </div>
+        <div class="tip-box"><strong>⚠️ Erreurs à éviter :</strong> Résumer le texte au lieu de l'analyser · Citer sans analyser · Oublier les didascalies (elles sont essentielles au théâtre) · Négliger la problématique.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════ SUJET 3 ════════ -->
+  <div class="subject-panel" id="panel-3">
+    <nav class="sec-nav">
+      <button class="active" onclick="showSecTab('s3-sujet',this,'s3')">📜 Sujet</button>
+      <button onclick="showSecTab('s3-travail',this,'s3')">✍️ Ma dissertation</button>
+      <button onclick="showSecTab('s3-corrige',this,'s3')">📗 Corrigé complet</button>
+    </nav>
+
+    <!-- Sujet S3 -->
+    <div id="s3-sujet" class="subject-panel active">
+      <div class="sec-hdr">
+        <h2>Dissertation littéraire</h2>
+        <span class="pts-badge">18 pts + 2 pts</span>
+      </div>
+      <div class="text-box">
+        <div class="text-title">Sujet</div>
+        <p>Méditant sur les conditions de vie des hommes dans la société, un critique littéraire déclare :</p>
+        <p style="font-style:italic;font-size:1rem;border-left:4px solid var(--gold);padding-left:14px;margin:14px 0">« Une œuvre littéraire est à la fois l'expression de l'angoisse existentielle et de l'espoir : angoisse devant des réalités inacceptables et paralysantes ; espoir devant un futur qu'on imagine moins horrible. »</p>
+        <p>En vous référant aux œuvres lues ou étudiées, vous commenterez ces propos du critique relatifs à l'épanouissement des hommes dans leur milieu de vie.</p>
+      </div>
+      <div class="tip-box"><strong>💡 Mots-clés à analyser :</strong> <em>angoisse existentielle</em> (souffrance face aux injustices, à la mort, à l'oppression) · <em>espoir</em> (désir d'un monde meilleur, résistance, utopie) · <em>réalités inacceptables et paralysantes</em> · <em>futur moins horrible</em> (amélioration possible). La thèse est à la fois valider ET nuancer.</div>
+    </div>
+
+    <!-- Travail S3 -->
+    <div id="s3-travail" class="subject-panel">
+      <div class="question-block">
+        <h3>✍️ Rédaction – Dissertation <span class="q-pts">18 pts + 2 pts présentation</span></h3>
+        <div class="tip-box"><strong>💡 Œuvres mobilisables :</strong> <em>Une vie de boy</em> (Ferdinand Oyono) · <em>Le vieux nègre et la médaille</em> (F. Oyono) · <em>Mission terminée</em> (Mongo Beti) · <em>Le pauvre Christ de Bomba</em> (Mongo Beti) · <em>L'Enfant noir</em> (Camara Laye) · <em>Les bouts de bois de Dieu</em> (Sembène Ousmane) · <em>La nuit de noces</em> · autres œuvres au programme.</div>
+        <textarea id="diss-textarea" placeholder="Rédigez votre dissertation ici..." style="min-height:300px" oninput="countWords(this,'diss-count')"></textarea>
+        <div class="word-counter" id="diss-count">0 mot(s)</div>
+        <div class="btn-row">
+          <button class="btn-primary" onclick="toggleCorrige('corrige-diss')">📗 Voir le corrigé</button>
+        </div>
+        <div class="corrige" id="corrige-diss">
+          <h4>📗 Plan détaillé de la dissertation</h4>
+          <div class="plan-block">
+            <div class="plan-title">📌 Introduction</div>
+            <p>Accroche : La littérature africaine, née souvent dans la douleur de la colonisation et de l'injustice sociale, interroge la condition humaine. Présentation du sujet : Le critique affirme que l'œuvre littéraire porte simultanément angoisse et espoir. Problématique : Dans quelle mesure la littérature africaine est-elle à la fois le miroir de souffrances insupportables et le vecteur d'un espoir en un avenir meilleur ? Annonce du plan en 3 parties.</p>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title"><span class="plan-roman">I.</span> La littérature, témoin de l'angoisse existentielle</div>
+            <ul style="padding-left:18px;margin-top:8px;font-size:.86rem;line-height:1.9">
+              <li><strong>A. L'oppression coloniale comme source d'angoisse :</strong> Dans <em>Une vie de boy</em>, Toundi vit dans la terreur constante de son maître blanc. L'angoisse est physique (violences) et psychologique (aliénation identitaire).</li>
+              <li><strong>B. L'injustice sociale et la misère :</strong> Dans <em>Les bouts de bois de Dieu</em> (Sembène Ousmane), les cheminots sénégalais affrontent la faim et la répression. La réalité est « inacceptable et paralysante ».</li>
+              <li><strong>C. L'angoisse existentielle face à la mort et à la perte de soi :</strong> Meka dans <em>Le vieux nègre et la médaille</em> ressent le vide de sa vie sacrifiée pour une médaille dérisoire.</li>
+            </ul>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title"><span class="plan-roman">II.</span> La littérature, porteuse d'espoir et de résistance</div>
+            <ul style="padding-left:18px;margin-top:8px;font-size:.86rem;line-height:1.9">
+              <li><strong>A. La résistance comme acte d'espoir :</strong> Dualla Manga dans <em>Ngum a Jemea</em> incarne l'espoir d'une nation libérée. Sa condamnation est une victoire morale.</li>
+              <li><strong>B. La solidarité et la fraternité comme horizon :</strong> Dans <em>Les bouts de bois de Dieu</em>, la grève des cheminots symbolise l'espoir collectif d'une dignité retrouvée.</li>
+              <li><strong>C. La mémoire et la parole comme outils d'émancipation :</strong> La littérature elle-même est acte d'espoir — écrire, c'est témoigner et refuser l'oubli.</li>
+            </ul>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title"><span class="plan-roman">III.</span> Nuance : la tension angoisse/espoir, moteur de la création littéraire</div>
+            <ul style="padding-left:18px;margin-top:8px;font-size:.86rem;line-height:1.9">
+              <li><strong>A. Des œuvres à la fin ouverte ou ambiguë :</strong> Certaines œuvres ne proposent pas de résolution — elles maintiennent la tension pour ne pas trahir la complexité du réel.</li>
+              <li><strong>B. L'espoir peut être illusoire :</strong> Dans <em>Mission terminée</em> (Mongo Beti), le retour au village de Medza ne résout rien. L'espoir est fragile.</li>
+              <li><strong>C. La littérature comme espace de catharsis :</strong> En nommant l'angoisse, l'œuvre libère le lecteur et ouvre une voie vers l'espoir — c'est sa fonction thérapeutique et politique.</li>
+            </ul>
+          </div>
+          <div class="plan-block">
+            <div class="plan-title">📌 Conclusion</div>
+            <p>La vision du critique est juste et éclairante : la grande littérature africaine naît précisément de cette tension entre le cri de douleur face aux injustices et le murmure d'un avenir possible. Elle n'est ni résignation ni naïveté, mais regard lucide sur le monde et pari sur l'humanité. <em>Ouverture :</em> Cette double dimension explique peut-être pourquoi la littérature africaine demeure si vivante et nécessaire aujourd'hui.</p>
+          </div>
+          <div class="grid-crit" style="margin-top:14px">
+            <div class="crit-item"><div class="crit-label">Introduction / Conclusion (3 pts)</div>Problématique claire, annonce de plan, synthèse et ouverture.</div>
+            <div class="crit-item"><div class="crit-label">Développement (9 pts)</div>3 parties équilibrées, arguments articulés, transitions réussies.</div>
+            <div class="crit-item"><div class="crit-label">Références littéraires (4 pts)</div>Œuvres citées correctement, exemples précis et pertinents.</div>
+            <div class="crit-item"><div class="crit-label">Langue (2 pts)</div>Vocabulaire critique, expression élaborée, syntaxe correcte.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Corrigé complet S3 -->
+    <div id="s3-corrige" class="subject-panel">
+      <div class="question-block">
+        <h3>📗 Méthode de la dissertation littéraire</h3>
+        <div class="corrige active" style="margin-top:0">
+          <h4>✅ Les étapes clés</h4>
+          <ul>
+            <li><strong>Analyser le sujet</strong> : identifier les mots-clés, comprendre la thèse du critique, repérer ce qui est à commenter.</li>
+            <li><strong>Dégager une problématique</strong> : reformuler en question ouverte (ex. : « Dans quelle mesure... ? »).</li>
+            <li><strong>Construire un plan dialectique</strong> (thèse → antithèse → synthèse) ou thématique (si la question n'est pas binaire).</li>
+            <li><strong>Mobiliser des œuvres précises</strong> : auteur, titre, personnage, passage précis → illustration convaincante.</li>
+            <li><strong>Rédiger des transitions</strong> entre chaque partie pour assurer la cohérence.</li>
+          </ul>
+        </div>
+        <div class="tip-box"><strong>⚠️ Erreurs à éviter :</strong> Raconter l'histoire des œuvres au lieu d'en tirer des arguments · Plan déséquilibré (parties de longueurs très inégales) · Absence de problématique · Citer des œuvres hors programme ou mal connues.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- SCORE PANEL -->
+<div id="score-panel">
+  <div class="score-label">📊 Sujet choisi</div>
+  <div class="score-num" id="score-display">—</div>
+  <div class="score-sub" id="score-sub">Choisissez un sujet</div>
+</div>
+
+<!-- MODAL FIN -->
+<div id="modal-end">
+  <div class="modal-inner">
+    <div style="font-size:3rem">⏱</div>
+    <h2>Temps écoulé !</h2>
+    <p>L'épreuve est terminée. Consultez les corrigés pour évaluer votre travail.</p>
+    <div class="final-score" id="modal-score">BAC</div>
+    <p style="font-size:.82rem">Courage ! Le travail régulier est la clé du succès.</p>
+    <button class="btn-primary" style="margin:10px auto 0;display:block" onclick="closeModal()">Consulter les corrigés →</button>
+  </div>
+</div>
+
+<script>
+// ─── CHRONO ───
+const TOTAL = 4 * 3600;
+let remaining = TOTAL;
+let running = false;
+let timerInterval = null;
+
+function startChrono() {
+  running = true;
+  document.getElementById('btn-pause').textContent = '⏸ Pause';
+  timerInterval = setInterval(() => {
+    if (remaining <= 0) { clearInterval(timerInterval); endExam(); return; }
+    remaining--;
+    updateDisplay();
+  }, 1000);
+}
+
+function toggleChrono() {
+  if (running) {
+    running = false;
+    clearInterval(timerInterval);
+    document.getElementById('btn-pause').textContent = '▶ Reprendre';
+  } else {
+    startChrono();
+  }
+}
+
+function updateDisplay() {
+  const h = Math.floor(remaining / 3600);
+  const m = Math.floor((remaining % 3600) / 60);
+  const s = remaining % 60;
+  const disp = document.getElementById('chrono-display');
+  disp.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const pct = (remaining / TOTAL) * 100;
+  document.getElementById('chrono-fill').style.width = pct + '%';
+  disp.className = '';
+  if (remaining <= 1800) disp.classList.add('warning');
+  if (remaining <= 600) disp.classList.add('danger');
+}
+
+function endExam() {
+  clearInterval(timerInterval);
+  running = false;
+  document.getElementById('modal-end').classList.add('open');
+}
+function closeModal() {
+  document.getElementById('modal-end').classList.remove('open');
+}
+
+// Start on load
+window.addEventListener('load', () => {
+  updateDisplay();
+  startChrono();
+});
+
+// ─── SUBJECT SELECTOR ───
+const subjectNames = { 1:'Contraction + Discussion', 2:'Commentaire composé', 3:'Dissertation' };
+let currentSubject = 1;
+
+function selectSubject(n, el) {
+  currentSubject = n;
+  document.querySelectorAll('.subj-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.subject-panel[id^="panel-"]').forEach(p => p.classList.remove('active'));
+  document.getElementById(`panel-${n}`).classList.add('active');
+  document.getElementById('score-display').textContent = `Sujet ${n}`;
+  document.getElementById('score-sub').textContent = subjectNames[n];
+}
+
+// ─── SEC TABS ───
+function showSecTab(id, btn, prefix) {
+  // hide all panels under this subject
+  document.querySelectorAll(`#panel-${currentSubject} .subject-panel`).forEach(p => p.classList.remove('active'));
+  document.querySelectorAll(`#panel-${currentSubject} nav button`).forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ─── CORRIGÉ TOGGLE ───
+function toggleCorrige(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('active');
+  const isOpen = el.classList.contains('active');
+  event.target.textContent = isOpen ? '🔒 Masquer le corrigé' : '📗 Voir le corrigé';
+}
+
+// ─── WORD COUNT ───
+function countWords(ta, countId) {
+  const words = ta.value.trim().split(/\s+/).filter(w => w.length > 0);
+  const n = ta.value.trim() === '' ? 0 : words.length;
+  const el = document.getElementById(countId);
+  el.textContent = `${n} mot(s)`;
+  if (countId === 'res-count') {
+    el.style.color = (n >= 132 && n <= 162) ? '#1a5c2e' : (n === 0 ? '' : '#8b1a1a');
+    if (n >= 132 && n <= 162) el.textContent += ' ✅ Dans la fourchette';
+    else if (n > 162) el.textContent += ' ⚠️ Trop long';
+    else if (n > 0) el.textContent += ' ⚠️ Insuffisant';
+  }
+}
+</script>
+</body>
+</html>

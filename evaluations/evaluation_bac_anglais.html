@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Évaluation BAC – Anglais</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Serif+4:ital,wght@0,300;0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#12100e;--bg:#f4f0e6;--cream:#faf7f2;--white:#ffffff;
+  --gold:#a0720a;--gold-lt:#c9921a;--teal:#0e5c52;--red:#7b1a1a;
+  --blue:#0d3460;--violet:#3b1f6e;--muted:#6b5c40;--border:#d6cbb5;
+  --success:#eaf5ed;--success-b:#3a7d56;--warn:#fff8e7;--warn-b:#c9921a;
+  --radius:13px;--shadow:0 4px 22px rgba(18,16,14,.11);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Source Serif 4',Georgia,serif;background:var(--bg);color:var(--ink);min-height:100vh}
+
+/* HEADER */
+header{background:linear-gradient(150deg,#0d3460 0%,#12100e 55%,#3b1f6e 100%);color:#fff;padding:26px 18px 18px;text-align:center;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 20px)}
+.hdr-meta{display:flex;justify-content:space-between;max-width:860px;margin:0 auto 10px;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;opacity:.65;position:relative}
+header h1{font-family:'Playfair Display',serif;font-size:clamp(1.25rem,4vw,1.9rem);font-weight:900;letter-spacing:-.01em;position:relative}
+header .sub{font-size:.82rem;opacity:.75;font-style:italic;margin-top:3px;position:relative}
+
+/* CHRONO */
+#chrono-bar{position:sticky;top:0;z-index:200;background:var(--blue);color:#fff;display:flex;align-items:center;gap:14px;padding:10px 18px;box-shadow:0 2px 18px rgba(0,0,0,.22)}
+#chrono-display{font-family:'Playfair Display',serif;font-size:1.55rem;font-weight:700;letter-spacing:.06em;min-width:90px;text-align:center;transition:color .3s}
+#chrono-display.warn{color:#f5c842}
+#chrono-display.danger{color:#ff5555;animation:blink 1s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.chrono-track{flex:1;height:7px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden}
+.chrono-fill{height:100%;background:linear-gradient(90deg,#1a8c5a,#f5c842,#c0392b);border-radius:99px;transition:width 1s linear}
+.c-label{font-size:.7rem;opacity:.6;white-space:nowrap}
+.c-btn{background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:6px 13px;font-family:'Source Serif 4',serif;font-size:.78rem;cursor:pointer;transition:background .2s}
+.c-btn:hover{background:rgba(255,255,255,.24)}
+.c-btn.stop{background:rgba(123,26,26,.45);border-color:#c0392b}
+
+/* MAIN */
+main{max-width:880px;margin:0 auto;padding:22px 15px 80px}
+
+/* CONTEXT */
+.context-card{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:22px;box-shadow:var(--shadow);border-top:4px solid var(--gold)}
+.context-card h2{font-family:'Playfair Display',serif;font-size:1rem;color:var(--blue);margin-bottom:9px}
+.context-card p{font-size:.88rem;line-height:1.78;color:var(--muted)}
+.pills{display:flex;flex-wrap:wrap;gap:9px;margin-top:12px}
+.pill{background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:4px 13px;font-size:.78rem;font-weight:600;color:var(--muted)}
+
+/* TABS */
+.sec-tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:22px}
+@media(max-width:640px){.sec-tabs{grid-template-columns:1fr 1fr}}
+.sec-tab{background:var(--white);border:2px solid var(--border);border-radius:var(--radius);padding:12px 8px;text-align:center;cursor:pointer;transition:all .22s;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.sec-tab:hover{border-color:var(--gold);transform:translateY(-2px)}
+.sec-tab.active{border-color:var(--blue);background:var(--blue);color:#fff}
+.sec-tab .t-ico{font-size:1.4rem;display:block;margin-bottom:4px}
+.sec-tab .t-name{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;line-height:1.3}
+.sec-tab .t-pts{font-size:.68rem;margin-top:3px;opacity:.65}
+.sec-tab.active .t-pts{opacity:.7}
+
+/* PANELS */
+.panel{display:none;animation:fadeUp .32s ease}
+.panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;gap:10px;padding:16px 20px 12px;border-bottom:1px solid var(--border);background:var(--white)}
+.sec-hdr h2{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--blue)}
+.pts-badge{margin-left:auto;background:var(--gold);color:#fff;border-radius:99px;padding:3px 13px;font-size:.78rem;font-weight:700;white-space:nowrap}
+
+/* TEXT BOX */
+.text-box{background:var(--cream);border:1.5px solid var(--border);border-left:5px solid var(--gold);border-radius:0 0 var(--radius) var(--radius);padding:20px 22px;font-size:.9rem;line-height:1.88}
+.text-ctx{background:var(--warn);border:1.5px solid var(--warn-b);border-radius:10px;padding:10px 14px;font-size:.84rem;font-style:italic;color:#5a3a00;margin-bottom:14px;line-height:1.7}
+.text-box p{margin-bottom:10px;text-align:justify}
+.text-box ul{padding-left:20px;margin-bottom:10px}
+.text-box li{margin-bottom:5px}
+.text-source{font-style:italic;font-size:.8rem;color:var(--muted);margin-top:12px;padding-top:8px;border-top:1px solid var(--border)}
+.hl-orange{background:#fff3cd;border-radius:3px;padding:0 2px;font-weight:600}
+.hl-blue{background:#d4e6ff;border-radius:3px;padding:0 2px;font-weight:600}
+.hl-green{background:#d4f0db;border-radius:3px;padding:0 2px;font-weight:600}
+.hl-red{background:#f5d0d0;border-radius:3px;padding:0 2px;font-weight:600}
+
+/* QUESTION */
+.q-block{background:var(--white);border:1.5px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.q-block h3{font-family:'Playfair Display',serif;font-size:.98rem;color:var(--red);margin-bottom:11px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.q-pts{background:var(--red);color:#fff;border-radius:99px;padding:2px 10px;font-size:.72rem;font-weight:700}
+.consigne{background:#f6f3ee;border-left:3px solid var(--gold);border-radius:7px;padding:10px 13px;font-size:.87rem;font-style:italic;line-height:1.78;margin-bottom:13px;color:var(--ink)}
+.consigne strong{font-style:normal;color:var(--red)}
+.dialog-box{background:#f0f4fa;border:1.5px solid #b8cce8;border-radius:10px;padding:14px 16px;margin-bottom:13px;font-size:.86rem;line-height:2}
+.dialog-box .speaker{font-weight:700;color:var(--blue);min-width:70px;display:inline-block}
+.blank{display:inline-block;border-bottom:2px solid var(--gold);min-width:90px;text-align:center;color:var(--gold);font-weight:700;padding:0 4px}
+
+/* TEXTAREA */
+textarea{width:100%;min-height:110px;padding:12px;font-family:'Source Serif 4',serif;font-size:.87rem;line-height:1.78;border:1.5px solid var(--border);border-radius:8px;background:var(--cream);color:var(--ink);resize:vertical;outline:none;transition:border-color .2s}
+textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(13,52,96,.08)}
+
+/* BUTTONS */
+.btn-show{background:var(--teal);color:#fff;border:none;border-radius:8px;padding:10px 22px;font-family:'Source Serif 4',serif;font-weight:600;font-size:.86rem;cursor:pointer;transition:background .2s;display:inline-flex;align-items:center;gap:7px;margin-top:12px}
+.btn-show:hover{background:#0a4a42}
+
+/* CORRIGÉ */
+.corrige{display:none;background:var(--success);border:1.5px solid #a8d5b8;border-left:5px solid var(--success-b);border-radius:var(--radius);padding:18px 20px;margin-top:14px;animation:fadeUp .3s ease}
+.corrige.open{display:block}
+.corrige h4{font-family:'Playfair Display',serif;color:var(--teal);font-size:.97rem;margin-bottom:11px;display:flex;align-items:center;gap:7px}
+.corrige p,.corrige li{font-size:.87rem;line-height:1.82}
+.corrige ul{padding-left:18px;margin-bottom:8px}
+.answer-box{background:var(--white);border:1px solid #a8d5b8;border-radius:9px;padding:13px 15px;margin:9px 0;font-size:.87rem;line-height:1.82}
+.answer-box .a-label{font-weight:700;color:var(--teal);font-size:.8rem;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px}
+.crit-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+@media(max-width:480px){.crit-grid{grid-template-columns:1fr}}
+.crit-item{background:var(--white);border:1px solid #c8e6d4;border-radius:8px;padding:10px 12px;font-size:.8rem}
+.crit-item .cl{font-weight:700;color:var(--teal);font-size:.78rem;margin-bottom:3px}
+
+/* TIP */
+.tip{background:var(--warn);border:1.5px solid var(--warn-b);border-radius:9px;padding:11px 15px;font-size:.84rem;line-height:1.72;margin:10px 0}
+.tip strong{color:#5a3a00}
+
+/* SCORE PANEL */
+#score-panel{position:fixed;bottom:18px;right:18px;z-index:300;background:var(--blue);color:#fff;border-radius:var(--radius);padding:13px 17px;box-shadow:0 8px 30px rgba(0,0,0,.22);min-width:148px;text-align:center}
+#score-panel .sl{font-size:.7rem;opacity:.65;letter-spacing:.08em;text-transform:uppercase}
+#score-panel .sn{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:900;color:#f5c842;line-height:1.1;margin:3px 0}
+#score-panel .ss{font-size:.72rem;opacity:.6}
+
+/* MODAL */
+#modal{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.6);align-items:center;justify-content:center}
+#modal.open{display:flex}
+.modal-box{background:#fff;border-radius:18px;padding:34px 28px;max-width:400px;width:90%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.32)}
+.modal-box h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--red);margin-bottom:9px}
+.modal-box p{font-size:.88rem;color:var(--muted);line-height:1.72;margin-bottom:14px}
+.modal-close{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:10px 24px;font-family:'Source Serif 4',serif;font-weight:600;cursor:pointer;display:block;margin:0 auto}
+
+.word-bank{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 13px;padding:10px 12px;background:#f0f4fa;border:1.5px solid #b8cce8;border-radius:9px}
+.word-chip{background:var(--blue);color:#fff;border-radius:99px;padding:3px 13px;font-size:.8rem;font-weight:600}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hdr-meta">
+    <span>🇨🇲 MINESEC – OBC &nbsp;|&nbsp; BAC A1-A2-A3-A4-A5</span>
+    <span>Coeff. 4 &nbsp;|&nbsp; 40 pts</span>
+  </div>
+  <h1>English Language Examination</h1>
+  <p class="sub">Durée : 3 heures &nbsp;·&nbsp; Évaluation interactive corrigée</p>
+</header>
+
+<!-- CHRONO 3h -->
+<div id="chrono-bar">
+  <div style="display:flex;flex-direction:column;align-items:center">
+    <div class="c-label">⏱ Temps</div>
+    <div id="chrono-display">3:00:00</div>
+  </div>
+  <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+    <div class="chrono-track"><div class="chrono-fill" id="c-fill" style="width:100%"></div></div>
+    <div style="display:flex;justify-content:space-between;font-size:.65rem;opacity:.55"><span>Début</span><span>1h30</span><span>Fin</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:5px">
+    <button class="c-btn" id="btn-pause" onclick="toggleChrono()">⏸ Pause</button>
+    <button class="c-btn stop" onclick="endExam()">⏹ Terminer</button>
+  </div>
+</div>
+
+<main>
+
+  <!-- CONTEXT -->
+  <div class="context-card">
+    <h2>📋 Instructions & contexte de l'épreuve</h2>
+    <p>Cette épreuve comporte <strong>quatre sections</strong>. Répondez à <strong>toutes les questions</strong>. Pour la Section D (Composition), choisissez <strong>un seul sujet</strong> parmi les trois proposés et rédigez entre 200 et 250 mots. Consultez le corrigé après chaque réponse en cliquant sur <em>« 📗 Voir la réponse »</em>.</p>
+    <div class="pills">
+      <span class="pill">📖 4 sections</span>
+      <span class="pill">⏱ 3 heures</span>
+      <span class="pill">📊 Coeff. 4</span>
+      <span class="pill">🏆 40 points</span>
+      <span class="pill">✍️ Answer ALL questions</span>
+    </div>
+  </div>
+
+  <!-- SECTION TABS -->
+  <div class="sec-tabs">
+    <div class="sec-tab active" onclick="showPanel('p-texte',this)">
+      <span class="t-ico">📄</span>
+      <span class="t-name">Text</span>
+      <span class="t-pts">Support</span>
+    </div>
+    <div class="sec-tab" onclick="showPanel('p-grammar',this)">
+      <span class="t-ico">📝</span>
+      <span class="t-name">A. Grammar</span>
+      <span class="t-pts">10 pts</span>
+    </div>
+    <div class="sec-tab" onclick="showPanel('p-vocab',this)">
+      <span class="t-ico">🔤</span>
+      <span class="t-name">B. Vocabulary</span>
+      <span class="t-pts">10 pts</span>
+    </div>
+    <div class="sec-tab" onclick="showPanel('p-reading',this)">
+      <span class="t-ico">📚</span>
+      <span class="t-name">C. Reading</span>
+      <span class="t-pts">10 pts</span>
+    </div>
+    <div class="sec-tab" onclick="showPanel('p-writing',this)">
+      <span class="t-ico">✍️</span>
+      <span class="t-name">D. Writing</span>
+      <span class="t-pts">10 pts</span>
+    </div>
+  </div>
+
+  <!-- ═══ TEXTE ═══ -->
+  <div class="panel active" id="p-texte">
+    <div class="sec-hdr"><h2>Texte support – Dialogue médical & Passage « Our Rubbish and Us »</h2><span class="pts-badge">Support</span></div>
+    <div class="text-box">
+      <div class="text-ctx"><strong>Texte 1 – Dialogue :</strong> Sections A et B s'appuient sur un dialogue entre un patient et un médecin, ainsi que sur un texte de compréhension intitulé <em>« Our Rubbish and Us »</em>. Lisez attentivement chaque extrait avant de répondre.</div>
+
+      <p style="font-weight:700;color:var(--blue);margin-bottom:6px">🩺 Dialogue : Patient & Doctor</p>
+      <div class="dialog-box">
+        <div><span class="speaker">Patient :</span> Good morning Doctor.</div>
+        <div><span class="speaker">Doctor :</span> Good morning Mr. Mbida. Have a seat. What has <span class="hl-orange">______</span> you here this morning? <em style="color:var(--muted);font-size:.82rem">(bring / bringing / brought)</em></div>
+        <div><span class="speaker">Patient :</span> I had a terrible night Doctor. I did not sleep at all. I vomited the whole time and now I feel very weak. The <span class="hl-orange">______</span> part of it is that my body temperature has risen to 40 degrees Celsius. I am really frightened about my situation. <em style="color:var(--muted);font-size:.82rem">(bad / worst / worse)</em></div>
+        <div><span class="speaker">Doctor :</span> <span class="hl-green">______</span> have you done about the temperature? <em style="color:var(--muted);font-size:.82rem">(how / which / what)</em></div>
+        <div><span class="speaker">Patient :</span> I took malaria tablets that I bought from a neighbour <span class="hl-green">______</span> medicine store is at the main road junction in our quarter. <em style="color:var(--muted);font-size:.82rem">(who / who's / whose)</em></div>
+        <div><span class="speaker">Doctor :</span> That was dangerous Mr. Mbida! Auto-medication is not advisable! You are aware of that <span class="hl-red">______</span> you? Now I have to do a rapid malaria test to determine causes of the high temperature. <em style="color:var(--muted);font-size:.82rem">(aren't / are / isn't)</em></div>
+        <div><span class="speaker">Patient :</span> I am very sorry about that Doctor. It was at night and I couldn't come to the hospital due to the insecurity around here.</div>
+        <div><span class="speaker">Doctor :</span> Take this number and call us next time.</div>
+      </div>
+
+      <p style="font-weight:700;color:var(--blue);margin:16px 0 8px">🗑️ Texte 2 – Our Rubbish and Us <em style="font-weight:400;color:var(--muted)">(extrait)</em></p>
+      <p>One of the striking things about most of our big towns today is that they are very dirty. This is because as a nation, we have not yet mastered how to handle our rubbish. Rubbish disposal or putting away our household refuse and other waste in a hygienic manner, is still a problem.</p>
+      <p>But where is this enormous garbage from nowadays? The quantity of dirt in our towns and cities can partially be explained by the fact that our population is growing rapidly. More people mean more waste. It can also be accounted for by the quality of goods at the disposal of the population. Our markets today are overflowing with <span class="hl-blue">non-durable goods produced by home or foreign industries</span> and <span class="hl-blue">second-hand articles from Europe, Asia and the Americas</span>. According to AWAKE Magazine (August 22, 2002), <em>« Many products today are designed to be thrown away. They are either difficult to repair or simply fragile. »</em> The same magazine quotes a Swiss weekly <em>« Die Weltwoche »</em> which argues that <em>« An economic collapse would be guaranteed, if everyone were to use his/her furniture and car for life or even for twice as long as he now does. »</em></p>
+      <p>Of no less importance in our society today, is <span class="hl-red">industrial waste</span>. Those who live near industries are plagued by a peculiar kind of waste that is toxic waste — consisting of dangerous chemicals which are by-products of industries. For example, inhabitants of Bassa in Douala are already suffering the effects of these dangerous chemicals.</p>
+      <p>How can we get rid of dirt? There are many ways of disposing of rubbish. The oldest method is by <strong>recycling</strong>. Another way of disposing rubbish is by <strong>burying it</strong>. In some towns, people dig huge pits and throw their refuse in them. However, the inconvenience here is that they do not take the pains to cover them. The indiscriminate digging of pits can lead to other environmental problems. <span class="hl-red">Plastic bags, old bits of metal, paint and even petrol</span> are put into pits. These eventually contaminate the soil.</p>
+      <div class="text-source">Culled and adapted from <em>Integrated Skills in English</em> by Mungeh Simon Amaya.</div>
+    </div>
+    <div class="tip" style="margin-top:14px">
+      <strong>🔍 Légende des surlignages :</strong>
+      <span class="hl-orange">Orange</span> = choix de mots (Section A-I) ·
+      <span class="hl-green">Vert</span> = pronoms relatifs ·
+      <span class="hl-blue">Bleu</span> = sources d'approvisionnement (Q3) ·
+      <span class="hl-red">Rouge</span> = déchets dangereux (Q6)
+    </div>
+  </div>
+
+  <!-- ═══ A. GRAMMAR ═══ -->
+  <div class="panel" id="p-grammar">
+    <div class="sec-hdr"><h2>Section A – Grammar</h2><span class="pts-badge">10 pts</span></div>
+
+    <!-- A-I -->
+    <div style="background:var(--bg);border-radius:var(--radius);padding:14px 18px;margin:14px 0 12px;border:1px solid var(--border)">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;color:var(--blue)">I. Complete the dialogue with suitable expressions from the brackets</span>
+      <span style="background:var(--gold);color:#fff;border-radius:99px;padding:2px 10px;font-size:.75rem;font-weight:700;margin-left:10px">5 pts · 1 pt chacun</span>
+    </div>
+
+    <!-- A-I Q1 -->
+    <div class="q-block">
+      <h3>Question 1 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">What has <strong>______</strong> you here this morning? <em>(bring / bringing / brought)</em></div>
+      <div class="tip"><strong>💡 Hint :</strong> The structure <em>« What has _____ you »</em> uses a <strong>present perfect</strong>. The present perfect requires the <strong>past participle</strong> of the verb.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot correct et justifiez votre choix..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-a1q1')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-a1q1">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Réponse correcte</div>
+          <strong>brought</strong> — participe passé du verbe irrégulier <em>bring → brought → brought</em>.<br>
+          La structure <em>« What has brought you here? »</em> est un présent parfait (have/has + participe passé), utilisé ici pour demander la raison de la venue du patient. <em>Bring</em> (base verbale) et <em>bringing</em> (participe présent) sont incorrects dans ce contexte.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Mot correct (0,5 pt)</div>« brought » correctement identifié.</div>
+          <div class="crit-item"><div class="cl">Justification (0,5 pt)</div>Présent parfait + participe passé expliqué.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A-I Q2 -->
+    <div class="q-block">
+      <h3>Question 2 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">The <strong>______</strong> part of it is that my body temperature has risen to 40 degrees Celsius. <em>(bad / worst / worse)</em></div>
+      <div class="tip"><strong>💡 Hint :</strong> <em>Bad → worse → worst</em>. <em>Worst</em> est le <strong>superlatif</strong>, <em>worse</em> est le <strong>comparatif</strong>. Ici, le patient désigne la dimension la plus grave de sa situation parmi toutes.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot correct et justifiez votre choix..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-a1q2')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-a1q2">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Réponse correcte</div>
+          <strong>worst</strong> — superlatif de <em>bad</em>.<br>
+          Le patient évoque <em>l'aspect le plus grave</em> de sa situation parmi plusieurs symptômes décrits. Le superlatif <em>worst</em> s'impose : <em>« The worst part of it »</em> = « le pire de tout ça ». <em>Worse</em> (comparatif) nécessiterait une comparaison explicite avec un autre élément ; <em>bad</em> est simplement l'adjectif de base.
+        </div>
+      </div>
+    </div>
+
+    <!-- A-I Q3 -->
+    <div class="q-block">
+      <h3>Question 3 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne"><strong>______</strong> have you done about the temperature? <em>(how / which / what)</em></div>
+      <div class="tip"><strong>💡 Hint :</strong> <em>What</em> interroge sur des <strong>actions ou des choses</strong>. <em>How</em> interroge sur la <strong>manière</strong>. <em>Which</em> implique un <strong>choix entre options</strong>. Le docteur veut savoir <em>ce que</em> le patient a fait.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot correct et justifiez votre choix..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-a1q3')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-a1q3">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Réponse correcte</div>
+          <strong>What</strong> — pronom interrogatif portant sur une action.<br>
+          <em>« What have you done about the temperature? »</em> = « Qu'avez-vous fait concernant la fièvre ? » Le médecin demande quelles mesures ont été prises, non la manière (<em>how</em>) ni un choix entre options précises (<em>which</em>).
+        </div>
+      </div>
+    </div>
+
+    <!-- A-I Q4 -->
+    <div class="q-block">
+      <h3>Question 4 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">I took malaria tablets that I bought from a neighbour <strong>______</strong> medicine store is at the main road junction in our quarter. <em>(who / who's / whose)</em></div>
+      <div class="tip"><strong>💡 Hint :</strong> <em>Whose</em> est le <strong>pronom relatif possessif</strong> (= dont le / de qui le). <em>Who</em> = sujet (personne). <em>Who's</em> = contraction de <em>who is</em>. Ici, le mot manquant introduit le possesseur du magasin.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot correct et justifiez votre choix..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-a1q4')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-a1q4">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Réponse correcte</div>
+          <strong>whose</strong> — pronom relatif possessif.<br>
+          <em>« …a neighbour <strong>whose</strong> medicine store is at the main road junction »</em> = « un voisin <em>dont</em> la pharmacie se trouve au carrefour ». <em>Whose</em> indique que le magasin appartient au voisin. <em>Who</em> serait sujet, <em>who's</em> signifie <em>who is</em>, tous deux incorrects ici.
+        </div>
+      </div>
+    </div>
+
+    <!-- A-I Q5 -->
+    <div class="q-block">
+      <h3>Question 5 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">You are aware of that <strong>______</strong> you? <em>(aren't / are / isn't)</em></div>
+      <div class="tip"><strong>💡 Hint :</strong> La question-tag (tag question) doit être à la forme <strong>contraire</strong> de la phrase principale. La phrase principale est affirmative (<em>you are aware</em>), donc la tag doit être <strong>négative</strong>. Le sujet est <em>you</em>.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot correct et justifiez votre choix..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-a1q5')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-a1q5">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Réponse correcte</div>
+          <strong>aren't</strong> — forme négative contractée de <em>are</em> pour la tag question.<br>
+          Règle : affirmative + tag négative → <em>« You are aware of that, <strong>aren't</strong> you? »</em>. <em>Are</em> est positif (incorrect pour une tag après phrase affirmative). <em>Isn't</em> ne correspond pas au sujet <em>you</em>.
+        </div>
+      </div>
+    </div>
+
+    <!-- A-II -->
+    <div style="background:var(--bg);border-radius:var(--radius);padding:14px 18px;margin:22px 0 12px;border:1px solid var(--border)">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;color:var(--blue)">II. Rewrite the sentences as started</span>
+      <span style="background:var(--gold);color:#fff;border-radius:99px;padding:2px 10px;font-size:.75rem;font-weight:700;margin-left:10px">5 pts · 1 pt chacun</span>
+    </div>
+
+    <!-- A-II Q1 -->
+    <div class="q-block">
+      <h3>Question 1 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Most parents don't like to borrow money from the bank to finance their children's studies. They borrow from their meeting groups.<br><strong>Most parents prefer…</strong></div>
+      <div class="tip"><strong>💡 Hint :</strong> Structure de préférence : <em>prefer + V-ing + to + V-ing</em>. Comparez les deux actions (emprunter à la banque vs emprunter aux tontines).</div>
+      <textarea style="min-height:80px" placeholder="Most parents prefer ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-a2q1')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-a2q1">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          Most parents prefer <strong>borrowing from their meeting groups to borrowing money from the bank</strong> to finance their children's studies.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Structure prefer + V-ing (0,5 pt)</div>Gérondif correctement utilisé après <em>prefer</em>.</div>
+          <div class="crit-item"><div class="cl">Sens conservé (0,5 pt)</div>Les deux actions comparées et le sens original maintenu.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A-II Q2 -->
+    <div class="q-block">
+      <h3>Question 2 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">"Do I need a National Identity Card in order to apply for this job?" The applicant asked me.<br><strong>The applicant asked me…</strong></div>
+      <div class="tip"><strong>💡 Hint :</strong> Discours indirect pour une question fermée (oui/non) : <em>asked + whether/if + sujet + verbe (décalage temporel)</em>. Attention au changement de pronom <em>I → he/she</em>.</div>
+      <textarea style="min-height:80px" placeholder="The applicant asked me ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-a2q2')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-a2q2">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          The applicant asked me <strong>whether/if he/she needed a National Identity Card in order to apply for the job</strong>.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Whether/if (0,25 pt)</div>Introducteur de question indirecte fermée.</div>
+          <div class="crit-item"><div class="cl">Pronom he/she (0,25 pt)</div>Changement de personne I → he/she.</div>
+          <div class="crit-item"><div class="cl">Temps (0,25 pt)</div>Do need → needed (concordance des temps).</div>
+          <div class="crit-item"><div class="cl">Sens (0,25 pt)</div>Sens global de la question préservé.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A-II Q3 -->
+    <div class="q-block">
+      <h3>Question 3 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">It is risky to have a pin code that is not secured. Hackers may hack your account and do away with your money.<br><strong>Having…</strong></div>
+      <div class="tip"><strong>💡 Hint :</strong> Transformez le sujet <em>it</em> en gérondif sujet : <em>Having + nom/adjectif = is risky + because/as + conséquence</em>.</div>
+      <textarea style="min-height:80px" placeholder="Having ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-a2q3')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-a2q3">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          Having <strong>a pin code that is not secured is risky as hackers may hack your account and do away with your money</strong>.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Gérondif sujet (0,5 pt)</div><em>Having</em> utilisé comme sujet de la phrase.</div>
+          <div class="crit-item"><div class="cl">Fusion cohérente (0,5 pt)</div>Les deux phrases originales combinées logiquement.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A-II Q4 -->
+    <div class="q-block">
+      <h3>Question 4 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">My brother did not know that online shopping was cheap and less stressful so they bought all their goods from the supermarket.<br><strong>If my brother had…</strong></div>
+      <div class="tip"><strong>💡 Hint :</strong> Conditionnel passé (3ème type) : <em>If + had + participe passé, would/could + have + participe passé</em>. Exprime une situation hypothétique dans le passé.</div>
+      <textarea style="min-height:80px" placeholder="If my brother had ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-a2q4')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-a2q4">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          If my brother had <strong>known that online shopping was cheap and less stressful, they would not have bought all their goods from the supermarket</strong>.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">If + had known (0,5 pt)</div>Proposition conditionnelle au plus-que-parfait.</div>
+          <div class="crit-item"><div class="cl">would not have bought (0,5 pt)</div>Conditionnel passé dans la principale.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- A-II Q5 -->
+    <div class="q-block">
+      <h3>Question 5 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Cigarette smoking can cause cancer of the lungs.<br><strong>Cancer of the lungs…</strong></div>
+      <div class="tip"><strong>💡 Hint :</strong> Transformez à la <strong>voix passive</strong>. Le complément d'agent (cigarette smoking) devient introduit par <em>by</em>. Structure : sujet + can be + participe passé + by + agent.</div>
+      <textarea style="min-height:70px" placeholder="Cancer of the lungs ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-a2q5')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-a2q5">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          Cancer of the lungs <strong>can be caused by cigarette smoking</strong>.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Can be caused (0,5 pt)</div>Modalité passive correcte : can + be + participe passé.</div>
+          <div class="crit-item"><div class="cl">By cigarette smoking (0,5 pt)</div>Complément d'agent introduit correctement par <em>by</em>.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRILLE A -->
+    <div class="q-block" style="border-color:var(--gold);border-top:4px solid var(--gold)">
+      <h3>📊 Grille de notation – Section A</h3>
+      <div class="crit-grid" style="margin-top:10px">
+        <div class="crit-item" style="border-color:var(--warn-b)"><div class="cl" style="color:var(--gold)">I. Dialogue (5 pts)</div>Q1 : 1 pt · Q2 : 1 pt · Q3 : 1 pt · Q4 : 1 pt · Q5 : 1 pt</div>
+        <div class="crit-item" style="border-color:var(--warn-b)"><div class="cl" style="color:var(--gold)">II. Réécriture (5 pts)</div>Q1 : 1 pt · Q2 : 1 pt · Q3 : 1 pt · Q4 : 1 pt · Q5 : 1 pt</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ B. VOCABULARY ═══ -->
+  <div class="panel" id="p-vocab">
+    <div class="sec-hdr"><h2>Section B – Vocabulary</h2><span class="pts-badge">10 pts</span></div>
+
+    <div style="background:var(--bg);border-radius:var(--radius);padding:14px 18px;margin:14px 0 12px;border:1px solid var(--border)">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;color:var(--blue)">I. Complete the blanks with appropriate words of your own</span>
+      <span style="background:var(--gold);color:#fff;border-radius:99px;padding:2px 10px;font-size:.75rem;font-weight:700;margin-left:10px">5 pts · 1 pt chacun</span>
+    </div>
+
+    <!-- B-I Q1 -->
+    <div class="q-block">
+      <h3>Question 1 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Tom has been called up for many <strong>______</strong> interviews but he has never been given the opportunity to work anywhere.</div>
+      <div class="tip"><strong>💡 Hint :</strong> Le mot manquant qualifie le type d'interviews. Si Tom cherche du travail sans succès, il passe des entretiens d'<strong>emploi</strong>. Le mot manquant est un adjectif ou nom qualifiant ces interviews.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot manquant et expliquez votre choix..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-b1q1')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-b1q1">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Réponse correcte</div>
+          <strong>job</strong> (ou <em>unsuccessful</em>) — « job interviews » = entretiens d'embauche.<br>
+          Tom a passé de nombreux entretiens d'emploi sans jamais être retenu. Le mot <em>job</em> qualifie la nature des interviews : ce sont des entretiens professionnels. Une autre réponse acceptable : <em>many unsuccessful interviews</em>.
+        </div>
+      </div>
+    </div>
+
+    <!-- B-I Q2 -->
+    <div class="q-block">
+      <h3>Question 2 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Eto'o is a retired footballer of the Indomitable Lions, the national team of Cameroon. He contested for the presidency of FECAFOOT and won with an overwhelming <strong>______</strong>.</div>
+      <div class="tip"><strong>💡 Hint :</strong> Après <em>« overwhelming »</em> (écrasant), le mot attendu désigne le résultat d'une élection — ce que l'on obtient en proportion de voix lors d'un vote.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot manquant..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-b1q2')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-b1q2">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <strong>majority</strong> — « an overwhelming majority » = une majorité écrasante.<br>
+          En contexte électoral, on parle de remporter une <em>majority</em> (majorité) de voix. <em>Overwhelming</em> est un amplificateur signifiant que la victoire a été très large.
+        </div>
+      </div>
+    </div>
+
+    <!-- B-I Q3 -->
+    <div class="q-block">
+      <h3>Question 3 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">In most of the rural areas in Cameroon, women constitute the backbone of the <strong>______</strong> of their areas because they sell the crops that come from their farms and take care of their families.</div>
+      <div class="tip"><strong>💡 Hint :</strong> Les femmes vendent les récoltes et nourrissent les familles → elles soutiennent l'activité productive locale. Elles sont la colonne vertébrale de l'<strong>économie</strong> locale.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot manquant..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-b1q3')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-b1q3">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <strong>economy</strong> — « the backbone of the economy » = la colonne vertébrale de l'économie.<br>
+          Les femmes rurales assurent la production et la distribution des biens alimentaires, ce qui constitue le moteur de l'économie locale. <em>Economy</em> désigne ici l'ensemble des activités productives et commerciales d'une communauté.
+        </div>
+      </div>
+    </div>
+
+    <!-- B-I Q4 -->
+    <div class="q-block">
+      <h3>Question 4 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">It is important to take the Covid-19 <strong>______</strong> for better protection against it.</div>
+      <div class="tip"><strong>💡 Hint :</strong> Le mot manquant désigne la substance médicale administrée pour protéger contre une maladie — notamment lors d'une campagne de vaccination mondiale.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot manquant..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-b1q4')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-b1q4">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <strong>vaccine</strong> — « take the Covid-19 vaccine » = se faire vacciner contre la Covid-19.<br>
+          Un <em>vaccine</em> est une préparation biologique qui confère une immunité contre une maladie infectieuse. C'est le terme médical précis dans ce contexte.
+        </div>
+      </div>
+    </div>
+
+    <!-- B-I Q5 -->
+    <div class="q-block">
+      <h3>Question 5 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Kate Jones got into depression following the <strong>______</strong> of her parents in a ghastly motor accident.</div>
+      <div class="tip"><strong>💡 Hint :</strong> Un accident de voiture « ghastly » (horrible) dont Kate est déprimée → ses parents n'ont pas survécu. Le mot désigne leur disparition.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot manquant..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-b1q5')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-b1q5">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <strong>death</strong> (ou <em>loss</em>) — « following the death of her parents » = à la suite du décès de ses parents.<br>
+          Kate est déprimée parce que ses parents sont morts dans l'accident. <em>Death</em> est le terme le plus précis ; <em>loss</em> (perte) est également acceptable.
+        </div>
+      </div>
+    </div>
+
+    <!-- B-II -->
+    <div style="background:var(--bg);border-radius:var(--radius);padding:14px 18px;margin:22px 0 12px;border:1px solid var(--border)">
+      <span style="font-family:'Playfair Display',serif;font-weight:700;color:var(--blue)">II. Complete the cloze text — choose from the box below</span>
+      <span style="background:var(--gold);color:#fff;border-radius:99px;padding:2px 10px;font-size:.75rem;font-weight:700;margin-left:10px">5 pts · 1,25 pt chacun</span>
+    </div>
+    <div class="word-bank">
+      <span class="word-chip">tools</span><span class="word-chip">save</span><span class="word-chip">bills</span>
+      <span class="word-chip">deposit</span><span class="word-chip">withdraw</span><span class="word-chip">saves</span><span class="word-chip">hospital</span>
+    </div>
+    <p style="font-size:.84rem;color:var(--muted);margin-bottom:14px;font-style:italic">⚠️ Il y a plus de mots que de blancs. Certains mots ne seront pas utilisés.</p>
+
+    <div class="q-block" style="background:var(--cream);border-left:4px solid var(--teal)">
+      <p style="font-size:.9rem;line-height:2.1;color:var(--ink)">
+        In many modern banks nowadays, transactions have become easier than before. Customers do not need to move to their main branch to
+        <span class="blank">[1]</span> money from their bank accounts. They can use ATM machines around them. This
+        <span class="blank">[2]</span> time. Sometimes we may be admitted in the
+        <span class="blank">[3]</span> and need money. Some other person may help using our ATM cards. Many banks encourage the use of ICT
+        <span class="blank">[4]</span> for many other transactions such as the payment of electricity and water
+        <span class="blank">[5]</span>.
+      </p>
+    </div>
+
+    <!-- B-II Q1 -->
+    <div class="q-block">
+      <h3>Blanc [1] <span class="q-pts">1,25 pt</span></h3>
+      <div class="consigne">Customers do not need to move to their main branch to <strong>[1]</strong> money from their bank accounts.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot correct et justifiez..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-b2q1')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-b2q1">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box"><strong>withdraw</strong> — retirer de l'argent d'un compte bancaire. <em>Withdraw money from a bank account</em> est l'expression consacrée. <em>Deposit</em> = déposer (contraire) ; <em>save</em> = épargner.</div>
+      </div>
+    </div>
+
+    <!-- B-II Q2 -->
+    <div class="q-block">
+      <h3>Blanc [2] <span class="q-pts">1,25 pt</span></h3>
+      <div class="consigne">This <strong>[2]</strong> time.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot correct et justifiez..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-b2q2')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-b2q2">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box"><strong>saves</strong> — 3ème personne du singulier, sujet <em>this</em> (= utiliser les DAB). « This saves time » = cela fait gagner du temps. <em>Save</em> (infinitif) serait incorrect grammaticalement avec le sujet <em>this</em>.</div>
+      </div>
+    </div>
+
+    <!-- B-II Q3 -->
+    <div class="q-block">
+      <h3>Blanc [3] <span class="q-pts">1,25 pt</span></h3>
+      <div class="consigne">Sometimes we may be admitted in the <strong>[3]</strong> and need money.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot correct et justifiez..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-b2q3')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-b2q3">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box"><strong>hospital</strong> — on est <em>admitted in the hospital</em> (hospitalisé). Ce contexte justifie le besoin urgent d'argent via un tiers utilisant la carte bancaire.</div>
+      </div>
+    </div>
+
+    <!-- B-II Q4 -->
+    <div class="q-block">
+      <h3>Blanc [4] <span class="q-pts">1,25 pt</span></h3>
+      <div class="consigne">Many banks encourage the use of ICT <strong>[4]</strong> for many other transactions.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot correct et justifiez..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-b2q4')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-b2q4">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box"><strong>tools</strong> — « ICT tools » = outils des technologies de l'information et de la communication. Les banques encouragent l'utilisation de ces outils numériques pour diverses transactions.</div>
+      </div>
+    </div>
+
+    <!-- B-II Q5 -->
+    <div class="q-block">
+      <h3>Blanc [5] <span class="q-pts">1,25 pt</span></h3>
+      <div class="consigne">…such as the payment of electricity and water <strong>[5]</strong>.</div>
+      <textarea style="min-height:70px" placeholder="Écrivez le mot correct et justifiez..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-b2q5')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-b2q5">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box"><strong>bills</strong> — « electricity and water bills » = factures d'électricité et d'eau. <em>Bills</em> désigne les factures de services publics. Mots non utilisés : <em>deposit, save</em>.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ C. READING ═══ -->
+  <div class="panel" id="p-reading">
+    <div class="sec-hdr"><h2>Section C – Reading Comprehension</h2><span class="pts-badge">10 pts</span></div>
+
+    <!-- C Q1 -->
+    <div class="q-block" style="margin-top:14px">
+      <h3>Question 1 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">State the <strong>main problem</strong> mentioned in the text that is facing our towns and cities today.</div>
+      <textarea style="min-height:80px" placeholder="Énoncez le problème principal évoqué dans le texte..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-cq1')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-cq1">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">The main problem facing our towns and cities today is <strong>improper rubbish disposal</strong>. Most big cities are very dirty because citizens and authorities have not yet mastered how to manage household refuse and other waste in a hygienic manner.</div>
+      </div>
+    </div>
+
+    <!-- C Q2 -->
+    <div class="q-block">
+      <h3>Question 2 <span class="q-pts">2 pts</span></h3>
+      <div class="consigne">Explain in your own words the statement: <em>« More people mean more waste »</em> (paragraph 2, line 3).</div>
+      <div class="tip"><strong>💡 Hint :</strong> Reformulez l'idée sans copier le texte. Pensez au lien entre croissance démographique et production de déchets.</div>
+      <textarea placeholder="Expliquez en vos propres mots..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-cq2')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-cq2">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">As the population grows, the volume of garbage produced inevitably increases because each individual generates a certain amount of refuse daily. When the number of inhabitants rises, so does the total amount of household and personal waste, making the management of dirt increasingly difficult for urban authorities.</div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Idée principale (1 pt)</div>Lien population croissante → déchets croissants clairement exprimé.</div>
+          <div class="crit-item"><div class="cl">Reformulation (1 pt)</div>Réponse dans ses propres mots, sans copier le texte.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C Q3 -->
+    <div class="q-block">
+      <h3>Question 3 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">From the text, <strong>list four sources</strong> from where goods are supplied in our markets.</div>
+      <textarea style="min-height:90px" placeholder="Source 1 : ...\nSource 2 : ...\nSource 3 : ...\nSource 4 : ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-cq3')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-cq3">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <div class="a-label">Quatre sources d'approvisionnement</div>
+          <ul>
+            <li><strong>Home industries</strong> (industries locales/nationales)</li>
+            <li><strong>Foreign industries</strong> (industries étrangères)</li>
+            <li><strong>Europe</strong> (articles de seconde main)</li>
+            <li><strong>Asia</strong> (articles de seconde main)</li>
+          </ul>
+          <em>Note : « the Americas » est également mentionné dans le texte et constitue une 5ᵉ source valide.</em>
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">4 sources (1 pt)</div>0,25 pt par source correctement identifiée.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C Q4 -->
+    <div class="q-block">
+      <h3>Question 4 <span class="q-pts">2 pts</span></h3>
+      <div class="consigne">What is the <strong>position</strong> of the Swiss weekly newspaper <em>« Die Weltwoche »</em> for a sustainable economy?</div>
+      <div class="tip"><strong>💡 Hint :</strong> Le journal suisse formule une <em>condition hypothétique</em> qui conduirait à un effondrement économique. Quelle est leur position sur la durabilité des biens de consommation ?</div>
+      <textarea placeholder="Expliquez la position du journal suisse..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-cq4')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-cq4">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box"><em>Die Weltwoche</em> argues that using durable goods — such as furniture and cars — for their entire lifespan, or even twice as long as people currently do, would <strong>guarantee an economic collapse</strong>. In other words, the newspaper implies that a sustainable economy based on long-lasting products is paradoxically incompatible with economic growth, since the current economy depends on rapid consumption and replacement of goods.</div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Position clairement exposée (1 pt)</div>L'argument économique du journal reformulé.</div>
+          <div class="crit-item"><div class="cl">Implication comprise (1 pt)</div>Le paradoxe durabilité vs croissance économique expliqué.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C Q5 -->
+    <div class="q-block">
+      <h3>Question 5 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">According to the text, which <strong>two methods</strong> of garbage disposal are recommended?</div>
+      <textarea style="min-height:80px" placeholder="Méthode 1 : ...\nMéthode 2 : ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-cq5')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-cq5">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <ul>
+            <li><strong>Recycling</strong> — la plus ancienne méthode : transformer des objets usagés en nouveaux outils. Ex : fondre des métaux ou transformer des bidons en matériaux de construction.</li>
+            <li><strong>Burying (enfouissement)</strong> — creuser des fosses pour y enterrer les déchets, notamment dans les exploitations agricoles (compostage de mauvaises récoltes).</li>
+          </ul>
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Recycling (0,5 pt)</div>Identifié comme méthode recommandée.</div>
+          <div class="crit-item"><div class="cl">Burying (0,5 pt)</div>Identifié comme méthode recommandée.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C Q6 -->
+    <div class="q-block">
+      <h3>Question 6 <span class="q-pts">1 pt</span></h3>
+      <div class="consigne">Name <strong>four kinds of garbage</strong> that can be dangerous when disposed together in a pit.</div>
+      <textarea style="min-height:80px" placeholder="1. ...\n2. ...\n3. ...\n4. ..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-cq6')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-cq6">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">
+          <ul>
+            <li><strong>Plastic bags</strong> (sacs plastiques)</li>
+            <li><strong>Old bits of metal</strong> (vieux morceaux de métal)</li>
+            <li><strong>Paint</strong> (peinture)</li>
+            <li><strong>Petrol</strong> (essence/pétrole)</li>
+          </ul>
+          Ces éléments contaminent le sol lorsqu'ils sont mélangés dans une fosse.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">4 types (1 pt)</div>0,25 pt par type correctement identifié.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- C Q7 -->
+    <div class="q-block">
+      <h3>Question 7 <span class="q-pts">2 pts</span></h3>
+      <div class="consigne">After reading the text, do you and your neighbours dispose of your garbage appropriately? <strong>Name two places</strong> where you usually throw your dirt.</div>
+      <div class="tip"><strong>💡 Hint :</strong> Question personnelle — votre réponse doit être cohérente et rédigée en anglais correct. Justifiez brièvement votre pratique d'élimination des déchets.</div>
+      <textarea placeholder="Répondez en anglais en nommant deux endroits précis..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-cq7')">📗 Voir la réponse</button>
+      <div class="corrige" id="c-cq7">
+        <h4>📗 Réponse modèle</h4>
+        <div class="answer-box">My neighbours and I do not always dispose of our garbage appropriately. Most of the time, I throw my dirt in <strong>(1) the community dustbin</strong> located at the end of our street, and occasionally in <strong>(2) a designated municipal collection point</strong> when the bins are full. However, I am aware that some people still dump their waste in open spaces, which is harmful to the environment.</div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Réponse à la question (1 pt)</div>Position personnelle clairement exprimée.</div>
+          <div class="crit-item"><div class="cl">Deux endroits nommés (1 pt)</div>0,5 pt par endroit précis et plausible.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ D. WRITING ═══ -->
+  <div class="panel" id="p-writing">
+    <div class="sec-hdr"><h2>Section D – Composition Writing</h2><span class="pts-badge">10 pts</span></div>
+
+    <div class="context-card" style="margin-top:14px">
+      <h2>📌 Consigne générale</h2>
+      <p>Write a composition of <strong>between 200 and 250 words</strong> on <strong>ONE</strong> of the topics below. Choose the topic that best suits you and develop it fully.</p>
+      <div class="pills">
+        <span class="pill">📝 200-250 mots</span>
+        <span class="pill">1 seul sujet</span>
+        <span class="pill">🏆 10 pts</span>
+      </div>
+    </div>
+
+    <!-- TOPIC 1 -->
+    <div class="q-block">
+      <h3>Topic 1 – Narrative Essay <span class="q-pts">10 pts</span></h3>
+      <div class="consigne">Last week your family organized the <strong>traditional wedding of your older sister</strong>. You were actively involved in the ceremony. You want to let your friends get a feel of what happened. <strong>Narrate</strong> what happened to them by considering: When and where it took place · The different stages of the ceremony · Who attended and their impressions · Your general impression.</div>
+      <div class="tip"><strong>💡 Plan suggéré :</strong> Introduction (date, lieu) → Déroulement (dot, discours, fête) → Participants et réactions → Conclusion personnelle.</div>
+      <textarea style="min-height:200px" placeholder="Rédigez votre composition narrative ici (200-250 mots)..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-d1')">📗 Voir un exemple de corrigé</button>
+      <div class="corrige" id="c-d1">
+        <h4>📗 Exemple de production</h4>
+        <div class="answer-box">
+          Last Saturday, my family organized the traditional wedding of my older sister, Amina, at our family compound in Bafoussam. The ceremony began at nine o'clock in the morning and lasted until midnight.<br><br>
+          The event unfolded in three main stages. First, the <em>dowry presentation</em> took place, during which my brother-in-law's family offered gifts and money to our parents. Then came the <em>official declaration</em>, where both families sealed the union with palm wine and prayers from our village elders. Finally, a grand feast was organized, filled with traditional dances, music, and plenty of food.<br><br>
+          Relatives came from Douala, Yaoundé, and even from France. The atmosphere was joyful and emotional. Our grandmother cried tears of happiness, while the young guests danced enthusiastically to <em>bikutsi</em> rhythms. My personal role was to welcome guests and coordinate the food service, which I found exhausting but deeply rewarding.<br><br>
+          Overall, I was profoundly moved by this ceremony. It reminded me of the richness of our cultural heritage and the importance of family bonds. I will cherish this memory forever.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Contenu / Pertinence (4 pts)</div>Tous les points traités : date, lieu, étapes, participants, impression.</div>
+          <div class="crit-item"><div class="cl">Langue / Grammaire (3 pts)</div>Temps narratifs corrects (prétérit), vocabulaire riche.</div>
+          <div class="crit-item"><div class="cl">Structure / Cohérence (2 pts)</div>Introduction, développement, conclusion ; connecteurs logiques.</div>
+          <div class="crit-item"><div class="cl">Longueur (1 pt)</div>Entre 200 et 250 mots respectés.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOPIC 2 -->
+    <div class="q-block">
+      <h3>Topic 2 – Formal Letter <span class="q-pts">10 pts</span></h3>
+      <div class="consigne">When the <em>Probatoire</em> results were published last August, your best friend failed and has been avoiding you because you passed. You are <strong>Bima Rasta</strong> and your friend is <strong>Ngong Jones</strong>. Write a <strong>letter to advise him</strong>: Not to be demoralized · To join a study group with classmates · To stay away from abusive telephone usage · To choose the subjects he is good at.</div>
+      <div class="tip"><strong>💡 Format :</strong> En-tête (nom, adresse, date) → Formule d'appel → Corps (4 conseils développés) → Formule de politesse → Signature.</div>
+      <textarea style="min-height:220px" placeholder="Rédigez votre lettre formelle ici (200-250 mots)..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-d2')">📗 Voir un exemple de corrigé</button>
+      <div class="corrige" id="c-d2">
+        <h4>📗 Exemple de production</h4>
+        <div class="answer-box">
+          Bima Rasta<br>P.O. Box 123, Yaoundé<br>3rd June 2025<br><br>
+          Dear Ngong Jones,<br><br>
+          I was deeply saddened to hear about your <em>Probatoire</em> results, but I want you to know that this is not the end of your journey. Failure is just a stepping stone to success, and I believe you can still make it with determination and focus. <strong>Do not let this setback demoralize you</strong> — many successful people have faced similar challenges and triumphed.<br><br>
+          I strongly advise you to <strong>join a study group with our classmates</strong>. Studying together will help you understand difficult topics better and keep you motivated. You can share ideas and learn from others' strengths. Additionally, please <strong>stay away from abusive telephone usage</strong>. Excessive scrolling and gaming consume precious study time. Instead, dedicate those hours to revising past papers.<br><br>
+          Most importantly, <strong>choose the subjects you are genuinely good at</strong>. Focusing on your strengths will boost your confidence and improve your overall performance. Create a timetable and stick to it.<br><br>
+          Stay positive, Ngong. You have the potential to succeed, and I am rooting for you!<br><br>
+          Yours sincerely,<br>Bima Rasta
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Contenu (4 pts)</div>Les 4 conseils développés et pertinents.</div>
+          <div class="crit-item"><div class="cl">Format lettre (2 pts)</div>En-tête, formule d'appel, politesse, signature présents.</div>
+          <div class="crit-item"><div class="cl">Langue (3 pts)</div>Grammaire, vocabulaire, registre soutenu.</div>
+          <div class="crit-item"><div class="cl">Longueur (1 pt)</div>200-250 mots respectés.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOPIC 3 -->
+    <div class="q-block">
+      <h3>Topic 3 – Article de presse <span class="q-pts">10 pts</span></h3>
+      <div class="consigne">You are the <strong>Senior Prefect</strong> of your school and you have realised that violence is on the rise. Write an article to be published in the <em>« Horizon Newspaper »</em> titled <strong>« Violence, the cankerworm in our schools today. »</strong><br>In your article: Give some causes of violence in school · Identify some consequences of violence · Suggest possible solutions.</div>
+      <div class="tip"><strong>💡 Structure article :</strong> Titre en gras → Chapeau d'introduction → Causes (§1) → Conséquences (§2) → Solutions (§3) → Conclusion/Appel.</div>
+      <textarea style="min-height:220px" placeholder="Rédigez votre article de presse ici (200-250 mots)..."></textarea>
+      <button class="btn-show" onclick="toggleCorrige('c-d3')">📗 Voir un exemple de corrigé</button>
+      <div class="corrige" id="c-d3">
+        <h4>📗 Exemple de production</h4>
+        <div class="answer-box">
+          <strong>VIOLENCE, THE CANKERWORM IN OUR SCHOOLS TODAY</strong><br>
+          <em>By the Senior Prefect — Horizon Newspaper</em><br><br>
+          Violence has become an alarming reality in our school environment. As Senior Prefect, I feel it is my duty to address this growing menace that is eating into the very fabric of our educational system.<br><br>
+          Several factors contribute to school violence. First, <strong>peer pressure and gang culture</strong> push vulnerable students to adopt aggressive behaviours. Second, <strong>broken homes</strong> deprive children of emotional stability, making them more prone to violence. Finally, the <strong>unchecked use of social media</strong> exposes students to violent content that they imitate.<br><br>
+          The consequences are devastating. Victims suffer <strong>physical injuries, psychological trauma</strong>, and academic decline. The school environment becomes hostile, discouraging attendance and learning. In extreme cases, violence leads to expulsions or even death.<br><br>
+          To combat this scourge, I propose three solutions: <strong>regular counselling sessions</strong> to help students manage emotions; the creation of <strong>student mediation committees</strong> to resolve conflicts peacefully; and <strong>strict disciplinary policies</strong> coupled with parental involvement.<br><br>
+          Violence has no place in our schools. Let us act now before it is too late.
+        </div>
+        <div class="crit-grid">
+          <div class="crit-item"><div class="cl">Contenu (4 pts)</div>Causes, conséquences et solutions clairement articulées.</div>
+          <div class="crit-item"><div class="cl">Format article (1 pt)</div>Titre, chapeau, structure paragraphique.</div>
+          <div class="crit-item"><div class="cl">Langue (3 pts)</div>Vocabulaire journalistique, grammaire, registre soutenu.</div>
+          <div class="crit-item"><div class="cl">Cohérence + longueur (2 pts)</div>Connecteurs logiques + 200-250 mots respectés.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRILLE D -->
+    <div class="q-block" style="border-color:var(--gold);border-top:4px solid var(--gold)">
+      <h3>📊 Grille de notation – Section D (10 pts)</h3>
+      <div class="crit-grid" style="margin-top:10px">
+        <div class="crit-item" style="border-color:var(--warn-b)"><div class="cl" style="color:var(--gold)">Contenu & Pertinence (4 pts)</div>Tous les points demandés traités, idées développées et cohérentes avec le sujet choisi.</div>
+        <div class="crit-item" style="border-color:var(--warn-b)"><div class="cl" style="color:var(--gold)">Langue & Grammaire (3 pts)</div>Correction grammaticale, richesse du vocabulaire, registre adapté au type de texte.</div>
+        <div class="crit-item" style="border-color:var(--warn-b)"><div class="cl" style="color:var(--gold)">Structure & Cohérence (2 pts)</div>Organisation claire (intro, développement, conclusion), connecteurs logiques, progression des idées.</div>
+        <div class="crit-item" style="border-color:var(--warn-b)"><div class="cl" style="color:var(--gold)">Longueur (1 pt)</div>Respect de la fourchette 200-250 mots. En deçà ou au-delà = pénalité.</div>
+      </div>
+      <div style="text-align:center;margin-top:14px;padding:14px;background:var(--blue);color:#fff;border-radius:10px;font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700">
+        Total : 40 points &nbsp;·&nbsp; Coefficient 4 &nbsp;·&nbsp; Durée : 3 heures
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- SCORE PANEL -->
+<div id="score-panel">
+  <div class="sl">📍 Section active</div>
+  <div class="sn" id="sn-display">📄</div>
+  <div class="ss" id="ss-display">Texte support</div>
+</div>
+
+<!-- MODAL -->
+<div id="modal">
+  <div class="modal-box">
+    <div style="font-size:2.8rem">⏰</div>
+    <h2>Time's up!</h2>
+    <p>The 3 hours of the examination are over. Consult the answer keys to self-evaluate your responses.</p>
+    <p style="font-size:.82rem;margin-top:6px">« Hard work is the key to success. » — Good luck!</p>
+    <button class="modal-close" onclick="document.getElementById('modal').classList.remove('open')">Consulter les corrigés →</button>
+  </div>
+</div>
+
+<script>
+// ─── CHRONO 3h ───
+const TOTAL=3*3600;
+let remaining=TOTAL,running=false,interval=null;
+function startChrono(){
+  running=true;
+  document.getElementById('btn-pause').textContent='⏸ Pause';
+  interval=setInterval(()=>{
+    if(remaining<=0){clearInterval(interval);endExam();return}
+    remaining--;updateDisplay();
+  },1000);
+}
+function toggleChrono(){
+  if(running){running=false;clearInterval(interval);document.getElementById('btn-pause').textContent='▶ Reprendre'}
+  else startChrono();
+}
+function updateDisplay(){
+  const h=Math.floor(remaining/3600),m=Math.floor((remaining%3600)/60),s=remaining%60;
+  const d=document.getElementById('chrono-display');
+  d.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('c-fill').style.width=(remaining/TOTAL*100)+'%';
+  d.className='';
+  if(remaining<=2700)d.classList.add('warn');
+  if(remaining<=300)d.classList.add('danger');
+}
+function endExam(){clearInterval(interval);running=false;document.getElementById('modal').classList.add('open')}
+window.addEventListener('load',()=>{updateDisplay();startChrono()});
+
+// ─── PANELS ───
+const snNames={
+  'p-texte':['📄','Texte support'],
+  'p-grammar':['📝','A. Grammar'],
+  'p-vocab':['🔤','B. Vocabulary'],
+  'p-reading':['📚','C. Reading'],
+  'p-writing':['✍️','D. Writing']
+};
+function showPanel(id,el){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sec-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  const[ico,name]=snNames[id]||['—','—'];
+  document.getElementById('sn-display').textContent=ico;
+  document.getElementById('ss-display').textContent=name;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── CORRIGÉ TOGGLE ───
+function toggleCorrige(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+  const btn=event.currentTarget;
+  btn.textContent=el.classList.contains('open')?'🔒 Masquer':'📗 Voir la réponse';
+}
+</script>
+</body>
+</html>

@@ -12,6 +12,7 @@ on:
       - 'Logo détouré.png'
       - '.htaccess'
       - 'api/**'
+      - 'evaluations/**'
 
   # Permet de lancer manuellement depuis GitHub
   workflow_dispatch:
@@ -39,6 +40,8 @@ jobs:
             [ -f "$f" ] && cp "$f" deploy/api/
           done
           if [ -f api/database_mysql.sql ]; then cp api/database_mysql.sql deploy/api/; fi
+          # Dossier évaluations interactives BAC
+          if [ -d evaluations ]; then cp -r evaluations/ deploy/evaluations/; fi
           # Placeholder pour les dossiers uploads
           touch deploy/uploads/.gitkeep
           echo "✅ Fichiers prêts :"
