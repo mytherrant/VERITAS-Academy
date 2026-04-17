@@ -9,7 +9,7 @@ on:
     branches: [master]
     paths:
       - 'VERITAS_v1.0.html'
-      - 'index.html'
+      - 'index.php'
       - 'Logo détouré.png'
       - '.htaccess'
       - 'api/**'
@@ -29,11 +29,13 @@ jobs:
       - name: 📋 Préparer les fichiers pour le déploiement
         run: |
           mkdir -p deploy/api deploy/uploads/video deploy/uploads/epreuve deploy/uploads/cours deploy/uploads/ressource deploy/uploads/image
-          # Le fichier principal devient index.html sur le serveur
-          cp VERITAS_v1.0.html deploy/index.html
+          # L'app devient app.html — servi via index.php (bypass cache LiteSpeed)
+          cp VERITAS_v1.0.html deploy/app.html
+          # Wrapper PHP anti-cache (DirectoryIndex index.php)
+          cp index.php deploy/index.php
           # Logo
           cp "Logo détouré.png" deploy/
-          # .htaccess pour la sécurité et le cache
+          # .htaccess pour la sécurité, le cache et LiteSpeed
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
           # API PHP — on NE copie PAS config.php (contient les vraies credentials du serveur)
           for f in api/upload.php api/files.php api/sync.php; do
