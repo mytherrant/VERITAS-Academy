@@ -7509,13 +7509,13 @@ function printBulletinHtml(sid,tri){
     ${['Prof. Principal','Parent / Tuteur','Le Chef d&#39;Établissement'].map((l,i)=>`<div style="text-align:center;padding-top:4px"><div style="font-size:13px;text-transform:uppercase;color:#888;letter-spacing:.5px">${l}</div><div style="margin-top:24px;border-top:1px solid #ccc;padding-top:3px;font-size:13px;color:#bbb">${i===2?(sc?.directeur||'Le Directeur'):'Signature'}</div></div>`).join('')}
   </div>
   <!-- QR CODE AUTHENTIFICATION -->
-  <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:6px 12px;border-top:1.5px solid #142554">
-    <div style="text-align:right;line-height:1.3">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 12px;border-top:1.5px solid #142554;text-align:center">
+    <div style="flex-shrink:0;border:1.5px solid #142554;border-radius:4px;padding:2px;background:#fff;line-height:0">${_qrSvg.toSVG((sc?.nom||'VERITAS')+'\\nBulletin '+tri+'\\n'+s.pre+' '+s.nom+'\\n'+s.cls+' - '+s.mat+'\\nMoy:'+moy.toFixed(2)+'/20 Rang:'+rang+'/'+allMoy.length+'\\n'+today(),2)}</div>
+    <div style="line-height:1.4">
       <div style="font-size:7px;color:#142554;font-weight:800;letter-spacing:1.5px;text-transform:uppercase">Document Authentifié</div>
       <div style="font-size:6px;color:#888;margin-top:1px">${today()} · Réf: <strong style="color:#142554;font-family:monospace">${gid().substring(0,8).toUpperCase()}</strong></div>
       <div style="font-size:5px;color:#aaa;margin-top:1px">Scannez le QR code pour vérifier</div>
     </div>
-    <div style="flex-shrink:0;border:1.5px solid #142554;border-radius:4px;padding:2px;background:#fff;line-height:0">${_qrSvg.toSVG((sc?.nom||'VERITAS')+'\\nBulletin '+tri+'\\n'+s.pre+' '+s.nom+'\\n'+s.cls+' - '+s.mat+'\\nMoy:'+moy.toFixed(2)+'/20 Rang:'+rang+'/'+allMoy.length+'\\n'+today(),2)}</div>
   </div>
   <!-- PIED DE PAGE -->
   <div style="background:#f0ede7;border-top:1px solid #ddd8d0;padding:4px 12px;display:flex;justify-content:space-between;font-size:6px;color:#bbb">
@@ -11341,8 +11341,9 @@ function _lancerLittQCM(oeuvreKey){
       +'<div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;margin:8px 0">Question '+(idx+1)+'/'+qs.length+' — Score : '+score+'</div>'
       +'<div style="font-family:Georgia,serif;font-size:16px;color:var(--ink);line-height:1.6;margin-bottom:18px;font-weight:600">'+q.q+'</div>'
       +'<div class="quiz-opts">';
+    var safeExp=(q.exp||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
     q.opts.forEach(function(o,i){
-      html+='<button class="quiz-opt" id="qo'+i+'" onclick="_lqAns('+i+','+q.ans+','+JSON.stringify(q.exp||'')+')">'
+      html+='<button class="quiz-opt" id="qo'+i+'" onclick="_lqAns('+i+','+q.ans+',\''+safeExp+'\')">'
         +'<span style="display:inline-block;width:22px;height:22px;border-radius:50%;background:#E8EEFF;color:#142554;font-size:11px;font-weight:800;line-height:22px;text-align:center;margin-right:8px">'+'ABCD'[i]+'</span>'+o+'</button>';
     });
     html+='</div><div id="lqfb" style="margin-top:14px;min-height:20px"></div></div></div>';
@@ -11385,15 +11386,15 @@ function _lancerLittVF(oeuvreKey){
       return;
     }
     var q=qs[idx];
-    var expData=JSON.stringify(q.exp||'');
+    var safeExpVF=(q.exp||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
     _vc('<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
       +'<div class="vsec-title">✅ Vrai/Faux — '+oe.titre+'</div>'
       +'<div class="vcard" style="max-width:560px;margin:0 auto">'
       +'<div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;margin-bottom:8px">Proposition '+(idx+1)+'/'+qs.length+'</div>'
       +'<div style="font-family:Georgia,serif;font-size:17px;line-height:1.65;color:var(--ink);margin-bottom:24px;font-weight:600;border-left:4px solid #FFC93C;padding-left:14px">'+q.q+'</div>'
       +'<div style="display:flex;gap:14px;justify-content:center">'
-      +'<button id="vfV" style="flex:1;padding:16px;border-radius:14px;border:2.5px solid #059669;background:#D1FAE5;color:#065F46;font-size:16px;font-weight:800;cursor:pointer" onclick="_vfLittAns(true,'+q.rep+','+expData+')">✅ VRAI</button>'
-      +'<button id="vfF" style="flex:1;padding:16px;border-radius:14px;border:2.5px solid #DC2626;background:#FEE2E2;color:#991B1B;font-size:16px;font-weight:800;cursor:pointer" onclick="_vfLittAns(false,'+q.rep+','+expData+')">❌ FAUX</button>'
+      +'<button id="vfV" style="flex:1;padding:16px;border-radius:14px;border:2.5px solid #059669;background:#D1FAE5;color:#065F46;font-size:16px;font-weight:800;cursor:pointer" onclick="_vfLittAns(true,'+q.rep+',\''+safeExpVF+'\')">✅ VRAI</button>'
+      +'<button id="vfF" style="flex:1;padding:16px;border-radius:14px;border:2.5px solid #DC2626;background:#FEE2E2;color:#991B1B;font-size:16px;font-weight:800;cursor:pointer" onclick="_vfLittAns(false,'+q.rep+',\''+safeExpVF+'\')">❌ FAUX</button>'
       +'</div>'
       +'<div id="vffb" style="margin-top:14px;min-height:20px"></div>'
       +'</div></div>');
