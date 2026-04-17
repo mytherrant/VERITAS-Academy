@@ -4282,9 +4282,11 @@ function testFirebaseConnection(){cloudTestConnection();}
 // ── MODULE CLOUD SYNC — veritas-school.com API ──────────────────
 // ══════════════════════════════════════════════════════════════════
 
-function _cloudHeaders(){
+function _cloudHeaders(withContentType){
   var secret=DB.cloudConfig?.secret||'';
-  return{'Content-Type':'application/json','Authorization':'Bearer '+secret};
+  var h={'Authorization':'Bearer '+secret};
+  if(withContentType)h['Content-Type']='application/json';
+  return h;
 }
 function _cloudUrl(endpoint){
   var base=(DB.cloudConfig?.url||'https://veritas-school.com/api').replace(/\/$/,'');
@@ -4338,7 +4340,7 @@ function cloudSaveDB(){
   }
   fetch(_cloudUrl('sync.php'),{
     method:'POST',
-    headers:_cloudHeaders(),
+    headers:_cloudHeaders(true),
     body:JSON.stringify(data)
   })
   .then(function(r){

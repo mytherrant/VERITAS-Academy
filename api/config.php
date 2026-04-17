@@ -1,6 +1,8 @@
 <?php
 // ============================================================
 // VÉRITAS Academy — Configuration Base de Données
+// ⚠️ CE FICHIER N'EST PAS DÉPLOYÉ PAR GITHUB ACTIONS
+//    Modifiez-le directement dans le Gestionnaire de fichiers LWS
 // ============================================================
 
 // Paramètres MySQL (à remplir depuis phpMyAdmin LWS)
@@ -8,46 +10,25 @@ define('DB_HOST', '185.98.131.160');
 define('DB_NAME', 'verit2781684');
 define('DB_USER', 'verit2781684');
 define('DB_PASS', 'VOTRE_MOT_DE_PASSE_MYSQL');  // ← À CHANGER sur le serveur
-define('DB_CHARSET', 'utf8mb4');
 
-// Dossier d'upload pour les fichiers
+define('DB_CHARSET', 'utf8mb4');
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
 define('MAX_FILE_SIZE', 50 * 1024 * 1024); // 50 Mo max
+define('API_SECRET', 'CHANGEZ_MOI_cle_secrete_veritas_2026'); // ← À CHANGER
 
-// Clé secrète pour l'API (changez cette valeur !)
-define('API_SECRET', 'CHANGEZ_MOI_cle_secrete_veritas_2026');
-
-// CORS — autorise le domaine officiel + localhost pour le développement
-$allowedOrigins = [
-    'https://veritas-school.com',
-    'http://veritas-school.com',
-    'http://localhost:8000',
-    'http://localhost',
-    'http://127.0.0.1:8000',
-    'http://127.0.0.1',
-];
-$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-
-// Autoriser les fichiers ouverts en local (file://) → origin = "null"
-// Autoriser les requêtes sans origin (même serveur, curl, etc.)
-if ($origin === '' || $origin === 'null') {
-    $corsOrigin = '*';
-} elseif (in_array($origin, $allowedOrigins)) {
-    $corsOrigin = $origin;
-} else {
-    $corsOrigin = 'https://veritas-school.com';
-}
-
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: ' . $corsOrigin);
+// ── CORS : accepte toutes les origines (app locale + live) ──────
+// On répond IMMÉDIATEMENT aux préflights OPTIONS avant tout le reste
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-if ($corsOrigin !== '*') header('Vary: Origin');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
+header('Access-Control-Max-Age: 86400'); // cache le préflight 24h
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
     exit;
 }
+
+header('Content-Type: application/json; charset=utf-8');
 
 // Connexion PDO
 function getDB() {
@@ -65,28 +46,36 @@ function getDB() {
             );
         } catch (PDOException $e) {
             http_response_code(500);
-            echo json_encode(['error' => 'Erreur de connexion à la base de données']);
+            echo json_encode(['error' => 'Erreur connexion MySQL : ' . $e->getMessage()]);
             exit;
         }
     }
     return $pdo;
 }
 
-// Vérification simple du token admin
+// Vérification du token Bearer
 function requireAuth() {
-    $headers = getallheaders();
-    $auth = $headers['Authorization'] ?? '';
-    $token = str_replace('Bearer ', '', $auth);
+    $auth = '';
+    if (function_exists('getallheaders')) {
+        $headers = getallheaders();
+        // Cherche Authorization quelle que soit la casse
+        foreach ($headers as $key => $value) {
+            if (strtolower($key) === 'authorization') { $auth = $value; break; }
+        }
+    }
+    if (empty($auth)) {
+        $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
+    }
+    $token = trim(str_ireplace('bearer', '', $auth));
     if ($token !== API_SECRET) {
         http_response_code(401);
-        echo json_encode(['error' => 'Non autorisé']);
+        echo json_encode(['error' => 'Non autorisé — clé API invalide']);
         exit;
     }
 }
 
-// Réponse JSON
 function jsonResponse($data, $code = 200) {
     http_response_code($code);
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
