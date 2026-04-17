@@ -35,8 +35,10 @@ jobs:
           cp "Logo détouré.png" deploy/
           # .htaccess pour la sécurité et le cache
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
-          # API PHP
-          if [ -d api ]; then cp api/*.php deploy/api/; fi
+          # API PHP — on NE copie PAS config.php (contient les vraies credentials du serveur)
+          for f in api/upload.php api/files.php api/sync.php; do
+            [ -f "$f" ] && cp "$f" deploy/api/
+          done
           if [ -f api/database_mysql.sql ]; then cp api/database_mysql.sql deploy/api/; fi
           # Placeholder pour les dossiers uploads
           touch deploy/uploads/.gitkeep

@@ -27,13 +27,22 @@ $allowedOrigins = [
     'http://127.0.0.1',
 ];
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-$corsOrigin = in_array($origin, $allowedOrigins) ? $origin : 'https://veritas-school.com';
+
+// Autoriser les fichiers ouverts en local (file://) → origin = "null"
+// Autoriser les requêtes sans origin (même serveur, curl, etc.)
+if ($origin === '' || $origin === 'null') {
+    $corsOrigin = '*';
+} elseif (in_array($origin, $allowedOrigins)) {
+    $corsOrigin = $origin;
+} else {
+    $corsOrigin = 'https://veritas-school.com';
+}
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: ' . $corsOrigin);
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Vary: Origin');
+if ($corsOrigin !== '*') header('Vary: Origin');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
