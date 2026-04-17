@@ -3,8 +3,8 @@
 -- À exécuter dans phpMyAdmin
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS veritas_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE veritas_db;
+-- NOTE : ne pas utiliser CREATE DATABASE ni USE sur LWS
+-- Sélectionnez la base verit2781684 dans phpMyAdmin avant d'importer
 
 -- ── Données principales (synchronisées depuis localStorage) ──
 

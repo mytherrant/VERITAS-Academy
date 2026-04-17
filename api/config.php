@@ -17,11 +17,23 @@ define('MAX_FILE_SIZE', 50 * 1024 * 1024); // 50 Mo max
 // Clé secrète pour l'API (changez cette valeur !)
 define('API_SECRET', 'CHANGEZ_MOI_cle_secrete_veritas_2026');
 
-// CORS — autorise votre domaine
+// CORS — autorise le domaine officiel + localhost pour le développement
+$allowedOrigins = [
+    'https://veritas-school.com',
+    'http://veritas-school.com',
+    'http://localhost:8000',
+    'http://localhost',
+    'http://127.0.0.1:8000',
+    'http://127.0.0.1',
+];
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$corsOrigin = in_array($origin, $allowedOrigins) ? $origin : 'https://veritas-school.com';
+
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: https://veritas-school.com');
+header('Access-Control-Allow-Origin: ' . $corsOrigin);
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Vary: Origin');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);

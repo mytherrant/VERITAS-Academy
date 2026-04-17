@@ -2457,6 +2457,8 @@ function load(){
   DB.elearning.contenus=_curC;
   // Merge citations from defaultDB if missing
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
+  // Init cloud config if missing
+  if(!DB.cloudConfig){DB.cloudConfig={url:'https://veritas-school.com/api',secret:'',lastSync:'Jamais'};}
   if(!DB.elearning.soumissions)DB.elearning.soumissions=[];
   if(!DB.elearning.telechargementsGratuits)DB.elearning.telechargementsGratuits={};
   if(!DB.products)DB.products=defaultDB().products;
@@ -4273,20 +4275,231 @@ function deleteGalleryPhoto(pid){
 // ═══════════════════════════════════════════════
 // SYNC DONNÉES (JSON Export/Import)
 // ═══════════════════════════════════════════════
-function saveFirebaseConfig(){
-  if(!DB.firebase)DB.firebase={};
-  ['apiKey','projectId','authDomain','storageBucket'].forEach(k=>{
-    const el=document.getElementById('fb_'+k);if(el)DB.firebase[k]=el.value.trim();
-  });save();toast('✓ Configuration Firebase enregistrée');
+function saveFirebaseConfig(){saveCloudConfig();}
+function testFirebaseConnection(){cloudTestConnection();}
+
+// ══════════════════════════════════════════════════════════════════
+// ── MODULE CLOUD SYNC — veritas-school.com API ──────────────────
+// ══════════════════════════════════════════════════════════════════
+
+function _cloudHeaders(){
+  var secret=DB.cloudConfig?.secret||'';
+  return{'Content-Type':'application/json','Authorization':'Bearer '+secret};
 }
-function testFirebaseConnection(){
-  const cfg=DB.firebase;
-  if(!cfg?.apiKey||!cfg?.projectId){toast('Configurez Firebase d\'abord','warn');return;}
-  toast('🔌 Test de connexion à '+cfg.projectId+'...');
-  setTimeout(()=>{
-    if(cfg.apiKey.startsWith('AIza')&&cfg.projectId.length>5)toast('✓ Configuration Firebase valide — prêt pour le déploiement');
-    else toast('⚠️ Vérifiez vos clés Firebase','warn');
-  },1500);
+function _cloudUrl(endpoint){
+  var base=(DB.cloudConfig?.url||'https://veritas-school.com/api').replace(/\/$/,'');
+  return base+'/'+endpoint;
+}
+
+function saveCloudConfig(){
+  if(!DB.cloudConfig)DB.cloudConfig={};
+  var url=(_ge('cloud_url')?.value||'').trim();
+  var secret=(_ge('cloud_secret')?.value||'').trim();
+  if(!url){toast('⚠️ URL du serveur requise','warn');return;}
+  if(!secret){toast('⚠️ Clé API requise','warn');return;}
+  DB.cloudConfig.url=url;
+  DB.cloudConfig.secret=secret;
+  save();
+  toast('✓ Configuration cloud enregistrée');
+}
+
+function cloudTestConnection(){
+  var secret=DB.cloudConfig?.secret;
+  if(!secret){toast('⚠️ Configurez d\'abord la clé API dans les paramètres Cloud','warn');return;}
+  toast('🔌 Test de connexion...');
+  _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Connexion en cours...</span></div>');
+  fetch(_cloudUrl('files.php'),{headers:_cloudHeaders()})
+  .then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  })
+  .then(function(data){
+    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Connexion réussie !</strong> Le serveur répond correctement. '+
+      (Array.isArray(data)?data.length+' fichier(s) en ligne.':'')+'</span></div>');
+    toast('✅ Connexion au cloud réussie !');
+  })
+  .catch(function(e){
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span><strong>Échec de connexion :</strong> '+_esc(e.message)+'. Vérifiez l\'URL et la clé API.</span></div>');
+    toast('❌ Connexion échouée : '+e.message,'err');
+  });
+}
+
+function cloudSaveDB(){
+  if(!iA()){toast('Accès réservé aux administrateurs','warn');return;}
+  var secret=DB.cloudConfig?.secret;
+  if(!secret){toast('⚠️ Configurez la clé API dans Paramètres → Cloud','warn');return;}
+  if(!confirm('Sauvegarder toutes les données vers le cloud ?\nCela remplacera la dernière sauvegarde en ligne.'))return;
+  toast('☁️ Envoi des données vers le cloud...');
+  _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Sauvegarde en cours... Ne fermez pas cette page.</span></div>');
+  var data=JSON.parse(JSON.stringify(DB));
+  // Strip large binary data
+  if(data.elearning&&data.elearning.contenus){
+    data.elearning.contenus.forEach(function(c){if(c.fichierData&&c.fichierData.length>5000)c.fichierData='';});
+  }
+  fetch(_cloudUrl('sync.php'),{
+    method:'POST',
+    headers:_cloudHeaders(),
+    body:JSON.stringify(data)
+  })
+  .then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  })
+  .then(function(res){
+    if(res.error)throw new Error(res.error);
+    DB.cloudConfig.lastSync=new Date().toLocaleString('fr-FR');
+    save();
+    var sizeKB=Math.round((res.size||0)/1024);
+    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sauvegarde réussie !</strong> Snapshot #'+res.snapshot_id+' — '+sizeKB+' Ko envoyés. '+new Date().toLocaleString('fr-FR')+'</span></div>');
+    toast('✅ Données sauvegardées dans le cloud !');
+  })
+  .catch(function(e){
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span><strong>Erreur :</strong> '+_esc(e.message)+'</span></div>');
+    toast('❌ Échec sauvegarde cloud : '+e.message,'err');
+  });
+}
+
+function cloudRestoreDB(){
+  if(!isSA()){toast('Accès réservé au super-administrateur','warn');return;}
+  var secret=DB.cloudConfig?.secret;
+  if(!secret){toast('⚠️ Configurez la clé API dans Paramètres → Cloud','warn');return;}
+  if(!confirm('⚠️ ATTENTION : Cela remplacera TOUTES vos données locales par la dernière sauvegarde cloud.\n\nÊtes-vous sûr ?'))return;
+  if(!confirm('Dernière confirmation : les données actuelles seront écrasées. Continuer ?'))return;
+  toast('📥 Récupération des données depuis le cloud...');
+  _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Restauration en cours...</span></div>');
+  fetch(_cloudUrl('sync.php'),{headers:_cloudHeaders()})
+  .then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  })
+  .then(function(data){
+    if(data.error)throw new Error(data.error);
+    if(!data.school||!data.students){throw new Error('Format de données invalide');}
+    // Save current config before overwriting
+    var cloudCfg=DB.cloudConfig;
+    DB=data;
+    DB.cloudConfig=cloudCfg;
+    DB.cloudConfig.lastSync=new Date().toLocaleString('fr-FR')+' (restauré)';
+    save();
+    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Restauration réussie !</strong> '+DB.students.length+' élèves, '+DB.teachers.length+' enseignants, '+DB.grades.length+' notes chargées.</span></div>');
+    toast('✅ Données restaurées depuis le cloud !');
+    setTimeout(function(){re();},1000);
+  })
+  .catch(function(e){
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span><strong>Erreur :</strong> '+_esc(e.message)+'</span></div>');
+    toast('❌ Échec restauration : '+e.message,'err');
+  });
+}
+
+function mCloudUploadFile(){
+  if(!iA()){toast('Accès réservé aux administrateurs','warn');return;}
+  var secret=DB.cloudConfig?.secret;
+  if(!secret){toast('⚠️ Configurez la clé API dans Paramètres → Cloud','warn');return;}
+  M('📤 Uploader un fichier','Envoyer un fichier vers le serveur veritas-school.com',
+    '<div class="fg mb12"><span class="fl">Catégorie</span><select class="fi" id="upl_cat">'+
+    '<option value="video">🎬 Vidéo</option>'+
+    '<option value="epreuve">📝 Épreuve / Examen</option>'+
+    '<option value="cours">📖 Cours / Support</option>'+
+    '<option value="ressource">📁 Ressource</option>'+
+    '<option value="image">🖼️ Image</option></select></div>'+
+    '<div class="fg mb12"><span class="fl">Titre du fichier</span><input class="fi" id="upl_title" placeholder="Ex: Épreuve Maths Tle C 2025"></div>'+
+    '<div class="fg mb12"><span class="fl">Classe concernée</span><input class="fi" id="upl_classe" placeholder="Ex: Tle C"></div>'+
+    '<div class="fg mb12"><span class="fl">Matière</span><input class="fi" id="upl_matiere" placeholder="Ex: Mathématiques"></div>'+
+    '<div class="fg mb12"><span class="fl">Description (optionnel)</span><textarea class="fi" id="upl_desc" rows="2" placeholder="Brève description..."></textarea></div>'+
+    '<div class="fg mb12"><span class="fl">Fichier (max 50 Mo)</span><input type="file" class="fi" id="upl_file" accept=".pdf,.mp4,.webm,.ogg,.png,.jpg,.jpeg,.webp,.html,.xlsx"></div>'+
+    '<div id="uplProgress" class="mt8"></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'+
+    '<button class="btn bi" onclick="cloudDoUpload()">📤 Envoyer</button>'
+  );
+}
+
+function cloudDoUpload(){
+  var fileInput=_ge('upl_file');
+  if(!fileInput||!fileInput.files.length){toast('Sélectionnez un fichier','warn');return;}
+  var file=fileInput.files[0];
+  if(file.size>50*1024*1024){toast('Fichier trop volumineux (max 50 Mo)','warn');return;}
+  var cat=_ge('upl_cat')?.value||'ressource';
+  var title=(_ge('upl_title')?.value||'').trim()||file.name;
+  var classe=(_ge('upl_classe')?.value||'').trim();
+  var matiere=(_ge('upl_matiere')?.value||'').trim();
+  var desc=(_ge('upl_desc')?.value||'').trim();
+  var fd=new FormData();
+  fd.append('file',file);
+  fd.append('category',cat);
+  fd.append('title',title);
+  fd.append('classe',classe);
+  fd.append('matiere',matiere);
+  fd.append('description',desc);
+  _si('uplProgress','<div class="ib ibt"><span>⏳</span><span>Envoi en cours... '+Math.round(file.size/1024)+' Ko</span></div>');
+  fetch(_cloudUrl('upload.php'),{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+(DB.cloudConfig?.secret||'')},
+    body:fd
+  })
+  .then(function(r){
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return r.json();
+  })
+  .then(function(res){
+    if(res.error)throw new Error(res.error);
+    _si('uplProgress','<div class="ib ibg"><span>✅</span><span><strong>Fichier uploadé !</strong><br>URL : <a href="'+_esc(res.url)+'" target="_blank" style="color:var(--bl);word-break:break-all">'+_esc(res.url)+'</a></span></div>');
+    toast('✅ Fichier uploadé avec succès !');
+  })
+  .catch(function(e){
+    _si('uplProgress','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span>'+_esc(e.message)+'</span></div>');
+    toast('❌ Échec upload : '+e.message,'err');
+  });
+}
+
+function mCloudFilesList(){
+  if(!iA()){toast('Accès réservé aux administrateurs','warn');return;}
+  var secret=DB.cloudConfig?.secret;
+  if(!secret){toast('⚠️ Configurez la clé API','warn');return;}
+  M('📁 Fichiers en ligne','Liste des fichiers uploadés sur veritas-school.com',
+    '<div id="cloudFilesContent"><div class="ib ibt"><span>⏳</span><span>Chargement...</span></div></div>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+  );
+  fetch(_cloudUrl('files.php'),{headers:_cloudHeaders()})
+  .then(function(r){return r.json();})
+  .then(function(files){
+    if(!files.length){
+      _si('cloudFilesContent','<div class="empty">Aucun fichier uploadé pour le moment.</div>');
+      return;
+    }
+    var catIco={video:'🎬',epreuve:'📝',cours:'📖',ressource:'📁',image:'🖼️'};
+    var h='<div class="tw"><table><thead><tr><th></th><th>Titre</th><th>Catégorie</th><th>Classe</th><th>Taille</th><th>Date</th><th></th></tr></thead><tbody>';
+    files.forEach(function(f){
+      var sizeKB=Math.round((f.size_bytes||0)/1024);
+      var sizeStr=sizeKB>1024?Math.round(sizeKB/1024)+' Mo':sizeKB+' Ko';
+      h+='<tr><td>'+(catIco[f.category]||'📄')+'</td>';
+      h+='<td><a href="'+_esc(f.public_url||'')+'" target="_blank" style="color:var(--bl)">'+_esc(f.title||f.original_name||f.filename)+'</a></td>';
+      h+='<td><span class="bg bgt">'+_esc(f.category||'')+'</span></td>';
+      h+='<td>'+_esc(f.classe||'—')+'</td>';
+      h+='<td class="mono xs2">'+sizeStr+'</td>';
+      h+='<td class="xs2 mut">'+_esc(f.created_at||'')+'</td>';
+      h+='<td><button class="btn bo xs" onclick="cloudDeleteFile(\''+f.id+'\')">🗑</button></td></tr>';
+    });
+    h+='</tbody></table></div>';
+    _si('cloudFilesContent',h);
+  })
+  .catch(function(e){
+    _si('cloudFilesContent','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span>'+_esc(e.message)+'</span></div>');
+  });
+}
+
+function cloudDeleteFile(fid){
+  if(!confirm('Supprimer ce fichier du serveur ?'))return;
+  fetch(_cloudUrl('files.php?id='+fid),{
+    method:'DELETE',
+    headers:_cloudHeaders()
+  })
+  .then(function(r){return r.json();})
+  .then(function(res){
+    if(res.error){toast('❌ '+res.error,'err');return;}
+    toast('✅ Fichier supprimé');
+    mCloudFilesList();
+  })
+  .catch(function(e){toast('❌ '+e.message,'err');});
 }
 
 
@@ -8344,19 +8557,22 @@ function pgSettings(){
       <div class="ib ibi mt14 mb0"><span>💡</span><span>Pour synchroniser via <strong>intranet</strong>: exportez les données, partagez via WiFi, importez sur l\'autre appareil.</span></div>
     </div>
     <div class="card mt16">
-      <div class="ct">☁️ Firebase — Mise en ligne</div>
-      <div class="ib ibt mb14"><span>🌐</span><span>Configurez Firebase pour héberger l\'application en ligne et synchroniser les données en temps réel.</span></div>
+      <div class="ct">☁️ VÉRITAS Cloud — Synchronisation en ligne</div>
+      <div class="ib ibg mb14"><span>🌐</span><span>Synchronisez vos données avec le serveur <strong>veritas-school.com</strong>. Sauvegardez automatiquement dans MySQL et uploadez vos fichiers (vidéos, épreuves, cours).</span></div>
       <div class="fg2">
-        <div class="fg"><span class="fl">API Key</span><input class="fi" id="fb_apiKey" value="${DB.firebase?.apiKey||''}" placeholder="AIzaSy..."></div>
-        <div class="fg"><span class="fl">Project ID</span><input class="fi" id="fb_projectId" value="${DB.firebase?.projectId||''}" placeholder="veritas-xxxxx"></div>
-        <div class="fg"><span class="fl">Auth Domain</span><input class="fi" id="fb_authDomain" value="${DB.firebase?.authDomain||''}" placeholder="veritas-xxxxx.firebaseapp.com"></div>
-        <div class="fg"><span class="fl">Storage Bucket</span><input class="fi" id="fb_storageBucket" value="${DB.firebase?.storageBucket||''}" placeholder="veritas-xxxxx.appspot.com"></div>
+        <div class="fg full"><span class="fl">URL du serveur API</span><input class="fi" id="cloud_url" value="${DB.cloudConfig?.url||'https://veritas-school.com/api'}" placeholder="https://veritas-school.com/api"></div>
+        <div class="fg full"><span class="fl">Clé API (token secret)</span><input class="fi" id="cloud_secret" type="password" value="${DB.cloudConfig?.secret||''}" placeholder="Votre clé secrète API"></div>
       </div>
-      <div class="fl2 g8 mt14">
-        <button class="btn bi sm" onclick="saveFirebaseConfig()">💾 Enregistrer Firebase</button>
-        <button class="btn bgr2 sm" onclick="testFirebaseConnection()">🔌 Tester connexion</button>
+      <button class="btn bi sm mt10" onclick="saveCloudConfig()">💾 Enregistrer config cloud</button>
+      <div class="fl2 g8 fw mt14 pt14" style="border-top:var(--br)">
+        <button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="cloudSaveDB()">☁️ Sauvegarder vers le cloud</button>
+        <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="cloudRestoreDB()">📥 Restaurer depuis le cloud</button>
+        <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="cloudTestConnection()">🔌 Tester la connexion</button>
+        <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mCloudUploadFile()">📤 Uploader un fichier</button>
+        <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mCloudFilesList()">📁 Fichiers en ligne</button>
       </div>
-      <div class="ib ibi mt14 mb0"><span>📋</span><span><strong>Guide rapide:</strong> 1) Créez un projet sur <a href='https://console.firebase.google.com' target='_blank' style='color:var(--bl)'>console.firebase.google.com</a> 2) Activez Firestore 3) Copiez les clés ici 4) Déployez avec <code>firebase deploy</code></span></div>
+      <div id="cloudSyncStatus" class="mt12"></div>
+      <div class="ib ibi mt14 mb0"><span>💡</span><span><strong>Dernière sync :</strong> ${DB.cloudConfig?.lastSync||'Jamais'} — Les données sont sauvegardées dans la base MySQL de veritas-school.com. Les fichiers uploadés sont accessibles depuis n\'importe quel appareil.</span></div>
     </div>
     <div class="card mt16">
       <div class="ct">🔐 Sécurité</div>
