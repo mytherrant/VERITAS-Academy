@@ -8667,19 +8667,12 @@ function buildIntroVideoHtml(){
   var nom=(DB&&DB.school&&DB.school.nom)||"VÉRITAS";
   var sl=(DB&&DB.publicInfo&&DB.publicInfo.slogan)||"La Réussite Assurée";
 
-  // Overlay commun (utilisé sur les 3 modes : YouTube, vidéo locale, fallback animé)
+  // Overlay commun — bouton son uniquement, sans texte superflu
   function buildOverlay(withSoundBtn){
-    var btn = withSoundBtn
-      ? '<button class="vhero-sound-btn muted" id="vheroSoundBtn" onclick="_vheroToggleSound(event)" title="Activer le son">🔇 <span>Activer le son</span></button>'
-      : '';
+    if(!withSoundBtn) return '';
     return '<div class="vhero-video-overlay">'
       + '<div class="vhero-vo-top">'
-        + '<div class="vhero-live-badge">EN DIRECT</div>'
-        + btn
-      + '</div>'
-      + '<div class="vhero-vo-bot">'
-        + '<div class="vhero-video-caption-main">🎬 Vidéo de présentation</div>'
-        + '<div class="vhero-video-caption-sub">© Mythe Errant 2026 · VÉRITAS — '+nom.replace(/"/g,'&quot;')+'</div>'
+        + '<button class="vhero-sound-btn muted" id="vheroSoundBtn" onclick="_vheroToggleSound(event)" title="Activer le son">🔇 <span>Activer le son</span></button>'
       + '</div>'
     + '</div>';
   }
@@ -8716,24 +8709,11 @@ function buildIntroVideoHtml(){
       +'</div>';
   }
 
-  // ── 3. FALLBACK : aucune vidéo configurée, on affiche un hero animé riche ──
-  var eleveN = (DB&&DB.students&&DB.students.length)||0;
-  var ensN   = (DB&&DB.teachers&&DB.teachers.length)||0;
+  // ── 3. FALLBACK : aucune vidéo configurée — gradient animé épuré ──
   return '<div class="vhero-video-wrap" data-vtype="fallback" style="background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#7C3AED);background-size:400% 400%;animation:vhAnim 8s ease infinite">'
-    // contenu central animé
     +'<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;z-index:1">'
-      +'<div style="font-size:clamp(48px,10vw,72px);margin-bottom:14px;filter:drop-shadow(0 4px 16px rgba(0,0,0,.4));animation:float 6s ease-in-out infinite">🎓</div>'
-      +'<div style="font-family:Montserrat,sans-serif;font-size:clamp(18px,3vw,26px);font-weight:900;color:#fff;text-shadow:0 2px 16px rgba(0,0,0,.5);line-height:1.15;margin-bottom:8px">'+nom+'</div>'
-      +'<div style="font-family:Georgia,serif;font-size:clamp(12px,2vw,15px);color:rgba(255,255,255,.85);font-style:italic;margin-bottom:16px">'+sl+'</div>'
-      +'<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;font-size:11px;color:rgba(255,255,255,.75)">'
-        +(eleveN?'<span>👨‍🎓 '+eleveN+' élèves</span>':'')
-        +(ensN?'<span>👩‍🏫 '+ensN+' enseignants</span>':'')
-        +'<span>📍 Yaoundé, Cameroun</span>'
-      +'</div>'
-      +'<div style="margin-top:14px;font-size:10px;color:rgba(255,201,60,.85);letter-spacing:1px">💡 Uploadez une vidéo depuis Paramètres → Vidéo d\'accueil</div>'
+      +'<div style="font-size:clamp(56px,12vw,88px);filter:drop-shadow(0 4px 24px rgba(0,0,0,.4));animation:float 6s ease-in-out infinite">🎓</div>'
     +'</div>'
-    // overlay caption transparent
-    +buildOverlay(false)
     +'</div>';
 }
 
