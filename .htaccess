@@ -1,10 +1,5 @@
 # ═══ VÉRITAS Academy — Configuration Hostinger (Apache) ═══
 
-# ── Désactiver le cache LiteSpeed pour les fichiers dynamiques ──
-<IfModule LiteSpeed>
-  CacheLookup off
-</IfModule>
-
 # Force HTTPS
 RewriteEngine On
 RewriteCond %{HTTPS} off
@@ -14,8 +9,8 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 # RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
-# Default document — index.php passe par PHP (bypass cache LiteSpeed statique)
-DirectoryIndex index.php index.html
+# Default document
+DirectoryIndex index.html
 
 # Security headers
 <IfModule mod_headers.c>
@@ -38,9 +33,12 @@ DirectoryIndex index.php index.html
 # Ressources statiques = cache long (elles ne changent pas)
 <IfModule mod_headers.c>
   <FilesMatch "\.(html|htm)$">
-    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
-    Header set Expires "0"
+    Header set Expires "Thu, 01 Jan 1970 00:00:00 GMT"
+    Header set Surrogate-Control "no-store"
+    Header set CDN-Cache-Control "no-store"
+    Header set X-LiteSpeed-Cache-Control "no-cache"
   </FilesMatch>
 </IfModule>
 <IfModule mod_expires.c>
@@ -59,5 +57,5 @@ DirectoryIndex index.php index.html
   Deny from all
 </FilesMatch>
 
-# Custom 404 — toujours router vers index.php (SPA)
-ErrorDocument 404 /index.php
+# Custom 404
+ErrorDocument 404 /index.html
