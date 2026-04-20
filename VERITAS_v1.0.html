@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20t | Vidéo 500px PC/520px tablette/460px mobile + fix son mobile -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20v | Fix doublons admin + partenaires visiteurs + galerie/couvertures cloud -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -3097,6 +3097,47 @@ function initVisitor(){
   setTimeout(function(){_heroActuLoad('education');},800);
   // Activer le son vidéo au premier toucher/clic sur la page
   _vheroAutoUnmuteOnInteraction();
+  // Charger les données publiques depuis le serveur (partenaires, calendrier, etc.)
+  _fetchPublicData();
+}
+
+function _fetchPublicData(){
+  var base=(DB.cloudConfig&&DB.cloudConfig.url||'https://veritas-school.com/api').replace(/\/+$/,'');
+  var url=base+'/public_data.php';
+  fetch(url,{method:'GET',headers:{'Accept':'application/json'},signal:(typeof AbortSignal!=='undefined'&&AbortSignal.timeout?AbortSignal.timeout(8000):undefined)})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(data){
+    var changed=false;
+    // Partenaires : fusionner seulement si le visiteur n'en a pas en local
+    if(data.partenaires&&data.partenaires.length>0&&(!DB.partenaires||DB.partenaires.length===0)){
+      DB.partenaires=data.partenaires;changed=true;
+    }
+    // Calendrier
+    if(data.calendrier&&data.calendrier.length>0&&(!DB.calendrier||DB.calendrier.length===0)){
+      DB.calendrier=data.calendrier;changed=true;
+    }
+    // tickerItems
+    if(data.tickerItems&&data.tickerItems.length>0&&(!DB.tickerItems||DB.tickerItems.length===0)){
+      DB.tickerItems=data.tickerItems;initTicker();changed=true;
+    }
+    // Infos école (pour visiteurs avec DB vide)
+    if(data.school){
+      if(!DB.school||!DB.school.nom||DB.school.nom==='VÉRITAS Academy'){
+        DB.school=Object.assign(DB.school||{},data.school);
+        var nm2=$('vName');if(nm2)nm2.textContent=DB.school.nom||'VÉRITAS Academy';
+        var sl2=$('vSlogan');if(sl2)sl2.textContent=DB.school.slogan||"Centre d'Excellence Scolaire";
+        var ct2=$('vCity');if(ct2)ct2.textContent=DB.school.ville||'Yaoundé, Cameroun';
+        changed=true;
+      }
+    }
+    // Afficher le bouton Partenaires si des partenaires existent
+    if(DB.partenaires&&DB.partenaires.length>0){
+      _addPartnersNav();
+    }
+    // NB: on ne call pas save() — ces données sont chargées depuis le serveur
+    // et ne doivent pas écraser le localStorage de l'admin connecté
+  })
+  .catch(function(){/* silencieux — pas de connexion ou premier lancement */});
 }
 function _vheroAutoUnmuteOnInteraction(){
   // Attendre que la vidéo soit dans le DOM, puis brancher le son sur un tap direct
@@ -4717,24 +4758,49 @@ function uploadGalleryPhoto(){
   input.type='file';input.accept='image/*';input.multiple=true;
   input.style.display='none';document.body.appendChild(input);
   input.onchange=function(e){
-    var files=Array.from(e.target.files);var processed=0;
+    var files=Array.from(e.target.files);
+    var total=files.filter(function(f){return f.size<=5000000;}).length;
+    var processed=0;
     files.forEach(function(file){
-      if(file.size>2000000){toast('Image '+file.name+' trop lourde (max 2Mo)','warn');return;}
-      var reader=new FileReader();
-      reader.onload=function(evt){
-        var titre=prompt('Titre de la photo:',file.name.replace(/\.[^.]+$/,''));
-        if(titre){
-          if(!DB.galleryImages)DB.galleryImages=[];
-          DB.galleryImages.push({id:gid(),src:evt.target.result,titre:titre,desc:'',date:today()});
-          processed++;
-          if(processed===files.length){save();vShowSec('photos',document.querySelectorAll('.vnav-btn')[2]);toast('✓ '+processed+' photo(s) ajoutée(s)');}
-        }
-      };
-      reader.readAsDataURL(file);
+      if(file.size>5000000){toast('Image '+file.name+' trop lourde (max 5Mo)','warn');return;}
+      var titre=prompt('Titre de la photo :',file.name.replace(/\.[^.]+$/,''));
+      if(!titre)return;
+      // Essayer d'uploader sur le serveur (si cloud configuré)
+      var cfg=DB.cloudConfig;
+      if(cfg&&cfg.url&&cfg.secret){
+        toast('⬆️ Upload en cours…','info');
+        var fd=new FormData();
+        fd.append('file',file);fd.append('category','image');
+        fd.append('title',titre);fd.append('_secret',cfg.secret);
+        fetch(cfg.url.replace(/\/+$/,'')+'/upload.php',{
+          method:'POST',
+          headers:{'Authorization':'Bearer '+cfg.secret},
+          body:fd
+        }).then(function(r){return r.json();})
+        .then(function(res){
+          if(res.url){
+            if(!DB.galleryImages)DB.galleryImages=[];
+            DB.galleryImages.push({id:gid(),src:res.url,titre:titre,desc:'',date:today()});
+            processed++;save();
+            if(processed===total){vShowSec('photos',document.querySelectorAll('.vnav-btn')[2]);toast('✓ '+processed+' photo(s) uploadée(s) sur le serveur');}
+          }else{_galleryFallback(file,titre,total,function(){processed++;if(processed===total){vShowSec('photos',document.querySelectorAll('.vnav-btn')[2]);}});}
+        }).catch(function(){_galleryFallback(file,titre,total,function(){processed++;if(processed===total){vShowSec('photos',document.querySelectorAll('.vnav-btn')[2]);}});});
+      }else{
+        _galleryFallback(file,titre,total,function(){processed++;if(processed===total){save();vShowSec('photos',document.querySelectorAll('.vnav-btn')[2]);toast('✓ Photo ajoutée (stockage local — configurez le cloud pour un accès universel)','info');}});
+      }
     });
     input.remove();
   };
   setTimeout(function(){input.click();},100);
+}
+function _galleryFallback(file,titre,total,done){
+  var reader=new FileReader();
+  reader.onload=function(evt){
+    if(!DB.galleryImages)DB.galleryImages=[];
+    DB.galleryImages.push({id:gid(),src:evt.target.result,titre:titre,desc:'',date:today()});
+    save();done();
+  };
+  reader.readAsDataURL(file);
 }
 
 function deleteGalleryPhoto(pid){
@@ -4836,6 +4902,10 @@ function cloudSaveDB(){
   if(data.devoirs){data.devoirs.forEach(function(d){if(d.fichierData&&d.fichierData.length>5000)d.fichierData='';});}
   // 6. Partenaires logos
   if(data.partenaires){data.partenaires.forEach(function(p){if(p.logo&&p.logo.startsWith('data:')&&p.logo.length>5000){p.logo='';if(stripped.indexOf('logos partenaires')<0)stripped.push('logos partenaires');}});}
+  // 7. Photos galerie en data URL (stockage local → utiliser upload serveur)
+  if(data.galleryImages){data.galleryImages.forEach(function(img){if(img.src&&img.src.startsWith('data:')&&img.src.length>5000){img.src='';if(stripped.indexOf('photos galerie locales')<0)stripped.push('photos galerie locales');}});}
+  // 8. Couvertures livres en data URL
+  if(data.books){data.books.forEach(function(b){if(b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>5000){b.coverImg='';if(stripped.indexOf('couvertures livres locales')<0)stripped.push('couvertures livres locales');}});}
 
   var payload=JSON.stringify(data);
   var sizeKB=Math.round(payload.length/1024);
@@ -8374,14 +8444,33 @@ function uploadBookCover(bid){
   input.style.display='none';document.body.appendChild(input);
   input.onchange=function(e){
     var file=e.target.files[0];if(!file)return;
-    if(file.size>500000){toast('Image trop lourde (max 500Ko)','warn');return;}
-    var reader=new FileReader();
-    reader.onload=function(evt){
-      var b=DB.books.find(function(x){return x.id===bid;});
-      if(b){b.coverImg=evt.target.result;save();re();toast('✓ Couverture mise à jour');}
-    };reader.readAsDataURL(file);input.remove();
+    if(file.size>3000000){toast('Image trop lourde (max 3Mo)','warn');return;}
+    var cfg=DB.cloudConfig;
+    if(cfg&&cfg.url&&cfg.secret){
+      toast('⬆️ Upload couverture…','info');
+      var fd=new FormData();
+      fd.append('file',file);fd.append('category','image');
+      fd.append('title','cover_'+bid);fd.append('_secret',cfg.secret);
+      fetch(cfg.url.replace(/\/+$/,'')+'/upload.php',{
+        method:'POST',headers:{'Authorization':'Bearer '+cfg.secret},body:fd
+      }).then(function(r){return r.json();})
+      .then(function(res){
+        var b=DB.books.find(function(x){return x.id===bid;});
+        if(res.url&&b){b.coverImg=res.url;save();re();toast('✓ Couverture mise à jour (serveur)');}
+        else _bookCoverFallback(file,bid);
+      }).catch(function(){_bookCoverFallback(file,bid);});
+    }else{_bookCoverFallback(file,bid);}
+    input.remove();
   };
   setTimeout(function(){input.click();},100);
+}
+function _bookCoverFallback(file,bid){
+  var reader=new FileReader();
+  reader.onload=function(evt){
+    var b=DB.books.find(function(x){return x.id===bid;});
+    if(b){b.coverImg=evt.target.result;save();re();toast('✓ Couverture mise à jour (local)');}
+  };
+  reader.readAsDataURL(file);
 }
 function uploadBookPreview(bid){
   var input=document.createElement('input');input.type='file';input.accept='image/*';input.multiple=true;
@@ -9306,7 +9395,7 @@ function pgSettings(){
         <button class="btn bvi" onclick="importAllData()">📥 Importer JSON</button>
         <button class="btn" style="background:#059669;color:#fff" onclick="exportSQL()">🗄️ Exporter SQL</button>
       </div>
-      <div class="fl2 fw g8 mt12 pt12" style="border-top:var(--br)"><div class="bold s mb8">🛠️ Gestion avancee</div><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()">📢 Defilant</button><button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()">🎬 Video</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()">📦 Packs</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()">📅 Calendrier</button><button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()">🤝 Partenaires</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()">🎮 Jeux</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Labos</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évals</button><button class="btn sm" style="background:#142554;color:#fff;border-radius:10px" onclick="re();goTo('visitor_accounts')">👥 Comptes</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button><button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Labos</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageEvaluations()">📊 Évaluations</button><button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mPayAttempts()">💰 Paiements</button></div>
+      <div class="fl2 fw g8 mt12 pt12" style="border-top:var(--br)"><div class="bold s mb8">🛠️ Gestion avancee</div><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()">📢 Defilant</button><button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()">🎬 Video</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()">📦 Packs</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()">📅 Calendrier</button><button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()">🤝 Partenaires</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()">🎮 Jeux</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Labos</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évals</button><button class="btn sm" style="background:#142554;color:#fff;border-radius:10px" onclick="re();goTo('visitor_accounts')">👥 Comptes</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageEvaluations()">📊 Évaluations</button><button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mPayAttempts()">💰 Paiements</button></div>
       <div class="ib ibi mt14 mb0"><span>💡</span><span>Pour synchroniser via <strong>intranet</strong>: exportez les données, partagez via WiFi, importez sur l\'autre appareil.</span></div>
     </div>
     <div class="card mt16">
@@ -10641,10 +10730,12 @@ function _addPartnersNav(){
   if(!vNav) return;
   var existing = vNav.querySelector('[data-nav="partners"]');
   if(existing) return; // already added
+  // N'afficher le bouton que si des partenaires existent (ou si admin pour prévisualisation)
+  if((!DB.partenaires||DB.partenaires.length===0)&&!iA()) return;
   var btn = document.createElement('button');
   btn.className = 'vnav-btn';
   btn.setAttribute('data-nav','partners');
-  if(btn)btn.textContent= '🤝 Partenaires';
+  btn.textContent = '🤝 Partenaires';
   btn.onclick = function(){vNav.querySelectorAll('.vnav-btn').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');showPartenaires();};
   vNav.appendChild(btn);
 }
@@ -10661,24 +10752,7 @@ function _patchAdminNavs(){
 function _applyPatches(){
   _addPartnersNav();
   initTickerFixed();
-  // Patch the CMS page to include partners management
-  var origPgSettings = pgSettings;
-  pgSettings = function(){
-    var base = origPgSettings();
-    // Add SQL export and partners buttons
-    return base.replace(
-      '<button class="btn bgr2" onclick="exportAllData()">📤 Exporter toutes les données (JSON)</button>',
-      '<button class="btn bgr2" onclick="exportAllData()">📤 Exporter JSON</button>'+
-      '<button class="btn bo" onclick="exportAllDataSQL()">🗄️ Exporter SQL</button>'
-    ) + 
-    '<div class="card mt16"><div class="ct">🤝 Partenaires & Sponsors</div>'+
-    '<div class="ib ibt mb12"><span>🤝</span><span>Gérez la page Partenaires affichée aux visiteurs.</span></div>'+
-    '<div class="fl2 g8"><button class="btn bi sm" onclick="mManagePartners()">Gérer les partenaires</button>'+
-    '<button class="btn bo sm" onclick="mManagePacks()">📦 Gérer les packs</button>'+
-    '<button class="btn bo sm" onclick="mEditCalendrier()">📅 Calendrier</button>'+
-    '<button class="btn bo sm" onclick="mSetIntroVideo()">🎬 Vidéo accueil</button>'+
-    '</div></div>';
-  };
+  // Note: pgSettings override removed — tous les boutons sont déjà dans Gestion avancée
 }
 
 // Run patches after DOM ready
