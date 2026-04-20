@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20o | Vidéo mobile plus haute + son auto au premier toucher -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20p | Fix hauteur vidéo mobile: supprimer inline height:300px -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -1018,13 +1018,11 @@ body { font-size: 15px !important; }
 }
 @media(max-width:900px){
   #vHeroGrid { grid-template-columns: 1fr !important; min-height: auto !important; }
-  .vhero-video-wrap { height: 420px !important; }
-  #vHeroGrid > div:first-child { height: 420px !important; overflow: hidden !important; }
+  .vhero-video-wrap, #vHeroVideoOuter { height: 420px !important; }
   #vHeroNews { min-height: 280px !important; }
 }
 @media(max-width:700px){
-  .vhero-video-wrap { height: 360px !important; }
-  #vHeroGrid > div:first-child { height: 360px !important; }
+  .vhero-video-wrap, #vHeroVideoOuter { height: 360px !important; }
 }
 /* Overlay transparent POSÉ sur la vidéo */
 .vhero-video-overlay {
@@ -3351,7 +3349,7 @@ function vShowSec(sec,btn){
     <!-- ═══ VIDÉO + ACTUALITÉS CÔTE À CÔTE ═══ -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;min-height:320px" id="vHeroGrid">
       <!-- Vidéo de présentation -->
-      <div style="border-radius:var(--r3);overflow:hidden;height:300px">
+      <div id="vHeroVideoOuter" style="border-radius:var(--r3);overflow:hidden">
         ${_heroVideoHtml}
       </div>
       <!-- Panel Actualités -->
