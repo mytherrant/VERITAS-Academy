@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20n | Auto-chargement vidéo serveur sur tous appareils -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20o | Vidéo mobile plus haute + son auto au premier toucher -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -1018,13 +1018,13 @@ body { font-size: 15px !important; }
 }
 @media(max-width:900px){
   #vHeroGrid { grid-template-columns: 1fr !important; min-height: auto !important; }
-  .vhero-video-wrap { height: 320px !important; }
-  #vHeroGrid > div:first-child { height: 320px !important; overflow: hidden !important; }
+  .vhero-video-wrap { height: 420px !important; }
+  #vHeroGrid > div:first-child { height: 420px !important; overflow: hidden !important; }
   #vHeroNews { min-height: 280px !important; }
 }
 @media(max-width:700px){
-  .vhero-video-wrap { height: 260px !important; }
-  #vHeroGrid > div:first-child { height: 260px !important; }
+  .vhero-video-wrap { height: 360px !important; }
+  #vHeroGrid > div:first-child { height: 360px !important; }
 }
 /* Overlay transparent POSÉ sur la vidéo */
 .vhero-video-overlay {
@@ -3088,6 +3088,24 @@ function initVisitor(){
   setTimeout(_slideAutoStart,1000);
   // Charger les actualités dans le hero panel
   setTimeout(function(){_heroActuLoad('education');},800);
+  // Activer le son vidéo au premier toucher/clic sur la page
+  _vheroAutoUnmuteOnInteraction();
+}
+function _vheroAutoUnmuteOnInteraction(){
+  var done=false;
+  function handler(){
+    if(done)return; done=true;
+    document.removeEventListener('touchstart',handler,true);
+    document.removeEventListener('click',handler,true);
+    var v=document.getElementById('vheroVideo');
+    var btn=document.getElementById('vheroSoundBtn');
+    if(v&&v.muted){
+      v.muted=false;
+      if(btn){btn.classList.remove('muted');btn.innerHTML='🔊 <span>Son activé</span>';}
+    }
+  }
+  document.addEventListener('touchstart',handler,{capture:true,once:true,passive:true});
+  document.addEventListener('click',handler,{capture:true,once:true});
 }
 // ═══ Scroll reveal observer ═══
 var _vRevealObs=null;
