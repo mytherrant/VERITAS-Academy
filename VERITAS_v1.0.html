@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20w | Fix notifications + doublons admin + partenaires visiteurs + galerie/couvertures cloud -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20x | Fix jeux 3e/1ere/Tle + suppression + import HTML épreuves/jeux -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -11399,6 +11399,7 @@ function mManageJeux(){
     +"<button class='btn br2 sm' onclick='_setAllJeuxPremium()'>🔒 Tout premium</button>"
     +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='cm();mImportQCM()'>📥 Importer JSON</button>"
     +"<button class='btn sm' style='background:#059669;color:#fff' onclick='cm();mImportJeuFichier()'>📤 Importer Jeu/Quiz</button>"
+    +"<button class='btn sm' style='background:#BE185D;color:#fff' onclick='cm();mImportJeuHTML()'>🌐 Importer HTML</button>"
     +"<button class='btn sm' style='background:#6B7280;color:#fff' onclick='_restoreAllJeux()'>↩ Restaurer tous</button>"
     +"</div>"
     +"<div class='bold s mb10'>➕ Créer un nouveau Quiz / Jeu</div>"
@@ -11434,6 +11435,7 @@ function _setAllJeuxGratuit(){if(typeof JEUX_CATALOGUE!=="undefined")JEUX_CATALO
 function _setAllJeuxPremium(){if(typeof JEUX_CATALOGUE!=="undefined")JEUX_CATALOGUE.forEach(function(j){j.gratuit=false;});toast("Tous premium");cm();setTimeout(mManageJeux,80);}
 function _restoreJeu(id){
   DB.deletedJeux=(DB.deletedJeux||[]).filter(function(x){return x!==id;});
+  _restoreJeuInMemory(id);
   save();cm();setTimeout(mManageJeux,80);toast('Jeu restauré');
 }
 function _restoreAllJeux(){
@@ -11443,15 +11445,24 @@ function _restoreAllJeux(){
 function _delJeu(id){
   var j=typeof JEUX_CATALOGUE!=="undefined"&&JEUX_CATALOGUE.find(function(x){return x.id===id;});
   if(j&&j.custom){
-    // custom: really delete
     _delJeuCustom(id);
   } else {
-    // built-in: soft-hide
     if(!confirm('Masquer ce jeu ? Il n\'apparaîtra plus aux visiteurs.'))return;
     DB.deletedJeux=DB.deletedJeux||[];
     if(DB.deletedJeux.indexOf(id)<0)DB.deletedJeux.push(id);
+    // Supprimer aussi de la mémoire immédiatement
+    if(typeof JEUX_CATALOGUE!=="undefined"){
+      var idx=JEUX_CATALOGUE.findIndex(function(x){return x.id===id;});
+      if(idx>=0)JEUX_CATALOGUE.splice(idx,1);
+    }
     save();cm();setTimeout(mManageJeux,80);toast('Jeu masqué');
   }
+}
+function _restoreJeuInMemory(id){
+  // Re-injecter le jeu littéraire dans JEUX_CATALOGUE si c'est un jeu litt
+  if(typeof JEUX_CATALOGUE==="undefined")return;
+  if(JEUX_CATALOGUE.find(function(x){return x.id===id;}))return;
+  _injectLittJeux(); // Re-run injection (les jeux déjà présents sont ignorés grâce au find)
 }
 function _delJeuCustom(id){
   if(!confirm("Supprimer ce jeu ?"))return;
@@ -12118,41 +12129,7 @@ var LITT_OEUVRES = {
   }
 };
 
-// ── INJECTION AU CATALOGUE ──────────────────────────────────────────
-(function _injectLittJeux(){
-  var defs=[
-    // 3e
-    {id:"litt_3e_vc",titre:"Ville Cruelle — Mongo Beti",emoji:"🌆",mat:"Littérature",niv:"3ème",oeuvre:"3e_ville_cruelle"},
-    {id:"litt_3e_mk",titre:"La Marmite de Koka Mbala",emoji:"🫕",mat:"Littérature",niv:"3ème",oeuvre:"3e_marmite_koka"},
-    {id:"litt_3e_pg",titre:"Petites Gouttes de Chant — Philombe",emoji:"🎵",mat:"Littérature",niv:"3ème",oeuvre:"3e_petites_gouttes"},
-    // 2nde
-    {id:"litt_2e_tc",titre:"Les Tribus de Capitoline",emoji:"🏙️",mat:"Littérature",niv:"2nde",oeuvre:"2nde_tribus_capitoline"},
-    {id:"litt_2e_ps",titre:"Poèmes Sauvages — Nkoumo",emoji:"🔥",mat:"Littérature",niv:"2nde",oeuvre:"2nde_poemes_sauvages"},
-    {id:"litt_2e_ta",titre:"Tartuffe — Molière",emoji:"🎭",mat:"Littérature",niv:"2nde",oeuvre:"2nde_tartuffe"},
-    // 1ère
-    {id:"litt_1e_ct",titre:"Au Cœur des Ténèbres — Conrad",emoji:"🌑",mat:"Littérature",niv:"1ère",oeuvre:"1ere_coeur_tenebres"},
-    {id:"litt_1e_ba",titre:"Balafon — Engelbert Mveng",emoji:"🎶",mat:"Littérature",niv:"1ère",oeuvre:"1ere_balafon"},
-    {id:"litt_1e_lp",titre:"Le Lion et la Perle — Soyinka",emoji:"🦁",mat:"Littérature",niv:"1ère",oeuvre:"1ere_lion_perle"},
-    // Tle
-    {id:"litt_tle_sp",titre:"Stances et Poèmes — Prudhomme",emoji:"📜",mat:"Littérature",niv:"Terminale",oeuvre:"tle_stances_poemes"},
-    {id:"litt_tle_vn",titre:"Le Vieux Nègre et la Médaille",emoji:"🏅",mat:"Littérature",niv:"Terminale",oeuvre:"tle_vieux_negro"},
-    {id:"litt_tle_nj",titre:"Ngum a Jemea — Eyombwan",emoji:"✝️",mat:"Littérature",niv:"Terminale",oeuvre:"tle_ngum_jemea"}
-  ];
-  defs.forEach(function(d){
-    if(typeof JEUX_CATALOGUE==="undefined")return;
-    if(JEUX_CATALOGUE.find(function(j){return j.id===d.id;}))return;
-    var oeuvreKey=d.oeuvre;
-    var oe=LITT_OEUVRES[oeuvreKey]||{};
-    var actionName="_litt_"+d.id.replace(/-/g,"_");
-    var jeu={id:d.id,titre:d.titre,emoji:d.emoji,matiere:d.mat,niveau:d.niv,
-      desc:"QCM · Pendu · Vrai/Faux · Texte à trous"+(oe.auteur?" — "+oe.auteur:""),
-      gratuit:true,plan:"Premium",custom:false,action:actionName};
-    JEUX_CATALOGUE.push(jeu);
-    (function(jid,okey){
-      window["_litt_"+jid.replace(/-/g,"_")]=function(){_showLittMenu(jid,okey);};
-    })(d.id,oeuvreKey);
-  });
-})();
+// ── INJECTION AU CATALOGUE — déplacée après JEUX_CATALOGUE (ligne ~13334) ──
 
 // ── CARTE MENTALE (Mind Map SVG) ───────────────────────────────────
 function _showLittCarte(oeuvreKey){
@@ -13342,7 +13319,45 @@ var JEUX_CATALOGUE=[
   });
   // Restaurer les jeux custom persistés
   if(typeof DB!=='undefined'&&DB) { _restoreCustomJeux&&_restoreCustomJeux(); }
+  // ⚠️ Injecter les jeux littéraires ICI (après que JEUX_CATALOGUE est défini)
+  _injectLittJeux();
 })();
+
+// ── Injection des jeux littéraires dans le catalogue (appelée après init) ──
+function _injectLittJeux(){
+  if(typeof JEUX_CATALOGUE==="undefined")return;
+  var defs=[
+    // 3e
+    {id:"litt_3e_vc",titre:"Ville Cruelle — Mongo Beti",emoji:"🌆",mat:"Littérature",niv:"3ème",oeuvre:"3e_ville_cruelle"},
+    {id:"litt_3e_mk",titre:"La Marmite de Koka Mbala",emoji:"🫕",mat:"Littérature",niv:"3ème",oeuvre:"3e_marmite_koka"},
+    {id:"litt_3e_pg",titre:"Petites Gouttes de Chant — Philombe",emoji:"🎵",mat:"Littérature",niv:"3ème",oeuvre:"3e_petites_gouttes"},
+    // 2nde
+    {id:"litt_2e_tc",titre:"Les Tribus de Capitoline",emoji:"🏙️",mat:"Littérature",niv:"2nde",oeuvre:"2nde_tribus_capitoline"},
+    {id:"litt_2e_ps",titre:"Poèmes Sauvages — Nkoumo",emoji:"🔥",mat:"Littérature",niv:"2nde",oeuvre:"2nde_poemes_sauvages"},
+    {id:"litt_2e_ta",titre:"Tartuffe — Molière",emoji:"🎭",mat:"Littérature",niv:"2nde",oeuvre:"2nde_tartuffe"},
+    // 1ère
+    {id:"litt_1e_ct",titre:"Au Cœur des Ténèbres — Conrad",emoji:"🌑",mat:"Littérature",niv:"1ère",oeuvre:"1ere_coeur_tenebres"},
+    {id:"litt_1e_ba",titre:"Balafon — Engelbert Mveng",emoji:"🎶",mat:"Littérature",niv:"1ère",oeuvre:"1ere_balafon"},
+    {id:"litt_1e_lp",titre:"Le Lion et la Perle — Soyinka",emoji:"🦁",mat:"Littérature",niv:"1ère",oeuvre:"1ere_lion_perle"},
+    // Terminale
+    {id:"litt_tle_sp",titre:"Stances et Poèmes — Prudhomme",emoji:"📜",mat:"Littérature",niv:"Terminale",oeuvre:"tle_stances_poemes"},
+    {id:"litt_tle_vn",titre:"Le Vieux Nègre et la Médaille",emoji:"🏅",mat:"Littérature",niv:"Terminale",oeuvre:"tle_vieux_negro"},
+    {id:"litt_tle_nj",titre:"Ngum a Jemea — Eyombwan",emoji:"✝️",mat:"Littérature",niv:"Terminale",oeuvre:"tle_ngum_jemea"}
+  ];
+  defs.forEach(function(d){
+    if(JEUX_CATALOGUE.find(function(j){return j.id===d.id;}))return;
+    var oeuvreKey=d.oeuvre;
+    var oe=(typeof LITT_OEUVRES!=="undefined"&&LITT_OEUVRES[oeuvreKey])||{};
+    var actionName="_litt_"+d.id.replace(/-/g,"_");
+    var jeu={id:d.id,titre:d.titre,emoji:d.emoji,matiere:d.mat,niveau:d.niv,
+      desc:"QCM · Pendu · Vrai/Faux · Texte à trous"+(oe.auteur?" — "+oe.auteur:""),
+      gratuit:true,plan:"Gratuit",custom:false,action:actionName};
+    JEUX_CATALOGUE.push(jeu);
+    (function(jid,okey){
+      window["_litt_"+jid.replace(/-/g,"_")]=function(){_showLittMenu(jid,okey);};
+    })(d.id,oeuvreKey);
+  });
+}
 
 // ─── CRUD CARTES MENTALES ─────────────────────────
 function mAddCarteMentale(){
@@ -13874,13 +13889,24 @@ function showEpreuves(){
   var classe=window._epClasse||"";
   var seq=window._epSeq||"";
 
-  // Récupérer TOUTES les épreuves : librairie elearning (cat1, cat4, cat6) + épreuves admin personnalisées
+  // Récupérer TOUTES les épreuves : EPREUVES_DB + librairie elearning (cat1,cat4,cat6) + épreuves admin
   var _hiddenEp=DB.hiddenEpreuves||[];
+  // 1. EPREUVES_DB (épreuves intégrées, gérées via mManageEpreuves)
+  var builtinEp=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]).filter(function(e){
+    return _hiddenEp.indexOf(e.id)<0;
+  });
+  // 2. Librairie e-learning (cat1=épreuves, cat4=corpus, cat6=annales)
   var libEpreuves=(DB.elearningLibrary||[]).filter(function(e){
     return (e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6")&&_hiddenEp.indexOf(e.id)<0;
   });
+  // 3. Épreuves créées par l'admin
   var customEpreuves=(DB.customEpreuves||[]);
-  var allEpreuves=libEpreuves.concat(customEpreuves);
+  // Fusionner sans doublons (priorité lib > builtin)
+  var seenIds={};
+  var allEpreuves=[];
+  libEpreuves.forEach(function(e){if(!seenIds[e.id]){seenIds[e.id]=1;allEpreuves.push(e);}});
+  builtinEp.forEach(function(e){if(!seenIds[e.id]){seenIds[e.id]=1;allEpreuves.push(e);}});
+  customEpreuves.forEach(function(e){if(!seenIds[e.id]){seenIds[e.id]=1;allEpreuves.push(e);}});
 
   // Filtres
   var list=allEpreuves.filter(function(e){
@@ -13966,11 +13992,17 @@ function showEpreuveDetail(id){
   var libEpreuves=(DB.elearningLibrary||[]).filter(function(e){
     return e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6";
   });
-  var ep=libEpreuves.concat(DB.customEpreuves||[]).find(function(e){return e.id===id;});
+  var builtinEp=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]);
+  var ep=libEpreuves.concat(builtinEp).concat(DB.customEpreuves||[]).find(function(e){return e.id===id;});
   if(!ep)return;
+  // Si épreuve HTML → ouvrir directement
+  if((ep.externalUrl||ep.htmlLocal)&&!ep.apercu&&!ep.extrait){
+    _openHtmlContent(id,'epreuve');return;
+  }
   var locked=!ep.gratuit&&!SES;
   var apercu=ep.apercu||ep.extrait||ep.desc||"";
   var descText=ep.desc||ep.apercu||ep.extrait||"";
+  var hasHtml=ep.externalUrl||ep.htmlLocal;
   M("📝 "+ep.titre,"Ressource éducative VERITAS",
     "<div class='fg2'>"
     +(ep.classe?"<div class='fg'><span class='fl'>Classe</span><div style='font-size:13px;font-weight:700;color:#142554'>"+ep.classe+"</div></div>":"")
@@ -13978,13 +14010,15 @@ function showEpreuveDetail(id){
     +(ep.seq?"<div class='fg'><span class='fl'>Séquence</span><div style='font-size:13px'>"+ep.seq+"</div></div>":"")
     +(ep.prix!==undefined?"<div class='fg'><span class='fl'>Prix</span><div style='font-size:13px;font-weight:700;color:"+(ep.gratuit?"#059669":"#7C3AED")+"'>"+(ep.gratuit?"GRATUIT":ep.prix+" FCFA")+"</div></div>":"")
     +"</div>"
-    +"<div style='background:#F8FAFF;border:1px solid #E0EAFF;border-radius:12px;padding:16px;margin-top:14px;font-family:Georgia,serif;font-size:13px;color:#374151;line-height:1.85'>"
+    +(apercu?"<div style='background:#F8FAFF;border:1px solid #E0EAFF;border-radius:12px;padding:16px;margin-top:14px;font-family:Georgia,serif;font-size:13px;color:#374151;line-height:1.85'>"
     +"<div style='font-size:11px;font-weight:700;color:#7C3AED;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>Aperçu du contenu</div>"
     +(apercu||descText)
     +(locked?"<div style='margin-top:12px;padding:10px;background:#FEF3C7;border-radius:8px;font-size:12px;color:#D97706;font-style:normal'>🔒 Le contenu complet est réservé aux abonnés. Inscrivez-vous pour y accéder.</div>":"")
-    +"</div>",
+    +"</div>":""),
     "<button class='btn bo' onclick='cm()'>Fermer</button>"
-    +(locked?"<button class='btn bi' onclick='cm();vShowSec(\"elearning\",null)'>⭐ S'abonner</button>":"<button class='btn bi' onclick='cm();showEpreuves()'>← Retour</button>"),
+    +(locked?"<button class='btn bi' onclick='cm();vShowSec(\"elearning\",null)'>⭐ S'abonner</button>"
+      :(hasHtml?"<button class='btn bi' onclick='cm();_openHtmlContent(\""+id+"\",\"epreuve\")'>📄 Ouvrir l'épreuve</button>"
+              :"<button class='btn bi' onclick='cm();showEpreuves()'>← Retour</button>")),
     true);
 }
 
@@ -15162,7 +15196,10 @@ function mManageEpreuves(){
   M("📝 Gérer les Épreuves","Ajoutez et gérez les épreuves officielles",
     "<div class='ib ibt mb12'><span>📝</span><span>Masquez les épreuves par défaut inutiles. Les épreuves masquées n'apparaissent plus aux élèves.</span></div>"
     +"<div class='tw mb12' style='max-height:240px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th style='text-align:left;padding:6px 8px'>Titre</th><th>Matière</th><th>Accès</th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
-    +"<button class='btn bi sm' onclick='_newEp()'>➕ Ajouter une épreuve</button>",
+    +"<div class='fl2 g8 mt10'>"
+    +"<button class='btn bi sm' onclick='_newEp()'>➕ Saisir une épreuve</button>"
+    +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='_importEpreuveHTML()'>📥 Importer HTML</button>"
+    +"</div>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
 }
 function _hideBuiltinEp(id){
@@ -15228,6 +15265,136 @@ function _saveEp(){
   else DB.customEpreuves.push(ep);
   save();cm();toast(window._editEpIdx>=0?"✅ Épreuve modifiée":"✅ Épreuve ajoutée");
   setTimeout(mManageEpreuves,80);
+}
+
+// ── IMPORT HTML — ÉPREUVES ────────────────────────────────────────
+function _importEpreuveHTML(){
+  cm();
+  M('📥 Importer une épreuve HTML','Chargez un fichier HTML contenant l\'épreuve',
+    '<div class="ib ibt mb12"><span>💡</span><span>Importez un fichier <strong>.html</strong> (épreuve interactive, PDF inline, etc.). Il sera ouvert dans un nouvel onglet quand l\'élève clique. Renseignez ensuite les métadonnées.</span></div>'
+    +'<div class="fg2">'
+    +'<div class="fg full"><span class="fl">Titre *</span><input class="fi" id="ehTitre" placeholder="BAC C 2025 — Mathématiques"></div>'
+    +'<div class="fg"><span class="fl">Examen</span><select class="fi" id="ehExam"><option value="BEPC">BEPC</option><option value="Probatoire">Probatoire</option><option value="BAC">BAC</option><option value="Séquence">Séquence interne</option></select></div>'
+    +'<div class="fg"><span class="fl">Série / Classe</span><input class="fi" id="ehSerie" placeholder="C, D, A..."></div>'
+    +'<div class="fg"><span class="fl">Matière *</span><input class="fi" id="ehMat" placeholder="Mathématiques"></div>'
+    +'<div class="fg"><span class="fl">Année</span><input class="fi" id="ehAnnee" type="number" value="'+new Date().getFullYear()+'"></div>'
+    +'<div class="fg full"><span class="fl">Option 1 — Fichier HTML local</span>'
+    +'<input type="file" class="fi" id="ehFile" accept=".html,.htm" style="padding:6px">'
+    +'<div style="font-size:11px;color:var(--ink4);margin-top:4px">⚠️ Stocké localement — visible uniquement sur cet appareil. Préférez l\'URL (option 2) pour un accès universel.</div>'
+    +'</div>'
+    +'<div class="fg full"><span class="fl">Option 2 — URL externe (recommandé)</span>'
+    +'<input class="fi" id="ehUrl" placeholder="https://veritas-school.com/epreuves/bac_c_2025_maths.html"></div>'
+    +'<div class="fg full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="ehGratuit"><span>Accès gratuit (sans abonnement)</span></label></div>'
+    +'</div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_saveEpreuveHTML()">💾 Importer</button>',true);
+}
+function _saveEpreuveHTML(){
+  var titre=(document.getElementById('ehTitre')?.value||'').trim();
+  var mat=(document.getElementById('ehMat')?.value||'').trim();
+  if(!titre||!mat){toast('Titre et matière requis','warn');return;}
+  var url=(document.getElementById('ehUrl')?.value||'').trim();
+  var file=document.getElementById('ehFile')?.files?.[0];
+  var exam=document.getElementById('ehExam')?.value||'BAC';
+  var serie=document.getElementById('ehSerie')?.value||'';
+  var annee=parseInt(document.getElementById('ehAnnee')?.value)||new Date().getFullYear();
+  var gratuit=document.getElementById('ehGratuit')?.checked||false;
+  function _finalize(htmlUrl){
+    if(!DB.customEpreuves)DB.customEpreuves=[];
+    DB.customEpreuves.push({
+      id:'ep_html_'+Date.now(),titre:titre,exam:exam,serie:serie,matiere:mat,annee:annee,
+      duree:120,coef:1,extrait:'',gratuit:gratuit,type:'epreuve',
+      externalUrl:htmlUrl,fichier:'',fichierData:''
+    });
+    save();cm();toast('✅ Épreuve HTML importée');setTimeout(mManageEpreuves,80);
+  }
+  if(url){_finalize(url);return;}
+  if(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      // Stocker le contenu HTML et créer une Blob URL à l'ouverture
+      var content=e.target.result;
+      if(!DB.customEpHtml)DB.customEpHtml={};
+      var id='ep_html_'+Date.now();
+      DB.customEpHtml[id]=content;
+      if(!DB.customEpreuves)DB.customEpreuves=[];
+      DB.customEpreuves.push({
+        id:id,titre:titre,exam:exam,serie:serie,matiere:mat,annee:annee,
+        duree:120,coef:1,extrait:'',gratuit:gratuit,type:'epreuve',
+        htmlLocal:true,fichier:'',fichierData:''
+      });
+      save();cm();toast('✅ Épreuve HTML importée (local)');setTimeout(mManageEpreuves,80);
+    };
+    reader.readAsText(file,'utf-8');
+    return;
+  }
+  toast('Choisissez un fichier ou entrez une URL','warn');
+}
+
+// ── IMPORT HTML — JEUX/QUIZ ────────────────────────────────────────
+function mImportJeuHTML(){
+  cm();
+  M('📥 Importer un Jeu/Quiz HTML','Fichier HTML interactif ou URL externe',
+    '<div class="ib ibt mb12"><span>💡</span><span>Un jeu HTML interactif s\'ouvre dans un nouvel onglet. Utile pour importer des quiz tiers, des labos virtuels, ou des jeux créés dans d\'autres outils.</span></div>'
+    +'<div class="fg2">'
+    +'<div class="fg full"><span class="fl">Titre *</span><input class="fi" id="jhTitre" placeholder="Quiz Chimie — Équations de réaction"></div>'
+    +'<div class="fg"><span class="fl">Matière</span><input class="fi" id="jhMat" placeholder="Physique-Chimie"></div>'
+    +'<div class="fg"><span class="fl">Niveau</span><select class="fi" id="jhNiv"><option>3ème</option><option>2nde</option><option>1ère</option><option>Terminale</option><option>Toutes classes</option></select></div>'
+    +'<div class="fg"><span class="fl">Émoji</span><input class="fi" id="jhEmoji" value="🎮" maxlength="2" style="max-width:70px"></div>'
+    +'<div class="fg full"><span class="fl">Option 1 — Fichier HTML local</span>'
+    +'<input type="file" class="fi" id="jhFile" accept=".html,.htm" style="padding:6px"></div>'
+    +'<div class="fg full"><span class="fl">Option 2 — URL externe (recommandé)</span>'
+    +'<input class="fi" id="jhUrl" placeholder="https://veritas-school.com/jeux/quiz_chimie.html"></div>'
+    +'<div class="fg full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="jhGratuit" checked><span>Accès gratuit</span></label></div>'
+    +'</div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_saveJeuHTML()">💾 Importer</button>',true);
+}
+function _saveJeuHTML(){
+  var titre=(document.getElementById('jhTitre')?.value||'').trim();
+  if(!titre){toast('Titre requis','warn');return;}
+  var mat=document.getElementById('jhMat')?.value||'';
+  var niv=document.getElementById('jhNiv')?.value||'Toutes classes';
+  var emoji=document.getElementById('jhEmoji')?.value||'🎮';
+  var url=(document.getElementById('jhUrl')?.value||'').trim();
+  var file=document.getElementById('jhFile')?.files?.[0];
+  var gratuit=document.getElementById('jhGratuit')?.checked!==false;
+  function _finalizeJeu(htmlUrl,isLocal,content){
+    if(typeof JEUX_CATALOGUE==="undefined"){toast('Module jeux non chargé','warn');return;}
+    var id='jeu_html_'+Date.now();
+    var jeu={id:id,titre:titre,emoji:emoji,matiere:mat,niveau:niv,
+      desc:'Jeu/Quiz HTML interactif',gratuit:gratuit,plan:gratuit?'Gratuit':'Premium',
+      custom:true,type:'html',externalUrl:htmlUrl||'',htmlLocal:isLocal||false};
+    if(isLocal&&content){if(!DB.customJeuxHtml)DB.customJeuxHtml={};DB.customJeuxHtml[id]=content;}
+    JEUX_CATALOGUE.push(jeu);
+    if(!DB.customJeux)DB.customJeux=[];
+    DB.customJeux.push(jeu);
+    // Action handler
+    window['_jeuHtml_'+id]=function(){_openHtmlContent(id,'jeu');};
+    save();cm();toast('✅ Jeu HTML importé');setTimeout(mManageJeux,80);
+  }
+  if(url){_finalizeJeu(url,false,null);return;}
+  if(file){
+    var reader=new FileReader();
+    reader.onload=function(e){_finalizeJeu('',true,e.target.result);};
+    reader.readAsText(file,'utf-8');return;
+  }
+  toast('Choisissez un fichier ou entrez une URL','warn');
+}
+
+// ── Ouvre un contenu HTML (jeu ou épreuve) dans un nouvel onglet ──
+function _openHtmlContent(id,type){
+  // Chercher d'abord une URL externe
+  var item=null;
+  if(type==='jeu'&&typeof JEUX_CATALOGUE!=="undefined") item=JEUX_CATALOGUE.find(function(j){return j.id===id;});
+  if(type==='epreuve') item=(DB.customEpreuves||[]).find(function(e){return e.id===id;});
+  if(!item)return;
+  if(item.externalUrl){window.open(item.externalUrl,'_blank');return;}
+  // Contenu local (stocké dans DB)
+  var store=type==='jeu'?DB.customJeuxHtml:DB.customEpHtml;
+  var html=store&&store[id];
+  if(html){var blob=new Blob([html],{type:'text/html'});var u=URL.createObjectURL(blob);window.open(u,'_blank');return;}
+  toast('Contenu HTML non trouvé','warn');
 }
 
 // ── GESTIONNAIRE LABORATOIRES ──────────────────────────────────────
