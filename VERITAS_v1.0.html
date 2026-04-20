@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20r | Support HTML interactif: jeux, épreuves, évaluations -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20s | Correction bugs, vidéo 360px, 4 nouveaux jeux, orientation IA -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -995,7 +995,7 @@ body { font-size: 15px !important; }
 
 /* Vidéo héro - conteneur responsive (v1.0 - remplit la cellule grid) */
 .vhero-video-wrap {
-  position: relative; width: 100%; height: 300px; overflow: hidden;
+  position: relative; width: 100%; height: 360px; overflow: hidden;
   background: #0F172A;
   border-radius: var(--r3, 18px);
   border: 2px solid rgba(255,201,60,.3);
@@ -1007,6 +1007,7 @@ body { font-size: 15px !important; }
 .vhero-video-wrap video {
   width: 100%; height: 100%;
   object-fit: cover;
+  object-position: top center;
   display: block;
   border: none;
 }
@@ -1016,8 +1017,8 @@ body { font-size: 15px !important; }
   width: 100%; height: 100%;
   display: block; border: none;
 }
-/* Desktop : hauteur fixe 300px */
-#vHeroVideoOuter { height: 300px; }
+/* Desktop : hauteur fixe 360px */
+#vHeroVideoOuter { height: 360px; }
 @media(max-width:900px){
   #vHeroGrid { grid-template-columns: 1fr !important; min-height: auto !important; }
   .vhero-video-wrap, #vHeroVideoOuter { height: 420px !important; }
@@ -1986,7 +1987,7 @@ tr:hover td {
     grid-template-columns:1fr!important;
     gap:12px!important;
   }
-  .vhero-video-wrap{
+  .vhero-video-wrap,#vHeroVideoOuter{
     height:240px!important;
     border-radius:14px!important;
   }
@@ -9714,6 +9715,54 @@ async function _runAIOrient(){
   }
 }
 
+function mAIOrientation(){
+  if(!_aiGate('orient'))return;
+  var u=_aiUsed('orient'),lim=_aiLimit('orient'),rem=Math.max(0,lim-u);
+  var badge=lim>=999?'∞ Illimité':rem+' analyse'+(rem>1?'s':'')+' aujourd\'hui';
+  M('🧭 Orientation IA','Découvrez les filières et métiers adaptés à votre profil',
+    '<div class="ib ibt mb12"><span>🎯</span><span>L\'IA analyse votre profil scolaire et vous oriente vers les meilleures filières. <strong>'+badge+'</strong>.</span></div>'+
+    '<div class="fg mb10"><span class="fl">Série / Niveau actuel</span><select class="fi" id="oriSerie">'+
+    ['3ème — BEPC','2nde (toutes séries)','1ère A (Lettres)','1ère C/D (Scientifique)','Tle A (Lettres)','Tle C (Maths)','Tle D (SVT)','Tle E (Tech.)','Tle G (Commerce)'].map(function(s){return'<option>'+s+'</option>';}).join('')+
+    '</select></div>'+
+    '<div class="fg mb10"><span class="fl">Vos matières fortes *</span>'+
+    '<textarea class="fi" id="oriForces" rows="2" placeholder="Ex: Mathématiques, Physique, SVT…"></textarea></div>'+
+    '<div class="fg mb10"><span class="fl">Vos matières faibles</span>'+
+    '<textarea class="fi" id="oriFaiblesses" rows="2" placeholder="Ex: Français, Histoire-Géo…"></textarea></div>'+
+    '<div class="fg mb10"><span class="fl">Centres d\'intérêt / métiers envisagés</span>'+
+    '<textarea class="fi" id="oriInterets" rows="2" placeholder="Ex: médecine, informatique, enseignement, business…"></textarea></div>'+
+    '<div id="aiResO" class="ai-res" style="display:none"></div>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>'+
+    '<button class="btn bgr2" id="aiBtnO" onclick="_runAIOrient()">🤖 Analyser mon profil ('+rem+' restant'+(rem>1?'s':'')+')</button>',true);
+}
+async function _runAIOrient(){
+  if(!_aiGate('orient'))return;
+  var serie=(document.getElementById('oriSerie')?.value||'').trim();
+  var forces=(document.getElementById('oriForces')?.value||'').trim();
+  var faiblesses=(document.getElementById('oriFaiblesses')?.value||'').trim();
+  var interets=(document.getElementById('oriInterets')?.value||'').trim();
+  if(!forces){toast('Indiquez vos matières fortes','warn');return;}
+  var btn=document.getElementById('aiBtnO'),res=document.getElementById('aiResO');
+  if(btn){btn.disabled=true;btn.innerHTML='⏳ Analyse en cours…';}
+  var prompt='Tu es un conseiller d\'orientation expert du système éducatif camerounais (MINESEC, universités, grandes écoles). '+
+    'Profil élève : Niveau/Série : '+serie+'. Matières fortes : '+forces+'. Matières faibles : '+(faiblesses||'non précisées')+'. Centres d\'intérêt : '+(interets||'non précisés')+'. '+
+    'Fournis une analyse structurée (utilise ** pour les titres) : '+
+    '**Profil détecté** : résumé du profil en 2 phrases. '+
+    '**Filières recommandées au Cameroun** : liste 3 filières (université, IUT, grandes écoles) avec leurs conditions d\'accès. '+
+    '**Métiers accessibles** : liste 4 débouchés concrets au Cameroun avec les salaires approximatifs. '+
+    '**Plan d\'action** : 3 conseils pratiques pour renforcer le dossier. '+
+    '**Conseil BEPC/BAC** : stratégie pour les examens en vue de cette orientation. '+
+    'Maximum 400 mots. En français. Adapté au contexte camerounais.';
+  try{
+    var txt=await callClaudeAPI(prompt);
+    _aiInc('orient');
+    var rem2=Math.max(0,_aiLimit('orient')-_aiUsed('orient'));
+    if(res){res.style.display='block';res.textContent=txt;}
+    if(btn){btn.disabled=false;btn.innerHTML='🔄 Nouvelle analyse ('+(rem2>0?rem2+' restant'+(rem2>1?'s':''):'0 restant')+')';}
+  }catch(e){
+    toast('Erreur IA : '+e.message,'err');
+    if(btn){btn.disabled=false;btn.innerHTML='🎯 Réessayer';}
+  }
+}
 function mAICorrection(){
   if(!_aiGate('correct'))return;
   var u=_aiUsed('correct'),lim=_aiLimit('correct'),rem=Math.max(0,lim-u);
@@ -13052,6 +13101,50 @@ var JEUX_CATALOGUE=[
     {q:"Que sont les enzymes ?",opts:["Des hormones","Des protéines catalyseurs","Des vitamines","Des sucres"],ans:1,exp:"Protéines qui accélèrent les réactions chimiques sans être consommées. Ex : amylase (digestion amidon)."},
     {q:"Les neurones communiquent par...",opts:["Les synapses","Les muscles","Les os","Le sang"],ans:0,exp:"Synapses : zones de contact entre neurones où sont libérés les neurotransmetteurs (dopamine, sérotonine...)."},
    ]},
+  {id:'j_lois_physique',titre:'Lois de Physique-Chimie',emoji:'⚡',matiere:'Physique-Chimie',niveau:'2nde-Tle',type:'qcm',acces:1,
+    questions:[
+      {q:'Quelle est la loi d\'Ohm ?',opts:['U = R × I','U = I / R','I = U × R','R = U × I²'],ans:0,exp:'La loi d\'Ohm : U = R × I, où U est la tension (V), R la résistance (Ω) et I l\'intensité (A).'},
+      {q:'Quelle est la 2ème loi de Newton ?',opts:['F = m × a','F = m / a','a = F / m²','F = m + a'],ans:0,exp:'La 2ème loi de Newton : F = m × a. La force (N) = masse (kg) × accélération (m/s²).'},
+      {q:'Formule de la vitesse',opts:['v = d / t','v = d × t','v = t / d','v = d + t'],ans:0,exp:'Vitesse = distance / temps. En m/s ou km/h.'},
+      {q:'Formule de l\'énergie cinétique',opts:['Ec = ½mv²','Ec = mv²','Ec = ½mv','Ec = mv/2²'],ans:0,exp:'Énergie cinétique : Ec = ½mv². m en kg, v en m/s, Ec en joules.'},
+      {q:'Formule de la puissance électrique',opts:['P = U × I','P = U / I','P = I / U','P = U + I'],ans:0,exp:'Puissance électrique P = U × I, exprimée en watts (W).'},
+      {q:'La réaction acido-basique met en jeu',opts:['Un transfert de proton H⁺','Un transfert d\'électron','Une fusion nucléaire','Un changement d\'état'],ans:0,exp:'La réaction acido-basique est un transfert de proton (H⁺) d\'un acide vers une base.'},
+      {q:'Formule de la chaleur reçue (calorimétrie)',opts:['Q = m × c × ΔT','Q = m / c × ΔT','Q = m × c / ΔT','Q = c × ΔT²'],ans:0,exp:'Q = m × c × ΔT. m : masse (kg), c : capacité thermique massique, ΔT : variation de température.'},
+      {q:'Qu\'est-ce que la période T d\'un phénomène périodique ?',opts:['La durée d\'un cycle','La fréquence en Hz','L\'amplitude','La longueur d\'onde'],ans:0,exp:'La période T est la durée d\'un cycle complet, exprimée en secondes.'}
+    ]},
+  {id:'j_regions_cmr',titre:'Régions du Cameroun',emoji:'🗺️',matiere:'Géographie',niveau:'6ème-Tle',type:'qcm',acces:1,
+    questions:[
+      {q:'Combien de régions compte le Cameroun ?',opts:['10','8','12','9'],ans:0,exp:'Le Cameroun est divisé en 10 régions depuis la réforme administrative.'},
+      {q:'Quelle est la capitale de la région du Centre ?',opts:['Yaoundé','Bertoua','Bafoussam','Ngaoundéré'],ans:0,exp:'Yaoundé est la capitale politique du Cameroun et le chef-lieu de la région du Centre.'},
+      {q:'Quelle région est traversée par le fleuve Sanaga ?',opts:['Centre et Littoral','Nord et Extrême-Nord','Est et Sud','Adamaoua et Nord-Ouest'],ans:0,exp:'Le Sanaga, plus long fleuve du Cameroun, traverse les régions du Centre et du Littoral.'},
+      {q:'La région du Littoral a pour chef-lieu',opts:['Douala','Kribi','Edéa','Nkongsamba'],ans:0,exp:'Douala, capitale économique du Cameroun, est le chef-lieu de la région du Littoral.'},
+      {q:'Quelle région partage une frontière avec le Nigeria au nord-ouest ?',opts:['Nord-Ouest','Adamaoua','Nord','Centre'],ans:0,exp:'La région du Nord-Ouest est frontalière avec le Nigeria.'},
+      {q:'La région de l\'Est a pour chef-lieu',opts:['Bertoua','Abong-Mbang','Batouri','Yokadouma'],ans:0,exp:'Bertoua est le chef-lieu de la région de l\'Est.'},
+      {q:'Le mont Cameroun se trouve dans quelle région ?',opts:['Sud-Ouest','Littoral','Nord-Ouest','Centre'],ans:0,exp:'Le mont Cameroun (4 095 m), plus haut sommet d\'Afrique centrale, est situé dans la région du Sud-Ouest.'},
+      {q:'Quelle région est la plus grande du Cameroun ?',opts:['Est','Nord','Adamaoua','Centre'],ans:0,exp:'La région de l\'Est est la plus grande région du Cameroun avec environ 109 000 km².'}
+    ]},
+  {id:'j_maths_fonctions',titre:'Fonctions & Dérivées — Maths Tle',emoji:'📐',matiere:'Mathématiques',niveau:'Tle',type:'qcm',acces:1,
+    questions:[
+      {q:'La dérivée de f(x) = x² est',opts:['f\'(x) = 2x','f\'(x) = x','f\'(x) = 2','f\'(x) = x²'],ans:0,exp:'Règle de dérivation : si f(x) = xⁿ alors f\'(x) = n·xⁿ⁻¹. Donc (x²)\' = 2x.'},
+      {q:'La dérivée de f(x) = sin(x) est',opts:['f\'(x) = cos(x)','f\'(x) = -cos(x)','f\'(x) = -sin(x)','f\'(x) = tan(x)'],ans:0,exp:'(sin x)\' = cos x. Règle fondamentale à mémoriser.'},
+      {q:'La dérivée de f(x) = eˣ est',opts:['f\'(x) = eˣ','f\'(x) = x·eˣ','f\'(x) = e','f\'(x) = eˣ⁻¹'],ans:0,exp:'La fonction exponentielle est sa propre dérivée : (eˣ)\' = eˣ.'},
+      {q:'La dérivée de f(x) = ln(x) est',opts:['f\'(x) = 1/x','f\'(x) = 1/x²','f\'(x) = ln(x)/x','f\'(x) = x·ln(x)'],ans:0,exp:'(ln x)\' = 1/x pour x > 0.'},
+      {q:'Si f\'(x) > 0 sur un intervalle, f est',opts:['Croissante','Décroissante','Constante','Nulle'],ans:0,exp:'Si la dérivée est positive, la fonction est croissante sur cet intervalle.'},
+      {q:'∫x dx = ?',opts:['x²/2 + C','x² + C','2x + C','x/2 + C'],ans:0,exp:'Primitive de x : ∫x dx = x²/2 + C, où C est la constante d\'intégration.'},
+      {q:'La dérivée de f(x) = cos(x) est',opts:['f\'(x) = -sin(x)','f\'(x) = sin(x)','f\'(x) = -cos(x)','f\'(x) = tan(x)'],ans:0,exp:'(cos x)\' = -sin x. Attention au signe !'},
+      {q:'Le nombre dérivé f\'(a) représente',opts:['La pente de la tangente en a','La valeur de f en a','L\'ordonnée à l\'origine','La limite de f en +∞'],ans:0,exp:'f\'(a) est la pente (coefficient directeur) de la tangente à la courbe de f au point d\'abscisse a.'}
+    ]},
+  {id:'j_svt_genetique',titre:'Génétique & Hérédité — SVT',emoji:'🧬',matiere:'SVT',niveau:'1ère-Tle',type:'qcm',acces:1,
+    questions:[
+      {q:'Quel scientifique est le fondateur de la génétique ?',opts:['Gregor Mendel','Charles Darwin','Louis Pasteur','Robert Koch'],ans:0,exp:'Gregor Mendel (1822-1884), moine botaniste autrichien, a établi les lois de l\'hérédité après ses expériences sur les petits pois.'},
+      {q:'Combien de chromosomes contient une cellule somatique humaine ?',opts:['46','23','48','44'],ans:0,exp:'Les cellules somatiques humaines contiennent 46 chromosomes (23 paires), dont 22 paires d\'autosomes et 1 paire de chromosomes sexuels.'},
+      {q:'Un individu de génotype Aa est dit',opts:['Hétérozygote','Homozygote dominant','Homozygote récessif','Haploïde'],ans:0,exp:'Un individu avec deux allèles différents (Aa) est hétérozygote. AA est homozygote dominant, aa est homozygote récessif.'},
+      {q:'La méiose produit des cellules',opts:['Haploïdes (n chromosomes)','Diploïdes (2n chromosomes)','Triploïdes','Sans chromosomes'],ans:0,exp:'La méiose est une division qui réduit de moitié le nombre de chromosomes pour produire des gamètes haploïdes (n).'},
+      {q:'L\'ADN est composé de',opts:['Nucléotides','Acides aminés','Glucides','Lipides'],ans:0,exp:'L\'ADN est un polynucléotide formé de nucléotides, chacun composé d\'un sucre (désoxyribose), d\'un groupement phosphate et d\'une base azotée (A, T, G, C).'},
+      {q:'Les chromosomes sexuels chez la femme sont',opts:['XX','XY','YY','X seulement'],ans:0,exp:'La femme possède deux chromosomes X (XX) ; l\'homme possède un X et un Y (XY).'},
+      {q:'L\'ARN messager est synthétisé lors de',opts:['La transcription','La traduction','La réplication','La mitose'],ans:0,exp:'La transcription est la synthèse d\'ARNm à partir de l\'ADN, dans le noyau cellulaire.'},
+      {q:'Une mutation est',opts:['Une modification permanente de l\'ADN','Une division cellulaire','Une protéine défectueuse','Un type de mitose'],ans:0,exp:'Une mutation est une modification permanente de la séquence d\'ADN qui peut être héréditaire si elle touche les cellules germinales.'}
+    ]}
 ];
 
 // ── FONCTIONS DE LANCEMENT — JEUX LITTÉRAIRES ─────────────────────
@@ -14963,6 +15056,13 @@ function _toggleLaboAcces(id){
   cm();setTimeout(mManageLabos,80);
 }
 function _newLabo(){window._editLaboIdx=-1;_laboFormUI(null);}
+function _editLabo(i){
+  var base=(typeof LABO_DB!=="undefined"?LABO_DB.length:0);
+  var localIdx=i-base;
+  if(localIdx<0||!DB.customLabos||!DB.customLabos[localIdx])return;
+  window._editLaboIdx=localIdx;
+  _laboFormUI(DB.customLabos[localIdx]);
+}
 function _delLabo(localIdx){
   if(!confirm("Supprimer ce laboratoire ?"))return;
   if(DB.customLabos)DB.customLabos.splice(localIdx,1);
@@ -16938,6 +17038,9 @@ function cvTeacherDeleteSujet(cvId,sjId){
   save();re();toast('Sujet supprimé');
 }
 
+function cvViewSoumissions(sjId,cvId){
+  cvTeacherCorrections(cvId,sjId);
+}
 function cvTeacherCorrections(cvId,sjId){
   var cv=(DB.classesVirtuelles||[]).find(function(c){return c.id===cvId;});if(!cv)return;
   var sj=(cv.sujets||[]).find(function(s){return s.id===sjId;});if(!sj)return;
