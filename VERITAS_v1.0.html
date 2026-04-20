@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20c | Cours + evals dans defaultDB + acces visiteurs + blocage par user -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20d | Fix stockage plein: video intro via IndexedDB -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -2741,6 +2741,10 @@ function save(){
     if(data.elearning&&data.elearning.contenus){
       data.elearning.contenus.forEach(function(c){if(c.fichierData&&c.fichierData.length>5000)c.fichierData='';});
     }
+    // Strip intro video data URL — video is stored in IndexedDB, idbKey preserved
+    if(data.introVideo&&data.introVideo.src&&data.introVideo.src.startsWith('data:')){
+      data.introVideo.src='';
+    }
     localStorage.setItem('vrt10',JSON.stringify(data));
   }catch(e){
     if(e.name==='QuotaExceededError'){toast('⚠️ Stockage plein — simplifiez les données','warn');}
@@ -4520,18 +4524,55 @@ function cloudSaveDB(){
   if(!confirm('Sauvegarder toutes les données vers le cloud ?\nCela remplacera la dernière sauvegarde en ligne.'))return;
   toast('☁️ Envoi des données vers le cloud...');
   _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Sauvegarde en cours... Ne fermez pas cette page.</span></div>');
+
   var data=JSON.parse(JSON.stringify(DB));
-  // Strip large binary data
-  if(data.elearning&&data.elearning.contenus){
-    data.elearning.contenus.forEach(function(c){if(c.fichierData&&c.fichierData.length>5000)c.fichierData='';});
+  var stripped=[];
+
+  // ── Filtrer TOUTES les données binaires volumineuses ────────────────
+  // 1. Vidéo d'accueil : si data URL locale (peut faire 50-100 Mo), on ne l'envoie pas
+  if(data.introVideo&&data.introVideo.src&&data.introVideo.src.startsWith('data:')){
+    data.introVideo._hasLocalVideo=true;  // marqueur : à restaurer manuellement
+    data.introVideo._mime=data.introVideo.mime||'video/mp4';
+    data.introVideo.src='';              // retiré du payload cloud
+    stripped.push('vidéo d\'accueil');
   }
+  // 2. Logo de l'école en base64
+  if(data.school&&data.school.logo&&data.school.logo.startsWith('data:')&&data.school.logo.length>10000){
+    data.school._hasLocalLogo=true;
+    data.school.logo='';
+    stripped.push('logo');
+  }
+  // 3. Fichiers joints dans les contenus e-learning
+  if(data.elearning&&data.elearning.contenus){
+    data.elearning.contenus.forEach(function(c){
+      if(c.fichierData&&c.fichierData.length>5000){c.fichierData='';if(stripped.indexOf('pièces jointes e-learning')<0)stripped.push('pièces jointes e-learning');}
+    });
+  }
+  // 4. Fichiers dans soumissions élèves
+  if(data.elearning&&data.elearning.soumissions){
+    data.elearning.soumissions.forEach(function(s){if(s.fichierData&&s.fichierData.length>5000)s.fichierData='';});
+  }
+  // 5. Devoirs avec fichiers
+  if(data.devoirs){data.devoirs.forEach(function(d){if(d.fichierData&&d.fichierData.length>5000)d.fichierData='';});}
+  // 6. Partenaires logos
+  if(data.partenaires){data.partenaires.forEach(function(p){if(p.logo&&p.logo.startsWith('data:')&&p.logo.length>5000){p.logo='';if(stripped.indexOf('logos partenaires')<0)stripped.push('logos partenaires');}});}
+
+  var payload=JSON.stringify(data);
+  var sizeKB=Math.round(payload.length/1024);
+
+  // Avertissement si encore trop lourd (> 4 Mo après filtrage)
+  if(sizeKB>4000){
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEF3C7;border:1px solid #FDE68A;color:#D97706"><span>⚠️</span><span>Données encore volumineuses après filtrage ('+sizeKB+' Ko). La sauvegarde peut échouer.</span></div>');
+  }
+
   fetch(_cloudUrl('sync.php'),{
     method:'POST',
     headers:_cloudHeaders(true),
-    body:JSON.stringify(data)
+    body:payload
   })
   .then(function(r){
-    if(!r.ok)throw new Error('HTTP '+r.status);
+    if(r.status===413)throw new Error('Payload trop grand (HTTP 413) — réduisez les données (vidéos, images)');
+    if(!r.ok)throw new Error('Erreur serveur HTTP '+r.status+' — vérifiez que sync.php est bien déployé');
     return r.json();
   })
   .then(function(res){
@@ -4539,13 +4580,13 @@ function cloudSaveDB(){
     var dateSync=res.saved_at||new Date().toLocaleString('fr-FR');
     DB.cloudConfig.lastSync=dateSync;
     save();
-    var sizeKB=res.size_kb||Math.round((res.size||0)/1024);
-    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sauvegarde réussie !</strong> '+sizeKB+' Ko envoyés — '+dateSync+'</span></div>');
+    var note=stripped.length?' <span style="color:#D97706;font-size:11px">(non inclus : '+stripped.join(', ')+')</span>':'';
+    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sauvegarde réussie !</strong> '+(res.size_kb||sizeKB)+' Ko — '+dateSync+note+'</span></div>');
     toast('✅ Données sauvegardées dans le cloud !');
   })
   .catch(function(e){
-    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span><strong>Erreur :</strong> '+_esc(e.message)+'</span></div>');
-    toast('❌ Échec sauvegarde cloud : '+e.message,'err');
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span><strong>Échec :</strong> '+_esc(e.message)+'</span></div>');
+    toast('❌ Sauvegarde échouée : '+e.message,'err');
   });
 }
 
@@ -9078,7 +9119,27 @@ function buildIntroVideoHtml(){
       +'</div>';
   }
 
-  // ── 2. Vidéo locale uploadée (data:video/...) ──
+  // ── 2. Vidéo locale dans IndexedDB (grand fichier — src strippé du localStorage) ──
+  if(v&&v.idbKey&&!v.src){
+    idbGetFile(v.idbKey,function(rec){
+      if(rec&&rec.data){
+        DB.introVideo.src=rec.data; // restaure en mémoire (non persisté en LS)
+        var wrap=document.querySelector('.vhero-video-wrap[data-vtype="idb-loading"]');
+        if(wrap){
+          wrap.setAttribute('data-vtype','local');
+          wrap.innerHTML='<video id="vheroVideo" src="'+rec.data+'" autoplay muted loop playsinline oncontextmenu="return false" controlsList="nodownload"></video>'
+            +buildOverlay(true);
+        }
+      }
+    });
+    return '<div class="vhero-video-wrap" data-vtype="idb-loading">'
+      +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#7C3AED);background-size:400% 400%;animation:vhAnim 8s ease infinite">'
+        +'<div style="color:#fff;font-size:14px;opacity:.7;font-family:sans-serif">⏳ Chargement vidéo...</div>'
+      +'</div>'
+      +'</div>';
+  }
+
+  // ── 3. Vidéo locale uploadée (data:video/... déjà en mémoire) ──
   if(v&&v.src&&v.src.indexOf('data:video')===0){
     return '<div class="vhero-video-wrap" data-vtype="local">'
       +'<video id="vheroVideo" src="'+v.src+'" autoplay muted loop playsinline'
@@ -9088,7 +9149,7 @@ function buildIntroVideoHtml(){
       +'</div>';
   }
 
-  // ── 3. FALLBACK : aucune vidéo configurée — gradient animé épuré ──
+  // ── 4. FALLBACK : aucune vidéo configurée — gradient animé épuré ──
   return '<div class="vhero-video-wrap" data-vtype="fallback" style="background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#7C3AED);background-size:400% 400%;animation:vhAnim 8s ease infinite">'
     +'<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;z-index:1">'
       +'<div style="font-size:clamp(56px,12vw,88px);filter:drop-shadow(0 4px 24px rgba(0,0,0,.4));animation:float 6s ease-in-out infinite">🎓</div>'
@@ -10348,13 +10409,21 @@ function mSetIntroVideo(){
   var v=DB.introVideo||{};
   window._pVidSrc=v.src||"";
   window._pVidMime=v.mime||"video/mp4";
+  var previewHtml;
+  if(v.src&&v.src.indexOf('data:video')===0){
+    previewHtml="<video src='"+v.src+"' controls style='width:100%;max-height:140px;border-radius:8px'></video>";
+  }else if(v.src&&!v.src.startsWith('data:')){
+    previewHtml="<video src='"+v.src+"' controls style='width:100%;max-height:140px;border-radius:8px'></video>";
+  }else if(v.idbKey){
+    previewHtml="<div style='background:#F0FDF4;border:2px solid #86EFAC;border-radius:10px;padding:16px;text-align:center;color:#166534;font-size:13px'>✅ Vidéo locale chargée depuis votre appareil (stockage optimisé)</div>";
+  }else{
+    previewHtml="<div style='background:#F8FAFF;border:2px dashed #C7D2FE;border-radius:10px;padding:20px;text-align:center;color:#6B7A99;font-size:13px'>Aucune video configuree</div>";
+  }
   M("🎬 Video de presentation","Lecture automatique muette sur la page accueil",
     "<div class='ib ibt mb12'><span>💡</span><span>Format MP4/WebM recommande. Demarre automatiquement sans son.</span></div>"
     +"<div class='fg mb12'><span class='fl'>Choisir un fichier video (MP4/WebM, max 50 Mo)</span>"
     +"<input type='file' id='ivFile' accept='video/*' class='fi' style='padding:8px' onchange='_ivLoad(this)'></div>"
-    +"<div id='ivPreview' style='margin-bottom:12px'>"
-    +(v.src?"<video src='"+v.src+"' controls style='width:100%;max-height:140px;border-radius:8px'></video>":"<div style='background:#F8FAFF;border:2px dashed #C7D2FE;border-radius:10px;padding:20px;text-align:center;color:#6B7A99;font-size:13px'>Aucune video configuree</div>")
-    +"</div>"
+    +"<div id='ivPreview' style='margin-bottom:12px'>"+previewHtml+"</div>"
     +"<div class='fg mb10'><span class='fl'>Ou coller une URL video directe (MP4)</span>"
     +"<input class='fi' id='ivUrl' value='"+(v.src&&!v.src.startsWith("data:")?v.src:"")+"' placeholder='https://exemple.com/video.mp4'></div>",
     "<button class='btn bo' onclick='cm()'>Annuler</button>"
@@ -10377,9 +10446,21 @@ function _ivLoad(inp){
 function _ivSave(){
   var src=window._pVidSrc||(document.getElementById("ivUrl")?.value||"").trim();
   if(!src){toast("Choisissez une video","warn");return;}
-  DB.introVideo={src:src,mime:window._pVidMime||"video/mp4"};
-  save();window._vidHtml=buildIntroVideoHtml();
-  cm();toast("Video enregistree");
+  var mime=window._pVidMime||"video/mp4";
+  if(src.indexOf('data:video')===0){
+    // Grande vidéo locale → IndexedDB pour éviter QuotaExceededError sur localStorage
+    toast("Sauvegarde en cours...","info");
+    idbSave('intro_video',src,'intro_video.mp4',mime,function(ok){
+      if(!ok){toast("Erreur stockage vidéo (IndexedDB)","err");return;}
+      DB.introVideo={idbKey:'intro_video',mime:mime,src:src}; // src en mémoire, strippé par save()
+      save();window._vidHtml=buildIntroVideoHtml();
+      cm();toast("Vidéo enregistrée ✓");
+    });
+  }else{
+    DB.introVideo={src:src,mime:mime};
+    save();window._vidHtml=buildIntroVideoHtml();
+    cm();toast("Vidéo enregistrée ✓");
+  }
 }
 function _ivClear(){DB.introVideo=null;window._pVidSrc="";save();window._vidHtml=buildIntroVideoHtml();cm();toast("Video supprimee");}
 
