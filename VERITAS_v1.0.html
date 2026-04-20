@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20g | Section Actualités + fix auth video -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20h | Actualités dans hero à la place du carousel -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -3078,39 +3078,82 @@ function initVisitor(){
   initTicker();
   if(SES&&(SES.type==="visiteur"||SES.type==="visiteur_inscrit"))setTimeout(_updateVisitorHeader,50);
   setTimeout(_slideAutoStart,1000);
-  // Pré-charger les actualités pour le bloc preview (délai pour ne pas bloquer le rendu)
-  setTimeout(_actuLoadPreview,1500);
-}
-
-function _actuLoadPreview(){
-  var preview=document.getElementById('actu-preview');
-  if(!preview)return;
-  var base=(DB.cloudConfig&&DB.cloudConfig.url||'https://veritas-school.com/api').replace(/\/+$/,'');
-  fetch(base+'/news_proxy.php?cat=education')
-    .then(function(r){return r.json();})
-    .then(function(data){
-      if(!data.items||!data.items.length){preview.innerHTML='';return;}
-      _actuCache['education']={items:data.items,ts:Date.now()};
-      var html='';
-      data.items.slice(0,4).forEach(function(it){
-        html+='<a href="'+it.link+'" target="_blank" rel="noopener" style="text-decoration:none">'
-          +'<div style="background:var(--sur);border:1px solid var(--bg3);border-left:3px solid #3C8DFF;border-radius:var(--r2);padding:12px;transition:all .2s" '
-            +'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(0,0,0,.07)\'" '
-            +'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">'
-            +'<div style="font-size:12px;font-weight:700;color:var(--ink1);line-height:1.4;margin-bottom:6px">'+it.title+'</div>'
-            +'<div style="display:flex;gap:6px;align-items:center">'
-              +(it.source?'<span style="font-size:10px;color:#3C8DFF;font-weight:700">'+it.source+'</span>':'')
-              +'<span style="font-size:10px;color:var(--ink4)">'+it.date+'</span>'
-            +'</div>'
-          +'</div></a>';
-      });
-      preview.innerHTML=html;
-    })
-    .catch(function(){preview.innerHTML='';});
+  // Charger les actualités dans le hero panel
+  setTimeout(function(){_heroActuLoad('education');},800);
 }
 // ═══ Scroll reveal observer ═══
 var _vRevealObs=null;
-// ── ACTUALITÉS ÉDUCATIVES ────────────────────────────────────────────────────
+// ── ACTUALITÉS HERO PANEL ────────────────────────────────────────────────────
+var _heroCatColors={education:'#3C8DFF',minesec:'#34d399',grandes_ecoles:'#a78bfa',bourses:'#fbbf24'};
+var _heroCurCat='education';
+
+function _heroActuTab(cat,btn){
+  _heroCurCat=cat;
+  ['education','minesec','grandes_ecoles','bourses'].forEach(function(id){
+    var b=document.getElementById('hat_'+id);
+    if(!b)return;
+    var active=id===cat;
+    var col=_heroCatColors[id]||'#3C8DFF';
+    b.style.background=active?col:'rgba(255,255,255,.1)';
+    b.style.color=active?'#fff':'rgba(255,255,255,.6)';
+  });
+  _heroActuLoad(cat);
+}
+
+function _heroActuLoad(cat){
+  var list=document.getElementById('vHeroNewsList');
+  if(!list)return;
+  var now=Date.now();
+  // Utiliser le cache si disponible
+  if(_actuCache[cat]&&(now-_actuCache[cat].ts)<1800000){
+    _heroActuRender(_actuCache[cat].items,cat);
+    return;
+  }
+  list.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:80px;color:rgba(255,255,255,.4);font-size:12px">⏳ Chargement...</div>';
+  var base=(DB.cloudConfig&&DB.cloudConfig.url||'https://veritas-school.com/api').replace(/\/+$/,'');
+  fetch(base+'/news_proxy.php?cat='+encodeURIComponent(cat))
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.items&&data.items.length){
+        _actuCache[cat]={items:data.items,ts:now};
+        _heroActuRender(data.items,cat);
+      }else{
+        list.innerHTML='<div style="color:rgba(255,255,255,.4);font-size:12px;padding:16px;text-align:center">Aucun article disponible</div>';
+      }
+    })
+    .catch(function(){
+      list.innerHTML='<div style="color:rgba(239,68,68,.6);font-size:12px;padding:16px;text-align:center">⚠️ Actualités indisponibles</div>';
+    });
+}
+
+function _heroActuRender(items,cat){
+  var list=document.getElementById('vHeroNewsList');
+  if(!list)return;
+  var col=_heroCatColors[cat]||'#3C8DFF';
+  var html='';
+  items.forEach(function(it){
+    html+='<a href="'+it.link+'" target="_blank" rel="noopener" style="text-decoration:none;display:block">'
+      +'<div style="padding:10px 8px;border-bottom:1px solid rgba(255,255,255,.05);cursor:pointer;transition:background .15s;border-radius:6px" '
+        +'onmouseover="this.style.background=\'rgba(255,255,255,.05)\'" '
+        +'onmouseout="this.style.background=\'\'">'
+        +'<div style="display:flex;align-items:flex-start;gap:8px">'
+          +'<span style="width:3px;min-width:3px;height:36px;border-radius:2px;background:'+col+';display:inline-block;margin-top:2px"></span>'
+          +'<div style="flex:1;min-width:0">'
+            +'<div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.9);line-height:1.45;margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+it.title+'</div>'
+            +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
+              +(it.source?'<span style="font-size:9px;color:'+col+';font-weight:700;background:'+col+'22;padding:1px 7px;border-radius:8px">'+it.source+'</span>':'')
+              +'<span style="font-size:9px;color:rgba(255,255,255,.35)">'+it.date+'</span>'
+              +'<span style="margin-left:auto;font-size:9px;color:'+col+';font-weight:700;opacity:.8">↗</span>'
+            +'</div>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+    +'</a>';
+  });
+  list.innerHTML=html;
+}
+
+// ── ACTUALITÉS ÉDUCATIVES (page dédiée) ──────────────────────────────────────
 var _actuCat='education';
 var _actuCache={};
 
@@ -3241,40 +3284,33 @@ function vShowSec(sec,btn){
   if(sec==="presentation"){
     const pi=DB.publicInfo||{};
     var _heroVideoHtml=buildIntroVideoHtml();
-    var _slidesData=DB.alaune||[
-          {titre:'Bienvenue \u00e0 V\u00c9RITAS Academy',desc:'Centre d\u0027Excellence Scolaire \u2014 Yaound\u00e9, Cameroun. La r\u00e9ussite de chaque \u00e9l\u00e8ve est notre mission.',bg:'linear-gradient(135deg,#142554 0%,#3C8DFF 50%,#7C3AED 100%)',ico:'school',tag:'Actualit\u00e9'},
-          {titre:'Rentr\u00e9e Scolaire 2025-2026',desc:'Les inscriptions sont ouvertes ! Pr\u00e9parez l\u0027avenir de vos enfants avec un encadrement de qualit\u00e9.',bg:'linear-gradient(135deg,#0f766e,#14b8a6,#5eead4)',ico:'campaign',tag:'Inscription'},
-          {titre:'Examens BEPC & BAC 2026',desc:'\u00c9preuves blanches, r\u00e9visions intensives et coaching personnalis\u00e9. Nos \u00e9l\u00e8ves sont pr\u00eats !',bg:'linear-gradient(135deg,#7c3aed,#a855f7,#c084fc)',ico:'emoji_events',tag:'Examens'},
-          {titre:'Laboratoires Virtuels Interactifs',desc:'Physique, Chimie, SVT \u2014 des simulations anim\u00e9es pour apprendre en exp\u00e9rimentant.',bg:'linear-gradient(135deg,#b45309,#f59e0b,#fbbf24)',ico:'science',tag:'Innovation'},
-          {titre:'E-Learning & Ressources MINESEC',desc:'Plus de 60 \u00e9preuves officielles, cours vid\u00e9os et fiches de r\u00e9vision accessibles en ligne.',bg:'linear-gradient(135deg,#1e40af,#3b82f6,#60a5fa)',ico:'auto_stories',tag:'E-Learning'},
-          {titre:'Jeux \u00c9ducatifs & Cartes Mentales',desc:'Apprenez en jouant : quiz, pendu, textes \u00e0 trous et cartes mentales litt\u00e9raires interactives.',bg:'linear-gradient(135deg,#be123c,#f43f5e,#fda4af)',ico:'sports_esports',tag:'Jeux'}
-        ];
-    var _slidesHtml=_slidesData.map(function(s,i){return '<div class="vslide" style="min-width:100%;height:100%;position:relative;display:flex;align-items:center;justify-content:center;background:'+s.bg+';perspective:800px">'
-          +'<div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 80%,rgba(255,255,255,.06),transparent 50%),radial-gradient(circle at 85% 25%,rgba(255,255,255,.04),transparent 40%)"></div>'
-          +'<div style="position:absolute;top:14px;left:18px;background:rgba(0,0,0,.35);backdrop-filter:blur(8px);padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;color:#FFC93C;letter-spacing:1.5px;text-transform:uppercase">'+(s.tag||'Info')+'</div>'
-          +'<div style="position:relative;z-index:2;text-align:center;max-width:600px;padding:20px;transform:rotateY('+(i%2===0?'2':'-2')+'deg);transition:transform .5s">'
-          +'<div style="font-size:48px;margin-bottom:10px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3));animation:float 4s ease-in-out infinite '+(i*.3)+'s"><span class="material-symbols-rounded" style="font-size:48px;color:#fff">'+s.ico+'</span></div>'
-          +'<div style="font-family:Libre Baskerville,serif;font-size:20px;font-weight:700;color:#fff;text-shadow:0 3px 12px rgba(0,0,0,.4);margin-bottom:6px;line-height:1.2">'+s.titre+'</div>'
-          +'<div style="font-size:12px;color:rgba(255,255,255,.8);line-height:1.5;text-shadow:0 1px 4px rgba(0,0,0,.3)">'+s.desc+'</div>'
-          +'</div></div>';}).join('');
-    var _dotsHtml=_slidesData.map(function(_,i){return '<div onclick="_slideTo('+i+')" style="width:'+(i===0?'24px':'8px')+';height:8px;border-radius:4px;background:'+(i===0?'#FFC93C':'rgba(255,255,255,.4)')+';cursor:pointer;transition:all .3s"></div>';}).join('');
     c.innerHTML=`<div class="vsec">
-    <!-- ═══ VIDÉO + CAROUSEL CÔTE À CÔTE ═══ -->
+    <!-- ═══ VIDÉO + ACTUALITÉS CÔTE À CÔTE ═══ -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;min-height:320px" id="vHeroGrid">
       <!-- Vidéo de présentation -->
       <div style="border-radius:var(--r3);overflow:hidden;min-height:300px">
         ${_heroVideoHtml}
       </div>
-      <!-- Carousel À la Une -->
-      <div id="vAlaUne" style="position:relative;border-radius:var(--r3);overflow:hidden;background:#0a0f1e;box-shadow:0 8px 32px rgba(0,0,0,.35)">
-        <div style="position:absolute;top:12px;left:14px;z-index:6;background:rgba(255,201,60,.95);color:#142554;padding:4px 12px;border-radius:12px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;box-shadow:0 2px 8px rgba(0,0,0,.3)">📰 À la Une</div>
-        <div id="vSlides" style="display:flex;transition:transform .7s cubic-bezier(.4,0,.2,1);height:100%;will-change:transform">
-          ${_slidesHtml}
+      <!-- Panel Actualités -->
+      <div id="vHeroNews" style="position:relative;border-radius:var(--r3);overflow:hidden;background:#0a0f1e;box-shadow:0 8px 32px rgba(0,0,0,.35);display:flex;flex-direction:column;min-height:300px">
+        <!-- Header -->
+        <div style="padding:12px 14px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.08);flex-shrink:0">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;box-shadow:0 0 0 3px rgba(239,68,68,.25);animation:pulse 2s infinite"></span>
+            <span style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:#fff;letter-spacing:1px;text-transform:uppercase">📡 Actualités Éducatives</span>
+          </div>
+          <button onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">Voir tout →</button>
         </div>
-        <button onclick="_slideNav(-1)" style="position:absolute;left:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:16px;cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center">\u276e</button>
-        <button onclick="_slideNav(1)" style="position:absolute;right:8px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.4);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.2);color:#fff;font-size:16px;cursor:pointer;z-index:5;display:flex;align-items:center;justify-content:center">\u276f</button>
-        <div id="vSlideDots" style="position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5">
-          ${_dotsHtml}
+        <!-- Onglets catégories -->
+        <div style="padding:8px 10px;display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;scrollbar-width:none">
+          <button onclick="_heroActuTab('education',this)" id="hat_education" style="padding:4px 11px;border-radius:12px;border:none;background:#3C8DFF;color:#fff;font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:Montserrat,sans-serif">📰 Éducation</button>
+          <button onclick="_heroActuTab('minesec',this)" id="hat_minesec" style="padding:4px 11px;border-radius:12px;border:none;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:Montserrat,sans-serif">🏛️ MINESEC</button>
+          <button onclick="_heroActuTab('grandes_ecoles',this)" id="hat_grandes_ecoles" style="padding:4px 11px;border-radius:12px;border:none;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:Montserrat,sans-serif">🎓 Grandes Écoles</button>
+          <button onclick="_heroActuTab('bourses',this)" id="hat_bourses" style="padding:4px 11px;border-radius:12px;border:none;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:10px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:Montserrat,sans-serif">💼 Bourses</button>
+        </div>
+        <!-- Liste articles -->
+        <div id="vHeroNewsList" style="flex:1;overflow-y:auto;padding:6px 8px;scrollbar-width:thin;scrollbar-color:#3C8DFF #0a0f1e">
+          <div style="display:flex;align-items:center;justify-content:center;height:100%;color:rgba(255,255,255,.4);font-size:12px">⏳ Chargement...</div>
         </div>
       </div>
     </div>
@@ -3353,17 +3389,6 @@ function vShowSec(sec,btn){
       </div>
     </div>
 
-    <!-- ACTUALITÉS RÉCENTES -->
-    <div class="v-reveal" style="margin-bottom:24px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-        <div style="font-family:Montserrat,sans-serif;font-size:17px;font-weight:800;color:var(--ink1)">📡 Actualités Éducatives</div>
-        <button onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))" style="background:var(--blb);color:var(--bl);border:none;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">Voir tout →</button>
-      </div>
-      <div id="actu-preview" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
-        <div style="text-align:center;padding:20px;color:var(--ink4);font-size:12px;grid-column:1/-1">⏳ Chargement...</div>
-      </div>
-    </div>
-
     <!-- TÉMOIGNAGES (inspiré grandprof) -->
     <div class="v-reveal-right" style="background:linear-gradient(135deg,#FCE2EE 0%,#FFF3C4 100%);border-radius:20px;padding:24px;margin-bottom:24px">
       <div style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:700;color:#142554;margin-bottom:16px;text-align:center">💬 Ce qu&#39;ils disent de VÉRITAS</div>
@@ -3435,6 +3460,8 @@ function vShowSec(sec,btn){
       <div class="ib ibg mt10 mb0"><span>✅</span><span>Moyenne de <strong>82%</strong> de réussite aux examens nationaux sur 3 ans.</span></div>
     </div>`;
     setTimeout(_vRevealInit,100);
+    // Charger les actualités dans le hero panel
+    setTimeout(function(){_heroActuLoad(_heroCurCat||'education');},600);
   } else if(sec==="histoire"){
     const pi=DB.publicInfo||{};
     c.innerHTML=`<div class="vsec">
@@ -4091,6 +4118,7 @@ function vShowSec(sec,btn){
     c.innerHTML=_buildOrientationSection();
   } else if(sec==="actualites"){
     showActualites(c);
+    return;
   } else if(sec==="contact"){
     const pi=DB.publicInfo||{};
     c.innerHTML=`<div class="vsec">
