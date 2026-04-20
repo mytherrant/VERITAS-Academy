@@ -59,3 +59,22 @@ DirectoryIndex index.html
 
 # Custom 404
 ErrorDocument 404 /index.html
+
+# PHP upload limits for large video files (intro video up to 100 MB)
+<IfModule mod_php.c>
+  php_value upload_max_filesize 100M
+  php_value post_max_size 105M
+  php_value max_execution_time 300
+  php_value max_input_time 300
+</IfModule>
+<IfModule lsapi_module>
+  php_value upload_max_filesize 100M
+  php_value post_max_size 105M
+  php_value max_execution_time 300
+  php_value max_input_time 300
+</IfModule>
+
+# MIME types for video serving
+AddType video/mp4  .mp4
+AddType video/webm .webm
+AddType video/ogg  .ogv .ogg
