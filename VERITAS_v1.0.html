@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20i | Panel Actualités: dégradé bleu + glass + animations -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20j | Fix vidéo mobile: height explicite + controls fallback -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -1012,15 +1012,16 @@ body { font-size: 15px !important; }
   border: none;
 }
 @media(max-width:900px){
-  .vhero-video-wrap { min-height: 220px; }
+  /* height explicite (pas seulement min-height) pour que position:absolute fonctionne sur iOS */
+  .vhero-video-wrap { height: 240px !important; min-height: 240px !important; }
   #vHeroGrid { grid-template-columns: 1fr !important; min-height: auto !important; }
-  #vHeroGrid > div:first-child { min-height: 220px !important; }
-  #vAlaUne { min-height: 260px; }
+  #vHeroGrid > div:first-child { height: 240px !important; min-height: 240px !important; }
+  #vHeroNews { min-height: 280px !important; height: auto !important; }
 }
 @media(max-width:700px){
-  .vhero-video-wrap { min-height: 200px; }
-  #vHeroGrid > div:first-child { min-height: 200px !important; }
-  #vAlaUne { min-height: 240px; }
+  .vhero-video-wrap { height: 210px !important; min-height: 210px !important; }
+  #vHeroGrid > div:first-child { height: 210px !important; min-height: 210px !important; }
+  #vHeroNews { min-height: 260px !important; }
 }
 /* Overlay transparent POSÉ sur la vidéo */
 .vhero-video-overlay {
@@ -1983,8 +1984,13 @@ tr:hover td {
     gap:12px!important;
   }
   .vhero-video-wrap{
-    min-height:220px!important;
+    height:240px!important;
+    min-height:240px!important;
     border-radius:14px!important;
+  }
+  #vHeroGrid>div:first-child{
+    height:240px!important;
+    min-height:240px!important;
   }
   /* ── Footer ── */
   #VISITOR>div:last-of-type{
@@ -9370,8 +9376,9 @@ function buildIntroVideoHtml(){
   // ── 3. Vidéo hébergée sur le serveur (URL HTTP/HTTPS, non-YouTube) ──
   if(v&&v.src&&(v.src.indexOf('http://')===0||v.src.indexOf('https://')===0)){
     return '<div class="vhero-video-wrap" data-vtype="local">'
-      +'<video id="vheroVideo" src="'+v.src+'" autoplay muted loop playsinline'
-      +' oncontextmenu="return false" controlsList="nodownload"></video>'
+      +'<video id="vheroVideo" src="'+v.src+'" autoplay muted loop playsinline controls'
+      +' style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;display:block"'
+      +' oncontextmenu="return false" controlsList="nodownload nofullscreen"></video>'
       +buildOverlay(true)
       +'</div>';
   }
