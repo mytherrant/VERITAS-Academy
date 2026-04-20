@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20f | Fix auth upload: secret dans FormData (LiteSpeed) -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20g | Section Actualités + fix auth video -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -2073,6 +2073,7 @@ setInterval(_refreshCitation,15000);
   <button class="vnav-btn" onclick="showEpreuves()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">assignment</span> Épreuves</button>
   <button class="vnav-btn" onclick="showEvaluations()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">insights</span> Évals</button>
   <button class="vnav-btn" onclick="showLabosVirtuels()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">science</span> Labos</button>
+  <button class="vnav-btn" onclick="vShowSec('actualites',this)" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#ef4444;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">newspaper</span> Actualités</button>
   <button class="vnav-btn" onclick="vShowSec('contact',this)"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">forum</span> Contact</button>
 </div>
 <div id="vContent"></div>
@@ -2610,8 +2611,11 @@ function load(){
   DB.elearning.contenus=_curC;
   // Merge citations from defaultDB if missing
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
-  // Init cloud config if missing
+  // Init cloud config — toujours forcer URL et secret si absents
   if(!DB.cloudConfig){DB.cloudConfig={url:'https://veritas-school.com/api',secret:'VERITAS-CLOUD-2026-xK9m',lastSync:'Jamais'};}
+  if(!DB.cloudConfig.url)DB.cloudConfig.url='https://veritas-school.com/api';
+  if(!DB.cloudConfig.secret)DB.cloudConfig.secret='VERITAS-CLOUD-2026-xK9m';
+}
   if(!DB.elearning.soumissions)DB.elearning.soumissions=[];
   if(!DB.elearning.telechargementsGratuits)DB.elearning.telechargementsGratuits={};
   if(!DB.products)DB.products=defaultDB().products;
@@ -3075,9 +3079,151 @@ function initVisitor(){
   initTicker();
   if(SES&&(SES.type==="visiteur"||SES.type==="visiteur_inscrit"))setTimeout(_updateVisitorHeader,50);
   setTimeout(_slideAutoStart,1000);
+  // Pré-charger les actualités pour le bloc preview (délai pour ne pas bloquer le rendu)
+  setTimeout(_actuLoadPreview,1500);
+}
+
+function _actuLoadPreview(){
+  var preview=document.getElementById('actu-preview');
+  if(!preview)return;
+  var base=(DB.cloudConfig&&DB.cloudConfig.url||'https://veritas-school.com/api').replace(/\/+$/,'');
+  fetch(base+'/news_proxy.php?cat=education')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(!data.items||!data.items.length){preview.innerHTML='';return;}
+      _actuCache['education']={items:data.items,ts:Date.now()};
+      var html='';
+      data.items.slice(0,4).forEach(function(it){
+        html+='<a href="'+it.link+'" target="_blank" rel="noopener" style="text-decoration:none">'
+          +'<div style="background:var(--sur);border:1px solid var(--bg3);border-left:3px solid #3C8DFF;border-radius:var(--r2);padding:12px;transition:all .2s" '
+            +'onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 4px 12px rgba(0,0,0,.07)\'" '
+            +'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">'
+            +'<div style="font-size:12px;font-weight:700;color:var(--ink1);line-height:1.4;margin-bottom:6px">'+it.title+'</div>'
+            +'<div style="display:flex;gap:6px;align-items:center">'
+              +(it.source?'<span style="font-size:10px;color:#3C8DFF;font-weight:700">'+it.source+'</span>':'')
+              +'<span style="font-size:10px;color:var(--ink4)">'+it.date+'</span>'
+            +'</div>'
+          +'</div></a>';
+      });
+      preview.innerHTML=html;
+    })
+    .catch(function(){preview.innerHTML='';});
 }
 // ═══ Scroll reveal observer ═══
 var _vRevealObs=null;
+// ── ACTUALITÉS ÉDUCATIVES ────────────────────────────────────────────────────
+var _actuCat='education';
+var _actuCache={};
+
+function showActualites(container){
+  var c=container||document.getElementById('vContent');
+  if(!c)return;
+  var cats=[
+    {id:'education',     label:'📰 Éducation',     color:'#3C8DFF'},
+    {id:'minesec',       label:'🏛️ MINESEC',        color:'#059669'},
+    {id:'grandes_ecoles',label:'🎓 Grandes Écoles', color:'#7C3AED'},
+    {id:'bourses',       label:'💼 Bourses',         color:'#f59e0b'},
+  ];
+  var tabsHtml=cats.map(function(ct){
+    var active=ct.id===_actuCat;
+    return '<button onclick="_actuTab(\''+ct.id+'\')" id="actutab_'+ct.id+'" style="'
+      +'padding:8px 16px;border-radius:20px;border:2px solid '+(active?ct.color:'transparent')+';'
+      +'background:'+(active?ct.color+'22':'transparent')+';color:'+(active?ct.color:'var(--ink3)')+';'
+      +'font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s">'+ct.label+'</button>';
+  }).join('');
+
+  c.innerHTML='<div class="vsec">'
+    +'<div class="vsec-title">📡 Actualités Éducatives</div>'
+    +'<div class="vsec-sub">Restez informé — éducation Cameroun, MINESEC, grandes écoles et bourses</div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:12px;border-bottom:var(--br)">'
+      +tabsHtml
+      +'<button onclick="_actuRefresh()" title="Actualiser" style="margin-left:auto;padding:8px 14px;border-radius:20px;border:1px solid var(--bg3);background:var(--sur);color:var(--ink3);cursor:pointer;font-size:13px">🔄</button>'
+    +'</div>'
+    +'<div id="actu-feed" style="min-height:200px"></div>'
+    +'<div class="vsec-sub" style="margin-top:20px;font-size:11px">Sources : Google News · Actualisation automatique toutes les 30 min</div>'
+    +'</div>';
+
+  _actuLoad(_actuCat);
+}
+
+function _actuTab(cat){
+  _actuCat=cat;
+  var cats=['education','minesec','grandes_ecoles','bourses'];
+  var colors={education:'#3C8DFF',minesec:'#059669',grandes_ecoles:'#7C3AED',bourses:'#f59e0b'};
+  cats.forEach(function(id){
+    var btn=document.getElementById('actutab_'+id);
+    if(!btn)return;
+    var active=id===cat;
+    var col=colors[id];
+    btn.style.border='2px solid '+(active?col:'transparent');
+    btn.style.background=active?col+'22':'transparent';
+    btn.style.color=active?col:'var(--ink3)';
+  });
+  _actuLoad(cat);
+}
+
+function _actuRefresh(){
+  delete _actuCache[_actuCat];
+  _actuLoad(_actuCat);
+}
+
+function _actuLoad(cat){
+  var feed=document.getElementById('actu-feed');
+  if(!feed)return;
+
+  // Utiliser le cache en mémoire si < 30 min
+  var now=Date.now();
+  if(_actuCache[cat]&&(now-_actuCache[cat].ts)<1800000){
+    _actuRender(_actuCache[cat].items,cat);
+    return;
+  }
+
+  feed.innerHTML='<div style="text-align:center;padding:40px;color:var(--ink4)">'
+    +'<div style="font-size:32px;margin-bottom:10px;animation:spin 1s linear infinite;display:inline-block">⏳</div>'
+    +'<div style="font-size:13px">Chargement des actualités...</div></div>';
+
+  var base=(DB.cloudConfig&&DB.cloudConfig.url||'https://veritas-school.com/api').replace(/\/+$/,'');
+  var url=base+'/news_proxy.php?cat='+encodeURIComponent(cat)+'&t='+Math.floor(now/1800000);
+
+  fetch(url)
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.items&&data.items.length){
+        _actuCache[cat]={items:data.items,ts:now};
+        _actuRender(data.items,cat);
+      }else{
+        feed.innerHTML='<div class="ib ibt"><span>📭</span><span>Aucun article disponible pour le moment — réessayez dans quelques minutes.</span></div>';
+      }
+    })
+    .catch(function(){
+      feed.innerHTML='<div class="ib ibw"><span>⚠️</span><span>Impossible de charger les actualités. Vérifiez votre connexion.</span></div>';
+    });
+}
+
+function _actuRender(items,cat){
+  var feed=document.getElementById('actu-feed');
+  if(!feed)return;
+  var colors={education:'#3C8DFF',minesec:'#059669',grandes_ecoles:'#7C3AED',bourses:'#f59e0b'};
+  var col=colors[cat]||'#3C8DFF';
+  var html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">';
+  items.forEach(function(it){
+    html+='<a href="'+it.link+'" target="_blank" rel="noopener" style="text-decoration:none">'
+      +'<div style="background:var(--sur);border:1px solid var(--bg3);border-left:3px solid '+col+';border-radius:var(--r2);padding:14px;transition:all .2s;cursor:pointer" '
+        +'onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.08)\';this.style.transform=\'translateY(-2px)\'" '
+        +'onmouseout="this.style.boxShadow=\'\';this.style.transform=\'\'">'
+        +'<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;color:var(--ink1);line-height:1.4;margin-bottom:8px">'+it.title+'</div>'
+        +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+          +(it.source?'<span style="font-size:10px;color:'+col+';font-weight:700;background:'+col+'15;padding:2px 8px;border-radius:10px">'+it.source+'</span>':'')
+          +'<span style="font-size:10px;color:var(--ink4)">📅 '+it.date+'</span>'
+          +'<span style="margin-left:auto;font-size:11px;color:'+col+';font-weight:700">Lire →</span>'
+        +'</div>'
+      +'</div>'
+    +'</a>';
+  });
+  html+='</div>';
+  feed.innerHTML=html;
+}
+
 function _vRevealInit(){
   if(_vRevealObs)_vRevealObs.disconnect();
   _vRevealObs=new IntersectionObserver(function(entries){
@@ -3205,6 +3351,17 @@ function vShowSec(sec,btn){
           <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px">📋</div><div style="font-size:10px;color:rgba(255,255,255,.6)">Corpus</div></div>
           <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px">🎬</div><div style="font-size:10px;color:rgba(255,255,255,.6)">Vidéos</div></div>
         </div>
+      </div>
+    </div>
+
+    <!-- ACTUALITÉS RÉCENTES -->
+    <div class="v-reveal" style="margin-bottom:24px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div style="font-family:Montserrat,sans-serif;font-size:17px;font-weight:800;color:var(--ink1)">📡 Actualités Éducatives</div>
+        <button onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))" style="background:var(--blb);color:var(--bl);border:none;border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer">Voir tout →</button>
+      </div>
+      <div id="actu-preview" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px">
+        <div style="text-align:center;padding:20px;color:var(--ink4);font-size:12px;grid-column:1/-1">⏳ Chargement...</div>
       </div>
     </div>
 
@@ -3933,6 +4090,8 @@ function vShowSec(sec,btn){
     });
     h+='</div></div>';
     c.innerHTML=_buildOrientationSection();
+  } else if(sec==="actualites"){
+    showActualites(c);
   } else if(sec==="contact"){
     const pi=DB.publicInfo||{};
     c.innerHTML=`<div class="vsec">
@@ -10469,9 +10628,8 @@ function _ivSave(){
   // Cas 2 : Fichier local → upload vers le serveur
   if(window._pVidFile){
     var cfg=DB.cloudConfig||{};
-    var base=(cfg.url||'').replace(/\/+$/,'');
-    if(!base){toast("Configurez l'URL API dans Paramètres → Cloud","warn");return;}
-    var secret=cfg.secret||'';
+    var base=(cfg.url||'https://veritas-school.com/api').replace(/\/+$/,'');
+    var secret=cfg.secret||'VERITAS-CLOUD-2026-xK9m'; // fallback hardcodé
 
     var fd=new FormData();
     fd.append('video',window._pVidFile,window._pVidFile.name);

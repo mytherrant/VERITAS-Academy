@@ -37,7 +37,7 @@ jobs:
           # .htaccess pour la sécurité, le cache et LiteSpeed
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
           # API PHP : config_sync.php (pas de credentials), sync.php, files.php, upload_video.php
-          for f in api/config_sync.php api/upload.php api/files.php api/sync.php api/upload_video.php; do
+          for f in api/config_sync.php api/upload.php api/files.php api/sync.php api/upload_video.php api/news_proxy.php; do
             [ -f "$f" ] && cp "$f" deploy/api/
           done
           # NE PAS déployer config.php (contient credentials MySQL)
