@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20k | Fix vidéo mobile: height px absolu + bouton play fallback -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20l | Fix vidéo mobile: flux normal sans position:absolute -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -1003,13 +1003,18 @@ body { font-size: 15px !important; }
   flex-shrink: 0;
   display: block;
 }
-.vhero-video-wrap video,
-.vhero-video-wrap iframe {
-  position: absolute; top: 0; left: 0;
+/* <video> en flux normal — pas de position:absolute (cause hauteur 0 sur iOS) */
+.vhero-video-wrap video {
   width: 100%; height: 100%;
   object-fit: cover;
   display: block;
   border: none;
+}
+/* iframe YouTube conserve position:absolute pour le ratio 16:9 */
+.vhero-video-wrap iframe {
+  position: absolute; top: 0; left: 0;
+  width: 100%; height: 100%;
+  display: block; border: none;
 }
 @media(max-width:900px){
   #vHeroGrid { grid-template-columns: 1fr !important; min-height: auto !important; }
@@ -9371,32 +9376,22 @@ function buildIntroVideoHtml(){
       +'</div>';
   }
 
-  // ── 3. Vidéo hébergée sur le serveur (URL HTTP/HTTPS, non-YouTube) ──
-  if(v&&v.src&&(v.src.indexOf('http://')===0||v.src.indexOf('https://')===0)){
-    return '<div class="vhero-video-wrap" data-vtype="local">'
+  // ── 3. Vidéo URL serveur ou data URL ──
+  if(v&&v.src&&(v.src.indexOf('http')===0||v.src.indexOf('data:video')===0)){
+    // PAS de position:absolute sur <video> — flux normal, fonctionne sur tous les mobiles
+    return '<div class="vhero-video-wrap" data-vtype="local" style="display:flex;align-items:stretch">'
       +'<video id="vheroVideo"'
       +' src="'+v.src+'"'
       +' autoplay muted loop playsinline'
-      +' style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block"'
-      +' oncontextmenu="return false"'
-      +' oncanplay="this.play()"'
+      +' style="width:100%;height:100%;object-fit:cover;display:block;flex:1"'
+      +' oncanplay="this.play().catch(function(){})"'
       +' onerror="_vheroVideoFallback()"'
       +'></video>'
-      +'<div id="vheroPlayBtn" style="display:none;position:absolute;inset:0;z-index:10;align-items:center;justify-content:center;background:rgba(0,0,0,.35);cursor:pointer" onclick="_vheroManualPlay()">'
-        +'<div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,.4)">'
-          +'<div style="width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent #142554;margin-left:4px"></div>'
+      +'<div id="vheroPlayBtn" style="display:none;position:absolute;inset:0;z-index:10;align-items:center;justify-content:center;background:rgba(0,0,0,.4);cursor:pointer" onclick="_vheroManualPlay()">'
+        +'<div style="width:68px;height:68px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 28px rgba(0,0,0,.45)">'
+          +'<div style="width:0;height:0;border-style:solid;border-width:13px 0 13px 24px;border-color:transparent transparent transparent #142554;margin-left:5px"></div>'
         +'</div>'
       +'</div>'
-      +buildOverlay(true)
-      +'</div>';
-  }
-
-  // ── 3b. Vidéo locale data URL (rétrocompatibilité) ──
-  if(v&&v.src&&v.src.indexOf('data:video')===0){
-    return '<div class="vhero-video-wrap" data-vtype="local">'
-      +'<video id="vheroVideo" src="'+v.src+'" autoplay muted loop playsinline'
-      +' oncontextmenu="return false"'
-      +' controlsList="nodownload"></video>'
       +buildOverlay(true)
       +'</div>';
   }
