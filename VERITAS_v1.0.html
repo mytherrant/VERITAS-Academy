@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20v | Fix doublons admin + partenaires visiteurs + galerie/couvertures cloud -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20w | Fix notifications + doublons admin + partenaires visiteurs + galerie/couvertures cloud -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -4333,44 +4333,104 @@ function showLogin(role){
 // ═══════════════════════════════════════════════
 // NOTIFICATIONS
 // ═══════════════════════════════════════════════
-function showNotifications(){
-  const notifs=(DB.notifications||[]).filter(n=>n.to==='all'||n.to===SES?.id||n.to===SES?.type).sort((a,b)=>b.date.localeCompare(a.date));
-  const uid=SES?.id||SES?.user||'';
-  const html=notifs.length?notifs.map(n=>{
-    const isRead=(n.read||[]).includes(uid);
-    return'<div style="padding:12px;border-bottom:1px solid var(--bg2);background:'+(isRead?'transparent':'var(--blb)')+';cursor:pointer" onclick="markNotifRead(\''+n.id+'\')">'+
-    '<div class="fl2 fic fsb"><div class="fl2 fic g6"><span>'+(n.type==='warn'?'⚠️':n.type==='success'?'✅':'ℹ️')+'</span><span class="semi s">'+n.titre+'</span></div><span class="xs2 mut">'+n.date+'</span></div>'+
-    '<div style="font-size:13px;color:var(--ink2);margin-top:4px">'+n.msg+'</div></div>';
-  }).join(''):'<div class="empty"><div class="empty-ico">🔔</div>Aucune notification</div>';
-  M('🔔 Notifications',''+notifs.length+' notification(s)',html+(iA()?'<div style="padding:12px;border-top:var(--br)"><button class="btn bi sm" onclick="cm();mNewNotification()">＋ Nouvelle notification</button></div>':''),
-  '<button class="btn bo" onclick="cm()">Fermer</button>');
+function _notifUid(){return SES?.id||SES?.user||'';}
+function _notifList(){
+  var uid=_notifUid();
+  return (DB.notifications||[])
+    .filter(function(n){return n.to==='all'||n.to===uid||n.to===SES?.type;})
+    .sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
 }
-function markNotifRead(nid){
-  const n=(DB.notifications||[]).find(x=>x.id===nid);
-  if(n){const uid=SES?.id||SES?.user||'';if(!n.read)n.read=[];if(!n.read.includes(uid))n.read.push(uid);save();topUI();}
+function showNotifications(){
+  _renderNotifModal();
+}
+function _renderNotifModal(){
+  var notifs=_notifList();
+  var uid=_notifUid();
+  var unread=notifs.filter(function(n){return !(n.read||[]).includes(uid);}).length;
+  var html='';
+  if(notifs.length){
+    html='<div style="max-height:420px;overflow-y:auto">';
+    notifs.forEach(function(n){
+      var isRead=(n.read||[]).includes(uid);
+      var ico=n.type==='warn'?'⚠️':n.type==='success'?'✅':'ℹ️';
+      var bg=isRead?'transparent':'rgba(59,130,246,.07)';
+      var border=isRead?'1px solid var(--bg2)':'1px solid rgba(59,130,246,.18)';
+      html+='<div style="padding:12px 14px;border-bottom:1px solid var(--bg2);background:'+bg+';border-left:'+border+';cursor:pointer;transition:background .2s" '
+        +'onmouseenter="this.style.background=\'rgba(59,130,246,.05)\'" '
+        +'onmouseleave="this.style.background=\''+bg+'\'" '
+        +'onclick="_notifMarkAndRefresh(\''+n.id+'\')">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
+        +'<div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">'
+        +(isRead?'':'<span style="width:7px;height:7px;border-radius:50%;background:#3B82F6;flex-shrink:0;margin-top:3px;display:inline-block"></span>')
+        +'<span style="font-size:16px">'+ico+'</span>'
+        +'<span style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:'+(isRead?'600':'800')+';color:var(--ink1)">'+_esc(n.titre)+'</span>'
+        +'</div>'
+        +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'
+        +'<span style="font-size:11px;color:var(--ink4)">'+_esc(n.date||'')+'</span>'
+        +(iA()?'<button onclick="event.stopPropagation();_delNotif(\''+n.id+'\')" style="background:none;border:none;cursor:pointer;font-size:14px;opacity:.4;padding:0 2px" title="Supprimer">🗑</button>':'')
+        +'</div>'
+        +'</div>'
+        +'<div style="font-size:12.5px;color:var(--ink2);margin-top:5px;margin-left:'+(isRead?'22px':'29px')+';line-height:1.55">'+_esc(n.msg)+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+  } else {
+    html='<div class="empty"><div class="empty-ico">🔔</div><div>Aucune notification pour le moment</div></div>';
+  }
+  var footer='<button class="btn bo" onclick="cm()">Fermer</button>';
+  if(unread>0) footer+='<button class="btn bgr2" onclick="_markAllNotifsRead()">✓ Tout marquer lu</button>';
+  if(iA()) footer='<button class="btn bi sm" onclick="cm();mNewNotification()">＋ Nouvelle</button>'+footer;
+  var titre=unread>0?'🔔 Notifications <span style="background:#EF4444;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px">'+unread+' non lu'+(unread>1?'es':'')+'</span>':'🔔 Notifications';
+  M(titre,notifs.length+' notification'+(notifs.length>1?'s':''),html,footer);
+}
+function _notifMarkAndRefresh(nid){
+  var n=(DB.notifications||[]).find(function(x){return x.id===nid;});
+  if(n){var uid=_notifUid();if(!n.read)n.read=[];if(!n.read.includes(uid))n.read.push(uid);save();topUI();}
+  _renderNotifModal();
+}
+function markNotifRead(nid){_notifMarkAndRefresh(nid);}
+function _markAllNotifsRead(){
+  var uid=_notifUid();
+  (DB.notifications||[]).forEach(function(n){
+    if(n.to==='all'||n.to===uid||n.to===SES?.type){
+      if(!n.read)n.read=[];
+      if(!n.read.includes(uid))n.read.push(uid);
+    }
+  });
+  save();topUI();_renderNotifModal();toast('✓ Toutes les notifications marquées comme lues');
+}
+function _delNotif(nid){
+  DB.notifications=(DB.notifications||[]).filter(function(x){return x.id!==nid;});
+  save();topUI();_renderNotifModal();toast('Notification supprimée');
 }
 function mNewNotification(){
-  M('Nouvelle notification','Envoyer à tous',
-  '<div class="fg2"><div class="fg"><span class="fl">Titre *</span><input class="fi" id="nfTitre"></div>'+
-  '<div class="fg"><span class="fl">Type</span><select class="fi" id="nfType"><option value="info">ℹ️ Info</option><option value="warn">⚠️ Alerte</option><option value="success">✅ Succès</option></select></div>'+
-  '<div class="fg"><span class="fl">Destinataire</span><select class="fi" id="nfTo"><option value="all">Tous</option><option value="eleve">Élèves</option><option value="enseignant">Enseignants</option></select></div>'+
-  '<div class="fg full"><span class="fl">Message *</span><textarea class="fi" id="nfMsg" rows="3"></textarea></div></div>',
+  M('📤 Nouvelle notification','Envoyer un message aux utilisateurs',
+  '<div class="fg2">'
+  +'<div class="fg full"><span class="fl">Titre *</span><input class="fi" id="nfTitre" placeholder="Ex: Résultats des épreuves blanches disponibles"></div>'
+  +'<div class="fg"><span class="fl">Type</span><select class="fi" id="nfType"><option value="info">ℹ️ Information</option><option value="success">✅ Bonne nouvelle</option><option value="warn">⚠️ Alerte / Urgent</option></select></div>'
+  +'<div class="fg"><span class="fl">Destinataires</span><select class="fi" id="nfTo"><option value="all">👥 Tout le monde</option><option value="eleve">🎓 Élèves uniquement</option><option value="enseignant">👨‍🏫 Enseignants uniquement</option></select></div>'
+  +'<div class="fg full"><span class="fl">Message *</span><textarea class="fi" id="nfMsg" rows="4" placeholder="Rédigez votre message ici…"></textarea></div>'
+  +'</div>',
   '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="sendNotification()">📤 Envoyer</button>');
 }
 function autoNotify(titre,msg,to){
   if(!DB.notifications)DB.notifications=[];
   DB.notifications.push({id:gid(),to:to||'all',titre:titre,msg:msg,
-    date:new Date().toISOString().split('T')[0],read:[],type:'warn'});
-  save();
+    date:new Date().toISOString().split('T')[0],read:[],type:'info'});
+  save();topUI();
 }
 function sendNotification(){
-  const titre=(document.getElementById('nfTitre')?.value||'').trim();
-  const msg=(document.getElementById('nfMsg')?.value||'').trim();
+  var titre=(document.getElementById('nfTitre')?.value||'').trim();
+  var msg=(document.getElementById('nfMsg')?.value||'').trim();
   if(!titre||!msg){toast('Titre et message requis','warn');return;}
   if(!DB.notifications)DB.notifications=[];
-  DB.notifications.push({id:gid(),to:document.getElementById('nfTo')?.value||'all',titre,msg,
-    date:new Date().toISOString().split('T')[0],read:[],type:document.getElementById('nfType')?.value||'info'});
-  save();cm();toast('✓ Notification envoyée');
+  DB.notifications.push({id:gid(),
+    to:document.getElementById('nfTo')?.value||'all',
+    titre:titre,msg:msg,
+    date:new Date().toISOString().split('T')[0],
+    read:[],
+    type:document.getElementById('nfType')?.value||'info'});
+  save();topUI();cm();toast('✓ Notification envoyée');
 }
 
 // ═══════════════════════════════════════════════
