@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Commentaire Composé – Analyse du Texte et de la Consigne</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vert:   #1a8c5a;
+    --rouge:  #c0392b;
+    --jaune:  #f5a623;
+    --bleu:   #1565c0;
+    --orange: #e67e22;
+    --violet: #7b2d8b;
+    --bg:     #f7f3eb;
+    --card:   #ffffff;
+    --text:   #2c1a0e;
+    --muted:  #7a6652;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: linear-gradient(135deg, #1565c0 0%, #0d3b8c 55%, #7b2d8b 100%);
+    color: #fff;
+    padding: 28px 20px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0px, rgba(255,255,255,.04) 2px, transparent 2px, transparent 18px);
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(255,255,255,.18);
+    border: 1.5px solid rgba(255,255,255,.35);
+    border-radius: 99px;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    margin-bottom: 10px;
+  }
+  header h1 {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(1.5rem, 5vw, 2.4rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+  header p { font-size: .92rem; opacity: .85; }
+
+  /* ─── NAV ─── */
+  nav {
+    display: flex;
+    overflow-x: auto;
+    background: #fff;
+    border-bottom: 3px solid #e0d8cc;
+    padding: 0 12px;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  }
+  nav button {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 14px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -3px;
+    transition: all .2s;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+  }
+  nav button.active { color: var(--bleu); border-bottom-color: var(--bleu); }
+  nav button:hover:not(.active) { color: var(--text); }
+
+  /* ─── SECTIONS ─── */
+  section { display: none; padding: 24px 16px 60px; max-width: 800px; margin: 0 auto; }
+  section.active { display: block; animation: fadeUp .35s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 14px rgba(0,0,0,.06);
+    border-left: 5px solid var(--bleu);
+  }
+  .card.rouge  { border-left-color: var(--rouge); }
+  .card.jaune  { border-left-color: var(--jaune); }
+  .card.vert   { border-left-color: var(--vert); }
+  .card.orange { border-left-color: var(--orange); }
+  .card.violet { border-left-color: var(--violet); }
+  .card h3 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .card p, .card li { font-size: .93rem; line-height: 1.75; }
+  .card ul { padding-left: 20px; margin-top: 6px; }
+  .card ul li { margin-bottom: 4px; }
+
+  /* ─── SECTION TITLE ─── */
+  .sec-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--bleu);
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sec-title span { font-size: 1.6rem; }
+
+  /* ─── CHIPS ─── */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .chip {
+    background: #e3edf9;
+    color: #0d3b8c;
+    border-radius: 99px;
+    padding: 5px 13px;
+    font-size: .8rem;
+    font-weight: 700;
+    border: 1.5px solid #b3cce8;
+  }
+
+  /* ─── POEM BOX ─── */
+  .poem-box {
+    background: linear-gradient(135deg, #faf7ff, #f0eaf9);
+    border: 2px solid #c9aadc;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin: 14px 0;
+    font-style: italic;
+    font-size: .91rem;
+    line-height: 2;
+    color: #3a1a5e;
+  }
+  .poem-box .poem-title {
+    font-style: normal;
+    font-family: 'Baloo 2', cursive;
+    font-weight: 800;
+    font-size: 1rem;
+    color: var(--violet);
+    margin-bottom: 12px;
+  }
+  .poem-box .stanza { margin-bottom: 14px; }
+  .poem-box .source {
+    font-style: normal;
+    font-size: .8rem;
+    color: var(--muted);
+    margin-top: 10px;
+    text-align: right;
+  }
+
+  /* ─── CONSIGNE BOX ─── */
+  .consigne-box {
+    background: linear-gradient(135deg, #fff8e7, #fff3cd);
+    border: 2px solid var(--jaune);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin: 14px 0;
+    font-size: .91rem;
+    line-height: 1.8;
+  }
+  .consigne-box .label {
+    font-family: 'Baloo 2', cursive;
+    font-weight: 800;
+    font-size: .82rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: #7a4a00;
+    margin-bottom: 8px;
+  }
+  .consigne-box .injonction { color: var(--rouge); font-weight: 800; }
+  .consigne-box .outils    { color: var(--bleu); font-weight: 700; }
+  .consigne-box .axes      { color: var(--vert); font-weight: 800; }
+
+  /* ─── HIGHLIGHT GRID ─── */
+  .hi-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 14px; }
+  @media(min-width:520px){ .hi-grid { grid-template-columns: 1fr 1fr; } }
+
+  .hi-card {
+    border-radius: 12px;
+    padding: 16px 18px;
+    color: #fff;
+    font-size: .9rem;
+    line-height: 1.65;
+  }
+  .hi-card h4 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1rem; font-weight: 800;
+    margin-bottom: 6px;
+  }
+  .hi-card.fond   { background: linear-gradient(135deg, #1565c0, #0d3b8c); }
+  .hi-card.forme  { background: linear-gradient(135deg, #7b2d8b, #4a1060); }
+  .hi-card.axe1   { background: linear-gradient(135deg, #1a8c5a, #0d5c3a); }
+  .hi-card.axe2   { background: linear-gradient(135deg, #e67e22, #b95e00); }
+
+  /* ─── QUIZ ─── */
+  .quiz-q {
+    background: #fff;
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 14px rgba(0,0,0,.06);
+    border-top: 4px solid var(--jaune);
+  }
+  .quiz-q p.q-text { font-weight: 700; font-size: .97rem; margin-bottom: 14px; line-height: 1.55; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+  .opt-btn {
+    background: #f7f3eb;
+    border: 2px solid #e0d8cc;
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: .88rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all .2s;
+    color: var(--text);
+  }
+  .opt-btn:hover:not(:disabled) { border-color: var(--bleu); background: #e3edf9; }
+  .opt-btn.correct { background: #d4edda; border-color: #1a8c5a; color: #0d5c3a; }
+  .opt-btn.wrong   { background: #f8d7da; border-color: #c0392b; color: #7b1c1c; }
+  .feedback {
+    margin-top: 10px; font-size: .85rem; font-weight: 700;
+    padding: 8px 12px; border-radius: 8px; display: none;
+  }
+  .feedback.ok  { background: #d4edda; color: #0d5c3a; display: block; }
+  .feedback.nok { background: #f8d7da; color: #7b1c1c; display: block; }
+  #quiz-score {
+    text-align: center; padding: 20px;
+    background: linear-gradient(135deg, #1565c0, #7b2d8b);
+    color: #fff; border-radius: var(--radius);
+    font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800;
+    display: none; margin-top: 10px;
+  }
+  #submit-quiz {
+    display: block; margin: 0 auto 10px;
+    background: var(--bleu); color: #fff;
+    border: none; border-radius: 99px; padding: 12px 32px;
+    font-family: 'Baloo 2', cursive; font-weight: 700; font-size: 1rem;
+    cursor: pointer; transition: background .2s;
+  }
+  #submit-quiz:hover { background: #0d3b8c; }
+
+  /* ─── ACTIVITY (gap-fill) ─── */
+  .gap-sentence {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    font-size: .93rem;
+    line-height: 1.8;
+    border-left: 4px solid var(--bleu);
+  }
+  .gap-input {
+    display: inline-block;
+    border: none;
+    border-bottom: 2.5px solid var(--bleu);
+    background: #e3edf9;
+    border-radius: 6px 6px 0 0;
+    padding: 2px 8px;
+    font-family: 'Nunito', sans-serif;
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--bleu);
+    width: 150px;
+    outline: none;
+    transition: background .2s;
+  }
+  .gap-input:focus { background: #c9ddf5; }
+  .gap-input.ok   { background: #d4edda; border-color: #1a8c5a; color: #0d5c3a; }
+  .gap-input.nok  { background: #f8d7da; border-color: #c0392b; color: #7b1c1c; }
+
+  .btn-act {
+    background: var(--bleu); color: #fff;
+    border: none; border-radius: 99px; padding: 10px 26px;
+    font-family: 'Baloo 2', cursive; font-weight: 700; font-size: .92rem;
+    cursor: pointer; transition: background .2s; margin-top: 12px; margin-right: 8px;
+  }
+  .btn-act:hover { background: #0d3b8c; }
+  .btn-act.reset { background: var(--muted); }
+  .btn-act.reset:hover { background: #5a4535; }
+
+  #act-result {
+    text-align: center; font-family: 'Baloo 2', cursive; font-size: 1.05rem; font-weight: 700;
+    margin-top: 14px; padding: 12px; border-radius: 12px; display: none;
+  }
+  #act-result.ok  { background: #d4edda; color: #0d5c3a; display: block; }
+  #act-result.nok { background: #f8d7da; color: #7b1c1c; display: block; }
+
+  /* ─── RECAP ─── */
+  .recap-list { list-style: none; padding: 0; }
+  .recap-list li {
+    display: flex; gap: 12px; align-items: flex-start;
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.2);
+    font-size: .93rem;
+  }
+  .recap-list li:last-child { border: none; }
+  .recap-list .ico { font-size: 1.4rem; flex-shrink: 0; }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar-wrap { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .progress-bar { flex: 1; height: 8px; background: #e0d8cc; border-radius: 99px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, #1565c0, #7b2d8b); border-radius: 99px; transition: width .5s; }
+  .progress-label { font-size: .78rem; font-weight: 700; color: var(--muted); white-space: nowrap; }
+
+  /* ─── EXEMPLE BOX ─── */
+  .exemple-box {
+    background: linear-gradient(135deg, #fff8e7, #fff3cd);
+    border: 1.5px solid var(--jaune);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin: 10px 0 14px;
+  }
+  .exemple-box .title { font-weight: 800; color: #7a4a00; font-size: .82rem; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
+  .exemple-box p { font-size: .9rem; line-height: 1.7; }
+
+  /* ─── TABLE ─── */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); box-shadow: 0 2px 14px rgba(0,0,0,.08); margin-bottom: 18px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; font-size: .85rem; }
+  thead tr { background: linear-gradient(135deg, #1565c0, #7b2d8b); color: #fff; }
+  th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid #f0ebe1; }
+  th { font-family: 'Baloo 2', cursive; font-weight: 700; font-size: .88rem; }
+  tr:hover td { background: #f7f3eb; }
+  td:first-child { font-weight: 700; color: var(--muted); font-size: .82rem; }
+
+  /* ─── STEP INDICATOR ─── */
+  .step-box {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: #fff; border-radius: 12px; padding: 16px 18px;
+    margin-bottom: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.05);
+  }
+  .step-num {
+    flex-shrink: 0;
+    width: 34px; height: 34px;
+    background: var(--bleu); color: #fff;
+    border-radius: 50%;
+    font-family: 'Baloo 2', cursive; font-weight: 800; font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-body { font-size: .93rem; line-height: 1.7; }
+  .step-body strong { color: var(--bleu); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">📚 Méthodologie · Commentaire Composé</div>
+  <h1>Analyse du Texte et de la Consigne</h1>
+  <p>Leçon interactive · Littérature française · Niveau BAC</p>
+</header>
+
+<!-- NAV -->
+<nav>
+  <button class="active" onclick="showTab('intro',this)">🏠 Introduction</button>
+  <button onclick="showTab('corpus',this)">📜 Corpus</button>
+  <button onclick="showTab('cours',this)">📖 Cours</button>
+  <button onclick="showTab('activite',this)">✏️ Activité</button>
+  <button onclick="showTab('quiz',this)">✅ Quiz</button>
+  <button onclick="showTab('recap',this)">🎯 Récapitulatif</button>
+</nav>
+
+<!-- ══════════════ INTRO ══════════════ -->
+<section id="intro" class="active">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:16%"></div></div>
+    <span class="progress-label">Étape 1 / 6</span>
+  </div>
+
+  <div class="sec-title"><span>🏠</span> Introduction</div>
+
+  <div class="card">
+    <h3>🎯 Objectif de la leçon</h3>
+    <div class="chips">
+      <span class="chip">Identifier les parties d'une consigne de CC</span>
+      <span class="chip">Distinguer fond et forme</span>
+      <span class="chip">Dégager les axes de lecture</span>
+      <span class="chip">Formuler des hypothèses de lecture</span>
+    </div>
+    <p>À la fin de cette leçon, tu seras capable d'<strong>analyser correctement le texte et la consigne</strong> d'un commentaire composé afin de tirer les éléments nécessaires à l'élaboration du plan.</p>
+  </div>
+
+  <div class="card rouge">
+    <h3>💡 Ce que tu vas apprendre à faire</h3>
+    <div class="step-box">
+      <div class="step-num">1</div>
+      <div class="step-body"><strong>Lire la consigne</strong> et en identifier les parties (injonction, outils, axes thématiques).</div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">2</div>
+      <div class="step-body"><strong>Comprendre « fond et forme »</strong> : ce que le texte dit (fond) et comment il le dit (forme).</div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">3</div>
+      <div class="step-body"><strong>Dégager des centres d'intérêt</strong> et formuler des hypothèses de lecture pour chacun.</div>
+    </div>
+    <div class="step-box">
+      <div class="step-num">4</div>
+      <div class="step-body"><strong>Appliquer la méthode</strong> à des consignes réelles du Baccalauréat.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>📌 Sur quoi porte cette leçon ?</h3>
+    <p>Cette leçon porte sur la <strong>méthodologie du commentaire composé</strong>, et plus précisément sur la première étape indispensable : <strong>l'analyse du texte et de la consigne</strong>. On attend de toi que tu saches décomposer une consigne de commentaire composé pour en extraire les axes, les outils stylistiques suggérés, et les thèmes à développer.</p>
+  </div>
+
+  <button class="btn-act" onclick="showTab('corpus', document.querySelectorAll('nav button')[1])">Lire le corpus →</button>
+</section>
+
+<!-- ══════════════ CORPUS ══════════════ -->
+<section id="corpus">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
+    <span class="progress-label">Étape 2 / 6</span>
+  </div>
+
+  <div class="sec-title"><span>📜</span> Corpus &amp; Consigne</div>
+
+  <div class="card violet">
+    <h3>🖊️ Le poème : « Si je pouvais »</h3>
+    <p>Lis attentivement ce poème de Sully Prudhomme avant d'analyser la consigne.</p>
+  </div>
+
+  <div class="poem-box">
+    <div class="poem-title">Si je pouvais — Sully Prudhomme</div>
+    <div class="stanza">
+      Si je pouvais aller lui dire :<br>
+      « Elle est à vous et ne m'inspire<br>
+      Plus rien, même plus d'amitié ;<br>
+      Je n'en ai plus pour cette ingrate ;<br>
+      Mais elle est pâle, délicate :<br>
+      Ayez soin d'elle par pitié.
+    </div>
+    <div class="stanza">
+      « Écoutez-moi sans jalousie,<br>
+      Car l'aile de sa fantaisie<br>
+      N'a fait, hélas ! que m'effleurer ;<br>
+      Je sais comment sa main repousse,<br>
+      Mais pour ceux qu'elle aime elle est douce<br>
+      Ne la faites jamais pleurer. »
+    </div>
+    <div class="stanza">
+      Si je pouvais aller lui dire :<br>
+      « Elle est triste et lente à sourire ;<br>
+      Donnez-lui des fleurs chaque jour,<br>
+      Des bluets plutôt que des roses :<br>
+      C'est l'offrande des moindres choses<br>
+      Qui recèle le plus d'amour. »
+    </div>
+    <div class="stanza">
+      Je pourrais vivre avec l'idée<br>
+      Qu'elle est chérie et possédée<br>
+      Non par moi, mais selon mon cœur…<br>
+      Méchante enfant qui m'abandonne,<br>
+      Vois le chagrin que tu me donnes :<br>
+      Je ne peux rien pour ton bonheur !
+    </div>
+    <div class="source">Sully Prudhomme, <em>Stances et Poèmes</em>, « Femmes », 1865.</div>
+  </div>
+
+  <div class="card jaune">
+    <h3>📋 La consigne du Commentaire Composé</h3>
+    <div class="consigne-box">
+      <div class="label">Consigne officielle</div>
+      <p>
+        <span class="injonction">Sans dissocier le fond de la forme</span>, 
+        vous ferez de ce texte un commentaire composé. Vous pourrez, si vous voulez, en vous servant des 
+        <span class="outils">indices du référent, de la fonction impressive, du vocabulaire, de l'implicite, de la ponctuation, des éléments de rythme, les figures de style etc.</span> 
+        montrer <span class="axes">la douleur d'un amant délaissé, soucieux du bonheur de l'aimée malgré son propre chagrin</span>.
+      </p>
+    </div>
+    <p style="font-size:.85rem; margin-top:6px"><span style="color:var(--rouge); font-weight:700">■</span> Injonction &nbsp; <span style="color:var(--bleu); font-weight:700">■</span> Outils stylistiques &nbsp; <span style="color:var(--vert); font-weight:700">■</span> Axes thématiques</p>
+  </div>
+
+  <button class="btn-act" onclick="showTab('cours', document.querySelectorAll('nav button')[2])">Étudier le cours →</button>
+</section>
+
+<!-- ══════════════ COURS ══════════════ -->
+<section id="cours">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+    <span class="progress-label">Étape 3 / 6</span>
+  </div>
+
+  <div class="sec-title"><span>📖</span> Cours : Analyser la Consigne</div>
+
+  <!-- PARTIE 1: Les parties de la consigne -->
+  <div class="card">
+    <h3>1️⃣ Les parties d'une consigne de CC</h3>
+    <p>Une consigne de commentaire composé comporte <strong>trois parties</strong> essentielles :</p>
+    <div class="hi-grid" style="margin-top:14px">
+      <div class="hi-card fond">
+        <h4>🔴 L'injonction</h4>
+        <p>C'est l'ordre donné au candidat. Elle se présente toujours sous la même forme :<br>
+        <em>« Sans dissocier le fond de la forme »</em> ou <em>« en prenant soin de ne pas dissocier le fond de la forme »</em>.</p>
+      </div>
+      <div class="hi-card forme">
+        <h4>🔵 Les outils stylistiques</h4>
+        <p>Ce sont les procédés d'écriture suggérés : figures de style, ponctuation, temps verbaux, champs lexicaux, types de phrases, etc.</p>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="hi-card axe1" style="border-radius:12px; padding:16px 18px; color:#fff; font-size:.9rem; line-height:1.65;">
+        <h4 style="font-family:'Baloo 2',cursive; font-size:1rem; font-weight:800; margin-bottom:6px;">🟢 Les axes thématiques (centres d'intérêt)</h4>
+        <p>Ce sont les idées directrices que la consigne propose de développer. Il peut y en avoir <strong>un ou deux</strong>. Quand il n'y en a qu'un, c'est au candidat de trouver le second.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTIE 2: Fond et forme -->
+  <div class="card rouge">
+    <h3>2️⃣ Comprendre « sans dissocier le fond de la forme »</h3>
+    <div class="hi-grid" style="margin-top:12px">
+      <div class="hi-card fond">
+        <h4>📚 Le FOND</h4>
+        <p>C'est le <strong>contenu informatif et thématique</strong> du texte : l'ensemble des idées, des émotions, des thèmes développés par l'auteur.</p>
+        <p style="margin-top:8px; font-style:italic; opacity:.85">Ex : la douleur de l'amant, son amour désintéressé…</p>
+      </div>
+      <div class="hi-card forme">
+        <h4>✍️ La FORME</h4>
+        <p>C'est l'ensemble des <strong>outils linguistiques et procédés d'écriture</strong> : temps verbaux, ponctuation, structure des phrases, figures de style, rythme, etc.</p>
+        <p style="margin-top:8px; font-style:italic; opacity:.85">Ex : le conditionnel « je pourrais », l'anaphore « Si je pouvais »…</p>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px; margin-bottom:0; border-left-color:var(--rouge)">
+      <p>⚠️ <strong>Règle fondamentale :</strong> Dans un CC, on ne peut pas parler du sens d'un texte sans montrer <em>comment</em> il est construit, et inversement. Fond et forme sont toujours liés.</p>
+    </div>
+  </div>
+
+  <!-- PARTIE 3: Axes de lecture -->
+  <div class="card jaune">
+    <h3>3️⃣ Identifier les centres d'intérêt (axes)</h3>
+    <p>Dans la consigne du poème, <strong>un seul axe est explicitement formulé</strong> :</p>
+    <div class="exemple-box">
+      <div class="title">Axe proposé par la consigne</div>
+      <p>« Montrer <strong>la douleur d'un amant délaissé, soucieux du bonheur de l'aimée malgré son propre chagrin</strong> »</p>
+    </div>
+    <p>Cet axe contient en réalité <strong>deux idées complémentaires</strong> — qui peuvent devenir deux sous-parties :</p>
+    <div class="hi-grid" style="margin-top:10px">
+      <div class="hi-card axe1">
+        <h4>Axe 1</h4>
+        <p>La <strong>douleur d'un amant délaissé</strong> : le poète souffre d'un amour non partagé et d'un abandon.</p>
+      </div>
+      <div class="hi-card axe2">
+        <h4>Axe 2</h4>
+        <p>Un <strong>amour désintéressé</strong> : malgré sa peine, il reste soucieux du bonheur de l'aimée.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARTIE 4: Hypothèses de lecture -->
+  <div class="card vert">
+    <h3>4️⃣ Formuler des hypothèses de lecture</h3>
+    <p>À partir de chaque axe, tu dois dégager <strong>au moins deux hypothèses de lecture</strong>, c'est-à-dire des questions de lecture que tu poseras au texte :</p>
+    <div class="table-wrap" style="margin-top:12px">
+      <table>
+        <thead>
+          <tr>
+            <th>Axe</th>
+            <th>Hypothèse 1</th>
+            <th>Hypothèse 2</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>La douleur de l'amant</td>
+            <td>Le poète exprime-t-il son chagrin de façon directe ou voilée ?</td>
+            <td>Quels procédés traduisent l'intensité de sa souffrance ?</td>
+          </tr>
+          <tr>
+            <td>L'amour désintéressé</td>
+            <td>Comment l'amant manifeste-t-il son souci du bonheur de l'aimée ?</td>
+            <td>En quoi ce poème est-il un acte d'amour altruiste ?</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PARTIE 5: Informations fournies par la consigne -->
+  <div class="card">
+    <h3>5️⃣ Ce que la consigne t'offre</h3>
+    <p>Une consigne de CC peut fournir les informations suivantes :</p>
+    <ul style="margin-top:10px">
+      <li>L'<strong>idée générale</strong> du texte ou le thème central</li>
+      <li>Les <strong>deux centres d'intérêt</strong> (axes du plan)</li>
+      <li>Un <strong>seul centre d'intérêt</strong> : dans ce cas, c'est au candidat de retrouver l'autre</li>
+      <li>Des <strong>outils d'analyse</strong> suggérés pour construire l'argumentation</li>
+    </ul>
+  </div>
+
+  <button class="btn-act" onclick="showTab('activite', document.querySelectorAll('nav button')[3])">Faire l'activité →</button>
+</section>
+
+<!-- ══════════════ ACTIVITÉ ══════════════ -->
+<section id="activite">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:67%"></div></div>
+    <span class="progress-label">Étape 4 / 6</span>
+  </div>
+
+  <div class="sec-title"><span>✏️</span> Activité : Vers le BAC</div>
+
+  <div class="card jaune">
+    <h3>🎓 Consignes du Baccalauréat à analyser</h3>
+    <p>Complète les cases en identifiant les parties de chaque consigne. Tape ta réponse dans les champs.</p>
+  </div>
+
+  <!-- BAC A 2024 -->
+  <div class="card">
+    <h3>📌 Consigne BAC A 2024</h3>
+    <div class="consigne-box">
+      <div class="label">Texte de la consigne</div>
+      <p>Vous ferez de ce texte un commentaire composé sans dissocier le fond de la forme. À l'aide des champs lexicaux, des types de phrase, des temps verbaux, des figures de style, etc., vous pourrez montrer comment la conception intéressée du mariage chez Diddi brise les rêves de sa fille Ramla.</p>
+    </div>
+
+    <div class="gap-sentence">
+      <strong>L'injonction</strong> est :
+      <input type="text" class="gap-input" id="g1" placeholder="ta réponse…" data-answer="sans dissocier le fond de la forme">
+    </div>
+
+    <div class="gap-sentence">
+      <strong>Les outils stylistiques</strong> mentionnés : champs lexicaux, types de phrase, temps verbaux,
+      <input type="text" class="gap-input" id="g2" placeholder="…" data-answer="figures de style">
+    </div>
+
+    <div class="gap-sentence">
+      <strong>L'axe 1</strong> (thème principal) : la conception 
+      <input type="text" class="gap-input" id="g3" placeholder="…" data-answer="intéressée">
+       du mariage chez Diddi.
+    </div>
+
+    <div class="gap-sentence">
+      <strong>L'axe 2</strong> (conséquence) : cette conception 
+      <input type="text" class="gap-input" id="g4" placeholder="…" data-answer="brise les rêves">
+       de sa fille Ramla.
+    </div>
+  </div>
+
+  <!-- BAC A 2025 -->
+  <div class="card">
+    <h3>📌 Consigne BAC A 2025</h3>
+    <div class="consigne-box">
+      <div class="label">Texte de la consigne</div>
+      <p>Sans dissocier le fond de la forme, vous ferez de ce texte un commentaire composé. En faisant attention aux didascalies, aux types de phrase, aux répliques des personnages, aux champs lexicaux, aux figures de style, etc., vous pourrez montrer comment l'incitation du peuple à la révolte par Dualla Manga débouche sur son sentiment de satisfaction de la mission accomplie.</p>
+    </div>
+
+    <div class="gap-sentence">
+      <strong>Outil spécifique au théâtre</strong> mentionné en premier :
+      <input type="text" class="gap-input" id="g5" placeholder="…" data-answer="didascalies">
+    </div>
+
+    <div class="gap-sentence">
+      <strong>L'axe 1</strong> : l'
+      <input type="text" class="gap-input" id="g6" placeholder="…" data-answer="incitation du peuple">
+       à la révolte par Dualla Manga.
+    </div>
+
+    <div class="gap-sentence">
+      <strong>L'axe 2</strong> : le sentiment de 
+      <input type="text" class="gap-input" id="g7" placeholder="…" data-answer="satisfaction">
+       de la mission accomplie.
+    </div>
+
+    <div class="gap-sentence">
+      <strong>Combien de centres d'intérêt</strong> cette consigne propose-t-elle ?
+      <input type="text" class="gap-input" id="g8" placeholder="…" data-answer="deux">
+    </div>
+  </div>
+
+  <button class="btn-act" onclick="checkActivity()">Vérifier mes réponses ✓</button>
+  <button class="btn-act reset" onclick="resetActivity()">Recommencer ↺</button>
+  <div id="act-result"></div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section id="quiz">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:83%"></div></div>
+    <span class="progress-label">Étape 5 / 6</span>
+  </div>
+
+  <div class="sec-title"><span>✅</span> Quiz de vérification</div>
+
+  <div class="quiz-q" id="q1">
+    <p class="q-text">1. Dans une consigne de CC, l'injonction est toujours formulée par :</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q1')">« Vous analyserez les procédés stylistiques du texte »</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q1')">« Sans dissocier le fond de la forme »</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q1')">« Montrez les figures de style utilisées »</button>
+    </div>
+    <div class="feedback ok" id="f1ok">✅ Exact ! L'injonction impose toujours de traiter fond et forme ensemble.</div>
+    <div class="feedback nok" id="f1nok">❌ Non. L'injonction caractéristique du CC est « sans dissocier le fond de la forme ».</div>
+  </div>
+
+  <div class="quiz-q" id="q2">
+    <p class="q-text">2. Le FOND d'un texte, c'est :</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q2')">Les figures de style et la ponctuation</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q2')">L'ensemble des idées, thèmes et émotions développés dans le texte</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q2')">La structure des phrases et les temps verbaux</button>
+    </div>
+    <div class="feedback ok" id="f2ok">✅ Correct ! Le fond désigne le contenu informatif et thématique du texte.</div>
+    <div class="feedback nok" id="f2nok">❌ Non. Le fond, c'est le contenu (idées, thèmes, émotions). La forme, c'est les outils linguistiques.</div>
+  </div>
+
+  <div class="quiz-q" id="q3">
+    <p class="q-text">3. Dans le poème « Si je pouvais », quel axe est explicitement proposé par la consigne ?</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q3')">La beauté des images poétiques et le rythme des vers</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q3')">La douleur d'un amant délaissé, soucieux du bonheur de l'aimée</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q3')">L'amour impossible entre deux êtres de milieux différents</button>
+    </div>
+    <div class="feedback ok" id="f3ok">✅ Bien lu ! La consigne indique clairement cet axe pour guider l'analyse.</div>
+    <div class="feedback nok" id="f3nok">❌ Non. Relis la consigne : elle propose de montrer « la douleur d'un amant délaissé, soucieux du bonheur de l'aimée ».</div>
+  </div>
+
+  <div class="quiz-q" id="q4">
+    <p class="q-text">4. Une consigne propose un seul centre d'intérêt. Que doit faire le candidat ?</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q4')">Faire un plan en un seul axe uniquement</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q4')">Trouver lui-même le deuxième centre d'intérêt</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q4')">Ignorer le fond et analyser uniquement la forme</button>
+    </div>
+    <div class="feedback ok" id="f4ok">✅ Exact ! Quand la consigne ne donne qu'un axe, le candidat doit dégager l'autre par sa propre analyse.</div>
+    <div class="feedback nok" id="f4nok">❌ Non. Le candidat doit retrouver le deuxième centre d'intérêt à travers sa propre lecture du texte.</div>
+  </div>
+
+  <div class="quiz-q" id="q5">
+    <p class="q-text">5. Dans la consigne BAC A 2025, quel outil spécifique au théâtre est mentionné ?</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q5')">Les champs lexicaux</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q5')">Les didascalies</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q5')">Les figures de style</button>
+    </div>
+    <div class="feedback ok" id="f5ok">✅ Correct ! Les didascalies sont des indications scéniques propres au texte de théâtre.</div>
+    <div class="feedback nok" id="f5nok">❌ Non. Les didascalies (indications scéniques) sont l'outil spécifique au théâtre mentionné dans cette consigne.</div>
+  </div>
+
+  <div class="quiz-q" id="q6">
+    <p class="q-text">6. Les outils stylistiques dans une consigne de CC servent à :</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q6')">Remplacer la lecture attentive du texte</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q6')">Guider l'analyse de la forme pour l'articuler au fond</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q6')">Donner le plan détaillé du commentaire</button>
+    </div>
+    <div class="feedback ok" id="f6ok">✅ Parfait ! Les outils suggèrent des pistes d'analyse formelle à articuler avec les idées du texte.</div>
+    <div class="feedback nok" id="f6nok">❌ Non. Les outils stylistiques guident l'analyse de la forme que l'on doit relier au fond du texte.</div>
+  </div>
+
+  <button id="submit-quiz" onclick="submitQuiz()">Voir mon score 🏆</button>
+  <div id="quiz-score"></div>
+</section>
+
+<!-- ══════════════ RÉCAPITULATIF ══════════════ -->
+<section id="recap">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    <span class="progress-label">Étape 6 / 6 ✓</span>
+  </div>
+
+  <div class="sec-title"><span>🎯</span> Récapitulatif</div>
+
+  <div class="card" style="background:linear-gradient(135deg,#1565c0,#7b2d8b); color:#fff; border:none;">
+    <h3 style="color:#fff">🌟 Ce que tu dois retenir</h3>
+    <ul class="recap-list" style="color:#fff">
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">1️⃣</span><span>Une consigne de CC comporte : une <strong>injonction</strong>, des <strong>outils stylistiques</strong> et des <strong>axes thématiques</strong>.</span></li>
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">2️⃣</span><span>L'injonction est toujours : <strong>« sans dissocier le fond de la forme »</strong>.</span></li>
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">3️⃣</span><span>Le <strong>fond</strong> = les idées/thèmes ; la <strong>forme</strong> = les procédés d'écriture. Les deux sont toujours liés.</span></li>
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">4️⃣</span><span>La consigne peut fournir <strong>un ou deux axes</strong>. Si elle n'en donne qu'un, le candidat trouve l'autre.</span></li>
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">5️⃣</span><span>Pour chaque axe, tu dois formuler <strong>au moins deux hypothèses de lecture</strong>.</span></li>
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">6️⃣</span><span>Les outils stylistiques guident l'analyse formelle à articuler avec le fond du texte.</span></li>
+    </ul>
+  </div>
+
+  <div class="card jaune">
+    <h3>📝 Exercice de production à faire chez soi</h3>
+    <p>Pour chacune des consignes suivantes, identifie : l'injonction, les outils, les axes et formule deux hypothèses de lecture par axe.</p>
+    <ul style="margin-top:10px">
+      <li><strong>BAC A 2024 :</strong> Diddi / Ramla (conception du mariage)</li>
+      <li><strong>BAC A 2025 :</strong> Dualla Manga / incitation à la révolte</li>
+      <li>Cherche une consigne de CC dans un ancien sujet et applique la même méthode.</li>
+    </ul>
+  </div>
+
+  <div class="card vert">
+    <h3>🔗 Pour aller plus loin</h3>
+    <ul>
+      <li>Entraîne-toi à identifier fond et forme sur d'autres poèmes (Baudelaire, Apollinaire, Senghor).</li>
+      <li>Lis plusieurs consignes de BAC des années précédentes et classe leurs axes.</li>
+      <li>Rédige un premier jet de plan en deux parties à partir des hypothèses dégagées.</li>
+    </ul>
+  </div>
+
+  <div style="text-align:center; padding:24px; background:linear-gradient(135deg,#f5a623,#e67e22); border-radius:16px; color:#fff; margin-top:18px;">
+    <div style="font-size:2.5rem">🏆</div>
+    <div style="font-family:'Baloo 2',cursive; font-size:1.4rem; font-weight:800; margin:6px 0">Félicitations !</div>
+    <p style="font-size:.9rem; opacity:.9">Tu as terminé la leçon sur l'analyse de la consigne du Commentaire Composé. Applique cette méthode à chaque sujet et tu maîtriseras cette étape clé du BAC !</p>
+  </div>
+</section>
+
+<script>
+// ─── TAB NAVIGATION ───
+function showTab(id, btn) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  else {
+    const map = {intro:0, corpus:1, cours:2, activite:3, quiz:4, recap:5};
+    document.querySelectorAll('nav button')[map[id]].classList.add('active');
+  }
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ─── QUIZ ───
+const answers = {};
+function answer(btn, type, qid) {
+  const q = document.getElementById(qid);
+  if (q.dataset.answered) return;
+  q.dataset.answered = '1';
+  answers[qid] = type;
+  q.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  btn.classList.add(type);
+  const num = qid.slice(1);
+  const ok  = document.getElementById('f' + num + 'ok');
+  const nok = document.getElementById('f' + num + 'nok');
+  if (type === 'correct') { ok.style.display  = 'block'; }
+  else                    { nok.style.display = 'block'; }
+}
+
+function submitQuiz() {
+  const total = 6;
+  const score = Object.values(answers).filter(v => v === 'correct').length;
+  const pct   = Math.round(score / total * 100);
+  const emoji = pct >= 80 ? '🏆' : pct >= 50 ? '👍' : '📚';
+  const msg   = pct >= 80 ? 'Excellent ! Tu maîtrises bien la méthode.' :
+                pct >= 50 ? 'Bien ! Relis le cours pour consolider.' :
+                            'Continue à réviser, tu y arriveras !';
+  const div = document.getElementById('quiz-score');
+  div.style.display = 'block';
+  div.innerHTML = `${emoji} Score : ${score} / ${total} (${pct}%)<br><span style="font-size:.85rem;font-weight:400;opacity:.85">${msg}</span>`;
+  document.getElementById('submit-quiz').style.display = 'none';
+}
+
+// ─── GAP-FILL ACTIVITY ───
+const ANSWERS = {
+  g1: ['sans dissocier le fond de la forme', 'sans dissocier le fond et la forme'],
+  g2: ['figures de style', 'figure de style'],
+  g3: ['intéressée', 'interessee'],
+  g4: ['brise les rêves', 'brise les reves'],
+  g5: ['didascalies', 'didascalie'],
+  g6: ['incitation du peuple', "l'incitation du peuple"],
+  g7: ['satisfaction'],
+  g8: ['deux', '2']
+};
+
+function normalize(str) {
+  return str.trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/['']/g, "'");
+}
+
+function checkActivity() {
+  let correct = 0;
+  const total = Object.keys(ANSWERS).length;
+  Object.entries(ANSWERS).forEach(([id, accepted]) => {
+    const inp = document.getElementById(id);
+    const val = normalize(inp.value);
+    const ok  = accepted.some(a => normalize(a) === val || val.includes(normalize(a)));
+    inp.classList.remove('ok','nok');
+    inp.classList.add(ok ? 'ok' : 'nok');
+    if (ok) correct++;
+  });
+  const res = document.getElementById('act-result');
+  if (correct === total) {
+    res.className = 'ok';
+    res.innerHTML = `🏆 Parfait ! Tu as correctement identifié les ${total} éléments !`;
+  } else {
+    res.className = 'nok';
+    res.innerHTML = `⚠️ ${correct} / ${total} correctes. Les cases en rouge sont incorrectes — relis le cours !`;
+  }
+}
+
+function resetActivity() {
+  Object.keys(ANSWERS).forEach(id => {
+    const inp = document.getElementById(id);
+    inp.value = '';
+    inp.classList.remove('ok','nok');
+  });
+  const res = document.getElementById('act-result');
+  res.className = '';
+  res.style.display = 'none';
+  res.textContent = '';
+}
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20b | Fix cloud sync: flat file storage + pre-config API key -->
+﻿<!DOCTYPE html>
+<!-- VÉRITAS v1.0 | Build 2026-04-20c | Cours + evals dans defaultDB + acces visiteurs + blocage par user -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -2492,6 +2492,14 @@ function defaultDB(){return{
       {id:'res_bac_lit',cat:'cat6',titre:'📚 Évaluation BAC — Littérature & Culture Générale (interactive)',classe:'Tle A',matiere:'Littérature',seq:'BAC',prix:0,gratuit:true,plans:['plan1','plan2','plan3','plan4'],fichier:'',idbKey:'',resPedago:'lit',apercu:'📚 Épreuve interactive BAC Littérature — 3 sujets, chrono 4h, corrigés et plans détaillés.',desc:'Épreuve type BAC Littérature avec 3 sujets complets et corrigés.'},
       {id:'res_cours_cc',cat:'cat2',titre:'📖 Cours — Méthode du Commentaire Composé (interactive)',classe:'Tle A',matiere:'Français',seq:'Méthodologie',prix:500,gratuit:false,plans:['plan1','plan3','plan4'],fichier:'',idbKey:'',resPedago:'cc',apercu:'📖 Leçon interactive : analyse de consigne BAC, fond vs forme, axes et hypothèses de lecture. Quiz + exercices.',desc:'Cours interactif complet sur la méthode du commentaire composé au BAC.'},
       {id:'res_cours_mod1',cat:'cat2',titre:'🎭 Module 1 — Stances et Poèmes (Sully Prudhomme) Tle A',classe:'Tle A',matiere:'Français',seq:'Module 1',prix:1000,gratuit:false,plans:['plan1','plan3','plan4'],fichier:'',idbKey:'',resPedago:'mod1',apercu:'🎭 Cahier complet Tle A : biographie, Parnasse, 3 poèmes, versification, mythologie, figures de style. 15+ leçons interactives.',desc:'Module complet de français Terminale A avec 15+ leçons interactives.'},
+      // ── ÉPREUVES BAC INTERACTIVES (externalUrl) ──
+      {id:'bac_eval_anglais',cat:'cat6',titre:'📝 Épreuve BAC — Anglais (Interactif)',classe:'Terminale',matiere:'Anglais',seq:'Examens',prix:0,gratuit:true,plans:[],desc:'Épreuve complète BAC Anglais avec chrono intégré et corrigé interactif. Grammar & Vocabulary (10pts) · Reading Comprehension (10pts) · Writing (20pts). Durée : 3h · Coeff. 4 · Note /40',apercu:'Grammar/Vocabulary · Reading Comprehension · Writing — Chrono automatique, correction instantanée, score final',externalUrl:'https://veritas-school.com/evaluations/evaluation_bac_anglais.html',fichier:'',fichierData:''},
+      {id:'bac_eval_francais',cat:'cat6',titre:'📝 Épreuve BAC — Langue Française (Interactif)',classe:'Terminale',matiere:'Français',seq:'Examens',prix:0,gratuit:true,plans:[],desc:'Épreuve complète BAC Langue Française avec chrono et corrigé interactif. Communication (5pts) · Morphosyntaxe (5pts) · Sémantique (5pts) · Stylistique & Rhétorique (5pts). Durée : 2h · Coeff. 2 · Note /20',apercu:'Communication · Morphosyntaxe · Sémantique · Stylistique — Chrono automatique, correction instantanée',externalUrl:'https://veritas-school.com/evaluations/evaluation_bac_langue_francaise.html',fichier:'',fichierData:''},
+      {id:'bac_eval_litterature',cat:'cat6',titre:'📝 Épreuve BAC — Littérature & Culture Générale (Interactif)',classe:'Terminale',matiere:'Littérature',seq:'Examens',prix:0,gratuit:true,plans:[],desc:'Épreuve complète BAC Littérature & Culture Générale. Contraction + Discussion · Commentaire composé · Dissertation. Durée : 4h · Coeff. 3 · Note /20',apercu:'Contraction & Discussion · Commentaire composé · Dissertation — Chrono automatique, correction guidée',externalUrl:'https://veritas-school.com/evaluations/evaluation_bac_litterature.html',fichier:'',fichierData:''},
+      // ── COURS INTERACTIFS (externalUrl) ──
+      {id:'cours_commentaire_compose',cat:'cat2',titre:'📖 Cours — Commentaire Composé & Analyse de Texte',classe:'Terminale',matiere:'Français',seq:'Toutes séquences',prix:0,gratuit:true,plans:[],desc:'Méthode complète du commentaire composé : analyse de la consigne, plan, rédaction. Cours interactif avec exercices guidés. Pour Terminale A.',apercu:'Analyse du texte · Élaboration du plan · Rédaction · Exercices corrigés — Cours interactif Terminale A',externalUrl:'https://veritas-school.com/cours/commentaire_compose_analyse.html',fichier:'',fichierData:''},
+      {id:'cours_module1_tleA',cat:'cat2',titre:'📖 Cours — Stances & Poèmes · Terminale A (Module 1)',classe:'Terminale',matiere:'Littérature',seq:'Séquence 1',prix:0,gratuit:true,plans:[],desc:'Cahier de Français Terminale A : étude des stances et poèmes, textes fondamentaux, analyse littéraire, fiches de méthode. Module 1 complet.',apercu:'Stances · Poèmes · Analyse littéraire · Fiches de méthode — Cours interactif avec sidebar navigation',externalUrl:'https://veritas-school.com/cours/module_1_tle_A.html',fichier:'',fichierData:''},
+      {id:'cours_registres_langue_5e',cat:'cat2',titre:'📖 Cours — Les Registres de Langue (5ème)',classe:'5ème',matiere:'Français',seq:'Toutes séquences',prix:0,gratuit:true,plans:[],desc:'Cours complet sur les registres de langue : familier, courant, soutenu. Exemples, exercices interactifs, quiz. Pour la classe de 5ème.',apercu:'Registre familier · Registre courant · Registre soutenu — Exemples, exercices et quiz intégrés',externalUrl:'https://veritas-school.com/cours/registres_de_langue_5e.html',fichier:'',fichierData:''}
     ],
     abonnements:[],
     commandes:[],soumissions:[],telechargementsGratuits:{}
@@ -2597,7 +2605,8 @@ function load(){
   // Merge resPedago entries from defaultDB if missing in existing DB
   var _defC=defaultDB().elearning.contenus||[];
   var _curC=DB.elearning.contenus||[];
-  _defC.forEach(function(dc){if(dc.resPedago && !_curC.find(function(c){return c.id===dc.id;})){_curC.push(dc);}});
+  // Merge resPedago AND externalUrl entries so evaluations/courses are always visible
+  _defC.forEach(function(dc){if((dc.resPedago||dc.externalUrl)&&!_curC.find(function(c){return c.id===dc.id;})){_curC.push(dc);}});
   DB.elearning.contenus=_curC;
   // Merge citations from defaultDB if missing
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
@@ -3452,7 +3461,15 @@ function vShowSec(sec,btn){
         h+='<div id="elCatalog" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px">';
         filtered.forEach(function(item){
           var isFree=item.gratuit||false;
-          var isUnlocked=isFree||(free2<2);
+          // Pour les contenus avec URL externe : vérifier accès individuel
+          var accId=SES&&SES.accountId;
+          var isBlocked=accId&&(item.blockedFor||[]).indexOf(accId)>=0;
+          var isManuallyUnlocked=accId&&(item.unlockedFor||[]).indexOf(accId)>=0;
+          var visAcc=accId?(DB.visitorAccounts||[]).find(function(a){return a.id===accId;}):null;
+          var vPlans=visAcc?visAcc.plans||[]:[];
+          var hasPlanAccess=item.plans&&item.plans.length&&item.plans.some(function(p){return vPlans.indexOf(p)>=0;});
+          var hasRealAccess=(isFree&&!isBlocked)||isManuallyUnlocked||hasPlanAccess||iA();
+          var isUnlocked=item.externalUrl?hasRealAccess:(isFree||(free2<2));
           if(!isFree) free2++;
           var isLocked=!isUnlocked;
           var pLabels={plan1:'EXAMEN',plan2:'INTERMÉD.',plan3:'ENSEIGNANT',plan4:'FAMILLE'};
@@ -4890,6 +4907,7 @@ function pgElearningMgmt(){
   h+='<button class="btn bi" onclick="mAddElearningContent()">&#43; Ajouter contenu</button>';
   h+='<button class="btn bg2" onclick="pg=\'submit_resource\';re()">&#128228; Soumettre ressource</button>';
   h+='<button class="btn" style="background:linear-gradient(135deg,#E8F0FE,#C7D7F9);color:#1a56db;border:1.5px solid #a5b4fc;font-weight:700;font-size:12px" onclick="importEvaluationsBAC()">&#128229; Importer &#201;valuations BAC</button>';
+  h+='<button class="btn" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);color:#1b5e20;border:1.5px solid #a5d6a7;font-weight:700;font-size:12px" onclick="importCoursInteractifs()">&#128218; Importer Cours Interactifs</button>';
   h+='</div></div>';
 
   // KPIs
@@ -5050,7 +5068,9 @@ function pgElearningMgmt(){
       h+='<td class="mono bold" style="color:var(--gold)">'+fmtN(item.prix||0)+'</td>';
       h+='<td>'+(item.externalUrl?'<a href="'+item.externalUrl+'" target="_blank" class="bg bgb" style="font-size:10px;text-decoration:none">🔗 URL ext.</a>':item.fichierData?'<span class="bg bgg" style="font-size:10px">📄 Oui</span>':'<span class="xs2 mut">—</span>')+'</td>';
       h+='<td>'+(item.gratuit?'<span class="bg bgg">✓</span>':'<span class="xs2 mut">—</span>')+'</td>';
-      h+='<td><div class="fl2 g4"><button class="btn bvi xs" onclick="mEditElearningContent(\''+item.id+'\')">✏️</button><button class="btn br2 xs" onclick="deleteElearningContent(\''+item.id+'\')">🗑</button></div></td>';
+      h+='<td><div class="fl2 g4"><button class="btn bvi xs" onclick="mEditElearningContent(\''+item.id+'\')">✏️</button>';
+      if(item.externalUrl) h+='<button class="btn xs" style="background:#FFF8E1;color:#F59E0B;border:1px solid #FDE68A" onclick="mGererAccesContenu(\''+item.id+'\')">👥</button>';
+      h+='<button class="btn br2 xs" onclick="deleteElearningContent(\''+item.id+'\')">🗑</button></div></td>';
       h+='</tr>';
     });
     h+='</tbody></table></div>';
@@ -5230,8 +5250,131 @@ function importEvaluationsBAC(){
   toast('✅ Évaluations BAC : '+msg.trim(),'ok');
 }
 
+// ── COURS INTERACTIFS (fichiers dans /cours/) ────────────────────────────
+var CATALOGUE_COURS_INTERACTIFS=[
+  {
+    id:'cours_commentaire_compose',
+    titre:'📖 Cours — Commentaire Composé & Analyse de Texte',
+    cat:'cat2',classe:'Terminale',matiere:'Français',seq:'Toutes séquences',
+    prix:0,gratuit:true,plans:[],
+    desc:'Méthode complète du commentaire composé : analyse de la consigne, plan, rédaction. Cours interactif avec exercices guidés. Pour Terminale A.',
+    apercu:'Analyse du texte · Élaboration du plan · Rédaction · Exercices corrigés — Cours interactif Terminale A',
+    externalUrl:'https://veritas-school.com/cours/commentaire_compose_analyse.html',
+    fichier:'',fichierData:''
+  },
+  {
+    id:'cours_module1_tleA',
+    titre:'📖 Cours — Stances & Poèmes · Terminale A (Module 1)',
+    cat:'cat2',classe:'Terminale',matiere:'Littérature',seq:'Séquence 1',
+    prix:0,gratuit:true,plans:[],
+    desc:'Cahier de Français Terminale A : étude des stances et poèmes, textes fondamentaux, analyse littéraire, fiches de méthode. Module 1 complet.',
+    apercu:'Stances · Poèmes · Analyse littéraire · Fiches de méthode — Cours interactif avec sidebar navigation',
+    externalUrl:'https://veritas-school.com/cours/module_1_tle_A.html',
+    fichier:'',fichierData:''
+  },
+  {
+    id:'cours_registres_langue_5e',
+    titre:'📖 Cours — Les Registres de Langue (5ème)',
+    cat:'cat2',classe:'5ème',matiere:'Français',seq:'Toutes séquences',
+    prix:0,gratuit:true,plans:[],
+    desc:'Cours complet sur les registres de langue : familier, courant, soutenu. Exemples, exercices interactifs, quiz. Pour la classe de 5ème.',
+    apercu:'Registre familier · Registre courant · Registre soutenu — Exemples, exercices et quiz intégrés',
+    externalUrl:'https://veritas-school.com/cours/registres_de_langue_5e.html',
+    fichier:'',fichierData:''
+  }
+];
+
+function importCoursInteractifs(){
+  if(!iA())return;
+  if(!DB.elearning)DB.elearning=defaultDB().elearning;
+  if(!DB.elearning.contenus)DB.elearning.contenus=[];
+  var added=0,updated=0;
+  CATALOGUE_COURS_INTERACTIFS.forEach(function(cours){
+    var existing=DB.elearning.contenus.find(function(c){return c.id===cours.id;});
+    if(existing){
+      existing.externalUrl=cours.externalUrl;
+      existing.desc=cours.desc;
+      existing.apercu=cours.apercu;
+      existing.cat=cours.cat;
+      existing.classe=cours.classe;
+      existing.matiere=cours.matiere;
+      existing.gratuit=true;
+      updated++;
+    } else {
+      DB.elearning.contenus.push(Object.assign({},cours,{dateAjout:today()}));
+      added++;
+    }
+  });
+  save();re();
+  var msg=(added?added+' ajouté(s). ':'')+(updated?updated+' mis à jour. ':'');
+  toast('✅ Cours : '+msg.trim(),'ok');
+}
+
 // (validerSoumission v1 supprimée)
 
+// ── GESTION ACCÈS PAR UTILISATEUR ────────────────────────────────────────
+function mGererAccesContenu(itemId){
+  if(!iA())return;
+  var el=DB.elearning||{contenus:[]};
+  var item=(el.contenus||[]).find(function(c){return c.id===itemId;});
+  if(!item)return;
+  var accs=DB.visitorAccounts||[];
+  if(!accs.length){M('👥 Gestion des accès','Aucun compte visiteur enregistré.','<p style="color:var(--ink3);font-size:13px">Aucun compte visiteur inscrit pour le moment.</p>','<button class="btn bo" onclick="cm()">Fermer</button>');return;}
+  if(!item.unlockedFor)item.unlockedFor=[];
+  if(!item.blockedFor)item.blockedFor=[];
+  var rows='';
+  accs.forEach(function(acc){
+    var isUnlocked=item.unlockedFor.indexOf(acc.id)>=0;
+    var isBlocked=item.blockedFor.indexOf(acc.id)>=0;
+    var hasPlan=acc.plans&&acc.plans.length&&item.plans&&item.plans.some(function(p){return acc.plans.indexOf(p)>=0;});
+    var status=isBlocked?'<span style="background:#FEE2E2;color:#DC2626;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">🔒 Bloqué</span>':isUnlocked?'<span style="background:#D1FAE5;color:#059669;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">🔓 Débloqué</span>':hasPlan?'<span style="background:#E0EAFF;color:#3C8DFF;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">✅ Via plan</span>':'<span style="background:#F3F4F6;color:#6B7280;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">— Aucun accès</span>';
+    rows+='<tr>'
+      +'<td class="semi s">'+_esc(acc.pre)+' '+_esc(acc.nom)+'</td>'
+      +'<td class="xs2 mut">'+_esc(acc.email||acc.tel||'')+'</td>'
+      +'<td>'+status+'</td>'
+      +'<td><div class="fl2 g4">'
+      +(isBlocked
+        ?'<button class="btn bgg xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'unblock\')">🔓 Rétablir</button>'
+        :isUnlocked
+          ?'<button class="btn br2 xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'block\')">🔒 Bloquer</button>'
+            +'<button class="btn bo xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'remove_unlock\')">✕ Retirer</button>'
+          :'<button class="btn bgg xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'unlock\')">🔓 Débloquer</button>'
+            +'<button class="btn br2 xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'block\')">🔒 Bloquer</button>'
+      )
+      +'</div></td>'
+      +'</tr>';
+  });
+  M('👥 Accès : '+item.titre,'Gérer l\'accès individuel par utilisateur',
+    '<div class="ib ibt mb14"><span>ℹ️</span><span><b>Débloquer</b> = accès sans abonnement. <b>Bloquer</b> = refus même avec un plan actif.</span></div>'
+    +'<div class="tw"><table><thead><tr><th>Visiteur</th><th>Contact</th><th>Statut</th><th>Actions</th></tr></thead><tbody>'+rows+'</tbody></table></div>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>',true);
+}
+
+function toggleAccesContenu(itemId,accId,action){
+  var el=DB.elearning||{contenus:[]};
+  var item=(el.contenus||[]).find(function(c){return c.id===itemId;});
+  if(!item)return;
+  if(!item.unlockedFor)item.unlockedFor=[];
+  if(!item.blockedFor)item.blockedFor=[];
+  if(action==='unlock'){
+    if(item.unlockedFor.indexOf(accId)<0)item.unlockedFor.push(accId);
+    item.blockedFor=item.blockedFor.filter(function(id){return id!==accId;});
+    toast('✅ Accès accordé');
+  } else if(action==='block'){
+    if(item.blockedFor.indexOf(accId)<0)item.blockedFor.push(accId);
+    item.unlockedFor=item.unlockedFor.filter(function(id){return id!==accId;});
+    toast('🔒 Accès bloqué');
+  } else if(action==='remove_unlock'){
+    item.unlockedFor=item.unlockedFor.filter(function(id){return id!==accId;});
+    toast('Accès individuel retiré');
+  } else if(action==='unblock'){
+    item.blockedFor=item.blockedFor.filter(function(id){return id!==accId;});
+    toast('🔓 Blocage levé');
+  }
+  save();
+  // Re-ouvrir la modale avec les données à jour
+  mGererAccesContenu(itemId);
+}
 
 function refuserSoumission(id){
   var sub=(DB.elearning.soumissions||[]).find(function(s){return s.id===id;});

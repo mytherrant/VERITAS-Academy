@@ -13,6 +13,7 @@ on:
       - '.htaccess'
       - 'api/**'
       - 'evaluations/**'
+      - 'cours/**'
 
   # Permet de lancer manuellement depuis GitHub
   workflow_dispatch:
@@ -41,8 +42,9 @@ jobs:
           done
           # NE PAS déployer config.php (contient credentials MySQL)
           if [ -f api/database_mysql.sql ]; then cp api/database_mysql.sql deploy/api/; fi
-          # Dossier évaluations interactives BAC
+          # Dossiers évaluations et cours interactifs
           if [ -d evaluations ]; then cp -r evaluations/ deploy/evaluations/; fi
+          if [ -d cours ]; then cp -r cours/ deploy/cours/; fi
           # Placeholder pour les dossiers uploads
           touch deploy/uploads/.gitkeep
           echo "✅ Fichiers prêts :"

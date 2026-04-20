@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Les Registres de Langue – Classe de 5e</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vert: #1a8c5a;
+    --rouge: #c0392b;
+    --jaune: #f5a623;
+    --bleu: #1565c0;
+    --orange: #e67e22;
+    --bg: #f7f3eb;
+    --card: #ffffff;
+    --text: #2c1a0e;
+    --muted: #7a6652;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: linear-gradient(135deg, #1a8c5a 0%, #0d5c3a 60%, #c0392b 100%);
+    color: #fff;
+    padding: 28px 20px 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0px, rgba(255,255,255,.04) 2px, transparent 2px, transparent 18px);
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(255,255,255,.18);
+    border: 1.5px solid rgba(255,255,255,.35);
+    border-radius: 99px;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    margin-bottom: 10px;
+  }
+  header h1 {
+    font-family: 'Baloo 2', cursive;
+    font-size: clamp(1.6rem, 5vw, 2.6rem);
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 6px;
+  }
+  header p {
+    font-size: .92rem;
+    opacity: .85;
+  }
+
+  /* ─── NAV TABS ─── */
+  nav {
+    display: flex;
+    overflow-x: auto;
+    background: #fff;
+    border-bottom: 3px solid #e0d8cc;
+    padding: 0 12px;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  }
+  nav button {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    padding: 14px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: .82rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -3px;
+    transition: all .2s;
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+  }
+  nav button.active {
+    color: var(--vert);
+    border-bottom-color: var(--vert);
+  }
+  nav button:hover:not(.active) { color: var(--text); }
+
+  /* ─── SECTIONS ─── */
+  section { display: none; padding: 24px 16px 60px; max-width: 780px; margin: 0 auto; }
+  section.active { display: block; animation: fadeUp .35s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 14px rgba(0,0,0,.06);
+    border-left: 5px solid var(--vert);
+  }
+  .card.rouge  { border-left-color: var(--rouge); }
+  .card.jaune  { border-left-color: var(--jaune); }
+  .card.bleu   { border-left-color: var(--bleu); }
+  .card.orange { border-left-color: var(--orange); }
+
+  .card h3 {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .card p, .card li { font-size: .93rem; line-height: 1.7; }
+  .card ul { padding-left: 18px; }
+
+  /* ─── SECTION TITLE ─── */
+  .sec-title {
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--vert);
+    margin-bottom: 18px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sec-title span { font-size: 1.6rem; }
+
+  /* ─── OBJECTIVE CHIPS ─── */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .chip {
+    background: #e8f5ee;
+    color: #0d5c3a;
+    border-radius: 99px;
+    padding: 5px 13px;
+    font-size: .8rem;
+    font-weight: 700;
+    border: 1.5px solid #b2dfcb;
+  }
+
+  /* ─── REGISTER GRID ─── */
+  .reg-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+  .reg-card {
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+  }
+  .reg-card::after {
+    content: attr(data-icon);
+    position: absolute; right: 14px; bottom: 6px;
+    font-size: 3.2rem; opacity: .18;
+  }
+  .reg-card.fam  { background: linear-gradient(135deg,#e67e22,#d35400); }
+  .reg-card.cour { background: linear-gradient(135deg,#1565c0,#0d47a1); }
+  .reg-card.sout { background: linear-gradient(135deg,#1a8c5a,#0d5c3a); }
+  .reg-card h4 { font-family:'Baloo 2',cursive; font-size:1.15rem; font-weight:800; margin-bottom:6px; }
+  .reg-card p  { font-size:.88rem; line-height:1.65; opacity:.93; }
+  .reg-card .tag {
+    display:inline-block; background:rgba(255,255,255,.22); border-radius:99px;
+    font-size:.72rem; font-weight:700; padding:2px 10px; margin-bottom:8px; letter-spacing:.05em;
+  }
+
+  /* ─── COMPARISON TABLE ─── */
+  .table-wrap { overflow-x:auto; border-radius: var(--radius); box-shadow:0 2px 14px rgba(0,0,0,.08); margin-bottom:18px; }
+  table { width:100%; border-collapse:collapse; background:#fff; font-size:.85rem; }
+  thead tr { background: linear-gradient(135deg,#1a8c5a,#0d5c3a); color:#fff; }
+  th, td { padding: 12px 14px; text-align:left; border-bottom:1px solid #f0ebe1; }
+  th { font-family:'Baloo 2',cursive; font-weight:700; font-size:.88rem; }
+  tr:hover td { background:#f7f3eb; }
+  td:first-child { font-weight:700; color:var(--muted); }
+  .fam-c { color:#d35400; font-weight:700; }
+  .cour-c { color:#0d47a1; font-weight:700; }
+  .sout-c { color:#0d5c3a; font-weight:700; }
+
+  /* ─── QUIZ ─── */
+  .quiz-q {
+    background:#fff;
+    border-radius:var(--radius);
+    padding:20px;
+    margin-bottom:16px;
+    box-shadow:0 2px 14px rgba(0,0,0,.06);
+    border-top: 4px solid var(--jaune);
+  }
+  .quiz-q p.q-text {
+    font-weight:700; font-size:.97rem; margin-bottom:14px; line-height:1.5;
+  }
+  .quiz-opts { display:flex; flex-direction:column; gap:8px; }
+  .opt-btn {
+    background:#f7f3eb;
+    border:2px solid #e0d8cc;
+    border-radius:10px;
+    padding:10px 14px;
+    font-family:'Nunito',sans-serif;
+    font-size:.88rem;
+    font-weight:600;
+    cursor:pointer;
+    text-align:left;
+    transition:all .2s;
+    color:var(--text);
+  }
+  .opt-btn:hover:not(:disabled) { border-color:var(--vert); background:#e8f5ee; }
+  .opt-btn.correct { background:#d4edda; border-color:#1a8c5a; color:#0d5c3a; }
+  .opt-btn.wrong   { background:#f8d7da; border-color:#c0392b; color:#7b1c1c; }
+  .feedback {
+    margin-top:10px; font-size:.85rem; font-weight:700;
+    padding:8px 12px; border-radius:8px; display:none;
+  }
+  .feedback.ok  { background:#d4edda; color:#0d5c3a; display:block; }
+  .feedback.nok { background:#f8d7da; color:#7b1c1c; display:block; }
+
+  #quiz-score {
+    text-align:center; padding:20px;
+    background: linear-gradient(135deg,#1a8c5a,#0d5c3a);
+    color:#fff; border-radius:var(--radius);
+    font-family:'Baloo 2',cursive; font-size:1.3rem; font-weight:800;
+    display:none; margin-top:10px;
+  }
+  #submit-quiz {
+    display:block; margin:0 auto 10px;
+    background: var(--vert); color:#fff;
+    border:none; border-radius:99px; padding:12px 32px;
+    font-family:'Baloo 2',cursive; font-weight:700; font-size:1rem;
+    cursor:pointer; transition:background .2s;
+  }
+  #submit-quiz:hover { background:#0d5c3a; }
+
+  /* ─── ACTIVITY ─── */
+  .drag-zone {
+    border: 2.5px dashed #b2dfcb;
+    border-radius: var(--radius);
+    min-height: 70px;
+    padding: 12px;
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start;
+    background:#f7f3eb;
+    transition: border-color .2s;
+  }
+  .drag-zone.over { border-color: var(--vert); background: #e8f5ee; }
+  .drag-item {
+    background: #fff;
+    border: 2px solid #e0d8cc;
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-size: .84rem; font-weight: 700;
+    cursor: grab;
+    transition: box-shadow .15s;
+    user-select: none;
+  }
+  .drag-item:active { cursor:grabbing; box-shadow:0 4px 16px rgba(0,0,0,.12); }
+  .zone-label {
+    font-family:'Baloo 2',cursive; font-weight:700; font-size:.92rem;
+    margin-bottom:6px; color:var(--muted);
+  }
+  #act-result {
+    text-align:center; font-family:'Baloo 2',cursive; font-size:1.05rem; font-weight:700;
+    margin-top:14px; padding:12px; border-radius:12px; display:none;
+  }
+  #act-result.ok  { background:#d4edda; color:#0d5c3a; display:block; }
+  #act-result.nok { background:#f8d7da; color:#7b1c1c; display:block; }
+
+  .btn-act {
+    background: var(--bleu); color:#fff;
+    border:none; border-radius:99px; padding:10px 26px;
+    font-family:'Baloo 2',cursive; font-weight:700; font-size:.92rem;
+    cursor:pointer; transition:background .2s; margin-top:12px; margin-right:8px;
+  }
+  .btn-act:hover { background:#0d47a1; }
+  .btn-act.reset { background: var(--muted); }
+  .btn-act.reset:hover { background:#5a4535; }
+
+  /* ─── RECAP ─── */
+  .recap-list { list-style:none; padding:0; }
+  .recap-list li {
+    display:flex; gap:12px; align-items:flex-start;
+    padding:12px 0; border-bottom:1px solid #e0d8cc; font-size:.93rem;
+  }
+  .recap-list li:last-child { border:none; }
+  .recap-list .ico { font-size:1.4rem; flex-shrink:0; }
+
+  /* ─── PROGRESS BAR ─── */
+  .progress-bar-wrap { display:flex; align-items:center; gap:10px; margin-bottom:20px; }
+  .progress-bar { flex:1; height:8px; background:#e0d8cc; border-radius:99px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,#1a8c5a,#f5a623); border-radius:99px; transition:width .5s; }
+  .progress-label { font-size:.78rem; font-weight:700; color:var(--muted); white-space:nowrap; }
+
+  /* ─── EXEMPLE BOX ─── */
+  .exemple-box {
+    background:linear-gradient(135deg,#fff8e7,#fff3cd);
+    border:1.5px solid #f5a623;
+    border-radius:12px;
+    padding:14px 16px;
+    margin:10px 0 14px;
+  }
+  .exemple-box .title { font-weight:800; color:#7a4a00; font-size:.82rem; text-transform:uppercase; letter-spacing:.08em; margin-bottom:6px; }
+  .exemple-box p { font-size:.9rem; font-style:italic; color:var(--text); }
+
+  /* Responsive */
+  @media(min-width:520px){
+    .reg-grid { grid-template-columns:1fr 1fr; }
+    .reg-card.sout { grid-column:1/-1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">🇨🇲 Français – Classe de 5e</div>
+  <h1>Les Registres de Langue</h1>
+  <p>Leçon interactive · Grammaire & Expression orale</p>
+</header>
+
+<!-- NAV -->
+<nav>
+  <button class="active" onclick="showTab('intro',this)">🏠 Introduction</button>
+  <button onclick="showTab('cours',this)">📖 Cours</button>
+  <button onclick="showTab('tableau',this)">📊 Tableau comparatif</button>
+  <button onclick="showTab('activite',this)">🧩 Activité</button>
+  <button onclick="showTab('quiz',this)">✅ Quiz</button>
+  <button onclick="showTab('recap',this)">🎯 Récapitulatif</button>
+</nav>
+
+<!-- ══════════════ INTRO ══════════════ -->
+<section id="intro" class="active">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:16%"></div></div>
+    <span class="progress-label">Étape 1 / 6</span>
+  </div>
+
+  <div class="sec-title"><span>🏠</span> Introduction</div>
+
+  <div class="card">
+    <h3>🎯 Objectifs de la leçon</h3>
+    <div class="chips">
+      <span class="chip">Identifier les registres de langue</span>
+      <span class="chip">Distinguer fam. / courant / soutenu</span>
+      <span class="chip">Adapter son langage à la situation</span>
+      <span class="chip">Produire des phrases dans chaque registre</span>
+    </div>
+    <p>À la fin de cette leçon, tu sauras <strong>choisir les mots justes</strong> selon que tu parles à tes camarades, à un professeur ou dans une rédaction officielle.</p>
+  </div>
+
+  <div class="card rouge">
+    <h3>💡 Mise en situation</h3>
+    <p>Lis ces trois façons de demander la route :</p>
+    <div class="exemple-box">
+      <div class="title">👦 À un ami</div>
+      <p>« Eh fréro, la gare, c'est par là-bas ? »</p>
+    </div>
+    <div class="exemple-box">
+      <div class="title">👨 À un passant ordinaire</div>
+      <p>« Excusez-moi, la gare est dans quelle direction ? »</p>
+    </div>
+    <div class="exemple-box">
+      <div class="title">🎓 Dans un texte officiel</div>
+      <p>« Pourriez-vous m'indiquer l'emplacement de la gare ferroviaire, s'il vous plaît ? »</p>
+    </div>
+    <p style="margin-top:8px">Ces trois phrases disent la <strong>même chose</strong>, mais dans des registres différents. Pourquoi ? C'est ce que nous allons découvrir !</p>
+  </div>
+
+  <div class="card bleu">
+    <h3>📌 Qu'est-ce qu'un registre de langue ?</h3>
+    <p>Un <strong>registre de langue</strong> (ou niveau de langue) est une façon de parler ou d'écrire adaptée à une <strong>situation de communication</strong> : le lieu, l'interlocuteur, le sujet abordé et le ton souhaité influencent notre choix de mots et de phrases.</p>
+  </div>
+
+  <button class="btn-act" onclick="showTab('cours', document.querySelector('nav button:nth-child(2)'))">Commencer le cours →</button>
+</section>
+
+<!-- ══════════════ COURS ══════════════ -->
+<section id="cours">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:33%"></div></div>
+    <span class="progress-label">Étape 2 / 6</span>
+  </div>
+
+  <div class="sec-title"><span>📖</span> Les trois registres</div>
+
+  <div class="reg-grid">
+
+    <div class="reg-card fam" data-icon="😄">
+      <span class="tag">REGISTRE FAMILIER</span>
+      <h4>😄 Le Registre Familier</h4>
+      <p>Utilisé entre amis, en famille, dans des conversations décontractées. Il inclut des mots abrégés, des expressions argotiques, une syntaxe relâchée.</p>
+    </div>
+
+    <div class="reg-card cour" data-icon="💬">
+      <span class="tag">REGISTRE COURANT</span>
+      <h4>💬 Le Registre Courant</h4>
+      <p>C'est le français standard, compris par tous. Il est utilisé dans la vie quotidienne, à l'école, dans les médias, entre personnes qui ne se connaissent pas bien.</p>
+    </div>
+
+    <div class="reg-card sout" data-icon="🎓">
+      <span class="tag">REGISTRE SOUTENU</span>
+      <h4>🎓 Le Registre Soutenu (ou littéraire)</h4>
+      <p>Utilisé dans les textes littéraires, les discours officiels, les cérémonies, les dissertations. Le vocabulaire est riche et précis, la syntaxe est soignée.</p>
+    </div>
+
+  </div>
+
+  <div class="card jaune">
+    <h3>🔍 Comment les reconnaître ?</h3>
+    <ul>
+      <li><strong>Vocabulaire :</strong> mots familiers/argot ↔ mots courants ↔ mots recherchés/rares</li>
+      <li><strong>Syntaxe :</strong> phrases incomplètes ↔ phrases correctes ↔ phrases complexes et élaborées</li>
+      <li><strong>Prononciation :</strong> rapide/déformée ↔ normale ↔ articulée/soignée</li>
+      <li><strong>Contexte :</strong> récréation/maison ↔ magasin/transport ↔ tribunal/discours</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>📚 Exemples détaillés</h3>
+    <p style="margin-bottom:10px"><strong>Situation :</strong> parler de quelque chose de beau</p>
+    <div class="exemple-box">
+      <div class="title">😄 Familier</div>
+      <p>« C'est trop stylé ! » / « Waouh, c'est ouf ! »</p>
+    </div>
+    <div class="exemple-box">
+      <div class="title">💬 Courant</div>
+      <p>« C'est très beau. » / « J'aime beaucoup ça. »</p>
+    </div>
+    <div class="exemple-box">
+      <div class="title">🎓 Soutenu</div>
+      <p>« Cette œuvre est d'une remarquable beauté. » / « Je suis vivement impressionné par cette splendeur. »</p>
+    </div>
+  </div>
+
+  <div class="card rouge">
+    <h3>⚠️ À retenir !</h3>
+    <ul>
+      <li>Aucun registre n'est « meilleur » que l'autre : chacun est adapté à une situation.</li>
+      <li>Le registre familier n'est pas un mauvais français — c'est simplement inapproprié dans un contexte formel.</li>
+      <li>Savoir changer de registre, c'est <strong>maîtriser sa langue</strong> !</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════════ TABLEAU ══════════════ -->
+<section id="tableau">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:50%"></div></div>
+    <span class="progress-label">Étape 3 / 6</span>
+  </div>
+
+  <div class="sec-title"><span>📊</span> Tableau comparatif</div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Critère</th>
+          <th>😄 Familier</th>
+          <th>💬 Courant</th>
+          <th>🎓 Soutenu</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Contexte</td>
+          <td class="fam-c">Entre amis, famille</td>
+          <td class="cour-c">Vie quotidienne, école</td>
+          <td class="sout-c">Cérémonies, textes officiels</td>
+        </tr>
+        <tr>
+          <td>Vocabulaire</td>
+          <td class="fam-c">Argot, mots tronqués</td>
+          <td class="cour-c">Mots simples et courants</td>
+          <td class="sout-c">Mots rares, précis, littéraires</td>
+        </tr>
+        <tr>
+          <td>Syntaxe</td>
+          <td class="fam-c">Phrases incomplètes</td>
+          <td class="cour-c">Phrases bien construites</td>
+          <td class="sout-c">Phrases longues, complexes</td>
+        </tr>
+        <tr>
+          <td>Manger</td>
+          <td class="fam-c">« bouffer »</td>
+          <td class="cour-c">« manger »</td>
+          <td class="sout-c">« se sustenter »</td>
+        </tr>
+        <tr>
+          <td>Voiture</td>
+          <td class="fam-c">« bagnole »</td>
+          <td class="cour-c">« voiture »</td>
+          <td class="sout-c">« véhicule automobile »</td>
+        </tr>
+        <tr>
+          <td>Argent</td>
+          <td class="fam-c">« fric », « thunes »</td>
+          <td class="cour-c">« argent »</td>
+          <td class="sout-c">« pécune », « numéraire »</td>
+        </tr>
+        <tr>
+          <td>Maison</td>
+          <td class="fam-c">« baraque »</td>
+          <td class="cour-c">« maison »</td>
+          <td class="sout-c">« demeure », « habitation »</td>
+        </tr>
+        <tr>
+          <td>Ennuyeux</td>
+          <td class="fam-c">« chiant »</td>
+          <td class="cour-c">« ennuyeux »</td>
+          <td class="sout-c">« fastidieux »</td>
+        </tr>
+        <tr>
+          <td>Né(e) quand</td>
+          <td class="fam-c">Négation sans « ne »</td>
+          <td class="cour-c">« Je ne sais pas »</td>
+          <td class="sout-c">« Je l'ignore »</td>
+        </tr>
+        <tr>
+          <td>Interro. indirecte</td>
+          <td class="fam-c">« T'as quoi comme problème ? »</td>
+          <td class="cour-c">« Quel est ton problème ? »</td>
+          <td class="sout-c">« Quel désagrément éprouvez-vous ? »</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card orange">
+    <h3>🇨🇲 Exemple camerounais</h3>
+    <p>Situation : demander à quelqu'un d'où il vient.</p>
+    <div class="exemple-box">
+      <div class="title">😄 Familier</div>
+      <p>« T'es de quel coin ? » / « Tu sors d'où, mon gars ? »</p>
+    </div>
+    <div class="exemple-box">
+      <div class="title">💬 Courant</div>
+      <p>« Tu viens de quelle ville ? » / « D'où es-tu originaire ? »</p>
+    </div>
+    <div class="exemple-box">
+      <div class="title">🎓 Soutenu</div>
+      <p>« Pourriez-vous m'indiquer votre région d'origine ? »</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ ACTIVITÉ ══════════════ -->
+<section id="activite">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:66%"></div></div>
+    <span class="progress-label">Étape 4 / 6</span>
+  </div>
+
+  <div class="sec-title"><span>🧩</span> Activité de classement</div>
+
+  <div class="card">
+    <h3>📝 Consigne</h3>
+    <p>Glisse chaque expression dans la bonne colonne selon son registre de langue. Clique sur <strong>« Vérifier »</strong> quand tu as terminé.</p>
+  </div>
+
+  <!-- Source items -->
+  <div style="background:#fff; border-radius:14px; padding:16px; box-shadow:0 2px 14px rgba(0,0,0,.07); margin-bottom:18px;">
+    <div class="zone-label">📦 Expressions à classer :</div>
+    <div id="source-zone" class="drag-zone" ondragover="allowDrop(event)" ondrop="drop(event,'source')">
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-val="fam" id="d1">« C'est nul ! »</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-val="sout" id="d2">« Il convient de noter que... »</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-val="cour" id="d3">« Je suis fatigué. »</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-val="fam" id="d4">« J'suis crevé, mec ! »</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-val="sout" id="d5">« Je vous saurais gré de... »</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-val="cour" id="d6">« Bonjour, comment allez-vous ? »</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-val="fam" id="d7">« Ça déchire ! »</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-val="sout" id="d8">« Cette question mérite une réflexion approfondie. »</div>
+      <div class="drag-item" draggable="true" ondragstart="drag(event)" data-val="cour" id="d9">« Il fait beau aujourd'hui. »</div>
+    </div>
+  </div>
+
+  <!-- Drop zones -->
+  <div style="display:grid; grid-template-columns:1fr; gap:14px;" id="drop-areas">
+    <div>
+      <div class="zone-label" style="color:#d35400">😄 Familier</div>
+      <div id="zone-fam" class="drag-zone" ondragover="allowDrop(event)" ondrop="drop(event,'fam')"></div>
+    </div>
+    <div>
+      <div class="zone-label" style="color:#0d47a1">💬 Courant</div>
+      <div id="zone-cour" class="drag-zone" ondragover="allowDrop(event)" ondrop="drop(event,'cour')"></div>
+    </div>
+    <div>
+      <div class="zone-label" style="color:#0d5c3a">🎓 Soutenu</div>
+      <div id="zone-sout" class="drag-zone" ondragover="allowDrop(event)" ondrop="drop(event,'sout')"></div>
+    </div>
+  </div>
+
+  <div>
+    <button class="btn-act" onclick="checkActivity()">✅ Vérifier</button>
+    <button class="btn-act reset" onclick="resetActivity()">🔄 Recommencer</button>
+  </div>
+  <div id="act-result"></div>
+</section>
+
+<!-- ══════════════ QUIZ ══════════════ -->
+<section id="quiz">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:83%"></div></div>
+    <span class="progress-label">Étape 5 / 6</span>
+  </div>
+
+  <div class="sec-title"><span>✅</span> Quiz d'évaluation</div>
+
+  <div class="quiz-q" id="q1">
+    <p class="q-text">1. La phrase « T'as vu l'bagnole de prof ? » appartient à quel registre ?</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q1')">Soutenu</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q1')">Familier</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q1')">Courant</button>
+    </div>
+    <div class="feedback ok" id="f1ok">✅ Bravo ! « T'as », « bagnole » et la suppression du « ne » de négation sont des marques du registre familier.</div>
+    <div class="feedback nok" id="f1nok">❌ Incorrect. « T'as », « bagnole » → registre <strong>familier</strong>.</div>
+  </div>
+
+  <div class="quiz-q" id="q2">
+    <p class="q-text">2. Dans quel contexte utilise-t-on le registre soutenu ?</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q2')">Avec ses amis intimes</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q2')">Au marché avec un commerçant</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q2')">Dans une cérémonie officielle ou un discours</button>
+    </div>
+    <div class="feedback ok" id="f2ok">✅ Exact ! Le registre soutenu s'emploie dans les situations formelles : discours, textes littéraires, cérémonies.</div>
+    <div class="feedback nok" id="f2nok">❌ Non. Le registre soutenu est réservé aux situations formelles comme les <strong>cérémonies ou discours officiels</strong>.</div>
+  </div>
+
+  <div class="quiz-q" id="q3">
+    <p class="q-text">3. Quel mot est la forme soutenue de « maison » ?</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q3')">Baraque</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q3')">Demeure</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q3')">Chez-moi</button>
+    </div>
+    <div class="feedback ok" id="f3ok">✅ Correct ! « Demeure » ou « habitation » sont les équivalents soutenus de « maison ».</div>
+    <div class="feedback nok" id="f3nok">❌ Non. Le mot soutenu pour « maison » est <strong>« demeure »</strong>.</div>
+  </div>
+
+  <div class="quiz-q" id="q4">
+    <p class="q-text">4. La phrase « Je ne sais pas où il se trouve » appartient au registre :</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q4')">Familier</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q4')">Courant</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q4')">Soutenu</button>
+    </div>
+    <div class="feedback ok" id="f4ok">✅ Bien ! La phrase est correcte grammaticalement, avec un vocabulaire simple → registre courant.</div>
+    <div class="feedback nok" id="f4nok">❌ Non. C'est le registre <strong>courant</strong> : phrase correcte mais sans vocabulaire recherché.</div>
+  </div>
+
+  <div class="quiz-q" id="q5">
+    <p class="q-text">5. Laquelle de ces phrases est au registre soutenu ?</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q5')">« Je veux manger. »</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q5')">« J'ai trop faim là ! »</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q5')">« Je souhaiterais me sustenter. »</button>
+    </div>
+    <div class="feedback ok" id="f5ok">✅ Parfait ! « Souhaiterais » (conditionnel de politesse) et « se sustenter » (mot littéraire pour manger) sont des marques du soutenu.</div>
+    <div class="feedback nok" id="f5nok">❌ Non. « Je souhaiterais me sustenter » est au registre <strong>soutenu</strong> grâce au conditionnel et au mot rare « sustenter ».</div>
+  </div>
+
+  <div class="quiz-q" id="q6">
+    <p class="q-text">6. Transformer « J'ai rien compris » en registre courant donne :</p>
+    <div class="quiz-opts">
+      <button class="opt-btn" onclick="answer(this,'wrong','q6')">« Je n'ai point saisi la substance de vos propos. »</button>
+      <button class="opt-btn" onclick="answer(this,'correct','q6')">« Je n'ai rien compris. »</button>
+      <button class="opt-btn" onclick="answer(this,'wrong','q6')">« Rien capté, man ! »</button>
+    </div>
+    <div class="feedback ok" id="f6ok">✅ Exact ! On rétablit simplement la négation complète « ne...rien » pour passer au registre courant.</div>
+    <div class="feedback nok" id="f6nok">❌ Non. Il suffit de rétablir le « ne » : <strong>« Je n'ai rien compris. »</strong></div>
+  </div>
+
+  <button id="submit-quiz" onclick="submitQuiz()">Voir mon score 🏆</button>
+  <div id="quiz-score"></div>
+</section>
+
+<!-- ══════════════ RÉCAPITULATIF ══════════════ -->
+<section id="recap">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    <span class="progress-label">Étape 6 / 6 ✓</span>
+  </div>
+
+  <div class="sec-title"><span>🎯</span> Récapitulatif</div>
+
+  <div class="card" style="background:linear-gradient(135deg,#1a8c5a,#0d5c3a); color:#fff; border:none;">
+    <h3 style="color:#fff">🌟 Ce que tu dois retenir</h3>
+    <ul class="recap-list" style="color:#fff">
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">1️⃣</span><span>Il existe <strong>trois registres de langue</strong> : familier, courant et soutenu.</span></li>
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">2️⃣</span><span>Le choix du registre dépend du <strong>contexte, de l'interlocuteur et de l'intention</strong>.</span></li>
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">3️⃣</span><span>Le <strong>registre familier</strong> s'utilise entre proches (argot, syntaxe relâchée).</span></li>
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">4️⃣</span><span>Le <strong>registre courant</strong> est le français standard, compris partout.</span></li>
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">5️⃣</span><span>Le <strong>registre soutenu</strong> emploie un vocabulaire riche et des tournures complexes.</span></li>
+      <li style="border-color:rgba(255,255,255,.2)"><span class="ico">6️⃣</span><span>Aucun registre n'est <strong>supérieur</strong> à l'autre — chacun est approprié à son contexte.</span></li>
+    </ul>
+  </div>
+
+  <div class="card jaune">
+    <h3>📝 Exercice de production à faire chez soi</h3>
+    <p>Choisis <strong>une situation parmi les suivantes</strong> et écris trois phrases (une par registre) :</p>
+    <ul style="margin-top:8px">
+      <li>Demander de l'aide pour porter un sac lourd</li>
+      <li>Expliquer pourquoi tu étais absent à l'école</li>
+      <li>Parler d'un film que tu as vu récemment</li>
+    </ul>
+  </div>
+
+  <div class="card bleu">
+    <h3>🔗 Pour aller plus loin</h3>
+    <ul>
+      <li>Observe les discours à la radio, à la télévision → identifie les registres !</li>
+      <li>Compare comment tu parles à tes amis et à tes professeurs.</li>
+      <li>Lis des textes littéraires camerounais (Mongo Beti, Ferdinand Oyono) et note les mots soutenus.</li>
+    </ul>
+  </div>
+
+  <div style="text-align:center; padding:24px; background:linear-gradient(135deg,#f5a623,#e67e22); border-radius:16px; color:#fff;">
+    <div style="font-size:2.5rem">🏆</div>
+    <div style="font-family:'Baloo 2',cursive; font-size:1.4rem; font-weight:800; margin:6px 0">Félicitations !</div>
+    <p style="font-size:.9rem; opacity:.9">Tu as terminé la leçon sur les registres de langue. Pratique chaque jour et tu deviendras un(e) expert(e) de la langue française !</p>
+  </div>
+</section>
+
+<script>
+// ─── TAB NAVIGATION ───
+function showTab(id, btn) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (btn) btn.classList.add('active');
+  else {
+    const map = {intro:0,cours:1,tableau:2,activite:3,quiz:4,recap:5};
+    document.querySelectorAll('nav button')[map[id]].classList.add('active');
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ─── QUIZ ───
+const answers = {};
+function answer(btn, type, qid) {
+  const q = document.getElementById(qid);
+  if (q.dataset.answered) return;
+  q.dataset.answered = '1';
+  answers[qid] = type;
+  q.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  btn.classList.add(type);
+  document.getElementById(type === 'correct' ? `f${qid.slice(1)}ok` : `f${qid.slice(1)}nok`).style.display = 'block';
+}
+function submitQuiz() {
+  const total = 6;
+  let score = Object.values(answers).filter(v => v === 'correct').length;
+  const div = document.getElementById('quiz-score');
+  const pct = Math.round(score/total*100);
+  let emoji = pct >= 80 ? '🏆' : pct >= 50 ? '👍' : '📚';
+  div.style.display = 'block';
+  div.innerHTML = `${emoji} Score : ${score} / ${total} (${pct}%)<br><span style="font-size:.85rem;font-weight:400;opacity:.85">${pct>=80?'Excellent ! Tu maîtrises bien les registres.':pct>=50?'Bien ! Relis le cours pour consolider.':'Continue à réviser, tu y arriveras !'}</span>`;
+  document.getElementById('submit-quiz').style.display = 'none';
+}
+
+// ─── DRAG & DROP ───
+let draggedId = null;
+function drag(e) { draggedId = e.target.id; }
+function allowDrop(e) { e.preventDefault(); e.currentTarget.classList.add('over'); }
+function drop(e, zone) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('over');
+  if (!draggedId) return;
+  const el = document.getElementById(draggedId);
+  if (zone === 'source') document.getElementById('source-zone').appendChild(el);
+  else if (zone === 'fam')  document.getElementById('zone-fam').appendChild(el);
+  else if (zone === 'cour') document.getElementById('zone-cour').appendChild(el);
+  else if (zone === 'sout') document.getElementById('zone-sout').appendChild(el);
+  draggedId = null;
+}
+document.querySelectorAll('.drag-zone').forEach(z => {
+  z.addEventListener('dragleave', () => z.classList.remove('over'));
+});
+
+function checkActivity() {
+  const zones = {fam: 'zone-fam', cour: 'zone-cour', sout: 'zone-sout'};
+  let correct = 0, total = 9;
+  for (const [reg, zoneId] of Object.entries(zones)) {
+    document.getElementById(zoneId).querySelectorAll('.drag-item').forEach(item => {
+      if (item.dataset.val === reg) { item.style.border = '2px solid #1a8c5a'; correct++; }
+      else item.style.border = '2px solid #c0392b';
+    });
+  }
+  const res = document.getElementById('act-result');
+  if (correct === total) {
+    res.className = 'ok';
+    res.innerHTML = `🏆 Parfait ! Tu as bien classé les ${total} expressions !`;
+  } else {
+    res.className = 'nok';
+    res.innerHTML = `⚠️ ${correct} / ${total} correctes. Les éléments en rouge sont mal placés. Recommence !`;
+  }
+}
+
+function resetActivity() {
+  const src = document.getElementById('source-zone');
+  ['zone-fam','zone-cour','zone-sout'].forEach(id => {
+    document.getElementById(id).querySelectorAll('.drag-item').forEach(el => {
+      el.style.border = '';
+      src.appendChild(el);
+    });
+  });
+  const res = document.getElementById('act-result');
+  res.className = '';
+  res.style.display = 'none';
+}
+</script>
+</body>
+</html>

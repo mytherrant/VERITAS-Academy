@@ -1,0 +1,2463 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cahier de Français — Terminale A · Stances et Poèmes</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --or:#b8860b;--or-clair:#fef7e0;--vert:#1a5c3a;--vert-clair:#e8f5ee;
+  --rouge:#8b1a1a;--rouge-clair:#f8e8e8;--bleu:#1a3a6b;--bleu-clair:#e0eaf5;
+  --violet:#4a1a7a;--violet-clair:#ede8ff;--teal:#0d5c5c;--teal-clair:#e0f5f5;
+  --bg:#faf8f3;--card:#fff;--text:#1a1208;--muted:#6b5a3a;--radius:14px;
+  --marine:#0a2a4a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+
+/* ── HEADER ── */
+.main-header{
+  background:linear-gradient(135deg,#1a0a08 0%,#3a1808 40%,#1a5c3a 70%,#b8860b 100%);
+  color:#fff;padding:36px 20px 28px;text-align:center;position:relative;overflow:hidden
+}
+.main-header::before{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(55deg,rgba(255,255,255,.03) 0,rgba(255,255,255,.03) 1px,transparent 1px,transparent 20px)}
+.main-header .badge{display:inline-block;background:rgba(184,134,11,.25);border:1.5px solid rgba(184,134,11,.5);
+  border-radius:99px;font-size:.7rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+  padding:4px 18px;margin-bottom:12px;color:var(--or-clair)}
+.main-header h1{font-family:'Playfair Display',serif;font-size:clamp(1.6rem,5vw,2.8rem);font-weight:900;line-height:1.15;margin-bottom:6px}
+.main-header p{font-size:.9rem;opacity:.78}
+
+/* ── SIDEBAR NAV ── */
+.app-layout{display:flex;min-height:calc(100vh - 160px)}
+.sidebar{width:260px;flex-shrink:0;background:#fff;border-right:2px solid #e8dfc8;
+  position:sticky;top:0;height:100vh;overflow-y:auto;padding:16px 0}
+.sidebar-section{margin-bottom:4px}
+.sidebar-title{font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
+  color:var(--muted);padding:8px 16px 4px}
+.nav-btn{display:block;width:100%;text-align:left;background:none;border:none;
+  padding:8px 16px 8px 20px;font-family:'Nunito',sans-serif;font-size:.8rem;font-weight:700;
+  color:var(--muted);cursor:pointer;transition:all .15s;border-left:3px solid transparent;line-height:1.4}
+.nav-btn:hover{color:var(--text);background:#fdf8f0}
+.nav-btn.active{color:var(--or);border-left-color:var(--or);background:var(--or-clair)}
+.nav-btn .nav-tag{display:inline-block;font-size:.62rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.08em;padding:1px 7px;border-radius:99px;margin-left:4px;vertical-align:middle}
+.tag-cb1{background:#e8f5ee;color:#0d5c3a}
+.tag-cb2{background:#ede8ff;color:#4a1a7a}
+.tag-cb3{background:#fef7e0;color:#7a5200}
+.tag-meth{background:#e0eaf5;color:#1a3a6b}
+.tag-gt{background:#f8e8e8;color:#8b1a1a}
+.tag-eval{background:#f5f5f5;color:#333}
+
+/* ── CONTENT AREA ── */
+.content-area{flex:1;padding:28px 24px 80px;max-width:820px}
+.lesson-section{display:none}
+.lesson-section.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── LESSON HEADER ── */
+.lesson-header{border-radius:var(--radius);padding:22px 24px;margin-bottom:22px;color:#fff;position:relative;overflow:hidden}
+.lesson-header::before{content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,rgba(255,255,255,.04) 0,rgba(255,255,255,.04) 1px,transparent 1px,transparent 18px)}
+.lesson-header.or{background:linear-gradient(135deg,#1a0a08,#3a2408,#b8860b)}
+.lesson-header.vert{background:linear-gradient(135deg,#0a1a10,#1a5c3a)}
+.lesson-header.bleu{background:linear-gradient(135deg,#0a1a2a,#1a3a6b)}
+.lesson-header.violet{background:linear-gradient(135deg,#1a0a3a,#4a1a7a)}
+.lesson-header.rouge{background:linear-gradient(135deg,#1a0808,#8b1a1a)}
+.lesson-header.teal{background:linear-gradient(135deg,#0a1a1a,#0d5c5c)}
+.lesson-header.marine{background:linear-gradient(135deg,#060e16,#0a2a4a,#0d5c5c)}
+.lesson-tag{display:inline-block;background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.3);
+  border-radius:99px;font-size:.68rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;
+  padding:3px 12px;margin-bottom:8px}
+.lesson-header h2{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:900;line-height:1.2;margin-bottom:4px}
+.lesson-header p{font-size:.84rem;opacity:.8}
+
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:16px;
+  box-shadow:0 2px 12px rgba(0,0,0,.06);border-left:5px solid var(--or)}
+.card.vert{border-left-color:var(--vert)}
+.card.bleu{border-left-color:var(--bleu)}
+.card.rouge{border-left-color:var(--rouge)}
+.card.violet{border-left-color:var(--violet)}
+.card.teal{border-left-color:var(--teal)}
+.card.marine{border-left-color:var(--marine)}
+.card.gray{border-left-color:#999}
+.card h3{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:700;margin-bottom:10px}
+.card p,.card li{font-size:.92rem;line-height:1.78}
+.card ul,.card ol{padding-left:20px}
+.card li{margin-bottom:4px}
+
+/* ── SEC TITLE ── */
+.sec-title{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:800;
+  margin-bottom:14px;display:flex;align-items:center;gap:8px;
+  padding-bottom:8px;border-bottom:2px solid #f0e8d8}
+.sec-title.or{color:var(--or);border-color:var(--or-clair)}
+.sec-title.vert{color:var(--vert);border-color:var(--vert-clair)}
+.sec-title.bleu{color:var(--bleu);border-color:var(--bleu-clair)}
+.sec-title.violet{color:var(--violet);border-color:var(--violet-clair)}
+.sec-title.rouge{color:var(--rouge);border-color:var(--rouge-clair)}
+.sec-title.teal{color:var(--teal);border-color:var(--teal-clair)}
+.sec-title.marine{color:var(--marine);border-color:var(--bleu-clair)}
+
+/* ── OBJECTIF BOX ── */
+.obj-box{background:linear-gradient(135deg,#1a1208,#3a2808);color:#fff;
+  border-radius:var(--radius);padding:16px 20px;margin-bottom:16px}
+.obj-box .obj-label{font-size:.68rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.12em;color:var(--or-clair);margin-bottom:6px}
+.obj-box p{font-size:.9rem;line-height:1.72;opacity:.92}
+
+/* ── CORPUS BOX ── */
+.corpus-box{background:linear-gradient(135deg,#0a1a30,#1a3a6b);color:#fff;
+  border-radius:var(--radius);padding:20px 22px;margin-bottom:16px}
+.corpus-box .corpus-label{font-size:.68rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.12em;color:#a8c8f0;margin-bottom:10px}
+.corpus-box p{font-family:'Playfair Display',serif;font-size:.97rem;font-style:italic;
+  line-height:2.1;color:#fff}
+.corpus-box .strophe{margin-bottom:14px}
+.corpus-box .auteur{font-style:normal;font-size:.78rem;color:rgba(255,255,255,.6);margin-top:12px;font-family:'Nunito',sans-serif}
+
+/* ── RETENIR BOX ── */
+.retenir-box{background:linear-gradient(135deg,var(--vert),#0d3a20);color:#fff;
+  border-radius:var(--radius);padding:18px 20px;margin-bottom:16px}
+.retenir-box h4{font-family:'Playfair Display',serif;font-size:1rem;color:var(--or-clair);margin-bottom:10px}
+.retenir-box p,.retenir-box li{font-size:.88rem;line-height:1.78;opacity:.93}
+.retenir-box ul{padding-left:18px}
+
+/* ── QUESTION LIST ── */
+.q-list{list-style:none;padding:0}
+.q-list li{padding:10px 14px;background:#fff;border-radius:10px;margin-bottom:8px;
+  box-shadow:0 1px 6px rgba(0,0,0,.05);border-left:3px solid var(--or);
+  font-size:.9rem;line-height:1.7}
+.q-list li strong{color:var(--or);margin-right:4px}
+
+/* ── VERS BAC ── */
+.bac-box{background:linear-gradient(135deg,#0a0a20,#1a1a4a);color:#fff;
+  border-radius:var(--radius);padding:18px 20px;margin-bottom:16px}
+.bac-box .bac-label{font-size:.68rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.14em;color:#f0c040;margin-bottom:8px}
+.bac-box p,.bac-box li{font-size:.88rem;line-height:1.75;opacity:.92}
+.bac-box ol{padding-left:18px}
+
+/* ── EXERCICE ── */
+.ex-box{background:var(--or-clair);border:1.5px solid #d4a820;border-radius:var(--radius);padding:16px 18px;margin-bottom:14px}
+.ex-box .ex-label{font-weight:800;color:#7a5200;font-size:.76rem;text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px}
+.ex-box p,.ex-box li{font-size:.9rem;line-height:1.72;color:var(--text)}
+.ex-box ul,.ex-box ol{padding-left:18px}
+
+/* ── TABLE ── */
+.table-wrap{overflow-x:auto;border-radius:var(--radius);box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:16px}
+table{width:100%;border-collapse:collapse;background:#fff;font-size:.84rem}
+thead tr{background:linear-gradient(135deg,#1a0a08,#3a2408);color:var(--or-clair)}
+th,td{padding:11px 13px;text-align:left;border-bottom:1px solid #f0e8d8}
+th{font-family:'Playfair Display',serif;font-weight:700;font-size:.86rem}
+tr:hover td{background:#fdf8f0}
+td:first-child{font-weight:700;color:var(--muted)}
+
+/* ── QUIZ ── */
+.quiz-q{background:#fff;border-radius:var(--radius);padding:18px;margin-bottom:14px;
+  box-shadow:0 2px 12px rgba(0,0,0,.06);border-top:4px solid var(--or)}
+.quiz-q .q-text{font-weight:700;font-size:.93rem;margin-bottom:12px;line-height:1.55}
+.quiz-opts{display:flex;flex-direction:column;gap:7px}
+.opt-btn{background:#fdf8f0;border:2px solid #e8dfc8;border-radius:9px;padding:9px 13px;
+  font-family:'Nunito',sans-serif;font-size:.86rem;font-weight:600;cursor:pointer;
+  text-align:left;transition:all .18s;color:var(--text)}
+.opt-btn:hover:not(:disabled){border-color:var(--or);background:var(--or-clair)}
+.opt-btn.correct{background:#d4edda;border-color:var(--vert);color:#0d3a1f}
+.opt-btn.wrong{background:#f8d7da;border-color:var(--rouge);color:#5a0a0a}
+.feedback{margin-top:8px;font-size:.83rem;font-weight:700;padding:7px 11px;border-radius:7px;display:none}
+.feedback.ok{background:#d4edda;color:#0d3a1f;display:block}
+.feedback.nok{background:#f8d7da;color:#5a0a0a;display:block}
+.score-box{text-align:center;padding:18px;background:linear-gradient(135deg,#b8860b,#1a5c3a);
+  color:#fff;border-radius:var(--radius);font-family:'Playfair Display',serif;
+  font-size:1.2rem;font-weight:700;display:none;margin-top:10px}
+.submit-btn{display:block;margin:0 auto 10px;background:var(--or);color:#fff;border:none;
+  border-radius:99px;padding:11px 30px;font-family:'Playfair Display',serif;font-weight:700;
+  font-size:.95rem;cursor:pointer;transition:background .2s}
+.submit-btn:hover{background:#8b6500}
+
+/* ── DRAG DROP ── */
+.drag-zone{border:2.5px dashed #d4b560;border-radius:var(--radius);min-height:60px;padding:10px;
+  display:flex;flex-wrap:wrap;gap:7px;align-items:flex-start;background:#fdf8f0;transition:border-color .2s}
+.drag-zone.over{border-color:var(--or);background:var(--or-clair)}
+.drag-item{background:#fff;border:2px solid #e8dfc8;border-radius:7px;padding:6px 12px;
+  font-size:.82rem;font-weight:700;cursor:grab;transition:box-shadow .15s;user-select:none}
+.drag-item:active{cursor:grabbing;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.zone-label{font-family:'Playfair Display',serif;font-weight:700;font-size:.88rem;margin-bottom:5px;color:var(--muted)}
+.act-result{text-align:center;font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;
+  margin-top:12px;padding:11px;border-radius:11px;display:none}
+.act-result.ok{background:#d4edda;color:#0d3a1f;display:block}
+.act-result.nok{background:#f8d7da;color:#5a0a0a;display:block}
+.btn-act{background:var(--bleu);color:#fff;border:none;border-radius:99px;padding:9px 24px;
+  font-family:'Playfair Display',serif;font-weight:700;font-size:.9rem;cursor:pointer;
+  transition:background .2s;margin-top:10px;margin-right:7px}
+.btn-act:hover{background:#0d2550}
+.btn-reset{background:var(--muted);color:#fff;border:none;border-radius:99px;padding:9px 24px;
+  font-family:'Playfair Display',serif;font-weight:700;font-size:.9rem;cursor:pointer;margin-top:10px}
+
+/* ── PLAN ── */
+.plan-box{border-radius:var(--radius);overflow:hidden;margin-bottom:12px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.plan-header{background:linear-gradient(135deg,#1a0a08,#3a2408);color:var(--or-clair);
+  padding:11px 17px;font-family:'Playfair Display',serif;font-size:.92rem;font-weight:700}
+.plan-body{background:#fff;padding:13px 17px;font-size:.87rem;line-height:1.78}
+.plan-body strong{color:var(--or)}
+.plan-body p{margin-bottom:6px}
+
+/* ── EPREUVE ── */
+.epreuve-header{background:linear-gradient(135deg,#0a0a20,#1a1a5a);color:#fff;
+  border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.epreuve-header .ep-label{font-size:.68rem;font-weight:800;text-transform:uppercase;
+  letter-spacing:.14em;color:#f0c040;margin-bottom:6px}
+.epreuve-header h3{font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:700;margin-bottom:4px}
+
+/* ── TOGGLE REPONSE ── */
+.reponse-wrap{background:var(--bg);border-radius:9px;padding:13px 16px;margin-top:10px;
+  font-size:.88rem;line-height:1.75;border-left:3px solid var(--or);display:none}
+.reponse-wrap.open{display:block}
+.toggle-rep{background:none;border:1.5px solid var(--teal);color:var(--teal);border-radius:99px;
+  padding:5px 15px;font-family:'Nunito',sans-serif;font-size:.78rem;font-weight:700;
+  cursor:pointer;transition:all .18s;margin-top:8px}
+.toggle-rep:hover{background:var(--teal);color:#fff}
+
+/* ── CHIPS ── */
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+.chip{background:var(--or-clair);color:#7a5200;border-radius:99px;padding:4px 13px;
+  font-size:.76rem;font-weight:700;border:1.5px solid #d4a820}
+
+/* ── ANNOTATION ── */
+.annot{cursor:pointer;border-bottom:1.5px dotted var(--or);color:var(--or-clair);transition:all .2s}
+.annot:hover{background:rgba(184,134,11,.2);border-radius:3px}
+.annot-popup{display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:#1c0812;border:1.5px solid var(--or);border-radius:12px;padding:13px 17px;
+  max-width:340px;width:90%;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.annot-popup.active{display:block;animation:fadeUp .2s ease}
+.annot-popup h4{font-family:'Playfair Display',serif;color:var(--or-clair);margin-bottom:5px;font-size:.95rem}
+.annot-popup p{font-size:.83rem;color:rgba(255,255,255,.85);line-height:1.65}
+.close-popup{position:absolute;top:7px;right:11px;cursor:pointer;font-size:1rem;color:rgba(255,255,255,.5)}
+
+/* ── GRILLE ── */
+.grille-box{background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);margin-bottom:16px}
+.grille-box table thead tr{background:linear-gradient(135deg,#1a5c3a,#0d3a20)}
+
+/* ── RECAP LIST ── */
+.recap-list{list-style:none;padding:0}
+.recap-list li{display:flex;gap:11px;align-items:flex-start;padding:10px 0;
+  border-bottom:1px solid #e8dfc8;font-size:.91rem;line-height:1.7}
+.recap-list li:last-child{border:none}
+.recap-list .ico{font-size:1.3rem;flex-shrink:0}
+
+/* ── MOBILE ── */
+.menu-toggle{display:none;position:fixed;top:12px;left:12px;z-index:999;
+  background:var(--or);color:#fff;border:none;border-radius:50%;
+  width:42px;height:42px;font-size:1.2rem;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.2)}
+@media(max-width:700px){
+  .sidebar{position:fixed;left:-260px;top:0;z-index:998;height:100%;transition:left .3s;box-shadow:4px 0 20px rgba(0,0,0,.15)}
+  .sidebar.open{left:0}
+  .menu-toggle{display:flex;align-items:center;justify-content:center}
+  .content-area{padding:18px 14px 80px}
+  .app-layout{flex-direction:column}
+}
+.divider{height:1px;background:linear-gradient(90deg,transparent,#d4b560,transparent);margin:20px 0}
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+
+<div class="main-header">
+  <div class="badge">🇨🇲 Terminale A · Français · Année scolaire 2024–2025</div>
+  <h1>📚 Cahier de Français<br><em>Stances et Poèmes</em> — Sully Prudhomme</h1>
+  <p>Jacques Miterand Takou · Dominique Ambassa · Toutes séquences & semaines</p>
+</div>
+
+<div class="app-layout">
+<!-- ══════════ SIDEBAR ══════════ -->
+<nav class="sidebar" id="sidebar">
+
+<div class="sidebar-section">
+  <div class="sidebar-title">🏁 SÉQUENCE I</div>
+  <button class="nav-btn active" onclick="show('s1-diag',this)">📋 Éval. diagnostique</button>
+  <button class="nav-btn" onclick="show('s1-gt-myth',this)">GT : Mythologie <span class="nav-tag tag-gt">GT</span></button>
+  <button class="nav-btn" onclick="show('s1-cb2-metrique',this)">Éléments de métrique <span class="nav-tag tag-cb2">CB2</span></button>
+  <button class="nav-btn" onclick="show('s1-lm-liminaire',this)">LM Poème liminaire <span class="nav-tag tag-cb1">CB1</span></button>
+  <button class="nav-btn" onclick="show('s1-controle',this)">Contrôle + Compte rendu</button>
+</div>
+
+<div class="sidebar-section">
+  <div class="sidebar-title">📅 SEMAINE 1</div>
+  <button class="nav-btn" onclick="show('s2-paratexte',this)">Analyse des paratextes <span class="nav-tag tag-cb1">CB1</span></button>
+  <button class="nav-btn" onclick="show('s2-gt-nature',this)">GT : Nature & Vie humaine <span class="nav-tag tag-gt">GT</span></button>
+  <button class="nav-btn" onclick="show('s2-image',this)">Analyse d'image <span class="nav-tag tag-cb2">CB2</span></button>
+  <button class="nav-btn" onclick="show('s2-emetteur',this)">Émetteur / Récepteur <span class="nav-tag tag-cb2">CB2</span></button>
+  <button class="nav-btn" onclick="show('s2-metrique2',this)">Métrique (le hibou) <span class="nav-tag tag-cb2">CB2</span></button>
+  <button class="nav-btn" onclick="show('s2-methodo1',this)">Méthodo CC : Consigne <span class="nav-tag tag-meth">Méth.</span></button>
+</div>
+
+<div class="sidebar-section">
+  <div class="sidebar-title">📅 SEMAINE 2</div>
+  <button class="nav-btn" onclick="show('s3-rosees',this)">GT : « Rosées » <span class="nav-tag tag-gt">GT</span></button>
+  <button class="nav-btn" onclick="show('s3-homme-mer',this)">GT : « L'Homme et la mer » <span class="nav-tag tag-gt">GT</span></button>
+  <button class="nav-btn" onclick="show('s3-substituts',this)">Référents & substituts <span class="nav-tag tag-cb2">CB2</span></button>
+  <button class="nav-btn" onclick="show('s3-phraseologie',this)">Phraséologie <span class="nav-tag tag-cb2">CB2</span></button>
+  <button class="nav-btn" onclick="show('s3-methodo2',this)">Méthodo CC : Axes <span class="nav-tag tag-meth">Méth.</span></button>
+</div>
+
+<div class="sidebar-section">
+  <div class="sidebar-title">📅 SEMAINE 3</div>
+  <button class="nav-btn" onclick="show('s4-dormeur',this)">GT : « Le Dormeur du val » <span class="nav-tag tag-gt">GT</span></button>
+  <button class="nav-btn" onclick="show('s4-latents',this)">Contenus latents <span class="nav-tag tag-cb2">CB2</span></button>
+  <button class="nav-btn" onclick="show('s4-sonores',this)">Procédés sonores <span class="nav-tag tag-cb2">CB2</span></button>
+  <button class="nav-btn" onclick="show('s4-oral',this)">Production orale <span class="nav-tag tag-cb3">CB3</span></button>
+  <button class="nav-btn" onclick="show('s4-methodo3',this)">Méthodo CC : Plan <span class="nav-tag tag-meth">Méth.</span></button>
+</div>
+
+<div class="sidebar-section">
+  <div class="sidebar-title">📅 SEMAINE 4</div>
+  <button class="nav-btn" onclick="show('s5-olympio',this)">GT : « Tristesse d'Olympio » <span class="nav-tag tag-gt">GT</span></button>
+  <button class="nav-btn" onclick="show('s5-midi',this)">GT : « Midi » <span class="nav-tag tag-gt">GT</span></button>
+  <button class="nav-btn" onclick="show('s5-ressem1',this)">LM « Ressemblance » — S1 <span class="nav-tag tag-cb1">CB1</span></button>
+  <button class="nav-btn" onclick="show('s5-ressem2',this)">Plan détaillé — S2 <span class="nav-tag tag-meth">Méth.</span></button>
+  <button class="nav-btn" onclick="show('s5-ressem3',this)">Confrontation — S3 <span class="nav-tag tag-eval">Éval.</span></button>
+</div>
+
+<div class="sidebar-section">
+  <div class="sidebar-title">⚖️ SEMAINE 5 — ÉPREUVES</div>
+  <button class="nav-btn" onclick="show('ep1-langue',this)">Épreuve 1 : Langue française</button>
+  <button class="nav-btn" onclick="show('ep2-langue',this)">Épreuve 2 : L'Enfant des poubelles</button>
+  <button class="nav-btn" onclick="show('ep3-cc',this)">Épreuve 3 : CC « Rencontre »</button>
+  <button class="nav-btn" onclick="show('ep4-cc',this)">Épreuve 4 : CC « La Poésie »</button>
+  <button class="nav-btn" onclick="show('ep5-controle',this)">Épreuve 5 : Contrôle de lecture</button>
+</div>
+
+</nav>
+<!-- ══════════ END SIDEBAR ══════════ -->
+
+<div class="content-area">
+
+<!-- ══════════════════════════════════════════════
+     SÉQUENCE I — ÉVALUATION DIAGNOSTIQUE
+══════════════════════════════════════════════ -->
+<div class="lesson-section active" id="s1-diag">
+  <div class="lesson-header or">
+    <div class="lesson-tag">Séquence I · Introduction</div>
+    <h2>📋 Évaluation diagnostique</h2>
+    <p>Vérifier et consolider les prérequis · Stances et Poèmes</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Vérifier et consolider les prérequis avant d'aborder la séquence sur <em>Stances et Poèmes</em> de Sully Prudhomme.</p>
+  </div>
+
+  <div class="corpus-box">
+    <div class="corpus-label">📄 Texte support : La corruption dans les services publics</div>
+    <p>Plusieurs noms de codes sont attribués à ces pratiques qui sont aussi vieilles que le monde : « gombo », « tchoko », « réseau », « geste », « blé », « enveloppe », « whisky ». Aucun service n'est épargné. Les arnaqueurs ont investi toute la chaîne administrative partant de l'accès aux grandes écoles en passant par les concours administratifs jusqu'au circuit des affectations en passant par les prises en solde des nouveaux agents publics, les avancements et les nominations…</p>
+    <div class="auteur">Grégoire Djarmaila, « Services publics : la maladie du monnayage » — Cameroon Tribune n°12686, 19 septembre 2022</div>
+  </div>
+
+  <div class="sec-title or"><span>📝</span> I. Langue française</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Qui parle dans le texte ? Sa présence est-elle explicite ou implicite ?</li>
+    <li><strong>2.</strong> Quelle est la fonction de langage dominante ? Identifie et justifie son emploi.</li>
+    <li><strong>3.</strong> Détermine la structure de phrase dominante dans le premier paragraphe. Que traduit son emploi ?</li>
+    <li><strong>4.</strong> Identifie dans le texte un emprunt, une néologie de forme et une néologie de sens. Explique-les et justifie leur emploi dans ce contexte.</li>
+    <li><strong>5.</strong> Construis les champs lexicaux de la corruption et de l'emploi. Quelle intention de communication se dégage de leur association ?</li>
+    <li><strong>6.</strong> À partir de 4 indices, donne le type de ce texte. Précise sa fonction.</li>
+  </ul>
+
+  <div class="sec-title vert"><span>✂️</span> II. Contraction de texte</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> De quoi parle le texte ?</li>
+    <li><strong>2.</strong> Quel est le point de vue de l'auteur ?</li>
+    <li><strong>3.</strong> Relève deux connecteurs logiques dans le texte et donne leurs valeurs.</li>
+    <li><strong>4.</strong> Le texte compte 208 mots, réduis-le au ¼ de sa longueur en respectant les exigences du résumé.</li>
+    <li><strong>5.</strong> Selon toi, la corruption est-elle vraiment le principal frein au développement du Cameroun ?</li>
+  </ul>
+
+  <div class="sec-title bleu"><span>✍️</span> III. Commentaire composé</div>
+  <div class="corpus-box">
+    <div class="corpus-label">Extrait — Wole Soyinka, Le Lion et la perle, Acte II, 1968</div>
+    <p>SADIKOU : Dans ce cas, ne tournons pas autour du pot : Baroka te demande pour épouse.<br><br>
+    LAKOUNLÉ : (bondit) Quoi ! Ô le porc cynique ! le chameau ! l'insatiable coureur gâteux !<br><br>
+    SIDI : La paix, mon petit Kounlé. Tu deviens fatigant ! Le message est pour moi, pas pour toi.<br><br>
+    LAKOUNLÉ : Ma Ruth, ma Rachel, mon Esther, ma Bethsabée, vous qui rassemblez toutes les perfections révélées depuis la Genèse jusqu'à l'Apocalypse…</p>
+  </div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Quelle est l'idée générale du texte ?</li>
+    <li><strong>2.</strong> Axe 1 : La séduction de Lakounlé — Identifie deux outils d'analyse et leur interprétation.</li>
+    <li><strong>3.</strong> Axe 2 : La vantardise/l'orgueil de Sidi — Identifie deux outils et leur interprétation.</li>
+    <li><strong>4.</strong> Donne en justifiant deux intérêts de ce texte.</li>
+    <li><strong>5.</strong> Rédige un paragraphe de commentaire pour l'une des deux idées.</li>
+  </ul>
+
+  <div class="sec-title violet"><span>🎓</span> IV. Dissertation</div>
+  <div class="card violet">
+    <h3>Sujet</h3>
+    <p>Selon Barthélemy KOTCHY, « Le théâtre négro-africain est un donné à voir et un donné à penser ».</p>
+  </div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Qu'est-ce que le théâtre négro-africain ? Cite quelques œuvres.</li>
+    <li><strong>2.</strong> Quel problème soulève ce sujet ?</li>
+    <li><strong>3.</strong> Qu'est-ce que cet extrait de Soyinka donne « à voir » et qu'est-ce qui est donné à penser ?</li>
+    <li><strong>4.</strong> Rédige un paragraphe de dissertation sur le théâtre comme donné à voir en illustrant avec Soyinka.</li>
+  </ul>
+
+  <div class="retenir-box">
+    <h4>📊 Grille d'auto-évaluation</h4>
+    <ul>
+      <li>✅ Comprendre l'histoire et ses personnages</li>
+      <li>✅ Retrouver les idées principales</li>
+      <li>✅ Identifier le sujet et le verbe dans une phrase</li>
+      <li>✅ Faire attention aux accords (verbe/sujet, pluriel)</li>
+      <li>✅ Conjuguer les verbes aux temps demandés</li>
+      <li>✅ Utiliser du vocabulaire précis</li>
+      <li>✅ Écrire un petit texte clair et structuré</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ SÉQUENCE I — GT MYTHOLOGIE ══ -->
+<div class="lesson-section" id="s1-gt-myth">
+  <div class="lesson-header rouge">
+    <div class="lesson-tag">Séquence I · CB1 — Réception</div>
+    <h2>🏛️ GT : L'expression de la mythologie dans la poésie symboliste du 19ᵉ s.</h2>
+    <p>Groupement de textes · <em>Stances et Poèmes</em></p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Reconnaître et interpréter les références mythologiques dans la poésie symboliste du 19ᵉ siècle, notamment dans l'œuvre de Sully Prudhomme.</p>
+  </div>
+
+  <div class="chips">
+    <span class="chip">Définir la mythologie</span>
+    <span class="chip">Identifier les figures mythologiques</span>
+    <span class="chip">Relier mythe et symbolisme</span>
+    <span class="chip">Analyser un texte poétique</span>
+  </div>
+
+  <div class="sec-title rouge"><span>📖</span> I. La mythologie — Définition</div>
+  <div class="card">
+    <h3>Qu'est-ce que la mythologie ?</h3>
+    <p>La <strong>mythologie</strong> est un ensemble de récits fondateurs (mythes) transmis par une culture pour expliquer l'origine du monde, de l'homme, des phénomènes naturels et des valeurs morales. La mythologie <strong>gréco-latine</strong> est la plus présente dans la littérature française.</p>
+  </div>
+  <div class="card rouge">
+    <h3>Le Symbolisme poétique (19ᵉ siècle)</h3>
+    <ul>
+      <li><strong>Principe :</strong> Suggérer plutôt que nommer — le poème est un réseau de symboles</li>
+      <li><strong>Figures clés :</strong> Baudelaire, Verlaine, Mallarmé, Rimbaud, Sully Prudhomme</li>
+      <li><strong>Rapport à la mythologie :</strong> Les mythes, chargés de symboles universels, deviennent le langage idéal du symbolisme</li>
+    </ul>
+  </div>
+
+  <div class="sec-title rouge"><span>🏛️</span> II. Mythes clés dans Stances et Poèmes</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Personnage</th><th>Récit mythologique</th><th>Symbole dans la poésie</th></tr></thead>
+      <tbody>
+        <tr><td>Prométhée</td><td>Vola le feu aux dieux — enchaîné par Zeus</td><td>Génie créateur souffrant, révolte</td></tr>
+        <tr><td>Icare</td><td>Voulut atteindre le soleil — ailes de cire fondues</td><td>Idéal inaccessible, chute du rêveur</td></tr>
+        <tr><td>Vénus / Aphrodite</td><td>Déesse de l'amour, née de l'écume de la mer</td><td>Beauté idéale, amour, désir esthétique</td></tr>
+        <tr><td>Apollon</td><td>Dieu du soleil, de la poésie, meneur des Muses</td><td>Inspiration poétique, lumière</td></tr>
+        <tr><td>Psyché</td><td>Mortelle aimée d'Éros, rendue immortelle par Zeus</td><td>Âme humaine quêtant l'idéal</td></tr>
+        <tr><td>Les Parques</td><td>Clotho, Lachésis, Atropos — filent le destin</td><td>Destin implacable, mort inévitable</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card or">
+    <h3>Fonctions de la mythologie dans la poésie</h3>
+    <ul>
+      <li><strong>Symbolique :</strong> Le mythe condense une idée complexe en une image (Prométhée = génie rebelle puni)</li>
+      <li><strong>Esthétique :</strong> La référence antique ennoblit le poème (nommer Vénus plutôt que « la beauté »)</li>
+      <li><strong>Universelle :</strong> Le mythe parle à tous les lecteurs cultivés (Icare = l'idéal inaccessible)</li>
+      <li><strong>Philosophique :</strong> Le mythe illustre une réflexion sur la condition humaine (Sisyphe = l'absurde)</li>
+    </ul>
+  </div>
+
+  <div id="act-myth" class="card">
+    <h3>🧩 Activité — Associer mythe et symbole</h3>
+    <p style="margin-bottom:12px">Glisse chaque personnage dans la bonne zone selon sa valeur symbolique dans la poésie symboliste.</p>
+    <div class="zone-label">📦 Personnages à classer :</div>
+    <div id="src-myth" class="drag-zone" ondragover="allowDrop(event)" ondrop="dropM(event,'src-myth')">
+      <div class="drag-item" draggable="true" ondragstart="dragStart(event)" data-val="genie" id="dm1">Prométhée</div>
+      <div class="drag-item" draggable="true" ondragstart="dragStart(event)" data-val="ideal" id="dm2">Icare</div>
+      <div class="drag-item" draggable="true" ondragstart="dragStart(event)" data-val="beaute" id="dm3">Vénus</div>
+      <div class="drag-item" draggable="true" ondragstart="dragStart(event)" data-val="poesie" id="dm4">Apollon</div>
+      <div class="drag-item" draggable="true" ondragstart="dragStart(event)" data-val="destin" id="dm5">Les Parques</div>
+      <div class="drag-item" draggable="true" ondragstart="dragStart(event)" data-val="ideal" id="dm6">Psyché</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+      <div><div class="zone-label" style="color:var(--rouge)">🔥 Génie souffrant</div>
+        <div id="zm-genie" class="drag-zone" ondragover="allowDrop(event)" ondrop="dropM(event,'zm-genie')"></div></div>
+      <div><div class="zone-label" style="color:var(--bleu)">🌟 Idéal / Âme</div>
+        <div id="zm-ideal" class="drag-zone" ondragover="allowDrop(event)" ondrop="dropM(event,'zm-ideal')"></div></div>
+      <div><div class="zone-label" style="color:var(--or)">🌹 Beauté / Amour</div>
+        <div id="zm-beaute" class="drag-zone" ondragover="allowDrop(event)" ondrop="dropM(event,'zm-beaute')"></div></div>
+      <div><div class="zone-label" style="color:var(--vert)">☀️ Poésie</div>
+        <div id="zm-poesie" class="drag-zone" ondragover="allowDrop(event)" ondrop="dropM(event,'zm-poesie')"></div></div>
+      <div style="grid-column:1/-1"><div class="zone-label" style="color:var(--violet)">⏳ Destin / Mort</div>
+        <div id="zm-destin" class="drag-zone" ondragover="allowDrop(event)" ondrop="dropM(event,'zm-destin')"></div></div>
+    </div>
+    <button class="btn-act" onclick="checkMythDrop()">✅ Vérifier</button>
+    <button class="btn-reset" onclick="resetMythDrop()">🔄 Recommencer</button>
+    <div class="act-result" id="res-myth"></div>
+  </div>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <ul>
+      <li>La mythologie est un ensemble de récits fondateurs symboliques sur les dieux, héros et la condition humaine</li>
+      <li>Le symbolisme (19ᵉ s.) cherche à suggérer des vérités profondes par des symboles, pas à les nommer</li>
+      <li>Mythes à retenir : Prométhée · Icare · Vénus · Apollon · les Parques</li>
+      <li>Quatre fonctions : symbolique · esthétique · universelle · philosophique</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ SÉQUENCE I — CB2 MÉTRIQUE ══ -->
+<div class="lesson-section" id="s1-cb2-metrique">
+  <div class="lesson-header violet">
+    <div class="lesson-tag">Séquence I · CB2 — Outils de la langue</div>
+    <h2>📏 Éléments de métrique dans la poésie classique</h2>
+    <p>Vers · Rimes · Strophes — texte support : « Rosée »</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Étudier les éléments de métrique dans la poésie classique : compter les syllabes, identifier les types de rimes et les formes strophiques.</p>
+  </div>
+
+  <div class="sec-title violet"><span>📏</span> I. Le vers et la syllabe</div>
+  <div class="card violet">
+    <h3>Règles de décompte syllabique</h3>
+    <ul>
+      <li>Le <strong>« e » muet en fin de mot</strong> ne compte pas s'il est suivi d'une voyelle</li>
+      <li>Le <strong>« e » muet en fin de vers</strong> ne compte jamais</li>
+      <li>La <strong>diérèse</strong> : deux voyelles prononcées séparément (vi-o-lon = 3 syllabes)</li>
+      <li>La <strong>synérèse</strong> : deux voyelles contractées en une (vio-lon = 2 syllabes)</li>
+    </ul>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Nom du vers</th><th>Syllabes</th><th>Usage principal</th></tr></thead>
+      <tbody>
+        <tr><td>Alexandrin</td><td>12</td><td>Vers noble, tragédie, poésie lyrique</td></tr>
+        <tr><td>Décasyllabe</td><td>10</td><td>Épopées médiévales, Renaissance</td></tr>
+        <tr><td>Octosyllabe</td><td>8</td><td>Fables, poésie légère, Romans</td></tr>
+        <tr><td>Heptasyllabe</td><td>7</td><td>Chansons, poèmes populaires</td></tr>
+        <tr><td>Hexasyllabe</td><td>6</td><td>Poèmes brefs, légèreté</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card or">
+    <h3>L'alexandrin et la césure</h3>
+    <p>L'<strong>alexandrin</strong> (12 syllabes) se divise en deux <strong>hémistiches</strong> de 6 syllabes séparés par la <strong>césure</strong> (pause obligatoire).<br><br>
+    Exemple : « Je | l'ai | trop | ai | mé | e // pour | ne | point | la | haïr » → 12 syllabes, césure à la 6ᵉ</p>
+    <p style="margin-top:10px"><strong>Enjambement :</strong> le sens déborde sur le vers suivant sans pause syntaxique.<br>
+    <strong>Rejet :</strong> un élément court est rejeté au début du vers suivant.<br>
+    <strong>Contre-rejet :</strong> un élément est anticipé à la fin du vers précédent.</p>
+  </div>
+
+  <div class="sec-title violet"><span>🎵</span> II. Les rimes</div>
+  <div class="card">
+    <h3>Qualité des rimes</h3>
+    <ul>
+      <li><strong>Rime pauvre :</strong> 1 son commun (ex. : ami / parti → [i])</li>
+      <li><strong>Rime suffisante :</strong> 2 sons communs (ex. : aimer / rêver → [é]+[r])</li>
+      <li><strong>Rime riche :</strong> 3 sons ou plus (ex. : lumière / poussière → [ièr]+consonnes)</li>
+    </ul>
+  </div>
+  <div class="card violet">
+    <h3>Disposition des rimes</h3>
+    <ul>
+      <li><strong>Rimes plates (suivies) AABB :</strong> vers 1 rime avec vers 2, vers 3 avec vers 4</li>
+      <li><strong>Rimes croisées (alternées) ABAB :</strong> vers 1 rime avec vers 3, vers 2 avec vers 4</li>
+      <li><strong>Rimes embrassées ABBA :</strong> vers 1 rime avec vers 4, vers 2 avec vers 3</li>
+    </ul>
+    <p style="margin-top:10px"><strong>Alternance masculin/féminin :</strong> En poésie classique, les rimes masculines (syllabe sonore finale) et féminines (terminant par un « e » muet) doivent obligatoirement alterner.</p>
+  </div>
+
+  <div class="sec-title violet"><span>📋</span> III. Les strophes</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Nom</th><th>Nombre de vers</th><th>Caractéristiques</th></tr></thead>
+      <tbody>
+        <tr><td>Distique</td><td>2</td><td>Formule concise, sentencieuse</td></tr>
+        <tr><td>Tercet</td><td>3</td><td>Déséquilibre expressif</td></tr>
+        <tr><td>Quatrain</td><td>4</td><td>Forme la plus courante, équilibrée</td></tr>
+        <tr><td>Sizain</td><td>6</td><td>Développement en deux parties</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card or">
+    <h3>Formes poétiques fixes</h3>
+    <ul>
+      <li><strong>Le sonnet :</strong> 14 vers — 2 quatrains + 2 tercets. Forme la plus noble du lyrisme.</li>
+      <li><strong>L'ode :</strong> poème lyrique en strophes régulières, à la gloire d'un être ou idéal.</li>
+      <li><strong>La stance :</strong> strophe lyrique autonome (= titre du recueil de Prudhomme)</li>
+      <li><strong>L'élégie :</strong> poème de plainte, de deuil, de mélancolie.</li>
+    </ul>
+  </div>
+
+  <div class="sec-title vert"><span>🔎</span> IV. Analyse guidée — « Rosée » (texte support)</div>
+  <div class="corpus-box">
+    <div class="corpus-label">Texte support : « Rosée » — Sully Prudhomme</div>
+    <div class="strophe">
+      <p>Dans le calice ouvert d'une rose entrouverte<br>
+      Dort une larme d'eau, perle du matin ;<br>
+      C'est la rosée : elle a toute la nuit couverte<br>
+      De ses pleurs froids la fleur au cœur incertain.</p>
+    </div>
+    <div class="strophe">
+      <p>Le soleil vient sourire à sa gouttelette frêle,<br>
+      Elle s'évapore et monte au ciel de saphir ;<br>
+      Ainsi l'âme s'exhale, ainsi la larme vole<br>
+      Vers le beau, vers le bien, vers l'éternel désir.</p>
+    </div>
+  </div>
+  <ul class="q-list">
+    <li><strong>1. Mètre :</strong> Compte les syllabes du vers 1 : « Dans le ca-li-ce ou-vert d'u-ne ro-se en-trou-ver-te » → Combien ? Quel est le mètre ?</li>
+    <li><strong>2. Rimes :</strong> Identifie les rimes des deux strophes et détermine leur disposition (plates, croisées ou embrassées).</li>
+    <li><strong>3. Qualité :</strong> Classe les rimes en pauvres, suffisantes ou riches.</li>
+    <li><strong>4. Alternance :</strong> L'alternance masculin/féminin est-elle respectée ?</li>
+    <li><strong>5. Sens :</strong> Comment le mètre et les rimes contribuent-ils au sens du poème ?</li>
+  </ul>
+
+  <div class="card vert">
+    <h3>✅ Éléments de correction</h3>
+    <ul>
+      <li><strong>Mètre :</strong> Alexandrins (12 syllabes)</li>
+      <li><strong>Disposition :</strong> ABAB (rimes croisées)</li>
+      <li><strong>Schéma :</strong> entrouverte(A-fém.) / matin(B-masc.) / couverte(A-fém.) / incertain(B-masc.)</li>
+      <li><strong>Qualité :</strong> entrouverte/couverte = riche ; matin/incertain = suffisante</li>
+      <li><strong>Alternance :</strong> Oui, parfaitement respectée</li>
+    </ul>
+  </div>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <ul>
+      <li>L'<strong>alexandrin</strong> (12 syll.) est divisé en 2 hémistiches par la <strong>césure</strong></li>
+      <li>3 qualités de rimes : <strong>pauvre</strong> (1 son) · <strong>suffisante</strong> (2 sons) · <strong>riche</strong> (3+ sons)</li>
+      <li>3 dispositions : <strong>plates</strong> AABB · <strong>croisées</strong> ABAB · <strong>embrassées</strong> ABBA</li>
+      <li>Alternance masc./fém. <strong>obligatoire</strong> en poésie classique</li>
+      <li><strong>Sonnet</strong> = 2 quatrains + 2 tercets · <strong>Stance</strong> = strophe lyrique autonome</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ SÉQUENCE I — LM LIMINAIRE ══ -->
+<div class="lesson-section" id="s1-lm-liminaire">
+  <div class="lesson-header rouge">
+    <div class="lesson-tag">Séquence I · CB1 — Réception des textes</div>
+    <h2>📜 Lecture Méthodique du Poème liminaire</h2>
+    <p>Contenus latents · Phraséologie · Formes poétiques — Plan détaillé</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Lire et exploiter le poème liminaire de <em>Stances et Poèmes</em> : identifier les contenus latents/manifestes, dégager les axes de la LM et élaborer un plan détaillé de CC.</p>
+  </div>
+
+  <div class="corpus-box">
+    <div class="corpus-label">Poème liminaire — Sully Prudhomme, Stances et Poèmes, 1865</div>
+    <div class="strophe">
+      <p>Ces vers sont les miens : <span class="annot" onclick="showAnnot('a1')">j'y souffre</span> et j'y soupire ;<br>
+      Ils ont leur blessure et leur joie à côté ;<br>
+      Qu'on les lise avec la même charité<br>
+      Qu'on lit les maux d'un frère avant de les maudire.</p>
+    </div>
+    <div class="strophe">
+      <p>Je n'ai pas souhaité le mal que j'ai souffert ;<br>
+      Mais, chaque fois qu'un deuil sur ma vie a passé,<br>
+      J'en ai gardé le <span class="annot" onclick="showAnnot('a2')">deuil</span> exprès dans mes écrits :<br>
+      <span class="annot" onclick="showAnnot('a3')">La douleur est un bien dont l'art est l'intérêt.</span></p>
+    </div>
+    <div class="strophe">
+      <p>Du fond de mes chagrins j'ai fait sonner <span class="annot" onclick="showAnnot('a4')">ces lyres</span> ;<br>
+      Quelquefois c'est gaiement que j'ai pleuré aussi :<br>
+      L'âme aime à <span class="annot" onclick="showAnnot('a5')">se mentir</span> dans ses propres délires.</p>
+    </div>
+    <div class="strophe">
+      <p>Je vous offre, <span class="annot" onclick="showAnnot('a6')">ami</span>, ces pages sans malice ;<br>
+      Peut-être en les lisant vous sourirez parfois :<br>
+      Nous pleurons les mêmes larmes, vous et moi.</p>
+    </div>
+  </div>
+
+  <div class="annot-popup" id="popup-a1"><span class="close-popup" onclick="closeAnnot()">✕</span><h4>« j'y souffre »</h4><p>Aveu direct de souffrance. Le poète identifie ses vers à son intériorité. Fonction <strong>lyrique</strong>.</p></div>
+  <div class="annot-popup" id="popup-a2"><span class="close-popup" onclick="closeAnnot()">✕</span><h4>Répétition de « deuil »</h4><p><strong>Polyptote :</strong> répétition du même mot dans des fonctions différentes. Insiste sur la transformation de la douleur en matière poétique.</p></div>
+  <div class="annot-popup" id="popup-a3"><span class="close-popup" onclick="closeAnnot()">✕</span><h4>Formule centrale</h4><p><strong>Métaphore financière :</strong> la douleur est le capital, l'art en est l'intérêt (le bénéfice). Formule-clé de la poétique de Prudhomme.</p></div>
+  <div class="annot-popup" id="popup-a4"><span class="close-popup" onclick="closeAnnot()">✕</span><h4>« ces lyres »</h4><p><strong>Métonymie :</strong> la lyre (instrument d'Apollon) désigne la poésie. Référence mythologique discrète.</p></div>
+  <div class="annot-popup" id="popup-a5"><span class="close-popup" onclick="closeAnnot()">✕</span><h4>« se mentir »</h4><p><strong>Oxymore psychologique :</strong> l'âme se trompe elle-même pour supporter la réalité. La poésie comme consolation illusoire mais nécessaire.</p></div>
+  <div class="annot-popup" id="popup-a6"><span class="close-popup" onclick="closeAnnot()">✕</span><h4>« ami »</h4><p><strong>Apostrophe :</strong> interpellation directe du lecteur. Crée une complicité intime entre le poète et son lecteur.</p></div>
+
+  <div class="sec-title or"><span>🔍</span> Contenus manifestes / Contenus latents</div>
+  <div class="card">
+    <h3>Contenus manifestes (ce que le texte dit explicitement)</h3>
+    <ul>
+      <li>Le poète présente son recueil comme une confession personnelle</li>
+      <li>Il demande au lecteur de lire avec bienveillance</li>
+      <li>La souffrance est la matière première de son art</li>
+      <li>Il conclut sur une solidarité universelle dans la douleur</li>
+    </ul>
+  </div>
+  <div class="card or">
+    <h3>Contenus latents (ce que le texte suggère implicitement)</h3>
+    <ul>
+      <li>La <strong>poésie comme catharsis</strong> : écrire pour guérir, transformer la douleur en beauté</li>
+      <li>La <strong>conception symboliste</strong> du poète souffrant comme figure prophétique</li>
+      <li>La <strong>fraternité humaine</strong> dans la souffrance : le poète parle pour tous</li>
+      <li>La <strong>valeur rédemptrice de l'art</strong> : la création transcende la souffrance individuelle</li>
+    </ul>
+  </div>
+
+  <div class="sec-title bleu"><span>🔍</span> Axes de la Lecture Méthodique</div>
+  <div class="card bleu">
+    <h3>Axe I — Un poème-confession : le moi lyrique en quête de complicité</h3>
+    <ul>
+      <li>Usage du « je » : affirmation d'une identité poétique personnelle (v.1)</li>
+      <li>Aveu de souffrance dès le v.1 : le poète ne cache pas sa vulnérabilité</li>
+      <li>Appel à la bienveillance (v.3-4) : lecteur invité à lire avec empathie</li>
+      <li>Interpellation directe « ami » (v.12) : complicité poète/lecteur</li>
+      <li>Conclusion universelle (v.14) : la souffrance partagée efface la distance</li>
+    </ul>
+  </div>
+  <div class="card rouge">
+    <h3>Axe II — La poétique de la douleur : l'art comme transformation</h3>
+    <ul>
+      <li>La souffrance n'est pas voulue mais assumée (v.5-6)</li>
+      <li>Formule centrale v.8 : « La douleur est un bien dont l'art est l'intérêt »</li>
+      <li>Métaphore financière : douleur = capital ; art = bénéfice</li>
+      <li>Paradoxe v.10 : « c'est gaiement que j'ai pleuré » → la poésie transcende</li>
+    </ul>
+  </div>
+  <div class="card vert">
+    <h3>Axe III — Un art poétique entre romantisme et symbolisme</h3>
+    <ul>
+      <li>Héritage romantique : le poète souffrant comme figure centrale</li>
+      <li>Dimension symboliste : lyre, deuil, larmes → symboles voilant le réel</li>
+      <li>Universalité : le poème particulier devient miroir de l'âme humaine (v.14)</li>
+    </ul>
+  </div>
+
+  <div class="sec-title or"><span>📋</span> Plan détaillé du Commentaire Composé</div>
+  <div class="plan-box"><div class="plan-header">Introduction</div>
+    <div class="plan-body">
+      <p><strong>Situation :</strong> Sully Prudhomme (1839–1907), poète symboliste, 1er Prix Nobel de Litt. (1901), publie <em>Stances et Poèmes</em> en 1865.</p>
+      <p><strong>Problématique :</strong> En quoi ce poème liminaire constitue-t-il à la fois une confession intime et un art poétique symboliste ?</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">I. Un poème-confession : le moi lyrique en quête de complicité</div>
+    <div class="plan-body">
+      <p><strong>I.1 :</strong> L'affirmation d'une identité poétique personnelle → citations v.1, v.12</p>
+      <p><strong>I.2 :</strong> L'aveu de vulnérabilité comme invitation à l'empathie → citations v.3-4</p>
+      <p><strong>I.3 :</strong> La solidarité universelle dans la souffrance → citation v.14</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">II. L'art comme transformation de la souffrance</div>
+    <div class="plan-body">
+      <p><strong>II.1 :</strong> La souffrance, matière involontaire mais précieuse → citation v.5-6</p>
+      <p><strong>II.2 :</strong> Formule centrale : la douleur comme capital artistique → citation + analyse v.8</p>
+      <p><strong>II.3 :</strong> Le paradoxe de la joie dans les larmes → citation v.10-11</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">III. Un art poétique entre romantisme et symbolisme</div>
+    <div class="plan-body">
+      <p><strong>III.1 :</strong> L'héritage romantique : le poète souffrant comme figure centrale</p>
+      <p><strong>III.2 :</strong> La dimension symboliste : symboles (lyre, larmes, deuil) → v.9</p>
+      <p><strong>III.3 :</strong> Le liminaire comme seuil annonçant les thèmes du recueil</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Conclusion</div>
+    <div class="plan-body">
+      <p>Ce poème est à la fois une confession intime, une poétique de la douleur transfigurée et un pacte de lecture. À rapprocher de Baudelaire (<em>Les Fleurs du Mal</em>) et de Verlaine (« Art Poétique »).</p>
+    </div>
+  </div>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens — Phraséologie</h4>
+    <ul>
+      <li>La <strong>phraséologie</strong> désigne les expressions figées propres à une langue</li>
+      <li>Formule centrale à citer : <strong>« La douleur est un bien dont l'art est l'intérêt »</strong></li>
+      <li>La <strong>métaphore filée</strong> de la souffrance/capital artistique traverse le poème</li>
+      <li>Ton : mélange de mélancolie, d'humilité et de fraternité</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ SÉQUENCE I — CONTRÔLE ══ -->
+<div class="lesson-section" id="s1-controle">
+  <div class="lesson-header marine">
+    <div class="lesson-tag">Séquence I · Évaluation finale</div>
+    <h2>📝 Contrôle de lecture + Compte rendu</h2>
+    <p>Intégration (3h) · LM, centres d'intérêt et plan détaillé CC de « Renaissance »</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Évaluer la lecture de l'œuvre intégrale et élaborer un plan détaillé du Commentaire Composé sur « Renaissance ».</p>
+  </div>
+
+  <div class="sec-title marine"><span>📝</span> A. Contrôle de lecture</div>
+  <div class="card marine">
+    <h3>Question 1 (3 pts)</h3>
+    <p>Qui est Sully Prudhomme ? Précise sa nationalité, son époque, son mouvement littéraire et sa distinction la plus importante.</p>
+    <button class="toggle-rep" onclick="toggleRep(this)">👁 Voir la réponse</button>
+    <div class="reponse-wrap">Sully Prudhomme (1839–1907) est un poète français du courant symboliste. Il est le <strong>premier lauréat du Prix Nobel de Littérature</strong> (1901). Son recueil <em>Stances et Poèmes</em> (1865) est son œuvre inaugurale.</div>
+  </div>
+  <div class="card marine">
+    <h3>Question 2 (4 pts)</h3>
+    <p>Que signifie chacun des deux termes du titre <em>Stances et Poèmes</em> ?</p>
+    <button class="toggle-rep" onclick="toggleRep(this)">👁 Voir la réponse</button>
+    <div class="reponse-wrap">Une <strong>stance</strong> est une strophe lyrique autonome exprimant une pensée complète. Un <strong>poème</strong> est une composition poétique plus développée. Le titre réunit deux formes : la concision lyrique et l'ampleur poétique.</div>
+  </div>
+  <div class="card marine">
+    <h3>Question 3 (4 pts)</h3>
+    <p>Cite et explique brièvement deux thèmes majeurs du recueil.</p>
+    <button class="toggle-rep" onclick="toggleRep(this)">👁 Voir la réponse</button>
+    <div class="reponse-wrap"><strong>Thème 1 — La souffrance intérieure :</strong> transformée en matière artistique (« La douleur est un bien dont l'art est l'intérêt »).<br><br><strong>Thème 2 — L'amour et la beauté fragile :</strong> « Le Vase brisé » — l'amour comme vase imperceptiblement détruit.</div>
+  </div>
+  <div class="card marine">
+    <h3>Question 4 (5 pts)</h3>
+    <p>Que représente le mythe de Prométhée pour Sully Prudhomme ? Quel lien fais-tu avec le symbolisme ?</p>
+    <button class="toggle-rep" onclick="toggleRep(this)">👁 Voir la réponse</button>
+    <div class="reponse-wrap">Prométhée incarne le poète lui-même : celui qui, en offrant sa sensibilité au monde (comme Prométhée offrait le feu), accepte de souffrir en retour. Ce mythe s'inscrit dans la poétique symboliste : le personnage condense une philosophie entière de la création artistique.</div>
+  </div>
+
+  <div class="sec-title teal"><span>📄</span> B. Méthodologie du Compte rendu</div>
+  <div class="card teal">
+    <h3>Structure du compte rendu de lecture</h3>
+    <ol style="padding-left:18px">
+      <li style="margin-bottom:8px"><strong>Présentation :</strong> Titre, auteur, date, maison d'édition, genre, courant littéraire</li>
+      <li style="margin-bottom:8px"><strong>Résumé et thèmes :</strong> 5-6 lignes max · 2-3 thèmes dominants</li>
+      <li style="margin-bottom:8px"><strong>Analyse des procédés :</strong> Style, formes poétiques, procédés stylistiques</li>
+      <li style="margin-bottom:8px"><strong>Appréciation personnelle argumentée :</strong> Ce que tu as aimé/moins aimé, intérêt pour le lecteur contemporain</li>
+      <li><strong>Conclusion et recommandation :</strong> À qui ? Pourquoi ? Phrase-bilan</li>
+    </ol>
+  </div>
+  <div class="card rouge">
+    <h3>⚠️ Erreurs à éviter</h3>
+    <ul>
+      <li>❌ Ne pas confondre compte rendu et résumé pur</li>
+      <li>❌ Ne pas citer sans analyser</li>
+      <li>❌ Ne pas oublier un jugement personnel argumenté</li>
+      <li>✅ Toujours relier les procédés stylistiques au sens</li>
+    </ul>
+  </div>
+
+  <div class="sec-title or"><span>📋</span> C. Plan CC — « Renaissance » (Intégration)</div>
+  <div class="corpus-box">
+    <div class="corpus-label">Texte : « Renaissance » — Sully Prudhomme, Stances et Poèmes</div>
+    <div class="strophe">
+      <p>Depuis qu'elle a souffert, elle s'est embrassée<br>
+      À la nature entière avec plus de douceur ;<br>
+      Elle a mieux entendu la plainte de sa sœur<br>
+      La brise, et deviné la blessure de la rosée.</p>
+    </div>
+    <div class="strophe">
+      <p>Elle a senti passer dans l'haleine des nuits<br>
+      De longs frissons pareils à ses propres émois ;<br>
+      Elle a cru retrouver ses douleurs et ses bruits<br>
+      Dans le cri de la mer et le silence des bois.</p>
+    </div>
+    <div class="strophe">
+      <p>Depuis qu'elle a souffert, elle aime tout ce qui souffre ;<br>
+      Son âme compatit au deuil universel ;<br>
+      La pitié l'a saisie et ne la quitte plus :<br>
+      Elle entend dans la mort même un appel vers la vie,<br>
+      Et la mort lui sourit parce qu'elle est guérie.</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Introduction — Problématique</div>
+    <div class="plan-body"><p>Comment Prudhomme transforme-t-il, dans « Renaissance », la souffrance individuelle en une expérience d'ouverture universelle ?</p></div>
+  </div>
+  <div class="plan-box"><div class="plan-header">I. La souffrance comme révélation de la sensibilité universelle</div>
+    <div class="plan-body">
+      <p><strong>I.1 :</strong> Anaphore « Depuis qu'elle a souffert » (v.1 et v.9) → la souffrance comme seuil transformateur</p>
+      <p><strong>I.2 :</strong> « Elle a mieux entendu » → comparatif de progression, éducation des sens</p>
+      <p><strong>I.3 :</strong> « Deviné la blessure de la rosée » → la fragilité naturelle rejoint la fragilité humaine</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">II. La nature comme miroir de l'âme — Correspondances symbolistes</div>
+    <div class="plan-body">
+      <p><strong>II.1 :</strong> Personnification : « la plainte de sa sœur la brise » → nature fraternelle</p>
+      <p><strong>II.2 :</strong> Antithèse « cri de la mer / silence des bois » → complexité de l'âme</p>
+      <p><strong>II.3 :</strong> Comparaison : « frissons pareils à ses propres émois » → monde intérieur/extérieur unis</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">III. La renaissance : guérison par l'empathie et réconciliation avec la vie</div>
+    <div class="plan-body">
+      <p><strong>III.1 :</strong> « La pitié l'a saisie et ne la quitte plus » → compassion durable</p>
+      <p><strong>III.2 :</strong> Paradoxe : « Elle entend dans la mort même un appel vers la vie »</p>
+      <p><strong>III.3 :</strong> « La mort lui sourit parce qu'elle est guérie » → réconciliation totale</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Conclusion — Ouverture</div>
+    <div class="plan-body"><p>À rapprocher des « Correspondances » de Baudelaire et de <em>Sagesse</em> de Verlaine. La souffrance individuelle devient chez Prudhomme le chemin vers la compassion universelle.</p></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SEMAINE 1 — PARATEXTES
+══════════════════════════════════════════════ -->
+<div class="lesson-section" id="s2-paratexte">
+  <div class="lesson-header vert">
+    <div class="lesson-tag">Semaine 1 · CB1 — Réception</div>
+    <h2>📖 Analyse des paratextes — Hypothèses de lecture</h2>
+    <p>Étude de l'œuvre intégrale · <em>Stances et Poèmes</em></p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Formuler des hypothèses et attentes de lecture à partir de l'analyse des paratextes de <em>Stances et Poèmes</em>.</p>
+  </div>
+
+  <div class="sec-title vert"><span>🔬</span> Analyse des paratextes</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Comment s'intitule l'œuvre à étudier ?</li>
+    <li><strong>2.</strong> Qui l'a écrite ?</li>
+    <li><strong>3.</strong> En quelle année ? Et chez quel éditeur ?</li>
+    <li><strong>4.</strong> À quel genre et sous-genre souscrit-elle ?</li>
+    <li><strong>5.</strong> Quelles sont les illustrations présentes sur la couverture ? Que suggèrent ces images ?</li>
+    <li><strong>6.</strong> Identifie les couleurs, puis analyse et interprète-les selon le contexte.</li>
+  </ul>
+
+  <div class="sec-title vert"><span>🧐</span> Hypothèses de lecture</div>
+  <div class="card">
+    <h3>À partir de tes réponses, formule quatre hypothèses :</h3>
+    <ul>
+      <li>L'œuvre pourrait parler de…</li>
+      <li>On peut s'attendre à…</li>
+      <li>S'agirait-il de…</li>
+      <li>Le titre « Stances et Poèmes » suggère…</li>
+    </ul>
+  </div>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <ul>
+      <li>🌺 Sully Prudhomme (1839–1907) — poète français, Prix Nobel de Littérature 1901</li>
+      <li>🌺 <strong>Stance</strong> : poème court, généralement de 4 à 8 vers, exprimant une idée ou un sentiment</li>
+      <li>🌺 <strong>Poème</strong> : texte écrit en vers ou en prose exprimant la beauté et les sentiments personnels</li>
+      <li>🌺 La couverture épurée (noir sur blanc, homme nu labourant) laisse augurer une écriture mélancolique et sobre</li>
+    </ul>
+  </div>
+
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice 1</div>
+    <p>Formule les hypothèses de lecture à partir des titres suivants :</p>
+    <ul><li>« À l'hirondelle »</li><li>« Inconscience »</li><li>« Pluie »</li><li>« Les Chaînes »</li></ul>
+  </div>
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice 2</div>
+    <p>Soient les titres et dédicaces : <em>LE VASE BRISÉ (Albert Decrais.)</em> / <em>ROSÉES (À Paul Bouvard)</em></p>
+    <ol><li>De quel type de paratexte s'agit-il ?</li><li>Formule deux hypothèses pour chacun.</li></ol>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 1 — GT NATURE ET VIE HUMAINE ══ -->
+<div class="lesson-section" id="s2-gt-nature">
+  <div class="lesson-header rouge">
+    <div class="lesson-tag">Semaine 1 · CB1 — Groupement de textes</div>
+    <h2>🌿 GT : La nature comme métaphore de la vie humaine</h2>
+    <p>Le dialogue entre l'homme et la nature</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Mettre <em>Stances et Poèmes</em> en relation avec d'autres œuvres symboliques autour de la thématique de la nature.</p>
+  </div>
+
+  <div class="card">
+    <h3>📌 Corpus du groupement</h3>
+    <ul>
+      <li>🌺 <strong>Texte 1 :</strong> Sully Prudhomme, « Rosées » (<em>Stances et Poèmes</em>)</li>
+      <li>🌺 <strong>Texte 2 :</strong> Charles Baudelaire, « L'Homme et la mer » (<em>Les Fleurs du mal</em>)</li>
+      <li>🌺 <strong>Texte 3 :</strong> Arthur Rimbaud, « Le Dormeur du Val » (<em>Poésies</em>)</li>
+      <li>🌺 <strong>Texte 4 :</strong> Victor Hugo, « Tristesse d'Olympio » (<em>Les Rayons et les Ombres</em>)</li>
+      <li>🌺 <strong>Texte 5 :</strong> Leconte de Lisle, « Midi » (<em>Poèmes antiques</em>)</li>
+    </ul>
+  </div>
+
+  <div class="sec-title rouge"><span>✏️</span> Présentation du thème et méthode</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Que sais-tu de chaque auteur ?</li>
+    <li><strong>2.</strong> De quelles nationalités sont-ils ?</li>
+    <li><strong>3.</strong> À quel courant littéraire appartiennent-ils ?</li>
+    <li><strong>4.</strong> De quelles œuvres sont tirés les textes ?</li>
+    <li><strong>5.</strong> Lis chaque texte et dis de quoi il parle.</li>
+    <li><strong>6.</strong> Trouve les points de convergence et de divergence.</li>
+  </ul>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <p>Le groupement est un exercice qui s'inscrit dans le <strong>dialogisme / intertextualité</strong>. Il vise à montrer comment la poésie devient à la fois un miroir de l'âme et une fenêtre ouverte sur la nature et la société, en confrontant Prudhomme à d'autres voix contemporaines.</p>
+  </div>
+
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice 1</div>
+    <p>Lis chacun des textes en relevant les points de divergence et de convergence dans un tableau :</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Texte / Auteur</th><th>Rapport à la nature</th><th>Thème central</th><th>Convergences</th><th>Divergences</th></tr></thead>
+        <tbody>
+          <tr><td>Prudhomme — « Rosées »</td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>Baudelaire — « L'Homme et la mer »</td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>Rimbaud — « Le Dormeur du Val »</td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>Hugo — « Tristesse d'Olympio »</td><td></td><td></td><td></td><td></td></tr>
+          <tr><td>Leconte de Lisle — « Midi »</td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 1 — ANALYSE D'IMAGE ══ -->
+<div class="lesson-section" id="s2-image">
+  <div class="lesson-header teal">
+    <div class="lesson-tag">Semaine 1 · CB2 — Outils de la langue</div>
+    <h2>🖼️ Analyse d'image</h2>
+    <p>Nature, composantes et messages de l'image</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Analyser une image et décoder les différents messages véhiculés : message dénotatif (1er degré) et message connotatif (intention de communication).</p>
+  </div>
+
+  <div class="sec-title teal"><span>✏️</span> Traitement de la notion</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Observe attentivement l'image.</li>
+    <li><strong>2.</strong> Quelle est sa nature (photo, dessin, affiche, tableau…) ?</li>
+    <li><strong>3.</strong> Combien de personnages apparaissent sur l'image ?</li>
+    <li><strong>4.</strong> Qui sont-ils ?</li>
+    <li><strong>5.</strong> Où se trouvent-ils et que font-ils ?</li>
+    <li><strong>6.</strong> Quelles émotions lis-tu sur leurs visages ?</li>
+    <li><strong>7.</strong> Quel message peut-on dégager de cette image ?</li>
+  </ul>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens — Méthode d'analyse d'image</h4>
+    <ul>
+      <li><strong>Observation :</strong> Regarder attentivement l'image, déterminer son type/nature et relever ses composantes</li>
+      <li><strong>Description :</strong> Décrire précisément ce que l'on voit sans interpréter (objets, personnes, positions, angles de vue, couleurs)</li>
+      <li><strong>Interprétation :</strong> Donner du sens à l'image en tenant compte du contexte
+        <ul>
+          <li>Messages <strong>dénotatifs</strong> : sens de premier degré, ce qu'on voit directement</li>
+          <li>Messages <strong>connotatifs</strong> : intentions de communication, sens symbolique</li>
+        </ul>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 1 — ÉMETTEUR/RÉCEPTEUR ══ -->
+<div class="lesson-section" id="s2-emetteur">
+  <div class="lesson-header bleu">
+    <div class="lesson-tag">Semaine 1 · CB2 — Outils de la langue</div>
+    <h2>📡 Émetteur / Récepteur</h2>
+    <p>Identifier, classer et interpréter les marques de l'émetteur et du récepteur</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Identifier, classer et interpréter les marques de l'émetteur et du récepteur dans un texte.</p>
+  </div>
+
+  <div class="corpus-box">
+    <div class="corpus-label">Corpus — Louis Aragon, Roman inachevé, Gallimard, 1966</div>
+    <p>Que serais-je sans toi qui vins à ma rencontre<br>
+    Que cette heure arrêtée au cadran de la montre<br>
+    Que serais-je sans toi qu'un cœur au bois dormant<br>
+    Que serais-je sans toi que ce balbutiement ?<br><br>
+    J'ai tout appris de toi sur les choses humaines<br>
+    Et j'ai vu désormais le monde à ta façon<br>
+    J'ai tout appris de toi comme on boit aux fontaines<br>
+    Comme on lit dans le ciel les étoiles lointaines<br>
+    Comme au passant qui chante on reprend sa chanson<br>
+    J'ai tout appris de toi jusqu'au sens du frisson !</p>
+  </div>
+
+  <div class="sec-title bleu"><span>✏️</span> Traitement de la notion</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Lis attentivement le corpus.</li>
+    <li><strong>2.</strong> Qui parle dans le texte ?</li>
+    <li><strong>3.</strong> À qui s'adresse-t-il ?</li>
+    <li><strong>4.</strong> Par quels indices remarques-tu leurs présences dans le texte ?</li>
+    <li><strong>5.</strong> Relève et classe les indices de l'émetteur et ceux du récepteur.</li>
+    <li><strong>6.</strong> Quelle relation les unit ?</li>
+    <li><strong>7.</strong> Que traduit l'abondance des indices de l'un et de l'autre ?</li>
+  </ul>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <div class="table-wrap" style="margin-top:10px">
+      <table>
+        <thead><tr><th>Facteurs de communication</th><th>Marques de présence</th><th>Effets de sens</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Émetteur</strong> (locuteur, énonciateur, narrateur, poète)</td>
+            <td>Explicites : je, j', me, moi, m' / mon, ma, mes<br>Implicites : pronoms pluriels, on, !, …, vocabulaire mélioratif/péjoratif</td>
+            <td>Exprimer ses états d'âme · prise de position · engagement personnel</td>
+          </tr>
+          <tr>
+            <td><strong>Récepteur</strong> (lecteur, destinataire, auditeur, spectateur)</td>
+            <td>Tu, te, toi, t', vous / ton, ta, tes, vos / l'apostrophe / l'impératif</td>
+            <td>Respect, intimité, conseil, ordre, politesse</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="bac-box">
+    <div class="bac-label">👑 VERS LE BAC</div>
+    <ol>
+      <li style="margin-bottom:12px"><strong>(BAC CD 2022)</strong> : « Chez les voisins, Loutaya ne dormit pas aussitôt non plus… »<br>a. À partir d'indices précis, identifiez les émetteurs de cet extrait.<br>b. Justifiez leur alternance.</li>
+      <li><strong>(BAC BI 2022)</strong> : « Docta... Je ne veux pas casser votre science là que vous avez achetée à l'Université… »<br>a. Identifiez les interlocuteurs dans les trois premières lignes.<br>b. Précisez l'attitude de l'émetteur vis-à-vis des récepteurs.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 1 — MÉTRIQUE (LE HIBOU) ══ -->
+<div class="lesson-section" id="s2-metrique2">
+  <div class="lesson-header violet">
+    <div class="lesson-tag">Semaine 1 · CB2 — Outils de la langue</div>
+    <h2>🦉 Éléments de métrique — Le Hibou</h2>
+    <p>Vers · Rimes · Strophes — Réné Philombe</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Étudier les éléments de métrique dans la poésie classique à partir du sonnet « Le Hibou » de René Philombe.</p>
+  </div>
+
+  <div class="corpus-box">
+    <div class="corpus-label">Corpus — René Philombe, Petites gouttes de chant pour créer l'homme</div>
+    <p>Le/hi/bou,/cet/oi/seau/des/fu/nes/tes/au/gures,<br>
+    Est fait pour apeurer les plus fermes d'esprits.<br>
+    Sa tête perforée de grands yeux ahuris<br>
+    Renferme des pensées et des sciences obscures.<br><br>
+    Tant/que/rit/le/so/leil/sur/tou/tes/les/ver/dures,<br>
+    Il reste dans un coin, ce rêveur incompris ;<br>
+    Et là, nonchalamment, sans pousser aucun cri,<br>
+    Se cache des vivants dans des voluptés pures.<br><br>
+    Mais quand coulent des cieux les ténèbres paisibles,<br>
+    Il s'éveille et déploie sa généreuse ardeur<br>
+    Pour tuer dans nos champs des bestioles nuisibles.<br><br>
+    Le sage a du hibou ce noble caractère :<br>
+    En offrant au prochain le meilleur de son cœur,<br>
+    Il couvre son bienfait de nuit et de mystère.</p>
+  </div>
+
+  <div class="sec-title violet"><span>✏️</span> Traitement de la notion</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Lis attentivement le corpus.</li>
+    <li><strong>2.</strong> Comment est disposé le texte ?</li>
+    <li><strong>3.</strong> Comment commence chaque ligne ?</li>
+    <li><strong>4.</strong> Que remarques-tu à la fin de chacune ?</li>
+    <li><strong>5.</strong> Compte les syllabes de chaque vers. Que remarques-tu ?</li>
+    <li><strong>6.</strong> Combien de strophes compte le texte ? Comment les appelle-t-on ?</li>
+    <li><strong>7.</strong> À quel type de texte appartient cet extrait ? Justifie.</li>
+  </ul>
+
+  <div class="card vert">
+    <h3>Éléments de correction attendus</h3>
+    <ul>
+      <li><strong>Forme :</strong> Sonnet (2 quatrains + 2 tercets = 14 vers)</li>
+      <li><strong>Mètre :</strong> Alexandrins (12 syllabes) — le découpage syllabique est indiqué sur les vers 1 et 5</li>
+      <li><strong>Rimes :</strong> ABBA (embrassées) dans les quatrains, CDE / CDE ou CDC / EDE dans les tercets</li>
+      <li><strong>Thème :</strong> Le hibou comme image du sage qui agit dans l'ombre pour le bien commun</li>
+    </ul>
+  </div>
+
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice — Hymne national</div>
+    <p>Étudie la métrique dans le texte suivant (extrait de l'Hymne national du Cameroun) :</p>
+    <div style="font-style:italic;margin-top:8px;line-height:2">
+      <p>O Cameroun, berceau de nos ancêtres,<br>
+      Autrefois tu vécus dans la barbarie.<br>
+      Comme un soleil tu commences à paraître,<br>
+      Peu à peu tu sors de ta sauvagerie.<br><br>
+      Que tous tes enfants du Nord au Sud,<br>
+      De l'Est à l'Ouest soient tout amour !<br>
+      Te servir que ce soit leur seul but<br>
+      Pour remplir leur devoir toujours.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 1 — MÉTHODO CC CONSIGNE ══ -->
+<div class="lesson-section" id="s2-methodo1">
+  <div class="lesson-header marine">
+    <div class="lesson-tag">Semaine 1 · Méthodologie</div>
+    <h2>✍️ Méthodologie CC : Analyser la consigne</h2>
+    <p>Texte : « Si je pouvais » — Sully Prudhomme</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Analyser correctement le texte et la consigne du commentaire composé afin de tirer les éléments nécessaires à l'élaboration du plan.</p>
+  </div>
+
+  <div class="corpus-box">
+    <div class="corpus-label">Corpus — « Si je pouvais » — Sully Prudhomme, Stances et Poèmes, « Femmes », 1865</div>
+    <div class="strophe">
+      <p>Si je pouvais aller lui dire :<br>
+      « Elle est à vous et ne m'inspire<br>
+      Plus rien, même plus d'amitié ;<br>
+      Je n'en ai plus pour cette ingrate ;<br>
+      Mais elle est pâle, délicate :<br>
+      Ayez soin d'elle par pitié.</p>
+    </div>
+    <div class="strophe">
+      <p>« Écoutez-moi sans jalousie,<br>
+      Car l'aile de sa fantaisie<br>
+      N'a fait, hélas ! que m'effleurer ;<br>
+      Je sais comment sa main repousse,<br>
+      Mais pour ceux qu'elle aime elle est douce<br>
+      Ne la faites jamais pleurer. »</p>
+    </div>
+    <div class="strophe">
+      <p>Si je pouvais aller lui dire :<br>
+      « Elle est triste et lente à sourire ;<br>
+      Donnez-lui des fleurs chaque jour,<br>
+      Des bluets plutôt que des roses :<br>
+      C'est l'offrande des moindres choses<br>
+      Qui recèle le plus d'amour. »</p>
+    </div>
+    <div class="strophe">
+      <p>Je pourrais vivre avec l'idée<br>
+      Qu'elle est chérie et possédée<br>
+      Non par moi, mais selon mon cœur…<br>
+      Méchante enfant qui m'abandonne,<br>
+      Vois le chagrin que tu me donnes :<br>
+      Je ne peux rien pour ton bonheur !</p>
+    </div>
+    <div class="auteur">Consigne : Sans dissocier le fond de la forme, vous ferez de ce texte un commentaire composé. Vous pourrez, si vous voulez, en vous servant des indices du référent, de la fonction impressive, du vocabulaire, de l'implicite, de la ponctuation, des éléments de rythme, les figures de style etc. montrer la douleur d'un amant délaissé, soucieux du bonheur de l'aimée malgré son propre chagrin.</div>
+  </div>
+
+  <div class="sec-title marine"><span>✏️</span> Traitement de la notion</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Quelles sont les parties de la consigne ?</li>
+    <li><strong>2.</strong> Quelle compréhension as-tu de l'expression « sans dissocier le fond et la forme » ?</li>
+    <li><strong>3.</strong> Combien d'idée(s) chaque consigne propose-t-elle ?</li>
+    <li><strong>4.</strong> Comment nomme-t-on celle(s)-ci dans le cadre du Commentaire Composé ?</li>
+    <li><strong>5.</strong> Que te suggère chacune d'elle(s) ?</li>
+    <li><strong>6.</strong> Déduis au moins deux hypothèses de lecture pour chaque idée proposée.</li>
+    <li><strong>7.</strong> Quels types de renseignements une consigne de CC offre-t-elle ?</li>
+  </ul>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <ul>
+      <li>🌺 <strong>Le fond :</strong> contenu informatif et thématique du texte — l'ensemble des idées développées</li>
+      <li>🌺 <strong>La forme :</strong> ensemble d'outils linguistiques et procédés d'écriture (temps verbaux, ponctuation, focalisation, structures de phrases, figures de style…)</li>
+      <li>🌺 La consigne peut fournir : l'idée générale du texte / les deux centres d'intérêt / un seul CI (et le candidat doit trouver l'autre)</li>
+    </ul>
+  </div>
+
+  <div class="bac-box">
+    <div class="bac-label">👑 VERS LE BAC — Analyse de consignes</div>
+    <ol>
+      <li style="margin-bottom:14px"><strong>(BAC A 2024)</strong> : « Vous ferez de ce texte un commentaire composé sans dissocier le fond de la forme. À l'aide des champs lexicaux, des types de phrase, des temps verbaux, des figures de style, etc., vous pourrez montrer comment la conception intéressée du mariage chez Diddi brise les rêves de sa fille Ramla. »<br>→ Identifie les parties de la consigne et analyse-les.</li>
+      <li><strong>(BAC A 2025)</strong> : « Sans dissocier le fond de la forme, vous ferez de ce texte un commentaire composé. En faisant attention aux didascalies, aux types de phrase, aux répliques des personnages, aux champs lexicaux, aux figures de style, etc., vous pourrez montrer comment l'incitation du peuple à la révolte par Dualla Manga débouche sur son sentiment de satisfaction de la mission accomplie. »</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SEMAINE 2 — GT ROSÉES
+══════════════════════════════════ -->
+<div class="lesson-section" id="s3-rosees">
+  <div class="lesson-header vert">
+    <div class="lesson-tag">Semaine 2 · CB1 — Groupement de textes</div>
+    <h2>🌿 GT : « Rosées » — La rosée comme métaphore de l'âme</h2>
+    <p>Sully Prudhomme · Stances et Poèmes</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Montrer comment le poète utilise la rosée comme métaphore pour explorer l'âme humaine.</p>
+  </div>
+
+  <div class="corpus-box">
+    <div class="corpus-label">« Rosées » À PAUL BOUVARD — Sully Prudhomme, Stances et Poèmes</div>
+    <div class="strophe">
+      <p>Je rêve, et la pâle rosée<br>
+      Dans les plaines perle sans bruit,<br>
+      Sur le duvet des fleurs posée<br>
+      Par la main fraîche de la nuit.</p>
+    </div>
+    <div class="strophe">
+      <p>D'où viennent ces tremblantes gouttes ?<br>
+      Il ne pleut pas, le temps est clair.<br>
+      C'est qu'avant de se former toutes<br>
+      Elles étaient déjà dans l'air.</p>
+    </div>
+    <div class="strophe">
+      <p>D'où viennent mes pleurs ? Toute flamme,<br>
+      Ce soir, est douce au fond des cieux ;<br>
+      C'est que je les avais dans l'âme<br>
+      Avant de les sentir aux yeux.</p>
+    </div>
+    <div class="strophe">
+      <p>On a dans l'âme une tendresse<br>
+      Où tremblent toutes les douleurs,<br>
+      Et c'est parfois une caresse<br>
+      Qui trouble, et fait germer les pleurs.</p>
+    </div>
+  </div>
+
+  <div class="sec-title vert"><span>✏️</span> Questions d'exploitation</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Qui écrit ? À qui ? Pourquoi ?</li>
+    <li><strong>2.</strong> À quoi te fait penser le titre ?</li>
+    <li><strong>3.</strong> À quoi compare-t-il la rosée ?</li>
+    <li><strong>4.</strong> Qu'a-t-elle en commun avec l'homme ?</li>
+    <li><strong>5.</strong> Quels caractères ou aspects de l'homme met-il en exergue à travers cette métaphore de la nature ?</li>
+  </ul>
+
+  <div class="sec-title or"><span>📋</span> Tableau d'analyse — Axes du CC</div>
+  <div class="plan-box"><div class="plan-header">Introduction — Situation + Idée générale + Problématique + Plan</div>
+    <div class="plan-body">
+      <p><strong>Situation :</strong> Sully Prudhomme, poète symboliste (1839–1907), <em>Stances et Poèmes</em>, 1865.</p>
+      <p><strong>Idée générale :</strong> Le poète établit un parallèle entre la formation de la rosée et l'origine des larmes humaines.</p>
+      <p><strong>Problématique :</strong> En quoi la rosée est-elle une métaphore de la vie intérieure de l'homme ?</p>
+      <p><strong>Plan :</strong> Axe 1 : La formation de la rosée · Axe 2 : Source/origine des pleurs et peines</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Axe 1 : La formation de la rosée (strophes 1 et 2)</div>
+    <div class="plan-body">
+      <p><strong>Idée 1 :</strong> La rosée, phénomène nocturne et silencieux → « perle sans bruit », « main fraîche de la nuit »</p>
+      <p><strong>Idée 2 :</strong> Origine mystérieuse de la rosée → « D'où viennent ces tremblantes gouttes ? » — question rhétorique</p>
+      <p><strong>Interprétation :</strong> La rosée préexiste dans l'air → elle n'est pas créée mais révélée</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Axe 2 : Source / Origine des pleurs et des peines (strophes 3 et 4)</div>
+    <div class="plan-body">
+      <p><strong>Idée 1 :</strong> Parallèle entre rosée et larmes → « D'où viennent mes pleurs ? » — même structure interrogative</p>
+      <p><strong>Idée 2 :</strong> Les larmes préexistent dans l'âme → « je les avais dans l'âme / Avant de les sentir aux yeux »</p>
+      <p><strong>Interprétation :</strong> La douleur est constitutive de l'âme humaine — elle cherche à s'extérioriser</p>
+    </div>
+  </div>
+
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice</div>
+    <p>Élabore un plan détaillé de commentaire composé du texte « Rosées ».</p>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 2 — GT L'HOMME ET LA MER ══ -->
+<div class="lesson-section" id="s3-homme-mer">
+  <div class="lesson-header bleu">
+    <div class="lesson-tag">Semaine 2 · CB1 — Groupement de textes</div>
+    <h2>🌊 GT : « L'Homme et la mer » — Baudelaire</h2>
+    <p>Les ressemblances entre la mer et l'homme</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Lire et exploiter le texte en mettant en exergue les ressemblances entre la mer et l'homme.</p>
+  </div>
+
+  <div class="corpus-box">
+    <div class="corpus-label">« L'Homme et la mer » — Charles Baudelaire, Les Fleurs du Mal</div>
+    <div class="strophe">
+      <p>Homme libre, toujours tu chériras la mer !<br>
+      La mer est ton miroir ; tu contemples ton âme<br>
+      Dans le déroulement infini de sa lame,<br>
+      Et ton esprit n'est pas un gouffre moins amer.</p>
+    </div>
+    <div class="strophe">
+      <p>Tu te plais à plonger au sein de ton image ;<br>
+      Tu l'embrasses des yeux et des bras, et ton cœur<br>
+      Se distrait quelquefois de sa propre rumeur<br>
+      Au bruit de cette plainte indomptable et sauvage.</p>
+    </div>
+    <div class="strophe">
+      <p>Vous êtes tous les deux ténébreux et discrets :<br>
+      Homme, nul n'a sondé le fond de tes abîmes ;<br>
+      Ô mer, nul ne connaît tes richesses intimes,<br>
+      Tant vous êtes jaloux de garder vos secrets !</p>
+    </div>
+    <div class="strophe">
+      <p>Et cependant voilà des siècles innombrables<br>
+      Que vous vous combattiez sans pitié ni remord,<br>
+      Tellement vous aimez le carnage et la mort,<br>
+      Ô lutteurs éternels, ô frères implacables !</p>
+    </div>
+  </div>
+
+  <div class="sec-title bleu"><span>✏️</span> Questions d'exploitation</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Qui écrit ? À qui ? Pourquoi ?</li>
+    <li><strong>2.</strong> Comment la mer est-elle présentée et décrite dans le texte ?</li>
+    <li><strong>3.</strong> Quels rapports l'homme entretient-il avec la mer ?</li>
+    <li><strong>4.</strong> Quels sentiments dominent dans ce poème ?</li>
+    <li><strong>5.</strong> Quelle est la figure de style « Ô lutteurs éternels, ô frères implacables ! » ? Que traduit-elle ?</li>
+    <li><strong>6.</strong> Quel est le but de Baudelaire dans ce poème ?</li>
+  </ul>
+
+  <div class="sec-title bleu"><span>📊</span> Confrontation et synthèse</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th colspan="2">Convergences</th><th colspan="2">Divergences</th></tr>
+      <tr><th>Homme</th><th>Mer</th><th>Homme</th><th>Mer</th></tr></thead>
+      <tbody><tr><td style="min-height:60px"></td><td></td><td></td><td></td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice</div>
+    <p>Étudie la rime et la métrique dans « L'Homme et la mer ». Déduis le type de poème.</p>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 2 — RÉFÉRENTS/SUBSTITUTS ══ -->
+<div class="lesson-section" id="s3-substituts">
+  <div class="lesson-header teal">
+    <div class="lesson-tag">Semaine 2 · CB2 — Outils de la langue</div>
+    <h2>🔗 Référents et substituts</h2>
+    <p>Identifier le référent, relever et classer ses substituts</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Identifier le référent puis relever, classer et interpréter ses substituts dans un texte.</p>
+  </div>
+
+  <div class="corpus-box">
+    <div class="corpus-label">Corpus — D'après Charles Perrault, Les Fées (1697)</div>
+    <p>Il était une fois une veuve qui avait deux filles ; l'aînée lui ressemblait si fort et d'humeur et de visage que celui qui la voyait, voyait la mère. Elles étaient toutes deux si désagréables et si orgueilleuses qu'on ne pouvait vivre avec elles. La cadette, qui était le vrai portrait de son père pour la douceur et pour l'honnêteté, était avec cela une des plus belles filles qu'on eût su voir. Comme on aime naturellement son semblable, cette mère était folle de sa fille aînée, et en même temps avait une aversion effroyable pour la cadette. Elle la faisait manger à la cuisine et travailler sans cesse.</p>
+  </div>
+
+  <div class="sec-title teal"><span>✏️</span> Traitement de la notion</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> De quoi parle le texte ?</li>
+    <li><strong>2.</strong> À quoi renvoient les mots soulignés dans le corpus ?</li>
+    <li><strong>3.</strong> Relève pour chacun les mots ou expressions qui les remplacent.</li>
+    <li><strong>4.</strong> À quelles catégories grammaticales appartiennent ces remplaçants ?</li>
+    <li><strong>5.</strong> Classe-les dans le tableau ci-dessous.</li>
+    <li><strong>6.</strong> Comment peux-tu justifier l'emploi de ces remplaçants ?</li>
+  </ul>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th colspan="2">La Veuve</th><th colspan="2">L'Aînée</th><th colspan="2">La Cadette</th></tr>
+      <tr><th>Lexicaux</th><th>Grammaticaux</th><th>Lexicaux</th><th>Grammaticaux</th><th>Lexicaux</th><th>Grammaticaux</th></tr></thead>
+      <tbody><tr><td></td><td></td><td></td><td></td><td></td><td></td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <ul>
+      <li>🌺 Les <strong>substituts du référent</strong> sont des mots et expressions qui permettent de le remplacer</li>
+      <li>🌺 La référence peut être <strong>anaphorique</strong> (les substituts suivent le référent) ou <strong>cataphorique</strong> (le référent suit les substituts)</li>
+      <li>🌺 <strong>Substituts grammaticaux :</strong> pronoms (il, elle, lui, le, la, leur, qui, lequel…) et déterminants (adj. possessifs, démonstratifs, articles)</li>
+      <li>🌺 <strong>Substituts lexicaux :</strong> nom, adjectif, expansion du nom, périphrase, synecdoque, métaphore</li>
+      <li>🌺 Les substituts lexicaux, par leur dimension méliorative ou péjorative, sont plus riches pour l'interprétation</li>
+    </ul>
+  </div>
+
+  <div class="bac-box">
+    <div class="bac-label">👑 VERS LE BAC</div>
+    <ol>
+      <li style="margin-bottom:10px"><strong>(BAC ABI 2024)</strong> : Après avoir identifié le référent, relevez deux de ses substituts lexicaux dans le texte de Wole Soyinka. Quel est l'effet de sens recherché ?</li>
+      <li><strong>Exercice Croc-Blanc (Jack London)</strong> : Identifie les référents principaux dans l'extrait (la mère-louve, la belette, le louveteau), relève et classe leurs substituts. Que traduisent-ils ?</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 2 — PHRASÉOLOGIE ══ -->
+<div class="lesson-section" id="s3-phraseologie">
+  <div class="lesson-header or">
+    <div class="lesson-tag">Semaine 2 · CB2 — Outils de la langue</div>
+    <h2>🗣️ Phraséologie</h2>
+    <p>Identifier, classer et interpréter les phrasèmes dans un texte</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Identifier et justifier l'emploi des phraséologies dans un texte.</p>
+  </div>
+
+  <div class="corpus-box">
+    <div class="corpus-label">Corpus — Grand Corps Malade, Le langage du corps, 2020 (extrait)</div>
+    <p>Il y a bien sûr la bouche qui a souvent une grande gueule / Mais se met souvent le doigt dans l'œil / Elle a la langue bien pendue pour jouer les chefs du corps humain / Elle montre les dents c'est connu mais n'a pas le cœur sur la main / Seulement la main n'a pas forcément le monopole du cœur / Elle aime bien serrer le poing, elle aime jouer les terreurs / Elle peut même faire un doigt elle ne fait rien à moitié / La main ne prend pas de gants et nous prend vite à contre-pied / Le pied n'a pas de poil dans la main mais manque d'ambition / Au pied levé je dirais comme ça que le pied n'a pas le bras long…</p>
+  </div>
+
+  <div class="sec-title or"><span>✏️</span> Traitement de la notion</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Lis attentivement le corpus et dis de quoi il parle.</li>
+    <li><strong>2.</strong> Quelles sont les parties du corps évoquées dans le texte ?</li>
+    <li><strong>3.</strong> Qu'est-ce qui caractérise chacune ?</li>
+    <li><strong>4.</strong> Relève les mots utilisés pour les décrire.</li>
+    <li><strong>5.</strong> Leur signification est-elle fixe ou contextuelle ?</li>
+    <li><strong>6.</strong> Peut-on changer l'ordre, la disposition ou l'association de ces mots ?</li>
+    <li><strong>7.</strong> Comment nomme-t-on ces expressions ? Que traduit leur emploi ?</li>
+  </ul>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens — Types de phrasèmes</h4>
+    <ul>
+      <li>🌺 <strong>Collocation :</strong> deux éléments liés (base + collocatif) — ex. « bouffée d'oxygène »</li>
+      <li>🌺 <strong>Locution :</strong> groupe de mots figés ayant une valeur grammaticale</li>
+      <li>🌺 <strong>Parémie :</strong> énoncé stable et bref, généralement didactique</li>
+      <li>🌺 <strong>Slogan :</strong> formule employée dans les campagnes de propagande</li>
+      <li>🌺 <strong>Calque linguistique / emprunt :</strong> traduction mot à mot (recto verso, manu militaris)</li>
+      <li>🌺 <strong>Dicton, proverbe, maxime :</strong> propos sentencieux venant du peuple</li>
+    </ul>
+  </div>
+
+  <div class="bac-box">
+    <div class="bac-label">👑 VERS LE BAC</div>
+    <ol>
+      <li style="margin-bottom:10px"><strong>(BAC ABI 2022)</strong> : « Deux femmes et douze enfants par ces temps de crise, il faut le faire ! »<br>a. Relevez un élément de phraséologie dans cet extrait.<br>b. Dites ce qu'il signifie.</li>
+      <li><strong>(BAC ABI 2024)</strong> : « Sidi. - Ils diront que je n'étais pas vierge… »<br>a. Relevez un élément de phraséologie dans la 2ᵉ réplique de Sidi.<br>b. Que traduit son emploi ?</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 2 — MÉTHODO CC AXES ══ -->
+<div class="lesson-section" id="s3-methodo2">
+  <div class="lesson-header marine">
+    <div class="lesson-tag">Semaine 2 · Méthodologie</div>
+    <h2>✍️ Méthodologie CC : Dégager les axes</h2>
+    <p>Texte : « Si je pouvais » — exploitation du texte et recherche des idées</p>
+  </div>
+
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Lire et exploiter le texte à commenter afin de dégager les axes et sous-axes du commentaire composé.</p>
+  </div>
+
+  <div class="sec-title marine"><span>✏️</span> Traitement de la notion</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Lis attentivement le corpus « Si je pouvais ».</li>
+    <li><strong>2.</strong> Qui parle dans le poème ? À qui s'adresse-t-il ?</li>
+    <li><strong>3.</strong> Quels sentiments dominent chez le locuteur ?</li>
+    <li><strong>4.</strong> Quelles sont les idées proposées par la consigne ?</li>
+  </ul>
+
+  <div class="sec-title marine"><span>🔍</span> Exploitation guidée des axes</div>
+  <div class="card bleu">
+    <h3>Axe 1 : Un amant délaissé mais encore attaché à l'aimée</h3>
+    <ul>
+      <li><strong>Énonciation :</strong> usage du « je » et du conditionnel « Si je pouvais » → impuissance et distance</li>
+      <li><strong>Vocabulaire de la tristesse :</strong> « ingrate », « chagrin », « pâle, délicate »</li>
+      <li><strong>Champ lexical de la douleur :</strong> « triste et lente à sourire », « main repousse »</li>
+    </ul>
+  </div>
+  <div class="card rouge">
+    <h3>Axe 2 : Le fair-play — souhait du bonheur de l'être aimé loin de lui</h3>
+    <ul>
+      <li><strong>Impératifs bienveillants :</strong> « Ayez soin d'elle », « Ne la faites jamais pleurer », « Donnez-lui »</li>
+      <li><strong>Métaphores :</strong> Symbolisme des fleurs (« bluets plutôt que des roses »)</li>
+      <li><strong>Ponctuation :</strong> usage des guillemets → discours rapporté, détachement</li>
+    </ul>
+  </div>
+
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <ul>
+      <li>On identifie d'abord le thème et la situation d'énonciation (qui parle ? à qui ? dans quel contexte ?)</li>
+      <li>On relève ensuite les procédés stylistiques (lexique, figures, rythme, ponctuation, tonalité)</li>
+      <li>On dégage enfin des axes d'analyse qui articulent le fond et la forme</li>
+    </ul>
+  </div>
+
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice</div>
+    <p>Élabore le plan détaillé du texte « Si je pouvais ».</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SEMAINE 3 — DORMEUR DU VAL
+══════════════════════════════════ -->
+<div class="lesson-section" id="s4-dormeur">
+  <div class="lesson-header vert">
+    <div class="lesson-tag">Semaine 3 · CB1 — Groupement de textes</div>
+    <h2>🌿 GT : « Le Dormeur du val » — Rimbaud</h2>
+    <p>Rapports entre l'homme et la nature</p>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Lire et exploiter le texte en insistant sur les rapports entre l'homme et la nature.</p>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">« Le Dormeur du Val » — Arthur Rimbaud, 1870</div>
+    <div class="strophe">
+      <p>C'est un trou de verdure où chante une rivière<br>
+      Accrochant follement aux herbes des haillons<br>
+      D'argent ; où le soleil, de la montagne fière,<br>
+      Luit : c'est un petit val qui mousse de rayons.</p>
+    </div>
+    <div class="strophe">
+      <p>Un soldat jeune, bouche ouverte, tête nue,<br>
+      Et la nuque baignant dans le frais cresson bleu,<br>
+      Dort ; il est étendu dans l'herbe, sous la nue,<br>
+      Pâle dans son lit vert où la lumière pleut.</p>
+    </div>
+    <div class="strophe">
+      <p>Les pieds dans les glaïeuls, il dort. Souriant comme<br>
+      Sourirait un enfant malade, il fait un somme :<br>
+      Nature, berce-le chaudement : il a froid.</p>
+    </div>
+    <div class="strophe">
+      <p>Les parfums ne font pas frissonner sa narine ;<br>
+      Il dort dans le soleil, la main sur sa poitrine<br>
+      Tranquille. Il a deux trous rouges au côté droit.</p>
+    </div>
+  </div>
+  <div class="sec-title vert"><span>✏️</span> Questions d'exploitation</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> De quoi parle le texte ?</li>
+    <li><strong>2.</strong> Quels sont les éléments de la nature présents dans le texte ?</li>
+    <li><strong>3.</strong> Quels sentiments dominent dans ce poème ?</li>
+    <li><strong>4.</strong> Quel ordre donne-t-il à la nature ? Que laisse-t-il entendre par cet ordre ?</li>
+    <li><strong>5.</strong> Pourquoi insiste-t-il sur la description de la nature plutôt que la mort du jeune homme ?</li>
+    <li><strong>6.</strong> Quel type de rapport peux-tu établir entre la nature et l'homme dans ce texte ?</li>
+  </ul>
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice de consolidation</div>
+    <ol>
+      <li style="margin-bottom:8px">Étudie les marques de l'émetteur et du récepteur dans ce texte. Dégage leurs effets de sens.</li>
+      <li>Identifie un enjambement et un rejet dans ce poème. Que traduisent-ils ?</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 3 — CONTENUS LATENTS ══ -->
+<div class="lesson-section" id="s4-latents">
+  <div class="lesson-header or">
+    <div class="lesson-tag">Semaine 3 · CB2 — Outils de la langue</div>
+    <h2>🔍 Contenus latents et manifestes</h2>
+    <p>Présupposés et sous-entendus</p>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Décoder les contenus latents et interpréter leur emploi dans un texte.</p>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">Corpus — Guy de Maupassant, Bel-Ami, 1884 (extrait)</div>
+    <p>Elle (la mort) m'a défiguré si complètement que je ne me reconnais pas. Je n'ai plus rien de moi, de moi l'homme radieux, frais et fort que j'étais à trente ans. Je l'ai vue teindre en blanc mes cheveux noirs, et avec quelle lenteur savante et méchante ! Elle m'a pris ma peau ferme, mes muscles, mes dents, tout mon corps de jadis, ne me laissant qu'une âme désespérée qu'elle enlèvera bientôt aussi. Oui, elle m'a émietté, la gueuse, elle a accompli doucement et terriblement la longue destruction de mon être, seconde par seconde. Respirer, dormir, boire, manger, travailler, rêver, tout ce que nous faisons, c'est mourir. Vivre enfin, c'est mourir !</p>
+  </div>
+  <div class="sec-title or"><span>✏️</span> Traitement de la notion</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Observe les passages en gras (personnification de la mort).</li>
+    <li><strong>2.</strong> Que renseignent-ils sur l'état du locuteur ?</li>
+    <li><strong>3.</strong> Comment était-il avant ? Comment est-il aujourd'hui ?</li>
+    <li><strong>4.</strong> Quels sont les messages cachés derrière ses propos ?</li>
+    <li><strong>5.</strong> Quelle est son intention de communication ?</li>
+  </ul>
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <ul>
+      <li>🌺 Le <strong>contenu manifeste</strong> est l'information claire, le posé (ce qui est dit explicitement)</li>
+      <li>🌺 Le <strong>contenu latent / implicite</strong> désigne les sens cachés dans un énoncé. On distingue :</li>
+      <li>🌺 <strong>Présupposé :</strong> situation antérieure à un énoncé, cachée dans l'énoncé (à travers : négation, adverbes, imparfait, verbes d'état, préfixes, antonymes, intonation) — ex. « Ne plus, avant, aujourd'hui »</li>
+      <li>🌺 <strong>Sous-entendu :</strong> ce qu'implique un énoncé selon le contexte — plusieurs sous-entendus possibles (culturels, religieux, historiques…)</li>
+    </ul>
+  </div>
+  <div class="bac-box">
+    <div class="bac-label">👑 VERS LE BAC</div>
+    <ol>
+      <li style="margin-bottom:12px"><strong>(BAC D 2025)</strong> : « Mon cher et vénérable oncle, j'ai compris tout ce que tu as dit bien que le sens de certains mots m'ait échappé. »<br>a. Dégagez le présupposé et un sous-entendu dans cet énoncé.<br>b. En quoi ces contenus latents dévoilent-ils l'intention de communication de Vouata ?</li>
+      <li><strong>(BAC ABI 2025)</strong> : « Jérôme, votre fils n'a pas vécu sa dernière année dans ce village. »<br>a. Dégagez le présupposé et un sous-entendu dans cette phrase.<br>b. Quelle intention de communication du locuteur ces contenus latents révèlent-ils ?</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 3 — PROCÉDÉS SONORES ══ -->
+<div class="lesson-section" id="s4-sonores">
+  <div class="lesson-header violet">
+    <div class="lesson-tag">Semaine 3 · CB2 — Outils de la langue</div>
+    <h2>🎵 Procédés sonores dans la poésie classique</h2>
+    <p>Rythme · Allitérations · Assonances</p>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Identifier et analyser les procédés sonores dans la poésie classique afin de comprendre leur rôle expressif et esthétique.</p>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">Corpus — Pierre de Marbeuf, Et la mer et l'amour, 1628</div>
+    <p>Et la mer et l'amour ont l'amer pour partage,<br>
+    Et la mer est amère, et l'amour est amer,<br>
+    L'on s'abîme en l'amour aussi bien qu'en la mer,<br>
+    Car la mer et l'amour ne sont point sans orage.<br>
+    Celui qui craint les eaux qu'il demeure au rivage,<br>
+    Celui qui craint les maux qu'on souffre pour aimer,<br>
+    Qu'il ne se laisse pas à l'amour enflammer,<br>
+    Et tous deux ils seront sans hasard de naufrage.<br>
+    La mère de l'amour eut la mer pour berceau,<br>
+    Le feu sort de l'amour, sa mère sort de l'eau,<br>
+    Mais l'eau contre ce feu ne peut fournir des armes.<br>
+    Si l'eau pouvait éteindre un brasier amoureux,<br>
+    Ton amour qui me brûle est si fort douloureux,<br>
+    Que j'eusse éteint son feu de la mer de mes larmes.</p>
+  </div>
+  <div class="sec-title violet"><span>✏️</span> a) Le rythme</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Combien de syllabes comporte chaque vers ?</li>
+    <li><strong>2.</strong> Les vers sont-ils réguliers ? Comment appelle-t-on ce type de vers ?</li>
+    <li><strong>3.</strong> À quels endroits le poète fait-il sentir une pause ?</li>
+    <li><strong>4.</strong> Quel effet produit ce découpage sur la lecture ?</li>
+  </ul>
+  <div class="sec-title violet"><span>🎵</span> b) Les répétitions sonores</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Quels sons sont répétés dans les deux premiers vers ?</li>
+    <li><strong>2.</strong> Comment s'appelle la répétition d'un même son consonantique ?</li>
+    <li><strong>3.</strong> Comment s'appelle la répétition d'un même son vocalique ?</li>
+    <li><strong>4.</strong> Quels effets produisent ces répétitions ?</li>
+  </ul>
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <ul>
+      <li>🌺 <strong>Le rythme :</strong> créé par le nombre de syllabes (souvent alexandrin = 12) et la césure</li>
+      <li>🌺 <strong>L'allitération :</strong> répétition d'un son <em>consonantique</em> — effet d'harmonie imitative ou d'insistance</li>
+      <li>🌺 <strong>L'assonance :</strong> répétition d'un son <em>vocalique</em> — échos sonores et musicalité</li>
+      <li>🌺 Ces procédés renforcent le sens du poème et participent à son pouvoir évocateur</li>
+    </ul>
+  </div>
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice 1 — Verlaine, Poèmes saturniens</div>
+    <p style="font-style:italic;line-height:2;margin-top:6px">Les sanglots longs / Des violons / De l'automne / Blessent mon cœur / D'une langueur / Monotone. / Tout suffocant / Et blême, quand / Sonne l'heure…</p>
+    <p style="margin-top:8px">Étudie la musicalité (rythme, allitérations, assonances) dans cet extrait.</p>
+  </div>
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice 2 — Repérer et nommer les procédés sonores</div>
+    <ul>
+      <li>« Pour qui sont ces serpents qui sifflent sur vos têtes ? » (Racine)</li>
+      <li>« Le soleil s'est noyé dans son sang qui se fige. » (Baudelaire)</li>
+      <li>« Dans le silence sombre où l'astre se repose. » (Hugo)</li>
+      <li>« Pataugeant dans le poto-poto d'or de ton limon. » (Mveng)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 3 — PRODUCTION ORALE ══ -->
+<div class="lesson-section" id="s4-oral">
+  <div class="lesson-header teal">
+    <div class="lesson-tag">Semaine 3 · CB3 — Production orale</div>
+    <h2>🎤 Production orale — Compte rendu de lecture</h2>
+    <p>Texte : « Un Songe » — Sully Prudhomme</p>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Organiser et présenter un compte-rendu de lecture clair et structuré à l'oral.</p>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">Corpus — « Un Songe » À JULES GUIFFREY — Sully Prudhomme, Stances et Poèmes</div>
+    <p>J'étais mort, j'entrais au tombeau […]<br>— O père, qu'il est difficile<br>De ne plus penser au soleil !</p>
+  </div>
+  <div class="sec-title teal"><span>💡</span> Questions de préparation</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Lis attentivement le corpus.</li>
+    <li><strong>2.</strong> Qui parle dans ce poème ? À qui s'adresse-t-il ?</li>
+    <li><strong>3.</strong> Dans quel cadre se déroule la scène (réalité, rêve, imaginaire) ?</li>
+    <li><strong>4.</strong> Comment le poète exprime-t-il la mort et le dialogue avec l'au-delà ?</li>
+    <li><strong>5.</strong> Quelles informations essentielles retiens-tu du texte ?</li>
+    <li><strong>6.</strong> Quels passages t'ont marqué ou déplu ?</li>
+    <li><strong>7.</strong> Quelles leçons peut-on tirer de ce texte ?</li>
+  </ul>
+  <div class="retenir-box">
+    <h4>🧠 Je retiens — Structure du compte rendu oral</h4>
+    <ul>
+      <li>1. <strong>Situer l'œuvre :</strong> auteur, titre, contexte</li>
+      <li>2. <strong>Résumer le contenu</strong> de façon claire et fidèle</li>
+      <li>3. <strong>Mettre en valeur les thèmes</strong> et idées principales</li>
+      <li>4. <strong>Exprimer son appréciation personnelle</strong> (émotions, intérêt, jugement critique)</li>
+      <li>5. Utiliser un <strong>langage clair, organisé et vivant</strong> pour capter l'attention de l'auditoire</li>
+    </ul>
+  </div>
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice — Compte rendu oral (3 minutes max)</div>
+    <p>Prépare un compte rendu de lecture oral du poème « Un Songe » ayant :</p>
+    <ol>
+      <li>Une introduction : présentation du texte (titre, auteur, contexte poétique)</li>
+      <li>Un résumé du contenu (situation d'énonciation et idées principales)</li>
+      <li>Une analyse personnelle : ce que tu as retenu, tes impressions, les images qui t'ont marqué</li>
+      <li>Une conclusion brève ouvrant sur une réflexion (sur le rapport entre vie et mort)</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 3 — MÉTHODO CC PLAN ══ -->
+<div class="lesson-section" id="s4-methodo3">
+  <div class="lesson-header marine">
+    <div class="lesson-tag">Semaine 3 · Méthodologie</div>
+    <h2>✍️ Méthodologie CC : Élaborer le plan</h2>
+    <p>Texte : « Si je pouvais » — Proposition de plan détaillé</p>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Élaborer un plan de commentaire composé cohérent et pertinent.</p>
+  </div>
+  <div class="card">
+    <h3>IG : La douleur d'un amant délaissé, soucieux du bonheur de l'aimée malgré son propre chagrin</h3>
+  </div>
+  <div class="plan-box"><div class="plan-header">Centre d'Intérêt I : La Douleur et le Renoncement de l'Amant</div>
+    <div class="plan-body">
+      <p><strong>Sous-Centre 1.1 — L'Amant Résigné mais Dévoué</strong></p>
+      <p>Outil 1 : La négation « ne m'inspire plus rien » → rupture consommée<br>
+      Outil 2 : Adverbe de condition « Si je pouvais » → impuissance, distance</p>
+      <p style="margin-top:8px"><strong>Sous-Centre 1.2 — L'Expression de l'Amertume</strong></p>
+      <p>Outil 1 : Champ lexical de la douleur → « ingrate », « chagrin »<br>
+      Outil 2 : Tonalité lyrique → « pâle, délicate » (v.5), « triste et lente à sourire » (v.16)</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Centre d'Intérêt II : Le Portrait de l'Aimée et la Sollicitude du Poète</div>
+    <div class="plan-body">
+      <p><strong>Sous-Centre 2.1 — La Fragilité et le Caractère de l'Aimée</strong></p>
+      <p>Outil 1 : Adjectifs qualifiants « pâle, délicate, triste, lente à sourire »<br>
+      Outil 2 : Contraste entre « repousse » et « douce »</p>
+      <p style="margin-top:8px"><strong>Sous-Centre 2.2 — Le Désir de Bonheur pour l'Autre</strong></p>
+      <p>Outil 1 : Impératifs bienveillants → « Ayez soin », « Ne la faites jamais pleurer », « Donnez-lui »<br>
+      Outil 2 : Symbolisme des fleurs → « Des bluets plutôt que des roses » (v.18)</p>
+    </div>
+  </div>
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <p>Ce poème oscille entre tristesse, tendresse et résignation. Le locuteur exprime ses regrets et ses conseils à l'homme aimé par la femme qu'il a perdue. <strong>Intérêts :</strong> psychologique et stylistique.</p>
+  </div>
+  <div class="bac-box">
+    <div class="bac-label">👑 VERS LE BAC — Marizibill (Apollinaire)</div>
+    <p style="margin-bottom:10px">Consigne : Sans dissocier le fond de la forme, vous ferez de ce texte un commentaire composé. Vous pourrez, si vous le voulez, en vous aidant des indicateurs spatio-temporels, des champs lexicaux et des figures de style, montrer comment le poète dévoile la prostitution et le proxénétisme. (BAC ABI 2016)</p>
+    <p style="font-style:italic">Dans la Haute-Rue à Cologne / Elle allait et venait le soir / Offerte à tous en tout mignonne / Puis buvait lasse des trottoirs / Très tard dans les brasseries borgnes…</p>
+    <p style="margin-top:10px">→ Analyse la consigne et élabore le plan détaillé.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SEMAINE 4 — TRISTESSE D'OLYMPIO
+══════════════════════════════════ -->
+<div class="lesson-section" id="s5-olympio">
+  <div class="lesson-header bleu">
+    <div class="lesson-tag">Semaine 4 · CB1 — Groupement de textes</div>
+    <h2>🌿 GT : « Tristesse d'Olympio » — Victor Hugo</h2>
+    <p>Questions de langue intégrées</p>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Répondre correctement aux questions de langue à partir de l'extrait de Hugo.</p>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">Victor Hugo, « Tristesse d'Olympio » (Les Rayons et les Ombres) — extrait</div>
+    <p>« Oh ! dites-moi, ravins, frais ruisseaux, treilles mûres,<br>
+    Rameaux chargés de nids, grottes, forêts, buissons,<br>
+    Est-ce que vous ferez pour d'autres vos murmures ?<br>
+    Est-ce que vous direz à d'autres vos chansons ?<br><br>
+    « Nous vous comprenions tant ! doux, attentifs, austères,<br>
+    Tous nos échos s'ouvraient si bien à votre voix !<br>
+    Et nous prêtions si bien, sans troubler vos mystères,<br>
+    L'oreille aux mots profonds que vous dites parfois !<br><br>
+    « Répondez, vallon pur, répondez, solitude,<br>
+    Ô nature abritée en ce désert si beau,<br>
+    Lorsque nous dormirons tous deux dans l'attitude<br>
+    Que donne aux morts pensifs la forme du tombeau ;</p>
+  </div>
+  <div class="sec-title bleu"><span>📡</span> Communication</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Identifie le référent principal du texte puis relève et classe ses substituts. Quelle est l'intention de communication du poète ?</li>
+    <li><strong>2.</strong> Dans le 4ᵉ vers « Est-ce que vous direz à d'autres vos chansons ? » : quels sont les présupposés et les sous-entendus ? Quel message ce poème transmet-il sur le rapport homme/nature face à la mort ?</li>
+  </ul>
+  <div class="sec-title bleu"><span>🔧</span> Morphosyntaxe</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Quel est le type de phrase dominant dans la 1ère strophe ? Quel effet de sens se dégage de son emploi ?</li>
+    <li><strong>2.</strong> Relève et donne les valeurs d'emploi de l'impératif dans le texte. Que traduit son emploi par le poète ?</li>
+  </ul>
+  <div class="sec-title bleu"><span>💡</span> Sémantique</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Construis à partir du texte les champs lexicaux de la nature et de l'insensibilité/indifférence. Que traduit leur emploi commun ?</li>
+    <li><strong>2.</strong> De quelles connotations sont chargés les mots « Lorsque nous dormirons » / « De nous savoir couchés » ? Quelles intentions de communication ?</li>
+  </ul>
+  <div class="sec-title bleu"><span>🎭</span> Rhétorique</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> À partir de 4 indices précis, détermine le type de ce texte. Donne son type ou forme et sa fonction.</li>
+    <li><strong>2.</strong> Étudie la rime (type, disposition, richesse) puis relève l'allitération dominante dans la 1ère strophe. Quelle fonction du langage ces procédés mettent-ils en évidence ?</li>
+  </ul>
+</div>
+
+<!-- ══ SEMAINE 4 — MIDI ══ -->
+<div class="lesson-section" id="s5-midi">
+  <div class="lesson-header or">
+    <div class="lesson-tag">Semaine 4 · CB1 — Groupement de textes</div>
+    <h2>☀️ GT : « Midi » — Leconte de Lisle</h2>
+    <p>La nature magnifiée et méditation existentielle</p>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Lire le poème en identifiant la représentation poétique de la nature et la méditation existentielle et philosophique qui en découle.</p>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">« Midi » — Leconte de Lisle (Poèmes antiques)</div>
+    <div class="strophe">
+      <p>Midi, roi des étés, épandu sur la plaine,<br>
+      Tombe en nappes d'argent des hauteurs du ciel bleu.<br>
+      L'air flamboie et brûle sans haleine ;<br>
+      La terre est assoupie en sa robe de feu.</p>
+    </div>
+    <div class="strophe">
+      <p>L'étendue est immense et les champs n'ont point d'ombre,<br>
+      Et la source est tarie où buvaient les troupeaux ;<br>
+      La lointaine forêt, dont la lisière est sombre,<br>
+      Dort là-bas, immobile, en un pesant repos.</p>
+    </div>
+    <div class="strophe">
+      <p>Homme, si, le cœur plein de joie ou d'amertume,<br>
+      Tu passais vers midi dans les champs radieux,<br>
+      Fuis ! la nature est vide et le soleil consume :<br>
+      Rien n'est vivant ici, rien n'est triste ou joyeux.</p>
+    </div>
+    <div class="strophe">
+      <p>Viens ! Le soleil te parle en paroles sublimes ;<br>
+      Dans sa flamme implacable absorbe-toi sans fin ;<br>
+      Et retourne à pas lents vers les cités infimes,<br>
+      Le cœur trempé sept fois dans le néant divin.</p>
+    </div>
+  </div>
+  <div class="sec-title or"><span>✏️</span> Hypothèses et choix des axes</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Quels sentiments dominent dans ce poème ?</li>
+    <li><strong>2.</strong> À quel courant littéraire souscrit le poète ?</li>
+    <li><strong>3.</strong> En quoi le poète fait-il un portrait idéalisé de la nature ?</li>
+    <li><strong>4.</strong> Pourquoi cette nature est-elle inhospitalière ?</li>
+    <li><strong>5.</strong> Quels liens établit-il entre l'homme et la nature ?</li>
+  </ul>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Axes</th><th>Outils</th><th>Repérages / passages</th><th>Analyses et interprétations</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Axe 1 :</strong> La nature magnifiée et menaçante</td><td></td><td></td><td></td></tr>
+        <tr><td><strong>Axe 2 :</strong> Une méditation sur l'homme et le néant</td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="ex-box">
+    <div class="ex-label">✍️ Exercice</div>
+    <p>Fais un compte rendu de lecture du texte « Midi ».</p>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 4 — RESSEMBLANCE S1 ══ -->
+<div class="lesson-section" id="s5-ressem1">
+  <div class="lesson-header rouge">
+    <div class="lesson-tag">Semaine 4 · 1ère Séance — CB1 + Méthodologie</div>
+    <h2>📜 LM « Ressemblance » — Lecture méthodique</h2>
+    <p>Sully Prudhomme · Stances et Poèmes</p>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Lire méthodiquement le texte à commenter.</p>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">« Ressemblance » — Sully Prudhomme, Stances et Poèmes</div>
+    <div class="strophe">
+      <p>Vous désirez savoir de moi<br>
+      D'où me vient pour vous ma tendresse ;<br>
+      Je vous aime, voici pourquoi :<br>
+      Vous ressemblez à ma jeunesse.</p>
+    </div>
+    <div class="strophe">
+      <p>Vos yeux noirs sont mouillés souvent<br>
+      Par l'espérance et la tristesse,<br>
+      Et vous allez toujours rêvant :<br>
+      Vous ressemblez à ma jeunesse.</p>
+    </div>
+    <div class="strophe">
+      <p>Votre tête est de marbre pur,<br>
+      Faite pour le ciel de la Grèce<br>
+      Où la blancheur luit dans l'azur :<br>
+      Vous ressemblez à ma jeunesse.</p>
+    </div>
+    <div class="strophe">
+      <p>Je vous tends chaque jour la main,<br>
+      Vous offrant l'amour qui m'oppresse ;<br>
+      Mais vous passez votre chemin...<br>
+      Vous ressemblez à ma jeunesse.</p>
+    </div>
+    <div class="auteur">Consigne : Réaliser un commentaire composé qui ne dissocie pas le fond de la forme. En vous appuyant sur les marques de l'émetteur, le vocabulaire évocateur, la versification, les figures de style, les temps verbaux, examiner comment la nostalgie de la jeunesse débouche sur un amour non réciproque.</div>
+  </div>
+  <div class="sec-title rouge"><span>📖</span> Découverte et présentation</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Qui parle ? À qui ? Quel est le type de texte ?</li>
+    <li><strong>2.</strong> Que remarques-tu sur le mètre (longueur des vers) ?</li>
+    <li><strong>3.</strong> Schéma des rimes.</li>
+    <li><strong>4.</strong> Que te suggère le titre « Ressemblance » ? Formule deux hypothèses de lecture.</li>
+  </ul>
+  <div class="sec-title rouge"><span>🔍</span> Choix et exploitation des axes</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Quels axes la consigne propose-t-elle ?</li>
+    <li><strong>2.</strong> Quels éléments de la forme utiliser ?</li>
+    <li><strong>3.</strong> Comment Prudhomme marie-t-il le fond et la forme ?</li>
+  </ul>
+  <div class="sec-title rouge"><span>💡</span> Relecture et exploitation</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Quels sentiments l'émetteur exprime-t-il ?</li>
+    <li><strong>2.</strong> Quels éléments du passé sont évoqués ? Lesquels de la jeunesse sont idéalisés ?</li>
+    <li><strong>3.</strong> Quelles répétitions et figures de style sont utilisées ?</li>
+    <li><strong>4.</strong> Comment la versification et les temps verbaux contribuent-ils à l'expression des sentiments ?</li>
+  </ul>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Axes</th><th>Outils</th><th>Repérages / passages</th><th>Analyses et interprétations</th></tr></thead>
+      <tbody>
+        <tr><td><strong>La nostalgie de la jeunesse</strong></td><td></td><td></td><td></td></tr>
+        <tr><td><strong>L'amour non réciproque</strong></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <p>Le locuteur s'adresse à une femme à qui il avoue son amour. À travers des images lyriques, il célèbre sa beauté ; mais derrière cette admiration se cache une profonde mélancolie : l'amertume d'un amour non partagé, puisque la femme indifférente « passe son chemin ».</p>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 4 — RESSEMBLANCE S2 ══ -->
+<div class="lesson-section" id="s5-ressem2">
+  <div class="lesson-header violet">
+    <div class="lesson-tag">Semaine 4 · 2ᵉ Séance — Méthodologie</div>
+    <h2>📋 Plan détaillé — « Ressemblance »</h2>
+    <p>Recherche des idées et élaboration du plan</p>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>Rechercher les idées et élaborer le plan détaillé du commentaire composé de « Ressemblance ».</p>
+  </div>
+  <div class="sec-title violet"><span>📋</span> Structure du plan détaillé</div>
+  <div class="card violet">
+    <h3>IG : La nostalgie de la jeunesse qui débouche sur un amour non réciproque</h3>
+  </div>
+  <div class="plan-box"><div class="plan-header">Axe I : La nostalgie de la jeunesse</div>
+    <div class="plan-body">
+      <p><strong>SCI 1.1 — La beauté de la jeunesse</strong><br>
+      Figure de style : la comparaison (« Votre tête est de marbre pur ») → idéalisation de la beauté<br>
+      Lexique mélioratif : « pur », « azur », « blancheur » → association beauté/idéal grec</p>
+      <p style="margin-top:8px"><strong>SCI 1.2 — Les émotions liées à la jeunesse</strong><br>
+      L'espérance et la tristesse (v.6) → dualité constitutive de la jeunesse<br>
+      L'anaphore « Vous ressemblez à ma jeunesse » (× 4) → insistance nostalgique, refrain obsessionnel</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Axe II : L'amour non réciproque</div>
+    <div class="plan-body">
+      <p><strong>SCI 2.1 — La tendresse non partagée</strong><br>
+      Hyperbole : « Je vous aime » → aveu direct, sans détour<br>
+      Métaphore : « l'amour qui m'oppresse » → poids de l'amour non rendu</p>
+      <p style="margin-top:8px"><strong>SCI 2.2 — La distance émotionnelle</strong><br>
+      La négation et la ponctuation : « Mais vous passez votre chemin... » → rejet, indifférence<br>
+      Structure de phrase : les points de suspension → mélancolie, résignation</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Intérêts du texte</div>
+    <div class="plan-body">
+      <p><strong>Psychologique :</strong> portrait de l'amour mélancolique qui idéalise l'être aimé</p>
+      <p><strong>Stylistique :</strong> maîtrise de la versification et des figures de répétition au service du sentiment</p>
+    </div>
+  </div>
+  <div class="retenir-box">
+    <h4>🧠 Je retiens</h4>
+    <p>Chaque strophe associe des images lyriques et des comparaisons pour idéaliser la beauté de l'aimée, tout en évoquant la fraîcheur et l'élan du passé. Ainsi, le poème unit célébration et mélancolie.</p>
+  </div>
+</div>
+
+<!-- ══ SEMAINE 4 — RESSEMBLANCE S3 ══ -->
+<div class="lesson-section" id="s5-ressem3">
+  <div class="lesson-header teal">
+    <div class="lesson-tag">Semaine 4 · 3ᵉ Séance — Évaluation</div>
+    <h2>⚖️ Confrontation et auto-évaluation — « Ressemblance »</h2>
+    <p>Grille d'observation et meilleure production</p>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">🎯 Objectif</div>
+    <p>S'impliquer dans l'activité de confrontation en vue d'apprécier personnellement ses productions.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Critères</th><th>Indicateurs de réussite</th><th>Oui</th><th>Moyen.</th><th>Non</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Compréhension / Pertinence</strong></td><td>J'ai bien compris le sens du poème (jeunesse, amour non réciproque)</td><td>□</td><td>□</td><td>□</td></tr>
+        <tr><td></td><td>J'ai respecté les consignes (fond et forme, analyse stylistique)</td><td>□</td><td>□</td><td>□</td></tr>
+        <tr><td><strong>Organisation / Cohérence</strong></td><td>Mon commentaire suit un plan logique (CI, SCI, outils)</td><td>□</td><td>□</td><td>□</td></tr>
+        <tr><td></td><td>Chaque SCI est distinct, clair et illustré</td><td>□</td><td>□</td><td>□</td></tr>
+        <tr><td><strong>Expression / Correction</strong></td><td>J'ai rédigé dans une langue correcte (orthographe, syntaxe)</td><td>□</td><td>□</td><td>□</td></tr>
+        <tr><td></td><td>J'ai utilisé un vocabulaire précis et des outils variés</td><td>□</td><td>□</td><td>□</td></tr>
+        <tr><td><strong>Originalité</strong></td><td>Ma copie est bien présentée et j'ai dégagé les intérêts du texte</td><td>□</td><td>□</td><td>□</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="card">
+    <h3>🧠 Meilleure production — Structure de référence</h3>
+    <p><strong>IG :</strong> La nostalgie de la jeunesse qui débouche sur un amour non réciproque</p>
+    <br>
+    <p><strong>Axe 1 : La nostalgie de la jeunesse</strong><br>
+    SCI1 : La beauté de la jeunesse → figures de style (comparaison, métaphore) + lexique mélioratif<br>
+    SCI2 : Les émotions liées à la jeunesse → espérance et tristesse, anaphore obsessionnelle</p>
+    <br>
+    <p><strong>Transition :</strong> Mais cette célébration nostalgique cache une blessure profonde…</p>
+    <br>
+    <p><strong>Axe 2 : L'amour non réciproque</strong><br>
+    SCI : La tendresse non partagée → aveu direct, hyperbole<br>
+    SCI : La distance émotionnelle → négation, ponctuation, résignation</p>
+    <br>
+    <p><strong>Intérêts :</strong> psychologique (portrait de l'amour mélancolique) + stylistique (maîtrise de la versification)</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     SEMAINE 5 — ÉPREUVES
+══════════════════════════════════ -->
+<div class="lesson-section" id="ep1-langue">
+  <div class="epreuve-header">
+    <div class="ep-label">⚖️ Semaine 5 · Épreuve 1</div>
+    <h3>Langue française — Sully Prudhomme, Stances et Poèmes, 1865</h3>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">Texte — Sully Prudhomme, Stances et Poèmes, 1865</div>
+    <p>Je ne me plaindrai point. La pâle Jalousie<br>
+    Retient sa voix tremblante et pleure un sang muet.<br>
+    Qu'ils vivent de longs jours, heureux sans poésie,<br>
+    Et qu'un amour tranquille habite leur chevet !<br><br>
+    Qu'il la possède bien, sans l'avoir désirée,<br>
+    Par le droit seul, exempt du péril de l'aveu,<br>
+    Sans cette passion folle et désespérée<br>
+    Qui tente sur le vide une étreinte de feu !<br><br>
+    Mais qu'insensiblement le réseau gris des rides<br>
+    Fatigue le sourire et blesse les baisers ;<br>
+    Que les cheveux blanchis, les prunelles arides<br>
+    N'offrent plus que l'hiver à des sens apaisés ;<br><br>
+    J'attends, moi, sa vieillesse, et j'en épierai l'heure ;<br>
+    Et ce sera mon tour ; alors je lui dirai ;<br>
+    « Je vous chéris toujours, et toujours je vous pleure :<br>
+    Reprenez un dépôt que je gardais sacré.</p>
+  </div>
+  <div class="sec-title marine"><span>📡</span> I. Communication</div>
+  <ul class="q-list">
+    <li><strong>1a.</strong> Précise la fonction de langage dominante dans la dernière strophe avec des indices précis.</li>
+    <li><strong>1b.</strong> Comment peut-on interpréter son usage ?</li>
+    <li><strong>2a.</strong> Le référent est-il implicite ou explicite dans la troisième strophe ? Justifie ta réponse puis relève ses substituts lexicaux.</li>
+    <li><strong>2b.</strong> En quoi renseignent-ils sur les souhaits et sentiments du poète ?</li>
+  </ul>
+  <div class="sec-title marine"><span>🔧</span> II. Morphosyntaxe</div>
+  <ul class="q-list">
+    <li><strong>1a.</strong> Effectue le décompte des vers de la première strophe. Que constates-tu au niveau du 2ᵉ et 3ᵉ vers ?</li>
+    <li><strong>1b.</strong> Quel effet de sens se dégage de cet outil poétique ?</li>
+    <li><strong>2a.</strong> Détermine le rythme utilisé dans le premier vers de la dernière strophe et indique la valeur de la virgule.</li>
+    <li><strong>2b.</strong> Quelle est l'intention de communication du poète ?</li>
+  </ul>
+  <div class="sec-title marine"><span>💡</span> III. Sémantique</div>
+  <ul class="q-list">
+    <li><strong>1a.</strong> Propose deux sous-entendus contenus dans : « Qu'il la possède bien, sans l'avoir désirée ».</li>
+    <li><strong>1b.</strong> Déduis le message que l'énonciateur veut faire passer concernant le nouveau couple.</li>
+    <li><strong>2a.</strong> Relève un élément de phraséologie dans la 4ᵉ strophe et donne sa signification.</li>
+    <li><strong>2b.</strong> Que traduit son emploi sur l'état d'esprit du poète ?</li>
+  </ul>
+  <div class="sec-title marine"><span>🎭</span> IV. Rhétorique</div>
+  <ul class="q-list">
+    <li><strong>1a.</strong> Étudie la rime de tous les points de vue (nature, disposition, qualité).</li>
+    <li><strong>1b.</strong> Déduis à quelle forme classique ce poème s'apparente avec au moins deux indices.</li>
+    <li><strong>2a.</strong> Repère un contre-rejet dans la première strophe et donne sa valeur.</li>
+    <li><strong>2b.</strong> Que met-il en évidence ?</li>
+    <li><strong>3a.</strong> Quelles sont les deux figures de style (analogie et opposition) contenues dans « un amour tranquille habite leur chevet » ?</li>
+    <li><strong>3b.</strong> Qu'expriment-elles ?</li>
+  </ul>
+</div>
+
+<!-- ══ ÉPREUVE 2 ══ -->
+<div class="lesson-section" id="ep2-langue">
+  <div class="epreuve-header">
+    <div class="ep-label">⚖️ Semaine 5 · Épreuve 2</div>
+    <h3>Langue française — « L'Enfant des poubelles » — René Philombe</h3>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">René Philombe, extrait d'Anthologie de la poésie Camerounaise, CLE, 2000</div>
+    <p>Le hangar du marché dormait, l'œil irrité,<br>
+    Comme un monstre frustré de ses rires farouches.<br>
+    Un enfant, concurrent des dogues et des mouches,<br>
+    Cherchait dans la poubelle un repas empesté.<br><br>
+    Sa frimousse était grave et veuve de gaité,<br>
+    Et meurtri par la faim, silencieuse cartouche,<br>
+    Il arborait un deuil solennel et sa bouche<br>
+    Semblait toujours grogner contre l'humanité.<br><br>
+    Bientôt il eut les bras chargés par le destin !<br>
+    Il fallait commencer son horrible festin<br>
+    Quand pressé de douleurs soudain, je le côtoie.<br><br>
+    Je lui tends une main qu'il saisit en tremblant.<br>
+    Mais en rouvrant la sienne, il s'étonna, et de joie,<br>
+    Sans me dire au revoir, il déploie son élan.</p>
+  </div>
+  <div class="sec-title marine"><span>📡</span> I. Communication</div>
+  <ul class="q-list">
+    <li><strong>1a.</strong> Identifie le principal référent dans le texte et relève ses substituts lexicaux.</li>
+    <li><strong>1b.</strong> Quelle image du référent ces substituts donnent-ils ?</li>
+    <li><strong>2a.</strong> La présence de l'émetteur est-elle explicite ou implicite ? Relève et classe ses indices.</li>
+    <li><strong>2b.</strong> Comment peut-on interpréter ce choix énonciatif ?</li>
+  </ul>
+  <div class="sec-title marine"><span>🔧</span> II. Morphosyntaxe</div>
+  <ul class="q-list">
+    <li><strong>1a.</strong> Repère un contre-rejet dans la 2ᵉ strophe de ce sonnet.</li>
+    <li><strong>1b.</strong> Quelle est l'intention de communication du poète ?</li>
+    <li><strong>2a.</strong> Reconstitue le système verbal du texte (temps, occurrences, illustrations).</li>
+    <li><strong>2b.</strong> Que traduit cette alternance ?</li>
+  </ul>
+  <div class="sec-title marine"><span>💡</span> III. Sémantique / Lexicologie</div>
+  <ul class="q-list">
+    <li><strong>1a.</strong> Relève l'élément de phraséologie dans la dernière strophe.</li>
+    <li><strong>1b.</strong> Que laisse-t-il comprendre sur l'état d'esprit du référent ?</li>
+    <li><strong>2a.</strong> Construis les champs lexicaux de la pauvreté et de la poubelle. Quelle est leur relation ?</li>
+    <li><strong>3a.</strong> Quels sont les contenus latents du vers « Bientôt, il eut les mains chargées par le destin ! » ?</li>
+    <li><strong>3b.</strong> Quel effet de sens se dégage de ces implicites ?</li>
+  </ul>
+  <div class="sec-title marine"><span>🎭</span> IV. Stylistique / Rhétorique</div>
+  <ul class="q-list">
+    <li><strong>1a.</strong> À quelle figure de style appartient « il arborait un deuil solennel » ? Que met-elle en évidence ?</li>
+    <li><strong>2a.</strong> Détermine avec au moins deux indices la tonalité dominante dans les trois premières strophes.</li>
+    <li><strong>2b.</strong> En quoi cette tonalité est-elle en adéquation avec l'intention du poète ?</li>
+  </ul>
+</div>
+
+<!-- ══ ÉPREUVE 3 ══ -->
+<div class="lesson-section" id="ep3-cc">
+  <div class="epreuve-header">
+    <div class="ep-label">⚖️ Semaine 5 · Épreuve 3</div>
+    <h3>Commentaire composé — « Rencontre » — Sully Prudhomme</h3>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">« Rencontre » — Sully Prudhomme, Stances et Poèmes</div>
+    <p>Je ne te raille point, jeune prostituée !<br>
+    Tu vas l'œil provocant, le pied galant et prompt,<br>
+    À travers le sarcasme et l'ignoble huée :<br>
+    Ton immuable rire est plus fort que l'affront.<br><br>
+    Et moi, je porte au bal le masque de mon front ;<br>
+    J'y vais, l'âme d'amour à vingt ans dénuée,<br>
+    Mendier des regards dans la blanche nuée<br>
+    Des vierges dont jamais les cœurs ne choisiront.<br><br>
+    Également parés et dédaignés de même,<br>
+    Tu cherches ton dîner, moi j'ai besoin qu'on m'aime.<br>
+    Qui voudra de ton corps ? l'amant heureux te fuit ;<br><br>
+    Qui voudra de mon cœur ? l'ange aimé se retire…<br>
+    Sommes-nous donc voués au glacial délire<br>
+    Du Désespoir pâmé sur la Faim dans la nuit ?</p>
+  </div>
+  <div class="card or">
+    <h3>Consigne</h3>
+    <p>Sans dissocier le fond de la forme, vous ferez de cet extrait de poème un commentaire composé. Si vous le voulez, vous pourrez en vous appuyant sur les marques de l'émetteur, le vocabulaire, la ponctuation forte, les temps verbaux et les types de verbes, examiner comment le poète compare sa condition à celle d'une prostituée.</p>
+  </div>
+  <div class="sec-title rouge"><span>💡</span> Proposition de plan</div>
+  <div class="plan-box"><div class="plan-header">Introduction — Problématique</div>
+    <div class="plan-body"><p>En quoi le poète établit-il un parallèle inattendu entre sa condition de poète rejeté et celle d'une prostituée ?</p></div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Axe I : La condition parallèle de deux exclus de la société</div>
+    <div class="plan-body">
+      <p><strong>SCI 1.1 :</strong> La prostituée : rejet social mais dignité maintenue → « immuable rire », « plus fort que l'affront »</p>
+      <p><strong>SCI 1.2 :</strong> Le poète : exclusion affective, mendiant de regards → « l'âme d'amour dénuée », « Mendier des regards »</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Axe II : La fraternité dans le désespoir — deux solitudes face au monde</div>
+    <div class="plan-body">
+      <p><strong>SCI 2.1 :</strong> La symétrie structurelle → questions rhétoriques parallèles (v.11-12), adverbe « Également »</p>
+      <p><strong>SCI 2.2 :</strong> La conclusion nihiliste → « glacial délire / Du Désespoir pâmé sur la Faim » — personnifications</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ÉPREUVE 4 ══ -->
+<div class="lesson-section" id="ep4-cc">
+  <div class="epreuve-header">
+    <div class="ep-label">⚖️ Semaine 5 · Épreuve 4</div>
+    <h3>Commentaire composé — « La Poésie (1-4) » — Sully Prudhomme</h3>
+  </div>
+  <div class="corpus-box">
+    <div class="corpus-label">« La Poésie » (1-4) — À Victor Gérusez — Sully Prudhomme</div>
+    <div class="strophe">
+      <p>Quand j'entends disputer les hommes<br>
+      Sur Dieu qu'ils ne pénètrent point,<br>
+      Je me demande où nous en sommes :<br>
+      Hélas, toujours au même point.</p>
+    </div>
+    <div class="strophe">
+      <p>Oui, j'entends d'admirables phrases,<br>
+      Des sons par la bouche ennoblis ;<br>
+      Mais les mots ressemblent aux vases,<br>
+      Les plus beaux sont les moins remplis.</p>
+    </div>
+    <div class="strophe">
+      <p>Alors, pour me sauver du doute,<br>
+      J'ouvre un Euclide avec amour,<br>
+      Il propose, il prouve, et j'écoute,<br>
+      Et je suis inondé de jour.</p>
+    </div>
+    <div class="strophe">
+      <p>L'évidence, éclair de l'étude,<br>
+      Jaillit, et me laisse enchanté !<br>
+      Je savoure la certitude,<br>
+      Mon seul vrai bonheur, ma santé !</p>
+    </div>
+  </div>
+  <div class="card or">
+    <h3>Consigne</h3>
+    <p>Sans dissocier le fond de la forme, vous ferez de cet extrait de poème un commentaire composé. Si vous le voulez, vous pourrez examiner les dissensions religieuses et la clarté scientifique en vous appuyant sur les marques de l'émetteur, le vocabulaire, la ponctuation forte, les temps verbaux et les types de verbes.</p>
+  </div>
+  <div class="sec-title or"><span>💡</span> Proposition de plan</div>
+  <div class="plan-box"><div class="plan-header">Axe I : Les vaines querelles religieuses — critique de la foi aveugle</div>
+    <div class="plan-body">
+      <p><strong>SCI 1.1 :</strong> L'inutilité des débats religieux → « où nous en sommes : Hélas, toujours au même point »</p>
+      <p><strong>SCI 1.2 :</strong> Critique du discours vide → « les mots ressemblent aux vases, les plus beaux sont les moins remplis »</p>
+    </div>
+  </div>
+  <div class="plan-box"><div class="plan-header">Axe II : La clarté scientifique comme seule certitude</div>
+    <div class="plan-body">
+      <p><strong>SCI 2.1 :</strong> La science comme refuge → « J'ouvre un Euclide avec amour », opposition émotionnelle/rationnelle</p>
+      <p><strong>SCI 2.2 :</strong> L'extase de la certitude → « inondé de jour », « certitude / Mon seul vrai bonheur » — vocabulaire de la lumière</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ÉPREUVE 5 ══ -->
+<div class="lesson-section" id="ep5-controle">
+  <div class="epreuve-header">
+    <div class="ep-label">⚖️ Semaine 5 · Épreuve 5</div>
+    <h3>Contrôle de lecture — Stances et Poèmes</h3>
+  </div>
+  <div class="obj-box">
+    <div class="obj-label">📌 Instructions</div>
+    <p>Réponds à toutes les questions. Les réponses doivent montrer une lecture réelle et attentive de l'œuvre.</p>
+  </div>
+  <div class="sec-title marine"><span>📚</span> I. Structure interne de l'œuvre</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Dresse la carte d'identité de l'œuvre (titre, auteur, date, genre, éditeur).</li>
+    <li><strong>2.</strong> Quel prix littéraire l'auteur a-t-il reçu ? En quelle année ?</li>
+    <li><strong>3.</strong> Dans quelle école littéraire s'inscrit-il principalement ?</li>
+    <li><strong>4.</strong> Combien de sections compte le livre ? Combien de poèmes pour chaque section ?</li>
+    <li><strong>5.</strong> Réponds par Vrai ou Faux et justifie :
+      <ul>
+        <li>Prudhomme utilise la poésie moderne. → ……</li>
+        <li>La première section compte plus de poèmes. → ……</li>
+        <li>« Le meilleur moment des amours » se trouve dans la dernière section. → ……</li>
+        <li>« Un songe » évoque une discussion du poète avec sa mère. → ……</li>
+        <li>Il existe quatre poèmes intitulés « sonnet » dans le livre. → ……</li>
+        <li>« Je me croyais poète » est le dernier poème du recueil. → ……</li>
+        <li>Le premier poème du livre est « Le vase brisé ». → ……</li>
+        <li>Les poèmes sont écrits dans une seule forme classique. → ……</li>
+      </ul>
+    </li>
+  </ul>
+  <div class="sec-title marine"><span>🎨</span> II. Analyse thématique</div>
+  <ul class="q-list">
+    <li><strong>1.</strong> Propose quatre poèmes à caractère lyrique.</li>
+    <li><strong>2.</strong> Donne deux poèmes pour les thèmes suivants : temps · liberté · religion.</li>
+    <li><strong>3.</strong> Quelle est l'opinion de Sully Prudhomme concernant la religion ? Justifie à partir de l'œuvre.</li>
+    <li><strong>4.</strong> Quel regard porte-t-il sur le métier d'écrivain ?</li>
+    <li><strong>5.</strong> En quoi cette œuvre peut-elle être considérée comme actuelle ?</li>
+  </ul>
+</div>
+
+</div><!-- end content-area -->
+</div><!-- end app-layout -->
+
+<!-- ANNOTATION POPUPS -->
+<div id="global-popup" style="display:none;position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:#1c0812;border:1.5px solid var(--or);border-radius:12px;padding:13px 17px;
+  max-width:340px;width:90%;z-index:500;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+  <span onclick="closeAnnot()" style="position:absolute;top:7px;right:11px;cursor:pointer;color:rgba(255,255,255,.5)">✕</span>
+  <h4 id="gp-title" style="font-family:'Playfair Display',serif;color:var(--or-clair);margin-bottom:5px;font-size:.95rem"></h4>
+  <p id="gp-body" style="font-size:.83rem;color:rgba(255,255,255,.85);line-height:1.65"></p>
+</div>
+
+<script>
+// ── NAVIGATION ──
+function show(id, btn) {
+  document.querySelectorAll('.lesson-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const sec = document.getElementById(id);
+  if (sec) sec.classList.add('active');
+  if (btn) btn.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+// ── TOGGLE RÉPONSE ──
+function toggleRep(btn) {
+  const rep = btn.nextElementSibling;
+  rep.classList.toggle('open');
+  btn.textContent = rep.classList.contains('open') ? '🙈 Masquer' : '👁 Voir la réponse';
+}
+
+// ── ANNOTATIONS ──
+const annotData = {
+  a1:{title:"« j'y souffre »",body:"Aveu direct de souffrance. Le poète identifie ses vers à son intériorité. Fonction <strong>lyrique</strong>."},
+  a2:{title:"Répétition de « deuil »",body:"<strong>Polyptote :</strong> répétition du même mot dans des fonctions différentes. La douleur vécue devient matière poétique."},
+  a3:{title:"Formule centrale (v.8)",body:"<strong>Métaphore financière :</strong> la douleur est le capital, l'art en est l'intérêt (le bénéfice). Formule-clé de la poétique de Prudhomme."},
+  a4:{title:"« ces lyres »",body:"<strong>Métonymie :</strong> la lyre (instrument d'Apollon) désigne la poésie. Référence mythologique discrète."},
+  a5:{title:"« se mentir »",body:"<strong>Oxymore psychologique :</strong> l'âme se trompe elle-même pour supporter la réalité. La poésie comme consolation illusoire."},
+  a6:{title:"« ami »",body:"<strong>Apostrophe :</strong> interpellation directe du lecteur. Crée une complicité intime poète/lecteur."}
+};
+
+function showAnnot(id) {
+  const d = annotData[id];
+  if (!d) return;
+  document.getElementById('gp-title').textContent = d.title;
+  document.getElementById('gp-body').innerHTML = d.body;
+  document.getElementById('global-popup').style.display = 'block';
+}
+function closeAnnot() {
+  document.getElementById('global-popup').style.display = 'none';
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.classList.contains('annot') && !e.target.closest('#global-popup')) closeAnnot();
+});
+
+// ── DRAG & DROP (Mythologie) ──
+let dragId = null;
+function dragStart(e) { dragId = e.target.id; }
+function allowDrop(e) { e.preventDefault(); e.currentTarget.classList.add('over'); }
+
+function dropM(e, zoneId) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('over');
+  if (!dragId) return;
+  const el = document.getElementById(dragId);
+  if (el) document.getElementById(zoneId).appendChild(el);
+  dragId = null;
+}
+document.querySelectorAll('.drag-zone').forEach(z => {
+  z.addEventListener('dragleave', () => z.classList.remove('over'));
+});
+
+function checkMythDrop() {
+  const zones = {genie:'zm-genie', ideal:'zm-ideal', beaute:'zm-beaute', poesie:'zm-poesie', destin:'zm-destin'};
+  let correct = 0, total = 6;
+  for (const [reg, zId] of Object.entries(zones)) {
+    document.getElementById(zId).querySelectorAll('.drag-item').forEach(item => {
+      if (item.dataset.val === reg) { item.style.border = '2px solid var(--vert)'; correct++; }
+      else item.style.border = '2px solid var(--rouge)';
+    });
+  }
+  const res = document.getElementById('res-myth');
+  if (correct === total) { res.className = 'act-result ok'; res.innerHTML = '🏆 Parfait ! Tous les personnages sont bien classés !'; }
+  else { res.className = 'act-result nok'; res.innerHTML = `⚠️ ${correct}/${total} corrects. Les éléments en rouge sont mal placés.`; }
+}
+
+function resetMythDrop() {
+  const src = document.getElementById('src-myth');
+  ['zm-genie','zm-ideal','zm-beaute','zm-poesie','zm-destin'].forEach(id => {
+    document.getElementById(id).querySelectorAll('.drag-item').forEach(el => {
+      el.style.border = ''; src.appendChild(el);
+    });
+  });
+  const res = document.getElementById('res-myth');
+  res.className = 'act-result'; res.style.display = 'none';
+}
+</script>
+</body>
+</html>
