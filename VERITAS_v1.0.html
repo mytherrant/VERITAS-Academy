@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20m | Agrandir vidéo mobile: 320px/260px -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20n | Auto-chargement vidéo serveur sur tous appareils -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -9396,11 +9396,21 @@ function buildIntroVideoHtml(){
       +'</div>';
   }
 
-  // ── 4. FALLBACK : aucune vidéo configurée — gradient animé épuré ──
-  return '<div class="vhero-video-wrap" data-vtype="fallback" style="background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#7C3AED);background-size:400% 400%;animation:vhAnim 8s ease infinite">'
-    +'<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;z-index:1">'
-      +'<div style="font-size:clamp(56px,12vw,88px);filter:drop-shadow(0 4px 24px rgba(0,0,0,.4));animation:float 6s ease-in-out infinite">🎓</div>'
-    +'</div>'
+  // ── 4. Tentative auto : vidéo serveur par défaut (uploadée par l'admin) ──
+  // Même si DB.introVideo est vide sur cet appareil, le fichier peut exister sur le serveur.
+  // On tente /uploads/video/intro_video.mp4 ; onerror bascule sur le gradient.
+  var cfg=DB&&DB.cloudConfig;
+  var base=(cfg&&cfg.url||'https://veritas-school.com/api').replace(/\/api\/?$/,'').replace(/\/+$/,'');
+  var autoSrc=base+'/uploads/video/intro_video.mp4';
+  return '<div class="vhero-video-wrap" data-vtype="auto" style="display:flex;align-items:stretch">'
+    +'<video id="vheroVideo"'
+    +' src="'+autoSrc+'"'
+    +' autoplay muted loop playsinline'
+    +' style="width:100%;height:100%;object-fit:cover;display:block;flex:1"'
+    +' oncanplay="this.play().catch(function(){})"'
+    +' onerror="_vheroShowGradient()"'
+    +'></video>'
+    +buildOverlay(true)
     +'</div>';
 }
 
@@ -9416,6 +9426,17 @@ function _vheroCheckAutoplay(){
 function _vheroVideoFallback(){
   var btn=document.getElementById('vheroPlayBtn');
   if(btn)btn.style.display='flex';
+}
+// Appelé si la vidéo auto-serveur n'existe pas — remplace par gradient animé
+function _vheroShowGradient(){
+  var wrap=document.querySelector('.vhero-video-wrap[data-vtype="auto"]');
+  if(!wrap)return;
+  wrap.removeAttribute('data-vtype');
+  wrap.style.cssText=(wrap.style.cssText||'')
+    +';background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#7C3AED);background-size:400% 400%;animation:vhAnim 8s ease infinite;display:block';
+  wrap.innerHTML='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;z-index:1">'
+    +'<div style="font-size:clamp(56px,12vw,88px);filter:drop-shadow(0 4px 24px rgba(0,0,0,.4));animation:float 6s ease-in-out infinite">🎓</div>'
+    +'</div>';
 }
 function _vheroManualPlay(){
   var v=document.getElementById('vheroVideo');
