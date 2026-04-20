@@ -23,6 +23,8 @@ header('Content-Type: application/json; charset=utf-8');
 // ── Vérification du token Bearer ──
 function requireAuth() {
     $auth = '';
+
+    // 1. Header Authorization (méthode standard)
     if (function_exists('getallheaders')) {
         foreach (getallheaders() as $key => $value) {
             if (strtolower($key) === 'authorization') { $auth = $value; break; }
@@ -33,6 +35,16 @@ function requireAuth() {
              ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION']
              ?? '';
     }
+
+    // 2. Fallback : champ POST _secret (LiteSpeed supprime parfois le header Authorization)
+    if (empty($auth) && !empty($_POST['_secret'])) {
+        $auth = 'Bearer ' . $_POST['_secret'];
+    }
+    // 3. Fallback : champ GET _secret (pour requêtes GET avec token)
+    if (empty($auth) && !empty($_GET['_secret'])) {
+        $auth = 'Bearer ' . $_GET['_secret'];
+    }
+
     $token = trim(str_ireplace('bearer', '', $auth));
     if ($token !== API_SECRET) {
         http_response_code(401);

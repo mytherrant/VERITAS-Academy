@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20e | Video intro hébergée sur le serveur via upload_video.php -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20f | Fix auth upload: secret dans FormData (LiteSpeed) -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -10475,6 +10475,7 @@ function _ivSave(){
 
     var fd=new FormData();
     fd.append('video',window._pVidFile,window._pVidFile.name);
+    fd.append('_secret',secret); // fallback si LiteSpeed supprime le header Authorization
 
     var xhr=new XMLHttpRequest();
     xhr.open('POST',base+'/upload_video.php');
