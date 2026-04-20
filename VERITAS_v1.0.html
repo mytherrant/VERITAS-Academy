@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20q | Hauteur vidéo: 300px desktop, 420/360px mobile uniquement -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20r | Support HTML interactif: jeux, épreuves, évaluations -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -3766,9 +3766,14 @@ function vShowSec(sec,btn){
             if(item.externalUrl){
               h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px;font-weight:700" onclick="window.open(\''+item.externalUrl+'\',\'_blank\')">&#9654;&#65039; Passer l\'épreuve</button>';
             } else {
-              if(dlUsed>0) h+='<span class="dl-counter">📊 '+dlUsed+'/3</span>';
-              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')">👁 Consulter</button>';
-              h+='<button class="btn" style="background:'+catColor+'22;color:'+catColor+';font-size:11px;padding:6px 10px;border-radius:12px;border:1px solid '+catColor+'44" onclick="consulterGratuit(\''+item.id+'\')">📥 Télécharger</button>';
+              var isHtmlItem=(item.fileType==='html')||(item.fichier&&item.fichier.toLowerCase().endsWith('.html'));
+              if(dlUsed>0&&!isHtmlItem) h+='<span class="dl-counter">📊 '+dlUsed+'/3</span>';
+              if(isHtmlItem){
+                h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px;font-weight:700" onclick="consulterGratuit(\''+item.id+'\')">🌐 Lancer</button>';
+              } else {
+                h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')">👁 Consulter</button>';
+                h+='<button class="btn" style="background:'+catColor+'22;color:'+catColor+';font-size:11px;padding:6px 10px;border-radius:12px;border:1px solid '+catColor+'44" onclick="consulterGratuit(\''+item.id+'\')">📥 Télécharger</button>';
+              }
             }
             h+='</div>';
           } else if(isLocked){
@@ -5375,6 +5380,18 @@ function pgElearningMgmt(){
   return h;
 }
 
+function _ecTypeToggle(val){
+  var fw=document.getElementById('ecFileWrap');
+  var uw=document.getElementById('ecUrlWrap');
+  if(val==='html'){
+    if(fw)fw.style.display='none';
+    if(uw)uw.style.display='';
+  } else {
+    if(fw)fw.style.display='';
+    if(uw)uw.style.display='none';
+  }
+}
+
 function mAddElearningContent(){
   var el=DB.elearning||{categories:[]};
   var planOptions=['plan1','plan2','plan3','plan4'];
@@ -5396,7 +5413,13 @@ function mAddElearningContent(){
   '<div class="fg full"><span class="fl">Aperçu du contenu (visible avant achat)</span><textarea class="fi" id="ecApercu" rows="3" placeholder="Décrivez le contenu du document pour inciter à l\'achat : chapitres, exercices, pages..."></textarea></div>'+
   '<div class="fg full"><span class="fl">📦 Packs qui donnent accès à ce contenu</span>'+plansCheckboxes+'</div>'+
   '<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px;background:var(--grb);border-radius:8px"><input type="checkbox" id="ecGratuit"> <span class="fl" style="color:var(--gr)">✅ Contenu gratuit (aperçu public sans abonnement)</span></label></div>'+
-  '<div class="fg full"><span class="fl">Fichier (PDF, Word, Image)</span><input type="file" id="ecFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp4,.mov,.avi,.webm,.mp3,.m4a,.pptx,.xlsx,.zip" class="fi" style="padding:8px"></div>'+
+  '<div class="fg"><span class="fl">Type de contenu</span><select class="fi" id="ecType" onchange="_ecTypeToggle(this.value)">'+
+  '<option value="fichier">📄 Fichier (PDF, Vidéo, Image...)</option>'+
+  '<option value="html">🌐 HTML interactif (jeu, épreuve, évaluation)</option>'+
+  '</select></div>'+
+  '<div class="fg full" id="ecFileWrap"><span class="fl">Fichier (PDF, Vidéo, Image, HTML)</span><input type="file" id="ecFile" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.mp4,.mov,.avi,.webm,.mp3,.m4a,.pptx,.xlsx,.zip,.html" class="fi" style="padding:8px"></div>'+
+  '<div class="fg full" id="ecUrlWrap" style="display:none"><span class="fl">URL du fichier HTML <small style="color:var(--ink3)">(hébergé sur veritas-school.com ou ailleurs)</small></span>'+
+  '<input class="fi" id="ecExternalUrl" placeholder="https://veritas-school.com/evaluations/mon_epreuve.html" type="url"></div>'+
   '</div>',
   '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveElearningContent()">✓ Ajouter au catalogue</button>',true);
 }
@@ -5458,6 +5481,8 @@ function saveElearningContent(){
   var apercu=document.getElementById('ecApercu')?.value||'';
   var fileInput=document.getElementById('ecFile');
   function doSaveEl(fd,fn){
+    var ftype=document.getElementById('ecType')?.value||'fichier';
+    var extUrl=(document.getElementById('ecExternalUrl')?.value||'').trim();
     DB.elearning.contenus.push({
       id:gid(),cat:document.getElementById('ecCat')?.value||'cat1',
       titre:titre,classe:document.getElementById('ecCls')?.value||'3ème',
@@ -5465,9 +5490,21 @@ function saveElearningContent(){
       seq:document.getElementById('ecSeq')?.value||'',
       prix:prix,gratuit:isGratuit,plans:selectedPlans,
       apercu:apercu,fichier:fn,fichierData:fd,
+      fileType:ftype,
+      externalUrl:(ftype==='html'&&extUrl)?extUrl:'',
       desc:document.getElementById('ecDesc')?.value||''
     });
     save();cm();re();toast('✓ Contenu ajouté au catalogue');
+  }
+  if(document.getElementById('ecType')?.value==='html'){
+    var extUrl2=(document.getElementById('ecExternalUrl')?.value||'').trim();
+    if(extUrl2){ doSaveEl('',''); return; }
+    // HTML file uploaded
+    if(fileInput&&fileInput.files&&fileInput.files[0]){
+      var reader=new FileReader();reader.onload=function(e){doSaveEl(e.target.result,fileInput.files[0].name);};
+      reader.readAsDataURL(fileInput.files[0]);
+    } else { toast('Entrez une URL ou choisissez un fichier HTML','warn'); }
+    return;
   }
   if(fileInput&&fileInput.files&&fileInput.files[0]){
     var reader=new FileReader();reader.onload=function(e){doSaveEl(e.target.result,fileInput.files[0].name);};
@@ -5889,6 +5926,12 @@ function consulterGratuit(itemId){
     return;
   }
   localStorage.setItem(dlKey,String(used+1));
+  // Si contenu HTML avec externalUrl → ouvrir dans un onglet
+  if(item.externalUrl){window.open(item.externalUrl,'_blank');return;}
+  // Si fichier HTML uploadé → ouvrir via Blob URL
+  if(item.fichier&&item.fichier.toLowerCase().endsWith('.html')&&item.fichierData){
+    try{var blob=new Blob([atob(item.fichierData.split(',')[1])],{type:'text/html'});window.open(URL.createObjectURL(blob),'_blank');return;}catch(ex){}
+  }
   // Track global counter in DB
   if(!item.dlCount) item.dlCount=0;
   item.dlCount++;
@@ -5962,6 +6005,7 @@ function viewResource(item, isFree){
     var isWord=['doc','docx'].includes(ext);
     var isPpt=['ppt','pptx'].includes(ext);
     var isXls=['xls','xlsx'].includes(ext);
+    var isHtml=ext==='html'||item.fileType==='html';
 
     var viewer='';
     if(isVid){
@@ -5985,6 +6029,18 @@ function viewResource(item, isFree){
         '<div style="font-size:48px;margin-bottom:12px">'+(isWord?'📝':isPpt?'📊':'📈')+'</div>'+
         '<div style="font-size:13px;color:var(--ink3);margin-bottom:12px">Fichier '+ext.toUpperCase()+' — '+fname+'</div>'+
         '<div style="font-size:11px;color:var(--ink4)">Téléchargez pour ouvrir dans votre application Office</div></div>';
+    } else if(isHtml){
+      // HTML interactif : ouvrir dans un nouvel onglet via Blob URL
+      if(dataUrl&&dataUrl.indexOf('data:')===0){
+        var blob=new Blob([atob(dataUrl.split(',')[1])],{type:'text/html'});
+        var blobUrl=URL.createObjectURL(blob);
+        window.open(blobUrl,'_blank');
+        cm();
+        return;
+      }
+      viewer='<div style="background:var(--bg2);border-radius:12px;padding:30px;text-align:center;margin-bottom:10px">'+
+        '<div style="font-size:48px;margin-bottom:12px">🌐</div>'+
+        '<div style="font-size:13px;color:var(--ink3)">Contenu HTML interactif — '+_esc(fname)+'</div></div>';
     } else {
       viewer='<div style="background:var(--bg2);border-radius:12px;padding:30px;text-align:center;margin-bottom:10px">'+
         '<div style="font-size:48px;margin-bottom:12px">📄</div>'+
