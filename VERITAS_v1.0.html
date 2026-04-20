@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20s | Correction bugs, vidéo 360px, 4 nouveaux jeux, orientation IA -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20t | Vidéo 500px PC/520px tablette/460px mobile + fix son mobile -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -995,7 +995,7 @@ body { font-size: 15px !important; }
 
 /* Vidéo héro - conteneur responsive (v1.0 - remplit la cellule grid) */
 .vhero-video-wrap {
-  position: relative; width: 100%; height: 360px; overflow: hidden;
+  position: relative; width: 100%; height: 500px; overflow: hidden;
   background: #0F172A;
   border-radius: var(--r3, 18px);
   border: 2px solid rgba(255,201,60,.3);
@@ -1018,14 +1018,14 @@ body { font-size: 15px !important; }
   display: block; border: none;
 }
 /* Desktop : hauteur fixe 360px */
-#vHeroVideoOuter { height: 360px; }
+#vHeroVideoOuter { height: 500px; }
 @media(max-width:900px){
   #vHeroGrid { grid-template-columns: 1fr !important; min-height: auto !important; }
-  .vhero-video-wrap, #vHeroVideoOuter { height: 420px !important; }
+  .vhero-video-wrap, #vHeroVideoOuter { height: 520px !important; }
   #vHeroNews { min-height: 280px !important; }
 }
 @media(max-width:700px){
-  .vhero-video-wrap, #vHeroVideoOuter { height: 360px !important; }
+  .vhero-video-wrap, #vHeroVideoOuter { height: 460px !important; }
 }
 /* Overlay transparent POSÉ sur la vidéo */
 .vhero-video-overlay {
@@ -1062,9 +1062,9 @@ body { font-size: 15px !important; }
   color: #142554;
   border: 2px solid #fff;
   border-radius: 24px;
-  padding: 7px 14px;
+  padding: 8px 16px;
   font-family: 'Montserrat', sans-serif;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   cursor: pointer;
   box-shadow: 0 4px 14px rgba(0,0,0,.35);
@@ -1072,10 +1072,16 @@ body { font-size: 15px !important; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 40px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .vhero-sound-btn:hover { transform: scale(1.06); background: #FFC93C; }
 .vhero-sound-btn.muted { background: rgba(255,255,255,.9); color: #142554; }
 .vhero-sound-btn.playing { background: rgba(5,150,105,.95); color: #fff; }
+@media(max-width:700px){
+  .vhero-sound-btn { padding: 10px 18px; font-size: 14px; min-height: 46px; }
+}
 /* Badge live */
 .vhero-live-badge {
   pointer-events: none;
@@ -1988,11 +1994,11 @@ tr:hover td {
     gap:12px!important;
   }
   .vhero-video-wrap,#vHeroVideoOuter{
-    height:240px!important;
+    height:340px!important;
     border-radius:14px!important;
   }
   #vHeroGrid>div:first-child{
-    height:240px!important;
+    height:340px!important;
     overflow:hidden!important;
   }
   /* ── Footer ── */
@@ -3093,20 +3099,33 @@ function initVisitor(){
   _vheroAutoUnmuteOnInteraction();
 }
 function _vheroAutoUnmuteOnInteraction(){
-  var done=false;
-  function handler(){
-    if(done)return; done=true;
-    document.removeEventListener('touchstart',handler,true);
-    document.removeEventListener('click',handler,true);
+  // Attendre que la vidéo soit dans le DOM, puis brancher le son sur un tap direct
+  var tries=0;
+  var interval=setInterval(function(){
     var v=document.getElementById('vheroVideo');
-    var btn=document.getElementById('vheroSoundBtn');
-    if(v&&v.muted){
-      v.muted=false;
-      if(btn){btn.classList.remove('muted');btn.innerHTML='🔊 <span>Son activé</span>';}
+    if(v){
+      clearInterval(interval);
+      // Touch direct sur la vidéo → unmute (satisfait la politique navigateur mobile)
+      v.addEventListener('touchstart',function onTouch(){
+        v.removeEventListener('touchstart',onTouch);
+        _vheroUnmute();
+      },{passive:true,once:true});
+      v.addEventListener('click',function onClick(){
+        v.removeEventListener('click',onClick);
+        _vheroUnmute();
+      },{once:true});
     }
+    if(++tries>40)clearInterval(interval);
+  },200);
+}
+function _vheroUnmute(){
+  var v=document.getElementById('vheroVideo');
+  var btn=document.getElementById('vheroSoundBtn');
+  if(v&&v.muted){
+    v.muted=false;
+    v.play().catch(function(){});
+    if(btn){btn.classList.remove('muted');btn.classList.add('playing');btn.innerHTML='🔊 <span>Son activé</span>';}
   }
-  document.addEventListener('touchstart',handler,{capture:true,once:true,passive:true});
-  document.addEventListener('click',handler,{capture:true,once:true});
 }
 // ═══ Scroll reveal observer ═══
 var _vRevealObs=null;
