@@ -1,68 +1,49 @@
 <?php
 // ============================================================
-// VÉRITAS — Gestion des fichiers
-// GET /api/files.php          → liste tous les fichiers
-// GET /api/files.php?id=xxx   → un fichier
-// DELETE /api/files.php?id=xxx → supprimer
+// VÉRITAS — Liste des sauvegardes disponibles
+// GET /api/files.php  → liste les sauvegardes JSON sur le serveur
+// ── Pas de MySQL requis ──
 // ============================================================
-require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/config_sync.php';
 
-$method = $_SERVER['REQUEST_METHOD'];
-$id = $_GET['id'] ?? null;
-$category = $_GET['category'] ?? null;
-$classe = $_GET['classe'] ?? null;
+$method    = $_SERVER['REQUEST_METHOD'];
+$backupDir = __DIR__ . '/../uploads/';
 
-$db = getDB();
-
-// ── GET : liste ou détail ──
 if ($method === 'GET') {
-    if ($id) {
-        $stmt = $db->prepare('SELECT * FROM files WHERE id = ?');
-        $stmt->execute([$id]);
-        $file = $stmt->fetch();
-        if (!$file) jsonResponse(['error' => 'Fichier non trouvé'], 404);
-        jsonResponse($file);
-    }
-
-    $query = 'SELECT * FROM files WHERE 1=1';
-    $params = [];
-
-    if ($category) {
-        $query .= ' AND category = ?';
-        $params[] = $category;
-    }
-    if ($classe) {
-        $query .= ' AND classe = ?';
-        $params[] = $classe;
-    }
-
-    $query .= ' ORDER BY created_at DESC';
-    $stmt = $db->prepare($query);
-    $stmt->execute($params);
-    jsonResponse($stmt->fetchAll());
-}
-
-// ── DELETE : supprimer un fichier ──
-if ($method === 'DELETE') {
     requireAuth();
-    if (!$id) jsonResponse(['error' => 'ID requis'], 400);
 
-    $stmt = $db->prepare('SELECT * FROM files WHERE id = ?');
-    $stmt->execute([$id]);
-    $file = $stmt->fetch();
-    if (!$file) jsonResponse(['error' => 'Fichier non trouvé'], 404);
+    $files = [];
 
-    // Supprimer le fichier physique
-    $filePath = UPLOAD_DIR . $file['category'] . '/' . $file['filename'];
-    if (file_exists($filePath)) {
-        unlink($filePath);
+    // Sauvegarde principale
+    $mainFile = $backupDir . 'veritas_db_backup.json';
+    if (file_exists($mainFile)) {
+        $metaFile = $backupDir . 'veritas_db_meta.json';
+        $meta = file_exists($metaFile)
+            ? json_decode(file_get_contents($metaFile), true)
+            : [];
+        $files[] = [
+            'name'     => 'veritas_db_backup.json',
+            'type'     => 'backup_principal',
+            'size'     => filesize($mainFile),
+            'saved_at' => $meta['saved_at']    ?? '',
+            'label'    => 'Sauvegarde principale — ' . ($meta['saved_at_fr'] ?? date('d/m/Y', filemtime($mainFile))),
+        ];
     }
 
-    // Supprimer de la base
-    $stmt = $db->prepare('DELETE FROM files WHERE id = ?');
-    $stmt->execute([$id]);
+    // Archives
+    $archives = glob($backupDir . 'veritas_db_2*.json') ?: [];
+    rsort($archives); // plus récente en premier
+    foreach ($archives as $arch) {
+        $files[] = [
+            'name'     => basename($arch),
+            'type'     => 'archive',
+            'size'     => filesize($arch),
+            'saved_at' => date('c', filemtime($arch)),
+            'label'    => 'Archive — ' . date('d/m/Y H:i', filemtime($arch)),
+        ];
+    }
 
-    jsonResponse(['message' => 'Fichier supprimé', 'id' => $id]);
+    jsonResponse($files);
 }
 
 jsonResponse(['error' => 'Méthode non autorisée'], 405);

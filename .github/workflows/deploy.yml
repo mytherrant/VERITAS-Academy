@@ -35,10 +35,11 @@ jobs:
           cp "Logo détouré.png" deploy/
           # .htaccess pour la sécurité, le cache et LiteSpeed
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
-          # API PHP — on NE copie PAS config.php (contient les vraies credentials du serveur)
-          for f in api/upload.php api/files.php api/sync.php; do
+          # API PHP : config_sync.php (pas de credentials), sync.php, files.php
+          for f in api/config_sync.php api/upload.php api/files.php api/sync.php; do
             [ -f "$f" ] && cp "$f" deploy/api/
           done
+          # NE PAS déployer config.php (contient credentials MySQL)
           if [ -f api/database_mysql.sql ]; then cp api/database_mysql.sql deploy/api/; fi
           # Dossier évaluations interactives BAC
           if [ -d evaluations ]; then cp -r evaluations/ deploy/evaluations/; fi

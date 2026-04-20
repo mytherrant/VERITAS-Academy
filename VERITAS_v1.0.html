@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20a | Fix mobile layout: flex-direction column on #VISITOR -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20b | Fix cloud sync: flat file storage + pre-config API key -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -2602,7 +2602,7 @@ function load(){
   // Merge citations from defaultDB if missing
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
   // Init cloud config if missing
-  if(!DB.cloudConfig){DB.cloudConfig={url:'https://veritas-school.com/api',secret:'',lastSync:'Jamais'};}
+  if(!DB.cloudConfig){DB.cloudConfig={url:'https://veritas-school.com/api',secret:'VERITAS-CLOUD-2026-xK9m',lastSync:'Jamais'};}
   if(!DB.elearning.soumissions)DB.elearning.soumissions=[];
   if(!DB.elearning.telechargementsGratuits)DB.elearning.telechargementsGratuits={};
   if(!DB.products)DB.products=defaultDB().products;
@@ -4519,10 +4519,11 @@ function cloudSaveDB(){
   })
   .then(function(res){
     if(res.error)throw new Error(res.error);
-    DB.cloudConfig.lastSync=new Date().toLocaleString('fr-FR');
+    var dateSync=res.saved_at||new Date().toLocaleString('fr-FR');
+    DB.cloudConfig.lastSync=dateSync;
     save();
-    var sizeKB=Math.round((res.size||0)/1024);
-    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sauvegarde réussie !</strong> Snapshot #'+res.snapshot_id+' — '+sizeKB+' Ko envoyés. '+new Date().toLocaleString('fr-FR')+'</span></div>');
+    var sizeKB=res.size_kb||Math.round((res.size||0)/1024);
+    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sauvegarde réussie !</strong> '+sizeKB+' Ko envoyés — '+dateSync+'</span></div>');
     toast('✅ Données sauvegardées dans le cloud !');
   })
   .catch(function(e){
