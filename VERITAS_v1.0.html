@@ -11235,14 +11235,20 @@ function _getFullQuizList(){
 function mManageJeux(){
   if(!iA())return;
   if(typeof JEUX_CATALOGUE==="undefined"){toast("Module jeux non charge","warn");return;}
+  var _deleted=DB.deletedJeux||[];
   var rows=JEUX_CATALOGUE.map(function(j){
-    return "<tr>"
-      +"<td style='padding:6px 8px'>"+j.emoji+" <strong>"+j.titre+"</strong></td>"
+    var isHidden=_deleted.indexOf(j.id)>=0;
+    return "<tr style='"+(isHidden?"opacity:.45;background:#FEF2F2":"")+"'>"
+      +"<td style='padding:6px 8px'>"+j.emoji+" <strong>"+j.titre+"</strong>"+(isHidden?" <span style='font-size:9px;background:#FCA5A5;color:#7F1D1D;padding:1px 6px;border-radius:4px;font-weight:700'>MASQUÉ</span>":"")+"</td>"
       +"<td style='padding:6px 8px;font-size:11px'>"+j.matiere+"</td>"
       +"<td style='padding:6px 8px;font-size:11px'>"+j.niveau+"</td>"
       +"<td style='padding:6px 8px'><span style='background:"+(j.gratuit?"#D1FAE5":"#FEF3C7")+";color:"+(j.gratuit?"#059669":"#D97706")+";font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px'>"+(j.gratuit?"GRATUIT":j.plan||"PREMIUM")+"</span></td>"
-      +"<td style='padding:4px'><button class='btn bo xs' onclick='_toggleJeuAcces(\""+j.id+"\")'>⇄ Accès</button>"
-      +(j.custom?"<button class='btn br2 xs' onclick='_delJeuCustom(\""+j.id+"\")'>🗑</button>":"")
+      +"<td style='padding:4px'>"
+      +(isHidden
+        ?"<button class='btn bgr2 xs' onclick='_restoreJeu(\""+j.id+"\")'>↩ Restaurer</button>"
+        :"<button class='btn bo xs' onclick='_toggleJeuAcces(\""+j.id+"\")' style='margin-right:3px'>⇄ Accès</button>"
+        +"<button class='btn br2 xs' onclick='_delJeu(\""+j.id+"\")'>🗑</button>"
+      )
       +"</td></tr>";
   }).join("");
   var MATS=["Mathematiques","Francais","Litterature","Histoire-Geographie","Physique-Chimie","SVT","Anglais","Philosophie","Toutes matieres"];
@@ -11259,6 +11265,7 @@ function mManageJeux(){
     +"<button class='btn br2 sm' onclick='_setAllJeuxPremium()'>🔒 Tout premium</button>"
     +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='cm();mImportQCM()'>📥 Importer JSON</button>"
     +"<button class='btn sm' style='background:#059669;color:#fff' onclick='cm();mImportJeuFichier()'>📤 Importer Jeu/Quiz</button>"
+    +"<button class='btn sm' style='background:#6B7280;color:#fff' onclick='_restoreAllJeux()'>↩ Restaurer tous</button>"
     +"</div>"
     +"<div class='bold s mb10'>➕ Créer un nouveau Quiz / Jeu</div>"
     +"<div class='fg2'>"
@@ -11291,6 +11298,27 @@ function _toggleJeuAcces(id){
 }
 function _setAllJeuxGratuit(){if(typeof JEUX_CATALOGUE!=="undefined")JEUX_CATALOGUE.forEach(function(j){j.gratuit=true;});toast("Tous gratuits");cm();setTimeout(mManageJeux,80);}
 function _setAllJeuxPremium(){if(typeof JEUX_CATALOGUE!=="undefined")JEUX_CATALOGUE.forEach(function(j){j.gratuit=false;});toast("Tous premium");cm();setTimeout(mManageJeux,80);}
+function _restoreJeu(id){
+  DB.deletedJeux=(DB.deletedJeux||[]).filter(function(x){return x!==id;});
+  save();cm();setTimeout(mManageJeux,80);toast('Jeu restauré');
+}
+function _restoreAllJeux(){
+  DB.deletedJeux=[];
+  save();cm();setTimeout(mManageJeux,80);toast('Tous les jeux restaurés');
+}
+function _delJeu(id){
+  var j=typeof JEUX_CATALOGUE!=="undefined"&&JEUX_CATALOGUE.find(function(x){return x.id===id;});
+  if(j&&j.custom){
+    // custom: really delete
+    _delJeuCustom(id);
+  } else {
+    // built-in: soft-hide
+    if(!confirm('Masquer ce jeu ? Il n\'apparaîtra plus aux visiteurs.'))return;
+    DB.deletedJeux=DB.deletedJeux||[];
+    if(DB.deletedJeux.indexOf(id)<0)DB.deletedJeux.push(id);
+    save();cm();setTimeout(mManageJeux,80);toast('Jeu masqué');
+  }
+}
 function _delJeuCustom(id){
   if(!confirm("Supprimer ce jeu ?"))return;
   var idx=JEUX_CATALOGUE.findIndex(function(j){return j.id===id;});
@@ -13255,7 +13283,9 @@ function _delJeu(id){
 function showJeuxEdu(){
   var filtreMat=window._jeuFMat||"Tous";
   var filtreNiv=window._jeuFNiv||"Tous";
+  var _deleted=DB.deletedJeux||[];
   var list=JEUX_CATALOGUE.filter(function(j){
+    if(_deleted.indexOf(j.id)>=0)return false;
     var mOk=filtreMat==="Tous"||(j.matiere||"").toLowerCase().indexOf(filtreMat.toLowerCase())>=0;
     var nOk=filtreNiv==="Tous"||(j.niveau||"").toLowerCase().indexOf(filtreNiv.toLowerCase())>=0;
     return mOk&&nOk;
@@ -13711,8 +13741,9 @@ function showEpreuves(){
   var seq=window._epSeq||"";
 
   // Récupérer TOUTES les épreuves : librairie elearning (cat1, cat4, cat6) + épreuves admin personnalisées
+  var _hiddenEp=DB.hiddenEpreuves||[];
   var libEpreuves=(DB.elearningLibrary||[]).filter(function(e){
-    return e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6";
+    return (e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6")&&_hiddenEp.indexOf(e.id)<0;
   });
   var customEpreuves=(DB.customEpreuves||[]);
   var allEpreuves=libEpreuves.concat(customEpreuves);
@@ -14092,16 +14123,18 @@ function showLabosVirtuels(){
   var cat=window._laboCat||"tous";
   var cats=["tous","physique","chimie","svt","maths","geo","histoire"];
   var catLabels={"tous":"Tous","physique":"⚡ Physique","chimie":"⚗️ Chimie","svt":"🧬 SVT","maths":"📐 Maths","geo":"🗺️ Géo","histoire":"🏛️ Histoire"};
-  var list=LABO_DB.filter(function(l){return cat==="tous"||l.cat===cat;});
+  var _hiddenLV=DB.hiddenLabos||[];
+  var _visibleLabo=LABO_DB.filter(function(l){return _hiddenLV.indexOf(l.id)<0;});
+  var list=_visibleLabo.filter(function(l){return cat==="tous"||l.cat===cat;});
   var gratuits=list.filter(function(l){return l.gratuit;}).length;
 
   var h="<div class='vsec'>";
   h+="<div class='vsec-title'>🔬 Laboratoires Virtuels</div>";
-  h+="<div class='vsec-sub'>"+LABO_DB.length+" expériences interactives basées sur le programme MINESEC — Sans risque, sans matériel</div>";
+  h+="<div class='vsec-sub'>"+_visibleLabo.length+" expériences interactives basées sur le programme MINESEC — Sans risque, sans matériel</div>";
 
   // Bandeau stats
   h+="<div style='display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px'>";
-  [{n:LABO_DB.length,l:"Expériences",c:"#142554",i:"🔬"},{n:gratuits,l:"Gratuites",c:"#059669",i:"✅"},{n:LABO_DB.filter(function(l){return !l.gratuit;}).length,l:"Premium",c:"#7C3AED",i:"⭐"}].forEach(function(s){
+  [{n:_visibleLabo.length,l:"Expériences",c:"#142554",i:"🔬"},{n:gratuits,l:"Gratuites",c:"#059669",i:"✅"},{n:_visibleLabo.filter(function(l){return !l.gratuit;}).length,l:"Premium",c:"#7C3AED",i:"⭐"}].forEach(function(s){
     h+="<div style='background:linear-gradient(135deg,"+s.c+"15,"+s.c+"08);border:1px solid "+s.c+"30;border-radius:14px;padding:14px;text-align:center'>";
     h+="<div style='font-size:22px;margin-bottom:4px'>"+s.i+"</div>";
     h+="<div style='font-family:Montserrat,sans-serif;font-size:22px;font-weight:900;color:"+s.c+"'>"+s.n+"</div>";
@@ -14983,14 +15016,30 @@ function mManageEpreuves(){
       +"<td style='padding:6px 8px;font-size:11px'>"+ep.matiere+"</td>"
       +"<td style='padding:6px 8px;font-size:11px'>"+(ep.gratuit?"<span style='color:#059669;font-weight:700'>Gratuit</span>":"<span style='color:#7C3AED'>Premium</span>")+"</td>"
       +"<td style='padding:6px 8px;white-space:nowrap'>"
-        +(isCustom?"<button class='btn bo xs' onclick='_editEp("+(i)+")'  style='margin-right:4px'>✏️</button><button class='btn br2 xs' onclick='_delEp("+(i-( typeof EPREUVES_DB!=="undefined"?EPREUVES_DB.length:0))+")'>🗑</button>":"<span style='font-size:10px;color:var(--ink4)'>Défaut</span>")
+        +(isCustom
+          ?"<button class='btn bo xs' onclick='_editEp("+(i)+")'  style='margin-right:4px'>✏️</button><button class='btn br2 xs' onclick='_delEp("+(i-(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB.length:0))+")'>🗑</button>"
+          :((DB.hiddenEpreuves||[]).indexOf(ep.id)>=0
+            ?"<button class='btn bgr2 xs' onclick='_restoreEpreuve(\""+ep.id+"\")'>↩ Restaurer</button>"
+            :"<button class='btn br2 xs' onclick='_hideBuiltinEp(\""+ep.id+"\")'>🗑 Masquer</button>"
+          )
+        )
       +"</td></tr>";
   }).join("");
   M("📝 Gérer les Épreuves","Ajoutez et gérez les épreuves officielles",
-    "<div class='ib ibt mb12'><span>📝</span><span>Les épreuves par défaut ne peuvent pas être supprimées. Vous pouvez ajouter vos propres épreuves.</span></div>"
+    "<div class='ib ibt mb12'><span>📝</span><span>Masquez les épreuves par défaut inutiles. Les épreuves masquées n'apparaissent plus aux élèves.</span></div>"
     +"<div class='tw mb12' style='max-height:240px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th style='text-align:left;padding:6px 8px'>Titre</th><th>Matière</th><th>Accès</th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
     +"<button class='btn bi sm' onclick='_newEp()'>➕ Ajouter une épreuve</button>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
+}
+function _hideBuiltinEp(id){
+  if(!confirm('Masquer cette épreuve ? Elle n\'apparaîtra plus aux élèves.'))return;
+  DB.hiddenEpreuves=DB.hiddenEpreuves||[];
+  if(DB.hiddenEpreuves.indexOf(id)<0)DB.hiddenEpreuves.push(id);
+  save();cm();setTimeout(mManageEpreuves,80);toast('Épreuve masquée');
+}
+function _restoreEpreuve(id){
+  DB.hiddenEpreuves=(DB.hiddenEpreuves||[]).filter(function(x){return x!==id;});
+  save();cm();setTimeout(mManageEpreuves,80);toast('Épreuve restaurée');
 }
 function _newEp(){window._editEpIdx=-1;_epFormUI(null);}
 function _editEp(globalIdx){
@@ -15050,6 +15099,7 @@ function _saveEp(){
 // ── GESTIONNAIRE LABORATOIRES ──────────────────────────────────────
 function mManageLabos(){
   if(!iA())return;
+  var _hiddenL=DB.hiddenLabos||[];
   var list=(typeof LABO_DB!=="undefined"?LABO_DB:[]).concat(DB.customLabos||[]);
   var base=(typeof LABO_DB!=="undefined"?LABO_DB.length:0);
   var rows=list.map(function(lv,i){
@@ -15059,7 +15109,13 @@ function mManageLabos(){
       +"<td style='padding:6px 8px'><strong style='font-size:12px'>"+lv.titre+"</strong><br><span style='font-size:10px;color:var(--ink4)'>"+lv.matiere+" · "+lv.classe+"</span></td>"
       +"<td style='padding:6px 8px;font-size:11px'>"+(lv.gratuit?"<span style='color:#059669'>Gratuit</span>":"<span style='color:#7C3AED'>Premium</span>")+"</td>"
       +"<td style='padding:6px 8px;white-space:nowrap'>"
-        +(isCustom?"<button class='btn bo xs' onclick='_editLabo("+(i)+")'  style='margin-right:4px'>✏️</button><button class='btn br2 xs' onclick='_delLabo("+(i-base)+")'>🗑</button>":"<button class='btn bo xs' onclick='_toggleLaboAcces(\""+lv.id+"\")'>🔒 Accès</button>")
+        +(isCustom
+          ?"<button class='btn bo xs' onclick='_editLabo("+(i)+")'  style='margin-right:4px'>✏️</button><button class='btn br2 xs' onclick='_delLabo("+(i-base)+")'>🗑</button>"
+          :((DB.hiddenLabos||[]).indexOf(lv.id)>=0
+            ?"<button class='btn bgr2 xs' onclick='_restoreLabo(\""+lv.id+"\")'>↩ Restaurer</button>"
+            :"<button class='btn bo xs' onclick='_toggleLaboAcces(\""+lv.id+"\")' style='margin-right:3px'>🔒</button><button class='btn br2 xs' onclick='_hideBuiltinLabo(\""+lv.id+"\")'>🗑</button>"
+          )
+        )
       +"</td></tr>";
   }).join("");
   M("🔬 Gérer les Laboratoires","",
@@ -15073,6 +15129,16 @@ function _toggleLaboAcces(id){
   if(!lv)return;lv.gratuit=!lv.gratuit;
   toast((lv.gratuit?"Gratuit":"Premium")+" : "+lv.titre);
   cm();setTimeout(mManageLabos,80);
+}
+function _hideBuiltinLabo(id){
+  if(!confirm('Masquer ce laboratoire ? Il n\'apparaîtra plus aux élèves.'))return;
+  DB.hiddenLabos=DB.hiddenLabos||[];
+  if(DB.hiddenLabos.indexOf(id)<0)DB.hiddenLabos.push(id);
+  save();cm();setTimeout(mManageLabos,80);toast('Labo masqué');
+}
+function _restoreLabo(id){
+  DB.hiddenLabos=(DB.hiddenLabos||[]).filter(function(x){return x!==id;});
+  save();cm();setTimeout(mManageLabos,80);toast('Labo restauré');
 }
 function _newLabo(){window._editLaboIdx=-1;_laboFormUI(null);}
 function _editLabo(i){
