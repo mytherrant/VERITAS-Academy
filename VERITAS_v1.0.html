@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.0 | Build 2026-04-20j | Fix vidéo mobile: height explicite + controls fallback -->
+<!-- VÉRITAS v1.0 | Build 2026-04-20k | Fix vidéo mobile: height px absolu + bouton play fallback -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -995,33 +995,31 @@ body { font-size: 15px !important; }
 
 /* Vidéo héro - conteneur responsive (v1.0 - remplit la cellule grid) */
 .vhero-video-wrap {
-  position: relative; width: 100%; height: 100%; overflow: hidden;
+  position: relative; width: 100%; height: 300px; overflow: hidden;
   background: #0F172A;
   border-radius: var(--r3, 18px);
   border: 2px solid rgba(255,201,60,.3);
   box-shadow: 0 8px 32px rgba(20,37,84,.28);
   flex-shrink: 0;
-  min-height: 260px;
+  display: block;
 }
 .vhero-video-wrap video,
 .vhero-video-wrap iframe {
-  position: absolute; inset: 0;
+  position: absolute; top: 0; left: 0;
   width: 100%; height: 100%;
   object-fit: cover;
   display: block;
   border: none;
 }
 @media(max-width:900px){
-  /* height explicite (pas seulement min-height) pour que position:absolute fonctionne sur iOS */
-  .vhero-video-wrap { height: 240px !important; min-height: 240px !important; }
   #vHeroGrid { grid-template-columns: 1fr !important; min-height: auto !important; }
-  #vHeroGrid > div:first-child { height: 240px !important; min-height: 240px !important; }
-  #vHeroNews { min-height: 280px !important; height: auto !important; }
+  .vhero-video-wrap { height: 240px !important; }
+  #vHeroGrid > div:first-child { height: 240px !important; overflow: hidden !important; }
+  #vHeroNews { min-height: 280px !important; }
 }
 @media(max-width:700px){
-  .vhero-video-wrap { height: 210px !important; min-height: 210px !important; }
-  #vHeroGrid > div:first-child { height: 210px !important; min-height: 210px !important; }
-  #vHeroNews { min-height: 260px !important; }
+  .vhero-video-wrap { height: 200px !important; }
+  #vHeroGrid > div:first-child { height: 200px !important; }
 }
 /* Overlay transparent POSÉ sur la vidéo */
 .vhero-video-overlay {
@@ -1985,12 +1983,11 @@ tr:hover td {
   }
   .vhero-video-wrap{
     height:240px!important;
-    min-height:240px!important;
     border-radius:14px!important;
   }
   #vHeroGrid>div:first-child{
     height:240px!important;
-    min-height:240px!important;
+    overflow:hidden!important;
   }
   /* ── Footer ── */
   #VISITOR>div:last-of-type{
@@ -3331,7 +3328,7 @@ function vShowSec(sec,btn){
     <!-- ═══ VIDÉO + ACTUALITÉS CÔTE À CÔTE ═══ -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;min-height:320px" id="vHeroGrid">
       <!-- Vidéo de présentation -->
-      <div style="border-radius:var(--r3);overflow:hidden;min-height:300px">
+      <div style="border-radius:var(--r3);overflow:hidden;height:300px">
         ${_heroVideoHtml}
       </div>
       <!-- Panel Actualités -->
@@ -3508,8 +3505,9 @@ function vShowSec(sec,btn){
       <div class="ib ibg mt10 mb0"><span>✅</span><span>Moyenne de <strong>82%</strong> de réussite aux examens nationaux sur 3 ans.</span></div>
     </div>`;
     setTimeout(_vRevealInit,100);
-    // Charger les actualités dans le hero panel
     setTimeout(function(){_heroActuLoad(_heroCurCat||'education');},600);
+    // Vérifier autoplay 2s après le rendu (fallback bouton ▶ si bloqué)
+    setTimeout(_vheroCheckAutoplay,2000);
   } else if(sec==="histoire"){
     const pi=DB.publicInfo||{};
     c.innerHTML=`<div class="vsec">
@@ -9376,9 +9374,19 @@ function buildIntroVideoHtml(){
   // ── 3. Vidéo hébergée sur le serveur (URL HTTP/HTTPS, non-YouTube) ──
   if(v&&v.src&&(v.src.indexOf('http://')===0||v.src.indexOf('https://')===0)){
     return '<div class="vhero-video-wrap" data-vtype="local">'
-      +'<video id="vheroVideo" src="'+v.src+'" autoplay muted loop playsinline controls'
-      +' style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;display:block"'
-      +' oncontextmenu="return false" controlsList="nodownload nofullscreen"></video>'
+      +'<video id="vheroVideo"'
+      +' src="'+v.src+'"'
+      +' autoplay muted loop playsinline'
+      +' style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block"'
+      +' oncontextmenu="return false"'
+      +' oncanplay="this.play()"'
+      +' onerror="_vheroVideoFallback()"'
+      +'></video>'
+      +'<div id="vheroPlayBtn" style="display:none;position:absolute;inset:0;z-index:10;align-items:center;justify-content:center;background:rgba(0,0,0,.35);cursor:pointer" onclick="_vheroManualPlay()">'
+        +'<div style="width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(0,0,0,.4)">'
+          +'<div style="width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent #142554;margin-left:4px"></div>'
+        +'</div>'
+      +'</div>'
       +buildOverlay(true)
       +'</div>';
   }
@@ -9399,6 +9407,25 @@ function buildIntroVideoHtml(){
       +'<div style="font-size:clamp(56px,12vw,88px);filter:drop-shadow(0 4px 24px rgba(0,0,0,.4));animation:float 6s ease-in-out infinite">🎓</div>'
     +'</div>'
     +'</div>';
+}
+
+// Fallback si autoplay bloqué sur mobile
+function _vheroCheckAutoplay(){
+  var v=document.getElementById('vheroVideo');
+  if(!v)return;
+  if(v.paused){
+    var btn=document.getElementById('vheroPlayBtn');
+    if(btn)btn.style.display='flex';
+  }
+}
+function _vheroVideoFallback(){
+  var btn=document.getElementById('vheroPlayBtn');
+  if(btn)btn.style.display='flex';
+}
+function _vheroManualPlay(){
+  var v=document.getElementById('vheroVideo');
+  var btn=document.getElementById('vheroPlayBtn');
+  if(v){v.muted=true;v.play().then(function(){if(btn)btn.style.display='none';}).catch(function(){});}
 }
 
 // Toggle son sur la vidéo héro (seul moyen qui marche avec autoplay navigateur)
