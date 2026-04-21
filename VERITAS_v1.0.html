@@ -305,11 +305,12 @@ textarea.fi{resize:vertical;min-height:72px}
 
 
 /* ===== PHOTO GALLERY ===== */
-.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
-.gallery-card{position:relative;border-radius:var(--r3);overflow:hidden;background:var(--bg2);border:var(--br);cursor:pointer;transition:all .2s;aspect-ratio:4/3}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.gallery-card{position:relative;border-radius:var(--r3);overflow:hidden;background:var(--bg2);border:var(--br);cursor:pointer;transition:all .2s;aspect-ratio:16/10}
 .gallery-card:hover{box-shadow:var(--sh2);transform:translateY(-3px)}
 .gallery-card img{width:100%;height:100%;object-fit:cover}
-.gallery-card .gallery-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff}
+.gallery-card .gallery-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff;opacity:0;transition:opacity .25s}
+.gallery-card:hover .gallery-overlay{opacity:1}
 .gallery-card .gallery-overlay .semi{font-size:13px}.gallery-card .gallery-overlay .xs2{opacity:.7}
 .gallery-upload{border:2px dashed var(--bg3);border-radius:var(--r3);padding:30px;text-align:center;cursor:pointer;transition:all .2s}
 .gallery-upload:hover{border-color:var(--gold);background:var(--gp)}
@@ -1890,14 +1891,36 @@ tr:hover td {
     width:100vw!important;
     max-width:100vw!important;
   }
-  /* ── Barre de connexion ── */
+  /* ── Barre de connexion mobile ── */
   .vlogin-bar{
-    padding:5px 10px!important;
-    flex-wrap:nowrap!important;
+    padding:8px 10px!important;
+    flex-direction:column!important;
+    flex-wrap:wrap!important;
     gap:6px!important;
+    align-items:stretch!important;
   }
-  .vlogin-bar>span:first-child{font-size:11px!important}
-  .vlogin-btns{display:flex!important;gap:4px!important;flex-shrink:0!important}
+  .vlogin-bar>span:first-child{
+    font-size:12px!important;
+    font-weight:700!important;
+    text-align:center!important;
+    color:rgba(255,255,255,.9)!important;
+  }
+  .vlogin-btns{
+    display:grid!important;
+    grid-template-columns:1fr 1fr 1fr!important;
+    gap:5px!important;
+    width:100%!important;
+  }
+  .vlogin-btns .btn.sm{
+    padding:9px 4px!important;
+    font-size:11px!important;
+    text-align:center!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    border-radius:8px!important;
+    font-weight:700!important;
+  }
   /* ── Héro compact ── */
   .vhero-content{
     flex-direction:row!important;
@@ -2021,6 +2044,15 @@ tr:hover td {
   .vhero-title{font-size:13px!important}
   .vsec{padding:10px 8px 20px!important}
   .vstats{gap:6px!important}
+  /* Barre de connexion très petits écrans : 2 colonnes pour les 3 boutons */
+  .vlogin-btns{
+    grid-template-columns:1fr 1fr!important;
+    gap:4px!important;
+  }
+  .vlogin-btns .btn.sm{
+    padding:8px 2px!important;
+    font-size:10px!important;
+  }
 }
 </style>
 </head>
@@ -2035,6 +2067,7 @@ tr:hover td {
     <button class="btn sm" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-weight:600" onclick="showRegisterForm()">✨ S'inscrire</button>
     <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin('eleve')">🎓 Se connecter</button>
     <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin('enseignant')">👨‍🏫 Enseignant</button>
+    <span id="vSyncDot" onclick="iA()&&cloudSaveDB()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>
     <span id="adminAccessPoint" style="display:inline-block;width:20px;height:20px;cursor:default;opacity:0" onclick="_adminTriple()" title=""></span>
   </div>
 </div>
@@ -2086,6 +2119,7 @@ setInterval(_refreshCitation,15000);
   <button class="vnav-btn" onclick="showCalendrier()" style="background:linear-gradient(135deg,rgba(220,38,38,.15),rgba(220,38,38,.05));color:#DC2626;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">event</span> Calendrier</button>
   <button class="vnav-btn" onclick="showJeuxEdu()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">sports_esports</span> Jeux</button>
   <button class="vnav-btn" onclick="showEpreuves()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">assignment</span> Épreuves</button>
+  <button class="vnav-btn" onclick="showExtraits()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">menu_book</span> Extraits</button>
   <button class="vnav-btn" onclick="showEvaluations()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">insights</span> Évals</button>
   <button class="vnav-btn" onclick="showLabosVirtuels()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">science</span> Labos</button>
   <button class="vnav-btn" onclick="vShowSec('actualites',this)" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#ef4444;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">newspaper</span> Actualités</button>
@@ -2140,7 +2174,7 @@ setInterval(_refreshCitation,15000);
       </div>
       <button class="lbtn" id="lBtn" onclick="doLogin()">Accéder au portail →</button>
       <button class="lback" onclick="goToVisitor()" id="lBackBtn">← Retour au portail public</button>
-      <!-- Accès admin via raccourcis clavier uniquement : Ctrl+Shift+A (Admin) / Ctrl+Shift+V (Super Admin) -->
+      <!-- Accès admin : Ctrl+Shift+L (Admin) · Ctrl+Shift+U (SuperAdmin) · ou 3×/5× clic sur adminAccessPoint -->
     </div>
   </div>
 </div>
@@ -2388,7 +2422,14 @@ function defaultDB(){return{
     {id:'th6',tid:'t4',date:'18/10/2024',heures:4,cls:'4ème',matiere:'SVT',desc:'Biologie cellulaire'},
   ],
   tauxHoraire:2000,
-  galleryImages:[],
+  galleryImages:[
+    {id:'gi1',src:'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=900&q=80',titre:'Salle de classe',desc:'Nos salles équipées',date:'15/01/2025'},
+    {id:'gi2',src:'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=900&q=80',titre:'Travail en groupe',desc:'Collaboration entre élèves',date:'20/01/2025'},
+    {id:'gi3',src:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=900&q=80',titre:'Cours magistral',desc:'Nos enseignants expérimentés',date:'22/01/2025'},
+    {id:'gi4',src:'https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=900&q=80',titre:'Bibliothèque',desc:'Espace de révision',date:'25/01/2025'},
+    {id:'gi5',src:'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=900&q=80',titre:'Révisions intensives',desc:'Préparation BEPC et BAC',date:'01/02/2025'},
+    {id:'gi6',src:'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=900&q=80',titre:'Excellence scolaire',desc:'Nos élèves réussissent',date:'10/02/2025'},
+  ],
   products:[
     {id:'p1',ico:'📝',titre:'Annales BEPC 2020-2025',prix:3500,ancien:5000,desc:'5 années de sujets et corrigés complets — Toutes matières',cat:'Épreuves',photo:'',actif:true},
     {id:'p2',ico:'🎓',titre:'Annales BAC A/C/D 2020-2025',prix:4000,ancien:6000,desc:'Séries A, C, D — Sujets corrigés + méthodologie détaillée',cat:'Épreuves',photo:'',actif:true},
@@ -2512,6 +2553,80 @@ function defaultDB(){return{
       {id:'bac_eval_anglais',cat:'cat6',titre:'📝 Épreuve BAC — Anglais (Interactif)',classe:'Terminale',matiere:'Anglais',seq:'Examens',prix:0,gratuit:true,plans:[],desc:'Épreuve complète BAC Anglais avec chrono intégré et corrigé interactif. Grammar & Vocabulary (10pts) · Reading Comprehension (10pts) · Writing (20pts). Durée : 3h · Coeff. 4 · Note /40',apercu:'Grammar/Vocabulary · Reading Comprehension · Writing — Chrono automatique, correction instantanée, score final',externalUrl:'https://veritas-school.com/evaluations/evaluation_bac_anglais.html',fichier:'',fichierData:''},
       {id:'bac_eval_francais',cat:'cat6',titre:'📝 Épreuve BAC — Langue Française (Interactif)',classe:'Terminale',matiere:'Français',seq:'Examens',prix:0,gratuit:true,plans:[],desc:'Épreuve complète BAC Langue Française avec chrono et corrigé interactif. Communication (5pts) · Morphosyntaxe (5pts) · Sémantique (5pts) · Stylistique & Rhétorique (5pts). Durée : 2h · Coeff. 2 · Note /20',apercu:'Communication · Morphosyntaxe · Sémantique · Stylistique — Chrono automatique, correction instantanée',externalUrl:'https://veritas-school.com/evaluations/evaluation_bac_langue_francaise.html',fichier:'',fichierData:''},
       {id:'bac_eval_litterature',cat:'cat6',titre:'📝 Épreuve BAC — Littérature & Culture Générale (Interactif)',classe:'Terminale',matiere:'Littérature',seq:'Examens',prix:0,gratuit:true,plans:[],desc:'Épreuve complète BAC Littérature & Culture Générale. Contraction + Discussion · Commentaire composé · Dissertation. Durée : 4h · Coeff. 3 · Note /20',apercu:'Contraction & Discussion · Commentaire composé · Dissertation — Chrono automatique, correction guidée',externalUrl:'https://veritas-school.com/evaluations/evaluation_bac_litterature.html',fichier:'',fichierData:''},
+      // ── ÉPREUVES DÉMO (htmlContent embarqué — filigrane visible) ──
+      {id:'demo_maths3',cat:'cat1',titre:'📝 Épreuve Maths 3ème — Séq. 3 (Démo téléchargeable)',classe:'3ème',matiere:'Mathématiques',seq:'Séquence 3',prix:0,gratuit:true,plans:['plan1','plan2','plan3','plan4'],fichier:'epreuve_maths3_seq3.html',apercu:'Algèbre (équations) · Géométrie (Pythagore, Thalès) · Statistiques. 3 exercices — 20 points — 2h. Corrigé inclus.',desc:'Épreuve complète avec corrigé. Résolution d\'équations et systèmes, théorème de Pythagore et de Thalès, statistiques descriptives (moyenne, médiane, diagramme).',
+       htmlContent:`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Épreuve Mathématiques 3ème — Séquence 3</title><style>body{font-family:Georgia,serif;max-width:780px;margin:0 auto;padding:24px;background:#fff;color:#111;line-height:1.75}.hdr{background:#142554;color:#fff;padding:20px 24px;border-radius:12px;margin-bottom:22px;text-align:center}.hdr h1{font-size:18px;margin:4px 0;color:#FFC93C}.hdr p{margin:3px 0;font-size:13px;opacity:.82}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}.mbox{border:1px solid #C7D2FE;border-radius:10px;padding:10px;text-align:center;background:#F0F4FF}.mbox .lb{font-size:10px;color:#6B7A99;text-transform:uppercase;letter-spacing:.5px}.mbox .vl{font-size:16px;font-weight:700;color:#142554}.exo{border-left:4px solid #142554;padding:14px 16px;background:#F8FAFF;border-radius:0 10px 10px 0;margin-bottom:18px}.exo h3{font-size:14px;color:#142554;margin:0 0 10px;font-family:Montserrat,sans-serif;font-weight:800}.q{margin:9px 0;padding-left:14px;font-size:14px}.q b{color:#3C8DFF}.pts{font-size:11px;color:#94A3B8;font-style:italic}.note{background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px 14px;font-size:12px;color:#92400E;margin-bottom:18px}.sep{border-top:1px dashed #CBD5E1;margin:16px 0}.ft{text-align:center;font-size:11px;color:#94A3B8;margin-top:28px;padding-top:14px;border-top:1px solid #E2E8F0}table{border-collapse:collapse;width:100%;margin:8px 0;font-size:13px}th,td{border:1px solid #C7D2FE;padding:7px 10px;text-align:center}th{background:#EEF2FF;font-weight:700;color:#142554}</style></head><body>
+<div class="hdr"><div style="font-size:10px;letter-spacing:2px;opacity:.65;text-transform:uppercase">Centre VÉRITAS — Yaoundé, Cameroun</div><h1>ÉPREUVE DE MATHÉMATIQUES</h1><p>Classe de 3ème &nbsp;·&nbsp; Séquence 3 &nbsp;·&nbsp; Année scolaire 2024-2025</p></div>
+<div class="meta"><div class="mbox"><div class="lb">Durée</div><div class="vl">2h 00</div></div><div class="mbox"><div class="lb">Coefficient</div><div class="vl">4</div></div><div class="mbox"><div class="lb">Note sur</div><div class="vl">20 pts</div></div></div>
+<div class="note">⚠️ L'usage de la calculatrice est autorisé. La présentation soignée sera valorisée. Toute tentative de fraude entraîne l'annulation de la copie.</div>
+<div class="exo"><h3>Exercice 1 — Algèbre et équations (6 points)</h3>
+<p>On donne l'équation : <b>3x − 5 = x + 7</b></p>
+<div class="q"><b>1)</b> Résoudre cette équation dans ℝ. <span class="pts">(2 pts)</span></div>
+<div class="q"><b>2)</b> Vérifier la solution en la substituant dans l'équation. <span class="pts">(1 pt)</span></div>
+<p style="margin-top:12px">On considère maintenant le système : <b>{ 2x + y = 10 &nbsp;; &nbsp;x − y = 2 }</b></p>
+<div class="q"><b>3)</b> Résoudre ce système par substitution. <span class="pts">(3 pts)</span></div></div>
+<div class="exo"><h3>Exercice 2 — Géométrie : Pythagore et Thalès (7 points)</h3>
+<p>Dans un triangle ABC rectangle en A, on a : AB = 6 cm et BC = 10 cm.</p>
+<div class="q"><b>1)</b> Calculer la longueur AC. Justifier la démarche. <span class="pts">(2.5 pts)</span></div>
+<div class="q"><b>2)</b> M est le milieu de [BC] et N est le milieu de [AB]. Montrer que MN ∥ AC et calculer MN. <span class="pts">(2.5 pts)</span></div>
+<div class="q"><b>3)</b> Un triangle a des côtés de longueur 9 cm, 12 cm et 15 cm. Est-il rectangle ? Justifier. <span class="pts">(2 pts)</span></div></div>
+<div class="exo"><h3>Exercice 3 — Statistiques (7 points)</h3>
+<p>Les notes de 20 élèves lors d'un contrôle de mathématiques sont :</p>
+<p style="font-family:monospace;background:#EFF6FF;padding:8px 12px;border-radius:6px;font-size:13px">5 · 8 · 9 · 11 · 12 · 12 · 13 · 13 · 14 · 14 · 14 · 15 · 15 · 16 · 16 · 17 · 17 · 18 · 19 · 20</p>
+<div class="q"><b>1)</b> Déterminer l'étendue de cette série statistique. <span class="pts">(1 pt)</span></div>
+<div class="q"><b>2)</b> Calculer la moyenne de la classe. <span class="pts">(3 pts)</span></div>
+<div class="q"><b>3)</b> Déterminer la médiane. <span class="pts">(2 pts)</span></div>
+<div class="q"><b>4)</b> Quel pourcentage d'élèves a obtenu une note supérieure ou égale à 14 ? <span class="pts">(1 pt)</span></div></div>
+<div class="sep"></div><div class="ft">Épreuve VÉRITAS Academy · 3ème Séquence 3 · Yaoundé, Cameroun · 2024-2025<br>Préparée par le Département de Mathématiques — Usage pédagogique uniquement</div>
+</body></html>`},
+
+      {id:'demo_pc2nde',cat:'cat1',titre:'⚗️ Épreuve Physique-Chimie 2nde — Séq. 2 (Plan requis)',classe:'2nde',matiere:'Physique-Chimie',seq:'Séquence 2',prix:800,gratuit:false,plans:['plan1','plan2','plan3','plan4'],fichier:'epreuve_pc2nde_seq2.html',apercu:'Électricité (circuits, loi d\'Ohm) · Chimie (atomes, molécules) · Optique (lois de Descartes). 3 parties — 20 pts — 2h30.',desc:'Épreuve complète avec corrigé. Circuits série et dérivation, loi d\'Ohm, structure de l\'atome, formules moléculaires, réfraction de la lumière.',
+       htmlContent:`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Épreuve Physique-Chimie 2nde — Séquence 2</title><style>body{font-family:Georgia,serif;max-width:780px;margin:0 auto;padding:24px;background:#fff;color:#111;line-height:1.75}.hdr{background:linear-gradient(135deg,#059669,#065F46);color:#fff;padding:20px 24px;border-radius:12px;margin-bottom:22px;text-align:center}.hdr h1{font-size:18px;margin:4px 0;color:#A7F3D0}.hdr p{margin:3px 0;font-size:13px;opacity:.82}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}.mbox{border:1px solid #A7F3D0;border-radius:10px;padding:10px;text-align:center;background:#ECFDF5}.mbox .lb{font-size:10px;color:#6B7A99;text-transform:uppercase}.mbox .vl{font-size:16px;font-weight:700;color:#065F46}.exo{border-left:4px solid #059669;padding:14px 16px;background:#F0FDF4;border-radius:0 10px 10px 0;margin-bottom:18px}.exo h3{font-size:14px;color:#065F46;margin:0 0 10px;font-family:Montserrat,sans-serif;font-weight:800}.q{margin:9px 0;padding-left:14px;font-size:14px}.q b{color:#059669}.pts{font-size:11px;color:#94A3B8;font-style:italic}.note{background:#F0FDF4;border:1px solid #A7F3D0;border-radius:8px;padding:10px 14px;font-size:12px;color:#065F46;margin-bottom:18px}.ft{text-align:center;font-size:11px;color:#94A3B8;margin-top:28px;padding-top:14px;border-top:1px solid #E2E8F0}</style></head><body>
+<div class="hdr"><div style="font-size:10px;letter-spacing:2px;opacity:.65;text-transform:uppercase">Centre VÉRITAS — Yaoundé, Cameroun</div><h1>ÉPREUVE DE PHYSIQUE-CHIMIE</h1><p>Classe de 2nde &nbsp;·&nbsp; Séquence 2 &nbsp;·&nbsp; Année scolaire 2024-2025</p></div>
+<div class="meta"><div class="mbox"><div class="lb">Durée</div><div class="vl">2h 30</div></div><div class="mbox"><div class="lb">Coefficient</div><div class="vl">3</div></div><div class="mbox"><div class="lb">Note sur</div><div class="vl">20 pts</div></div></div>
+<div class="note">⚠️ Calculatrice scientifique autorisée. Les résultats numériques doivent être donnés avec leurs unités. Toute réponse doit être justifiée.</div>
+<div class="exo"><h3>Partie A — Électricité : Circuits et loi d'Ohm (8 points)</h3>
+<p>On dispose d'un générateur U = 12 V et de trois résistances R₁ = 60 Ω, R₂ = 40 Ω, R₃ = 30 Ω.</p>
+<div class="q"><b>A1)</b> Calculer la résistance équivalente R<sub>eq</sub> si R₁ et R₂ sont en série. <span class="pts">(1.5 pt)</span></div>
+<div class="q"><b>A2)</b> Calculer R<sub>eq</sub> si R₁ et R₂ sont en dérivation. <span class="pts">(1.5 pt)</span></div>
+<div class="q"><b>A3)</b> Dans un circuit série R₁-R₂ alimenté par U = 12 V, calculer le courant I et la tension U₁ aux bornes de R₁. <span class="pts">(2 pts)</span></div>
+<div class="q"><b>A4)</b> On branche R₃ en dérivation avec R₂. Calculer le courant total débité par le générateur. Justifier. <span class="pts">(3 pts)</span></div></div>
+<div class="exo"><h3>Partie B — Chimie : Atomes et molécules (6 points)</h3>
+<div class="q"><b>B1)</b> L'atome de sodium a pour symbole ²³₁₁Na. Combien contient-il de protons, neutrons et électrons ? <span class="pts">(2 pts)</span></div>
+<div class="q"><b>B2)</b> Donner la formule développée et la formule brute de l'eau (H₂O) et du dioxyde de carbone (CO₂). <span class="pts">(2 pts)</span></div>
+<div class="q"><b>B3)</b> Classer selon leur état à 25°C : H₂O · O₂ · NaCl · CO₂ · Fe · C₂H₅OH. <span class="pts">(2 pts)</span></div></div>
+<div class="exo"><h3>Partie C — Optique : Lois de Descartes (6 points)</h3>
+<p>Un rayon lumineux passe de l'air (n₁ = 1,00) dans du verre (n₂ = 1,50). L'angle d'incidence vaut i₁ = 30°. <i>(sin 30° = 0,50)</i></p>
+<div class="q"><b>C1)</b> Énoncer la loi de Snell-Descartes pour la réfraction. <span class="pts">(1 pt)</span></div>
+<div class="q"><b>C2)</b> Calculer l'angle de réfraction i₂. <span class="pts">(3 pts)</span></div>
+<div class="q"><b>C3)</b> Le rayon réfracté se rapproche-t-il ou s'éloigne-t-il de la normale ? Expliquer. <span class="pts">(2 pts)</span></div></div>
+<div class="ft">Épreuve VÉRITAS Academy · 2nde Séquence 2 · Yaoundé, Cameroun · 2024-2025<br>Département Sciences Physiques — Usage pédagogique uniquement</div>
+</body></html>`},
+
+      {id:'demo_bac_tle_c',cat:'cat1',titre:'🎓 Épreuve Maths BAC Tle C — Séq. 3 Type BAC (Plan EXAMEN)',classe:'Tle C',matiere:'Mathématiques',seq:'Séquence 3',prix:1200,gratuit:false,plans:['plan1','plan3','plan4'],fichier:'epreuve_maths_bac_tlec.html',apercu:'Suites numériques (géométrique) · Dérivées et étude de fonction · Probabilités sans remise. Type BAC série C — 3h — 20 pts.',desc:'Épreuve type BAC Tle C avec corrigé intégral. Suites (uₙ₊₁=2uₙ+1), dérivation et tableau de variations (x³-6x²+9x-2), probabilités composées.',
+       htmlContent:`<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Épreuve Maths BAC Tle C — Séquence 3</title><style>body{font-family:Georgia,serif;max-width:780px;margin:0 auto;padding:24px;background:#fff;color:#111;line-height:1.75}.hdr{background:linear-gradient(135deg,#7C3AED,#4C1D95);color:#fff;padding:20px 24px;border-radius:12px;margin-bottom:22px;text-align:center}.hdr h1{font-size:18px;margin:4px 0;color:#DDD6FE}.hdr p{margin:3px 0;font-size:13px;opacity:.82}.meta{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}.mbox{border:1px solid #DDD6FE;border-radius:10px;padding:10px;text-align:center;background:#F5F3FF}.mbox .lb{font-size:10px;color:#6B7A99;text-transform:uppercase}.mbox .vl{font-size:16px;font-weight:700;color:#4C1D95}.exo{border-left:4px solid #7C3AED;padding:14px 16px;background:#FAF5FF;border-radius:0 10px 10px 0;margin-bottom:18px}.exo h3{font-size:14px;color:#4C1D95;margin:0 0 10px;font-family:Montserrat,sans-serif;font-weight:800}.q{margin:9px 0;padding-left:14px;font-size:14px}.q b{color:#7C3AED}.pts{font-size:11px;color:#94A3B8;font-style:italic}.notice{background:linear-gradient(135deg,#EDE9FE,#E0E7FF);border:1px solid #C4B5FD;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#4C1D95}.ft{text-align:center;font-size:11px;color:#94A3B8;margin-top:28px;padding-top:14px;border-top:1px solid #E2E8F0}</style></head><body>
+<div class="hdr"><div style="font-size:10px;letter-spacing:2px;opacity:.65;text-transform:uppercase">Centre VÉRITAS — Yaoundé · Type BAC Série C</div><h1>ÉPREUVE DE MATHÉMATIQUES — TERMINALE C</h1><p>Séquence 3 &nbsp;·&nbsp; Année scolaire 2024-2025</p></div>
+<div class="meta"><div class="mbox"><div class="lb">Durée</div><div class="vl">3h 00</div></div><div class="mbox"><div class="lb">Coefficient</div><div class="vl">5</div></div><div class="mbox"><div class="lb">Note sur</div><div class="vl">20 pts</div></div></div>
+<div class="notice">📋 <b>Instructions :</b> Calculatrice autorisée. Toute réponse non justifiée est notée zéro. La qualité de la rédaction est prise en compte. Les trois exercices sont indépendants.</div>
+<div class="exo"><h3>Exercice 1 — Suites numériques (6 points)</h3>
+<p>Soit la suite (uₙ) définie par : <b>u₀ = 3</b> et <b>uₙ₊₁ = 2uₙ + 1</b> pour tout n ∈ ℕ.</p>
+<div class="q"><b>1)</b> Calculer u₁, u₂ et u₃. <span class="pts">(1.5 pt)</span></div>
+<div class="q"><b>2)</b> On pose vₙ = uₙ + 1. Montrer que (vₙ) est une suite géométrique dont on précisera la raison et le premier terme. <span class="pts">(2 pts)</span></div>
+<div class="q"><b>3)</b> En déduire l'expression de uₙ en fonction de n, puis calculer u₁₀. <span class="pts">(2.5 pts)</span></div></div>
+<div class="exo"><h3>Exercice 2 — Dérivation et étude de fonction (8 points)</h3>
+<p>Soit f la fonction définie sur ℝ par : <b>f(x) = x³ − 6x² + 9x − 2</b></p>
+<div class="q"><b>1)</b> Calculer f'(x), la dérivée de f. <span class="pts">(1.5 pt)</span></div>
+<div class="q"><b>2)</b> Étudier le signe de f'(x) et dresser le tableau de variations de f. <span class="pts">(3 pts)</span></div>
+<div class="q"><b>3)</b> Déterminer les extrema de f (valeurs et nature : maximum local ou minimum local). <span class="pts">(2 pts)</span></div>
+<div class="q"><b>4)</b> Tracer l'allure de la courbe de f (extrema + intersection avec l'axe des ordonnées). <span class="pts">(1.5 pt)</span></div></div>
+<div class="exo"><h3>Exercice 3 — Probabilités (6 points)</h3>
+<p>Une urne contient <b>5 boules blanches</b> et <b>3 boules noires</b>. On tire successivement et <i>sans remise</i> deux boules.</p>
+<div class="q"><b>1)</b> Calculer la probabilité d'obtenir deux boules blanches. <span class="pts">(2 pts)</span></div>
+<div class="q"><b>2)</b> Calculer la probabilité d'obtenir une boule blanche puis une noire (dans cet ordre). <span class="pts">(1.5 pt)</span></div>
+<div class="q"><b>3)</b> Calculer la probabilité d'obtenir au moins une boule blanche. <span class="pts">(2.5 pts)</span></div></div>
+<div class="ft">Épreuve Type BAC · Terminale C · VÉRITAS Academy · Yaoundé, Cameroun · 2024-2025<br>Département Mathématiques — Usage pédagogique exclusif</div>
+</body></html>`},
+
       // ── COURS INTERACTIFS (externalUrl) ──
       {id:'cours_commentaire_compose',cat:'cat2',titre:'📖 Cours — Commentaire Composé & Analyse de Texte',classe:'Terminale',matiere:'Français',seq:'Toutes séquences',prix:0,gratuit:true,plans:[],desc:'Méthode complète du commentaire composé : analyse de la consigne, plan, rédaction. Cours interactif avec exercices guidés. Pour Terminale A.',apercu:'Analyse du texte · Élaboration du plan · Rédaction · Exercices corrigés — Cours interactif Terminale A',externalUrl:'https://veritas-school.com/cours/commentaire_compose_analyse.html',fichier:'',fichierData:''},
       {id:'cours_module1_tleA',cat:'cat2',titre:'📖 Cours — Stances & Poèmes · Terminale A (Module 1)',classe:'Terminale',matiere:'Littérature',seq:'Séquence 1',prix:0,gratuit:true,plans:[],desc:'Cahier de Français Terminale A : étude des stances et poèmes, textes fondamentaux, analyse littéraire, fiches de méthode. Module 1 complet.',apercu:'Stances · Poèmes · Analyse littéraire · Fiches de méthode — Cours interactif avec sidebar navigation',externalUrl:'https://veritas-school.com/cours/module_1_tle_A.html',fichier:'',fichierData:''},
@@ -2608,6 +2723,7 @@ function load(){
   DB.school.slogan='Centre d\'Excellence Scolaire';
   // Ensure new fields exist
   if(!DB.publicInfo)DB.publicInfo=defaultDB().publicInfo;
+  if(!DB.galleryImages||!DB.galleryImages.length)DB.galleryImages=defaultDB().galleryImages;
   if(!DB.photos)DB.photos=defaultDB().photos;
   if(!DB.examResults)DB.examResults=defaultDB().examResults;
   if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts;
@@ -2622,7 +2738,7 @@ function load(){
   var _defC=defaultDB().elearning.contenus||[];
   var _curC=DB.elearning.contenus||[];
   // Merge resPedago AND externalUrl entries so evaluations/courses are always visible
-  _defC.forEach(function(dc){if((dc.resPedago||dc.externalUrl)&&!_curC.find(function(c){return c.id===dc.id;})){_curC.push(dc);}});
+  _defC.forEach(function(dc){if((dc.resPedago||dc.externalUrl||dc.htmlContent)&&!_curC.find(function(c){return c.id===dc.id;})){_curC.push(dc);}});
   DB.elearning.contenus=_curC;
   // Merge citations from defaultDB if missing
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
@@ -2634,6 +2750,7 @@ function load(){
   if(!DB.elearning.telechargementsGratuits)DB.elearning.telechargementsGratuits={};
   if(!DB.products)DB.products=defaultDB().products;
   if(!DB.orientationDemandes)DB.orientationDemandes=[];
+  if(!DB.extraits)DB.extraits=[];
   DB.admins.forEach(a=>{if(!a.role2)a.role2=a.role==='Directeur'?'admin':'secretaire';});
   // Ensure default admin exists (mot de passe sera hashé par _migratePasswords)
   if(!DB.admins.find(function(a){return a.user==='directeur';})){
@@ -2764,10 +2881,86 @@ function save(){
       data.introVideo.src='';
     }
     localStorage.setItem('vrt10',JSON.stringify(data));
+    // Déclencher la synchronisation automatique différée (admins seulement)
+    if(typeof _triggerAutoSync==='function')_triggerAutoSync();
   }catch(e){
     if(e.name==='QuotaExceededError'){toast('⚠️ Stockage plein — simplifiez les données','warn');}
     else throw e;
   }
+}
+
+// ── Auto-sync différée (20 s après le dernier save()) ───────────────────────
+var _autoSyncTimer=null;
+var _autoSyncDirty=false;
+
+function _triggerAutoSync(){
+  if(!iA())return; // admins seulement
+  var cfg=DB.cloudConfig;
+  if(!cfg||!cfg.url||!cfg.secret)return; // pas configuré
+  _autoSyncDirty=true;
+  _setSyncDot('pending');
+  if(_autoSyncTimer)clearTimeout(_autoSyncTimer);
+  _autoSyncTimer=setTimeout(function(){
+    _autoSyncTimer=null;
+    if(_autoSyncDirty)_cloudAutoSync();
+  },20000); // 20 secondes de délai
+}
+
+function _cloudAutoSync(){
+  if(!iA())return;
+  var cfg=DB.cloudConfig;
+  if(!cfg||!cfg.url||!cfg.secret)return;
+  _autoSyncDirty=false;
+  _setSyncDot('syncing');
+
+  var data=JSON.parse(JSON.stringify(DB));
+  // Stripping binaires (même logique que cloudSaveDB)
+  if(data.introVideo&&data.introVideo.src&&data.introVideo.src.startsWith('data:'))data.introVideo.src='';
+  if(data.school&&data.school.logo&&data.school.logo.startsWith('data:')&&data.school.logo.length>10000)data.school.logo='';
+  if(data.elearning&&data.elearning.contenus)data.elearning.contenus.forEach(function(c){if(c.fichierData&&c.fichierData.length>5000)c.fichierData='';});
+  if(data.elearning&&data.elearning.soumissions)data.elearning.soumissions.forEach(function(s){if(s.fichierData&&s.fichierData.length>5000)s.fichierData='';});
+  if(data.devoirs)data.devoirs.forEach(function(d){if(d.fichierData&&d.fichierData.length>5000)d.fichierData='';});
+  if(data.partenaires)data.partenaires.forEach(function(p){if(p.logo&&p.logo.startsWith('data:')&&p.logo.length>5000)p.logo='';});
+  if(data.books)data.books.forEach(function(b){
+    if(b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>5000)b.coverImg='';
+    if(b.fichierKey){if(b.fichierData)b.fichierData='';b.fichierKey='';}
+  });
+
+  fetch(_cloudUrl('sync.php'),{
+    method:'POST',
+    headers:_cloudHeaders(true),
+    body:JSON.stringify(data)
+  })
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(res){
+    if(res.error)throw new Error(res.error);
+    var dateSync=res.saved_at||new Date().toLocaleString('fr-FR');
+    DB.cloudConfig.lastSync=dateSync;
+    // Appel direct à localStorage pour éviter récursion save()→_triggerAutoSync
+    try{localStorage.setItem('vrt10',JSON.stringify(DB));}catch(e){}
+    _setSyncDot('ok',dateSync);
+  })
+  .catch(function(e){
+    _setSyncDot('err');
+    // En cas d'échec silencieux on remet le drapeau dirty pour reessai au prochain save
+    _autoSyncDirty=true;
+    console.warn('[VÉRITAS auto-sync] Échec :', e.message);
+  });
+}
+
+function _setSyncDot(state,label){
+  var dot=document.getElementById('vSyncDot');
+  if(!dot)return;
+  var cfg={
+    pending: {bg:'#FFC93C',title:'Modifications non synchronisées',ico:'⏳'},
+    syncing: {bg:'#60A5FA',title:'Synchronisation en cours…',ico:'🔄'},
+    ok:      {bg:'#34D399',title:'Synchronisé'+(label?' — '+label:''),ico:'✓'},
+    err:     {bg:'#F87171',title:'Échec de la synchronisation',ico:'⚠'}
+  }[state]||{bg:'#9CA3AF',title:'',ico:'?'};
+  dot.style.background=cfg.bg;
+  dot.title=cfg.title;
+  dot.textContent=cfg.ico;
+  dot.style.display=iA()?'inline-flex':'none';
 }
 function gid(){return Math.random().toString(36).slice(2,10);}
 function today(){return new Date().toLocaleDateString('fr-FR');}
@@ -3089,9 +3282,14 @@ function initVisitor(){
   const ct=$("vCity");if(ct)ct.textContent=DB.school?.ville||"Yaoundé, Cameroun";
   const se=$("vStatEtu");if(se)se.textContent=DB.students.length;
   const se2=$("vStatEns");if(se2)se2.textContent=DB.teachers.length;
+  // Mettre à jour le label de la barre de connexion avec le vrai nom de l'école
+  var lbLabel=document.querySelector('.vlogin-bar>span:first-child');
+  if(lbLabel)lbLabel.textContent='🏫 '+(DB.school&&DB.school.nom||'VÉRITAS Academy');
   vShowSec("presentation",document.querySelector(".vnav-btn"));
   initTicker();
   if(SES&&(SES.type==="visiteur"||SES.type==="visiteur_inscrit"))setTimeout(_updateVisitorHeader,50);
+  // Sync dot : visible si admin déjà connecté (ex: admin navigue vers la page visiteur)
+  if(iA()){var sd=document.getElementById('vSyncDot');if(sd){sd.style.display='inline-flex';_setSyncDot((DB.cloudConfig&&DB.cloudConfig.lastSync)?'ok':'pending',DB.cloudConfig&&DB.cloudConfig.lastSync||'');}}
   setTimeout(_slideAutoStart,1000);
   // Charger les actualités dans le hero panel
   setTimeout(function(){_heroActuLoad('education');},800);
@@ -3102,27 +3300,63 @@ function initVisitor(){
 }
 
 function _fetchPublicData(){
-  var base=(DB.cloudConfig&&DB.cloudConfig.url||'https://veritas-school.com/api').replace(/\/+$/,'');
-  var url=base+'/public_data.php';
-  fetch(url,{method:'GET',headers:{'Accept':'application/json'},signal:(typeof AbortSignal!=='undefined'&&AbortSignal.timeout?AbortSignal.timeout(8000):undefined)})
-  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  // Stratégie d'URL : 1) URL relative au fichier HTML (fonctionne si l'app et l'API sont sur le même serveur)
+  //                   2) URL cloud configurée par l'admin
+  var relUrl='';
+  try{
+    var base2=window.location.href.replace(/\/[^\/]*$/,'/').replace(/\?.*$/,'');
+    if(base2.startsWith('http'))relUrl=base2+'api/public_data.php';
+  }catch(e){}
+  var cfgUrl=(DB.cloudConfig&&DB.cloudConfig.url||'https://veritas-school.com/api').replace(/\/+$/,'')+'/public_data.php';
+  // Utiliser l'URL relative si disponible et différente de l'URL configurée, sinon l'URL configurée
+  var url=(relUrl&&relUrl!==cfgUrl)?relUrl:cfgUrl;
+
+  function _doFetch(fetchUrl,fallbackUrl){
+    return fetch(fetchUrl,{method:'GET',headers:{'Accept':'application/json'},signal:(typeof AbortSignal!=='undefined'&&AbortSignal.timeout?AbortSignal.timeout(8000):undefined)})
+    .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .catch(function(e){
+      // Si l'URL relative a échoué, essayer l'URL cloud configurée
+      if(fallbackUrl&&fetchUrl!==fallbackUrl){
+        return fetch(fallbackUrl,{method:'GET',headers:{'Accept':'application/json'},signal:(typeof AbortSignal!=='undefined'&&AbortSignal.timeout?AbortSignal.timeout(6000):undefined)})
+        .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();});
+      }
+      throw e;
+    });
+  }
+
+  _doFetch(url,(url!==cfgUrl)?cfgUrl:null)
   .then(function(data){
+    var isAdmin=iA();
     var changed=false;
-    // Partenaires : fusionner seulement si le visiteur n'en a pas en local
-    if(data.partenaires&&data.partenaires.length>0&&(!DB.partenaires||DB.partenaires.length===0)){
-      DB.partenaires=data.partenaires;changed=true;
+
+    // ── Partenaires ─────────────────────────────────────────────────────────
+    if(data.partenaires&&data.partenaires.length>0){
+      // Non-admins : toujours prendre les données du serveur
+      // Admins     : ne pas écraser (ils gèrent depuis le dashboard local)
+      if(!isAdmin||(DB.partenaires||[]).length===0){
+        DB.partenaires=data.partenaires;changed=true;
+      }
     }
-    // Calendrier
-    if(data.calendrier&&data.calendrier.length>0&&(!DB.calendrier||DB.calendrier.length===0)){
-      DB.calendrier=data.calendrier;changed=true;
+
+    // ── Calendrier ──────────────────────────────────────────────────────────
+    if(data.calendrier&&data.calendrier.length>0){
+      if(!isAdmin||(DB.calendrier||[]).length===0){
+        DB.calendrier=data.calendrier;changed=true;
+      }
     }
-    // tickerItems
-    if(data.tickerItems&&data.tickerItems.length>0&&(!DB.tickerItems||DB.tickerItems.length===0)){
-      DB.tickerItems=data.tickerItems;initTicker();changed=true;
+
+    // ── Ticker (messages défilants) ─────────────────────────────────────────
+    if(data.tickerItems&&data.tickerItems.length>0){
+      if(!isAdmin||(DB.tickerItems||[]).length===0){
+        DB.tickerItems=data.tickerItems;changed=true;
+      }
+      // Toujours ré-initialiser le ticker pour les visiteurs (DOM peut être vide)
+      if(!isAdmin){initTicker();}
     }
-    // Infos école (pour visiteurs avec DB vide)
+
+    // ── Infos école ─────────────────────────────────────────────────────────
     if(data.school){
-      if(!DB.school||!DB.school.nom||DB.school.nom==='VÉRITAS Academy'){
+      if(!isAdmin||!DB.school||!DB.school.nom||DB.school.nom==='VÉRITAS Academy'){
         DB.school=Object.assign(DB.school||{},data.school);
         var nm2=$('vName');if(nm2)nm2.textContent=DB.school.nom||'VÉRITAS Academy';
         var sl2=$('vSlogan');if(sl2)sl2.textContent=DB.school.slogan||"Centre d'Excellence Scolaire";
@@ -3130,14 +3364,51 @@ function _fetchPublicData(){
         changed=true;
       }
     }
-    // Afficher le bouton Partenaires si des partenaires existent
-    if(DB.partenaires&&DB.partenaires.length>0){
+
+    // ── publicInfo (présentation, description, contact…) ────────────────────
+    if(data.publicInfo){
+      if(!isAdmin||!DB.publicInfo||!DB.publicInfo.description){
+        DB.publicInfo=Object.assign(DB.publicInfo||{},data.publicInfo);changed=true;
+      }
+    }
+
+    // ── Plans e-learning ────────────────────────────────────────────────────
+    if(data.elearning_plans&&data.elearning_plans.length>0){
+      if(!isAdmin||(!(DB.elearning&&DB.elearning.plans)||DB.elearning.plans.length===0)){
+        if(!DB.elearning)DB.elearning={plans:[],categories:[],contenus:[],abonnements:[],commandes:[]};
+        DB.elearning.plans=data.elearning_plans;changed=true;
+      }
+    }
+
+    // ── Ré-initialiser les éléments visuels dynamiques pour les visiteurs ───
+    if(!isAdmin&&changed){
+      // Ticker : re-lancer toujours (les nouveaux items du serveur doivent s'afficher)
+      if(typeof initTicker==='function')initTicker();
+      // Bouton Partenaires dans le nav (n'apparaît que si des partenaires existent)
+      if(DB.partenaires&&DB.partenaires.length>0)_addPartnersNav();
+      // Label école dans la barre de connexion
+      var lbl=document.querySelector('.vlogin-bar>span:first-child');
+      if(lbl&&DB.school&&DB.school.nom)lbl.textContent='🏫 '+(DB.school.nom||'VÉRITAS Academy');
+      // Re-rendre la section courante si ses données ont été mises à jour
+      var curSec=window._vCurrentSec||'presentation';
+      if(curSec==='partenaires'||curSec==='presentation'||curSec==='elearning'||curSec==='contact'||curSec==='boutique'){
+        try{vShowSec(curSec,document.querySelector('.vnav-btn.on'));}catch(e){}
+      }
+    } else if(isAdmin&&DB.partenaires&&DB.partenaires.length>0){
       _addPartnersNav();
     }
-    // NB: on ne call pas save() — ces données sont chargées depuis le serveur
-    // et ne doivent pas écraser le localStorage de l'admin connecté
+
+    // NB: on ne call pas save() ici — ces données viennent du serveur et ne
+    // doivent pas remplacer le localStorage admin (qui fait foi côté gestion)
   })
-  .catch(function(){/* silencieux — pas de connexion ou premier lancement */});
+  .catch(function(e){
+    // Silencieux — offline, serveur non configuré, ou premier lancement
+    // Réessayer une seule fois après 8 s (utile sur connexions mobiles lentes)
+    if(!_fetchPublicData._retried){
+      _fetchPublicData._retried=true;
+      setTimeout(function(){_fetchPublicData._retried=false;_fetchPublicData();},8000);
+    }
+  });
 }
 function _vheroAutoUnmuteOnInteraction(){
   // Attendre que la vidéo soit dans le DOM, puis brancher le son sur un tap direct
@@ -3401,6 +3672,7 @@ function _vRevealInit(){
 }
 
 function vShowSec(sec,btn){
+  window._vCurrentSec=sec;
   document.querySelectorAll(".vnav-btn").forEach(b=>b.classList.remove("on"));
   if(btn)btn.classList.add("on");
   const c=$("vContent");
@@ -3551,10 +3823,9 @@ function vShowSec(sec,btn){
     </div>
     ${(DB.galleryImages||[]).length>0?`<div class="vcard mt20">
       <div class="ct">📸 Notre centre en images</div>
-      <div class="gallery-grid" style="grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">
+      <div class="gallery-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
         ${(DB.galleryImages||[]).slice(0,6).map(p=>`<div class="gallery-card" style="aspect-ratio:16/10">
           <img src="${p.src}" alt="${p.titre}" loading="lazy" style="width:100%;height:100%;object-fit:cover">
-          <div class="gallery-overlay"><div class="semi" style="font-size:12px">${p.titre}</div></div>
         </div>`).join('')}
       </div>
       ${(DB.galleryImages||[]).length>6?`<div style="text-align:center;margin-top:12px">
@@ -3615,11 +3886,7 @@ function vShowSec(sec,btn){
       </div>`).join("")}
       ${(DB.galleryImages||[]).map(p=>`<div class="gallery-card">
         <img src="${p.src}" alt="${p.titre}" loading="lazy">
-        <div class="gallery-overlay">
-          <div class="semi">${p.titre}</div>
-          <div class="xs2">${p.date||''}</div>
-          ${iA()?'<button class="btn br2 xs" style="margin-top:4px" onclick="event.stopPropagation();deleteGalleryPhoto(&quot;'+p.id+'&quot;)">🗑</button>':''}
-        </div>
+        ${iA()?`<div class="gallery-overlay"><button class="btn br2 xs" style="margin-top:4px" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')">🗑</button></div>`:''}
       </div>`).join("")}
     </div>
     <div class="vcard mt16" style="text-align:center">
@@ -3786,7 +4053,7 @@ function vShowSec(sec,btn){
           var vPlans=visAcc?visAcc.plans||[]:[];
           var hasPlanAccess=item.plans&&item.plans.length&&item.plans.some(function(p){return vPlans.indexOf(p)>=0;});
           var hasRealAccess=(isFree&&!isBlocked)||isManuallyUnlocked||hasPlanAccess||iA();
-          var isUnlocked=item.externalUrl?hasRealAccess:(isFree||(free2<2));
+          var isUnlocked=hasRealAccess||(isFree)||(free2<2);
           if(!isFree) free2++;
           var isLocked=!isUnlocked;
           var pLabels={plan1:'EXAMEN',plan2:'INTERMÉD.',plan3:'ENSEIGNANT',plan4:'FAMILLE'};
@@ -3844,10 +4111,18 @@ function vShowSec(sec,btn){
             h+='<button class="btn" style="background:#E8EEFF;color:#4B5BDB;font-size:11px;padding:6px 12px;border-radius:12px" onclick="document.getElementById(\'elPlans\')?.scrollIntoView({behavior:\'smooth\'})">🔒 Abonnement</button>';
             h+='</div>';
           } else {
-            h+='<span class="rc-price" style="color:'+catColor+'">'+fmtN(item.prix)+' FCFA</span>';
+            if(hasPlanAccess&&!iA()){
+              h+='<span style="background:#D1FAE5;color:#059669;font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;display:inline-block">✓ Inclus dans votre abonnement</span>';
+            } else {
+              h+='<span class="rc-price" style="color:'+catColor+'">'+fmtN(item.prix)+' FCFA</span>';
+            }
             h+='<div style="display:flex;align-items:center;gap:6px">';
             if(item.apercu||item.desc) h+='<button class="btn" style="background:'+catColor+'18;color:'+catColor+';font-size:10px;padding:5px 10px;border-radius:10px;border:1px solid '+catColor+'33" onclick="event.stopPropagation();previewElContent(\''+item.id+'\')">👁 Aperçu</button>';
-            h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="commanderContenu(\''+item.id+'\')">🛒 Commander</button>';
+            if(hasPlanAccess||iA()){
+              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')">📖 Consulter</button>';
+            } else {
+              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="commanderContenu(\''+item.id+'\')">🛒 Commander</button>';
+            }
             h+='</div>';
           }
           h+='</div></div>';
@@ -4040,8 +4315,9 @@ function vShowSec(sec,btn){
             <span style="font-family:'Fira Code';font-size:17px;font-weight:700;color:var(--gold)">${fmt(b.prix)}</span>
             <span style="font-size:13px;color:${b.stock>5?'var(--gr)':b.stock>0?'var(--or)':'var(--re)'};font-weight:700">${b.stock>5?'✅ En stock':b.stock>0?'⚠ '+b.stock+' restants':'❌ Rupture'}</span>
           </div>
-          <div style="display:grid;grid-template-columns:${hasPreview?'1fr 1fr 1fr':'1fr 1fr'};gap:6px;margin-top:10px">
+          <div style="display:grid;grid-template-columns:${(hasPreview&&b.fichierUrl&&b.lireGratuit)?'1fr 1fr 1fr 1fr':((hasPreview||(b.fichierUrl&&b.lireGratuit))?'1fr 1fr 1fr':'1fr 1fr')};gap:6px;margin-top:10px">
             ${hasPreview?`<button class="btn sm" onclick="event.stopPropagation();viewBookDetail('${b.id}')" style="justify-content:center;font-size:11px;background:var(--blb);color:var(--bl);border:1px solid var(--bl2)">👁 Feuilleter</button>`:''}
+            ${(b.fichierUrl&&b.lireGratuit)?`<button class="btn sm" onclick="event.stopPropagation();_visitorLireManuel('${b.id}')" style="justify-content:center;font-size:11px;background:#D1FAE5;color:#059669;border:1px solid #A7F3D0;font-weight:700">📖 Lire</button>`:''}
             <button class="btn bo sm" onclick="event.stopPropagation();viewBookDetail('${b.id}')" style="justify-content:center;font-size:11px">📋 Détails</button>
             ${b.stock>0?`<button class="btn bi sm" onclick="event.stopPropagation();visitorOrderBook('${b.id}')" style="justify-content:center;font-size:11px">🛒 Commander</button>`:`<button class="btn sm" style="justify-content:center;font-size:11px;background:var(--bg3);color:var(--ink4);cursor:not-allowed" disabled>Rupture</button>`}
           </div>
@@ -4890,6 +5166,31 @@ function _cloudUrl(endpoint){
   return base+'/'+endpoint;
 }
 
+// ── Upload d'un fichier vers le serveur cloud ────────────────────────
+// cb(url, errMsg) — url=null si échec
+function _uploadToServer(file,type,refId,cb){
+  var secret=DB.cloudConfig&&DB.cloudConfig.secret;
+  var baseUrl=DB.cloudConfig&&DB.cloudConfig.url;
+  if(!secret||!baseUrl){cb(null,'Aucune configuration cloud');return;}
+  var fd=new FormData();
+  fd.append('file',file);
+  fd.append('type',type||'resource');
+  fd.append('ref_id',refId||'x');
+  fd.append('_secret',secret);
+  toast('⬆️ Upload vers le serveur...');
+  fetch(_cloudUrl('upload_file.php'),{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+secret},
+    body:fd
+  })
+  .then(function(r){return r.json();})
+  .then(function(j){
+    if(j.success&&j.url){cb(j.url,null);}
+    else{cb(null,j.error||'Erreur upload serveur');}
+  })
+  .catch(function(err){cb(null,'Erreur réseau : '+(err.message||err));});
+}
+
 function saveCloudConfig(){
   if(!DB.cloudConfig)DB.cloudConfig={};
   var url=(_ge('cloud_url')?.value||'').trim();
@@ -4964,8 +5265,13 @@ function cloudSaveDB(){
   if(data.partenaires){data.partenaires.forEach(function(p){if(p.logo&&p.logo.startsWith('data:')&&p.logo.length>5000){p.logo='';if(stripped.indexOf('logos partenaires')<0)stripped.push('logos partenaires');}});}
   // 7. Photos galerie en data URL (stockage local → utiliser upload serveur)
   if(data.galleryImages){data.galleryImages.forEach(function(img){if(img.src&&img.src.startsWith('data:')&&img.src.length>5000){img.src='';if(stripped.indexOf('photos galerie locales')<0)stripped.push('photos galerie locales');}});}
-  // 8. Couvertures livres en data URL
-  if(data.books){data.books.forEach(function(b){if(b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>5000){b.coverImg='';if(stripped.indexOf('couvertures livres locales')<0)stripped.push('couvertures livres locales');}});}
+  // 8. Couvertures livres en data URL + fichiers locaux (non-URL)
+  if(data.books){data.books.forEach(function(b){
+    if(b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>5000){b.coverImg='';if(stripped.indexOf('couvertures livres locales')<0)stripped.push('couvertures livres locales');}
+    // Les clés localStorage (fichierKey) et binaires inline ne sont valables que sur cet appareil
+    // On les retire du payload cloud ; fichierUrl (URL serveur) reste intact
+    if(b.fichierKey){if(b.fichierData)b.fichierData='';b.fichierKey='';if(stripped.indexOf('fichiers manuels locaux')<0)stripped.push('fichiers manuels locaux');}
+  });}
 
   var payload=JSON.stringify(data);
   var sizeKB=Math.round(payload.length/1024);
@@ -5517,9 +5823,10 @@ function pgElearningMgmt(){
       h+='<td class="xs2">'+item.matiere+'</td>';
       h+='<td>'+packBadges+'</td>';
       h+='<td class="mono bold" style="color:var(--gold)">'+fmtN(item.prix||0)+'</td>';
-      h+='<td>'+(item.externalUrl?'<a href="'+item.externalUrl+'" target="_blank" class="bg bgb" style="font-size:10px;text-decoration:none">🔗 URL ext.</a>':item.fichierData?'<span class="bg bgg" style="font-size:10px">📄 Oui</span>':'<span class="xs2 mut">—</span>')+'</td>';
+      h+='<td>'+(item.fichierUrl?'<a href="'+item.fichierUrl+'" target="_blank" class="bg bgg" style="font-size:10px;text-decoration:none">☁️ Serveur</a>':item.externalUrl?'<a href="'+item.externalUrl+'" target="_blank" class="bg bgb" style="font-size:10px;text-decoration:none">🔗 URL</a>':item.fichierData?'<span class="bg" style="font-size:10px;background:#FEF3C7;color:#92400E">📄 Local</span>':'<span class="xs2 mut">—</span>')+'</td>';
       h+='<td>'+(item.gratuit?'<span class="bg bgg">✓</span>':'<span class="xs2 mut">—</span>')+'</td>';
       h+='<td><div class="fl2 g4"><button class="btn bvi xs" onclick="mEditElearningContent(\''+item.id+'\')">✏️</button>';
+      h+='<button class="btn xs" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A" title="Uploader un fichier" onclick="_uploadElFichier(\''+item.id+'\')">📤</button>';
       if(item.externalUrl) h+='<button class="btn xs" style="background:#FFF8E1;color:#F59E0B;border:1px solid #FDE68A" onclick="mGererAccesContenu(\''+item.id+'\')">👥</button>';
       h+='<button class="btn br2 xs" onclick="deleteElearningContent(\''+item.id+'\')">🗑</button></div></td>';
       h+='</tr>';
@@ -6066,6 +6373,14 @@ function consulterGratuit(itemId){
   if(item.resPedago && typeof _RESSOURCES_PEDAGO!=='undefined' && _RESSOURCES_PEDAGO[item.resPedago]){
     lancerRessourcePedago(item.resPedago, false);
     return;
+  }
+  // Contenu HTML embarqué → ouvrir avec filigrane VÉRITAS
+  if(item.htmlContent){_openHtmlWithWatermark(item.htmlContent,item.titre,null);return;}
+  // Fichier uploadé sur serveur → viewer avec filigrane
+  if(item.fichierUrl){
+    var isPdfUrl=(item.fichierUrl.toLowerCase().indexOf('.pdf')>-1)||((item.fichierType||'').indexOf('pdf')>-1);
+    if(isPdfUrl){_showPDFViewer(item.fichierUrl,item.titre,iA());return;}
+    window.open(item.fichierUrl,'_blank');return;
   }
   // Track downloads
   var dlKey='dl_'+itemId+'_'+new Date().toDateString();
@@ -6658,6 +6973,24 @@ function go2SES(acc){
     hideAll();
     $("APP").style.display="flex";
     buildNav();topUI();goTo("dashboard");
+    // Afficher l'indicateur de sync cloud pour les admins
+    setTimeout(function(){
+      if(iA()){
+        var dot=document.getElementById('vSyncDot');
+        if(dot){
+          dot.style.display='inline-flex';
+          var lastSync=DB.cloudConfig&&DB.cloudConfig.lastSync;
+          _setSyncDot(lastSync?'ok':'pending',lastSync||'');
+        }
+        // Auto-push vers le serveur au login si cloud configuré (pour que le téléphone reçoive les dernières données)
+        var cfg=DB.cloudConfig;
+        if(cfg&&cfg.url&&cfg.secret){
+          setTimeout(function(){
+            if(iA()&&!_autoSyncDirty)_cloudAutoSync();
+          },3000);
+        }
+      }
+    },300);
   }catch(err){
     // Afficher l'erreur si le chargement du tableau de bord échoue
     $("APP").style.display="none";
@@ -8576,8 +8909,10 @@ function pgBooks2(){
         <div class="xs2 mut mb8">${b.vendu} vendus · ${b.pages} pages</div>
         <div class="fl2 g6 fw">
           <button class="btn bgr2 xs" onclick="viewBook('${b.id}')">👁 Voir</button>
-          ${b.fichierKey?`<button class="btn xs" style="background:#E0F2FE;color:#0369A1;border:1px solid #BAE6FD" onclick="_previewManuel('${b.id}')">🔍 Visualiser</button>`:''}
-          ${b.fichierKey?`<button class="btn xs" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7" onclick="_dlManuel('${b.id}')">⬇️ Télécharger</button>`:''}
+          ${(b.fichierUrl||b.fichierKey)?`<button class="btn xs" style="background:#E0F2FE;color:#0369A1;border:1px solid #BAE6FD" onclick="_previewManuel('${b.id}')">🔍 Visualiser</button>`:''}
+          ${(b.fichierUrl||b.fichierKey)?`<button class="btn xs" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7" onclick="_dlManuel('${b.id}')">⬇️ Télécharger</button>`:''}
+          ${b.fichierUrl?`<span style="background:#D1FAE5;color:#059669;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;border:1px solid #A7F3D0">☁️ Serveur${b.lireGratuit?' · 📖 Libre':''}
+</span>`:''}
           ${iA()?`<button class="btn bg2 xs" onclick="editBook('${b.id}')">✏️</button>
           <button class="btn xs" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A" onclick="_uploadManuelFichier('${b.id}')">📤 Upload</button>
           <button class="btn br2 xs" onclick="delBook('${b.id}')">🗑</button>`:''}
@@ -8627,10 +8962,16 @@ function editBook(id){
     <div class="fg"><span class="fl">Stock</span><input class="fi" id="eBkSt" type="number" value="${b.stock}"></div>
     <div class="fg"><span class="fl">Icône</span><input class="fi" id="eBkI" value="${b.ico||'📚'}" maxlength="2"></div>
     <div class="fg full"><span class="fl">Description</span><textarea class="fi" id="eBkD" rows="2">${b.desc||''}</textarea></div>
+    <div class="fg full"><span class="fl" style="font-weight:700;color:#059669">📖 Lecture gratuite visiteurs</span>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px;background:#D1FAE5;border-radius:8px;border:1px solid #A7F3D0">
+        <input type="checkbox" id="eBkLG"${b.lireGratuit?' checked':''} style="width:18px;height:18px;accent-color:#059669">
+        <span style="font-size:13px;color:#065F46">Autoriser les visiteurs à lire gratuitement ce PDF en ligne (nécessite un fichier uploadé sur le serveur)</span>
+      </label>
+    </div>
   </div>`,
   `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEditBk('${id}')">✓ Enregistrer</button>`);
 }
-function saveEditBk(id){const b=DB.books.find(x=>x.id===id);if(!b)return;b.titre=document.getElementById('eBkT')?.value||b.titre;b.cls=document.getElementById('eBkCl')?.value||b.cls;b.auteur=document.getElementById('eBkA')?.value||b.auteur;b.prix=+document.getElementById('eBkP')?.value||b.prix;b.stock=+document.getElementById('eBkSt')?.value||0;b.ico=document.getElementById('eBkI')?.value||b.ico;b.desc=document.getElementById('eBkD')?.value||b.desc;save();cm();re();toast('✓ Manuel modifié');}
+function saveEditBk(id){const b=DB.books.find(x=>x.id===id);if(!b)return;b.titre=document.getElementById('eBkT')?.value||b.titre;b.cls=document.getElementById('eBkCl')?.value||b.cls;b.auteur=document.getElementById('eBkA')?.value||b.auteur;b.prix=+document.getElementById('eBkP')?.value||b.prix;b.stock=+document.getElementById('eBkSt')?.value||0;b.ico=document.getElementById('eBkI')?.value||b.ico;b.desc=document.getElementById('eBkD')?.value||b.desc;b.lireGratuit=!!(document.getElementById('eBkLG')?.checked);save();cm();re();toast('✓ Manuel modifié');}
 function delBook(id){if(!confirm('Supprimer ce manuel ?'))return;DB.books=DB.books.filter(b=>b.id!==id);save();re();}
 
 // ── MANUELS : UPLOAD FICHIER ADMIN ──────────────────────────────────
@@ -8642,24 +8983,33 @@ function _uploadManuelFichier(bid){
   input.style.display='none';document.body.appendChild(input);
   input.onchange=function(e){
     var file=e.target.files[0];if(!file)return;
-    var maxMo=file.type.startsWith('video')?80:20;
-    if(file.size>maxMo*1024*1024){toast('Fichier trop lourd (max '+maxMo+'Mo)','warn');return;}
-    toast('Chargement en cours...');
-    var reader=new FileReader();
-    reader.onload=function(evt){
-      var key='manuel_'+bid;
-      try{
-        localStorage.setItem(key,evt.target.result);
-        b.fichierKey=key;b.fichierNom=file.name;b.fichierType=file.type;
-        save();re();toast('✓ Fichier uploadé : '+file.name);
-      }catch(err){
-        // Si localStorage plein, stocker dans DB directement (limité mais fonctionnel)
-        b.fichierData=evt.target.result;b.fichierNom=file.name;b.fichierType=file.type;b.fichierKey='inline_'+bid;
-        save();re();toast('✓ Fichier uploadé (stockage interne)');
+    var maxMo=file.type.startsWith('video')?80:30;
+    if(file.size>maxMo*1024*1024){toast('Fichier trop lourd (max '+maxMo+' Mo)','warn');return;}
+    // Essayer d'abord le serveur cloud
+    _uploadToServer(file,'book',bid,function(url,err){
+      if(url){
+        b.fichierUrl=url;b.fichierNom=file.name;b.fichierType=file.type;
+        delete b.fichierKey;delete b.fichierData;
+        save();re();toast('✓ Fichier uploadé sur le serveur : '+file.name);
+      } else {
+        // Fallback : stockage local
+        toast('Serveur non configuré — stockage local','warn');
+        var reader=new FileReader();
+        reader.onload=function(evt){
+          var key='manuel_'+bid;
+          try{
+            localStorage.setItem(key,evt.target.result);
+            b.fichierKey=key;b.fichierNom=file.name;b.fichierType=file.type;
+            save();re();toast('✓ Fichier stocké localement : '+file.name);
+          }catch(ex){
+            b.fichierData=evt.target.result;b.fichierNom=file.name;b.fichierType=file.type;b.fichierKey='inline_'+bid;
+            save();re();toast('✓ Fichier stocké (stockage interne)');
+          }
+        };
+        reader.onerror=function(){toast('Erreur de lecture','warn');};
+        reader.readAsDataURL(file);
       }
-    };
-    reader.onerror=function(){toast('Erreur de lecture','warn');};
-    reader.readAsDataURL(file);
+    });
     input.remove();
   };
   setTimeout(function(){input.click();},100);
@@ -8667,6 +9017,9 @@ function _uploadManuelFichier(bid){
 
 function _getManuelData(b){
   if(!b)return null;
+  // URL serveur (cross-device)
+  if(b.fichierUrl)return b.fichierUrl;
+  // Fichier localStorage
   if(b.fichierKey&&b.fichierKey.startsWith('manuel_')){
     try{return localStorage.getItem(b.fichierKey);}catch(e){return null;}
   }
@@ -8679,16 +9032,22 @@ function _previewManuel(bid){
   if(!data){toast('Aucun fichier disponible','warn');return;}
   var nom=b.fichierNom||'document';
   var type=b.fichierType||'application/pdf';
+  var isUrl=data.indexOf('http')===0;
+  var isPdf=type.indexOf('pdf')>=0||nom.toLowerCase().endsWith('.pdf');
   var isImg=type.startsWith('image');
   var isVid=type.startsWith('video');
-  var isPdf=type.indexOf('pdf')>=0||nom.toLowerCase().endsWith('.pdf');
+  // URL serveur + PDF → viewer avec filigrane
+  if(isUrl&&isPdf){_showPDFViewer(data,nom,iA());return;}
+  // URL serveur + autre type → ouvrir dans un onglet
+  if(isUrl){window.open(data,'_blank');return;}
+  // Données locales (base64) → popup
   var w=window.open('','_blank','width=900,height=700');
   if(!w){toast('Popup bloqué — autorisez les popups','warn');return;}
   var body='';
-  if(isPdf){body='<iframe src="'+data+'" style="width:100%;height:100%;border:none"></iframe>';}
-  else if(isImg){body='<img src="'+data+'" style="max-width:100%;display:block;margin:0 auto">';}
-  else if(isVid){body='<video src="'+data+'" controls style="width:100%;max-height:90vh;display:block"></video>';}
-  else{body='<div style="padding:40px;text-align:center"><p style="font-size:16px;margin-bottom:20px">📄 '+nom+'</p><a href="'+data+'" download="'+nom+'" style="background:#142554;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">⬇️ Télécharger</a></div>';}
+  if(isPdf){body='<iframe src="'+data+'" style="width:100%;height:calc(100vh - 44px);border:none"></iframe>';}
+  else if(isImg){body='<div style="background:#111;min-height:calc(100vh - 44px);display:flex;align-items:center;justify-content:center"><img src="'+data+'" style="max-width:100%;max-height:calc(100vh - 60px);display:block"></div>';}
+  else if(isVid){body='<video src="'+data+'" controls style="width:100%;max-height:calc(100vh - 44px);display:block;background:#000"></video>';}
+  else{body='<div style="padding:40px;text-align:center;background:#111;min-height:calc(100vh - 44px)"><p style="font-size:16px;margin-bottom:20px;color:#fff">📄 '+nom+'</p><a href="'+data+'" download="'+nom+'" style="background:#142554;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">⬇️ Télécharger</a></div>';}
   w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+nom+' — VÉRITAS</title>'
     +'<style>body{margin:0;padding:0;background:#111;color:#fff;height:100vh}'
     +'.bar{background:#142554;padding:10px 18px;display:flex;align-items:center;justify-content:space-between}'
@@ -8704,9 +9063,54 @@ function _dlManuel(bid){
   var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
   var data=_getManuelData(b);
   if(!data){toast('Aucun fichier disponible','warn');return;}
+  var nom=b.fichierNom||('manuel_'+b.titre+'.pdf');
   var a=document.createElement('a');
-  a.href=data;a.download=b.fichierNom||('manuel_'+b.titre+'.pdf');
-  a.click();toast('⬇️ Téléchargement lancé : '+(b.fichierNom||b.titre));
+  a.href=data;
+  if(data.indexOf('http')===0){a.target='_blank';}else{a.download=nom;}
+  a.click();toast('⬇️ Téléchargement lancé : '+nom);
+}
+
+// ── Lecture gratuite d'un manuel par un visiteur (URL serveur requis) ──
+function _visitorLireManuel(bid){
+  var b=DB.books.find(function(x){return x.id===bid;});
+  if(!b){toast('Manuel introuvable','warn');return;}
+  if(!b.fichierUrl||!b.lireGratuit){toast('Ce manuel n\'est pas disponible en lecture gratuite','warn');return;}
+  var isPdf=b.fichierUrl.toLowerCase().indexOf('.pdf')>-1||(b.fichierType||'').indexOf('pdf')>-1;
+  if(isPdf){_showPDFViewer(b.fichierUrl,b.titre||'Manuel',false);return;}
+  window.open(b.fichierUrl,'_blank');
+}
+
+// ── Upload d'un fichier de ressource e-learning sur le serveur ──────
+function _uploadElFichier(itemId){
+  var item=(DB.elearning.contenus||[]).find(function(c){return c.id===itemId;});
+  if(!item){toast('Ressource introuvable','warn');return;}
+  var input=document.createElement('input');
+  input.type='file';
+  input.accept='.pdf,.doc,.docx,.ppt,.pptx,.html,image/*,video/*,.mp4,.webm';
+  input.style.display='none';document.body.appendChild(input);
+  input.onchange=function(e){
+    var file=e.target.files[0];if(!file)return;
+    var maxMo=file.type.startsWith('video')?80:30;
+    if(file.size>maxMo*1024*1024){toast('Fichier trop lourd (max '+maxMo+' Mo)','warn');return;}
+    _uploadToServer(file,'resource',itemId,function(url,err){
+      if(url){
+        item.fichierUrl=url;item.fichierNom=file.name;item.fichierType=file.type;
+        delete item.fichierData;
+        save();re();toast('✓ Ressource uploadée sur le serveur : '+file.name);
+      } else {
+        toast('Serveur non disponible — stockage local','warn');
+        var reader=new FileReader();
+        reader.onload=function(evt){
+          item.fichierData=evt.target.result;item.fichierNom=file.name;item.fichierType=file.type;
+          save();re();toast('✓ Ressource stockée localement : '+file.name);
+        };
+        reader.onerror=function(){toast('Erreur de lecture','warn');};
+        reader.readAsDataURL(file);
+      }
+    });
+    input.remove();
+  };
+  setTimeout(function(){input.click();},100);
 }
 
 // ═══════════════════════════════════════════════
@@ -9455,7 +9859,7 @@ function pgSettings(){
         <button class="btn bvi" onclick="importAllData()">📥 Importer JSON</button>
         <button class="btn" style="background:#059669;color:#fff" onclick="exportSQL()">🗄️ Exporter SQL</button>
       </div>
-      <div class="fl2 fw g8 mt12 pt12" style="border-top:var(--br)"><div class="bold s mb8">🛠️ Gestion avancee</div><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()">📢 Defilant</button><button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()">🎬 Video</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()">📦 Packs</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()">📅 Calendrier</button><button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()">🤝 Partenaires</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()">🎮 Jeux</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Labos</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évals</button><button class="btn sm" style="background:#142554;color:#fff;border-radius:10px" onclick="re();goTo('visitor_accounts')">👥 Comptes</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageEvaluations()">📊 Évaluations</button><button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mPayAttempts()">💰 Paiements</button></div>
+      <div class="fl2 fw g8 mt12 pt12" style="border-top:var(--br)"><div class="bold s mb8">🛠️ Gestion avancee</div><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()">📢 Defilant</button><button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()">🎬 Video</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()">📦 Packs</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()">📅 Calendrier</button><button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()">🤝 Partenaires</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()">🎮 Jeux</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Labos</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évals</button><button class="btn sm" style="background:#142554;color:#fff;border-radius:10px" onclick="re();goTo('visitor_accounts')">👥 Comptes</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageEvaluations()">📊 Évaluations</button><button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mPayAttempts()">💰 Paiements</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageExtraits()">📖 Extraits</button></div>
       <div class="ib ibi mt14 mb0"><span>💡</span><span>Pour synchroniser via <strong>intranet</strong>: exportez les données, partagez via WiFi, importez sur l\'autre appareil.</span></div>
     </div>
     <div class="card mt16">
@@ -10073,7 +10477,7 @@ function viewSecure(item){
   else{toast('Aucun fichier disponible','warn');}
 }
 
-// Admin access: triple-click on hidden element OR Ctrl+Shift+A / Ctrl+Shift+V
+// Admin access: 3×/5× tap on hidden element OR Ctrl+Shift+L / Ctrl+Shift+U
 // Géré de façon centralisée dans le bloc ACCÈS ADMIN SECRET ci-dessous
 
 // ═══════════════════════════════════════════════════════════
@@ -11534,13 +11938,47 @@ function _restoreCustomJeux(){
   if(typeof DB==='undefined'||!DB)return;
   if(!DB.customJeux||!DB.customJeux.length)return;
   DB.customJeux.forEach(function(j){
+    // Corriger l'emoji manquant en mémoire
+    if(!j.emoji)j.emoji='🌐';
+    // Corriger l'action manquante pour les jeux HTML
+    if(j.type==='html'&&!j.action)j.action='_jeuHtml_'+j.id;
     if(!JEUX_CATALOGUE.find(function(x){return x.id===j.id;})){
       JEUX_CATALOGUE.push(j);
+    }
+    // Enregistrer la fonction window correcte selon le type
+    if(j.type==='html'){
+      (function(jj){window[jj.action]=function(){_openHtmlContent(jj.id,'jeu');};})(j);
+    } else {
       var action=j.action||("lancerCustomQuiz_"+j.id.replace(/[^a-z0-9]/gi,"_"));
-      window[action]=function(){_lancerCustomQuiz(j.id);};
+      if(!j.action)j.action=action;
+      (function(jj){window[jj.action]=function(){_lancerCustomQuiz(jj.id);};})(j);
     }
   });
+  // Persister les corrections d'emoji/action en base
+  save();
 }
+// ── Lanceur universel (utilisé dans les onclick des cartes jeux) ─────────────
+// Cherche le jeu à l'heure du clic — plus besoin de window['_jeuHtml_xxx']
+function vLaunchJeu(id){
+  var j=(typeof JEUX_CATALOGUE!=='undefined')&&JEUX_CATALOGUE.find(function(x){return x.id===id;});
+  if(!j){
+    // Fallback : chercher dans DB.customJeux (peut arriver si JEUX_CATALOGUE pas encore peuplé)
+    j=DB.customJeux&&DB.customJeux.find(function(x){return x.id===id;});
+    if(j&&!JEUX_CATALOGUE.find(function(x){return x.id===id;})){JEUX_CATALOGUE.push(j);}
+  }
+  if(!j){toast('Jeu introuvable','warn');return;}
+  // Jeu HTML → ouvrir le contenu dans un nouvel onglet avec filigrane
+  if(j.type==='html'){
+    if(j.externalUrl){window.open(j.externalUrl,'_blank');return;}
+    var html=DB.customJeuxHtml&&DB.customJeuxHtml[id];
+    if(html){_openHtmlWithWatermark(html,j.titre,null);return;}
+    toast('Contenu HTML non trouvé','warn');return;
+  }
+  // Jeu avec questions (QCM / V-F / Pendu / Trous)
+  if(!j.questions||!j.questions.length){toast('Aucune question disponible pour ce jeu','warn');return;}
+  _lancerCustomQuiz(id);
+}
+
 // Lanceur générique pour quiz custom (QCM, V/F, Pendu, Texte à trous)
 function _lancerCustomQuiz(id){
   var j=JEUX_CATALOGUE.find(function(x){return x.id===id;});
@@ -12811,15 +13249,25 @@ function _refuserSub(id){
 }
 
 // ── ACCÈS ADMIN SECRET ─────────────────────────────────────────────
+// Raccourcis : Ctrl+Shift+L (Admin) · Ctrl+Shift+U (SuperAdmin)
+// Les anciens Ctrl+Shift+A / V étaient interceptés par Chrome/Firefox
 var _aacN=0,_aatN=null;
 function _adminTriple(){
   _aacN++;if(_aatN)clearTimeout(_aatN);
   _aatN=setTimeout(function(){_aacN=0;},700);
-  if(_aacN>=3){_aacN=0;showLogin("admin");}
+  // 3 clics → admin  |  5 clics → superadmin
+  if(_aacN>=5){_aacN=0;showLogin("superadmin");toast("👑 Accès Super Administration");}
+  else if(_aacN===3){setTimeout(function(){if(_aacN===3){_aacN=0;showLogin("admin");toast("🔐 Accès Administration");}},400);}
 }
 document.addEventListener("keydown",function(e){
-  if(e.ctrlKey&&e.shiftKey&&e.key==="A"){e.preventDefault();showLogin("admin");toast("🔐 Accès Administration");}
-  if(e.ctrlKey&&e.shiftKey&&e.key==="V"){e.preventDefault();showLogin("superadmin");toast("👑 Accès Super Administration");}
+  var k=(e.key||'').toLowerCase();
+  // Ctrl+Shift+L → Admin login (L comme Login)
+  if(e.ctrlKey&&e.shiftKey&&k==="l"){e.preventDefault();showLogin("admin");toast("🔐 Accès Administration");}
+  // Ctrl+Shift+U → SuperAdmin login (U comme Ultimate)
+  if(e.ctrlKey&&e.shiftKey&&k==="u"){e.preventDefault();showLogin("superadmin");toast("👑 Accès Super Administration");}
+  // Rétrocompatibilité : anciens raccourcis (au cas où le navigateur ne les intercepte pas)
+  if(e.ctrlKey&&e.shiftKey&&k==="a"){e.preventDefault();showLogin("admin");toast("🔐 Accès Administration");}
+  if(e.ctrlKey&&e.shiftKey&&k==="v"){e.preventDefault();showLogin("superadmin");toast("👑 Accès Super Administration");}
 });
 
 // ── INITIALISATION ─────────────────────────────────────────────────
@@ -13491,11 +13939,11 @@ function showJeuxEdu(){
     h+="<span style='color:#6B7A99;font-weight:600;font-size:12px'>"+items.length+" œuvre"+(items.length>1?"s":"")+"</span></div>";
     h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px'>";
     items.forEach(function(it){
-      // Find the matching JEUX_CATALOGUE entry for the action
-      var jeuId="litt_"+it.key.replace(/^(\d+e?_)/,"$1").replace(/e_/,"e_");
-      var matchJeu=JEUX_CATALOGUE.find(function(j){return j.id && j.oeuvre===it.key;});
-      var actionName=matchJeu?matchJeu.action:"";
-      var clickAction=actionName?actionName+"()":"_showLittCarte('"+it.key+"')";
+      // Bouton "Jeux" de l'œuvre : chercher l'entrée catalogue par oeuvreKey OU par id préfixé "litt_"
+      var matchJeu=JEUX_CATALOGUE.find(function(j){return j.oeuvre===it.key;})
+        ||JEUX_CATALOGUE.find(function(j){return j.id&&(j.id==='litt_'+it.key||j.id.endsWith('_'+it.key.replace(/[^a-z0-9]/gi,'_')));});
+      // Utiliser vLaunchJeu si un jeu catalogue existe, sinon afficher la carte mentale
+      var clickAction=matchJeu?"vLaunchJeu('"+matchJeu.id+"')":"_showLittCarte('"+it.key+"')";
 
       h+="<div style='background:#fff;border:2px solid "+it.col+"22;border-radius:16px;overflow:hidden;cursor:pointer;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.04)' "
         +"onmouseover=\"this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,.1)';this.style.borderColor='"+it.col+"55'\" "
@@ -13543,13 +13991,18 @@ function showJeuxEdu(){
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px'>";
   list.forEach(function(j){
     var locked=!j.gratuit&&!SES;
-    h+="<div class='jeu-card' onclick='"+(locked?"toast(\"Connexion requise pour accéder aux jeux premium\",\"warn\")":j.action+"()")+"'>";
+    // Utiliser vLaunchJeu(id) — stable, résout l'id au moment du clic (pas de window['xxx'])
+    var clickExpr=locked
+      ?"toast(\"Connexion requise pour accéder aux jeux premium\",\"warn\")"
+      :"vLaunchJeu(\""+j.id+"\")";
+    h+="<div class='jeu-card' onclick='"+clickExpr+"'>";
     h+="<div class='jeu-thumb' style='background:linear-gradient(135deg,"
-      +(j.type==="pendu"?"#FEF3C7,#FDE68A":j.type==="trous"?"#F0FDF4,#D1FAE5":j.gratuit?"#E0F2FE,#BAE6FD":"#EDE9FE,#DDD6FE")+"'>";
-    h+=j.emoji;
+      +(j.type==="pendu"?"#FEF3C7,#FDE68A":j.type==="trous"?"#F0FDF4,#D1FAE5":j.type==="html"?"#E0FDF4,#CCFBF1":j.gratuit?"#E0F2FE,#BAE6FD":"#EDE9FE,#DDD6FE")+"'>";
+    h+=(j.emoji||'🌐');
     if(!j.gratuit) h+="<span class='jeu-premium'>PREMIUM</span>";
     else h+="<span class='jeu-free'>GRATUIT</span>";
-    if(j.type)h+="<span style='position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:rgba(0,0,0,.4)'>"+{qcm:"QCM",vf:"Vrai/Faux",pendu:"Pendu",trous:"Texte trous"}[j.type]+"</span>";
+    var typeLabel={qcm:"QCM",vf:"Vrai/Faux",pendu:"Pendu",trous:"Texte trous",html:"HTML"}[j.type]||j.type||'';
+    if(typeLabel)h+="<span style='position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:rgba(0,0,0,.4)'>"+typeLabel+"</span>";
     h+="</div><div class='jeu-body'>";
     h+="<div class='jeu-title'>"+j.titre+"</div>";
     h+="<div class='jeu-desc'>"+j.desc+"</div>";
@@ -13995,30 +14448,38 @@ function showEpreuveDetail(id){
   var builtinEp=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]);
   var ep=libEpreuves.concat(builtinEp).concat(DB.customEpreuves||[]).find(function(e){return e.id===id;});
   if(!ep)return;
-  // Si épreuve HTML → ouvrir directement
-  if((ep.externalUrl||ep.htmlLocal)&&!ep.apercu&&!ep.extrait){
-    _openHtmlContent(id,'epreuve');return;
-  }
   var locked=!ep.gratuit&&!SES;
+  // Détecter si la ressource a un fichier associé (HTML/PDF/Word/URL)
+  var hasFile=ep.externalUrl||ep.htmlLocal||ep.idbKey||
+    (DB.customEpHtml&&(DB.customEpHtml[id]||DB.customEpHtml[ep.idbKey||'']));
+  var format=ep.format||'html';
+  var fmtLabels={html:'HTML',pdf:'PDF',word:'Word',url:'Lien'};
+  var fmtColors={html:'#059669',pdf:'#DC2626',word:'#2563EB',url:'#7C3AED'};
+  // Si fichier dispo et pas d'aperçu → ouvrir directement sans modale
+  if(hasFile&&!ep.apercu&&!ep.extrait&&!locked){
+    _openRessource(id);return;
+  }
   var apercu=ep.apercu||ep.extrait||ep.desc||"";
-  var descText=ep.desc||ep.apercu||ep.extrait||"";
-  var hasHtml=ep.externalUrl||ep.htmlLocal;
   M("📝 "+ep.titre,"Ressource éducative VERITAS",
     "<div class='fg2'>"
     +(ep.classe?"<div class='fg'><span class='fl'>Classe</span><div style='font-size:13px;font-weight:700;color:#142554'>"+ep.classe+"</div></div>":"")
     +(ep.matiere?"<div class='fg'><span class='fl'>Matière</span><div style='font-size:13px'>"+ep.matiere+"</div></div>":"")
     +(ep.seq?"<div class='fg'><span class='fl'>Séquence</span><div style='font-size:13px'>"+ep.seq+"</div></div>":"")
+    +(ep.annee?"<div class='fg'><span class='fl'>Année</span><div style='font-size:13px'>"+ep.annee+"</div></div>":"")
+    +((ep.exam||ep.serie)?"<div class='fg'><span class='fl'>Examen</span><div style='font-size:13px'>"+(ep.exam||'')+(ep.serie?' '+ep.serie:'')+"</div></div>":"")
+    +(hasFile?"<div class='fg'><span class='fl'>Format</span><div><span style='background:"+(fmtColors[format]||'#6b7280')+";color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:8px'>"+(fmtLabels[format]||format.toUpperCase())+"</span></div></div>":"")
     +(ep.prix!==undefined?"<div class='fg'><span class='fl'>Prix</span><div style='font-size:13px;font-weight:700;color:"+(ep.gratuit?"#059669":"#7C3AED")+"'>"+(ep.gratuit?"GRATUIT":ep.prix+" FCFA")+"</div></div>":"")
     +"</div>"
     +(apercu?"<div style='background:#F8FAFF;border:1px solid #E0EAFF;border-radius:12px;padding:16px;margin-top:14px;font-family:Georgia,serif;font-size:13px;color:#374151;line-height:1.85'>"
     +"<div style='font-size:11px;font-weight:700;color:#7C3AED;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>Aperçu du contenu</div>"
-    +(apercu||descText)
+    +apercu
     +(locked?"<div style='margin-top:12px;padding:10px;background:#FEF3C7;border-radius:8px;font-size:12px;color:#D97706;font-style:normal'>🔒 Le contenu complet est réservé aux abonnés. Inscrivez-vous pour y accéder.</div>":"")
     +"</div>":""),
     "<button class='btn bo' onclick='cm()'>Fermer</button>"
     +(locked?"<button class='btn bi' onclick='cm();vShowSec(\"elearning\",null)'>⭐ S'abonner</button>"
-      :(hasHtml?"<button class='btn bi' onclick='cm();_openHtmlContent(\""+id+"\",\"epreuve\")'>📄 Ouvrir l'épreuve</button>"
-              :"<button class='btn bi' onclick='cm();showEpreuves()'>← Retour</button>")),
+      :(hasFile
+        ?"<button class='btn bi' onclick='cm();_openRessource(\""+id+"\")'>📄 Ouvrir la ressource</button>"
+        :"<button class='btn bi' onclick='cm();showEpreuves()'>← Retour</button>")),
     true);
 }
 
@@ -15174,15 +15635,20 @@ function mManageEpreuves(){
   if(!DB.customEpreuves)DB.customEpreuves=[];
   // Fusionner épreuves par défaut + épreuves admin
   var all=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]).concat(DB.customEpreuves||[]);
+  var fmtColors={html:'#059669',pdf:'#DC2626',word:'#2563EB',url:'#7C3AED'};
   var rows=all.map(function(ep,i){
     var isCustom=i>=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB.length:0);
+    var fmt=ep.format||((ep.externalUrl||ep.htmlLocal||ep.idbKey)?'html':'');
+    var fmtBadge=fmt?"<span style='background:"+(fmtColors[fmt]||'#6b7280')+";color:#fff;font-size:8px;font-weight:800;padding:1px 5px;border-radius:4px;margin-left:4px'>"+fmt.toUpperCase()+"</span>":"";
+    var hasFile=ep.externalUrl||ep.htmlLocal||ep.idbKey;
     return "<tr style='border-bottom:1px solid var(--bg3)'>"
       +"<td style='padding:6px 8px;font-size:12px'>"
-        +"<strong>"+ep.titre+"</strong>"
-        +"<div style='font-size:10px;color:var(--ink4)'>"+ep.exam+(ep.serie?" "+ep.serie:"")+" · "+ep.annee+"</div>"
+        +"<div style='display:flex;align-items:center;gap:4px'><strong>"+_esc(ep.titre)+"</strong>"+fmtBadge+"</div>"
+        +"<div style='font-size:10px;color:var(--ink4)'>"+_esc(ep.exam||'')+(ep.serie?" "+_esc(ep.serie):"")+(ep.annee?" · "+ep.annee:"")+"</div>"
       +"</td>"
-      +"<td style='padding:6px 8px;font-size:11px'>"+ep.matiere+"</td>"
+      +"<td style='padding:6px 8px;font-size:11px'>"+_esc(ep.matiere||'')+"</td>"
       +"<td style='padding:6px 8px;font-size:11px'>"+(ep.gratuit?"<span style='color:#059669;font-weight:700'>Gratuit</span>":"<span style='color:#7C3AED'>Premium</span>")+"</td>"
+      +(hasFile?"<td style='padding:6px 8px'><button class='btn bi xs' onclick='_openRessource(\""+ep.id+"\")' style='padding:3px 7px;font-size:10px'>👁</button></td>":"<td></td>")
       +"<td style='padding:6px 8px;white-space:nowrap'>"
         +(isCustom
           ?"<button class='btn bo xs' onclick='_editEp("+(i)+")'  style='margin-right:4px'>✏️</button><button class='btn br2 xs' onclick='_delEp("+(i-(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB.length:0))+")'>🗑</button>"
@@ -15195,10 +15661,10 @@ function mManageEpreuves(){
   }).join("");
   M("📝 Gérer les Épreuves","Ajoutez et gérez les épreuves officielles",
     "<div class='ib ibt mb12'><span>📝</span><span>Masquez les épreuves par défaut inutiles. Les épreuves masquées n'apparaissent plus aux élèves.</span></div>"
-    +"<div class='tw mb12' style='max-height:240px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th style='text-align:left;padding:6px 8px'>Titre</th><th>Matière</th><th>Accès</th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
+    +"<div class='tw mb12' style='max-height:260px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th style='text-align:left;padding:6px 8px'>Titre</th><th>Matière</th><th>Accès</th><th></th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
     +"<div class='fl2 g8 mt10'>"
     +"<button class='btn bi sm' onclick='_newEp()'>➕ Saisir une épreuve</button>"
-    +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='_importEpreuveHTML()'>📥 Importer HTML</button>"
+    +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='_importRessourceMulti()'>📥 Importer (HTML · PDF · Word)</button>"
     +"</div>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
 }
@@ -15267,68 +15733,318 @@ function _saveEp(){
   setTimeout(mManageEpreuves,80);
 }
 
-// ── IMPORT HTML — ÉPREUVES ────────────────────────────────────────
-function _importEpreuveHTML(){
+// ══════════════════════════════════════════════════════════════════════
+// RESSOURCES MULTI-FORMAT — HTML · PDF · Word avec filigrane VÉRITAS
+// ══════════════════════════════════════════════════════════════════════
+
+function _importRessourceMulti(){
   cm();
-  M('📥 Importer une épreuve HTML','Chargez un fichier HTML contenant l\'épreuve',
-    '<div class="ib ibt mb12"><span>💡</span><span>Importez un fichier <strong>.html</strong> (épreuve interactive, PDF inline, etc.). Il sera ouvert dans un nouvel onglet quand l\'élève clique. Renseignez ensuite les métadonnées.</span></div>'
+  M('📥 Importer une ressource pédagogique',
+    '<span style="display:flex;gap:6px;align-items:center"><span style="background:#DC2626;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px">PDF</span><span style="background:#2563EB;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px">Word</span><span style="background:#059669;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px">HTML</span><span style="font-size:12px;color:var(--ink4)">Filigrane VÉRITAS appliqué automatiquement</span></span>',
+    '<div class="ib ibt mb12"><span>💡</span><span>Importez n\'importe quel format. Le filigrane <strong>VÉRITAS Academy</strong> est ajouté à l\'affichage et au téléchargement.</span></div>'
     +'<div class="fg2">'
-    +'<div class="fg full"><span class="fl">Titre *</span><input class="fi" id="ehTitre" placeholder="BAC C 2025 — Mathématiques"></div>'
-    +'<div class="fg"><span class="fl">Examen</span><select class="fi" id="ehExam"><option value="BEPC">BEPC</option><option value="Probatoire">Probatoire</option><option value="BAC">BAC</option><option value="Séquence">Séquence interne</option></select></div>'
-    +'<div class="fg"><span class="fl">Série / Classe</span><input class="fi" id="ehSerie" placeholder="C, D, A..."></div>'
-    +'<div class="fg"><span class="fl">Matière *</span><input class="fi" id="ehMat" placeholder="Mathématiques"></div>'
-    +'<div class="fg"><span class="fl">Année</span><input class="fi" id="ehAnnee" type="number" value="'+new Date().getFullYear()+'"></div>'
-    +'<div class="fg full"><span class="fl">Option 1 — Fichier HTML local</span>'
-    +'<input type="file" class="fi" id="ehFile" accept=".html,.htm" style="padding:6px">'
-    +'<div style="font-size:11px;color:var(--ink4);margin-top:4px">⚠️ Stocké localement — visible uniquement sur cet appareil. Préférez l\'URL (option 2) pour un accès universel.</div>'
+    +'<div class="fg full"><span class="fl">Titre *</span><input class="fi" id="riTitre" placeholder="BAC C 2025 — Mathématiques"></div>'
+    +'<div class="fg"><span class="fl">Type</span><select class="fi" id="riExam">'
+    +'<option value="BEPC">BEPC</option><option value="Probatoire">Probatoire</option>'
+    +'<option value="BAC">BAC</option><option value="Séquence">Séquence</option>'
+    +'<option value="Cours">Cours</option><option value="Devoir">Devoir</option>'
+    +'<option value="Correction">Correction</option></select></div>'
+    +'<div class="fg"><span class="fl">Série / Classe</span><input class="fi" id="riSerie" placeholder="C, D, A, 3ème..."></div>'
+    +'<div class="fg"><span class="fl">Matière *</span><input class="fi" id="riMat" placeholder="Mathématiques"></div>'
+    +'<div class="fg"><span class="fl">Année</span><input class="fi" id="riAnnee" type="number" value="'+new Date().getFullYear()+'"></div>'
+    +'<div class="fg full"><span class="fl">📎 Fichier local (.html, .pdf, .doc, .docx)</span>'
+    +'<input type="file" class="fi" id="riFichier" accept=".html,.htm,.pdf,.doc,.docx" style="padding:6px">'
+    +'<div style="font-size:10px;color:var(--ink4);margin-top:4px;line-height:1.5">Stocké dans IndexedDB (sur cet appareil). Pour un accès universel depuis tous les appareils, utilisez l\'URL externe.</div>'
     +'</div>'
-    +'<div class="fg full"><span class="fl">Option 2 — URL externe (recommandé)</span>'
-    +'<input class="fi" id="ehUrl" placeholder="https://veritas-school.com/epreuves/bac_c_2025_maths.html"></div>'
-    +'<div class="fg full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="ehGratuit"><span>Accès gratuit (sans abonnement)</span></label></div>'
+    +'<div class="fg full"><span class="fl">🔗 URL externe (recommandé pour multi-appareils)</span>'
+    +'<input class="fi" id="riUrl" placeholder="https://veritas-school.com/ressources/bac_c_2025.pdf">'
+    +'<div style="font-size:10px;color:var(--ink4);margin-top:4px">Le format est détecté depuis l\'extension (.pdf, .docx, .html…)</div></div>'
+    +'<div class="fg full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="riGratuit"><span>Accès gratuit (sans abonnement)</span></label></div>'
     +'</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="_saveEpreuveHTML()">💾 Importer</button>',true);
+    +'<button class="btn bi" onclick="_saveRessourceMulti()">💾 Importer</button>',true);
 }
-function _saveEpreuveHTML(){
-  var titre=(document.getElementById('ehTitre')?.value||'').trim();
-  var mat=(document.getElementById('ehMat')?.value||'').trim();
+
+function _saveRessourceMulti(){
+  var titre=(_ge('riTitre')?.value||'').trim();
+  var mat=(_ge('riMat')?.value||'').trim();
   if(!titre||!mat){toast('Titre et matière requis','warn');return;}
-  var url=(document.getElementById('ehUrl')?.value||'').trim();
-  var file=document.getElementById('ehFile')?.files?.[0];
-  var exam=document.getElementById('ehExam')?.value||'BAC';
-  var serie=document.getElementById('ehSerie')?.value||'';
-  var annee=parseInt(document.getElementById('ehAnnee')?.value)||new Date().getFullYear();
-  var gratuit=document.getElementById('ehGratuit')?.checked||false;
-  function _finalize(htmlUrl){
+  var url=(_ge('riUrl')?.value||'').trim();
+  var file=_ge('riFichier')?.files?.[0];
+  var exam=_ge('riExam')?.value||'BAC';
+  var serie=(_ge('riSerie')?.value||'').trim();
+  var annee=parseInt(_ge('riAnnee')?.value)||new Date().getFullYear();
+  var gratuit=_ge('riGratuit')?.checked||false;
+  if(!url&&!file){toast('Choisissez un fichier ou entrez une URL','warn');return;}
+
+  function _detFmt(name){
+    var ext=(name||'').split('.').pop().toLowerCase().split('?')[0];
+    return ext==='pdf'?'pdf':(ext==='doc'||ext==='docx')?'word':'html';
+  }
+  function _persist(fmt,idbKey,extUrl){
     if(!DB.customEpreuves)DB.customEpreuves=[];
     DB.customEpreuves.push({
-      id:'ep_html_'+Date.now(),titre:titre,exam:exam,serie:serie,matiere:mat,annee:annee,
-      duree:120,coef:1,extrait:'',gratuit:gratuit,type:'epreuve',
-      externalUrl:htmlUrl,fichier:'',fichierData:''
+      id:'ep_'+Date.now(),titre:titre,exam:exam,serie:serie,matiere:mat,
+      annee:annee,duree:120,coef:1,extrait:'',gratuit:gratuit,
+      type:'epreuve',format:fmt,idbKey:idbKey||'',externalUrl:extUrl||''
     });
-    save();cm();toast('✅ Épreuve HTML importée');setTimeout(mManageEpreuves,80);
+    save();cm();
+    toast('✅ Ressource importée ('+fmt.toUpperCase()+')');
+    setTimeout(mManageEpreuves,80);
   }
-  if(url){_finalize(url);return;}
-  if(file){
-    var reader=new FileReader();
-    reader.onload=function(e){
-      // Stocker le contenu HTML et créer une Blob URL à l'ouverture
-      var content=e.target.result;
+
+  // URL uniquement (pas de fichier local)
+  if(url&&!file){_persist(_detFmt(url),'',url);return;}
+
+  // Fichier local
+  var fmt=_detFmt(file.name);
+  var ikey='ep_res_'+Date.now();
+
+  if(fmt==='html'){
+    // HTML → lire comme texte et stocker dans DB.customEpHtml (compatibilité legacy)
+    var r=new FileReader();
+    r.onload=function(ev){
       if(!DB.customEpHtml)DB.customEpHtml={};
-      var id='ep_html_'+Date.now();
-      DB.customEpHtml[id]=content;
-      if(!DB.customEpreuves)DB.customEpreuves=[];
-      DB.customEpreuves.push({
-        id:id,titre:titre,exam:exam,serie:serie,matiere:mat,annee:annee,
-        duree:120,coef:1,extrait:'',gratuit:gratuit,type:'epreuve',
-        htmlLocal:true,fichier:'',fichierData:''
-      });
-      save();cm();toast('✅ Épreuve HTML importée (local)');setTimeout(mManageEpreuves,80);
+      DB.customEpHtml[ikey]=ev.target.result;
+      _persist('html',ikey,'');
     };
-    reader.readAsText(file,'utf-8');
+    r.readAsText(file,'utf-8');
+  } else {
+    // PDF / Word → lire en base64 (data URL) et stocker dans IndexedDB (veritasDB)
+    var r2=new FileReader();
+    r2.onload=function(ev){
+      var dataUrl=ev.target.result;
+      // Essayer IndexedDB d'abord (idbSave = veritasDB, compatible avec idbGetFile)
+      try{
+        idbSave(ikey,dataUrl,file.name,file.type,function(ok){
+          _persist(fmt,ikey,'');
+        });
+      } catch(e){
+        // Fallback: stocker en localStorage via customEpHtml (pour fichiers petits)
+        if(!DB.customEpHtml)DB.customEpHtml={};
+        DB.customEpHtml[ikey]=dataUrl;
+        _persist(fmt,ikey,'');
+      }
+    };
+    r2.readAsDataURL(file);
+  }
+}
+
+// ── Ouvre une ressource avec filigrane selon son format ──
+function _openRessource(id){
+  var allEp=[];
+  if(typeof EPREUVES_DB!=="undefined")allEp=allEp.concat(EPREUVES_DB);
+  allEp=allEp.concat((DB.elearningLibrary||[]).filter(function(e){return e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6";}));
+  allEp=allEp.concat(DB.customEpreuves||[]);
+  var ep=allEp.find(function(e){return e.id===id;});
+  if(!ep){toast('Ressource introuvable','warn');return;}
+
+  var fmt=ep.format||'html';
+
+  // ─ URL externe ─
+  if(ep.externalUrl){
+    if(fmt==='pdf'){_showPDFViewer(ep.externalUrl,ep.titre,true);return;}
+    if(fmt==='word'){toast('Ouverture du document Word…');window.open(ep.externalUrl,'_blank');return;}
+    _openHtmlWithWatermark(null,ep.titre,ep.externalUrl);
     return;
   }
-  toast('Choisissez un fichier ou entrez une URL','warn');
+
+  var ikey=ep.idbKey||id;
+
+  // ─ Fichier HTML en mémoire (DB.customEpHtml) ─
+  if(fmt==='html'){
+    var htmlSrc=DB.customEpHtml&&(DB.customEpHtml[ikey]||DB.customEpHtml[id]);
+    if(htmlSrc){_openHtmlWithWatermark(htmlSrc,ep.titre,null);return;}
+    // Legacy htmlLocal
+    if(ep.htmlLocal){toast('Fichier HTML non trouvé (peut-être sur un autre appareil)','warn');}
+    else toast('Aucun fichier HTML associé','warn');
+    return;
+  }
+
+  // ─ PDF / Word en IndexedDB ─
+  if(ep.idbKey){
+    idbGetFile(ep.idbKey,function(rec){
+      if(rec&&rec.data){
+        if(fmt==='pdf'){_showPDFViewer(rec.data,ep.titre,true);return;}
+        _downloadWordWithWatermark(rec.data,ep);
+      } else {
+        // Fallback: customEpHtml (base64 stocké en localStorage)
+        var fb=DB.customEpHtml&&DB.customEpHtml[ep.idbKey];
+        if(fb){
+          if(fmt==='pdf'){_showPDFViewer(fb,ep.titre,true);return;}
+          _downloadWordWithWatermark(fb,ep);
+        } else {
+          toast('Fichier non trouvé — il a peut-être été importé sur un autre appareil.','warn');
+        }
+      }
+    });
+    return;
+  }
+
+  toast('Aucun fichier associé à cette ressource','warn');
+}
+
+// ── Viewer PDF modal avec filigrane CSS en overlay ──
+function _showPDFViewer(src,titre,canDownload){
+  // Générer un blob wrapper HTML avec filigrane pour les data: URLs
+  var displaySrc=src;
+  if(src&&src.startsWith('data:')){
+    try{
+      var b=new Blob([src.includes(',')
+        ? new Uint8Array(atob(src.split(',')[1]).split('').map(function(c){return c.charCodeAt(0);}))
+        : src],{type:'application/pdf'});
+      displaySrc=URL.createObjectURL(b);
+    }catch(e){displaySrc=src;}
+  }
+  var school=DB.school||{};
+  var body=''
+    +'<div style="background:linear-gradient(135deg,#142554,#1e3a7a);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;border-radius:8px 8px 0 0">'
+    +'<span style="color:#FFC93C;font-weight:800;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70%">📄 '+_esc(titre)+'</span>'
+    +'<span style="color:rgba(255,255,255,.6);font-size:9px;white-space:nowrap">© VÉRITAS · Usage pédagogique</span>'
+    +'</div>'
+    +'<div style="position:relative;height:65vh;background:#525659;overflow:hidden">'
+    // Filigrane en overlay CSS
+    +'<div style="position:absolute;inset:0;pointer-events:none;z-index:5;display:flex;align-items:center;justify-content:center;overflow:hidden">'
+    +'<div style="font-size:clamp(30px,7vw,70px);font-weight:900;color:rgba(20,37,84,0.08);transform:rotate(-45deg);white-space:nowrap;letter-spacing:10px;user-select:none">VÉRITAS</div>'
+    +'</div>'
+    +'<embed src="'+displaySrc+'" type="application/pdf" style="width:100%;height:100%;border:none" />'
+    +'</div>'
+    +'<div style="background:#142554;color:rgba(255,255,255,.55);text-align:center;padding:5px 8px;font-size:10px;border-radius:0 0 8px 8px;line-height:1.4">'
+    +(school.nom||'VÉRITAS Academy')+' · veritas-school.com · Usage pédagogique uniquement'
+    +'</div>';
+  var footer='<button class="btn bo" onclick="cm()">Fermer</button>';
+  if(canDownload){
+    footer+='<button class="btn" style="background:#7C3AED;color:#fff" onclick="window.open(\''+displaySrc+'\',\'_blank\')">⬇️ Ouvrir PDF</button>';
+    footer+='<button class="btn" style="background:#DC2626;color:#fff" onclick="cm();_downloadPDFCover(\''+encodeURIComponent(titre)+'\')">📄 Page de garde</button>';
+  }
+  M('','',body,footer,true);
+}
+
+// ── Ouvre HTML avec filigrane injecté (nouveau onglet) ──
+function _openHtmlWithWatermark(htmlText,titre,externalUrl){
+  var school=DB.school||{};
+  var banner='<div id="_vWm" style="position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#142554,#1e3a7a);color:#FFC93C;text-align:center;padding:7px 16px;font-size:12px;font-weight:700;z-index:2147483647;box-shadow:0 2px 8px rgba(0,0,0,.3);letter-spacing:.5px">🎓 '+(school.nom||'VÉRITAS Academy')+' · veritas-school.com · Usage pédagogique uniquement</div><div style="height:37px"></div>'
+    +'<style>body::after{content:"VÉRITAS";position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-45deg);font-size:clamp(40px,10vw,90px);color:rgba(20,37,84,0.05);font-weight:900;pointer-events:none;z-index:2147483646;white-space:nowrap;letter-spacing:12px;font-family:sans-serif;}</style>';
+
+  if(externalUrl&&!htmlText){
+    // Wrapper iframe avec filigrane
+    var wrapper='<!DOCTYPE html><html><head><meta charset="utf-8"><style>*{margin:0;padding:0;box-sizing:border-box}body{overflow:hidden;background:#1a1a2e}</style></head><body>'
+      +banner.replace('height:37px','height:40px')
+      +'<iframe src="'+externalUrl+'" style="width:100%;height:calc(100vh - 40px);border:none"></iframe></body></html>';
+    var b=new Blob([wrapper],{type:'text/html'});
+    window.open(URL.createObjectURL(b),'_blank');
+    return;
+  }
+
+  // Injecter dans le HTML local
+  var injected=htmlText||'';
+  var bodyMatch=/<body([^>]*)>/i.exec(injected);
+  if(bodyMatch) injected=injected.replace(bodyMatch[0],bodyMatch[0]+banner);
+  else injected=banner+injected;
+  var b=new Blob([injected],{type:'text/html'});
+  window.open(URL.createObjectURL(b),'_blank');
+}
+
+// ── Télécharger PDF : page de garde jsPDF avec filigrane ──
+function _downloadPDFCover(encodedTitre){
+  var titre=decodeURIComponent(encodedTitre||'');
+  var jsPDFCls=(typeof jspdf!=='undefined'&&jspdf.jsPDF)?jspdf.jsPDF:(typeof jsPDF!=='undefined'?jsPDF:null);
+  if(!jsPDFCls){toast('jsPDF non disponible','warn');return;}
+  var doc=new jsPDFCls({orientation:'portrait',unit:'mm',format:'a4'});
+  var pw=210,ph=297,school=DB.school||{};
+
+  // Fond navy
+  doc.setFillColor(20,37,84);doc.rect(0,0,pw,ph,'F');
+  // Filigrane répété
+  doc.setFont(undefined,'bold');doc.setFontSize(55);doc.setTextColor(255,255,255);
+  var wAlpha=0.04;
+  [40,100,160,220].forEach(function(y){
+    doc.setFillColor(255,255,255); // placeholder — just text with light color
+    doc.setTextColor(40,60,110);
+    doc.text('VÉRITAS',pw/2,y,{align:'center',angle:30});
+  });
+  // En-tête
+  doc.setTextColor(255,201,60);doc.setFontSize(26);doc.setFont(undefined,'bold');
+  doc.text(school.nom||'VÉRITAS Academy',pw/2,55,{align:'center'});
+  doc.setFontSize(11);doc.setTextColor(180,200,255);doc.setFont(undefined,'normal');
+  doc.text(school.slogan||'Centre d\'Excellence Scolaire',pw/2,65,{align:'center'});
+  doc.text('Yaoundé, Cameroun',pw/2,72,{align:'center'});
+  // Séparateur
+  doc.setDrawColor(255,201,60);doc.setLineWidth(0.8);doc.line(25,79,pw-25,79);
+  // Titre ressource
+  doc.setFontSize(18);doc.setTextColor(255,255,255);doc.setFont(undefined,'bold');
+  var tl=doc.splitTextToSize(titre||'Ressource pédagogique',160);
+  doc.text(tl,pw/2,96,{align:'center'});
+  // Métadonnées
+  doc.setFontSize(10);doc.setFont(undefined,'italic');doc.setTextColor(180,200,255);
+  doc.text('Document protégé — Usage pédagogique uniquement',pw/2,125,{align:'center'});
+  doc.text('© '+new Date().getFullYear()+' '+( school.nom||'VÉRITAS Academy')+' · veritas-school.com',pw/2,133,{align:'center'});
+  doc.text('Tél : '+(school.tel||'+237 697 637 739')+' · contact@veritas.cm',pw/2,141,{align:'center'});
+  // Encadré or
+  doc.setFillColor(255,201,60);doc.roundedRect(20,ph-75,pw-40,36,4,4,'F');
+  doc.setTextColor(20,37,84);doc.setFontSize(10);doc.setFont(undefined,'bold');
+  doc.text('📄 Page de garde officielle VÉRITAS',pw/2,ph-60,{align:'center'});
+  doc.setFont(undefined,'normal');doc.setFontSize(9);
+  doc.text('Ce document accompagne la ressource pédagogique.',pw/2,ph-52,{align:'center'});
+  doc.text('Toute reproduction non autorisée est interdite.',pw/2,ph-45,{align:'center'});
+
+  doc.save((titre||'ressource').replace(/[^a-z0-9]/gi,'_')+'_VERITAS.pdf');
+  toast('📄 Page de garde PDF téléchargée');
+}
+
+// ── Télécharger Word avec filigrane (HTML→.doc) ──
+function _downloadWordWithWatermark(dataUrlOrText,ep){
+  var school=DB.school||{};
+  var contacts='veritas-school.com · '+(school.tel||'+237 697 637 739')+' · contact@veritas.cm';
+  var htmlDoc='<html xmlns:o="urn:schemas-microsoft-com:office:office" '
+    +'xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+    +'<head><meta charset="utf-8"><title>'+_esc(ep.titre||'Ressource')+'</title>'
+    +'<style>'
+    +'body{font-family:"Times New Roman",serif;margin:2.5cm;color:#1e293b}'
+    +'.veritas-header{background:#142554;color:#FFC93C;text-align:center;padding:16px;margin-bottom:24px}'
+    +'.veritas-header h1{color:#FFC93C;font-size:18pt;margin:0 0 4px;font-family:Arial,sans-serif}'
+    +'.veritas-header p{color:rgba(255,255,255,.8);margin:2px 0;font-size:9pt}'
+    +'.doc-title{text-align:center;color:#142554;font-size:16pt;font-weight:bold;margin:0 0 6px}'
+    +'.doc-meta{text-align:center;color:#666;font-size:10pt;font-style:italic;margin-bottom:20px}'
+    +'.doc-badge{display:inline-block;background:#142554;color:#FFC93C;font-size:8pt;'
+    +'font-weight:bold;padding:2px 8px;border-radius:4px;margin:0 2px}'
+    +'.watermark{position:fixed;top:42%;left:5%;width:90%;text-align:center;'
+    +'font-size:76pt;color:rgba(200,200,200,0.11);font-weight:900;'
+    +'transform:rotate(-40deg);z-index:-1;font-family:Arial,sans-serif;letter-spacing:12px}'
+    +'.sep{border:none;border-top:2px solid #FFC93C;margin:16px 0}'
+    +'.notice{background:#FFF8E1;border-left:4px solid #FFC93C;padding:12px 16px;margin:20px 0;font-size:9pt}'
+    +'.footer{border-top:1px solid #ddd;margin-top:40px;padding-top:10px;text-align:center;font-size:8pt;color:#999}'
+    +'</style></head><body>'
+    +'<div class="watermark">VÉRITAS</div>'
+    +'<div class="veritas-header">'
+    +'<h1>'+(school.nom||'VÉRITAS Academy')+'</h1>'
+    +'<p>'+(school.slogan||'Centre d\'Excellence Scolaire')+'</p>'
+    +'<p>Yaoundé, Cameroun · '+contacts+'</p>'
+    +'</div>'
+    +'<div class="doc-title">'+_esc(ep.titre||'Ressource pédagogique')+'</div>'
+    +'<div class="doc-meta">'
+    +(ep.exam?'<span class="doc-badge">'+_esc(ep.exam)+'</span> ':'' )
+    +(ep.serie?'<span class="doc-badge">'+_esc(ep.serie)+'</span> ':'')
+    +(ep.matiere?'· '+_esc(ep.matiere)+' ':'')
+    +(ep.annee?'· '+ep.annee:'')
+    +'</div>'
+    +'<hr class="sep">'
+    +'<div class="notice">'
+    +'<strong>📄 Document VÉRITAS Academy — Usage pédagogique</strong><br>'
+    +'Ce document est protégé par le filigrane VÉRITAS. Toute reproduction non autorisée est interdite.<br>'
+    +'Contact : '+contacts
+    +'</div>'
+    +'<div class="footer">© '+new Date().getFullYear()+' '+(school.nom||'VÉRITAS Academy')+' · '+contacts+'<br>'
+    +'Document protégé — Usage pédagogique uniquement</div>'
+    +'</body></html>';
+  var blob=new Blob([htmlDoc],{type:'application/msword'});
+  var u=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=u;
+  a.download=(ep.titre||'ressource').replace(/[^a-z0-9]/gi,'_')+'_VERITAS.doc';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(u);
+  toast('📝 Document Word téléchargé avec filigrane');
 }
 
 // ── IMPORT HTML — JEUX/QUIZ ────────────────────────────────────────
@@ -15362,15 +16078,16 @@ function _saveJeuHTML(){
   function _finalizeJeu(htmlUrl,isLocal,content){
     if(typeof JEUX_CATALOGUE==="undefined"){toast('Module jeux non chargé','warn');return;}
     var id='jeu_html_'+Date.now();
-    var jeu={id:id,titre:titre,emoji:emoji,matiere:mat,niveau:niv,
+    var action='_jeuHtml_'+id;
+    var jeu={id:id,titre:titre,emoji:emoji||'🌐',matiere:mat,niveau:niv,
       desc:'Jeu/Quiz HTML interactif',gratuit:gratuit,plan:gratuit?'Gratuit':'Premium',
-      custom:true,type:'html',externalUrl:htmlUrl||'',htmlLocal:isLocal||false};
+      custom:true,type:'html',action:action,externalUrl:htmlUrl||'',htmlLocal:isLocal||false};
     if(isLocal&&content){if(!DB.customJeuxHtml)DB.customJeuxHtml={};DB.customJeuxHtml[id]=content;}
     JEUX_CATALOGUE.push(jeu);
     if(!DB.customJeux)DB.customJeux=[];
     DB.customJeux.push(jeu);
     // Action handler
-    window['_jeuHtml_'+id]=function(){_openHtmlContent(id,'jeu');};
+    (function(jid){window['_jeuHtml_'+jid]=function(){_openHtmlContent(jid,'jeu');};})(id);
     save();cm();toast('✅ Jeu HTML importé');setTimeout(mManageJeux,80);
   }
   if(url){_finalizeJeu(url,false,null);return;}
@@ -15382,19 +16099,350 @@ function _saveJeuHTML(){
   toast('Choisissez un fichier ou entrez une URL','warn');
 }
 
-// ── Ouvre un contenu HTML (jeu ou épreuve) dans un nouvel onglet ──
+// ── Ouvre un contenu HTML (jeu ou épreuve) — legacy + routage multi-format ──
 function _openHtmlContent(id,type){
-  // Chercher d'abord une URL externe
+  // Pour les épreuves, router vers le nouveau système multi-format
+  if(type==='epreuve'){_openRessource(id);return;}
+  // Pour les jeux HTML → comportement original
   var item=null;
-  if(type==='jeu'&&typeof JEUX_CATALOGUE!=="undefined") item=JEUX_CATALOGUE.find(function(j){return j.id===id;});
-  if(type==='epreuve') item=(DB.customEpreuves||[]).find(function(e){return e.id===id;});
-  if(!item)return;
+  if(typeof JEUX_CATALOGUE!=="undefined") item=JEUX_CATALOGUE.find(function(j){return j.id===id;});
+  if(!item){toast('Contenu introuvable','warn');return;}
   if(item.externalUrl){window.open(item.externalUrl,'_blank');return;}
-  // Contenu local (stocké dans DB)
-  var store=type==='jeu'?DB.customJeuxHtml:DB.customEpHtml;
-  var html=store&&store[id];
-  if(html){var blob=new Blob([html],{type:'text/html'});var u=URL.createObjectURL(blob);window.open(u,'_blank');return;}
+  var html=DB.customJeuxHtml&&DB.customJeuxHtml[id];
+  if(html){
+    _openHtmlWithWatermark(html,item.titre,null);
+    return;
+  }
   toast('Contenu HTML non trouvé','warn');
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// EXTRAITS DE LIVRES — Visitor + Admin (PDF/Word avec filigrane)
+// ══════════════════════════════════════════════════════════════════════
+
+// ── Page visiteur : liste des extraits disponibles ──
+function showExtraits(){
+  var extraits=(DB.extraits||[]);
+  var niveaux=['Tous','3ème','2nde','1ère','Terminale'];
+  var fNiv=window._extFNiv||'Tous';
+  var fMat=window._extFMat||'Tous';
+  var matieres=['Tous'].concat([].concat.apply([],extraits.map(function(e){return e.matiere||'';}).filter(Boolean)).filter(function(v,i,a){return a.indexOf(v)===i;}));
+  var list=extraits.filter(function(e){
+    var okN=(fNiv==='Tous'||e.niveau===fNiv);
+    var okM=(fMat==='Tous'||e.matiere===fMat);
+    return okN&&okM;
+  });
+  var h="<div class='vsec'>";
+  h+="<div class='vsec-title'>📖 Extraits de Livres</div>";
+  h+="<div class='vsec-sub'>Découvrez des extraits d'œuvres sélectionnées — téléchargeables en PDF ou Word</div>";
+  // Filtres niveau
+  h+="<div style='display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px'>";
+  niveaux.forEach(function(n){
+    h+="<button style='padding:4px 12px;border-radius:16px;border:1.5px solid "+(fNiv===n?"#142554":"var(--bg3)")+";background:"+(fNiv===n?"#142554":"#fff")+";color:"+(fNiv===n?"#FFC93C":"var(--ink3)")+";font-size:11px;font-weight:700;cursor:pointer' onclick='window._extFNiv=\""+n+"\";showExtraits()'>"+n+"</button>";
+  });
+  h+="</div>";
+  if(!list.length){
+    h+="<div class='vcard' style='text-align:center;padding:48px 24px'>";
+    if(!extraits.length){
+      h+="<div style='font-size:48px;margin-bottom:12px'>📚</div><div style='font-size:16px;font-weight:700;color:#142554'>Aucun extrait disponible pour le moment</div>";
+      h+="<div style='font-size:13px;color:var(--ink4);margin-top:8px'>Les extraits de livres seront ajoutés prochainement par vos professeurs.</div>";
+    } else {
+      h+="<div style='font-size:13px;color:var(--ink4)'>Aucun extrait pour ce filtre.</div>";
+    }
+    h+="</div>";
+  } else {
+    h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;margin-top:4px'>";
+    list.forEach(function(e){
+      var cov=e.couverture?("background-image:url('"+e.couverture+"');background-size:cover;background-position:center;"):"background:linear-gradient(135deg,#142554,#1e3a7a);";
+      h+="<div style='background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:1px solid var(--bg3);cursor:pointer' onclick='_viewExtraitModal(\""+e.id+"\")'>";
+      h+="<div style='height:100px;"+cov+"display:flex;align-items:center;justify-content:center;position:relative'>";
+      if(!e.couverture)h+="<span style='font-size:38px'>📖</span>";
+      h+="<span style='position:absolute;top:8px;right:8px;background:"+(e.gratuit?"#059669":"#7C3AED")+";color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+(e.gratuit?"GRATUIT":"PREMIUM")+"</span>";
+      h+="</div>";
+      h+="<div style='padding:12px 14px'>";
+      h+="<div style='font-weight:800;color:#142554;font-size:14px;margin-bottom:3px'>"+_esc(e.titre)+"</div>";
+      h+="<div style='font-size:12px;color:var(--ink4);margin-bottom:6px'>"+_esc(e.auteur||'')+(e.pages?" · "+e.pages+" p.":"")+"</div>";
+      if(e.resume)h+="<div style='font-size:11px;color:var(--ink3);line-height:1.5;margin-bottom:8px'>"+_esc(e.resume.slice(0,90))+(e.resume.length>90?"…":"")+"</div>";
+      h+="<div style='display:flex;gap:6px;flex-wrap:wrap'>";
+      if(e.niveau)h+="<span style='background:#EDE9FE;color:#7C3AED;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+_esc(e.niveau)+"</span>";
+      if(e.matiere)h+="<span style='background:#E0F2FE;color:#0369A1;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+_esc(e.matiere)+"</span>";
+      h+="</div></div></div>";
+    });
+    h+="</div>";
+  }
+  h+="</div>";
+  _vc(h);
+}
+
+// ── Modale de lecture d'un extrait ──
+function _viewExtraitModal(id){
+  var e=(DB.extraits||[]).find(function(x){return x.id===id;});
+  if(!e){toast('Extrait introuvable','err');return;}
+  var locked=!e.gratuit&&!SES;
+  var body="<div style='max-height:50vh;overflow-y:auto;padding:8px 0'>";
+  body+="<div style='margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid #FFC93C'>";
+  body+="<div style='font-size:18px;font-weight:800;color:#142554'>"+_esc(e.titre)+"</div>";
+  if(e.auteur)body+="<div style='font-size:13px;color:var(--ink4);margin-top:3px'>"+_esc(e.auteur)+(e.niveau?" · "+_esc(e.niveau):"")+(e.pages?" · "+_esc(e.pages)+" pages":"")+"</div>";
+  if(e.resume)body+="<div style='font-size:12px;font-style:italic;color:var(--ink3);margin-top:8px;padding:8px 12px;background:#F8FAFF;border-radius:6px'>"+_esc(e.resume)+"</div>";
+  body+="</div>";
+  if(locked){
+    body+="<div style='text-align:center;padding:24px'>";
+    body+="<div style='font-size:36px;margin-bottom:8px'>🔒</div>";
+    body+="<div style='font-weight:700;color:#142554;margin-bottom:4px'>Contenu réservé aux abonnés</div>";
+    body+="<div style='font-size:12px;color:var(--ink4)'>Connectez-vous ou abonnez-vous pour lire l'extrait complet.</div></div>";
+  } else {
+    var texte=e.texte||'';
+    body+="<div style='font-size:14px;line-height:1.9;color:#1e293b;font-family:Georgia,serif;white-space:pre-wrap;background:#FFFDF5;padding:14px;border-radius:8px;border:1px solid #e2e8f0'>"+_esc(texte)+"</div>";
+  }
+  body+="</div>";
+  var footer="<button class='btn bo' onclick='cm()'>Fermer</button>";
+  if(!locked){
+    footer+="<button class='btn' style='background:#DC2626;color:#fff' onclick='cm();_downloadExtraitPDF(\""+id+"\")'>📄 PDF</button>";
+    footer+="<button class='btn' style='background:#2563EB;color:#fff' onclick='cm();_downloadExtraitWord(\""+id+"\")'>📝 Word</button>";
+  } else {
+    footer+="<button class='btn bi' onclick='cm();vShowSec(\"elearning\",null)'>⭐ S'abonner</button>";
+  }
+  M("📖 Extrait — "+_esc(e.titre),"",body,footer,true);
+}
+
+// ── Télécharger PDF avec filigrane ──
+function _downloadExtraitPDF(id){
+  var e=(DB.extraits||[]).find(function(x){return x.id===id;});
+  if(!e||!e.texte){toast('Extrait non disponible','warn');return;}
+  if(typeof jspdf==='undefined'&&typeof jsPDF==='undefined'){toast('Module PDF non chargé','warn');return;}
+  var jsPDFCls=(typeof jspdf!=='undefined')?jspdf.jsPDF:jsPDF;
+  var doc=new jsPDFCls({orientation:'portrait',unit:'mm',format:'a4'});
+  var pageW=210,pageH=297,margin=15,contentW=pageW-margin*2;
+  var school=DB.school||{};
+  var contacts="veritas-school.com · "+(school.tel||'+237 697 637 739')+" · contact@veritas.cm";
+
+  // ── En-tête colorée ──
+  doc.setFillColor(20,37,84);
+  doc.rect(0,0,pageW,28,'F');
+  doc.setTextColor(255,201,60);
+  doc.setFontSize(16);doc.setFont(undefined,'bold');
+  doc.text(school.nom||'VÉRITAS Academy',pageW/2,11,{align:'center'});
+  doc.setFontSize(9);doc.setFont(undefined,'normal');
+  doc.setTextColor(200,215,255);
+  doc.text(school.slogan||'Centre d\'Excellence Scolaire',pageW/2,18,{align:'center'});
+  doc.text('Yaoundé, Cameroun',pageW/2,24,{align:'center'});
+
+  // ── Filigrane diagonal (dessiné tôt, avant le contenu) ──
+  doc.setFontSize(55);
+  doc.setTextColor(230,230,230);
+  doc.setFont(undefined,'bold');
+  doc.text('VÉRITAS',pageW/2,pageH/2,{align:'center',angle:45});
+  doc.text('VÉRITAS',pageW/2,pageH/2+60,{align:'center',angle:45});
+
+  // ── Titre de l'œuvre ──
+  doc.setFont(undefined,'bold');
+  doc.setFontSize(17);
+  doc.setTextColor(20,37,84);
+  doc.text(_esc(e.titre),pageW/2,40,{align:'center'});
+  doc.setFont(undefined,'italic');
+  doc.setFontSize(11);
+  doc.setTextColor(100,100,100);
+  var meta='';
+  if(e.auteur)meta+=e.auteur;
+  if(e.niveau)meta+=(meta?' · ':'')+e.niveau;
+  if(e.pages)meta+=(meta?' · ':'')+e.pages+' pages';
+  if(meta)doc.text(meta,pageW/2,48,{align:'center'});
+
+  // ── Ligne séparatrice ──
+  doc.setDrawColor(255,201,60);doc.setLineWidth(0.7);
+  doc.line(margin,53,pageW-margin,53);
+
+  // ── Résumé ──
+  var yPos=60;
+  if(e.resume){
+    doc.setFont(undefined,'italic');doc.setFontSize(10);doc.setTextColor(80,80,80);
+    var resumLines=doc.splitTextToSize(e.resume,contentW);
+    doc.text(resumLines,margin,yPos);
+    yPos+=resumLines.length*5+6;
+    doc.setDrawColor(200,200,200);doc.line(margin,yPos-2,pageW-margin,yPos-2);
+  }
+
+  // ── Texte de l'extrait ──
+  doc.setFont(undefined,'normal');doc.setFontSize(11);doc.setTextColor(30,30,30);
+  var lines=doc.splitTextToSize(e.texte,contentW);
+  var lineH=5.5;
+  var footerY=pageH-14;
+  lines.forEach(function(line){
+    if(yPos+lineH>footerY){
+      _addExtraitPDFFooter(doc,pageW,pageH,contacts);
+      doc.addPage();
+      // filigrane sur nouvelle page
+      doc.setFontSize(55);doc.setTextColor(230,230,230);doc.setFont(undefined,'bold');
+      doc.text('VÉRITAS',pageW/2,pageH/2,{align:'center',angle:45});
+      doc.setFont(undefined,'normal');doc.setFontSize(11);doc.setTextColor(30,30,30);
+      yPos=20;
+    }
+    doc.text(line,margin,yPos);
+    yPos+=lineH;
+  });
+  _addExtraitPDFFooter(doc,pageW,pageH,contacts);
+
+  doc.save((e.titre||'extrait').replace(/[^a-z0-9]/gi,'_')+'_VERITAS.pdf');
+  toast('📄 PDF téléchargé avec filigrane');
+}
+
+function _addExtraitPDFFooter(doc,pageW,pageH,contacts){
+  doc.setDrawColor(20,37,84);doc.setLineWidth(0.4);
+  doc.line(15,pageH-12,pageW-15,pageH-12);
+  doc.setFontSize(8);doc.setFont(undefined,'normal');doc.setTextColor(120,120,120);
+  doc.text('© VÉRITAS Academy · '+contacts,pageW/2,pageH-6,{align:'center'});
+  doc.text('Document protégé — Usage pédagogique uniquement',pageW/2,pageH-2,{align:'center'});
+}
+
+// ── Télécharger Word (.doc HTML) avec filigrane ──
+function _downloadExtraitWord(id){
+  var e=(DB.extraits||[]).find(function(x){return x.id===id;});
+  if(!e||!e.texte){toast('Extrait non disponible','warn');return;}
+  var school=DB.school||{};
+  var contacts="veritas-school.com · "+(school.tel||'+237 697 637 739')+" · contact@veritas.cm";
+  var htmlDoc="<html xmlns:o='urn:schemas-microsoft-com:office:office'"
+    +" xmlns:w='urn:schemas-microsoft-com:office:word'"
+    +" xmlns='http://www.w3.org/TR/REC-html40'>"
+    +"<head><meta charset='utf-8'><title>"+_esc(e.titre)+"</title>"
+    +"<style>"
+    +"body{font-family:'Times New Roman',serif;font-size:12pt;margin:2.5cm;color:#1e293b}"
+    +".header{background:#142554;color:#FFC93C;text-align:center;padding:14px;margin-bottom:20px}"
+    +".header h1{color:#FFC93C;font-size:18pt;margin:0 0 4px}"
+    +".header p{color:rgba(255,255,255,0.8);font-size:10pt;margin:0}"
+    +".titre-oeuvre{text-align:center;color:#142554;font-size:18pt;font-weight:bold;margin:16px 0 4px}"
+    +".meta{text-align:center;color:#666;font-size:10pt;font-style:italic;margin-bottom:16px}"
+    +".resume{background:#F8FAFF;border-left:4px solid #FFC93C;padding:10px 14px;font-style:italic;font-size:10pt;color:#444;margin-bottom:18px}"
+    +".content{line-height:1.9;font-size:12pt;text-align:justify;white-space:pre-wrap}"
+    +".filigrane{position:fixed;top:45%;left:10%;width:80%;text-align:center;font-size:80pt;"
+    +"color:rgba(200,200,200,0.18);font-weight:bold;transform:rotate(-40deg);z-index:-1;pointer-events:none}"
+    +".footer{border-top:1px solid #ddd;padding-top:10px;margin-top:40px;text-align:center;font-size:8pt;color:#999}"
+    +"</style></head><body>"
+    +"<div class='filigrane'>VÉRITAS</div>"
+    +"<div class='header'><h1>"+(school.nom||'VÉRITAS Academy')+"</h1>"
+    +"<p>"+(school.slogan||'Centre d\'Excellence Scolaire')+" · Yaoundé, Cameroun</p></div>"
+    +"<div class='titre-oeuvre'>"+_esc(e.titre)+"</div>"
+    +"<div class='meta'>"+(e.auteur?_esc(e.auteur):"")+(e.niveau?" · "+_esc(e.niveau):"")+(e.pages?" · "+_esc(e.pages)+" pages":"")+"</div>"
+    +(e.resume?"<div class='resume'>"+_esc(e.resume)+"</div>":"")
+    +"<hr style='border:none;border-top:2px solid #FFC93C;margin-bottom:18px'>"
+    +"<div class='content'>"+_esc(e.texte)+"</div>"
+    +"<div class='footer'>© VÉRITAS Academy · "+contacts+"<br>Document protégé — Usage pédagogique uniquement</div>"
+    +"</body></html>";
+  var blob=new Blob([htmlDoc],{type:'application/msword'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download=(e.titre||'extrait').replace(/[^a-z0-9]/gi,'_')+'_VERITAS.doc';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  toast('📝 Word téléchargé avec filigrane');
+}
+
+// ── Admin : Gérer les extraits ──
+function mManageExtraits(){
+  if(!iA())return;
+  var list=DB.extraits||[];
+  var rows=list.length?list.map(function(e,i){
+    return "<tr style='border-bottom:1px solid #f1f5f9'>"
+      +"<td style='padding:8px 10px;font-weight:700;color:#142554'>"+_esc(e.titre)+"</td>"
+      +"<td style='padding:8px 6px;font-size:11px'>"+_esc(e.auteur||'—')+"</td>"
+      +"<td style='padding:8px 6px;font-size:11px'>"+_esc(e.niveau||'—')+"</td>"
+      +"<td style='padding:8px 6px;font-size:11px'>"+_esc(e.matiere||'—')+"</td>"
+      +"<td style='padding:8px 6px'><span style='background:"+(e.gratuit?"#D1FAE5":"#EDE9FE")+";color:"+(e.gratuit?"#059669":"#7C3AED")+";font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+(e.gratuit?"GRATUIT":"PREMIUM")+"</span></td>"
+      +"<td style='padding:8px 6px;font-size:10px;color:var(--ink4)'>"+((e.texte||'').length)+" car.</td>"
+      +"<td style='padding:8px 6px;white-space:nowrap'>"
+      +"<button onclick='cm();_editExtrait(\""+e.id+"\")' style='background:#E0EAFF;color:#142554;border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-right:3px'>✏️</button>"
+      +"<button onclick='_delExtrait(\""+e.id+"\")' style='background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer'>🗑</button>"
+      +"</td></tr>";
+  }).join(""):"<tr><td colspan='7' style='text-align:center;padding:24px;color:var(--ink4)'>Aucun extrait ajouté</td></tr>";
+  M("📖 Extraits de Livres","Gérer les extraits disponibles pour les élèves",
+    "<div style='margin-bottom:12px'><button class='btn bi sm' onclick='cm();mAddExtrait()'>＋ Nouvel extrait</button></div>"
+    +"<div style='overflow-x:auto'><table style='width:100%;border-collapse:collapse'>"
+    +"<thead><tr style='background:#142554;color:#fff'>"
+    +"<th style='padding:8px 10px;text-align:left'>Titre</th>"
+    +"<th style='padding:8px 6px;text-align:left'>Auteur</th>"
+    +"<th style='padding:8px 6px;text-align:left'>Niveau</th>"
+    +"<th style='padding:8px 6px;text-align:left'>Matière</th>"
+    +"<th style='padding:8px 6px;text-align:left'>Accès</th>"
+    +"<th style='padding:8px 6px;text-align:left'>Taille</th>"
+    +"<th style='padding:8px 6px;text-align:left'>Actions</th>"
+    +"</tr></thead><tbody>"+rows+"</tbody></table></div>",
+    "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
+}
+
+// ── Admin : Ajouter un extrait ──
+function mAddExtrait(prefill){
+  var p=prefill||{};
+  M("📖 "+(p.id?"Modifier":"Ajouter")+" un extrait de livre","Texte avec filigrane PDF/Word automatique",
+    "<div class='fg2'>"
+    +"<div class='fg full'><span class='fl'>Titre de l'œuvre *</span><input class='fi' id='extTitre' value='"+_esc(p.titre||'')+"' placeholder='Ville Cruelle'></div>"
+    +"<div class='fg'><span class='fl'>Auteur</span><input class='fi' id='extAuteur' value='"+_esc(p.auteur||'')+"' placeholder='Mongo Beti'></div>"
+    +"<div class='fg'><span class='fl'>Niveau</span><select class='fi' id='extNiveau'>"
+    +"<option "+((!p.niveau||p.niveau==='3ème')?"selected":"")+" value='3ème'>3ème</option>"
+    +"<option "+((p.niveau==='2nde')?"selected":"")+" value='2nde'>2nde</option>"
+    +"<option "+((p.niveau==='1ère')?"selected":"")+" value='1ère'>1ère</option>"
+    +"<option "+((p.niveau==='Terminale')?"selected":"")+" value='Terminale'>Terminale</option>"
+    +"<option "+((p.niveau==='Toutes')?"selected":"")+" value='Toutes'>Toutes classes</option>"
+    +"</select></div>"
+    +"<div class='fg'><span class='fl'>Matière</span><input class='fi' id='extMat' value='"+_esc(p.matiere||'Littérature')+"' placeholder='Littérature'></div>"
+    +"<div class='fg'><span class='fl'>Pages / Chapitres</span><input class='fi' id='extPages' value='"+_esc(p.pages||'')+"' placeholder='pp. 1-25 / Chap. I-III'></div>"
+    +"<div class='fg full'><span class='fl'>Résumé / Description courte</span><textarea class='fi' id='extResume' rows='2' placeholder='Courte présentation de l\\'extrait…'>"+_esc(p.resume||'')+"</textarea></div>"
+    +"<div class='fg full'><span class='fl'>Texte de l'extrait *</span><textarea class='fi' id='extTexte' rows='10' style='font-family:Georgia,serif;font-size:13px;line-height:1.7' placeholder='Collez ici le texte de l\\'extrait…'>"+_esc(p.texte||'')+"</textarea></div>"
+    +"<div class='fg full'><label style='display:flex;align-items:center;gap:8px;cursor:pointer'><input type='checkbox' id='extGratuit'"+(p.gratuit!==false?" checked":"")+" ><span>Accès gratuit (visible sans abonnement)</span></label></div>"
+    +(p.id?"<input type='hidden' id='extId' value='"+p.id+"'>":"")
+    +"</div>",
+    "<button class='btn bo' onclick='cm()'>Annuler</button>"
+    +"<button class='btn bi' onclick='_saveExtrait()'>💾 Enregistrer</button>",true);
+}
+
+// ── Admin : Modifier un extrait ──
+function _editExtrait(id){
+  var e=(DB.extraits||[]).find(function(x){return x.id===id;});
+  if(!e){toast('Extrait introuvable','err');return;}
+  mAddExtrait(e);
+}
+
+// ── Admin : Sauvegarder un extrait ──
+function _saveExtrait(){
+  var titre=(_ge('extTitre')?.value||'').trim();
+  var texte=(_ge('extTexte')?.value||'').trim();
+  if(!titre){toast('Titre requis','warn');return;}
+  if(!texte){toast('Texte de l\'extrait requis','warn');return;}
+  var existingId=_ge('extId')?.value||'';
+  if(!DB.extraits)DB.extraits=[];
+  if(existingId){
+    var idx=DB.extraits.findIndex(function(x){return x.id===existingId;});
+    if(idx>=0){
+      DB.extraits[idx].titre=titre;
+      DB.extraits[idx].auteur=(_ge('extAuteur')?.value||'').trim();
+      DB.extraits[idx].niveau=_ge('extNiveau')?.value||'3ème';
+      DB.extraits[idx].matiere=(_ge('extMat')?.value||'').trim();
+      DB.extraits[idx].pages=(_ge('extPages')?.value||'').trim();
+      DB.extraits[idx].resume=(_ge('extResume')?.value||'').trim();
+      DB.extraits[idx].texte=texte;
+      DB.extraits[idx].gratuit=_ge('extGratuit')?.checked!==false;
+      save();cm();toast('✅ Extrait modifié');setTimeout(mManageExtraits,80);return;
+    }
+  }
+  DB.extraits.push({
+    id:'ext_'+gid(),
+    titre:titre,
+    auteur:(_ge('extAuteur')?.value||'').trim(),
+    niveau:_ge('extNiveau')?.value||'3ème',
+    matiere:(_ge('extMat')?.value||'').trim(),
+    pages:(_ge('extPages')?.value||'').trim(),
+    resume:(_ge('extResume')?.value||'').trim(),
+    texte:texte,
+    gratuit:_ge('extGratuit')?.checked!==false,
+    dateAjout:today()
+  });
+  save();cm();toast('✅ Extrait ajouté');setTimeout(mManageExtraits,80);
+}
+
+// ── Admin : Supprimer un extrait ──
+function _delExtrait(id){
+  if(!confirm('Supprimer cet extrait ?'))return;
+  DB.extraits=(DB.extraits||[]).filter(function(x){return x.id!==id;});
+  save();cm();setTimeout(mManageExtraits,80);toast('Extrait supprimé');
 }
 
 // ── GESTIONNAIRE LABORATOIRES ──────────────────────────────────────
@@ -15939,11 +16987,15 @@ function _monCompte(){
 
 function deconnecter(){
   SES=null;
+  if(_autoSyncTimer){clearTimeout(_autoSyncTimer);_autoSyncTimer=null;}
+  _autoSyncDirty=false;
   hideAll();$("VISITOR").style.display="flex";
   var bar=document.getElementById("vLoginBtns");
   if(bar) bar.innerHTML='<button class="btn sm" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-weight:600" onclick="showRegisterForm()">✨ S\'inscrire</button>'
     +' <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin(\'eleve\')">🎓 Se connecter</button>'
-    +' <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin(\'enseignant\')">👨\u200d🏫 Enseignant</button>';
+    +' <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin(\'enseignant\')">👨\u200d🏫 Enseignant</button>'
+    +'<span id="vSyncDot" onclick="iA()&&cloudSaveDB()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>'
+    +'<span id="adminAccessPoint" style="display:inline-block;width:20px;height:20px;cursor:default;opacity:0" onclick="_adminTriple()" title=""></span>';
   initVisitor();toast("Déconnecté");
 }
 
@@ -17991,22 +19043,23 @@ var _origCvEleveViewSujet=typeof cvEleveViewSujet==='function'?cvEleveViewSujet:
 // ── AMÉLIORATION: Raccourcis clavier avec aide visuelle ───────────
 // Afficher une aide discrète si on appuie sur Ctrl
 document.addEventListener('keydown',function(e){
-  // Les raccourcis admin sont déjà gérés (Ctrl+Shift+A et Ctrl+Shift+V)
-  // Ajouter raccourci Ctrl+Shift+H pour aide clavier
-  if(e.ctrlKey&&e.shiftKey&&e.key==='H'){
+  // Raccourcis admin Ctrl+Shift+L et Ctrl+Shift+U gérés dans le bloc principal
+  if(e.ctrlKey&&e.shiftKey&&(e.key==='H'||e.key==='h')){
     e.preventDefault();
     M('⌨️ Raccourcis Clavier VÉRITAS','Accès sécurisé par combinaisons de touches',
       '<div style="display:grid;gap:10px">'+
-      '<div style="background:#E0EAFF;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px">'+
-      '<kbd style="background:#142554;color:#FFC93C;padding:6px 12px;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700">Ctrl + Shift + A</kbd>'+
+      '<div style="background:#E0EAFF;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+      '<kbd style="background:#142554;color:#FFC93C;padding:6px 12px;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700">Ctrl + Shift + L</kbd>'+
       '<span style="font-size:14px;color:#142554;font-weight:600">🔐 Accès Administration</span></div>'+
-      '<div style="background:#EDE9FE;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px">'+
-      '<kbd style="background:#7C3AED;color:#fff;padding:6px 12px;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700">Ctrl + Shift + V</kbd>'+
+      '<div style="background:#EDE9FE;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+      '<kbd style="background:#7C3AED;color:#fff;padding:6px 12px;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700">Ctrl + Shift + U</kbd>'+
       '<span style="font-size:14px;color:#7C3AED;font-weight:600">👑 Accès Super Administration</span></div>'+
-      '<div style="background:#D1FAE5;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px">'+
+      '<div style="background:#D1FAE5;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
       '<kbd style="background:#059669;color:#fff;padding:6px 12px;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700">Ctrl + Shift + H</kbd>'+
       '<span style="font-size:14px;color:#059669;font-weight:600">⌨️ Afficher cette aide</span></div>'+
-      '<div class="ib ibt mb0"><span>🔒</span><span>Les liens d\'administration ne sont pas visibles sur l\'interface. Seuls les raccourcis clavier permettent d\'y accéder, pour plus de sécurité.</span></div>'+
+      '<div style="background:#FFF7ED;border-radius:12px;padding:14px;font-size:13px;color:#92400E">'+
+      '📱 <b>Sur mobile/tablette :</b> Appuyez <b>3×</b> rapidement sur le logo VÉRITAS → Admin · <b>5×</b> → SuperAdmin</div>'+
+      '<div class="ib ibt mb0"><span>🔒</span><span>Les boutons d\'administration sont invisibles. Raccourcis ou taps répétés uniquement.</span></div>'+
       '</div>',
       '<button class="btn bo" onclick="cm()">Fermer</button>');
   }

@@ -1,6 +1,6 @@
 # ============================================================
-# VÉRITAS — Déploiement automatique vers LWS
-# Se déclenche à chaque push sur master
+# VÉRITAS — Déploiement automatique vers veritas-school.com
+# Se déclenche à chaque push sur master qui touche ces fichiers
 # ============================================================
 name: 🚀 Déployer sur veritas-school.com
 
@@ -9,54 +9,93 @@ on:
     branches: [master]
     paths:
       - 'VERITAS_v1.0.html'
-      - 'Logo détouré.png'
+      - 'index.php'
       - '.htaccess'
       - 'api/**'
       - 'evaluations/**'
       - 'cours/**'
 
-  # Permet de lancer manuellement depuis GitHub
+  # Lancement manuel depuis GitHub → Actions → Run workflow
   workflow_dispatch:
 
 jobs:
   deploy:
-    name: 📤 Upload vers LWS
+    name: 📤 Upload vers LWS (FTP)
     runs-on: ubuntu-latest
 
     steps:
       - name: 📥 Récupérer le code
         uses: actions/checkout@v4
 
-      - name: 📋 Préparer les fichiers pour le déploiement
+      - name: 📋 Préparer les fichiers
         run: |
-          mkdir -p deploy/api deploy/uploads/video deploy/uploads/epreuve deploy/uploads/cours deploy/uploads/ressource deploy/uploads/image
-          # Le fichier principal → index.html à la racine du site
-          cp VERITAS_v1.0.html deploy/index.html
-          # Logo
-          cp "Logo détouré.png" deploy/
-          # .htaccess pour la sécurité, le cache et LiteSpeed
-          if [ -f .htaccess ]; then cp .htaccess deploy/; fi
-          # API PHP : config_sync.php (pas de credentials), sync.php, files.php, upload_video.php
-          for f in api/config_sync.php api/upload.php api/files.php api/sync.php api/upload_video.php api/news_proxy.php; do
-            [ -f "$f" ] && cp "$f" deploy/api/
-          done
-          # NE PAS déployer config.php (contient credentials MySQL)
-          if [ -f api/database_mysql.sql ]; then cp api/database_mysql.sql deploy/api/; fi
-          # Dossiers évaluations et cours interactifs
-          if [ -d evaluations ]; then cp -r evaluations/ deploy/evaluations/; fi
-          if [ -d cours ]; then cp -r cours/ deploy/cours/; fi
-          # Placeholder pour les dossiers uploads
-          touch deploy/uploads/.gitkeep
-          echo "✅ Fichiers prêts :"
-          find deploy -type f | head -20
+          mkdir -p deploy/api \
+                   deploy/uploads/media \
+                   deploy/uploads/video \
+                   deploy/uploads/epreuve \
+                   deploy/uploads/cours \
+                   deploy/uploads/ressource \
+                   deploy/uploads/image
 
-      - name: 🚀 Déployer via FTP
+          # ── Application principale ──────────────────────────────
+          # index.php sert app.html avec en-têtes no-cache (anti-LiteSpeed)
+          cp VERITAS_v1.0.html deploy/app.html
+          cp index.php         deploy/index.php
+
+          # Logo
+          if [ -f "Logo détouré.png" ]; then cp "Logo détouré.png" deploy/; fi
+
+          # .htaccess (sécurité + cache)
+          if [ -f .htaccess ]; then cp .htaccess deploy/; fi
+
+          # ── API PHP ─────────────────────────────────────────────
+          # NE PAS déployer config.php (credentials MySQL locaux)
+          for f in \
+            api/config_sync.php \
+            api/sync.php \
+            api/files.php \
+            api/upload.php \
+            api/upload_file.php \
+            api/upload_video.php \
+            api/news_proxy.php \
+            api/public_data.php; do
+            [ -f "$f" ] && cp "$f" deploy/api/ && echo "  ✓ $f"
+          done
+
+          if [ -f api/database_mysql.sql ]; then
+            cp api/database_mysql.sql deploy/api/
+          fi
+
+          # ── Évaluations et cours interactifs ────────────────────
+          if [ -d evaluations ]; then cp -r evaluations/ deploy/evaluations/; fi
+          if [ -d cours ];       then cp -r cours/       deploy/cours/;       fi
+
+          # Placeholder pour uploads (vide au départ, géré par PHP)
+          touch deploy/uploads/.gitkeep
+          touch deploy/uploads/media/.gitkeep
+
+          echo ""
+          echo "✅ Fichiers prêts pour déploiement :"
+          find deploy -type f | sort
+
+      - name: 🚀 Déployer via FTP vers veritas-school.com
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ftp.veritas-school.com
+          server:   ftp.veritas-school.com
           username: ${{ secrets.FTP_USER }}
           password: ${{ secrets.FTP_PASS }}
-          local-dir: ./deploy/
+          local-dir:  ./deploy/
           server-dir: ./
           dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.gitkeep
           log-level: standard
+
+      - name: ✅ Résumé du déploiement
+        if: success()
+        run: |
+          echo "🎉 Déploiement réussi sur https://veritas-school.com"
+          echo "   app.html     → servi par index.php (no-cache LiteSpeed)"
+          echo "   api/*.php    → endpoints cloud sync + upload"
+          echo "   Déployé le : $(date '+%d/%m/%Y à %H:%M:%S UTC')"
