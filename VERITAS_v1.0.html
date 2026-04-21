@@ -1893,32 +1893,41 @@ tr:hover td {
   }
   /* ── Barre de connexion mobile ── */
   .vlogin-bar{
-    padding:8px 10px!important;
-    flex-direction:column!important;
-    flex-wrap:wrap!important;
+    padding:6px 12px!important;
+    flex-direction:row!important;
+    flex-wrap:nowrap!important;
     gap:6px!important;
-    align-items:stretch!important;
+    align-items:center!important;
+    overflow:hidden!important;
+    min-height:44px!important;
   }
   .vlogin-bar>span:first-child{
-    font-size:12px!important;
-    font-weight:700!important;
-    text-align:center!important;
-    color:rgba(255,255,255,.9)!important;
-  }
-  .vlogin-btns{
-    display:grid!important;
-    grid-template-columns:1fr 1fr 1fr!important;
-    gap:5px!important;
-    width:100%!important;
-  }
-  .vlogin-btns .btn.sm{
-    padding:9px 4px!important;
-    font-size:11px!important;
-    text-align:center!important;
-    white-space:nowrap!important;
+    flex:1 1 auto!important;
     overflow:hidden!important;
     text-overflow:ellipsis!important;
-    border-radius:8px!important;
+    white-space:nowrap!important;
+    font-size:11px!important;
+    font-weight:700!important;
+    color:rgba(255,255,255,.9)!important;
+    min-width:0!important;
+  }
+  .vlogin-btns{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    gap:5px!important;
+    flex-shrink:0!important;
+    align-items:center!important;
+  }
+  /* Masquer le bouton Enseignant sur mobile — accessible via "Se connecter" */
+  .vlogin-btns .btn.sm:nth-of-type(3){
+    display:none!important;
+  }
+  .vlogin-btns .btn.sm{
+    padding:7px 10px!important;
+    font-size:11px!important;
+    white-space:nowrap!important;
+    flex-shrink:0!important;
+    border-radius:10px!important;
     font-weight:700!important;
   }
   /* ── Héro compact ── */
@@ -3190,6 +3199,61 @@ function viewBookDetail(bid){
   if(cv)cv.innerHTML=h;
   window._rvStars=0;
 }
+// ── Modale "Extrait gratuit" — visible directement depuis la boutique ──
+function _showExtrait(bid){
+  var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
+  var hasExt=b.extrait||((b.previewImages||[]).length>0);
+  if(!hasExt){toast('Aucun extrait disponible pour ce manuel','warn');return;}
+  var cc=b.coverColor||'#1a3a8a';
+  var rt=getBookRating(bid);
+
+  // En-tête du livre
+  var h='<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--bg3)">';
+  h+='<div style="width:64px;height:90px;border-radius:8px;background:linear-gradient(160deg,'+cc+','+cc+'cc);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;position:relative;box-shadow:0 4px 12px rgba(0,0,0,.2)">';
+  if(b.coverImg)h+='<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">';
+  else h+=b.ico;
+  h+='</div>';
+  h+='<div style="flex:1;min-width:0">';
+  h+='<div style="font-family:Libre Baskerville,serif;font-size:15px;font-weight:700;color:var(--bl);margin-bottom:3px;line-height:1.3">'+_esc(b.titre)+'</div>';
+  h+='<div style="font-size:12px;color:var(--ink4);margin-bottom:6px">'+_esc(b.cls)+' · '+_esc(b.auteur)+' · '+b.pages+' pages</div>';
+  if(rt.count>0)h+='<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px"><span style="font-size:13px">'+starsHtml(rt.avg)+'</span><span class="mono" style="font-size:12px;color:var(--gold);font-weight:700">'+rt.avg.toFixed(1)+'</span><span style="font-size:11px;color:var(--ink4)">('+rt.count+')</span></div>';
+  if(b.ancienPrix)h+='<span style="font-size:12px;color:var(--re);text-decoration:line-through;margin-right:6px">'+fmt(b.ancienPrix)+'</span>';
+  h+='<span style="font-family:Fira Code,monospace;font-size:17px;font-weight:700;color:var(--gold)">'+fmt(b.prix)+'</span>';
+  h+='</div></div>';
+
+  // Badge "EXTRAIT GRATUIT"
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+  h+='<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gr)">📖 Extrait gratuit</div>';
+  h+='<span style="background:var(--grb);color:var(--gr);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;border:1px solid var(--grd)">Aperçu avant achat</span>';
+  h+='</div>';
+
+  // Texte de l'extrait
+  if(b.extrait){
+    h+='<div style="background:var(--bg);border:var(--br);border-radius:var(--r2);padding:16px 18px;font-family:Libre Baskerville,serif;font-size:13px;line-height:2;color:var(--ink2);white-space:pre-line;max-height:42vh;overflow-y:auto;position:relative;scrollbar-width:thin">';
+    h+=_esc(b.extrait);
+    h+='<div style="margin-top:16px;padding-top:12px;border-top:2px dashed var(--bg3);text-align:center;font-size:12px;color:var(--ink4);font-family:Poppins,sans-serif">📚 <strong>Fin de l\'extrait</strong> — Le manuel complet contient '+b.pages+' pages</div>';
+    h+='</div>';
+  }
+
+  // Images de prévisualisation
+  if((b.previewImages||[]).length>0){
+    h+='<div style="margin-top:12px"><div style="font-size:11px;font-weight:700;color:var(--bl);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📸 Aperçu des pages</div>';
+    h+='<div style="display:flex;gap:8px;overflow-x:auto;padding:4px 0;scrollbar-width:thin">';
+    (b.previewImages||[]).forEach(function(img){
+      h+='<img src="'+img+'" style="height:140px;border-radius:6px;border:1px solid var(--bg3);flex-shrink:0;cursor:zoom-in;box-shadow:0 2px 8px rgba(0,0,0,.08)" onclick="window.open(\''+img+'\',\'_blank\')">';
+    });
+    h+='</div></div>';
+  }
+
+  // CTA
+  M('📖 Extrait gratuit', b.titre, h,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'+
+    '<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px">📋 Détails & Avis</button>'+
+    (b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')">🛒 Commander — '+fmt(b.prix)+'</button>':'<span style="font-size:12px;color:var(--re);font-weight:700;padding:8px">Rupture de stock</span>'),
+    true // large modal
+  );
+}
+
 function setReviewStars(n){
   window._rvStars=n;
   for(var i=1;i<=5;i++){var el=document.getElementById('rs_'+i);if(el)el.style.color=i<=n?'#FFC93C':'#ddd';}
@@ -3212,7 +3276,8 @@ function showBookTab(btn,tabId){
   tabs.querySelectorAll('.book-tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
   const viewer=tabs.parentElement;
-  viewer.querySelectorAll('[id^="chapters_"],[id^="preview_"]').forEach(d=>d.style.display='none');
+  // Masquer tous les panneaux du viewer (chap_*, prev_*, revs_*)
+  viewer.querySelectorAll('[id^="chap_"],[id^="prev_"],[id^="revs_"],[id^="chapters_"],[id^="preview_"]').forEach(d=>d.style.display='none');
   const target=document.getElementById(tabId);
   if(target)target.style.display='block';
 }
@@ -3932,10 +3997,11 @@ function vShowSec(sec,btn){
     <div class="vcard mt4">
       <div class="ct">📚 Nos Manuels les Mieux Notés</div>
       <div class="featured-scroll">
-        ${DB.books.map(b=>{const rt=getBookRating(b.id);const cc=b.coverColor||'#1a3a8a';return`<div class="featured-card" onclick="viewBookDetail('${b.id}')">
+        ${DB.books.map(b=>{const rt=getBookRating(b.id);const cc=b.coverColor||'#1a3a8a';const hasExt=b.extrait||((b.previewImages||[]).length>0);return`<div class="featured-card" onclick="${hasExt?'_showExtrait':'viewBookDetail'}('${b.id}')">
           <div style="height:90px;background:linear-gradient(160deg,${cc},${cc}cc);display:flex;align-items:center;justify-content:center;position:relative">
             ${b.coverImg?'<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover">':'<div style="font-size:36px">'+b.ico+'</div>'}
             <div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#FFC93C;padding:1px 6px;border-radius:8px;font-size:11px;font-weight:700">${b.cls}</div>
+            ${hasExt?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(5,150,105,.9);color:#fff;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:700">👁 Extrait</div>':''}
           </div>
           <div style="padding:10px">
             <div style="font-size:13px;font-weight:700;line-height:1.2;margin-bottom:3px">${b.titre}</div>
@@ -4315,8 +4381,8 @@ function vShowSec(sec,btn){
             <span style="font-family:'Fira Code';font-size:17px;font-weight:700;color:var(--gold)">${fmt(b.prix)}</span>
             <span style="font-size:13px;color:${b.stock>5?'var(--gr)':b.stock>0?'var(--or)':'var(--re)'};font-weight:700">${b.stock>5?'✅ En stock':b.stock>0?'⚠ '+b.stock+' restants':'❌ Rupture'}</span>
           </div>
-          <div style="display:grid;grid-template-columns:${(hasPreview&&b.fichierUrl&&b.lireGratuit)?'1fr 1fr 1fr 1fr':((hasPreview||(b.fichierUrl&&b.lireGratuit))?'1fr 1fr 1fr':'1fr 1fr')};gap:6px;margin-top:10px">
-            ${hasPreview?`<button class="btn sm" onclick="event.stopPropagation();viewBookDetail('${b.id}')" style="justify-content:center;font-size:11px;background:var(--blb);color:var(--bl);border:1px solid var(--bl2)">👁 Feuilleter</button>`:''}
+          <div style="display:grid;grid-template-columns:${[hasPreview,(b.fichierUrl&&b.lireGratuit),true,b.stock>0].filter(Boolean).length>=4?'1fr 1fr 1fr 1fr':[hasPreview,(b.fichierUrl&&b.lireGratuit)].some(Boolean)?'1fr 1fr 1fr':'1fr 1fr'};gap:6px;margin-top:10px">
+            ${hasPreview?`<button class="btn sm" onclick="event.stopPropagation();_showExtrait('${b.id}')" style="justify-content:center;font-size:11px;background:var(--blb);color:var(--bl);border:1px solid var(--bl2);font-weight:700">👁 Extrait</button>`:''}
             ${(b.fichierUrl&&b.lireGratuit)?`<button class="btn sm" onclick="event.stopPropagation();_visitorLireManuel('${b.id}')" style="justify-content:center;font-size:11px;background:#D1FAE5;color:#059669;border:1px solid #A7F3D0;font-weight:700">📖 Lire</button>`:''}
             <button class="btn bo sm" onclick="event.stopPropagation();viewBookDetail('${b.id}')" style="justify-content:center;font-size:11px">📋 Détails</button>
             ${b.stock>0?`<button class="btn bi sm" onclick="event.stopPropagation();visitorOrderBook('${b.id}')" style="justify-content:center;font-size:11px">🛒 Commander</button>`:`<button class="btn sm" style="justify-content:center;font-size:11px;background:var(--bg3);color:var(--ink4);cursor:not-allowed" disabled>Rupture</button>`}
