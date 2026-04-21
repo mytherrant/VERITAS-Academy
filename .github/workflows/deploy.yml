@@ -42,7 +42,9 @@ jobs:
                    deploy/uploads/image
 
           # ── Application principale ──────────────────────────────
-          # index.php sert app.html avec en-têtes no-cache (anti-LiteSpeed)
+          # index.html → servi directement par LiteSpeed (entrée principale)
+          # app.html + index.php → wrapper no-cache si LiteSpeed configuré pour PHP
+          cp VERITAS_v1.0.html deploy/index.html
           cp VERITAS_v1.0.html deploy/app.html
           cp index.php         deploy/index.php
 
