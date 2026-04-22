@@ -2128,7 +2128,6 @@ setInterval(_refreshCitation,15000);
   <button class="vnav-btn" onclick="showCalendrier()" style="background:linear-gradient(135deg,rgba(220,38,38,.15),rgba(220,38,38,.05));color:#DC2626;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">event</span> Calendrier</button>
   <button class="vnav-btn" onclick="showJeuxEdu()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">sports_esports</span> Jeux</button>
   <button class="vnav-btn" onclick="showEpreuves()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">assignment</span> Épreuves</button>
-  <button class="vnav-btn" onclick="showExtraits()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">menu_book</span> Extraits</button>
   <button class="vnav-btn" onclick="showEvaluations()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">insights</span> Évals</button>
   <button class="vnav-btn" onclick="showLabosVirtuels()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">science</span> Labos</button>
   <button class="vnav-btn" onclick="vShowSec('actualites',this)" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#ef4444;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">newspaper</span> Actualités</button>
@@ -11867,10 +11866,11 @@ function mManageJeux(){
     +"<div class='fl2 g8 fw mb14'>"
     +"<button class='btn bgr2 sm' onclick='_setAllJeuxGratuit()'>✅ Tout gratuit</button>"
     +"<button class='btn br2 sm' onclick='_setAllJeuxPremium()'>🔒 Tout premium</button>"
+    +"<button class='btn sm' style='background:#DC2626;color:#fff' onclick='_deleteAllBuiltinJeux()'>🗑 Supprimer tous les jeux par défaut</button>"
+    +"<button class='btn sm' style='background:#6B7280;color:#fff' onclick='_restoreAllJeux()'>↩ Restaurer tous</button>"
     +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='cm();mImportQCM()'>📥 Importer JSON</button>"
     +"<button class='btn sm' style='background:#059669;color:#fff' onclick='cm();mImportJeuFichier()'>📤 Importer Jeu/Quiz</button>"
     +"<button class='btn sm' style='background:#BE185D;color:#fff' onclick='cm();mImportJeuHTML()'>🌐 Importer HTML</button>"
-    +"<button class='btn sm' style='background:#6B7280;color:#fff' onclick='_restoreAllJeux()'>↩ Restaurer tous</button>"
     +"</div>"
     +"<div class='bold s mb10'>➕ Créer un nouveau Quiz / Jeu</div>"
     +"<div class='fg2'>"
@@ -11910,22 +11910,32 @@ function _restoreJeu(id){
 }
 function _restoreAllJeux(){
   DB.deletedJeux=[];
-  save();cm();setTimeout(mManageJeux,80);toast('Tous les jeux restaurés');
+  save();cm();setTimeout(mManageJeux,80);toast('✅ Tous les jeux restaurés');
+}
+function _deleteAllBuiltinJeux(){
+  if(!confirm('Supprimer TOUS les jeux par défaut ?\n\nSeuls vos jeux personnalisés resteront visibles. Restauration possible depuis ce panneau.'))return;
+  if(typeof JEUX_CATALOGUE==="undefined")return;
+  var builtinIds=JEUX_CATALOGUE.filter(function(j){return !j.custom;}).map(function(j){return j.id;});
+  DB.deletedJeux=builtinIds;
+  // Retirer de la mémoire immédiatement
+  for(var i=JEUX_CATALOGUE.length-1;i>=0;i--){
+    if(!JEUX_CATALOGUE[i].custom)JEUX_CATALOGUE.splice(i,1);
+  }
+  save();cm();setTimeout(mManageJeux,80);toast('✅ Tous les jeux par défaut supprimés');
 }
 function _delJeu(id){
   var j=typeof JEUX_CATALOGUE!=="undefined"&&JEUX_CATALOGUE.find(function(x){return x.id===id;});
   if(j&&j.custom){
     _delJeuCustom(id);
   } else {
-    if(!confirm('Masquer ce jeu ? Il n\'apparaîtra plus aux visiteurs.'))return;
+    if(!confirm('Supprimer ce jeu ? Il n\'apparaîtra plus aux visiteurs.\n\nVous pourrez le restaurer depuis ce même panneau.'))return;
     DB.deletedJeux=DB.deletedJeux||[];
     if(DB.deletedJeux.indexOf(id)<0)DB.deletedJeux.push(id);
-    // Supprimer aussi de la mémoire immédiatement
     if(typeof JEUX_CATALOGUE!=="undefined"){
       var idx=JEUX_CATALOGUE.findIndex(function(x){return x.id===id;});
       if(idx>=0)JEUX_CATALOGUE.splice(idx,1);
     }
-    save();cm();setTimeout(mManageJeux,80);toast('Jeu masqué');
+    save();cm();setTimeout(mManageJeux,80);toast('✅ Jeu supprimé');
   }
 }
 function _restoreJeuInMemory(id){
@@ -15719,30 +15729,42 @@ function mManageEpreuves(){
         +(isCustom
           ?"<button class='btn bo xs' onclick='_editEp("+(i)+")'  style='margin-right:4px'>✏️</button><button class='btn br2 xs' onclick='_delEp("+(i-(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB.length:0))+")'>🗑</button>"
           :((DB.hiddenEpreuves||[]).indexOf(ep.id)>=0
-            ?"<button class='btn bgr2 xs' onclick='_restoreEpreuve(\""+ep.id+"\")'>↩ Restaurer</button>"
-            :"<button class='btn br2 xs' onclick='_hideBuiltinEp(\""+ep.id+"\")'>🗑 Masquer</button>"
+            ?"<button class='btn bgr2 xs' onclick='_restoreEpreuve(\""+ep.id+"\")' style='font-size:10px'>↩ Restaurer</button>"
+            :"<button class='btn br2 xs' onclick='_hideBuiltinEp(\""+ep.id+"\")' style='font-size:10px'>🗑 Supprimer</button>"
           )
         )
       +"</td></tr>";
   }).join("");
   M("📝 Gérer les Épreuves","Ajoutez et gérez les épreuves officielles",
-    "<div class='ib ibt mb12'><span>📝</span><span>Masquez les épreuves par défaut inutiles. Les épreuves masquées n'apparaissent plus aux élèves.</span></div>"
-    +"<div class='tw mb12' style='max-height:260px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th style='text-align:left;padding:6px 8px'>Titre</th><th>Matière</th><th>Accès</th><th></th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
-    +"<div class='fl2 g8 mt10'>"
+    "<div class='ib ibt mb12'><span>📝</span><span>Supprimez les épreuves par défaut inutiles. Elles peuvent être restaurées à tout moment.</span></div>"
+    +"<div class='tw mb12' style='max-height:240px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th style='text-align:left;padding:6px 8px'>Titre</th><th>Matière</th><th>Accès</th><th></th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
+    +"<div class='fl2 g8 fw mt10'>"
     +"<button class='btn bi sm' onclick='_newEp()'>➕ Saisir une épreuve</button>"
     +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='_importRessourceMulti()'>📥 Importer (HTML · PDF · Word)</button>"
+    +"<button class='btn sm' style='background:#DC2626;color:#fff' onclick='_deleteAllBuiltinEp()'>🗑 Supprimer toutes les épreuves par défaut</button>"
+    +"<button class='btn sm' style='background:#059669;color:#fff' onclick='_restoreAllEpreuves()'>↩ Tout restaurer</button>"
     +"</div>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
 }
 function _hideBuiltinEp(id){
-  if(!confirm('Masquer cette épreuve ? Elle n\'apparaîtra plus aux élèves.'))return;
+  if(!confirm('Supprimer cette épreuve ? Elle n\'apparaîtra plus aux visiteurs.\n\nVous pourrez la restaurer depuis ce même panneau.'))return;
   DB.hiddenEpreuves=DB.hiddenEpreuves||[];
   if(DB.hiddenEpreuves.indexOf(id)<0)DB.hiddenEpreuves.push(id);
-  save();cm();setTimeout(mManageEpreuves,80);toast('Épreuve masquée');
+  save();cm();setTimeout(mManageEpreuves,80);toast('✅ Épreuve supprimée');
 }
 function _restoreEpreuve(id){
   DB.hiddenEpreuves=(DB.hiddenEpreuves||[]).filter(function(x){return x!==id;});
-  save();cm();setTimeout(mManageEpreuves,80);toast('Épreuve restaurée');
+  save();cm();setTimeout(mManageEpreuves,80);toast('✅ Épreuve restaurée');
+}
+function _deleteAllBuiltinEp(){
+  if(!confirm('Supprimer TOUTES les épreuves par défaut ?\n\nElles seront masquées et ne s\'afficheront plus. Restauration possible depuis ce panneau.'))return;
+  var all=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]);
+  DB.hiddenEpreuves=all.map(function(e){return e.id;});
+  save();cm();setTimeout(mManageEpreuves,80);toast('✅ Toutes les épreuves par défaut supprimées');
+}
+function _restoreAllEpreuves(){
+  DB.hiddenEpreuves=[];
+  save();cm();setTimeout(mManageEpreuves,80);toast('✅ Toutes les épreuves restaurées');
 }
 function _newEp(){window._editEpIdx=-1;_epFormUI(null);}
 function _editEp(globalIdx){
@@ -16527,15 +16549,20 @@ function mManageLabos(){
         +(isCustom
           ?"<button class='btn bo xs' onclick='_editLabo("+(i)+")'  style='margin-right:4px'>✏️</button><button class='btn br2 xs' onclick='_delLabo("+(i-base)+")'>🗑</button>"
           :((DB.hiddenLabos||[]).indexOf(lv.id)>=0
-            ?"<button class='btn bgr2 xs' onclick='_restoreLabo(\""+lv.id+"\")'>↩ Restaurer</button>"
-            :"<button class='btn bo xs' onclick='_toggleLaboAcces(\""+lv.id+"\")' style='margin-right:3px'>🔒</button><button class='btn br2 xs' onclick='_hideBuiltinLabo(\""+lv.id+"\")'>🗑</button>"
+            ?"<button class='btn bgr2 xs' onclick='_restoreLabo(\""+lv.id+"\")' style='font-size:10px'>↩ Restaurer</button>"
+            :"<button class='btn bo xs' onclick='_toggleLaboAcces(\""+lv.id+"\")' style='margin-right:3px;font-size:10px'>🔒</button><button class='btn br2 xs' onclick='_hideBuiltinLabo(\""+lv.id+"\")' style='font-size:10px'>🗑 Suppr.</button>"
           )
         )
       +"</td></tr>";
   }).join("");
   M("🔬 Gérer les Laboratoires","",
-    "<div class='tw mb12' style='max-height:240px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th></th><th style='text-align:left;padding:6px 8px'>Labo</th><th>Accès</th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
-    +"<button class='btn bi sm' onclick='_newLabo()'>➕ Nouveau laboratoire</button>",
+    "<div class='ib ibt mb12'><span>🔬</span><span>Supprimez les labos par défaut inutiles. Restauration possible à tout moment.</span></div>"
+    +"<div class='tw mb12' style='max-height:220px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th></th><th style='text-align:left;padding:6px 8px'>Labo</th><th>Accès</th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
+    +"<div class='fl2 g8 fw'>"
+    +"<button class='btn bi sm' onclick='_newLabo()'>➕ Nouveau laboratoire</button>"
+    +"<button class='btn sm' style='background:#DC2626;color:#fff' onclick='_deleteAllBuiltinLabos()'>🗑 Supprimer tous les labos par défaut</button>"
+    +"<button class='btn sm' style='background:#059669;color:#fff' onclick='_restoreAllLabos()'>↩ Tout restaurer</button>"
+    +"</div>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
 }
 function _toggleLaboAcces(id){
@@ -16546,14 +16573,24 @@ function _toggleLaboAcces(id){
   cm();setTimeout(mManageLabos,80);
 }
 function _hideBuiltinLabo(id){
-  if(!confirm('Masquer ce laboratoire ? Il n\'apparaîtra plus aux élèves.'))return;
+  if(!confirm('Supprimer ce laboratoire ? Il n\'apparaîtra plus aux visiteurs.\n\nVous pourrez le restaurer depuis ce même panneau.'))return;
   DB.hiddenLabos=DB.hiddenLabos||[];
   if(DB.hiddenLabos.indexOf(id)<0)DB.hiddenLabos.push(id);
-  save();cm();setTimeout(mManageLabos,80);toast('Labo masqué');
+  save();cm();setTimeout(mManageLabos,80);toast('✅ Labo supprimé');
 }
 function _restoreLabo(id){
   DB.hiddenLabos=(DB.hiddenLabos||[]).filter(function(x){return x!==id;});
-  save();cm();setTimeout(mManageLabos,80);toast('Labo restauré');
+  save();cm();setTimeout(mManageLabos,80);toast('✅ Labo restauré');
+}
+function _deleteAllBuiltinLabos(){
+  if(!confirm('Supprimer TOUS les laboratoires par défaut ?\n\nRestauration possible depuis ce panneau.'))return;
+  var all=(typeof LABO_DB!=="undefined"?LABO_DB:[]);
+  DB.hiddenLabos=all.map(function(l){return l.id;});
+  save();cm();setTimeout(mManageLabos,80);toast('✅ Tous les labos par défaut supprimés');
+}
+function _restoreAllLabos(){
+  DB.hiddenLabos=[];
+  save();cm();setTimeout(mManageLabos,80);toast('✅ Tous les labos restaurés');
 }
 function _newLabo(){window._editLaboIdx=-1;_laboFormUI(null);}
 function _editLabo(i){
