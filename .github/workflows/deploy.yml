@@ -34,6 +34,7 @@ jobs:
       - name: 📋 Préparer les fichiers
         run: |
           mkdir -p deploy/api \
+                   deploy/api/data \
                    deploy/uploads/media \
                    deploy/uploads/video \
                    deploy/uploads/epreuve \
@@ -70,6 +71,11 @@ jobs:
 
           if [ -f api/database_mysql.sql ]; then
             cp api/database_mysql.sql deploy/api/
+          fi
+
+          # ── Répertoire data pour sauvegardes cloud sync ──────────
+          if [ -f api/data/index.php ]; then
+            cp api/data/index.php deploy/api/data/
           fi
 
           # ── Évaluations et cours interactifs ────────────────────

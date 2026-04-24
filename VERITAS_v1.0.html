@@ -2743,11 +2743,19 @@ function load(){
   if(!DB.superAdmin)DB.superAdmin=defaultDB().superAdmin;
   if(!DB.loginLog)DB.loginLog=[];
   if(!DB.elearning)DB.elearning=defaultDB().elearning;
+  // Masque persistant des suppressions admin sur les contenus par défaut
+  if(!DB.deletedDefaults)DB.deletedDefaults=[];
   // Merge resPedago entries from defaultDB if missing in existing DB
   var _defC=defaultDB().elearning.contenus||[];
   var _curC=DB.elearning.contenus||[];
-  // Merge resPedago AND externalUrl entries so evaluations/courses are always visible
-  _defC.forEach(function(dc){if((dc.resPedago||dc.externalUrl||dc.htmlContent)&&!_curC.find(function(c){return c.id===dc.id;})){_curC.push(dc);}});
+  // Merge UNIQUEMENT les items non supprimés par l'admin (deletedDefaults = masque)
+  _defC.forEach(function(dc){
+    if((dc.resPedago||dc.externalUrl||dc.htmlContent)
+       &&!_curC.find(function(c){return c.id===dc.id;})
+       &&DB.deletedDefaults.indexOf(dc.id)<0){
+      _curC.push(dc);
+    }
+  });
   DB.elearning.contenus=_curC;
   // Merge citations from defaultDB if missing
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
@@ -3097,9 +3105,17 @@ function addBookContent(bid){
     }).join('');
   }
   let coverHtml=b.coverImg?'<img src="'+b.coverImg+'" style="width:60px;height:80px;object-fit:cover;border-radius:4px;border:1px solid var(--bg3)">':'<span class="xs2 mut">Aucune couverture</span>';
+  var _pdfStat=b.previewPdfKey
+    ?'<span class="bg bgg">✅ '+_esc(b.previewPdfName||'apercu.pdf')+'</span> '
+      +'<button class="btn bo xs" onclick="removeBookPdfPreview(\''+bid+'\')" style="font-size:10px;padding:2px 8px">🗑 Supprimer</button>'
+    :'<span class="xs2 mut">Aucun aperçu PDF chargé</span>';
   M('📖 Gérer le contenu — '+b.titre,'Extraits et chapitres consultables par les visiteurs',
-  '<div class="ib ibt mb14"><span>📝</span><span>Ajoutez des extraits (10+ pages) que les visiteurs pourront feuilleter gratuitement.</span></div>'+
-  '<div class="fg mb12"><span class="fl">Extrait principal (texte)</span><textarea class="fi" id="bkExtrait" rows="8" placeholder="Collez ici un extrait du livre (10-20 pages)...">'+(b.extrait||'')+'</textarea></div>'+
+  '<div class="ib ibt mb14"><span>📝</span><span>Ajoutez des extraits que les visiteurs pourront lire avant d\'acheter.</span></div>'+
+  '<div class="fg mb12"><span class="fl">📄 Aperçu PDF / Word (avant achat)</span>'+
+  '<div class="fl2 fic g8 mt6" id="bkPdfStatus">'+_pdfStat+'</div>'+
+  '<div class="ib" style="background:var(--blb);border:1px solid var(--bld);color:var(--bl);border-radius:var(--r);padding:7px 11px;font-size:12px;margin:5px 0">💡 Chargez 2-3 pages PDF/Word — les visiteurs les liront avant d\'acheter.</div>'+
+  '<input type="file" class="fi mt4" id="bkPdfFile" accept=".pdf,.doc,.docx" style="font-size:12px"></div>'+
+  '<div class="fg mb12"><span class="fl">Extrait principal (texte)</span><textarea class="fi" id="bkExtrait" rows="6" placeholder="Collez ici un extrait du livre (10-20 pages)...">'+(b.extrait||'')+'</textarea></div>'+
   '<div class="fg mb12"><span class="fl">Chapitres (un par ligne)</span><textarea class="fi" id="bkChaps" rows="4" placeholder="Chapitre 1 — Algèbre">'+(b.chaps||[]).join('\n')+'</textarea></div>'+
   '<div class="fg mb12"><span class="fl">📸 Images / Captures de pages</span>'+
   '<div class="fl2 g8 fw mt8" id="bkPreviews">'+previewHtml+'</div>'+
@@ -3110,11 +3126,38 @@ function addBookContent(bid){
 }
 
 function saveBookContent(bid){
-  const b=DB.books.find(x=>x.id===bid);if(!b)return;
+  var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
   b.extrait=document.getElementById('bkExtrait')?.value||'';
-  const chapsText=document.getElementById('bkChaps')?.value||'';
-  b.chaps=chapsText.split('\n').map(x=>x.trim()).filter(x=>x);
-  save();cm();re();toast('✓ Contenu du livre mis à jour');
+  var chapsText=document.getElementById('bkChaps')?.value||'';
+  b.chaps=chapsText.split('\n').map(function(x){return x.trim();}).filter(function(x){return x;});
+  var pdfInput=document.getElementById('bkPdfFile');
+  var pdfFile=pdfInput&&pdfInput.files&&pdfInput.files[0];
+  if(pdfFile){
+    var pdfReader=new FileReader();
+    pdfReader.onload=function(ev){
+      var pdfKey='bkprev_'+bid;
+      idbSave(pdfKey,ev.target.result,pdfFile.name,pdfFile.type||'application/pdf',function(){
+        b.previewPdfKey=pdfKey;b.previewPdfName=pdfFile.name;
+        save();cm();re();toast('✓ Contenu + aperçu PDF enregistrés');
+      });
+    };
+    pdfReader.onerror=function(){save();cm();re();toast('✓ Contenu enregistré (erreur lecture PDF)','warn');};
+    pdfReader.readAsDataURL(pdfFile);
+  } else {
+    save();cm();re();toast('✓ Contenu du livre mis à jour');
+  }
+}
+
+function removeBookPdfPreview(bid){
+  var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
+  if(b.previewPdfKey){
+    var _idbReq=indexedDB.open('veritasDB',1);
+    _idbReq.onsuccess=function(e){
+      try{e.target.result.transaction('files','readwrite').objectStore('files').delete(b.previewPdfKey);}catch(ex){}
+    };
+  }
+  b.previewPdfKey='';b.previewPdfName='';
+  save();addBookContent(bid);toast('✓ Aperçu PDF supprimé');
 }
 function removeBookPreview(bid,idx){
   const b=DB.books.find(x=>x.id===bid);if(!b||!b.previewImages)return;
@@ -3167,9 +3210,13 @@ function viewBookDetail(bid){
   (b.chaps||[]).forEach(function(ch,i){h+='<div class="book-chapter"><div class="ch-num">'+(i+1)+'</div><div><strong>'+ch+'</strong></div></div>';});
   if(!(b.chaps||[]).length)h+='<div class="empty xs2">Aucun chapitre</div>';
   h+='</div>';
-  // Excerpt tab
-  h+='<div id="prev_'+bid+'" style="display:none">';
-  if(b.extrait){
+  // Excerpt tab — supporte PDF (async IDB) + texte + images
+  var _pdfAttr=b.previewPdfKey?' data-pdfkey="'+b.previewPdfKey+'"':'';
+  h+='<div id="prev_'+bid+'"'+_pdfAttr+' style="display:none">';
+  if(b.previewPdfKey){
+    h+='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:8px">📄 <strong>Aperçu PDF disponible</strong></div>';
+    h+='<div id="pdfCont_'+bid+'"><div class="ib ibt"><span>⏳</span><span>Chargement de l\'aperçu…</span></div></div>';
+  }else if(b.extrait){
     h+='<div style="background:var(--bg);border:var(--br);border-radius:var(--r2);padding:20px;font-family:Libre Baskerville,serif;font-size:13px;line-height:2;color:var(--ink2);white-space:pre-line;max-height:400px;overflow-y:auto;position:relative">';
     h+='<div style="position:absolute;top:8px;right:8px;background:var(--gp);color:var(--gold);padding:2px 10px;border-radius:12px;font-size:13px;font-weight:700;font-family:Outfit,sans-serif">EXTRAIT GRATUIT</div>';
     h+=b.extrait;
@@ -3203,8 +3250,30 @@ function viewBookDetail(bid){
 // ── Modale "Extrait gratuit" — visible directement depuis la boutique ──
 function _showExtrait(bid){
   var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
+  // Aperçu PDF prioritaire (chargement async depuis IndexedDB)
+  if(b.previewPdfKey){
+    idbGetFile(b.previewPdfKey,function(rec){
+      if(!rec){
+        if(b.extrait||(b.previewImages||[]).length>0){_showExtrait_text(bid);return;}
+        toast('Aperçu PDF introuvable (chargé sur un autre appareil ?)','warn');return;
+      }
+      var h='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:10px">'
+            +'📢 <strong>Extrait gratuit</strong> — Lisez les premières pages avant d\'acheter.</div>'
+            +'<iframe src="'+rec.data+'" style="width:100%;height:62vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>'
+            +'<div style="margin-top:6px;text-align:center;font-size:11px;color:var(--ink4)">📄 '+_esc(rec.name||b.previewPdfName||'apercu.pdf')+'</div>';
+      M('📄 Aperçu — '+b.titre,'Extrait gratuit avant achat',h,
+        '<button class="btn bo" onclick="cm()">Fermer</button>'
+        +'<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px">📋 Détails</button>'
+        +(b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')" >🛒 Commander — '+fmt(b.prix)+'</button>':''),true);
+    });
+    return;
+  }
+  _showExtrait_text(bid);
+}
+function _showExtrait_text(bid){
+  var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
   var hasExt=b.extrait||((b.previewImages||[]).length>0);
-  if(!hasExt){toast('Aucun extrait disponible pour ce manuel','warn');return;}
+  if(!hasExt){toast('Aucun aperçu disponible pour ce manuel','warn');return;}
   var cc=b.coverColor||'#1a3a8a';
   var rt=getBookRating(bid);
 
@@ -3247,7 +3316,7 @@ function _showExtrait(bid){
   }
 
   // CTA
-  M('📖 Extrait gratuit', b.titre, h,
+  M('📖 Aperçu gratuit', b.titre, h,
     '<button class="btn bo" onclick="cm()">Fermer</button>'+
     '<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px">📋 Détails & Avis</button>'+
     (b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')">🛒 Commander — '+fmt(b.prix)+'</button>':'<span style="font-size:12px;color:var(--re);font-weight:700;padding:8px">Rupture de stock</span>'),
@@ -3273,14 +3342,32 @@ function submitReview(bid){
 }
 
 function showBookTab(btn,tabId){
-  const tabs=btn.parentElement;
-  tabs.querySelectorAll('.book-tab').forEach(t=>t.classList.remove('active'));
+  var tabs=btn.parentElement;
+  tabs.querySelectorAll('.book-tab').forEach(function(t){t.classList.remove('active');});
   btn.classList.add('active');
-  const viewer=tabs.parentElement;
-  // Masquer tous les panneaux du viewer (chap_*, prev_*, revs_*)
-  viewer.querySelectorAll('[id^="chap_"],[id^="prev_"],[id^="revs_"],[id^="chapters_"],[id^="preview_"]').forEach(d=>d.style.display='none');
-  const target=document.getElementById(tabId);
-  if(target)target.style.display='block';
+  var viewer=tabs.parentElement;
+  viewer.querySelectorAll('[id^="chap_"],[id^="prev_"],[id^="revs_"],[id^="chapters_"],[id^="preview_"]').forEach(function(d){d.style.display='none';});
+  var target=document.getElementById(tabId);
+  if(target){
+    target.style.display='block';
+    // Charger l'aperçu PDF depuis IDB si disponible et pas encore chargé
+    var pdfKey=target.getAttribute('data-pdfkey');
+    var bid=tabId.replace('prev_','');
+    var cont=document.getElementById('pdfCont_'+bid);
+    if(pdfKey&&cont&&!target._pdfLoaded){
+      target._pdfLoaded=true;
+      idbGetFile(pdfKey,function(rec){
+        if(!cont)return;
+        if(!rec){
+          cont.innerHTML='<div class="ib" style="background:#FEE2E2;color:#DC2626;padding:10px;border-radius:8px;font-size:12px">'
+            +'❌ Aperçu PDF introuvable (peut être chargé sur un autre appareil).</div>';
+          return;
+        }
+        cont.innerHTML='<iframe src="'+rec.data+'" style="width:100%;height:58vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>'
+          +'<div style="font-size:11px;color:var(--ink4);text-align:center;margin-top:4px">📄 '+_esc(rec.name||'apercu.pdf')+'</div>';
+      });
+    }
+  }
 }
 
 function applyPromo(bid){
@@ -5226,7 +5313,11 @@ function _cloudHeaders(withContentType){
 }
 function _cloudUrl(endpoint){
   var base=(DB.cloudConfig?.url||'https://veritas-school.com/api').replace(/\/$/,'');
-  return base+'/'+endpoint;
+  var secret=DB.cloudConfig?.secret||'';
+  var url=base+'/'+endpoint;
+  // Envoyer _secret aussi en param GET (LiteSpeed peut supprimer le header Authorization)
+  if(secret)url+=(url.indexOf('?')>=0?'&':'?')+'_secret='+encodeURIComponent(secret);
+  return url;
 }
 
 // ── Upload d'un fichier vers le serveur cloud ────────────────────────
@@ -5853,7 +5944,8 @@ function pgElearningMgmt(){
   // Catalogue contenus
   h+='<div class="card"><div class="fl2 fic fsb mb13">';
   h+='<div class="ct mb0">📖 Catalogue ('+el.contenus.length+' ressources)</div>';
-  h+='<button class="btn bi sm" onclick="mAddElearningContent()">＋ Ajouter</button></div>';
+  h+='<button class="btn bi sm" onclick="mAddElearningContent()">+ Ajouter</button>';
+  h+='<button class="btn bo sm" onclick="restoreAllDefaultContents()" style="font-size:11px">Restaurer defauts</button></div>';
 
   // Résumé par pack
   if(el.contenus.length>0){
@@ -5965,11 +6057,14 @@ function mEditElearningContent(itemId){
   '<div class="fg"><span class="fl">Séquence</span><select class="fi" id="ecSeq">'+['Séquence 1','Séquence 2','Séquence 3','Séquence 4','Séquence 5','Séquence 6','Toutes séquences','Examens'].map(function(s){return '<option'+(s===item.seq?' selected':'')+'>'+s+'</option>';}).join('')+'</select></div>'+
   '<div class="fg"><span class="fl">Prix (FCFA)</span><input class="fi" id="ecPrix" type="number" value="'+(item.prix||0)+'"></div>'+
   '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="ecDesc" rows="2">'+( item.desc||'')+'</textarea></div>'+
-  '<div class="fg full"><span class="fl">Aperçu du contenu</span><textarea class="fi" id="ecApercu" rows="3">'+(item.apercu||'')+'</textarea></div>'+
+  '<div class="fg full"><span class="fl">Aperçu du contenu (texte)</span><textarea class="fi" id="ecApercu" rows="3">'+(item.apercu||'')+'</textarea></div>'+
+  '<div class="fg full"><span class="fl">📄 Aperçu PDF/Word (gratuit avant abonnement)</span>'+
+  '<div class="fl2 fic g8 mt6" id="elPdfStat_'+itemId+'">'+(item.previewPdfKey?'<span class="bg bgg">'+_esc(item.previewPdfName||'apercu.pdf')+'</span> <button class="btn bo xs" onclick="_removeElPreview(\''+itemId+'\')" style="font-size:10px;padding:2px 8px">Suppr.</button>':'<span class="xs2 mut">Aucun apercu PDF</span>')+'</div>'+
+  '<input type="file" class="fi mt6" id="elPdfFile_'+itemId+'" accept=".pdf,.doc,.docx" style="font-size:12px"></div>'+
   '<div class="fg full"><span class="fl">📦 Packs qui donnent accès</span>'+plansCheckboxes+'</div>'+
-  '<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px;background:var(--grb);border-radius:8px"><input type="checkbox" id="ecGratuit"'+(item.gratuit?' checked':'')+'>  <span style="color:var(--gr)">✅ Contenu gratuit</span></label></div>'+
+  '<div class="fg"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px;background:var(--grb);border-radius:8px"><input type="checkbox" id="ecGratuit"'+(item.gratuit?' checked':'')+'>  <span style="color:var(--gr)">Contenu gratuit</span></label></div>'+
   '</div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEditElearningContent(\''+itemId+'\')">✓ Enregistrer</button>',true);
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEditElearningContent(\''+itemId+'\')">Enregistrer</button>',true);
 }
 
 function saveEditElearningContent(itemId){
@@ -5986,7 +6081,32 @@ function saveEditElearningContent(itemId){
   item.apercu=document.getElementById('ecApercu')?.value||'';
   item.gratuit=document.getElementById('ecGratuit')?.checked||false;
   item.plans=['plan1','plan2','plan3','plan4'].filter(function(pid){return document.getElementById('ecPlan_'+pid)?.checked;});
-  save();cm();re();toast('✓ Contenu mis à jour');
+  // Aperçu PDF optionnel
+  var _elPdfIn=document.getElementById('elPdfFile_'+itemId);
+  var _elPdfFile=_elPdfIn&&_elPdfIn.files&&_elPdfIn.files[0];
+  if(_elPdfFile){
+    var _elReader=new FileReader();
+    _elReader.onload=function(ev){
+      var pdfKey='elprev_'+itemId;
+      idbSave(pdfKey,ev.target.result,_elPdfFile.name,_elPdfFile.type||'application/pdf',function(){
+        item.previewPdfKey=pdfKey;item.previewPdfName=_elPdfFile.name;
+        save();cm();re();toast('✓ Contenu + aperçu PDF enregistrés');
+      });
+    };
+    _elReader.readAsDataURL(_elPdfFile);
+  } else {
+    save();cm();re();toast('✓ Contenu mis à jour');
+  }
+}
+
+function _removeElPreview(itemId){
+  var item=(DB.elearning&&DB.elearning.contenus||[]).find(function(c){return c.id===itemId;});if(!item)return;
+  if(item.previewPdfKey){
+    var _r=indexedDB.open('veritasDB',1);
+    _r.onsuccess=function(e){try{e.target.result.transaction('files','readwrite').objectStore('files').delete(item.previewPdfKey);}catch(ex){}};
+  }
+  item.previewPdfKey='';item.previewPdfName='';
+  save();mEditElearningContent(itemId);toast('✓ Aperçu PDF supprimé');
 }
 
 
@@ -6033,9 +6153,30 @@ function saveElearningContent(){
 }
 
 function deleteElearningContent(id){
-  if(!confirm('Supprimer ce contenu ?'))return;
+  if(!confirm('Supprimer ce contenu ?\nNote : les ressources par défaut peuvent être restaurées depuis Paramètres.'))return;
   DB.elearning.contenus=(DB.elearning.contenus||[]).filter(function(c){return c.id!==id;});
-  save();re();toast('Contenu supprimé');
+  // Mémoriser la suppression des contenus par défaut pour éviter leur réapparition
+  var _defIds=(defaultDB().elearning.contenus||[]).map(function(c){return c.id;});
+  if(_defIds.indexOf(id)>=0){
+    if(!DB.deletedDefaults)DB.deletedDefaults=[];
+    if(DB.deletedDefaults.indexOf(id)<0)DB.deletedDefaults.push(id);
+  }
+  save();re();toast('✓ Contenu supprimé');
+}
+
+function restoreAllDefaultContents(){
+  if(!iA())return;
+  if(!confirm('Restaurer tous les contenus e-learning par défaut supprimés ?'))return;
+  DB.deletedDefaults=[];
+  var _defC2=defaultDB().elearning.contenus||[];
+  var _curC2=DB.elearning.contenus||[];
+  _defC2.forEach(function(dc){
+    if((dc.resPedago||dc.externalUrl||dc.htmlContent)&&!_curC2.find(function(c){return c.id===dc.id;})){
+      _curC2.push(dc);
+    }
+  });
+  DB.elearning.contenus=_curC2;
+  save();re();toast('✓ Ressources par défaut restaurées');
 }
 
 // ── IMPORT ÉVALUATIONS BAC (v39.2+) ─────────────────────────────────────
@@ -6467,6 +6608,22 @@ function consulterGratuit(itemId){
   viewResource(item, true); // true = free access
 }
 
+// Charge et affiche un aperçu PDF e-learning depuis IndexedDB dans le viewer modal
+function _loadElPdfPreview(itemId,pdfKey){
+  var cont=document.getElementById('elPdfViewer_'+itemId);
+  if(!cont)return;
+  cont.innerHTML='<div class="ib ibt" style="margin-top:8px"><span>⏳</span><span>Chargement de l\'aperçu PDF…</span></div>';
+  idbGetFile(pdfKey,function(rec){
+    if(!rec){
+      cont.innerHTML='<div class="ib" style="background:#FEE2E2;color:#DC2626;padding:10px;border-radius:8px;font-size:12px;margin-top:8px">'
+        +'❌ Aperçu PDF introuvable (chargé sur un autre appareil).</div>';
+      return;
+    }
+    cont.innerHTML='<div style="margin-top:10px"><iframe src="'+rec.data+'" style="width:100%;height:52vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>'
+      +'<div style="font-size:11px;color:var(--ink4);text-align:center;margin-top:4px">📄 '+_esc(rec.name||'apercu.pdf')+'</div></div>';
+  });
+}
+
 // v1.0 : Aperçu rapide d'un contenu e-learning (sans téléchargement)
 function previewElContent(itemId){
   var el=DB.elearning||defaultDB().elearning;
@@ -6498,24 +6655,29 @@ function previewElContent(itemId){
     return;
   }
   var cat=(el.categories||[]).find(function(c){return c.id===item.cat;})||{ico:'📄',nom:'Autre'};
-  var apercuText=item.apercu||item.desc||'Aucun aperçu disponible pour cette ressource.';
-  var pLabels={plan1:'Examen',plan2:'Intermédiaire',plan3:'Enseignant',plan4:'Famille'};
+  var apercuText=item.apercu||item.desc||'Aucun apercu disponible pour cette ressource.';
+  var pLabels={plan1:'Examen',plan2:'Intermediaire',plan3:'Enseignant',plan4:'Famille'};
   var plansStr=(item.plans||[]).map(function(pk){return pLabels[pk]||pk;}).join(', ');
-  M('👁 Aperçu — '+item.titre, cat.ico+' '+cat.nom,
+  var _pdfBtnEl=item.previewPdfKey
+    ?'<button class="btn" style="background:#EEF2FF;color:#4B5BDB;font-size:11px;padding:5px 12px;border-radius:10px;margin-top:6px" onclick="_loadElPdfPreview(\''+item.id+'\',\''+item.previewPdfKey+'\')" >Voir apercu PDF gratuit</button>':'';
+  M('Apercu — '+item.titre, cat.ico+' '+cat.nom,
     '<div style="text-align:center;margin-bottom:16px">'+
     '<div style="font-family:Montserrat,sans-serif;font-size:17px;font-weight:700;color:#142554">'+_esc(item.titre)+'</div>'+
-    '<div style="font-size:12px;color:var(--ink3);margin:4px 0">'+_esc(item.classe||'')+' · '+_esc(item.matiere||'')+' · '+_esc(item.seq||'')+'</div>'+
+    '<div style="font-size:12px;color:var(--ink3);margin:4px 0">'+_esc(item.classe||'')+' . '+_esc(item.matiere||'')+' . '+_esc(item.seq||'')+'</div>'+
     (item.gratuit?'<span style="background:#D1FAE5;color:#059669;font-size:12px;font-weight:700;padding:3px 12px;border-radius:8px;display:inline-block;margin-top:6px">GRATUIT</span>':'<span style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:#FFC93C;display:inline-block;margin-top:6px">'+fmtN(item.prix)+' FCFA</span>')+
+    _pdfBtnEl+
     '</div>'+
     '<div style="background:linear-gradient(135deg,#F0F4FF,#E8F0FE);border:1px solid #C7D7FE;border-radius:12px;padding:16px;margin-bottom:14px;text-align:left">'+
-    '<div style="font-size:11px;font-weight:700;color:#3C8DFF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">📋 Aperçu du contenu :</div>'+
+    '<div style="font-size:11px;font-weight:700;color:#3C8DFF;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Apercu du contenu :</div>'+
     '<div style="font-family:Georgia,serif;font-size:13px;color:var(--ink2);line-height:1.8;white-space:pre-line">'+_esc(apercuText)+'</div>'+
     '</div>'+
-    (plansStr?'<div style="font-size:12px;color:var(--ink4);margin-bottom:10px">📦 Inclus dans : <strong>'+_esc(plansStr)+'</strong></div>':'')+
-    '<div class="ib ibt mb0"><span>💡</span><span>Pour accéder au document complet, souscrivez à un abonnement ou commandez à l\'unité.</span></div>',
+    (plansStr?'<div style="font-size:12px;color:var(--ink4);margin-bottom:10px">Inclus dans : <strong>'+_esc(plansStr)+'</strong></div>':'')+
+    '<div id="elPdfViewer_'+item.id+'"></div>'+
+    '<div class="ib ibt mb0"><span>Info :</span><span>Pour acceder au document complet, souscrivez a un abonnement ou commandez a l\'unite.</span></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>'+
-    (item.gratuit?'<button class="btn bi" onclick="cm();consulterGratuit(\''+itemId+'\')">📄 Consulter gratuitement</button>':
-    '<button class="btn bi" onclick="cm();commanderContenu(\''+itemId+'\')">🛒 Commander</button>'));
+    (item.gratuit?'<button class="btn bi" onclick="cm();consulterGratuit(\''+itemId+'\')">Consulter gratuitement</button>':
+    '<button class="btn bi" onclick="cm();commanderContenu(\''+itemId+'\')">Commander</button>'));
+  return;
 }
 
 function viewResource(item, isFree){
@@ -15402,7 +15564,13 @@ function _simLoop(){
 function _simUpdateControls(){
   var cw=document.getElementById('simControls');
   if(!cw||!window._sim.controlsDef) return;
-  cw.innerHTML=window._sim.controlsDef();
+  // Ne pas reconstruire si l'utilisateur interagit (glisse un slider, tape du texte...)
+  var _act=document.activeElement;
+  if(_act&&cw.contains(_act)) return;
+  var _newHtml=window._sim.controlsDef();
+  if(window._sim._lastCtrlHtml===_newHtml) return;
+  window._sim._lastCtrlHtml=_newHtml;
+  cw.innerHTML=_newHtml;
 }
 
 function _initLaboSim(lv){
@@ -15411,6 +15579,7 @@ function _initLaboSim(lv){
   var cnv=document.getElementById('laboCnv');
   if(!cnv) return;
   var ctx=cnv.getContext('2d');
+  if(!ctx){console.warn('[VÉRITAS labo] Canvas 2D unavailable for '+lv.id);window._sim.running=false;return;}
   var W=cnv.width, H=cnv.height;
   var vals=document.getElementById('simValues');
   var cw=document.getElementById('simControls');
@@ -16689,7 +16858,8 @@ function _initLaboSim(lv){
     window._sim._draw=function(){
       var p=window._sim.params; var t=window._sim.t;
       ctx.clearRect(0,0,W,H); ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
-      var vb=verbs[p.verb]; var forms=vb.temps[p.temps];
+      var vb=verbs[Math.max(0,Math.min(p.verb||0,verbs.length-1))]||verbs[0]; if(!vb)return;
+      var forms=(vb.temps[p.temps]||vb.temps.present)||[]; if(!forms.length)return;
       // Background card
       ctx.fillStyle='rgba(255,255,255,.04)'; ctx.fillRect(20,20,W-40,H-40);
       // Verb title

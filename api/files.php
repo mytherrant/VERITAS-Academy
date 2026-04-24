@@ -7,7 +7,7 @@
 require_once __DIR__ . '/config_sync.php';
 
 $method    = $_SERVER['REQUEST_METHOD'];
-$backupDir = __DIR__ . '/../uploads/';
+$backupDir = __DIR__ . '/data/';
 
 if ($method === 'GET') {
     requireAuth();

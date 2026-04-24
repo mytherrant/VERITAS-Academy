@@ -8,7 +8,7 @@
 require_once __DIR__ . '/config_sync.php';
 
 $method     = $_SERVER['REQUEST_METHOD'];
-$backupDir  = __DIR__ . '/../uploads/';
+$backupDir  = __DIR__ . '/data/';
 $backupFile = $backupDir . 'veritas_db_backup.json';
 $metaFile   = $backupDir . 'veritas_db_meta.json';
 
