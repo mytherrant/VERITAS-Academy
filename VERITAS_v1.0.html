@@ -3344,6 +3344,8 @@ function load(){
         // Met à jour le lien si le groupe par défaut en a un et que l'existant est vide
         var eg=DB.whatsappGroupes.find(function(g){return g.niveau===dg.niveau;});
         if(eg&&!eg.lien&&dg.lien) eg.lien=dg.lien;
+        if(eg&&!eg.accessMode) eg.accessMode='libre';
+        if(eg&&!eg.plansRequis) eg.plansRequis=[];
       }
     });
   }
@@ -7990,7 +7992,20 @@ function pgDash(){
       <div class="sc ${s.stat==='Payé'?'scgr':'scr'}" onclick="goTo('mon_paiement')" style="cursor:pointer"><div class="sci">💳</div><div class="scl">Paiement</div><div class="scv ${s.stat==='Payé'?'vgr':'vr'}" style="font-size:14px">${s.stat}</div><div class="scs">${fmt(s.frais)}/mois</div></div>
       <div class="sc scb" onclick="goTo('mes_devoirs')" style="cursor:pointer"><div class="sci">📋</div><div class="scl">Devoirs à rendre</div><div class="scv vb">${dvsPending.length}</div><div class="scs">${dvsE.length} au total</div></div>
     </div>
-    ${(function(){var _wg=(DB.whatsappGroupes||[]).find(function(g){return g.actif&&g.niveau===s.cls;});return _wg&&_wg.lien?'<div style="background:linear-gradient(135deg,#25D366,#128C7E);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:12px"><span style="font-size:26px">📱</span><div><div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#fff">Groupe WhatsApp — '+_wg.nom+'</div><div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px">Rejoignez le groupe officiel de votre classe</div></div></div><a href="'+_wg.lien+'" target="_blank" style="background:#fff;color:#128C7E;font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;padding:8px 18px;border-radius:20px;text-decoration:none;white-space:nowrap;flex-shrink:0">📲 Rejoindre</a></div>':'';})()}
+    ${(function(){
+      var _wg=(DB.whatsappGroupes||[]).find(function(g){return g.actif&&g.niveau===s.cls;});
+      if(!_wg)return '';
+      var _a2=typeof _waGroupAccess==='function'?_waGroupAccess(_wg,null,{stat:s.stat,cls:s.cls}):{eligible:true,reason:'Acces libre'};
+      var _m=_wg.accessMode||'libre';
+      var _bg=_a2.eligible?'linear-gradient(135deg,#25D366,#128C7E)':'linear-gradient(135deg,#94A3B8,#64748B)';
+      var _sub=_a2.eligible?'Rejoignez le groupe officiel de votre classe':_a2.reason;
+      var _btn='';
+      if(_a2.eligible&&_wg.lien){_btn='<a href="'+_wg.lien+'" target="_blank" style="background:#fff;color:#128C7E;font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;padding:8px 18px;border-radius:20px;text-decoration:none;white-space:nowrap;flex-shrink:0">&#128242; Rejoindre</a>';}
+      else if(_m==='paiement'){_btn='<span style="background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px">&#128179; Reglez votre scolarite</span>';}
+      else if(_m==='abonnement'){_btn='<span style="background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px">&#128230; Abonnement requis</span>';}
+      else{_btn='<span style="background:rgba(255,255,255,.2);color:#fff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px">Validation admin requise</span>';}
+      return '<div style="background:'+_bg+';border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:12px"><span style="font-size:26px">&#128241;</span><div><div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#fff">Groupe WA &#8212; '+_esc(_wg.nom)+'</div><div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px">'+_sub+'</div></div></div>'+_btn+'</div>';
+    })()}
     <div class="g2">
       <div class="card"><div class="ct">📝 Mes dernières notes — ${TRS[0]}</div>
         ${gr.length===0?'<div class="empty"><div class="empty-ico">📋</div>Aucune note disponible</div>':gr.map(g=>{const m=(g.n1+g.n2)/2;const ap2=getAppr(m);return`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)">
@@ -20755,7 +20770,8 @@ function cvEleveChat(cvId){
       classes_virtuelles_admin:pgClassesVirtuellesAdmin,
       classes_virtuelles_teacher:pgClassesVirtuellesTeacher,
       mes_classes_virtuelles:pgMesClassesVirtuelles,
-      wa_groupes:function(){return '<div class="fl2 fic mb16"><div class="bold" style="font-size:18px">📱 Groupes WhatsApp</div></div>'+pgWAGroupes();}
+      wa_groupes:function(){return '<div class="fl2 fic mb16"><div class="bold" style="font-size:18px">&#128241; Groupes WhatsApp</div></div>'+pgWAGroupes();},
+      wa_access:pgWAAccess
     };
     if(extra[p]) return extra[p]();
     return origRender(p);
@@ -20766,7 +20782,8 @@ function cvEleveChat(cvId){
       classes_virtuelles_admin:'Classes Virtuelles',
       classes_virtuelles_teacher:'Mes Classes Virtuelles',
       mes_classes_virtuelles:'Mes Classes Virtuelles',
-      wa_groupes:'Groupes WhatsApp'
+      wa_groupes:'Groupes WhatsApp',
+      wa_access:'Acces Groupes WA'
     };
     var pgt=document.getElementById('pgt');
     if(pgt) pgt.textContent=(typeof PT!=='undefined'&&PT[p])||PT_ext[p]||p;
@@ -20787,6 +20804,7 @@ function cvEleveChat(cvId){
         pedSection.i.push({k:'classes_virtuelles_admin',i:'📚',l:'Classes Virtuelles'});
       }
       var commSection=ANAV.find(function(s){return s.s==='Communication';});
+      if(commSection&&!commSection.i.find(function(i){return i.k==='wa_access';})){commSection.i.push({k:'wa_access',i:'&#x1F510;',l:'Acces Groupes WA'});}
       if(commSection&&!commSection.i.find(function(i){return i.k==='wa_groupes';})){
         commSection.i.push({k:'wa_groupes',i:'📱',l:'Groupes WhatsApp'});
       }
@@ -20832,6 +20850,7 @@ function cvEleveChat(cvId){
     PT.classes_virtuelles_teacher='Mes Classes Virtuelles';
     PT.mes_classes_virtuelles='Mes Classes Virtuelles';
     PT.wa_groupes='Groupes WhatsApp';
+    PT.wa_access='Acces Groupes WA';
   }
 })();
 
@@ -21857,20 +21876,25 @@ function mWAGroupes(){
   if(!iA()) return;
   if(!DB.whatsappGroupes) DB.whatsappGroupes = [];
   var grps = DB.whatsappGroupes;
-  var rows = grps.length ? grps.map(function(g, i){
+  var _modeCol={libre:"#059669",abonnement:"#3C8DFF",paiement:"#D97706",manuel:"#7C3AED"};
+  var _modeLbl={libre:"Libre",abonnement:"Abo.",paiement:"Paiem.",manuel:"Manuel"};
+  var rows = grps.length ? grps.map(function(g){
+    var _mode=g.accessMode||"libre"; var _mc=_modeCol[_mode]||"#142554";
     return '<tr>'
       +'<td style="padding:8px 10px;font-weight:600">'+_esc(g.niveau)+'</td>'
       +'<td style="padding:8px 10px">'+_esc(g.nom)+'</td>'
       +'<td style="padding:8px 10px;font-size:.78rem;color:#0070BA;word-break:break-all"><a href="'+_esc(g.lien)+'" target="_blank">'+_esc(g.lien)+'</a></td>'
+      +'<td style="padding:8px 8px;text-align:center"><span style="background:'+_mc+'22;color:'+_mc+';border:1px solid '+_mc+'44;padding:2px 7px;border-radius:20px;font-size:.73rem">'+(_modeLbl[_mode]||_mode)+'</span></td>'
       +'<td style="padding:8px 10px;text-align:center">'
         +'<span style="background:'+(g.actif?'#1a5c2e':'#8b1a1a')+';color:#fff;padding:2px 8px;border-radius:20px;font-size:.75rem">'
         +(g.actif?'Actif':'Inactif')+'</span></td>'
       +'<td style="padding:8px 6px;text-align:center">'
+        '<button class="btn sm" style="background:#7C3AED;color:#fff;margin:1px" title="Configurer acces" onclick="_waConfigAccess(\''+g.id+'\')">CFG</button>'
         +'<button class="btn sm" style="background:#142554;color:#fff;margin:1px" onclick="mEditWAGroupe(\''+g.id+'\')">âœï¸</button>'
         +'<button class="btn sm" style="background:#8b1a1a;color:#fff;margin:1px" onclick="_delWAGroupe(\''+g.id+'\')">ðŸ—‘</button>'
       +'</td>'
       +'</tr>';
-  }).join('') : '<tr><td colspan="5" style="text-align:center;padding:20px;color:#999">Aucun groupe configurÃ©</td></tr>';
+  }).join('') : '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999">Aucun groupe configure</td></tr>';
 
   M('ðŸ“² Groupes WhatsApp par classe','Configurez un lien d\'invitation par niveau / classe',
     '<div style="overflow-x:auto">'
@@ -21879,6 +21903,7 @@ function mWAGroupes(){
     +'<th style="padding:8px 10px;text-align:left">Niveau</th>'
     +'<th style="padding:8px 10px;text-align:left">Nom du groupe</th>'
     +'<th style="padding:8px 10px;text-align:left">Lien invitation</th>'
+    +'<th style="padding:8px 10px">Acces</th>'
     +'<th style="padding:8px 10px">Statut</th>'
     +'<th style="padding:8px 10px">Actions</th>'
     +'</tr></thead><tbody>'+rows+'</tbody></table></div>'
@@ -21896,10 +21921,10 @@ function mWAGroupes(){
       +'<span class="fl">Lien invitation</span>'
       +'<input class="fi" id="wgLien" placeholder="https://chat.whatsapp.com/...">'
     +'</div>'
-    +'<div class="fg">'
-      +'<span class="fl">Actif</span>'
-      +'<select class="fi" id="wgActif"><option value="1">Oui</option><option value="0">Non</option></select>'
-    +'</div>',
+    +'<div class="fg"><span class="fl">Mode d\'acces</span>'
+      +'<select class="fi" id="wgMode"><option value="libre">Libre</option><option value="paiement">Paiement</option><option value="abonnement">Abonnement</option><option value="manuel">Manuel</option></select></div>'
+    +'<div class="fg"><span class="fl">Actif</span>'
+      +'<select class="fi" id="wgActif"><option value="1">Oui</option><option value="0">Non</option></select></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>'
     +'<button class="btn bi" onclick="_saveWAGroupe()">âœ… Enregistrer le groupe</button>',
     true
@@ -21915,7 +21940,7 @@ function _saveWAGroupe(){
     toast('Le lien doit commencer par https://chat.whatsapp.com/ ou https://wa.me/','warn'); return;
   }
   if(!DB.whatsappGroupes) DB.whatsappGroupes=[];
-  DB.whatsappGroupes.push({ id:gid(), niveau:niv, nom:nom, lien:lien, actif: _ge('wgActif').value==='1' });
+  DB.whatsappGroupes.push({ id:gid(), niveau:niv, nom:nom, lien:lien, accessMode:(_ge('wgMode')?.value||'libre'), plansRequis:[], actif: _ge('wgActif').value==='1' });
   save(); cm(); mWAGroupes(); toast('âœ… Groupe enregistrÃ©');
 }
 
@@ -21928,6 +21953,9 @@ function _delWAGroupe(id){
 function mEditWAGroupe(id){
   var g = (DB.whatsappGroupes||[]).find(function(x){ return x.id===id; });
   if(!g) return;
+  var _eModes=['libre','paiement','abonnement','manuel'];
+  var _eLbls={libre:'Libre',paiement:'Paiement',abonnement:'Abonnement',manuel:'Manuel'};
+  var _eModeOpts=_eModes.map(function(m){return '<option value="'+m+'"'+((g.accessMode||'libre')===m?' selected':'')+'>'+_eLbls[m]+'</option>';}).join('');
   M('âœï¸ Modifier le groupe','',
     '<div class="fg"><span class="fl">Niveau</span>'
     +'<input class="fi" id="egNiv" value="'+_esc(g.niveau)+'"></div>'
@@ -21935,6 +21963,8 @@ function mEditWAGroupe(id){
     +'<input class="fi" id="egNom" value="'+_esc(g.nom)+'"></div>'
     +'<div class="fg"><span class="fl">Lien</span>'
     +'<input class="fi" id="egLien" value="'+_esc(g.lien)+'"></div>'
+    +'<div class="fg"><span class="fl">Mode d\'acces</span>'
+    +'<select class="fi" id="egMode">'+_eModeOpts+'</select></div>'
     +'<div class="fg"><span class="fl">Actif</span>'
     +'<select class="fi" id="egActif">'
     +'<option value="1"'+(g.actif?' selected':'')+'>Oui</option>'
@@ -21951,8 +21981,251 @@ function _updateWAGroupe(id){
   DB.whatsappGroupes[idx].niveau = (_ge('egNiv')?.value||'').trim();
   DB.whatsappGroupes[idx].nom    = (_ge('egNom')?.value||'').trim();
   DB.whatsappGroupes[idx].lien   = (_ge('egLien')?.value||'').trim();
+  DB.whatsappGroupes[idx].accessMode = (_ge('egMode')?.value||'libre');
   DB.whatsappGroupes[idx].actif  = _ge('egActif')?.value==='1';
   save(); cm(); mWAGroupes(); toast('âœ… Groupe mis Ã  jour');
+}
+
+// ── CONTRÔLE D'ACCÈS AUX GROUPES WHATSAPP ───────────────────────────────────
+
+// Vérifie si un compte (visiteur ou élève) est éligible pour un groupe WA
+function _waGroupAccess(grp, acc, stu){
+  if(!grp||!grp.actif) return{eligible:false,reason:'Groupe inactif'};
+  var mode=grp.accessMode||'libre';
+  if(mode==='libre') return{eligible:true,reason:'Accès libre'};
+  if(mode==='manuel') return{eligible:false,reason:'Validation manuelle requise',canManuel:true};
+  if(mode==='paiement'){
+    if(stu) return{eligible:stu.stat==='Payé',reason:stu.stat==='Payé'?'Scolarité réglée':'Scolarité non réglée ('+stu.stat+')'};
+    if(acc){
+      var paid=(DB.payments||[]).find(function(p){return p.eid===acc.id&&p.stat==='Payé';});
+      var cPaid=(DB.payAttempts||[]).find(function(p){return p.status==='confirmed'&&(p.label||'').indexOf(acc.id)>=0;});
+      return{eligible:!!(paid||cPaid),reason:(paid||cPaid)?'Paiement confirmé':'Aucun paiement confirmé'};
+    }
+    return{eligible:false,reason:'Paiement requis'};
+  }
+  if(mode==='abonnement'){
+    var plansReq=grp.plansRequis||[];
+    if(!plansReq.length) return{eligible:true,reason:'Abonnement (aucun plan requis)'};
+    var hasP=function(list){return plansReq.some(function(p){return(list||[]).indexOf(p)>=0;});};
+    if(acc){
+      if(hasP(acc.plans)) return{eligible:true,reason:'Abonnement actif'};
+      var aboE=(DB.elearning&&DB.elearning.abonnements||[]).find(function(a){
+        return a.statut==='Actif'&&hasP([a.plan]);
+      });
+      return{eligible:!!aboE,reason:aboE?'Abonnement e-learning actif':'Abonnement requis ('+plansReq.join(', ')+')'};
+    }
+    if(stu){
+      var stuA=(DB.elearning&&DB.elearning.abonnements||[]).find(function(a){
+        return a.statut==='Actif'&&a.classe===stu.cls&&hasP([a.plan]);
+      });
+      return{eligible:!!stuA,reason:stuA?'Abonnement actif':'Abonnement requis'};
+    }
+    return{eligible:false,reason:'Abonnement requis'};
+  }
+  return{eligible:false,reason:'Conditions non remplies'};
+}
+
+// Infobulles par mode
+function _wacModeInfo(mode){
+  var info={libre:'Tous les utilisateurs peuvent être invités sans condition.',abonnement:'Seuls les utilisateurs ayant souscrit à un des plans sélectionnés peuvent être invités.',paiement:'Seuls les élèves/visiteurs ayant réglé leur scolarité peuvent être invités.',manuel:'Aucune invitation automatique — l\'admin invite manuellement chaque personne.'};
+  return info[mode]||'';
+}
+
+// Toggle champ plans dans la modale de config
+function _wacModeToggle(){
+  var mode=(_ge('wacMode')?.value)||'libre';
+  var wrap=_ge('wacPlansWrap');
+  if(wrap) wrap.style.display=mode==='abonnement'?'':'none';
+  var infEl=_ge('wacInfoTxt');
+  if(infEl) infEl.textContent=_wacModeInfo(mode);
+}
+
+// Modale de configuration du mode d'accès d'un groupe
+function _waConfigAccess(grpId){
+  var grp=(DB.whatsappGroupes||[]).find(function(g){return g.id===grpId;});
+  if(!grp) return;
+  var plans=(DB.elearning&&DB.elearning.plans)||[];
+  var modeLabels={libre:'🟢 Libre — tout le monde',abonnement:'🔵 Abonnement — plans e-learning requis',paiement:'💛 Paiement — scolarité réglée requise',manuel:'⚙️ Manuel — validation admin uniquement'};
+  var modeOpts=['libre','abonnement','paiement','manuel'].map(function(m){
+    return '<option value="'+m+'"'+((grp.accessMode||'libre')===m?' selected':'')+'>'+modeLabels[m]+'</option>';
+  }).join('');
+  var planOpts=plans.map(function(p){
+    return '<option value="'+p.id+'"'+((grp.plansRequis||[]).indexOf(p.id)>=0?' selected':'')+'>'+_esc(p.nom)+'</option>';
+  }).join('');
+  var curMode=grp.accessMode||'libre';
+  M('🔧 Accès — '+_esc(grp.nom),'Conditions requises pour rejoindre ce groupe WhatsApp',
+    '<div class="ib ibi mb12"><span>💡</span><span id="wacInfoTxt">'+_wacModeInfo(curMode)+'</span></div>'
+    +'<div class="fg"><span class="fl">Mode d\'accès</span>'
+    +'<select class="fi" id="wacMode" onchange="_wacModeToggle()">'+modeOpts+'</select></div>'
+    +'<div class="fg" id="wacPlansWrap" style="display:'+(curMode==='abonnement'?'':'none')+'">'
+    +'<span class="fl">Plans e-learning requis</span>'
+    +(planOpts
+      ?'<select class="fi" id="wacPlans" multiple size="4" style="height:90px">'+planOpts+'</select><div style="font-size:11px;color:var(--ink4);margin-top:4px">Ctrl+clic pour sélectionner plusieurs plans</div>'
+      :'<div class="ib ibt xs2"><span>⚠️</span><span>Aucun plan e-learning configuré. Créez d\'abord des plans dans E-Learning → Plans.</span></div>')
+    +'</div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_saveWAConfig(\''+grpId+'\')">💾 Enregistrer</button>'
+  );
+}
+
+// Enregistre la config d'accès
+function _saveWAConfig(grpId){
+  var idx=(DB.whatsappGroupes||[]).findIndex(function(g){return g.id===grpId;});
+  if(idx<0) return;
+  var mode=_ge('wacMode')?.value||'libre';
+  var plansEl=_ge('wacPlans');
+  var plans=plansEl?Array.from(plansEl.selectedOptions).map(function(o){return o.value;}):[];
+  DB.whatsappGroupes[idx].accessMode=mode;
+  DB.whatsappGroupes[idx].plansRequis=plans;
+  save(); cm(); re(); toast('✅ Accès configuré — '+DB.whatsappGroupes[idx].nom);
+}
+
+// Inviter en masse les comptes éligibles d'un groupe
+function _waInviteEligibles(grpId){
+  var grp=(DB.whatsappGroupes||[]).find(function(g){return g.id===grpId;});
+  if(!grp) return;
+  var eligible=(DB.visitorAccounts||[]).filter(function(a){
+    return a.cls===grp.niveau&&a.groupeStatut!=='invite'&&_waGroupAccess(grp,a,null).eligible;
+  });
+  if(!eligible.length){toast('Aucun visiteur éligible non encore invité','warn');return;}
+  eligible.forEach(function(a){_sendWAGroupInvite(a.id);});
+  toast('📲 '+eligible.length+' invitation(s) envoyée(s)');
+}
+
+// Accorder l'accès manuellement à un visiteur
+function _waManuelInvite(accId){
+  var idx=(DB.visitorAccounts||[]).findIndex(function(a){return a.id===accId;});
+  if(idx<0) return;
+  DB.visitorAccounts[idx].groupeStatut='invite';
+  DB.visitorAccounts[idx].dateInvitGroupe=today();
+  save(); re();
+  _sendWAGroupInvite(accId);
+  toast('✅ Accès accordé manuellement');
+}
+
+// ── PAGE ADMIN : GESTION ACCÈS GROUPES WA ───────────────────────────────────
+function pgWAAccess(){
+  if(!iA()) return na();
+  if(!DB.whatsappGroupes) DB.whatsappGroupes=[];
+  var plans=(DB.elearning&&DB.elearning.plans)||[];
+  var planLabel=function(pid){var p=plans.find(function(x){return x.id===pid;});return p?_esc(p.nom):pid;};
+
+  var totalActifs=(DB.whatsappGroupes||[]).filter(function(g){return g.actif;}).length;
+  var allAccs=DB.visitorAccounts||[];
+  var nInvited=allAccs.filter(function(a){return a.groupeStatut==='invite';}).length;
+  var nPending=allAccs.filter(function(a){return !a.groupeStatut||a.groupeStatut==='en_attente';}).length;
+  var nEligible=0;
+  (DB.whatsappGroupes||[]).filter(function(g){return g.actif;}).forEach(function(grp){
+    allAccs.filter(function(a){return a.cls===grp.niveau&&a.groupeStatut!=='invite'&&_waGroupAccess(grp,a,null).eligible;}).forEach(function(){nEligible++;});
+  });
+
+  var modeCol={libre:'#059669',abonnement:'#3C8DFF',paiement:'#D97706',manuel:'#7C3AED'};
+  var modeTxt={libre:'🟢 Libre',abonnement:'🔵 Abonnement',paiement:'💛 Paiement',manuel:'⚙️ Manuel'};
+
+  var h='<div class="fl2 fic fsb mb16 fw g8">';
+  h+='<div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;color:#142554">📱 Accès Groupes WhatsApp</div>';
+  h+='<div class="fl2 g8"><button class="btn bi" onclick="mWAGroupes()">⚙️ Configurer les groupes</button>';
+  h+='<button class="btn" style="background:#25D366;color:#fff" onclick="mWAPendingMembers()">⏳ Inscriptions en attente</button></div></div>';
+
+  h+='<div class="sg" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">';
+  h+='<div class="sc scb"><div class="sci">📱</div><div class="scl">Groupes actifs</div><div class="scv vb">'+totalActifs+'</div></div>';
+  h+='<div class="sc scgr"><div class="sci">✅</div><div class="scl">Déjà invités</div><div class="scv vgr">'+nInvited+'</div></div>';
+  h+='<div class="sc" style="background:#FFF3CD"><div class="sci">🎯</div><div class="scl">Éligibles non invités</div><div class="scv" style="color:#D97706">'+nEligible+'</div></div>';
+  h+='<div class="sc scr"><div class="sci">⏳</div><div class="scl">En attente</div><div class="scv vr">'+nPending+'</div></div>';
+  h+='</div>';
+
+  var activeGrps=(DB.whatsappGroupes||[]).filter(function(g){return g.actif;});
+  if(!activeGrps.length){
+    h+='<div class="card"><div class="empty"><div class="empty-ico">📱</div>Aucun groupe WhatsApp actif</div></div>';
+    return h;
+  }
+
+  activeGrps.forEach(function(grp){
+    var mode=grp.accessMode||'libre';
+    var mc=modeCol[mode]||'#142554';
+    var mt=modeTxt[mode]||mode;
+    var plansReq=grp.plansRequis||[];
+    var students=(DB.students||[]).filter(function(s){return s.cls===grp.niveau;});
+    var visitors=allAccs.filter(function(a){return a.cls===grp.niveau;});
+    var eligibleNotInvited=visitors.filter(function(a){return a.groupeStatut!=='invite'&&_waGroupAccess(grp,a,null).eligible;}).length;
+
+    h+='<div class="card mb16">';
+    h+='<div class="fl2 fic fsb mb14 fw g8">';
+    h+='<div class="fl2 fic g10"><span style="font-size:22px">📱</span><div>';
+    h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#142554">'+_esc(grp.nom)+'</div>';
+    h+='<div style="font-size:12px;color:var(--ink3);margin-top:2px">Niveau : <strong>'+_esc(grp.niveau)+'</strong>';
+    if(grp.lien) h+=' · <a href="'+_esc(grp.lien)+'" target="_blank" style="color:#25D366;font-weight:700">Lien groupe ↗</a>';
+    h+='</div></div></div>';
+    h+='<div class="fl2 fic g8 fw">';
+    h+='<span style="background:'+mc+'22;color:'+mc+';border:1px solid '+mc+'44;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700">'+mt+'</span>';
+    if(mode==='abonnement'&&plansReq.length) h+='<span style="font-size:11px;color:var(--ink3)">Plans : '+plansReq.map(planLabel).join(', ')+'</span>';
+    h+='<button class="btn bo xs" onclick="_waConfigAccess(\''+grp.id+'\')">🔧 Modifier accès</button>';
+    if(eligibleNotInvited>0) h+='<button class="btn xs" style="background:#25D366;color:#fff" onclick="_waInviteEligibles(\''+grp.id+'\')">📲 Inviter '+eligibleNotInvited+' éligible(s)</button>';
+    h+='</div></div>';
+
+    // Table élèves
+    if(students.length){
+      h+='<div style="margin-bottom:14px">';
+      h+='<div style="font-size:11px;font-weight:700;color:#142554;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">👨‍🎓 Élèves ('+students.length+')</div>';
+      h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+      h+='<thead><tr style="background:#F8FAFF"><th style="padding:6px 10px;text-align:left">Élève</th><th style="padding:6px 8px">Scolarité</th><th style="padding:6px 8px">Éligibilité</th><th style="padding:6px 8px">Invitation</th></tr></thead><tbody>';
+      students.forEach(function(s){
+        var a2=_waGroupAccess(grp,null,s);
+        var ec=a2.eligible?'#059669':'#DC2626';
+        var vAcc=(DB.visitorAccounts||[]).find(function(a){return a.cls===s.cls&&(a.nom.toLowerCase()===s.nom.toLowerCase()||a.pre.toLowerCase()===s.pre.toLowerCase());});
+        var wasInvited=vAcc&&vAcc.groupeStatut==='invite';
+        h+='<tr style="border-bottom:1px solid var(--bg2)">';
+        h+='<td style="padding:6px 10px"><div style="font-weight:600">'+_esc(s.nom)+' '+_esc(s.pre)+'</div><div style="font-size:10px;color:var(--ink4)">'+_esc(s.mat)+'</div></td>';
+        h+='<td style="padding:6px 8px;text-align:center"><span class="bg '+(s.stat==='Payé'?'bgg':'bgr')+' xs">'+_esc(s.stat)+'</span></td>';
+        h+='<td style="padding:6px 8px;text-align:center"><span style="color:'+ec+';font-size:11px;font-weight:600">'+(a2.eligible?'✅':'❌')+' '+_esc(a2.reason)+'</span></td>';
+        h+='<td style="padding:6px 8px;text-align:center">';
+        if(wasInvited){h+='<span style="color:#059669;font-size:11px;font-weight:600">✅ Invité</span>';}
+        else if(a2.eligible&&vAcc){h+='<button class="btn xs" style="background:#25D366;color:#fff" onclick="_sendWAGroupInvite(\''+vAcc.id+'\')">📲 Inviter</button>';}
+        else if(a2.eligible){h+='<span style="color:#059669;font-size:11px">✅ Éligible</span>';}
+        else if(a2.canManuel&&vAcc){h+='<button class="btn xs bo" onclick="_waManuelInvite(\''+vAcc.id+'\')">⚙️ Accorder</button>';}
+        else{h+='<span style="color:#9CA3AF;font-size:10px">—</span>';}
+        h+='</td></tr>';
+      });
+      h+='</tbody></table></div></div>';
+    }
+
+    // Table visiteurs
+    if(visitors.length){
+      h+='<div>';
+      h+='<div style="font-size:11px;font-weight:700;color:#142554;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">🌐 Comptes visiteurs ('+visitors.length+')</div>';
+      h+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">';
+      h+='<thead><tr style="background:#F8FAFF"><th style="padding:6px 10px;text-align:left">Visiteur</th><th style="padding:6px 8px">Statut</th><th style="padding:6px 8px">Abonnements</th><th style="padding:6px 8px">Éligibilité</th><th style="padding:6px 8px">Invitation</th></tr></thead><tbody>';
+      visitors.forEach(function(a){
+        var a2=_waGroupAccess(grp,a,null);
+        var ec=a2.eligible?'#059669':'#DC2626';
+        h+='<tr style="border-bottom:1px solid var(--bg2)">';
+        h+='<td style="padding:6px 10px"><div style="font-weight:600">'+_esc(a.pre)+' '+_esc(a.nom)+'</div><div style="font-size:10px;color:var(--ink4)">'+_esc(a.tel||a.email||'—')+'</div></td>';
+        h+='<td style="padding:6px 8px;text-align:center"><span class="bg '+(a.statut==='actif'?'bgg':'bgr')+' xs">'+_esc(a.statut||'—')+'</span></td>';
+        h+='<td style="padding:6px 8px;font-size:10px;color:var(--ink3)">'+((a.plans||[]).map(planLabel).join(', ')||'—')+'</td>';
+        h+='<td style="padding:6px 8px;text-align:center"><span style="color:'+ec+';font-size:11px;font-weight:600">'+(a2.eligible?'✅':'❌')+' '+_esc(a2.reason)+'</span></td>';
+        h+='<td style="padding:6px 8px;text-align:center">';
+        if(a.groupeStatut==='invite'){
+          h+='<div style="font-size:10px;color:#059669;font-weight:700">✅ Invité '+_esc(a.dateInvitGroupe||'')+'</div>';
+          h+='<button class="btn xs bo mt2" onclick="_sendWAGroupInvite(\''+a.id+'\')">🔄 Renvoyer</button>';
+        } else if(a2.eligible){
+          h+='<button class="btn xs" style="background:#25D366;color:#fff" onclick="_validerEtInviter(\''+a.id+'\')">📲 Inviter</button>';
+        } else if(a2.canManuel){
+          h+='<button class="btn xs bo" onclick="_waManuelInvite(\''+a.id+'\')">⚙️ Accorder</button>';
+        } else {
+          h+='<span style="color:#9CA3AF;font-size:10px">Non éligible</span>';
+        }
+        h+='</td></tr>';
+      });
+      h+='</tbody></table></div></div>';
+    }
+
+    if(!students.length&&!visitors.length){
+      h+='<div class="empty xs2">Aucun élève ou visiteur inscrit dans cette classe</div>';
+    }
+    h+='</div>'; // card
+  });
+
+  return h;
 }
 
 // Dashboard inscriptions en attente d'invitation groupe
