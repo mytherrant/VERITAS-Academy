@@ -2395,6 +2395,231 @@ button, [role="button"],
 .gallery-card { transition: transform var(--t-mid) var(--ease-spring), box-shadow var(--t-mid) var(--ease-smooth); }
 .gallery-card:hover { transform: translateY(-4px) scale(1.01); }
 .gallery-card .gallery-overlay { transition: opacity var(--t-mid) var(--ease-smooth); }
+
+/* ════════════════════════════════════════════════════════════
+   DESIGN BOOST v2 — Effets plus perceptibles, toujours visibles
+   ════════════════════════════════════════════════════════════ */
+
+/* ── B1. BOUTONS PRIMAIRES — glow pulsé permanent ── */
+@keyframes btnGlowPulse {
+  0%,100% { box-shadow: 0 4px 18px rgba(60,141,255,.25), 0 1px 4px rgba(60,141,255,.12); }
+  50%     { box-shadow: 0 6px 28px rgba(60,141,255,.42), 0 2px 8px rgba(60,141,255,.20); }
+}
+.btn.bi {
+  animation: btnGlowPulse 2.8s ease-in-out infinite;
+}
+.btn.bi:hover {
+  animation: none;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 10px 32px rgba(60,141,255,.45) !important;
+}
+
+/* ── B2. CARDS — hover plus dramatique ── */
+.card:hover, .vcard:hover, .sc:hover, .rc:hover, .nc:hover, .bc:hover {
+  transform: translateY(-10px) rotateX(1deg) !important;
+  box-shadow: 0 28px 64px rgba(20,37,84,.16), 0 8px 20px rgba(20,37,84,.10) !important;
+  border-top: 2px solid #FFC93C !important;
+}
+
+/* ── B3. SIDEBAR ACTIF — indicateur toujours visible + glow pulsé ── */
+@keyframes sidebarGlow {
+  0%,100% { box-shadow: inset 4px 0 0 #FFC93C, 0 0 10px rgba(255,201,60,.20); }
+  50%     { box-shadow: inset 4px 0 0 #FFE082, 0 0 20px rgba(255,201,60,.40); }
+}
+.sb .sbit.on {
+  animation: sidebarGlow 2s ease-in-out infinite !important;
+  background: linear-gradient(90deg, rgba(255,201,60,.18) 0%, rgba(255,201,60,.04) 100%) !important;
+  border-radius: 8px !important;
+}
+/* Barre indicator toujours visible même sans hover */
+.sb .sbit::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  width: 3px;
+  height: 30%;
+  background: rgba(255,201,60,.35);
+  border-radius: 0 3px 3px 0;
+  transform: translateY(-50%);
+  transition: height .3s var(--ease-spring), background .3s ease;
+}
+.sb .sbit:hover::before { height: 60%; background: rgba(255,201,60,.65); }
+.sb .sbit.on::before    { height: 100%; background: #FFC93C; }
+
+/* ── B4. CHIFFRES STATISTIQUES — shimmer or permanent ── */
+@keyframes goldShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.scv, .lsn, .hours-value, .avg-num, .vstats-n, .vstat-n {
+  background: linear-gradient(90deg, var(--gold,#FFC93C) 0%, #FFE082 40%, var(--gold,#FFC93C) 60%, #FFE082 100%);
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: goldShimmer 3s linear infinite !important;
+  font-weight: 700 !important;
+}
+
+/* ── B5. TITRES DE SECTION — underline doré animé permanent ── */
+@keyframes titleUnderline {
+  0%   { background-position: -100% 0; }
+  100% { background-position:  200% 0; }
+}
+.pgt, h2.pgt, .vsec-h, .vsec-title, .vsh {
+  position: relative;
+}
+.pgt::after, .vsec-h::after, .vsec-title::after, .vsh::after {
+  content: '';
+  display: block;
+  height: 3px;
+  width: 100%;
+  max-width: 180px;
+  margin-top: 6px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #142554 0%, #FFC93C 30%, #3C8DFF 60%, #FFC93C 80%, #142554 100%);
+  background-size: 200% auto;
+  animation: titleUnderline 3s linear infinite;
+}
+
+/* ── B6. LIGNES TABLEAU — hover or franc ── */
+tr:hover td {
+  background: rgba(255,201,60,.09) !important;
+  transition: background .18s ease;
+}
+tr:hover td:first-child {
+  border-left: 3px solid #FFC93C;
+}
+
+/* ── B7. BADGES — glow doré permanent ── */
+@keyframes badgeGlow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(255,201,60,.0); }
+  50%     { box-shadow: 0 0 0 5px rgba(255,201,60,.25); }
+}
+.badge, .pk-badge, .sbbg, .nb {
+  animation: badgeGlow 2.5s ease-in-out infinite;
+}
+.badge:hover, .pk-badge:hover { transform: scale(1.12) !important; }
+
+/* ── B8. CHAMPS FORMULAIRE — ring visible même sans focus ── */
+.fi, .lf input, .fg input, .fg select, .fg textarea {
+  border: 1.5px solid rgba(60,141,255,.20) !important;
+  transition: all .3s var(--ease-spring) !important;
+}
+.fi:focus, .lf input:focus, .fg input:focus, .fg select:focus, .fg textarea:focus {
+  border-color: #FFC93C !important;
+  box-shadow: 0 0 0 4px rgba(255,201,60,.20), 0 2px 10px rgba(255,201,60,.12) !important;
+  transform: translateY(-2px) !important;
+  outline: none !important;
+}
+
+/* ── B9. PACK CARDS — lift + ombre colorée permanente ── */
+.pk {
+  box-shadow: 0 4px 20px rgba(20,37,84,.10) !important;
+  transition: all .35s var(--ease-spring) !important;
+}
+.pk:hover {
+  transform: translateY(-10px) scale(1.025) !important;
+  box-shadow: 0 28px 70px rgba(255,201,60,.22), 0 10px 24px rgba(20,37,84,.15) !important;
+}
+.pk.hot, .pk-featured {
+  box-shadow: 0 6px 28px rgba(255,201,60,.28) !important;
+  animation: badgeGlow 2s ease-in-out infinite !important;
+}
+
+/* ── B10. NAV VISITEUR — fond doré au survol plus visible ── */
+.vnav-btn {
+  transition: background .2s ease, color .2s ease, transform .2s var(--ease-spring) !important;
+}
+.vnav-btn:hover {
+  background: rgba(255,201,60,.15) !important;
+  color: #FFC93C !important;
+  transform: translateY(-2px) !important;
+}
+.vnav-btn.on {
+  color: #FFC93C !important;
+  border-bottom: 2px solid #FFC93C !important;
+}
+
+/* ── B11. TOASTS — slide-up spring plus prononcé ── */
+@keyframes toastBounce {
+  0%  { opacity:0; transform: translateY(40px) scale(.85); }
+  55% { transform: translateY(-8px) scale(1.04); }
+  75% { transform: translateY(4px) scale(.98); }
+  100%{ opacity:1; transform: translateY(0) scale(1); }
+}
+.toast { animation: toastBounce .5s var(--ease-bounce) forwards !important; }
+
+/* ── B12. MODAL — entrée 3D plus dramatique ── */
+@keyframes modalBounceIn {
+  0%  { opacity:0; transform: scale(.80) translateY(30px); }
+  60% { transform: scale(1.04) translateY(-4px); }
+  80% { transform: scale(.98) translateY(2px); }
+  100%{ opacity:1; transform: scale(1) translateY(0); }
+}
+.modal { animation: modalBounceIn .4s var(--ease-bounce) !important; }
+
+/* ── B13. BOUTONS COMMANDER / ORDER ── */
+.book-order-btn, .sc-btn {
+  transition: all .25s var(--ease-spring) !important;
+}
+.book-order-btn:hover, .sc-btn:hover {
+  transform: scale(1.06) translateY(-2px) !important;
+  box-shadow: 0 8px 24px rgba(255,201,60,.30) !important;
+}
+
+/* ── B14. TOPBAR SHADOW plus visible au scroll ── */
+.tb.scrolled {
+  box-shadow: 0 4px 24px rgba(20,37,84,.18) !important;
+  border-bottom: 1px solid rgba(255,201,60,.12) !important;
+}
+
+/* ── B15. BARRE PROGRESSION — shimmer permanent ── */
+@keyframes progressShimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.pf, .cc-fill, .quiz-progress-fill, .exam-fill {
+  background-image: linear-gradient(90deg,
+    var(--bl,#3C8DFF) 0%,
+    #6DB3FF 40%,
+    var(--bl,#3C8DFF) 60%,
+    #FFC93C 100%) !important;
+  background-size: 250% auto;
+  animation: progressShimmer 2s linear infinite !important;
+}
+
+/* ── B16. SCROLL PROGRESS — gradient plus vif ── */
+.v-scroll-progress {
+  height: 4px !important;
+  background: linear-gradient(90deg, #3C8DFF, #FFC93C, #FF6B6B, #FFC93C, #3C8DFF) !important;
+  background-size: 300% auto !important;
+  animation: progressShimmer 3s linear infinite !important;
+}
+
+/* ── B17. GALERIE / AVATARS — transition plus ample ── */
+.gallery-card:hover {
+  transform: translateY(-8px) scale(1.04) !important;
+  box-shadow: 0 20px 48px rgba(0,0,0,.20) !important;
+}
+.av:hover, .review-av:hover {
+  transform: scale(1.15) !important;
+  box-shadow: 0 6px 20px rgba(255,201,60,.30) !important;
+}
+
+/* ── B18. CURSOR POINTER renforcé ── */
+.btn, .card, .vcard, .sc, .pk, .bc, .rc, .nc, .sbit, .tab, .ltb,
+.vnav-btn, .book-order-btn, .sc-btn, .lbtn, .back-btn,
+.gallery-card, .feat-card, .ai-card, .dv-card, .jeu-card,
+.review-card, .partner-card { cursor: pointer !important; }
+
+/* ── B19. FOCUS VISIBLE — ring plus épais ── */
+:focus-visible {
+  outline: 3px solid #FFC93C !important;
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 6px rgba(255,201,60,.18) !important;
+  border-radius: 6px !important;
+}
 </style>
 </head>
 <body>
