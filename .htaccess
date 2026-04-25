@@ -9,8 +9,9 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 # RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
-# Default document
-DirectoryIndex index.html
+# Default document — index.php en premier pour bypasser le cache LiteSpeed
+# index.php sert app.html avec des headers no-cache PHP (plus fiables que .htaccess)
+DirectoryIndex index.php index.html
 
 # Security headers
 <IfModule mod_headers.c>
