@@ -3201,7 +3201,15 @@ function defaultDB(){return{
     commandes:[],soumissions:[],telechargementsGratuits:{}
   },
   visitorAccounts:[],
-  whatsappGroupes:[],   // {id, niveau, nom, lien, actif}
+  whatsappGroupes:[
+    {id:'wag1',niveau:'Tle D',nom:'VÉRITAS — Terminale D 2025-2026',lien:'https://chat.whatsapp.com/D4tuJO1HHVh9H3SPQWnkXG',actif:true},
+    {id:'wag2',niveau:'Tle C',nom:'VÉRITAS — Terminale C 2025-2026',lien:'https://chat.whatsapp.com/FvTTAnXXQqYLe1YvW619L0',actif:true},
+    {id:'wag3',niveau:'1ère D',nom:'VÉRITAS — 1ère D 2025-2026',lien:'https://chat.whatsapp.com/Bx1XRiFJa6xIcNkJ7420s5',actif:true},
+    {id:'wag4',niveau:'1ère C',nom:'VÉRITAS — 1ère C 2025-2026',lien:'https://chat.whatsapp.com/Cyd7e13QZNM6zNy7zUS9a3',actif:true},
+    {id:'wag5',niveau:'3ème',nom:'VÉRITAS — 3ème 2025-2026',lien:'https://chat.whatsapp.com/KfCaRDhJhx36dj1ihLnedu',actif:true},
+    {id:'wag6',niveau:'1ère A',nom:'VÉRITAS — 1ère A 2025-2026',lien:'https://chat.whatsapp.com/DVqUVRcCVvgJLbM6D06CnP',actif:true},
+    {id:'wag7',niveau:'Tle A',nom:'VÉRITAS — Terminale A 2025-2026',lien:'https://chat.whatsapp.com/K4y5AATBNZl26urdl28eZ0',actif:true}
+  ],
   evaluations:[],
   coachingPacks:[],
   visitorOrders:[],
@@ -3325,6 +3333,20 @@ function load(){
   if(!DB.products)DB.products=defaultDB().products;
   if(!DB.orientationDemandes)DB.orientationDemandes=[];
   if(!DB.extraits)DB.extraits=[];
+  // Seed/merge default WhatsApp class groups
+  if(!DB.whatsappGroupes||!DB.whatsappGroupes.length){
+    DB.whatsappGroupes=defaultDB().whatsappGroupes;
+  } else {
+    defaultDB().whatsappGroupes.forEach(function(dg){
+      if(!DB.whatsappGroupes.find(function(g){return g.niveau===dg.niveau;})){
+        DB.whatsappGroupes.push(dg);
+      } else {
+        // Met à jour le lien si le groupe par défaut en a un et que l'existant est vide
+        var eg=DB.whatsappGroupes.find(function(g){return g.niveau===dg.niveau;});
+        if(eg&&!eg.lien&&dg.lien) eg.lien=dg.lien;
+      }
+    });
+  }
   DB.admins.forEach(a=>{if(!a.role2)a.role2=a.role==='Directeur'?'admin':'secretaire';});
   // Ensure default admin exists (mot de passe sera hashé par _migratePasswords)
   if(!DB.admins.find(function(a){return a.user==='directeur';})){
@@ -4736,7 +4758,9 @@ function vShowSec(sec,btn){
       h+='<input class="fi" style="flex:1;min-width:140px;font-size:12px;border-radius:10px" placeholder="🔍 Rechercher..." id="elSearch" oninput="filterElContents()">';
       h+='</div>';
 
+      var _delDef=DB.deletedDefaults||[];
       var filtered=(el.contenus||[]).filter(function(item){
+        if(_delDef.indexOf(item.id)>=0) return false;
         if(item.cat!==selCat) return false;
         if(selCls!=='Toutes'&&item.classe!==selCls) return false;
         return true;
@@ -7966,6 +7990,7 @@ function pgDash(){
       <div class="sc ${s.stat==='Payé'?'scgr':'scr'}" onclick="goTo('mon_paiement')" style="cursor:pointer"><div class="sci">💳</div><div class="scl">Paiement</div><div class="scv ${s.stat==='Payé'?'vgr':'vr'}" style="font-size:14px">${s.stat}</div><div class="scs">${fmt(s.frais)}/mois</div></div>
       <div class="sc scb" onclick="goTo('mes_devoirs')" style="cursor:pointer"><div class="sci">📋</div><div class="scl">Devoirs à rendre</div><div class="scv vb">${dvsPending.length}</div><div class="scs">${dvsE.length} au total</div></div>
     </div>
+    ${(function(){var _wg=(DB.whatsappGroupes||[]).find(function(g){return g.actif&&g.niveau===s.cls;});return _wg&&_wg.lien?'<div style="background:linear-gradient(135deg,#25D366,#128C7E);border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:12px"><span style="font-size:26px">📱</span><div><div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#fff">Groupe WhatsApp — '+_wg.nom+'</div><div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px">Rejoignez le groupe officiel de votre classe</div></div></div><a href="'+_wg.lien+'" target="_blank" style="background:#fff;color:#128C7E;font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;padding:8px 18px;border-radius:20px;text-decoration:none;white-space:nowrap;flex-shrink:0">📲 Rejoindre</a></div>':'';})()}
     <div class="g2">
       <div class="card"><div class="ct">📝 Mes dernières notes — ${TRS[0]}</div>
         ${gr.length===0?'<div class="empty"><div class="empty-ico">📋</div>Aucune note disponible</div>':gr.map(g=>{const m=(g.n1+g.n2)/2;const ap2=getAppr(m);return`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)">
@@ -9822,22 +9847,32 @@ function _previewManuel(bid){
   if(isUrl&&isPdf){_showPDFViewer(data,nom,iA());return;}
   // URL serveur + autre type → ouvrir dans un onglet
   if(isUrl){window.open(data,'_blank');return;}
-  // Données locales (base64) → popup
-  var w=window.open('','_blank','width=900,height=700');
-  if(!w){toast('Popup bloqué — autorisez les popups','warn');return;}
-  var body='';
-  if(isPdf){body='<iframe src="'+data+'" style="width:100%;height:calc(100vh - 44px);border:none"></iframe>';}
-  else if(isImg){body='<div style="background:#111;min-height:calc(100vh - 44px);display:flex;align-items:center;justify-content:center"><img src="'+data+'" style="max-width:100%;max-height:calc(100vh - 60px);display:block"></div>';}
-  else if(isVid){body='<video src="'+data+'" controls style="width:100%;max-height:calc(100vh - 44px);display:block;background:#000"></video>';}
-  else{body='<div style="padding:40px;text-align:center;background:#111;min-height:calc(100vh - 44px)"><p style="font-size:16px;margin-bottom:20px;color:#fff">📄 '+nom+'</p><a href="'+data+'" download="'+nom+'" style="background:#142554;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">⬇️ Télécharger</a></div>';}
-  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+nom+' — VÉRITAS</title>'
-    +'<style>body{margin:0;padding:0;background:#111;color:#fff;height:100vh}'
-    +'.bar{background:#142554;padding:10px 18px;display:flex;align-items:center;justify-content:space-between}'
-    +'.bar-t{font-family:sans-serif;font-size:14px;font-weight:700;color:#FFC93C}'
-    +'.bar-c{font-size:11px;color:rgba(255,255,255,.5)}'
-    +'</style></head><body>'
-    +'<div class="bar"><span class="bar-t">📖 '+nom+'</span><span class="bar-c">© Mythe Errant 2026 · VÉRITAS</span></div>'
-    +body+'</body></html>');
+  // Données locales (base64) → popup ou modal de secours
+  function _showInModal(){
+    var inner='';
+    if(isPdf){inner='<div style="border-radius:10px;overflow:hidden;border:1px solid var(--bg3)"><embed src="'+data+'" type="application/pdf" style="width:100%;height:60vh;border:none"></div>';}
+    else if(isImg){inner='<div style="text-align:center"><img src="'+data+'" style="max-width:100%;max-height:60vh;border-radius:10px;display:inline-block"></div>';}
+    else if(isVid){inner='<video src="'+data+'" controls style="width:100%;max-height:55vh;border-radius:10px;display:block;background:#000"></video>';}
+    else{inner='<div style="text-align:center;padding:30px"><div style="font-size:42px;margin-bottom:12px">📄</div><div style="font-size:14px;color:var(--ink3);margin-bottom:16px">'+nom+'</div><a href="'+data+'" download="'+nom+'" class="btn bi">⬇️ Télécharger</a></div>';}
+    M('📖 '+nom,'',inner,'<button class="btn bo" onclick="cm()">Fermer</button>',true);
+  }
+  var w=window.open('','_blank','width=900,height=700,resizable=yes,scrollbars=yes');
+  if(!w||w.closed){_showInModal();return;}
+  try{
+    var body='';
+    if(isPdf){body='<iframe src="'+data+'" style="width:100%;height:calc(100vh - 44px);border:none"></iframe>';}
+    else if(isImg){body='<div style="background:#111;min-height:calc(100vh - 44px);display:flex;align-items:center;justify-content:center"><img src="'+data+'" style="max-width:100%;max-height:calc(100vh - 60px);display:block"></div>';}
+    else if(isVid){body='<video src="'+data+'" controls style="width:100%;max-height:calc(100vh - 44px);display:block;background:#000"></video>';}
+    else{body='<div style="padding:40px;text-align:center;background:#111;min-height:calc(100vh - 44px)"><p style="font-size:16px;margin-bottom:20px;color:#fff">📄 '+nom+'</p><a href="'+data+'" download="'+nom+'" style="background:#142554;color:#fff;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">⬇️ Télécharger</a></div>';}
+    w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+nom+' — VÉRITAS</title>'
+      +'<style>body{margin:0;padding:0;background:#111;color:#fff;height:100vh}'
+      +'.bar{background:#142554;padding:10px 18px;display:flex;align-items:center;justify-content:space-between}'
+      +'.bar-t{font-family:sans-serif;font-size:14px;font-weight:700;color:#FFC93C}'
+      +'.bar-c{font-size:11px;color:rgba(255,255,255,.5)}'
+      +'</style></head><body>'
+      +'<div class="bar"><span class="bar-t">📖 '+nom+'</span><span class="bar-c">© Mythe Errant 2026 · VÉRITAS</span></div>'
+      +body+'</body></html>');
+  }catch(e){w.close();_showInModal();}
   w.document.close();
 }
 
@@ -12745,6 +12780,8 @@ function _restoreCustomJeux(){
 // ── Lanceur universel (utilisé dans les onclick des cartes jeux) ─────────────
 // Cherche le jeu à l'heure du clic — plus besoin de window['_jeuHtml_xxx']
 function vLaunchJeu(id){
+  var _delJ=DB.deletedJeux||[];
+  if(_delJ.indexOf(id)>=0){toast('Ce jeu n\'est plus disponible.','warn');return;}
   var j=(typeof JEUX_CATALOGUE!=='undefined')&&JEUX_CATALOGUE.find(function(x){return x.id===id;});
   if(!j){
     // Fallback : chercher dans DB.customJeux (peut arriver si JEUX_CATALOGUE pas encore peuplé)
@@ -14728,8 +14765,9 @@ function showJeuxEdu(){
     h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px'>";
     items.forEach(function(it){
       // Bouton "Jeux" de l'œuvre : chercher l'entrée catalogue par oeuvreKey OU par id préfixé "litt_"
-      var matchJeu=JEUX_CATALOGUE.find(function(j){return j.oeuvre===it.key;})
-        ||JEUX_CATALOGUE.find(function(j){return j.id&&(j.id==='litt_'+it.key||j.id.endsWith('_'+it.key.replace(/[^a-z0-9]/gi,'_')));});
+      var _deleted=DB.deletedJeux||[];
+      var matchJeu=JEUX_CATALOGUE.find(function(j){return j.oeuvre===it.key&&_deleted.indexOf(j.id)<0;})
+        ||JEUX_CATALOGUE.find(function(j){return j.id&&_deleted.indexOf(j.id)<0&&(j.id==='litt_'+it.key||j.id.endsWith('_'+it.key.replace(/[^a-z0-9]/gi,'_')));});
       // Utiliser vLaunchJeu si un jeu catalogue existe, sinon afficher la carte mentale
       var clickAction=matchJeu?"vLaunchJeu('"+matchJeu.id+"')":"_showLittCarte('"+it.key+"')";
 
@@ -19632,13 +19670,14 @@ function autoCreateWAGroups(){
   cls.forEach(function(cl){
     var existing=DB.waGroupes.find(function(g){return g.classe===cl;});
     if(!existing){
+      var _waLien=((DB.whatsappGroupes||[]).find(function(g){return g.niveau===cl;})||{}).lien||'';
       DB.waGroupes.push({
         id:waGroupId(),
         classe:cl,
         nom:'VÉRITAS — '+cl,
         membres:[],
         dateCreation:today(),
-        lien:'',
+        lien:_waLien,
         actif:true
       });
     }
