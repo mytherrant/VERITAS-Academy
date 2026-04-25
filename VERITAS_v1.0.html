@@ -21851,23 +21851,21 @@ function _sendWAGroupInvite(accId){
   if(!acc){ toast('Compte introuvable','warn'); return; }
   var tel = (acc.tel||'').replace(/[\s\-\(\)]/g,'');
   if(tel && !tel.startsWith('+')) tel = '+237' + tel;
-  if(!tel){ toast('Pas de numÃ©ro WhatsApp pour cet apprenant','warn'); return; }
-  // Trouver le groupe correspondant au niveau/classe
+  if(!tel){ toast('Pas de num\u00e9ro WhatsApp pour cet apprenant','warn'); return; }
   var groupes = DB.whatsappGroupes || [];
   var groupe = groupes.find(function(g){
     return g.actif && (g.niveau===acc.cls || g.niveau==='tous');
   });
   var lienGroupe = groupe ? groupe.lien : '';
   var nomGroupe  = groupe ? groupe.nom  : 'Classe '+acc.cls;
-  var msg = 'ðŸŽ“ *Bienvenue au Centre VÃ‰RITAS !*\n\n'
+  var msg = '\uD83C\uDF93 *Bienvenue au Centre V\u00c9RITAS !*\n\n'
     + 'Bonjour ' + acc.pre + ' ' + acc.nom + ',\n\n'
-    + 'Votre inscription a bien Ã©tÃ© validÃ©e.\n'
-    + 'Rejoignez votre groupe de classe pour suivre toutes les activitÃ©s :\n\n'
-    + (lienGroupe ? 'ðŸ‘‰ *' + nomGroupe + '* : ' + lienGroupe : 'âš ï¸ Lien de groupe Ã  configurer dans l\'admin') + '\n\n'
-    + 'Votre accÃ¨s Ã  la plateforme e-learning est maintenant actif.\n'
-    + 'ðŸ“ž Pour toute question : wa.me/237697637739\n\n'
-    + 'âœ¨ Bonne prÃ©paration ! â€” _Ã‰quipe VÃ‰RITAS_';
-  // Marquer comme invitÃ©
+    + 'Votre inscription a bien \u00e9t\u00e9 valid\u00e9e.\n'
+    + 'Rejoignez votre groupe de classe pour suivre toutes les activit\u00e9s :\n\n'
+    + (lienGroupe ? '\uD83D\uDC49 *' + nomGroupe + '* : ' + lienGroupe : '\u26A0\uFE0F Lien de groupe \u00e0 configurer dans l\'admin') + '\n\n'
+    + 'Votre acc\u00e8s \u00e0 la plateforme e-learning est maintenant actif.\n'
+    + '\uD83D\uDCDE Pour toute question : wa.me/237697637739\n\n'
+    + '\u2728 Bonne pr\u00e9paration ! \u2014 _\u00c9quipe V\u00c9RITAS_';
   var vaIdx = (DB.visitorAccounts||[]).findIndex(function(a){ return a.id===accId; });
   if(vaIdx>=0){
     DB.visitorAccounts[vaIdx].groupeStatut = 'invite';
@@ -21876,10 +21874,40 @@ function _sendWAGroupInvite(accId){
   save(); re();
   var url = 'https://wa.me/' + tel.replace('+','') + '?text=' + encodeURIComponent(msg);
   window.open(url, '_blank');
-  toast('âœ… WhatsApp ouvert â€” envoyez l\'invitation Ã  ' + acc.pre);
+  toast('&#9989; WhatsApp ouvert — envoyez l\'invitation \u00e0 ' + acc.pre);
 }
 
-// Valider une inscription et envoyer l'invitation groupe en une action
+function _waInviterEleve(eleveId){
+  var idx=(DB.students||[]).findIndex(function(s){return s.id===eleveId;});
+  if(idx<0){toast('El\u00e8ve introuvable','warn');return;}
+  DB.students[idx].waInvited=true;
+  DB.students[idx].dateInvitGroupe=today();
+  save(); cm();
+  _waEnvoyerEleve(eleveId);
+}
+function _waEnvoyerEleve(eleveId){
+  var s=(DB.students||[]).find(function(x){return x.id===eleveId;});
+  if(!s){toast('El\u00e8ve introuvable','warn');return;}
+  var tel=((s.tel||s.phone||'')).replace(/[\s\-\(\)]/g,'');
+  if(tel && !tel.startsWith('+')) tel='+237'+tel;
+  if(!tel){toast('Pas de num\u00e9ro WhatsApp pour cet \u00e9l\u00e8ve','warn');return;}
+  var groupes=DB.whatsappGroupes||[];
+  var groupe=groupes.find(function(g){return g.actif&&(g.niveau===(s.cls||s.classe)||g.niveau==='tous');});
+  var lienGroupe=groupe?groupe.lien:'';
+  var nomGroupe=groupe?groupe.nom:'Classe '+(s.cls||s.classe||'');
+  var msg='\uD83C\uDF93 *Bienvenue au Centre V\u00c9RITAS !*\n\n'
+    +'Bonjour '+(s.pre||s.prenom||'')+' '+s.nom+',\n\n'
+    +'Rejoignez votre groupe de classe :\n\n'
+    +(lienGroupe?'\uD83D\uDC49 *'+nomGroupe+'* : '+lienGroupe:'\u26A0\uFE0F Lien de groupe \u00e0 configurer dans l\'admin')+'\n\n'
+    +'\uD83D\uDCDE Pour toute question : wa.me/237697637739\n\n'
+    +'\u2728 Bonne pr\u00e9paration ! \u2014 _\u00c9quipe V\u00c9RITAS_';
+  var idx2=(DB.students||[]).findIndex(function(x){return x.id===eleveId;});
+  if(idx2>=0){DB.students[idx2].waInvited=true;DB.students[idx2].dateInvitGroupe=today();}
+  save(); re();
+  var url='https://wa.me/'+tel.replace('+','')+'?text='+encodeURIComponent(msg);
+  window.open(url,'_blank');
+  toast('&#9989; WhatsApp ouvert \u2014 envoyez l\'invitation \u00e0 '+(s.pre||s.prenom||''));
+}
 function _validerEtInviter(accId){
   var vaIdx = (DB.visitorAccounts||[]).findIndex(function(a){ return a.id===accId; });
   if(vaIdx<0){ toast('Compte introuvable','warn'); return; }
@@ -22250,107 +22278,84 @@ function pgWAAccess(){
 // Dashboard inscriptions en attente d'invitation groupe
 function mWAPendingMembers(){
   if(!iA()) return;
-  var pending = (DB.visitorAccounts||[]).filter(function(a){
-    return a.groupeStatut==='en_attente' || !a.groupeStatut;
-  });
-  var invited = (DB.visitorAccounts||[]).filter(function(a){
-    return a.groupeStatut==='invite';
-  });
+
+  // Visiteurs en attente (comptes en ligne)
+  var vPending = (DB.visitorAccounts||[])
+    .filter(function(a){ return a.groupeStatut==='en_attente' || !a.groupeStatut; })
+    .map(function(a){ return Object.assign({},a,{_src:'visitor'}); });
+  var vInvited = (DB.visitorAccounts||[])
+    .filter(function(a){ return a.groupeStatut==='invite'; })
+    .map(function(a){ return Object.assign({},a,{_src:'visitor'}); });
+
+  // Eleves inscrits sans invitation WA
+  var ePending = (DB.students||[])
+    .filter(function(s){ return !s.waInvited; })
+    .map(function(s){ return Object.assign({},s,{_src:'eleve', pre:s.pre||s.prenom||'', nom:s.nom||'', tel:s.tel||s.phone||'', cls:s.cls||s.classe||'', dateInscription:s.dateInscription||s.created||''}); });
+  var eInvited = (DB.students||[])
+    .filter(function(s){ return s.waInvited; })
+    .map(function(s){ return Object.assign({},s,{_src:'eleve', pre:s.pre||s.prenom||'', nom:s.nom||'', tel:s.tel||s.phone||'', cls:s.cls||s.classe||'', dateInvitGroupe:s.dateInvitGroupe||''}); });
+
+  var pending = vPending.concat(ePending);
+  var invited = vInvited.concat(eInvited);
 
   function rowPending(a){
+    var srcBadge = a._src==='eleve'
+      ? '<span style="font-size:.68rem;background:#EDE9FE;color:#5B21B6;padding:1px 5px;border-radius:4px;margin-left:4px">&#127979; El&egrave;ve</span>'
+      : '<span style="font-size:.68rem;background:#E0F2FE;color:#0369A1;padding:1px 5px;border-radius:4px;margin-left:4px">&#127760; Visiteur</span>';
+    var validateBtn = a._src==='eleve'
+      ? '<button class="btn sm" style="background:#25D366;color:#fff;margin:2px" onclick="_waInviterEleve(''+a.id+'')">&#9989; Valider + Inviter</button>'
+        +'<button class="btn sm" style="background:#142554;color:#fff;margin:2px" onclick="_waEnvoyerEleve(''+a.id+'')">&#128242; Invitation seule</button>'
+      : '<button class="btn sm" style="background:#25D366;color:#fff;margin:2px" onclick="_validerEtInviter(''+a.id+'')">&#9989; Valider + Inviter</button>'
+        +'<button class="btn sm" style="background:#142554;color:#fff;margin:2px" onclick="_sendWAGroupInvite(''+a.id+'')">&#128242; Invitation seule</button>';
     return '<tr>'
-      +'<td style="padding:8px 10px"><strong>'+_esc(a.pre)+' '+_esc(a.nom)+'</strong><br>'
-      +'<span style="font-size:.75rem;color:#555">'+_esc(a.cls||'â€”')+'</span></td>'
-      +'<td style="padding:8px 10px;font-size:.85rem">'+_esc(a.tel||'â€”')+'</td>'
-      +'<td style="padding:8px 10px;font-size:.8rem;color:#555">'+_esc(a.dateInscription||'â€”')+'</td>'
-      +'<td style="padding:8px 6px;text-align:center">'
-        +'<button class="btn sm" style="background:#25D366;color:#fff;margin:2px" onclick="_validerEtInviter(\''+a.id+'\')">âœ… Valider + Inviter</button>'
-        +'<button class="btn sm" style="background:#142554;color:#fff;margin:2px" onclick="_sendWAGroupInvite(\''+a.id+'\')">ðŸ“² Invitation seule</button>'
-      +'</td>'
+      +'<td style="padding:8px 10px"><strong>'+_esc(a.pre)+' '+_esc(a.nom)+'</strong>'+srcBadge+'<br>'
+      +'<span style="font-size:.75rem;color:#555">'+_esc(a.cls||'&mdash;')+'</span></td>'
+      +'<td style="padding:8px 10px;font-size:.85rem">'+_esc(a.tel||'&mdash;')+'</td>'
+      +'<td style="padding:8px 10px;font-size:.8rem;color:#555">'+_esc(a.dateInscription||'&mdash;')+'</td>'
+      +'<td style="padding:8px 6px;text-align:center">'+validateBtn+'</td>'
       +'</tr>';
   }
 
   function rowInvited(a){
-    return '<tr style="opacity:.7">'
-      +'<td style="padding:6px 10px">'+_esc(a.pre)+' '+_esc(a.nom)+'</td>'
-      +'<td style="padding:6px 10px;font-size:.85rem">'+_esc(a.tel||'â€”')+'</td>'
-      +'<td style="padding:6px 10px;font-size:.8rem;color:#1a5c2e">âœ… InvitÃ© le '+_esc(a.dateInvitGroupe||'â€”')+'</td>'
-      +'<td style="padding:6px 10px;text-align:center">'
-        +'<button class="btn sm" style="background:#142554;color:#fff" onclick="_sendWAGroupInvite(\''+a.id+'\')">ðŸ” Renvoyer</button>'
-      +'</td>'
+    var srcBadge = a._src==='eleve'
+      ? '<span style="font-size:.68rem;background:#EDE9FE;color:#5B21B6;padding:1px 5px;border-radius:4px;margin-left:4px">&#127979; El&egrave;ve</span>'
+      : '<span style="font-size:.68rem;background:#E0F2FE;color:#0369A1;padding:1px 5px;border-radius:4px;margin-left:4px">&#127760; Visiteur</span>';
+    var resendBtn = a._src==='eleve'
+      ? '<button class="btn sm" style="background:#142554;color:#fff" onclick="_waEnvoyerEleve(''+a.id+'')">&#128257; Renvoyer</button>'
+      : '<button class="btn sm" style="background:#142554;color:#fff" onclick="_sendWAGroupInvite(''+a.id+'')">&#128257; Renvoyer</button>';
+    return '<tr style="opacity:.75">'
+      +'<td style="padding:6px 10px">'+_esc(a.pre)+' '+_esc(a.nom)+srcBadge+'</td>'
+      +'<td style="padding:6px 10px;font-size:.85rem">'+_esc(a.tel||'&mdash;')+'</td>'
+      +'<td style="padding:6px 10px;font-size:.8rem;color:#1a5c2e">&#9989; Invit&eacute; le '+_esc(a.dateInvitGroupe||'&mdash;')+'</td>'
+      +'<td style="padding:6px 10px;text-align:center">'+resendBtn+'</td>'
       +'</tr>';
   }
 
-  var body = '<h4 style="color:#8b1a1a;margin-bottom:6px">â³ En attente d\'invitation ('+pending.length+')</h4>'
+  var body = '<h4 style="color:#8b1a1a;margin-bottom:6px">&#9203; En attente d'invitation ('+pending.length+')</h4>'
     +(pending.length
       ? '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.83rem">'
         +'<thead><tr style="background:#fff3f3"><th style="padding:6px 10px;text-align:left">Apprenant</th>'
         +'<th style="padding:6px 10px">WhatsApp</th><th style="padding:6px 10px">Inscrit le</th><th style="padding:6px 10px">Actions</th></tr></thead>'
         +'<tbody>'+pending.map(rowPending).join('')+'</tbody></table></div>'
-      : '<p style="color:#999;font-size:.85rem;padding:10px">Aucune inscription en attente ðŸŽ‰</p>')
+      : '<p style="color:#999;font-size:.85rem;padding:10px">Aucune inscription en attente &#127881;</p>')
     +'<hr style="margin:14px 0">'
-    +'<h4 style="color:#1a5c2e;margin-bottom:6px">âœ… DÃ©jÃ  invitÃ©s ('+invited.length+')</h4>'
+    +'<h4 style="color:#1a5c2e;margin-bottom:6px">&#9989; D&eacute;j&agrave; invit&eacute;s ('+invited.length+')</h4>'
     +(invited.length
       ? '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.83rem">'
+        +'<thead><tr style="background:#f0fdf4"><th style="padding:6px 10px;text-align:left">Apprenant</th>'
+        +'<th style="padding:6px 10px">WhatsApp</th><th style="padding:6px 10px">Date invitation</th><th style="padding:6px 10px">Action</th></tr></thead>'
         +'<tbody>'+invited.map(rowInvited).join('')+'</tbody></table></div>'
-      : '<p style="color:#999;font-size:.85rem;padding:10px">Aucun apprenant invitÃ© pour l\'instant.</p>');
+      : '<p style="color:#999;font-size:.85rem;padding:10px">Aucun apprenant invit&eacute; pour l'instant.</p>');
 
-  M('ðŸ“² IntÃ©gration Groupes WhatsApp',
-    pending.length+' en attente Â· '+invited.length+' invitÃ©s',
+  M('&#128242; Int&eacute;gration Groupes WhatsApp',
+    pending.length+' en attente &middot; '+invited.length+' invit&eacute;s',
     body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +'<button class="btn bi" onclick="mWAGroupes()">âš™ï¸ GÃ©rer les groupes</button>',
+    +'<button class="btn bi" onclick="mWAGroupes()">&#9881;&#65039; G&eacute;rer les groupes</button>',
     true
   );
 }
 
-
-if(typeof window.VERITAS_PAYMENTS === 'undefined'){
-  window.VERITAS_PAYMENTS = {
-    momo: {
-      label: "MTN Mobile Money",
-      numero: "+237 650 435 106",   // ← À REMPLACER
-      nomCompte: "TAKOU Jacques Miterand",
-      code: "*126#",
-      couleur: "#FFCC00",
-      ico: "📱"
-    },
-    orange: {
-      label: "Orange Money",
-      numero: "+237 697 637 739",   // ← À REMPLACER
-      nomCompte: "TAKOU Jacques Miterand",
-      code: "#150#",
-      couleur: "#FF6600",
-      ico: "🟠"
-    },
-    paypal: {
-      label: "PayPal",
-      url: "https://paypal.me/VotreUtilisateur",  // ← À REMPLACER
-      email: "contact@veritas.cm",
-      couleur: "#0070BA",
-      ico: "💳"
-    },
-    stripe: {
-      label: "Carte bancaire (Stripe)",
-      url: "https://buy.stripe.com/votre-lien-de-paiement",  // ← À REMPLACER (Stripe Payment Link)
-      couleur: "#635BFF",
-      ico: "💳"
-    },
-    bank: {
-      label: "Virement bancaire",
-      titulaire: "CENTRE VÉRITAS",
-      banque: "Afriland First Bank",
-      iban: "CM21 XXXX XXXX XXXX XXXX XXXX XXX",  // ← À REMPLACER
-      swift: "CCEICMCX",
-      couleur: "#2C3E50",
-      ico: "🏦"
-    },
-    whatsapp: "+237 697 637 739",  // ← vérifier
-    email: "contact@veritas.cm"
-  };
-}
-
-// Générer une référence de commande unique (affichée au client pour traçabilité)
 function _payRef(prefix){
   var d = new Date();
   var y = d.getFullYear().toString().slice(2);
