@@ -2063,6 +2063,338 @@ tr:hover td {
     font-size:10px!important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   VÉRITAS — Design Enhancement v1.1
+   Tokens · Animations · Micro-interactions · Transitions
+   ══════════════════════════════════════════════════════════ */
+
+/* ── 1. DESIGN TOKENS ── */
+:root {
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+  --ease-smooth: cubic-bezier(.4,0,.2,1);
+  --t-fast:  150ms;
+  --t-mid:   250ms;
+  --t-slow:  400ms;
+  --sh-gold: 0 4px 24px rgba(255,201,60,.22);
+  --sh-blue: 0 4px 24px rgba(60,141,255,.20);
+  --sh-lift: 0 14px 44px rgba(20,37,84,.13);
+}
+
+/* ── 2. SMOOTH SCROLL ── */
+html { scroll-behavior: smooth; }
+
+/* ── 3. FOCUS VISIBLE (accessibilité clavier) ── */
+:focus-visible {
+  outline: 2.5px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── 4. PREFERS-REDUCED-MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* ── 5. BOUTONS — RIPPLE + LIFT ── */
+.btn { position: relative; overflow: hidden; isolation: isolate; }
+.btn .ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.28);
+  transform: scale(0);
+  animation: rippleExpand .55s linear forwards;
+  pointer-events: none;
+}
+@keyframes rippleExpand {
+  to { transform: scale(4); opacity: 0; }
+}
+.btn.bi {
+  transition: background var(--t-fast) var(--ease-smooth),
+              box-shadow  var(--t-fast) var(--ease-smooth),
+              transform   var(--t-fast) var(--ease-smooth);
+}
+.btn.bi:hover  { transform: translateY(-2px); box-shadow: var(--sh-gold); }
+.btn.bi:active { transform: translateY(0);    box-shadow: none; }
+.btn.bg2:hover  { transform: translateY(-1px); box-shadow: var(--sh-gold); }
+.btn.bg2:active { transform: translateY(0); }
+.btn.bo:hover   { transform: translateY(-1px); }
+.btn.bo:active  { transform: translateY(0); }
+.btn:disabled   { pointer-events: none; }
+
+/* ── 6. CARTES STAT — ICÔNES FLOTTANTES + COMPTEUR ── */
+@keyframes statReveal {
+  from { opacity: 0; transform: translateY(10px) scale(.94); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.scv { animation: statReveal .6s var(--ease-spring) both; }
+.sc:nth-child(1) .scv { animation-delay: .04s; }
+.sc:nth-child(2) .scv { animation-delay: .12s; }
+.sc:nth-child(3) .scv { animation-delay: .20s; }
+.sc:nth-child(4) .scv { animation-delay: .28s; }
+.sci {
+  transition: opacity var(--t-mid) var(--ease-smooth),
+              transform var(--t-mid) var(--ease-smooth);
+  animation: floatIcon 5s ease-in-out infinite;
+}
+@keyframes floatIcon {
+  0%,100% { transform: translateY(0) rotate(0deg); }
+  50%     { transform: translateY(-6px) rotate(5deg); }
+}
+.sc:hover .sci { opacity: .22; transform: scale(1.18) rotate(-7deg) !important; }
+.scg:hover  { box-shadow: 0 8px 28px rgba(255,201,60,.16); }
+.scgr:hover { box-shadow: 0 8px 28px rgba(5,150,105,.15); }
+.scr:hover  { box-shadow: 0 8px 28px rgba(220,38,38,.12); }
+.scb:hover  { box-shadow: 0 8px 28px rgba(60,141,255,.14); }
+.scpu:hover { box-shadow: 0 8px 28px rgba(124,58,237,.12); }
+
+/* ── 7. CARD — ACCENT COULEUR AU SURVOL ── */
+.card {
+  transition: box-shadow var(--t-mid) var(--ease-smooth),
+              transform  var(--t-mid) var(--ease-smooth),
+              border-top-color var(--t-mid) var(--ease-smooth);
+  border-top: 2px solid transparent;
+}
+.card:hover {
+  border-top-color: var(--gold);
+  box-shadow: var(--sh-lift);
+  transform: translateY(-3px);
+}
+
+/* ── 8. TABLEAU — HOVER DORÉ ── */
+tr { transition: background var(--t-fast) var(--ease-smooth); }
+tr:hover td {
+  background: var(--gp) !important;
+  transition: background var(--t-fast) var(--ease-smooth);
+}
+
+/* ── 9. MODAL — ENTRÉE SPRING ── */
+.modal { animation: modalSpring .28s var(--ease-spring) both; }
+@keyframes modalSpring {
+  from { opacity: 0; transform: scale(.88) translateY(18px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.mov { animation: overlayIn .22s var(--ease-smooth) both; }
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── 10. PAGE CONTENT — FADE SLIDE ── */
+.cnt { animation: pageSlideIn .22s var(--ease-smooth) both; }
+@keyframes pageSlideIn {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 11. SIDEBAR — BARRE INDICATRICE ANIMÉE ── */
+.sbit::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 50%;
+  width: 3px; height: 0;
+  background: rgba(255,201,60,.65);
+  border-radius: 0 3px 3px 0;
+  transform: translateY(-50%);
+  transition: height var(--t-mid) var(--ease-spring);
+}
+.sbit:hover::before { height: 55%; }
+.sbit.on::before    { height: 100%; background: #FFC93C; }
+.sbit.on .sbic      { filter: drop-shadow(0 0 4px rgba(255,201,60,.7)); }
+
+/* ── 12. TOAST — SLIDE UP SPRING ── */
+#toast { animation: toastIn .32s var(--ease-spring) both; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(22px) scale(.90); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── 13. BARRES DE PROGRESSION — SHIMMER ── */
+.pf { position: relative; overflow: hidden; }
+.pf::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,.38) 50%,
+    transparent 100%);
+  background-size: 200% 100%;
+  animation: barShimmer 2.2s ease-in-out infinite;
+  border-radius: inherit;
+}
+@keyframes barShimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* ── 14. CHAMPS FORMULAIRE — FOCUS DORÉ ── */
+.fi {
+  transition: border-color var(--t-fast) var(--ease-smooth),
+              background   var(--t-fast) var(--ease-smooth),
+              box-shadow   var(--t-fast) var(--ease-smooth);
+}
+.fi:focus {
+  border-color: var(--gold);
+  background: var(--sur);
+  box-shadow: 0 0 0 3.5px rgba(255,201,60,.13), 0 1px 4px rgba(20,37,84,.06);
+}
+
+/* ── 15. CARDS PORTAIL — ENTRÉE DÉCALÉE ── */
+@keyframes cardFadeUp {
+  from { opacity: 0; transform: translateY(16px) scale(.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.vsec .vcard,
+.vsec .cc,
+.vsec .nc,
+.vsec .rc { animation: cardFadeUp .45s var(--ease-spring) both; }
+.vsec > *:nth-child(1) { animation-delay: .03s; }
+.vsec > *:nth-child(2) { animation-delay: .08s; }
+.vsec > *:nth-child(3) { animation-delay: .14s; }
+.vsec > *:nth-child(4) { animation-delay: .20s; }
+.vsec > *:nth-child(5) { animation-delay: .26s; }
+.vsec > *:nth-child(6) { animation-delay: .32s; }
+
+/* ── 16. BADGES — HOVER SCALE ── */
+.bg {
+  transition: transform var(--t-fast) var(--ease-spring),
+              box-shadow var(--t-fast) var(--ease-smooth);
+}
+.bg:hover { transform: scale(1.07); box-shadow: 0 2px 8px rgba(0,0,0,.10); }
+
+/* ── 17. SKELETON LOADING ── */
+.skel {
+  background: linear-gradient(90deg,
+    var(--bg2) 25%,
+    var(--bg3) 50%,
+    var(--bg2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: var(--r);
+  color: transparent !important;
+  pointer-events: none;
+  user-select: none;
+}
+.skel * { opacity: 0 !important; }
+
+/* ── 18. BARRE DE CHARGEMENT ── */
+.loading-bar {
+  background: linear-gradient(90deg,
+    var(--bl) 0%, var(--gold) 40%,
+    var(--bl2) 70%, var(--gold) 100%);
+  background-size: 300% 100%;
+  animation: loadingPulse 1.8s ease-in-out infinite;
+}
+@keyframes loadingPulse {
+  0%,100% { background-position: 0% 50%; }
+  50%     { background-position: 100% 50%; }
+}
+
+/* ── 19. SCROLLBARS HORIZONTAUX DORÉS ── */
+.featured-scroll::-webkit-scrollbar-thumb,
+.news-scroll::-webkit-scrollbar-thumb { background: rgba(255,201,60,.4); border-radius: 3px; }
+.featured-scroll::-webkit-scrollbar-thumb:hover,
+.news-scroll::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+/* ── 20. BOUTON COMMANDER LIVRE ── */
+.book-order-btn {
+  transition: background var(--t-fast) var(--ease-smooth),
+              transform  var(--t-fast) var(--ease-spring),
+              box-shadow var(--t-fast) var(--ease-smooth);
+}
+.book-order-btn:hover  { transform: translateY(-2px) scale(1.015); box-shadow: 0 6px 20px rgba(255,201,60,.30); }
+.book-order-btn:active { transform: translateY(0) scale(1); }
+
+/* ── 21. TITRE SECTION VISITEUR — SHIMMER DÉGRADÉ ── */
+.vsec-title::after {
+  background: linear-gradient(90deg, var(--gold), var(--bl2), var(--gold));
+  background-size: 200% 100%;
+  animation: underlineShimmer 3.5s ease-in-out infinite;
+}
+@keyframes underlineShimmer {
+  0%,100% { background-position: 0% 50%; }
+  50%     { background-position: 100% 50%; }
+}
+
+/* ── 22. PACK CARDS ── */
+.pk {
+  transition: transform var(--t-mid) var(--ease-spring),
+              box-shadow var(--t-mid) var(--ease-smooth);
+}
+.pk:hover      { transform: translateY(-5px); box-shadow: 0 18px 50px rgba(0,0,0,.26); }
+.pk.hot:hover  { box-shadow: 0 18px 50px rgba(255,201,60,.22); }
+
+/* ── 23. RESOURCE CARDS E-LEARNING ── */
+.rc {
+  transition: transform var(--t-mid) var(--ease-spring),
+              box-shadow var(--t-mid) var(--ease-smooth),
+              border-color var(--t-mid) var(--ease-smooth);
+}
+.rc:hover { transform: translateY(-5px); box-shadow: 0 14px 36px rgba(0,0,0,.12); }
+
+/* ── 24. CURSOR POINTER ENFORCEMENT ── */
+button, [role="button"],
+.bc, .vcard, .cc, .nc, .rc, .sc, .pk,
+.sbit, .vnav-btn, .tab, .ltb, .book-tab,
+.gallery-card, .feat-card, .ai-card,
+.featured-card, .dv-card, .book-chapter { cursor: pointer; }
+
+/* ── 25. SYNC DOT — PULSATION VISIBLE ── */
+.sync-dot {
+  animation: syncPulse 1.8s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(5,150,105,.5);
+}
+@keyframes syncPulse {
+  0%  { box-shadow: 0 0 0 0 rgba(5,150,105,.5); }
+  60% { box-shadow: 0 0 0 7px rgba(5,150,105,0); }
+  100%{ box-shadow: 0 0 0 0 rgba(5,150,105,0); }
+}
+
+/* ── 26. BOUTONS NAV VISITEUR — FOND SUBTIL AU SURVOL ── */
+.vnav-btn { isolation: isolate; }
+.vnav-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,201,60,.07);
+  border-radius: 8px 8px 0 0;
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform var(--t-fast) var(--ease-smooth);
+  z-index: -1;
+}
+.vnav-btn:hover::before { transform: scaleY(1); }
+.vnav-btn.on::before    { transform: scaleY(1); background: rgba(255,201,60,.11); }
+
+/* ── 27. AVATARS HOVER ── */
+.av, .sba, .review-av {
+  transition: transform var(--t-fast) var(--ease-spring),
+              box-shadow var(--t-fast) var(--ease-smooth);
+}
+.review-av:hover { transform: scale(1.10); box-shadow: 0 4px 14px rgba(0,0,0,.15); }
+
+/* ── 28. ZONE UPLOAD PHOTO ── */
+.photo-upload-zone {
+  transition: border-color var(--t-mid) var(--ease-smooth),
+              background   var(--t-mid) var(--ease-smooth),
+              transform    var(--t-mid) var(--ease-spring);
+}
+.photo-upload-zone:hover { transform: scale(1.05); }
+
+/* ── 29. TOPBAR — OMBRE AU DÉFILEMENT ── */
+.tb { transition: box-shadow var(--t-mid) var(--ease-smooth); }
+.tb.scrolled { box-shadow: 0 2px 16px rgba(20,37,84,.10); }
+
+/* ── 30. GALERIE — OVERLAY REVEAL ── */
+.gallery-card { transition: transform var(--t-mid) var(--ease-spring), box-shadow var(--t-mid) var(--ease-smooth); }
+.gallery-card:hover { transform: translateY(-4px) scale(1.01); }
+.gallery-card .gallery-overlay { transition: opacity var(--t-mid) var(--ease-smooth); }
 </style>
 </head>
 <body>
@@ -22099,6 +22431,157 @@ setTimeout(function(){initTickerFixed();},3000);
 
 })();
 
+</script>
+
+<!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
+<script>
+(function(){
+'use strict';
+
+/* ─── VÉRIFICATION prefers-reduced-motion ─── */
+var reduceMotion = window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ─── EFFET RIPPLE SUR LES BOUTONS ─── */
+function addRipple(e) {
+  if (reduceMotion) return;
+  var btn = e.currentTarget;
+  var existing = btn.querySelector('.ripple-wave');
+  if (existing) existing.remove();
+  var rect = btn.getBoundingClientRect();
+  var size = Math.max(rect.width, rect.height) * 1.5;
+  var x = (e.clientX || rect.left + rect.width  / 2) - rect.left - size / 2;
+  var y = (e.clientY || rect.top  + rect.height / 2) - rect.top  - size / 2;
+  var wave = document.createElement('span');
+  wave.className = 'ripple-wave';
+  wave.style.cssText = 'width:' + size + 'px;height:' + size + 'px;left:' + x + 'px;top:' + y + 'px;';
+  btn.appendChild(wave);
+  wave.addEventListener('animationend', function(){ wave.remove(); }, { once: true });
+}
+
+function attachRipples() {
+  document.querySelectorAll('.btn:not([data-ripple])').forEach(function(btn) {
+    btn.setAttribute('data-ripple', '1');
+    btn.addEventListener('click', addRipple);
+  });
+}
+
+/* ─── ANIMATION COMPTEUR CHIFFRES ─── */
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+function animateCounter(el, target, duration) {
+  if (reduceMotion) { el.textContent = formatNum(target); return; }
+  var start = null;
+  var isFloat = (target % 1 !== 0);
+  function step(ts) {
+    if (!start) start = ts;
+    var progress = Math.min((ts - start) / duration, 1);
+    var eased = easeOutCubic(progress);
+    var current = eased * target;
+    el.textContent = isFloat ? current.toFixed(1) : formatNum(Math.round(current));
+    if (progress < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+function formatNum(n) {
+  /* fr-FR : espace insécable comme séparateur des milliers */
+  return n.toLocaleString ? n.toLocaleString('fr-FR') : String(n);
+}
+
+function runCounters() {
+  document.querySelectorAll('.scv:not([data-counted])').forEach(function(el) {
+    var raw = (el.textContent || '').replace(/\u00a0|\s/g, '').replace(/,/g, '.');
+    /* Ne compter que si la valeur contient aussi des unités FCFA ou % */
+    var numMatch = raw.match(/^([0-9]+(?:\.[0-9]+)?)/);
+    if (!numMatch) return;
+    var num = parseFloat(numMatch[1]);
+    if (isNaN(num) || num <= 0) return;
+    var suffix = raw.slice(numMatch[1].length); /* garde " FCFA", "%", etc. */
+    el.setAttribute('data-counted', '1');
+    /* Anime le chiffre, réinsère le suffixe à la fin */
+    var clone = el.cloneNode(false);
+    clone.textContent = '0' + suffix;
+    el.parentNode.replaceChild(clone, el);
+    animateCounter(clone, num, 950);
+    /* On réécrit le suffixe à chaque frame via wrapper */
+    var orig = clone;
+    var prevText = '';
+    var suffixFix = setInterval(function() {
+      if (!document.contains(orig)) { clearInterval(suffixFix); return; }
+      var txt = orig.textContent;
+      if (!txt.endsWith(suffix) && !orig.hasAttribute('data-suffixed')) {
+        /* sera géré par la fin de l'animation — rien à faire */
+      }
+    }, 1000);
+    /* Après 1s, écrire valeur finale propre */
+    setTimeout(function() {
+      if (document.contains(orig)) orig.textContent = formatNum(num) + suffix;
+      clearInterval(suffixFix);
+    }, 1050);
+  });
+}
+
+/* ─── OMBRE TOPBAR AU DÉFILEMENT ─── */
+function initScrollShadow() {
+  var cnt = document.querySelector('.cnt');
+  var tb  = document.querySelector('.tb');
+  if (!cnt || !tb) return;
+  cnt.addEventListener('scroll', function() {
+    tb.classList.toggle('scrolled', cnt.scrollTop > 6);
+  }, { passive: true });
+}
+
+/* ─── OBSERVATION CHANGEMENTS DE PAGE ─── */
+/* VERITAS injecte le contenu des pages via innerHTML sur .cnt */
+var _observer = null;
+
+function onPageChange() {
+  attachRipples();
+  if (!reduceMotion) setTimeout(runCounters, 150);
+}
+
+function startObserver() {
+  if (_observer) return;
+  _observer = new MutationObserver(function(mutations) {
+    var added = false;
+    for (var i = 0; i < mutations.length; i++) {
+      if (mutations[i].addedNodes.length) { added = true; break; }
+    }
+    if (added) onPageChange();
+  });
+  /* Observer le conteneur principal */
+  var cnt = document.querySelector('.cnt');
+  if (cnt) _observer.observe(cnt, { childList: true, subtree: false });
+  /* Observer aussi le portail visiteur */
+  var vc = document.getElementById('vContent');
+  if (vc) _observer.observe(vc, { childList: true, subtree: false });
+}
+
+/* ─── CURSEUR POINTER SUR ÉLÉMENTS CLIQUABLES DYNAMIQUES ─── */
+function fixCursors() {
+  var sel = '.bc,.vcard,.cc,.nc,.rc,.sc,.pk,.feat-card,.ai-card,.featured-card,.dv-card';
+  document.querySelectorAll(sel).forEach(function(el) {
+    if (!el.style.cursor) el.style.cursor = 'pointer';
+  });
+}
+
+/* ─── BOOT ─── */
+function boot() {
+  attachRipples();
+  initScrollShadow();
+  startObserver();
+  fixCursors();
+  if (!reduceMotion) setTimeout(runCounters, 350);
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', boot);
+} else {
+  boot();
+}
+
+})();
 </script>
 </body>
 </html>
