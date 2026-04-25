@@ -22583,5 +22583,450 @@ if (document.readyState === 'loading') {
 
 })();
 </script>
+
+<!-- ══ VÉRITAS Alert Engine v1.0 — Alertes automatiques ══ -->
+<script>
+(function(){
+'use strict';
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOTEUR D'ALERTES AUTOMATIQUES — VÉRITAS v1.0
+   Surveille la base de données après chaque save() et génère
+   des notifications ciblées selon 15 catégories.
+   Déduplication via DB.notifSent[]. Ré-entrance protégée.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+var _alertActive = false;
+var _alertTimer  = null;
+
+/* ── Helpers date ── */
+function _today(){ return new Date().toISOString().split('T')[0]; }
+function _daysAgo(n){ return new Date(Date.now() - n*86400000).toISOString().split('T')[0]; }
+function _daysFromNow(n){ return new Date(Date.now() + n*86400000).toISOString().split('T')[0]; }
+function _daysBetween(a,b){
+  try{ return Math.round((new Date(b)-new Date(a))/86400000); }catch(e){ return 0; }
+}
+
+/* ── Feu une notification avec déduplication ── */
+function _fire(key, titre, msg, to, type) {
+  if (!window.DB) return;
+  if (!DB.notifSent) DB.notifSent = [];
+  var today = _today();
+  var cutoff = _daysAgo(14);
+  // Purge anciennes entrées
+  DB.notifSent = DB.notifSent.filter(function(e){ return e.d >= cutoff; });
+  // Déjà envoyé aujourd'hui pour cette clé ?
+  if (DB.notifSent.find(function(e){ return e.k === key; })) return;
+  DB.notifSent.push({ k: key, d: today });
+  if (!DB.notifications) DB.notifications = [];
+  var id = window.gid ? window.gid() : 'al'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  DB.notifications.unshift({
+    id: id, to: to||'all', titre: titre, msg: msg,
+    date: today, read: [], type: type||'info'
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 1 — Paiements en attente > 3 jours (admin)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkPaiementsPending(){
+  var attempts = DB.payAttempts || [];
+  var cutoff = _daysAgo(3);
+  attempts.forEach(function(p){
+    if(p.status!=='pending') return;
+    var d = (p.date||'').split('T')[0];
+    if(!d || d>cutoff) return;
+    _fire('pay_pending_'+p.ref,
+      'Paiement en attente',
+      'La tentative '+p.ref+' ('+( p.label||'')+')'
+      +' est non confirmée depuis plus de 3 jours.'
+      +' Vérifiez et validez via Gestion → Paiements.',
+      'admin','warn');
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 2 — Frais de scolarité impayés ce mois (admin)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkScolariteImpayee(){
+  var students = DB.students || [];
+  var mois = _today().slice(0,7);
+  students.forEach(function(s){
+    var totalDu = parseInt(s.frais||0,10);
+    if(!totalDu) return;
+    var totalPaye = (DB.payments||[])
+      .filter(function(p){ return p.eid===s.id && p.stat!=='annule'; })
+      .reduce(function(sum,p){ return sum+(parseInt(p.mnt,10)||0); },0);
+    var solde = totalDu - totalPaye;
+    if(solde>0){
+      _fire('scol_impayee_'+s.id+'_'+mois,
+        'Scolarite impayee',
+        (s.pre||'')+' '+(s.nom||'')+' ('+(s.cls||'')+') : solde impaye de '
+        +solde.toLocaleString('fr-FR')+' FCFA ce mois-ci.',
+        'admin','warn');
+    }
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 3 — Absences excessives ce mois-ci > 3 (admin)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkAbsences(){
+  var absences = DB.absences || [];
+  var mois = _today().slice(0,7);
+  var moisStart = mois+'-01';
+  var moisEnd   = mois+'-31';
+  var cnt = {};
+  absences.forEach(function(a){
+    if(a.date && a.date>=moisStart && a.date<=moisEnd)
+      cnt[a.eid] = (cnt[a.eid]||0)+1;
+  });
+  var students = DB.students || [];
+  Object.keys(cnt).forEach(function(eid){
+    if(cnt[eid]<=3) return;
+    var s = students.find(function(x){ return x.id===eid; });
+    var name = s ? (s.pre||'')+' '+(s.nom||'') : eid;
+    _fire('abs_excess_'+eid+'_'+mois,
+      'Absences excessives',
+      name+' ('+(s&&s.cls||'')+') : '+cnt[eid]+' absence(s) ce mois. Suivi recommande.',
+      'admin','warn');
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 4 — Moyenne critique < 5/20 ce trimestre (admin)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkNotesCritiques(){
+  var grades = DB.grades || [];
+  var students = DB.students || [];
+  var month = parseInt(_today().slice(5,7),10);
+  var tri = month<=4?'3': month<=8?'1':'2';
+  var grMap = {};
+  grades.forEach(function(g){
+    if(String(g.tri||g.trimestre||'')!==tri) return;
+    if(!grMap[g.eid]) grMap[g.eid]=[];
+    var n1=parseFloat(g.n1||g.note1||0);
+    var n2=parseFloat(g.n2||g.note2||0);
+    var coef=parseInt(g.coef||1,10);
+    grMap[g.eid].push({pts:(n1+n2)/2*coef,coef:coef});
+  });
+  Object.keys(grMap).forEach(function(eid){
+    var items=grMap[eid];
+    var tc=items.reduce(function(s,e){ return s+e.coef; },0);
+    var tp=items.reduce(function(s,e){ return s+e.pts; },0);
+    if(tc===0) return;
+    var moy=tp/tc;
+    if(moy>=5) return;
+    var s=students.find(function(x){ return x.id===eid; });
+    var name=s?(s.pre||'')+' '+(s.nom||''):eid;
+    _fire('note_critique_'+eid+'_T'+tri+'_'+_today().slice(0,7),
+      'Moyenne critique',
+      name+' ('+(s&&s.cls||'')+') : moyenne '+moy.toFixed(1)+'/20 au trimestre '+tri+'. Attention soutien necessaire.',
+      'admin','warn');
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 5 — Devoirs non corrigés > 3 jours (enseignant)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkDevoirsNonCoriges(){
+  var subs = DB.submissions || [];
+  var devoirs = DB.devoirs || [];
+  var cutoff = _daysAgo(3);
+  subs.forEach(function(sub){
+    // Déjà noté
+    if(sub.note!==undefined && sub.note!==null && sub.note!=='') return;
+    var d=(sub.date||sub.dateEnvoi||'').split('T')[0];
+    if(!d || d>cutoff) return;
+    var dv=devoirs.find(function(x){ return x.id===sub.devoirId; });
+    var to=(dv&&(dv.tid||dv.teacherId))||'enseignant';
+    _fire('sub_noncorige_'+sub.id,
+      'Devoir non corrige',
+      'La soumission de '+(sub.eleveName||sub.eleveId||'un eleve')+' pour'
+      +' "'+(dv&&dv.titre||sub.devoirId||'un devoir')+'" attend correction depuis +3 jours.',
+      to,'warn');
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 6 — Abonnement e-learning expirant < 5 jours (eleve)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkAbonnementsExpires(){
+  var abos=(DB.elearning&&DB.elearning.abonnements)||[];
+  var today=_today();
+  var soon=_daysFromNow(5);
+  abos.forEach(function(a){
+    if(!a.fin) return;
+    if(a.fin<today){
+      _fire('abo_expire_'+a.id+'_'+today.slice(0,7),
+        'Abonnement expire',
+        'Votre abonnement '+(a.planLabel||a.planId||'e-learning')
+        +' a expire le '+a.fin+'. Renouvelez pour acceder aux ressources.',
+        a.uid||'eleve','warn');
+    } else if(a.fin<=soon){
+      var days=_daysBetween(today,a.fin);
+      _fire('abo_expiring_'+a.id+'_'+today,
+        'Abonnement bientot expire',
+        'Votre abonnement '+(a.planLabel||a.planId||'e-learning')
+        +' expire dans '+days+' jour(s). Renouvelez pour continuer.',
+        a.uid||'eleve','info');
+    }
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 7 — Nouveau devoir publié aujourd'hui (eleve)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkNouveauxDevoirs(){
+  var devoirs=DB.devoirs||[];
+  var today=_today();
+  devoirs.forEach(function(dv){
+    var d=(dv.date||dv.dateCreation||'').split('T')[0];
+    if(d!==today) return;
+    _fire('new_devoir_'+dv.id,
+      'Nouveau devoir',
+      '"'+(dv.titre||'Devoir')+'" ('+(dv.matiere||dv.sub||'')+') publie aujourd\'hui.'
+      +' Date limite : '+(dv.deadline||dv.dateLimite||'non precisee')+'.',
+      'eleve','info');
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 8 — Note de devoir disponible (eleve)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkDevoirsNotes(){
+  var subs=DB.submissions||[];
+  var devoirs=DB.devoirs||[];
+  subs.forEach(function(sub){
+    if(sub.note===undefined||sub.note===null||sub.note==='') return;
+    var dateN=(sub.dateNote||sub.dateCorrected||'').split('T')[0];
+    if(!dateN) return;
+    var dv=devoirs.find(function(d){ return d.id===sub.devoirId; });
+    _fire('sub_note_'+sub.id,
+      'Note disponible',
+      'Votre devoir "'+(dv&&dv.titre||sub.devoirId||'')+'" a ete corrige.'
+      +' Vous avez obtenu '+sub.note+'/20.',
+      sub.eleveId||'eleve','success');
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 9 — Aucune sauvegarde depuis > 7 jours (admin)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkSauvegarde(){
+  var lastExport=(DB._lastExport)||(DB.school&&DB.school.lastExport)||null;
+  var mois=_today().slice(0,7);
+  if(!lastExport){
+    _fire('sauvegarde_jamais_'+mois,
+      'Aucune sauvegarde',
+      'Aucune sauvegarde de la base n\'a ete effectuee. Exportez vos donnees via Parametres → Exporter.',
+      'admin','warn');
+    return;
+  }
+  if(lastExport<_daysAgo(7)){
+    _fire('sauvegarde_ancienne_'+mois,
+      'Sauvegarde ancienne',
+      'Derniere sauvegarde : '+lastExport+' (>7 jours). Pensez a exporter vos donnees.',
+      'admin','warn');
+  }
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 10 — Commandes visiteurs en attente (admin)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkCommandesVisiteurs(){
+  var orders=DB.visitorOrders||[];
+  var pending=orders.filter(function(o){
+    return o.status==='pending'||o.status==='en_attente'||!o.status;
+  });
+  if(!pending.length) return;
+  var key='cmdes_visiteur_'+_today()+'_n'+pending.length;
+  _fire(key,
+    'Commandes en attente',
+    pending.length+' commande(s) visiteur(s) en attente de traitement. Consultez la boutique.',
+    'admin','info');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 11 — Excellence scolaire note >= 18 (admin + eleve)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkExcellence(){
+  var grades=DB.grades||[];
+  var students=DB.students||[];
+  grades.forEach(function(g){
+    var n1=parseFloat(g.n1||g.note1||0);
+    var n2=parseFloat(g.n2||g.note2||0);
+    var best=Math.max(n1,n2);
+    if(best<18) return;
+    var s=students.find(function(x){ return x.id===g.eid; });
+    var name=s?(s.pre||'')+' '+(s.nom||''):'Un eleve';
+    // Notif admin
+    _fire('excellence_adm_'+g.id,
+      'Performance excellente',
+      name+' ('+(s&&s.cls||'')+') : '+best+'/20 en '+(g.sub||g.matiere||'une matiere')+'. Felicitations !',
+      'admin','success');
+    // Notif eleve
+    if(s&&s.id){
+      _fire('excellence_elv_'+g.id,
+        'Bravo — excellente note !',
+        'Vous avez obtenu '+best+'/20 en '+(g.sub||g.matiere||'une matiere')+'. Continuez sur cette lancee !',
+        s.id,'success');
+    }
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 12 — Événement calendrier dans les 3 prochains jours (all)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkCalendrier(){
+  var events=DB.calendrier||[];
+  var today=_today();
+  var plus3=_daysFromNow(3);
+  events.forEach(function(ev){
+    var d=(ev.date||ev.start||'').split('T')[0];
+    if(!d||d<today||d>plus3) return;
+    var days=_daysBetween(today,d);
+    var quand=days===0?'aujourd\'hui':days===1?'demain':'dans '+days+' jours';
+    var desc=(ev.description||ev.desc||'').slice(0,80);
+    _fire('cal_'+( ev.id||d+'_'+(ev.titre||'ev'))+'_'+today,
+      'Evenement a venir',
+      '"'+(ev.titre||ev.nom||'Evenement')+'" prevu '+quand+' ('+d+').'+(desc?' '+desc:''),
+      'all','info');
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 13 — Livre en rupture de stock (admin)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkStockLivres(){
+  var books=DB.books||[];
+  var mois=_today().slice(0,7);
+  books.forEach(function(b){
+    if(typeof b.stock==='undefined') return;
+    if(parseInt(b.stock,10)!==0) return;
+    _fire('stock_zero_'+b.id+'_'+mois,
+      'Rupture de stock',
+      '"'+(b.titre||b.nom||'Un livre')+'" est en rupture de stock. Reapprovisionnez.',
+      'admin','warn');
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 14 — Code promo expiré encore actif (admin)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkPromos(){
+  var promos=DB.promoCodes||[];
+  var today=_today();
+  promos.forEach(function(p){
+    if(p.expiry&&p.expiry<today&&p.active){
+      _fire('promo_expire_'+p.id,
+        'Code promo expire actif',
+        'Le code "'+( p.code||p.id)+'" a expire le '+p.expiry+' mais est encore actif. Desactivez-le.',
+        'admin','warn');
+    }
+  });
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   CATÉGORIE 15 — Message de bienvenue mensuel (utilisateur)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _chkBienvenue(){
+  if(!window.SES) return;
+  var uid=SES.id||SES.user||'';
+  if(!uid) return;
+  var mois=_today().slice(0,7);
+  _fire('bienvenue_'+uid+'_'+mois,
+    'Bienvenue sur VERITAS',
+    'Bonjour '+(SES.pre||SES.nom||'')+' ! Consultez vos notifications pour rester informe(e) des actualites du centre.',
+    uid,'info');
+}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOTEUR PRINCIPAL — orchestre les 15 catégories
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+function _runAlerts(){
+  if(_alertActive) return;
+  if(!window.DB||!window.SES) return;
+  _alertActive=true;
+  try{
+    var isAdmin=typeof iA==='function'?iA():(SES.type==='admin'||SES.type==='superadmin');
+    var isTeacher=SES.type==='enseignant';
+    var isStudent=SES.type==='eleve';
+
+    if(isAdmin){
+      _chkPaiementsPending();
+      _chkScolariteImpayee();
+      _chkAbsences();
+      _chkNotesCritiques();
+      _chkSauvegarde();
+      _chkCommandesVisiteurs();
+      _chkStockLivres();
+      _chkPromos();
+      _chkCalendrier();
+      _chkExcellence();
+    }
+    if(isTeacher||isAdmin){
+      _chkDevoirsNonCoriges();
+    }
+    if(isStudent||isAdmin){
+      _chkNouveauxDevoirs();
+      _chkDevoirsNotes();
+      _chkAbonnementsExpires();
+    }
+    _chkBienvenue();
+
+    // Persiste via le vrai save() (sans re-déclencher le cycle)
+    var realSave=window._veritasRealSave||window.save;
+    if(typeof realSave==='function') realSave();
+    if(typeof topUI==='function') topUI();
+  }catch(e){
+    // Fail silencieux — ne jamais casser l'application
+  }finally{
+    _alertActive=false;
+  }
+}
+
+/* ── Debounce : évite les appels en rafale après save() ── */
+function _scheduleAlerts(){
+  clearTimeout(_alertTimer);
+  _alertTimer=setTimeout(_runAlerts,800);
+}
+
+/* ── Intercepte window.save() pour surveiller les mutations ── */
+function _wrapSave(){
+  if(window._veritasSaveWrapped) return;
+  if(typeof window.save!=='function') return;
+  window._veritasRealSave=window.save;
+  window.save=function(){
+    window._veritasRealSave.apply(this,arguments);
+    if(!_alertActive) _scheduleAlerts();
+  };
+  window._veritasSaveWrapped=true;
+}
+
+/* ── Boot : attend que DB + SES + save() soient disponibles ── */
+function _bootAlerts(){
+  var tries=0;
+  var iv=setInterval(function(){
+    tries++;
+    if(tries>120){ clearInterval(iv); return; } // abandon après 60s
+    if(!window.DB||!window.SES||typeof window.save!=='function') return;
+    clearInterval(iv);
+    _wrapSave();
+    // Vérification initiale après 2s (laisse l'appli s'initialiser)
+    setTimeout(_runAlerts,2000);
+    // Vérification périodique toutes les 10 min
+    setInterval(_runAlerts,10*60*1000);
+  },500);
+}
+
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',_bootAlerts);
+}else{
+  _bootAlerts();
+}
+
+})();
+</script>
 </body>
 </html>
