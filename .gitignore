@@ -46,6 +46,11 @@ check_veritas*.js
 Tempcheck_veritas.js
 UsersMYTHEE~1*.js
 
+# Scripts de patch temporaires (appliqués puis obsolètes)
+patch_*.js
+fix_*.js
+_check*.js
+
 # Build local FTP
 deploy/
 
