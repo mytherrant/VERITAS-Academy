@@ -34,3 +34,28 @@ veritas-backend/uploads/*
 _integrate.py
 _apply_formatting.py
 _eval_insert.js
+
+# Scripts de diagnostic / session générés par Claude Code
+*.ps1
+apply_fixes*.py
+diag*.py
+diag*.txt
+diag*.js
+generate_veritas*.py
+check_veritas*.js
+Tempcheck_veritas.js
+UsersMYTHEE~1*.js
+
+# Build local FTP
+deploy/
+
+# Fichiers de travail temporaires
+app.html
+VERITAS_*_fra.html
+VERITAS_*_updated.html
+Guide_*.html
+VERITAS_Guide_*.pdf
+
+# Images / médias locaux non versionnés
+*.jpg
+*.jpeg
