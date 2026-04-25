@@ -7373,19 +7373,27 @@ function viewResource(item, accessMode, dlUsedToday, dlLimitToday){
 
     var dlBtn='';
     if(isAdmin){
-      // Admin : téléchargement direct
+      // Admin : téléchargement direct via data-* (pas de quoting inline)
       dlBtn='<button class="btn bi sm" data-durl="'+encodeURIComponent(dataUrl)+'" data-dfname="'+encodeURIComponent(fname)+'" onclick="_dlFile(this)">&#11015; Télécharger (admin)</button>';
     } else if(isPdf){
-      // PDF : pas de téléchargement direct — filigrane non injectable sur binaire
-      dlBtn='<span style="font-size:10px;color:var(--ink4);padding:4px 8px">&#128274; PDF protégé — consultation uniquement</span>';
+      // PDF : pas de téléchargement direct (filigrane non injectable sur binaire)
+      dlBtn='<span style="font-size:10px;color:var(--ink4);padding:4px 8px">&#128274; PDF protégé &mdash; consultation uniquement</span>';
     } else if(isWord||isPpt||isXls){
-      dlBtn='<button class="btn bi sm" onclick="_downloadWordWithWatermark(''+encodeURIComponent(dataUrl)+'','+JSON.stringify({titre:item.titre,exam:'',serie:'',matiere:item.matiere||''}).replace(/</g,'\x3c')+')">&#11015; Télécharger (filigrane)</button>';
+      // Word/PPT/XLS : wrapper HTML filigrane via data-attributes
+      dlBtn='<button class="btn bi sm"'
+        +' data-durl="'+encodeURIComponent(dataUrl)+'"'
+        +' data-dtitle="'+encodeURIComponent(item.titre||'')+'"'
+        +' data-dmat="'+encodeURIComponent(item.matiere||'')+'"'
+        +' onclick="_dlBtnWord(this)">&#11015; T&eacute;l&eacute;charger (filigrane)</button>';
     } else if(isSubscribed||isFree){
-      // Autres formats : download wrappé avec filigrane si HTML, sinon direct
       if(isHtml){
-        dlBtn='<button class="btn bi sm" onclick="_dlHtmlWatermarked('+JSON.stringify(decodeURIComponent(dataUrl)).replace(/</g,'\x3c')+','+JSON.stringify(item.titre).replace(/</g,'\x3c')+')">&#11015; Télécharger (filigrane)</button>';
+        // HTML interactif : téléchargement avec filigrane injecté
+        dlBtn='<button class="btn bi sm"'
+          +' data-durl="'+encodeURIComponent(dataUrl)+'"'
+          +' data-dtitle="'+encodeURIComponent(item.titre||'')+'"'
+          +' onclick="_dlBtnHtml(this)">&#11015; T&eacute;l&eacute;charger (filigrane)</button>';
       } else {
-        dlBtn='<button class="btn bi sm" data-durl="'+encodeURIComponent(dataUrl)+'" data-dfname="'+encodeURIComponent(fname)+'" onclick="_dlFile(this)">&#11015; Télécharger</button>';
+        dlBtn='<button class="btn bi sm" data-durl="'+encodeURIComponent(dataUrl)+'" data-dfname="'+encodeURIComponent(fname)+'" onclick="_dlFile(this)">&#11015; T&eacute;l&eacute;charger</button>';
       }
     }
 
@@ -7427,6 +7435,28 @@ function _dlHtmlWatermarked(htmlContent,titre){
   a.download=(titre||'ressource').replace(/[^a-z0-9]/gi,'_')+'_VERITAS.html';
   document.body.appendChild(a);a.click();document.body.removeChild(a);
   toast('&#11015; Fichier téléchargé avec filigrane');
+}
+function _dlBtnWord(btn){
+  // Lit les data-attributes et construit un wrapper Word avec filigrane
+  var dataUrl=decodeURIComponent(btn.dataset.durl||'');
+  var ep={titre:decodeURIComponent(btn.dataset.dtitle||''),exam:'',serie:'',matiere:decodeURIComponent(btn.dataset.dmat||'')};
+  if(!dataUrl){toast('Fichier non disponible','warn');return;}
+  _downloadWordWithWatermark(dataUrl,ep);
+}
+function _dlBtnHtml(btn){
+  // Lit les data-attributes et télécharge le HTML avec filigrane injecté
+  var dataUrl=decodeURIComponent(btn.dataset.durl||'');
+  var titre=decodeURIComponent(btn.dataset.dtitle||'Ressource');
+  if(!dataUrl){toast('Fichier non disponible','warn');return;}
+  // Si c'est déjà du texte HTML (pas un data URL), télécharger directement
+  if(dataUrl.indexOf('data:text/html')===0){
+    try{
+      var html=atob(dataUrl.split(',')[1]);
+      _dlHtmlWatermarked(html,titre);
+      return;
+    }catch(e){}
+  }
+  _dlHtmlWatermarked(dataUrl,titre);
 }
 function _dlFile(btn){
   var url=decodeURIComponent(btn.dataset.durl||'');
@@ -22026,6 +22056,16 @@ function _sendWAGroupInvite(accId){
   toast('&#9989; WhatsApp ouvert — envoyez l\'invitation \u00e0 ' + acc.pre);
 }
 
+function _waBtnDispatch(btn){
+  var id=btn.dataset.waid||'';
+  var action=btn.dataset.waaction||'';
+  if(!id||!action){toast('Action inconnue','warn');return;}
+  if(action==='inviterEleve')     _waInviterEleve(id);
+  else if(action==='envoyerEleve')    _waEnvoyerEleve(id);
+  else if(action==='validerVisiteur') _validerEtInviter(id);
+  else if(action==='invitationVisiteur') _sendWAGroupInvite(id);
+  else toast('Action non reconnue: '+action,'warn');
+}
 function _waInviterEleve(eleveId){
   var idx=(DB.students||[]).findIndex(function(s){return s.id===eleveId;});
   if(idx<0){toast('El\u00e8ve introuvable','warn');return;}
@@ -22428,59 +22468,62 @@ function pgWAAccess(){
 function mWAPendingMembers(){
   if(!iA()) return;
 
-  // Visiteurs en attente (comptes en ligne)
-  var vPending = (DB.visitorAccounts||[])
-    .filter(function(a){ return a.groupeStatut==='en_attente' || !a.groupeStatut; })
-    .map(function(a){ return Object.assign({},a,{_src:'visitor'}); });
-  var vInvited = (DB.visitorAccounts||[])
-    .filter(function(a){ return a.groupeStatut==='invite'; })
-    .map(function(a){ return Object.assign({},a,{_src:'visitor'}); });
+  var vPending=(DB.visitorAccounts||[])
+    .filter(function(a){return a.groupeStatut==='en_attente'||!a.groupeStatut;})
+    .map(function(a){return Object.assign({},a,{_src:'visitor'});});
+  var vInvited=(DB.visitorAccounts||[])
+    .filter(function(a){return a.groupeStatut==='invite';})
+    .map(function(a){return Object.assign({},a,{_src:'visitor'});});
+  var ePending=(DB.students||[])
+    .filter(function(s){return !s.waInvited;})
+    .map(function(s){return Object.assign({},s,{_src:'eleve',pre:s.pre||s.prenom||'',nom:s.nom||'',tel:s.tel||s.phone||'',cls:s.cls||s.classe||'',dateInscription:s.dateInscription||s.created||''});});
+  var eInvited=(DB.students||[])
+    .filter(function(s){return s.waInvited;})
+    .map(function(s){return Object.assign({},s,{_src:'eleve',pre:s.pre||s.prenom||'',nom:s.nom||'',tel:s.tel||s.phone||'',cls:s.cls||s.classe||'',dateInvitGroupe:s.dateInvitGroupe||''});});
 
-  // Eleves inscrits sans invitation WA
-  var ePending = (DB.students||[])
-    .filter(function(s){ return !s.waInvited; })
-    .map(function(s){ return Object.assign({},s,{_src:'eleve', pre:s.pre||s.prenom||'', nom:s.nom||'', tel:s.tel||s.phone||'', cls:s.cls||s.classe||'', dateInscription:s.dateInscription||s.created||''}); });
-  var eInvited = (DB.students||[])
-    .filter(function(s){ return s.waInvited; })
-    .map(function(s){ return Object.assign({},s,{_src:'eleve', pre:s.pre||s.prenom||'', nom:s.nom||'', tel:s.tel||s.phone||'', cls:s.cls||s.classe||'', dateInvitGroupe:s.dateInvitGroupe||''}); });
+  var pending=vPending.concat(ePending);
+  var invited=vInvited.concat(eInvited);
 
-  var pending = vPending.concat(ePending);
-  var invited = vInvited.concat(eInvited);
+  // Helper bouton : utilise data-id + data-action pour éviter tout problème de quoting
+  function mkBtn(action,id,style,label){
+    return '<button class="btn sm" style="'+style+'" data-waid="'+_esc(id)+'" data-waaction="'+action+'" onclick="_waBtnDispatch(this)">'+label+'</button>';
+  }
 
-  function rowPending(a){
-    var srcBadge = a._src==='eleve'
+  function badge(src){
+    return src==='eleve'
       ? '<span style="font-size:.68rem;background:#EDE9FE;color:#5B21B6;padding:1px 5px;border-radius:4px;margin-left:4px">&#127979; El&egrave;ve</span>'
       : '<span style="font-size:.68rem;background:#E0F2FE;color:#0369A1;padding:1px 5px;border-radius:4px;margin-left:4px">&#127760; Visiteur</span>';
-    var validateBtn = a._src==='eleve'
-      ? '<button class="btn sm" style="background:#25D366;color:#fff;margin:2px" onclick="_waInviterEleve(''+a.id+'')">&#9989; Valider + Inviter</button>'
-        +'<button class="btn sm" style="background:#142554;color:#fff;margin:2px" onclick="_waEnvoyerEleve(''+a.id+'')">&#128242; Invitation seule</button>'
-      : '<button class="btn sm" style="background:#25D366;color:#fff;margin:2px" onclick="_validerEtInviter(''+a.id+'')">&#9989; Valider + Inviter</button>'
-        +'<button class="btn sm" style="background:#142554;color:#fff;margin:2px" onclick="_sendWAGroupInvite(''+a.id+'')">&#128242; Invitation seule</button>';
+  }
+
+  function rowPending(a){
+    var btn1=a._src==='eleve'
+      ? mkBtn('inviterEleve',a.id,'background:#25D366;color:#fff;margin:2px','&#9989; Valider + Inviter')
+      : mkBtn('validerVisiteur',a.id,'background:#25D366;color:#fff;margin:2px','&#9989; Valider + Inviter');
+    var btn2=a._src==='eleve'
+      ? mkBtn('envoyerEleve',a.id,'background:#142554;color:#fff;margin:2px','&#128242; Invitation seule')
+      : mkBtn('invitationVisiteur',a.id,'background:#142554;color:#fff;margin:2px','&#128242; Invitation seule');
     return '<tr>'
-      +'<td style="padding:8px 10px"><strong>'+_esc(a.pre)+' '+_esc(a.nom)+'</strong>'+srcBadge+'<br>'
+      +'<td style="padding:8px 10px"><strong>'+_esc(a.pre)+' '+_esc(a.nom)+'</strong>'+badge(a._src)+'<br>'
       +'<span style="font-size:.75rem;color:#555">'+_esc(a.cls||'&mdash;')+'</span></td>'
       +'<td style="padding:8px 10px;font-size:.85rem">'+_esc(a.tel||'&mdash;')+'</td>'
       +'<td style="padding:8px 10px;font-size:.8rem;color:#555">'+_esc(a.dateInscription||'&mdash;')+'</td>'
-      +'<td style="padding:8px 6px;text-align:center">'+validateBtn+'</td>'
+      +'<td style="padding:8px 6px;text-align:center">'+btn1+btn2+'</td>'
       +'</tr>';
   }
 
   function rowInvited(a){
-    var srcBadge = a._src==='eleve'
-      ? '<span style="font-size:.68rem;background:#EDE9FE;color:#5B21B6;padding:1px 5px;border-radius:4px;margin-left:4px">&#127979; El&egrave;ve</span>'
-      : '<span style="font-size:.68rem;background:#E0F2FE;color:#0369A1;padding:1px 5px;border-radius:4px;margin-left:4px">&#127760; Visiteur</span>';
-    var resendBtn = a._src==='eleve'
-      ? '<button class="btn sm" style="background:#142554;color:#fff" onclick="_waEnvoyerEleve(''+a.id+'')">&#128257; Renvoyer</button>'
-      : '<button class="btn sm" style="background:#142554;color:#fff" onclick="_sendWAGroupInvite(''+a.id+'')">&#128257; Renvoyer</button>';
+    var btn=a._src==='eleve'
+      ? mkBtn('envoyerEleve',a.id,'background:#142554;color:#fff','&#128257; Renvoyer')
+      : mkBtn('invitationVisiteur',a.id,'background:#142554;color:#fff','&#128257; Renvoyer');
     return '<tr style="opacity:.75">'
-      +'<td style="padding:6px 10px">'+_esc(a.pre)+' '+_esc(a.nom)+srcBadge+'</td>'
+      +'<td style="padding:6px 10px">'+_esc(a.pre)+' '+_esc(a.nom)+badge(a._src)+'</td>'
       +'<td style="padding:6px 10px;font-size:.85rem">'+_esc(a.tel||'&mdash;')+'</td>'
       +'<td style="padding:6px 10px;font-size:.8rem;color:#1a5c2e">&#9989; Invit&eacute; le '+_esc(a.dateInvitGroupe||'&mdash;')+'</td>'
-      +'<td style="padding:6px 10px;text-align:center">'+resendBtn+'</td>'
+      +'<td style="padding:6px 10px;text-align:center">'+btn+'</td>'
       +'</tr>';
   }
 
-  var body = '<h4 style="color:#8b1a1a;margin-bottom:6px">&#9203; En attente d'invitation ('+pending.length+')</h4>'
+  var body='<h4 style="color:#8b1a1a;margin-bottom:6px">&#9203; En attente d\'invitation ('+pending.length+')</h4>'
     +(pending.length
       ? '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.83rem">'
         +'<thead><tr style="background:#fff3f3"><th style="padding:6px 10px;text-align:left">Apprenant</th>'
@@ -22494,15 +22537,14 @@ function mWAPendingMembers(){
         +'<thead><tr style="background:#f0fdf4"><th style="padding:6px 10px;text-align:left">Apprenant</th>'
         +'<th style="padding:6px 10px">WhatsApp</th><th style="padding:6px 10px">Date invitation</th><th style="padding:6px 10px">Action</th></tr></thead>'
         +'<tbody>'+invited.map(rowInvited).join('')+'</tbody></table></div>'
-      : '<p style="color:#999;font-size:.85rem;padding:10px">Aucun apprenant invit&eacute; pour l'instant.</p>');
+      : '<p style="color:#999;font-size:.85rem;padding:10px">Aucun apprenant invit&eacute; pour l\'instant.</p>');
 
   M('&#128242; Int&eacute;gration Groupes WhatsApp',
     pending.length+' en attente &middot; '+invited.length+' invit&eacute;s',
     body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
     +'<button class="btn bi" onclick="mWAGroupes()">&#9881;&#65039; G&eacute;rer les groupes</button>',
-    true
-  );
+    true);
 }
 
 function _payRef(prefix){
