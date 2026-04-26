@@ -18790,18 +18790,265 @@ function mManageEvaluations(){
       +"<td style='padding:6px 8px;white-space:nowrap'>"
         +"<button class='btn bo xs' onclick='_editEval("+i+")' style='margin-right:2px'>✏️</button>"
         +"<button class='btn' style='background:"+(ev.actif?"#FEE2E2":"#D1FAE5")+";color:"+(ev.actif?"#DC2626":"#059669")+";border-radius:6px;font-size:9px;font-weight:700;padding:2px 7px;border:none;cursor:pointer;margin-right:2px' onclick='_toggleEval("+i+")'>"+(ev.actif?"Désactiver":"Activer")+"</button>"
-        +"<button class='btn br2 xs' onclick='_delEval("+i+")'>🗑</button>"
+        +"<button class='btn xs' style='background:#059669;color:#fff;border-radius:6px;font-size:9px;padding:2px 7px;margin-right:2px' onclick='_exportEvalJSON("+i+")'>&#8659; JSON</button>"
+        +"<button class='btn xs' style='background:#2563EB;color:#fff;border-radius:6px;font-size:9px;padding:2px 7px;margin-right:2px' onclick='_exportEvalCSV("+i+")'>&#8659; CSV</button>"
+        +"<button class='btn br2 xs' onclick='_delEval("+i+")'>&#128465;</button>"
       +"</td></tr>";
   }).join("");
   M("📊 Gérer les Évaluations","Créez des QCM en ligne instantanés pour vos élèves",
     "<div class='ib ibt mb12'><span>💡</span><span>Les évaluations actives sont accessibles aux élèves connectés via leur espace personnel.</span></div>"
     +(rows?"<div class='tw mb12' style='max-height:220px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th style='text-align:left;padding:6px 8px'>Évaluation</th><th>Questions</th><th>Réponses</th><th>État</th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
           :"<div class='empty mb12'><div class='empty-ico'>📊</div>Aucune évaluation créée</div>")
-    +"<button class='btn bi sm' onclick='_newEval()'>➕ Nouvelle évaluation</button>",
+    +"<div style='display:flex;gap:8px;flex-wrap:wrap'>"
+    +"<button class='btn bi sm' onclick='_newEval()'>&#10133; Nouvelle &eacute;valuation</button>"
+    +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='_importEvalModal()'>&#128229; Importer</button>"
+    +"</div>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
 }
 function _toggleEval(i){DB.evaluations[i].actif=!DB.evaluations[i].actif;save();cm();setTimeout(mManageEvaluations,80);}
 function _delEval(i){if(!confirm("Supprimer cette évaluation et toutes ses réponses ?"))return;DB.evaluations.splice(i,1);save();cm();setTimeout(mManageEvaluations,80);toast("Évaluation supprimée");}
+
+// ── Import évaluations multi-format ─────────────────────────────────────────
+
+function _importEvalModal(){
+  M('&#128229; Importer des &eacute;valuations',
+    'JSON &middot; CSV &middot; GIFT (Moodle) &middot; Texte num&eacute;rot&eacute;',
+    '<div class="ib ibt mb12"><span>&#128161;</span><span>Importez des QCM depuis diff&eacute;rents formats. '
+    +'Les questions seront ajout&eacute;es comme une nouvelle &eacute;valuation.</span></div>'
+    +'<div class="fg mb10"><span class="fl">Format du fichier</span>'
+    +'<select class="fi" id="impEvFmt" onchange="_impEvFmtChange(this.value)">'
+    +'<option value="json">&#128196; JSON (export V&Eacute;RITAS / Moodle JSON)</option>'
+    +'<option value="csv">&#128202; CSV (Question, A, B, C, D, R&eacute;ponse)</option>'
+    +'<option value="gift">&#127891; GIFT Moodle (:: Question :: {=bonne ~autre})</option>'
+    +'<option value="txt">&#128221; Texte num&eacute;rot&eacute; (1. Q\na)A Réponse:a)</option>'
+    +'</select></div>'
+    +'<div class="fg mb10" id="impEvFileWrap">'
+    +'<span class="fl">Fichier &agrave; importer</span>'
+    +'<input type="file" class="fi" id="impEvFile" accept=".json,.csv,.txt,.xml,.gift" style="padding:8px">'
+    +'</div>'
+    +'<div class="fg mb10" id="impEvTextWrap" style="display:none">'
+    +'<span class="fl">Coller le texte directement</span>'
+    +'<textarea class="fi" id="impEvText" rows="8" placeholder="Collez le contenu ici..."></textarea>'
+    +'</div>'
+    +'<div class="fg2">'
+    +'<div class="fg"><span class="fl">Titre de l&#39;&eacute;valuation *</span>'
+    +'<input class="fi" id="impEvTitre" placeholder="&Eacute;valuation import&eacute;e"></div>'
+    +'<div class="fg"><span class="fl">Mati&egrave;re</span>'
+    +'<select class="fi" id="impEvMat">'
+    +'<option>Math&eacute;matiques</option><option>Fran&ccedil;ais</option><option>Anglais</option>'
+    +'<option>Physique-Chimie</option><option>SVT</option><option>Histoire-G&eacute;o</option>'
+    +'<option>Philosophie</option><option>Informatique</option><option>Autre</option>'
+    +'</select></div>'
+    +'<div class="fg"><span class="fl">Classe</span>'
+    +'<input class="fi" id="impEvCls" placeholder="3&egrave;me, Tle C..."></div>'
+    +'<div class="fg"><span class="fl">Dur&eacute;e (min)</span>'
+    +'<input class="fi" id="impEvDuree" type="number" value="30"></div>'
+    +'</div>'
+    +'<div id="impEvPreview" style="display:none;background:var(--bg2);border-radius:8px;padding:10px;margin-top:8px;font-size:12px"></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_doImportEval()">&#10003; Importer</button>',
+    true);
+}
+
+function _impEvFmtChange(fmt){
+  // Afficher zone texte pour GIFT/TXT, fichier pour tous
+  var showText=fmt==='gift'||fmt==='txt';
+  var fw=document.getElementById('impEvFileWrap');
+  var tw=document.getElementById('impEvTextWrap');
+  if(fw) fw.style.display='block'; // toujours visible
+  if(tw) tw.style.display=showText?'block':'none';
+}
+
+// ── Parseurs ────────────────────────────────────────────────────────────────
+
+function _parseEvalJSON(text){
+  var data=JSON.parse(text);
+  // Format array d'évaluations ou objet unique
+  var evals=Array.isArray(data)?data:[data];
+  var questions=[];
+  evals.forEach(function(ev){
+    if(ev.questions) questions=questions.concat(ev.questions);
+  });
+  // Normalisation : {q, opts:[A,B,C,D], ans:index}
+  questions=questions.map(function(q){
+    if(q.opts&&typeof q.ans==='number') return q; // déjà normalisé
+    // Moodle JSON : {question_text, answers:[{answer_text, fraction}]}
+    if(q.question_text){
+      var opts=(q.answers||[]).map(function(a){return (a.answer_text||'').replace(/<[^>]+>/g,'').trim();});
+      var ans=0;
+      (q.answers||[]).forEach(function(a,i){if(parseFloat(a.fraction||0)>0) ans=i;});
+      return {q:q.question_text.replace(/<[^>]+>/g,'').trim(),opts:opts,ans:ans};
+    }
+    return null;
+  }).filter(Boolean);
+  return questions;
+}
+
+function _parseEvalCSV(text){
+  // Format attendu : Question,OptionA,OptionB,OptionC,OptionD,BonneReponse
+  // BonneReponse = A/B/C/D ou 0/1/2/3 ou texte exact de la bonne option
+  var lines=text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  var questions=[];
+  // Ignorer en-tête si la 1ère colonne ressemble à un header
+  var startLine=0;
+  if(lines[0]&&/question|q|enonce/i.test(lines[0].split(/[,;]/)[0])) startLine=1;
+  for(var i=startLine;i<lines.length;i++){
+    // Support virgule et point-virgule comme séparateur
+    var sep=lines[i].indexOf(';')>=0?';':',';
+    var cols=lines[i].split(sep).map(function(c){return c.replace(/^["']|["']$/g,'').trim();});
+    if(cols.length<5) continue;
+    var q=cols[0];
+    var opts=cols.slice(1,5);
+    var rep=cols[5]||cols[4]||'A';
+    var ans=0;
+    if(/^[0-3]$/.test(rep)) ans=parseInt(rep);
+    else if(/^[A-Da-d]$/.test(rep)) ans=rep.toLowerCase().charCodeAt(0)-97;
+    else { // cherche la correspondance de texte
+      var idx=opts.findIndex(function(o){return o.toLowerCase()===rep.toLowerCase();});
+      if(idx>=0) ans=idx;
+    }
+    if(q&&opts[0]) questions.push({q:q,opts:opts,ans:ans});
+  }
+  return questions;
+}
+
+function _parseEvalGIFT(text){
+  // Format GIFT Moodle : ::Title:: Question { =Bonne ~Mauvaise ~Mauvaise }
+  var questions=[];
+  var blocks=text.split(/\n\s*\n+/).filter(function(b){return b.trim();});
+  blocks.forEach(function(block){
+    block=block.replace(/\/\/[^\n]*/g,'').trim();
+    if(!block||block.startsWith('$')) return;
+    var qText='', opts=[], ans=0;
+    var titleMatch=block.match(/^::([^:]+)::/);
+    if(titleMatch) block=block.replace(titleMatch[0],'').trim();
+    var braceIdx=block.indexOf('{');
+    if(braceIdx<0) return;
+    qText=block.slice(0,braceIdx).trim();
+    var inner=block.slice(braceIdx+1,block.lastIndexOf('}')).trim();
+    var optMatches=inner.match(/[=~][^=~#{}]+/g)||[];
+    optMatches.forEach(function(o,i){
+      var isCorrect=o.charAt(0)==='=';
+      var txt=o.slice(1).replace(/#[^#]*#/,'').trim();
+      if(txt){
+        if(isCorrect) ans=opts.length;
+        opts.push(txt);
+      }
+    });
+    if(qText&&opts.length>=2) questions.push({q:qText,opts:opts.slice(0,4),ans:Math.min(ans,3)});
+  });
+  return questions;
+}
+
+function _parseEvalTxt(text){
+  var questions=[];
+  var blocks=text.split(/\n(?=\d+[.\)]\s)/).filter(function(b){return b.trim();});
+  blocks.forEach(function(block){
+    var lines=block.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    if(!lines.length) return;
+    var qLine=lines[0].replace(/^\d+[.\)]\s*/,'').trim();
+    var opts=[], ans=0;
+    var repLine='';
+    lines.slice(1).forEach(function(l){
+      var optM=l.match(/^([a-dA-D])[.\)\-\s]\s*(.+)/);
+      var repM=l.match(/^(?:r[e\u00e9]ponse|bonne\s+r[e\u00e9]ponse)\s*:?\s*([a-dA-D0-3])/i);
+      if(optM) opts.push(optM[2].trim());
+      else if(repM) repLine=repM[1];
+    });
+    if(repLine){
+      if(/^[0-3]$/.test(repLine)) ans=parseInt(repLine);
+      else ans=repLine.toLowerCase().charCodeAt(0)-97;
+    }
+    if(qLine&&opts.length>=2) questions.push({q:qLine,opts:opts.slice(0,4),ans:Math.max(0,Math.min(ans,opts.length-1))});
+  });
+  return questions;
+}
+
+function _doImportEval(){
+  var fmt=document.getElementById('impEvFmt')?.value||'json';
+  var titre=(document.getElementById('impEvTitre')?.value||'').trim()||'Évaluation importée';
+  var mat=document.getElementById('impEvMat')?.value||'';
+  var cls=(document.getElementById('impEvCls')?.value||'').trim();
+  var duree=parseInt(document.getElementById('impEvDuree')?.value)||30;
+
+  function _finalize(questions){
+    if(!questions||!questions.length){toast('Aucune question trouvée dans le fichier','warn');return;}
+    _initEvals();
+    var ev={id:'eval_'+Date.now(),titre:titre,matiere:mat,classe:cls,
+      duree:duree,questions:questions,reponses:[],actif:true,
+      date:new Date().toLocaleDateString('fr-FR')};
+    DB.evaluations.push(ev);
+    save();cm();
+    toast('&#9989; '+questions.length+' question(s) import&eacute;e(s) — '+titre);
+    setTimeout(mManageEvaluations,80);
+  }
+
+  function _parse(text){
+    try{
+      var q=[];
+      if(fmt==='json') q=_parseEvalJSON(text);
+      else if(fmt==='csv') q=_parseEvalCSV(text);
+      else if(fmt==='gift') q=_parseEvalGIFT(text);
+      else q=_parseEvalTxt(text);
+      // Aperçu dans le modal
+      var prev=document.getElementById('impEvPreview');
+      if(prev){
+        prev.style.display='block';
+        prev.innerHTML='<strong>&#128202; '+q.length+' question(s) d&eacute;tect&eacute;e(s)</strong>'
+          +(q.length?'<ul style="margin:6px 0 0 14px;max-height:100px;overflow-y:auto">'
+            +q.slice(0,5).map(function(x,i){return '<li>Q'+(i+1)+': '+_esc(x.q).slice(0,60)+(x.q.length>60?'…':'')+'</li>';}).join('')
+            +(q.length>5?'<li style="color:#6B7A99">… et '+(q.length-5)+' autre(s)</li>':'')+'</ul>':'');
+      }
+      _finalize(q);
+    }catch(err){toast('Erreur de lecture : '+err.message,'warn');}
+  }
+
+  // Lire depuis le textarea collé ou depuis le fichier
+  var textArea=document.getElementById('impEvText');
+  var pastedText=(textArea?.value||'').trim();
+  if(pastedText){_parse(pastedText);return;}
+
+  var fileEl=document.getElementById('impEvFile');
+  if(!fileEl||!fileEl.files[0]){toast('Choisissez un fichier ou collez le texte','warn');return;}
+  var reader=new FileReader();
+  reader.onload=function(ev){_parse(ev.target.result);};
+  reader.readAsText(fileEl.files[0],'utf-8');
+}
+
+// ── Export évaluations ───────────────────────────────────────────────────────
+
+function _exportEvalJSON(idx){
+  _initEvals();
+  var ev=DB.evaluations[idx];
+  if(!ev) return;
+  var blob=new Blob([JSON.stringify(ev,null,2)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=ev.titre.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_VERITAS.json';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast('&#8659; Export JSON : '+ev.titre);
+}
+
+function _exportEvalCSV(idx){
+  _initEvals();
+  var ev=DB.evaluations[idx];
+  if(!ev) return;
+  var rows=['Question,Option A,Option B,Option C,Option D,Bonne réponse'];
+  (ev.questions||[]).forEach(function(q){
+    var opts=q.opts||[];
+    var ans=(q.ans||0);
+    var ansLetter=String.fromCharCode(65+ans); // A/B/C/D
+    rows.push([q.q,opts[0]||'',opts[1]||'',opts[2]||'',opts[3]||'',ansLetter]
+      .map(function(c){return '"'+String(c).replace(/"/g,'""')+'"';}).join(','));
+  });
+  var blob=new Blob([rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=ev.titre.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_VERITAS.csv';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  toast('&#8659; Export CSV : '+ev.questions.length+' questions');
+}
+
 function _newEval(){window._editEvalIdx=-1;_evalFormUI(null);}
 function _editEval(i){window._editEvalIdx=i;_evalFormUI(DB.evaluations[i]);}
 function _evalFormUI(ev){
