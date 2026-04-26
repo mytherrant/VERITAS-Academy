@@ -3295,6 +3295,10 @@ function load(){
   if(_ldSrc){DB.school.logo=_ldSrc;}
   DB.school.nom='VERITAS Academy';
   DB.school.slogan='Centre d\'Excellence Scolaire';
+  // Migration v1.1 — forcer ville et tel (Douala)
+  DB.school.ville='Douala, Cameroun';
+  if(!DB.school.tel||DB.school.tel.indexOf('697')>=0||DB.school.tel.indexOf('6 00 00')>=0)
+    DB.school.tel='656 720 476 / 650 435 106';
   // Ensure new fields exist
   if(!DB.publicInfo)DB.publicInfo=defaultDB().publicInfo;
   if(!DB.galleryImages||!DB.galleryImages.length)DB.galleryImages=defaultDB().galleryImages;
@@ -3316,9 +3320,14 @@ function load(){
   // Merge UNIQUEMENT les items non supprimés par l'admin (deletedDefaults = masque)
   _defC.forEach(function(dc){
     if((dc.resPedago||dc.externalUrl||dc.htmlContent)
-       &&!_curC.find(function(c){return c.id===dc.id;})
        &&DB.deletedDefaults.indexOf(dc.id)<0){
-      _curC.push(dc);
+      var existing=_curC.find(function(c){return c.id===dc.id;});
+      if(!existing){
+        _curC.push(dc);
+      } else if(dc.htmlContent){
+        // Migration v1.1 — patcher le htmlContent existant (ville, tel)
+        existing.htmlContent=dc.htmlContent;
+      }
     }
   });
   DB.elearning.contenus=_curC;
