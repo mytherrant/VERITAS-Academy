@@ -18820,11 +18820,12 @@ function _importEvalModal(){
     +'<option value="json">&#128196; JSON (export V&Eacute;RITAS / Moodle JSON)</option>'
     +'<option value="csv">&#128202; CSV (Question, A, B, C, D, R&eacute;ponse)</option>'
     +'<option value="gift">&#127891; GIFT Moodle (:: Question :: {=bonne ~autre})</option>'
+    +'<option value="html">&#127760; HTML (page quiz, export Word/Writer HTML)</option>'
     +'<option value="txt">&#128221; Texte num&eacute;rot&eacute; (1. Q\na)A Réponse:a)</option>'
     +'</select></div>'
     +'<div class="fg mb10" id="impEvFileWrap">'
     +'<span class="fl">Fichier &agrave; importer</span>'
-    +'<input type="file" class="fi" id="impEvFile" accept=".json,.csv,.txt,.xml,.gift" style="padding:8px">'
+    +'<input type="file" class="fi" id="impEvFile" accept=".json,.csv,.txt,.xml,.gift,.html,.htm" style="padding:8px">'
     +'</div>'
     +'<div class="fg mb10" id="impEvTextWrap" style="display:none">'
     +'<span class="fl">Coller le texte directement</span>'
@@ -18940,6 +18941,87 @@ function _parseEvalGIFT(text){
   return questions;
 }
 
+function _parseEvalHtml(html){
+  // 1. Essayer de détecter un tableau ou une liste structurée dans le HTML
+  //    en utilisant un DOMParser (disponible dans le navigateur) ;
+  //    côté Node/test on tombe dans le fallback texte.
+  try{
+    var doc=(typeof DOMParser!=='undefined')
+      ?new DOMParser().parseFromString(html,'text/html')
+      :null;
+
+    if(doc){
+      var questions=[];
+
+      // Cas 1 : liste ordonnée <ol> avec <li> = questions,
+      //          et sous-listes <ul>/<ol> avec les options
+      var ols=doc.querySelectorAll('ol');
+      ols.forEach(function(ol){
+        ol.querySelectorAll('li').forEach(function(li){
+          var qText='';
+          var opts=[];
+          var ans=0;
+          // Texte direct du <li> (avant la sous-liste)
+          li.childNodes.forEach(function(n){
+            if(n.nodeType===3) qText+=n.textContent;
+            if(n.nodeName==='P'||n.nodeName==='SPAN'||n.nodeName==='B'||n.nodeName==='STRONG') qText+=n.textContent;
+          });
+          qText=qText.trim();
+          // Sous-liste = options
+          var subList=li.querySelector('ul,ol');
+          if(subList){
+            subList.querySelectorAll('li').forEach(function(opt,i){
+              var t=opt.textContent.trim();
+              // Marque de bonne réponse : [x] ou (x) ou * en début
+              if(/^[\[\(\*]/.test(t)||/correct|bonne|answer/i.test(opt.className||'')){ans=i;}
+              t=t.replace(/^[\[\(\*xX\]\)\s]+/,'').trim();
+              opts.push(t);
+            });
+          }
+          if(qText&&opts.length>=2) questions.push({q:qText,opts:opts.slice(0,4),ans:Math.min(ans,3)});
+        });
+      });
+      if(questions.length) return questions;
+
+      // Cas 2 : paragraphes ou divs avec class quiz/question
+      var qEls=doc.querySelectorAll('.question,.quiz-question,[data-question]');
+      if(qEls.length){
+        qEls.forEach(function(el){
+          var qText=(el.querySelector('.question-text,.stem,p')||el).textContent.trim();
+          var opts=[];
+          var ans=0;
+          el.querySelectorAll('.answer,.choice,.option,li').forEach(function(opt,i){
+            if(/correct|right|bonne/i.test(opt.className)) ans=i;
+            opts.push(opt.textContent.replace(/^[a-dA-D][.\)\-\s]/,'').trim());
+          });
+          if(qText&&opts.length>=2) questions.push({q:qText,opts:opts.slice(0,4),ans:Math.min(ans,3)});
+        });
+        if(questions.length) return questions;
+      }
+
+      // Cas 3 : fallback — extraire le texte brut du body et passer au parseur TXT
+      var bodyText=(doc.body||doc.documentElement).textContent||'';
+      return _parseEvalTxt(bodyText);
+    }
+  }catch(e){ /* ignore, fallback below */ }
+
+  // Fallback : strip les balises manuellement et passer au parseur TXT
+  var plain=html
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi,'')
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi,'')
+    .replace(/<br\s*\/?>/gi,'\n')
+    .replace(/<\/p>/gi,'\n')
+    .replace(/<\/li>/gi,'\n')
+    .replace(/<\/div>/gi,'\n')
+    .replace(/<[^>]+>/g,'')
+    .replace(/&nbsp;/g,' ')
+    .replace(/&amp;/g,'&')
+    .replace(/&lt;/g,'<')
+    .replace(/&gt;/g,'>')
+    .replace(/&quot;/g,'"');
+  return _parseEvalTxt(plain);
+}
+
 function _parseEvalTxt(text){
   var questions=[];
   var blocks=text.split(/\n(?=\d+[.\)]\s)/).filter(function(b){return b.trim();});
@@ -18989,6 +19071,7 @@ function _doImportEval(){
       if(fmt==='json') q=_parseEvalJSON(text);
       else if(fmt==='csv') q=_parseEvalCSV(text);
       else if(fmt==='gift') q=_parseEvalGIFT(text);
+      else if(fmt==='html') q=_parseEvalHtml(text);
       else q=_parseEvalTxt(text);
       // Aperçu dans le modal
       var prev=document.getElementById('impEvPreview');
