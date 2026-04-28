@@ -3392,6 +3392,7 @@ function previewFichier(item){
   };
   if(item.fichierData&&item.fichierData.length>100){tryShow(item.fichierData,item.fichier,item.fileType);}
   else if(item.idbKey){idbGetFile(item.idbKey,function(rec){if(!rec){toast('Fichier introuvable','warn');return;}tryShow(rec.data,rec.name,rec.type);});}
+  else if(item.fichierUrl){tryShow(item.fichierUrl,item.fichier||item.fichierUrl.split('/').pop(),item.fileType||'');}
   else{toast('Aucun fichier à prévisualiser','warn');}
 }
 function openFichier(item){
@@ -3406,6 +3407,7 @@ function openFichier(item){
   }
   if(item.fichierData&&item.fichierData.length>100){_dl(item.fichierData,fname,ftype);}
   else if(item.idbKey){idbGetFile(item.idbKey,function(rec){if(!rec){toast('Fichier introuvable','warn');return;}_dl(rec.data,rec.name||fname,rec.type||ftype);});}
+  else if(item.fichierUrl){var a=document.createElement('a');a.href=item.fichierUrl;a.target='_blank';a.click();}
   else{toast('Aucun fichier attaché','warn');}
 }
 function _dlSoumission(sid){
@@ -6044,8 +6046,16 @@ function cloudSaveDB(){
     DB.cloudConfig.lastSync=dateSync;
     save();
     var note=stripped.length?' <span style="color:#D97706;font-size:11px">(non inclus : '+stripped.join(', ')+')</span>':'';
-    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sauvegarde réussie !</strong> '+(res.size_kb||sizeKB)+' Ko — '+dateSync+note+'</span></div>');
+    var _sz=(res.size_kb||sizeKB),_dt=dateSync,_nt=note;
+    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sauvegarde des données réussie !</strong> '+_sz+' Ko — '+_dt+_nt+'<br><span style="font-size:11px;opacity:.7">🔄 Vérification et upload des fichiers locaux...</span></span></div>');
     toast('✅ Données sauvegardées dans le cloud !');
+    _cloudAutoUploadBinaries(function(uploaded,errors){
+      var fNote=uploaded>0?' <span style="color:#059669;font-size:11px">+ '+uploaded+' fichier(s) uploadé(s) ✅</span>':'';
+      if(errors>0)fNote+=' <span style="color:#D97706;font-size:11px">('+errors+' échec(s))</span>';
+      var finalMsg=uploaded===0&&errors===0?' <span style="font-size:11px;opacity:.55">(aucun fichier local supplémentaire)</span>':fNote;
+      _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sauvegarde complète !</strong> '+_sz+' Ko — '+_dt+_nt+finalMsg+'</span></div>');
+      if(uploaded>0)toast('✅ '+uploaded+' fichier(s) uploadé(s) sur le cloud !');
+    });
   })
   .catch(function(e){
     _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span><strong>Échec :</strong> '+_esc(e.message)+'</span></div>');
@@ -6196,6 +6206,157 @@ function cloudDeleteFile(fid){
   .catch(function(e){toast('❌ '+e.message,'err');});
 }
 
+
+// ── Upload automatique des binaires locaux vers le cloud ─────────────────────
+// Appelée automatiquement après cloudSaveDB ET manuellement via cloudSyncBinaries()
+function _cloudAutoUploadBinaries(onDone){
+  var secret=DB.cloudConfig&&DB.cloudConfig.secret;
+  var baseUrl=DB.cloudConfig&&DB.cloudConfig.url;
+  if(!secret||!baseUrl){if(onDone)onDone(0,0);return;}
+  var queue=[];
+
+  // ── Helper : convertir data URL → File ─────────────────────────────────
+  function _toFile(dataUrl,name,type){
+    try{
+      var arr=dataUrl.split(',');
+      var mime=type||((arr[0].match(/:(.*?);/)||['',('application/octet-stream')])[1]);
+      var bstr=atob(arr[1]||''||dataUrl.split(',')[1]||'');
+      var nb=bstr.length;var u8=new Uint8Array(nb);
+      for(var i=0;i<nb;i++)u8[i]=bstr.charCodeAt(i);
+      return new File([u8],name||'file.bin',{type:mime});
+    }catch(e){return null;}
+  }
+
+  // ── Collecte des items à uploader ────────────────────────────────────────
+
+  // 1. E-learning contenus — fichierData (data URL locale)
+  ((DB.elearning&&DB.elearning.contenus)||[]).forEach(function(c){
+    if(c.fichierData&&c.fichierData.length>100&&!c.fichierUrl){
+      (function(cc){
+        queue.push({label:cc.titre||cc.id,cat:'cours',
+          get:function(cb){cb(cc.fichierData,cc.fichier||'fichier.bin',cc.fileType||'');},
+          ok:function(url){cc.fichierUrl=url;cc.fichierData='';}});
+      })(c);
+    }
+    // 1b. E-learning contenus — idbKey (fichier volumineux dans IndexedDB)
+    if(c.idbKey&&!c.fichierUrl){
+      (function(cc){
+        queue.push({label:cc.titre||cc.id,cat:'cours',
+          get:function(cb){
+            idbGetFile(cc.idbKey,function(rec){
+              if(!rec){cb(null);return;}
+              cb(rec.data,rec.name||cc.fichier||'fichier.bin',rec.type||cc.fileType||'');
+            });
+          },
+          ok:function(url){cc.fichierUrl=url;cc.idbKey='';}});
+      })(c);
+    }
+  });
+
+  // 2. Livres — fichier principal (localStorage ou data URL inline)
+  (DB.books||[]).forEach(function(b){
+    if(!b.fichierUrl){
+      if(b.fichierKey&&b.fichierKey.indexOf('manuel_')===0){
+        (function(bb){
+          queue.push({label:bb.titre||bb.id,cat:'ressource',
+            get:function(cb){
+              var d=null;try{d=localStorage.getItem(bb.fichierKey);}catch(e){}
+              if(d)cb(d,bb.fichierNom||'manuel.pdf',bb.fichierType||'application/pdf');
+              else cb(null);
+            },
+            ok:function(url){bb.fichierUrl=url;bb.fichierKey='';}});
+        })(b);
+      } else if(b.fichierData&&b.fichierData.length>100){
+        (function(bb){
+          queue.push({label:bb.titre||bb.id,cat:'ressource',
+            get:function(cb){cb(bb.fichierData,bb.fichierNom||'manuel.pdf',bb.fichierType||'application/pdf');},
+            ok:function(url){bb.fichierUrl=url;bb.fichierData='';if(bb.fichierKey&&bb.fichierKey.indexOf('inline')>=0)bb.fichierKey='';}});
+        })(b);
+      }
+    }
+    // Couverture livre en data URL locale
+    if(b.coverImg&&b.coverImg.indexOf('data:')=== 0&&b.coverImg.length>5000){
+      (function(bb){
+        queue.push({label:'cover_'+(bb.titre||bb.id),cat:'image',
+          get:function(cb){cb(bb.coverImg,'cover_'+bb.id+'.jpg','image/jpeg');},
+          ok:function(url){bb.coverImg=url;}});
+      })(b);
+    }
+  });
+
+  // 3. Galerie photos en data URL locale
+  (DB.galleryImages||[]).forEach(function(img){
+    if(img.src&&img.src.indexOf('data:')===0&&img.src.length>5000){
+      (function(ii){
+        queue.push({label:'photo_'+(ii.titre||ii.id),cat:'image',
+          get:function(cb){cb(ii.src,'photo_'+ii.id+'.jpg','image/jpeg');},
+          ok:function(url){ii.src=url;}});
+      })(img);
+    }
+  });
+
+  // 4. Logo école en data URL locale
+  if(DB.school&&DB.school.logo&&DB.school.logo.indexOf('data:')===0&&DB.school.logo.length>5000){
+    queue.push({label:'logo_veritas',cat:'image',
+      get:function(cb){cb(DB.school.logo,'logo_veritas.png','image/png');},
+      ok:function(url){DB.school.logo=url;}});
+  }
+
+  if(!queue.length){if(onDone)onDone(0,0);return;}
+
+  var total=queue.length,uploaded=0,errors=0;
+
+  function _next(idx){
+    if(idx>=queue.length){save();if(onDone)onDone(uploaded,errors);return;}
+    var entry=queue[idx];
+    var statusEl=document.getElementById('cloudSyncStatus');
+    if(statusEl)statusEl.innerHTML='<div class="ib ibt"><span>⬆️</span><span>Upload '
+      +(idx+1)+'/'+total+' : '+_esc(entry.label||'')+'...</span></div>';
+    entry.get(function(dataUrl,fname,ftype){
+      if(!dataUrl){errors++;_next(idx+1);return;}
+      if(dataUrl.indexOf('http')===0){_next(idx+1);return;}// déjà URL serveur
+      var file=_toFile(dataUrl,fname,ftype);
+      if(!file||file.size===0){errors++;_next(idx+1);return;}
+      if(file.size>50*1024*1024){errors++;_next(idx+1);return;}// >50Mo — skip
+      var fd=new FormData();
+      fd.append('file',file);
+      fd.append('category',entry.cat||'ressource');
+      fd.append('title',entry.label||'fichier');
+      fd.append('_secret',secret);
+      fetch(baseUrl.replace(/\/+$/,'')+'/upload_file.php',{
+        method:'POST',
+        headers:{'Authorization':'Bearer '+secret},
+        body:fd
+      })
+      .then(function(r){return r.json();})
+      .then(function(res){
+        if(res.success&&res.url){entry.ok(res.url);uploaded++;}
+        else errors++;
+        _next(idx+1);
+      })
+      .catch(function(){errors++;_next(idx+1);});
+    });
+  }
+  _next(0);
+}
+
+// Bouton "Sync fichiers locaux" — déclenchement manuel
+function cloudSyncBinaries(){
+  if(!iA()){toast('Accès réservé aux administrateurs','warn');return;}
+  var secret=DB.cloudConfig&&DB.cloudConfig.secret;
+  if(!secret){toast('⚠️ Configurez la clé API dans Paramètres → Cloud','warn');return;}
+  _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Analyse des fichiers locaux non synchronisés...</span></div>');
+  _cloudAutoUploadBinaries(function(uploaded,errors){
+    if(uploaded===0&&errors===0){
+      _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span>Tous les fichiers sont déjà synchronisés sur le cloud !</span></div>');
+      toast('✅ Aucun fichier local à uploader');
+    } else {
+      var msg=uploaded+' fichier(s) uploadé(s)'+(errors>0?', '+errors+' échec(s)':'')+'.';
+      _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sync terminée !</strong> '+msg+'</span></div>');
+      toast('✅ '+msg);
+    }
+  });
+}
 
 // (togglePromo v1 supprimée — version améliorée ci-dessous)
 
@@ -10819,7 +10980,7 @@ function pgSettings(){
         <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="cloudRestoreDB()">📥 Restaurer depuis le cloud</button>
         <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="cloudTestConnection()">🔌 Tester la connexion</button>
         <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mCloudUploadFile()">📤 Uploader un fichier</button>
-        <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mCloudFilesList()">📁 Fichiers en ligne</button>
+        <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mCloudFilesList()">📁 Fichiers en ligne</button><button class="btn sm" style="background:#065F46;color:#fff;border-radius:10px" onclick="cloudSyncBinaries()">🔄 Sync fichiers locaux</button>
       </div>
       <div id="cloudSyncStatus" class="mt12"></div>
       <div class="ib ibi mt14 mb0"><span>💡</span><span><strong>Dernière sync :</strong> ${DB.cloudConfig?.lastSync||'Jamais'} — Les données sont sauvegardées dans la base MySQL de veritas-school.com. Les fichiers uploadés sont accessibles depuis n\'importe quel appareil.</span></div>
@@ -11418,6 +11579,7 @@ function viewSecure(item){
   }
   if(item.fichierData&&item.fichierData.length>100){show(item.fichierData,item.fichier,item.fileType);}
   else if(item.idbKey){idbGetFile(item.idbKey,function(rec){if(!rec){toast('Ressource introuvable','warn');return;}show(rec.data,rec.name,rec.type);});}
+  else if(item.fichierUrl){show(item.fichierUrl,item.fichier||item.fichierUrl.split('/').pop(),item.fileType||'');}
   else{toast('Aucun fichier disponible','warn');}
 }
 
