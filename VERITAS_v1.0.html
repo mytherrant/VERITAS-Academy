@@ -305,11 +305,11 @@ textarea.fi{resize:vertical;min-height:72px}
 
 
 /* ===== PHOTO GALLERY ===== */
-.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
-.gallery-card{position:relative;border-radius:var(--r3);overflow:hidden;background:var(--bg2);border:var(--br);cursor:pointer;transition:all .2s;aspect-ratio:16/10}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:24px}
+.gallery-card{position:relative;border-radius:var(--r3);overflow:hidden;background:var(--bg2);border:var(--br);cursor:pointer;transition:all .2s;aspect-ratio:4/3}
 .gallery-card:hover{box-shadow:var(--sh2);transform:translateY(-3px)}
 .gallery-card img{width:100%;height:100%;object-fit:cover}
-.gallery-card .gallery-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px;background:linear-gradient(transparent,rgba(0,0,0,.7));color:#fff;opacity:0;transition:opacity .25s}
+.gallery-card .gallery-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px 12px;background:linear-gradient(transparent,rgba(0,0,0,.75));color:#fff;opacity:.9;transition:opacity .25s}
 .gallery-card:hover .gallery-overlay{opacity:1}
 .gallery-card .gallery-overlay .semi{font-size:13px}.gallery-card .gallery-overlay .xs2{opacity:.7}
 .gallery-upload{border:2px dashed var(--bg3);border-radius:var(--r3);padding:30px;text-align:center;cursor:pointer;transition:all .2s}
@@ -387,7 +387,7 @@ textarea.fi{resize:vertical;min-height:72px}
 
 @media(max-width:768px){
   .book-hero{grid-template-columns:1fr}
-  .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+  .gallery-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
 }
 @media(max-width:768px){.sg{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}
   .sb{position:fixed;left:0;top:0;bottom:0;z-index:200;transform:translateX(-100%)}
@@ -3301,7 +3301,7 @@ function load(){
     DB.school.tel='656 720 476 / 650 435 106';
   // Ensure new fields exist
   if(!DB.publicInfo)DB.publicInfo=defaultDB().publicInfo;
-  if(!DB.galleryImages||!DB.galleryImages.length)DB.galleryImages=defaultDB().galleryImages;
+  if(!DB.galleryImages)DB.galleryImages=defaultDB().galleryImages;
   if(!DB.photos)DB.photos=defaultDB().photos;
   if(!DB.examResults)DB.examResults=defaultDB().examResults;
   if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts;
@@ -3843,21 +3843,28 @@ function viewBookDetail(bid){
 // ── Modale "Extrait gratuit" — visible directement depuis la boutique ──
 function _showExtrait(bid){
   var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
-  // Aperçu PDF prioritaire (chargement async depuis IndexedDB)
+  function _showPdfExtrait(pdfSrc,pdfName){
+    var h='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:10px">'
+          +'📢 <strong>Extrait gratuit</strong> — Lisez les premières pages avant d\'acheter.</div>'
+          +'<iframe src="'+pdfSrc+'" style="width:100%;height:62vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF" allowfullscreen>'
+          +'<p style="text-align:center;padding:20px">PDF non affiché. <a href="'+pdfSrc+'" target="_blank">Ouvrir →</a></p></iframe>'
+          +'<div style="margin-top:6px;text-align:center;font-size:11px;color:var(--ink4)">📄 '+_esc(pdfName||b.previewPdfName||'apercu.pdf')
+          +'  <a href="'+pdfSrc+'" target="_blank" style="margin-left:10px;color:var(--bl)">↗ Ouvrir dans le navigateur</a></div>';
+    M('📄 Aperçu — '+b.titre,'Extrait gratuit avant achat',h,
+      '<button class="btn bo" onclick="cm()">Fermer</button>'
+      +'<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px">📋 Détails</button>'
+      +(b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')" >🛒 Commander — '+fmt(b.prix)+'</button>':''),true);
+  }
+  // 1. URL serveur (cross-device) — priorité maximale
+  if(b.previewPdfUrl){_showPdfExtrait(b.previewPdfUrl,b.previewPdfName||'apercu.pdf');return;}
+  // 2. Clé IndexedDB (même appareil seulement)
   if(b.previewPdfKey){
     idbGetFile(b.previewPdfKey,function(rec){
       if(!rec){
         if(b.extrait||(b.previewImages||[]).length>0){_showExtrait_text(bid);return;}
-        toast('Aperçu PDF introuvable (chargé sur un autre appareil ?)','warn');return;
+        toast('Aperçu PDF introuvable — uploadez via Sauvegarde cloud pour accès multi-appareils','warn');return;
       }
-      var h='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:10px">'
-            +'📢 <strong>Extrait gratuit</strong> — Lisez les premières pages avant d\'acheter.</div>'
-            +'<iframe src="'+rec.data+'" style="width:100%;height:62vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>'
-            +'<div style="margin-top:6px;text-align:center;font-size:11px;color:var(--ink4)">📄 '+_esc(rec.name||b.previewPdfName||'apercu.pdf')+'</div>';
-      M('📄 Aperçu — '+b.titre,'Extrait gratuit avant achat',h,
-        '<button class="btn bo" onclick="cm()">Fermer</button>'
-        +'<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px">📋 Détails</button>'
-        +(b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')" >🛒 Commander — '+fmt(b.prix)+'</button>':''),true);
+      _showPdfExtrait(rec.data,rec.name||b.previewPdfName);
     });
     return;
   }
@@ -4624,11 +4631,17 @@ function vShowSec(sec,btn){
     <div class="gallery-grid v-stagger">
       ${DB.photos.map(p=>`<div class="gallery-card" style="background:var(--bg2)">
         <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:56px">${p.emoji}</div>
-        <div class="gallery-overlay"><div class="semi">${p.titre}</div><div class="xs2">${p.desc}</div></div>
+        <div class="gallery-overlay">
+          <div class="semi">${p.titre}</div><div class="xs2">${p.desc}</div>
+          ${iA()?`<button class="btn br2 xs" style="margin-top:6px;background:rgba(220,38,38,.85);border:none" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')">🗑 Supprimer</button>`:''}
+        </div>
       </div>`).join("")}
-      ${(DB.galleryImages||[]).map(p=>`<div class="gallery-card">
+      ${(DB.galleryImages||[]).map(p=>`<div class="gallery-card" onclick="_galleryLightbox('${encodeURIComponent(p.src)}','${_esc(p.titre||'')}')">
         <img src="${p.src}" alt="${p.titre}" loading="lazy">
-        ${iA()?`<div class="gallery-overlay"><button class="btn br2 xs" style="margin-top:4px" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')">🗑</button></div>`:''}
+        <div class="gallery-overlay">
+          <div class="semi">${p.titre}</div>
+          ${iA()?`<button class="btn br2 xs" style="margin-top:4px;background:rgba(220,38,38,.85);border:none" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')">🗑</button>`:''}
+        </div>
       </div>`).join("")}
     </div>
     <div class="vcard mt16" style="text-align:center">
@@ -5885,6 +5898,18 @@ function _galleryFallback(file,titre,total,done){
   reader.readAsDataURL(file);
 }
 
+function _galleryLightbox(encodedSrc, titre){
+  var src=decodeURIComponent(encodedSrc);
+  M('','',
+    '<div style="text-align:center;padding:4px 0">'
+    +'<img src="'+src+'" alt="'+_esc(titre)+'" loading="lazy" '
+    +'style="max-width:100%;max-height:75vh;border-radius:10px;display:block;margin:0 auto;box-shadow:0 8px 32px rgba(0,0,0,.25)">'
+    +(titre?'<div style="margin-top:12px;font-family:Libre Baskerville,serif;font-size:16px;font-weight:700;color:var(--bl)">'+_esc(titre)+'</div>':'')
+    +'</div>',
+    '<button class="btn bo" onclick="cm()">✕ Fermer</button>',
+    true
+  );
+}
 function deleteGalleryPhoto(pid){
   if(!confirm('Supprimer cette photo ?'))return;
   DB.galleryImages=(DB.galleryImages||[]).filter(function(p){return p.id!==pid;});
@@ -6304,6 +6329,22 @@ function _cloudAutoUploadBinaries(onDone){
       ok:function(url){DB.school.logo=url;}});
   }
 
+  // 5. previewPdfKey des livres (extraits PDF cross-device)
+  (DB.books||[]).forEach(function(b){
+    if(b.previewPdfKey&&!b.previewPdfUrl){
+      (function(bb){
+        queue.push({label:'preview_'+(bb.titre||bb.id),cat:'epreuve',
+          get:function(cb){
+            idbGetFile(bb.previewPdfKey,function(rec){
+              if(!rec){cb(null);return;}
+              cb(rec.data,rec.name||bb.previewPdfName||'apercu.pdf',rec.type||'application/pdf');
+            });
+          },
+          ok:function(url){bb.previewPdfUrl=url;}});
+      })(b);
+    }
+  });
+
   if(!queue.length){if(onDone)onDone(0,0);return;}
 
   var total=queue.length,uploaded=0,errors=0;
@@ -6343,6 +6384,33 @@ function _cloudAutoUploadBinaries(onDone){
 }
 
 // Bouton "Sync fichiers locaux" — déclenchement manuel
+function cloudForcePull(){
+  if(!iA()){toast('Accès réservé aux administrateurs','warn');return;}
+  var secret=DB.cloudConfig&&DB.cloudConfig.secret;
+  if(!secret){toast('⚠️ Configurez la clé API dans Paramètres → Cloud','warn');return;}
+  if(!confirm('⬇️ Remplacer les données locales par la version du cloud ?\n'
+    +'Vos modifications non synchronisées seront perdues.'))return;
+  _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Récupération depuis le cloud...</span></div>');
+  toast('📥 Récupération en cours...','info');
+  fetch(_cloudUrl('sync.php'),{headers:_cloudHeaders()})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+  .then(function(serverDB){
+    if(!serverDB||!serverDB.school||!serverDB.students)throw new Error('Format invalide');
+    var cloudCfg=DB.cloudConfig;
+    DB=serverDB;
+    DB.cloudConfig=cloudCfg;
+    DB.cloudConfig.lastSync=new Date().toLocaleString('fr-FR')+' (force pull)';
+    save();
+    _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Synchronisé depuis le cloud !</strong> '
+      +DB.students.length+' élèves, '+DB.teachers.length+' enseignants.</span></div>');
+    toast('✅ Données synchronisées depuis le cloud !');
+    setTimeout(function(){re();},800);
+  })
+  .catch(function(e){
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span>'+_esc(e.message)+'</span></div>');
+    toast('❌ '+e.message,'err');
+  });
+}
 function cloudSyncBinaries(){
   if(!iA()){toast('Accès réservé aux administrateurs','warn');return;}
   var secret=DB.cloudConfig&&DB.cloudConfig.secret;
@@ -11007,7 +11075,7 @@ function pgSettings(){
         <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="cloudRestoreDB()">📥 Restaurer depuis le cloud</button>
         <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="cloudTestConnection()">🔌 Tester la connexion</button>
         <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mCloudUploadFile()">📤 Uploader un fichier</button>
-        <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mCloudFilesList()">📁 Fichiers en ligne</button><button class="btn sm" style="background:#065F46;color:#fff;border-radius:10px" onclick="cloudSyncBinaries()">🔄 Sync fichiers locaux</button>
+        <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mCloudFilesList()">📁 Fichiers en ligne</button><button class="btn sm" style="background:#065F46;color:#fff;border-radius:10px" onclick="cloudSyncBinaries()">🔄 Sync fichiers locaux</button><button class="btn sm" style="background:#6D28D9;color:#fff;border-radius:10px" onclick="cloudForcePull()">⬇️ Forcer depuis le cloud</button>
       </div>
       <div id="cloudSyncStatus" class="mt12"></div>
       <div class="ib ibi mt14 mb0"><span>💡</span><span><strong>Dernière sync :</strong> ${DB.cloudConfig?.lastSync||'Jamais'} — Les données sont sauvegardées dans la base MySQL de veritas-school.com. Les fichiers uploadés sont accessibles depuis n\'importe quel appareil.</span></div>
@@ -18296,7 +18364,11 @@ function _showPDFViewer(src,titre,canDownload){
       return '<div style="position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden;display:flex;align-items:center;justify-content:center">'+
              '<div style="position:absolute;top:-40px;left:-60px;right:-60px;bottom:-40px;display:flex;flex-direction:column;gap:0">'+rows+'</div></div>';
     })()
-    +'<embed src="'+displaySrc+'" type="application/pdf" style="width:100%;height:100%;border:none" />'
+    +'<iframe src="'+displaySrc+'" style="width:100%;height:100%;border:none;display:block" '
+    +'title="'+_esc(titre)+'" allowfullscreen>'
+    +'<p style="color:#fff;text-align:center;padding-top:40px">Votre navigateur ne supporte pas l\'affichage PDF intégré. '
+    +'<a href="'+displaySrc+'" target="_blank" style="color:#FFC93C">Ouvrir le PDF →</a></p>'
+    +'</iframe>'
     +'</div>'
     +'<div style="background:#142554;color:rgba(255,255,255,.55);text-align:center;padding:5px 8px;font-size:10px;border-radius:0 0 8px 8px;line-height:1.4">'
     +(school.nom||'VÉRITAS Academy')+' · veritas-school.com · Usage pédagogique uniquement'
