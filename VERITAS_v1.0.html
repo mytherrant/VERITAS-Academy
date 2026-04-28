@@ -3481,6 +3481,7 @@ function exportSQL(){
 
 function save(){
   try{
+    DB.lastModified=Date.now();
     var data=JSON.parse(JSON.stringify(DB));
     // Strip large inline file data before saving to LS (keep idbKey reference)
     if(data.elearning&&data.elearning.contenus){
@@ -5886,7 +5887,8 @@ function _galleryFallback(file,titre,total,done){
 
 function deleteGalleryPhoto(pid){
   if(!confirm('Supprimer cette photo ?'))return;
-  DB.galleryImages=DB.galleryImages.filter(p=>p.id!==pid);
+  DB.galleryImages=(DB.galleryImages||[]).filter(function(p){return p.id!==pid;});
+  DB.photos=(DB.photos||[]).filter(function(p){return p.id!==pid;});
   save();if(typeof initVisitor==='function')initVisitor();toast('Photo supprimée');
 }
 
@@ -8063,11 +8065,36 @@ function go2SES(acc){
           var lastSync=DB.cloudConfig&&DB.cloudConfig.lastSync;
           _setSyncDot(lastSync?'ok':'pending',lastSync||'');
         }
-        // Auto-push vers le serveur au login si cloud configuré (pour que le téléphone reçoive les dernières données)
+        // Sync intelligente au login : compare lastModified local vs serveur
+        // Si serveur plus récent → pull (restaure) ; sinon → push
         var cfg=DB.cloudConfig;
         if(cfg&&cfg.url&&cfg.secret){
           setTimeout(function(){
-            if(iA()&&!_autoSyncDirty)_cloudAutoSync();
+            if(!iA())return;
+            var localTS=DB.lastModified||0;
+            fetch(_cloudUrl('sync.php'),{headers:_cloudHeaders()})
+            .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+            .then(function(serverDB){
+              if(!serverDB||!serverDB.school||!serverDB.students){if(!_autoSyncDirty)_cloudAutoSync();return;}
+              var serverTS=serverDB.lastModified||0;
+              if(serverTS>localTS){
+                // Serveur plus récent → restaurer les données du serveur
+                var cloudCfg=DB.cloudConfig;
+                DB=serverDB;
+                DB.cloudConfig=cloudCfg;
+                DB.cloudConfig.lastSync=new Date().toLocaleString('fr-FR')+' (auto-sync ↓)';
+                save();
+                _setSyncDot('ok',DB.cloudConfig.lastSync);
+                toast('🔄 Données synchronisées depuis le cloud','info');
+                setTimeout(function(){re();},800);
+              } else {
+                // Local à jour ou plus récent → pousser vers serveur
+                if(!_autoSyncDirty)_cloudAutoSync();
+              }
+            })
+            .catch(function(){
+              if(!_autoSyncDirty)_cloudAutoSync();
+            });
           },3000);
         }
       }
@@ -10964,7 +10991,7 @@ function pgSettings(){
         <button class="btn bvi" onclick="importAllData()">📥 Importer JSON</button>
         <button class="btn" style="background:#059669;color:#fff" onclick="exportSQL()">🗄️ Exporter SQL</button>
       </div>
-      <div class="fl2 fw g8 mt12 pt12" style="border-top:var(--br)"><div class="bold s mb8">🛠️ Gestion avancee</div><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()">📢 Defilant</button><button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()">🎬 Video</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()">📦 Packs</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()">📅 Calendrier</button><button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()">🤝 Partenaires</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()">🎮 Jeux</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Labos</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évals</button><button class="btn sm" style="background:#142554;color:#fff;border-radius:10px" onclick="re();goTo('visitor_accounts')">👥 Comptes</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageEvaluations()">📊 Évaluations</button><button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mPayAttempts()">💰 Paiements</button> <button class="btn sm" style="background:#25D366;color:#fff;border-radius:10px;margin:2px" onclick="mWAPendingMembers()">ðŸ“² Groupes WA</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageExtraits()">📖 Extraits</button></div>
+      <div class="fl2 fw g8 mt12 pt12" style="border-top:var(--br)"><div class="bold s mb8">🛠️ Gestion avancee</div><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()">📢 Defilant</button><button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()">🎬 Video</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()">📦 Packs</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()">📅 Calendrier</button><button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()">🤝 Partenaires</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()">🎮 Jeux</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Labos</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évals</button><button class="btn sm" style="background:#142554;color:#fff;border-radius:10px" onclick="re();goTo('visitor_accounts')">👥 Comptes</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button><button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mPayAttempts()">💰 Paiements</button> <button class="btn sm" style="background:#25D366;color:#fff;border-radius:10px;margin:2px" onclick="mWAPendingMembers()">ðŸ“² Groupes WA</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageExtraits()">📖 Extraits</button></div>
       <div class="ib ibi mt14 mb0"><span>💡</span><span>Pour synchroniser via <strong>intranet</strong>: exportez les données, partagez via WiFi, importez sur l\'autre appareil.</span></div>
     </div>
     <div class="card mt16">
