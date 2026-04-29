@@ -4039,8 +4039,7 @@ function _showExtrait(bid){
           +'📢 <strong>Extrait gratuit</strong> — Lisez les premières pages avant d\'acheter.</div>'
           +'<iframe src="'+pdfSrc+'" style="width:100%;height:62vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF" allowfullscreen>'
           +'<p style="text-align:center;padding:20px">PDF non affiché. <a href="'+pdfSrc+'" target="_blank">Ouvrir →</a></p></iframe>'
-          +'<div style="margin-top:6px;text-align:center;font-size:11px;color:var(--ink4)">📄 '+_esc(pdfName||b.previewPdfName||'apercu.pdf')
-          +'  <a href="'+pdfSrc+'" target="_blank" style="margin-left:10px;color:var(--bl)">↗ Ouvrir dans le navigateur</a></div>';
+          +'<div style="margin-top:6px;text-align:center"><a href="'+pdfSrc+'" target="_blank" style="font-size:12px;color:var(--bl)">↗ Ouvrir dans le navigateur</a></div>';
     M('📄 Aperçu — '+b.titre,'Extrait gratuit avant achat',h,
       '<button class="btn bo" onclick="cm()">Fermer</button>'
       +'<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px">📋 Détails</button>'
@@ -4154,8 +4153,7 @@ function showBookTab(btn,tabId){
             +'❌ Aperçu PDF introuvable (peut être chargé sur un autre appareil).</div>';
           return;
         }
-        cont.innerHTML='<iframe src="'+rec.data+'" style="width:100%;height:58vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>'
-          +'<div style="font-size:11px;color:var(--ink4);text-align:center;margin-top:4px">📄 '+_esc(rec.name||'apercu.pdf')+'</div>';
+        cont.innerHTML='<iframe src="'+rec.data+'" style="width:100%;height:58vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>';
       });
     }
   }
@@ -4831,15 +4829,13 @@ function vShowSec(sec,btn){
       ${DB.photos.map(p=>`<div class="gallery-card" style="background:var(--bg2)">
         <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:56px">${p.emoji}</div>
         <div class="gallery-overlay">
-          <div class="semi">${p.titre}</div><div class="xs2">${p.desc}</div>
-          ${iA()?`<button class="btn br2 xs" style="margin-top:6px;background:rgba(220,38,38,.85);border:none" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')">🗑 Supprimer</button>`:''}
+          ${iA()?`<button class="btn br2 xs" style="background:rgba(220,38,38,.85);border:none" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')">🗑 Supprimer</button>`:''}
         </div>
       </div>`).join("")}
       ${(DB.galleryImages||[]).map(p=>`<div class="gallery-card" onclick="_galleryLightbox('${encodeURIComponent(p.src)}','${_esc(p.titre||'')}')">
         <img src="${p.src}" alt="${p.titre}" loading="lazy">
         <div class="gallery-overlay">
-          <div class="semi">${p.titre}</div>
-          ${iA()?`<button class="btn br2 xs" style="margin-top:4px;background:rgba(220,38,38,.85);border:none" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')">🗑</button>`:''}
+          ${iA()?`<button class="btn br2 xs" style="background:rgba(220,38,38,.85);border:none" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')">🗑</button>`:''}
         </div>
       </div>`).join("")}
     </div>
@@ -6573,7 +6569,8 @@ function _cloudAutoUploadBinaries(onDone){
   // Upload d'une entrée avec retry (jusqu'à 2 tentatives) et timeout
   function _uploadEntry(entry,fname,ftype,file,attempt,onResult){
     var isVideo=(ftype||'').indexOf('video/')===0;
-    var timeoutMs=isVideo?120000:30000; // 30s images/PDF · 120s vidéos
+    var isPdf=(ftype||'').indexOf('pdf')>=0||(fname||'').toLowerCase().endsWith('.pdf');
+    var timeoutMs=(isVideo||isPdf)?120000:30000; // 30s images · 120s PDF et vidéos
     var ctrl=typeof AbortController!=='undefined'?new AbortController():null;
     var tmt=ctrl?setTimeout(function(){ctrl.abort();},timeoutMs):null;
     var fd=new FormData();
@@ -7793,8 +7790,7 @@ function _loadElPdfPreview(itemId,pdfKey){
         +'❌ Aperçu PDF introuvable (chargé sur un autre appareil).</div>';
       return;
     }
-    cont.innerHTML='<div style="margin-top:10px"><iframe src="'+rec.data+'" style="width:100%;height:52vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>'
-      +'<div style="font-size:11px;color:var(--ink4);text-align:center;margin-top:4px">📄 '+_esc(rec.name||'apercu.pdf')+'</div></div>';
+    cont.innerHTML='<div style="margin-top:10px"><iframe src="'+rec.data+'" style="width:100%;height:52vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe></div>';
   });
 }
 
