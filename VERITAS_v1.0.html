@@ -6011,9 +6011,11 @@ function uploadGalleryPhoto(){
       if(cfg&&cfg.url&&cfg.secret){
         toast('⬆️ Upload en cours…','info');
         var fd=new FormData();
-        fd.append('file',file);fd.append('category','image');
-        fd.append('title',titre);fd.append('_secret',cfg.secret);
-        fetch(cfg.url.replace(/\/+$/,'')+'/upload.php',{
+        fd.append('file',file);
+        fd.append('type','image');         // upload_file.php
+        fd.append('ref_id',gid());         // upload_file.php
+        fd.append('_secret',cfg.secret);
+        fetch(cfg.url.replace(/\/+$/,'')+'/upload_file.php',{  // standalone, sans MySQL
           method:'POST',
           headers:{'Authorization':'Bearer '+cfg.secret},
           body:fd
@@ -10281,21 +10283,33 @@ function uploadBookCover(bid){
   input.style.display='none';document.body.appendChild(input);
   input.onchange=function(e){
     var file=e.target.files[0];if(!file)return;
-    if(file.size>3000000){toast('Image trop lourde (max 3Mo)','warn');return;}
+    if(file.size>5*1024*1024){toast('Image trop lourde (max 5Mo)','warn');return;}
     var cfg=DB.cloudConfig;
     if(cfg&&cfg.url&&cfg.secret){
       toast('⬆️ Upload couverture…','info');
       var fd=new FormData();
-      fd.append('file',file);fd.append('category','image');
-      fd.append('title','cover_'+bid);fd.append('_secret',cfg.secret);
-      fetch(cfg.url.replace(/\/+$/,'')+'/upload.php',{
-        method:'POST',headers:{'Authorization':'Bearer '+cfg.secret},body:fd
-      }).then(function(r){return r.json();})
+      fd.append('file',file);
+      fd.append('type','image');          // champ correct pour upload_file.php
+      fd.append('ref_id','cover_'+bid);  // champ correct pour upload_file.php
+      fd.append('_secret',cfg.secret);
+      // Timeout 30s
+      var ctrl=typeof AbortController!=='undefined'?new AbortController():null;
+      var tmt=ctrl?setTimeout(function(){ctrl.abort();},30000):null;
+      fetch(cfg.url.replace(/\/+$/,'')+'/upload_file.php',{  // ← upload_file.php (sans MySQL)
+        method:'POST',
+        headers:{'Authorization':'Bearer '+cfg.secret},
+        body:fd,
+        signal:ctrl?ctrl.signal:undefined
+      }).then(function(r){if(tmt)clearTimeout(tmt);return r.json();})
       .then(function(res){
         var b=DB.books.find(function(x){return x.id===bid;});
-        if(res.url&&b){b.coverImg=res.url;save();re();toast('✓ Couverture mise à jour (serveur)');}
-        else _bookCoverFallback(file,bid);
-      }).catch(function(){_bookCoverFallback(file,bid);});
+        if(res.url&&b){b.coverImg=res.url;save();re();toast('✓ Couverture sauvegardée sur le serveur ✅');}
+        else{console.warn('[cover upload] Réponse serveur:',res);_bookCoverFallback(file,bid);}
+      }).catch(function(err){
+        if(tmt)clearTimeout(tmt);
+        console.warn('[cover upload] Erreur:',err);
+        _bookCoverFallback(file,bid);
+      });
     }else{_bookCoverFallback(file,bid);}
     input.remove();
   };
