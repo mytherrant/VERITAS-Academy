@@ -6226,7 +6226,16 @@ function cloudSaveDB(){
     toast('✅ Données sauvegardées dans le cloud !');
     _cloudAutoUploadBinaries(function(uploaded,errors){
       var fNote=uploaded>0?' <span style="color:#059669;font-size:11px">+ '+uploaded+' fichier(s) uploadé(s) ✅</span>':'';
-      if(errors>0)fNote+=' <span style="color:#D97706;font-size:11px">('+errors+' échec(s))</span>';
+      if(errors>0){
+        // Récupérer le détail des échecs depuis localStorage
+        var failDetail='';
+        try{
+          var fl=JSON.parse(localStorage.getItem('_vrtUploadErrors')||'[]');
+          if(fl.length)failDetail=' <span style="font-size:10px;color:#92400E;cursor:pointer" onclick="var d=JSON.parse(localStorage.getItem(\'_vrtUploadErrors\')||\'[]\');alert(\'Fichiers en échec :\\n\'+d.map(function(x){return \'• \'+x.label+\' : \'+x.reason;}).join(\'\\n\'))">⚠️ '+errors+' échec(s) — cliquez pour détails</span>';
+          else failDetail=' <span style="color:#D97706;font-size:11px">⚠️ '+errors+' échec(s)</span>';
+        }catch(e){failDetail=' <span style="color:#D97706;font-size:11px">⚠️ '+errors+' échec(s)</span>';}
+        fNote+=failDetail;
+      }
       var finalMsg=uploaded===0&&errors===0?' <span style="font-size:11px;opacity:.55">(aucun fichier local supplémentaire)</span>':fNote;
       _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sauvegarde complète !</strong> '+_sz+' Ko — '+_dt+_nt+finalMsg+'</span></div>');
       if(uploaded>0){
@@ -6503,36 +6512,74 @@ function _cloudAutoUploadBinaries(onDone){
   if(!queue.length){if(onDone)onDone(0,0);return;}
 
   var total=queue.length,uploaded=0,errors=0;
+  // Log des échecs pour diagnostic
+  var _failLog=[];
+
+  // Upload d'une entrée avec retry (jusqu'à 2 tentatives) et timeout
+  function _uploadEntry(entry,fname,ftype,file,attempt,onResult){
+    var isVideo=(ftype||'').indexOf('video/')===0;
+    var timeoutMs=isVideo?120000:30000; // 30s images/PDF · 120s vidéos
+    var ctrl=typeof AbortController!=='undefined'?new AbortController():null;
+    var tmt=ctrl?setTimeout(function(){ctrl.abort();},timeoutMs):null;
+    var fd=new FormData();
+    fd.append('file',file,fname);
+    fd.append('type',entry.cat||'image');   // ← champ correct pour PHP
+    fd.append('ref_id',entry.label||'x');   // ← champ correct pour PHP
+    fd.append('_secret',secret);
+    fetch(baseUrl.replace(/\/+$/,'')+'/upload_file.php',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+secret},
+      body:fd,
+      signal:ctrl?ctrl.signal:undefined
+    })
+    .then(function(r){
+      if(tmt)clearTimeout(tmt);
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      return r.json();
+    })
+    .then(function(res){
+      if(res.success&&res.url){onResult(res.url,null);}
+      else onResult(null,res.error||'Réponse serveur invalide');
+    })
+    .catch(function(e){
+      if(tmt)clearTimeout(tmt);
+      var msg=e.message||'Erreur réseau';
+      if(attempt<2){
+        // Retry automatique après 3s
+        setTimeout(function(){_uploadEntry(entry,fname,ftype,file,attempt+1,onResult);},3000);
+      } else {
+        onResult(null,msg);
+      }
+    });
+  }
 
   function _next(idx){
-    if(idx>=queue.length){save();if(onDone)onDone(uploaded,errors);return;}
+    if(idx>=queue.length){
+      // Sauvegarder le log des échecs dans localStorage pour diagnostic
+      if(_failLog.length>0){
+        try{localStorage.setItem('_vrtUploadErrors',JSON.stringify(_failLog.slice(-20)));}catch(e){}
+        console.warn('[VÉRITAS upload] Échecs (',_failLog.length,'):',_failLog);
+      }
+      save();
+      if(onDone)onDone(uploaded,errors);
+      return;
+    }
     var entry=queue[idx];
     var statusEl=document.getElementById('cloudSyncStatus');
     if(statusEl)statusEl.innerHTML='<div class="ib ibt"><span>⬆️</span><span>Upload '
       +(idx+1)+'/'+total+' : '+_esc(entry.label||'')+'...</span></div>';
     entry.get(function(dataUrl,fname,ftype){
-      if(!dataUrl){errors++;_next(idx+1);return;}
-      if(dataUrl.indexOf('http')===0){_next(idx+1);return;}// déjà URL serveur
+      // Déjà une URL serveur → skip sans erreur
+      if(!dataUrl||dataUrl===''){ _failLog.push({label:entry.label,reason:'données vides ou IDB introuvable'}); errors++;_next(idx+1);return;}
+      if(dataUrl.indexOf('http')===0){_next(idx+1);return;}
       var file=_toFile(dataUrl,fname,ftype);
-      if(!file||file.size===0){errors++;_next(idx+1);return;}
-      if(file.size>50*1024*1024){errors++;_next(idx+1);return;}// >50Mo — skip
-      var fd=new FormData();
-      fd.append('file',file);
-      fd.append('category',entry.cat||'ressource');
-      fd.append('title',entry.label||'fichier');
-      fd.append('_secret',secret);
-      fetch(baseUrl.replace(/\/+$/,'')+'/upload_file.php',{
-        method:'POST',
-        headers:{'Authorization':'Bearer '+secret},
-        body:fd
-      })
-      .then(function(r){return r.json();})
-      .then(function(res){
-        if(res.success&&res.url){entry.ok(res.url);uploaded++;}
-        else errors++;
+      if(!file||file.size===0){_failLog.push({label:entry.label,reason:'data URL invalide ou vide'});errors++;_next(idx+1);return;}
+      if(file.size>50*1024*1024){_failLog.push({label:entry.label,reason:'fichier >50Mo ignoré ('+Math.round(file.size/1048576)+'Mo)'});errors++;_next(idx+1);return;}
+      _uploadEntry(entry,fname,ftype,file,1,function(url,err){
+        if(url){entry.ok(url);uploaded++;}
+        else{_failLog.push({label:entry.label,reason:err||'inconnu'});errors++;}
         _next(idx+1);
-      })
-      .catch(function(){errors++;_next(idx+1);});
+      });
     });
   }
   _next(0);
