@@ -3542,15 +3542,29 @@ function _effectiveCloudConfig(){
 
 // ── Polling arrière-plan : vérifie toutes les 90s si le cloud est plus récent ─
 // Fonctionne même sans login admin (utilise le cache vrt10_cc si disponible)
+// ── Score de richesse d'une DB (pour comparaison de contenu) ─────────────────
+// Compare les données réelles, pas seulement le timestamp
+function _dbScore(d){
+  if(!d)return 0;
+  return ((d.students||[]).length*10)
+        +((d.books||[]).length*8)
+        +((d.teachers||[]).length*6)
+        +((d.grades||[]).length*2)
+        +((d.payments||[]).length*2)
+        +((d.elearning&&d.elearning.contenus||[]).length*5)
+        +((d.galleryImages||[]).length*3)
+        +((d.packs||[]).length*4)
+        +(d.lastModified?1:0);
+}
+
 function _startBgPoll(){
   if(_bgPollTimer)return; // déjà actif
-  var cfg=_effectiveCloudConfig(); // DB.cloudConfig OU cache vrt10_cc
+  var cfg=_effectiveCloudConfig();
   if(!cfg||!cfg.url||!cfg.secret)return;
   _bgPollTimer=setInterval(function(){
     var cfg2=_effectiveCloudConfig();
     if(!cfg2||!cfg2.url||!cfg2.secret){clearInterval(_bgPollTimer);_bgPollTimer=null;return;}
-    if(!navigator.onLine)return; // pas de réseau → skip
-    // Construire les headers avec le cfg2 effectif (peut venir du cache)
+    if(!navigator.onLine)return;
     var hdrs={'Authorization':'Bearer '+cfg2.secret};
     var url=(cfg2.url||'').replace(/\/$/,'')
       +'/sync.php?t='+Date.now()
@@ -3558,28 +3572,67 @@ function _startBgPoll(){
     fetch(url,{headers:hdrs})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(serverDB){
-      if(!serverDB||!serverDB.lastModified)return;
+      if(!serverDB||!serverDB.school)return;
       var serverTS=serverDB.lastModified||0;
       var localTS=DB.lastModified||0;
-      if(serverTS>localTS+5000){ // cloud plus récent de plus de 5 secondes
-        // Préserver la config cloud locale (ne pas l'écraser par la version serveur)
+      var serverScore=_dbScore(serverDB);
+      var localScore=_dbScore(DB);
+
+      // ── Décision de pull : timestamp OU contenu plus riche côté serveur ──
+      var shouldPull=(serverTS>localTS+3000)          // cloud plus récent
+                   ||(serverScore>localScore+5);       // cloud a plus de données
+
+      // ── Décision de push : local admin plus récent ET pas déjà en cours ──
+      var shouldPush=iA()&&!_autoSyncDirty
+                   &&(localTS>serverTS+3000)
+                   &&(localScore>=serverScore);
+
+      if(shouldPull){
         var prevCfg=DB.cloudConfig||cfg2;
+        // ── Fusion intelligente des ressources ──────────────────────────
+        // Les données admin (élèves, notes, paiements) : le cloud prime
+        // Les ressources (livres, galerie, e-learning) : UNION des deux
+        function _mergeById(localArr,serverArr){
+          var merged=JSON.parse(JSON.stringify(serverArr||[]));
+          var serverIds={};merged.forEach(function(x){serverIds[x.id||x.mat||x.mat2]=true;});
+          (localArr||[]).forEach(function(x){
+            var k=x.id||x.mat||x.mat2;
+            if(k&&!serverIds[k])merged.push(x); // ajouter les items locaux absents du cloud
+          });
+          return merged;
+        }
+        // Sauvegarder les ressources locales avant écrasement
+        var localBooks=DB.books||[];
+        var localGallery=DB.galleryImages||[];
+        var localElearn=(DB.elearning&&DB.elearning.contenus)||[];
+        var localPacks=DB.packs||[];
+        var localCitations=DB.citations||[];
+        // Remplacer par la version cloud (données admin)
         DB=serverDB;
+        // Fusionner les ressources
+        DB.books=_mergeById(localBooks,DB.books);
+        DB.galleryImages=_mergeById(localGallery,DB.galleryImages);
+        if(!DB.elearning)DB.elearning={contenus:[],plans:[],abonnements:[],commandes:[],soumissions:[]};
+        DB.elearning.contenus=_mergeById(localElearn,DB.elearning.contenus);
+        DB.packs=_mergeById(localPacks,DB.packs);
+        DB.citations=_mergeById(localCitations,DB.citations);
+        // Restaurer la config cloud locale
         if(!DB.cloudConfig||!DB.cloudConfig.url)DB.cloudConfig=prevCfg;
         DB.cloudConfig.lastSync=new Date().toLocaleString('fr-FR')+' ↓';
         save();
-        _saveCloudConfigCache(); // refresh du cache téléphone
+        _saveCloudConfigCache();
         _setSyncDot&&_setSyncDot('ok',DB.cloudConfig.lastSync);
-        toast('🔄 Données mises à jour','info');
+        // Si admin connecté : re-pousser la fusion vers le cloud (pour que l'autre appareil en bénéficie)
+        if(iA()){setTimeout(function(){_autoSyncDirty=true;_cloudAutoSync();},5000);}
+        toast('🔄 Données synchronisées et fusionnées','info');
         if(typeof re==='function')setTimeout(re,600);
-      } else if(localTS>serverTS+5000&&iA()&&!_autoSyncDirty){
-        // Local plus récent → push
+      } else if(shouldPush){
         _autoSyncDirty=true;
         _cloudAutoSync();
       }
     })
     .catch(function(){});
-  },90000); // toutes les 90 secondes
+  },30000); // toutes les 30 secondes (au lieu de 90s)
 }
 
 function _triggerAutoSync(){
@@ -6644,13 +6697,22 @@ function cloudForcePull(){
   .then(function(serverDB){
     if(!serverDB||!serverDB.school||!serverDB.students)throw new Error('Format invalide');
     var cloudCfg=DB.cloudConfig;
+    // Fusion : préserver les ressources locales absentes du cloud
+    function _mById(la,sa){var m=JSON.parse(JSON.stringify(sa||[]));var si={};m.forEach(function(x){si[x.id||x.mat]=true;});(la||[]).forEach(function(x){var k=x.id||x.mat;if(k&&!si[k])m.push(x);});return m;}
+    var lb=DB.books||[],lg=DB.galleryImages||[],le=(DB.elearning&&DB.elearning.contenus)||[];
     DB=serverDB;
+    DB.books=_mById(lb,DB.books);
+    DB.galleryImages=_mById(lg,DB.galleryImages);
+    if(!DB.elearning)DB.elearning={contenus:[],plans:[],abonnements:[],commandes:[],soumissions:[]};
+    DB.elearning.contenus=_mById(le,DB.elearning.contenus);
     DB.cloudConfig=cloudCfg;
     DB.cloudConfig.lastSync=new Date().toLocaleString('fr-FR')+' (force pull)';
     save();
     _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Synchronisé depuis le cloud !</strong> '
-      +DB.students.length+' élèves, '+DB.teachers.length+' enseignants.</span></div>');
-    toast('✅ Données synchronisées depuis le cloud !');
+      +DB.students.length+' élèves · '+DB.teachers.length+' enseignants · '+DB.books.length+' manuels.</span></div>');
+    toast('✅ Données synchronisées et fusionnées !');
+    // Re-pousser la fusion vers le cloud
+    setTimeout(function(){_autoSyncDirty=true;_cloudAutoSync();},3000);
     setTimeout(function(){re();},800);
   })
   .catch(function(e){
@@ -8399,16 +8461,25 @@ function go2SES(acc){
             .then(function(serverDB){
               if(!serverDB||!serverDB.school||!serverDB.students){if(!_autoSyncDirty)_cloudAutoSync();return;}
               var serverTS=serverDB.lastModified||0;
-              if(serverTS>localTS){
-                // Serveur plus récent → restaurer les données du serveur
+              var localScore2=_dbScore(DB),serverScore2=_dbScore(serverDB);
+              if(serverTS>localTS||(serverScore2>localScore2+5)){
+                // Serveur plus récent OU plus riche → fusionner
                 var cloudCfg=DB.cloudConfig;
+                function _mL(la,sa){var m=JSON.parse(JSON.stringify(sa||[]));var si={};m.forEach(function(x){si[x.id||x.mat]=true;});(la||[]).forEach(function(x){var k=x.id||x.mat;if(k&&!si[k])m.push(x);});return m;}
+                var lb2=DB.books||[],lg2=DB.galleryImages||[],le2=(DB.elearning&&DB.elearning.contenus)||[];
                 DB=serverDB;
+                DB.books=_mL(lb2,DB.books);
+                DB.galleryImages=_mL(lg2,DB.galleryImages);
+                if(!DB.elearning)DB.elearning={contenus:[],plans:[],abonnements:[],commandes:[],soumissions:[]};
+                DB.elearning.contenus=_mL(le2,DB.elearning.contenus);
                 DB.cloudConfig=cloudCfg;
                 DB.cloudConfig.lastSync=new Date().toLocaleString('fr-FR')+' (auto-sync ↓)';
                 save();
                 _setSyncDot('ok',DB.cloudConfig.lastSync);
                 toast('🔄 Données synchronisées depuis le cloud','info');
                 setTimeout(function(){re();},800);
+                // Re-pousser la fusion si admin
+                setTimeout(function(){if(iA()){_autoSyncDirty=true;_cloudAutoSync();}},6000);
               } else {
                 // Local à jour ou plus récent → pousser vers serveur
                 if(!_autoSyncDirty)_cloudAutoSync();
