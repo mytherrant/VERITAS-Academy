@@ -3513,7 +3513,13 @@ function _hasLocalBinaries(){
   if((DB.galleryImages||[]).some(function(g){return g.src&&g.src.startsWith('data:')&&g.src.length>500;}))return true;
   if(DB.school&&DB.school.logo&&DB.school.logo.startsWith('data:')&&DB.school.logo.length>500)return true;
   if((DB.partenaires||[]).some(function(p){return p.logo&&p.logo.startsWith('data:')&&p.logo.length>500;}))return true;
-  if((DB.books||[]).some(function(b){return (b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>500)||(b.fichierKey&&b.fichierKey.length>0)||(b.fichierData&&b.fichierData.length>500);}))return true;
+  if((DB.books||[]).some(function(b){
+    if(b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>500)return true;
+    if(b.fichierKey&&b.fichierKey.length>0)return true;
+    if(b.fichierData&&b.fichierData.length>500)return true;
+    if((b.previewImages||[]).some(function(img){return img&&img.startsWith('data:')&&img.length>500;}))return true;
+    return false;
+  }))return true;
   if(DB.elearning&&(DB.elearning.contenus||[]).some(function(c){return (c.fichierData&&c.fichierData.length>500)||(c.idbKey&&c.idbKey.length>0);}))return true;
   return false;
 }
@@ -3601,6 +3607,40 @@ function _startBgPoll(){
           });
           return merged;
         }
+        // ── Fusion des images : préserver les images non-vides locales ────
+        // Si le cloud a une image vide (upload échoué/strippé) mais local en a une, garder locale
+        function _mergeBooks(localArr,serverArr){
+          var merged=_mergeById(localArr,serverArr);
+          // Construire un index des livres locaux
+          var localMap={};(localArr||[]).forEach(function(b){if(b.id)localMap[b.id]=b;});
+          merged.forEach(function(b){
+            var loc=localMap[b.id];
+            if(!loc)return;
+            // coverImg : préférer une URL/data non-vide si le cloud a vide
+            if((!b.coverImg||b.coverImg==='')&&loc.coverImg)b.coverImg=loc.coverImg;
+            // previewPdfUrl / previewPdfKey
+            if((!b.previewPdfUrl||b.previewPdfUrl==='')&&loc.previewPdfUrl)b.previewPdfUrl=loc.previewPdfUrl;
+            if((!b.previewPdfKey||b.previewPdfKey==='')&&loc.previewPdfKey)b.previewPdfKey=loc.previewPdfKey;
+            // previewImages : union des deux tableaux (server prime pour les URLs, local pour data:)
+            if(loc.previewImages&&loc.previewImages.length>0){
+              var srvImgs=b.previewImages||[];
+              var extra=loc.previewImages.filter(function(img){return img&&!srvImgs.includes(img);});
+              b.previewImages=(srvImgs.concat(extra)).filter(function(img){return img&&img.length>0;});
+            }
+          });
+          return merged;
+        }
+        function _mergeGallery(localArr,serverArr){
+          var merged=_mergeById(localArr,serverArr);
+          var localMap={};(localArr||[]).forEach(function(g){if(g.id)localMap[g.id]=g;});
+          merged.forEach(function(g){
+            var loc=localMap[g.id];
+            if(!loc)return;
+            // src : préférer non-vide si cloud a vide
+            if((!g.src||g.src==='')&&loc.src)g.src=loc.src;
+          });
+          return merged;
+        }
         // Sauvegarder les ressources locales avant écrasement
         var localBooks=DB.books||[];
         var localGallery=DB.galleryImages||[];
@@ -3610,8 +3650,8 @@ function _startBgPoll(){
         // Remplacer par la version cloud (données admin)
         DB=serverDB;
         // Fusionner les ressources
-        DB.books=_mergeById(localBooks,DB.books);
-        DB.galleryImages=_mergeById(localGallery,DB.galleryImages);
+        DB.books=_mergeBooks(localBooks,DB.books);
+        DB.galleryImages=_mergeGallery(localGallery,DB.galleryImages);
         if(!DB.elearning)DB.elearning={contenus:[],plans:[],abonnements:[],commandes:[],soumissions:[]};
         DB.elearning.contenus=_mergeById(localElearn,DB.elearning.contenus);
         DB.packs=_mergeById(localPacks,DB.packs);
@@ -3685,6 +3725,12 @@ function _cloudAutoSyncPush(attempt){
   if(data.books)data.books.forEach(function(b){
     if(b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>5000)b.coverImg='';
     if(b.fichierKey){if(b.fichierData)b.fichierData='';b.fichierKey='';}
+    // Strip previewImages data URLs (si upload a échoué) pour éviter payload surdimensionné
+    if(b.previewImages){
+      b.previewImages=b.previewImages.map(function(img){
+        return (img&&img.startsWith('data:')&&img.length>5000)?'':img;
+      }).filter(function(img){return img&&img.length>0;});
+    }
   });
   if(data.galleryImages)data.galleryImages.forEach(function(img){
     if(img.src&&img.src.startsWith('data:')&&img.src.length>5000)img.src=img.serverSrc||'';
@@ -3889,8 +3935,9 @@ function addBookContent(bid){
     }).join('');
   }
   let coverHtml=b.coverImg?'<img src="'+b.coverImg+'" style="width:60px;height:80px;object-fit:cover;border-radius:4px;border:1px solid var(--bg3)">':'<span class="xs2 mut">Aucune couverture</span>';
-  var _pdfStat=b.previewPdfKey
+  var _pdfStat=(b.previewPdfUrl||b.previewPdfKey)
     ?'<span class="bg bgg">✅ '+_esc(b.previewPdfName||'apercu.pdf')+'</span> '
+      +(b.previewPdfUrl?'<span class="xs2" style="color:var(--gr)">☁️ Disponible sur tous les appareils</span> ':'<span class="xs2 mut">📱 Local uniquement</span> ')
       +'<button class="btn bo xs" onclick="removeBookPdfPreview(\''+bid+'\')" style="font-size:10px;padding:2px 8px">🗑 Supprimer</button>'
     :'<span class="xs2 mut">Aucun aperçu PDF chargé</span>';
   M('📖 Gérer le contenu — '+b.titre,'Extraits et chapitres consultables par les visiteurs',
@@ -3917,16 +3964,63 @@ function saveBookContent(bid){
   var pdfInput=document.getElementById('bkPdfFile');
   var pdfFile=pdfInput&&pdfInput.files&&pdfInput.files[0];
   if(pdfFile){
-    var pdfReader=new FileReader();
-    pdfReader.onload=function(ev){
-      var pdfKey='bkprev_'+bid;
-      idbSave(pdfKey,ev.target.result,pdfFile.name,pdfFile.type||'application/pdf',function(){
-        b.previewPdfKey=pdfKey;b.previewPdfName=pdfFile.name;
-        save();cm();re();toast('✓ Contenu + aperçu PDF enregistrés');
+    var cloudCfg=_effectiveCloudConfig();
+    if(cloudCfg&&cloudCfg.url&&cloudCfg.secret){
+      // ── Upload direct vers le cloud pour accessibilité multi-appareils ──
+      toast('⬆️ Upload PDF en cours…','info');
+      var fd=new FormData();
+      fd.append('file',pdfFile,pdfFile.name);
+      fd.append('type','book');
+      fd.append('ref_id',bid);
+      fd.append('_secret',cloudCfg.secret);
+      var ctrl=typeof AbortController!=='undefined'?new AbortController():null;
+      var tmt=ctrl?setTimeout(function(){ctrl.abort();},120000):null;
+      var baseUrl=cloudCfg.url.replace(/\/+$/,'');
+      fetch(baseUrl+'/upload_file.php',{
+        method:'POST',
+        headers:{'Authorization':'Bearer '+cloudCfg.secret},
+        body:fd,
+        signal:ctrl?ctrl.signal:undefined
+      }).then(function(r){
+        if(tmt)clearTimeout(tmt);
+        return r.json();
+      }).then(function(j){
+        if(j&&j.url){
+          b.previewPdfUrl=j.url;
+          b.previewPdfName=pdfFile.name;
+          b.previewPdfKey=''; // plus besoin du stockage local
+          save();cm();re();toast('✓ PDF disponible sur tous les appareils ☁️');
+        } else {
+          throw new Error(j&&j.error?j.error:'Réponse invalide');
+        }
+      }).catch(function(e){
+        if(tmt)clearTimeout(tmt);
+        // Fallback : stocker en IDB local
+        toast('⚠️ Upload cloud échoué, enregistrement local…','warn');
+        var pdfReader=new FileReader();
+        pdfReader.onload=function(ev){
+          var pdfKey='bkprev_'+bid;
+          idbSave(pdfKey,ev.target.result,pdfFile.name,pdfFile.type||'application/pdf',function(){
+            b.previewPdfKey=pdfKey;b.previewPdfName=pdfFile.name;
+            save();cm();re();toast('✓ PDF enregistré localement (cloud indisponible)','warn');
+          });
+        };
+        pdfReader.onerror=function(){save();cm();re();toast('✓ Contenu enregistré (erreur lecture PDF)','warn');};
+        pdfReader.readAsDataURL(pdfFile);
       });
-    };
-    pdfReader.onerror=function(){save();cm();re();toast('✓ Contenu enregistré (erreur lecture PDF)','warn');};
-    pdfReader.readAsDataURL(pdfFile);
+    } else {
+      // ── Pas de cloud configuré : stockage IDB local ──
+      var pdfReader=new FileReader();
+      pdfReader.onload=function(ev){
+        var pdfKey='bkprev_'+bid;
+        idbSave(pdfKey,ev.target.result,pdfFile.name,pdfFile.type||'application/pdf',function(){
+          b.previewPdfKey=pdfKey;b.previewPdfName=pdfFile.name;
+          save();cm();re();toast('✓ Contenu + aperçu PDF enregistrés');
+        });
+      };
+      pdfReader.onerror=function(){save();cm();re();toast('✓ Contenu enregistré (erreur lecture PDF)','warn');};
+      pdfReader.readAsDataURL(pdfFile);
+    }
   } else {
     save();cm();re();toast('✓ Contenu du livre mis à jour');
   }
@@ -3940,7 +4034,7 @@ function removeBookPdfPreview(bid){
       try{e.target.result.transaction('files','readwrite').objectStore('files').delete(b.previewPdfKey);}catch(ex){}
     };
   }
-  b.previewPdfKey='';b.previewPdfName='';
+  b.previewPdfKey='';b.previewPdfName='';b.previewPdfUrl='';
   save();addBookContent(bid);toast('✓ Aperçu PDF supprimé');
 }
 function removeBookPreview(bid,idx){
@@ -3994,10 +4088,15 @@ function viewBookDetail(bid){
   (b.chaps||[]).forEach(function(ch,i){h+='<div class="book-chapter"><div class="ch-num">'+(i+1)+'</div><div><strong>'+ch+'</strong></div></div>';});
   if(!(b.chaps||[]).length)h+='<div class="empty xs2">Aucun chapitre</div>';
   h+='</div>';
-  // Excerpt tab — supporte PDF (async IDB) + texte + images
+  // Excerpt tab — supporte PDF (URL cloud ou IDB) + texte + images
   var _pdfAttr=b.previewPdfKey?' data-pdfkey="'+b.previewPdfKey+'"':'';
-  h+='<div id="prev_'+bid+'"'+_pdfAttr+' style="display:none">';
-  if(b.previewPdfKey){
+  var _pdfUrlAttr=b.previewPdfUrl?' data-pdfurl="'+b.previewPdfUrl+'"':'';
+  h+='<div id="prev_'+bid+'"'+_pdfAttr+_pdfUrlAttr+' style="display:none">';
+  if(b.previewPdfUrl){
+    h+='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:8px">📄 <strong>Aperçu PDF disponible</strong> ☁️</div>';
+    h+='<iframe src="'+b.previewPdfUrl+'" style="width:100%;height:58vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>';
+    h+='<div style="margin-top:6px;text-align:center"><a href="'+b.previewPdfUrl+'" target="_blank" style="font-size:12px;color:var(--bl)">↗ Ouvrir dans le navigateur</a></div>';
+  }else if(b.previewPdfKey){
     h+='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:8px">📄 <strong>Aperçu PDF disponible</strong></div>';
     h+='<div id="pdfCont_'+bid+'"><div class="ib ibt"><span>⏳</span><span>Chargement de l\'aperçu…</span></div></div>';
   }else if(b.extrait){
@@ -6523,6 +6622,22 @@ function _cloudAutoUploadBinaries(onDone){
           get:function(cb){cb(bb.coverImg,'cover_'+bb.id+'.jpg','image/jpeg');},
           ok:function(url){bb.coverImg=url;}});
       })(b);
+    }
+    // Images de prévisualisation du livre (captures de pages)
+    if(b.previewImages&&b.previewImages.length>0){
+      b.previewImages.forEach(function(imgData,idx){
+        if(imgData&&imgData.indexOf('data:')===0&&imgData.length>5000){
+          (function(bb,ii,i2){
+            queue.push({label:'previmg_'+(bb.titre||bb.id)+'_'+ii,cat:'image',
+              get:function(cb){cb(i2,'previmg_'+bb.id+'_'+ii+'.jpg','image/jpeg');},
+              ok:function(url){
+                // Remplacer la data URL par l'URL serveur dans le tableau
+                var arrIdx=bb.previewImages.indexOf(i2);
+                if(arrIdx>=0)bb.previewImages[arrIdx]=url;
+              }});
+          })(b,idx,imgData);
+        }
+      });
     }
   });
 
