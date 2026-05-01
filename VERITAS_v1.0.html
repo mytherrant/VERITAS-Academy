@@ -3934,7 +3934,7 @@ function addBookContent(bid){
       return '<div style="position:relative;width:80px;height:100px;border:1px solid var(--bg3);border-radius:4px;overflow:hidden"><img src="'+img+'" style="width:100%;height:100%;object-fit:cover"><div style="position:absolute;top:2px;right:2px;background:var(--re);color:#fff;border:none;border-radius:50%;width:16px;height:16px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="removeBookPreview('+String.fromCharCode(39)+bid+String.fromCharCode(39)+','+i+')">×</div></div>';
     }).join('');
   }
-  let coverHtml=b.coverImg?'<img src="'+b.coverImg+'" style="width:60px;height:80px;object-fit:cover;border-radius:4px;border:1px solid var(--bg3)">':'<span class="xs2 mut">Aucune couverture</span>';
+  let coverHtml=b.coverImg?'<img src="'+_esc(b.coverImg)+'" style="width:60px;height:80px;object-fit:cover;border-radius:4px;border:1px solid var(--bg3)" onerror="this.outerHTML=\'<span class=\\\'xs2 mut\\\'>Image indisponible</span>\'">':'<span class="xs2 mut">Aucune couverture</span>';
   var _pdfStat=(b.previewPdfUrl||b.previewPdfKey)
     ?'<span class="bg bgg">✅ '+_esc(b.previewPdfName||'apercu.pdf')+'</span> '
       +(b.previewPdfUrl?'<span class="xs2" style="color:var(--gr)">☁️ Disponible sur tous les appareils</span> ':'<span class="xs2 mut">📱 Local uniquement</span> ')
@@ -4056,8 +4056,9 @@ function viewBookDetail(bid){
   // Cover
   h+='<div style="display:flex;flex-direction:column;gap:10px;align-items:center">';
   h+='<div class="book-cover-lg" style="background:linear-gradient(160deg,'+cc+','+cc+'dd);color:#fff;flex-direction:column;padding:20px;text-align:center">';
-  if(b.coverImg)h+='<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">';
-  else h+='<div style="font-size:60px;margin-bottom:8px">'+b.ico+'</div><div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;line-height:1.3">'+b.titre+'</div>';
+  // Fallback emoji+titre toujours rendu en arrière-plan, masqué si l'img charge
+  h+='<div class="bk-fallback" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center"><div style="font-size:60px;margin-bottom:8px">'+b.ico+'</div><div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;line-height:1.3;color:#fff">'+_esc(b.titre)+'</div></div>';
+  if(b.coverImg)h+='<img src="'+_esc(b.coverImg)+'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:1" onerror="this.style.display=\'none\'" onload="var p=this.parentNode.querySelector(\'.bk-fallback\');if(p)p.style.display=\'none\'">';
   h+='</div>';
   h+='<button class="btn bo sm" onclick="downloadBookCover(\''+bid+'\')" style="width:100%">📥 Couverture</button></div>';
   // Info
@@ -4093,9 +4094,21 @@ function viewBookDetail(bid){
   var _pdfUrlAttr=b.previewPdfUrl?' data-pdfurl="'+b.previewPdfUrl+'"':'';
   h+='<div id="prev_'+bid+'"'+_pdfAttr+_pdfUrlAttr+' style="display:none">';
   if(b.previewPdfUrl){
+    var _isMobUA=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||'');
     h+='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:8px">📄 <strong>Aperçu PDF disponible</strong> ☁️</div>';
-    h+='<iframe src="'+b.previewPdfUrl+'" style="width:100%;height:58vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>';
-    h+='<div style="margin-top:6px;text-align:center"><a href="'+b.previewPdfUrl+'" target="_blank" style="font-size:12px;color:var(--bl)">↗ Ouvrir dans le navigateur</a></div>';
+    if(_isMobUA){
+      // Mobile : iframe PDF ne fonctionne pas → bouton + Google Docs viewer
+      var _gv='https://docs.google.com/viewer?embedded=true&url='+encodeURIComponent(b.previewPdfUrl);
+      h+='<div style="border:2px dashed var(--bld);border-radius:var(--r);padding:24px;text-align:center;background:var(--blb)">'
+        +'<div style="font-size:48px;margin-bottom:10px">📄</div>'
+        +'<div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;color:var(--bl);margin-bottom:14px">'+_esc(b.previewPdfName||'Aperçu')+'</div>'
+        +'<a href="'+b.previewPdfUrl+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:4px">📖 Ouvrir le PDF</a>'
+        +'<a href="'+_gv+'" target="_blank" rel="noopener" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:4px">🔍 Voir aperçu</a>'
+        +'</div>';
+    } else {
+      h+='<iframe src="'+b.previewPdfUrl+'" style="width:100%;height:58vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>';
+      h+='<div style="margin-top:6px;text-align:center"><a href="'+b.previewPdfUrl+'" target="_blank" style="font-size:12px;color:var(--bl)">↗ Ouvrir dans le navigateur</a></div>';
+    }
   }else if(b.previewPdfKey){
     h+='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:8px">📄 <strong>Aperçu PDF disponible</strong></div>';
     h+='<div id="pdfCont_'+bid+'"><div class="ib ibt"><span>⏳</span><span>Chargement de l\'aperçu…</span></div></div>';
@@ -4134,11 +4147,24 @@ function viewBookDetail(bid){
 function _showExtrait(bid){
   var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
   function _showPdfExtrait(pdfSrc,pdfName){
+    var _isMob=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||'');
+    var _isHttpUrl=pdfSrc&&pdfSrc.indexOf('http')===0;
     var h='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:10px">'
-          +'📢 <strong>Extrait gratuit</strong> — Lisez les premières pages avant d\'acheter.</div>'
-          +'<iframe src="'+pdfSrc+'" style="width:100%;height:62vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF" allowfullscreen>'
-          +'<p style="text-align:center;padding:20px">PDF non affiché. <a href="'+pdfSrc+'" target="_blank">Ouvrir →</a></p></iframe>'
-          +'<div style="margin-top:6px;text-align:center"><a href="'+pdfSrc+'" target="_blank" style="font-size:12px;color:var(--bl)">↗ Ouvrir dans le navigateur</a></div>';
+          +'📢 <strong>Extrait gratuit</strong> — Lisez les premières pages avant d\'acheter.</div>';
+    if(_isMob&&_isHttpUrl){
+      // Sur mobile, iframe + PDF ne fonctionne pas → bouton ouverture + Google Docs viewer
+      var _gv='https://docs.google.com/viewer?embedded=true&url='+encodeURIComponent(pdfSrc);
+      h+='<div style="border:2px dashed var(--bld);border-radius:var(--r);padding:28px;text-align:center;background:var(--blb)">'
+        +'<div style="font-size:56px;margin-bottom:12px">📄</div>'
+        +'<div style="font-family:Libre Baskerville,serif;font-size:15px;font-weight:700;color:var(--bl);margin-bottom:16px">'+_esc(pdfName||'Aperçu PDF')+'</div>'
+        +'<a href="'+pdfSrc+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:14px;padding:12px 22px;margin:5px">📖 Ouvrir le PDF</a><br>'
+        +'<a href="'+_gv+'" target="_blank" rel="noopener" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:5px">🔍 Voir aperçu intégré</a>'
+        +'</div>';
+    } else {
+      h+='<iframe src="'+pdfSrc+'" style="width:100%;height:62vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF" allowfullscreen>'
+        +'<p style="text-align:center;padding:20px">PDF non affiché. <a href="'+pdfSrc+'" target="_blank">Ouvrir →</a></p></iframe>'
+        +'<div style="margin-top:6px;text-align:center"><a href="'+pdfSrc+'" target="_blank" style="font-size:12px;color:var(--bl)">↗ Ouvrir dans le navigateur</a></div>';
+    }
     M('📄 Aperçu — '+b.titre,'Extrait gratuit avant achat',h,
       '<button class="btn bo" onclick="cm()">Fermer</button>'
       +'<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px">📋 Détails</button>'
@@ -4168,9 +4194,9 @@ function _showExtrait_text(bid){
 
   // En-tête du livre
   var h='<div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--bg3)">';
-  h+='<div style="width:64px;height:90px;border-radius:8px;background:linear-gradient(160deg,'+cc+','+cc+'cc);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;position:relative;box-shadow:0 4px 12px rgba(0,0,0,.2)">';
-  if(b.coverImg)h+='<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">';
-  else h+=b.ico;
+  h+='<div style="width:64px;height:90px;border-radius:8px;background:linear-gradient(160deg,'+cc+','+cc+'cc);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0;overflow:hidden;position:relative;box-shadow:0 4px 12px rgba(0,0,0,.2);color:#fff">';
+  h+='<span style="position:relative;z-index:0">'+b.ico+'</span>';
+  if(b.coverImg)h+='<img src="'+_esc(b.coverImg)+'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:1" onerror="this.style.display=\'none\'">';
   h+='</div>';
   h+='<div style="flex:1;min-width:0">';
   h+='<div style="font-family:Libre Baskerville,serif;font-size:15px;font-weight:700;color:var(--bl);margin-bottom:3px;line-height:1.3">'+_esc(b.titre)+'</div>';
@@ -4983,7 +5009,7 @@ function vShowSec(sec,btn){
       <div class="featured-scroll">
         ${DB.books.map(b=>{const rt=getBookRating(b.id);const cc=b.coverColor||'#1a3a8a';const hasExt=b.extrait||((b.previewImages||[]).length>0);return`<div class="featured-card" onclick="${hasExt?'_showExtrait':'viewBookDetail'}('${b.id}')">
           <div style="height:90px;background:linear-gradient(160deg,${cc},${cc}cc);display:flex;align-items:center;justify-content:center;position:relative">
-            ${b.coverImg?'<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover">':'<div style="font-size:36px">'+b.ico+'</div>'}
+            <div style="font-size:36px;position:absolute;z-index:0">${b.ico}</div>${b.coverImg?'<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover;position:relative;z-index:1" onerror="this.style.display=\'none\'">':''}
             <div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#FFC93C;padding:1px 6px;border-radius:8px;font-size:11px;font-weight:700">${b.cls}</div>
             ${hasExt?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(5,150,105,.9);color:#fff;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:700">👁 Extrait</div>':''}
           </div>
@@ -5351,7 +5377,7 @@ function vShowSec(sec,btn){
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-bottom:24px">
       ${DB.books.map(b=>{const cc=b.coverColor||'#1a3a8a';const hasPreview=b.extrait||(b.previewImages&&b.previewImages.length);return`<div style="border:1px solid var(--bg3);border-radius:var(--r3);overflow:hidden;transition:all .2s;cursor:pointer;background:var(--sur)" onclick="viewBookDetail('${b.id}')">
         <div style="height:140px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,${cc},${cc}cc)">
-          ${b.coverImg?'<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover" alt="">':'<div style="font-size:50px">'+b.ico+'</div>'}
+          <div style="font-size:50px;position:absolute;z-index:0">${b.ico}</div>${b.coverImg?'<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover;position:relative;z-index:1" alt="" onerror="this.style.display=\'none\'">':''}
           <div style="position:absolute;top:6px;left:6px;background:rgba(13,31,74,.9);color:#FFC93C;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:700">${b.cls}</div>
           ${b.stock<=0?'<div style="position:absolute;top:6px;right:6px;background:var(--re);color:#fff;padding:2px 8px;border-radius:12px;font-size:13px;font-weight:700">Rupture</div>':''}
           ${hasPreview?'<div style="position:absolute;bottom:6px;right:6px;background:rgba(255,255,255,.9);color:var(--bl);padding:2px 8px;border-radius:8px;font-size:13px;font-weight:700">👁 Aperçu gratuit</div>':''}
@@ -10537,7 +10563,7 @@ function pgBooks2(){
   <div class="bgrid">
     ${list.map(b=>`<div class="bc">
       <div class="bcover" style="background:var(--blb);position:relative">
-        ${b.coverImg?`<img src="${b.coverImg}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">`:''}
+        ${b.coverImg?`<img src="${b.coverImg}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:0" onerror="this.style.display='none'">`:''}
         <span style="position:relative;z-index:1;font-size:34px">${b.ico||'📚'}</span>
         ${b.fichierKey?'<span style="position:absolute;bottom:4px;right:6px;background:#059669;color:#fff;font-size:10px;font-weight:700;border-radius:8px;padding:1px 6px">📄 Fichier</span>':''}
       </div>
