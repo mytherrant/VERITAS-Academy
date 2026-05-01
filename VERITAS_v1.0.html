@@ -2633,7 +2633,7 @@ tr:hover td:first-child {
     <button class="btn sm" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-weight:600" onclick="showRegisterForm()">✨ S'inscrire</button>
     <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin('eleve')">🎓 Se connecter</button>
     <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin('enseignant')">👨‍🏫 Enseignant</button>
-    <span id="vSyncDot" onclick="iA()&&cloudSaveDB()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>
+    <span id="vSyncDot" onclick="iA()&&mSyncMenu()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>
     <span id="adminAccessPoint" style="display:inline-block;width:44px;height:44px;cursor:default;opacity:0;vertical-align:middle" onclick="_adminTriple()" title=""></span>
   </div>
 </div>
@@ -3803,12 +3803,39 @@ function _setSyncDot(state,label){
     pending: {bg:'#FFC93C',title:'Modifications non synchronisées',ico:'⏳'},
     syncing: {bg:'#60A5FA',title:'Synchronisation en cours…',ico:'🔄'},
     ok:      {bg:'#34D399',title:'Synchronisé'+(label?' — '+label:''),ico:'✓'},
-    err:     {bg:'#F87171',title:'Échec de la synchronisation',ico:'⚠'}
+    err:     {bg:'#F87171',title:'Échec de la synchronisation'+(label?' — '+label:''),ico:'⚠'}
   }[state]||{bg:'#9CA3AF',title:'',ico:'?'};
   dot.style.background=cfg.bg;
   dot.title=cfg.title;
   dot.textContent=cfg.ico;
   dot.style.display=iA()?'inline-flex':'none';
+  // Stocker l'état pour le menu
+  window._lastSyncState=state;
+  window._lastSyncLabel=label||'';
+}
+// ── Menu de synchronisation (clic sur la pastille) ─────────────────
+function mSyncMenu(){
+  if(!iA())return;
+  var cfg=DB.cloudConfig||{};
+  var st=window._lastSyncState||'?';
+  var stLbl={pending:'⏳ Non synchronisé',syncing:'🔄 En cours…',ok:'✅ Synchronisé',err:'⚠️ Échec'}[st]||'État inconnu';
+  var lastSync=cfg.lastSync||'jamais';
+  M("🔄 Synchronisation Cloud","Gérez la synchronisation manuellement",
+    "<div style='background:var(--bg);border-radius:12px;padding:14px;margin-bottom:14px'>"
+    +"<div style='font-size:11px;color:var(--ink4);margin-bottom:4px'>État actuel</div>"
+    +"<div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:var(--bl)'>"+stLbl+"</div>"
+    +(window._lastSyncLabel?"<div style='font-size:11px;color:#DC2626;margin-top:4px'>"+_esc(window._lastSyncLabel)+"</div>":"")
+    +"<div style='font-size:11px;color:var(--ink4);margin-top:8px'>Dernière sync : "+_esc(lastSync)+"</div>"
+    +"<div style='font-size:11px;color:var(--ink4)'>Cloud : "+(cfg.url?_esc(cfg.url):"<span style='color:#DC2626'>non configuré</span>")+"</div>"
+    +"</div>"
+    +"<div class='ib ibt mb12'><span>💡</span><span>Astuce : la sync automatique se déclenche 8s après chaque modification. Utilisez ces boutons en cas de problème.</span></div>"
+    +"<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px'>"
+    +"<button class='btn bi sm' onclick='cm();_autoSyncDirty=true;_cloudAutoSync();toast(\"⬆️ Synchronisation lancée…\")'>⬆️ Pousser maintenant</button>"
+    +"<button class='btn sm' style='background:#6D28D9;color:#fff' onclick='cm();cloudForcePull&&cloudForcePull()'>⬇️ Récupérer du cloud</button>"
+    +"<button class='btn sm' style='background:#065F46;color:#fff' onclick='cm();cloudSyncBinaries&&cloudSyncBinaries()'>🔄 Sync fichiers locaux</button>"
+    +"<button class='btn sm' style='background:#1E3A8A;color:#fff' onclick='cm();mCloudFilesList&&mCloudFilesList()'>📁 Fichiers en ligne</button>"
+    +"</div>",
+    "<button class='btn bo' onclick='cm()'>Fermer</button>");
 }
 function gid(){return Math.random().toString(36).slice(2,10);}
 function today(){return new Date().toLocaleDateString('fr-FR');}
@@ -13452,7 +13479,10 @@ function mManageJeux(){
   if(typeof JEUX_CATALOGUE==="undefined"){toast("Module jeux non charge","warn");return;}
   var _deleted=DB.deletedJeux||[];
   var activeRows=[],deletedRows=[];
+var _purgedJ=DB.purgedJeux||[];
 JEUX_CATALOGUE.forEach(function(j){
+  // Ne pas afficher les jeux purgés (suppression définitive)
+  if(_purgedJ.indexOf(j.id)>=0)return;
   var isHidden=_deleted.indexOf(j.id)>=0;
   var row="<tr>"
     +"<td style='padding:6px 8px'>"+j.emoji+" <strong>"+j.titre+"</strong></td>"
@@ -13461,9 +13491,11 @@ JEUX_CATALOGUE.forEach(function(j){
     +"<td style='padding:6px 8px'><span style='background:"+(j.gratuit?"#D1FAE5":"#FEF3C7")+";color:"+(j.gratuit?"#059669":"#D97706")+";font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px'>"+(j.gratuit?"GRATUIT":j.plan||"PREMIUM")+"</span></td>"
     +"<td style='padding:4px'>"
     +(isHidden
-      ?"<button class='btn bgr2 xs' onclick='_restoreJeu(\""+j.id+"\")'>&#8617; Restaurer</button>"
+      ?"<button class='btn bgr2 xs' onclick='_restoreJeu(\""+j.id+"\")' style='margin-right:3px'>&#8617; Restaurer</button>"
+        +"<button class='btn xs' style='background:#7F1D1D;color:#fff;font-size:10px' onclick='_purgeJeu(\""+j.id+"\")'>🚫 Purger</button>"
       :"<button class='btn bo xs' onclick='_toggleJeuAcces(\""+j.id+"\")' style='margin-right:3px'>&#8644; Acc&egrave;s</button>"
-      +"<button class='btn br2 xs' onclick='_delJeu(\""+j.id+"\")'>&#128465;</button>"
+      +"<button class='btn br2 xs' onclick='_delJeu(\""+j.id+"\")' style='margin-right:3px'>&#128465;</button>"
+      +"<button class='btn xs' style='background:#7F1D1D;color:#fff;font-size:10px' onclick='_purgeJeu(\""+j.id+"\")'>🚫 Purger</button>"
     )
     +"</td></tr>";
   if(isHidden) deletedRows.push(row); else activeRows.push(row);
@@ -13522,6 +13554,26 @@ function _restoreJeu(id){
   DB.deletedJeux=(DB.deletedJeux||[]).filter(function(x){return x!==id;});
   _restoreJeuInMemory(id);
   save();cm();setTimeout(mManageJeux,80);toast('Jeu restauré');
+}
+// ── PURGE JEU (suppression définitive) ──
+function _purgeJeu(id){
+  var j=typeof JEUX_CATALOGUE!=="undefined"&&JEUX_CATALOGUE.find(function(x){return x.id===id;});
+  if(!j){toast('Jeu introuvable','warn');return;}
+  if(!_confirmPurge('Jeu : '+j.titre+' ('+j.matiere+')'))return;
+  DB.purgedJeux=DB.purgedJeux||[];
+  if(DB.purgedJeux.indexOf(id)<0)DB.purgedJeux.push(id);
+  // Si custom, retirer aussi de JEUX_CATALOGUE et DB.customJeux
+  if(j.custom){
+    var idx=JEUX_CATALOGUE.findIndex(function(x){return x.id===id;});
+    if(idx>=0)JEUX_CATALOGUE.splice(idx,1);
+    if(DB.customJeux)DB.customJeux=DB.customJeux.filter(function(x){return x.id!==id;});
+  }
+  save();cm();setTimeout(mManageJeux,80);toast('🚫 Jeu purgé définitivement');
+}
+function _unpurgeAllJeux(){
+  if(!confirm("Annuler toutes les purges de jeux et les restaurer dans l'admin ?"))return;
+  DB.purgedJeux=[];
+  save();cm();setTimeout(mManageJeux,80);toast('✅ Purges annulées');
 }
 function _restoreAllJeux(){
   DB.deletedJeux=[];
@@ -15749,8 +15801,10 @@ function showJeuxEdu(){
   var filtreMat=window._jeuFMat||"Tous";
   var filtreNiv=window._jeuFNiv||"Tous";
   var _deleted=DB.deletedJeux||[];
+  var _purged=DB.purgedJeux||[];
   var list=JEUX_CATALOGUE.filter(function(j){
     if(_deleted.indexOf(j.id)>=0)return false;
+    if(_purged.indexOf(j.id)>=0)return false;
     var mOk=filtreMat==="Tous"||(j.matiere||"").toLowerCase().indexOf(filtreMat.toLowerCase())>=0;
     var nOk=filtreNiv==="Tous"||(j.niveau||"").toLowerCase().indexOf(filtreNiv.toLowerCase())>=0;
     return mOk&&nOk;
@@ -16213,16 +16267,18 @@ function showEpreuves(){
 
   // Récupérer TOUTES les épreuves : EPREUVES_DB + librairie elearning (cat1,cat4,cat6) + épreuves admin
   var _hiddenEp=DB.hiddenEpreuves||[];
+  var _purgedEp=DB.purgedEpreuves||[];
+  function _isVisibleEp(id){return _hiddenEp.indexOf(id)<0&&_purgedEp.indexOf(id)<0;}
   // 1. EPREUVES_DB (épreuves intégrées, gérées via mManageEpreuves)
   var builtinEp=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]).filter(function(e){
-    return _hiddenEp.indexOf(e.id)<0;
+    return _isVisibleEp(e.id);
   });
   // 2. Librairie e-learning (cat1=épreuves, cat4=corpus, cat6=annales)
   var libEpreuves=(DB.elearningLibrary||[]).filter(function(e){
-    return (e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6")&&_hiddenEp.indexOf(e.id)<0;
+    return (e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6")&&_isVisibleEp(e.id);
   });
-  // 3. Épreuves créées par l'admin
-  var customEpreuves=(DB.customEpreuves||[]);
+  // 3. Épreuves créées par l'admin (filtrées des purgées)
+  var customEpreuves=(DB.customEpreuves||[]).filter(function(e){return _isVisibleEp(e.id);});
   // Fusionner sans doublons (priorité lib > builtin)
   var seenIds={};
   var allEpreuves=[];
@@ -16945,7 +17001,8 @@ function showLabosVirtuels(){
   var cats=["tous","physique","chimie","svt","maths","geo","histoire","info","langues"];
   var catLabels={"tous":"Tous","physique":"⚡ Physique","chimie":"⚗️ Chimie","svt":"🧬 SVT","maths":"📐 Maths","geo":"🗺️ Géo","histoire":"🏛️ Histoire","info":"💻 Info","langues":"✍️ Langues"};
   var _hiddenLV=DB.hiddenLabos||[];
-  var _visibleLabo=LABO_DB.filter(function(l){return _hiddenLV.indexOf(l.id)<0;});
+  var _purgedLV=DB.purgedLabos||[];
+  var _visibleLabo=LABO_DB.filter(function(l){return _hiddenLV.indexOf(l.id)<0&&_purgedLV.indexOf(l.id)<0;});
   var list=_visibleLabo.filter(function(l){return cat==="tous"||l.cat===cat;});
   var gratuits=list.filter(function(l){return l.gratuit;}).length;
 
@@ -17549,7 +17606,105 @@ function _initLaboSim(lv){
     };
 
   // ── MATHS : Volumes & Solides (lv5/lv6) ──
-  } else if(lv.id==="lv5"||lv.id==="lv6"){
+  } else if(lv.id==="lv5"){
+    // ── SVT : Photosynthèse / Nutrition des plantes (lv5) ──
+    window._sim.params={lumiere:80,co2:50,eau:60};
+    window._sim.defaults={lumiere:80,co2:50,eau:60};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>☀️ Lumière (%): <input type='range' min='0' max='100' value='"+p.lumiere+"' oninput='window._sim.params.lumiere=+this.value' style='width:90px'><span>"+p.lumiere+"%</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>🌫️ CO₂ (%): <input type='range' min='0' max='100' value='"+p.co2+"' oninput='window._sim.params.co2=+this.value' style='width:90px'><span>"+p.co2+"%</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>💧 Eau (%): <input type='range' min='0' max='100' value='"+p.eau+"' oninput='window._sim.params.eau=+this.value' style='width:90px'><span>"+p.eau+"%</span></label>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params;var t=window._sim.t;
+      ctx.clearRect(0,0,W,H);
+      // Ciel dégradé selon lumière
+      var skyTop='rgba('+(15+p.lumiere*0.5)+','+(30+p.lumiere*1.2)+','+(60+p.lumiere*1.5)+',1)';
+      var skyBot='rgba('+(40+p.lumiere)+','+(80+p.lumiere*1.3)+','+(120+p.lumiere*1)+',1)';
+      var grad=ctx.createLinearGradient(0,0,0,H*0.7);
+      grad.addColorStop(0,skyTop);grad.addColorStop(1,skyBot);
+      ctx.fillStyle=grad;ctx.fillRect(0,0,W,H*0.7);
+      // Sol
+      ctx.fillStyle='#5C3A1E';ctx.fillRect(0,H*0.7,W,H*0.3);
+      ctx.fillStyle='#3E2614';ctx.fillRect(0,H*0.7,W,8);
+      // Soleil (taille selon lumière)
+      var sunR=8+p.lumiere*0.3;
+      var sgrad=ctx.createRadialGradient(W-80,60,sunR*0.3,W-80,60,sunR*1.8);
+      sgrad.addColorStop(0,'rgba(255,243,107,1)');sgrad.addColorStop(0.6,'rgba(255,201,60,'+(p.lumiere/120)+')');sgrad.addColorStop(1,'rgba(255,201,60,0)');
+      ctx.fillStyle=sgrad;ctx.beginPath();ctx.arc(W-80,60,sunR*1.8,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(255,243,107,'+(0.4+p.lumiere/200)+')';ctx.beginPath();ctx.arc(W-80,60,sunR,0,Math.PI*2);ctx.fill();
+      // Rayons solaires animés
+      if(p.lumiere>20){
+        ctx.strokeStyle='rgba(255,243,107,'+(p.lumiere/300)+')';ctx.lineWidth=2;
+        for(var ri=0;ri<8;ri++){
+          var ra=(t*0.3+ri*Math.PI/4)%(Math.PI*2);
+          var rl=sunR+15+Math.sin(t*2+ri)*5;
+          ctx.beginPath();ctx.moveTo(W-80+Math.cos(ra)*sunR*1.2,60+Math.sin(ra)*sunR*1.2);
+          ctx.lineTo(W-80+Math.cos(ra)*(sunR+rl),60+Math.sin(ra)*(sunR+rl));ctx.stroke();
+        }
+      }
+      // Plante (tige + feuilles, vigueur selon facteurs)
+      var vigueur=Math.min(p.lumiere,p.co2,p.eau)/100;
+      var plantH=80+vigueur*120;
+      var px=W/2;var py=H*0.7;
+      // Tige
+      ctx.strokeStyle='#16A34A';ctx.lineWidth=4+vigueur*3;
+      ctx.beginPath();ctx.moveTo(px,py);ctx.bezierCurveTo(px-5,py-plantH/3,px+5,py-plantH*2/3,px,py-plantH);ctx.stroke();
+      // Feuilles
+      var nbFeuilles=Math.floor(2+vigueur*5);
+      for(var fi=0;fi<nbFeuilles;fi++){
+        var fy=py-(fi+1)*(plantH/(nbFeuilles+1));
+        var fSide=fi%2===0?-1:1;
+        var fSize=20+vigueur*15;
+        var sway=Math.sin(t+fi)*3;
+        ctx.fillStyle='rgba(34,'+(150+vigueur*60)+',60,'+(0.7+vigueur*0.3)+')';
+        ctx.beginPath();
+        ctx.ellipse(px+fSide*fSize*0.6+sway,fy,fSize,fSize*0.5,fSide*0.4,0,Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle='#15803D';ctx.lineWidth=1.5;ctx.stroke();
+      }
+      // Racines
+      ctx.strokeStyle='#7C2D12';ctx.lineWidth=2;
+      for(var rk=0;rk<5;rk++){
+        var ra2=Math.PI+rk*0.3-0.6;
+        ctx.beginPath();ctx.moveTo(px,py);
+        ctx.lineTo(px+Math.cos(ra2)*30,py+Math.abs(Math.sin(ra2))*30);ctx.stroke();
+      }
+      // Molécules CO2 entrantes (animées vers les feuilles)
+      if(p.co2>10){
+        ctx.fillStyle='rgba(150,150,150,'+(p.co2/120)+')';ctx.font='bold 11px Fira Code';
+        for(var ci=0;ci<Math.floor(p.co2/20);ci++){
+          var phase=(t*30+ci*80)%200;
+          ctx.fillText('CO₂',60+phase,80+ci*30);
+        }
+      }
+      // Molécules H2O remontant les racines
+      if(p.eau>10){
+        ctx.fillStyle='rgba(96,165,250,'+(p.eau/120)+')';
+        for(var wi=0;wi<Math.floor(p.eau/15);wi++){
+          var wph=(t*20+wi*30)%50;
+          ctx.beginPath();ctx.arc(px-25+wi*8,py+30-wph,3,0,Math.PI*2);ctx.fill();
+        }
+      }
+      // Molécules O2 sortantes (produit de la photosynthèse)
+      if(vigueur>0.3){
+        ctx.fillStyle='rgba(34,197,94,'+vigueur+')';ctx.font='bold 11px Fira Code';
+        for(var oi=0;oi<Math.floor(vigueur*5);oi++){
+          var oph=(t*25+oi*60)%150;
+          ctx.fillText('O₂',px+30+oph,py-plantH/2-oph*0.5);
+        }
+      }
+      // Équation
+      ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 13px Fira Code';ctx.textAlign='left';
+      ctx.fillText('6 CO₂ + 6 H₂O ──[lumière]──▶ C₆H₁₂O₆ + 6 O₂',16,H-20);
+      var croissance=Math.round(vigueur*100);
+      setVal("<span>☀️ "+p.lumiere+"%</span><span>🌫️ CO₂ "+p.co2+"%</span><span>💧 "+p.eau+"%</span><span>🌱 Croissance: "+croissance+"%</span><span>"+(croissance>70?'✅ Photosynthèse optimale':croissance>30?'🟡 Photosynthèse partielle':'❌ Photosynthèse insuffisante')+"</span>");
+      _simUpdateControls();
+    };
+
+  } else if(lv.id==="lv6"){
     window._sim.params={shape:'cube',size:4};
     window._sim.defaults={shape:'cube',size:4};
     window._sim.controlsDef=function(){
@@ -18657,11 +18812,15 @@ function _saveCoach(){
 function mManageEpreuves(){
   if(!iA())return;
   if(!DB.customEpreuves)DB.customEpreuves=[];
-  // Fusionner épreuves par défaut + épreuves admin
-  var all=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]).concat(DB.customEpreuves||[]);
+  // Fusionner épreuves par défaut + épreuves admin (en filtrant les purgées)
+  var _purgedE=DB.purgedEpreuves||[];
+  var _builtinFiltered=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB.filter(function(e){return _purgedE.indexOf(e.id)<0;}):[]);
+  var _customFiltered=(DB.customEpreuves||[]).filter(function(e){return _purgedE.indexOf(e.id)<0;});
+  var all=_builtinFiltered.concat(_customFiltered);
+  var _builtinFilteredLen=_builtinFiltered.length;
   var fmtColors={html:'#059669',pdf:'#DC2626',word:'#2563EB',url:'#7C3AED'};
   var rows=all.map(function(ep,i){
-    var isCustom=i>=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB.length:0);
+    var isCustom=i>=_builtinFilteredLen;
     var fmt=ep.format||((ep.externalUrl||ep.htmlLocal||ep.idbKey)?'html':'');
     var fmtBadge=fmt?"<span style='background:"+(fmtColors[fmt]||'#6b7280')+";color:#fff;font-size:8px;font-weight:800;padding:1px 5px;border-radius:4px;margin-left:4px'>"+fmt.toUpperCase()+"</span>":"";
     var hasFile=ep.externalUrl||ep.htmlLocal||ep.idbKey;
@@ -18675,24 +18834,60 @@ function mManageEpreuves(){
       +(hasFile?"<td style='padding:6px 8px'><button class='btn bi xs' onclick='_openRessource(\""+ep.id+"\")' style='padding:3px 7px;font-size:10px'>👁</button></td>":"<td></td>")
       +"<td style='padding:6px 8px;white-space:nowrap'>"
         +(isCustom
-          ?"<button class='btn bo xs' onclick='_editEp("+(i)+")'  style='margin-right:4px'>✏️</button><button class='btn br2 xs' onclick='_delEp("+(i-(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB.length:0))+")'>🗑</button>"
+          ?"<button class='btn bo xs' onclick='_editEpById(\""+ep.id+"\")' style='margin-right:3px'>✏️</button>"
+            +"<button class='btn br2 xs' onclick='_delEpById(\""+ep.id+"\")' style='margin-right:3px'>🗑</button>"
+            +"<button class='btn xs' style='background:#7F1D1D;color:#fff;font-size:10px' onclick='_purgeEpreuve(\""+ep.id+"\",true)'>🚫 Purger</button>"
           :((DB.hiddenEpreuves||[]).indexOf(ep.id)>=0
-            ?"<button class='btn bgr2 xs' onclick='_restoreEpreuve(\""+ep.id+"\")' style='font-size:10px'>↩ Restaurer</button>"
-            :"<button class='btn br2 xs' onclick='_hideBuiltinEp(\""+ep.id+"\")' style='font-size:10px'>🗑 Supprimer</button>"
+            ?"<button class='btn bgr2 xs' onclick='_restoreEpreuve(\""+ep.id+"\")' style='font-size:10px;margin-right:3px'>↩ Restaurer</button>"
+              +"<button class='btn xs' style='background:#7F1D1D;color:#fff;font-size:10px' onclick='_purgeEpreuve(\""+ep.id+"\")'>🚫 Purger</button>"
+            :"<button class='btn br2 xs' onclick='_hideBuiltinEp(\""+ep.id+"\")' style='font-size:10px;margin-right:3px'>🗑 Supprimer</button>"
+              +"<button class='btn xs' style='background:#7F1D1D;color:#fff;font-size:10px' onclick='_purgeEpreuve(\""+ep.id+"\")'>🚫 Purger</button>"
           )
         )
       +"</td></tr>";
   }).join("");
   M("📝 Gérer les Épreuves","Ajoutez et gérez les épreuves officielles",
-    "<div class='ib ibt mb12'><span>📝</span><span>Supprimez les épreuves par défaut inutiles. Elles peuvent être restaurées à tout moment.</span></div>"
+    "<div class='ib ibt mb12'><span>📝</span><span>🗑 Supprimer = masquer (restaurable). 🚫 Purger = suppression définitive (irréversible).</span></div>"
+    +(_purgedE.length?"<div class='ib' style='background:#FEE2E2;color:#7F1D1D;border-radius:8px;padding:8px 12px;font-size:11px;margin-bottom:10px'>🚫 "+_purgedE.length+" épreuve(s) purgée(s) définitivement</div>":"")
     +"<div class='tw mb12' style='max-height:240px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th style='text-align:left;padding:6px 8px'>Titre</th><th>Matière</th><th>Accès</th><th></th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
     +"<div class='fl2 g8 fw mt10'>"
     +"<button class='btn bi sm' onclick='_newEp()'>➕ Saisir une épreuve</button>"
     +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='_importRessourceMulti()'>📥 Importer (HTML · PDF · Word)</button>"
     +"<button class='btn sm' style='background:#DC2626;color:#fff' onclick='_deleteAllBuiltinEp()'>🗑 Supprimer toutes les épreuves par défaut</button>"
     +"<button class='btn sm' style='background:#059669;color:#fff' onclick='_restoreAllEpreuves()'>↩ Tout restaurer</button>"
+    +(_purgedE.length?"<button class='btn sm' style='background:#7F1D1D;color:#fff' onclick='_unpurgeAllEpreuves()'>↩ Annuler les purges ("+_purgedE.length+")</button>":"")
     +"</div>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
+}
+// ── Épreuves : helpers par ID (robustes au filtrage) ─────────────
+function _editEpById(id){
+  var idx=(DB.customEpreuves||[]).findIndex(function(e){return e.id===id;});
+  if(idx<0){toast("Épreuve par défaut non modifiable","warn");return;}
+  window._editEpIdx=idx;
+  _epFormUI(DB.customEpreuves[idx]);
+}
+function _delEpById(id){
+  if(!confirm("Supprimer cette épreuve ?"))return;
+  if(DB.customEpreuves)DB.customEpreuves=DB.customEpreuves.filter(function(e){return e.id!==id;});
+  save();cm();setTimeout(mManageEpreuves,80);toast("Épreuve supprimée");
+}
+// ── PURGE ÉPREUVE (suppression définitive) ──
+function _purgeEpreuve(id,isCustom){
+  var ep=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB.find(function(x){return x.id===id;}):null)
+    ||(DB.customEpreuves||[]).find(function(x){return x.id===id;});
+  if(!ep){toast('Épreuve introuvable','warn');return;}
+  if(!_confirmPurge('Épreuve : '+ep.titre+(ep.matiere?' ('+ep.matiere+')':'')))return;
+  DB.purgedEpreuves=DB.purgedEpreuves||[];
+  if(DB.purgedEpreuves.indexOf(id)<0)DB.purgedEpreuves.push(id);
+  if(isCustom&&DB.customEpreuves){
+    DB.customEpreuves=DB.customEpreuves.filter(function(x){return x.id!==id;});
+  }
+  save();cm();setTimeout(mManageEpreuves,80);toast('🚫 Épreuve purgée définitivement');
+}
+function _unpurgeAllEpreuves(){
+  if(!confirm("Annuler toutes les purges d'épreuves et les restaurer dans l'admin ?"))return;
+  DB.purgedEpreuves=[];
+  save();cm();setTimeout(mManageEpreuves,80);toast('✅ Purges annulées');
 }
 function _hideBuiltinEp(id){
   if(!confirm('Supprimer cette épreuve ? Elle n\'apparaîtra plus aux visiteurs.\n\nVous pourrez la restaurer depuis ce même panneau.'))return;
@@ -19540,12 +19735,22 @@ function _delExtrait(id){
   save();cm();setTimeout(mManageExtraits,80);toast('Extrait supprimé');
 }
 
+// ── HELPER PURGE (suppression définitive) ─────────────────────────
+// Demande à l'admin de taper "PURGER" pour confirmer la suppression définitive
+function _confirmPurge(label){
+  var ans=prompt("⚠️ SUPPRESSION DÉFINITIVE\n\n"+label+"\n\nCe contenu sera définitivement masqué et n'apparaîtra plus dans l'admin (vous ne pourrez pas le restaurer sauf à réinstaller VÉRITAS).\n\nTapez PURGER pour confirmer :");
+  return ans&&ans.trim().toUpperCase()==='PURGER';
+}
+
 // ── GESTIONNAIRE LABORATOIRES ──────────────────────────────────────
 function mManageLabos(){
   if(!iA())return;
   var _hiddenL=DB.hiddenLabos||[];
-  var list=(typeof LABO_DB!=="undefined"?LABO_DB:[]).concat(DB.customLabos||[]);
-  var base=(typeof LABO_DB!=="undefined"?LABO_DB.length:0);
+  var _purgedL=DB.purgedLabos||[];
+  // Filtrer les labos purgés (ils n'apparaissent plus dans l'admin)
+  var allLabos=(typeof LABO_DB!=="undefined"?LABO_DB.filter(function(l){return _purgedL.indexOf(l.id)<0;}):[]);
+  var list=allLabos.concat((DB.customLabos||[]).filter(function(l){return _purgedL.indexOf(l.id)<0;}));
+  var base=allLabos.length;
   var rows=list.map(function(lv,i){
     var isCustom=i>=base;
     return "<tr style='border-bottom:1px solid var(--bg3)'>"
@@ -19554,23 +19759,43 @@ function mManageLabos(){
       +"<td style='padding:6px 8px;font-size:11px'>"+(lv.gratuit?"<span style='color:#059669'>Gratuit</span>":"<span style='color:#7C3AED'>Premium</span>")+"</td>"
       +"<td style='padding:6px 8px;white-space:nowrap'>"
         +(isCustom
-          ?"<button class='btn bo xs' onclick='_editLabo("+(i)+")'  style='margin-right:4px'>✏️</button><button class='btn br2 xs' onclick='_delLabo("+(i-base)+")'>🗑</button>"
+          ?"<button class='btn bo xs' onclick='_editLabo("+(i)+")'  style='margin-right:4px'>✏️</button><button class='btn br2 xs' onclick='_delLabo("+(i-base)+")' style='margin-right:3px'>🗑</button><button class='btn xs' style='background:#7F1D1D;color:#fff;font-size:10px' onclick='_purgeLabo(\""+lv.id+"\",true)'>🚫 Purger</button>"
           :((DB.hiddenLabos||[]).indexOf(lv.id)>=0
-            ?"<button class='btn bgr2 xs' onclick='_restoreLabo(\""+lv.id+"\")' style='font-size:10px'>↩ Restaurer</button>"
-            :"<button class='btn bo xs' onclick='_toggleLaboAcces(\""+lv.id+"\")' style='margin-right:3px;font-size:10px'>🔒</button><button class='btn br2 xs' onclick='_hideBuiltinLabo(\""+lv.id+"\")' style='font-size:10px'>🗑 Suppr.</button>"
+            ?"<button class='btn bgr2 xs' onclick='_restoreLabo(\""+lv.id+"\")' style='font-size:10px;margin-right:3px'>↩ Restaurer</button><button class='btn xs' style='background:#7F1D1D;color:#fff;font-size:10px' onclick='_purgeLabo(\""+lv.id+"\")'>🚫 Purger</button>"
+            :"<button class='btn bo xs' onclick='_toggleLaboAcces(\""+lv.id+"\")' style='margin-right:3px;font-size:10px'>🔒</button><button class='btn br2 xs' onclick='_hideBuiltinLabo(\""+lv.id+"\")' style='font-size:10px;margin-right:3px'>🗑 Suppr.</button><button class='btn xs' style='background:#7F1D1D;color:#fff;font-size:10px' onclick='_purgeLabo(\""+lv.id+"\")'>🚫 Purger</button>"
           )
         )
       +"</td></tr>";
   }).join("");
   M("🔬 Gérer les Laboratoires","",
-    "<div class='ib ibt mb12'><span>🔬</span><span>Supprimez les labos par défaut inutiles. Restauration possible à tout moment.</span></div>"
+    "<div class='ib ibt mb12'><span>🔬</span><span>🗑 Supprimer = masquer (restaurable). 🚫 Purger = suppression définitive (irréversible).</span></div>"
+    +(_purgedL.length?"<div class='ib' style='background:#FEE2E2;color:#7F1D1D;border-radius:8px;padding:8px 12px;font-size:11px;margin-bottom:10px'>🚫 "+_purgedL.length+" labo(s) purgé(s) définitivement</div>":"")
     +"<div class='tw mb12' style='max-height:220px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th></th><th style='text-align:left;padding:6px 8px'>Labo</th><th>Accès</th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
     +"<div class='fl2 g8 fw'>"
     +"<button class='btn bi sm' onclick='_newLabo()'>➕ Nouveau laboratoire</button>"
     +"<button class='btn sm' style='background:#DC2626;color:#fff' onclick='_deleteAllBuiltinLabos()'>🗑 Supprimer tous les labos par défaut</button>"
     +"<button class='btn sm' style='background:#059669;color:#fff' onclick='_restoreAllLabos()'>↩ Tout restaurer</button>"
+    +(_purgedL.length?"<button class='btn sm' style='background:#7F1D1D;color:#fff' onclick='_unpurgeAllLabos()'>↩ Annuler les purges ("+_purgedL.length+")</button>":"")
     +"</div>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
+}
+// ── PURGE LABO (suppression définitive) ──
+function _purgeLabo(id,isCustom){
+  var lv=(typeof LABO_DB!=="undefined"?LABO_DB.find(function(x){return x.id===id;}):null)||(DB.customLabos||[]).find(function(x){return x.id===id;});
+  if(!lv){toast('Labo introuvable','warn');return;}
+  if(!_confirmPurge('Labo : '+lv.titre+' ('+lv.matiere+')'))return;
+  DB.purgedLabos=DB.purgedLabos||[];
+  if(DB.purgedLabos.indexOf(id)<0)DB.purgedLabos.push(id);
+  // Si custom, retirer aussi de customLabos
+  if(isCustom&&DB.customLabos){
+    DB.customLabos=DB.customLabos.filter(function(x){return x.id!==id;});
+  }
+  save();cm();setTimeout(mManageLabos,80);toast('🚫 Labo purgé définitivement');
+}
+function _unpurgeAllLabos(){
+  if(!confirm("Annuler toutes les purges de labos et les restaurer dans l'admin ?"))return;
+  DB.purgedLabos=[];
+  save();cm();setTimeout(mManageLabos,80);toast('✅ Purges annulées');
 }
 function _toggleLaboAcces(id){
   if(typeof LABO_DB==="undefined")return;
@@ -19695,7 +19920,11 @@ function mManageEvaluations(){
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
 }
 function _toggleEval(i){DB.evaluations[i].actif=!DB.evaluations[i].actif;save();cm();setTimeout(mManageEvaluations,80);}
-function _delEval(i){if(!confirm("Supprimer cette évaluation et toutes ses réponses ?"))return;DB.evaluations.splice(i,1);save();cm();setTimeout(mManageEvaluations,80);toast("Évaluation supprimée");}
+function _delEval(i){
+  var ev=DB.evaluations[i];if(!ev)return;
+  if(!confirm("⚠️ SUPPRESSION DÉFINITIVE\n\nÉvaluation : "+(ev.titre||'(sans titre)')+"\n"+(ev.questions||[]).length+" questions · "+(ev.reponses||[]).length+" réponses élèves\n\nTout sera supprimé de façon irréversible. Continuer ?"))return;
+  DB.evaluations.splice(i,1);save();cm();setTimeout(mManageEvaluations,80);toast("🚫 Évaluation purgée définitivement");
+}
 
 // ── Import évaluations multi-format ─────────────────────────────────────────
 
@@ -20440,7 +20669,7 @@ function deconnecter(){
   if(bar) bar.innerHTML='<button class="btn sm" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-weight:600" onclick="showRegisterForm()">✨ S\'inscrire</button>'
     +' <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin(\'eleve\')">🎓 Se connecter</button>'
     +' <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin(\'enseignant\')">👨\u200d🏫 Enseignant</button>'
-    +'<span id="vSyncDot" onclick="iA()&&cloudSaveDB()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>'
+    +'<span id="vSyncDot" onclick="iA()&&mSyncMenu()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>'
     +'<span id="adminAccessPoint" style="display:inline-block;width:44px;height:44px;cursor:default;opacity:0;vertical-align:middle" onclick="_adminTriple()" title=""></span>';
   initVisitor();toast("Déconnecté");
 }
