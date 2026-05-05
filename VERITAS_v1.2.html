@@ -14608,8 +14608,218 @@ var LITT_OEUVRES = {
 
 // ── INJECTION AU CATALOGUE — déplacée après JEUX_CATALOGUE (ligne ~13334) ──
 
-// ── CARTE MENTALE (Mind Map SVG) ───────────────────────────────────
+// ── CARTE MENTALE v2 — Canvas HD (lisible et téléchargeable) ────────────
+// Polyfill roundRect (Chrome < 99 / Firefox < 112)
+(function(){if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){r=Math.min(r,w/2,h/2);this.beginPath();this.moveTo(x+r,y);this.lineTo(x+w-r,y);this.quadraticCurveTo(x+w,y,x+w,y+r);this.lineTo(x+w,y+h-r);this.quadraticCurveTo(x+w,y+h,x+w-r,y+h);this.lineTo(x+r,y+h);this.quadraticCurveTo(x,y+h,x,y+h-r);this.lineTo(x,y+r);this.quadraticCurveTo(x,y,x+r,y);this.closePath();return this;};}})();
+
 function _showLittCarte(oeuvreKey){
+  var oe=LITT_OEUVRES[oeuvreKey];
+  if(!oe||!oe.carte){toast('Carte non disponible','warn');return;}
+  var c=oe.carte;
+  // ── Légende couleur sous la carte ──
+  var legHtml='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px">';
+  (c.branches||[]).forEach(function(br){
+    legHtml+='<div style="background:'+br.color+';color:#fff;padding:10px 12px;border-radius:10px;box-shadow:0 3px 10px rgba(0,0,0,.15)">'
+      +'<div style="font-weight:800;font-size:13px;margin-bottom:5px">'+_esc(br.label||'')+'</div>'
+      +'<div style="font-size:11px;opacity:.92;line-height:1.6">'
+      +(br.items||[]).map(function(x){return'• '+_esc(x);}).join('<br>')+'</div></div>';
+  });
+  legHtml+='</div>';
+  _vc('<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
+    +'<div class="vsec-title">🗺️ Carte Mentale — '+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-sub" style="font-style:italic">'+_esc(oe.auteur)+' — '+_esc(oe.classe)+'</div>'
+    +'<div style="background:#07142E;border-radius:18px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.45);margin:12px 0">'
+    +'<canvas id="mmCanvas" style="width:100%;height:auto;display:block"></canvas>'
+    +'</div>'
+    +legHtml
+    +'<div class="vcard mt14"><div class="bold s mb8">📌 Comment utiliser cette carte ?</div>'
+    +'<div style="font-size:13px;color:var(--ink3);line-height:1.8">Visualisez les <strong>'+(c.branches||[]).length+' axes</strong> autour du centre (titre + auteur). Chaque branche regroupe un aspect essentiel de l\'œuvre. Téléchargez en HD pour révision ou impression A4.</div>'
+    +'<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'
+    +'<button class="btn sm bi" onclick="_mmDownload(\''+oeuvreKey+'\')">⬇️ Télécharger HD (PNG)</button>'
+    +'<button class="btn sm bo" onclick="window.print()">🖨️ Imprimer</button>'
+    +'</div></div></div>');
+  setTimeout(function(){
+    var cv=document.getElementById('mmCanvas');
+    if(cv) _mmDrawCv(cv,c,oe,1);
+  },80);
+}
+
+// ── Moteur canvas unifié (screen @ sc=1, download @ sc=2) ──────────────
+function _mmDrawCv(cv,c,oe,sc){
+  var W=1200*sc, H=760*sc;
+  cv.width=W; cv.height=H;
+  var ctx=cv.getContext('2d');
+  var cx=W/2, cy=H/2;
+  var branches=c.branches||[];
+  var nBr=branches.length;
+  var COLORS=['#0EA5E9','#F97316','#8B5CF6','#10B981','#EF4444','#F59E0B'];
+
+  // ── Fond dégradé radial ──
+  var bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.65);
+  bg.addColorStop(0,'#1E3A7A'); bg.addColorStop(.55,'#0F2252'); bg.addColorStop(1,'#071428');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
+
+  // Étoiles déterministes (pas aléatoires = même résultat à chaque rendu)
+  for(var si=0;si<65;si++){
+    var sx=((Math.sin(si*47.3)*.5+.5)*W)|0;
+    var sy=((Math.cos(si*31.7)*.5+.5)*H)|0;
+    var sr=(si%6===0?1.7:.85)*sc;
+    ctx.globalAlpha=Math.sin(si*13.1)*.3+.15;
+    ctx.fillStyle='#fff'; ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha=1;
+
+  // ── Angles selon nb de branches ──
+  var angles;
+  if(nBr===4) angles=[-135,-45,45,135];
+  else if(nBr===3) angles=[-120,0,120];
+  else if(nBr===2) angles=[-90,90];
+  else{ angles=[]; for(var ai=0;ai<nBr;ai++) angles.push(-180+ai*(360/nBr)); }
+
+  var brDist=230*sc;
+  var brW=152*sc, brH=46*sc, brR=14*sc;
+  var itW=172*sc, itH=34*sc, itR=9*sc, itGap=10*sc;
+
+  // ── Branches ──
+  branches.forEach(function(br,bi){
+    var ang=angles[bi]*Math.PI/180;
+    var bx=cx+Math.cos(ang)*brDist;
+    var by=cy+Math.sin(ang)*brDist;
+    var col=br.color||COLORS[bi%COLORS.length];
+    var isLeft=Math.cos(ang)<-0.12;
+    var isRight=Math.cos(ang)>0.12;
+
+    // Ligne centre → branche (Bezier)
+    var cpx=cx+(bx-cx)*.5+Math.sin(ang)*28*sc;
+    var cpy=cy+(by-cy)*.5-Math.cos(ang)*28*sc;
+    ctx.save();
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.quadraticCurveTo(cpx,cpy,bx,by);
+    ctx.strokeStyle=col; ctx.lineWidth=4.5*sc; ctx.globalAlpha=.75; ctx.lineCap='round'; ctx.stroke();
+    ctx.restore();
+
+    // Halo + boîte branche
+    ctx.save(); ctx.shadowColor=col; ctx.shadowBlur=18*sc;
+    _mmRR(ctx,bx-brW/2,by-brH/2,brW,brH,brR,col,null,0);
+    ctx.restore();
+    _mmRR(ctx,bx-brW/2,by-brH/2,brW,brH,brR,null,'rgba(255,255,255,.55)',1.8*sc);
+
+    // Icône automatique
+    var ico=''; var lb=(br.label||'').toLowerCase();
+    if(/thème|theme/.test(lb)) ico='💡 ';
+    else if(/personnage/.test(lb)) ico='👥 ';
+    else if(/genre|structure|forme/.test(lb)) ico='📐 ';
+    else if(/contexte|époque|histoire/.test(lb)) ico='🌍 ';
+    else if(/style|procéd/.test(lb)) ico='🎨 ';
+    else if(/symbol|image|réception/.test(lb)) ico='✨ ';
+    ctx.save();
+    ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.font='bold '+(13.5*sc)+'px Arial,sans-serif';
+    ctx.shadowColor='rgba(0,0,0,.5)'; ctx.shadowBlur=3*sc;
+    ctx.fillText(ico+_mmClip(br.label||'',19),bx,by);
+    ctx.restore();
+
+    // ── Items : colonne à côté du nœud branche ──
+    var items=br.items||[];
+    var nIt=items.length; if(!nIt) return;
+    var totalH=nIt*itH+(nIt-1)*itGap;
+
+    var itemCX;
+    if(isLeft){
+      itemCX=bx-brW/2-16*sc-itW/2;
+    } else if(isRight){
+      itemCX=bx+brW/2+16*sc+itW/2;
+    } else {
+      // branche verticale (top/bottom) : alterner gauche/droite par index
+      itemCX=(bi%2===0)?(cx+130*sc+16*sc+itW/2):(cx-130*sc-16*sc-itW/2);
+    }
+
+    var itemStartY=by-totalH/2;
+    // Clamp dans le canvas
+    var my=8*sc, mx=6*sc;
+    if(itemStartY<my) itemStartY=my;
+    if(itemStartY+totalH>H-my) itemStartY=H-my-totalH;
+    if(itemCX-itW/2<mx) itemCX=mx+itW/2;
+    if(itemCX+itW/2>W-mx) itemCX=W-mx-itW/2;
+
+    items.forEach(function(it,ii){
+      var iy=itemStartY+ii*(itH+itGap);
+      var anchorX=isLeft?(bx-brW/2):(bx+brW/2);
+      var anchorXitem=isLeft?(itemCX+itW/2):(itemCX-itW/2);
+
+      // Pointillés branche → item
+      ctx.save();
+      ctx.beginPath(); ctx.moveTo(anchorX,by); ctx.lineTo(anchorXitem,iy+itH/2);
+      ctx.strokeStyle=col; ctx.lineWidth=1.5*sc; ctx.globalAlpha=.38;
+      ctx.setLineDash([5*sc,4*sc]); ctx.stroke();
+      ctx.restore();
+
+      // Boîte item (fond semi-transparent + bordure colorée)
+      _mmRR(ctx,itemCX-itW/2,iy,itW,itH,itR,'rgba(255,255,255,.09)',col,1.5*sc);
+
+      // Texte item avec wrapping 2 lignes
+      ctx.save();
+      ctx.fillStyle='rgba(255,255,255,.97)'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font=(12*sc)+'px Arial,sans-serif';
+      var maxTW=itW-18*sc;
+      var wds=String(it||'').split(' ');
+      var l1='',l2='',on2=false;
+      wds.forEach(function(w){
+        if(on2){ l2+=(l2?' ':'')+w; return; }
+        var t=(l1?l1+' ':'')+w;
+        if(ctx.measureText(t).width<=maxTW) l1=t;
+        else{ on2=true; l2=w; }
+      });
+      if(l2){
+        ctx.font=(10.5*sc)+'px Arial,sans-serif';
+        ctx.fillText(_mmClip(l1,30),itemCX,iy+itH/2-7*sc);
+        ctx.fillText(_mmClip(l2,30),itemCX,iy+itH/2+7*sc);
+      } else {
+        ctx.fillText(_mmClip(l1,34),itemCX,iy+itH/2);
+      }
+      ctx.restore();
+    });
+  });
+
+  // ── Nœud central (ellipse dorée) ──
+  var crx=132*sc, cry=56*sc;
+  ctx.save();
+  ctx.shadowColor='#FFC93C'; ctx.shadowBlur=38*sc;
+  var cg=ctx.createRadialGradient(cx,cy-10*sc,0,cx,cy,crx);
+  cg.addColorStop(0,'#FFE88A'); cg.addColorStop(.6,'#FFC93C'); cg.addColorStop(1,'#C8880A');
+  ctx.fillStyle=cg;
+  ctx.beginPath(); ctx.ellipse(cx,cy,crx,cry,0,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.88)'; ctx.lineWidth=2.8*sc;
+  ctx.beginPath(); ctx.ellipse(cx,cy,crx,cry,0,0,Math.PI*2); ctx.stroke();
+  ctx.restore();
+
+  // Texte central multi-lignes
+  var cLines=(c.centre||oe.titre+'\n'+oe.auteur).split('\n').filter(Boolean);
+  var lh=17*sc;
+  ctx.save(); ctx.textAlign='center'; ctx.fillStyle='#142554';
+  cLines.forEach(function(l,li){
+    var fs=li===0?15*sc:11.5*sc;
+    ctx.font=(li===0?'bold ':'')+fs+'px Arial,sans-serif';
+    ctx.fillText(_mmClip(l,26),cx,cy-((cLines.length-1)*lh/2)+li*lh+4*sc);
+  });
+  ctx.restore();
+
+  // Signature
+  ctx.save(); ctx.fillStyle='rgba(255,255,255,.22)';
+  ctx.font=(9*sc)+'px Arial,sans-serif'; ctx.textAlign='end'; ctx.textBaseline='bottom';
+  ctx.fillText('VÉRITAS · Mythe Errant 2026',W-10*sc,H-8*sc);
+  ctx.restore();
+}
+// Rounded rect helper
+function _mmRR(ctx,x,y,w,h,r,fill,stroke,sw){
+  ctx.beginPath(); ctx.roundRect(x,y,w,h,r);
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=sw||1;ctx.stroke();}
+}
+// Clip texte
+function _mmClip(s,max){s=String(s||'');return s.length>max?s.slice(0,max-1)+'…':s;}
+
+// ── NE PAS SUPPRIMER — ancienne fonction préservée pour compatibilité
+function _showLittCarte_svg_unused(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe||!oe.carte){toast("Carte non disponible","warn");return;}
   var c=oe.carte;
@@ -14781,33 +14991,23 @@ if(typeof _esc !== 'function'){
   };
 }
 
-// Télécharger la carte mentale en PNG
+// Télécharger la carte mentale en PNG — canvas HD 2x
 function _mmDownload(oeuvreKey){
-  try{
-    var svgEl = document.querySelector('.vsec svg');
-    if(!svgEl){toast('Carte introuvable','warn');return;}
-    var oe = LITT_OEUVRES[oeuvreKey]||{};
-    var xml = new XMLSerializer().serializeToString(svgEl);
-    var svg64 = 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(xml)));
-    var img = new Image();
-    img.onload = function(){
-      var cv = document.createElement('canvas');
-      cv.width = 1920; cv.height = 1280;
-      var ctx = cv.getContext('2d');
-      ctx.fillStyle = '#0D1B3E';
-      ctx.fillRect(0,0,cv.width,cv.height);
-      ctx.drawImage(img,0,0,cv.width,cv.height);
-      // [WATERMARK v1.2] Filigrane avant export carte mentale
-      applyWatermark(cv,ctx);
-      var a = document.createElement('a');
-      a.download = 'CarteMentale_'+(oe.titre||'oeuvre').replace(/[^\w]+/g,'_')+'.png';
-      a.href = cv.toDataURL('image/png');
+  var oe=LITT_OEUVRES[oeuvreKey];
+  if(!oe||!oe.carte){toast('Carte non disponible','warn');return;}
+  toast('🎨 Génération HD…');
+  setTimeout(function(){
+    try{
+      var cv=document.createElement('canvas');
+      _mmDrawCv(cv,oe.carte,oe,2); // 2400×1520 px
+      applyWatermark(cv,cv.getContext('2d'));
+      var a=document.createElement('a');
+      a.download='CarteMentale_'+(oe.titre||'oeuvre').replace(/[^\wÀ-ɏ]+/g,'_')+'.png';
+      a.href=cv.toDataURL('image/png');
       a.click();
-      toast('✓ Carte téléchargée');
-    };
-    img.onerror = function(){toast('Erreur conversion','err');};
-    img.src = svg64;
-  }catch(e){toast('Erreur: '+e.message,'err');}
+      toast('✓ Carte HD téléchargée (2400×1520 px)');
+    }catch(e){toast('Erreur export: '+e.message,'err');}
+  },50);
 }
 
 // ── MENU PRINCIPAL PAR ŒUVRE ────────────────────────────────────────
