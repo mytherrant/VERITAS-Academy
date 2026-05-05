@@ -8,6 +8,7 @@ on:
   push:
     branches: [master]
     paths:
+      - 'VERITAS_v1.2.html'
       - 'VERITAS_v1.1.html'
       - 'index.php'
       - '.htaccess'
@@ -47,8 +48,16 @@ jobs:
           # ── Application principale ──────────────────────────────
           # app.html → servi par index.php (wrapper no-cache LiteSpeed)
           # index.html → accès direct sans PHP
-          cp VERITAS_v1.1.html deploy/app.html
-          cp VERITAS_v1.1.html deploy/index.html
+          # Priorité v1.2 si présent, sinon fallback v1.1
+          if [ -f "VERITAS_v1.2.html" ]; then
+            cp VERITAS_v1.2.html deploy/app.html
+            cp VERITAS_v1.2.html deploy/index.html
+            echo "  ✓ VERITAS_v1.2.html → app.html + index.html"
+          else
+            cp VERITAS_v1.1.html deploy/app.html
+            cp VERITAS_v1.1.html deploy/index.html
+            echo "  ✓ VERITAS_v1.1.html → app.html + index.html"
+          fi
           cp index.php         deploy/index.php
 
           # Logo
@@ -108,7 +117,7 @@ jobs:
         if: success()
         run: |
           echo "🎉 Déploiement réussi sur https://veritas-school.com"
-          echo "   app.html / index.html → VÉRITAS v1.1"
+          echo "   app.html / index.html → VÉRITAS v1.2"
           echo "   index.php             → wrapper no-cache LiteSpeed"
           echo "   api/db.php            → persistance JSON LWS"
           echo "   api/upload.php        → upload fichiers LWS"
