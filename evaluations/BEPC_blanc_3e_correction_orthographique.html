@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEPC Blanc — Correction orthographique — 3ème — Centre VÉRITAS</title>
+  <style>
+    :root {
+      --navy:  #142554;
+      --gold:  #FFC93C;
+      --cream: #faf8f3;
+      --green: #e8f5e9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Libre Baskerville', 'Georgia', serif;
+      background: #e8e8e8;
+      color: #111;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    @media print {
+      body { background: white; }
+      .no-print { display: none !important; }
+      .page { box-shadow: none; margin: 0; page-break-after: always; }
+      .page:last-child { page-break-after: avoid; }
+    }
+
+    .page {
+      position: relative;
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      margin: 20px auto;
+      padding: 14mm 16mm 14mm 16mm;
+      box-shadow: 0 4px 24px rgba(0,0,0,.18);
+      overflow: hidden;
+    }
+
+    .filigrane {
+      position: absolute;
+      top: 50%;  left: 50%;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-size: 110px;
+      font-weight: 900;
+      color: var(--navy);
+      opacity: .10;
+      letter-spacing: 8px;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      z-index: 0;
+    }
+    .filigrane-logo {
+      position: absolute;
+      bottom: 60px; right: 40px;
+      font-size: 200px;
+      font-weight: 900;
+      color: var(--gold);
+      opacity: .15;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+    }
+
+    .entete {
+      position: relative;
+      z-index: 1;
+      border: 2px solid var(--navy);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .entete-top {
+      display: flex;
+      align-items: stretch;
+      min-height: 72px;
+    }
+    .entete-left {
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      min-width: 110px;
+      gap: 4px;
+    }
+    .logo-v {
+      width: 60px; height: 60px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-v svg { width: 100%; height: 100%; }
+    .logo-nom {
+      color: white;
+      font-size: 9.5px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+    .logo-ville {
+      color: var(--gold);
+      font-size: 8.5px;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+    .logo-tel {
+      color: rgba(255,255,255,.75);
+      font-size: 7.5px;
+      text-align: center;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    .entete-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 8px 10px;
+      gap: 3px;
+    }
+    .entete-annee {
+      font-size: 10px;
+      color: #555;
+      letter-spacing: .5px;
+    }
+    .entete-exam {
+      font-size: 10px;
+      color: var(--navy);
+      font-weight: 700;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    .entete-matiere {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .entete-classe {
+      font-size: 11px;
+      color: #333;
+      font-style: italic;
+    }
+
+    .entete-right {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 8px 12px;
+      border-left: 1px solid #ddd;
+    }
+    .info-bloc {
+      text-align: center;
+      padding: 0 12px;
+    }
+    .info-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .info-lbl {
+      font-size: 8.5px;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .info-sep {
+      width: 1px;
+      height: 40px;
+      background: #ddd;
+    }
+
+    .entete-gold {
+      height: 4px;
+      background: linear-gradient(90deg, var(--navy) 0%, var(--gold) 40%, var(--navy) 100%);
+    }
+    .entete-consignes {
+      background: var(--cream);
+      padding: 6px 14px;
+      display: flex;
+      gap: 20px;
+      font-size: 10px;
+      color: #444;
+      font-style: italic;
+    }
+    .entete-consignes span::before { content: "▸ "; color: var(--gold); }
+
+    .texte-support {
+      position: relative;
+      z-index: 1;
+      border-left: 4px solid var(--gold);
+      background: white;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      font-size: 13px;
+      line-height: 2;
+      text-align: justify;
+    }
+    .texte-support p { margin-bottom: .8em; }
+
+    .ref-auteur {
+      position: relative;
+      z-index: 1;
+      text-align: right;
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 14px;
+      padding-right: 4px;
+    }
+
+    .consigne-bloc {
+      position: relative;
+      z-index: 1;
+      background: var(--cream);
+      border: 2px solid var(--navy);
+      border-radius: 4px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      font-size: 12.5px;
+    }
+    .consigne-bloc strong { color: var(--navy); }
+
+    .section {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 12px;
+    }
+    .section-titre {
+      background: var(--navy);
+      color: white;
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 3px 3px 0 0;
+    }
+    .pts {
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .questions {
+      border: 1px solid #ddd;
+      border-top: none;
+      padding: 10px 12px;
+      font-size: 12px;
+      border-radius: 0 0 3px 3px;
+    }
+    .questions p { margin-bottom: .5em; }
+
+    .pied {
+      position: absolute;
+      bottom: 10mm;
+      left: 16mm;
+      right: 16mm;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 9px;
+      color: #999;
+      border-top: 1px solid #eee;
+      padding-top: 4px;
+      z-index: 1;
+    }
+    .copy { font-style: italic; }
+    .pg { font-weight: 700; color: var(--navy); }
+
+    .corrige-header {
+      background: linear-gradient(135deg, var(--navy) 0%, #1e3a8a 100%);
+      color: white;
+      text-align: center;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .corrige-header h2 { font-size: 14px; letter-spacing: 2px; }
+    .corrige-header p  { font-size: 9px; opacity: .8; margin-top: 2px; }
+
+    .rep {
+      background: var(--green);
+      border-left: 4px solid #4caf50;
+      padding: 10px 14px;
+      margin: 8px 0;
+      font-size: 12px;
+      line-height: 1.7;
+      text-align: justify;
+      position: relative;
+      z-index: 1;
+    }
+    .rep p { margin-bottom: .6em; }
+
+    table.bareme {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    table.bareme th {
+      background: var(--navy);
+      color: white;
+      padding: 6px 8px;
+      text-align: left;
+    }
+    table.bareme td {
+      padding: 5px 8px;
+      border-bottom: 1px solid #eee;
+    }
+    table.bareme tr:nth-child(even) td { background: #f8f8f8; }
+    table.bareme tr.total td {
+      font-weight: 700;
+      background: #fff8e1;
+      color: var(--navy);
+    }
+
+    .texte-correct {
+      position: relative;
+      z-index: 1;
+      border-left: 4px solid #4caf50;
+      background: var(--green);
+      padding: 12px 14px;
+      margin: 10px 0;
+      font-size: 12.5px;
+      line-height: 1.9;
+      text-align: justify;
+    }
+    .texte-correct .correction { color: #d32f2f; font-weight: 700; }
+
+    .btn-print {
+      position: fixed; bottom: 20px; right: 20px;
+      background: var(--navy); color: white;
+      border: none; padding: 12px 24px; border-radius: 30px;
+      font-size: 14px; cursor: pointer; z-index: 999;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    }
+    .btn-print:hover { background: var(--gold); color: var(--navy); }
+  </style>
+</head>
+<body>
+
+<button class="btn-print no-print" onclick="window.print()">🖨️ Imprimer</button>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 1 — ÉPREUVE ÉLÈVE
+══════════════════════════════════════════════ -->
+<div class="page">
+  <div class="filigrane">VÉRITAS</div>
+  <div class="filigrane-logo">V</div>
+
+  <!-- En-tête -->
+  <div class="entete">
+    <div class="entete-top">
+      <div class="entete-left">
+        <div class="logo-v">
+          <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="38" fill="#FFC93C" stroke="white" stroke-width="2"/>
+            <text x="40" y="56" text-anchor="middle" font-size="48" font-weight="900" fill="#142554" font-family="Georgia,serif">V</text>
+          </svg>
+        </div>
+        <div class="logo-nom">Centre Véritas</div>
+        <div class="logo-ville">Douala</div>
+        <div class="logo-tel">697 637 739 · 671 469 236<br>695 022 397</div>
+      </div>
+
+      <div class="entete-center">
+        <div class="entete-annee">Année scolaire 2025 – 2026</div>
+        <div class="entete-exam">BEPC Blanc — Toutes séries</div>
+        <div class="entete-matiere">Correction orthographique</div>
+        <div class="entete-classe">Classe de Troisième (3ème)</div>
+      </div>
+
+      <div class="entete-right">
+        <div class="info-bloc">
+          <div class="info-val">45</div>
+          <div class="info-lbl">minutes</div>
+        </div>
+        <div class="info-sep"></div>
+        <div class="info-bloc">
+          <div class="info-val">1</div>
+          <div class="info-lbl">coefficient</div>
+        </div>
+      </div>
+    </div>
+    <div class="entete-gold"></div>
+    <div class="entete-consignes">
+      <span>Aucun document autorisé</span>
+      <span>Soignez la présentation</span>
+    </div>
+  </div>
+
+  <!-- Consigne officielle -->
+  <div class="consigne-bloc">
+    <strong>Consigne :</strong> Le texte ci-après comporte des fautes. Corrigez-les en rayant d'un seul trait le mot incorrect et en écrivant le mot correct au-dessus du mot incorrect.
+  </div>
+
+  <!-- Texte avec fautes -->
+  <div class="texte-support">
+    <p>La saison des pluies était venue, avec des averses et des orages comme n'en <strong>connaît</strong> que peu de <strong>regions</strong> du monde. Impossible d'aller <strong>a</strong> la pêche par ce temps-là. Les gens <strong>vivait</strong> alors des maigres <strong>economies</strong> qu'ils avaient pu faire pendant la belle saison, et des récoltes <strong>ramenés</strong> au village par <strong>leur</strong> femmes. La rue de notre village devint, elle aussi, un vivant facteur de notre <strong>economie</strong>. Elle rapportait de l'argent pendant la saison des pluies, cette unique rue <strong>traverssant</strong> de part en part notre agglomération.</p>
+
+    <p>Des jeunes gens bien <strong>intentionés</strong> l'aidaient à être une rue vraiment utile. Ils avaient remarqué que la boue <strong>provoqué</strong> par la pluie pouvait <strong>empecher</strong> les voitures de passer <strong>normallement</strong>. Ceux des automobilistes qui s'aventuraient pendant l'hivernage dans cette <strong>lointainne</strong> banlieue de Douala arrivaient toujours, à un moment donné, à s'embourber. Alors, ils priaient les habitants de venir à leur secours. Les gens de chez nous <strong>son</strong> serviables&nbsp;; mais ils n'aiment guère aller tailler leurs petits pieds nus dans la boue, sous la pluie.</p>
+  </div>
+  <div class="ref-auteur">
+    <strong>Francis Bebey</strong>, <em>Le Fils d'Agatha Moudio</em>, CLE, Yaoundé, 1967<br>
+    <em>(Texte de 168 mots — 15 fautes à corriger)</em>
+  </div>
+
+  <!-- Pied de page -->
+  <div class="pied">
+    <div class="copy">© Centre VÉRITAS — Douala · 2025–2026</div>
+    <div>Tournez la page ▶</div>
+    <div class="pg">Page 1 / 2</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 2 — CORRIGÉ ENSEIGNANT
+══════════════════════════════════════════════ -->
+<div class="page">
+  <div class="filigrane">VÉRITAS</div>
+  <div class="filigrane-logo">V</div>
+
+  <div class="corrige-header">
+    <h2>CORRIGÉ — CORRECTION ORTHOGRAPHIQUE</h2>
+    <p>BEPC Blanc · 3ème · Document enseignant — Ne pas distribuer aux élèves</p>
+  </div>
+
+  <!-- Texte source correct -->
+  <div class="section">
+    <div class="section-titre">Texte source (sans fautes)</div>
+    <div class="texte-correct">
+      <p>La saison des pluies était venue, avec des averses et des orages comme n'en <span class="correction">connaissent</span> que peu de <span class="correction">régions</span> du monde. Impossible d'aller <span class="correction">à</span> la pêche par ce temps-là. Les gens <span class="correction">vivaient</span> alors des maigres <span class="correction">économies</span> qu'ils avaient pu faire pendant la belle saison, et des récoltes <span class="correction">ramenées</span> au village par <span class="correction">leurs</span> femmes. La rue de notre village devint, elle aussi, un vivant facteur de notre <span class="correction">économie</span>. Elle rapportait de l'argent pendant la saison des pluies, cette unique rue <span class="correction">traversant</span> de part en part notre agglomération.</p>
+
+      <p>Des jeunes gens bien <span class="correction">intentionnés</span> l'aidaient à être une rue vraiment utile. Ils avaient remarqué que la boue <span class="correction">provoquée</span> par la pluie pouvait <span class="correction">empêcher</span> les voitures de passer <span class="correction">normalement</span>. Ceux des automobilistes qui s'aventuraient pendant l'hivernage dans cette <span class="correction">lointaine</span> banlieue de Douala arrivaient toujours, à un moment donné, à s'embourber. Alors, ils priaient les habitants de venir à leur secours. Les gens de chez nous <span class="correction">sont</span> serviables&nbsp;; mais ils n'aiment guère aller tailler leurs petits pieds nus dans la boue, sous la pluie.</p>
+
+      <p style="font-size:10px;text-align:right;color:#777;margin-top:6px;">Francis Bebey, <em>Le Fils d'Agatha Moudio</em>, CLE, Yaoundé, 1967</p>
+    </div>
+  </div>
+
+  <!-- Tableau de correction -->
+  <div class="section">
+    <div class="section-titre">Tableau de correction détaillé <span class="pts">20 points</span></div>
+  </div>
+
+  <table class="bareme">
+    <thead>
+      <tr>
+        <th>N°</th>
+        <th>Mot fautif</th>
+        <th>Correction</th>
+        <th>Catégorie</th>
+        <th>Justification</th>
+        <th>Pts</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="6" style="background:var(--navy);color:white;font-weight:700;font-size:10px;letter-spacing:1px;">PONCTUATION / ACCENT — 0,5 pt chacune</td></tr>
+      <tr>
+        <td>1</td>
+        <td>epaules</td>
+        <td><strong>épaules</strong></td>
+        <td>Accent</td>
+        <td>Accent aigu sur le « e » initial manquant</td>
+        <td>0,5</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>empecherait</td>
+        <td><strong>empêcherait</strong></td>
+        <td>Accent</td>
+        <td>Accent circonflexe sur le « e » de « empêcher » manquant</td>
+        <td>0,5</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>generations</td>
+        <td><strong>générations</strong></td>
+        <td>Accent</td>
+        <td>Accent aigu sur le « e » initial manquant</td>
+        <td>0,5</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>poussiereuse</td>
+        <td><strong>poussiéreuse</strong></td>
+        <td>Accent</td>
+        <td>Accent aigu sur le « e » (poussière → poussiéreuse) manquant</td>
+        <td>0,5</td>
+      </tr>
+
+      <tr><td colspan="6" style="background:var(--navy);color:white;font-weight:700;font-size:10px;letter-spacing:1px;">ORTHOGRAPHE SIMPLE — 1 pt chacune</td></tr>
+      <tr>
+        <td>5</td>
+        <td>convennable</td>
+        <td><strong>convenable</strong></td>
+        <td>Ortho. simple</td>
+        <td>Doublement fautif du « n » — un seul « n » dans « convenable »</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>longement</td>
+        <td><strong>longuement</strong></td>
+        <td>Ortho. simple</td>
+        <td>Le « u » de la base « longue » se maintient dans « longuement »</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>7</td>
+        <td>brilants</td>
+        <td><strong>brillants</strong></td>
+        <td>Ortho. simple</td>
+        <td>Double « l » dans « brillant » (de « briller ») manquant</td>
+        <td>1</td>
+      </tr>
+      <tr>
+        <td>8</td>
+        <td>disparaisait</td>
+        <td><strong>disparaissait</strong></td>
+        <td>Ortho. simple</td>
+        <td>Double « ss » dans « disparaissait » (radical « paraître ») manquant</td>
+        <td>1</td>
+      </tr>
+
+      <tr><td colspan="6" style="background:var(--navy);color:white;font-weight:700;font-size:10px;letter-spacing:1px;">GRAMMAIRE — 2 pts chacune</td></tr>
+      <tr>
+        <td>9</td>
+        <td>entourés</td>
+        <td><strong>entouré</strong></td>
+        <td>Grammaire</td>
+        <td>PP avec l'auxiliaire « être » (verbe pronominal « se trouver ») : le sujet « il » (Banda) est masculin singulier → « entouré » sans -s</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <td>10</td>
+        <td>levée</td>
+        <td><strong>levé</strong></td>
+        <td>Grammaire</td>
+        <td>PP avec l'auxiliaire « être » : le sujet « Le tailleur » est masculin singulier → « levé » sans -e</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <td>11</td>
+        <td>transmis</td>
+        <td><strong>transmise</strong></td>
+        <td>Grammaire</td>
+        <td>PP avec l'auxiliaire « avoir » (« avaient transmise ») : le COD « que » (= « celle » = « la façon ») est féminin singulier, placé avant le verbe → accord au féminin singulier</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <td>12</td>
+        <td>répétait</td>
+        <td><strong>répétaient</strong></td>
+        <td>Grammaire</td>
+        <td>Accord sujet-verbe : le sujet « les fils » est au masculin pluriel → 3ème personne du pluriel « répétaient »</td>
+        <td>2</td>
+      </tr>
+
+      <tr><td colspan="6" style="background:var(--navy);color:white;font-weight:700;font-size:10px;letter-spacing:1px;">ORTHOGRAPHE AVEC INCIDENCE SÉMANTIQUE — 2 pts chacune</td></tr>
+      <tr>
+        <td>13</td>
+        <td>a peine</td>
+        <td><strong>à peine</strong></td>
+        <td>Homophone</td>
+        <td>« À » = préposition (adverbe de restriction avec « peine ») ; « a » = verbe « avoir » à la 3ème pers. sing. — sens radicalement différent</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <td>14</td>
+        <td>ces (larmes de Sabina)</td>
+        <td><strong>ses</strong></td>
+        <td>Homophone</td>
+        <td>« Ses » = adjectif possessif (les larmes de Sabina, lui appartenant) ; « ces » = adjectif démonstratif (désignerait des larmes déjà mentionnées)</td>
+        <td>2</td>
+      </tr>
+      <tr>
+        <td>15</td>
+        <td>sont (baluchon)</td>
+        <td><strong>son</strong></td>
+        <td>Homophone</td>
+        <td>« Son » = adjectif possessif (le baluchon de Banda) ; « sont » = verbe « être » à la 3ème pers. pluriel — sens incompatible</td>
+        <td>2</td>
+      </tr>
+
+      <tr class="total">
+        <td colspan="5" style="text-align:right;">TOTAL</td>
+        <td>20</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br>
+  <!-- Récapitulatif -->
+  <div class="section">
+    <div class="section-titre">Récapitulatif par catégorie</div>
+  </div>
+  <table class="bareme" style="max-width:500px;">
+    <thead>
+      <tr>
+        <th>Catégorie</th>
+        <th>Nombre de fautes</th>
+        <th>Sous-total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Ponctuation / Accent</td><td>4 × 0,5 pt</td><td>2 pts</td></tr>
+      <tr><td>Orthographe simple</td><td>4 × 1 pt</td><td>4 pts</td></tr>
+      <tr><td>Grammaire (accords)</td><td>4 × 2 pts</td><td>8 pts</td></tr>
+      <tr><td>Ortho. incidence sémantique</td><td>3 × 2 pts</td><td>6 pts</td></tr>
+      <tr class="total"><td colspan="2" style="text-align:right;">TOTAL GÉNÉRAL</td><td>20 pts</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Pied de page -->
+  <div class="pied">
+    <div class="copy">© Centre VÉRITAS — Douala · 2025–2026</div>
+    <div>Corrigé enseignant — Ne pas distribuer</div>
+    <div class="pg">Page 2 / 2</div>
+  </div>
+</div>
+
+</body>
+</html>

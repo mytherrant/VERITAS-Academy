@@ -23,12 +23,12 @@ npm-debug.log*
 /tmp/
 *.tmp
 
-# Node
+# Node / backend non utilisé
 node_modules/
-veritas-backend/node_modules/
-veritas-backend/.env
-veritas-backend/uploads/*
-!veritas-backend/uploads/.gitkeep
+veritas-backend/
+
+# Credentials serveur — ne jamais versionner
+api/config.php
 
 # Temp scripts
 _integrate.py
@@ -56,6 +56,7 @@ deploy/
 
 # Fichiers de travail temporaires
 app.html
+VERITAS_v1.0.html
 VERITAS_*_fra.html
 VERITAS_*_updated.html
 Guide_*.html

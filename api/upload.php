@@ -1,99 +1,49 @@
 <?php
-// ============================================================
-// VÉRITAS — Upload de fichiers (vidéos, PDFs, épreuves)
-// POST /api/upload.php
-// ============================================================
-require_once __DIR__ . '/config.php';
-requireAuth();
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: https://veritas-school.com');
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+
+$UPLOAD_BASE = __DIR__ . '/../uploads/veritas/';
+$PUBLIC_BASE = 'https://veritas-school.com/uploads/veritas/';
+$MAX_BYTES   = 50 * 1024 * 1024; // 50 Mo
+$ALLOWED_EXT = ['pdf','jpg','jpeg','png','gif','webp','mp4','mp3'];
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    jsonResponse(['error' => 'Méthode non autorisée'], 405);
+  http_response_code(405); echo '{"error":"Méthode non autorisée"}'; exit;
 }
-
-// Vérifier qu'un fichier est envoyé
-if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
-    $errors = [
-        UPLOAD_ERR_INI_SIZE => 'Fichier trop volumineux (limite serveur)',
-        UPLOAD_ERR_FORM_SIZE => 'Fichier trop volumineux',
-        UPLOAD_ERR_PARTIAL => 'Upload incomplet',
-        UPLOAD_ERR_NO_FILE => 'Aucun fichier envoyé',
-    ];
-    $code = $_FILES['file']['error'] ?? UPLOAD_ERR_NO_FILE;
-    jsonResponse(['error' => $errors[$code] ?? 'Erreur upload'], 400);
+if (empty($_FILES['file'])) {
+  http_response_code(400); echo '{"error":"Aucun fichier reçu"}'; exit;
 }
 
 $file = $_FILES['file'];
-
-// Vérifier la taille
-if ($file['size'] > MAX_FILE_SIZE) {
-    jsonResponse(['error' => 'Fichier trop volumineux (max 50 Mo)'], 400);
+if ($file['error'] !== UPLOAD_ERR_OK) {
+  http_response_code(400); echo '{"error":"Erreur upload PHP: ' . $file['error'] . '"}'; exit;
+}
+if ($file['size'] > $MAX_BYTES) {
+  http_response_code(413); echo '{"error":"Fichier > 50 Mo"}'; exit;
 }
 
-// Types autorisés
-$allowedTypes = [
-    'application/pdf' => 'epreuve',
-    'video/mp4' => 'video',
-    'video/webm' => 'video',
-    'video/ogg' => 'video',
-    'image/png' => 'image',
-    'image/jpeg' => 'image',
-    'image/webp' => 'image',
-    'text/html' => 'ressource',
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'ressource',
-];
-
-$mime = mime_content_type($file['tmp_name']);
-if (!isset($allowedTypes[$mime])) {
-    jsonResponse(['error' => 'Type de fichier non autorisé : ' . $mime], 400);
+$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+if (!in_array($ext, $ALLOWED_EXT, true)) {
+  http_response_code(415); echo '{"error":"Extension non autorisée: ' . htmlspecialchars($ext) . '"}'; exit;
 }
 
-// Générer un nom unique
-$id = bin2hex(random_bytes(4));
-$ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-$category = $_POST['category'] ?? $allowedTypes[$mime];
-$filename = $category . '_' . $id . '.' . $ext;
+$folder  = isset($_POST['folder']) ? preg_replace('/[^a-z0-9_-]/', '', $_POST['folder']) : 'misc';
+$newName = uniqid('vrt_', true) . '.' . $ext;
+$destDir = $UPLOAD_BASE . $folder . '/';
+if (!is_dir($destDir)) { mkdir($destDir, 0755, true); }
 
-// Créer le dossier si nécessaire
-$uploadDir = UPLOAD_DIR . $category . '/';
-if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true);
+if (!move_uploaded_file($file['tmp_name'], $destDir . $newName)) {
+  http_response_code(500); echo '{"error":"Déplacement fichier échoué"}'; exit;
 }
 
-// Déplacer le fichier
-$destPath = $uploadDir . $filename;
-if (!move_uploaded_file($file['tmp_name'], $destPath)) {
-    jsonResponse(['error' => 'Erreur lors de l\'enregistrement du fichier'], 500);
-}
-
-// URL publique
-$publicUrl = 'https://veritas-school.com/uploads/' . $category . '/' . $filename;
-
-// Enregistrer en base de données
-$db = getDB();
-$stmt = $db->prepare(
-    'INSERT INTO files (id, filename, original_name, mime_type, size_bytes, category, title, description, classe, matiere, uploaded_by, public_url)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-);
-$stmt->execute([
-    $id,
-    $filename,
-    $file['name'],
-    $mime,
-    $file['size'],
-    $category,
-    $_POST['title'] ?? $file['name'],
-    $_POST['description'] ?? '',
-    $_POST['classe'] ?? '',
-    $_POST['matiere'] ?? '',
-    $_POST['uploaded_by'] ?? 'admin',
-    $publicUrl
-]);
-
-jsonResponse([
-    'success' => true,
-    'id' => $id,
-    'url' => $publicUrl,
-    'filename' => $filename,
-    'size' => $file['size'],
-    'category' => $category
-], 201);
+echo json_encode([
+  'ok'     => true,
+  'url'    => $PUBLIC_BASE . $folder . '/' . $newName,
+  'name'   => $newName,
+  'folder' => $folder,
+  'size'   => $file['size'],
+  'ext'    => $ext
+], JSON_UNESCAPED_UNICODE);

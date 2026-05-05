@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEPC Blanc — Expression écrite — 3ème — Centre VÉRITAS</title>
+  <style>
+    :root {
+      --navy:  #142554;
+      --gold:  #FFC93C;
+      --cream: #faf8f3;
+      --green: #e8f5e9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Libre Baskerville', 'Georgia', serif;
+      background: #e8e8e8;
+      color: #111;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    @media print {
+      body { background: white; }
+      .no-print { display: none !important; }
+      .page { box-shadow: none; margin: 0; page-break-after: always; }
+      .page:last-child { page-break-after: avoid; }
+    }
+
+    .page {
+      position: relative;
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      margin: 20px auto;
+      padding: 14mm 16mm 18mm 16mm;
+      box-shadow: 0 4px 24px rgba(0,0,0,.18);
+      overflow: hidden;
+    }
+
+    .filigrane {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-size: 110px;
+      font-weight: 900;
+      color: var(--navy);
+      opacity: .10;
+      letter-spacing: 8px;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      z-index: 0;
+    }
+    .filigrane-logo {
+      position: absolute;
+      bottom: 60px; right: 40px;
+      font-size: 200px;
+      font-weight: 900;
+      color: var(--gold);
+      opacity: .12;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+    }
+
+    /* ── En-tête ── */
+    .entete {
+      position: relative;
+      z-index: 1;
+      border: 2px solid var(--navy);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .entete-top {
+      display: flex;
+      align-items: stretch;
+      min-height: 72px;
+    }
+    .entete-left {
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      min-width: 110px;
+      gap: 4px;
+    }
+    .logo-v {
+      width: 60px; height: 60px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-v svg { width: 100%; height: 100%; }
+    .logo-nom {
+      color: white; font-size: 9.5px; font-weight: 700;
+      text-align: center; letter-spacing: 1px;
+      text-transform: uppercase; line-height: 1.2; margin-top: 2px;
+    }
+    .logo-ville { color: var(--gold); font-size: 8.5px; text-align: center; }
+    .logo-tel {
+      color: rgba(255,255,255,.75); font-size: 7.5px;
+      text-align: center; line-height: 1.4; margin-top: 2px;
+    }
+    .entete-center {
+      flex: 1;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      padding: 8px 10px; gap: 3px;
+    }
+    .entete-annee { font-size: 10px; color: #555; letter-spacing: .5px; }
+    .entete-exam  { font-size: 10px; color: var(--navy); font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+    .entete-matiere {
+      font-size: 18px; font-weight: 700; color: var(--navy);
+      letter-spacing: 2px; text-transform: uppercase; text-align: center;
+    }
+    .entete-classe { font-size: 11px; color: #333; font-style: italic; }
+    .entete-right {
+      display: flex; align-items: center; gap: 0;
+      padding: 8px 12px; border-left: 1px solid #ddd;
+    }
+    .info-bloc { text-align: center; padding: 0 12px; }
+    .info-val { font-size: 20px; font-weight: 700; color: var(--navy); }
+    .info-lbl { font-size: 8.5px; color: #777; text-transform: uppercase; letter-spacing: .5px; }
+    .info-sep  { width: 1px; height: 40px; background: #ddd; }
+    .entete-gold {
+      height: 4px;
+      background: linear-gradient(90deg, var(--navy) 0%, var(--gold) 40%, var(--navy) 100%);
+    }
+    .entete-consignes {
+      background: var(--cream);
+      padding: 6px 14px;
+      display: flex; gap: 20px;
+      font-size: 10px; color: #444; font-style: italic;
+    }
+    .entete-consignes span::before { content: "▸ "; color: var(--gold); }
+
+    /* ── Avertissement ── */
+    .avertissement {
+      position: relative; z-index: 1;
+      background: #fff8e1;
+      border: 2px solid var(--gold);
+      border-radius: 4px;
+      padding: 7px 14px;
+      margin-bottom: 14px;
+      font-size: 12px; text-align: center;
+      color: var(--navy); font-weight: 700;
+    }
+
+    /* ── Titre sujet ── */
+    .sujet-titre {
+      position: relative; z-index: 1;
+      font-size: 13px; font-weight: 700;
+      color: var(--navy);
+      text-decoration: underline;
+      margin: 14px 0 8px;
+    }
+
+    /* ── Contexte (situation) ── */
+    .contexte {
+      position: relative; z-index: 1;
+      font-size: 12.5px;
+      line-height: 1.75;
+      text-align: justify;
+      margin-bottom: 8px;
+    }
+
+    /* ── Extrait encadré ── */
+    .extrait-encadre {
+      position: relative; z-index: 1;
+      border: 1.5px solid #333;
+      padding: 10px 16px;
+      margin: 8px 0;
+      font-size: 12px;
+      font-style: italic;
+      line-height: 1.75;
+      text-align: justify;
+      background: white;
+    }
+    .extrait-ref {
+      text-align: right;
+      font-size: 10.5px;
+      font-style: normal;
+      font-weight: 700;
+      margin-top: 6px;
+      color: #333;
+    }
+
+    /* ── Tâche ── */
+    .tache {
+      position: relative; z-index: 1;
+      font-size: 12.5px;
+      line-height: 1.75;
+      text-align: justify;
+      margin: 8px 0 6px;
+    }
+
+    /* ── Consignes numérotées ── */
+    .consignes-liste {
+      position: relative; z-index: 1;
+      list-style: none;
+      padding: 0;
+      margin: 0 0 6px 0;
+    }
+    .consignes-liste li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 6px;
+      font-size: 12.5px;
+      line-height: 1.75;
+      text-align: justify;
+    }
+    .consignes-liste .c-num {
+      background: var(--navy);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      min-width: 18px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+
+    /* ── Séparateur entre sujets ── */
+    .sep-sujet {
+      position: relative; z-index: 1;
+      display: flex; align-items: center; gap: 10px;
+      margin: 16px 0 14px;
+    }
+    .sep-sujet::before, .sep-sujet::after {
+      content: ''; flex: 1; height: 1px; background: #ccc;
+    }
+    .sep-sujet span {
+      font-size: 10px; color: #aaa; white-space: nowrap;
+      font-style: italic;
+    }
+
+    /* ── Pied de page ── */
+    .pied {
+      position: absolute;
+      bottom: 10mm; left: 16mm; right: 16mm;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 9px; color: #999;
+      border-top: 1px solid #eee; padding-top: 4px;
+      z-index: 1;
+    }
+    .copy { font-style: italic; }
+    .pg { font-weight: 700; color: var(--navy); }
+
+    /* ── Corrigé ── */
+    .corrige-header {
+      background: linear-gradient(135deg, var(--navy) 0%, #1e3a8a 100%);
+      color: white; text-align: center;
+      padding: 10px; border-radius: 4px;
+      margin-bottom: 12px;
+      position: relative; z-index: 1;
+    }
+    .corrige-header h2 { font-size: 14px; letter-spacing: 2px; }
+    .corrige-header p  { font-size: 9px; opacity: .8; margin-top: 2px; }
+
+    .section-corrige {
+      position: relative; z-index: 1;
+      margin-bottom: 10px;
+    }
+    .section-corrige-titre {
+      background: var(--navy);
+      color: white;
+      padding: 5px 12px;
+      font-size: 11px; font-weight: 700;
+      border-radius: 3px 3px 0 0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .pts-badge {
+      background: var(--gold); color: var(--navy);
+      font-size: 9.5px; font-weight: 700;
+      padding: 1px 7px; border-radius: 20px;
+    }
+
+    .rep {
+      background: var(--green);
+      border-left: 4px solid #4caf50;
+      padding: 8px 13px; margin: 4px 0 8px 0;
+      font-size: 11.5px; line-height: 1.65;
+      text-align: justify;
+      position: relative; z-index: 1;
+    }
+    .rep p { margin-bottom: .45em; }
+    .rep ul { padding-left: 16px; margin: 3px 0; }
+    .rep li { margin-bottom: .35em; }
+    .rep .tolerance { color: #666; font-style: italic; font-size: 10.5px; margin-top: 4px; }
+
+    table.bareme {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 6px;
+      position: relative; z-index: 1;
+    }
+    table.bareme th {
+      background: var(--navy); color: white;
+      padding: 5px 8px; text-align: left;
+    }
+    table.bareme td { padding: 4px 8px; border-bottom: 1px solid #eee; }
+    table.bareme tr:nth-child(even) td { background: #f8f8f8; }
+    table.bareme tr.total td {
+      font-weight: 700; background: #fff8e1; color: var(--navy);
+    }
+    table.bareme tr.sous-total td {
+      font-weight: 600; background: #f0f4ff; color: var(--navy);
+    }
+
+    .btn-print {
+      position: fixed; bottom: 20px; right: 20px;
+      background: var(--navy); color: white;
+      border: none; padding: 12px 24px; border-radius: 30px;
+      font-size: 14px; cursor: pointer; z-index: 999;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    }
+    .btn-print:hover { background: var(--gold); color: var(--navy); }
+  </style>
+</head>
+<body>
+
+<button class="btn-print no-print" onclick="window.print()">🖨️ Imprimer</button>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 1 — ÉPREUVE ÉLÈVE
+══════════════════════════════════════════════ -->
+<div class="page">
+  <div class="filigrane">VÉRITAS</div>
+  <div class="filigrane-logo">V</div>
+
+  <!-- En-tête -->
+  <div class="entete">
+    <div class="entete-top">
+      <div class="entete-left">
+        <div class="logo-v">
+          <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="38" fill="#FFC93C" stroke="white" stroke-width="2"/>
+            <text x="40" y="56" text-anchor="middle" font-size="48" font-weight="900" fill="#142554" font-family="Georgia,serif">V</text>
+          </svg>
+        </div>
+        <div class="logo-nom">Centre Véritas</div>
+        <div class="logo-ville">Douala</div>
+        <div class="logo-tel">697 637 739 · 671 469 236<br>695 022 397</div>
+      </div>
+
+      <div class="entete-center">
+        <div class="entete-annee">Année scolaire 2025 – 2026</div>
+        <div class="entete-exam">BEPC Blanc — Toutes séries</div>
+        <div class="entete-matiere">Expression écrite</div>
+        <div class="entete-classe">Classe de Troisième (3<sup>ème</sup>)</div>
+      </div>
+
+      <div class="entete-right">
+        <div class="info-bloc">
+          <div class="info-val">2h</div>
+          <div class="info-lbl">durée</div>
+        </div>
+        <div class="info-sep"></div>
+        <div class="info-bloc">
+          <div class="info-val">2</div>
+          <div class="info-lbl">coefficient</div>
+        </div>
+      </div>
+    </div>
+    <div class="entete-gold"></div>
+    <div class="entete-consignes">
+      <span>Aucun document autorisé</span>
+      <span>Le candidat traitera <strong>un seul</strong> des deux sujets</span>
+      <span>Soignez la présentation</span>
+    </div>
+  </div>
+
+  <!-- Avertissement -->
+  <div class="avertissement">
+    Le candidat traitera au choix l'un des deux sujets ci-dessous.
+  </div>
+
+  <!-- ═══ SUJET 1 ═══ -->
+  <div class="sujet-titre">Sujet 1</div>
+
+  <div class="contexte">
+    Dans de nombreuses familles camerounaises, les difficultés économiques conduisent certains parents à retirer leurs enfants de l'école avant même l'obtention du BEPC. Face à ce phénomène préoccupant, l'auteur camerounais Eza Boto rappelle, à travers l'un de ses personnages, la valeur inestimable de l'instruction&nbsp;:
+  </div>
+
+  <div class="extrait-encadre">
+    «&nbsp;Je me suis toujours laissé dire que tu réussirais mieux dans une grande ville. Moi, je te bénis, fils&nbsp;; sois heureux là-bas. Travaille et ne reviens que lorsque tu seras devenu quelqu'un.&nbsp;»
+    <div class="extrait-ref">Eza Boto (Mongo Beti), <em>Ville cruelle</em>, Présence Africaine, Paris, 1956, Épilogue.</div>
+  </div>
+
+  <div class="tache">
+    Choqué(e) par le phénomène de l'abandon scolaire et convaincu(e) de l'importance de l'instruction pour l'avenir du Cameroun, tu décides de sensibiliser tes camarades sur la nécessité de persévérer à l'école malgré les obstacles. Produis un texte à dominante <strong>argumentative</strong> dans lequel&nbsp;:
+  </div>
+
+  <ol class="consignes-liste">
+    <li>
+      <span class="c-num">1</span>
+      <span>Tu poses, dans une <strong>introduction de six lignes environ</strong>, le problème de l'abandon scolaire et ses enjeux pour la jeunesse camerounaise.</span>
+    </li>
+    <li>
+      <span class="c-num">2</span>
+      <span>Tu construis un <strong>paragraphe d'une douzaine de lignes</strong> dans lequel tu énonces <strong>trois causes</strong> de l'abandon scolaire chez les jeunes. Et dans un <strong>paragraphe d'égale longueur</strong>, tu fais ressortir <strong>trois conséquences</strong> de cet abandon sur les jeunes et sur la société.</span>
+    </li>
+    <li>
+      <span class="c-num">3</span>
+      <span>Dans une <strong>conclusion de six lignes environ</strong>, tu proposes <strong>deux solutions</strong> concrètes pour lutter contre l'abandon scolaire.</span>
+    </li>
+  </ol>
+
+  <!-- Séparateur -->
+  <div class="sep-sujet"><span>— OU —</span></div>
+
+  <!-- ═══ SUJET 2 ═══ -->
+  <div class="sujet-titre">Sujet 2</div>
+
+  <div class="contexte">
+    Lors des grandes vacances, tes parents t'ont emmené(e) dans votre village natal pour assister à une grande cérémonie traditionnelle familiale (mariage, funérailles de renom, initiation, fête des prémices…). De retour en ville, tu décides de raconter cet événement à ton ami(e) qui n'a pas pu y assister pour lui faire partager cette expérience culturelle riche. Produis un texte à dominante <strong>narrative</strong> dans lequel&nbsp;:
+  </div>
+
+  <ol class="consignes-liste">
+    <li>
+      <span class="c-num">1</span>
+      <span>Tu précises, dans une <strong>introduction de six lignes environ</strong>, les circonstances qui ont conduit à l'organisation de cette cérémonie (quand, où, pour quelle raison, qui était présent).</span>
+    </li>
+    <li>
+      <span class="c-num">2</span>
+      <span>Tu relates, dans un <strong>paragraphe d'une douzaine de lignes</strong>, les <strong>temps forts</strong> de la cérémonie. Et dans un <strong>second paragraphe d'égale longueur</strong>, tu décris l'<strong>atmosphère</strong> qui y régnait et les échanges entre les participants.</span>
+    </li>
+    <li>
+      <span class="c-num">3</span>
+      <span>Dans une <strong>conclusion de six lignes environ</strong>, tu exprimes <strong>deux sentiments</strong> éprouvés lors de cette cérémonie et tu expliques ce qu'elle t'a appris sur ta culture.</span>
+    </li>
+  </ol>
+
+  <!-- Pied de page -->
+  <div class="pied">
+    <div class="copy">© Centre VÉRITAS — Douala · 2025–2026</div>
+    <div>Tournez la page — Corrigé ▶</div>
+    <div class="pg">Page 1 / 2</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 2 — CORRIGÉ / GRILLES D'ÉVALUATION
+══════════════════════════════════════════════ -->
+<div class="page">
+  <div class="filigrane">VÉRITAS</div>
+  <div class="filigrane-logo">V</div>
+
+  <div class="corrige-header">
+    <h2>CORRIGÉ — GRILLES D'ÉVALUATION</h2>
+    <p>BEPC Blanc · Expression écrite · 3<sup>ème</sup> · Document enseignant — Ne pas distribuer aux élèves</p>
+  </div>
+
+  <!-- ═══ GRILLE SUJET 1 ═══ -->
+  <div class="section-corrige">
+    <div class="section-corrige-titre">
+      Sujet 1 — Texte argumentatif (Abandon scolaire)
+      <span class="pts-badge">20 points</span>
+    </div>
+  </div>
+
+  <table class="bareme">
+    <thead>
+      <tr>
+        <th style="width:30%">Critère / Consigne</th>
+        <th>Indicateurs de réussite</th>
+        <th style="width:10%;text-align:center;">Pts</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Consigne 1</strong><br><em>Introduction (~6 lignes)</em></td>
+        <td>
+          &bull; Le problème de l'abandon scolaire est clairement posé (1 pt)<br>
+          &bull; Le contexte camerounais est mentionné (1 pt)<br>
+          &bull; L'introduction annonce le plan ou la thèse (1 pt)<br>
+          &bull; La longueur est respectée (~6 lignes) (1 pt)
+        </td>
+        <td style="text-align:center;font-weight:700;">4</td>
+      </tr>
+      <tr>
+        <td><strong>Consigne 2a</strong><br><em>§ causes (~12 lignes)</em></td>
+        <td>
+          &bull; 3 causes distinctes et pertinentes : 1 pt chacune<br>
+          <em>Exemples : pauvreté familiale / mariage précoce / travail des enfants / manque d'établissements scolaires / désintérêt des parents / grossesses précoces</em><br>
+          &bull; Chaque cause est développée et illustrée (non listée brièvement) : 0,5 pt × 3<br>
+          &bull; Longueur et cohérence du paragraphe : 0,5 pt
+        </td>
+        <td style="text-align:center;font-weight:700;">5</td>
+      </tr>
+      <tr>
+        <td><strong>Consigne 2b</strong><br><em>§ conséquences (~12 lignes)</em></td>
+        <td>
+          &bull; 3 conséquences distinctes et pertinentes : 1 pt chacune<br>
+          <em>Exemples : chômage / pauvreté perpétuée / délinquance / perte du capital humain / inégalités sociales / exclusion sociale</em><br>
+          &bull; Chaque conséquence est développée et illustrée : 0,5 pt × 3<br>
+          &bull; Connecteurs logiques utilisés (« De plus », « Par conséquent », « En outre »…) : 0,5 pt<br>
+          &bull; Longueur et cohérence du paragraphe : 0,5 pt
+        </td>
+        <td style="text-align:center;font-weight:700;">5</td>
+      </tr>
+      <tr>
+        <td><strong>Consigne 3</strong><br><em>Conclusion (~6 lignes)</em></td>
+        <td>
+          &bull; 2 solutions concrètes et développées : 1,5 pt chacune<br>
+          <em>Exemples : bourses scolaires / cantines scolaires / sensibilisation des parents / engagement de l'État / internats / appui des ONG</em><br>
+          &bull; La conclusion récapitule et ouvre sur une perspective : 1 pt
+        </td>
+        <td style="text-align:center;font-weight:700;">4</td>
+      </tr>
+      <tr>
+        <td><strong>Qualité de la langue</strong></td>
+        <td>
+          &bull; <em>Orthographe</em> : &lt; 5 fautes = 1,5 pt · 5-10 fautes = 0,75 pt · &gt; 10 = 0 pt<br>
+          &bull; <em>Grammaire et syntaxe</em> : phrases bien construites, accord sujet-verbe, PP = 1,5 pt<br>
+          &bull; <em>Vocabulaire</em> : lexique argumentatif varié, registre soutenu = 1 pt
+        </td>
+        <td style="text-align:center;font-weight:700;">4</td>
+      </tr>
+      <tr class="total">
+        <td colspan="2" style="text-align:right;">TOTAL SUJET 1</td>
+        <td style="text-align:center;">20</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br>
+
+  <!-- ═══ GRILLE SUJET 2 ═══ -->
+  <div class="section-corrige">
+    <div class="section-corrige-titre">
+      Sujet 2 — Texte narratif (Cérémonie traditionnelle)
+      <span class="pts-badge">20 points</span>
+    </div>
+  </div>
+
+  <table class="bareme">
+    <thead>
+      <tr>
+        <th style="width:30%">Critère / Consigne</th>
+        <th>Indicateurs de réussite</th>
+        <th style="width:10%;text-align:center;">Pts</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Consigne 1</strong><br><em>Introduction (~6 lignes)</em></td>
+        <td>
+          &bull; Contexte spatio-temporel posé (quand, où) : 1 pt<br>
+          &bull; Raison de la cérémonie clairement précisée : 1 pt<br>
+          &bull; Personnages présents mentionnés : 0,5 pt<br>
+          &bull; Introduction fluide qui accroche le lecteur : 0,5 pt
+        </td>
+        <td style="text-align:center;font-weight:700;">3</td>
+      </tr>
+      <tr>
+        <td><strong>Consigne 2a</strong><br><em>§ temps forts (~12 lignes)</em></td>
+        <td>
+          &bull; 3 moments forts distincts de la cérémonie relatés : 1,5 pt chacun<br>
+          <em>Exemples : préparatifs, discours de chef, repas communautaire, danses, offrandes, rites…</em><br>
+          &bull; Ordre chronologique respecté : 0,5 pt<br>
+          &bull; Temps du récit bien employés (PS/imparfait) : 0,5 pt<br>
+          &bull; Longueur respectée : 0,5 pt
+        </td>
+        <td style="text-align:center;font-weight:700;">5</td>
+      </tr>
+      <tr>
+        <td><strong>Consigne 2b</strong><br><em>§ atmosphère (~12 lignes)</em></td>
+        <td>
+          &bull; Description vivante de l'atmosphère (sons, couleurs, odeurs, ambiance) : 2 pts<br>
+          &bull; Échanges entre participants restitués (dialogue ou paroles rapportées) : 2 pts<br>
+          &bull; Vocabulaire descriptif riche (adjectifs, figures de style) : 1 pt
+        </td>
+        <td style="text-align:center;font-weight:700;">5</td>
+      </tr>
+      <tr>
+        <td><strong>Consigne 3</strong><br><em>Conclusion (~6 lignes)</em></td>
+        <td>
+          &bull; 2 sentiments clairement exprimés et nommés : 1,5 pt chacun<br>
+          <em>Exemples : fierté, nostalgie, joie, émotion, appartenance, admiration…</em><br>
+          &bull; Leçon culturelle tirée de la cérémonie : 1 pt
+        </td>
+        <td style="text-align:center;font-weight:700;">4</td>
+      </tr>
+      <tr>
+        <td><strong>Qualité de la langue</strong></td>
+        <td>
+          &bull; <em>Orthographe</em> : &lt; 5 fautes = 1,5 pt · 5-10 fautes = 0,75 pt · &gt; 10 = 0 pt<br>
+          &bull; <em>Grammaire</em> : accord des PP, concordance des temps, syntaxe = 1,5 pt<br>
+          &bull; <em>Vocabulaire</em> : lexique narratif/descriptif varié, style = 1 pt
+        </td>
+        <td style="text-align:center;font-weight:700;">4</td>
+      </tr>
+      <tr class="total">
+        <td colspan="2" style="text-align:right;">TOTAL SUJET 2</td>
+        <td style="text-align:center;">20</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="position:relative;z-index:1;margin-top:10px;padding:8px 12px;background:#fff8e1;border-radius:4px;font-size:10.5px;color:#555;">
+    <strong>NB :</strong> Le candidat ne traite qu'un seul sujet. Si les deux sujets sont traités, seul le premier sera évalué.<br>
+    <strong>Langue :</strong> Déduire 0,5 pt par faute grave non comptée dans le barème orthographe (ex. : confusion de type de texte, hors sujet manifeste).<br>
+    <strong>Longueur :</strong> Déduire 1 pt si la production est nettement inférieure aux longueurs requises pour 2 consignes ou plus.
+  </div>
+
+  <!-- Pied de page -->
+  <div class="pied">
+    <div class="copy">© Centre VÉRITAS — Douala · 2025–2026</div>
+    <div>Corrigé enseignant — Ne pas distribuer</div>
+    <div class="pg">Page 2 / 2</div>
+  </div>
+</div>
+
+</body>
+</html>

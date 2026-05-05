@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEPC Blanc — Étude de texte — 3ème — Centre VÉRITAS</title>
+  <style>
+    :root {
+      --navy:  #142554;
+      --gold:  #FFC93C;
+      --cream: #faf8f3;
+      --green: #e8f5e9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Libre Baskerville', 'Georgia', serif;
+      background: #e8e8e8;
+      color: #111;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    @media print {
+      body { background: white; }
+      .no-print { display: none !important; }
+      .page { box-shadow: none; margin: 0; page-break-after: always; }
+      .page:last-child { page-break-after: avoid; }
+    }
+
+    .page {
+      position: relative;
+      width: 210mm;
+      min-height: 297mm;
+      background: white;
+      margin: 20px auto;
+      padding: 14mm 16mm 14mm 16mm;
+      box-shadow: 0 4px 24px rgba(0,0,0,.18);
+      overflow: hidden;
+    }
+
+    .filigrane {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) rotate(-35deg);
+      font-size: 110px;
+      font-weight: 900;
+      color: var(--navy);
+      opacity: .10;
+      letter-spacing: 8px;
+      pointer-events: none;
+      user-select: none;
+      white-space: nowrap;
+      z-index: 0;
+    }
+    .filigrane-logo {
+      position: absolute;
+      bottom: 60px; right: 40px;
+      font-size: 200px;
+      font-weight: 900;
+      color: var(--gold);
+      opacity: .15;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+    }
+
+    .entete {
+      position: relative;
+      z-index: 1;
+      border: 2px solid var(--navy);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .entete-top {
+      display: flex;
+      align-items: stretch;
+      min-height: 72px;
+    }
+    .entete-left {
+      background: var(--navy);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 14px;
+      min-width: 110px;
+      gap: 4px;
+    }
+    .logo-v {
+      width: 60px; height: 60px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .logo-v svg { width: 100%; height: 100%; }
+    .logo-nom {
+      color: white;
+      font-size: 9.5px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      line-height: 1.2;
+      margin-top: 2px;
+    }
+    .logo-ville {
+      color: var(--gold);
+      font-size: 8.5px;
+      text-align: center;
+    }
+    .logo-tel {
+      color: rgba(255,255,255,.75);
+      font-size: 7.5px;
+      text-align: center;
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+    .entete-center {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 8px 10px;
+      gap: 3px;
+    }
+    .entete-annee { font-size: 10px; color: #555; letter-spacing: .5px; }
+    .entete-exam { font-size: 10px; color: var(--navy); font-weight: 700; letter-spacing: .5px; text-transform: uppercase; }
+    .entete-matiere {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .entete-classe { font-size: 11px; color: #333; font-style: italic; }
+    .entete-right {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 8px 12px;
+      border-left: 1px solid #ddd;
+    }
+    .info-bloc { text-align: center; padding: 0 12px; }
+    .info-val { font-size: 20px; font-weight: 700; color: var(--navy); }
+    .info-lbl { font-size: 8.5px; color: #777; text-transform: uppercase; letter-spacing: .5px; }
+    .info-sep { width: 1px; height: 40px; background: #ddd; }
+    .entete-gold {
+      height: 4px;
+      background: linear-gradient(90deg, var(--navy) 0%, var(--gold) 40%, var(--navy) 100%);
+    }
+    .entete-consignes {
+      background: var(--cream);
+      padding: 6px 14px;
+      display: flex;
+      gap: 20px;
+      font-size: 10px;
+      color: #444;
+      font-style: italic;
+    }
+    .entete-consignes span::before { content: "▸ "; color: var(--gold); }
+
+    .chapeau {
+      position: relative;
+      z-index: 1;
+      background: var(--cream);
+      border-left: 4px solid var(--navy);
+      padding: 8px 14px;
+      margin-bottom: 8px;
+      font-size: 11.5px;
+      font-style: italic;
+      color: #444;
+    }
+
+    .texte-support {
+      position: relative;
+      z-index: 1;
+      border-left: 4px solid var(--gold);
+      background: white;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      font-size: 12.5px;
+      line-height: 1.85;
+      text-align: justify;
+    }
+    .texte-support p { margin-bottom: .8em; }
+    .texte-support .ligne-num {
+      color: #999;
+      font-size: 9px;
+      float: right;
+      margin-right: -10px;
+    }
+
+    .ref-auteur {
+      position: relative;
+      z-index: 1;
+      text-align: right;
+      font-size: 11px;
+      color: #555;
+      margin-bottom: 14px;
+      padding-right: 4px;
+    }
+
+    .section {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 12px;
+    }
+    .section-titre {
+      background: var(--navy);
+      color: white;
+      padding: 6px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 3px 3px 0 0;
+    }
+    .pts {
+      background: var(--gold);
+      color: var(--navy);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .questions {
+      border: 1px solid #ddd;
+      border-top: none;
+      padding: 10px 14px;
+      font-size: 12px;
+      border-radius: 0 0 3px 3px;
+    }
+    .questions ol { padding-left: 22px; }
+    .questions ol li { margin-bottom: .7em; }
+    .questions .sub { margin-left: 18px; margin-top: .3em; font-size: 11.5px; }
+    .questions .pts-inline {
+      display: inline-block;
+      background: #fff8e1;
+      color: var(--navy);
+      font-size: 9.5px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+      margin-left: 4px;
+    }
+
+    .pied {
+      position: absolute;
+      bottom: 10mm;
+      left: 16mm; right: 16mm;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 9px;
+      color: #999;
+      border-top: 1px solid #eee;
+      padding-top: 4px;
+      z-index: 1;
+    }
+    .copy { font-style: italic; }
+    .pg { font-weight: 700; color: var(--navy); }
+
+    .corrige-header {
+      background: linear-gradient(135deg, var(--navy) 0%, #1e3a8a 100%);
+      color: white;
+      text-align: center;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .corrige-header h2 { font-size: 14px; letter-spacing: 2px; }
+    .corrige-header p  { font-size: 9px; opacity: .8; margin-top: 2px; }
+
+    .rep {
+      background: var(--green);
+      border-left: 4px solid #4caf50;
+      padding: 10px 14px;
+      margin: 6px 0 10px 0;
+      font-size: 11.5px;
+      line-height: 1.7;
+      text-align: justify;
+      position: relative;
+      z-index: 1;
+    }
+    .rep p { margin-bottom: .5em; }
+    .rep .tolerance { color: #777; font-style: italic; font-size: 10.5px; }
+
+    table.bareme {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin-top: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    table.bareme th {
+      background: var(--navy);
+      color: white;
+      padding: 5px 8px;
+      text-align: left;
+    }
+    table.bareme td {
+      padding: 4px 8px;
+      border-bottom: 1px solid #eee;
+    }
+    table.bareme tr:nth-child(even) td { background: #f8f8f8; }
+    table.bareme tr.total td {
+      font-weight: 700;
+      background: #fff8e1;
+      color: var(--navy);
+    }
+
+    .q-num { font-weight: 700; color: var(--navy); }
+
+    .btn-print {
+      position: fixed; bottom: 20px; right: 20px;
+      background: var(--navy); color: white;
+      border: none; padding: 12px 24px; border-radius: 30px;
+      font-size: 14px; cursor: pointer; z-index: 999;
+      box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    }
+    .btn-print:hover { background: var(--gold); color: var(--navy); }
+  </style>
+</head>
+<body>
+
+<button class="btn-print no-print" onclick="window.print()">🖨️ Imprimer</button>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 1 — ÉPREUVE ÉLÈVE
+══════════════════════════════════════════════ -->
+<div class="page">
+  <div class="filigrane">VÉRITAS</div>
+  <div class="filigrane-logo">V</div>
+
+  <div class="entete">
+    <div class="entete-top">
+      <div class="entete-left">
+        <div class="logo-v">
+          <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="38" fill="#FFC93C" stroke="white" stroke-width="2"/>
+            <text x="40" y="56" text-anchor="middle" font-size="48" font-weight="900" fill="#142554" font-family="Georgia,serif">V</text>
+          </svg>
+        </div>
+        <div class="logo-nom">Centre Véritas</div>
+        <div class="logo-ville">Douala</div>
+        <div class="logo-tel">697 637 739 · 671 469 236<br>695 022 397</div>
+      </div>
+
+      <div class="entete-center">
+        <div class="entete-annee">Année scolaire 2025 – 2026</div>
+        <div class="entete-exam">BEPC Blanc — Toutes séries</div>
+        <div class="entete-matiere">Étude de texte</div>
+        <div class="entete-classe">Classe de Troisième (3ème)</div>
+      </div>
+
+      <div class="entete-right">
+        <div class="info-bloc">
+          <div class="info-val">1h</div>
+          <div class="info-lbl">durée</div>
+        </div>
+        <div class="info-sep"></div>
+        <div class="info-bloc">
+          <div class="info-val">1</div>
+          <div class="info-lbl">coefficient</div>
+        </div>
+      </div>
+    </div>
+    <div class="entete-gold"></div>
+    <div class="entete-consignes">
+      <span>Aucun document autorisé</span>
+      <span>Répondez en phrases complètes</span>
+      <span>Soignez la présentation</span>
+    </div>
+  </div>
+
+  <!-- Chapeau -->
+  <div class="chapeau">
+    Dans ce roman, Banda, jeune homme du village de Bamila (Cameroun), évoque ses souvenirs d'enfance auprès de sa mère. Le jour où elle l'a conduit à l'école de la ville a marqué un tournant dans sa vie.
+  </div>
+
+  <!-- Texte support -->
+  <div class="texte-support">
+    <p>Banda évoquait parfois ces lointains souvenirs avec une douceur mêlée de mélancolie. Peut-être n'avait-il jamais su tout ce qu'avait été sa mère pour lui ; peut-être ne l'avait-il deviné que le jour où il avait souffert pour la première fois de sa vie, le jour où elle l'avait conduit à l'école de la ville.<span class="ligne-num">5</span></p>
+
+    <p>Il se rappelait encore cette matinée-là. La cour sentait la rosée fraîche et le bois fumé. Sa mère, vêtue de son pagne bleu du dimanche, l'avait pris par la main sans un mot, et ils avaient marché longtemps sur la piste rouge qui serpentait entre les cacaoyers. Lui ne disait rien non plus, mais son cœur battait très vite.<span class="ligne-num">10</span></p>
+
+    <p>À la porte de l'école, elle s'était penchée vers lui, avait ajusté le col de sa chemise propre et l'avait regardé droit dans les yeux.</p>
+
+    <p>— Tu vas apprendre, lui avait-elle dit simplement, d'une voix ferme. C'est tout ce que je peux faire pour toi.<span class="ligne-num">15</span></p>
+
+    <p>Désormais, cinq jours sur sept, il serait séparé d'elle. Il avait pleuré ce jour-là comme jamais plus il ne pourrait le faire. Il avait bien fini par se faire à cette nouvelle existence, mais au début, ce fut très difficile : sa mère ne l'avait pas habitué à fréquenter les autres enfants.<span class="ligne-num">20</span></p>
+
+    <p>Longtemps encore, les nuits de pluie, quand la pluie crépitait sur le toit et que de violentes rafales agitaient les arbres derrière le village, il entendait dans le craquement des branches la voix de sa mère, et il serrait les poings pour ne pas pleurer.</p>
+  </div>
+  <div class="ref-auteur">
+    D'après <strong>Eza Boto</strong> (Mongo Beti), <em>Ville cruelle</em>, Présence Africaine, 1956 — Chapitre I (adapté)<br>
+    <em>(Texte de 261 mots)</em>
+  </div>
+
+  <!-- PARTIE I -->
+  <div class="section">
+    <div class="section-titre">
+      I. Compréhension du texte
+      <span class="pts">10 points</span>
+    </div>
+    <div class="questions">
+      <ol>
+        <li>De quoi parle ce texte&nbsp;? Justifiez votre réponse par au moins <strong>deux éléments précis</strong> tirés du texte. <span class="pts-inline">2 pts</span></li>
+        <li>Relevez dans le texte <strong>quatre mots ou expressions</strong> appartenant au champ lexical de la <strong>tristesse et de l'émotion</strong>. <span class="pts-inline">2 pts</span></li>
+        <li>Expliquez la phrase que prononce la mère&nbsp;: «&nbsp;Tu vas apprendre. C'est tout ce que je peux faire pour toi.&nbsp;» Que révèle-t-elle sur le personnage de la mère&nbsp;? <span class="pts-inline">2 pts</span></li>
+        <li>Quels sentiments éprouve Banda en évoquant ses souvenirs d'enfance&nbsp;? Justifiez votre réponse par <strong>deux détails</strong> du texte. <span class="pts-inline">2 pts</span></li>
+        <li>À votre avis, pourquoi Banda a-t-il eu du mal à s'adapter à sa «&nbsp;nouvelle existence&nbsp;»&nbsp;? Donnez au moins <strong>deux raisons</strong>. <span class="pts-inline">2 pts</span></li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- PARTIE II -->
+  <div class="section">
+    <div class="section-titre">
+      II. Connaissance et maniement de la langue
+      <span class="pts">10 points</span>
+    </div>
+    <div class="questions">
+      <ol>
+        <li>
+          «&nbsp;<em>Désormais, cinq jours sur sept, il <u>serait</u> séparé d'elle.</em>&nbsp;»
+          <div class="sub">a) À quel <strong>temps</strong> et à quel <strong>mode</strong> est conjugué le verbe «&nbsp;serait&nbsp;»&nbsp;? Justifiez son emploi dans ce contexte. <span class="pts-inline">2 pts</span></div>
+          <div class="sub">b) Réécrivez cette phrase en remplaçant «&nbsp;il&nbsp;» par «&nbsp;<strong>les deux frères</strong>&nbsp;». Faites toutes les modifications nécessaires. <span class="pts-inline">1 pt</span></div>
+        </li>
+        <li>
+          «&nbsp;<em>Il avait bien fini par se faire à cette nouvelle existence, mais au début, ce fut très difficile.</em>&nbsp;»
+          <div class="sub">a) Identifiez la valeur du passé simple «&nbsp;fut&nbsp;» dans cette phrase et opposez-la à celle du plus-que-parfait «&nbsp;avait fini&nbsp;». <span class="pts-inline">1 pt</span></div>
+          <div class="sub">b) Réécrivez la seconde partie de la phrase («&nbsp;au début, ce fut très difficile&nbsp;») en la transformant en proposition subordonnée circonstancielle de <strong>concession</strong>. <span class="pts-inline">1 pt</span></div>
+        </li>
+        <li>
+          Le passage suivant est au <strong>style direct</strong>&nbsp;:<br>
+          «&nbsp;Tu vas apprendre, lui avait-elle dit simplement. C'est tout ce que je peux faire pour toi.&nbsp;»
+          <div class="sub">a) Réécrivez ce passage au <strong>style indirect</strong> en commençant par&nbsp;: «&nbsp;<em>Elle lui dit que…</em>&nbsp;» Faites tous les changements nécessaires. <span class="pts-inline">3 pts</span></div>
+        </li>
+        <li>
+          «&nbsp;<em>la piste rouge qui <u>serpentait</u> entre les cacaoyers</em>&nbsp;»
+          <div class="sub">a) Identifiez et nommez la <strong>figure de style</strong> contenue dans le verbe «&nbsp;serpentait&nbsp;». <span class="pts-inline">1 pt</span></div>
+          <div class="sub">b) Quel effet produit-elle sur le lecteur&nbsp;? <span class="pts-inline">1 pt</span></div>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="pied">
+    <div class="copy">© Centre VÉRITAS — Douala · 2025–2026</div>
+    <div>Tournez la page ▶</div>
+    <div class="pg">Page 1 / 2</div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════
+     PAGE 2 — CORRIGÉ ENSEIGNANT
+══════════════════════════════════════════════ -->
+<div class="page">
+  <div class="filigrane">VÉRITAS</div>
+  <div class="filigrane-logo">V</div>
+
+  <div class="corrige-header">
+    <h2>CORRIGÉ — ÉTUDE DE TEXTE</h2>
+    <p>BEPC Blanc · 3ème · Document enseignant — Ne pas distribuer aux élèves</p>
+  </div>
+
+  <!-- CORRIGÉ PARTIE I -->
+  <div class="section">
+    <div class="section-titre">I. Compréhension du texte <span class="pts">10 points</span></div>
+  </div>
+
+  <p style="position:relative;z-index:1;font-size:12px;font-weight:700;color:var(--navy);margin:6px 0 2px;">
+    <span class="q-num">1.</span> De quoi parle ce texte ? <span class="pts-inline">2 pts</span>
+  </p>
+  <div class="rep">
+    <p>Ce texte parle des <strong>souvenirs d'enfance de Banda</strong>, notamment le jour où sa mère l'a conduit à l'école de la ville, marquant une <strong>douloureuse séparation</strong> entre eux. Il évoque aussi la <strong>nostalgie</strong> que cet événement a laissée.</p>
+    <p><em>Justification :</em> «&nbsp;le jour où elle l'avait conduit à l'école de la ville&nbsp;» ; «&nbsp;les nuits de pluie... il entendait dans le craquement des branches la voix de sa mère&nbsp;».</p>
+    <p class="tolerance">Barème : 1 pt pour le thème principal + 0,5 pt × 2 éléments justificatifs tirés du texte.</p>
+  </div>
+
+  <p style="position:relative;z-index:1;font-size:12px;font-weight:700;color:var(--navy);margin:6px 0 2px;">
+    <span class="q-num">2.</span> Champ lexical de la tristesse et de l'émotion <span class="pts-inline">2 pts</span>
+  </p>
+  <div class="rep">
+    <p>Mots/expressions acceptés (4 parmi) : <strong>mélancolie</strong>, <strong>souffert</strong>, <strong>pleuré</strong>, <strong>très difficile</strong>, <strong>serrait les poings</strong>, <strong>pour ne pas pleurer</strong>, <strong>douceur mêlée de mélancolie</strong>, <strong>séparé d'elle</strong>.</p>
+    <p class="tolerance">Barème : 0,5 pt × 4 mots/expressions pertinents. Tolérance pour d'autres relevés justifiés.</p>
+  </div>
+
+  <p style="position:relative;z-index:1;font-size:12px;font-weight:700;color:var(--navy);margin:6px 0 2px;">
+    <span class="q-num">3.</span> Explication de la parole de la mère <span class="pts-inline">2 pts</span>
+  </p>
+  <div class="rep">
+    <p>La mère dit à Banda que <strong>l'instruction est le seul bien précieux qu'elle puisse lui offrir</strong>. Elle n'a pas d'argent ni de richesses matérielles, mais elle peut lui donner accès à l'école, qui représente une chance d'avenir. Sa parole révèle une femme <strong>lucide, courageuse et aimante</strong> : elle consent à se séparer de son fils par amour et par sens du devoir.</p>
+    <p class="tolerance">Barème : 1 pt pour le sens de la phrase + 1 pt pour ce qu'elle révèle du personnage. Accepter toute formulation pertinente.</p>
+  </div>
+
+  <p style="position:relative;z-index:1;font-size:12px;font-weight:700;color:var(--navy);margin:6px 0 2px;">
+    <span class="q-num">4.</span> Sentiments de Banda <span class="pts-inline">2 pts</span>
+  </p>
+  <div class="rep">
+    <p><strong>Nostalgie / tendresse :</strong> «&nbsp;douceur mêlée de mélancolie&nbsp;» — le souvenir est à la fois doux et douloureux.</p>
+    <p><strong>Émotion retenue / tristesse :</strong> «&nbsp;il serrait les poings pour ne pas pleurer&nbsp;» — geste physique qui trahit une grande peine contenue, longtemps après les faits.</p>
+    <p class="tolerance">Barème : 1 pt par sentiment correctement identifié et justifié par le texte. Accepter : attachement à la mère, culpabilité, solitude, si justifié.</p>
+  </div>
+
+  <p style="position:relative;z-index:1;font-size:12px;font-weight:700;color:var(--navy);margin:6px 0 2px;">
+    <span class="q-num">5.</span> Pourquoi Banda a-t-il eu du mal à s'adapter <span class="pts-inline">2 pts</span>
+  </p>
+  <div class="rep">
+    <p><strong>Raison 1 :</strong> Sa mère l'avait habitué à ne fréquenter que peu de monde : «&nbsp;sa mère ne l'avait pas habitué à fréquenter les autres enfants&nbsp;» → il n'était pas préparé à la vie collective de l'école.</p>
+    <p><strong>Raison 2 :</strong> La <strong>séparation brutale d'avec sa mère</strong>, à qui il était très attaché : «&nbsp;cinq jours sur sept, il serait séparé d'elle. Il avait pleuré ce jour-là comme jamais plus il ne pourrait le faire.&nbsp;»</p>
+    <p class="tolerance">Barème : 1 pt × 2 raisons pertinentes, chacune appuyée par le texte.</p>
+  </div>
+
+  <!-- CORRIGÉ PARTIE II -->
+  <div class="section" style="margin-top:12px;">
+    <div class="section-titre">II. Connaissance et maniement de la langue <span class="pts">10 points</span></div>
+  </div>
+
+  <p style="position:relative;z-index:1;font-size:12px;font-weight:700;color:var(--navy);margin:6px 0 2px;">
+    <span class="q-num">1.</span> Temps, mode et réécriture <span class="pts-inline">3 pts</span>
+  </p>
+  <div class="rep">
+    <p><strong>a)</strong> «&nbsp;serait&nbsp;» est au <strong>conditionnel présent</strong> (mode conditionnel). Dans ce contexte, il n'exprime pas une condition mais un <strong>futur dans le passé</strong> : vu du moment du départ (passé), Banda allait être séparé de sa mère — le conditionnel traduit un futur envisagé depuis un point de référence passé.</p>
+    <p><strong>b)</strong> «&nbsp;Désormais, cinq jours sur sept, <strong>ils seraient séparés d'elle.</strong>&nbsp;»<br>Modifications : «&nbsp;il&nbsp;» → «&nbsp;ils&nbsp;» (3ème pers. pluriel) ; «&nbsp;serait séparé&nbsp;» → «&nbsp;<strong>seraient séparés</strong>&nbsp;» (accord du PP au masculin pluriel).</p>
+    <p class="tolerance">Barème : a) 0,5 pt temps + 0,5 pt mode + 1 pt justification emploi (futur dans le passé). b) 0,5 pt pronom + 0,5 pt accord verbal.</p>
+  </div>
+
+  <p style="position:relative;z-index:1;font-size:12px;font-weight:700;color:var(--navy);margin:6px 0 2px;">
+    <span class="q-num">2.</span> Valeur des temps du récit <span class="pts-inline">2 pts</span>
+  </p>
+  <div class="rep">
+    <p><strong>a)</strong> Le <strong>passé simple «&nbsp;fut&nbsp;»</strong> exprime une action ponctuelle, présentée comme achevée et délimitée dans le temps (premier plan du récit). Le <strong>plus-que-parfait «&nbsp;avait fini&nbsp;»</strong> exprime une action accomplie antérieure à une autre action passée (arrière-plan, antériorité).</p>
+    <p><strong>b)</strong> Transformation en subordonnée de concession :<br>
+    «&nbsp;<strong>Il avait bien fini par se faire à cette nouvelle existence, bien que ce fût très difficile au début.</strong>&nbsp;»<br>
+    ou : «&nbsp;...même si c'était très difficile au début.&nbsp;»</p>
+    <p class="tolerance">Barème : a) 0,5 pt × 2 valeurs identifiées. b) 1 pt pour toute formulation correcte de concession (bien que + subjonctif / même si / quoique / malgré).</p>
+  </div>
+
+  <p style="position:relative;z-index:1;font-size:12px;font-weight:700;color:var(--navy);margin:6px 0 2px;">
+    <span class="q-num">3.</span> Passage au style indirect <span class="pts-inline">3 pts</span>
+  </p>
+  <div class="rep">
+    <p>Passage au style indirect :<br>
+    «&nbsp;<strong>Elle lui dit qu'il allait apprendre et que c'était tout ce qu'elle pouvait faire pour lui.</strong>&nbsp;»</p>
+    <p>Changements effectués :</p>
+    <ul style="padding-left:18px;margin-top:4px;">
+      <li>Suppression des guillemets et du verbe introducteur inséré</li>
+      <li>«&nbsp;Tu vas apprendre&nbsp;» → «&nbsp;qu'il <strong>allait</strong> apprendre&nbsp;» (2ème pers. → 3ème pers. ; présent → imparfait par concordance)</li>
+      <li>«&nbsp;C'est tout ce que je peux faire pour toi&nbsp;» → «&nbsp;que c'était tout ce qu'elle <strong>pouvait</strong> faire pour lui&nbsp;» (personne + concordance des temps)</li>
+      <li>Conjonction «&nbsp;que&nbsp;» pour introduire chaque proposition</li>
+    </ul>
+    <p class="tolerance">Barème : 1 pt pour la structure (que…) + 1 pt pour les changements de personne + 1 pt pour la concordance des temps. Accepter «&nbsp;dit&nbsp;» ou «&nbsp;avait dit&nbsp;» selon l'interprétation de la consigne.</p>
+  </div>
+
+  <p style="position:relative;z-index:1;font-size:12px;font-weight:700;color:var(--navy);margin:6px 0 2px;">
+    <span class="q-num">4.</span> Figure de style — «&nbsp;serpentait&nbsp;» <span class="pts-inline">2 pts</span>
+  </p>
+  <div class="rep">
+    <p><strong>a)</strong> Il s'agit d'une <strong>métaphore</strong> (ou personnification filée) : le verbe «&nbsp;serpentait&nbsp;» attribue à la piste le mouvement sinueux d'un <strong>serpent</strong>. La piste n'est pas un être vivant, mais on lui prête le déplacement ondulant de cet animal.</p>
+    <p><strong>b)</strong> Cet effet produit une <strong>image visuelle très concrète</strong> et dynamique : le lecteur voit mentalement la piste tournoyer et s'enfoncer dans la végétation des cacaoyers, ce qui rend la marche vers l'école encore plus longue, presque inquiétante, dans l'imaginaire de l'enfant.</p>
+    <p class="tolerance">Barème : a) 1 pt pour l'identification (métaphore ou personnification acceptées) avec explication du rapprochement. b) 1 pt pour l'effet : image visuelle / suggestion de longueur, de mystère.</p>
+  </div>
+
+  <div style="position:relative;z-index:1;margin-top:12px;padding:8px 12px;background:#fff8e1;border-radius:4px;font-size:10.5px;font-style:italic;color:#555;">
+    <strong>NB :</strong> Toute réponse correctement formulée et justifiée, non prévue dans ce corrigé, sera prise en compte.
+  </div>
+
+  <div class="pied">
+    <div class="copy">© Centre VÉRITAS — Douala · 2025–2026</div>
+    <div>Corrigé enseignant — Ne pas distribuer</div>
+    <div class="pg">Page 2 / 2</div>
+  </div>
+</div>
+
+</body>
+</html>

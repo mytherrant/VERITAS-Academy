@@ -1,4 +1,4 @@
-# ═══ VÉRITAS Academy — Configuration Hostinger (Apache) ═══
+# ═══ VÉRITAS Academy — Configuration LWS (LiteSpeed/Apache) ═══
 
 # Force HTTPS
 RewriteEngine On

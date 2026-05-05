@@ -8,12 +8,13 @@ on:
   push:
     branches: [master]
     paths:
-      - 'VERITAS_v1.0.html'
+      - 'VERITAS_v1.1.html'
       - 'index.php'
       - '.htaccess'
       - 'api/**'
       - 'evaluations/**'
       - 'cours/**'
+      - 'Logo détouré.png'
 
   # Lancement manuel depuis GitHub → Actions → Run workflow
   workflow_dispatch:
@@ -35,6 +36,7 @@ jobs:
         run: |
           mkdir -p deploy/api \
                    deploy/api/data \
+                   deploy/uploads/veritas \
                    deploy/uploads/media \
                    deploy/uploads/video \
                    deploy/uploads/epreuve \
@@ -43,25 +45,27 @@ jobs:
                    deploy/uploads/image
 
           # ── Application principale ──────────────────────────────
-          # index.html → servi directement par LiteSpeed (entrée principale)
-          # app.html + index.php → wrapper no-cache si LiteSpeed configuré pour PHP
-          cp VERITAS_v1.0.html deploy/index.html
-          cp VERITAS_v1.0.html deploy/app.html
+          # app.html → servi par index.php (wrapper no-cache LiteSpeed)
+          # index.html → accès direct sans PHP
+          cp VERITAS_v1.1.html deploy/app.html
+          cp VERITAS_v1.1.html deploy/index.html
           cp index.php         deploy/index.php
 
           # Logo
           if [ -f "Logo détouré.png" ]; then cp "Logo détouré.png" deploy/; fi
 
-          # .htaccess (sécurité + cache)
+          # .htaccess (sécurité + cache + MIME)
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
 
           # ── API PHP ─────────────────────────────────────────────
-          # NE PAS déployer config.php (credentials MySQL locaux)
+          # config.php = credentials MySQL → NE JAMAIS déployer via CI
+          # database_mysql.sql = schéma de référence → NE PAS exposer publiquement
           for f in \
+            api/db.php \
+            api/upload.php \
             api/config_sync.php \
             api/sync.php \
             api/files.php \
-            api/upload.php \
             api/upload_file.php \
             api/upload_video.php \
             api/news_proxy.php \
@@ -69,11 +73,7 @@ jobs:
             [ -f "$f" ] && cp "$f" deploy/api/ && echo "  ✓ $f"
           done
 
-          if [ -f api/database_mysql.sql ]; then
-            cp api/database_mysql.sql deploy/api/
-          fi
-
-          # ── Répertoire data pour sauvegardes cloud sync ──────────
+          # ── Répertoire data protégé (veritas_db.json) ──────────
           if [ -f api/data/index.php ]; then
             cp api/data/index.php deploy/api/data/
           fi
@@ -82,9 +82,9 @@ jobs:
           if [ -d evaluations ]; then cp -r evaluations/ deploy/evaluations/; fi
           if [ -d cours ];       then cp -r cours/       deploy/cours/;       fi
 
-          # Placeholder pour uploads (vide au départ, géré par PHP)
+          # Placeholders uploads (vides au départ, gérés par PHP)
           touch deploy/uploads/.gitkeep
-          touch deploy/uploads/media/.gitkeep
+          touch deploy/uploads/veritas/.gitkeep
 
           echo ""
           echo "✅ Fichiers prêts pour déploiement :"
@@ -108,6 +108,9 @@ jobs:
         if: success()
         run: |
           echo "🎉 Déploiement réussi sur https://veritas-school.com"
-          echo "   app.html     → servi par index.php (no-cache LiteSpeed)"
-          echo "   api/*.php    → endpoints cloud sync + upload"
+          echo "   app.html / index.html → VÉRITAS v1.1"
+          echo "   index.php             → wrapper no-cache LiteSpeed"
+          echo "   api/db.php            → persistance JSON LWS"
+          echo "   api/upload.php        → upload fichiers LWS"
+          echo "   api/sync.php          → sync legacy (compatibilité)"
           echo "   Déployé le : $(date '+%d/%m/%Y à %H:%M:%S UTC')"
