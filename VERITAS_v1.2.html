@@ -3665,21 +3665,60 @@ function adminAddFile(itemId) {
   inp.click();
 }
 
+// Taille en Ko d'une chaîne
+function _strKo(s){return s?Math.round(s.length*3/4/1024):0;}
+// Vrai si c'est une data-URL volumineuse (>2 Ko)
+function _isHeavyData(s){return s&&s.startsWith('data:')&&s.length>2048;}
+// Purge toutes les data-URLs volumineuses d'un objet DB avant écriture locale
+function _stripBinaries(data){
+  // Vidéo intro
+  if(data.introVideo&&_isHeavyData(data.introVideo.src))data.introVideo.src='';
+  // Logo établissement
+  if(data.school&&_isHeavyData(data.school.logo))data.school.logo='';
+  // Galerie photos
+  if(data.galleryImages)data.galleryImages.forEach(function(g){if(_isHeavyData(g.src))g.src='';});
+  // Partenaires
+  if(data.partenaires)data.partenaires.forEach(function(p){if(_isHeavyData(p.logo))p.logo='';});
+  // Livres — couvertures, fichiers, aperçus
+  if(data.books)data.books.forEach(function(b){
+    if(_isHeavyData(b.coverImg))b.coverImg='';
+    if(_isHeavyData(b.fichierData))b.fichierData='';
+    if(b.previewImages)b.previewImages=b.previewImages.map(function(img){return _isHeavyData(img)?'':img;});
+  });
+  // E-learning fichiers
+  if(data.elearning&&data.elearning.contenus)
+    data.elearning.contenus.forEach(function(c){if(_isHeavyData(c.fichierData))c.fichierData='';});
+  // Photos élèves / enseignants
+  if(data.students)data.students.forEach(function(s){if(_isHeavyData(s.photo))s.photo='';});
+  if(data.teachers)data.teachers.forEach(function(t){if(_isHeavyData(t.photo))t.photo='';});
+  return data;
+}
+
 function save(){
-  // ── 1. Écriture locale (priorité absolue, sync) ───────────────────────────
+  // ── 1. Écriture locale — les data-URLs lourdes sont toujours purgées ────────
+  DB.lastModified=Date.now();
+  var data=_stripBinaries(JSON.parse(JSON.stringify(DB)));
   try{
-    DB.lastModified=Date.now();
-    var data=JSON.parse(JSON.stringify(DB));
-    if(data.elearning&&data.elearning.contenus){
-      data.elearning.contenus.forEach(function(c){if(c.fichierData&&c.fichierData.length>5000)c.fichierData='';});
-    }
-    if(data.introVideo&&data.introVideo.src&&data.introVideo.src.startsWith('data:')){
-      data.introVideo.src='';
-    }
     localStorage.setItem('vrt10',JSON.stringify(data));
   }catch(e){
-    if(e.name==='QuotaExceededError'){toast('⚠️ Stockage plein — simplifiez les données','warn');}
-    else throw e;
+    if(e.name==='QuotaExceededError'){
+      // Purge agressive : tout ce qui ressemble à une data-URL (même courte)
+      try{
+        var purged=JSON.stringify(data).replace(/"data:[^"]{50,}"/g,'""');
+        localStorage.setItem('vrt10',purged);
+        // Déclencher l'upload cloud automatique des binaires encore en mémoire
+        setTimeout(function(){
+          if(typeof cloudSyncBinaries==='function'){
+            toast('📤 Stockage local plein — upload automatique vers le cloud…','warn');
+            cloudSyncBinaries(true); // true = silencieux
+          }
+        },200);
+      }catch(e2){
+        // En dernier recours vider les clés les moins critiques
+        try{localStorage.removeItem('_veritasErrors');localStorage.setItem('vrt10',JSON.stringify(data));}
+        catch(e3){console.error('[save] localStorage saturé:',e3);}
+      }
+    } else throw e;
   }
   // ── 2. Sync LWS_API debounced 800 ms (async, non-bloquant) ───────────────
   clearTimeout(_syncTimeout);
@@ -4036,8 +4075,65 @@ function mSyncMenu(){
     +"<button class='btn sm' style='background:#6D28D9;color:#fff' onclick='cm();cloudForcePull&&cloudForcePull()'>⬇️ Récupérer du cloud</button>"
     +"<button class='btn sm' style='background:#065F46;color:#fff' onclick='cm();cloudSyncBinaries&&cloudSyncBinaries()'>🔄 Sync fichiers locaux</button>"
     +"<button class='btn sm' style='background:#1E3A8A;color:#fff' onclick='cm();mCloudFilesList&&mCloudFilesList()'>📁 Fichiers en ligne</button>"
+    +"<button class='btn sm' style='background:#B45309;color:#fff' onclick='mStorageDiag()'>📊 Diagnostiquer stockage</button>"
+    +"<button class='btn sm' style='background:#7F1D1D;color:#fff' onclick='_purgeLocalBinaries()'>🗑️ Libérer espace local</button>"
     +"</div>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>");
+}
+
+// ── Diagnostic de l'espace localStorage ────────────────────────────────────
+function mStorageDiag(){
+  var total=0;
+  var rows=[];
+  try{
+    var raw=localStorage.getItem('vrt10');
+    if(raw){
+      var d=JSON.parse(raw);
+      var cat=function(label,val){
+        var ko=_strKo(JSON.stringify(val));
+        if(ko>0)rows.push({label:label,ko:ko});
+        total+=ko;
+      };
+      cat('Intro vidéo',d.introVideo);
+      cat('Logo école',d.school&&d.school.logo);
+      cat('Galerie photos',(d.galleryImages||[]).map(function(g){return g.src||'';}));
+      cat('Partenaires logos',(d.partenaires||[]).map(function(p){return p.logo||'';}));
+      cat('Livres (couv+data)',(d.books||[]).map(function(b){return (b.coverImg||'')+(b.fichierData||'');}));
+      cat('E-learning fichiers',(d.elearning&&d.elearning.contenus||[]).map(function(c){return c.fichierData||'';}));
+      cat('Élèves',d.students);
+      cat('Notes',d.grades);
+      cat('Paiements',d.payments);
+      cat('Autres',d);
+    }
+  }catch(e){rows=[{label:'Erreur lecture',ko:0}];}
+  rows.sort(function(a,b){return b.ko-a.ko;});
+  var bar=function(ko){var pct=Math.min(100,Math.round(ko/51.2));return '<div style="height:6px;background:#E5E7EB;border-radius:3px;margin-top:2px"><div style="height:6px;background:'+(pct>60?'#DC2626':pct>30?'#D97706':'#059669')+';border-radius:3px;width:'+pct+'%"></div></div>';};
+  var html='<div style="font-size:11px;color:var(--ink4);margin-bottom:10px">Quota localStorage ≈ 5 Mo (5 120 Ko) · Utilisé : <b>'+fmtN(total)+' Ko</b></div>';
+  html+='<div style="max-height:260px;overflow-y:auto">';
+  rows.forEach(function(r){html+='<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between"><span style="font-size:12px">'+_esc(r.label)+'</span><b style="font-size:12px">'+fmtN(r.ko)+' Ko</b></div>'+bar(r.ko)+'</div>';});
+  html+='</div>';
+  if(total>4000)html+='<div class="ib ibt" style="margin-top:10px;background:#FEF2F2;border-color:#DC2626"><span>⚠️</span><span>Stockage presque plein. Cliquez "Libérer espace local" pour supprimer les images binaires du cache local (elles restent sur le serveur).</span></div>';
+  cm();
+  M('📊 Diagnostic Stockage','Utilisation du cache local navigateur',html,'<button class="btn bi" onclick="cm()">OK</button>');
+}
+
+// ── Purge d'urgence : supprime toutes les data-URLs du localStorage ─────────
+function _purgeLocalBinaries(silent){
+  if(!silent&&!confirm('Supprimer toutes les images/vidéos du cache local ?\nElles restent sur le serveur et seront rechargées au prochain lancement.'))return;
+  try{
+    var d=JSON.parse(localStorage.getItem('vrt10')||'{}');
+    var purged=_stripBinaries(d);
+    // Purge plus agressive : galerie et logos
+    if(purged.galleryImages)purged.galleryImages.forEach(function(g){g.src='';});
+    if(purged.partenaires)purged.partenaires.forEach(function(p){p.logo='';});
+    if(purged.school)purged.school.logo='';
+    if(purged.introVideo)purged.introVideo.src='';
+    localStorage.setItem('vrt10',JSON.stringify(purged));
+    // Mettre à jour DB en mémoire aussi
+    DB=purged;
+    toast('✓ Espace libéré — images supprimées localement','ok');
+    cm();
+  }catch(e){toast('Erreur: '+e.message,'err');}
 }
 function gid(){return Math.random().toString(36).slice(2,10);}
 function today(){return new Date().toLocaleDateString('fr-FR');}
@@ -7088,24 +7184,32 @@ function cloudForcePull(){
     toast('❌ '+e.message,'err');
   });
 }
-function cloudSyncBinaries(){
-  if(!iA()){toast('Accès réservé aux administrateurs','warn');return;}
+function cloudSyncBinaries(silent){
+  if(!iA()){if(!silent)toast('Accès réservé aux administrateurs','warn');return;}
   var secret=DB.cloudConfig&&DB.cloudConfig.secret;
-  if(!secret){toast('⚠️ Configurez la clé API dans Paramètres → Cloud','warn');return;}
-  _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Analyse des fichiers locaux non synchronisés...</span></div>');
+  if(!secret){if(!silent)toast('⚠️ Configurez la clé API dans Paramètres → Cloud','warn');return;}
+  if(!silent)_si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Analyse des fichiers locaux non synchronisés...</span></div>');
   _cloudAutoUploadBinaries(function(uploaded,errors){
     if(uploaded===0&&errors===0){
-      _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span>Tous les fichiers sont déjà synchronisés sur le cloud !</span></div>');
-      toast('✅ Aucun fichier local à uploader');
+      if(!silent){
+        _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span>Tous les fichiers sont déjà synchronisés sur le cloud !</span></div>');
+        toast('✅ Aucun fichier local à uploader');
+      }
     } else {
       var msg=uploaded+' fichier(s) uploadé(s)'+(errors>0?', '+errors+' échec(s)':'')+'.';
-      _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sync terminée !</strong> '+msg+' Mise à jour de la DB cloud...</span></div>');
-      toast('✅ '+msg);
+      if(!silent){
+        _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sync terminée !</strong> '+msg+' Mise à jour de la DB cloud...</span></div>');
+      }
+      toast('✅ '+msg+(silent?' (auto-upload)':''));
       // Re-push DB pour que les URLs serveur soient disponibles sur tous les appareils
       if(uploaded>0){
         setTimeout(function(){_cloudSilentPushDB(function(ok){
-          var note=ok?' ✅ DB cloud mise à jour.':' ⚠️ Re-sync DB échouée — relancez manuellement.';
-          _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sync terminée !</strong> '+msg+note+'</span></div>');
+          if(!silent){
+            var note=ok?' ✅ DB cloud mise à jour.':' ⚠️ Re-sync DB échouée — relancez manuellement.';
+            _si('cloudSyncStatus','<div class="ib ibg"><span>✅</span><span><strong>Sync terminée !</strong> '+msg+note+'</span></div>');
+          }
+          // Après upload réussi : purger les data-URLs locales et re-sauvegarder
+          if(ok){setTimeout(function(){_purgeLocalBinaries&&_purgeLocalBinaries(true);},500);}
         });},1200);
       }
     }
