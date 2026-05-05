@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Épreuve 2nde — Le Lion et la Perle — Centre VÉRITAS</title>
+<style>
+:root{--navy:#142554;--gold:#FFC93C;--cream:#faf8f3;--ink:#1a1a2e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Times New Roman',serif;background:var(--cream);color:var(--ink);max-width:21cm;margin:0 auto;padding:1.5cm;font-size:12pt}
+.bande{background:var(--gold);height:7px;width:100%}
+.entete{border:2px solid var(--navy);padding:12px 16px;display:flex;justify-content:space-between;align-items:flex-start;margin:10px 0;gap:10px}
+.entete-g{font-size:11pt;line-height:1.6}
+.entete-d{text-align:right;font-size:11pt;line-height:1.6}
+.titre-section{background:var(--navy);color:#fff;padding:5px 12px;font-weight:bold;font-size:11pt;margin:18px 0 8px}
+.pts{float:right;background:var(--gold);color:var(--navy);padding:1px 8px;border-radius:10px;font-size:10pt}
+.texte-support{border-left:4px solid var(--gold);padding:10px 14px;background:#fff;line-height:1.9;margin:12px 0}
+.didascalie{font-style:italic;color:#555;font-size:10.5pt}
+.source{font-size:10pt;font-style:italic;text-align:right;color:var(--navy);margin-top:6px;border-top:1px solid #ccc;padding-top:4px}
+.questions{margin:8px 0 0 0;padding-left:18px}
+.questions li{margin:6px 0;line-height:1.7}
+.sous-titre{font-weight:bold;color:var(--navy);margin:10px 0 4px}
+.filigrane{position:fixed;font-size:110px;color:var(--navy);opacity:.04;top:38%;left:12%;transform:rotate(-28deg);pointer-events:none;z-index:0;font-family:serif}
+.footer{border-top:3px double var(--gold);margin-top:24px;padding-top:6px;font-size:9pt;color:var(--navy);text-align:center}
+.corrige-wrap{display:none;border:2px dashed var(--navy);padding:16px;margin-top:24px;background:#f0f4ff}
+.corrige-wrap h2{color:var(--navy);font-size:13pt;border-bottom:2px solid var(--gold);padding-bottom:4px;margin-bottom:12px}
+.rep{margin:6px 0;line-height:1.7}
+.toggle-btn{display:block;margin:16px auto 0;padding:8px 20px;background:var(--navy);color:#fff;border:none;cursor:pointer;font-size:11pt;border-radius:4px}
+.toggle-btn:hover{background:#1e3a7a}
+@media print{.toggle-btn,.corrige-wrap{display:none !important}}
+</style>
+</head>
+<body>
+<div class="filigrane">VÉRITAS</div>
+<div class="bande"></div>
+
+<div class="entete">
+  <div class="entete-g">
+    <strong>RÉPUBLIQUE DU CAMEROUN</strong><br>
+    Paix – Travail – Patrie<br>
+    Ministère des Enseignements Secondaires<br>
+    <strong>Centre VÉRITAS — Douala</strong>
+  </div>
+  <div class="entete-d">
+    <strong>ÉPREUVE DE FRANÇAIS</strong><br>
+    Classe : 2<sup>nde</sup> Littéraire<br>
+    Durée : 2h00 · Coefficient : 2<br>
+    Note : _______ / 20
+  </div>
+</div>
+
+<h2 style="text-align:center;color:var(--navy);margin:14px 0 4px;font-size:13pt">TEXTE SUPPORT</h2>
+<p style="text-align:center;font-size:10pt;color:#555;margin-bottom:8px"><em>Extrait de théâtre</em></p>
+
+<div class="texte-support">
+  <p class="didascalie">Scène I — Le matin. Place centrale du village d'Ilujinle (Nigeria). SIDI entre d'un pas vif, une calebasse en équilibre sur la tête, un magazine illustré ouvert dans la main. LAKUNLÉ, jeune instituteur, court derrière elle.</p>
+
+  <p style="margin-top:10px"><strong>SIDI</strong> <span class="didascalie">(brandissant le magazine)</span> : Regardez ! Regardez encore ! C'est moi sur cette image — en pleine page ! Et là, et là encore ! Le photographe venu de Lagos a fait de moi la reine du village !</p>
+
+  <p style="margin-top:8px"><strong>LAKUNLÉ</strong> <span class="didascalie">(essoufflé)</span> : Sidi, arrête-toi. Laisse-moi porter cette calebasse. Ce n'est pas digne d'une jeune fille que l'on photographie pour les magazines.</p>
+
+  <p style="margin-top:8px"><strong>SIDI</strong> : Dans ce village, Lakunlé, un homme parle à une femme après lui avoir payé sa dot — pas avant. Quinze sacs de cauris, c'est le prix fixé par mon père.</p>
+
+  <p style="margin-top:8px"><strong>LAKUNLÉ</strong> <span class="didascalie">(scandalisé)</span> : La dot ! Toujours la dot ! Cette coutume barbare et dégradante qui traite la femme comme une marchandise à acheter ! Non. Jamais je ne paierai. Je t'aime, Sidi, d'un amour pur et éclairé. Et l'amour n'a pas de prix.</p>
+
+  <p style="margin-top:8px"><strong>SIDI</strong> <span class="didascalie">(riant)</span> : Alors tu n'auras pas Sidi. Si tu refuses de payer, c'est que tu penses que je ne vaux rien.</p>
+
+  <p style="margin-top:8px"><strong>LAKUNLÉ</strong> : Tu confonds la valeur et le prix ! Une femme n'est pas un bouc que l'on mène au marché ! Les livres le disent. L'Occident a compris depuis longtemps que la femme est l'égale de l'homme.</p>
+
+  <p style="margin-top:8px"><strong>SIDI</strong> <span class="didascalie">(s'immobilisant)</span> : L'Occident… L'Occident… Est-ce que tes livres de l'Occident ont nourri notre village l'année de la sécheresse ? <span class="didascalie">(Elle reprend sa calebasse et sort.)</span></p>
+
+  <p style="margin-top:10px">[…]</p>
+
+  <p style="margin-top:10px"><strong>BAROKA</strong> <span class="didascalie">(seul dans sa case, tirant sur sa pipe)</span> : La perle du village refuse le lion. Mais le lion n'a pas dit son dernier mot.</p>
+
+  <div class="source">Wole SOYINKA, <em>Le Lion et la Perle</em> [<em>The Lion and the Jewel</em>, Three Crowns Books, Oxford University Press, 1963], trad. fr.</div>
+</div>
+
+<div class="titre-section">PARTIE I — COMPRÉHENSION DU TEXTE <span class="pts">6 pts</span></div>
+<ol class="questions">
+  <li>Pourquoi Sidi est-elle si joyeuse au début de la scène ? <em>(1 pt)</em></li>
+  <li>Quel argument principal Lakunlé avance-t-il pour refuser de payer la dot ? <em>(1,5 pt)</em></li>
+  <li>Comment Sidi répond-elle à l'argument de Lakunlé sur la valeur de la femme ? En quoi sa réponse révèle-t-elle une vision différente de la dignité féminine ? <em>(2 pts)</em></li>
+  <li>Que laisse entendre la dernière réplique de Baroka ? Que révèle-t-elle sur son caractère ? <em>(1,5 pt)</em></li>
+</ol>
+
+<div class="titre-section">PARTIE II — ÉTUDE DU VOCABULAIRE <span class="pts">4 pts</span></div>
+<ol class="questions">
+  <li>« Cette coutume <u>barbare</u> et dégradante. » — Expliquez le sens de <em>barbare</em> dans ce contexte. Donnez son antonyme tel qu'il apparaît dans le texte. <em>(1,5 pt)</em></li>
+  <li>« Le lion n'a pas dit son dernier mot. » — Expliquez cette expression figurée. <em>(1 pt)</em></li>
+  <li>Relevez dans le texte deux couples de mots ou expressions <strong>en opposition</strong> et précisez ce que chaque opposition représente thématiquement. <em>(1,5 pt)</em></li>
+</ol>
+
+<div class="titre-section">PARTIE III — ÉTUDE GRAMMATICALE <span class="pts">4 pts</span></div>
+<ol class="questions">
+  <li>« Je t'aime <u>d'un amour pur et éclairé</u>. »
+    <ol type="a" style="margin-top:4px;margin-left:18px">
+      <li>Donnez la nature et la fonction du groupe souligné. <em>(1 pt)</em></li>
+      <li>Précisez le genre, le nombre et la nature des adjectifs qualificatifs dans ce groupe. <em>(0,5 pt)</em></li>
+    </ol>
+  </li>
+  <li>« Si tu refuses de payer, c'est que tu penses que je ne vaux rien. »
+    <ol type="a" style="margin-top:4px;margin-left:18px">
+      <li>Identifiez la nature et la fonction de la proposition <em>« si tu refuses de payer »</em>. <em>(1 pt)</em></li>
+      <li>Identifiez la nature de la proposition <em>« que je ne vaux rien »</em>. <em>(0,5 pt)</em></li>
+    </ol>
+  </li>
+  <li>Réécrivez la phrase suivante en mettant le verbe au <strong>présent du subjonctif</strong> : « Il faut que tu <u>paieras</u> la dot. » <em>(1 pt)</em></li>
+</ol>
+
+<div class="titre-section">PARTIE IV — EXPRESSION ÉCRITE <span class="pts">6 pts</span></div>
+<p style="margin:8px 0 10px"><strong>Traitez l'un des deux sujets suivants au choix.</strong></p>
+
+<div class="sous-titre">Sujet A — Texte argumentatif</div>
+<p>La dot est-elle une coutume respectable ou une pratique dégradante pour la femme ? Développez votre point de vue en vous appuyant sur des arguments et des exemples précis. <em>(20 lignes environ)</em></p>
+
+<div class="sous-titre" style="margin-top:10px">Sujet B — Commentaire guidé</div>
+<p>En quoi le dialogue entre Sidi et Lakunlé illustre-t-il l'opposition entre tradition africaine et modernité occidentale ? Développez votre réponse en deux ou trois paragraphes organisés, en vous appuyant sur des éléments précis du texte. <em>(20 lignes environ)</em></p>
+
+<div class="footer">
+  Centre VÉRITAS — Douala, Cameroun · Épreuve de séquence · Classe de 2<sup>nde</sup> · © Mythe Errant 2026
+  <div class="bande" style="margin-top:6px"></div>
+</div>
+
+<button class="toggle-btn" onclick="toggleCorrige(this)">🔓 Afficher le corrigé enseignant</button>
+
+<div class="corrige-wrap" id="corrige">
+  <h2>📋 CORRIGÉ — DOCUMENT RÉSERVÉ À L'ENSEIGNANT</h2>
+
+  <div class="titre-section">PARTIE I — Corrigé Compréhension</div>
+  <ol class="questions">
+    <li class="rep"><b>Sidi est joyeuse</b> parce que sa photo a été publiée dans un magazine illustré par un photographe venu de Lagos. Elle se voit consacrée « reine du village ».</li>
+    <li class="rep"><b>Argument de Lakunlé :</b> la dot est une « coutume barbare et dégradante » qui rabaisse la femme au rang de marchandise. L'amour digne n'a pas de prix.</li>
+    <li class="rep"><b>Sidi répond :</b> refuser de payer la dot revient à dire que la femme n'a aucune valeur. La dot est ici une forme de <em>reconnaissance</em> de la dignité de la femme — non une marchandisation. Deux conceptions de la dignité s'affrontent : reconnaissance par le prix (tradition) vs reconnaissance par l'amour désintéressé (modernité).</li>
+    <li class="rep"><b>Baroka laisse entendre</b> qu'il a un plan pour conquérir Sidi. Il révèle sa ruse, sa patience et sa confiance en sa propre puissance — c'est le « lion vieux » qui n'a pas perdu ses griffes.</li>
+  </ol>
+
+  <div class="titre-section">PARTIE II — Corrigé Vocabulaire</div>
+  <ol class="questions">
+    <li class="rep"><b>Barbare :</b> sauvage, primitif (péjoratif, dans la bouche de Lakunlé qui valorise l'Occident). <b>Antonyme dans le texte :</b> « éclairé » (ou « civilisé », implicite dans « l'Occident »).</li>
+    <li class="rep"><b>« N'a pas dit son dernier mot » :</b> n'a pas encore utilisé tous ses moyens ; il agira plus tard, de façon décisive.</li>
+    <li class="rep"><b>Couples en opposition (2 parmi) :</b>
+      <ul style="margin-left:18px;margin-top:4px">
+        <li>« barbare » / « éclairé » → tradition vs modernité</li>
+        <li>« valeur » / « prix » → dignité humaine vs transaction commerciale</li>
+        <li>« Occident » / « notre village » → modernité importée vs réalité locale</li>
+        <li>« lion » / « perle » → force conquérante / beauté convoitée</li>
+      </ul>
+    </li>
+  </ol>
+
+  <div class="titre-section">PARTIE III — Corrigé Grammaire</div>
+  <ol class="questions">
+    <li class="rep">
+      <b>a.</b> « d'un amour pur et éclairé » : groupe nominal prépositionnel, <em>complément circonstanciel de manière</em> (ou complément de moyen) du verbe « aimer ».<br>
+      <b>b.</b> Masculin singulier ; « pur » et « éclairé » = adjectifs qualificatifs épithètes du nom « amour ».
+    </li>
+    <li class="rep">
+      <b>a.</b> « si tu refuses de payer » : proposition subordonnée conjonctionnelle circonstancielle de <em>condition</em>.<br>
+      <b>b.</b> « que je ne vaux rien » : proposition subordonnée complétive (COD de « penses »).
+    </li>
+    <li class="rep"><b>Subjonctif présent :</b> Il faut que tu <em>paies</em> la dot.</li>
+  </ol>
+
+  <div class="titre-section">PARTIE IV — Grille d'évaluation</div>
+  <table style="width:100%;border-collapse:collapse;font-size:11pt">
+    <tr style="background:var(--navy);color:#fff"><th style="padding:6px;text-align:left">Critère</th><th style="padding:6px">Points</th><th style="padding:6px">Indicateurs</th></tr>
+    <tr style="background:#f5f5ff"><td style="padding:6px;border:1px solid #ccc">Fond</td><td style="padding:6px;text-align:center;border:1px solid #ccc">2</td><td style="padding:6px;border:1px solid #ccc">Sujet A : arguments pro/contre équilibrés. Sujet B : 2 axes (Lakunlé = modernité ; Sidi + Baroka = tradition)</td></tr>
+    <tr><td style="padding:6px;border:1px solid #ccc">Forme</td><td style="padding:6px;text-align:center;border:1px solid #ccc">2</td><td style="padding:6px;border:1px solid #ccc">Introduction et conclusion, paragraphes distincts, connecteurs logiques</td></tr>
+    <tr style="background:#f5f5ff"><td style="padding:6px;border:1px solid #ccc">Langue</td><td style="padding:6px;text-align:center;border:1px solid #ccc">2</td><td style="padding:6px;border:1px solid #ccc">≤ 3 fautes = 2 pts · 4-6 = 1 pt · &gt; 6 = 0,5 pt</td></tr>
+  </table>
+</div>
+
+<script>
+function toggleCorrige(btn){
+  var c=document.getElementById('corrige');
+  if(c.style.display==='none'||!c.style.display){c.style.display='block';btn.textContent='🔒 Masquer le corrigé';c.scrollIntoView({behavior:'smooth'});}
+  else{c.style.display='none';btn.textContent='🔓 Afficher le corrigé enseignant';}
+}
+</script>
+</body>
+</html>

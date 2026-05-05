@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Épreuve 3e — Ville cruelle — Centre VÉRITAS</title>
+<style>
+:root{--navy:#142554;--gold:#FFC93C;--cream:#faf8f3;--ink:#1a1a2e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Times New Roman',serif;background:var(--cream);color:var(--ink);max-width:21cm;margin:0 auto;padding:1.5cm;font-size:12pt}
+.bande{background:var(--gold);height:7px;width:100%}
+.entete{border:2px solid var(--navy);padding:12px 16px;display:flex;justify-content:space-between;align-items:flex-start;margin:10px 0;gap:10px}
+.entete-g{font-size:11pt;line-height:1.6}
+.entete-d{text-align:right;font-size:11pt;line-height:1.6}
+.titre-section{background:var(--navy);color:#fff;padding:5px 12px;font-weight:bold;font-size:11pt;margin:18px 0 8px}
+.pts{float:right;background:var(--gold);color:var(--navy);padding:1px 8px;border-radius:10px;font-size:10pt}
+.texte-support{border-left:4px solid var(--gold);padding:10px 14px;background:#fff;font-style:italic;line-height:1.8;margin:12px 0}
+.source{font-size:10pt;font-style:normal;text-align:right;color:var(--navy);margin-top:6px;border-top:1px solid #ccc;padding-top:4px}
+.questions{margin:8px 0 0 0;padding-left:18px}
+.questions li{margin:6px 0;line-height:1.7}
+.sous-titre{font-weight:bold;color:var(--navy);margin:10px 0 4px}
+.filigrane{position:fixed;font-size:110px;color:var(--navy);opacity:.04;top:38%;left:12%;transform:rotate(-28deg);pointer-events:none;z-index:0;font-family:serif}
+.footer{border-top:3px double var(--gold);margin-top:24px;padding-top:6px;font-size:9pt;color:var(--navy);text-align:center}
+/* CORRIGÉ */
+.corrige-wrap{display:none;border:2px dashed var(--navy);padding:16px;margin-top:24px;background:#f0f4ff}
+.corrige-wrap h2{color:var(--navy);font-size:13pt;border-bottom:2px solid var(--gold);padding-bottom:4px;margin-bottom:12px}
+.rep{margin:6px 0;line-height:1.7}
+.rep b{color:var(--navy)}
+.toggle-btn{display:block;margin:16px auto 0;padding:8px 20px;background:var(--navy);color:#fff;border:none;cursor:pointer;font-size:11pt;border-radius:4px}
+.toggle-btn:hover{background:#1e3a7a}
+@media print{
+  .toggle-btn{display:none}
+  .corrige-wrap{display:none !important}
+  .filigrane{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="filigrane">VÉRITAS</div>
+
+<div class="bande"></div>
+
+<div class="entete">
+  <div class="entete-g">
+    <strong>RÉPUBLIQUE DU CAMEROUN</strong><br>
+    Paix – Travail – Patrie<br>
+    Ministère des Enseignements Secondaires<br>
+    <strong>Centre VÉRITAS — Douala</strong>
+  </div>
+  <div class="entete-d">
+    <strong>ÉPREUVE DE FRANÇAIS</strong><br>
+    Classe : 3<sup>ème</sup> · Série littéraire<br>
+    Durée : 2h00 · Coefficient : 2<br>
+    Note : _______ / 20
+  </div>
+</div>
+
+<h2 style="text-align:center;color:var(--navy);margin:14px 0 6px;font-size:13pt">TEXTE SUPPORT</h2>
+
+<div class="texte-support">
+  <p>
+  Ce même matin-là, Banda faisait la queue devant les agents du Contrôle au couteau desquels il devait soumettre ses deux cents kilos de cacao. Il était arrivé avant l'aube, espérant être parmi les premiers servis. La file s'étirait sur une vingtaine de mètres dans la boue jaune.
+  </p>
+  <p style="margin-top:8px">
+  Lorsqu'il tenta de s'avancer, l'agent lui barra le chemin d'un geste sec.
+  </p>
+  <p style="margin-top:8px">
+  — Va-t'en au bout de la queue. Ça t'apprendra à être pressé.
+  </p>
+  <p style="margin-top:8px">
+  Banda recula, les poings crispés. Ses deux cents kilos de cacao représentaient toute une saison de labeur — les matins glacés dans la forêt, les plaies aux mains, les dettes à rembourser.
+  </p>
+  <p style="margin-top:8px">
+  — Est-ce que vous arriverez jamais à vous mettre ça dans vos têtes d'hommes de la brousse ? reprit l'agent, s'adressant à ses collègues. Ici, c'est la civilisation. L'ordre. Vous comprenez ce mot-là ?
+  </p>
+  <p style="margin-top:8px">Un rire bref courut parmi les agents.</p>
+  <p style="margin-top:8px">[…]</p>
+  <p style="margin-top:8px">
+  Quand son tour vint enfin, Banda s'avança avec ses sacs. L'agent enfonça son couteau dans les cabosses et les fit tourner lentement entre ses doigts. Un silence de plomb s'abattit sur la file.
+  </p>
+  <p style="margin-top:8px">
+  — Condamné, dit l'agent sans lever les yeux. Mauvaise qualité.
+  </p>
+  <p style="margin-top:8px">
+  Banda sentit le sol se dérober sous ses pieds. Sa récolte était perdue.
+  </p>
+  <div class="source">Eza BOTO (Mongo Beti), <em>Ville cruelle</em>, Éditions Présence Africaine, Paris, 1954, chap. IV, pp. 47-49.</div>
+</div>
+
+<!-- PARTIE I -->
+<div class="titre-section">PARTIE I — COMPRÉHENSION DU TEXTE <span class="pts">6 pts</span></div>
+<ol class="questions">
+  <li>Qu'est-ce que Banda vient faire ce matin-là au lieu-dit du Contrôle ? <em>(1 pt)</em></li>
+  <li>Comment l'agent accueille-t-il Banda lorsqu'il tente de s'avancer dans la file ? Citez le texte pour appuyer votre réponse. <em>(1,5 pt)</em></li>
+  <li>Que révèle l'expression <strong>« hommes de la brousse »</strong> sur le regard que les agents portent sur les cultivateurs africains ? <em>(2 pts)</em></li>
+  <li>Quel jugement l'agent rend-il sur le cacao de Banda ? Quelle en est la conséquence immédiate pour Banda ? <em>(1,5 pt)</em></li>
+</ol>
+
+<!-- PARTIE II -->
+<div class="titre-section">PARTIE II — ÉTUDE DU VOCABULAIRE <span class="pts">4 pts</span></div>
+<ol class="questions">
+  <li>« Ses deux cents kilos représentaient toute une saison de <u>labeur</u>. » — Donnez un synonyme de <em>labeur</em> dans ce contexte. <em>(1 pt)</em></li>
+  <li>« Les poings crispés. » — Expliquez cette expression. Que nous révèle-t-elle sur l'état d'esprit de Banda ? <em>(1,5 pt)</em></li>
+  <li>Relevez dans le texte <strong>quatre mots ou expressions</strong> appartenant au champ lexical de la souffrance ou de l'injustice. <em>(1,5 pt)</em></li>
+</ol>
+
+<!-- PARTIE III -->
+<div class="titre-section">PARTIE III — ÉTUDE GRAMMATICALE <span class="pts">4 pts</span></div>
+<ol class="questions">
+  <li>« <u>Banda faisait la queue</u> devant les agents au couteau desquels il devait soumettre ses deux cents kilos. »
+    <ol type="a" style="margin-top:4px;margin-left:18px">
+      <li>Identifiez la nature et la fonction du groupe souligné. <em>(1 pt)</em></li>
+      <li>Quelle est la valeur de l'imparfait dans <em>faisait</em> ? <em>(0,5 pt)</em></li>
+    </ol>
+  </li>
+  <li>« Ça t'apprendra à être pressé. » — Transformez cette phrase au <strong>discours indirect</strong>, en commençant par : <em>L'agent dit à Banda que…</em> <em>(1,5 pt)</em></li>
+  <li>Identifiez la nature et la fonction de la proposition <em>« quand son tour vint enfin »</em>. <em>(1 pt)</em></li>
+</ol>
+
+<!-- PARTIE IV -->
+<div class="titre-section">PARTIE IV — EXPRESSION ÉCRITE <span class="pts">6 pts</span></div>
+<p style="margin:8px 0 10px"><strong>Traitez l'un des deux sujets suivants au choix.</strong></p>
+
+<div class="sous-titre">Sujet A — Narration</div>
+<p>Racontez une scène d'injustice que vous avez vécue ou observée. Précisez le contexte, les acteurs et vos sentiments. <em>(15 à 20 lignes)</em></p>
+
+<div class="sous-titre" style="margin-top:10px">Sujet B — Réflexion guidée</div>
+<p>À votre avis, pourquoi des personnages comme Banda restent-ils silencieux face à l'injustice ? Développez votre réponse avec au moins deux raisons clairement expliquées. <em>(12 à 16 lignes)</em></p>
+
+<div class="footer">
+  Centre VÉRITAS — Douala, Cameroun · Épreuve de séquence · Classe de 3<sup>ème</sup> · © Mythe Errant 2026
+  <div class="bande" style="margin-top:6px"></div>
+</div>
+
+<!-- BOUTON CORRIGÉ -->
+<button class="toggle-btn" onclick="toggleCorrige(this)">🔓 Afficher le corrigé enseignant</button>
+
+<!-- CORRIGÉ ENSEIGNANT -->
+<div class="corrige-wrap" id="corrige">
+  <h2>📋 CORRIGÉ — DOCUMENT RÉSERVÉ À L'ENSEIGNANT</h2>
+
+  <div class="titre-section">PARTIE I — Corrigé Compréhension</div>
+  <ol class="questions">
+    <li class="rep"><b>Banda vient soumettre</b> ses 200 kg de cacao au contrôle officiel pour les vendre.</li>
+    <li class="rep"><b>L'agent le renvoie brutalement</b> au bout de la queue : « Va-t'en au bout de la queue. Ça t'apprendra à être pressé. » — Ton méprisantsans explication.</li>
+    <li class="rep"><b>Révèle le mépris colonial :</b> les agents considèrent les cultivateurs africains comme des gens ignorants, non civilisés, inférieurs. L'expression associe les Africains à la sauvagerie et oppose « brousse » à « civilisation ».</li>
+    <li class="rep"><b>Jugement : « Condamné. Mauvaise qualité. »</b> — Conséquence : la récolte entière est perdue. Banda perd toute une saison de travail, ses dettes restent impayées.</li>
+  </ol>
+
+  <div class="titre-section">PARTIE II — Corrigé Vocabulaire</div>
+  <ol class="questions">
+    <li class="rep"><b>Synonymes acceptés :</b> travail, peine, effort, dur labeur, sueur.</li>
+    <li class="rep"><b>« Les poings crispés » :</b> Banda serre les poings — signe de colère rentrée, de révolte impuissante. Il supporte l'injustice sans pouvoir réagir.</li>
+    <li class="rep"><b>Champ lexical souffrance/injustice :</b> « crispés », « labeur », « plaies », « dettes », « silence de plomb », « condamné », « perdu », « sol se dérober ». <em>(4 parmi ces termes)</em></li>
+  </ol>
+
+  <div class="titre-section">PARTIE III — Corrigé Grammaire</div>
+  <ol class="questions">
+    <li class="rep">
+      <b>a.</b> « Banda faisait la queue » : proposition principale / sujet + groupe verbal (prédicat).<br>
+      <b>b.</b> Imparfait de <em>description</em> : présente l'action en cours, décrit la situation de Banda au moment où commence la scène.
+    </li>
+    <li class="rep"><b>Discours indirect :</b> L'agent dit à Banda que cela lui apprendrait à être pressé.</li>
+    <li class="rep"><b>« Quand son tour vint enfin » :</b> proposition subordonnée conjonctionnelle circonstancielle de <em>temps</em>, rattachée à la principale « Banda s'avança ».</li>
+  </ol>
+
+  <div class="titre-section">PARTIE IV — Grille d'évaluation Expression écrite</div>
+  <table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:11pt">
+    <tr style="background:var(--navy);color:#fff">
+      <th style="padding:6px;text-align:left">Critère</th><th style="padding:6px">Points</th><th style="padding:6px">Indicateurs</th>
+    </tr>
+    <tr style="background:#f5f5ff">
+      <td style="padding:6px;border:1px solid #ccc">Fond (respect du sujet, idées)</td><td style="padding:6px;text-align:center;border:1px solid #ccc">2</td><td style="padding:6px;border:1px solid #ccc">Sujet respecté, idées pertinentes et développées</td>
+    </tr>
+    <tr>
+      <td style="padding:6px;border:1px solid #ccc">Forme (structure, paragraphes, connecteurs)</td><td style="padding:6px;text-align:center;border:1px solid #ccc">2</td><td style="padding:6px;border:1px solid #ccc">Introduction, développement, conclusion ; cohérence</td>
+    </tr>
+    <tr style="background:#f5f5ff">
+      <td style="padding:6px;border:1px solid #ccc">Langue (orthographe, grammaire, ponctuation)</td><td style="padding:6px;text-align:center;border:1px solid #ccc">2</td><td style="padding:6px;border:1px solid #ccc">≤ 3 fautes = 2 pts · 4-6 fautes = 1 pt · &gt; 6 = 0,5 pt</td>
+    </tr>
+  </table>
+  <p style="font-size:10pt;color:#555;margin-top:6px"><em>Note au correcteur : le sujet B attend au moins deux raisons argumentées (ex. peur des représailles, dépendance économique, rapport de force colonial).</em></p>
+</div>
+
+<script>
+function toggleCorrige(btn){
+  var c=document.getElementById('corrige');
+  if(c.style.display==='none'||!c.style.display){
+    c.style.display='block';btn.textContent='🔒 Masquer le corrigé';
+    c.scrollIntoView({behavior:'smooth'});
+  } else {
+    c.style.display='none';btn.textContent='🔓 Afficher le corrigé enseignant';
+  }
+}
+</script>
+</body>
+</html>
