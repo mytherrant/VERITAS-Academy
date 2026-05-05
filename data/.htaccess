@@ -1,0 +1,3 @@
+# Protéger le dossier data/ — aucun accès HTTP direct
+Order deny,allow
+Deny from all

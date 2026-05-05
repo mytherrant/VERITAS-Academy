@@ -1,49 +1,52 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: https://veritas-school.com');
+/**
+ * VÉRITAS Academy — api/upload.php
+ * POST multipart/form-data
+ *   file   = fichier à uploader
+ *   folder = sous-dossier (galerie | elearning | misc)
+ * Retourne JSON : {"ok":true,"url":"https://veritas-school.com/uploads/veritas/galerie/vt_xxx.jpg"}
+ */
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+header('Content-Type: application/json; charset=utf-8');
 
-$UPLOAD_BASE = __DIR__ . '/../uploads/veritas/';
-$PUBLIC_BASE = 'https://veritas-school.com/uploads/veritas/';
-$MAX_BYTES   = 50 * 1024 * 1024; // 50 Mo
-$ALLOWED_EXT = ['pdf','jpg','jpeg','png','gif','webp','mp4','mp3'];
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(200); exit; }
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') { http_response_code(405); echo json_encode(['ok'=>false,'error'=>'POST requis']); exit; }
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  http_response_code(405); echo '{"error":"Méthode non autorisée"}'; exit;
-}
-if (empty($_FILES['file'])) {
-  http_response_code(400); echo '{"error":"Aucun fichier reçu"}'; exit;
+if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+    $err = $_FILES['file']['error'] ?? -1;
+    http_response_code(400); echo json_encode(['ok'=>false,'error'=>'Fichier manquant ou erreur upload (code '.$err.')']); exit;
 }
 
-$file = $_FILES['file'];
-if ($file['error'] !== UPLOAD_ERR_OK) {
-  http_response_code(400); echo '{"error":"Erreur upload PHP: ' . $file['error'] . '"}'; exit;
-}
-if ($file['size'] > $MAX_BYTES) {
-  http_response_code(413); echo '{"error":"Fichier > 50 Mo"}'; exit;
-}
+$file   = $_FILES['file'];
+$folder = preg_replace('/[^a-z0-9_\-]/i','', $_POST['folder'] ?? 'misc') ?: 'misc';
 
-$ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-if (!in_array($ext, $ALLOWED_EXT, true)) {
-  http_response_code(415); echo '{"error":"Extension non autorisée: ' . htmlspecialchars($ext) . '"}'; exit;
+/* Types autorisés */
+$allowed = ['image/jpeg','image/jpg','image/png','image/gif','image/webp','application/pdf','video/mp4','audio/mpeg','audio/mp3'];
+$finfo   = new finfo(FILEINFO_MIME_TYPE);
+$mime    = $finfo->file($file['tmp_name']);
+if (!in_array($mime, $allowed)) {
+    http_response_code(400); echo json_encode(['ok'=>false,'error'=>'Type non autorisé: '.$mime]); exit;
 }
 
-$folder  = isset($_POST['folder']) ? preg_replace('/[^a-z0-9_-]/', '', $_POST['folder']) : 'misc';
-$newName = uniqid('vrt_', true) . '.' . $ext;
-$destDir = $UPLOAD_BASE . $folder . '/';
-if (!is_dir($destDir)) { mkdir($destDir, 0755, true); }
-
-if (!move_uploaded_file($file['tmp_name'], $destDir . $newName)) {
-  http_response_code(500); echo '{"error":"Déplacement fichier échoué"}'; exit;
+/* Taille max : 10 Mo */
+if ($file['size'] > 10*1024*1024) {
+    http_response_code(400); echo json_encode(['ok'=>false,'error'=>'Fichier > 10 Mo']); exit;
 }
 
-echo json_encode([
-  'ok'     => true,
-  'url'    => $PUBLIC_BASE . $folder . '/' . $newName,
-  'name'   => $newName,
-  'folder' => $folder,
-  'size'   => $file['size'],
-  'ext'    => $ext
-], JSON_UNESCAPED_UNICODE);
+/* Répertoire cible */
+$uploadBase = dirname(__DIR__) . '/uploads/veritas/' . $folder . '/';
+if (!is_dir($uploadBase)) mkdir($uploadBase, 0755, true);
+
+/* Nom de fichier sécurisé unique */
+$ext  = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+$ext  = preg_replace('/[^a-z0-9]/','',$ext);
+$name = 'vt_' . bin2hex(random_bytes(8)) . '.' . $ext;
+$dest = $uploadBase . $name;
+
+if (!move_uploaded_file($file['tmp_name'], $dest)) {
+    http_response_code(500); echo json_encode(['ok'=>false,'error'=>'Impossible de déplacer le fichier']); exit;
+}
+
+$url = 'https://veritas-school.com/uploads/veritas/' . $folder . '/' . $name;
+echo json_encode(['ok'=>true,'url'=>$url,'name'=>$name,'size'=>$file['size'],'mime'=>$mime]);
