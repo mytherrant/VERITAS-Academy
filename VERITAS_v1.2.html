@@ -3332,93 +3332,112 @@ function defaultDB(){return{
 };}
 
 let DB;
-async function load(){
-  try{const d=localStorage.getItem('vrt10');DB=d?JSON.parse(d):defaultDB();}
-  catch(e){DB=defaultDB();}
-  // Logo + identite : toujours synchroniser depuis source embarquee
+// ── Migration DB : à appeler après TOUT remplacement de DB (load, pull cloud, force-pull) ──
+// BUG-01/BUG-09 FIX : centralise les guards "si champ manquant → valeur par défaut"
+function _migrateDB(){
+  // Identité école (toujours forcer depuis source embarquée)
   var _ldEl=document.getElementById('_logoData');
   var _ldSrc=(_ldEl&&_ldEl.src&&_ldEl.src.startsWith('data:'))?_ldEl.src:'';
-  if(_ldSrc){DB.school.logo=_ldSrc;}
-  DB.school.nom='VERITAS Academy';
-  DB.school.slogan='Centre d\'Excellence Scolaire';
-  // Migration v1.1 — forcer ville et tel (Douala)
-  DB.school.ville='Douala, Cameroun';
-  if(!DB.school.tel||DB.school.tel.indexOf('697')>=0||DB.school.tel.indexOf('6 00 00')>=0)
-    DB.school.tel='656 720 476 / 650 435 106';
-  // Ensure new fields exist
-  if(!DB.publicInfo)DB.publicInfo=defaultDB().publicInfo;
-  if(!DB.galleryImages)DB.galleryImages=defaultDB().galleryImages;
-  if(!DB.photos)DB.photos=defaultDB().photos;
-  if(!DB.examResults)DB.examResults=defaultDB().examResults;
-  if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts;
-  if(!DB.absences)DB.absences=defaultDB().absences;
-  if(!DB.devoirs)DB.devoirs=defaultDB().devoirs;
-  if(!DB.submissions)DB.submissions=defaultDB().submissions;
-  if(!DB.bookPurchases)DB.bookPurchases=defaultDB().bookPurchases;
-  if(!DB.superAdmin)DB.superAdmin=defaultDB().superAdmin;
+  if(_ldSrc){DB.school=DB.school||{};DB.school.logo=_ldSrc;}
+  if(!DB.school)DB.school={};
+  if(!DB.school.nom)DB.school.nom='VERITAS Academy';
+  if(!DB.school.slogan)DB.school.slogan='Centre d\'Excellence Scolaire';
+  if(!DB.school.ville)DB.school.ville='Douala, Cameroun';
+  // Arrays essentiels
+  if(!DB.students)DB.students=[];
+  if(!DB.teachers)DB.teachers=[];
+  if(!DB.grades)DB.grades=[];
+  if(!DB.payments)DB.payments=[];
+  if(!DB.absences)DB.absences=[];
+  if(!DB.devoirs)DB.devoirs=[];
+  if(!DB.submissions)DB.submissions=[];
+  if(!DB.bookPurchases)DB.bookPurchases=[];
+  if(!DB.bookReviews)DB.bookReviews=[];
+  if(!DB.books)DB.books=defaultDB().books;
+  if(!DB.payAttempts)DB.payAttempts=[];
   if(!DB.loginLog)DB.loginLog=[];
-  if(!DB.elearning)DB.elearning=defaultDB().elearning;
-  // Masque persistant des suppressions admin sur les contenus par défaut
-  if(!DB.deletedDefaults)DB.deletedDefaults=[];
-  // Merge resPedago entries from defaultDB if missing in existing DB
-  var _defC=defaultDB().elearning.contenus||[];
-  var _curC=DB.elearning.contenus||[];
-  // Merge UNIQUEMENT les items non supprimés par l'admin (deletedDefaults = masque)
-  _defC.forEach(function(dc){
-    if((dc.resPedago||dc.externalUrl||dc.htmlContent)
-       &&DB.deletedDefaults.indexOf(dc.id)<0){
-      var existing=_curC.find(function(c){return c.id===dc.id;});
-      if(!existing){
-        _curC.push(dc);
-      } else if(dc.htmlContent){
-        // Migration v1.1 — patcher le htmlContent existant (ville, tel)
-        existing.htmlContent=dc.htmlContent;
-      }
-    }
-  });
-  DB.elearning.contenus=_curC;
-  // Merge citations from defaultDB if missing
-  if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
-  // Init cloud config — toujours forcer URL et secret si absents
-  if(!DB.cloudConfig){DB.cloudConfig={url:'https://veritas-school.com/api',secret:'VERITAS-CLOUD-2026-xK9m',lastSync:'Jamais'};}
-  if(!DB.cloudConfig.url)DB.cloudConfig.url='https://veritas-school.com/api';
-  if(!DB.cloudConfig.secret)DB.cloudConfig.secret='VERITAS-CLOUD-2026-xK9m';
-  if(!DB.elearning.soumissions)DB.elearning.soumissions=[];
-  if(!DB.elearning.telechargementsGratuits)DB.elearning.telechargementsGratuits={};
-  if(!DB.products)DB.products=defaultDB().products;
-  if(!DB.orientationDemandes)DB.orientationDemandes=[];
+  if(!DB.notifications)DB.notifications=[];
+  if(!DB.visitorAccounts)DB.visitorAccounts=[];
+  if(!DB.visitorOrders)DB.visitorOrders=[];
+  if(!DB.packs)DB.packs=[];
+  if(!DB.promoCodes)DB.promoCodes=[];
+  if(!DB.partenaires)DB.partenaires=[];
+  if(!DB.tickerItems)DB.tickerItems=[];
+  if(!DB.calendrier)DB.calendrier=[];
   if(!DB.extraits)DB.extraits=[];
-  // Seed/merge default WhatsApp class groups
-  if(!DB.whatsappGroupes||!DB.whatsappGroupes.length){
-    DB.whatsappGroupes=defaultDB().whatsappGroupes;
-  } else {
-    defaultDB().whatsappGroupes.forEach(function(dg){
-      if(!DB.whatsappGroupes.find(function(g){return g.niveau===dg.niveau;})){
-        DB.whatsappGroupes.push(dg);
-      } else {
-        // Met à jour le lien si le groupe par défaut en a un et que l'existant est vide
-        var eg=DB.whatsappGroupes.find(function(g){return g.niveau===dg.niveau;});
-        if(eg&&!eg.lien&&dg.lien) eg.lien=dg.lien;
-        if(eg&&!eg.accessMode) eg.accessMode='libre';
-        if(eg&&!eg.plansRequis) eg.plansRequis=[];
-      }
-    });
-  }
-  DB.admins.forEach(a=>{if(!a.role2)a.role2=a.role==='Directeur'?'admin':'secretaire';});
-  // Ensure default admin exists (mot de passe sera hashé par _migratePasswords)
+  if(!DB.deletedDefaults)DB.deletedDefaults=[];
+  if(!DB.orientationDemandes)DB.orientationDemandes=[];
+  if(!DB.announce)DB.announce=[];
+  if(!DB.products)DB.products=defaultDB().products||[];
+  if(!DB.depenses)DB.depenses=[];
+  if(!DB.recettes)DB.recettes=[];
+  if(!DB.photos)DB.photos=defaultDB().photos||[];
+  if(!DB.examResults)DB.examResults=defaultDB().examResults||[];
+  if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts||[];
+  if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
+  // E-learning
+  if(!DB.elearning)DB.elearning=defaultDB().elearning;
+  if(!DB.elearning.soumissions)DB.elearning.soumissions=[];
+  if(!DB.elearning.plans)DB.elearning.plans=[];
+  if(!DB.elearning.contenus)DB.elearning.contenus=[];
+  if(!DB.elearning.abonnements)DB.elearning.abonnements=[];
+  if(!DB.elearning.commandes)DB.elearning.commandes=[];
+  if(!DB.elearning.telechargementsGratuits)DB.elearning.telechargementsGratuits={};
+  // Auth
+  if(!DB.superAdmin||!DB.superAdmin.user)DB.superAdmin=defaultDB().superAdmin;
+  if(!DB.admins)DB.admins=defaultDB().admins||[];
+  if(!DB.tpwd)DB.tpwd=defaultDB().tpwd;
+  DB.admins.forEach(function(a){if(!a.role2)a.role2=a.role==='Directeur'?'admin':'secretaire';});
   if(!DB.admins.find(function(a){return a.user==='directeur';})){
     DB.admins.push({id:'a1',user:'directeur',pwd:'Veritas2024!',nom:'M. Jacques Miterand TAKOU',role:'Directeur',role2:'admin'});
   }
-  if(!DB.superAdmin||!DB.superAdmin.user){DB.superAdmin=defaultDB().superAdmin;}
-  // Restore custom cartes mentales and deleted items
+  // Cloud config
+  if(!DB.cloudConfig)DB.cloudConfig={url:'https://veritas-school.com/api',secret:'VERITAS-CLOUD-2026-xK9m',lastSync:'Jamais'};
+  if(!DB.cloudConfig.url)DB.cloudConfig.url='https://veritas-school.com/api';
+  if(!DB.cloudConfig.secret)DB.cloudConfig.secret='VERITAS-CLOUD-2026-xK9m';
+  // WhatsApp groupes
+  if(!DB.whatsappGroupes||!DB.whatsappGroupes.length){
+    DB.whatsappGroupes=defaultDB().whatsappGroupes;
+  } else {
+    (defaultDB().whatsappGroupes||[]).forEach(function(dg){
+      if(!DB.whatsappGroupes.find(function(g){return g.niveau===dg.niveau;})){
+        DB.whatsappGroupes.push(dg);
+      } else {
+        var eg=DB.whatsappGroupes.find(function(g){return g.niveau===dg.niveau;});
+        if(eg&&!eg.lien&&dg.lien)eg.lien=dg.lien;
+        if(eg&&!eg.accessMode)eg.accessMode='libre';
+        if(eg&&!eg.plansRequis)eg.plansRequis=[];
+      }
+    });
+  }
+  // Merge e-learning contenus par défaut (respect masque suppressions)
+  var _defC=defaultDB().elearning.contenus||[];
+  var _curC=DB.elearning.contenus;
+  _defC.forEach(function(dc){
+    if((dc.resPedago||dc.externalUrl||dc.htmlContent)&&DB.deletedDefaults.indexOf(dc.id)<0){
+      var existing=_curC.find(function(c){return c.id===dc.id;});
+      if(!existing){_curC.push(dc);}
+      else if(dc.htmlContent){existing.htmlContent=dc.htmlContent;}
+    }
+  });
+  DB.elearning.contenus=_curC;
+  // Cartes mentales personnalisées
   if(DB.customCartesMentales){for(var ck in DB.customCartesMentales){if(typeof LITT_OEUVRES!=='undefined')LITT_OEUVRES[ck]=DB.customCartesMentales[ck];}}
   if(DB.deletedCartes&&typeof LITT_OEUVRES!=='undefined'){DB.deletedCartes.forEach(function(k){delete LITT_OEUVRES[k];});}
-  // NE PAS splicer JEUX_CATALOGUE ici — DB.deletedJeux est utilisé comme masque dans showJeuxEdu
-  // et _injectLittJeux. Splicer empêchait l'admin de voir/restaurer les jeux supprimés.
-  // Ensure teachers have user accounts
-  if(!DB.tpwd){DB.tpwd=defaultDB().tpwd;}
-  // Hasher automatiquement tous les mots de passe en clair (migration v1.0)
-  setTimeout(function(){_migratePasswords();},500);
+  // Lancer migration mots de passe si pas encore fait
+  if(!window._pwdMigrationScheduled){window._pwdMigrationScheduled=true;setTimeout(function(){_migratePasswords();},500);}
+}
+
+async function load(){
+  try{const d=localStorage.getItem('vrt10');DB=d?JSON.parse(d):defaultDB();}
+  catch(e){DB=defaultDB();}
+  // Tel spécifique (ne va pas dans _migrateDB pour ne pas écraser une valeur custom)
+  if(!DB.school.tel||DB.school.tel.indexOf('697')>=0||DB.school.tel.indexOf('6 00 00')>=0)
+    DB.school.tel='656 720 476 / 650 435 106';
+  if(!DB.publicInfo)DB.publicInfo=defaultDB().publicInfo;
+  if(!DB.galleryImages)DB.galleryImages=defaultDB().galleryImages;
+  // BUG-01 FIX: migration centralisée (champs manquants, cartes, auth)
+  _migrateDB();
   // ── LWS_API : pull données depuis le serveur (non-bloquant) ─────────────────
   try{
     var _lwsRes=await fetch(LWS_API.db+'?t='+Date.now());
@@ -3429,6 +3448,7 @@ async function load(){
       var _lwsServer=_lwsRemote.lastModified||0;
       if(_lwsServer>_lwsLocal){
         DB=_lwsRemote;
+        _migrateDB(); // BUG-01 FIX : re-run migration guards après remplacement DB
         localStorage.setItem('vrt10',JSON.stringify(DB));
         if(typeof re==='function') setTimeout(re,200);
       }
@@ -3531,10 +3551,13 @@ function _dlSoumission(sid){
     var a=document.createElement('a');a.href=s.fichierData;a.download=fname;a.click();
   }
 }
+// BUG-07 FIX : toutes les opérations IDB utilisent 'veritasDB' (unifié)
+// L'ancienne base 'veritas_files' n'est plus utilisée ; idbSaveFile redirige vers idbSave
 var _idb=null;
 function getIDB(cb){
   if(_idb){cb(_idb);return;}
-  var req=indexedDB.open('veritas_files',1);
+  // Utiliser 'veritasDB' — même nom que idbSave/idbGetFile (version améliorée)
+  var req=indexedDB.open('veritasDB',1);
   req.onupgradeneeded=function(e){var db=e.target.result;if(!db.objectStoreNames.contains('files'))db.createObjectStore('files',{keyPath:'key'});};
   req.onsuccess=function(e){_idb=e.target.result;cb(_idb);};
   req.onerror=function(){toast('IndexedDB non disponible','warn');};
@@ -3725,7 +3748,13 @@ function save(){
   _syncTimeout=setTimeout(async function(){
     try{
       var dbLight=JSON.parse(JSON.stringify(DB));
-      (dbLight.elearning?.contenus||[]).forEach(function(c){delete c.fichierData;});
+      // BUG-10 FIX : ne jamais envoyer les mots de passe (même hashés) au serveur
+      if(dbLight.superAdmin)delete dbLight.superAdmin.pwd;
+      (dbLight.admins||[]).forEach(function(a){delete a.pwd;});
+      (dbLight.visitorAccounts||[]).forEach(function(v){delete v.pwd;delete v.pwdHash;});
+      if(dbLight.tpwd)dbLight.tpwd={};
+      // Stripping binaires lourds
+      (dbLight.elearning&&dbLight.elearning.contenus||[]).forEach(function(c){delete c.fichierData;});
       (dbLight.books||[]).forEach(function(b){delete b.content;});
       var res=await fetch(LWS_API.db,{
         method:'POST',
@@ -3888,8 +3917,12 @@ function _startBgPoll(){
         var localElearn=(DB.elearning&&DB.elearning.contenus)||[];
         var localPacks=DB.packs||[];
         var localCitations=DB.citations||[];
+        // BUG-03 FIX : ne remplacer DB que si l'utilisateur est admin
+        if(!iA()){return;}
         // Remplacer par la version cloud (données admin)
         DB=serverDB;
+        // BUG-03/BUG-09 FIX : re-run migration pour garantir tous les champs v1.2
+        _migrateDB();
         // Fusionner les ressources
         DB.books=_mergeBooks(localBooks,DB.books);
         DB.galleryImages=_mergeGallery(localGallery,DB.galleryImages);
@@ -4121,18 +4154,23 @@ function mStorageDiag(){
 function _purgeLocalBinaries(silent){
   if(!silent&&!confirm('Supprimer toutes les images/vidéos du cache local ?\nElles restent sur le serveur et seront rechargées au prochain lancement.'))return;
   try{
-    var d=JSON.parse(localStorage.getItem('vrt10')||'{}');
-    var purged=_stripBinaries(d);
-    // Purge plus agressive : galerie et logos
-    if(purged.galleryImages)purged.galleryImages.forEach(function(g){g.src='';});
-    if(purged.partenaires)purged.partenaires.forEach(function(p){p.logo='';});
-    if(purged.school)purged.school.logo='';
-    if(purged.introVideo)purged.introVideo.src='';
-    localStorage.setItem('vrt10',JSON.stringify(purged));
-    // Mettre à jour DB en mémoire aussi
-    DB=purged;
-    toast('✓ Espace libéré — images supprimées localement','ok');
-    cm();
+    // BUG-02 FIX : muter DB en mémoire en place, sans remplacer depuis localStorage
+    // (localStorage = snapshot sans données non-sauvegardées — toujours muter le live DB)
+    var _clear=function(s){return(_isHeavyData(s)?'':s);};
+    if(DB.school)DB.school.logo=_clear(DB.school.logo);
+    if(DB.introVideo)DB.introVideo.src=_clear(DB.introVideo.src);
+    (DB.galleryImages||[]).forEach(function(g){g.src=_clear(g.src);});
+    (DB.partenaires||[]).forEach(function(p){p.logo=_clear(p.logo);});
+    (DB.books||[]).forEach(function(b){
+      b.coverImg=_clear(b.coverImg);
+      b.fichierData=_clear(b.fichierData);
+      if(b.previewImages)b.previewImages=b.previewImages.map(_clear);
+    });
+    (DB.elearning&&DB.elearning.contenus||[]).forEach(function(c){c.fichierData=_clear(c.fichierData);});
+    (DB.students||[]).forEach(function(s){s.photo=_clear(s.photo);});
+    (DB.teachers||[]).forEach(function(t){t.photo=_clear(t.photo);});
+    save(); // persiste DB muté (toutes données non-binaires préservées)
+    if(!silent){toast('✓ Espace libéré — images supprimées localement','ok');cm();}
   }catch(e){toast('Erreur: '+e.message,'err');}
 }
 function gid(){return Math.random().toString(36).slice(2,10);}
@@ -4201,7 +4239,7 @@ function visitorOrderBook(bid){
   if(b.stock<=0){toast('Ce manuel est en rupture de stock','warn');return;}
   const overlay=document.createElement('div');
   if(overlay)overlay.className='mov';
-  overlay.innerHTML=`<div class="modal"><div class="mhd"><div><div class="mtt">🛒 Commander: ${b.titre}</div><div class="mst">${b.cls} · ${b.auteur} · ${fmt(b.prix)} FCFA</div></div><button class="mc" onclick="this.closest('.mov').remove()">✕</button></div>
+  overlay.innerHTML=`<div class="modal"><div class="mhd"><div><div class="mtt">🛒 Commander: ${_esc(b.titre)}</div><div class="mst">${_esc(b.cls)} · ${_esc(b.auteur)} · ${fmt(b.prix)} FCFA</div></div><button class="mc" onclick="this.closest('.mov').remove()">✕</button></div>
   <div class="mb">
     <div style="text-align:center;margin-bottom:16px"><div style="font-size:48px">${b.ico}</div><div class="mono bold" style="font-size:24px;color:var(--gold);margin-top:8px">${fmt(b.prix)} FCFA</div></div>
     <div class="ib ibt mb14"><span>📋</span><span>Remplissez ce formulaire pour réserver votre manuel. Nous vous contacterons pour confirmer.</span></div>
@@ -4387,9 +4425,9 @@ function viewBookDetail(bid){
   h+='</div>';
   h+='<button class="btn bo sm" onclick="downloadBookCover(\''+bid+'\')" style="width:100%">📥 Couverture</button></div>';
   // Info
-  h+='<div class="book-info"><h2>'+b.titre+'</h2>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="bg bgb">'+b.cls+'</span><span class="bg bgd">'+b.pages+' pages</span><span class="bg '+(b.stock>0?'bgg':'bgr')+'">'+(b.stock>0?b.stock+' en stock':'Rupture')+'</span></div>';
-  h+='<div style="font-size:13px;color:var(--ink3)">✍️ <strong>'+b.auteur+'</strong> · 📖 '+(b.chaps?.length||0)+' chapitres</div>';
+  h+='<div class="book-info"><h2>'+_esc(b.titre)+'</h2>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="bg bgb">'+_esc(b.cls)+'</span><span class="bg bgd">'+_esc(String(b.pages))+' pages</span><span class="bg '+(b.stock>0?'bgg':'bgr')+'">'+(b.stock>0?b.stock+' en stock':'Rupture')+'</span></div>';
+  h+='<div style="font-size:13px;color:var(--ink3)">✍️ <strong>'+_esc(b.auteur)+'</strong> · 📖 '+(b.chaps?.length||0)+' chapitres</div>';
   if(author)h+='<div class="author-badge mt4">✍️ Auteur vérifié — '+author.nom+'</div>';
   // Stars
   if(rt.count>0)h+='<div style="display:flex;align-items:center;gap:8px;margin:8px 0"><span style="font-size:18px">'+starsHtml(rt.avg)+'</span><span class="mono bold" style="color:var(--gold)">'+rt.avg.toFixed(1)+'</span><span class="xs2 mut">('+rt.count+' avis)</span></div>';
@@ -5341,7 +5379,7 @@ function vShowSec(sec,btn){
             ${hasExt?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(5,150,105,.9);color:#fff;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:700">👁 Extrait</div>':''}
           </div>
           <div style="padding:10px">
-            <div style="font-size:13px;font-weight:700;line-height:1.2;margin-bottom:3px">${b.titre}</div>
+            <div style="font-size:13px;font-weight:700;line-height:1.2;margin-bottom:3px">${_esc(b.titre)}</div>
             ${rt.count>0?'<div style="font-size:13px;margin-bottom:3px">'+starsHtml(rt.avg)+' <span class="xs2 mut">('+rt.count+')</span></div>':''}
             <div class="mono bold" style="font-size:13px;color:var(--gold)">${fmt(b.prix)}</div>
           </div>
@@ -7165,6 +7203,8 @@ function cloudForcePull(){
     function _mById(la,sa){var m=JSON.parse(JSON.stringify(sa||[]));var si={};m.forEach(function(x){si[x.id||x.mat]=true;});(la||[]).forEach(function(x){var k=x.id||x.mat;if(k&&!si[k])m.push(x);});return m;}
     var lb=DB.books||[],lg=DB.galleryImages||[],le=(DB.elearning&&DB.elearning.contenus)||[];
     DB=serverDB;
+    // BUG-09 FIX : re-migration obligatoire après tout remplacement de DB
+    _migrateDB();
     DB.books=_mById(lb,DB.books);
     DB.galleryImages=_mById(lg,DB.galleryImages);
     if(!DB.elearning)DB.elearning={contenus:[],plans:[],abonnements:[],commandes:[],soumissions:[]};
@@ -8964,11 +9004,15 @@ function go2SES(acc){
               var serverTS=serverDB.lastModified||0;
               var localScore2=_dbScore(DB),serverScore2=_dbScore(serverDB);
               if(serverTS>localTS||(serverScore2>localScore2+5)){
+                // BUG-03 FIX : le polling background ne remplace DB que pour les admins
+                if(!iA())return;
                 // Serveur plus récent OU plus riche → fusionner
                 var cloudCfg=DB.cloudConfig;
                 function _mL(la,sa){var m=JSON.parse(JSON.stringify(sa||[]));var si={};m.forEach(function(x){si[x.id||x.mat]=true;});(la||[]).forEach(function(x){var k=x.id||x.mat;if(k&&!si[k])m.push(x);});return m;}
                 var lb2=DB.books||[],lg2=DB.galleryImages||[],le2=(DB.elearning&&DB.elearning.contenus)||[];
                 DB=serverDB;
+                // BUG-09/BUG-03 FIX : re-migration systématique
+                _migrateDB();
                 DB.books=_mL(lb2,DB.books);
                 DB.galleryImages=_mL(lg2,DB.galleryImages);
                 if(!DB.elearning)DB.elearning={contenus:[],plans:[],abonnements:[],commandes:[],soumissions:[]};
@@ -9218,7 +9262,7 @@ function pgDash(){
           <button class="btn bvi sm mt8" onclick="goTo('mes_devoirs')">📋 Tous mes devoirs →</button>
         </div>
         <div class="card"><div class="ct">📣 Annonces récentes</div>
-          ${DB.announce.slice(-3).reverse().map(a=>`<div class="fl2 fic g10" style="padding:8px 0;border-bottom:1px solid var(--bg2)"><span class="bg ${EVT[a.type]?.c||'bgt'} xs">${EVT[a.type]?.l||a.type}</span><div class="s semi">${a.titre}</div></div>`).join("") || '<div class="empty xs2">Aucune annonce</div>'}
+          ${DB.announce.slice(-3).reverse().map(a=>`<div class="fl2 fic g10" style="padding:8px 0;border-bottom:1px solid var(--bg2)"><span class="bg ${EVT[a.type]?.c||'bgt'} xs">${_esc(EVT[a.type]?.l||a.type)}</span><div class="s semi">${_esc(a.titre)}</div></div>`).join("") || '<div class="empty xs2">Aucune annonce</div>'}
           <button class="btn bo sm mt8" onclick="goTo('announce')">Toutes les annonces →</button>
         </div>
       </div>
@@ -10827,8 +10871,8 @@ function pgAnn(){
       <div class="fl2 fic g8"><span class="bg ${EVT[a.type]?.c||'bgt'}">${EVT[a.type]?.l||a.type}</span>${a.urg?`<span class="bg bgr">🚨 Urgent</span>`:''}</div>
       <div class="fl2 fic g8"><span class="xs2 mut">${a.date}</span>${iA()?`<button class="btn br2 xs" onclick="delAnn('${a.id}')">🗑</button>`:''}</div>
     </div>
-    <div class="bold s mb4">${a.titre}</div>
-    <div style="font-size:13px;color:var(--ink2);line-height:1.7">${a.desc}</div>
+    <div class="bold s mb4">${_esc(a.titre)}</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.7">${_esc(a.desc)}</div>
   </div>`).join('') || '<div class="card"><div class="empty"><div class="empty-ico">📣</div>Aucune annonce</div></div>'}`;
 }
 function mAddAnn(){
