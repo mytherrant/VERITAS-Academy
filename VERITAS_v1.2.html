@@ -8066,8 +8066,52 @@ function deleteAbo(id){
 }
 
 function activerAbonnement(id){
-  var abo=(DB.elearning.abonnements||[]).find(function(a){return a.id===id;});
-  if(abo){abo.statut='Activé';save();re();toast('✓ Abonnement activé');}
+  var abo=(DB.elearning&&DB.elearning.abonnements||[]).find(function(a){return a.id===id;});
+  if(!abo){toast('Abonnement introuvable','warn');return;}
+  abo.statut='Activé';
+  abo.dateActivation=today();
+
+  // ── Retrouver le compte visiteur lié (via accountId ou normalisation du tel) ──
+  var acc=null;
+  if(abo.accountId){
+    acc=(DB.visitorAccounts||[]).find(function(a){return a.id===abo.accountId;});
+  }
+  if(!acc&&abo.tel){
+    var normT=function(t){return(t||'').replace(/[\s\-\(\)\+]/g,'').replace(/^237/,'');};
+    var tAbo=normT(abo.tel);
+    acc=(DB.visitorAccounts||[]).find(function(a){return normT(a.tel)===tAbo;});
+  }
+
+  // ── Mettre à jour acc.plans pour que _waGroupAccess fonctionne immédiatement ──
+  if(acc){
+    if(!acc.plans)acc.plans=[];
+    if(acc.plans.indexOf(abo.plan)<0)acc.plans.push(abo.plan);
+    abo.accountId=acc.id; // rétro-lier si pas encore fait
+    acc.statut='actif';
+    acc.groupeStatut=acc.groupeStatut||'en_attente';
+  }
+
+  save();re();
+  toast('✓ Abonnement activé'+(acc?' — compte '+acc.pre+' mis à jour':''));
+
+  // ── Proposer l'invitation WhatsApp immédiatement ──
+  if(acc){
+    var grp=(DB.whatsappGroupes||[]).find(function(g){
+      return g.actif&&(g.niveau===acc.cls||g.niveau==='tous');
+    });
+    var planObj=(DB.elearning&&DB.elearning.plans||[]).find(function(p){return p.id===abo.plan;});
+    var planNom=planObj?planObj.nom:abo.plan;
+    M('✅ Abonnement activé','Plan : '+_esc(planNom),
+      '<div class="ib ibg mb12"><span>✓</span><span><b>'+_esc(acc.pre+' '+acc.nom)+'</b> · '+_esc(acc.cls)+'<br>Abonnement <b>'+_esc(planNom)+'</b> ajouté au compte.</span></div>'
+      +'<div class="fg mb8"><span class="fl">📱 WhatsApp</span><div style="font-size:13px;color:var(--ink2)">'+_esc(acc.tel||'non renseigné')+'</div></div>'
+      +(grp
+        ? '<div class="ib ibg mb8"><span>📲</span><span>Groupe disponible : <b>'+_esc(grp.nom)+'</b></span></div>'
+        : '<div class="ib" style="background:#FEF9C3;border-color:#CA8A04"><span>⚠️</span><span>Aucun groupe WhatsApp actif pour la classe <b>'+_esc(acc.cls)+'</b>. Configurez un groupe dans Gestion → Groupes WhatsApp.</span></div>'),
+      '<button class="btn bo" onclick="cm()">Plus tard</button>'
+      +(grp&&acc.tel
+        ? '<button class="btn bi" onclick="cm();_sendWAGroupInvite(\''+acc.id+'\')">📲 Envoyer invitation WhatsApp</button>'
+        : ''));
+  }
 }
 
 function pgBoutiqueMgmt(){
@@ -8553,7 +8597,13 @@ function commanderAbonnement(planId){
   '<div class="fg2">'+
   '<div class="fg"><span class="fl">Votre nom complet *</span><input class="fi" id="elNom" placeholder="Ex: MBALLA Jean-Pierre"></div>'+
   '<div class="fg"><span class="fl">Numéro WhatsApp *</span><input class="fi" id="elTel" placeholder="Ex: 697 637 739"></div>'+
-  '<div class="fg"><span class="fl">Classe / Niveau</span><select class="fi" id="elClasse">'+CLS.map(function(cl){return '<option>'+cl+'</option>';}).join('')+'</select></div>'+
+  '<div class="fg"><span class="fl">Classe / Niveau</span><select class="fi" id="elClasse">'+(function(){
+    var grps=(DB.whatsappGroupes||[]).filter(function(g){return g.actif&&g.niveau&&g.niveau!=='tous';});
+    var opts=grps.length?grps.map(function(g){return g.niveau;}):CLS.slice();
+    var seen={};return opts.filter(function(c){if(seen[c])return false;seen[c]=true;return true;})
+      .sort(function(a,b){return a.localeCompare(b,'fr');})
+      .map(function(cl){return '<option'+(cl===(SES&&SES.cls)?' selected':'')+'>'+_esc(cl)+'</option>';}).join('');
+  })()+'</select></div>'+
   '<div class="fg"><span class="fl">Email (optionnel)</span><input class="fi" id="elEmail" placeholder="votre@email.com"></div>'+
   '</div>'+
   '<div class="ib ibt mb13"><span>💳</span><span>Après validation, vous serez redirigé(e) vers notre formulaire de paiement sécurisé.</span></div>',
@@ -8569,9 +8619,12 @@ function validerAbonnement(planId){
   var plan=(DB.elearning.plans||[]).find(function(p){return p.id===planId;});
   var newAbo={
     id:gid(),plan:planId,nom:nom,tel:tel,
-    classe:document.getElementById('elClasse')?.value||'',
-    email:document.getElementById('elEmail')?.value||'',
-    date:today(),statut:'En attente'
+    classe:document.getElementById('elClasse')?.value||SES?.cls||'',
+    email:document.getElementById('elEmail')?.value||SES?.email||'',
+    date:today(),statut:'En attente',
+    // Lien vers le compte visiteur si connecté — nécessaire pour activation automatique
+    accountId: SES && (SES.type==='visiteur'||SES.type==='visiteur_inscrit') ? (SES.id||SES.accountId||'') : '',
+    payRef: '' // sera renseigné lors du paiement
   };
   DB.elearning.abonnements.push(newAbo);
   // Notification admin
@@ -8581,18 +8634,24 @@ function validerAbonnement(planId){
     'admin'
   );
   save();cm();
-  // v1.0 : ouvrir le modal de paiement unifié au lieu d'un simple toast+WhatsApp
   var montant = plan ? (plan.prix||0) : 0;
+  var aboId = newAbo.id; // capture avant le timeout
   setTimeout(function(){
     if(typeof openPaymentModal === 'function' && montant > 0){
+      // Générer la ref en avance pour la stocker dans l'abonnement
+      var payRef = 'ELRN'+new Date().toISOString().slice(2,10).replace(/-/g,'')+'-'+(Math.random().toString(36).slice(2,6)).toUpperCase();
+      // Rétro-lier : stocker la payRef dans l'abonnement pour que mPayAttempts puisse la retrouver
+      var aboToLink = (DB.elearning&&DB.elearning.abonnements||[]).find(function(a){return a.id===aboId;});
+      if(aboToLink){aboToLink.payRef=payRef;save();}
       openPaymentModal({
         montant: montant,
         label: '🎓 '+(plan ? plan.nom : 'Abonnement E-Learning')+' — '+nom,
-        refPrefix: 'ELRN'
+        refPrefix: 'ELRN',
+        ref: payRef
       });
     } else {
       toast('✓ Demande d\'abonnement envoyée ! L\'administration sera contactée.');
-      var msg='🔔 *Nouvel abonnement E-Learning VÉRITAS !*\n\n📋 Plan: '+(plan?plan.nom:planId)+'\n👤 Nom: '+nom+'\n📱 Tél: '+tel+'\n📚 Classe: '+(document.getElementById('elClasse')?.value||'')+'\n📅 Date: '+today();
+      var msg='🔔 *Nouvel abonnement E-Learning VÉRITAS !*\n\n📋 Plan: '+(plan?plan.nom:planId)+'\n👤 Nom: '+nom+'\n📱 Tél: '+tel+'\n📚 Classe: '+newAbo.classe+'\n📅 Date: '+today();
       window.open('https://wa.me/237697637739?text='+encodeURIComponent(msg),'_blank');
     }
   }, 100);
@@ -21182,8 +21241,25 @@ function _buildRegisterHTML(){
     +"<div class='fg'><span class='fl'>Nom *</span><input class='fi' id='rNom' placeholder='MBALLA'></div>"
     +"<div class='fg'><span class='fl'>WhatsApp *</span><input class='fi' id='rTel' placeholder='+237 6 00 00 00 00'></div>"
     +"<div class='fg'><span class='fl'>Email</span><input class='fi' type='email' id='rEmail' placeholder='jean@email.cm'></div>"
-    +"<div class='fg'><span class='fl'>Classe</span><select class='fi' id='rCls'>"
-    +CLS.map(function(cl){return "<option>"+cl+"</option>";}).join("")+"</select></div>"
+    +(function(){
+      // Filtrer : n'afficher que les classes qui ont un groupe WhatsApp actif
+      // Fallback sur toutes les classes si aucun groupe configuré
+      var grps=(DB.whatsappGroupes||[]).filter(function(g){return g.actif&&g.niveau&&g.niveau!=='tous';});
+      var clsActives=grps.length ? grps.map(function(g){return g.niveau;}) : CLS.slice();
+      // Toujours dédupliquer et trier
+      var seen={};
+      var opts=clsActives.filter(function(c){if(seen[c])return false;seen[c]=true;return true;})
+        .sort(function(a,b){return a.localeCompare(b,'fr');});
+      var userCls=SES&&SES.cls;
+      return "<div class='fg'><span class='fl'>Classe</span><select class='fi' id='rCls'>"
+        +opts.map(function(cl){
+          return "<option"+(cl===userCls?' selected':'')+">"+_esc(cl)+"</option>";
+        }).join("")+"</select>"
+        +(grps.length
+          ? "<div style='font-size:11px;color:#059669;margin-top:3px'>✓ "+grps.length+" groupe(s) actif(s) disponible(s)</div>"
+          : "<div style='font-size:11px;color:#9CA3AF;margin-top:3px'>Toutes les classes (groupes non filtrés)</div>")
+        +"</div>";
+    })()
     +"<div class='fg full'><span class='fl'>Identifiant (sans espaces) *</span>"
     +"<input class='fi' id='rUser' placeholder='jean.mballa' oninput='_chkUser(this.value)'>"
     +"<div id='uAvail' style='font-size:11px;margin-top:3px;color:#9CA3AF'>Minimum 3 caractères</div></div>"
@@ -24356,14 +24432,18 @@ function _waGroupAccess(grp, acc, stu){
     var hasP=function(list){return plansReq.some(function(p){return(list||[]).indexOf(p)>=0;});};
     if(acc){
       if(hasP(acc.plans)) return{eligible:true,reason:'Abonnement actif'};
+      // FIX BUG typo : 'Activé' (avec accent) est le statut écrit par activerAbonnement()
+      // On accepte aussi 'Actif' pour compatibilité avec d'éventuels anciens enregistrements
+      var _aboActif=function(a){return a.statut==='Activé'||a.statut==='Actif';};
       var aboE=(DB.elearning&&DB.elearning.abonnements||[]).find(function(a){
-        return a.statut==='Actif'&&hasP([a.plan]);
+        return _aboActif(a)&&(a.accountId===acc.id||hasP([a.plan]));
       });
       return{eligible:!!aboE,reason:aboE?'Abonnement e-learning actif':'Abonnement requis ('+plansReq.join(', ')+')'};
     }
     if(stu){
+      var _aboActif2=function(a){return a.statut==='Activé'||a.statut==='Actif';};
       var stuA=(DB.elearning&&DB.elearning.abonnements||[]).find(function(a){
-        return a.statut==='Actif'&&a.classe===stu.cls&&hasP([a.plan]);
+        return _aboActif2(a)&&a.classe===stu.cls&&hasP([a.plan]);
       });
       return{eligible:!!stuA,reason:stuA?'Abonnement actif':'Abonnement requis'};
     }
@@ -24827,29 +24907,63 @@ function _payCopyFallback(txt, label){
 function mPayAttempts(){
   if(!iA()) return;
   var atts = (DB.payAttempts||[]).slice().reverse();
+
+  // Helper : trouver l'abonnement e-learning lié à une tentative de paiement
+  // Stratégie : même payRef OU label contenant ELRN OU même montant+date proches
+  function _findAboForPay(pay){
+    var abos=DB.elearning&&DB.elearning.abonnements||[];
+    // 1. lien direct via payRef
+    if(pay.ref){var r=abos.find(function(a){return a.payRef===pay.ref;});if(r)return r;}
+    // 2. abonnement en attente créé dans la même minute (±2 min)
+    var payTs=pay.date?new Date(pay.date).getTime():0;
+    var near=abos.filter(function(a){
+      if(a.statut!=='En attente')return false;
+      var aTs=a.date?new Date(a.date+' 00:00').getTime():0;
+      return Math.abs(payTs-aTs)<2*60*1000;
+    });
+    if(near.length===1)return near[0];
+    return null;
+  }
+
   var rows = atts.length
     ? atts.map(function(a){
-        var dt = new Date(a.date).toLocaleString('fr-FR');
-        var statColor = a.status==='paid' ? 'var(--gr)' : (a.status==='pending' ? 'var(--gold2)' : 'var(--re)');
+        var dt = a.date ? new Date(a.date).toLocaleString('fr-FR') : '-';
+        var statColor = a.status==='paid'?'var(--gr)':a.status==='pending'?'var(--gold2)':'var(--re)';
+        var aboLie = _findAboForPay(a);
+        var btnPaye = a.status==='paid'
+          ? '<span style="font-size:11px;color:var(--gr)">✓ Validé</span>'
+          : '<button class="btn xs bi" onclick="_payMarkPaid(\''+a.ref+'\')">✓ Payé</button>';
+        var btnAbo = (aboLie && aboLie.statut!=='Activé')
+          ? ' <button class="btn xs" style="background:#6D28D9;color:#fff" onclick="cm();activerAbonnement(\''+aboLie.id+'\')">🎓 Activer abo</button>'
+          : (aboLie&&aboLie.statut==='Activé' ? '<span style="font-size:10px;color:var(--gr)"> ✓ Abo actif</span>' : '');
         return '<tr>'
           +'<td style="font-family:monospace;font-size:11px">'+_esc(a.ref)+'</td>'
-          +'<td style="font-size:12px">'+_esc(a.label)+'</td>'
+          +'<td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis">'+_esc(a.label)+'</td>'
           +'<td style="font-size:12px;white-space:nowrap"><strong>'+new Intl.NumberFormat('fr-FR').format(a.montant)+'</strong> FCFA</td>'
           +'<td style="font-size:11px;color:var(--ink4);white-space:nowrap">'+dt+'</td>'
           +'<td><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:800;background:'+statColor+';color:#fff">'+_esc(a.status||'pending').toUpperCase()+'</span></td>'
-          +'<td>'
-            +'<button class="btn xs bi" onclick="(function(){var a=DB.payAttempts.find(function(x){return x.ref===\''+a.ref+'\'});if(a){a.status=\'paid\';save();mPayAttempts();toast(\'✓ Marqué payé\');}})()">✓ Payé</button> '
-            +'<button class="btn xs bo" onclick="(function(){if(!confirm(\'Supprimer ?\'))return;DB.payAttempts=DB.payAttempts.filter(function(x){return x.ref!==\''+a.ref+'\'});save();mPayAttempts();})()">🗑</button>'
+          +'<td style="white-space:nowrap">'+btnPaye+btnAbo
+            +' <button class="btn xs bo" onclick="_payDelete(\''+a.ref+'\')">🗑</button>'
           +'</td>'
         +'</tr>';
       }).join('')
-    : '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--ink4)">Aucune tentative de paiement enregistrée.</td></tr>';
-  M('💳 Tentatives de paiement', 'Suivi des paiements initiés depuis le site visiteur',
-    '<div class="ib ibt mb12"><span>💡</span><span>Ces entrées sont créées automatiquement quand un visiteur ouvre le modal de paiement. Marquez-les comme "payé" après vérification WhatsApp/banque.</span></div>'
-    +'<div class="tw" style="max-height:400px;overflow:auto"><table>'
+    : '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--ink4)">Aucune tentative enregistrée.</td></tr>';
+  M('💳 Paiements & Abonnements', 'Validez les paiements puis activez les abonnements',
+    '<div class="ib ibt mb12"><span>💡</span><span>1. Vérifiez le paiement (MoMo/Stripe). 2. Cliquez <b>"✓ Payé"</b>. 3. Si un abonnement est lié, cliquez <b>"🎓 Activer abo"</b> pour activer l\'accès e-learning et envoyer l\'invitation WhatsApp.</span></div>'
+    +'<div class="tw" style="max-height:420px;overflow:auto"><table>'
     +'<thead><tr><th>Réf</th><th>Description</th><th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>');
+}
+// Helpers appelés depuis les onclick inline de mPayAttempts
+function _payMarkPaid(ref){
+  var a=(DB.payAttempts||[]).find(function(x){return x.ref===ref;});
+  if(a){a.status='paid';a.datePaid=new Date().toISOString();save();mPayAttempts();toast('✓ Paiement marqué comme reçu');}
+}
+function _payDelete(ref){
+  if(!confirm('Supprimer cette tentative ?'))return;
+  DB.payAttempts=(DB.payAttempts||[]).filter(function(x){return x.ref!==ref;});
+  save();mPayAttempts();
 }
 window.openPaymentModal = openPaymentModal;
 window.mPayAttempts = mPayAttempts;
