@@ -2690,12 +2690,12 @@ setInterval(_refreshCitation,15000);
   <button class="vnav-btn on" onclick="vShowSec('presentation',this)"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">home</span> Accueil</button>
   <button class="vnav-btn" onclick="vShowSec('elearning',this)" style="background:linear-gradient(135deg,rgba(60,141,255,.15),rgba(60,141,255,.05));color:#3C8DFF;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">auto_stories</span> E-Learning</button>
   <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">storefront</span> Boutique</button>
+  <button class="vnav-btn" onclick="showJeuxEdu()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">sports_esports</span> Jeux</button>
+  <button class="vnav-btn" onclick="showLabosVirtuels()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">science</span> Labos</button>
   <button class="vnav-btn" onclick="vShowSec('orientation',this)" style="background:linear-gradient(135deg,rgba(5,150,105,.15),rgba(5,150,105,.05));color:#059669;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">explore</span> Orientation</button>
   <button class="vnav-btn" onclick="showCalendrier()" style="background:linear-gradient(135deg,rgba(220,38,38,.15),rgba(220,38,38,.05));color:#DC2626;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">event</span> Calendrier</button>
-  <button class="vnav-btn" onclick="showJeuxEdu()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">sports_esports</span> Jeux</button>
   <button class="vnav-btn" onclick="showEpreuves()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">assignment</span> Épreuves</button>
   <button class="vnav-btn" onclick="showEvaluations()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">insights</span> Évals</button>
-  <button class="vnav-btn" onclick="showLabosVirtuels()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">science</span> Labos</button>
   <button class="vnav-btn" onclick="vShowSec('actualites',this)" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#ef4444;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">newspaper</span> Actualités</button>
   <button class="vnav-btn" onclick="vShowSec('contact',this)"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">forum</span> Contact</button>
   <button class="vnav-btn" onclick="openCart()" style="position:relative;background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">shopping_cart</span> Panier<span id="cartBadge" style="position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;border-radius:50%;font-size:10px;width:18px;height:18px;display:none;align-items:center;justify-content:center;font-weight:700"></span></button>
@@ -3703,8 +3703,9 @@ function _stripBinaries(data){
   // Partenaires
   if(data.partenaires)data.partenaires.forEach(function(p){if(_isHeavyData(p.logo))p.logo='';});
   // Livres — couvertures, fichiers, aperçus
+  // Couvertures : seuil élevé (200 KB) pour ne pas effacer les JPEG de couverture (~20-80 KB)
   if(data.books)data.books.forEach(function(b){
-    if(_isHeavyData(b.coverImg))b.coverImg='';
+    if(b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>273000)b.coverImg='';
     if(_isHeavyData(b.fichierData))b.fichierData='';
     if(b.previewImages)b.previewImages=b.previewImages.map(function(img){return _isHeavyData(img)?'':img;});
   });
@@ -4523,6 +4524,27 @@ function _showExtrait(bid){
         +'<a href="'+pdfSrc+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:14px;padding:12px 22px;margin:5px">📖 Ouvrir le PDF</a><br>'
         +'<a href="'+_gv+'" target="_blank" rel="noopener" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:5px">🔍 Voir aperçu intégré</a>'
         +'</div>';
+    } else if(_isMob&&!_isHttpUrl&&pdfSrc&&pdfSrc.indexOf('data:')===0){
+      // Mobile + data: URL → convertir en Blob URL pour ouverture/téléchargement natif
+      var _blobUrl='';
+      try{
+        var _arr=pdfSrc.split(','),_mime=(_arr[0].match(/:(.*?);/)||['','application/pdf'])[1];
+        var _bstr=atob(_arr[1]),_n=_bstr.length,_u8=new Uint8Array(_n);
+        while(_n--)_u8[_n]=_bstr.charCodeAt(_n);
+        _blobUrl=URL.createObjectURL(new Blob([_u8],{type:_mime}));
+      }catch(_be){_blobUrl='';}
+      if(_blobUrl){
+        var _fname=_esc(pdfName||'apercu.pdf');
+        h+='<div style="border:2px dashed var(--bld);border-radius:var(--r);padding:28px;text-align:center;background:var(--blb)">'
+          +'<div style="font-size:56px;margin-bottom:12px">📄</div>'
+          +'<div style="font-family:Libre Baskerville,serif;font-size:15px;font-weight:700;color:var(--bl);margin-bottom:16px">'+_fname+'</div>'
+          +'<a href="'+_blobUrl+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:14px;padding:12px 22px;margin:5px">📖 Ouvrir le PDF</a><br>'
+          +'<a href="'+_blobUrl+'" download="'+_fname+'" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:5px">⬇ Télécharger</a>'
+          +'</div>';
+      } else {
+        h+='<iframe src="'+pdfSrc+'" style="width:100%;height:62vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF" allowfullscreen>'
+          +'<p style="text-align:center;padding:20px">PDF non affiché. <a href="'+pdfSrc+'" target="_blank">Ouvrir →</a></p></iframe>';
+      }
     } else {
       h+='<iframe src="'+pdfSrc+'" style="width:100%;height:62vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF" allowfullscreen>'
         +'<p style="text-align:center;padding:20px">PDF non affiché. <a href="'+pdfSrc+'" target="_blank">Ouvrir →</a></p></iframe>'
@@ -5195,7 +5217,7 @@ function vShowSec(sec,btn){
           <div style="font-family:Montserrat,sans-serif;font-size:24px;font-weight:700;color:#FFC93C;line-height:1.2">Améliore tes <span style="text-decoration:underline;text-decoration-color:rgba(255,201,60,.4)">NOTES</span><br>et réussis ton <span style="color:#fff">EXAMEN !</span></div>
           <div style="font-family:Georgia,serif;font-size:14px;color:rgba(255,255,255,.7);margin-top:10px;line-height:1.7;font-style:italic">Nous mettons à ta disposition tout le nécessaire pour étudier efficacement et atteindre l&#39;excellence scolaire !</div>
           <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
-            <button class="btn" style="background:#FFC93C;color:#142554;font-family:Montserrat,sans-serif;font-weight:700;border-radius:12px;padding:10px 20px" onclick="vShowSec('boutique',document.querySelectorAll('.vnav-btn')[5])">🛍️ Voir nos offres</button>
+            <button class="btn" style="background:#FFC93C;color:#142554;font-family:Montserrat,sans-serif;font-weight:700;border-radius:12px;padding:10px 20px" onclick="vShowSec('boutique',document.querySelector('.vnav-btn[onclick*="boutique"]'))">🛍️ Voir nos offres</button>
             <button class="btn" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 20px" onclick="showLogin('eleve')">🎓 Se connecter</button>
           </div>
         </div>
@@ -5385,7 +5407,7 @@ function vShowSec(sec,btn){
           </div>
         </div>`}).join("")}
       </div>
-      <div style="text-align:center;margin-top:10px"><button class="btn bi sm" onclick="vShowSec('boutique',document.querySelectorAll('.vnav-btn')[5])">🛒 Voir toute la boutique →</button></div>
+      <div style="text-align:center;margin-top:10px"><button class="btn bi sm" onclick="vShowSec('boutique',document.querySelector('.vnav-btn[onclick*="boutique"]'))">🛒 Voir toute la boutique →</button></div>
     </div>
     <div class="ib ibg mt16"><span>✅</span><span><strong>Nos résultats parlent d'eux-mêmes !</strong> Une moyenne de <strong>${Math.round(DB.examResults.flatMap(er=>er.niveaux).reduce((a,n)=>a+n.taux,0)/Math.max(1,DB.examResults.flatMap(er=>er.niveaux).length))}%</strong> de réussite aux examens officiels. Inscrivez votre enfant dès maintenant.</span></div>
     </div>`;
@@ -11560,7 +11582,17 @@ function saveSale(){
   DB.bookPurchases.push({id:gid(),eid,bid,date:today(),mnt,statut:'Payé',ref});
   save();cm();re();toast('✓ Vente enregistrée');
 }
-function markBPPaid(bpid){const bp=DB.bookPurchases.find(x=>x.id===bpid);if(bp){bp.statut='Payé';save();re();toast('✓ Paiement confirmé');}}
+function markBPPaid(bpid){
+  const bp=DB.bookPurchases.find(x=>x.id===bpid);
+  if(bp){
+    bp.statut='Payé';save();re();toast('✓ Paiement confirmé');
+    // Notification vers l'acheteur
+    if(typeof autoNotify==='function'&&bp.eid){
+      var _bk=DB.books&&DB.books.find(x=>x.id===bp.bid);
+      autoNotify('📚 Achat confirmé','Votre achat du livre « '+(_bk?_bk.titre:bp.bid)+' » est confirmé. Bonne lecture !',bp.eid);
+    }
+  }
+}
 function printBookRec(bpid){
   const bp=DB.bookPurchases.find(x=>x.id===bpid);if(!bp)return;
   const b=DB.books.find(x=>x.id===bp.bid);const st=S(bp.eid);
@@ -24958,7 +24990,15 @@ function mPayAttempts(){
 // Helpers appelés depuis les onclick inline de mPayAttempts
 function _payMarkPaid(ref){
   var a=(DB.payAttempts||[]).find(function(x){return x.ref===ref;});
-  if(a){a.status='paid';a.datePaid=new Date().toISOString();save();mPayAttempts();toast('✓ Paiement marqué comme reçu');}
+  if(a){
+    a.status='paid';a.datePaid=new Date().toISOString();save();
+    // Notification admin + notification client si compte lié
+    if(typeof autoNotify==='function'){
+      autoNotify('✅ Paiement validé','Réf. '+ref+' — '+(a.label||'Paiement')+' ('+fmtN(a.montant||0)+' FCFA) marqué comme reçu.','admin');
+      if(a.accountId)autoNotify('✅ Paiement confirmé','Votre paiement (réf. '+ref+') a été validé. Merci de votre confiance !',a.accountId);
+    }
+    mPayAttempts();toast('✓ Paiement marqué comme reçu');
+  }
 }
 function _payDelete(ref){
   if(!confirm('Supprimer cette tentative ?'))return;
