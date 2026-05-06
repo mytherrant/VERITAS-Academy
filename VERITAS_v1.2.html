@@ -2691,7 +2691,7 @@ setInterval(_refreshCitation,15000);
   <button class="vnav-btn" onclick="vShowSec('elearning',this)" style="background:linear-gradient(135deg,rgba(60,141,255,.15),rgba(60,141,255,.05));color:#3C8DFF;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">auto_stories</span> E-Learning</button>
   <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">storefront</span> Boutique</button>
   <button class="vnav-btn" onclick="showJeuxEdu()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">sports_esports</span> Jeux</button>
-  <button class="vnav-btn" onclick="showLabosVirtuels()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">science</span> Labos</button>
+  <button class="vnav-btn" onclick="showClasseVirtuelle()" style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));color:#7C3AED;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">groups</span> Classes</button>
   <button class="vnav-btn" onclick="vShowSec('orientation',this)" style="background:linear-gradient(135deg,rgba(5,150,105,.15),rgba(5,150,105,.05));color:#059669;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">explore</span> Orientation</button>
   <button class="vnav-btn" onclick="showCalendrier()" style="background:linear-gradient(135deg,rgba(220,38,38,.15),rgba(220,38,38,.05));color:#DC2626;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">event</span> Calendrier</button>
   <button class="vnav-btn" onclick="showEpreuves()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">assignment</span> Épreuves</button>
@@ -3371,6 +3371,9 @@ function _migrateDB(){
   if(!DB.products)DB.products=defaultDB().products||[];
   if(!DB.depenses)DB.depenses=[];
   if(!DB.recettes)DB.recettes=[];
+  // Classes Virtuelles
+  if(!DB.classrooms||DB.classrooms.length===0)DB.classrooms=_cvDefaultClassrooms();
+  if(!DB.forumPosts)DB.forumPosts=[];
   if(!DB.photos)DB.photos=defaultDB().photos||[];
   if(!DB.examResults)DB.examResults=defaultDB().examResults||[];
   if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts||[];
@@ -17741,6 +17744,529 @@ var LABO_PACKS=[
    avantages:["Tous les labos (20+)","Épreuves officielles BEPC/BAC","Simulateur d'examen","Coaching personnalisé","Accès prioritaire nouveaux contenus","Support WhatsApp"],
    badge:"15 000 FCFA/mois",populaire:true},
 ];
+
+// ═══════════════════════════════════════════════════════════════════════
+// MODULE : CLASSES VIRTUELLES — Forum interactif type Microsoft Teams
+// ═══════════════════════════════════════════════════════════════════════
+
+var _CV={classroomId:null,channelId:null,refreshTimer:null,replyTo:null};
+
+function _cvDefaultClassrooms(){
+  var classes=[].concat([].slice.call(new Set((DB.students||[]).map(function(s){return s.cls;}).filter(Boolean))));
+  if(!classes.length)classes=['6ème','5ème','4ème','3ème','2nde','1ère A','Tle A'];
+  var palette=['#3C8DFF','#7C3AED','#059669','#DC2626','#F59E0B','#0891B2','#4F46E5','#BE185D'];
+  var icos={};
+  return classes.map(function(cls,i){
+    var key=cls.replace(/[^a-z0-9]/gi,'').toLowerCase();
+    return {
+      id:'cls_'+key,nom:cls,
+      couleur:palette[i%palette.length],ico:'📚',
+      channels:[
+        {id:'ch_gen_'+key,nom:'Général',ico:'💬',ordre:0},
+        {id:'ch_ann_'+key,nom:'Annonces',ico:'📢',ordre:1,teacherOnly:true},
+        {id:'ch_fr_'+key,nom:'Français',ico:'📝',ordre:2},
+        {id:'ch_math_'+key,nom:'Mathématiques',ico:'📐',ordre:3},
+        {id:'ch_sc_'+key,nom:'Sciences',ico:'🔬',ordre:4}
+      ],
+      membres:(DB.students||[]).filter(function(s){return s.cls===cls;}).map(function(s){return s.id;}),
+      enseignants:(DB.teachers||[]).map(function(t){return t.id;})
+    };
+  });
+}
+
+function showClasseVirtuelle(cid,chid){
+  if(!DB.classrooms||!DB.classrooms.length){DB.classrooms=_cvDefaultClassrooms();save();}
+  if(!DB.forumPosts)DB.forumPosts=[];
+  if(cid&&chid){_CV.classroomId=cid;_CV.channelId=chid;_cvRenderChannel();return;}
+  if(_CV.classroomId&&_CV.channelId){_cvRenderChannel();return;}
+  _cvRenderHome();
+}
+
+function _cvRenderHome(){
+  var cls=DB.classrooms||[];
+  var accessible=cls;
+  if(SES&&SES.type==='eleve'){
+    var mine=cls.filter(function(c){return (c.membres||[]).indexOf(SES.id||SES.eid)>-1||c.nom===SES.cls;});
+    accessible=mine.length?mine:cls;
+  }
+  var totalPosts=(DB.forumPosts||[]).length;
+  var today2=new Date().toISOString().slice(0,10);
+  var todayPosts=(DB.forumPosts||[]).filter(function(p){return (p.dateISO||'').startsWith(today2);}).length;
+  var h="<div class='vsec' style='max-width:980px;margin:0 auto'>";
+  h+="<div style='display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px'>";
+  h+="<div><div class='vsec-title' style='margin-bottom:4px'>🏫 Classes Virtuelles</div><div style='font-size:13px;color:var(--ink4)'>Échangez avec vos enseignants et camarades</div></div>";
+  if(iA()){h+="<button class='btn bi sm' onclick='_cvAdminPanel()'>⚙️ Gérer les classes</button>";}
+  h+="</div>";
+  // Stats
+  h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:24px'>";
+  [{n:accessible.length,l:'Classes actives',i:'🏫',c:'#3C8DFF'},{n:totalPosts,l:'Messages',i:'💬',c:'#7C3AED'},{n:todayPosts,l:"Aujourd'hui",i:'🔔',c:'#059669'},{n:(DB.students||[]).length,l:'Élèves',i:'👤',c:'#F59E0B'}].forEach(function(s){
+    h+="<div style='background:linear-gradient(135deg,"+s.c+"18,"+s.c+"06);border:1px solid "+s.c+"25;border-radius:14px;padding:14px;text-align:center'><div style='font-size:22px;margin-bottom:4px'>"+s.i+"</div><div style='font-size:20px;font-weight:900;color:"+s.c+";font-family:Montserrat,sans-serif'>"+s.n+"</div><div style='font-size:11px;color:var(--ink4)'>"+s.l+"</div></div>";
+  });
+  h+="</div>";
+  // Grille classes
+  h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;margin-bottom:28px'>";
+  accessible.forEach(function(c){
+    var posts=(DB.forumPosts||[]).filter(function(p){return p.classroomId===c.id;});
+    var last=posts.slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');});
+    var lastP=last[0]||null;
+    var firstCh=(c.channels||[{id:''}])[0];
+    h+="<div onclick=\"_CV.classroomId='"+c.id+"';_CV.channelId='"+firstCh.id+"';_cvRenderChannel()\" style='background:var(--sur);border:2px solid var(--bg3);border-radius:18px;overflow:hidden;cursor:pointer;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.04)' onmouseover=\"this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 28px rgba(0,0,0,.1)';this.style.borderColor='"+c.couleur+"'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 2px 8px rgba(0,0,0,.04)';this.style.borderColor='var(--bg3)'\">";
+    h+="<div style='background:linear-gradient(135deg,"+c.couleur+","+c.couleur+"bb);padding:20px;position:relative'>";
+    h+="<div style='font-size:38px;margin-bottom:8px'>"+c.ico+"</div>";
+    h+="<div style='font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#fff'>"+_esc(c.nom)+"</div>";
+    h+="<div style='font-size:11px;color:rgba(255,255,255,.7);margin-top:3px'>"+(c.channels||[]).length+" canaux · "+(c.membres||[]).length+" élèves</div>";
+    h+="</div><div style='padding:12px 14px'>";
+    h+="<div style='font-size:11px;color:var(--ink4);margin-bottom:8px'>"+(lastP?("💬 "+_esc((lastP.auteurNom||'').split(' ')[0])+" · "+_cvRelTime(lastP.dateISO)):"Aucun message pour l'instant")+"</div>";
+    h+="<div style='display:flex;gap:5px;flex-wrap:wrap'>";
+    (c.channels||[]).slice(0,4).forEach(function(ch){h+="<span style='font-size:10px;background:"+c.couleur+"15;color:"+c.couleur+";border:1px solid "+c.couleur+"25;border-radius:8px;padding:2px 7px;font-weight:600'>"+ch.ico+" "+_esc(ch.nom)+"</span>";});
+    h+="</div></div></div>";
+  });
+  h+="</div>";
+  // Activité récente
+  var recent=(DB.forumPosts||[]).slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');}).slice(0,6);
+  if(recent.length){
+    h+="<div class='vcard'><div class='ct mb10'>⚡ Activité récente</div>";
+    recent.forEach(function(p){
+      var cls2=(DB.classrooms||[]).find(function(c){return c.id===p.classroomId;});
+      var ch2=cls2&&(cls2.channels||[]).find(function(c){return c.id===p.channelId;});
+      if(!cls2)return;
+      h+="<div onclick=\"showClasseVirtuelle('"+p.classroomId+"','"+p.channelId+"')\" style='display:flex;align-items:flex-start;gap:10px;padding:9px;border-radius:10px;cursor:pointer;transition:.15s;margin-bottom:4px' onmouseover=\"this.style.background='var(--bg)'\" onmouseout=\"this.style.background=''\">"+
+        "<div style='width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,"+cls2.couleur+","+cls2.couleur+"99);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0'>"+_cvInitials(p.auteurNom)+"</div>"+
+        "<div style='flex:1;min-width:0'>"+
+        "<div style='font-size:12px;font-weight:700;color:var(--bl)'>"+_esc(p.auteurNom)+"<span style='font-weight:400;color:var(--ink4);margin-left:6px;font-size:11px'>"+_cvRelTime(p.dateISO)+"</span></div>"+
+        "<div style='font-size:11px;color:var(--ink4)'>"+cls2.ico+" "+_esc(cls2.nom)+(ch2?(" · "+ch2.ico+" "+_esc(ch2.nom)):"")+"</div>"+
+        "<div style='font-size:12px;color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+_esc((p.contenu||p.titre||'').slice(0,80))+"</div>"+
+        "</div></div>";
+    });
+    h+="</div>";
+  }
+  if(!accessible.length){
+    h+="<div style='text-align:center;padding:60px 20px;color:var(--ink4)'><div style='font-size:56px;margin-bottom:14px'>🏫</div><div style='font-size:15px;font-weight:700;color:var(--bl);margin-bottom:6px'>Aucune classe disponible</div>"+(iA()?"<button class='btn bi sm mt8' onclick='_cvAdminPanel()'>⚙️ Créer une classe</button>":"<div style='font-size:13px'>Contactez l'administration</div>")+"</div>";
+  }
+  h+="</div>";
+  _vc(h);
+}
+
+function _cvRenderChannel(){
+  var cls=(DB.classrooms||[]).find(function(c){return c.id===_CV.classroomId;});
+  if(!cls){_cvRenderHome();return;}
+  var ch=(cls.channels||[]).find(function(c){return c.id===_CV.channelId;})||(cls.channels||[])[0];
+  if(!ch){_cvRenderHome();return;}
+  _CV.channelId=ch.id;
+  var posts=(DB.forumPosts||[]).filter(function(p){return p.channelId===ch.id;});
+  var pinned=posts.filter(function(p){return p.pinned;});
+  var normal=posts.filter(function(p){return !p.pinned;}).sort(function(a,b){return (a.dateISO||'').localeCompare(b.dateISO||'');});
+  var isMob=window.innerWidth<660;
+  var canPost=!(ch.teacherOnly&&SES&&SES.type==='eleve');
+
+  var h="<div style='display:flex;min-height:82vh;background:var(--bg);border-radius:var(--r3);overflow:hidden;border:var(--br)'>";
+
+  // ─ Sidebar (desktop seulement) ────────────────────────────────
+  if(!isMob){
+    h+="<div style='width:210px;flex-shrink:0;background:linear-gradient(180deg,#0D1B3E 0%,#142554 100%);overflow-y:auto;display:flex;flex-direction:column'>";
+    h+="<div style='padding:14px 12px;border-bottom:1px solid rgba(255,255,255,.1)'>";
+    h+="<button onclick='_CV.classroomId=null;_CV.channelId=null;_cvRenderHome()' style='background:none;border:none;color:rgba(255,255,255,.45);font-size:11px;cursor:pointer;margin-bottom:10px;padding:0;display:flex;align-items:center;gap:4px;transition:.2s' onmouseover=\"this.style.color='#fff'\" onmouseout=\"this.style.color='rgba(255,255,255,.45)'\">← Toutes les classes</button>";
+    h+="<div style='display:flex;align-items:center;gap:8px'><span style='font-size:22px'>"+cls.ico+"</span><span style='font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#fff;line-height:1.2'>"+_esc(cls.nom)+"</span></div>";
+    h+="</div>";
+    h+="<div style='padding:6px 4px;flex:1'>";
+    h+="<div style='padding:6px 10px;font-size:9px;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-top:6px'>CANAUX</div>";
+    (cls.channels||[]).forEach(function(c){
+      var cnt=(DB.forumPosts||[]).filter(function(p){return p.channelId===c.id;}).length;
+      var active=c.id===ch.id;
+      h+="<div onclick=\"showClasseVirtuelle('"+cls.id+"','"+c.id+"')\" style='display:flex;align-items:center;justify-content:space-between;padding:8px 10px;margin:1px 4px;border-radius:8px;cursor:pointer;background:"+(active?"rgba(255,255,255,.16)":"none")+";transition:.15s' onmouseover=\"if(this.style.background!='rgba(255,255,255,.16)')this.style.background='rgba(255,255,255,.07)'\" onmouseout=\"if(this.style.background!='rgba(255,255,255,.16)')this.style.background='none'\">"+
+        "<span style='font-size:12px;color:"+(active?"#fff":"rgba(255,255,255,.6)")+";font-weight:"+(active?"700":"400")+"'>"+c.ico+" "+_esc(c.nom)+(c.teacherOnly?" 🔒":"")+"</span>"+
+        (cnt?"<span style='font-size:10px;background:rgba(255,255,255,.14);color:rgba(255,255,255,.7);border-radius:10px;padding:1px 6px;min-width:18px;text-align:center'>"+cnt+"</span>":"")+"</div>";
+    });
+    if(iA()){h+="<div onclick=\"_cvAddChannel('"+cls.id+"')\" style='display:flex;align-items:center;gap:5px;padding:8px 10px;margin:8px 4px 4px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,.3);font-size:11px;border:1px dashed rgba(255,255,255,.15);transition:.15s' onmouseover=\"this.style.color='rgba(255,255,255,.7)';this.style.borderColor='rgba(255,255,255,.35)'\" onmouseout=\"this.style.color='rgba(255,255,255,.3)';this.style.borderColor='rgba(255,255,255,.15)'\">+ Nouveau canal</div>";}
+    h+="</div></div>";
+  }
+
+  // ─ Zone principale ─────────────────────────────────────────────
+  h+="<div style='flex:1;display:flex;flex-direction:column;min-width:0;background:var(--sur)'>";
+
+  // Header canal
+  h+="<div style='padding:11px 16px;background:var(--sur);border-bottom:var(--br);display:flex;align-items:center;justify-content:space-between;gap:8px'>";
+  h+="<div style='display:flex;align-items:center;gap:10px'>";
+  if(isMob){h+="<button onclick='_cvRenderHome()' style='background:none;border:none;font-size:20px;cursor:pointer;color:var(--ink2);line-height:1;padding:2px 6px'>←</button>";}
+  h+="<div style='font-size:20px'>"+ch.ico+"</div>";
+  h+="<div><div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:var(--bl)'>"+_esc(ch.nom)+(ch.teacherOnly?" 🔒":"")+"</div>";
+  h+="<div style='font-size:11px;color:var(--ink4)'>"+cls.ico+" "+_esc(cls.nom)+" · "+(pinned.length+normal.length)+" message(s)</div></div></div>";
+  h+="<div style='display:flex;gap:6px'>";
+  if(isMob){h+="<button class='btn bo xs' onclick=\"_cvShowChannelMenu('"+cls.id+"')\">☰</button>";}
+  if(iA()){h+="<button class='btn bo xs' onclick=\"_cvModeratePanel('"+cls.id+"')\">⚙️</button>";}
+  h+="<button class='btn bi xs' onclick='_cvPullFresh()' title='Actualiser'>↻</button></div></div>";
+
+  // Feed messages
+  h+="<div id='cvFeed' style='flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;min-height:200px;background:var(--bg)'>";
+  if(!pinned.length&&!normal.length){
+    h+="<div style='text-align:center;padding:60px 20px;color:var(--ink4)'><div style='font-size:52px;margin-bottom:14px'>💬</div><div style='font-size:15px;font-weight:700;color:var(--bl);margin-bottom:6px'>Démarrez la conversation !</div><div style='font-size:13px'>Soyez le premier à poster dans ce canal.</div></div>";
+  } else {
+    if(pinned.length){
+      h+="<div style='font-size:11px;font-weight:700;color:#B45309;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px'>📌 Messages épinglés</div>";
+      pinned.forEach(function(p){h+=_cvPostCard(p,cls,ch);});
+      h+="<div style='height:1px;background:var(--bg3);margin:4px 0 8px'></div>";
+    }
+    normal.forEach(function(p){h+=_cvPostCard(p,cls,ch);});
+  }
+  h+="<div id='cvBottom'></div></div>";
+
+  // Composer
+  if(!SES){
+    h+="<div style='padding:12px 16px;background:var(--sur);border-top:var(--br);text-align:center'><div style='font-size:12px;color:var(--ink4);margin-bottom:8px'>Connectez-vous pour participer</div><button class='btn bi sm' onclick=\"showLogin('eleve')\">🔑 Se connecter</button></div>";
+  } else if(!canPost){
+    h+="<div style='padding:10px 16px;background:var(--sur);border-top:var(--br);text-align:center;font-size:12px;color:var(--ink4)'>📢 Canal réservé aux enseignants</div>";
+  } else {
+    h+="<div style='padding:10px 14px;background:var(--sur);border-top:var(--br)'>";
+    h+="<div id='cvReplyBanner' style='display:none;background:#EFF6FF;border:1px solid #BFDBFE;border-radius:8px;padding:6px 10px;margin-bottom:8px;font-size:12px;color:var(--bl);display:flex;align-items:center;justify-content:space-between'><span id='cvReplyInfo'></span><button onclick='_cvCancelReply()' style='background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink4);line-height:1'>×</button></div>";
+    h+="<div style='display:flex;align-items:flex-end;gap:8px'>";
+    h+="<div style='width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,"+cls.couleur+","+cls.couleur+"99);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;flex-shrink:0'>"+_cvInitials(SES.pre?SES.pre+' '+SES.nom:SES.nom||'?')+"</div>";
+    h+="<div style='flex:1'>";
+    h+="<div style='display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap'>";
+    var types=[{v:'discussion',l:'💬'},{v:'question',l:'❓'},{v:'ressource',l:'📎'}];
+    if(iA()||SES.type==='enseignant'){types.push({v:'devoir',l:'📝'});types.push({v:'annonce',l:'📢'});}
+    h+="<select id='cvPostType' style='font-size:11px;padding:4px 8px;border-radius:8px;border:1px solid var(--bg3);background:var(--sur);color:var(--ink2);cursor:pointer'>";
+    types.forEach(function(t){h+="<option value='"+t.v+"'>"+t.l+" "+t.v.charAt(0).toUpperCase()+t.v.slice(1)+"</option>";});
+    h+="</select>";
+    if(iA()||SES.type==='enseignant'){
+      h+="<input id='cvPostTitre' placeholder='Titre (optionnel)' style='flex:1;font-size:11px;padding:4px 8px;border-radius:8px;border:1px solid var(--bg3);background:var(--sur);min-width:120px'>";
+    }
+    h+="</div>";
+    h+="<div style='display:flex;gap:8px;align-items:flex-end'>";
+    h+="<textarea id='cvMsgInput' placeholder='Écrire un message…' rows='2' style='flex:1;resize:none;padding:10px;border-radius:12px;border:1px solid var(--bg3);background:var(--bg);font-size:13px;font-family:inherit;outline:none;transition:.2s;line-height:1.5' onfocus=\"this.style.borderColor='var(--bl)'\" onblur=\"this.style.borderColor='var(--bg3)'\"></textarea>";
+    h+="<button onclick=\"_cvSubmitPost('"+cls.id+"','"+ch.id+"')\" class='btn bi' style='padding:10px 16px;border-radius:12px;flex-shrink:0;font-size:13px'>➤</button>";
+    h+="</div></div></div></div>";
+  }
+  h+="</div></div>";
+  _vc(h);
+  setTimeout(function(){var b=document.getElementById('cvBottom');if(b)b.scrollIntoView();},80);
+  if(_CV.refreshTimer)clearInterval(_CV.refreshTimer);
+  _CV.refreshTimer=setInterval(function(){_cvSilentRefresh();},30000);
+}
+
+function _cvPostCard(p,cls,ch){
+  var me=SES;
+  var uid=me&&(me.id||me.eid||'');
+  var isMe=uid&&(p.auteurId===uid);
+  var isTeacher=p.auteurType==='enseignant'||p.auteurType==='admin';
+  var iLiked=uid&&(p.likes||[]).indexOf(uid)>-1;
+  var typeColors={discussion:'#3C8DFF',question:'#F59E0B',ressource:'#059669',devoir:'#7C3AED',annonce:'#DC2626'};
+  var typeIcos={discussion:'💬',question:'❓',ressource:'📎',devoir:'📝',annonce:'📢'};
+  var tc=typeColors[p.type||'discussion']||'#6B7A99';
+  var ti=typeIcos[p.type||'discussion']||'💬';
+  var border=p.pinned?'border-left:3px solid #FFC93C':isMe?'border-left:3px solid '+cls.couleur:'';
+
+  var html="<div id='cvp_"+p.id+"' style='background:var(--sur);border-radius:14px;padding:14px;border:1px solid var(--bg3);"+border+";transition:.2s'>";
+
+  // En-tête auteur
+  html+="<div style='display:flex;align-items:flex-start;gap:10px;margin-bottom:10px'>";
+  html+="<div style='width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,"+tc+","+tc+"bb);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0'>"+_cvInitials(p.auteurNom)+"</div>";
+  html+="<div style='flex:1;min-width:0'>";
+  html+="<div style='display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:2px'>";
+  html+="<span style='font-weight:700;font-size:13px;color:var(--bl)'>"+_esc(p.auteurNom)+"</span>";
+  html+="<span style='font-size:10px;background:"+tc+"16;color:"+tc+";border:1px solid "+tc+"28;border-radius:8px;padding:1px 7px;font-weight:700'>"+ti+" "+_esc(p.type||'discussion')+"</span>";
+  if(isTeacher)html+="<span style='font-size:10px;background:#FFF7ED;color:#B45309;border:1px solid #FED7AA;border-radius:8px;padding:1px 7px;font-weight:700'>👑 "+(p.auteurType==='admin'?'Admin':'Enseignant')+"</span>";
+  if(p.pinned)html+="<span style='font-size:10px;background:#FFF7ED;color:#B45309;border:1px solid #FED7AA;border-radius:8px;padding:1px 7px;font-weight:700'>📌</span>";
+  html+="</div>";
+  html+="<div style='font-size:11px;color:var(--ink4)'>"+_cvRelTime(p.dateISO)+"</div>";
+  html+="</div>";
+  // Boutons admin/owner
+  html+="<div style='display:flex;gap:2px;flex-shrink:0;opacity:.55'>";
+  if(iA()){html+="<button onclick=\"_cvTogglePin('"+p.id+"')\" style='background:none;border:none;cursor:pointer;font-size:14px;line-height:1;padding:3px' title='"+(p.pinned?"Désépingler":"Épingler")+"'>"+(p.pinned?"📌":"📍")+"</button>";}
+  if(iA()||isMe){html+="<button onclick=\"_cvDeletePost('"+p.id+"')\" style='background:none;border:none;cursor:pointer;font-size:14px;line-height:1;padding:3px' title='Supprimer'>🗑️</button>";}
+  html+="</div></div>";
+
+  // Titre
+  if(p.titre){html+="<div style='font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;color:var(--bl);margin-bottom:6px'>"+_esc(p.titre)+"</div>";}
+  // Contenu
+  html+="<div style='font-size:13px;color:var(--ink2);line-height:1.75;white-space:pre-wrap;word-break:break-word'>"+_esc(p.contenu||'')+"</div>";
+  // Pièce jointe
+  if(p.fichierUrl){html+="<div style='margin-top:8px'><a href='"+_esc(p.fichierUrl)+"' target='_blank' style='display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--bl);background:var(--blb);border:1px solid var(--bld);border-radius:8px;padding:5px 10px;text-decoration:none'>📎 "+_esc(p.fichierNom||'Ressource')+"</a></div>";}
+
+  // Barre d'actions
+  html+="<div style='display:flex;align-items:center;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bg3);flex-wrap:wrap'>";
+  html+="<button onclick=\"_cvLike('"+p.id+"')\" style='background:none;border:none;cursor:pointer;font-size:12px;color:"+(iLiked?"#EF4444":"var(--ink4)")+";font-weight:"+(iLiked?"700":"400")+";display:flex;align-items:center;gap:4px;transition:.2s;padding:0'>"+(iLiked?"❤️":"🤍")+" "+(p.likes||[]).length+"</button>";
+  if(me){html+="<button onclick=\"_cvStartReply('"+p.id+"','"+_esc(p.auteurNom)+"')\" style='background:none;border:none;cursor:pointer;font-size:12px;color:var(--ink4);display:flex;align-items:center;gap:4px;padding:0;transition:.2s' onmouseover=\"this.style.color='var(--bl)'\" onmouseout=\"this.style.color='var(--ink4)'\">💬 Répondre ("+(p.replies||[]).length+")</button>";}
+  html+="</div>";
+
+  // Réponses (thread)
+  if((p.replies||[]).length){
+    html+="<div style='margin-top:12px;margin-left:18px;border-left:2px solid var(--bg3);padding-left:12px;display:flex;flex-direction:column;gap:8px'>";
+    (p.replies||[]).sort(function(a,b){return (a.dateISO||'').localeCompare(b.dateISO||'');}).forEach(function(r){
+      var rLiked=uid&&(r.likes||[]).indexOf(uid)>-1;
+      var rMe=uid&&r.auteurId===uid;
+      html+="<div style='background:var(--bg);border-radius:10px;padding:10px'>";
+      html+="<div style='display:flex;align-items:center;gap:7px;margin-bottom:6px'>";
+      html+="<div style='width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6B7A99,#9CA3AF);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff'>"+_cvInitials(r.auteurNom||'?')+"</div>";
+      html+="<span style='font-size:12px;font-weight:700;color:var(--bl)'>"+_esc(r.auteurNom||'')+"</span>";
+      if(r.auteurType==='enseignant'||r.auteurType==='admin')html+="<span style='font-size:9px;background:#FFF7ED;color:#B45309;border-radius:6px;padding:1px 5px'>👑</span>";
+      html+="<span style='font-size:10px;color:var(--ink4)'>"+_cvRelTime(r.dateISO)+"</span>";
+      if(iA()||rMe){html+="<button onclick=\"_cvDeleteReply('"+p.id+"','"+r.id+"')\" style='background:none;border:none;cursor:pointer;font-size:12px;color:var(--ink4);margin-left:auto;opacity:.5'>🗑️</button>";}
+      html+="</div>";
+      html+="<div style='font-size:12px;color:var(--ink2);line-height:1.65;white-space:pre-wrap;word-break:break-word'>"+_esc(r.contenu||'')+"</div>";
+      html+="<button onclick=\"_cvLikeReply('"+p.id+"','"+r.id+"')\" style='background:none;border:none;cursor:pointer;font-size:11px;color:"+(rLiked?"#EF4444":"var(--ink4)")+";margin-top:6px;padding:0'>"+(rLiked?"❤️":"🤍")+" "+(r.likes||[]).length+"</button>";
+      html+="</div>";
+    });
+    html+="</div>";
+  }
+  html+="</div>";
+  return html;
+}
+
+// ─ Helpers ──────────────────────────────────────────────────────
+function _cvInitials(nom){
+  if(!nom)return '?';
+  var words=(nom||'').trim().split(/\s+/).slice(0,2);
+  return words.map(function(w){return w[0]||'';}).join('').toUpperCase().slice(0,2)||'?';
+}
+function _cvRelTime(iso){
+  if(!iso)return '';
+  var diff=Date.now()-new Date(iso).getTime();
+  if(diff<60000)return "À l'instant";
+  if(diff<3600000)return Math.floor(diff/60000)+'min';
+  if(diff<86400000)return Math.floor(diff/3600000)+'h';
+  if(diff<604800000)return Math.floor(diff/86400000)+'j';
+  return new Date(iso).toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
+}
+
+// ─ Actions utilisateur ──────────────────────────────────────────
+function _cvSubmitPost(clsId,chId){
+  var input=document.getElementById('cvMsgInput');
+  var typeEl=document.getElementById('cvPostType');
+  var titreEl=document.getElementById('cvPostTitre');
+  if(!input)return;
+  var msg=(input.value||'').trim();
+  if(!msg){toast('Message vide','warn');return;}
+  if(!SES){toast('Connectez-vous d\'abord','warn');return;}
+  var auteurNom=SES.pre?(_esc(SES.pre)+' '+_esc(SES.nom||'')).trim():(_esc(SES.nom||SES.nomComplet||'Utilisateur'));
+  var reply={id:gid(),classroomId:clsId,channelId:chId,auteurId:SES.id||SES.eid||'',auteurNom:auteurNom.trim(),auteurType:SES.type||'visiteur',type:(typeEl?typeEl.value:'discussion'),titre:(titreEl?titreEl.value.trim():''),contenu:msg,date:today(),dateISO:new Date().toISOString(),likes:[],pinned:false,replies:[]};
+  if(_CV.replyTo){
+    var parent=(DB.forumPosts||[]).find(function(p){return p.id===_CV.replyTo;});
+    if(parent){
+      if(!parent.replies)parent.replies=[];
+      parent.replies.push({id:gid(),auteurId:reply.auteurId,auteurNom:reply.auteurNom,auteurType:reply.auteurType,contenu:msg,date:today(),dateISO:new Date().toISOString(),likes:[]});
+      _CV.replyTo=null;save();
+      if(typeof _triggerAutoSync==='function')setTimeout(_triggerAutoSync,400);
+      input.value='';_cvRenderChannel();toast('✓ Réponse envoyée');return;
+    }
+  }
+  if(!DB.forumPosts)DB.forumPosts=[];
+  DB.forumPosts.push(reply);save();
+  if(typeof _triggerAutoSync==='function')setTimeout(_triggerAutoSync,400);
+  input.value='';_cvRenderChannel();toast('✓ Message envoyé');
+}
+function _cvLike(pid){
+  if(!SES){toast('Connectez-vous pour liker','warn');return;}
+  var p=(DB.forumPosts||[]).find(function(x){return x.id===pid;});
+  if(!p)return;if(!p.likes)p.likes=[];
+  var uid=SES.id||SES.eid||'';
+  var idx=p.likes.indexOf(uid);
+  if(idx>-1)p.likes.splice(idx,1);else p.likes.push(uid);
+  save();_cvRenderChannel();
+}
+function _cvLikeReply(pid,rid){
+  if(!SES){toast('Connectez-vous pour liker','warn');return;}
+  var p=(DB.forumPosts||[]).find(function(x){return x.id===pid;});if(!p)return;
+  var r=(p.replies||[]).find(function(x){return x.id===rid;});if(!r)return;
+  if(!r.likes)r.likes=[];
+  var uid=SES.id||SES.eid||'';
+  var idx=r.likes.indexOf(uid);
+  if(idx>-1)r.likes.splice(idx,1);else r.likes.push(uid);
+  save();_cvRenderChannel();
+}
+function _cvStartReply(pid,nom){
+  _CV.replyTo=pid;
+  var b=document.getElementById('cvReplyBanner'),i=document.getElementById('cvReplyInfo');
+  if(b){b.style.display='flex';}if(i)i.textContent='↩ Répondre à '+nom;
+  var inp=document.getElementById('cvMsgInput');
+  if(inp){inp.focus();inp.placeholder='Répondre à '+nom+'…';}
+}
+function _cvCancelReply(){
+  _CV.replyTo=null;
+  var b=document.getElementById('cvReplyBanner');if(b)b.style.display='none';
+  var inp=document.getElementById('cvMsgInput');if(inp){inp.value='';inp.placeholder='Écrire un message…';}
+}
+function _cvTogglePin(pid){
+  if(!iA())return;
+  var p=(DB.forumPosts||[]).find(function(x){return x.id===pid;});if(!p)return;
+  p.pinned=!p.pinned;save();_cvRenderChannel();toast(p.pinned?'📌 Épinglé':'Désépinglé');
+}
+function _cvDeletePost(pid){
+  if(!confirm('Supprimer ce message ?'))return;
+  DB.forumPosts=(DB.forumPosts||[]).filter(function(p){return p.id!==pid;});
+  save();_cvRenderChannel();toast('✓ Message supprimé');
+}
+function _cvDeleteReply(pid,rid){
+  if(!confirm('Supprimer cette réponse ?'))return;
+  var p=(DB.forumPosts||[]).find(function(x){return x.id===pid;});if(!p)return;
+  p.replies=(p.replies||[]).filter(function(r){return r.id!==rid;});
+  save();_cvRenderChannel();toast('✓ Réponse supprimée');
+}
+function _cvPullFresh(){
+  var feed=document.getElementById('cvFeed');
+  if(feed){var ind=document.createElement('div');ind.id='cvRefInd';ind.style.cssText='text-align:center;padding:6px;font-size:11px;color:var(--ink4)';ind.textContent='⟳ Actualisation…';feed.appendChild(ind);}
+  fetch(LWS_API.db+'?t='+Date.now()).then(function(r){return r.json();}).then(function(remote){
+    if(remote&&remote.forumPosts){
+      var remIds={};(remote.forumPosts||[]).forEach(function(p){remIds[p.id]=true;});
+      var localOnly=(DB.forumPosts||[]).filter(function(p){return !remIds[p.id];});
+      DB.forumPosts=(remote.forumPosts||[]).concat(localOnly);
+    }
+    if(remote&&remote.classrooms&&remote.classrooms.length){DB.classrooms=remote.classrooms;}
+    save();_cvRenderChannel();toast('✓ Actualisé');
+  }).catch(function(){var i=document.getElementById('cvRefInd');if(i)i.remove();toast('Données locales (hors ligne)','warn');});
+}
+function _cvSilentRefresh(){
+  // Refresh sans toast ni indicateur visuel
+  if(!_CV.classroomId)return;
+  fetch(LWS_API.db+'?t='+Date.now()).then(function(r){return r.json();}).then(function(remote){
+    if(!remote)return;
+    var changed=false;
+    if(remote.forumPosts&&remote.forumPosts.length>(DB.forumPosts||[]).length){
+      var remIds={};(remote.forumPosts||[]).forEach(function(p){remIds[p.id]=true;});
+      var lo=(DB.forumPosts||[]).filter(function(p){return !remIds[p.id];});
+      DB.forumPosts=(remote.forumPosts||[]).concat(lo);changed=true;
+    }
+    if(changed){save();_cvRenderChannel();}
+  }).catch(function(){});
+}
+function _cvShowChannelMenu(clsId){
+  var c=(DB.classrooms||[]).find(function(x){return x.id===clsId;});if(!c)return;
+  var h="<div style='padding:16px'><div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:var(--bl);margin-bottom:12px'>"+c.ico+" "+_esc(c.nom)+"</div>";
+  (c.channels||[]).forEach(function(ch){
+    h+="<div onclick=\"cm();showClasseVirtuelle('"+c.id+"','"+ch.id+"')\" style='display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;cursor:pointer;transition:.15s;margin-bottom:4px' onmouseover=\"this.style.background='var(--bg)'\" onmouseout=\"this.style.background=''\"><span style='font-size:18px'>"+ch.ico+"</span><span style='font-size:13px;font-weight:600;color:var(--ink2)'>"+_esc(ch.nom)+(ch.teacherOnly?" 🔒":"")+"</span></div>";
+  });
+  h+="</div>";
+  M(c.ico+" "+c.nom,"Sélectionner un canal",h,"<button class='btn bo' onclick='cm()'>Fermer</button>");
+}
+
+// ─ Admin ────────────────────────────────────────────────────────
+function _cvAdminPanel(){
+  var cls=DB.classrooms||[];
+  var h="<div style='max-height:60vh;overflow-y:auto'>";
+  h+="<div style='display:flex;align-items:center;justify-content:space-between;margin-bottom:12px'><div style='font-size:13px;color:var(--ink4)'>"+cls.length+" classe(s)</div><button class='btn bi sm' onclick=\"cm();_cvCreateClassroom()\">+ Créer une classe</button></div>";
+  cls.forEach(function(c){
+    var posts=(DB.forumPosts||[]).filter(function(p){return p.classroomId===c.id;}).length;
+    h+="<div style='background:var(--bg);border-radius:12px;padding:14px;margin-bottom:8px;border:1px solid var(--bg3)'>";
+    h+="<div style='display:flex;align-items:center;gap:10px;margin-bottom:8px'>";
+    h+="<div style='width:36px;height:36px;border-radius:10px;background:"+c.couleur+";display:flex;align-items:center;justify-content:center;font-size:18px'>"+c.ico+"</div>";
+    h+="<div style='flex:1'><div style='font-weight:700;font-size:14px;color:var(--bl)'>"+_esc(c.nom)+"</div><div style='font-size:11px;color:var(--ink4)'>"+(c.channels||[]).length+" canaux · "+(c.membres||[]).length+" élèves · "+posts+" messages</div></div>";
+    h+="<div style='display:flex;gap:4px'>";
+    h+="<button class='btn bo xs' onclick=\"cm();_cvSyncMembers('"+c.id+"')\" title='Synchroniser élèves'>👥</button>";
+    h+="<button class='btn bo xs' onclick=\"cm();_cvAddChannel('"+c.id+"')\">+ Canal</button>";
+    h+="<button class='btn bo xs' onclick=\"cm();_cvEditClassroom('"+c.id+"')\">✏️</button>";
+    h+="<button onclick=\"if(confirm('Supprimer cette classe ?')){DB.classrooms=(DB.classrooms||[]).filter(function(x){return x.id!='"+c.id+"';});DB.forumPosts=(DB.forumPosts||[]).filter(function(p){return p.classroomId!='"+c.id+"';});save();_cvAdminPanel();toast('✓ Classe supprimée');}\" style='background:var(--reb);color:var(--re);border:1px solid var(--red);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer'>🗑️</button>";
+    h+="</div></div>";
+    h+="<div style='display:flex;gap:4px;flex-wrap:wrap'>";
+    (c.channels||[]).forEach(function(ch){h+="<span style='font-size:10px;background:"+c.couleur+"15;color:"+c.couleur+";border:1px solid "+c.couleur+"25;border-radius:8px;padding:2px 7px'>"+ch.ico+" "+_esc(ch.nom)+"</span>";});
+    h+="</div></div>";
+  });
+  h+="</div>";
+  M('⚙️ Classes Virtuelles','Administration',h,'<button class="btn bo" onclick="cm()">Fermer</button>',true);
+}
+function _cvCreateClassroom(){
+  M('🏫 Nouvelle Classe','',
+    "<div class='fg'><span class='fl'>Nom de la classe</span><input class='fi' id='cvClsNom' placeholder='ex: 3ème A'></div>"+
+    "<div class='fg'><span class='fl'>Icône / Emoji</span><input class='fi' id='cvClsIco' value='📚' style='font-size:18px'></div>"+
+    "<div class='fg'><span class='fl'>Couleur</span><input type='color' class='fi' id='cvClsCouleur' value='#3C8DFF' style='height:38px;cursor:pointer'></div>",
+    "<button class='btn bo' onclick='cm()'>Annuler</button><button class='btn bi' onclick='_cvSaveClassroom()'>✓ Créer</button>"
+  );
+}
+function _cvSaveClassroom(){
+  var nom=(document.getElementById('cvClsNom')?.value||'').trim();
+  var ico=document.getElementById('cvClsIco')?.value||'📚';
+  var couleur=document.getElementById('cvClsCouleur')?.value||'#3C8DFF';
+  if(!nom){toast('Nom requis','warn');return;}
+  var key=nom.replace(/[^a-z0-9]/gi,'').toLowerCase()+'_'+gid().slice(0,4);
+  if(!DB.classrooms)DB.classrooms=[];
+  DB.classrooms.push({id:'cls_'+key,nom:nom,ico:ico,couleur:couleur,channels:[{id:'ch_gen_'+key,nom:'Général',ico:'💬',ordre:0},{id:'ch_ann_'+key,nom:'Annonces',ico:'📢',ordre:1,teacherOnly:true}],membres:[],enseignants:[]});
+  save();cm();toast('✓ Classe créée');if(typeof _triggerAutoSync==='function')_triggerAutoSync();
+}
+function _cvEditClassroom(clsId){
+  var c=(DB.classrooms||[]).find(function(x){return x.id===clsId;});if(!c)return;
+  var n=(DB.students||[]).filter(function(s){return s.cls===c.nom;}).length;
+  M('✏️ Modifier — '+c.nom,'',
+    "<div class='fg'><span class='fl'>Nom</span><input class='fi' id='cvEditNom' value='"+_esc(c.nom)+"'></div>"+
+    "<div class='fg'><span class='fl'>Icône</span><input class='fi' id='cvEditIco' value='"+_esc(c.ico)+"' style='font-size:18px'></div>"+
+    "<div class='fg'><span class='fl'>Couleur</span><input type='color' class='fi' id='cvEditCouleur' value='"+c.couleur+"' style='height:38px;cursor:pointer'></div>"+
+    "<div class='ib ibi mt8'><span>👥</span><span>"+n+" élève(s) de \""+_esc(c.nom)+"\" détectés dans la base</span></div>",
+    "<button class='btn bo' onclick='cm()'>Annuler</button><button class='btn bg2 sm' onclick=\"_cvSyncMembers('"+clsId+"')\">👥 Synchro élèves</button><button class='btn bi' onclick=\"_cvUpdateClassroom('"+clsId+"')\">✓ Enregistrer</button>"
+  );
+}
+function _cvUpdateClassroom(clsId){
+  var c=(DB.classrooms||[]).find(function(x){return x.id===clsId;});if(!c)return;
+  c.nom=(document.getElementById('cvEditNom')?.value||c.nom).trim();
+  c.ico=document.getElementById('cvEditIco')?.value||c.ico;
+  c.couleur=document.getElementById('cvEditCouleur')?.value||c.couleur;
+  save();cm();toast('✓ Classe mise à jour');_cvAdminPanel();
+}
+function _cvSyncMembers(clsId){
+  var c=(DB.classrooms||[]).find(function(x){return x.id===clsId;});if(!c)return;
+  c.membres=(DB.students||[]).filter(function(s){return s.cls===c.nom;}).map(function(s){return s.id;});
+  c.enseignants=(DB.teachers||[]).map(function(t){return t.id;});
+  save();cm();toast('✓ '+c.membres.length+' élève(s) synchronisé(s)');
+  if(typeof _triggerAutoSync==='function')_triggerAutoSync();
+}
+function _cvAddChannel(clsId){
+  var c=(DB.classrooms||[]).find(function(x){return x.id===clsId;});if(!c)return;
+  var presets=[{ico:'💬',nom:'Général'},{ico:'📢',nom:'Annonces'},{ico:'📝',nom:'Français'},{ico:'📐',nom:'Mathématiques'},{ico:'🔬',nom:'Sciences'},{ico:'🌍',nom:'Anglais'},{ico:'🗺️',nom:'Géographie'},{ico:'🏛️',nom:'Histoire'},{ico:'💻',nom:'Informatique'},{ico:'⚡',nom:'Physique'},{ico:'🧬',nom:'SVT'},{ico:'📖',nom:'Littérature'}];
+  var opts=presets.map(function(p){return "<option value='"+p.ico+" "+p.nom+"'>"+p.ico+" "+p.nom+"</option>";}).join('');
+  M('+ Nouveau Canal — '+c.nom,'',
+    "<div class='fg'><span class='fl'>Modèle</span><select class='fi' id='cvChSel'><option value=''>— Choisir —</option>"+opts+"</select></div>"+
+    "<div class='fg'><span class='fl'>Icône personnalisée</span><input class='fi' id='cvChIco' placeholder='💬' style='font-size:18px'></div>"+
+    "<div class='fg'><span class='fl'>Nom du canal</span><input class='fi' id='cvChNom' placeholder='ex: Révisions Bac'></div>"+
+    "<div class='fg'><span class='fl'>Options</span><label style='display:flex;align-items:center;gap:8px;font-size:13px'><input type='checkbox' id='cvChTeacher'> Réservé aux enseignants / admin</label></div>",
+    "<button class='btn bo' onclick='cm()'>Annuler</button><button class='btn bi' onclick=\"_cvSaveChannel('"+clsId+"')\">+ Créer</button>"
+  );
+  setTimeout(function(){
+    var sel=document.getElementById('cvChSel');
+    if(sel)sel.addEventListener('change',function(){
+      var v=sel.value;if(!v)return;
+      var parts=v.split(' ');
+      var icoEl=document.getElementById('cvChIco');
+      var nomEl=document.getElementById('cvChNom');
+      if(icoEl)icoEl.value=parts[0]||'💬';
+      if(nomEl)nomEl.value=parts.slice(1).join(' ')||v;
+    });
+  },100);
+}
+function _cvSaveChannel(clsId){
+  var c=(DB.classrooms||[]).find(function(x){return x.id===clsId;});if(!c)return;
+  var ico=(document.getElementById('cvChIco')?.value||'💬').trim()||'💬';
+  var nom=(document.getElementById('cvChNom')?.value||'').trim();
+  var teacherOnly=document.getElementById('cvChTeacher')?.checked||false;
+  if(!nom){toast('Nom du canal requis','warn');return;}
+  var key=nom.replace(/[^a-z0-9]/gi,'').toLowerCase()+'_'+gid().slice(0,4);
+  if(!c.channels)c.channels=[];
+  c.channels.push({id:'ch_'+key,nom:nom,ico:ico,ordre:c.channels.length,teacherOnly:teacherOnly});
+  save();cm();toast('✓ Canal créé');if(typeof _triggerAutoSync==='function')_triggerAutoSync();
+}
+function _cvModeratePanel(clsId){
+  var cls=(DB.classrooms||[]).find(function(c){return c.id===clsId;});if(!cls)return;
+  var posts=(DB.forumPosts||[]).filter(function(p){return p.classroomId===clsId;}).slice().sort(function(a,b){return (b.dateISO||'').localeCompare(a.dateISO||'');});
+  var h="<div style='max-height:55vh;overflow-y:auto'>";
+  h+="<div class='ib ibi mb8'><span>ℹ️</span><span>"+posts.length+" message(s)</span></div>";
+  if(!posts.length){h+="<div style='text-align:center;padding:20px;color:var(--ink4)'>Aucun message</div>";}
+  else{
+    posts.forEach(function(p){
+      var ch2=(cls.channels||[]).find(function(c){return c.id===p.channelId;});
+      h+="<div style='display:flex;align-items:flex-start;gap:8px;padding:8px;border-bottom:1px solid var(--bg3)'>";
+      h+="<div style='flex:1;min-width:0'><div style='font-size:12px;font-weight:700;color:var(--bl)'>"+_esc(p.auteurNom)+"<span style='font-weight:400;color:var(--ink4);margin-left:6px'>"+_cvRelTime(p.dateISO)+"</span></div>";
+      h+="<div style='font-size:11px;color:var(--ink4)'>"+(ch2?ch2.ico+" "+_esc(ch2.nom):"")+" · "+(p.type||'')+"</div>";
+      h+="<div style='font-size:12px;color:var(--ink2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap'>"+_esc((p.contenu||'').slice(0,80))+"</div></div>";
+      h+="<div style='display:flex;gap:3px;flex-shrink:0'>";
+      h+="<button onclick=\"_cvTogglePin('"+p.id+"');_cvModeratePanel('"+clsId+"')\" style='background:none;border:none;cursor:pointer;font-size:13px;opacity:.6'>"+(p.pinned?"📌":"📍")+"</button>";
+      h+="<button onclick=\"DB.forumPosts=(DB.forumPosts||[]).filter(function(x){return x.id!='"+p.id+"';});save();_cvModeratePanel('"+clsId+"');toast('✓ Supprimé')\" style='background:none;border:none;cursor:pointer;font-size:13px;color:var(--re)'>🗑️</button>";
+      h+="</div></div>";
+    });
+  }
+  h+="</div>";
+  M('⚙️ Modération — '+cls.ico+' '+cls.nom,'',h,
+    "<button class='btn bo' onclick='cm()'>Fermer</button>"+
+    "<button class='btn bg2 sm' onclick=\"if(confirm('Vider tous les messages ?')){DB.forumPosts=(DB.forumPosts||[]).filter(function(p){return p.classroomId!='"+clsId+"';});save();cm();toast('✓ Vidé');}\" >🗑️ Vider</button>",true);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FIN MODULE CLASSES VIRTUELLES
+// ═══════════════════════════════════════════════════════════════════
 
 function showLabosVirtuels(){
   var cat=window._laboCat||"tous";
