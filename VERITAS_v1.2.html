@@ -15373,6 +15373,50 @@ function _showLittCarte(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe||!oe.carte){toast('Carte non disponible','warn');return;}
   var c=oe.carte;
+  var _MMCOLORS=['#0EA5E9','#F97316','#8B5CF6','#10B981','#EF4444','#F59E0B'];
+  function _mmIco(lb){
+    lb=(lb||'').toLowerCase();
+    if(/thème|theme/.test(lb)) return'💡 ';
+    if(/personnage/.test(lb)) return'👥 ';
+    if(/genre|structure|forme/.test(lb)) return'📐 ';
+    if(/contexte|époque|histoire/.test(lb)) return'🌍 ';
+    if(/style|procéd/.test(lb)) return'🎨 ';
+    if(/symbol|image|réception/.test(lb)) return'✨ ';
+    return'';
+  }
+  var _isMobMap=window.innerWidth<660;
+  if(_isMobMap){
+    // ── Layout HTML carte (mobile) : cartes colorées empilées, lisibles sur tout écran ──
+    var cLines=(c.centre||(oe.titre+'\n'+oe.auteur)).split('\n').filter(Boolean);
+    var ctrHtml='<div style="background:linear-gradient(135deg,#C8880A,#FFC93C);border-radius:14px;padding:14px 18px;text-align:center;box-shadow:0 4px 16px rgba(255,201,60,.35);margin-bottom:12px">'
+      +'<div style="font-weight:900;font-size:16px;color:#142554;line-height:1.3">'+_esc(cLines[0]||oe.titre)+'</div>'
+      +(cLines[1]?'<div style="font-size:12px;color:#5a3e00;margin-top:4px;opacity:.85">'+_esc(cLines[1])+'</div>':'')
+      +'</div>';
+    var brHtml='';
+    (c.branches||[]).forEach(function(br,bi){
+      var col=br.color||_MMCOLORS[bi%_MMCOLORS.length];
+      brHtml+='<div style="background:'+col+';border-radius:12px;padding:12px 16px;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.18)">'
+        +'<div style="font-weight:800;font-size:14px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:6px">'+_mmIco(br.label)+_esc(br.label||'')+'</div>'
+        +'<div style="font-size:12.5px;line-height:1.8;opacity:.97">'
+        +(br.items||[]).map(function(x){return'<span style="display:block;padding:1px 0">• '+_esc(x)+'</span>';}).join('')
+        +'</div></div>';
+    });
+    _vc('<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
+      +'<div class="vsec-title">🗺️ Carte Mentale — '+_esc(oe.titre)+'</div>'
+      +'<div class="vsec-sub" style="font-style:italic">'+_esc(oe.auteur)+' — '+_esc(oe.classe)+'</div>'
+      +'<div style="background:#07142E;border-radius:16px;padding:16px;margin:12px 0">'
+      +ctrHtml
+      +'<div style="display:flex;flex-direction:column;gap:10px">'+brHtml+'</div>'
+      +'</div>'
+      +'<div class="vcard mt14"><div class="bold s mb8">📌 Comment utiliser cette carte ?</div>'
+      +'<div style="font-size:13px;color:var(--ink3);line-height:1.8">Visualisez les <strong>'+(c.branches||[]).length+' axes</strong> thématiques. Chaque carte regroupe un aspect essentiel de l\'œuvre. Téléchargez en HD (PNG) pour imprimer ou réviser.</div>'
+      +'<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'
+      +'<button class="btn sm bi" onclick="_mmDownload(\''+oeuvreKey+'\')">⬇️ Télécharger HD (PNG)</button>'
+      +'<button class="btn sm bo" onclick="window.print()">🖨️ Imprimer</button>'
+      +'</div></div></div>');
+    return;
+  }
+  // ── Layout Canvas (desktop) ──
   // ── Légende couleur sous la carte ──
   var legHtml='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:14px">';
   (c.branches||[]).forEach(function(br){
@@ -15398,16 +15442,7 @@ function _showLittCarte(oeuvreKey){
   setTimeout(function(){
     var cv=document.getElementById('mmCanvas');
     if(!cv) return;
-    var vw=window.innerWidth;
-    var isMob=vw<660;
-    // Sur mobile : sc = largeur du conteneur / 720 pour que le canvas remplisse l'écran
-    // Sur desktop : sc = 1 (canvas interne 1200px, réduit par CSS)
-    var sc=1;
-    if(isMob){
-      var cW=(cv.parentElement?cv.parentElement.clientWidth:vw)||vw;
-      sc=Math.min(cW/720,1); // jamais > 1 sur mobile
-    }
-    _mmDrawCv(cv,c,oe,sc,isMob);
+    _mmDrawCv(cv,c,oe,1,false);
   },80);
 }
 
@@ -21155,6 +21190,9 @@ function _showPDFViewer(src,titre,canDownload){
       displaySrc=URL.createObjectURL(new Blob([_bu],{type:_bm}));
     }
   }catch(e){displaySrc=src;}
+  // Mémoriser pour boutons onclick (blob URL ne peut pas être interpolé en attribut inline)
+  window._pdfVwSrc=displaySrc;
+  window._pdfVwTitre=titre;
   // Sur mobile : l'iframe PDF provoque une navigation (redirect). Afficher des boutons à la place.
   var _isMobPDF=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||'');
   if(_isMobPDF){
@@ -21163,8 +21201,8 @@ function _showPDFViewer(src,titre,canDownload){
       +'<div style="padding:32px 20px;text-align:center;background:var(--bg)">'
       +'<div style="font-size:64px;margin-bottom:16px">📄</div>'
       +'<div style="font-size:16px;font-weight:700;color:var(--bl);margin-bottom:20px">'+_esc(titre)+'</div>'
-      +'<a href="'+displaySrc+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:15px;padding:14px 28px;margin:6px;width:100%;max-width:280px">📖 Ouvrir le PDF</a><br>'
-      +(canDownload?'<a href="'+displaySrc+'" download="'+_esc(titre)+'.pdf" class="btn bo" style="display:inline-block;text-decoration:none;font-size:14px;padding:12px 24px;margin:6px;width:100%;max-width:280px">⬇ Télécharger</a><br>':'')
+      +'<button class="btn bi" style="font-size:15px;padding:14px 28px;margin:6px;width:100%;max-width:280px;cursor:pointer;border:none" onclick="window.open(window._pdfVwSrc,\'_blank\')">📖 Ouvrir le PDF</button><br>'
+      +(canDownload?'<button class="btn bo" style="font-size:14px;padding:12px 24px;margin:6px;width:100%;max-width:280px;cursor:pointer;border:none" onclick="window.open(window._pdfVwSrc,\'_blank\')">⬇ Télécharger</button><br>':'')
       +'<div style="font-size:11px;color:var(--ink4);margin-top:12px;font-style:italic">© VÉRITAS · Usage pédagogique uniquement</div>'
       +'</div>';
     M('','',_mBody,'<button class="btn bo" onclick="cm()">Fermer</button>',false);
@@ -21201,8 +21239,8 @@ function _showPDFViewer(src,titre,canDownload){
     +'</div>';
   var footer='<button class="btn bo" onclick="cm()">Fermer</button>';
   if(canDownload){
-    footer+='<button class="btn" style="background:#7C3AED;color:#fff" onclick="window.open(\''+displaySrc+'\',\'_blank\')">⬇️ Ouvrir PDF</button>';
-    footer+='<button class="btn" style="background:#DC2626;color:#fff" onclick="cm();_downloadPDFCover(\''+encodeURIComponent(titre)+'\')">📄 Page de garde</button>';
+    footer+='<button class="btn" style="background:#7C3AED;color:#fff" onclick="window.open(window._pdfVwSrc,\'_blank\')">⬇️ Ouvrir PDF</button>';
+    footer+='<button class="btn" style="background:#DC2626;color:#fff" onclick="(function(){var a=document.createElement(\'a\');a.href=window._pdfVwSrc;a.download=(window._pdfVwTitre||\'document\').replace(/[^a-z0-9]/gi,\'_\')+\'.pdf\';a.click();})()">⬇ Télécharger PDF</button>';
   }
   M('','',body,footer,true);
 }
