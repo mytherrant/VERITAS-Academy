@@ -7722,12 +7722,16 @@ function mStorageDashboard(){
   var stats={photos:0,pdf:0,word:0,video:0,audio:0,autre:0,total:0,sizeKo:0};
   function _classify(url){
     if(!url||typeof url!=='string')return null;
+    // FIX : ne compter QUE les URLs http(s) — les data: sont en local pas sur LWS
+    if(url.indexOf('data:')===0||url.indexOf('blob:')===0)return null;
+    if(url.indexOf('http')!==0)return null;
     var u=url.toLowerCase();
-    if(/\.(jpg|jpeg|png|gif|webp|svg)$/.test(u))return'photos';
-    if(/\.pdf$/.test(u))return'pdf';
-    if(/\.(docx?|odt)$/.test(u))return'word';
-    if(/\.(mp4|webm|mov|ogv)$/.test(u))return'video';
-    if(/\.(mp3|wav|m4a|ogg)$/.test(u))return'audio';
+    if(/\.(jpg|jpeg|png|gif|webp|svg)(\?|$)/.test(u))return'photos';
+    if(/\.pdf(\?|$)/.test(u))return'pdf';
+    if(/\.(docx?|odt)(\?|$)/.test(u))return'word';
+    if(/\.(mp4|webm|mov|ogv)(\?|$)/.test(u))return'video';
+    if(/\.(mp3|wav|m4a|ogg)(\?|$)/.test(u))return'audio';
+    if(/youtube\.com|youtu\.be/.test(u))return'video';
     return'autre';
   }
   function _addUrl(url){
