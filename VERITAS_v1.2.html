@@ -2819,7 +2819,7 @@ setInterval(_refreshCitation,15000);
 
 // ── LWS API config ──────────────────────────────────────────
 const LWS_API = {
-  db:     'https://veritas-school.com/api/db.php',
+  db:     'https://veritas-school-a39ab-default-rtdb.europe-west1.firebasedatabase.app/db.json',
   upload: 'https://veritas-school.com/api/upload.php',
   files:  'https://veritas-school.com/uploads/veritas/'
 };
@@ -3821,23 +3821,21 @@ function save(){
   _syncTimeout=setTimeout(async function(){
     try{
       var dbLight=JSON.parse(JSON.stringify(DB));
-      // BUG-10 FIX : ne jamais envoyer les mots de passe (même hashés) au serveur
+      // Sécurité : ne jamais envoyer les mots de passe dans le cloud
       if(dbLight.superAdmin)delete dbLight.superAdmin.pwd;
       (dbLight.admins||[]).forEach(function(a){delete a.pwd;});
       (dbLight.visitorAccounts||[]).forEach(function(v){delete v.pwd;delete v.pwdHash;});
       if(dbLight.tpwd)dbLight.tpwd={};
-      // Stripping binaires lourds
+      // Stripping binaires lourds (videos, PDFs base64)
       (dbLight.elearning&&dbLight.elearning.contenus||[]).forEach(function(c){delete c.fichierData;});
       (dbLight.books||[]).forEach(function(b){delete b.content;});
-      // Inclure _secret dans le corps (plus d'Authorization header à cause du CORS preflight LWS)
-      if(DB.cloudConfig&&DB.cloudConfig.secret)dbLight._secret=DB.cloudConfig.secret;
-      var res=await fetch(LWS_API.db+'?_secret='+encodeURIComponent(DB.cloudConfig&&DB.cloudConfig.secret||''),{
-        method:'POST',
+      var res=await fetch(LWS_API.db,{
+        method:'PUT',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify(dbLight)
       });
       if(!res.ok) throw new Error('HTTP '+res.status);
-      toast('✓ Synchronisé sur le serveur');
+      toast('☁️ Synchronisé');
       // ── Push immédiat vers sync.php (endpoint bg poll) pour éviter la désync db.php/sync.php ──
       // db.php et sync.php peuvent être deux fichiers différents côté serveur
       if(DB.cloudConfig&&DB.cloudConfig.url&&DB.cloudConfig.secret){
