@@ -5449,10 +5449,10 @@ function vShowSec(sec,btn){
     </div>
 
     <div class="vsec-title v-reveal">🏫 Présentation du Centre</div>
-    <div class="vsec-sub v-reveal">Bienvenue au ${DB.school?.nom||"VÉRITAS Academy"}</div>
+    <div class="vsec-sub v-reveal">Bienvenue au ${_esc(DB.school?.nom||"VÉRITAS Academy")}</div>
     <div class="g2 v-reveal v-stagger">
       <div class="vcard v-shine">
-        <div style="font-size:13px;line-height:1.9;white-space:pre-line;color:var(--ink2)">${pi.description||""}</div>
+        <div style="font-size:13px;line-height:1.9;white-space:pre-line;color:var(--ink2)">${_esc(pi.description||"")}</div>
       </div>
       <div>
         <div class="vcard mb16">
@@ -5515,7 +5515,7 @@ function vShowSec(sec,btn){
     <div class="vsec-title">📖 Notre Histoire</div>
     <div class="vsec-sub">20 ans d\'excellence au service des élèves camerounais</div>
     <div class="vcard mb20">
-      <div style="font-size:14px;line-height:2;white-space:pre-line;color:var(--ink2)">${pi.histoire||""}</div>
+      <div style="font-size:14px;line-height:2;white-space:pre-line;color:var(--ink2)">${_esc(pi.histoire||"")}</div>
     </div>
     <div class="g3">
       ${[["2023","Fondation du centre","Ouverture avec 15 élèves et 3 enseignants dans une salle de classe louée"],["2023","Fondation","Construction de nouveaux locaux et recrutement de 8 enseignants supplémentaires"],["2024","Première année","Obtention du statut d\'établissement d\'enseignement agréé par le MINESEC"],["2024","Croissance","Introduction des outils numériques dans les pratiques pédagogiques"],["2024","Innovation","Adaptation aux cours à distance pendant la période COVID-19"],["2025","Aujourd\'hui",`${DB.students.length} élèves, ${DB.teachers.length} enseignants, taux de réussite > 85%`]].map(([an,t,d])=>`<div class="vcard" style="border-left:4px solid #3C8DFF;background:linear-gradient(135deg,#fff 0%,#E0EAFF 100%);border-radius:14px"><div style="font-family:Georgia,serif;font-size:18px;color:var(--gold);font-weight:700">${an}</div><div class="semi s mt8 mb4">${t}</div><div style="font-size:13px;color:var(--ink4)">${d}</div></div>`).join("")}
@@ -6368,25 +6368,49 @@ function sendNotification(){
 // ═══════════════════════════════════════════════
 
 // ── Hachage SHA-256 avec sel unique par utilisateur ──
+// DEPRECATED : fallback XOR conservé uniquement pour vérifier les anciens hashes H$...
+// Ne jamais utiliser pour de nouveaux hashes — _hashSync produit ~4 milliards de valeurs (cassable en secondes).
 function _hashSync(pwd,salt){
-  // Fallback synchrone simple pour compatibilité
   var s=pwd+(salt||'_VERITAS_2026');var h=0;
   for(var i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;}
   return 'H$'+Math.abs(h).toString(36)+'$'+s.length;
 }
 async function hashPassword(pwd,salt){
   if(typeof crypto!=='undefined'&&crypto.subtle){
-    var enc=new TextEncoder();var data=enc.encode(pwd+'$'+(salt||'VERITAS')+'$2026');
-    var hash=await crypto.subtle.digest('SHA-256',data);
-    return 'S256$'+Array.from(new Uint8Array(hash)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    try{
+      var enc=new TextEncoder();var data=enc.encode(pwd+'$'+(salt||'VERITAS')+'$2026');
+      var hash=await crypto.subtle.digest('SHA-256',data);
+      return 'S256$'+Array.from(new Uint8Array(hash)).map(function(b){return b.toString(16).padStart(2,'0');}).join('');
+    }catch(e){console.warn('[security] crypto.subtle a échoué, fallback faible:',e);}
   }
+  // Fallback uniquement pour navigateurs anciens — produit H$ (XOR faible)
+  console.warn('[security] AVERTISSEMENT : utilisation du hash XOR faible (navigateur ancien)');
   return _hashSync(pwd,salt);
 }
 function isHashed(p){return p&&(p.indexOf('S256$')===0||p.indexOf('H$')===0);}
-async function verifyPassword(plain,hashed,salt){
-  if(!isHashed(hashed))return plain===hashed; // legacy plaintext
-  var h=await hashPassword(plain,salt);
-  return h===hashed;
+async function verifyPassword(plain,hashed,salt,recordRef){
+  if(isHashed(hashed)){
+    try{
+      var h=await hashPassword(plain,salt);
+      var ok=(h===hashed);
+      // Si compte ancien (H$ XOR faible) et auth réussie → upgrader vers S256$
+      if(ok && hashed.indexOf('H$')===0 && recordRef){
+        try{recordRef.pwd=h;if(typeof save==='function')setTimeout(save,100);}catch(eU){}
+      }
+      return ok;
+    }catch(e){console.warn('[security] hash fail, fallback plain:',e);return false;}
+  }
+  // Legacy plaintext : autoriser UNE fois pour ne pas brick les comptes seed, mais upgrader immédiatement
+  if(plain===hashed){
+    if(recordRef){
+      try{
+        recordRef.pwd=await hashPassword(plain,salt);
+        if(typeof save==='function')setTimeout(save,100);
+      }catch(eU2){console.warn('[security] upgrade fail:',eU2);}
+    }
+    return true;
+  }
+  return false;
 }
 
 // ── Migration automatique : hasher tous les mots de passe en clair ──
@@ -9322,29 +9346,34 @@ async function doLogin(){
     var sa2=null;
     if(DB.studentAccounts){for(var i=0;i<DB.studentAccounts.length;i++){
       var a2=DB.studentAccounts[i];
-      if(a2.user.toLowerCase()===u.toLowerCase()){var ok=await verifyPassword(p,a2.pwd,a2.user);if(ok){sa2=a2;break;}}
+      if(a2.user.toLowerCase()===u.toLowerCase()){var ok=await verifyPassword(p,a2.pwd,a2.user,a2);if(ok){sa2=a2;break;}}
     }}
     if(sa2){var s=S(sa2.eid);if(s){sa2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;go2SES({...s,type:'eleve',sid:s.id,accountId:sa2.id,plans:sa2.plans||[]});return;}}
     // Visiteurs inscrits en ligne
     var va2=null;
     if(DB.visitorAccounts){for(var j=0;j<DB.visitorAccounts.length;j++){
       var v2=DB.visitorAccounts[j];
-      if(v2.user.toLowerCase()===u.toLowerCase()&&v2.statut!=='suspendu'){var ok2=await verifyPassword(p,v2.pwd,v2.user);if(ok2){va2=v2;break;}}
+      if(v2.user.toLowerCase()===u.toLowerCase()&&v2.statut!=='suspendu'){var ok2=await verifyPassword(p,v2.pwd,v2.user,v2);if(ok2){va2=v2;break;}}
     }}
     if(va2){va2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur',accountId:va2.id,plans:va2.plans||[]});hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);return;}
   } else if(lr==="enseignant"){
     var t=DB.teachers.find(function(t2){return t2.user===u;});
-    if(t&&DB.tpwd[u]){var okT=await verifyPassword(p,DB.tpwd[u],u);if(okT){DB.loginLog.push({user:u,role:'enseignant',date:today()});save();_recordLoginSuccess(u);_loginAttempts.count=0;go2SES({...t,type:'enseignant',tid:t.id});return;}}
+    if(t&&DB.tpwd[u]){
+      // Wrapper pour permettre l'upgrade DB.tpwd[u] via recordRef.pwd
+      var _tpwdRef={get pwd(){return DB.tpwd[u];},set pwd(v){DB.tpwd[u]=v;}};
+      var okT=await verifyPassword(p,DB.tpwd[u],u,_tpwdRef);
+      if(okT){DB.loginLog.push({user:u,role:'enseignant',date:today()});save();_recordLoginSuccess(u);_loginAttempts.count=0;go2SES({...t,type:'enseignant',tid:t.id});return;}
+    }
   } else if(lr==="admin"){
     var foundAdmin=null;
     if(DB.admins){for(var k=0;k<DB.admins.length;k++){
       var ad=DB.admins[k];
-      if(ad.user===u){var okA=await verifyPassword(p,ad.pwd,ad.user);if(okA){foundAdmin=ad;break;}}
+      if(ad.user===u){var okA=await verifyPassword(p,ad.pwd,ad.user,ad);if(okA){foundAdmin=ad;break;}}
     }}
     if(foundAdmin){_recordLoginSuccess(u);_loginAttempts.count=0;sendOTP({...foundAdmin,type:'admin'});return;}
   } else if(lr==="superadmin"){
     var sa=DB.superAdmin;
-    if(sa&&u===sa.user){var okS=await verifyPassword(p,sa.pwd,sa.user);
+    if(sa&&u===sa.user){var okS=await verifyPassword(p,sa.pwd,sa.user,sa);
       if(okS){_recordLoginSuccess(u);_loginAttempts.count=0;sendOTP({...sa,type:'superadmin',pre:'',role2:'superadmin'});return;}
     }
   }
@@ -10336,21 +10365,36 @@ function mAddAdmin(){
   '</div>',
   '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveNewAdmin()">✓ Créer le compte</button>');
 }
-function saveNewAdmin(){
+async function saveNewAdmin(){
   var user=(document.getElementById('naUser')?.value||'').trim();
   var pwd=document.getElementById('naPwd')?.value||'';
   var nom=(document.getElementById('naNom')?.value||'').trim();
   var role=document.getElementById('naRole')?.value||'Administrateur';
   if(!user||!pwd||!nom){toast('Tous les champs requis','warn');return;}
+  if(pwd.length<8){toast('Mot de passe : minimum 8 caractères','warn');return;}
   if(DB.admins.find(function(a){return a.user===user;})){toast('Identifiant déjà utilisé','warn');return;}
-  DB.admins.push({id:gid(),user:user,pwd:pwd,nom:nom,role:role,role2:'admin'});
-  save();autoNotify('Nouvel administrateur','Un nouveau compte admin a été créé: '+nom+' ('+role+')','all');cm();re();toast('✓ Administrateur '+nom+' créé');
+  // FIX sécurité : hash AVANT save() pour ne jamais pousser de plain text vers Firebase
+  try{
+    var hashed=await hashPassword(pwd,user);
+    DB.admins.push({id:gid(),user:user,pwd:hashed,nom:nom,role:role,role2:'admin'});
+    save();autoNotify('Nouvel administrateur','Un nouveau compte admin a été créé: '+nom+' ('+role+')','all');cm();re();toast('✓ Administrateur '+nom+' créé');
+  }catch(e){toast('Erreur hash mot de passe : '+e.message,'warn');}
 }
-function promoteToAdmin(tid){
+async function promoteToAdmin(tid){
   var t=T(tid);if(!t)return;
   if(DB.admins.find(function(a){return a.user===t.user;})){toast('Déjà administrateur','warn');return;}
   if(!confirm('Promouvoir '+t.pre+' '+t.nom+' au rang d\'administrateur ?'))return;
-  DB.admins.push({id:gid(),user:t.user,pwd:DB.tpwd[t.user]||'Veritas2024!',nom:t.pre+' '+t.nom,role:'Enseignant-Admin',role2:'admin'});
+  // FIX sécurité : si DB.tpwd contient déjà un hash, le réutiliser ; sinon refuser
+  var existingPwd=DB.tpwd[t.user];
+  if(!existingPwd){toast('Cet enseignant n\'a pas de mot de passe défini','warn');return;}
+  // Si plain text, hasher ; si déjà hashé, garder tel quel
+  var finalPwd;
+  if(isHashed(existingPwd)){finalPwd=existingPwd;}
+  else{
+    try{finalPwd=await hashPassword(existingPwd,t.user);DB.tpwd[t.user]=finalPwd;}
+    catch(e){toast('Erreur hash : '+e.message,'warn');return;}
+  }
+  DB.admins.push({id:gid(),user:t.user,pwd:finalPwd,nom:t.pre+' '+t.nom,role:'Enseignant-Admin',role2:'admin'});
   save();autoNotify('Promotion admin',t.pre+' '+t.nom+' a été promu administrateur','all');re();toast('✓ '+t.pre+' '+t.nom+' promu administrateur');
 }
 function revokeAdmin(aid){
@@ -13986,7 +14030,8 @@ function _ivSave(){
   if(window._pVidFile){
     var cfg=DB.cloudConfig||{};
     var base=(cfg.url||'https://veritas-school.com/api').replace(/\/+$/,'');
-    var secret=cfg.secret||'VERITAS-CLOUD-2026-xK9m'; // fallback hardcodé
+    var secret=cfg.secret; // FIX sécurité : pas de fallback hardcodé
+    if(!secret){toast('⚠ Clé API cloud manquante — configurez Paramètres → Cloud','warn');return;}
 
     var fd=new FormData();
     fd.append('video',window._pVidFile,window._pVidFile.name);
@@ -24395,9 +24440,9 @@ function cvTeacherCorrections(cvId,sjId){
     if(!soum) return '<tr style="background:var(--reb)"><td class="semi">'+el.nom+' '+el.pre+'</td><td><span class="bg bgr" style="font-size:11px">Non soumis</span></td><td>—</td><td>—</td><td>—</td></tr>';
     var corrige=soum.note!==undefined&&soum.note!==null;
     return '<tr>'+
-      '<td class="semi">'+el.nom+' '+el.pre+'</td>'+
-      '<td><span class="bg bgg" style="font-size:11px">'+soum.dateSoumission+'</span></td>'+
-      '<td style="font-size:12px;max-width:200px">'+(soum.contenu?soum.contenu.substring(0,60)+'...':'')+(soum.fichier?'<br><a href="'+soum.fichier+'" target="_blank" style="font-size:11px;color:var(--bl)">📎 Fichier</a>':'')+'</td>'+
+      '<td class="semi">'+_esc(el.nom)+' '+_esc(el.pre)+'</td>'+
+      '<td><span class="bg bgg" style="font-size:11px">'+_esc(soum.dateSoumission||'')+'</span></td>'+
+      '<td style="font-size:12px;max-width:200px">'+(soum.contenu?_esc(soum.contenu.substring(0,60))+'...':'')+(soum.fichier?'<br><a href="'+_esc(soum.fichier)+'" target="_blank" style="font-size:11px;color:var(--bl)">📎 Fichier</a>':'')+'</td>'+
       '<td>'+(corrige?'<span class="mono bold" style="color:var(--gr)">'+soum.note+'/'+sj.noteSur+'</span>':'<span class="bg bgd" style="font-size:11px">À corriger</span>')+'</td>'+
       '<td><button class="btn bi xs" onclick="cvCorrectSoumission(\''+soum.id+'\',\''+sjId+'\')">'+( corrige?'✏️ Réviser':'✅ Corriger')+'</button></td>'+
       '</tr>';
@@ -24420,8 +24465,8 @@ function cvCorrectSoumission(soumId,sjId){
     var sj=(cv.sujets||[]).find(function(s){return s.id===sjId;});
     if(sj) noteSur=sj.noteSur||20;
   });
-  M('Corriger — '+el.nom+' '+el.pre,'',
-    '<div class="ib ibt mb12"><span>📄</span><span>'+( soum.contenu||'Aucun texte fourni')+'</span></div>'+
+  M('Corriger — '+_esc(el.nom||'')+' '+_esc(el.pre||''),'',
+    '<div class="ib ibt mb12"><span>📄</span><span style="white-space:pre-wrap">'+_esc(soum.contenu||'Aucun texte fourni')+'</span></div>'+
     (soum.fichierUrl?
       '<div style="margin-bottom:12px"><a class="btn bvi sm" href="'+_esc(soum.fichierUrl)+'" target="_blank" rel="noopener">📎 ☁️ Voir le fichier soumis</a> <a class="btn bo sm" href="'+_esc(soum.fichierUrl)+'" download target="_blank">📥 Télécharger</a></div>':
      soum.fichierData?
