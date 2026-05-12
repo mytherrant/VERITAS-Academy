@@ -3821,30 +3821,55 @@ function save(){
   _syncTimeout=setTimeout(async function(){
     try{
       var dbLight=JSON.parse(JSON.stringify(DB));
-      // Sécurité : ne jamais envoyer les mots de passe dans le cloud
-      if(dbLight.superAdmin)delete dbLight.superAdmin.pwd;
-      (dbLight.admins||[]).forEach(function(a){delete a.pwd;});
-      (dbLight.visitorAccounts||[]).forEach(function(v){delete v.pwd;delete v.pwdHash;});
+      // Sécurité : strip les mots de passe en clair (ne jamais cloud)
+      // Mais GARDER les pwdHash (bcrypt one-way) pour que l'auth fonctionne sur d'autres appareils
+      function _stripPlainPwd(o){
+        if(!o)return;
+        if(o.pwd && !(typeof o.pwd==='string' && o.pwd.startsWith('$'))){
+          // pwd n'est pas un hash bcrypt → c'est du clair → supprimer
+          delete o.pwd;
+        }
+      }
+      if(dbLight.superAdmin)_stripPlainPwd(dbLight.superAdmin);
+      (dbLight.admins||[]).forEach(_stripPlainPwd);
+      (dbLight.visitorAccounts||[]).forEach(function(v){
+        _stripPlainPwd(v);
+        // pwdHash : OK à garder (hash bcrypt), permet auth sur autres appareils
+      });
       if(dbLight.tpwd)dbLight.tpwd={};
       // Stripping binaires lourds (videos, PDFs base64)
       (dbLight.elearning&&dbLight.elearning.contenus||[]).forEach(function(c){delete c.fichierData;});
       (dbLight.books||[]).forEach(function(b){delete b.content;});
+      // ── OPTIMISTIC LOCK : avant PUT, vérifier que personne n'a écrit après notre dernière sync ──
+      // Firebase REST : GET /db/lastModified.json renvoie juste le timestamp (pas tout le DB)
+      try{
+        var _tsUrl=LWS_API.db.replace(/\/db\.json$/,'/db/lastModified.json')+'?t='+Date.now();
+        var _checkRes=await fetch(_tsUrl,{method:'GET'});
+        if(_checkRes.ok){
+          var _remoteTS=parseInt(await _checkRes.json())||0;
+          var _localKnownTS=window._fbLastSyncedMs||0;
+          // Conflit détecté : cloud a une version plus récente que notre dernier push, ET plus récente que notre DB locale
+          if(_remoteTS>_localKnownTS+2000 && _remoteTS>(DB.lastModified||0)+2000){
+            console.warn('[Firebase] Conflit détecté — pull avant push');
+            toast('⟳ Re-synchro (autre appareil a modifié)','info');
+            // Différer le PUT : laisser le poller faire le merge, puis re-tenter
+            clearTimeout(_syncTimeout);
+            _syncTimeout=setTimeout(function(){save();},2500);
+            return;
+          }
+        }
+      }catch(eLock){/* check non-bloquant — continuer le PUT */}
       var res=await fetch(LWS_API.db,{
         method:'PUT',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify(dbLight)
       });
       if(!res.ok) throw new Error('HTTP '+res.status);
+      // Mémoriser le lastModified du push pour optimistic-lock du prochain PUT
+      window._fbLastSyncedMs=DB.lastModified||Date.now();
       toast('☁️ Synchronisé');
-      // ── Push immédiat vers sync.php (endpoint bg poll) pour éviter la désync db.php/sync.php ──
-      // db.php et sync.php peuvent être deux fichiers différents côté serveur
-      if(DB.cloudConfig&&DB.cloudConfig.url&&DB.cloudConfig.secret){
-        setTimeout(function(){
-          if(typeof _cloudSilentPushDB==='function')_cloudSilentPushDB(null);
-        },500);
-      }
     }catch(e){
-      console.warn('[LWS] save error:',e);
+      console.warn('[Firebase] save error:',e);
       if(iA()&&typeof _hasLocalBinaries==='function'&&_hasLocalBinaries()){
         _toastRetrySync(); // toast avec bouton "Réessayer" stylisé
       } else {
@@ -3932,16 +3957,11 @@ function _dbScore(d){
 
 function _startBgPoll(){
   if(_bgPollTimer)return; // déjà actif
-  var cfg=_effectiveCloudConfig();
-  if(!cfg||!cfg.url||!cfg.secret)return;
+  // FIX: polling Firebase (plus de dépendance LWS sync.php)
   _bgPollTimer=setInterval(function(){
-    var cfg2=_effectiveCloudConfig();
-    if(!cfg2||!cfg2.url||!cfg2.secret){clearInterval(_bgPollTimer);_bgPollTimer=null;return;}
     if(!navigator.onLine)return;
-    // Pas d'Authorization header (CORS preflight échoue) — secret passé en ?k= dans l'URL
-    var url=(cfg2.url||'').replace(/\/$/,'')
-      +'/sync.php?t='+Date.now()
-      +(cfg2.secret?'&k='+encodeURIComponent(cfg2.secret)+'&_secret='+encodeURIComponent(cfg2.secret):'');
+    // Firebase Realtime Database REST GET — cache-buster pour éviter cache navigateur
+    var url=LWS_API.db+'?t='+Date.now();
     fetch(url,{})
     .then(function(r){return r.ok?r.json():null;})
     .then(function(serverDB){
@@ -4052,13 +4072,14 @@ function _startBgPoll(){
         save();
         _saveCloudConfigCache();
         _setSyncDot&&_setSyncDot('ok',DB.cloudConfig.lastSync);
-        // Si admin connecté : re-pousser la fusion vers le cloud (pour que l'autre appareil en bénéficie)
-        if(iA()){setTimeout(function(){_autoSyncDirty=true;_cloudAutoSync();},5000);}
+        // Si admin connecté : re-pousser la fusion vers Firebase (pour que l'autre appareil en bénéficie)
+        // save() est debounced 800ms et pousse vers Firebase via PUT
+        if(iA()){setTimeout(function(){save();},5000);}
         toast('🔄 Données synchronisées et fusionnées','info');
         if(typeof re==='function')setTimeout(re,600);
       } else if(shouldPush){
-        _autoSyncDirty=true;
-        _cloudAutoSync();
+        // Push local plus récent vers Firebase via save() (toujours PUT, jamais sync.php)
+        save();
       }
     })
     .catch(function(){});
@@ -4128,25 +4149,38 @@ function _cloudAutoSyncPush(attempt){
     if(img.src&&img.src.startsWith('data:')&&img.src.length>_AL)img.src=img.serverSrc||'';
   });
 
+  // Strip plain passwords avant push Firebase (garder pwdHash bcrypt one-way)
+  function _stripPlainPwdFb(o){
+    if(!o)return;
+    if(o.pwd && !(typeof o.pwd==='string' && o.pwd.startsWith('$'))) delete o.pwd;
+  }
+  if(data.superAdmin)_stripPlainPwdFb(data.superAdmin);
+  (data.admins||[]).forEach(_stripPlainPwdFb);
+  (data.visitorAccounts||[]).forEach(_stripPlainPwdFb);
+  if(data.tpwd)data.tpwd={};
+
   // Timeout 15s pour éviter les blocages
   var ctrl=typeof AbortController!=='undefined'?new AbortController():null;
   var tmt=ctrl?setTimeout(function(){ctrl.abort();},15000):null;
 
-  fetch(_cloudUrl('sync.php'),{
-    method:'POST',
-    headers:_cloudHeaders(true),
+  // FIX: PUT Firebase au lieu de POST sync.php (LWS) — sync multi-appareils fiable
+  fetch(LWS_API.db,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify(data),
     signal:ctrl?ctrl.signal:undefined
   })
   .then(function(r){
     if(tmt)clearTimeout(tmt);
     if(!r.ok)throw new Error('HTTP '+r.status+(r.status===413?' (données trop volumineuses)':r.status===401?' (clé API invalide)':''));
-    return r.json();
+    // Firebase retourne l'objet PUT en succès — pas besoin de parser
+    return {saved_at:new Date().toLocaleString('fr-FR')};
   })
   .then(function(res){
     if(res.error)throw new Error(res.error);
     var dateSync=res.saved_at||new Date().toLocaleString('fr-FR');
     DB.cloudConfig.lastSync=dateSync;
+    window._fbLastSyncedMs=DB.lastModified||Date.now();
     _saveCloudConfigCache(); // mettre à jour le cache pour le téléphone
     _syncRetryCount=0;
     try{localStorage.setItem('vrt10',JSON.stringify(DB));}catch(e){}
@@ -6944,15 +6978,26 @@ function cloudSaveDB(){
     _si('cloudSyncStatus','<div class="ib" style="background:#FEF3C7;border:1px solid #FDE68A;color:#D97706"><span>⚠️</span><span>Données encore volumineuses après filtrage ('+sizeKB+' Ko). La sauvegarde peut échouer.</span></div>');
   }
 
-  fetch(_cloudUrl('sync.php'),{
-    method:'POST',
-    headers:_cloudHeaders(true),
+  // Strip plain pwd avant push Firebase (garder pwdHash bcrypt)
+  function _stripPlainPwdSave(o){if(!o)return;if(o.pwd&&!(typeof o.pwd==='string'&&o.pwd.startsWith('$')))delete o.pwd;}
+  var _pData=JSON.parse(payload);
+  if(_pData.superAdmin)_stripPlainPwdSave(_pData.superAdmin);
+  (_pData.admins||[]).forEach(_stripPlainPwdSave);
+  (_pData.visitorAccounts||[]).forEach(_stripPlainPwdSave);
+  if(_pData.tpwd)_pData.tpwd={};
+  payload=JSON.stringify(_pData);
+
+  // FIX: PUT Firebase au lieu de POST sync.php
+  fetch(LWS_API.db,{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
     body:payload
   })
   .then(function(r){
     if(r.status===413)throw new Error('Payload trop grand (HTTP 413) — réduisez les données (vidéos, images)');
-    if(!r.ok)throw new Error('Erreur serveur HTTP '+r.status+' — vérifiez que sync.php est bien déployé');
-    return r.json();
+    if(!r.ok)throw new Error('Erreur serveur HTTP '+r.status+' — Firebase indisponible ?');
+    // Firebase retourne l'objet PUT — pas d'enveloppe {saved_at, size_kb}
+    return {saved_at:new Date().toLocaleString('fr-FR'),size_kb:sizeKB};
   })
   .then(function(res){
     if(res.error)throw new Error(res.error);
@@ -7001,12 +7046,14 @@ function cloudRestoreDB(){
   if(!confirm('Dernière confirmation : les données actuelles seront écrasées. Continuer ?'))return;
   toast('📥 Récupération des données depuis le cloud...');
   _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Restauration en cours...</span></div>');
-  fetch(_cloudUrl('sync.php'),{headers:_cloudHeaders()})
+  // FIX: GET Firebase au lieu de sync.php
+  fetch(LWS_API.db+'?t='+Date.now())
   .then(function(r){
     if(!r.ok)throw new Error('HTTP '+r.status);
     return r.json();
   })
   .then(function(data){
+    if(!data)throw new Error('Cloud vide — aucune sauvegarde à restaurer');
     if(data.error)throw new Error(data.error);
     if(!data.school||!data.students){throw new Error('Format de données invalide');}
     // Save current config before overwriting
@@ -7396,7 +7443,17 @@ function _cloudSilentPushDB(onDone){
   if(data.partenaires)data.partenaires.forEach(function(p){if(p.logo&&p.logo.startsWith('data:')&&p.logo.length>_BIN_LIMIT)p.logo='';});
   if(data.books)data.books.forEach(function(b){if(b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>_BIN_LIMIT)b.coverImg='';if(b.fichierKey){if(b.fichierData)b.fichierData='';b.fichierKey='';}});
   if(data.galleryImages)data.galleryImages.forEach(function(img){if(img.src&&img.src.startsWith('data:')&&img.src.length>_BIN_LIMIT)img.src=img.serverSrc||'';});
-  fetch(_cloudUrl('sync.php'),{method:'POST',headers:_cloudHeaders(true),body:JSON.stringify(data)})
+  // Strip plain pwd avant push Firebase (garder pwdHash bcrypt)
+  function _stripPlainPwdSilent(o){
+    if(!o)return;
+    if(o.pwd && !(typeof o.pwd==='string' && o.pwd.startsWith('$'))) delete o.pwd;
+  }
+  if(data.superAdmin)_stripPlainPwdSilent(data.superAdmin);
+  (data.admins||[]).forEach(_stripPlainPwdSilent);
+  (data.visitorAccounts||[]).forEach(_stripPlainPwdSilent);
+  if(data.tpwd)data.tpwd={};
+  // FIX: PUT Firebase au lieu de POST sync.php
+  fetch(LWS_API.db,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
   .then(function(r){return r.ok?r.json():Promise.reject(r.status);})
   .then(function(res){
     if(!res.error){DB.cloudConfig.lastSync=new Date().toLocaleString('fr-FR')+'(auto)';save();}
@@ -7433,10 +7490,12 @@ function cloudForcePull(){
     +'Vos modifications non synchronisées seront perdues.'))return;
   _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Récupération depuis le cloud...</span></div>');
   toast('📥 Récupération en cours...','info');
-  fetch(_cloudUrl('sync.php'),{headers:_cloudHeaders()})
+  // FIX: GET Firebase au lieu de sync.php
+  fetch(LWS_API.db+'?t='+Date.now())
   .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
   .then(function(serverDB){
-    if(!serverDB||!serverDB.school||!serverDB.students)throw new Error('Format invalide');
+    if(!serverDB)throw new Error('Cloud vide — rien à récupérer');
+    if(!serverDB.school||!serverDB.students)throw new Error('Format invalide');
     var cloudCfg=DB.cloudConfig;
     // Fusion : préserver les ressources locales absentes du cloud
     function _mById(la,sa){var m=JSON.parse(JSON.stringify(sa||[]));var si={};m.forEach(function(x){si[x.id||x.mat]=true;});(la||[]).forEach(function(x){var k=x.id||x.mat;if(k&&!si[k])m.push(x);});return m;}
@@ -9322,7 +9381,8 @@ function go2SES(acc){
           setTimeout(function(){
             if(!iA())return;
             var localTS=DB.lastModified||0;
-            fetch(_cloudUrl('sync.php'),{headers:_cloudHeaders()})
+            // FIX: GET Firebase au lieu de sync.php
+            fetch(LWS_API.db+'?t='+Date.now())
             .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
             .then(function(serverDB){
               if(!serverDB||!serverDB.school||!serverDB.students){if(!_autoSyncDirty)_cloudAutoSync();return;}
@@ -18863,12 +18923,15 @@ function _cvPullFresh(){
   var feed=document.getElementById('cvFeed');
   if(feed){var ind=document.createElement('div');ind.id='cvRefInd';ind.style.cssText='text-align:center;padding:6px;font-size:11px;color:var(--ink4)';ind.textContent='⟳ Actualisation…';feed.appendChild(ind);}
   fetch(LWS_API.db+'?t='+Date.now()).then(function(r){return r.json();}).then(function(remote){
-    if(remote&&remote.forumPosts){
+    // FIX : Firebase renvoie null si DB vide. Ne pas crasher.
+    var i=document.getElementById('cvRefInd');if(i)i.remove();
+    if(!remote){toast('Aucune donnée distante','info');return;}
+    if(remote.forumPosts){
       var remIds={};(remote.forumPosts||[]).forEach(function(p){remIds[p.id]=true;});
       var localOnly=(DB.forumPosts||[]).filter(function(p){return !remIds[p.id];});
       DB.forumPosts=(remote.forumPosts||[]).concat(localOnly);
     }
-    if(remote&&remote.classrooms&&remote.classrooms.length){DB.classrooms=remote.classrooms;}
+    if(remote.classrooms&&remote.classrooms.length){DB.classrooms=remote.classrooms;}
     save();_cvRenderChannel();toast('✓ Actualisé');
   }).catch(function(){var i=document.getElementById('cvRefInd');if(i)i.remove();toast('Données locales (hors ligne)','warn');});
 }
