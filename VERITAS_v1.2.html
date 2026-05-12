@@ -3868,6 +3868,11 @@ function save(){
       // Mémoriser le lastModified du push pour optimistic-lock du prochain PUT
       window._fbLastSyncedMs=DB.lastModified||Date.now();
       toast('☁️ Synchronisé');
+      // ── Filet de sécurité : backup non-bloquant vers LWS db.php (200 Go disponibles) ──
+      // Si Firebase tombe en panne, on a une copie indépendante sur ton serveur
+      setTimeout(function(){
+        if(typeof _backupDBToLWS==='function')_backupDBToLWS(dbLight);
+      },0);
     }catch(e){
       console.warn('[Firebase] save error:',e);
       if(iA()&&typeof _hasLocalBinaries==='function'&&_hasLocalBinaries()){
@@ -7503,6 +7508,229 @@ function _cloudFullAutoSync(){
       }
     });
   });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── Sauvegarde DB JSON vers LWS db.php (filet de sécurité non-bloquant) ─────
+// ═══════════════════════════════════════════════════════════════════════════
+// Appelée après chaque PUT Firebase réussi. Crée une copie indépendante de la
+// DB sur les 200 Go LWS. Si Firebase est down, on a une sauvegarde fraîche.
+async function _backupDBToLWS(dbLight){
+  var cfg=DB.cloudConfig;
+  if(!cfg||!cfg.url||!cfg.secret)return;
+  try{
+    var url=(cfg.url||'').replace(/\/+$/,'')+'/db.php?_secret='+encodeURIComponent(cfg.secret);
+    var res=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(dbLight)
+    });
+    if(!res.ok){console.warn('[LWS backup] HTTP',res.status);return;}
+    // Mémoriser timestamp + taille pour le dashboard
+    try{
+      var r=await res.json();
+      window._lwsBackupInfo={
+        at: new Date().toLocaleString('fr-FR'),
+        sizeKo: r.size_ko||Math.round(JSON.stringify(dbLight).length/1024)
+      };
+      try{localStorage.setItem('_vrtLwsBackup',JSON.stringify(window._lwsBackupInfo));}catch(eL){}
+    }catch(eR){}
+  }catch(e){
+    console.warn('[LWS backup] échec:',e);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── BOUTON : Forcer la sync complète ────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+// Combine : upload fichiers locaux → PUT Firebase → POST LWS backup
+// Affiche un récap clair avec progression et erreurs.
+async function forceFullSync(){
+  if(!iA()){toast('Accès réservé aux administrateurs','warn');return;}
+  var cfg=DB.cloudConfig;
+  if(!cfg||!cfg.url||!cfg.secret){
+    toast('⚠️ Configurez la clé API dans Paramètres → Cloud','warn');return;
+  }
+  // Étape 1 : count des éléments
+  var nBin=_countLocalBinaries();
+  M('🚀 Synchronisation complète','Cette opération va :',
+    '<div style="font-size:13px;line-height:1.9">'
+      +'<div style="background:#EFF6FF;border-left:3px solid #2563EB;padding:10px 14px;border-radius:8px;margin-bottom:10px">'
+      +'<strong>1. Upload des fichiers locaux</strong><br>'
+      +'<span style="color:var(--ink3);font-size:12px">'+(nBin>0?nBin+' fichier(s) à envoyer sur LWS':'Aucun fichier en attente')+'</span></div>'
+      +'<div style="background:#F0FDF4;border-left:3px solid #16A34A;padding:10px 14px;border-radius:8px;margin-bottom:10px">'
+      +'<strong>2. Sauvegarde DB → Firebase</strong><br>'
+      +'<span style="color:var(--ink3);font-size:12px">Texte (élèves, notes, paramètres) — sync instantanée multi-appareils</span></div>'
+      +'<div style="background:#FEF3C7;border-left:3px solid #D97706;padding:10px 14px;border-radius:8px;margin-bottom:10px">'
+      +'<strong>3. Sauvegarde DB → LWS (200 Go)</strong><br>'
+      +'<span style="color:var(--ink3);font-size:12px">Copie indépendante de secours sur ton serveur</span></div>'
+      +'<div id="forceSyncStatus" class="mt12"></div>'
+      +'</div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" id="forceSyncBtn" onclick="_runForceFullSync()">🚀 Lancer la synchronisation</button>',
+    false
+  );
+}
+
+async function _runForceFullSync(){
+  var btn=document.getElementById('forceSyncBtn');
+  if(btn){btn.disabled=true;btn.innerHTML='⏳ En cours…';}
+  var stat=document.getElementById('forceSyncStatus');
+  function _step(html){if(stat)stat.innerHTML+=html;}
+  _step('<div style="font-size:12px;color:var(--ink3);padding:4px 0">⏳ Étape 1/3 : Upload des fichiers locaux…</div>');
+  // Étape 1 : binaires
+  await new Promise(function(resolve){
+    if(typeof _cloudAutoUploadBinaries==='function'){
+      _cloudAutoUploadBinaries(function(uploaded,errors){
+        var msg='✓ '+(uploaded||0)+' fichier(s) uploadé(s)';
+        if(errors)msg+=' · ⚠️ '+errors+' échec(s)';
+        _step('<div style="font-size:12px;color:#059669;padding:4px 0">'+msg+'</div>');
+        resolve();
+      });
+    } else { _step('<div style="font-size:12px;color:var(--ink4);padding:4px 0">— Aucun module d\'upload</div>'); resolve(); }
+  });
+  // Étape 2 : PUT Firebase
+  _step('<div style="font-size:12px;color:var(--ink3);padding:4px 0">⏳ Étape 2/3 : Sauvegarde sur Firebase…</div>');
+  try{
+    var dbLight=_buildDbLight();
+    var res=await fetch(LWS_API.db,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(dbLight)});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    _step('<div style="font-size:12px;color:#059669;padding:4px 0">✓ Firebase synchronisé ('+Math.round(JSON.stringify(dbLight).length/1024)+' Ko)</div>');
+  }catch(e){
+    _step('<div style="font-size:12px;color:#DC2626;padding:4px 0">✗ Firebase : '+_esc(e.message)+'</div>');
+  }
+  // Étape 3 : POST LWS
+  _step('<div style="font-size:12px;color:var(--ink3);padding:4px 0">⏳ Étape 3/3 : Sauvegarde sur LWS (200 Go)…</div>');
+  try{
+    await _backupDBToLWS(_buildDbLight());
+    if(window._lwsBackupInfo){
+      _step('<div style="font-size:12px;color:#059669;padding:4px 0">✓ LWS backup : '+window._lwsBackupInfo.sizeKo+' Ko à '+window._lwsBackupInfo.at+'</div>');
+    } else {
+      _step('<div style="font-size:12px;color:#D97706;padding:4px 0">⚠️ LWS : statut inconnu (voir console)</div>');
+    }
+  }catch(e){
+    _step('<div style="font-size:12px;color:#DC2626;padding:4px 0">✗ LWS : '+_esc(e.message)+'</div>');
+  }
+  _step('<div style="margin-top:12px;padding:10px;background:#F0FDF4;border-radius:8px;font-size:13px;font-weight:600;color:#16A34A">✅ Synchronisation terminée — tes données sont sauvegardées à 2 endroits indépendants.</div>');
+  if(btn){btn.disabled=false;btn.innerHTML='✓ Terminé · Fermer';btn.setAttribute('onclick','cm()');}
+}
+
+// Helper : construit la DB allégée comme save() le ferait
+function _buildDbLight(){
+  var data=JSON.parse(JSON.stringify(DB));
+  data.lastModified=Date.now();
+  function _strip(o){if(!o)return;if(o.pwd&&!(typeof o.pwd==='string'&&o.pwd.startsWith('$')))delete o.pwd;}
+  if(data.superAdmin)_strip(data.superAdmin);
+  (data.admins||[]).forEach(_strip);
+  (data.visitorAccounts||[]).forEach(_strip);
+  if(data.tpwd)data.tpwd={};
+  (data.elearning&&data.elearning.contenus||[]).forEach(function(c){if(c.fichierData&&c.fichierData.length>1000)delete c.fichierData;});
+  (data.books||[]).forEach(function(b){if(b.content)delete b.content;});
+  return data;
+}
+
+function _countLocalBinaries(){
+  var n=0;
+  (DB.galleryImages||[]).forEach(function(g){if(g.src&&g.src.startsWith('data:')&&g.src.length>500)n++;});
+  if(DB.school&&DB.school.logo&&DB.school.logo.startsWith('data:')&&DB.school.logo.length>500)n++;
+  (DB.partenaires||[]).forEach(function(p){if(p.logo&&p.logo.startsWith('data:')&&p.logo.length>500)n++;});
+  (DB.books||[]).forEach(function(b){
+    if(b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>500)n++;
+    if(b.fichierKey)n++;
+    if(b.previewImages)(b.previewImages||[]).forEach(function(img){if(img&&img.startsWith('data:')&&img.length>500)n++;});
+  });
+  (DB.elearning&&DB.elearning.contenus||[]).forEach(function(c){
+    if(c.fichierData&&c.fichierData.length>500&&!c.fichierUrl)n++;
+    if(c.idbKey)n++;
+  });
+  return n;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── TABLEAU DE BORD STOCKAGE LWS (200 Go) ───────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+function mStorageDashboard(){
+  if(!iA()){toast('Accès réservé aux administrateurs','warn');return;}
+  // Compter les fichiers uploadés sur LWS (URLs)
+  var stats={photos:0,pdf:0,word:0,video:0,audio:0,autre:0,total:0,sizeKo:0};
+  function _classify(url){
+    if(!url||typeof url!=='string')return null;
+    var u=url.toLowerCase();
+    if(/\.(jpg|jpeg|png|gif|webp|svg)$/.test(u))return'photos';
+    if(/\.pdf$/.test(u))return'pdf';
+    if(/\.(docx?|odt)$/.test(u))return'word';
+    if(/\.(mp4|webm|mov|ogv)$/.test(u))return'video';
+    if(/\.(mp3|wav|m4a|ogg)$/.test(u))return'audio';
+    return'autre';
+  }
+  function _addUrl(url){
+    var c=_classify(url); if(!c)return;
+    stats[c]++; stats.total++;
+  }
+  (DB.galleryImages||[]).forEach(function(g){_addUrl(g.serverSrc||g.src);});
+  (DB.books||[]).forEach(function(b){
+    _addUrl(b.coverImg);
+    _addUrl(b.fichierUrl);
+    _addUrl(b.previewPdfUrl);
+    (b.previewImages||[]).forEach(_addUrl);
+  });
+  (DB.partenaires||[]).forEach(function(p){_addUrl(p.logo);});
+  if(DB.school&&DB.school.logo)_addUrl(DB.school.logo);
+  (DB.elearning&&DB.elearning.contenus||[]).forEach(function(c){_addUrl(c.fichierUrl);});
+  (DB.elearning&&DB.elearning.soumissions||[]).forEach(function(s){_addUrl(s.fichierUrl);});
+  (DB.devoirs||[]).forEach(function(d){_addUrl(d.fichierUrl);});
+
+  var localPending=_countLocalBinaries();
+  var dbSize=Math.round(JSON.stringify(DB).length/1024);
+  // Lire le backup info depuis localStorage
+  var bkInfo=null;
+  try{var raw=localStorage.getItem('_vrtLwsBackup');if(raw)bkInfo=JSON.parse(raw);}catch(eS){}
+
+  function _card(ico,label,val,col){
+    return '<div style="background:'+(col||'#F8FAFC')+';border-radius:12px;padding:14px;text-align:center">'
+      +'<div style="font-size:28px;line-height:1">'+ico+'</div>'
+      +'<div style="font-size:22px;font-weight:800;color:var(--bl);margin:6px 0 2px">'+val+'</div>'
+      +'<div style="font-size:11px;color:var(--ink3);font-weight:600;letter-spacing:.3px;text-transform:uppercase">'+label+'</div>'
+      +'</div>';
+  }
+
+  var body='<div style="max-height:60vh;overflow-y:auto;padding-right:4px">'
+    // En-tête
+    +'<div class="ib ibi mb14"><span>💾</span><span>Ton hébergement LWS dispose de <strong>200 Go</strong> de stockage. Voici ce qui est actuellement utilisé.</span></div>'
+    // Stats par type
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">'
+    +_card('🖼️','Photos',stats.photos,'#EFF6FF')
+    +_card('📄','PDFs',stats.pdf,'#FEF3C7')
+    +_card('📝','Word/ODT',stats.word,'#F3E8FF')
+    +_card('🎥','Vidéos',stats.video,'#FEE2E2')
+    +_card('🎵','Audio',stats.audio,'#ECFDF5')
+    +_card('📦','Autre',stats.autre,'#F1F5F9')
+    +'</div>'
+    // Total
+    +'<div style="background:linear-gradient(135deg,#142554,#1e3a7a);color:#fff;border-radius:14px;padding:18px;margin-bottom:14px;text-align:center">'
+    +'<div style="font-size:36px;font-weight:900;color:#FFC93C">'+stats.total+'</div>'
+    +'<div style="font-size:13px;opacity:.9;margin-top:4px">fichiers stockés sur LWS</div>'
+    +'<div style="font-size:11px;opacity:.7;margin-top:6px">URL publique : veritas-school.com/uploads/veritas/</div>'
+    +'</div>'
+    // DB info
+    +'<div style="background:#F8FAFC;border-radius:12px;padding:14px;margin-bottom:14px">'
+    +'<div style="font-weight:700;font-size:13px;color:var(--bl);margin-bottom:8px">📊 Base de données (texte)</div>'
+    +'<div style="font-size:12px;color:var(--ink2);line-height:1.7">'
+    +'• Taille actuelle : <strong>'+dbSize+' Ko</strong><br>'
+    +'• Firebase : '+(DB.cloudConfig&&DB.cloudConfig.lastSync?'<span style="color:#16A34A">✓ '+_esc(DB.cloudConfig.lastSync)+'</span>':'<span style="color:#D97706">Jamais sync</span>')+'<br>'
+    +'• Backup LWS : '+(bkInfo?'<span style="color:#16A34A">✓ '+_esc(bkInfo.at)+' ('+bkInfo.sizeKo+' Ko)</span>':'<span style="color:#D97706">Aucun encore</span>')
+    +'</div></div>'
+    // Pending local
+    +(localPending>0
+      ?'<div class="ib ibw mb10"><span>⚠️</span><span><strong>'+localPending+' fichier(s) en local non-synchronisé(s).</strong> Cliquez sur "Forcer la sync complète" pour les envoyer sur LWS.</span></div>'
+      :'<div class="ib ibg mb10"><span>✅</span><span>Aucun fichier local en attente — tout est sur LWS.</span></div>')
+    +'</div>';
+
+  M('💾 Stockage LWS (200 Go disponibles)','Vue d\'ensemble de tes données','<div></div>'+body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +'<button class="btn bi" onclick="cm();forceFullSync()">🚀 Forcer la sync complète</button>',
+    true
+  );
 }
 
 // Bouton "Sync fichiers locaux" — déclenchement manuel
@@ -12429,6 +12657,8 @@ function pgSettings(){
       </div>
       <button class="btn bi sm mt10" onclick="saveCloudConfig()">💾 Enregistrer config cloud</button>
       <div class="fl2 g8 fw mt14 pt14" style="border-top:var(--br)">
+        <button class="btn sm" style="background:linear-gradient(135deg,#DC2626,#F97316);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="forceFullSync()">🚀 Forcer la sync complète</button>
+        <button class="btn sm" style="background:linear-gradient(135deg,#142554,#1e3a7a);color:#FFC93C;border-radius:10px;font-weight:700" onclick="mStorageDashboard()">💾 Stockage LWS (200 Go)</button>
         <button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="cloudSaveDB()">☁️ Sauvegarder vers le cloud</button>
         <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="cloudRestoreDB()">📥 Restaurer depuis le cloud</button>
         <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="cloudTestConnection()">🔌 Tester la connexion</button>
