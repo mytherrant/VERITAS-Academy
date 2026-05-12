@@ -3675,12 +3675,11 @@ async function uploadToLWS(file, folder, onProgress) {
     var fd = new FormData();
     fd.append('file', file);
     fd.append('folder', folder || 'misc');
-    // Authentification via _secret dans le body (pas de header Authorization — CORS LWS)
+    // FIX WAF LWS 2026 : Authorization header au lieu de _secret= (qui est bloqué par Anubis WAF)
     var _sec=DB.cloudConfig&&DB.cloudConfig.secret;
-    if(_sec){fd.append('_secret',_sec);}
-    var _uploadUrl=LWS_API.upload+(_sec?'?_secret='+encodeURIComponent(_sec):'');
     var xhr = new XMLHttpRequest();
-    xhr.open('POST', _uploadUrl);
+    xhr.open('POST', LWS_API.upload);
+    if(_sec)xhr.setRequestHeader('Authorization','Bearer '+_sec);
     xhr.upload.onprogress = function(e) {
       if (onProgress && e.lengthComputable) {
         onProgress(Math.round(e.loaded / e.total * 100));
@@ -3918,6 +3917,13 @@ function _hasLocalBinaries(){
   // Soumissions et devoirs avec fichiers locaux
   if(DB.elearning&&(DB.elearning.soumissions||[]).some(function(s){return s.fichierData&&s.fichierData.length>100&&!s.fichierUrl;}))return true;
   if((DB.devoirs||[]).some(function(d){return d.fichierData&&d.fichierData.length>100&&!d.fichierUrl;}))return true;
+  // Photos profil élèves/enseignants (ajoutés v1.2)
+  if((DB.students||[]).some(function(s){return s.photo&&typeof s.photo==='string'&&s.photo.indexOf('data:')===0&&s.photo.length>500;}))return true;
+  if((DB.teachers||[]).some(function(t){return t.photo&&typeof t.photo==='string'&&t.photo.indexOf('data:')===0&&t.photo.length>500;}))return true;
+  // Photos packs boutique (ajoutés v1.2)
+  if((DB.packs||[]).some(function(p){return p.photo&&typeof p.photo==='string'&&p.photo.indexOf('data:')===0&&p.photo.length>500;}))return true;
+  // Ticker items avec image
+  if((DB.tickerItems||[]).some(function(ti){return ti.image&&typeof ti.image==='string'&&ti.image.indexOf('data:')===0&&ti.image.length>500;}))return true;
   return false;
 }
 
@@ -4492,13 +4498,13 @@ function saveBookContent(bid){
       fd.append('file',pdfFile,pdfFile.name);
       fd.append('type','book');
       fd.append('ref_id',bid);
-      fd.append('_secret',cloudCfg.secret);
       var ctrl=typeof AbortController!=='undefined'?new AbortController():null;
       var tmt=ctrl?setTimeout(function(){ctrl.abort();},120000):null;
       var baseUrl=cloudCfg.url.replace(/\/+$/,'');
-      fetch(baseUrl+'/upload_file.php?_secret='+encodeURIComponent(cloudCfg.secret),{
+      // FIX WAF LWS 2026 : Authorization header au lieu de _secret= dans URL/FormData
+      fetch(baseUrl+'/upload_file.php',{
         method:'POST',
-        // Pas d'Authorization header (CORS preflight LWS) — secret dans FormData._secret + URL
+        headers:{'Authorization':'Bearer '+cloudCfg.secret},
         body:fd,
         signal:ctrl?ctrl.signal:undefined
       }).then(function(r){
@@ -6861,19 +6867,18 @@ function testFirebaseConnection(){cloudTestConnection();}
 // ══════════════════════════════════════════════════════════════════
 
 function _cloudHeaders(withContentType){
-  // NE PAS inclure Authorization — cause l'échec du preflight CORS (serveur LWS n'autorise pas ce header)
-  // L'authentification se fait via ?_secret=... dans l'URL (cf. _cloudUrl) et _secret dans le body
+  // FIX WAF LWS 2026 : utiliser Authorization header (CORS preflight le permet maintenant)
+  // Le WAF LWS Anubis bloque _secret= en URL/FormData → on bascule sur Authorization Bearer
   var h={};
   if(withContentType)h['Content-Type']='application/json';
+  var secret=DB.cloudConfig&&DB.cloudConfig.secret;
+  if(secret)h['Authorization']='Bearer '+secret;
   return h;
 }
 function _cloudUrl(endpoint){
   var base=(DB.cloudConfig?.url||'https://veritas-school.com/api').replace(/\/$/,'');
-  var secret=DB.cloudConfig?.secret||'';
-  var url=base+'/'+endpoint;
-  // Envoyer _secret aussi en param GET (LiteSpeed peut supprimer le header Authorization)
-  if(secret)url+=(url.indexOf('?')>=0?'&':'?')+'_secret='+encodeURIComponent(secret);
-  return url;
+  // FIX WAF LWS 2026 : plus de _secret= dans l'URL (bloqué par WAF) — utiliser _cloudHeaders à la place
+  return base+'/'+endpoint;
 }
 
 // ── Déduire la catégorie d'upload à partir du type MIME ou de l'extension ──
@@ -6899,11 +6904,11 @@ function _uploadToServer(file,type,refId,cb){
   fd.append('file',file);
   fd.append('type',type||'resource');
   fd.append('ref_id',refId||'x');
-  fd.append('_secret',secret);
   toast('⬆️ Upload vers le serveur...');
-  // _cloudUrl('upload_file.php') inclut déjà ?_secret= — pas d'Authorization header (CORS)
-  fetch(_cloudUrl('upload_file.php'),{
+  // FIX WAF LWS 2026 : Authorization header (le WAF bloque _secret= en URL/body)
+  fetch(baseUrl.replace(/\/+$/,'')+'/upload_file.php',{
     method:'POST',
+    headers:{'Authorization':'Bearer '+secret},
     body:fd
   })
   .then(function(r){return r.json();})
@@ -7141,9 +7146,10 @@ function cloudDoUpload(){
   fd.append('matiere',matiere);
   fd.append('description',desc);
   _si('uplProgress','<div class="ib ibt"><span>⏳</span><span>Envoi en cours... '+Math.round(file.size/1024)+' Ko</span></div>');
-  // _cloudUrl('upload.php') inclut déjà ?_secret= dans l'URL — pas besoin de Authorization header
+  // FIX WAF LWS 2026 : Authorization header (via _cloudHeaders) au lieu de _secret en URL
   fetch(_cloudUrl('upload.php'),{
     method:'POST',
+    headers:_cloudHeaders(false),
     body:fd
   })
   .then(function(r){
@@ -7376,6 +7382,50 @@ function _cloudAutoUploadBinaries(onDone){
     }
   });
 
+  // 9. Photos profil élèves (data: URL → upload LWS, remplacement par URL serveur)
+  (DB.students||[]).forEach(function(s){
+    if(s.photo&&typeof s.photo==='string'&&s.photo.indexOf('data:')===0&&s.photo.length>5000){
+      (function(ss){
+        queue.push({label:'photo_eleve_'+(ss.pre||'')+'_'+(ss.nom||ss.id),cat:'image',
+          get:function(cb){cb(ss.photo,'eleve_'+ss.id+'.jpg','image/jpeg');},
+          ok:function(url){ss.photo=url;}});
+      })(s);
+    }
+  });
+
+  // 10. Photos profil enseignants (data: URL → upload LWS)
+  (DB.teachers||[]).forEach(function(t){
+    if(t.photo&&typeof t.photo==='string'&&t.photo.indexOf('data:')===0&&t.photo.length>5000){
+      (function(tt){
+        queue.push({label:'photo_enseignant_'+(tt.pre||'')+'_'+(tt.nom||tt.id),cat:'image',
+          get:function(cb){cb(tt.photo,'enseignant_'+tt.id+'.jpg','image/jpeg');},
+          ok:function(url){tt.photo=url;}});
+      })(t);
+    }
+  });
+
+  // 11. Photos produits boutique/packs (data: URL → upload LWS)
+  (DB.packs||[]).forEach(function(p){
+    if(p.photo&&typeof p.photo==='string'&&p.photo.indexOf('data:')===0&&p.photo.length>5000){
+      (function(pp){
+        queue.push({label:'photo_pack_'+(pp.titre||pp.id),cat:'image',
+          get:function(cb){cb(pp.photo,'pack_'+pp.id+'.jpg','image/jpeg');},
+          ok:function(url){pp.photo=url;}});
+      })(p);
+    }
+  });
+
+  // 12. Ticker items avec image embarquée (rare mais possible)
+  (DB.tickerItems||[]).forEach(function(ti){
+    if(ti.image&&typeof ti.image==='string'&&ti.image.indexOf('data:')===0&&ti.image.length>5000){
+      (function(tii){
+        queue.push({label:'ticker_'+(tii.titre||tii.id),cat:'image',
+          get:function(cb){cb(tii.image,'ticker_'+tii.id+'.jpg','image/jpeg');},
+          ok:function(url){tii.image=url;}});
+      })(ti);
+    }
+  });
+
   if(!queue.length){if(onDone)onDone(0,0);return;}
 
   var total=queue.length,uploaded=0,errors=0;
@@ -7395,10 +7445,10 @@ function _cloudAutoUploadBinaries(onDone){
     fd.append('file',file,fname);
     fd.append('type',entry.cat||'image');   // ← champ correct pour PHP
     fd.append('ref_id',entry.label||'x');   // ← champ correct pour PHP
-    fd.append('_secret',secret);
-    fetch(baseUrl.replace(/\/+$/,'')+'/upload_file.php?_secret='+encodeURIComponent(secret),{
+    // FIX WAF LWS 2026 : Authorization header (le WAF Anubis bloque _secret= en URL/body)
+    fetch(baseUrl.replace(/\/+$/,'')+'/upload_file.php',{
       method:'POST',
-      // Pas d'Authorization header (CORS LWS) — secret dans FormData._secret + URL
+      headers:{'Authorization':'Bearer '+secret},
       body:fd,
       signal:ctrl?ctrl.signal:undefined
     })
@@ -7519,10 +7569,14 @@ async function _backupDBToLWS(dbLight){
   var cfg=DB.cloudConfig;
   if(!cfg||!cfg.url||!cfg.secret)return;
   try{
-    var url=(cfg.url||'').replace(/\/+$/,'')+'/db.php?_secret='+encodeURIComponent(cfg.secret);
+    // FIX WAF LWS 2026 : Authorization header (db.php ne vérifie pas le secret mais on l'envoie quand même)
+    var url=(cfg.url||'').replace(/\/+$/,'')+'/db.php';
     var res=await fetch(url,{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+cfg.secret
+      },
       body:JSON.stringify(dbLight)
     });
     if(!res.ok){console.warn('[LWS backup] HTTP',res.status);return;}
@@ -7637,12 +7691,25 @@ function _countLocalBinaries(){
   (DB.books||[]).forEach(function(b){
     if(b.coverImg&&b.coverImg.startsWith('data:')&&b.coverImg.length>500)n++;
     if(b.fichierKey)n++;
+    if(b.fichierData&&b.fichierData.length>500&&!b.fichierUrl)n++;
+    if(b.previewPdfKey)n++;
     if(b.previewImages)(b.previewImages||[]).forEach(function(img){if(img&&img.startsWith('data:')&&img.length>500)n++;});
   });
   (DB.elearning&&DB.elearning.contenus||[]).forEach(function(c){
     if(c.fichierData&&c.fichierData.length>500&&!c.fichierUrl)n++;
     if(c.idbKey)n++;
   });
+  (DB.elearning&&DB.elearning.soumissions||[]).forEach(function(s){
+    if(s.fichierData&&s.fichierData.length>100&&!s.fichierUrl)n++;
+  });
+  (DB.devoirs||[]).forEach(function(d){
+    if(d.fichierData&&d.fichierData.length>100&&!d.fichierUrl)n++;
+  });
+  // Photos profil ajoutées v1.2
+  (DB.students||[]).forEach(function(s){if(s.photo&&typeof s.photo==='string'&&s.photo.indexOf('data:')===0&&s.photo.length>500)n++;});
+  (DB.teachers||[]).forEach(function(t){if(t.photo&&typeof t.photo==='string'&&t.photo.indexOf('data:')===0&&t.photo.length>500)n++;});
+  (DB.packs||[]).forEach(function(p){if(p.photo&&typeof p.photo==='string'&&p.photo.indexOf('data:')===0&&p.photo.length>500)n++;});
+  (DB.tickerItems||[]).forEach(function(ti){if(ti.image&&typeof ti.image==='string'&&ti.image.indexOf('data:')===0&&ti.image.length>500)n++;});
   return n;
 }
 
@@ -7679,6 +7746,12 @@ function mStorageDashboard(){
   (DB.elearning&&DB.elearning.contenus||[]).forEach(function(c){_addUrl(c.fichierUrl);});
   (DB.elearning&&DB.elearning.soumissions||[]).forEach(function(s){_addUrl(s.fichierUrl);});
   (DB.devoirs||[]).forEach(function(d){_addUrl(d.fichierUrl);});
+  // Photos profil ajoutées v1.2
+  (DB.students||[]).forEach(function(s){_addUrl(s.photo);});
+  (DB.teachers||[]).forEach(function(t){_addUrl(t.photo);});
+  (DB.packs||[]).forEach(function(p){_addUrl(p.photo);});
+  (DB.tickerItems||[]).forEach(function(ti){_addUrl(ti.image);});
+  if(DB.introVideo&&DB.introVideo.src)_addUrl(DB.introVideo.src);
 
   var localPending=_countLocalBinaries();
   var dbSize=Math.round(JSON.stringify(DB).length/1024);
@@ -11580,13 +11653,13 @@ function uploadBookCover(bid){
       fd.append('file',file);
       fd.append('type','image');          // champ correct pour upload_file.php
       fd.append('ref_id','cover_'+bid);  // champ correct pour upload_file.php
-      fd.append('_secret',cfg.secret);
       // Timeout 30s
       var ctrl=typeof AbortController!=='undefined'?new AbortController():null;
       var tmt=ctrl?setTimeout(function(){ctrl.abort();},30000):null;
-      fetch(cfg.url.replace(/\/+$/,'')+'/upload_file.php?_secret='+encodeURIComponent(cfg.secret),{
-        // Pas d'Authorization header (CORS LWS) — secret dans FormData._secret + URL
+      // FIX WAF LWS 2026 : Authorization header
+      fetch(cfg.url.replace(/\/+$/,'')+'/upload_file.php',{
         method:'POST',
+        headers:{'Authorization':'Bearer '+cfg.secret},
         body:fd,
         signal:ctrl?ctrl.signal:undefined
       }).then(function(r){if(tmt)clearTimeout(tmt);return r.json();})
@@ -14265,11 +14338,11 @@ function _ivSave(){
 
     var fd=new FormData();
     fd.append('video',window._pVidFile,window._pVidFile.name);
-    fd.append('_secret',secret); // fallback si LiteSpeed supprime le header Authorization
 
     var xhr=new XMLHttpRequest();
-    // Pas d'Authorization header (CORS LWS) — secret dans FormData._secret + URL
-    xhr.open('POST',base+'/upload_video.php?_secret='+encodeURIComponent(secret));
+    // FIX WAF LWS 2026 : Authorization header (le WAF bloque _secret= en URL)
+    xhr.open('POST',base+'/upload_video.php');
+    xhr.setRequestHeader('Authorization','Bearer '+secret);
 
     // Barre de progression dans le toast
     xhr.upload.onprogress=function(e){

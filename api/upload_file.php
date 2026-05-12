@@ -98,16 +98,11 @@ if (!move_uploaded_file($file['tmp_name'], $dest)) {
 }
 
 // ── Construire l'URL publique ──
+// FIX 2026 : LWS retourne $_SERVER['DOCUMENT_ROOT'] mal aligné (avec /htdocs/),
+// donc on hardcode le chemin public depuis la racine web
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host     = $_SERVER['HTTP_HOST'] ?? 'localhost';
-
-// Chemin relatif de /uploads/media/ depuis la racine web
-$docRoot   = rtrim(str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']), '/');
-$mediaReal = rtrim(str_replace('\\', '/', realpath($mediaDir)), '/');
-$relMedia  = str_replace($docRoot, '', $mediaReal);
-if (!$relMedia) $relMedia = '/uploads/media';
-
-$url = $protocol . '://' . $host . $relMedia . '/' . $filename;
+$host     = $_SERVER['HTTP_HOST'] ?? 'veritas-school.com';
+$url      = $protocol . '://' . $host . '/uploads/media/' . $filename;
 
 jsonResponse([
     'success'  => true,
