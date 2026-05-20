@@ -19163,6 +19163,194 @@ var LABO_DB=[
      {q:"L'imparfait s'utilise pour :",opts:["Action ponctuelle terminée","Description, habitude dans le passé","Action future","Hypothèse"],ans:1,exp:"Imparfait = durée, description, habitude : 'Chaque matin il se levait à 6h'. Ponctuel terminé → passé composé."},
    ],
    ressource:"https://minesec-distancelearning.cm",pack:null},
+
+  // ═══════════════════════════════════════════════════════════════════════
+  // ── 8 NOUVEAUX LABOS CAPTIVANTS (programme MINESEC) ───────────────────
+  // ═══════════════════════════════════════════════════════════════════════
+
+  {id:"lv27",titre:"Le Système Immunitaire & Vaccination",matiere:"SVT",cat:"svt",
+   classe:"Tle D",ico:"🛡️",color:"#16A34A",gratuit:true,
+   desc:"Comprendre comment notre corps se défend contre les infections : anticorps, lymphocytes, vaccins. Programme Tle.",
+   theorie:"🛡️ IMMUNITÉ INNÉE (1ère ligne) : peau, muqueuses, phagocytose par macrophages. Rapide, non-spécifique.\n\n⚔️ IMMUNITÉ ADAPTATIVE (lente, spécifique) :\n• Lymphocytes B → produisent anticorps (Ig) qui neutralisent l'antigène.\n• Lymphocytes T cytotoxiques → tuent les cellules infectées.\n• Lymphocytes T auxiliaires (CD4) → coordonnent la réponse.\n\n💉 VACCINATION : injection d'antigène atténué ou inactivé → mémoire immunitaire.\nÀ la 2ème exposition, réponse rapide et forte (lymphocytes mémoire). C'est le principe.\n\n🦠 VIH : détruit les LT4 (CD4) → effondrement immunité → SIDA.",
+   experience:[
+     "1️⃣ OBSERVATION : Une coupure cicatrise. Étape 1 : rougeur + chaleur (vasodilatation). Étape 2 : pus (macrophages morts + bactéries). Étape 3 : croûte (fibrine). Étape 4 : peau neuve.",
+     "2️⃣ EXPÉRIENCE PASTEUR (1885) : Pasteur injecte virus rage atténué à un jeune mordu. Il survit ! Première vaccination. Principe : exposer le système immunitaire SANS danger.",
+     "3️⃣ ANTIGÈNE-ANTICORPS : modèle clé-serrure. Chaque anticorps reconnaît UN antigène spécifique (variole, grippe, COVID...). Production : ~10 milliards d'anticorps différents possibles.",
+     "4️⃣ TYPES DE VACCINS : Atténué (BCG, ROR) — vivant affaibli. Inactivé (grippe) — virus tué. Sous-unité (hépatite B) — protéine du virus. ARNm (Pfizer COVID) — code génétique → cellule produit l'antigène.",
+     "5️⃣ TEST ELISA : détecter VIH dans sang. Antigène fixé sur plaque → ajout sang. Si anticorps anti-VIH présents → ils se fixent → coloration → personne séropositive.",
+     "6️⃣ GROUPES SANGUINS : A, B, AB, O. Antigène A sur globule = groupe A. Anticorps anti-B dans plasma = groupe A. Transfusion A→B = catastrophe (agglutination).",
+     "7️⃣ MÉMOIRE IMMUNITAIRE : graphique. 1ère exposition à un microbe : pic anticorps faible et tardif (~7 jours). 2ème exposition : pic ÉNORME et rapide (~3 jours). C'est pourquoi le rappel vaccinal renforce la protection.",
+   ],
+   quiz:[
+     {q:"Cellules qui produisent les anticorps :",opts:["Lymphocytes T","Lymphocytes B","Macrophages","Globules rouges"],ans:1,exp:"Lymphocytes B (LB) deviennent plasmocytes et sécrètent les anticorps (immunoglobulines)."},
+     {q:"Le VIH attaque principalement :",opts:["Globules rouges","Lymphocytes T4 (CD4)","Plaquettes","Neurones"],ans:1,exp:"VIH se fixe sur les récepteurs CD4 des LT4 → les détruit → effondrement de la coordination immunitaire → SIDA."},
+     {q:"Principe d'un vaccin :",opts:["Tuer les microbes du corps","Stimuler la mémoire immunitaire avant l'infection","Donner directement des anticorps","Boost générique du système"],ans:1,exp:"Le vaccin expose le système immunitaire à un antigène inoffensif pour créer une mémoire. Lors d'une vraie infection, réponse immédiate."},
+     {q:"Personne de groupe sanguin O a :",opts:["Antigène A et B","Aucun antigène A ni B","Antigènes A,B et anti-A,anti-B","Antigène O"],ans:1,exp:"Groupe O = absence d'antigène A et B. Plasma contient anti-A et anti-B. Donneur universel mais receveur que de O."},
+     {q:"L'immunité innée est :",opts:["Spécifique et lente","Non-spécifique et rapide","Acquise par vaccination","Limitée aux nouveau-nés"],ans:1,exp:"Immunité innée = barrière universelle (peau, phagocytose) rapide mais non-spécifique. Adaptative = spécifique mais lente."},
+     {q:"Sérothérapie consiste à :",opts:["Vacciner","Injecter des anticorps déjà formés","Faire une transfusion","Donner des antibiotiques"],ans:1,exp:"Sérothérapie = injection d'anticorps préformés (rapide mais non durable). Utile contre venin de serpent, rage post-exposition."},
+   ],
+   ressource:"https://minesec-distancelearning.cm",pack:null},
+
+  {id:"lv28",titre:"ADN, Gènes & Hérédité",matiere:"SVT",cat:"svt",
+   classe:"1ère D-Tle D",ico:"🧬",color:"#7C3AED",gratuit:true,
+   desc:"Structure de l'ADN, code génétique, transmission des caractères et lois de Mendel. Programme 1ère-Tle.",
+   theorie:"🧬 ADN = double hélice (Watson & Crick 1953) faite de 4 bases : A-T et G-C (complémentaires).\n\n📐 STRUCTURE : 2 brins anti-parallèles enroulés. Sucre (désoxyribose) + phosphate = squelette. Bases à l'intérieur.\n\n⛓️ ARN messager : copie d'un gène (transcription dans noyau). Sort vers ribosome.\n\n🔬 CODE GÉNÉTIQUE : par triplets (codons) de 3 bases → 1 acide aminé. 64 codons → 20 acides aminés (redondance).\n\n👶 LOIS DE MENDEL :\n• 1ère loi : uniformité des hybrides F1.\n• 2ème loi : ségrégation 3:1 dans F2 (dominant : récessif).\n• Sexe humain : XX (♀), XY (♂).",
+   experience:[
+     "1️⃣ EXTRACTION ADN MAISON : écraser banane, mélanger avec eau salée + savon liquide. Filtrer. Ajouter alcool froid à 90° doucement. Observer : filaments blancs visqueux = ADN ! Vrai expérience accessible.",
+     "2️⃣ COMPLÉMENTARITÉ DES BASES : A=T, G=C. Si un brin est ATGCGTAA, l'autre est TACGCATT (lire à l'envers : 5'→3'). Vérifie : A face à T, G face à C.",
+     "3️⃣ TRANSCRIPTION : ADN → ARN. Brin codant 'ATGCCC' → ARN 'AUGCCC' (T remplacé par U). Triplet AUG = méthionine = START.",
+     "4️⃣ MUTATION : changement de base. ATGCCC (Méthionine-Proline) → ATGCGC (Méthionine-Arginine). Conséquence : protéine modifiée. Ex : drépanocytose (1 mutation = anémie falciforme).",
+     "5️⃣ CROISEMENT MENDEL : Pois lisses (LL) × pois ridés (ll) → F1 : 100% Ll lisses (loi 1). F1×F1 → F2 : 1 LL, 2 Ll, 1 ll = 3 lisses : 1 ridé (loi 2).",
+     "6️⃣ SEXE DE L'ENFANT : ♂ XY produit spermatozoïdes X (50%) ou Y (50%). ♀ XX produit ovules X (100%). C'est le PÈRE qui détermine le sexe. ♂ XY + X → fille XX. ♂ XY + Y → garçon XY.",
+     "7️⃣ ARBRE GÉNÉALOGIQUE : tracer la transmission d'une maladie. Maladie autosomique récessive (mucoviscidose) : sauts de génération, parents porteurs sains. Maladie liée à X (hémophilie) : surtout chez garçons.",
+   ],
+   quiz:[
+     {q:"Bases complémentaires dans l'ADN :",opts:["A-G et T-C","A-T et G-C","A-C et T-G","Aucune règle"],ans:1,exp:"Règle de Chargaff : Adénine s'apparie avec Thymine (2 liaisons H), Guanine avec Cytosine (3 liaisons H)."},
+     {q:"Combien d'acides aminés codent les 64 codons ?",opts:["64","32","20","4"],ans:2,exp:"Code génétique = 64 codons → 20 acides aminés. Plusieurs codons peuvent coder le même AA (redondance)."},
+     {q:"Croisement Aa × Aa donne :",opts:["100% Aa","25% AA, 50% Aa, 25% aa","50% AA, 50% aa","100% aa"],ans:1,exp:"Loi 2 Mendel : 1/4 AA, 2/4 Aa, 1/4 aa = phénotypes 3:1 (dominant:récessif)."},
+     {q:"Génotype d'un garçon hémophile (gène sur X, récessif) :",opts:["X^h Y","X^H X^h","X^H Y","X^h X^h"],ans:0,exp:"X^h Y : un seul X (du côté ♂), donc si le gène hémophile est présent → maladie. Pas de 'compensation' par l'autre X."},
+     {q:"L'ARNm est produit dans :",opts:["Cytoplasme","Noyau","Ribosome","Mitochondrie"],ans:1,exp:"Transcription ADN→ARNm se fait dans le NOYAU. Puis l'ARNm sort vers le cytoplasme et le ribosome pour traduction."},
+     {q:"Un caryotype humain normal compte :",opts:["46 chromosomes","23 chromosomes","48 chromosomes","2 chromosomes"],ans:0,exp:"46 chromosomes = 23 paires (22 autosomes + 1 paire sexuelle XX ou XY). Trisomie 21 = 3 chromosomes 21 au lieu de 2."},
+   ],
+   ressource:"https://minesec-distancelearning.cm",pack:null},
+
+  {id:"lv29",titre:"Probabilités Conditionnelles & Bayes",matiere:"Maths",cat:"maths",
+   classe:"Tle C-Tle D",ico:"🎲",color:"#F59E0B",gratuit:true,
+   desc:"Probabilités conditionnelles, indépendance, formule de Bayes et arbres pondérés. Programme Tle.",
+   theorie:"🎲 P(A|B) = P(A∩B)/P(B) — probabilité de A SACHANT B.\n\n🌳 ARBRE PONDÉRÉ : branches = événements, poids = probabilités. P(chemin) = produit des poids.\n\n🔄 INDÉPENDANCE : A et B indépendants ⇔ P(A∩B) = P(A)×P(B) ⇔ P(A|B) = P(A).\n\n🧠 FORMULE DE BAYES : P(A|B) = P(B|A)×P(A) / P(B).\nApplication clé : test médical. P(malade|test+) ≠ P(test+|malade).",
+   experience:[
+     "1️⃣ TIRAGE DE BOULES : Urne = 5 rouges + 3 vertes. 2 tirages SANS remise. P(2 rouges) = (5/8)×(4/7) = 20/56 ≈ 0,357. Sans remise = dépendant.",
+     "2️⃣ TIRAGE AVEC REMISE : même urne. P(2 rouges avec remise) = (5/8)×(5/8) = 25/64 ≈ 0,391. Avec remise = indépendant.",
+     "3️⃣ INTERSECTION : Dans une classe de 30 élèves : 18 font Maths, 12 font Anglais, 6 les deux. P(M∩A) = 6/30 = 0,2. P(M∪A) = (18+12-6)/30 = 0,8.",
+     "4️⃣ TEST MÉDICAL : maladie touche 1% pop. Test détecte 99% des malades (sensibilité), faux+ = 5%. Tu es positif. P(malade|+) = ? Bayes : (0,99×0,01)/(0,99×0,01 + 0,05×0,99) ≈ 17%. SURPRENANT !",
+     "5️⃣ PARADOXE DU JEU MONTY HALL : 3 portes, 1 voiture. Tu choisis. Le présentateur ouvre une porte vide. Faut-il changer ? OUI ! P(gagner si on change) = 2/3.",
+     "6️⃣ LANCERS DE DÉS : 2 dés à 6 faces. P(somme=7) = 6/36 = 1/6. P(somme=12) = 1/36. P(somme=2) = 1/36.",
+     "7️⃣ EXPÉRIENCE COVID : taux positivité = 5%, sensibilité du test = 80%, faux+ = 2%. Tu testes positif. P(vraiment infecté) = 0,8×0,05 / (0,8×0,05 + 0,02×0,95) = 67%.",
+   ],
+   quiz:[
+     {q:"P(A|B) = 0,3 et P(B) = 0,4. Alors P(A∩B) =",opts:["0,12","0,75","0,7","0,1"],ans:0,exp:"P(A∩B) = P(A|B)×P(B) = 0,3×0,4 = 0,12."},
+     {q:"A et B indépendants. P(A)=0,5 et P(B)=0,4. P(A∪B) =",opts:["0,9","0,2","0,7","0,3"],ans:2,exp:"Indépendants : P(A∩B)=0,5×0,4=0,2. P(A∪B)=P(A)+P(B)-P(A∩B)=0,9-0,2=0,7."},
+     {q:"Sur 100 personnes : 30 fument, 20 ont cancer, 15 fument ET ont cancer. P(cancer|fume) =",opts:["0,2","0,5","0,75","0,15"],ans:1,exp:"P(C|F) = P(C∩F)/P(F) = 15/30 = 0,5. Parmi les fumeurs, 50% ont cancer."},
+     {q:"Lancer de 2 dés. P(somme = 7) =",opts:["1/36","1/12","1/6","5/36"],ans:2,exp:"Issues : (1,6)(6,1)(2,5)(5,2)(3,4)(4,3) = 6 sur 36 = 1/6."},
+     {q:"Pour A et B indépendants, P(A|B) =",opts:["P(B)","P(A)×P(B)","P(A)","0"],ans:2,exp:"Indépendance : la connaissance de B ne change pas P(A). Donc P(A|B) = P(A)."},
+     {q:"Test détecte 95% malades. 1% pop malade. Pos test → vraiment malade ?",opts:["≈ 95%","≈ 50%","≈ 16% (paradoxe Bayes)","100%"],ans:2,exp:"P(malade|+) ≈ 0,95×0,01 / (0,95×0,01 + 0,05×0,99) ≈ 16%. La rareté du cas + faux+ fausse l'intuition."},
+   ],
+   ressource:"https://minesec-distancelearning.cm",pack:"Premium"},
+
+  {id:"lv30",titre:"Énergie Nucléaire : Fission & Fusion",matiere:"Physique",cat:"physique",
+   classe:"Tle C-Tle D",ico:"☢️",color:"#DC2626",gratuit:false,plan:"Sciences",
+   desc:"Radioactivité, désintégration, fission (centrales), fusion (étoiles, bombe H). Programme Tle.",
+   theorie:"⚛️ NOYAU : Z protons + N neutrons. A=Z+N (nombre de masse). Notation : ^A_Z X.\n\n☢️ RADIOACTIVITÉ :\n• α : émission ^4_2 He (noyau hélium). Z↓2, A↓4.\n• β⁻ : neutron→proton + électron. Z↑1, A=cst.\n• γ : photon haute énergie. Z et A inchangés.\n\n⏱️ DEMI-VIE T : temps après lequel 50% des noyaux ont désintégré. N(t) = N₀ × (1/2)^(t/T).\n\n💥 FISSION : noyau lourd (U-235) absorbe neutron → se brise en 2 + 3 neutrons + énergie. Réaction en chaîne. Centrales nucléaires.\n\n☀️ FUSION : 2 noyaux légers (H) → noyau plus lourd (He) + énergie. Source du Soleil. Bombe H.",
+   experience:[
+     "1️⃣ COMPOSITION U-235 : Z=92 protons, A=235 → N=143 neutrons. Symbole : ^235_92 U. Très instable, fissile.",
+     "2️⃣ DÉSINTÉGRATION α : ^238_92 U → ^234_90 Th + ^4_2 He. Vérifier : Z: 92=90+2 ✓ ; A: 238=234+4 ✓.",
+     "3️⃣ DÉSINTÉGRATION β⁻ : ^14_6 C → ^14_7 N + e⁻. Un neutron du C devient proton (Z↑1). Datation au C-14 utilise cette propriété (T=5730 ans).",
+     "4️⃣ DEMI-VIE : iode-131 (T=8 jours). Après 24 jours = 3 demi-vies. Fraction restante = (1/2)³ = 1/8 = 12,5%. Si N₀=400 atomes → 50 restants.",
+     "5️⃣ DATATION C-14 : un fossile contient 25% du C-14 normal. 25% = (1/2)² → 2 demi-vies = 2×5730 = 11 460 ans.",
+     "6️⃣ FISSION U-235 : neutron + ^235_92 U → ^141_56 Ba + ^92_36 Kr + 3 neutrons + 200 MeV. Les 3 neutrons fissent d'autres U-235 → réaction en chaîne (bombe A) ou contrôlée (centrale).",
+     "7️⃣ FUSION DANS LE SOLEIL : 4 ^1_1 H → ^4_2 He + 2 positrons + 2 neutrinos + énergie. Température requise : 15 millions K (cœur Soleil). Sur Terre : ITER tente la reproduction.",
+   ],
+   quiz:[
+     {q:"L'uranium-235 contient combien de neutrons ?",opts:["92","143","235","327"],ans:1,exp:"^235_92 U : A=235, Z=92 protons. N=A-Z=235-92=143 neutrons."},
+     {q:"Désintégration α : Z et A changent comment ?",opts:["Z↑2, A=cst","Z=cst, A↓4","Z↓2, A↓4","Z↓1, A=cst"],ans:2,exp:"α = ^4_2 He éjecté. Le noyau perd 2 protons (Z↓2) et 2 neutrons (A↓4)."},
+     {q:"Iode-131 (T=8j). Après 32 jours, fraction restante :",opts:["1/4","1/8","1/16","1/32"],ans:2,exp:"32j = 4 demi-vies. Fraction = (1/2)⁴ = 1/16."},
+     {q:"Centrale nucléaire utilise quel phénomène ?",opts:["Fusion","Fission","Combustion","Désintégration alpha"],ans:1,exp:"Centrale = fission de U-235 ou Pu-239 contrôlée. Fusion = pas encore maîtrisée pour énergie."},
+     {q:"Énergie du Soleil provient de :",opts:["Combustion","Fusion H→He","Fission","Géothermie"],ans:1,exp:"Au cœur du Soleil (15 millions K), 4 H → 1 He + énergie via fusion. Perte de masse convertie en E selon E=mc²."},
+     {q:"Un échantillon : 25% C-14 restant. Âge ?",opts:["5730 ans","11 460 ans","17 190 ans","Indéterminable"],ans:1,exp:"25% = (1/2)² → 2 demi-vies × 5730 = 11 460 ans."},
+   ],
+   ressource:"https://minesec-distancelearning.cm",pack:"Sciences"},
+
+  {id:"lv31",titre:"Chimie Organique : Synthèse d'Ester",matiere:"Chimie",cat:"chimie",
+   classe:"1ère D-Tle D",ico:"⚗️",color:"#F97316",gratuit:true,
+   desc:"Estérification, hydrolyse, parfums et arômes. Mécanismes et déplacement d'équilibre. Programme 1ère-Tle.",
+   theorie:"⚗️ ESTÉRIFICATION : Acide carboxylique + Alcool ⇌ Ester + Eau.\nR-COOH + R'-OH ⇌ R-CO-O-R' + H₂O\n\n⚖️ Équilibre LIMITÉ (~67% acide-alcool primaires, 50% secondaires). Lente.\n\n🚀 CATALYSEUR : H₂SO₄ concentré accélère SANS modifier l'équilibre.\n\n⬆️ DÉPLACER vers la droite (Le Chatelier) :\n• Excès d'un réactif (généralement alcool)\n• Élimination de l'eau formée (distillation Dean-Stark)\n\n🌸 ESTERS = PARFUMS : éthanoate d'éthyle = colle nail, éthanoate de pentyle = banane, butanoate d'éthyle = ananas.",
+   experience:[
+     "1️⃣ SYNTHÈSE BANANE : mélanger 10mL acide éthanoïque + 10mL alcool isopentylique + 2mL H₂SO₄. Chauffer 1h à reflux. Refroidir, laver à l'eau. Odeur intense de banane = éthanoate d'isopentyle.",
+     "2️⃣ MONTAGE À REFLUX : ballon + colonne de Vigreux + réfrigérant à eau. La vapeur monte, condense, redescend. Évite la perte de réactifs. Sécurité : pierre ponce contre l'ébullition.",
+     "3️⃣ VÉRIFICATION ÉQUILIBRE : 1 mol acide + 1 mol alcool → 0,67 mol ester + 0,33 mol acide non transformé (alcool primaire). Pour atteindre 95% : excès d'alcool (3 mol) ou retirer l'eau.",
+     "4️⃣ HYDROLYSE (réaction inverse) : ester + eau (+ H+ catalyseur) → acide + alcool. Même équilibre. Saponification (avec NaOH) = hydrolyse basique → savon !",
+     "5️⃣ CHROMATOGRAPHIE CCM : éluant éther/acétate. Déposer acide pur, alcool pur, ester pur, mélange réactionnel. Comparer Rf après révélation iode. Vérifier présence/absence de chaque espèce.",
+     "6️⃣ NOMENCLATURE : éthanoate d'éthyle = CH₃-COO-C₂H₅. 'éthan-OATE' = acide éthanoïque. 'éthyle' = éthanol. Acétate (anc.) = éthanoate.",
+     "7️⃣ APPLICATION INDUSTRIELLE : arômes alimentaires de synthèse moins chers que les naturels. Glycéride (ester de glycérol) = corps gras, savons. Polyesters = textiles (PET = bouteille plastique).",
+   ],
+   quiz:[
+     {q:"Estérification : produits formés :",opts:["Ester + H₂","Acide + alcool","Ester + H₂O","Alcool + base"],ans:2,exp:"R-COOH + R'-OH ⇌ R-COO-R' + H₂O. Eau est un sous-produit."},
+     {q:"Pour déplacer l'équilibre vers l'ester, on peut :",opts:["Augmenter T fortement","Retirer l'eau formée","Ajouter eau","Diminuer alcool"],ans:1,exp:"Le Chatelier : retirer un produit déplace vers la formation. Excès d'alcool aussi."},
+     {q:"Rôle du H₂SO₄ dans estérification :",opts:["Réactif","Solvant","Catalyseur","Produit"],ans:2,exp:"H₂SO₄ catalyse la réaction (accélère sans être consommé). Ne change PAS la position de l'équilibre."},
+     {q:"Rendement avec alcool PRIMAIRE :",opts:["95%","67%","100%","50%"],ans:1,exp:"~67% pour alcool primaire (RCH₂OH). Secondaire ~50%, tertiaire ~5%."},
+     {q:"Éthanoate d'éthyle, formule :",opts:["CH₃CH₂OH","CH₃COOH","CH₃COO-CH₂CH₃","CH₃CHO"],ans:2,exp:"Éthanoate = CH₃-COO-, éthyle = -CH₂CH₃. Donne odeur de colle/dissolvant ongles."},
+     {q:"Saponification d'un ester avec NaOH donne :",opts:["Ester + eau","Acide carboxylique + alcool","Ion carboxylate + alcool","Aldéhyde"],ans:2,exp:"Hydrolyse basique : R-COO-R' + NaOH → R-COO⁻Na⁺ (savon) + R'-OH. Irréversible."},
+   ],
+   ressource:"https://minesec-distancelearning.cm",pack:null},
+
+  {id:"lv32",titre:"Climat Mondial & Changement Climatique",matiere:"Géographie",cat:"geo",
+   classe:"2nde-1ère",ico:"🌍",color:"#0EA5E9",gratuit:true,
+   desc:"Climats, biomes, effet de serre, réchauffement, conséquences. Programme 2nde-1ère.",
+   theorie:"🌍 5 GRANDS CLIMATS :\n• Équatorial (chaud humide toute l'année — forêt) — Cameroun sud, Amazonie\n• Tropical (saisons sèche/humide — savane) — Cameroun nord, Sahel\n• Désertique (sec extrême) — Sahara, Atacama\n• Tempéré (4 saisons) — Europe, Amérique du nord\n• Polaire (froid extrême) — Arctique, Antarctique\n\n🌡️ EFFET DE SERRE : gaz (CO₂, CH₄, vapeur eau) piègent rayonnement infrarouge → réchauffement. NATUREL : +33°C sinon Terre = -18°C en moyenne.\n\n📈 CHANGEMENT CLIMATIQUE : +1,1°C depuis 1880 dû activité humaine (combustion fossiles, déforestation).\n\n⚠️ CONSÉQUENCES : fonte glaces, montée océans, sécheresses Sahel, événements extrêmes, biodiversité.",
+   experience:[
+     "1️⃣ MESURE LOCALE : relever T et pluies mensuelles à Yaoundé (1 an). Tracer climogramme. Identifier saisons : grande saison sèche (déc-fév), petite saison pluies (mars-mai), petite saison sèche (juin-août), grande saison pluies (sept-nov).",
+     "2️⃣ COMPARAISON CLIMATS : Yaoundé (équatorial) ~25°C cst, 1600mm pluies. Maroua (tropical sahélien) 28°C, 800mm. Paris (tempéré) 12°C, 650mm. Tracer 3 climogrammes côte à côte.",
+     "3️⃣ EFFET DE SERRE — MAQUETTE : 2 bouteilles plastique transparentes, une fermée, une ouverte. Mettre au soleil 30min. Mesurer T intérieure. La fermée = +5 à 10°C. Analogie atmosphère terrestre.",
+     "4️⃣ COURBE CO₂ MAUNA LOA (1958-2026) : 315 ppm → 425 ppm. Augmentation continue. Causes : combustion fossiles (charbon, pétrole, gaz) + déforestation.",
+     "5️⃣ FONTE DE L'ARCTIQUE : photos satellites 1980 vs 2020. Surface banquise été : -40%. Conséquence : albédo (réflexion) ↓ → réchauffement amplifié (rétroaction positive).",
+     "6️⃣ CAMEROUN — LAC TCHAD : 1963 = 25 000 km². 2025 = 1 500 km² (-94%). Causes : sécheresse + irrigation excessive. Crise écologique + sécurité (Boko Haram exploite la misère).",
+     "7️⃣ SOLUTIONS : transition énergétique (solaire, éolien, hydraulique), reboisement, transports communs, sobriété. Accord de Paris 2015 : limiter à +1,5°C. Aujourd'hui : on est à +1,1°C, trajectoire actuelle +2,7°C en 2100.",
+   ],
+   quiz:[
+     {q:"Climat du sud Cameroun (Yaoundé) :",opts:["Tropical sec","Équatorial","Désertique","Méditerranéen"],ans:1,exp:"Yaoundé = équatorial : chaud (25°C cst), humide toute l'année (1600mm pluies), 2 saisons sèches courtes."},
+     {q:"Principal gaz à effet de serre dû à l'homme :",opts:["O₂","CO₂","N₂","H₂"],ans:1,exp:"CO₂ = principal GES anthropique (combustion fossiles). Aussi méthane (élevage), N₂O (engrais), CFC (climatisation)."},
+     {q:"Réchauffement climatique observé depuis 1880 :",opts:["+0,1°C","+1,1°C","+5°C","+10°C"],ans:1,exp:"+1,1°C en moyenne globale. Mais +2°C en Arctique. Cameroun : +1,5°C dans certaines régions."},
+     {q:"Lac Tchad a perdu :",opts:["10%","50%","94%","Aucune perte"],ans:2,exp:"Surface 1963 : 25 000 km². 2025 : 1 500 km². Perte ~94% : sécheresses + sur-irrigation."},
+     {q:"Sans effet de serre naturel, T moyenne Terre serait :",opts:["+15°C","0°C","-18°C","-50°C"],ans:2,exp:"Sans GES naturels, Terre = -18°C (gelée). Avec GES naturels = +15°C. Pratique pour la vie. Le problème = excès anthropique."},
+     {q:"Énergie renouvelable la plus utilisée au Cameroun :",opts:["Solaire","Hydraulique","Éolienne","Géothermique"],ans:1,exp:"Cameroun = 75% hydraulique (Edéa, Songloulou, Lom Pangar). Solaire en croissance."},
+   ],
+   ressource:"https://minesec-distancelearning.cm",pack:null},
+
+  {id:"lv33",titre:"Algorithmes : Tri & Complexité",matiere:"Informatique",cat:"info",
+   classe:"1ère-Tle TI",ico:"💻",color:"#1E40AF",gratuit:false,plan:"Sciences",
+   desc:"Tri à bulles, tri par sélection, complexité O(n²), tri rapide O(n log n). Programme TI.",
+   theorie:"💻 ALGO = suite d'instructions pour résoudre un problème.\n\n📊 COMPLEXITÉ = nombre d'opérations en fonction de n.\n• O(1) : constant (accès à tableau[i])\n• O(log n) : logarithmique (recherche dichotomique)\n• O(n) : linéaire (parcours simple)\n• O(n²) : quadratique (tris naïfs)\n• O(n log n) : log-linéaire (tris efficaces)\n• O(2^n) : exponentiel (FORCE BRUTE)\n\n🔢 TRI À BULLES : compare voisins, échange si désordre. Répète. Pire cas O(n²).\n\n⚡ TRI RAPIDE (Quicksort) : choisir pivot, partitionner < et >, récursion. Moyenne O(n log n).",
+   experience:[
+     "1️⃣ ALGO TRI BULLES (Python-like) :\n  for i de 0 à n-1:\n    for j de 0 à n-i-1:\n      si t[j] > t[j+1]:\n        échanger(t[j], t[j+1])\nDessine les étapes sur [5,3,8,1].",
+     "2️⃣ ÉTAPES SUR [5,3,8,1] :\nPassage 1: [3,5,8,1] → [3,5,8,1] → [3,5,1,8]\nPassage 2: [3,5,1,8] → [3,1,5,8] → fini\nPassage 3: [1,3,5,8] → trié !",
+     "3️⃣ COMPTER LES COMPARAISONS : pour n=4, max = 4×3 = 12 comparaisons. Pour n=10 = 90. Pour n=1000 = 1 million. Quadratique.",
+     "4️⃣ TRI PAR SÉLECTION : trouver le min, le mettre en 1er. Recommencer avec [1:]. Aussi O(n²) mais moins d'échanges.",
+     "5️⃣ RECHERCHE DICHOTOMIQUE (tableau trié) : couper en 2 à chaque étape. n=1 000 000 → 20 comparaisons (log₂ 10⁶). C'est pourquoi le tri préalable est utile.",
+     "6️⃣ QUICKSORT — PIVOT : choisir t[0]=5 dans [5,3,8,1,4]. Partition : <5 → [3,1,4], =5 → [5], >5 → [8]. Récursion sur chaque partie.",
+     "7️⃣ COMPARER PERFORMANCES : n=10⁶ éléments. Tri bulles : 10¹² ops (~17 min). Quicksort : 2×10⁷ ops (~20 ms). Différence x50 000 !",
+   ],
+   quiz:[
+     {q:"Complexité du tri à bulles pire cas :",opts:["O(n)","O(n²)","O(n log n)","O(1)"],ans:1,exp:"Tri à bulles : 2 boucles imbriquées → O(n²). Pour n=1000, ~10⁶ opérations."},
+     {q:"Algorithme le plus rapide pour grands n :",opts:["Tri à bulles O(n²)","Tri par sélection O(n²)","Quicksort O(n log n)","Tous équivalents"],ans:2,exp:"Quicksort/Mergesort en O(n log n) sont bien plus rapides pour grands n. Pour n=10⁶ : O(n²)=10¹² vs O(n log n)=2×10⁷."},
+     {q:"Recherche dichotomique exige :",opts:["Tableau non trié","Tableau trié","Tableau vide","Récursion"],ans:1,exp:"Dichotomie requiert un tableau trié. Coupe en 2 à chaque étape. Complexité O(log n)."},
+     {q:"Pour n=1024, log₂(n) =",opts:["10","100","1024","2"],ans:0,exp:"2¹⁰ = 1024 donc log₂(1024) = 10. Très efficace : dichotomie sur 1024 éléments = 10 comparaisons max."},
+     {q:"Complexité de l'accès t[i] dans un tableau :",opts:["O(log n)","O(n)","O(1)","O(n²)"],ans:2,exp:"Accès direct via indice = O(1) = constant. C'est la force des tableaux vs listes chaînées."},
+     {q:"Tri sur [3,1,2] avec tri à bulles, 1er échange :",opts:["Aucun","3 et 1","1 et 2","3 et 2"],ans:1,exp:"Compare 3 et 1 → 3>1 donc échange → [1,3,2]. Puis compare 3 et 2 → [1,2,3] trié."},
+   ],
+   ressource:"https://minesec-distancelearning.cm",pack:"Sciences"},
+
+  {id:"lv34",titre:"Cameroun Colonial & Indépendance",matiere:"Histoire",cat:"histoire",
+   classe:"3ème-2nde",ico:"🇨🇲",color:"#15803D",gratuit:true,
+   desc:"Du protectorat allemand à l'indépendance (1884-1960). Personnages, dates, événements clés. Programme MINESEC.",
+   theorie:"🇨🇲 1884 : Traité germano-douala (Rois Bell et Akwa signent avec Nachtigal). Cameroun devient protectorat allemand → Kamerun.\n\n⚔️ RÉSISTANCES : Douala Manga Bell pendu en 1914. Martin-Paul Samba fusillé. Madola Bell.\n\n🌍 1916-1922 : Première Guerre mondiale. Allemagne perd. Cameroun = mandat SDN partagé France (4/5) + Royaume-Uni (1/5).\n\n📜 1946 : Trusteeship ONU (tutelle). Création UPC (Union des Populations du Cameroun) par Ruben UM NYOBÉ.\n\n💥 1955-1971 : Guerre du Cameroun. UPC interdite, maquis. Ruben Um Nyobé assassiné 1958.\n\n🎉 1er janvier 1960 : INDÉPENDANCE (Cameroun français). Ahmadou AHIDJO 1er président.\n\n🤝 1er octobre 1961 : RÉUNIFICATION avec Cameroun anglais (sud). État fédéral.\n\n🌟 1972 : République unitaire. 1982 : Paul BIYA succède à Ahidjo.",
+   experience:[
+     "1️⃣ FRISE CHRONOLOGIQUE : place sur une ligne 1884, 1914, 1916, 1922, 1946, 1955, 1958, 1960, 1961, 1972, 1982. Indique l'événement de chaque date.",
+     "2️⃣ CARTE DU KAMERUN ALLEMAND : Douala, Kribi, Édéa, Yaoundé (capitale 1909), Garoua. Frontières s'étendaient jusqu'au lac Tchad et nord du Gabon.",
+     "3️⃣ FIGURES DE LA RÉSISTANCE : Rudolph Douala Manga Bell (pendu 8 août 1914), Martin-Paul Samba (fusillé même jour), Madola Bell, Ngoso Din. Tous accusés de 'haute trahison'.",
+     "4️⃣ RUBEN UM NYOBÉ : né 1913 Boumnyebel, fondateur UPC 1948. Discours ONU New York 1952. Maquis 1955-1958. Tué par armée française 13 sept 1958. Surnommé 'Mpodol'.",
+     "5️⃣ AHMADOU AHIDJO : né 1924 Garoua, 1er Premier ministre 1958, 1er Président 1960-1982. Régime autoritaire, parti unique UNC. Démission étrange 1982.",
+     "6️⃣ COMPARAISON 2 ZONES : Cameroun FR (1/5 → Yaoundé, langue française, droit civil) vs Cameroun ANG (4/5 → Buéa, anglais, common law). Différences héritées jusqu'aujourd'hui (crise anglophone 2016).",
+     "7️⃣ ANALYSE DOCUMENT : extrait discours Um Nyobé ONU 1952 : 'Notre pays doit accéder à l'indépendance...'. Comparer avec discours Ahidjo 1er janvier 1960. Ce qui change : qui dirige ? Ce qui ne change pas : pacte colonial économique.",
+   ],
+   quiz:[
+     {q:"Année du traité germano-douala :",opts:["1860","1884","1900","1914"],ans:1,exp:"12 juillet 1884 : Nachtigal signe avec les rois Bell et Akwa. Naissance du 'Kamerun' allemand."},
+     {q:"Date de l'indépendance du Cameroun (français) :",opts:["1er janvier 1960","1er octobre 1961","13 sept 1958","20 mai 1972"],ans:0,exp:"1er janvier 1960 : indépendance du Cameroun français. Le 1er octobre 1961 = réunification avec le sud anglophone."},
+     {q:"Premier président du Cameroun :",opts:["Paul Biya","Ruben Um Nyobé","Ahmadou Ahidjo","Douala Manga Bell"],ans:2,exp:"Ahmadou Ahidjo, président de 1960 à 1982. Successeur : Paul Biya en novembre 1982."},
+     {q:"Fondateur de l'UPC (1948) :",opts:["Ahidjo","Ruben Um Nyobé","Charles Atangana","Paul Soppo Priso"],ans:1,exp:"Ruben Um Nyobé, 'Mpodol', fonde l'UPC le 10 avril 1948 à Douala. Assassiné par armée française 13 septembre 1958."},
+     {q:"Après défaite allemande en 1916, le Cameroun passe sous :",opts:["Indépendance immédiate","Mandat SDN partagé France/UK","Tutelle américaine","Tutelle belge"],ans:1,exp:"Conférence Paris 1919 : 4/5 France, 1/5 Royaume-Uni. Mandat de la Société Des Nations (1922) puis tutelle ONU (1946)."},
+     {q:"Date de la réunification (FR + ANG) :",opts:["1960","1er octobre 1961","20 mai 1972","1982"],ans:1,exp:"1er octobre 1961 : Cameroun anglais (sud) rejoint le Cameroun français après référendum. État fédéral jusqu'en 1972."},
+   ],
+   ressource:"https://minesec-distancelearning.cm",pack:null},
 ];
 
 // ─ PACKS LABOS ─
@@ -23966,6 +24154,58 @@ if(typeof EPREUVES_DB==='undefined'){
     {id:"ep_info1",titre:"Épreuve Informatique 3ème — Séq. 4",matiere:"Informatique",classe:"3ème",seq:"Séquence 4",cat:"cat1",gratuit:true,
      desc:"Tableur, traitement de texte, Internet et sécurité informatique.",
      apercu:"Exercice 1 (5 pts) — Tableur : Formules de base (SOMME, MOYENNE, SI). Réaliser un graphique à partir de données.\nExercice 2 (5 pts) — Traitement de texte : Mettre en forme un courrier administratif. Créer un tableau.\nExercice 3 (5 pts) — Internet : Adresse IP, DNS, protocole HTTP/HTTPS. Différence navigateur/moteur de recherche.\nExercice 4 (5 pts) — Sécurité : Virus, phishing, mot de passe sécurisé. Bonnes pratiques."},
+
+    // ═════════════════════════════════════════════════════════════════
+    // ── 10 NOUVELLES ÉPREUVES TYPE EXAMEN (programme MINESEC 2026) ──
+    // ═════════════════════════════════════════════════════════════════
+
+    // ── DICTÉE — 6ème et 5ème ──
+    {id:"ep_dic6",titre:"Dictée préparée — 6ème (Famille & École)",matiere:"Français",classe:"6ème",seq:"Séquence 2",cat:"cat1",gratuit:true,
+     desc:"Dictée 90 mots avec préparation : accord du verbe, pluriel des noms, homophones a/à, et/est.",
+     apercu:"PRÉPARATION (15 min)\n• Vocabulaire à étudier : la rentrée, le tableau, le maître, les cahiers, attentif, sage.\n• Règles à réviser : accord sujet-verbe au présent. Homophones a/à : 'a' = verbe avoir, 'à' = préposition. et/est : 'et' = lien, 'est' = verbe être.\n\nDICTÉE (20 min)\n« C'est la rentrée des classes. Les élèves arrivent à l'école avec leurs cahiers neufs et leurs stylos bien taillés. Le maître les accueille avec un large sourire. Il leur explique le règlement intérieur. Tous écoutent attentivement. La cloche sonne et les enfants se rangent en silence dans la cour. Cette première journée est très importante pour eux. »\n\nQUESTIONS APRÈS DICTÉE (5 pts) :\n1) Souligner les verbes conjugués. 2) Donner la nature de 'attentivement'. 3) Trouver un synonyme de 'accueille'."},
+
+    {id:"ep_dic5",titre:"Dictée préparée — 5ème (Le marché)",matiere:"Français",classe:"5ème",seq:"Séquence 3",cat:"cat1",gratuit:true,
+     desc:"Dictée 120 mots : accords participe passé avec être/avoir, conjugaison imparfait, ponctuation directe.",
+     apercu:"PRÉPARATION (15 min)\n• Vocabulaire : marchande, plantain, manioc, marchander, abondante.\n• Règles : PP avec être → accord sujet ; PP avec avoir → accord COD si avant. Imparfait : -ais, -ait, -ions, -iez, -aient.\n\nDICTÉE (20 min)\n« Ce matin, ma mère et moi étions allés au marché Mokolo. La foule était dense. Les marchandes que nous avions rencontrées la semaine dernière nous saluèrent gaiement. Elles avaient préparé des étals magnifiques : plantains mûrs, manioc frais, ndolè bien lavé, arachides grillées. — Combien coûte ce panier de tomates ? demanda ma mère. — Mille francs, madame ! répondit la vendeuse. Après un long marchandage, nous achetâmes deux paniers pour mille cinq cents francs. »\n\nQUESTIONS (5 pts) : 1) Justifier l'accord de 'rencontrées'. 2) Mettre le 1er paragraphe au présent. 3) Relever un dialogue direct et expliquer la ponctuation."},
+
+    // ── ÉTUDE DE TEXTE — 4ème ──
+    {id:"ep_etx4",titre:"Étude de texte — 4ème : Mongo Béti",matiere:"Français",classe:"4ème",seq:"Séquence 4",cat:"cat1",gratuit:true,
+     desc:"Étude d'un extrait de 'Le pauvre Christ de Bomba' de Mongo Béti. Compréhension, vocabulaire, repérage figures de style.",
+     apercu:"TEXTE — extrait de « Le pauvre Christ de Bomba » de Mongo Béti (1956) :\n\n« Le R.P. Drumont avait fondé sa mission à Bomba comme on plante un drapeau en territoire ennemi. Tout y était à conquérir : les âmes des hommes, les corps des femmes, les esprits des enfants. Il prêchait avec une ardeur féroce, comme s'il avait voulu, à lui seul, racheter mille siècles de paganisme africain. Mais quand le soir tombait sur la forêt et que retentissaient les tam-tams lointains, il sentait monter en lui un doute glacial : et si tout cela n'avait servi à rien ? »\n\nQUESTIONS — 20 pts\nI. Compréhension (8 pts)\n1) Qui est le personnage principal ? Que fait-il ?\n2) Relevez deux expressions montrant le caractère du R.P. Drumont.\n3) Pourquoi le tam-tam le fait-il douter ?\n\nII. Vocabulaire (4 pts)\n4) Donnez le sens de : 'paganisme', 'racheter', 'féroce'.\n\nIII. Figures de style (4 pts)\n5) Identifiez et expliquez la comparaison de la 1ère phrase.\n6) Identifiez la métaphore filée du texte (champ lexical de la conquête militaire).\n\nIV. Réflexion (4 pts)\n7) Expliquez en 10 lignes en quoi ce texte critique la colonisation."},
+
+    // ── ORTHOGRAPHE/GRAMMAIRE — 5ème et 3ème ──
+    {id:"ep_orth5",titre:"Orthographe & Grammaire — 5ème",matiere:"Français",classe:"5ème",seq:"Séquence 4",cat:"cat1",gratuit:true,
+     desc:"Évaluation orthographique : accords, homophones, conjugaison, vocabulaire. 20 points.",
+     apercu:"Exercice 1 — Accord du participe passé (5 pts)\nComplétez avec l'accord correct : 'Les lettres que j'ai écri___', 'Elle est parti___', 'Les fleurs que tu m'as offert___', 'Ils se sont lav___', 'La voiture que j'ai vu___ passer'.\n\nExercice 2 — Homophones (5 pts)\nChoisissez : 'C'est (sa/ça) qui m'inquiète'. 'Il (a/à) raison d'aller (a/à) Yaoundé.' 'Je crois qu'(on/ont) (a/à) gagné.' '(Quel/Qu'elle) belle journée !' '(Si/S'y) seulement tu étais venu.'\n\nExercice 3 — Conjugaison (5 pts)\nMettez au passé simple : 'Nous (aller) au village.' Au plus-que-parfait : 'Tu (finir) tes devoirs.' Au futur : 'Ils (être) prêts.' Au subjonctif présent : 'Il faut que vous (savoir).' Au conditionnel : 'Je (vouloir) un livre.'\n\nExercice 4 — Vocabulaire (5 pts)\nDonnez 1 synonyme et 1 antonyme de : courageux, rapide, content, ancien, ami."},
+
+    {id:"ep_orth3",titre:"Orthographe & Grammaire — 3ème (préparation BEPC)",matiere:"Français",classe:"3ème",seq:"Séquence 5",cat:"cat1",gratuit:true,
+     desc:"Évaluation BEPC : analyse logique, valeurs des temps, transformations, lexique. 20 points.",
+     apercu:"Exercice 1 — Analyse de phrase (5 pts)\nAnalysez la phrase suivante (nature et fonction de chaque groupe) : 'Hier, dans le petit village où mes grands-parents vivaient, nous avons assisté à une cérémonie traditionnelle qui m'a profondément ému.'\n\nExercice 2 — Valeurs des temps (4 pts)\nIndiquez la valeur de chaque temps souligné :\n• 'Quand il PLEUVAIT, j'ai fermé les fenêtres.' (imparfait : ?)\n• 'Il SERAIT venu si tu l'avais invité.' (conditionnel : ?)\n• 'Demain, je PRENDRAI le train.' (futur : ?)\n• 'L'eau BOUT à 100°C.' (présent : ?)\n\nExercice 3 — Transformations (5 pts)\n• Passive : 'Le maire a inauguré l'école.' → ?\n• Discours indirect : Il a dit : 'Je viendrai demain.' → ?\n• Négative complète : 'Quelqu'un a apporté quelque chose.' → ?\n\nExercice 4 — Lexique BEPC (6 pts)\nDonnez le sens de : éphémère, perspicace, pugnace, indolent, intrépide, exaspérer."},
+
+    // ── BEPC Blanc — Histoire-Géo ──
+    {id:"ep_hg3",titre:"BEPC Blanc — Histoire-Géo 3ème (Cameroun + Mondialisation)",matiere:"Histoire-Géographie",classe:"3ème",seq:"BEPC",cat:"cat1",gratuit:true,
+     desc:"Sujet blanc BEPC HG : histoire du Cameroun indépendant + mondialisation économique. 20 points.",
+     apercu:"DOSSIER HISTOIRE (10 pts) — Le Cameroun depuis 1960\nDocument 1 : Discours d'Ahidjo au 1er janvier 1960. Document 2 : Carte du Cameroun fédéral (1961-1972). Document 3 : Photo de Paul Biya prêtant serment 1982.\n\n1) Présentez les 3 documents (3 pts).\n2) Quelles sont les 2 grandes étapes politiques entre 1960 et 1972 ? (3 pts)\n3) Comment Paul Biya succède-t-il à Ahidjo ? (2 pts)\n4) Citez 2 défis politiques du Cameroun aujourd'hui (2 pts).\n\nDOSSIER GÉO (10 pts) — La mondialisation\nDocument 4 : Carte des flux commerciaux mondiaux. Document 5 : Photo de Douala (port).\n\n1) Définissez : mondialisation, FTN, IDH (3 pts).\n2) Quels sont les 3 grands pôles mondiaux ? (2 pts)\n3) Quel est le rôle du port de Douala dans l'intégration du Cameroun aux échanges mondiaux ? (3 pts)\n4) Citez 2 conséquences positives et 2 négatives de la mondialisation pour le Cameroun (2 pts)."},
+
+    // ── BAC SVT — Tle D ──
+    {id:"ep_svt_tle",titre:"Épreuve BAC SVT — Tle D 2026 (Génétique + Immunité)",matiere:"SVT",classe:"Tle D",seq:"BAC",cat:"cat1",gratuit:false,prix:2000,
+     desc:"Sujet blanc BAC D conforme programme 2026. Génétique + Système immunitaire. 20 points.",
+     apercu:"PARTIE I — Génétique (10 pts)\nOn croise des drosophiles aux yeux rouges (sauvage, dominant) avec des drosophiles aux yeux blancs (mutant, récessif, lié à X).\n1) Donnez les phénotypes et génotypes des parents (mâles et femelles).\n2) Réalisez le croisement F1. Quels phénotypes obtient-on ?\n3) F1 × F1 = F2. Donnez les proportions phénotypiques attendues chez les ♂ et ♀.\n4) Comment expliquer que dans la nature, on observe plus de mâles aux yeux blancs ?\n\nPARTIE II — Immunité (10 pts)\nUn enfant non vacciné contracte la rougeole. Document : courbe de production d'anticorps en fonction du temps après infection.\n1) Identifiez les cellules de l'immunité acquise impliquées (3 pts).\n2) Expliquez la différence entre la réponse primaire (1ère infection) et la réponse secondaire (rappel) (4 pts).\n3) Pourquoi la vaccination est-elle plus efficace que de laisser la maladie se déclencher naturellement ? Donnez 3 arguments (3 pts)."},
+
+    // ── BAC Physique — Tle C ──
+    {id:"ep_phy_tle",titre:"Épreuve BAC Physique — Tle C 2026 (Mécanique + Nucléaire)",matiere:"Physique",classe:"Tle C",seq:"BAC",cat:"cat1",gratuit:false,prix:2000,
+     desc:"Sujet BAC C 2026 conforme programme. Mécanique du point + radioactivité + datation. 20 points.",
+     apercu:"EXERCICE 1 — Mécanique (8 pts)\nUne bille de masse m = 0,2 kg est lâchée sans vitesse initiale d'une hauteur h = 5 m (g = 10 m/s², pas de frottement).\n1) Calculez l'énergie potentielle initiale.\n2) En appliquant le principe de conservation, déterminez la vitesse au sol.\n3) Si on ajoute un frottement constant f = 0,5 N, recalculez la vitesse au sol.\n4) Tracez les diagrammes énergétiques Ec(t), Ep(t), Em(t) sans frottement.\n\nEXERCICE 2 — Nucléaire (12 pts)\nL'iode-131 (T = 8 jours) est utilisé en médecine pour traiter la thyroïde.\n1) Donnez la composition du noyau d'iode-131 (Z = 53). Écrivez son symbole.\n2) Il se désintègre β⁻ en xénon-131 (Xe). Écrivez l'équation.\n3) Initialement on injecte N₀ = 10¹⁵ atomes. Combien restent-ils après 24 jours ?\n4) Datation : un fossile contient 12,5% du C-14 initial (T = 5730 ans). Quel est son âge ?\n5) Distinguez fission (centrale) et fusion (Soleil). Donnez 2 différences essentielles."},
+
+    // ── Bonus : Examen blanc Probatoire C — Maths ──
+    {id:"ep_prob_c",titre:"Probatoire C Blanc — Maths 2026",matiere:"Mathématiques",classe:"1ère C",seq:"Probatoire",cat:"cat1",gratuit:false,prix:1500,
+     desc:"Probatoire C 2026 blanc : suites, dérivation, géométrie, complexes. 20 points.",
+     apercu:"EXERCICE 1 — Suites (5 pts)\nSoit (Un) définie par U₀ = 5 et Un+1 = (Un + 3)/2.\n1) Montrez par récurrence que Un > 3 pour tout n.\n2) Étudiez la monotonie de (Un).\n3) Posons Vn = Un − 3. Montrez que (Vn) est géométrique de raison 1/2. Déduisez Un.\n\nEXERCICE 2 — Dérivation (5 pts)\nf(x) = (2x − 1)/(x + 1) sur ℝ\\{−1}.\n1) Calculez f'(x).\n2) Dressez le tableau de variation.\n3) Tracez la courbe (asymptotes, points particuliers).\n\nEXERCICE 3 — Complexes (5 pts)\nz = 2 + 2i√3.\n1) Calculez |z| et arg(z).\n2) Mettez z sous forme trigonométrique.\n3) Calculez z⁶ et donnez le résultat sous forme algébrique.\n\nEXERCICE 4 — Géométrie (5 pts)\nDans un repère orthonormé, A(1;2), B(4;−1), C(−2;3).\n1) Calculez les coordonnées du barycentre G de (A,2)(B,1)(C,1).\n2) Démontrez que ABCD est un parallélogramme si D a pour coordonnées (−5;6).\n3) Calculez l'aire de ABC."},
+
+    // ── BEPC Blanc Sciences ──
+    {id:"ep_sci_bepc",titre:"BEPC Blanc Sciences — 3ème (PCT + SVT)",matiere:"Sciences",classe:"3ème",seq:"BEPC",cat:"cat1",gratuit:true,
+     desc:"BEPC blanc 2026 conforme MINESEC : PCT (Physique-Chimie-Tech) + SVT. 20 points.",
+     apercu:"PARTIE A — PHYSIQUE (5 pts)\n1) Un conducteur ohmique de résistance R = 220 Ω est traversé par I = 0,5 A. Calculez U.\n2) Un appareil de puissance 60 W fonctionne 4h/jour. Calculez l'énergie consommée en kWh par jour.\n3) Comment éviter un court-circuit ? (2 sécurités électriques)\n\nPARTIE B — CHIMIE (5 pts)\n1) Donnez la formule du dioxyde de carbone.\n2) On dissout 5 g de NaCl dans 250 mL d'eau. Calculez la concentration massique.\n3) Équilibrez : __ Fe + __ O₂ → __ Fe₂O₃.\n4) Test du dioxygène : __ ? Test du dihydrogène : __ ?\n\nPARTIE C — SVT (10 pts)\n1) Faites un schéma annoté de l'appareil reproducteur féminin (4 pts).\n2) Donnez les étapes du cycle menstruel (3 pts).\n3) Citez 3 méthodes contraceptives et expliquez leur principe (3 pts)."},
   ];
 }
 
