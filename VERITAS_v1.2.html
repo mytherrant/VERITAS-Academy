@@ -2830,7 +2830,7 @@ const LWS_API = {
 // Quand FIREBASE_API_KEY est vide → auth désactivée, fetch direct (compat actuelle)
 // Quand FIREBASE_API_KEY est défini → chaque requête Firebase passe ?auth=<idToken>
 // Permet d'activer rules Firebase {".read":"auth!=null",".write":"auth!=null"}
-const FIREBASE_API_KEY = ''; // ← Coller ici la "apiKey" depuis Firebase Console (Paramètres → Général → Vos applications)
+const FIREBASE_API_KEY = 'AIzaSyAIw7PFgQTCkIEgCv32DbqGVfwR-_UwC-E'; // Web API key (publique — sécurité via rules Firebase)
 
 window._fbAuth = { idToken: null, expiresAt: 0, pending: null };
 
