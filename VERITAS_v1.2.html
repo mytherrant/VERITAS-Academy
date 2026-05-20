@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta http-equiv="Content-Security-Policy"
-  content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; connect-src 'self' https://veritas-school.com;">
+  content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https: http:; connect-src 'self' https://veritas-school.com https://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 <meta name="referrer" content="strict-origin-when-cross-origin">
@@ -2832,17 +2832,80 @@ const LWS_API = {
 // Permet d'activer rules Firebase {".read":"auth!=null",".write":"auth!=null"}
 const FIREBASE_API_KEY = 'AIzaSyAIw7PFgQTCkIEgCv32DbqGVfwR-_UwC-E'; // Web API key (publique — sécurité via rules Firebase)
 
-window._fbAuth = { idToken: null, expiresAt: 0, pending: null };
+// Cache persistant : 1 utilisateur anonyme par navigateur (pas un à chaque ouverture)
+window._fbAuth = (function(){
+  try{
+    var raw = localStorage.getItem('_vrtFbAuth');
+    if(raw){
+      var saved = JSON.parse(raw);
+      if(saved && saved.refreshToken){
+        return {
+          idToken: saved.idToken || null,
+          refreshToken: saved.refreshToken,
+          expiresAt: saved.expiresAt || 0,
+          localId: saved.localId || null,
+          pending: null
+        };
+      }
+    }
+  }catch(e){}
+  return { idToken: null, refreshToken: null, expiresAt: 0, localId: null, pending: null };
+})();
+
+function _fbAuthPersist(){
+  try{
+    localStorage.setItem('_vrtFbAuth', JSON.stringify({
+      idToken: window._fbAuth.idToken,
+      refreshToken: window._fbAuth.refreshToken,
+      expiresAt: window._fbAuth.expiresAt,
+      localId: window._fbAuth.localId
+    }));
+  }catch(e){}
+}
 
 async function _ensureFbAuth(){
-  if(!FIREBASE_API_KEY) return null; // Auth désactivée — comportement actuel
-  // Token encore valide (renouvellement 1 min avant expiration)
+  if(!FIREBASE_API_KEY) return null; // Auth désactivée
+  // 1) Token encore valide (refresh 1 min avant expiration) → retour direct
   if(window._fbAuth.idToken && Date.now() < window._fbAuth.expiresAt - 60000){
     return window._fbAuth.idToken;
   }
-  // Requête déjà en cours → attendre
+  // 2) Requête déjà en cours → mutualiser
   if(window._fbAuth.pending) return window._fbAuth.pending;
-  // Nouvelle requête anonyme
+  // 3) Si on a un refreshToken → renouveler (pas créer un nouvel utilisateur !)
+  if(window._fbAuth.refreshToken){
+    window._fbAuth.pending = (async function(){
+      try{
+        var body = 'grant_type=refresh_token&refresh_token=' + encodeURIComponent(window._fbAuth.refreshToken);
+        var res = await fetch('https://securetoken.googleapis.com/v1/token?key=' + FIREBASE_API_KEY, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: body
+        });
+        if(!res.ok){
+          console.warn('[Firebase Auth] refresh HTTP ' + res.status + ' — retombe sur nouveau signUp');
+          // Refresh token invalide → repartir de zéro
+          window._fbAuth.refreshToken = null;
+          window._fbAuth.idToken = null;
+          window._fbAuth.pending = null;
+          _fbAuthPersist();
+          return _ensureFbAuth();
+        }
+        var data = await res.json();
+        window._fbAuth.idToken = data.id_token || data.access_token;
+        window._fbAuth.refreshToken = data.refresh_token || window._fbAuth.refreshToken;
+        window._fbAuth.expiresAt = Date.now() + (parseInt(data.expires_in || '3600') * 1000);
+        _fbAuthPersist();
+        return window._fbAuth.idToken;
+      } catch(e){
+        console.warn('[Firebase Auth] erreur refresh:', e);
+        return null;
+      } finally {
+        window._fbAuth.pending = null;
+      }
+    })();
+    return window._fbAuth.pending;
+  }
+  // 4) Aucun token : signUp anonyme (UNE SEULE FOIS par navigateur)
   window._fbAuth.pending = (async function(){
     try{
       var res = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FIREBASE_API_KEY, {
@@ -2851,16 +2914,19 @@ async function _ensureFbAuth(){
         body: JSON.stringify({returnSecureToken: true})
       });
       if(!res.ok){
-        console.warn('[Firebase Auth] HTTP', res.status, '— fallback mode anonyme désactivé');
+        console.warn('[Firebase Auth] signUp HTTP ' + res.status);
         return null;
       }
       var data = await res.json();
       window._fbAuth.idToken = data.idToken;
+      window._fbAuth.refreshToken = data.refreshToken;
+      window._fbAuth.localId = data.localId;
       window._fbAuth.expiresAt = Date.now() + (parseInt(data.expiresIn || '3600') * 1000);
-      console.info('[Firebase Auth] Token anonyme obtenu, expire à', new Date(window._fbAuth.expiresAt).toLocaleString('fr-FR'));
+      _fbAuthPersist();
+      console.info('[Firebase Auth] Identité anonyme créée (' + data.localId + ')');
       return data.idToken;
     } catch(e){
-      console.warn('[Firebase Auth] échec réseau:', e);
+      console.warn('[Firebase Auth] échec signUp:', e);
       return null;
     } finally {
       window._fbAuth.pending = null;
@@ -2869,12 +2935,18 @@ async function _ensureFbAuth(){
   return window._fbAuth.pending;
 }
 
-// Wrapper transparent : si auth activée, ajoute ?auth=token ; sinon, fetch direct
+// Wrapper transparent : auth activée → ajoute ?auth=token, sinon fetch direct
 async function _fbFetch(url, options){
   var token = await _ensureFbAuth();
   if(!token) return fetch(url, options);
   var sep = url.indexOf('?') >= 0 ? '&' : '?';
   return fetch(url + sep + 'auth=' + encodeURIComponent(token), options);
+}
+
+// Pré-warming : déclencher l'auth dès le chargement de la page (avant le premier save)
+// Évite la race condition au démarrage où save() est appelé avant que l'auth ne soit prête
+if(FIREBASE_API_KEY && typeof window !== 'undefined'){
+  setTimeout(function(){ _ensureFbAuth().catch(function(){}); }, 0);
 }
 
 let _syncTimeout = null;
@@ -3920,6 +3992,7 @@ function save(){
       if(!res.ok) throw new Error('HTTP '+res.status);
       // Mémoriser le lastModified du push pour optimistic-lock du prochain PUT
       window._fbLastSyncedMs=DB.lastModified||Date.now();
+      window._fbSaveFails=0; // reset compteur d'échecs
       toast('☁️ Synchronisé');
       // ── Filet de sécurité : backup non-bloquant vers LWS db.php (200 Go disponibles) ──
       // Si Firebase tombe en panne, on a une copie indépendante sur ton serveur
@@ -3928,10 +4001,16 @@ function save(){
       },0);
     }catch(e){
       console.warn('[Firebase] save error:',e);
-      if(iA()&&typeof _hasLocalBinaries==='function'&&_hasLocalBinaries()){
-        _toastRetrySync(); // toast avec bouton "Réessayer" stylisé
-      } else {
-        toast('⚠ Sauvegarde locale uniquement','warn');
+      // Compteur d'échecs pour éviter de spammer le toast au démarrage
+      window._fbSaveFails = (window._fbSaveFails||0) + 1;
+      // Ne montrer le toast que si : admin connecté ET 2+ échecs consécutifs
+      // (premier échec souvent dû au timing auth au démarrage)
+      if(iA() && window._fbSaveFails >= 2){
+        if(typeof _hasLocalBinaries==='function'&&_hasLocalBinaries()){
+          _toastRetrySync();
+        } else {
+          toast('⚠ Sauvegarde locale uniquement','warn');
+        }
       }
     }
     // ── 3. Auto-upload des binaires locaux si nécessaire (déclenché après chaque save admin) ──
@@ -7686,17 +7765,25 @@ async function _runForceFullSync(){
   var stat=document.getElementById('forceSyncStatus');
   function _step(html){if(stat)stat.innerHTML+=html;}
   _step('<div style="font-size:12px;color:var(--ink3);padding:4px 0">⏳ Étape 1/3 : Upload des fichiers locaux…</div>');
-  // Étape 1 : binaires
-  await new Promise(function(resolve){
-    if(typeof _cloudAutoUploadBinaries==='function'){
-      _cloudAutoUploadBinaries(function(uploaded,errors){
-        var msg='✓ '+(uploaded||0)+' fichier(s) uploadé(s)';
-        if(errors)msg+=' · ⚠️ '+errors+' échec(s)';
-        _step('<div style="font-size:12px;color:#059669;padding:4px 0">'+msg+'</div>');
+  // ── Étape 1 : binaires AVEC TIMEOUT GLOBAL (90s max) — évite le hang ──
+  await Promise.race([
+    new Promise(function(resolve){
+      if(typeof _cloudAutoUploadBinaries==='function'){
+        _cloudAutoUploadBinaries(function(uploaded,errors){
+          var msg='✓ '+(uploaded||0)+' fichier(s) uploadé(s)';
+          if(errors)msg+=' · ⚠️ '+errors+' échec(s)';
+          _step('<div style="font-size:12px;color:#059669;padding:4px 0">'+msg+'</div>');
+          resolve();
+        });
+      } else { _step('<div style="font-size:12px;color:var(--ink4);padding:4px 0">— Aucun module d\'upload</div>'); resolve(); }
+    }),
+    new Promise(function(resolve){
+      setTimeout(function(){
+        _step('<div style="font-size:12px;color:#D97706;padding:4px 0">⏱️ Timeout 90s — on passe à l\'étape suivante. Utilisez "🧹 Nettoyer références cassées" si nécessaire.</div>');
         resolve();
-      });
-    } else { _step('<div style="font-size:12px;color:var(--ink4);padding:4px 0">— Aucun module d\'upload</div>'); resolve(); }
-  });
+      }, 90000);
+    })
+  ]);
   // Étape 2 : PUT Firebase
   _step('<div style="font-size:12px;color:var(--ink3);padding:4px 0">⏳ Étape 2/3 : Sauvegarde sur Firebase…</div>');
   try{
@@ -7765,6 +7852,130 @@ function _countLocalBinaries(){
   (DB.packs||[]).forEach(function(p){if(p.photo&&typeof p.photo==='string'&&p.photo.indexOf('data:')===0&&p.photo.length>500)n++;});
   (DB.tickerItems||[]).forEach(function(ti){if(ti.image&&typeof ti.image==='string'&&ti.image.indexOf('data:')===0&&ti.image.length>500)n++;});
   return n;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── NETTOYAGE DES RÉFÉRENCES CASSÉES (data: orphelines, URLs invalides) ────
+// ═══════════════════════════════════════════════════════════════════════════
+// Outil de réparation : purge les références à des images/fichiers qui ne
+// peuvent plus être uploadés (data: vides, URLs en /htdocs/, etc.)
+function mCleanBrokenRefs(){
+  if(!iA()){toast('Accès réservé aux administrateurs','warn');return;}
+  // Pré-analyse pour montrer ce qui sera nettoyé
+  var report={
+    galleryEmpty:0, galleryBrokenUrl:0,
+    booksCover:0, booksFichier:0, booksPreview:0,
+    studentsPhoto:0, teachersPhoto:0,
+    elearningEmpty:0, soumissionsEmpty:0, devoirsEmpty:0,
+    partenairesLogo:0, packsPhoto:0
+  };
+  function _isBrokenDataUrl(s){
+    return s && typeof s==='string' && s.indexOf('data:')===0 && s.length<200;
+  }
+  function _isBrokenServerUrl(s){
+    return s && typeof s==='string' && (s.indexOf('/htdocs/')>=0 || s.indexOf('undefined')>=0);
+  }
+  (DB.galleryImages||[]).forEach(function(g){
+    if(_isBrokenDataUrl(g.src)||(!g.src&&!g.serverSrc))report.galleryEmpty++;
+    if(_isBrokenServerUrl(g.src)||_isBrokenServerUrl(g.serverSrc))report.galleryBrokenUrl++;
+  });
+  (DB.books||[]).forEach(function(b){
+    if(_isBrokenDataUrl(b.coverImg)||_isBrokenServerUrl(b.coverImg))report.booksCover++;
+    if(_isBrokenDataUrl(b.fichierData)||_isBrokenServerUrl(b.fichierUrl))report.booksFichier++;
+    if(b.previewImages){
+      b.previewImages.forEach(function(img){
+        if(_isBrokenDataUrl(img)||_isBrokenServerUrl(img))report.booksPreview++;
+      });
+    }
+  });
+  (DB.students||[]).forEach(function(s){if(_isBrokenDataUrl(s.photo)||_isBrokenServerUrl(s.photo))report.studentsPhoto++;});
+  (DB.teachers||[]).forEach(function(t){if(_isBrokenDataUrl(t.photo)||_isBrokenServerUrl(t.photo))report.teachersPhoto++;});
+  (DB.partenaires||[]).forEach(function(p){if(_isBrokenDataUrl(p.logo)||_isBrokenServerUrl(p.logo))report.partenairesLogo++;});
+  (DB.packs||[]).forEach(function(p){if(_isBrokenDataUrl(p.photo)||_isBrokenServerUrl(p.photo))report.packsPhoto++;});
+  (DB.elearning&&DB.elearning.contenus||[]).forEach(function(c){
+    if(_isBrokenDataUrl(c.fichierData)||_isBrokenServerUrl(c.fichierUrl))report.elearningEmpty++;
+  });
+  (DB.elearning&&DB.elearning.soumissions||[]).forEach(function(s){
+    if(_isBrokenDataUrl(s.fichierData)||_isBrokenServerUrl(s.fichierUrl))report.soumissionsEmpty++;
+  });
+  (DB.devoirs||[]).forEach(function(d){
+    if(_isBrokenDataUrl(d.fichierData)||_isBrokenServerUrl(d.fichierUrl))report.devoirsEmpty++;
+  });
+  var total=Object.keys(report).reduce(function(s,k){return s+report[k];},0);
+
+  var body='<div style="max-height:60vh;overflow-y:auto">'
+    +'<div class="ib ibw mb14"><span>⚠️</span><span>Cet outil va supprimer les références à des fichiers <strong>cassés ou orphelins</strong> : data URLs vides, URLs en <code>/htdocs/</code> inaccessibles, photos n\'ayant pas pu être uploadées. <strong>Ne touche pas aux fichiers valides.</strong></span></div>'
+    +(total===0
+      ? '<div class="ib ibg"><span>✅</span><span>Aucune référence cassée trouvée. Tout est propre.</span></div>'
+      : '<div style="background:#FEF3C7;border:1px solid #FDE68A;border-radius:12px;padding:14px;margin-bottom:14px">'
+        +'<div style="font-weight:800;color:#92400E;margin-bottom:8px">'+total+' référence(s) à nettoyer :</div>'
+        +'<div style="font-size:13px;color:#78350F;line-height:1.8">'
+        +(report.galleryEmpty?'• '+report.galleryEmpty+' image(s) galerie vide(s)<br>':'')
+        +(report.galleryBrokenUrl?'• '+report.galleryBrokenUrl+' URL(s) galerie en /htdocs/<br>':'')
+        +(report.booksCover?'• '+report.booksCover+' couverture(s) livre cassée(s)<br>':'')
+        +(report.booksFichier?'• '+report.booksFichier+' fichier(s) livre cassé(s)<br>':'')
+        +(report.booksPreview?'• '+report.booksPreview+' image(s) preview livre cassée(s)<br>':'')
+        +(report.studentsPhoto?'• '+report.studentsPhoto+' photo(s) élève cassée(s)<br>':'')
+        +(report.teachersPhoto?'• '+report.teachersPhoto+' photo(s) enseignant cassée(s)<br>':'')
+        +(report.partenairesLogo?'• '+report.partenairesLogo+' logo(s) partenaire cassé(s)<br>':'')
+        +(report.packsPhoto?'• '+report.packsPhoto+' photo(s) pack cassée(s)<br>':'')
+        +(report.elearningEmpty?'• '+report.elearningEmpty+' fichier(s) e-learning cassé(s)<br>':'')
+        +(report.soumissionsEmpty?'• '+report.soumissionsEmpty+' fichier(s) soumission cassé(s)<br>':'')
+        +(report.devoirsEmpty?'• '+report.devoirsEmpty+' fichier(s) devoir cassé(s)<br>':'')
+        +'</div></div>')
+    +'<div class="ib ibi mt12"><span>💡</span><span>Après nettoyage, ré-uploadez les fichiers manquants via les pages concernées (Galerie, Livres, etc.).</span></div>'
+    +'</div>';
+
+  M('🧹 Nettoyer les références cassées','Outil de réparation post-corruption',body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +(total>0?'<button class="btn" style="background:#DC2626;color:#fff" onclick="_runCleanBrokenRefs()">🧹 Nettoyer maintenant ('+total+')</button>':''),
+    false
+  );
+}
+
+function _runCleanBrokenRefs(){
+  function _bad(s){
+    if(!s||typeof s!=='string')return true;
+    if(s.indexOf('data:')===0&&s.length<200)return true;
+    if(s.indexOf('/htdocs/')>=0)return true;
+    if(s.indexOf('undefined')>=0)return true;
+    return false;
+  }
+  var cleaned=0;
+  (DB.galleryImages||[]).forEach(function(g){
+    if(_bad(g.src)){g.src=g.serverSrc||'';cleaned++;}
+    if(_bad(g.serverSrc))g.serverSrc='';
+  });
+  // Supprimer les entries totalement vides de la galerie
+  DB.galleryImages=(DB.galleryImages||[]).filter(function(g){return g.src&&g.src.length>10;});
+  (DB.books||[]).forEach(function(b){
+    if(_bad(b.coverImg)){b.coverImg='';cleaned++;}
+    if(_bad(b.fichierUrl)){b.fichierUrl='';cleaned++;}
+    if(_bad(b.fichierData)){b.fichierData='';cleaned++;}
+    if(b.previewImages){
+      var before=b.previewImages.length;
+      b.previewImages=b.previewImages.filter(function(img){return !_bad(img);});
+      cleaned+=(before-b.previewImages.length);
+    }
+  });
+  (DB.students||[]).forEach(function(s){if(_bad(s.photo)){s.photo='';cleaned++;}});
+  (DB.teachers||[]).forEach(function(t){if(_bad(t.photo)){t.photo='';cleaned++;}});
+  (DB.partenaires||[]).forEach(function(p){if(_bad(p.logo)){p.logo='';cleaned++;}});
+  (DB.packs||[]).forEach(function(p){if(_bad(p.photo)){p.photo='';cleaned++;}});
+  (DB.elearning&&DB.elearning.contenus||[]).forEach(function(c){
+    if(_bad(c.fichierData)){c.fichierData='';cleaned++;}
+    if(_bad(c.fichierUrl)){c.fichierUrl='';cleaned++;}
+  });
+  (DB.elearning&&DB.elearning.soumissions||[]).forEach(function(s){
+    if(_bad(s.fichierData)){s.fichierData='';cleaned++;}
+    if(_bad(s.fichierUrl)){s.fichierUrl='';cleaned++;}
+  });
+  (DB.devoirs||[]).forEach(function(d){
+    if(_bad(d.fichierData)){d.fichierData='';cleaned++;}
+    if(_bad(d.fichierUrl)){d.fichierUrl='';cleaned++;}
+  });
+  save();cm();re();
+  toast('🧹 '+cleaned+' référence(s) nettoyée(s)','ok');
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -12790,6 +13001,7 @@ function pgSettings(){
       <div class="fl2 g8 fw mt14 pt14" style="border-top:var(--br)">
         <button class="btn sm" style="background:linear-gradient(135deg,#DC2626,#F97316);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="forceFullSync()">🚀 Forcer la sync complète</button>
         <button class="btn sm" style="background:linear-gradient(135deg,#142554,#1e3a7a);color:#FFC93C;border-radius:10px;font-weight:700" onclick="mStorageDashboard()">💾 Stockage LWS (200 Go)</button>
+        <button class="btn sm" style="background:linear-gradient(135deg,#92400E,#D97706);color:#fff;border-radius:10px;font-weight:700" onclick="mCleanBrokenRefs()">🧹 Nettoyer références cassées</button>
         <button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="cloudSaveDB()">☁️ Sauvegarder vers le cloud</button>
         <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="cloudRestoreDB()">📥 Restaurer depuis le cloud</button>
         <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="cloudTestConnection()">🔌 Tester la connexion</button>
