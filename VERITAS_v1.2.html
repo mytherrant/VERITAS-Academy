@@ -3512,6 +3512,18 @@ function _migrateDB(){
   _fixHtdocsUrls();
   // FIX : filtrer les produits supprimés (tombstones) — empeche resurrection apres sync
   if(typeof _filterDeletedProducts==='function')_filterDeletedProducts();
+  // FIX : effacer les valeurs placeholder (+237 6 00 00 00 00) — bloquait l'affichage du vrai numero
+  if(DB.publicInfo){
+    if(DB.publicInfo.contact && (DB.publicInfo.contact.indexOf('6 00 00')>=0 || DB.publicInfo.contact === '+237 6 00 00 00 00')){
+      DB.publicInfo.contact='';
+    }
+    if(DB.publicInfo.whatsapp && (DB.publicInfo.whatsapp.indexOf('6 00 00')>=0 || DB.publicInfo.whatsapp === '+237 6 00 00 00 00')){
+      DB.publicInfo.whatsapp='';
+    }
+    if(DB.publicInfo.email && DB.publicInfo.email==='contact@veritas-cm.cm'){
+      DB.publicInfo.email='';
+    }
+  }
   // Identité école (toujours forcer depuis source embarquée)
   var _ldEl=document.getElementById('_logoData');
   var _ldSrc=(_ldEl&&_ldEl.src&&_ldEl.src.startsWith('data:'))?_ldEl.src:'';
@@ -5727,7 +5739,7 @@ function vShowSec(sec,btn){
       <div>
         <div class="vcard mb16">
           <div class="ct">📍 Informations pratiques</div>
-          ${[['🕐 Horaires',pi.horaires||'—'],['📞 Téléphone',pi.contact||DB.school?.tel||'—'],['✉️ Email',pi.email||'—'],['📍 Adresse',DB.school?.ville||'—'],['📌 Boîte Postale',DB.school?.bp||'—']].map(([l,v])=>`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)"><span class="s mut">${l}</span><span class="s semi">${v}</span></div>`).join("")}
+          ${[['🕐 Horaires',pi.horaires||'—'],['📞 Téléphone',pi.contact||DB.school?.tel||'—'],['✉️ Email',pi.email||DB.school?.email||'—'],['📍 Adresse',pi.adresse||DB.school?.ville||'—'],['📌 Boîte Postale',pi.bp||DB.school?.bp||'—']].map(([l,v])=>`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)"><span class="s mut">${_esc(l)}</span><span class="s semi">${_esc(v)}</span></div>`).join("")}
         </div>
         <div class="vcard">
           <div class="ct">📊 En chiffres</div>
@@ -6467,7 +6479,7 @@ function vShowSec(sec,btn){
     <div class="g2">
       <div class="vcard">
         <div class="ct">📬 Coordonnées</div>
-        ${[['📞','Téléphone',pi.contact||DB.school?.tel||'—'],['✉️','Email',pi.email||'—'],['📍','Adresse',DB.school?.ville||'—'],['📌','B.P.',DB.school?.bp||'—'],['🕐','Horaires',pi.horaires||'—']].map(([e,l,v])=>`<div class="fl2 fic g10" style="padding:10px 0;border-bottom:1px solid var(--bg2)"><span style="font-size:18px">${e}</span><div><div style="font-size:13px;color:var(--ink4)">${l}</div><div class="semi s">${v}</div></div></div>`).join("")}
+        ${[['📞','Téléphone',pi.contact||DB.school?.tel||'—'],['✉️','Email',pi.email||DB.school?.email||'—'],['📍','Adresse',pi.adresse||DB.school?.ville||'—'],['📌','B.P.',pi.bp||DB.school?.bp||'—'],['🕐','Horaires',pi.horaires||'—']].map(([e,l,v])=>`<div class="fl2 fic g10" style="padding:10px 0;border-bottom:1px solid var(--bg2)"><span style="font-size:18px">${e}</span><div><div style="font-size:13px;color:var(--ink4)">${_esc(l)}</div><div class="semi s">${_esc(v)}</div></div></div>`).join("")}
         <div style="margin-top:14px">
           <a href="https://wa.me/${(pi.whatsapp||"").replace(/[^0-9]/g,"")}" target="_blank" class="btn bgr2 sm" style="display:inline-flex;width:100%;justify-content:center">📲 Écrire sur WhatsApp</a>
         </div>
@@ -10938,8 +10950,11 @@ function pgCMS(){
       <div class="fg mb10"><span class="fl">Slogan accrocheur</span><input class="fi" id="cms_slogan2" value="${pi.slogan2||''}"></div>
       <div class="fg mb10"><span class="fl">Description du centre</span><textarea class="fi" id="cms_description" rows="5">${pi.description||''}</textarea></div>
       <div class="fg mb10"><span class="fl">Horaires d\'ouverture</span><input class="fi" id="cms_horaires" value="${pi.horaires||''}"></div>
-      <div class="fg mb10"><span class="fl">Email de contact</span><input class="fi" id="cms_email" value="${pi.email||''}"></div>
-      <div class="fg mb10"><span class="fl">WhatsApp</span><input class="fi" id="cms_whatsapp" value="${pi.whatsapp||''}"></div>
+      <div class="fg mb10"><span class="fl">📞 Téléphone (affiché sur la page d'accueil)</span><input class="fi" id="cms_contact" value="${pi.contact||''}" placeholder="+237 656 720 476"></div>
+      <div class="fg mb10"><span class="fl">Email de contact</span><input class="fi" id="cms_email" value="${pi.email||''}" placeholder="contact@veritas-school.com"></div>
+      <div class="fg mb10"><span class="fl">WhatsApp</span><input class="fi" id="cms_whatsapp" value="${pi.whatsapp||''}" placeholder="+237 656 720 476"></div>
+      <div class="fg mb10"><span class="fl">📍 Adresse complète</span><input class="fi" id="cms_adresse" value="${pi.adresse||''}" placeholder="Quartier, Ville"></div>
+      <div class="fg mb10"><span class="fl">📌 Boîte Postale</span><input class="fi" id="cms_bp" value="${pi.bp||''}" placeholder="BP 1234, Douala"></div>
       <button class="btn bi sm mt8" onclick="saveCMS('presentation')">💾 Enregistrer</button>
     </div>
     <div class="card"><div class="ct">📖 Histoire</div>
@@ -10995,7 +11010,14 @@ function pgCMS(){
 function saveCMS(section){
   if(!DB.publicInfo)DB.publicInfo={};
   if(section==='presentation'){
-    ['slogan2','description','horaires','email','whatsapp'].forEach(k=>{const el=document.getElementById('cms_'+k);if(el)DB.publicInfo[k]=el.value;});
+    // FIX : ajout de contact, adresse, bp pour sauvegarder le téléphone d'accueil et l'adresse
+    ['slogan2','description','horaires','contact','email','whatsapp','adresse','bp'].forEach(k=>{const el=document.getElementById('cms_'+k);if(el)DB.publicInfo[k]=el.value.trim();});
+    // Synchroniser DB.school pour compatibilité (le numero est utilisé en plusieurs endroits)
+    if(!DB.school)DB.school={};
+    var contactEl=document.getElementById('cms_contact');
+    if(contactEl&&contactEl.value.trim())DB.school.tel=contactEl.value.trim();
+    var bpEl=document.getElementById('cms_bp');
+    if(bpEl)DB.school.bp=bpEl.value.trim();
   }else if(section==='histoire'){
     ['histoire','equipe'].forEach(k=>{const el=document.getElementById('cms_'+k);if(el)DB.publicInfo[k]=el.value;});
   }else if(section==='resultats'){
