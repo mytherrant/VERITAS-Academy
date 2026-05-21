@@ -2902,13 +2902,23 @@ async function _ensureFbAuth(){
           body: body
         });
         if(!res.ok){
-          console.warn('[Firebase Auth] refresh HTTP ' + res.status + ' — retombe sur nouveau signUp');
-          // Refresh token invalide → repartir de zéro
+          console.warn('[Firebase Auth] refresh HTTP ' + res.status + ' — signUp inline');
+          // FIX race : signUp INLINE au lieu de récursion via _ensureFbAuth
+          // (sinon fenêtre où pending=null avant nouvelle Promise → 2 signUps possibles)
           window._fbAuth.refreshToken = null;
           window._fbAuth.idToken = null;
-          window._fbAuth.pending = null;
           _fbAuthPersist();
-          return _ensureFbAuth();
+          var su = await fetch('https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=' + FIREBASE_API_KEY, {
+            method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({returnSecureToken:true})
+          });
+          if(!su.ok){console.warn('[Firebase Auth] signUp fallback HTTP '+su.status); return null;}
+          var sd = await su.json();
+          window._fbAuth.idToken = sd.idToken;
+          window._fbAuth.refreshToken = sd.refreshToken;
+          window._fbAuth.localId = sd.localId;
+          window._fbAuth.expiresAt = Date.now() + (parseInt(sd.expiresIn || '3600') * 1000);
+          _fbAuthPersist();
+          return sd.idToken;
         }
         var data = await res.json();
         window._fbAuth.idToken = data.id_token || data.access_token;
@@ -3488,7 +3498,8 @@ function _fixHtdocsUrls(){
     if(!s||typeof s!=='string')return s;
     if(s.indexOf('/htdocs/uploads/')<0)return s;
     fixed++;
-    return s.replace('/htdocs/uploads/','/uploads/');
+    // FIX : utiliser regex global (sinon seule la 1ère occurrence est remplacée)
+    return s.replace(/\/htdocs\/uploads\//g,'/uploads/');
   }
   // Galerie
   (DB.galleryImages||[]).forEach(function(g){
@@ -3515,6 +3526,8 @@ function _fixHtdocsUrls(){
   // E-learning
   (DB.elearning&&DB.elearning.contenus||[]).forEach(function(c){if(c.fichierUrl)c.fichierUrl=_fix(c.fichierUrl);});
   (DB.elearning&&DB.elearning.soumissions||[]).forEach(function(s){if(s.fichierUrl)s.fichierUrl=_fix(s.fichierUrl);});
+  // FIX : DB.submissions (array global hors elearning) — soumissions de devoirs
+  (DB.submissions||[]).forEach(function(s){if(s.fichierUrl)s.fichierUrl=_fix(s.fichierUrl);if(s.fichier)s.fichier=_fix(s.fichier);});
   (DB.devoirs||[]).forEach(function(d){if(d.fichierUrl)d.fichierUrl=_fix(d.fichierUrl);});
   if(fixed>0){
     console.info('[fix htdocs] '+fixed+' URL(s) réécrites — /htdocs/uploads/ → /uploads/');
@@ -4962,6 +4975,8 @@ function _showExtrait(bid){
         var _bstr=atob(_arr[1]),_n=_bstr.length,_u8=new Uint8Array(_n);
         while(_n--)_u8[_n]=_bstr.charCodeAt(_n);
         _blobUrl=URL.createObjectURL(new Blob([_u8],{type:_mime}));
+        // FIX mémoire mobile : révoquer le Blob URL après 60s (pour PDF déjà ouvert ou abandonné)
+        setTimeout(function(_u){try{URL.revokeObjectURL(_u);}catch(eR){}},60000,_blobUrl);
       }catch(_be){_blobUrl='';}
       if(_blobUrl){
         var _fname=_esc(pdfName||'apercu.pdf');
@@ -10228,6 +10243,7 @@ const ANAV=[
   {s:"Pédagogie",i:[{k:"grades",i:"▦",l:"Notes & Bulletins"},{k:"classstats",i:"📊",l:"Statistiques"},{k:"honneur",i:"🏆",l:"Tableau d\'honneur"},{k:"devoirs_admin",i:"📋",l:"Devoirs"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"},{k:"books2",i:"▤",l:"Bibliothèque"}]},
   {s:"Communication",i:[{k:"send",i:"◎",l:"Centre WhatsApp"},{k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"}]},
   {s:"Administration",i:[{k:"teachers",i:"◉",l:"Enseignants & Paie"},{k:"attesttravail",i:"📄",l:"Attestations"},{k:"accounts",i:"⨡",l:"Comptes & Accès"},{k:"booksale",i:"📚",l:"Vente manuels"},{k:"boutiquemgmt",i:"🛍️",l:"Boutique"},{k:"elearningmgmt",i:"📚",l:"E-Learning"},{k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},{k:"visitororders",i:"🛒",l:"Commandes"},{k:"recubooks",i:"🧾",l:"Reçus manuels"},{k:"autredep",i:"💸",l:"Autres dépenses"},{k:"paiements_admin",i:"💳",l:"Paiements"},{k:"finance",i:"△",l:"Bilan financier"},{k:"settings",i:"⊙",l:"Paramètres"},{k:"datareset",i:"🗑",l:"Nettoyage"},{k:"cms",i:"🌐",l:"Portail visiteur"}]},
+  {s:"Aide",i:[{k:"guide",i:"📖",l:"Guide d'utilisation"}]},
 ];
 const SANAV=[
   {s:"Supervision",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"superoverview",i:"◐",l:"Vue d\'ensemble"},{k:"loginlog",i:"◌",l:"Journal connexions"},{k:"allaccounts",i:"⊡",l:"Tous les comptes"}]},
@@ -10236,6 +10252,7 @@ const SANAV=[
   {s:"Communication",i:[{k:"announce",i:"◆",l:"Annonces"},{k:"send",i:"◎",l:"Centre WhatsApp"},{k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"}]},
   {s:"Boutique & E-Learning",i:[{k:"boutiquemgmt",i:"🛍️",l:"Boutique"},{k:"booksale",i:"📚",l:"Vente manuels"},{k:"recubooks",i:"🧾",l:"Reçus manuels"},{k:"elearningmgmt",i:"📚",l:"E-Learning"},{k:"resPedago",i:"📄",l:"Ressources BAC"},{k:"visitororders",i:"🛒",l:"Commandes"},{k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},{k:"books2",i:"▤",l:"Bibliothèque"}]},
   {s:"Administration",i:[{k:"accounts",i:"⨡",l:"Comptes & Accès"},{k:"paiements_admin",i:"💳",l:"Paiements"},{k:"finance",i:"△",l:"Bilan financier"},{k:"autredep",i:"💸",l:"Autres dépenses"},{k:"settings",i:"⊙",l:"Paramètres"},{k:"cms",i:"🌐",l:"Portail visiteur"},{k:"datareset",i:"🗑",l:"Nettoyage données"}]},
+  {s:"Aide",i:[{k:"guide",i:"📖",l:"Guide d'utilisation"}]},
 ];
 const TNAV=[
   {s:"Mon espace",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"grades",i:"▦",l:"Saisie de notes"},{k:"devoirs_teacher",i:"📋",l:"Mes devoirs"},{k:"perf_teacher",i:"📊",l:"Performances"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"}]},
@@ -10319,6 +10336,8 @@ function render(p){
     statistics:pgClassStats,absences_admin:pgAbsencesAdmin,devoirs_admin:pgDevoirsAdmin,orientation_admin:pgOrientationAdmin,resPedago:pgResPedagoAdmin,paiements_admin:pgPaiementsAdmin,
     // Super Admin
     superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,
+    // Guide d'utilisation (tous rôles)
+    guide:pgGuide,
   };
   return(P[p]||pgDash)();
 }
@@ -10791,11 +10810,11 @@ function viewSubs(dvid){
   M(`Soumissions — ${dv.titre}`,`${dv.cls} · ${dv.sub} · ${subs.length}/${cls.length} soumissions`,
     subs.length===0?`<div class="empty"><div class="empty-ico">📭</div>Aucune soumission reçue</div>`:
     subs.map(sb=>{const st=S(sb.eid);return`<div style="padding:12px;border:var(--br);border-radius:var(--r2);margin-bottom:10px">
-      <div class="fl2 fic fsb mb8"><div class="semi s">${st?.pre||''} ${st?.nom||''}</div><span class="xs2 mut">${sb.date}</span></div>
-      ${sb.contenu?`<div style="font-size:13px;color:var(--ink2);background:var(--bg2);padding:10px;border-radius:var(--r);margin-bottom:8px">${sb.contenu}</div>`:''}
+      <div class="fl2 fic fsb mb8"><div class="semi s">${_esc(st?.pre||'')} ${_esc(st?.nom||'')}</div><span class="xs2 mut">${_esc(sb.date||'')}</span></div>
+      ${sb.contenu?`<div style="font-size:13px;color:var(--ink2);background:var(--bg2);padding:10px;border-radius:var(--r);margin-bottom:8px;white-space:pre-wrap">${_esc(sb.contenu)}</div>`:''}
       <div class="fl2 fic g8">
         <div class="fg" style="flex:1"><input type="number" min="0" max="20" step="0.5" placeholder="Note /20" value="${sb.note||''}" id="note_${sb.id}" style="width:90px;padding:7px;border:1.5px solid var(--bg3);border-radius:6px;outline:none;font-size:13px"></div>
-        <div class="fg" style="flex:2"><input type="text" placeholder="Commentaire optionnel" value="${sb.commentaire||''}" id="comm_${sb.id}" class="fi"></div>
+        <div class="fg" style="flex:2"><input type="text" placeholder="Commentaire optionnel" value="${_esc(sb.commentaire||'')}" id="comm_${sb.id}" class="fi"></div>
         <button class="btn bgr2 sm" onclick="saveNote_sb('${sb.id}')">💾 Noter</button>
       </div>
     </div>`;}).join(""),
@@ -13119,9 +13138,9 @@ function delOrientDemande(id){
 function viewOrientMsg(id){
   const d=(DB.orientationDemandes||[]).find(x=>x.id===id);
   if(!d)return;
-  M('📄 Message de la demande',d.nom+' — '+d.date,
-  `<div style="padding:12px;background:var(--bg2);border-radius:var(--r2);font-size:13px;line-height:1.8;white-space:pre-wrap">${d.msg||'(Aucun message)'}</div>
-   ${d.dispo?`<div class="ib ibt mt12 mb0"><span>📅</span><span>Disponibilité : ${d.dispo}</span></div>`:''}`,
+  M('📄 Message de la demande',_esc(d.nom||'')+' — '+_esc(d.date||''),
+  `<div style="padding:12px;background:var(--bg2);border-radius:var(--r2);font-size:13px;line-height:1.8;white-space:pre-wrap">${_esc(d.msg||'(Aucun message)')}</div>
+   ${d.dispo?`<div class="ib ibt mt12 mb0"><span>📅</span><span>Disponibilité : ${_esc(d.dispo)}</span></div>`:''}`,
   `<button class="btn bo" onclick="cm()">Fermer</button>
    <a href="https://wa.me/237${(d.tel||'').replace(/[^0-9]/g,'')}" target="_blank" class="btn bgr2">📲 WhatsApp</a>`);
 }
@@ -13154,6 +13173,267 @@ function exportOrientationExcel(){
   const data=(DB.orientationDemandes||[]).map(d=>({'Date':d.date,'Nom':d.nom,'Téléphone':d.tel,'Niveau':d.niveau||'—','Service':d.type,'Disponibilité':d.dispo||'—','Message':d.msg||'—','Statut':d.statut}));
   exportToExcel(data,'Orientation_Conseil_'+today(),'Demandes');
 }
+// ══════════════════════════════════════════════════════════════════════════
+// ─ pgGuide : GUIDE D'UTILISATION COMPLET (tous rôles) ────────────────────
+// ══════════════════════════════════════════════════════════════════════════
+function pgGuide(){
+  var role=(SES&&SES.type)||'visitor';
+  var roleLabels={superadmin:'Super-Administrateur',admin:'Administrateur',enseignant:'Enseignant',eleve:'Élève',visiteur:'Visiteur',visiteur_inscrit:'Visiteur inscrit'};
+  var currentRoleLabel=roleLabels[role]||'Visiteur';
+  var section=window._guideSec||'demarrage';
+  var sections=[
+    {k:'demarrage',ico:'🚀',l:"Démarrage rapide",col:'#3C8DFF'},
+    {k:'comptes',ico:'👥',l:"Comptes & connexion",col:'#7C3AED'},
+    {k:'admin',ico:'⚙️',l:"Administration",col:'#142554'},
+    {k:'pedagogie',ico:'📚',l:"Pédagogie & notes",col:'#16A34A'},
+    {k:'paiements',ico:'💳',l:"Paiements & finance",col:'#F59E0B'},
+    {k:'elearning',ico:'🎓',l:"E-Learning & jeux",col:'#0EA5E9'},
+    {k:'sync',ico:'☁️',l:"Sync cloud & sauvegarde",col:'#DC2626'},
+    {k:'visiteurs',ico:'🌐',l:"Portail visiteurs",col:'#BE185D'},
+    {k:'depannage',ico:'🛠️',l:"Dépannage / FAQ",col:'#92400E'},
+    {k:'about',ico:'ℹ️',l:"À propos / Version",col:'#6B7A99'}
+  ];
+
+  var h='<div class="fl2 fic fsb fw g8 mb16">'
+    +'<div><div class="bold" style="font-size:22px;color:var(--bl);font-family:Montserrat,sans-serif">📖 Guide d\'utilisation VÉRITAS</div>'
+    +'<div class="xs2 mut">Votre tableau de bord — Connecté en tant que <strong>'+_esc(currentRoleLabel)+'</strong></div></div>'
+    +'<div class="fl2 g6"><button class="btn bo sm" onclick="window.print()">🖨️ Imprimer</button>'
+    +'<button class="btn bi sm" onclick="_guideDownloadPDF()">📥 Télécharger PDF</button></div>'
+    +'</div>';
+
+  // Bandeau onglets de navigation
+  h+='<div style="background:var(--bg);border-radius:14px;padding:14px;margin-bottom:18px;border:var(--br)">';
+  h+='<div class="xs2 mut mb8" style="font-weight:700;letter-spacing:.5px;text-transform:uppercase">Navigation par sujet</div>';
+  h+='<div class="fl2 g6 fw">';
+  sections.forEach(function(s){
+    var active=(s.k===section);
+    h+='<button onclick="window._guideSec=\''+s.k+'\';re()" style="background:'+(active?s.col:'#fff')+';color:'+(active?'#fff':s.col)+';border:1.5px solid '+s.col+';padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;transition:.18s;display:flex;align-items:center;gap:6px"><span style="font-size:14px">'+s.ico+'</span>'+s.l+'</button>';
+  });
+  h+='</div></div>';
+
+  // Contenu de la section
+  h+='<div id="guideContent" style="background:#fff;border-radius:16px;padding:24px;border:var(--br);box-shadow:0 2px 8px rgba(0,0,0,.03)">';
+  h+=_guideContent(section,role);
+  h+='</div>';
+
+  return h;
+}
+
+// Génère le contenu HTML d'une section
+function _guideContent(section,role){
+  var sNom=(DB.school&&DB.school.nom)||'VÉRITAS Academy';
+  function _block(ico,titre,html){
+    return '<div style="margin-bottom:20px;padding:16px 18px;background:#F8FAFF;border-left:4px solid #142554;border-radius:0 12px 12px 0">'
+      +'<div style="font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="font-size:20px">'+ico+'</span>'+_esc(titre)+'</div>'
+      +'<div style="font-size:13.5px;color:#374151;line-height:1.8">'+html+'</div></div>';
+  }
+  function _step(n,t,d){
+    return '<div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:10px;padding:10px;background:#fff;border:1px solid #E0EAFF;border-radius:10px">'
+      +'<div style="background:#142554;color:#FFC93C;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0">'+n+'</div>'
+      +'<div><div style="font-weight:700;color:#142554;font-size:13.5px;margin-bottom:3px">'+_esc(t)+'</div><div style="font-size:13px;color:#475569;line-height:1.6">'+d+'</div></div></div>';
+  }
+  function _tip(t){
+    return '<div style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-left:4px solid #D97706;padding:10px 14px;border-radius:0 10px 10px 0;margin:10px 0;font-size:13px;color:#78350F"><strong>💡 Astuce :</strong> '+t+'</div>';
+  }
+  function _warn(t){
+    return '<div style="background:linear-gradient(135deg,#FEE2E2,#FECACA);border-left:4px solid #DC2626;padding:10px 14px;border-radius:0 10px 10px 0;margin:10px 0;font-size:13px;color:#991B1B"><strong>⚠️ Attention :</strong> '+t+'</div>';
+  }
+
+  if(section==='demarrage'){
+    return '<div style="font-family:Georgia,serif;font-size:14px;color:#374151;line-height:1.8;margin-bottom:18px">Bienvenue sur <strong>'+_esc(sNom)+'</strong>, votre plateforme de gestion scolaire complète. Voici comment démarrer en 5 étapes.</div>'
+      +_step(1,"Connectez-vous","Cliquez sur 'Se connecter' en haut à droite. Sélectionnez votre rôle (Élève, Enseignant, Admin). Saisissez vos identifiants. Au premier login, votre mot de passe en clair est automatiquement hashé (SHA-256) pour la sécurité.")
+      +_step(2,"Découvrez votre tableau de bord","Une fois connecté, le menu de gauche affiche tous les outils selon votre rôle. Le tableau de bord donne une vue d'ensemble (élèves, notes, paiements, finances).")
+      +_step(3,"Sauvegardez vos données","Vos données sont automatiquement synchronisées sur Firebase et sauvegardées sur LWS (200 Go). Allez dans <strong>Paramètres → Cloud → 🚀 Forcer la sync complète</strong> pour une sauvegarde manuelle.")
+      +_step(4,"Explorez les fonctionnalités","Notes, paiements, e-learning, jeux, labos virtuels, cartes mentales littéraires, boutique. Tout est intégré.")
+      +_step(5,"Aidez-vous de ce guide","Ce guide est accessible à tout moment depuis le menu <strong>Aide → 📖 Guide d'utilisation</strong>. Naviguez par sujet via les onglets ci-dessus.")
+      +_tip("Pour rouvrir ce guide n'importe quand, cherchez le bouton 📖 dans le menu latéral.");
+  }
+
+  if(section==='comptes'){
+    return _block('🔐','Types de comptes',
+      '<table style="width:100%;border-collapse:collapse;font-size:13px;margin:8px 0">'
+      +'<thead><tr style="background:#142554;color:#FFC93C"><th style="padding:8px 10px;text-align:left">Rôle</th><th style="padding:8px 10px;text-align:left">Accès</th><th style="padding:8px 10px;text-align:left">Création</th></tr></thead>'
+      +'<tbody>'
+      +'<tr style="border-bottom:1px solid #E5E7EB"><td style="padding:8px 10px"><strong>Super-administrateur</strong></td><td style="padding:8px 10px">Tout — y compris suppression d\'admins</td><td style="padding:8px 10px">Compte unique préexistant</td></tr>'
+      +'<tr style="border-bottom:1px solid #E5E7EB"><td style="padding:8px 10px"><strong>Administrateur</strong></td><td style="padding:8px 10px">Gestion élèves, notes, finance, e-learning</td><td style="padding:8px 10px">Super-admin uniquement</td></tr>'
+      +'<tr style="border-bottom:1px solid #E5E7EB"><td style="padding:8px 10px"><strong>Enseignant</strong></td><td style="padding:8px 10px">Notes de ses classes, devoirs, performances</td><td style="padding:8px 10px">Admin via Enseignants & Paie</td></tr>'
+      +'<tr style="border-bottom:1px solid #E5E7EB"><td style="padding:8px 10px"><strong>Élève</strong></td><td style="padding:8px 10px">Bulletins, devoirs, absences, paiements</td><td style="padding:8px 10px">Admin via Inscriptions</td></tr>'
+      +'<tr><td style="padding:8px 10px"><strong>Visiteur inscrit</strong></td><td style="padding:8px 10px">E-Learning, jeux, labos, boutique</td><td style="padding:8px 10px">Auto-inscription publique</td></tr>'
+      +'</tbody></table>')
+      +_block('🔑','Sécurité des mots de passe',
+        '<ul style="padding-left:22px"><li>Tous les mots de passe sont hashés en <strong>SHA-256 avec sel unique</strong> (S256$)</li><li>Migration automatique au premier login (plain text → hash)</li><li>Verrouillage temporaire après 3 tentatives échouées (anti-brute force)</li><li>Stockage uniquement du hash dans Firebase — jamais du plain text</li></ul>')
+      +_warn("Le compte super-administrateur ne doit jamais être partagé. Changez son mot de passe par défaut dans Paramètres → Sécurité dès la première connexion.");
+  }
+
+  if(section==='admin'){
+    return _block('⊕','Inscriptions élèves',
+      _step('1',"Ouvrir l'inscription","Menu <strong>Élèves → Inscriptions</strong>, cliquer sur ➕ Nouvel élève")
+      +_step('2',"Remplir le dossier","Nom, prénom, sexe, date de naissance, classe, parents, contact. Ajouter une photo (optionnel).")
+      +_step('3',"Définir les frais","Frais de scolarité annuels. Le système calculera automatiquement le solde restant.")
+      +_step('4',"Compte élève automatique","Un compte VRT-XXX est créé automatiquement. L'élève pourra se connecter avec.")
+    )+_block('◉','Gestion enseignants',
+      'Menu <strong>Enseignants & Paie</strong> — Ajouter un enseignant avec matière, taux horaire, contact. Saisir les heures effectuées dans <em>Mes performances</em>. La paie est calculée automatiquement.'
+    )+_block('🛍️','Boutique',
+      'Menu <strong>Boutique</strong> — Ajouter produits (manuels, fournitures, uniformes, services). Définir prix, photo, description. Les commandes des visiteurs arrivent dans <strong>Commandes</strong>.'
+    )+_block('🌐','Portail visiteur (CMS)',
+      'Menu <strong>Portail visiteur</strong> — Modifier slogan, description, horaires, <strong>📞 téléphone</strong>, email, WhatsApp, adresse, B.P. Tout ce qui apparaît sur la page d\'accueil publique.'
+    );
+  }
+
+  if(section==='pedagogie'){
+    return _block('▦','Saisie des notes',
+      _step('1',"Sélectionner classe et matière","Menu <strong>Notes & Bulletins</strong>")
+      +_step('2',"Saisir les notes","Note 1 et Note 2 par trimestre, coefficient automatique")
+      +_step('3',"Génération bulletin","Cliquer sur 🖨️ Bulletin pour générer le PDF avec moyennes, rangs, mentions")
+    )+_block('📋','Devoirs maison',
+      'Menu <strong>Devoirs</strong> — Créer un devoir (titre, classe, matière, échéance, énoncé). Les élèves voient et soumettent leurs réponses. Vous corrigez avec note + commentaire.'
+    )+_block('🏆','Tableau d\'honneur',
+      'Auto-généré dans <strong>Tableau d\'honneur</strong> — top élèves par classe, moyenne, mention. Affichable en grand pour la cérémonie.'
+    )+_block('📜','Certificats',
+      'Menu <strong>Certificats</strong> — Génération de certificats de scolarité PDF instantanée, avec filigrane VÉRITAS et signature électronique.'
+    );
+  }
+
+  if(section==='paiements'){
+    return _block('💳','Encaisser un paiement',
+      _step('1',"Ouvrir paiements","Menu <strong>Paiements & Reçus</strong>")
+      +_step('2',"Sélectionner l\'élève","Choisir dans la liste. Le solde restant s\'affiche en temps réel.")
+      +_step('3',"Enregistrer le paiement","Montant, date, trimestre, moyen (MoMo, Orange Money, espèces, virement). Référence auto-générée.")
+      +_step('4',"Reçu PDF","Cliquer 🧾 Reçu → PDF avec en-tête école + cachet + signature.")
+    )+_block('💰','Moyens de paiement intégrés',
+      '<ul style="padding-left:22px"><li>📱 <strong>MTN Mobile Money</strong> — numéro configurable dans Paramètres</li><li>📱 <strong>Orange Money</strong></li><li>💳 <strong>Stripe / PayPal</strong> (cartes internationales)</li><li>🏦 <strong>Virement bancaire</strong></li><li>💵 <strong>Espèces</strong> au guichet</li></ul>'
+    )+_block('△','Bilan financier',
+      'Menu <strong>Bilan financier</strong> — Recettes (paiements), dépenses (Autres dépenses + Paie enseignants), solde. Export Excel disponible.'
+    )+_warn("Les paiements via MoMo / Orange Money / PayPal nécessitent une vérification manuelle dans <strong>Paramètres → Cloud → 💰 Paiements</strong>. C'est l'admin qui marque 'payé' après vérification du téléphone/relevé bancaire.");
+  }
+
+  if(section==='elearning'){
+    return _block('📚','E-Learning',
+      'Menu <strong>E-Learning</strong> — Créer des contenus pédagogiques : cours, vidéos, PDFs, épreuves blanches. Définir l\'accès (gratuit ou par plan d\'abonnement).'
+    )+_block('🎮','Jeux éducatifs',
+      'Menu <strong>Jeux</strong> — 40+ jeux QCM, V/F, Pendu, textes à trous. Cartes mentales littéraires interactives pour les œuvres du programme MINESEC (6e → Tle).'
+    )+_block('🔬','Laboratoires virtuels',
+      'Menu <strong>Labos</strong> — 34 expériences interactives en Physique, Chimie, SVT, Maths, Géo, Histoire, Info, Langues. Chaque labo : théorie + 7 étapes + 6 quiz.'
+    )+_block('🗺️','Cartes mentales littéraires',
+      'Toutes les œuvres au programme MINESEC ont leur carte mentale :<br>'
+      +'<strong>6ème</strong> : Les Chants de la Forêt, Les Bimanes, Les Contes de Korotoumou<br>'
+      +'<strong>5ème</strong> : L\'Arbre Fétiche, N\'koum-wam, Père inconnu<br>'
+      +'<strong>4ème</strong> : Trois prétendants un mari, Cœur du Sahel, L\'attachement au sol natal<br>'
+      +'<strong>3ème</strong> : Ville Cruelle, La marmite de Koka Mbala, Petites gouttes de chant<br>'
+      +'<strong>2nde</strong> : Les Tribus de Capitoline, Poèmes sauvages, Tartuffe<br>'
+      +'<strong>1ère</strong> : Au Cœur des ténèbres, Balafon, Le Lion et la perle<br>'
+      +'<strong>Tle</strong> : Stances et poèmes, Le Vieux nègre, Ngum a Jemea'
+    )+_block('📝','Épreuves type examen',
+      'Menu <strong>Épreuves</strong> — BEPC, Probatoire, BAC blancs + dictées + études de texte + orthographe. Affichage HTML pleine page + téléchargement PDF avec filigrane et QR code.'
+    );
+  }
+
+  if(section==='sync'){
+    return _block('☁️','Architecture cloud',
+      '<strong>Hybride à 2 étages :</strong><br>'
+      +'1. <strong>Firebase Realtime DB</strong> — synchronisation texte temps réel multi-appareils (élèves, notes, paramètres)<br>'
+      +'2. <strong>LWS PHP (200 Go)</strong> — stockage fichiers binaires (photos, PDF, vidéos, Word) + backup DB indépendant'
+    )+_block('🚀','Forcer la sync complète',
+      _step('1',"Aller dans Paramètres → Cloud","Trouver le bouton rouge 🚀 'Forcer la sync complète'")
+      +_step('2',"Lancer la sync","3 étapes visibles : Upload fichiers → Push Firebase → Backup LWS")
+      +_step('3',"Attendre 30-60 secondes","Vous voyez les progress en temps réel. Cancel possible à tout moment.")
+    )+_block('💾','Tableau de bord stockage',
+      'Paramètres → Cloud → <strong>💾 Stockage LWS (200 Go)</strong> — Compteurs par type (photos, PDF, Word, vidéos), total fichiers, espace utilisé, dernier sync.'
+    )+_block('🧹','Nettoyer références cassées',
+      'Si certains fichiers sont perdus (URL en /htdocs/ avant le 12 mai), utilisez <strong>🧹 Nettoyer références cassées</strong> pour purger les liens cassés. Les fichiers récents (post 12 mai) sont automatiquement réparés.'
+    )+_tip("La sync se fait automatiquement après chaque modification (débounce 800ms). Forcer manuellement n'est nécessaire qu'en cas de doute.");
+  }
+
+  if(section==='visiteurs'){
+    return _block('🌐','Page d\'accueil publique',
+      'Accessible à tout le monde sans connexion. Affiche : vidéo de présentation, slogan, statistiques, partenaires, actualités, calendrier.'
+    )+_block('📰','Actualités éducatives',
+      'Section <strong>Actualités</strong> — Flux automatique depuis Google News (éducation Cameroun, MINESEC, grandes écoles, bourses). Auto-refresh toutes les 15 min. Bouton 🔄 pour forcer.'
+    )+_block('🛒','Boutique en ligne',
+      'Manuels, fournitures, services. Le visiteur commande via WhatsApp en 1 clic. Codes promo possibles. Paiement en ligne (MoMo, OM, PayPal, Stripe).'
+    )+_block('🎓','E-Learning visiteur',
+      'Le visiteur peut s\'inscrire gratuitement (auto-création de compte) puis souscrire à un plan (mensuel, trimestriel, annuel) pour accéder aux cours premium.'
+    )+_block('🤝','Partenaires',
+      'Section <strong>Partenaires</strong> — Logos premium, or, argent. Configurables dans Paramètres admin.'
+    );
+  }
+
+  if(section==='depannage'){
+    return _block('🆘','Problèmes fréquents',
+      '<strong>Q: La vidéo d\'accueil ne s\'affiche pas</strong><br>R: Configurer une URL vidéo dans <strong>Paramètres → Vidéo d\'accueil</strong>. Sinon un gradient animé avec logo VÉRITAS sera affiché par défaut.<br><br>'
+      +'<strong>Q: "Sauvegarde locale uniquement" s\'affiche</strong><br>R: Vide le cache navigateur (Ctrl+Shift+R) et recharge. Vérifier que tu es bien connecté en admin. Le toast n\'apparaît qu\'après 2+ échecs consécutifs.<br><br>'
+      +'<strong>Q: Les fichiers PDF ne s\'ouvrent pas sur mobile</strong><br>R: Sur Android, le PDF s\'ouvre dans un nouvel onglet via window.open(). Autorise les pop-ups si demandé.<br><br>'
+      +'<strong>Q: Les items supprimés reviennent</strong><br>R: Le système de tombstones préserve toutes les suppressions. Si un item revient après une sync, vérifier que la sync s\'est bien terminée (voir bouton 🚀 Forcer la sync).<br><br>'
+      +'<strong>Q: Comment réinitialiser mes données ?</strong><br>R: Menu <strong>Nettoyage données</strong> — réservé super-admin. Permet de purger des collections spécifiques. Pas de bouton "RESET TOUT" pour des raisons de sécurité.'
+    )+_block('📞','Support',
+      'Email : <strong>contact@veritas-school.com</strong><br>'
+      +'WhatsApp : voir <strong>Portail visiteur → 📞 Téléphone</strong><br>'
+      +'GitHub : <a href="https://github.com/mytherrant/VERITAS-Academy" target="_blank">github.com/mytherrant/VERITAS-Academy</a>'
+    );
+  }
+
+  if(section==='about'){
+    return _block('ℹ️','VÉRITAS Academy v1.2',
+      '<ul style="padding-left:22px;font-size:13.5px;line-height:2"><li><strong>Auteur :</strong> Jacques Miterand TAKOU — Centre VÉRITAS Yaoundé, Cameroun</li><li><strong>Version :</strong> v1.2 (mai 2026)</li><li><strong>Architecture :</strong> Single-file HTML/JS vanilla</li><li><strong>Stockage :</strong> Firebase RTDB + LWS 200 Go</li><li><strong>Sécurité :</strong> Firebase Anonymous Auth, SHA-256 mots de passe, CSP renforcée</li><li><strong>Conformité :</strong> Programme MINESEC Cameroun</li><li><strong>Licence :</strong> © Mythe Errant 2026</li></ul>'
+    )+_block('🎯','Statistiques de la plateforme',
+      '<ul style="padding-left:22px;line-height:2">'
+      +'<li>'+((DB.students||[]).length)+' élèves enregistrés</li>'
+      +'<li>'+((DB.teachers||[]).length)+' enseignants</li>'
+      +'<li>'+((DB.grades||[]).length)+' notes saisies</li>'
+      +'<li>'+((DB.payments||[]).length)+' paiements</li>'
+      +'<li>'+((DB.books||[]).length)+' livres en boutique</li>'
+      +'<li>34 laboratoires virtuels · 40+ jeux · 22 cartes mentales littéraires</li>'
+      +'</ul>'
+    );
+  }
+
+  return '<div class="empty"><div class="empty-ico">📖</div>Sélectionnez une section ci-dessus pour voir le contenu.</div>';
+}
+
+// Téléchargement du guide en PDF
+function _guideDownloadPDF(){
+  var jsPDFCls=(typeof jspdf!=='undefined'&&jspdf.jsPDF)?jspdf.jsPDF:(typeof jsPDF!=='undefined'?jsPDF:null);
+  if(!jsPDFCls){toast('jsPDF non disponible','warn');return;}
+  toast('📥 Génération du guide PDF…','info');
+  try{
+    var doc=new jsPDFCls({orientation:'portrait',unit:'mm',format:'a4'});
+    var pw=210,ph=297,margin=18,y=margin;
+    var sch=DB.school||{};
+    // En-tête
+    doc.setFillColor(20,37,84);doc.rect(0,0,pw,30,'F');
+    doc.setTextColor(255,201,60);doc.setFont(undefined,'bold');doc.setFontSize(18);
+    doc.text('Guide d\'utilisation VÉRITAS',pw/2,14,{align:'center'});
+    doc.setFontSize(10);doc.setFont(undefined,'normal');doc.setTextColor(255,255,255);
+    doc.text(sch.nom||'VÉRITAS Academy',pw/2,21,{align:'center'});
+    doc.text('Version 1.2 — '+new Date().toLocaleDateString('fr-FR'),pw/2,26,{align:'center'});
+    y=42;
+    var sections=['demarrage','comptes','admin','pedagogie','paiements','elearning','sync','visiteurs','depannage','about'];
+    var titles={demarrage:'1. Démarrage rapide',comptes:'2. Comptes et connexion',admin:'3. Administration',pedagogie:'4. Pédagogie et notes',paiements:'5. Paiements et finance',elearning:'6. E-Learning et jeux',sync:'7. Sync cloud et sauvegarde',visiteurs:'8. Portail visiteurs',depannage:'9. Dépannage / FAQ',about:'10. À propos'};
+    sections.forEach(function(s){
+      if(y>ph-30){doc.addPage();y=margin;}
+      doc.setFillColor(20,37,84);doc.rect(margin-2,y-5,pw-2*margin+4,9,'F');
+      doc.setTextColor(255,201,60);doc.setFont(undefined,'bold');doc.setFontSize(13);
+      doc.text(titles[s]||s,margin,y+1);y+=12;
+      // Extraire le texte de la section (sans HTML)
+      doc.setTextColor(31,41,55);doc.setFont(undefined,'normal');doc.setFontSize(10);
+      var raw=_guideContent(s,(SES&&SES.type)||'admin');
+      var txt=raw.replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
+      var lines=doc.splitTextToSize(txt,pw-2*margin);
+      lines.forEach(function(l){if(y>ph-margin-10){doc.addPage();y=margin;}doc.text(l,margin,y);y+=4.8;});
+      y+=6;
+    });
+    // Pied de page sur chaque page
+    var n=doc.internal.getNumberOfPages();
+    for(var p=1;p<=n;p++){
+      doc.setPage(p);doc.setFontSize(8);doc.setTextColor(150,160,180);doc.setFont(undefined,'italic');
+      doc.text('© '+new Date().getFullYear()+' '+(sch.nom||'VÉRITAS')+' — Guide utilisateur',pw/2,ph-6,{align:'center'});
+      doc.text('Page '+p+'/'+n,pw-margin,ph-6,{align:'right'});
+    }
+    doc.save('Guide_VERITAS_v1.2.pdf');
+    toast('✅ Guide téléchargé');
+  }catch(e){console.error(e);toast('Erreur PDF : '+e.message,'err');}
+}
+
 function pgSettings(){
   if(!iA())return na();
   return`<div class="g2">
