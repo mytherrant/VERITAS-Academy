@@ -21,15 +21,21 @@ if (!array_key_exists($cat, $feeds)) {
     exit;
 }
 
-// Cache fichier — 30 minutes
+// Cache fichier — 10 minutes (raccourci pour fraicheur)
+// ?nocache=1 bypasse complètement le cache (bouton "Actualiser")
 $cacheDir  = sys_get_temp_dir() . '/';
 $cacheFile = $cacheDir . 'veritas_news_' . $cat . '.json';
-if (file_exists($cacheFile) && (time() - filemtime($cacheFile)) < 1800) {
+$noCache   = isset($_GET['nocache']) && $_GET['nocache']==='1';
+$cacheAge  = file_exists($cacheFile) ? (time() - filemtime($cacheFile)) : 999999;
+if (!$noCache && file_exists($cacheFile) && $cacheAge < 600) {
     $cached = json_decode(file_get_contents($cacheFile), true);
-    $cached['from_cache'] = true;
+    $cached['from_cache']  = true;
+    $cached['cache_age_s'] = $cacheAge;
     echo json_encode($cached);
     exit;
 }
+// Si nocache=1, supprimer le fichier cache pour forcer un fetch propre
+if ($noCache && file_exists($cacheFile)) @unlink($cacheFile);
 
 // Récupérer le flux RSS
 $ctx = stream_context_create([
@@ -84,6 +90,6 @@ foreach ($rss->channel->item as $item) {
     if (count($items) >= 12) break;
 }
 
-$result = ['items' => $items, 'from_cache' => false, 'cat' => $cat];
+$result = ['items' => $items, 'from_cache' => false, 'cat' => $cat, 'fetched_at' => date('c')];
 @file_put_contents($cacheFile, json_encode($result));
 echo json_encode($result);

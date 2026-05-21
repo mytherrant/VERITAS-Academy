@@ -5467,10 +5467,11 @@ function showActualites(container){
       +'<button onclick="_actuRefresh()" title="Actualiser" style="margin-left:auto;padding:8px 14px;border-radius:20px;border:1px solid var(--bg3);background:var(--sur);color:var(--ink3);cursor:pointer;font-size:13px">🔄</button>'
     +'</div>'
     +'<div id="actu-feed" style="min-height:200px"></div>'
-    +'<div class="vsec-sub" style="margin-top:20px;font-size:11px">Sources : Google News · Actualisation automatique toutes les 30 min</div>'
+    +'<div class="vsec-sub" style="margin-top:20px;font-size:11px">Sources : Google News · Auto-actualisation toutes les 15 min · Bouton 🔄 = force refresh</div>'
     +'</div>';
 
   _actuLoad(_actuCat);
+  _actuStartAutoRefresh(); // lance le timer 15 min
 }
 
 function _actuTab(cat){
@@ -5490,34 +5491,36 @@ function _actuTab(cat){
 }
 
 function _actuRefresh(){
+  // Force-refresh : vide le cache MÉMOIRE + envoie nocache=1 au proxy PHP
   delete _actuCache[_actuCat];
-  _actuLoad(_actuCat);
+  _actuLoad(_actuCat, true);
 }
 
-function _actuLoad(cat){
+function _actuLoad(cat, forceRefresh){
   var feed=document.getElementById('actu-feed');
   if(!feed)return;
 
-  // Utiliser le cache en mémoire si < 30 min
+  // Utiliser le cache mémoire si < 10 min ET pas de force refresh
   var now=Date.now();
-  if(_actuCache[cat]&&(now-_actuCache[cat].ts)<1800000){
-    _actuRender(_actuCache[cat].items,cat);
+  if(!forceRefresh && _actuCache[cat]&&(now-_actuCache[cat].ts)<600000){
+    _actuRender(_actuCache[cat].items,cat,_actuCache[cat].fetched_at);
     return;
   }
 
   feed.innerHTML='<div style="text-align:center;padding:40px;color:var(--ink4)">'
     +'<div style="font-size:32px;margin-bottom:10px;animation:spin 1s linear infinite;display:inline-block">⏳</div>'
-    +'<div style="font-size:13px">Chargement des actualités...</div></div>';
+    +'<div style="font-size:13px">'+(forceRefresh?'Force refresh en cours...':'Chargement des actualités...')+'</div></div>';
 
   var base=(DB.cloudConfig&&DB.cloudConfig.url||'https://veritas-school.com/api').replace(/\/+$/,'');
-  var url=base+'/news_proxy.php?cat='+encodeURIComponent(cat)+'&t='+Math.floor(now/1800000);
+  // t= invalide le cache navigateur ; nocache=1 force le proxy à re-fetch Google News
+  var url=base+'/news_proxy.php?cat='+encodeURIComponent(cat)+'&t='+now+(forceRefresh?'&nocache=1':'');
 
-  fetch(url)
+  fetch(url,{cache:forceRefresh?'no-store':'default'})
     .then(function(r){return r.json();})
     .then(function(data){
       if(data.items&&data.items.length){
-        _actuCache[cat]={items:data.items,ts:now};
-        _actuRender(data.items,cat);
+        _actuCache[cat]={items:data.items,ts:now,fetched_at:data.fetched_at||null};
+        _actuRender(data.items,cat,data.fetched_at);
       }else{
         feed.innerHTML='<div class="ib ibt"><span>📭</span><span>Aucun article disponible pour le moment — réessayez dans quelques minutes.</span></div>';
       }
@@ -5527,12 +5530,33 @@ function _actuLoad(cat){
     });
 }
 
-function _actuRender(items,cat){
+// Auto-refresh toutes les 15 min quand la page actualités est visible
+window._actuAutoTimer=null;
+function _actuStartAutoRefresh(){
+  if(window._actuAutoTimer)clearInterval(window._actuAutoTimer);
+  window._actuAutoTimer=setInterval(function(){
+    if(window._vCurrentSec==='actualites'&&document.visibilityState==='visible'){
+      _actuRefresh();
+    }
+  },15*60*1000);
+}
+
+function _actuRender(items,cat,fetchedAt){
   var feed=document.getElementById('actu-feed');
   if(!feed)return;
   var colors={education:'#3C8DFF',minesec:'#059669',grandes_ecoles:'#7C3AED',bourses:'#f59e0b'};
   var col=colors[cat]||'#3C8DFF';
-  var html='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">';
+  // Indicateur de fraîcheur en haut
+  var freshHtml='';
+  if(fetchedAt){
+    var fetchDate=new Date(fetchedAt);
+    var diffMin=Math.floor((Date.now()-fetchDate.getTime())/60000);
+    freshHtml='<div style="font-size:11px;color:var(--ink4);margin-bottom:8px;display:flex;align-items:center;gap:6px">'
+      +'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(diffMin<5?'#16A34A':diffMin<30?'#D97706':'#94A3B8')+'"></span>'
+      +'Mis à jour il y a '+(diffMin<1?'moins d\'1 min':diffMin+' min')+' · '+items.length+' article(s)'
+      +'</div>';
+  }
+  var html=freshHtml+'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">';
   items.forEach(function(it){
     html+='<a href="'+it.link+'" target="_blank" rel="noopener" style="text-decoration:none">'
       +'<div style="background:var(--sur);border:1px solid var(--bg3);border-left:3px solid '+col+';border-radius:var(--r2);padding:14px;transition:all .2s;cursor:pointer" '
@@ -13307,18 +13331,34 @@ function _vheroCheckAutoplay(){
   }
 }
 function _vheroVideoFallback(){
-  var btn=document.getElementById('vheroPlayBtn');
-  if(btn)btn.style.display='flex';
+  // FIX : si la vidéo a une erreur (URL 404, format invalide), basculer
+  // sur le gradient animé au lieu d'un play button inutile qui ne fait rien
+  var v=document.getElementById('vheroVideo');
+  var wrap=v?v.closest('.vhero-video-wrap'):document.querySelector('.vhero-video-wrap');
+  if(wrap){
+    wrap.setAttribute('data-vtype','fallback');
+    _vheroShowGradient(wrap);
+  }
 }
-// Appelé si la vidéo auto-serveur n'existe pas — remplace par gradient animé
-function _vheroShowGradient(){
-  var wrap=document.querySelector('.vhero-video-wrap[data-vtype="auto"]');
+// Appelé si la vidéo n'existe pas — remplace par gradient animé
+// Accepte un wrap optionnel ; sinon cherche le wrap auto
+function _vheroShowGradient(wrap){
+  if(!wrap){
+    wrap=document.querySelector('.vhero-video-wrap[data-vtype="auto"]')
+      ||document.querySelector('.vhero-video-wrap[data-vtype="fallback"]')
+      ||document.querySelector('.vhero-video-wrap');
+  }
   if(!wrap)return;
-  wrap.removeAttribute('data-vtype');
+  if(wrap.getAttribute('data-vtype')==='gradient-shown')return; // déjà affiché
+  wrap.setAttribute('data-vtype','gradient-shown');
   wrap.style.cssText=(wrap.style.cssText||'')
-    +';background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#7C3AED);background-size:400% 400%;animation:vhAnim 8s ease infinite;display:block';
+    +';background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#7C3AED);background-size:400% 400%;animation:vhAnim 8s ease infinite;display:block;position:relative';
+  var nom=(DB&&DB.school&&DB.school.nom)||'VÉRITAS';
+  var sl=(DB&&DB.publicInfo&&DB.publicInfo.slogan)||'Centre d\'Excellence Scolaire';
   wrap.innerHTML='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;z-index:1">'
     +'<div style="font-size:clamp(56px,12vw,88px);filter:drop-shadow(0 4px 24px rgba(0,0,0,.4));animation:float 6s ease-in-out infinite">🎓</div>'
+    +'<div style="font-family:Montserrat,sans-serif;font-size:clamp(20px,4vw,32px);font-weight:900;color:#FFC93C;margin-top:14px;text-shadow:0 2px 14px rgba(0,0,0,.5);letter-spacing:.5px">'+_esc(nom)+'</div>'
+    +'<div style="font-family:Georgia,serif;font-size:clamp(12px,2vw,15px);color:rgba(255,255,255,.85);margin-top:8px;font-style:italic;max-width:600px">'+_esc(sl)+'</div>'
     +'</div>';
 }
 function _vheroManualPlay(){
