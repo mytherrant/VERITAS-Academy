@@ -87,6 +87,25 @@ input,select,textarea,button{font-family:'Inter',sans-serif;font-size:15px}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
 @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+/* ── ANIMATIONS CARTES MENTALES (Claude design) ── */
+@keyframes mmSlideIn{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes mmFadeRight{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)}}
+@keyframes mmPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 0 rgba(255,201,60,.6))}50%{transform:scale(1.08);filter:drop-shadow(0 0 12px rgba(255,201,60,.8))}}
+@keyframes mmStars{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:.85;transform:scale(1.05)}}
+@keyframes mmGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,201,60,.4)}50%{box-shadow:0 0 0 8px rgba(255,201,60,0)}}
+@keyframes mmShimmer{0%{background-position:-200% center}100%{background-position:200% center}}
+.mm-branch{transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s ease}
+.mm-branch:hover{transform:translateY(-3px) scale(1.01)}
+.mm-branch:hover{box-shadow:0 8px 24px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.2) !important}
+/* Cards literature avec hover lift */
+.litt-card{transition:transform .3s cubic-bezier(.34,1.56,.64,1),box-shadow .3s ease,filter .3s ease}
+.litt-card:hover{transform:translateY(-5px) scale(1.02);filter:brightness(1.05)}
+.litt-card:active{transform:scale(.98)}
+/* Pictogrammes flottants */
+.pict-float{display:inline-block;animation:float 3s ease-in-out infinite}
+.pict-pulse{display:inline-block;animation:mmPulse 2.5s ease-in-out infinite}
+.pict-spin{display:inline-block;transition:transform .4s ease}
+.litt-card:hover .pict-spin{transform:rotate(8deg) scale(1.1)}
 @keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 @keyframes borderGlow{0%,100%{border-color:rgba(255,201,60,.15)}50%{border-color:rgba(255,201,60,.4)}}
 @keyframes typeIn{from{width:0}to{width:100%}}
@@ -16333,21 +16352,22 @@ var LITT_OEUVRES = {
   "6e_contes_korotoumou": {
     titre:"Les Contes de Korotoumou",auteur:"Amadou Koné",classe:"6ème",
     carte:{
-      centre:"Les Contes de Korotoumou\nAmadou Koné\n(Tradition mandé)",
+      centre:"Les Contes de Korotoumou\nAmadou Koné\n(Plantation de Kongodjan)",
       branches:[
-        {label:"Personnages",color:"#0891B2",items:["Korotoumou (la conteuse-héroïne)","Le griot (gardien de la mémoire)","Les rois et les princesses","Les animaux symboliques (hyène, lièvre, panthère)","Les ancêtres"]},
-        {label:"Thèmes",color:"#16A34A",items:["Sagesse africaine","Bien vs mal","Courage des héros","Justice traditionnelle","Solidarité"]},
-        {label:"Style",color:"#D97706",items:["Conte oral transcrit","Formules d'ouverture et clôture","Refrains musicaux","Personnages-types","Morale finale explicite"]},
-        {label:"Contexte",color:"#7C3AED",items:["Amadou Koné (1953-) — écrivain ivoirien","Tradition mandé (Mali, Côte d'Ivoire)","Présence Africaine ou NEA","Transmission familiale","Patrimoine oral ouest-africain"]}
+        {label:"Personnages",color:"#0891B2",items:["Korotoumou (grande sœur — conteuse de 60 ans)","Le narrateur (frère cadet)","Maï (la nièce de Korotoumou)","Lièvre et Hyène (compères des contes)","Chat, Chien, Singe, Oiseau Malan","Gnitorni, La proscrite, Ntégnan, Soumaoro"]},
+        {label:"Thèmes",color:"#16A34A",items:["Sagesse africaine en langue Cerma","Modernité (TV, radio) vs oralité","Bien vs mal — justice traditionnelle","Lieu mythique : la plantation de café-cacao","Transmission menacée par l'oubli"]},
+        {label:"Style et structure",color:"#D97706",items:["3 sections : animaux entre eux, hommes entre eux, hommes/animaux/objets","Formule d'ouverture : 'Kouncoun'","Récit-cadre (sœur raconte au frère)","Personnages-types et refrains","Morale finale explicite"]},
+        {label:"Contexte",color:"#7C3AED",items:["Amadou Koné — écrivain ivoirien","Aire culturelle Cerma (Burkina/Côte d'Ivoire)","Kongodjan = plantation natale (lieu réel transposé)","Critique sociale douce de la modernité","Patrimoine oral ouest-africain"]}
       ]
     },
     qcm:[
-      {q:"De quel pays vient Amadou Koné ?",opts:["Cameroun","Côte d'Ivoire","Sénégal","Mali"],ans:1,exp:"Amadou Koné, né en 1953, est un écrivain ivoirien spécialiste de la culture mandé d'Afrique de l'Ouest."},
-      {q:"Qui est Korotoumou dans les contes ?",opts:["Une princesse","Une conteuse-héroïne","Une reine","Un animal"],ans:1,exp:"Korotoumou est à la fois conteuse et héroïne, figure typique de la culture mandé qui valorise les femmes-mémoires."},
-      {q:"Quel est l'animal rusé typique des contes mandé ?",opts:["Le lion","Le lièvre","L'éléphant","Le crocodile"],ans:1,exp:"Le lièvre (équivalent du renard européen) symbolise la ruse intelligente qui triomphe de la force brute."},
-      {q:"Comment commence traditionnellement un conte mandé ?",opts:["'Il était une fois...'","'Ne ka kèlè...' (Je vais vous dire...)","'Au temps des Pharaons...'","Sans introduction"],ans:1,exp:"Les conteurs mandés ouvrent avec des formules rituelles en langue locale, transcrites ensuite : 'Je vais vous dire...' ou 'Écoutez bien...'"},
-      {q:"Quelle leçon morale revient le plus souvent ?",opts:["L'amour romantique","Le courage et la sagesse plutôt que la force","La richesse à tout prix","L'individualisme"],ans:1,exp:"Les contes valorisent courage + sagesse contre force brute. C'est le triomphe de l'intelligence éthique."},
-      {q:"Quel rôle joue le griot dans la culture mandé ?",opts:["Soldat","Conseiller spirituel","Gardien de la mémoire et historien","Marchand"],ans:2,exp:"Le griot est la mémoire vivante du peuple : généalogies, événements historiques, contes — tout est conservé dans sa parole."}
+      {q:"De quel pays vient Amadou Koné ?",opts:["Cameroun","Côte d'Ivoire","Sénégal","Mali"],ans:1,exp:"Amadou Koné est un écrivain ivoirien né en 1953, spécialiste des traditions orales d'Afrique de l'Ouest, en particulier de l'aire Cerma."},
+      {q:"Qui est Korotoumou dans le récit ?",opts:["Une jeune princesse","La grande sœur du narrateur, conteuse de 60 ans","Une reine","Un personnage de conte"],ans:1,exp:"Korotoumou est la grande sœur du narrateur. Elle approche la soixantaine et porte les contes de leur enfance à Kongodjan. C'est une figure de transmission."},
+      {q:"Comment s'appelle la plantation où les contes étaient racontés autrefois ?",opts:["Bamako","Kongodjan","Abidjan","Korhogo"],ans:1,exp:"Kongodjan, plantation de café et cacao de l'enfance des deux frère et sœur — devenue un 'vieux mythe' depuis l'arrivée de la modernité (radio, télévision)."},
+      {q:"En quelle langue locale les contes étaient-ils traditionnellement dits ?",opts:["Mandinka","Cerma","Bambara","Dioula"],ans:1,exp:"En Cerma, la langue maternelle de la famille. Le narrateur souligne que sa sœur ne parle pas bien le français, mais maîtrise les contes dans cette langue."},
+      {q:"Comment l'œuvre est-elle structurée ?",opts:["En 5 chapitres","En 3 sections : Animaux entre eux, Hommes entre eux, Hommes/animaux/objets","En 12 récits","En vers libres"],ans:1,exp:"3 grandes parties + prologue + notes pédagogiques. La structure suit une logique pédagogique : des animaux (simple) vers le mélange (complexe)."},
+      {q:"Quel animal rusé est récurrent dans les contes ?",opts:["Le lion","Le lièvre (face à l'Hyène)","L'éléphant","Le crocodile"],ans:1,exp:"Le couple Lièvre/Hyène est emblématique : le Lièvre rusé triomphe de l'Hyène gloutonne. Voir 'Lièvre et Hyène pêcheurs'."},
+      {q:"Quelle est la fonction critique de l'œuvre ?",opts:["Critiquer la colonisation","Critiquer en douceur la modernité qui fait oublier l'oralité","Critiquer la religion","Critiquer la politique"],ans:1,exp:"Le prologue oppose télévision/radio (modernité aliénante) au conte (sagesse traditionnelle menacée). Œuvre engagée pour la préservation du patrimoine oral."}
     ],
     fiche:{
       genre:"Recueil de contes africains traditionnels",forme:"Récits courts à structure répétitive et morale finale",edition:"Nouvelles Éditions Africaines (NEA), Abidjan",
@@ -16637,25 +16657,44 @@ function _showLittCarte(oeuvreKey){
     var brHtml='';
     (c.branches||[]).forEach(function(br,bi){
       var col=br.color||_MMCOLORS[bi%_MMCOLORS.length];
-      brHtml+='<div style="background:'+col+';border-radius:12px;padding:12px 16px;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.18)">'
-        +'<div style="font-weight:800;font-size:14px;margin-bottom:8px;border-bottom:1px solid rgba(255,255,255,.3);padding-bottom:6px">'+_mmIco(br.label)+_esc(br.label||'')+'</div>'
-        +'<div style="font-size:12.5px;line-height:1.8;opacity:.97">'
-        +(br.items||[]).map(function(x){return'<span style="display:block;padding:1px 0">• '+_esc(x)+'</span>';}).join('')
+      // Branches avec gradient subtil, glow et animation d'entrée
+      brHtml+='<div class="mm-branch" style="background:linear-gradient(135deg,'+col+','+col+'dd);border-radius:14px;padding:14px 18px;color:#fff;box-shadow:0 4px 14px '+col+'40,inset 0 1px 0 rgba(255,255,255,.15);position:relative;overflow:hidden;animation:mmSlideIn .55s '+(bi*0.08)+'s both cubic-bezier(.34,1.56,.64,1)" data-color="'+col+'">'
+        // Bande décorative latérale
+        +'<div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:rgba(255,255,255,.35)"></div>'
+        // Halo radial décoratif
+        +'<div style="position:absolute;top:-30px;right:-30px;width:90px;height:90px;background:radial-gradient(circle,rgba(255,255,255,.18) 0%,transparent 70%);pointer-events:none"></div>'
+        // Titre avec icône agrandie
+        +'<div style="font-weight:900;font-size:15px;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid rgba(255,255,255,.25);display:flex;align-items:center;gap:8px;letter-spacing:.3px;text-shadow:0 1px 4px rgba(0,0,0,.2);position:relative">'
+          +'<span style="font-size:24px;line-height:1;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))">'+(_mmIco(br.label)||'●')+'</span>'
+          +'<span>'+_esc(br.label||'')+'</span>'
+        +'</div>'
+        +'<div style="font-size:13px;line-height:1.85;opacity:.96;position:relative">'
+        +(br.items||[]).map(function(x,ii){
+          return '<div style="display:flex;align-items:flex-start;gap:6px;padding:3px 0;animation:mmFadeRight .4s '+(bi*0.08+0.15+ii*0.04)+'s both ease-out">'
+            +'<span style="color:#FFC93C;font-weight:900;flex-shrink:0;font-size:14px;line-height:1.4">▸</span>'
+            +'<span>'+_esc(x)+'</span>'
+            +'</div>';
+        }).join('')
         +'</div></div>';
     });
     _vc('<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-      +'<div class="vsec-title">🗺️ Carte Mentale — '+_esc(oe.titre)+'</div>'
+      +'<div class="vsec-title" style="display:flex;align-items:center;gap:10px"><span style="font-size:32px;animation:mmPulse 2.5s ease-in-out infinite">🗺️</span><span>Carte Mentale — '+_esc(oe.titre)+'</span></div>'
       +'<div class="vsec-sub" style="font-style:italic">'+_esc(oe.auteur)+' — '+_esc(oe.classe)+'</div>'
-      +'<div style="background:#07142E;border-radius:16px;padding:16px;margin:12px 0">'
-      +ctrHtml
-      +'<div style="display:flex;flex-direction:column;gap:10px">'+brHtml+'</div>'
-      +'</div>'
-      +'<div class="vcard mt14"><div class="bold s mb8">📌 Comment utiliser cette carte ?</div>'
-      +'<div style="font-size:13px;color:var(--ink3);line-height:1.8">Visualisez les <strong>'+(c.branches||[]).length+' axes</strong> thématiques. Chaque carte regroupe un aspect essentiel de l\'œuvre. Téléchargez en HD (PNG) pour imprimer ou réviser.</div>'
-      +'<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'
-      +'<button class="btn sm bi" onclick="_mmDownload(\''+oeuvreKey+'\')">⬇️ Télécharger HD (PNG)</button>'
-      +'<button class="btn sm bo" onclick="window.print()">🖨️ Imprimer</button>'
-      +'</div></div></div>');
+      // Container avec fond étoilé animé
+      +'<div style="background:radial-gradient(ellipse at center,#1E3A8A 0%,#07142E 70%,#020817 100%);border-radius:20px;padding:20px;margin:14px 0;position:relative;overflow:hidden;box-shadow:0 10px 40px rgba(20,37,84,.4)">'
+      // Étoiles décoratives animées
+      +'<div style="position:absolute;inset:0;background-image:radial-gradient(2px 2px at 20% 30%,rgba(255,201,60,.5),transparent),radial-gradient(1px 1px at 60% 70%,rgba(255,255,255,.6),transparent),radial-gradient(1px 1px at 85% 40%,rgba(255,201,60,.4),transparent),radial-gradient(2px 2px at 30% 80%,rgba(255,255,255,.5),transparent);pointer-events:none;opacity:.6;animation:mmStars 8s ease-in-out infinite"></div>'
+      +'<div style="position:relative;z-index:2">'+ctrHtml
+      +'<div style="display:flex;flex-direction:column;gap:12px">'+brHtml+'</div>'
+      +'</div></div>'
+      // Card "Comment utiliser" plus moderne
+      +'<div class="vcard mt14" style="background:linear-gradient(135deg,#FFF8E1,#FFEDB5);border:2px solid #FFC93C;border-radius:16px;animation:mmSlideIn .55s '+((c.branches||[]).length*0.08+0.3)+'s both ease-out">'
+        +'<div class="bold s mb8" style="color:#7C2D12;font-size:15px;display:flex;align-items:center;gap:8px"><span style="font-size:22px">📌</span><span>Comment utiliser cette carte ?</span></div>'
+        +'<div style="font-size:13px;color:#78350F;line-height:1.8">Visualisez les <strong>'+(c.branches||[]).length+' axes</strong> thématiques. Chaque carte regroupe un aspect essentiel de l\'œuvre. Téléchargez en HD pour imprimer ou réviser.</div>'
+        +'<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">'
+        +'<button class="btn sm" style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#FFC93C;font-weight:700;border:none;box-shadow:0 3px 10px rgba(20,37,84,.3);transition:transform .15s" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="_mmDownload(\''+oeuvreKey+'\')"><span style="margin-right:6px">⬇️</span>Télécharger HD</button>'
+        +'<button class="btn sm" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;font-weight:700;border:none;box-shadow:0 3px 10px rgba(255,201,60,.4);transition:transform .15s" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="window.print()"><span style="margin-right:6px">🖨️</span>Imprimer</button>'
+        +'</div></div></div>');
     return;
   }
   // ── Layout Canvas (desktop) ──
