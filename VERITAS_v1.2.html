@@ -4756,13 +4756,16 @@ function viewBookDetail(bid){
     var _isMobUA=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||'');
     h+='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:8px">📄 <strong>Aperçu PDF disponible</strong> ☁️</div>';
     if(_isMobUA){
-      // Mobile : iframe PDF ne fonctionne pas → bouton + Google Docs viewer
+      // Mobile : iframe PDF ne fonctionne pas → FIX : window.open au lieu de <a target=_blank>
+      // qui sur Android navigue le SPA (même origine PDF = vue inline qui remplace l'app)
       var _gv='https://docs.google.com/viewer?embedded=true&url='+encodeURIComponent(b.previewPdfUrl);
+      window['_bookPdfUrl_'+bid]=b.previewPdfUrl;
+      window['_bookGvUrl_'+bid]=_gv;
       h+='<div style="border:2px dashed var(--bld);border-radius:var(--r);padding:24px;text-align:center;background:var(--blb)">'
         +'<div style="font-size:48px;margin-bottom:10px">📄</div>'
         +'<div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;color:var(--bl);margin-bottom:14px">'+_esc(b.previewPdfName||'Aperçu')+'</div>'
-        +'<a href="'+b.previewPdfUrl+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:4px">📖 Ouvrir le PDF</a>'
-        +'<a href="'+_gv+'" target="_blank" rel="noopener" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:4px">🔍 Voir aperçu</a>'
+        +'<button class="btn bi" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:4px" onclick="var w=window.open(window[\'_bookPdfUrl_'+bid+'\'],\'_blank\');if(!w)alert(\'Autorisez les pop-ups pour ouvrir le PDF\');">📖 Ouvrir le PDF</button>'
+        +'<button class="btn bo" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:4px" onclick="var w=window.open(window[\'_bookGvUrl_'+bid+'\'],\'_blank\');if(!w)alert(\'Autorisez les pop-ups\');">🔍 Voir aperçu</button>'
         +'</div>';
     } else {
       // Desktop : Google Docs viewer (évite les erreurs CORS iframe direct)
@@ -4816,13 +4819,17 @@ function _showExtrait(bid){
     var h='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:10px">'
           +'📢 <strong>Extrait gratuit</strong> — Lisez les premières pages avant d\'acheter.</div>';
     if(_isMob&&_isHttpUrl){
-      // Sur mobile, iframe + PDF ne fonctionne pas → bouton ouverture + Google Docs viewer
+      // Sur mobile, iframe + PDF ne fonctionne pas → FIX : window.open au lieu de <a target=_blank>
+      // Android navigue le SPA quand le PDF est sur même origine (vue inline)
       var _gv='https://docs.google.com/viewer?embedded=true&url='+encodeURIComponent(pdfSrc);
+      window._extraitPdfUrl=pdfSrc;
+      window._extraitGvUrl=_gv;
+      window._extraitPdfName=pdfName||'apercu.pdf';
       h+='<div style="border:2px dashed var(--bld);border-radius:var(--r);padding:28px;text-align:center;background:var(--blb)">'
         +'<div style="font-size:56px;margin-bottom:12px">📄</div>'
         +'<div style="font-family:Libre Baskerville,serif;font-size:15px;font-weight:700;color:var(--bl);margin-bottom:16px">'+_esc(pdfName||'Aperçu PDF')+'</div>'
-        +'<a href="'+pdfSrc+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:14px;padding:12px 22px;margin:5px">📖 Ouvrir le PDF</a><br>'
-        +'<a href="'+_gv+'" target="_blank" rel="noopener" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:5px">🔍 Voir aperçu intégré</a>'
+        +'<button class="btn bi" style="border:none;cursor:pointer;font-size:14px;padding:12px 22px;margin:5px" onclick="var w=window.open(window._extraitPdfUrl,\'_blank\');if(!w)alert(\'Autorisez les pop-ups pour ouvrir le PDF\');">📖 Ouvrir le PDF</button><br>'
+        +'<button class="btn bo" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:5px" onclick="var w=window.open(window._extraitGvUrl,\'_blank\');if(!w)alert(\'Autorisez les pop-ups\');">🔍 Voir aperçu intégré</button>'
         +'</div>';
     } else if(_isMob&&!_isHttpUrl&&pdfSrc&&pdfSrc.indexOf('data:')===0){
       // Mobile + data: URL → convertir en Blob URL pour ouverture/téléchargement natif
@@ -4986,10 +4993,13 @@ function showBookTab(btn,tabId){
         var _isMobIDB=/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent||'');
         if(_isMobIDB){
           var _fn2=rec.name||'apercu.pdf';
+          // FIX mobile : window.open au lieu de <a target=_blank> (Android navigue le SPA)
+          window._idbPdfSrc=_pdfSrc;
+          window._idbPdfName=_fn2;
           cont.innerHTML='<div style="border:2px dashed var(--bld);border-radius:var(--r);padding:24px;text-align:center;background:var(--blb)">'
             +'<div style="font-size:48px;margin-bottom:10px">📄</div>'
             +'<div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;color:var(--bl);margin-bottom:14px">'+_esc(_fn2)+'</div>'
-            +'<a href="'+_pdfSrc+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:4px">📖 Ouvrir le PDF</a>'
+            +'<button class="btn bi" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:4px" onclick="var w=window.open(window._idbPdfSrc,\'_blank\');if(!w)alert(\'Autorisez les pop-ups pour ouvrir le PDF\');">📖 Ouvrir le PDF</button>'
             +'<a href="'+_pdfSrc+'" download="'+_esc(_fn2)+'" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:4px">⬇ Télécharger</a>'
             +'</div>';
         } else {
