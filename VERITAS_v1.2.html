@@ -3458,9 +3458,57 @@ function defaultDB(){return{
 };}
 
 let DB;
+// ── FIX URL /htdocs/ : réécrit toutes les URLs cassées d'avant 12 mai 2026 ──
+// Bug : upload_file.php retournait des URLs comme veritas-school.com/htdocs/uploads/...
+// qui sont en 404 (le 'htdocs' était le DOCUMENT_ROOT, pas dans le chemin URL).
+// Fix : enlever /htdocs/ partout pour pointer vers /uploads/ (le bon chemin)
+function _fixHtdocsUrls(){
+  var fixed=0;
+  function _fix(s){
+    if(!s||typeof s!=='string')return s;
+    if(s.indexOf('/htdocs/uploads/')<0)return s;
+    fixed++;
+    return s.replace('/htdocs/uploads/','/uploads/');
+  }
+  // Galerie
+  (DB.galleryImages||[]).forEach(function(g){
+    g.src=_fix(g.src);
+    if(g.serverSrc)g.serverSrc=_fix(g.serverSrc);
+  });
+  // Livres : coverImg, fichierUrl, previewPdfUrl, previewImages
+  (DB.books||[]).forEach(function(b){
+    b.coverImg=_fix(b.coverImg);
+    b.fichierUrl=_fix(b.fichierUrl);
+    b.previewPdfUrl=_fix(b.previewPdfUrl);
+    if(b.previewImages){
+      b.previewImages=b.previewImages.map(_fix);
+    }
+  });
+  // Photos profils + logos
+  if(DB.school&&DB.school.logo)DB.school.logo=_fix(DB.school.logo);
+  if(DB.introVideo&&DB.introVideo.src)DB.introVideo.src=_fix(DB.introVideo.src);
+  (DB.students||[]).forEach(function(s){if(s.photo)s.photo=_fix(s.photo);});
+  (DB.teachers||[]).forEach(function(t){if(t.photo)t.photo=_fix(t.photo);});
+  (DB.partenaires||[]).forEach(function(p){if(p.logo)p.logo=_fix(p.logo);});
+  (DB.packs||[]).forEach(function(p){if(p.photo)p.photo=_fix(p.photo);});
+  (DB.tickerItems||[]).forEach(function(ti){if(ti.image)ti.image=_fix(ti.image);});
+  // E-learning
+  (DB.elearning&&DB.elearning.contenus||[]).forEach(function(c){if(c.fichierUrl)c.fichierUrl=_fix(c.fichierUrl);});
+  (DB.elearning&&DB.elearning.soumissions||[]).forEach(function(s){if(s.fichierUrl)s.fichierUrl=_fix(s.fichierUrl);});
+  (DB.devoirs||[]).forEach(function(d){if(d.fichierUrl)d.fichierUrl=_fix(d.fichierUrl);});
+  if(fixed>0){
+    console.info('[fix htdocs] '+fixed+' URL(s) réécrites — /htdocs/uploads/ → /uploads/');
+    try{localStorage.setItem('_vrtHtdocsFixed', new Date().toISOString());}catch(e){}
+  }
+  return fixed;
+}
+
 // ── Migration DB : à appeler après TOUT remplacement de DB (load, pull cloud, force-pull) ──
 // BUG-01/BUG-09 FIX : centralise les guards "si champ manquant → valeur par défaut"
 function _migrateDB(){
+  // FIX URLs /htdocs/ : toutes les URLs uploadées avant 12/05/2026 sont cassées
+  // Réécriture systématique au chargement (idempotent — ne fait rien si pas de /htdocs/)
+  _fixHtdocsUrls();
   // Identité école (toujours forcer depuis source embarquée)
   var _ldEl=document.getElementById('_logoData');
   var _ldSrc=(_ldEl&&_ldEl.src&&_ldEl.src.startsWith('data:'))?_ldEl.src:'';
