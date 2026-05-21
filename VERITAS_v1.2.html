@@ -3510,6 +3510,8 @@ function _migrateDB(){
   // FIX URLs /htdocs/ : toutes les URLs uploadées avant 12/05/2026 sont cassées
   // Réécriture systématique au chargement (idempotent — ne fait rien si pas de /htdocs/)
   _fixHtdocsUrls();
+  // FIX : filtrer les produits supprimés (tombstones) — empeche resurrection apres sync
+  if(typeof _filterDeletedProducts==='function')_filterDeletedProducts();
   // Identité école (toujours forcer depuis source embarquée)
   var _ldEl=document.getElementById('_logoData');
   var _ldSrc=(_ldEl&&_ldEl.src&&_ldEl.src.startsWith('data:'))?_ldEl.src:'';
@@ -3640,7 +3642,8 @@ async function load(){
           deletedDefaults: (DB.deletedDefaults||[]).slice(),
           hiddenLabos: (DB.hiddenLabos||[]).slice(),
           purgedLabos: (DB.purgedLabos||[]).slice(),
-          deletedCartes: (DB.deletedCartes||[]).slice()
+          deletedCartes: (DB.deletedCartes||[]).slice(),
+          deletedProducts: (DB.deletedProducts||[]).slice()
         };
         DB=_lwsRemote;
         // Re-injecter les suppressions locales en union avec celles du cloud
@@ -3656,6 +3659,7 @@ async function load(){
         DB.hiddenLabos=_unionIds(_preserveDel.hiddenLabos, DB.hiddenLabos);
         DB.purgedLabos=_unionIds(_preserveDel.purgedLabos, DB.purgedLabos);
         DB.deletedCartes=_unionIds(_preserveDel.deletedCartes, DB.deletedCartes);
+        DB.deletedProducts=_unionIds(_preserveDel.deletedProducts, DB.deletedProducts);
         _migrateDB(); // BUG-01 FIX : re-run migration guards après remplacement DB
         localStorage.setItem('vrt10',JSON.stringify(DB));
         if(typeof re==='function') setTimeout(re,200);
@@ -4269,11 +4273,12 @@ function _startBgPoll(){
         var localElearn=(DB.elearning&&DB.elearning.contenus)||[];
         var localPacks=DB.packs||[];
         var localCitations=DB.citations||[];
-        // FIX : préserver les suppressions locales (jeux, labos, cartes)
+        // FIX : préserver les suppressions locales (jeux, labos, cartes, produits)
         var _localDel={
           dj:(DB.deletedJeux||[]).slice(), pj:(DB.purgedJeux||[]).slice(),
           dd:(DB.deletedDefaults||[]).slice(), hl:(DB.hiddenLabos||[]).slice(),
-          pl:(DB.purgedLabos||[]).slice(), dc:(DB.deletedCartes||[]).slice()
+          pl:(DB.purgedLabos||[]).slice(), dc:(DB.deletedCartes||[]).slice(),
+          dp:(DB.deletedProducts||[]).slice()
         };
         // BUG-03 FIX : ne remplacer DB que si l'utilisateur est admin
         if(!iA()){return;}
@@ -4287,6 +4292,7 @@ function _startBgPoll(){
         DB.hiddenLabos=_uIds(_localDel.hl,DB.hiddenLabos);
         DB.purgedLabos=_uIds(_localDel.pl,DB.purgedLabos);
         DB.deletedCartes=_uIds(_localDel.dc,DB.deletedCartes);
+        DB.deletedProducts=_uIds(_localDel.dp,DB.deletedProducts);
         // BUG-03/BUG-09 FIX : re-run migration pour garantir tous les champs v1.2
         _migrateDB();
         // Fusionner les ressources
@@ -8219,8 +8225,8 @@ function cloudForcePull(){
     // Fusion : préserver les ressources locales absentes du cloud
     function _mById(la,sa){var m=JSON.parse(JSON.stringify(sa||[]));var si={};m.forEach(function(x){si[x.id||x.mat]=true;});(la||[]).forEach(function(x){var k=x.id||x.mat;if(k&&!si[k])m.push(x);});return m;}
     var lb=DB.books||[],lg=DB.galleryImages||[],le=(DB.elearning&&DB.elearning.contenus)||[];
-    // FIX : préserver les suppressions locales (sinon jeux/labos reviennent)
-    var _ld={dj:(DB.deletedJeux||[]).slice(),pj:(DB.purgedJeux||[]).slice(),dd:(DB.deletedDefaults||[]).slice(),hl:(DB.hiddenLabos||[]).slice(),pl:(DB.purgedLabos||[]).slice(),dc:(DB.deletedCartes||[]).slice()};
+    // FIX : préserver les suppressions locales (sinon jeux/labos/produits reviennent)
+    var _ld={dj:(DB.deletedJeux||[]).slice(),pj:(DB.purgedJeux||[]).slice(),dd:(DB.deletedDefaults||[]).slice(),hl:(DB.hiddenLabos||[]).slice(),pl:(DB.purgedLabos||[]).slice(),dc:(DB.deletedCartes||[]).slice(),dp:(DB.deletedProducts||[]).slice()};
     DB=serverDB;
     function _uIds2(a,b){var s={};(a||[]).forEach(function(x){s[x]=1;});(b||[]).forEach(function(x){s[x]=1;});return Object.keys(s);}
     DB.deletedJeux=_uIds2(_ld.dj,DB.deletedJeux);
@@ -8229,6 +8235,7 @@ function cloudForcePull(){
     DB.hiddenLabos=_uIds2(_ld.hl,DB.hiddenLabos);
     DB.purgedLabos=_uIds2(_ld.pl,DB.purgedLabos);
     DB.deletedCartes=_uIds2(_ld.dc,DB.deletedCartes);
+    DB.deletedProducts=_uIds2(_ld.dp,DB.deletedProducts);
     // BUG-09 FIX : re-migration obligatoire après tout remplacement de DB
     _migrateDB();
     DB.books=_mById(lb,DB.books);
@@ -9232,10 +9239,22 @@ function toggleProduct(pid){var p=(DB.products||[]).find(function(x){return x.id
 function deleteProduct(pid){
   if(!confirm('Supprimer ce produit ?'))return;
   DB.products=(DB.products||[]).filter(function(x){return x.id!==pid;});
+  // FIX : marquer dans tombstone pour eviter resurrection apres sync cloud
+  DB.deletedProducts=DB.deletedProducts||[];
+  if(DB.deletedProducts.indexOf(pid)<0)DB.deletedProducts.push(pid);
   save();re();
   // Forcer le push cloud immédiat pour que les visiteurs voient la suppression
   if(typeof _triggerAutoSync==='function')_triggerAutoSync();
   toast('✓ Produit supprimé — synchronisation en cours…');
+}
+
+// FIX : filtre des produits supprimes a chaque rendu/load
+// Appele dans _migrateDB et a chaque acces a DB.products
+function _filterDeletedProducts(){
+  if(!DB.deletedProducts||!DB.deletedProducts.length)return;
+  var tombstones={};
+  DB.deletedProducts.forEach(function(id){tombstones[id]=true;});
+  DB.products=(DB.products||[]).filter(function(p){return !tombstones[p.id];});
 }
 
 
@@ -13290,6 +13309,20 @@ function buildIntroVideoHtml(){
 
   // ── 3. Vidéo URL serveur ou data URL ──
   if(v&&v.src&&(v.src.indexOf('http')===0||v.src.indexOf('data:video')===0)){
+    // Pré-check : URL avec /htdocs/ = cassée, basculer directement sur gradient
+    if(v.src.indexOf('/htdocs/')>=0){
+      setTimeout(function(){_vheroVideoFallback();},50);
+    } else {
+      // Garde-fou mobile : si après 4s le video.readyState reste 0 (HAVE_NOTHING),
+      // fallback vers gradient (certains navigateurs mobiles ne firent pas onerror)
+      setTimeout(function(){
+        var vid=document.getElementById('vheroVideo');
+        if(vid&&vid.readyState===0){
+          console.warn('[vhero] timeout 4s — video non chargee, fallback gradient');
+          _vheroVideoFallback();
+        }
+      },4000);
+    }
     // PAS de position:absolute sur <video> — flux normal, fonctionne sur tous les mobiles
     return '<div class="vhero-video-wrap" data-vtype="local" style="display:flex;align-items:stretch">'
       +'<video id="vheroVideo"'
