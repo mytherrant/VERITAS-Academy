@@ -2691,6 +2691,7 @@ setInterval(_refreshCitation,15000);
   <button class="vnav-btn" onclick="vShowSec('elearning',this)" style="background:linear-gradient(135deg,rgba(60,141,255,.15),rgba(60,141,255,.05));color:#3C8DFF;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">auto_stories</span> E-Learning</button>
   <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">storefront</span> Boutique</button>
   <button class="vnav-btn" onclick="showJeuxEdu()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">sports_esports</span> Jeux</button>
+  <button class="vnav-btn" onclick="showLabosVirtuels()" style="background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(14,165,233,.05));color:#0EA5E9;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">science</span> Labos</button>
   <button class="vnav-btn" onclick="showClasseVirtuelle()" style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));color:#7C3AED;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">groups</span> Classes</button>
   <button class="vnav-btn" onclick="vShowSec('orientation',this)" style="background:linear-gradient(135deg,rgba(5,150,105,.15),rgba(5,150,105,.05));color:#059669;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">explore</span> Orientation</button>
   <button class="vnav-btn" onclick="showCalendrier()" style="background:linear-gradient(135deg,rgba(220,38,38,.15),rgba(220,38,38,.05));color:#DC2626;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">event</span> Calendrier</button>
@@ -3631,7 +3632,30 @@ async function load(){
       var _lwsLocal=DB.lastModified||0;
       var _lwsServer=_lwsRemote.lastModified||0;
       if(_lwsServer>_lwsLocal){
+        // ── FIX : préserver les suppressions locales (deletedJeux, purgedJeux, deletedDefaults, etc.) ──
+        // Sinon les jeux supprimés réapparaissent après une sync cloud
+        var _preserveDel={
+          deletedJeux: (DB.deletedJeux||[]).slice(),
+          purgedJeux: (DB.purgedJeux||[]).slice(),
+          deletedDefaults: (DB.deletedDefaults||[]).slice(),
+          hiddenLabos: (DB.hiddenLabos||[]).slice(),
+          purgedLabos: (DB.purgedLabos||[]).slice(),
+          deletedCartes: (DB.deletedCartes||[]).slice()
+        };
         DB=_lwsRemote;
+        // Re-injecter les suppressions locales en union avec celles du cloud
+        function _unionIds(localArr, remoteArr){
+          var s={};
+          (localArr||[]).forEach(function(x){s[x]=true;});
+          (remoteArr||[]).forEach(function(x){s[x]=true;});
+          return Object.keys(s);
+        }
+        DB.deletedJeux=_unionIds(_preserveDel.deletedJeux, DB.deletedJeux);
+        DB.purgedJeux=_unionIds(_preserveDel.purgedJeux, DB.purgedJeux);
+        DB.deletedDefaults=_unionIds(_preserveDel.deletedDefaults, DB.deletedDefaults);
+        DB.hiddenLabos=_unionIds(_preserveDel.hiddenLabos, DB.hiddenLabos);
+        DB.purgedLabos=_unionIds(_preserveDel.purgedLabos, DB.purgedLabos);
+        DB.deletedCartes=_unionIds(_preserveDel.deletedCartes, DB.deletedCartes);
         _migrateDB(); // BUG-01 FIX : re-run migration guards après remplacement DB
         localStorage.setItem('vrt10',JSON.stringify(DB));
         if(typeof re==='function') setTimeout(re,200);
@@ -4245,10 +4269,24 @@ function _startBgPoll(){
         var localElearn=(DB.elearning&&DB.elearning.contenus)||[];
         var localPacks=DB.packs||[];
         var localCitations=DB.citations||[];
+        // FIX : préserver les suppressions locales (jeux, labos, cartes)
+        var _localDel={
+          dj:(DB.deletedJeux||[]).slice(), pj:(DB.purgedJeux||[]).slice(),
+          dd:(DB.deletedDefaults||[]).slice(), hl:(DB.hiddenLabos||[]).slice(),
+          pl:(DB.purgedLabos||[]).slice(), dc:(DB.deletedCartes||[]).slice()
+        };
         // BUG-03 FIX : ne remplacer DB que si l'utilisateur est admin
         if(!iA()){return;}
         // Remplacer par la version cloud (données admin)
         DB=serverDB;
+        // Re-injecter les suppressions locales (union avec cloud)
+        function _uIds(a,b){var s={};(a||[]).forEach(function(x){s[x]=1;});(b||[]).forEach(function(x){s[x]=1;});return Object.keys(s);}
+        DB.deletedJeux=_uIds(_localDel.dj,DB.deletedJeux);
+        DB.purgedJeux=_uIds(_localDel.pj,DB.purgedJeux);
+        DB.deletedDefaults=_uIds(_localDel.dd,DB.deletedDefaults);
+        DB.hiddenLabos=_uIds(_localDel.hl,DB.hiddenLabos);
+        DB.purgedLabos=_uIds(_localDel.pl,DB.purgedLabos);
+        DB.deletedCartes=_uIds(_localDel.dc,DB.deletedCartes);
         // BUG-03/BUG-09 FIX : re-run migration pour garantir tous les champs v1.2
         _migrateDB();
         // Fusionner les ressources
@@ -8152,7 +8190,16 @@ function cloudForcePull(){
     // Fusion : préserver les ressources locales absentes du cloud
     function _mById(la,sa){var m=JSON.parse(JSON.stringify(sa||[]));var si={};m.forEach(function(x){si[x.id||x.mat]=true;});(la||[]).forEach(function(x){var k=x.id||x.mat;if(k&&!si[k])m.push(x);});return m;}
     var lb=DB.books||[],lg=DB.galleryImages||[],le=(DB.elearning&&DB.elearning.contenus)||[];
+    // FIX : préserver les suppressions locales (sinon jeux/labos reviennent)
+    var _ld={dj:(DB.deletedJeux||[]).slice(),pj:(DB.purgedJeux||[]).slice(),dd:(DB.deletedDefaults||[]).slice(),hl:(DB.hiddenLabos||[]).slice(),pl:(DB.purgedLabos||[]).slice(),dc:(DB.deletedCartes||[]).slice()};
     DB=serverDB;
+    function _uIds2(a,b){var s={};(a||[]).forEach(function(x){s[x]=1;});(b||[]).forEach(function(x){s[x]=1;});return Object.keys(s);}
+    DB.deletedJeux=_uIds2(_ld.dj,DB.deletedJeux);
+    DB.purgedJeux=_uIds2(_ld.pj,DB.purgedJeux);
+    DB.deletedDefaults=_uIds2(_ld.dd,DB.deletedDefaults);
+    DB.hiddenLabos=_uIds2(_ld.hl,DB.hiddenLabos);
+    DB.purgedLabos=_uIds2(_ld.pl,DB.purgedLabos);
+    DB.deletedCartes=_uIds2(_ld.dc,DB.deletedCartes);
     // BUG-09 FIX : re-migration obligatoire après tout remplacement de DB
     _migrateDB();
     DB.books=_mById(lb,DB.books);
