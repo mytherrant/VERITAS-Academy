@@ -5796,8 +5796,13 @@ function vShowSec(sec,btn){
           ${iA()?`<button class="btn br2 xs" style="background:rgba(220,38,38,.85);border:none" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')">🗑 Supprimer</button>`:''}
         </div>
       </div>`).join("")}
-      ${(DB.galleryImages||[]).map(p=>`<div class="gallery-card" onclick="_galleryLightbox('${encodeURIComponent(p.src)}','${_esc(p.titre||'')}')">
-        <img src="${p.src}" alt="${p.titre}" loading="lazy">
+      ${(DB.galleryImages||[]).filter(p=>p.src&&p.src.length>20).map(p=>`<div class="gallery-card" onclick="_galleryLightbox('${encodeURIComponent(p.src)}','${_esc(p.titre||'')}')">
+        <img src="${p.src}" alt="${p.titre||''}" loading="lazy" onerror="this.style.display='none';var pl=this.parentNode.querySelector('.img-fallback');if(pl)pl.style.display='flex';">
+        <div class="img-fallback" style="display:none;position:absolute;inset:0;background:linear-gradient(135deg,#FEE2E2,#FECACA);align-items:center;justify-content:center;flex-direction:column;color:#991B1B;font-size:11px;text-align:center;padding:10px">
+          <div style="font-size:32px;margin-bottom:6px">🖼️</div>
+          <div style="font-weight:700">Image perdue</div>
+          <div style="font-size:10px;margin-top:4px;opacity:.8">À ré-uploader</div>
+        </div>
         <div class="gallery-overlay">
           ${iA()?`<button class="btn br2 xs" style="background:rgba(220,38,38,.85);border:none" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')">🗑</button>`:''}
         </div>
@@ -10928,7 +10933,7 @@ function pgCMS(){
     <div class="card"><div class="ct">📸 Galerie Photos</div>
       <div class="mb12">${(DB.galleryImages||[]).length} photo(s) en galerie</div>
       <button class="btn bi sm" onclick="uploadGalleryPhoto()">📸 Ajouter des photos</button>
-      <div class="fl2 g8 fw mt12">${(DB.galleryImages||[]).map(p=>'<div style="position:relative;width:80px;height:60px;border-radius:4px;overflow:hidden;border:1px solid var(--bg3)"><img src="'+p.src+'" style="width:100%;height:100%;object-fit:cover"><button style="position:absolute;top:1px;right:1px;background:var(--re);color:#fff;border:none;border-radius:50%;width:14px;height:14px;font-size:13px;cursor:pointer" onclick="deleteGalleryPhoto(&quot;'+p.id+'&quot;)">×</button></div>').join('')}</div>
+      <div class="fl2 g8 fw mt12">${(DB.galleryImages||[]).map(p=>'<div style="position:relative;width:80px;height:60px;border-radius:4px;overflow:hidden;border:1px solid var(--bg3);background:#F1F5F9"><img src="'+(p.src||'')+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\';var pl=this.parentNode.querySelector(\'.imgpl\');if(pl)pl.style.display=\'flex\';"><div class="imgpl" style="display:'+(p.src?'none':'flex')+';position:absolute;inset:0;background:linear-gradient(135deg,#FEE2E2,#FECACA);align-items:center;justify-content:center;font-size:20px;color:#991B1B">🖼️</div><button title="Supprimer" style="position:absolute;top:1px;right:1px;background:var(--re);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1;z-index:2" onclick="deleteGalleryPhoto(&quot;'+p.id+'&quot;)">×</button></div>').join('')}</div>
     </div>
     <div class="card"><div class="ct">🏆 Résultats aux examens</div>
       <div class="ib ibi mb12"><span>💡</span><span>Modifiez les taux de réussite et les années affichés aux visiteurs. L'admin peut ajouter/supprimer des années.</span></div>
@@ -18697,45 +18702,190 @@ function showEpreuves(){
 }
 
 function showEpreuveDetail(id){
+  // FIX : redirection vers la NOUVELLE vue HTML pleine page (au lieu de la modale)
+  // Avec bouton de téléchargement PDF intégré
+  _showEpreuveHTML(id);
+}
+
+// ── NOUVELLE VUE HTML PLEINE PAGE — épreuve formatée + télécharger PDF ──
+function _showEpreuveHTML(id){
   var libEpreuves=(DB.elearningLibrary||[]).filter(function(e){
     return e.cat==="cat1"||e.cat==="cat4"||e.cat==="cat6";
   });
   var builtinEp=(typeof EPREUVES_DB!=="undefined"?EPREUVES_DB:[]);
   var ep=libEpreuves.concat(builtinEp).concat(DB.customEpreuves||[]).find(function(e){return e.id===id;});
-  if(!ep)return;
+  if(!ep){toast('Épreuve introuvable','warn');return;}
   var locked=!ep.gratuit&&!SES;
-  // Détecter si la ressource a un fichier associé (HTML/PDF/Word/URL)
   var hasFile=ep.externalUrl||ep.htmlLocal||ep.idbKey||
     (DB.customEpHtml&&(DB.customEpHtml[id]||DB.customEpHtml[ep.idbKey||'']));
   var format=ep.format||'html';
   var fmtLabels={html:'HTML',pdf:'PDF',word:'Word',url:'Lien'};
   var fmtColors={html:'#059669',pdf:'#DC2626',word:'#2563EB',url:'#7C3AED'};
-  // Si fichier dispo et pas d'aperçu → ouvrir directement sans modale
-  if(hasFile&&!ep.apercu&&!ep.extrait&&!locked){
-    _openRessource(id);return;
-  }
+  // Mémoriser l'épreuve courante pour le bouton PDF
+  window._currentEpreuve=ep;
   var apercu=ep.apercu||ep.extrait||ep.desc||"";
-  M("📝 "+ep.titre,"Ressource éducative VERITAS",
-    "<div class='fg2'>"
-    +(ep.classe?"<div class='fg'><span class='fl'>Classe</span><div style='font-size:13px;font-weight:700;color:#142554'>"+ep.classe+"</div></div>":"")
-    +(ep.matiere?"<div class='fg'><span class='fl'>Matière</span><div style='font-size:13px'>"+ep.matiere+"</div></div>":"")
-    +(ep.seq?"<div class='fg'><span class='fl'>Séquence</span><div style='font-size:13px'>"+ep.seq+"</div></div>":"")
-    +(ep.annee?"<div class='fg'><span class='fl'>Année</span><div style='font-size:13px'>"+ep.annee+"</div></div>":"")
-    +((ep.exam||ep.serie)?"<div class='fg'><span class='fl'>Examen</span><div style='font-size:13px'>"+(ep.exam||'')+(ep.serie?' '+ep.serie:'')+"</div></div>":"")
-    +(hasFile?"<div class='fg'><span class='fl'>Format</span><div><span style='background:"+(fmtColors[format]||'#6b7280')+";color:#fff;font-size:10px;font-weight:800;padding:2px 8px;border-radius:8px'>"+(fmtLabels[format]||format.toUpperCase())+"</span></div></div>":"")
-    +(ep.prix!==undefined?"<div class='fg'><span class='fl'>Prix</span><div style='font-size:13px;font-weight:700;color:"+(ep.gratuit?"#059669":"#7C3AED")+"'>"+(ep.gratuit?"GRATUIT":ep.prix+" FCFA")+"</div></div>":"")
-    +"</div>"
-    +(apercu?"<div style='background:#F8FAFF;border:1px solid #E0EAFF;border-radius:12px;padding:16px;margin-top:14px;font-family:Georgia,serif;font-size:13px;color:#374151;line-height:1.85'>"
-    +"<div style='font-size:11px;font-weight:700;color:#7C3AED;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>Aperçu du contenu</div>"
-    +apercu
-    +(locked?"<div style='margin-top:12px;padding:10px;background:#FEF3C7;border-radius:8px;font-size:12px;color:#D97706;font-style:normal'>🔒 Le contenu complet est réservé aux abonnés. Inscrivez-vous pour y accéder.</div>":"")
-    +"</div>":""),
-    "<button class='btn bo' onclick='cm()'>Fermer</button>"
-    +(locked?"<button class='btn bi' onclick='cm();vShowSec(\"elearning\",null)'>⭐ S'abonner</button>"
-      :(hasFile
-        ?"<button class='btn bi' onclick='cm();_openRessource(\""+id+"\")'>📄 Ouvrir la ressource</button>"
-        :"<button class='btn bi' onclick='cm();showEpreuves()'>← Retour</button>")),
-    true);
+  // Convertir le texte en HTML structuré
+  var htmlContent=_formatEpreuveContent(apercu);
+  var school=DB.school||{};
+  var schoolNom=_esc(school.nom||'VÉRITAS Academy');
+  var slogan=_esc(school.slogan||'Centre d\'Excellence Scolaire');
+
+  var html='<div class="vsec">'
+    +'<button class="back-btn" onclick="showEpreuves()">← Retour aux épreuves</button>'
+    // En-tête épreuve (sera capturé dans le PDF)
+    +'<div id="epreuvePrintable" style="background:#fff;padding:24px;border-radius:14px;border:1px solid var(--bg3);box-shadow:0 2px 8px rgba(0,0,0,.04);margin-top:14px">'
+      // Bannière institutionnelle
+      +'<div style="border-bottom:3px double #142554;padding-bottom:14px;margin-bottom:18px;text-align:center">'
+        +'<div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#FFC93C;letter-spacing:2px;text-transform:uppercase">'+schoolNom+'</div>'
+        +'<div style="font-family:Georgia,serif;font-size:11px;color:#6B7A99;font-style:italic;margin-top:2px">'+slogan+'</div>'
+        +'<div style="font-size:10px;color:#94A3B8;margin-top:4px">'+_esc(school.ville||'Yaoundé, Cameroun')+' · MINESEC '+(new Date().getFullYear())+'</div>'
+      +'</div>'
+      // Métadonnées épreuve
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px;padding:14px;background:#F8FAFF;border-radius:10px">'
+      +(ep.classe?'<div><div style="font-size:9px;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Classe</div><div style="font-size:13px;font-weight:700;color:#142554">'+_esc(ep.classe)+'</div></div>':'')
+      +(ep.matiere?'<div><div style="font-size:9px;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Matière</div><div style="font-size:13px;color:#374151">'+_esc(ep.matiere)+'</div></div>':'')
+      +(ep.seq?'<div><div style="font-size:9px;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Séquence</div><div style="font-size:13px;color:#374151">'+_esc(ep.seq)+'</div></div>':'')
+      +(ep.annee?'<div><div style="font-size:9px;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Année</div><div style="font-size:13px;color:#374151">'+_esc(ep.annee)+'</div></div>':'')
+      +(ep.duree?'<div><div style="font-size:9px;color:#94A3B8;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Durée</div><div style="font-size:13px;color:#374151">'+ep.duree+' min</div></div>':'')
+      +'</div>'
+      // Titre épreuve
+      +'<div style="font-family:Montserrat,sans-serif;font-size:22px;font-weight:900;color:#142554;text-align:center;margin:20px 0 8px;line-height:1.3">'+_esc(ep.titre)+'</div>'
+      +(ep.desc?'<div style="font-family:Georgia,serif;font-size:13px;color:#6B7A99;font-style:italic;text-align:center;margin-bottom:24px;max-width:600px;margin-left:auto;margin-right:auto">'+_esc(ep.desc)+'</div>':'')
+      +'<div style="height:1px;background:linear-gradient(90deg,transparent,#142554,transparent);margin:20px 0"></div>'
+      // Contenu de l'épreuve
+      +(locked?
+        '<div style="background:#FEF3C7;border:2px dashed #FCD34D;border-radius:12px;padding:30px;text-align:center;margin:20px 0">'
+        +'<div style="font-size:56px;margin-bottom:12px">🔒</div>'
+        +'<div style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;color:#92400E;margin-bottom:8px">Contenu Premium</div>'
+        +'<div style="font-size:13px;color:#78350F;line-height:1.7;max-width:500px;margin:0 auto">Cette épreuve est réservée aux abonnés. Inscrivez-vous pour y accéder.</div>'
+        +'<button class="btn bi mt12" onclick="vShowSec(\'elearning\',null)">⭐ S\'abonner</button>'
+        +'</div>'
+        :htmlContent)
+      // Pied de page institutionnel
+      +'<div style="margin-top:30px;padding-top:14px;border-top:2px solid #E2E8F0;text-align:center">'
+        +'<div style="font-family:Georgia,serif;font-size:10px;color:#94A3B8;font-style:italic">© '+new Date().getFullYear()+' '+schoolNom+' · '+_esc(school.tel||'')+' · '+_esc(school.email||'contact@veritas-school.com')+'</div>'
+        +'<div style="font-size:9px;color:#CBD5E1;margin-top:4px">Document généré le '+today()+' · Usage pédagogique uniquement · Reproduction interdite</div>'
+      +'</div>'
+    +'</div>'
+    // Boutons d'action
+    +'<div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:20px">'
+    +(locked?'':
+      '<button class="btn bi" onclick="_downloadEpreuvePDF()" style="padding:12px 22px;font-weight:700"><span style="font-size:18px;margin-right:6px">📥</span> Télécharger en PDF</button>'
+    )
+    +'<button class="btn" style="background:#FFC93C;color:#142554;padding:12px 22px;font-weight:700" onclick="window.print()"><span style="font-size:16px;margin-right:6px">🖨️</span> Imprimer</button>'
+    +(hasFile&&!locked?'<button class="btn" style="background:'+(fmtColors[format]||'#6B7A99')+';color:#fff;padding:12px 22px;font-weight:700" onclick="_openRessource(\''+id+'\')">📄 Ouvrir '+(fmtLabels[format]||format.toUpperCase())+'</button>':'')
+    +'<button class="btn bo" onclick="showEpreuves()" style="padding:12px 22px">← Retour à la liste</button>'
+    +'</div>'
+    +'</div>';
+  _vc(html);
+}
+
+// Formate le texte d'une épreuve en HTML structuré (détecte exercices, parties, sauts de ligne)
+function _formatEpreuveContent(text){
+  if(!text)return '<div style="text-align:center;padding:30px;color:#94A3B8;font-style:italic">Aucun contenu détaillé disponible pour cette épreuve.</div>';
+  var t=String(text);
+  // Échapper le HTML d'abord
+  t=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Détecter les titres de section (Exercice X, Partie X, EXERCICE, etc.)
+  t=t.replace(/^(EXERCICE [IVX0-9]+|Exercice [0-9]+|PARTIE [IVX]+|Partie [IVX]+|Section [A-Z]|SECTION [A-Z]|Sujet [0-9]+|SUJET [0-9]+|DOSSIER [A-Z0-9]+|Dossier [A-Z0-9]+|Question [0-9]+|PRÉPARATION|DICTÉE|QUESTIONS|Texte ?:)([^\n]*)/gm,
+    '<div style="background:#142554;color:#FFC93C;padding:8px 14px;border-radius:8px 8px 0 0;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;margin:18px 0 0">$1$2</div>');
+  // Sauts de ligne en paragraphes
+  var lines=t.split(/\n/);
+  var html='';
+  var inSection=false;
+  lines.forEach(function(line){
+    line=line.trim();
+    if(!line){html+='<div style="height:6px"></div>';return;}
+    if(line.indexOf('<div style="background:#142554')>=0){
+      // Titre de section déjà formaté
+      html+=line;
+      inSection=true;
+    } else {
+      html+='<div style="font-family:Georgia,serif;font-size:13.5px;line-height:1.85;color:#1F2937;padding:6px 14px'+(inSection?';background:#FAFBFF;border-left:3px solid #142554':'')+'">'+line+'</div>';
+    }
+  });
+  return '<div style="margin:14px 0">'+html+'</div>';
+}
+
+// Téléchargement de l'épreuve courante en PDF (via jsPDF avec rendu HTML)
+function _downloadEpreuvePDF(){
+  var ep=window._currentEpreuve;
+  if(!ep){toast('Épreuve non chargée','warn');return;}
+  // Vérifier que jsPDF est disponible
+  var jsPDFCls=(typeof jspdf!=='undefined'&&jspdf.jsPDF)?jspdf.jsPDF:(typeof jsPDF!=='undefined'?jsPDF:null);
+  if(!jsPDFCls){toast('jsPDF non disponible — réessayez dans quelques secondes','warn');return;}
+  toast('📥 Génération du PDF en cours…','info');
+  try{
+    var doc=new jsPDFCls({orientation:'portrait',unit:'mm',format:'a4'});
+    var pw=210,ph=297,margin=18;
+    var y=margin;
+    var school=DB.school||{};
+    // En-tête
+    doc.setFillColor(20,37,84);doc.rect(0,0,pw,28,'F');
+    doc.setTextColor(255,201,60);doc.setFont(undefined,'bold');doc.setFontSize(15);
+    doc.text(school.nom||'VÉRITAS Academy',pw/2,12,{align:'center'});
+    doc.setFontSize(9);doc.setFont(undefined,'normal');doc.setTextColor(255,255,255);
+    doc.text(school.slogan||'Centre d\'Excellence Scolaire',pw/2,18,{align:'center'});
+    doc.text((school.ville||'Yaoundé, Cameroun')+' · MINESEC '+new Date().getFullYear(),pw/2,23,{align:'center'});
+    y=36;
+    // Métadonnées
+    doc.setTextColor(20,37,84);doc.setFont(undefined,'bold');doc.setFontSize(11);
+    var metaLine=[];
+    if(ep.classe)metaLine.push('Classe : '+ep.classe);
+    if(ep.matiere)metaLine.push('Matière : '+ep.matiere);
+    if(ep.seq)metaLine.push('Séquence : '+ep.seq);
+    if(ep.duree)metaLine.push('Durée : '+ep.duree+' min');
+    doc.text(metaLine.join('  ·  '),pw/2,y,{align:'center'});
+    y+=10;
+    // Titre épreuve
+    doc.setFont(undefined,'bold');doc.setFontSize(16);doc.setTextColor(20,37,84);
+    var titleLines=doc.splitTextToSize(ep.titre||'Épreuve',pw-2*margin);
+    titleLines.forEach(function(l){doc.text(l,pw/2,y,{align:'center'});y+=7;});
+    y+=2;
+    // Description
+    if(ep.desc){
+      doc.setFont(undefined,'italic');doc.setFontSize(10);doc.setTextColor(107,122,153);
+      var descLines=doc.splitTextToSize(ep.desc,pw-2*margin);
+      descLines.forEach(function(l){doc.text(l,pw/2,y,{align:'center'});y+=5;});
+    }
+    // Séparateur
+    y+=4;doc.setDrawColor(20,37,84);doc.setLineWidth(0.5);doc.line(margin,y,pw-margin,y);y+=8;
+    // Contenu
+    doc.setFont(undefined,'normal');doc.setFontSize(11);doc.setTextColor(31,41,55);
+    var contentText=ep.apercu||ep.extrait||ep.desc||'(Aucun contenu détaillé)';
+    var contentLines=doc.splitTextToSize(contentText,pw-2*margin);
+    contentLines.forEach(function(line){
+      // Nouvelle page si besoin
+      if(y>ph-margin-10){doc.addPage();y=margin;}
+      // Détecter les titres de section pour les surligner
+      if(/^(EXERCICE|Exercice |PARTIE|Partie |Section|SUJET|Sujet|DOSSIER|Dossier|QUESTIONS|DICTÉE|PRÉPARATION)/.test(line)){
+        doc.setFillColor(20,37,84);
+        doc.rect(margin-2,y-4,pw-2*margin+4,7,'F');
+        doc.setTextColor(255,201,60);doc.setFont(undefined,'bold');
+        doc.text(line,margin,y+1);
+        doc.setTextColor(31,41,55);doc.setFont(undefined,'normal');
+        y+=8;
+      } else {
+        doc.text(line,margin,y);
+        y+=5.5;
+      }
+    });
+    // Pied de page sur toutes les pages
+    var totalPages=doc.internal.getNumberOfPages();
+    for(var p=1;p<=totalPages;p++){
+      doc.setPage(p);
+      doc.setFontSize(8);doc.setTextColor(150,160,180);doc.setFont(undefined,'italic');
+      doc.text('© '+new Date().getFullYear()+' '+(school.nom||'VÉRITAS Academy')+' — Usage pédagogique uniquement',pw/2,ph-6,{align:'center'});
+      doc.text('Page '+p+'/'+totalPages,pw-margin,ph-6,{align:'right'});
+      doc.text(today(),margin,ph-6);
+    }
+    var safeName=(ep.titre||'epreuve').replace(/[^a-zA-Z0-9_-]+/g,'_').substring(0,60);
+    doc.save(safeName+'_VERITAS.pdf');
+    toast('✅ PDF téléchargé : '+safeName+'.pdf');
+  }catch(e){
+    console.error('[PDF] erreur:',e);
+    toast('❌ Erreur génération PDF : '+e.message,'err');
+  }
 }
 
 // ── SIMULATEUR D'EXAMEN ───────────────────────────────────────────
