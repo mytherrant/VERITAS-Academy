@@ -13461,7 +13461,7 @@ function pgSettings(){
         <button class="btn bvi" onclick="importAllData()">📥 Importer JSON</button>
         <button class="btn" style="background:#059669;color:#fff" onclick="exportSQL()">🗄️ Exporter SQL</button>
       </div>
-      <div class="fl2 fw g8 mt12 pt12" style="border-top:var(--br)"><div class="bold s mb8">🛠️ Gestion avancee</div><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()">📢 Defilant</button><button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()">🎬 Video</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()">📦 Packs</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()">📅 Calendrier</button><button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()">🤝 Partenaires</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()">🎮 Jeux</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Labos</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évals</button><button class="btn sm" style="background:#142554;color:#fff;border-radius:10px" onclick="re();goTo('visitor_accounts')">👥 Comptes</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button><button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mPayAttempts()">💰 Paiements</button> <button class="btn sm" style="background:#25D366;color:#fff;border-radius:10px;margin:2px" onclick="mWAPendingMembers()">ðŸ“² Groupes WA</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageExtraits()">📖 Extraits</button></div>
+      <div class="fl2 fw g8 mt12 pt12" style="border-top:var(--br)"><div class="bold s mb8">🛠️ Gestion avancee</div><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()">📢 Defilant</button><button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()">🎬 Video</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()">📦 Packs</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()">📅 Calendrier</button><button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()">🤝 Partenaires</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()">🎮 Jeux</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Labos</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évals</button><button class="btn sm" style="background:#142554;color:#fff;border-radius:10px" onclick="re();goTo('visitor_accounts')">👥 Comptes</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button><button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mPayAttempts()">💰 Paiements</button> <button class="btn sm" style="background:#25D366;color:#fff;border-radius:10px;margin:2px" onclick="mWAPendingMembers()">📲 Groupes WA</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageExtraits()">📖 Extraits</button></div>
       <div class="ib ibi mt14 mb0"><span>💡</span><span>Pour synchroniser via <strong>intranet</strong>: exportez les données, partagez via WiFi, importez sur l\'autre appareil.</span></div>
     </div>
     <div class="card mt16">
@@ -21887,29 +21887,29 @@ function _initLaboSim(lv){
 
   // ── SIMULATION GÉNÉRIQUE (autres labos) ──
   
-  // â”€â”€ lv8 : DÃ©colonisation en Afrique â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ lv8 : Décolonisation en Afrique â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv8"){
     var events=[
       {y:1956,pays:"Maroc / Tunisie",col:"France",c:"#EAB308"},
       {y:1957,pays:"Ghana",col:"Grande-Bretagne",c:"#22C55E"},
-      {y:1958,pays:"GuinÃ©e",col:"France",c:"#EAB308"},
-      {y:1960,pays:"Cameroun, SÃ©nÃ©gal, Mali, CÃ´te d'Ivoireâ€¦",col:"France",c:"#EAB308"},
+      {y:1958,pays:"Guinée",col:"France",c:"#EAB308"},
+      {y:1960,pays:"Cameroun, Sénégal, Mali, Côte d'Ivoire…",col:"France",c:"#EAB308"},
       {y:1960,pays:"Nigeria, Kenya, Somalie",col:"Grande-Bretagne",c:"#22C55E"},
-      {y:1962,pays:"AlgÃ©rie, Rwanda, Burundi",col:"France / Belgique",c:"#EAB308"},
+      {y:1962,pays:"Algérie, Rwanda, Burundi",col:"France / Belgique",c:"#EAB308"},
       {y:1964,pays:"Malawi, Zambie",col:"Grande-Bretagne",c:"#22C55E"},
-      {y:1965,pays:"Gambie, RhodÃ©sie (UDI)",col:"Grande-Bretagne",c:"#22C55E"},
-      {y:1968,pays:"GuinÃ©e Ã©quatoriale, Swaziland",col:"Espagne / GB",c:"#F97316"},
+      {y:1965,pays:"Gambie, Rhodésie (UDI)",col:"Grande-Bretagne",c:"#22C55E"},
+      {y:1968,pays:"Guinée équatoriale, Swaziland",col:"Espagne / GB",c:"#F97316"},
       {y:1975,pays:"Mozambique, Angola, Comores",col:"Portugal",c:"#EF4444"},
       {y:1980,pays:"Zimbabwe",col:"Grande-Bretagne",c:"#22C55E"},
       {y:1990,pays:"Namibie",col:"Afrique du Sud / ONU",c:"#8B5CF6"},
-      {y:1993,pays:"Ã‰rythrÃ©e",col:"Ã‰thiopie",c:"#EC4899"},
+      {y:1993,pays:"Érythrée",col:"Éthiopie",c:"#EC4899"},
     ];
     var selected=0;
     window._sim.params={sel:0};
     window._sim.controlsDef=function(){
       var p=window._sim.params;
-      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:8px'>Ã‰vÃ©nement: <input type='range' min='0' max='"+(events.length-1)+"' value='"+p.sel+"' oninput='window._sim.params.sel=+this.value' style='width:130px'></label>"
-        +"<span style='font-size:11px;color:#142554'>"+events[p.sel].y+" â€” "+events[p.sel].pays+"</span>";
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:8px'>Événement: <input type='range' min='0' max='"+(events.length-1)+"' value='"+p.sel+"' oninput='window._sim.params.sel=+this.value' style='width:130px'></label>"
+        +"<span style='font-size:11px;color:#142554'>"+events[p.sel].y+" — "+events[p.sel].pays+"</span>";
     };
     _simUpdateControls();
     window._sim._draw=function(){
@@ -21951,24 +21951,24 @@ function _initLaboSim(lv){
       var ev=events[sel];
       ctx.fillStyle='rgba(255,255,255,.07)'; if(typeof ctx.roundRect==='function') ctx.roundRect(12,10,W-24,72,12); else ctx.rect(12,10,W-24,72); ctx.fill();
       ctx.fillStyle=ev.c; ctx.font='bold 16px Montserrat'; ctx.textAlign='left';
-      ctx.fillText(ev.y+' â€” IndÃ©pendance',24,36);
+      ctx.fillText(ev.y+' — Indépendance',24,36);
       ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='13px Georgia';
       ctx.fillText(ev.pays,24,56);
       ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='11px Georgia';
       ctx.fillText('Ancienne puissance : '+ev.col,24,74);
-      setVal('<span>ðŸ“… '+ev.y+'</span><span>ðŸŒ '+ev.pays+'</span><span>ðŸ´ '+ev.col+'</span>');
+      setVal('<span>📅 '+ev.y+'</span><span>🌍 '+ev.pays+'</span><span>ðŸ´ '+ev.col+'</span>');
       _simUpdateControls();
     };
 
-  // â”€â”€ lv9 : Optique & Propagation de la LumiÃ¨re â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ lv9 : Optique & Propagation de la Lumière â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv9"){
     var P=window._sim.params={angle:45,n1:1.0,n2:1.5};
     window._sim.defaults={angle:45,n1:1.0,n2:1.5};
     window._sim.controlsDef=function(){
       var p=window._sim.params;
       var sinT2=p.n1/p.n2*Math.sin(p.angle*Math.PI/180);
-      var refr=sinT2<=1?'Î¸r = '+(Math.asin(sinT2)*180/Math.PI).toFixed(1)+'Â°':'RÃ©flexion totale';
-      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Î¸ incident: <input type='range' min='5' max='89' value='"+p.angle+"' oninput='window._sim.params.angle=+this.value' style='width:100px'><span>"+p.angle+"Â°</span></label>"
+      var refr=sinT2<=1?'θr = '+(Math.asin(sinT2)*180/Math.PI).toFixed(1)+'°':'Réflexion totale';
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>θ incident: <input type='range' min='5' max='89' value='"+p.angle+"' oninput='window._sim.params.angle=+this.value' style='width:100px'><span>"+p.angle+"°</span></label>"
         +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>n2 (milieu): <input type='range' min='1.0' max='2.5' step='0.05' value='"+p.n2+"' oninput='window._sim.params.n2=+this.value' style='width:100px'><span>"+p.n2+"</span></label>"
         +"<span style='font-size:11px;color:#7C3AED;font-weight:700'>"+refr+"</span>";
     };
@@ -21986,8 +21986,8 @@ function _initLaboSim(lv){
       ctx.beginPath(); ctx.moveTo(cx,iy-120); ctx.lineTo(cx,iy+120); ctx.stroke(); ctx.setLineDash([]);
       // Labels
       ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='11px Fira Code'; ctx.textAlign='left';
-      ctx.fillText('nâ‚ = '+p.n1+' (air)',10,iy-12);
-      ctx.fillText('nâ‚‚ = '+p.n2+' (verre)',10,iy+24);
+      ctx.fillText('n₁ = '+p.n1+' (air)',10,iy-12);
+      ctx.fillText('n₁‚ = '+p.n2+' (verre)',10,iy+24);
       // Incident ray
       var ang=p.angle*Math.PI/180;
       var ix=cx-Math.sin(ang)*150, iy1=iy-Math.cos(ang)*150;
@@ -22013,30 +22013,30 @@ function _initLaboSim(lv){
         ctx.strokeStyle='rgba(252,211,77,.4)'; ctx.lineWidth=1;
         ctx.beginPath(); ctx.arc(cx,iy,50,-(Math.PI/2+ang),-Math.PI/2); ctx.stroke();
         ctx.fillStyle='#FFC93C'; ctx.font='11px Fira Code'; ctx.textAlign='center';
-        ctx.fillText(p.angle+'Â°',cx-30,iy-38);
+        ctx.fillText(p.angle+'°',cx-30,iy-38);
         ctx.strokeStyle='rgba(52,211,153,.4)';
         ctx.beginPath(); ctx.arc(cx,iy,50,Math.PI/2,Math.PI/2+t2); ctx.stroke();
         ctx.fillStyle='#34D399';
-        ctx.fillText((t2*180/Math.PI).toFixed(1)+'Â°',cx+32,iy+44);
-        setVal('<span>âš¡ Î¸i='+p.angle+'Â°</span><span>ðŸ”µ Î¸r='+p.angle+'Â°</span><span>ðŸŸ¢ Î¸t='+(t2*180/Math.PI).toFixed(1)+'Â°</span><span>nâ‚sinÎ¸i=nâ‚‚sinÎ¸t</span>');
+        ctx.fillText((t2*180/Math.PI).toFixed(1)+'°',cx+32,iy+44);
+        setVal('<span>⚡ θi='+p.angle+'°</span><span>🔵 θr='+p.angle+'°</span><span>🟢 θt='+(t2*180/Math.PI).toFixed(1)+'°</span><span>n₁sinθi=n₁‚sinθt</span>');
       } else {
         ctx.fillStyle='#EF4444'; ctx.font='bold 13px Montserrat'; ctx.textAlign='center';
-        ctx.fillText('âš ï¸ RÃ©flexion totale interne',W/2,iy+50);
-        setVal('<span>âš ï¸ Angle limite dÃ©passÃ© â€” rÃ©flexion totale</span>');
+        ctx.fillText('⚠️ Réflexion totale interne',W/2,iy+50);
+        setVal('<span>⚠️ Angle limite dépassé — réflexion totale</span>');
       }
       _simUpdateControls();
     };
 
-  // â”€â”€ lv10 : Thermodynamique & CalorimÃ©trie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ lv10 : Thermodynamique & Calorimétrie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv10"){
     var molecules=[];
     for(var mi=0;mi<30;mi++) molecules.push({x:200+Math.random()*280,y:60+Math.random()*220,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,r:4+Math.random()*3});
     window._sim.params={T:300,Q:0,mc:100}; window._sim.defaults={T:300,Q:0,mc:100};
     window._sim.controlsDef=function(){
       var p=window._sim.params;
-      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>ðŸŒ¡ï¸ TempÃ©rature (K): <input type='range' min='100' max='800' value='"+p.T+"' oninput='window._sim.params.T=+this.value' style='width:100px'><span>"+p.T+"K</span></label>"
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>🌡️ Température (K): <input type='range' min='100' max='800' value='"+p.T+"' oninput='window._sim.params.T=+this.value' style='width:100px'><span>"+p.T+"K</span></label>"
         +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Chaleur Q (J): <input type='range' min='0' max='5000' step='100' value='"+p.Q+"' oninput='window._sim.params.Q=+this.value' style='width:100px'><span>"+p.Q+"J</span></label>"
-        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>MasseÃ—c (J/K): <input type='range' min='10' max='500' step='10' value='"+p.mc+"' oninput='window._sim.params.mc=+this.value' style='width:80px'><span>"+p.mc+"</span></label>";
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Masse×c (J/K): <input type='range' min='10' max='500' step='10' value='"+p.mc+"' oninput='window._sim.params.mc=+this.value' style='width:80px'><span>"+p.mc+"</span></label>";
     };
     _simUpdateControls();
     window._sim._draw=function(){
@@ -22073,25 +22073,25 @@ function _initLaboSim(lv){
       var dT=(p.Q/p.mc).toFixed(1);
       ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(505,50,160,130);
       ctx.fillStyle='#FFC93C'; ctx.font='bold 12px Fira Code'; ctx.textAlign='left';
-      ctx.fillText('Q = mÂ·cÂ·Î”T',515,80); ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='11px Fira Code';
+      ctx.fillText('Q = mÂ·cÂ·ΔT',515,80); ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='11px Fira Code';
       ctx.fillText('T = '+p.T+' K',515,100);
       ctx.fillText('Q = '+p.Q+' J',515,118);
-      ctx.fillText('Î”T = '+dT+' K',515,136);
+      ctx.fillText('ΔT = '+dT+' K',515,136);
       ctx.fillText('T finale = '+(+p.T + +dT).toFixed(0)+' K',515,158);
-      setVal('<span>ðŸŒ¡ï¸ T='+p.T+'K</span><span>Q='+p.Q+'J</span><span>Î”T='+dT+'K</span><span>EcÌ„âˆT</span>');
+      setVal('<span>🌡️ T='+p.T+'K</span><span>Q='+p.Q+'J</span><span>ΔT='+dT+'K</span><span>Ec̄∝T</span>');
     };
 
-  // â”€â”€ lv11 : OxydorÃ©duction & Combustion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ lv11 : Oxydoréduction & Combustion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv11"){
     window._sim.params={reaction:0,step:0};
     var reactions=[
-      {nom:'Zn + CuÂ²âº â†’ ZnÂ²âº + Cu',oxyd:'Zn â†’ ZnÂ²âº + 2eâ»',red:'CuÂ²âº + 2eâ» â†’ Cu',ne:2,col1:'#78716C',col2:'#0EA5E9',prod:'#F97316'},
-      {nom:'Fe + 2HCl â†’ FeClâ‚‚ + Hâ‚‚',oxyd:'Fe â†’ FeÂ²âº + 2eâ»',red:'2Hâº + 2eâ» â†’ Hâ‚‚',ne:2,col1:'#6B7280',col2:'#EF4444',prod:'#A3E635'},
-      {nom:'CHâ‚„ + 2Oâ‚‚ â†’ COâ‚‚ + 2Hâ‚‚O',oxyd:'Combustion',red:'C: -4 â†’ +4',ne:8,col1:'#60A5FA',col2:'#F97316',prod:'#94A3B8'},
+      {nom:'Zn + Cu²âº → Zn²âº + Cu',oxyd:'Zn → Zn²âº + 2eâ»',red:'Cu²âº + 2eâ» → Cu',ne:2,col1:'#78716C',col2:'#0EA5E9',prod:'#F97316'},
+      {nom:'Fe + 2HCl → FeCl₁‚ + H₁‚',oxyd:'Fe → Fe²âº + 2eâ»',red:'2Hâº + 2eâ» → H₁‚',ne:2,col1:'#6B7280',col2:'#EF4444',prod:'#A3E635'},
+      {nom:'CH₁„ + 2O₁‚ → CO₁‚ + 2H₁‚O',oxyd:'Combustion',red:'C: -4 → +4',ne:8,col1:'#60A5FA',col2:'#F97316',prod:'#94A3B8'},
     ];
     window._sim.controlsDef=function(){
       var p=window._sim.params;
-      return "<button onclick='window._sim.params.reaction=(window._sim.params.reaction+1)%3;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>â‡„ Changer rÃ©action</button>"
+      return "<button onclick='window._sim.params.reaction=(window._sim.params.reaction+1)%3;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>⇄ Changer réaction</button>"
         +"<span style='font-size:11px;color:#142554;font-weight:700;margin-left:8px'>"+reactions[p.reaction].nom+"</span>";
     };
     _simUpdateControls();
@@ -22102,7 +22102,7 @@ function _initLaboSim(lv){
       // Two half-cells
       [
         {x:120,label:'Oxydation',eq:rx.oxyd,col:rx.col1},
-        {x:460,label:'RÃ©duction',eq:rx.red,col:rx.col2}
+        {x:460,label:'Réduction',eq:rx.red,col:rx.col2}
       ].forEach(function(cell){
         ctx.strokeStyle=cell.col; ctx.lineWidth=2.5;
         ctx.strokeRect(cell.x-80,60,160,180);
@@ -22142,23 +22142,23 @@ function _initLaboSim(lv){
       ctx.fillText(rx.nom,W/2,H-48);
       ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='11px Georgia';
       ctx.fillText(rx.oxyd+'   |   '+rx.red,W/2,H-28);
-      setVal('<span>âš¡ n(eâ»)='+rx.ne+'</span><span>Ox: '+rx.oxyd+'</span><span>RÃ©d: '+rx.red+'</span>');
+      setVal('<span>⚡ n(eâ»)='+rx.ne+'</span><span>Ox: '+rx.oxyd+'</span><span>Réd: '+rx.red+'</span>');
     };
 
   // â”€â”€ lv12 : Digestion Humaine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv12"){
     var organs=[
-      {n:'Bouche',x:340,y:40,r:22,c:'#F97316',info:'Mastication + amylase salivaire. Amidon â†’ Maltose.'},
-      {n:'Å’sophage',x:340,y:90,r:10,c:'#60A5FA',info:'Transit par pÃ©ristaltisme. ~10 secondes.'},
-      {n:'Estomac',x:320,y:155,r:40,c:'#EF4444',info:'HCl + pepsine. pH=1,5â€“3. ProtÃ©ines â†’ peptides. ~2-4h.'},
-      {n:'Intestin grÃªle',x:290,y:260,r:25,c:'#A3E635',info:'Bile + sucs pancrÃ©atiques. Absorption : 90% nutriments. ~6h.'},
-      {n:'Gros intestin',x:400,y:280,r:20,c:'#F59E0B',info:'Absorption eau. Formation des fÃ¨ces. Microbiote. ~24-48h.'},
-      {n:'Anus',x:450,y:330,r:12,c:'#94A3B8',info:'Ã‰vacuation des dÃ©chets.'},
+      {n:'Bouche',x:340,y:40,r:22,c:'#F97316',info:'Mastication + amylase salivaire. Amidon → Maltose.'},
+      {n:'Œsophage',x:340,y:90,r:10,c:'#60A5FA',info:'Transit par péristaltisme. ~10 secondes.'},
+      {n:'Estomac',x:320,y:155,r:40,c:'#EF4444',info:'HCl + pepsine. pH=1,5–3. Protéines → peptides. ~2-4h.'},
+      {n:'Intestin grêle',x:290,y:260,r:25,c:'#A3E635',info:'Bile + sucs pancréatiques. Absorption : 90% nutriments. ~6h.'},
+      {n:'Gros intestin',x:400,y:280,r:20,c:'#F59E0B',info:'Absorption eau. Formation des fèces. Microbiote. ~24-48h.'},
+      {n:'Anus',x:450,y:330,r:12,c:'#94A3B8',info:'Évacuation des déchets.'},
     ];
     window._sim.params={step:0}; window._sim.defaults={step:0};
     window._sim.controlsDef=function(){
       var p=window._sim.params; var o=organs[p.step%organs.length];
-      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Ã‰tape: <input type='range' min='0' max='"+(organs.length-1)+"' value='"+p.step+"' oninput='window._sim.params.step=+this.value' style='width:120px'></label>"
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Étape: <input type='range' min='0' max='"+(organs.length-1)+"' value='"+p.step+"' oninput='window._sim.params.step=+this.value' style='width:120px'></label>"
         +"<span style='font-size:10px;color:#475882'>"+o.n+": "+o.info+"</span>";
     };
     _simUpdateControls();
@@ -22206,8 +22206,8 @@ function _initLaboSim(lv){
     window._sim.params={fc:60,spo2:98}; window._sim.defaults={fc:60,spo2:98};
     window._sim.controlsDef=function(){
       var p=window._sim.params;
-      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>ðŸ’“ FC (bpm): <input type='range' min='40' max='180' value='"+p.fc+"' oninput='window._sim.params.fc=+this.value' style='width:90px'><span>"+p.fc+"</span></label>"
-        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>ðŸ« SpOâ‚‚ (%): <input type='range' min='80' max='100' value='"+p.spo2+"' oninput='window._sim.params.spo2=+this.value' style='width:90px'><span>"+p.spo2+"%</span></label>";
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>💓 FC (bpm): <input type='range' min='40' max='180' value='"+p.fc+"' oninput='window._sim.params.fc=+this.value' style='width:90px'><span>"+p.fc+"</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>🫁 SpO₁‚ (%): <input type='range' min='80' max='100' value='"+p.spo2+"' oninput='window._sim.params.spo2=+this.value' style='width:90px'><span>"+p.spo2+"%</span></label>";
     };
     _simUpdateControls();
     window._sim._draw=function(){
@@ -22253,7 +22253,7 @@ function _initLaboSim(lv){
         ctx.beginPath(); ctx.ellipse(l[0],l[1],l[2],l[2]*1.4,0,0,Math.PI*2);
         ctx.fill(); ctx.stroke();
         ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='10px Fira Code'; ctx.textAlign='center';
-        ctx.fillText('ðŸ«',l[0],l[1]+4);
+        ctx.fillText('🫁',l[0],l[1]+4);
       });
       // Animated blood cells
       var bPhase=(beat*0.15)%1;
@@ -22274,13 +22274,13 @@ function _initLaboSim(lv){
         if(xi===0)ctx.moveTo(10+xi,ey2); else ctx.lineTo(10+xi,ey2);
       }
       ctx.stroke();
-      setVal('<span>ðŸ’“ '+p.fc+' bpm</span><span>SpOâ‚‚: '+p.spo2+'%</span><span>Q=VESÃ—FC</span>');
+      setVal('<span>💓 '+p.fc+' bpm</span><span>SpO₁‚: '+p.spo2+'%</span><span>Q=VES×FC</span>');
     };
 
-  // â”€â”€ lv14 : GÃ©nÃ©tique & HÃ©rÃ©ditÃ© â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ lv14 : Génétique & Hérédité â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv14"){
     window._sim.params={phase:0,ploidy:2}; window._sim.defaults={phase:0,ploidy:2};
-    var phases=['Prophase I','MÃ©taphase I','Anaphase I','TÃ©lophase I','MÃ©iose II â€” Cellules haploÃ¯des'];
+    var phases=['Prophase I','Métaphase I','Anaphase I','Télophase I','Méiose II — Cellules haploïdes'];
     window._sim.controlsDef=function(){
       var p=window._sim.params;
       return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:8px'>Phase: <input type='range' min='0' max='4' value='"+p.phase+"' oninput='window._sim.params.phase=+this.value' style='width:140px'><span>"+phases[p.phase]+"</span></label>";
@@ -22304,7 +22304,7 @@ function _initLaboSim(lv){
         {dx:10,dy:-10,col:'#3B82F6',pair:ph<2},{dx:30,dy:-10,col:'#3B82F6',pair:ph<2},
       ];
       if(ph<4){
-        drawCell(W/2,H/2-20,100,'2n=4 (diploÃ¯de)',chroms);
+        drawCell(W/2,H/2-20,100,'2n=4 (diploïde)',chroms);
         if(ph===1){
           ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
           ctx.beginPath(); ctx.moveTo(W/2,H/2-120); ctx.lineTo(W/2,H/2+80); ctx.stroke(); ctx.setLineDash([]);
@@ -22329,7 +22329,7 @@ function _initLaboSim(lv){
           ctx.fillText('n=2',ccx,ccy+72);
         }
         ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='12px Georgia'; ctx.textAlign='center';
-        ctx.fillText('4 cellules haploÃ¯des â€” gamÃ¨tes',W/2,H-20);
+        ctx.fillText('4 cellules haploïdes — gamètes',W/2,H-20);
       }
       ctx.fillStyle='#FFC93C'; ctx.font='bold 13px Montserrat'; ctx.textAlign='center';
       ctx.fillText(phases[ph],W/2,25);
@@ -22337,14 +22337,14 @@ function _initLaboSim(lv){
       _simUpdateControls();
     };
 
-  // â”€â”€ lv15 : ProbabilitÃ©s & Statistiques â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ lv15 : Probabilités & Statistiques â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv15"){
     var freq=new Array(13).fill(0); var total=0;
     window._sim.params={ndice:2,running:true}; window._sim.defaults={ndice:2,running:true};
     window._sim.controlsDef=function(){
       var p=window._sim.params;
-      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>DÃ©s: <input type='range' min='1' max='4' value='"+p.ndice+"' oninput='window._sim.params.ndice=+this.value;freq=new Array(13).fill(0);total=0' style='width:80px'><span>"+p.ndice+"</span></label>"
-        +"<button onclick='freq=new Array(13).fill(0);total=0;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer'>ðŸ”„ Reset</button>"
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Dés: <input type='range' min='1' max='4' value='"+p.ndice+"' oninput='window._sim.params.ndice=+this.value;freq=new Array(13).fill(0);total=0' style='width:80px'><span>"+p.ndice+"</span></label>"
+        +"<button onclick='freq=new Array(13).fill(0);total=0;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer'>🔄 Reset</button>"
         +"<span style='font-size:11px;color:#475882'>"+total+" lancers</span>";
     };
     _simUpdateControls();
@@ -22379,13 +22379,13 @@ function _initLaboSim(lv){
       ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5;
       ctx.beginPath(); ctx.moveTo(55,20); ctx.lineTo(55,H-55); ctx.lineTo(W-10,H-55); ctx.stroke();
       ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px Fira Code'; ctx.textAlign='center';
-      ctx.fillText('Somme des '+p.ndice+' dÃ©(s)',W/2,H-10);
-      ctx.fillText(total+' lancers â€” loi normale Ã©merge',W/2,18);
-      setVal('<span>ðŸŽ² '+p.ndice+' dÃ©(s)</span><span>'+total+' lancers</span><span>Courbe en cloche</span>');
+      ctx.fillText('Somme des '+p.ndice+' dé(s)',W/2,H-10);
+      ctx.fillText(total+' lancers — loi normale émerge',W/2,18);
+      setVal('<span>🎲 '+p.ndice+' dé(s)</span><span>'+total+' lancers</span><span>Courbe en cloche</span>');
       _simUpdateControls();
     };
 
-  // â”€â”€ lv16 : Fonctions & DÃ©rivÃ©es â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ lv16 : Fonctions & Dérivées â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv16"){
     window._sim.params={a:1,b:0,c:-2,xtan:0}; window._sim.defaults={a:1,b:0,c:-2,xtan:0};
     window._sim.controlsDef=function(){
@@ -22393,7 +22393,7 @@ function _initLaboSim(lv){
       return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px'>a: <input type='range' min='-3' max='3' step='0.5' value='"+p.a+"' oninput='window._sim.params.a=+this.value' style='width:70px'><span>"+p.a+"</span></label>"
         +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px'>b: <input type='range' min='-5' max='5' step='0.5' value='"+p.b+"' oninput='window._sim.params.b=+this.value' style='width:70px'><span>"+p.b+"</span></label>"
         +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px'>c: <input type='range' min='-5' max='5' step='0.5' value='"+p.c+"' oninput='window._sim.params.c=+this.value' style='width:70px'><span>"+p.c+"</span></label>"
-        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px'>xâ‚€: <input type='range' min='-4' max='4' step='0.1' value='"+p.xtan+"' oninput='window._sim.params.xtan=+this.value' style='width:70px'><span>"+p.xtan+"</span></label>";
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px'>x₁€: <input type='range' min='-4' max='4' step='0.1' value='"+p.xtan+"' oninput='window._sim.params.xtan=+this.value' style='width:70px'><span>"+p.xtan+"</span></label>";
     };
     _simUpdateControls();
     window._sim._draw=function(){
@@ -22434,24 +22434,24 @@ function _initLaboSim(lv){
       // Formula
       ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(10,10,220,65);
       ctx.fillStyle='#60A5FA'; ctx.font='bold 12px Fira Code'; ctx.textAlign='left';
-      ctx.fillText('f(x) = '+p.a+'xÂ² + '+p.b+'x + '+p.c,18,32);
+      ctx.fillText('f(x) = '+p.a+'x² + '+p.b+'x + '+p.c,18,32);
       ctx.fillStyle='#FFC93C'; ctx.font='11px Fira Code';
       ctx.fillText("f'(x) = "+(2*p.a)+'x + '+p.b,18,52);
       ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='10px Fira Code';
       ctx.fillText("f'("+x0+") = "+deriv.toFixed(2),18,68);
-      setVal("<span>f(x)="+p.a+"xÂ²+"+p.b+"x+"+p.c+"</span><span>f'("+x0+")="+deriv.toFixed(2)+"</span><span>f("+x0+")="+y0.toFixed(2)+"</span>");
+      setVal("<span>f(x)="+p.a+"x²+"+p.b+"x+"+p.c+"</span><span>f'("+x0+")="+deriv.toFixed(2)+"</span><span>f("+x0+")="+y0.toFixed(2)+"</span>");
       _simUpdateControls();
     };
 
-  // â”€â”€ lv17 : TrigonomÃ©trie & Cercle Unitaire â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ lv17 : Trigonométrie & Cercle Unitaire â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv17"){
     window._sim.params={angleDeg:45,speed:1}; window._sim.defaults={angleDeg:45,speed:1};
     window._sim.controlsDef=function(){
       var p=window._sim.params;
       var rad=(p.angleDeg*Math.PI/180);
-      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Î¸ (degrÃ©s): <input type='range' min='0' max='360' value='"+p.angleDeg+"' oninput='window._sim.params.angleDeg=+this.value' style='width:120px'><span>"+p.angleDeg+"Â°</span></label>"
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>θ (degrés): <input type='range' min='0' max='360' value='"+p.angleDeg+"' oninput='window._sim.params.angleDeg=+this.value' style='width:120px'><span>"+p.angleDeg+"°</span></label>"
         +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Vitesse: <input type='range' min='0' max='3' step='0.1' value='"+p.speed+"' oninput='window._sim.params.speed=+this.value' style='width:80px'><span>"+p.speed+"</span></label>"
-        +"<span style='font-size:11px;color:#7C3AED;font-weight:700'>sin="+Math.sin(rad).toFixed(3)+" cos="+Math.cos(rad).toFixed(3)+" tan="+(Math.abs(Math.cos(rad))<0.01?'âˆž':Math.tan(rad).toFixed(3))+"</span>";
+        +"<span style='font-size:11px;color:#7C3AED;font-weight:700'>sin="+Math.sin(rad).toFixed(3)+" cos="+Math.cos(rad).toFixed(3)+" tan="+(Math.abs(Math.cos(rad))<0.01?'∝ž':Math.tan(rad).toFixed(3))+"</span>";
     };
     _simUpdateControls();
     window._sim._draw=function(){
@@ -22476,12 +22476,12 @@ function _initLaboSim(lv){
       ctx.strokeStyle='#60A5FA'; ctx.lineWidth=2;
       ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(px,cy); ctx.stroke();
       ctx.fillStyle='#60A5FA'; ctx.font='11px Fira Code'; ctx.textAlign='center';
-      ctx.fillText('cos Î¸',cx+(px-cx)/2,cy+16);
+      ctx.fillText('cos θ',cx+(px-cx)/2,cy+16);
       // sin projection (vertical)
       ctx.strokeStyle='#A3E635'; ctx.lineWidth=2;
       ctx.beginPath(); ctx.moveTo(px,cy); ctx.lineTo(px,py); ctx.stroke();
       ctx.fillStyle='#A3E635'; ctx.textAlign='left';
-      ctx.fillText('sin Î¸',px+5,cy-(py-cy)/2);
+      ctx.fillText('sin θ',px+5,cy-(py-cy)/2);
       // Radius
       ctx.strokeStyle='#FFC93C'; ctx.lineWidth=2.5;
       ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(px,py); ctx.stroke();
@@ -22489,7 +22489,7 @@ function _initLaboSim(lv){
       ctx.strokeStyle='rgba(252,211,77,.5)'; ctx.lineWidth=1.5;
       ctx.beginPath(); ctx.arc(cx,cy,40,0,-ang,ang>Math.PI); ctx.stroke();
       ctx.fillStyle='#FFC93C'; ctx.font='bold 11px Fira Code'; ctx.textAlign='center';
-      ctx.fillText(p.angleDeg+'Â°',cx+55*Math.cos(-ang/2),cy+55*Math.sin(-ang/2));
+      ctx.fillText(p.angleDeg+'°',cx+55*Math.cos(-ang/2),cy+55*Math.sin(-ang/2));
       // Point
       ctx.fillStyle='#EF4444'; ctx.beginPath(); ctx.arc(px,py,7,0,Math.PI*2); ctx.fill();
       // Sin wave on right side
@@ -22511,25 +22511,25 @@ function _initLaboSim(lv){
       ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='9px Fira Code'; ctx.textAlign='center';
       ctx.fillText('1',cx+R+8,cy+4); ctx.fillText('-1',cx-R-14,cy+4);
       ctx.fillText('1',cx+4,cy-R-5); ctx.fillText('-1',cx+4,cy+R+12);
-      setVal('<span>Î¸='+p.angleDeg+'Â°</span><span>sin='+Math.sin(ang).toFixed(3)+'</span><span>cos='+Math.cos(ang).toFixed(3)+'</span>');
+      setVal('<span>θ='+p.angleDeg+'°</span><span>sin='+Math.sin(ang).toFixed(3)+'</span><span>cos='+Math.cos(ang).toFixed(3)+'</span>');
       _simUpdateControls();
     };
 
   // â”€â”€ lv18 : La Mondialisation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv18"){
     var POLES=[
-      {n:'AmÃ©rique N.',x:140,y:130,col:'#3B82F6'},{n:'Europe',x:320,y:110,col:'#FFC93C'},
+      {n:'Amérique N.',x:140,y:130,col:'#3B82F6'},{n:'Europe',x:320,y:110,col:'#FFC93C'},
       {n:'Asie-Pacifique',x:520,y:120,col:'#EF4444'},{n:'Afrique',x:320,y:230,col:'#22C55E'},
-      {n:'AmÃ©rique S.',x:180,y:270,col:'#A78BFA'},{n:'Moyen-Orient',x:400,y:190,col:'#F97316'},
+      {n:'Amérique S.',x:180,y:270,col:'#A78BFA'},{n:'Moyen-Orient',x:400,y:190,col:'#F97316'},
     ];
     var FLOWS=[
       {f:0,t:1,val:7200,label:'commerce'},{f:1,t:2,val:9400,label:'tech'},{f:2,t:0,val:8100,label:'manufact.'},
-      {f:3,t:1,val:3200,label:'matiÃ¨res'},{f:0,t:3,val:1800,label:'aide'},{f:1,t:3,val:2600,label:'invest.'},
-      {f:5,t:1,val:4200,label:'Ã©nergie'},{f:2,t:3,val:5100,label:'export'},{f:4,t:2,val:2300,label:'comm.'},
+      {f:3,t:1,val:3200,label:'matières'},{f:0,t:3,val:1800,label:'aide'},{f:1,t:3,val:2600,label:'invest.'},
+      {f:5,t:1,val:4200,label:'énergie'},{f:2,t:3,val:5100,label:'export'},{f:4,t:2,val:2300,label:'comm.'},
     ];
     window._sim.params={flow:0};
     window._sim.controlsDef=function(){
-      return "<span style='font-size:11px;color:#142554;font-weight:700'>Arcs animÃ©s = flux commerciaux et financiers mondiaux</span>";
+      return "<span style='font-size:11px;color:#142554;font-weight:700'>Arcs animés = flux commerciaux et financiers mondiaux</span>";
     };
     _simUpdateControls();
     window._sim._draw=function(){
@@ -22568,8 +22568,8 @@ function _initLaboSim(lv){
       ctx.fillStyle='#FFC93C'; ctx.font='bold 11px Montserrat'; ctx.textAlign='center';
       ctx.fillText('Triade (Am.N. / Europe / Asie) = 75% du PIB mondial',W/2,H-35);
       ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px Georgia';
-      ctx.fillText('FMI â€¢ OMC â€¢ ONU â€¢ multinationales â€¢ dÃ©localisation â€¢ dette',W/2,H-18);
-      setVal('<span>ðŸŒ 3 pÃ´les de la Triade</span><span>Flux commerce, capital, migr.</span>');
+      ctx.fillText('FMI • OMC • ONU • multinationales • délocalisation • dette',W/2,H-18);
+      setVal('<span>🌍 3 pôles de la Triade</span><span>Flux commerce, capital, migr.</span>');
     };
 
   // â”€â”€ lv19 : Algorithmes & Programmation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -22581,9 +22581,9 @@ function _initLaboSim(lv){
     window._sim.controlsDef=function(){
       var p=window._sim.params;
       return "<button onclick=\"window._sim.params.algo='bubble';resetArr()\" style='background:"+(p.algo==='bubble'?'#142554':'#E8EEFF')+";color:"+(p.algo==='bubble'?'#FFC93C':'#142554')+";border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer'>Tri Bulles</button>"
-        +"<button onclick=\"window._sim.params.algo='select';resetArr()\" style='background:"+(p.algo==='select'?'#7C3AED':'#E8EEFF')+";color:"+(p.algo==='select'?'#fff':'#142554')+";border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px'>Tri SÃ©lection</button>"
-        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px;margin-left:8px'>Vitesse: <input type='range' min='0.5' max='5' step='0.5' value='"+p.speed+"' oninput='window._sim.params.speed=+this.value' style='width:70px'><span>Ã—"+p.speed+"</span></label>"
-        +"<button onclick='resetArr()' style='background:#EF4444;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px'>ðŸ”€ MÃ©langer</button>";
+        +"<button onclick=\"window._sim.params.algo='select';resetArr()\" style='background:"+(p.algo==='select'?'#7C3AED':'#E8EEFF')+";color:"+(p.algo==='select'?'#fff':'#142554')+";border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px'>Tri Sélection</button>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px;margin-left:8px'>Vitesse: <input type='range' min='0.5' max='5' step='0.5' value='"+p.speed+"' oninput='window._sim.params.speed=+this.value' style='width:70px'><span>×"+p.speed+"</span></label>"
+        +"<button onclick='resetArr()' style='background:#EF4444;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px'>🔀 Mélanger</button>";
     };
     _simUpdateControls();
     var lastStep=0;
@@ -22619,19 +22619,19 @@ function _initLaboSim(lv){
       // Status
       ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(10,10,W-20,35);
       ctx.fillStyle='#FFC93C'; ctx.font='bold 12px Montserrat'; ctx.textAlign='center';
-      ctx.fillText(sorted?'âœ… Tableau triÃ©!':(p.algo==='bubble'?'Tri Ã  bulles':'Tri par sÃ©lection')+' â€” Ã‰tape '+sortStep,W/2,32);
-      setVal('<span>'+(sorted?'TerminÃ©':'En cours')+'</span><span>Ã‰tape: '+sortStep+'</span><span>O(nÂ²)</span>');
+      ctx.fillText(sorted?'âœ… Tableau trié!':(p.algo==='bubble'?'Tri à bulles':'Tri par sélection')+' — Étape '+sortStep,W/2,32);
+      setVal('<span>'+(sorted?'Terminé':'En cours')+'</span><span>Étape: '+sortStep+'</span><span>O(n²)</span>');
       _simUpdateControls();
     };
 
-  // â”€â”€ lv20 : Conjugaison & Grammaire FranÃ§aise â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ lv20 : Conjugaison & Grammaire Française â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv20"){
     var verbs=[
       {inf:'aimer',gr:1,temps:{
         present:['aime','aimes','aime','aimons','aimez','aiment'],
         imparfait:['aimais','aimais','aimait','aimions','aimiez','aimaient'],
         futur:['aimerai','aimeras','aimera','aimerons','aimerez','aimeront'],
-        passe_c:['ai aimÃ©','as aimÃ©','a aimÃ©','avons aimÃ©','avez aimÃ©','ont aimÃ©'],
+        passe_c:['ai aimé','as aimé','a aimé','avons aimé','avez aimé','ont aimé'],
       }},
       {inf:'finir',gr:2,temps:{
         present:['finis','finis','finit','finissons','finissez','finissent'],
@@ -22639,11 +22639,11 @@ function _initLaboSim(lv){
         futur:['finirai','finiras','finira','finirons','finirez','finiront'],
         passe_c:['ai fini','as fini','a fini','avons fini','avez fini','ont fini'],
       }},
-      {inf:'Ãªtre',gr:3,temps:{
-        present:['suis','es','est','sommes','Ãªtes','sont'],
-        imparfait:['Ã©tais','Ã©tais','Ã©tait','Ã©tions','Ã©tiez','Ã©taient'],
+      {inf:'être',gr:3,temps:{
+        present:['suis','es','est','sommes','êtes','sont'],
+        imparfait:['étais','étais','était','étions','étiez','étaient'],
         futur:['serai','seras','sera','serons','serez','seront'],
-        passe_c:['ai Ã©tÃ©','as Ã©tÃ©','a Ã©tÃ©','avons Ã©tÃ©','avez Ã©tÃ©','ont Ã©tÃ©'],
+        passe_c:['ai été','as été','a été','avons été','avez été','ont été'],
       }},
       {inf:'avoir',gr:3,temps:{
         present:['ai','as','a','avons','avez','ont'],
@@ -22655,11 +22655,11 @@ function _initLaboSim(lv){
         present:['vais','vas','va','allons','allez','vont'],
         imparfait:['allais','allais','allait','allions','alliez','allaient'],
         futur:['irai','iras','ira','irons','irez','iront'],
-        passe_c:['suis allÃ©','es allÃ©','est allÃ©','sommes allÃ©s','Ãªtes allÃ©s','sont allÃ©s'],
+        passe_c:['suis allé','es allé','est allé','sommes allés','êtes allés','sont allés'],
       }},
     ];
     var TEMPS_KEYS=['present','imparfait','futur','passe_c'];
-    var TEMPS_LABELS={'present':'PrÃ©sent','imparfait':'Imparfait','futur':'Futur simple','passe_c':'PassÃ© composÃ©'};
+    var TEMPS_LABELS={'present':'Présent','imparfait':'Imparfait','futur':'Futur simple','passe_c':'Passé composé'};
     var PRONOMS=['je','tu','il/elle','nous','vous','ils/elles'];
     window._sim.params={verb:0,temps:'present'}; window._sim.defaults={verb:0,temps:'present'};
     window._sim.controlsDef=function(){
@@ -22684,9 +22684,9 @@ function _initLaboSim(lv){
       ctx.fillStyle='#FFC93C'; ctx.font='bold 24px Libre Baskerville,Georgia,serif'; ctx.textAlign='center';
       ctx.fillText(vb.inf.toUpperCase(),W/2,72);
       ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='12px Montserrat';
-      ctx.fillText('Groupe '+vb.gr+' â€” '+TEMPS_LABELS[p.temps],W/2,96);
+      ctx.fillText('Groupe '+vb.gr+' — '+TEMPS_LABELS[p.temps],W/2,96);
       // Table
-      var cols=[[60,'Pronom'],[W/2+20,'Forme conjuguÃ©e']];
+      var cols=[[60,'Pronom'],[W/2+20,'Forme conjuguée']];
       var rowH=36, startY=120;
       // Header
       ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(30,startY,W-60,rowH);
@@ -22719,21 +22719,87 @@ function _initLaboSim(lv){
       _simUpdateControls();
     };
 
-  // â”€â”€ FALLBACK GÃ‰NÃ‰RIQUE (labo futur) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── FALLBACK GÉNÉRIQUE AMÉLIORÉ (slideshow des étapes d'expérience) ────
   } else {
-    window._sim.controlsDef=function(){return "<span style='font-size:11px;color:#6B7A99'>Simulation en dÃ©veloppement â€” thÃ©orie et quiz disponibles</span>";};
+    window._sim.params={stepIdx:0,autoPlay:true};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      var totalSteps=(lv.experience||[]).length;
+      return "<button onclick='window._sim.params.stepIdx=Math.max(0,window._sim.params.stepIdx-1);window._sim.params.autoPlay=false;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>← Étape précédente</button>"
+        +"<button onclick='window._sim.params.autoPlay=!window._sim.params.autoPlay' style='background:#7C3AED;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>"+(p.autoPlay?'⏸ Pause':'▶ Auto')+"</button>"
+        +"<button onclick='window._sim.params.stepIdx=Math.min("+(totalSteps-1)+",window._sim.params.stepIdx+1);window._sim.params.autoPlay=false;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>Étape suivante →</button>"
+        +"<span style='font-size:11px;color:#142554;font-weight:700;margin-left:8px'>Étape "+(p.stepIdx+1)+"/"+totalSteps+"</span>";
+    };
     _simUpdateControls();
     window._sim._draw=function(){
       var t=window._sim.t; ctx.clearRect(0,0,W,H);
-      ctx.fillStyle='rgba(255,255,255,.02)';
-      for(var i=0;i<40;i++){var px=(Math.sin(t*0.3+i*7)*0.5+0.5)*W;var py=(Math.cos(t*0.2+i*5)*0.5+0.5)*H;ctx.beginPath();ctx.arc(px,py,2+Math.sin(t+i)*1.5,0,Math.PI*2);ctx.fill();}
-      ctx.fillStyle='rgba(255,255,255,.45)'; ctx.font='bold 16px Montserrat'; ctx.textAlign='center';
-      ctx.fillText(lv.ico+' '+lv.titre,W/2,H/2-16);
-      ctx.fillStyle='rgba(255,199,60,.6)'; ctx.font='12px Georgia';
-      ctx.fillText(lv.matiere+' â€¢ '+lv.classe,W/2,H/2+12);
-      ctx.fillStyle='rgba(255,255,255,.25)'; ctx.font='11px Georgia';
-      ctx.fillText('Utilisez les onglets ThÃ©orie, Quiz et Notes',W/2,H/2+38);
-      setVal('<span>'+lv.ico+' '+lv.matiere+'</span><span>'+lv.classe+'</span>');
+      var p=window._sim.params;
+      var steps=lv.experience||[];
+      var totalSteps=steps.length;
+      // Auto-play : changer d'étape toutes les 6 secondes
+      if(p.autoPlay && t>0 && t%6 < 0.05 && totalSteps>1){
+        p.stepIdx=(p.stepIdx+1) % totalSteps;
+        _simUpdateControls();
+      }
+      // Fond animé : particules colorées
+      var col1={r:20,g:37,b:84},col2={r:124,g:58,b:237};
+      var bg=ctx.createLinearGradient(0,0,W,H);
+      bg.addColorStop(0,'rgba(20,37,84,.95)');bg.addColorStop(1,'rgba(15,23,42,.95)');
+      ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+      // Particules dorées en arrière-plan
+      for(var i=0;i<25;i++){
+        var px=(Math.sin(t*0.4+i*7.3)*0.5+0.5)*W;
+        var py=(Math.cos(t*0.3+i*5.1)*0.5+0.5)*H;
+        var sz=1.5+Math.sin(t*1.5+i)*1.2;
+        ctx.fillStyle='rgba(255,201,60,'+(0.15+Math.sin(t+i*0.7)*0.1)+')';
+        ctx.beginPath();ctx.arc(px,py,sz,0,Math.PI*2);ctx.fill();
+      }
+      // Titre du lab en haut
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(255,201,60,.95)';
+      ctx.font='bold 17px Montserrat,sans-serif';
+      ctx.fillText(lv.ico+' '+lv.titre,W/2,28);
+      ctx.fillStyle='rgba(255,255,255,.6)';
+      ctx.font='11px Georgia,serif';
+      ctx.fillText(lv.matiere+' • '+lv.classe,W/2,44);
+      // Étape courante affichée comme un encadré
+      var step=steps[p.stepIdx]||'';
+      // Boîte centrale
+      var boxX=40,boxY=64,boxW=W-80,boxH=H-90;
+      var grad=ctx.createLinearGradient(boxX,boxY,boxX+boxW,boxY+boxH);
+      grad.addColorStop(0,'rgba(255,255,255,.06)');grad.addColorStop(1,'rgba(255,201,60,.08)');
+      ctx.fillStyle=grad;
+      // Roundrect manuel
+      var r=14;
+      ctx.beginPath();
+      ctx.moveTo(boxX+r,boxY);ctx.lineTo(boxX+boxW-r,boxY);ctx.quadraticCurveTo(boxX+boxW,boxY,boxX+boxW,boxY+r);
+      ctx.lineTo(boxX+boxW,boxY+boxH-r);ctx.quadraticCurveTo(boxX+boxW,boxY+boxH,boxX+boxW-r,boxY+boxH);
+      ctx.lineTo(boxX+r,boxY+boxH);ctx.quadraticCurveTo(boxX,boxY+boxH,boxX,boxY+boxH-r);
+      ctx.lineTo(boxX,boxY+r);ctx.quadraticCurveTo(boxX,boxY,boxX+r,boxY);
+      ctx.closePath();ctx.fill();
+      ctx.strokeStyle='rgba(255,201,60,.4)';ctx.lineWidth=1.5;ctx.stroke();
+      // Texte de l'étape avec wrap
+      ctx.fillStyle='#FFC93C';ctx.font='bold 13px Montserrat,sans-serif';ctx.textAlign='left';
+      ctx.fillText('ÉTAPE '+(p.stepIdx+1)+'/'+totalSteps,boxX+18,boxY+24);
+      // Wrap du contenu
+      ctx.fillStyle='rgba(255,255,255,.92)';ctx.font='12.5px Georgia,serif';
+      var words=String(step).split(' '),line='',lines=[],maxW=boxW-36;
+      words.forEach(function(w){
+        var test=(line?line+' ':'')+w;
+        if(ctx.measureText(test).width>maxW && line){lines.push(line);line=w;}
+        else line=test;
+      });
+      if(line)lines.push(line);
+      lines.slice(0,12).forEach(function(l,li){
+        ctx.fillText(l,boxX+18,boxY+50+li*18);
+      });
+      // Progression
+      var pct=totalSteps>1?(p.stepIdx/(totalSteps-1)):1;
+      ctx.fillStyle='rgba(255,255,255,.15)';
+      ctx.fillRect(boxX,boxY+boxH-6,boxW,3);
+      ctx.fillStyle='rgba(255,201,60,.9)';
+      ctx.fillRect(boxX,boxY+boxH-6,boxW*pct,3);
+      setVal('<span>📍 Étape '+(p.stepIdx+1)+'/'+totalSteps+'</span><span>'+lv.matiere+'</span><span>'+(p.autoPlay?'▶ Auto-play':'⏸ Manuel')+'</span>');
     };
   }
 
@@ -24669,9 +24735,9 @@ function doRegister(){
     dateInscription:new Date().toLocaleDateString("fr-FR"),lastLogin:today()};
   DB.visitorAccounts.push(acc);save();
   // == Notification admin - nouvelle inscription ==
-  autoNotify('ðŸ†• Nouvelle inscription : '+pre+' '+nom,
-    'Classe : '+acc.cls+' | TÃ©l/WA : '+tel+' | Utilisateur : '+user+
-    ' | Inscrit le '+acc.dateInscription+'. Validez son accÃ¨s au groupe depuis Gestion â†’ Groupes WhatsApp.',
+  autoNotify('🆕 Nouvelle inscription : '+pre+' '+nom,
+    'Classe : '+acc.cls+' | Tél/WA : '+tel+' | Utilisateur : '+user+
+    ' | Inscrit le '+acc.dateInscription+'. Validez son accès au groupe depuis Gestion → Groupes WhatsApp.',
     'admin');
   _notifyAdminNewMember(acc);
   SES={id:acc.id,nom:nom,pre:pre,mat:user,cls:acc.cls,tel:tel,
@@ -27730,17 +27796,17 @@ function _notifyAdminNewMember(acc){
   if(!window.VERITAS_PAYMENTS) return;
   var adminWA = (window.VERITAS_PAYMENTS.whatsapp||'').replace(/[\s\-]/g,'');
   if(!adminWA) return;
-  var msg = 'ðŸ”” *NOUVELLE INSCRIPTION â€“ Centre VÃ‰RITAS*\n\n'
-    + 'ðŸ‘¤ *Nom :* ' + acc.pre + ' ' + acc.nom + '\n'
-    + 'ðŸ“š *Classe/Niveau :* ' + (acc.cls||'Non prÃ©cisÃ©') + '\n'
-    + 'ðŸ“ž *WhatsApp :* ' + (acc.tel||'â€”') + '\n'
-    + 'ðŸ“§ *Email :* ' + (acc.email||'â€”') + '\n'
-    + 'ðŸ• *Inscrit le :* ' + acc.dateInscription + '\n\n'
-    + 'âœ… Connectez-vous Ã  VÃ‰RITAS â†’ Gestion â†’ Groupes WhatsApp\n'
+  var msg = '🔔 *NOUVELLE INSCRIPTION – Centre VÉRITAS*\n\n'
+    + '👤 *Nom :* ' + acc.pre + ' ' + acc.nom + '\n'
+    + '📚 *Classe/Niveau :* ' + (acc.cls||'Non précisé') + '\n'
+    + '📞 *WhatsApp :* ' + (acc.tel||'—') + '\n'
+    + '📧 *Email :* ' + (acc.email||'—') + '\n'
+    + '🕐 *Inscrit le :* ' + acc.dateInscription + '\n\n'
+    + 'âœ… Connectez-vous à VÉRITAS → Gestion → Groupes WhatsApp\n'
     + 'pour valider et envoyer l\'invitation de groupe.';
-  // Ouvre WA admin en arriÃ¨re-plan (silencieux pour l'Ã©lÃ¨ve)
+  // Ouvre WA admin en arrière-plan (silencieux pour l'élève)
   var url = 'https://wa.me/' + adminWA.replace('+','') + '?text=' + encodeURIComponent(msg);
-  // On stocke l'URL pour que l'admin puisse la dÃ©clencher manuellement si besoin
+  // On stocke l'URL pour que l'admin puisse la déclencher manuellement si besoin
   if(!DB.whatsappGroupes) DB.whatsappGroupes = [];
   // Marquer le compte comme "en attente d'invitation groupe"
   var vaIdx = (DB.visitorAccounts||[]).findIndex(function(a){ return a.id===acc.id; });
@@ -27748,7 +27814,7 @@ function _notifyAdminNewMember(acc){
   save();
 }
 
-// Envoie une invitation de groupe WA Ã  un apprenant (cÃ´tÃ© admin)
+// Envoie une invitation de groupe WA à un apprenant (côté admin)
 function _sendWAGroupInvite(accId){
   var acc = (DB.visitorAccounts||[]).find(function(a){ return a.id===accId; });
   if(!acc){ toast('Compte introuvable','warn'); return; }
@@ -27850,13 +27916,13 @@ function mWAGroupes(){
         +(g.actif?'Actif':'Inactif')+'</span></td>'
       +'<td style="padding:8px 6px;text-align:center">'
         '<button class="btn sm" style="background:#7C3AED;color:#fff;margin:1px" title="Configurer acces" onclick="_waConfigAccess(\''+g.id+'\')">CFG</button>'
-        +'<button class="btn sm" style="background:#142554;color:#fff;margin:1px" onclick="mEditWAGroupe(\''+g.id+'\')">âœï¸</button>'
-        +'<button class="btn sm" style="background:#8b1a1a;color:#fff;margin:1px" onclick="_delWAGroupe(\''+g.id+'\')">ðŸ—‘</button>'
+        +'<button class="btn sm" style="background:#142554;color:#fff;margin:1px" onclick="mEditWAGroupe(\''+g.id+'\')">âœ️</button>'
+        +'<button class="btn sm" style="background:#8b1a1a;color:#fff;margin:1px" onclick="_delWAGroupe(\''+g.id+'\')">🗑</button>'
       +'</td>'
       +'</tr>';
   }).join('') : '<tr><td colspan="6" style="text-align:center;padding:20px;color:#999">Aucun groupe configure</td></tr>';
 
-  M('ðŸ“² Groupes WhatsApp par classe','Configurez un lien d\'invitation par niveau / classe',
+  M('📲 Groupes WhatsApp par classe','Configurez un lien d\'invitation par niveau / classe',
     '<div style="overflow-x:auto">'
     +'<table style="width:100%;border-collapse:collapse;font-size:.85rem">'
     +'<thead><tr style="background:#f5f7ff;font-size:.78rem;color:#142554">'
@@ -27871,7 +27937,7 @@ function mWAGroupes(){
     +'<h4 style="margin-bottom:10px;font-size:.9rem">âž• Ajouter un groupe</h4>'
     +'<div class="fg">'
       +'<span class="fl">Niveau / Classe</span>'
-      +'<input class="fi" id="wgNiveau" placeholder="ex : Terminale D, 3Ã¨me, tous">'
+      +'<input class="fi" id="wgNiveau" placeholder="ex : Terminale D, 3ème, tous">'
     +'</div>'
     +'<div class="fg">'
       +'<span class="fl">Nom du groupe WA</span>'
@@ -27901,13 +27967,13 @@ function _saveWAGroupe(){
   }
   if(!DB.whatsappGroupes) DB.whatsappGroupes=[];
   DB.whatsappGroupes.push({ id:gid(), niveau:niv, nom:nom, lien:lien, accessMode:(_ge('wgMode')?.value||'libre'), plansRequis:[], actif: _ge('wgActif').value==='1' });
-  save(); cm(); mWAGroupes(); toast('âœ… Groupe enregistrÃ©');
+  save(); cm(); mWAGroupes(); toast('âœ… Groupe enregistré');
 }
 
 function _delWAGroupe(id){
   if(!confirm('Supprimer ce groupe ?')) return;
   DB.whatsappGroupes=(DB.whatsappGroupes||[]).filter(function(g){ return g.id!==id; });
-  save(); cm(); mWAGroupes(); toast('Groupe supprimÃ©');
+  save(); cm(); mWAGroupes(); toast('Groupe supprimé');
 }
 
 function mEditWAGroupe(id){
@@ -27916,7 +27982,7 @@ function mEditWAGroupe(id){
   var _eModes=['libre','paiement','abonnement','manuel'];
   var _eLbls={libre:'Libre',paiement:'Paiement',abonnement:'Abonnement',manuel:'Manuel'};
   var _eModeOpts=_eModes.map(function(m){return '<option value="'+m+'"'+((g.accessMode||'libre')===m?' selected':'')+'>'+_eLbls[m]+'</option>';}).join('');
-  M('âœï¸ Modifier le groupe','',
+  M('âœ️ Modifier le groupe','',
     '<div class="fg"><span class="fl">Niveau</span>'
     +'<input class="fi" id="egNiv" value="'+_esc(g.niveau)+'"></div>'
     +'<div class="fg"><span class="fl">Nom</span>'
@@ -27931,7 +27997,7 @@ function mEditWAGroupe(id){
     +'<option value="0"'+(!g.actif?' selected':'')+'>Non</option>'
     +'</select></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="_updateWAGroupe(\''+id+'\')">ðŸ’¾ Mettre Ã  jour</button>'
+    +'<button class="btn bi" onclick="_updateWAGroupe(\''+id+'\')">💾 Mettre à jour</button>'
   );
 }
 
@@ -27943,7 +28009,7 @@ function _updateWAGroupe(id){
   DB.whatsappGroupes[idx].lien   = (_ge('egLien')?.value||'').trim();
   DB.whatsappGroupes[idx].accessMode = (_ge('egMode')?.value||'libre');
   DB.whatsappGroupes[idx].actif  = _ge('egActif')?.value==='1';
-  save(); cm(); mWAGroupes(); toast('âœ… Groupe mis Ã  jour');
+  save(); cm(); mWAGroupes(); toast('âœ… Groupe mis à jour');
 }
 
 // ── CONTRÔLE D'ACCÈS AUX GROUPES WHATSAPP ───────────────────────────────────
