@@ -10,12 +10,16 @@ on:
     paths:
       - 'VERITAS_v1.2.html'
       - 'VERITAS_v1.1.html'
+      - 'VERITAS_Promo_Video.html'
       - 'index.php'
       - '.htaccess'
       - 'api/**'
       - 'evaluations/**'
       - 'cours/**'
       - 'Logo détouré.png'
+      - 'sitemap.xml'
+      - 'robots.txt'
+      - 'manifest.webmanifest'
 
   # Lancement manuel depuis GitHub → Actions → Run workflow
   workflow_dispatch:
@@ -66,8 +70,20 @@ jobs:
           # .htaccess (sécurité + cache + MIME)
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
 
+          # ── SEO + PWA (sitemap, robots, manifest) ───────────────
+          for f in sitemap.xml robots.txt manifest.webmanifest; do
+            [ -f "$f" ] && cp "$f" deploy/ && echo "  ✓ $f"
+          done
+
+          # ── Vidéo promotionnelle ───────────────────────────────
+          if [ -f VERITAS_Promo_Video.html ]; then
+            cp VERITAS_Promo_Video.html deploy/
+            echo "  ✓ VERITAS_Promo_Video.html"
+          fi
+
           # ── API PHP ─────────────────────────────────────────────
           # config.php = credentials MySQL → NE JAMAIS déployer via CI
+          # payment_config.php = credentials Orange/MTN → NE JAMAIS déployer via CI
           # database_mysql.sql = schéma de référence → NE PAS exposer publiquement
           for f in \
             api/db.php \
@@ -78,7 +94,9 @@ jobs:
             api/upload_file.php \
             api/upload_video.php \
             api/news_proxy.php \
-            api/public_data.php; do
+            api/public_data.php \
+            api/payment_orange.php \
+            api/payment_mtn.php; do
             [ -f "$f" ] && cp "$f" deploy/api/ && echo "  ✓ $f"
           done
 
