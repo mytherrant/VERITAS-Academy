@@ -1,0 +1,90 @@
+{
+  "name": "VÉRITAS Academy — Centre de répétitions Cameroun",
+  "short_name": "VÉRITAS",
+  "description": "Centre de répétitions scolaire à Douala. Cours collège & lycée, préparation BEPC & BAC, e-learning, classes virtuelles.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#142554",
+  "theme_color": "#142554",
+  "lang": "fr-CM",
+  "dir": "ltr",
+  "categories": ["education", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Boutique de manuels",
+      "short_name": "Boutique",
+      "url": "/#boutique",
+      "description": "Acheter des manuels scolaires"
+    },
+    {
+      "name": "E-Learning",
+      "short_name": "Cours",
+      "url": "/#elearning",
+      "description": "Cours en ligne et abonnements"
+    },
+    {
+      "name": "Évaluations",
+      "short_name": "Évals",
+      "url": "/#evaluations",
+      "description": "Évaluations en ligne"
+    },
+    {
+      "name": "Contact WhatsApp",
+      "short_name": "Contact",
+      "url": "https://wa.me/237697637739",
+      "description": "Nous contacter par WhatsApp"
+    }
+  ]
+}

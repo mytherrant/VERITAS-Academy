@@ -1,38 +1,81 @@
-# ═══ VÉRITAS Academy — Configuration LWS (LiteSpeed/Apache) ═══
+# ═══ VÉRITAS Academy — Configuration LWS (LiteSpeed/Apache) v1.2 ═══
+# Sécurité renforcée + SEO + Performance
 
-# Force HTTPS
+# ─────────────────────────────────────────────────────────
+# 1. Redirection HTTPS forcée (anti-MITM)
+# ─────────────────────────────────────────────────────────
 RewriteEngine On
 RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !=https
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Remove www (optional — uncomment if you prefer non-www)
+# Optionnel : www → non-www
 # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 # RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
-# Default document — index.php en premier pour bypasser le cache LiteSpeed
-# index.php sert app.html avec des headers no-cache PHP (plus fiables que .htaccess)
+# index.php sert app.html avec headers no-cache PHP
 DirectoryIndex index.php index.html
 
-# Security headers
+# ─────────────────────────────────────────────────────────
+# 2. Headers de sécurité (renforcés v1.2)
+# ─────────────────────────────────────────────────────────
 <IfModule mod_headers.c>
-  Header set X-Content-Type-Options "nosniff"
-  Header set X-Frame-Options "SAMEORIGIN"
-  Header set X-XSS-Protection "1; mode=block"
-  Header set Referrer-Policy "strict-origin-when-cross-origin"
-  Header set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+  # Force HTTPS pendant 1 an (HSTS)
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+  # Anti-MIME sniffing
+  Header always set X-Content-Type-Options "nosniff"
+
+  # Anti-clickjacking
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  # XSS protection (legacy)
+  Header always set X-XSS-Protection "1; mode=block"
+
+  # Référent
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Permissions (caméra/micro/géoloc bloqués, paiement autorisé)
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(self), interest-cohort=()"
+
+  # Cross-origin embedder/opener
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  Header always set Cross-Origin-Resource-Policy "same-site"
 </IfModule>
 
-# Compression — critical for 1.3 MB single-file app
+# ─────────────────────────────────────────────────────────
+# 3. Bloquer les User-Agents malveillants (scanners, bots)
+# ─────────────────────────────────────────────────────────
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTP_USER_AGENT} (sqlmap|nikto|nessus|acunetix|netsparker|wpscan|fimap|havij|w3af|skipfish|masscan|nmap) [NC]
+  RewriteRule .* - [F,L]
+
+  # Bloquer les patterns d'injection SQL classiques
+  RewriteCond %{QUERY_STRING} (union[\s+]+select|insert[\s+]+into|drop[\s+]+table|update[\s+]+set|delete[\s+]+from) [NC,OR]
+  RewriteCond %{QUERY_STRING} (<script|javascript:|vbscript:|onload=|onerror=|onmouseover=) [NC,OR]
+  RewriteCond %{QUERY_STRING} (\.\./|\.\.\\|%2e%2e) [NC]
+  RewriteRule .* - [F,L]
+
+  # Bloquer accès direct aux fichiers de config sensibles
+  RewriteRule ^(api/payment_config\.php|api/config\.php|api/config_sync\.php)$ - [F,L]
+  RewriteRule ^api/data/_security_log\.txt$ - [F,L]
+  RewriteRule ^api/data/_access_log\.txt$ - [F,L]
+</IfModule>
+
+# ─────────────────────────────────────────────────────────
+# 4. Compression (Gzip / Brotli)
+# ─────────────────────────────────────────────────────────
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json
   AddOutputFilterByType DEFLATE text/xml application/xml application/xhtml+xml
-  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE image/svg+xml application/manifest+json
 </IfModule>
 
-# Cache control
-# HTML = jamais mis en cache (app single-file mise à jour fréquemment)
-# Ressources statiques = cache long (elles ne changent pas)
+# ─────────────────────────────────────────────────────────
+# 5. Cache Control intelligent
+# ─────────────────────────────────────────────────────────
 <IfModule mod_headers.c>
+  # HTML : jamais mis en cache
   <FilesMatch "\.(html|htm)$">
     Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
@@ -41,7 +84,18 @@ DirectoryIndex index.php index.html
     Header set CDN-Cache-Control "no-store"
     Header set X-LiteSpeed-Cache-Control "no-cache"
   </FilesMatch>
+
+  # Assets statiques : cache 1 an
+  <FilesMatch "\.(css|js|woff2|jpg|jpeg|png|gif|webp|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Sitemap/robots : cache 1 jour
+  <FilesMatch "\.(xml|txt)$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
 </IfModule>
+
 <IfModule mod_expires.c>
   ExpiresActive On
   ExpiresByType text/html "access plus 0 seconds"
@@ -49,19 +103,41 @@ DirectoryIndex index.php index.html
   ExpiresByType application/javascript "access plus 1 week"
   ExpiresByType image/png "access plus 1 month"
   ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/webp "access plus 1 month"
   ExpiresByType image/svg+xml "access plus 1 month"
 </IfModule>
 
-# Block access to sensitive files
-<FilesMatch "\.(md|gitignore|htaccess)$">
+# ─────────────────────────────────────────────────────────
+# 6. Bloquer fichiers sensibles (renforcé)
+# ─────────────────────────────────────────────────────────
+<FilesMatch "(^\.|\.env|\.git|\.htaccess|\.htpasswd|\.sql|\.bak|\.swp|\.old|\.log|composer\.|package\.|payment_config\.php|_security_log|_access_log)">
+  Require all denied
+</FilesMatch>
+
+<FilesMatch "\.(md|gitignore|htaccess|htpasswd|sql|bak|log)$">
   Order allow,deny
   Deny from all
 </FilesMatch>
 
-# Custom 404
-ErrorDocument 404 /index.html
+# Désactiver le listing des répertoires
+Options -Indexes
 
-# PHP upload limits for large video files (intro video up to 100 MB)
+# ─────────────────────────────────────────────────────────
+# 7. SEO — pages d'erreur et MIME types
+# ─────────────────────────────────────────────────────────
+ErrorDocument 404 /index.html
+ErrorDocument 403 /index.html
+
+AddType application/manifest+json .webmanifest
+AddType image/webp .webp
+AddType application/font-woff2 .woff2
+AddType video/mp4 .mp4
+AddType video/webm .webm
+AddType video/ogg .ogv .ogg
+
+# ─────────────────────────────────────────────────────────
+# 8. Upload PHP — limites pour vidéos
+# ─────────────────────────────────────────────────────────
 <IfModule mod_php.c>
   php_value upload_max_filesize 100M
   php_value post_max_size 105M
@@ -75,7 +151,11 @@ ErrorDocument 404 /index.html
   php_value max_input_time 300
 </IfModule>
 
-# MIME types for video serving
-AddType video/mp4  .mp4
-AddType video/webm .webm
-AddType video/ogg  .ogv .ogg
+# ─────────────────────────────────────────────────────────
+# 9. Cacher la version Apache / PHP (security through obscurity)
+# ─────────────────────────────────────────────────────────
+ServerSignature Off
+<IfModule mod_headers.c>
+  Header unset X-Powered-By
+  Header unset Server
+</IfModule>

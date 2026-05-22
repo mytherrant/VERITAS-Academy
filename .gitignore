@@ -29,6 +29,11 @@ veritas-backend/
 
 # Credentials serveur — ne jamais versionner
 api/config.php
+api/payment_config.php
+api/data/
+api/data/_security_log.txt
+api/data/_access_log.txt
+api/data/payments/
 
 # Temp scripts
 _integrate.py

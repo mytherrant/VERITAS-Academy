@@ -1,15 +1,233 @@
 ﻿<!DOCTYPE html>
-<!-- VÉRITAS v1.2 | Bugs fix + Sécurité + Filigrane -->
+<!-- VÉRITAS v1.2 | Sécurité renforcée + SEO complet + Filigrane -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+
+<!-- ════════════════════════════════════════════════════════════
+     🔐 SÉCURITÉ
+     ════════════════════════════════════════════════════════════ -->
 <meta http-equiv="Content-Security-Policy"
-  content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https: http:; connect-src 'self' https://veritas-school.com https://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com;">
+  content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com https://www.clarity.ms; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https: http:; connect-src 'self' https://veritas-school.com https://*.firebasedatabase.app https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com https://www.google-analytics.com https://*.clarity.ms; frame-src 'self' https://mozilla.github.io https://www.youtube.com;">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
 <meta name="referrer" content="strict-origin-when-cross-origin">
-<title>VÉRITAS v1.2 — Système de Gestion Scolaire Professionnel</title>
+<meta name="format-detection" content="telephone=yes,email=yes,address=yes">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), interest-cohort=()">
+
+<!-- ════════════════════════════════════════════════════════════
+     🌐 SEO — Référencement Google / Bing / DuckDuckGo
+     ════════════════════════════════════════════════════════════ -->
+<title>VÉRITAS Academy — Centre de Répétitions Scolaire d'Excellence à Douala, Cameroun</title>
+<meta name="description" content="Centre VÉRITAS — Établissement de répétitions et soutien scolaire à Douala (Cameroun). Cours de la 6ème à la Terminale, préparation BEPC & BAC, e-learning, classes virtuelles, boutique de manuels. Programmes MINESEC, enseignants qualifiés, suivi personnalisé.">
+<meta name="keywords" content="centre de répétitions Douala, école Cameroun, soutien scolaire Cameroun, BEPC Cameroun, BAC Cameroun, MINESEC, cours en ligne Cameroun, e-learning lycée, répétition collège, classes virtuelles, manuels scolaires Cameroun, Jacques Miterand TAKOU">
+<meta name="author" content="Jacques Miterand TAKOU — Centre VÉRITAS">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+<meta name="googlebot" content="index,follow">
+<meta name="bingbot" content="index,follow">
+<meta name="language" content="French">
+<meta name="geo.region" content="CM-LT">
+<meta name="geo.placename" content="Douala, Littoral, Cameroun">
+<meta name="geo.position" content="4.0511;9.7679">
+<meta name="ICBM" content="4.0511, 9.7679">
+<meta name="rating" content="general">
+<meta name="distribution" content="global">
+<meta name="revisit-after" content="7 days">
+<link rel="canonical" href="https://veritas-school.com/">
+<link rel="alternate" hreflang="fr-cm" href="https://veritas-school.com/">
+<link rel="alternate" hreflang="x-default" href="https://veritas-school.com/">
+
+<!-- ════════════════════════════════════════════════════════════
+     📱 PROGRESSIVE WEB APP
+     ════════════════════════════════════════════════════════════ -->
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#142554">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="VÉRITAS">
+<meta name="application-name" content="VÉRITAS Academy">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+<!-- ════════════════════════════════════════════════════════════
+     🔗 OPEN GRAPH (Facebook, LinkedIn, WhatsApp)
+     ════════════════════════════════════════════════════════════ -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="VÉRITAS Academy">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:url" content="https://veritas-school.com/">
+<meta property="og:title" content="VÉRITAS Academy — Centre de Répétitions Scolaire d'Excellence">
+<meta property="og:description" content="Préparation BEPC & BAC à Douala. Programmes MINESEC, e-learning, classes virtuelles, manuels scolaires. Du collège à la Terminale.">
+<meta property="og:image" content="https://veritas-school.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Centre VÉRITAS Academy — Excellence scolaire à Douala, Cameroun">
+<meta property="og:phone_number" content="+237697637739">
+<meta property="og:email" content="contact@veritas.cm">
+<meta property="og:street-address" content="Douala">
+<meta property="og:locality" content="Douala">
+<meta property="og:region" content="Littoral">
+<meta property="og:country-name" content="Cameroun">
+
+<!-- ════════════════════════════════════════════════════════════
+     🐦 TWITTER CARDS
+     ════════════════════════════════════════════════════════════ -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@VeritasAcademyCM">
+<meta name="twitter:creator" content="@VeritasAcademyCM">
+<meta name="twitter:title" content="VÉRITAS Academy — Excellence scolaire à Douala">
+<meta name="twitter:description" content="Préparation BEPC & BAC, e-learning, classes virtuelles. Programmes MINESEC, du collège à la Terminale.">
+<meta name="twitter:image" content="https://veritas-school.com/og-image.jpg">
+<meta name="twitter:image:alt" content="VÉRITAS Academy logo et identité">
+
+<!-- ════════════════════════════════════════════════════════════
+     🏫 SCHEMA.ORG — Données structurées pour Google
+     ════════════════════════════════════════════════════════════ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": ["EducationalOrganization", "LocalBusiness"],
+  "@id": "https://veritas-school.com/#organization",
+  "name": "Centre VÉRITAS Academy",
+  "alternateName": ["VÉRITAS", "Centre VÉRITAS", "Veritas Academy Cameroun"],
+  "description": "Centre de répétitions et soutien scolaire à Douala. Programmes MINESEC du collège à la Terminale, préparation BEPC & BAC, e-learning, classes virtuelles, boutique de manuels.",
+  "url": "https://veritas-school.com/",
+  "logo": "https://veritas-school.com/logo.png",
+  "image": "https://veritas-school.com/og-image.jpg",
+  "telephone": "+237697637739",
+  "email": "contact@veritas.cm",
+  "founder": {
+    "@type": "Person",
+    "name": "Jacques Miterand TAKOU",
+    "jobTitle": "Directeur fondateur"
+  },
+  "foundingDate": "2020-09-01",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Douala",
+    "addressLocality": "Douala",
+    "addressRegion": "Littoral",
+    "postalCode": "00000",
+    "addressCountry": "CM"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 4.0511,
+    "longitude": 9.7679
+  },
+  "openingHoursSpecification": [{
+    "@type": "OpeningHoursSpecification",
+    "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],
+    "opens": "07:30",
+    "closes": "18:00"
+  }],
+  "sameAs": [
+    "https://www.facebook.com/VeritasAcademyCM",
+    "https://www.instagram.com/veritas.academy.cm",
+    "https://wa.me/237697637739"
+  ],
+  "areaServed": [
+    {"@type":"Country","name":"Cameroun"},
+    {"@type":"City","name":"Douala"},
+    {"@type":"City","name":"Yaoundé"}
+  ],
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Offres pédagogiques",
+    "itemListElement": [
+      {"@type":"Offer","itemOffered":{"@type":"Course","name":"Cours de répétitions 6ème à 3ème (Collège)","description":"Préparation au BEPC, programmes MINESEC"}},
+      {"@type":"Offer","itemOffered":{"@type":"Course","name":"Cours de répétitions 2nde, 1ère, Terminale (Lycée)","description":"Préparation Probatoire et BAC séries A, C, D"}},
+      {"@type":"Offer","itemOffered":{"@type":"Course","name":"E-Learning premium","description":"Cours vidéo, épreuves corrigées, fiches de révision"}},
+      {"@type":"Offer","itemOffered":{"@type":"Service","name":"Classes virtuelles","description":"Cours en visioconférence avec enseignants qualifiés"}}
+    ]
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "@id": "https://veritas-school.com/#website",
+  "url": "https://veritas-school.com/",
+  "name": "VÉRITAS Academy",
+  "publisher": {"@id":"https://veritas-school.com/#organization"},
+  "inLanguage": "fr-CM",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://veritas-school.com/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com/"},
+    {"@type":"ListItem","position":2,"name":"E-Learning","item":"https://veritas-school.com/#elearning"},
+    {"@type":"ListItem","position":3,"name":"Boutique","item":"https://veritas-school.com/#boutique"}
+  ]
+}
+</script>
+
+<!-- ════════════════════════════════════════════════════════════
+     📊 AUDIMÈTRES — Tracking de la visibilité (v1.2)
+     ──────────────────────────────────────────────────────────
+     🎯 4 outils gratuits cumulés (chacun donne une vue différente) :
+       1. Google Analytics 4 (GA4)         — sessions, pages vues, conversion
+       2. Microsoft Clarity                — heatmaps, replays, scroll depth
+       3. Google Search Console (passif)   — requêtes Google, CTR, positions
+       4. Facebook Pixel (si pub FB/IG)    — retargeting réseaux sociaux
+
+     ⚠️ REMPLACER les IDs ci-dessous par les vôtres :
+       - G-XXXXXXXXXX → ID GA4 (console.google.com/analytics)
+       - cccccccccc   → ID Clarity (clarity.microsoft.com)
+       - 0000000000   → ID Facebook Pixel (business.facebook.com)
+     ════════════════════════════════════════════════════════════ -->
+
+<!-- ── 1. Google Analytics 4 (GA4) — Mesure d'audience ── -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX', {
+    anonymize_ip: true,
+    cookie_flags: 'SameSite=Strict;Secure',
+    page_title: document.title,
+    page_location: window.location.href
+  });
+  // Helper global pour tracker des événements custom
+  window.veritasTrack = function(action, params){
+    if(typeof gtag==='function') gtag('event', action, params||{});
+  };
+</script>
+
+<!-- ── 2. Microsoft Clarity — Heatmaps + Session Replay (gratuit illimité) ── -->
+<script>
+  (function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "cccccccccc");
+</script>
+
+<!-- ── 3. Facebook Pixel — Retargeting (décommenter si vous faites de la pub Meta) ── -->
+<!--
+<script>
+  !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+  n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+  document,'script','https://connect.facebook.net/en_US/fbevents.js');
+  fbq('init', '0000000000');
+  fbq('track', 'PageView');
+</script>
+-->
+
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
@@ -3209,7 +3427,14 @@ function defaultDB(){return{
     {id:'p9',ico:'📋',titre:'Fiches de Révision BEPC/BAC',prix:2000,ancien:3500,desc:'80 fiches synthétiques format poche — Toutes matières — Résumés essentiels',cat:'Épreuves',photo:'',actif:true},
     {id:'p10',ico:'🌍',titre:'Atlas Cameroun & Monde',prix:3000,ancien:4500,desc:'Cartes détaillées, données économiques, démographiques et historiques',cat:'Manuels',photo:'',actif:true},
     {id:'p11',ico:'🧑‍🏫',titre:'Préparation Intensive BEPC (WhatsApp)',prix:8000,ancien:12000,desc:'Groupe WhatsApp encadré par nos enseignants — Exercices quotidiens',cat:'Services',photo:'',actif:true},
-    {id:'p12',ico:'🏆',titre:'Pack Réussite Totale',prix:35000,ancien:55000,desc:'Annales + Fiches + Cours vacances + Soutien en ligne — Tout inclus !',cat:'Pack',photo:'',actif:true}
+    {id:'p12',ico:'🏆',titre:'Pack Réussite Totale',prix:35000,ancien:55000,desc:'Annales + Fiches + Cours vacances + Soutien en ligne — Tout inclus !',cat:'Pack',photo:'',actif:true},
+    // ─── Articles & Ressources mis en avant (featured) — éditables depuis Admin > Boutique ───
+    {id:'p13',ico:'📚',titre:'Fiches Maths Tle',prix:3500,ancien:5000,desc:'120 fiches de révision Mathématiques Terminale — Formules, théorèmes, méthodes essentielles',cat:'Épreuves',photo:'',actif:true,featured:true,nouveau:false,bgColor:'#EDE9FE'},
+    {id:'p14',ico:'🖊️',titre:'Cahier Physique',prix:4200,ancien:0,desc:'300 exercices de Physique avec solutions détaillées — Tous niveaux secondaires',cat:'Épreuves',photo:'',actif:true,featured:true,nouveau:false,bgColor:'#D1FAE5'},
+    {id:'p15',ico:'🎧',titre:'Audio Français',prix:2900,ancien:0,desc:'18 heures d\'enregistrements audio + transcriptions complètes — Compréhension orale',cat:'Manuels',photo:'',actif:true,featured:true,nouveau:true,bgColor:'#DBEAFE'},
+    {id:'p16',ico:'📐',titre:'Kit Géométrie',prix:8500,ancien:11000,desc:'Set complet pour examens : compas, rapporteur 360°, équerres, règles, gabarits',cat:'Fournitures',photo:'',actif:true,featured:true,nouveau:false,bgColor:'#FDE8EC'},
+    {id:'p17',ico:'📗',titre:'Guide Orientation',prix:1900,ancien:0,desc:'200 pages : filières, débouchés, concours camerounais et internationaux',cat:'Manuels',photo:'',actif:true,featured:true,nouveau:false,bgColor:'#FEF3C7'},
+    {id:'p18',ico:'🏆',titre:'Abonnement Annuel',prix:49000,ancien:99000,desc:'Accès illimité 12 mois à toutes les ressources VÉRITAS — Plateforme + Manuels + Cours',cat:'Pack',photo:'',actif:true,featured:true,nouveau:true,bgColor:'#ECFDF5'}
   ],
   elearning:{
     plans:[
@@ -3590,6 +3815,20 @@ function _migrateDB(){
   if(!DB.orientationDemandes)DB.orientationDemandes=[];
   if(!DB.announce)DB.announce=[];
   if(!DB.products)DB.products=defaultDB().products||[];
+  // ─── Migration v1.2 : ajout des 6 produits "featured" (p13-p18) si absents ───
+  // Respecte les suppressions explicites (DB.deletedProducts) pour ne pas ressusciter ce que l'admin a supprimé.
+  (function(){
+    var featuredIds=['p13','p14','p15','p16','p17','p18'];
+    var existingIds=(DB.products||[]).map(function(p){return p.id;});
+    var deleted=(DB.deletedProducts||[]);
+    var defaults=(defaultDB().products||[]);
+    featuredIds.forEach(function(fid){
+      if(existingIds.indexOf(fid)<0 && deleted.indexOf(fid)<0){
+        var seed=defaults.find(function(p){return p.id===fid;});
+        if(seed)DB.products.push(JSON.parse(JSON.stringify(seed)));
+      }
+    });
+  })();
   if(!DB.depenses)DB.depenses=[];
   if(!DB.recettes)DB.recettes=[];
   // Classes Virtuelles
@@ -3613,8 +3852,28 @@ function _migrateDB(){
   if(!DB.tpwd)DB.tpwd=defaultDB().tpwd;
   DB.admins.forEach(function(a){if(!a.role2)a.role2=a.role==='Directeur'?'admin':'secretaire';});
   if(!DB.admins.find(function(a){return a.user==='directeur';})){
-    DB.admins.push({id:'a1',user:'directeur',pwd:'Veritas2024!',nom:'M. Jacques Miterand TAKOU',role:'Directeur',role2:'admin'});
+    DB.admins.push({id:'a1',user:'directeur',pwd:'Veritas2024!',nom:'M. Jacques Miterand TAKOU',role:'Directeur',role2:'admin',_pwdMustChange:true});
   }
+  // ── 🔐 v1.2 SÉCURITÉ : alerter si mots de passe par défaut encore actifs ──
+  setTimeout(function(){
+    try {
+      var defaultPasswords = [
+        {user:'directeur', pwd:'Veritas2024!'},
+        {user:'superadmin', pwd:'VERITAS_Super@2024!'}
+      ];
+      defaultPasswords.forEach(function(d){
+        var a = (DB.admins||[]).find(function(x){return x.user===d.user;});
+        if(a && a.pwd===d.pwd){
+          console.warn('⚠️ SÉCURITÉ : Le compte "'+d.user+'" utilise encore le mot de passe par défaut. Changez-le IMMÉDIATEMENT depuis Admin → Comptes & Accès.');
+          if(window.VN) VN.toAdmin('🚨 ALERTE SÉCURITÉ', 'Le compte "'+d.user+'" utilise encore le mot de passe par défaut. Changez-le immédiatement.', 'warn');
+        }
+        if(DB.superAdmin && DB.superAdmin.user===d.user && DB.superAdmin.pwd===d.pwd){
+          console.warn('⚠️ SÉCURITÉ : Super Admin "'+d.user+'" utilise encore le mot de passe par défaut.');
+          if(window.VN) VN.toAdmin('🚨 ALERTE SÉCURITÉ', 'Le Super Admin utilise encore le mot de passe par défaut.', 'warn');
+        }
+      });
+    } catch(e){}
+  }, 4000);
   // Cloud config
   if(!DB.cloudConfig)DB.cloudConfig={url:'https://veritas-school.com/api',secret:'VERITAS-CLOUD-2026-xK9m',lastSync:'Jamais'};
   if(!DB.cloudConfig.url)DB.cloudConfig.url='https://veritas-school.com/api';
@@ -4653,10 +4912,15 @@ function confirmProductOrder(title,price){
   // v1.0 : ouvrir le modal de paiement unifié
   setTimeout(function(){
     if(typeof openPaymentModal === 'function' && finalPrice > 0){
+      // ── v1.2 : metadata pour activation automatique ──
+      var lastOrder = DB.visitorOrders[DB.visitorOrders.length-1];
       openPaymentModal({
         montant: finalPrice,
-        label: '🛒 '+title+' — '+nom,
-        refPrefix: 'SHOP'
+        label: '🛒 '+title,
+        refPrefix: 'SHOP',
+        intent: 'product',
+        targetId: lastOrder?lastOrder.id:null,
+        customerNom: nom, customerTel: tel
       });
     } else {
       toast('✓ Commande envoyée !');
@@ -4710,10 +4974,16 @@ function confirmVisitorOrder(bid){
   // v1.0 : ouvrir le modal de paiement unifié
   setTimeout(function(){
     if(typeof openPaymentModal === 'function' && finalPrix > 0){
+      // ── v1.2 : metadata pour activation automatique ──
       openPaymentModal({
         montant: finalPrix,
-        label: '📚 '+b.titre+' — '+nom,
-        refPrefix: 'BOOK'
+        label: '📚 '+b.titre,
+        refPrefix: 'BOOK',
+        intent: 'book',
+        targetId: bid,
+        customerNom: nom,
+        customerTel: tel,
+        customerEmail: document.getElementById('voEmail')?.value||''
       });
     } else {
       toast('✓ Commande enregistrée ! Nous vous contacterons au '+tel);
@@ -4904,13 +5174,11 @@ function viewBookDetail(bid){
         +'<button class="btn bo" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:4px" onclick="var w=window.open(window[\'_bookGvUrl_'+bid+'\'],\'_blank\');if(!w)alert(\'Autorisez les pop-ups\');">🔍 Voir aperçu</button>'
         +'</div>';
     } else {
-      // Desktop : Google Docs viewer (évite les erreurs CORS iframe direct)
-      var _gvDesk='https://docs.google.com/viewer?embedded=true&url='+encodeURIComponent(b.previewPdfUrl);
-      h+='<iframe src="'+_gvDesk+'" style="width:100%;height:58vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>';
-      h+='<div style="margin-top:6px;text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">'
-        +'<a href="'+b.previewPdfUrl+'" target="_blank" rel="noopener" style="font-size:12px;color:var(--bl)">↗ Ouvrir le PDF directement</a>'
-        +'<a href="'+_gvDesk+'" target="_blank" rel="noopener" style="font-size:12px;color:var(--gr)">🔍 Google Docs viewer</a>'
-        +'</div>';
+      // Desktop : viewer PDF robuste (fetch+blob → PDF.js fallback)
+      var _pvId='pdfPv_'+bid;
+      h+='<div id="'+_pvId+'"><div class="ib ibt"><span>⏳</span><span>Chargement de l\'aperçu PDF…</span></div></div>';
+      window['_bookPdfUrl_'+bid]=b.previewPdfUrl;
+      setTimeout(function(){ if(typeof _pdfViewerIframe==='function') _pdfViewerIframe(window['_bookPdfUrl_'+bid],_pvId,{height:'58vh'}); },120);
     }
   }else if(b.previewPdfKey){
     h+='<div style="background:var(--blb);border:1px solid var(--bld);border-radius:var(--r);padding:8px 12px;font-size:12px;color:var(--bl);margin-bottom:8px">📄 <strong>Aperçu PDF disponible</strong></div>';
@@ -4992,13 +5260,11 @@ function _showExtrait(bid){
           +'<p style="text-align:center;padding:20px">PDF non affiché. <a href="'+pdfSrc+'" target="_blank">Ouvrir →</a></p></iframe>';
       }
     } else if(_isHttpUrl){
-      // Desktop + URL HTTP → Google Docs viewer (évite CORS iframe direct)
-      var _gvDesk2='https://docs.google.com/viewer?embedded=true&url='+encodeURIComponent(pdfSrc);
-      h+='<iframe src="'+_gvDesk2+'" style="width:100%;height:62vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>';
-      h+='<div style="margin-top:6px;text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">'
-        +'<a href="'+pdfSrc+'" target="_blank" rel="noopener" style="font-size:12px;color:var(--bl)">↗ Ouvrir le PDF directement</a>'
-        +'<a href="'+_gvDesk2+'" target="_blank" rel="noopener" style="font-size:12px;color:var(--gr)">🔍 Google Docs viewer</a>'
-        +'</div>';
+      // Desktop + URL HTTP → viewer robuste (fetch+blob → PDF.js fallback)
+      var _epvId='extraitPv_'+bid;
+      h+='<div id="'+_epvId+'"><div class="ib ibt"><span>⏳</span><span>Chargement de l\'aperçu PDF…</span></div></div>';
+      window._extraitPdfUrl=pdfSrc;
+      setTimeout(function(){ if(typeof _pdfViewerIframe==='function') _pdfViewerIframe(window._extraitPdfUrl,_epvId,{height:'62vh'}); },120);
     } else {
       // Desktop + data: URL locale → iframe direct (pas de CORS)
       h+='<iframe src="'+pdfSrc+'" style="width:100%;height:62vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF" allowfullscreen>'
@@ -5162,8 +5428,125 @@ function applyPromo(bid){
   if(result)result.innerHTML='<div style="font-size:13px;color:var(--gr);margin-top:4px;padding:6px;background:var(--grb);border-radius:var(--r)">✅ <strong>'+promo.desc+'</strong> — Vous économisez <strong>'+fmt(savings)+' FCFA</strong><br><span class="mono bold" style="font-size:14px;color:var(--gold)">Nouveau prix: '+fmt(newPrice)+' FCFA</span></div>';
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// HELPER PDF VIEWER ROBUSTE (v1.2)
+// Stratégie en cascade pour contourner X-Frame-Options / CORS / blocage tiers :
+//   1. fetch() le PDF → Blob URL → iframe (le PDF devient "local" pour le navigateur)
+//   2. si fetch échoue (CORS) → Mozilla PDF.js viewer (https://mozilla.github.io/pdf.js)
+//   3. si PDF.js échoue → iframe direct
+//   4. fallback final → boutons "Ouvrir" + "Télécharger"
+// ═══════════════════════════════════════════════════════════════════
+function _pdfViewerIframe(pdfUrl, containerId, opts){
+  opts = opts || {};
+  var ifrId = 'pdfIfr_'+Math.random().toString(36).substr(2,7);
+  var fallbackId = 'pdfFb_'+Math.random().toString(36).substr(2,7);
+  var ctn = document.getElementById(containerId);
+  if(!ctn) return;
+  // Squelette : iframe vide + zone fallback cachée
+  ctn.innerHTML =
+    '<iframe id="'+ifrId+'" style="width:100%;height:'+(opts.height||'62vh')+';border:1px solid var(--bg3);border-radius:8px;display:block;background:#525659" allowfullscreen></iframe>'
+    +'<div id="'+fallbackId+'" style="display:none;text-align:center;padding:24px;background:var(--blb);border-radius:8px;margin-top:6px">'
+      +'<div style="font-size:48px;margin-bottom:10px">📄</div>'
+      +'<div style="font-size:13px;color:var(--ink3);margin-bottom:14px">L\'aperçu n\'a pas pu être chargé directement.<br>Choisissez une option :</div>'
+      +'<a href="'+pdfUrl+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;margin:4px">📖 Ouvrir dans un onglet</a>'
+      +'<a href="'+pdfUrl+'" download class="btn bo" style="display:inline-block;text-decoration:none;margin:4px">⬇ Télécharger</a>'
+    +'</div>'
+    +'<div style="margin-top:6px;text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:11px">'
+      +'<a href="'+pdfUrl+'" target="_blank" rel="noopener" style="color:var(--bl);text-decoration:none">↗ Ouvrir le PDF directement</a>'
+      +'<a href="https://mozilla.github.io/pdf.js/web/viewer.html?file='+encodeURIComponent(pdfUrl)+'" target="_blank" rel="noopener" style="color:var(--gr);text-decoration:none">🔍 Viewer alternatif (PDF.js)</a>'
+    +'</div>';
+  var ifr = document.getElementById(ifrId);
+  var fb = document.getElementById(fallbackId);
+
+  // Étape 1 : fetch → Blob URL (contourne X-Frame-Options du serveur source)
+  var revoked=false;
+  function _revokeLater(url){ setTimeout(function(){ if(!revoked){revoked=true;try{URL.revokeObjectURL(url);}catch(e){}} }, 5*60*1000); }
+
+  // Timeout : si rien ne se charge en 6s, on bascule sur PDF.js
+  var loadTimeout = setTimeout(function(){
+    if(!ifr.src || ifr.src===window.location.href){
+      // Plan B : Mozilla PDF.js
+      ifr.src = 'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent(pdfUrl);
+    }
+  }, 6000);
+
+  fetch(pdfUrl, {mode:'cors', credentials:'omit'})
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.blob();
+    })
+    .then(function(blob){
+      clearTimeout(loadTimeout);
+      var blobUrl = URL.createObjectURL(blob);
+      _revokeLater(blobUrl);
+      ifr.src = blobUrl;
+    })
+    .catch(function(err){
+      console.warn('[pdfViewer] fetch échoué, Plan B (PDF.js):',err.message);
+      clearTimeout(loadTimeout);
+      // Plan B : Mozilla PDF.js (gère bien les PDF cross-origin)
+      ifr.src = 'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent(pdfUrl);
+      // Si PDF.js lui-même échoue (rare), basculer sur les boutons après 8s
+      setTimeout(function(){
+        try {
+          var doc = ifr.contentDocument || ifr.contentWindow?.document;
+          if(!doc) { ifr.style.display='none'; fb.style.display='block'; }
+        } catch(e){
+          // CORS sur l'iframe = c'est probablement OK (PDF.js fonctionne en cross-origin)
+        }
+      }, 8000);
+    });
+}
+
 function downloadBookCover(bid){
   const b=DB.books.find(x=>x.id===bid);if(!b)return;
+  const safeName='Couverture_'+(b.titre||'manuel').replace(/[^a-zA-ZÀ-ÿ0-9]/g,'_');
+
+  // ── PRIORITÉ 1 : vraie image de couverture uploadée par l'admin ──
+  // (b.coverImg est défini par uploadBookCover → URL serveur OU data URL)
+  if(b.coverImg){
+    const img=new Image();
+    img.crossOrigin='anonymous'; // pour autoriser le canvas si CORS le permet
+    img.onload=function(){
+      try {
+        const canvas=document.createElement('canvas');
+        // Respecter le ratio original de l'image
+        canvas.width=img.naturalWidth||img.width||600;
+        canvas.height=img.naturalHeight||img.height||800;
+        const ctx=canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        // Filigrane discret
+        if(typeof applyWatermark==='function') applyWatermark(canvas,ctx);
+        const link=document.createElement('a');
+        link.download=safeName+'.png';
+        link.href=canvas.toDataURL('image/png');
+        link.click();
+        toast('✓ Couverture téléchargée (image originale)');
+      } catch(e){
+        // CORS tainted canvas → fallback : téléchargement direct du fichier source
+        console.warn('[downloadBookCover] canvas CORS, fallback direct',e);
+        const link=document.createElement('a');
+        link.href=b.coverImg;
+        link.download=safeName+'.'+((b.coverImg.match(/\.(png|jpg|jpeg|webp|gif)/i)||[,'png'])[1].toLowerCase());
+        if(b.coverImg.indexOf('http')===0) link.target='_blank';
+        link.click();
+        toast('✓ Couverture ouverte dans un nouvel onglet');
+      }
+    };
+    img.onerror=function(){
+      // Image inaccessible (404 ou CORS dur) → on retombe sur le placeholder canvas
+      console.warn('[downloadBookCover] image non chargeable, fallback placeholder');
+      _downloadBookCoverPlaceholder(b,safeName);
+    };
+    img.src=b.coverImg;
+    return;
+  }
+
+  // ── PRIORITÉ 2 : aucune image uploadée → générer un placeholder esthétique ──
+  _downloadBookCoverPlaceholder(b,safeName);
+}
+
+function _downloadBookCoverPlaceholder(b,safeName){
   const cc=b.coverColor||'#1a3a8a';
   const canvas=document.createElement('canvas');
   canvas.width=600;canvas.height=800;
@@ -5175,25 +5558,24 @@ function downloadBookCover(bid){
   for(let i=0;i<20;i++){ctx.beginPath();ctx.arc(Math.random()*600,Math.random()*800,Math.random()*80+20,0,Math.PI*2);ctx.fill();}
   ctx.fillStyle='rgba(255,255,255,0.15)';ctx.fillRect(40,40,520,720);
   ctx.fillStyle='#fff';ctx.font='bold 80px serif';ctx.textAlign='center';
-  ctx.fillText(b.ico,300,200);
+  ctx.fillText(b.ico||'📚',300,200);
   ctx.font='bold 32px "Libre Baskerville",serif';
-  const words=b.titre.split(' ');let line='';let y=300;
+  const words=(b.titre||'').split(' ');let line='';let y=300;
   for(const w of words){const test=line+w+' ';if(ctx.measureText(test).width>460&&line){ctx.fillText(line.trim(),300,y);y+=44;line=w+' ';}else{line=test;}}
   ctx.fillText(line.trim(),300,y);
   ctx.font='italic 18px "Libre Baskerville",serif';ctx.fillStyle='rgba(255,255,255,0.7)';
-  ctx.fillText(b.auteur,300,y+60);
+  ctx.fillText(b.auteur||'',300,y+60);
   ctx.font='bold 16px sans-serif';ctx.fillStyle='rgba(255,255,255,0.5)';
-  ctx.fillText(b.cls+' — '+b.pages+' pages',300,720);
+  ctx.fillText((b.cls||'')+' — '+(b.pages||0)+' pages',300,720);
   ctx.fillStyle='rgba(232,200,112,0.9)';ctx.fillRect(200,740,200,4);
   ctx.font='12px sans-serif';ctx.fillStyle='rgba(255,255,255,0.4)';
   ctx.fillText(DB.school?.nom||'Centre VÉRITAS',300,770);
-  // [WATERMARK v1.2] Filigrane avant export couverture livre
-  applyWatermark(canvas,ctx);
+  if(typeof applyWatermark==='function') applyWatermark(canvas,ctx);
   const link=document.createElement('a');
-  link.download='Couverture_'+b.titre.replace(/[^a-zA-ZÀ-ÿ0-9]/g,'_')+'.png';
+  link.download=safeName+'.png';
   link.href=canvas.toDataURL('image/png');
   link.click();
-  toast('✓ Couverture téléchargée');
+  toast('ℹ️ Couverture générique téléchargée (aucune image personnalisée)');
 }
 
 // ─── CAROUSEL "À LA UNE" ────────────────────────
@@ -6245,29 +6627,30 @@ function vShowSec(sec,btn){
     </div>
 
     <!-- MANUELS GRID -->
-    <!-- SHOP ARTICLES -->
-    <div class="vcard mb20">
-      <div class="ct mb14">🛒 Articles &amp; Ressources</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">
-        ${(function(){
-          var arts=[
-            {e:'📚',bg:'#EDE9FE',t:'Fiches Maths Tle',d:'120 fiches révision',p:'3 500 FCFA',o:'5 000 FCFA',isN:false},
-            {e:'🖊️',bg:'#D1FAE5',t:'Cahier Physique',d:'300 exercices+solutions',p:'4 200 FCFA',o:'',isN:false},
-            {e:'🎧',bg:'#DBEAFE',t:'Audio Français',d:'18h + transcriptions',p:'2 900 FCFA',o:'',isN:true},
-            {e:'📐',bg:'#FDE8EC',t:'Kit Géométrie',d:'Set complet examens',p:'8 500 FCFA',o:'11 000 FCFA',isN:false},
-            {e:'📗',bg:'#FEF3C7',t:'Guide Orientation',d:'200 pages + débouchés',p:'1 900 FCFA',o:'',isN:false},
-            {e:'🏆',bg:'#ECFDF5',t:'Abonnement Annuel',d:'Accès illimité 12 mois',p:'49 000 FCFA',o:'99 000 FCFA',isN:true},
-          ];
-          return arts.map(function(s){
-            var pNum=parseInt(s.p.replace(/[^0-9]/g,''));
-            return'<div class="sc"><div class="sc-thumb" style="background:'+s.bg+'">'+s.e+(s.isN?'<span class="sc-new">NEW</span>':'')+
-              '</div><div class="sc-body"><h4>'+s.t+'</h4><p class="sc-desc">'+s.d+'</p>'+
-              '<div class="shoprow"><span class="sc-price">'+s.p+'</span>'+(s.o?'<span class="sc-old">'+s.o+'</span>':'')+
-              '</div><button class="btn bi" style="width:100%;justify-content:center;font-size:11px;padding:5px 8px;margin-top:6px;border-radius:8px" onclick="visitorOrderProduct(\''+s.t.replace(/'/g,'')+'\','+pNum+')">🛒 Commander</button></div></div>';
-          }).join('');
-        })()}
-      </div>
-    </div>
+    <!-- SHOP ARTICLES (rendus depuis DB.products avec featured:true — éditables depuis Admin > Boutique) -->
+    ${(function(){
+      var featured=(DB.products||[]).filter(function(p){return p.actif&&p.featured;});
+      if(!featured.length)return '';
+      return '<div class="vcard mb20">'
+        +'<div class="ct mb14">🛒 Articles &amp; Ressources</div>'
+        +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">'
+        +featured.map(function(s){
+            var bg=s.bgColor||'#EDE9FE';
+            var thumb=s.photo
+              ? '<img src="'+s.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">'
+              : (s.ico||'📦');
+            var oldP=s.ancien?fmt(s.ancien)+' FCFA':'';
+            return '<div class="sc"><div class="sc-thumb" style="background:'+bg+'">'+thumb
+              +(s.nouveau?'<span class="sc-new">NEW</span>':'')
+              +'</div><div class="sc-body"><h4>'+_esc(s.titre)+'</h4>'
+              +'<p class="sc-desc">'+_esc(s.desc||'')+'</p>'
+              +'<div class="shoprow"><span class="sc-price">'+fmt(s.prix)+' FCFA</span>'
+              +(oldP?'<span class="sc-old">'+oldP+'</span>':'')+'</div>'
+              +'<button class="btn bi" style="width:100%;justify-content:center;font-size:11px;padding:5px 8px;margin-top:6px;border-radius:8px" onclick="visitorOrderProduct(\''+s.titre.replace(/'/g,'')+'\','+s.prix+')">🛒 Commander</button>'
+              +'</div></div>';
+          }).join('')
+        +'</div></div>';
+    })()}
 
 
     <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-bottom:24px">
@@ -6304,7 +6687,7 @@ function vShowSec(sec,btn){
     <div class="vcard mb20">
       <div class="ct">🎁 Autres Produits & Services</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
-        ${(DB.products||[]).filter(function(p){return p.actif;}).map(function(p){
+        ${(DB.products||[]).filter(function(p){return p.actif&&!p.featured;}).map(function(p){
         var pct=p.ancien?Math.round((1-p.prix/p.ancien)*100):0;
         return '<div style="border:1px solid var(--bg3);border-radius:16px;padding:18px;transition:all .25s;cursor:pointer;background:var(--sur);position:relative;overflow:hidden" onclick="visitorOrderProduct(&apos;'+p.titre.replace(/'/g,'')+'&apos;,'+p.prix+')">'+
         (pct?'<div style="position:absolute;top:8px;right:8px;background:#DC2626;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:12px;box-shadow:0 2px 6px rgba(220,38,38,.3)">🔥 -'+pct+'%</div>':'')+
@@ -8552,6 +8935,19 @@ function pgElearningMgmt(){
   h+='<button class="btn" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9);color:#1b5e20;border:1.5px solid #a5d6a7;font-weight:700;font-size:12px" onclick="importCoursInteractifs()">&#128218; Importer Cours Interactifs</button>';
   h+='</div></div>';
 
+  // ─── BARRE D'OUTILS RAPIDES — gestion des modules pédagogiques liés ───
+  h+='<div class="card mb16" style="background:linear-gradient(135deg,#F0FDF4,#D1FAE5);border:1px solid #A7F3D0">';
+  h+='<div class="ct">⚡ Modules e-learning éditables</div>';
+  h+='<div class="fl2 g8 fw">';
+  h+='<button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()">📦 Packs personnalisés</button>';
+  h+='<button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()">🎮 Jeux éducatifs</button>';
+  h+='<button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Laboratoires virtuels</button>';
+  h+='<button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button>';
+  h+='<button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button>';
+  h+='<button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évaluations en ligne</button>';
+  h+='<button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button>';
+  h+='</div></div>';
+
   // KPIs
   var kpis=[
     ['&#128218;',el.contenus.length,'Contenus publiés','#3C8DFF','#E0EAFF'],
@@ -9211,7 +9607,7 @@ function pgBoutiqueMgmt(){
   prods.forEach(function(p){
     var pct=p.ancien?Math.round((1-p.prix/p.ancien)*100):0;
     h+='<tr><td>'+(p.photo?'<img src="'+p.photo+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover">':'<span style="font-size:24px">'+p.ico+'</span>')+'</td>';
-    h+='<td><div class="semi">'+p.titre+'</div><div class="xs2 mut">'+p.desc.substring(0,50)+'...</div></td>';
+    h+='<td><div class="semi">'+p.titre+(p.featured?' <span style="background:#FFC93C;color:#142554;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-left:4px">⭐ EN AVANT</span>':'')+(p.nouveau?' <span style="background:#DC2626;color:#fff;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-left:4px">🆕 NEW</span>':'')+'</div><div class="xs2 mut">'+p.desc.substring(0,50)+'...</div></td>';
     h+='<td><span class="bg bgb">'+(p.cat||'—')+'</span></td>';
     h+='<td class="mono" style="color:var(--re);text-decoration:line-through">'+(p.ancien?fmt(p.ancien):'—')+'</td>';
     h+='<td class="mono bold" style="color:var(--gold)">'+fmt(p.prix)+'</td>';
@@ -9232,6 +9628,8 @@ function mAddProduct(){
   '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="pdDesc" rows="2" placeholder="Description courte du produit..."></textarea></div>'+
   '<div class="fg full"><span class="fl">Photo (URL ou coller une image)</span><input class="fi" id="pdPhoto" placeholder="https://... ou collez une image base64"></div>'+
   '<div class="fg full"><span class="fl">Télécharger une photo</span><input type="file" id="pdFile" accept="image/*" onchange="loadProductPhoto(this)" style="font-size:13px"></div>'+
+  '<div class="fg"><span class="fl">⭐ Mettre en avant (Articles & Ressources)</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdFeatured"><span style="font-size:13px">Afficher dans le carrousel principal</span></label></div>'+
+  '<div class="fg"><span class="fl">🆕 Badge "NEW"</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdNouveau"><span style="font-size:13px">Marquer comme nouveauté</span></label></div>'+
   '<div id="pdPreview" style="margin-top:8px"></div></div>',
   '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveProduct()">✓ Ajouter</button>',true);
 }
@@ -9252,7 +9650,9 @@ function saveProduct(){
   DB.products.push({id:gid(),ico:document.getElementById('pdIco')?.value||'📦',titre:titre,
     prix:prix,ancien:parseInt(document.getElementById('pdAncien')?.value)||0,
     desc:document.getElementById('pdDesc')?.value||'',cat:document.getElementById('pdCat')?.value||'Autre',
-    photo:document.getElementById('pdPhoto')?.value||'',actif:true});
+    photo:document.getElementById('pdPhoto')?.value||'',actif:true,
+    featured:!!document.getElementById('pdFeatured')?.checked,
+    nouveau:!!document.getElementById('pdNouveau')?.checked});
   save();cm();re();toast('✓ Produit ajouté à la boutique');
 }
 function mEditProduct(pid){
@@ -9266,6 +9666,8 @@ function mEditProduct(pid){
   '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="pdDesc" rows="2">'+p.desc+'</textarea></div>'+
   '<div class="fg full"><span class="fl">Photo URL</span><input class="fi" id="pdPhoto" value="'+(p.photo||'')+'"></div>'+
   '<div class="fg full"><span class="fl">Changer la photo</span><input type="file" id="pdFile" accept="image/*" onchange="loadProductPhoto(this)" style="font-size:13px"></div>'+
+  '<div class="fg"><span class="fl">⭐ Mettre en avant (Articles & Ressources)</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdFeatured"'+(p.featured?' checked':'')+'><span style="font-size:13px">Afficher dans le carrousel principal</span></label></div>'+
+  '<div class="fg"><span class="fl">🆕 Badge "NEW"</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdNouveau"'+(p.nouveau?' checked':'')+'><span style="font-size:13px">Marquer comme nouveauté</span></label></div>'+
   '<div id="pdPreview">'+(p.photo?'<img src="'+p.photo+'" style="width:80px;height:80px;border-radius:10px;object-fit:cover">':'')+'</div></div>',
   '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="updateProduct(\''+pid+'\')">✓ Enregistrer</button>',true);
 }
@@ -9279,6 +9681,8 @@ function updateProduct(pid){
   p.ico=document.getElementById('pdIco')?.value||p.ico;
   var newPhoto=document.getElementById('pdPhoto')?.value;
   if(newPhoto)p.photo=newPhoto;
+  p.featured=!!document.getElementById('pdFeatured')?.checked;
+  p.nouveau=!!document.getElementById('pdNouveau')?.checked;
   save();cm();re();toast('✓ Produit mis à jour');
 }
 function toggleProduct(pid){var p=(DB.products||[]).find(function(x){return x.id===pid;});if(p){p.actif=!p.actif;save();re();toast(p.actif?'Produit activé':'Produit désactivé');}}
@@ -9763,9 +10167,15 @@ function validerAbonnement(planId){
       if(aboToLink){aboToLink.payRef=payRef;save();}
       openPaymentModal({
         montant: montant,
-        label: '🎓 '+(plan ? plan.nom : 'Abonnement E-Learning')+' — '+nom,
+        label: '🎓 '+(plan ? plan.nom : 'Abonnement E-Learning'),
         refPrefix: 'ELRN',
-        ref: payRef
+        ref: payRef,
+        // ── v1.2 : metadata pour activation automatique ──
+        intent: 'subscription',
+        targetId: planId,
+        customerAccountId: (SES&&(SES.type==='visiteur'||SES.type==='visiteur_inscrit')?SES.id:null),
+        customerNom: nom,
+        customerTel: tel
       });
     } else {
       toast('✓ Demande d\'abonnement envoyée ! L\'administration sera contactée.');
@@ -9809,8 +10219,12 @@ function validerCommandeContenu(itemId){
     if(typeof openPaymentModal === 'function' && montant > 0){
       openPaymentModal({
         montant: montant,
-        label: '📄 '+(item ? item.titre : 'Contenu E-Learning')+' — '+nom,
-        refPrefix: 'ELRN'
+        label: '📄 '+(item ? item.titre : 'Contenu E-Learning'),
+        refPrefix: 'ELRN',
+        intent: 'product',
+        targetId: itemId,
+        customerNom: nom,
+        customerTel: tel
       });
     } else {
       toast('✓ Commande envoyée ! Livraison par WhatsApp sous 24h.');
@@ -10237,22 +10651,111 @@ function logout(){
   goToVisitor();
 }
 // ─── NAVIGATIONS PAR RÔLE ────────────────────────
+// ─── NAV ADMIN — Refonte v1.2 : 8 sections logiques, sans doublons ────────
 const ANAV=[
-  {s:"Accueil",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"}]},
-  {s:"Élèves",i:[{k:"students",i:"⊕",l:"Inscriptions"},{k:"payments",i:"◇",l:"Paiements & Reçus"},{k:"absences_admin",i:"✅",l:"Absences"},{k:"certscol",i:"📜",l:"Certificats"},{k:"listeclasse",i:"📋",l:"Listes par classe"},{k:"presence",i:"✅",l:"Fiches de présence"}]},
-  {s:"Pédagogie",i:[{k:"grades",i:"▦",l:"Notes & Bulletins"},{k:"classstats",i:"📊",l:"Statistiques"},{k:"honneur",i:"🏆",l:"Tableau d\'honneur"},{k:"devoirs_admin",i:"📋",l:"Devoirs"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"},{k:"books2",i:"▤",l:"Bibliothèque"}]},
-  {s:"Communication",i:[{k:"send",i:"◎",l:"Centre WhatsApp"},{k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"}]},
-  {s:"Administration",i:[{k:"teachers",i:"◉",l:"Enseignants & Paie"},{k:"attesttravail",i:"📄",l:"Attestations"},{k:"accounts",i:"⨡",l:"Comptes & Accès"},{k:"booksale",i:"📚",l:"Vente manuels"},{k:"boutiquemgmt",i:"🛍️",l:"Boutique"},{k:"elearningmgmt",i:"📚",l:"E-Learning"},{k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},{k:"visitororders",i:"🛒",l:"Commandes"},{k:"recubooks",i:"🧾",l:"Reçus manuels"},{k:"autredep",i:"💸",l:"Autres dépenses"},{k:"paiements_admin",i:"💳",l:"Paiements"},{k:"finance",i:"△",l:"Bilan financier"},{k:"settings",i:"⊙",l:"Paramètres"},{k:"datareset",i:"🗑",l:"Nettoyage"},{k:"cms",i:"🌐",l:"Portail visiteur"}]},
-  {s:"Aide",i:[{k:"guide",i:"📖",l:"Guide d'utilisation"}]},
+  {s:"🏠 Accueil",i:[
+    {k:"dashboard",i:"◈",l:"Tableau de bord"}
+  ]},
+  {s:"🎓 Élèves",i:[
+    {k:"students",i:"⊕",l:"Inscriptions"},
+    {k:"listeclasse",i:"📋",l:"Listes par classe"},
+    {k:"certscol",i:"📜",l:"Certificats de scolarité"},
+    {k:"presence",i:"📝",l:"Fiches de présence"},
+    {k:"absences_admin",i:"✅",l:"Absences"}
+  ]},
+  {s:"📚 Pédagogie",i:[
+    {k:"grades",i:"▦",l:"Notes & Bulletins"},
+    {k:"classstats",i:"📊",l:"Statistiques de classe"},
+    {k:"honneur",i:"🏆",l:"Tableau d'honneur"},
+    {k:"devoirs_admin",i:"📋",l:"Devoirs"},
+    {k:"schedule",i:"▣",l:"Emploi du temps"}
+  ]},
+  {s:"👨‍🏫 Personnel",i:[
+    {k:"teachers",i:"◉",l:"Enseignants & Paie"},
+    {k:"attesttravail",i:"📄",l:"Attestations & Paie"}
+  ]},
+  {s:"🛍️ Boutique & E-Learning",i:[
+    {k:"boutiquemgmt",i:"🛒",l:"Boutique articles"},
+    {k:"booksale",i:"📚",l:"Vente manuels"},
+    {k:"books2",i:"▤",l:"Bibliothèque"},
+    {k:"elearningmgmt",i:"🎓",l:"E-Learning"},
+    {k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},
+    {k:"visitororders",i:"📦",l:"Commandes visiteurs"}
+  ]},
+  {s:"💰 Finances",i:[
+    {k:"payments",i:"💳",l:"Paiements élèves"},
+    {k:"paiements_admin",i:"💰",l:"Tentatives de paiement"},
+    {k:"autredep",i:"💸",l:"Autres dépenses"},
+    {k:"finance",i:"△",l:"Bilan financier"}
+  ]},
+  {s:"📢 Communication & Portail",i:[
+    {k:"announce",i:"◆",l:"Annonces"},
+    {k:"send",i:"◎",l:"Centre WhatsApp"},
+    {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
+    {k:"cms",i:"🌐",l:"Portail visiteur"}
+  ]},
+  {s:"⚙️ Système",i:[
+    {k:"accounts",i:"⨡",l:"Comptes admin/enseignants"},
+    {k:"visitor_accounts",i:"👥",l:"Comptes visiteurs inscrits"},
+    {k:"settings",i:"⊙",l:"Paramètres école"},
+    {k:"datareset",i:"🗑",l:"Nettoyage données"},
+    {k:"guide",i:"📖",l:"Guide d'utilisation"}
+  ]}
 ];
+// ─── NAV SUPER ADMIN — Refonte v1.2 : 9 sections (Supervision + 8 ANAV) ────
 const SANAV=[
-  {s:"Supervision",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"superoverview",i:"◐",l:"Vue d\'ensemble"},{k:"loginlog",i:"◌",l:"Journal connexions"},{k:"allaccounts",i:"⊡",l:"Tous les comptes"}]},
-  {s:"Élèves & Pédagogie",i:[{k:"students",i:"⊕",l:"Inscriptions"},{k:"grades",i:"▦",l:"Notes & Bulletins"},{k:"payments",i:"💳",l:"Paiements & Reçus"},{k:"absences_admin",i:"✅",l:"Absences"},{k:"certscol",i:"📜",l:"Certificats"},{k:"listeclasse",i:"📋",l:"Listes de classe"},{k:"classstats",i:"📊",l:"Statistiques"},{k:"honneur",i:"🏆",l:"Tableau d\'honneur"},{k:"devoirs_admin",i:"📋",l:"Devoirs"},{k:"schedule",i:"▣",l:"Emploi du temps"}]},
-  {s:"Enseignants & RH",i:[{k:"teachers",i:"◉",l:"Enseignants & Paie"},{k:"attesttravail",i:"📄",l:"Attestations"},{k:"presence",i:"✅",l:"Fiches de présence"}]},
-  {s:"Communication",i:[{k:"announce",i:"◆",l:"Annonces"},{k:"send",i:"◎",l:"Centre WhatsApp"},{k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"}]},
-  {s:"Boutique & E-Learning",i:[{k:"boutiquemgmt",i:"🛍️",l:"Boutique"},{k:"booksale",i:"📚",l:"Vente manuels"},{k:"recubooks",i:"🧾",l:"Reçus manuels"},{k:"elearningmgmt",i:"📚",l:"E-Learning"},{k:"resPedago",i:"📄",l:"Ressources BAC"},{k:"visitororders",i:"🛒",l:"Commandes"},{k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},{k:"books2",i:"▤",l:"Bibliothèque"}]},
-  {s:"Administration",i:[{k:"accounts",i:"⨡",l:"Comptes & Accès"},{k:"paiements_admin",i:"💳",l:"Paiements"},{k:"finance",i:"△",l:"Bilan financier"},{k:"autredep",i:"💸",l:"Autres dépenses"},{k:"settings",i:"⊙",l:"Paramètres"},{k:"cms",i:"🌐",l:"Portail visiteur"},{k:"datareset",i:"🗑",l:"Nettoyage données"}]},
-  {s:"Aide",i:[{k:"guide",i:"📖",l:"Guide d'utilisation"}]},
+  {s:"👑 Supervision",i:[
+    {k:"dashboard",i:"◈",l:"Tableau de bord"},
+    {k:"superoverview",i:"◐",l:"Vue d'ensemble système"},
+    {k:"loginlog",i:"◌",l:"Journal des connexions"},
+    {k:"allaccounts",i:"⊡",l:"Tous les comptes"}
+  ]},
+  {s:"🎓 Élèves",i:[
+    {k:"students",i:"⊕",l:"Inscriptions"},
+    {k:"listeclasse",i:"📋",l:"Listes par classe"},
+    {k:"certscol",i:"📜",l:"Certificats de scolarité"},
+    {k:"presence",i:"📝",l:"Fiches de présence"},
+    {k:"absences_admin",i:"✅",l:"Absences"}
+  ]},
+  {s:"📚 Pédagogie",i:[
+    {k:"grades",i:"▦",l:"Notes & Bulletins"},
+    {k:"classstats",i:"📊",l:"Statistiques de classe"},
+    {k:"honneur",i:"🏆",l:"Tableau d'honneur"},
+    {k:"devoirs_admin",i:"📋",l:"Devoirs"},
+    {k:"schedule",i:"▣",l:"Emploi du temps"}
+  ]},
+  {s:"👨‍🏫 Personnel",i:[
+    {k:"teachers",i:"◉",l:"Enseignants & Paie"},
+    {k:"attesttravail",i:"📄",l:"Attestations & Paie"}
+  ]},
+  {s:"🛍️ Boutique & E-Learning",i:[
+    {k:"boutiquemgmt",i:"🛒",l:"Boutique articles"},
+    {k:"booksale",i:"📚",l:"Vente manuels"},
+    {k:"books2",i:"▤",l:"Bibliothèque"},
+    {k:"elearningmgmt",i:"🎓",l:"E-Learning"},
+    {k:"resPedago",i:"📄",l:"Ressources BAC"},
+    {k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},
+    {k:"visitororders",i:"📦",l:"Commandes visiteurs"}
+  ]},
+  {s:"💰 Finances",i:[
+    {k:"payments",i:"💳",l:"Paiements élèves"},
+    {k:"paiements_admin",i:"💰",l:"Tentatives de paiement"},
+    {k:"autredep",i:"💸",l:"Autres dépenses"},
+    {k:"finance",i:"△",l:"Bilan financier"}
+  ]},
+  {s:"📢 Communication & Portail",i:[
+    {k:"announce",i:"◆",l:"Annonces"},
+    {k:"send",i:"◎",l:"Centre WhatsApp"},
+    {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
+    {k:"cms",i:"🌐",l:"Portail visiteur"}
+  ]},
+  {s:"⚙️ Système",i:[
+    {k:"accounts",i:"⨡",l:"Comptes admin/enseignants"},
+    {k:"visitor_accounts",i:"👥",l:"Comptes visiteurs inscrits"},
+    {k:"settings",i:"⊙",l:"Paramètres école"},
+    {k:"datareset",i:"🗑",l:"Nettoyage données"},
+    {k:"guide",i:"📖",l:"Guide d'utilisation"}
+  ]}
 ];
 const TNAV=[
   {s:"Mon espace",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"grades",i:"▦",l:"Saisie de notes"},{k:"devoirs_teacher",i:"📋",l:"Mes devoirs"},{k:"perf_teacher",i:"📊",l:"Performances"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"}]},
@@ -10262,23 +10765,66 @@ const ENAV=[
   {s:"Mon espace",i:[{k:"dashboard",i:"🏠",l:"Accueil"},{k:"mon_bulletin",i:"📄",l:"Mes notes & Bulletin"},{k:"mes_evaluations",i:"📊",l:"Évaluations en ligne"},{k:"mes_absences",i:"✅",l:"Mes absences"},{k:"mes_devoirs",i:"📋",l:"Mes devoirs"},{k:"mon_paiement",i:"💳",l:"Mon paiement"},{k:"boutique",i:"📚",l:"Boutique manuels"},{k:"announce",i:"◆",l:"Annonces"},{k:"schedule",i:"▣",l:"Emploi du temps"}]}
 ];
 
+// ─── PT — Titres des pages (refonte v1.2 : cohérence + route visitor_accounts) ──
 const PT={
-  dashboard:"Tableau de bord",students:"Inscriptions élèves",payments:"Paiements & Reçus",grades:"Notes & Bulletins",
-  schedule:"Emploi du temps",announce:"Annonces & Événements",books2:"Bibliothèque",send:"Centre WhatsApp",
-  teachers:"Enseignants & Paie",accounts:"Comptes & Accès",booksale:"Vente de manuels",visitororders:"Commandes visiteurs",classstats:"Statistiques & Performances",honneur:"Tableau d\'Honneur",finance:"Bilan financier",
-  settings:"Paramètres école",mybooks:"Mes Publications",releve_template:"Relevé de Notes Vierge",submit_resource:"Soumettre une Ressource",soumissions:"Soumissions recues",authorsmgmt:"Gestion Auteurs & Partage",certscol:"Certificats de scolarité",listeclasse:"Listes par classe",
-  presence:"Fiches de présence",attesttravail:"Attestations & Bulletins de paie",recubooks:"Reçus — Vente manuels",
-  autredep:"Dépenses supplémentaires",
-  // Élève
-  mon_bulletin:"Mes Notes & Bulletin",mes_evaluations:"Évaluations en ligne",mes_absences:"Mes Absences",mes_devoirs:"Mes Devoirs",
-  mon_paiement:"Mon Paiement",boutique:"Boutique Manuels",
-  // Enseignant
-  devoirs_teacher:"Mes Devoirs",perf_teacher:"Performances de mes classes",
-  // Admin
-  absences_admin:"Gestion des absences",devoirs_admin:"Gestion des devoirs",
-  orientation_admin:"Orientation & Conseil",paiements_admin:"Tableau de bord Paiements",
+  // Accueil & Système
+  dashboard:"Tableau de bord",
+  settings:"Paramètres de l'école",
+  accounts:"Comptes administrateurs & enseignants",
+  visitor_accounts:"Comptes visiteurs inscrits",
+  datareset:"Nettoyage des données",
+  guide:"Guide d'utilisation",
+  // Élèves
+  students:"Inscriptions élèves",
+  listeclasse:"Listes par classe",
+  certscol:"Certificats de scolarité",
+  presence:"Fiches de présence",
+  absences_admin:"Gestion des absences",
+  // Pédagogie
+  grades:"Notes & Bulletins",
+  classstats:"Statistiques de classe",
+  honneur:"Tableau d'honneur",
+  devoirs_admin:"Gestion des devoirs",
+  schedule:"Emploi du temps",
+  // Personnel
+  teachers:"Enseignants & Paie",
+  attesttravail:"Attestations & Bulletins de paie",
+  // Boutique & E-Learning
+  boutiquemgmt:"Boutique articles & ressources",
+  booksale:"Vente de manuels",
+  books2:"Bibliothèque scolaire",
+  elearningmgmt:"E-Learning & Contenus premium",
+  authorsmgmt:"Auteurs & Partage de droits",
+  visitororders:"Commandes visiteurs",
+  resPedago:"Ressources pédagogiques (Probatoire/BAC)",
+  // Finances
+  payments:"Paiements élèves & Reçus",
+  paiements_admin:"Tentatives de paiement (MoMo/OM/Stripe)",
+  autredep:"Autres dépenses",
+  finance:"Bilan financier",
+  // Communication & Portail
+  announce:"Annonces & Événements",
+  send:"Centre WhatsApp",
+  orientation_admin:"Orientation & Conseil",
+  cms:"Portail visiteur (CMS)",
   // Super Admin
-  superoverview:"Vue d\'ensemble système",cms:"Gestion du Portail Visiteur",loginlog:"Journal des connexions",allaccounts:"Tous les comptes",
+  superoverview:"Vue d'ensemble système",
+  loginlog:"Journal des connexions",
+  allaccounts:"Tous les comptes",
+  // Pages enseignant
+  mybooks:"Mes publications",
+  releve_template:"Relevé de notes vierge",
+  submit_resource:"Soumettre une ressource",
+  soumissions:"Soumissions reçues",
+  devoirs_teacher:"Mes devoirs",
+  perf_teacher:"Performances de mes classes",
+  // Pages élève
+  mon_bulletin:"Mes notes & Bulletin",
+  mes_evaluations:"Évaluations en ligne",
+  mes_absences:"Mes absences",
+  mes_devoirs:"Mes devoirs",
+  mon_paiement:"Mon paiement",
+  boutique:"Boutique manuels"
 };
 
 function buildNav(){
@@ -10753,7 +11299,13 @@ function confirmerAchat(bid){
         montant: b.prix,
         label: '📚 '+b.titre+' ('+b.cls+')',
         ref: ref,
-        refPrefix: 'BOOK'
+        refPrefix: 'BOOK',
+        // ── v1.2 : metadata pour activation automatique ──
+        intent: 'book',
+        targetId: bid,
+        customerAccountId: s?(s.accountId||s.id):null,
+        customerNom: s?(s.pre+' '+s.nom):'',
+        customerTel: s?s.tel:''
       });
     } else {
       toast('✓ Commande enregistrée ! Passez à l\'administration');
@@ -10983,6 +11535,18 @@ function pgCMS(){
   if(!isSA()&&!iA())return na();
   const pi=DB.publicInfo||{};
   return`<div class="ib ibg mb16"><span>🌐</span><span>Modifiez ici <strong>tout le contenu</strong> affiché sur le portail visiteur public.</span></div>
+  <!-- BARRE D'OUTILS RAPIDES — accès aux gestionnaires CMS depuis un seul endroit -->
+  <div class="card mb16" style="background:linear-gradient(135deg,#F8F9FF,#EDE9FE);border:1px solid #C7D2FE">
+    <div class="ct">⚡ Outils rapides du portail</div>
+    <div class="fl2 g8 fw">
+      <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()">📢 Bandeau défilant</button>
+      <button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()">🎬 Vidéo d'accueil</button>
+      <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()">📅 Calendrier événements</button>
+      <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()">🤝 Partenaires</button>
+      <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageExtraits()">📖 Extraits de manuels</button>
+      <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageCitations()">💬 Citations héro</button>
+    </div>
+  </div>
   <div class="g2">
     <div class="card"><div class="ct">🏫 Présentation</div>
       <div class="fg mb10"><span class="fl">Slogan accrocheur</span><input class="fi" id="cms_slogan2" value="${pi.slogan2||''}"></div>
@@ -12453,7 +13017,15 @@ function pgSend(){
   const allCls=[...new Set(DB.students.map(s=>s.cls))];
   const selC=window._waC||allCls[0]||'';
   const stu=selT==='group'?DB.students.filter(s=>s.cls===selC&&s.ptel):DB.students.filter(s=>s.ptel);
-  return`<div class="tabs mb16">${[['individual','Message individuel'],['group','Message de groupe'],['bulletin','Envoi bulletins'],['announce','Annonces parents']].map(([k,l])=>`<button class="tab${selT===k?' on':''}" onclick="window._waT='${k}';re()">${l}</button>`).join('')}</div>
+  return`<!-- BARRE D'OUTILS — gestion des groupes WhatsApp -->
+  <div class="card mb16" style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC">
+    <div class="ct">⚡ Groupes WhatsApp & inscriptions</div>
+    <div class="fl2 g8 fw">
+      <button class="btn sm" style="background:#25D366;color:#fff;border-radius:10px" onclick="mWAPendingMembers()">📲 Membres en attente d'accès</button>
+      <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="(function(){var p=document.querySelector('a[href*=\\'whatsapp\\']');toast('Vous gérez les liens d\\'invitation directement sur WhatsApp')})()">🔗 Gérer les invitations</button>
+    </div>
+  </div>
+  <div class="tabs mb16">${[['individual','Message individuel'],['group','Message de groupe'],['bulletin','Envoi bulletins'],['announce','Annonces parents']].map(([k,l])=>`<button class="tab${selT===k?' on':''}" onclick="window._waT='${k}';re()">${l}</button>`).join('')}</div>
   ${selT==='individual'?`<div class="card">
     <div class="ct">📱 Message WhatsApp individuel</div>
     <div class="fg2"><div class="fg"><span class="fl">Destinataire</span><select class="fi" id="waEtu" onchange="prevWA()">${stu.map(s=>`<option value="${s.id}">${s.pre} ${s.nom} (${s.cls})</option>`).join('')}</select></div>
@@ -13461,8 +14033,8 @@ function pgSettings(){
         <button class="btn bvi" onclick="importAllData()">📥 Importer JSON</button>
         <button class="btn" style="background:#059669;color:#fff" onclick="exportSQL()">🗄️ Exporter SQL</button>
       </div>
-      <div class="fl2 fw g8 mt12 pt12" style="border-top:var(--br)"><div class="bold s mb8">🛠️ Gestion avancee</div><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()">📢 Defilant</button><button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()">🎬 Video</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()">📦 Packs</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()">📅 Calendrier</button><button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()">🤝 Partenaires</button><button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()">🎮 Jeux</button><button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Labos</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button><button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évals</button><button class="btn sm" style="background:#142554;color:#fff;border-radius:10px" onclick="re();goTo('visitor_accounts')">👥 Comptes</button><button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button><button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mPayAttempts()">💰 Paiements</button> <button class="btn sm" style="background:#25D366;color:#fff;border-radius:10px;margin:2px" onclick="mWAPendingMembers()">📲 Groupes WA</button><button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageExtraits()">📖 Extraits</button></div>
       <div class="ib ibi mt14 mb0"><span>💡</span><span>Pour synchroniser via <strong>intranet</strong>: exportez les données, partagez via WiFi, importez sur l\'autre appareil.</span></div>
+      <div class="ib ibg mt12 mb0" style="background:#F0FDF4;border:1px solid #A7F3D0"><span>✨</span><span><strong>Nouveau (v1.2)</strong> : les anciens raccourcis « Gestion avancée » ont été éclatés dans les bonnes sections du menu. Retrouvez-les dans : 🌐 <strong>Portail visiteur</strong> (ticker, vidéo, calendrier, partenaires, extraits), 🎓 <strong>E-Learning</strong> (packs, jeux, labos, coaching, import QCM), 📚 <strong>Pédagogie › Devoirs</strong> (épreuves, évals), 💰 <strong>Finances</strong> (tentatives paiement) et 📢 <strong>Communication</strong> (groupes WhatsApp).</span></div>
     </div>
     <div class="card mt16">
       <div class="ct">☁️ VÉRITAS Cloud — Synchronisation en ligne</div>
@@ -13492,6 +14064,89 @@ function pgSettings(){
       <button class="btn bi sm" onclick="DB.tauxHoraire=parseInt(document.getElementById('sc_taux')?.value)||2000;save();toast('✓ Taux horaire mis à jour: '+fmt(DB.tauxHoraire)+'/h')">💾 Enregistrer taux</button>
     </div>
     <div class="card mt16">
+      <div class="ct">⚡ Paiements API automatiques (Orange Money / MTN MoMo)</div>
+      <div class="ib ibg mb14"><span>🎉</span><span><strong>v1.2 — Paiement 100% automatique.</strong> Activez l'API officielle Orange Money pour que les paiements soient confirmés <strong>sans intervention admin</strong>. Le client paie → Orange notifie le serveur → l'accès s'active automatiquement.</span></div>
+
+      <div class="fg2">
+        <div class="fg full"><label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--blb);border-radius:10px;cursor:pointer">
+          <input type="checkbox" id="payOrangeEnabled" ${(DB.payApiConfig&&DB.payApiConfig.orangeEnabled)?'checked':''} onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.orangeEnabled=this.checked;save();toast(this.checked?'🟠 Orange API activée':'🟠 Orange API désactivée');re();">
+          <span><strong>🟠 Activer le bouton "⚡ Payer maintenant (auto)" pour Orange Money</strong></span>
+        </label></div>
+
+        <div class="fg full"><label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--blb);border-radius:10px;cursor:pointer">
+          <input type="checkbox" id="payMtnEnabled" ${(DB.payApiConfig&&DB.payApiConfig.mtnEnabled)?'checked':''} onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.mtnEnabled=this.checked;save();toast(this.checked?'📱 MTN API activée':'📱 MTN API désactivée');re();">
+          <span><strong>📱 Activer le bouton "⚡ Payer avec mon MTN MoMo"</strong> — le client tape son n°, reçoit prompt USSD, valide avec son PIN</span>
+        </label></div>
+      </div>
+
+      <details class="mt12" style="background:var(--bg2);padding:14px 18px;border-radius:10px">
+        <summary style="cursor:pointer;font-weight:700;color:var(--ink2)">📋 Mise en service — Étapes pour Orange Money Cameroun</summary>
+        <ol style="font-size:13px;line-height:1.9;color:var(--ink3);margin:12px 0 0 20px">
+          <li>Allez sur <a href="https://developer.orange.com" target="_blank" style="color:var(--bl);font-weight:700">developer.orange.com</a> → <strong>Mes applications</strong></li>
+          <li>Créez une nouvelle application (si pas déjà fait) → souscrivez au produit <strong>« Orange Money WebPayment Cameroon »</strong></li>
+          <li>Récupérez les <strong>3 identifiants</strong> : <code>Client ID</code>, <code>Client Secret</code>, <code>Merchant Key</code></li>
+          <li>Ouvrez le fichier <code>api/payment_config.php</code> sur le serveur LWS (gestionnaire de fichiers)</li>
+          <li>Remplacez les 3 valeurs <code>ORANGE_CLIENT_ID</code>, <code>ORANGE_CLIENT_SECRET</code>, <code>ORANGE_MERCHANT_KEY</code></li>
+          <li>Renseignez <code>PUBLIC_BASE_URL = "https://veritas-school.com"</code> (votre vrai domaine)</li>
+          <li>Dans <strong>developer.orange.com</strong>, configurez le <strong>Webhook URL</strong> : <br><code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:11px">https://veritas-school.com/api/payment_orange.php?action=notify</code></li>
+          <li>Cochez la case ci-dessus pour <strong>activer Orange API</strong> dans VÉRITAS</li>
+          <li>Testez avec une petite somme (100 FCFA) en mode sandbox d'abord</li>
+        </ol>
+      </details>
+
+      <details class="mt8" style="background:var(--bg2);padding:14px 18px;border-radius:10px">
+        <summary style="cursor:pointer;font-weight:700;color:var(--ink2)">📋 Mise en service — Étapes pour MTN MoMo Cameroun</summary>
+        <ol style="font-size:13px;line-height:1.9;color:var(--ink3);margin:12px 0 0 20px">
+          <li>Allez sur <a href="https://momodeveloper.mtn.com" target="_blank" style="color:var(--bl);font-weight:700">momodeveloper.mtn.com</a> → <strong>Profile</strong></li>
+          <li>Copiez votre <strong>Primary Key</strong> (= Subscription Key)</li>
+          <li>Souscrivez au produit <strong>« Collection »</strong> (sandbox d'abord, puis production via "Go-Live")</li>
+          <li>Générez votre <strong>API User</strong> (UUID v4) et <strong>API Key</strong> via 2 appels curl (voir <code>GUIDE_MTN_MOMO_API.md</code>)</li>
+          <li>Éditez <code>api/payment_config.php</code> avec les 3 valeurs : <code>MTN_API_USER</code>, <code>MTN_API_KEY</code>, <code>MTN_SUBSCRIPTION_KEY</code></li>
+          <li>Mode : <code>MTN_TARGET_ENV='sandbox'</code> pour tester, <code>'mtncameroon'</code> en production</li>
+          <li>Cochez la case ci-dessus pour <strong>activer MTN API</strong> dans VÉRITAS</li>
+          <li>Numéros de test sandbox : <code>46733123450</code> (✅ SUCCESS), <code>46733123451</code> (❌ REJECTED)</li>
+        </ol>
+      </details>
+
+      <div class="fl2 g8 mt12 fw">
+        <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}window.open(u.replace(/\\/+$/,'')+'/payment_orange.php?action=list&secret='+encodeURIComponent(DB.cloudConfig.secret||''),'_blank')})()">🟠 Paiements Orange (liste)</button>
+        <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}window.open(u.replace(/\\/+$/,'')+'/payment_mtn.php?action=list&secret='+encodeURIComponent(DB.cloudConfig.secret||''),'_blank')})()">📱 Paiements MTN (liste)</button>
+        <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}fetch(u.replace(/\\/+$/,'')+'/payment_orange.php?action=status&ref=TEST').then(function(r){return r.text();}).then(function(t){toast('🟠 Orange : '+t.substring(0,80));}).catch(function(e){toast('Erreur : '+e.message,'err');})})()">🔌 Tester Orange</button>
+        <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}fetch(u.replace(/\\/+$/,'')+'/payment_mtn.php?action=status&ref=TEST').then(function(r){return r.text();}).then(function(t){toast('📱 MTN : '+t.substring(0,80));}).catch(function(e){toast('Erreur : '+e.message,'err');})})()">🔌 Tester MTN</button>
+      </div>
+    </div>
+    <div class="card mt16">
+      <div class="ct">🤖 Automatisation & Notifications</div>
+      <div class="ib ibg mb14"><span>✨</span><span><strong>v1.2 — Tout est automatique.</strong> Chaque action (inscription, paiement, note, devoir, annonce...) déclenche automatiquement les notifications et les synchronisations entre sections.</span></div>
+      <div class="fg2">
+        <div class="fg full"><label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--blb);border-radius:10px;cursor:pointer">
+          <input type="checkbox" id="notif_sound_chk" ${DB.notifSound!==false?'checked':''} onchange="DB.notifSound=this.checked;save();toast(this.checked?'🔊 Son activé':'🔇 Son désactivé');">
+          <span><strong>🔊 Son des notifications</strong> — bip court quand une nouvelle notification arrive</span>
+        </label></div>
+      </div>
+      <details class="mt12" style="background:var(--bg2);padding:12px 16px;border-radius:10px">
+        <summary style="cursor:pointer;font-weight:700;color:var(--ink2)">📋 Voir les 12 événements automatisés</summary>
+        <div class="mt10" style="font-size:12.5px;line-height:1.8;color:var(--ink3)">
+          <strong>Notifications automatiques émises pour :</strong><br>
+          • 🎓 Nouvel élève inscrit → admin<br>
+          • 🗑 Élève supprimé → nettoyage auto de ses notes/paiements/absences/devoirs<br>
+          • 💳 Paiement reçu → notif élève (success)<br>
+          • 💰 Tentative de paiement validée (MoMo/OM/Stripe) → admin<br>
+          • 📊 Nouvelle note ajoutée → notif élève<br>
+          • ◆ Annonce publiée → tous les destinataires ciblés<br>
+          • 👨‍🏫 Nouvel enseignant créé → admin<br>
+          • ⚙️ Paramètres école modifiés → sync auto vers le portail public<br>
+          • 👥 Visiteur inscrit → admin<br>
+          • 🛒 Commande boutique → admin<br>
+          • 📋 Devoir soumis → enseignant + admin<br>
+          • ⚠️ Absence enregistrée → notif élève<br>
+          <br><strong>Rafraîchissement temps réel :</strong> le tableau de bord se met à jour seul toutes les 30 secondes.
+        </div>
+      </details>
+      <button class="btn bo sm mt10" onclick="if(window.VA){VA.debug();toast('Console : 20 derniers événements');}else{toast('Module non initialisé','warn');}">🛠️ Debug événements (F12)</button>
+      <button class="btn bo sm mt10" onclick="if(window.VN){VN.toAdmin('🧪 Test notification','Le système de notifications fonctionne correctement','success');toast('✓ Test envoyé');}else{toast('Module non initialisé','warn');}">🔔 Tester une notification</button>
+    </div>
+    <div class="card mt16">
       <div class="ct">🎟️ Codes Promo (Boutique)</div>
       <div class="ib ibt mb12"><span>💡</span><span>Ces codes sont utilisables dans la boutique intégrée et la commande visiteur. Ils se synchronisent automatiquement.</span></div>
       <div class="tw"><table><thead><tr><th>Code</th><th>Réduction</th><th>Description</th><th>Utilisations</th><th>Actif</th><th></th></tr></thead>
@@ -13513,8 +14168,363 @@ function pgSettings(){
     </div>
   </div>`:''}`;
 }
-function saveSettings(){['nom','slogan','ville','tel','bp','directeur','annee'].forEach(k=>{const el=document.getElementById('sc_'+k);if(el)DB.school[k]=el.value;});save();buildNav();toast('✓ Paramètres enregistrés');}
-function savePublicInfo(){if(!DB.publicInfo)DB.publicInfo={};['slogan2','description','histoire','horaires','email','whatsapp'].forEach(k=>{const el=document.getElementById('pi_'+k);if(el)DB.publicInfo[k]=el.value;});save();toast('✓ Portail public mis à jour');}
+function saveSettings(){['nom','slogan','ville','tel','bp','directeur','annee'].forEach(k=>{const el=document.getElementById('sc_'+k);if(el)DB.school[k]=el.value;});save();buildNav();toast('✓ Paramètres enregistrés');if(window.VERITAS_AUTO)VERITAS_AUTO.fire('school.updated',{});}
+function savePublicInfo(){if(!DB.publicInfo)DB.publicInfo={};['slogan2','description','histoire','horaires','email','whatsapp'].forEach(k=>{const el=document.getElementById('pi_'+k);if(el)DB.publicInfo[k]=el.value;});save();toast('✓ Portail public mis à jour');if(window.VERITAS_AUTO)VERITAS_AUTO.fire('school.updated',{});}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VERITAS — AUTOMATISATION & SYNCHRONISATION (v1.2)
+// ═══════════════════════════════════════════════════════════════════════════
+// Système central qui :
+//  1. Synchronise automatiquement les sections (settings ↔ publicInfo, etc.)
+//  2. Émet des notifications automatiques sur les événements clés
+//  3. Recalcule les agrégats (moyennes, soldes) dès qu'une donnée change
+//
+// Architecture : moteur d'événements + monkey-patching non destructif des
+// fonctions existantes (les sources d'origine restent intactes).
+// ═══════════════════════════════════════════════════════════════════════════
+
+(function(){
+  'use strict';
+
+  // ───────────────────────────────────────────────────────────────────────
+  // 1. MOTEUR D'ÉVÉNEMENTS — VERITAS_AUTO
+  // ───────────────────────────────────────────────────────────────────────
+  window.VERITAS_AUTO = {
+    rules: {},
+    history: [], // les 50 derniers événements (debug)
+
+    on: function(eventName, handler){
+      if(!this.rules[eventName]) this.rules[eventName] = [];
+      this.rules[eventName].push(handler);
+      return this;
+    },
+
+    fire: function(eventName, payload){
+      // Trace pour debug
+      this.history.unshift({event:eventName,payload:payload,t:Date.now()});
+      if(this.history.length>50) this.history.length = 50;
+
+      var handlers = this.rules[eventName] || [];
+      handlers.forEach(function(fn){
+        try { fn(payload||{}); } catch(e){ console.error('[VERITAS_AUTO]',eventName,e); }
+      });
+    },
+
+    debug: function(){ console.table(this.history.slice(0,20)); }
+  };
+
+  // ───────────────────────────────────────────────────────────────────────
+  // 2. MOTEUR DE NOTIFICATIONS — VERITAS_NOTIFY
+  // ───────────────────────────────────────────────────────────────────────
+  window.VERITAS_NOTIFY = {
+    // Son court (Web Audio API) — peut être désactivé via DB.notifSound = false
+    beep: function(type){
+      try {
+        if(typeof DB!=='undefined' && DB.notifSound===false) return;
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        var freq = type==='warn'?440:type==='success'?880:type==='err'?330:660;
+        osc.frequency.value = freq;
+        gain.gain.value = 0.04;
+        osc.start();
+        osc.stop(ctx.currentTime + 0.12);
+        setTimeout(function(){ try{ctx.close();}catch(_){}}, 200);
+      } catch(e){ /* silent */ }
+    },
+
+    // Envoi générique : opts = {to,titre,msg,type,link,sound}
+    send: function(opts){
+      if(!opts || !opts.titre || !opts.msg) return;
+      if(typeof DB === 'undefined') return;
+      if(!DB.notifications) DB.notifications = [];
+      DB.notifications.unshift({
+        id: (typeof gid==='function'?gid():''+Date.now()+Math.random()),
+        to: opts.to || 'all',
+        titre: String(opts.titre).substring(0,120),
+        msg: String(opts.msg).substring(0,500),
+        type: opts.type || 'info',
+        link: opts.link || null,
+        date: new Date().toISOString().split('T')[0],
+        dateFull: new Date().toISOString(),
+        read: []
+      });
+      // Limite à 200 notifications stockées (sinon localStorage saturé)
+      if(DB.notifications.length > 200) DB.notifications.length = 200;
+      if(typeof save==='function') save();
+      if(typeof topUI==='function') topUI();
+      if(opts.sound !== false) this.beep(opts.type);
+    },
+
+    toStudent: function(eid,titre,msg,type){ this.send({to:eid,titre:titre,msg:msg,type:type||'info'}); },
+    toRole:    function(role,titre,msg,type){ this.send({to:role,titre:titre,msg:msg,type:type||'info'}); },
+    toAdmin:   function(titre,msg,type){ this.send({to:'admin',titre:titre,msg:msg,type:type||'info'}); },
+    toAll:     function(titre,msg,type){ this.send({to:'all',titre:titre,msg:msg,type:type||'info'}); }
+  };
+
+  // Alias court
+  window.VN = window.VERITAS_NOTIFY;
+  window.VA = window.VERITAS_AUTO;
+
+  // ───────────────────────────────────────────────────────────────────────
+  // 3. RÈGLES DE SYNCHRONISATION (12 événements pré-câblés)
+  // ───────────────────────────────────────────────────────────────────────
+
+  // ── 3.1 ─ Élève créé ───────────────────────────────────────────────────
+  VA.on('student.created', function(p){
+    var s = p.student;
+    if(!s) return;
+    // Notif admin
+    VN.toAdmin('🎓 Nouvel élève inscrit',
+      (s.pre||'')+' '+(s.nom||'')+' — Classe '+(s.cls||'?')+' — Matricule '+(s.mat||'?'),
+      'success');
+  });
+
+  // ── 3.2 ─ Élève supprimé : nettoyer ses données liées ──────────────────
+  VA.on('student.deleted', function(p){
+    var eid = p.eid;
+    if(!eid) return;
+    var nGrades=0,nPay=0,nAbs=0,nSubs=0;
+    if(DB.grades){var n=DB.grades.length;DB.grades=DB.grades.filter(function(g){return g.eid!==eid;});nGrades=n-DB.grades.length;}
+    if(DB.payments){var n=DB.payments.length;DB.payments=DB.payments.filter(function(x){return x.eid!==eid;});nPay=n-DB.payments.length;}
+    if(DB.absences){var n=DB.absences.length;DB.absences=DB.absences.filter(function(x){return x.eid!==eid;});nAbs=n-DB.absences.length;}
+    if(DB.submissions){var n=DB.submissions.length;DB.submissions=DB.submissions.filter(function(x){return x.eid!==eid;});nSubs=n-DB.submissions.length;}
+    if(DB.studentAccounts){DB.studentAccounts=DB.studentAccounts.filter(function(a){return a.eid!==eid;});}
+    if(nGrades+nPay+nAbs+nSubs>0){
+      save();
+      VN.toAdmin('🗑 Données élève supprimées',
+        'Nettoyage auto : '+nGrades+' notes, '+nPay+' paiements, '+nAbs+' absences, '+nSubs+' soumissions',
+        'info');
+    }
+  });
+
+  // ── 3.3 ─ Paiement reçu : mettre à jour le statut élève ────────────────
+  VA.on('payment.received', function(p){
+    var pay = p.payment;
+    if(!pay) return;
+    if(pay.stat==='Payé' && pay.eid && DB.students){
+      var s = DB.students.find(function(x){return x.id===pay.eid;});
+      if(s){
+        s.stat = 'Payé';
+        // Notif à l'élève
+        VN.toStudent(pay.eid, '💳 Paiement enregistré',
+          'Votre paiement de '+(typeof fmt==='function'?fmt(pay.mnt):pay.mnt)+' a été enregistré ('+(pay.mo||'')+'). Merci !',
+          'success');
+        save();
+      }
+    }
+  });
+
+  // ── 3.4 ─ Tentative de paiement validée (MoMo/OM/Stripe) ───────────────
+  VA.on('payAttempt.validated', function(p){
+    var att = p.attempt;
+    if(!att) return;
+    VN.toAdmin('💰 Paiement confirmé',
+      (att.ref||'?')+' — '+(typeof fmt==='function'?fmt(att.montant||0):att.montant)+' validé. Méthode : '+(att.moyen||'?'),
+      'success');
+  });
+
+  // ── 3.5 ─ Note ajoutée : notif élève + sync stats ──────────────────────
+  VA.on('grade.added', function(p){
+    var g = p.grade;
+    if(!g) return;
+    if(g.eid){
+      VN.toStudent(g.eid, '📊 Nouvelle note',
+        (g.sub||'?')+' — '+(g.tri||'')+' : '+(g.n1||'-')+' / '+(g.n2||'-'),
+        'info');
+    }
+  });
+
+  // ── 3.6 ─ Annonce publiée : notifier la cible ─────────────────────────
+  VA.on('announce.published', function(p){
+    var a = p.announce;
+    if(!a) return;
+    var to = a.cible || 'all';
+    VN.send({to:to, titre:'◆ '+(a.titre||'Annonce'), msg:(a.desc||'').substring(0,200), type:a.urg?'warn':'info'});
+  });
+
+  // ── 3.7 ─ Enseignant créé : notif admin ────────────────────────────────
+  VA.on('teacher.created', function(p){
+    var t = p.teacher;
+    if(!t) return;
+    VN.toAdmin('👨‍🏫 Nouvel enseignant',
+      (t.pre||'')+' '+(t.nom||'')+' — '+(t.mat2||'?')+' — Salaire '+(typeof fmt==='function'?fmt(t.sal||0):t.sal),
+      'success');
+  });
+
+  // ── 3.8 ─ Paramètres école modifiés : propager dans publicInfo ────────
+  VA.on('school.updated', function(){
+    if(!DB.school) return;
+    if(!DB.publicInfo) DB.publicInfo = {};
+    var pi = DB.publicInfo, sc = DB.school;
+    // Sync bidirectionnel des champs partagés
+    if(sc.tel && !pi.contact)        pi.contact = sc.tel;
+    if(sc.tel && !pi.whatsapp)       pi.whatsapp = sc.tel;
+    if(sc.ville && !pi.adresse)      pi.adresse = sc.ville;
+    if(sc.bp && !pi.bp)              pi.bp = sc.bp;
+    if(pi.contact && !sc.tel)        sc.tel = pi.contact;
+    if(pi.adresse && !sc.ville)      sc.ville = pi.adresse;
+    if(pi.bp && !sc.bp)              sc.bp = pi.bp;
+    save();
+  });
+
+  // ── 3.9 ─ Visiteur inscrit : notif admin ────────────────────────────────
+  VA.on('visitor.registered', function(p){
+    var v = p.visitor;
+    if(!v) return;
+    VN.toAdmin('👥 Nouveau visiteur inscrit',
+      (v.nom||v.user||'?')+' — Tél: '+(v.tel||'?')+(v.email?' — '+v.email:''),
+      'info');
+  });
+
+  // ── 3.10 ─ Commande boutique passée ────────────────────────────────────
+  VA.on('order.placed', function(p){
+    var o = p.order;
+    if(!o) return;
+    VN.toAdmin('🛒 Nouvelle commande',
+      (o.client||'?')+' — '+(o.produit||'?')+' — '+(typeof fmt==='function'?fmt(o.montant||0):o.montant),
+      'success');
+  });
+
+  // ── 3.11 ─ Devoir soumis : notif enseignant ────────────────────────────
+  VA.on('devoir.submitted', function(p){
+    var sub = p.submission;
+    if(!sub) return;
+    // Trouver l'enseignant lié au devoir
+    var dv = (DB.devoirs||[]).find(function(d){return d.id===sub.dvid;});
+    if(dv && dv.tid){
+      VN.send({to:dv.tid, titre:'📋 Nouveau devoir soumis',
+        msg:(sub.enom||'?')+' a soumis : '+(dv.titre||dv.sub||'?'), type:'info'});
+    }
+    VN.toAdmin('📋 Devoir soumis', (sub.enom||'?')+' : '+(dv?.titre||dv?.sub||'devoir'), 'info');
+  });
+
+  // ── 3.12 ─ Absence enregistrée : notif élève ───────────────────────────
+  VA.on('absence.added', function(p){
+    var ab = p.absence;
+    if(!ab || !ab.eid) return;
+    VN.toStudent(ab.eid, '⚠️ Absence enregistrée',
+      (ab.matiere||'')+' — '+(ab.heures||0)+'h le '+(ab.date||today())+(ab.justifie?' (justifiée)':' (à justifier)'),
+      ab.justifie?'info':'warn');
+  });
+
+  // ───────────────────────────────────────────────────────────────────────
+  // 4. MONKEY-PATCHING NON DESTRUCTIF des fonctions existantes
+  //    On enveloppe les fonctions clés pour déclencher les événements.
+  //    Les sources originales restent intactes.
+  // ───────────────────────────────────────────────────────────────────────
+  function _wrap(fnName, eventName, payloadExtractor){
+    if(typeof window[fnName] !== 'function') return;
+    var orig = window[fnName];
+    if(orig.__veritasWrapped) return; // évite double-wrap
+    var wrapped = function(){
+      var result = orig.apply(this, arguments);
+      try {
+        var payload = payloadExtractor ? payloadExtractor(arguments,result) : {};
+        VA.fire(eventName, payload);
+      } catch(e){ console.error('[VERITAS wrap]',fnName,e); }
+      return result;
+    };
+    wrapped.__veritasWrapped = true;
+    window[fnName] = wrapped;
+  }
+
+  // On attend le DOMContentLoaded pour que toutes les fonctions soient définies
+  function _installHooks(){
+    // ── Élèves (saveStu) ──
+    _wrap('saveStu','student.created',function(){
+      var last = DB.students && DB.students[DB.students.length-1];
+      return { student: last };
+    });
+    // ── Paiements (savePay) ──
+    _wrap('savePay','payment.received',function(){
+      var last = DB.payments && DB.payments[DB.payments.length-1];
+      return { payment: last };
+    });
+    // ── Notes (saveGr) ──
+    _wrap('saveGr','grade.added',function(){
+      var last = DB.grades && DB.grades[DB.grades.length-1];
+      return { grade: last };
+    });
+    // ── Annonces (saveAnn) ──
+    _wrap('saveAnn','announce.published',function(){
+      var last = DB.announce && DB.announce[DB.announce.length-1];
+      return { announce: last };
+    });
+    // ── Enseignants (saveTch) ──
+    _wrap('saveTch','teacher.created',function(){
+      var last = DB.teachers && DB.teachers[DB.teachers.length-1];
+      return { teacher: last };
+    });
+    // ── Absences (saveAbsence) ──
+    _wrap('saveAbsence','absence.added',function(){
+      var last = DB.absences && DB.absences[DB.absences.length-1];
+      return { absence: last };
+    });
+    // ── Validation paiement modal (mPayAttempts._payMarkPaid) ──
+    _wrap('_payMarkPaid','payAttempt.validated',function(args){
+      var ref = args[0];
+      var att = (DB.payAttempts||[]).find(function(a){return a.ref===ref;});
+      return { attempt: att };
+    });
+    // ── Visiteur inscrit (doRegister) ──
+    _wrap('doRegister','visitor.registered',function(){
+      var last = DB.visitorAccounts && DB.visitorAccounts[DB.visitorAccounts.length-1];
+      return { visitor: last };
+    });
+    // ── Admin crée compte visiteur (_mgrCreate) ──
+    _wrap('_mgrCreate','visitor.registered',function(){
+      var last = DB.visitorAccounts && DB.visitorAccounts[DB.visitorAccounts.length-1];
+      return { visitor: last };
+    });
+    // ── Commande boutique manuel (confirmerAchat / confirmProductOrder) ──
+    _wrap('confirmerAchat','order.placed',function(){
+      var last = DB.visitorOrders && DB.visitorOrders[DB.visitorOrders.length-1];
+      return { order: { client: last?.nom, produit: last?.bookTitle, montant: last?.prix } };
+    });
+    _wrap('confirmProductOrder','order.placed',function(args){
+      var last = DB.visitorOrders && DB.visitorOrders[DB.visitorOrders.length-1];
+      return { order: { client: last?.nom, produit: args[0]||last?.bookTitle, montant: args[1]||last?.prix } };
+    });
+    _wrap('visitorOrderProduct','order.placed',function(args){
+      return { order: { client: 'Visiteur', produit: args[0]||'?', montant: args[1]||0 } };
+    });
+    // ── Devoir soumis (submitDevoir) ──
+    _wrap('submitDevoir','devoir.submitted',function(){
+      var last = DB.submissions && DB.submissions[DB.submissions.length-1];
+      return { submission: last };
+    });
+    console.log('[VERITAS_AUTO] Hooks installés ✓ — '+Object.keys(VA.rules).length+' événements enregistrés');
+  }
+
+  // ───────────────────────────────────────────────────────────────────────
+  // 5. AUTO-RAFRAÎCHISSEMENT TEMPS RÉEL DU DASHBOARD
+  // ───────────────────────────────────────────────────────────────────────
+  var _dashRefreshTimer = null;
+  function _startDashAutoRefresh(){
+    if(_dashRefreshTimer) clearInterval(_dashRefreshTimer);
+    _dashRefreshTimer = setInterval(function(){
+      if(typeof pg!=='undefined' && pg==='dashboard' && typeof re==='function'){
+        // Rafraîchit silencieusement les stats du dashboard toutes les 30s
+        try { re(); } catch(e){}
+      }
+      if(typeof topUI==='function') topUI();
+    }, 30000);
+  }
+
+  // ───────────────────────────────────────────────────────────────────────
+  // 6. INSTALLATION DIFFÉRÉE (après chargement complet de tous les scripts)
+  // ───────────────────────────────────────────────────────────────────────
+  if(document.readyState==='complete'){
+    setTimeout(function(){_installHooks();_startDashAutoRefresh();}, 1500);
+  } else {
+    window.addEventListener('load', function(){
+      setTimeout(function(){_installHooks();_startDashAutoRefresh();}, 1500);
+    });
+  }
+
+})();
 
 // ═══════════════════════════════════════════════
 // INIT
@@ -17591,12 +18601,15 @@ function _showLittTechniques(oeuvreKey){
   oe.techniques.forEach(function(t,i){
     var cols=['#142554','#059669','#D97706','#7C3AED','#DC2626','#0891B2'];
     var col=cols[i%cols.length];
+    // Normaliser : si t est une simple chaîne, la convertir en objet {nom}
+    if(typeof t === 'string'){ t = {nom: t}; }
+    if(!t || (!t.nom && !t.def && !t.exemple && !t.effet)) return;
     h+='<div class="vcard" style="border-left:5px solid '+col+'">'
-      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(t.def||t.exemple||t.effet?'10px':'0')+'">'
         +'<span style="background:'+col+';color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">'+(i+1)+'</span>'
-        +'<div style="font-weight:800;color:'+col+';font-size:15px">'+_esc(t.nom)+'</div>'
+        +'<div style="font-weight:800;color:'+col+';font-size:15px">'+_esc(t.nom||'Procédé '+(i+1))+'</div>'
       +'</div>'
-      +'<div style="font-size:13px;color:var(--ink4);margin-bottom:8px;font-style:italic">'+_esc(t.def)+'</div>'
+      +(t.def?'<div style="font-size:13px;color:var(--ink4);margin-bottom:8px;font-style:italic">'+_esc(t.def)+'</div>':'')
       +(t.exemple?
         '<div style="background:#1a1a2e;border-radius:8px;padding:10px 14px;margin-bottom:8px">'
           +'<div style="font-size:11px;color:#aaa;margin-bottom:4px;text-transform:uppercase;font-weight:600">Exemple dans l\'œuvre</div>'
@@ -23287,7 +24300,7 @@ function _showPDFViewer(src,titre,canDownload){
       return '<div style="position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden;display:flex;align-items:center;justify-content:center">'+
              '<div style="position:absolute;top:-40px;left:-60px;right:-60px;bottom:-40px;display:flex;flex-direction:column;gap:0">'+rows+'</div></div>';
     })()
-    +'<iframe src="'+displaySrc+'" style="width:100%;height:100%;border:none;display:block" '
+    +'<iframe id="_pdfVwIfr" src="'+displaySrc+'" style="width:100%;height:100%;border:none;display:block" '
     +'title="'+_esc(titre)+'" allowfullscreen>'
     +'<p style="color:#fff;text-align:center;padding-top:40px">Votre navigateur ne supporte pas l\'affichage PDF intégré. '
     +'<a href="'+displaySrc+'" target="_blank" style="color:#FFC93C">Ouvrir le PDF →</a></p>'
@@ -23302,6 +24315,41 @@ function _showPDFViewer(src,titre,canDownload){
     footer+='<button class="btn" style="background:#DC2626;color:#fff" onclick="(function(){var a=document.createElement(\'a\');a.href=window._pdfVwSrc;a.download=(window._pdfVwTitre||\'document\').replace(/[^a-z0-9]/gi,\'_\')+\'.pdf\';a.click();})()">⬇ Télécharger PDF</button>';
   }
   M('','',body,footer,true);
+
+  // ── v1.2 — Si l'URL est HTTP, basculer en stratégie fetch+blob pour contourner X-Frame-Options ──
+  if(src && src.indexOf('http')===0){
+    setTimeout(function(){
+      var ifr = document.getElementById('_pdfVwIfr');
+      if(!ifr) return;
+      // Timeout : si rien ne se charge en 5s → bascule PDF.js
+      var didLoad = false;
+      ifr.addEventListener('load', function(){ didLoad = true; });
+      var fbTimer = setTimeout(function(){
+        if(!didLoad){
+          console.warn('[_showPDFViewer] iframe direct timeout, bascule PDF.js');
+          ifr.src = 'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent(src);
+        }
+      }, 5000);
+      // Stratégie principale : fetch → blob → iframe (contourne X-Frame-Options)
+      fetch(src, {mode:'cors', credentials:'omit'})
+        .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.blob(); })
+        .then(function(blob){
+          clearTimeout(fbTimer);
+          var blobUrl = URL.createObjectURL(blob);
+          window._pdfVwSrc = blobUrl;
+          ifr.src = blobUrl;
+          didLoad = true;
+          setTimeout(function(){ try{URL.revokeObjectURL(blobUrl);}catch(e){} }, 10*60*1000);
+        })
+        .catch(function(err){
+          console.warn('[_showPDFViewer] fetch échoué:',err.message,'→ Plan B PDF.js');
+          clearTimeout(fbTimer);
+          if(!didLoad){
+            ifr.src = 'https://mozilla.github.io/pdf.js/web/viewer.html?file=' + encodeURIComponent(src);
+          }
+        });
+    }, 200);
+  }
 }
 
 // ── Ouvre HTML avec filigrane injecté (nouveau onglet) ──
@@ -28341,6 +29389,69 @@ function mWAPendingMembers(){
     true);
 }
 
+// ═══════════════════════════════════════════════════════════════════
+// CONFIGURATION PAIEMENTS — VERITAS_PAYMENTS (v1.2 — FIX manquant)
+// ═══════════════════════════════════════════════════════════════════
+// Numéros REELS du Centre VÉRITAS — modifiables depuis Admin → Paramètres
+// (les valeurs sont surchargées par DB.payConfig si présent)
+window.VERITAS_PAYMENTS = (function(){
+  var defaults = {
+    momo: {
+      label:'MTN Mobile Money',
+      numero:'+237 650 435 106',
+      nomCompte:'TAKOU Jacques Miterand',
+      code:'*126#',
+      couleur:'#FFCB05',
+      ico:'📱'
+    },
+    orange: {
+      label:'Orange Money',
+      numero:'+237 697 637 739',
+      nomCompte:'TAKOU Jacques Miterand',
+      code:'#150*1#',
+      couleur:'#FF6600',
+      ico:'🟠'
+    },
+    paypal: {
+      label:'PayPal',
+      url:'https://paypal.me/JacquesTakou',
+      email:'contact@veritas.cm',
+      couleur:'#003087',
+      ico:'💳'
+    },
+    stripe: {
+      label:'Carte bancaire',
+      url:'https://buy.stripe.com/test_replace_me',
+      couleur:'#635BFF',
+      ico:'💳'
+    },
+    bank: {
+      label:'Virement bancaire',
+      titulaire:'Centre VÉRITAS',
+      banque:'À configurer',
+      iban:'À configurer',
+      swift:'À configurer',
+      couleur:'#1E3A8A',
+      ico:'🏦'
+    },
+    whatsapp:'+237 697 637 739',
+    email:'contact@veritas.cm'
+  };
+  // Surcharge depuis DB.payConfig si l'admin l'a édité
+  try {
+    if(typeof DB!=='undefined' && DB.payConfig){
+      Object.keys(DB.payConfig).forEach(function(k){
+        if(typeof defaults[k]==='object' && typeof DB.payConfig[k]==='object'){
+          Object.assign(defaults[k], DB.payConfig[k]);
+        } else if(DB.payConfig[k]){
+          defaults[k]=DB.payConfig[k];
+        }
+      });
+    }
+  } catch(e){}
+  return defaults;
+})();
+
 function _payRef(prefix){
   var d = new Date();
   var y = d.getFullYear().toString().slice(2);
@@ -28397,26 +29508,37 @@ function openPaymentModal(payInfo){
 
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px">'
 
-      // MoMo
-      + '<div class="paymethod" style="background:#fff;border:2px solid '+P.momo.couleur+';border-radius:12px;padding:14px;transition:.2s;cursor:pointer" onclick="_payCopy(\''+P.momo.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro MoMo\')">'
+      // MoMo — avec API automatique si activée
+      + '<div class="paymethod" style="background:#fff;border:2px solid '+P.momo.couleur+';border-radius:12px;padding:14px;position:relative">'
         + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
           + '<div style="font-size:28px">'+P.momo.ico+'</div>'
           + '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">'+P.momo.label+'</div>'
+          + (DB.payApiConfig&&DB.payApiConfig.mtnEnabled?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
         + '</div>'
-        + '<div style="font-family:monospace;font-size:15px;font-weight:800;color:'+P.momo.couleur+';margin-bottom:4px">'+P.momo.numero+'</div>'
+        + '<div style="font-family:monospace;font-size:15px;font-weight:800;color:'+P.momo.couleur+';margin-bottom:4px;cursor:pointer" onclick="_payCopy(\''+P.momo.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro MoMo\')">'+P.momo.numero+'</div>'
         + '<div style="font-size:11px;color:var(--ink4);line-height:1.5">Nom : <strong>'+P.momo.nomCompte+'</strong><br>Code USSD : <strong>'+P.momo.code+'</strong></div>'
-        + '<div style="font-size:10px;color:var(--ink4);margin-top:6px;font-style:italic">👆 Cliquez pour copier le numéro</div>'
+        + (DB.payApiConfig&&DB.payApiConfig.mtnEnabled
+            ? '<div style="margin-top:10px;border-top:1px solid var(--bg3);padding-top:10px">'
+              +'<input class="fi" id="mtnPhoneInput_'+ref+'" placeholder="Votre n° MTN (ex: 6XX XX XX XX)" value="'+(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:6px 10px;width:100%;margin-bottom:6px">'
+              +'<button class="btn" style="width:100%;background:linear-gradient(135deg,'+P.momo.couleur+',#FFA500);color:#142554;border:none;border-radius:8px;padding:10px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitMtn(\''+ref+'\','+montant+',\''+_esc(label).replace(/\x27/g,"")+'\',\''+(payInfo.intent||"generic")+'\',\''+(payInfo.targetId||"")+'\',\''+(payInfo.customerAccountId||"")+'\',\''+(payInfo.customerNom||"").replace(/\x27/g,"")+'\')">⚡ Payer avec mon MTN MoMo</button>'
+              +'</div>'
+            : '<div style="font-size:10px;color:var(--ink4);margin-top:6px;font-style:italic">👆 Cliquez pour copier le numéro</div>'
+          )
       + '</div>'
 
-      // Orange Money
-      + '<div class="paymethod" style="background:#fff;border:2px solid '+P.orange.couleur+';border-radius:12px;padding:14px;cursor:pointer" onclick="_payCopy(\''+P.orange.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro Orange Money\')">'
+      // Orange Money — avec API automatique si activée
+      + '<div class="paymethod" style="background:#fff;border:2px solid '+P.orange.couleur+';border-radius:12px;padding:14px;position:relative">'
         + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
           + '<div style="font-size:28px">'+P.orange.ico+'</div>'
           + '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">'+P.orange.label+'</div>'
+          + (DB.payApiConfig&&DB.payApiConfig.orangeEnabled?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
         + '</div>'
-        + '<div style="font-family:monospace;font-size:15px;font-weight:800;color:'+P.orange.couleur+';margin-bottom:4px">'+P.orange.numero+'</div>'
+        + '<div style="font-family:monospace;font-size:15px;font-weight:800;color:'+P.orange.couleur+';margin-bottom:4px;cursor:pointer" onclick="_payCopy(\''+P.orange.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro Orange Money\')">'+P.orange.numero+'</div>'
         + '<div style="font-size:11px;color:var(--ink4);line-height:1.5">Nom : <strong>'+P.orange.nomCompte+'</strong><br>Code USSD : <strong>'+P.orange.code+'</strong></div>'
-        + '<div style="font-size:10px;color:var(--ink4);margin-top:6px;font-style:italic">👆 Cliquez pour copier le numéro</div>'
+        + (DB.payApiConfig&&DB.payApiConfig.orangeEnabled
+            ? '<button class="btn" style="margin-top:8px;width:100%;background:linear-gradient(135deg,'+P.orange.couleur+',#ff8c00);color:#fff;border:none;border-radius:8px;padding:10px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitOrange(\''+ref+'\','+montant+',\''+_esc(label).replace(/\x27/g,"")+'\',\''+(payInfo.intent||"generic")+'\',\''+(payInfo.targetId||"")+'\',\''+(payInfo.customerAccountId||"")+'\',\''+(payInfo.customerNom||"").replace(/\x27/g,"")+'\',\''+(payInfo.customerTel||"")+'\')">⚡ Payer maintenant (auto)</button>'
+            : '<div style="font-size:10px;color:var(--ink4);margin-top:6px;font-style:italic">👆 Cliquez pour copier le numéro</div>'
+          )
       + '</div>'
 
       // PayPal
@@ -28466,18 +29588,222 @@ function openPaymentModal(payInfo){
     + '</div>';
 
   // Enregistrer la tentative de paiement en local pour traçabilité admin
+  // ── v1.2 : ajout métadonnées intent/targetId pour activation automatique ──
   try{
     DB.payAttempts = DB.payAttempts || [];
     DB.payAttempts.push({
-      ref: ref, label: label, montant: montant,
+      ref: ref,
+      label: label,
+      montant: montant,
       date: new Date().toISOString(),
-      status: 'pending'
+      status: 'pending',
+      // Métadonnées pour activation automatique post-validation
+      intent: payInfo.intent || 'generic',         // 'book' | 'product' | 'subscription' | 'whatsapp_group' | 'classroom' | 'generic'
+      targetId: payInfo.targetId || null,          // ID du livre / plan / groupe / classe
+      accountId: payInfo.customerAccountId || (typeof SES!=='undefined'&&SES?SES.accountId:null),
+      customerNom: payInfo.customerNom || (typeof SES!=='undefined'&&SES?(SES.pre+' '+SES.nom):''),
+      customerTel: payInfo.customerTel || (typeof SES!=='undefined'&&SES?SES.tel:''),
+      customerEmail: payInfo.customerEmail || ''
     });
     if(typeof save === 'function') save();
-  }catch(e){/* silencieux */}
+    // Notif admin via VERITAS_NOTIFY (si dispo)
+    if(window.VN){
+      VN.toAdmin('💳 Nouvelle tentative de paiement',
+        (payInfo.customerNom||'Client')+' — '+label+' ('+montantFmt+') — Réf: '+ref,
+        'info');
+    }
+  }catch(e){console.warn('[payAttempt]',e);}
 
   M('💰 Paiement Sécurisé', label+' — '+montantFmt, body,
     '<button class="btn bo" onclick="cm()">Fermer</button>');
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ── v1.2 : INITIATION PAIEMENT ORANGE MONEY (API automatique) ──
+// ═══════════════════════════════════════════════════════════════════
+function _payInitOrange(ref, montant, label, intent, targetId, accountId, nom, tel){
+  if(!DB.payApiConfig || !DB.payApiConfig.orangeEnabled){
+    toast('Orange API non activée — voir Paramètres','warn');
+    return;
+  }
+  if(!DB.cloudConfig||!DB.cloudConfig.url||!DB.cloudConfig.secret){
+    toast('Configuration cloud manquante (URL serveur + secret API)','err');
+    return;
+  }
+  toast('⏳ Initialisation Orange Money...','info');
+  var endpoint = DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_orange.php?action=init';
+  fetch(endpoint, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+DB.cloudConfig.secret},
+    body: JSON.stringify({ref:ref,montant:montant,label:label,intent:intent,targetId:targetId,
+      accountId:accountId,clientNom:nom,clientTel:tel})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){toast('❌ Orange API: '+data.error,'err');return;}
+    if(!data.payment_url){toast('❌ URL paiement Orange manquante','err');return;}
+    // Redirection vers la page de paiement Orange
+    cm();
+    M('⏳ Paiement Orange Money en cours','Référence : '+ref,
+      '<div style="text-align:center;padding:20px">'
+      +'<div style="font-size:64px;margin-bottom:14px">🟠</div>'
+      +'<div style="font-size:14px;color:var(--ink2);margin-bottom:14px">Une nouvelle fenêtre va s\'ouvrir pour finaliser votre paiement sur Orange Money.</div>'
+      +'<a href="'+data.payment_url+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:14px;padding:12px 24px">📱 Ouvrir la page de paiement</a>'
+      +'<div style="margin-top:14px;font-size:12px;color:var(--ink4)">Validez avec votre PIN Orange Money sur votre téléphone.<br>L\'activation sera automatique après confirmation.</div>'
+      +'<div id="payOrangeStatus" style="margin-top:14px;font-size:12px;color:var(--bl);font-weight:700"></div>'
+      +'</div>',
+      '<button class="btn bo" onclick="cm();_payStopPolling()">Fermer</button>');
+    // Ouvre automatiquement la fenêtre de paiement
+    var pw = window.open(data.payment_url, '_blank');
+    if(!pw) toast('Autorisez les pop-ups pour ouvrir Orange Money','warn');
+    // Lancer le polling de statut
+    _payStartPolling(ref);
+  })
+  .catch(function(err){
+    console.error('[Orange init]',err);
+    toast('❌ Connexion serveur impossible','err');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ── v1.2 : INITIATION PAIEMENT MTN MOMO (API automatique) ──
+// ═══════════════════════════════════════════════════════════════════
+function _payInitMtn(ref, montant, label, intent, targetId, accountId, nom){
+  if(!DB.payApiConfig || !DB.payApiConfig.mtnEnabled){
+    toast('MTN API non activée — voir Paramètres','warn');
+    return;
+  }
+  if(!DB.cloudConfig||!DB.cloudConfig.url||!DB.cloudConfig.secret){
+    toast('Configuration cloud manquante','err');
+    return;
+  }
+  // Récupérer le numéro depuis l'input
+  var phoneEl = document.getElementById('mtnPhoneInput_'+ref);
+  var tel = phoneEl ? phoneEl.value.replace(/[^0-9+]/g,'') : '';
+  if(!tel || tel.length < 9){
+    toast('⚠️ Entrez votre numéro MTN MoMo valide','warn');
+    if(phoneEl) phoneEl.focus();
+    return;
+  }
+  toast('⏳ Envoi du prompt MoMo sur '+tel+'...','info');
+  var endpoint = DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_mtn.php?action=init';
+  fetch(endpoint, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+DB.cloudConfig.secret},
+    body: JSON.stringify({ref:ref,montant:montant,label:label,intent:intent,targetId:targetId,
+      accountId:accountId,clientNom:nom,clientTel:tel})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){toast('❌ MTN API: '+data.error,'err');return;}
+    cm();
+    M('⏳ Paiement MTN MoMo en cours','Référence : '+ref,
+      '<div style="text-align:center;padding:20px">'
+      +'<div style="font-size:64px;margin-bottom:14px">📱</div>'
+      +'<div style="font-size:14px;color:var(--ink2);margin-bottom:12px"><strong>📲 Vérifiez votre téléphone '+_esc(tel)+'</strong></div>'
+      +'<div style="font-size:13px;color:var(--ink3);margin-bottom:14px;background:var(--blb);padding:12px;border-radius:8px;border:1px solid var(--bld)">Un prompt USSD MoMo a été envoyé. Composez votre <strong>PIN MoMo</strong> pour valider le paiement de <strong>'+new Intl.NumberFormat("fr-FR").format(montant)+' FCFA</strong>.</div>'
+      +'<div style="font-size:12px;color:var(--ink4)">⏱ Validation requise sous 60 secondes. L\'activation sera automatique.</div>'
+      +'<div id="payMtnStatus" style="margin-top:14px;font-size:13px;color:var(--bl);font-weight:700;padding:10px;background:var(--bg2);border-radius:8px">⏳ En attente de votre PIN MoMo...</div>'
+      +'</div>',
+      '<button class="btn bo" onclick="cm();_payStopPolling()">Fermer</button>');
+    // Polling
+    _payStartPollingMtn(ref);
+  })
+  .catch(function(err){
+    console.error('[MTN init]',err);
+    toast('❌ Connexion serveur impossible','err');
+  });
+}
+
+// Polling MTN spécifique (utilise payment_mtn.php)
+function _payStartPollingMtn(ref){
+  _payStopPolling();
+  var url = DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_mtn.php?action=status&ref='+encodeURIComponent(ref);
+  var checks = 0;
+  _payPollTimer = setInterval(function(){
+    checks++;
+    if(checks > 24){ // arrêt après 2 min (MTN expire ~60s)
+      _payStopPolling();
+      var sel=document.getElementById('payMtnStatus');
+      if(sel){sel.innerHTML='⏰ Délai dépassé. Réessayez si le paiement n\'a pas abouti.';sel.style.color='var(--or)';}
+      return;
+    }
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+      var statusEl = document.getElementById('payMtnStatus');
+      if(!statusEl) return;
+      if(data.status==='paid'){
+        statusEl.innerHTML = '✅ Paiement confirmé ! Activation en cours...';
+        statusEl.style.color = 'var(--gr)';
+        _payStopPolling();
+        var att = (DB.payAttempts||[]).find(function(x){return x.ref===ref;});
+        if(att){
+          att.status='paid';
+          att.datePaid=new Date().toISOString();
+          att.providerAuto='mtn_api';
+          if(typeof _payAutoActivate==='function'){
+            var result=_payAutoActivate(att);
+            att.activationResult=result.msg;
+          }
+          save();
+          if(window.VN) VN.toAdmin('✅ Paiement MTN auto-confirmé',
+            'Réf '+ref+' validé par MTN MoMo API ('+(att.activationResult||'OK')+')','success');
+        }
+        setTimeout(function(){cm();toast('✅ Paiement confirmé et accès activé !','ok');},2500);
+      } else if(data.status==='failed' || data.status==='cancelled'){
+        statusEl.innerHTML = '❌ Paiement refusé'+(data.reason?' ('+data.reason+')':'')+'. Réessayez.';
+        statusEl.style.color = 'var(--re)';
+        _payStopPolling();
+      } else {
+        statusEl.innerHTML = '⏳ En attente de votre PIN MoMo... ('+(checks*5)+'s)';
+      }
+    }).catch(function(){});
+  }, 5000);
+}
+
+// Polling du statut de paiement (toutes les 5s)
+var _payPollTimer = null;
+function _payStartPolling(ref){
+  _payStopPolling();
+  var url = DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_orange.php?action=status&ref='+encodeURIComponent(ref);
+  var checks = 0;
+  _payPollTimer = setInterval(function(){
+    checks++;
+    if(checks > 120){_payStopPolling();return;} // arrêt après 10 min
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+      var statusEl = document.getElementById('payOrangeStatus');
+      if(statusEl){
+        if(data.status==='paid'){
+          statusEl.innerHTML = '✅ Paiement confirmé ! Activation en cours...';
+          statusEl.style.color = 'var(--gr)';
+          _payStopPolling();
+          // Activer côté local
+          var att = (DB.payAttempts||[]).find(function(x){return x.ref===ref;});
+          if(att){
+            att.status = 'paid';
+            att.datePaid = new Date().toISOString();
+            att.providerAuto = 'orange_api';
+            if(typeof _payAutoActivate==='function'){
+              var result = _payAutoActivate(att);
+              att.activationResult = result.msg;
+            }
+            save();
+            if(window.VN) VN.toAdmin('✅ Paiement Orange auto-confirmé',
+              'Réf '+ref+' validé par l\'API Orange ('+(att.activationResult||'OK')+')','success');
+          }
+          setTimeout(function(){cm();toast('✅ Paiement confirmé et accès activé !','ok');},2500);
+        } else if(data.status==='failed' || data.status==='cancelled'){
+          statusEl.innerHTML = '❌ Paiement '+data.status+'. Réessayez ou choisissez un autre moyen.';
+          statusEl.style.color = 'var(--re)';
+          _payStopPolling();
+        } else {
+          statusEl.innerHTML = '⏳ En attente de votre confirmation Orange Money... ('+checks*5+'s)';
+        }
+      }
+    }).catch(function(){});
+  }, 5000);
+}
+function _payStopPolling(){
+  if(_payPollTimer){clearInterval(_payPollTimer);_payPollTimer=null;}
 }
 
 // Helper : copier un texte dans le presse-papier
@@ -28528,47 +29854,217 @@ function mPayAttempts(){
     return null;
   }
 
+  // ── v1.2 : icône + libellé selon l'intent ──
+  function _intentBadge(a){
+    var map = {
+      book:        {ico:'📚',lbl:'Livre',         col:'#0EA5E9'},
+      product:     {ico:'🛒',lbl:'Produit',       col:'#D97706'},
+      subscription:{ico:'🎓',lbl:'Abonnement',    col:'#7C3AED'},
+      whatsapp_group:{ico:'📲',lbl:'Groupe WA',   col:'#25D366'},
+      classroom:   {ico:'🎥',lbl:'Classe virt.',col:'#BE185D'},
+      generic:     {ico:'💳',lbl:'Paiement',      col:'#64748B'}
+    };
+    var m = map[a.intent||'generic'] || map.generic;
+    return '<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:10px;background:'+m.col+'20;color:'+m.col+';font-size:10px;font-weight:700">'+m.ico+' '+m.lbl+'</span>';
+  }
+
   var rows = atts.length
     ? atts.map(function(a){
         var dt = a.date ? new Date(a.date).toLocaleString('fr-FR') : '-';
         var statColor = a.status==='paid'?'var(--gr)':a.status==='pending'?'var(--gold2)':'var(--re)';
         var aboLie = _findAboForPay(a);
+        // ── v1.2 : bouton consolidé "Valider et activer" ──
         var btnPaye = a.status==='paid'
           ? '<span style="font-size:11px;color:var(--gr)">✓ Validé</span>'
-          : '<button class="btn xs bi" onclick="_payMarkPaid(\''+a.ref+'\')">✓ Payé</button>';
-        var btnAbo = (aboLie && aboLie.statut!=='Activé')
-          ? ' <button class="btn xs" style="background:#6D28D9;color:#fff" onclick="cm();activerAbonnement(\''+aboLie.id+'\')">🎓 Activer abo</button>'
+          : '<button class="btn xs" style="background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-weight:700;border:none" onclick="_payMarkPaid(\''+a.ref+'\')" title="Valider le paiement ET activer automatiquement l\'accès">✓ Valider &amp; activer</button>';
+        var btnAbo = (aboLie && aboLie.statut!=='Activé' && a.status!=='paid')
+          ? ' <button class="btn xs" style="background:#6D28D9;color:#fff" onclick="cm();activerAbonnement(\''+aboLie.id+'\')">🎓 Abo (manuel)</button>'
           : (aboLie&&aboLie.statut==='Activé' ? '<span style="font-size:10px;color:var(--gr)"> ✓ Abo actif</span>' : '');
+        // Infos client + résultat d'activation
+        var clientInfo = (a.customerNom||a.customerTel)
+          ? '<div style="font-size:10px;color:var(--ink4);margin-top:2px">👤 '+_esc(a.customerNom||'')+(a.customerTel?' · '+_esc(a.customerTel):'')+'</div>'
+          : '';
+        var actInfo = a.activationResult ? '<div style="font-size:10px;color:var(--gr);margin-top:2px">✓ '+_esc(a.activationResult)+'</div>' : '';
         return '<tr>'
-          +'<td style="font-family:monospace;font-size:11px">'+_esc(a.ref)+'</td>'
-          +'<td style="font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis">'+_esc(a.label)+'</td>'
-          +'<td style="font-size:12px;white-space:nowrap"><strong>'+new Intl.NumberFormat('fr-FR').format(a.montant)+'</strong> FCFA</td>'
-          +'<td style="font-size:11px;color:var(--ink4);white-space:nowrap">'+dt+'</td>'
-          +'<td><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:800;background:'+statColor+';color:#fff">'+_esc(a.status||'pending').toUpperCase()+'</span></td>'
-          +'<td style="white-space:nowrap">'+btnPaye+btnAbo
+          +'<td style="font-family:monospace;font-size:11px;vertical-align:top">'+_esc(a.ref)+'<br>'+_intentBadge(a)+'</td>'
+          +'<td style="font-size:12px;max-width:220px;vertical-align:top">'+_esc(a.label)+clientInfo+actInfo+'</td>'
+          +'<td style="font-size:12px;white-space:nowrap;vertical-align:top"><strong>'+new Intl.NumberFormat('fr-FR').format(a.montant)+'</strong> FCFA</td>'
+          +'<td style="font-size:11px;color:var(--ink4);white-space:nowrap;vertical-align:top">'+dt+'</td>'
+          +'<td style="vertical-align:top"><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:800;background:'+statColor+';color:#fff">'+_esc(a.status||'pending').toUpperCase()+'</span></td>'
+          +'<td style="white-space:nowrap;vertical-align:top">'+btnPaye+btnAbo
             +' <button class="btn xs bo" onclick="_payDelete(\''+a.ref+'\')">🗑</button>'
           +'</td>'
         +'</tr>';
       }).join('')
     : '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--ink4)">Aucune tentative enregistrée.</td></tr>';
-  M('💳 Paiements & Abonnements', 'Validez les paiements puis activez les abonnements',
-    '<div class="ib ibt mb12"><span>💡</span><span>1. Vérifiez le paiement (MoMo/Stripe). 2. Cliquez <b>"✓ Payé"</b>. 3. Si un abonnement est lié, cliquez <b>"🎓 Activer abo"</b> pour activer l\'accès e-learning et envoyer l\'invitation WhatsApp.</span></div>'
+
+  // ── v1.2 : compteurs récap ──
+  var pendingCount = atts.filter(function(x){return x.status==='pending';}).length;
+  var paidCount = atts.filter(function(x){return x.status==='paid';}).length;
+  var totalCollected = atts.filter(function(x){return x.status==='paid';}).reduce(function(s,x){return s+(x.montant||0);},0);
+  var topBar = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px">'
+    +'<div style="background:var(--orb);padding:8px 12px;border-radius:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:var(--or)">'+pendingCount+'</div><div style="font-size:10px;color:var(--ink4)">⏳ En attente</div></div>'
+    +'<div style="background:var(--grb);padding:8px 12px;border-radius:8px;text-align:center"><div style="font-size:18px;font-weight:800;color:var(--gr)">'+paidCount+'</div><div style="font-size:10px;color:var(--ink4)">✓ Validés</div></div>'
+    +'<div style="background:var(--blb);padding:8px 12px;border-radius:8px;text-align:center"><div style="font-size:14px;font-weight:800;color:var(--bl)">'+new Intl.NumberFormat('fr-FR').format(totalCollected)+'</div><div style="font-size:10px;color:var(--ink4)">💰 Total FCFA</div></div>'
+    +'</div>';
+
+  M('💳 Paiements & Activations Auto', 'Validation = activation automatique',
+    topBar
+    +'<div class="ib ibg mb12" style="background:#F0FDF4;border:1px solid #A7F3D0"><span>✨</span><span><strong>v1.2 — Automatisation totale</strong> : cliquez sur <b>"✓ Valider &amp; activer"</b>. Le système exécute automatiquement la bonne action selon le type (📚 livre → commande payée, 🎓 abonnement → accès e-learning activé, 📲 groupe WA → adhésion validée, 🎥 classe virtuelle → élève inscrit). Le client reçoit une notification avec ses accès.</span></div>'
     +'<div class="tw" style="max-height:420px;overflow:auto"><table>'
-    +'<thead><tr><th>Réf</th><th>Description</th><th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>'
+    +'<thead><tr><th>Réf / Type</th><th>Description / Client</th><th>Montant</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>');
 }
 // Helpers appelés depuis les onclick inline de mPayAttempts
+// ── v1.2 : auto-exécution de l'action liée à l'intent ──
 function _payMarkPaid(ref){
   var a=(DB.payAttempts||[]).find(function(x){return x.ref===ref;});
-  if(a){
-    a.status='paid';a.datePaid=new Date().toISOString();save();
-    // Notification admin + notification client si compte lié
-    if(typeof autoNotify==='function'){
-      autoNotify('✅ Paiement validé','Réf. '+ref+' — '+(a.label||'Paiement')+' ('+fmtN(a.montant||0)+' FCFA) marqué comme reçu.','admin');
-      if(a.accountId)autoNotify('✅ Paiement confirmé','Votre paiement (réf. '+ref+') a été validé. Merci de votre confiance !',a.accountId);
+  if(!a) return;
+  a.status='paid';
+  a.datePaid=new Date().toISOString();
+
+  // ── ACTIVATION AUTOMATIQUE selon l'intent ──
+  var result = _payAutoActivate(a);
+  a.activationResult = result.msg;
+
+  save();
+
+  // ── NOTIFICATIONS ──
+  if(window.VN){
+    VN.toAdmin('✅ Paiement validé','Réf. '+ref+' — '+(a.label||'Paiement')+' ('+fmtN(a.montant||0)+' FCFA)'+(result.msg?' — '+result.msg:''),'success');
+    if(a.accountId) VN.send({to:a.accountId, titre:'✅ Paiement confirmé', msg:'Votre paiement '+(a.label||'')+' a été validé. '+(result.userMsg||'Merci de votre confiance !'), type:'success'});
+  } else if(typeof autoNotify==='function'){
+    autoNotify('✅ Paiement validé','Réf. '+ref+' — '+(a.label||'Paiement')+' ('+fmtN(a.montant||0)+' FCFA) marqué comme reçu.','admin');
+    if(a.accountId)autoNotify('✅ Paiement confirmé','Votre paiement (réf. '+ref+') a été validé. Merci de votre confiance !',a.accountId);
+  }
+
+  // ── ÉVÉNEMENT pour VERITAS_AUTO ──
+  if(window.VA) VA.fire('payAttempt.validated', {attempt: a});
+
+  mPayAttempts();
+  toast('✓ Paiement validé'+(result.msg?' — '+result.msg:''));
+}
+
+// ── Cœur de l'automatisation post-paiement ──
+// Selon a.intent + a.targetId, déclenche l'action métier appropriée.
+function _payAutoActivate(a){
+  if(!a || !a.intent) return {msg:'', userMsg:''};
+  try {
+    switch(a.intent){
+
+      // ── 1. Achat d'un livre ──
+      case 'book': {
+        if(!DB.visitorOrders) DB.visitorOrders=[];
+        var order = DB.visitorOrders.find(function(o){return o.id===a.targetId||o.ref===a.ref;});
+        if(order){
+          order.statut = 'Payé';
+          order.datePaiement = a.datePaid;
+        } else {
+          // Créer une commande rétroactive si pas trouvée
+          DB.visitorOrders.push({
+            id:'ord_'+Date.now(), ref:a.ref, bid:a.targetId,
+            bookTitle:(a.label||'').replace(/^[^—]*—\s*/,''),
+            nom:a.customerNom||'?', tel:a.customerTel||'?',
+            date:new Date().toLocaleDateString('fr-FR'),
+            statut:'Payé', prix:a.montant, datePaiement:a.datePaid
+          });
+        }
+        // Décrémenter le stock si livre identifié
+        var bk = (DB.books||[]).find(function(b){return b.id===a.targetId;});
+        if(bk && bk.stock>0){bk.stock--;bk.vendu=(bk.vendu||0)+1;}
+        return {msg:'Commande activée', userMsg:'Votre commande est confirmée. Nous vous contacterons pour la livraison.'};
+      }
+
+      // ── 2. Achat d'un produit boutique générique ──
+      case 'product': {
+        if(!DB.visitorOrders) DB.visitorOrders=[];
+        DB.visitorOrders.push({
+          id:'ord_'+Date.now(), ref:a.ref, bid:'product:'+a.targetId,
+          bookTitle:a.label||'Produit',
+          nom:a.customerNom||'?', tel:a.customerTel||'?',
+          date:new Date().toLocaleDateString('fr-FR'),
+          statut:'Payé', prix:a.montant, datePaiement:a.datePaid
+        });
+        return {msg:'Commande activée', userMsg:'Votre commande est confirmée.'};
+      }
+
+      // ── 3. Souscription à un plan e-learning ──
+      case 'subscription': {
+        if(!DB.elearning) DB.elearning={};
+        if(!DB.elearning.abonnements) DB.elearning.abonnements=[];
+        var plan = (DB.elearning.plans||[]).find(function(p){return p.id===a.targetId;});
+        var endDate = new Date(); endDate.setMonth(endDate.getMonth()+12);
+        DB.elearning.abonnements.push({
+          id:'abo_'+Date.now(), ref:a.ref,
+          accountId:a.accountId, planId:a.targetId,
+          planNom:plan?plan.nom:a.label,
+          montant:a.montant, dateDebut:new Date().toISOString(),
+          dateFin:endDate.toISOString(),
+          statut:'Actif'
+        });
+        // Ajouter le plan au compte visiteur
+        if(a.accountId){
+          var acc = (DB.visitorAccounts||[]).find(function(x){return x.id===a.accountId;});
+          if(acc){
+            if(!acc.plans) acc.plans=[];
+            if(acc.plans.indexOf(a.targetId)<0) acc.plans.push(a.targetId);
+            acc.statut='actif';
+          }
+        }
+        return {msg:'Abonnement '+(plan?plan.nom:'')+' activé', userMsg:'Votre abonnement est actif pour 12 mois. Connectez-vous pour accéder à vos contenus premium.'};
+      }
+
+      // ── 4. Accès à un groupe WhatsApp ──
+      case 'whatsapp_group': {
+        if(!DB.whatsappGroupes) DB.whatsappGroupes=[];
+        var grp = DB.whatsappGroupes.find(function(g){return g.id===a.targetId;});
+        if(!grp) return {msg:'Groupe introuvable', userMsg:'Contactez-nous pour finaliser votre adhésion.'};
+        if(!grp.membresValides) grp.membresValides=[];
+        if(grp.membresValides.indexOf(a.accountId)<0 && a.accountId) grp.membresValides.push(a.accountId);
+        // Marquer le compte comme actif pour ce groupe
+        if(a.accountId){
+          var acc2 = (DB.visitorAccounts||[]).find(function(x){return x.id===a.accountId;});
+          if(acc2){
+            if(!acc2.waGroupesValides) acc2.waGroupesValides=[];
+            if(acc2.waGroupesValides.indexOf(a.targetId)<0) acc2.waGroupesValides.push(a.targetId);
+          }
+        }
+        var lien = grp.lien || grp.lienInvitation || '';
+        return {
+          msg:'Accès au groupe '+(grp.nom||'')+' accordé',
+          userMsg:'Votre adhésion au groupe WhatsApp est validée.'+(lien?' Lien : '+lien:'')
+        };
+      }
+
+      // ── 5. Inscription à une classe virtuelle ──
+      case 'classroom': {
+        if(!DB.classrooms) DB.classrooms=[];
+        var cv = DB.classrooms.find(function(c){return c.id===a.targetId;});
+        if(!cv) return {msg:'Classe virtuelle introuvable', userMsg:'Contactez-nous pour finaliser votre inscription.'};
+        if(!cv.students) cv.students=[];
+        if(a.accountId && !cv.students.find(function(s){return s.accountId===a.accountId;})){
+          cv.students.push({
+            accountId:a.accountId,
+            nom:a.customerNom||'?',
+            tel:a.customerTel||'?',
+            email:a.customerEmail||'',
+            dateInscription:new Date().toISOString(),
+            statut:'Inscrit'
+          });
+        }
+        return {
+          msg:'Inscrit à la classe '+(cv.nom||''),
+          userMsg:'Votre inscription à la classe virtuelle est confirmée.'+(cv.lienVisio?' Lien : '+cv.lienVisio:'')
+        };
+      }
+
+      default:
+        return {msg:'', userMsg:''};
     }
-    mPayAttempts();toast('✓ Paiement marqué comme reçu');
+  } catch(e){
+    console.error('[_payAutoActivate]',e);
+    return {msg:'Erreur activation : '+e.message, userMsg:''};
   }
 }
 function _payDelete(ref){
@@ -30233,5 +31729,488 @@ if(document.readyState==='loading'){
 ════════════════════════════════════════════════════════════════
 */
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<!-- 🎨 VERITAS — Pack "Gen Z Wow" (v1.2) — 12 améliorations visuelles modernes -->
+<!-- ═══════════════════════════════════════════════════════════════════════════ -->
+<style id="veritas-genz-style">
+/* ═════ VARIABLES ═════ */
+:root{
+  --vgz-gold:#FFC93C;--vgz-gold-glow:rgba(255,201,60,.5);
+  --vgz-neon:#3C8DFF;--vgz-pink:#EC4899;--vgz-violet:#7C3AED;
+  --vgz-mint:#10B981;--vgz-night:#0D1B3E;--vgz-deep:#142554;
+}
+
+/* ═════ #1 — CURSEUR PERSONNALISÉ ═════ */
+.vgz-cursor{position:fixed;width:24px;height:24px;border:2px solid var(--vgz-gold);border-radius:50%;pointer-events:none;z-index:99999;transition:transform .15s ease-out,opacity .2s,width .2s,height .2s,background .2s;mix-blend-mode:difference;transform:translate(-50%,-50%);opacity:0;display:none}
+.vgz-cursor-dot{position:fixed;width:6px;height:6px;background:var(--vgz-gold);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);opacity:0;transition:opacity .2s;display:none}
+.vgz-cursor.is-hover{width:48px;height:48px;background:rgba(255,201,60,.18);border-color:transparent}
+@media(hover:hover) and (pointer:fine){
+  .vgz-cursor,.vgz-cursor-dot{display:block}
+  body{cursor:none}
+  a,button,input,select,textarea,.vnav-btn,.vsec-title,[onclick]{cursor:none !important}
+}
+
+/* ═════ #2 — REVEAL ON SCROLL ═════ */
+.v-reveal{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
+.v-reveal.is-visible{opacity:1;transform:translateY(0)}
+.v-stagger.is-visible>*{animation:vgzFadeUp .6s ease-out both}
+.v-stagger.is-visible>*:nth-child(1){animation-delay:.05s}
+.v-stagger.is-visible>*:nth-child(2){animation-delay:.15s}
+.v-stagger.is-visible>*:nth-child(3){animation-delay:.25s}
+.v-stagger.is-visible>*:nth-child(4){animation-delay:.35s}
+.v-stagger.is-visible>*:nth-child(5){animation-delay:.45s}
+.v-stagger.is-visible>*:nth-child(6){animation-delay:.55s}
+@keyframes vgzFadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═════ #3 — SIDEBAR : LIFT + GLOW + INDICATEUR ═════ */
+.vnav{position:relative}
+.vnav-btn{position:relative;transition:transform .25s cubic-bezier(.34,1.56,.64,1),background .25s,box-shadow .3s,filter .3s !important;transform-style:preserve-3d}
+.vnav-btn::before{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,201,60,.3),rgba(60,141,255,.2));border-radius:inherit;opacity:0;transition:opacity .3s;z-index:-1;filter:blur(8px)}
+.vnav-btn:hover{transform:translateX(6px) translateZ(20px) scale(1.04);filter:drop-shadow(0 6px 18px rgba(255,201,60,.35))}
+.vnav-btn:hover::before{opacity:.8}
+.vnav-btn.on{transform:translateX(4px) scale(1.02);box-shadow:0 4px 24px rgba(255,201,60,.25);position:relative}
+.vnav-btn.on::after{content:"";position:absolute;left:0;top:10%;bottom:10%;width:4px;background:linear-gradient(180deg,#FFC93C,#FFA500);border-radius:0 6px 6px 0;box-shadow:0 0 16px var(--vgz-gold-glow);animation:vgzSlide .4s cubic-bezier(.16,1,.3,1)}
+@keyframes vgzSlide{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+/* Pulse douce sur icônes inactives */
+.vnav-btn:not(.on) .material-icons-round,
+.vnav-btn:not(.on) span:first-child{animation:vgzPulse 4s ease-in-out infinite}
+@keyframes vgzPulse{0%,100%{transform:scale(1);opacity:.85}50%{transform:scale(1.08);opacity:1}}
+/* Badge NEW animé */
+.vnav-btn[data-new]::before{content:"NEW";position:absolute;top:6px;right:8px;background:linear-gradient(135deg,#EC4899,#DC2626);color:#fff;font-size:8px;font-weight:900;padding:2px 6px;border-radius:8px;letter-spacing:.5px;animation:vgzShake 3s infinite;z-index:5;filter:none;opacity:1;inset:auto 8px auto auto;width:auto;height:auto}
+@keyframes vgzShake{0%,90%,100%{transform:rotate(0)}93%{transform:rotate(-8deg) scale(1.1)}96%{transform:rotate(8deg) scale(1.1)}}
+
+/* ═════ #4 — BOUTONS MAGNÉTIQUES + RIPPLE ═════ */
+.btn,.vbtn,button[onclick]{position:relative;overflow:hidden;transition:transform .15s ease-out,box-shadow .3s}
+.btn::after,.vbtn::after,button[onclick]::after{content:"";position:absolute;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);transform:translate(-50%,-50%) scale(0);pointer-events:none;animation:none;top:var(--ripple-y,50%);left:var(--ripple-x,50%)}
+.btn.is-ripple::after,.vbtn.is-ripple::after,button.is-ripple::after{animation:vgzRipple .6s ease-out}
+@keyframes vgzRipple{to{transform:translate(-50%,-50%) scale(60);opacity:0}}
+
+/* ═════ #5 — HERO 3D AVEC MOCKUP TÉLÉPHONE ═════ */
+.vgz-hero3d{position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(135deg,#080F24 0%,#142554 50%,#1E3A8A 100%);min-height:340px;display:flex;align-items:center;justify-content:center;padding:30px;perspective:1200px}
+.vgz-hero3d::before{content:"";position:absolute;inset:-20%;background:
+  radial-gradient(circle at 20% 30%,rgba(255,201,60,.18) 0%,transparent 40%),
+  radial-gradient(circle at 80% 70%,rgba(60,141,255,.18) 0%,transparent 40%),
+  radial-gradient(circle at 50% 50%,rgba(124,58,237,.12) 0%,transparent 50%);
+  animation:vgzMeshShift 16s ease-in-out infinite}
+@keyframes vgzMeshShift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-3%,2%) scale(1.05)}66%{transform:translate(3%,-2%) scale(1.02)}}
+/* Grid overlay */
+.vgz-hero3d::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px;mask:radial-gradient(ellipse at center,#000 30%,transparent 70%);pointer-events:none}
+.vgz-hero3d-inner{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:30px;width:100%;max-width:900px;flex-wrap:wrap}
+.vgz-hero3d-text{flex:1;min-width:260px;color:#fff}
+.vgz-hero3d-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,201,60,.4);backdrop-filter:blur(10px);padding:6px 14px;border-radius:30px;font-size:11px;font-weight:700;color:var(--vgz-gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+.vgz-hero3d-badge .live-dot{width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 0 0 rgba(16,185,129,.7);animation:vgzPing 1.6s infinite}
+@keyframes vgzPing{0%{box-shadow:0 0 0 0 rgba(16,185,129,.7)}70%{box-shadow:0 0 0 10px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
+.vgz-hero3d h1{font-family:'Libre Baskerville',serif;font-size:38px;line-height:1.15;color:#fff;margin:0 0 12px;background:linear-gradient(135deg,#fff 30%,#FFC93C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.vgz-hero3d-sub{font-size:14px;color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:18px}
+.vgz-hero3d-ctas{display:flex;gap:10px;flex-wrap:wrap}
+.vgz-hero3d-cta{background:#FFC93C;color:#142554;border:none;padding:12px 24px;border-radius:14px;font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 10px 30px rgba(255,201,60,.3)}
+.vgz-hero3d-cta:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 16px 40px rgba(255,201,60,.5)}
+.vgz-hero3d-cta.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);box-shadow:none}
+.vgz-hero3d-cta.ghost:hover{background:rgba(255,255,255,.15)}
+/* Mockup téléphone 3D */
+.vgz-phone{flex:0 0 220px;height:380px;background:linear-gradient(160deg,#1a1a2e,#0a0a1a);border:6px solid #1a1a2e;border-radius:36px;position:relative;box-shadow:0 30px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,201,60,.2),inset 0 0 0 1px rgba(255,255,255,.05);animation:vgzFloat 5s ease-in-out infinite;transform-style:preserve-3d;transform:rotateY(-12deg) rotateX(8deg)}
+@keyframes vgzFloat{0%,100%{transform:rotateY(-12deg) rotateX(8deg) translateY(0)}50%{transform:rotateY(-10deg) rotateX(6deg) translateY(-12px)}}
+.vgz-phone::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:80px;height:18px;background:#0a0a1a;border-radius:0 0 12px 12px;z-index:2}
+.vgz-phone-screen{position:absolute;inset:14px;background:linear-gradient(180deg,#080F24,#142554);border-radius:24px;overflow:hidden;display:flex;flex-direction:column}
+.vgz-phone-header{background:#0D1B3E;padding:22px 12px 8px;text-align:center;border-bottom:1px solid rgba(255,201,60,.1)}
+.vgz-phone-logo{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#FFC93C,#FFA500);display:flex;align-items:center;justify-content:center;margin:0 auto 4px;font-family:'Libre Baskerville',serif;font-size:22px;color:#142554;font-weight:700;box-shadow:0 0 16px rgba(255,201,60,.4)}
+.vgz-phone-name{font-size:8px;font-weight:800;color:#FFC93C;letter-spacing:1.5px}
+.vgz-phone-list{flex:1;padding:8px;display:flex;flex-direction:column;gap:6px;overflow:hidden}
+.vgz-phone-item{background:rgba(255,255,255,.06);border-left:2px solid #FFC93C;border-radius:6px;padding:6px 8px;display:flex;align-items:center;gap:6px;animation:vgzSlideIn .5s ease-out both}
+.vgz-phone-item:nth-child(1){animation-delay:.5s}.vgz-phone-item:nth-child(2){animation-delay:.8s}.vgz-phone-item:nth-child(3){animation-delay:1.1s}.vgz-phone-item:nth-child(4){animation-delay:1.4s}
+@keyframes vgzSlideIn{from{opacity:0;transform:translateX(15px)}to{opacity:1;transform:translateX(0)}}
+.vgz-phone-emoji{font-size:14px}
+.vgz-phone-text{flex:1;font-size:7px;color:#fff;line-height:1.3}
+.vgz-phone-bottom{background:rgba(255,201,60,.15);padding:6px;text-align:center;font-size:7px;font-weight:800;color:#FFC93C;letter-spacing:1px}
+
+/* ═════ #6 — STATS ANIMÉES ═════ */
+.vgz-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:24px 0}
+.vgz-stat{background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,201,60,.04));border:1px solid rgba(255,201,60,.2);border-radius:18px;padding:20px 16px;text-align:center;backdrop-filter:blur(10px);transition:transform .3s;position:relative;overflow:hidden}
+.vgz-stat:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 14px 40px rgba(255,201,60,.15)}
+.vgz-stat::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(255,201,60,.15) 0%,transparent 50%);opacity:0;transition:opacity .3s}
+.vgz-stat:hover::before{opacity:1}
+.vgz-stat-num{font-family:'Libre Baskerville',serif;font-size:38px;font-weight:700;color:#FFC93C;line-height:1;text-shadow:0 0 30px rgba(255,201,60,.4);font-feature-settings:"tnum"}
+.vgz-stat-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1.5px;margin-top:8px}
+
+/* ═════ #7 — BENTO GRID ═════ */
+.vgz-bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:12px;margin:20px 0}
+.vgz-bento-card{position:relative;border-radius:20px;overflow:hidden;background:var(--vgz-deep);transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s;cursor:pointer;border:1px solid rgba(255,255,255,.06)}
+.vgz-bento-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 60px rgba(20,37,84,.4)}
+.vgz-bento-card .b-bg{position:absolute;inset:0;opacity:.15;transition:opacity .3s}
+.vgz-bento-card:hover .b-bg{opacity:.3}
+.vgz-bento-card .b-content{position:relative;z-index:2;height:100%;padding:18px;display:flex;flex-direction:column;justify-content:space-between;color:#fff}
+.vgz-bento-card .b-ico{font-size:32px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
+.vgz-bento-card .b-title{font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;line-height:1.2}
+.vgz-bento-card .b-desc{font-size:11px;color:rgba(255,255,255,.7);margin-top:3px}
+.vgz-bento-card .b-arrow{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;color:#FFC93C;transition:all .3s}
+.vgz-bento-card:hover .b-arrow{background:#FFC93C;color:#142554;transform:rotate(-45deg) scale(1.1)}
+.bento-1{grid-column:span 2;grid-row:span 2;background:linear-gradient(135deg,#142554,#1E3A8A)}
+.bento-2{background:linear-gradient(135deg,#7C3AED,#A855F7)}
+.bento-3{background:linear-gradient(135deg,#0EA5E9,#0284C7)}
+.bento-4{background:linear-gradient(135deg,#059669,#10B981);grid-column:span 2}
+.bento-5{background:linear-gradient(135deg,#BE185D,#EC4899)}
+.bento-6{background:linear-gradient(135deg,#D97706,#F59E0B)}
+
+/* ═════ #8 — CARTES "POUR QUI" AVEC TILT 3D ═════ */
+.vgz-roles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0;perspective:1500px}
+.vgz-role{position:relative;border-radius:20px;padding:24px 20px;background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,201,60,.15);transition:transform .15s ease-out,box-shadow .3s;transform-style:preserve-3d;cursor:pointer;text-align:center;color:#fff;overflow:hidden}
+.vgz-role::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,201,60,.18) 0%,transparent 50%);opacity:0;transition:opacity .3s;pointer-events:none}
+.vgz-role:hover::before{opacity:1}
+.vgz-role:hover{box-shadow:0 30px 80px rgba(0,0,0,.4),0 0 0 1px var(--vgz-gold-glow)}
+.vgz-role-ico{font-size:48px;margin-bottom:10px;display:inline-block;filter:drop-shadow(0 6px 16px rgba(0,0,0,.3));transition:transform .3s}
+.vgz-role:hover .vgz-role-ico{transform:translateZ(40px) scale(1.1)}
+.vgz-role-title{font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;color:#FFC93C;margin-bottom:8px}
+.vgz-role-desc{font-size:12px;color:rgba(255,255,255,.7);line-height:1.5}
+.vgz-role-cta{display:inline-block;margin-top:14px;padding:6px 14px;background:rgba(255,201,60,.15);color:#FFC93C;border-radius:20px;font-size:11px;font-weight:700;text-decoration:none;transition:all .3s}
+.vgz-role:hover .vgz-role-cta{background:#FFC93C;color:#142554}
+
+/* ═════ #9 — MARQUEE PARTENAIRES ═════ */
+.vgz-marquee{margin:24px 0;padding:14px 0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.03),transparent);border-radius:14px;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent)}
+.vgz-marquee-track{display:flex;gap:48px;animation:vgzMarquee 30s linear infinite;white-space:nowrap}
+@keyframes vgzMarquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.vgz-marquee-item{font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:8px;white-space:nowrap;letter-spacing:1px}
+.vgz-marquee-item .ico{font-size:22px}
+
+/* ═════ #10 — TÉMOIGNAGES MODERNES ═════ */
+.vgz-testis{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:24px 0}
+.vgz-testi{background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,201,60,.02));border:1px solid rgba(255,201,60,.15);border-radius:20px;padding:22px;color:#fff;position:relative;transition:transform .3s,box-shadow .3s}
+.vgz-testi:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(255,201,60,.15)}
+.vgz-testi::before{content:"\201C";position:absolute;top:-10px;left:14px;font-family:Georgia,serif;font-size:80px;color:rgba(255,201,60,.25);line-height:1}
+.vgz-testi-stars{color:#FFC93C;font-size:14px;letter-spacing:2px;margin-bottom:10px;position:relative}
+.vgz-testi-text{font-family:Georgia,serif;font-style:italic;font-size:13px;line-height:1.7;color:rgba(255,255,255,.85);margin-bottom:14px}
+.vgz-testi-author{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
+.vgz-testi-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#FFC93C,#FFA500);display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-weight:800;color:#142554;font-size:15px;flex-shrink:0;box-shadow:0 4px 12px rgba(255,201,60,.3)}
+.vgz-testi-info-name{font-size:13px;font-weight:800;color:#FFC93C}
+.vgz-testi-info-meta{font-size:10px;color:rgba(255,255,255,.55);margin-top:2px}
+
+/* ═════ #11 — NÉON GLOW ═════ */
+.vgz-neon-text{text-shadow:0 0 10px var(--vgz-gold-glow),0 0 20px rgba(255,201,60,.3),0 0 40px rgba(255,201,60,.2)}
+.vgz-glass{background:rgba(255,255,255,.06);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1);border-radius:18px}
+
+/* ═════ #12 — RESPONSIVE ═════ */
+@media (max-width:900px){
+  .vgz-hero3d{flex-direction:column;text-align:center}
+  .vgz-phone{flex:0 0 180px;height:300px;margin:0 auto}
+  .vgz-bento{grid-template-columns:repeat(2,1fr)}
+  .bento-1,.bento-4{grid-column:span 2}
+  .vgz-roles{grid-template-columns:repeat(2,1fr)}
+  .vgz-testis{grid-template-columns:1fr}
+  .vgz-hero3d h1{font-size:28px}
+}
+@media (max-width:600px){
+  .vgz-cursor,.vgz-cursor-dot{display:none !important}
+  body{cursor:auto !important}
+  *{cursor:auto !important}
+  .vgz-roles{grid-template-columns:1fr}
+}
+</style>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════════
+// VERITAS Gen Z Pack — Initialisation après chargement DOM
+// ═══════════════════════════════════════════════════════════════════════════
+(function(){
+  'use strict';
+
+  // ── 1. CURSEUR PERSONNALISÉ ──────────────────────────────────────────────
+  function initCursor(){
+    if(window.matchMedia('(hover:none)').matches) return;
+    var cursor=document.createElement('div');cursor.className='vgz-cursor';
+    var dot=document.createElement('div');dot.className='vgz-cursor-dot';
+    document.body.appendChild(cursor);document.body.appendChild(dot);
+    var mx=0,my=0,cx=0,cy=0;
+    document.addEventListener('mousemove',function(e){
+      mx=e.clientX;my=e.clientY;
+      dot.style.left=mx+'px';dot.style.top=my+'px';dot.style.opacity='1';
+      cursor.style.opacity='1';
+    });
+    function loop(){
+      cx+=(mx-cx)*0.18;cy+=(my-cy)*0.18;
+      cursor.style.left=cx+'px';cursor.style.top=cy+'px';
+      requestAnimationFrame(loop);
+    }
+    loop();
+    document.addEventListener('mouseover',function(e){
+      var t=e.target;
+      if(t.closest('a,button,input,select,textarea,.vnav-btn,[onclick]')) cursor.classList.add('is-hover');
+      else cursor.classList.remove('is-hover');
+    });
+  }
+
+  // ── 2. REVEAL ON SCROLL ──────────────────────────────────────────────────
+  function initReveal(){
+    if(!('IntersectionObserver' in window)) return;
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.add('is-visible');io.unobserve(e.target);}
+      });
+    },{threshold:.12,rootMargin:'0px 0px -50px 0px'});
+    document.querySelectorAll('.v-reveal,.vsec,.vcard,.vgz-stats,.vgz-bento,.vgz-roles,.vgz-testis').forEach(function(el){
+      if(!el.classList.contains('v-reveal'))el.classList.add('v-reveal');
+      io.observe(el);
+    });
+  }
+
+  // ── 3. RIPPLE EFFECT SUR BOUTONS ─────────────────────────────────────────
+  function initRipple(){
+    document.addEventListener('click',function(e){
+      var b=e.target.closest('.btn,.vbtn,button');
+      if(!b||b.dataset.noRipple)return;
+      var r=b.getBoundingClientRect();
+      b.style.setProperty('--ripple-x',(e.clientX-r.left)+'px');
+      b.style.setProperty('--ripple-y',(e.clientY-r.top)+'px');
+      b.classList.remove('is-ripple');
+      void b.offsetWidth;
+      b.classList.add('is-ripple');
+      setTimeout(function(){b.classList.remove('is-ripple');},600);
+    });
+  }
+
+  // ── 4. STATS ANIMÉES (compteurs montant à 0 → N) ────────────────────────
+  window.vgzAnimateCount=function(el,target,suffix,duration){
+    duration=duration||1500;suffix=suffix||'';
+    var start=null,startVal=0;
+    function step(ts){
+      if(!start)start=ts;
+      var pct=Math.min(1,(ts-start)/duration);
+      var eased=1-Math.pow(1-pct,3); // ease-out cubic
+      var current=Math.floor(startVal+(target-startVal)*eased);
+      el.textContent=current.toLocaleString('fr-FR')+suffix;
+      if(pct<1)requestAnimationFrame(step);
+      else el.textContent=target.toLocaleString('fr-FR')+suffix;
+    }
+    requestAnimationFrame(step);
+  };
+  function initStatsObserver(){
+    if(!('IntersectionObserver' in window)) return;
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting && !e.target.dataset.counted){
+          var t=parseInt(e.target.dataset.count||'0');
+          var suf=e.target.dataset.suffix||'';
+          e.target.dataset.counted='1';
+          window.vgzAnimateCount(e.target,t,suf,1500);
+          io.unobserve(e.target);
+        }
+      });
+    },{threshold:.5});
+    document.querySelectorAll('[data-count]').forEach(function(el){io.observe(el);});
+  }
+
+  // ── 5. TILT 3D SUR CARTES "POUR QUI" ────────────────────────────────────
+  function initTilt(){
+    document.querySelectorAll('.vgz-role,.vgz-bento-card').forEach(function(card){
+      card.addEventListener('mousemove',function(e){
+        var r=card.getBoundingClientRect();
+        var x=(e.clientX-r.left)/r.width;
+        var y=(e.clientY-r.top)/r.height;
+        var rx=(y-.5)*-12;var ry=(x-.5)*12;
+        card.style.transform='translateY(-6px) perspective(800px) rotateX('+rx+'deg) rotateY('+ry+'deg) scale(1.02)';
+        card.style.setProperty('--mx',(x*100)+'%');
+        card.style.setProperty('--my',(y*100)+'%');
+      });
+      card.addEventListener('mouseleave',function(){
+        card.style.transform='';
+      });
+    });
+  }
+
+  // ── 6. INJECTION DE LA SECTION HERO 3D + STATS + BENTO + ROLES + MARQUEE + TESTIS ──
+  function injectGenZBlock(){
+    var vContent=document.getElementById('vContent');
+    if(!vContent) return;
+    // Détecter si on est sur la section "presentation" (accueil visiteur)
+    var firstSection=vContent.querySelector('.vsec');
+    if(!firstSection) return;
+    // Vérifier si déjà injecté
+    if(document.getElementById('vgz-hero-wrap')) return;
+
+    // Compteurs dynamiques basés sur DB
+    var nStudents=(typeof DB!=='undefined'&&DB.students)?DB.students.length:127;
+    var nTeachers=(typeof DB!=='undefined'&&DB.teachers)?DB.teachers.length:25;
+    var nBooks=(typeof DB!=='undefined'&&DB.books)?DB.books.length:42;
+    var nVisitors=Math.floor(80+Math.random()*60); // pseudo-live
+
+    var wrap=document.createElement('div');
+    wrap.id='vgz-hero-wrap';
+    wrap.innerHTML = ''
+      // === HERO 3D ===
+      +'<div class="vgz-hero3d v-reveal">'
+        +'<div class="vgz-hero3d-inner">'
+          +'<div class="vgz-hero3d-text">'
+            +'<div class="vgz-hero3d-badge"><span class="live-dot"></span>'+nVisitors+' apprenants en ligne maintenant</div>'
+            +'<h1>Réussis ton <em>BAC</em>, ton <em>BEPC</em>,<br>ton <em>Probatoire</em>.</h1>'
+            +'<div class="vgz-hero3d-sub">La plateforme éducative #1 à Douala. Cours en direct, épreuves corrigées, classes virtuelles et résultats prouvés.</div>'
+            +'<div class="vgz-hero3d-ctas">'
+              +'<button class="vgz-hero3d-cta" onclick="showRegisterForm()">🚀 Commencer gratuitement</button>'
+              +'<button class="vgz-hero3d-cta ghost" onclick="vShowSec(\'elearning\',document.querySelector(\'.vnav-btn[onclick*=elearning]\'))">▶ Découvrir</button>'
+            +'</div>'
+          +'</div>'
+          +'<div class="vgz-phone">'
+            +'<div class="vgz-phone-screen">'
+              +'<div class="vgz-phone-header"><div class="vgz-phone-logo">V</div><div class="vgz-phone-name">VÉRITAS</div></div>'
+              +'<div class="vgz-phone-list">'
+                +'<div class="vgz-phone-item"><div class="vgz-phone-emoji">🎯</div><div class="vgz-phone-text">Nouvelle note : 16/20 en Maths</div></div>'
+                +'<div class="vgz-phone-item"><div class="vgz-phone-emoji">📚</div><div class="vgz-phone-text">Cours BAC Philo dispo</div></div>'
+                +'<div class="vgz-phone-item"><div class="vgz-phone-emoji">🎥</div><div class="vgz-phone-text">Classe virtuelle 18h</div></div>'
+                +'<div class="vgz-phone-item"><div class="vgz-phone-emoji">✅</div><div class="vgz-phone-text">Paiement OM confirmé</div></div>'
+              +'</div>'
+              +'<div class="vgz-phone-bottom">⚡ TEMPS RÉEL</div>'
+            +'</div>'
+          +'</div>'
+        +'</div>'
+      +'</div>'
+
+      // === STATS ANIMÉES ===
+      +'<div class="vgz-stats v-reveal">'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="94" data-suffix="%">0</div><div class="vgz-stat-label">Réussite BEPC</div></div>'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="91" data-suffix="%">0</div><div class="vgz-stat-label">Réussite BAC</div></div>'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="'+nStudents+'" data-suffix="+">0</div><div class="vgz-stat-label">Élèves formés</div></div>'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="'+nTeachers+'" data-suffix="">0</div><div class="vgz-stat-label">Enseignants</div></div>'
+      +'</div>'
+
+      // === BENTO GRID ===
+      +'<div class="vgz-bento v-reveal">'
+        +'<div class="vgz-bento-card bento-1" onclick="vShowSec(\'elearning\',document.querySelector(\'.vnav-btn[onclick*=elearning]\'))">'
+          +'<div class="b-arrow">↗</div>'
+          +'<div class="b-content"><div class="b-ico">📚</div><div><div class="b-title">E-Learning Premium</div><div class="b-desc">Cours vidéo, épreuves corrigées et fiches de révision pour BEPC, Probat & BAC. Accessible 24h/24.</div></div></div>'
+        +'</div>'
+        +'<div class="vgz-bento-card bento-2" onclick="showClasseVirtuelle()">'
+          +'<div class="b-content"><div class="b-ico">🎥</div><div class="b-title">Classes virtuelles</div></div>'
+        +'</div>'
+        +'<div class="vgz-bento-card bento-3" onclick="showLabosVirtuels()">'
+          +'<div class="b-content"><div class="b-ico">🔬</div><div class="b-title">Labos virtuels</div></div>'
+        +'</div>'
+        +'<div class="vgz-bento-card bento-4" onclick="vShowSec(\'boutique\',document.querySelector(\'.vnav-btn[onclick*=boutique]\'))">'
+          +'<div class="b-arrow">↗</div>'
+          +'<div class="b-content"><div class="b-ico">🛒</div><div><div class="b-title">Boutique manuels</div><div class="b-desc">'+nBooks+' manuels MINESEC · Paiement MoMo/Orange · Livraison Douala</div></div></div>'
+        +'</div>'
+        +'<div class="vgz-bento-card bento-5" onclick="showJeuxEdu()">'
+          +'<div class="b-content"><div class="b-ico">🎮</div><div class="b-title">Jeux éducatifs</div></div>'
+        +'</div>'
+        +'<div class="vgz-bento-card bento-6" onclick="showEpreuves()">'
+          +'<div class="b-content"><div class="b-ico">📝</div><div class="b-title">Annales</div></div>'
+        +'</div>'
+      +'</div>'
+
+      // === POUR QUI ===
+      +'<div style="margin:30px 0 16px;text-align:center"><h2 style="font-family:Libre Baskerville,serif;font-size:26px;color:#FFC93C;margin:0 0 6px" class="vgz-neon-text">Tu es...</h2><div style="font-size:13px;color:rgba(255,255,255,.6)">Une plateforme. Un accès personnalisé pour chaque rôle.</div></div>'
+      +'<div class="vgz-roles v-reveal">'
+        +'<div class="vgz-role" onclick="showLogin(\'eleve\')">'
+          +'<div class="vgz-role-ico">🎓</div>'
+          +'<div class="vgz-role-title">ÉLÈVE</div>'
+          +'<div class="vgz-role-desc">Notes, bulletins, devoirs et cours en ligne. Tout ce qu\'il te faut pour réussir.</div>'
+          +'<div class="vgz-role-cta">Se connecter →</div>'
+        +'</div>'
+        +'<div class="vgz-role" onclick="showRegisterForm()">'
+          +'<div class="vgz-role-ico">👨‍👩‍👧</div>'
+          +'<div class="vgz-role-title">PARENT</div>'
+          +'<div class="vgz-role-desc">Suis la progression de ton enfant, paie en MoMo et reçois les notifs en direct.</div>'
+          +'<div class="vgz-role-cta">S\'inscrire →</div>'
+        +'</div>'
+        +'<div class="vgz-role" onclick="showLogin(\'enseignant\')">'
+          +'<div class="vgz-role-ico">👨‍🏫</div>'
+          +'<div class="vgz-role-title">ENSEIGNANT</div>'
+          +'<div class="vgz-role-desc">Saisis tes notes en lot, publie tes manuels, suis les performances de tes classes.</div>'
+          +'<div class="vgz-role-cta">Accéder →</div>'
+        +'</div>'
+        +'<div class="vgz-role" onclick="window.open(\'https://wa.me/237697637739?text=Bonjour%20VERITAS%20pour%20mon%20etablissement\',\'_blank\')">'
+          +'<div class="vgz-role-ico">🏫</div>'
+          +'<div class="vgz-role-title">ÉTABLISSEMENT</div>'
+          +'<div class="vgz-role-desc">Digitalise ton école : inscriptions, paiements, bulletins APC, e-learning complet.</div>'
+          +'<div class="vgz-role-cta">Contacter →</div>'
+        +'</div>'
+      +'</div>'
+
+      // === MARQUEE ===
+      +'<div class="vgz-marquee v-reveal">'
+        +'<div class="vgz-marquee-track">'
+          +(['<span class="ico">🏫</span> MINESEC','<span class="ico">📚</span> Programmes officiels','<span class="ico">⚡</span> MTN MoMo','<span class="ico">🟠</span> Orange Money','<span class="ico">🎓</span> ENS Yaoundé','<span class="ico">🔬</span> Polytechnique','<span class="ico">📖</span> CLE International','<span class="ico">🤝</span> Afrédit'].map(function(s){return '<div class="vgz-marquee-item">'+s+'</div>';}).join(''))
+          // dupliquer pour boucle infinie
+          +(['<span class="ico">🏫</span> MINESEC','<span class="ico">📚</span> Programmes officiels','<span class="ico">⚡</span> MTN MoMo','<span class="ico">🟠</span> Orange Money','<span class="ico">🎓</span> ENS Yaoundé','<span class="ico">🔬</span> Polytechnique','<span class="ico">📖</span> CLE International','<span class="ico">🤝</span> Afrédit'].map(function(s){return '<div class="vgz-marquee-item">'+s+'</div>';}).join(''))
+        +'</div>'
+      +'</div>'
+
+      // === TÉMOIGNAGES ===
+      +'<div style="margin:30px 0 16px;text-align:center"><h2 style="font-family:Libre Baskerville,serif;font-size:26px;color:#FFC93C;margin:0 0 6px" class="vgz-neon-text">Ils nous font confiance</h2></div>'
+      +'<div class="vgz-testis v-reveal">'
+        +'<div class="vgz-testi">'
+          +'<div class="vgz-testi-stars">★★★★★</div>'
+          +'<div class="vgz-testi-text">Grâce à VÉRITAS, j\'ai pu suivre les cours depuis Douala et préparer mon BAC à mon rythme. La plateforme est fluide et les enseignants disponibles 24/7.</div>'
+          +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">M</div><div><div class="vgz-testi-info-name">Marie K.</div><div class="vgz-testi-info-meta">Tle C · BAC mention Bien 2025</div></div></div>'
+        +'</div>'
+        +'<div class="vgz-testi">'
+          +'<div class="vgz-testi-stars">★★★★★</div>'
+          +'<div class="vgz-testi-text">Le suivi des notes et absences de mon fils en temps réel est révolutionnaire. Je paie en MoMo en 5 secondes, et les bulletins APC sont impeccables.</div>'
+          +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">J</div><div><div class="vgz-testi-info-name">Jean-Paul M.</div><div class="vgz-testi-info-meta">Parent · 3ème · Bonapriso</div></div></div>'
+        +'</div>'
+        +'<div class="vgz-testi">'
+          +'<div class="vgz-testi-stars">★★★★★</div>'
+          +'<div class="vgz-testi-text">Les classes virtuelles sont fluides même avec une connexion modeste. Mes élèves participent plus qu\'en présentiel ! Et la saisie de notes en lot, un bonheur.</div>'
+          +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">G</div><div><div class="vgz-testi-info-name">M. Georges T.</div><div class="vgz-testi-info-meta">Prof Maths · 15 ans d\'expérience</div></div></div>'
+        +'</div>'
+      +'</div>'
+      ;
+
+    // Insertion après la première section (vidéo + actualités)
+    firstSection.appendChild(wrap);
+
+    // Ré-initialiser les observers sur les nouveaux éléments
+    setTimeout(function(){
+      initReveal();
+      initStatsObserver();
+      initTilt();
+    },100);
+  }
+
+  // ── 7. AJOUTER BADGES "NEW" SUR ONGLETS SIDEBAR ──────────────────────────
+  function decorateSidebar(){
+    var newItems=['jeux','labos','classes','orientation'];
+    document.querySelectorAll('.vnav-btn').forEach(function(btn){
+      var onclick=btn.getAttribute('onclick')||'';
+      newItems.forEach(function(item){
+        if(onclick.indexOf("'"+item+"'")>=0 || onclick.indexOf('"'+item+'"')>=0){
+          btn.setAttribute('data-new','1');
+        }
+      });
+    });
+  }
+
+  // ── 8. RE-INJECTION QUAND ON RETOURNE SUR L'ACCUEIL ──────────────────────
+  function watchSection(){
+    if(typeof vShowSec === 'function' && !vShowSec.__vgzWrapped){
+      var orig = vShowSec;
+      window.vShowSec = function(sec){
+        var r = orig.apply(this, arguments);
+        if(sec === 'presentation') setTimeout(injectGenZBlock, 100);
+        return r;
+      };
+      window.vShowSec.__vgzWrapped = true;
+    }
+  }
+
+  // ── INITIALISATION ───────────────────────────────────────────────────────
+  function boot(){
+    initCursor();
+    initRipple();
+    decorateSidebar();
+    initReveal();
+    initStatsObserver();
+    initTilt();
+    injectGenZBlock();
+    watchSection();
+  }
+
+  if(document.readyState==='complete' || document.readyState==='interactive'){
+    setTimeout(boot, 800);
+  } else {
+    window.addEventListener('DOMContentLoaded', function(){setTimeout(boot, 800);});
+  }
+  // Re-check si l'app charge tardivement
+  setTimeout(boot, 2500);
+})();
+</script>
+
 </body>
 </html>

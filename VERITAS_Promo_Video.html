@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1920,initial-scale=1">
+<title>VÉRITAS Academy — Vidéo promotionnelle</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Montserrat:wght@400;600;700;800;900&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif}
+html,body{width:100vw;height:100vh;overflow:hidden;background:#000;color:#fff}
+.stage{position:fixed;inset:0;width:1920px;height:1080px;transform-origin:top left;background:#000}
+@media (max-aspect-ratio: 16/9){.stage{transform:scale(calc(100vw / 1920))}}
+@media (min-aspect-ratio: 16/9){.stage{transform:scale(calc(100vh / 1080))}}
+
+.scene{position:absolute;inset:0;opacity:0;pointer-events:none;display:flex;align-items:center;justify-content:center}
+.scene.active{opacity:1;pointer-events:auto;animation:sceneIn 0.8s ease-out forwards}
+
+@keyframes sceneIn{from{opacity:0;transform:scale(1.02)}to{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideLeft{from{opacity:0;transform:translateX(-60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideRight{from{opacity:0;transform:translateX(60px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pop{0%{opacity:0;transform:scale(0.5)}60%{transform:scale(1.1)}100%{opacity:1;transform:scale(1)}}
+@keyframes shine{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-15px)}}
+@keyframes rotate{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes typewriter{from{width:0}to{width:100%}}
+@keyframes countUp{from{opacity:0}to{opacity:1}}
+@keyframes bgShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* ── SCÈNE 1 : Logo intro ── */
+.s1{background:radial-gradient(circle at center,#1a3a8a 0%,#0D1B3E 70%,#000 100%)}
+.s1 .logo-circle{width:200px;height:200px;border-radius:50%;background:#FFC93C;display:flex;align-items:center;justify-content:center;animation:pop 1s ease-out;box-shadow:0 0 80px rgba(255,201,60,.6)}
+.s1 .logo-circle::before{content:'V';font-family:'Libre Baskerville',serif;font-size:120px;color:#142554;font-weight:700}
+.s1 .title-block{position:absolute;bottom:200px;text-align:center;width:100%;animation:slideUp 1.2s ease-out 0.6s both}
+.s1 h1{font-family:'Libre Baskerville',serif;font-size:96px;color:#FFC93C;letter-spacing:8px;margin-bottom:16px;text-shadow:0 4px 20px rgba(0,0,0,.5)}
+.s1 p{font-size:32px;color:rgba(255,255,255,.85);font-style:italic;letter-spacing:3px}
+
+/* particules flottantes */
+.particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.particles span{position:absolute;border-radius:50%;background:rgba(255,201,60,.15);animation:float 4s ease-in-out infinite}
+
+/* ── SCÈNE 2 : Slogan accrocheur ── */
+.s2{background:linear-gradient(135deg,#142554,#1E3A8A,#0D1B3E);background-size:200% 200%;animation:bgShift 8s ease infinite;flex-direction:column;gap:40px}
+.s2 .accroche{font-family:'Libre Baskerville',serif;font-size:108px;font-weight:700;text-align:center;line-height:1.2;animation:slideUp 1s ease-out;background:linear-gradient(135deg,#FFC93C,#FFD96A);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;max-width:1600px}
+.s2 .accroche em{font-style:normal;background:none;-webkit-text-fill-color:#fff;color:#fff;display:block;font-size:80px;margin-top:20px}
+.s2 .underline{width:300px;height:6px;background:#FFC93C;border-radius:3px;animation:slideUp 1s ease-out 0.6s both}
+.s2 .subline{font-size:32px;color:rgba(255,255,255,.7);font-weight:300;letter-spacing:4px;animation:slideUp 1s ease-out 0.9s both}
+
+/* ── SCÈNE 3 : Statistiques chiffres clés ── */
+.s3{background:linear-gradient(180deg,#0F172A 0%,#1E3A8A 100%);flex-direction:column;padding:80px}
+.s3 h2{font-size:64px;font-weight:800;margin-bottom:60px;text-align:center;animation:slideUp 0.8s ease-out}
+.s3 h2 .gold{color:#FFC93C}
+.s3 .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:40px;width:100%;max-width:1700px}
+.s3 .stat{background:rgba(255,255,255,.05);border:2px solid rgba(255,201,60,.3);border-radius:24px;padding:50px 30px;text-align:center;backdrop-filter:blur(10px);animation:pop 0.6s ease-out both}
+.s3 .stat:nth-child(1){animation-delay:0.3s}
+.s3 .stat:nth-child(2){animation-delay:0.5s}
+.s3 .stat:nth-child(3){animation-delay:0.7s}
+.s3 .stat:nth-child(4){animation-delay:0.9s}
+.s3 .stat-num{font-family:'Libre Baskerville',serif;font-size:96px;color:#FFC93C;font-weight:700;line-height:1;margin-bottom:12px;text-shadow:0 0 30px rgba(255,201,60,.4)}
+.s3 .stat-label{font-size:22px;font-weight:600;color:rgba(255,255,255,.9);text-transform:uppercase;letter-spacing:2px}
+.s3 .stat-sub{font-size:14px;color:rgba(255,255,255,.5);margin-top:8px}
+
+/* ── SCÈNE 4 : Plateforme E-Learning ── */
+.s4{background:linear-gradient(135deg,#0F172A,#3C8DFF);padding:60px;flex-direction:column}
+.s4 .badge{background:rgba(255,201,60,.2);color:#FFC93C;padding:10px 24px;border-radius:30px;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:30px;animation:slideUp 0.6s ease-out}
+.s4 h2{font-size:80px;font-weight:900;margin-bottom:24px;text-align:center;animation:slideUp 0.8s ease-out 0.2s both}
+.s4 h2 .gold{color:#FFC93C}
+.s4 .lead{font-size:28px;color:rgba(255,255,255,.85);max-width:1200px;text-align:center;margin-bottom:50px;line-height:1.5;animation:slideUp 0.8s ease-out 0.4s both}
+.s4 .feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:1700px;width:100%}
+.s4 .feat{background:rgba(255,255,255,.1);border-radius:20px;padding:30px;backdrop-filter:blur(8px);animation:slideUp 0.6s ease-out both}
+.s4 .feat:nth-child(1){animation-delay:0.6s}
+.s4 .feat:nth-child(2){animation-delay:0.75s}
+.s4 .feat:nth-child(3){animation-delay:0.9s}
+.s4 .feat-ico{font-size:64px;margin-bottom:14px}
+.s4 .feat-title{font-size:24px;font-weight:800;margin-bottom:10px;color:#FFC93C}
+.s4 .feat-desc{font-size:16px;color:rgba(255,255,255,.85);line-height:1.5}
+
+/* ── SCÈNE 5 : Boutique manuels ── */
+.s5{background:linear-gradient(135deg,#142554,#7C3AED);padding:80px;flex-direction:column}
+.s5 .row{display:flex;align-items:center;gap:80px;max-width:1700px}
+.s5 .text{flex:1;animation:slideLeft 0.8s ease-out}
+.s5 .badge{background:#FFC93C;color:#142554;padding:8px 20px;border-radius:30px;font-size:16px;font-weight:800;letter-spacing:2px;display:inline-block;margin-bottom:20px}
+.s5 h2{font-size:72px;font-weight:900;margin-bottom:24px;line-height:1.1}
+.s5 h2 .gold{color:#FFC93C}
+.s5 .lead{font-size:22px;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:24px}
+.s5 .check-list li{list-style:none;font-size:20px;margin-bottom:12px;padding-left:36px;position:relative}
+.s5 .check-list li::before{content:'✓';position:absolute;left:0;width:24px;height:24px;background:#FFC93C;color:#142554;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px}
+.s5 .books{flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:24px;animation:slideRight 0.8s ease-out 0.2s both}
+.s5 .book{background:linear-gradient(135deg,#FFC93C,#FFD96A);border-radius:16px;padding:30px;color:#142554;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:float 3s ease-in-out infinite}
+.s5 .book:nth-child(2){animation-delay:0.5s}
+.s5 .book:nth-child(3){animation-delay:1s}
+.s5 .book:nth-child(4){animation-delay:1.5s}
+.s5 .book-ico{font-size:48px;margin-bottom:10px}
+.s5 .book-title{font-size:18px;font-weight:800;margin-bottom:6px;font-family:'Libre Baskerville',serif}
+.s5 .book-price{font-size:24px;font-weight:900}
+
+/* ── SCÈNE 6 : Classes virtuelles ── */
+.s6{background:linear-gradient(135deg,#0F172A,#7C3AED);padding:80px;flex-direction:column}
+.s6 h2{font-size:84px;font-weight:900;margin-bottom:30px;text-align:center;animation:slideUp 0.8s ease-out}
+.s6 h2 .gold{color:#FFC93C}
+.s6 .lead{font-size:28px;color:rgba(255,255,255,.85);text-align:center;max-width:1200px;margin-bottom:60px;line-height:1.5;animation:slideUp 0.8s ease-out 0.2s both}
+.s6 .mockup{width:1200px;height:600px;background:#1a1a2e;border-radius:24px;box-shadow:0 30px 90px rgba(0,0,0,.5);border:3px solid #FFC93C;position:relative;overflow:hidden;animation:pop 0.8s ease-out 0.4s both}
+.s6 .mock-bar{height:50px;background:#0F172A;display:flex;align-items:center;padding:0 20px;gap:8px}
+.s6 .mock-bar::before{content:'';width:14px;height:14px;border-radius:50%;background:#FF5F57;box-shadow:24px 0 0 #FEBC2E,48px 0 0 #28C840}
+.s6 .mock-grid{padding:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:20px;height:calc(100% - 50px)}
+.s6 .mock-tile{background:rgba(124,58,237,.3);border:2px solid rgba(124,58,237,.6);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:60px;animation:pulse 3s ease-in-out infinite}
+.s6 .mock-tile:nth-child(1){animation-delay:0s}
+.s6 .mock-tile:nth-child(2){animation-delay:0.5s}
+.s6 .mock-tile:nth-child(3){animation-delay:1s}
+.s6 .mock-tile:nth-child(4){animation-delay:1.5s}
+.s6 .mock-tile:nth-child(5){animation-delay:2s}
+.s6 .mock-tile:nth-child(6){animation-delay:2.5s}
+
+/* ── SCÈNE 7 : Cartes mentales littérature ── */
+.s7{background:linear-gradient(135deg,#142554,#059669);padding:60px;flex-direction:column}
+.s7 .badge{background:rgba(255,201,60,.2);color:#FFC93C;padding:10px 24px;border-radius:30px;font-size:18px;font-weight:700;margin-bottom:20px;animation:slideUp 0.6s ease-out}
+.s7 h2{font-size:72px;font-weight:900;margin-bottom:30px;text-align:center;animation:slideUp 0.8s ease-out 0.2s both}
+.s7 h2 .gold{color:#FFC93C}
+.s7 .mindmap{width:1400px;height:560px;position:relative;animation:pop 1s ease-out 0.4s both}
+.s7 .center-node{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#FFC93C;color:#142554;padding:30px 50px;border-radius:24px;font-weight:900;font-size:28px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.4);z-index:5;animation:pulse 3s ease-in-out infinite}
+.s7 .center-node small{display:block;font-size:14px;margin-top:6px;font-weight:600}
+.s7 .branch{position:absolute;padding:20px 28px;border-radius:16px;color:#fff;font-weight:700;font-size:20px;box-shadow:0 12px 40px rgba(0,0,0,.3);animation:float 4s ease-in-out infinite}
+.s7 .b1{top:8%;left:5%;background:#7C3AED;animation-delay:0s}
+.s7 .b2{top:8%;right:5%;background:#0EA5E9;animation-delay:0.6s}
+.s7 .b3{bottom:8%;left:5%;background:#DC2626;animation-delay:1.2s}
+.s7 .b4{bottom:8%;right:5%;background:#D97706;animation-delay:1.8s}
+
+/* ── SCÈNE 8 : Jeux éducatifs ── */
+.s8{background:linear-gradient(135deg,#7C3AED,#EC4899);padding:80px;flex-direction:column}
+.s8 h2{font-size:84px;font-weight:900;margin-bottom:30px;text-align:center;animation:slideUp 0.8s ease-out}
+.s8 h2 .emoji{font-size:80px;display:inline-block;animation:rotate 8s linear infinite;transform-origin:center}
+.s8 .lead{font-size:28px;color:rgba(255,255,255,.9);text-align:center;margin-bottom:50px;animation:slideUp 0.8s ease-out 0.2s both}
+.s8 .games-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:20px;max-width:1700px;width:100%}
+.s8 .game{background:rgba(255,255,255,.12);border-radius:20px;padding:30px 20px;text-align:center;backdrop-filter:blur(8px);animation:pop 0.5s ease-out both}
+.s8 .game:nth-child(1){animation-delay:0.4s}
+.s8 .game:nth-child(2){animation-delay:0.5s}
+.s8 .game:nth-child(3){animation-delay:0.6s}
+.s8 .game:nth-child(4){animation-delay:0.7s}
+.s8 .game:nth-child(5){animation-delay:0.8s}
+.s8 .game:nth-child(6){animation-delay:0.9s}
+.s8 .game:nth-child(7){animation-delay:1.0s}
+.s8 .game:nth-child(8){animation-delay:1.1s}
+.s8 .game:nth-child(9){animation-delay:1.2s}
+.s8 .game:nth-child(10){animation-delay:1.3s}
+.s8 .game-ico{font-size:60px;margin-bottom:10px;display:block}
+.s8 .game-name{font-size:16px;font-weight:700;color:#fff}
+
+/* ── SCÈNE 9 : Paiement automatique ── */
+.s9{background:linear-gradient(135deg,#FF6600,#FFC93C);padding:60px;flex-direction:column}
+.s9 .badge{background:rgba(255,255,255,.25);color:#142554;padding:10px 24px;border-radius:30px;font-size:18px;font-weight:800;letter-spacing:2px;margin-bottom:20px;animation:slideUp 0.6s ease-out}
+.s9 h2{font-size:80px;font-weight:900;margin-bottom:24px;text-align:center;color:#142554;animation:slideUp 0.8s ease-out 0.2s both}
+.s9 .lead{font-size:26px;color:#142554;text-align:center;max-width:1300px;margin-bottom:50px;line-height:1.5;font-weight:600;animation:slideUp 0.8s ease-out 0.4s both}
+.s9 .pay-row{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;max-width:1700px}
+.s9 .pay{background:#fff;color:#142554;border-radius:24px;padding:40px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);min-width:340px;animation:pop 0.6s ease-out both}
+.s9 .pay:nth-child(1){animation-delay:0.6s}
+.s9 .pay:nth-child(2){animation-delay:0.8s}
+.s9 .pay:nth-child(3){animation-delay:1s}
+.s9 .pay-ico{font-size:72px;margin-bottom:14px}
+.s9 .pay-name{font-size:28px;font-weight:900;margin-bottom:6px;font-family:'Libre Baskerville',serif}
+.s9 .pay-num{font-family:monospace;font-size:24px;color:#0EA5E9;font-weight:800;margin-bottom:8px}
+.s9 .pay-auto{background:#059669;color:#fff;font-size:13px;font-weight:800;padding:6px 16px;border-radius:20px;display:inline-block;letter-spacing:1px}
+
+/* ── SCÈNE 10 : Notifications temps réel ── */
+.s10{background:linear-gradient(135deg,#0F172A,#059669);padding:80px;flex-direction:column}
+.s10 h2{font-size:80px;font-weight:900;margin-bottom:30px;text-align:center;animation:slideUp 0.8s ease-out}
+.s10 h2 .gold{color:#FFC93C}
+.s10 .lead{font-size:26px;color:rgba(255,255,255,.85);text-align:center;max-width:1400px;margin-bottom:50px;animation:slideUp 0.8s ease-out 0.2s both}
+.s10 .notif-list{display:flex;flex-direction:column;gap:18px;max-width:1100px;width:100%}
+.s10 .notif{background:rgba(255,255,255,.1);border-left:4px solid #FFC93C;border-radius:14px;padding:20px 28px;display:flex;align-items:center;gap:20px;backdrop-filter:blur(8px);animation:slideLeft 0.5s ease-out both}
+.s10 .notif:nth-child(1){animation-delay:0.4s}
+.s10 .notif:nth-child(2){animation-delay:0.65s}
+.s10 .notif:nth-child(3){animation-delay:0.9s}
+.s10 .notif:nth-child(4){animation-delay:1.15s}
+.s10 .notif-ico{font-size:40px}
+.s10 .notif-text{flex:1}
+.s10 .notif-title{font-size:22px;font-weight:800;color:#fff;margin-bottom:4px}
+.s10 .notif-msg{font-size:16px;color:rgba(255,255,255,.7)}
+
+/* ── SCÈNE 11 : Sécurité ── */
+.s11{background:linear-gradient(135deg,#142554,#0F172A);padding:80px;flex-direction:column}
+.s11 .shield{font-size:140px;margin-bottom:30px;animation:pulse 2s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(255,201,60,.5))}
+.s11 h2{font-size:80px;font-weight:900;margin-bottom:24px;text-align:center;animation:slideUp 0.8s ease-out}
+.s11 h2 .gold{color:#FFC93C}
+.s11 .lead{font-size:24px;color:rgba(255,255,255,.85);text-align:center;max-width:1200px;margin-bottom:50px;animation:slideUp 0.8s ease-out 0.2s both}
+.s11 .sec-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:30px;max-width:1700px;width:100%}
+.s11 .sec{background:rgba(255,255,255,.05);border:2px solid rgba(255,201,60,.3);border-radius:20px;padding:30px;text-align:center;animation:slideUp 0.5s ease-out both}
+.s11 .sec:nth-child(1){animation-delay:0.4s}
+.s11 .sec:nth-child(2){animation-delay:0.55s}
+.s11 .sec:nth-child(3){animation-delay:0.7s}
+.s11 .sec:nth-child(4){animation-delay:0.85s}
+.s11 .sec-ico{font-size:56px;margin-bottom:14px}
+.s11 .sec-title{font-size:18px;font-weight:800;color:#FFC93C;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.s11 .sec-desc{font-size:14px;color:rgba(255,255,255,.7);line-height:1.5}
+
+/* ── SCÈNE 12 : Témoignages ── */
+.s12{background:linear-gradient(180deg,#0D1B3E,#142554);padding:60px;flex-direction:column}
+.s12 h2{font-size:72px;font-weight:900;margin-bottom:50px;text-align:center;animation:slideUp 0.8s ease-out}
+.s12 h2 .gold{color:#FFC93C}
+.s12 .testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:1700px;width:100%}
+.s12 .testi{background:rgba(255,255,255,.06);border-radius:24px;padding:40px;border-top:4px solid #FFC93C;backdrop-filter:blur(8px);animation:slideUp 0.6s ease-out both}
+.s12 .testi:nth-child(1){animation-delay:0.3s}
+.s12 .testi:nth-child(2){animation-delay:0.5s}
+.s12 .testi:nth-child(3){animation-delay:0.7s}
+.s12 .testi-stars{color:#FFC93C;font-size:24px;margin-bottom:14px;letter-spacing:4px}
+.s12 .testi-quote{font-family:'Libre Baskerville',serif;font-size:22px;color:rgba(255,255,255,.9);font-style:italic;line-height:1.6;margin-bottom:24px}
+.s12 .testi-author{display:flex;align-items:center;gap:14px}
+.s12 .testi-avatar{width:56px;height:56px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px}
+.s12 .testi-name{font-weight:800;font-size:18px}
+.s12 .testi-role{font-size:14px;color:rgba(255,255,255,.6)}
+
+/* ── SCÈNE 13 : Tarifs ── */
+.s13{background:linear-gradient(135deg,#0F172A,#1E3A8A);padding:60px;flex-direction:column}
+.s13 h2{font-size:80px;font-weight:900;margin-bottom:20px;text-align:center;animation:slideUp 0.8s ease-out}
+.s13 h2 .gold{color:#FFC93C}
+.s13 .lead{font-size:24px;color:rgba(255,255,255,.7);text-align:center;margin-bottom:50px;animation:slideUp 0.8s ease-out 0.2s both}
+.s13 .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:30px;max-width:1500px;width:100%}
+.s13 .plan{background:rgba(255,255,255,.06);border-radius:24px;padding:40px;text-align:center;border:2px solid rgba(255,201,60,.2);animation:slideUp 0.6s ease-out both;position:relative}
+.s13 .plan:nth-child(1){animation-delay:0.3s}
+.s13 .plan:nth-child(2){animation-delay:0.5s;border-color:#FFC93C;transform:scale(1.05);background:rgba(255,201,60,.1)}
+.s13 .plan:nth-child(3){animation-delay:0.7s}
+.s13 .plan-tag{position:absolute;top:-15px;left:50%;transform:translateX(-50%);background:#FFC93C;color:#142554;padding:6px 20px;border-radius:20px;font-size:14px;font-weight:800;letter-spacing:1px}
+.s13 .plan-name{font-size:24px;font-weight:800;color:#FFC93C;text-transform:uppercase;letter-spacing:2px;margin-bottom:16px}
+.s13 .plan-price{font-family:'Libre Baskerville',serif;font-size:64px;font-weight:700;color:#fff;line-height:1}
+.s13 .plan-price small{font-size:24px;color:rgba(255,255,255,.6);font-family:'Montserrat',sans-serif;font-weight:600}
+.s13 .plan-old{font-size:18px;color:rgba(255,255,255,.4);text-decoration:line-through;margin-top:6px}
+.s13 .plan-feat{list-style:none;margin-top:24px;text-align:left}
+.s13 .plan-feat li{padding:8px 0;font-size:15px;color:rgba(255,255,255,.85);padding-left:30px;position:relative}
+.s13 .plan-feat li::before{content:'✓';position:absolute;left:0;color:#FFC93C;font-weight:900}
+
+/* ── SCÈNE 14 : Comment ça marche ── */
+.s14{background:linear-gradient(135deg,#7C3AED,#0EA5E9);padding:80px;flex-direction:column}
+.s14 h2{font-size:80px;font-weight:900;margin-bottom:50px;text-align:center;animation:slideUp 0.8s ease-out}
+.s14 .steps{display:flex;gap:40px;align-items:center;max-width:1800px}
+.s14 .step{background:rgba(255,255,255,.15);border-radius:20px;padding:36px 30px;text-align:center;flex:1;backdrop-filter:blur(10px);animation:slideUp 0.6s ease-out both;position:relative}
+.s14 .step:nth-child(1){animation-delay:0.3s}
+.s14 .step:nth-child(3){animation-delay:0.5s}
+.s14 .step:nth-child(5){animation-delay:0.7s}
+.s14 .step:nth-child(7){animation-delay:0.9s}
+.s14 .step-num{position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:48px;height:48px;background:#FFC93C;color:#142554;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:24px}
+.s14 .step-ico{font-size:64px;margin:14px 0}
+.s14 .step-title{font-size:20px;font-weight:800;margin-bottom:6px}
+.s14 .step-desc{font-size:14px;color:rgba(255,255,255,.8);line-height:1.5}
+.s14 .arrow{font-size:48px;color:#FFC93C;animation:pulse 1.5s ease-in-out infinite}
+
+/* ────────────────────────────────────────────────────────── */
+/* ── BONUS : GUIDE D'UTILISATION PAR RÔLE (Scènes 15-20) ── */
+/* ────────────────────────────────────────────────────────── */
+
+/* ── SCÈNE G1 : Pour les Élèves ── */
+.sg1{background:linear-gradient(135deg,#059669,#10B981,#0F172A);padding:80px;flex-direction:column}
+.sg1 .badge{background:rgba(255,201,60,.2);color:#FFC93C;padding:10px 24px;border-radius:30px;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;animation:slideUp 0.6s ease-out}
+.sg1 h2{font-size:80px;font-weight:900;margin-bottom:20px;text-align:center;animation:slideUp 0.8s ease-out 0.2s both}
+.sg1 h2 .gold{color:#FFC93C}
+.sg1 .lead{font-size:26px;color:rgba(255,255,255,.85);max-width:1200px;text-align:center;margin-bottom:50px;animation:slideUp 0.8s ease-out 0.4s both}
+.sg1 .role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1700px;width:100%}
+.sg1 .role-card{background:rgba(255,255,255,.12);border:2px solid rgba(255,201,60,.3);border-radius:20px;padding:30px 24px;backdrop-filter:blur(8px);animation:slideUp 0.6s ease-out both}
+.sg1 .role-card:nth-child(1){animation-delay:0.6s}
+.sg1 .role-card:nth-child(2){animation-delay:0.7s}
+.sg1 .role-card:nth-child(3){animation-delay:0.8s}
+.sg1 .role-card:nth-child(4){animation-delay:0.9s}
+.sg1 .role-card:nth-child(5){animation-delay:1.0s}
+.sg1 .role-card:nth-child(6){animation-delay:1.1s}
+.sg1 .role-ico{font-size:54px;margin-bottom:10px}
+.sg1 .role-title{font-size:22px;font-weight:800;color:#FFC93C;margin-bottom:8px}
+.sg1 .role-desc{font-size:14px;color:rgba(255,255,255,.85);line-height:1.5}
+
+/* ── SCÈNE G2 : Pour les Enseignants ── */
+.sg2{background:linear-gradient(135deg,#7C3AED,#A855F7,#142554);padding:80px;flex-direction:column}
+.sg2 .badge{background:rgba(255,201,60,.2);color:#FFC93C;padding:10px 24px;border-radius:30px;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;animation:slideUp 0.6s ease-out}
+.sg2 h2{font-size:80px;font-weight:900;margin-bottom:20px;text-align:center;animation:slideUp 0.8s ease-out 0.2s both}
+.sg2 h2 .gold{color:#FFC93C}
+.sg2 .lead{font-size:26px;color:rgba(255,255,255,.85);max-width:1200px;text-align:center;margin-bottom:50px;animation:slideUp 0.8s ease-out 0.4s both}
+.sg2 .role-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1700px;width:100%}
+.sg2 .role-card{background:rgba(255,255,255,.12);border:2px solid rgba(255,201,60,.3);border-radius:20px;padding:30px 24px;backdrop-filter:blur(8px);animation:slideUp 0.6s ease-out both}
+.sg2 .role-card:nth-child(1){animation-delay:0.6s}
+.sg2 .role-card:nth-child(2){animation-delay:0.75s}
+.sg2 .role-card:nth-child(3){animation-delay:0.9s}
+.sg2 .role-card:nth-child(4){animation-delay:1.05s}
+.sg2 .role-card:nth-child(5){animation-delay:1.2s}
+.sg2 .role-card:nth-child(6){animation-delay:1.35s}
+.sg2 .role-ico{font-size:54px;margin-bottom:10px}
+.sg2 .role-title{font-size:22px;font-weight:800;color:#FFC93C;margin-bottom:8px}
+.sg2 .role-desc{font-size:14px;color:rgba(255,255,255,.85);line-height:1.5}
+
+/* ── SCÈNE G3 : Pour l'Administration ── */
+.sg3{background:linear-gradient(135deg,#142554,#1E3A8A,#0F172A);padding:80px;flex-direction:column}
+.sg3 .badge{background:rgba(255,201,60,.2);color:#FFC93C;padding:10px 24px;border-radius:30px;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;animation:slideUp 0.6s ease-out}
+.sg3 h2{font-size:80px;font-weight:900;margin-bottom:20px;text-align:center;animation:slideUp 0.8s ease-out 0.2s both}
+.sg3 h2 .gold{color:#FFC93C}
+.sg3 .lead{font-size:26px;color:rgba(255,255,255,.85);max-width:1200px;text-align:center;margin-bottom:40px;animation:slideUp 0.8s ease-out 0.4s both}
+.sg3 .role-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;max-width:1750px;width:100%}
+.sg3 .role-card{background:rgba(255,255,255,.08);border:2px solid rgba(255,201,60,.25);border-radius:18px;padding:24px 18px;backdrop-filter:blur(8px);animation:slideUp 0.6s ease-out both}
+.sg3 .role-card:nth-child(1){animation-delay:0.6s}
+.sg3 .role-card:nth-child(2){animation-delay:0.7s}
+.sg3 .role-card:nth-child(3){animation-delay:0.8s}
+.sg3 .role-card:nth-child(4){animation-delay:0.9s}
+.sg3 .role-card:nth-child(5){animation-delay:1.0s}
+.sg3 .role-card:nth-child(6){animation-delay:1.1s}
+.sg3 .role-card:nth-child(7){animation-delay:1.2s}
+.sg3 .role-card:nth-child(8){animation-delay:1.3s}
+.sg3 .role-ico{font-size:42px;margin-bottom:8px}
+.sg3 .role-title{font-size:18px;font-weight:800;color:#FFC93C;margin-bottom:4px}
+.sg3 .role-desc{font-size:12px;color:rgba(255,255,255,.8);line-height:1.4}
+
+/* ── SCÈNE G4 : Pour les Parents ── */
+.sg4{background:linear-gradient(135deg,#BE185D,#EC4899,#0F172A);padding:80px;flex-direction:column}
+.sg4 .badge{background:rgba(255,201,60,.2);color:#FFC93C;padding:10px 24px;border-radius:30px;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;animation:slideUp 0.6s ease-out}
+.sg4 h2{font-size:80px;font-weight:900;margin-bottom:20px;text-align:center;animation:slideUp 0.8s ease-out 0.2s both}
+.sg4 h2 .gold{color:#FFC93C}
+.sg4 .lead{font-size:26px;color:rgba(255,255,255,.85);max-width:1200px;text-align:center;margin-bottom:50px;animation:slideUp 0.8s ease-out 0.4s both}
+.sg4 .parent-row{display:flex;gap:30px;max-width:1700px;width:100%;align-items:center}
+.sg4 .phone-mock{flex:0 0 360px;height:600px;background:#1a1a2e;border:8px solid #FFC93C;border-radius:40px;padding:20px;position:relative;animation:float 4s ease-in-out infinite;box-shadow:0 30px 80px rgba(0,0,0,.5)}
+.sg4 .phone-notif{background:rgba(255,201,60,.15);border:1px solid rgba(255,201,60,.4);border-radius:14px;padding:14px;margin-bottom:10px;animation:slideUp 0.6s ease-out both;color:#fff}
+.sg4 .phone-notif:nth-child(1){animation-delay:0.8s}
+.sg4 .phone-notif:nth-child(2){animation-delay:1.0s}
+.sg4 .phone-notif:nth-child(3){animation-delay:1.2s}
+.sg4 .phone-notif:nth-child(4){animation-delay:1.4s}
+.sg4 .pn-title{font-size:14px;font-weight:800;color:#FFC93C;margin-bottom:4px}
+.sg4 .pn-text{font-size:12px;color:rgba(255,255,255,.85);line-height:1.4}
+.sg4 .parent-feats{flex:1;display:flex;flex-direction:column;gap:18px}
+.sg4 .pf{background:rgba(255,255,255,.1);border-radius:16px;padding:20px 24px;display:flex;align-items:center;gap:20px;animation:slideLeft 0.6s ease-out both}
+.sg4 .pf:nth-child(1){animation-delay:0.6s}
+.sg4 .pf:nth-child(2){animation-delay:0.75s}
+.sg4 .pf:nth-child(3){animation-delay:0.9s}
+.sg4 .pf:nth-child(4){animation-delay:1.05s}
+.sg4 .pf-ico{font-size:42px}
+.sg4 .pf-content{flex:1}
+.sg4 .pf-title{font-size:22px;font-weight:800;color:#FFC93C;margin-bottom:4px}
+.sg4 .pf-desc{font-size:15px;color:rgba(255,255,255,.85)}
+
+/* ── SCÈNE G5 : Application Mobile / PWA ── */
+.sg5{background:linear-gradient(135deg,#0EA5E9,#0284C7,#0F172A);padding:80px;flex-direction:column}
+.sg5 .badge{background:rgba(255,201,60,.2);color:#FFC93C;padding:10px 24px;border-radius:30px;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;animation:slideUp 0.6s ease-out}
+.sg5 h2{font-size:80px;font-weight:900;margin-bottom:20px;text-align:center;animation:slideUp 0.8s ease-out 0.2s both}
+.sg5 h2 .gold{color:#FFC93C}
+.sg5 .lead{font-size:26px;color:rgba(255,255,255,.85);max-width:1200px;text-align:center;margin-bottom:50px;animation:slideUp 0.8s ease-out 0.4s both}
+.sg5 .pwa-row{display:flex;gap:60px;align-items:center;max-width:1700px;width:100%}
+.sg5 .pwa-phone{flex:0 0 280px;height:560px;background:linear-gradient(160deg,#142554,#0D1B3E);border:8px solid #FFC93C;border-radius:36px;padding:20px;animation:float 4s ease-in-out infinite;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 30px 80px rgba(0,0,0,.5);text-align:center}
+.sg5 .pwa-logo{width:120px;height:120px;border-radius:30px;background:#FFC93C;display:flex;align-items:center;justify-content:center;font-family:'Libre Baskerville',serif;font-size:72px;color:#142554;font-weight:700;margin-bottom:20px;box-shadow:0 0 60px rgba(255,201,60,.5)}
+.sg5 .pwa-name{font-size:22px;font-weight:800;color:#FFC93C;margin-bottom:6px}
+.sg5 .pwa-tag{font-size:13px;color:rgba(255,255,255,.7)}
+.sg5 .pwa-feats{flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.sg5 .pwa-feat{background:rgba(255,255,255,.1);border-radius:16px;padding:24px;animation:slideRight 0.6s ease-out both}
+.sg5 .pwa-feat:nth-child(1){animation-delay:0.6s}
+.sg5 .pwa-feat:nth-child(2){animation-delay:0.75s}
+.sg5 .pwa-feat:nth-child(3){animation-delay:0.9s}
+.sg5 .pwa-feat:nth-child(4){animation-delay:1.05s}
+.sg5 .pwa-ico{font-size:42px;margin-bottom:8px}
+.sg5 .pwa-ft{font-size:18px;font-weight:800;color:#FFC93C;margin-bottom:4px}
+.sg5 .pwa-fd{font-size:13px;color:rgba(255,255,255,.85);line-height:1.4}
+
+/* ── SCÈNE G6 : Outils annexes & Bonus ── */
+.sg6{background:linear-gradient(135deg,#1E3A8A,#7C3AED,#142554);padding:80px;flex-direction:column}
+.sg6 .badge{background:rgba(255,201,60,.2);color:#FFC93C;padding:10px 24px;border-radius:30px;font-size:18px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px;animation:slideUp 0.6s ease-out}
+.sg6 h2{font-size:80px;font-weight:900;margin-bottom:20px;text-align:center;animation:slideUp 0.8s ease-out 0.2s both}
+.sg6 h2 .gold{color:#FFC93C}
+.sg6 .lead{font-size:26px;color:rgba(255,255,255,.85);max-width:1200px;text-align:center;margin-bottom:40px;animation:slideUp 0.8s ease-out 0.4s both}
+.sg6 .bonus-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1700px;width:100%}
+.sg6 .bonus{background:rgba(255,255,255,.1);border:2px solid rgba(255,201,60,.3);border-radius:20px;padding:30px 24px;text-align:center;backdrop-filter:blur(8px);animation:pop 0.6s ease-out both}
+.sg6 .bonus:nth-child(1){animation-delay:0.5s}
+.sg6 .bonus:nth-child(2){animation-delay:0.65s}
+.sg6 .bonus:nth-child(3){animation-delay:0.8s}
+.sg6 .bonus:nth-child(4){animation-delay:0.95s}
+.sg6 .bonus:nth-child(5){animation-delay:1.1s}
+.sg6 .bonus:nth-child(6){animation-delay:1.25s}
+.sg6 .bonus-ico{font-size:64px;margin-bottom:12px}
+.sg6 .bonus-title{font-size:22px;font-weight:800;color:#FFC93C;margin-bottom:8px}
+.sg6 .bonus-desc{font-size:14px;color:rgba(255,255,255,.85);line-height:1.5}
+
+/* ── SCÈNE 15 : Call to action ── */
+.s15{background:radial-gradient(circle at center,#FFC93C 0%,#FF6600 100%);flex-direction:column;text-align:center;padding:80px}
+.s15 .cta-emoji{font-size:140px;animation:pulse 1.5s ease-in-out infinite}
+.s15 h2{font-family:'Libre Baskerville',serif;font-size:120px;color:#142554;font-weight:700;margin:20px 0;line-height:1;animation:slideUp 0.8s ease-out}
+.s15 .lead{font-size:36px;color:#142554;font-weight:600;max-width:1400px;margin-bottom:40px;animation:slideUp 0.8s ease-out 0.2s both}
+.s15 .cta-btn{background:#142554;color:#FFC93C;padding:28px 60px;border-radius:60px;font-size:36px;font-weight:900;letter-spacing:3px;text-transform:uppercase;box-shadow:0 20px 60px rgba(0,0,0,.4);animation:pulse 1.5s ease-in-out infinite,slideUp 0.8s ease-out 0.4s both}
+
+/* ── SCÈNE 16 : Contacts ── */
+.s16{background:linear-gradient(135deg,#142554,#0D1B3E);flex-direction:column;padding:80px;text-align:center}
+.s16 .logo-small{width:120px;height:120px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;font-family:'Libre Baskerville',serif;font-size:80px;font-weight:700;margin-bottom:24px;animation:pop 0.8s ease-out}
+.s16 h1{font-family:'Libre Baskerville',serif;font-size:84px;color:#FFC93C;letter-spacing:6px;margin-bottom:14px;animation:slideUp 0.8s ease-out 0.2s both}
+.s16 .tagline{font-size:24px;color:rgba(255,255,255,.7);font-style:italic;margin-bottom:50px;animation:slideUp 0.8s ease-out 0.4s both}
+.s16 .contacts{display:flex;gap:40px;margin-bottom:40px;flex-wrap:wrap;justify-content:center}
+.s16 .contact{background:rgba(255,255,255,.08);border-radius:20px;padding:24px 36px;display:flex;align-items:center;gap:14px;backdrop-filter:blur(8px);animation:slideUp 0.6s ease-out both}
+.s16 .contact:nth-child(1){animation-delay:0.6s}
+.s16 .contact:nth-child(2){animation-delay:0.75s}
+.s16 .contact:nth-child(3){animation-delay:0.9s}
+.s16 .contact-ico{font-size:36px}
+.s16 .contact-text{text-align:left}
+.s16 .contact-label{font-size:12px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:2px}
+.s16 .contact-val{font-size:22px;font-weight:800;color:#fff}
+.s16 .url{font-family:'Libre Baskerville',serif;font-size:42px;color:#FFC93C;margin-top:30px;letter-spacing:2px;animation:shine 2s ease-in-out infinite}
+.s16 .copyright{position:absolute;bottom:30px;font-size:14px;color:rgba(255,255,255,.4)}
+
+/* ── PROGRESS BAR ── */
+.progress{position:fixed;bottom:0;left:0;height:6px;background:linear-gradient(90deg,#FFC93C,#FF6600);box-shadow:0 0 20px rgba(255,201,60,.8);z-index:100;transition:width 0.3s linear}
+
+/* ── CONTROLS (visibles uniquement avant lecture) ── */
+.start-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0D1B3E,#142554);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:200;transition:opacity 0.5s}
+.start-screen.hide{opacity:0;pointer-events:none}
+.start-screen h1{font-family:'Libre Baskerville',serif;font-size:96px;color:#FFC93C;letter-spacing:6px;margin-bottom:20px}
+.start-screen p{font-size:24px;color:rgba(255,255,255,.7);margin-bottom:40px;text-align:center;max-width:800px;line-height:1.6}
+.start-btn{background:#FFC93C;color:#142554;padding:24px 60px;border-radius:60px;font-size:28px;font-weight:900;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer;box-shadow:0 20px 60px rgba(255,201,60,.4);transition:transform .2s}
+.start-btn:hover{transform:scale(1.05)}
+.hint{margin-top:24px;font-size:14px;color:rgba(255,255,255,.5)}
+
+/* ── REPLAY ── */
+.replay-screen{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:300}
+.replay-screen.show{display:flex}
+.replay-screen h2{font-size:64px;color:#FFC93C;font-family:'Libre Baskerville',serif;margin-bottom:30px}
+.replay-btn{background:#FFC93C;color:#142554;padding:20px 50px;border-radius:60px;font-size:22px;font-weight:900;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="start-screen" id="startScreen">
+  <h1>VÉRITAS Academy</h1>
+  <p>Découvrez en 3 minutes pourquoi VÉRITAS est <strong style="color:#FFC93C">le centre de référence</strong> à Douala — et comment l'utiliser au quotidien.</p>
+  <button class="start-btn" onclick="startVideo()">▶ Lancer la présentation</button>
+  <div class="hint">22 scènes · 3:06 min · Plein écran recommandé (F11)</div>
+  <div style="margin-top:30px;display:flex;gap:20px;flex-wrap:wrap;justify-content:center;max-width:900px">
+    <div style="background:rgba(255,201,60,.1);border:1px solid rgba(255,201,60,.3);border-radius:12px;padding:14px 22px;color:#FFC93C;font-size:14px;font-weight:600">🎬 Auto-jouante</div>
+    <div style="background:rgba(255,201,60,.1);border:1px solid rgba(255,201,60,.3);border-radius:12px;padding:14px 22px;color:#FFC93C;font-size:14px;font-weight:600">📱 Mobile & Desktop</div>
+    <div style="background:rgba(255,201,60,.1);border:1px solid rgba(255,201,60,.3);border-radius:12px;padding:14px 22px;color:#FFC93C;font-size:14px;font-weight:600">🎓 Guide complet</div>
+    <div style="background:rgba(255,201,60,.1);border:1px solid rgba(255,201,60,.3);border-radius:12px;padding:14px 22px;color:#FFC93C;font-size:14px;font-weight:600">✨ Animations HD</div>
+  </div>
+</div>
+
+<div class="stage">
+
+  <!-- SCÈNE 1 : Logo intro (0-5s) -->
+  <div class="scene s1">
+    <div class="particles" id="particles1"></div>
+    <div class="logo-circle"></div>
+    <div class="title-block">
+      <h1>VÉRITAS</h1>
+      <p>ACADEMY · DOUALA · CAMEROUN</p>
+    </div>
+  </div>
+
+  <!-- SCÈNE 2 : Slogan (5-12s) -->
+  <div class="scene s2">
+    <div class="accroche">L'excellence scolaire<em>à portée de tous</em></div>
+    <div class="underline"></div>
+    <div class="subline">CENTRE DE RÉPÉTITIONS · BEPC · PROBATOIRE · BAC</div>
+  </div>
+
+  <!-- SCÈNE 3 : Statistiques (12-20s) -->
+  <div class="scene s3">
+    <h2>Des résultats qui <span class="gold">parlent</span></h2>
+    <div class="stats-grid">
+      <div class="stat"><div class="stat-num">94%</div><div class="stat-label">Réussite BEPC</div><div class="stat-sub">Promotion 2025</div></div>
+      <div class="stat"><div class="stat-num">91%</div><div class="stat-label">Réussite BAC</div><div class="stat-sub">Toutes séries</div></div>
+      <div class="stat"><div class="stat-num">500+</div><div class="stat-label">Élèves formés</div><div class="stat-sub">Depuis 2020</div></div>
+      <div class="stat"><div class="stat-num">25+</div><div class="stat-label">Enseignants</div><div class="stat-sub">Qualifiés MINESEC</div></div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 4 : E-Learning (20-30s) -->
+  <div class="scene s4">
+    <div class="badge">🎓 Plateforme E-Learning</div>
+    <h2>Apprenez <span class="gold">partout, à tout moment</span></h2>
+    <div class="lead">Votre cartable numérique : cours vidéo, épreuves corrigées, fiches de révision, accessible 24h/24 depuis votre téléphone.</div>
+    <div class="feat-grid">
+      <div class="feat"><div class="feat-ico">📚</div><div class="feat-title">Cours complets</div><div class="feat-desc">Toutes matières — 6ème à Tle. Programmes officiels MINESEC.</div></div>
+      <div class="feat"><div class="feat-ico">🎥</div><div class="feat-title">Vidéos HD</div><div class="feat-desc">Explications visuelles claires par nos enseignants experts.</div></div>
+      <div class="feat"><div class="feat-ico">📝</div><div class="feat-title">Épreuves corrigées</div><div class="feat-desc">BEPC, Probatoire & BAC : annales 2020-2025 toutes séries.</div></div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 5 : Boutique (30-40s) -->
+  <div class="scene s5">
+    <div class="row">
+      <div class="text">
+        <div class="badge">🛒 BOUTIQUE EN LIGNE</div>
+        <h2>Tous vos <span class="gold">manuels</span> en un clic</h2>
+        <div class="lead">Recevez vos manuels scolaires directement chez vous, partout au Cameroun.</div>
+        <ul class="check-list">
+          <li>Aperçus gratuits avant achat</li>
+          <li>Paiement Orange Money & MTN MoMo</li>
+          <li>Livraison Douala express</li>
+          <li>Codes promo exclusifs</li>
+        </ul>
+      </div>
+      <div class="books">
+        <div class="book"><div class="book-ico">📘</div><div class="book-title">Maths Tle C</div><div class="book-price">3 500 F</div></div>
+        <div class="book"><div class="book-ico">📕</div><div class="book-title">SVT 1ère</div><div class="book-price">4 200 F</div></div>
+        <div class="book"><div class="book-ico">📗</div><div class="book-title">Anglais 3ème</div><div class="book-price">2 900 F</div></div>
+        <div class="book"><div class="book-ico">📙</div><div class="book-title">Physique BAC</div><div class="book-price">3 800 F</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 6 : Classes virtuelles (40-50s) -->
+  <div class="scene s6">
+    <h2>🎥 Classes <span class="gold">virtuelles</span> en direct</h2>
+    <div class="lead">Interagissez en temps réel avec nos enseignants et vos camarades. Comme en classe, mais depuis chez vous.</div>
+    <div class="mockup">
+      <div class="mock-bar"></div>
+      <div class="mock-grid">
+        <div class="mock-tile">👨‍🏫</div>
+        <div class="mock-tile">👩‍🎓</div>
+        <div class="mock-tile">👨‍🎓</div>
+        <div class="mock-tile">👩‍🎓</div>
+        <div class="mock-tile">👨‍🎓</div>
+        <div class="mock-tile">👩‍🎓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 7 : Cartes mentales (50-58s) -->
+  <div class="scene s7">
+    <div class="badge">🧠 Cartes mentales littéraires</div>
+    <h2>La <span class="gold">littérature</span> visualisée</h2>
+    <div class="mindmap">
+      <div class="center-node">Ville Cruelle<small>Mongo Beti · 3ème</small></div>
+      <div class="branch b1">📜 Axes de lecture</div>
+      <div class="branch b2">👥 Personnages</div>
+      <div class="branch b3">✍️ Style & Langue</div>
+      <div class="branch b4">🌍 Contexte historique</div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 8 : Jeux éducatifs (58-66s) -->
+  <div class="scene s8">
+    <h2>Apprendre en <span class="emoji">🎮</span> s'amusant</h2>
+    <div class="lead">15+ jeux éducatifs : géographie, histoire, sciences, langues, littérature...</div>
+    <div class="games-grid">
+      <div class="game"><span class="game-ico">🌍</span><div class="game-name">Capitales</div></div>
+      <div class="game"><span class="game-ico">📚</span><div class="game-name">Verbes</div></div>
+      <div class="game"><span class="game-ico">⚗️</span><div class="game-name">Chimie</div></div>
+      <div class="game"><span class="game-ico">🧬</span><div class="game-name">SVT</div></div>
+      <div class="game"><span class="game-ico">🎭</span><div class="game-name">Auteurs</div></div>
+      <div class="game"><span class="game-ico">🧮</span><div class="game-name">Calcul</div></div>
+      <div class="game"><span class="game-ico">🇨🇲</span><div class="game-name">Cameroun</div></div>
+      <div class="game"><span class="game-ico">⚖️</span><div class="game-name">Équations</div></div>
+      <div class="game"><span class="game-ico">🦴</span><div class="game-name">Anatomie</div></div>
+      <div class="game"><span class="game-ico">🔤</span><div class="game-name">Pendu</div></div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 9 : Paiements automatiques (66-76s) -->
+  <div class="scene s9">
+    <div class="badge">⚡ PAIEMENT 100% AUTOMATIQUE</div>
+    <h2>Payez en <span style="color:#7C3AED">5 secondes</span></h2>
+    <div class="lead">Orange Money, MTN MoMo : confirmation instantanée. Votre accès s'active automatiquement, sans attente.</div>
+    <div class="pay-row">
+      <div class="pay">
+        <div class="pay-ico">🟠</div>
+        <div class="pay-name">Orange Money</div>
+        <div class="pay-num">+237 697 637 739</div>
+        <div class="pay-auto">⚡ AUTO</div>
+      </div>
+      <div class="pay">
+        <div class="pay-ico">📱</div>
+        <div class="pay-name">MTN MoMo</div>
+        <div class="pay-num">+237 650 435 106</div>
+        <div class="pay-auto">⚡ AUTO</div>
+      </div>
+      <div class="pay">
+        <div class="pay-ico">💳</div>
+        <div class="pay-name">Carte bancaire</div>
+        <div class="pay-num">Visa · Mastercard</div>
+        <div class="pay-auto">⚡ AUTO</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 10 : Notifications (76-84s) -->
+  <div class="scene s10">
+    <h2>Restez <span class="gold">informés</span> en temps réel</h2>
+    <div class="lead">Parents, élèves, enseignants : des notifications automatiques à chaque événement important.</div>
+    <div class="notif-list">
+      <div class="notif"><div class="notif-ico">📊</div><div class="notif-text"><div class="notif-title">Nouvelle note publiée</div><div class="notif-msg">Mathématiques · Trimestre 2 · 16/20 — Bravo Esther !</div></div></div>
+      <div class="notif"><div class="notif-ico">💳</div><div class="notif-text"><div class="notif-title">Paiement confirmé</div><div class="notif-msg">MoMo · Pack Premium 49 000 FCFA — Accès activé</div></div></div>
+      <div class="notif"><div class="notif-ico">📋</div><div class="notif-text"><div class="notif-title">Nouveau devoir</div><div class="notif-msg">Rédaction de français — À rendre vendredi 18h</div></div></div>
+      <div class="notif"><div class="notif-ico">🎥</div><div class="notif-text"><div class="notif-title">Classe virtuelle dans 15 min</div><div class="notif-msg">Physique-Chimie Tle D — Salle Google Meet ouverte</div></div></div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 11 : Sécurité (84-92s) -->
+  <div class="scene s11">
+    <div class="shield">🛡️</div>
+    <h2>Vos données <span class="gold">protégées</span></h2>
+    <div class="lead">Sécurité bancaire, chiffrement, authentification renforcée. La confidentialité de votre famille est notre priorité.</div>
+    <div class="sec-grid">
+      <div class="sec"><div class="sec-ico">🔐</div><div class="sec-title">SHA-256</div><div class="sec-desc">Mots de passe chiffrés</div></div>
+      <div class="sec"><div class="sec-ico">🌐</div><div class="sec-title">HTTPS</div><div class="sec-desc">Connexion sécurisée</div></div>
+      <div class="sec"><div class="sec-ico">🛡️</div><div class="sec-title">Anti-fraude</div><div class="sec-desc">Détection des attaques</div></div>
+      <div class="sec"><div class="sec-ico">☁️</div><div class="sec-title">Sauvegardes</div><div class="sec-desc">Cloud automatique</div></div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 12 : Témoignages (92-102s) -->
+  <div class="scene s12">
+    <h2>Ils nous font <span class="gold">confiance</span></h2>
+    <div class="testi-grid">
+      <div class="testi">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">« Mon fils a eu son BAC C avec mention. VÉRITAS lui a donné les méthodes qui manquaient au lycée. Mille mercis ! »</div>
+        <div class="testi-author"><div class="testi-avatar">M</div><div><div class="testi-name">Mme MBALLA</div><div class="testi-role">Parent — Bonanjo</div></div></div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">« Les vidéos de maths sont géniales. Je révise quand je veux, je peux mettre pause. Je suis passée de 8/20 à 15/20 ! »</div>
+        <div class="testi-author"><div class="testi-avatar">E</div><div><div class="testi-name">Esther N.</div><div class="testi-role">Élève — Tle D</div></div></div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">« Le paiement Orange Money fonctionne du premier coup, je n'avais jamais vu ça avant. Sérieux et professionnel. »</div>
+        <div class="testi-author"><div class="testi-avatar">P</div><div><div class="testi-name">M. ETOGA</div><div class="testi-role">Parent — Akwa</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 13 : Tarifs (102-110s) -->
+  <div class="scene s13">
+    <h2>Des tarifs <span class="gold">accessibles</span></h2>
+    <div class="lead">3 formules pour s'adapter à tous les budgets · Réduction -50% jusqu'au 31 janvier</div>
+    <div class="plans">
+      <div class="plan">
+        <div class="plan-name">Découverte</div>
+        <div class="plan-price">3 000<small> F/mois</small></div>
+        <ul class="plan-feat">
+          <li>Accès cours en ligne</li>
+          <li>Fiches de révision</li>
+          <li>Support WhatsApp</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <div class="plan-tag">⭐ POPULAIRE</div>
+        <div class="plan-name">Premium</div>
+        <div class="plan-price">49 000<small> F/an</small></div>
+        <div class="plan-old">~~99 000 F~~ -50%</div>
+        <ul class="plan-feat">
+          <li>Tout Découverte +</li>
+          <li>Toutes les épreuves corrigées</li>
+          <li>Cours vidéo illimités</li>
+          <li>Classes virtuelles hebdo</li>
+          <li>1 livre offert</li>
+        </ul>
+      </div>
+      <div class="plan">
+        <div class="plan-name">Présentiel</div>
+        <div class="plan-price">15 000<small> F/mois</small></div>
+        <ul class="plan-feat">
+          <li>Cours au centre à Douala</li>
+          <li>Petits effectifs</li>
+          <li>Suivi individualisé</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 14 : Comment ça marche (110-118s) -->
+  <div class="scene s14">
+    <h2>Inscription en <span style="color:#FFC93C">3 minutes</span></h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-ico">📝</div><div class="step-title">Inscrivez-vous</div><div class="step-desc">veritas-school.com en 2 clics</div></div>
+      <div class="arrow">▶</div>
+      <div class="step"><div class="step-num">2</div><div class="step-ico">💳</div><div class="step-title">Payez par MoMo</div><div class="step-desc">Orange ou MTN, 5 secondes</div></div>
+      <div class="arrow">▶</div>
+      <div class="step"><div class="step-num">3</div><div class="step-ico">🚀</div><div class="step-title">Accès immédiat</div><div class="step-desc">Cours, vidéos, classes</div></div>
+      <div class="arrow">▶</div>
+      <div class="step"><div class="step-num">4</div><div class="step-ico">🏆</div><div class="step-title">Réussissez</div><div class="step-desc">BEPC, Probat, BAC</div></div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- 🎯 BONUS : GUIDE D'UTILISATION PAR RÔLE (6 nouvelles scènes) -->
+  <!-- ════════════════════════════════════════════════════════ -->
+
+  <!-- SCÈNE G1 : Pour les Élèves (118-127s) -->
+  <div class="scene sg1">
+    <div class="badge">🎓 GUIDE D'UTILISATION</div>
+    <h2>Pour les <span class="gold">Élèves</span></h2>
+    <div class="lead">Votre espace personnel sécurisé : tout pour réussir, à portée de main</div>
+    <div class="role-grid">
+      <div class="role-card"><div class="role-ico">📄</div><div class="role-title">Mon Bulletin</div><div class="role-desc">Notes, moyennes, rang de classe et bulletin APC téléchargeable en PDF</div></div>
+      <div class="role-card"><div class="role-ico">📊</div><div class="role-title">Évaluations en ligne</div><div class="role-desc">QCM interactifs avec chrono, corrigés détaillés et progression suivie</div></div>
+      <div class="role-card"><div class="role-ico">✅</div><div class="role-title">Mes Absences</div><div class="role-desc">Historique complet, justifications, heures cumulées par matière</div></div>
+      <div class="role-card"><div class="role-ico">📋</div><div class="role-title">Mes Devoirs</div><div class="role-desc">Devoirs à rendre, soumission en ligne, notes et commentaires enseignants</div></div>
+      <div class="role-card"><div class="role-ico">💳</div><div class="role-title">Mon Paiement</div><div class="role-desc">Historique paiements, échéances, paiement MoMo/OM en 1 clic</div></div>
+      <div class="role-card"><div class="role-ico">📚</div><div class="role-title">Boutique Manuels</div><div class="role-desc">Achetez vos manuels, accédez aux extraits gratuits, livraison Douala</div></div>
+    </div>
+  </div>
+
+  <!-- SCÈNE G2 : Pour les Enseignants (127-136s) -->
+  <div class="scene sg2">
+    <div class="badge">👨‍🏫 GUIDE D'UTILISATION</div>
+    <h2>Pour les <span class="gold">Enseignants</span></h2>
+    <div class="lead">Tous les outils pédagogiques pour gérer vos classes efficacement</div>
+    <div class="role-grid">
+      <div class="role-card"><div class="role-ico">▦</div><div class="role-title">Saisie de notes</div><div class="role-desc">Mode lot : saisissez toute une classe en quelques secondes</div></div>
+      <div class="role-card"><div class="role-ico">📋</div><div class="role-title">Devoirs publiés</div><div class="role-desc">Créez devoirs avec date limite et corrigez en ligne</div></div>
+      <div class="role-card"><div class="role-ico">📊</div><div class="role-title">Performances</div><div class="role-desc">Statistiques détaillées par élève, classe et matière</div></div>
+      <div class="role-card"><div class="role-ico">✍️</div><div class="role-title">Mes Publications</div><div class="role-desc">Publiez vos manuels, gagnez des royalties à chaque vente</div></div>
+      <div class="role-card"><div class="role-ico">📤</div><div class="role-title">Soumettre Ressources</div><div class="role-desc">Partagez cours, épreuves et corpus avec l'administration</div></div>
+      <div class="role-card"><div class="role-ico">📅</div><div class="role-title">Emploi du temps</div><div class="role-desc">Consultez vos cours, salles et matières en un coup d'œil</div></div>
+    </div>
+  </div>
+
+  <!-- SCÈNE G3 : Pour l'Administration (136-145s) -->
+  <div class="scene sg3">
+    <div class="badge">🏛️ GUIDE D'UTILISATION</div>
+    <h2>Pour l'<span class="gold">Administration</span></h2>
+    <div class="lead">Pilotez votre établissement avec une vue 360° en temps réel</div>
+    <div class="role-grid">
+      <div class="role-card"><div class="role-ico">🎓</div><div class="role-title">Inscriptions</div><div class="role-desc">Élèves & comptes</div></div>
+      <div class="role-card"><div class="role-ico">💳</div><div class="role-title">Finances</div><div class="role-desc">Paiements, reçus, bilan</div></div>
+      <div class="role-card"><div class="role-ico">▦</div><div class="role-title">Notes & APC</div><div class="role-desc">Bulletins officiels</div></div>
+      <div class="role-card"><div class="role-ico">🏆</div><div class="role-title">Tableau d'honneur</div><div class="role-desc">Excellence valorisée</div></div>
+      <div class="role-card"><div class="role-ico">👨‍🏫</div><div class="role-title">Enseignants & Paie</div><div class="role-desc">RH centralisée</div></div>
+      <div class="role-card"><div class="role-ico">📢</div><div class="role-title">WhatsApp & Annonces</div><div class="role-desc">Communication directe</div></div>
+      <div class="role-card"><div class="role-ico">🛍️</div><div class="role-title">Boutique & E-Learning</div><div class="role-desc">Gestion contenus</div></div>
+      <div class="role-card"><div class="role-ico">🌐</div><div class="role-title">Portail Visiteur</div><div class="role-desc">Site éditable en direct</div></div>
+    </div>
+  </div>
+
+  <!-- SCÈNE G4 : Pour les Parents (145-154s) -->
+  <div class="scene sg4">
+    <div class="badge">👨‍👩‍👧 GUIDE D'UTILISATION</div>
+    <h2>Pour les <span class="gold">Parents</span></h2>
+    <div class="lead">Suivez la scolarité de votre enfant depuis votre téléphone, 24h/24</div>
+    <div class="parent-row">
+      <div class="phone-mock">
+        <div class="phone-notif"><div class="pn-title">🔔 Nouvelle note</div><div class="pn-text">Votre enfant a obtenu 16/20 en Mathématiques</div></div>
+        <div class="phone-notif"><div class="pn-title">✅ Paiement reçu</div><div class="pn-text">Pension Mars 2026 enregistrée — Merci !</div></div>
+        <div class="phone-notif"><div class="pn-title">📊 Bulletin disponible</div><div class="pn-text">Le bulletin du 1er trimestre est prêt à télécharger</div></div>
+        <div class="phone-notif"><div class="pn-title">⚠️ Absence signalée</div><div class="pn-text">Absent en SVT mardi 12 — Veuillez justifier</div></div>
+      </div>
+      <div class="parent-feats">
+        <div class="pf"><div class="pf-ico">🔔</div><div class="pf-content"><div class="pf-title">Notifications instantanées</div><div class="pf-desc">Chaque note, absence ou message arrive sur votre téléphone</div></div></div>
+        <div class="pf"><div class="pf-ico">💳</div><div class="pf-content"><div class="pf-title">Paiement en 5 secondes</div><div class="pf-desc">MTN MoMo ou Orange Money, validation automatique</div></div></div>
+        <div class="pf"><div class="pf-ico">📨</div><div class="pf-content"><div class="pf-title">WhatsApp avec l'école</div><div class="pf-desc">Échangez directement avec les enseignants et l'admin</div></div></div>
+        <div class="pf"><div class="pf-ico">📈</div><div class="pf-content"><div class="pf-title">Progression en direct</div><div class="pf-desc">Voyez l'évolution des notes, classement et appréciations</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCÈNE G5 : Application Mobile / PWA (154-163s) -->
+  <div class="scene sg5">
+    <div class="badge">📱 APPLICATION MOBILE</div>
+    <h2>Installable <span class="gold">sur votre téléphone</span></h2>
+    <div class="lead">Pas besoin du Play Store — installation en 1 clic depuis votre navigateur</div>
+    <div class="pwa-row">
+      <div class="pwa-phone">
+        <div class="pwa-logo">V</div>
+        <div class="pwa-name">VÉRITAS</div>
+        <div class="pwa-tag">Academy</div>
+      </div>
+      <div class="pwa-feats">
+        <div class="pwa-feat"><div class="pwa-ico">⚡</div><div class="pwa-ft">Installation 1 clic</div><div class="pwa-fd">Ajoutez VÉRITAS à votre écran d'accueil comme une vraie app</div></div>
+        <div class="pwa-feat"><div class="pwa-ico">📶</div><div class="pwa-ft">Mode hors-ligne</div><div class="pwa-fd">Consultez vos notes et cours même sans connexion internet</div></div>
+        <div class="pwa-feat"><div class="pwa-ico">🔔</div><div class="pwa-ft">Notifications push</div><div class="pwa-fd">Recevez les alertes en temps réel, même app fermée</div></div>
+        <div class="pwa-feat"><div class="pwa-ico">🔄</div><div class="pwa-ft">Mises à jour auto</div><div class="pwa-fd">Toujours la dernière version, sans rien faire</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCÈNE G6 : Outils annexes & Bonus (163-172s) -->
+  <div class="scene sg6">
+    <div class="badge">✨ ET BIEN PLUS ENCORE</div>
+    <h2>Une suite <span class="gold">complète</span></h2>
+    <div class="lead">VÉRITAS, c'est aussi tous ces outils pour aller au-delà des cours</div>
+    <div class="bonus-grid">
+      <div class="bonus"><div class="bonus-ico">🔬</div><div class="bonus-title">Laboratoires virtuels</div><div class="bonus-desc">Expériences interactives en Physique, Chimie et SVT</div></div>
+      <div class="bonus"><div class="bonus-ico">📚</div><div class="bonus-title">Bibliothèque</div><div class="bonus-desc">+30 manuels MINESEC accessibles avec extraits gratuits</div></div>
+      <div class="bonus"><div class="bonus-ico">🧭</div><div class="bonus-title">Orientation post-BAC</div><div class="bonus-desc">Concours, grandes écoles, filières et débouchés au Cameroun</div></div>
+      <div class="bonus"><div class="bonus-ico">📅</div><div class="bonus-title">Calendrier scolaire</div><div class="bonus-desc">Examens, congés, événements VÉRITAS centralisés</div></div>
+      <div class="bonus"><div class="bonus-ico">📝</div><div class="bonus-title">Annales BEPC/BAC</div><div class="bonus-desc">5 années d'épreuves corrigées, toutes séries</div></div>
+      <div class="bonus"><div class="bonus-ico">🤝</div><div class="bonus-title">Partenaires</div><div class="bonus-desc">Réseau d'écoles, librairies et organismes éducatifs</div></div>
+    </div>
+  </div>
+
+  <!-- SCÈNE 15 : Call to Action (172-178s) -->
+  <div class="scene s15">
+    <div class="cta-emoji">🚀</div>
+    <h2>Rejoignez-nous<br>aujourd'hui !</h2>
+    <div class="lead">Rentrée 2026 — Places limitées<br>Réservez votre essai gratuit dès maintenant</div>
+    <div class="cta-btn">veritas-school.com</div>
+  </div>
+
+  <!-- SCÈNE 16 : Contacts (124-132s) -->
+  <div class="scene s16">
+    <div class="logo-small">V</div>
+    <h1>VÉRITAS</h1>
+    <div class="tagline">L'excellence scolaire à portée de tous</div>
+    <div class="contacts">
+      <div class="contact">
+        <div class="contact-ico">📞</div>
+        <div class="contact-text"><div class="contact-label">Téléphone</div><div class="contact-val">+237 697 637 739</div></div>
+      </div>
+      <div class="contact">
+        <div class="contact-ico">📧</div>
+        <div class="contact-text"><div class="contact-label">Email</div><div class="contact-val">contact@veritas.cm</div></div>
+      </div>
+      <div class="contact">
+        <div class="contact-ico">📍</div>
+        <div class="contact-text"><div class="contact-label">Adresse</div><div class="contact-val">Douala — Cameroun</div></div>
+      </div>
+    </div>
+    <div class="url">veritas-school.com</div>
+    <div class="copyright">© 2026 Mythe Errant · VÉRITAS Academy · Tous droits réservés</div>
+  </div>
+
+</div>
+
+<div class="progress" id="progress" style="width:0%"></div>
+
+<div class="replay-screen" id="replayScreen">
+  <h2>🎬 Fin de la vidéo</h2>
+  <button class="replay-btn" onclick="restartVideo()">↻ Rejouer</button>
+</div>
+
+<script>
+// ── DURÉES DES SCÈNES (en secondes) — total ~186s = 3:06 min ──
+// v2 : enrichi avec 6 scènes "Guide d'utilisation" (G1-G6) entre la 14 et la 15
+var DURATIONS = [
+  5,   // 1  - Logo intro
+  7,   // 2  - Slogan
+  8,   // 3  - Stats
+  10,  // 4  - E-Learning
+  10,  // 5  - Boutique
+  10,  // 6  - Classes virtuelles
+  8,   // 7  - Cartes mentales
+  8,   // 8  - Jeux
+  10,  // 9  - Paiements
+  8,   // 10 - Notifications
+  8,   // 11 - Sécurité
+  10,  // 12 - Témoignages
+  8,   // 13 - Tarifs
+  8,   // 14 - Comment ça marche
+  // ─── BONUS : Guide d'utilisation ───
+  9,   // G1 - Pour les Élèves
+  9,   // G2 - Pour les Enseignants
+  9,   // G3 - Pour l'Administration
+  9,   // G4 - Pour les Parents
+  9,   // G5 - Application Mobile / PWA
+  9,   // G6 - Outils annexes & Bonus
+  // ─── Fin ───
+  6,   // 15 - CTA (devenu scène 21)
+  8    // 16 - Contacts (devenue scène 22)
+];
+
+var scenes = document.querySelectorAll('.scene');
+var progressBar = document.getElementById('progress');
+var totalDuration = DURATIONS.reduce(function(a,b){return a+b;}, 0);
+
+// Particules pour scène 1
+function createParticles(){
+  var container = document.getElementById('particles1');
+  if(!container) return;
+  for(var i=0;i<30;i++){
+    var s = document.createElement('span');
+    var size = 4 + Math.random()*20;
+    s.style.width = size+'px';
+    s.style.height = size+'px';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.animationDelay = (Math.random()*4)+'s';
+    s.style.animationDuration = (3+Math.random()*3)+'s';
+    container.appendChild(s);
+  }
+}
+createParticles();
+
+// Lecture séquentielle des scènes
+var currentScene = 0;
+var startTime = 0;
+var rafId = null;
+
+function showScene(idx){
+  scenes.forEach(function(s,i){
+    s.classList.toggle('active', i===idx);
+  });
+}
+
+function tick(now){
+  var elapsed = (now - startTime) / 1000;
+  var pct = Math.min(100, (elapsed/totalDuration)*100);
+  progressBar.style.width = pct + '%';
+
+  // Trouve la scène courante
+  var cum = 0;
+  for(var i=0;i<DURATIONS.length;i++){
+    cum += DURATIONS[i];
+    if(elapsed < cum){
+      if(currentScene !== i){
+        currentScene = i;
+        showScene(i);
+      }
+      break;
+    }
+  }
+
+  if(elapsed < totalDuration){
+    rafId = requestAnimationFrame(tick);
+  } else {
+    // Fin
+    progressBar.style.width = '100%';
+    document.getElementById('replayScreen').classList.add('show');
+  }
+}
+
+function startVideo(){
+  document.getElementById('startScreen').classList.add('hide');
+  setTimeout(function(){
+    startTime = performance.now();
+    showScene(0);
+    rafId = requestAnimationFrame(tick);
+    // Plein écran auto si possible
+    try { document.documentElement.requestFullscreen(); } catch(e){}
+  }, 500);
+}
+
+function restartVideo(){
+  document.getElementById('replayScreen').classList.remove('show');
+  startTime = performance.now();
+  currentScene = 0;
+  showScene(0);
+  rafId = requestAnimationFrame(tick);
+}
+
+// Raccourci clavier : Espace pour pause/reprise
+document.addEventListener('keydown', function(e){
+  if(e.code === 'Space'){
+    e.preventDefault();
+    if(rafId){
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    } else if(startTime){
+      // Reprise (recalcule startTime)
+      var elapsed = parseFloat(progressBar.style.width) / 100 * totalDuration;
+      startTime = performance.now() - elapsed*1000;
+      rafId = requestAnimationFrame(tick);
+    }
+  }
+});
+</script>
+
+</body>
+</html>
