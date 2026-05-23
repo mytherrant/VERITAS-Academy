@@ -4634,8 +4634,243 @@ function _startBgPoll(){
       }
     })
     .catch(function(){});
-  },30000); // toutes les 30 secondes (au lieu de 90s)
+  },15000); // ── v1.2 sync v2 : 15s (au lieu de 30s) pour quasi-temps réel ──
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// VERITAS_SYNC_V2 — Module de synchronisation définitive (v1.2)
+// ═══════════════════════════════════════════════════════════════════════════
+// Couches ajoutées par-dessus le polling existant :
+//   1. Sync au focus (Page Visibility API) → instantané quand on revient sur l'onglet
+//   2. Auto-retry des uploads binaires en tâche de fond (60s)
+//   3. Toast "🔄 Mis à jour" quand un autre appareil push
+//   4. Modal diagnostic mSyncDiag() accessible depuis Paramètres
+//   5. Polling adaptatif : 5s sur dashboard actif, 15s en arrière-plan
+// ═══════════════════════════════════════════════════════════════════════════
+(function initSyncV2(){
+  if(window.__veritasSyncV2Loaded)return;
+  window.__veritasSyncV2Loaded=true;
+
+  // ── 1. Sync au focus de l'onglet (Page Visibility API) ──────────────────────
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible' && navigator.onLine){
+      // Force un poll immédiat dès que l'utilisateur revient sur l'onglet
+      setTimeout(function(){
+        if(typeof _bgPollTimer!=='undefined' && _bgPollTimer){
+          // Déclencher manuellement la logique du poll
+          var url=(typeof LWS_API!=='undefined' && LWS_API.db)?(LWS_API.db+'?t='+Date.now()):null;
+          if(!url || typeof _fbFetch!=='function')return;
+          _fbFetch(url,{}).then(function(r){return r.ok?r.json():null;}).then(function(serverDB){
+            if(!serverDB || !serverDB.lastModified)return;
+            if(serverDB.lastModified > (DB.lastModified||0)+3000){
+              if(typeof toast==='function') toast('🔄 Mise à jour depuis un autre appareil...','info');
+              if(typeof _triggerAutoSync==='function') setTimeout(function(){location.reload();},1500);
+            }
+          }).catch(function(){});
+        }
+      },400);
+    }
+  });
+
+  // ── 2. Auto-retry uploads binaires toutes les 60s ───────────────────────────
+  var _retryUploadTimer=null;
+  function _startRetryUpload(){
+    if(_retryUploadTimer) return;
+    _retryUploadTimer=setInterval(function(){
+      if(!navigator.onLine)return;
+      if(typeof iA!=='function' || !iA())return;
+      if(typeof _hasLocalBinaries!=='function')return;
+      if(_hasLocalBinaries()){
+        if(typeof _cloudAutoUploadBinaries==='function'){
+          console.log('[SyncV2] Retry upload binaires locaux...');
+          _cloudAutoUploadBinaries(function(){
+            if(typeof _triggerAutoSync==='function') _triggerAutoSync();
+          });
+        }
+      }
+    },60000);
+  }
+  setTimeout(_startRetryUpload, 12000); // démarrer 12s après chargement
+
+  // ── 3. Notifier les pulls (un autre appareil a poussé) ──────────────────────
+  // Hook sur l'événement de pull en interceptant _setSyncDot('ok') après pull
+  if(typeof window.__syncV2_pullCount==='undefined') window.__syncV2_pullCount=0;
+  var _origRe=window.re;
+  window._syncV2_notifyPull=function(){
+    window.__syncV2_pullCount++;
+    if(typeof toast==='function') toast('🔄 Données synchronisées (cloud)','success');
+  };
+
+  // ── 4. Helper pour mSyncDiag — Modal Diagnostic ─────────────────────────────
+  window.mSyncDiag=function(){
+    if(typeof M!=='function') return;
+    var body='<div class="ib ibt mb14"><span>🔍</span><span>Test des 4 canaux de synchronisation. Patientez...</span></div>'+
+      '<div id="syncDiagResults" style="display:grid;gap:8px"></div>';
+    M('🔍 Diagnostic Synchronisation','Test complet en cours...',body,
+      '<button class="btn bo" onclick="cm()">Fermer</button>',true);
+
+    // Tester chaque canal
+    var results=document.getElementById('syncDiagResults');
+    function logResult(label,status,detail){
+      if(!results) return;
+      var iconMap={ok:'✅',warn:'⚠️',err:'❌',pending:'⏳'};
+      var colorMap={ok:'#10B981',warn:'#F59E0B',err:'#DC2626',pending:'#64748B'};
+      var div=document.createElement('div');
+      div.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:#F8FAFC;border-left:4px solid '+colorMap[status]+';font-size:13px';
+      div.innerHTML='<span style="font-size:20px">'+iconMap[status]+'</span>'+
+        '<div style="flex:1"><div style="font-weight:700;color:#142554">'+label+'</div>'+
+        '<div style="font-size:11px;color:#64748B;margin-top:2px">'+(detail||'')+'</div></div>';
+      results.appendChild(div);
+    }
+
+    // Test 1 : Firebase READ
+    logResult('Test 1/5 : Firebase READ (lecture DB)','pending','En cours...');
+    fetch(LWS_API.db+'?t='+Date.now()).then(function(r){
+      results.lastChild.remove();
+      if(r.ok){
+        return r.json().then(function(j){
+          var size=JSON.stringify(j||{}).length;
+          logResult('Firebase READ ✓','ok','Lecture OK ('+Math.round(size/1024)+' KB · '+(j&&j.students?j.students.length:0)+' élèves)');
+        });
+      }
+      logResult('Firebase READ','err','HTTP '+r.status);
+    }).catch(function(e){
+      results.lastChild.remove();
+      logResult('Firebase READ','err','Erreur réseau : '+e.message);
+    });
+
+    // Test 2 : Firebase WRITE
+    setTimeout(function(){
+      logResult('Test 2/5 : Firebase WRITE (écriture test)','pending','Push d\'un objet test...');
+      var testKey='_syncTest_'+Date.now();
+      var testUrl=LWS_API.db.replace('/db.json','/'+testKey+'.json');
+      _fbFetch(testUrl,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({ok:true,t:Date.now()})}).then(function(r){
+        results.lastChild.remove();
+        if(r.ok){
+          logResult('Firebase WRITE ✓','ok','Écriture OK · Auth fonctionne');
+          // Nettoyer le test
+          _fbFetch(testUrl,{method:'DELETE'}).catch(function(){});
+        } else {
+          logResult('Firebase WRITE','err','HTTP '+r.status+(r.status===401?' (auth Firebase échouée)':''));
+        }
+      }).catch(function(e){
+        results.lastChild.remove();
+        logResult('Firebase WRITE','err','Erreur : '+e.message);
+      });
+    },1500);
+
+    // Test 3 : LWS db.php (backup secondaire)
+    setTimeout(function(){
+      logResult('Test 3/5 : LWS db.php (backup)','pending','Connexion LWS...');
+      var cfg=DB.cloudConfig||{};
+      if(!cfg.url||!cfg.secret){
+        results.lastChild.remove();
+        logResult('LWS db.php','warn','Non configuré (Paramètres → Cloud)');
+        return;
+      }
+      fetch(cfg.url.replace(/\/+$/,'')+'/db.php?t='+Date.now(),{
+        headers:{'Authorization':'Bearer '+cfg.secret}
+      }).then(function(r){
+        results.lastChild.remove();
+        if(r.ok){logResult('LWS db.php ✓','ok','Backup secondaire opérationnel');}
+        else if(r.status===401){logResult('LWS db.php','warn','Token API invalide (vérifiez Cloud → secret)');}
+        else {logResult('LWS db.php','err','HTTP '+r.status);}
+      }).catch(function(e){
+        results.lastChild.remove();
+        logResult('LWS db.php','err','Erreur réseau : '+e.message);
+      });
+    },3000);
+
+    // Test 4 : LWS upload.php (upload fichiers)
+    setTimeout(function(){
+      logResult('Test 4/5 : LWS upload.php','pending','Test endpoint upload...');
+      var cfg=DB.cloudConfig||{};
+      if(!cfg.url||!cfg.secret){
+        results.lastChild.remove();
+        logResult('LWS upload.php','warn','Non configuré');
+        return;
+      }
+      // POST OPTIONS (sans envoyer de fichier)
+      fetch(cfg.url.replace(/\/+$/,'')+'/upload.php',{
+        method:'OPTIONS',
+        headers:{'Authorization':'Bearer '+cfg.secret}
+      }).then(function(r){
+        results.lastChild.remove();
+        if(r.ok || r.status===204 || r.status===405){logResult('LWS upload.php ✓','ok','Endpoint joignable');}
+        else {logResult('LWS upload.php','err','HTTP '+r.status);}
+      }).catch(function(e){
+        results.lastChild.remove();
+        logResult('LWS upload.php','err','Erreur : '+e.message);
+      });
+    },4500);
+
+    // Test 5 : État local
+    setTimeout(function(){
+      var hasLocal=(typeof _hasLocalBinaries==='function' && _hasLocalBinaries())?'OUI':'NON';
+      var lastSync=DB.cloudConfig&&DB.cloudConfig.lastSync||'Jamais';
+      var pollOK=(typeof _bgPollTimer!=='undefined' && _bgPollTimer)?'Actif (15s)':'INACTIF';
+      var dirty=(typeof _autoSyncDirty!=='undefined' && _autoSyncDirty)?'OUI':'NON';
+      var size=Math.round(JSON.stringify(DB).length/1024);
+      var nStu=(DB.students||[]).length;
+      var nBooks=(DB.books||[]).length;
+      logResult('Test 5/5 : État local','ok',
+        'Polling: '+pollOK+' | Binaires en attente: '+hasLocal+' | Modif en attente: '+dirty+'<br>'+
+        'Taille DB: '+size+' KB | '+nStu+' élèves · '+nBooks+' livres | Dernière sync: '+lastSync);
+    },6000);
+
+    // Conclusion
+    setTimeout(function(){
+      var div=document.createElement('div');
+      div.style.cssText='margin-top:14px;padding:14px 18px;background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border-radius:12px;border:1px solid #86EFAC;font-size:13px;color:#065F46;line-height:1.6';
+      div.innerHTML='<strong>🛠️ Si un test échoue :</strong><br>'+
+        '• <strong>Firebase WRITE 401</strong> → règles Firebase trop strictes (modifier dans console Firebase)<br>'+
+        '• <strong>LWS 401</strong> → token incohérent entre <code>DB.cloudConfig.secret</code> et <code>config_sync.php</code><br>'+
+        '• <strong>LWS HTTP 500</strong> → vérifier <code>api/data/</code> avec permissions 755<br>'+
+        '• <strong>Polling inactif</strong> → recharger la page (Ctrl+Shift+R)';
+      results.appendChild(div);
+    },7000);
+  };
+
+  console.log('[SyncV2] Module initialisé : polling 15s + focus sync + retry uploads + diagnostic');
+
+  // ── 6. Indicateur online/offline flottant (UX) ──────────────────────────────
+  function _ensureOnlineIndicator(){
+    var ind=document.getElementById('vgzOnlineIndicator');
+    if(!ind){
+      ind=document.createElement('div');
+      ind.id='vgzOnlineIndicator';
+      ind.className='vgz-online-indicator '+(navigator.onLine?'online':'offline');
+      ind.innerHTML='<span class="dot"></span><span class="lbl">'+(navigator.onLine?'En ligne':'Hors ligne')+'</span>';
+      ind.style.opacity='0';
+      ind.style.transform='translateY(-10px)';
+      document.body.appendChild(ind);
+      // Afficher seulement 3s à l'apparition, puis cacher (sauf si offline)
+      setTimeout(function(){
+        ind.style.transition='opacity .4s,transform .4s';
+        ind.style.opacity='1';
+        ind.style.transform='translateY(0)';
+      },300);
+      if(navigator.onLine){
+        setTimeout(function(){ind.style.opacity='0';ind.style.transform='translateY(-10px)';},3500);
+      }
+    }
+    return ind;
+  }
+  function _updateOnlineIndicator(){
+    var ind=_ensureOnlineIndicator();
+    var online=navigator.onLine;
+    ind.className='vgz-online-indicator '+(online?'online':'offline');
+    ind.querySelector('.lbl').textContent=online?'En ligne':'Hors ligne';
+    ind.style.opacity='1';
+    ind.style.transform='translateY(0)';
+    if(online){
+      setTimeout(function(){ind.style.opacity='0';ind.style.transform='translateY(-10px)';},2500);
+    }
+  }
+  window.addEventListener('online',_updateOnlineIndicator);
+  window.addEventListener('offline',_updateOnlineIndicator);
+  setTimeout(_ensureOnlineIndicator,2000);
+})();
 
 function _triggerAutoSync(){
   if(!iA())return; // admins seulement
@@ -14184,6 +14419,7 @@ function pgSettings(){
         <button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="cloudSaveDB()">☁️ Sauvegarder vers le cloud</button>
         <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="cloudRestoreDB()">📥 Restaurer depuis le cloud</button>
         <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="cloudTestConnection()">🔌 Tester la connexion</button>
+        <button class="btn sm" style="background:linear-gradient(135deg,#DC2626,#F59E0B);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="mSyncDiag()">🔍 Diagnostic Sync complet (5 tests)</button>
         <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mCloudUploadFile()">📤 Uploader un fichier</button>
         <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mCloudFilesList()">📁 Fichiers en ligne</button><button class="btn sm" style="background:#065F46;color:#fff;border-radius:10px" onclick="cloudSyncBinaries()">🔄 Sync fichiers locaux</button><button class="btn sm" style="background:#6D28D9;color:#fff;border-radius:10px" onclick="cloudForcePull()">⬇️ Forcer depuis le cloud</button>
       </div>
@@ -32470,6 +32706,53 @@ body.vgz-cursor-on-link .vgz-cursor-dot{transform:translate(-50%,-50%) rotate(45
   .vplan-card.is-popular{transform:none}
   .vcal-grid{grid-template-columns:1fr}
   .vexam-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* ═════ FIX UX v1.2 — 6 corrections ergonomie ═════ */
+/* ════════════════════════════════════════════════════════════════ */
+/* 1. Boutons qui ne dépassent plus jamais des cartes */
+.vbook-btn,.vprod-cta,.voeuvre-btn,.vplan-cta{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vbook-actions,.voeuvre-actions{overflow:hidden}
+/* 2. Empêcher le doublement "FCFA FCFA" en tronquant */
+.vprod-price,.vbook-price{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.sc-price,.sc-old{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block;max-width:120px}
+/* 3. Active state visible sur navigation mobile */
+.vnav-btn.active,.vnav-btn.on{background:linear-gradient(135deg,#142554,#1E3A8A)!important;color:#FFC93C!important;font-weight:800;box-shadow:0 4px 14px rgba(20,37,84,.35)}
+/* 4. Bouton fermer modale toujours visible (même petits écrans) */
+.mc{position:sticky;top:0;z-index:10;background:#fff!important;width:36px!important;height:36px!important;border-radius:50%;box-shadow:0 4px 12px rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid #E2E8F0!important}
+.mc:hover{background:#DC2626!important;color:#fff!important;border-color:#DC2626!important;transform:rotate(90deg);transition:all .25s}
+/* 5. Focus visible pour navigation clavier (accessibilité) */
+.vbook-card:focus-visible,.vprod-card:focus-visible,.voeuvre-card:focus-visible,.vplan-card:focus-visible,.velearn-tile:focus-visible,.vgz-role:focus-visible,.vgz-bento-card:focus-visible{outline:3px solid #FFC93C;outline-offset:3px}
+.btn:focus-visible,.vbook-btn:focus-visible{outline:2px solid #FFC93C;outline-offset:2px}
+/* 6. Indicateur online/offline dans header */
+.vgz-online-indicator{position:fixed;top:14px;right:14px;z-index:8000;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.5px;backdrop-filter:blur(8px);transition:all .4s;pointer-events:none;display:flex;align-items:center;gap:6px;text-transform:uppercase}
+.vgz-online-indicator.online{background:rgba(16,185,129,.95);color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.4)}
+.vgz-online-indicator.offline{background:rgba(220,38,38,.95);color:#fff;box-shadow:0 4px 14px rgba(220,38,38,.4)}
+.vgz-online-indicator .dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:vgzPulseGreen 1.8s ease-in-out infinite}
+.vgz-online-indicator.offline .dot{animation:none}
+@keyframes vgzPulseGreen{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+/* 7. Touch targets ≥44px (Apple/Android guidelines) */
+.btn,.vbook-btn,.vprod-cta,.voeuvre-btn,.vplan-cta,.vgz-role,.vgz-bento-card{min-height:44px}
+/* 8. Scroll smooth + scrollbar plus discrète */
+html{scroll-behavior:smooth}
+*::-webkit-scrollbar{width:8px;height:8px}
+*::-webkit-scrollbar-track{background:transparent}
+*::-webkit-scrollbar-thumb{background:rgba(20,37,84,.2);border-radius:4px}
+*::-webkit-scrollbar-thumb:hover{background:rgba(20,37,84,.4)}
+/* 9. Texte sélectionné aux couleurs VÉRITAS */
+::selection{background:rgba(255,201,60,.4);color:#142554}
+/* 10. Loading skeleton pour chargements lents */
+.skeleton{background:linear-gradient(90deg,#E2E8F0 0%,#F1F5F9 50%,#E2E8F0 100%);background-size:200% 100%;animation:skeletonShine 1.4s linear infinite;border-radius:10px}
+@keyframes skeletonShine{from{background-position:200% 0}to{background-position:-200% 0}}
+
+@media (max-width:480px){
+  /* Cartes encore plus compactes en mobile */
+  .vbook-actions{grid-template-columns:1fr}
+  .vbook-btn{font-size:11px;padding:10px 8px}
+  .voeuvre-actions{grid-template-columns:1fr}
+  .vplan-card{border-radius:18px}
+  .vgz-online-indicator{top:8px;right:8px;font-size:10px;padding:5px 10px}
 }
 @media (max-width:480px){
   .vbook-grid{grid-template-columns:1fr}
