@@ -6072,91 +6072,14 @@ function vShowSec(sec,btn){
       </div>
     </div>
 
-    <div class="vstats v-reveal v-stagger">
-          <div class="vstats-item"><div class="vstats-n">${DB.students.length}</div><div class="vstats-l">Élèves inscrits</div></div>
-          <div class="vstats-item"><div class="vstats-n">${DB.teachers.length}</div><div class="vstats-l">Enseignants</div></div>
-          <div class="vstats-item"><div class="vstats-n">${(DB.elearning&&DB.elearning.contenus||[]).length}+</div><div class="vstats-l">Ressources</div></div>
-          <div class="vstats-item"><div class="vstats-n">85%</div><div class="vstats-l">Taux réussite</div></div>
-        </div>
-            <!-- SECTION FONCTIONNALITÉS -->
-    <div class="v-reveal v-stagger" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin-bottom:28px">
-      ${[
-        ['📘','Gestion des Élèves','Inscriptions, dossiers scolaires et suivi personnalisé de chaque élève','var(--blb)','var(--bl)'],
-        ['📊','Suivi des Notes','Saisie, bulletins APC, moyennes automatiques et classements','var(--grb)','var(--gr)'],
-        ['💰','Paiements','Reçus, suivi des frais de scolarité et bilan financier en temps réel','var(--yellow2)','var(--gold2)'],
-        ['📅','Emploi du Temps','Organisation des cours, devoirs et planification pédagogique','var(--pub)','var(--pu)']
-      ].map(([ico,titre,desc,bg,col])=>'<div style="background:'+bg+';border-radius:var(--r3);padding:20px;text-align:center;transition:all .3s ease;cursor:default" class="feat-card"><div style="font-size:36px;margin-bottom:10px">'+ico+'</div><div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:'+col+';margin-bottom:6px">'+titre+'</div><div style="font-size:13px;color:var(--ink3);line-height:1.6">'+desc+'</div></div>').join("")}
-    </div>
-
-    <!-- POUR QUI ? -->
-    <div class="v-reveal v-stagger" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px">
-      <div style="background:var(--sur);border-radius:var(--r3);padding:20px;text-align:center;border:var(--br);transition:all .25s" onmouseover="this.style.borderColor='var(--bl2)'" onmouseout="this.style.borderColor=''">
-        <div style="width:48px;height:48px;border-radius:50%;background:var(--blb);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px">🎓</div>
-        <div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:var(--bl);margin-bottom:6px">Élèves</div>
-        <div style="font-size:13px;color:var(--ink3);line-height:1.6">Consultez vos notes, bulletins, devoirs et suivez votre progression en temps réel.</div>
-      </div>
-      <div style="background:var(--sur);border-radius:var(--r3);padding:20px;text-align:center;border:var(--br);transition:all .25s" onmouseover="this.style.borderColor='var(--gr)'" onmouseout="this.style.borderColor=''">
-        <div style="width:48px;height:48px;border-radius:50%;background:var(--grb);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px">👨‍🏫</div>
-        <div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:var(--gr);margin-bottom:6px">Enseignants</div>
-        <div style="font-size:13px;color:var(--ink3);line-height:1.6">Saisissez les notes, gérez vos devoirs, publiez vos manuels et suivez vos performances.</div>
-      </div>
-      <div style="background:var(--sur);border-radius:var(--r3);padding:20px;text-align:center;border:var(--br);transition:all .25s" onmouseover="this.style.borderColor='var(--pu)'" onmouseout="this.style.borderColor=''">
-        <div style="width:48px;height:48px;border-radius:50%;background:var(--pub);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-size:22px">🏛️</div>
-        <div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:var(--pu);margin-bottom:6px">Administration</div>
-        <div style="font-size:13px;color:var(--ink3);line-height:1.6">Gérez inscriptions, finances, bulletins, emploi du temps et communication centralisée.</div>
-      </div>
-    </div>
-
-    <!-- SECTION: AMÉLIORE TES NOTES (inspiré grandprof) -->
-    <div class="v-reveal" style="background:linear-gradient(135deg,#142554 0%,#1A3878 100%);border-radius:20px;padding:28px;margin-bottom:24px;position:relative;overflow:hidden">
-      <div style="position:absolute;top:-20px;right:-20px;font-size:100px;opacity:.04">📚</div>
-      <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-        <div style="flex:1;min-width:220px">
-          <div style="font-family:Montserrat,sans-serif;font-size:24px;font-weight:700;color:#FFC93C;line-height:1.2">Améliore tes <span style="text-decoration:underline;text-decoration-color:rgba(255,201,60,.4)">NOTES</span><br>et réussis ton <span style="color:#fff">EXAMEN !</span></div>
-          <div style="font-family:Georgia,serif;font-size:14px;color:rgba(255,255,255,.7);margin-top:10px;line-height:1.7;font-style:italic">Nous mettons à ta disposition tout le nécessaire pour étudier efficacement et atteindre l&#39;excellence scolaire !</div>
-          <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
-            <button class="btn" style="background:#FFC93C;color:#142554;font-family:Montserrat,sans-serif;font-weight:700;border-radius:12px;padding:10px 20px" onclick="vShowSec('boutique',document.querySelector('.vnav-btn[onclick*="boutique"]'))">🛍️ Voir nos offres</button>
-            <button class="btn" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:12px;padding:10px 20px" onclick="showLogin('eleve')">🎓 Se connecter</button>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;min-width:200px">
-          <div style="background:rgba(255,201,60,.1);border:1px solid rgba(255,201,60,.2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:24px">📝</div><div style="font-family:Georgia,serif;font-size:11px;color:rgba(255,255,255,.7);margin-top:4px">Épreuves & Corrigés</div></div>
-          <div style="background:rgba(60,141,255,.1);border:1px solid rgba(60,141,255,.2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:24px">🧑‍🏫</div><div style="font-family:Georgia,serif;font-size:11px;color:rgba(255,255,255,.7);margin-top:4px">Suivi Personnalisé</div></div>
-          <div style="background:rgba(252,226,238,.1);border:1px solid rgba(252,226,238,.2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:24px">📅</div><div style="font-family:Georgia,serif;font-size:11px;color:rgba(255,255,255,.7);margin-top:4px">Planning d\'études</div></div>
-          <div style="background:rgba(5,150,105,.1);border:1px solid rgba(5,150,105,.2);border-radius:12px;padding:12px;text-align:center"><div style="font-size:24px">🏆</div><div style="font-family:Georgia,serif;font-size:11px;color:rgba(255,255,255,.7);margin-top:4px">Taux réussite 85%</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PROMO E-LEARNING -->
-    <div class="v-reveal-left" style="background:linear-gradient(135deg,#142554 0%,#3C8DFF 100%);border-radius:20px;padding:24px;margin-bottom:24px;position:relative;overflow:hidden">
-      <div style="position:absolute;top:-20px;right:-10px;font-size:100px;opacity:.05">📚</div>
-      <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-        <div style="flex:1;min-width:200px">
-          <div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:700;color:#FFC93C">📚 E-Learning VÉRITAS</div>
-          <div style="font-family:Georgia,serif;font-size:13px;color:rgba(255,255,255,.75);margin-top:8px;line-height:1.7;font-style:italic">Épreuves des meilleurs établissements, cours détaillés, corpus par séquence — dès 3 000 FCFA/an</div>
-          <button class="btn" style="background:#FFC93C;color:#142554;font-family:Montserrat,sans-serif;font-weight:700;border-radius:12px;padding:10px 20px;margin-top:12px" onclick="vShowSec('elearning',document.querySelectorAll('.vnav-btn')[3])">Voir les abonnements →</button>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-          <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px">📝</div><div style="font-size:10px;color:rgba(255,255,255,.6)">Épreuves</div></div>
-          <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px">📖</div><div style="font-size:10px;color:rgba(255,255,255,.6)">Cours PDF</div></div>
-          <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px">📋</div><div style="font-size:10px;color:rgba(255,255,255,.6)">Corpus</div></div>
-          <div style="background:rgba(255,255,255,.1);border-radius:10px;padding:10px;text-align:center"><div style="font-size:20px">🎬</div><div style="font-size:10px;color:rgba(255,255,255,.6)">Vidéos</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- TÉMOIGNAGES (inspiré grandprof) -->
-    <div class="v-reveal-right" style="background:linear-gradient(135deg,#FCE2EE 0%,#FFF3C4 100%);border-radius:20px;padding:24px;margin-bottom:24px">
-      <div style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:700;color:#142554;margin-bottom:16px;text-align:center">💬 Ce qu&#39;ils disent de VÉRITAS</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">
-        ${[
-          ['Marion J.','Bachelière 2024','Depuis que je suis inscrite au centre, mes notes se sont améliorées de façon spectaculaire. Les enseignants sont dévoués !','⭐⭐⭐⭐⭐'],
-          ['Samuel C.','Élève de 3ème','Les cours de vacances m&#39;ont permis de rattraper mon retard en maths. Aujourd&#39;hui je suis 3ème de ma classe !','⭐⭐⭐⭐⭐'],
-          ['Mme Ateba C.','Parent d&#39;élève','VÉRITAS offre un suivi personnalisé remarquable. Mon enfant est motivé et ses résultats le prouvent.','⭐⭐⭐⭐⭐']
-        ].map(([nom,role,texte,stars])=>'<div style="background:#fff;border-radius:14px;padding:16px;box-shadow:0 2px 12px rgba(20,37,84,.06)"><div style="font-size:14px;color:#FFC93C;margin-bottom:6px">'+stars+'</div><div style="font-family:Georgia,serif;font-size:13px;color:var(--ink2);line-height:1.7;font-style:italic;margin-bottom:10px">« '+texte+' »</div><div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;color:#142554">'+nom+'</div><div style="font-size:12px;color:var(--ink4)">'+role+'</div></div>').join("")}
-      </div>
-    </div>
+    <!-- ═════ DOUBLONS SUPPRIMÉS (v1.2) ═════
+         ❌ Stats   → déjà dans .vgz-stats (Pack Gen Z Wow)
+         ❌ Features (4) → déjà dans .vgz-bento (6 cartes interactives)
+         ❌ Pour qui (3) → déjà dans .vgz-roles (4 cartes Tu es...)
+         ❌ Témoignages → déjà dans .vgz-testis (Marie K., Jean-Paul M., M. Georges T.)
+         ❌ Améliore tes NOTES → redondant avec hero3d titre
+         ❌ Promo E-Learning → déjà dans .vgz-bento "E-Learning Premium"
+    -->
 
     <div class="vsec-title v-reveal">🏫 Présentation du Centre</div>
     <div class="vsec-sub v-reveal">Bienvenue au ${_esc(DB.school?.nom||"VÉRITAS Academy")}</div>
@@ -6354,8 +6277,13 @@ function vShowSec(sec,btn){
       h+='<button onclick="showLabosVirtuels()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:24px;padding:10px 22px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">🔬 Labos virtuels</button>';
       h+='<a href="https://minesec-distancelearning.cm" target="_blank" rel="noopener" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);border-radius:24px;padding:10px 22px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px">🌐 Cours MINESEC officiels</a>';
       h+='</div></div>';
-      // ── CATEGORIES — TUILES PREMIUM v2 (pictos 3D + couleurs vibrantes) ──
-      h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#142554;margin-bottom:14px">📂 Choisissez une catégorie</div>';
+      // ── CATEGORIES — TUILES PREMIUM v2 (pictos 3D + couleurs vibrantes + anim) ──
+      h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#142554;margin-bottom:14px;display:flex;align-items:center;gap:8px">📂 Choisissez une catégorie<span style="font-size:11px;color:#94A3B8;font-weight:500">Cliquez pour explorer</span></div>';
+      // Animation d'entrée : déclenche la classe .entering pour stagger
+      setTimeout(function(){
+        var g=document.querySelector('.velearn-grid');
+        if(g){g.classList.add('entering');setTimeout(function(){g.classList.remove('entering');},2000);}
+      },50);
       var _picBase='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
       // Mapping catégorie → couleur + picto 3D (configurables via DB.elearning.categories[i].cssClass / pictoUrl)
       var _catThemes={
@@ -6569,55 +6497,46 @@ function vShowSec(sec,btn){
     h+='<div style="font-family:Georgia,serif;font-size:15px;color:var(--ink3);font-style:italic;margin-top:8px;max-width:500px;margin-left:auto;margin-right:auto">Accès illimité aux épreuves, cours et corpus selon votre niveau — prix imbattables !</div>';
     h+='</div>';
 
-    var planThemes={
-      plan1:{bg:'linear-gradient(160deg,#EFF6FF 0%,#DBEAFE 100%)',accent:'#3B82F6',accentLight:'rgba(59,130,246,.1)',txt:'#1E293B',sub:'#64748B',price:'#1D4ED8',btn:'linear-gradient(135deg,#3B82F6,#2563EB)',btnTxt:'#fff',check:'#3B82F6',border:'2px solid rgba(59,130,246,.15)',ring:'rgba(59,130,246,.2)',ico:'school'},
-      plan2:{bg:'linear-gradient(160deg,#FFFBEB 0%,#FEF3C7 100%)',accent:'#D97706',accentLight:'rgba(217,119,6,.1)',txt:'#1E293B',sub:'#64748B',price:'#B45309',btn:'linear-gradient(135deg,#F59E0B,#D97706)',btnTxt:'#fff',check:'#D97706',border:'2px solid rgba(217,119,6,.15)',ring:'rgba(217,119,6,.2)',ico:'workspace_premium',pop:true},
-      plan3:{bg:'linear-gradient(160deg,#ECFDF5 0%,#D1FAE5 100%)',accent:'#059669',accentLight:'rgba(5,150,105,.1)',txt:'#1E293B',sub:'#64748B',price:'#047857',btn:'linear-gradient(135deg,#059669,#047857)',btnTxt:'#fff',check:'#059669',border:'2px solid rgba(5,150,105,.15)',ring:'rgba(5,150,105,.2)',ico:'verified'},
-      plan4:{bg:'linear-gradient(160deg,#FFF1F2 0%,#FFE4E6 100%)',accent:'#E11D48',accentLight:'rgba(225,29,72,.1)',txt:'#1E293B',sub:'#64748B',price:'#BE123C',btn:'linear-gradient(135deg,#E11D48,#BE123C)',btnTxt:'#fff',check:'#E11D48',border:'2px solid rgba(225,29,72,.15)',ring:'rgba(225,29,72,.2)',ico:'emoji_events'}
+    // ── PLANS PREMIUM v2 — pictos 3D HD + animations + conic border populaire ──
+    var _picBaseP='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
+    var planPictos={
+      plan1:_picBaseP+'graduation-cap_1f393.png',           // Examen
+      plan2:_picBaseP+'open-book_1f4d6.png',                // Intermédiaire
+      plan3:_picBaseP+'briefcase_1f4bc.png',                // Enseignant
+      plan4:_picBaseP+'family_1f46a.png'                    // Famille
     };
+    var planCssMap={plan1:'p1',plan2:'p2',plan3:'p3',plan4:'p4'};
 
-    h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px;align-items:start">';
+    h+='<div class="vplan-grid v-reveal">';
     el.plans.forEach(function(plan,idx){
-      var th=planThemes[plan.id]||planThemes.plan3;
       var pct=plan.ancien?Math.round((1-plan.prix/plan.ancien)*100):0;
-      var isPopular=plan.populaire||th.pop;
-      // Card wrapper
-      h+='<div style="background:'+th.bg+';border-radius:24px;padding:0;position:relative;overflow:hidden;'+th.border+';box-shadow:0 4px 20px rgba(0,0,0,.06);transition:all .35s cubic-bezier(.16,1,.3,1);text-align:center'+(isPopular?';transform:scale(1.03);box-shadow:0 12px 40px '+th.ring:'')+'">';
-      // Top accent bar with gradient
-      h+='<div style="height:6px;background:'+th.btn+';width:100%"></div>';
-      // Inner padding
-      h+='<div style="padding:28px 24px 24px">';
-      // Icon circle
-      h+='<div style="width:56px;height:56px;border-radius:50%;background:'+th.accentLight+';display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:2px solid '+th.accent+'"><span class="material-icons-round" style="font-size:28px;color:'+th.accent+'">'+th.ico+'</span></div>';
-      // Popular badge
-      if(isPopular) h+='<div style="position:absolute;top:18px;right:16px;background:'+th.btn+';color:'+th.btnTxt+';font-family:Poppins,sans-serif;font-size:10px;font-weight:700;padding:4px 12px;border-radius:20px;letter-spacing:.5px;box-shadow:0 2px 8px '+th.ring+'"><span class="material-icons-round" style="font-size:12px;vertical-align:-2px;margin-right:3px">star</span>Populaire</div>';
-      // Promo badge
-      if(pct) h+='<div style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#DC2626,#E11D48);color:#fff;font-family:Poppins,sans-serif;font-size:11px;font-weight:700;padding:5px 14px;border-radius:20px;margin-bottom:10px;box-shadow:0 3px 10px rgba(220,38,38,.25)"><span class="material-icons-round" style="font-size:14px">local_fire_department</span>-'+pct+'% ÉCONOMIE</div>';
-      // Plan name
-      h+='<div style="font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:'+th.txt+';margin-top:4px;letter-spacing:1px;text-transform:uppercase">'+_esc(plan.nom)+'</div>';
-      h+='<div style="font-family:Poppins,sans-serif;font-size:12px;color:'+th.sub+';margin:6px 0 18px;font-weight:500">'+_esc(plan.cible)+'</div>';
-      // Divider
-      h+='<div style="width:40px;height:2px;background:'+th.accent+';margin:0 auto 16px;border-radius:2px;opacity:.5"></div>';
-      // Price — old price struck through
-      if(plan.ancien) h+='<div style="font-family:Poppins,sans-serif;font-size:14px;color:#94A3B8;text-decoration:line-through;text-decoration-color:#E11D48;text-decoration-thickness:2px;margin-bottom:2px">'+fmtN(plan.ancien)+' <span style="font-size:10px">XAF</span></div>';
-      h+='<div style="font-family:Montserrat,sans-serif;font-size:42px;font-weight:900;color:'+th.price+';line-height:1;letter-spacing:-1px">'+fmtN(plan.prix)+'<span style="font-size:14px;font-weight:500;letter-spacing:0;vertical-align:super;margin-left:2px">XAF</span></div>';
-      h+='<div style="font-family:Poppins,sans-serif;font-size:11px;color:'+th.sub+';margin-top:4px;font-weight:500">/ an</div>';
-      // Resources count pill
+      var isPopular=plan.populaire||(idx===1);
+      var cssClass=planCssMap[plan.id]||'p1';
+      var picto=plan.pictoUrl||planPictos[plan.id]||_picBaseP+'memo_1f4dd.png';
       var nbRessources=(el.contenus||[]).filter(function(c){return c.plans&&c.plans.indexOf(plan.id)>-1;}).length;
-      if(nbRessources>0) h+='<div style="display:inline-flex;align-items:center;gap:5px;background:'+th.accentLight+';color:'+th.accent+';font-family:Poppins,sans-serif;font-size:11px;font-weight:600;padding:6px 14px;border-radius:20px;margin-top:12px;border:1px solid '+th.accent+'30"><span class="material-icons-round" style="font-size:14px">menu_book</span>'+nbRessources+' ressources incluses</div>';
-      // Features list
-      h+='<div style="margin:20px 0;text-align:left">';
+
+      h+='<div class="vplan-card '+cssClass+(isPopular?' is-popular':'')+'">';
+      h+='  <div class="vplan-top"></div>';
+      h+=  (isPopular?'<div class="vplan-badge-pop">Populaire</div>':'');
+      h+='  <div class="vplan-body">';
+      h+='    <div class="vplan-ico"><img src="'+_esc(picto)+'" alt="" loading="lazy"></div>';
+      h+=    (pct?'<div class="vplan-promo">🔥 -'+pct+'% ÉCONOMIE</div>':'');
+      h+='    <div class="vplan-name">'+_esc(plan.nom)+'</div>';
+      h+='    <div class="vplan-cible">'+_esc(plan.cible)+'</div>';
+      h+='    <div class="vplan-divider"></div>';
+      h+=    (plan.ancien?'<div class="vplan-old-price">'+fmtN(plan.ancien)+' XAF</div>':'');
+      h+='    <div class="vplan-price">'+fmtN(plan.prix)+'<span style="font-size:14px;font-weight:600;color:#94A3B8;margin-left:4px">XAF</span></div>';
+      h+='    <div class="vplan-price-unit">/ an scolaire</div>';
+      h+=    (nbRessources>0?'<div class="vplan-resources">📚 '+nbRessources+' ressources incluses</div>':'');
+      h+='    <div class="vplan-feats">';
       plan.avantages.forEach(function(av){
-        h+='<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;padding:6px 0">'
-          +'<span class="material-icons-round" style="color:'+th.check+';font-size:18px;flex-shrink:0;margin-top:1px">check_circle</span>'
-          +'<span style="font-family:Poppins,sans-serif;font-size:13px;color:'+th.txt+';line-height:1.5;font-weight:500">'+av+'</span></div>';
+        h+='      <div class="vplan-feat">'+_esc(av).replace(/^[✅✓☑️\s]+/,'')+'</div>';
       });
+      h+='    </div>';
+      h+='    <button class="vplan-cta" onclick="commanderAbonnement(\''+plan.id+'\')">S\'abonner maintenant</button>';
+      h+='    <div class="vplan-footer">Valable toute l\'année scolaire</div>';
+      h+='  </div>';
       h+='</div>';
-      // CTA button
-      h+='<button class="btn" style="width:100%;justify-content:center;background:'+th.btn+';color:'+th.btnTxt+';font-family:Montserrat,sans-serif;font-weight:800;border-radius:16px;padding:15px;font-size:15px;letter-spacing:1.5px;box-shadow:0 6px 20px '+th.ring+';transition:all .3s cubic-bezier(.16,1,.3,1);border:none;text-transform:uppercase" onclick="commanderAbonnement(\''+plan.id+'\')"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px;margin-right:6px">rocket_launch</span>S&#39;ABONNER</button>';
-      h+='<div style="font-family:Poppins,sans-serif;font-size:10px;color:'+th.sub+';margin-top:14px;font-weight:400"><span class="material-icons-round" style="font-size:12px;vertical-align:-2px;margin-right:3px;color:'+th.check+'">verified</span>Valable toute l&#39;année scolaire</div>';
-      h+='</div>'; // close padding
-      h+='</div>'; // close card
     });
     h+='</div></div>';
 
@@ -9676,7 +9595,13 @@ function mAddProduct(){
   '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="pdDesc" rows="2" placeholder="Description courte du produit..."></textarea></div>'+
   '<div class="fg full"><span class="fl">Photo (URL ou coller une image)</span><input class="fi" id="pdPhoto" placeholder="https://... ou collez une image base64"></div>'+
   '<div class="fg full"><span class="fl">Télécharger une photo</span><input type="file" id="pdFile" accept="image/*" onchange="loadProductPhoto(this)" style="font-size:13px"></div>'+
-  '<div class="fg full"><span class="fl">🎨 Picto 3D HD (URL) — laissez vide pour utiliser l\'emoji</span><input class="fi" id="pdPictoUrl" placeholder="https://em-content.zobj.net/source/microsoft-3D-fluent/406/headphone_1f3a7.png"><div style="font-size:10px;color:var(--ink4);margin-top:4px">💡 Cherchez sur <a href="https://emojipedia.org" target="_blank" style="color:var(--bl)">emojipedia.org</a> et copiez l\'URL Microsoft 3D</div></div>'+
+  '<div class="fg full"><span class="fl">🎨 Picto 3D HD</span>'+
+    '<div style="display:flex;gap:8px;align-items:center">'+
+      '<input class="fi" id="pdPictoUrl" placeholder="(vide = emoji) ou URL...">'+
+      '<button type="button" class="btn bi sm" onclick="openPictoPicker(\'pdPictoUrl\')" style="white-space:nowrap;padding:8px 14px">🎨 Choisir</button>'+
+    '</div>'+
+    '<div id="pdPictoPreview" style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink4)"></div>'+
+  '</div>'+
   '<div class="fg full"><span class="fl">🌈 Couleur de fond du picto</span><select class="fi" id="pdBgColor"><option value="">Auto (violet pâle)</option><option value="linear-gradient(135deg,#DBEAFE,#BFDBFE)">💙 Bleu pâle</option><option value="linear-gradient(135deg,#D1FAE5,#A7F3D0)">💚 Vert pâle</option><option value="linear-gradient(135deg,#FEE2E2,#FECACA)">❤️ Rouge pâle</option><option value="linear-gradient(135deg,#FEF3C7,#FDE68A)">💛 Jaune pâle</option><option value="linear-gradient(135deg,#EDE9FE,#DDD6FE)">💜 Violet pâle</option><option value="linear-gradient(135deg,#FCE7F3,#FBCFE8)">💖 Rose pâle</option><option value="linear-gradient(135deg,#CFFAFE,#A5F3FC)">🩵 Cyan pâle</option><option value="linear-gradient(135deg,#FED7AA,#FDBA74)">🧡 Orange pâle</option></select></div>'+
   '<div class="fg"><span class="fl">⭐ Mettre en avant (Articles & Ressources)</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdFeatured"><span style="font-size:13px">Afficher dans le carrousel principal</span></label></div>'+
   '<div class="fg"><span class="fl">🆕 Badge "NEW"</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdNouveau"><span style="font-size:13px">Marquer comme nouveauté</span></label></div>'+
@@ -9691,6 +9616,149 @@ function loadProductPhoto(input){
     _si('pdPreview','<img src="'+e.target.result+'" style="width:80px;height:80px;border-radius:10px;object-fit:cover">');
   };
   reader.readAsDataURL(input.files[0]);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PICTO PICKER — bibliothèque visuelle de 60+ pictos 3D HD
+// ═══════════════════════════════════════════════════════════════
+window._PICTO_LIB = [
+  // Éducation
+  {tag:'education',label:'Élève / Diplôme',file:'graduation-cap_1f393.png'},
+  {tag:'education',label:'École',file:'school_1f3eb.png'},
+  {tag:'education',label:'Enseignant',file:'man-teacher-medium-skin-tone_1f468-1f3fd-200d-1f3eb.png'},
+  {tag:'education',label:'Famille',file:'family_1f46a.png'},
+  // Livres & Cahiers
+  {tag:'books',label:'Livres',file:'books_1f4da.png'},
+  {tag:'books',label:'Livre ouvert',file:'open-book_1f4d6.png'},
+  {tag:'books',label:'Livre fermé',file:'closed-book_1f4d5.png'},
+  {tag:'books',label:'Cahier déco',file:'notebook-with-decorative-cover_1f4d4.png'},
+  {tag:'books',label:'Cahier',file:'notebook_1f4d3.png'},
+  {tag:'books',label:'Mémo',file:'memo_1f4dd.png'},
+  // Outils & écriture
+  {tag:'tools',label:'Crayon noir',file:'pencil_270f-fe0f.png'},
+  {tag:'tools',label:'Stylo',file:'pen_1f58a-fe0f.png'},
+  {tag:'tools',label:'Stylo bille',file:'ballot-box-with-ballot_1f5f3-fe0f.png'},
+  {tag:'tools',label:'Règle triangle',file:'triangular-ruler_1f4d0.png'},
+  {tag:'tools',label:'Règle droite',file:'straight-ruler_1f4cf.png'},
+  {tag:'tools',label:'Trombone',file:'paperclip_1f4ce.png'},
+  {tag:'tools',label:'Punaise',file:'pushpin_1f4cc.png'},
+  {tag:'tools',label:'Calculatrice',file:'abacus_1f9ee.png'},
+  // Multimédia
+  {tag:'media',label:'Casque audio',file:'headphone_1f3a7.png'},
+  {tag:'media',label:'Caméra vidéo',file:'video-camera_1f4f9.png'},
+  {tag:'media',label:'Projecteur',file:'film-projector_1f4fd-fe0f.png'},
+  {tag:'media',label:'Microphone',file:'microphone_1f3a4.png'},
+  {tag:'media',label:'TV',file:'television_1f4fa.png'},
+  {tag:'media',label:'Ordi portable',file:'laptop_1f4bb.png'},
+  {tag:'media',label:'Téléphone',file:'mobile-phone_1f4f1.png'},
+  // Sciences
+  {tag:'sciences',label:'Microscope',file:'microscope_1f52c.png'},
+  {tag:'sciences',label:'Télescope',file:'telescope_1f52d.png'},
+  {tag:'sciences',label:'Atome',file:'atom-symbol_269b-fe0f.png'},
+  {tag:'sciences',label:'ADN',file:'dna_1f9ec.png'},
+  {tag:'sciences',label:'Tube test',file:'test-tube_1f9ea.png'},
+  {tag:'sciences',label:'Pétri',file:'petri-dish_1f9eb.png'},
+  {tag:'sciences',label:'Planète',file:'globe-showing-europe-africa_1f30d.png'},
+  // Récompenses
+  {tag:'awards',label:'Trophée',file:'trophy_1f3c6.png'},
+  {tag:'awards',label:'Médaille',file:'1st-place-medal_1f947.png'},
+  {tag:'awards',label:'Médaille sport',file:'sports-medal_1f3c5.png'},
+  {tag:'awards',label:'Couronne',file:'crown_1f451.png'},
+  {tag:'awards',label:'Étoile',file:'star_2b50.png'},
+  {tag:'awards',label:'Étoile briller',file:'glowing-star_1f31f.png'},
+  // Paiement / Commerce
+  {tag:'money',label:'Liasse billets',file:'money-with-wings_1f4b8.png'},
+  {tag:'money',label:'Carte crédit',file:'credit-card_1f4b3.png'},
+  {tag:'money',label:'Coffre fort',file:'money-bag_1f4b0.png'},
+  {tag:'money',label:'Diamant',file:'gem-stone_1f48e.png'},
+  {tag:'money',label:'Étiquette',file:'label_1f3f7-fe0f.png'},
+  {tag:'money',label:'Panier',file:'shopping-cart_1f6d2.png'},
+  {tag:'money',label:'Sacs courses',file:'shopping-bags_1f6cd-fe0f.png'},
+  // Jeux & divertissement
+  {tag:'fun',label:'Manette',file:'video-game_1f3ae.png'},
+  {tag:'fun',label:'Cible',file:'direct-hit_1f3af.png'},
+  {tag:'fun',label:'Dés',file:'game-die_1f3b2.png'},
+  {tag:'fun',label:'Puzzle',file:'puzzle-piece_1f9e9.png'},
+  {tag:'fun',label:'Ballon',file:'soccer-ball_26bd.png'},
+  // Communication
+  {tag:'comm',label:'Bulle msg',file:'speech-balloon_1f4ac.png'},
+  {tag:'comm',label:'Mégaphone',file:'megaphone_1f4e3.png'},
+  {tag:'comm',label:'Cloche',file:'bell_1f514.png'},
+  {tag:'comm',label:'Cadeau',file:'wrapped-gift_1f381.png'},
+  {tag:'comm',label:'Poignée main',file:'handshake_1f91d.png'},
+  {tag:'comm',label:'Cœur',file:'red-heart_2764-fe0f.png'},
+  // Urgence / Top
+  {tag:'top',label:'Feu',file:'fire_1f525.png'},
+  {tag:'top',label:'Éclair',file:'high-voltage_26a1.png'},
+  {tag:'top',label:'Rocket',file:'rocket_1f680.png'},
+  {tag:'top',label:'Cible',file:'bullseye_1f3af.png'},
+  {tag:'top',label:'Drapeau VICT',file:'chequered-flag_1f3c1.png'},
+  // Calendrier / temps
+  {tag:'time',label:'Calendrier',file:'calendar_1f4c5.png'},
+  {tag:'time',label:'Calendrier spi',file:'spiral-calendar_1f5d3-fe0f.png'},
+  {tag:'time',label:'Horloge',file:'alarm-clock_23f0.png'},
+  {tag:'time',label:'Sablier',file:'hourglass-done_231b.png'}
+];
+
+function openPictoPicker(targetInputId){
+  var lib=window._PICTO_LIB||[];
+  var base='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
+  var tagsSet={}; lib.forEach(function(p){tagsSet[p.tag]=true;});
+  var tags=['all'].concat(Object.keys(tagsSet));
+  var tagLabels={all:'Tout',education:'🎓 École',books:'📚 Livres',tools:'✏️ Outils',media:'📱 Média',sciences:'🔬 Sciences',awards:'🏆 Récompenses',money:'💳 Argent',fun:'🎮 Jeux',comm:'💬 Comm',top:'🔥 Top',time:'📅 Temps'};
+
+  var tabsHtml='<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">';
+  tags.forEach(function(t){
+    tabsHtml+='<button type="button" class="vpicker-tab" data-tag="'+t+'" onclick="_pickerFilter(\''+t+'\')" style="padding:5px 12px;border-radius:14px;border:1px solid #E2E8F0;background:'+(t==='all'?'#142554':'#F8FAFC')+';color:'+(t==='all'?'#fff':'#475569')+';font-size:11px;font-weight:700;cursor:pointer">'+_esc(tagLabels[t]||t)+'</button>';
+  });
+  tabsHtml+='</div>';
+
+  var gridHtml='<div class="vpicker-grid" id="vpickerGrid">';
+  lib.forEach(function(p){
+    var url=base+p.file;
+    gridHtml+='<div class="vpicker-item" data-tag="'+p.tag+'" data-url="'+url+'" onclick="_pickerSelect(\''+targetInputId+'\',\''+url+'\',this)" title="'+_esc(p.label)+'"><img src="'+url+'" alt="" loading="lazy"></div>';
+  });
+  gridHtml+='</div>';
+
+  M('🎨 Choisir un picto 3D HD','Cliquez pour sélectionner',
+    '<input class="vpicker-search" placeholder="🔍 Rechercher (ex: livre, cœur, fusée...)" oninput="_pickerSearch(this.value)">'+
+    tabsHtml+
+    gridHtml,
+    '<button class="btn bo" onclick="cm()">Annuler</button>',
+    true);
+}
+
+function _pickerFilter(tag){
+  document.querySelectorAll('.vpicker-tab').forEach(function(b){
+    var active=b.getAttribute('data-tag')===tag;
+    b.style.background=active?'#142554':'#F8FAFC';
+    b.style.color=active?'#fff':'#475569';
+  });
+  document.querySelectorAll('.vpicker-item').forEach(function(i){
+    if(tag==='all'||i.getAttribute('data-tag')===tag){i.style.display='flex';}else{i.style.display='none';}
+  });
+}
+
+function _pickerSearch(q){
+  q=(q||'').toLowerCase().trim();
+  if(!q){_pickerFilter('all');return;}
+  document.querySelectorAll('.vpicker-item').forEach(function(i){
+    var title=(i.getAttribute('title')||'').toLowerCase();
+    var url=(i.getAttribute('data-url')||'').toLowerCase();
+    i.style.display=(title.indexOf(q)>=0||url.indexOf(q)>=0)?'flex':'none';
+  });
+}
+
+function _pickerSelect(targetId,url,el){
+  var input=document.getElementById(targetId);
+  if(input){
+    input.value=url;
+    // Update preview
+    var preview=document.getElementById('pdPictoPreview');
+    if(preview) preview.innerHTML='<img src="'+url+'" style="width:36px;height:36px;object-fit:contain;border-radius:6px;border:1px solid #E2E8F0;padding:2px;background:#fff"> Picto sélectionné';
+  }
+  cm();
+  toast('✓ Picto sélectionné');
 }
 function saveProduct(){
   var titre=(document.getElementById('pdTitre')?.value||'').trim();
@@ -9718,7 +9786,13 @@ function mEditProduct(pid){
   '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="pdDesc" rows="2">'+p.desc+'</textarea></div>'+
   '<div class="fg full"><span class="fl">Photo URL</span><input class="fi" id="pdPhoto" value="'+(p.photo||'')+'"></div>'+
   '<div class="fg full"><span class="fl">Changer la photo</span><input type="file" id="pdFile" accept="image/*" onchange="loadProductPhoto(this)" style="font-size:13px"></div>'+
-  '<div class="fg full"><span class="fl">🎨 Picto 3D HD (URL)</span><input class="fi" id="pdPictoUrl" value="'+_esc(p.pictoUrl||'')+'" placeholder="https://em-content.zobj.net/source/microsoft-3D-fluent/406/..."></div>'+
+  '<div class="fg full"><span class="fl">🎨 Picto 3D HD</span>'+
+    '<div style="display:flex;gap:8px;align-items:center">'+
+      '<input class="fi" id="pdPictoUrl" value="'+_esc(p.pictoUrl||'')+'" placeholder="(vide = emoji) ou URL...">'+
+      '<button type="button" class="btn bi sm" onclick="openPictoPicker(\'pdPictoUrl\')" style="white-space:nowrap;padding:8px 14px">🎨 Choisir</button>'+
+    '</div>'+
+    '<div id="pdPictoPreview" style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink4)">'+(p.pictoUrl?'<img src="'+_esc(p.pictoUrl)+'" style="width:36px;height:36px;object-fit:contain"> Picto actuel':'')+'</div>'+
+  '</div>'+
   '<div class="fg full"><span class="fl">🌈 Couleur de fond du picto</span><select class="fi" id="pdBgColor">'+
     ['','linear-gradient(135deg,#DBEAFE,#BFDBFE)','linear-gradient(135deg,#D1FAE5,#A7F3D0)','linear-gradient(135deg,#FEE2E2,#FECACA)','linear-gradient(135deg,#FEF3C7,#FDE68A)','linear-gradient(135deg,#EDE9FE,#DDD6FE)','linear-gradient(135deg,#FCE7F3,#FBCFE8)','linear-gradient(135deg,#CFFAFE,#A5F3FC)','linear-gradient(135deg,#FED7AA,#FDBA74)']
     .map(function(c,i){var labels=['Auto','💙 Bleu','💚 Vert','❤️ Rouge','💛 Jaune','💜 Violet','💖 Rose','🩵 Cyan','🧡 Orange'];return '<option value="'+c+'"'+((p.bgColor||'')===c?' selected':'')+'>'+labels[i]+'</option>';}).join('')+
@@ -15391,56 +15465,93 @@ function renderQuizScore(){
 // ═══════════════════════════════════════════════════════════
 function showCalendrier(){
   var cal=CALENDRIER_SCOLAIRE;
+  var _picB='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
+  var examPictos={
+    'BEPC':{cls:'bepc',pic:'graduation-cap_1f393.png'},
+    'Probatoire':{cls:'probatoire',pic:'open-book_1f4d6.png'},
+    'BAC':{cls:'bac',pic:'trophy_1f3c6.png'},
+    'CEP':{cls:'concours',pic:'memo_1f4dd.png'}
+  };
+  function classifyExam(nom){
+    var n=(nom||'').toLowerCase();
+    if(n.indexOf('bepc')>=0) return examPictos.BEPC;
+    if(n.indexOf('probat')>=0) return examPictos.Probatoire;
+    if(n.indexOf('bac')>=0) return examPictos.BAC;
+    return examPictos.CEP;
+  }
+
   var h='<div class="vsec">';
   h+='<div class="vsec-title">📅 Calendrier Scolaire '+cal.annee+'</div>';
   h+='<div class="vsec-sub">Dates officielles MINESEC — Séquences, examens nationaux, vacances</div>';
-  
-  // Trimestres
-  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:20px">';
-  cal.trimestres.forEach(function(tri){
-    h+='<div class="vcard" style="border-top:4px solid #3B82F6">';
-    h+='<div style="font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#1E3A8A;margin-bottom:8px">'+
-      (tri.num===1?'1er':tri.num+'ème')+' Trimestre</div>';
-    h+='<div style="font-size:11px;color:#6B7A99;margin-bottom:10px">📅 '+tri.debut+' → '+tri.fin+'</div>';
+
+  // ═════ TRIMESTRES — Cartes premium v2 ═════
+  h+='<div class="vcal-grid v-reveal">';
+  cal.trimestres.forEach(function(tri,i){
+    var triClass=['t1','t2','t3'][Math.min(i,2)];
+    var triLabel=tri.num===1?'1er Trimestre':tri.num+'ème Trimestre';
+    h+='<div class="vcal-card '+triClass+'">';
+    h+='  <div class="vcal-card-header">';
+    h+='    <div class="vcal-card-tri">'+triLabel+'</div>';
+    h+='    <div class="vcal-card-period">'+_esc(tri.debut)+' → '+_esc(tri.fin)+'</div>';
+    h+='  </div>';
+    h+='  <div class="vcal-card-body">';
     tri.seqs.forEach(function(s){
-      h+='<div style="background:#F0F4FF;border-radius:8px;padding:8px 10px;margin-bottom:6px">';
-      h+='<div style="font-size:11px;font-weight:700;color:#3B82F6">Séquence '+s.num+'</div>';
-      h+='<div style="font-size:10px;color:#6B7A99">'+s.debut+' → '+s.fin+'</div>';
-      h+='<div style="font-size:10px;color:#DC2626;font-weight:600;margin-top:2px">📝 '+s.examens+'</div>';
-      h+='</div>';
+      h+='    <div class="vcal-seq">';
+      h+='      <div class="vcal-seq-num">Séquence '+s.num+'</div>';
+      h+='      <div class="vcal-seq-dates">'+_esc(s.debut)+' → '+_esc(s.fin)+'</div>';
+      h+='      <div class="vcal-seq-exam">'+_esc(s.examens)+'</div>';
+      h+='    </div>';
     });
+    h+='  </div>';
     h+='</div>';
   });
   h+='</div>';
-  
-  // Examens nationaux
-  h+='<div class="vcard mb16">';
-  h+='<div class="ct mb12">🎓 Examens Nationaux 2024-2025</div>';
-  h+='<div style="overflow-x:auto">';
-  h+='<table style="width:100%;border-collapse:collapse;font-size:12px">';
-  h+='<thead><tr style="background:#1E3A8A;color:#fff">';
-  h+='<th style="padding:8px 12px;text-align:left;border-radius:8px 0 0 0">Examen</th>';
-  h+='<th style="padding:8px 12px;text-align:left">Date</th>';
-  h+='<th style="padding:8px 12px;text-align:left">Niveau</th>';
-  h+='<th style="padding:8px 12px;text-align:left;border-radius:0 8px 0 0">Matières</th></tr></thead><tbody>';
+
+  // ═════ EXAMENS NATIONAUX — Cartes premium ═════
+  h+='<div class="vcard mb16" style="background:linear-gradient(180deg,#F8FAFC,#fff);border:1px solid rgba(20,37,84,.08)">';
+  h+='<div class="ct mb12">🎓 Examens Nationaux '+cal.annee+'</div>';
+  h+='<div class="vexam-grid v-reveal">';
+  (cal.examens_nationaux||[]).forEach(function(ex){
+    var theme=classifyExam(ex.nom);
+    h+='<div class="vexam-card '+theme.cls+'">';
+    h+='  <div class="vexam-ico"><img src="'+_picB+theme.pic+'" alt="" loading="lazy"></div>';
+    h+='  <div class="vexam-title">'+_esc(ex.nom)+'</div>';
+    h+='  <div class="vexam-cls">'+_esc(ex.niveaux)+' · '+_esc((ex.matières||'').substring(0,40))+(ex.matières&&ex.matières.length>40?'...':'')+'</div>';
+    h+='  <div class="vexam-date">📅 '+_esc(ex.date)+'</div>';
+    h+='</div>';
+  });
+  h+='</div></div>';
+
+  // ═════ DÉTAIL EXAMENS — Table simple sous les cartes ═════
+  h+='<div class="vcard mb16" style="margin-top:18px">';
+  h+='<div class="ct mb12">📋 Détails des matières par examen</div>';
+  h+='<div style="overflow-x:auto;border-radius:12px;border:1px solid rgba(20,37,84,.1)">';
+  h+='<table style="width:100%;border-collapse:collapse;font-size:12.5px">';
+  h+='<thead><tr style="background:linear-gradient(135deg,#1E3A8A,#142554);color:#fff">';
+  h+='<th style="padding:12px 14px;text-align:left;font-family:Montserrat,sans-serif;font-weight:800;font-size:12px;letter-spacing:.5px">Examen</th>';
+  h+='<th style="padding:12px 14px;text-align:left;font-family:Montserrat,sans-serif;font-weight:800;font-size:12px;letter-spacing:.5px">Date</th>';
+  h+='<th style="padding:12px 14px;text-align:left;font-family:Montserrat,sans-serif;font-weight:800;font-size:12px;letter-spacing:.5px">Niveau</th>';
+  h+='<th style="padding:12px 14px;text-align:left;font-family:Montserrat,sans-serif;font-weight:800;font-size:12px;letter-spacing:.5px">Matières</th></tr></thead><tbody>';
   cal.examens_nationaux.forEach(function(ex,i){
-    h+='<tr style="background:'+(i%2===0?'#F8FAFF':'#fff')+'">';
-    h+='<td style="padding:8px 12px;font-weight:700;color:#1E3A8A">'+ex.nom+'</td>';
-    h+='<td style="padding:8px 12px;color:#DC2626;font-weight:600">'+ex.date+'</td>';
-    h+='<td style="padding:8px 12px"><span style="background:#E8EEFF;color:#1E3A8A;padding:2px 8px;border-radius:8px;font-weight:700">'+ex.niveaux+'</span></td>';
-    h+='<td style="padding:8px 12px;color:#4A5568;font-size:11px">'+ex.matières+'</td>';
+    h+='<tr style="background:'+(i%2===0?'#F8FAFC':'#fff')+';border-top:1px solid rgba(20,37,84,.04)">';
+    h+='<td style="padding:12px 14px;font-weight:800;color:#1E3A8A">'+_esc(ex.nom)+'</td>';
+    h+='<td style="padding:12px 14px"><span style="display:inline-flex;align-items:center;gap:4px;color:#DC2626;font-weight:700;background:#FEE2E2;padding:3px 10px;border-radius:10px;font-size:11.5px">📅 '+_esc(ex.date)+'</span></td>';
+    h+='<td style="padding:12px 14px"><span style="background:linear-gradient(135deg,#E8EEFF,#DBEAFE);color:#1E3A8A;padding:4px 12px;border-radius:12px;font-weight:800;font-size:11.5px;border:1px solid rgba(30,58,138,.2)">'+_esc(ex.niveaux)+'</span></td>';
+    h+='<td style="padding:12px 14px;color:#475569;font-size:11.5px;line-height:1.5">'+_esc(ex.matières)+'</td>';
     h+='</tr>';
   });
   h+='</tbody></table></div></div>';
-  
-  // Vacances
+
+  // ═════ VACANCES — Cartes premium ═════
   h+='<div class="vcard">';
-  h+='<div class="ct mb10">🏖️ Vacances scolaires</div>';
-  h+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
+  h+='<div class="ct mb12">🏖️ Vacances scolaires</div>';
+  h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">';
   cal.vacances.forEach(function(v){
-    h+='<div style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:12px;padding:10px 16px;border:1px solid #F59E0B">';
-    h+='<div style="font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;color:#92400E">'+v.label+'</div>';
-    h+='<div style="font-size:11px;color:#78350F">'+v.debut+' → '+v.fin+'</div>';
+    h+='<div style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:18px;padding:18px;border:1px solid #F59E0B;box-shadow:0 6px 16px rgba(245,158,11,.15);transition:transform .3s,box-shadow .3s;position:relative;overflow:hidden" onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 16px 40px rgba(245,158,11,.3)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 6px 16px rgba(245,158,11,.15)\'">';
+    h+='<div style="position:absolute;top:-20px;right:-20px;font-size:80px;opacity:.15">🏖️</div>';
+    h+='<div style="font-size:32px;margin-bottom:8px">🌴</div>';
+    h+='<div style="font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;color:#92400E;letter-spacing:.5px">'+_esc(v.label)+'</div>';
+    h+='<div style="font-size:12px;color:#78350F;margin-top:6px;font-weight:600">📅 '+_esc(v.debut)+' → '+_esc(v.fin)+'</div>';
     h+='</div>';
   });
   h+='</div></div>';
@@ -19984,36 +20095,40 @@ function showJeuxEdu(){
   // Group oeuvres by class — incluant 6ème et 4ème (nouvelles cartes ajoutées)
   var oeuvresByClass={"6ème":[],"4ème":[],"3ème":[],"2nde":[],"1ère":[],"Terminale":[]};
   // ── PROGRAMME OFFICIEL MINESEC (Cameroun) — 22 œuvres ──
+  // Pictogrammes 3D HD Microsoft Fluent par œuvre
+  var _picOe='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
   var littDefs=[
     // 6ème — patrimoine oral et conte africain
-    {key:"6e_chants_foret",ico:"🌳",col:"#16A34A"},
-    {key:"6e_bimanes",ico:"🦍",col:"#0EA5E9"},
-    {key:"6e_contes_korotoumou",ico:"📖",col:"#0891B2"},
+    {key:"6e_chants_foret",     pic:'deciduous-tree_1f333.png',                 col:"#16A34A"},
+    {key:"6e_bimanes",          pic:'gorilla_1f98d.png',                        col:"#0EA5E9"},
+    {key:"6e_contes_korotoumou",pic:'open-book_1f4d6.png',                      col:"#0891B2"},
     // 5ème — récits initiatiques et critique sociale
-    {key:"5e_arbre_fetiche",ico:"🌴",col:"#15803D"},
-    {key:"5e_nkum_wam",ico:"👑",col:"#7C3AED"},
-    {key:"5e_pere_inconnu",ico:"🧬",col:"#DC2626"},
+    {key:"5e_arbre_fetiche",    pic:'palm-tree_1f334.png',                      col:"#15803D"},
+    {key:"5e_nkum_wam",         pic:'crown_1f451.png',                          col:"#7C3AED"},
+    {key:"5e_pere_inconnu",     pic:'dna_1f9ec.png',                            col:"#DC2626"},
     // 4ème — comédie, condition féminine, enracinement
-    {key:"4e_trois_pretendants",ico:"🎭",col:"#16A34A"},
-    {key:"4e_coeur_sahel",ico:"💧",col:"#DC2626"},
-    {key:"4e_attachement_sol",ico:"🌍",col:"#D97706"},
+    {key:"4e_trois_pretendants",pic:'performing-arts_1f3ad.png',                col:"#16A34A"},
+    {key:"4e_coeur_sahel",      pic:'droplet_1f4a7.png',                        col:"#DC2626"},
+    {key:"4e_attachement_sol",  pic:'globe-showing-europe-africa_1f30d.png',    col:"#D97706"},
     // 3ème — roman colonial, théâtre africain, poésie
-    {key:"3e_ville_cruelle",ico:"🏙️",col:"#0891B2"},
-    {key:"3e_marmite_koka",ico:"🍲",col:"#059669"},
-    {key:"3e_petites_gouttes",ico:"🎵",col:"#D97706"},
+    {key:"3e_ville_cruelle",    pic:'cityscape_1f3d9-fe0f.png',                 col:"#0891B2"},
+    {key:"3e_marmite_koka",     pic:'pot-of-food_1f372.png',                    col:"#059669"},
+    {key:"3e_petites_gouttes",  pic:'musical-note_1f3b5.png',                   col:"#D97706"},
     // 2nde — poésie, théâtre classique
-    {key:"2nde_tribus_capitoline",ico:"🏛️",col:"#1E3A8A"},
-    {key:"2nde_poemes_sauvages",ico:"🔥",col:"#DC2626"},
-    {key:"2nde_tartuffe",ico:"🎭",col:"#7C3AED"},
+    {key:"2nde_tribus_capitoline",pic:'classical-building_1f3db-fe0f.png',      col:"#1E3A8A"},
+    {key:"2nde_poemes_sauvages",pic:'fire_1f525.png',                           col:"#DC2626"},
+    {key:"2nde_tartuffe",       pic:'performing-arts_1f3ad.png',                col:"#7C3AED"},
     // 1ère — roman, poésie, théâtre africain
-    {key:"1ere_coeur_tenebres",ico:"🌑",col:"#0F172A"},
-    {key:"1ere_balafon",ico:"🎶",col:"#BE185D"},
-    {key:"1ere_lion_perle",ico:"🦁",col:"#D97706"},
+    {key:"1ere_coeur_tenebres", pic:'new-moon_1f311.png',                       col:"#0F172A"},
+    {key:"1ere_balafon",        pic:'musical-keyboard_1f3b9.png',               col:"#BE185D"},
+    {key:"1ere_lion_perle",     pic:'lion_1f981.png',                           col:"#D97706"},
     // Terminale — poésie XIXe, roman et théâtre africain
-    {key:"tle_stances_poemes",ico:"📜",col:"#059669"},
-    {key:"tle_vieux_negro",ico:"🏅",col:"#1E3A8A"},
-    {key:"tle_ngum_jemea",ico:"✝️",col:"#7C3AED"}
+    {key:"tle_stances_poemes",  pic:'scroll_1f4dc.png',                         col:"#059669"},
+    {key:"tle_vieux_negro",     pic:'sports-medal_1f3c5.png',                   col:"#1E3A8A"},
+    {key:"tle_ngum_jemea",      pic:'latin-cross_271d-fe0f.png',                col:"#7C3AED"}
   ];
+  // Helper : URL complète du picto
+  littDefs.forEach(function(d){d.picUrl=_picOe+d.pic;});
   // FIX : ajouter "6ème" et "4ème" si pas déjà présents
   if(!oeuvresByClass["6ème"])oeuvresByClass["6ème"]=[];
   if(!oeuvresByClass["4ème"])oeuvresByClass["4ème"]=[];
@@ -20021,57 +20136,69 @@ function showJeuxEdu(){
     var oe=LITT_OEUVRES[d.key];
     if(!oe) return;
     var cls=oe.classe||"";
-    if(cls.indexOf("6")>=0) oeuvresByClass["6ème"].push({key:d.key,oe:oe,ico:d.ico,col:d.col});
-    else if(cls.indexOf("4")>=0) oeuvresByClass["4ème"].push({key:d.key,oe:oe,ico:d.ico,col:d.col});
-    else if(cls.indexOf("3")>=0) oeuvresByClass["3ème"].push({key:d.key,oe:oe,ico:d.ico,col:d.col});
-    else if(cls.indexOf("2")>=0) oeuvresByClass["2nde"].push({key:d.key,oe:oe,ico:d.ico,col:d.col});
-    else if(cls.indexOf("1")>=0) oeuvresByClass["1ère"].push({key:d.key,oe:oe,ico:d.ico,col:d.col});
-    else oeuvresByClass["Terminale"].push({key:d.key,oe:oe,ico:d.ico,col:d.col});
+    var entry={key:d.key,oe:oe,picUrl:d.picUrl,col:d.col};
+    if(cls.indexOf("6")>=0) oeuvresByClass["6ème"].push(entry);
+    else if(cls.indexOf("4")>=0) oeuvresByClass["4ème"].push(entry);
+    else if(cls.indexOf("3")>=0) oeuvresByClass["3ème"].push(entry);
+    else if(cls.indexOf("2")>=0) oeuvresByClass["2nde"].push(entry);
+    else if(cls.indexOf("1")>=0) oeuvresByClass["1ère"].push(entry);
+    else oeuvresByClass["Terminale"].push(entry);
   });
 
-  ["6ème","4ème","3ème","2nde","1ère","Terminale"].forEach(function(cls){
+  // Mapping classe → suffixe CSS pour couleurs premium
+  var _clsCss={"6ème":"cls-6","5ème":"cls-5","4ème":"cls-4","3ème":"cls-3","2nde":"cls-2","1ère":"cls-1","Terminale":"cls-T"};
+  ["6ème","5ème","4ème","3ème","2nde","1ère","Terminale"].forEach(function(cls){
     var items=oeuvresByClass[cls];
-    if(!items.length) return;
-    h+="<div style='margin-bottom:16px'>";
-    h+="<div style='font-family:Montserrat,Montserrat,sans-serif;font-size:14px;font-weight:800;color:#142554;margin-bottom:10px;display:flex;align-items:center;gap:8px'>";
-    h+="<span style='background:#142554;color:#FFC93C;padding:3px 10px;border-radius:10px;font-size:11px'>"+cls+"</span>";
-    h+="<span style='color:#6B7A99;font-weight:600;font-size:12px'>"+items.length+" œuvre"+(items.length>1?"s":"")+"</span></div>";
-    h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px'>";
+    if(!items||!items.length) return;
+    var cssCls=_clsCss[cls]||'cls-3';
+    h+="<div class='voeuvre-section v-reveal'>";
+    h+="  <div class='voeuvre-cls-header'>";
+    h+="    <span class='voeuvre-cls-pill'>"+_esc(cls)+"</span>";
+    h+="    <span class='voeuvre-cls-count'>"+items.length+" œuvre"+(items.length>1?"s":"")+" au programme</span>";
+    h+="  </div>";
+    h+="  <div class='voeuvre-grid'>";
     items.forEach(function(it){
       // Bouton "Jeux" de l'œuvre : chercher l'entrée catalogue par oeuvreKey OU par id préfixé "litt_"
       var _deleted=DB.deletedJeux||[];
       var matchJeu=JEUX_CATALOGUE.find(function(j){return j.oeuvre===it.key&&_deleted.indexOf(j.id)<0;})
         ||JEUX_CATALOGUE.find(function(j){return j.id&&_deleted.indexOf(j.id)<0&&(j.id==='litt_'+it.key||j.id.endsWith('_'+it.key.replace(/[^a-z0-9]/gi,'_')));});
-      // Utiliser vLaunchJeu si un jeu catalogue existe, sinon afficher la carte mentale
       var clickAction=matchJeu?"vLaunchJeu('"+matchJeu.id+"')":"_showLittCarte('"+it.key+"')";
 
-      h+="<div style='background:#fff;border:2px solid "+it.col+"22;border-radius:16px;overflow:hidden;cursor:pointer;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.04)' "
-        +"onmouseover=\"this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 30px rgba(0,0,0,.1)';this.style.borderColor='"+it.col+"55'\" "
-        +"onmouseout=\"this.style.transform='';this.style.boxShadow='0 2px 8px rgba(0,0,0,.04)';this.style.borderColor='"+it.col+"22'\">";
-      // Header
-      h+="<div style='background:linear-gradient(135deg,"+it.col+","+it.col+"bb);padding:14px;position:relative'>";
-      h+="<div style='position:absolute;top:6px;right:8px;background:rgba(255,255,255,.2);color:#fff;font-size:8px;font-weight:800;padding:2px 8px;border-radius:8px'>"+cls+"</div>";
-      h+="<div style='font-size:28px;margin-bottom:6px'>"+it.ico+"</div>";
-      h+="<div style='font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#fff;line-height:1.3'>"+it.oe.titre+"</div>";
-      h+="<div style='font-size:10px;color:rgba(255,255,255,.7);margin-top:2px'>"+it.oe.auteur+"</div>";
+      // Stats compactes : présence de chaque module
+      var hasCarte=!!it.oe.carte;
+      var hasQcm=!!(it.oe.qcm&&it.oe.qcm.length);
+      var hasFiche=!!it.oe.fiche;
+      var hasCit=!!(it.oe.citations&&it.oe.citations.length);
+      var hasCtrl=!!(it.oe.controle&&it.oe.controle.length);
+
+      h+="<div class='voeuvre-card "+cssCls+"' onclick=\"_showLittMenu('"+it.key+"','"+it.key+"')\">";
+      h+="  <div class='voeuvre-head'>";
+      h+="    <div class='voeuvre-cls-badge'>"+_esc(cls)+"</div>";
+      h+="    <div class='voeuvre-ico'><img src='"+_esc(it.picUrl)+"' alt='' loading='lazy'></div>";
+      h+="    <div class='voeuvre-title'>"+_esc(it.oe.titre)+"</div>";
+      h+="    <div class='voeuvre-author'>"+_esc(it.oe.auteur||'')+"</div>";
+      h+="  </div>";
+      h+="  <div class='voeuvre-body'>";
+      h+="    <div class='voeuvre-stats'>";
+      h+="      <div class='voeuvre-stat"+(hasCarte?' active':'')+"' title='Carte mentale'><div class='voeuvre-stat-ico'>🗺️</div><div class='voeuvre-stat-lbl'>Carte</div></div>";
+      h+="      <div class='voeuvre-stat"+(hasQcm?' active':'')+"' title='Questionnaire'><div class='voeuvre-stat-ico'>📝</div><div class='voeuvre-stat-lbl'>QCM</div></div>";
+      h+="      <div class='voeuvre-stat"+(hasFiche?' active':'')+"' title='Fiche de lecture'><div class='voeuvre-stat-ico'>📋</div><div class='voeuvre-stat-lbl'>Fiche</div></div>";
+      h+="      <div class='voeuvre-stat"+(hasCit?' active':'')+"' title='Citations clés'><div class='voeuvre-stat-ico'>💬</div><div class='voeuvre-stat-lbl'>Citat.</div></div>";
+      h+="      <div class='voeuvre-stat"+(hasCtrl?' active':'')+"' title='Contrôle lecture'><div class='voeuvre-stat-ico'>📚</div><div class='voeuvre-stat-lbl'>Ctrl</div></div>";
+      h+="    </div>";
+      h+="    <div class='voeuvre-actions'>";
+      h+="      <button class='voeuvre-btn btn-carte' onclick=\"event.stopPropagation();_showLittCarte('"+it.key+"')\">🗺️ Carte</button>";
+      h+="      <button class='voeuvre-btn btn-jeux' onclick=\"event.stopPropagation();"+clickAction+"\">🎮 Jeux</button>";
+      h+="    </div>";
+      if(iA()) h+="    <div class='voeuvre-admin'>"+
+        "<button class='voeuvre-admin-btn edit' onclick=\"event.stopPropagation();mEditCarteMentale('"+it.key+"')\">✏️ Modifier</button>"+
+        "<button class='voeuvre-admin-btn del' onclick=\"event.stopPropagation();_delCarteMentale('"+it.key+"')\">🗑 Supprimer</button>"+
+      "    </div>";
+      h+="  </div>";
       h+="</div>";
-      // Body with action buttons
-      h+="<div style='padding:10px'>";
-      h+="<div style='display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px'>";
-      if(it.oe.carte) h+="<span style='font-size:9px;background:#EDE9FE;color:#7C3AED;padding:2px 6px;border-radius:6px;font-weight:700'>🗺️ Carte</span>";
-      if(it.oe.qcm&&it.oe.qcm.length) h+="<span style='font-size:9px;background:#DBEAFE;color:#1E3A8A;padding:2px 6px;border-radius:6px;font-weight:700'>📝 QCM</span>";
-      if(it.oe.fiche) h+="<span style='font-size:9px;background:#D1FAE5;color:#059669;padding:2px 6px;border-radius:6px;font-weight:700'>📋 Fiche</span>";
-      if(it.oe.citations&&it.oe.citations.length) h+="<span style='font-size:9px;background:#FEF3C7;color:#D97706;padding:2px 6px;border-radius:6px;font-weight:700'>💬 Citations</span>";
-      if(it.oe.controle&&it.oe.controle.length) h+="<span style='font-size:9px;background:#FEE2E2;color:#DC2626;padding:2px 6px;border-radius:6px;font-weight:700'>📚 Contrôle</span>";
-      h+="</div>";
-      h+="<div style='display:grid;grid-template-columns:1fr 1fr;gap:6px'>";
-      h+="<button onclick=\"event.stopPropagation();_showLittCarte('"+it.key+"')\" style='background:linear-gradient(135deg,#7C3AED,#A78BFA);color:#fff;border:none;border-radius:10px;padding:7px;font-size:10px;font-weight:700;cursor:pointer'>🗺️ Carte</button>";
-      h+="<button onclick=\"event.stopPropagation();"+clickAction+"\" style='background:linear-gradient(135deg,#142554,#3B82F6);color:#fff;border:none;border-radius:10px;padding:7px;font-size:10px;font-weight:700;cursor:pointer'>🎮 Jeux</button>";
-      h+="</div>";
-      if(iA()) h+="<div style='display:flex;gap:4px;margin-top:6px'><button onclick=\"event.stopPropagation();mEditCarteMentale('"+it.key+"')\" style='flex:1;background:#EDE9FE;color:#7C3AED;border:none;border-radius:8px;padding:4px;font-size:9px;font-weight:700;cursor:pointer'>✏️ Modifier</button><button onclick=\"event.stopPropagation();_delCarteMentale('"+it.key+"')\" style='flex:1;background:#FEE2E2;color:#DC2626;border:none;border-radius:8px;padding:4px;font-size:9px;font-weight:700;cursor:pointer'>🗑 Supprimer</button></div>";
-      h+="</div></div>";
     });
-    h+="</div></div>";
+    h+="  </div>";
+    h+="</div>";
   });
   h+="</div>";
   // ══════════ FIN CARTES MENTALES ══════════
@@ -32127,6 +32254,211 @@ body.vgz-cursor-on-link .vgz-cursor-dot{transform:translate(-50%,-50%) rotate(45
 .velearn-tile.c-anciens    {--vel-c1:#06B6D4;--vel-c2:#0E7490}
 .velearn-tile.c-default    {--vel-c1:#64748B;--vel-c2:#334155}
 
+/* ════════════════════════════════════════════════════════════════ */
+/* ═════ CARTES PLANS D'ABONNEMENT PREMIUM v2 ═════ */
+/* ════════════════════════════════════════════════════════════════ */
+.vplan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:24px;margin:24px 0;align-items:start}
+.vplan-card{position:relative;border-radius:24px;background:#fff;box-shadow:0 6px 24px rgba(20,37,84,.08);overflow:hidden;transition:transform .45s cubic-bezier(.16,1,.3,1),box-shadow .45s;text-align:center;border:1px solid rgba(20,37,84,.05)}
+.vplan-card:hover{transform:translateY(-12px);box-shadow:0 30px 70px rgba(20,37,84,.15)}
+.vplan-card.is-popular{transform:scale(1.04);z-index:2}
+.vplan-card.is-popular::before{content:"";position:absolute;inset:-2px;background:conic-gradient(from var(--ang,0deg),#FFC93C 0deg,#FF6600 90deg,#A855F7 180deg,#3C8DFF 270deg,#FFC93C 360deg);border-radius:24px;z-index:-1;animation:vplanSpin 6s linear infinite}
+@keyframes vplanSpin{to{--ang:360deg}}
+.vplan-card.is-popular:hover{transform:scale(1.04) translateY(-12px)}
+
+/* Top bar dégradé épais */
+.vplan-top{height:8px;background:var(--vpl-grad,linear-gradient(90deg,#3B82F6,#1E40AF));position:relative;overflow:hidden}
+.vplan-top::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.6) 50%,transparent 100%);background-size:200% 100%;animation:vplanShine 3s linear infinite}
+@keyframes vplanShine{from{background-position:-100% 0}to{background-position:200% 0}}
+
+.vplan-body{padding:32px 24px 26px;position:relative}
+
+/* Picto 3D HD */
+.vplan-ico{width:74px;height:74px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;border-radius:24px;background:var(--vpl-light,rgba(59,130,246,.1));border:2px solid var(--vpl-accent,#3B82F6);position:relative;animation:vbookFloat 3.5s ease-in-out infinite;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+.vplan-ico img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))}
+.vplan-ico::after{content:"";position:absolute;inset:-6px;background:radial-gradient(circle,var(--vpl-accent,#3B82F6) 0%,transparent 70%);opacity:0;border-radius:30px;z-index:-1;transition:opacity .4s}
+.vplan-card:hover .vplan-ico::after{opacity:.25}
+
+/* Badge Populaire — ribbon */
+.vplan-badge-pop{position:absolute;top:18px;right:-30px;width:140px;text-align:center;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;padding:6px 0;letter-spacing:1.5px;transform:rotate(35deg);box-shadow:0 4px 12px rgba(255,201,60,.5);z-index:5;text-transform:uppercase}
+.vplan-badge-pop::before{content:"⭐ ";font-size:10px}
+
+/* Sparkles autour du plan populaire */
+.vplan-card.is-popular .vplan-body::before{content:"✨";position:absolute;top:8%;left:8%;font-size:18px;animation:vplanSparkle 2.5s ease-in-out infinite;opacity:.7}
+.vplan-card.is-popular .vplan-body::after{content:"✨";position:absolute;bottom:8%;right:8%;font-size:14px;animation:vplanSparkle 2.5s ease-in-out infinite .8s;opacity:.7}
+@keyframes vplanSparkle{0%,100%{transform:scale(.7) rotate(0);opacity:.4}50%{transform:scale(1.2) rotate(180deg);opacity:1}}
+
+.vplan-name{font-family:Montserrat,sans-serif;font-size:22px;font-weight:900;color:#1E293B;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.vplan-cible{font-size:12px;color:#64748B;margin-bottom:16px;font-weight:500}
+
+.vplan-divider{width:50px;height:3px;background:linear-gradient(90deg,transparent,var(--vpl-accent,#3B82F6),transparent);margin:0 auto 16px;border-radius:2px}
+
+.vplan-promo{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#DC2626,#F97316);color:#fff;font-size:11px;font-weight:900;padding:5px 14px;border-radius:20px;margin-bottom:10px;box-shadow:0 4px 12px rgba(220,38,38,.3);letter-spacing:.5px;animation:vplanFlame 2s ease-in-out infinite}
+@keyframes vplanFlame{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+.vplan-old-price{font-size:14px;color:#94A3B8;text-decoration:line-through;text-decoration-color:#DC2626;text-decoration-thickness:2px;margin-bottom:4px}
+.vplan-price{font-family:Montserrat,sans-serif;font-size:46px;font-weight:900;background:var(--vpl-grad,linear-gradient(135deg,#3B82F6,#1E40AF));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;letter-spacing:-1.5px}
+.vplan-price-unit{font-size:13px;color:#94A3B8;font-weight:600;margin-top:4px}
+
+.vplan-resources{display:inline-flex;align-items:center;gap:5px;background:var(--vpl-light,rgba(59,130,246,.1));color:var(--vpl-accent,#3B82F6);font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;margin:14px 0 18px;border:1px solid var(--vpl-accent,#3B82F6)}
+
+.vplan-feats{text-align:left;margin:18px 0;padding:0 4px}
+.vplan-feat{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;font-size:13px;color:#475569;line-height:1.5;font-weight:500}
+.vplan-feat::before{content:"✓";flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--vpl-accent,#3B82F6);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:11px;margin-top:1px}
+
+.vplan-cta{width:100%;background:var(--vpl-grad,linear-gradient(135deg,#3B82F6,#1E40AF));color:#fff;border:none;border-radius:18px;padding:16px;font-family:Montserrat,sans-serif;font-weight:900;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;box-shadow:0 8px 24px rgba(59,130,246,.35);transition:all .35s;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.vplan-cta::before{content:"🚀";font-size:18px}
+.vplan-card:hover .vplan-cta{transform:translateY(-3px);box-shadow:0 14px 36px rgba(59,130,246,.5)}
+
+.vplan-footer{font-size:11px;color:#94A3B8;margin-top:14px;display:flex;align-items:center;justify-content:center;gap:5px}
+.vplan-footer::before{content:"✅";font-size:13px}
+
+/* Couleurs par plan */
+.vplan-card.p1{--vpl-accent:#3B82F6;--vpl-light:rgba(59,130,246,.12);--vpl-grad:linear-gradient(135deg,#3B82F6,#1E40AF)}
+.vplan-card.p2{--vpl-accent:#D97706;--vpl-light:rgba(217,119,6,.12);--vpl-grad:linear-gradient(135deg,#F59E0B,#D97706)}
+.vplan-card.p3{--vpl-accent:#059669;--vpl-light:rgba(5,150,105,.12);--vpl-grad:linear-gradient(135deg,#10B981,#047857)}
+.vplan-card.p4{--vpl-accent:#A855F7;--vpl-light:rgba(168,85,247,.12);--vpl-grad:linear-gradient(135deg,#A855F7,#6B21A8)}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* ═════ SÉLECTEUR DE PICTOS 3D HD (admin) ═════ */
+/* ════════════════════════════════════════════════════════════════ */
+.vpicker-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:8px;max-height:280px;overflow-y:auto;padding:10px;background:linear-gradient(180deg,#F8FAFC,#F1F5F9);border-radius:12px;border:1px solid #E2E8F0}
+.vpicker-item{cursor:pointer;border-radius:10px;padding:8px;display:flex;align-items:center;justify-content:center;background:#fff;border:2px solid transparent;transition:all .25s;position:relative}
+.vpicker-item:hover{border-color:#3C8DFF;transform:scale(1.1);box-shadow:0 6px 16px rgba(60,141,255,.25)}
+.vpicker-item.selected{border-color:#FFC93C;background:#FFF8E1;box-shadow:0 0 0 3px rgba(255,201,60,.25)}
+.vpicker-item img{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.15))}
+.vpicker-search{width:100%;padding:8px 12px;border:1px solid #E2E8F0;border-radius:10px;font-size:13px;margin-bottom:10px;outline:none}
+.vpicker-search:focus{border-color:#3C8DFF;box-shadow:0 0 0 3px rgba(60,141,255,.15)}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* ═════ ANIMATIONS TRANSITION E-LEARNING ═════ */
+/* ════════════════════════════════════════════════════════════════ */
+.velearn-grid.entering .velearn-tile{opacity:0;transform:translateY(20px) scale(.95)}
+.velearn-grid.entering .velearn-tile{animation:vtileEnter .6s cubic-bezier(.34,1.56,.64,1) forwards}
+.velearn-grid.entering .velearn-tile:nth-child(1){animation-delay:.05s}
+.velearn-grid.entering .velearn-tile:nth-child(2){animation-delay:.12s}
+.velearn-grid.entering .velearn-tile:nth-child(3){animation-delay:.19s}
+.velearn-grid.entering .velearn-tile:nth-child(4){animation-delay:.26s}
+.velearn-grid.entering .velearn-tile:nth-child(5){animation-delay:.33s}
+.velearn-grid.entering .velearn-tile:nth-child(6){animation-delay:.40s}
+@keyframes vtileEnter{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* ═════ CARTES CALENDRIER PREMIUM ═════ */
+/* ════════════════════════════════════════════════════════════════ */
+.vcal-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px;margin:18px 0}
+.vcal-card{position:relative;border-radius:22px;overflow:hidden;background:#fff;box-shadow:0 6px 20px rgba(20,37,84,.08);transition:transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .4s;cursor:default}
+.vcal-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(20,37,84,.15)}
+.vcal-card-header{background:var(--vc-grad,linear-gradient(135deg,#3B82F6,#1E40AF));padding:18px 20px;color:#fff;position:relative;overflow:hidden}
+.vcal-card-header::after{content:"";position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.18) 0%,transparent 70%);pointer-events:none}
+.vcal-card-tri{font-family:Montserrat,sans-serif;font-size:18px;font-weight:900;letter-spacing:1px;margin-bottom:4px;text-shadow:0 2px 6px rgba(0,0,0,.15)}
+.vcal-card-period{font-size:11.5px;color:rgba(255,255,255,.85);font-weight:600;display:flex;align-items:center;gap:6px}
+.vcal-card-period::before{content:"📅";font-style:normal}
+.vcal-card-body{padding:14px 16px}
+.vcal-seq{background:linear-gradient(135deg,var(--vc-light,#F0F4FF),#fff);border-left:3px solid var(--vc-accent,#3B82F6);border-radius:10px;padding:10px 12px;margin-bottom:8px;transition:transform .25s,box-shadow .25s}
+.vcal-seq:hover{transform:translateX(4px);box-shadow:0 4px 12px rgba(59,130,246,.15)}
+.vcal-seq-num{font-size:11px;font-weight:800;color:var(--vc-accent,#3B82F6);text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.vcal-seq-num::before{content:"📌"}
+.vcal-seq-dates{font-size:11px;color:#64748B;margin-top:3px}
+.vcal-seq-exam{font-size:11px;color:#DC2626;font-weight:700;margin-top:4px;display:flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(220,38,38,.06);border-radius:6px}
+.vcal-seq-exam::before{content:"📝"}
+
+.vcal-card.t1{--vc-accent:#3B82F6;--vc-light:#EFF6FF;--vc-grad:linear-gradient(135deg,#3B82F6,#1E40AF)}
+.vcal-card.t2{--vc-accent:#A855F7;--vc-light:#FAF5FF;--vc-grad:linear-gradient(135deg,#A855F7,#6B21A8)}
+.vcal-card.t3{--vc-accent:#10B981;--vc-light:#ECFDF5;--vc-grad:linear-gradient(135deg,#10B981,#047857)}
+
+/* Cartes examens nationaux */
+.vexam-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin:18px 0}
+.vexam-card{position:relative;border-radius:22px;overflow:hidden;background:linear-gradient(160deg,var(--ve-c1,#FFC93C),var(--ve-c2,#F59E0B));padding:22px;color:#fff;text-align:center;transition:transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .4s;cursor:default;min-height:220px;display:flex;flex-direction:column;justify-content:space-between}
+.vexam-card::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 80% 20%,rgba(255,255,255,.2) 0%,transparent 50%),
+  radial-gradient(circle at 20% 80%,rgba(0,0,0,.1) 0%,transparent 50%);
+  pointer-events:none}
+.vexam-card::after{content:"";position:absolute;top:-40px;right:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.2) 0%,transparent 60%);pointer-events:none;animation:vbookFloat 5s ease-in-out infinite}
+.vexam-card > *{position:relative;z-index:1}
+.vexam-card:hover{transform:translateY(-8px) scale(1.02);box-shadow:0 25px 60px rgba(0,0,0,.2)}
+.vexam-ico{width:64px;height:64px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.25);border-radius:18px;backdrop-filter:blur(8px);box-shadow:0 4px 12px rgba(0,0,0,.15);animation:vbookFloat 3.5s ease-in-out infinite}
+.vexam-ico img{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+.vexam-title{font-family:Montserrat,sans-serif;font-size:18px;font-weight:900;letter-spacing:1px;text-shadow:0 2px 8px rgba(0,0,0,.2);margin-bottom:6px}
+.vexam-cls{font-size:11px;color:rgba(255,255,255,.85);font-weight:600;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px}
+.vexam-date{background:rgba(255,255,255,.25);backdrop-filter:blur(6px);padding:8px 14px;border-radius:14px;font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;border:1px solid rgba(255,255,255,.25);box-shadow:0 4px 12px rgba(0,0,0,.1);display:inline-block}
+
+.vexam-card.bepc       {--ve-c1:#3B82F6;--ve-c2:#1E40AF}
+.vexam-card.probatoire {--ve-c1:#A855F7;--ve-c2:#6B21A8}
+.vexam-card.bac        {--ve-c1:#10B981;--ve-c2:#047857}
+.vexam-card.concours   {--ve-c1:#F97316;--ve-c2:#C2410C}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* ═════ CARTES ŒUVRES LITTÉRAIRES PREMIUM v2 ═════ */
+/* ════════════════════════════════════════════════════════════════ */
+.voeuvre-section{margin-bottom:24px}
+.voeuvre-cls-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:8px 14px;background:linear-gradient(90deg,rgba(20,37,84,.04),transparent);border-radius:12px;border-left:4px solid var(--voeuvre-c,#142554)}
+.voeuvre-cls-pill{background:linear-gradient(135deg,#142554,#1E3A8A);color:#FFC93C;padding:5px 14px;border-radius:14px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:900;letter-spacing:1px;box-shadow:0 4px 12px rgba(20,37,84,.25)}
+.voeuvre-cls-count{font-size:12px;color:#64748B;font-weight:600}
+.voeuvre-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
+
+.voeuvre-card{position:relative;border-radius:22px;overflow:hidden;background:#fff;box-shadow:0 6px 22px rgba(20,37,84,.08);transition:transform .45s cubic-bezier(.34,1.56,.64,1),box-shadow .45s;cursor:pointer;display:flex;flex-direction:column;border:1px solid rgba(20,37,84,.05)}
+.voeuvre-card:hover{transform:translateY(-10px) scale(1.025);box-shadow:0 28px 70px rgba(20,37,84,.18)}
+.voeuvre-card:active{transform:translateY(-4px) scale(.99)}
+
+/* Header coloré avec picto 3D HD */
+.voeuvre-head{background:linear-gradient(135deg,var(--vo-c1,#16A34A),var(--vo-c2,#15803D));padding:22px 16px 18px;position:relative;overflow:hidden;min-height:140px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.voeuvre-head::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 25% 25%,rgba(255,255,255,.22) 0%,transparent 50%),
+  radial-gradient(circle at 75% 75%,rgba(0,0,0,.18) 0%,transparent 50%);
+  pointer-events:none}
+.voeuvre-head::after{content:"";position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.15) 0%,transparent 60%);pointer-events:none;animation:vbookFloat 5s ease-in-out infinite}
+
+.voeuvre-cls-badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.35);backdrop-filter:blur(6px);color:#FFC93C;padding:3px 10px;border-radius:10px;font-size:10px;font-weight:900;letter-spacing:.5px;z-index:2;border:1px solid rgba(255,201,60,.3)}
+
+.voeuvre-ico{position:relative;z-index:1;width:72px;height:72px;background:rgba(255,255,255,.22);border-radius:20px;backdrop-filter:blur(8px);box-shadow:0 8px 22px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;margin-bottom:12px;animation:vbookFloat 3.5s ease-in-out infinite;transition:transform .4s cubic-bezier(.34,1.56,.64,1);border:1px solid rgba(255,255,255,.2)}
+.voeuvre-ico img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+.voeuvre-card:hover .voeuvre-ico{transform:rotate(-8deg) scale(1.1)}
+
+.voeuvre-title{position:relative;z-index:1;font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;color:#fff;line-height:1.25;letter-spacing:.3px;text-shadow:0 2px 8px rgba(0,0,0,.25);margin-bottom:4px;max-width:100%}
+.voeuvre-author{position:relative;z-index:1;font-size:11.5px;color:rgba(255,255,255,.9);font-style:italic;font-weight:500;display:flex;align-items:center;gap:5px;justify-content:center}
+.voeuvre-author::before{content:"✍";font-style:normal}
+
+/* Body avec compteur de modules + boutons */
+.voeuvre-body{padding:14px;display:flex;flex-direction:column;flex:1}
+.voeuvre-stats{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:10px}
+.voeuvre-stat{text-align:center;padding:6px 4px;background:linear-gradient(180deg,#F8FAFC,#fff);border-radius:8px;border:1px solid rgba(20,37,84,.06);transition:all .25s;position:relative}
+.voeuvre-stat.active{background:linear-gradient(180deg,#F0FDF4,#D1FAE5);border-color:rgba(16,185,129,.3)}
+.voeuvre-stat:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(20,37,84,.1)}
+.voeuvre-stat-ico{font-size:14px;margin-bottom:2px}
+.voeuvre-stat-lbl{font-size:8.5px;font-weight:800;color:#64748B;text-transform:uppercase;letter-spacing:.5px;line-height:1}
+.voeuvre-stat.active .voeuvre-stat-lbl{color:#059669}
+
+.voeuvre-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:auto}
+.voeuvre-btn{padding:10px;border:none;border-radius:12px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.3px}
+.voeuvre-btn.btn-carte{background:linear-gradient(135deg,#7C3AED,#A78BFA);color:#fff;box-shadow:0 4px 12px rgba(124,58,237,.35)}
+.voeuvre-btn.btn-carte:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(124,58,237,.5)}
+.voeuvre-btn.btn-jeux{background:linear-gradient(135deg,#142554,#3B82F6);color:#fff;box-shadow:0 4px 12px rgba(20,37,84,.4)}
+.voeuvre-btn.btn-jeux:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(20,37,84,.55);background:linear-gradient(135deg,#3B82F6,#142554)}
+
+.voeuvre-admin{display:flex;gap:6px;margin-top:8px}
+.voeuvre-admin-btn{flex:1;padding:6px;border:none;border-radius:8px;font-size:10px;font-weight:700;cursor:pointer;transition:all .2s}
+.voeuvre-admin-btn.edit{background:#EDE9FE;color:#7C3AED}
+.voeuvre-admin-btn.del{background:#FEE2E2;color:#DC2626}
+.voeuvre-admin-btn:hover{transform:translateY(-1px);filter:brightness(.95)}
+
+/* Couleurs par classe */
+.voeuvre-card.cls-6  {--vo-c1:#16A34A;--vo-c2:#15803D}
+.voeuvre-card.cls-5  {--vo-c1:#0891B2;--vo-c2:#0E7490}
+.voeuvre-card.cls-4  {--vo-c1:#DC2626;--vo-c2:#991B1B}
+.voeuvre-card.cls-3  {--vo-c1:#D97706;--vo-c2:#92400E}
+.voeuvre-card.cls-2  {--vo-c1:#1E3A8A;--vo-c2:#0F172A}
+.voeuvre-card.cls-1  {--vo-c1:#7C3AED;--vo-c2:#6B21A8}
+.voeuvre-card.cls-T  {--vo-c1:#BE185D;--vo-c2:#831843}
+
+@media (max-width:720px){
+  .voeuvre-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .voeuvre-stats{grid-template-columns:repeat(5,1fr)}
+  .voeuvre-stat-lbl{font-size:7px}
+}
+@media (max-width:480px){
+  .voeuvre-grid{grid-template-columns:1fr}
+}
+
 /* Responsive */
 @media (max-width:720px){
   .vbook-grid{grid-template-columns:repeat(2,1fr);gap:12px}
@@ -32134,10 +32466,15 @@ body.vgz-cursor-on-link .vgz-cursor-dot{transform:translate(-50%,-50%) rotate(45
   .vbook-title{font-size:13px;min-height:34px}
   .vprod-grid{grid-template-columns:repeat(2,1fr);gap:10px}
   .velearn-grid{grid-template-columns:1fr;gap:12px}
+  .vplan-grid{grid-template-columns:1fr;gap:16px}
+  .vplan-card.is-popular{transform:none}
+  .vcal-grid{grid-template-columns:1fr}
+  .vexam-grid{grid-template-columns:repeat(2,1fr);gap:12px}
 }
 @media (max-width:480px){
   .vbook-grid{grid-template-columns:1fr}
   .vprod-grid{grid-template-columns:1fr}
+  .vexam-grid{grid-template-columns:1fr}
 }
 
 /* ═════ #11 — NÉON GLOW ═════ */
