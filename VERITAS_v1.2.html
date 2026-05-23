@@ -6316,6 +6316,96 @@ function vShowSec(sec,btn){
          ❌ Promo E-Learning → déjà dans .vgz-bento "E-Learning Premium"
     -->
 
+    <!-- ═════ ANALYSE LITTÉRAIRE PREMIUM (v1.2) ═════ -->
+    <div class="vlit-section v-reveal">
+      <div class="vlit-header">
+        <div class="vlit-header-bg"></div>
+        <div class="vlit-header-content">
+          <div class="vlit-badge">📚 Analyse littéraire</div>
+          <h2 class="vlit-title">Décrypte les <em>classiques</em> du programme</h2>
+          <div class="vlit-sub">22 œuvres MINESEC analysées en profondeur · Axes, citations, contexte, figures de style</div>
+        </div>
+      </div>
+
+      <!-- 4 angles d'analyse -->
+      <div class="vlit-angles">
+        <div class="vlit-angle" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)">
+          <div class="vlit-angle-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/world-map_1f5fa-fe0f.png" alt=""></div>
+          <h3>Cartes mentales</h3>
+          <p>Visualisez les <strong>axes de lecture</strong>, personnages, thèmes et symboles en un coup d'œil.</p>
+          <div class="vlit-angle-cta">Explorer →</div>
+        </div>
+        <div class="vlit-angle" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)">
+          <div class="vlit-angle-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/speech-balloon_1f4ac.png" alt=""></div>
+          <h3>Citations & figures</h3>
+          <p>Pour chaque œuvre : <strong>5+ citations clés</strong> avec analyses, figures de style identifiées.</p>
+          <div class="vlit-angle-cta">Découvrir →</div>
+        </div>
+        <div class="vlit-angle" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)">
+          <div class="vlit-angle-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/scroll_1f4dc.png" alt=""></div>
+          <h3>Fiche & contexte</h3>
+          <p><strong>Auteur, époque, mouvement</strong> littéraire, résumé synthétique, thèmes majeurs.</p>
+          <div class="vlit-angle-cta">Consulter →</div>
+        </div>
+        <div class="vlit-angle" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)">
+          <div class="vlit-angle-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/memo_1f4dd.png" alt=""></div>
+          <h3>QCM & Contrôle</h3>
+          <p><strong>8 questions QCM</strong> par œuvre + contrôle de lecture corrigé pour vous tester.</p>
+          <div class="vlit-angle-cta">Tester →</div>
+        </div>
+      </div>
+
+      <!-- Œuvres en vedette (3 aléatoires depuis LITT_OEUVRES) -->
+      <div class="vlit-featured-title">⭐ Œuvres à la une</div>
+      <div class="vlit-featured-grid" id="vlit-featured-grid">
+        ${(function(){
+          if(typeof LITT_OEUVRES==='undefined') return '<div style="color:var(--ink4);text-align:center;padding:20px">Chargement...</div>';
+          var keys=Object.keys(LITT_OEUVRES);
+          // 3 œuvres représentatives : 6e, 3e, Tle
+          var featured=['6e_chants_foret','3e_ville_cruelle','tle_vieux_negro'].filter(function(k){return LITT_OEUVRES[k];});
+          if(featured.length<3) featured=keys.slice(0,3);
+          var picMap={
+            '6e_chants_foret':'deciduous-tree_1f333.png',
+            '6e_bimanes':'gorilla_1f98d.png',
+            '3e_ville_cruelle':'cityscape_1f3d9-fe0f.png',
+            '3e_marmite_koka':'pot-of-food_1f372.png',
+            'tle_vieux_negro':'sports-medal_1f3c5.png',
+            'tle_stances_poemes':'scroll_1f4dc.png',
+            '1ere_lion_perle':'lion_1f981.png',
+            '4e_coeur_sahel':'droplet_1f4a7.png'
+          };
+          var picBase='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
+          return featured.map(function(k){
+            var oe=LITT_OEUVRES[k];
+            var picFile=picMap[k]||'open-book_1f4d6.png';
+            return '<div class="vlit-feat-card" onclick="_showLittMenu(\''+k+'\',\''+k+'\')">'+
+              '<div class="vlit-feat-pic"><img src="'+picBase+picFile+'" alt=""></div>'+
+              '<div class="vlit-feat-info">'+
+                '<div class="vlit-feat-cls">'+_esc(oe.classe||'')+'</div>'+
+                '<div class="vlit-feat-title">'+_esc(oe.titre)+'</div>'+
+                '<div class="vlit-feat-author">'+_esc(oe.auteur||'')+'</div>'+
+                '<div class="vlit-feat-tags">'+
+                  (oe.carte?'<span>🗺️ Carte</span>':'')+
+                  (oe.qcm&&oe.qcm.length?'<span>📝 QCM</span>':'')+
+                  (oe.citations&&oe.citations.length?'<span>💬 '+oe.citations.length+' cit.</span>':'')+
+                  (oe.fiche?'<span>📋 Fiche</span>':'')+
+                '</div>'+
+                '<div class="vlit-feat-cta">Analyser cette œuvre →</div>'+
+              '</div>'+
+            '</div>';
+          }).join('');
+        })()}
+      </div>
+
+      <!-- CTA explorer toutes les œuvres -->
+      <div class="vlit-bottom-cta">
+        <button onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)" class="vlit-explore-all">
+          📚 Explorer les 22 œuvres au programme →
+        </button>
+        <div class="vlit-bottom-meta">6ème · 5ème · 4ème · 3ème · 2nde · 1ère · Terminale</div>
+      </div>
+    </div>
+
     <div class="vsec-title v-reveal">🏫 Présentation du Centre</div>
     <div class="vsec-sub v-reveal">Bienvenue au ${_esc(DB.school?.nom||"VÉRITAS Academy")}</div>
     <div class="g2 v-reveal v-stagger">
@@ -17324,6 +17414,222 @@ function _importQCMDo(){
 // © Mythe Errant 2026 · VÉRITAS v1.1
 // ══════════════════════════════════════════════════════════════════
 
+// ══════════════════════════════════════════════════════════════════
+// ── CRITIQUES LITTÉRAIRES — Inspiré de #Çameditlivre ──────────────
+// Analyses approfondies d'œuvres camerounaises et africaines
+// Chaque analyse propose un ANGLE DE LECTURE ORIGINAL + citation clé
+// ══════════════════════════════════════════════════════════════════
+var LITT_ANALYSES = [
+  {
+    id:'pere_inconnu_pabe_mongo',
+    titre:"Père inconnu",
+    auteur:"Pabe Mongo",
+    editeur:"Edicef",
+    annee:"",
+    genre:"Roman",
+    pays:"Cameroun",
+    couleur:"#7C3AED", // violet
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/family_1f46a.png",
+    angle:"La faute d'une mère est-elle l'héritage de sa fille ?",
+    citation:"Et si les mères payaient leurs fautes à travers l'échec de leur fille ?",
+    hashtags:["#Çameditlivre","#Pèreinconnu","#PabeMongo","#Edicef"],
+    accroche:"Une lecture inattendue : suivre la mère, et non la fille, à la recherche de son père…",
+    analyse:"Il y a quelques jours, je discutais avec Pabe Mongo. À propos de littérature, et de son livre Père inconnu. Comme tout auteur passionné de ses propres écrits, je lui ai demandé, dans le cas spécifique de ce livre, lequel de ses personnages il avait le plus aimé. Sa réponse m'a surpris. Car, alors que je pensais qu'il se projetait à travers la narratrice (la petite fille à la recherche de son père), il a plutôt parlé de sa mère.\n\nEn lisant Père inconnu, avez-vous déjà songé à la douleur de cette mère ? L'avez-vous déjà suivie du regard ; questionné ses émotions, écouté ses silences et ses plaintes ?\n\nC'est selon la trajectoire de celle-ci que j'ai relu le récit. Relisez le récit. En vous intéressant à la mère de l'héroïne, comme je l'ai fait : en l'isolant, en laissant la lumière de votre regard jaillir sur sa douleur, sa solitude, l'échec de sa propre fille… Vous vous demanderez peut-être alors comme moi si les mères paient leurs fautes à travers l'échec de leur fille, si les filles sont condamnées, dans certaines situations, à ne ressembler qu'à leur mère, c'est-à-dire reproduire leur échec, leur faiblesse…\n\nPère inconnu de Pabe Mongo, à (re)lire donc, mais aussi à offrir !"
+  },
+  {
+    id:'revanche_amante_aboyoyo',
+    titre:"La revanche de l'amante",
+    auteur:"Anne Rachel Aboyoyo",
+    editeur:"Éditions Proximité",
+    annee:"2025",
+    genre:"Poésie",
+    pays:"Cameroun",
+    couleur:"#EC4899", // rose
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/red-heart_2764-fe0f.png",
+    angle:"Quand l'amante prend sa revanche sur le discours qui la criminalise",
+    citation:"Chaque vers est un cri de liberté ; liberté de la féminité et du désir.",
+    hashtags:["#Çameditpoésie","#Larevanchedelamante","#AnneRachelAboyoyo","#Proximité"],
+    accroche:"Une poésie subversive qui réinvente la figure de l'amante.",
+    analyse:"Ce qui frappe d'abord chez Anne Rachel Aboyoyo, c'est le souffle. Chaque poème est vie, danse, lumière, vertige des hauteurs ou des profondeurs. Il y a aussi quelque chose de l'ordre du cru (ou plutôt de la franchise) que la parole poétique transfigure, embellit.\n\nIci, L'amante (l'éternelle briseuse de ménage depuis la nuit du monde) ne discute point l'époux avec l'épouse. Elle ne souhaite pas prendre la place de celle-ci encore moins devenir une épouse bis ; sorte de Mme Y dans l'ombre d'une Mme X. Être amante suffit. Demeurer la femme puissante, aimée et aimante, dans les coulisses de la vie amoureuse de l'époux, en lui laissant la liberté d'en aimer d'autres.\n\nChaque poème a sa fureur autant que sa douceur ou sa délicatesse ; chaque vers est un cri de liberté ; liberté de la féminité et du désir ; liberté d'écrire et de dire. Tantôt l'amante sermonne son homme (Kamba), tantôt elle se jette dans ses bras, l'aguiche, le charme.\n\nAnne Rachel dessine, dans une douce et poétique subversion, la figure de l'amante moderne, qui révèle les failles de la relation amoureuse « classique » et devient une force d'équilibre pour la stabilité du couple. Une nouvelle fonction est ainsi assignée à l'amante, qui prend par là même sa revanche sur le discours social qui, depuis des siècles, la criminalise.\n\nLa revanche de l'amante, à lire donc !"
+  },
+  {
+    id:'societe_bienheureux_muttlon',
+    titre:"La société des bienheureux",
+    auteur:"Mutt-Lon",
+    editeur:"Ifrikiya",
+    annee:"2025",
+    genre:"Roman",
+    pays:"Cameroun",
+    couleur:"#F59E0B", // ambre
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/money-with-wings_1f4b8.png",
+    angle:"Et si dépenser de l'argent devenait LE travail ?",
+    citation:"Nous vivons dans un beau pays où, parmi les libertés ordinaires, il y a celle de s'enrichir subitement, de manière inexpliquée et ostentatoire.",
+    hashtags:["#Çameditlivre","#Lasociétédesbienheureux","#MuttLon","#Ifrikiya"],
+    accroche:"Keman : faux ingénu, vrai ingénieux ?",
+    analyse:"Au Cameroun, nous avons nos expressions : « le travail dépasse l'argent ». Cette formule, on la connaît tous. Elle révèle combien on souhaite gagner mieux notre vie ; être mieux traité sur le plan salarial, et mieux encore, combien on souhaite parfois travailler moins et seulement gagner plus.\n\nEt voici que quelqu'un y a pensé : Mutt-Lon. Comment ? En posant la question autrement : et si pour une fois l'argent dépassait le travail ? Si dépenser de l'argent devenait Le travail ?\n\nÀ Djamonomine, village de Keman, à l'est du Cameroun, un jour, une Mercedes vient échouer. Aucun doute : les passagers sont morts. Parmi eux, Fidèle Abomo, députée célèbre, serre contre sa poitrine une mallette contenant 30 millions de francs. Plus tard, Keman fait la connaissance de Nnom Moro, le « boss », qui dit être propriétaire de la mallette et confie à Keman une mission : dépenser 30 millions chaque semaine. Cycle infernal !\n\n« Tout le monde rêve d'avoir beaucoup d'argent, d'en distribuer et d'être loué pour cela. Mais les gens ne mesurent pas ce que ça impliquerait comme bouleversements dans leur vie. »\n\nL'argent de la mallette se régénère, mais les biens achetés disparaissent. Comment dépenser en biens éphémères, sachant que tout part et revient ? On entre dans une société de la jouissance et du gaspillage, avec ses clients-types, ses lieux-types. Et puis quelque chose arrive : l'attachement. Une femme, Agnès. Elle ne pouvait pas être un bien comme un autre…\n\nL'écriture de Mutt-Lon est fluide. Aucune phrase ne dépasse l'autre. L'écrivain plonge le lecteur dans son œuvre par une double scénographie : la confidence (Keman converse avec Agnès) et le journal intime.\n\nLa société des bienheureux, à lire donc !"
+  },
+  {
+    id:'reve_pecheur_boum',
+    titre:"Le rêve du pêcheur",
+    auteur:"Hemley Boum",
+    editeur:"Gallimard",
+    annee:"2024",
+    genre:"Roman",
+    pays:"Cameroun",
+    couleur:"#0EA5E9", // cyan
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/droplet_1f4a7.png",
+    angle:"Mourir de soif au bord d'un fleuve…",
+    citation:"La vie d'un homme ne tient pas en quelques mots : il est né, il a vécu, il est mort, cî-git-il. Pour qui veut l'entendre, le récit est beaucoup plus long, plus tortueux.",
+    hashtags:["#Çameditlivre","#Lerêvedupêcheur","#HemleyBoum","#Gallimard"],
+    accroche:"Une métaphore violente et lumineuse de l'eau, du sang et du destin.",
+    analyse:"Qu'est-ce que le bonheur ? Pour Zacharias, le bonheur tient à Yalana sa compagne, leurs deux filles Dorothée et Myriam, et le parfait équilibre entre la douceur du foyer, son travail de pêcheur et son ancrage à la terre de ses ancêtres : Campo. Il ne possédait rien d'autre, rien qu'il rêvât. Mais alors quoi ?\n\nUn jour, une compagnie forestière débarque au village. Et tout bascule. Comme le choc d'une pierre dans le clair d'une source d'eau. Le bonheur s'éloigne, devient une promesse. Il prend le visage de la fortune. Zacharias commence à rêver d'une moto, d'argent. « Leur vie au village et la compétence qui en découlait étaient liées à l'environnement, aux pratiques anciennes transmises et adaptées à un présent ancré dans ce lieu. »\n\nMais le malheur de l'humain vient de ceci : l'on ne peut rien goûter ici-bas, le trouver délicieux, et le recracher plutôt que l'avaler. Aucune compagnie commerciale avec de solides capitaux ne laisse de place pour les petits commerçants. La pirogue a été surclassée par des chalutiers, l'expertise traditionnelle par les moyens techniques de la compagnie. Zacharias s'est endetté, est devenu un autre homme. Il a fini par voler 2 millions à M. Andreas. Et il termine en prison, à Kodengui, durant deux ans et trois mois.\n\nLa mort de Myriam est si triste ! Dorothée tournera le dos à sa mère. Des années plus tard, elle tombera enceinte, donnera naissance à un fils qu'elle appellera Zacharias, du nom de son père. Zachary, devenu psy en France, est un homme perdu. Il lui manque quelque chose : l'appel mystérieux de la source, du sang.\n\nQue lui restait-il à faire ? Rien d'autre que revenir vers Dorothée, vers sa grand-mère Yalana, vers Campo. Le sang comme un fleuve a définitivement sa source et son lit.\n\nLe bonheur demeure à mes yeux comme une fontaine à l'entrée de chacune de nos maisons. Elle dit : « Je suis là, près de toi : bois si tu as soif. » Mais nous, nous cherchons ailleurs. Et nous mourons de soif sous un intense soleil intérieur.\n\nLe rêve du pêcheur, à lire donc !"
+  },
+  {
+    id:'une_si_longue_lettre_ba',
+    titre:"Une si longue lettre",
+    auteur:"Mariama Bâ",
+    editeur:"Les Nouvelles Éditions Africaines",
+    annee:"1979",
+    genre:"Roman épistolaire",
+    pays:"Sénégal",
+    couleur:"#DC2626", // rouge
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/envelope-with-arrow_1f4e9.png",
+    angle:"Lire autrement un livre connu",
+    citation:"Et pourtant que n'a-t-il fait pour que je devienne sa femme !",
+    hashtags:["#Çameditlivre","#Unesilonguelettre","#MariamaBâ"],
+    accroche:"Tous les hommes sont-ils heureux dans la polygamie ?",
+    analyse:"Tout le monde sait à-peu-près de quoi parle Une si longue lettre. C'est un classique de la littérature sénégalaise — ce genre de livre que tout le monde connaît, surtout sans l'avoir lu.\n\nRamatoulaye écrit une lettre à son amie de longue date, Aïssatou. Son mari, Modou Fall, vient de mourir. Elle s'épanche dans un ton lyrique, personnel, intime. On y découvre les souffrances silencieuses d'une femme trahie par son mari, qui prend comme seconde épouse Binetou, la camarade de classe de sa fille Daba.\n\nMais m'est venue à l'esprit cette interrogation : tous les hommes sont-ils heureux dans la polygamie ? Et inversement, toutes les femmes y sont-elles malheureuses ?\n\nNon, je le crois ; tous les hommes ne sont pas heureux dans la polygamie. Ils veulent une femme qui soit tout à la fois. En l'homme, il y a l'amour, mais aussi le devoir ; et c'est très souvent l'éducation familiale, la culture et la tradition qui fixent le cap. Mawdo Bâ se met avec la jeune Nabou parce que sa mère trouve sa bru Aïssatou trop roturière.\n\nToutes les femmes sont-elles malheureuses dans la polygamie ? C'est une question d'attachement, de consentement, et de nuances. Aïssatou coupe court et s'éloigne ; Ramatoulaye regrette d'être mise devant le fait accompli.\n\nSa plus grande douleur : la trahison. « Dire que j'ai aimé passionnément cet homme, dire que je lui ai consacré trente ans de ma vie, dire que j'ai porté douze fois son enfant. »\n\nCes plaintes de femmes (légitimes) peuvent se résumer à : « nous ne sommes pas des objets, nous avons aussi un cœur, une intelligence. » Mais il ne faut pas trop blâmer les hommes ; il faut surtout questionner les cultures dont ils sont issus et l'éducation qu'ils reçoivent : vaste problématique, vieille comme le monde.\n\nUne si longue lettre, à relire donc !"
+  },
+  {
+    id:'quand_saigne_palmier_mbock',
+    titre:"Quand saigne le palmier",
+    auteur:"Charly Gabriel Mbock",
+    editeur:"Éditions CLÉ",
+    annee:"1989",
+    genre:"Roman",
+    pays:"Cameroun",
+    couleur:"#16A34A", // vert
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/palm-tree_1f334.png",
+    angle:"Un roman tragique comme j'aime en lire",
+    citation:"Le palmier est l'arbre de toutes les saisons. […] Mais le palmier, c'est l'arbre de l'indifférence. Son vin est blanc, blancs ses vers. Son huile est rouge, rouge sa sauce. Le palmier sait purifier, mais prends garde, il saigne aussi.",
+    hashtags:["#Çameditlivre","#Quandsaignelepalmier","#CharlyGabrielMbock","#EditionsClé"],
+    accroche:"Allégorie du palmier, tragédie d'une succession au trône.",
+    analyse:"On peut entrer dans le roman de Charly Gabriel Mbock par plusieurs portes. On peut y lire un petit bout d'Afrique avec ses traditions, ses valeurs, racontée avec finesse à travers l'histoire de Bitchoka. On peut aussi y entrer par l'allégorie du palmier. Enfin, on peut y pénétrer simplement par son intrigue.\n\nBitchoka doit succéder à son chef de père vieillissant. La demande de celui-ci est simple : de son vivant, il veut voir son fils se marier et avoir des fils. Mais Bitchoka cache un secret terrible : il est stérile. « Pour croquer des os il faut avoir des dents solides » et Bitchoka lui a « uniquement des gencives ».\n\nIl préfère la lâcheté au courage, la mort à la vie, par la plus lâche des décisions pour un fils de chef : le suicide. Mais les dieux s'y opposent. Et ils choisissent Lién, un valeureux homme du village, pour accomplir leur dessein.\n\nBitchoka signe un pacte de sang avec Lién, devant le palmier sacré, puis lui confie une mission secrète à laquelle Sondi, sa femme, est tenue d'obéir, sans savoir qui, quand ou pourquoi. De cette mission secrète naît Nyemb Bitchoka, l'héritier du trône, fils de Bitchoka et Sondi. Mais il ressemble trait pour trait à Lién.\n\nLién pouvait-il vivre après cela ? Le chef Bitchoka pouvait-il survivre après avoir rompu le pacte signé avec Lién ? C'est cela la tragédie ! Tout était dit, scellé d'avance.\n\nIl y a dans la langue de Charly Gabriel Mbock la richesse des proverbes, le parler des anciens. « Celui qui a une lance émoussée doit être prêt à céder sa place aux autres pendant la chasse au fauve. »\n\nIl faut se méfier des livres des anciens : leur écriture est redoutable ; et les histoires bien racontées.\n\nQuand saigne le palmier, à relire donc !"
+  },
+  {
+    id:'il_ne_voulait_pas_enseigner_ombete',
+    titre:"Il ne voulait pas enseigner",
+    auteur:"P.-C. Ombété-Bella",
+    editeur:"Éditions Clé",
+    annee:"2025",
+    genre:"Roman",
+    pays:"Cameroun",
+    couleur:"#1E40AF", // bleu
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/teacher_1f9d1-200d-1f3eb.png",
+    angle:"Calvin Batila : un ambitieux sans colonne vertébrale ?",
+    citation:"Faire partie de l'élite est une tâche ardue.",
+    hashtags:["#Çameditlivre","#Ilnevoulaitpasenseigner","#OmbétéBella","#ÉditionsClé"],
+    accroche:"Et après ? Imaginez la suite…",
+    analyse:"À la seule lecture du titre, une question m'est venue à l'esprit : Il ne voulait pas enseigner… ET ? L'interrogation peut aussi bien être remplacée par des points de suspension. Car il y a une suite logique dans ce titre ; quelque chose de l'ordre du « comme/puisqu'il ne voulait pas enseigner alors… » Alors, quoi ? Tout peut arriver.\n\nL'histoire n'est peut-être pas celle que l'on croit. On s'attendrait à une histoire « pure » de craie, de souffrance, d'OTS. Après un bac D à 22 ans, Calvin Batila termine ses études en juillet 1977, obtient un CAPES histoire-géo. Une apogée pour beaucoup mais « pour Batila, le diplôme n'était qu'un moyen. Dans sa tête, être un simple enseignant ne lui seyait pas. »\n\nIl ne tiendra la craie que six mois. Et pour le reste ? C'est là toute la force du roman.\n\nIl y a quelque chose dont Calvin Batila ne peut souffrir : l'anonymat, l'invisibilité, le manque de pouvoir. Quelle force y a-t-il dans la craie ? Quelle gloire et quelle puissance ? La craie : une noblesse fantasmée, une grandeur creuse vécue sur le mode mineur et solitaire.\n\nQuand il a finalement quitté la craie, qu'il croit le rêve de grandeur à portée de main, quelque chose le rappelle à son métier originel. Yoko. Le Ministère de la Coopération dissout. Huguette Itamba, la femme puissante au bras long, n'y pourra rien. Cruel conteur que P.-C. Ombété-Bella !\n\nIl y a dans ce roman des passages d'anthologie ; la première partie d'une écriture mélodieuse, sublime. On respire Huguette Itamba, son parfum, sa féminité. La page 104, belle, mélodieuse, subtile. Les phrases chantent ; les mots dansent, et le Jazz que Calvin adore occupe chaque mot.\n\nOn peut forcer le destin à condition de ne pas avoir des ailes d'Icare… ou d'avoir une colonne vertébrale solide !\n\nIl ne voulait pas enseigner, à lire donc !"
+  },
+  {
+    id:'crepuscule_tourment_miano',
+    titre:"Crépuscule du tourment",
+    auteur:"Léonora Miano",
+    editeur:"Grasset",
+    annee:"2016",
+    genre:"Roman",
+    pays:"Cameroun / France",
+    couleur:"#BE185D", // magenta
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/artist-palette_1f3a8.png",
+    angle:"Écrire comme peindre (un tableau)",
+    citation:"On a beau écouter, on n'entend que ce qui est au fond de soi.",
+    hashtags:["#Çameditlivre","#LéonoraMiano","#Crépusculedutourment","#Grasset"],
+    accroche:"Quatre voix de femmes pour un homme absent.",
+    analyse:"Les grands auteurs écrivent comme les grands peintres peignent leurs toiles. Le geste de la plume est comme celui du pinceau. On le devine lent, patient, précis. Les phrases de Miano sont ainsi : ciselées, modelées, moulées, taillées.\n\nDio est absent du récit. Seule compte la sensuelle musicalité de ces voix de femmes qui le racontent. Sa forme, ses pensées, sa chair, ses paroles, tout est connu ou deviné à travers la voix des femmes qui ont peuplé sa vie. Son destin n'est rien d'autre que celui d'un être objet ; sujet passif du remords d'une mère, du souvenir d'une ex amante, de l'inquiétude d'une sœur.\n\nLa voix de Madame, la mère de Dio, tire la première. Cette parole, je l'ai le plus aimée. Parce que c'est celle d'une mère, et que l'amour d'une mère, ce lien par le cordon ombilical, c'est quelque chose de grand, de mystérieux, de divin. Dio est une chute d'eau qui prend racine depuis le sommet de ce torrent.\n\n« Tu me hais le plus, dit la mère, de n'avoir pas quitté un homme qui me brutalisait et m'humilait dès qu'il le pouvait. » Le lien de sang, la question de l'héritage culturel, sont au cœur du livre. Mais « entrer en conflit avec une part inaliénable de soi-même est un combat perdu d'avance. On ne divorce pas du sang qui coule dans nos veines. »\n\nLes voix d'Amandla, Ixora et Tiki sont les gouttes de pluie du même orage. Sous les secousses de leurs mots, on découvre tantôt un Dio lâche, un Dio inquiet, incompris, qui fuit, se fuit, se cherche et se perd.\n\nJ'aime chez Miano cette capacité à lier la fiction à la réflexion, dans un équilibre parfait. Et puis ses phrases ! Miano découpe les mots, les trempe dans son cœur, puis les aligne dans un geste délicat et précis, comme celui d'un peintre.\n\nCrépuscule du tourment, à lire donc !"
+  },
+  {
+    id:'habiller_ciel_ebode',
+    titre:"Habiller le ciel",
+    auteur:"Eugène Ébodé",
+    editeur:"Gallimard",
+    annee:"2022",
+    genre:"Roman",
+    pays:"Cameroun",
+    couleur:"#0891B2", // sarcelle
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/cloud_2601-fe0f.png",
+    angle:"Mémoire, souvenir et tendresse",
+    citation:"La mémoire a ses assauts, ses rebonds, ses sursauts, ses méandres et ses ressacs. Elle se joue de l'autonomie de la volonté.",
+    hashtags:["#Çameditlivre","#Habillerleciel","#EugèneEbodé","#Gallimard"],
+    accroche:"Tendre roman sur la mémoire après la mort d'une mère.",
+    analyse:"Achevé Habiller le ciel d'Eugène Ébodé. Tendre roman sur la mémoire et le souvenir. Le narrateur Eugène a perdu sa mère (après le décès de son père seize ans plus tôt). Ce triste événement le plonge dans ses souvenirs, promenant le lecteur dans l'univers intérieur du narrateur.\n\nY passe une foule de portraits touchants, d'anecdotes et de drames. On y revoit les figures de la mère (issue des Amougou, clan de propriétaires de cacao), du père ; celles de Tante Arsène, la sœur cadette et la confidente de la mère, et d'Albert Mackon, l'ancien condisciple du collège Libermann, et bien sûr Myriam Ningor, la petite amie tchadienne d'Eugène.\n\nAprès avoir été recalé à l'épreuve probatoire au Cameroun, Eugène se rend au Tchad pour y passer le baccalauréat, tout en jouant au foot. Mais la guerre qui éclate à Ndjamena, en mars 1980, le contraint à retourner au Cameroun, auprès de sa mère.\n\nComme souvent chez Eugène Ébodé, son amour du foot, sa passion pour la littérature, son rapport à la famille, le départ pour la France, reviennent presque systématiquement. Et puis il y a aussi le narrateur, Eugène, avec plus ou moins les mêmes traits — comme une projection de la personne de l'écrivain.\n\nHabiller le ciel, à lire donc !"
+  },
+  {
+    id:'voile_draupadi_devi',
+    titre:"Le Voile de Draupadi",
+    auteur:"Ananda Devi",
+    editeur:"L'Harmattan",
+    annee:"1993",
+    genre:"Roman",
+    pays:"Île Maurice",
+    couleur:"#A855F7", // violet
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/fire_1f525.png",
+    angle:"Lire Ananda Devi et être heureux",
+    citation:"Une mère qui refuse de faire une offrande pour son fils n'est pas une mère.",
+    hashtags:["#Çameditlivre","#AnandaDevi","#LeVoiledeDraupadi"],
+    accroche:"Jusqu'où n'irait pas une mère pour sauver son fils ?",
+    analyse:"Au fil des œuvres d'un auteur, on attend qu'il fasse la même chose, mais aussi qu'il soit différent. Quand on se plonge rétrospectivement dans l'ouvrage d'un auteur qu'on a découvert par des œuvres plus récentes, que chercher ? Peut-être seulement ce qu'il fut à ses débuts.\n\nL'histoire y est simple. Un fils, Wynn, est gravement malade. Sa mère, Anjali, veille à son chevet. Dev, le père, considère Anjali comme principale responsable, pour la culpabiliser, se venger d'elle, à cause de leur couple qui meurt, de l'intimité disparue. Tout au long des pages, Ananda Devi nous promène entre les lignes sinueuses de ce couple brisé, des douleurs et sacrifices d'une mère, et la crise spirituelle d'Anjali.\n\nDev a une solution : Anjali doit exécuter la marche sur le feu pour expier ses fautes, implorer les dieux afin de ramener à la vie ce fils mourant. Mais Anjali a cessé de croire, à cause de ce qui est arrivé à Vasanti, sa cousine, quand celle-ci s'est mise à croire, à voir. Mais jusqu'où n'irait pas une mère pour sauver son fils ?\n\nLe Voile de Draupadi est un roman introspectif au style poétique, comme toujours chez Ananda Devi. Il y a chez elle toujours deux histoires qui s'entrelacent : l'histoire de la langue, et une histoire plus intime (déchirement, dilemme spirituel) avec le côté culturel : l'île Maurice, ses cultes, ses traditions.\n\nLe Voile de Draupadi d'Ananda Devi, à lire donc !"
+  },
+  {
+    id:'bimanes_abega',
+    titre:"Les Bimanes",
+    auteur:"Séverin Cécile Abéga",
+    editeur:"NEA/Édicef",
+    annee:"1983",
+    genre:"Nouvelles",
+    pays:"Cameroun",
+    couleur:"#92400E", // brun
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/gorilla_1f98d.png",
+    angle:"Lire pour un enfant et replonger en enfance",
+    citation:"Le crâne du vieux Tchakarias cuisait tellement qu'il se demandait si le soleil ne lui avait point pelé la calvitie.",
+    hashtags:["#Çameditlivre","#Lesbimanes","#SéverinCécileAbéga"],
+    accroche:"Le rire fougueux des phrases d'Abéga, retrouvé.",
+    analyse:"Cette semaine, je rangeais ma petite bibliothèque pour y insérer un roman récemment paru. Je suis alors tombé sur ma vieille édition des Bimanes, dont les pages jaunies commençaient à se détacher. Sans savoir comment j'ai commencé à le relire.\n\nIl y a d'abord eu le souvenir : on ne revient pas impunément sur les œuvres des années collège. Le souvenir et la nostalgie en sont les joyeuses punitions.\n\nM'est revenu d'abord en mémoire le style d'Abéga. À 10 ou 12 ans, qu'est-ce qu'on sait du style d'un auteur ? Des phrases nous font éclater de rire. Aujourd'hui, je le comprends mieux : tout à la fois précieux, soigné, ironique.\n\nDans Le fardeau, Ana (fille de Tchakarias) aime Nomo (cultivateur, excellent cueilleur de vin de palmes) mais le ngomna (il n'y a pas mieux pour désigner un fonctionnaire ventru) s'intéresse aussi à elle. Tchakarias a-t-il comploté avec Ana pour cuire la langue du ngomna avec son mets d'arachide brûlant et pimenté ?\n\nLe comique de situation ? C'est Nomo se mettant à quatre pattes, se faisant passer pour un mouton parmi les bêtes du vieux Tchakarias pour échapper à ce beau-père qui allait le surprendre s'amourachant avec sa fille Ana.\n\nLes Bimanes, ce sont finalement les humbles, « les petites gens ». Avec leur malheur, leur drame mais toujours avec la dignité et la noblesse que peuvent revêtir leurs attitudes. Les grands y prennent pour leur grade, deviennent humbles à défaut de se faire humilier.\n\nLes Bimanes de S. C. Abéga à relire donc."
+  },
+  {
+    id:'solo_revenant_efoui',
+    titre:"Solo d'un revenant",
+    auteur:"Kossi Efoui",
+    editeur:"Seuil",
+    annee:"2008",
+    genre:"Roman",
+    pays:"Togo",
+    couleur:"#475569", // gris ardoise
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/microphone_1f3a4.png",
+    angle:"Le solo d'un retour au pays natal",
+    citation:"Je ne sais plus me tenir, j'ai l'impression d'avoir perdu toute raison d'être là, d'être sur une barque qui s'éloigne de la rive et d'être en même temps l'homme debout sur la rive qui regarde la barque s'éloigner.",
+    hashtags:["#Çameditlivre","#KossiEfoui","#Solodunrevenant","#Seuil"],
+    accroche:"Une voix mort-vivante, mémoire d'un pays exilé.",
+    analyse:"Le revenant, être bien charnel, dense et imposant, avec un corps littéraire dont le lecteur est pourtant incapable de dresser un portrait net. On dirait une ombre qui murmure en traversant une rue mal éclairée, la nuit ; qui passe dans un mouvement poétique mais furtif.\n\nLe narrateur revient à Gloria (ville fictive), après dix ans d'absence. Il voudrait retrouver son ami d'enfance Mozaya, et une autre connaissance : Asafo Johnson. Mais c'est mal connaître Kossi Efoui et ses phrases vives et tortueuses qui crient, qui giflent, qui boxent ; et sa langue musicale, photographique.\n\nLe narrateur est bien un revenant : aussi mort que Mozaya et effacé comme Asafo Johnson. Mort symboliquement. Son retour à Gloria est celui d'un homme parti trop longtemps et qui, revenu sur le lieu de l'enfance, cherche les morts parmi les vivants, n'ayant en lui que le souvenir des temps anciens, des astres éteints, des paysages morts.\n\nIl croit retrouver Asafo dans ce qui fut la maison de celui-ci. Il arrive, face au portail, hésite, ne reconnaît personne. Il est perdu devant la maison « avec sa madone accrochée au portail tenant dans les bras un Jésus sanglant, à moitié nu avec deux petits trous dans les mains et un grand trou au poitrail. »\n\nTout au long du texte, le revenant parle. Pour lui-même. Comme dans une performance scénique. Autour de cette parole solitaire gravite une galerie de personnages insolites, à l'allure fantomatique. Ils sont là comme un orchestre muet, qui laisse se produire un chanteur seul sur scène.\n\nPeut-être faut-il simplement voir dans ce roman ce que son titre indique : un solo (de paroles, de regrets, de remords et de réminiscences) ; le solo d'un retour au pays natal pour un Césaire d'un autre genre : un revenant dépaysé.\n\nSolo d'un revenant de Kossi Efoui, à lire donc !"
+  },
+  {
+    id:'roi_premier_venu_dzotap',
+    titre:"Le roi et le premier venu",
+    auteur:"Alain Serge Dzotap",
+    editeur:"Pastel",
+    annee:"2017",
+    genre:"Jeunesse / Conte",
+    pays:"Cameroun",
+    couleur:"#F97316", // orange
+    ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/crown_1f451.png",
+    angle:"Lire pour un enfant et replonger en enfance",
+    citation:"Comment conter les conflits du monde, résumer la condition humaine aux enfants, en si peu de mots ?",
+    hashtags:["#Çameditlivre","#AlainSergeDzotap","#Leroietlepremiervenu","#EditionsPastel"],
+    accroche:"Un roi, un mauvais conseiller, et la machine du pouvoir corrompu.",
+    analyse:"Ma lecture de cette semaine m'a fait replonger en enfance. À l'IFC, je voulais emprunter des livres pour les « mini-moi » (un père qui lit ne peut souhaiter que la même chose pour ses enfants). Mais comment choisir un livre pour enfant, quand on est adulte, et romancier ?\n\nAu milieu de quelques noms qui fusent de la bouche aimable de la bibliothécaire, un nom retient mon attention : Alain Serge Dzotap. Pour l'aîné des « mini-moi », j'avais déjà pris les Petits contes des pourquoi du même auteur. On avait beaucoup ri (« le chat qui mange la souris cric croc cric »). Je n'ai plus hésité.\n\nImaginez un roi (le lion) qui règne sur ses sujets avec justice, droiture et bonté. Il n'y a pas de guerre, aucun conflit en vue. Puis, un jour, piqué par on-ne-sait-quoi, celui-ci pense que la bonté, la justice, ne sont pas tout. Un bon roi doit être craint d'abord, et surtout même. Alors, si la crainte et la fureur ne sont pas inscrites dans le cœur du roi, il lui faut les puiser ailleurs, que quelqu'un le motive ! Le premier venu tombe à pic ; ce genre de conseiller machiavélique qui, à travers les décisions du monarque qu'il influence, tire profit, règle des comptes.\n\nComment conter les conflits du monde, résumer la condition humaine aux enfants, en si peu de mots ? Comment les préparer à habiter le monde comme il est, à y survivre ? Et comment avec tout ça, ne pas étouffer leur imagination, leur laisser une part de rêve, de liberté, d'enfance ?\n\nAlain Serge Dzotap le fait bien, dans cet univers dont il rend avec force et simplicité l'atmosphère, les tensions, mais aussi l'humanité des personnages (ces animaux qui nous ressemblent).\n\nLe roi et le premier venu, à lire donc !"
+  }
+];
+
 // ── BASE DE DONNÉES LITTÉRAIRE ─────────────────────────────────────
 var LITT_OEUVRES = {
 
@@ -17379,7 +17685,14 @@ var LITT_OEUVRES = {
       {q:"Expliquez la métaphore 'un silence de plomb s'abattit sur la file'.",r:"Le plomb (métal lourd, étouffant) traduit l'oppression collective. Le verbe 's'abattit' (tomber violemment) évoque une force qui écrase. L'image dit l'angoisse partagée de tous les paysans devant l'arbitraire."},
       {q:"Comment Banda exprime-t-il sa colère et pourquoi reste-t-il silencieux ?",r:"Banda 'recula, les poings crispés' — colère physique mais rentrée. Il ne peut pas protester ouvertement contre le pouvoir colonial sans risquer d'aggraver sa situation. C'est la résistance muette imposée au colonisé."},
       {q:"Sous quel pseudonyme Mongo Beti publie-t-il ce roman et pourquoi est-ce significatif ?",r:"Il publie sous Eza Boto. C'est son premier roman (1954) ; il adoptera 'Mongo Beti' pour ses œuvres ultérieures. Le pseudonyme protège de la censure coloniale — écrire contre le système impose la dissimulation."}
-    ]
+    ],
+    analyse:{
+      angle:"Quand la ville devient cruelle, qui est-elle vraiment cruelle pour ?",
+      citation:"Va-t'en au bout de la queue. Ça t'apprendra à être pressé. Est-ce que vous arriverez jamais à vous mettre ça dans vos têtes d'hommes de la brousse ?",
+      hashtags:["#Çameditlivre","#VilleCruelle","#MongoBeti","#EzaBoto","#PrésenceAfricaine"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Quand on lit Ville Cruelle, on s'arrête souvent à Banda. À sa douleur. À ses 200 kilos de cacao refusés. À son humiliation devant les agents du Contrôle. Et c'est légitime, car c'est lui le héros, l'enfant de Bamila descendu à Tanga pour vendre la récolte d'une saison entière. Mais que se passe-t-il si l'on regarde plutôt la ville ?\n\nTanga, voyez-vous, n'est pas un simple décor. C'est un personnage. Et c'est ce personnage qui donne son titre au roman : la ville cruelle. Mais qui Tanga est-elle cruelle ? Et au profit de qui ? Eza Boto (qui n'est pas encore Mongo Beti — il faudra attendre quelques années pour cette mue identitaire) construit ici une ville à deux visages. Tanga-Sud : « scintillant, blanc, rouge, vert » avec ses voitures coquettes, ses pelouses, sa tôle ondulée. Tanga-Nord : les cases en terre battue, les toits de nattes, le bruit, la sueur. Et Banda regarde Tanga-Sud comme on regarde un mirage : avec l'espoir naïf d'y entrer un jour.\n\nMais voilà. La ville cruelle n'est pas Tanga. La ville cruelle, c'est le SYSTÈME. Cette mécanique impitoyable où deux agents du Contrôle, eux-mêmes mal payés, mal nourris, deviennent les bourreaux d'un paysan qui pourrait être leur frère. « Va-t'en au bout de la queue. » Et l'on cuirait au soleil pendant des heures encore. Et « Condamné. Mauvaise qualité. » sans lever les yeux. L'agent n'a même pas regardé Banda. Parce que Banda, dans la ville cruelle, n'est plus un homme : c'est un dossier.\n\nC'est ici que la finesse d'Eza Boto se révèle. Il ne dénonce pas le colon blanc avec colère et grands discours. Il fait pire : il montre comment le colon a réussi à faire de l'Africain le bras armé de l'humiliation de l'Africain. Et c'est cela, peut-être, la plus grande cruauté du système colonial : avoir transformé certains de ses victimes en complices zélés.\n\nÀ relire alors, lentement, en s'attardant sur le « silence de plomb » qui s'abat sur la file après le verdict. Ce silence-là, ce n'est pas la peur d'un seul homme. C'est l'angoisse collective d'une humanité qu'on rabaisse, et qui le sait, et qui se tait. Ville Cruelle, à (re)lire donc, mais aussi à transmettre."
+    }
   },
 
   "3e_marmite_koka": {
@@ -17429,7 +17742,14 @@ var LITT_OEUVRES = {
       {q:"Comment Menga, par la satire, dénonce-t-il les dérives du pouvoir traditionnel africain ?",r:"En montrant qu'un roi qui s'abandonne à la superstition perd le contrôle réel de son pouvoir — il est gouverné par ceux qui manipulent ses croyances. Menga questionne la légitimité d'un pouvoir fondé sur l'irrationnel."},
       {q:"Quel personnage incarne la résistance populaire et par quel moyen ?",r:"Bitala incarne la résistance populaire par la ruse et l'intelligence pratique. Là où la force directe est impossible, la débrouillardise déjoue l'autorité corrompue — valorisation de la sagesse populaire africaine."},
       {q:"De quelle nationalité est Guy Menga et quel contexte historique éclaire la pièce ?",r:"Guy Menga est Congolais (Congo-Brazzaville, 1935-2014). Publiée en 1966, la pièce s'inscrit dans le contexte des indépendances africaines et interroge la capacité des jeunes États africains à se gouverner sainement."}
-    ]
+    ],
+    analyse:{
+      angle:"Que reste-t-il d'un roi quand il croit aux pouvoirs d'un objet ?",
+      citation:"Un roi qui croit aux fétiches est un roi que les fétiches gouvernent.",
+      hashtags:["#Çameditthéâtre","#LaMarmitedeKokaMbala","#GuyMenga","#CongoBrazza"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Il y a, dans toute pièce de théâtre satirique africaine, un moment où l'on se demande : Menga rit-il du roi, ou rit-il de nous ? Car la marmite de Koka-Mbala, c'est bien sûr l'histoire d'un roi naïf, Bintsamou, et d'un Grand Féticheur manipulateur, Bobolo, et d'un jeune rusé, Bitala. C'est aussi l'histoire d'un Cameroun, d'un Congo, d'un Sénégal — bref, de toute l'Afrique des indépendances naissantes — qui découvre qu'on peut être politiquement libre et spirituellement enchaîné.\n\nL'angle qui m'a frappé en relisant la pièce, c'est le chiasme prononcé par Bitala (la voix du bon sens populaire) : « Un roi qui croit aux fétiches est un roi que les fétiches gouvernent. » Méditez cette formule. Elle dit beaucoup plus que sa surface. Elle dit que LE POUVOIR APPARTIENT TOUJOURS À CELUI QUI POSSÈDE CE QUE LE ROI CRAINT. Si le roi craint un objet, c'est le gardien de l'objet qui règne. Si le roi craint la rumeur, c'est le colporteur de la rumeur qui règne. Si le roi craint la presse, c'est le journaliste qui règne. C'est aussi vrai aujourd'hui qu'en 1966.\n\nGuy Menga, écrivant à l'aube des indépendances, n'a pas voulu accuser les Blancs ni les colons. Il a fait quelque chose de plus courageux : il a regardé en face les royaumes africains et leurs propres mécanismes de captivité. Bintsamou n'a pas besoin du colonialisme pour être un roi pantin. Il a Bobolo. Et Bobolo lui suffit largement pour le faire marcher au pas.\n\nMais Menga ne désespère pas. Il nous offre Bitala. Cette ruse populaire, cette débrouillardise africaine qui ne demande ni la permission ni la lance, et qui sait, parfois, déjouer les plus puissants. Bitala n'est pas un héros. Il est le pays. Il est tout ce que le pays produit de meilleur quand on l'oublie : un sens du réel inentamé, un humour qui survit, une intelligence qui ne se rend pas.\n\nLa Marmite de Koka-Mbala, à lire donc, et surtout à jouer ! Le théâtre, contrairement au roman, n'existe qu'à condition d'être dit, joué, ri devant un public. C'est dans cette circulation orale que Menga reprend toute sa force."
+    }
   },
 
   "3e_petites_gouttes": {
@@ -17481,7 +17801,14 @@ var LITT_OEUVRES = {
       {q:"En quoi l'humanisme de Philombe dépasse-t-il le cadre strict de la Négritude ?",r:"La Négritude célèbre la dignité africaine. Philombe va plus loin : il célèbre l'humanité universelle toutes races confondues ('Mon frère qui es blanc, noir, jaune'). Son humanisme transcende les identités raciales."},
       {q:"Quelle organisation René Philombe fonde-t-il en 1966 et pourquoi est-ce significatif ?",r:"L'APEC — Association des Poètes et Écrivains Camerounais — fondée en 1966 à sa sortie de prison. Acte de résistance culturelle pour structurer la littérature camerounaise et défendre la liberté d'expression."},
       {q:"Comment la métaphore de la pluie éclaire-t-elle le projet poétique du recueil ?",r:"Chaque poème est une 'petite goutte' qui, accumulée avec les autres, 'fait germer' l'homme nouveau sur la terre aride. La pluie douce symbolise la constance et la patience de la poésie humaniste comme force de transformation."}
-    ]
+    ],
+    analyse:{
+      angle:"Comment un homme emprisonné a-t-il fini par libérer une langue ?",
+      citation:"Mon frère qui es blanc, mon frère qui es noir, mon frère qui es jaune. Nous sommes tous des hommes.",
+      hashtags:["#Çameditpoésie","#PetitesGouttesdeChant","#RenéPhilombe","#APEC"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Quand on lit René Philombe pour la première fois, on est tenté de le classer rapidement. Poésie engagée. Négritude tardive. Humanisme post-colonial. Tous ces tiroirs critiques attendent leur ranger, et on les ouvre, et on referme.\n\nMais il faut résister à cette tentation. Il faut s'asseoir devant ces poèmes — pas trop longtemps, c'est court — et écouter une voix qui ne ressemble à aucune autre dans la littérature camerounaise. La voix d'un homme qui a passé cinq ans en prison pour avoir écrit. Cinq ans. Imaginez un instant ce que cela représente, cinq ans à perdre les saisons, les visages, le pas du matin sur les feuilles mortes.\n\nEt voici ce que cet homme fait, à sa sortie : il fonde l'APEC. Il rassemble les écrivains de son pays. Il leur dit, en somme : ce qu'on m'a pris, prenons-le-leur en retour, mais autrement. Pas par la haine. Par la langue. Par cette « petite goutte » modeste, presque ridicule à côté du fracas de l'État, mais qui, ajoutée à d'autres, finit par creuser la pierre.\n\nLe titre programmatique du recueil — Petites Gouttes de Chant pour Créer l'Homme — pourrait paraître emphatique sous une autre plume. Sous celle de Philombe, il sonne juste. Parce que CRÉER L'HOMME, dans le contexte qui est le sien, n'est pas une métaphore religieuse. C'est une nécessité politique. Le colonisé sortant de la colonisation a été abîmé, dévalué, miniaturisé. Il faut donc le RECRÉER. Pas le venger. Pas l'opposer à l'autre. Le recréer dans sa pleine humanité.\n\nEt c'est là que Philombe dépasse la Négritude. Senghor, Césaire célèbrent l'homme noir. Philombe, lui, dit : « Mon frère qui es blanc, mon frère qui es noir, mon frère qui es jaune. » Trois vers, trois races, et entre elles ce mot magnifique : MON FRÈRE. C'est l'humanisme africain dans sa plus haute expression. Pas un humanisme qui efface les différences. Un humanisme qui les met sur le même plan syntaxique avant de conclure : nous sommes tous des hommes.\n\nÀ relire donc, à voix haute si possible, pour entendre cette anaphore qui n'est pas un procédé : c'est une prière. Petites Gouttes de Chant pour Créer l'Homme — un titre, un programme, une révolution douce."
+    }
   },
 
   // ─── 2nde ──────────────────────────────────────────────────────
@@ -17532,7 +17859,14 @@ var LITT_OEUVRES = {
       {q:"Qu'est-ce que le discours indirect libre et quel est son effet dans ce roman ?",r:"Technique hybride qui fond la voix du narrateur et les pensées du personnage sans guillemets. Cela permet d'accéder directement à l'intériorité de Mathieu et de créer une forte identification du lecteur."},
       {q:"Quelles activités populaires pratique Mathieu à Yaoundé ?",r:"Jeu de dames à Mvog-Mbi (où il excelle), football au stade Hippodrome le dimanche, cinéma indien à La Mefou ou Le Febe — portrait précis d'un jeune urbain camerounais de condition modeste."},
       {q:"Expliquez la métaphore 'regardait sans le voir'. Que dit-elle de la condition de Mathieu ?",r:"Les clients de l'hôtel Casino voient Mathieu comme serveur (objet de service) mais pas comme sujet, comme personne. C'est la métaphore de l'invisibilité sociale : être présent physiquement mais inexistant dans le regard de l'autre."}
-    ]
+    ],
+    analyse:{
+      angle:"Peut-on aimer hors de sa tribu sans trahir les siens ?",
+      citation:"Les tribus… toujours les tribus. Mathieu n'en pouvait plus de cette façon de réduire l'homme à son ethnie.",
+      hashtags:["#Çameditlivre","#LesTribusdeCapitoline","#OmbétéBella","#Yaoundé"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Au Cameroun, on aime se moquer du tribalisme tout en l'pratiquant. C'est l'une de nos contradictions les plus tenaces. On condamne en public ce qu'on cultive en privé : « Lui, c'est un X, je ne donnerais jamais ma fille » ; « Elle, c'est une Y, je sais qui je marie ». Et la conversation se poursuit, ailleurs.\n\nOmbété-Bella, lui, ne se moque pas. Il regarde. Il regarde Mathieu, jeune homme d'origines incertaines (déjà ce détail !), serveur dans un hôtel de Yaoundé, qui aime Capitoline-Ida Petnga. Il regarde la tante Song'Lina, gardienne des traditions et des frontières ethniques. Il regarde la confidente Tamar. Et il laisse les personnages parler, douter, se contredire, comme parlent les vrais gens.\n\nL'angle qui m'a touché ici n'est pas la dénonciation du tribalisme — elle est attendue. C'est plutôt la manière dont l'auteur fait DE LA VILLE un personnage à part entière. Yaoundé n'est pas une toile de fond. Yaoundé est un acteur. Mvog-Mbi avec son jeu de dames populaire. Le stade Hippodrome où les dimanches sont à l'envers. L'hôtel Casino où Mathieu sert sans qu'on le voie. La boulangerie Acropole, le cinéma La Mefou, le cinéma Le Febe — et plus haut, inaccessibles, le Capitole, l'Abbia, réservés aux « Grands ».\n\nEt là, soudain, on comprend que le tribalisme n'est pas le seul obstacle entre Mathieu et Capitoline. Il y a aussi ces frontières invisibles que la ville trace dans la chair de ses habitants. Tu n'iras pas au Capitole. Tu n'épouseras pas dans cette famille. Tu n'auras pas cet emploi. Mathieu se cogne contre ces murs sans les voir, parce qu'il les a intériorisés.\n\nLa réussite littéraire d'Ombété-Bella tient à cette discrétion. Il utilise le discours indirect libre — cette technique formidable qui fond la voix du narrateur dans la pensée du personnage. On ne lit pas Mathieu. On EST Mathieu, l'espace de quelques pages. On ressent l'humiliation comme la sienne. Et c'est ainsi qu'un roman dont le sujet pourrait paraître convenu (le tribalisme à Yaoundé) devient un texte qui nous regarde droit dans les yeux.\n\nLes Tribus de Capitoline, à lire donc — et surtout à discuter en famille."
+    }
   },
 
   "2nde_poemes_sauvages": {
@@ -17585,7 +17919,14 @@ var LITT_OEUVRES = {
       {q:"Pourquoi Nkoumo écrit-il en français plutôt qu'en langue africaine uniquement ?",r:"Comme Senghor et Césaire, Nkoumo s'approprie le français pour l'africaniser — y injecter des rythmes, des images et une cosmovision africaines. C'est la stratégie négritudienne : habiter la langue coloniale de l'intérieur pour en faire un vecteur d'identité africaine. 'Mes mots ont des racines qui plongent dans la terre rouge de mes pères.'"},
       {q:"Que symbolise le feu de brousse dans le recueil et pourquoi cette image est-elle culturellement significative ?",r:"Dans les traditions africaines, le feu de brousse dégage la savane pour que la végétation repousse — image de purification et de renaissance. Chez Nkoumo, il symbolise la renaissance identitaire après la colonisation : brûler l'oppression culturelle pour que l'identité africaine renaisse plus forte. C'est aussi la lumière qui éclaire les 'poèmes sauvages'."},
       {q:"En quoi la poésie de Nkoumo est-elle à la fois esthétique et politique ?",r:"Chez les poètes de la Négritude, l'esthétique EST politique : célébrer la beauté de la nuit africaine, des ancêtres, de la nature est un refus de l'effacement culturel colonial. Chaque choix formel (vers libre vs alexandrin, anaphore vs rime régulière) est aussi une prise de position. Nkoumo hérite de cette conviction profonde."}
-    ]
+    ],
+    analyse:{
+      angle:"Que reste-t-il du sauvage quand le feu l'éclaire ?",
+      citation:"Mes mots ont des racines qui plongent dans la terre rouge de mes pères.",
+      hashtags:["#Çameditpoésie","#PoèmesSauvages","#HenriNkoumo","#Négritude"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"On a dit beaucoup de choses sur le mot « sauvage ». Les uns l'ont brandi comme une accusation. Les autres l'ont retourné en blason. Aimé Césaire, dans Cahier d'un retour au pays natal, a fait du « sauvage » une fierté. Léopold Sédar Senghor, dans Hosties noires et Chants d'ombre, a chanté l'« homme noir » avec une dignité presque liturgique. Henri Nkoumo, lui, fait quelque chose d'à la fois plus modeste et plus malin : il met le feu.\n\nPoèmes Sauvages Éclairés au Feu de Brousse. Lisez ce titre lentement. Il ne dit pas « poèmes sauvages », point. Il dit : « éclairés au feu de brousse ». Le sauvage n'est donc pas autosuffisant. Il est révélé par un éclairage particulier, une lumière spécifique : celle du feu de brousse. Et celui qui connaît la savane africaine sait ce qu'est le feu de brousse : pas un incendie destructeur, mais une PURIFICATION saisonnière. On brûle pour que ça repousse. On dégage pour que la vie revienne.\n\nNkoumo fait donc avec sa poésie ce que le feu de brousse fait avec la savane : il brûle les vieilles croûtes mentales, les images héritées, les langages convenus. Et au sortir de cette combustion, qu'est-ce qui reste ? Des racines. « Mes mots ont des racines qui plongent dans la terre rouge de mes pères. »\n\nC'est là que la mécanique poétique de Nkoumo se révèle. Il n'écrit pas POUR célébrer l'Afrique — il écrit DEPUIS l'Afrique. La nuance est immense. Quand on écrit POUR célébrer, on prend une posture, on s'expose, on prêche. Quand on écrit DEPUIS, on parle simplement la langue qu'on parle, et c'est l'autre qui doit s'adapter ou ne pas comprendre. Nkoumo fait ce choix-là. Ses anaphores ne sont pas des effets : c'est la respiration de la tradition orale. Son vers libre n'est pas une rébellion contre l'alexandrin : c'est la cadence du conte autour du feu.\n\nÀ lire donc, pas comme on lit un manuel scolaire, mais comme on écoute un griot. Lentement. À voix haute si possible. En se demandant à chaque vers : qui parle ? Et la réponse vient, à mesure que les pages tournent : c'est la terre rouge, c'est le feu de brousse, c'est la voix d'avant la voix. Poèmes Sauvages Éclairés au Feu de Brousse — un titre qui est déjà une poétique."
+    }
   },
 
   "2nde_tartuffe": {
@@ -17638,7 +17979,14 @@ var LITT_OEUVRES = {
       {q:"Pourquoi la pièce est-elle censurée de 1664 à 1669 ? Qui s'y oppose et pourquoi ?",r:"La Compagnie du Saint-Sacrement et les dévots obtiennent l'interdiction en 1664, y voyant une attaque contre la religion. Molière se défend : il attaque les FAUX dévots, pas la vraie piété. Il faudra 5 ans pour que la pièce soit autorisée en 1669."},
       {q:"Qu'est-ce que le deus ex machina ? Comment fonctionne-t-il dans Tartuffe et quelles sont ses limites ?",r:"Le deus ex machina est une intervention extérieure et artificielle qui résout un nœud insoluble. Dans Tartuffe, c'est le roi qui démasque et arrête Tartuffe. Limite : ce procédé est artificiel — rien dans l'intrigue ne l'annonçait. Il permet à Molière de flatter Louis XIV mais affaiblit la cohérence dramatique."},
       {q:"Analysez la phrase 'Vous êtes fou, mon frère'. Que dit-elle sur la relation raison/aveuglement dans la pièce ?",r:"Cette apostrophe de Cléante à Orgon résume le conflit central : la raison répète inlassablement les mêmes arguments, mais l'aveuglement fanatique les rejette. L'impuissance de la raison face au fanatisme est l'une des leçons universelles de la pièce, toujours d'actualité."}
-    ]
+    ],
+    analyse:{
+      angle:"Qui est vraiment l'aveugle : le faux dévot ou celui qui le croit ?",
+      citation:"Vous êtes fou, mon frère.",
+      hashtags:["#Çameditthéâtre","#Tartuffe","#Molière","#FauxDévots"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Tartuffe, c'est l'imposteur. Tout le monde le sait. Dès le titre. On entre dans la pièce en sachant qui va perdre, qui va gagner, et combien d'actes seront nécessaires. Molière, en 1664, ne nous demande pas de découvrir un imposteur. Il nous demande quelque chose de bien plus difficile : COMPRENDRE COMMENT UN HOMME INTELLIGENT, RICHE, RESPECTÉ — Orgon — PEUT EN ARRIVER À DEVENIR SON COMPLICE.\n\nVoilà l'angle qui change tout dans la lecture de Tartuffe. La pièce n'est pas du tout sur Tartuffe. Tartuffe n'est qu'un instrument. Le sujet véritable, c'est Orgon. Cet homme qui, captivé par les démonstrations religieuses ostentatoires d'un inconnu rencontré à l'église, l'invite chez lui, le loge, le nourrit, finit par lui DONNER SA FILLE en mariage, lui CÉDER ses biens, le préférer à sa propre famille. Tartuffe ne fait rien d'autre que de SE LAISSER aimer.\n\nC'est pourquoi la pièce, malgré son apparent dénouement heureux (le roi qui surgit comme un deus ex machina), n'est pas vraiment rassurante. Parce qu'à la fin, Tartuffe est puni, mais qu'a-t-on appris sur Orgon ? Pas grand-chose. La famille Orgon est sauvée par grâce royale, pas par lucidité retrouvée. Et dans la vraie vie, les rois ne descendent pas sur scène à la dernière minute.\n\nLe vrai trésor de la pièce, c'est Cléante. Personnage de raison, frère de la femme d'Orgon. Il parle, il parle, il parle, il argumente, il distingue les vrais dévots des faux. Personne ne l'écoute. « Vous êtes fou, mon frère » — cette apostrophe résignée résume le drame profond de la pièce : LA RAISON NE PEUT RIEN CONTRE LE FANATISME UNE FOIS QUE CELUI-CI A PRIS LE COMMANDE D'UN ESPRIT.\n\nEt c'est pourquoi Tartuffe reste, plus de 350 ans après, d'une actualité brûlante. Remplacez les habits noirs du faux dévot par n'importe quel costume d'aujourd'hui : gourou, prêcheur en ligne, mentor charismatique, influenceur spirituel. La mécanique est la même. Un homme s'invente une autorité morale. Un autre — souvent plus instruit — se laisse séduire par cette autorité. Et la famille, autour, regarde le naufrage en silence.\n\nTartuffe, à (re)lire donc, et à voir jouer si possible. Parce qu'au théâtre, on entend les silences des autres personnages quand Tartuffe parle. Et ces silences-là disent plus que les mots."
+    }
   },
 
   // ─── 1ère ──────────────────────────────────────────────────────
@@ -17691,7 +18039,14 @@ var LITT_OEUVRES = {
       {q:"Quelle critique Chinua Achebe formule-t-il dans 'An Image of Africa' (1975) contre Conrad ?",r:"Achebe accuse Conrad de déshumaniser les Africains : ils n'ont pas de voix propre, de psychologie, d'humanité dans le roman. Ils sont un décor exotique, des silhouettes muettes. Même si Conrad critique le colonialisme belge, son regard reste profondément eurocentré."},
       {q:"Analysez les dernières paroles de Kurtz 'The horror! The horror!' Pourquoi sont-elles si importantes ?",r:"Ces paroles sont le centre névralgique du roman. Leur ambiguïté totale — horreur de quoi ? — en fait un symbole ouvert. Kurtz reconnaît tardivement l'horreur de ce qu'il est devenu. Marlow ment à The Intended sur ces paroles — il lui dit que Kurtz a prononcé son nom, protégeant l'illusion de la 'civilisation'."},
       {q:"En quoi le roman est-il à la fois anti-impérialiste et porteur d'un regard problématique sur l'Afrique ?",r:"Anti-impérialiste : Conrad dénonce la violence et l'hypocrisie coloniale belge au Congo. Problématique : l'Afrique est utilisée comme décor symbolique pour explorer l'âme européenne — les Africains n'ont pas de voix, de nom, de psychologie propre. C'est l'ambiguïté que pointe Achebe : la critique reste enfermée dans une vision eurocentrée."}
-    ]
+    ],
+    analyse:{
+      angle:"Et si l'horreur de Kurtz, c'était l'Europe regardée en face ?",
+      citation:"The horror ! The horror !",
+      hashtags:["#Çameditlivre","#AuCœurdesTénèbres","#JosephConrad","#Achebe"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Il faut, je crois, lire Au Cœur des Ténèbres deux fois. Une fois avec Conrad. Une fois avec Achebe. Et accepter de tenir ces deux lectures ensemble, sans choisir.\n\nAvec Conrad : un voyageur britannique d'origine polonaise descend le fleuve Congo, en pleine époque léopoldienne, et découvre la barbarie du capitalisme colonial belge. Pas l'innocence d'une jungle « primitive ». Non. Les ténèbres, dans le roman, ne sont pas en Afrique. Elles sont DANS LES POSTES DE LA COMPAGNIE. Elles sont dans ce que devient un Européen quand on lui donne, loin des regards, le pouvoir total sur d'autres humains. Kurtz, l'homme cultivé, l'éloquent, l'idéaliste, devient un boucher. « The horror ! The horror ! » — c'est lui qui se voit, à la fin, dans le miroir de ce qu'il est devenu.\n\nAvec Achebe : un jeune professeur nigérian lit ce texte qu'on lui présente comme un chef-d'œuvre humaniste, et il s'aperçoit que dans tout ce livre, IL N'Y A PAS UN SEUL AFRICAIN QUI PARLE. Pas un seul. Les Africains sont là, bien sûr — par milliers — mais comme silhouettes, comme cris, comme décor symbolique. Achebe publie en 1975 « An Image of Africa », et il pose une question que la critique européenne n'avait jamais pensé à formuler : peut-on dénoncer le colonialisme tout en participant à l'effacement des colonisés ?\n\nCe double regard est précieux. Il ne s'agit pas de jeter Conrad. Il s'agit de l'écouter et de l'interroger. Conrad nous offre quelque chose d'unique : LE MIROIR INTÉRIEUR DE L'EUROPE COLONIALE. Personne, à son époque, ne le faisait avec cette intensité morale. C'est précieux. Mais ce miroir ne reflète que l'Europe. Pour voir le Congo, il faut sortir du livre et aller chercher d'autres voix.\n\nÀ vous, élèves de Première, qui lisez ce texte cette année, voici ma suggestion : lisez d'abord Conrad seul. Puis lisez Achebe sur Conrad. Puis revenez à Conrad. Vous verrez que le roman, dans cette triangulation, devient encore plus vertigineux. Parce qu'il devient À LA FOIS un grand texte anti-impérialiste ET un grand texte sur l'angle mort de toute prise de parole. On ne peut parler de tout depuis nulle part. Même les meilleurs ont des angles morts.\n\nAu Cœur des Ténèbres, à lire donc, mais en compagnie de Chinua Achebe."
+    }
   },
 
   "1ere_balafon": {
@@ -17743,7 +18098,14 @@ var LITT_OEUVRES = {
       {q:"Qu'est-ce qu'un balafon ? Pourquoi Mveng en fait-il le symbole central de son recueil ?",r:"Le balafon est un instrument à percussions à lames de bois résonantes, cousin du xylophone, utilisé dans les cérémonies africaines. Mveng en fait une métaphore de l'âme africaine sonnant entre le ciel et la terre. En choisissant cet instrument africain comme titre et symbole central, il érige un objet culturel africain au rang de symbole spirituel universel."},
       {q:"Pourquoi Mveng cite-t-il Confucius dans ses poèmes ? Qu'est-ce que cela révèle de sa vision du monde ?",r:"En invoquant Confucius (Kong-Fu-Tseu), Mveng sort du débat binaire Afrique/Europe pour chercher dans la sagesse asiatique une troisième voie. Cela révèle son universalisme : la vérité spirituelle n'appartient pas à une seule culture. Le 'carrefour des sagesses' est le lieu où toutes les traditions se rejoignent — vision visionnaire et rare."},
       {q:"Analysez la construction antithétique du vers 'Je ne suis pas moins homme parce que je suis noir'. Quel est son enjeu ?",r:"La litote ('pas moins homme') est une affirmation par la négation : Mveng refuse de prouver ou défendre — il constate. L'antithèse (noir / homme) répond à l'idéologie coloniale qui hiérarchisait l'humanité par la couleur. La sobriété du ton est volontaire : pas de véhémence, seulement la dignité tranquille."}
-    ]
+    ],
+    analyse:{
+      angle:"Quand un instrument africain devient une métaphore spirituelle universelle",
+      citation:"Je ne suis pas moins homme parce que je suis noir.",
+      hashtags:["#Çameditpoésie","#Balafon","#EngelbertMveng","#NégritudeChrétienne"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Engelbert Mveng a fait quelque chose que personne, avant lui, n'avait osé : il a installé un BALAFON dans la nef d'une cathédrale spirituelle. Vous voyez l'audace ? À une époque où l'Église catholique enseignait encore que les rythmes africains étaient « païens », « infantiles », « à civiliser », ce prêtre-poète-historien a publié un recueil intitulé Balafon. Pas Cantiques. Pas Psaumes. BALAFON.\n\nC'est ce déplacement qui fait toute la singularité de son œuvre. Mveng ne demande pas la permission. Il n'argumente pas, comme d'autres l'ont fait, pour prouver que la culture africaine MÉRITE d'être chrétienne. Il fait l'inverse : il pose le balafon devant l'autel, et il dit, calmement, comme on constate une évidence : Dieu peut être chanté avec ces lames de bois aussi bien qu'avec un orgue.\n\nMais Mveng ne s'arrête pas à l'Afrique chrétienne. C'est cela qui me fascine. Il convoque Confucius, le sage chinois, dans la même conversation. Pourquoi ? Parce que pour Mveng, la vérité spirituelle n'a pas de nationalité. Elle a des accents, des langues, des instruments — et toutes ces différences ne sont pas des obstacles, ce sont des RICHESSES. Mveng appelle cela le « carrefour des sagesses ». Et ce mot, carrefour, est précieux. Un carrefour n'est pas un mélange flou. C'est un lieu PRÉCIS où des chemins distincts se rencontrent — et chacun garde son identité.\n\nLisez ce vers : « Je ne suis pas moins homme parce que je suis noir. » La construction est admirable. Pas de cri. Pas de « regardez-moi je suis aussi grand que vous ». Une litote. Une négation polie qui désarme l'adversaire : « pas moins ». Et la conclusion s'impose toute seule : nous sommes égaux. Mveng n'a pas eu besoin de hausser la voix. Il a juste eu besoin de bien construire sa phrase.\n\nC'est pourquoi Balafon, à mes yeux, est l'un des recueils les plus sous-estimés de la littérature camerounaise. On l'oublie parce qu'il est trop discret. Trop élégant. Trop éloigné du fracas. Mais quand on l'écoute attentivement — comme on écoute un balafon, justement — on entend une voix qui a inventé une troisième voie entre la révolte césairienne et la conciliation senghorienne : la voie de la DIGNITÉ TRANQUILLE.\n\nBalafon, à lire donc, et à entendre — par les oreilles autant que par les yeux."
+    }
   },
 
   "1ere_lion_perle": {
@@ -17795,7 +18157,14 @@ var LITT_OEUVRES = {
       {q:"Comment la structure en trois tableaux (Matin, Midi, Soir) structure-t-elle le drame ?",r:"La structure temporelle d'une journée de village accompagne la progression dramatique : Matin (présentation des personnages), Midi (complication — ruse de Baroka), Soir (dénouement — choix de Sidi). Cette structure ancre la pièce dans le rythme de la vie villageoise africaine."},
       {q:"Quel est le choix final de Sidi et quelle est sa signification philosophique ?",r:"Sidi choisit Baroka (tradition rusée) et rejette Lakunlé (modernisme vide). Ce choix est ironique : la 'perle' modernisée par la photographie choisit le vieux chef. Soyinka ne défend pas la tradition : il montre que la ruse pragmatique de Baroka est plus efficace que le discours déraciné de Lakunlé. C'est une satire des deux."},
       {q:"Pourquoi Wole Soyinka est-il une figure importante de la littérature africaine mondiale ?",r:"Soyinka est le premier auteur africain à recevoir le Prix Nobel de littérature (1986). Il a créé un théâtre africain authentique intégrant les formes yorubas (chants, danses, mimes) dans une dramaturgie moderne. Il a également été emprisonné (deux ans, sans jugement) pour son engagement politique lors de la guerre civile nigériane."}
-    ]
+    ],
+    analyse:{
+      angle:"Qui Sidi choisit-elle vraiment quand elle choisit Baroka ?",
+      citation:"La 'perle' modernisée par la photographie choisit finalement le vieux lion. Tout est dit.",
+      hashtags:["#Çameditthéâtre","#LeLionetlaPerle","#WoleSoyinka","#Nobel1986"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"On lit souvent Le Lion et la Perle comme un combat entre deux hommes pour une femme. C'est paresseux. Soyinka ne perd pas son temps à écrire un triangle amoureux. Il pose une question infiniment plus dangereuse : QU'EST-CE QU'UNE FEMME CHOISIT, QUAND ELLE CHOISIT ?\n\nSidi, la « perle » du village d'Ilujinle, est belle. Tout le monde le sait, à commencer par elle. Un photographe blanc est venu, l'a immortalisée, son visage circule dans des magazines lointains. Elle se sent universelle, désormais. Et autour d'elle, deux prétendants. Lakunlé, l'instituteur, jeune, instruit, moderne, qui veut l'épouser SANS payer la dot — car la dot est, dit-il, un vestige rétrograde. Et Baroka, le « lion », le vieux chef polygame, qui fait précisément tout ce que Lakunlé condamne.\n\nLe spectateur occidental, par paresse, attend que Sidi choisisse Lakunlé. C'est le sens de l'histoire, n'est-ce pas ? Le progrès, l'émancipation, la modernité. Et c'est précisément là que Soyinka piège son lecteur. Sidi choisit Baroka. Et ce choix, loin d'être réactionnaire, dit quelque chose de TRÈS profond sur ce qu'est l'émancipation vraie.\n\nCar regardez Lakunlé attentivement. Il parle de modernité, mais il méprise les coutumes de son village sans avoir lu un seul livre africain. Il imite les Européens, leurs costumes, leurs manières, leur vocabulaire — sans en comprendre l'origine. Sa modernité est un VERNIS, pas une racine. Il ne sait pas ce qu'il fuit, il sait juste ce qu'il imite.\n\nBaroka, lui, sait. Il connaît les rites, les sagesses, la ruse traditionnelle. Et il est aussi capable d'apprendre — il accueille la photographie, il négocie, il manœuvre. Il n'oppose pas l'ancien au nouveau : il fait dialoguer les deux dans sa propre pratique du pouvoir. Sidi le devine, et c'est lui qu'elle choisit.\n\nSoyinka ne fait pas l'apologie de la polygamie ni de la vieille tradition. Il dit quelque chose de plus subtil : l'émancipation ne consiste pas à imiter l'autre. Elle consiste à savoir qui l'on est, d'où l'on vient, et à choisir librement parmi les héritages disponibles. Sidi, en choisissant Baroka, ne choisit pas le passé. Elle choisit la lucidité.\n\nLe Lion et la Perle, à lire donc — et surtout à monter en classe, parce que c'est en jouant la pièce qu'on en comprend la mécanique."
+    }
   },
 
   // ─── Terminale ─────────────────────────────────────────────────
@@ -17848,7 +18217,14 @@ var LITT_OEUVRES = {
       {q:"Dans 'La Mémoire I', quelle vision du présent et du passé Prudhomme développe-t-il ?",r:"Le présent est 'un cri d'angoisse' — douleur pure, sans sens. La mémoire est 'la chaîne des temps révolus' — ce qui relie les moments vécus. Sans mémoire, l'existence se réduit à la souffrance du moment. Avec elle, le temps prend forme. Vision qui anticipe Proust."},
       {q:"Qu'est-ce que le Parnasse ? Comment cette appartenance se manifeste-t-elle dans la poésie de Prudhomme ?",r:"Le Parnasse est un mouvement du XIXe siècle (contre le romantisme larmoyant) qui prône la rigueur formelle et la retenue émotionnelle. Chez Prudhomme : octosyllabes rigoureux, lexique du voilement, maîtrise de la douleur. La forme disciplinée traduit thématiquement la discipline émotionnelle."},
       {q:"Expliquez le déchirement d'INTUS. Quelle est la formation intellectuelle de Prudhomme qui explique ce déchirement ?",r:"Prudhomme était ingénieur de formation (raison, science) puis devenu poète (sensibilité, foi possible). Ce double héritage produit le déchirement d'INTUS : 'Panthéiste, athée, ou chrétien'. Sa conscience scientifique ne lui permet pas d'adhérer simplement, mais sa sensibilité ne lui permet pas non plus d'être athée tranquille. Il vit avec 'ces deux murmures'."}
-    ]
+    ],
+    analyse:{
+      angle:"Que peut un ingénieur quand il rencontre la poésie ?",
+      citation:"À demi rompu tous les jours.",
+      hashtags:["#Çameditpoésie","#StancesetPoèmes","#SullyPrudhomme","#Nobel1901"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Le premier Prix Nobel de littérature de l'histoire (1901) ne fut pas Tolstoï. Ne fut pas Zola. Fut un poète français aujourd'hui presque oublié dans son propre pays : Sully Prudhomme. Et l'on s'étonne. Mais quand on relit ses Stances et Poèmes, on comprend mieux ce que les jurés de l'époque ont entendu : une voix qui dit la douleur sans hurler, l'amour sans larmoyer, le doute sans s'en glorifier.\n\nMon angle préféré pour entrer dans Prudhomme, c'est sa biographie. Il était ingénieur de formation. Un homme des chiffres, des plans, des structures. Et un jour, la poésie est venue. Ce qui rend son œuvre singulière, c'est qu'il n'a jamais effacé l'ingénieur. Lisez ses octosyllabes : ils sont CONSTRUITS comme des ponts. Chaque vers est exactement à sa place. Aucun débordement. Aucune émotion qui dépasse de la rampe. C'est une poésie d'INGÉNIEUR-POÈTE.\n\n« À demi rompu tous les jours. » Cinq mots. Et toute une vie d'homme. Comment se rompt-on À DEMI ? Et comment cela tient-il SUR DURÉE ? L'hyperbole devrait être ridicule. Elle est juste, parce que Prudhomme connaît une vérité que la passion ignore : la blessure quotidienne ne casse pas l'homme d'un coup, elle l'use lentement. Et il y a, dans cette usure, une étrange dignité.\n\nLe poème INTUS dit autre chose : « Panthéiste, athée, ou chrétien ». L'ingénieur en lui ne peut adhérer à une foi sans preuve. Le poète en lui ne peut se résigner à une indifférence sans âme. Alors il vit AVEC ces deux murmures, comme on vit avec deux voix qui ne se taisent jamais. La poésie devient l'endroit où ces deux voix peuvent coexister sans se livrer bataille à mort.\n\nLisez Prudhomme, mes amis, comme un antidote. Antidote contre quoi ? Contre l'idée que la poésie doit toujours crier. Contre l'idée qu'il faut avoir des certitudes pour écrire. Contre l'idée que la douleur, pour être vraie, doit être bruyante. Prudhomme dit le contraire. Il dit qu'on peut être déchiré et discret. Qu'on peut souffrir et se taire — non pas par lâcheté, mais par PUDEUR.\n\nStances et Poèmes, à lire donc, à voix basse, dans le silence d'un soir d'études. Et vous comprendrez peut-être pourquoi, en 1901, les jurés du Nobel ont choisi ce monsieur discret plutôt que les colosses qu'on attendait."
+    }
   },
 
   "tle_vieux_negro": {
@@ -17900,7 +18276,14 @@ var LITT_OEUVRES = {
       {q:"Analysez la phrase 'Ces Blancs ne savaient même pas mentir'. Que dit-elle de la lucidité de Meka ?",r:"Cette phrase est l'ironie centrale. Meka dit pire que 'les Blancs mentent' : leur mensonge est si maladroit qu'il ne convaincrait personne. Venant de Meka (le 'bon colonisé'), ce jugement dit l'échec total de l'idéologie coloniale. Sa lucidité trahit que le système ne fonctionne même plus pour ceux qui voulaient y croire."},
       {q:"Quelle ironie tragique couronne la journée de la remise de la médaille ?",r:"Meka est arrêté la nuit même par la police coloniale, qui est incapable de distinguer le 'bon colonisé décoré' d'un indigène ordinaire. La médaille ne protège de rien — l'arbitraire colonial est total. L'ironie est cruelle : décoré le jour comme 'ami de la France', arrêté la nuit comme suspect."},
       {q:"En quoi Ferdinand Oyono est-il représentatif du roman africain anticolonial des années 1950 ?",r:"Oyono, avec Mongo Beti, représente la génération des romanciers qui dénoncent le colonialisme de l'intérieur, par la satire plutôt que par le pamphlet. Né en 1929 au Cameroun sous mandat, il publie deux romans majeurs en 1956 (Une vie de boy et Le Vieux Nègre). Il sera aussi diplomate et ministre dans le Cameroun indépendant."}
-    ]
+    ],
+    analyse:{
+      angle:"Une médaille suffit-elle à protéger un Nègre ?",
+      citation:"Ces Blancs ne savaient même pas mentir.",
+      hashtags:["#Çameditlivre","#LeVieuxNègreetlaMédaille","#FerdinandOyono","#Cameroun"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Si je devais ne retenir qu'UNE phrase de toute la littérature anticoloniale africaine, je crois que je choisirais celle-ci : « Ces Blancs ne savaient même pas mentir. » Elle est dite par Meka. Le « bon colonisé ». Celui qui a donné ses terres à l'Église, perdu ses deux fils à la guerre française, accepté toutes les humiliations en croyant qu'il s'agissait d'amour fraternel. À la fin, c'est LUI qui le dit. Pas un militant. Pas un intellectuel. UN VIEUX. Et c'est en cela que la phrase est dévastatrice.\n\nLe roman d'Oyono est une mécanique satirique parfaite. Il prend un homme bon, dévoué, presque saint. Il l'élève. Le décore. L'inonde de promesses. Et puis, dans la même nuit, la police coloniale le tabasse, le jette en prison, ne le reconnaît même pas. Meka comprend. Pas en théorie. EN SON CORPS. Sa lucidité finale n'est pas un éclair intellectuel : c'est une douleur qui devient pensée.\n\nL'angle qui me frappe à chaque relecture, c'est l'ESPACE. Regardez où Meka est placé dans l'église, lui qui a donné ses terres à cette même Église : au fond de la nef, sur le ciment poussiéreux, à côté d'un lépreux. L'Église, censée transcender les races, REPRODUIT la ségrégation coloniale dans son architecture même. Oyono n'a pas besoin de discours : la position des corps dans l'espace dit tout.\n\nEt puis cette ironie cruelle de la médaille. Décoré le jour. Tabassé la nuit. Par les mêmes Blancs. Dans le même uniforme. C'est si caricatural qu'on pourrait crier à l'exagération — sauf que les archives coloniales sont pleines de cas exactement comme celui-là. Oyono n'invente rien. Il observe.\n\nMais ce qui me touche le plus, c'est la TENDRESSE d'Oyono pour Meka. Il ne se moque pas. Il ne le méprise pas. Il l'accompagne dans sa désillusion comme on accompagne un père. Oyono sait que Meka représente toute une génération de Camerounais. Pas les héros. Pas les résistants. Les bons. Les obéissants. Ceux qui ont cru. Et qui se réveillent — à 70 ans — pour découvrir que tout cela n'était qu'une comédie mal jouée.\n\n« Ces Blancs ne savaient même pas mentir. » Méditez cette phrase. Elle ne dit pas seulement que les Blancs mentent. Elle dit que LEUR MENSONGE EST SI GROSSIER QU'IL FAUT TOUTE UNE VIE D'AVEUGLEMENT POUR NE PAS LE VOIR. Et c'est cela, la vraie violence coloniale : avoir réussi à rendre cet aveuglement possible.\n\nLe Vieux Nègre et la Médaille, à lire absolument — surtout en Terminale, juste avant d'entrer dans le monde."
+    }
   },
 
   "tle_ngum_jemea": {
@@ -17955,7 +18338,14 @@ var LITT_OEUVRES = {
       {q:"Analysez la réplique de Dualla Manga à Niedermeyer : 'Ce que vous aimez, ce sont nos richesses que vous pillez'. Quelle technique rhétorique emploie-t-il ?",r:"Dualla emploie une antithèse démasquante : il oppose l'amour proclamé de Niedermeyer à la réalité du pillage. La formulation directe et sans détour dit que 'aimer' et 'piller' sont synonymes dans le discours colonial. C'est le retournement rhétorique : démystifier l'hypocrisie en la nommant simplement."},
       {q:"Pourquoi Eyombwan a-t-il d'abord écrit l'œuvre en langue duala ? Quelle est la signification de ce choix ?",r:"Eyombwan, conservateur du patrimoine culturel immatériel, écrit d'abord en duala (1976) pour ancrer l'œuvre dans la tradition culturelle sawa. Ce choix dit que l'histoire des Duala mérite d'être racontée dans leur propre langue avant d'être traduite. C'est un geste de résistance : la mémoire nationale ne passe pas d'abord par le français colonial."},
       {q:"En quoi la cérémonie d'intronisation de l'Acte I est-elle importante pour la compréhension de la pièce ?",r:"Le rite d'intronisation (lavage de la bouche, feuille de dibôkubôku sur le front) ancre la légitimité de Dualla Manga dans la tradition sawa. Face à la légitimité bureaucratique de Von Roehm (lois, décrets), la légitimité royale duala est présentée comme plus ancienne et plus profonde. La résistance de Dualla est d'abord culturelle et spirituelle, pas seulement politique."}
-    ]
+    ],
+    analyse:{
+      angle:"Quand le théâtre devient mémoire d'un roi pendu",
+      citation:"Ce que vous aimez, ce sont nos richesses que vous pillez.",
+      hashtags:["#Çameditthéâtre","#NgumaJemea","#DuallaMangaBell","#Cameroun1914"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Il y a des œuvres qu'on lit pour le plaisir littéraire. Il y a des œuvres qu'on lit pour comprendre. Et il y a des œuvres qu'on lit POUR NE PAS OUBLIER. Ngum a Jemea appartient à cette dernière catégorie. C'est avant tout un acte de mémoire.\n\nLe 8 août 1914, à Douala, un homme est pendu par les autorités allemandes. Il s'appelle Rudolph Dualla Manga Bell. Il est roi des Duala. Et son « crime », c'est d'avoir refusé que l'administration coloniale exproprie son peuple de ses terres pour 40 pfennigs le mètre carré. Quarante pfennigs. Lisez bien. Pour pratiquement RIEN. On expulsait des familles entières de la terre de leurs ancêtres pour permettre la construction d'un quartier réservé aux Européens.\n\nDavid Mbanga Eyombwan a fait ce que toute société culturellement vivante doit faire avec ses héros : il en a fait du THÉÂTRE. Pas un essai historique. Pas un monument de bronze. Du théâtre. Parce que le théâtre se rejoue. Parce que chaque génération doit pouvoir incarner ces personnages, mettre dans leurs bouches les mots de Dualla, sentir physiquement ce que c'est qu'être un roi face à un empire.\n\nDeux choses me touchent profondément dans cette pièce. PREMIÈREMENT, le choix d'écrire d'abord en duala (1976), puis de traduire. Eyombwan rappelle que l'histoire des Duala doit d'abord exister DANS LA LANGUE DES DUALA. Le français viendra après. C'est un acte politique fondamental — la souveraineté de la mémoire passe par la souveraineté de la langue.\n\nDEUXIÈMEMENT, la cérémonie d'intronisation du premier acte. Eyombwan ne nous présente pas Dualla Manga comme un dirigeant moderne défendant les droits humains. Il le présente comme un ROI, intronisé selon les rites sawa, lavage de la bouche, feuille de dibôkubôku sur le front. Pourquoi ? Parce que la légitimité de Dualla ne vient pas de l'opinion publique, des urnes, ou du droit international. Elle vient d'une lignée. D'une terre. D'une cosmologie.\n\nQuand Von Roehm parle, il invoque des lois et des décrets. Quand Dualla Manga parle, il invoque les ancêtres et la dignité d'un peuple. Ce sont deux mondes qui se rencontrent — et l'un va tuer l'autre. Mais comme Eyombwan le suggère par la pièce elle-même : on peut tuer le corps d'un roi. On ne tue pas sa parole.\n\nNgum a Jemea, à lire absolument, et à monter en classe — pour que chaque génération camerounaise apprenne à prononcer ce nom : Dualla Manga Bell."
+    }
   },
 
   // ═══════════════════════════════════════════════════════════════════════
@@ -18004,7 +18394,14 @@ var LITT_OEUVRES = {
     controle:[
       {q:"Pourquoi Anya Noa nomme-t-il chaque animal dans la langue beti (Kulu, Zee, Ndoe...) ?",r:"1) Pour respecter la précision culturelle : ces animaux ne sont pas les animaux génériques européens (renard, lion...) mais des entités beti spécifiques ; 2) Pour transmettre la langue beti aux jeunes lecteurs ; 3) Pour souligner que la fable n'est pas universelle abstraite mais incarnée dans une culture concrète ; 4) Pour donner une couleur authentique au texte ; 5) Pour résister à la traduction-trahison : un animal porte sa langue, le retraduire l'appauvrit."},
       {q:"Quelle est la différence entre Anya Noa et un simple conteur de village ?",r:"Anya Noa est un ÉRUDIT-PASSEUR : 1) Il a une formation académique (publié à l'Imprimerie St Paul, dans la Revue Abbia, Presses universitaires) ; 2) Il pratique l'écriture savante ET l'oralité beti ; 3) Il systématise la pédagogie (avant-propos méthodologique, bestiaire structuré) ; 4) Il préserve par l'écrit ce que l'oralité risque de perdre ; 5) Il transmet à un public élargi (lecteurs francophones, écoles). C'est un médiateur entre deux mondes."}
-    ]
+    ],
+    analyse:{
+      angle:"Quand la tortue, le léopard et l'aigle deviennent professeurs",
+      citation:"Les contes gardent vivante la sagesse des hommes d'autrefois. C'était leur école.",
+      hashtags:["#Çameditlivre","#LesChantsdelaForêt","#LucienAnyaNoa","#OralitéBeti"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Quand un enfant de 11 ans, à l'école, ouvre Les Chants de la Forêt pour la première fois, je veux qu'il sache UNE chose : ce qu'il tient entre ses mains n'est pas seulement un livre. C'est un OBJET DE PASSAGE. Une opération de sauvetage. Lucien Anya Noa a fait l'effort patient de transcrire, par écrit, ce que la grande forêt équatoriale du Sud Cameroun transmettait à l'oral depuis des siècles. Si vous lisez ce livre, vous tenez la voix de très vieux conteurs qui, sans Anya Noa, auraient peut-être été emportés par le silence.\n\nL'angle que je vous propose : observer comment Anya Noa choisit ses NOMS. Kulu pour la Tortue. Zee pour le Léopard. Ndoe pour l'Aigle. Berne pour le Cochon. Pourquoi ne pas dire simplement « la tortue », « le léopard » ? Parce qu'au moment où l'on traduit, on TRAHIT. Le léopard occidental n'est pas Zee. Zee, dans la cosmologie beti, n'est pas seulement un animal : c'est un caractère, une force, un type humain. Garder Zee dans le texte, c'est résister à l'effacement.\n\nEt c'est cela qui fait d'Anya Noa autre chose qu'un simple conteur. Il est un PASSEUR-ÉRUDIT. Un homme à cheval entre deux mondes : la grande forêt du sud, et l'université. Il pratique l'oralité avec le respect dû à ses anciens, ET l'écriture savante avec la rigueur dévolue aux scolaires. Cette double allégeance est rare. La plupart des gens choisissent un seul camp.\n\nLisez son avant-propos. C'est un texte que je voudrais voir étudié au même titre que les analyses de textes : « C'est une grande richesse qu'ils nous ont laissée là, une partie de l'héritage que mère et père lèguent à leurs enfants. » Notez le « mère ET père » — pas le seul père patriarche. La transmission est bilatérale. C'est déjà, par cette petite formule, tout un programme.\n\nAux jeunes lecteurs : lisez ces contes lentement. Laissez Kulu vous enseigner la patience. Laissez Zee vous enseigner que la force sans réflexion mène à l'échec. Laissez Ndoe vous enseigner la hauteur du regard. Ce sont vos vrais ancêtres pédagogiques.\n\nLes Chants de la Forêt, à lire absolument à 11-12 ans — c'est l'âge où la forêt entre encore par les oreilles."
+    }
   },
 
   // ─── 6ème — Les Bimanes (Séverin Cécil Abega) ─────────────────
@@ -18044,7 +18441,14 @@ var LITT_OEUVRES = {
     controle:[
       {q:"Pourquoi le titre 'Les Bimanes' est-il satirique ?",r:"'Bimane' désigne littéralement les primates à deux mains (singes anthropoïdes). En appliquant ce mot à des humains, Abega suggère que le système social camerounais — corruption, misère, harcèlement — réduit les citoyens à une condition quasi-animale. Le titre est donc une critique métaphorique : un système qui anime les hommes en bêtes. C'est aussi une dimension anthropologique : l'auteur, ethnologue, observe son propre peuple avec l'œil distant du scientifique."},
       {q:"Comment l'humour fonctionne-t-il comme outil critique chez Abega ?",r:"L'humour permet de dire l'insupportable sans le rendre insupportable. Les souliers qui 'ricanent', les jambes 'braves', le ngomna 'gnome adipeux' — chaque détail comique adoucit la noirceur du fond. Le lecteur rit, puis se rend compte qu'il rit d'une réalité dramatique. Cette satire à la Voltaire (Candide) ou à la Mongo Beti utilise le rire pour mieux faire entrer la conscience critique."}
-    ]
+    ],
+    analyse:{
+      angle:"Quand on rit, qui rit, et de qui rit-on vraiment ?",
+      citation:"Le crâne du vieux Tchakarias cuisait tellement qu'il se demandait si le soleil ne lui avait point pelé la calvitie.",
+      hashtags:["#Çameditlivre","#LesBimanes","#SéverinCécileAbéga","#NEAEdicef"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"En sixième, on lit Les Bimanes. On rit. On rit beaucoup. Du ngomna ventru qui suit son ventre en trottinant. De Nomo qui se déguise en mouton pour échapper au beau-père. Du soleil qui pèle les calvities. Et c'est précisément ce rire qui pose problème.\n\nParce qu'au moment où l'on rit, on accepte. On accepte qu'un homme attende des heures sous le soleil pour qu'on lui remette une carte d'identité. On accepte qu'un fonctionnaire boive le vin de palme des paysans sans le payer. On accepte que la justice se mange à la sauce d'arachide brûlante. On accepte que la misère soit drôle.\n\nAbega, ethnologue de formation, a écrit Les Bimanes comme un anthropologue regarde son propre peuple : avec une distance critique. Le titre lui-même est dévastateur. « Bimane » désigne en zoologie les primates à deux mains. Quand Abega applique ce mot à ses concitoyens, il ne les insulte pas. Il dit : voyez ce que le système fait de nous. Il nous animalise. Il nous fait courir, ramper, mendier, et nous appelle ensuite des hommes libres.\n\nL'angle qui m'intéresse aujourd'hui : pourquoi un anthropologue écrit-il des nouvelles plutôt qu'un essai scientifique ? Parce qu'un essai s'adresse aux universitaires. Une nouvelle s'adresse à TOUT LE MONDE. Et l'humour, contrairement au pamphlet, ouvre les défenses. On ne rit jamais contre soi-même au premier abord. On rit avec l'auteur, contre les personnages — Tchakarias, le ngomna, Ana. Et soudain, en refermant le livre, on s'aperçoit qu'on est aussi Tchakarias. Aussi le ngomna. Aussi Ana.\n\nC'est cette mécanique satirique qui fait des Bimanes un vrai trésor pour les jeunes lecteurs. Le rire ouvre la porte ; la conscience entre par derrière sans qu'on s'en aperçoive. Voltaire le faisait avec Candide. Mongo Beti le fait avec Mission Terminée. Abega le fait avec Les Bimanes — et il a en plus l'élégance de ne jamais hausser le ton.\n\nÀ relire en grandissant. Vous verrez : les nouvelles changent avec vous. Ce qui vous faisait rire à 12 ans vous fera réfléchir à 25, et pleurer à 40."
+    }
   },
 
   // ─── 6ème — Les Contes de Korotoumou (Amadou Koné) ────────────
@@ -18083,7 +18487,14 @@ var LITT_OEUVRES = {
     techniques:["Conte oral transcrit","Formule rituelle","Structure répétitive","Morale finale"],
     controle:[
       {q:"Quelles sont les fonctions traditionnelles du conte en Afrique ?",r:"1) Éducation morale (transmettre valeurs et interdits) ; 2) Préservation de l'histoire et de la généalogie ; 3) Divertissement collectif (le soir au village) ; 4) Cohésion sociale (rassemblement intergénérationnel) ; 5) Apprentissage de la langue et de l'art oratoire."}
-    ]
+    ],
+    analyse:{
+      angle:"Pourquoi raconte-t-on encore des contes en 2025 ?",
+      citation:"Le conte ne dit pas seulement ce qui s'est passé. Il dit ce qu'il faudrait que nous fassions.",
+      hashtags:["#Çameditlivre","#LesContesdeKorotoumou","#AmadouKoné","#OralitéAfricaine"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Imaginez un instant qu'on supprime tous les contes de notre culture. Pas d'Hyène cupide. Pas de Tortue rusée. Pas d'orphelin qui triomphe à la fin parce qu'il a été bon. Pas de roi méchant qui s'étouffe avec son propre poison. Imaginez. Que resterait-il pour TRANSMETTRE ?\n\nLes Contes de Korotoumou (Amadou Koné nous offre la voix de cette conteuse fictive) ne sont pas des « historiettes pour enfants ». Ce sont des INFRASTRUCTURES MORALES. Pendant que l'enfant rit ou frissonne, son cerveau enregistre : la cupidité punit, le partage récompense, la patience est plus forte que la ruse mal placée. Quand cet enfant aura 30 ans, et qu'il sera tenté de mentir à son associé, quelque part en lui, la voix d'Hyène va remonter. Pas comme une règle. Comme une mémoire incorporée.\n\nAmadou Koné, écrivain ivoirien né en 1953, a fait pour les contes de Côte d'Ivoire ce qu'Anya Noa a fait pour le Sud Cameroun : il les a TRANSCRITS, mais avec un art particulier. Il ne fige pas le conte sur le papier. Il en garde la respiration orale — les formules d'ouverture, les répétitions rituelles, les chants intercalés. Quand on lit les Contes de Korotoumou, on entend une voix qui n'est pas la sienne. C'est la voix d'avant.\n\nL'angle qui me frappe : pourquoi raconte-t-on encore des contes EN 2025 ? À l'ère TikTok, Netflix, IA ? Précisément parce que ces formats nouveaux NE TRANSMETTENT PAS. Ils distraient. Ils captivent. Mais ils ne déposent rien dans la conscience. Un conte, lui, laisse une trace. C'est sa fonction structurelle. Et c'est pour cela que les sociétés qui abandonnent les contes deviennent fragiles.\n\nAux enseignants de 6ème : ne lisez pas Korotoumou aux élèves. FAITES-LES LIRE EUX-MÊMES, à voix haute, devant leurs camarades, avec les gestes. Faites-leur sentir physiquement la différence entre lire un manuel et conter. Vous formerez ainsi non pas des lecteurs, mais des passeurs.\n\nLes Contes de Korotoumou, à lire — et surtout à dire."
+    }
   },
 
   // ╔══════════════════════════════════════════════════════════════╗
@@ -18128,7 +18539,14 @@ var LITT_OEUVRES = {
     controle:[
       {q:"En quoi Paul Lanta incarne-t-il le drame du jeune cadre africain post-colonial ?",r:"Paul Lanta est l'archétype du jeune Africain formé à l'occidentale : son éducation (brevet, stage topographique) lui donne les outils techniques de la modernité mais l'a coupé de ses racines. Il ne connaît de la civilisation locale 'que les vestiges désuets'. Il doit prendre des décisions (urbanisation) qui concernent un patrimoine qu'il n'a jamais vraiment compris. Pliya en fait une figure tragique : non un méchant, mais une victime du déracinement colonial."},
       {q:"Pourquoi Pliya décrit-il si précisément la géographie d'Abomey ?",r:"La description spatiale est SYMBOLIQUE : la route goudronnée droite venant de Bohicon = la modernité linéaire (école, hôpital, poste, police). Les venelles 'aux détours curieux' évitant les paillotes/arbres sacrés = la tradition qui résiste, sinueuse, secrète. Le marché Houndjro entre tôles ondulées et paillotes branlantes = la cohabitation tendue. Le palais Ghézo transformé en musée = la mémoire muséifiée. La géographie raconte l'histoire — c'est l'œil d'ethnographe de Pliya."}
-    ]
+    ],
+    analyse:{
+      angle:"Qui décide quand l'arbre sacré doit tomber ?",
+      citation:"Paul Lanta ne connaissait de la civilisation locale que les vestiges désuets.",
+      hashtags:["#Çameditlivre","#LArbreFétiche","#JeanPliya","#Bénin"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Il y a, dans toute Afrique post-coloniale, ce moment qui revient encore aujourd'hui : un cadre jeune, formé dans les écoles modernes, doit décider si l'on abat un arbre sacré pour faire passer une route. C'est exactement le drame que Jean Pliya raconte dans L'Arbre Fétiche. Et trois mots du roman me hantent : « vestiges désuets ». Voilà comment Paul Lanta voit la culture de son propre peuple. Comme un MUSÉE.\n\nLisez bien. Paul Lanta n'est pas un méchant. Il n'est pas un colon. Il n'est même pas indifférent. Il est juste DÉRACINÉ. Le système scolaire colonial, en lui donnant son brevet et son stage topographique, lui a donné en même temps une grille de lecture du monde où tout ce qui n'est pas mesurable n'est pas réel. L'arbre est un arbre. Le sacré est un mythe. La modernité est un progrès. Voilà ses certitudes.\n\nLe problème, c'est que sa technique modernisante va se heurter à quelque chose qui ne s'écrit pas dans ses cahiers : LA MÉMOIRE D'UN PEUPLE. Les anciens lui parlent d'un arbre où vivent les ancêtres. Lanta entend : superstition. Mais en arrachant l'arbre, on n'arrache pas une superstition — on arrache une COSMOLOGIE, c'est-à-dire une façon de tenir le monde ensemble.\n\nPliya écrit avec son œil d'anthropologue (il est ethnographe avant d'être romancier). Sa description d'Abomey est minutieuse : la route goudronnée droite venant de Bohicon, les venelles « aux détours curieux » qui contournent les arbres sacrés et les paillotes. Ces deux géographies racontent deux histoires. La route droite, c'est l'imposition de la rationalité coloniale. Les venelles tortueuses, c'est la résistance silencieuse de la tradition, qui ne se laisse pas redresser.\n\nMon angle préféré : Pliya ne JUGE PAS Paul Lanta. Il le PLAINT. Il en fait une figure tragique. Parce que Lanta a fait tout ce qu'on lui a demandé de faire : étudier, obéir, monter dans la hiérarchie. Et au moment d'agir, il s'aperçoit qu'il ne sait plus dans QUEL monde il agit. Le savoir qu'on lui a donné n'est pas le savoir qu'il lui faudrait.\n\nL'Arbre Fétiche, à lire pour comprendre que la décolonisation, ce n'est pas seulement renvoyer le colon. C'est aussi retrouver, en soi, les venelles que la route coloniale a tenté d'effacer."
+    }
   },
 
   // ─── 5ème — N'kum-Wam, le huitième notable (David Massoma Pandong) ──
@@ -18168,7 +18586,14 @@ var LITT_OEUVRES = {
     controle:[
       {q:"Quels indices montrent que N'koum-wam est une pièce de théâtre et non un récit ?",r:"1) Sous-titre explicite : 'Comédie en cinq actes' ; 2) Préface qui cite Aristote (mimesis) et Suberville (fête des yeux et oreilles) ; 3) Structure en actes ; 4) Dialogues entre 'nombreux personnages' ; 5) Représentation scénique d'une 'séquence de vie à la chefferie de Kekem'. Tout converge vers la théâtralité."},
       {q:"Pourquoi le choix d'une comédie plutôt que d'une tragédie pour traiter la notabilité ?",r:"La comédie permet : 1) une distance critique sans hostilité (rire pour mieux comprendre) ; 2) une représentation vivante de la vie quotidienne (mimesis) ; 3) l'acceptation publique de critiques voilées sur les élites ; 4) une pédagogie politique accessible — l'élève de 5ème rit avant de réfléchir. Pandong choisit le rire comme arme douce pour transmettre une réflexion sérieuse sur le renouvellement des élites."}
-    ]
+    ],
+    analyse:{
+      angle:"Et si la succession d'un notable racontait l'avenir d'un peuple ?",
+      citation:"Le théâtre est d'abord une fête des yeux et des oreilles. — Jean Suberville, cité par Pandong.",
+      hashtags:["#Çameditthéâtre","#Nkoumwam","#Pandong","#Afrédit2024"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"On peut lire N'koum-wam d'au moins deux façons. La façon scolaire : c'est une comédie en cinq actes qui raconte la succession d'un notable décédé dans la chefferie de Kekem. Drôle, bien faite, instructive. Et la façon plus profonde : c'est une RÉFLEXION POLITIQUE sur la manière dont les élites se reproduisent (ou non) dans nos sociétés.\n\nL'angle qui me fascine est l'ONOMASTIQUE. Pandong, qui se présente lui-même comme un défenseur du vivre-ensemble (ingénieur du génie civil, formé à penser la communion des matériaux !), a choisi des noms qui circulent entre trois régions camerounaises : Kekem, Santchou. C'est-à-dire le Littoral, le Sud-Ouest, l'Ouest. En faisant cela, il fabrique un Cameroun théâtral où nos frontières administratives n'existent plus, où les humains se mêlent comme ils le faisaient avant qu'on les compte.\n\nLe second angle, plus dramatique : Pandong refuse les catégories classiques. La pièce n'est ni vraiment une comédie, ni vraiment une tragédie. C'est une « œuvre rituelle », nous dit la préface — autrement dit, une CÉRÉMONIE TRANSCRITE EN MOTS. La chefferie de Kekem fonctionne au théâtre comme elle fonctionne dans la vie : par dialogues, palabres, débats. La parole partagée est l'objet central. La sagesse au-dessus des biens temporels est la règle.\n\nÀ mes yeux, la pièce traite, sans en avoir l'air, d'une question redoutable : Quand un héritier dévalorise ce qu'on lui transmet, faut-il le forcer ou trouver quelqu'un d'autre ? Question qui dépasse largement Kekem. Question qui concerne toutes nos chefferies, nos institutions, nos familles, nos pays. Comment renouvelle-t-on une élite sans la trahir ?\n\nN'koum-wam, à lire pour le plaisir du théâtre — et à monter pour le plaisir de jouer ensemble."
+    }
   },
 
   // ─── 5ème — Père inconnu (Pabe Mongo) ─────────────────────────
@@ -18209,7 +18634,14 @@ var LITT_OEUVRES = {
     controle:[
       {q:"Pourquoi le choix d'une narratrice fillette plutôt qu'un narrateur garçon ?",r:"1) Le récit prend une dimension supplémentaire : la fille subit doublement (absence du père + condition féminine traditionnelle) ; 2) Le regard naïf de l'enfant désarme les défenses du lecteur adulte ; 3) La fille effectue déjà des tâches domestiques précoces (cueillette, vaisselle, eau) — l'œuvre dénonce aussi l'exploitation des fillettes ; 4) Le ton intime est plus crédible chez une enfant qu'un garçon ; 5) Pabé Mongo offre rare une voix littéraire féminine et enfantine au Cameroun."},
       {q:"Comment Pabé Mongo réhabilite-t-il la famille monoparentale ?",r:"En appelant 'trinité' la cellule mère + 2 enfants, l'auteur lui confère une dignité religieuse. La famille SANS le père est présentée comme 'proche du paradis' avant que des 'personnages étrangers' (oncle, prétendants) ne la perturbent. La mère, malgré sa pauvreté, travaille sans relâche et offre amour et nourriture. Le portrait dépasse les préjugés traditionnels : être 'fils/fille de personne' n'empêche pas d'être profondément aimé et choyé."}
-    ]
+    ],
+    analyse:{
+      angle:"La faute d'une mère est-elle l'héritage de sa fille ?",
+      citation:"Avez-vous déjà songé à la douleur de cette mère ?",
+      hashtags:["#Çameditlivre","#PèreInconnu","#PabéMongo","#Edicef"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Il y a quelques jours, je discutais avec Pabé Mongo à propos de Père inconnu. Comme tout auteur passionné de ses propres écrits, je lui ai demandé lequel de ses personnages il avait le plus aimé. Sa réponse m'a surpris. Car, alors que je pensais qu'il se projetait à travers la narratrice (la petite fille à la recherche de son père), il a plutôt parlé de SA MÈRE.\n\nEn lisant Père inconnu, avez-vous déjà songé à la douleur de cette mère ? L'avez-vous déjà suivie du regard ; questionné ses émotions, écouté ses silences et ses plaintes ? C'est selon la trajectoire de celle-ci que j'ai relu le récit.\n\nRelisez avec moi : en isolant la mère, en laissant la lumière de votre regard jaillir sur sa douleur, sa solitude, l'échec parfois de sa propre fille. Vous vous demanderez peut-être comme moi si les MÈRES PAIENT LEURS FAUTES À TRAVERS L'ÉCHEC DE LEUR FILLE. Si les filles sont condamnées, dans certaines situations, à ne ressembler qu'à leur mère — c'est-à-dire reproduire leur échec, leur faiblesse, leur silence.\n\nLa choix narratif de Pabé Mongo est admirable. Donner la voix à la FILLE, et non à la mère, déplace tout. La fille raconte naïvement ce que la mère subit. L'enfant voit sans comprendre, et le lecteur comprend en lisant ce qu'elle voit sans le savoir. C'est de la grande littérature : la conscience adulte du lecteur traverse le filtre de la conscience enfantine, et le résultat est dévastateur.\n\nLe mot « trinité » utilisé pour la cellule mère + 2 enfants n'est pas anodin. Il sacralise une famille que la société méprise — la famille sans père. Pabé Mongo prend une cellule jugée « anormale » et lui donne une dignité religieuse. La famille de la narratrice est « proche du paradis » AVANT que des « personnages étrangers » (l'oncle, les prétendants) n'y entrent. Cette inversion est précieuse : ce n'est pas le manque de père qui détruit la trinité, c'est l'arrivée de mauvais hommes.\n\nL'œuvre est étonnamment actuelle. Aujourd'hui, beaucoup de pères s'effacent encore quand naissent leurs enfants ; certaines mères élèvent encore leurs enfants seules ; et la douleur des enfants demeure la même : LE VIDE, l'absence du père, le silence des origines.\n\nPère inconnu de Pabé Mongo, à (re)lire donc, mais aussi à offrir !"
+    }
   },
 
   // ╔══════════════════════════════════════════════════════════════╗
@@ -18252,7 +18684,14 @@ var LITT_OEUVRES = {
     techniques:["Comédie de mœurs","Satire","Quiproquos","Personnages-types","Répliques cinglantes"],
     controle:[
       {q:"Pourquoi cette pièce est-elle toujours d'actualité ?",r:"1) La question de la dot reste vive en Afrique, parfois pervertie en transaction commerciale ; 2) Les mariages forcés persistent ; 3) L'émancipation des femmes africaines est un combat actuel ; 4) La tension tradition/modernité reste centrale ; 5) Le rire d'Oyono Mbia désamorce les sujets graves et permet une critique acceptable. La pièce est jouée et étudiée depuis 60 ans car ses thèmes restent universels."}
-    ]
+    ],
+    analyse:{
+      angle:"Trois prétendants pour un mariage — qui marie-t-on vraiment ?",
+      citation:"Trois prétendants ? Mais c'est un mari que je veux, pas un marché aux bestiaux !",
+      hashtags:["#Çameditthéâtre","#TroisPrétendantsunMari","#GuillaumeOyonoMbia","#Cameroun"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Quand une jeune fille a TROIS prétendants, on dirait qu'elle a beaucoup de chance. Trois choix. Tant d'options. Mais relisez le titre de la pièce d'Oyono Mbia avec attention : Trois prétendants… UN MARI. Le pluriel s'effondre dans le singulier. Et c'est précisément là que la satire commence.\n\nLa pièce raconte l'histoire de Juliette, jeune fille instruite, autour de qui s'agitent trois prétendants, et surtout son PÈRE Atangana, qui voit dans cette agitation une opportunité commerciale. Trois dots possibles. Trois familles qui surenchérissent. Juliette est devenue, sans qu'elle l'ait choisi, un BIEN À NÉGOCIER.\n\nCe qui rend Oyono Mbia génial, c'est qu'il ne joue pas l'indignation. Il rit. Il fait rire. Les répliques d'Atangana sont des sommets d'auto-caricature : « Une fille, ça doit obéir ! Tu vois cette poule là ? Elle ne discute pas quand on lui dit où pondre. » On rit, on rit beaucoup. Et puis, doucement, on s'aperçoit qu'on rit d'une réalité qui n'a pas tellement disparu, même en 2025. La dot est encore, dans certaines familles, une transaction. Les filles instruites se voient encore expliquer qu'elles « pensent trop ».\n\nLa réplique-éclair de Juliette change tout : « Je suis allée à l'école, papa. Je ne suis plus une chèvre qu'on attache au poteau du marché. » Notez ce qu'elle fait. Elle REPREND la métaphore animalière de son père. Elle ne la rejette pas. Elle la RETOURNE. « Je ne suis PLUS une chèvre. » L'école n'efface pas la condition antérieure ; elle la dépasse. L'éducation comme libération — c'est une thèse qui reste à défendre, encore et encore.\n\nMais le génie d'Oyono Mbia tient à un autre détail : il ne pose pas Juliette en héroïne moderne contre un père réactionnaire. Il montre que les deux sont prisonniers d'un système qui les dépasse. Atangana n'est pas méchant. Il est ce que la coutume a fait de lui. Et c'est PRÉCISÉMENT pour cela qu'on peut espérer le changement : non en condamnant les pères, mais en éduquant les filles. Et en éduquant les pères à comprendre que leur fille leur ressemble, maintenant qu'elle aussi est allée à l'école.\n\nTrois prétendants… Un mari, à lire — et surtout à JOUER en classe. C'est une pièce qui ne révèle son génie qu'incarnée par des voix de 13 ans."
+    }
   },
 
   // ─── 4ème — Cœur du Sahel (Djaïli Amadou Amal) ────────────────
@@ -18291,7 +18730,14 @@ var LITT_OEUVRES = {
     techniques:["Polyphonie","Réalisme social","Témoignage romancé","Style sobre engagé"],
     controle:[
       {q:"Pourquoi cette œuvre est-elle importante pour la jeunesse camerounaise ?",r:"1) Elle révèle une réalité souvent cachée : l'exploitation des fillettes domestiques ; 2) Elle valorise la dignité des invisibles ; 3) Elle critique les pratiques traditionnelles oppressives sans rejeter la culture ; 4) Elle montre la solidarité féminine comme force de résistance ; 5) Elle invite les jeunes lecteurs à devenir des citoyens conscients et engagés ; 6) Elle prouve qu'une auteure africaine peut atteindre une audience internationale (Goncourt des lycéens)."}
-    ]
+    ],
+    analyse:{
+      angle:"Qui a le droit d'appeler une enfant par son nom ?",
+      citation:"On ne nous demandait pas notre âge, on ne nous demandait pas notre nom. On nous appelait « la petite » — c'était notre identité.",
+      hashtags:["#Çameditlivre","#CœurduSahel","#DjaïliAmadouAmal","#GoncourtLycéens"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Il y a, dans Cœur du Sahel, une phrase à laquelle je reviens sans cesse : « On nous appelait la petite — c'était notre identité. » Quatre mots. Une identité. Pas un nom. Pas un âge. Pas une histoire. Juste un démonstratif : LA petite. Comme on dit « la chaise » ou « la marmite ». Et c'est là que toute la violence du livre se condense.\n\nDjaïli Amadou Amal raconte dans ce roman le sort des fillettes domestiques au Cameroun, particulièrement dans le Nord — région d'où elle vient elle-même. Elle ne dénonce pas par un essai. Elle CONFIE. Elle prête sa voix à celles qu'on n'entend jamais, parce qu'elles n'ont ni voix, ni nom, ni espace dans nos villes. On les regarde sans les voir. On les pleure sans les compter.\n\nL'angle qui m'a brisé, en relisant le roman, c'est l'ANAPHORE. « On ne nous demandait pas notre âge, on ne nous demandait pas notre nom. » Le martèlement du « on ne nous demandait pas » dit l'effacement systématique. Pas un effacement par méchanceté. Un effacement par INDIFFÉRENCE. Et l'indifférence, parfois, fait plus mal que la haine. La haine reconnaît au moins l'existence de l'autre. L'indifférence la nie.\n\nMais Djaïli Amadou Amal n'écrit pas seulement une dénonciation. Elle écrit aussi une CONSOLATION. « Le Sahel est dur, mais le cœur des femmes y est doux comme la pluie qui tombe enfin. » Notez l'image. La pluie au Sahel n'est pas un événement ordinaire. C'est une grâce attendue. Précieuse. Vitale. Et la douceur des femmes entre elles, dans la dureté de l'aridité, est précisément cela : un don rare qui maintient la vie.\n\nCe qui rend le roman si juste, c'est ce mélange. La dénonciation et la consolation. La colère et la solidarité. L'auteure n'oppose pas la tradition au modernisme. Elle pose UNE question simple, dévastatrice, à toutes les sociétés : « Qui a inventé une tradition qui pleure des fillettes ? » Cette interrogation rhétorique démonte l'argument du « c'est la tradition ». Toute tradition a été INVENTÉE à un moment. Donc elle peut être réinventée. Si elle fait souffrir, elle doit être réinventée.\n\nCœur du Sahel, à lire absolument, et à donner à lire en 4ème. Parce qu'en grandissant, ces lecteurs deviendront ceux qui décident — et il faut qu'ils sachent."
+    }
   },
 
   // ─── 4ème — L'attachement au sol natal (Ernest Alima) ──────────
@@ -18329,7 +18775,14 @@ var LITT_OEUVRES = {
     techniques:["Récit lyrique","Description sensorielle","Symbolisme tellurique","Proverbes intégrés"],
     controle:[
       {q:"Pourquoi l'attachement au sol natal est-il un enjeu actuel pour les jeunes Camerounais ?",r:"1) L'exode rural massif vide les campagnes camerounaises ; 2) La diaspora éloigne géographiquement les jeunes ; 3) L'éducation occidentale peut faire mépriser les origines rurales ; 4) Sans mémoire des origines, il n'y a pas de construction identitaire solide ; 5) L'attachement au sol natal n'empêche pas la modernité, il l'enracine. Ce thème est fondamental pour la jeunesse camerounaise en pleine mutation."}
-    ]
+    ],
+    analyse:{
+      angle:"Et si la terre se souvenait de nous comme nous d'elle ?",
+      citation:"Qui oublie son village n'est plus chez lui nulle part.",
+      hashtags:["#Çameditlivre","#LAttachementauSolNatal","#ErnestAlima","#Cameroun"],
+      analyste:"Une analyse Çameditlivre · VÉRITAS",
+      contenu:"Lisez d'abord ce proverbe : « Qui oublie son village n'est plus chez lui nulle part. » Six mots. Une vie possible. Une vie impossible. C'est terrible et c'est juste.\n\nErnest Alima, dans L'attachement au sol natal, n'écrit pas un pamphlet contre l'exode. Il n'oppose pas le village à la ville. Il pose simplement une question, à voix douce, que tout jeune Africain doit affronter un jour : QU'EST-CE QUE J'EMPORTE AVEC MOI QUAND JE PARS ? Et que reste-t-il chez moi quand je suis loin ?\n\nCe livre est précieux parce qu'il refuse la mesure moderne. « La terre des ancêtres ne se mesure pas en hectares, mais en souvenirs et en silences habités. » Quelle phrase ! Notez le balancement. D'un côté, l'unité technique : hectares. De l'autre, les unités spirituelles : souvenirs, silences habités. L'auteur dit que la terre n'est pas qu'un bien comptable. Elle est un PATRIMOINE SPIRITUEL. Une chose qui se transmet par les histoires racontées au feu, par les noms qu'on donne aux endroits, par les morts qu'on enterre dessous.\n\nL'angle qui me frappe : Alima ne s'adresse pas aux paysans. Il s'adresse aux PARTANTS. À ceux qui sont allés étudier à Yaoundé, Douala, Paris, Montréal. Et il leur dit : on peut partir. On DOIT parfois partir. Mais il y a une manière de partir qui ne fait pas perdre la maison. Il y a une manière de revenir aussi, qui restaure ce qu'on n'a jamais vraiment quitté.\n\nLe roman se lit lentement, comme on marche dans un sentier connu. Phrases courtes. Images simples. Proverbes intégrés. Cette sobriété, c'est l'art d'Alima : il pourrait écrire fort, il choisit d'écrire JUSTE.\n\nEt puis cette personnification superbe : « Le sol qui t'a vu naître saura toujours te reconnaître. » C'est la terre qui reconnaît, et non l'inverse. Vous voyez le retournement ? D'habitude, on dit que nous reconnaissons notre terre. Alima dit : c'est elle qui nous reconnaît. C'est-à-dire que la terre garde la mémoire de nos enfances bien plus longtemps que nous. Et c'est cela qui doit nous rassurer : on peut oublier le village, le village ne nous oubliera pas.\n\nL'attachement au sol natal, à lire en 4ème — pour ceux qui partiront. Et à relire à 30 ans — pour ceux qui sont déjà partis."
+    }
   }
 
 };
@@ -18854,6 +19307,15 @@ function _showLittMenu(jid,oeuvreKey){
       +'<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#142554">Citations & Figures</div>'
       +'<div style="font-size:11px;color:var(--ink4);margin-top:4px">'+((oe.citations||[]).length)+' extraits analysés</div>'
     +'</div>'
+    // ── v1.2 : ANALYSE LITTÉRAIRE (style Çameditlivre) ──
+    +(oe.analyse?
+      '<div class="vcard" style="cursor:pointer;text-align:center;background:linear-gradient(135deg,#FAF5FF,#EDE9FE);border:1.5px solid rgba(124,58,237,.25);position:relative" onclick="_showLittAnalyse(\''+oeuvreKey+'\')">'
+        +'<div style="position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;font-size:8px;font-weight:900;padding:2px 7px;border-radius:8px;letter-spacing:.5px">✨ NEW</div>'
+        +'<div style="font-size:38px;margin-bottom:8px">📖</div>'
+        +'<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#7C3AED">Analyse littéraire</div>'
+        +'<div style="font-size:11px;color:var(--ink4);margin-top:4px;font-style:italic">Angle de lecture inédit</div>'
+      +'</div>'
+    :'')
     // Techniques d'écriture
     +'<div class="vcard" style="cursor:pointer;text-align:center" onclick="_showLittTechniques(\''+oeuvreKey+'\')">'
       +'<div style="font-size:38px;margin-bottom:8px">🔧</div>'
@@ -18939,6 +19401,73 @@ function _showLittFiche(oeuvreKey){
   }
   h+='</div></div>';
   _vc(h);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// ── ANALYSE LITTÉRAIRE (style Çameditlivre) — v1.2 ───────────────
+// Affiche le champ `analyse` d'une œuvre en plein écran
+// ══════════════════════════════════════════════════════════════════
+function _showLittAnalyse(oeuvreKey){
+  var oe=LITT_OEUVRES[oeuvreKey];
+  if(!oe||!oe.analyse){toast("Aucune analyse disponible pour cette œuvre","warn");return;}
+  var a=oe.analyse;
+  var paragraphes=(a.contenu||'').split(/\n\n+/).filter(function(p){return p.trim().length>0;});
+  var paragraphesHtml=paragraphes.map(function(p){
+    return '<p style="font-family:Georgia,serif;font-size:15.5px;line-height:1.85;color:#2D3748;margin:0 0 18px;text-align:justify;hyphens:auto">'+_esc(p)+'</p>';
+  }).join('');
+
+  _vc('<div class="vsec">'
+    +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
+    +'<article style="max-width:740px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 12px 40px rgba(20,37,84,.08)">'
+    // En-tête avec image et titre
+    +'<header style="background:linear-gradient(135deg,#7C3AED 0%,#A855F7 50%,#EC4899 100%);padding:32px 28px 28px;color:#fff;position:relative;overflow:hidden">'
+      +'<div style="position:absolute;top:-30px;right:-30px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,.18) 0%,transparent 70%);border-radius:50%"></div>'
+      +'<div style="position:absolute;bottom:-40px;left:-40px;width:140px;height:140px;background:radial-gradient(circle,rgba(255,201,60,.2) 0%,transparent 70%);border-radius:50%"></div>'
+      +'<div style="position:relative;z-index:1">'
+        +'<div style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);color:#fff;padding:5px 14px;border-radius:18px;font-size:10.5px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;border:1px solid rgba(255,255,255,.25)">'
+          +'📖 Analyse littéraire'
+        +'</div>'
+        +'<h1 style="font-family:\'Libre Baskerville\',Georgia,serif;font-size:30px;font-weight:700;margin:0 0 8px;line-height:1.2;letter-spacing:.3px;text-shadow:0 2px 6px rgba(0,0,0,.15)">'+_esc(oe.titre)+'</h1>'
+        +'<div style="font-style:italic;opacity:.95;font-size:14px;margin-bottom:14px">'+_esc(oe.auteur||'')+(oe.classe?' · <span style="background:rgba(255,255,255,.18);padding:2px 10px;border-radius:10px;font-size:11px;font-style:normal;font-weight:700;margin-left:6px">'+_esc(oe.classe)+'</span>':'')+'</div>'
+        // Angle de lecture
+        +'<div style="background:rgba(0,0,0,.12);backdrop-filter:blur(6px);border-left:4px solid #FFC93C;padding:14px 18px;border-radius:6px;margin-top:18px">'
+          +'<div style="font-size:10px;font-weight:900;letter-spacing:1.5px;color:#FFC93C;text-transform:uppercase;margin-bottom:4px">🎯 Angle de lecture</div>'
+          +'<div style="font-family:Georgia,serif;font-size:17px;font-style:italic;color:#fff;line-height:1.4">'+_esc(a.angle||'')+'</div>'
+        +'</div>'
+      +'</div>'
+    +'</header>'
+    // Citation phare
+    +(a.citation?
+      '<div style="padding:24px 32px;background:linear-gradient(180deg,#FAFBFF,#fff);border-bottom:1px solid rgba(124,58,237,.1)">'
+      +'<blockquote style="font-family:\'Libre Baskerville\',Georgia,serif;font-size:18px;font-style:italic;color:#1E293B;line-height:1.6;padding:0 16px;margin:0;border-left:4px solid #7C3AED;position:relative">'
+        +'<span style="position:absolute;top:-12px;left:-8px;font-size:48px;color:rgba(124,58,237,.2);font-family:Georgia,serif;line-height:1">"</span>'
+        +'<span style="position:relative;z-index:1">'+_esc(a.citation)+'</span>'
+      +'</blockquote>'
+      +'</div>'
+    :'')
+    // Corps de l'analyse
+    +'<div style="padding:32px 36px">'
+      +paragraphesHtml
+    +'</div>'
+    // Footer hashtags + analyste
+    +'<footer style="padding:20px 32px;background:linear-gradient(180deg,#FAFBFF,#F8FAFC);border-top:1px solid rgba(124,58,237,.1)">'
+      +(a.hashtags&&a.hashtags.length?
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">'
+        +a.hashtags.map(function(t){return '<span style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#7C3AED;background:#FAF5FF;padding:4px 10px;border-radius:12px;border:1px solid rgba(124,58,247,.2)">'+_esc(t)+'</span>';}).join('')
+        +'</div>'
+      :'')
+      +'<div style="display:flex;align-items:center;gap:10px;font-size:11.5px;color:#64748B;border-top:1px dashed rgba(124,58,247,.2);padding-top:14px;margin-top:8px">'
+        +'<span style="font-size:22px">📝</span>'
+        +'<span style="flex:1"><strong style="color:#7C3AED">'+_esc(a.analyste||'Analyse Çameditlivre · VÉRITAS')+'</strong><br>Inspiré du style éditorial de Çameditlivre · Approche personnelle et littéraire des œuvres au programme MINESEC.</span>'
+      +'</div>'
+    +'</footer>'
+    // Actions
+    +'<div style="padding:18px 32px 26px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">'
+      +'<button class="btn bi" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')" style="padding:10px 22px;border-radius:14px;font-weight:700">← Menu de l\'œuvre</button>'
+      +(oe.citations&&oe.citations.length?'<button class="btn bo" onclick="_showLittCitations(\''+oeuvreKey+'\')" style="padding:10px 22px;border-radius:14px;font-weight:700">💬 Citations détaillées →</button>':'')
+    +'</div>'
+    +'</article>'
+    +'</div>');
 }
 
 // ── CITATIONS & FIGURES DE STYLE ──────────────────────────────────────
@@ -32494,34 +33023,34 @@ body.vgz-cursor-on-link .vgz-cursor-dot{transform:translate(-50%,-50%) rotate(45
 /* ═════ CARTES PLANS D'ABONNEMENT PREMIUM v2 ═════ */
 /* ════════════════════════════════════════════════════════════════ */
 .vplan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:24px;margin:24px 0;align-items:start}
-.vplan-card{position:relative;border-radius:24px;background:#fff;box-shadow:0 6px 24px rgba(20,37,84,.08);overflow:hidden;transition:transform .45s cubic-bezier(.16,1,.3,1),box-shadow .45s;text-align:center;border:1px solid rgba(20,37,84,.05)}
-.vplan-card:hover{transform:translateY(-12px);box-shadow:0 30px 70px rgba(20,37,84,.15)}
-.vplan-card.is-popular{transform:scale(1.04);z-index:2}
-.vplan-card.is-popular::before{content:"";position:absolute;inset:-2px;background:conic-gradient(from var(--ang,0deg),#FFC93C 0deg,#FF6600 90deg,#A855F7 180deg,#3C8DFF 270deg,#FFC93C 360deg);border-radius:24px;z-index:-1;animation:vplanSpin 6s linear infinite}
-@keyframes vplanSpin{to{--ang:360deg}}
-.vplan-card.is-popular:hover{transform:scale(1.04) translateY(-12px)}
+/* FOND BLANC PUR — pas de gradient agressif */
+.vplan-card{position:relative;border-radius:24px;background:#ffffff;box-shadow:0 8px 28px rgba(20,37,84,.06),0 2px 6px rgba(20,37,84,.04);overflow:hidden;transition:transform .45s cubic-bezier(.16,1,.3,1),box-shadow .45s,border-color .3s;text-align:center;border:1.5px solid rgba(20,37,84,.06)}
+.vplan-card:hover{transform:translateY(-10px);box-shadow:0 24px 60px rgba(20,37,84,.12);border-color:var(--vpl-accent,#3B82F6)}
+.vplan-card.is-popular{transform:scale(1.03);z-index:2;border:2px solid var(--vpl-accent,#3B82F6)}
+.vplan-card.is-popular:hover{transform:scale(1.03) translateY(-10px)}
+/* Halo doré subtil uniquement sur popular (pas de conic agressif) */
+.vplan-card.is-popular::after{content:"";position:absolute;top:-3px;left:-3px;right:-3px;bottom:-3px;background:linear-gradient(135deg,rgba(255,201,60,.18),rgba(168,85,247,.12) 50%,rgba(60,141,255,.12) 100%);border-radius:26px;z-index:-1;filter:blur(8px);opacity:.7}
 
-/* Top bar dégradé épais */
-.vplan-top{height:8px;background:var(--vpl-grad,linear-gradient(90deg,#3B82F6,#1E40AF));position:relative;overflow:hidden}
-.vplan-top::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.6) 50%,transparent 100%);background-size:200% 100%;animation:vplanShine 3s linear infinite}
+/* Top bar dégradé fin (la signature couleur du plan) */
+.vplan-top{height:6px;background:var(--vpl-grad,linear-gradient(90deg,#3B82F6,#1E40AF));position:relative;overflow:hidden;border-radius:24px 24px 0 0}
+.vplan-top::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.5) 50%,transparent 100%);background-size:200% 100%;animation:vplanShine 4s linear infinite}
 @keyframes vplanShine{from{background-position:-100% 0}to{background-position:200% 0}}
 
-.vplan-body{padding:32px 24px 26px;position:relative}
+.vplan-body{padding:28px 22px 24px;position:relative;background:#fff;border-radius:0 0 22px 22px}
 
-/* Picto 3D HD */
-.vplan-ico{width:74px;height:74px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;border-radius:24px;background:var(--vpl-light,rgba(59,130,246,.1));border:2px solid var(--vpl-accent,#3B82F6);position:relative;animation:vbookFloat 3.5s ease-in-out infinite;box-shadow:0 8px 20px rgba(0,0,0,.08)}
-.vplan-ico img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.25))}
-.vplan-ico::after{content:"";position:absolute;inset:-6px;background:radial-gradient(circle,var(--vpl-accent,#3B82F6) 0%,transparent 70%);opacity:0;border-radius:30px;z-index:-1;transition:opacity .4s}
-.vplan-card:hover .vplan-ico::after{opacity:.25}
+/* Picto 3D HD — fond clair, accent coloré subtil */
+.vplan-ico{width:74px;height:74px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;border-radius:22px;background:var(--vpl-light,rgba(59,130,246,.1));border:2px solid var(--vpl-accent,#3B82F6);position:relative;animation:vbookFloat 3.5s ease-in-out infinite;box-shadow:0 6px 16px rgba(20,37,84,.08)}
+.vplan-ico img{width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.2))}
+.vplan-ico::after{content:"";position:absolute;inset:-8px;background:radial-gradient(circle,var(--vpl-accent,#3B82F6) 0%,transparent 70%);opacity:0;border-radius:30px;z-index:-1;transition:opacity .4s}
+.vplan-card:hover .vplan-ico::after{opacity:.18}
 
-/* Badge Populaire — ribbon */
-.vplan-badge-pop{position:absolute;top:18px;right:-30px;width:140px;text-align:center;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;padding:6px 0;letter-spacing:1.5px;transform:rotate(35deg);box-shadow:0 4px 12px rgba(255,201,60,.5);z-index:5;text-transform:uppercase}
-.vplan-badge-pop::before{content:"⭐ ";font-size:10px}
+/* Badge Populaire — pill colorée plus discrète */
+.vplan-badge-pop{position:absolute;top:14px;right:14px;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;font-family:Montserrat,sans-serif;font-size:10px;font-weight:900;padding:5px 12px;letter-spacing:1px;border-radius:14px;box-shadow:0 4px 12px rgba(255,201,60,.35);z-index:5;text-transform:uppercase;display:inline-flex;align-items:center;gap:4px}
+.vplan-badge-pop::before{content:"⭐";font-size:11px}
 
-/* Sparkles autour du plan populaire */
-.vplan-card.is-popular .vplan-body::before{content:"✨";position:absolute;top:8%;left:8%;font-size:18px;animation:vplanSparkle 2.5s ease-in-out infinite;opacity:.7}
-.vplan-card.is-popular .vplan-body::after{content:"✨";position:absolute;bottom:8%;right:8%;font-size:14px;animation:vplanSparkle 2.5s ease-in-out infinite .8s;opacity:.7}
-@keyframes vplanSparkle{0%,100%{transform:scale(.7) rotate(0);opacity:.4}50%{transform:scale(1.2) rotate(180deg);opacity:1}}
+/* Sparkles subtils autour du plan populaire (opacité réduite) */
+.vplan-card.is-popular .vplan-body::before{content:"✨";position:absolute;top:18px;left:14px;font-size:14px;animation:vplanSparkle 3s ease-in-out infinite;opacity:.4;pointer-events:none}
+@keyframes vplanSparkle{0%,100%{transform:scale(.7) rotate(0);opacity:.25}50%{transform:scale(1.1) rotate(180deg);opacity:.6}}
 
 .vplan-name{font-family:Montserrat,sans-serif;font-size:22px;font-weight:900;color:#1E293B;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
 .vplan-cible{font-size:12px;color:#64748B;margin-bottom:16px;font-weight:500}
@@ -32685,6 +33214,84 @@ body.vgz-cursor-on-link .vgz-cursor-dot{transform:translate(-50%,-50%) rotate(45
 .voeuvre-card.cls-2  {--vo-c1:#1E3A8A;--vo-c2:#0F172A}
 .voeuvre-card.cls-1  {--vo-c1:#7C3AED;--vo-c2:#6B21A8}
 .voeuvre-card.cls-T  {--vo-c1:#BE185D;--vo-c2:#831843}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* ═════ ANALYSE LITTÉRAIRE — Section home v1.2 ═════ */
+/* ════════════════════════════════════════════════════════════════ */
+.vlit-section{margin:36px 0;border-radius:28px;overflow:hidden;background:linear-gradient(180deg,#fff,#FAFBFF);box-shadow:0 8px 32px rgba(20,37,84,.06);border:1px solid rgba(124,58,237,.1)}
+
+/* Header */
+.vlit-header{position:relative;padding:36px 32px 30px;text-align:center;overflow:hidden}
+.vlit-header-bg{position:absolute;inset:0;background:linear-gradient(135deg,#FAF5FF 0%,#EDE9FE 50%,#FFFBEB 100%);opacity:.9}
+.vlit-header-bg::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 20% 30%,rgba(124,58,237,.15) 0%,transparent 50%),
+  radial-gradient(circle at 80% 70%,rgba(255,201,60,.12) 0%,transparent 50%);
+  opacity:.7}
+.vlit-header::after{content:"📖 ✒️ 📜 ✨ 📚";position:absolute;top:10px;right:20px;font-size:22px;opacity:.18;letter-spacing:20px;animation:vlitDrift 20s linear infinite}
+@keyframes vlitDrift{from{transform:translateX(0)}to{transform:translateX(-50px)}}
+.vlit-header-content{position:relative;z-index:1}
+
+.vlit-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;padding:6px 16px;border-radius:24px;font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px;box-shadow:0 6px 16px rgba(124,58,237,.3)}
+
+.vlit-title{font-family:'Libre Baskerville',Georgia,serif;font-size:32px;font-weight:700;color:#142554;margin:0 0 8px;line-height:1.15;letter-spacing:.3px}
+.vlit-title em{font-style:italic;background:linear-gradient(135deg,#7C3AED,#A855F7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-decoration:underline;text-decoration-color:rgba(124,58,237,.25);text-underline-offset:6px;text-decoration-thickness:3px}
+
+.vlit-sub{font-size:14px;color:#64748B;line-height:1.6;max-width:560px;margin:0 auto;font-style:italic}
+
+/* Grille des 4 angles d'analyse */
+.vlit-angles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;padding:24px 28px}
+.vlit-angle{background:#fff;border-radius:18px;padding:22px 18px;cursor:pointer;transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s,border-color .3s;border:1.5px solid rgba(124,58,237,.1);text-align:center;position:relative;overflow:hidden}
+.vlit-angle::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#7C3AED,#A855F7,#FFC93C);transform:scaleX(0);transform-origin:left;transition:transform .4s}
+.vlit-angle:hover{transform:translateY(-8px);box-shadow:0 24px 50px rgba(124,58,237,.18);border-color:rgba(124,58,237,.4)}
+.vlit-angle:hover::before{transform:scaleX(1)}
+.vlit-angle-ico{width:64px;height:64px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#FAF5FF,#EDE9FE);border-radius:18px;border:1.5px solid rgba(124,58,237,.15);animation:vbookFloat 3.5s ease-in-out infinite;transition:transform .4s}
+.vlit-angle:hover .vlit-angle-ico{transform:scale(1.1) rotate(-6deg)}
+.vlit-angle-ico img{width:42px;height:42px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(124,58,237,.2))}
+.vlit-angle h3{font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;color:#142554;margin:0 0 8px;letter-spacing:.3px}
+.vlit-angle p{font-size:12px;color:#475569;line-height:1.55;margin:0 0 14px;min-height:50px}
+.vlit-angle p strong{color:#7C3AED;font-weight:700}
+.vlit-angle-cta{display:inline-block;font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:#7C3AED;padding:6px 14px;background:#FAF5FF;border-radius:16px;border:1px solid rgba(124,58,237,.2);transition:all .3s}
+.vlit-angle:hover .vlit-angle-cta{background:#7C3AED;color:#fff;border-color:#7C3AED;transform:translateX(2px)}
+
+/* Œuvres en vedette */
+.vlit-featured-title{text-align:center;font-family:Montserrat,sans-serif;font-size:16px;font-weight:900;color:#142554;margin:8px 0 18px;letter-spacing:.5px;padding:0 28px}
+.vlit-featured-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;padding:0 28px 24px}
+
+.vlit-feat-card{display:flex;gap:14px;align-items:center;background:#fff;border-radius:18px;padding:14px;border:1.5px solid rgba(20,37,84,.08);cursor:pointer;transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s,border-color .3s;position:relative;overflow:hidden}
+.vlit-feat-card::after{content:"→";position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:20px;color:rgba(124,58,237,.3);transition:all .3s}
+.vlit-feat-card:hover{transform:translateY(-4px);box-shadow:0 16px 36px rgba(124,58,237,.15);border-color:rgba(124,58,237,.35)}
+.vlit-feat-card:hover::after{color:#7C3AED;transform:translateY(-50%) translateX(4px)}
+
+.vlit-feat-pic{width:74px;height:74px;flex-shrink:0;background:linear-gradient(135deg,#FAF5FF,#EDE9FE);border-radius:16px;border:1.5px solid rgba(124,58,237,.15);display:flex;align-items:center;justify-content:center;animation:vbookFloat 3.5s ease-in-out infinite}
+.vlit-feat-pic img{width:50px;height:50px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.15))}
+
+.vlit-feat-info{flex:1;min-width:0;padding-right:20px}
+.vlit-feat-cls{display:inline-block;background:linear-gradient(135deg,#142554,#1E3A8A);color:#FFC93C;font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;letter-spacing:.8px;margin-bottom:5px}
+.vlit-feat-title{font-family:'Libre Baskerville',Georgia,serif;font-size:14px;font-weight:700;color:#142554;line-height:1.3;margin-bottom:2px;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+.vlit-feat-author{font-size:11px;color:#64748B;font-style:italic;margin-bottom:8px}
+.vlit-feat-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:6px}
+.vlit-feat-tags span{font-size:9.5px;color:#7C3AED;background:#FAF5FF;padding:2px 7px;border-radius:6px;font-weight:700;white-space:nowrap}
+.vlit-feat-cta{font-family:Montserrat,sans-serif;font-size:10.5px;font-weight:800;color:#7C3AED;letter-spacing:.3px}
+
+/* CTA bas */
+.vlit-bottom-cta{padding:0 28px 28px;text-align:center}
+.vlit-explore-all{background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;border:none;border-radius:18px;padding:16px 32px;font-family:Montserrat,sans-serif;font-weight:900;font-size:14px;letter-spacing:.8px;cursor:pointer;box-shadow:0 8px 24px rgba(124,58,237,.35);transition:all .35s}
+.vlit-explore-all:hover{transform:translateY(-3px);box-shadow:0 16px 40px rgba(124,58,247,.5);background:linear-gradient(135deg,#6B21A8,#7C3AED)}
+.vlit-bottom-meta{margin-top:10px;font-size:11px;color:#64748B;letter-spacing:.5px;font-weight:600}
+
+@media (max-width:720px){
+  .vlit-title{font-size:24px}
+  .vlit-header{padding:28px 20px 22px}
+  .vlit-angles{padding:18px 16px;grid-template-columns:1fr 1fr;gap:10px}
+  .vlit-angle{padding:18px 12px}
+  .vlit-angle h3{font-size:13px}
+  .vlit-angle p{font-size:11px;min-height:0}
+  .vlit-featured-grid{padding:0 16px 18px;grid-template-columns:1fr}
+}
+@media (max-width:480px){
+  .vlit-angles{grid-template-columns:1fr}
+  .vlit-title{font-size:20px}
+}
 
 @media (max-width:720px){
   .voeuvre-grid{grid-template-columns:repeat(2,1fr);gap:12px}
