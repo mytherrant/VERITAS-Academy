@@ -3429,12 +3429,12 @@ function defaultDB(){return{
     {id:'p11',ico:'🧑‍🏫',titre:'Préparation Intensive BEPC (WhatsApp)',prix:8000,ancien:12000,desc:'Groupe WhatsApp encadré par nos enseignants — Exercices quotidiens',cat:'Services',photo:'',actif:true},
     {id:'p12',ico:'🏆',titre:'Pack Réussite Totale',prix:35000,ancien:55000,desc:'Annales + Fiches + Cours vacances + Soutien en ligne — Tout inclus !',cat:'Pack',photo:'',actif:true},
     // ─── Articles & Ressources mis en avant (featured) — éditables depuis Admin > Boutique ───
-    {id:'p13',ico:'📚',titre:'Fiches Maths Tle',prix:3500,ancien:5000,desc:'120 fiches de révision Mathématiques Terminale — Formules, théorèmes, méthodes essentielles',cat:'Épreuves',photo:'',actif:true,featured:true,nouveau:false,bgColor:'#EDE9FE'},
-    {id:'p14',ico:'🖊️',titre:'Cahier Physique',prix:4200,ancien:0,desc:'300 exercices de Physique avec solutions détaillées — Tous niveaux secondaires',cat:'Épreuves',photo:'',actif:true,featured:true,nouveau:false,bgColor:'#D1FAE5'},
-    {id:'p15',ico:'🎧',titre:'Audio Français',prix:2900,ancien:0,desc:'18 heures d\'enregistrements audio + transcriptions complètes — Compréhension orale',cat:'Manuels',photo:'',actif:true,featured:true,nouveau:true,bgColor:'#DBEAFE'},
-    {id:'p16',ico:'📐',titre:'Kit Géométrie',prix:8500,ancien:11000,desc:'Set complet pour examens : compas, rapporteur 360°, équerres, règles, gabarits',cat:'Fournitures',photo:'',actif:true,featured:true,nouveau:false,bgColor:'#FDE8EC'},
-    {id:'p17',ico:'📗',titre:'Guide Orientation',prix:1900,ancien:0,desc:'200 pages : filières, débouchés, concours camerounais et internationaux',cat:'Manuels',photo:'',actif:true,featured:true,nouveau:false,bgColor:'#FEF3C7'},
-    {id:'p18',ico:'🏆',titre:'Abonnement Annuel',prix:49000,ancien:99000,desc:'Accès illimité 12 mois à toutes les ressources VÉRITAS — Plateforme + Manuels + Cours',cat:'Pack',photo:'',actif:true,featured:true,nouveau:true,bgColor:'#ECFDF5'}
+    {id:'p13',ico:'📚',titre:'Fiches Maths Tle',prix:3500,ancien:5000,desc:'120 fiches de révision Mathématiques Terminale — Formules, théorèmes, méthodes essentielles',cat:'Épreuves',photo:'',actif:true,featured:true,nouveau:false,bgColor:'linear-gradient(135deg,#EDE9FE,#DDD6FE)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/notebook-with-decorative-cover_1f4d4.png'},
+    {id:'p14',ico:'🖊️',titre:'Cahier Physique',prix:4200,ancien:0,desc:'300 exercices de Physique avec solutions détaillées — Tous niveaux secondaires',cat:'Épreuves',photo:'',actif:true,featured:true,nouveau:false,bgColor:'linear-gradient(135deg,#D1FAE5,#A7F3D0)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/pencil_270f-fe0f.png'},
+    {id:'p15',ico:'🎧',titre:'Audio Français',prix:2900,ancien:0,desc:'18 heures d\'enregistrements audio + transcriptions complètes — Compréhension orale',cat:'Manuels',photo:'',actif:true,featured:true,nouveau:true,bgColor:'linear-gradient(135deg,#DBEAFE,#BFDBFE)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/headphone_1f3a7.png'},
+    {id:'p16',ico:'📐',titre:'Kit Géométrie',prix:8500,ancien:11000,desc:'Set complet pour examens : compas, rapporteur 360°, équerres, règles, gabarits',cat:'Fournitures',photo:'',actif:true,featured:true,nouveau:false,bgColor:'linear-gradient(135deg,#FEE2E2,#FECACA)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/triangular-ruler_1f4d0.png'},
+    {id:'p17',ico:'📗',titre:'Guide Orientation',prix:1900,ancien:0,desc:'200 pages : filières, débouchés, concours camerounais et internationaux',cat:'Manuels',photo:'',actif:true,featured:true,nouveau:false,bgColor:'linear-gradient(135deg,#FEF3C7,#FDE68A)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/closed-book_1f4d5.png'},
+    {id:'p18',ico:'🏆',titre:'Abonnement Annuel',prix:49000,ancien:99000,desc:'Accès illimité 12 mois à toutes les ressources VÉRITAS — Plateforme + Manuels + Cours',cat:'Pack',photo:'',actif:true,featured:true,nouveau:true,bgColor:'linear-gradient(135deg,#FCE7F3,#FBCFE8)',pictoUrl:'https://em-content.zobj.net/source/microsoft-3D-fluent/406/trophy_1f3c6.png'}
   ],
   elearning:{
     plans:[
@@ -3826,6 +3826,18 @@ function _migrateDB(){
       if(existingIds.indexOf(fid)<0 && deleted.indexOf(fid)<0){
         var seed=defaults.find(function(p){return p.id===fid;});
         if(seed)DB.products.push(JSON.parse(JSON.stringify(seed)));
+      }
+    });
+    // Mise à jour automatique des produits p13-p18 sans pictoUrl (migration v2)
+    var defaultsMap={};
+    defaults.forEach(function(d){defaultsMap[d.id]=d;});
+    (DB.products||[]).forEach(function(p){
+      if(featuredIds.indexOf(p.id)>=0 && defaultsMap[p.id]){
+        if(!p.pictoUrl && defaultsMap[p.id].pictoUrl) p.pictoUrl=defaultsMap[p.id].pictoUrl;
+        // Si bgColor est l'ancienne couleur hex simple, la mettre à jour
+        if(p.bgColor && p.bgColor.indexOf('linear-gradient')<0 && defaultsMap[p.id].bgColor){
+          p.bgColor=defaultsMap[p.id].bgColor;
+        }
       }
     });
   })();
@@ -6342,21 +6354,39 @@ function vShowSec(sec,btn){
       h+='<button onclick="showLabosVirtuels()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:24px;padding:10px 22px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">🔬 Labos virtuels</button>';
       h+='<a href="https://minesec-distancelearning.cm" target="_blank" rel="noopener" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);border-radius:24px;padding:10px 22px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px">🌐 Cours MINESEC officiels</a>';
       h+='</div></div>';
-      // ── CATEGORY PANELS ──
+      // ── CATEGORIES — TUILES PREMIUM v2 (pictos 3D + couleurs vibrantes) ──
       h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#142554;margin-bottom:14px">📂 Choisissez une catégorie</div>';
-      h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:24px">';
+      var _picBase='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
+      // Mapping catégorie → couleur + picto 3D (configurables via DB.elearning.categories[i].cssClass / pictoUrl)
+      var _catThemes={
+        'cat1':{cls:'c-epreuves', pic:'memo_1f4dd.png'},                  // Épreuves séquentielles
+        'cat2':{cls:'c-cours',    pic:'open-book_1f4d6.png'},             // Cours détaillés PDF
+        'cat3':{cls:'c-video',    pic:'film-projector_1f4fd-fe0f.png'},   // Cours vidéo
+        'cat4':{cls:'c-corpus',   pic:'card-file-box_1f5c3-fe0f.png'},    // Corpus par séquence
+        'cat5':{cls:'c-fiches',   pic:'pushpin_1f4cc.png'},               // Fiches de révision
+        'cat6':{cls:'c-anciens',  pic:'graduation-cap_1f393.png'}         // Anciens sujets
+      };
+      h+='<div class="velearn-grid v-reveal">';
       el.categories.forEach(function(cat,i){
-        var grad=catGrads[i%catGrads.length];
-        var acc=catAccents[i%catAccents.length];
+        var theme=_catThemes[cat.id]||{cls:'c-default',pic:'books_1f4da.png'};
+        var clsName=cat.cssClass||theme.cls;
+        var picUrl=cat.pictoUrl||(_picBase+theme.pic);
         var cnt=(el.contenus||[]).filter(function(x){return x.cat===cat.id;}).length;
         var free=(el.contenus||[]).filter(function(x){return x.cat===cat.id&&x.gratuit;}).length;
-        h+='<div class="el-cat-panel" style="background:'+grad+'" onclick="window._elCat=\''+cat.id+'\';vShowSec(\'elearning\',null)">';
-        h+='<div class="el-cat-header"><div class="el-cat-ico">'+cat.ico+'</div>';
-        h+='<div class="el-cat-info"><h4>'+cat.nom+'</h4><p>'+cat.desc+'</p></div></div>';
-        h+='<div class="el-cat-footer">';
-        h+='<div class="el-cat-count">'+cnt+' ressource'+(cnt>1?'s':'')+(free?' · <span style="color:'+acc+'">'+free+' gratuite'+(free>1?'s':'')+'</span>':'')+'</div>';
-        h+='<div class="el-cat-arrow">→</div></div>';
-        if(i===0) h+='<div class="el-cat-badge">⭐ Populaire</div>';
+        var isPopular=(i===0)||cat.populaire;
+        h+='<div class="velearn-tile '+clsName+'" onclick="window._elCat=\''+cat.id+'\';vShowSec(\'elearning\',null)">';
+        h+='  <div class="velearn-tile-top">';
+        h+='    <div class="velearn-tile-ico"><img src="'+_esc(picUrl)+'" alt="" loading="lazy"></div>';
+        h+='    '+(isPopular?'<div class="velearn-tile-badge popular">★ Populaire</div>':(free?'<div class="velearn-tile-badge">'+free+' gratuit'+(free>1?'es':'')+'</div>':''));
+        h+='  </div>';
+        h+='  <div>';
+        h+='    <div class="velearn-tile-title">'+_esc(cat.nom)+'</div>';
+        h+='    <div class="velearn-tile-desc">'+_esc(cat.desc)+'</div>';
+        h+='  </div>';
+        h+='  <div class="velearn-tile-bottom">';
+        h+='    <div class="velearn-tile-stats">📚 <strong>'+cnt+'</strong> ressource'+(cnt>1?'s':'')+(free?' · <strong>'+free+'</strong> gratuit'+(free>1?'es':''):'')+'</div>';
+        h+='    <div class="velearn-tile-arrow">→</div>';
+        h+='  </div>';
         h+='</div>';
       });
       h+='</div>';
@@ -6653,53 +6683,71 @@ function vShowSec(sec,btn){
     })()}
 
 
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:16px;margin-bottom:24px">
-      ${DB.books.map(b=>{const cc=b.coverColor||'#1a3a8a';const hasPreview=b.extrait||(b.previewImages&&b.previewImages.length);return`<div style="border:1px solid var(--bg3);border-radius:var(--r3);overflow:hidden;transition:all .2s;cursor:pointer;background:var(--sur)" onclick="viewBookDetail('${b.id}')">
-        <div style="height:140px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,${cc},${cc}cc)">
-          <div style="font-size:50px;position:absolute;z-index:0">${b.ico}</div>${b.coverImg?'<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover;position:relative;z-index:1" alt="" onerror="this.style.display=\'none\'">':''}
-          <div style="position:absolute;top:6px;left:6px;background:rgba(13,31,74,.9);color:#FFC93C;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:700">${b.cls}</div>
-          ${b.stock<=0?'<div style="position:absolute;top:6px;right:6px;background:var(--re);color:#fff;padding:2px 8px;border-radius:12px;font-size:13px;font-weight:700">Rupture</div>':''}
-          ${hasPreview?'<div style="position:absolute;bottom:6px;right:6px;background:rgba(255,255,255,.9);color:var(--bl);padding:2px 8px;border-radius:8px;font-size:13px;font-weight:700">👁 Aperçu gratuit</div>':''}
-          <div style="position:absolute;bottom:6px;left:6px;background:rgba(0,0,0,.6);color:#fff;padding:2px 6px;border-radius:6px;font-size:12px">${b.pages} pages · ${(b.chaps||[]).length} chap.</div>
-        </div>
-        <div style="padding:14px">
-          <div style="font-family:'Libre Baskerville',serif;font-size:14px;font-weight:700;color:var(--ink);line-height:1.3;margin-bottom:2px">${b.titre}</div>
-          <div style="font-size:13px;color:var(--ink4);margin-bottom:2px">✍️ ${b.auteur}</div>
-          <div style="font-size:13px;color:var(--ink3);margin-bottom:8px;line-height:1.5">${(b.desc||'').substring(0,80)}${(b.desc||'').length>80?'...':''}</div>
-          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-            ${b.ancienPrix?'<span style="font-size:13px;color:var(--ink4);text-decoration:line-through;text-decoration-color:#DC2626">'+fmt(b.ancienPrix)+'</span><span style="font-size:13px;font-weight:700;color:#fff;background:#DC2626;padding:2px 8px;border-radius:8px;margin-left:4px">-'+Math.round((1-b.prix/b.ancienPrix)*100)+'%</span>':''}
+    <!-- ═════ GRILLE LIVRES PREMIUM v2 — Cartes 3D avec animations ═════ -->
+    <div class="vbook-grid">
+      ${DB.books.map(b=>{
+        const cc=b.coverColor||'#1a3a8a';
+        const hasPreview=b.extrait||(b.previewImages&&b.previewImages.length);
+        const stockCls=b.stock>5?'ok':b.stock>0?'warn':'out';
+        const stockLbl=b.stock>5?'En stock':b.stock>0?b.stock+' restants':'Rupture';
+        const stockIco=b.stock>5?'✓':b.stock>0?'⚠':'✕';
+        const discount=b.ancienPrix?Math.round((1-b.prix/b.ancienPrix)*100):0;
+        return `<div class="vbook-card${b.featured?' is-featured':''}" style="--vbk-color:${cc}" onclick="viewBookDetail('${b.id}')">
+          <div class="vbook-cover">
+            ${b.coverImg?`<img src="${b.coverImg}" alt="${_esc(b.titre)}" onerror="this.style.display='none'">`:`<span class="vbook-cover-emoji">${b.ico||'📘'}</span>`}
+            <div class="vbook-class-badge">${_esc(b.cls)}</div>
+            ${b.stock<=0?'<div class="vbook-stock-out">Rupture</div>':''}
+            ${hasPreview?'<div class="vbook-preview-badge">Aperçu gratuit</div>':''}
+            <div class="vbook-pages">${b.pages||0}p · ${(b.chaps||[]).length} chap.</div>
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <span style="font-family:'Fira Code';font-size:17px;font-weight:700;color:var(--gold)">${fmt(b.prix)}</span>
-            <span style="font-size:13px;color:${b.stock>5?'var(--gr)':b.stock>0?'var(--or)':'var(--re)'};font-weight:700">${b.stock>5?'✅ En stock':b.stock>0?'⚠ '+b.stock+' restants':'❌ Rupture'}</span>
+          <div class="vbook-body">
+            <div class="vbook-title">${_esc(b.titre)}</div>
+            <div class="vbook-author">${_esc(b.auteur||'')}</div>
+            <div class="vbook-desc">${_esc((b.desc||'').substring(0,90))}</div>
+            ${discount?`<div class="vbook-old-price"><s>${fmt(b.ancienPrix)} FCFA</s><span class="vbook-discount">-${discount}%</span></div>`:''}
+            <div class="vbook-price-row">
+              <span class="vbook-price">${fmt(b.prix)} F</span>
+              <span class="vbook-stock ${stockCls}">${stockIco} ${stockLbl}</span>
+            </div>
+            <div class="vbook-actions">
+              ${hasPreview?`<button class="vbook-btn btn-extrait" onclick="event.stopPropagation();_showExtrait('${b.id}')">👁 Extrait</button>`:''}
+              <button class="vbook-btn btn-detail" onclick="event.stopPropagation();viewBookDetail('${b.id}')">📋 Détails</button>
+              ${b.stock>0?`<button class="vbook-btn btn-buy" onclick="event.stopPropagation();visitorOrderBook('${b.id}')">🛒 Commander maintenant</button>`:'<button class="vbook-btn btn-buy" disabled>Rupture de stock</button>'}
+            </div>
           </div>
-          <div style="display:grid;grid-template-columns:${[hasPreview,(b.fichierUrl&&b.lireGratuit),true,b.stock>0].filter(Boolean).length>=4?'1fr 1fr 1fr 1fr':[hasPreview,(b.fichierUrl&&b.lireGratuit)].some(Boolean)?'1fr 1fr 1fr':'1fr 1fr'};gap:6px;margin-top:10px">
-            ${hasPreview?`<button class="btn sm" onclick="event.stopPropagation();_showExtrait('${b.id}')" style="justify-content:center;font-size:11px;background:var(--blb);color:var(--bl);border:1px solid var(--bl2);font-weight:700">👁 Extrait</button>`:''}
-            ${(b.fichierUrl&&b.lireGratuit)?`<button class="btn sm" onclick="event.stopPropagation();_visitorLireManuel('${b.id}')" style="justify-content:center;font-size:11px;background:#D1FAE5;color:#059669;border:1px solid #A7F3D0;font-weight:700">📖 Lire</button>`:''}
-            <button class="btn bo sm" onclick="event.stopPropagation();viewBookDetail('${b.id}')" style="justify-content:center;font-size:11px">📋 Détails</button>
-            ${b.stock>0?`<button class="btn bi sm" onclick="event.stopPropagation();visitorOrderBook('${b.id}')" style="justify-content:center;font-size:11px">🛒 Commander</button>`:`<button class="btn sm" style="justify-content:center;font-size:11px;background:var(--bg3);color:var(--ink4);cursor:not-allowed" disabled>Rupture</button>`}
-          </div>
-        </div>
-      </div>`}).join("")}
+        </div>`;
+      }).join("")}
     </div>
 
-    <!-- AUTRES PRODUITS -->
+    <!-- ═════ AUTRES PRODUITS PREMIUM v2 ═════ -->
     <div class="vcard mb20">
       <div class="ct">🎁 Autres Produits & Services</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
+      <div class="vprod-grid">
         ${(DB.products||[]).filter(function(p){return p.actif&&!p.featured;}).map(function(p){
-        var pct=p.ancien?Math.round((1-p.prix/p.ancien)*100):0;
-        return '<div style="border:1px solid var(--bg3);border-radius:16px;padding:18px;transition:all .25s;cursor:pointer;background:var(--sur);position:relative;overflow:hidden" onclick="visitorOrderProduct(&apos;'+p.titre.replace(/'/g,'')+'&apos;,'+p.prix+')">'+
-        (pct?'<div style="position:absolute;top:8px;right:8px;background:#DC2626;color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:12px;box-shadow:0 2px 6px rgba(220,38,38,.3)">🔥 -'+pct+'%</div>':'')+
-        (p.photo?'<div style="height:100px;border-radius:10px;overflow:hidden;margin-bottom:10px"><img src="'+p.photo+'" style="width:100%;height:100%;object-fit:cover"></div>':'<div style="font-size:36px;margin-bottom:10px;text-align:center">'+p.ico+'</div>')+
-        '<div style="font-size:10px;color:var(--bl2);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">'+( p.cat||'')+'</div>'+
-        '<div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;line-height:1.3;margin-bottom:6px;color:var(--ink)">'+p.titre+'</div>'+
-        '<div style="font-family:Georgia,serif;font-size:13px;color:var(--ink3);line-height:1.6;margin-bottom:10px;min-height:40px">'+p.desc+'</div>'+
-        (p.ancien?'<div style="font-size:13px;color:var(--re);text-decoration:line-through;text-decoration-thickness:2px">'+fmt(p.ancien)+' FCFA</div>':'')+
-        '<div style="font-family:Georgia,serif;font-size:18px;font-weight:700;color:var(--gold);margin-top:2px">'+fmt(p.prix)+' <span style="font-size:13px;font-weight:400">FCFA</span></div>'+
-        '<div style="margin-top:10px;padding:8px;border-radius:10px;background:#3C8DFF;color:#fff;font-family:Montserrat,sans-serif;font-size:13px;font-weight:600;text-align:center;transition:all .2s">🛒 Commander</div>'+
-        '</div>';
-      }).join("")}
+          var pct=p.ancien?Math.round((1-p.prix/p.ancien)*100):0;
+          var bg=p.bgColor||(p.color?p.color:'linear-gradient(135deg,#EDE9FE,#DDD6FE)');
+          // Picto 3D si disponible, sinon emoji + fallback
+          var pictoUrl=p.pictoUrl||'';
+          var icoHtml=p.photo
+            ? '<img src="'+_esc(p.photo)+'" alt="'+_esc(p.titre)+'">'
+            : (pictoUrl
+                ? '<div class="vprod-thumb-ico"><img src="'+_esc(pictoUrl)+'" alt=""></div>'
+                : '<div class="vprod-thumb-emoji">'+(p.ico||'🎁')+'</div>');
+          return '<div class="vprod-card'+(p.nouveau?' has-new':'')+'" onclick="visitorOrderProduct(&apos;'+p.titre.replace(/'/g,'')+'&apos;,'+p.prix+')">'+
+            '<div class="vprod-thumb" style="background:'+bg+'">'+icoHtml+'</div>'+
+            (pct?'<div class="vprod-discount">🔥 -'+pct+'%</div>':'')+
+            '<div class="vprod-body">'+
+              (p.cat?'<div class="vprod-cat">'+_esc(p.cat)+'</div>':'')+
+              '<div class="vprod-title">'+_esc(p.titre)+'</div>'+
+              '<div class="vprod-desc">'+_esc(p.desc||'')+'</div>'+
+              '<div class="vprod-pricing">'+
+                (p.ancien?'<div class="vprod-old">'+fmt(p.ancien)+' FCFA</div>':'')+
+                '<div class="vprod-price">'+fmt(p.prix)+' FCFA</div>'+
+                '<div class="vprod-cta">🛒 Commander</div>'+
+              '</div>'+
+            '</div>'+
+          '</div>';
+        }).join("")}
       </div>
     </div>
 
@@ -9628,6 +9676,8 @@ function mAddProduct(){
   '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="pdDesc" rows="2" placeholder="Description courte du produit..."></textarea></div>'+
   '<div class="fg full"><span class="fl">Photo (URL ou coller une image)</span><input class="fi" id="pdPhoto" placeholder="https://... ou collez une image base64"></div>'+
   '<div class="fg full"><span class="fl">Télécharger une photo</span><input type="file" id="pdFile" accept="image/*" onchange="loadProductPhoto(this)" style="font-size:13px"></div>'+
+  '<div class="fg full"><span class="fl">🎨 Picto 3D HD (URL) — laissez vide pour utiliser l\'emoji</span><input class="fi" id="pdPictoUrl" placeholder="https://em-content.zobj.net/source/microsoft-3D-fluent/406/headphone_1f3a7.png"><div style="font-size:10px;color:var(--ink4);margin-top:4px">💡 Cherchez sur <a href="https://emojipedia.org" target="_blank" style="color:var(--bl)">emojipedia.org</a> et copiez l\'URL Microsoft 3D</div></div>'+
+  '<div class="fg full"><span class="fl">🌈 Couleur de fond du picto</span><select class="fi" id="pdBgColor"><option value="">Auto (violet pâle)</option><option value="linear-gradient(135deg,#DBEAFE,#BFDBFE)">💙 Bleu pâle</option><option value="linear-gradient(135deg,#D1FAE5,#A7F3D0)">💚 Vert pâle</option><option value="linear-gradient(135deg,#FEE2E2,#FECACA)">❤️ Rouge pâle</option><option value="linear-gradient(135deg,#FEF3C7,#FDE68A)">💛 Jaune pâle</option><option value="linear-gradient(135deg,#EDE9FE,#DDD6FE)">💜 Violet pâle</option><option value="linear-gradient(135deg,#FCE7F3,#FBCFE8)">💖 Rose pâle</option><option value="linear-gradient(135deg,#CFFAFE,#A5F3FC)">🩵 Cyan pâle</option><option value="linear-gradient(135deg,#FED7AA,#FDBA74)">🧡 Orange pâle</option></select></div>'+
   '<div class="fg"><span class="fl">⭐ Mettre en avant (Articles & Ressources)</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdFeatured"><span style="font-size:13px">Afficher dans le carrousel principal</span></label></div>'+
   '<div class="fg"><span class="fl">🆕 Badge "NEW"</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdNouveau"><span style="font-size:13px">Marquer comme nouveauté</span></label></div>'+
   '<div id="pdPreview" style="margin-top:8px"></div></div>',
@@ -9651,6 +9701,8 @@ function saveProduct(){
     prix:prix,ancien:parseInt(document.getElementById('pdAncien')?.value)||0,
     desc:document.getElementById('pdDesc')?.value||'',cat:document.getElementById('pdCat')?.value||'Autre',
     photo:document.getElementById('pdPhoto')?.value||'',actif:true,
+    pictoUrl:(document.getElementById('pdPictoUrl')?.value||'').trim(),
+    bgColor:(document.getElementById('pdBgColor')?.value||''),
     featured:!!document.getElementById('pdFeatured')?.checked,
     nouveau:!!document.getElementById('pdNouveau')?.checked});
   save();cm();re();toast('✓ Produit ajouté à la boutique');
@@ -9666,6 +9718,11 @@ function mEditProduct(pid){
   '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="pdDesc" rows="2">'+p.desc+'</textarea></div>'+
   '<div class="fg full"><span class="fl">Photo URL</span><input class="fi" id="pdPhoto" value="'+(p.photo||'')+'"></div>'+
   '<div class="fg full"><span class="fl">Changer la photo</span><input type="file" id="pdFile" accept="image/*" onchange="loadProductPhoto(this)" style="font-size:13px"></div>'+
+  '<div class="fg full"><span class="fl">🎨 Picto 3D HD (URL)</span><input class="fi" id="pdPictoUrl" value="'+_esc(p.pictoUrl||'')+'" placeholder="https://em-content.zobj.net/source/microsoft-3D-fluent/406/..."></div>'+
+  '<div class="fg full"><span class="fl">🌈 Couleur de fond du picto</span><select class="fi" id="pdBgColor">'+
+    ['','linear-gradient(135deg,#DBEAFE,#BFDBFE)','linear-gradient(135deg,#D1FAE5,#A7F3D0)','linear-gradient(135deg,#FEE2E2,#FECACA)','linear-gradient(135deg,#FEF3C7,#FDE68A)','linear-gradient(135deg,#EDE9FE,#DDD6FE)','linear-gradient(135deg,#FCE7F3,#FBCFE8)','linear-gradient(135deg,#CFFAFE,#A5F3FC)','linear-gradient(135deg,#FED7AA,#FDBA74)']
+    .map(function(c,i){var labels=['Auto','💙 Bleu','💚 Vert','❤️ Rouge','💛 Jaune','💜 Violet','💖 Rose','🩵 Cyan','🧡 Orange'];return '<option value="'+c+'"'+((p.bgColor||'')===c?' selected':'')+'>'+labels[i]+'</option>';}).join('')+
+  '</select></div>'+
   '<div class="fg"><span class="fl">⭐ Mettre en avant (Articles & Ressources)</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdFeatured"'+(p.featured?' checked':'')+'><span style="font-size:13px">Afficher dans le carrousel principal</span></label></div>'+
   '<div class="fg"><span class="fl">🆕 Badge "NEW"</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdNouveau"'+(p.nouveau?' checked':'')+'><span style="font-size:13px">Marquer comme nouveauté</span></label></div>'+
   '<div id="pdPreview">'+(p.photo?'<img src="'+p.photo+'" style="width:80px;height:80px;border-radius:10px;object-fit:cover">':'')+'</div></div>',
@@ -9681,6 +9738,8 @@ function updateProduct(pid){
   p.ico=document.getElementById('pdIco')?.value||p.ico;
   var newPhoto=document.getElementById('pdPhoto')?.value;
   if(newPhoto)p.photo=newPhoto;
+  p.pictoUrl=(document.getElementById('pdPictoUrl')?.value||'').trim();
+  p.bgColor=(document.getElementById('pdBgColor')?.value||'');
   p.featured=!!document.getElementById('pdFeatured')?.checked;
   p.nouveau=!!document.getElementById('pdNouveau')?.checked;
   save();cm();re();toast('✓ Produit mis à jour');
@@ -31937,6 +31996,149 @@ body.vgz-cursor-on-link .vgz-cursor-dot{transform:translate(-50%,-50%) rotate(45
 .vgz-testi-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFC93C,#FFA500);display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-weight:900;color:#142554;font-size:17px;flex-shrink:0;box-shadow:0 4px 16px rgba(255,201,60,.4)}
 .vgz-testi-info-name{font-size:13.5px;font-weight:800;color:#FFC93C}
 .vgz-testi-info-meta{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* ═════ CARTES PREMIUM v2 — Livres / Articles / E-Learning ═════ */
+/* ════════════════════════════════════════════════════════════════ */
+
+/* ── 1. GRILLE & CARTE LIVRE PREMIUM ── */
+.vbook-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;margin:20px 0 28px}
+.vbook-card{position:relative;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#fff 0%,#FAFBFF 100%);box-shadow:0 6px 24px rgba(20,37,84,.08),0 1px 3px rgba(20,37,84,.06);transition:transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .4s,border-color .3s;border:1px solid rgba(20,37,84,.08);cursor:pointer;display:flex;flex-direction:column}
+.vbook-card:hover{transform:translateY(-10px) scale(1.02);box-shadow:0 30px 70px rgba(20,37,84,.18),0 0 0 1px rgba(255,201,60,.4);border-color:transparent}
+
+/* Cover : 170px avec image, gradient, parallax */
+.vbook-cover{position:relative;height:170px;overflow:hidden;background:linear-gradient(160deg,var(--vbk-color,#1a3a8a),color-mix(in srgb,var(--vbk-color,#1a3a8a) 70%,#000));display:flex;align-items:center;justify-content:center}
+.vbook-cover::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 30% 30%,rgba(255,255,255,.18) 0%,transparent 50%),
+  repeating-linear-gradient(45deg,transparent 0,transparent 15px,rgba(255,255,255,.04) 15px,rgba(255,255,255,.04) 16px);
+  pointer-events:none}
+.vbook-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;transition:transform .6s}
+.vbook-card:hover .vbook-cover img{transform:scale(1.08)}
+.vbook-cover-emoji{position:relative;z-index:0;font-size:60px;filter:drop-shadow(0 8px 20px rgba(0,0,0,.4));animation:vbookFloat 3.5s ease-in-out infinite;transition:transform .4s}
+.vbook-card:hover .vbook-cover-emoji{transform:scale(1.15) rotate(-5deg)}
+@keyframes vbookFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+/* Badge classe — pilule top-left avec dégradé */
+.vbook-class-badge{position:absolute;top:10px;left:10px;background:linear-gradient(135deg,#0D1B3E,#142554);color:#FFC93C;padding:5px 12px;border-radius:14px;font-size:11px;font-weight:900;letter-spacing:1px;z-index:2;box-shadow:0 4px 12px rgba(0,0,0,.3);border:1px solid rgba(255,201,60,.3)}
+
+/* Badge prévisualisation — bas-droit */
+.vbook-preview-badge{position:absolute;bottom:10px;right:10px;background:rgba(255,255,255,.95);color:#142554;padding:4px 10px;border-radius:10px;font-size:10px;font-weight:800;z-index:2;backdrop-filter:blur(8px);display:flex;align-items:center;gap:4px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.vbook-preview-badge::before{content:"";width:6px;height:6px;border-radius:50%;background:#10B981;animation:vbookPulse 2s infinite}
+@keyframes vbookPulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+
+/* Pages info — bas-gauche */
+.vbook-pages{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:8px;font-size:10px;font-weight:600;z-index:2;backdrop-filter:blur(8px)}
+
+/* Badge rupture */
+.vbook-stock-out{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#DC2626,#991B1B);color:#fff;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:800;z-index:2;box-shadow:0 4px 12px rgba(220,38,38,.5)}
+
+/* Body : titre, auteur, description */
+.vbook-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column}
+.vbook-title{font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#142554;line-height:1.3;margin-bottom:6px;min-height:38px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vbook-author{font-size:11.5px;color:#6B7A99;margin-bottom:8px;display:flex;align-items:center;gap:5px;font-style:italic}
+.vbook-author::before{content:"✍️";font-style:normal}
+.vbook-desc{font-size:11.5px;color:var(--ink3,#475569);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+
+/* Prix avec gradient or */
+.vbook-price-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:8px 12px;background:linear-gradient(135deg,#FFF8E1,#FFE082);border-radius:12px;border:1px solid rgba(255,201,60,.3)}
+.vbook-price{font-family:'Fira Code',monospace;font-size:17px;font-weight:900;background:linear-gradient(135deg,#D97706,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:.5px}
+.vbook-stock{font-size:11px;font-weight:800;display:flex;align-items:center;gap:4px}
+.vbook-stock.ok{color:#059669}
+.vbook-stock.warn{color:#D97706}
+.vbook-stock.out{color:#DC2626}
+
+/* Prix barré + réduction */
+.vbook-old-price{display:flex;align-items:center;gap:6px;margin-bottom:8px;font-size:11px}
+.vbook-old-price s{color:#94A3B8;text-decoration-color:#DC2626}
+.vbook-discount{background:linear-gradient(135deg,#DC2626,#F97316);color:#fff;padding:2px 8px;border-radius:8px;font-weight:900;font-size:10px;box-shadow:0 4px 10px rgba(220,38,38,.3)}
+
+/* Boutons actions */
+.vbook-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:auto}
+.vbook-btn{padding:8px;border:none;border-radius:10px;font-size:11px;font-weight:800;cursor:pointer;transition:all .25s;display:flex;align-items:center;justify-content:center;gap:4px;letter-spacing:.3px}
+.vbook-btn.btn-extrait{background:#E0F2FE;color:#0369A1;border:1px solid #BAE6FD}
+.vbook-btn.btn-extrait:hover{background:#BAE6FD;transform:translateY(-2px);box-shadow:0 6px 16px rgba(3,105,161,.2)}
+.vbook-btn.btn-detail{background:#F1F5F9;color:#334155;border:1px solid #E2E8F0}
+.vbook-btn.btn-detail:hover{background:#E2E8F0;transform:translateY(-2px)}
+.vbook-btn.btn-buy{background:linear-gradient(135deg,#3C8DFF,#1E40AF);color:#fff;box-shadow:0 4px 12px rgba(60,141,255,.4);grid-column:1/-1;padding:10px}
+.vbook-btn.btn-buy:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 10px 28px rgba(60,141,255,.6);background:linear-gradient(135deg,#1E40AF,#0D1B3E)}
+.vbook-btn.btn-buy:disabled{background:#E2E8F0;color:#94A3B8;cursor:not-allowed;box-shadow:none}
+
+/* Indicateur featured (cours best-seller) */
+.vbook-card.is-featured::after{content:"⭐ Top vente";position:absolute;top:14px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:3px 12px;border-radius:12px;font-size:10px;font-weight:900;z-index:3;box-shadow:0 4px 12px rgba(255,201,60,.5);letter-spacing:.5px}
+
+/* ── 2. CARTE PRODUIT / ARTICLE PREMIUM ── */
+.vprod-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;margin:16px 0}
+.vprod-card{position:relative;border-radius:20px;padding:0;background:#fff;box-shadow:0 6px 20px rgba(20,37,84,.08);transition:transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .4s;cursor:pointer;overflow:hidden;border:1px solid rgba(20,37,84,.06);display:flex;flex-direction:column}
+.vprod-card:hover{transform:translateY(-8px) scale(1.03);box-shadow:0 25px 60px rgba(20,37,84,.18),0 0 0 1px rgba(255,201,60,.35)}
+.vprod-card.has-new::before{content:"NEW";position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff;padding:4px 10px;border-radius:10px;font-size:10px;font-weight:900;z-index:3;box-shadow:0 4px 12px rgba(239,68,68,.5);letter-spacing:1px;animation:vprodNew 2s ease-in-out infinite}
+@keyframes vprodNew{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.vprod-thumb{height:120px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--vp-bg,linear-gradient(135deg,#EDE9FE,#DDD6FE))}
+.vprod-thumb::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.5) 0%,transparent 70%);opacity:0;transition:opacity .4s}
+.vprod-card:hover .vprod-thumb::before{opacity:1}
+.vprod-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vprod-thumb-ico{font-size:0;width:64px;height:64px;display:flex;align-items:center;justify-content:center;animation:vbookFloat 3.5s ease-in-out infinite;filter:drop-shadow(0 8px 18px rgba(0,0,0,.25));transition:transform .4s}
+.vprod-card:hover .vprod-thumb-ico{transform:scale(1.18) rotate(-5deg)}
+.vprod-thumb-ico img{width:100%;height:100%;object-fit:contain}
+.vprod-thumb-emoji{font-size:54px;animation:vbookFloat 3.5s ease-in-out infinite;filter:drop-shadow(0 8px 18px rgba(0,0,0,.25))}
+
+.vprod-discount{position:absolute;top:10px;left:10px;background:linear-gradient(135deg,#DC2626,#F97316);color:#fff;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:900;z-index:3;box-shadow:0 4px 12px rgba(220,38,38,.4);display:flex;align-items:center;gap:3px}
+
+.vprod-body{padding:14px;flex:1;display:flex;flex-direction:column}
+.vprod-cat{font-size:9px;color:#3C8DFF;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px}
+.vprod-title{font-family:Montserrat,sans-serif;font-size:13.5px;font-weight:800;color:#142554;margin-bottom:6px;line-height:1.25}
+.vprod-desc{font-size:11px;color:#64748B;line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+.vprod-pricing{margin-top:auto;padding-top:8px;border-top:1px dashed rgba(20,37,84,.1)}
+.vprod-old{font-size:10px;color:#94A3B8;text-decoration:line-through;text-decoration-color:#DC2626;text-decoration-thickness:1.5px}
+.vprod-price{font-family:'Fira Code',monospace;font-size:17px;font-weight:900;background:linear-gradient(135deg,#D97706,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:2px}
+.vprod-cta{margin-top:10px;padding:10px 14px;background:linear-gradient(135deg,#3C8DFF,#1E40AF);color:#fff;border-radius:12px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;text-align:center;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 6px 16px rgba(60,141,255,.35)}
+.vprod-card:hover .vprod-cta{transform:translateY(-2px);box-shadow:0 12px 28px rgba(60,141,255,.5);background:linear-gradient(135deg,#1E40AF,#142554)}
+
+/* ── 3. TILE E-LEARNING PREMIUM ── */
+.velearn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin:18px 0}
+.velearn-tile{position:relative;border-radius:24px;padding:24px 22px 22px;background:linear-gradient(160deg,var(--vel-c1,#3B82F6),var(--vel-c2,#1E40AF));color:#fff;cursor:pointer;overflow:hidden;transition:transform .4s cubic-bezier(.34,1.56,.64,1),box-shadow .4s;box-shadow:0 10px 30px rgba(0,0,0,.15);min-height:200px;display:flex;flex-direction:column;justify-content:space-between}
+.velearn-tile::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 80% 20%,rgba(255,255,255,.2) 0%,transparent 50%),
+  radial-gradient(circle at 20% 80%,rgba(0,0,0,.15) 0%,transparent 50%);
+  opacity:.8;pointer-events:none}
+.velearn-tile::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.15) 50%,transparent 70%);background-size:200% 100%;background-position:-100% 0;transition:background-position .8s;pointer-events:none}
+.velearn-tile:hover{transform:translateY(-8px) scale(1.03);box-shadow:0 30px 60px rgba(0,0,0,.25)}
+.velearn-tile:hover::after{background-position:200% 0}
+.velearn-tile > *{position:relative;z-index:1}
+.velearn-tile-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.velearn-tile-ico{width:54px;height:54px;border-radius:14px;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:0;backdrop-filter:blur(6px);box-shadow:0 4px 12px rgba(0,0,0,.15);transition:transform .4s}
+.velearn-tile:hover .velearn-tile-ico{transform:rotate(-8deg) scale(1.1)}
+.velearn-tile-ico img{width:36px;height:36px;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(0,0,0,.3))}
+.velearn-tile-badge{background:rgba(255,255,255,.25);color:#fff;padding:4px 12px;border-radius:12px;font-size:10px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;backdrop-filter:blur(6px);box-shadow:0 4px 10px rgba(0,0,0,.15);border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;gap:4px}
+.velearn-tile-badge.popular{background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554}
+.velearn-tile-title{font-family:Montserrat,sans-serif;font-size:21px;font-weight:900;letter-spacing:.5px;line-height:1.15;margin-bottom:8px;text-shadow:0 2px 8px rgba(0,0,0,.2)}
+.velearn-tile-desc{font-size:12.5px;line-height:1.55;color:rgba(255,255,255,.92);margin-bottom:14px;font-weight:500}
+.velearn-tile-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid rgba(255,255,255,.15)}
+.velearn-tile-stats{font-size:11.5px;font-weight:700;color:rgba(255,255,255,.95);display:flex;align-items:center;gap:4px}
+.velearn-tile-stats strong{color:#FFE082}
+.velearn-tile-arrow{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;transition:all .4s;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.2)}
+.velearn-tile:hover .velearn-tile-arrow{background:#fff;color:#142554;transform:translateX(4px)}
+
+/* Palettes de couleurs par catégorie e-learning */
+.velearn-tile.c-epreuves   {--vel-c1:#3B82F6;--vel-c2:#1E3A8A}
+.velearn-tile.c-cours      {--vel-c1:#A855F7;--vel-c2:#6B21A8}
+.velearn-tile.c-video      {--vel-c1:#EF4444;--vel-c2:#991B1B}
+.velearn-tile.c-corpus     {--vel-c1:#10B981;--vel-c2:#047857}
+.velearn-tile.c-fiches     {--vel-c1:#F97316;--vel-c2:#9A3412}
+.velearn-tile.c-anciens    {--vel-c1:#06B6D4;--vel-c2:#0E7490}
+.velearn-tile.c-default    {--vel-c1:#64748B;--vel-c2:#334155}
+
+/* Responsive */
+@media (max-width:720px){
+  .vbook-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .vbook-cover{height:130px}
+  .vbook-title{font-size:13px;min-height:34px}
+  .vprod-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .velearn-grid{grid-template-columns:1fr;gap:12px}
+}
+@media (max-width:480px){
+  .vbook-grid{grid-template-columns:1fr}
+  .vprod-grid{grid-template-columns:1fr}
+}
 
 /* ═════ #11 — NÉON GLOW ═════ */
 .vgz-neon-text{text-shadow:0 0 10px var(--vgz-gold-glow),0 0 20px rgba(255,201,60,.3),0 0 40px rgba(255,201,60,.2)}
