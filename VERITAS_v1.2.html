@@ -47,7 +47,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="VÉRITAS">
 <meta name="application-name" content="VÉRITAS Academy">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<!-- v1.2 fix : apple-touch-icon pointe vers le logo existant pour éviter 404 -->
+<link rel="apple-touch-icon" href="/Logo détouré.png">
+<link rel="icon" type="image/png" href="/Logo détouré.png">
 
 <!-- ════════════════════════════════════════════════════════════
      🔗 OPEN GRAPH (Facebook, LinkedIn, WhatsApp)
@@ -243,6 +245,10 @@ tryLoad();})();
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 ::selection{background:var(--gold);color:#fff}
 :root{
+  /* v1.2 fix audit : ajout variables CSS manquantes (--ink1, --w, --wa) */
+  --ink1:#0F1E47;   /* texte fort (notifications) */
+  --w:100%;          /* progress bar width (par défaut 100%) */
+  --wa:#F59E0B;      /* couleur "En attente" / "Waiting" (ambre) */
   --bg:#F0F2F7;--bg2:#E4E8F0;--bg3:#CDD3DF;--sur:#FFFFFF;--sur2:#F8F9FC;
   --ink:#142554;--ink2:#1E2D5A;--ink3:#475882;--ink4:#6B7DA0;
   --gold:#FFC93C;--gold2:#F5B800;--gp:#FFF8E1;--gb:#FFE082;
@@ -15355,41 +15361,8 @@ function _aiGate(t){
 }
 
 
-async function _runAIOrient(){
-  if(!_aiGate('orient'))return;
-  var desc=(document.getElementById('aiDesc')?.value||'').trim();
-  if(desc.length<15){toast('Décrivez vos passions (min. 15 caractères)','warn');return;}
-  var btn=document.getElementById('aiBtnO'),res=document.getElementById('aiResO');
-  if(btn){btn.disabled=true;btn.innerHTML='⏳ Analyse IA en cours…';}
-  var cls=document.getElementById('aiCls').value;
-  var mat2=document.getElementById('aiMat').value;
-  var moy=document.getElementById('aiMoy').value;
-  var asp=document.getElementById('aiAsp').value;
-  var prompt=
-    'Tu es un conseiller d\'orientation expert du système éducatif camerounais (MINESEC/MINESUP). '+
-    'Tu connais parfaitement : les séries du BAC camerounais (A, C, D, E, F1/2/3/4, TI), '+
-    'le BEPC, les grandes écoles (Polytechnique Yaoundé, FASA, ENAM, ENSP, IRIC, ESSEC, EMIA, ISTDI, UY1/UY2), '+
-    'les BTS/HND camerounais, les conditions d\'admission, les concours d\'entrée, '+
-    'les débouchés professionnels au Cameroun et les carrières porteurs en Afrique centrale. '+
-    '\n\nProfil : Classe='+cls+', Matière préférée='+mat2+', Moyenne=«'+moy+'», Aspiration=«'+asp+'», '+
-    'Description=«'+desc+'». '+
-    '\n\nOrienation personnalisée structurée (utilise ** pour les titres) : '+
-    '**1. Analyse du profil** — Forces, aptitudes et traits de personnalité identifiés. '+
-    '**2. Filières recommandées** — 3 options avec : série BAC, établissements camerounais, '+
-    'conditions d\'accès (moyenne, concours), durée des études, débouchés métiers concrets. '+
-    '**3. Conseils stratégiques** — 4 étapes concrètes pour atteindre l\'objectif au Cameroun. '+
-    'Sois précis, encourageant et ancré dans la réalité camerounaise. Max 420 mots. En français.';
-  try{
-    var txt=await callClaudeAPI(prompt);
-    _aiInc('orient');
-    var rem=Math.max(0,_aiLimit('orient')-_aiUsed('orient'));
-    if(res){res.style.display='block';res.textContent=txt;}
-    if(btn){btn.disabled=false;btn.innerHTML='🔄 Nouvelle analyse ('+(rem>0?rem+' restant'+(rem>1?'s':''):'0 restant')+')';}
-  }catch(e){
-    toast('Erreur IA : '+e.message,'err');
-    if(btn){btn.disabled=false;btn.innerHTML='🤖 Réessayer';}
-  }
-}
+// ── v1.2 fix : ancien _runAIOrient supprimé (code mort, lisait des IDs inexistants).
+// La version active est définie ci-dessous après mAIOrientation().
 
 function mAIOrientation(){
   if(!_aiGate('orient'))return;
