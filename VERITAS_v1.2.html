@@ -31742,9 +31742,16 @@ if(document.readyState==='loading'){
 }
 
 /* ═════ #1 — CURSEUR PERSONNALISÉ ═════ */
-.vgz-cursor{position:fixed;width:24px;height:24px;border:2px solid var(--vgz-gold);border-radius:50%;pointer-events:none;z-index:99999;transition:transform .15s ease-out,opacity .2s,width .2s,height .2s,background .2s;mix-blend-mode:difference;transform:translate(-50%,-50%);opacity:0;display:none}
-.vgz-cursor-dot{position:fixed;width:6px;height:6px;background:var(--vgz-gold);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);opacity:0;transition:opacity .2s;display:none}
-.vgz-cursor.is-hover{width:48px;height:48px;background:rgba(255,201,60,.18);border-color:transparent}
+/* ═════ Curseur premium — étoile dorée pulsée + halo de trainée ═════ */
+.vgz-cursor{position:fixed;width:36px;height:36px;border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);opacity:0;display:none;background:
+  radial-gradient(circle,rgba(255,201,60,.55) 0%,rgba(255,201,60,.18) 40%,transparent 70%);
+  filter:blur(.5px);transition:width .25s cubic-bezier(.34,1.56,.64,1),height .25s cubic-bezier(.34,1.56,.64,1),opacity .2s}
+.vgz-cursor-dot{position:fixed;width:10px;height:10px;background:radial-gradient(circle,#FFE082 0%,#FFC93C 60%,transparent 100%);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%) rotate(45deg);opacity:0;transition:opacity .2s,transform .15s;display:none;box-shadow:0 0 14px rgba(255,201,60,.9),0 0 28px rgba(255,201,60,.5)}
+.vgz-cursor-dot::before{content:"";position:absolute;inset:0;background:inherit;border-radius:inherit;animation:vgzCursPulse 2s ease-in-out infinite}
+@keyframes vgzCursPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.8);opacity:.3}}
+.vgz-cursor.is-hover{width:72px;height:72px;background:radial-gradient(circle,rgba(255,201,60,.35) 0%,rgba(255,201,60,.1) 50%,transparent 80%)}
+.vgz-cursor.is-hover ~ .vgz-cursor-dot,
+body.vgz-cursor-on-link .vgz-cursor-dot{transform:translate(-50%,-50%) rotate(45deg) scale(0.6)}
 @media(hover:hover) and (pointer:fine){
   .vgz-cursor,.vgz-cursor-dot{display:block}
   body{cursor:none}
@@ -31840,7 +31847,9 @@ if(document.readyState==='loading'){
 .vgz-bento-card .b-bg{position:absolute;inset:0;opacity:.15;transition:opacity .3s}
 .vgz-bento-card:hover .b-bg{opacity:.3}
 .vgz-bento-card .b-content{position:relative;z-index:2;height:100%;padding:18px;display:flex;flex-direction:column;justify-content:space-between;color:#fff}
-.vgz-bento-card .b-ico{font-size:32px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))}
+.vgz-bento-card .b-ico{font-size:32px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3));transition:transform .35s cubic-bezier(.34,1.56,.64,1);display:inline-block}
+.vgz-bento-card:hover .b-ico{transform:scale(1.15) rotate(-8deg)}
+.vgz-bento-card .b-ico img{display:block}
 .vgz-bento-card .b-title{font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;line-height:1.2}
 .vgz-bento-card .b-desc{font-size:11px;color:rgba(255,255,255,.7);margin-top:3px}
 .vgz-bento-card .b-arrow{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;color:#FFC93C;transition:all .3s}
@@ -31852,37 +31861,82 @@ if(document.readyState==='loading'){
 .bento-5{background:linear-gradient(135deg,#BE185D,#EC4899)}
 .bento-6{background:linear-gradient(135deg,#D97706,#F59E0B)}
 
-/* ═════ #8 — CARTES "POUR QUI" AVEC TILT 3D ═════ */
-.vgz-roles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0;perspective:1500px}
-.vgz-role{position:relative;border-radius:20px;padding:24px 20px;background:linear-gradient(160deg,rgba(255,255,255,.05),rgba(255,255,255,.02));border:1px solid rgba(255,201,60,.15);transition:transform .15s ease-out,box-shadow .3s;transform-style:preserve-3d;cursor:pointer;text-align:center;color:#fff;overflow:hidden}
-.vgz-role::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,201,60,.18) 0%,transparent 50%);opacity:0;transition:opacity .3s;pointer-events:none}
-.vgz-role:hover::before{opacity:1}
-.vgz-role:hover{box-shadow:0 30px 80px rgba(0,0,0,.4),0 0 0 1px var(--vgz-gold-glow)}
-.vgz-role-ico{font-size:48px;margin-bottom:10px;display:inline-block;filter:drop-shadow(0 6px 16px rgba(0,0,0,.3));transition:transform .3s}
-.vgz-role:hover .vgz-role-ico{transform:translateZ(40px) scale(1.1)}
-.vgz-role-title{font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;color:#FFC93C;margin-bottom:8px}
-.vgz-role-desc{font-size:12px;color:rgba(255,255,255,.7);line-height:1.5}
-.vgz-role-cta{display:inline-block;margin-top:14px;padding:6px 14px;background:rgba(255,201,60,.15);color:#FFC93C;border-radius:20px;font-size:11px;font-weight:700;text-decoration:none;transition:all .3s}
-.vgz-role:hover .vgz-role-cta{background:#FFC93C;color:#142554}
+/* ═════ WRAPPER SOMBRE PREMIUM — gradient animé + aurora ═════ */
+.vgz-dark-section{background:linear-gradient(135deg,#0D1B3E 0%,#142554 25%,#1E3A8A 50%,#142554 75%,#0F172A 100%);background-size:400% 400%;animation:vgzAurora 15s ease infinite;border-radius:28px;padding:40px 28px;margin:30px 0;position:relative;overflow:hidden;box-shadow:0 25px 80px rgba(13,27,62,.5),0 0 0 1px rgba(255,201,60,.1)}
+@keyframes vgzAurora{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.vgz-dark-section::before{content:"";position:absolute;inset:0;background:
+  radial-gradient(circle at 15% 25%,rgba(255,201,60,.18) 0%,transparent 40%),
+  radial-gradient(circle at 85% 75%,rgba(60,141,255,.18) 0%,transparent 40%),
+  radial-gradient(circle at 50% 50%,rgba(124,58,237,.10) 0%,transparent 60%);
+  pointer-events:none;animation:vgzFloat 12s ease-in-out infinite}
+.vgz-dark-section::after{content:"";position:absolute;inset:0;background-image:
+  radial-gradient(circle at 20% 30%,#FFC93C 1px,transparent 1px),
+  radial-gradient(circle at 70% 60%,#3C8DFF 1px,transparent 1px),
+  radial-gradient(circle at 40% 80%,#FFC93C 1px,transparent 1px);
+  background-size:100px 100px,150px 150px,80px 80px;opacity:.25;animation:vgzStarsDrift 30s linear infinite;pointer-events:none}
+@keyframes vgzFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-20px,15px) scale(1.05)}66%{transform:translate(15px,-10px) scale(.95)}}
+@keyframes vgzStarsDrift{from{transform:translate(0,0)}to{transform:translate(-100px,100px)}}
+.vgz-dark-section > *{position:relative;z-index:2}
+.vgz-section-title{text-align:center;margin:0 0 6px;font-family:'Libre Baskerville',serif;font-size:32px;background:linear-gradient(90deg,#FFC93C,#FFE082,#FFC93C);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;text-shadow:none;animation:vgzShimmer 3s linear infinite;letter-spacing:2px}
+@keyframes vgzShimmer{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+.vgz-section-sub{text-align:center;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:28px;letter-spacing:.5px}
 
-/* ═════ #9 — MARQUEE PARTENAIRES ═════ */
-.vgz-marquee{margin:24px 0;padding:14px 0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.03),transparent);border-radius:14px;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 15%,#000 85%,transparent)}
-.vgz-marquee-track{display:flex;gap:48px;animation:vgzMarquee 30s linear infinite;white-space:nowrap}
+/* ═════ #8 — CARTES "POUR QUI" — Pictos 3D + animations multi-couleurs ═════ */
+.vgz-roles{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:24px 0;perspective:1500px}
+.vgz-role{position:relative;border-radius:22px;padding:28px 20px 24px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,201,60,.05));border:1.5px solid rgba(255,201,60,.3);transition:transform .15s ease-out,box-shadow .3s,border-color .3s;transform-style:preserve-3d;cursor:pointer;text-align:center;color:#fff;overflow:hidden;backdrop-filter:blur(12px)}
+.vgz-role::before{content:"";position:absolute;inset:-2px;background:conic-gradient(from var(--ang,0deg),transparent 0deg,#FFC93C 90deg,#3C8DFF 180deg,#7C3AED 270deg,transparent 360deg);border-radius:22px;opacity:0;z-index:-1;transition:opacity .4s;animation:vgzSpin 6s linear infinite paused}
+.vgz-role::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,201,60,.28) 0%,transparent 50%);opacity:0;transition:opacity .3s;pointer-events:none;border-radius:22px}
+@keyframes vgzSpin{to{--ang:360deg}}
+.vgz-role:hover::before{opacity:.55;animation-play-state:running}
+.vgz-role:hover::after{opacity:1}
+.vgz-role:hover{box-shadow:0 30px 90px rgba(0,0,0,.5),0 0 60px rgba(255,201,60,.25);border-color:transparent}
+
+/* Couleur unique par carte */
+.vgz-role.r-eleve     {--vgz-role-color:#FFC93C}
+.vgz-role.r-parent    {--vgz-role-color:#3C8DFF}
+.vgz-role.r-enseignant{--vgz-role-color:#10B981}
+.vgz-role.r-etab      {--vgz-role-color:#A855F7}
+.vgz-role .vgz-role-glow{position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,var(--vgz-role-color,#FFC93C) 0%,transparent 65%);opacity:.35;filter:blur(20px);transition:opacity .4s,transform .4s;pointer-events:none}
+.vgz-role:hover .vgz-role-glow{opacity:.7;transform:translateX(-50%) scale(1.2)}
+
+/* Pictogramme 3D HD */
+.vgz-role-ico{width:88px;height:88px;margin:0 auto 14px;display:block;position:relative;animation:vgzFloatIco 3.5s ease-in-out infinite;filter:drop-shadow(0 12px 24px rgba(0,0,0,.5))}
+.vgz-role-ico img{width:100%;height:100%;object-fit:contain;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+@keyframes vgzFloatIco{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.vgz-role:hover .vgz-role-ico img{transform:scale(1.18) rotate(-6deg) translateZ(50px)}
+
+.vgz-role-title{font-family:Montserrat,sans-serif;font-size:19px;font-weight:900;color:#fff;margin-bottom:10px;letter-spacing:1.5px;position:relative}
+.vgz-role-title::after{content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);width:0;height:2px;background:var(--vgz-role-color,#FFC93C);transition:width .4s;box-shadow:0 0 10px var(--vgz-role-color,#FFC93C)}
+.vgz-role:hover .vgz-role-title::after{width:50px}
+.vgz-role-desc{font-size:13px;color:rgba(255,255,255,.92);line-height:1.6;font-weight:500;margin-top:8px}
+.vgz-role-cta{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:10px 20px;background:linear-gradient(135deg,var(--vgz-role-color,#FFC93C),#FFE082);color:#142554;border-radius:26px;font-size:12px;font-weight:900;text-decoration:none;transition:all .3s;box-shadow:0 6px 18px rgba(255,201,60,.4);letter-spacing:.5px;text-transform:uppercase}
+.vgz-role.r-parent     .vgz-role-cta{box-shadow:0 6px 18px rgba(60,141,255,.4)}
+.vgz-role.r-enseignant .vgz-role-cta{box-shadow:0 6px 18px rgba(16,185,129,.4)}
+.vgz-role.r-etab       .vgz-role-cta{box-shadow:0 6px 18px rgba(168,85,247,.4)}
+.vgz-role:hover .vgz-role-cta{transform:translateY(-3px) scale(1.05);box-shadow:0 12px 32px rgba(255,201,60,.55)}
+
+/* ═════ #9 — MARQUEE PARTENAIRES — pictos 3D + glow ═════ */
+.vgz-marquee{margin:28px 0;padding:18px 0;background:linear-gradient(90deg,transparent,rgba(255,201,60,.1),rgba(60,141,255,.08),rgba(255,201,60,.1),transparent);border-radius:16px;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);border-top:1px solid rgba(255,201,60,.2);border-bottom:1px solid rgba(255,201,60,.2);position:relative}
+.vgz-marquee::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 30%,rgba(255,255,255,.06) 50%,transparent 70%);background-size:200% 100%;animation:vgzMarqueeShine 4s linear infinite;pointer-events:none}
+@keyframes vgzMarqueeShine{from{background-position:-100% 0}to{background-position:200% 0}}
+.vgz-marquee-track{display:flex;gap:56px;animation:vgzMarquee 30s linear infinite;white-space:nowrap}
 @keyframes vgzMarquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-.vgz-marquee-item{font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:rgba(255,255,255,.5);display:flex;align-items:center;gap:8px;white-space:nowrap;letter-spacing:1px}
-.vgz-marquee-item .ico{font-size:22px}
+.vgz-marquee-item{font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#fff;display:flex;align-items:center;gap:12px;white-space:nowrap;letter-spacing:1.5px;text-transform:uppercase;padding:6px 14px;border-radius:30px;background:rgba(255,255,255,.05);border:1px solid rgba(255,201,60,.15);transition:all .3s}
+.vgz-marquee-item:hover{background:rgba(255,201,60,.15);border-color:rgba(255,201,60,.5);transform:scale(1.05)}
+.vgz-marquee-item .ico{font-size:0;width:32px;height:32px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.vgz-marquee-item .ico img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 8px rgba(255,201,60,.5))}
 
-/* ═════ #10 — TÉMOIGNAGES MODERNES ═════ */
+/* ═════ #10 — TÉMOIGNAGES (fond plus contrasté) ═════ */
 .vgz-testis{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:24px 0}
-.vgz-testi{background:linear-gradient(160deg,rgba(255,255,255,.04),rgba(255,201,60,.02));border:1px solid rgba(255,201,60,.15);border-radius:20px;padding:22px;color:#fff;position:relative;transition:transform .3s,box-shadow .3s}
+.vgz-testi{background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,201,60,.03));border:1px solid rgba(255,201,60,.2);border-radius:20px;padding:24px;color:#fff;position:relative;transition:transform .3s,box-shadow .3s;backdrop-filter:blur(6px)}
 .vgz-testi:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(255,201,60,.15)}
-.vgz-testi::before{content:"\201C";position:absolute;top:-10px;left:14px;font-family:Georgia,serif;font-size:80px;color:rgba(255,201,60,.25);line-height:1}
-.vgz-testi-stars{color:#FFC93C;font-size:14px;letter-spacing:2px;margin-bottom:10px;position:relative}
-.vgz-testi-text{font-family:Georgia,serif;font-style:italic;font-size:13px;line-height:1.7;color:rgba(255,255,255,.85);margin-bottom:14px}
-.vgz-testi-author{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
-.vgz-testi-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#FFC93C,#FFA500);display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-weight:800;color:#142554;font-size:15px;flex-shrink:0;box-shadow:0 4px 12px rgba(255,201,60,.3)}
-.vgz-testi-info-name{font-size:13px;font-weight:800;color:#FFC93C}
-.vgz-testi-info-meta{font-size:10px;color:rgba(255,255,255,.55);margin-top:2px}
+.vgz-testi::before{content:"\201C";position:absolute;top:-10px;left:14px;font-family:Georgia,serif;font-size:80px;color:rgba(255,201,60,.35);line-height:1}
+.vgz-testi-stars{color:#FFC93C;font-size:15px;letter-spacing:2px;margin-bottom:10px;position:relative;filter:drop-shadow(0 0 6px rgba(255,201,60,.4))}
+.vgz-testi-text{font-family:Georgia,serif;font-style:italic;font-size:13.5px;line-height:1.7;color:rgba(255,255,255,.92);margin-bottom:14px}
+.vgz-testi-author{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid rgba(255,201,60,.15)}
+.vgz-testi-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFC93C,#FFA500);display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-weight:900;color:#142554;font-size:17px;flex-shrink:0;box-shadow:0 4px 16px rgba(255,201,60,.4)}
+.vgz-testi-info-name{font-size:13.5px;font-weight:800;color:#FFC93C}
+.vgz-testi-info-meta{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px}
 
 /* ═════ #11 — NÉON GLOW ═════ */
 .vgz-neon-text{text-shadow:0 0 10px var(--vgz-gold-glow),0 0 20px rgba(255,201,60,.3),0 0 40px rgba(255,201,60,.2)}
@@ -32070,70 +32124,98 @@ if(document.readyState==='loading'){
         +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="'+nTeachers+'" data-suffix="">0</div><div class="vgz-stat-label">Enseignants</div></div>'
       +'</div>'
 
-      // === BENTO GRID ===
-      +'<div class="vgz-bento v-reveal">'
-        +'<div class="vgz-bento-card bento-1" onclick="vShowSec(\'elearning\',document.querySelector(\'.vnav-btn[onclick*=elearning]\'))">'
-          +'<div class="b-arrow">↗</div>'
-          +'<div class="b-content"><div class="b-ico">📚</div><div><div class="b-title">E-Learning Premium</div><div class="b-desc">Cours vidéo, épreuves corrigées et fiches de révision pour BEPC, Probat & BAC. Accessible 24h/24.</div></div></div>'
-        +'</div>'
-        +'<div class="vgz-bento-card bento-2" onclick="showClasseVirtuelle()">'
-          +'<div class="b-content"><div class="b-ico">🎥</div><div class="b-title">Classes virtuelles</div></div>'
-        +'</div>'
-        +'<div class="vgz-bento-card bento-3" onclick="showLabosVirtuels()">'
-          +'<div class="b-content"><div class="b-ico">🔬</div><div class="b-title">Labos virtuels</div></div>'
-        +'</div>'
-        +'<div class="vgz-bento-card bento-4" onclick="vShowSec(\'boutique\',document.querySelector(\'.vnav-btn[onclick*=boutique]\'))">'
-          +'<div class="b-arrow">↗</div>'
-          +'<div class="b-content"><div class="b-ico">🛒</div><div><div class="b-title">Boutique manuels</div><div class="b-desc">'+nBooks+' manuels MINESEC · Paiement MoMo/Orange · Livraison Douala</div></div></div>'
-        +'</div>'
-        +'<div class="vgz-bento-card bento-5" onclick="showJeuxEdu()">'
-          +'<div class="b-content"><div class="b-ico">🎮</div><div class="b-title">Jeux éducatifs</div></div>'
-        +'</div>'
-        +'<div class="vgz-bento-card bento-6" onclick="showEpreuves()">'
-          +'<div class="b-content"><div class="b-ico">📝</div><div class="b-title">Annales</div></div>'
-        +'</div>'
-      +'</div>'
+      // === BENTO GRID — pictos 3D HD ===
+      +(function(){
+        var P='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
+        function pic(name){return '<img src="'+P+name+'" alt="" loading="lazy" style="width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 6px 12px rgba(0,0,0,.35))">';}
+        return '<div class="vgz-bento v-reveal">'
+          +'<div class="vgz-bento-card bento-1" onclick="vShowSec(\'elearning\',document.querySelector(\'.vnav-btn[onclick*=elearning]\'))">'
+            +'<div class="b-arrow">↗</div>'
+            +'<div class="b-content"><div class="b-ico">'+pic('books_1f4da.png')+'</div><div><div class="b-title">E-Learning Premium</div><div class="b-desc">Cours vidéo, épreuves corrigées et fiches de révision pour BEPC, Probat & BAC. Accessible 24h/24.</div></div></div>'
+          +'</div>'
+          +'<div class="vgz-bento-card bento-2" onclick="showClasseVirtuelle()">'
+            +'<div class="b-content"><div class="b-ico">'+pic('video-camera_1f4f9.png')+'</div><div class="b-title">Classes virtuelles</div></div>'
+          +'</div>'
+          +'<div class="vgz-bento-card bento-3" onclick="showLabosVirtuels()">'
+            +'<div class="b-content"><div class="b-ico">'+pic('microscope_1f52c.png')+'</div><div class="b-title">Labos virtuels</div></div>'
+          +'</div>'
+          +'<div class="vgz-bento-card bento-4" onclick="vShowSec(\'boutique\',document.querySelector(\'.vnav-btn[onclick*=boutique]\'))">'
+            +'<div class="b-arrow">↗</div>'
+            +'<div class="b-content"><div class="b-ico">'+pic('shopping-cart_1f6d2.png')+'</div><div><div class="b-title">Boutique manuels</div><div class="b-desc">'+nBooks+' manuels MINESEC · Paiement MoMo/Orange · Livraison Douala</div></div></div>'
+          +'</div>'
+          +'<div class="vgz-bento-card bento-5" onclick="showJeuxEdu()">'
+            +'<div class="b-content"><div class="b-ico">'+pic('video-game_1f3ae.png')+'</div><div class="b-title">Jeux éducatifs</div></div>'
+          +'</div>'
+          +'<div class="vgz-bento-card bento-6" onclick="showEpreuves()">'
+            +'<div class="b-content"><div class="b-ico">'+pic('memo_1f4dd.png')+'</div><div class="b-title">Annales</div></div>'
+          +'</div>'
+        +'</div>';
+      })()
 
-      // === POUR QUI ===
-      +'<div style="margin:30px 0 16px;text-align:center"><h2 style="font-family:Libre Baskerville,serif;font-size:26px;color:#FFC93C;margin:0 0 6px" class="vgz-neon-text">Tu es...</h2><div style="font-size:13px;color:rgba(255,255,255,.6)">Une plateforme. Un accès personnalisé pour chaque rôle.</div></div>'
+      // === SECTION SOMBRE PREMIUM ===
+      // CDN Microsoft Fluent 3D Emoji — pictogrammes haute résolution
+      +'<div class="vgz-dark-section">'
+      +'<div style="margin:0 0 18px;text-align:center"><h2 class="vgz-section-title">Tu es...</h2><div class="vgz-section-sub">✨ Une plateforme. Un accès personnalisé pour chaque rôle.</div></div>'
       +'<div class="vgz-roles v-reveal">'
-        +'<div class="vgz-role" onclick="showLogin(\'eleve\')">'
-          +'<div class="vgz-role-ico">🎓</div>'
+        +'<div class="vgz-role r-eleve" onclick="showLogin(\'eleve\')">'
+          +'<div class="vgz-role-glow"></div>'
+          +'<div class="vgz-role-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/graduation-cap_1f393.png" alt="Élève" loading="lazy"></div>'
           +'<div class="vgz-role-title">ÉLÈVE</div>'
           +'<div class="vgz-role-desc">Notes, bulletins, devoirs et cours en ligne. Tout ce qu\'il te faut pour réussir.</div>'
           +'<div class="vgz-role-cta">Se connecter →</div>'
         +'</div>'
-        +'<div class="vgz-role" onclick="showRegisterForm()">'
-          +'<div class="vgz-role-ico">👨‍👩‍👧</div>'
+        +'<div class="vgz-role r-parent" onclick="showRegisterForm()">'
+          +'<div class="vgz-role-glow"></div>'
+          +'<div class="vgz-role-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/family_1f46a.png" alt="Parent" loading="lazy"></div>'
           +'<div class="vgz-role-title">PARENT</div>'
           +'<div class="vgz-role-desc">Suis la progression de ton enfant, paie en MoMo et reçois les notifs en direct.</div>'
           +'<div class="vgz-role-cta">S\'inscrire →</div>'
         +'</div>'
-        +'<div class="vgz-role" onclick="showLogin(\'enseignant\')">'
-          +'<div class="vgz-role-ico">👨‍🏫</div>'
+        +'<div class="vgz-role r-enseignant" onclick="showLogin(\'enseignant\')">'
+          +'<div class="vgz-role-glow"></div>'
+          +'<div class="vgz-role-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/man-teacher-medium-skin-tone_1f468-1f3fd-200d-1f3eb.png" alt="Enseignant" loading="lazy"></div>'
           +'<div class="vgz-role-title">ENSEIGNANT</div>'
           +'<div class="vgz-role-desc">Saisis tes notes en lot, publie tes manuels, suis les performances de tes classes.</div>'
           +'<div class="vgz-role-cta">Accéder →</div>'
         +'</div>'
-        +'<div class="vgz-role" onclick="window.open(\'https://wa.me/237697637739?text=Bonjour%20VERITAS%20pour%20mon%20etablissement\',\'_blank\')">'
-          +'<div class="vgz-role-ico">🏫</div>'
+        +'<div class="vgz-role r-etab" onclick="window.open(\'https://wa.me/237697637739?text=Bonjour%20VERITAS%20pour%20mon%20etablissement\',\'_blank\')">'
+          +'<div class="vgz-role-glow"></div>'
+          +'<div class="vgz-role-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/school_1f3eb.png" alt="Établissement" loading="lazy"></div>'
           +'<div class="vgz-role-title">ÉTABLISSEMENT</div>'
           +'<div class="vgz-role-desc">Digitalise ton école : inscriptions, paiements, bulletins APC, e-learning complet.</div>'
           +'<div class="vgz-role-cta">Contacter →</div>'
         +'</div>'
       +'</div>'
 
-      // === MARQUEE ===
+      // === MARQUEE PARTENAIRES — pictos 3D ===
       +'<div class="vgz-marquee v-reveal">'
         +'<div class="vgz-marquee-track">'
-          +(['<span class="ico">🏫</span> MINESEC','<span class="ico">📚</span> Programmes officiels','<span class="ico">⚡</span> MTN MoMo','<span class="ico">🟠</span> Orange Money','<span class="ico">🎓</span> ENS Yaoundé','<span class="ico">🔬</span> Polytechnique','<span class="ico">📖</span> CLE International','<span class="ico">🤝</span> Afrédit'].map(function(s){return '<div class="vgz-marquee-item">'+s+'</div>';}).join(''))
-          // dupliquer pour boucle infinie
-          +(['<span class="ico">🏫</span> MINESEC','<span class="ico">📚</span> Programmes officiels','<span class="ico">⚡</span> MTN MoMo','<span class="ico">🟠</span> Orange Money','<span class="ico">🎓</span> ENS Yaoundé','<span class="ico">🔬</span> Polytechnique','<span class="ico">📖</span> CLE International','<span class="ico">🤝</span> Afrédit'].map(function(s){return '<div class="vgz-marquee-item">'+s+'</div>';}).join(''))
+          +(function(){
+            var items = [
+              {img:'school_1f3eb',                   txt:'MINESEC'},
+              {img:'books_1f4da',                    txt:'Programmes officiels'},
+              {img:'high-voltage_26a1',              txt:'MTN MoMo'},
+              {img:'orange-circle_1f7e0',            txt:'Orange Money'},
+              {img:'graduation-cap_1f393',           txt:'ENS Yaoundé'},
+              {img:'microscope_1f52c',               txt:'Polytechnique'},
+              {img:'open-book_1f4d6',                txt:'CLE International'},
+              {img:'handshake_1f91d',                txt:'Afrédit'}
+            ];
+            var pictBase='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
+            var html='';
+            // Boucle x2 pour défilement infini
+            for(var i=0;i<2;i++){
+              items.forEach(function(it){
+                html+='<div class="vgz-marquee-item"><span class="ico"><img src="'+pictBase+it.img+'.png" alt="" loading="lazy"></span>'+it.txt+'</div>';
+              });
+            }
+            return html;
+          })()
         +'</div>'
       +'</div>'
 
-      // === TÉMOIGNAGES ===
-      +'<div style="margin:30px 0 16px;text-align:center"><h2 style="font-family:Libre Baskerville,serif;font-size:26px;color:#FFC93C;margin:0 0 6px" class="vgz-neon-text">Ils nous font confiance</h2></div>'
+      // === TÉMOIGNAGES — toujours dans le wrapper sombre ===
+      +'<div style="margin:34px 0 16px;text-align:center"><h2 class="vgz-section-title">Ils nous font confiance</h2><div class="vgz-section-sub">⭐ Plus de 500 familles ont choisi VÉRITAS</div></div>'
       +'<div class="vgz-testis v-reveal">'
         +'<div class="vgz-testi">'
           +'<div class="vgz-testi-stars">★★★★★</div>'
@@ -32151,6 +32233,7 @@ if(document.readyState==='loading'){
           +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">G</div><div><div class="vgz-testi-info-name">M. Georges T.</div><div class="vgz-testi-info-meta">Prof Maths · 15 ans d\'expérience</div></div></div>'
         +'</div>'
       +'</div>'
+      +'</div>'  // close .vgz-dark-section
       ;
 
     // Insertion après la première section (vidéo + actualités)
