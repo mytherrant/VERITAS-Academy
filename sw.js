@@ -4,7 +4,9 @@
 // les données dynamiques. Permet le fonctionnement hors-ligne basique.
 // ═══════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'veritas-v1.2.4';
+const CACHE_VERSION = 'veritas-v1.2.5';
+// v1.2.5 : Force le rafraîchissement après l'incident HTTP 500 (24 mai 2026)
+// Nettoyage aggressif de TOUS les anciens caches au démarrage
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
@@ -45,12 +47,17 @@ self.addEventListener('install', event => {
 // ═══════════════════════════════════════════════════════════════════
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
+    Promise.all([
+      // 1. Supprimer TOUS les anciens caches (pas seulement ceux d'une version antérieure)
+      caches.keys().then(keys => Promise.all(
         keys.filter(k => !k.startsWith(CACHE_VERSION))
-            .map(k => caches.delete(k))
-      ))
-      .then(() => self.clients.claim())
+            .map(k => { console.log('[SW] Suppression cache:', k); return caches.delete(k); })
+      )),
+      // 2. Prendre le contrôle de tous les clients immédiatement
+      self.clients.claim(),
+      // 3. Notifier les clients que le SW est actif
+      self.clients.matchAll().then(clients => clients.forEach(c => c.postMessage({type:'SW_UPDATED', version:CACHE_VERSION})))
+    ])
   );
 });
 
@@ -75,7 +82,9 @@ self.addEventListener('fetch', event => {
     event.respondWith(
       fetch(req)
         .then(res => {
-          if (res.ok) {
+          // v1.2.5 SÉCURITÉ : ne cacher que les réponses 200 ET valides
+          // Ne JAMAIS cacher les 4xx/5xx (pages d'erreur LWS, Cloudflare, etc.)
+          if (res.ok && res.status === 200 && res.type !== 'error') {
             const clone = res.clone();
             caches.open(STATIC_CACHE).then(c => c.put(req, clone));
           }

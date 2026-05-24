@@ -247,12 +247,47 @@ tryLoad();})();
 <!-- ═══ v1.2 OPTIMISATION : Service Worker + Lazy Loading auto ═══ -->
 <script>
 // Service Worker pour cache offline + perf mobile
+// v1.2.5 : auto-update + protection contre cache pollué (HTTP 500 etc.)
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('[VÉRITAS SW] Cache offline actif'))
-      .catch(err => console.warn('[VÉRITAS SW] Erreur:', err));
+      .then(function(reg){
+        console.log('[VÉRITAS SW] Cache offline actif');
+        // Vérifier MAJ toutes les heures
+        setInterval(function(){ reg.update().catch(function(){}); }, 60*60*1000);
+        // Si nouvelle version détectée, l'activer immédiatement
+        reg.addEventListener('updatefound', function(){
+          var nw = reg.installing;
+          if(nw) nw.addEventListener('statechange', function(){
+            if(nw.state === 'installed' && navigator.serviceWorker.controller){
+              console.log('[VÉRITAS SW] Nouvelle version disponible — rechargement…');
+              nw.postMessage('SKIP_WAITING');
+              setTimeout(function(){ location.reload(); }, 500);
+            }
+          });
+        });
+      })
+      .catch(function(err){ console.warn('[VÉRITAS SW] Erreur:', err); });
+
+    // Écouter les messages du SW (notamment SW_UPDATED)
+    navigator.serviceWorker.addEventListener('message', function(e){
+      if(e.data && e.data.type === 'SW_UPDATED'){
+        console.log('[VÉRITAS SW] Activé version', e.data.version);
+      }
+    });
   });
+
+  // FAIL-SAFE : si la page contient une erreur 500 dans le titre, désinstaller le SW
+  if(document.title && (document.title.indexOf('500') >= 0 || document.title.indexOf('ERROR') >= 0 || document.title.indexOf('Hebergeur') >= 0)){
+    console.warn('[VÉRITAS SW] Page d\'erreur détectée — nettoyage cache + désinstallation SW');
+    navigator.serviceWorker.getRegistrations().then(function(regs){
+      regs.forEach(function(r){ r.unregister(); });
+    });
+    if(caches && caches.keys) caches.keys().then(function(keys){
+      keys.forEach(function(k){ caches.delete(k); });
+    });
+    setTimeout(function(){ location.reload(true); }, 1000);
+  }
 }
 
 // Lazy loading universel : applique loading="lazy" decoding="async"
