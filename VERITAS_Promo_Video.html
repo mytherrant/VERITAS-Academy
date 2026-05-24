@@ -427,6 +427,121 @@ html,body{width:100vw;height:100vh;overflow:hidden;background:#000;color:#fff}
 .replay-screen.show{display:flex}
 .replay-screen h2{font-size:64px;color:#FFC93C;font-family:'Libre Baskerville',serif;margin-bottom:30px}
 .replay-btn{background:#FFC93C;color:#142554;padding:20px 50px;border-radius:60px;font-size:22px;font-weight:900;letter-spacing:2px;text-transform:uppercase;border:none;cursor:pointer}
+.replay-screen .actions{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:20px}
+.replay-screen .secondary-btn{background:transparent;color:#FFC93C;padding:18px 36px;border-radius:60px;font-size:16px;font-weight:700;letter-spacing:1px;border:2px solid #FFC93C;cursor:pointer;transition:all .2s}
+.replay-screen .secondary-btn:hover{background:#FFC93C;color:#142554}
+
+/* ════════════════════════════════════════════════════════════════ */
+/* ── v2 FINALISATION : CONTRÔLES PRO + CAPTIONS + HUD ───────── */
+/* ════════════════════════════════════════════════════════════════ */
+
+/* Captions / sous-titres au bas de la vidéo (pour réseaux sociaux muet + a11y) */
+.captions-overlay{
+  position:fixed; bottom:60px; left:50%; transform:translateX(-50%);
+  max-width:80%; padding:14px 28px;
+  background:rgba(0,0,0,.78); backdrop-filter:blur(8px);
+  border-radius:12px; color:#fff;
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif;
+  font-size:22px; font-weight:600; line-height:1.4;
+  text-align:center; text-shadow:0 2px 4px rgba(0,0,0,.6);
+  z-index:140; opacity:0; pointer-events:none;
+  transition:opacity .35s ease-out;
+  border-bottom:2px solid #FFC93C;
+}
+.captions-overlay.show{ opacity:1; }
+.captions-overlay.hidden{ display:none; }
+@media (max-width:768px){
+  .captions-overlay{ font-size:16px; max-width:92%; bottom:80px; padding:10px 18px; }
+}
+
+/* HUD bas de page : compteur scène + temps + boutons */
+.video-hud{
+  position:fixed; bottom:14px; left:50%; transform:translateX(-50%);
+  display:flex; align-items:center; gap:14px;
+  background:rgba(20,37,84,.92); backdrop-filter:blur(12px);
+  border:1px solid rgba(255,201,60,.3);
+  padding:10px 18px; border-radius:50px;
+  z-index:150; box-shadow:0 8px 32px rgba(0,0,0,.4);
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif;
+}
+.video-hud.hidden{ display:none; }
+.hud-btn{
+  width:38px; height:38px; border-radius:50%; border:none;
+  background:rgba(255,201,60,.18); color:#FFC93C;
+  font-size:14px; cursor:pointer; display:flex;
+  align-items:center; justify-content:center;
+  transition:all .2s ease-out;
+}
+.hud-btn:hover{ background:#FFC93C; color:#142554; transform:scale(1.08); }
+.hud-btn:focus-visible{ outline:2px solid #FFC93C; outline-offset:2px; }
+.hud-scene{
+  color:#FFC93C; font-size:12px; font-weight:800;
+  letter-spacing:1px; padding:0 8px; min-width:42px; text-align:center;
+}
+.hud-time{
+  color:rgba(255,255,255,.85); font-size:12px; font-weight:600;
+  font-variant-numeric:tabular-nums; padding:0 8px;
+}
+.hud-divider{ width:1px; height:24px; background:rgba(255,255,255,.15); }
+@media (max-width:768px){
+  .video-hud{ gap:8px; padding:8px 12px; }
+  .hud-btn{ width:34px; height:34px; font-size:12px; }
+  .hud-scene{ font-size:11px; min-width:36px; }
+  .hud-time{ font-size:11px; }
+}
+
+/* Help/raccourcis clavier overlay */
+.shortcuts-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.85); backdrop-filter:blur(8px);
+  display:none; align-items:center; justify-content:center; z-index:400;
+}
+.shortcuts-overlay.show{ display:flex; }
+.shortcuts-card{
+  background:linear-gradient(135deg,#142554,#0D1B3E);
+  border:1px solid rgba(255,201,60,.3); border-radius:16px;
+  padding:36px 44px; max-width:520px; color:#fff;
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif;
+}
+.shortcuts-card h3{
+  font-family:'Plus Jakarta Sans',sans-serif; font-size:24px;
+  color:#FFC93C; margin-bottom:20px;
+}
+.shortcuts-row{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 0; border-bottom:1px solid rgba(255,255,255,.08);
+}
+.shortcuts-row:last-child{ border:none; }
+.shortcuts-key{
+  background:rgba(255,201,60,.15); color:#FFC93C;
+  padding:4px 12px; border-radius:6px; font-weight:700; font-size:13px;
+  border:1px solid rgba(255,201,60,.3); font-family:'JetBrains Mono','Courier New',monospace;
+}
+.shortcuts-label{ font-size:14px; color:rgba(255,255,255,.85); }
+.shortcuts-close{
+  margin-top:20px; width:100%; padding:12px; background:#FFC93C;
+  color:#142554; border:none; border-radius:10px; font-weight:800;
+  cursor:pointer; font-family:inherit; font-size:14px;
+}
+
+/* Application v2 design tokens à l'écran de démarrage */
+.start-screen h1{ font-family:'Plus Jakarta Sans','Libre Baskerville',serif !important; letter-spacing:-0.02em; }
+.start-screen p{ font-family:'Plus Jakarta Sans','Montserrat',sans-serif; }
+.start-btn{ font-family:'Plus Jakarta Sans','Montserrat',sans-serif !important; }
+
+/* Mode portrait mobile : message rotation pour expérience optimale */
+.rotate-suggest{
+  display:none; position:fixed; inset:0; background:#142554;
+  color:#FFC93C; align-items:center; justify-content:center;
+  flex-direction:column; z-index:500; padding:30px; text-align:center;
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif;
+}
+.rotate-suggest svg{ width:80px; height:80px; margin-bottom:20px; animation:rotate 3s ease-in-out infinite; }
+.rotate-suggest h3{ font-size:24px; margin-bottom:10px; }
+.rotate-suggest p{ font-size:14px; opacity:.8; max-width:280px; }
+.rotate-suggest button{ margin-top:20px; padding:12px 24px; background:#FFC93C; color:#142554; border:none; border-radius:10px; font-weight:800; cursor:pointer; }
+@media (max-width:768px) and (orientation:portrait){
+  .rotate-suggest{ display:flex; }
+}
 </style>
 </head>
 <body>
@@ -435,7 +550,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;background:#000;color:#fff}
   <h1>VÉRITAS Academy</h1>
   <p>Découvrez en 3 minutes pourquoi VÉRITAS est <strong style="color:#FFC93C">le centre de référence</strong> à Douala — et comment l'utiliser au quotidien.</p>
   <button class="start-btn" onclick="startVideo()">▶ Lancer la présentation</button>
-  <div class="hint">🔊 Avec musique · 22 scènes · 3:06 min · F11 pour plein écran</div>
+  <div class="hint">🔊 Avec musique · 22 scènes · 3:06 min · <kbd style="background:rgba(255,201,60,.15);padding:2px 8px;border-radius:4px;border:1px solid rgba(255,201,60,.3);color:#FFC93C;font-family:JetBrains Mono,monospace;font-size:11px">F11</kbd> plein écran · <kbd style="background:rgba(255,201,60,.15);padding:2px 8px;border-radius:4px;border:1px solid rgba(255,201,60,.3);color:#FFC93C;font-family:JetBrains Mono,monospace;font-size:11px">?</kbd> raccourcis</div>
   <div style="margin-top:30px;display:flex;gap:20px;flex-wrap:wrap;justify-content:center;max-width:900px">
     <div style="background:rgba(255,201,60,.1);border:1px solid rgba(255,201,60,.3);border-radius:12px;padding:14px 22px;color:#FFC93C;font-size:14px;font-weight:600">🎬 Auto-jouante</div>
     <div style="background:rgba(255,201,60,.1);border:1px solid rgba(255,201,60,.3);border-radius:12px;padding:14px 22px;color:#FFC93C;font-size:14px;font-weight:600">📱 Mobile & Desktop</div>
@@ -826,6 +941,49 @@ html,body{width:100vw;height:100vh;overflow:hidden;background:#000;color:#fff}
 
 <div class="progress" id="progress" style="width:0%"></div>
 
+<!-- ════════ v2 FINALISATION : Captions / Sous-titres ════════ -->
+<div class="captions-overlay hidden" id="captions" aria-live="polite"></div>
+
+<!-- ════════ v2 FINALISATION : HUD compteur scène + temps + contrôles ════════ -->
+<div class="video-hud hidden" id="videoHud" role="toolbar" aria-label="Contrôles de la vidéo">
+  <button class="hud-btn" id="hudPlayPause" onclick="togglePlayPause()" aria-label="Pause / Lecture" title="Pause / Lecture (Espace)">⏸</button>
+  <button class="hud-btn" id="hudPrev" onclick="prevScene()" aria-label="Scène précédente" title="Scène précédente (←)">⏮</button>
+  <div class="hud-divider"></div>
+  <div class="hud-scene" id="hudScene" aria-label="Scène en cours">1/22</div>
+  <div class="hud-time" id="hudTime" aria-label="Temps écoulé">0:00 / 3:06</div>
+  <div class="hud-divider"></div>
+  <button class="hud-btn" id="hudNext" onclick="skipScene()" aria-label="Scène suivante" title="Scène suivante (→)">⏭</button>
+  <button class="hud-btn" id="hudCaptions" onclick="toggleCaptions()" aria-label="Activer/désactiver les sous-titres" title="Sous-titres (C)">CC</button>
+  <button class="hud-btn" id="hudHelp" onclick="toggleShortcuts()" aria-label="Afficher l'aide raccourcis" title="Raccourcis clavier (?)">?</button>
+</div>
+
+<!-- ════════ v2 FINALISATION : Aide raccourcis clavier ════════ -->
+<div class="shortcuts-overlay" id="shortcutsOverlay" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+  <div class="shortcuts-card">
+    <h3 id="shortcuts-title">⌨️ Raccourcis clavier</h3>
+    <div class="shortcuts-row"><span class="shortcuts-label">Pause / Lecture</span><span class="shortcuts-key">Espace</span></div>
+    <div class="shortcuts-row"><span class="shortcuts-label">Scène suivante</span><span class="shortcuts-key">→ ou N</span></div>
+    <div class="shortcuts-row"><span class="shortcuts-label">Scène précédente</span><span class="shortcuts-key">← ou P</span></div>
+    <div class="shortcuts-row"><span class="shortcuts-label">Activer / couper le son</span><span class="shortcuts-key">M</span></div>
+    <div class="shortcuts-row"><span class="shortcuts-label">Sous-titres on/off</span><span class="shortcuts-key">C</span></div>
+    <div class="shortcuts-row"><span class="shortcuts-label">Plein écran</span><span class="shortcuts-key">F</span></div>
+    <div class="shortcuts-row"><span class="shortcuts-label">Cette aide</span><span class="shortcuts-key">?</span></div>
+    <div class="shortcuts-row"><span class="shortcuts-label">Quitter le plein écran</span><span class="shortcuts-key">Esc</span></div>
+    <button class="shortcuts-close" onclick="toggleShortcuts()">Fermer</button>
+  </div>
+</div>
+
+<!-- ════════ v2 FINALISATION : Suggestion rotation paysage mobile ════════ -->
+<div class="rotate-suggest" id="rotateSuggest">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M3 16h13a3 3 0 0 0 0-6h-3"/><polyline points="13 6 13 10 17 10"/>
+    <rect x="2" y="2" width="20" height="20" rx="2"/>
+  </svg>
+  <h3>Mode paysage recommandé</h3>
+  <p>Tournez votre téléphone pour profiter de la vidéo en plein écran.</p>
+  <button onclick="document.getElementById('rotateSuggest').style.display='none'">Continuer quand même</button>
+</div>
+
 <!-- ── AUDIO : musique de fond libre de droits (Bensound — "Inspire") ── -->
 <audio id="bgMusic" loop preload="auto" crossorigin="anonymous">
   <source src="https://www.bensound.com/bensound-music/bensound-inspire.mp3" type="audio/mpeg">
@@ -871,6 +1029,33 @@ var DURATIONS = [
   // ─── Fin ───
   6,   // 15 - CTA (devenu scène 21)
   8    // 16 - Contacts (devenue scène 22)
+];
+
+// ── v2 FINALISATION : NARRATION (sous-titres scène par scène) ──
+// Texte court, percutant, optimisé lecture en 1-2 secondes
+var CAPTIONS = [
+  "VÉRITAS Academy — L'excellence scolaire à Douala.",                                          // 1
+  "Préparez le BEPC et le BAC avec les meilleurs outils.",                                       // 2
+  "95% de réussite · 500+ élèves · 8 ans d'expérience.",                                         // 3
+  "E-Learning premium : cours, vidéos, IA tuteur 24/7.",                                         // 4
+  "Boutique en ligne : manuels scolaires officiels MINESEC.",                                    // 5
+  "Classes virtuelles : direct avec vos enseignants.",                                           // 6
+  "Cartes mentales littéraires : visualisez les œuvres au programme.",                          // 7
+  "Jeux éducatifs : apprenez en jouant — verbes, capitales, formules.",                          // 8
+  "Paiement Mobile Money : MoMo, Orange Money, PayPal — sécurisé.",                              // 9
+  "Notifications temps réel : ne ratez plus aucune actualité.",                                  // 10
+  "Sécurité renforcée : HTTPS, bcrypt, rate-limiting, RGPD.",                                    // 11
+  "« Mon fils a eu son BAC grâce à VÉRITAS. » — Marie, parent.",                                 // 12
+  "3 formules accessibles : Starter, Pro, Elite — à partir de 5 000 FCFA.",                      // 13
+  "Inscription en 3 minutes : créez votre compte gratuitement maintenant.",                      // 14
+  "Élèves : suivez vos notes, vos devoirs, votre planning depuis votre espace.",                 // G1
+  "Enseignants : saisissez les notes, créez des devoirs, suivez vos classes.",                   // G2
+  "Administration : pilotez l'école — finances, statistiques, communication.",                   // G3
+  "Parents : recevez les bulletins, payez la scolarité, communiquez en 1 clic.",                 // G4
+  "Application mobile PWA : installez VÉRITAS sur votre téléphone.",                             // G5
+  "Forum communauté · Marketplace enseignants · Parrainage : +500 FCFA crédit.",                 // G6
+  "Rejoignez VÉRITAS — l'avenir scolaire de votre enfant commence ici.",                         // 15
+  "veritas-school.com · +237 697 637 739 · contact@veritas.cm"                                   // 16
 ];
 
 // ── Recalculer le scale pour TOUJOURS tenir dans la fenêtre ──
@@ -956,12 +1141,45 @@ function showScene(idx){
   scenes.forEach(function(s,i){
     s.classList.toggle('active', i===idx);
   });
+  // v2 : mettre à jour captions + HUD
+  updateCaption(idx);
+  updateHud(idx);
+}
+
+// v2 FINALISATION : Caption update
+var captionsEnabled = true;
+function updateCaption(idx){
+  var el = document.getElementById('captions');
+  if(!el || captionsEnabled === false) return;
+  var txt = CAPTIONS[idx] || '';
+  if(!txt){ el.classList.remove('show'); return; }
+  el.textContent = txt;
+  el.classList.remove('hidden');
+  // re-trigger animation
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+
+function updateHud(idx){
+  var sceneEl = document.getElementById('hudScene');
+  if(sceneEl) sceneEl.textContent = (idx+1) + '/' + DURATIONS.length;
+}
+
+function fmtTime(seconds){
+  var m = Math.floor(seconds/60);
+  var s = Math.floor(seconds % 60);
+  return m + ':' + (s<10 ? '0'+s : s);
 }
 
 function tick(now){
   var elapsed = (now - startTime) / 1000;
   var pct = Math.min(100, (elapsed/totalDuration)*100);
   progressBar.style.width = pct + '%';
+
+  // v2 : mettre à jour le compteur de temps HUD
+  var timeEl = document.getElementById('hudTime');
+  if(timeEl) timeEl.textContent = fmtTime(elapsed) + ' / ' + fmtTime(totalDuration);
 
   // Trouve la scène courante
   var cum = 0;
@@ -982,14 +1200,18 @@ function tick(now){
     // Fin
     progressBar.style.width = '100%';
     document.getElementById('replayScreen').classList.add('show');
+    // v2 : masquer HUD + captions sur la fin
+    var hud = document.getElementById('videoHud'); if(hud) hud.classList.add('hidden');
+    var cap = document.getElementById('captions'); if(cap) cap.classList.remove('show');
   }
 }
 
 function startVideo(){
   document.getElementById('startScreen').classList.add('hide');
-  // Afficher les boutons son + skip
+  // Afficher les boutons son + skip + HUD
   var sb=document.getElementById('soundBtn'); if(sb) sb.style.display='flex';
   var kb=document.getElementById('skipBtn');  if(kb) kb.style.display='flex';
+  var hud=document.getElementById('videoHud'); if(hud) hud.classList.remove('hidden');
   // Lancer la musique de fond (muted au démarrage pour respecter les politiques navigateur)
   var audio=document.getElementById('bgMusic');
   if(audio){
@@ -1061,21 +1283,130 @@ function restartVideo(){
   rafId = requestAnimationFrame(tick);
 }
 
-// Raccourci clavier : Espace pour pause/reprise
+// ════════════════════════════════════════════════════════════════
+// v2 FINALISATION : Contrôles avancés (Play/Pause, Prev, Captions, Help)
+// ════════════════════════════════════════════════════════════════
+var pausedAt = null;
+function togglePlayPause(){
+  var btn = document.getElementById('hudPlayPause');
+  if(rafId){
+    // Mettre en pause
+    cancelAnimationFrame(rafId);
+    rafId = null;
+    pausedAt = parseFloat(progressBar.style.width) / 100 * totalDuration;
+    if(btn) btn.textContent = '▶';
+    if(btn) btn.setAttribute('aria-label','Reprendre');
+    // Pause audio
+    var audio = document.getElementById('bgMusic');
+    if(audio) audio.pause();
+  } else if(startTime){
+    // Reprendre
+    var elapsed = pausedAt || (parseFloat(progressBar.style.width) / 100 * totalDuration);
+    startTime = performance.now() - elapsed*1000;
+    rafId = requestAnimationFrame(tick);
+    pausedAt = null;
+    if(btn) btn.textContent = '⏸';
+    if(btn) btn.setAttribute('aria-label','Pause');
+    var audio = document.getElementById('bgMusic');
+    if(audio && !audio.muted) audio.play().catch(function(){});
+  }
+}
+
+function prevScene(){
+  if(currentScene <= 0) return;
+  // Calculer le temps cumulé jusqu'à la scène précédente
+  var cum = 0;
+  for(var i=0; i<currentScene-1; i++) cum += DURATIONS[i];
+  startTime = performance.now() - cum*1000;
+  pausedAt = null;
+}
+
+function toggleCaptions(){
+  captionsEnabled = !captionsEnabled;
+  var el = document.getElementById('captions');
+  var btn = document.getElementById('hudCaptions');
+  if(captionsEnabled){
+    if(btn) btn.style.background = 'rgba(255,201,60,.4)';
+    updateCaption(currentScene);
+  } else {
+    if(btn) btn.style.background = 'rgba(255,201,60,.18)';
+    if(el) el.classList.remove('show');
+  }
+}
+
+function toggleShortcuts(){
+  var ov = document.getElementById('shortcutsOverlay');
+  if(!ov) return;
+  ov.classList.toggle('show');
+}
+
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(function(){});
+  } else {
+    document.exitFullscreen().catch(function(){});
+  }
+}
+
+// Raccourcis clavier complets
 document.addEventListener('keydown', function(e){
-  if(e.code === 'Space'){
-    e.preventDefault();
-    if(rafId){
-      cancelAnimationFrame(rafId);
-      rafId = null;
-    } else if(startTime){
-      // Reprise (recalcule startTime)
-      var elapsed = parseFloat(progressBar.style.width) / 100 * totalDuration;
-      startTime = performance.now() - elapsed*1000;
-      rafId = requestAnimationFrame(tick);
-    }
+  if(e.target && (e.target.tagName==='INPUT' || e.target.tagName==='TEXTAREA')) return;
+  switch(e.code){
+    case 'Space':           e.preventDefault(); togglePlayPause(); break;
+    case 'ArrowRight':
+    case 'KeyN':            e.preventDefault(); skipScene(); break;
+    case 'ArrowLeft':
+    case 'KeyP':            e.preventDefault(); prevScene(); break;
+    case 'KeyM':            e.preventDefault(); toggleSound(); break;
+    case 'KeyC':            e.preventDefault(); toggleCaptions(); break;
+    case 'KeyF':            e.preventDefault(); toggleFullscreen(); break;
+    case 'Slash':                                                       // ? key
+    case 'IntlRo':
+      if(e.shiftKey){ e.preventDefault(); toggleShortcuts(); }
+      break;
+    case 'Escape':
+      var ov=document.getElementById('shortcutsOverlay');
+      if(ov && ov.classList.contains('show')){ e.preventDefault(); ov.classList.remove('show'); }
+      break;
   }
 });
+
+// Click sur overlay raccourcis = fermer
+document.getElementById('shortcutsOverlay')?.addEventListener('click', function(e){
+  if(e.target.id === 'shortcutsOverlay') toggleShortcuts();
+});
+
+// ════════════════════════════════════════════════════════════════
+// v2 FINALISATION : Boutons replay screen (téléchargement / partage)
+// ════════════════════════════════════════════════════════════════
+// Ajout dynamique des actions de partage après le bouton Rejouer
+(function enrichReplayScreen(){
+  var rs = document.getElementById('replayScreen');
+  if(!rs) return;
+  // Vérifier si déjà enrichi
+  if(rs.querySelector('.actions')) return;
+  var actions = document.createElement('div');
+  actions.className = 'actions';
+  actions.innerHTML =
+    '<a class="secondary-btn" href="https://veritas-school.com" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">🌐 Visiter le site</a>'
+    +'<button class="secondary-btn" onclick="shareVideo()">📤 Partager</button>'
+    +'<button class="secondary-btn" onclick="window.open(\'https://wa.me/237697637739?text=Bonjour%2C%20je%20viens%20de%20voir%20la%20vid%C3%A9o%20VERITAS%20et%20je%20souhaite%20m%27inscrire\',\'_blank\')">💬 WhatsApp</button>';
+  rs.appendChild(actions);
+})();
+
+function shareVideo(){
+  var url = 'https://veritas-school.com/VERITAS_Promo_Video.html';
+  var text = 'Découvrez VÉRITAS Academy — l\'excellence scolaire à Douala en 3 minutes !';
+  if(navigator.share){
+    navigator.share({title:'VÉRITAS Academy', text:text, url:url}).catch(function(){});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(url+' — '+text).then(function(){
+      alert('Lien copié dans le presse-papier ✓');
+    });
+  } else {
+    prompt('Copiez ce lien :', url);
+  }
+}
 </script>
 
 </body>
