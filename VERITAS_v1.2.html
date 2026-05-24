@@ -241,6 +241,51 @@ function tryLoad(){if(i>=u.length)return;var s=document.createElement('script');
 tryLoad();})();
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- ═══ v1.2 OPTIMISATION : Service Worker + Lazy Loading auto ═══ -->
+<script>
+// Service Worker pour cache offline + perf mobile
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('[VÉRITAS SW] Cache offline actif'))
+      .catch(err => console.warn('[VÉRITAS SW] Erreur:', err));
+  });
+}
+
+// Lazy loading universel : applique loading="lazy" decoding="async"
+// sur toutes les <img> qui n'ont pas déjà ces attributs.
+// Économise ~1 Mo de bande passante sur le chargement initial mobile.
+(function lazyLoadImages() {
+  function applyLazy(root){
+    (root || document).querySelectorAll('img').forEach(function(img){
+      if (!img.hasAttribute('loading')) img.setAttribute('loading', 'lazy');
+      if (!img.hasAttribute('decoding')) img.setAttribute('decoding', 'async');
+    });
+  }
+  // Premier passage au load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => applyLazy());
+  } else {
+    applyLazy();
+  }
+  // Observer pour les images injectées dynamiquement (DB.books, etc.)
+  if (window.MutationObserver) {
+    var mo = new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        m.addedNodes.forEach(function(n){
+          if (n.nodeType === 1) {
+            if (n.tagName === 'IMG') applyLazy(n.parentNode);
+            else if (n.querySelectorAll) applyLazy(n);
+          }
+        });
+      });
+    });
+    mo.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  }
+})();
+</script>
+
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 ::selection{background:var(--gold);color:#fff}
@@ -2940,6 +2985,7 @@ setInterval(_refreshCitation,15000);
   <button class="vnav-btn" onclick="showCalendrier()" style="background:linear-gradient(135deg,rgba(220,38,38,.15),rgba(220,38,38,.05));color:#DC2626;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">event</span> Calendrier</button>
   <button class="vnav-btn" onclick="showEpreuves()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">assignment</span> Épreuves</button>
   <button class="vnav-btn" onclick="showEvaluations()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">insights</span> Évals</button>
+  <button class="vnav-btn" onclick="mDevoirCorrectionIA()" style="background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(16,185,129,.05));color:#10B981;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">auto_fix_high</span> Devoir IA</button>
   <button class="vnav-btn" onclick="vShowSec('actualites',this)" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#ef4444;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">newspaper</span> Actualités</button>
   <button class="vnav-btn" onclick="vShowSec('contact',this)"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">forum</span> Contact</button>
   <button class="vnav-btn" onclick="openCart()" style="position:relative;background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">shopping_cart</span> Panier<span id="cartBadge" style="position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;border-radius:50%;font-size:10px;width:18px;height:18px;display:none;align-items:center;justify-content:center;font-weight:700"></span></button>
@@ -5844,6 +5890,117 @@ function _slideGo(){
 }
 function _slideAutoStart(){clearInterval(_slideTimer);_slideTimer=setInterval(function(){_slideNav(1);},5000);}
 
+// ═══════════════════════════════════════════════════════════════════════════
+// TOUR INTERACTIF — Onboarding au 1er visiteur (v1.2 OPTIMISATION)
+// ═══════════════════════════════════════════════════════════════════════════
+function maybeShowOnboarding(){
+  // Ne montrer qu'aux visiteurs anonymes (pas aux comptes inscrits) et 1x seulement
+  if(SES) return;
+  if(localStorage.getItem('_vrtOnboardingSeen')==='1') return;
+  if(window._onboardingActive) return;
+  window._onboardingActive=true;
+  _showOnboardingStep(0);
+}
+
+window.startOnboarding=function(){
+  // Permet de relancer manuellement (depuis menu Aide par ex.)
+  localStorage.removeItem('_vrtOnboardingSeen');
+  window._onboardingActive=true;
+  _showOnboardingStep(0);
+};
+
+var _ONBOARDING_STEPS=[
+  {
+    emoji:'👋',
+    title:'Bienvenue sur VÉRITAS !',
+    text:'Découvrez en 5 étapes ce que vous pouvez faire ici. C\'est rapide, promis.',
+    cta:'C\'est parti !'
+  },
+  {
+    emoji:'📚',
+    title:'1 — Boutique de manuels',
+    text:'Achetez vos manuels scolaires officiels MINESEC. Aperçus gratuits, paiement MoMo/Orange, livraison à Douala. Cliquez sur l\'onglet <b>Boutique</b> dans le menu.',
+    cta:'Suivant →',
+    target:'.vnav-btn[onclick*=boutique]'
+  },
+  {
+    emoji:'🎓',
+    title:'2 — Plateforme E-Learning',
+    text:'Cours, épreuves corrigées, fiches de révision pour BEPC, Probatoire et BAC. <b>5 contenus gratuits</b> pour tester avant abonnement.',
+    cta:'Suivant →',
+    target:'.vnav-btn[onclick*=elearning]'
+  },
+  {
+    emoji:'📖',
+    title:'3 — Analyses littéraires',
+    text:'22 œuvres au programme MINESEC <b>analysées en profondeur</b> avec angles de lecture inédits, citations clés, et QCM corrigés.',
+    cta:'Suivant →'
+  },
+  {
+    emoji:'🎬',
+    title:'4 — Classes virtuelles & labos',
+    text:'Suivez les cours en direct ou en différé, expérimentez en laboratoire virtuel (chimie, physique, SVT). Le tout depuis votre téléphone.',
+    cta:'Suivant →'
+  },
+  {
+    emoji:'🚀',
+    title:'5 — Inscrivez-vous gratuitement',
+    text:'Créez un compte gratuit pour <b>sauvegarder votre progression, débloquer des contenus premium et gagner 500 FCFA</b> en parrainant un ami !',
+    cta:'Créer mon compte gratuit',
+    action:'showRegisterForm'
+  }
+];
+
+function _showOnboardingStep(idx){
+  if(idx>=_ONBOARDING_STEPS.length){_endOnboarding();return;}
+  var step=_ONBOARDING_STEPS[idx];
+  var totalSteps=_ONBOARDING_STEPS.length;
+  var progress=Math.round(((idx+1)/totalSteps)*100);
+  // Overlay
+  var existing=document.getElementById('_obOverlay');
+  if(existing)existing.remove();
+  var ov=document.createElement('div');
+  ov.id='_obOverlay';
+  ov.style.cssText='position:fixed;inset:0;background:rgba(13,27,62,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:20px;animation:obFade .3s ease-out;font-family:Montserrat,sans-serif';
+  ov.innerHTML=
+    '<style>@keyframes obFade{from{opacity:0}to{opacity:1}}@keyframes obPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}</style>'+
+    '<div style="background:#fff;border-radius:24px;max-width:480px;width:100%;padding:32px 28px 24px;box-shadow:0 30px 80px rgba(0,0,0,.4);text-align:center;animation:obPop .4s cubic-bezier(.34,1.56,.64,1);position:relative">'+
+      // Skip top right
+      '<button onclick="_endOnboarding(true)" style="position:absolute;top:14px;right:14px;background:none;border:none;color:#64748B;font-size:13px;cursor:pointer;padding:6px 10px">Passer</button>'+
+      // Big emoji
+      '<div style="font-size:64px;margin-bottom:12px;line-height:1">'+step.emoji+'</div>'+
+      // Title
+      '<h2 style="font-family:Libre Baskerville,Georgia,serif;font-size:24px;font-weight:700;color:#142554;margin:0 0 14px;line-height:1.2">'+step.title+'</h2>'+
+      // Text
+      '<p style="font-size:14px;color:#475569;line-height:1.65;margin:0 0 24px">'+step.text+'</p>'+
+      // Progress
+      '<div style="background:#E2E8F0;height:6px;border-radius:3px;overflow:hidden;margin:0 0 18px"><div style="height:100%;width:'+progress+'%;background:linear-gradient(90deg,#FFC93C,#F59E0B);transition:width .4s"></div></div>'+
+      '<div style="font-size:11px;color:#94A3B8;margin-bottom:14px">Étape '+(idx+1)+' / '+totalSteps+'</div>'+
+      // CTA
+      '<button onclick="_onboardingNext('+idx+')" style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;border:none;border-radius:14px;padding:14px 28px;font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(20,37,84,.3);width:100%;letter-spacing:.5px">'+step.cta+'</button>'+
+    '</div>';
+  document.body.appendChild(ov);
+}
+
+window._onboardingNext=function(idx){
+  var step=_ONBOARDING_STEPS[idx];
+  if(step&&step.action&&typeof window[step.action]==='function'){
+    _endOnboarding();
+    setTimeout(function(){window[step.action]();},300);
+    return;
+  }
+  _showOnboardingStep(idx+1);
+};
+
+window._endOnboarding=function(skipped){
+  var ov=document.getElementById('_obOverlay');
+  if(ov){ov.style.opacity='0';setTimeout(function(){if(ov.parentNode)ov.remove();},300);}
+  localStorage.setItem('_vrtOnboardingSeen','1');
+  window._onboardingActive=false;
+  if(!skipped&&typeof toast==='function')toast('🎉 Bonne découverte de VÉRITAS !','success');
+};
+
+
 function initVisitor(){
   const img=$("vLogo");if(img)img.src=getLogo();
   const nm=$("vName");if(nm)nm.textContent=DB.school?.nom||"VÉRITAS Academy";
@@ -5856,6 +6013,10 @@ function initVisitor(){
   if(lbLabel)lbLabel.textContent='🏫 '+(DB.school&&DB.school.nom||'VÉRITAS Academy');
   vShowSec("presentation",document.querySelector(".vnav-btn"));
   initTicker();
+  // ── v1.2 OPTIMISATION : Tour interactif au premier visiteur ──
+  setTimeout(function(){
+    try { if(typeof maybeShowOnboarding === 'function') maybeShowOnboarding(); } catch(e){}
+  }, 1500);
   if(SES&&(SES.type==="visiteur"||SES.type==="visiteur_inscrit"))setTimeout(_updateVisitorHeader,50);
   // Sync dot : visible si admin déjà connecté (ex: admin navigue vers la page visiteur)
   if(iA()){var sd=document.getElementById('vSyncDot');if(sd){sd.style.display='inline-flex';_setSyncDot((DB.cloudConfig&&DB.cloudConfig.lastSync)?'ok':'pending',DB.cloudConfig&&DB.cloudConfig.lastSync||'');}}
@@ -16384,6 +16545,100 @@ setTimeout(function(){
   initTickerFixed();
 }, 1000);
 
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CORRECTION DE DEVOIRS PAR IA (v1.2 OPTIMISATION — Priorité 1 #4)
+// Permet à un élève de soumettre un devoir (rédaction, exo maths, dissertation)
+// et de recevoir une correction détaillée, note /20, points forts/faibles.
+// ═══════════════════════════════════════════════════════════════════════════
+window.mDevoirCorrectionIA = function(){
+  if(typeof M !== 'function') return;
+  // Gate IA (limite quotidienne selon plan)
+  if(typeof _aiGate==='function' && !_aiGate('devoir')) return;
+  var u = (typeof _aiUsed==='function')?_aiUsed('devoir'):0;
+  var lim = (typeof _aiLimit==='function')?_aiLimit('devoir'):3;
+  var rem = Math.max(0, lim-u);
+  var badge = lim>=999 ? '∞ Illimité' : rem+' correction'+(rem>1?'s':'')+' aujourd\'hui';
+
+  M('📝 Correction de devoir par IA','Soumets ton devoir, l\'IA te corrige en 30 s',
+    '<div class="ib ibt mb12"><span>🎯</span><span>Idéal pour : <b>rédactions, dissertations, commentaires, exercices de maths, problèmes physique-chimie</b>. Tu reçois une note /20, les points forts, les axes d\'amélioration. <b>'+badge+'</b>.</span></div>'+
+    '<div class="fg mb10"><span class="fl">Matière *</span>'+
+      '<select class="fi" id="dvSub">'+
+        ['Français — Rédaction','Français — Dissertation','Français — Commentaire composé','Français — Résumé','Anglais — Essay','Mathématiques','Physique-Chimie','SVT','Histoire-Géographie','Philosophie','Économie','Informatique','Autre']
+        .map(function(s){return '<option>'+s+'</option>';}).join('')+
+      '</select></div>'+
+    '<div class="fg mb10"><span class="fl">Niveau *</span>'+
+      '<select class="fi" id="dvLvl">'+
+        ['6ème','5ème','4ème','3ème','2nde','1ère A','1ère C','1ère D','Tle A','Tle C','Tle D','Probatoire','BAC blanc','BAC officiel']
+        .map(function(s){return '<option>'+s+'</option>';}).join('')+
+      '</select></div>'+
+    '<div class="fg mb10"><span class="fl">Sujet / Consigne du devoir *</span>'+
+      '<textarea class="fi" id="dvConsigne" rows="2" placeholder="Ex: Dissertez sur la phrase de Mongo Beti..."></textarea></div>'+
+    '<div class="fg mb10"><span class="fl">Ton travail (texte ou réponse) *</span>'+
+      '<textarea class="fi" id="dvTravail" rows="8" placeholder="Colle ici ta rédaction, ta dissertation ou la résolution de ton exercice..." style="font-family:Georgia,serif;font-size:13.5px;line-height:1.6"></textarea></div>'+
+    '<div id="dvRes" class="ai-res" style="display:none"></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'+
+    '<button class="btn bgr2" id="dvBtn" onclick="_runCorrectionIA()">🤖 Corriger ('+rem+' restant'+(rem>1?'s':'')+')</button>',true);
+};
+
+window._runCorrectionIA = async function(){
+  if(typeof _aiGate==='function' && !_aiGate('devoir')) return;
+  var sub = (document.getElementById('dvSub')?.value||'').trim();
+  var lvl = (document.getElementById('dvLvl')?.value||'').trim();
+  var con = (document.getElementById('dvConsigne')?.value||'').trim();
+  var trv = (document.getElementById('dvTravail')?.value||'').trim();
+  if(!con){toast('Indique la consigne du devoir','warn');return;}
+  if(trv.length<40){toast('Ton travail doit faire au moins 40 caractères','warn');return;}
+  var btn=document.getElementById('dvBtn'),res=document.getElementById('dvRes');
+  if(btn){btn.disabled=true;btn.innerHTML='⏳ Correction en cours…';}
+
+  var prompt =
+    'Tu es un enseignant expert du système éducatif camerounais (MINESEC), bienveillant et exigeant. '+
+    'Tu vas corriger le travail d\'un élève de '+lvl+' en '+sub+'. '+
+    '\n\n=== CONSIGNE DU DEVOIR ===\n'+con+
+    '\n\n=== TRAVAIL DE L\'ÉLÈVE ===\n'+trv+
+    '\n\n=== TA CORRECTION (structure obligatoire avec ** pour les titres) ===\n'+
+    '**📊 Note proposée : X/20** (sois juste, ni trop sévère ni complaisant)\n\n'+
+    '**✅ Points forts** — Liste 2-3 points concrets que l\'élève maîtrise bien.\n\n'+
+    '**⚠️ Points à améliorer** — Liste 3-4 erreurs précises (fautes de langue, manques d\'analyse, défauts de structure…) avec des CITATIONS du texte de l\'élève si possible.\n\n'+
+    '**💡 Conseils pour progresser** — 3 conseils concrets et actionnables, adaptés au niveau '+lvl+'.\n\n'+
+    '**✨ Si je devais réécrire un paragraphe** — Propose une réécriture améliorée d\'un passage faible (max 60 mots).\n\n'+
+    'Sois précis, encourageant, et toujours pédagogique. Max 500 mots. En français standard.';
+
+  try{
+    var txt = await callClaudeAPI(prompt);
+    if(typeof _aiInc==='function') _aiInc('devoir');
+    var rem2 = (typeof _aiLimit==='function' && typeof _aiUsed==='function')
+      ? Math.max(0, _aiLimit('devoir')-_aiUsed('devoir')) : 0;
+    if(res){
+      res.style.display='block';
+      // Formatter le markdown léger ** ** → <strong>
+      var html = _esc(txt)
+        .replace(/\*\*([^*]+)\*\*/g,'<strong style="color:#7C3AED;font-size:15px;display:inline-block;margin-top:8px">$1</strong>')
+        .replace(/\n/g,'<br>');
+      res.innerHTML = '<div style="background:linear-gradient(135deg,#FAF5FF,#EDE9FE);border-left:4px solid #7C3AED;border-radius:12px;padding:16px 20px;font-family:Georgia,serif;font-size:13.5px;line-height:1.85;color:#1E293B">'+html+'</div>'+
+        '<div style="margin-top:12px;font-size:11px;color:#64748B;text-align:right;font-style:italic">Correction générée par IA pédagogique — Centre VÉRITAS</div>';
+      res.scrollIntoView({behavior:'smooth',block:'nearest'});
+    }
+    // Sauvegarder la correction dans l'historique de l'utilisateur
+    if(SES && SES.id){
+      DB._aiCorrections = DB._aiCorrections || [];
+      DB._aiCorrections.unshift({
+        id:'corr_'+Date.now(),
+        userId: SES.id,
+        sub: sub, lvl: lvl, consigne: con,
+        date: new Date().toISOString(),
+        correction: txt.substring(0,2000) // limite stockage
+      });
+      if(DB._aiCorrections.length>50) DB._aiCorrections.length=50;
+      if(typeof save==='function') save();
+    }
+    if(btn){btn.disabled=false;btn.innerHTML='🔄 Corriger un autre devoir ('+rem2+' restant'+(rem2>1?'s':'')+')';}
+  }catch(e){
+    toast('Erreur IA : '+e.message,'err');
+    if(btn){btn.disabled=false;btn.innerHTML='🤖 Réessayer';}
+  }
+};
 
 async function callClaudeAPI(prompt,sysPrompt){
   var sys=sysPrompt||"Tu es un assistant pedagogique expert du systeme educatif camerounais (MINESEC/MINESUP). Tu connais les programmes BEPC et BAC series A/C/D, les grandes ecoles camerounaises et tu contextualises dans la realite camerounaise.";

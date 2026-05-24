@@ -63,12 +63,22 @@ DirectoryIndex index.php index.html
 </IfModule>
 
 # ─────────────────────────────────────────────────────────
-# 4. Compression (Gzip / Brotli)
+# 4. Compression (Brotli prioritaire, Gzip fallback)
+# v1.2 OPTIMISATION : ajout Brotli pour réduire 3.35 Mo → ~400 Ko
 # ─────────────────────────────────────────────────────────
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/css application/javascript application/json
+  AddOutputFilterByType BROTLI_COMPRESS text/xml application/xml application/xhtml+xml
+  AddOutputFilterByType BROTLI_COMPRESS image/svg+xml application/manifest+json
+  AddOutputFilterByType BROTLI_COMPRESS text/plain text/javascript application/x-javascript
+  BrotliCompressionQuality 6
+</IfModule>
 <IfModule mod_deflate.c>
   AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json
   AddOutputFilterByType DEFLATE text/xml application/xml application/xhtml+xml
   AddOutputFilterByType DEFLATE image/svg+xml application/manifest+json
+  AddOutputFilterByType DEFLATE text/plain text/javascript application/x-javascript
+  DeflateCompressionLevel 6
 </IfModule>
 
 # ─────────────────────────────────────────────────────────
