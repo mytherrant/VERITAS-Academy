@@ -2987,6 +2987,8 @@ setInterval(_refreshCitation,15000);
   <button class="vnav-btn" onclick="showEvaluations()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">insights</span> Évals</button>
   <button class="vnav-btn" onclick="mDevoirCorrectionIA()" style="background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(16,185,129,.05));color:#10B981;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">auto_fix_high</span> Devoir IA</button>
   <button class="vnav-btn" onclick="mParrainage()" style="background:linear-gradient(135deg,rgba(236,72,153,.18),rgba(236,72,153,.05));color:#EC4899;border-radius:20px;margin:3px 2px;font-weight:700" title="Parrainage : gagnez du crédit"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">card_giftcard</span> Parrainage</button>
+  <button class="vnav-btn" onclick="mIAAdaptative()" style="background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(99,102,241,.05));color:#6366F1;border-radius:20px;margin:3px 2px;font-weight:700" title="Votre parcours IA personnalisé"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">psychology</span> Parcours IA</button>
+  <button class="vnav-btn" onclick="showForum()" style="background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(245,158,11,.05));color:#F59E0B;border-radius:20px;margin:3px 2px;font-weight:700" title="Forum communautaire"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">forum</span> Forum</button>
   <button class="vnav-btn" onclick="mLanguageMenu()" style="border-radius:20px;margin:3px 2px;font-weight:700" title="Changer la langue / Switch language"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">language</span> FR/EN</button>
   <button class="vnav-btn" onclick="vShowSec('actualites',this)" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#ef4444;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">newspaper</span> Actualités</button>
   <button class="vnav-btn" onclick="vShowSec('contact',this)"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">forum</span> Contact</button>
@@ -11321,6 +11323,8 @@ const ANAV=[
     {k:"send",i:"◎",l:"Centre WhatsApp"},
     {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
     {k:"parrainage_admin",i:"🎁",l:"Programme parrainage"},
+    {k:"forum_admin",i:"💬",l:"Modération Forum"},
+    {k:"marketplace_admin",i:"🛒",l:"Marketplace enseignants"},
     {k:"cms",i:"🌐",l:"Portail visiteur"}
   ]},
   {s:"⚙️ Système",i:[
@@ -11337,7 +11341,8 @@ const SANAV=[
     {k:"dashboard",i:"◈",l:"Tableau de bord"},
     {k:"superoverview",i:"◐",l:"Vue d'ensemble système"},
     {k:"loginlog",i:"◌",l:"Journal des connexions"},
-    {k:"allaccounts",i:"⊡",l:"Tous les comptes"}
+    {k:"allaccounts",i:"⊡",l:"Tous les comptes"},
+    {k:"centres_admin",i:"🏢",l:"Centres clients SaaS"}
   ]},
   {s:"🎓 Élèves",i:[
     {k:"students",i:"⊕",l:"Inscriptions"},
@@ -11378,6 +11383,8 @@ const SANAV=[
     {k:"send",i:"◎",l:"Centre WhatsApp"},
     {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
     {k:"parrainage_admin",i:"🎁",l:"Programme parrainage"},
+    {k:"forum_admin",i:"💬",l:"Modération Forum"},
+    {k:"marketplace_admin",i:"🛒",l:"Marketplace enseignants"},
     {k:"cms",i:"🌐",l:"Portail visiteur"}
   ]},
   {s:"⚙️ Système",i:[
@@ -11389,7 +11396,7 @@ const SANAV=[
   ]}
 ];
 const TNAV=[
-  {s:"Mon espace",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"grades",i:"▦",l:"Saisie de notes"},{k:"devoirs_teacher",i:"📋",l:"Mes devoirs"},{k:"perf_teacher",i:"📊",l:"Performances"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"}]},
+  {s:"Mon espace",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"grades",i:"▦",l:"Saisie de notes"},{k:"devoirs_teacher",i:"📋",l:"Mes devoirs"},{k:"perf_teacher",i:"📊",l:"Performances"},{k:"marketplace_teacher",i:"🛒",l:"Marketplace (vendre cours)"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"}]},
   {s:"Ressources",i:[{k:"books2",i:"▤",l:"Bibliothèque"},{k:"mybooks",i:"✍️",l:"Mes publications"},{k:"releve_template",i:"📋",l:"Relevé vierge"},{k:"submit_resource",i:"📤",l:"Soumettre ressource"}]}
 ];
 const ENAV=[
@@ -11512,6 +11519,8 @@ function render(p){
     // Admin
     statistics:pgClassStats,absences_admin:pgAbsencesAdmin,devoirs_admin:pgDevoirsAdmin,orientation_admin:pgOrientationAdmin,resPedago:pgResPedagoAdmin,paiements_admin:pgPaiementsAdmin,
     stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,
+    forum_admin:pgForumAdmin,marketplace_admin:pgMarketplaceAdmin,centres_admin:pgCentresAdmin,
+    marketplace_teacher:pgMarketplaceEnseignant,
     // Super Admin
     superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,
     // Guide d'utilisation (tous rôles)
@@ -31676,6 +31685,597 @@ window.pgParrainageAdmin = function(){
 
 // Restaurer bonus parrainage depuis DB si défini
 try { if(DB && DB._parrainageBonus) window.PARRAINAGE_BONUS = DB._parrainageBonus; } catch(e){}
+
+// ════════════════════════════════════════════════════════════════════
+// ── v1.2 P3 — #13 IA ADAPTATIVE — Spaced Repetition SM-2 ───────────
+// ════════════════════════════════════════════════════════════════════
+// Algorithme SuperMemo-2 (Anki) : analyse perfs élève → planning révisions
+// optimal. Stocke les "cartes" (notions à réviser) dans DB.smCards{}.
+window.SM2 = {
+  // calcule la prochaine date de révision selon la qualité de réponse (0-5)
+  nextReview: function(card, quality){
+    quality = Math.max(0, Math.min(5, +quality||0));
+    card.easiness = card.easiness || 2.5;
+    card.repetition = card.repetition || 0;
+    card.interval = card.interval || 1;
+    if(quality < 3){
+      card.repetition = 0;
+      card.interval = 1;
+    } else {
+      if(card.repetition === 0) card.interval = 1;
+      else if(card.repetition === 1) card.interval = 6;
+      else card.interval = Math.ceil(card.interval * card.easiness);
+      card.repetition++;
+      card.easiness = Math.max(1.3, card.easiness + (0.1 - (5-quality)*(0.08+(5-quality)*0.02)));
+    }
+    card.lastReview = Date.now();
+    card.nextReview = Date.now() + card.interval * 24*60*60*1000;
+    card.lastQuality = quality;
+    return card;
+  },
+  // Enregistre un résultat de quiz/devoir et MAJ la carte SM-2
+  recordResult: function(userId, topic, scorePct){
+    if(!userId || !topic) return;
+    DB.smCards = DB.smCards || {};
+    DB.smCards[userId] = DB.smCards[userId] || {};
+    var card = DB.smCards[userId][topic] || { topic: topic, history: [] };
+    var quality = Math.round((scorePct/100) * 5); // 0-100% → 0-5
+    card.history.push({ score: scorePct, quality: quality, date: Date.now() });
+    if(card.history.length > 20) card.history = card.history.slice(-20);
+    SM2.nextReview(card, quality);
+    DB.smCards[userId][topic] = card;
+    try { save(); } catch(e){}
+  },
+  // Retourne les topics à réviser maintenant (interval expired)
+  getDueTopics: function(userId){
+    if(!DB.smCards || !DB.smCards[userId]) return [];
+    var now = Date.now();
+    return Object.values(DB.smCards[userId]).filter(function(c){
+      return c.nextReview && c.nextReview <= now;
+    }).sort(function(a,b){ return (a.lastQuality||0) - (b.lastQuality||0); });
+  },
+  // Topics à renforcer (qualité moyenne < 3)
+  getWeakTopics: function(userId){
+    if(!DB.smCards || !DB.smCards[userId]) return [];
+    return Object.values(DB.smCards[userId]).filter(function(c){
+      var avg = c.history.reduce(function(s,h){return s+h.quality;},0) / Math.max(1,c.history.length);
+      return avg < 3 && c.history.length >= 2;
+    }).sort(function(a,b){
+      var avgA = a.history.reduce(function(s,h){return s+h.quality;},0)/a.history.length;
+      var avgB = b.history.reduce(function(s,h){return s+h.quality;},0)/b.history.length;
+      return avgA - avgB;
+    });
+  }
+};
+
+window.mIAAdaptative = function(){
+  try {
+    var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+    if(!ses || (ses.type!=='visiteur_inscrit' && ses.type!=='eleve')){
+      M('🧠 IA Adaptative','Connectez-vous pour suivre votre parcours',
+        '<div style="text-align:center;padding:20px"><p>Inscrivez-vous pour bénéficier d\'un parcours personnalisé.</p><p>L\'IA analyse vos performances et vous propose les bonnes révisions au bon moment.</p></div>',
+        '<button class="btn bo" onclick="cm()">Fermer</button>'
+        +'<button class="btn bi" onclick="cm();showInscription&&showInscription()">S\'inscrire</button>');
+      return;
+    }
+    var due = SM2.getDueTopics(ses.id);
+    var weak = SM2.getWeakTopics(ses.id);
+    var allCards = (DB.smCards&&DB.smCards[ses.id]) ? Object.values(DB.smCards[ses.id]) : [];
+    var mastered = allCards.filter(function(c){
+      var avg = c.history.reduce(function(s,h){return s+h.quality;},0)/Math.max(1,c.history.length);
+      return avg >= 4 && c.history.length >= 3;
+    }).length;
+
+    var dueHTML = due.length ? due.slice(0,5).map(function(c){
+      return '<div style="background:#FEF3C7;padding:12px;border-radius:10px;margin-bottom:8px;border-left:4px solid #F59E0B">'
+        +'<b style="color:#92400E">⏰ '+_esc(c.topic)+'</b>'
+        +'<div style="font-size:12px;color:#6B7280;margin-top:4px">Dernière qualité : '+(c.lastQuality||0)+'/5</div></div>';
+    }).join('') : '<div style="padding:20px;text-align:center;color:#10B981">✅ Aucune révision urgente</div>';
+
+    var weakHTML = weak.length ? weak.slice(0,5).map(function(c){
+      var avg = (c.history.reduce(function(s,h){return s+h.quality;},0)/c.history.length).toFixed(1);
+      return '<div style="background:#FEE2E2;padding:12px;border-radius:10px;margin-bottom:8px;border-left:4px solid #EF4444">'
+        +'<b style="color:#991B1B">📉 '+_esc(c.topic)+'</b>'
+        +'<div style="font-size:12px;color:#6B7280;margin-top:4px">Moyenne : '+avg+'/5 — à renforcer</div></div>';
+    }).join('') : '<div style="padding:20px;text-align:center;color:#10B981">💪 Aucun point faible identifié</div>';
+
+    var body = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">'
+      +_statCard('📚', allCards.length, 'Notions suivies', '#3C8DFF')
+      +_statCard('✅', mastered, 'Maîtrisées', '#10B981')
+      +_statCard('⏰', due.length, 'À réviser', '#F59E0B')
+      +_statCard('📉', weak.length, 'À renforcer', '#EF4444')
+      +'</div>'
+      +'<div style="margin-top:14px"><h4 style="color:#142554;margin-bottom:8px">⏰ Révisions du jour (top 5)</h4>'+dueHTML+'</div>'
+      +'<div style="margin-top:14px"><h4 style="color:#142554;margin-bottom:8px">📉 Points faibles (top 5)</h4>'+weakHTML+'</div>'
+      +'<div style="margin-top:14px;padding:12px;background:#EEF2FF;border-radius:10px;font-size:13px;color:#3730A3">'
+      +'<b>💡 Astuce :</b> faites les quiz et devoirs IA pour alimenter votre IA personnelle. Plus elle a de données, plus ses recommandations sont précises.</div>';
+
+    M('🧠 Votre IA Adaptative', 'Parcours personnalisé SuperMemo-2', body,
+      '<button class="btn bi" onclick="cm()">Fermer</button>', true);
+  } catch(e){
+    console.error('mIAAdaptative:',e);
+    toast('Erreur IA : '+e.message,'err');
+  }
+};
+
+// Hook quiz → enregistrer auto les résultats dans SM-2
+window._hookQuizSM2 = function(topic, scorePct){
+  try {
+    var ses = (typeof SES!=='undefined') ? SES : null;
+    if(ses && ses.id && topic) SM2.recordResult(ses.id, topic, scorePct);
+  } catch(e){}
+};
+
+// ════════════════════════════════════════════════════════════════════
+// ── v1.2 P3 — #14 FORUM / COMMUNAUTÉ ───────────────────────────────
+// ════════════════════════════════════════════════════════════════════
+window.FORUM_CATEGORIES = [
+  {k:'general', l:'💬 Général', c:'#6B7280'},
+  {k:'francais', l:'📖 Français', c:'#EC4899'},
+  {k:'maths', l:'🔢 Maths', c:'#3C8DFF'},
+  {k:'physique', l:'⚗️ Physique', c:'#7C3AED'},
+  {k:'svt', l:'🌱 SVT', c:'#10B981'},
+  {k:'anglais', l:'🌍 Anglais', c:'#F59E0B'},
+  {k:'histoire', l:'🏛️ Histoire-Géo', c:'#92400E'},
+  {k:'orientation', l:'🧭 Orientation', c:'#0EA5E9'},
+  {k:'examens', l:'📝 BEPC/BAC', c:'#DC2626'}
+];
+
+window.showForum = function(){
+  try {
+    DB.forumPosts = DB.forumPosts || [];
+    var ses = (typeof SES!=='undefined') ? SES : null;
+    var isLogged = ses && (ses.type==='visiteur_inscrit' || ses.type==='eleve' || ses.type==='enseignant' || iA());
+    var cats = FORUM_CATEGORIES.map(function(c){
+      var count = DB.forumPosts.filter(function(p){return p.cat===c.k && !p.banned;}).length;
+      return '<button class="btn" style="background:'+c.c+';color:#fff;margin:4px;border-radius:14px;padding:8px 14px;font-weight:600" onclick="showForumCat(\''+c.k+'\')">'+c.l+' <span style="opacity:.8;font-size:11px">('+count+')</span></button>';
+    }).join('');
+    var recent = DB.forumPosts.filter(function(p){return !p.banned;}).sort(function(a,b){return b.date-a.date;}).slice(0,10);
+    var recentHTML = recent.length ? recent.map(function(p){
+      var cat = FORUM_CATEGORIES.find(function(c){return c.k===p.cat;}) || FORUM_CATEGORIES[0];
+      var nbReplies = (DB.forumPosts||[]).filter(function(x){return x.parentId===p.id;}).length;
+      var nbVotes = (p.votes||[]).length;
+      return '<div class="card" style="margin:8px 0;cursor:pointer" onclick="showForumPost(\''+p.id+'\')">'
+        +'<div style="display:flex;justify-content:space-between;align-items:start;gap:10px">'
+        +'<div style="flex:1"><div style="font-weight:700;color:#142554;margin-bottom:6px">'+_esc(p.title||'(sans titre)')+'</div>'
+        +'<div style="font-size:12px;color:#6B7280">'+_esc((p.body||'').slice(0,120))+(p.body&&p.body.length>120?'…':'')+'</div></div>'
+        +'<div style="text-align:right;font-size:11px;color:#9CA3AF;white-space:nowrap">'
+        +'<span style="background:'+cat.c+';color:#fff;padding:2px 8px;border-radius:8px;font-weight:600">'+cat.l+'</span><br>'
+        +'<span style="margin-top:4px;display:inline-block">👍 '+nbVotes+' · 💬 '+nbReplies+'</span></div></div></div>';
+    }).join('') : '<div style="text-align:center;padding:30px;color:#9CA3AF">Aucune question pour le moment. Soyez le premier à poster !</div>';
+
+    var html = '<div class="vsec">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">'
+      +'<h2 style="margin:0;color:#142554">💬 Forum Communauté VÉRITAS</h2>'
+      +(isLogged ? '<button class="btn bi" onclick="mNewForumPost()">✏️ Poser une question</button>' :
+        '<button class="btn bi" onclick="showInscription&&showInscription()">🔓 Se connecter pour poster</button>')
+      +'</div>'
+      +'<div style="background:linear-gradient(135deg,rgba(60,141,255,.08),rgba(124,58,237,.05));padding:14px;border-radius:14px;margin-bottom:14px">'
+      +'<div style="font-size:12px;color:#374151;margin-bottom:8px;font-weight:700">📂 Catégories</div>'
+      +'<div>'+cats+'</div></div>'
+      +'<div><h3 style="color:#142554">🔥 Discussions récentes</h3>'+recentHTML+'</div>'
+      +'</div>';
+    if(typeof _vc==='function') _vc(html); else _si('vContent', html);
+  } catch(e){
+    console.error('showForum:',e);
+    toast('Erreur forum : '+e.message,'err');
+  }
+};
+
+window.showForumCat = function(catKey){
+  var cat = FORUM_CATEGORIES.find(function(c){return c.k===catKey;});
+  if(!cat) return;
+  var posts = (DB.forumPosts||[]).filter(function(p){return p.cat===catKey && !p.banned && !p.parentId;}).sort(function(a,b){return b.date-a.date;});
+  var ses = (typeof SES!=='undefined') ? SES : null;
+  var isLogged = ses && (ses.type==='visiteur_inscrit' || ses.type==='eleve' || ses.type==='enseignant' || iA());
+  var listHTML = posts.length ? posts.map(function(p){
+    var nbReplies = (DB.forumPosts||[]).filter(function(x){return x.parentId===p.id;}).length;
+    var nbVotes = (p.votes||[]).length;
+    return '<div class="card" style="cursor:pointer;margin:8px 0" onclick="showForumPost(\''+p.id+'\')">'
+      +'<div style="font-weight:700;color:#142554">'+_esc(p.title)+'</div>'
+      +'<div style="font-size:12px;color:#6B7280;margin-top:6px">'+_esc((p.body||'').slice(0,180))+'</div>'
+      +'<div style="margin-top:8px;font-size:11px;color:#9CA3AF">👤 '+_esc(p.authorName||'Anonyme')+' · 👍 '+nbVotes+' · 💬 '+nbReplies+' · '+new Date(p.date).toLocaleDateString('fr-FR')+'</div></div>';
+  }).join('') : '<div style="text-align:center;padding:30px;color:#9CA3AF">Aucune question dans cette catégorie</div>';
+  var html = '<div class="vsec">'
+    +'<button class="btn bo sm" onclick="showForum()">← Toutes les catégories</button>'
+    +'<h2 style="color:'+cat.c+';margin-top:10px">'+cat.l+'</h2>'
+    +(isLogged ? '<button class="btn bi" onclick="mNewForumPost(\''+catKey+'\')">✏️ Poser une question</button>' : '')
+    +'<div style="margin-top:14px">'+listHTML+'</div></div>';
+  if(typeof _vc==='function') _vc(html); else _si('vContent', html);
+};
+
+window.mNewForumPost = function(presetCat){
+  var catOpts = FORUM_CATEGORIES.map(function(c){
+    return '<option value="'+c.k+'"'+(c.k===presetCat?' selected':'')+'>'+c.l+'</option>';
+  }).join('');
+  M('✏️ Nouvelle question','Posez votre question à la communauté',
+    '<div class="fg"><span class="fl">Catégorie</span><select class="fi" id="fpCat">'+catOpts+'</select></div>'
+    +'<div class="fg"><span class="fl">Titre *</span><input class="fi" id="fpTitle" placeholder="Ex: Comment résoudre une équation du 2nd degré ?"></div>'
+    +'<div class="fg"><span class="fl">Détails *</span><textarea class="fi" id="fpBody" rows="6" placeholder="Décrivez votre question en détail..."></textarea></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="saveForumPost()">📤 Publier</button>');
+};
+
+window.saveForumPost = function(){
+  var ses = (typeof SES!=='undefined') ? SES : null;
+  if(!ses){ toast('Connexion requise','warn'); return; }
+  var title = (_ge('fpTitle')?.value||'').trim();
+  var body = (_ge('fpBody')?.value||'').trim();
+  var cat = (_ge('fpCat')?.value||'general');
+  if(!title || title.length<5){ toast('Titre trop court','warn'); return; }
+  if(!body || body.length<10){ toast('Détails trop courts','warn'); return; }
+  DB.forumPosts = DB.forumPosts || [];
+  DB.forumPosts.push({
+    id: gid(), cat: cat, title: title, body: body,
+    authorId: ses.id, authorName: (ses.pre||'')+' '+(ses.nom||''),
+    date: Date.now(), votes: [], banned: false, parentId: null
+  });
+  try { save(); } catch(e){}
+  // Notif admin
+  try { autoNotify && autoNotify('💬 Nouvelle question forum','['+ cat +'] '+title,'info'); } catch(e){}
+  cm();
+  toast('✓ Question publiée');
+  showForumCat(cat);
+};
+
+window.showForumPost = function(postId){
+  var post = (DB.forumPosts||[]).find(function(p){return p.id===postId;});
+  if(!post){ toast('Question introuvable','warn'); return; }
+  var replies = (DB.forumPosts||[]).filter(function(p){return p.parentId===postId && !p.banned;}).sort(function(a,b){return a.date-b.date;});
+  var ses = (typeof SES!=='undefined') ? SES : null;
+  var isLogged = ses && (ses.type==='visiteur_inscrit' || ses.type==='eleve' || ses.type==='enseignant' || iA());
+  var hasVoted = ses && (post.votes||[]).indexOf(ses.id) >= 0;
+  var cat = FORUM_CATEGORIES.find(function(c){return c.k===post.cat;}) || FORUM_CATEGORIES[0];
+
+  var repliesHTML = replies.length ? replies.map(function(r){
+    return '<div style="background:#F9FAFB;padding:12px;border-radius:10px;margin-top:10px;border-left:3px solid #3C8DFF">'
+      +'<div style="font-size:13px;color:#374151;white-space:pre-wrap">'+_esc(r.body)+'</div>'
+      +'<div style="font-size:11px;color:#9CA3AF;margin-top:8px">👤 '+_esc(r.authorName||'Anonyme')+' · '+new Date(r.date).toLocaleString('fr-FR')+'</div></div>';
+  }).join('') : '<div style="text-align:center;padding:20px;color:#9CA3AF">Aucune réponse pour le moment</div>';
+
+  var html = '<div class="vsec">'
+    +'<button class="btn bo sm" onclick="showForumCat(\''+post.cat+'\')">← '+cat.l+'</button>'
+    +'<div class="card mt12">'
+    +'<div style="display:flex;justify-content:space-between;align-items:start;gap:12px;flex-wrap:wrap">'
+    +'<h2 style="margin:0;color:#142554;flex:1">'+_esc(post.title)+'</h2>'
+    +'<button class="btn '+(hasVoted?'bi':'bo')+'" onclick="voteForumPost(\''+post.id+'\')"'+(!isLogged?' disabled':'')+'>👍 '+(post.votes||[]).length+'</button></div>'
+    +'<div style="margin-top:12px;color:#374151;white-space:pre-wrap;font-size:14px;line-height:1.6">'+_esc(post.body)+'</div>'
+    +'<div style="font-size:11px;color:#9CA3AF;margin-top:10px">👤 '+_esc(post.authorName||'Anonyme')+' · '+new Date(post.date).toLocaleString('fr-FR')
+    +(iA() ? ' · <button class="btn bo sm" onclick="adminBanForumPost(\''+post.id+'\')" style="margin-left:8px">🚫 Supprimer</button>':'')+'</div>'
+    +'</div>'
+    +'<h3 style="color:#142554;margin-top:18px">💬 Réponses ('+replies.length+')</h3>'
+    +repliesHTML
+    +(isLogged ? '<div class="card mt12"><textarea class="fi" id="fpReply" rows="3" placeholder="Votre réponse..."></textarea>'
+      +'<button class="btn bi mt10" onclick="saveForumReply(\''+post.id+'\')">📤 Répondre</button></div>' : '')
+    +'</div>';
+  if(typeof _vc==='function') _vc(html); else _si('vContent', html);
+};
+
+window.voteForumPost = function(postId){
+  var ses = (typeof SES!=='undefined') ? SES : null;
+  if(!ses){ toast('Connexion requise','warn'); return; }
+  var post = (DB.forumPosts||[]).find(function(p){return p.id===postId;});
+  if(!post) return;
+  post.votes = post.votes || [];
+  var idx = post.votes.indexOf(ses.id);
+  if(idx>=0) post.votes.splice(idx,1);
+  else post.votes.push(ses.id);
+  try { save(); } catch(e){}
+  showForumPost(postId);
+};
+
+window.saveForumReply = function(parentId){
+  var ses = (typeof SES!=='undefined') ? SES : null;
+  if(!ses){ toast('Connexion requise','warn'); return; }
+  var body = (_ge('fpReply')?.value||'').trim();
+  if(!body || body.length<5){ toast('Réponse trop courte','warn'); return; }
+  var parent = (DB.forumPosts||[]).find(function(p){return p.id===parentId;});
+  DB.forumPosts.push({
+    id: gid(), cat: parent ? parent.cat : 'general',
+    title: '', body: body,
+    authorId: ses.id, authorName: (ses.pre||'')+' '+(ses.nom||''),
+    date: Date.now(), votes: [], banned: false, parentId: parentId
+  });
+  try { save(); } catch(e){}
+  toast('✓ Réponse publiée');
+  showForumPost(parentId);
+};
+
+window.adminBanForumPost = function(postId){
+  if(!iA()) return;
+  if(!confirm('Supprimer ce post ?')) return;
+  var post = (DB.forumPosts||[]).find(function(p){return p.id===postId;});
+  if(post){ post.banned = true; try{save();}catch(e){} toast('✓ Supprimé'); showForum(); }
+};
+
+// Page admin de modération forum
+window.pgForumAdmin = function(){
+  if(!iA()) return na();
+  var posts = (DB.forumPosts||[]).filter(function(p){return !p.banned;}).sort(function(a,b){return b.date-a.date;});
+  var bannedCount = (DB.forumPosts||[]).filter(function(p){return p.banned;}).length;
+  var rows = posts.slice(0,50).map(function(p){
+    var cat = FORUM_CATEGORIES.find(function(c){return c.k===p.cat;}) || FORUM_CATEGORIES[0];
+    var preview = (p.title || p.body || '').slice(0,80);
+    return '<tr><td>'+new Date(p.date).toLocaleDateString('fr-FR')+'</td>'
+      +'<td><span style="background:'+cat.c+';color:#fff;padding:2px 6px;border-radius:6px;font-size:11px">'+cat.l+'</span></td>'
+      +'<td>'+_esc(preview)+'</td>'
+      +'<td>'+_esc(p.authorName||'?')+'</td>'
+      +'<td>'+(p.parentId?'réponse':'question')+'</td>'
+      +'<td><button class="btn sm" style="background:#DC2626;color:#fff" onclick="adminBanForumPost(\''+p.id+'\')">🚫 Suppr.</button></td></tr>';
+  }).join('');
+  return '<div class="pgt">💬 Modération Forum</div>'
+    +'<div class="card mt12"><div class="ct">📊 Stats</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
+    +_statCard('💬', posts.length, 'Posts actifs', '#3C8DFF')
+    +_statCard('🚫', bannedCount, 'Supprimés', '#EF4444')
+    +_statCard('📂', FORUM_CATEGORIES.length, 'Catégories', '#10B981')
+    +'</div></div>'
+    +'<div class="card mt12"><div class="ct">📋 50 derniers posts</div>'
+    +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
+    +'<thead><tr><th>Date</th><th>Cat.</th><th>Aperçu</th><th>Auteur</th><th>Type</th><th>Action</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table></div></div>';
+};
+
+// ════════════════════════════════════════════════════════════════════
+// ── v1.2 P3 — #11 MARKETPLACE ENSEIGNANTS ──────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// Enseignants peuvent soumettre cours/quiz/livres. Admin valide.
+// Modèle 70/30 (70% enseignant, 30% VÉRITAS).
+window.MARKETPLACE_COMMISSION = 0.30;
+
+window.pgMarketplaceEnseignant = function(){
+  var ses = (typeof SES!=='undefined') ? SES : null;
+  if(!ses || (ses.type!=='enseignant' && !iA())) return na();
+  DB.marketplaceItems = DB.marketplaceItems || [];
+  var mine = DB.marketplaceItems.filter(function(m){return m.teacherId===ses.id;});
+  var totalSales = mine.reduce(function(s,m){return s+(m.salesCount||0);},0);
+  var totalRev = mine.reduce(function(s,m){return s+((m.salesCount||0)*(m.price||0)*(1-MARKETPLACE_COMMISSION));},0);
+  var pending = mine.filter(function(m){return m.status==='pending';}).length;
+  var approved = mine.filter(function(m){return m.status==='approved';}).length;
+
+  var itemsHTML = mine.length ? mine.map(function(m){
+    var statusColor = {pending:'#F59E0B', approved:'#10B981', rejected:'#EF4444'}[m.status]||'#6B7280';
+    var statusLbl = {pending:'⏳ En attente', approved:'✅ Approuvé', rejected:'❌ Refusé'}[m.status]||'?';
+    return '<div class="card" style="margin:8px 0">'
+      +'<div style="display:flex;justify-content:space-between;align-items:start;gap:10px">'
+      +'<div style="flex:1"><b>'+_esc(m.title)+'</b> <span style="background:#E5E7EB;padding:2px 6px;border-radius:4px;font-size:11px">'+_esc(m.type)+'</span>'
+      +'<div style="font-size:12px;color:#6B7280;margin-top:4px">'+_esc((m.description||'').slice(0,100))+'</div></div>'
+      +'<div style="text-align:right">'
+      +'<span style="background:'+statusColor+';color:#fff;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700">'+statusLbl+'</span>'
+      +'<div style="font-weight:800;color:#10B981;margin-top:6px">'+fmt(m.price||0)+'</div>'
+      +'<div style="font-size:11px;color:#9CA3AF">'+(m.salesCount||0)+' ventes</div></div></div>'
+      +(m.rejectReason ? '<div style="background:#FEE2E2;padding:8px;border-radius:6px;margin-top:8px;font-size:12px;color:#991B1B"><b>Refus :</b> '+_esc(m.rejectReason)+'</div>':'')
+      +'</div>';
+  }).join('') : '<div style="text-align:center;padding:30px;color:#9CA3AF">Aucun contenu soumis. Cliquez sur "Soumettre" pour commencer !</div>';
+
+  return '<div class="pgt">🛒 Marketplace — Mes contenus</div>'
+    +'<div class="card mt12"><div class="ct">📊 Vue d\'ensemble</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
+    +_statCard('📚', mine.length, 'Soumissions', '#3C8DFF')
+    +_statCard('✅', approved, 'Approuvés', '#10B981')
+    +_statCard('⏳', pending, 'En attente', '#F59E0B')
+    +_statCard('🛒', totalSales, 'Ventes', '#EC4899')
+    +_statCard('💰', fmt(totalRev), 'Revenus (70%)', '#FFC93C')
+    +'</div></div>'
+    +'<div class="card mt12">'
+    +'<button class="btn bi" onclick="mMarketplaceSubmit()">📤 Soumettre un nouveau contenu</button>'
+    +'<div class="ib ibi mt12 mb0"><span>💡</span><span>Modèle <b>70/30</b> : vous touchez 70% des ventes, VÉRITAS 30%. Versement mensuel via MoMo/Orange.</span></div></div>'
+    +'<div class="card mt12"><div class="ct">📋 Mes contenus</div>'+itemsHTML+'</div>';
+};
+
+window.mMarketplaceSubmit = function(){
+  M('📤 Soumettre un contenu', 'Modèle 70/30 (vous 70%, VÉRITAS 30%)',
+    '<div class="fg"><span class="fl">Type *</span><select class="fi" id="mkType">'
+    +'<option value="cours">📚 Cours complet</option>'
+    +'<option value="quiz">❓ Quiz / Évaluation</option>'
+    +'<option value="livre">📖 Livre / E-book PDF</option>'
+    +'<option value="video">🎥 Vidéo pédagogique</option>'
+    +'</select></div>'
+    +'<div class="fg"><span class="fl">Titre *</span><input class="fi" id="mkTitle" placeholder="Ex: Cours complet de Géométrie 3ème"></div>'
+    +'<div class="fg"><span class="fl">Description *</span><textarea class="fi" id="mkDesc" rows="4" placeholder="Décrivez votre contenu, son public, ses objectifs..."></textarea></div>'
+    +'<div class="fg"><span class="fl">Niveau</span><select class="fi" id="mkLevel">'
+    +'<option value="6e">6ème</option><option value="5e">5ème</option><option value="4e">4ème</option><option value="3e">3ème</option>'
+    +'<option value="2nde">2nde</option><option value="1ere">1ère</option><option value="tle">Terminale</option></select></div>'
+    +'<div class="fg"><span class="fl">Matière</span><input class="fi" id="mkSubject" placeholder="Ex: Mathématiques"></div>'
+    +'<div class="fg"><span class="fl">Prix de vente (FCFA) *</span><input class="fi" id="mkPrice" type="number" min="500" step="500" value="2000"></div>'
+    +'<div class="fg"><span class="fl">Lien contenu (URL ou WeTransfer)</span><input class="fi" id="mkUrl" placeholder="https://..."></div>'
+    +'<div style="background:#FEF3C7;padding:10px;border-radius:8px;font-size:12px;color:#92400E"><b>ℹ️</b> Votre soumission sera validée par un admin VÉRITAS sous 48h.</div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="saveMarketplaceItem()">📤 Soumettre</button>', true);
+};
+
+window.saveMarketplaceItem = function(){
+  var ses = (typeof SES!=='undefined') ? SES : null;
+  if(!ses){ toast('Connexion requise','warn'); return; }
+  var title = (_ge('mkTitle')?.value||'').trim();
+  var desc = (_ge('mkDesc')?.value||'').trim();
+  var price = parseInt(_ge('mkPrice')?.value)||0;
+  if(!title || title.length<5){ toast('Titre trop court','warn'); return; }
+  if(!desc || desc.length<20){ toast('Description trop courte','warn'); return; }
+  if(price<500){ toast('Prix minimum 500 FCFA','warn'); return; }
+  DB.marketplaceItems = DB.marketplaceItems || [];
+  DB.marketplaceItems.push({
+    id: gid(),
+    teacherId: ses.id,
+    teacherName: (ses.pre||'')+' '+(ses.nom||''),
+    type: _ge('mkType')?.value||'cours',
+    title: title,
+    description: desc,
+    level: _ge('mkLevel')?.value||'',
+    subject: _ge('mkSubject')?.value||'',
+    price: price,
+    url: _ge('mkUrl')?.value||'',
+    status: 'pending',
+    salesCount: 0,
+    submittedAt: Date.now()
+  });
+  try { save(); } catch(e){}
+  try { autoNotify && autoNotify('🛒 Nouvelle soumission marketplace', title+' par '+(ses.pre||'?'), 'info'); } catch(e){}
+  cm();
+  toast('✓ Soumission envoyée pour validation','ok');
+  if(typeof re==='function') re();
+};
+
+// Page admin validation
+window.pgMarketplaceAdmin = function(){
+  if(!iA()) return na();
+  DB.marketplaceItems = DB.marketplaceItems || [];
+  var pending = DB.marketplaceItems.filter(function(m){return m.status==='pending';});
+  var approved = DB.marketplaceItems.filter(function(m){return m.status==='approved';});
+  var totalRev = approved.reduce(function(s,m){return s+((m.salesCount||0)*(m.price||0)*MARKETPLACE_COMMISSION);},0);
+
+  var pendingHTML = pending.length ? pending.map(function(m){
+    return '<div class="card" style="border-left:4px solid #F59E0B;margin:8px 0">'
+      +'<div style="display:flex;justify-content:space-between;align-items:start;gap:10px">'
+      +'<div style="flex:1"><b>'+_esc(m.title)+'</b> <span style="background:#E5E7EB;padding:2px 6px;border-radius:4px;font-size:11px">'+_esc(m.type)+' / '+_esc(m.level)+'</span>'
+      +'<div style="font-size:12px;color:#6B7280;margin-top:4px">Par <b>'+_esc(m.teacherName)+'</b> · '+_esc(m.subject||'?')+'</div>'
+      +'<div style="font-size:13px;color:#374151;margin-top:8px">'+_esc(m.description)+'</div>'
+      +(m.url ? '<a href="'+_esc(m.url)+'" target="_blank" style="color:#3C8DFF;font-size:12px">🔗 '+_esc(m.url)+'</a>':'')
+      +'</div>'
+      +'<div style="text-align:right"><b style="color:#10B981">'+fmt(m.price)+'</b></div></div>'
+      +'<div style="display:flex;gap:8px;margin-top:12px">'
+      +'<button class="btn sm" style="background:#10B981;color:#fff" onclick="adminApproveMK(\''+m.id+'\')">✅ Approuver</button>'
+      +'<button class="btn sm" style="background:#EF4444;color:#fff" onclick="adminRejectMK(\''+m.id+'\')">❌ Refuser</button>'
+      +'</div></div>';
+  }).join('') : '<div style="text-align:center;padding:20px;color:#10B981">✅ Aucune soumission en attente</div>';
+
+  return '<div class="pgt">🛒 Marketplace — Modération</div>'
+    +'<div class="card mt12"><div class="ct">📊 Stats globales</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
+    +_statCard('⏳', pending.length, 'En attente', '#F59E0B')
+    +_statCard('✅', approved.length, 'Approuvés', '#10B981')
+    +_statCard('💰', fmt(totalRev), 'Commission VÉRITAS (30%)', '#FFC93C')
+    +'</div></div>'
+    +'<div class="card mt12"><div class="ct">⏳ Soumissions à valider</div>'+pendingHTML+'</div>';
+};
+
+window.adminApproveMK = function(id){
+  if(!iA()) return;
+  var m = (DB.marketplaceItems||[]).find(function(x){return x.id===id;});
+  if(!m) return;
+  m.status = 'approved';
+  m.approvedAt = Date.now();
+  try { save(); } catch(e){}
+  try { autoNotify && autoNotify('✅ Contenu approuvé', m.title+' est désormais publié sur la marketplace','ok'); } catch(e){}
+  toast('✓ Approuvé');
+  if(typeof re==='function') re();
+};
+
+window.adminRejectMK = function(id){
+  if(!iA()) return;
+  var reason = prompt('Raison du refus (visible par l\'enseignant) :');
+  if(reason===null) return;
+  var m = (DB.marketplaceItems||[]).find(function(x){return x.id===id;});
+  if(!m) return;
+  m.status = 'rejected';
+  m.rejectReason = reason||'Non précisé';
+  m.rejectedAt = Date.now();
+  try { save(); } catch(e){}
+  toast('Refusé');
+  if(typeof re==='function') re();
+};
+
+// ════════════════════════════════════════════════════════════════════
+// ── v1.2 P3 — #15 MULTI-TENANT — Préparation centre_id ─────────────
+// ════════════════════════════════════════════════════════════════════
+// Permet d'héberger plusieurs centres sur la même instance.
+// Sous-domaine → centre_id. Chaque DB.* est tagguée centreId.
+window.MULTITENANT = {
+  current: null,
+  init: function(){
+    try {
+      // Résolution depuis sous-domaine (douala.veritas-school.com → 'douala')
+      var host = location.hostname.split('.');
+      var sub = host.length >= 3 ? host[0] : 'default';
+      if(sub==='www'||sub==='veritas-school'||sub==='localhost') sub = 'default';
+      MULTITENANT.current = sub;
+      if(!DB._centreId) DB._centreId = sub;
+      document.documentElement.setAttribute('data-centre', sub);
+    } catch(e){ MULTITENANT.current = 'default'; }
+  },
+  registerCentre: function(centre){
+    if(!iA()) return;
+    DB.centres = DB.centres || [];
+    DB.centres.push({
+      id: centre.id || gid(),
+      slug: centre.slug,
+      nom: centre.nom,
+      ville: centre.ville,
+      email: centre.email,
+      tel: centre.tel,
+      plan: centre.plan||'starter', // starter / pro / enterprise
+      mrrFcfa: centre.mrrFcfa||10000,
+      createdAt: Date.now(),
+      active: true
+    });
+    try { save(); } catch(e){}
+  }
+};
+try { MULTITENANT.init(); } catch(e){}
+
+window.pgCentresAdmin = function(){
+  if(!iA() || !isSA()) return na();
+  DB.centres = DB.centres || [];
+  var totalMRR = DB.centres.filter(function(c){return c.active;}).reduce(function(s,c){return s+(+c.mrrFcfa||0);},0);
+  var rows = DB.centres.map(function(c){
+    return '<tr>'
+      +'<td><b>'+_esc(c.nom||'?')+'</b><br><span style="font-size:11px;color:#6B7280">'+_esc(c.slug||'?')+'.veritas-school.com</span></td>'
+      +'<td>'+_esc(c.ville||'?')+'</td>'
+      +'<td><span style="background:#3C8DFF;color:#fff;padding:2px 8px;border-radius:6px;font-size:11px">'+_esc(c.plan)+'</span></td>'
+      +'<td><b style="color:#10B981">'+fmt(c.mrrFcfa||0)+'</b>/mois</td>'
+      +'<td>'+new Date(c.createdAt).toLocaleDateString('fr-FR')+'</td>'
+      +'<td>'+(c.active?'✅':'⏸️')+'</td></tr>';
+  }).join('') || '<tr><td colspan="6" style="text-align:center;padding:20px;color:#9CA3AF">Aucun centre client (mode mono-tenant)</td></tr>';
+  return '<div class="pgt">🏢 Centres clients (multi-tenant)</div>'
+    +'<div class="card mt12"><div class="ct">📊 SaaS Overview</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">'
+    +_statCard('🏢', DB.centres.length, 'Centres clients', '#3C8DFF')
+    +_statCard('✅', DB.centres.filter(function(c){return c.active;}).length, 'Actifs', '#10B981')
+    +_statCard('💰', fmt(totalMRR), 'MRR mensuel récurrent', '#FFC93C')
+    +_statCard('📅', fmt(totalMRR*12), 'ARR annualisé', '#7C3AED')
+    +'</div></div>'
+    +'<div class="card mt12"><div class="ct">🏢 Liste des centres</div>'
+    +'<button class="btn bi sm" onclick="mAddCentre()">➕ Ajouter un centre client</button>'
+    +'<div style="overflow-x:auto;margin-top:12px"><table class="t" style="width:100%;border-collapse:collapse">'
+    +'<thead><tr><th>Centre</th><th>Ville</th><th>Plan</th><th>MRR</th><th>Inscrit</th><th>Statut</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table></div></div>'
+    +'<div class="card mt12"><div class="ct">💡 Notice multi-tenant</div>'
+    +'<div class="ib ibi mb0"><span>ℹ️</span><span>L\'isolation complète des données par centre nécessite un backend dédié (cf. ROADMAP_LONG_TERME.md #15). Le frontend est prêt — il manque les Row-Level Security côté SQL et la résolution serveur des sous-domaines.</span></div></div>';
+};
+
+window.mAddCentre = function(){
+  M('🏢 Ajouter un centre client', 'Plan SaaS multi-tenant',
+    '<div class="fg"><span class="fl">Nom du centre *</span><input class="fi" id="cNom" placeholder="Centre VÉRITAS Yaoundé"></div>'
+    +'<div class="fg"><span class="fl">Sous-domaine (slug) *</span><input class="fi" id="cSlug" placeholder="yaounde" style="text-transform:lowercase"></div>'
+    +'<div class="fg"><span class="fl">Ville</span><input class="fi" id="cVille" placeholder="Yaoundé"></div>'
+    +'<div class="fg"><span class="fl">Email contact</span><input class="fi" id="cEmail" type="email"></div>'
+    +'<div class="fg"><span class="fl">Téléphone WhatsApp</span><input class="fi" id="cTel" placeholder="+237 6XX XX XX XX"></div>'
+    +'<div class="fg"><span class="fl">Plan</span><select class="fi" id="cPlan">'
+    +'<option value="starter">Starter — 10 000 FCFA/mois (≤100 élèves)</option>'
+    +'<option value="pro">Pro — 25 000 FCFA/mois (≤500 élèves)</option>'
+    +'<option value="enterprise">Enterprise — 50 000 FCFA/mois (illimité)</option>'
+    +'</select></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="saveCentre()">💾 Créer le centre</button>');
+};
+
+window.saveCentre = function(){
+  var nom = (_ge('cNom')?.value||'').trim();
+  var slug = (_ge('cSlug')?.value||'').trim().toLowerCase().replace(/[^a-z0-9-]/g,'');
+  var plan = _ge('cPlan')?.value||'starter';
+  var mrr = {starter:10000, pro:25000, enterprise:50000}[plan]||10000;
+  if(!nom || !slug){ toast('Nom et slug requis','warn'); return; }
+  MULTITENANT.registerCentre({
+    slug: slug, nom: nom,
+    ville: _ge('cVille')?.value||'',
+    email: _ge('cEmail')?.value||'',
+    tel: _ge('cTel')?.value||'',
+    plan: plan, mrrFcfa: mrr
+  });
+  cm();
+  toast('✓ Centre '+nom+' créé');
+  if(typeof re==='function') re();
+};
 
 // ════════════════════════════════════════════════════════════════════
 // ── v1.1 — MODULE 1 : PAGE PRODUIT FULLSCREEN ────────────────────

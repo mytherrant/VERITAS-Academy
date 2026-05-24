@@ -1,0 +1,50 @@
+{
+  "appId": "cm.veritas.app",
+  "appName": "VÉRITAS Academy",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "url": "https://veritas-school.com",
+    "cleartext": false
+  },
+  "android": {
+    "buildOptions": {
+      "keystorePath": "release.keystore",
+      "keystoreAlias": "veritas",
+      "releaseType": "AAB"
+    },
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "ios": {
+    "scheme": "VERITAS",
+    "contentInset": "automatic"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#142554",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#142554"
+    },
+    "PushNotifications": {
+      "presentationOptions": ["badge", "sound", "alert"]
+    },
+    "Keyboard": {
+      "resize": "body",
+      "style": "dark"
+    },
+    "App": {
+      "deepLinks": [
+        { "url": "veritas://*" },
+        { "url": "https://veritas-school.com/*" }
+      ]
+    }
+  }
+}
