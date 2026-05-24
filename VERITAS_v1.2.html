@@ -2986,6 +2986,8 @@ setInterval(_refreshCitation,15000);
   <button class="vnav-btn" onclick="showEpreuves()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">assignment</span> Épreuves</button>
   <button class="vnav-btn" onclick="showEvaluations()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">insights</span> Évals</button>
   <button class="vnav-btn" onclick="mDevoirCorrectionIA()" style="background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(16,185,129,.05));color:#10B981;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">auto_fix_high</span> Devoir IA</button>
+  <button class="vnav-btn" onclick="mParrainage()" style="background:linear-gradient(135deg,rgba(236,72,153,.18),rgba(236,72,153,.05));color:#EC4899;border-radius:20px;margin:3px 2px;font-weight:700" title="Parrainage : gagnez du crédit"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">card_giftcard</span> Parrainage</button>
+  <button class="vnav-btn" onclick="mLanguageMenu()" style="border-radius:20px;margin:3px 2px;font-weight:700" title="Changer la langue / Switch language"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">language</span> FR/EN</button>
   <button class="vnav-btn" onclick="vShowSec('actualites',this)" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#ef4444;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">newspaper</span> Actualités</button>
   <button class="vnav-btn" onclick="vShowSec('contact',this)"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">forum</span> Contact</button>
   <button class="vnav-btn" onclick="openCart()" style="position:relative;background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px">shopping_cart</span> Panier<span id="cartBadge" style="position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;border-radius:50%;font-size:10px;width:18px;height:18px;display:none;align-items:center;justify-content:center;font-weight:700"></span></button>
@@ -11310,6 +11312,7 @@ const ANAV=[
   {s:"💰 Finances",i:[
     {k:"payments",i:"💳",l:"Paiements élèves"},
     {k:"paiements_admin",i:"💰",l:"Tentatives de paiement"},
+    {k:"stats_business",i:"📊",l:"Stats Business (CA/Conv.)"},
     {k:"autredep",i:"💸",l:"Autres dépenses"},
     {k:"finance",i:"△",l:"Bilan financier"}
   ]},
@@ -11317,6 +11320,7 @@ const ANAV=[
     {k:"announce",i:"◆",l:"Annonces"},
     {k:"send",i:"◎",l:"Centre WhatsApp"},
     {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
+    {k:"parrainage_admin",i:"🎁",l:"Programme parrainage"},
     {k:"cms",i:"🌐",l:"Portail visiteur"}
   ]},
   {s:"⚙️ Système",i:[
@@ -11365,6 +11369,7 @@ const SANAV=[
   {s:"💰 Finances",i:[
     {k:"payments",i:"💳",l:"Paiements élèves"},
     {k:"paiements_admin",i:"💰",l:"Tentatives de paiement"},
+    {k:"stats_business",i:"📊",l:"Stats Business (CA/Conv.)"},
     {k:"autredep",i:"💸",l:"Autres dépenses"},
     {k:"finance",i:"△",l:"Bilan financier"}
   ]},
@@ -11372,6 +11377,7 @@ const SANAV=[
     {k:"announce",i:"◆",l:"Annonces"},
     {k:"send",i:"◎",l:"Centre WhatsApp"},
     {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
+    {k:"parrainage_admin",i:"🎁",l:"Programme parrainage"},
     {k:"cms",i:"🌐",l:"Portail visiteur"}
   ]},
   {s:"⚙️ Système",i:[
@@ -11505,6 +11511,7 @@ function render(p){
     devoirs_teacher:pgDevoirsTeacher,perf_teacher:pgPerfTeacher,
     // Admin
     statistics:pgClassStats,absences_admin:pgAbsencesAdmin,devoirs_admin:pgDevoirsAdmin,orientation_admin:pgOrientationAdmin,resPedago:pgResPedagoAdmin,paiements_admin:pgPaiementsAdmin,
+    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,
     // Super Admin
     superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,
     // Guide d'utilisation (tous rôles)
@@ -26899,6 +26906,7 @@ function _buildRegisterHTML(){
     +"<div class='fg'><span class='fl'>Nom *</span><input class='fi' id='rNom' placeholder='MBALLA'></div>"
     +"<div class='fg'><span class='fl'>WhatsApp *</span><input class='fi' id='rTel' placeholder='+237 6 00 00 00 00'></div>"
     +"<div class='fg'><span class='fl'>Email</span><input class='fi' type='email' id='rEmail' placeholder='jean@email.cm'></div>"
+    +"<div class='fg'><span class='fl'>🎁 Code parrainage (optionnel)</span><input class='fi' id='rRef' placeholder='VRT...' value='"+(sessionStorage.getItem('_vrtRef')||'')+"' style='text-transform:uppercase;letter-spacing:1px'></div>"
     +(function(){
       // Filtrer : n'afficher que les classes qui ont un groupe WhatsApp actif
       // Fallback sur toutes les classes si aucun groupe configuré
@@ -26961,6 +26969,8 @@ function doRegister(){
     plans:[],statut:"actif",
     dateInscription:new Date().toLocaleDateString("fr-FR"),lastLogin:today()};
   DB.visitorAccounts.push(acc);save();
+  // P2 : appliquer parrainage si code présent dans sessionStorage
+  try { if(typeof _processReferralOnSignup==='function') _processReferralOnSignup(acc.id); } catch(e){}
   // == Notification admin - nouvelle inscription ==
   autoNotify('🆕 Nouvelle inscription : '+pre+' '+nom,
     'Classe : '+acc.cls+' | Tél/WA : '+tel+' | Utilisateur : '+user+
@@ -27148,12 +27158,15 @@ function _mgrCreate(){
   if(pwd.length<6){toast("Mot de passe trop court","warn");return;}
   if(!DB.visitorAccounts)DB.visitorAccounts=[];
   if(DB.visitorAccounts.find(function(a){return a.user.toLowerCase()===user.toLowerCase();})){toast("Identifiant déjà pris","warn");return;}
-  DB.visitorAccounts.push({id:"va_"+Date.now(),user:user,pwd:pwd,nom:nom,pre:pre,tel:tel,
+  var _newId = "va_"+Date.now();
+  DB.visitorAccounts.push({id:_newId,user:user,pwd:pwd,nom:nom,pre:pre,tel:tel,
     email:document.getElementById("maE")?.value||"",
     cls:document.getElementById("maC")?.value||CLS[0],
     plans:[],statut:"actif",
     dateInscription:new Date().toLocaleDateString("fr-FR"),lastLogin:null});
-  save();cm();re();toast("Compte créé pour "+pre+" ✅");
+  save();
+  try { if(typeof _processReferralOnSignup==='function') _processReferralOnSignup(_newId); } catch(e){}
+  cm();re();toast("Compte créé pour "+pre+" ✅");
 }
 
 // ── ÉVALUATIONS EN LIGNE ─────────────────────────────────────────
@@ -31254,7 +31267,417 @@ function _payDelete(ref){
 window.openPaymentModal = openPaymentModal;
 window.mPayAttempts = mPayAttempts;
 
-// ═══════════════════════════��═════════════════════════��════════════
+// ════════════════════════════════════════════════════════════════════
+// ── v1.2 P2 — MODULE STATS BUSINESS DASHBOARD ADMIN ────────────────
+// ════════════════════════════════════════════════════════════════════
+window.mBusinessStats = function(){
+  if(!iA()) return;
+  try {
+    var pays = (DB.payAttempts||[]).filter(function(p){return p.status==='paid';});
+    var allPays = DB.payAttempts||[];
+    var totalCA = pays.reduce(function(s,p){return s+(+p.montant||0);},0);
+    var caMois = pays.filter(function(p){
+      try{var d=new Date(p.created||p.date); var n=new Date();
+        return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth();}
+      catch(e){return false;}
+    }).reduce(function(s,p){return s+(+p.montant||0);},0);
+    var nbStud = (DB.students||[]).length;
+    var nbVisit = (DB.visitorAccounts||[]).length;
+    var nbAbo = ((DB.elearning||{}).abonnements||[]).filter(function(a){return a.statut==='actif';}).length;
+    var nbBook = (DB.bookPurchases||[]).length;
+    var pendingPays = allPays.filter(function(p){return p.status==='pending';}).length;
+    var convRate = nbVisit>0 ? ((nbAbo/nbVisit)*100).toFixed(1) : '0';
+
+    // Top 3 produits e-learning vendus
+    var prodCount = {};
+    (allPays.filter(function(p){return p.status==='paid';})).forEach(function(p){
+      var k = p.label||'(inconnu)';
+      prodCount[k] = (prodCount[k]||0)+1;
+    });
+    var topProd = Object.entries(prodCount).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
+
+    var body = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px">'
+      +_statCard('💰', fmt(totalCA), 'CA total', '#10B981')
+      +_statCard('📅', fmt(caMois), 'CA ce mois', '#3C8DFF')
+      +_statCard('👥', nbStud, 'Élèves', '#FFC93C')
+      +_statCard('🌐', nbVisit, 'Visiteurs inscrits', '#7C3AED')
+      +_statCard('🎓', nbAbo, 'Abonnements actifs', '#EC4899')
+      +_statCard('📚', nbBook, 'Achats livres', '#F59E0B')
+      +_statCard('⏳', pendingPays, 'Paiements en attente', '#EF4444')
+      +_statCard('📊', convRate+'%', 'Taux conversion', '#06B6D4')
+      +'</div>';
+
+    if(topProd.length){
+      body += '<div style="background:linear-gradient(135deg,rgba(255,201,60,.08),rgba(60,141,255,.05));padding:14px;border-radius:14px;margin-top:8px">'
+        +'<div style="font-weight:700;color:#142554;margin-bottom:10px;display:flex;align-items:center;gap:6px">'
+        +'<span class="material-icons-round" style="color:#FFC93C">trending_up</span> Top 3 produits</div>';
+      topProd.forEach(function(t,i){
+        var medal = ['🥇','🥈','🥉'][i]||'•';
+        body += '<div style="display:flex;justify-content:space-between;padding:8px;background:#fff;border-radius:8px;margin-bottom:6px">'
+          +'<span>'+medal+' '+_esc(t[0])+'</span>'
+          +'<b style="color:#10B981">'+t[1]+' vente'+(t[1]>1?'s':'')+'</b></div>';
+      });
+      body += '</div>';
+    }
+
+    body += '<div style="margin-top:14px;padding:10px;background:#F3F4F6;border-radius:10px;font-size:12px;color:#6B7280">'
+      +'<b>📈 Suggestions :</b> '
+      +(caMois<10000 ? 'Augmenter la visibilité (poster Facebook, WhatsApp).' :
+        caMois<50000 ? 'Bon démarrage — pensez aux programmes de parrainage.' :
+        'Excellente croissance — envisagez d\'ajouter des plans premium.')
+      +'</div>';
+
+    M('📊 Statistiques Business', 'Vue d\'ensemble VÉRITAS', body,
+      '<button class="btn bo" onclick="cm()">Fermer</button>'
+      +'<button class="btn bi" onclick="mBusinessStats()">🔄 Actualiser</button>', true);
+  } catch(e){
+    console.error('mBusinessStats error:', e);
+    toast('Erreur stats : '+e.message,'err');
+  }
+};
+
+function _statCard(emoji, val, lbl, color){
+  return '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;text-align:center;border-top:3px solid '+color+'">'
+    +'<div style="font-size:24px;margin-bottom:6px">'+emoji+'</div>'
+    +'<div style="font-size:20px;font-weight:800;color:'+color+';margin-bottom:2px">'+val+'</div>'
+    +'<div style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">'+lbl+'</div>'
+    +'</div>';
+}
+
+// ════════════════════════════════════════════════════════════════════
+// ── v1.2 P2 — MODULE PROGRAMME DE PARRAINAGE ───────────────────────
+// ════════════════════════════════════════════════════════════════════
+// Logique : chaque visiteur inscrit reçoit un code unique. S'il partage
+// ce code et qu'un nouveau s'inscrit avec, les 2 reçoivent +500 FCFA de
+// crédit à utiliser sur la boutique ou e-learning.
+window.PARRAINAGE_BONUS = 500; // FCFA crédit par parrainage réussi
+
+window._genReferralCode = function(uid){
+  if(!uid) return 'VRTGUEST';
+  // Code court basé sur l'UID utilisateur
+  var c = (uid+'').replace(/[^A-Z0-9]/gi,'').toUpperCase().slice(0,6);
+  while(c.length<6) c+='X';
+  return 'VRT'+c;
+};
+
+window.mParrainage = function(){
+  try {
+    var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+    if(!ses || (ses.type!=='visiteur_inscrit' && ses.type!=='eleve')){
+      M('🎁 Programme de parrainage','Connectez-vous pour parrainer',
+        '<div style="text-align:center;padding:18px"><p>Inscrivez-vous gratuitement pour obtenir votre code de parrainage et gagner <b style="color:#10B981">'+fmt(PARRAINAGE_BONUS)+' de crédit</b> par filleul qui s\'inscrit !</p></div>',
+        '<button class="btn bo" onclick="cm()">Fermer</button>'
+        +'<button class="btn bi" onclick="cm();showInscription()">S\'inscrire</button>');
+      return;
+    }
+    var code = _genReferralCode(ses.id);
+    var filleuls = (DB.parrainages||[]).filter(function(p){return p.parrainId===ses.id;});
+    var credit = filleuls.reduce(function(s,f){return s + (f.confirmed?PARRAINAGE_BONUS:0);},0);
+    var shareUrl = (location.origin||'https://veritas-academy.com')+'/?ref='+code;
+    var shareMsg = encodeURIComponent('🎓 Rejoins-moi sur VÉRITAS Academy avec mon code '+code+' et reçois '+fmt(PARRAINAGE_BONUS)+' de crédit ! '+shareUrl);
+
+    var body = '<div style="background:linear-gradient(135deg,#FFC93C,#F59E0B);padding:20px;border-radius:14px;text-align:center;color:#142554;margin-bottom:14px">'
+      +'<div style="font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Votre code parrainage</div>'
+      +'<div style="font-size:32px;font-weight:900;letter-spacing:3px;font-family:monospace">'+code+'</div>'
+      +'<button class="btn" style="margin-top:10px;background:rgba(20,37,84,.9);color:#FFC93C;border:none;padding:6px 14px;border-radius:8px;font-size:12px" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié !\');});">📋 Copier</button>'
+      +'</div>'
+      +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
+      +'<div style="background:#fff;border:2px solid #10B981;border-radius:12px;padding:14px;text-align:center">'
+        +'<div style="font-size:28px">'+filleuls.length+'</div>'
+        +'<div style="font-size:11px;color:#6B7280">Filleul'+(filleuls.length>1?'s':'')+'</div></div>'
+      +'<div style="background:#fff;border:2px solid #FFC93C;border-radius:12px;padding:14px;text-align:center">'
+        +'<div style="font-size:20px;color:#10B981;font-weight:800">'+fmt(credit)+'</div>'
+        +'<div style="font-size:11px;color:#6B7280">Crédit gagné</div></div>'
+      +'</div>'
+      +'<div style="background:#F3F4F6;padding:14px;border-radius:12px;margin-bottom:12px">'
+      +'<div style="font-weight:700;margin-bottom:8px">🚀 Comment ça marche ?</div>'
+      +'<ol style="margin:0;padding-left:20px;font-size:13px;color:#374151;line-height:1.7">'
+      +'<li>Partagez votre code à un ami</li>'
+      +'<li>Il s\'inscrit en saisissant le code</li>'
+      +'<li>Vous recevez <b>'+fmt(PARRAINAGE_BONUS)+'</b> de crédit chacun</li>'
+      +'<li>Crédit utilisable sur la boutique et les abonnements e-learning</li></ol></div>'
+      +'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
+      +'<a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text='+shareMsg+'">📱 WhatsApp</a>'
+      +'<a class="btn" style="background:#1877F2;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(shareUrl)+'">📘 Facebook</a>'
+      +'<button class="btn bo" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(function(){toast(\'Lien copié !\');});">🔗 Lien</button>'
+      +'</div>';
+
+    M('🎁 Programme de parrainage','Invitez vos amis, gagnez du crédit',body,
+      '<button class="btn bi" onclick="cm()">Fermer</button>', true);
+  } catch(e){
+    console.error('mParrainage error:',e);
+    toast('Erreur parrainage : '+e.message,'err');
+  }
+};
+
+// Capture ref code depuis URL ?ref=VRT...
+window._captureReferralCode = function(){
+  try {
+    var u = new URL(location.href);
+    var ref = u.searchParams.get('ref');
+    if(ref && /^VRT[A-Z0-9]+$/i.test(ref)){
+      sessionStorage.setItem('_vrtRef', ref.toUpperCase());
+    }
+  } catch(e){}
+};
+try { _captureReferralCode(); } catch(e){}
+
+// Hook inscription : à appeler depuis le flux d'inscription après création du compte
+window._processReferralOnSignup = function(newUserId){
+  try {
+    // Priorité au champ formulaire (rRef ou maRef), sinon sessionStorage
+    var field = (document.getElementById('rRef') || document.getElementById('maRef'));
+    var ref = (field && field.value && field.value.trim()) || sessionStorage.getItem('_vrtRef');
+    if(ref) ref = ref.toUpperCase().trim();
+    if(!ref || !newUserId) return false;
+    // Trouver le parrain
+    var parrain = (DB.visitorAccounts||[]).find(function(v){
+      return _genReferralCode(v.id)===ref;
+    });
+    if(!parrain || parrain.id===newUserId) return false;
+    DB.parrainages = DB.parrainages || [];
+    DB.parrainages.push({
+      id: gid(), parrainId: parrain.id, filleulId: newUserId,
+      code: ref, confirmed: true, bonus: PARRAINAGE_BONUS,
+      date: new Date().toISOString()
+    });
+    // Créditer les 2
+    DB.userCredits = DB.userCredits || {};
+    DB.userCredits[parrain.id] = (DB.userCredits[parrain.id]||0) + PARRAINAGE_BONUS;
+    DB.userCredits[newUserId] = (DB.userCredits[newUserId]||0) + PARRAINAGE_BONUS;
+    save();
+    sessionStorage.removeItem('_vrtRef');
+    toast('🎉 +'+fmt(PARRAINAGE_BONUS)+' crédit (parrainage)','ok');
+    return true;
+  } catch(e){ console.warn(e); return false; }
+};
+
+// ════════════════════════════════════════════════════════════════════
+// ── v1.2 P2 — MODULE i18n BILINGUE FR/EN ───────────────────────────
+// ════════════════════════════════════════════════════════════════════
+// Approche pragmatique : dictionnaire des chaînes UI critiques, helper
+// t(key) qui retourne la version selon DB._lang ('fr' défaut, 'en').
+// Les chaînes data (œuvres, élèves, etc.) restent en FR — c'est l'UI
+// qui se traduit pour les visiteurs internationaux.
+window.I18N_DICT = {
+  fr: {
+    'nav.home':'Accueil', 'nav.elearning':'E-Learning', 'nav.boutique':'Boutique',
+    'nav.games':'Jeux', 'nav.labs':'Labos', 'nav.classes':'Classes',
+    'nav.orientation':'Orientation', 'nav.calendar':'Calendrier',
+    'nav.exams':'Épreuves', 'nav.evals':'Évals', 'nav.ai':'Devoir IA',
+    'nav.news':'Actualités', 'nav.contact':'Contact', 'nav.cart':'Panier',
+    'btn.signup':'S\'inscrire', 'btn.login':'Se connecter', 'btn.close':'Fermer',
+    'btn.cancel':'Annuler', 'btn.confirm':'Confirmer', 'btn.save':'Enregistrer',
+    'btn.delete':'Supprimer', 'btn.edit':'Modifier', 'btn.refresh':'Actualiser',
+    'btn.buy':'Acheter', 'btn.subscribe':'S\'abonner', 'btn.referral':'Parrainage',
+    'lbl.price':'Prix', 'lbl.duration':'Durée', 'lbl.level':'Niveau',
+    'lbl.subject':'Matière', 'lbl.teacher':'Enseignant', 'lbl.student':'Élève',
+    'msg.welcome':'Bienvenue sur VÉRITAS Academy',
+    'msg.loading':'Chargement…',
+    'msg.error':'Une erreur est survenue',
+    'msg.success':'Opération réussie',
+    'msg.copied':'Copié !',
+    'msg.empty':'Aucun résultat',
+    'menu.lang':'Langue', 'menu.lang.fr':'Français', 'menu.lang.en':'English'
+  },
+  en: {
+    'nav.home':'Home', 'nav.elearning':'E-Learning', 'nav.boutique':'Shop',
+    'nav.games':'Games', 'nav.labs':'Labs', 'nav.classes':'Classes',
+    'nav.orientation':'Guidance', 'nav.calendar':'Calendar',
+    'nav.exams':'Exams', 'nav.evals':'Tests', 'nav.ai':'AI Tutor',
+    'nav.news':'News', 'nav.contact':'Contact', 'nav.cart':'Cart',
+    'btn.signup':'Sign up', 'btn.login':'Log in', 'btn.close':'Close',
+    'btn.cancel':'Cancel', 'btn.confirm':'Confirm', 'btn.save':'Save',
+    'btn.delete':'Delete', 'btn.edit':'Edit', 'btn.refresh':'Refresh',
+    'btn.buy':'Buy', 'btn.subscribe':'Subscribe', 'btn.referral':'Referral',
+    'lbl.price':'Price', 'lbl.duration':'Duration', 'lbl.level':'Level',
+    'lbl.subject':'Subject', 'lbl.teacher':'Teacher', 'lbl.student':'Student',
+    'msg.welcome':'Welcome to VÉRITAS Academy',
+    'msg.loading':'Loading…',
+    'msg.error':'An error occurred',
+    'msg.success':'Operation successful',
+    'msg.copied':'Copied!',
+    'msg.empty':'No results',
+    'menu.lang':'Language', 'menu.lang.fr':'Français', 'menu.lang.en':'English'
+  }
+};
+
+window.t = function(key, fallback){
+  try {
+    var lang = (DB && DB._lang) || localStorage.getItem('_vrtLang') || 'fr';
+    var dict = I18N_DICT[lang] || I18N_DICT.fr;
+    return dict[key] || I18N_DICT.fr[key] || fallback || key;
+  } catch(e){ return fallback || key; }
+};
+
+window.setLang = function(lang){
+  if(lang!=='fr' && lang!=='en') return;
+  try {
+    DB._lang = lang;
+    localStorage.setItem('_vrtLang', lang);
+    if(typeof save==='function') save();
+    document.documentElement.lang = lang==='en' ? 'en' : 'fr-CM';
+    // Appliquer aux éléments avec data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      var k = el.getAttribute('data-i18n');
+      el.textContent = t(k);
+    });
+    toast(lang==='en'?'Language: English':'Langue : Français','ok');
+    try { if(typeof re==='function') re(); } catch(e){}
+  } catch(e){ console.warn('setLang:',e); }
+};
+
+window.mLanguageMenu = function(){
+  var curr = (DB && DB._lang) || localStorage.getItem('_vrtLang') || 'fr';
+  var body = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:8px">'
+    +'<button class="btn" style="background:'+(curr==='fr'?'#FFC93C':'#F3F4F6')+';color:'+(curr==='fr'?'#142554':'#374151')+';padding:18px;font-size:16px;font-weight:700;border-radius:14px" onclick="setLang(\'fr\');cm()">🇫🇷 Français</button>'
+    +'<button class="btn" style="background:'+(curr==='en'?'#FFC93C':'#F3F4F6')+';color:'+(curr==='en'?'#142554':'#374151')+';padding:18px;font-size:16px;font-weight:700;border-radius:14px" onclick="setLang(\'en\');cm()">🇬🇧 English</button>'
+    +'</div>'
+    +'<div style="margin-top:14px;padding:10px;background:#FEF3C7;border-radius:8px;font-size:12px;color:#92400E">'
+    +'<b>ℹ️ Note :</b> '+(curr==='fr'?'Les contenus pédagogiques (cours, œuvres, épreuves) restent en français — seule l\'interface est traduite.':'Educational content (courses, works, exams) stays in French — only the UI is translated.')
+    +'</div>';
+  M(t('menu.lang','Langue'),'',body,'<button class="btn bi" onclick="cm()">'+t('btn.close','Fermer')+'</button>');
+};
+
+// Auto-load langue au démarrage
+try {
+  var savedLang = localStorage.getItem('_vrtLang');
+  if(savedLang==='en') document.documentElement.lang = 'en';
+} catch(e){}
+
+// ════════════════════════════════════════════════════════════════════
+// ── v1.2 P2 — PAGES ADMIN : Stats Business + Parrainage ────────────
+// ════════════════════════════════════════════════════════════════════
+window.pgStatsBusiness = function(){
+  if(!iA()) return na();
+  try {
+    var pays = (DB.payAttempts||[]).filter(function(p){return p.status==='paid';});
+    var allPays = DB.payAttempts||[];
+    var totalCA = pays.reduce(function(s,p){return s+(+p.montant||0);},0);
+    var now = new Date();
+    var caMois = pays.filter(function(p){
+      try{var d=new Date(p.created||p.date); return d.getFullYear()===now.getFullYear() && d.getMonth()===now.getMonth();}catch(e){return false;}
+    }).reduce(function(s,p){return s+(+p.montant||0);},0);
+    var caSem = pays.filter(function(p){
+      try{var d=new Date(p.created||p.date); return (now-d)/(1000*60*60*24) <= 7;}catch(e){return false;}
+    }).reduce(function(s,p){return s+(+p.montant||0);},0);
+    var nbStud = (DB.students||[]).length;
+    var nbVisit = (DB.visitorAccounts||[]).length;
+    var nbAbo = ((DB.elearning||{}).abonnements||[]).filter(function(a){return a.statut==='actif';}).length;
+    var nbBook = (DB.bookPurchases||[]).length;
+    var nbPar = (DB.parrainages||[]).length;
+    var pendingPays = allPays.filter(function(p){return p.status==='pending';}).length;
+    var convRate = nbVisit>0 ? ((nbAbo/nbVisit)*100).toFixed(1) : '0';
+
+    // Top 5 produits
+    var prodCount = {};
+    pays.forEach(function(p){
+      var k = p.label||'(inconnu)';
+      prodCount[k] = (prodCount[k]||0)+(+p.montant||0);
+    });
+    var topProd = Object.entries(prodCount).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+
+    // Évolution 6 mois
+    var monthlyData = [];
+    for(var i=5;i>=0;i--){
+      var d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      var label = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][d.getMonth()];
+      var ca = pays.filter(function(p){
+        try{var pd=new Date(p.created||p.date); return pd.getFullYear()===d.getFullYear() && pd.getMonth()===d.getMonth();}catch(e){return false;}
+      }).reduce(function(s,p){return s+(+p.montant||0);},0);
+      monthlyData.push({label:label, val:ca});
+    }
+    var maxMonth = Math.max(1, ...monthlyData.map(function(m){return m.val;}));
+
+    var bars = monthlyData.map(function(m){
+      var h = Math.max(8,(m.val/maxMonth)*140);
+      return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">'
+        +'<div style="font-size:10px;color:#6B7280;font-weight:700">'+(m.val>0?fmt(m.val):'')+'</div>'
+        +'<div style="width:80%;height:'+h+'px;background:linear-gradient(180deg,#3C8DFF,#142554);border-radius:6px 6px 0 0;transition:.3s"></div>'
+        +'<div style="font-size:11px;color:#374151;font-weight:600">'+m.label+'</div></div>';
+    }).join('');
+
+    var topHTML = topProd.map(function(t,i){
+      var medal = ['🥇','🥈','🥉','4️⃣','5️⃣'][i];
+      return '<div style="display:flex;justify-content:space-between;padding:10px 14px;background:#fff;border-radius:10px;margin-bottom:6px;border:1px solid #E5E7EB">'
+        +'<span>'+medal+' '+_esc(t[0])+'</span>'
+        +'<b style="color:#10B981">'+fmt(t[1])+'</b></div>';
+    }).join('') || '<div style="text-align:center;padding:20px;color:#9CA3AF">Aucune vente confirmée</div>';
+
+    return '<div class="pgt">📊 Statistiques Business</div>'
+      +'<div class="card mt12"><div class="ct">💰 Chiffre d\'affaires</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">'
+      +_statCard('💰', fmt(totalCA), 'CA total', '#10B981')
+      +_statCard('📅', fmt(caMois), 'CA ce mois', '#3C8DFF')
+      +_statCard('📆', fmt(caSem), 'CA cette semaine', '#7C3AED')
+      +_statCard('⏳', pendingPays, 'En attente', '#EF4444')
+      +'</div></div>'
+      +'<div class="card mt12"><div class="ct">📈 Évolution 6 derniers mois</div>'
+      +'<div style="display:flex;align-items:flex-end;justify-content:space-around;height:200px;gap:10px;padding:14px">'+bars+'</div></div>'
+      +'<div class="card mt12"><div class="ct">👥 Utilisateurs</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px">'
+      +_statCard('🎓', nbStud, 'Élèves inscrits', '#FFC93C')
+      +_statCard('🌐', nbVisit, 'Visiteurs', '#06B6D4')
+      +_statCard('📊', convRate+'%', 'Taux conversion', '#EC4899')
+      +_statCard('🎁', nbPar, 'Parrainages', '#F59E0B')
+      +'</div></div>'
+      +'<div class="card mt12"><div class="ct">🛒 Activité</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px">'
+      +_statCard('🎓', nbAbo, 'Abonnements actifs', '#10B981')
+      +_statCard('📚', nbBook, 'Achats livres', '#F59E0B')
+      +'</div></div>'
+      +'<div class="card mt12"><div class="ct">🏆 Top 5 produits (CA)</div>'+topHTML+'</div>';
+  } catch(e){
+    console.error('pgStatsBusiness:',e);
+    return '<div class="pgt">📊 Statistiques Business</div><div class="card">Erreur : '+_esc(e.message)+'</div>';
+  }
+};
+
+window.pgParrainageAdmin = function(){
+  if(!iA()) return na();
+  try {
+    var pars = DB.parrainages||[];
+    var totalBonus = pars.filter(function(p){return p.confirmed;}).length * (PARRAINAGE_BONUS||500);
+    var byParrain = {};
+    pars.forEach(function(p){
+      byParrain[p.parrainId] = (byParrain[p.parrainId]||0) + 1;
+    });
+    var topParrains = Object.entries(byParrain).sort(function(a,b){return b[1]-a[1];}).slice(0,10);
+    var visitors = DB.visitorAccounts||[];
+
+    var topHTML = topParrains.map(function(t,i){
+      var v = visitors.find(function(x){return x.id===t[0];});
+      var nom = v ? (v.pre||'')+' '+(v.nom||'') : 'Anonyme';
+      return '<tr><td>'+(i+1)+'</td><td>'+_esc(nom)+'</td><td><code style="background:#F3F4F6;padding:2px 6px;border-radius:4px">'+_genReferralCode(t[0])+'</code></td><td><b style="color:#10B981">'+t[1]+'</b></td><td>'+fmt(t[1]*(PARRAINAGE_BONUS||500))+'</td></tr>';
+    }).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:#9CA3AF">Aucun parrainage actif</td></tr>';
+
+    return '<div class="pgt">🎁 Programme de parrainage</div>'
+      +'<div class="card mt12"><div class="ct">📊 Vue d\'ensemble</div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">'
+      +_statCard('🎁', pars.length, 'Parrainages totaux', '#EC4899')
+      +_statCard('✅', pars.filter(function(p){return p.confirmed;}).length, 'Confirmés', '#10B981')
+      +_statCard('💰', fmt(totalBonus), 'Crédits distribués', '#FFC93C')
+      +_statCard('👥', Object.keys(byParrain).length, 'Parrains actifs', '#7C3AED')
+      +'</div></div>'
+      +'<div class="card mt12"><div class="ct">🏆 Top 10 parrains</div>'
+      +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
+      +'<thead><tr><th>#</th><th>Nom</th><th>Code</th><th>Filleuls</th><th>Bonus généré</th></tr></thead>'
+      +'<tbody>'+topHTML+'</tbody></table></div></div>'
+      +'<div class="card mt12"><div class="ct">⚙️ Configuration</div>'
+      +'<div class="fg"><span class="fl">Bonus par parrainage (FCFA)</span>'
+      +'<input class="fi" id="parr_bonus" type="number" value="'+(PARRAINAGE_BONUS||500)+'" min="0" step="100"></div>'
+      +'<button class="btn bi mt10" onclick="window.PARRAINAGE_BONUS=parseInt(_ge(\'parr_bonus\')?.value)||500;DB._parrainageBonus=window.PARRAINAGE_BONUS;save();toast(\'✓ Bonus mis à jour\');">💾 Enregistrer</button>'
+      +'</div>';
+  } catch(e){
+    console.error('pgParrainageAdmin:',e);
+    return '<div class="pgt">🎁 Parrainage</div><div class="card">Erreur : '+_esc(e.message)+'</div>';
+  }
+};
+
+// Restaurer bonus parrainage depuis DB si défini
+try { if(DB && DB._parrainageBonus) window.PARRAINAGE_BONUS = DB._parrainageBonus; } catch(e){}
+
+// ════════════════════════════════════════════════════════════════════
 // ── v1.1 — MODULE 1 : PAGE PRODUIT FULLSCREEN ────────────────────
 // ══════════════════════════════════════════════════════════════════
 
