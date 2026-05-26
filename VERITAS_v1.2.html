@@ -7559,37 +7559,34 @@ function vShowSec(sec,btn){
         var g=document.querySelector('.velearn-grid');
         if(g){g.classList.add('entering');setTimeout(function(){g.classList.remove('entering');},2000);}
       },50);
-      var _picBase='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
-      // Mapping catégorie → couleur + picto 3D (configurables via DB.elearning.categories[i].cssClass / pictoUrl)
-      var _catThemes={
-        'cat1':{cls:'c-epreuves', pic:'memo_1f4dd.png'},                  // Épreuves séquentielles
-        'cat2':{cls:'c-cours',    pic:'open-book_1f4d6.png'},             // Cours détaillés PDF
-        'cat3':{cls:'c-video',    pic:'film-projector_1f4fd-fe0f.png'},   // Cours vidéo
-        'cat4':{cls:'c-corpus',   pic:'card-file-box_1f5c3-fe0f.png'},    // Corpus par séquence
-        'cat5':{cls:'c-fiches',   pic:'pushpin_1f4cc.png'},               // Fiches de révision
-        'cat6':{cls:'c-anciens',  pic:'graduation-cap_1f393.png'}         // Anciens sujets
+      // v2.2 : Mapping catégorie → couleur Lucide + icône SVG (style analyse littéraire)
+      var _catLcMap={
+        'cat1':{ic:'doc',       col:'#3B82F6', bg:'rgba(59,130,246,0.12)'}, // Épreuves
+        'cat2':{ic:'book',      col:'#7C3AED', bg:'rgba(124,58,237,0.12)'}, // Cours PDF
+        'cat3':{ic:'sparkles',  col:'#DC2626', bg:'rgba(220,38,38,0.12)'},  // Cours vidéo
+        'cat4':{ic:'clipboard', col:'#059669', bg:'rgba(5,150,105,0.12)'},  // Corpus
+        'cat5':{ic:'pencil',    col:'#D97706', bg:'rgba(217,119,6,0.12)'},  // Fiches
+        'cat6':{ic:'check',     col:'#0891B2', bg:'rgba(8,145,178,0.12)'}   // Anciens sujets
       };
-      h+='<div class="velearn-grid v-reveal">';
+      h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px" class="v-reveal">';
       el.categories.forEach(function(cat,i){
-        var theme=_catThemes[cat.id]||{cls:'c-default',pic:'books_1f4da.png'};
-        var clsName=cat.cssClass||theme.cls;
-        var picUrl=cat.pictoUrl||(_picBase+theme.pic);
+        var theme=_catLcMap[cat.id]||{ic:'book',col:'#142554',bg:'rgba(20,37,84,0.08)'};
         var cnt=(el.contenus||[]).filter(function(x){return x.cat===cat.id;}).length;
         var free=(el.contenus||[]).filter(function(x){return x.cat===cat.id&&x.gratuit;}).length;
         var isPopular=(i===0)||cat.populaire;
-        h+='<div class="velearn-tile '+clsName+'" onclick="window._elCat=\''+cat.id+'\';vShowSec(\'elearning\',null)">';
-        h+='  <div class="velearn-tile-top">';
-        h+='    <div class="velearn-tile-ico"><img src="'+_esc(picUrl)+'" alt="" loading="lazy"></div>';
-        h+='    '+(isPopular?'<div class="velearn-tile-badge popular">★ Populaire</div>':(free?'<div class="velearn-tile-badge">'+free+' gratuit'+(free>1?'es':'')+'</div>':''));
-        h+='  </div>';
-        h+='  <div>';
-        h+='    <div class="velearn-tile-title">'+_esc(cat.nom)+'</div>';
-        h+='    <div class="velearn-tile-desc">'+_esc(cat.desc)+'</div>';
-        h+='  </div>';
-        h+='  <div class="velearn-tile-bottom">';
-        h+='    <div class="velearn-tile-stats">📚 <strong>'+cnt+'</strong> ressource'+(cnt>1?'s':'')+(free?' · <strong>'+free+'</strong> gratuit'+(free>1?'es':''):'')+'</div>';
-        h+='    <div class="velearn-tile-arrow">→</div>';
-        h+='  </div>';
+        h+='<div class="vcard" style="cursor:pointer;text-align:center;position:relative;padding:18px 12px;transition:all .25s ease-out" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 24px rgba(20,37,84,.12)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'" onclick="window._elCat=\''+cat.id+'\';vShowSec(\'elearning\',null)">';
+        if(isPopular){
+          h+='<div style="position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#FFC93C,#F5B800);color:#142554;font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;letter-spacing:.5px;z-index:2">★ POPULAIRE</div>';
+        } else if(free){
+          h+='<div style="position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;letter-spacing:.5px;z-index:2">'+free+' GRATUIT'+(free>1?'S':'')+'</div>';
+        }
+        // Halo coloré avec icône Lucide SVG
+        h+='<div style="width:56px;height:56px;border-radius:50%;background:'+theme.bg+';display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 12px '+theme.bg.replace('0.12','0.25')+'">';
+        h+='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="'+theme.col+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+theme.ic+'"/></svg>';
+        h+='</div>';
+        h+='<div style="font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-size:14px;font-weight:800;color:'+theme.col+';line-height:1.2;margin-bottom:5px">'+_esc(cat.nom)+'</div>';
+        h+='<div style="font-size:11px;color:var(--ink4);line-height:1.4;margin-bottom:10px;min-height:30px">'+_esc((cat.desc||'').slice(0,55))+'</div>';
+        h+='<div style="font-size:11px;color:'+theme.col+';font-weight:700;padding-top:8px;border-top:1px solid #E4E8F0">📚 '+cnt+' ressource'+(cnt>1?'s':'')+'</div>';
         h+='</div>';
       });
       h+='</div>';
@@ -21868,7 +21865,6 @@ function showJeuxEdu(){
   var NIVEAUX=["Tous","3eme","1ere","Terminale","6eme-3eme","2nde-Tle"];
   var h="<div class='vsec'>";
   h+="<div class='vsec-title vsec-title-hero'>🎮 Jeux Éducatifs & Cartes Mentales</div><div class='vsec-sub'>Apprenez en vous amusant — verbes, capitales, formules, œuvres au programme</div>";
-  h+="<div class='vsec-sub'>Apprenez en jouant — jeux, quiz et cartes mentales interactives</div>";
 
   // ══════════ SECTION CARTES MENTALES LITTÉRAIRES ══════════
   h+="<div id='cartesMentalesSection' data-mat='Littérature' style='margin-bottom:28px'>";
@@ -21961,11 +21957,14 @@ function showJeuxEdu(){
       var hasCtrl=!!(it.oe.controle&&it.oe.controle.length);
 
       h+="<div class='voeuvre-card "+cssCls+"' onclick=\"_showLittMenu('"+it.key+"','"+it.key+"')\">";
-      h+="  <div class='voeuvre-head'>";
-      h+="    <div class='voeuvre-cls-badge'>"+_esc(cls)+"</div>";
-      h+="    <div class='voeuvre-ico'><img src='"+_esc(it.picUrl)+"' alt='' loading='lazy'></div>";
-      h+="    <div class='voeuvre-title'>"+_esc(it.oe.titre)+"</div>";
-      h+="    <div class='voeuvre-author'>"+_esc(it.oe.auteur||'')+"</div>";
+      // v2.2 : couverture livre stylisée
+      h+="  <div class='voeuvre-head voeuvre-cover' style='background:linear-gradient(135deg,"+(it.col||'#142554')+",#0F1E47);position:relative'>";
+      h+="    <div style='position:absolute;left:0;top:0;bottom:0;width:6px;background:rgba(0,0,0,.25);box-shadow:inset -2px 0 4px rgba(0,0,0,.3)'></div>";
+      h+="    <div class='voeuvre-cls-badge' style='background:rgba(255,201,60,.95);color:#142554'>"+_esc(cls)+"</div>";
+      h+="    <div class='voeuvre-ico' style='background:rgba(255,255,255,.12);border:2px solid rgba(255,201,60,.4);border-radius:50%;padding:8px'><img src='"+_esc(it.picUrl)+"' alt='' loading='lazy'></div>";
+      h+="    <div class='voeuvre-title' style='color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.4);font-family:Plus Jakarta Sans,Libre Baskerville,serif;font-weight:800'>"+_esc(it.oe.titre)+"</div>";
+      h+="    <div class='voeuvre-author' style='color:rgba(255,255,255,.85);font-style:italic;font-family:Crimson Pro,Libre Baskerville,Georgia,serif'>"+_esc(it.oe.auteur||'')+"</div>";
+      h+="    <div style='position:absolute;bottom:8px;right:10px;font-family:Plus Jakarta Sans,sans-serif;font-size:9px;color:rgba(255,201,60,.6);font-weight:700;letter-spacing:1px;text-transform:uppercase'>VÉRITAS</div>";
       h+="  </div>";
       h+="  <div class='voeuvre-body'>";
       h+="    <div class='voeuvre-stats'>";
@@ -22005,16 +22004,44 @@ function showJeuxEdu(){
   });
   h+="</div>";
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px'>";
+  // v2.2 : pictos SVG par type/matière (au lieu d'emojis monochromes sur Android)
+  function _jeuIcon(j){
+    var t=(j.type||'').toLowerCase(), m=(j.matiere||'').toLowerCase();
+    if(t==='qcm') return 'pencil';
+    if(t==='vf') return 'check';
+    if(t==='pendu') return 'edit';
+    if(t==='trous') return 'edit';
+    if(t==='html') return 'sparkles';
+    if(m.indexOf('math')>=0) return 'chart';
+    if(m.indexOf('phys')>=0||m.indexOf('chim')>=0) return 'flask';
+    if(m.indexOf('svt')>=0) return 'flask';
+    if(m.indexOf('hist')>=0||m.indexOf('geo')>=0) return 'compass';
+    if(m.indexOf('fran')>=0||m.indexOf('litt')>=0) return 'book';
+    if(m.indexOf('angl')>=0) return 'globe';
+    return 'sparkles';
+  }
+  function _jeuColor(j){
+    var m=(j.matiere||'').toLowerCase();
+    if(m.indexOf('math')>=0) return '#3C8DFF';
+    if(m.indexOf('phys')>=0||m.indexOf('chim')>=0) return '#7C3AED';
+    if(m.indexOf('svt')>=0) return '#10B981';
+    if(m.indexOf('hist')>=0||m.indexOf('geo')>=0) return '#D97706';
+    if(m.indexOf('fran')>=0||m.indexOf('litt')>=0) return '#EC4899';
+    if(m.indexOf('angl')>=0) return '#0EA5E9';
+    return '#6366F1';
+  }
   list.forEach(function(j){
     var locked=!j.gratuit&&!SES;
-    // Utiliser vLaunchJeu(id) — stable, résout l'id au moment du clic (pas de window['xxx'])
     var clickExpr=locked
       ?"toast(\"Connexion requise pour accéder aux jeux premium\",\"warn\")"
       :"vLaunchJeu(\""+j.id+"\")";
+    var ic=_jeuIcon(j), col=_jeuColor(j);
     h+="<div class='jeu-card' onclick='"+clickExpr+"'>";
-    h+="<div class='jeu-thumb' style='background:linear-gradient(135deg,"
-      +(j.type==="pendu"?"#FEF3C7,#FDE68A":j.type==="trous"?"#F0FDF4,#D1FAE5":j.type==="html"?"#E0FDF4,#CCFBF1":j.gratuit?"#E0F2FE,#BAE6FD":"#EDE9FE,#DDD6FE")+"'>";
-    h+=(j.emoji||'🌐');
+    // Halo coloré avec icône SVG centrée (au lieu d'emoji monochrome)
+    h+="<div class='jeu-thumb' style='background:linear-gradient(135deg,"+col+"15,"+col+"05);display:flex;align-items:center;justify-content:center;position:relative'>";
+    h+="<div style='width:56px;height:56px;border-radius:50%;background:"+col+"22;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px "+col+"30'>";
+    h+="<svg width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='"+col+"' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-"+ic+"'/></svg>";
+    h+="</div>";
     if(!j.gratuit) h+="<span class='jeu-premium'>PREMIUM</span>";
     else h+="<span class='jeu-free'>GRATUIT</span>";
     var typeLabel={qcm:"QCM",vf:"Vrai/Faux",pendu:"Pendu",trous:"Texte trous",html:"HTML"}[j.type]||j.type||'';
