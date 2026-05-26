@@ -38235,5 +38235,56 @@ html{scroll-behavior:smooth}
 })();
 </script>
 
+<!-- ═══════════════════════════════════════════════════════════
+     v2.7.3 — RESCUE BOOT (anti-page-blanche)
+     Force l'affichage du portail visiteur si rien n'est visible
+     après 2s, peu importe la cause du blocage.
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  var attempts = 0, MAX = 5;
+  function rescueBoot(){
+    attempts++;
+    try {
+      var visitorEl = document.getElementById('VISITOR');
+      var appEl = document.getElementById('APP');
+      var lsEl = document.getElementById('LS');
+      var bodyText = (document.body && document.body.innerText || '').trim();
+
+      // Détecter si AU MOINS un conteneur principal est visible
+      function isVisible(el){
+        if(!el) return false;
+        var s = window.getComputedStyle ? getComputedStyle(el) : null;
+        return s && s.display !== 'none' && s.visibility !== 'hidden' && el.offsetHeight > 0;
+      }
+      var anyVisible = isVisible(visitorEl) || isVisible(appEl) || isVisible(lsEl);
+
+      // Si page blanche détectée → forcer l'affichage du portail visiteur
+      if(!anyVisible && bodyText.length < 80){
+        console.warn('[VÉRITAS RESCUE] Page blanche détectée — tentative '+attempts+'/'+MAX);
+        try { if(visitorEl){ visitorEl.style.display = 'flex'; } } catch(e){}
+        try { if(typeof initVisitor === 'function') initVisitor(); } catch(e){ console.error('[VÉRITAS RESCUE] initVisitor fail:', e); }
+        try { if(typeof vShowSec === 'function') vShowSec('presentation', null); } catch(e){ console.error('[VÉRITAS RESCUE] vShowSec fail:', e); }
+        // Re-tester dans 1s
+        if(attempts < MAX) setTimeout(rescueBoot, 1500);
+      } else {
+        console.log('[VÉRITAS RESCUE] Page chargée normalement après '+attempts+' tentative(s)');
+      }
+    } catch(e){
+      console.error('[VÉRITAS RESCUE] Erreur:', e);
+      // Dernier recours : afficher au moins un message
+      if(attempts >= MAX){
+        try {
+          document.body.innerHTML = '<div style="position:fixed;inset:0;background:#142554;color:#FFC93C;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial,sans-serif;padding:30px;text-align:center"><h1 style="font-size:28px;margin-bottom:14px">🎓 VÉRITAS Academy</h1><p style="max-width:480px;line-height:1.6">Le chargement automatique a échoué. Veuillez :</p><ol style="text-align:left;margin:14px 0;line-height:2"><li>Vider votre cache navigateur (Ctrl+Maj+Suppr)</li><li>Recharger sans cache (Ctrl+Maj+R)</li><li>Ou utiliser un autre navigateur</li></ol><a href="tel:+237697637739" style="background:#FFC93C;color:#142554;padding:12px 24px;border-radius:30px;text-decoration:none;font-weight:bold;margin-top:14px">📞 +237 697 637 739</a></div>';
+        } catch(e2){}
+      }
+    }
+  }
+
+  // Lancer le rescue après 2s (laisse le temps à l'app de boot normalement)
+  setTimeout(rescueBoot, 2000);
+})();
+</script>
+
 </body>
 </html>
