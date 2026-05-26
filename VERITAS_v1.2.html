@@ -33826,7 +33826,7 @@ window._sanitizeHTML = function(input){
   if(typeof input !== 'string') return '';
   // v2.4 FIX : retirer DABORD les caractères de contrôle invisibles
   // (ASCII 0-31 + 127 DEL), PUIS échapper le HTML — préserve les espaces normaux
-  input = input.replace(/[ -]/g, '');
+  input = input.replace(/[\u0000-\u001F\u007F]/g, '');
   // Échappe caractères HTML dangereux
   return input
     .replace(/&/g,'&amp;')
@@ -33835,7 +33835,7 @@ window._sanitizeHTML = function(input){
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#39;')
     .replace(/\//g,'&#x2F;')
-    .replace(/[ -]/g,''); // contrôle invisible
+    .replace(/[\u0000-\u001F\u007F]/g, ''); // contrôle invisible
 };
 
 // 2. CSRF token simple (basé sur sessionStorage + timestamp)
