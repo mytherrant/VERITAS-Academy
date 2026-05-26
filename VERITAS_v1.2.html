@@ -308,6 +308,35 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   }
 }
 
+// v2.6 — Nav dropdowns : helpers toggle + close all
+window._navToggle = function(btn, ev){
+  ev && ev.stopPropagation && ev.stopPropagation();
+  var group = btn.closest('.vnav-group');
+  if(!group) return;
+  // Fermer les autres groupes
+  document.querySelectorAll('.vnav-group.open').forEach(function(g){ if(g !== group) g.classList.remove('open'); });
+  // Toggle ce groupe
+  group.classList.toggle('open');
+  btn.setAttribute('aria-expanded', group.classList.contains('open') ? 'true' : 'false');
+};
+
+// Fermer tous les dropdowns
+window._navGo = function(){
+  document.querySelectorAll('.vnav-group.open').forEach(function(g){
+    g.classList.remove('open');
+    var t = g.querySelector('.vnav-trigger');
+    if(t) t.setAttribute('aria-expanded','false');
+  });
+};
+
+// Fermer si clic ailleurs ou Escape
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.vnav-group')) _navGo();
+});
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape') _navGo();
+});
+
 // v2.5.1 — BOOT WATCHDOG : si l'application ne démarre pas après 6 secondes
 // (page blanche signalée 26 mai 2026), forcer nettoyage cache + reload.
 // Détection : ni #app ni #VISITOR ni #login affichés visiblement.
@@ -1790,6 +1819,38 @@ input,select,textarea,button{font-family:'Poppins','Inter',sans-serif!important}
 .vnav-btn:hover{background:#E8EEFF;color:#142554}
 .vnav-btn.on{background:linear-gradient(135deg,#142554,#3C8DFF);color:#fff;
   box-shadow:0 4px 12px rgba(60,141,255,.3)}
+
+/* ── v2.6 : Nav dropdowns (groupements 7 boutons) ── */
+.vnav-group{ position:relative; display:inline-block; }
+.vnav-group .vnav-trigger{ display:inline-flex; align-items:center; gap:6px; }
+.vnav-dropdown{
+  position:absolute; top:calc(100% + 6px); left:0;
+  background:#fff; border:1px solid #E2E8F0; border-radius:14px;
+  box-shadow:0 18px 50px rgba(20,37,84,.18);
+  padding:6px; min-width:260px; z-index:200;
+  opacity:0; transform:translateY(-8px); pointer-events:none;
+  transition:opacity .18s ease-out, transform .18s ease-out;
+  max-height:80vh; overflow-y:auto;
+}
+.vnav-group.open .vnav-dropdown,
+.vnav-dropdown:hover{ opacity:1; transform:translateY(0); pointer-events:auto; }
+.vnav-dropdown button{
+  display:flex; flex-direction:column; align-items:flex-start; width:100%;
+  background:transparent; border:none; cursor:pointer; text-align:left;
+  padding:10px 12px; border-radius:10px; transition:background .15s;
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif; font-size:13px;
+  color:#142554;
+}
+.vnav-dropdown button:hover{ background:#F0F4FF; }
+.vnav-dropdown button b{ font-weight:800; }
+.vnav-dd-sub{
+  font-size:11px; color:#6B7280; margin-top:2px; font-weight:500;
+  line-height:1.3;
+}
+.vnav-group.open .vnav-trigger{ background:#E8EEFF !important; }
+@media (max-width:768px){
+  .vnav-dropdown{ left:auto; right:0; min-width:240px; }
+}
 
 /* ── ELEARNING — Category panels redesign ── */
 .el-cat-panel{border-radius:20px;overflow:hidden;cursor:pointer;transition:all .3s;
@@ -3915,19 +3976,59 @@ setInterval(_refreshCitation,15000);
 <main class="vbody" id="vBody" role="main" aria-label="Contenu principal">
 <a id="main-content" tabindex="-1" class="sr-only">Contenu principal</a>
 <nav class="vnav" id="vNav" role="navigation" aria-label="Navigation principale">
+  <!-- v2.6 : Nav simplifiée 13 → 7 groupes hiérarchisés -->
+  <!-- 1. Accueil -->
   <button class="vnav-btn on" onclick="vShowSec('presentation',this)" aria-label="Accueil"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-home"/></svg> Accueil</button>
+
+  <!-- 2. E-Learning (entrée directe — service phare) -->
   <button class="vnav-btn" onclick="vShowSec('elearning',this)" style="background:linear-gradient(135deg,rgba(60,141,255,.15),rgba(60,141,255,.05));color:#3C8DFF;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="E-Learning"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-book"/></svg> E-Learning</button>
+
+  <!-- 3. Boutique (entrée directe — service phare) -->
   <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Boutique"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-shop"/></svg> Boutique</button>
-  <button class="vnav-btn" onclick="showJeuxEdu()" aria-label="Jeux éducatifs"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-game"/></svg> Jeux</button>
-  <button class="vnav-btn" onclick="showLabosVirtuels()" style="background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(14,165,233,.05));color:#0EA5E9;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Laboratoires virtuels"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-flask"/></svg> Labos</button>
-  <button class="vnav-btn" onclick="showClasseVirtuelle()" style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));color:#7C3AED;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Classes virtuelles et Forum communauté"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-users"/></svg> Classes &amp; Forum</button>
-  <button class="vnav-btn" onclick="vShowSec('orientation',this)" style="background:linear-gradient(135deg,rgba(5,150,105,.15),rgba(5,150,105,.05));color:#059669;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Orientation scolaire"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-compass"/></svg> Orientation</button>
-  <button class="vnav-btn" onclick="showCalendrier()" style="background:linear-gradient(135deg,rgba(220,38,38,.15),rgba(220,38,38,.05));color:#DC2626;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Calendrier"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-calendar"/></svg> Calendrier</button>
-  <button class="vnav-btn" onclick="showEpreuves()" aria-label="Épreuves"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-doc"/></svg> Épreuves</button>
-  <button class="vnav-btn" onclick="showEvaluations()" aria-label="Évaluations"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-chart"/></svg> Évals</button>
-  <button class="vnav-btn" onclick="mHubIA()" style="background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(99,102,241,.05));color:#6366F1;border-radius:20px;margin:3px 2px;font-weight:700" title="Hub IA : Devoir corrigé + Parcours adaptatif + Orientation" aria-label="Hub IA : tous les outils intelligence artificielle"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-brain"/></svg> Hub IA</button>
-  <button class="vnav-btn" onclick="mParrainage()" style="background:linear-gradient(135deg,rgba(236,72,153,.18),rgba(236,72,153,.05));color:#EC4899;border-radius:20px;margin:3px 2px;font-weight:700" title="Parrainage : gagnez du crédit" aria-label="Programme de parrainage"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-gift"/></svg> Parrainage</button>
-  <button class="vnav-btn" onclick="vShowSec('actualites',this)" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#ef4444;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Actualités"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-news"/></svg> Actualités</button>
+
+  <!-- 4. 🤖 IA & Mvondo (groupe) -->
+  <div class="vnav-group">
+    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(99,102,241,.05));color:#6366F1;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Outils IA"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-brain"/></svg> IA <span style="opacity:.6;font-size:10px">▾</span></button>
+    <div class="vnav-dropdown" role="menu">
+      <button role="menuitem" onclick="_navGo();mAgentMvondo()"><span style="font-size:18px;margin-right:6px">🎓</span><b>Prof. Mvondo</b><span class="vnav-dd-sub">Quiz · Évaluations · Fiches</span></button>
+      <button role="menuitem" onclick="_navGo();mHubIA()"><span style="font-size:18px;margin-right:6px">🧠</span><b>Hub IA</b><span class="vnav-dd-sub">Devoir IA · Parcours adaptatif</span></button>
+      <button role="menuitem" onclick="_navGo();mPhotoMathIA()"><span style="font-size:18px;margin-right:6px">📸</span><b>Photo Math</b><span class="vnav-dd-sub">Corrige un exercice en photo</span></button>
+      <button role="menuitem" onclick="_navGo();mVeritasGenome()"><span style="font-size:18px;margin-right:6px">🧬</span><b>Mon Genome</b><span class="vnav-dd-sub">ADN académique personnel</span></button>
+    </div>
+  </div>
+
+  <!-- 5. 🎮 Pratiquer (groupe : Jeux + Labos + Épreuves + Évals + Étude groupe) -->
+  <div class="vnav-group">
+    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(245,158,11,.05));color:#D97706;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Pratiquer"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-game"/></svg> Pratiquer <span style="opacity:.6;font-size:10px">▾</span></button>
+    <div class="vnav-dropdown" role="menu">
+      <button role="menuitem" onclick="_navGo();showJeuxEdu()"><span style="font-size:18px;margin-right:6px">🎮</span><b>Jeux éducatifs</b><span class="vnav-dd-sub">QCM, pendu, cartes mentales</span></button>
+      <button role="menuitem" onclick="_navGo();showLabosVirtuels()"><span style="font-size:18px;margin-right:6px">🔬</span><b>Labos virtuels</b><span class="vnav-dd-sub">Physique, chimie, SVT</span></button>
+      <button role="menuitem" onclick="_navGo();showEpreuves()"><span style="font-size:18px;margin-right:6px">📝</span><b>Épreuves &amp; Annales</b><span class="vnav-dd-sub">BEPC, Probatoire, BAC corrigés</span></button>
+      <button role="menuitem" onclick="_navGo();showEvaluations()"><span style="font-size:18px;margin-right:6px">📊</span><b>Évaluations</b><span class="vnav-dd-sub">Tests en ligne chronométrés</span></button>
+      <button role="menuitem" onclick="_navGo();mStudyRoom()"><span style="font-size:18px;margin-right:6px">👥</span><b>Étude en groupe</b><span class="vnav-dd-sub">Room temps réel code 6 chiffres</span></button>
+      <button role="menuitem" onclick="_navGo();mAchievements()"><span style="font-size:18px;margin-right:6px">🏆</span><b>Mes badges</b><span class="vnav-dd-sub">30+ achievements</span></button>
+    </div>
+  </div>
+
+  <!-- 6. 🌐 Communauté (Classes + Forum + Parrainage) -->
+  <div class="vnav-group">
+    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));color:#7C3AED;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Communauté"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-users"/></svg> Communauté <span style="opacity:.6;font-size:10px">▾</span></button>
+    <div class="vnav-dropdown" role="menu">
+      <button role="menuitem" onclick="_navGo();showClasseVirtuelle()"><span style="font-size:18px;margin-right:6px">🏫</span><b>Classes &amp; Forum</b><span class="vnav-dd-sub">Échanges avec enseignants &amp; pairs</span></button>
+      <button role="menuitem" onclick="_navGo();mParrainage()"><span style="font-size:18px;margin-right:6px">🎁</span><b>Parrainage</b><span class="vnav-dd-sub">+500 FCFA crédit par filleul</span></button>
+      <button role="menuitem" onclick="_navGo();mMonParcours()"><span style="font-size:18px;margin-right:6px">🔥</span><b>Mon parcours</b><span class="vnav-dd-sub">XP, streak, niveau</span></button>
+    </div>
+  </div>
+
+  <!-- 7. 📰 Vie scolaire (Calendrier + Orientation + Actualités) -->
+  <div class="vnav-group">
+    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#DC2626;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Vie scolaire"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-calendar"/></svg> Infos <span style="opacity:.6;font-size:10px">▾</span></button>
+    <div class="vnav-dropdown" role="menu">
+      <button role="menuitem" onclick="_navGo();showCalendrier()"><span style="font-size:18px;margin-right:6px">📅</span><b>Calendrier scolaire</b><span class="vnav-dd-sub">Trimestres, séquences, vacances</span></button>
+      <button role="menuitem" onclick="_navGo();vShowSec('orientation',null)"><span style="font-size:18px;margin-right:6px">🧭</span><b>Orientation</b><span class="vnav-dd-sub">Filières, grandes écoles</span></button>
+      <button role="menuitem" onclick="_navGo();vShowSec('actualites',null)"><span style="font-size:18px;margin-right:6px">📰</span><b>Actualités</b><span class="vnav-dd-sub">News éducatives Cameroun</span></button>
+    </div>
+  </div>
 </nav>
 <div id="vContent" role="region" aria-live="polite"></div>
 </main>
@@ -7498,32 +7599,18 @@ function vShowSec(sec,btn){
     <!-- ═════ ENGAGEMENT QUOTIDIEN (v2.3) — 4 cartes dynamiques ═════ -->
     ${(typeof _engagementBannerHtml==='function'?_engagementBannerHtml():'')}
 
-    <!-- ═════ INNOVATIONS V2.4 — 4 accès rapides ═════ -->
-    <div class="v-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:12px 0 20px">
-      <div onclick="mPhotoMathIA()" style="background:linear-gradient(135deg,#3730A3,#6366F1);color:#fff;padding:12px;border-radius:12px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px">📸</div>
-          <div><div style="font-weight:800;font-size:13px">Photo Math IA</div><div style="font-size:10px;opacity:.85">Corrige par photo</div></div>
-        </div>
+    <!-- v2.6 : Innovations IA déplacées dans nav 'IA ▾' (supprimé d'ici pour éviter doublon) -->
+
+    <!-- ═════ 🎓 BANDEAU MVONDO — Star feature mise en avant (v2.6) ═════ -->
+    <div class="v-reveal" onclick="mAgentMvondo()" role="link" tabindex="0" style="background:linear-gradient(135deg,#142554 0%,#7C3AED 60%,#EC4899 100%);color:#fff;padding:18px 22px;margin:18px 0;border-radius:18px;cursor:pointer;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(124,58,237,.3);transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+      <div style="position:absolute;top:-20px;right:-20px;font-size:140px;opacity:.08;font-weight:900;font-family:Plus Jakarta Sans">M</div>
+      <div style="position:relative;width:60px;height:60px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;font-family:Plus Jakarta Sans;flex-shrink:0;box-shadow:0 8px 24px rgba(0,0,0,.2)">M</div>
+      <div style="position:relative;flex:1;min-width:240px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#FFC93C;font-weight:800;margin-bottom:4px">✨ Nouveau · Agent IA pédagogique</div>
+        <div style="font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-size:22px;font-weight:900;line-height:1.15">Découvrez le Professeur Mvondo</div>
+        <div style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.9);margin-top:4px">Quiz · Corrigés · Fiches révision · Évaluations notées en 30 secondes — 100% gratuit</div>
       </div>
-      <div onclick="mVeritasGenome()" style="background:linear-gradient(135deg,#0F1E47,#7C3AED);color:#fff;padding:12px;border-radius:12px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,201,60,.2);display:flex;align-items:center;justify-content:center;font-size:18px">🧬</div>
-          <div><div style="font-weight:800;font-size:13px">Mon Genome</div><div style="font-size:10px;opacity:.85">ADN académique</div></div>
-        </div>
-      </div>
-      <div onclick="mStudyRoom()" style="background:linear-gradient(135deg,#065F46,#10B981);color:#fff;padding:12px;border-radius:12px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px">👥</div>
-          <div><div style="font-weight:800;font-size:13px">Étude en groupe</div><div style="font-size:10px;opacity:.85">Room temps réel</div></div>
-        </div>
-      </div>
-      <div onclick="mAchievements()" style="background:linear-gradient(135deg,#92400E,#F59E0B);color:#fff;padding:12px;border-radius:12px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px">🏆</div>
-          <div><div style="font-weight:800;font-size:13px">Mes badges</div><div style="font-size:10px;opacity:.85">30+ achievements</div></div>
-        </div>
-      </div>
+      <div style="position:relative;background:#FFC93C;color:#142554;padding:10px 20px;border-radius:99px;font-weight:800;font-size:13px;font-family:Plus Jakarta Sans">Essayer →</div>
     </div>
 
     <!-- ═════ ANALYSE LITTÉRAIRE — Bannière compacte (v2.2) ═════ -->
