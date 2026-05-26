@@ -20432,6 +20432,15 @@ function _showLittMenu(jid,oeuvreKey){
   if(!oe){toast("Œuvre introuvable","warn");return;}
   var fi=oe.fiche||{};
   var ficheDesc=fi.genre?fi.genre:(oe.classe||'');
+  // v2.4 FIX : tracker les œuvres visitées (badge litt_explorer)
+  try {
+    DB._oeuvresVisited = DB._oeuvresVisited || [];
+    if(DB._oeuvresVisited.indexOf(oeuvreKey) < 0){
+      DB._oeuvresVisited.push(oeuvreKey);
+      save();
+      if(typeof _checkBadges==='function') setTimeout(_checkBadges, 200);
+    }
+  } catch(e){}
   _vc('<div class="vsec">'
     +'<button class="back-btn" onclick="showJeuxEdu()">← Jeux</button>'
     +'<div class="vsec-title">📖 '+_esc(oe.titre)+'</div>'
@@ -32807,6 +32816,9 @@ window._showAIAdaptiveDashboard = function(){
 // 1. Sanitization HTML pour les contenus user-generated (forum, commentaires)
 window._sanitizeHTML = function(input){
   if(typeof input !== 'string') return '';
+  // v2.4 FIX : retirer DABORD les caractères de contrôle invisibles
+  // (ASCII 0-31 + 127 DEL), PUIS échapper le HTML — préserve les espaces normaux
+  input = input.replace(/[ -]/g, '');
   // Échappe caractères HTML dangereux
   return input
     .replace(/&/g,'&amp;')
@@ -33007,6 +33019,13 @@ window.mMonParcours = function(){
       +'<button class="btn" style="padding:10px;background:#F0FDF4;color:#065F46;border:1px solid #6EE7B7;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mDevoirCorrectionIA()">🤖 Devoir IA +30 XP</button>'
       +'<button class="btn" style="padding:10px;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mBattles()">⚔️ Battle +50 XP</button>'
       +'<button class="btn" style="padding:10px;background:#FAF5FF;color:#6B21A8;border:1px solid #D8B4FE;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mSujetDuJour()">☀️ Sujet du jour +15 XP</button>'
+    +'</div>'
+    // v2.4 FIX : accès Wrapped + Achievements + Genome depuis Mon Parcours
+    +'<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:8px;margin-top:6px">🌟 Découvrez aussi</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
+      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mAchievements()">🏆 Badges</button>'
+      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mVeritasGenome()">🧬 Genome</button>'
+      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mWrapped()">🎁 Wrapped</button>'
     +'</div>';
   M('🎯 Mon Parcours','XP · Niveau · Streak',body,
     '<button class="btn bi" onclick="cm()">Continuer</button>', true);
@@ -33211,9 +33230,19 @@ window.mSujetDuJour = function(){
     +'</div>';
   M('☀️ Sujet du jour','Une question par jour pour rester affûté',body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +(canReveal ? '<button class="btn bi" onclick="cm();(typeof _addXP===\'function\'?_addXP(\'sujet_jour\'):null)">📖 J\'ai lu (+15 XP)</button>' : ''), true);
+    +(canReveal ? '<button class="btn bi" onclick="cm();_markSujetLu()">📖 J\'ai lu (+15 XP)</button>' : ''), true);
   // Marquer comme révélé après 18h
   if(canReveal && !sj.revealed){ sj.revealed = true; try{save();}catch(e){} }
+};
+
+// v2.4 FIX : compteur _sujetsLus + XP + badges
+window._markSujetLu = function(){
+  try {
+    DB._sujetsLus = (DB._sujetsLus||0) + 1;
+    save();
+    if(typeof _addXP==='function') _addXP('sujet_jour');
+    if(typeof _checkBadges==='function') setTimeout(_checkBadges, 200);
+  } catch(e){}
 };
 
 // ─── 4. BAC EN 100 JOURS ────────────────────────────────────────────
@@ -33247,6 +33276,8 @@ window.MISSIONS_BAC = [
 ];
 
 window.mBacCountdown = function(){
+  // v2.4 FIX : tracker les consultations pour le badge "Compte à rebours"
+  try { DB._bacChecks = (DB._bacChecks||0) + 1; save(); if(typeof _checkBadges==='function') setTimeout(_checkBadges, 200); } catch(e){}
   var days = _getDaysToBAC();
   var dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,1)) / 86400000);
   var mission = MISSIONS_BAC[dayOfYear % MISSIONS_BAC.length];
@@ -33324,6 +33355,8 @@ window.mVeritasGenome = function(){
       '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire pour mon Genome</button>');
     return;
   }
+  // v2.4 FIX : tracker la consultation pour débloquer le badge genome_unlock
+  try { DB._genomeViewed = true; save(); if(typeof _checkBadges==='function') setTimeout(_checkBadges, 200); } catch(e){}
   var s = _getUserStreak() || {xp:0,current:0,best:0,totalActivities:0};
   var lvl = _currentLevel(s.xp);
   // Calculs Genome (basés sur SM-2 + battles + activités)
@@ -33498,8 +33531,10 @@ window._solvePhotoMath = function(dataUrl){
       +'<div style="font-size:11px;color:#059669;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">✅ Correction IA</div>'
       +'<div style="font-size:13px;color:#065F46;line-height:1.7;white-space:pre-line">'+_sanitizeHTML(answer)+'</div>'
       +'</div>';
-    // +XP
+    // +XP + compteur badge (photo_ia_first + all_modules)
     if(typeof _addXP === 'function') _addXP('devoir');
+    try { DB._photoIACount = (DB._photoIACount||0) + 1; save(); } catch(e){}
+    if(typeof _checkBadges==='function') setTimeout(_checkBadges, 300);
     _auditLog('photo_math_success', {len: answer.length});
   })
   .catch(function(err){
