@@ -12297,7 +12297,7 @@ const SANAV=[
   ]}
 ];
 const TNAV=[
-  {s:"Mon espace",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"grades",i:"▦",l:"Saisie de notes"},{k:"devoirs_teacher",i:"📋",l:"Mes devoirs"},{k:"perf_teacher",i:"📊",l:"Performances"},{k:"marketplace_teacher",i:"🛒",l:"Marketplace (vendre cours)"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"}]},
+  {s:"Mon espace",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"grades",i:"▦",l:"Saisie de notes"},{k:"devoirs_teacher",i:"📋",l:"Mes devoirs"},{k:"mvondo",i:"🎓",l:"Mvondo IA (Quiz, Évals, Fiches)"},{k:"perf_teacher",i:"📊",l:"Performances"},{k:"marketplace_teacher",i:"🛒",l:"Marketplace (vendre cours)"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"}]},
   {s:"Ressources",i:[{k:"books2",i:"▤",l:"Bibliothèque"},{k:"mybooks",i:"✍️",l:"Mes publications"},{k:"releve_template",i:"📋",l:"Relevé vierge"},{k:"submit_resource",i:"📤",l:"Soumettre ressource"}]}
 ];
 const ENAV=[
@@ -12423,6 +12423,7 @@ function render(p){
     forum_admin:pgForumAdmin,marketplace_admin:pgMarketplaceAdmin,centres_admin:pgCentresAdmin,
     calendrier_admin:pgCalendrierAdmin,
     marketplace_teacher:pgMarketplaceEnseignant,
+    mvondo:pgMvondo,
     // Super Admin
     superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,
     // Guide d'utilisation (tous rôles)
@@ -32815,6 +32816,12 @@ window.mHubIA = function(){
       +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#065F46;font-size:15px">🧭 Orientation par IA</div><div style="font-size:12px;color:#047857;margin-top:3px;line-height:1.4">Découvrez les filières et écoles adaptées à votre profil et vos résultats</div></div>'
       +'<div style="color:#059669;font-size:20px;align-self:center">→</div>'
     +'</div>'
+    // v2.5 : Agent Mvondo (concurrent de Didactia/Leopold)
+    +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);padding:14px;border-radius:14px;border:1px solid #A855F7;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:transform .2s;color:#fff" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();mAgentMvondo()">'
+      +'<div style="width:48px;height:48px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:900;font-size:22px;font-family:Plus Jakarta Sans">M</div>'
+      +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#FFC93C;font-size:15px">🎓 Professeur Mvondo</div><div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:3px;line-height:1.4">Agent IA pédagogique : quiz, corrigés, fiches révision, évaluations notées… <em style="color:#FFC93C">7 capacités pour enseignants &amp; élèves</em></div></div>'
+      +'<div style="color:#FFC93C;font-size:20px;align-self:center">→</div>'
+    +'</div>'
     +(connected
       ? '<div style="background:#F0FDF4;padding:10px 12px;border-radius:10px;border:1px solid #86EFAC;font-size:11px;color:#15803D;text-align:center;margin-top:6px">✓ Vous êtes connecté — toutes les fonctions IA personnalisées sont disponibles</div>'
       : '<div style="background:#FEF3C7;padding:10px 12px;border-radius:10px;border:1px solid #FCD34D;font-size:11px;color:#92400E;text-align:center;margin-top:6px">💡 Inscrivez-vous gratuitement pour débloquer le parcours personnalisé</div>'
@@ -34539,6 +34546,333 @@ window.MULTITENANT = {
   }
 };
 try { MULTITENANT.init(); } catch(e){}
+
+// ════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════
+// v2.5 — 🎓 AGENT IA PÉDAGOGIQUE "MVONDO" (concurrent de Didactia/Leopold)
+// ════════════════════════════════════════════════════════════════════
+// 7 capacités : quiz, corrigés, exercices différenciés, fiches révision,
+// remédiation, transformation éval notée, analyse document
+// Persona : Mvondo, professeur agrégé camerounais — connaît MINESEC,
+// programme BEPC/Probatoire/BAC, contexte CM (Douala, Yaoundé...)
+
+window.MVONDO_PERSONA = "Tu es Mvondo, professeur agrégé camerounais experimenté du système MINESEC (collège et lycée). Tu connais parfaitement les programmes BEPC, Probatoire et BAC séries A/C/D. Tu contextualises tes exemples dans la réalité camerounaise (Douala, Yaoundé, francophone bilingue). Tu rédiges en français correct, niveau MINESEC. Tes réponses sont structurées, claires, pédagogiques. Tu n'inventes JAMAIS de faits — si tu ne sais pas, tu le dis.";
+
+window.MVONDO_TACHES = [
+  { id:'quiz',       ic:'pencil',    col:'#3C8DFF', t:'Générer un quiz',           d:'QCM / Vrai-Faux / Questions ouvertes — sur n\'importe quel sujet' },
+  { id:'corrige',    ic:'check',     col:'#10B981', t:'Générer un corrigé',         d:'Pour un sujet d\'épreuve, exercice ou QCM existant' },
+  { id:'fiche',      ic:'doc',       col:'#7C3AED', t:'Fiche de révision',          d:'Synthèse des points clés d\'un chapitre / cours' },
+  { id:'diff',       ic:'chart',     col:'#F59E0B', t:'Exercices différenciés',     d:'3 niveaux : facile, moyen, difficile sur le même thème' },
+  { id:'remed',      ic:'compass',   col:'#EC4899', t:'Activité de remédiation',   d:'Pour élèves en difficulté sur une notion précise' },
+  { id:'eval',       ic:'edit',      col:'#DC2626', t:'Évaluation notée',           d:'Sujet complet barème + corrigé prêt à imprimer' },
+  { id:'doc',        ic:'bookopen',  col:'#6366F1', t:'Analyser un document',       d:'Coller un texte → l\'IA génère questions/résumé/quiz dessus' }
+];
+
+window.mAgentMvondo = function(taskId){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  // Disponible pour : admin, enseignants, élèves inscrits, visiteurs inscrits
+  if(!ses){
+    M('🎓 Professeur Mvondo','Votre assistant IA pédagogique',
+      '<div style="text-align:center;padding:18px"><p>Mvondo est votre professeur IA camerounais — il génère :</p>'
+      +'<ul style="text-align:left;color:#374151;line-height:2;max-width:400px;margin:0 auto">'
+      +'<li>📝 Quiz et QCM personnalisés</li><li>✅ Corrigés détaillés</li>'
+      +'<li>📋 Fiches de révision</li><li>📊 Exercices différenciés (3 niveaux)</li>'
+      +'<li>🧭 Activités de remédiation</li><li>✏️ Évaluations notées prêtes</li>'
+      +'<li>📖 Analyse de documents</li></ul></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button>'
+      +'<button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire pour Mvondo</button>');
+    return;
+  }
+  if(!_checkRateLimit('mvondo', 20)) return;
+
+  if(taskId){
+    return _mvondoTaskForm(taskId);
+  }
+
+  // Menu principal : 7 cards taches
+  var cards = MVONDO_TACHES.map(function(t){
+    return '<div onclick="cm();mAgentMvondo(\''+t.id+'\')" style="background:#fff;border:1.5px solid '+t.col+'40;border-radius:14px;padding:14px;cursor:pointer;transition:all .2s;display:flex;gap:12px;align-items:flex-start" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 20px rgba(0,0,0,.08)\';this.style.borderColor=\''+t.col+'\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\';this.style.borderColor=\''+t.col+'40\'">'
+      +'<div style="width:42px;height:42px;border-radius:50%;background:'+t.col+'18;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+      +'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+t.col+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-'+t.ic+'"/></svg>'
+      +'</div>'
+      +'<div style="flex:1"><div style="font-weight:800;font-size:14px;color:'+t.col+'">'+t.t+'</div><div style="font-size:11px;color:#6B7280;margin-top:3px;line-height:1.4">'+t.d+'</div></div>'
+      +'<div style="color:'+t.col+';font-size:18px;align-self:center">→</div>'
+      +'</div>';
+  }).join('');
+
+  var hist = (DB._mvondoHist||{})[ses.id] || [];
+  var histPreview = hist.length ? '<div style="margin-top:18px;padding:12px;background:#F3F4F6;border-radius:10px"><div style="font-weight:700;font-size:12px;color:#374151;margin-bottom:6px">📚 Vos '+Math.min(3,hist.length)+' dernières générations</div>'
+    +hist.slice(-3).reverse().map(function(h){
+      return '<div style="font-size:11px;color:#6B7280;padding:4px 0;border-bottom:1px solid #E5E7EB">• '+_esc(h.task)+' — '+_esc((h.prompt||'').substring(0,50))+'…</div>';
+    }).join('')+'</div>' : '';
+
+  var body = '<div style="padding:8px">'
+    +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;padding:18px;border-radius:14px;margin-bottom:14px;display:flex;gap:14px;align-items:center">'
+      +'<div style="width:60px;height:60px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;font-family:Plus Jakarta Sans">M</div>'
+      +'<div><div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800">Agent IA pédagogique</div>'
+      +'<div style="font-size:20px;font-weight:900;font-family:Plus Jakarta Sans">Professeur Mvondo</div>'
+      +'<div style="font-size:11px;opacity:.85;font-style:italic;font-family:Crimson Pro,serif">Expert MINESEC · BEPC · Probatoire · BAC · Programme camerounais</div></div>'
+    +'</div>'
+    +'<div style="font-size:13px;color:#142554;font-weight:700;margin-bottom:10px">Que souhaitez-vous créer ?</div>'
+    +'<div style="display:grid;gap:8px">'+cards+'</div>'
+    +histPreview
+    +'</div>';
+
+  M('🎓 Professeur Mvondo','Votre IA pédagogique camerounaise',body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +'<button class="btn bi" onclick="cm();mMvondoHistorique()">📚 Historique complet</button>', true);
+};
+
+window._mvondoTaskForm = function(taskId){
+  var task = MVONDO_TACHES.find(function(t){return t.id===taskId;});
+  if(!task){ mAgentMvondo(); return; }
+  var CLS = ['6ème','5ème','4ème','3ème','2nde','1ère','Terminale'];
+  var MATS = ['Mathématiques','Français','Anglais','Histoire-Géo','SVT','Physique-Chimie','Philosophie','Économie','Informatique','EPS'];
+  var SERIES = ['—','A4','C','D','TI','ESF','STT'];
+
+  var formExtra = '';
+  if(taskId === 'quiz' || taskId === 'eval'){
+    formExtra += '<div class="fg"><span class="fl">Nombre de questions</span><input class="fi" type="number" id="mvNb" value="10" min="3" max="30"></div>';
+    formExtra += '<div class="fg"><span class="fl">Type</span><select class="fi" id="mvType"><option value="qcm">QCM (choix multiple)</option><option value="vf">Vrai/Faux</option><option value="ouvertes">Questions ouvertes</option><option value="mixte">Mixte</option></select></div>';
+  }
+  if(taskId === 'diff'){
+    formExtra += '<div class="ib ibi mb12 mt0"><span>💡</span><span>L\'IA générera 3 versions du même exercice (facile, moyen, difficile).</span></div>';
+  }
+  if(taskId === 'eval'){
+    formExtra += '<div class="fg"><span class="fl">Durée (minutes)</span><input class="fi" type="number" id="mvDuree" value="60" min="30" max="240"></div>';
+    formExtra += '<div class="fg"><span class="fl">Note sur</span><input class="fi" type="number" id="mvBareme" value="20" min="5" max="100"></div>';
+  }
+  if(taskId === 'doc'){
+    formExtra += '<div class="fg"><span class="fl">Texte à analyser (collez ici)</span><textarea class="fi" id="mvDoc" rows="6" placeholder="Collez l\'extrait du cours, chapitre, article…" style="resize:vertical;min-height:120px"></textarea></div>';
+    formExtra += '<div class="fg"><span class="fl">Que faire avec ce document ?</span><select class="fi" id="mvDocAction"><option value="quiz">Générer un quiz dessus</option><option value="resume">Résumer en 5 points</option><option value="questions">Générer 10 questions de réflexion</option><option value="lexique">Extraire le lexique technique</option></select></div>';
+  }
+
+  M('🎓 Mvondo — '+task.t, task.d,
+    '<div class="fg2">'
+    +'<div class="fg"><span class="fl">Classe</span><select class="fi" id="mvCls">'+CLS.map(function(c,i){return '<option'+(i===3?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div>'
+    +'<div class="fg"><span class="fl">Matière</span><select class="fi" id="mvMat">'+MATS.map(function(m){return '<option>'+m+'</option>';}).join('')+'</select></div>'
+    +'</div>'
+    +'<div class="fg"><span class="fl">Sujet / Chapitre / Notion</span><input class="fi" id="mvSujet" placeholder="Ex: Théorème de Thalès, La revanche de l\'amante, La 1ère Guerre Mondiale…"></div>'
+    +formExtra
+    +'<div class="fg"><span class="fl">Instructions supplémentaires (optionnel)</span><textarea class="fi" id="mvExtra" rows="2" placeholder="Ex: Contextualiser pour élèves de Douala / Inclure exemples concrets / Difficulté progressive…"></textarea></div>'
+    +'<div id="mvResult" style="margin-top:14px"></div>',
+    '<button class="btn bo" onclick="cm();mAgentMvondo()">← Retour</button>'
+    +'<button class="btn bi" id="mvGenBtn" onclick="_mvondoGenerate(\''+taskId+'\')">⚡ Générer</button>', true);
+};
+
+window._mvondoGenerate = async function(taskId){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses) return;
+  if(!_checkRateLimit('mvondo_gen', 5)){ return; }
+  var task = MVONDO_TACHES.find(function(t){return t.id===taskId;});
+  if(!task) return;
+  var cls = (_ge('mvCls')||{}).value || '';
+  var mat = (_ge('mvMat')||{}).value || '';
+  var sujet = ((_ge('mvSujet')||{}).value||'').trim();
+  var extra = ((_ge('mvExtra')||{}).value||'').trim();
+
+  if(!sujet || sujet.length < 3){
+    toast('Indiquez le sujet, chapitre ou notion','warn'); return;
+  }
+
+  // Construire le prompt selon la tâche
+  var prompt = '';
+  var nb, type, duree, bareme, doc, docAction;
+  switch(taskId){
+    case 'quiz':
+      nb = parseInt((_ge('mvNb')||{}).value) || 10;
+      type = (_ge('mvType')||{}).value || 'qcm';
+      prompt = 'Génère un quiz '+type+' de '+nb+' questions pour des élèves de '+cls+' en '+mat+' sur le thème : '+sujet+'.\n';
+      prompt += 'Format attendu :\n';
+      if(type==='qcm') prompt += '1. Question ?\n  A) ...\n  B) ...\n  C) ...\n  D) ...\n  Réponse : X\n  Explication : ...\n\n';
+      else if(type==='vf') prompt += '1. Affirmation : ...\n  Vrai/Faux : V ou F\n  Justification : ...\n\n';
+      else prompt += '1. Question ouverte : ...\n  Réponse modèle : ...\n  Critères : ...\n\n';
+      break;
+    case 'corrige':
+      prompt = 'Rédige un corrigé détaillé pour : '+sujet+' (Niveau '+cls+', matière '+mat+').\nSois pédagogique, explique chaque étape du raisonnement, donne la méthode.';
+      break;
+    case 'fiche':
+      prompt = 'Rédige une fiche de révision pour des élèves de '+cls+' en '+mat+' sur : '+sujet+'.\nStructure : 1) Définitions clés, 2) Concepts essentiels, 3) Formules/règles, 4) Exemples typiques, 5) Pièges à éviter, 6) Mnémotechniques. Maximum 800 mots.';
+      break;
+    case 'diff':
+      prompt = 'Génère 3 exercices différenciés sur '+sujet+' pour des élèves de '+cls+' en '+mat+'.\n'
+        + 'Niveau 1 (Facile) : un exercice direct d\'application avec corrigé.\n'
+        + 'Niveau 2 (Moyen) : un exercice nécessitant 2-3 étapes avec corrigé.\n'
+        + 'Niveau 3 (Difficile) : un exercice exigeant analyse et synthèse avec corrigé.';
+      break;
+    case 'remed':
+      prompt = 'Conçois une activité de remédiation pour des élèves de '+cls+' en '+mat+' qui ont des difficultés sur : '+sujet+'.\n'
+        + 'Structure : 1) Diagnostic des difficultés typiques, 2) Rappel théorique simplifié, 3) Exercice progressif (du plus simple au plus complexe), 4) Astuce mnémotechnique, 5) Évaluation finale 5 questions.';
+      break;
+    case 'eval':
+      nb = parseInt((_ge('mvNb')||{}).value) || 10;
+      duree = parseInt((_ge('mvDuree')||{}).value) || 60;
+      bareme = parseInt((_ge('mvBareme')||{}).value) || 20;
+      prompt = 'Rédige une évaluation notée complète pour des élèves de '+cls+' en '+mat+' sur : '+sujet+'.\n'
+        + 'Durée : '+duree+' min · Notation : '+bareme+' points.\n'
+        + 'Structure : En-tête (titre + classe + durée + barème), '+nb+' questions/exercices avec points par item, corrigé complet à la fin avec critères de notation par question.';
+      break;
+    case 'doc':
+      doc = ((_ge('mvDoc')||{}).value||'').trim();
+      docAction = (_ge('mvDocAction')||{}).value || 'quiz';
+      if(!doc || doc.length < 50){ toast('Collez un texte plus consistant (50 char min)','warn'); return; }
+      if(doc.length > 4000) doc = doc.substring(0,4000)+'…[tronqué]';
+      var actionMap = {
+        'quiz': 'Génère un quiz de 8 questions QCM (avec réponses + explications) basé sur ce texte.',
+        'resume': 'Résume ce texte en 5 points clés, dans un format facile à mémoriser.',
+        'questions': 'Génère 10 questions de réflexion ouvertes basées sur ce texte, avec pour chacune une piste de réponse.',
+        'lexique': 'Extrais le lexique technique de ce texte (mots clés + définition courte + exemple).'
+      };
+      prompt = 'Document à analyser pour des élèves de '+cls+' en '+mat+', sujet "'+sujet+'" :\n\n«'+doc+'»\n\nTâche : '+actionMap[docAction];
+      break;
+  }
+  if(extra) prompt += '\n\nInstructions supplémentaires : '+extra;
+
+  // UI Loading
+  var btn = _ge('mvGenBtn');
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Mvondo réfléchit…'; }
+  _ge('mvResult').innerHTML = '<div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:14px;text-align:center"><div style="font-size:32px;margin-bottom:6px;animation:pulse 1.2s infinite">🎓</div><div style="font-weight:700;color:#3730A3">Le professeur Mvondo rédige…</div><div style="font-size:11px;color:#6366F1;margin-top:4px;font-style:italic">Cela peut prendre 10-30 secondes pour les contenus longs</div></div>';
+
+  try {
+    var resp = await callClaudeAPI(prompt, MVONDO_PERSONA);
+    var formatted = _sanitizeHTML(resp).replace(/\n/g,'<br>');
+    _ge('mvResult').innerHTML =
+      '<div style="background:#F0FDF4;border:2px solid #6EE7B7;border-radius:14px;padding:18px;margin-top:12px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:1px">✓ Mvondo a généré</div>'
+      +'<div style="display:flex;gap:6px">'
+      +'<button class="btn sm" style="background:#fff;border:1px solid #6EE7B7;color:#059669;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_mvondoCopy()">📋 Copier</button>'
+      +(taskId==='eval'?'<button class="btn sm" style="background:#10B981;color:#fff;border:none;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_mvondoSaveEval(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/'/g,"\\'")+'\')">💾 Enregistrer dans Évaluations</button>':'')
+      +'</div></div>'
+      +'<div id="mvOutput" style="font-size:13px;color:#065F46;line-height:1.7;max-height:400px;overflow-y:auto">'+formatted+'</div>'
+      +'</div>';
+    // Persister dans l'historique
+    DB._mvondoHist = DB._mvondoHist || {};
+    DB._mvondoHist[ses.id] = DB._mvondoHist[ses.id] || [];
+    DB._mvondoHist[ses.id].push({
+      id: gid(), task: task.t, taskId: taskId,
+      cls: cls, mat: mat, sujet: sujet,
+      prompt: sujet, response: resp.substring(0, 5000),
+      date: Date.now()
+    });
+    if(DB._mvondoHist[ses.id].length > 50) DB._mvondoHist[ses.id] = DB._mvondoHist[ses.id].slice(-50);
+    try { save(); } catch(e){}
+    if(typeof _addXP === 'function') _addXP('devoir');
+  } catch(e){
+    _ge('mvResult').innerHTML = '<div style="background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;padding:12px;border-radius:10px">⚠️ Erreur IA. Réessayez ou simplifiez votre demande.<br><small>'+_esc(e.message||'')+'</small></div>';
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = '⚡ Régénérer'; }
+  }
+};
+
+window._mvondoCopy = function(){
+  var el = document.getElementById('mvOutput');
+  if(!el) return;
+  // Convertir <br> en \n pour la copie
+  var txt = el.innerHTML.replace(/<br\s*\/?>/g,'\n').replace(/<[^>]+>/g,'');
+  // Décoder entités
+  var ta = document.createElement('textarea');
+  ta.innerHTML = txt;
+  txt = ta.value;
+  if(navigator.clipboard){
+    navigator.clipboard.writeText(txt).then(function(){ toast('✓ Copié dans le presse-papier'); });
+  } else {
+    prompt('Copiez le texte :', txt);
+  }
+};
+
+window._mvondoSaveEval = function(cls, mat, sujet){
+  var el = document.getElementById('mvOutput');
+  if(!el) return;
+  var content = el.innerHTML.replace(/<br\s*\/?>/g,'\n').replace(/<[^>]+>/g,'');
+  var ta = document.createElement('textarea'); ta.innerHTML = content; content = ta.value;
+  DB.evaluations = DB.evaluations || [];
+  DB.evaluations.push({
+    id: gid(),
+    titre: 'Évaluation IA — '+sujet,
+    cls: cls, matiere: mat,
+    contenu: content,
+    auteur: SES ? ((SES.pre||'')+' '+(SES.nom||'')) : 'Mvondo IA',
+    auteurId: SES ? SES.id : null,
+    date: today(),
+    source: 'ia_mvondo'
+  });
+  try { save(); } catch(e){}
+  toast('✓ Évaluation enregistrée dans la base','ok');
+};
+
+window.mMvondoHistorique = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses) return;
+  var hist = (DB._mvondoHist||{})[ses.id] || [];
+  if(!hist.length){
+    M('📚 Historique Mvondo','Aucune génération pour le moment',
+      '<div style="text-align:center;padding:20px;color:#6B7280">Vos générations apparaîtront ici.</div>',
+      '<button class="btn bi" onclick="cm();mAgentMvondo()">← Retour à Mvondo</button>');
+    return;
+  }
+  var rows = hist.slice().reverse().map(function(h){
+    return '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer" onclick="_mvondoShowHistItem(\''+h.id+'\')">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-weight:700;color:#142554;font-size:13px">'+_esc(h.task)+'</div><div style="font-size:10px;color:#6B7280">'+new Date(h.date).toLocaleDateString('fr-FR')+'</div></div>'
+      +'<div style="font-size:11px;color:#475569;margin-top:3px">'+_esc(h.cls||'')+' · '+_esc(h.mat||'')+' · '+_esc(h.sujet||'')+'</div>'
+      +'</div>';
+  }).join('');
+  M('📚 Historique Mvondo',hist.length+' génération'+(hist.length>1?'s':''),'<div style="padding:6px">'+rows+'</div>',
+    '<button class="btn bi" onclick="cm();mAgentMvondo()">← Retour</button>'
+    +'<button class="btn bo" onclick="_mvondoClearHist()">🗑 Effacer historique</button>', true);
+};
+
+window._mvondoClearHist = function(){
+  if(!confirm('Effacer tout votre historique Mvondo ?')) return;
+  if(!SES) return;
+  DB._mvondoHist = DB._mvondoHist || {};
+  DB._mvondoHist[SES.id] = [];
+  save();
+  cm();
+  mAgentMvondo();
+};
+
+// Page dédiée Mvondo (accessible via nav enseignant/admin)
+window.pgMvondo = function(){
+  // Lancer directement la modale principale
+  setTimeout(function(){ mAgentMvondo(); }, 100);
+  return '<div class="pgt">🎓 Professeur Mvondo — Agent IA pédagogique</div>'
+    +'<div class="card mt12">'
+    +'<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">'
+    +'<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#142554,#7C3AED);color:#FFC93C;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;font-family:Plus Jakarta Sans;flex-shrink:0">M</div>'
+    +'<div style="flex:1;min-width:240px">'
+    +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#7C3AED;font-weight:800">Agent IA pédagogique camerounais</div>'
+    +'<h2 style="margin:4px 0;color:#142554;font-family:Plus Jakarta Sans">Professeur Mvondo</h2>'
+    +'<p style="font-style:italic;color:#475569;font-family:Crimson Pro,serif;font-size:14px;margin:6px 0">Expert MINESEC · BEPC · Probatoire · BAC séries A/C/D · Connaît les programmes camerounais.</p>'
+    +'<button class="btn bi" onclick="mAgentMvondo()" style="font-size:14px">⚡ Lancer Mvondo</button>'
+    +'</div></div></div>'
+    +'<div class="card mt12"><div class="ct">📚 Ce que Mvondo peut faire pour vous</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">'
+    +(MVONDO_TACHES||[]).map(function(t){
+      return '<div onclick="mAgentMvondo(\''+t.id+'\')" style="background:#fff;border:1px solid '+t.col+'30;border-radius:12px;padding:14px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor=\''+t.col+'\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\''+t.col+'30\';this.style.transform=\'\'">'
+        +'<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">'
+        +'<div style="width:36px;height:36px;border-radius:50%;background:'+t.col+'18;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
+        +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+t.col+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-'+t.ic+'"/></svg>'
+        +'</div>'
+        +'<div style="font-weight:800;color:'+t.col+';font-size:13px">'+t.t+'</div>'
+        +'</div>'
+        +'<div style="font-size:12px;color:#6B7280;line-height:1.4">'+t.d+'</div>'
+        +'</div>';
+    }).join('')
+    +'</div></div>'
+    +'<div class="card mt12" style="background:linear-gradient(135deg,#FEF3C7,#FCD34D)"><div class="ct">💡 Astuce : intégration aux évaluations</div>'
+    +'<div style="font-size:13px;color:#78350F;line-height:1.6">Quand vous générez une <b>Évaluation notée</b>, un bouton "💾 Enregistrer dans Évaluations" apparaît. L\'évaluation est alors disponible dans la section pédagogique pour la donner à vos élèves.</div>'
+    +'</div>';
+};
+
+window._mvondoShowHistItem = function(id){
+  var hist = (DB._mvondoHist||{})[SES.id] || [];
+  var h = hist.find(function(x){return x.id===id;});
+  if(!h) return;
+  M('📄 '+h.task,h.cls+' · '+h.mat+' · '+h.sujet,
+    '<div style="font-size:13px;color:#374151;line-height:1.7;max-height:400px;overflow-y:auto;white-space:pre-wrap">'+_esc(h.response||'')+'</div>',
+    '<button class="btn bo" onclick="cm();mMvondoHistorique()">← Historique</button>'
+    +'<button class="btn bi" onclick="navigator.clipboard.writeText(\'\'+'+JSON.stringify(h.response).replace(/'/g,"\\'")+').then(function(){toast(\'✓ Copié\');});">📋 Copier</button>', true);
+};
 
 // ════════════════════════════════════════════════════════════════════
 // v2.5 — CALENDRIER ADMIN ÉDITABLE (CRUD complet)
