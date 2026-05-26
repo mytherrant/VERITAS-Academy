@@ -337,89 +337,105 @@ document.addEventListener('keydown', function(e){
   if(e.key === 'Escape') _navGo();
 });
 
-// v2.6.1 — BOOT WATCHDOG REFAIT (anti-boucle)
-// L'ancien watchdog provoquait une boucle de rechargement infini car le check
-// se faisait trop tôt (2.5s) avant que initVisitor() ait pu rendre #VISITOR visible.
+// v2.7.1 — BOOT WATCHDOG PASSIF (NON DESTRUCTIF)
+// L'ancien watchdog (v2.6.1) provoquait une page "Mise à jour en cours" en boucle
+// sur connexion mobile lente (3.6 Mo HTML → 30-60s en 3G CM).
 //
-// NOUVELLE STRATÉGIE :
-// 1. Détecter une boucle : si déjà rechargé >= 2 fois dans la session, désactiver
-// 2. Délai allongé : 15s au lieu de 6s (donne le temps à l'app de boot)
-// 3. Multi-check : 3s, 6s, 10s, 15s — annule le watchdog dès qu'on trouve du contenu
-// 4. Critère de "contenu" simplifié : body.offsetHeight > 200 OU vContent non-vide
+// NOUVELLE STRATÉGIE — passif et utilisateur-friendly :
+// 1. Pas d'auto-reload — l'utilisateur garde le contrôle
+// 2. Délai 30s avant proposition d'aide (pas 15s)
+// 3. Si app pas démarrée, affiche un BOUTON manuel "Recharger" + "Nettoyer le cache"
+// 4. Annulation auto dès que contenu visible (polling 1s)
 try {
-  var _bootReloads = parseInt(sessionStorage.getItem('_vrtBootReloads')||'0', 10);
-  if(_bootReloads >= 2){
-    console.warn('[VÉRITAS BOOT] Watchdog désactivé : déjà rechargé', _bootReloads, 'fois');
-  } else {
-    var _bootWatchdogFired = false;
-    function _vrtBootCheck(){
-      if(_bootWatchdogFired) return true;
-      try {
-        // Critère 1 : un des conteneurs principaux est visible
-        var els = ['app','VISITOR','login','vContent','MC'];
-        for(var i=0; i<els.length; i++){
-          var el = document.getElementById(els[i]);
-          if(el && el.offsetHeight > 0){
-            // OK : le DOM a du contenu rendu
-            return true;
-          }
-        }
-        // Critère 2 : body a du contenu visible
-        if(document.body && document.body.offsetHeight > 200) return true;
-        // Critère 3 : vContent contient quelque chose
-        var vc = document.getElementById('vContent');
-        if(vc && (vc.innerHTML||'').length > 100) return true;
-      } catch(e){}
-      return false;
-    }
+  // Nettoyer le compteur de boucle obsolète qui aurait pu rester de l'ancienne version
+  try { sessionStorage.removeItem('_vrtBootReloads'); } catch(e){}
 
-    function _vrtBootCancel(){
-      if(window._vrtBootWatchdog){
-        clearTimeout(window._vrtBootWatchdog);
-        window._vrtBootWatchdog = null;
-        // Reset compteur de boucle (succès)
-        try { sessionStorage.removeItem('_vrtBootReloads'); } catch(e){}
+  var _bootWatchdogFired = false;
+  function _vrtBootCheck(){
+    if(_bootWatchdogFired) return true;
+    try {
+      var els = ['app','VISITOR','login','vContent','MC'];
+      for(var i=0; i<els.length; i++){
+        var el = document.getElementById(els[i]);
+        if(el && el.offsetHeight > 0) return true;
       }
-    }
-
-    // Polling : annule le watchdog dès qu'on détecte du contenu
-    var _bootPoll = setInterval(function(){
-      if(_vrtBootCheck()){
-        clearInterval(_bootPoll);
-        _vrtBootCancel();
-      }
-    }, 1500);
-
-    // Watchdog principal : 15s au lieu de 6s
-    window._vrtBootWatchdog = setTimeout(function(){
-      _bootWatchdogFired = true;
-      clearInterval(_bootPoll);
-      if(_vrtBootCheck()) return; // Double-check ultime
-
-      console.warn('[VÉRITAS BOOT] App non démarrée après 15s — nettoyage');
-      try { sessionStorage.setItem('_vrtBootReloads', String(_bootReloads+1)); } catch(e){}
-
-      if('serviceWorker' in navigator){
-        navigator.serviceWorker.getRegistrations().then(function(regs){
-          regs.forEach(function(r){ r.unregister(); });
-        }).catch(function(){});
-      }
-      if(typeof caches !== 'undefined' && caches.keys){
-        caches.keys().then(function(keys){
-          return Promise.all(keys.map(function(k){ return caches.delete(k); }));
-        }).then(function(){
-          try {
-            document.body.innerHTML = '<div style="position:fixed;inset:0;background:#142554;color:#FFC93C;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial,sans-serif;text-align:center;padding:20px"><div style="font-size:48px;margin-bottom:14px">🔄</div><div style="font-size:18px;font-weight:bold">Mise à jour VÉRITAS en cours…</div><div style="font-size:13px;opacity:.7;margin-top:8px">Nettoyage du cache… (tentative '+(_bootReloads+1)+'/2)</div><div style="font-size:12px;opacity:.5;margin-top:12px">Si cela boucle, fermez tous les onglets et ouvrez le site en navigation privée</div></div>';
-          } catch(e){}
-          setTimeout(function(){
-            try { location.reload(true); } catch(e){ location.href = location.href.split('?')[0] + '?_t=' + Date.now(); }
-          }, 2000);
-        });
-      } else {
-        setTimeout(function(){ location.reload(true); }, 2000);
-      }
-    }, 15000);
+      if(document.body && document.body.offsetHeight > 200) return true;
+      var vc = document.getElementById('vContent');
+      if(vc && (vc.innerHTML||'').length > 100) return true;
+    } catch(e){}
+    return false;
   }
+
+  function _vrtBootCancel(){
+    if(window._vrtBootWatchdog){
+      clearTimeout(window._vrtBootWatchdog);
+      window._vrtBootWatchdog = null;
+    }
+    if(window._vrtBootPoll){
+      clearInterval(window._vrtBootPoll);
+      window._vrtBootPoll = null;
+    }
+  }
+
+  // Polling : annule dès qu'on trouve du contenu (toutes les 1s)
+  window._vrtBootPoll = setInterval(function(){
+    if(_vrtBootCheck()){
+      _vrtBootCancel();
+    }
+  }, 1000);
+
+  // Watchdog 30s — affiche un message d'aide AVEC BOUTONS MANUELS (pas d'auto-reload)
+  window._vrtBootWatchdog = setTimeout(function(){
+    _bootWatchdogFired = true;
+    if(_vrtBootCheck()){ _vrtBootCancel(); return; }
+    _vrtBootCancel();
+    console.warn('[VÉRITAS] App non démarrée après 30s — message d\'aide affiché');
+    try {
+      // Helper pour nettoyer le cache à la demande de l'utilisateur
+      window._vrtManualClear = function(){
+        try {
+          if('serviceWorker' in navigator){
+            navigator.serviceWorker.getRegistrations().then(function(regs){
+              regs.forEach(function(r){ r.unregister(); });
+            }).catch(function(){});
+          }
+          if(typeof caches !== 'undefined' && caches.keys){
+            caches.keys().then(function(keys){
+              return Promise.all(keys.map(function(k){ return caches.delete(k); }));
+            }).then(function(){
+              try { localStorage.clear(); sessionStorage.clear(); } catch(e){}
+              location.reload(true);
+            });
+          } else {
+            location.reload(true);
+          }
+        } catch(e){ location.reload(true); }
+      };
+      // Afficher overlay AU-DESSUS sans détruire la page (pour le cas où la page chargeait en arrière-plan)
+      var overlay = document.createElement('div');
+      overlay.id = '_vrt_boot_help';
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(20,37,84,.97);color:#FFC93C;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial,sans-serif;text-align:center;padding:24px;z-index:99999;backdrop-filter:blur(8px)';
+      overlay.innerHTML = ''
+        + '<div style="font-size:56px;margin-bottom:18px">⏳</div>'
+        + '<div style="font-size:20px;font-weight:bold;margin-bottom:10px">Chargement plus long que prévu</div>'
+        + '<div style="font-size:14px;color:rgba(255,255,255,.8);margin-bottom:24px;max-width:400px;line-height:1.6">Votre connexion semble lente. VÉRITAS pèse 3,6 Mo et peut prendre 30-60 secondes en mobile 3G.</div>'
+        + '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">'
+        + '<button onclick="document.getElementById(\'_vrt_boot_help\').remove()" style="background:#FFC93C;color:#142554;border:none;padding:12px 24px;border-radius:30px;font-weight:bold;cursor:pointer;font-size:14px">⏸ Continuer à patienter</button>'
+        + '<button onclick="location.reload()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);padding:12px 24px;border-radius:30px;font-weight:bold;cursor:pointer;font-size:14px">🔄 Recharger</button>'
+        + '<button onclick="window._vrtManualClear()" style="background:rgba(220,38,38,.85);color:#fff;border:none;padding:12px 24px;border-radius:30px;font-weight:bold;cursor:pointer;font-size:14px">🧹 Vider le cache</button>'
+        + '</div>'
+        + '<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:24px;max-width:400px">💡 Astuce : si la page reste blanche, essayez la <b>navigation privée</b> (Ctrl+Maj+N)</div>';
+      document.body.appendChild(overlay);
+      // Annuler l'overlay si l'app boot finalement
+      var lateCheck = setInterval(function(){
+        if(_vrtBootCheck()){
+          clearInterval(lateCheck);
+          var ov = document.getElementById('_vrt_boot_help');
+          if(ov) ov.remove();
+        }
+      }, 1000);
+    } catch(e){ console.warn('[VÉRITAS] watchdog overlay fail:', e); }
+  }, 30000);
 } catch(e){ console.warn('[VÉRITAS BOOT] init err:', e); }
 
 // Lazy loading universel : applique loading="lazy" decoding="async"
@@ -38193,4 +38209,3 @@ html{scroll-behavior:smooth}
 
 </body>
 </html>
-<!-- v2.7 deploy trigger 1779797328 -->
