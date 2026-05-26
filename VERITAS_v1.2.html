@@ -975,6 +975,56 @@ html { scroll-behavior: smooth; }
   color:var(--neutral-500); font-size:var(--text-sm);
 }
 
+/* ── BANNIÈRE ANALYSE LITTÉRAIRE COMPACTE (v2.2) ─────────────── */
+.vlit-banner{
+  display:flex; align-items:center; gap:16px;
+  padding:16px 20px; margin:16px 0;
+  background:linear-gradient(135deg, var(--primary-700), var(--primary-800));
+  border-radius:var(--radius-lg); cursor:pointer;
+  border:1px solid rgba(255,201,60,.25);
+  box-shadow:var(--shadow-md); color:#fff;
+  transition:transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
+  overflow:hidden; position:relative;
+}
+.vlit-banner::before{
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(circle at 0% 50%, rgba(255,201,60,.15), transparent 50%);
+  pointer-events:none;
+}
+.vlit-banner:hover, .vlit-banner:focus-visible{
+  transform:translateY(-2px); box-shadow:var(--shadow-lg);
+  border-color:rgba(255,201,60,.5); outline:none;
+}
+.vlit-banner__pic{
+  flex-shrink:0; width:60px; height:60px; border-radius:50%;
+  background:rgba(255,201,60,.18); display:flex;
+  align-items:center; justify-content:center;
+  border:2px solid rgba(255,201,60,.4); position:relative;
+}
+.vlit-banner__body{ flex:1; min-width:0; position:relative; }
+.vlit-banner__label{
+  font-size:11px; color:var(--accent-400); font-weight:700;
+  letter-spacing:.1em; text-transform:uppercase; margin-bottom:4px;
+}
+.vlit-banner__title{
+  font-family:var(--font-display), 'Plus Jakarta Sans', 'Montserrat', sans-serif;
+  font-size:18px; font-weight:800; color:#fff; line-height:1.2;
+}
+.vlit-banner__sub{
+  font-size:12px; color:rgba(255,255,255,.7); margin-top:4px;
+  line-height:1.5;
+}
+.vlit-banner__arrow{
+  flex-shrink:0; font-size:24px; color:var(--accent-400);
+  font-weight:700; transition:transform .25s var(--ease-out); position:relative;
+}
+.vlit-banner:hover .vlit-banner__arrow{ transform:translateX(6px); }
+@media (max-width:640px){
+  .vlit-banner{ flex-wrap:wrap; padding:14px; gap:12px; }
+  .vlit-banner__title{ font-size:16px; }
+  .vlit-banner__sub{ font-size:11px; }
+}
+
 /* FAQ accordion v2 */
 .faq-v2{ border-top:1px solid var(--neutral-200); }
 .faq-v2__item{ border-bottom:1px solid var(--neutral-200); }
@@ -7168,60 +7218,7 @@ function vShowSec(sec,btn){
   if(sec==="presentation"){
     const pi=DB.publicInfo||{};
     var _heroVideoHtml=buildIntroVideoHtml();
-    // v2 DESIGN : Hero éditorial premium en haut de la page d'accueil
-    var _nbStudents = (DB.students||[]).length;
-    var _nbReussite = (function(){
-      try { var nivs=(DB.examResults||[]).flatMap(function(e){return e.niveaux||[];});
-        if(!nivs.length) return 95;
-        return Math.round(nivs.reduce(function(a,n){return a+(n.taux||0);},0)/nivs.length);
-      } catch(e){return 95;}
-    })();
-    var _nbAnnees = 2026 - 2018;
     c.innerHTML=`<div class="vsec">
-    <!-- ═══ HERO V2 — Design éditorial premium ═══ -->
-    <section class="hero-v2 u-r-xl u-mb-6" aria-labelledby="hero-v2-title">
-      <div class="hero-v2__container">
-        <span class="hero-v2__eyebrow">
-          <svg class="icon-v2" width="14" height="14" aria-hidden="true"><use href="#lc-sparkles"/></svg>
-          Centre d'Excellence Scolaire · Douala
-        </span>
-        <h1 id="hero-v2-title" class="hero-v2__title">
-          Réussissez votre <em>BEPC</em> et votre <em>BAC</em><br>avec l'élite du tutorat camerounais.
-        </h1>
-        <p class="hero-v2__subtitle">
-          Cours en ligne, IA tuteur personnelle, classes virtuelles, manuels, jeux éducatifs.
-          Plus de ${_nbStudents>10?_nbStudents:'500'} élèves nous font déjà confiance.
-        </p>
-        <div class="hero-v2__ctas">
-          <button class="btn-v2 btn-v2--accent btn-v2--lg" onclick="showRegisterForm()" aria-label="Créer un compte gratuit">
-            <svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-sparkles"/></svg>
-            Commencer gratuitement
-          </button>
-          <button class="btn-v2 btn-v2--secondary btn-v2--lg" onclick="vShowSec('elearning',document.querySelector('.vnav-btn[onclick*=elearning]'))" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25);color:#fff" aria-label="Découvrir l'e-learning">
-            <svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-book"/></svg>
-            Découvrir l'e-learning
-          </button>
-        </div>
-        <div class="hero-v2__stats">
-          <div>
-            <div class="hero-v2__stat-num">${_nbReussite}%</div>
-            <div class="hero-v2__stat-label">Taux de réussite</div>
-          </div>
-          <div>
-            <div class="hero-v2__stat-num">${_nbStudents>10?_nbStudents+'+':'500+'}</div>
-            <div class="hero-v2__stat-label">Élèves accompagnés</div>
-          </div>
-          <div>
-            <div class="hero-v2__stat-num">${_nbAnnees}+</div>
-            <div class="hero-v2__stat-label">Années d'expérience</div>
-          </div>
-          <div>
-            <div class="hero-v2__stat-num">24/7</div>
-            <div class="hero-v2__stat-label">IA tuteur disponible</div>
-          </div>
-        </div>
-      </div>
-    </section>
     <!-- ═══ VIDÉO + ACTUALITÉS CÔTE À CÔTE ═══ -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;min-height:320px" id="vHeroGrid">
       <!-- Vidéo de présentation -->
@@ -7262,94 +7259,17 @@ function vShowSec(sec,btn){
          ❌ Promo E-Learning → déjà dans .vgz-bento "E-Learning Premium"
     -->
 
-    <!-- ═════ ANALYSE LITTÉRAIRE PREMIUM (v1.2) ═════ -->
-    <div class="vlit-section v-reveal">
-      <div class="vlit-header">
-        <div class="vlit-header-bg"></div>
-        <div class="vlit-header-content">
-          <div class="vlit-badge">📚 Analyse littéraire</div>
-          <h2 class="vlit-title">Décrypte les <em>classiques</em> du programme</h2>
-          <div class="vlit-sub">22 œuvres MINESEC analysées en profondeur · Axes, citations, contexte, figures de style</div>
-        </div>
+    <!-- ═════ ANALYSE LITTÉRAIRE — Bannière compacte (v2.2) ═════ -->
+    <div class="vlit-banner v-reveal" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)" role="link" tabindex="0" aria-label="Découvrir les analyses des 22 œuvres au programme">
+      <div class="vlit-banner__pic" aria-hidden="true">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-bookopen"/></svg>
       </div>
-
-      <!-- 4 angles d'analyse -->
-      <div class="vlit-angles">
-        <div class="vlit-angle" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)">
-          <div class="vlit-angle-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/world-map_1f5fa-fe0f.png" alt=""></div>
-          <h3>Cartes mentales</h3>
-          <p>Visualisez les <strong>axes de lecture</strong>, personnages, thèmes et symboles en un coup d'œil.</p>
-          <div class="vlit-angle-cta">Explorer →</div>
-        </div>
-        <div class="vlit-angle" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)">
-          <div class="vlit-angle-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/speech-balloon_1f4ac.png" alt=""></div>
-          <h3>Citations & figures</h3>
-          <p>Pour chaque œuvre : <strong>5+ citations clés</strong> avec analyses, figures de style identifiées.</p>
-          <div class="vlit-angle-cta">Découvrir →</div>
-        </div>
-        <div class="vlit-angle" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)">
-          <div class="vlit-angle-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/scroll_1f4dc.png" alt=""></div>
-          <h3>Fiche & contexte</h3>
-          <p><strong>Auteur, époque, mouvement</strong> littéraire, résumé synthétique, thèmes majeurs.</p>
-          <div class="vlit-angle-cta">Consulter →</div>
-        </div>
-        <div class="vlit-angle" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)">
-          <div class="vlit-angle-ico"><img src="https://em-content.zobj.net/source/microsoft-3D-fluent/406/memo_1f4dd.png" alt=""></div>
-          <h3>QCM & Contrôle</h3>
-          <p><strong>8 questions QCM</strong> par œuvre + contrôle de lecture corrigé pour vous tester.</p>
-          <div class="vlit-angle-cta">Tester →</div>
-        </div>
+      <div class="vlit-banner__body">
+        <div class="vlit-banner__label">📚 Analyse littéraire</div>
+        <div class="vlit-banner__title">22 œuvres MINESEC décryptées</div>
+        <div class="vlit-banner__sub">Cartes mentales · Citations · Figures de style · QCM · Contrôle de lecture</div>
       </div>
-
-      <!-- Œuvres en vedette (3 aléatoires depuis LITT_OEUVRES) -->
-      <div class="vlit-featured-title">⭐ Œuvres à la une</div>
-      <div class="vlit-featured-grid" id="vlit-featured-grid">
-        ${(function(){
-          if(typeof LITT_OEUVRES==='undefined') return '<div style="color:var(--ink4);text-align:center;padding:20px">Chargement...</div>';
-          var keys=Object.keys(LITT_OEUVRES);
-          // 3 œuvres représentatives : 6e, 3e, Tle
-          var featured=['6e_chants_foret','3e_ville_cruelle','tle_vieux_negro'].filter(function(k){return LITT_OEUVRES[k];});
-          if(featured.length<3) featured=keys.slice(0,3);
-          var picMap={
-            '6e_chants_foret':'deciduous-tree_1f333.png',
-            '6e_bimanes':'gorilla_1f98d.png',
-            '3e_ville_cruelle':'cityscape_1f3d9-fe0f.png',
-            '3e_marmite_koka':'pot-of-food_1f372.png',
-            'tle_vieux_negro':'sports-medal_1f3c5.png',
-            'tle_stances_poemes':'scroll_1f4dc.png',
-            '1ere_lion_perle':'lion_1f981.png',
-            '4e_coeur_sahel':'droplet_1f4a7.png'
-          };
-          var picBase='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
-          return featured.map(function(k){
-            var oe=LITT_OEUVRES[k];
-            var picFile=picMap[k]||'open-book_1f4d6.png';
-            return '<div class="vlit-feat-card" onclick="_showLittMenu(\''+k+'\',\''+k+'\')">'+
-              '<div class="vlit-feat-pic"><img src="'+picBase+picFile+'" alt=""></div>'+
-              '<div class="vlit-feat-info">'+
-                '<div class="vlit-feat-cls">'+_esc(oe.classe||'')+'</div>'+
-                '<div class="vlit-feat-title">'+_esc(oe.titre)+'</div>'+
-                '<div class="vlit-feat-author">'+_esc(oe.auteur||'')+'</div>'+
-                '<div class="vlit-feat-tags">'+
-                  (oe.carte?'<span>🗺️ Carte</span>':'')+
-                  (oe.qcm&&oe.qcm.length?'<span>📝 QCM</span>':'')+
-                  (oe.citations&&oe.citations.length?'<span>💬 '+oe.citations.length+' cit.</span>':'')+
-                  (oe.fiche?'<span>📋 Fiche</span>':'')+
-                '</div>'+
-                '<div class="vlit-feat-cta">Analyser cette œuvre →</div>'+
-              '</div>'+
-            '</div>';
-          }).join('');
-        })()}
-      </div>
-
-      <!-- CTA explorer toutes les œuvres -->
-      <div class="vlit-bottom-cta">
-        <button onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)" class="vlit-explore-all">
-          📚 Explorer les 22 œuvres au programme →
-        </button>
-        <div class="vlit-bottom-meta">6ème · 5ème · 4ème · 3ème · 2nde · 1ère · Terminale</div>
-      </div>
+      <div class="vlit-banner__arrow" aria-hidden="true">→</div>
     </div>
 
     <div class="vsec-title v-reveal">🏫 Présentation du Centre</div>
@@ -32148,10 +32068,25 @@ window.mParrainage = function(){
   try {
     var ses = (typeof SES!=='undefined' && SES) ? SES : null;
     if(!ses || (ses.type!=='visiteur_inscrit' && ses.type!=='eleve')){
-      M('🎁 Programme de parrainage','Connectez-vous pour parrainer',
-        '<div style="text-align:center;padding:18px"><p>Inscrivez-vous gratuitement pour obtenir votre code de parrainage et gagner <b style="color:#10B981">'+fmt(PARRAINAGE_BONUS)+' de crédit</b> par filleul qui s\'inscrit !</p></div>',
+      M('🎁 Programme de parrainage','Invitez vos amis & gagnez du crédit',
+        '<div style="padding:8px">'
+        +'<div style="background:linear-gradient(135deg,#FFC93C,#F59E0B);padding:18px;border-radius:14px;text-align:center;color:#142554;margin-bottom:14px">'
+          +'<div style="font-size:32px;font-weight:900">+ '+fmt(PARRAINAGE_BONUS)+'</div>'
+          +'<div style="font-size:12px;margin-top:4px;opacity:.85">de crédit par filleul qui s\'inscrit</div>'
+        +'</div>'
+        +'<div style="background:#F3F4F6;padding:14px;border-radius:12px;margin-bottom:12px">'
+        +'<div style="font-weight:700;margin-bottom:8px;color:#142554">🚀 Comment ça marche ?</div>'
+        +'<ol style="margin:0;padding-left:20px;font-size:13px;color:#374151;line-height:1.7">'
+          +'<li>Inscrivez-vous gratuitement (30 secondes)</li>'
+          +'<li>Récupérez votre code de parrainage unique</li>'
+          +'<li>Partagez-le à vos amis (WhatsApp, Facebook)</li>'
+          +'<li>Vous recevez <b>'+fmt(PARRAINAGE_BONUS)+'</b> de crédit chacun à leur inscription</li>'
+          +'<li>Utilisez le crédit sur la boutique et les abonnements</li>'
+        +'</ol></div>'
+        +'<p style="text-align:center;font-size:13px;color:#6B7280">Inscription en 30 secondes, 100% gratuit.</p>'
+        +'</div>',
         '<button class="btn bo" onclick="cm()">Fermer</button>'
-        +'<button class="btn bi" onclick="cm();showInscription()">S\'inscrire</button>');
+        +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);">✨ S\'inscrire</button>', true);
       return;
     }
     var code = _genReferralCode(ses.id);
@@ -32301,14 +32236,38 @@ window.setLang = function(lang){
     localStorage.setItem('_vrtLang', lang);
     if(typeof save==='function') save();
     document.documentElement.lang = lang==='en' ? 'en' : 'fr-CM';
-    // Appliquer aux éléments avec data-i18n
+
+    // Traduire éléments avec data-i18n
     document.querySelectorAll('[data-i18n]').forEach(function(el){
       var k = el.getAttribute('data-i18n');
       el.textContent = t(k);
     });
-    toast(lang==='en'?'Language: English':'Langue : Français','ok');
-    try { if(typeof re==='function') re(); } catch(e){}
-  } catch(e){ console.warn('setLang:',e); }
+
+    // ── v2.2 : traduction visible immédiate de la nav visiteur ──
+    var navMap = lang==='en' ? {
+      'Accueil':'Home','E-Learning':'E-Learning','Boutique':'Shop','Jeux':'Games',
+      'Labos':'Labs','Classes':'Classes','Orientation':'Guidance','Calendrier':'Calendar',
+      'Épreuves':'Exams','Évals':'Tests','Devoir IA':'AI Tutor','Parrainage':'Referral',
+      'Parcours IA':'AI Path','Forum':'Forum','Actualités':'News','Contact':'Contact',
+      'Panier':'Cart',"S'inscrire":'Sign up','Se connecter':'Log in','Enseignant':'Teacher'
+    } : {
+      'Home':'Accueil','Shop':'Boutique','Games':'Jeux','Labs':'Labos','Classes':'Classes',
+      'Guidance':'Orientation','Calendar':'Calendrier','Exams':'Épreuves','Tests':'Évals',
+      'AI Tutor':'Devoir IA','Referral':'Parrainage','AI Path':'Parcours IA','News':'Actualités',
+      'Cart':'Panier','Sign up':"S'inscrire",'Log in':'Se connecter','Teacher':'Enseignant'
+    };
+    document.querySelectorAll('.vnav-btn, .vlogin-btns .btn').forEach(function(btn){
+      // Récupérer le dernier nœud texte (après SVG icône)
+      btn.childNodes.forEach(function(n){
+        if(n.nodeType===3 && n.textContent.trim()){
+          var t0 = n.textContent.trim();
+          if(navMap[t0]) n.textContent = ' '+navMap[t0];
+        }
+      });
+    });
+
+    toast(lang==='en'?'🌐 Language: English ✓':'🌐 Langue : Français ✓','ok');
+  } catch(e){ console.warn('setLang:',e); toast('Erreur changement langue','warn'); }
 };
 
 window.mLanguageMenu = function(){
@@ -32527,10 +32486,25 @@ window.mIAAdaptative = function(){
   try {
     var ses = (typeof SES!=='undefined' && SES) ? SES : null;
     if(!ses || (ses.type!=='visiteur_inscrit' && ses.type!=='eleve')){
-      M('🧠 IA Adaptative','Connectez-vous pour suivre votre parcours',
-        '<div style="text-align:center;padding:20px"><p>Inscrivez-vous pour bénéficier d\'un parcours personnalisé.</p><p>L\'IA analyse vos performances et vous propose les bonnes révisions au bon moment.</p></div>',
+      M('🧠 Hub IA — Apprentissage intelligent','3 outils IA gratuits pour réussir',
+        '<div style="padding:8px">'
+        +'<div style="display:grid;grid-template-columns:1fr;gap:12px">'
+        +'<div style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);padding:14px;border-radius:14px;border:1px solid #C7D2FE;display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="cm();(typeof mDevoirCorrectionIA===\'function\'&&mDevoirCorrectionIA())">'
+          +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(99,102,241,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-pencil"/></svg></div>'
+          +'<div><div style="font-weight:800;color:#3730A3">📝 Devoir corrigé par IA</div><div style="font-size:12px;color:#4338CA;margin-top:3px">Collez votre rédaction, recevez une note + corrections</div></div>'
+        +'</div>'
+        +'<div style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);padding:14px;border-radius:14px;border:1px solid #D8B4FE;display:flex;gap:12px;align-items:flex-start">'
+          +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(168,85,247,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-brain"/></svg></div>'
+          +'<div><div style="font-weight:800;color:#6B21A8">🎯 Parcours personnalisé (connexion requise)</div><div style="font-size:12px;color:#7E22CE;margin-top:3px">L\'IA analyse vos perfs et propose les bons exercices</div></div>'
+        +'</div>'
+        +'<div style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);padding:14px;border-radius:14px;border:1px solid #6EE7B7;display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="cm();(typeof mOrientationIA===\'function\'?mOrientationIA():toast(\'Cette fonctionnalité arrive bientôt !\'))">'
+          +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(16,185,129,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-compass"/></svg></div>'
+          +'<div><div style="font-weight:800;color:#065F46">🧭 Orientation par IA</div><div style="font-size:12px;color:#047857;margin-top:3px">Découvrez les filières adaptées à votre profil</div></div>'
+        +'</div></div>'
+        +'<p style="margin-top:14px;font-size:12px;color:#6B7280;text-align:center">💡 Inscrivez-vous pour débloquer toutes les fonctions IA personnalisées</p>'
+        +'</div>',
         '<button class="btn bo" onclick="cm()">Fermer</button>'
-        +'<button class="btn bi" onclick="cm();showInscription&&showInscription()">S\'inscrire</button>');
+        +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);">✨ S\'inscrire</button>', true);
       return;
     }
     var due = SM2.getDueTopics(ses.id);
