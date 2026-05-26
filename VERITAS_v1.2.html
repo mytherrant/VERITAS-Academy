@@ -7343,6 +7343,9 @@ function vShowSec(sec,btn){
          ❌ Promo E-Learning → déjà dans .vgz-bento "E-Learning Premium"
     -->
 
+    <!-- ═════ ENGAGEMENT QUOTIDIEN (v2.3) — 4 cartes dynamiques ═════ -->
+    ${(typeof _engagementBannerHtml==='function'?_engagementBannerHtml():'')}
+
     <!-- ═════ ANALYSE LITTÉRAIRE — Bannière compacte (v2.2) ═════ -->
     <div class="vlit-banner v-reveal" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)" role="link" tabindex="0" aria-label="Découvrir les analyses des 22 œuvres au programme">
       <div class="vlit-banner__pic" aria-hidden="true">
@@ -32694,6 +32697,436 @@ window.mHubIA = function(){
 window._showAIAdaptiveDashboard = function(){
   // Réappelle mIAAdaptative (qui affichera la version connectée car ses=non-null)
   if(typeof mIAAdaptative === 'function') mIAAdaptative();
+};
+
+// ════════════════════════════════════════════════════════════════════
+// v2.3 — ENGAGEMENT QUOTIDIEN : 4 modules pertinents
+// 1. Streak + XP (Duolingo)  2. Battles  3. Sujet du jour  4. BAC 100j
+// ════════════════════════════════════════════════════════════════════
+
+// ─── 1. STREAK SYSTEM + XP ──────────────────────────────────────────
+window.VERITAS_XP = {
+  perActivity: { quiz:10, devoir:30, lecture:5, login:2, battle_win:50, sujet_jour:15 },
+  levels: [
+    {min:0,    title:'🌱 Apprenti',    color:'#94A3B8'},
+    {min:100,  title:'📘 Étudiant',     color:'#3C8DFF'},
+    {min:300,  title:'⭐ Bachelier',    color:'#10B981'},
+    {min:600,  title:'🎓 Diplômé',     color:'#7C3AED'},
+    {min:1000, title:'🏆 Champion',    color:'#FFC93C'},
+    {min:2000, title:'👑 Légende',     color:'#DC2626'}
+  ]
+};
+
+// Helper : récupère ou crée la fiche streak de l'utilisateur courant
+window._getUserStreak = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses || !ses.id) return null;
+  DB.userStreaks = DB.userStreaks || {};
+  if(!DB.userStreaks[ses.id]){
+    DB.userStreaks[ses.id] = { current:0, best:0, lastDate:null, xp:0, totalActivities:0 };
+  }
+  return DB.userStreaks[ses.id];
+};
+
+// Helper : ajoute XP + met à jour streak quotidien
+window._addXP = function(activity){
+  var s = _getUserStreak();
+  if(!s) return null;
+  var pts = (VERITAS_XP.perActivity[activity] || 1);
+  s.xp = (s.xp||0) + pts;
+  s.totalActivities = (s.totalActivities||0) + 1;
+  // Streak quotidien
+  var today = new Date().toISOString().slice(0,10);
+  if(s.lastDate !== today){
+    var y = new Date(); y.setDate(y.getDate()-1);
+    var yesterday = y.toISOString().slice(0,10);
+    if(s.lastDate === yesterday){
+      s.current = (s.current||0) + 1;
+    } else if(s.lastDate){
+      // Streak cassé
+      s.current = 1;
+    } else {
+      s.current = 1;
+    }
+    if(s.current > (s.best||0)) s.best = s.current;
+    s.lastDate = today;
+  }
+  try { save(); } catch(e){}
+  // Toast léger
+  if(typeof toast==='function'){
+    toast('+'+pts+' XP'+(s.current>1?' 🔥 '+s.current+'j':''),'ok');
+  }
+  return s;
+};
+
+window._currentLevel = function(xp){
+  xp = xp || 0;
+  var L = VERITAS_XP.levels;
+  for(var i=L.length-1; i>=0; i--){
+    if(xp >= L[i].min){
+      var next = L[i+1];
+      return {
+        current: L[i],
+        next: next || null,
+        progress: next ? (xp - L[i].min) / (next.min - L[i].min) * 100 : 100
+      };
+    }
+  }
+  return { current: L[0], next: L[1], progress: 0 };
+};
+
+// Badge streak visible (à appeler depuis un widget)
+window._streakBadgeHtml = function(){
+  var s = _getUserStreak();
+  if(!s) return '';
+  var lvl = _currentLevel(s.xp);
+  var col = lvl.current.color;
+  return '<div onclick="mMonParcours()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:linear-gradient(135deg,'+col+'18,'+col+'08);border:1px solid '+col+'40;border-radius:99px;cursor:pointer;font-size:11px;font-weight:700;color:'+col+'" title="Mon parcours · '+lvl.current.title+'">'
+    +(s.current>0?'<span>🔥 '+s.current+'j</span>':'')
+    +'<span>'+lvl.current.title.split(' ')[0]+' '+s.xp+' XP</span>'
+    +'</div>';
+};
+
+// Modal complet "Mon Parcours" — vue d'ensemble streak/XP/niveau/activités
+window.mMonParcours = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses){
+    M('🎯 Mon Parcours','Connectez-vous pour suivre votre progression',
+      '<div style="text-align:center;padding:18px"><p>Inscrivez-vous pour gagner des XP, débloquer des niveaux et maintenir votre streak quotidien comme Duolingo.</p></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire</button>');
+    return;
+  }
+  var s = _getUserStreak();
+  var lvl = _currentLevel(s.xp);
+  var pct = Math.round(lvl.progress);
+  var nextDelta = lvl.next ? (lvl.next.min - s.xp) : 0;
+  var body = '<div style="padding:8px">'
+    // Niveau + barre progression
+    +'<div style="background:linear-gradient(135deg,'+lvl.current.color+',#142554);color:#fff;padding:18px;border-radius:14px;margin-bottom:14px;text-align:center">'
+      +'<div style="font-size:11px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:700">Niveau actuel</div>'
+      +'<div style="font-size:24px;font-weight:900;margin:4px 0">'+lvl.current.title+'</div>'
+      +'<div style="background:rgba(0,0,0,.2);border-radius:99px;height:8px;margin:10px auto;max-width:280px;overflow:hidden">'
+        +'<div style="width:'+pct+'%;height:100%;background:#FFC93C;border-radius:99px;transition:width .6s"></div>'
+      +'</div>'
+      +(lvl.next ? '<div style="font-size:11px;opacity:.8">'+nextDelta+' XP pour '+lvl.next.title+'</div>' : '<div style="font-size:11px;opacity:.8">Niveau maximum atteint !</div>')
+    +'</div>'
+    // 3 stats
+    +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">'
+      +'<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">🔥</div><div style="font-size:22px;font-weight:900;color:#DC2626">'+s.current+'</div><div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">Jours d\'affilée</div></div>'
+      +'<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">⚡</div><div style="font-size:22px;font-weight:900;color:#F59E0B">'+s.xp+'</div><div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">XP total</div></div>'
+      +'<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">🏆</div><div style="font-size:22px;font-weight:900;color:#10B981">'+(s.best||0)+'</div><div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">Record streak</div></div>'
+    +'</div>'
+    // 4 actions
+    +'<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:8px">🎯 Que faire pour gagner +XP ?</div>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'
+      +'<button class="btn" style="padding:10px;background:#EFF6FF;color:#1E3A8A;border:1px solid #BFDBFE;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();showJeuxEdu()">📝 QCM +10 XP</button>'
+      +'<button class="btn" style="padding:10px;background:#F0FDF4;color:#065F46;border:1px solid #6EE7B7;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mDevoirCorrectionIA()">🤖 Devoir IA +30 XP</button>'
+      +'<button class="btn" style="padding:10px;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mBattles()">⚔️ Battle +50 XP</button>'
+      +'<button class="btn" style="padding:10px;background:#FAF5FF;color:#6B21A8;border:1px solid #D8B4FE;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mSujetDuJour()">☀️ Sujet du jour +15 XP</button>'
+    +'</div>';
+  M('🎯 Mon Parcours','XP · Niveau · Streak',body,
+    '<button class="btn bi" onclick="cm()">Continuer</button>', true);
+};
+
+// Hook automatique : incrémenter le streak chaque jour à l'ouverture
+try {
+  var _ses = (typeof SES !== 'undefined' && SES) ? SES : null;
+  if(_ses && _ses.id) setTimeout(function(){ _addXP('login'); }, 2000);
+} catch(e){}
+
+// ─── 2. BATTLES HEBDOMADAIRES + LEADERBOARD ─────────────────────────
+window._currentWeekKey = function(){
+  var d = new Date();
+  var year = d.getFullYear();
+  var firstJan = new Date(year,0,1);
+  var days = Math.floor((d - firstJan) / (1000*60*60*24));
+  var week = Math.ceil((days + firstJan.getDay() + 1) / 7);
+  return year+'-W'+String(week).padStart(2,'0');
+};
+
+window._generateBattleQuestions = function(){
+  // Tirer 10 QCM aléatoires depuis toutes les sources disponibles
+  var pool = [];
+  // LITT_OEUVRES
+  if(typeof LITT_OEUVRES !== 'undefined'){
+    Object.values(LITT_OEUVRES).forEach(function(oe){
+      if(oe.qcm) oe.qcm.forEach(function(q){ pool.push({q:q.q,a:q.a,b:q.b,c:q.c,ok:q.ok,src:oe.titre}); });
+    });
+  }
+  // JEUX_CATALOGUE QCM
+  if(typeof JEUX_CATALOGUE !== 'undefined'){
+    JEUX_CATALOGUE.filter(function(j){return j.type==='qcm'&&j.data;}).forEach(function(j){
+      (j.data||[]).slice(0,3).forEach(function(q){ if(q.q && q.ok) pool.push({q:q.q,a:q.a||q.A,b:q.b||q.B,c:q.c||q.C,ok:q.ok,src:j.titre}); });
+    });
+  }
+  if(pool.length < 5) return [];
+  // Shuffle + 10
+  pool.sort(function(){return Math.random()-0.5;});
+  return pool.slice(0,10);
+};
+
+window.mBattles = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses){
+    M('⚔️ Battles hebdo','Connectez-vous pour participer aux défis',
+      '<div style="text-align:center;padding:18px"><p>Affrontez les autres élèves dans 10 QCM hebdomadaires. Top 3 = prix mensuel (manuel offert) !</p></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire</button>');
+    return;
+  }
+  DB.battles = DB.battles || {};
+  var wk = _currentWeekKey();
+  DB.battles[wk] = DB.battles[wk] || { participants: {}, questions: null };
+  var battle = DB.battles[wk];
+  // Génère les questions si pas encore
+  if(!battle.questions){
+    battle.questions = _generateBattleQuestions();
+    try { save(); } catch(e){}
+  }
+  var hasPlayed = !!battle.participants[ses.id];
+  var leaderboard = Object.entries(battle.participants)
+    .sort(function(a,b){
+      if(b[1].score !== a[1].score) return b[1].score - a[1].score;
+      return a[1].timeMs - b[1].timeMs;
+    });
+  var myRank = leaderboard.findIndex(function(e){return e[0]===ses.id;}) + 1;
+
+  var body = '<div style="padding:8px">'
+    +'<div style="background:linear-gradient(135deg,#FEF3C7,#FBBF24);color:#92400E;padding:14px;border-radius:12px;margin-bottom:14px;text-align:center">'
+      +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">Défi de la semaine</div>'
+      +'<div style="font-size:18px;font-weight:900;margin-top:4px">🏆 Semaine '+wk.split('-W')[1]+' · '+leaderboard.length+' participants</div>'
+    +'</div>'
+    +(hasPlayed
+      ? '<div style="background:#D1FAE5;border:1px solid #6EE7B7;padding:12px;border-radius:10px;margin-bottom:14px;text-align:center"><div style="font-weight:700;color:#065F46">✓ Vous avez déjà joué cette semaine</div><div style="font-size:13px;color:#047857;margin-top:4px">Votre score : '+battle.participants[ses.id].score+'/10 · Position : #'+myRank+'</div></div>'
+      : '<div style="text-align:center;margin-bottom:14px"><button class="btn bi" style="background:linear-gradient(135deg,#DC2626,#F59E0B);color:#fff;padding:14px 28px;font-size:15px;font-weight:800" onclick="cm();_lancerBattle()">⚡ Lancer le défi (10 QCM)</button><div style="font-size:11px;color:#6B7280;margin-top:8px">Un seul essai par semaine</div></div>'
+    )
+    +'<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:8px">🏆 Classement de la semaine</div>';
+  if(!leaderboard.length){
+    body += '<div style="text-align:center;padding:20px;color:#9CA3AF">Soyez le premier à participer !</div>';
+  } else {
+    leaderboard.slice(0,10).forEach(function(e,idx){
+      var p = e[1];
+      var isMe = e[0] === ses.id;
+      var medal = ['🥇','🥈','🥉'][idx] || '#'+(idx+1);
+      body += '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:'+(isMe?'#FEF3C7':'#fff')+';border:1px solid '+(isMe?'#FCD34D':'#E5E7EB')+';border-radius:8px;margin-bottom:4px">'
+        +'<div style="font-size:18px;min-width:30px;font-weight:800">'+medal+'</div>'
+        +'<div style="flex:1;font-weight:600;color:#142554">'+_esc(p.nom||'Anonyme')+(isMe?' <span style="font-size:10px;background:#FFC93C;padding:1px 5px;border-radius:4px;color:#142554">vous</span>':'')+'</div>'
+        +'<div style="font-weight:800;color:#10B981">'+p.score+'/10</div>'
+      +'</div>';
+    });
+  }
+  body += '</div>';
+  M('⚔️ Battle hebdomadaire','Affrontez les autres élèves',body,
+    '<button class="btn bi" onclick="cm()">Fermer</button>', true);
+};
+
+window._lancerBattle = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses) return;
+  DB.battles = DB.battles || {};
+  var wk = _currentWeekKey();
+  var battle = DB.battles[wk];
+  if(!battle || !battle.questions || !battle.questions.length){
+    toast('Battle indisponible cette semaine','warn'); return;
+  }
+  var qs = battle.questions;
+  var idx = 0, score = 0, startMs = Date.now();
+  function _renderQ(){
+    if(idx >= qs.length){
+      // Fin
+      var timeMs = Date.now() - startMs;
+      battle.participants[ses.id] = {
+        nom: (ses.pre||'')+' '+(ses.nom||''),
+        score: score,
+        timeMs: timeMs,
+        date: Date.now()
+      };
+      try { save(); } catch(e){}
+      _addXP('battle_win');
+      // Bonus XP selon score
+      var s = _getUserStreak();
+      if(s){ s.xp = (s.xp||0) + score*5; try{save();}catch(e){} }
+      M('🎉 Battle terminé !','Bravo pour votre participation',
+        '<div style="text-align:center;padding:20px">'
+        +'<div style="font-size:60px;margin-bottom:10px">'+(score>=8?'🏆':score>=5?'⭐':'💪')+'</div>'
+        +'<div style="font-size:32px;font-weight:900;color:#10B981">'+score+'/10</div>'
+        +'<div style="font-size:13px;color:#6B7280;margin-top:8px">Temps : '+Math.round(timeMs/1000)+'s</div>'
+        +'<div style="margin-top:14px;padding:12px;background:#FEF3C7;border-radius:10px;font-size:13px;color:#92400E"><b>+'+(50+score*5)+' XP gagnés !</b><br>Battle bonus + '+score+' bonnes réponses × 5 XP</div>'
+        +'</div>',
+        '<button class="btn bo" onclick="cm()">Fermer</button>'
+        +'<button class="btn bi" onclick="cm();mBattles()">🏆 Voir le classement</button>', true);
+      return;
+    }
+    var q = qs[idx];
+    var body = '<div style="padding:8px">'
+      +'<div style="background:#142554;color:#fff;padding:10px 14px;border-radius:10px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center">'
+        +'<div style="font-weight:700">Question '+(idx+1)+'/10</div>'
+        +'<div style="font-size:11px;opacity:.85">Score : '+score+'/'+idx+'</div>'
+      +'</div>'
+      +'<div style="font-size:15px;color:#142554;font-weight:700;margin-bottom:14px;line-height:1.5">'+_esc(q.q)+'</div>'
+      +['a','b','c'].map(function(L){
+        if(!q[L]) return '';
+        return '<button class="btn" style="display:block;width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;background:#fff;border:2px solid #E5E7EB;border-radius:10px;color:#142554;font-size:14px;font-weight:600" onclick="window._answerBattle(\''+L+'\')">'+L.toUpperCase()+'. '+_esc(q[L])+'</button>';
+      }).join('')
+      +'</div>';
+    M('⚔️ Battle en cours','Q '+(idx+1)+'/10',body,'', true);
+    window._answerBattle = function(ans){
+      if(ans === q.ok) score++;
+      idx++;
+      setTimeout(_renderQ, 150);
+    };
+  }
+  _renderQ();
+};
+
+// ─── 3. SUJET DU JOUR (auto-IA, fallback statique) ──────────────────
+window.SUJETS_FALLBACK = [
+  { q:"Expliquez la fonction du chœur dans une tragédie grecque.", a:"Le chœur a 3 fonctions : narrative (résumer/anticiper), morale (commenter), lyrique (chanter les émotions collectives).", lvl:'1ère/Tle' },
+  { q:"Citez 3 figures de style dans 'L'Albatros' de Baudelaire et leur effet.", a:"Comparaison (poète=albatros), métaphore (ailes=poésie), antithèse (gloire céleste/honte terrestre).", lvl:'2nde/1ère' },
+  { q:"Quelle est la différence entre subjonctif présent et imparfait du subjonctif ?", a:"Présent : action contemporaine/postérieure dans contexte présent. Imparfait : action contemporaine/postérieure dans contexte passé (langue soutenue).", lvl:'4e-Tle' },
+  { q:"En géométrie, énoncez le théorème de Thalès.", a:"Si 2 droites sécantes sont coupées par 2 droites parallèles, les longueurs sont proportionnelles : AM/AB = AN/AC = MN/BC.", lvl:'3e/2nde' },
+  { q:"Quels sont les 4 grands traités de la décolonisation africaine ?", a:"Conférence de Bandung (1955), Brazzaville (1944), Lancaster House (1959), traité d'Évian (1962).", lvl:'Tle' },
+  { q:"Dans Une si longue lettre, qui sont Ramatoulaye et Aïssatou ?", a:"Deux amies sénégalaises qui réagissent différemment à la polygamie : Ramatoulaye reste, Aïssatou divorce et émigre aux USA.", lvl:'1ère/Tle' },
+  { q:"Quelle est la racine de l'équation x² - 5x + 6 = 0 ?", a:"Discriminant Δ=25-24=1. Solutions : (5±1)/2 = 3 ou 2.", lvl:'3e/2nde' }
+];
+
+window._getSujetDuJour = function(){
+  DB._sujetJour = DB._sujetJour || {};
+  var today = new Date().toISOString().slice(0,10);
+  if(DB._sujetJour.date === today && DB._sujetJour.q) return DB._sujetJour;
+  // Sélection déterministe basée sur la date (toujours le même sujet par jour)
+  var dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,1)) / 86400000);
+  var sj = SUJETS_FALLBACK[dayOfYear % SUJETS_FALLBACK.length];
+  DB._sujetJour = { date:today, q:sj.q, a:sj.a, lvl:sj.lvl, revealed:false };
+  try { save(); } catch(e){}
+  return DB._sujetJour;
+};
+
+window.mSujetDuJour = function(){
+  var sj = _getSujetDuJour();
+  var now = new Date();
+  var canReveal = now.getHours() >= 18 || sj.revealed;
+  var body = '<div style="padding:8px">'
+    +'<div style="background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;padding:14px;border-radius:12px;margin-bottom:14px;text-align:center">'
+      +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;opacity:.9">☀️ Sujet du '+new Date(sj.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+'</div>'
+      +'<div style="font-size:11px;margin-top:6px;background:rgba(0,0,0,.2);padding:2px 10px;border-radius:99px;display:inline-block">Niveau : '+sj.lvl+'</div>'
+    +'</div>'
+    +'<div style="background:#fff;border:2px solid #E5E7EB;border-radius:12px;padding:18px;margin-bottom:14px">'
+      +'<div style="font-size:11px;color:#6B7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">❓ Question</div>'
+      +'<div style="font-size:15px;color:#142554;font-weight:600;line-height:1.6">'+_esc(sj.q)+'</div>'
+    +'</div>'
+    +(canReveal
+      ? '<div style="background:#F0FDF4;border:2px solid #6EE7B7;border-radius:12px;padding:18px">'
+        +'<div style="font-size:11px;color:#059669;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">✅ Correction</div>'
+        +'<div style="font-size:14px;color:#065F46;line-height:1.7">'+_esc(sj.a)+'</div>'
+      +'</div>'
+      : '<div style="background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:14px;text-align:center">'
+        +'<div style="font-size:13px;color:#92400E;font-weight:700">🔒 Correction disponible à 18h</div>'
+        +'<div style="font-size:11px;color:#92400E;opacity:.8;margin-top:4px">Essayez de répondre par vous-même avant !</div>'
+      +'</div>'
+    )
+    +'</div>';
+  M('☀️ Sujet du jour','Une question par jour pour rester affûté',body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +(canReveal ? '<button class="btn bi" onclick="cm();(typeof _addXP===\'function\'?_addXP(\'sujet_jour\'):null)">📖 J\'ai lu (+15 XP)</button>' : ''), true);
+  // Marquer comme révélé après 18h
+  if(canReveal && !sj.revealed){ sj.revealed = true; try{save();}catch(e){} }
+};
+
+// ─── 4. BAC EN 100 JOURS ────────────────────────────────────────────
+window._getDaysToBAC = function(){
+  // Date BAC officielle : 1er juin par défaut, configurable via DB._bacDate
+  var bacDate;
+  if(DB._bacDate){
+    bacDate = new Date(DB._bacDate);
+  } else {
+    var y = new Date().getFullYear();
+    bacDate = new Date(y, 5, 1); // 1er juin année courante
+    if(bacDate < new Date()){
+      bacDate = new Date(y+1, 5, 1); // prochaine année
+    }
+  }
+  var diff = bacDate - new Date();
+  return Math.max(0, Math.ceil(diff / (1000*60*60*24)));
+};
+
+window.MISSIONS_BAC = [
+  '📖 Lire 2 chapitres d\'une œuvre au programme',
+  '📝 Faire 1 QCM de 10 questions',
+  '🤖 Soumettre une rédaction au Devoir IA',
+  '🧠 Réviser 1 carte mentale d\'œuvre littéraire',
+  '✍️ Écrire un résumé de 200 mots',
+  '🔬 Lancer 1 laboratoire virtuel',
+  '⚔️ Participer au battle de la semaine',
+  '📚 Lire 1 fascicule cours MINESEC',
+  '🎯 Faire 1 contrôle de lecture',
+  '🗺️ Explorer 1 nouvelle œuvre du programme'
+];
+
+window.mBacCountdown = function(){
+  var days = _getDaysToBAC();
+  var dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,1)) / 86400000);
+  var mission = MISSIONS_BAC[dayOfYear % MISSIONS_BAC.length];
+  var color = days<=30 ? '#DC2626' : days<=60 ? '#F59E0B' : days<=100 ? '#3C8DFF' : '#10B981';
+  var label = days<=30 ? 'CRITIQUE' : days<=60 ? 'INTENSIF' : days<=100 ? 'ACCÉLÉRATION' : 'PRÉPARATION';
+  var body = '<div style="padding:8px">'
+    +'<div style="background:linear-gradient(135deg,'+color+',#0F1E47);color:#fff;padding:24px;border-radius:14px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden">'
+      +'<div style="position:absolute;top:6px;right:10px;font-size:9px;background:rgba(255,255,255,.2);padding:3px 10px;border-radius:99px;font-weight:800;letter-spacing:1px">'+label+'</div>'
+      +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;font-weight:700;opacity:.85;margin-bottom:8px">Compte à rebours</div>'
+      +'<div style="font-size:56px;font-weight:900;line-height:1;font-family:\'Plus Jakarta Sans\',sans-serif">'+days+'</div>'
+      +'<div style="font-size:14px;margin-top:6px;opacity:.9">jour'+(days>1?'s':'')+' avant le BAC '+(new Date().getFullYear()+(_getDaysToBAC()>365?1:0))+'</div>'
+    +'</div>'
+    +'<div style="background:#fff;border:2px dashed '+color+';border-radius:12px;padding:18px;margin-bottom:14px">'
+      +'<div style="font-size:11px;color:'+color+';font-weight:800;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">🎯 Mission du jour</div>'
+      +'<div style="font-size:16px;color:#142554;font-weight:700;line-height:1.4">'+mission+'</div>'
+    +'</div>'
+    +'<div style="background:#F3F4F6;padding:12px;border-radius:10px;font-size:12px;color:#374151;line-height:1.6">'
+      +'<b>💡 Pourquoi un compte à rebours ?</b><br>La psychologie cognitive montre que la pression douce du temps améliore la concentration de 40%. Faites votre mission du jour pour maintenir votre streak 🔥.'
+    +'</div>'
+    +'</div>';
+  M('⏳ BAC en '+days+' jours','Votre compte à rebours quotidien',body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +'<button class="btn bi" onclick="cm();(typeof _addXP===\'function\'?_addXP(\'lecture\'):null)">✓ Mission acceptée (+5 XP)</button>', true);
+};
+
+// Widget visible en haut de l'accueil — appelable depuis vShowSec('presentation')
+window._engagementBannerHtml = function(){
+  var sj = _getSujetDuJour();
+  var days = _getDaysToBAC();
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  var streak = ses ? _getUserStreak() : null;
+  return '<div class="v-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:12px 0 20px">'
+    // Sujet du jour
+    +'<div onclick="mSujetDuJour()" style="background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;padding:14px;border-radius:14px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
+      +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">☀️ Sujet du jour</div>'
+      +'<div style="font-size:14px;font-weight:800;margin-top:4px;line-height:1.3">'+_esc(sj.q.substring(0,70))+(sj.q.length>70?'…':'')+'</div>'
+      +'<div style="font-size:10px;opacity:.85;margin-top:6px">Niveau : '+sj.lvl+' →</div>'
+    +'</div>'
+    // BAC countdown
+    +'<div onclick="mBacCountdown()" style="background:linear-gradient(135deg,'+(days<=30?'#DC2626':days<=100?'#F59E0B':'#3C8DFF')+',#0F1E47);color:#fff;padding:14px;border-radius:14px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
+      +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">⏳ Compte à rebours BAC</div>'
+      +'<div style="font-size:32px;font-weight:900;line-height:1;margin-top:4px">'+days+'<span style="font-size:14px;font-weight:600;opacity:.85"> jours</span></div>'
+      +'<div style="font-size:10px;opacity:.85;margin-top:4px">→ Mission du jour</div>'
+    +'</div>'
+    // Battles
+    +'<div onclick="mBattles()" style="background:linear-gradient(135deg,#F59E0B,#DC2626);color:#fff;padding:14px;border-radius:14px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
+      +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">⚔️ Battle hebdo</div>'
+      +'<div style="font-size:14px;font-weight:800;margin-top:4px">10 QCM · Classement national</div>'
+      +'<div style="font-size:10px;opacity:.85;margin-top:6px">+ 50 XP par participation →</div>'
+    +'</div>'
+    // Mon parcours (si connecté)
+    +(ses && streak
+      ? '<div onclick="mMonParcours()" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:14px;border-radius:14px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
+        +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">🔥 Mon parcours</div>'
+        +'<div style="font-size:24px;font-weight:900;margin-top:4px">'+streak.current+' j · '+streak.xp+' XP</div>'
+        +'<div style="font-size:10px;opacity:.85;margin-top:4px">'+_currentLevel(streak.xp).current.title+' →</div>'
+      +'</div>'
+      : '<div onclick="showRegisterForm()" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:14px;border-radius:14px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
+        +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">🎯 Mon parcours</div>'
+        +'<div style="font-size:14px;font-weight:800;margin-top:4px">Inscrivez-vous gratuitement</div>'
+        +'<div style="font-size:10px;opacity:.85;margin-top:6px">Streak · XP · Niveaux →</div>'
+      +'</div>'
+    )
+    +'</div>';
 };
 
 // Hook quiz → enregistrer auto les résultats dans SM-2
