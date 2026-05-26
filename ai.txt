@@ -1,0 +1,51 @@
+# ════════════════════════════════════════════════════════════════════
+# VÉRITAS Academy — ai.txt
+# Standard proposé : https://spawning.ai/ai-txt
+# Date : 2026-05-26
+# ════════════════════════════════════════════════════════════════════
+
+# Politique d'utilisation par les IA et systèmes automatisés
+# AI Usage Policy / Politique d'utilisation par intelligence artificielle
+
+User-Agent: *
+Disallow: /
+
+# ─── INTERDICTIONS EXPLICITES ───
+# Ce site et l'ensemble de son contenu (textes, code, design, méthodes
+# pédagogiques, données utilisateurs, œuvres littéraires citées avec
+# leurs analyses) sont protégés par le droit d'auteur.
+#
+# Les usages suivants sont STRICTEMENT INTERDITS :
+#
+#   ❌ Entraînement de modèles d'IA (LLM, vision, multimodal)
+#   ❌ Fine-tuning / RAG / embedding sur ce contenu
+#   ❌ Génération automatique de copies, paraphrases ou dérivés
+#   ❌ Scraping pour bases de données commerciales
+#   ❌ Indexation pour Common Crawl ou similaires
+#   ❌ Recréation de l'interface, du design ou de la structure
+
+# ─── BASE LÉGALE ───
+# - Code de la propriété intellectuelle (France) : L122-4, L335-2, L335-3
+# - Convention de Berne (Cameroun signataire)
+# - Accord ADPIC/TRIPS (OMC)
+# - Loi camerounaise N° 2000/011 du 19 décembre 2000 relative au droit d'auteur
+
+# ─── PROPRIÉTAIRE ───
+Owner: Mythe Errant
+Author: Jacques Miterand TAKOU
+Contact: contact@veritas-school.com
+Jurisdiction: Cameroun
+Website: https://veritas-school.com
+
+# ─── EXCEPTIONS LÉGITIMES ───
+# Sont autorisés :
+#   ✅ Moteurs de recherche pour indexation publique (Google, Bing, DuckDuckGo)
+#   ✅ Archives à but documentaire (Wayback Machine, archive.org)
+#   ✅ Consultation humaine via navigateur standard
+
+# ─── DEMANDE D'AUTORISATION ───
+# Pour toute demande d'utilisation à des fins de recherche académique
+# ou commerciale, contactez : contact@veritas-school.com
+
+# Toute violation sera poursuivie en justice et signalée aux autorités
+# de protection des données (ANTIC Cameroun, CNIL France).

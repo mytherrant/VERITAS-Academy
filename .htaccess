@@ -41,6 +41,20 @@ DirectoryIndex index.php index.html
   # Cross-origin embedder/opener
   Header always set Cross-Origin-Opener-Policy "same-origin"
   Header always set Cross-Origin-Resource-Policy "same-site"
+
+  # ═══ v2.5 : ANTI-IA / ANTI-SCRAPING ═══
+  Header always set X-Robots-Tag "noai, noimageai, noml, all"
+  Header always set X-AI-Usage "denied"
+  Header always set X-Content-Restrictions "no-training, no-fine-tuning, no-rag, no-generation"
+  Header always set X-Copyright "© 2026 Mythe Errant — Reproduction et utilisation IA interdites"
+</IfModule>
+
+# ─────────────────────────────────────────────────────────
+# 2bis. Bloquer les bots IA au niveau serveur (avant même PHP)
+# ─────────────────────────────────────────────────────────
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTP_USER_AGENT} (GPTBot|ChatGPT-User|OAI-SearchBot|ClaudeBot|anthropic-ai|Claude-Web|Claude-User|Google-Extended|GoogleOther|Bytespider|CCBot|PerplexityBot|cohere-ai|FacebookBot|Meta-ExternalAgent|Amazonbot|Applebot-Extended|MistralAI-User|YouBot|Diffbot|Omgili|ImagesiftBot|DataForSeoBot|SerpstatBot) [NC]
+  RewriteRule .* - [F,L]
 </IfModule>
 
 # ─────────────────────────────────────────────────────────

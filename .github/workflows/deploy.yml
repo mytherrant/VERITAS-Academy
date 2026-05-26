@@ -21,6 +21,7 @@ on:
       - 'robots.txt'
       - 'manifest.webmanifest'
       - 'sw.js'
+      - 'ai.txt'
 
   # Lancement manuel depuis GitHub → Actions → Run workflow
   workflow_dispatch:
@@ -72,7 +73,7 @@ jobs:
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
 
           # ── SEO + PWA (sitemap, robots, manifest) ───────────────
-          for f in sitemap.xml robots.txt manifest.webmanifest sw.js; do
+          for f in sitemap.xml robots.txt manifest.webmanifest sw.js ai.txt; do
             [ -f "$f" ] && cp "$f" deploy/ && echo "  ✓ $f"
           done
 

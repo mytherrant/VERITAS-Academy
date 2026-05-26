@@ -1,5 +1,7 @@
 # VÉRITAS Academy — robots.txt
 # https://veritas-school.com/
+# © 2026 Mythe Errant — Tous droits réservés
+# Ce site et son contenu sont protégés. Reproduction interdite sans autorisation écrite.
 
 User-agent: *
 Allow: /
@@ -14,23 +16,114 @@ Disallow: /*?admin
 Disallow: /*?token=
 Disallow: /*?secret=
 
-# ── Bloquer les bots agressifs ──
+# ════════════════════════════════════════════════════════════════════
+# 🛡️ ANTI-IA — Interdiction d'utilisation pour entraînement de modèles
+# Conformément à l'article L122-4 du Code de la propriété intellectuelle
+# ════════════════════════════════════════════════════════════════════
+
+# OpenAI (ChatGPT, GPT-4, etc.)
+User-agent: GPTBot
+Disallow: /
+User-agent: ChatGPT-User
+Disallow: /
+User-agent: OAI-SearchBot
+Disallow: /
+
+# Anthropic (Claude)
+User-agent: ClaudeBot
+Disallow: /
+User-agent: anthropic-ai
+Disallow: /
+User-agent: Claude-Web
+Disallow: /
+User-agent: Claude-User
+Disallow: /
+
+# Google AI (Gemini, Bard, Vertex)
+User-agent: Google-Extended
+Disallow: /
+User-agent: GoogleOther
+Disallow: /
+
+# Microsoft / Bing AI
+User-agent: Bingbot-AI
+Disallow: /
+User-agent: msnbot-AI
+Disallow: /
+
+# Meta (LLaMA training)
+User-agent: FacebookBot
+Disallow: /
+User-agent: Meta-ExternalAgent
+Disallow: /
+
+# Amazon
+User-agent: Amazonbot
+Disallow: /
+
+# ByteDance / TikTok
+User-agent: Bytespider
+Disallow: /
+
+# Perplexity AI
+User-agent: PerplexityBot
+Disallow: /
+
+# Common Crawl (utilisé pour entraîner de nombreux LLM)
+User-agent: CCBot
+Disallow: /
+
+# Cohere
+User-agent: cohere-ai
+Disallow: /
+User-agent: cohere-training-data-crawler
+Disallow: /
+
+# Diffbot
+User-agent: Diffbot
+Disallow: /
+
+# Apple
+User-agent: Applebot-Extended
+Disallow: /
+
+# Mistral
+User-agent: MistralAI-User
+Disallow: /
+
+# YouSearch / You.com
+User-agent: YouBot
+Disallow: /
+
+# Webz / Omgili
+User-agent: Omgilibot
+Disallow: /
+User-agent: Omgili
+Disallow: /
+
+# Image generators
+User-agent: ImagesiftBot
+Disallow: /
+
+# ── Bots SEO agressifs (gardés bloqués) ──
 User-agent: SemrushBot
 Disallow: /
-
 User-agent: AhrefsBot
 Disallow: /
-
 User-agent: DotBot
 Disallow: /
-
 User-agent: MJ12bot
 Disallow: /
-
 User-agent: PetalBot
 Disallow: /
+User-agent: DataForSeoBot
+Disallow: /
+User-agent: SerpstatBot
+Disallow: /
+User-agent: BLEXBot
+Disallow: /
 
-# ── Autoriser Google, Bing, DuckDuckGo (les utiles) ──
+# ── Autoriser uniquement les moteurs de recherche légitimes ──
 User-agent: Googlebot
 Allow: /
 Disallow: /api/
@@ -42,5 +135,23 @@ Disallow: /api/
 User-agent: DuckDuckBot
 Allow: /
 
+User-agent: Slurp
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+Disallow: /api/
+
 # ── Sitemap ──
 Sitemap: https://veritas-school.com/sitemap.xml
+
+# ════════════════════════════════════════════════════════════════════
+# AVERTISSEMENT LÉGAL
+# ════════════════════════════════════════════════════════════════════
+# Le contenu de ce site (texte, code, design, méthodes pédagogiques) est
+# la propriété intellectuelle de Mythe Errant / Jacques Miterand TAKOU.
+# Toute reproduction, indexation à des fins d'entraînement de modèles d'IA,
+# ou clonage automatisé est STRICTEMENT INTERDIT et constitue une violation
+# du droit d'auteur (articles L335-2 et L335-3 du Code de la propriété
+# intellectuelle français, adoption Cameroun via ADPIC/OMPI).
+# Contact : contact@veritas-school.com
