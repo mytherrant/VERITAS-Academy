@@ -12423,6 +12423,7 @@ const ANAV=[
   {s:"💰 Finances",i:[
     {k:"payments",i:"💳",l:"Paiements élèves"},
     {k:"paiements_admin",i:"💰",l:"Tentatives de paiement"},
+    {k:"partenaires_splits",i:"🤝",l:"Partage revenus partenaires"},
     {k:"stats_business",i:"📊",l:"Stats Business (CA/Conv.)"},
     {k:"autredep",i:"💸",l:"Autres dépenses"},
     {k:"finance",i:"△",l:"Bilan financier"}
@@ -12484,6 +12485,7 @@ const SANAV=[
   {s:"💰 Finances",i:[
     {k:"payments",i:"💳",l:"Paiements élèves"},
     {k:"paiements_admin",i:"💰",l:"Tentatives de paiement"},
+    {k:"partenaires_splits",i:"🤝",l:"Partage revenus partenaires"},
     {k:"stats_business",i:"📊",l:"Stats Business (CA/Conv.)"},
     {k:"autredep",i:"💸",l:"Autres dépenses"},
     {k:"finance",i:"△",l:"Bilan financier"}
@@ -12632,6 +12634,7 @@ function render(p){
     stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,
     forum_admin:pgForumAdmin,marketplace_admin:pgMarketplaceAdmin,centres_admin:pgCentresAdmin,
     calendrier_admin:pgCalendrierAdmin,
+    partenaires_splits:pgPartenairesSplits,
     marketplace_teacher:pgMarketplaceEnseignant,
     mvondo:pgMvondo,
     // Super Admin
@@ -32469,6 +32472,9 @@ function _payMarkPaid(ref){
   var result = _payAutoActivate(a);
   a.activationResult = result.msg;
 
+  // ── v2.8 : CALCUL SPLITS PARTENAIRES (parrains + auteurs) ──
+  try { if(typeof _computeSplits === 'function') _computeSplits(a); } catch(e){ console.warn('_computeSplits:', e); }
+
   save();
 
   // ── NOTIFICATIONS ──
@@ -32486,6 +32492,382 @@ function _payMarkPaid(ref){
   mPayAttempts();
   toast('✓ Paiement validé'+(result.msg?' — '+result.msg:''));
 }
+
+// ════════════════════════════════════════════════════════════════════
+// v2.8 — 💰 SYSTÈME PARTAGE REVENUS PARTENAIRES (splits + versements)
+// ════════════════════════════════════════════════════════════════════
+// Phase 1 : tracking auto au paiement (calcul des parts dues)
+// Phase 2 : versement manuel admin (1 clic → MoMo/Orange + WhatsApp confirmation)
+// Phase 3 : versement auto via Disbursement API (scaffolding)
+
+// Configuration des pourcentages (modifiable depuis admin)
+window.SPLIT_CONFIG_DEFAULT = {
+  parrain_abo: 10,      // 10% au parrain sur chaque abonnement filleul
+  parrain_boutique: 5,  //  5% au parrain sur achat boutique du filleul
+  auteur_livre: 60,     // 60% à l'auteur sur ventes de ses livres
+  auteur_ressource: 60, // 60% à l'auteur sur ses ressources marketplace
+  enseignant_cours: 70  // 70% à l'enseignant sur ventes cours/quiz marketplace
+};
+
+window._getSplitConfig = function(){
+  return Object.assign({}, SPLIT_CONFIG_DEFAULT, (DB._splitConfig || {}));
+};
+
+// Calculer les splits dus à partir d'un paiement validé
+window._computeSplits = function(payAttempt){
+  if(!payAttempt || !payAttempt.montant) return;
+  DB.splits = DB.splits || [];
+  DB.partenairesSplit = DB.partenairesSplit || {};
+  var cfg = _getSplitConfig();
+  var splits = [];
+
+  // 1. Parrainage : si le payeur a été parrainé, créditer le parrain
+  try {
+    var userId = payAttempt.accountId || payAttempt.userId;
+    if(userId){
+      var parr = (DB.parrainages || []).find(function(p){ return p.filleulId === userId && p.confirmed; });
+      if(parr && parr.parrainId && parr.parrainId !== userId){
+        var pct = (payAttempt.intent === 'subscription') ? cfg.parrain_abo : cfg.parrain_boutique;
+        var amount = Math.round((payAttempt.montant * pct) / 100);
+        if(amount > 0){
+          splits.push({
+            id: gid(),
+            paymentRef: payAttempt.ref,
+            type: 'parrainage',
+            partenaireId: parr.parrainId,
+            description: 'Parrainage de '+(payAttempt.customerNom || 'filleul'),
+            montantBase: payAttempt.montant,
+            pct: pct,
+            montant: amount,
+            etat: 'pending',
+            createdAt: Date.now()
+          });
+        }
+      }
+    }
+  } catch(e){ console.warn('split parrain:', e); }
+
+  // 2. Auteur de livre : si achat boutique d'un livre avec authorId
+  try {
+    if(payAttempt.intent === 'book' || payAttempt.intent === 'boutique'){
+      var bid = payAttempt.targetId;
+      var book = (DB.books || []).find(function(b){ return b.id === bid; });
+      if(book && book.authorId){
+        var pct = cfg.auteur_livre;
+        var amount = Math.round((payAttempt.montant * pct) / 100);
+        splits.push({
+          id: gid(),
+          paymentRef: payAttempt.ref,
+          type: 'auteur_livre',
+          partenaireId: book.authorId,
+          description: 'Vente livre : '+(book.titre||'?'),
+          montantBase: payAttempt.montant,
+          pct: pct,
+          montant: amount,
+          etat: 'pending',
+          createdAt: Date.now()
+        });
+      }
+    }
+  } catch(e){ console.warn('split auteur livre:', e); }
+
+  // 3. Enseignant marketplace : si achat d'un contenu marketplaceItems
+  try {
+    if(payAttempt.intent === 'marketplace'){
+      var mid = payAttempt.targetId;
+      var item = (DB.marketplaceItems || []).find(function(m){ return m.id === mid; });
+      if(item && item.teacherId){
+        var pct = cfg.enseignant_cours;
+        var amount = Math.round((payAttempt.montant * pct) / 100);
+        splits.push({
+          id: gid(),
+          paymentRef: payAttempt.ref,
+          type: 'enseignant_cours',
+          partenaireId: item.teacherId,
+          description: 'Vente '+(item.type||'cours')+' : '+(item.title||'?'),
+          montantBase: payAttempt.montant,
+          pct: pct,
+          montant: amount,
+          etat: 'pending',
+          createdAt: Date.now()
+        });
+        // Marquer la vente côté marketplace
+        item.salesCount = (item.salesCount||0) + 1;
+      }
+    }
+  } catch(e){ console.warn('split marketplace:', e); }
+
+  // Enregistrer les splits
+  splits.forEach(function(s){
+    DB.splits.push(s);
+    // Cumuler le solde du partenaire
+    DB.partenairesSplit[s.partenaireId] = DB.partenairesSplit[s.partenaireId] || { solde: 0, totalVerse: 0, splits: [] };
+    DB.partenairesSplit[s.partenaireId].solde += s.montant;
+    DB.partenairesSplit[s.partenaireId].splits.push(s.id);
+  });
+  if(splits.length) try { save(); } catch(e){}
+  return splits;
+};
+
+// Page admin : tableau de bord des partenaires + soldes + versements
+window.pgPartenairesSplits = function(){
+  if(!iA()) return na();
+  DB.splits = DB.splits || [];
+  DB.partenairesSplit = DB.partenairesSplit || {};
+  var partenaires = Object.keys(DB.partenairesSplit);
+
+  var totalDu = 0, totalVerse = 0;
+  partenaires.forEach(function(pid){
+    var p = DB.partenairesSplit[pid];
+    totalDu += (p.solde||0);
+    totalVerse += (p.totalVerse||0);
+  });
+
+  // Construire la table partenaires
+  var rows = partenaires.map(function(pid){
+    var p = DB.partenairesSplit[pid];
+    // Trouver le nom et téléphone du partenaire
+    var name = '?', tel = '', type = '?';
+    var visitor = (DB.visitorAccounts||[]).find(function(v){ return v.id === pid; });
+    var student = (DB.students||[]).find(function(s){ return s.id === pid; });
+    var teacher = (DB.teachers||[]).find(function(t){ return t.id === pid; });
+    var author  = (DB.authors||[]).find(function(a){ return a.id === pid; });
+    if(visitor){ name = (visitor.pre||'')+' '+(visitor.nom||''); tel = visitor.tel||''; type = 'Parrain'; }
+    else if(teacher){ name = (teacher.pre||'')+' '+(teacher.nom||''); tel = teacher.tel||''; type = 'Enseignant'; }
+    else if(author){ name = author.name||'?'; tel = author.tel||''; type = 'Auteur'; }
+    else if(student){ name = (student.pre||'')+' '+(student.nom||''); tel = student.tel||''; type = 'Élève'; }
+
+    var nbPending = (DB.splits||[]).filter(function(s){return s.partenaireId === pid && s.etat === 'pending';}).length;
+    return '<tr style="border-bottom:1px solid #E5E7EB">'
+      +'<td style="padding:10px"><b>'+_esc(name)+'</b><br><span style="font-size:10px;color:#6B7280">'+_esc(pid.substring(0,12))+'</span></td>'
+      +'<td style="padding:10px"><span class="chip-v2 chip-v2--primary">'+type+'</span></td>'
+      +'<td style="padding:10px;font-family:JetBrains Mono,monospace">'+_esc(tel||'—')+'</td>'
+      +'<td style="padding:10px;text-align:right"><b style="color:#10B981;font-size:15px">'+fmt(p.solde||0)+'</b><br><span style="font-size:10px;color:#6B7280">'+nbPending+' tx</span></td>'
+      +'<td style="padding:10px;text-align:right;color:#6B7280">'+fmt(p.totalVerse||0)+'</td>'
+      +'<td style="padding:10px;text-align:center">'
+        +(p.solde>=500 ? '<button class="btn-v2 btn-v2--success btn-v2--sm" onclick="mVerserPartenaire(\''+pid+'\')">💰 Verser</button>' : '<span style="font-size:11px;color:#9CA3AF">Min 500 FCFA</span>')
+        +' <button class="btn-v2 btn-v2--secondary btn-v2--sm" onclick="mDetailPartenaire(\''+pid+'\')">Détails</button>'
+      +'</td>'
+      +'</tr>';
+  }).join('');
+
+  return '<div class="pgt">💰 Partage Revenus Partenaires</div>'
+    +'<div class="card mt12"><div class="ct">📊 Vue d\'ensemble</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">'
+      +'<div class="card-v2" style="text-align:center;border-top:3px solid #F59E0B"><div class="h-display" style="color:#F59E0B">'+fmt(totalDu)+'</div><div class="text-muted">À verser</div></div>'
+      +'<div class="card-v2" style="text-align:center;border-top:3px solid #10B981"><div class="h-display" style="color:#10B981">'+fmt(totalVerse)+'</div><div class="text-muted">Déjà versé</div></div>'
+      +'<div class="card-v2" style="text-align:center;border-top:3px solid #3C8DFF"><div class="h-display" style="color:#3C8DFF">'+partenaires.length+'</div><div class="text-muted">Partenaires</div></div>'
+      +'<div class="card-v2" style="text-align:center;border-top:3px solid #7C3AED"><div class="h-display" style="color:#7C3AED">'+((DB.splits||[]).filter(function(s){return s.etat==='pending';}).length)+'</div><div class="text-muted">Splits en attente</div></div>'
+    +'</div></div>'
+    +'<div class="card mt12"><div class="ct">⚙️ Configuration des pourcentages</div>'
+    +'<div class="ib ibi mb12 mt0"><span>💡</span><span>Les pourcentages sont appliqués automatiquement à chaque paiement validé. Modifiables ci-dessous.</span></div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">'
+    +(function(){var cfg=_getSplitConfig();
+      return [
+        {k:'parrain_abo',l:'Parrain — abonnement',v:cfg.parrain_abo},
+        {k:'parrain_boutique',l:'Parrain — boutique',v:cfg.parrain_boutique},
+        {k:'auteur_livre',l:'Auteur — livre',v:cfg.auteur_livre},
+        {k:'auteur_ressource',l:'Auteur — ressource',v:cfg.auteur_ressource},
+        {k:'enseignant_cours',l:'Enseignant — cours',v:cfg.enseignant_cours}
+      ].map(function(c){
+        return '<div class="fg"><span class="fl">'+c.l+' (%)</span><input class="input-v2" type="number" id="sc_'+c.k+'" value="'+c.v+'" min="0" max="100"></div>';
+      }).join('');
+    })()
+    +'</div><button class="btn-v2 btn-v2--accent mt12" onclick="_saveSplitConfig()">💾 Enregistrer les pourcentages</button></div>'
+    +'<div class="card mt12"><div class="ct">👥 Liste des partenaires</div>'
+    +(partenaires.length ?
+      '<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse;font-size:13px"><thead style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff"><tr>'
+      +'<th style="padding:10px;text-align:left">Partenaire</th><th>Type</th><th>Téléphone</th><th style="text-align:right">Solde à verser</th><th style="text-align:right">Total versé</th><th>Action</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+      : '<div style="text-align:center;padding:30px;color:#9CA3AF">Aucun partenaire pour le moment. Les splits seront créés automatiquement à chaque vente avec parrain/auteur/enseignant.</div>')
+    +'</div>'
+    +'<div class="card mt12"><div class="ct">📜 Historique des 20 derniers splits</div>'
+    +(function(){
+      var recent = (DB.splits||[]).slice(-20).reverse();
+      if(!recent.length) return '<div style="text-align:center;padding:20px;color:#9CA3AF">Aucun split encore.</div>';
+      return '<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse;font-size:12px"><thead style="background:#F3F4F6"><tr>'
+        +'<th style="padding:8px;text-align:left">Date</th><th>Type</th><th>Description</th><th style="text-align:right">Base</th><th>%</th><th style="text-align:right">Part</th><th>État</th></tr></thead><tbody>'
+        +recent.map(function(s){
+          return '<tr><td style="padding:6px">'+new Date(s.createdAt).toLocaleDateString('fr-FR')+'</td>'
+            +'<td><span class="chip-v2 chip-v2--neutral">'+s.type+'</span></td>'
+            +'<td>'+_esc(s.description||'?')+'</td>'
+            +'<td style="text-align:right">'+fmt(s.montantBase)+'</td>'
+            +'<td style="text-align:center">'+s.pct+'%</td>'
+            +'<td style="text-align:right;font-weight:700;color:#10B981">'+fmt(s.montant)+'</td>'
+            +'<td>'+(s.etat==='paid'?'<span class="chip-v2 chip-v2--success">✓ Versé</span>':'<span class="chip-v2 chip-v2--warning">⏳ En attente</span>')+'</td></tr>';
+        }).join('')+'</tbody></table></div>';
+    })()
+    +'</div>';
+};
+
+// Sauvegarder la config %
+window._saveSplitConfig = function(){
+  var cfg = {};
+  ['parrain_abo','parrain_boutique','auteur_livre','auteur_ressource','enseignant_cours'].forEach(function(k){
+    var v = parseInt((_ge('sc_'+k)||{}).value);
+    if(!isNaN(v) && v>=0 && v<=100) cfg[k] = v;
+  });
+  DB._splitConfig = cfg;
+  save();
+  toast('✓ Configuration enregistrée','ok');
+};
+
+// Modal : initier un versement vers un partenaire
+window.mVerserPartenaire = function(partenaireId){
+  var p = (DB.partenairesSplit||{})[partenaireId];
+  if(!p || !p.solde){ toast('Solde nul','warn'); return; }
+  var name = '?', tel = '';
+  var v = (DB.visitorAccounts||[]).find(function(x){return x.id===partenaireId;});
+  var t = (DB.teachers||[]).find(function(x){return x.id===partenaireId;});
+  var a = (DB.authors||[]).find(function(x){return x.id===partenaireId;});
+  if(v){ name=(v.pre||'')+' '+(v.nom||''); tel=v.tel||''; }
+  else if(t){ name=(t.pre||'')+' '+(t.nom||''); tel=t.tel||''; }
+  else if(a){ name=a.name||'?'; tel=a.tel||''; }
+
+  M('💰 Verser à '+_esc(name),'Versement Mobile Money',
+    '<div style="padding:8px">'
+    +'<div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:18px;border-radius:14px;text-align:center;margin-bottom:14px">'
+      +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;opacity:.85">Solde à verser</div>'
+      +'<div style="font-size:36px;font-weight:900">'+fmt(p.solde)+'</div>'
+    +'</div>'
+    +'<div class="fg"><span class="fl">Téléphone Mobile Money du partenaire</span><input class="input-v2" id="vpTel" value="'+_esc(tel)+'" placeholder="+237 6XX XX XX XX"></div>'
+    +'<div class="fg"><span class="fl">Opérateur</span><select class="input-v2" id="vpOp"><option value="mtn">📱 MTN MoMo</option><option value="orange">🟠 Orange Money</option></select></div>'
+    +'<div class="fg"><span class="fl">Mode de versement</span><select class="input-v2" id="vpMode"><option value="manuel">✋ Manuel (envoi par téléphone, je marque comme versé)</option><option value="auto">⚡ Automatique (Disbursement API — config requise)</option></select></div>'
+    +'<div class="fg"><span class="fl">Note (optionnel)</span><input class="input-v2" id="vpNote" placeholder="Référence interne, période…"></div>'
+    +'<div class="ib ibi mb0 mt12"><span>💡</span><span>En mode manuel : l\'admin envoie l\'argent via l\'app MoMo/Orange du téléphone, puis valide ici. Un SMS+WhatsApp de confirmation est envoyé au partenaire.</span></div>'
+    +'</div>',
+    '<button class="btn-v2 btn-v2--secondary" onclick="cm()">Annuler</button>'
+    +'<button class="btn-v2 btn-v2--success" onclick="_executerVersement(\''+partenaireId+'\')">💰 Confirmer le versement</button>', true);
+};
+
+// Exécuter le versement (manuel ou auto)
+window._executerVersement = function(partenaireId){
+  var p = (DB.partenairesSplit||{})[partenaireId];
+  if(!p) return;
+  var montant = p.solde;
+  var tel = (_ge('vpTel')||{}).value || '';
+  var op = (_ge('vpOp')||{}).value || 'mtn';
+  var mode = (_ge('vpMode')||{}).value || 'manuel';
+  var note = (_ge('vpNote')||{}).value || '';
+  if(!tel || !/^(\+?237\s?)?6[5-9]\d/.test(tel.replace(/\s/g,''))){
+    toast('Téléphone Mobile Money invalide','warn'); return;
+  }
+
+  // Trouver le nom du partenaire
+  var name = '?';
+  var v = (DB.visitorAccounts||[]).find(function(x){return x.id===partenaireId;});
+  var t = (DB.teachers||[]).find(function(x){return x.id===partenaireId;});
+  var a = (DB.authors||[]).find(function(x){return x.id===partenaireId;});
+  if(v) name = (v.pre||'')+' '+(v.nom||'');
+  else if(t) name = (t.pre||'')+' '+(t.nom||'');
+  else if(a) name = a.name||'?';
+
+  if(mode === 'auto'){
+    // Phase 3 : Disbursement API (à activer plus tard)
+    toast('Mode automatique : configurez d\'abord MTN Disbursement API dans payment_config.php — voir documentation','warn');
+    return;
+  }
+
+  // Mode manuel : enregistrer le versement
+  if(!confirm('Confirmer le versement de '+fmt(montant)+' FCFA à '+name+' au '+tel+' ?\n\nVous devrez envoyer la somme via votre app '+(op==='mtn'?'MTN MoMo':'Orange Money')+' manuellement.')){
+    return;
+  }
+
+  // 1. Créer un enregistrement de versement
+  DB.versements = DB.versements || [];
+  var versement = {
+    id: gid(),
+    partenaireId: partenaireId,
+    nom: name,
+    tel: tel,
+    operateur: op,
+    montant: montant,
+    note: note,
+    mode: mode,
+    splitIds: (p.splits||[]).slice(),
+    date: Date.now(),
+    statut: 'effectue'
+  };
+  DB.versements.push(versement);
+
+  // 2. Marquer tous les splits comme "paid"
+  (DB.splits||[]).forEach(function(s){
+    if(s.partenaireId === partenaireId && s.etat === 'pending'){
+      s.etat = 'paid';
+      s.versementId = versement.id;
+      s.paidAt = Date.now();
+    }
+  });
+
+  // 3. Reset le solde + ajouter au total versé
+  p.totalVerse = (p.totalVerse||0) + montant;
+  p.solde = 0;
+  p.splits = [];
+  p.lastVersement = Date.now();
+
+  save();
+
+  // 4. Notification WhatsApp au partenaire
+  var msg = '✅ VÉRITAS Academy — Versement de '+fmt(montant)+' FCFA effectué à votre numéro '+tel+' ('+(op==='mtn'?'MTN MoMo':'Orange Money')+'). Réf: '+versement.id.substring(0,8)+'. Merci pour votre collaboration ! '+(note?'Note: '+note:'');
+  var waUrl = 'https://wa.me/'+tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg);
+  // Notification admin
+  if(typeof autoNotify==='function'){
+    autoNotify('💰 Versement effectué',name+' — '+fmt(montant)+' FCFA via '+(op==='mtn'?'MTN':'Orange'),'admin');
+  }
+
+  cm();
+  // Ouvrir WhatsApp avec le message pré-rempli
+  setTimeout(function(){ window.open(waUrl, '_blank'); }, 300);
+  toast('✓ Versement enregistré — WhatsApp ouvre pour confirmer au partenaire','ok');
+
+  // Refresh
+  if(typeof re==='function') re();
+};
+
+// Détail partenaire (historique de ses splits)
+window.mDetailPartenaire = function(partenaireId){
+  var p = (DB.partenairesSplit||{})[partenaireId];
+  if(!p){ toast('Partenaire introuvable','warn'); return; }
+  var splits = (DB.splits||[]).filter(function(s){return s.partenaireId === partenaireId;}).reverse();
+  var versements = (DB.versements||[]).filter(function(v){return v.partenaireId === partenaireId;}).reverse();
+
+  var name = '?';
+  var v = (DB.visitorAccounts||[]).find(function(x){return x.id===partenaireId;});
+  var t = (DB.teachers||[]).find(function(x){return x.id===partenaireId;});
+  var a = (DB.authors||[]).find(function(x){return x.id===partenaireId;});
+  if(v) name = (v.pre||'')+' '+(v.nom||'');
+  else if(t) name = (t.pre||'')+' '+(t.nom||'');
+  else if(a) name = a.name||'?';
+
+  var body = '<div style="padding:8px">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
+      +'<div class="card-v2" style="text-align:center;border-top:3px solid #F59E0B"><div style="font-size:22px;font-weight:900;color:#F59E0B">'+fmt(p.solde||0)+'</div><div class="text-muted" style="font-size:11px">À verser</div></div>'
+      +'<div class="card-v2" style="text-align:center;border-top:3px solid #10B981"><div style="font-size:22px;font-weight:900;color:#10B981">'+fmt(p.totalVerse||0)+'</div><div class="text-muted" style="font-size:11px">Déjà versé</div></div>'
+    +'</div>'
+    +'<h3 class="h-3">📜 Splits ('+splits.length+')</h3>'
+    +(splits.length?
+      '<div style="max-height:200px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px">'
+      +splits.map(function(s){
+        return '<div style="display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #F3F4F6;font-size:12px">'
+          +'<div><b>'+_esc(s.description||'?')+'</b><br><span style="color:#6B7280">'+new Date(s.createdAt).toLocaleDateString('fr-FR')+' · '+s.type+'</span></div>'
+          +'<div style="text-align:right"><b style="color:#10B981">'+fmt(s.montant)+'</b><br>'+(s.etat==='paid'?'<span style="color:#10B981;font-size:10px">✓ Versé</span>':'<span style="color:#F59E0B;font-size:10px">⏳ Attente</span>')+'</div>'
+        +'</div>';
+      }).join('')
+      +'</div>' : '<div style="text-align:center;padding:14px;color:#9CA3AF;font-size:13px">Aucun split.</div>')
+    +'<h3 class="h-3 mt12">💰 Versements ('+versements.length+')</h3>'
+    +(versements.length?
+      '<div style="max-height:160px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px">'
+      +versements.map(function(v){
+        return '<div style="padding:6px;border-bottom:1px solid #F3F4F6;font-size:12px">'
+          +'<b>'+fmt(v.montant)+' FCFA</b> via '+(v.operateur==='mtn'?'MTN MoMo':'Orange Money')+' — '+new Date(v.date).toLocaleDateString('fr-FR')
+          +(v.note?'<br><span style="color:#6B7280">'+_esc(v.note)+'</span>':'')
+        +'</div>';
+      }).join('')
+      +'</div>' : '<div style="text-align:center;padding:14px;color:#9CA3AF;font-size:13px">Aucun versement.</div>')
+    +'</div>';
+  M('👤 '+name,'Détail partenaire',body,
+    '<button class="btn-v2 btn-v2--secondary" onclick="cm()">Fermer</button>'
+    +(p.solde>=500?'<button class="btn-v2 btn-v2--success" onclick="cm();mVerserPartenaire(\''+partenaireId+'\')">💰 Verser '+fmt(p.solde)+'</button>':''), true);
+};
 
 // ── Cœur de l'automatisation post-paiement ──
 // Selon a.intent + a.targetId, déclenche l'action métier appropriée.
