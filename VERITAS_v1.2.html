@@ -352,15 +352,44 @@ window._autoA11y = function(root){
   } catch(e){}
 };
 
+// v2.2 : auto-wrap des emojis en début de .vsec-title pour activer halo animé
+window._upgradeSecTitles = function(root){
+  try {
+    var scope = root || document;
+    var titles = scope.querySelectorAll('.vsec-title:not([data-upgraded]), .vsec-title-hero:not([data-upgraded])');
+    titles.forEach(function(t){
+      t.setAttribute('data-upgraded','1');
+      // Si le premier enfant est déjà un span/svg, ne rien faire
+      var first = t.firstChild;
+      if(first && first.nodeType === 3){
+        // C'est du texte — extraire l'emoji du début (1-2 chars unicode)
+        var txt = first.textContent;
+        var m = txt.match(/^(\s*)((?:\p{Extended_Pictographic}‍?)+|[☀-⟿])\s*(.*)$/u);
+        if(m){
+          var emoji = m[2];
+          var rest = m[3];
+          // Créer span + texte
+          var span = document.createElement('span');
+          span.textContent = emoji;
+          span.setAttribute('aria-hidden','true');
+          var txtNode = document.createTextNode(' '+rest);
+          first.parentNode.replaceChild(txtNode, first);
+          t.insertBefore(span, txtNode);
+        }
+      }
+    });
+  } catch(e){ /* silencieux */ }
+};
+
 // Auto-init après chargement initial + à chaque mutation DOM
 if(document.readyState === 'loading'){
-  document.addEventListener('DOMContentLoaded', function(){ _autoA11y(); });
-} else { _autoA11y(); }
+  document.addEventListener('DOMContentLoaded', function(){ _autoA11y(); _upgradeSecTitles(); });
+} else { _autoA11y(); _upgradeSecTitles(); }
 if('MutationObserver' in window){
   var a11yMo = new MutationObserver(function(muts){
     muts.forEach(function(m){
       m.addedNodes && m.addedNodes.forEach(function(n){
-        if(n.nodeType===1) _autoA11y(n);
+        if(n.nodeType===1){ _autoA11y(n); _upgradeSecTitles(n); }
       });
     });
   });
@@ -1608,9 +1637,64 @@ input,select,textarea,button{font-family:'Poppins','Inter',sans-serif!important}
 /* ── Visitor Portal enhanced ── */
 #VISITOR{background:linear-gradient(160deg,#F0F4FF 0%,#EEF0FF 50%,#F5F0FF 100%)}
 .vsec{max-width:860px;margin:0 auto;padding:20px 16px 40px}
-.vsec-title{font-family:'Montserrat',sans-serif!important;font-size:22px;font-weight:800;
-  color:#142554;margin-bottom:6px;display:flex;align-items:center;gap:10px}
-.vsec-sub{font-size:13px;color:#6B7A99;margin-bottom:20px;line-height:1.6}
+.vsec-title{font-family:'Plus Jakarta Sans','Montserrat',sans-serif!important;font-size:24px;font-weight:800;
+  color:#142554;margin-bottom:6px;display:flex;align-items:center;gap:12px;letter-spacing:-.015em;
+  position:relative;line-height:1.2;padding-bottom:6px}
+.vsec-title::after{
+  content:''; position:absolute; left:0; bottom:0;
+  width:48px; height:3px; border-radius:99px;
+  background:linear-gradient(90deg, var(--accent-400, #FFC93C), var(--accent-500, #F5B800));
+  animation:vsecTitleUnderline 2.5s ease-in-out infinite;
+}
+@keyframes vsecTitleUnderline{
+  0%,100%{ width:48px; opacity:.85; }
+  50%{ width:120px; opacity:1; }
+}
+.vsec-title > span:first-child, .vsec-title > svg:first-child{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:44px; height:44px; border-radius:50%; flex-shrink:0;
+  background:linear-gradient(135deg, rgba(255,201,60,.15), rgba(255,201,60,.05));
+  border:1.5px solid rgba(255,201,60,.3);
+  font-size:22px; transition:transform .3s ease-out;
+  animation:vsecIconPulse 3s ease-in-out infinite;
+}
+@keyframes vsecIconPulse{
+  0%,100%{ transform:scale(1); box-shadow:0 0 0 0 rgba(255,201,60,.3); }
+  50%{ transform:scale(1.05); box-shadow:0 0 0 8px rgba(255,201,60,0); }
+}
+.vsec-title:hover > span:first-child, .vsec-title:hover > svg:first-child{
+  transform:scale(1.12) rotate(-5deg);
+}
+.vsec-sub{font-size:13px;color:#6B7A99;margin-bottom:24px;line-height:1.6;
+  font-family:var(--font-serif, 'Crimson Pro'), 'Libre Baskerville', Georgia, serif;
+  font-style:italic; margin-top:4px}
+
+/* Variante "hero" pour les pages majeures (e-learning, boutique, jeux, classes) */
+.vsec-title-hero{
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif !important;
+  font-size:32px; font-weight:800; line-height:1.1; letter-spacing:-.02em;
+  color:#142554; display:flex; align-items:center; gap:16px;
+  position:relative; margin-bottom:8px; padding:18px 0 12px;
+}
+.vsec-title-hero::after{
+  content:''; position:absolute; left:0; bottom:0;
+  width:72px; height:4px; border-radius:99px;
+  background:linear-gradient(90deg, #FFC93C, #F59E0B);
+  animation:vsecTitleUnderline 2.5s ease-in-out infinite;
+}
+.vsec-title-hero > span:first-child, .vsec-title-hero > svg:first-child{
+  width:56px; height:56px; border-radius:50%;
+  background:linear-gradient(135deg, rgba(255,201,60,.18), rgba(60,141,255,.1));
+  border:2px solid rgba(255,201,60,.4); font-size:28px;
+  display:inline-flex; align-items:center; justify-content:center;
+  animation:vsecIconPulse 3s ease-in-out infinite; flex-shrink:0;
+}
+@media (max-width:640px){
+  .vsec-title{ font-size:20px; }
+  .vsec-title > span:first-child, .vsec-title > svg:first-child{ width:38px; height:38px; font-size:18px; }
+  .vsec-title-hero{ font-size:24px; }
+  .vsec-title-hero > span:first-child, .vsec-title-hero > svg:first-child{ width:48px; height:48px; font-size:22px; }
+}
 
 /* ── Nav redesign ── */
 .vnav{background:#fff;border-bottom:3px solid #E8EEFF;padding:10px 12px;display:flex;
@@ -3698,6 +3782,11 @@ tr:hover td:first-child {
 <div class="vlogin-bar">
   <span>🏫 VÉRITAS Academy</span>
   <div class="vlogin-btns" id="vLoginBtns">
+    <!-- Boutons utilitaires v2.2 (panier, langue, contact) -->
+    <button class="btn sm icon-only" title="Panier" aria-label="Panier" onclick="openCart()" style="background:rgba(255,201,60,.15);color:#FFC93C;border:1px solid rgba(255,201,60,.3);padding:6px 10px;position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg><span id="cartBadge" style="position:absolute;top:-3px;right:-3px;background:#DC2626;color:#fff;border-radius:50%;font-size:9px;width:16px;height:16px;display:none;align-items:center;justify-content:center;font-weight:700" aria-live="polite"></span></button>
+    <button class="btn sm icon-only" title="Changer la langue / Switch language" aria-label="Changer la langue" onclick="mLanguageMenu()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"/></svg></button>
+    <button class="btn sm icon-only" title="Nous contacter" aria-label="Contact" onclick="vShowSec('contact',null)" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg></button>
+    <span style="width:1px;height:20px;background:rgba(255,255,255,.15);margin:0 4px"></span>
     <button class="btn sm" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-weight:600" onclick="showRegisterForm()">✨ S'inscrire</button>
     <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin('eleve')">🎓 Se connecter</button>
     <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin('enseignant')">👨‍🏫 Enseignant</button>
@@ -3752,19 +3841,14 @@ setInterval(_refreshCitation,15000);
   <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Boutique"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-shop"/></svg> Boutique</button>
   <button class="vnav-btn" onclick="showJeuxEdu()" aria-label="Jeux éducatifs"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-game"/></svg> Jeux</button>
   <button class="vnav-btn" onclick="showLabosVirtuels()" style="background:linear-gradient(135deg,rgba(14,165,233,.15),rgba(14,165,233,.05));color:#0EA5E9;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Laboratoires virtuels"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-flask"/></svg> Labos</button>
-  <button class="vnav-btn" onclick="showClasseVirtuelle()" style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));color:#7C3AED;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Classes virtuelles"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-users"/></svg> Classes</button>
+  <button class="vnav-btn" onclick="showClasseVirtuelle()" style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));color:#7C3AED;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Classes virtuelles et Forum communauté"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-users"/></svg> Classes &amp; Forum</button>
   <button class="vnav-btn" onclick="vShowSec('orientation',this)" style="background:linear-gradient(135deg,rgba(5,150,105,.15),rgba(5,150,105,.05));color:#059669;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Orientation scolaire"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-compass"/></svg> Orientation</button>
   <button class="vnav-btn" onclick="showCalendrier()" style="background:linear-gradient(135deg,rgba(220,38,38,.15),rgba(220,38,38,.05));color:#DC2626;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Calendrier"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-calendar"/></svg> Calendrier</button>
   <button class="vnav-btn" onclick="showEpreuves()" aria-label="Épreuves"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-doc"/></svg> Épreuves</button>
   <button class="vnav-btn" onclick="showEvaluations()" aria-label="Évaluations"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-chart"/></svg> Évals</button>
-  <button class="vnav-btn" onclick="mDevoirCorrectionIA()" style="background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(16,185,129,.05));color:#10B981;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Devoir corrigé par IA"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-sparkles"/></svg> Devoir IA</button>
+  <button class="vnav-btn" onclick="mHubIA()" style="background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(99,102,241,.05));color:#6366F1;border-radius:20px;margin:3px 2px;font-weight:700" title="Hub IA : Devoir corrigé + Parcours adaptatif + Orientation" aria-label="Hub IA : tous les outils intelligence artificielle"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-brain"/></svg> Hub IA</button>
   <button class="vnav-btn" onclick="mParrainage()" style="background:linear-gradient(135deg,rgba(236,72,153,.18),rgba(236,72,153,.05));color:#EC4899;border-radius:20px;margin:3px 2px;font-weight:700" title="Parrainage : gagnez du crédit" aria-label="Programme de parrainage"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-gift"/></svg> Parrainage</button>
-  <button class="vnav-btn" onclick="mIAAdaptative()" style="background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(99,102,241,.05));color:#6366F1;border-radius:20px;margin:3px 2px;font-weight:700" title="Votre parcours IA personnalisé" aria-label="Parcours IA personnalisé"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-brain"/></svg> Parcours IA</button>
-  <button class="vnav-btn" onclick="showForum()" style="background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(245,158,11,.05));color:#F59E0B;border-radius:20px;margin:3px 2px;font-weight:700" title="Forum communautaire" aria-label="Forum communautaire"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-forum"/></svg> Forum</button>
-  <button class="vnav-btn" onclick="mLanguageMenu()" style="border-radius:20px;margin:3px 2px;font-weight:700" title="Changer la langue / Switch language" aria-label="Changer la langue"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-globe"/></svg> FR/EN</button>
   <button class="vnav-btn" onclick="vShowSec('actualites',this)" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#ef4444;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Actualités"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-news"/></svg> Actualités</button>
-  <button class="vnav-btn" onclick="vShowSec('contact',this)" aria-label="Contact"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-mail"/></svg> Contact</button>
-  <button class="vnav-btn" onclick="openCart()" style="position:relative;background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Ouvrir le panier d'achat"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-cart"/></svg> Panier<span id="cartBadge" style="position:absolute;top:-4px;right:-4px;background:var(--re);color:#fff;border-radius:50%;font-size:10px;width:18px;height:18px;display:none;align-items:center;justify-content:center;font-weight:700" aria-live="polite"></span></button>
 </nav>
 <div id="vContent" role="region" aria-live="polite"></div>
 </main>
@@ -7753,7 +7837,8 @@ function vShowSec(sec,btn){
   } else if(sec==="boutique"){
     const promos=(DB.promoCodes||[]).filter(p=>p.actif);
     c.innerHTML=`<div class="vsec">
-    <div class="vsec-title">🛒 Boutique & Manuels Scolaires</div>
+    <div class="vsec-title vsec-title-hero">🛒 Boutique & Manuels Scolaires</div>
+    <div class="vsec-sub">Manuels officiels MINESEC, livraison à Douala et province</div>
     <div class="vsec-sub">Commandez vos manuels, consultez les extraits gratuits et profitez de nos promotions</div>
 
     <!-- PROMO BANNER -->
@@ -21782,7 +21867,7 @@ function showJeuxEdu(){
   var MATS=["Tous","Maths","Francais","Litterature","Histoire-Geo","Physique-Chimie","SVT","Anglais","Philosophie","Geographie"];
   var NIVEAUX=["Tous","3eme","1ere","Terminale","6eme-3eme","2nde-Tle"];
   var h="<div class='vsec'>";
-  h+="<div class='vsec-title'>🎮 Jeux Éducatifs & Cartes Mentales</div>";
+  h+="<div class='vsec-title vsec-title-hero'>🎮 Jeux Éducatifs & Cartes Mentales</div><div class='vsec-sub'>Apprenez en vous amusant — verbes, capitales, formules, œuvres au programme</div>";
   h+="<div class='vsec-sub'>Apprenez en jouant — jeux, quiz et cartes mentales interactives</div>";
 
   // ══════════ SECTION CARTES MENTALES LITTÉRAIRES ══════════
@@ -22319,7 +22404,7 @@ function showEpreuves(){
   }).join("");
 
   var h="<div class='vsec'>";
-  h+="<div class='vsec-title'>📝 Épreuves & Ressources</div>";
+  h+="<div class='vsec-title vsec-title-hero'>📝 Épreuves & Annales</div><div class='vsec-sub'>BEPC, Probatoire, BAC — sujets corrigés et fascicules officiels</div>";
   h+="<div class='vsec-sub'>Épreuves séquentielles, corpus, anciens sujets BEPC/Probatoire/BAC — tous niveaux</div>";
 
   // Bouton réinitialiser les filtres si au moins un filtre actif
@@ -23447,7 +23532,8 @@ function _cvRenderHome(){
   var todayPosts=(DB.forumPosts||[]).filter(function(p){return (p.dateISO||'').startsWith(today2);}).length;
   var h="<div class='vsec' style='max-width:980px;margin:0 auto'>";
   h+="<div style='display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:20px'>";
-  h+="<div><div class='vsec-title' style='margin-bottom:4px'>🏫 Classes Virtuelles</div><div style='font-size:13px;color:var(--ink4)'>Échangez avec vos enseignants et camarades</div></div>";
+  h+="<div><div class='vsec-title vsec-title-hero' style='margin-bottom:4px'>🏫 Classes &amp; Forum</div><div style='font-size:13px;color:var(--ink4)'>Échangez avec vos enseignants, camarades et la communauté VÉRITAS</div></div>";
+  h+="<button class='btn bo sm' onclick='showForum()' style='background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(245,158,11,.05));color:#F59E0B;border:1.5px solid rgba(245,158,11,.3);font-weight:700'><span style='margin-right:6px'>💬</span> Accéder au Forum public</button>";
   if(iA()){h+="<button class='btn bi sm' onclick='_cvAdminPanel()'>⚙️ Gérer les classes</button>";}
   h+="</div>";
   // Stats
@@ -23935,7 +24021,7 @@ function showLabosVirtuels(){
   var gratuits=list.filter(function(l){return l.gratuit;}).length;
 
   var h="<div class='vsec'>";
-  h+="<div class='vsec-title'>🔬 Laboratoires Virtuels</div>";
+  h+="<div class='vsec-title vsec-title-hero'>🔬 Laboratoires Virtuels</div>";
   h+="<div class='vsec-sub'>"+_visibleLabo.length+" expériences interactives basées sur le programme MINESEC — Sans risque, sans matériel</div>";
 
   // Bandeau stats
@@ -32545,6 +32631,42 @@ window.mIAAdaptative = function(){
     console.error('mIAAdaptative:',e);
     toast('Erreur IA : '+e.message,'err');
   }
+};
+
+// v2.2 : Hub IA unique — point d'entrée pour tous les outils IA
+window.mHubIA = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  var connected = ses && (ses.type==='visiteur_inscrit' || ses.type==='eleve');
+  var body = '<div style="padding:8px">'
+    +'<div style="background:linear-gradient(135deg,#EEF2FF,#E0E7FF);padding:14px;border-radius:14px;border:1px solid #C7D2FE;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();(typeof mDevoirCorrectionIA===\'function\'&&mDevoirCorrectionIA())">'
+      +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(99,102,241,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366F1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg></div>'
+      +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#3730A3;font-size:15px">📝 Devoir corrigé par IA</div><div style="font-size:12px;color:#4338CA;margin-top:3px;line-height:1.4">Collez votre rédaction, recevez une note + corrections + conseils en moins de 60 secondes</div></div>'
+      +'<div style="color:#6366F1;font-size:20px;align-self:center">→</div>'
+    +'</div>'
+    +'<div style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);padding:14px;border-radius:14px;border:1px solid #D8B4FE;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;'+(connected?'cursor:pointer;':'')+'transition:transform .2s" '+(connected?'onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();window._showAIAdaptiveDashboard&&window._showAIAdaptiveDashboard()"':'')+'>'
+      +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(168,85,247,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"/></svg></div>'
+      +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#6B21A8;font-size:15px">🎯 Parcours personnalisé '+(connected?'':'<span style="font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 6px;border-radius:6px;font-weight:600;margin-left:4px">connexion requise</span>')+'</div><div style="font-size:12px;color:#7E22CE;margin-top:3px;line-height:1.4">L\'IA analyse vos performances et propose les bons exercices au bon moment (algorithme SuperMemo)</div></div>'
+      +'<div style="color:#7C3AED;font-size:20px;align-self:center">→</div>'
+    +'</div>'
+    +'<div style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);padding:14px;border-radius:14px;border:1px solid #6EE7B7;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();(typeof mOrientationIA===\'function\'?mOrientationIA():vShowSec(\'orientation\',document.querySelector(\'.vnav-btn[onclick*=orientation]\')))">'
+      +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(16,185,129,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-compass"/></svg></div>'
+      +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#065F46;font-size:15px">🧭 Orientation par IA</div><div style="font-size:12px;color:#047857;margin-top:3px;line-height:1.4">Découvrez les filières et écoles adaptées à votre profil et vos résultats</div></div>'
+      +'<div style="color:#059669;font-size:20px;align-self:center">→</div>'
+    +'</div>'
+    +(connected
+      ? '<div style="background:#F0FDF4;padding:10px 12px;border-radius:10px;border:1px solid #86EFAC;font-size:11px;color:#15803D;text-align:center;margin-top:6px">✓ Vous êtes connecté — toutes les fonctions IA personnalisées sont disponibles</div>'
+      : '<div style="background:#FEF3C7;padding:10px 12px;border-radius:10px;border:1px solid #FCD34D;font-size:11px;color:#92400E;text-align:center;margin-top:6px">💡 Inscrivez-vous gratuitement pour débloquer le parcours personnalisé</div>'
+    )
+    +'</div>';
+  M('🧠 Hub IA','Vos 3 assistants intelligents pour réussir',body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +(connected ? '' : '<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);">✨ S\'inscrire</button>'), true);
+};
+
+// Helper pour afficher le dashboard adaptatif IA (était le contenu connecté de mIAAdaptative)
+window._showAIAdaptiveDashboard = function(){
+  // Réappelle mIAAdaptative (qui affichera la version connectée car ses=non-null)
+  if(typeof mIAAdaptative === 'function') mIAAdaptative();
 };
 
 // Hook quiz → enregistrer auto les résultats dans SM-2
