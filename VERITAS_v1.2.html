@@ -16591,49 +16591,235 @@ function buildIntroVideoHtml_legacy(){
     +'</div></div>';
 }
 
-// (mSetIntroVideo v1 supprimée — remplacée par version améliorée)
-function _aiUsed(t){
-  var k='ai_'+t+'_'+new Date().toDateString();
-  try{return parseInt(localStorage.getItem(k)||'0');}catch(e){return 0;}
-}
-function _aiInc(t){
-  var k='ai_'+t+'_'+new Date().toDateString();
-  var n=_aiUsed(t)+1;
-  try{localStorage.setItem(k,String(n));}catch(e){}
-  return n;
-}
-function _aiLimit(t){
-  // Progressive selon abonnement
-  var plan='';
-  var abos=(DB.elearning&&DB.elearning.abonnements)||[];
-  if(SES){
-    var a=abos.find(function(x){
-      return x.statut==='Activé'&&(
-        (SES.pre&&x.nom===(SES.pre+' '+SES.nom))||
-        x.nom===SES.nom||x.tel===SES.ptel||x.tel===SES.tel);
-    });
-    if(a) plan=a.plan;
+// ════════════════════════════════════════════════════════════════════
+// v2.7 — SYSTÈME DE QUOTAS IA PAR PLAN D'ABONNEMENT
+// ════════════════════════════════════════════════════════════════════
+// Stratégie freemium :
+// - Visiteur anonyme : 2 essais TOTAL (lifetime, localStorage)
+// - Visiteur inscrit gratuit : 3 essais / SEMAINE (reset lundi)
+// - Plan Starter : 5 / jour
+// - Plan Pro : 30 / jour
+// - Plan Elite : illimité
+// - Enseignant : 50 / jour
+// - Admin / Super-admin : illimité
+
+window.AI_QUOTAS = {
+  // [type d'action] : { anonyme, gratuit_sem, plan_starter_j, plan_pro_j, plan_elite, enseignant_j, admin }
+  default:    { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 },
+  mvondo:     { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 },
+  devoir:     { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 },
+  photo_ia:   { anon:1,  free:2,  starter:3,  pro:15,  elite:-1, teach:20,  admin:-1 },
+  orient:     { anon:1,  free:2,  starter:3,  pro:10,  elite:-1, teach:20,  admin:-1 },
+  correct:    { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 }
+};
+
+// Helper : déterminer le tier de l'utilisateur courant
+window._aiTier = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses || !ses.id) return 'anon';
+  // Admin / Super-admin
+  if(typeof iA==='function' && iA()) return 'admin';
+  // Enseignant
+  if(ses.type==='enseignant') return 'teach';
+  // Élève / visiteur inscrit : chercher abonnement actif
+  var abos = (DB.elearning && DB.elearning.abonnements) || [];
+  var a = abos.find(function(x){
+    if(x.statut!=='Activé' && x.statut!=='actif') return false;
+    return x.userId===ses.id ||
+      (ses.pre && x.nom===(ses.pre+' '+ses.nom)) ||
+      x.nom===ses.nom || x.tel===ses.tel;
+  });
+  if(a){
+    // Mapper plan vers tier
+    var p = (a.plan||'').toLowerCase();
+    if(p.indexOf('elite')>=0 || p==='plan4') return 'elite';
+    if(p.indexOf('pro')>=0 || p==='plan3') return 'pro';
+    if(p.indexOf('starter')>=0 || p==='plan2') return 'starter';
+    if(p.indexOf('plan1')>=0) return 'pro'; // ancien plan1 = pro
   }
-  if(plan==='plan4'||plan==='plan3') return 999;
-  if(plan==='plan1') return 25;
-  if(plan==='plan2') return 10;
-  return 2; // gratuit
-}
-function _aiGate(t){
-  var u=_aiUsed(t),lim=_aiLimit(t),rem=Math.max(0,lim-u);
-  if(rem<=0){
-    M('🔒 Limite IA atteinte','',
-      '<div style="text-align:center;padding:20px 10px">'+
-      '<div style="font-size:50px;margin-bottom:14px">🤖</div>'+
-      '<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:var(--ink);margin-bottom:8px">Limite journalière atteinte</div>'+
-      '<div style="font-size:13px;color:var(--ink3);line-height:1.7;margin-bottom:18px">Vous avez utilisé vos <strong>'+u+' essai(s)</strong> aujourd\'hui.<br>Abonnez-vous pour un accès étendu (10 à illimité).</div>'+
-      '<button class="btn bi" onclick="cm();document.getElementById(\'elPlans\')?.scrollIntoView({behavior:\'smooth\'})">📋 Voir les abonnements</button>'+
-      '</div>',
-      '<button class="btn bo" onclick="cm()">Fermer</button>');
+  return 'free'; // visiteur inscrit sans abonnement
+};
+
+// Période de comptage selon tier (lifetime, semaine, jour)
+window._aiPeriod = function(tier){
+  if(tier==='anon') return 'lifetime';
+  if(tier==='free') return 'week';
+  return 'day';
+};
+
+// Clé de stockage selon période
+window._aiKey = function(action, tier){
+  var p = _aiPeriod(tier);
+  if(p === 'lifetime') return '_aiQ_anon_' + action;
+  if(p === 'week'){
+    // Numéro de semaine ISO
+    var d = new Date();
+    var firstJan = new Date(d.getFullYear(),0,1);
+    var dayOfYear = Math.floor((d - firstJan) / 86400000);
+    var week = Math.ceil((dayOfYear + firstJan.getDay() + 1) / 7);
+    return '_aiQ_week_' + action + '_' + d.getFullYear() + 'W' + String(week).padStart(2,'0');
+  }
+  // day
+  var d2 = new Date();
+  return '_aiQ_day_' + action + '_' + d2.toISOString().slice(0,10);
+};
+
+// Récupérer compteur d'usage
+window._aiUsed = function(action){
+  var tier = _aiTier();
+  var key = _aiKey(action, tier);
+  try {
+    if(tier === 'anon' || tier === 'free' || tier === 'day'){
+      // Anon → localStorage (suit le device, pas l'user)
+      if(tier === 'anon') return parseInt(localStorage.getItem(key) || '0', 10);
+      // Inscrit → DB.userAIUsage par user
+      var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+      if(ses && ses.id){
+        DB.userAIUsage = DB.userAIUsage || {};
+        DB.userAIUsage[ses.id] = DB.userAIUsage[ses.id] || {};
+        return (DB.userAIUsage[ses.id][key] || 0);
+      }
+      return parseInt(localStorage.getItem(key) || '0', 10);
+    }
+    return parseInt(localStorage.getItem(key) || '0', 10);
+  } catch(e){ return 0; }
+};
+
+// Incrémenter compteur
+window._aiInc = function(action){
+  var tier = _aiTier();
+  var key = _aiKey(action, tier);
+  var n = _aiUsed(action) + 1;
+  try {
+    if(tier === 'anon'){
+      localStorage.setItem(key, String(n));
+    } else {
+      var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+      if(ses && ses.id){
+        DB.userAIUsage = DB.userAIUsage || {};
+        DB.userAIUsage[ses.id] = DB.userAIUsage[ses.id] || {};
+        DB.userAIUsage[ses.id][key] = n;
+        try { save(); } catch(e){}
+      } else {
+        localStorage.setItem(key, String(n));
+      }
+    }
+  } catch(e){}
+  return n;
+};
+
+// Récupérer la limite pour l'action courante
+window._aiLimit = function(action){
+  var tier = _aiTier();
+  var quotas = AI_QUOTAS[action] || AI_QUOTAS.default;
+  return quotas[tier] || quotas.free;
+};
+
+// Quota check + modal upgrade si dépassé
+window._aiGate = function(action){
+  action = action || 'default';
+  var tier = _aiTier();
+  var limit = _aiLimit(action);
+  var used = _aiUsed(action);
+  // -1 = illimité
+  if(limit === -1) return true;
+  if(used >= limit){
+    _showQuotaExceeded(action, tier, used, limit);
     return false;
   }
+  // Incrémenter le compteur (consommation)
+  _aiInc(action);
   return true;
-}
+};
+
+// Helper public : récupérer status quota (pour affichage badge)
+window._aiQuotaStatus = function(action){
+  action = action || 'mvondo';
+  var tier = _aiTier();
+  var limit = _aiLimit(action);
+  var used = _aiUsed(action);
+  var period = _aiPeriod(tier);
+  return {
+    tier: tier,
+    limit: limit,
+    used: used,
+    remaining: limit === -1 ? -1 : Math.max(0, limit - used),
+    period: period,
+    unlimited: limit === -1
+  };
+};
+
+// Modal "Quota dépassé" — incite à l'inscription/upgrade
+window._showQuotaExceeded = function(action, tier, used, limit){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  var labels = {
+    mvondo: 'Professeur Mvondo',
+    devoir: 'Devoir corrigé par IA',
+    photo_ia: 'Photo Math IA',
+    orient: 'Orientation IA',
+    correct: 'Correction IA'
+  };
+  var label = labels[action] || 'l\'assistant IA';
+  var periodTxt = tier==='anon' ? 'au total' : (tier==='free' ? 'cette semaine' : 'aujourd\'hui');
+
+  var body;
+  if(tier === 'anon'){
+    // Visiteur anonyme : invitation forte à s'inscrire
+    body = '<div style="text-align:center;padding:10px">'
+      +'<div style="font-size:56px;margin-bottom:14px">🎁</div>'
+      +'<div style="font-family:Plus Jakarta Sans,sans-serif;font-size:20px;font-weight:800;color:#142554;margin-bottom:6px">Vos essais gratuits sont épuisés</div>'
+      +'<div style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:14px">Vous avez utilisé vos <b>'+used+'/'+limit+' essais</b> '+periodTxt+' de '+label+'.</div>'
+      +'<div style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:16px;border-radius:14px;margin-bottom:14px;text-align:left">'
+        +'<div style="font-weight:900;font-size:15px;margin-bottom:6px">✨ Inscrivez-vous GRATUITEMENT et recevez :</div>'
+        +'<ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.8">'
+        +'<li>3 essais Mvondo / semaine</li>'
+        +'<li>Sauvegarde de votre progression</li>'
+        +'<li>500 FCFA de crédit par ami parrainé</li>'
+        +'<li>Badges + Genome + Wrapped annuel</li>'
+        +'</ul></div>'
+      +'<button class="btn bi" style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:14px 28px;font-size:14px;font-weight:800;width:100%;margin-bottom:6px" onclick="cm();showRegisterForm()">🚀 S\'inscrire gratuitement (30 sec)</button>'
+      +'<div style="font-size:11px;color:#94A3B8;margin-top:6px">Pas de carte bancaire · 100% gratuit</div>'
+      +'</div>';
+  } else if(tier === 'free'){
+    // Visiteur inscrit gratuit : upsell vers Plan
+    body = '<div style="text-align:center;padding:10px">'
+      +'<div style="font-size:56px;margin-bottom:14px">⚡</div>'
+      +'<div style="font-family:Plus Jakarta Sans,sans-serif;font-size:20px;font-weight:800;color:#142554;margin-bottom:6px">Quota hebdomadaire atteint</div>'
+      +'<div style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:16px">Vous avez utilisé <b>'+used+'/'+limit+' essais</b> de '+label+' '+periodTxt+'.<br>Le quota se réinitialise lundi prochain.</div>'
+      +'<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:14px;border-radius:12px;text-align:left;margin-bottom:14px">'
+        +'<div style="font-weight:800;color:#92400E;font-size:13px;margin-bottom:8px">🚀 Passez à un plan pour utiliser Mvondo sans limite :</div>'
+        +'<table style="width:100%;font-size:12px;color:#78350F"><tr><td><b>Starter</b></td><td>5 essais/jour</td><td><b>3 000 FCFA/mois</b></td></tr>'
+        +'<tr><td><b>Pro</b></td><td>30 essais/jour</td><td><b>8 000 FCFA/mois</b></td></tr>'
+        +'<tr><td><b>Elite</b></td><td>Illimité</td><td><b>15 000 FCFA/mois</b></td></tr></table>'
+      +'</div>'
+      +'<button class="btn bi" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:14px 28px;font-size:14px;font-weight:800;width:100%" onclick="cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)">⭐ Choisir un plan d\'abonnement</button>'
+      +'<button class="btn bo" style="margin-top:8px;width:100%" onclick="cm();mParrainage()">🎁 Ou parrainer un ami (+500 FCFA crédit)</button>'
+      +'</div>';
+  } else {
+    // Plans payants : message simple + upgrade vers plan supérieur
+    var upgradeMap = { starter: 'Pro', pro: 'Elite', teach: 'illimité' };
+    var upgrade = upgradeMap[tier] || 'supérieur';
+    body = '<div style="text-align:center;padding:10px">'
+      +'<div style="font-size:56px;margin-bottom:14px">📊</div>'
+      +'<div style="font-family:Plus Jakarta Sans,sans-serif;font-size:20px;font-weight:800;color:#142554;margin-bottom:6px">Quota journalier atteint</div>'
+      +'<div style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:14px">Vous avez utilisé <b>'+used+'/'+limit+' essais</b> de '+label+' aujourd\'hui.<br>Le quota se réinitialise à minuit.</div>'
+      +'<div style="background:#EEF2FF;padding:12px;border-radius:10px;font-size:12px;color:#3730A3;margin-bottom:12px">💡 Pour plus d\'essais, passez au plan <b>'+upgrade+'</b>.</div>'
+      +'<button class="btn bi" onclick="cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)">⭐ Upgrader vers '+upgrade+'</button>'
+      +'</div>';
+  }
+  M('🔒 Quota IA atteint','Plan actuel : '+tier.toUpperCase(),body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>', false);
+};
+
+// Badge "quotas restants" — petit affichage discret en haut du Hub IA
+window._aiQuotaBadgeHtml = function(action){
+  action = action || 'mvondo';
+  var st = _aiQuotaStatus(action);
+  if(st.unlimited) return '<span style="font-size:11px;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:3px 10px;border-radius:99px;font-weight:800">∞ Illimité</span>';
+  var color = st.remaining===0 ? '#DC2626' : st.remaining<=2 ? '#F59E0B' : '#10B981';
+  var periodLabel = st.period==='lifetime'?'au total':st.period==='week'?'cette semaine':'aujourd\'hui';
+  return '<span style="font-size:11px;background:'+color+'18;color:'+color+';padding:3px 10px;border-radius:99px;font-weight:700;border:1px solid '+color+'40">⚡ '+st.remaining+'/'+st.limit+' essai'+(st.remaining>1?'s':'')+' restant'+(st.remaining>1?'s':'')+' '+periodLabel+'</span>';
+};
 
 
 // ── v1.2 fix : ancien _runAIOrient supprimé (code mort, lisait des IDs inexistants).
@@ -33900,6 +34086,8 @@ window._handlePhotoMath = function(e){
 };
 
 window._solvePhotoMath = function(dataUrl){
+  // v2.7 : quota check par plan
+  if(typeof _aiGate === 'function' && !_aiGate('photo_ia')) return;
   // Utilise Pollinations.ai vision (gratuit, supporte image)
   // Prompt structuré pour réponse en étapes
   var prompt = encodeURIComponent("Tu es un professeur expert au programme MINESEC du Cameroun. Analyse l'exercice scolaire dans l'image et fournis : 1) Le sujet/discipline, 2) L'énoncé reformulé, 3) La résolution complète étape par étape, 4) La réponse finale. Sois pédagogique, en français.");
@@ -34741,20 +34929,8 @@ window.MVONDO_TACHES = [
 ];
 
 window.mAgentMvondo = function(taskId){
+  // v2.7 : ouvert à tous (anonymes inclus, avec quota 2 essais lifetime)
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
-  // Disponible pour : admin, enseignants, élèves inscrits, visiteurs inscrits
-  if(!ses){
-    M('🎓 Professeur Mvondo','Votre assistant IA pédagogique',
-      '<div style="text-align:center;padding:18px"><p>Mvondo est votre professeur IA camerounais — il génère :</p>'
-      +'<ul style="text-align:left;color:#374151;line-height:2;max-width:400px;margin:0 auto">'
-      +'<li>📝 Quiz et QCM personnalisés</li><li>✅ Corrigés détaillés</li>'
-      +'<li>📋 Fiches de révision</li><li>📊 Exercices différenciés (3 niveaux)</li>'
-      +'<li>🧭 Activités de remédiation</li><li>✏️ Évaluations notées prêtes</li>'
-      +'<li>📖 Analyse de documents</li></ul></div>',
-      '<button class="btn bo" onclick="cm()">Fermer</button>'
-      +'<button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire pour Mvondo</button>');
-    return;
-  }
   if(!_checkRateLimit('mvondo', 20)) return;
 
   if(taskId){
@@ -34778,13 +34954,23 @@ window.mAgentMvondo = function(taskId){
       return '<div style="font-size:11px;color:#6B7280;padding:4px 0;border-bottom:1px solid #E5E7EB">• '+_esc(h.task)+' — '+_esc((h.prompt||'').substring(0,50))+'…</div>';
     }).join('')+'</div>' : '';
 
+  // v2.7 : badge quota visible
+  var quotaBadge = (typeof _aiQuotaBadgeHtml === 'function') ? _aiQuotaBadgeHtml('mvondo') : '';
+  var tier = (typeof _aiTier === 'function') ? _aiTier() : 'anon';
+
   var body = '<div style="padding:8px">'
-    +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;padding:18px;border-radius:14px;margin-bottom:14px;display:flex;gap:14px;align-items:center">'
+    +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;padding:18px;border-radius:14px;margin-bottom:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">'
       +'<div style="width:60px;height:60px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;font-family:Plus Jakarta Sans">M</div>'
-      +'<div><div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800">Agent IA pédagogique</div>'
+      +'<div style="flex:1;min-width:200px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800">Agent IA pédagogique</div>'
       +'<div style="font-size:20px;font-weight:900;font-family:Plus Jakarta Sans">Professeur Mvondo</div>'
       +'<div style="font-size:11px;opacity:.85;font-style:italic;font-family:Crimson Pro,serif">Expert MINESEC · BEPC · Probatoire · BAC · Programme camerounais</div></div>'
+      +(quotaBadge ? '<div>'+quotaBadge+'</div>' : '')
     +'</div>'
+    + (tier === 'anon'
+      ? '<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:12px;color:#92400E"><b>🎁 Essai gratuit :</b> vous avez 2 essais Mvondo pour découvrir. <a href="javascript:cm();showRegisterForm()" style="color:#92400E;font-weight:700;text-decoration:underline">Inscrivez-vous gratuitement</a> pour 3 essais/semaine + sauvegarde.</div>'
+      : (tier === 'free'
+        ? '<div style="background:#EEF2FF;border:1px solid #C7D2FE;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:12px;color:#3730A3"><b>💎 Compte gratuit :</b> 3 essais Mvondo / semaine. <a href="javascript:cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)" style="color:#3730A3;font-weight:700;text-decoration:underline">Passer à un plan</a> pour utiliser sans limite.</div>'
+        : ''))
     +'<div style="font-size:13px;color:#142554;font-weight:700;margin-bottom:10px">Que souhaitez-vous créer ?</div>'
     +'<div style="display:grid;gap:8px">'+cards+'</div>'
     +histPreview
@@ -34833,8 +35019,10 @@ window._mvondoTaskForm = function(taskId){
 };
 
 window._mvondoGenerate = async function(taskId){
+  // v2.7 : quota check par plan d'abonnement (compte AVANT la génération)
+  if(typeof _aiGate === 'function' && !_aiGate('mvondo')) return;
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
-  if(!ses) return;
+  // ses peut être null pour visiteur anonyme — _aiGate gère
   if(!_checkRateLimit('mvondo_gen', 5)){ return; }
   var task = MVONDO_TACHES.find(function(t){return t.id===taskId;});
   if(!task) return;
