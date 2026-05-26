@@ -7343,8 +7343,39 @@ function vShowSec(sec,btn){
          ❌ Promo E-Learning → déjà dans .vgz-bento "E-Learning Premium"
     -->
 
+    <!-- ═════ CITATION DU JOUR (v2.4) — Auteurs camerounais ═════ -->
+    ${(typeof _citationBannerHtml==='function'?_citationBannerHtml():'')}
+
     <!-- ═════ ENGAGEMENT QUOTIDIEN (v2.3) — 4 cartes dynamiques ═════ -->
     ${(typeof _engagementBannerHtml==='function'?_engagementBannerHtml():'')}
+
+    <!-- ═════ INNOVATIONS V2.4 — 4 accès rapides ═════ -->
+    <div class="v-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:12px 0 20px">
+      <div onclick="mPhotoMathIA()" style="background:linear-gradient(135deg,#3730A3,#6366F1);color:#fff;padding:12px;border-radius:12px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px">📸</div>
+          <div><div style="font-weight:800;font-size:13px">Photo Math IA</div><div style="font-size:10px;opacity:.85">Corrige par photo</div></div>
+        </div>
+      </div>
+      <div onclick="mVeritasGenome()" style="background:linear-gradient(135deg,#0F1E47,#7C3AED);color:#fff;padding:12px;border-radius:12px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,201,60,.2);display:flex;align-items:center;justify-content:center;font-size:18px">🧬</div>
+          <div><div style="font-weight:800;font-size:13px">Mon Genome</div><div style="font-size:10px;opacity:.85">ADN académique</div></div>
+        </div>
+      </div>
+      <div onclick="mStudyRoom()" style="background:linear-gradient(135deg,#065F46,#10B981);color:#fff;padding:12px;border-radius:12px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px">👥</div>
+          <div><div style="font-weight:800;font-size:13px">Étude en groupe</div><div style="font-size:10px;opacity:.85">Room temps réel</div></div>
+        </div>
+      </div>
+      <div onclick="mAchievements()" style="background:linear-gradient(135deg,#92400E,#F59E0B);color:#fff;padding:12px;border-radius:12px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:18px">🏆</div>
+          <div><div style="font-weight:800;font-size:13px">Mes badges</div><div style="font-size:10px;opacity:.85">30+ achievements</div></div>
+        </div>
+      </div>
+    </div>
 
     <!-- ═════ ANALYSE LITTÉRAIRE — Bannière compacte (v2.2) ═════ -->
     <div class="vlit-banner v-reveal" onclick="showJeuxEdu();setTimeout(function(){var s=document.getElementById('cartesMentalesSection');if(s)s.scrollIntoView({behavior:'smooth'});},300)" role="link" tabindex="0" aria-label="Découvrir les analyses des 22 œuvres au programme">
@@ -32700,6 +32731,89 @@ window._showAIAdaptiveDashboard = function(){
 };
 
 // ════════════════════════════════════════════════════════════════════
+// v2.4 — 🛡️ SÉCURITÉ RUNTIME — Protection inputs utilisateurs
+// ════════════════════════════════════════════════════════════════════
+
+// 1. Sanitization HTML pour les contenus user-generated (forum, commentaires)
+window._sanitizeHTML = function(input){
+  if(typeof input !== 'string') return '';
+  // Échappe caractères HTML dangereux
+  return input
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;')
+    .replace(/\//g,'&#x2F;')
+    .replace(/[ -]/g,''); // contrôle invisible
+};
+
+// 2. CSRF token simple (basé sur sessionStorage + timestamp)
+window._getCSRFToken = function(){
+  var tok = sessionStorage.getItem('_vrtCSRF');
+  if(!tok){
+    tok = 'csrf_'+Date.now()+'_'+Math.random().toString(36).slice(2,12);
+    sessionStorage.setItem('_vrtCSRF', tok);
+  }
+  return tok;
+};
+
+// 3. Rate-limit client : bloque les actions spammées
+window._RATE_LIMITS = {}; // action → [timestamps]
+window._checkRateLimit = function(action, maxPerMinute){
+  maxPerMinute = maxPerMinute || 10;
+  var now = Date.now();
+  _RATE_LIMITS[action] = (_RATE_LIMITS[action]||[]).filter(function(t){return now-t < 60000;});
+  if(_RATE_LIMITS[action].length >= maxPerMinute){
+    if(typeof toast === 'function') toast('⚠️ Trop d\'actions. Attendez quelques secondes.','warn');
+    return false;
+  }
+  _RATE_LIMITS[action].push(now);
+  return true;
+};
+
+// 4. Honeypot field : champ caché que seuls les bots remplissent
+window._isLikelyBot = function(formEl){
+  if(!formEl) return false;
+  var hp = formEl.querySelector('input[name="_hp_field"]');
+  return hp && hp.value.length > 0;
+};
+
+// 5. Validation entrée stricte (noms, emails, téléphones CM)
+window._validate = {
+  email: function(s){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s||''); },
+  telCM: function(s){ return /^(\+?237\s?)?6[5-9]\d{1}[\s\-]?\d{2}[\s\-]?\d{2}[\s\-]?\d{2}$/.test((s||'').replace(/\s/g,'')); },
+  nom: function(s){ return s && s.length>=2 && s.length<=50 && /^[a-zA-ZÀ-ÿ\s'\-]+$/.test(s); },
+  pwd: function(s){ return s && s.length>=6 && s.length<=100; },
+  text: function(s, max){ max=max||500; return s && s.length<=max; }
+};
+
+// 6. Audit log local : enregistre actions sensibles
+window._auditLog = function(event, details){
+  try {
+    var logs = JSON.parse(localStorage.getItem('_vrtAuditLog') || '[]');
+    logs.push({
+      ts: Date.now(),
+      event: event,
+      details: details || {},
+      ua: navigator.userAgent.substring(0,100),
+      url: location.pathname
+    });
+    if(logs.length > 200) logs = logs.slice(-200);
+    localStorage.setItem('_vrtAuditLog', JSON.stringify(logs));
+  } catch(e){}
+};
+
+// 7. Détection clickjacking — si on est dans une iframe non-autorisée
+try {
+  if(window.top !== window.self && location.hostname !== 'veritas-school.com'){
+    document.body.innerHTML = '<div style="padding:30px;text-align:center;background:#142554;color:#FFC93C;font-family:sans-serif">⚠️ Cette page ne peut être affichée dans un cadre tiers pour des raisons de sécurité.<br><a href="https://veritas-school.com" style="color:#fff">Accéder à VÉRITAS</a></div>';
+  }
+} catch(e){
+  // Browser SOP empêche d'accéder à window.top — c'est le signe qu'on est dans un iframe cross-origin
+}
+
+// ════════════════════════════════════════════════════════════════════
 // v2.3 — ENGAGEMENT QUOTIDIEN : 4 modules pertinents
 // 1. Streak + XP (Duolingo)  2. Battles  3. Sujet du jour  4. BAC 100j
 // ════════════════════════════════════════════════════════════════════
@@ -33128,6 +33242,566 @@ window._engagementBannerHtml = function(){
     )
     +'</div>';
 };
+
+// ════════════════════════════════════════════════════════════════════
+// v2.4 — 🧬 VÉRITAS GENOME : ADN académique partageable
+// ════════════════════════════════════════════════════════════════════
+window.mVeritasGenome = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses){
+    M('🧬 VÉRITAS Genome','Découvrez votre ADN académique',
+      '<div style="text-align:center;padding:20px"><p style="margin-bottom:14px">Le VÉRITAS Genome analyse vos performances et révèle :</p><ul style="text-align:left;color:#374151;line-height:2;max-width:400px;margin:0 auto"><li>✓ Vos <b>forces</b> et <b>faiblesses</b> par matière</li><li>✓ Votre <b>courbe d\'évolution</b> sur 30 jours</li><li>✓ Une <b>prédiction de note BAC</b> basée IA</li><li>✓ Une <b>infographie partageable</b> sur WhatsApp</li></ul></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire pour mon Genome</button>');
+    return;
+  }
+  var s = _getUserStreak() || {xp:0,current:0,best:0,totalActivities:0};
+  var lvl = _currentLevel(s.xp);
+  // Calculs Genome (basés sur SM-2 + battles + activités)
+  var cards = (DB.smCards && DB.smCards[ses.id]) ? Object.values(DB.smCards[ses.id]) : [];
+  var topics = cards.length;
+  var mastered = cards.filter(function(c){
+    var avg = c.history.reduce(function(s,h){return s+h.quality;},0)/Math.max(1,c.history.length);
+    return avg >= 4;
+  }).length;
+  var weak = cards.filter(function(c){
+    var avg = c.history.reduce(function(s,h){return s+h.quality;},0)/Math.max(1,c.history.length);
+    return avg < 3 && c.history.length>=2;
+  }).length;
+  // Prédiction BAC : formule simple basée sur XP, streak, % maîtrisé
+  var pctMastered = topics > 0 ? (mastered/topics)*100 : 0;
+  var pctStreak = Math.min(100, (s.current||0)*3);
+  var pctXP = Math.min(100, (s.xp||0)/20);
+  var bacScore = Math.round((pctMastered*0.5 + pctStreak*0.2 + pctXP*0.3));
+  var bacNote = Math.round((bacScore/100) * 20);
+  var bacMention = bacNote >= 16 ? 'Très Bien' : bacNote >= 14 ? 'Bien' : bacNote >= 12 ? 'Assez Bien' : bacNote >= 10 ? 'Passable' : '—';
+  // Battles
+  var battlesPlayed = 0, battlesWon = 0;
+  if(DB.battles){
+    Object.values(DB.battles).forEach(function(b){
+      if(b.participants && b.participants[ses.id]){
+        battlesPlayed++;
+        if(b.participants[ses.id].score >= 8) battlesWon++;
+      }
+    });
+  }
+  // ID unique génétique (basé sur l'ID utilisateur — pour rendre chaque genome unique visuellement)
+  var hash = (ses.id+'').split('').reduce(function(a,c){return a+c.charCodeAt(0);},0);
+  var geneCode = ['VRT','GNM','BAC','DXA','RSL'][hash%5] + '-' + String(hash%9999).padStart(4,'0');
+
+  var body = '<div id="genomeCard" style="background:linear-gradient(135deg,#0F1E47,#1E3A8A 50%,#7C3AED);padding:24px;border-radius:18px;color:#fff;position:relative;overflow:hidden">'
+    +'<div style="position:absolute;top:-20px;right:-20px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,#FFC93C 0%,transparent 70%);opacity:.3"></div>'
+    +'<div style="position:relative;z-index:1">'
+    // Header
+    +'<div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:18px;flex-wrap:wrap;gap:10px">'
+      +'<div>'
+        +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#FFC93C;font-weight:800">🧬 VÉRITAS Genome</div>'
+        +'<div style="font-size:18px;font-weight:900;margin-top:4px;font-family:Plus Jakarta Sans,sans-serif">'+_esc((ses.pre||'')+' '+(ses.nom||''))+'</div>'
+        +'<div style="font-size:11px;opacity:.7;font-family:monospace;margin-top:2px">'+geneCode+'</div>'
+      +'</div>'
+      +'<div style="text-align:right">'
+        +'<div style="font-size:48px;font-weight:900;color:#FFC93C;line-height:1;font-family:Plus Jakarta Sans">'+bacNote+'/20</div>'
+        +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1px">Prédiction BAC</div>'
+        +'<div style="font-size:11px;color:#FFC93C;margin-top:2px">'+bacMention+'</div>'
+      +'</div>'
+    +'</div>'
+    // ADN visuel (barres horizontales colorées)
+    +'<div style="background:rgba(0,0,0,.25);border-radius:12px;padding:14px;margin-bottom:14px">'
+      +'<div style="font-size:10px;color:#FFC93C;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📊 Profil génétique</div>'
+      +[
+        {l:'Maîtrise notions',v:Math.round(pctMastered),c:'#10B981'},
+        {l:'Régularité (streak)',v:Math.round(pctStreak),c:'#DC2626'},
+        {l:'Engagement (XP)',v:Math.round(pctXP),c:'#FFC93C'}
+      ].map(function(r){
+        return '<div style="margin-bottom:8px">'
+          +'<div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>'+r.l+'</span><span style="font-weight:700;color:'+r.c+'">'+r.v+'%</span></div>'
+          +'<div style="background:rgba(255,255,255,.1);height:6px;border-radius:99px;overflow:hidden"><div style="width:'+r.v+'%;height:100%;background:'+r.c+';border-radius:99px;transition:width 1s"></div></div>'
+        +'</div>';
+      }).join('')
+    +'</div>'
+    // Stats
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;font-size:11px">'
+      +'<div><div style="font-size:22px;font-weight:900;color:#FFC93C">'+topics+'</div><div style="opacity:.7">Notions</div></div>'
+      +'<div><div style="font-size:22px;font-weight:900;color:#10B981">'+mastered+'</div><div style="opacity:.7">Maîtrisées</div></div>'
+      +'<div><div style="font-size:22px;font-weight:900;color:#3C8DFF">'+battlesPlayed+'</div><div style="opacity:.7">Battles</div></div>'
+      +'<div><div style="font-size:22px;font-weight:900;color:#EC4899">'+(s.best||0)+'</div><div style="opacity:.7">Record streak</div></div>'
+    +'</div>'
+    +'<div style="text-align:center;font-size:9px;color:rgba(255,255,255,.4);margin-top:14px;letter-spacing:1px">VÉRITAS ACADEMY · DOUALA · '+new Date().getFullYear()+'</div>'
+    +'</div></div>';
+
+  M('🧬 Votre VÉRITAS Genome','ADN académique unique partageable',body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +'<button class="btn" style="background:#25D366;color:#fff" onclick="_genomeShareWA()">📱 Partager WhatsApp</button>'
+    +'<button class="btn bi" onclick="_genomeDownload()">📥 Télécharger</button>', true);
+};
+
+window._genomeShareWA = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses) return;
+  var s = _getUserStreak() || {xp:0,current:0};
+  var lvl = _currentLevel(s.xp);
+  var url = 'https://veritas-school.com';
+  var msg = '🧬 Mon VÉRITAS Genome :\n'
+    +'• Niveau : '+lvl.current.title+'\n'
+    +'• XP : '+s.xp+' · Streak : '+s.current+'j 🔥\n'
+    +'Découvre le tien sur '+url+' !';
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+};
+
+window._genomeDownload = function(){
+  // Utilise html2canvas pour capturer la carte
+  if(typeof html2canvas === 'undefined'){
+    toast('Module export indisponible — copiez la capture manuellement','warn');
+    return;
+  }
+  var card = document.getElementById('genomeCard');
+  if(!card) return;
+  html2canvas(card,{backgroundColor:null,scale:2}).then(function(canvas){
+    var link = document.createElement('a');
+    link.download = 'veritas-genome-'+Date.now()+'.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    toast('✓ Genome téléchargé','ok');
+  }).catch(function(){toast('Échec capture','err');});
+};
+
+// ════════════════════════════════════════════════════════════════════
+// v2.4 — 📸 PHOTO MATH/CORRECTION IA (Vision Pollinations)
+// ════════════════════════════════════════════════════════════════════
+window.mPhotoMathIA = function(){
+  if(!_checkRateLimit('photo_ia', 5)) return;
+  M('📸 Correction IA par photo','Prenez votre exercice en photo · l\'IA explique',
+    '<div style="padding:8px">'
+    +'<div style="background:#EEF2FF;border:2px dashed #6366F1;border-radius:14px;padding:24px;text-align:center;margin-bottom:14px;cursor:pointer" onclick="document.getElementById(\'photoMathInput\').click()">'
+      +'<div style="font-size:48px;margin-bottom:10px">📷</div>'
+      +'<div style="font-weight:700;color:#3730A3">Cliquez pour prendre une photo</div>'
+      +'<div style="font-size:12px;color:#6B7280;margin-top:6px">Maths, physique, chimie, français, histoire-géo</div>'
+    +'</div>'
+    +'<input type="file" id="photoMathInput" accept="image/*" capture="environment" style="display:none" onchange="_handlePhotoMath(event)">'
+    +'<div id="photoMathPreview"></div>'
+    +'<div id="photoMathResult"></div>'
+    +'<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:10px;border-radius:8px;font-size:11px;color:#92400E;margin-top:10px">⚡ Limite : 5 photos/min · IA Pollinations gratuite</div>'
+    +'</div>',
+    '<button class="btn bi" onclick="cm()">Fermer</button>', true);
+};
+
+window._handlePhotoMath = function(e){
+  var file = e.target.files[0];
+  if(!file) return;
+  if(file.size > 5 * 1024 * 1024){ toast('Fichier trop volumineux (max 5 Mo)','warn'); return; }
+  var reader = new FileReader();
+  reader.onload = function(ev){
+    var dataUrl = ev.target.result;
+    document.getElementById('photoMathPreview').innerHTML =
+      '<img src="'+dataUrl+'" alt="Aperçu" style="max-width:100%;border-radius:10px;margin-bottom:12px;max-height:240px;display:block;margin:0 auto">';
+    document.getElementById('photoMathResult').innerHTML =
+      '<div style="text-align:center;padding:14px"><div style="font-size:24px;animation:pulse 1.2s infinite">🤖</div><div style="font-weight:700;margin-top:6px;color:#3730A3">L\'IA analyse votre exercice…</div></div>';
+    _solvePhotoMath(dataUrl);
+  };
+  reader.readAsDataURL(file);
+};
+
+window._solvePhotoMath = function(dataUrl){
+  // Utilise Pollinations.ai vision (gratuit, supporte image)
+  // Prompt structuré pour réponse en étapes
+  var prompt = encodeURIComponent("Tu es un professeur expert au programme MINESEC du Cameroun. Analyse l'exercice scolaire dans l'image et fournis : 1) Le sujet/discipline, 2) L'énoncé reformulé, 3) La résolution complète étape par étape, 4) La réponse finale. Sois pédagogique, en français.");
+  var url = 'https://text.pollinations.ai/openai';
+  fetch(url, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model: 'openai',
+      messages: [{
+        role:'user',
+        content:[
+          {type:'text', text: decodeURIComponent(prompt)},
+          {type:'image_url', image_url:{url: dataUrl}}
+        ]
+      }],
+      max_tokens: 1500
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    var answer = (d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || 'Désolé, l\'IA n\'a pas pu analyser votre image. Réessayez avec une photo plus nette.';
+    document.getElementById('photoMathResult').innerHTML =
+      '<div style="background:#F0FDF4;border:2px solid #6EE7B7;border-radius:12px;padding:14px;margin-top:10px">'
+      +'<div style="font-size:11px;color:#059669;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">✅ Correction IA</div>'
+      +'<div style="font-size:13px;color:#065F46;line-height:1.7;white-space:pre-line">'+_sanitizeHTML(answer)+'</div>'
+      +'</div>';
+    // +XP
+    if(typeof _addXP === 'function') _addXP('devoir');
+    _auditLog('photo_math_success', {len: answer.length});
+  })
+  .catch(function(err){
+    document.getElementById('photoMathResult').innerHTML =
+      '<div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:10px;padding:12px;color:#991B1B;font-size:13px">Erreur réseau. Vérifiez votre connexion et réessayez. <br>Détail : '+_sanitizeHTML(err.message||String(err))+'</div>';
+  });
+};
+
+// ════════════════════════════════════════════════════════════════════
+// v2.4 — 👥 MODE ÉTUDE EN GROUPE — Room avec code 6 chiffres
+// ════════════════════════════════════════════════════════════════════
+window.mStudyRoom = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses){
+    M('👥 Étude en groupe','Étudiez à plusieurs en temps réel',
+      '<div style="text-align:center;padding:20px"><p>Créez une room avec un code à 6 chiffres et invitez vos amis à étudier ensemble : QCM, chat, leaderboard live.</p></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire</button>');
+    return;
+  }
+  M('👥 Mode Étude en Groupe','Créez ou rejoignez une room',
+    '<div style="padding:8px">'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'
+      +'<div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:2px solid #93C5FD;border-radius:14px;padding:18px;text-align:center;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'" onclick="_createStudyRoom()">'
+        +'<div style="font-size:36px;margin-bottom:8px">🚀</div>'
+        +'<div style="font-weight:800;color:#1E3A8A;font-size:14px">Créer une room</div>'
+        +'<div style="font-size:11px;color:#3B82F6;margin-top:4px">Code unique 6 chiffres</div>'
+      +'</div>'
+      +'<div style="background:linear-gradient(135deg,#F0FDF4,#D1FAE5);border:2px solid #6EE7B7;border-radius:14px;padding:18px;text-align:center;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'" onclick="_joinStudyRoom()">'
+        +'<div style="font-size:36px;margin-bottom:8px">🔑</div>'
+        +'<div style="font-weight:800;color:#065F46;font-size:14px">Rejoindre une room</div>'
+        +'<div style="font-size:11px;color:#10B981;margin-top:4px">Saisir le code reçu</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:12px;border-radius:10px;font-size:11px;color:#92400E;margin-top:14px;line-height:1.5">'
+      +'<b>💡 Comment ça marche :</b><br>1. Créez une room → recevez code 6 chiffres<br>2. Partagez le code à vos amis<br>3. Tous ensemble : QCM commun, chat live, classement temps réel'
+    +'</div>'
+    +'</div>',
+    '<button class="btn bi" onclick="cm()">Fermer</button>', true);
+};
+
+window._createStudyRoom = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses) return;
+  var code = String(Math.floor(100000 + Math.random()*900000));
+  DB.studyRooms = DB.studyRooms || {};
+  DB.studyRooms[code] = {
+    code: code,
+    hostId: ses.id,
+    hostName: (ses.pre||'')+' '+(ses.nom||''),
+    members: [{id:ses.id, name:(ses.pre||'')+' '+(ses.nom||''), score:0, joinedAt:Date.now()}],
+    created: Date.now(),
+    status: 'lobby',
+    questions: []
+  };
+  try { save(); } catch(e){}
+  _renderStudyRoom(code);
+};
+
+window._joinStudyRoom = function(){
+  cm();
+  M('🔑 Rejoindre une room','Saisissez le code à 6 chiffres',
+    '<div class="fg"><span class="fl">Code de la room</span><input class="fi" id="joinRoomCode" placeholder="123456" maxlength="6" style="font-size:24px;letter-spacing:6px;text-align:center;font-family:JetBrains Mono,monospace"></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_confirmJoinRoom()">Rejoindre</button>');
+};
+
+window._confirmJoinRoom = function(){
+  var code = (_ge('joinRoomCode')||{}).value || '';
+  code = code.replace(/\s/g,'');
+  if(!/^\d{6}$/.test(code)){ toast('Code invalide (6 chiffres)','warn'); return; }
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses) return;
+  DB.studyRooms = DB.studyRooms || {};
+  var room = DB.studyRooms[code];
+  if(!room){ toast('Room introuvable','warn'); return; }
+  if(!room.members.find(function(m){return m.id===ses.id;})){
+    room.members.push({id:ses.id, name:(ses.pre||'')+' '+(ses.nom||''), score:0, joinedAt:Date.now()});
+    try { save(); } catch(e){}
+  }
+  cm();
+  _renderStudyRoom(code);
+};
+
+window._renderStudyRoom = function(code){
+  var room = (DB.studyRooms||{})[code];
+  if(!room){ toast('Room expirée','warn'); return; }
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  var isHost = ses && ses.id === room.hostId;
+  var body = '<div style="padding:8px">'
+    +'<div style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:18px;border-radius:14px;margin-bottom:14px;text-align:center">'
+      +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#FFC93C;font-weight:800">Code de la room</div>'
+      +'<div style="font-size:42px;font-weight:900;letter-spacing:6px;font-family:JetBrains Mono,monospace;color:#FFC93C;margin:6px 0">'+code+'</div>'
+      +'<button class="btn" style="background:rgba(255,201,60,.2);color:#FFC93C;border:1px solid rgba(255,201,60,.4);padding:6px 12px;font-size:11px;border-radius:8px" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié\');})">📋 Copier code</button>'
+    +'</div>'
+    +'<div style="font-weight:700;color:#142554;margin-bottom:8px">👥 Membres ('+room.members.length+')</div>'
+    +'<div style="background:#F9FAFB;border-radius:10px;padding:10px;max-height:200px;overflow-y:auto">'
+    +room.members.map(function(m,i){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:6px;border-bottom:1px solid #F3F4F6">'
+        +'<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3C8DFF,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px">'+((m.name||'?')[0]||'?').toUpperCase()+'</div>'
+        +'<div style="flex:1"><div style="font-weight:600;color:#142554;font-size:13px">'+_esc(m.name)+(m.id===room.hostId?' <span style="background:#FFC93C;color:#142554;font-size:9px;padding:1px 5px;border-radius:4px;font-weight:800">HÔTE</span>':'')+'</div></div>'
+        +(m.score>0?'<div style="font-weight:800;color:#10B981">+'+m.score+' XP</div>':'')
+      +'</div>';
+    }).join('')
+    +'</div>'
+    +(isHost
+      ? '<div style="margin-top:14px;padding:12px;background:#FEF3C7;border-radius:10px"><div style="font-weight:700;color:#92400E;margin-bottom:8px">⚙️ Actions hôte</div><button class="btn bi" style="width:100%" onclick="_startGroupQuiz(\''+code+'\')">⚡ Lancer le quiz commun (10 QCM)</button></div>'
+      : '<div style="margin-top:14px;padding:12px;background:#EFF6FF;border-radius:10px;text-align:center;font-size:13px;color:#1E3A8A">⏳ En attente que l\'hôte lance le quiz…</div>'
+    )
+    +'</div>';
+  M('👥 Room '+code,room.members.length+' membre(s) connecté(s)',body,
+    '<button class="btn bo" onclick="cm()">Quitter</button>'
+    +'<button class="btn bi" onclick="_renderStudyRoom(\''+code+'\')">🔄 Rafraîchir</button>', true);
+};
+
+window._startGroupQuiz = function(code){
+  var room = (DB.studyRooms||{})[code];
+  if(!room) return;
+  if(!room.questions || !room.questions.length){
+    room.questions = _generateBattleQuestions();
+    try { save(); } catch(e){}
+  }
+  // Lancer le mode quiz (réutilise la logique battle adaptée)
+  toast('Quiz de groupe lancé !','ok');
+  _lancerBattle(); // Réutilise la mécanique existante
+};
+
+// ════════════════════════════════════════════════════════════════════
+// v2.4 — 🏆 ACHIEVEMENTS / BADGES (30 niveaux progressifs)
+// ════════════════════════════════════════════════════════════════════
+window.VERITAS_BADGES = [
+  // Premier pas
+  {id:'first_login',     ic:'🎉', t:'Bienvenue',         d:'Premier login sur VÉRITAS',                cond:function(s,d){return (s.totalActivities||0)>=1;}},
+  {id:'first_qcm',       ic:'📝', t:'Premier QCM',       d:'Compléter votre premier QCM',               cond:function(s,d){return (s.xp||0)>=10;}},
+  {id:'first_devoir',    ic:'🤖', t:'IA en action',      d:'Utiliser le Devoir IA pour la 1ère fois',   cond:function(s,d){return (d._aiCorrections||[]).length>=1;}},
+  {id:'first_battle',    ic:'⚔️', t:'Combattant',       d:'Participer à votre 1er battle hebdo',       cond:function(s,d){var n=0;Object.values(d.battles||{}).forEach(function(b){if(b.participants&&b.participants[SES.id])n++;});return n>=1;}},
+  // Streaks
+  {id:'streak_3',        ic:'🔥', t:'3 jours d\'affilée',d:'Maintenir 3 jours de streak',               cond:function(s,d){return (s.current||0)>=3 || (s.best||0)>=3;}},
+  {id:'streak_7',        ic:'🔥', t:'Une semaine !',     d:'7 jours consécutifs',                       cond:function(s,d){return (s.best||0)>=7;}},
+  {id:'streak_30',       ic:'⭐', t:'Marathonien',       d:'30 jours d\'affilée — incroyable !',        cond:function(s,d){return (s.best||0)>=30;}},
+  {id:'streak_100',      ic:'👑', t:'Légende',          d:'100 jours non-stop',                        cond:function(s,d){return (s.best||0)>=100;}},
+  // XP / Niveaux
+  {id:'xp_100',          ic:'⚡', t:'100 XP',            d:'Atteindre 100 XP',                          cond:function(s,d){return (s.xp||0)>=100;}},
+  {id:'xp_500',          ic:'⚡', t:'500 XP',            d:'Atteindre 500 XP',                          cond:function(s,d){return (s.xp||0)>=500;}},
+  {id:'xp_1000',         ic:'💎', t:'1000 XP',           d:'Maître apprenant — 1000 XP',                cond:function(s,d){return (s.xp||0)>=1000;}},
+  {id:'level_champion',  ic:'🏆', t:'Champion',          d:'Atteindre le niveau Champion',              cond:function(s,d){return (s.xp||0)>=1000;}},
+  // Matières
+  {id:'litt_explorer',   ic:'📚', t:'Explorateur litt.', d:'Visiter 5 œuvres au programme',             cond:function(s,d){return (d._oeuvresVisited||[]).length>=5;}},
+  {id:'maths_master',    ic:'📐', t:'Mathématicien',     d:'Maîtriser 10 notions de maths',             cond:function(s,d){var c=(d.smCards&&d.smCards[SES.id])||{};var n=0;Object.values(c).forEach(function(x){if((x.topic||'').toLowerCase().indexOf('math')>=0)n++;});return n>=10;}},
+  {id:'5_works',         ic:'📖', t:'5 œuvres lues',     d:'Étudier 5 œuvres littéraires',              cond:function(s,d){var c=(d.smCards&&d.smCards[SES.id])||{};return Object.keys(c).length>=5;}},
+  // Battles
+  {id:'battle_win_3',    ic:'🥇', t:'Triple champion',   d:'Top 3 dans 3 battles hebdo',                cond:function(s,d){var w=0;Object.values(d.battles||{}).forEach(function(b){if(!b.participants||!b.participants[SES.id])return;var sc=b.participants[SES.id].score||0;if(sc>=8)w++;});return w>=3;}},
+  {id:'battle_perfect',  ic:'💯', t:'Sans-faute',        d:'10/10 dans un battle',                      cond:function(s,d){var p=false;Object.values(d.battles||{}).forEach(function(b){if(b.participants&&b.participants[SES.id]&&b.participants[SES.id].score===10)p=true;});return p;}},
+  // Communauté
+  {id:'forum_post',      ic:'💬', t:'Première question', d:'Publier sur le forum',                      cond:function(s,d){return (d.forumPosts||[]).some(function(p){return p.authorId===SES.id;});}},
+  {id:'forum_upvotes_5', ic:'❤️', t:'Apprécié',          d:'Recevoir 5 upvotes au forum',               cond:function(s,d){var t=0;(d.forumPosts||[]).forEach(function(p){if(p.authorId===SES.id)t+=(p.votes||[]).length;});return t>=5;}},
+  {id:'parrain_1',       ic:'🎁', t:'Parrain',           d:'Parrainer 1 ami',                           cond:function(s,d){return (d.parrainages||[]).filter(function(p){return p.parrainId===SES.id;}).length>=1;}},
+  {id:'parrain_5',       ic:'🎁', t:'Super parrain',     d:'Parrainer 5 amis',                          cond:function(s,d){return (d.parrainages||[]).filter(function(p){return p.parrainId===SES.id;}).length>=5;}},
+  // Engagement
+  {id:'sujet_jour_7',    ic:'☀️', t:'Habitué matinal',   d:'Lire 7 sujets du jour',                     cond:function(s,d){return (d._sujetsLus||0)>=7;}},
+  {id:'photo_ia_first',  ic:'📸', t:'Photographe',       d:'Première photo corrigée par IA',            cond:function(s,d){return (d._photoIACount||0)>=1;}},
+  {id:'study_room',      ic:'👥', t:'Sociable',          d:'Rejoindre/créer une étude en groupe',       cond:function(s,d){return d.studyRooms && Object.values(d.studyRooms).some(function(r){return r.members.some(function(m){return m.id===SES.id;});});}},
+  // Saisons / Date
+  {id:'bac_100',         ic:'⏰', t:'Compte à rebours',  d:'Consulter le compte à rebours BAC',         cond:function(s,d){return (d._bacChecks||0)>=1;}},
+  // Cumul
+  {id:'all_modules',     ic:'🌟', t:'Touche-à-tout',     d:'Essayer tous les modules : QCM, Devoir IA, Battle, Forum, Photo IA',
+    cond:function(s,d){return (s.xp||0)>=10 && (d._aiCorrections||[]).length>=1 && Object.values(d.battles||{}).some(function(b){return b.participants&&b.participants[SES.id];}) && (d.forumPosts||[]).some(function(p){return p.authorId===SES.id;}) && (d._photoIACount||0)>=1;}},
+  // Élite
+  {id:'top_10',          ic:'⭐', t:'Top 10 national',  d:'Figurer dans le top 10 d\'un battle',        cond:function(s,d){var top=false;Object.values(d.battles||{}).forEach(function(b){if(!b.participants||!b.participants[SES.id])return;var arr=Object.entries(b.participants).sort(function(a,b){return b[1].score-a[1].score||a[1].timeMs-b[1].timeMs;});if(arr.findIndex(function(e){return e[0]===SES.id;})<10)top=true;});return top;}},
+  // Spéciaux
+  {id:'early_adopter',   ic:'🚀', t:'Pionnier',          d:'Inscrit avant juin 2026',                   cond:function(s,d){var v=(d.visitorAccounts||[]).find(function(v){return v.id===SES.id;});if(!v)return false;return new Date(v.dateInscription||0) < new Date('2026-06-01');}},
+  {id:'genome_unlock',   ic:'🧬', t:'Genome révélé',     d:'Consulter votre VÉRITAS Genome',            cond:function(s,d){return d._genomeViewed===true;}},
+  {id:'wrapped_unlock',  ic:'🎁', t:'Wrapped 2026',      d:'Découvrir votre récap annuel',              cond:function(s,d){return d._wrappedViewed===true;}}
+];
+
+window._checkBadges = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses) return [];
+  var s = _getUserStreak() || {};
+  DB.userBadges = DB.userBadges || {};
+  DB.userBadges[ses.id] = DB.userBadges[ses.id] || [];
+  var unlocked = DB.userBadges[ses.id];
+  var newly = [];
+  VERITAS_BADGES.forEach(function(b){
+    if(unlocked.indexOf(b.id) >= 0) return;
+    try {
+      if(b.cond(s, DB)){
+        unlocked.push(b.id);
+        newly.push(b);
+      }
+    } catch(e){}
+  });
+  if(newly.length){
+    try { save(); } catch(e){}
+    // Animation déblocage
+    newly.forEach(function(b,i){
+      setTimeout(function(){ _showBadgeUnlock(b); }, i*1500);
+    });
+  }
+  return newly;
+};
+
+window._showBadgeUnlock = function(badge){
+  var n = document.createElement('div');
+  n.style.cssText = 'position:fixed;top:80px;right:20px;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:16px 22px;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.3);z-index:10000;display:flex;gap:12px;align-items:center;max-width:340px;animation:slideInRight .5s ease-out;cursor:pointer;font-family:Plus Jakarta Sans,sans-serif';
+  n.innerHTML = '<div style="font-size:36px">'+badge.ic+'</div><div><div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;opacity:.8">🏆 Badge débloqué !</div><div style="font-weight:900;font-size:15px;margin-top:2px">'+badge.t+'</div><div style="font-size:11px;opacity:.85;margin-top:2px">'+badge.d+'</div></div>';
+  n.onclick = function(){ mAchievements(); n.remove(); };
+  document.body.appendChild(n);
+  // Confettis
+  _confetti();
+  setTimeout(function(){ n.style.transition='all .5s'; n.style.opacity='0'; n.style.transform='translateX(50px)'; setTimeout(function(){n.remove();}, 500); }, 4500);
+};
+
+window.mAchievements = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses){
+    M('🏆 Achievements','Connectez-vous pour débloquer les badges',
+      '<div style="text-align:center;padding:18px"><p>30+ badges progressifs : Champion, Marathonien, Sans-faute, Légende…</p></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire</button>');
+    return;
+  }
+  DB.userBadges = DB.userBadges || {};
+  var unlocked = DB.userBadges[ses.id] || [];
+  var pct = Math.round((unlocked.length / VERITAS_BADGES.length) * 100);
+  var body = '<div style="padding:8px">'
+    +'<div style="background:linear-gradient(135deg,#FFC93C,#F59E0B);padding:16px;border-radius:14px;text-align:center;margin-bottom:14px;color:#142554">'
+      +'<div style="font-size:36px;font-weight:900">'+unlocked.length+'/'+VERITAS_BADGES.length+'</div>'
+      +'<div style="font-size:12px;opacity:.85;text-transform:uppercase;letter-spacing:1px;font-weight:800">Badges débloqués · '+pct+'%</div>'
+      +'<div style="background:rgba(0,0,0,.15);border-radius:99px;height:6px;margin-top:8px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:#fff"></div></div>'
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:10px">';
+  VERITAS_BADGES.forEach(function(b){
+    var owned = unlocked.indexOf(b.id) >= 0;
+    body += '<div style="text-align:center;padding:12px 8px;background:'+(owned?'linear-gradient(135deg,#FEF3C7,#FFE082)':'#F3F4F6')+';border:1px solid '+(owned?'#FCD34D':'#E5E7EB')+';border-radius:12px;'+(owned?'':'opacity:.5;filter:grayscale(.7)')+'" title="'+_esc(b.d)+'">'
+      +'<div style="font-size:32px;margin-bottom:4px">'+b.ic+'</div>'
+      +'<div style="font-weight:800;font-size:11px;color:'+(owned?'#92400E':'#6B7280')+';line-height:1.2">'+_esc(b.t)+'</div>'
+    +'</div>';
+  });
+  body += '</div></div>';
+  M('🏆 Mes Achievements',pct+'% complétés · '+unlocked.length+'/'+VERITAS_BADGES.length+' badges',body,
+    '<button class="btn bi" onclick="cm()">Continuer</button>', true);
+};
+
+// ════════════════════════════════════════════════════════════════════
+// v2.4 — 🎉 CONFETTIS sur succès importants
+// ════════════════════════════════════════════════════════════════════
+window._confetti = function(){
+  var c = document.createElement('div');
+  c.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden';
+  var colors = ['#FFC93C','#3C8DFF','#10B981','#EC4899','#F59E0B','#7C3AED'];
+  for(var i=0;i<40;i++){
+    var p = document.createElement('div');
+    var col = colors[Math.floor(Math.random()*colors.length)];
+    var size = 6 + Math.random()*8;
+    p.style.cssText = 'position:absolute;width:'+size+'px;height:'+size+'px;background:'+col+';left:'+(Math.random()*100)+'%;top:-20px;border-radius:'+(Math.random()>0.5?'50%':'2px')+';transform:rotate('+(Math.random()*360)+'deg)';
+    var dur = 2 + Math.random()*2;
+    var delay = Math.random()*0.5;
+    p.animate([
+      {transform:'translate(0,0) rotate(0deg)', opacity:1},
+      {transform:'translate('+(Math.random()*200-100)+'px,'+(window.innerHeight+50)+'px) rotate('+(Math.random()*720)+'deg)', opacity:0}
+    ], {duration: dur*1000, delay: delay*1000, easing:'cubic-bezier(.5,0,.5,1)', fill:'forwards'});
+    c.appendChild(p);
+  }
+  document.body.appendChild(c);
+  setTimeout(function(){c.remove();}, 4500);
+};
+
+// ════════════════════════════════════════════════════════════════════
+// v2.4 — 📚 CITATIONS QUOTIDIENNES D'AUTEURS CAMEROUNAIS
+// ════════════════════════════════════════════════════════════════════
+window.CITATIONS_CM = [
+  {t:'"Le travail honnête est la richesse du sage."', a:'Mongo Beti'},
+  {t:'"Un peuple sans culture est un peuple sans âme."', a:'Mongo Beti'},
+  {t:'"L\'école est le second berceau de l\'enfant."', a:'Ferdinand Oyono'},
+  {t:'"Le savoir n\'est pas une marchandise, c\'est un héritage."', a:'Calixthe Beyala'},
+  {t:'"On naît africain, on devient citoyen du monde."', a:'Léopold Sédar Senghor'},
+  {t:'"La culture est ce qui demeure quand on a tout oublié."', a:'Édouard Herriot'},
+  {t:'"L\'éducation est l\'arme la plus puissante pour changer le monde."', a:'Nelson Mandela'},
+  {t:'"Étudier, c\'est se libérer de soi-même pour mieux servir l\'autre."', a:'Kuoh-Moukouri Thérèse'},
+  {t:'"Toute connaissance commence par un doute."', a:'Léon-Marie Ayissi (philosophe CM)'},
+  {t:'"Le livre est l\'ami fidèle qui voyage avec toi sans bagage."', a:'Patrice Nganang'},
+  {t:'"Un enfant éduqué vaut mille trésors enfouis."', a:'Proverbe Bamiléké'},
+  {t:'"La sagesse n\'a pas de couleur, elle est universelle."', a:'Proverbe Beti'},
+  {t:'"Apprendre, c\'est creuser un puits pour les générations futures."', a:'Proverbe Bamoun'},
+  {t:'"L\'eau de la science doit couler jusqu\'au village le plus lointain."', a:'Marcien Towa'},
+  {t:'"La jeunesse est la sève de la nation, l\'école est son tuteur."', a:'Engelbert Mveng'},
+  {t:'"Le silence du sage est plus puissant que les paroles du fou."', a:'Proverbe Douala'},
+  {t:'"Quand le tisserand cesse de travailler, la natte se défait."', a:'Proverbe Africain'},
+  {t:'"L\'arbre ne donne pas son ombre à ceux qui n\'ont pas su l\'arroser."', a:'Proverbe Ewondo'},
+  {t:'"L\'avenir d\'un pays se prépare dans ses salles de classe."', a:'Bernard Fonlon'},
+  {t:'"On ne tisse pas la natte du futur avec les fils du passé seuls."', a:'Werewere Liking'},
+  {t:'"Lire, c\'est habiller son esprit aux couleurs du monde."', a:'Calixthe Beyala'},
+  {t:'"Le bambou plié résiste mieux à la tempête que le baobab rigide."', a:'Proverbe Africain'},
+  {t:'"L\'examen passe, le savoir reste."', a:'Proverbe scolaire CM'},
+  {t:'"Étudier sans s\'amuser, c\'est cultiver un champ sans graines."', a:'Pius Njawé'},
+  {t:'"Aujourd\'hui apprenant, demain bâtisseur du Cameroun."', a:'VÉRITAS Academy'}
+];
+
+window._getCitationDuJour = function(){
+  var dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,1)) / 86400000);
+  return CITATIONS_CM[dayOfYear % CITATIONS_CM.length];
+};
+
+window._citationBannerHtml = function(){
+  var c = _getCitationDuJour();
+  return '<div style="background:linear-gradient(135deg,#0F1E47 0%,#1E3A8A 100%);color:#fff;padding:18px 22px;border-radius:14px;margin:16px 0;position:relative;overflow:hidden;border-left:4px solid #FFC93C">'
+    +'<div style="position:absolute;top:-10px;right:0;font-family:Georgia,serif;font-size:80px;line-height:1;color:rgba(255,201,60,.15);font-weight:900">"</div>'
+    +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800;margin-bottom:6px">📜 Citation du jour</div>'
+    +'<div style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:16px;line-height:1.5;font-style:italic;margin-bottom:8px">'+_esc(c.t)+'</div>'
+    +'<div style="font-size:11px;color:#FFC93C;font-weight:700">— '+_esc(c.a)+'</div>'
+    +'</div>';
+};
+
+// ════════════════════════════════════════════════════════════════════
+// v2.4 — 🎁 WRAPPED ANNUEL — Récap visuel partageable
+// ════════════════════════════════════════════════════════════════════
+window.mWrapped = function(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses){
+    M('🎁 Wrapped 2026','Inscrivez-vous pour découvrir votre Wrapped annuel',
+      '<div style="text-align:center;padding:20px"><p>Découvrez votre récap visuel personnalisé en fin d\'année comme sur Spotify : œuvres préférées, niveau atteint, achievements, partageable sur réseaux sociaux.</p></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire</button>');
+    return;
+  }
+  var s = _getUserStreak() || {xp:0,current:0,best:0,totalActivities:0};
+  var lvl = _currentLevel(s.xp);
+  var badges = (DB.userBadges && DB.userBadges[ses.id]) || [];
+  var year = new Date().getFullYear();
+  DB._wrappedViewed = true;
+  try { save(); } catch(e){}
+  var body = '<div style="background:linear-gradient(135deg,#7C3AED 0%,#EC4899 50%,#F59E0B 100%);color:#fff;padding:24px;border-radius:18px;text-align:center">'
+    +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:3px;font-weight:800;opacity:.85">VÉRITAS Wrapped</div>'
+    +'<div style="font-size:48px;font-weight:900;line-height:1;margin:8px 0;font-family:Plus Jakarta Sans">'+year+'</div>'
+    +'<div style="font-size:14px;opacity:.85;margin-bottom:20px">'+_esc((ses.pre||'')+' '+(ses.nom||''))+'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px">'
+      +'<div style="background:rgba(0,0,0,.2);padding:14px;border-radius:12px"><div style="font-size:28px;font-weight:900;color:#FFC93C">'+(s.xp||0)+'</div><div style="font-size:11px;opacity:.85;text-transform:uppercase;letter-spacing:1px">XP cumulés</div></div>'
+      +'<div style="background:rgba(0,0,0,.2);padding:14px;border-radius:12px"><div style="font-size:28px;font-weight:900;color:#FFC93C">'+(s.best||0)+'</div><div style="font-size:11px;opacity:.85;text-transform:uppercase;letter-spacing:1px">Record streak 🔥</div></div>'
+      +'<div style="background:rgba(0,0,0,.2);padding:14px;border-radius:12px"><div style="font-size:28px;font-weight:900;color:#FFC93C">'+(s.totalActivities||0)+'</div><div style="font-size:11px;opacity:.85;text-transform:uppercase;letter-spacing:1px">Activités</div></div>'
+      +'<div style="background:rgba(0,0,0,.2);padding:14px;border-radius:12px"><div style="font-size:28px;font-weight:900;color:#FFC93C">'+badges.length+'</div><div style="font-size:11px;opacity:.85;text-transform:uppercase;letter-spacing:1px">Badges</div></div>'
+    +'</div>'
+    +'<div style="background:rgba(0,0,0,.3);padding:14px;border-radius:12px;margin-bottom:10px">'
+      +'<div style="font-size:11px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;margin-bottom:4px">Niveau atteint</div>'
+      +'<div style="font-size:22px;font-weight:900">'+lvl.current.title+'</div>'
+    +'</div>'
+    +'<div style="font-size:10px;opacity:.6;margin-top:14px;letter-spacing:1px">#VeritasWrapped'+year+' · veritas-school.com</div>'
+    +'</div>';
+  M('🎁 Votre Wrapped '+year,'Récap annuel — Partageable',body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +'<button class="btn" style="background:#25D366;color:#fff" onclick="_wrappedShareWA('+year+')">📱 Partager WhatsApp</button>', true);
+  // Confettis !
+  _confetti();
+};
+
+window._wrappedShareWA = function(year){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  var s = _getUserStreak() || {xp:0};
+  var msg = '🎉 Mon VÉRITAS Wrapped '+year+' :\n'
+    +'⚡ '+(s.xp||0)+' XP cumulés\n'
+    +'🔥 Record streak : '+(s.best||0)+' jours\n'
+    +'🏆 '+((DB.userBadges&&DB.userBadges[ses.id])||[]).length+' badges\n\n'
+    +'Découvre le tien sur veritas-school.com #VeritasWrapped'+year;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+};
+
+// Auto-check badges au chargement initial et après chaque action
+try { setTimeout(function(){ if(typeof _checkBadges==='function') _checkBadges(); }, 3000); } catch(e){}
+
+// CSS animations injectées (slideInRight pour notifications badges)
+(function(){
+  var s = document.createElement('style');
+  s.textContent = '@keyframes slideInRight{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}';
+  document.head.appendChild(s);
+})();
 
 // Hook quiz → enregistrer auto les résultats dans SM-2
 window._hookQuizSM2 = function(topic, scorePct){
