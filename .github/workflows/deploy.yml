@@ -120,7 +120,7 @@ jobs:
           find deploy -type f | sort
 
       - name: 🚀 Déployer via FTP vers veritas-school.com
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
           server:   ftp.veritas-school.com
           username: ${{ secrets.FTP_USER }}
