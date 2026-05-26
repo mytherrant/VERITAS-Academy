@@ -308,6 +308,67 @@ if ('serviceWorker' in navigator && location.protocol === 'https:') {
   }
 }
 
+// v2.5.1 — BOOT WATCHDOG : si l'application ne démarre pas après 6 secondes
+// (page blanche signalée 26 mai 2026), forcer nettoyage cache + reload.
+// Détection : ni #app ni #VISITOR ni #login affichés visiblement.
+window._vrtBootWatchdog = setTimeout(function(){
+  try {
+    var appShown = false;
+    var els = ['app', 'VISITOR', 'login'];
+    for(var i=0; i<els.length; i++){
+      var el = document.getElementById(els[i]);
+      if(el){
+        var cs = window.getComputedStyle ? getComputedStyle(el) : null;
+        var visible = cs && cs.display !== 'none' && cs.visibility !== 'hidden' && el.offsetHeight > 0;
+        if(visible){ appShown = true; break; }
+      }
+    }
+    // Vérifier aussi si du contenu réel est rendu
+    var contentChars = (document.body && document.body.innerText || '').replace(/\s/g,'').length;
+    if(!appShown && contentChars < 50){
+      console.warn('[VÉRITAS BOOT] App non démarrée après 6s — nettoyage d\'urgence');
+      // Désinstaller TOUS les service workers
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.getRegistrations().then(function(regs){
+          regs.forEach(function(r){ r.unregister(); });
+        }).catch(function(){});
+      }
+      // Vider TOUS les caches
+      if(typeof caches !== 'undefined' && caches.keys){
+        caches.keys().then(function(keys){
+          return Promise.all(keys.map(function(k){ return caches.delete(k); }));
+        }).then(function(){
+          // Afficher message + reload
+          try {
+            document.body.innerHTML = '<div style="position:fixed;inset:0;background:#142554;color:#FFC93C;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial,sans-serif;text-align:center;padding:20px"><div style="font-size:48px;margin-bottom:14px">🔄</div><div style="font-size:18px;font-weight:bold">Mise à jour VÉRITAS en cours…</div><div style="font-size:14px;opacity:.7;margin-top:8px">Nettoyage du cache… rechargement automatique</div></div>';
+          } catch(e){}
+          setTimeout(function(){
+            // Reload avec bypass cache
+            try { location.reload(true); } catch(e){ location.href = location.href.split('?')[0] + '?_t=' + Date.now(); }
+          }, 1500);
+        });
+      } else {
+        setTimeout(function(){ location.reload(true); }, 1500);
+      }
+    }
+  } catch(e){ console.warn('[VÉRITAS BOOT] watchdog:', e); }
+}, 6000);
+
+// Si l'app démarre normalement, annuler le watchdog
+window.addEventListener('DOMContentLoaded', function(){
+  setTimeout(function(){
+    var ok = false;
+    ['app','VISITOR','login'].forEach(function(id){
+      var el = document.getElementById(id);
+      if(el && window.getComputedStyle && getComputedStyle(el).display !== 'none' && el.offsetHeight > 0) ok = true;
+    });
+    if(ok && window._vrtBootWatchdog){
+      clearTimeout(window._vrtBootWatchdog);
+      window._vrtBootWatchdog = null;
+    }
+  }, 2500);
+});
+
 // Lazy loading universel : applique loading="lazy" decoding="async"
 // sur toutes les <img> qui n'ont pas déjà ces attributs.
 // Économise ~1 Mo de bande passante sur le chargement initial mobile.

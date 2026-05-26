@@ -4,8 +4,8 @@
 // les données dynamiques. Permet le fonctionnement hors-ligne basique.
 // ═══════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'veritas-v1.2.5';
-// v1.2.5 : Force le rafraîchissement après l'incident HTTP 500 (24 mai 2026)
+const CACHE_VERSION = 'veritas-v2.5.1';
+// v2.5.1 : Bump force après page blanche signalée 26 mai 2026
 // Nettoyage aggressif de TOUS les anciens caches au démarrage
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
