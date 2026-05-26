@@ -6816,31 +6816,95 @@ function _showOnboardingStep(idx){
   var step=_ONBOARDING_STEPS[idx];
   var totalSteps=_ONBOARDING_STEPS.length;
   var progress=Math.round(((idx+1)/totalSteps)*100);
-  // Overlay
+
+  // Nettoyage : retirer ancien overlay + listener clavier précédent
   var existing=document.getElementById('_obOverlay');
   if(existing)existing.remove();
+  if(window._obKeyHandler){
+    document.removeEventListener('keydown', window._obKeyHandler, true);
+    window._obKeyHandler = null;
+  }
+
+  // v2.4 FIX : pointer-events explicite + role dialog + a11y
   var ov=document.createElement('div');
   ov.id='_obOverlay';
-  ov.style.cssText='position:fixed;inset:0;background:rgba(13,27,62,.78);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:20px;animation:obFade .3s ease-out;font-family:Montserrat,sans-serif';
+  ov.setAttribute('role','dialog');
+  ov.setAttribute('aria-modal','true');
+  ov.setAttribute('aria-labelledby','_obTitle');
+  ov.setAttribute('aria-describedby','_obText');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(13,27,62,.78);z-index:2147483646;display:flex;align-items:center;justify-content:center;padding:20px;animation:obFade .3s ease-out;font-family:Montserrat,sans-serif;pointer-events:auto !important;cursor:auto';
+
   ov.innerHTML=
-    '<style>@keyframes obFade{from{opacity:0}to{opacity:1}}@keyframes obPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}</style>'+
-    '<div style="background:#fff;border-radius:24px;max-width:480px;width:100%;padding:32px 28px 24px;box-shadow:0 30px 80px rgba(0,0,0,.4);text-align:center;animation:obPop .4s cubic-bezier(.34,1.56,.64,1);position:relative">'+
-      // Skip top right
-      '<button onclick="_endOnboarding(true)" style="position:absolute;top:14px;right:14px;background:none;border:none;color:#64748B;font-size:13px;cursor:pointer;padding:6px 10px">Passer</button>'+
+    '<style>@keyframes obFade{from{opacity:0}to{opacity:1}}@keyframes obPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}#_obOverlay *{pointer-events:auto !important}#_obOverlay button{cursor:pointer !important}</style>'+
+    '<div id="_obCard" style="background:#fff;border-radius:24px;max-width:480px;width:100%;padding:32px 28px 24px;box-shadow:0 30px 80px rgba(0,0,0,.4);text-align:center;animation:obPop .4s cubic-bezier(.34,1.56,.64,1);position:relative;pointer-events:auto !important">'+
+      // Skip top right — bouton avec zone hit large
+      '<button type="button" id="_obSkipBtn" onclick="window._endOnboarding(true);return false;" style="position:absolute;top:8px;right:8px;background:#F1F5F9;border:1px solid #E2E8F0;color:#475569;font-size:12px;cursor:pointer;padding:8px 14px;border-radius:20px;font-weight:700;min-width:64px;min-height:36px;line-height:1;transition:all .2s" aria-label="Passer le tour de bienvenue">Passer ✕</button>'+
       // Big emoji
-      '<div style="font-size:64px;margin-bottom:12px;line-height:1">'+step.emoji+'</div>'+
+      '<div style="font-size:64px;margin-bottom:12px;line-height:1" aria-hidden="true">'+step.emoji+'</div>'+
       // Title
-      '<h2 style="font-family:Libre Baskerville,Georgia,serif;font-size:24px;font-weight:700;color:#142554;margin:0 0 14px;line-height:1.2">'+step.title+'</h2>'+
+      '<h2 id="_obTitle" style="font-family:Plus Jakarta Sans,Libre Baskerville,Georgia,serif;font-size:24px;font-weight:700;color:#142554;margin:0 0 14px;line-height:1.2">'+step.title+'</h2>'+
       // Text
-      '<p style="font-size:14px;color:#475569;line-height:1.65;margin:0 0 24px">'+step.text+'</p>'+
+      '<p id="_obText" style="font-size:14px;color:#475569;line-height:1.65;margin:0 0 24px">'+step.text+'</p>'+
       // Progress
       '<div style="background:#E2E8F0;height:6px;border-radius:3px;overflow:hidden;margin:0 0 18px"><div style="height:100%;width:'+progress+'%;background:linear-gradient(90deg,#FFC93C,#F59E0B);transition:width .4s"></div></div>'+
       '<div style="font-size:11px;color:#94A3B8;margin-bottom:14px">Étape '+(idx+1)+' / '+totalSteps+'</div>'+
-      // CTA
-      '<button onclick="_onboardingNext('+idx+')" style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;border:none;border-radius:14px;padding:14px 28px;font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(20,37,84,.3);width:100%;letter-spacing:.5px">'+step.cta+'</button>'+
+      // Boutons : Retour (si idx>0) + CTA
+      '<div style="display:flex;gap:10px">'+
+        (idx>0 ? '<button type="button" id="_obBackBtn" onclick="window._showOnboardingStep('+(idx-1)+');return false;" style="background:#F1F5F9;color:#142554;border:1px solid #E2E8F0;border-radius:14px;padding:14px 20px;font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-weight:700;font-size:14px;cursor:pointer;min-width:80px;letter-spacing:.5px" aria-label="Étape précédente">←</button>' : '')+
+        '<button type="button" id="_obCtaBtn" onclick="window._onboardingNext('+idx+');return false;" style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;border:none;border-radius:14px;padding:14px 28px;font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(20,37,84,.3);flex:1;letter-spacing:.5px;min-height:50px" autofocus>'+step.cta+'</button>'+
+      '</div>'+
+      // Indication clavier discrète
+      '<div style="font-size:10px;color:#94A3B8;margin-top:12px;letter-spacing:.3px">⌨️ Entrée pour continuer · Échap pour passer · ← → pour naviguer</div>'+
     '</div>';
   document.body.appendChild(ov);
+
+  // v2.4 FIX : Listener clavier pour navigation
+  window._obKeyHandler = function(e){
+    if(!document.getElementById('_obOverlay')) return;
+    if(e.key === 'Enter' || e.key === ' '){
+      e.preventDefault(); e.stopPropagation();
+      window._onboardingNext(idx);
+    } else if(e.key === 'Escape'){
+      e.preventDefault(); e.stopPropagation();
+      window._endOnboarding(true);
+    } else if(e.key === 'ArrowRight'){
+      e.preventDefault();
+      window._onboardingNext(idx);
+    } else if(e.key === 'ArrowLeft' && idx>0){
+      e.preventDefault();
+      window._showOnboardingStep(idx-1);
+    }
+  };
+  document.addEventListener('keydown', window._obKeyHandler, true);
+
+  // v2.4 FIX : Click sur l'overlay (en dehors du card) = pass au lieu de bloquer
+  ov.addEventListener('click', function(e){
+    if(e.target === ov){
+      // Clic sur le backdrop = passer
+      window._endOnboarding(true);
+    }
+  });
+
+  // v2.4 FIX : Auto-focus sur le CTA (pour navigation clavier immédiate)
+  setTimeout(function(){
+    var cta = document.getElementById('_obCtaBtn');
+    if(cta){
+      try { cta.focus(); } catch(e){}
+    }
+  }, 100);
+
+  // v2.4 FIX : Safety timeout — si l'utilisateur reste bloqué 30s, fermer
+  if(window._obSafetyTimeout) clearTimeout(window._obSafetyTimeout);
+  window._obSafetyTimeout = setTimeout(function(){
+    if(document.getElementById('_obOverlay')){
+      console.warn('[VERITAS] Onboarding bloqué 30s — auto-fermeture sécurité');
+      window._endOnboarding(true);
+    }
+  }, 30000);
 }
+
+// v2.4 FIX : exposer en global pour usage depuis HTML inline onclick
+window._showOnboardingStep = _showOnboardingStep;
 
 window._onboardingNext=function(idx){
   var step=_ONBOARDING_STEPS[idx];
@@ -6855,6 +6919,12 @@ window._onboardingNext=function(idx){
 window._endOnboarding=function(skipped){
   var ov=document.getElementById('_obOverlay');
   if(ov){ov.style.opacity='0';setTimeout(function(){if(ov.parentNode)ov.remove();},300);}
+  // v2.4 FIX : nettoyer listeners clavier + safety timeout
+  if(window._obKeyHandler){
+    document.removeEventListener('keydown', window._obKeyHandler, true);
+    window._obKeyHandler = null;
+  }
+  if(window._obSafetyTimeout){ clearTimeout(window._obSafetyTimeout); window._obSafetyTimeout = null; }
   localStorage.setItem('_vrtOnboardingSeen','1');
   window._onboardingActive=false;
   if(!skipped&&typeof toast==='function')toast('🎉 Bonne découverte de VÉRITAS !','success');
