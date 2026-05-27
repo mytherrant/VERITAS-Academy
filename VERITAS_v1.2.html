@@ -4450,12 +4450,85 @@ async function _ensureFbAuth(){
   return window._fbAuth.pending;
 }
 
+// v2.9.13 : CIRCUIT BREAKER pour Firebase
+// Si Firebase échoue 3 fois en moins de 10 secondes, on suspend les appels
+// pendant 5 minutes. Évite que la page spamme ERR_CONNECTION_RESET en boucle
+// et garde l'UX fluide même quand Firebase est inaccessible (CM connexions instables).
+window._fbBreaker = {
+  failures: [],
+  suspendedUntil: 0,
+  isOpen: function() {
+    return Date.now() < this.suspendedUntil;
+  },
+  recordFailure: function() {
+    var now = Date.now();
+    this.failures.push(now);
+    // Garder seulement les 10 dernières secondes
+    this.failures = this.failures.filter(function(t){ return now - t < 10000; });
+    if (this.failures.length >= 3) {
+      this.suspendedUntil = now + 5 * 60 * 1000; // 5 min de suspension
+      this.failures = [];
+      console.warn('[Firebase] CIRCUIT OUVERT — Firebase suspendu 5 min (mode hors-ligne actif)');
+      if (typeof toast === 'function') {
+        toast('🔌 Mode hors-ligne (Firebase indisponible)', 'warn');
+      }
+    }
+  },
+  recordSuccess: function() {
+    if (this.failures.length > 0) this.failures = [];
+    if (this.suspendedUntil > 0) {
+      this.suspendedUntil = 0;
+      console.log('[Firebase] CIRCUIT FERMÉ — connexion rétablie ✓');
+      if (typeof toast === 'function') {
+        toast('🌐 Connexion Firebase rétablie', 'ok');
+      }
+    }
+  }
+};
+
 // Wrapper transparent : auth activée → ajoute ?auth=token, sinon fetch direct
+// + Circuit breaker : retourne une Response synthétique 503 si suspendu (silencieux)
 async function _fbFetch(url, options){
-  var token = await _ensureFbAuth();
-  if(!token) return fetch(url, options);
-  var sep = url.indexOf('?') >= 0 ? '&' : '?';
-  return fetch(url + sep + 'auth=' + encodeURIComponent(token), options);
+  // Court-circuit : si Firebase est suspendu, retourner une fake Response 503
+  // (silencieuse, pas d'erreur dans la console) plutôt que de lancer une requête
+  // qui va échouer avec ERR_CONNECTION_RESET et polluer la console.
+  if (window._fbBreaker && window._fbBreaker.isOpen()) {
+    return new Response('{"_offline":true,"_reason":"circuit_open"}', {
+      status: 503,
+      statusText: 'Firebase suspendu (circuit breaker)',
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  try {
+    var token = await _ensureFbAuth();
+    var sep = url.indexOf('?') >= 0 ? '&' : '?';
+    var finalUrl = token ? (url + sep + 'auth=' + encodeURIComponent(token)) : url;
+
+    // Timeout côté client (sinon le fetch peut traîner 60s+ sur connexion morte)
+    var ctrl = new AbortController();
+    var timeoutId = setTimeout(function(){ ctrl.abort(); }, 8000);
+    var opts = Object.assign({}, options || {}, { signal: ctrl.signal });
+
+    var resp = await fetch(finalUrl, opts);
+    clearTimeout(timeoutId);
+
+    if (resp.ok) {
+      if (window._fbBreaker) window._fbBreaker.recordSuccess();
+    } else if (resp.status >= 500) {
+      if (window._fbBreaker) window._fbBreaker.recordFailure();
+    }
+    return resp;
+  } catch (e) {
+    // Erreur réseau (ERR_CONNECTION_RESET, abort timeout, etc.)
+    if (window._fbBreaker) window._fbBreaker.recordFailure();
+    // Retourner une fake Response 503 pour ne pas crasher le code appelant
+    return new Response('{"_offline":true,"_reason":"' + (e.name || 'fetch_error') + '"}', {
+      status: 503,
+      statusText: 'Firebase fetch error',
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 }
 
 // Pré-warming : déclencher l'auth dès le chargement de la page (avant le premier save)
