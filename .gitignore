@@ -70,3 +70,5 @@ VERITAS_Guide_*.pdf
 # Images / médias locaux non versionnés
 *.jpg
 *.jpeg
+# Exception : avatar de l'IA Ambassa (photo Jacques Miterand TAKOU)
+!ambassa-avatar.jpg

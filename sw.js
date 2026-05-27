@@ -4,9 +4,9 @@
 // les données dynamiques. Permet le fonctionnement hors-ligne basique.
 // ═══════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'veritas-v2.9.4';
-// v2.9.4 : 21 analyses littéraires complètes + menu œuvres en 3 sections + avatar Ambassa
-// (Analyse / Fiche d'identité + carte mentale / Contrôle de lecture complet)
+const CACHE_VERSION = 'veritas-v2.9.5';
+// v2.9.5 : Photo avatar Ambassa + simplification HTML (élimine onerror complexe)
+// Force invalidation totale pour réparer IA + langue + panier qui ne répondaient pas
 // Nettoyage aggressif de TOUS les anciens caches au démarrage
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
