@@ -38304,22 +38304,13 @@ if(document.readyState==='loading'){
   --vgz-mint:#10B981;--vgz-night:#0D1B3E;--vgz-deep:#142554;
 }
 
-/* ═════ #1 — CURSEUR PERSONNALISÉ ═════ */
-/* ═════ Curseur premium — étoile dorée pulsée + halo de trainée ═════ */
-.vgz-cursor{position:fixed;width:36px;height:36px;border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);opacity:0;display:none;background:
-  radial-gradient(circle,rgba(255,201,60,.55) 0%,rgba(255,201,60,.18) 40%,transparent 70%);
-  filter:blur(.5px);transition:width .25s cubic-bezier(.34,1.56,.64,1),height .25s cubic-bezier(.34,1.56,.64,1),opacity .2s}
-.vgz-cursor-dot{position:fixed;width:10px;height:10px;background:radial-gradient(circle,#FFE082 0%,#FFC93C 60%,transparent 100%);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%) rotate(45deg);opacity:0;transition:opacity .2s,transform .15s;display:none;box-shadow:0 0 14px rgba(255,201,60,.9),0 0 28px rgba(255,201,60,.5)}
-.vgz-cursor-dot::before{content:"";position:absolute;inset:0;background:inherit;border-radius:inherit;animation:vgzCursPulse 2s ease-in-out infinite}
-@keyframes vgzCursPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.8);opacity:.3}}
-.vgz-cursor.is-hover{width:72px;height:72px;background:radial-gradient(circle,rgba(255,201,60,.35) 0%,rgba(255,201,60,.1) 50%,transparent 80%)}
-.vgz-cursor.is-hover ~ .vgz-cursor-dot,
-body.vgz-cursor-on-link .vgz-cursor-dot{transform:translate(-50%,-50%) rotate(45deg) scale(0.6)}
-@media(hover:hover) and (pointer:fine){
-  .vgz-cursor,.vgz-cursor-dot{display:block}
-  body{cursor:none}
-  a,button,input,select,textarea,.vnav-btn,.vsec-title,[onclick]{cursor:none !important}
-}
+/* ═════ #1 — CURSEUR NATIF (main automatique sur liens/boutons) ═════ */
+/* Désactivation du curseur custom doré — retour aux curseurs natifs du système */
+/* La main (pointer) s'affichera automatiquement sur les liens, boutons et éléments cliquables */
+.vgz-cursor,.vgz-cursor-dot{display:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none}
+body{cursor:auto}
+a,button,[onclick],.vnav-btn,.btn,.vbtn,input[type="submit"],input[type="button"],select{cursor:pointer}
+input[type="text"],input[type="email"],input[type="password"],input[type="search"],input[type="tel"],input[type="number"],textarea{cursor:text}
 
 /* ═════ #2 — REVEAL ON SCROLL ═════ */
 .v-reveal{opacity:0;transform:translateY(40px);transition:opacity .8s cubic-bezier(.16,1,.3,1),transform .8s cubic-bezier(.16,1,.3,1)}
