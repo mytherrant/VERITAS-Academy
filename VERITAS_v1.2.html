@@ -4323,11 +4323,18 @@ setInterval(_refreshCitation,15000);
 })();
 
 // ── LWS API config ──────────────────────────────────────────
+// v2.9.14 : MIGRATION Firebase RTDB → LWS PHP backend
+// AVANT : db pointait vers veritas-school-a39ab-default-rtdb.europe-west1.firebasedatabase.app
+//         → ERR_CONNECTION_RESET récurrent depuis Cameroun
+// APRÈS : db pointe vers api/db.php (PHP sur LWS, stable, sous notre contrôle)
+//         → latence + accessibilité bien meilleures
+// Pour réactiver Firebase un jour : remettre l'ancienne URL
 const LWS_API = {
-  db:     'https://veritas-school-a39ab-default-rtdb.europe-west1.firebasedatabase.app/db.json',
+  db:     'https://veritas-school.com/api/db.php',
   upload: 'https://veritas-school.com/api/upload.php',
   files:  'https://veritas-school.com/uploads/veritas/'
 };
+const FIREBASE_DB_URL_BACKUP = 'https://veritas-school-a39ab-default-rtdb.europe-west1.firebasedatabase.app/db.json'; // Conservée si on veut réactiver Firebase
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ── Firebase Anonymous Auth (REST API) ──────────────────────────────────────
@@ -4335,7 +4342,19 @@ const LWS_API = {
 // Quand FIREBASE_API_KEY est vide → auth désactivée, fetch direct (compat actuelle)
 // Quand FIREBASE_API_KEY est défini → chaque requête Firebase passe ?auth=<idToken>
 // Permet d'activer rules Firebase {".read":"auth!=null",".write":"auth!=null"}
-const FIREBASE_API_KEY = 'AIzaSyAIw7PFgQTCkIEgCv32DbqGVfwR-_UwC-E'; // Web API key (publique — sécurité via rules Firebase)
+// v2.9.14 — DÉCISION ARCHITECTURALE : Firebase RTDB désactivé
+// Raisons (analyse objective coût/bénéfice) :
+//   1. ERR_CONNECTION_RESET récurrent depuis Cameroun (Firebase Europe)
+//   2. Coût de scaling élevé (>$1000/mois à 1M users)
+//   3. LWS api/db.php déjà en place, stable, gratuit, sous contrôle VÉRITAS
+//   4. Latence LWS (France) < latence Firebase (Belgique) pour CM
+//   5. Pas de quota externe (Firebase free tier = 100 connexions max)
+//   6. Multi-device sync : polling LWS toutes les 30s suffit pour l'usage scolaire
+// Conséquence : LWS devient le seul backend. Firebase Auth désactivé aussi
+// (l'auth anonyme générait un userId qu'on peut désormais générer côté client).
+// Pour réactiver Firebase un jour : remettre la clé API ici.
+const FIREBASE_API_KEY = ''; // Désactivé — backend unique = LWS api/db.php
+const FIREBASE_API_KEY_BACKUP = 'AIzaSyAIw7PFgQTCkIEgCv32DbqGVfwR-_UwC-E'; // Conservée pour réactivation future
 
 // Cache persistant : 1 utilisateur anonyme par navigateur (pas un à chaque ouverture)
 window._fbAuth = (function(){
@@ -4450,10 +4469,9 @@ async function _ensureFbAuth(){
   return window._fbAuth.pending;
 }
 
-// v2.9.13 : CIRCUIT BREAKER pour Firebase
-// Si Firebase échoue 3 fois en moins de 10 secondes, on suspend les appels
-// pendant 5 minutes. Évite que la page spamme ERR_CONNECTION_RESET en boucle
-// et garde l'UX fluide même quand Firebase est inaccessible (CM connexions instables).
+// v2.9.14 : CIRCUIT BREAKER générique pour le backend (LWS depuis maintenant)
+// Si le backend échoue 3 fois en moins de 10 secondes, on suspend les appels
+// pendant 5 minutes. Évite le spam d'erreurs réseau et garde l'UX fluide.
 window._fbBreaker = {
   failures: [],
   suspendedUntil: 0,
@@ -4463,14 +4481,13 @@ window._fbBreaker = {
   recordFailure: function() {
     var now = Date.now();
     this.failures.push(now);
-    // Garder seulement les 10 dernières secondes
     this.failures = this.failures.filter(function(t){ return now - t < 10000; });
     if (this.failures.length >= 3) {
-      this.suspendedUntil = now + 5 * 60 * 1000; // 5 min de suspension
+      this.suspendedUntil = now + 5 * 60 * 1000;
       this.failures = [];
-      console.warn('[Firebase] CIRCUIT OUVERT — Firebase suspendu 5 min (mode hors-ligne actif)');
+      console.warn('[Backend] CIRCUIT OUVERT — sync suspendu 5 min (mode hors-ligne actif)');
       if (typeof toast === 'function') {
-        toast('🔌 Mode hors-ligne (Firebase indisponible)', 'warn');
+        toast('🔌 Mode hors-ligne (sync suspendu)', 'warn');
       }
     }
   },
@@ -4478,39 +4495,37 @@ window._fbBreaker = {
     if (this.failures.length > 0) this.failures = [];
     if (this.suspendedUntil > 0) {
       this.suspendedUntil = 0;
-      console.log('[Firebase] CIRCUIT FERMÉ — connexion rétablie ✓');
+      console.log('[Backend] CIRCUIT FERMÉ — connexion rétablie ✓');
       if (typeof toast === 'function') {
-        toast('🌐 Connexion Firebase rétablie', 'ok');
+        toast('🌐 Connexion rétablie', 'ok');
       }
     }
   }
 };
 
-// Wrapper transparent : auth activée → ajoute ?auth=token, sinon fetch direct
-// + Circuit breaker : retourne une Response synthétique 503 si suspendu (silencieux)
+// v2.9.14 : _fbFetch — wrapper pour les appels au backend LWS (PHP)
+// Firebase RTDB désactivé. Auth Firebase aussi (FIREBASE_API_KEY vide).
+// Le code conservé compatibilité : on garde le nom _fbFetch pour ne pas
+// avoir à modifier les 12+ appels existants. La fonction route vers LWS.
 async function _fbFetch(url, options){
-  // Court-circuit : si Firebase est suspendu, retourner une fake Response 503
-  // (silencieuse, pas d'erreur dans la console) plutôt que de lancer une requête
-  // qui va échouer avec ERR_CONNECTION_RESET et polluer la console.
+  // Court-circuit : circuit breaker ouvert → réponse 503 silencieuse
   if (window._fbBreaker && window._fbBreaker.isOpen()) {
     return new Response('{"_offline":true,"_reason":"circuit_open"}', {
       status: 503,
-      statusText: 'Firebase suspendu (circuit breaker)',
+      statusText: 'Backend suspendu (circuit breaker)',
       headers: { 'Content-Type': 'application/json' }
     });
   }
 
   try {
-    var token = await _ensureFbAuth();
-    var sep = url.indexOf('?') >= 0 ? '&' : '?';
-    var finalUrl = token ? (url + sep + 'auth=' + encodeURIComponent(token)) : url;
-
-    // Timeout côté client (sinon le fetch peut traîner 60s+ sur connexion morte)
+    // Timeout 8 sec via AbortController
     var ctrl = new AbortController();
     var timeoutId = setTimeout(function(){ ctrl.abort(); }, 8000);
     var opts = Object.assign({}, options || {}, { signal: ctrl.signal });
 
-    var resp = await fetch(finalUrl, opts);
+    // Pas d'auth Firebase à ajouter (LWS gère son auth via headers Bearer
+    // depuis api/config_sync.php). Le code appelant passe les bons headers.
+    var resp = await fetch(url, opts);
     clearTimeout(timeoutId);
 
     if (resp.ok) {
@@ -4520,12 +4535,10 @@ async function _fbFetch(url, options){
     }
     return resp;
   } catch (e) {
-    // Erreur réseau (ERR_CONNECTION_RESET, abort timeout, etc.)
     if (window._fbBreaker) window._fbBreaker.recordFailure();
-    // Retourner une fake Response 503 pour ne pas crasher le code appelant
     return new Response('{"_offline":true,"_reason":"' + (e.name || 'fetch_error') + '"}', {
       status: 503,
-      statusText: 'Firebase fetch error',
+      statusText: 'Backend fetch error',
       headers: { 'Content-Type': 'application/json' }
     });
   }
