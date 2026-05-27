@@ -4,10 +4,10 @@
 // les données dynamiques. Permet le fonctionnement hors-ligne basique.
 // ═══════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'veritas-v2.9.6';
-// v2.9.6 : FIX CRITIQUE CSP — script-src bloquait blob: → IA + langue + panier KO
-// Ajout blob:/data: à script-src/script-src-elem/media-src/worker-src + pollinations.ai
-// Force invalidation totale (l'ancienne CSP est en cache navigateur)
+const CACHE_VERSION = 'veritas-v2.9.7';
+// v2.9.7 : CSP très permissive (https:/http:/blob: partout) — débloque toutes
+// les connexions encore bloquées en v2.9.6 (7 URLs connect-src). Retire le
+// meta X-Frame-Options (warning console — doit être en HTTP header serveur).
 // Nettoyage aggressif de TOUS les anciens caches au démarrage
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
