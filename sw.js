@@ -4,9 +4,10 @@
 // les données dynamiques. Permet le fonctionnement hors-ligne basique.
 // ═══════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'veritas-v2.9.5';
-// v2.9.5 : Photo avatar Ambassa + simplification HTML (élimine onerror complexe)
-// Force invalidation totale pour réparer IA + langue + panier qui ne répondaient pas
+const CACHE_VERSION = 'veritas-v2.9.6';
+// v2.9.6 : FIX CRITIQUE CSP — script-src bloquait blob: → IA + langue + panier KO
+// Ajout blob:/data: à script-src/script-src-elem/media-src/worker-src + pollinations.ai
+// Force invalidation totale (l'ancienne CSP est en cache navigateur)
 // Nettoyage aggressif de TOUS les anciens caches au démarrage
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
