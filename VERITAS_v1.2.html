@@ -1889,9 +1889,56 @@ input,select,textarea,button{font-family:'Poppins','Inter',sans-serif!important}
   line-height:1.3;
 }
 .vnav-group.open .vnav-trigger{ background:#E8EEFF !important; }
+/* v2.9.10 — Dropdown nav sur MOBILE : position fixed full-width + overlay pour éviter
+   d'être masqué par le overflow:auto de .vnav. L'utilisateur peut maintenant scroller
+   et choisir librement dans le menu déroulé. */
 @media (max-width:768px){
-  .vnav-dropdown{ left:auto; right:0; min-width:240px; }
+  .vnav-dropdown{
+    position:fixed !important;
+    top:64px !important; /* sous la barre nav */
+    left:8px !important;
+    right:8px !important;
+    bottom:auto !important;
+    min-width:0 !important;
+    width:auto !important;
+    max-height:calc(100vh - 80px) !important;
+    z-index:9999 !important;
+    border-radius:10px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45);
+  }
+  /* Overlay sombre derrière le dropdown ouvert sur mobile */
+  .vnav-group.open::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:rgba(13,27,62,.55);
+    z-index:9998;
+    backdrop-filter:blur(2px);
+  }
+  /* Bouton de fermeture visuel intégré au dropdown */
+  .vnav-dropdown::before{
+    content:"✕ Fermer";
+    position:sticky;
+    top:0;
+    display:block;
+    padding:10px 14px;
+    background:linear-gradient(135deg,#142554,#1E3A8A);
+    color:#FFC93C;
+    font-family:Montserrat,sans-serif;
+    font-size:11px;
+    font-weight:800;
+    letter-spacing:1.5px;
+    text-align:right;
+    border-radius:10px 10px 0 0;
+    margin:-6px -6px 6px;
+    cursor:pointer;
+    z-index:1;
+  }
 }
+/* Permettre au dropdown de sortir du conteneur .vnav (overflow visible nécessaire) */
+.vnav{ overflow-x:auto; overflow-y:visible; }
+.vnav-group{ position:static; }
+@media (max-width:768px){ .vnav-group{ position:relative; } }
 
 /* ── ELEARNING — Category panels redesign ── */
 .el-cat-panel{border-radius:20px;overflow:hidden;cursor:pointer;transition:all .3s;
@@ -17984,12 +18031,13 @@ window._runCorrectionIA = async function(){
 };
 
 async function callClaudeAPI(prompt, sysPrompt){
-  // v2.9.8 — CORRECTION CRITIQUE : utilisation de POST pour supporter les longs contextes
-  // (AMBASSA_PERSONA fait ~23 000 chars, l'URL GET explosait au-delà de 2 000 chars)
+  // v2.9.10 — Avec logs de diagnostic pour identifier où ça échoue côté client
+  console.log("[IA] callClaudeAPI appelée — prompt=" + (prompt||'').length + " chars, sys=" + (sysPrompt||'').length + " chars");
   var sys = sysPrompt || "Tu es un assistant pédagogique expert du système éducatif camerounais (MINESEC/MINESUP). Tu connais les programmes BEPC et BAC séries A/C/D, les grandes écoles camerounaises et tu contextualises dans la réalité camerounaise.";
 
-  // ── ESSAI 1 : Pollinations.ai en POST (supporte long context, format OpenAI-compatible) ──
+  // ── ESSAI 1 : Pollinations.ai en POST (format OpenAI chat-completions, long context OK) ──
   try {
+    console.log("[IA] Essai 1 : POST https://text.pollinations.ai/ (body messages JSON)");
     var resp = await fetch("https://text.pollinations.ai/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -18003,53 +18051,61 @@ async function callClaudeAPI(prompt, sysPrompt){
         stream: false
       })
     });
+    console.log("[IA] POST → status " + resp.status + " (ok=" + resp.ok + ")");
     if (resp.ok) {
       var txt = await resp.text();
-      // Pollinations POST retourne directement le texte (pas du JSON)
+      console.log("[IA] POST réponse : " + txt.length + " chars, début : " + txt.substring(0, 80));
       if (txt && txt.trim().length > 20) {
-        // Si format JSON (ex: {choices:[{message:{content:"..."}}]}), extraire
         try {
           var parsed = JSON.parse(txt);
           if (parsed.choices && parsed.choices[0] && parsed.choices[0].message) {
+            console.log("[IA] Format OpenAI détecté, extraction content");
             return parsed.choices[0].message.content;
           }
           if (typeof parsed === "string") return parsed;
-        } catch(eParse){ /* texte brut, retour direct */ }
+        } catch(eParse){ console.log("[IA] Pas du JSON, retour texte brut"); }
         return txt.trim();
+      } else {
+        console.warn("[IA] POST trop court ou vide → fallback GET");
       }
+    } else {
+      console.warn("[IA] POST status " + resp.status + " → fallback GET");
     }
-  } catch(e1) { console.warn("[Ambassa] Pollinations POST:", e1.message); }
+  } catch(e1) { console.warn("[IA] POST exception :", e1.message); }
 
   // ── ESSAI 2 : Pollinations.ai en GET avec system PROMPT TRONQUÉ (fallback courte URL) ──
-  // Si POST échoue (CORS, réseau), on essaie le GET avec un system prompt court (max 1500 chars)
   try {
-    var shortSys = sys.length > 1500 ? (sys.substring(0, 1500) + "\n[...persona tronqué pour URL...]") : sys;
+    var shortSys = sys.length > 1500 ? (sys.substring(0, 1500) + "\n[...persona tronqué...]") : sys;
     var url = "https://text.pollinations.ai/" + encodeURIComponent(shortSys + "\n\nQuestion: " + prompt + "\n\nRéponds en français:") + "?model=openai";
-    // Limite stricte d'URL : 1900 chars pour rester sous les 2048 standard
+    console.log("[IA] Essai 2 : GET (URL " + url.length + " chars)");
     if (url.length < 1900) {
       var resp2 = await fetch(url, { method: "GET", headers: { "Accept": "text/plain" } });
+      console.log("[IA] GET sys+prompt → status " + resp2.status);
       if (resp2.ok) {
         var txt2 = await resp2.text();
         if (txt2 && txt2.trim().length > 20) return txt2.trim();
       }
     } else {
-      console.warn("[Ambassa] URL trop longue (" + url.length + " chars), GET fallback ignoré");
+      console.warn("[IA] URL trop longue (" + url.length + " chars), saut");
     }
-  } catch(e2) { console.warn("[Ambassa] Pollinations GET:", e2.message); }
+  } catch(e2) { console.warn("[IA] GET sys+prompt exception :", e2.message); }
 
-  // ── ESSAI 3 : Pollinations en GET avec UNIQUEMENT le prompt utilisateur (dernier recours) ──
+  // ── ESSAI 3 : Pollinations en GET avec UNIQUEMENT le prompt (dernier recours) ──
   try {
-    var minimalUrl = "https://text.pollinations.ai/" + encodeURIComponent(prompt) + "?model=openai";
+    var minimalUrl = "https://text.pollinations.ai/" + encodeURIComponent(prompt);
+    console.log("[IA] Essai 3 : GET minimal (URL " + minimalUrl.length + " chars)");
     if (minimalUrl.length < 1900) {
       var resp3 = await fetch(minimalUrl);
+      console.log("[IA] GET minimal → status " + resp3.status);
       if (resp3.ok) {
         var txt3 = await resp3.text();
         if (txt3 && txt3.trim().length > 20) return txt3.trim();
       }
     }
-  } catch(e3) { console.warn("[Ambassa] Pollinations minimal:", e3.message); }
+  } catch(e3) { console.warn("[IA] GET minimal exception :", e3.message); }
 
-  return "⚠️ Service IA temporairement indisponible (problème de connexion). Vérifiez votre internet et réessayez dans quelques secondes. Si le problème persiste, consultez vos cours ou contactez votre enseignant.";
+  console.error("[IA] TOUS LES ESSAIS ONT ÉCHOUÉ — retour message d'erreur");
+  return "⚠️ Service IA temporairement indisponible. Si le problème persiste, ouvrez la console (F12) et envoyez les messages [IA] à votre administrateur.";
 }
 
 // ════════════════════════════════════════════════════════════════════
