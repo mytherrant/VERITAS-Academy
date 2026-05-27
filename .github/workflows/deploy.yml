@@ -71,7 +71,8 @@ jobs:
           # Logo
           if [ -f "Logo détouré.png" ]; then cp "Logo détouré.png" deploy/; fi
 
-          # Avatar IA Ambassa (photo Jacques Miterand TAKOU en blouse)
+          # Avatar IA Ambassa (portrait — .png ou .jpg selon disponibilité)
+          if [ -f "ambassa-avatar.png" ]; then cp "ambassa-avatar.png" deploy/; echo "  ✓ ambassa-avatar.png"; fi
           if [ -f "ambassa-avatar.jpg" ]; then cp "ambassa-avatar.jpg" deploy/; echo "  ✓ ambassa-avatar.jpg"; fi
 
           # .htaccess (sécurité + cache + MIME)
