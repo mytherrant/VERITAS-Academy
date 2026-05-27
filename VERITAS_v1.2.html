@@ -4026,11 +4026,11 @@ setInterval(_refreshCitation,15000);
   <!-- 3. Boutique (entrée directe — service phare) -->
   <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Boutique"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-shop"/></svg> Boutique</button>
 
-  <!-- 4. 🤖 IA & Mvondo (groupe) -->
+  <!-- 4. 🤖 IA & Ambassa (groupe) -->
   <div class="vnav-group">
     <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(99,102,241,.05));color:#6366F1;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Outils IA"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-brain"/></svg> IA <span style="opacity:.6;font-size:10px">▾</span></button>
     <div class="vnav-dropdown" role="menu">
-      <button role="menuitem" onclick="_navGo();mAgentMvondo()"><span style="font-size:18px;margin-right:6px">🎓</span><b>Prof. Mvondo</b><span class="vnav-dd-sub">Quiz · Évaluations · Fiches</span></button>
+      <button role="menuitem" onclick="_navGo();mAgentAmbassa()"><span style="font-size:18px;margin-right:6px">🎓</span><b>Prof. Ambassa</b><span class="vnav-dd-sub">Quiz · Évaluations · Fiches</span></button>
       <button role="menuitem" onclick="_navGo();mHubIA()"><span style="font-size:18px;margin-right:6px">🧠</span><b>Hub IA</b><span class="vnav-dd-sub">Devoir IA · Parcours adaptatif</span></button>
       <button role="menuitem" onclick="_navGo();mPhotoMathIA()"><span style="font-size:18px;margin-right:6px">📸</span><b>Photo Math</b><span class="vnav-dd-sub">Corrige un exercice en photo</span></button>
       <button role="menuitem" onclick="_navGo();mVeritasGenome()"><span style="font-size:18px;margin-right:6px">🧬</span><b>Mon Genome</b><span class="vnav-dd-sub">ADN académique personnel</span></button>
@@ -7663,13 +7663,13 @@ function vShowSec(sec,btn){
 
     <!-- v2.6 : Innovations IA déplacées dans nav 'IA ▾' (supprimé d'ici pour éviter doublon) -->
 
-    <!-- ═════ 🎓 BANDEAU MVONDO — Star feature mise en avant (v2.6) ═════ -->
-    <div class="v-reveal" onclick="mAgentMvondo()" role="link" tabindex="0" style="background:linear-gradient(135deg,#142554 0%,#7C3AED 60%,#EC4899 100%);color:#fff;padding:18px 22px;margin:18px 0;border-radius:18px;cursor:pointer;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(124,58,237,.3);transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+    <!-- ═════ 🎓 BANDEAU AMBASSA — Star feature mise en avant (v2.6) ═════ -->
+    <div class="v-reveal" onclick="mAgentAmbassa()" role="link" tabindex="0" style="background:linear-gradient(135deg,#142554 0%,#7C3AED 60%,#EC4899 100%);color:#fff;padding:18px 22px;margin:18px 0;border-radius:18px;cursor:pointer;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(124,58,237,.3);transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
       <div style="position:absolute;top:-20px;right:-20px;font-size:140px;opacity:.08;font-weight:900;font-family:Plus Jakarta Sans">M</div>
       <div style="position:relative;width:60px;height:60px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;font-family:Plus Jakarta Sans;flex-shrink:0;box-shadow:0 8px 24px rgba(0,0,0,.2)">M</div>
       <div style="position:relative;flex:1;min-width:240px">
         <div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#FFC93C;font-weight:800;margin-bottom:4px">✨ Nouveau · Agent IA pédagogique</div>
-        <div style="font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-size:22px;font-weight:900;line-height:1.15">Découvrez le Professeur Mvondo</div>
+        <div style="font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-size:22px;font-weight:900;line-height:1.15">Découvrez le Professeur Ambassa</div>
         <div style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.9);margin-top:4px">Quiz · Corrigés · Fiches révision · Évaluations notées en 30 secondes — 100% gratuit</div>
       </div>
       <div style="position:relative;background:#FFC93C;color:#142554;padding:10px 20px;border-radius:99px;font-weight:800;font-size:13px;font-family:Plus Jakarta Sans">Essayer →</div>
@@ -12509,7 +12509,7 @@ const SANAV=[
   ]}
 ];
 const TNAV=[
-  {s:"Mon espace",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"grades",i:"▦",l:"Saisie de notes"},{k:"devoirs_teacher",i:"📋",l:"Mes devoirs"},{k:"mvondo",i:"🎓",l:"Mvondo IA (Quiz, Évals, Fiches)"},{k:"perf_teacher",i:"📊",l:"Performances"},{k:"marketplace_teacher",i:"🛒",l:"Marketplace (vendre cours)"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"}]},
+  {s:"Mon espace",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"grades",i:"▦",l:"Saisie de notes"},{k:"devoirs_teacher",i:"📋",l:"Mes devoirs"},{k:"ambassa",i:"🎓",l:"Ambassa IA (Quiz, Évals, Fiches)"},{k:"perf_teacher",i:"📊",l:"Performances"},{k:"marketplace_teacher",i:"🛒",l:"Marketplace (vendre cours)"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"}]},
   {s:"Ressources",i:[{k:"books2",i:"▤",l:"Bibliothèque"},{k:"mybooks",i:"✍️",l:"Mes publications"},{k:"releve_template",i:"📋",l:"Relevé vierge"},{k:"submit_resource",i:"📤",l:"Soumettre ressource"}]}
 ];
 const ENAV=[
@@ -12636,7 +12636,7 @@ function render(p){
     calendrier_admin:pgCalendrierAdmin,
     partenaires_splits:pgPartenairesSplits,
     marketplace_teacher:pgMarketplaceEnseignant,
-    mvondo:pgMvondo,
+    ambassa:pgAmbassa,
     // Super Admin
     superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,
     // Guide d'utilisation (tous rôles)
@@ -16647,7 +16647,7 @@ function buildIntroVideoHtml_legacy(){
 window.AI_QUOTAS = {
   // [type d'action] : { anonyme, gratuit_sem, plan_starter_j, plan_pro_j, plan_elite, enseignant_j, admin }
   default:    { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 },
-  mvondo:     { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 },
+  ambassa:     { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 },
   devoir:     { anon:2,  free:3,  starter:5,  pro:30,  elite:-1, teach:50,  admin:-1 },
   photo_ia:   { anon:1,  free:2,  starter:3,  pro:15,  elite:-1, teach:20,  admin:-1 },
   orient:     { anon:1,  free:2,  starter:3,  pro:10,  elite:-1, teach:20,  admin:-1 },
@@ -16775,7 +16775,7 @@ window._aiGate = function(action){
 
 // Helper public : récupérer status quota (pour affichage badge)
 window._aiQuotaStatus = function(action){
-  action = action || 'mvondo';
+  action = action || 'ambassa';
   var tier = _aiTier();
   var limit = _aiLimit(action);
   var used = _aiUsed(action);
@@ -16794,7 +16794,7 @@ window._aiQuotaStatus = function(action){
 window._showQuotaExceeded = function(action, tier, used, limit){
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
   var labels = {
-    mvondo: 'Professeur Mvondo',
+    ambassa: 'Professeur Ambassa',
     devoir: 'Devoir corrigé par IA',
     photo_ia: 'Photo Math IA',
     orient: 'Orientation IA',
@@ -16813,7 +16813,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
       +'<div style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:16px;border-radius:14px;margin-bottom:14px;text-align:left">'
         +'<div style="font-weight:900;font-size:15px;margin-bottom:6px">✨ Inscrivez-vous GRATUITEMENT et recevez :</div>'
         +'<ul style="margin:0;padding-left:20px;font-size:13px;line-height:1.8">'
-        +'<li>3 essais Mvondo / semaine</li>'
+        +'<li>3 essais Ambassa / semaine</li>'
         +'<li>Sauvegarde de votre progression</li>'
         +'<li>500 FCFA de crédit par ami parrainé</li>'
         +'<li>Badges + Genome + Wrapped annuel</li>'
@@ -16828,7 +16828,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
       +'<div style="font-family:Plus Jakarta Sans,sans-serif;font-size:20px;font-weight:800;color:#142554;margin-bottom:6px">Quota hebdomadaire atteint</div>'
       +'<div style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:16px">Vous avez utilisé <b>'+used+'/'+limit+' essais</b> de '+label+' '+periodTxt+'.<br>Le quota se réinitialise lundi prochain.</div>'
       +'<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:14px;border-radius:12px;text-align:left;margin-bottom:14px">'
-        +'<div style="font-weight:800;color:#92400E;font-size:13px;margin-bottom:8px">🚀 Passez à un plan pour utiliser Mvondo sans limite :</div>'
+        +'<div style="font-weight:800;color:#92400E;font-size:13px;margin-bottom:8px">🚀 Passez à un plan pour utiliser Ambassa sans limite :</div>'
         +'<table style="width:100%;font-size:12px;color:#78350F"><tr><td><b>Starter</b></td><td>5 essais/jour</td><td><b>3 000 FCFA/mois</b></td></tr>'
         +'<tr><td><b>Pro</b></td><td>30 essais/jour</td><td><b>8 000 FCFA/mois</b></td></tr>'
         +'<tr><td><b>Elite</b></td><td>Illimité</td><td><b>15 000 FCFA/mois</b></td></tr></table>'
@@ -16854,7 +16854,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
 
 // Badge "quotas restants" — petit affichage discret en haut du Hub IA
 window._aiQuotaBadgeHtml = function(action){
-  action = action || 'mvondo';
+  action = action || 'ambassa';
   var st = _aiQuotaStatus(action);
   if(st.unlimited) return '<span style="font-size:11px;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:3px 10px;border-radius:99px;font-weight:800">∞ Illimité</span>';
   var color = st.remaining===0 ? '#DC2626' : st.remaining<=2 ? '#F59E0B' : '#10B981';
@@ -21005,14 +21005,9 @@ function _showLittAnalyse(oeuvreKey){
     +'<div style="padding:32px 36px">'
       +paragraphesHtml
     +'</div>'
-    // Footer hashtags + analyste
+    // Footer analyste (hashtags retirés du rendu — données préservées dans LITT_OEUVRES pour SEO)
     +'<footer style="padding:20px 32px;background:linear-gradient(180deg,#FAFBFF,#F8FAFC);border-top:1px solid rgba(124,58,237,.1)">'
-      +(a.hashtags&&a.hashtags.length?
-        '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">'
-        +a.hashtags.map(function(t){return '<span style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:700;color:#7C3AED;background:#FAF5FF;padding:4px 10px;border-radius:12px;border:1px solid rgba(124,58,247,.2)">'+_esc(t)+'</span>';}).join('')
-        +'</div>'
-      :'')
-      +'<div style="display:flex;align-items:center;gap:10px;font-size:11.5px;color:#64748B;border-top:1px dashed rgba(124,58,247,.2);padding-top:14px;margin-top:8px">'
+      +'<div style="display:flex;align-items:center;gap:10px;font-size:11.5px;color:#64748B;padding-top:6px">'
         +'<span style="font-size:22px">📝</span>'
         +'<span style="flex:1"><strong style="color:#7C3AED">'+_esc(a.analyste||'Analyse Çameditlivre · VÉRITAS')+'</strong><br>Inspiré du style éditorial de Çameditlivre · Approche personnelle et littéraire des œuvres au programme MINESEC.</span>'
       +'</div>'
@@ -33594,10 +33589,10 @@ window.mHubIA = function(){
       +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#065F46;font-size:15px">🧭 Orientation par IA</div><div style="font-size:12px;color:#047857;margin-top:3px;line-height:1.4">Découvrez les filières et écoles adaptées à votre profil et vos résultats</div></div>'
       +'<div style="color:#059669;font-size:20px;align-self:center">→</div>'
     +'</div>'
-    // v2.5 : Agent Mvondo (concurrent de Didactia/Leopold)
-    +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);padding:14px;border-radius:14px;border:1px solid #A855F7;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:transform .2s;color:#fff" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();mAgentMvondo()">'
+    // v2.5 : Agent Ambassa (concurrent de Didactia/Leopold)
+    +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);padding:14px;border-radius:14px;border:1px solid #A855F7;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:transform .2s;color:#fff" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();mAgentAmbassa()">'
       +'<div style="width:48px;height:48px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:900;font-size:22px;font-family:Plus Jakarta Sans">M</div>'
-      +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#FFC93C;font-size:15px">🎓 Professeur Mvondo</div><div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:3px;line-height:1.4">Agent IA pédagogique : quiz, corrigés, fiches révision, évaluations notées… <em style="color:#FFC93C">7 capacités pour enseignants &amp; élèves</em></div></div>'
+      +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#FFC93C;font-size:15px">🎓 Professeur Ambassa</div><div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:3px;line-height:1.4">Agent IA pédagogique : quiz, corrigés, fiches révision, évaluations notées… <em style="color:#FFC93C">7 capacités pour enseignants &amp; élèves</em></div></div>'
       +'<div style="color:#FFC93C;font-size:20px;align-self:center">→</div>'
     +'</div>'
     +(connected
@@ -35335,16 +35330,704 @@ try { MULTITENANT.init(); } catch(e){}
 
 // ════════════════════════════════════════════════════════════════════
 // ════════════════════════════════════════════════════════════════════
-// v2.5 — 🎓 AGENT IA PÉDAGOGIQUE "MVONDO" (concurrent de Didactia/Leopold)
+// v2.5 — 🎓 AGENT IA PÉDAGOGIQUE "AMBASSA" (concurrent de Didactia/Leopold)
 // ════════════════════════════════════════════════════════════════════
 // 7 capacités : quiz, corrigés, exercices différenciés, fiches révision,
 // remédiation, transformation éval notée, analyse document
-// Persona : Mvondo, professeur agrégé camerounais — connaît MINESEC,
+// Persona : Ambassa, professeur agrégé camerounais — connaît MINESEC,
 // programme BEPC/Probatoire/BAC, contexte CM (Douala, Yaoundé...)
 
-window.MVONDO_PERSONA = "Tu es Mvondo, professeur agrégé camerounais experimenté du système MINESEC (collège et lycée). Tu connais parfaitement les programmes BEPC, Probatoire et BAC séries A/C/D. Tu contextualises tes exemples dans la réalité camerounaise (Douala, Yaoundé, francophone bilingue). Tu rédiges en français correct, niveau MINESEC. Tes réponses sont structurées, claires, pédagogiques. Tu n'inventes JAMAIS de faits — si tu ne sais pas, tu le dis.";
+// ────────────────────────────────────────────────────────────────────
+// LISTE OFFICIELLE MANUELS MINESEC 2025/2026 (ESG — 1er et 2nd cycle)
+// Source : Arrêté MINESEC/CAB, signé du Ministre.
+// Usage : référence boutique VÉRITAS + recommandations IA Ambassa.
+// ────────────────────────────────────────────────────────────────────
+window.MANUELS_MINESEC_2025 = {
+  source: "Arrêté MINESEC/CAB — Liste officielle 2025/2026 (ESG 1er et 2nd cycle)",
+  devise: "FCFA",
+  classes: {
+    "6e": [
+      { matiere:"Langue française", titre:"Français 6ème", auteurs:"Owona, Ben Cohen", editeur:"NATHAN", prix:4200 },
+      { matiere:"Littérature", titre:"Les Chants de la Forêt", auteurs:"Lucien Anya Noa", editeur:"AFREDIT", prix:1900 },
+      { matiere:"Littérature", titre:"Les Bimanes", auteurs:"Séverin Cécile Abéga", editeur:"EDICEF", prix:2000 },
+      { matiere:"Littérature", titre:"Les Contes de Korotoumou", auteurs:"Amadou Koné", editeur:"Vallesse", prix:2200 },
+      { matiere:"Anglais", titre:"Anglais 6ème", auteurs:"Ombga, Enyegue, Mbeudeu", editeur:"Africa Education", prix:5000 },
+      { matiere:"Latin", titre:"Latinistas 6ème-5ème", auteurs:"Ottou Fouda, Sabikanda", editeur:"Eclosion", prix:5000 },
+      { matiere:"Histoire", titre:"Planète Cameroun 6ème-5ème", auteurs:"Botnem, Ekollo Sono, Mvele", editeur:"Hatier-ERA", prix:4200 },
+      { matiere:"Géographie", titre:"Planète Cameroun 6ème", auteurs:"Botnem, Ekollo Sono, Mvele", editeur:"EDICEF-ERA", prix:4200 },
+      { matiere:"ECM", titre:"Éducation à la citoyenneté 6ème/5ème", auteurs:"Kouna Bah, Ayuk Ayuk, Ndolo", editeur:"MONDOUX", prix:3500 },
+      { matiere:"Mathématiques", titre:"Mathématiques 6ème", auteurs:"Pôfcam, Talla Ndé, Yadaci", editeur:"MONDOUX", prix:4000 },
+      { matiere:"Sciences", titre:"Sciences 6ème", auteurs:"Bayetmi, Dchinda, Essimbi", editeur:"Africa Education", prix:5000 },
+      { matiere:"Informatique", titre:"Informatique 6ème", auteurs:"Jean Paul Paul, Wida Orpa", editeur:"Eclosion", prix:3500 }
+    ],
+    "5e": [
+      { matiere:"Langue française", titre:"Français 5ème", auteurs:"Modo, Nti, Ngo Kendeg", editeur:"Africa Education", prix:4500 },
+      { matiere:"Littérature", titre:"L'Arbre Fétiche", auteurs:"Jean Pliya", editeur:"CLE", prix:2000 },
+      { matiere:"Littérature", titre:"N'kum-Wam, le huitième notable", auteurs:"David Massoma Pandong", editeur:"AFREDIT", prix:2000 },
+      { matiere:"Littérature", titre:"Père inconnu", auteurs:"Pabe Mongo", editeur:"EDICEF/NEA", prix:2000 },
+      { matiere:"Anglais", titre:"Anglais 5ème", auteurs:"Ombga, Enyegue, Mbeudeu", editeur:"Africa Education", prix:4500 },
+      { matiere:"Latin", titre:"Latinistas 6ème-5ème", auteurs:"Ottou Fouda, Sabikanda", editeur:"Eclosion", prix:5000 },
+      { matiere:"Histoire", titre:"Planète Cameroun 6ème-5ème", auteurs:"Botnem, Ekollo Sono, Mvele", editeur:"Hatier-ERA", prix:4200 },
+      { matiere:"Géographie", titre:"Planète Cameroun 5ème", auteurs:"Botnem, Ekollo Sono, Mvele", editeur:"EDICEF-ERA", prix:4300 },
+      { matiere:"ECM", titre:"Éducation à la citoyenneté 6ème/5ème", auteurs:"Kouna Bah, Ayuk Ayuk, Ndolo", editeur:"MONDOUX", prix:3500 },
+      { matiere:"Mathématiques", titre:"Mathématiques 5ème", auteurs:"Nyanda Nkamwa, Kajoue W.", editeur:"COSMOS", prix:4200 },
+      { matiere:"Sciences", titre:"Sciences 5ème", auteurs:"Pouofo Nguiam, Fogha Z.", editeur:"CLE", prix:4000 },
+      { matiere:"Informatique", titre:"Informatique 5ème", auteurs:"Enyegue, Bolda", editeur:"NMI", prix:4000 }
+    ],
+    "4e": [
+      { matiere:"Langue française", titre:"Français 4ème", auteurs:"Ndaitara, Essomba, Lessomo", editeur:"Africa Education", prix:5000 },
+      { matiere:"Littérature", titre:"Trois prétendants, un mari", auteurs:"Guillaume Oyono Mbia", editeur:"CLE", prix:2500 },
+      { matiere:"Littérature", titre:"Cœur du Sahel", auteurs:"Djaïli Amadou Amal", editeur:"Proximité", prix:2500 },
+      { matiere:"Littérature", titre:"L'attachement au sol natal", auteurs:"Ernest Alima", editeur:"Ifrikiya", prix:1900 },
+      { matiere:"Anglais", titre:"L'Éveil en Anglais 4ème", auteurs:"Proboh, Etame, Ngwang", editeur:"NMI", prix:4000 },
+      { matiere:"Latin", titre:"Latinistas 4ème-3ème", auteurs:"Ottou Fouda, Sabikanda", editeur:"Eclosion", prix:5000 },
+      { matiere:"Grec", titre:"Je découvre la langue grecque 4ème-3ème", auteurs:"Ottou Fouda, Sabikanda", editeur:"Eclosion", prix:5000 },
+      { matiere:"Arabe", titre:"J'apprends l'Arabe 4ème", auteurs:"S. Abba, M. Bachirou, M. Baba", editeur:"Wisdom Publ.", prix:3000 },
+      { matiere:"Histoire", titre:"Planète Cameroun 4ème", auteurs:"Botnem, Ekollo Sono, Mvele", editeur:"Hatier-ERA", prix:3700 },
+      { matiere:"Géographie", titre:"Planète Cameroun 4ème", auteurs:"Botnem, Ekollo Sono, Mvele", editeur:"EDICEF-ERA", prix:4300 },
+      { matiere:"ECM", titre:"Éducation à la citoyenneté 4ème-3ème", auteurs:"Kouna Bah, Ayuk Ayuk, Ndolo", editeur:"MONDOUX", prix:3500 },
+      { matiere:"Allemand", titre:"Erwachen/Allemand 4ème", auteurs:"Mponoh, Ndam, Njeupam", editeur:"NMI", prix:4500 },
+      { matiere:"Espagnol", titre:"Nueva Didactica del Espanol 1", auteurs:"Habissou Bidoung, Sepulveda", editeur:"HABIBI", prix:5500 },
+      { matiere:"Italien", titre:"Didactica del'Italiano", auteurs:"Mathias H. Bikitik", editeur:"L'Harmattan", prix:3000 },
+      { matiere:"Chinois", titre:"J'aime le Chinois 4ème", auteurs:"Nama, Tidjon, Gouelekam", editeur:"Africa Education", prix:5500 },
+      { matiere:"Mathématiques", titre:"Mathématiques 4ème", auteurs:"Tchoutio, Tchouaffi, Bona", editeur:"Belles Lettres", prix:4500 },
+      { matiere:"SVTEEHB", titre:"SVTEEHB 4ème", auteurs:"Mondoman, Ntock Beng", editeur:"MONDOUX", prix:4000 },
+      { matiere:"PCT", titre:"Physique, Chimie, Technologie 4ème", auteurs:"Tagni, Abéga, Ango", editeur:"NMI", prix:4200 },
+      { matiere:"Informatique", titre:"Informatique 4ème", auteurs:"Jean Paul Paul, Wida Orpa", editeur:"Eclosion", prix:4000 }
+    ],
+    "3e": [
+      { matiere:"Langue française", titre:"Français 3ème", auteurs:"Ndaitara, Essomba, Lessomo", editeur:"Africa Education", prix:5000 },
+      { matiere:"Littérature", titre:"Ville cruelle", auteurs:"Mongo Beti", editeur:"Présence Africaine", prix:2500 },
+      { matiere:"Littérature", titre:"La marmite de Koka Mbala", auteurs:"Guy Menga", editeur:"CLE", prix:1700 },
+      { matiere:"Littérature", titre:"Petites gouttes de chant pour créer l'homme", auteurs:"René Philombe", editeur:"CLE", prix:2000 },
+      { matiere:"Anglais", titre:"L'Éveil en Anglais", auteurs:"Proboh, Etame, Ngwang", editeur:"NMI", prix:4500 },
+      { matiere:"Latin", titre:"Latinistas 4ème-3ème", auteurs:"Ottou Fouda, Sabikanda", editeur:"Eclosion", prix:5000 },
+      { matiere:"Grec", titre:"Je découvre la langue grecque 4ème-3ème", auteurs:"Ottou Fouda, Sabikanda", editeur:"Eclosion", prix:5000 },
+      { matiere:"Arabe", titre:"J'apprends l'Arabe 3ème", auteurs:"S. Abba, M. Bachirou, M. Baba", editeur:"Wisdom Publ.", prix:3000 },
+      { matiere:"Histoire", titre:"Planète Cameroun 3ème", auteurs:"Botnem, Ekollo Sono, Mvele", editeur:"Hatier-ERA", prix:3700 },
+      { matiere:"Géographie", titre:"Planète Cameroun 3ème", auteurs:"Botnem, Ekollo Sono, Mvele", editeur:"EDICEF-ERA", prix:4300 },
+      { matiere:"ECM", titre:"Éducation à la citoyenneté 4ème-3ème", auteurs:"Bah et autres", editeur:"MONDOUX", prix:3500 },
+      { matiere:"Allemand", titre:"Erwachen/Allemand 3ème", auteurs:"Mponoh, Ndam, Njeupam", editeur:"NMI", prix:4500 },
+      { matiere:"Espagnol", titre:"Nueva Didactica Del Espanol 2", auteurs:"Habissou Bidoung, Sepulveda", editeur:"HABIBI", prix:5500 },
+      { matiere:"Italien", titre:"Didactica Del'Italiano", auteurs:"Mathias H. Bikitik", editeur:"L'Harmattan", prix:3500 },
+      { matiere:"Chinois", titre:"J'aime le Chinois 3ème", auteurs:"Nama, Tidjon, Gouelekam", editeur:"Africa Education", prix:4000 },
+      { matiere:"Mathématiques", titre:"Mathématiques 3ème", auteurs:"Djapa Oumbo, Nguele", editeur:"D and L", prix:4500 },
+      { matiere:"SVTEEHB", titre:"SVTEEHB 3ème", auteurs:"Bayemi, Dchinda", editeur:"Africa Education", prix:5000 },
+      { matiere:"PCT", titre:"Physique, Chimie, Technologie 3ème", auteurs:"Nsa, Peha, Heumou, Kesso", editeur:"Wisdom", prix:4500 },
+      { matiere:"Informatique", titre:"Informatique 3ème", auteurs:"Jean Paul Paul, Wida Orpa", editeur:"Eclosion", prix:4000 }
+    ],
+    "2nde": [
+      { matiere:"Philosophie", titre:"L'Excellence en philosophie", auteurs:"Tiako Youadjeu, Miyoupo", editeur:"NMI", prix:4000 },
+      { matiere:"Langue française", titre:"Langue et Méthode au 2nde cycle", auteurs:"Lessomo Edene et alii", editeur:"Africa Education", prix:5000 },
+      { matiere:"Littérature", titre:"Les Tribus de Capitoline", auteurs:"P.C. Ombété Bella", editeur:"CLE", prix:3000 },
+      { matiere:"Littérature", titre:"Poèmes sauvages éclairés au feu de brousse", auteurs:"Henri Nkoumo", editeur:"Les Classiques", prix:1700 },
+      { matiere:"Littérature", titre:"Tartuffe", auteurs:"Molière", editeur:"Belles Lettres", prix:2000 },
+      { matiere:"Anglais", titre:"Interactions in English", auteurs:"Dorothy Forbin et alii", editeur:"CAMBRIDGE", prix:5000 },
+      { matiere:"Histoire", titre:"Le Monde. De la préhistoire au Moyen-Âge", auteurs:"Daniel Abwa, S. Mani Noah", editeur:"CLE", prix:4000 },
+      { matiere:"Géographie", titre:"Manuel en cours de production", auteurs:"MINESEC", editeur:"MINESEC", prix:0 },
+      { matiere:"ECM", titre:"Éducation à la citoyenneté et à la morale", auteurs:"Kouna Bah Jean Didier et alii", editeur:"MONDOUX", prix:3000 },
+      { matiere:"Allemand", titre:"IHR und WIR Plus 3", auteurs:"Moussa Anouma et autres", editeur:"HUEBER", prix:6000 },
+      { matiere:"Espagnol", titre:"Nueva Didactica del Espanol III", auteurs:"Habissou Bidoung et autres", editeur:"HABIBI", prix:4900 },
+      { matiere:"Chinois", titre:"Bonjour Cameroun 3", auteurs:"Didier Nama", editeur:"D&L", prix:3500 },
+      { matiere:"Mathématiques (A/SES)", titre:"L'Excellence en Mathématiques", auteurs:"V. Tegninko Valentin", editeur:"NMI", prix:4500 },
+      { matiere:"Sciences (A/SES)", titre:"Sciences", auteurs:"Fogha, Pouofo et autres", editeur:"CLE", prix:3500 },
+      { matiere:"Informatique (A/SES)", titre:"L'Excellence en Informatique", auteurs:"Djonwajar et al.", editeur:"NMI", prix:3100 },
+      { matiere:"Mathématiques (C/E)", titre:"L'Excellence en Mathématiques", auteurs:"Tegninko V., Sienlinou D.", editeur:"NMI", prix:5500 },
+      { matiere:"SVTEEHB (C/E)", titre:"SVTEEHB", auteurs:"Fogha, Pouofo et autres", editeur:"CLE", prix:5000 },
+      { matiere:"Physique-Chimie (C/E)", titre:"L'Excellence en Physique-Chimie", auteurs:"Ango Yves P., Tagni Jérémie", editeur:"NMI", prix:6000 },
+      { matiere:"Informatique (C/E)", titre:"L'Excellence en Informatique", auteurs:"Badane Djonwajar et al.", editeur:"NMI", prix:3100 },
+      { matiere:"Arts cinématographiques (AC)", titre:"Initiation aux Arts cinématographiques", auteurs:"F.N. Bikoï, Basseck Ba Kobhio", editeur:"Terre Africaine", prix:5000 }
+    ],
+    "1ere": [
+      { matiere:"Langue française", titre:"Langue et Méthode au 2nde cycle", auteurs:"Lessomo Edene et autres", editeur:"AFRIC'EDUC", prix:5000 },
+      { matiere:"Littérature", titre:"Au Cœur des ténèbres", auteurs:"Joseph Conrad", editeur:"Eclosion", prix:1900 },
+      { matiere:"Littérature", titre:"Balafon", auteurs:"Engelbert Mveng", editeur:"CLE", prix:1800 },
+      { matiere:"Littérature", titre:"Le Lion et la perle", auteurs:"Wole Soyinka", editeur:"CLE", prix:1700 },
+      { matiere:"Philosophie (littéraires)", titre:"Philosophie 1ères littéraires", auteurs:"Foumane Josué D. et autres", editeur:"MONDOUX", prix:4500 },
+      { matiere:"Philosophie (scientifiques)", titre:"Philosophie 1ères Scientifiques", auteurs:"Foumane Josué D. et autres", editeur:"MONDOUX", prix:3000 },
+      { matiere:"Anglais", titre:"Interactions in English", auteurs:"Dorothy Forbin and others", editeur:"CAMBRIDGE", prix:4500 },
+      { matiere:"Histoire", titre:"Le Monde. De la fin du XVIè siècle à 1939", auteurs:"Daniel Abwa, S. Mani Noah", editeur:"CLE", prix:4500 },
+      { matiere:"Géographie", titre:"Manuel en cours de production", auteurs:"MINESEC", editeur:"MINESEC", prix:0 },
+      { matiere:"ECM", titre:"Éducation à la citoyenneté 1ère", auteurs:"Kouna Bah Jean et autres", editeur:"MONDOUX", prix:3000 },
+      { matiere:"Allemand", titre:"Deutsch in Africa", auteurs:"Ebissemie Marthe", editeur:"ABID", prix:5000 },
+      { matiere:"Espagnol", titre:"Nueva Didactica del Espanol IV", auteurs:"Habissou Bidoung", editeur:"HABIBI", prix:5900 },
+      { matiere:"Chinois", titre:"Bonjour Cameroun 4", auteurs:"Didier Nama", editeur:"D&L", prix:3500 },
+      { matiere:"Mathématiques (A/SES)", titre:"Majors en Mathématiques", auteurs:"Nkeng Essombo et autres", editeur:"ASVA", prix:3500 },
+      { matiere:"Sciences (A/SES)", titre:"SCIENCES", auteurs:"Fogha V. J. et autres", editeur:"CLE", prix:5000 },
+      { matiere:"Informatique (A/SES)", titre:"À la conquête de l'informatique 1ère", auteurs:"Wambo, Kotto, Temgoua", editeur:"R. LUSTRAL", prix:3400 },
+      { matiere:"Mathématiques (C/E)", titre:"L'Excellence en Mathématiques", auteurs:"V. Tegninko et autres", editeur:"NMI", prix:6500 },
+      { matiere:"SVTEEHB (C/E)", titre:"L'Excellence en SVTEEHB 1ère", auteurs:"Oumarou Bibi, Ebang", editeur:"NMI", prix:6500 },
+      { matiere:"Physique (C/E)", titre:"L'Excellence en Physique 1ère", auteurs:"Tagni Jérémie, Ango Yves", editeur:"NMI", prix:5000 },
+      { matiere:"Chimie (C/E)", titre:"L'Excellence en Chimie", auteurs:"Ango Yves, Abega F. et autres", editeur:"NMI", prix:4500 },
+      { matiere:"Informatique (C/E)", titre:"À la conquête de l'informatique", auteurs:"Wambo, Kotto, Temgoua", editeur:"R. LUSTRAL", prix:3600 },
+      { matiere:"Mathématiques (D/TI)", titre:"Mathématiques 1ère D et TI", auteurs:"Nkeng Essombo et autres", editeur:"CEPER", prix:5500 },
+      { matiere:"SVTEEHB (D/TI)", titre:"SVTEEHB", auteurs:"Fogha Zaboue, Mbia Ombolo", editeur:"CLE", prix:6500 },
+      { matiere:"Informatique (D/TI)", titre:"À la conquête de l'informatique", auteurs:"Wambo, Kotto, Temgoua", editeur:"R. LUSTRAL", prix:3600 },
+      { matiere:"Chimie (D/TI)", titre:"L'Excellence en Chimie", auteurs:"Ango Yves P., Abega F. et alii", editeur:"NMI", prix:4500 }
+    ],
+    "tle": [
+      { matiere:"Langue française", titre:"Langue et méthode au 2nd cycle", auteurs:"Lessomo Edene et autres", editeur:"AFRIC'EDUC", prix:5000 },
+      { matiere:"Littérature", titre:"Stances et poèmes suivi de Les Épreuves", auteurs:"Sully Prudhomme", editeur:"Eclosion", prix:1900 },
+      { matiere:"Littérature", titre:"Le Vieux nègre et la médaille", auteurs:"Ferdinand Oyono", editeur:"EDICEF", prix:2500 },
+      { matiere:"Littérature", titre:"Ngum a Jemea. La foi inébranlable de Rudolf Duala Manga Bell", auteurs:"David Mbanga Eyombwan", editeur:"CICD", prix:3000 },
+      { matiere:"Anglais", titre:"Interaction in English", auteurs:"Dorothy Forbin and others", editeur:"CAMBRIDGE", prix:5000 },
+      { matiere:"Histoire", titre:"Histoire Tle", auteurs:"Kouna Bah, Ayuk Ayuk", editeur:"MONDOUX", prix:5000 },
+      { matiere:"Géographie", titre:"Manuel en cours de production", auteurs:"MINESEC", editeur:"MINESEC", prix:0 },
+      { matiere:"ECM", titre:"Éducation à la citoyenneté et à la morale", auteurs:"Kouna Bah Jean D. et autres", editeur:"MONDOUX", prix:3900 },
+      { matiere:"Allemand", titre:"Ihr und Wir Plus 4", auteurs:"Moussa Anouma et autres", editeur:"HUEBER", prix:5000 },
+      { matiere:"Espagnol", titre:"Nueva Didactica Del Espanol V", auteurs:"Habissou Bidoung, Félix S.", editeur:"HABIBI", prix:6000 },
+      { matiere:"Italien", titre:"Piacere ! Niveau 4/B1", auteurs:"Alexandra R. Martinez", editeur:"BELIN", prix:6000 },
+      { matiere:"Chinois", titre:"Bonjour Cameroun 4", auteurs:"Didier Nama", editeur:"D&L", prix:3500 },
+      { matiere:"Philosophie (littéraires)", titre:"Émergeons en Philosophie. Tles littéraires", auteurs:"Eboni, Nguefack, Ambomo", editeur:"MONDOUX", prix:7800 },
+      { matiere:"Philosophie (SES)", titre:"Majors en Philosophie. Tles SES", auteurs:"Foumane, Ombede A. et alii", editeur:"ASVA", prix:5000 },
+      { matiere:"Philosophie (C et D)", titre:"Émergeons en Philosophie. Tles C et D", auteurs:"Nguefack, Eboni, Ambomo", editeur:"MONDOUX", prix:5000 },
+      { matiere:"Philosophie (essai)", titre:"De la médiocrité à l'excellence", auteurs:"Ébénézer Njoh Mouelle", editeur:"CLE", prix:3000 },
+      { matiere:"Philosophie (essai)", titre:"Essai sur la problématique philosophique dans l'Afrique actuelle", auteurs:"Marcien Towa", editeur:"CLE", prix:1800 },
+      { matiere:"Mathématiques (A/SES)", titre:"Majors en Mathématiques", auteurs:"Fouda S., Nkoule", editeur:"ASVA", prix:3900 },
+      { matiere:"Informatique (A/SES)", titre:"À la conquête de l'informatique", auteurs:"Wambo, Momnougui et alii", editeur:"R. LUSTRAL", prix:3500 },
+      { matiere:"Sciences (littéraires)", titre:"L'Excellence en Sciences", auteurs:"Ebang Ehole et autres", editeur:"NMI", prix:4000 },
+      { matiere:"Mathématiques (C/E)", titre:"Émergeons en Mathématiques", auteurs:"Pokam, Ta Ha Nde, Ndjip N.", editeur:"MONDOUX", prix:6000 },
+      { matiere:"Physique (C/D/E/TI)", titre:"L'Excellence en Physique", auteurs:"Ango Y., Tagni J. et autres", editeur:"NMI", prix:6500 },
+      { matiere:"Chimie (C/D/E/TI)", titre:"Chimie Terminales C, D et E", auteurs:"Ango Y., Abega F. et autres", editeur:"NMI", prix:5500 },
+      { matiere:"SVTEEHB (C/TI)", titre:"SVTEEHB, Tles C et TI", auteurs:"Essimbi Ngono, Mbarga Panda", editeur:"MONDOUX", prix:6500 },
+      { matiere:"Mathématiques (D/TI)", titre:"Émergeons en Mathématiques", auteurs:"Pokam, Ta Ha Nde, Ndjip", editeur:"MONDOUX", prix:5500 },
+      { matiere:"SVTEEHB (D)", titre:"SVTEEHB, Tle D", auteurs:"Njoumbe, Fogha, Pouofo", editeur:"CLE", prix:8000 },
+      { matiere:"Informatique (C/D/E/TI)", titre:"À la conquête de l'informatique", auteurs:"Wambo, Momnougui, T.", editeur:"R. LUSTRAL", prix:3900 }
+    ]
+  }
+};
 
-window.MVONDO_TACHES = [
+// ────────────────────────────────────────────────────────────────────
+// BIBLIOTHÈQUE LITTÉRAIRE AFRICAINE/FRANCOPHONE — 99 auteurs majeurs
+// Source : index biblio_search.py (2 484 œuvres, 1.4M passages indexés)
+// Format : {a:auteur, n:nombre d'œuvres, t:[titres principaux]}
+// ────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────────────────────────
+// STRUCTURES OFFICIELLES DES ÉPREUVES MINESEC (BEPC / Probatoire / BAC / GCE / Technique)
+// Source : sujetexa.com (annales officielles 2020-2026) + skills VÉRITAS + standards MINESEC
+// Usage : référence Ambassa pour générer corrigés/épreuves conformes
+// ────────────────────────────────────────────────────────────────────
+window.STRUCTURES_EPREUVES_MINESEC = {
+  source: "Annales sujetexa.com + grilles OBC + standards MINESEC 2025/2026",
+  series_officielles: {
+    BEPC: ["Toutes séries"],
+    Probatoire: ["A4", "ABI", "ACA", "ACC", "CG", "SH", "C", "D", "E", "TI", "F (industriel)", "STT"],
+    BAC: ["A4", "ABI", "ACA", "ACC", "CG", "SH", "C", "D", "E", "TI", "F1-F4", "STT"],
+    GCE_O_Level: ["Forms I-V"],
+    GCE_A_Level: ["Lower Sixth", "Upper Sixth"]
+  },
+  // ──── BEPC (3e, toutes séries) — Format MINESEC officiel ────
+  // ⚠️ FRANÇAIS BEPC = 3 ÉPREUVES SÉPARÉES (pas de dictée — la dictée est en séquence/composition interne uniquement)
+  // Source vérifiée : DRES/EST-IRP/LAL Avril 2025 · DRES-ADAMAOUA Blanc 2025 · DRES-NORD harmonisé 2022-2023
+  BEPC: {
+    "Correction orthographique (1re épreuve français)": {
+      duree:"45 min", coef:1, total:20,
+      consigne_officielle:"Le texte ci-après comporte des fautes. Corrigez-les en rayant d'un seul trait le mot incorrect et en écrivant le mot correct au-dessus.",
+      structure:"Texte 130-180 mots extrait d'une œuvre publiée (auteur africain/camerounais préféré). 15 fautes délibérées = 20 pts exactement.",
+      bareme_categories:{
+        "Ponctuation/Accent manquant":"0,5 pt × 4 fautes = 2 pts",
+        "Orthographe simple (lettre manquante, doublement)":"1 pt × 4 fautes = 4 pts",
+        "Grammaire (accord PP, sujet-verbe, adjectif)":"2 pts × 4 fautes = 8 pts",
+        "Orthographe avec incidence sémantique (homophones)":"2 pts × 3 fautes = 6 pts"
+      },
+      remarque:"Le texte source CORRECT n'est jamais donné à l'élève — uniquement dans le corrigé enseignant."
+    },
+    "Étude de texte (2e épreuve français)": {
+      duree:"1h", coef:1, total:20,
+      structure:"Texte 250-350 mots avec chapeau introductif et référence bibliographique. Partie I Compréhension 10 pts + Partie II Connaissance et maniement de la langue 10 pts.",
+      partie_I_comprehension:{
+        nb_questions:"5 questions = 10 pts",
+        types:["thème du texte (2 pts)", "champ lexical à relever (2 pts)", "explication mot/expression (1-2 pts)", "sens propre vs figuré justifié (2 pts)", "sentiments/opinion justifiée (2 pts)", "inférence sur les personnages"]
+      },
+      partie_II_langue:{
+        nb_questions:"4 questions = 10 pts",
+        types:["nature/fonction de propositions", "temps et modes verbaux (identification + réécriture)", "discours direct ↔ indirect", "figures de style", "réécriture en proposition subordonnée circonstancielle (cause/conséquence/temps)", "valeur des connecteurs logiques"]
+      },
+      regle:"Réponses exigées en phrases complètes. Toujours justifier les identifications grammaticales."
+    },
+    "Expression écrite (3e épreuve français — CANEVAS MINESEC OBLIGATOIRE)": {
+      duree:"2h", coef:2, total:20,
+      structure:"2 sujets au choix (argumentatif OU narratif/descriptif). Le candidat traite UN SEUL SUJET — pénalité s'il traite les deux.",
+      canevas_invariable:{
+        composition:"[Contexte/situation 2-4 lignes] + [EXTRAIT ENCADRÉ avec auteur, titre italique, éditeur, ville, année] + [Tâche : Produis un texte à dominante argumentative/narrative/descriptive] + 3 consignes numérotées",
+        consigne_1:"INTRODUCTION DE SIX LIGNES ENVIRON — pose le problème / précise les circonstances",
+        consigne_2:"2 SOUS-PARAGRAPHES D'UNE DOUZAINE DE LIGNES CHACUN — souvent (a) 3 causes + (b) 3 conséquences OU (a) temps forts + (b) atmosphère OU (a) portrait + (b) actions",
+        consigne_3:"CONCLUSION DE 6 À 8 LIGNES — 2 conseils / 2 sentiments / 3 solutions"
+      },
+      bareme:{
+        "Consigne 1 (Introduction : problème posé, longueur, fluidité)":"3-4 pts",
+        "Consigne 2a (§1 développement : 3 éléments + cohérence)":"4-5 pts",
+        "Consigne 2b (§2 développement : 3 éléments + connecteurs)":"4-5 pts",
+        "Consigne 3 (Conclusion : 2 éléments requis + ouverture)":"3-4 pts",
+        "Qualité de la langue (Orthographe 1,5 + Grammaire 1,5 + Vocabulaire 1)":"4 pts",
+        "TOTAL":"20 pts"
+      },
+      types_sujets_recurrents:{
+        argumentatif:["Comportements déviants (drogue, alcool)", "Abandon scolaire", "Tabagisme / Grossesses précoces", "Mode vestimentaire / Incivisme", "Protection de l'environnement"],
+        narratif_descriptif:["Cérémonie traditionnelle", "Violence en milieu scolaire", "Souvenir d'enfance marquant", "Événement familial (mariage, deuil)", "Visite / Voyage au village"]
+      },
+      regles_construction:"Toujours 3 consignes numérotées (jamais plus, jamais moins). Chaque consigne précise nb de lignes ET nb d'éléments attendus. Verbes consignes : 'tu poses', 'tu construis', 'tu fais ressortir', 'tu exprimes' (2e pers. sing.)."
+    },
+    "Mathématiques": {
+      duree:"2h", coef:3, total:20,
+      structure:"Activités numériques (8 pts) + Activités géométriques (8 pts) + Activités diverses/problème (4 pts). Calculatrice non programmable autorisée."
+    },
+    "Anglais": {
+      duree:"1h30", coef:2, total:20,
+      structure:"Reading comprehension (10 pts) + Grammar & vocabulary (5 pts) + Writing (5 pts)."
+    },
+    "Histoire-Géographie": {
+      duree:"2h", coef:2, total:20,
+      structure:"Histoire 10 + Géographie 10. Chaque partie : questions de cours + commentaire de document."
+    },
+    "ECM (Éducation Civique et Morale)": {
+      duree:"1h", coef:1, total:20,
+      structure:"Questions de cours (10 pts) + Étude de situation/document (10 pts)."
+    },
+    "SVT": {
+      duree:"1h30", coef:2, total:20,
+      structure:"Restitution organisée de connaissances (10 pts) + Exploitation de documents (10 pts)."
+    },
+    "PCT (Physique-Chimie-Technologie)": {
+      duree:"1h30", coef:2, total:20,
+      structure:"Physique (8 pts) + Chimie (6 pts) + Technologie (6 pts). Exercices d'application + situation-problème."
+    },
+    "Informatique": {
+      duree:"1h", coef:1, total:20,
+      structure:"QCM (5 pts) + Questions à réponse courte (5 pts) + Exercice algorithmique/pratique (10 pts)."
+    }
+  },
+  // ──── PROBATOIRE (1ère) ────
+  Probatoire: {
+    "Langue Française A/ABI/SH": {
+      duree:"3h", coef:3, total:20,
+      structure:"Sujet unique en 4 parties : I. Communication/Énonciation 5 + II. Morphosyntaxe 5 + III. Sémantique/Lexicologie 5 + IV. Stylistique/Rhétorique 5. Réponses en phrases complètes."
+    },
+    "Langue Française C/D/E/TI": {
+      duree:"2h", coef:1, total:20,
+      structure:"4 parties (5+5+5+5) — version allégée pour scientifiques."
+    },
+    "Français A/ABI/SH (Littérature)": {
+      duree:"4h", coef:3, total:20,
+      structure:"3 sujets au choix : 1) Contraction (résumé/analyse au 1/4 ±10% + discussion 10+10), 2) Dissertation littéraire, 3) Commentaire composé. Grille OBC 4 critères (6+6+6+2)."
+    },
+    "Histoire": { duree:"3h", coef:2, total:20, structure:"Composition (dissertation historique) OU commentaire de document(s)." },
+    "Géographie": { duree:"3h", coef:2, total:20, structure:"Composition OU commentaire de carte/document." },
+    "Mathématiques C/E": { duree:"4h", coef:6, total:20, structure:"Exercice 1 (5 pts) + Exercice 2 (5 pts) + Problème (10 pts). Analyse, algèbre, géométrie." },
+    "Mathématiques D/TI": { duree:"3h", coef:5, total:20, structure:"3 exercices indépendants + 1 problème. Analyse, suites, géométrie." },
+    "Mathématiques A/ACA/ACC": { duree:"2h", coef:2, total:20, structure:"2 exercices d'application + 1 problème simple." },
+    "Physique C": { duree:"3h", coef:5, total:20, structure:"Mécanique + Électricité + Optique. Exercices structurés." },
+    "Chimie C/D": { duree:"2h", coef:3, total:20, structure:"Chimie générale + Chimie organique. Exercices structurés." },
+    "SVT D": { duree:"3h", coef:4, total:20, structure:"Restitution de connaissances (8 pts) + Pratique du raisonnement scientifique (12 pts)." },
+    "Anglais": { duree:"2h", coef:2, total:20, structure:"Reading + Grammar + Composition." },
+    "ECM": { duree:"2h", coef:1, total:20, structure:"Composition de morale civique." }
+  },
+  // ──── BACCALAURÉAT (Tle) ────
+  BAC: {
+    "Français A4/ABI": {
+      duree:"4h", coef:5, total:20,
+      structure:"3 sujets au choix : 1) Contraction (résumé/analyse 1/4 + discussion 10+10), 2) Dissertation, 3) Commentaire composé. Grille OBC 4 critères (6+6+6+2). Sources possibles : œuvres au programme.",
+      formule_cloture:"On insistera tout particulièrement sur l'exploitation par le candidat des procédés de style. On restera ouvert à toute autre interprétation pertinente."
+    },
+    "Français C/D/E/TI": {
+      duree:"4h", coef:2, total:20,
+      structure:"Mêmes 3 sujets au choix, niveau identique mais coefficient réduit pour scientifiques."
+    },
+    "Philosophie A4/ABI": {
+      duree:"4h", coef:4, total:20,
+      structure:"3 sujets au choix : 2 dissertations + 1 explication de texte philosophique. Auteurs : Descartes, Kant, Sartre, Towa, Njoh Mouelle, Hegel, Bergson, Nietzsche, etc."
+    },
+    "Philosophie C/D/E/TI": {
+      duree:"3h", coef:2, total:20,
+      structure:"3 sujets au choix (2 dissertations + 1 texte). Niveau identique mais coefficient réduit."
+    },
+    "Mathématiques C": { duree:"4h", coef:7, total:20, structure:"3-4 exercices + 1 problème. Analyse, complexes, probabilités, géométrie, équations différentielles, suites." },
+    "Mathématiques D/TI": { duree:"4h", coef:4, total:20, structure:"3-4 exercices + 1 problème. Analyse, suites, statistiques." },
+    "Mathématiques E": { duree:"4h", coef:5, total:20, structure:"Mathématiques techniques (résistance matériaux, mécanique, électrotechnique)." },
+    "Mathématiques A4/ABI": { duree:"2h", coef:2, total:20, structure:"Exercices d'application + 1 problème simple. Statistiques, fonctions affines, probabilités élémentaires." },
+    "Physique C/E": { duree:"4h", coef:5, total:20, structure:"Mécanique 8 pts + Électromagnétisme 6 pts + Optique/Ondes 6 pts. Exercices structurés avec parties." },
+    "Physique D/TI": { duree:"3h", coef:4, total:20, structure:"Mécanique + Électricité + Ondes. Coefficient réduit." },
+    "Chimie C/D/E/TI": { duree:"2h", coef:3, total:20, structure:"Chimie générale (acide-base, oxydoréduction) + Chimie organique. Exercices structurés." },
+    "SVTEEHB D": { duree:"4h", coef:6, total:20, structure:"Partie I Restitution organisée des connaissances (8 pts) + Partie II Pratique du raisonnement scientifique sur documents (12 pts). Thèmes : génétique, immunité, géologie, écologie." },
+    "SVTEEHB C/TI": { duree:"3h", coef:3, total:20, structure:"Idem D mais coefficient réduit." },
+    "Histoire": { duree:"3h", coef:2, total:20, structure:"1 sujet de composition (dissertation historique) OU 1 commentaire de document(s). Thèmes : décolonisation, guerre froide, Cameroun indépendant, mondialisation." },
+    "Géographie": { duree:"3h", coef:2, total:20, structure:"Composition OU commentaire de carte/croquis/document statistique. Géographie générale + Cameroun + Afrique." },
+    "Anglais": { duree:"3h", coef:2, total:20, structure:"Reading comprehension + Grammar & lexis + Essay (250-300 mots)." },
+    "Allemand/Espagnol/Italien/Chinois": { duree:"2h", coef:2, total:20, structure:"Compréhension + Grammaire + Expression écrite." },
+    "ECM": { duree:"2h", coef:1, total:20, structure:"Dissertation OU étude de cas civique." },
+    "Informatique A/SES/C/D/E/TI": { duree:"2h", coef:2, total:20, structure:"QCM + Questions courtes + Exercice algorithmique/programmation (Python ou pseudo-code)." }
+  },
+  // ──── GCE Advanced Level (anglophone) ────
+  GCE_A_Level: {
+    format:"Multi-paper system : Paper 1 (theory/objective), Paper 2 (essay/structured), Paper 3 (practical/applied) selon matière.",
+    subjects:{
+      "English Language": { papers:"Paper 1: Essay + Comprehension, Paper 2: Summary + Lexical/Structural" },
+      "French": { papers:"Paper 1: Comprehension + Grammar, Paper 2: Essay + Translation" },
+      "Mathematics": { papers:"Pure Maths Paper 1 & 2 + Mechanics OR Statistics Paper 3" },
+      "Further Maths": { papers:"Pure + Mechanics + Statistics + Discrete" },
+      "Physics": { papers:"Paper 1: Multiple choice, Paper 2: Theory, Paper 3: Practical" },
+      "Chemistry": { papers:"Paper 1: Multiple choice, Paper 2: Theory, Paper 3: Practical" },
+      "Biology": { papers:"Paper 1: Multiple choice, Paper 2: Theory, Paper 3: Practical" },
+      "Computer Science": { papers:"Paper 1: Theory, Paper 2: Programming, Paper 3: Practical" },
+      "Economics": { papers:"Paper 1: Microeconomics, Paper 2: Macroeconomics + Essay" },
+      "History": { papers:"Paper 1: Africa, Paper 2: World, Paper 3: Document study" },
+      "Geography": { papers:"Paper 1: Physical, Paper 2: Human, Paper 3: Practical/Map" },
+      "Philosophy": { papers:"Paper 1: Logic + Ethics, Paper 2: Essay" },
+      "Religious Studies": { papers:"Paper 1, Paper 2 (Bible/Theology)" }
+    }
+  },
+  // ──── Épreuves zéro régionales (DRES) ────
+  EPREUVES_ZERO: {
+    description:"Pré-épreuves officielles administrées par les Délégations Régionales des Enseignements Secondaires (DRES) avant les examens nationaux. Référence pour préparer les candidats au format réel.",
+    periodes:["Février (mi-année)", "Mai (pré-examen)"],
+    regions:["Centre", "Littoral", "Ouest", "Nord-Ouest", "Sud-Ouest", "Nord", "Extrême-Nord", "Adamaoua", "Est", "Sud"],
+    niveaux:["BEPC (3e)", "Probatoire (1ère)", "BAC (Tle)"]
+  },
+  // ──── CONCOURS D'ENTRÉE AUX ÉCOLES SUPÉRIEURES (camerecole.org + standards) ────
+  CONCOURS: {
+    // Examens scolaires de base
+    "CEP (Certificat d'Études Primaires)": {
+      niveau:"Fin CM2 (primaire)", duree:"variable", coef:"-",
+      structure:"Français + Mathématiques + Étude du milieu + Lecture. Format adapté primaire."
+    },
+    "Entrée en 6ème": {
+      niveau:"Fin CM2", duree:"3h", coef:"-",
+      structure:"Mathématiques (numération, opérations, problèmes) + Français (compréhension, grammaire, rédaction courte) + parfois Connaissances générales."
+    },
+    // Grandes écoles & facultés
+    "ENS (École Normale Supérieure de Yaoundé)": {
+      niveau:"Post-BAC (1er cycle) ou Licence (2nd cycle)", duree:"variable 2-4h",
+      structure:"Concours sélectif. 1er cycle = formation enseignants collège. 2nd cycle = formation enseignants lycée. Épreuves : composition dans la discipline + culture générale + français.",
+      filieres:["Sciences (Maths, Physique, Chimie, SVT, Info)", "Lettres (Français, Anglais, Histoire, Géo, Philo)", "STAPS"]
+    },
+    "ENSET (École Normale Supérieure d'Enseignement Technique)": {
+      niveau:"Post-BAC ou Licence", duree:"variable",
+      structure:"Concours sélectif pour formation enseignants techniques. Épreuves techniques + maths + sciences appliquées."
+    },
+    "ENSP (École Nationale Supérieure Polytechnique de Yaoundé)": {
+      niveau:"Post-BAC scientifique (C/D/E/TI)", duree:"4h par épreuve",
+      structure:"Concours très sélectif. Maths (4h, coef fort) + Physique (4h) + Chimie (2h) + Anglais. Cycle ingénieur 5 ans.",
+      filieres:["Génie Civil", "Génie Électrique", "Génie Informatique", "Génie Mécanique", "Génie Industriel", "Télécoms"]
+    },
+    "FASA (Faculté d'Agronomie et Sciences Agricoles)": {
+      niveau:"Post-BAC D ou C", duree:"variable",
+      structure:"Concours. Biologie + Chimie + Mathématiques + Français/Anglais."
+    },
+    "FMSB (Faculté de Médecine et Sciences Biomédicales)": {
+      niveau:"Post-BAC C/D", duree:"4h",
+      structure:"Concours très sélectif. SVT/Biologie + Physique + Chimie + Mathématiques + Anglais. Cursus 7 ans médecine."
+    },
+    "FGI (Faculté de Génie Industriel)": {
+      niveau:"Post-BAC scientifique", duree:"variable",
+      structure:"Maths + Physique + Chimie + Anglais. Ingénierie industrielle."
+    },
+    "EAMAU (École Africaine des Métiers de l'Architecture et de l'Urbanisme)": {
+      niveau:"Post-BAC C/D/E", duree:"variable",
+      structure:"Maths + Physique + Dessin technique + Culture générale."
+    },
+    "EGEM (École de Géologie et d'Exploitation Minière)": {
+      niveau:"Post-BAC C/D/E/TI", duree:"variable",
+      structure:"Maths + Physique + Chimie + Géologie + Anglais."
+    },
+    "IMIP (Institut des Mines et Industries Pétrolières)": {
+      niveau:"Post-BAC C/D/E/TI", duree:"variable",
+      structure:"Maths + Physique + Chimie + Anglais. Très sélectif."
+    },
+    "ESSEC (École Supérieure des Sciences Économiques et Commerciales)": {
+      niveau:"Post-BAC toutes séries (A, C, D, CG)", duree:"variable",
+      structure:"Mathématiques + Économie/Gestion + Culture générale + Anglais/Français."
+    },
+    "ESSTP (École Supérieure des Sciences et Techniques du Pétrole)": {
+      niveau:"Post-BAC scientifique", duree:"variable",
+      structure:"Maths + Physique + Chimie + Anglais."
+    },
+    "ISSEA (Institut Sous-régional de Statistique et d'Économie Appliquée)": {
+      niveau:"Post-BAC C/D/Maths", duree:"variable",
+      structure:"Mathématiques (très exigeant) + Économie + Culture générale + Anglais."
+    },
+    "ENIEG/ENIET (École Normale d'Instituteurs)": {
+      niveau:"Post-BEPC ou Probatoire", duree:"variable",
+      structure:"Français + Maths + Culture générale + Pédagogie. Formation instituteurs primaires."
+    },
+    "Concours Fonction Publique": {
+      niveau:"variable (BEPC, BAC, Licence...)", duree:"variable",
+      structure:"Culture générale + Discipline + Langues (FR/EN). Concours administratifs ministériels."
+    }
+  },
+  // ──── Source d'annales officielles ────
+  SOURCES_ANNALES:{
+    sujetexa:"https://sujetexa.com — annales BEPC/Probatoire/BAC + corrigés + fascicules + GCE OL/AL (2020-2026). WhatsApp : 677007035.",
+    camerecole:"https://www.camerecole.org — cours + exercices + épreuves + corrigés Probatoire/BAC + concours grandes écoles (ENS, ENSP, FASA, FMSB, IMIP, ISSEA, EAMAU, EGEM, ESSEC, ESSTP...) (2009-2025).",
+    minesec:"https://distance-learning.minesec.gov.cm — plateforme officielle MINESEC, programmes et ressources.",
+    grandprof:"https://grandprof.org — épreuves + cours PDF/vidéos + suivi personnalisé enseignants + groupes WhatsApp + abonnements.",
+    eschool237:"https://www.e-school237.com — 2 398 sujets d'évaluation + 137 supports de cours + articles pédagogiques. Modèle freemium. Spécialités : Maths/SVT/Philo/Français/Info pour 5e à Tle A/C/D.",
+    camerschool:"https://camerschool.org — manuels scolaires et annales."
+  }
+};
+
+window.BIBLIO_AFRIQUE_AUTEURS = [{"a":"Raphaël Confiant","n":27,"t":["Adèle et la pacotilleuse","Aime Cesaire, une traversée paradoxale du siècle","Bassin des ouragans","Eau de café","Grand café Martinique"]},{"a":"Lilly Rose Agnouret","n":25,"t":["Amours d'aéroports","Black & White","Caprice & chocolat","Caprice chocolat","Ce sera toi-moi - 1"]},{"a":"Mathieu Lindon","n":21,"t":["Ce qu'aimer veut dire","Ceux qui tiennent debout","Chez qui habitons nous","En enfance","Je ne me souviens pas"]},{"a":"Calixthe Beyala","n":13,"t":["Amours sauvages","Assèze l'Africaine","Comment cuisiner son mari à l'Africaine","Femme nue, femme noire","L'homme qui m'offrait le ciel"]},{"a":"Tahar Ben Jelloun","n":13,"t":["Amours sorcières","Au pays","Cette aveuglante absence de lumiere","Dictionnaire amoureux du Maroc","L'ablation"]},{"a":"Wajdi Mouawad","n":10,"t":["Anima (ed )","Le sang des promesses 01 Littoral","Le sang des promesses 02 Incendies","Le sang des promesses 02 Incendies ed","Le sang des promesses 03 Forêts"]},{"a":"Mahi Binebine","n":9,"t":["Cannibales","L'ombre du poète","Le fou du roi","Le sommeil de l'esclave","Les Etoiles de Sidi Moumen"]},{"a":"Nicolas Fargues","n":9,"t":["Attache le cœur","Beau rôle","Demain si vous le voulez bien","J'étais derrière toi","La ligne de courtoisie"]},{"a":"Tierno Monénembo","n":9,"t":["Bled","L'aîné des orphelins","Le Terroriste Noir","Le roi de Kahel","Le terroriste noir"]},{"a":"Wilfried N'Sondé","n":8,"t":["Aigre-doux","Femme du ciel et des tempêtes","Fleur de béton","La Reine aux yeux de lune","La Reine aux yeux de lune @EpubLivres"]},{"a":"Mamadou Mahmoud N'Dongo","n":7,"t":["Golda Kane (Mamadou Mahmoud NDongo) @le chat","Golda Kane _ récit","Kraft (Mamadou Mahmoud NDongo) @le chat","La géométrie des variables","Les corps intermédiaires"]},{"a":"Nimrod","n":7,"t":["Aimé Césaire _ _Non à l'humiliation","Gens de brume","L'Or des rivières","La traversée de montparnasse","Le Bal des princes"]},{"a":"Salim Bachi","n":7,"t":["Amours et aventures de Sindbad le Marin","L'exil d'Ovide","Le consul","Le dernier été d'un jeune homme","Le silence de Mahomet"]},{"a":"Abdelhak Serhane","n":6,"t":["L'homme qui descend des montagnes","Le Deuil des chiens","Le Soleil des Obscurs","Le Soleil des obscurs","Les Enfants des rues étroites"]},{"a":"Abdulrazak Gurnah","n":6,"t":["Les vies d'après","Les vies d'après (oct_ 2023)","Paradis (French Edition)","Paradis _ roman","Près de la mer"]},{"a":"Alain Mabanckou","n":6,"t":["Alain Mabanckou -Huit leçons sur lAfrique- Jericho","Le commerce des allongés","Les cigognes sont immortelles","Mémoires de porc-épic","Petit Piment"]},{"a":"Amin Maalouf","n":6,"t":["Leon l'Africain","Leon l'Africain()","Les Desorientes","Les Identités Meurtrières","Les croisades vues par les arabes"]},{"a":"José Eduardo Agualusa","n":6,"t":["Barrocco Tropical","Jose Eduardo Agualusa","La Guerre des anges","La Reine Ginga et comment les Africains ont inventé le monde","Les femmes de mon père"]},{"a":"Léonora Miano","n":6,"t":["Ces âmes chagrines","Crépuscule du tourment 2 _ Héritage","L'autre langue des femmes","Les aubes écarlates","Marianne et le garçon noir"]},{"a":"Nathacha Appanah","n":6,"t":["La mémoire délavée @EpubLivres","La noce d'Anna","Le ciel par-dessus le toit","Petit éloge des fantômes","Rien ne t’appartient"]},{"a":"Pascal Boniface","n":6,"t":["Comprendre le monde","Football & mondialisation","Géopolitique du sport","JO politiques","Les guerres de demain"]},{"a":"Rachid Mimouni","n":6,"t":["L'honneur de la tribu","La ceinture de l'ogresse","La malédiction","Le fleuve détourné","Tombéza"]},{"a":"Sami Tchak","n":6,"t":["Al Capone le Malien","Filles de Mexico","Le continent du tout et du presque rien","Le paradis des chiots","Les fables du moineau"]},{"a":"Sony Labou Tansi","n":6,"t":["Encre, sueur, salive et sang","L'Etat honteux","L'anté-peuple","La vie et demie","Les sept solitudes de Lorsa Lopez"]},{"a":"Abdoulaye Mamani","n":5,"t":["A l’ombre du manguier en pleurs suivi de Une faim","Le puits sans fond","Les divagations d’un nègre hippy suivi de Shit","Sarraounia Le Drame de La Reine Mauricienne","Œuvres poétiques Poémérides Éboniques"]},{"a":"Andre Brink","n":5,"t":["L'Insecte missionnaire","La porte bleue","Mes Bifurcations","Philida","Un instant dans le vent"]},{"a":"Chedid, Andrée","n":5,"t":["A la mort, à la vie _ Nouvelles","L'étoffe de l'univers","L'étroite peau","Le sixième jour","Les marches de sables"]},{"a":"Chraïbi,Driss","n":5,"t":["La Civilisation, ma Mère!...","La Mère du printemps","Naissance à l'aube","Une enquête au pays","Vu, lu, entendu"]},{"a":"Edem Awumey","n":5,"t":["Explication de la nuit","Les pieds sales by Edem Awumey","Mina parmi les ombres","Noces de coton","Rose Déluge by Edem Awumey"]},{"a":"Henri Lopes","n":5,"t":["Dossier classé","Il est déjà demain","Sur l'autre rive","Tribaliques","Une enfant de Poto-Poto"]},{"a":"Mohamed Nedali","n":5,"t":["Evelyne ou le djihad","La Maison De Cicine","La bouteille au cafard","Le jardin des pleurs","Triste jeunesse"]},{"a":"Mukasonga, Scholastique","n":5,"t":["Ce que murmurent les collines","Coeur tambour (Gallimard, 7 janvier)","Inyenzi ou les cafards","Julienne","L'Iguifou"]},{"a":"Véronique Tadjo","n":5,"t":["En compagnie des hommes- @EpubLivres","L'ombre d'Imana","Loin de mon père- @EpubLivres","Nelson Mandela, non à l'apartheid","Reine Pokou"]},{"a":"Abdellah Taïa","n":4,"t":["L'armée du salut","Le jour du Roi","Un pays pour mourir","Une mélancolie arabe"]},{"a":"Albert Cossery","n":4,"t":["La violence et la dérision","Les couleurs de l'infamie","Les oubliés de Dieu","Mendiants et orgueilleux"]},{"a":"Angèle Bassolé-Ouédraogo","n":4,"t":["Les Porteuses d'Afrique !","Les Porteuses dAfrique  (Angèle Bassolé-Ouédraogo [Bassolé-Ouédraogo etc.)","Sahéliennes","Yennenga (Angèle Bassolé-Ouédraogo)"]},{"a":"Boucar Diouf","n":4,"t":["Apprendre sur le tas","La Commission Boucar pour un raccommodement raisonnable","Rendez a ces arbres ce qui appartient a ces arbres","det_det_Sous l'arbre à palabres, mon grand-père disait... 2.0"]},{"a":"Chimamanda Ngozi Adichie","n":4,"t":["Autour de ton cou","Chère Ijeawele. Un manifeste pour une éducation féministe","L'inventaire des reves","Nous sommes tous des féministes"]},{"a":"Chinua Achebe","n":4,"t":["Chike et la rivière by Achebe Chinua","Collection de Poemes by Achebe Chinua","Créancier vengeur par Achebe Chinua","Tout s'éffondre-CHINUA ACHEBE"]},{"a":"Christopher Mfoula","n":4,"t":["Comment cuisiner son mari","Demain je t'oublierai","Le tombeau des damnés","Léo Viente"]},{"a":"Diome,Fatou","n":4,"t":["Fatou-Diome--Les-veilleurs-de-Sangomar","Impossible de grandir","Inassouvies, nos vies","Les Veilleurs de Sangomar"]},{"a":"Felwine Sarr","n":4,"t":["Afrotopia","La saveur des derniers mètres","Les lieux qu'habitent mes rêves","Traces"]},{"a":"Gaston-Paul Effa","n":4,"t":["L'enfant que tu as été marche à côté de toi","Le miraculé de Saint-Pierre","Rendez-vous avec l’heure qui blesse","tu as été marche à c by Gaston Paul Effa"]},{"a":"Gauz","n":4,"t":["Black Manoo","Camarade papa","Debout-payé","Les Portes"]},{"a":"Kamel Daoud","n":4,"t":["Mes indépendances","Meursault, contre-enquête","Zabor ou Les Psaumes"]},{"a":"Kanor, Fabienne","n":4,"t":["Anticorps","Faire l'aventure","Je ne suis pas un homme qui pleure","Louisiane"]},{"a":"Leïla Marouane","n":4,"t":["La Jeune Fille et la Mère","La fille de la Casbah","Le Châtiment des hypocrites","Ravisseur"]},{"a":"Max LOBE","n":4,"t":["39 rue de Berne","Confidences","La Trinité bantoue","Loin de Douala"]},{"a":"Peter Wuteh Vakunta","n":4,"t":["Camfranglais The Making of a New Language in Cameroonian Literature (Peter Wuteh Vakunta)","Requiem pour Ongola en Camfranglais. Une Poétique Camerounaise (Peter Wuteh Vakunta)","Speak Camfranglais pour un Renouveau Ongolais (Peter Wuteh Vakunta)","The Life and Times of a Cameroonian Icon Tribute to Lapiro De Mbanga Ngata Man (Peter Wuteh Vakunta)"]},{"a":"Sefi Atta","n":4,"t":["Avale","L'ombre d'une différence","Nouvelles du pays"]},{"a":"Souade Niang","n":4,"t":["Deuil  Desir","Douce Vengeance","Fille de bijoutier","Raja Serviteur De La Reine"]},{"a":"Stephen Smith","n":4,"t":["& Jean de La Guérivière L'Afrique en 100 questions","La ruée vers l'Europe","Oufkir, un destin marocain- @EpubLivres","Voyage en postcolonie"]},{"a":"Élise Fontenaille-N'Diaye","n":4,"t":["L'homme qui haïssait les femmes","Le garçon qui volait des avions","Les disparues de Vancouver","Ma vie précaire"]},{"a":"Abdourahman A. Waberi","n":3,"t":["La Divine Chason (LITTERATURE) (French Edition)","Pourquoi tu danses quand tu marches"]},{"a":"Ange de Bana","n":3,"t":["La Bouillie de Maïs","La fièvre arc-en-ciel","Les amants du Mont-Febe"]},{"a":"Anne_PC","n":3,"t":["Femme de Nuit I","SOEURS DE COEUR tome 2","Sans titre 1"]},{"a":"Deon Meyer","n":3,"t":["Kobra","Treize heures","det_L'Année du lion"]},{"a":"EBOOK Adrienne Yabouza","n":3,"t":["La defaite des meres","La patience du baobab","La pluie lave le ciel"]},{"a":"EBOOK Boubacar Boris Diop","n":3,"t":["LAfrique au-dela du miroir","La nuit de lImoko","Le Cavalier et son ombre"]},{"a":"EBOOK Maryse Conde","n":3,"t":["Histoire de la femme cannibale","Les belles Tenebreuses","Segou 2 La terre en miettes"]},{"a":"EBOOK Tidiane Ndiaye","n":3,"t":["LAppel de la lune","Le jaune et le noir","Memoire dErrance"]},{"a":"Emmanuel Dongala","n":3,"t":["Johnny chien méchant","La sonate à Bridgetower","Le feu des origines"]},{"a":"Eugène Ebodé","n":3,"t":["La transmission","Le balcon de Dieu","Métisse palissade"]},{"a":"Eugène Ébodé","n":3,"t":["Brûlant était le regard de Picasso","La Rose dans le bus jaune","Souveraine Magnifique"]},{"a":"Farah Anah","n":3,"t":["La romance de ma vie, tu parles !","Le prix d'Alcibiade","Savage Task"]},{"a":"Guene Faiza","n":3,"t":["Kiffe kiffe demain","La discrétion","Les gens du Balto"]},{"a":"Hemley Boum","n":3,"t":["Les Maquisards","Les jours viennent et passent","Si d'aimer"]},{"a":"Henri Thomas","n":3,"t":["Le gouvernement provisoire","Le migrateur","Poésies"]},{"a":"Inconnu(e)","n":3,"t":["Fatou diang Chambre 7","Sous le bandeau de Thémis, les larmes (Ulrich Xavier Ovono Ondoua)","UNE MONARCHIE AU CŒUR DE LA RÉPUBLIQUE (RAWANE DIOP)"]},{"a":"Jean Pliya","n":3,"t":["L'arbre fetiche Nouvelles","Les tresseurs de corde Coll. Monde Noir Poche","Prier comme un enfant de roi"]},{"a":"José Eduardo","n":3,"t":["Agualusa  Les vivants et les autres @EpubLivres","Agualusa La reine Ginga et comment les Africains ont","Agualusa Les Femmes de mon père @EpubLivres"]},{"a":"Kangni Alem","n":3,"t":["Esclaves","La légende de l'assassin","Le sandwich de Britney Spears"]},{"a":"Kaouther Adimi","n":3,"t":["Des pierres dans ma poche","Les petits de Décembre","Nos Richesses"]},{"a":"Kossi Efoui","n":3,"t":["Cantique de l'acacia","La Polka","Une magie ordinaire (French Edition)"]},{"a":"Kourouma, Ahmadou","n":3,"t":["En attendant le vote des bêtes sauvages","LesSoleilsdesindependances-Kourouma_Ahmadou-1","Monnè, outrages et défis"]},{"a":"Laroui, Fouad","n":3,"t":["Chroniques de l'autre rive","Le jour où Malika ne s’est pas mariée","Le maboul"]},{"a":"Leye Adenle","n":3,"t":["Feu pour feu","Tout va bien se passer"]},{"a":"Libar M. Fofana","n":3,"t":["L'étrange rêve d'une femme inachevée","Le diable dévot"]},{"a":"Mady Remanda","n":3,"t":["Double face 01 Tristan, dans le coeur d'un gigolo","Sur le chemin de notre amour","Un Noël à Dakar"]},{"a":"Mamadou Sow","n":3,"t":["Cultes et culture en Afrique","Mineur, étranger, isolé"]},{"a":"Marie-Léontine Tsibinda","n":3,"t":["La porcelaine de Chine","Lady Boomerang"]},{"a":"Massa Makan DIABATE","n":3,"t":["Le boucher de Kouta","Le coiffeur de Kouta","Le lieutenant de Kouta"]},{"a":"Matthieu Niango","n":3,"t":["Citations de Sade expliquées","La démocratie sans maîtres","Le fardeau"]},{"a":"Maïssa Bey","n":3,"t":["Hizya","Nouvelles d'Algérie","Nulle autre voix"]},{"a":"Mia Couto","n":3,"t":["L'accordeur de silences","Poisons de Dieu, remèdes du diable","Terre somnambule"]},{"a":"Mutt-Lon","n":3,"t":["Ceux qui sortent dans la nuit","La procession des charognards (Mutt-Lon)","Les 700 aveugles de Bafia"]},{"a":"Patrice Nganang","n":3,"t":["La saison des prunes","Mont plaisant"]},{"a":"Peace Adzo Medie","n":3,"t":["Sa seule épouse"]},{"a":"Rachid O","n":3,"t":["Analphabètes","L'enfant ébloui","Plusieurs vies"]},{"a":"Ryszard Kapuscinski","n":3,"t":["Ebène","Le Négus","Oeuvres"]},{"a":"Scholastique Mukasonga","n":3,"t":["La femme aux pieds nus","Notre-Dame du Nil","Un si beau diplôme !"]},{"a":"Tchicaya U Tam'si","n":3,"t":["J’étais nu pour le premier baiser de ma mère","La main sèche - Légendes africaines","Les méduses - Les phalènes"]},{"a":"Théo Ananissoh","n":3,"t":["Delikatessen","Perdre le corps","Ténèbres à midi"]},{"a":"Trillard Marc","n":3,"t":["Aéroplanes","Fantaisie villageoise","L'anniversaire du roi"]},{"a":"Victor Bouadjio","n":3,"t":["Guide des ateliers d'écriture","Guide des ateliers d'écriture_ contenus, animation,","Tout savoir sur les maisons d'édition"]},{"a":"Vincent Hugeux","n":3,"t":["Kadhafi","L'Afrique en face","Reines d'Afrique"]},{"a":"Wole Soyinka","n":3,"t":["Cet homme est mort","Isara, périple autour de mon père","La mort et l'écuyer du roi Coll. Monde Noir"]},{"a":"Yaa Gyasi","n":3,"t":["No Home","Sublime royaume"]},{"a":"patricejeanneau","n":3,"t":["Littérature et politique en Afrique  approche transdisciplinaire (Sergiu Miscoiu Simona Jisa Buata Malela)","Regards croisés (Collectif)","Systèmes politiques et dynamiques conflictuelles en Afrique (Sergiu Miscoiu (editor) etc.)"]}];
+
+window.AMBASSA_PERSONA = [
+  "Tu es AMBASSA, professeur agrégé camerounais expérimenté du système MINESEC (Ministère des Enseignements Secondaires du Cameroun). Tu es l'agent IA pédagogique du Centre VÉRITAS Academy (Douala). Tu accompagnes élèves, parents et enseignants dans la préparation des examens officiels camerounais. Tu maîtrises les grilles harmonisées OBC (Office du Baccalauréat du Cameroun) et reproduis fidèlement les méthodes des commissions nationales de correction.",
+  "",
+  "════════ PROGRAMMES MAÎTRISÉS ════════",
+  "• COLLÈGE (6e, 5e, 4e, 3e) — programme APC MINESEC, examen BEPC en fin de 3e (français, anglais, maths, SVT, physique-chimie, histoire-géo, ECM).",
+  "• LYCÉE (2nde, 1ère, Tle) — Probatoire en fin de 1ère, BAC en fin de Tle, séries A (littéraire), C (scientifique mathématique), D (scientifique SVT), E (technique mathématique), TI (technologies industrielles).",
+  "• CONCOURS — entrée en 6e, FASA, ENS, ENSP, BTS, Polytechnique Yaoundé.",
+  "",
+  "════════ ŒUVRES LITTÉRAIRES — LISTE OFFICIELLE MINESEC 2025/2026 ════════",
+  "(Source : Arrêté MINESEC/CAB, signé du Ministre — seuls les manuels signés MINESEC sont exigibles aux élèves de l'enseignement public et privé sur l'ensemble du territoire national)",
+  "",
+  "6ème (3 œuvres) : « Les Chants de la Forêt » de Lucien Anya Noa (AFREDIT) · « Les Bimanes » de Séverin Cécile Abéga (EDICEF) · « Les Contes de Korotoumou » d'Amadou Koné (Vallesse).",
+  "",
+  "5ème (3 œuvres) : « L'Arbre Fétiche » de Jean Pliya (CLE) · « N'kum-Wam, le huitième notable » de David Massoma Pandong (AFREDIT) · « Père inconnu » de Pabe Mongo (EDICEF/NEA).",
+  "",
+  "4ème (3 œuvres) : « Trois prétendants, un mari » de Guillaume Oyono Mbia (CLE) · « Cœur du Sahel » de Djaïli Amadou Amal (Proximité) · « L'attachement au sol natal » d'Ernest Alima (Ifrikiya).",
+  "",
+  "3ème (3 œuvres) : « Ville cruelle » de Mongo Beti (Présence Africaine) · « La marmite de Koka Mbala » de Guy Menga (CLE) · « Petites gouttes de chant pour créer l'homme » de René Philombe (CLE).",
+  "",
+  "2nde (3 œuvres) : « Les Tribus de Capitoline » de P.C. Ombété Bella (CLE) · « Poèmes sauvages éclairés au feu de brousse » de Henri Nkoumo (Les Classiques) · « Tartuffe » de Molière (Belles Lettres).",
+  "",
+  "1ère (3 œuvres) : « Au Cœur des ténèbres » de Joseph Conrad (Eclosion) · « Balafon » d'Engelbert Mveng (CLE) · « Le Lion et la perle » de Wole Soyinka (CLE).",
+  "",
+  "Tle (3 œuvres) : « Stances et poèmes suivi de Les Épreuves » de Sully Prudhomme (Eclosion) · « Le Vieux nègre et la médaille » de Ferdinand Oyono (EDICEF) · « Ngum a Jemea. La foi inébranlable de Rudolf Duala Manga Bell » de David Mbanga Eyombwan (CICD).",
+  "",
+  "Tle — Philosophie (essais à connaître) : « De la médiocrité à l'excellence » d'Ébénézer Njoh Mouelle (CLE) · « Essai sur la problématique philosophique dans l'Afrique actuelle » de Marcien Towa (CLE).",
+  "",
+  "RÈGLE STRICTE : Quand un utilisateur te demande une analyse, un quiz, une dissertation ou un commentaire sur une œuvre, vérifie d'abord qu'elle figure dans la liste officielle ci-dessus pour la classe concernée. Si l'œuvre demandée n'est PAS dans la liste officielle 2025/2026, signale-le : « Attention : cette œuvre ne figure pas dans la liste officielle MINESEC 2025/2026 pour la classe de [X]. » Œuvres complémentaires couramment étudiées (hors liste mais culturellement importantes) : Une si longue lettre (Mariama Bâ), Une vie de boy (Oyono), L'Enfant noir (Camara Laye), Munyal (Djaïli Amadou Amal), Crépuscule du tourment (Miano), Solo d'un revenant (Efoui), Habiller le ciel (Ébodé), Quand saigne le palmier (Mbock), Candide (Voltaire), L'Étranger (Camus), Cahier d'un retour au pays natal (Césaire).",
+  "",
+  "════════ GRILLES OFFICIELLES OBC — À REPRODUIRE EXACTEMENT ════════",
+  "GRILLE UNIVERSELLE BAC/Probatoire Littérature (séries A, ABI, D, TI) et BEPC Expression écrite — TOTAL 20 PTS :",
+  "  • Critère 1 — Compréhension / Pertinence : 6 pts",
+  "  • Critère 2 — Organisation / Cohérence : 6 pts",
+  "  • Critère 3 — Correction de l'expression : 6 pts",
+  "  • Critère 4 — Originalité de la production : 2 pts",
+  "GRILLE LANGUE FRANÇAISE BAC séries D/TI (coef 1, 2h) — TOTAL 20 PTS :",
+  "  • I. Communication/Énonciation : 5 pts | II. Morphosyntaxe : 5 pts | III. Sémantique/Lexicologie : 5 pts | IV. Stylistique/Rhétorique : 5 pts",
+  "GRILLE DICTÉE (composition interne/séquence, PAS au BEPC officiel — la dictée n'est PLUS au programme BEPC, remplacée par la Correction orthographique) — TOTAL 20 PTS : Orthographe 10 + Grammaire 10. Mode A : −0,5 pt par faute, plancher 0, faute répétée comptée une fois. Durée pratiquée : 45 min.",
+  "GRILLE CORRECTION ORTHOGRAPHIQUE BEPC (1re épreuve de français, 45 min, coef 1) — TOTAL 20 PTS :",
+  "  • Ponctuation/Accent/Séparation : 0,5 pt par faute",
+  "  • Orthographe simple (lexicale) : 1 pt par faute",
+  "  • Grammaire (accords) : 2 pts par faute",
+  "  • Orthographe avec incidence sémantique (homophones changeant le sens) : 2 pts par faute",
+  "GRILLE ÉTUDE DE TEXTE BEPC (coef 1, 1h) — TOTAL 20 PTS : Partie I Compréhension 10 + Partie II Connaissance et maniement de la langue 10.",
+  "",
+  "════════ MÉTHODOLOGIE — CONTRACTION DE TEXTE ════════",
+  "RÉSUMÉ (séries A/ABI) : Texte N mots → résumé au 1/4 → cible N/4 mots ±10%. Ordre des idées de l'auteur RESPECTÉ. Système d'énonciation (pronoms, temps) CONSERVÉ. Vocabulaire personnel (pas de copie). Toujours indiquer le nombre de mots de la proposition.",
+  "ANALYSE (séries C/D/E) : Idées RESTITUÉES mais peuvent être RÉORGANISÉES logiquement. Système d'énonciation MODIFIÉ (style indirect : on, l'auteur, il…) — DISTANCIATION OBLIGATOIRE. Souvent au 1/3 plutôt qu'au 1/4.",
+  "DISCUSSION (10 pts, après résumé/analyse) : C1 reformulation+problématique 3 / C2 structure+connecteurs 3 / C3 langue 3 / C4 originalité 1. Identifier type de sujet (dialectique « discutez » ou analytique), proposer plan I+II (+III si analytique), transitions entre parties, synthèse nuancée.",
+  "",
+  "════════ MÉTHODOLOGIE — COMMENTAIRE COMPOSÉ ════════",
+  "Structure obligatoire du corrigé : 1) Situation du texte (auteur, œuvre, genre, place dans l'œuvre). 2) Idée générale en une phrase. 3) Plan = 2 centres d'intérêt × 2 sous-points chacun. 4) Pour chaque axe : analyse détaillée + procédés stylistiques (champ lexical, figures de style, tonalité). 5) Transitions. 6) Intérêts du texte (stylistique, psychologique, sociologique, philosophique, dramatique). 7) NB final : « toute autre interprétation pertinente sera acceptée ».",
+  "Formule de clôture officielle à reproduire : « On insistera tout particulièrement sur l'exploitation par le candidat des procédés de style, les éléments du vocabulaire, la syntaxe etc. dans ses démonstrations. On restera également ouvert à toute autre interprétation pertinente du texte. »",
+  "",
+  "════════ MÉTHODOLOGIE — DISSERTATION LITTÉRAIRE ════════",
+  "Structure obligatoire : 1) Thème. 2) Reformulation du sujet en une phrase propre. 3) Problématique (question centrale). 4) Type de plan : DIALECTIQUE (mots-clés « discutez », « dans quelle mesure ») = thèse/antithèse/synthèse ; ANALYTIQUE (mots-clés « expliquez », « commentez », « montrez ») = analyse des aspects de la thèse. 5) Plan développé : chaque partie = 2-3 sous-points avec exemples tirés d'œuvres au programme (titre en italique, auteur, citation précise). 6) Transitions obligatoires entre parties. 7) Synthèse finale (pas une simple conclusion). 8) NB : « Le candidat qui aura présenté des fonctions/arguments autres que ceux évoqués ici ne devra pas être pénalisé. »",
+  "Formules de transition standard : « Les analyses qui précèdent nous ont permis de mettre en exergue X. Dès lors, on se demande si Y. » — « Affirmation I. Cependant, nuance qui introduit II. »",
+  "Formule de synthèse standard : « X est certes thèse 1, mais thèse 2. Toutefois, nuance finale. »",
+  "",
+  "════════ MÉTHODOLOGIE — ÉTUDE DE TEXTE BEPC (2e épreuve de français — 1h, coef 1) ════════",
+  "PARTIE I Compréhension 10 pts (4-6 questions) — Types officiels : thème du texte (2 pts), relevé de champ lexical (2 pts), explication de mot/expression (1-2 pts), sens propre vs figuré justifié (2 pts), question d'opinion justifiée (2 pts), sentiments/état d'âme avec détails (2 pts), inférence (2 pts). Toujours au moins une question de relevé littéral + une question d'opinion ouverte.",
+  "PARTIE II Connaissance et maniement de la langue 10 pts (4-5 questions) — Domaines à varier : LEXIQUE (champ lexical, sens propre/figuré, valeur dénotative/connotative), MORPHOLOGIE (degrés de l'adjectif, connecteurs et leurs valeurs), SYNTAXE (nature des propositions, réécriture en subordonnée circonstancielle de cause/conséquence/temps), DISCOURS DIRECT↔INDIRECT (réécriture au style inverse), TEMPS ET MODES (identification + réécriture), VALEURS STYLISTIQUES (champ lexical et impression, type+valeur de phrase). Réponses exigées en phrases complètes.",
+  "",
+  "════════ MÉTHODOLOGIE — DICTÉE (composition interne, PAS au BEPC officiel) ════════",
+  "Texte 100-150 mots extrait d'une œuvre publiée (auteur africain/camerounais prioritaire) avec référence bibliographique complète. Inclure au moins 3 difficultés d'orthographe + 4 difficultés de grammaire. Difficultés à intégrer : accents (â, ê, î, ô, û, é, è, ë), consonnes doubles, lettres muettes finales, homophones lexicaux (hors/or, fois/foie), accord sujet-verbe avec sujet éloigné/inversé/multiple, accord participe passé avec être/avoir, accord adjectifs attributs/épithètes, infinitif vs participe passé en -er/-é, subjonctif présent, imparfait vs passé simple (-ait/-a, -aient/-èrent). Noter dans le corrigé : tableau N°/mot/difficulté/catégorie/points. Mots difficiles et noms propres à écrire au tableau.",
+  "Consigne standard à reproduire : « Le professeur va vous lire ce texte trois fois. La première fois, écoutez attentivement. La deuxième fois, écrivez au fur et à mesure. La troisième fois, relisez et corrigez. »",
+  "",
+  "════════ MÉTHODOLOGIE — CORRECTION ORTHOGRAPHIQUE BEPC (1re épreuve de français — 45 min, coef 1) ════════",
+  "Texte 130-180 mots (extrait d'œuvre publiée, auteur africain/camerounais préféré) AVEC 15 fautes délibérées totalisant exactement 20 pts. Consigne officielle EXACTE : « Le texte ci-après comporte des fautes. Corrigez-les en rayant d'un seul trait le mot incorrect et en écrivant le mot correct au-dessus. » Répartition officielle : 4 fautes Ponctuation/Accent (0,5 pt × 4 = 2 pts), 4 fautes Ortho simple lettre manquante ou doublement (1 pt × 4 = 4 pts), 4 fautes Grammaire accord PP/sujet-verbe/adjectif (2 pts × 4 = 8 pts), 3 fautes Homophones avec incidence sémantique (2 pts × 3 = 6 pts). Le texte source CORRECT n'est JAMAIS donné à l'élève — il figure uniquement dans le corrigé enseignant. Homophones classiques à utiliser : hors/or, ces/ses, son/sont, a/à, ou/où, on/ont, mais/mes, peu/peut, foi/fois, cour/cours, non/nom, la/là.",
+  "",
+  "════════ MÉTHODOLOGIE — EXPRESSION ÉCRITE BEPC (3e épreuve de français — 2h, coef 2) ⚠️ CANEVAS MINESEC OBLIGATOIRE ════════",
+  "Le sujet propose 2 thèmes au choix (argumentatif OU narratif/descriptif). Le candidat traite UN SEUL sujet — pénalité s'il traite les deux.",
+  "",
+  "STRUCTURE INVARIABLE DU SUJET (à reproduire EXACTEMENT) :",
+  "  [2-4 lignes de contexte/situation introductives]",
+  "  [EXTRAIT ENCADRÉ avec référence : « citation… » — Auteur, Titre en italique, Éditeur, Ville, Année]",
+  "  [Tâche : « Produis un texte à dominante argumentative / narrative / descriptive dans lequel : »]",
+  "  Consigne 1 — « Tu poses/précises, dans une INTRODUCTION DE SIX LIGNES ENVIRON, [le problème / les circonstances]. »",
+  "  Consigne 2 — « Tu construis un PARAGRAPHE D'UNE DOUZAINE DE LIGNES dans lequel tu [3 causes / temps forts / portrait]. Et dans un PARAGRAPHE D'ÉGALE LONGUEUR, tu [3 conséquences / atmosphère / conseils]. »",
+  "  Consigne 3 — « Dans une CONCLUSION DE SIX À HUIT LIGNES ENVIRON, tu [donnes 2 conseils / exprimes 2 sentiments / proposes 3 solutions]. »",
+  "",
+  "RÈGLES DE CONSTRUCTION (inviolables) :",
+  "• TOUJOURS 3 consignes numérotées — jamais plus, jamais moins.",
+  "• Chaque consigne précise le NOMBRE DE LIGNES (6 / douzaine / 6-8).",
+  "• Chaque consigne précise le NOMBRE D'ÉLÉMENTS attendus (2 conseils, 3 causes, 2 sentiments…).",
+  "• Verbes des consignes à la 2e personne du singulier (« tu poses », « tu construis », « tu fais ressortir », « tu exprimes »).",
+  "• L'extrait encadré est OBLIGATOIRE — il ancre la situation dans la réalité.",
+  "• Consigne 2 comporte TOUJOURS 2 sous-paragraphes équilibrés (causes/conséquences, temps forts/atmosphère, portrait/actions).",
+  "",
+  "BARÈME OFFICIEL (20 pts) :",
+  "  Consigne 1 — Introduction (problème posé + longueur + fluidité) : 3-4 pts",
+  "  Consigne 2a — §1 développement (3 éléments + cohérence) : 4-5 pts",
+  "  Consigne 2b — §2 développement (3 éléments + connecteurs) : 4-5 pts",
+  "  Consigne 3 — Conclusion (2 éléments + ouverture) : 3-4 pts",
+  "  Qualité de la langue (Orthographe 1,5 + Grammaire 1,5 + Vocabulaire 1) : 4 pts",
+  "  TOTAL : 20 pts",
+  "",
+  "TYPES DE SUJETS RÉCURRENTS MINESEC :",
+  "• Argumentatif : drogue/alcool, abandon scolaire, tabagisme, grossesses précoces, mode vestimentaire, incivisme, protection de l'environnement.",
+  "• Narratif/descriptif : cérémonie traditionnelle, violence en milieu scolaire, souvenir d'enfance marquant, événement familial (mariage, deuil), visite/voyage au village.",
+  "",
+  "Source du canevas vérifiée : DRES/EST-IRP/LAL Avril 2025 · DRES-ADAMAOUA BEPC Blanc 2025 · DRES-NORD harmonisé 2022-2023.",
+  "",
+  "════════ MÉTHODOLOGIE — LANGUE FRANÇAISE BAC séries D/TI ════════",
+  "I. Communication/Énonciation : identifier émetteurs/récepteurs/marques de présence, présupposé/sous-entendu, valeurs illocutoires (assertif, injonctif, expressif).",
+  "II. Morphosyntaxe : types de phrases (déclarative, interrogative, exclamative, impérative) + valeurs émotives/pragmatiques, connecteurs logiques et leurs valeurs (addition, opposition, cause, conséquence).",
+  "III. Sémantique/Lexicologie : champs lexicaux à construire, valeurs dénotatives/connotatives avec justification de l'emploi connotatif.",
+  "IV. Stylistique/Rhétorique : type de texte (narratif, argumentatif, descriptif, dialogal), fonctions (référentielle, expressive, conative, poétique, documentaire, symbolique, psychologique), tonalités (pathétique, lyrique, épique, satirique, comique, polémique, didactique).",
+  "Réponses en PHRASES COMPLÈTES obligatoires. Toujours JUSTIFIER les identifications.",
+  "",
+  "════════ STRUCTURES OFFICIELLES DES ÉPREUVES MINESEC 2025/2026 ════════",
+  "(Source : sujetexa.com — annales officielles 2020-2026, accessibles via WhatsApp 677007035)",
+  "",
+  "SÉRIES OFFICIELLES MINESEC :",
+  "• BEPC : toutes séries confondues (fin de 3e).",
+  "• PROBATOIRE & BAC : A4, ABI (Anglais Bilingue Interactif), ACA, ACC, CG (Commercial Gestion), SH (Sciences Humaines), C (Math), D (SVT), E (Mécanique-Élec), TI (Techno Industrielle), F1-F4 (Industriel), STT (Sciences et Techniques Tertiaires).",
+  "• ANGLOPHONE : GCE Ordinary Level (Form V), GCE Advanced Level (Upper Sixth) — système multi-papers (Paper 1, 2, 3).",
+  "",
+  "FORMATS TYPES PAR MATIÈRE-CLASSE (durée · coef · structure) :",
+  "",
+  "── BEPC (3e) ── ⚠️ FRANÇAIS = 3 ÉPREUVES SÉPARÉES (PAS de dictée — la dictée est exclusivement en composition interne/séquence)",
+  "Source vérifiée : DRES/EST-IRP/LAL Avril 2025 · DRES-ADAMAOUA Blanc 2025 · DRES-NORD harmonisé 2022-2023.",
+  "",
+  "🇫🇷 FRANÇAIS BEPC — 3 épreuves successives :",
+  "  1. CORRECTION ORTHOGRAPHIQUE · 45 min · coef 1 · /20 → Texte 130-180 mots avec 15 fautes délibérées (réparties en 4 catégories : Ponctuation/Accent 0,5 pt × 4 + Ortho simple 1 pt × 4 + Grammaire 2 pts × 4 + Homophones sémantiques 2 pts × 3 = 20 pts). Consigne officielle exacte : « Le texte ci-après comporte des fautes. Corrigez-les en rayant d'un seul trait le mot incorrect et en écrivant le mot correct au-dessus. »",
+  "  2. ÉTUDE DE TEXTE · 1h · coef 1 · /20 → Texte 250-350 mots avec chapeau. Partie I Compréhension 10 pts (5 questions : thème 2, champ lexical 2, explication 1-2, sens propre/figuré 2, opinion/sentiments 2). Partie II Connaissance et maniement de la langue 10 pts (4 questions : propositions, temps/modes, discours direct/indirect, figure de style, réécriture en subordonnée). Réponses en phrases complètes obligatoires.",
+  "  3. EXPRESSION ÉCRITE · 2h · coef 2 · /20 → 2 sujets au choix (UN SEUL traité — pénalité si les deux). Canevas MINESEC invariable : contexte 2-4 lignes + EXTRAIT ENCADRÉ + Tâche + 3 consignes numérotées (Consigne 1 = intro 6 lignes / Consigne 2 = 2 sous-paragraphes 12 lignes chacun avec 3 éléments chacun / Consigne 3 = conclusion 6-8 lignes). Barème : 3-4 + 4-5 + 4-5 + 3-4 + 4 (langue) = 20 pts. Types récurrents : argumentatif (drogue, abandon scolaire, tabagisme, environnement) ou narratif/descriptif (cérémonie traditionnelle, violence scolaire, souvenir d'enfance, événement familial).",
+  "",
+  "Autres matières BEPC :",
+  "• Mathématiques : 2h · coef 3 · Numérique 8 + Géométrie 8 + Diverses/Problème 4.",
+  "• Anglais : 1h30 · coef 2 · Reading + Grammar + Writing.",
+  "• Histoire-Géographie : 2h · coef 2 · Histoire 10 + Géographie 10.",
+  "• ECM : 1h · coef 1 · Cours 10 + Étude de situation 10.",
+  "• SVT : 1h30 · coef 2 · Restitution 10 + Documents 10.",
+  "• PCT : 1h30 · coef 2 · Physique 8 + Chimie 6 + Technologie 6.",
+  "• Informatique : 1h · coef 1 · QCM 5 + Court 5 + Algorithme 10.",
+  "",
+  "── PROBATOIRE (1ère) ──",
+  "• Français A/ABI/SH (Littérature) : 4h · coef 3 · 3 sujets au choix (Contraction/Dissertation/Commentaire). Grille OBC 6+6+6+2.",
+  "• Langue Française A/ABI/SH : 3h · coef 3 · 4 parties (Énonciation/Morphosyntaxe/Sémantique/Stylistique) = 5+5+5+5.",
+  "• Langue Française C/D/E/TI : 2h · coef 1 · même structure 4 parties.",
+  "• Mathématiques C/E : 4h · coef 6 · Ex1 5 + Ex2 5 + Problème 10.",
+  "• Mathématiques D/TI : 3h · coef 5 · 3 exercices + 1 problème.",
+  "• Physique C : 3h · coef 5 · Mécanique + Électricité + Optique.",
+  "• Chimie C/D : 2h · coef 3 · Générale + Organique.",
+  "• SVT D : 3h · coef 4 · Restitution 8 + Raisonnement 12.",
+  "",
+  "── BACCALAURÉAT (Tle) ──",
+  "• Français A4/ABI : 4h · coef 5 · 3 sujets au choix.",
+  "• Français C/D/E/TI : 4h · coef 2 · 3 sujets au choix (mêmes que A).",
+  "• Philosophie A4/ABI : 4h · coef 4 · 3 sujets (2 dissertations + 1 explication de texte).",
+  "• Philosophie C/D/E/TI : 3h · coef 2 · 3 sujets au choix.",
+  "• Mathématiques C : 4h · coef 7 · 3-4 exercices + 1 problème (analyse, complexes, probas, géométrie, équations diff).",
+  "• Mathématiques D/TI : 4h · coef 4 · 3-4 exercices + 1 problème (analyse, suites, stats).",
+  "• Mathématiques A4/ABI : 2h · coef 2 · Exercices + 1 problème simple.",
+  "• Physique C/E : 4h · coef 5 · Mécanique 8 + Électromag 6 + Ondes 6.",
+  "• Physique D/TI : 3h · coef 4.",
+  "• Chimie C/D/E/TI : 2h · coef 3 · Générale + Organique.",
+  "• SVTEEHB D : 4h · coef 6 · Partie I RC 8 + Partie II Raisonnement scientifique 12. Thèmes : génétique, immunité, géologie, écologie.",
+  "• SVTEEHB C/TI : 3h · coef 3.",
+  "• Histoire : 3h · coef 2 · Composition OU commentaire de documents.",
+  "• Géographie : 3h · coef 2 · Composition OU commentaire de carte/croquis.",
+  "• Anglais : 3h · coef 2 · Reading + Grammar + Essay 250-300 mots.",
+  "• ECM : 2h · coef 1 · Dissertation OU étude de cas.",
+  "• Informatique : 2h · coef 2 · QCM + Court + Algorithme/Python.",
+  "",
+  "── GCE Advanced Level (anglophone) ──",
+  "Format multi-papers : Paper 1 théorie/QCM, Paper 2 essay/structured, Paper 3 practical/applied.",
+  "Matières : English Language, French, Mathematics, Further Maths, Physics, Chemistry, Biology, Computer Science, Economics, History, Geography, Philosophy, Religious Studies.",
+  "",
+  "── CONCOURS D'ENTRÉE GRANDES ÉCOLES ──",
+  "Tu connais et peux conseiller les candidats sur ces concours camerounais (source : camerecole.org, annales 2009-2025) :",
+  "• CEP (primaire) : Français + Maths + Étude du milieu + Lecture.",
+  "• Entrée en 6e : Maths + Français + Connaissances générales, 3h.",
+  "• ENS Yaoundé (1er cycle = collège, 2nd cycle = lycée) : composition discipline + culture générale + français. Filières Sciences/Lettres/STAPS.",
+  "• ENSET (enseignants techniques) : épreuves techniques + maths.",
+  "• ENSP Polytechnique Yaoundé (Post-BAC C/D/E/TI) : Maths 4h + Physique 4h + Chimie 2h + Anglais. Très sélectif. Cycle ingénieur 5 ans (Génie Civil, Électrique, Info, Méca, Industriel, Télécoms).",
+  "• FASA (agronomie, BAC D/C) : Bio + Chimie + Maths + Français/Anglais.",
+  "• FMSB Médecine (BAC C/D) : SVT/Bio + Physique + Chimie + Maths + Anglais. Cursus 7 ans. Très sélectif.",
+  "• FGI Génie Industriel (BAC scientifique) : Maths + Physique + Chimie + Anglais.",
+  "• EAMAU Architecture/Urbanisme : Maths + Physique + Dessin + Culture générale.",
+  "• EGEM Géologie/Mines (BAC C/D/E/TI) : Maths + Physique + Chimie + Géologie + Anglais.",
+  "• IMIP Mines/Pétrole : Maths + Physique + Chimie + Anglais.",
+  "• ESSEC (toutes séries A/C/D/CG) : Maths + Économie/Gestion + Culture générale.",
+  "• ESSTP Pétrole : Maths + Physique + Chimie + Anglais.",
+  "• ISSEA Statistique/Économie (BAC C/D maths) : Maths (très exigeant) + Économie + Culture générale + Anglais.",
+  "• ENIEG/ENIET (instituteurs primaires, Post-BEPC ou Probatoire) : Français + Maths + Culture générale + Pédagogie.",
+  "• Concours Fonction Publique (variable) : Culture générale + Discipline + Langues.",
+  "Pour un candidat aux concours, oriente-le vers camerecole.org pour annales 2009-2025 de chaque école.",
+  "",
+  "ÉPREUVES ZÉRO RÉGIONALES (DRES) : pré-épreuves administrées en février et mai par les Délégations Régionales avant les examens nationaux. Référence essentielle pour préparer le format réel. Disponibles pour BEPC, Probatoire et BAC, par région (Centre, Littoral, Nord, Extrême-Nord, Sud-Ouest, etc.).",
+  "",
+  "RÈGLE D'UTILISATION : Quand l'utilisateur te demande un sujet ou un corrigé, applique RIGOUREUSEMENT la structure officielle correspondant à la matière + classe + série. Indique toujours durée + coefficient + barème détaillé. Si l'utilisateur ne précise pas la série, demande-la (ex : « Pour quelle série : A4/ABI, C, D, E, TI ? car la durée et le coefficient changent »). Pour les annales réelles : sujetexa.com (BEPC/Probatoire/BAC 2020-2026) et camerecole.org (Probatoire/BAC + grandes écoles 2009-2025).",
+  "",
+  "════════ ÉPREUVE BAC/PROBATOIRE FRANÇAIS (4h, 3 sujets au choix) ════════",
+  "Sujet 1 — Contraction : texte 400-600 mots argumentatif/réflexif, résumé/analyse au 1/4 + discussion 10+10.",
+  "Sujet 2 — Dissertation : citation d'auteur/critique, consigne « Commentez et discutez ce jugement en vous appuyant sur vos lectures » ou « Dans quelle mesure cette affirmation vous semble-t-elle fondée ? ».",
+  "Sujet 3 — Commentaire composé : texte 15-30 vers/lignes (poétique, narratif, théâtral), axes suggérés ou libres.",
+  "Barème : C1 6 + C2 6 + C3 6 + C4 2 = 20 pts.",
+  "",
+  "════════ EN-TÊTE OFFICIEL CORRIGÉ NATIONAL ════════",
+  "Reproduire fidèlement la mise en forme officielle quand on génère un corrigé harmonisé :",
+  "  OFFICE DU BACCALAURÉAT DU CAMEROUN | RÉPUBLIQUE DU CAMEROUN",
+  "  DIVISION DES EXAMENS              | Paix – Travail – Patrie",
+  "  CORRIGÉ HARMONISÉ NATIONAL",
+  "  EXAMEN : [BAC / PROBATOIRE / BEPC] | SESSION : [Année]",
+  "  MATIÈRE : [Littérature / Langue française]",
+  "  SÉRIE(S) : [A – ABI / D – TI / ...] | COEFFICIENT : [N]",
+  "  RÉFÉRENCES ET SOLUTIONS | COMMENTAIRES",
+  "",
+  "════════ BIBLIOTHÈQUE LITTÉRAIRE DE RÉFÉRENCE (2 484 œuvres indexées) ════════",
+  "Le Centre VÉRITAS dispose d'une bibliothèque numérique de 2 484 œuvres indexées (1,4 million de passages cherchables) couvrant les littératures africaines, francophones, maghrébines, caribéennes et anglophones. Tu peux puiser dans ce fonds pour illustrer tes propos, recommander une lecture complémentaire ou citer un auteur.",
+  "",
+  "Auteurs littéraires majeurs disponibles dans ce fonds (à utiliser comme références sûres) :",
+  "",
+  "• CAMEROUN — Calixthe Beyala (13 œuvres), Léonora Miano (6), Gaston-Paul Effa (4), Max Lobe (4), Christopher Mfoula (4), Mongo Beti, Ferdinand Oyono, Engelbert Mveng, Severin Cécile Abéga, Pabe Mongo, Lucien Anya Noa, Peter Wuteh Vakunta, René Philombe, Guillaume Oyono Mbia, Djaïli Amadou Amal, David Mbanga Eyombwan, Henri Nkoumo, Eugène Ébodé, Hemley Boum, Mutt-Lon.",
+  "",
+  "• AFRIQUE FRANCOPHONE — Alain Mabanckou (Congo, 6), Sony Labou Tansi (Congo, 6), Henri Lopes (Congo, 5), Tierno Monénembo (Guinée, 9), Véronique Tadjo (Côte d'Ivoire, 5), Fatou Diome (Sénégal, 4), Felwine Sarr (Sénégal, 4), Sami Tchak (Togo, 6), Edem Awumey (Togo, 5), Boucar Diouf (Sénégal, 4), Mamadou Mahmoud N'Dongo (Sénégal, 7), Nimrod (Tchad, 7), Abdoulaye Mamani (Niger, 5), Angèle Bassolé-Ouédraogo (Burkina, 4), Kossi Efoui (Togo), Mariama Bâ (Sénégal).",
+  "",
+  "• MAGHREB — Tahar Ben Jelloun (Maroc, 13), Mahi Binebine (Maroc, 9), Driss Chraïbi (Maroc, 5), Mohamed Nedali (Maroc, 5), Rachid Mimouni (Algérie, 6), Salim Bachi (Algérie, 7), Abdelhak Serhane (Maroc, 6), Kamel Daoud (Algérie, 4), Abdellah Taïa (Maroc, 4), Albert Cossery (Égypte, 4), Leïla Marouane (Algérie, 4), Andrée Chedid (Égypte/Liban, 5).",
+  "",
+  "• AFRIQUE ANGLOPHONE — Chinua Achebe (Nigéria, 4), Chimamanda Ngozi Adichie (Nigéria, 4), Sefi Atta (Nigéria, 4), Wole Soyinka (Nigéria, Nobel 1986), Abdulrazak Gurnah (Tanzanie, Nobel 2021, 6), André Brink (Afrique du Sud, 5).",
+  "",
+  "• AFRIQUE LUSOPHONE — José Eduardo Agualusa (Angola, 6).",
+  "",
+  "• CARAÏBES & DIASPORA — Raphaël Confiant (Martinique, 27), Aimé Césaire (Martinique), Maryse Condé (Guadeloupe), Wilfried N'Sondé (Congo/France, 8), Nathacha Appanah (Maurice, 6), Scholastique Mukasonga (Rwanda, 5), Wajdi Mouawad (Liban/Québec, 10), Amin Maalouf (Liban, 6), Edem Awumey, Fabienne Kanor, Gauz.",
+  "",
+  "RÈGLE D'UTILISATION : Quand tu cites un de ces auteurs, donne titre exact et éditeur si tu en es certain. Si l'utilisateur veut une lecture sur un thème (immigration, tradition/modernité, féminisme, colonisation, enfance africaine, dictature, guerre civile, mémoire, identité), suggère 2-3 auteurs de cette liste avec leurs œuvres emblématiques. Si tu n'es pas certain d'un titre ou d'une date, dis-le et oriente vers le moteur biblio_search au Centre VÉRITAS.",
+  "",
+  "════════ SOURCES CAMEROUNAISES DE RÉFÉRENCE ════════",
+  "Plateformes officielles et reconnues — tu peux y renvoyer l'utilisateur sans inventer leurs contenus :",
+  "• distance-learning.minesec.gov.cm — plateforme officielle MINESEC (programmes, ressources).",
+  "• sujetexa.com — annales officielles BEPC/Probatoire/BAC + GCE OL/AL + fascicules + corrigés (2020-2026). Contact WhatsApp : 677007035.",
+  "• camerecole.org — cours + exercices + épreuves Probatoire/BAC + concours grandes écoles (ENS, ENSP, FASA, FMSB, IMIP, ISSEA…) couvrant 2009-2025.",
+  "• grandprof.org — cours, exercices et épreuves Cameroun.",
+  "• e-school237.com — ressources scolaires CM (cours, devoirs).",
+  "• camerschool.org — manuels scolaires et annales.",
+  "Éditeurs des œuvres au programme : Éditions CLÉ (Yaoundé), Présence Africaine, Gallimard, NEA-Edicef, Ifrikiya, Proximité, APEC, Grasset, Seuil, Edicef.",
+  "",
+  "════════ STYLE & EXIGENCES DE RÉDACTION ════════",
+  "• Français correct, registre soutenu, niveau MINESEC. Pas d'anglicismes inutiles.",
+  "• Structure : titres, sous-titres, listes numérotées, paragraphes courts. Lisible sur mobile.",
+  "• Contextualisation camerounaise : exemples ancrés à Douala, Yaoundé, Buea, Bafoussam ; références à la vie locale (lycées CM, marchés, transport, culture, fêtes nationales du 20 mai et 11 février).",
+  "• Bilinguisme : si l'élève demande en anglais (système GCE/anglophone), réponds en anglais.",
+  "• Pédagogie : annonce ce que tu vas faire, fais-le, conclus en récapitulant. Donne des méthodes, pas juste des résultats.",
+  "• Toute citation littéraire doit être donnée avec auteur + titre en italique + référence précise. Si tu n'es pas certain, ne cite pas.",
+  "",
+  "════════ RÈGLES ANTI-HALLUCINATION (CRITIQUES) ════════",
+  "1. Si tu n'es PAS certain d'un fait (date, citation, auteur, formule, statistique), tu LE DIS explicitement : « Je ne suis pas certain de cette date — vérifiez sur sujetexa.com ou auprès de votre enseignant. »",
+  "2. Tu n'inventes JAMAIS : ni citation littéraire, ni date d'édition, ni nom d'auteur, ni formule mathématique. Plutôt dire « je ne sais pas » que produire un faux fait crédible.",
+  "3. Si la question dépasse ton expertise (médicale, juridique, politique sensible), tu rediriges vers un humain qualifié.",
+  "4. Tu indiques toujours quand un sujet sort du programme MINESEC officiel.",
+  "5. Pour les corrigés d'épreuves récentes spécifiques, tu précises que ton corrigé est une PROPOSITION pédagogique, pas la grille officielle MINESEC : « Ceci est une proposition de corrigé pédagogique. Le corrigé officiel OBC peut différer. »",
+  "6. Tu reproduis EXACTEMENT les grilles OBC (4 critères 6+6+6+2), tu N'INVENTES jamais de nouveaux critères.",
+  "7. Toujours conclure les corrigés par : « NB : toute autre réponse/interprétation pertinente non prévue dans ce corrigé sera prise en compte. »",
+  "",
+  "════════ POSTURE PÉDAGOGIQUE ════════",
+  "Tu es exigeant mais bienveillant. Tu encourages l'effort, valorises les progrès, refuses la flatterie facile. Tu donnes des conseils méthodologiques (gestion du temps, plan, brouillon). Tu rappelles l'importance du français correct même en sciences. Tu honores la rigueur des enseignants camerounais sans jamais les disqualifier. Tu valorises systématiquement les auteurs camerounais et africains dans tes exemples."
+].join("\n");
+
+window.AMBASSA_TACHES = [
   { id:'quiz',       ic:'pencil',    col:'#3C8DFF', t:'Générer un quiz',           d:'QCM / Vrai-Faux / Questions ouvertes — sur n\'importe quel sujet' },
   { id:'corrige',    ic:'check',     col:'#10B981', t:'Générer un corrigé',         d:'Pour un sujet d\'épreuve, exercice ou QCM existant' },
   { id:'fiche',      ic:'doc',       col:'#7C3AED', t:'Fiche de révision',          d:'Synthèse des points clés d\'un chapitre / cours' },
@@ -35354,18 +36037,18 @@ window.MVONDO_TACHES = [
   { id:'doc',        ic:'bookopen',  col:'#6366F1', t:'Analyser un document',       d:'Coller un texte → l\'IA génère questions/résumé/quiz dessus' }
 ];
 
-window.mAgentMvondo = function(taskId){
+window.mAgentAmbassa = function(taskId){
   // v2.7 : ouvert à tous (anonymes inclus, avec quota 2 essais lifetime)
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
-  if(!_checkRateLimit('mvondo', 20)) return;
+  if(!_checkRateLimit('ambassa', 20)) return;
 
   if(taskId){
-    return _mvondoTaskForm(taskId);
+    return _ambassaTaskForm(taskId);
   }
 
   // Menu principal : 7 cards taches
-  var cards = MVONDO_TACHES.map(function(t){
-    return '<div onclick="cm();mAgentMvondo(\''+t.id+'\')" style="background:#fff;border:1.5px solid '+t.col+'40;border-radius:14px;padding:14px;cursor:pointer;transition:all .2s;display:flex;gap:12px;align-items:flex-start" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 20px rgba(0,0,0,.08)\';this.style.borderColor=\''+t.col+'\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\';this.style.borderColor=\''+t.col+'40\'">'
+  var cards = AMBASSA_TACHES.map(function(t){
+    return '<div onclick="cm();mAgentAmbassa(\''+t.id+'\')" style="background:#fff;border:1.5px solid '+t.col+'40;border-radius:14px;padding:14px;cursor:pointer;transition:all .2s;display:flex;gap:12px;align-items:flex-start" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 20px rgba(0,0,0,.08)\';this.style.borderColor=\''+t.col+'\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\';this.style.borderColor=\''+t.col+'40\'">'
       +'<div style="width:42px;height:42px;border-radius:50%;background:'+t.col+'18;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
       +'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+t.col+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-'+t.ic+'"/></svg>'
       +'</div>'
@@ -35374,42 +36057,42 @@ window.mAgentMvondo = function(taskId){
       +'</div>';
   }).join('');
 
-  var hist = (DB._mvondoHist||{})[ses.id] || [];
+  var hist = (ses && ses.id) ? ((DB._ambassaHist||{})[ses.id] || []) : [];
   var histPreview = hist.length ? '<div style="margin-top:18px;padding:12px;background:#F3F4F6;border-radius:10px"><div style="font-weight:700;font-size:12px;color:#374151;margin-bottom:6px">📚 Vos '+Math.min(3,hist.length)+' dernières générations</div>'
     +hist.slice(-3).reverse().map(function(h){
       return '<div style="font-size:11px;color:#6B7280;padding:4px 0;border-bottom:1px solid #E5E7EB">• '+_esc(h.task)+' — '+_esc((h.prompt||'').substring(0,50))+'…</div>';
     }).join('')+'</div>' : '';
 
   // v2.7 : badge quota visible
-  var quotaBadge = (typeof _aiQuotaBadgeHtml === 'function') ? _aiQuotaBadgeHtml('mvondo') : '';
+  var quotaBadge = (typeof _aiQuotaBadgeHtml === 'function') ? _aiQuotaBadgeHtml('ambassa') : '';
   var tier = (typeof _aiTier === 'function') ? _aiTier() : 'anon';
 
   var body = '<div style="padding:8px">'
     +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;padding:18px;border-radius:14px;margin-bottom:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">'
       +'<div style="width:60px;height:60px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;font-family:Plus Jakarta Sans">M</div>'
       +'<div style="flex:1;min-width:200px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800">Agent IA pédagogique</div>'
-      +'<div style="font-size:20px;font-weight:900;font-family:Plus Jakarta Sans">Professeur Mvondo</div>'
+      +'<div style="font-size:20px;font-weight:900;font-family:Plus Jakarta Sans">Professeur Ambassa</div>'
       +'<div style="font-size:11px;opacity:.85;font-style:italic;font-family:Crimson Pro,serif">Expert MINESEC · BEPC · Probatoire · BAC · Programme camerounais</div></div>'
       +(quotaBadge ? '<div>'+quotaBadge+'</div>' : '')
     +'</div>'
     + (tier === 'anon'
-      ? '<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:12px;color:#92400E"><b>🎁 Essai gratuit :</b> vous avez 2 essais Mvondo pour découvrir. <a href="javascript:cm();showRegisterForm()" style="color:#92400E;font-weight:700;text-decoration:underline">Inscrivez-vous gratuitement</a> pour 3 essais/semaine + sauvegarde.</div>'
+      ? '<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:12px;color:#92400E"><b>🎁 Essai gratuit :</b> vous avez 2 essais Ambassa pour découvrir. <a href="javascript:cm();showRegisterForm()" style="color:#92400E;font-weight:700;text-decoration:underline">Inscrivez-vous gratuitement</a> pour 3 essais/semaine + sauvegarde.</div>'
       : (tier === 'free'
-        ? '<div style="background:#EEF2FF;border:1px solid #C7D2FE;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:12px;color:#3730A3"><b>💎 Compte gratuit :</b> 3 essais Mvondo / semaine. <a href="javascript:cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)" style="color:#3730A3;font-weight:700;text-decoration:underline">Passer à un plan</a> pour utiliser sans limite.</div>'
+        ? '<div style="background:#EEF2FF;border:1px solid #C7D2FE;padding:10px 14px;border-radius:10px;margin-bottom:12px;font-size:12px;color:#3730A3"><b>💎 Compte gratuit :</b> 3 essais Ambassa / semaine. <a href="javascript:cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)" style="color:#3730A3;font-weight:700;text-decoration:underline">Passer à un plan</a> pour utiliser sans limite.</div>'
         : ''))
     +'<div style="font-size:13px;color:#142554;font-weight:700;margin-bottom:10px">Que souhaitez-vous créer ?</div>'
     +'<div style="display:grid;gap:8px">'+cards+'</div>'
     +histPreview
     +'</div>';
 
-  M('🎓 Professeur Mvondo','Votre IA pédagogique camerounaise',body,
+  M('🎓 Professeur Ambassa','Votre IA pédagogique camerounaise',body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +'<button class="btn bi" onclick="cm();mMvondoHistorique()">📚 Historique complet</button>', true);
+    +'<button class="btn bi" onclick="cm();mAmbassaHistorique()">📚 Historique complet</button>', true);
 };
 
-window._mvondoTaskForm = function(taskId){
-  var task = MVONDO_TACHES.find(function(t){return t.id===taskId;});
-  if(!task){ mAgentMvondo(); return; }
+window._ambassaTaskForm = function(taskId){
+  var task = AMBASSA_TACHES.find(function(t){return t.id===taskId;});
+  if(!task){ mAgentAmbassa(); return; }
   var CLS = ['6ème','5ème','4ème','3ème','2nde','1ère','Terminale'];
   var MATS = ['Mathématiques','Français','Anglais','Histoire-Géo','SVT','Physique-Chimie','Philosophie','Économie','Informatique','EPS'];
   var SERIES = ['—','A4','C','D','TI','ESF','STT'];
@@ -35431,7 +36114,7 @@ window._mvondoTaskForm = function(taskId){
     formExtra += '<div class="fg"><span class="fl">Que faire avec ce document ?</span><select class="fi" id="mvDocAction"><option value="quiz">Générer un quiz dessus</option><option value="resume">Résumer en 5 points</option><option value="questions">Générer 10 questions de réflexion</option><option value="lexique">Extraire le lexique technique</option></select></div>';
   }
 
-  M('🎓 Mvondo — '+task.t, task.d,
+  M('🎓 Ambassa — '+task.t, task.d,
     '<div class="fg2">'
     +'<div class="fg"><span class="fl">Classe</span><select class="fi" id="mvCls">'+CLS.map(function(c,i){return '<option'+(i===3?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div>'
     +'<div class="fg"><span class="fl">Matière</span><select class="fi" id="mvMat">'+MATS.map(function(m){return '<option>'+m+'</option>';}).join('')+'</select></div>'
@@ -35440,17 +36123,17 @@ window._mvondoTaskForm = function(taskId){
     +formExtra
     +'<div class="fg"><span class="fl">Instructions supplémentaires (optionnel)</span><textarea class="fi" id="mvExtra" rows="2" placeholder="Ex: Contextualiser pour élèves de Douala / Inclure exemples concrets / Difficulté progressive…"></textarea></div>'
     +'<div id="mvResult" style="margin-top:14px"></div>',
-    '<button class="btn bo" onclick="cm();mAgentMvondo()">← Retour</button>'
-    +'<button class="btn bi" id="mvGenBtn" onclick="_mvondoGenerate(\''+taskId+'\')">⚡ Générer</button>', true);
+    '<button class="btn bo" onclick="cm();mAgentAmbassa()">← Retour</button>'
+    +'<button class="btn bi" id="mvGenBtn" onclick="_ambassaGenerate(\''+taskId+'\')">⚡ Générer</button>', true);
 };
 
-window._mvondoGenerate = async function(taskId){
+window._ambassaGenerate = async function(taskId){
   // v2.7 : quota check par plan d'abonnement (compte AVANT la génération)
-  if(typeof _aiGate === 'function' && !_aiGate('mvondo')) return;
+  if(typeof _aiGate === 'function' && !_aiGate('ambassa')) return;
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
   // ses peut être null pour visiteur anonyme — _aiGate gère
-  if(!_checkRateLimit('mvondo_gen', 5)){ return; }
-  var task = MVONDO_TACHES.find(function(t){return t.id===taskId;});
+  if(!_checkRateLimit('ambassa_gen', 5)){ return; }
+  var task = AMBASSA_TACHES.find(function(t){return t.id===taskId;});
   if(!task) return;
   var cls = (_ge('mvCls')||{}).value || '';
   var mat = (_ge('mvMat')||{}).value || '';
@@ -35468,35 +36151,54 @@ window._mvondoGenerate = async function(taskId){
     case 'quiz':
       nb = parseInt((_ge('mvNb')||{}).value) || 10;
       type = (_ge('mvType')||{}).value || 'qcm';
-      prompt = 'Génère un quiz '+type+' de '+nb+' questions pour des élèves de '+cls+' en '+mat+' sur le thème : '+sujet+'.\n';
-      prompt += 'Format attendu :\n';
-      if(type==='qcm') prompt += '1. Question ?\n  A) ...\n  B) ...\n  C) ...\n  D) ...\n  Réponse : X\n  Explication : ...\n\n';
-      else if(type==='vf') prompt += '1. Affirmation : ...\n  Vrai/Faux : V ou F\n  Justification : ...\n\n';
-      else prompt += '1. Question ouverte : ...\n  Réponse modèle : ...\n  Critères : ...\n\n';
+      prompt = 'Génère un quiz '+type+' de '+nb+' questions conforme au programme MINESEC '+cls+' en '+mat+', sur le thème : '+sujet+'.\n';
+      prompt += 'Exigences : difficulté progressive (faciles 30% / moyennes 50% / difficiles 20%), contextualisation camerounaise quand pertinent, vocabulaire conforme aux manuels MINESEC. N\'INVENTE PAS de citations ou dates : si tu n\'es pas certain, formule la question autrement.\n';
+      prompt += 'Format strict attendu :\n';
+      if(type==='qcm') prompt += '1. [Énoncé clair] ?\n  A) ...\n  B) ...\n  C) ...\n  D) ...\n  ✅ Réponse : X\n  💡 Explication : [pourquoi X est juste + pourquoi les autres sont fausses]\n  📚 Source : [manuel / chapitre / programme]\n\n';
+      else if(type==='vf') prompt += '1. Affirmation : ...\n  ✅ Vrai/Faux : V ou F\n  💡 Justification : [argumentée, ≥1 phrase]\n\n';
+      else prompt += '1. Question ouverte : ...\n  ✅ Réponse modèle : [rédigée en phrases complètes]\n  🎯 Critères de notation : [3 éléments-clés attendus]\n\n';
       break;
     case 'corrige':
-      prompt = 'Rédige un corrigé détaillé pour : '+sujet+' (Niveau '+cls+', matière '+mat+').\nSois pédagogique, explique chaque étape du raisonnement, donne la méthode.';
+      prompt = 'Rédige un CORRIGÉ HARMONISÉ NATIONAL pour : '+sujet+' (Niveau '+cls+', matière '+mat+').\n'
+        + 'Applique strictement la méthodologie OBC :\n'
+        + '• Si Français lycée (commentaire/dissertation/résumé) : grille 4 critères (C1 Compréhension 6 + C2 Organisation 6 + C3 Expression 6 + C4 Originalité 2 = 20 pts).\n'
+        + '• Si Français BEPC étude de texte : Partie I Compréhension 10 + Partie II Langue 10.\n'
+        + '• Si Maths/Sciences : barème détaillé par question avec critères explicites.\n'
+        + 'Structure du corrigé : 1) Rappel sujet/consigne. 2) Méthode/plan adopté. 3) Proposition rédigée. 4) Tableau du barème. 5) Conseils méthodologiques. 6) NB : « Toute autre réponse pertinente sera prise en compte. »\n'
+        + 'Cite obligatoirement les œuvres au programme MINESEC quand pertinent (auteur + titre en italique).';
       break;
     case 'fiche':
-      prompt = 'Rédige une fiche de révision pour des élèves de '+cls+' en '+mat+' sur : '+sujet+'.\nStructure : 1) Définitions clés, 2) Concepts essentiels, 3) Formules/règles, 4) Exemples typiques, 5) Pièges à éviter, 6) Mnémotechniques. Maximum 800 mots.';
+      prompt = 'Rédige une fiche de révision pour des élèves de '+cls+' en '+mat+' sur : '+sujet+'.\n'
+        + 'Structure obligatoire : 1) Définitions clés (terminologie MINESEC). 2) Concepts essentiels avec exemples camerounais. 3) Formules/règles (encadrées). 4) Exemples typiques (au moins 1 issu du programme MINESEC). 5) Pièges à éviter (erreurs fréquentes des élèves CM). 6) Mnémotechniques. 7) Pour aller plus loin : références à sujetexa.com, grandprof.org, e-school237.com.\n'
+        + 'Maximum 800 mots. Style soutenu, vocabulaire précis. Si tu n\'es pas certain d\'une formule, dis-le.';
       break;
     case 'diff':
       prompt = 'Génère 3 exercices différenciés sur '+sujet+' pour des élèves de '+cls+' en '+mat+'.\n'
-        + 'Niveau 1 (Facile) : un exercice direct d\'application avec corrigé.\n'
-        + 'Niveau 2 (Moyen) : un exercice nécessitant 2-3 étapes avec corrigé.\n'
-        + 'Niveau 3 (Difficile) : un exercice exigeant analyse et synthèse avec corrigé.';
+        + 'Niveau 1 (Facile, 25% des élèves) : exercice direct d\'application + corrigé pas-à-pas. Barème /20.\n'
+        + 'Niveau 2 (Moyen, 50% des élèves) : exercice nécessitant 2-3 étapes avec articulation + corrigé. Barème /20.\n'
+        + 'Niveau 3 (Difficile, 25% des élèves) : exercice d\'analyse/synthèse exigeant méthode + corrigé détaillé. Barème /20.\n'
+        + 'Contextualise les énoncés (Douala, Yaoundé, marchés, lycées CM). N\'invente JAMAIS de données chiffrées incohérentes.';
       break;
     case 'remed':
       prompt = 'Conçois une activité de remédiation pour des élèves de '+cls+' en '+mat+' qui ont des difficultés sur : '+sujet+'.\n'
-        + 'Structure : 1) Diagnostic des difficultés typiques, 2) Rappel théorique simplifié, 3) Exercice progressif (du plus simple au plus complexe), 4) Astuce mnémotechnique, 5) Évaluation finale 5 questions.';
+        + 'Structure : 1) Diagnostic — les 3 difficultés typiques observées par les enseignants MINESEC. 2) Rappel théorique simplifié (vocabulaire accessible). 3) Exercice progressif (5 items du plus simple au plus complexe, avec corrigé après chacun). 4) Astuce mnémotechnique mémorisable. 5) Évaluation finale (5 questions courtes, barème /10, critère de réussite : 7/10).\n'
+        + 'Ton bienveillant mais exigeant. Encourager l\'effort sans flatterie.';
       break;
     case 'eval':
       nb = parseInt((_ge('mvNb')||{}).value) || 10;
       duree = parseInt((_ge('mvDuree')||{}).value) || 60;
       bareme = parseInt((_ge('mvBareme')||{}).value) || 20;
-      prompt = 'Rédige une évaluation notée complète pour des élèves de '+cls+' en '+mat+' sur : '+sujet+'.\n'
+      prompt = 'Rédige une ÉVALUATION NOTÉE complète au format MINESEC pour des élèves de '+cls+' en '+mat+' sur : '+sujet+'.\n'
         + 'Durée : '+duree+' min · Notation : '+bareme+' points.\n'
-        + 'Structure : En-tête (titre + classe + durée + barème), '+nb+' questions/exercices avec points par item, corrigé complet à la fin avec critères de notation par question.';
+        + 'STRUCTURE OBLIGATOIRE :\n'
+        + '1) En-tête officiel : « MINESEC-DECC / Centre VÉRITAS · ÉPREUVE DE [matière] · CLASSE : '+cls+' · DURÉE : '+duree+' min · COEFFICIENT : [N] »\n'
+        + '2) Consignes générales en italique.\n'
+        + '3) '+nb+' questions/exercices avec points indiqués par item ([X pts]).\n'
+        + '4) Si français lycée → applique grille OBC 4 critères (C1+C2+C3+C4 = 6+6+6+2).\n'
+        + '5) Si français BEPC → applique structure Étude de texte (I. Compréhension 10 + II. Langue 10) ou Production écrite.\n'
+        + '6) CORRIGÉ ENSEIGNANT en fin de document avec barème détaillé par question + critères de notation.\n'
+        + '7) NB final : « Toute autre réponse pertinente non prévue dans ce corrigé sera prise en compte. »\n'
+        + 'Si tu n\'es pas certain d\'une citation ou d\'une date, ne l\'inclus pas — propose une question alternative.';
       break;
     case 'doc':
       doc = ((_ge('mvDoc')||{}).value||'').trim();
@@ -35504,44 +36206,46 @@ window._mvondoGenerate = async function(taskId){
       if(!doc || doc.length < 50){ toast('Collez un texte plus consistant (50 char min)','warn'); return; }
       if(doc.length > 4000) doc = doc.substring(0,4000)+'…[tronqué]';
       var actionMap = {
-        'quiz': 'Génère un quiz de 8 questions QCM (avec réponses + explications) basé sur ce texte.',
-        'resume': 'Résume ce texte en 5 points clés, dans un format facile à mémoriser.',
-        'questions': 'Génère 10 questions de réflexion ouvertes basées sur ce texte, avec pour chacune une piste de réponse.',
-        'lexique': 'Extrais le lexique technique de ce texte (mots clés + définition courte + exemple).'
+        'quiz': 'Génère 8 questions QCM (4 options + bonne réponse + explication) basées EXCLUSIVEMENT sur ce texte. N\'utilise aucune information extérieure au texte. Si une question ne peut être posée sans inventer, propose-en une autre.',
+        'resume': 'Résume ce texte en respectant la méthodologie OBC : 1) Thème du texte. 2) Thèse de l\'auteur. 3) Structure (idées-clés par paragraphe, numérotées). 4) Proposition de résumé au 1/4 (indique le nombre de mots de ta proposition). Ne trahis pas l\'auteur, conserve son système d\'énonciation, utilise un vocabulaire personnel.',
+        'questions': 'Génère 10 questions d\'étude conformes au format BEPC/Probatoire : mix relevé littéral (faciles) + inférence + sens propre/figuré + opinion justifiée. Pour chaque question, donne barème (en points) et piste de réponse attendue.',
+        'lexique': 'Extrais le lexique technique/notionnel de ce texte : pour chaque mot-clé donne définition courte (max 2 lignes), classe grammaticale, exemple d\'emploi dans une autre phrase. Présente sous forme de tableau.'
       };
-      prompt = 'Document à analyser pour des élèves de '+cls+' en '+mat+', sujet "'+sujet+'" :\n\n«'+doc+'»\n\nTâche : '+actionMap[docAction];
+      prompt = 'Document à analyser pour des élèves de '+cls+' en '+mat+', sujet "'+sujet+'" :\n\n«'+doc+'»\n\nTâche : '+actionMap[docAction]+'\n\nRappel : applique les méthodologies MINESEC, n\'invente AUCUN fait hors du texte.';
       break;
   }
   if(extra) prompt += '\n\nInstructions supplémentaires : '+extra;
 
   // UI Loading
   var btn = _ge('mvGenBtn');
-  if(btn){ btn.disabled = true; btn.textContent = '⏳ Mvondo réfléchit…'; }
-  _ge('mvResult').innerHTML = '<div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:14px;text-align:center"><div style="font-size:32px;margin-bottom:6px;animation:pulse 1.2s infinite">🎓</div><div style="font-weight:700;color:#3730A3">Le professeur Mvondo rédige…</div><div style="font-size:11px;color:#6366F1;margin-top:4px;font-style:italic">Cela peut prendre 10-30 secondes pour les contenus longs</div></div>';
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Ambassa réfléchit…'; }
+  _ge('mvResult').innerHTML = '<div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:14px;text-align:center"><div style="font-size:32px;margin-bottom:6px;animation:pulse 1.2s infinite">🎓</div><div style="font-weight:700;color:#3730A3">Le professeur Ambassa rédige…</div><div style="font-size:11px;color:#6366F1;margin-top:4px;font-style:italic">Cela peut prendre 10-30 secondes pour les contenus longs</div></div>';
 
   try {
-    var resp = await callClaudeAPI(prompt, MVONDO_PERSONA);
+    var resp = await callClaudeAPI(prompt, AMBASSA_PERSONA);
     var formatted = _sanitizeHTML(resp).replace(/\n/g,'<br>');
     _ge('mvResult').innerHTML =
       '<div style="background:#F0FDF4;border:2px solid #6EE7B7;border-radius:14px;padding:18px;margin-top:12px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:1px">✓ Mvondo a généré</div>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:1px">✓ Ambassa a généré</div>'
       +'<div style="display:flex;gap:6px">'
-      +'<button class="btn sm" style="background:#fff;border:1px solid #6EE7B7;color:#059669;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_mvondoCopy()">📋 Copier</button>'
-      +(taskId==='eval'?'<button class="btn sm" style="background:#10B981;color:#fff;border:none;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_mvondoSaveEval(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/'/g,"\\'")+'\')">💾 Enregistrer dans Évaluations</button>':'')
+      +'<button class="btn sm" style="background:#fff;border:1px solid #6EE7B7;color:#059669;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaCopy()">📋 Copier</button>'
+      +(taskId==='eval'?'<button class="btn sm" style="background:#10B981;color:#fff;border:none;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSaveEval(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/'/g,"\\'")+'\')">💾 Enregistrer dans Évaluations</button>':'')
       +'</div></div>'
       +'<div id="mvOutput" style="font-size:13px;color:#065F46;line-height:1.7;max-height:400px;overflow-y:auto">'+formatted+'</div>'
       +'</div>';
-    // Persister dans l'historique
-    DB._mvondoHist = DB._mvondoHist || {};
-    DB._mvondoHist[ses.id] = DB._mvondoHist[ses.id] || [];
-    DB._mvondoHist[ses.id].push({
-      id: gid(), task: task.t, taskId: taskId,
-      cls: cls, mat: mat, sujet: sujet,
-      prompt: sujet, response: resp.substring(0, 5000),
-      date: Date.now()
-    });
-    if(DB._mvondoHist[ses.id].length > 50) DB._mvondoHist[ses.id] = DB._mvondoHist[ses.id].slice(-50);
-    try { save(); } catch(e){}
+    // Persister dans l'historique (uniquement pour les inscrits)
+    if(ses && ses.id){
+      DB._ambassaHist = DB._ambassaHist || {};
+      DB._ambassaHist[ses.id] = DB._ambassaHist[ses.id] || [];
+      DB._ambassaHist[ses.id].push({
+        id: gid(), task: task.t, taskId: taskId,
+        cls: cls, mat: mat, sujet: sujet,
+        prompt: sujet, response: resp.substring(0, 5000),
+        date: Date.now()
+      });
+      if(DB._ambassaHist[ses.id].length > 50) DB._ambassaHist[ses.id] = DB._ambassaHist[ses.id].slice(-50);
+      try { save(); } catch(e){}
+    }
     if(typeof _addXP === 'function') _addXP('devoir');
   } catch(e){
     _ge('mvResult').innerHTML = '<div style="background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;padding:12px;border-radius:10px">⚠️ Erreur IA. Réessayez ou simplifiez votre demande.<br><small>'+_esc(e.message||'')+'</small></div>';
@@ -35550,7 +36254,7 @@ window._mvondoGenerate = async function(taskId){
   }
 };
 
-window._mvondoCopy = function(){
+window._ambassaCopy = function(){
   var el = document.getElementById('mvOutput');
   if(!el) return;
   // Convertir <br> en \n pour la copie
@@ -35566,7 +36270,7 @@ window._mvondoCopy = function(){
   }
 };
 
-window._mvondoSaveEval = function(cls, mat, sujet){
+window._ambassaSaveEval = function(cls, mat, sujet){
   var el = document.getElementById('mvOutput');
   if(!el) return;
   var content = el.innerHTML.replace(/<br\s*\/?>/g,'\n').replace(/<[^>]+>/g,'');
@@ -35577,64 +36281,64 @@ window._mvondoSaveEval = function(cls, mat, sujet){
     titre: 'Évaluation IA — '+sujet,
     cls: cls, matiere: mat,
     contenu: content,
-    auteur: SES ? ((SES.pre||'')+' '+(SES.nom||'')) : 'Mvondo IA',
+    auteur: SES ? ((SES.pre||'')+' '+(SES.nom||'')) : 'Ambassa IA',
     auteurId: SES ? SES.id : null,
     date: today(),
-    source: 'ia_mvondo'
+    source: 'ia_ambassa'
   });
   try { save(); } catch(e){}
   toast('✓ Évaluation enregistrée dans la base','ok');
 };
 
-window.mMvondoHistorique = function(){
+window.mAmbassaHistorique = function(){
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
   if(!ses) return;
-  var hist = (DB._mvondoHist||{})[ses.id] || [];
+  var hist = (DB._ambassaHist||{})[ses.id] || [];
   if(!hist.length){
-    M('📚 Historique Mvondo','Aucune génération pour le moment',
+    M('📚 Historique Ambassa','Aucune génération pour le moment',
       '<div style="text-align:center;padding:20px;color:#6B7280">Vos générations apparaîtront ici.</div>',
-      '<button class="btn bi" onclick="cm();mAgentMvondo()">← Retour à Mvondo</button>');
+      '<button class="btn bi" onclick="cm();mAgentAmbassa()">← Retour à Ambassa</button>');
     return;
   }
   var rows = hist.slice().reverse().map(function(h){
-    return '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer" onclick="_mvondoShowHistItem(\''+h.id+'\')">'
+    return '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer" onclick="_ambassaShowHistItem(\''+h.id+'\')">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="font-weight:700;color:#142554;font-size:13px">'+_esc(h.task)+'</div><div style="font-size:10px;color:#6B7280">'+new Date(h.date).toLocaleDateString('fr-FR')+'</div></div>'
       +'<div style="font-size:11px;color:#475569;margin-top:3px">'+_esc(h.cls||'')+' · '+_esc(h.mat||'')+' · '+_esc(h.sujet||'')+'</div>'
       +'</div>';
   }).join('');
-  M('📚 Historique Mvondo',hist.length+' génération'+(hist.length>1?'s':''),'<div style="padding:6px">'+rows+'</div>',
-    '<button class="btn bi" onclick="cm();mAgentMvondo()">← Retour</button>'
-    +'<button class="btn bo" onclick="_mvondoClearHist()">🗑 Effacer historique</button>', true);
+  M('📚 Historique Ambassa',hist.length+' génération'+(hist.length>1?'s':''),'<div style="padding:6px">'+rows+'</div>',
+    '<button class="btn bi" onclick="cm();mAgentAmbassa()">← Retour</button>'
+    +'<button class="btn bo" onclick="_ambassaClearHist()">🗑 Effacer historique</button>', true);
 };
 
-window._mvondoClearHist = function(){
-  if(!confirm('Effacer tout votre historique Mvondo ?')) return;
+window._ambassaClearHist = function(){
+  if(!confirm('Effacer tout votre historique Ambassa ?')) return;
   if(!SES) return;
-  DB._mvondoHist = DB._mvondoHist || {};
-  DB._mvondoHist[SES.id] = [];
+  DB._ambassaHist = DB._ambassaHist || {};
+  DB._ambassaHist[SES.id] = [];
   save();
   cm();
-  mAgentMvondo();
+  mAgentAmbassa();
 };
 
-// Page dédiée Mvondo (accessible via nav enseignant/admin)
-window.pgMvondo = function(){
+// Page dédiée Ambassa (accessible via nav enseignant/admin)
+window.pgAmbassa = function(){
   // Lancer directement la modale principale
-  setTimeout(function(){ mAgentMvondo(); }, 100);
-  return '<div class="pgt">🎓 Professeur Mvondo — Agent IA pédagogique</div>'
+  setTimeout(function(){ mAgentAmbassa(); }, 100);
+  return '<div class="pgt">🎓 Professeur Ambassa — Agent IA pédagogique</div>'
     +'<div class="card mt12">'
     +'<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">'
     +'<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#142554,#7C3AED);color:#FFC93C;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;font-family:Plus Jakarta Sans;flex-shrink:0">M</div>'
     +'<div style="flex:1;min-width:240px">'
     +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#7C3AED;font-weight:800">Agent IA pédagogique camerounais</div>'
-    +'<h2 style="margin:4px 0;color:#142554;font-family:Plus Jakarta Sans">Professeur Mvondo</h2>'
+    +'<h2 style="margin:4px 0;color:#142554;font-family:Plus Jakarta Sans">Professeur Ambassa</h2>'
     +'<p style="font-style:italic;color:#475569;font-family:Crimson Pro,serif;font-size:14px;margin:6px 0">Expert MINESEC · BEPC · Probatoire · BAC séries A/C/D · Connaît les programmes camerounais.</p>'
-    +'<button class="btn bi" onclick="mAgentMvondo()" style="font-size:14px">⚡ Lancer Mvondo</button>'
+    +'<button class="btn bi" onclick="mAgentAmbassa()" style="font-size:14px">⚡ Lancer Ambassa</button>'
     +'</div></div></div>'
-    +'<div class="card mt12"><div class="ct">📚 Ce que Mvondo peut faire pour vous</div>'
+    +'<div class="card mt12"><div class="ct">📚 Ce que Ambassa peut faire pour vous</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">'
-    +(MVONDO_TACHES||[]).map(function(t){
-      return '<div onclick="mAgentMvondo(\''+t.id+'\')" style="background:#fff;border:1px solid '+t.col+'30;border-radius:12px;padding:14px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor=\''+t.col+'\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\''+t.col+'30\';this.style.transform=\'\'">'
+    +(AMBASSA_TACHES||[]).map(function(t){
+      return '<div onclick="mAgentAmbassa(\''+t.id+'\')" style="background:#fff;border:1px solid '+t.col+'30;border-radius:12px;padding:14px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor=\''+t.col+'\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\''+t.col+'30\';this.style.transform=\'\'">'
         +'<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px">'
         +'<div style="width:36px;height:36px;border-radius:50%;background:'+t.col+'18;display:flex;align-items:center;justify-content:center;flex-shrink:0">'
         +'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="'+t.col+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-'+t.ic+'"/></svg>'
@@ -35650,13 +36354,13 @@ window.pgMvondo = function(){
     +'</div>';
 };
 
-window._mvondoShowHistItem = function(id){
-  var hist = (DB._mvondoHist||{})[SES.id] || [];
+window._ambassaShowHistItem = function(id){
+  var hist = (DB._ambassaHist||{})[SES.id] || [];
   var h = hist.find(function(x){return x.id===id;});
   if(!h) return;
   M('📄 '+h.task,h.cls+' · '+h.mat+' · '+h.sujet,
     '<div style="font-size:13px;color:#374151;line-height:1.7;max-height:400px;overflow-y:auto;white-space:pre-wrap">'+_esc(h.response||'')+'</div>',
-    '<button class="btn bo" onclick="cm();mMvondoHistorique()">← Historique</button>'
+    '<button class="btn bo" onclick="cm();mAmbassaHistorique()">← Historique</button>'
     +'<button class="btn bi" onclick="navigator.clipboard.writeText(\'\'+'+JSON.stringify(h.response).replace(/'/g,"\\'")+').then(function(){toast(\'✓ Copié\');});">📋 Copier</button>', true);
 };
 
