@@ -1,15 +1,12 @@
 // ═══════════════════════════════════════════════════════════════════
-// VÉRITAS Academy — Service Worker v2.9.1
-// Stratégie : Cache First pour assets statiques, Network First pour
-// les données dynamiques. Permet le fonctionnement hors-ligne basique.
+// VÉRITAS Academy — Service Worker v2.9.11
+// Stratégie : Network First pour HTML, Cache First pour assets.
+// CORRECTION v2.9.11 : robustesse maximale — jamais de respondWith(undefined)
+// (cause du bug "Failed to convert value to 'Response'" en v2.9.7-v2.9.10)
 // ═══════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'veritas-v2.9.10';
-// v2.9.7 : CSP très permissive (https:/http:/blob: partout) — débloque toutes
-// les connexions encore bloquées en v2.9.6 (7 URLs connect-src). Retire le
-// meta X-Frame-Options (warning console — doit être en HTTP header serveur).
-// Nettoyage aggressif de TOUS les anciens caches au démarrage
-const STATIC_CACHE = `${CACHE_VERSION}-static`;
+const CACHE_VERSION = 'veritas-v2.9.11';
+const STATIC_CACHE  = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 
 // Assets critiques pré-cachés à l'installation
@@ -17,119 +14,166 @@ const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/app.html',
-  '/manifest.webmanifest',
-  '/Logo détouré.png'
+  '/manifest.webmanifest'
 ];
 
 // Domaines à mettre en cache runtime (CDN images/pictos)
 const RUNTIME_DOMAINS = [
-  'em-content.zobj.net',          // pictos 3D Microsoft Fluent
-  'images.unsplash.com',           // illustrations
-  'fonts.googleapis.com',          // CSS fonts
-  'fonts.gstatic.com',             // fichiers fonts
-  'cdnjs.cloudflare.com',          // libs (html2canvas, jspdf, xlsx)
+  'em-content.zobj.net',
+  'images.unsplash.com',
+  'fonts.googleapis.com',
+  'fonts.gstatic.com',
+  'cdnjs.cloudflare.com',
   'cdn.jsdelivr.net'
 ];
 
 // ═══════════════════════════════════════════════════════════════════
-// INSTALLATION : pré-cache les assets critiques
+// HELPER : retourne TOUJOURS une Response valide (jamais undefined)
+// ═══════════════════════════════════════════════════════════════════
+function emptyResponse(status) {
+  return new Response('', {
+    status: status || 504,
+    statusText: 'Service Worker fallback',
+    headers: { 'Content-Type': 'text/plain' }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// INSTALLATION : pré-cache + skipWaiting agressif
 // ═══════════════════════════════════════════════════════════════════
 self.addEventListener('install', event => {
+  console.log('[SW v2.9.11] Installation...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then(cache => cache.addAll(PRECACHE_URLS).catch(err => {
-        console.warn('[SW] Pré-cache partiel:', err);
-      }))
-      .then(() => self.skipWaiting())
+      .then(cache => {
+        // Pré-cache chaque URL individuellement (ne pas tout casser si une fail)
+        return Promise.all(PRECACHE_URLS.map(url =>
+          cache.add(url).catch(err => {
+            console.warn('[SW] Skip pre-cache', url, ':', err.message);
+          })
+        ));
+      })
+      .then(() => self.skipWaiting()) // IMPORTANT : prendre la main immédiatement
+      .catch(err => {
+        console.warn('[SW] Install error (non-bloquant):', err);
+        return self.skipWaiting();
+      })
   );
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// ACTIVATION : nettoyage des vieux caches
+// ACTIVATION : nettoyage caches anciens + clients.claim
 // ═══════════════════════════════════════════════════════════════════
 self.addEventListener('activate', event => {
+  console.log('[SW v2.9.11] Activation...');
   event.waitUntil(
     Promise.all([
-      // 1. Supprimer TOUS les anciens caches (pas seulement ceux d'une version antérieure)
+      // 1. Supprimer TOUS les anciens caches (même partiels d'autres versions)
       caches.keys().then(keys => Promise.all(
         keys.filter(k => !k.startsWith(CACHE_VERSION))
             .map(k => { console.log('[SW] Suppression cache:', k); return caches.delete(k); })
       )),
-      // 2. Prendre le contrôle de tous les clients immédiatement
+      // 2. Prendre le contrôle de tous les clients IMMÉDIATEMENT
       self.clients.claim(),
-      // 3. Notifier les clients que le SW est actif
-      self.clients.matchAll().then(clients => clients.forEach(c => c.postMessage({type:'SW_UPDATED', version:CACHE_VERSION})))
-    ])
+      // 3. Notifier les clients
+      self.clients.matchAll({ includeUncontrolled: true }).then(clients =>
+        clients.forEach(c => c.postMessage({ type: 'SW_UPDATED', version: CACHE_VERSION }))
+      )
+    ]).catch(err => console.warn('[SW] Activate error:', err))
   );
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// FETCH : stratégie hybride
+// FETCH : stratégie hybride avec FALLBACK ROBUSTE (jamais undefined)
 // ═══════════════════════════════════════════════════════════════════
 self.addEventListener('fetch', event => {
   const req = event.request;
-  const url = new URL(req.url);
 
-  // Ne PAS intercepter :
+  // Filtres : NE PAS intercepter
   if (req.method !== 'GET') return;
+  let url;
+  try { url = new URL(req.url); } catch(e) { return; }
   if (url.protocol === 'chrome-extension:') return;
-  if (url.pathname.includes('/api/')) return;        // toujours réseau pour API
-  if (url.hostname.includes('firebasedatabase.app')) return; // jamais cacher Firebase
-  if (url.hostname.includes('googletagmanager')) return;     // jamais cacher analytics
+  if (url.protocol === 'data:') return;
+  if (url.protocol === 'blob:') return;
+  if (url.pathname.includes('/api/')) return;
+  if (url.hostname.includes('firebasedatabase.app')) return;
+  if (url.hostname.includes('googletagmanager')) return;
   if (url.hostname.includes('clarity.ms')) return;
   if (url.hostname.includes('google-analytics')) return;
+  if (url.hostname.includes('pollinations.ai')) return;  // jamais intercepter l'IA
+  if (url.hostname.includes('openrouter.ai')) return;    // jamais intercepter l'IA
+  if (url.hostname.includes('anthropic.com')) return;
+  if (url.hostname.includes('identitytoolkit.googleapis')) return; // Firebase Auth
+  if (url.hostname.includes('securetoken.googleapis')) return;
 
-  // Stratégie 1 : NETWORK FIRST pour HTML (toujours version fraîche si possible)
-  if (req.destination === 'document' || req.headers.get('accept')?.includes('text/html')) {
+  // ── Stratégie 1 : NETWORK FIRST pour HTML ──
+  const acceptHeader = req.headers.get('accept') || '';
+  if (req.destination === 'document' || acceptHeader.includes('text/html')) {
     event.respondWith(
       fetch(req)
         .then(res => {
-          // v1.2.5 SÉCURITÉ : ne cacher que les réponses 200 ET valides
-          // Ne JAMAIS cacher les 4xx/5xx (pages d'erreur LWS, Cloudflare, etc.)
-          if (res.ok && res.status === 200 && res.type !== 'error') {
+          if (res && res.ok && res.status === 200 && res.type !== 'error') {
             const clone = res.clone();
-            caches.open(STATIC_CACHE).then(c => c.put(req, clone));
+            caches.open(STATIC_CACHE).then(c => c.put(req, clone)).catch(()=>{});
           }
-          return res;
+          return res || emptyResponse(504);
         })
-        .catch(() => caches.match(req).then(r => r || caches.match('/index.html')))
+        .catch(() =>
+          caches.match(req)
+            .then(r => r || caches.match('/index.html'))
+            .then(r => r || caches.match('/'))
+            .then(r => r || emptyResponse(504))  // ⚠️ FALLBACK ULTIME — jamais undefined
+            .catch(() => emptyResponse(504))
+        )
     );
     return;
   }
 
-  // Stratégie 2 : CACHE FIRST pour assets statiques (CSS, JS, fonts, images)
-  if (RUNTIME_DOMAINS.some(d => url.hostname.includes(d)) ||
-      req.destination === 'image' ||
-      req.destination === 'font' ||
-      req.destination === 'style' ||
-      req.destination === 'script') {
+  // ── Stratégie 2 : CACHE FIRST pour assets statiques ──
+  const isCacheable = RUNTIME_DOMAINS.some(d => url.hostname.includes(d)) ||
+                      req.destination === 'image' ||
+                      req.destination === 'font' ||
+                      req.destination === 'style' ||
+                      req.destination === 'script';
+  if (isCacheable) {
     event.respondWith(
-      caches.match(req).then(cached => {
-        if (cached) return cached;
-        return fetch(req).then(res => {
-          if (res.ok) {
-            const clone = res.clone();
-            caches.open(RUNTIME_CACHE).then(c => c.put(req, clone));
-          }
-          return res;
-        }).catch(() => cached || new Response('', { status: 504 }));
-      })
+      caches.match(req)
+        .then(cached => {
+          if (cached) return cached;
+          return fetch(req)
+            .then(res => {
+              if (res && res.ok) {
+                const clone = res.clone();
+                caches.open(RUNTIME_CACHE).then(c => c.put(req, clone)).catch(()=>{});
+              }
+              return res || emptyResponse(504);
+            })
+            .catch(() => emptyResponse(504));  // ⚠️ FALLBACK ULTIME
+        })
+        .catch(() => emptyResponse(504))
     );
     return;
   }
 
-  // Stratégie 3 : DEFAULT — network fallback cache
+  // ── Stratégie 3 : DEFAULT — pass-through réseau, fallback cache ──
   event.respondWith(
-    fetch(req).catch(() => caches.match(req))
+    fetch(req)
+      .then(res => res || emptyResponse(504))
+      .catch(() =>
+        caches.match(req).then(r => r || emptyResponse(504))
+      )
   );
 });
 
 // ═══════════════════════════════════════════════════════════════════
-// MESSAGE : permet à l'app de forcer un skipWaiting / clear cache
+// MESSAGE : commandes depuis l'app (skipWaiting, clear cache)
 // ═══════════════════════════════════════════════════════════════════
 self.addEventListener('message', event => {
-  if (event.data === 'SKIP_WAITING') self.skipWaiting();
-  if (event.data === 'CLEAR_CACHE') {
-    caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+  if (event.data === 'SKIP_WAITING' || (event.data && event.data.type === 'SKIP_WAITING')) {
+    self.skipWaiting();
+  }
+  if (event.data === 'CLEAR_CACHE' || (event.data && event.data.type === 'CLEAR_CACHE')) {
+    caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
   }
 });
