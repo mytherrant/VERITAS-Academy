@@ -35517,20 +35517,32 @@ window.STRUCTURES_EPREUVES_MINESEC = {
     GCE_A_Level: ["Lower Sixth", "Upper Sixth"]
   },
   // ──── BEPC (3e, toutes séries) — Format MINESEC officiel ────
-  // ⚠️ FRANÇAIS BEPC = 3 ÉPREUVES SÉPARÉES (pas de dictée — la dictée est en séquence/composition interne uniquement)
-  // Source vérifiée : DRES/EST-IRP/LAL Avril 2025 · DRES-ADAMAOUA Blanc 2025 · DRES-NORD harmonisé 2022-2023
+  // ⚠️ FRANÇAIS BEPC = 3 ÉPREUVES SÉPARÉES
+  // La 1re épreuve ALTERNE selon les sessions entre DICTÉE (classique) et CORRECTION ORTHOGRAPHIQUE.
+  // Les deux formats sont officiels MINESEC — toujours préparer les élèves AUX DEUX.
+  // Source vérifiée : DRES/EST-IRP/LAL Avril 2025 · DRES-ADAMAOUA Blanc 2025 · DRES-NORD harmonisé 2022-2023 · annales sujetexa.com 2019-2026
   BEPC: {
-    "Correction orthographique (1re épreuve français)": {
+    "Dictée OU Correction orthographique (1re épreuve français — ALTERNANCE selon sessions)": {
       duree:"45 min", coef:1, total:20,
-      consigne_officielle:"Le texte ci-après comporte des fautes. Corrigez-les en rayant d'un seul trait le mot incorrect et en écrivant le mot correct au-dessus.",
-      structure:"Texte 130-180 mots extrait d'une œuvre publiée (auteur africain/camerounais préféré). 15 fautes délibérées = 20 pts exactement.",
-      bareme_categories:{
-        "Ponctuation/Accent manquant":"0,5 pt × 4 fautes = 2 pts",
-        "Orthographe simple (lettre manquante, doublement)":"1 pt × 4 fautes = 4 pts",
-        "Grammaire (accord PP, sujet-verbe, adjectif)":"2 pts × 4 fautes = 8 pts",
-        "Orthographe avec incidence sémantique (homophones)":"2 pts × 3 fautes = 6 pts"
+      remarque_alternance:"Le MINESEC fait alterner les deux formats d'une session à l'autre. Toujours préparer les élèves AUX DEUX. L'épreuve est annoncée dans le sujet par son intitulé.",
+      format_A_dictee:{
+        consigne_officielle:"Le professeur va vous lire ce texte trois fois. La première fois, écoutez attentivement. La deuxième fois, écrivez au fur et à mesure. La troisième fois, relisez et corrigez.",
+        structure:"Texte 100-150 mots dicté à voix haute par le surveillant, extrait d'une œuvre publiée (auteur africain/camerounais préféré). Élève écrit ce qu'il entend.",
+        bareme:"Orthographe lexicale 10 + Grammaire (accords, conjugaison) 10. Mode A : −0,5 pt/faute, plancher 0, faute répétée comptée une fois.",
+        difficultes_typiques:"Accents (â/ê/î/ô/û/é/è), consonnes doubles, lettres muettes finales, homophones, accord sujet-verbe (sujets éloignés/inversés), accord PP (être/avoir), accord adjectifs, infinitif vs participe -er/-é, subjonctif présent, imparfait vs passé simple.",
+        note_enseignant:"Écrire au tableau les mots difficiles et noms propres (liste fournie dans le sujet)."
       },
-      remarque:"Le texte source CORRECT n'est jamais donné à l'élève — uniquement dans le corrigé enseignant."
+      format_B_correction_orthographique:{
+        consigne_officielle:"Le texte ci-après comporte des fautes. Corrigez-les en rayant d'un seul trait le mot incorrect et en écrivant le mot correct au-dessus.",
+        structure:"Texte 130-180 mots imprimé (extrait d'œuvre publiée) AVEC 15 fautes délibérées totalisant exactement 20 pts.",
+        bareme_categories:{
+          "Ponctuation/Accent manquant":"0,5 pt × 4 fautes = 2 pts",
+          "Orthographe simple (lettre manquante, doublement)":"1 pt × 4 fautes = 4 pts",
+          "Grammaire (accord PP, sujet-verbe, adjectif)":"2 pts × 4 fautes = 8 pts",
+          "Orthographe avec incidence sémantique (homophones)":"2 pts × 3 fautes = 6 pts"
+        },
+        remarque:"Le texte source CORRECT n'est jamais donné à l'élève — uniquement dans le corrigé enseignant."
+      }
     },
     "Étude de texte (2e épreuve français)": {
       duree:"1h", coef:1, total:20,
@@ -35804,7 +35816,7 @@ window.AMBASSA_PERSONA = [
   "  • Critère 4 — Originalité de la production : 2 pts",
   "GRILLE LANGUE FRANÇAISE BAC séries D/TI (coef 1, 2h) — TOTAL 20 PTS :",
   "  • I. Communication/Énonciation : 5 pts | II. Morphosyntaxe : 5 pts | III. Sémantique/Lexicologie : 5 pts | IV. Stylistique/Rhétorique : 5 pts",
-  "GRILLE DICTÉE (composition interne/séquence, PAS au BEPC officiel — la dictée n'est PLUS au programme BEPC, remplacée par la Correction orthographique) — TOTAL 20 PTS : Orthographe 10 + Grammaire 10. Mode A : −0,5 pt par faute, plancher 0, faute répétée comptée une fois. Durée pratiquée : 45 min.",
+  "GRILLE DICTÉE BEPC (1re épreuve français en ALTERNANCE avec Correction orthographique, 45 min, coef 1) — TOTAL 20 PTS : Orthographe lexicale 10 + Grammaire (accords, conjugaison) 10. Mode A : −0,5 pt par faute, plancher 0, faute répétée comptée une fois. La dictée est lue 3 fois par le surveillant.",
   "GRILLE CORRECTION ORTHOGRAPHIQUE BEPC (1re épreuve de français, 45 min, coef 1) — TOTAL 20 PTS :",
   "  • Ponctuation/Accent/Séparation : 0,5 pt par faute",
   "  • Orthographe simple (lexicale) : 1 pt par faute",
@@ -35830,7 +35842,7 @@ window.AMBASSA_PERSONA = [
   "PARTIE I Compréhension 10 pts (4-6 questions) — Types officiels : thème du texte (2 pts), relevé de champ lexical (2 pts), explication de mot/expression (1-2 pts), sens propre vs figuré justifié (2 pts), question d'opinion justifiée (2 pts), sentiments/état d'âme avec détails (2 pts), inférence (2 pts). Toujours au moins une question de relevé littéral + une question d'opinion ouverte.",
   "PARTIE II Connaissance et maniement de la langue 10 pts (4-5 questions) — Domaines à varier : LEXIQUE (champ lexical, sens propre/figuré, valeur dénotative/connotative), MORPHOLOGIE (degrés de l'adjectif, connecteurs et leurs valeurs), SYNTAXE (nature des propositions, réécriture en subordonnée circonstancielle de cause/conséquence/temps), DISCOURS DIRECT↔INDIRECT (réécriture au style inverse), TEMPS ET MODES (identification + réécriture), VALEURS STYLISTIQUES (champ lexical et impression, type+valeur de phrase). Réponses exigées en phrases complètes.",
   "",
-  "════════ MÉTHODOLOGIE — DICTÉE (composition interne, PAS au BEPC officiel) ════════",
+  "════════ MÉTHODOLOGIE — DICTÉE BEPC (1re épreuve en ALTERNANCE avec Correction orthographique — 45 min, coef 1) ════════",
   "Texte 100-150 mots extrait d'une œuvre publiée (auteur africain/camerounais prioritaire) avec référence bibliographique complète. Inclure au moins 3 difficultés d'orthographe + 4 difficultés de grammaire. Difficultés à intégrer : accents (â, ê, î, ô, û, é, è, ë), consonnes doubles, lettres muettes finales, homophones lexicaux (hors/or, fois/foie), accord sujet-verbe avec sujet éloigné/inversé/multiple, accord participe passé avec être/avoir, accord adjectifs attributs/épithètes, infinitif vs participe passé en -er/-é, subjonctif présent, imparfait vs passé simple (-ait/-a, -aient/-èrent). Noter dans le corrigé : tableau N°/mot/difficulté/catégorie/points. Mots difficiles et noms propres à écrire au tableau.",
   "Consigne standard à reproduire : « Le professeur va vous lire ce texte trois fois. La première fois, écoutez attentivement. La deuxième fois, écrivez au fur et à mesure. La troisième fois, relisez et corrigez. »",
   "",
@@ -35887,11 +35899,14 @@ window.AMBASSA_PERSONA = [
   "",
   "FORMATS TYPES PAR MATIÈRE-CLASSE (durée · coef · structure) :",
   "",
-  "── BEPC (3e) ── ⚠️ FRANÇAIS = 3 ÉPREUVES SÉPARÉES (PAS de dictée — la dictée est exclusivement en composition interne/séquence)",
-  "Source vérifiée : DRES/EST-IRP/LAL Avril 2025 · DRES-ADAMAOUA Blanc 2025 · DRES-NORD harmonisé 2022-2023.",
+  "── BEPC (3e) ── ⚠️ FRANÇAIS = 3 ÉPREUVES SÉPARÉES",
+  "La 1re épreuve ALTERNE selon les sessions entre DICTÉE (classique, oral) et CORRECTION ORTHOGRAPHIQUE (texte avec fautes à corriger). Le MINESEC fait varier d'une année à l'autre — préparer les élèves AUX DEUX formats.",
+  "Source vérifiée : DRES/EST-IRP/LAL Avril 2025 · DRES-ADAMAOUA Blanc 2025 · DRES-NORD harmonisé 2022-2023 · annales sujetexa.com 2019-2026.",
   "",
   "🇫🇷 FRANÇAIS BEPC — 3 épreuves successives :",
-  "  1. CORRECTION ORTHOGRAPHIQUE · 45 min · coef 1 · /20 → Texte 130-180 mots avec 15 fautes délibérées (réparties en 4 catégories : Ponctuation/Accent 0,5 pt × 4 + Ortho simple 1 pt × 4 + Grammaire 2 pts × 4 + Homophones sémantiques 2 pts × 3 = 20 pts). Consigne officielle exacte : « Le texte ci-après comporte des fautes. Corrigez-les en rayant d'un seul trait le mot incorrect et en écrivant le mot correct au-dessus. »",
+  "  1. DICTÉE OU CORRECTION ORTHOGRAPHIQUE · 45 min · coef 1 · /20 (alternance selon session) :",
+  "     → FORMAT A — DICTÉE CLASSIQUE : Texte 100-150 mots lu 3 fois par le surveillant. Élève écrit ce qu'il entend. Barème : Orthographe 10 + Grammaire 10. Mode A : −0,5 pt/faute, plancher 0. Consigne : « Le professeur va vous lire ce texte trois fois. La première fois, écoutez attentivement. La deuxième fois, écrivez au fur et à mesure. La troisième fois, relisez et corrigez. »",
+  "     → FORMAT B — CORRECTION ORTHOGRAPHIQUE : Texte imprimé 130-180 mots AVEC 15 fautes à corriger. Barème 4 catégories : Ponctuation/Accent 0,5 pt × 4 (2 pts) + Ortho simple 1 pt × 4 (4 pts) + Grammaire 2 pts × 4 (8 pts) + Homophones sémantiques 2 pts × 3 (6 pts) = 20 pts. Consigne : « Le texte ci-après comporte des fautes. Corrigez-les en rayant d'un seul trait le mot incorrect et en écrivant le mot correct au-dessus. »",
   "  2. ÉTUDE DE TEXTE · 1h · coef 1 · /20 → Texte 250-350 mots avec chapeau. Partie I Compréhension 10 pts (5 questions : thème 2, champ lexical 2, explication 1-2, sens propre/figuré 2, opinion/sentiments 2). Partie II Connaissance et maniement de la langue 10 pts (4 questions : propositions, temps/modes, discours direct/indirect, figure de style, réécriture en subordonnée). Réponses en phrases complètes obligatoires.",
   "  3. EXPRESSION ÉCRITE · 2h · coef 2 · /20 → 2 sujets au choix (UN SEUL traité — pénalité si les deux). Canevas MINESEC invariable : contexte 2-4 lignes + EXTRAIT ENCADRÉ + Tâche + 3 consignes numérotées (Consigne 1 = intro 6 lignes / Consigne 2 = 2 sous-paragraphes 12 lignes chacun avec 3 éléments chacun / Consigne 3 = conclusion 6-8 lignes). Barème : 3-4 + 4-5 + 4-5 + 3-4 + 4 (langue) = 20 pts. Types récurrents : argumentatif (drogue, abandon scolaire, tabagisme, environnement) ou narratif/descriptif (cérémonie traditionnelle, violence scolaire, souvenir d'enfance, événement familial).",
   "",
