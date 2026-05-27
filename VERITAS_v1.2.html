@@ -1856,7 +1856,7 @@ input,select,textarea,button{font-family:'Poppins','Inter',sans-serif!important}
 .vnav::-webkit-scrollbar-thumb{background:#C7D2FE;border-radius:10px}
 .vnav::-webkit-scrollbar-thumb:hover{background:#93A5CF}
 .vnav-btn{border:none;background:transparent;color:#6B7A99;font:600 12px/1 'Montserrat',sans-serif;
-  padding:8px 14px;border-radius:20px;cursor:pointer;transition:all .2s;letter-spacing:.3px}
+  padding:8px 14px;border-radius:6px;cursor:pointer;transition:all .2s;letter-spacing:.3px}
 .vnav-btn:hover{background:#E8EEFF;color:#142554}
 .vnav-btn.on{background:linear-gradient(135deg,#142554,#3C8DFF);color:#fff;
   box-shadow:0 4px 12px rgba(60,141,255,.3)}
@@ -7475,8 +7475,8 @@ function showActualites(container){
   var tabsHtml=cats.map(function(ct){
     var active=ct.id===_actuCat;
     return '<button onclick="_actuTab(\''+ct.id+'\')" id="actutab_'+ct.id+'" style="'
-      +'padding:8px 16px;border-radius:20px;border:2px solid '+(active?ct.color:'transparent')+';'
-      +'background:'+(active?ct.color+'22':'transparent')+';color:'+(active?ct.color:'var(--ink3)')+';'
+      +'padding:8px 16px;border-radius:6px;border:1.5px solid '+(active?ct.color:'var(--bg3)')+';'
+      +'background:'+(active?ct.color+'18':'transparent')+';color:'+(active?ct.color:'var(--ink3)')+';'
       +'font-family:Montserrat,sans-serif;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s">'+ct.label+'</button>';
   }).join('');
 
@@ -7485,7 +7485,7 @@ function showActualites(container){
     +'<div class="vsec-sub">Restez informé — éducation Cameroun, MINESEC, grandes écoles et bourses</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:12px;border-bottom:var(--br)">'
       +tabsHtml
-      +'<button onclick="_actuRefresh()" title="Actualiser" style="margin-left:auto;padding:8px 14px;border-radius:20px;border:1px solid var(--bg3);background:var(--sur);color:var(--ink3);cursor:pointer;font-size:13px">🔄</button>'
+      +'<button onclick="_actuRefresh()" title="Actualiser" style="margin-left:auto;padding:8px 14px;border-radius:6px;border:1px solid var(--bg3);background:var(--sur);color:var(--ink3);cursor:pointer;font-size:13px">🔄</button>'
     +'</div>'
     +'<div id="actu-feed" style="min-height:200px"></div>'
     +'<div class="vsec-sub" style="margin-top:20px;font-size:11px">Sources : Google News · Auto-actualisation toutes les 15 min · Bouton 🔄 = force refresh</div>'
@@ -38470,7 +38470,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 @keyframes vgzRipple{to{transform:translate(-50%,-50%) scale(60);opacity:0}}
 
 /* ═════ #5 — HERO 3D AVEC MOCKUP TÉLÉPHONE ═════ */
-.vgz-hero3d{position:relative;border-radius:24px;overflow:hidden;background:linear-gradient(135deg,#080F24 0%,#142554 50%,#1E3A8A 100%);min-height:340px;display:flex;align-items:center;justify-content:center;padding:30px;perspective:1200px}
+.vgz-hero3d{position:relative;border-radius:10px;overflow:hidden;background:linear-gradient(135deg,#080F24 0%,#142554 50%,#1E3A8A 100%);min-height:340px;display:flex;align-items:center;justify-content:center;padding:30px;perspective:1200px}
 .vgz-hero3d::before{content:"";position:absolute;inset:-20%;background:
   radial-gradient(circle at 20% 30%,rgba(255,201,60,.18) 0%,transparent 40%),
   radial-gradient(circle at 80% 70%,rgba(60,141,255,.18) 0%,transparent 40%),
@@ -38481,13 +38481,13 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .vgz-hero3d::after{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:40px 40px;mask:radial-gradient(ellipse at center,#000 30%,transparent 70%);pointer-events:none}
 .vgz-hero3d-inner{position:relative;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:30px;width:100%;max-width:900px;flex-wrap:wrap}
 .vgz-hero3d-text{flex:1;min-width:260px;color:#fff}
-.vgz-hero3d-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,201,60,.4);backdrop-filter:blur(10px);padding:6px 14px;border-radius:30px;font-size:11px;font-weight:700;color:var(--vgz-gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
+.vgz-hero3d-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(255,201,60,.4);backdrop-filter:blur(10px);padding:6px 14px;border-radius:6px;font-size:11px;font-weight:700;color:var(--vgz-gold);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:16px}
 .vgz-hero3d-badge .live-dot{width:8px;height:8px;border-radius:50%;background:#10B981;box-shadow:0 0 0 0 rgba(16,185,129,.7);animation:vgzPing 1.6s infinite}
 @keyframes vgzPing{0%{box-shadow:0 0 0 0 rgba(16,185,129,.7)}70%{box-shadow:0 0 0 10px rgba(16,185,129,0)}100%{box-shadow:0 0 0 0 rgba(16,185,129,0)}}
 .vgz-hero3d h1{font-family:'Libre Baskerville',serif;font-size:38px;line-height:1.15;color:#fff;margin:0 0 12px;background:linear-gradient(135deg,#fff 30%,#FFC93C 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 .vgz-hero3d-sub{font-size:14px;color:rgba(255,255,255,.75);line-height:1.6;margin-bottom:18px}
 .vgz-hero3d-ctas{display:flex;gap:10px;flex-wrap:wrap}
-.vgz-hero3d-cta{background:#FFC93C;color:#142554;border:none;padding:12px 24px;border-radius:14px;font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 10px 30px rgba(255,201,60,.3)}
+.vgz-hero3d-cta{background:#FFC93C;color:#142554;border:none;padding:12px 24px;border-radius:6px;font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .3s;display:inline-flex;align-items:center;gap:8px;box-shadow:0 10px 30px rgba(255,201,60,.3)}
 .vgz-hero3d-cta:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 16px 40px rgba(255,201,60,.5)}
 .vgz-hero3d-cta.ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2);box-shadow:none}
 .vgz-hero3d-cta.ghost:hover{background:rgba(255,255,255,.15)}
@@ -38515,7 +38515,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
     radial-gradient(circle at top right, rgba(255,201,60,.10) 0%, transparent 55%),
     linear-gradient(160deg, rgba(20,37,84,.96), rgba(13,27,62,.99));
   border:1px solid rgba(255,201,60,.22);
-  border-radius:18px;padding:22px 16px;text-align:center;
+  border-radius:8px;padding:22px 16px;text-align:center;
   box-shadow:0 6px 20px rgba(13,27,62,.18), inset 0 1px 0 rgba(255,255,255,.06);
   backdrop-filter:blur(8px);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease;
   position:relative;overflow:hidden
@@ -38529,7 +38529,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 /* ═════ #7 — BENTO GRID — fond navy commun + halos subtils par carte ═════ */
 .vgz-bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:14px;margin:20px 0}
 /* Base commune : navy profond + glassmorphisme, lisibilité garantie */
-.vgz-bento-card{position:relative;border-radius:20px;overflow:hidden;
+.vgz-bento-card{position:relative;border-radius:8px;overflow:hidden;
   background:linear-gradient(160deg, rgba(20,37,84,.95), rgba(13,27,62,.98));
   transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s,border-color .35s;
   cursor:pointer;border:1px solid rgba(255,255,255,.08);
@@ -38569,7 +38569,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .bento-6{--accent:#FBBF24}
 
 /* ═════ WRAPPER SOMBRE PREMIUM — gradient animé + aurora ═════ */
-.vgz-dark-section{background:linear-gradient(135deg,#0D1B3E 0%,#142554 25%,#1E3A8A 50%,#142554 75%,#0F172A 100%);background-size:400% 400%;animation:vgzAurora 15s ease infinite;border-radius:28px;padding:40px 28px;margin:30px 0;position:relative;overflow:hidden;box-shadow:0 25px 80px rgba(13,27,62,.5),0 0 0 1px rgba(255,201,60,.1)}
+.vgz-dark-section{background:linear-gradient(135deg,#0D1B3E 0%,#142554 25%,#1E3A8A 50%,#142554 75%,#0F172A 100%);background-size:400% 400%;animation:vgzAurora 15s ease infinite;border-radius:10px;padding:40px 28px;margin:30px 0;position:relative;overflow:hidden;box-shadow:0 25px 80px rgba(13,27,62,.5),0 0 0 1px rgba(255,201,60,.1)}
 @keyframes vgzAurora{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 .vgz-dark-section::before{content:"";position:absolute;inset:0;background:
   radial-gradient(circle at 15% 25%,rgba(255,201,60,.18) 0%,transparent 40%),
