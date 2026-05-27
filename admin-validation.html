@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>VÉRITAS — Validation des réponses IA (Plan Élite)</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',Roboto,Arial,sans-serif;background:#F8FAFC;color:#142554}
+  header{background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:18px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+  header h1{margin:0;font-size:20px;color:#FFC93C}
+  header .stats{display:flex;gap:18px;font-size:13px}
+  header .stats b{color:#FFC93C;font-size:16px;display:block}
+  .auth-box{max-width:420px;margin:80px auto;padding:28px;background:#fff;border-radius:10px;box-shadow:0 14px 36px rgba(0,0,0,.08);text-align:center}
+  .auth-box input{width:100%;padding:12px;border:1.5px solid #E2E8F0;border-radius:6px;font-size:14px;margin-bottom:12px;font-family:inherit}
+  .auth-box button{background:#FFC93C;color:#142554;border:none;padding:12px 24px;border-radius:6px;font-size:14px;font-weight:800;cursor:pointer;width:100%}
+  main{max-width:1100px;margin:0 auto;padding:24px;display:none}
+  .filters{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:center}
+  .filters select,.filters input{padding:8px 12px;border:1.5px solid #E2E8F0;border-radius:6px;font-size:13px;font-family:inherit}
+  .row{background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:18px;margin-bottom:14px;box-shadow:0 2px 6px rgba(0,0,0,.04)}
+  .row .meta{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:10px;font-size:11px;color:#64748B}
+  .row .meta b{color:#142554}
+  .row .question{font-weight:700;color:#142554;margin-bottom:10px;font-size:14px}
+  .row .answer{background:#F8FAFC;padding:12px 14px;border-left:3px solid #94A3B8;border-radius:0 6px 6px 0;font-size:13px;line-height:1.55;white-space:pre-wrap;max-height:300px;overflow-y:auto;margin-bottom:12px}
+  .row .answer-edit{display:none;width:100%;min-height:200px;padding:10px;border:1px solid #E2E8F0;border-radius:6px;font-family:'Courier New',monospace;font-size:12px;line-height:1.5}
+  .row.edit-mode .answer{display:none}
+  .row.edit-mode .answer-edit{display:block}
+  .row .classify{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+  .row .classify select,.row .classify input{padding:6px 10px;font-size:12px;border:1px solid #E2E8F0;border-radius:4px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .actions button{padding:8px 14px;border-radius:6px;border:none;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit}
+  .btn-validate{background:#10B981;color:#fff}
+  .btn-reject{background:#DC2626;color:#fff}
+  .btn-edit{background:#3C8DFF;color:#fff}
+  .btn-delete{background:#94A3B8;color:#fff}
+  .btn-save{background:#FFC93C;color:#142554}
+  .rating{display:inline-flex;gap:2px;margin-right:6px}
+  .star{cursor:pointer;font-size:22px;color:#CBD5E1;transition:.15s}
+  .star.on,.star:hover{color:#FFC93C}
+  .empty{text-align:center;padding:48px;color:#94A3B8;font-style:italic}
+  .pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .pill-anon{background:#FEE2E2;color:#991B1B}
+  .pill-free{background:#DBEAFE;color:#1E40AF}
+  .pill-pro{background:#FEF3C7;color:#92400E}
+  .pill-elite{background:#FAF5FF;color:#6B21A8}
+  .toast{position:fixed;bottom:20px;right:20px;background:#142554;color:#fff;padding:14px 22px;border-radius:6px;font-size:13px;font-weight:700;opacity:0;transform:translateY(20px);transition:.3s;z-index:9999}
+  .toast.show{opacity:1;transform:none}
+</style>
+</head>
+<body>
+
+<div class="auth-box" id="authBox">
+  <h2 style="margin-top:0;color:#142554">🔐 Accès admin</h2>
+  <p style="color:#64748B;font-size:13px">Entrez votre token administrateur pour accéder à la validation des réponses IA.</p>
+  <input type="password" id="adminToken" placeholder="Token administrateur" autocomplete="current-password">
+  <button onclick="login()">Se connecter</button>
+</div>
+
+<header id="mainHeader" style="display:none">
+  <h1>🎓 Validation IA — VÉRITAS Élite</h1>
+  <div class="stats" id="stats">
+    <div><b id="statPending">-</b>En attente</div>
+    <div><b id="statValidated">-</b>Validées</div>
+    <div><b id="statUses">-</b>Utilisations</div>
+    <div><b id="statRating">-</b>Note moy.</div>
+  </div>
+</header>
+
+<main id="mainContent">
+  <div class="filters">
+    <select id="filterStatus" onchange="reload()">
+      <option value="pending">⏳ En attente de validation</option>
+      <option value="validated">✓ Validées</option>
+      <option value="rejected">✗ Rejetées</option>
+    </select>
+    <select id="filterClasse" onchange="reload()">
+      <option value="">Toutes classes</option>
+      <option>6e</option><option>5e</option><option>4e</option><option>3e</option>
+      <option>2nde</option><option>1ère</option><option>Tle</option>
+    </select>
+    <input type="text" id="filterMatiere" placeholder="Filtrer par matière…" oninput="reload()" style="width:200px">
+    <span style="margin-left:auto;font-size:12px;color:#64748B" id="totalCount">Chargement…</span>
+  </div>
+
+  <div id="rows"></div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let TOKEN = sessionStorage.getItem('vrt_admin_token') || '';
+const API = '/api/admin_validate.php';
+
+if (TOKEN) showMain();
+
+function showMain() {
+  document.getElementById('authBox').style.display = 'none';
+  document.getElementById('mainHeader').style.display = 'flex';
+  document.getElementById('mainContent').style.display = 'block';
+  loadStats();
+  reload();
+}
+
+function login() {
+  const t = document.getElementById('adminToken').value.trim();
+  if (!t) return;
+  TOKEN = t;
+  sessionStorage.setItem('vrt_admin_token', t);
+  showMain();
+}
+
+async function api(action, opts={}) {
+  const url = API + '?action=' + action + (opts.qs || '');
+  const init = {
+    method: opts.method || 'GET',
+    headers: { 'X-Admin-Token': TOKEN, 'Content-Type': 'application/json' }
+  };
+  if (opts.body) init.body = JSON.stringify(opts.body);
+  const r = await fetch(url, init);
+  if (r.status === 403) { sessionStorage.removeItem('vrt_admin_token'); location.reload(); return; }
+  return r.json();
+}
+
+async function loadStats() {
+  try {
+    const r = await api('stats');
+    if (!r || !r.ok) return;
+    const s = r.stats;
+    document.getElementById('statPending').textContent   = s.pending || 0;
+    document.getElementById('statValidated').textContent = s.validated || 0;
+    document.getElementById('statUses').textContent      = s.total_uses || 0;
+    document.getElementById('statRating').textContent    = s.avg_rating ? parseFloat(s.avg_rating).toFixed(1) + '★' : '—';
+  } catch(e){}
+}
+
+async function reload() {
+  const status  = document.getElementById('filterStatus').value;
+  const classe  = document.getElementById('filterClasse').value;
+  const matiere = document.getElementById('filterMatiere').value.trim();
+  const qs = '&status=' + status + (classe ? '&classe=' + encodeURIComponent(classe) : '')
+                                 + (matiere ? '&matiere=' + encodeURIComponent(matiere) : '');
+  const r = await api('list', { qs });
+  if (!r || !r.ok) {
+    document.getElementById('rows').innerHTML = '<div class="empty">Erreur de chargement</div>';
+    return;
+  }
+  document.getElementById('totalCount').textContent = r.total + ' résultat' + (r.total > 1 ? 's' : '');
+  renderRows(r.rows);
+}
+
+function renderRows(rows) {
+  const el = document.getElementById('rows');
+  if (!rows.length) {
+    el.innerHTML = '<div class="empty">Aucune entrée pour ce filtre</div>';
+    return;
+  }
+  el.innerHTML = rows.map(r => `
+    <div class="row" data-id="${r.id}">
+      <div class="meta">
+        <span><b>📅 ${new Date(r.created_at).toLocaleString('fr-FR')}</b>
+              · <span class="pill pill-${r.requested_plan}">${r.requested_plan}</span>
+              · ${r.use_count} util.</span>
+        <span>${r.classe ? '🎓 ' + r.classe : ''} ${r.matiere ? ' · 📚 ' + r.matiere : ''}</span>
+      </div>
+      <div class="question">❓ ${escapeHtml(r.question_text)}</div>
+      <div class="answer">${escapeHtml(r.answer_text)}</div>
+      <textarea class="answer-edit">${escapeHtml(r.answer_text)}</textarea>
+      <div class="classify">
+        <select id="cls_${r.id}">
+          <option value="">Classe…</option>
+          ${['6e','5e','4e','3e','2nde','1ère','Tle'].map(c =>
+            '<option' + (r.classe===c?' selected':'') + '>' + c + '</option>').join('')}
+        </select>
+        <input id="mat_${r.id}" placeholder="Matière" value="${escapeHtml(r.matiere||'')}">
+        <input id="typ_${r.id}" placeholder="Type (quiz/corrigé/fiche…)" value="${escapeHtml(r.type_exercice||'')}">
+      </div>
+      <div class="actions">
+        <div class="rating" data-rating="5">
+          ${[1,2,3,4,5].map(n => '<span class="star ' + (n<=5?'on':'') + '" data-n="' + n + '">★</span>').join('')}
+        </div>
+        <button class="btn-edit" onclick="toggleEdit(${r.id})">✏️ Modifier réponse</button>
+        <button class="btn-validate" onclick="doValidate(${r.id})">✓ Valider</button>
+        <button class="btn-reject" onclick="doReject(${r.id})">✗ Rejeter</button>
+        <button class="btn-delete" onclick="doDelete(${r.id})">🗑 Supprimer</button>
+      </div>
+    </div>
+  `).join('');
+
+  // Bind stars
+  document.querySelectorAll('.rating').forEach(rt => {
+    rt.querySelectorAll('.star').forEach(s => {
+      s.onclick = () => {
+        const n = parseInt(s.dataset.n);
+        rt.dataset.rating = n;
+        rt.querySelectorAll('.star').forEach(x => x.classList.toggle('on', parseInt(x.dataset.n) <= n));
+      };
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function toggleEdit(id) {
+  const row = document.querySelector('[data-id="' + id + '"]');
+  row.classList.toggle('edit-mode');
+}
+
+async function doValidate(id) {
+  const row = document.querySelector('[data-id="' + id + '"]');
+  const rating = parseInt(row.querySelector('.rating').dataset.rating);
+  const classe = row.querySelector('#cls_' + id).value;
+  const matiere = row.querySelector('#mat_' + id).value.trim();
+  const type = row.querySelector('#typ_' + id).value.trim();
+  const edited = row.classList.contains('edit-mode')
+    ? row.querySelector('.answer-edit').value
+    : null;
+  const r = await api('validate', { method: 'POST', body: {
+    id, rating, edited_text: edited, classe, matiere, type_exercice: type
+  }});
+  if (r && r.ok) { toast('✓ Validée'); row.remove(); loadStats(); }
+  else toast('Erreur validation');
+}
+
+async function doReject(id) {
+  const note = prompt('Raison du rejet :');
+  if (note === null) return;
+  const r = await api('reject', { method: 'POST', body: { id, rejection_note: note || 'Rejeté' }});
+  if (r && r.ok) { toast('✗ Rejetée'); reload(); loadStats(); }
+}
+
+async function doDelete(id) {
+  if (!confirm('Supprimer définitivement ?')) return;
+  const r = await api('delete', { method: 'POST', body: { id }});
+  if (r && r.ok) { toast('🗑 Supprimée'); reload(); loadStats(); }
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
