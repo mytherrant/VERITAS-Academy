@@ -11,6 +11,7 @@ on:
       - 'VERITAS_v1.2.html'
       - 'VERITAS_v1.1.html'
       - 'VERITAS_Promo_Video.html'
+      - 'reset.html'
       - 'index.php'
       - '.htaccess'
       - 'api/**'
@@ -87,6 +88,14 @@ jobs:
           if [ -f VERITAS_Promo_Video.html ]; then
             cp VERITAS_Promo_Video.html deploy/
             echo "  ✓ VERITAS_Promo_Video.html"
+          fi
+
+          # ── Page de réparation d'urgence (reset.html) ──────────
+          # Accessible via https://veritas-school.com/reset.html
+          # Désinscrit le SW + vide le cache en 1 clic (pour debug user)
+          if [ -f reset.html ]; then
+            cp reset.html deploy/
+            echo "  ✓ reset.html"
           fi
 
           # ── API PHP ─────────────────────────────────────────────

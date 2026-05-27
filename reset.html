@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Réparation VÉRITAS — Reset complet</title>
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Segoe UI',Roboto,Arial,sans-serif;background:linear-gradient(135deg,#142554,#1E3A8A);min-height:100vh;display:flex;align-items:center;justify-content:center;color:#fff;padding:20px}
+  .card{background:rgba(255,255,255,.06);backdrop-filter:blur(12px);border:1px solid rgba(255,201,60,.3);border-radius:14px;padding:32px 28px;max-width:520px;width:100%;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+  h1{color:#FFC93C;font-size:24px;margin:0 0 8px;text-align:center}
+  .sub{text-align:center;color:rgba(255,255,255,.75);font-size:14px;margin-bottom:24px}
+  .step{padding:14px 16px;background:rgba(255,255,255,.04);border-left:3px solid #FFC93C;border-radius:0 8px 8px 0;margin-bottom:10px;font-size:14px;line-height:1.5;display:flex;align-items:flex-start;gap:12px;transition:all .3s}
+  .step.done{background:rgba(16,185,129,.12);border-left-color:#10B981}
+  .step.done .icon{background:#10B981}
+  .step.error{background:rgba(220,38,38,.12);border-left-color:#DC2626}
+  .step.error .icon{background:#DC2626}
+  .icon{width:24px;height:24px;border-radius:50%;background:rgba(255,201,60,.2);border:2px solid #FFC93C;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;color:#142554}
+  .icon.spin{animation:spin 1s linear infinite}
+  @keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  .actions{margin-top:24px;display:flex;gap:10px;flex-direction:column}
+  button{background:#FFC93C;color:#142554;border:none;padding:14px 24px;border-radius:8px;font-size:15px;font-weight:800;cursor:pointer;transition:all .2s;font-family:inherit}
+  button:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,201,60,.4)}
+  button:disabled{opacity:.5;cursor:not-allowed;transform:none}
+  button.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.3)}
+  .log{margin-top:18px;background:rgba(0,0,0,.3);border-radius:8px;padding:12px;font-family:'Courier New',monospace;font-size:11px;color:rgba(255,255,255,.7);max-height:160px;overflow-y:auto;white-space:pre-wrap;word-break:break-all}
+  .ok-banner{background:linear-gradient(135deg,#10B981,#059669);padding:18px;border-radius:10px;text-align:center;margin-top:20px;display:none}
+  .ok-banner.show{display:block}
+  .ok-banner h2{margin:0 0 6px;font-size:20px}
+  .ok-banner p{margin:0;opacity:.9;font-size:13px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>🛠 Réparation VÉRITAS</h1>
+  <div class="sub">Ce processus vide les caches obsolètes et réinstalle la dernière version. Aucune donnée personnelle (notes, comptes) n'est supprimée si vous avez exporté.</div>
+
+  <div id="steps">
+    <div class="step" data-id="sw"><div class="icon">1</div><div>Désinscription du Service Worker obsolète (v2.9.7)</div></div>
+    <div class="step" data-id="cache"><div class="icon">2</div><div>Suppression de tous les caches du navigateur</div></div>
+    <div class="step" data-id="storage"><div class="icon">3</div><div>Nettoyage du stockage local non essentiel</div></div>
+    <div class="step" data-id="reload"><div class="icon">4</div><div>Téléchargement de la version v2.9.11 (saine)</div></div>
+  </div>
+
+  <div class="actions">
+    <button id="btnGo">▶ Démarrer la réparation</button>
+    <button id="btnHome" class="ghost" onclick="location.href='/'">← Retour à l'accueil sans réparer</button>
+  </div>
+
+  <div class="log" id="log">Prêt. Cliquez sur « Démarrer la réparation ».</div>
+
+  <div class="ok-banner" id="okBanner">
+    <h2>✅ Réparation terminée</h2>
+    <p>Redirection vers veritas-school.com dans 3 secondes…</p>
+  </div>
+</div>
+
+<script>
+function logEl(msg){
+  var l=document.getElementById('log');
+  l.textContent+='\n'+msg;
+  l.scrollTop=l.scrollHeight;
+}
+function setStep(id,state){
+  var s=document.querySelector('[data-id="'+id+'"]');
+  if(!s)return;
+  s.classList.remove('done','error');
+  s.classList.add(state);
+  var ic=s.querySelector('.icon');
+  if(state==='done')ic.textContent='✓';
+  else if(state==='error')ic.textContent='✗';
+}
+function spinStep(id){
+  var s=document.querySelector('[data-id="'+id+'"]');
+  if(!s)return;
+  var ic=s.querySelector('.icon');
+  ic.classList.add('spin');
+  ic.textContent='⟳';
+}
+
+document.getElementById('btnGo').addEventListener('click', async function(){
+  this.disabled=true;
+  this.textContent='⏳ Réparation en cours...';
+  logEl('=== Début réparation ===');
+
+  // Step 1 : Service Workers
+  spinStep('sw');
+  try {
+    if('serviceWorker' in navigator){
+      var regs = await navigator.serviceWorker.getRegistrations();
+      logEl('SW trouvés : '+regs.length);
+      for(var i=0;i<regs.length;i++){
+        var ok = await regs[i].unregister();
+        logEl('  - SW '+regs[i].scope+' → '+(ok?'désinscrit':'échec'));
+      }
+    } else {
+      logEl('Service Workers non supportés (rien à faire)');
+    }
+    setStep('sw','done');
+  } catch(e){
+    logEl('Erreur SW : '+e.message);
+    setStep('sw','error');
+  }
+
+  // Step 2 : Caches
+  spinStep('cache');
+  try {
+    if(typeof caches !== 'undefined' && caches.keys){
+      var keys = await caches.keys();
+      logEl('Caches trouvés : '+keys.length+' ('+keys.join(', ')+')');
+      for(var j=0;j<keys.length;j++){
+        await caches.delete(keys[j]);
+        logEl('  - Cache '+keys[j]+' supprimé');
+      }
+    } else {
+      logEl('Cache API non supportée');
+    }
+    setStep('cache','done');
+  } catch(e){
+    logEl('Erreur Cache : '+e.message);
+    setStep('cache','error');
+  }
+
+  // Step 3 : Storage (juste les clés VÉRITAS techniques, pas les données)
+  spinStep('storage');
+  try {
+    var keysToClean = ['_vrtBootReloads','_veritasErrors','_pendingOps','_vrtLang'];
+    var cleaned = 0;
+    keysToClean.forEach(function(k){
+      try {
+        if(localStorage.getItem(k)!==null){ localStorage.removeItem(k); cleaned++; }
+        if(sessionStorage.getItem(k)!==null){ sessionStorage.removeItem(k); cleaned++; }
+      } catch(e){}
+    });
+    logEl('Clés techniques nettoyées : '+cleaned);
+    logEl('VOTRE BASE DE DONNÉES (VERITAS_DB) EST PRÉSERVÉE.');
+    setStep('storage','done');
+  } catch(e){
+    logEl('Erreur Storage : '+e.message);
+    setStep('storage','error');
+  }
+
+  // Step 4 : reload
+  spinStep('reload');
+  logEl('=== Réparation terminée ===');
+  logEl('Redirection vers veritas-school.com...');
+  setStep('reload','done');
+
+  document.getElementById('okBanner').classList.add('show');
+
+  setTimeout(function(){
+    // Cache buster fort + retour à la racine
+    var url = '/?cleanv11=' + Date.now();
+    location.replace(url);
+  }, 3000);
+});
+</script>
+</body>
+</html>
