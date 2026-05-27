@@ -176,4 +176,9 @@ self.addEventListener('message', event => {
   if (event.data === 'CLEAR_CACHE' || (event.data && event.data.type === 'CLEAR_CACHE')) {
     caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k))));
   }
+  // v2.9.12 : permet à la page de vérifier la version active
+  if (event.data && event.data.type === 'GET_VERSION') {
+    const port = event.ports && event.ports[0];
+    if (port) port.postMessage({ version: CACHE_VERSION });
+  }
 });

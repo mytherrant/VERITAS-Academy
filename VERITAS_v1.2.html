@@ -267,11 +267,76 @@ tryLoad();})();
 <script>
 // Service Worker pour cache offline + perf mobile
 // v1.2.5 : auto-update + protection contre cache pollué (HTTP 500 etc.)
+// v2.9.12 : MIN_SW_VERSION = la version minimale acceptable du SW.
+// Si on détecte un SW plus ancien (ex: v2.9.7 collé), on force la mise à jour
+// en désinscrivant + reload. Bannière visible pour l'utilisateur.
+window.__MIN_SW_VERSION_NUM = 12;  // équivalent à v2.9.12 (on extrait le 12)
+
+function _vrtCheckSWVersion(reg) {
+  if (!reg || !reg.active) return;
+  try {
+    var ch = new MessageChannel();
+    var done = false;
+    ch.port1.onmessage = function(ev) {
+      done = true;
+      var v = ev.data && ev.data.version ? ev.data.version : '';
+      console.log('[VÉRITAS SW] Version active:', v);
+      var match = v.match(/v2\.9\.(\d+)/);
+      var num = match ? parseInt(match[1], 10) : 0;
+      if (num < window.__MIN_SW_VERSION_NUM) {
+        console.warn('[VÉRITAS SW] OBSOLÈTE (' + v + ') — déclenchement mise à jour forcée');
+        _vrtShowStaleSWBanner(v);
+      } else {
+        console.log('[VÉRITAS SW] À jour ✓');
+      }
+    };
+    reg.active.postMessage({ type: 'GET_VERSION' }, [ch.port2]);
+    // Si pas de réponse en 3 secondes, le SW est trop vieux pour répondre à GET_VERSION
+    // → forcement <v2.9.12, donc obsolète
+    setTimeout(function() {
+      if (!done) {
+        console.warn('[VÉRITAS SW] N\'a pas répondu à GET_VERSION → SW obsolète');
+        _vrtShowStaleSWBanner('inconnu (≤v2.9.11)');
+      }
+    }, 3000);
+  } catch (e) { console.warn('[VÉRITAS SW] Check version err:', e); }
+}
+
+function _vrtShowStaleSWBanner(oldVersion) {
+  if (document.getElementById('_vrtStaleSWBanner')) return;
+  var div = document.createElement('div');
+  div.id = '_vrtStaleSWBanner';
+  div.style.cssText = 'position:fixed;top:0;left:0;right:0;background:linear-gradient(135deg,#DC2626,#B91C1C);color:#fff;padding:14px 20px;text-align:center;z-index:999999;font-family:Arial,sans-serif;font-size:14px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap';
+  div.innerHTML =
+      '<span style="font-size:20px">⚠️</span>'
+    + '<span>Version obsolète détectée (' + oldVersion + ') — Les IA et certaines fonctions ne marchent pas.</span>'
+    + '<button id="_vrtFixNowBtn" style="background:#FFC93C;color:#142554;border:none;padding:8px 18px;border-radius:6px;font-weight:800;cursor:pointer;font-size:13px">🔧 Mettre à jour maintenant (30 sec)</button>'
+    + '<button id="_vrtDismissSWBtn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,.5);padding:8px 14px;border-radius:6px;cursor:pointer;font-size:12px">Plus tard</button>';
+  document.body.appendChild(div);
+  // Pousser le contenu sous la bannière (sinon elle masque les boutons du haut)
+  document.body.style.paddingTop = (div.offsetHeight + 4) + 'px';
+
+  document.getElementById('_vrtFixNowBtn').onclick = function() {
+    // Direction : /reset.html (page de réparation auto en 1 clic)
+    location.href = '/reset.html';
+  };
+  document.getElementById('_vrtDismissSWBtn').onclick = function() {
+    div.remove();
+    document.body.style.paddingTop = '';
+    // Ne plus afficher pendant 1h
+    sessionStorage.setItem('_vrtSWBannerDismissed', Date.now());
+  };
+}
+
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('/sw.js')
       .then(function(reg){
         console.log('[VÉRITAS SW] Cache offline actif');
+        // v2.9.12 : Vérifier la version active immédiatement
+        if (!sessionStorage.getItem('_vrtSWBannerDismissed')) {
+          setTimeout(function(){ _vrtCheckSWVersion(reg); }, 1500);
+        }
         // Vérifier MAJ toutes les heures
         setInterval(function(){ reg.update().catch(function(){}); }, 60*60*1000);
         // Si nouvelle version détectée, l'activer immédiatement
