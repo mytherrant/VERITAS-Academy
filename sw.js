@@ -4,9 +4,9 @@
 // les données dynamiques. Permet le fonctionnement hors-ligne basique.
 // ═══════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'veritas-v2.9.1';
-// v2.9.1 : Curseur natif + Ambassa IA + correctifs critiques ses.id null
-// Bump version pour invalider TOUS les caches anciens (force reload HTML frais)
+const CACHE_VERSION = 'veritas-v2.9.2';
+// v2.9.2 : Refonte UI — fond sombre uniforme + glassmorphisme (hub gamif, stats, bento)
+// Couleurs adoucies avec overlays subtils, opacités/transparence, lisibilité accrue
 // Nettoyage aggressif de TOUS les anciens caches au démarrage
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;

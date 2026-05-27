@@ -34312,36 +34312,64 @@ window._engagementBannerHtml = function(){
   var days = _getDaysToBAC();
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
   var streak = ses ? _getUserStreak() : null;
+  // Card style commun : fond navy sombre profond + overlay coloré subtil + glassmorphisme
+  // Lisibilité maximale avec texte clair sur fond contrôlé
+  var cardStyle = function(accent){
+    return 'background:'
+      + 'radial-gradient(circle at top right, '+accent+'33 0%, transparent 55%),'
+      + 'linear-gradient(160deg, rgba(20,37,84,.92), rgba(13,27,62,.96));'
+      + 'color:#fff;padding:16px;border-radius:16px;cursor:pointer;'
+      + 'border:1px solid '+accent+'30;'
+      + 'box-shadow:0 6px 20px rgba(13,27,62,.25), inset 0 1px 0 rgba(255,255,255,.06);'
+      + 'backdrop-filter:blur(10px);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;'
+      + 'position:relative;overflow:hidden';
+  };
+  var cardHover = function(accent){
+    return 'this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 14px 32px rgba(13,27,62,.35), 0 0 0 1px '+accent+'55, inset 0 1px 0 rgba(255,255,255,.08)\'';
+  };
+  var cardOut = 'this.style.transform=\'\';this.style.boxShadow=\'0 6px 20px rgba(13,27,62,.25), inset 0 1px 0 rgba(255,255,255,.06)\'';
+  // Labels avec accent doré subtil pour lisibilité
+  var labelStyle = function(accent){
+    return 'font-size:10px;color:'+accent+';text-transform:uppercase;letter-spacing:1.8px;font-weight:800;opacity:.95';
+  };
+
+  // Couleurs d'accent (en hex pour permettre l'ajout de 33/55 d'opacité)
+  var accentSujet = '#A78BFA';   // violet doux
+  var accentBAC = days<=30 ? '#F87171' : days<=100 ? '#FBBF24' : '#60A5FA'; // rouge/jaune/bleu adoucis
+  var accentBattle = '#FB923C';  // orange doux
+  var accentParcoursOK = '#34D399'; // vert doux
+  var accentParcoursKO = '#FCD34D'; // jaune doux
+
   return '<div class="v-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:12px 0 20px">'
-    // Sujet du jour
-    +'<div onclick="mSujetDuJour()" style="background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;padding:14px;border-radius:14px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
-      +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">☀️ Sujet du jour</div>'
-      +'<div style="font-size:14px;font-weight:800;margin-top:4px;line-height:1.3">'+_esc(sj.q.substring(0,70))+(sj.q.length>70?'…':'')+'</div>'
-      +'<div style="font-size:10px;opacity:.85;margin-top:6px">Niveau : '+sj.lvl+' →</div>'
+    // Sujet du jour — accent violet doux
+    +'<div onclick="mSujetDuJour()" style="'+cardStyle(accentSujet)+'" onmouseover="'+cardHover(accentSujet)+'" onmouseout="'+cardOut+'">'
+      +'<div style="'+labelStyle(accentSujet)+'">☀ Sujet du jour</div>'
+      +'<div style="font-size:14px;font-weight:800;margin-top:6px;line-height:1.4;color:rgba(255,255,255,.95)">'+_esc(sj.q.substring(0,70))+(sj.q.length>70?'…':'')+'</div>'
+      +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">Niveau : '+sj.lvl+' →</div>'
     +'</div>'
-    // BAC countdown
-    +'<div onclick="mBacCountdown()" style="background:linear-gradient(135deg,'+(days<=30?'#DC2626':days<=100?'#F59E0B':'#3C8DFF')+',#0F1E47);color:#fff;padding:14px;border-radius:14px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
-      +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">⏳ Compte à rebours BAC</div>'
-      +'<div style="font-size:32px;font-weight:900;line-height:1;margin-top:4px">'+days+'<span style="font-size:14px;font-weight:600;opacity:.85"> jours</span></div>'
-      +'<div style="font-size:10px;opacity:.85;margin-top:4px">→ Mission du jour</div>'
+    // BAC countdown — accent dynamique (rouge/jaune/bleu) doux
+    +'<div onclick="mBacCountdown()" style="'+cardStyle(accentBAC)+'" onmouseover="'+cardHover(accentBAC)+'" onmouseout="'+cardOut+'">'
+      +'<div style="'+labelStyle(accentBAC)+'">◷ Compte à rebours BAC</div>'
+      +'<div style="font-size:34px;font-weight:900;line-height:1;margin-top:6px;color:#fff;font-family:\'Libre Baskerville\',serif">'+days+'<span style="font-size:14px;font-weight:600;color:rgba(255,255,255,.6);margin-left:6px">jours</span></div>'
+      +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">→ Mission du jour</div>'
     +'</div>'
-    // Battles
-    +'<div onclick="mBattles()" style="background:linear-gradient(135deg,#F59E0B,#DC2626);color:#fff;padding:14px;border-radius:14px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
-      +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">⚔️ Battle hebdo</div>'
-      +'<div style="font-size:14px;font-weight:800;margin-top:4px">10 QCM · Classement national</div>'
-      +'<div style="font-size:10px;opacity:.85;margin-top:6px">+ 50 XP par participation →</div>'
+    // Battles — accent orange doux
+    +'<div onclick="mBattles()" style="'+cardStyle(accentBattle)+'" onmouseover="'+cardHover(accentBattle)+'" onmouseout="'+cardOut+'">'
+      +'<div style="'+labelStyle(accentBattle)+'">⚔ Battle hebdo</div>'
+      +'<div style="font-size:14px;font-weight:800;margin-top:6px;color:rgba(255,255,255,.95)">10 QCM · Classement national</div>'
+      +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">+ 50 XP par participation →</div>'
     +'</div>'
-    // Mon parcours (si connecté)
+    // Mon parcours (si connecté) — accent vert doux / sinon jaune doux
     +(ses && streak
-      ? '<div onclick="mMonParcours()" style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:14px;border-radius:14px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
-        +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">🔥 Mon parcours</div>'
-        +'<div style="font-size:24px;font-weight:900;margin-top:4px">'+streak.current+' j · '+streak.xp+' XP</div>'
-        +'<div style="font-size:10px;opacity:.85;margin-top:4px">'+_currentLevel(streak.xp).current.title+' →</div>'
+      ? '<div onclick="mMonParcours()" style="'+cardStyle(accentParcoursOK)+'" onmouseover="'+cardHover(accentParcoursOK)+'" onmouseout="'+cardOut+'">'
+        +'<div style="'+labelStyle(accentParcoursOK)+'">✦ Mon parcours</div>'
+        +'<div style="font-size:24px;font-weight:900;margin-top:6px;color:#fff;font-family:\'Libre Baskerville\',serif">'+streak.current+' j · '+streak.xp+' XP</div>'
+        +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">'+_currentLevel(streak.xp).current.title+' →</div>'
       +'</div>'
-      : '<div onclick="showRegisterForm()" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:14px;border-radius:14px;cursor:pointer;transition:transform .25s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
-        +'<div style="font-size:10px;opacity:.85;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">🎯 Mon parcours</div>'
-        +'<div style="font-size:14px;font-weight:800;margin-top:4px">Inscrivez-vous gratuitement</div>'
-        +'<div style="font-size:10px;opacity:.85;margin-top:6px">Streak · XP · Niveaux →</div>'
+      : '<div onclick="showRegisterForm()" style="'+cardStyle(accentParcoursKO)+'" onmouseover="'+cardHover(accentParcoursKO)+'" onmouseout="'+cardOut+'">'
+        +'<div style="'+labelStyle(accentParcoursKO)+'">✦ Mon parcours</div>'
+        +'<div style="font-size:14px;font-weight:800;margin-top:6px;color:rgba(255,255,255,.95)">Inscrivez-vous gratuitement</div>'
+        +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">Streak · XP · Niveaux →</div>'
       +'</div>'
     )
     +'</div>';
@@ -38387,33 +38415,64 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 
 /* ═════ #6 — STATS ANIMÉES ═════ */
 .vgz-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin:24px 0}
-.vgz-stat{background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,201,60,.04));border:1px solid rgba(255,201,60,.2);border-radius:18px;padding:20px 16px;text-align:center;backdrop-filter:blur(10px);transition:transform .3s;position:relative;overflow:hidden}
-.vgz-stat:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 14px 40px rgba(255,201,60,.15)}
-.vgz-stat::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at top right,rgba(255,201,60,.15) 0%,transparent 50%);opacity:0;transition:opacity .3s}
+/* Cartes stats : fond navy sombre profond pour assurer la lisibilité du texte doré + label clair, indépendamment du fond de page */
+.vgz-stat{
+  background:
+    radial-gradient(circle at top right, rgba(255,201,60,.10) 0%, transparent 55%),
+    linear-gradient(160deg, rgba(20,37,84,.96), rgba(13,27,62,.99));
+  border:1px solid rgba(255,201,60,.22);
+  border-radius:18px;padding:22px 16px;text-align:center;
+  box-shadow:0 6px 20px rgba(13,27,62,.18), inset 0 1px 0 rgba(255,255,255,.06);
+  backdrop-filter:blur(8px);transition:transform .3s ease, box-shadow .3s ease, border-color .3s ease;
+  position:relative;overflow:hidden
+}
+.vgz-stat:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 16px 40px rgba(13,27,62,.32), 0 0 0 1px rgba(255,201,60,.4), inset 0 1px 0 rgba(255,255,255,.1);border-color:rgba(255,201,60,.45)}
+.vgz-stat::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 0%, rgba(255,201,60,.18) 0%, transparent 60%);opacity:0;transition:opacity .3s;pointer-events:none}
 .vgz-stat:hover::before{opacity:1}
-.vgz-stat-num{font-family:'Libre Baskerville',serif;font-size:38px;font-weight:700;color:#FFC93C;line-height:1;text-shadow:0 0 30px rgba(255,201,60,.4);font-feature-settings:"tnum"}
-.vgz-stat-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:1.5px;margin-top:8px}
+.vgz-stat-num{font-family:'Libre Baskerville',serif;font-size:42px;font-weight:700;color:#FFC93C;line-height:1;text-shadow:0 2px 12px rgba(255,201,60,.35);font-feature-settings:"tnum";letter-spacing:-1px}
+.vgz-stat-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.78);text-transform:uppercase;letter-spacing:1.5px;margin-top:10px}
 
-/* ═════ #7 — BENTO GRID ═════ */
-.vgz-bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:12px;margin:20px 0}
-.vgz-bento-card{position:relative;border-radius:20px;overflow:hidden;background:var(--vgz-deep);transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s;cursor:pointer;border:1px solid rgba(255,255,255,.06)}
-.vgz-bento-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 20px 60px rgba(20,37,84,.4)}
-.vgz-bento-card .b-bg{position:absolute;inset:0;opacity:.15;transition:opacity .3s}
-.vgz-bento-card:hover .b-bg{opacity:.3}
-.vgz-bento-card .b-content{position:relative;z-index:2;height:100%;padding:18px;display:flex;flex-direction:column;justify-content:space-between;color:#fff}
-.vgz-bento-card .b-ico{font-size:32px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3));transition:transform .35s cubic-bezier(.34,1.56,.64,1);display:inline-block}
-.vgz-bento-card:hover .b-ico{transform:scale(1.15) rotate(-8deg)}
-.vgz-bento-card .b-ico img{display:block}
-.vgz-bento-card .b-title{font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;line-height:1.2}
-.vgz-bento-card .b-desc{font-size:11px;color:rgba(255,255,255,.7);margin-top:3px}
-.vgz-bento-card .b-arrow{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:14px;color:#FFC93C;transition:all .3s}
-.vgz-bento-card:hover .b-arrow{background:#FFC93C;color:#142554;transform:rotate(-45deg) scale(1.1)}
-.bento-1{grid-column:span 2;grid-row:span 2;background:linear-gradient(135deg,#142554,#1E3A8A)}
-.bento-2{background:linear-gradient(135deg,#7C3AED,#A855F7)}
-.bento-3{background:linear-gradient(135deg,#0EA5E9,#0284C7)}
-.bento-4{background:linear-gradient(135deg,#059669,#10B981);grid-column:span 2}
-.bento-5{background:linear-gradient(135deg,#BE185D,#EC4899)}
-.bento-6{background:linear-gradient(135deg,#D97706,#F59E0B)}
+/* ═════ #7 — BENTO GRID — fond navy commun + halos subtils par carte ═════ */
+.vgz-bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:14px;margin:20px 0}
+/* Base commune : navy profond + glassmorphisme, lisibilité garantie */
+.vgz-bento-card{position:relative;border-radius:20px;overflow:hidden;
+  background:linear-gradient(160deg, rgba(20,37,84,.95), rgba(13,27,62,.98));
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s,border-color .35s;
+  cursor:pointer;border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 8px 22px rgba(13,27,62,.20), inset 0 1px 0 rgba(255,255,255,.05)}
+.vgz-bento-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 22px 50px rgba(13,27,62,.40), inset 0 1px 0 rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}
+/* Halo coloré du fond — restant subtil */
+.vgz-bento-card .b-bg{position:absolute;inset:0;opacity:.55;transition:opacity .35s;pointer-events:none;
+  background:radial-gradient(circle at 80% 20%, var(--accent,#FFC93C)2e 0%, transparent 60%),
+             radial-gradient(circle at 20% 90%, var(--accent,#FFC93C)1a 0%, transparent 55%)}
+.vgz-bento-card:hover .b-bg{opacity:.8}
+.vgz-bento-card .b-content{position:relative;z-index:2;height:100%;padding:20px;display:flex;flex-direction:column;justify-content:space-between;color:#fff}
+/* Pictogramme : badge circulaire avec verre teinté */
+.vgz-bento-card .b-ico{
+  width:48px;height:48px;border-radius:14px;
+  background:linear-gradient(135deg, rgba(255,255,255,.15), rgba(255,255,255,.04));
+  border:1px solid rgba(255,255,255,.18);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:24px;
+  box-shadow:0 4px 14px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.18);
+  backdrop-filter:blur(8px);
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1), background .35s
+}
+.vgz-bento-card:hover .b-ico{transform:scale(1.1) rotate(-5deg);background:linear-gradient(135deg, var(--accent,#FFC93C)40, rgba(255,255,255,.06))}
+.vgz-bento-card .b-ico img{display:block;width:28px;height:28px;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))}
+.vgz-bento-card .b-title{font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;line-height:1.25;letter-spacing:.2px}
+.vgz-bento-card .b-desc{font-size:11.5px;color:rgba(255,255,255,.72);margin-top:4px;line-height:1.45}
+.vgz-bento-card .b-arrow{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  display:flex;align-items:center;justify-content:center;font-size:13px;color:rgba(255,201,60,.85);transition:all .3s;backdrop-filter:blur(6px)}
+.vgz-bento-card:hover .b-arrow{background:rgba(255,201,60,.95);color:#142554;border-color:transparent;transform:rotate(-45deg) scale(1.1);box-shadow:0 4px 12px rgba(255,201,60,.4)}
+/* Couleurs d'accent par carte (overlay subtil, fond navy reste dominant) */
+.bento-1{--accent:#60A5FA;grid-column:span 2;grid-row:span 2}
+.bento-2{--accent:#A78BFA}
+.bento-3{--accent:#38BDF8}
+.bento-4{--accent:#34D399;grid-column:span 2}
+.bento-5{--accent:#F472B6}
+.bento-6{--accent:#FBBF24}
 
 /* ═════ WRAPPER SOMBRE PREMIUM — gradient animé + aurora ═════ */
 .vgz-dark-section{background:linear-gradient(135deg,#0D1B3E 0%,#142554 25%,#1E3A8A 50%,#142554 75%,#0F172A 100%);background-size:400% 400%;animation:vgzAurora 15s ease infinite;border-radius:28px;padding:40px 28px;margin:30px 0;position:relative;overflow:hidden;box-shadow:0 25px 80px rgba(13,27,62,.5),0 0 0 1px rgba(255,201,60,.1)}
