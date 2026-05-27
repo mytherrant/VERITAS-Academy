@@ -17,6 +17,7 @@ on:
       - 'evaluations/**'
       - 'cours/**'
       - 'Logo détouré.png'
+      - 'ambassa-avatar.jpg'
       - 'sitemap.xml'
       - 'robots.txt'
       - 'manifest.webmanifest'
@@ -68,6 +69,9 @@ jobs:
 
           # Logo
           if [ -f "Logo détouré.png" ]; then cp "Logo détouré.png" deploy/; fi
+
+          # Avatar IA Ambassa (photo Jacques Miterand TAKOU en blouse)
+          if [ -f "ambassa-avatar.jpg" ]; then cp "ambassa-avatar.jpg" deploy/; echo "  ✓ ambassa-avatar.jpg"; fi
 
           # .htaccess (sécurité + cache + MIME)
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
