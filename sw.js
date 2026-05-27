@@ -4,7 +4,7 @@
 // les données dynamiques. Permet le fonctionnement hors-ligne basique.
 // ═══════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'veritas-v2.9.7';
+const CACHE_VERSION = 'veritas-v2.9.8';
 // v2.9.7 : CSP très permissive (https:/http:/blob: partout) — débloque toutes
 // les connexions encore bloquées en v2.9.6 (7 URLs connect-src). Retire le
 // meta X-Frame-Options (warning console — doit être en HTTP header serveur).

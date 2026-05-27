@@ -17983,23 +17983,73 @@ window._runCorrectionIA = async function(){
   }
 };
 
-async function callClaudeAPI(prompt,sysPrompt){
-  var sys=sysPrompt||"Tu es un assistant pedagogique expert du systeme educatif camerounais (MINESEC/MINESUP). Tu connais les programmes BEPC et BAC series A/C/D, les grandes ecoles camerounaises et tu contextualises dans la realite camerounaise.";
-  try{
-    var url="https://text.pollinations.ai/"+encodeURIComponent(sys+"\n\nQuestion: "+prompt+"\n\nReponse en francais:")+"?model=openai&private=true";
-    var resp=await fetch(url,{method:"GET",headers:{"Accept":"text/plain"}});
-    if(resp.ok){var txt=await resp.text();if(txt&&txt.length>20)return txt;}
-  }catch(e1){console.warn("Pollinations:",e1);}
-  try{
-    var resp2=await fetch("https://openrouter.ai/api/v1/chat/completions",{
-      method:"POST",
-      headers:{"Content-Type":"application/json","Authorization":"Bearer sk-or-v1-free"},
-      body:JSON.stringify({model:"mistralai/mistral-7b-instruct:free",max_tokens:800,
-        messages:[{role:"system",content:sys},{role:"user",content:prompt}]})
+async function callClaudeAPI(prompt, sysPrompt){
+  // v2.9.8 — CORRECTION CRITIQUE : utilisation de POST pour supporter les longs contextes
+  // (AMBASSA_PERSONA fait ~23 000 chars, l'URL GET explosait au-delà de 2 000 chars)
+  var sys = sysPrompt || "Tu es un assistant pédagogique expert du système éducatif camerounais (MINESEC/MINESUP). Tu connais les programmes BEPC et BAC séries A/C/D, les grandes écoles camerounaises et tu contextualises dans la réalité camerounaise.";
+
+  // ── ESSAI 1 : Pollinations.ai en POST (supporte long context, format OpenAI-compatible) ──
+  try {
+    var resp = await fetch("https://text.pollinations.ai/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: sys },
+          { role: "user",   content: prompt }
+        ],
+        model: "openai",
+        private: true,
+        stream: false
+      })
     });
-    if(resp2.ok){var d=await resp2.json();var t2=(d.choices&&d.choices[0]&&d.choices[0].message&&d.choices[0].message.content)||"";if(t2.length>20)return t2;}
-  }catch(e2){console.warn("OpenRouter:",e2);}
-  return "Service IA temporairement indisponible. Consultez vos cours ou contactez votre enseignant.";
+    if (resp.ok) {
+      var txt = await resp.text();
+      // Pollinations POST retourne directement le texte (pas du JSON)
+      if (txt && txt.trim().length > 20) {
+        // Si format JSON (ex: {choices:[{message:{content:"..."}}]}), extraire
+        try {
+          var parsed = JSON.parse(txt);
+          if (parsed.choices && parsed.choices[0] && parsed.choices[0].message) {
+            return parsed.choices[0].message.content;
+          }
+          if (typeof parsed === "string") return parsed;
+        } catch(eParse){ /* texte brut, retour direct */ }
+        return txt.trim();
+      }
+    }
+  } catch(e1) { console.warn("[Ambassa] Pollinations POST:", e1.message); }
+
+  // ── ESSAI 2 : Pollinations.ai en GET avec system PROMPT TRONQUÉ (fallback courte URL) ──
+  // Si POST échoue (CORS, réseau), on essaie le GET avec un system prompt court (max 1500 chars)
+  try {
+    var shortSys = sys.length > 1500 ? (sys.substring(0, 1500) + "\n[...persona tronqué pour URL...]") : sys;
+    var url = "https://text.pollinations.ai/" + encodeURIComponent(shortSys + "\n\nQuestion: " + prompt + "\n\nRéponds en français:") + "?model=openai";
+    // Limite stricte d'URL : 1900 chars pour rester sous les 2048 standard
+    if (url.length < 1900) {
+      var resp2 = await fetch(url, { method: "GET", headers: { "Accept": "text/plain" } });
+      if (resp2.ok) {
+        var txt2 = await resp2.text();
+        if (txt2 && txt2.trim().length > 20) return txt2.trim();
+      }
+    } else {
+      console.warn("[Ambassa] URL trop longue (" + url.length + " chars), GET fallback ignoré");
+    }
+  } catch(e2) { console.warn("[Ambassa] Pollinations GET:", e2.message); }
+
+  // ── ESSAI 3 : Pollinations en GET avec UNIQUEMENT le prompt utilisateur (dernier recours) ──
+  try {
+    var minimalUrl = "https://text.pollinations.ai/" + encodeURIComponent(prompt) + "?model=openai";
+    if (minimalUrl.length < 1900) {
+      var resp3 = await fetch(minimalUrl);
+      if (resp3.ok) {
+        var txt3 = await resp3.text();
+        if (txt3 && txt3.trim().length > 20) return txt3.trim();
+      }
+    }
+  } catch(e3) { console.warn("[Ambassa] Pollinations minimal:", e3.message); }
+
+  return "⚠️ Service IA temporairement indisponible (problème de connexion). Vérifiez votre internet et réessayez dans quelques secondes. Si le problème persiste, consultez vos cours ou contactez votre enseignant.";
 }
 
 // ════════════════════════════════════════════════════════════════════
@@ -36155,7 +36205,7 @@ window.mAgentAmbassa = function(taskId){
     +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;padding:18px;border-radius:14px;margin-bottom:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">'
       +'<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#FFE082,#FFC93C);display:flex;align-items:center;justify-content:center;overflow:hidden;border:3px solid #FFC93C;box-shadow:0 4px 14px rgba(255,201,60,.4);flex-shrink:0;position:relative">'
         +'<span style="position:absolute;color:#142554;font-size:28px;font-weight:900;font-family:Plus Jakarta Sans,sans-serif;line-height:1">A</span>'
-        +'<img src="ambassa-avatar.jpg" alt="Professeur Ambassa" style="position:relative;z-index:2;width:100%;height:100%;object-fit:cover;display:block">'
+        +'<img src="ambassa-avatar.png" alt="Professeur Ambassa" style="position:relative;z-index:2;width:100%;height:100%;object-fit:cover;display:block">'
       +'</div>'
       +'<div style="flex:1;min-width:200px"><div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800">Agent IA pédagogique</div>'
       +'<div style="font-size:20px;font-weight:900;font-family:Plus Jakarta Sans">Professeur Ambassa</div>'

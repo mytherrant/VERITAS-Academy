@@ -18,6 +18,7 @@ on:
       - 'cours/**'
       - 'Logo détouré.png'
       - 'ambassa-avatar.jpg'
+      - 'ambassa-avatar.png'
       - 'sitemap.xml'
       - 'robots.txt'
       - 'manifest.webmanifest'
