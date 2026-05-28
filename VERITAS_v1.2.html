@@ -36585,9 +36585,15 @@ window._ambassaGenerate = async function(taskId){
         + 'Cite obligatoirement les œuvres au programme MINESEC quand pertinent (auteur + titre en italique).';
       break;
     case 'fiche':
-      prompt = 'Rédige une fiche de révision pour des élèves de '+cls+' en '+mat+' sur : '+sujet+'.\n'
-        + 'Structure obligatoire : 1) Définitions clés (terminologie MINESEC). 2) Concepts essentiels avec exemples camerounais. 3) Formules/règles (encadrées). 4) Exemples typiques (au moins 1 issu du programme MINESEC). 5) Pièges à éviter (erreurs fréquentes des élèves CM). 6) Mnémotechniques. 7) Pour aller plus loin : références à sujetexa.com, grandprof.org, e-school237.com.\n'
-        + 'Maximum 800 mots. Style soutenu, vocabulaire précis. Si tu n\'es pas certain d\'une formule, dis-le.';
+      prompt = 'Rédige une FICHE DE RÉVISION pour des élèves de '+cls+' en '+mat+' sur : '+sujet+'.\n'
+        + 'Respecte EXACTEMENT cette structure en 6 parties, dans cet ordre, avec des titres clairs :\n'
+        + '1) TITRE DE LA LEÇON — précis et explicite.\n'
+        + '2) OBJECTIF — ce que l\'élève saura faire à la fin (1 à 3 objectifs, verbes d\'action : identifier, distinguer, produire…).\n'
+        + '3) PETIT CORPUS POUR MANIPULER LA NOTION — 3 à 6 courts exemples / énoncés / extraits (contextualisés Cameroun) qui font OBSERVER la notion AVANT toute théorie.\n'
+        + '4) QUESTIONS GUIDES POUR LES APPRENANTS — 3 à 5 questions qui amènent l\'élève à DÉCOUVRIR la règle à partir du corpus (démarche inductive). NE DONNE PAS les réponses ici.\n'
+        + '5) RÉSUMÉ DE LA NOTION — la leçon synthétique (définition + règle + cas particuliers), claire et mémorisable.\n'
+        + '6) CONSOLIDATION — 3 à 5 petits exercices d\'application progressifs. RÈGLE STRICTE pour tout QCM : place D\'ABORD tous les énoncés (l\'élève traite seul), PUIS une rubrique « ✅ CORRIGÉ » séparée tout à la fin — JAMAIS la bonne réponse à côté de la question.\n'
+        + 'Style soutenu, niveau MINESEC, vocabulaire précis, lisible sur mobile. Exemples ancrés au Cameroun (Douala, Yaoundé…). Si tu n\'es pas certain d\'un fait, dis-le. Termine par une rubrique « 🔗 Pour aller plus loin » renvoyant à : distance-learning.minesec.gov.cm, sujetexa.com, camerecole.org, grandprof.org, e-school237.com.';
       break;
     case 'diff':
       prompt = 'Génère 3 exercices différenciés sur '+sujet+' pour des élèves de '+cls+' en '+mat+'.\n'
