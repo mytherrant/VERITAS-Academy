@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Business Plan — VÉRITAS Academy 2026</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   VÉRITAS — Business Plan PDF-ready (impression A4)
+   Couleurs : Navy #142554 · Or #FFC93C · Ivoire #FAF8F3
+═══════════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Libre+Baskerville:wght@400;700&family=Crimson+Pro:ital,wght@0,400;1,400&display=swap');
+
+:root {
+  --navy: #142554;
+  --navy-light: #1E3A8A;
+  --gold: #FFC93C;
+  --gold-dark: #D4A017;
+  --cream: #FAF8F3;
+  --ink: #1F2937;
+  --ink-light: #4B5563;
+  --gray: #94A3B8;
+  --green: #10B981;
+  --red: #DC2626;
+  --orange: #F97316;
+  --purple: #7C3AED;
+  --bg: #F8FAFC;
+  --border: #E2E8F0;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+/* Page A4 imprimable */
+.page {
+  max-width: 21cm;
+  min-height: 29.7cm;
+  margin: 1cm auto;
+  background: #fff;
+  padding: 2.5cm 2cm;
+  box-shadow: 0 8px 30px rgba(0,0,0,.08);
+  position: relative;
+  page-break-after: always;
+}
+
+/* Header de page (sauf cover) */
+.page:not(.cover)::before {
+  content: 'VÉRITAS Academy — Business Plan 2026';
+  position: absolute;
+  top: 0.8cm;
+  left: 2cm;
+  right: 2cm;
+  font-size: 10px;
+  color: var(--gray);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Footer de page (numéro) */
+.page:not(.cover)::after {
+  content: '';
+  position: absolute;
+  bottom: 0.8cm;
+  left: 2cm;
+  right: 2cm;
+  height: 1px;
+  background: var(--border);
+}
+
+/* COVER */
+.cover {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 50%, var(--navy) 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 3cm 2cm;
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  top: -10%; right: -10%;
+  width: 60%; height: 60%;
+  background: radial-gradient(circle, rgba(255,201,60,.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cover::after {
+  content: '';
+  position: absolute;
+  bottom: -10%; left: -10%;
+  width: 50%; height: 50%;
+  background: radial-gradient(circle, rgba(60,141,255,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.cover-logo {
+  width: 100px; height: 100px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--navy);
+  font-family: 'Libre Baskerville', serif;
+  font-size: 56px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32px;
+  box-shadow: 0 12px 40px rgba(255,201,60,.4);
+  position: relative;
+  z-index: 2;
+}
+.cover-brand {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 48px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  margin-bottom: 8px;
+  color: #fff;
+  position: relative;
+  z-index: 2;
+}
+.cover-tagline {
+  font-style: italic;
+  color: var(--gold);
+  font-size: 18px;
+  letter-spacing: 1px;
+  margin-bottom: 50px;
+  position: relative; z-index: 2;
+}
+.cover-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  position: relative; z-index: 2;
+}
+.cover-sub {
+  font-size: 16px;
+  color: rgba(255,255,255,.85);
+  margin-bottom: 60px;
+  font-weight: 300;
+  max-width: 14cm;
+  line-height: 1.7;
+  position: relative; z-index: 2;
+}
+.cover-meta {
+  position: absolute;
+  bottom: 3cm;
+  left: 0; right: 0;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,.7);
+  letter-spacing: 1px;
+  z-index: 2;
+}
+.cover-meta b {
+  display: block;
+  color: var(--gold);
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: 1.5px;
+}
+.cover-version {
+  position: absolute;
+  top: 2cm;
+  right: 2cm;
+  background: rgba(255,201,60,.15);
+  border: 1px solid rgba(255,201,60,.4);
+  color: var(--gold);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+/* Titres généraux */
+h1.section-title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 32px;
+  color: var(--navy);
+  margin: 0 0 8px;
+  letter-spacing: -0.5px;
+}
+h1.section-title::after {
+  content: '';
+  display: block;
+  width: 60px; height: 4px;
+  background: var(--gold);
+  margin-top: 12px;
+  border-radius: 2px;
+}
+h2 {
+  font-family: 'Inter', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--navy);
+  margin: 30px 0 12px;
+  letter-spacing: -0.3px;
+}
+h3 {
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 20px 0 8px;
+}
+h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink);
+  margin: 14px 0 6px;
+}
+p {
+  margin: 0 0 12px;
+}
+.lead {
+  font-size: 16px;
+  color: var(--ink-light);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+ul, ol { margin: 0 0 16px 22px; }
+li { margin-bottom: 6px; }
+
+/* Tableaux */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0 22px;
+  font-size: 12.5px;
+}
+th {
+  background: var(--navy);
+  color: #fff;
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+tr:nth-child(even) td { background: #FAFBFF; }
+tr:hover td { background: #FFF8E7; }
+
+/* Boites callout */
+.callout {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+  border-left: 4px solid var(--gold);
+  padding: 14px 18px;
+  margin: 18px 0;
+  border-radius: 0 8px 8px 0;
+  font-size: 14px;
+}
+.callout strong { color: #92400E; }
+
+.callout-navy {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 100%);
+  color: #fff;
+  padding: 18px 22px;
+  margin: 20px 0;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(20,37,84,.15);
+}
+.callout-navy h2 { color: var(--gold); margin-top: 0; }
+.callout-navy p { color: rgba(255,255,255,.92); }
+
+.callout-success {
+  background: linear-gradient(135deg, #D1FAE5 0%, #A7F3D0 100%);
+  border-left: 4px solid var(--green);
+  padding: 14px 18px;
+  margin: 18px 0;
+  border-radius: 0 8px 8px 0;
+  color: #065F46;
+}
+
+.callout-danger {
+  background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+  border-left: 4px solid var(--red);
+  padding: 14px 18px;
+  margin: 18px 0;
+  border-radius: 0 8px 8px 0;
+  color: #991B1B;
+}
+
+/* Stats cards */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+.stat-card {
+  background: linear-gradient(135deg, #fff, #F8FAFC);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.04);
+}
+.stat-card .label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--ink-light);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.stat-card .value {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1;
+}
+.stat-card .unit {
+  font-size: 12px;
+  color: var(--gray);
+  margin-top: 4px;
+}
+
+/* Highlights */
+.highlight-box {
+  background: linear-gradient(135deg, rgba(255,201,60,.12), rgba(255,201,60,.04));
+  border: 1.5px solid rgba(255,201,60,.4);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin: 20px 0;
+}
+.highlight-box .label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: var(--gold-dark);
+  margin-bottom: 8px;
+}
+
+/* Code & tech */
+code {
+  background: #F1F5F9;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--purple);
+}
+pre {
+  background: #1E293B;
+  color: #F1F5F9;
+  padding: 16px;
+  border-radius: 8px;
+  font-family: 'Courier New', monospace;
+  font-size: 11.5px;
+  line-height: 1.5;
+  overflow-x: auto;
+  margin: 14px 0 20px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Section anchor */
+.section-anchor {
+  display: block;
+  height: 0;
+  visibility: hidden;
+  position: relative;
+  top: -20px;
+}
+
+/* TOC sommaire */
+.toc {
+  background: #FAFBFF;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  margin: 24px 0 40px;
+  columns: 2;
+  column-gap: 30px;
+}
+.toc-item {
+  display: block;
+  padding: 6px 0;
+  color: var(--navy);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  break-inside: avoid;
+}
+.toc-item:hover { color: var(--gold-dark); }
+.toc-num {
+  display: inline-block;
+  width: 22px;
+  font-weight: 800;
+  color: var(--gold-dark);
+}
+
+/* Persona cards */
+.persona {
+  background: linear-gradient(135deg, #fff, #F8FAFC);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 14px 0;
+  border-left: 4px solid var(--purple);
+}
+.persona-name {
+  font-weight: 800;
+  color: var(--navy);
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+.persona-meta {
+  font-size: 12px;
+  color: var(--ink-light);
+  margin-bottom: 8px;
+  font-style: italic;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.badge-green { background: #D1FAE5; color: #065F46; }
+.badge-yellow { background: #FEF3C7; color: #92400E; }
+.badge-red { background: #FEE2E2; color: #991B1B; }
+.badge-blue { background: #DBEAFE; color: #1E40AF; }
+.badge-purple { background: #EDE9FE; color: #5B21B6; }
+
+/* Print styles */
+@media print {
+  body { background: #fff; }
+  .page {
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+    width: 21cm;
+    min-height: 29.7cm;
+  }
+  .toc-item { color: var(--navy) !important; }
+  a { color: var(--navy); text-decoration: none; }
+  .no-print { display: none; }
+}
+
+/* Print controls (écran seulement) */
+.print-controls {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  gap: 8px;
+  background: rgba(20,37,84,.95);
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.3);
+}
+.print-controls button {
+  background: var(--gold);
+  color: var(--navy);
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+  font-family: inherit;
+}
+.print-controls button:hover { background: #fff; }
+
+/* Petit + grand espacement */
+.mt-large { margin-top: 32px; }
+.mb-large { margin-bottom: 32px; }
+
+/* Liens internes */
+a { color: var(--navy); text-decoration: none; }
+a:hover { color: var(--gold-dark); }
+
+/* Mise en avant Quote */
+.quote {
+  font-family: 'Crimson Pro', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: var(--navy);
+  background: linear-gradient(135deg, #FAFBFF, #fff);
+  border-left: 4px solid var(--gold);
+  padding: 18px 24px;
+  margin: 20px 0;
+  border-radius: 0 10px 10px 0;
+  position: relative;
+}
+.quote::before {
+  content: '"';
+  font-size: 48px;
+  color: var(--gold);
+  position: absolute;
+  top: -8px;
+  left: 12px;
+  font-family: 'Libre Baskerville', serif;
+  font-weight: 700;
+  opacity: .4;
+}
+</style>
+</head>
+<body>
+
+<!-- Contrôles écran -->
+<div class="print-controls no-print">
+  <button onclick="window.print()">🖨️ Imprimer en PDF</button>
+  <button onclick="document.body.scrollIntoView({behavior:'smooth',block:'start'})">⬆️ Haut</button>
+</div>
+
+<!-- ═══════════════════════ PAGE 1 — COVER ═══════════════════════ -->
+<div class="page cover">
+  <div class="cover-version">Version 1.0 · Mai 2026</div>
+  <div class="cover-logo">V</div>
+  <div class="cover-brand">VÉRITAS</div>
+  <div class="cover-tagline">Academy</div>
+  <div class="cover-title">Business Plan</div>
+  <div class="cover-sub">
+    Plateforme éducative numérique de référence pour le système MINESEC camerounais.<br>
+    Vision 2026-2030 · Levée pre-seed
+  </div>
+  <div class="cover-meta">
+    <b>Jacques Miterand TAKOU</b>
+    Fondateur & CEO · Centre VÉRITAS Academy<br>
+    Douala, Cameroun · contact@veritas-school.com<br>
+    +237 697 637 739 · veritas-school.com
+  </div>
+</div>
+
+<!-- ═══════════════════════ PAGE 2 — SOMMAIRE ═══════════════════════ -->
+<div class="page">
+  <h1 class="section-title">Sommaire</h1>
+  <div class="toc">
+    <a class="toc-item" href="#sec1"><span class="toc-num">1.</span> Executive Summary</a>
+    <a class="toc-item" href="#sec2"><span class="toc-num">2.</span> Le problème adressé</a>
+    <a class="toc-item" href="#sec3"><span class="toc-num">3.</span> La solution VÉRITAS</a>
+    <a class="toc-item" href="#sec4"><span class="toc-num">4.</span> Marché TAM/SAM/SOM</a>
+    <a class="toc-item" href="#sec5"><span class="toc-num">5.</span> Analyse concurrentielle</a>
+    <a class="toc-item" href="#sec6"><span class="toc-num">6.</span> Modèle économique</a>
+    <a class="toc-item" href="#sec7"><span class="toc-num">7.</span> Marketing & acquisition</a>
+    <a class="toc-item" href="#sec8"><span class="toc-num">8.</span> Roadmap produit</a>
+    <a class="toc-item" href="#sec9"><span class="toc-num">9.</span> Équipe</a>
+    <a class="toc-item" href="#sec10"><span class="toc-num">10.</span> Projections financières</a>
+    <a class="toc-item" href="#sec11"><span class="toc-num">11.</span> Plan de financement</a>
+    <a class="toc-item" href="#sec12"><span class="toc-num">12.</span> Valorisation et sortie</a>
+    <a class="toc-item" href="#sec13"><span class="toc-num">13.</span> Risques et mitigation</a>
+    <a class="toc-item" href="#sec14"><span class="toc-num">14.</span> KPIs de pilotage</a>
+    <a class="toc-item" href="#sec15"><span class="toc-num">15.</span> Annexes</a>
+  </div>
+
+  <div class="callout-navy">
+    <h2>🎯 En une phrase</h2>
+    <p style="font-size:15px;line-height:1.7">VÉRITAS est l'unique plateforme tout-en-un combinant <strong style="color:var(--gold)">cours, annales BEPC/BAC, IA pédagogique spécialisée MINESEC et marketplace enseignants</strong> pour les 3 millions d'élèves du secondaire camerounais — à <strong style="color:var(--gold)">3 000-10 000 FCFA/mois</strong> contre <strong>25 000-50 000 FCFA</strong> pour des cours particuliers.</p>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">Investissement</div>
+      <div class="value">30 M</div>
+      <div class="unit">FCFA pre-seed</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Marché TAM</div>
+      <div class="value">4 825</div>
+      <div class="unit">Mds FCFA/an</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Revenu 2030</div>
+      <div class="value">3,6</div>
+      <div class="unit">Mds FCFA</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Marge nette 2030</div>
+      <div class="value">86 %</div>
+      <div class="unit">EBITDA 55%</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SECTION 1 — EXECUTIVE SUMMARY ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec1"></a>
+  <h1 class="section-title">1. Executive Summary</h1>
+  <p class="lead">Le marché camerounais de l'éducation numérique est mature pour une révolution. VÉRITAS s'y positionne avec une infrastructure déjà déployée et un modèle économique éprouvé.</p>
+
+  <h2>🎯 La vision</h2>
+  <div class="quote">
+    VÉRITAS Academy devient la plateforme éducative numérique de référence en Afrique francophone, en commençant par dominer le marché secondaire camerounais (MINESEC) avant l'expansion régionale (CEMAC + Afrique de l'Ouest francophone).
+  </div>
+
+  <h2>💡 La proposition de valeur</h2>
+  <p>Une seule application qui réunit <strong>cours interactifs, annales BEPC/BAC corrigées, IA pédagogique spécialisée MINESEC, classes virtuelles, boutique de manuels officiels et système de parrainage rémunéré</strong> — accessible à 5 000 FCFA/mois (vs cours particuliers 25 000-50 000 FCFA/mois).</p>
+
+  <h2>📈 Les chiffres-clés (cibles 5 ans)</h2>
+  <table>
+    <thead>
+      <tr><th>Indicateur</th><th>Année 1 (2026)</th><th>Année 3 (2028)</th><th>Année 5 (2030)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Utilisateurs actifs</strong></td><td>5 000</td><td>100 000</td><td>500 000</td></tr>
+      <tr><td><strong>Abonnés payants</strong></td><td>300</td><td>8 000</td><td>60 000</td></tr>
+      <tr><td><strong>Revenu annuel (FCFA)</strong></td><td>22 M</td><td>480 M</td><td>3,6 milliards</td></tr>
+      <tr><td><strong>Bénéfice net (FCFA)</strong></td><td>-12 M</td><td>+114 M</td><td>+1,3 milliard</td></tr>
+      <tr><td><strong>Marge nette</strong></td><td>—</td><td>24 %</td><td>36 %</td></tr>
+    </tbody>
+  </table>
+
+  <h2>💰 Besoin en investissement</h2>
+  <div class="highlight-box">
+    <div class="label">Levée Pre-seed actuelle</div>
+    <div style="font-family:'Libre Baskerville',serif;font-size:28px;color:var(--navy);font-weight:700">30 000 000 FCFA <span style="font-size:14px;color:var(--ink-light)">(~45 000 €)</span></div>
+    <div style="margin-top:6px;font-size:13px;color:var(--ink-light)">Validation marché + premiers 1 000 abonnés payants en 12 mois</div>
+    <div style="margin-top:10px;font-size:13px"><strong>Valorisation pré-money : 150 000 000 FCFA</strong> (~230 000 €) · Dilution offerte : 16,7 %</div>
+  </div>
+
+  <h2>🚀 État actuel — atouts vérifiables</h2>
+  <ul>
+    <li>✅ <strong>Produit fonctionnel</strong> déployé à <a href="https://veritas-school.com">veritas-school.com</a> (12 modules, 3,6 Mo)</li>
+    <li>✅ <strong>Stack technique complet</strong> : Frontend (HTML/JS) + Backend (PHP/LWS) + Anthropic API ready</li>
+    <li>✅ <strong>22 œuvres MINESEC</strong> intégrées avec analyses littéraires + 134 manuels officiels référencés</li>
+    <li>✅ <strong>Système de paiement multi-canaux</strong> : MoMo, Orange Money, PayPal, Stripe, virement</li>
+    <li>✅ <strong>IA Ambassa</strong> opérationnelle (proxy sécurisé + RAG + cache validé)</li>
+    <li>✅ <strong>Partenariats partenaires structurés</strong> : parrains 10-20 %, auteurs 60 %, enseignants 70 %</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════ SECTION 2 — PROBLÈME ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec2"></a>
+  <h1 class="section-title">2. Le problème adressé</h1>
+  <p class="lead">Le système éducatif camerounais souffre de trois failles structurelles que VÉRITAS adresse simultanément.</p>
+
+  <h2>2.1 Trois failles du système éducatif camerounais</h2>
+
+  <h3>A. Accès inéquitable aux ressources de qualité</h3>
+  <ul>
+    <li><strong>3 millions d'élèves</strong> dans le secondaire camerounais</li>
+    <li>Seuls <strong>20 %</strong> en zone urbaine ont accès à des cours particuliers de qualité (Douala, Yaoundé)</li>
+    <li><strong>80 %</strong> en zone rurale dépendent des enseignants de classe surchargés (50-100 élèves/classe)</li>
+    <li>Coût des cours particuliers : <strong>25 000-50 000 FCFA/mois</strong> par matière → inaccessibles à la majorité</li>
+  </ul>
+
+  <h3>B. Annales et corrigés dispersés, qualité variable</h3>
+  <ul>
+    <li>Sites concurrents (sujetexa, camerschool) : <strong>PDF non structurés</strong>, pas d'aide à la compréhension</li>
+    <li>Pas d'<strong>interactivité</strong> (le PDF ne corrige pas votre dissertation)</li>
+    <li>Pas de <strong>personnalisation</strong> (même corrigé pour tous)</li>
+    <li>Qualité parfois douteuse (corrigés par étudiants, sans validation enseignant)</li>
+  </ul>
+
+  <h3>C. Pas d'IA pédagogique adaptée au contexte camerounais</h3>
+  <ul>
+    <li>ChatGPT et autres IA généralistes ne connaissent <strong>pas le programme MINESEC officiel</strong></li>
+    <li>Inventent des œuvres qui ne sont pas au programme</li>
+    <li>Donnent des grilles d'évaluation hors-norme (pas les grilles OBC)</li>
+    <li><strong>Aucun acteur local</strong> ne fournit une IA spécialisée MINESEC</li>
+  </ul>
+
+  <h2>2.2 Impact économique du problème</h2>
+  <div class="callout-danger">
+    <strong>Taux d'échec au BEPC : 45-55 %</strong> chaque année (~100 000 échecs / 200 000 candidats)<br>
+    <strong>Taux d'échec au BAC : 40-50 %</strong> (~50 000 échecs / 120 000 candidats)<br>
+    <strong>Coût social</strong> : ~150 000 élèves rallongent leur parcours d'un an → <strong>perte économique nationale estimée à 50 milliards FCFA/an</strong>
+  </div>
+
+  <h2>2.3 Pourquoi maintenant ?</h2>
+  <table>
+    <thead>
+      <tr><th>Tendance</th><th>Impact pour VÉRITAS</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Pénétration smartphone CM</strong> : 75 % en 2026 (45 % en 2020)</td><td>Marché adressable triplé en 5 ans</td></tr>
+      <tr><td><strong>Couverture 4G</strong> : 85 % zones urbaines</td><td>Streaming vidéo + IA viable</td></tr>
+      <tr><td><strong>MoMo/Orange Money</strong> : 60 % de la population CM</td><td>Paiements digitaux normalisés</td></tr>
+      <tr><td><strong>Démocratisation IA</strong> : Claude/GPT accessibles via API</td><td>Spécialisation MINESEC possible</td></tr>
+      <tr><td><strong>Pression PISA/UNESCO</strong> : MINESEC cherche solutions</td><td>Vente B2B aux établissements possible</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════ SECTION 3 — SOLUTION ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec3"></a>
+  <h1 class="section-title">3. La solution VÉRITAS</h1>
+  <p class="lead">Une plateforme tout-en-un qui réunit 12 services intégrés en une seule application mobile-first.</p>
+
+  <h2>3.1 Une plateforme tout-en-un</h2>
+  <pre>┌─────────────────────────────────────────────────────────────┐
+│  VÉRITAS Academy — 1 app, 12 services intégrés              │
+├─────────────────────────────────────────────────────────────┤
+│  🎓 Cours interactifs vidéo (BEPC, Probatoire, BAC)         │
+│  📝 Annales 2009-2026 + corrigés OBC validés                │
+│  🤖 IA Ambassa (Claude Sonnet + RAG MINESEC)                │
+│  📚 Bibliothèque 2 484 œuvres africaines indexées           │
+│  🛒 Boutique manuels MINESEC officiels (livraison Douala)   │
+│  🎮 Jeux éducatifs (QCM, pendu, cartes mentales)            │
+│  🔬 Labos virtuels (physique, chimie, SVT)                  │
+│  👥 Classes virtuelles + Étude en groupe                    │
+│  🏆 Gamification : streaks, XP, 30+ badges, leaderboard     │
+│  💰 Système de parrainage rémunéré (10-20 %)                │
+│  📊 Suivi personnalisé : Genome académique                  │
+│  💳 Paiements MoMo / Orange / PayPal / Stripe               │
+└─────────────────────────────────────────────────────────────┘</pre>
+
+  <h2>3.2 Différenciateurs concurrentiels</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Capacité</th>
+        <th>VÉRITAS</th>
+        <th>Sujetexa/Camerschool</th>
+        <th>Didactia (CI)</th>
+        <th>Khan Academy</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Annales + corrigés MINESEC</td><td><span class="badge badge-green">✓ 2 484</span></td><td>✓</td><td>✗</td><td>✗</td></tr>
+      <tr><td>Cours vidéo MINESEC</td><td><span class="badge badge-green">✓</span></td><td>✗</td><td>⚠ Limité</td><td>⚠</td></tr>
+      <tr><td><strong>IA pédagogique CM</strong></td><td><span class="badge badge-green">✓ Ambassa</span></td><td>✗</td><td>⚠ Générique</td><td>✗</td></tr>
+      <tr><td>Boutique manuels</td><td><span class="badge badge-green">✓</span></td><td>✗</td><td>✗</td><td>✗</td></tr>
+      <tr><td>Paiement MoMo/Orange</td><td><span class="badge badge-green">✓</span></td><td>⚠</td><td>✓</td><td>✗</td></tr>
+      <tr><td>Système parrainage</td><td><span class="badge badge-green">✓ 10-20 %</span></td><td>✗</td><td>✗</td><td>✗</td></tr>
+      <tr><td>Marketplace enseignants</td><td><span class="badge badge-green">✓ 70 %</span></td><td>✗</td><td>✗</td><td>✗</td></tr>
+      <tr><td>Mobile-first</td><td><span class="badge badge-green">✓ PWA</span></td><td>⚠ PDF</td><td>✓</td><td>⚠</td></tr>
+      <tr><td><strong>Prix</strong></td><td><strong>1k-10k F/mois</strong></td><td>Gratuit (pub)</td><td>15 000 F</td><td>Gratuit</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <strong>Notre avantage unique</strong> : seule plateforme à combiner annales + IA spécialisée + commerce + communauté + paiement local dans une expérience unifiée.
+  </div>
+
+  <h2>3.3 Stack technique (état actuel — déployé)</h2>
+  <ul>
+    <li><strong>Frontend</strong> : HTML5/CSS/JavaScript vanilla, single-file 3,6 Mo, PWA-compatible</li>
+    <li><strong>Backend</strong> : PHP 8.2 sur LWS France (sécurité Cloudflare)</li>
+    <li><strong>Base</strong> : MySQL (cache validé) + SQLite FTS5 (bibliothèque 1,4 M passages)</li>
+    <li><strong>IA</strong> : Anthropic Claude Sonnet/Haiku via proxy sécurisé <code>api/ia_proxy.php</code></li>
+    <li><strong>CDN</strong> : Cloudflare Pro</li>
+    <li><strong>Service Worker</strong> : v2.9.14 (mode hors-ligne, mise à jour auto)</li>
+    <li><strong>CI/CD</strong> : GitHub Actions → FTP automatique vers LWS</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════ SECTION 4 — MARCHÉ ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec4"></a>
+  <h1 class="section-title">4. Marché cible (TAM / SAM / SOM)</h1>
+
+  <h2>4.1 TAM — Total Addressable Market</h2>
+  <div class="callout-navy">
+    <h2>Marché total adressable : <strong style="color:var(--gold)">4 825 milliards FCFA/an</strong></h2>
+  </div>
+  <table>
+    <thead>
+      <tr><th>Segment</th><th>Population</th><th>Dépense moy/an</th><th>Marché annuel</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Élèves secondaire CM</td><td>3 000 000</td><td>200 000 F</td><td><strong>600 Mds F</strong></td></tr>
+      <tr><td>Élèves secondaire CEMAC (Gabon, Congo, Tchad...)</td><td>2 500 000</td><td>250 000 F</td><td><strong>625 Mds F</strong></td></tr>
+      <tr><td>Afrique de l'Ouest francophone (CI, Sénégal, Mali...)</td><td>12 000 000</td><td>300 000 F</td><td><strong>3 600 Mds F</strong></td></tr>
+      <tr style="background:#FEF3C7"><td colspan="3"><strong>TOTAL TAM</strong></td><td><strong>4 825 Mds F (~7,4 Md €)</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>4.2 SAM — Serviceable Available Market</h2>
+  <p>Marché serviceable (smartphones + paiement digital) : <strong>1 200 milliards FCFA/an</strong></p>
+  <ul>
+    <li>50 % de pénétration smartphone élèves CM = 1 500 000 actifs digitaux</li>
+    <li>40 % capacité de paiement régulier (parents urbains) = 600 000 prospects payants</li>
+    <li>Dépense moyenne edtech : 60 000 F/an</li>
+    <li><strong>SAM Cameroun : 600 000 × 60 000 = 36 milliards FCFA/an</strong></li>
+    <li>Extension CEMAC + Afrique de l'Ouest francophone (5 ans) : × 30 = <strong>~1 200 milliards FCFA/an</strong></li>
+  </ul>
+
+  <h2>4.3 SOM — Serviceable Obtainable Market</h2>
+  <div class="highlight-box">
+    <div class="label">Objectif réaliste à 5 ans</div>
+    <div style="font-size:20px;font-weight:700;color:var(--navy);margin:6px 0">5 % du SAM Cameroun + 1 % SAM régional</div>
+    <ul style="margin-top:10px">
+      <li>Cameroun : 30 000 abonnés payants × 60 000 F = <strong>1,8 milliard F/an</strong></li>
+      <li>CEMAC : 12 000 abonnés × 60 000 F = <strong>0,7 milliard F/an</strong></li>
+      <li><strong>SOM 5 ans = ~2,5 milliards F/an</strong></li>
+    </ul>
+  </div>
+
+  <h2>4.4 Personae cibles</h2>
+
+  <div class="persona">
+    <div class="persona-name">👨‍🎓 Persona 1 — Élève Terminale Douala</div>
+    <div class="persona-meta">17 ans, Tle A4 ABI au Lycée Bilingue Joss · Smartphone Android, 4G/wifi</div>
+    <p><strong>Besoin</strong> : corrigés rapides, fiches révision, IA qui explique<br>
+    <strong>Plan visé</strong> : Pro 3 000 F/mois (10× moins cher que cours particuliers)</p>
+  </div>
+
+  <div class="persona">
+    <div class="persona-name">👩‍👧 Persona 2 — Mère de famille classe moyenne Yaoundé</div>
+    <div class="persona-meta">38 ans, fonctionnaire, 2 enfants en collège/lycée · Paie via MoMo</div>
+    <p><strong>Besoin</strong> : manuels officiels MINESEC sans courir les librairies, suivre les notes<br>
+    <strong>Plan visé</strong> : Boutique (achats ponctuels) + Starter 1 000 F × 2 enfants</p>
+  </div>
+
+  <div class="persona">
+    <div class="persona-name">👨‍🏫 Persona 3 — Enseignant français Bafoussam</div>
+    <div class="persona-meta">42 ans, agrégé MINESEC, 25 ans d'expérience · Cherche revenus complémentaires</div>
+    <p><strong>Besoin</strong> : reconnaissance, revenus, accès à ressources d'autres profs<br>
+    <strong>Plan visé</strong> : Marketplace enseignant (vendre ses corrigés, recevoir 70 %)</p>
+  </div>
+
+  <div class="persona">
+    <div class="persona-name">🏫 Persona 4 — Lycée privé Garoua</div>
+    <div class="persona-meta">800 élèves · Budget IT annuel : 2-5 millions F · Cherche se différencier</div>
+    <p><strong>Besoin</strong> : équiper ses élèves d'outil moderne, montrer aux parents<br>
+    <strong>Plan visé</strong> : Licence B2B 500 000 F/an = 625 F/élève/an (5× moins que B2C)</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SECTION 5 — CONCURRENCE ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec5"></a>
+  <h1 class="section-title">5. Analyse concurrentielle</h1>
+
+  <h2>5.1 Concurrents directs (Afrique francophone)</h2>
+  <table>
+    <thead>
+      <tr><th>Concurrent</th><th>Pays</th><th>Modèle</th><th>Forces</th><th>Faiblesses</th><th>Part CM</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Sujetexa</strong></td><td>CM</td><td>Free + pub</td><td>Volume annales</td><td>Pas d'IA, PDFs</td><td>~25 %</td></tr>
+      <tr><td><strong>Camerschool</strong></td><td>CM</td><td>Free + manuels</td><td>Liens libraires</td><td>Pas d'app</td><td>~15 %</td></tr>
+      <tr><td><strong>Camerecole</strong></td><td>CM</td><td>Free + concours</td><td>Concours grandes écoles</td><td>Pas mobile-first</td><td>~10 %</td></tr>
+      <tr><td><strong>Grandprof</strong></td><td>CM</td><td>Free + abos</td><td>Suivi enseignants</td><td>UX vieillissante</td><td>~8 %</td></tr>
+      <tr><td><strong>E-school237</strong></td><td>CM</td><td>Freemium</td><td>2 398 sujets</td><td>Limité 5e/Tle</td><td>~5 %</td></tr>
+      <tr><td><strong>Didactia</strong></td><td>CI</td><td>Premium 15k F</td><td>App native, IA</td><td>Pas MINESEC</td><td>&lt; 1 %</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout-success">
+    <strong>Diagnostic</strong> : marché atomisé, aucun acteur dominant. <strong>Place pour un leader intégré</strong>.
+  </div>
+
+  <h2>5.2 Concurrents indirects</h2>
+  <ul>
+    <li><strong>Cours particuliers physiques</strong> : 25 000-50 000 F/mois → cher, géographiquement limité</li>
+    <li><strong>Centres de soutien</strong> (Bonamoussadi, Bonanjo) : 80 000-200 000 F/an → premium uniquement</li>
+    <li><strong>WhatsApp d'enseignants</strong> : gratuit mais désorganisé, qualité variable</li>
+    <li><strong>YouTube</strong> : gratuit, contenu non spécifique CM, distractions</li>
+  </ul>
+
+  <h2>5.3 Pourquoi VÉRITAS va gagner</h2>
+  <table>
+    <thead>
+      <tr><th>Levier</th><th>Avantage différenciant</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Couverture intégrée</strong></td><td>Seul acteur à offrir 12 services unifiés en 1 app</td></tr>
+      <tr><td><strong>IA Ambassa spécialisée</strong></td><td>Premier modèle IA RAG MINESEC en Afrique francophone</td></tr>
+      <tr><td><strong>Communauté économique</strong></td><td>Parrainage 10-20 % → croissance virale + revenu pour utilisateurs</td></tr>
+      <tr><td><strong>Marketplace enseignants</strong></td><td>Aucun concurrent ne paie 70 % aux profs camerounais</td></tr>
+      <tr><td><strong>Prix accessibles</strong></td><td>Starter 1 000 F/mois (3× moins cher que Leopold)</td></tr>
+      <tr><td><strong>Made in Cameroun</strong></td><td>Légitimité culturelle vs Leopold (CI) ou Khan Academy (USA)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════ SECTION 6 — MODÈLE ÉCONOMIQUE ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec6"></a>
+  <h1 class="section-title">6. Modèle économique</h1>
+
+  <h2>6.1 Quatre piliers de revenus</h2>
+
+  <h3>Pilier 1 — Abonnements freemium (60 % du CA prévu)</h3>
+  <table>
+    <thead>
+      <tr><th>Plan</th><th>Prix FCFA/mois</th><th>Quota IA</th><th>Cible</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><span class="badge badge-blue">Anonyme</span></td><td>0</td><td>2 essais lifetime</td><td>Acquisition</td></tr>
+      <tr><td><span class="badge badge-green">Free (inscrit)</span></td><td>0</td><td>3/semaine</td><td>Top of funnel</td></tr>
+      <tr><td><span class="badge badge-yellow">Starter</span></td><td>1 000</td><td>5/jour</td><td>Élève moyen</td></tr>
+      <tr><td><span class="badge badge-purple">Pro</span></td><td>3 000</td><td>30/jour</td><td>Préparation examen</td></tr>
+      <tr><td><span class="badge badge-red">Élite</span></td><td>10 000</td><td>Illimité + Sonnet + Cache</td><td>Premium</td></tr>
+      <tr><td><span class="badge badge-blue">Enseignant</span></td><td>2 500</td><td>50/jour</td><td>Profs validateurs</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Pilier 2 — Boutique manuels (20 % du CA prévu)</h3>
+  <ul>
+    <li>134 manuels MINESEC officiels au catalogue (intégral 6e à Tle)</li>
+    <li>Prix moyen : 4 000 F · Marge VÉRITAS : 30 % = 1 200 F/manuel</li>
+    <li>Élève moyen : 6 manuels/an → 7 200 F de marge/élève/an</li>
+    <li><strong>À 30 000 abonnés : 216 M F/an</strong></li>
+  </ul>
+
+  <h3>Pilier 3 — Marketplace enseignants/auteurs (15 % du CA prévu)</h3>
+  <ul>
+    <li>200 enseignants validateurs vendant cours/corrigés (~2 000 F unitaire)</li>
+    <li>Commission VÉRITAS : 30 % (70 % au prof)</li>
+    <li>Volume : 50 ventes/prof/mois × 200 profs × 2 000 F × 30 % = 6 M F/mois</li>
+    <li><strong>À pleine maturité : 72 M F/an</strong></li>
+  </ul>
+
+  <h3>Pilier 4 — B2B Établissements (5 % du CA prévu)</h3>
+  <ul>
+    <li>Licence annuelle école : 500 000 F (jusqu'à 1 000 élèves)</li>
+    <li>Pack Excellence : 2 000 000 F (+ dashboard prof + reporting)</li>
+    <li>Cible : 30 établissements en 5 ans = <strong>30 M F/an</strong></li>
+  </ul>
+
+  <h2>6.2 Structure de coûts (en % du CA)</h2>
+  <table>
+    <thead><tr><th>Catégorie</th><th>% du CA</th></tr></thead>
+    <tbody>
+      <tr><td>Anthropic API (IA Sonnet/Haiku)</td><td>8-12 %</td></tr>
+      <tr><td>Infrastructure (LWS + Cloudflare + GPU)</td><td>3-5 %</td></tr>
+      <tr><td>Salaires équipe technique</td><td>10-15 %</td></tr>
+      <tr><td>Salaires enseignants validateurs</td><td>5-7 %</td></tr>
+      <tr><td>Marketing & acquisition</td><td>15-20 %</td></tr>
+      <tr><td>Frais paiement (MoMo, Orange : 1-3 %)</td><td>2-3 %</td></tr>
+      <tr><td>Reversement parrains (10-20 %)</td><td>5-8 %</td></tr>
+      <tr><td>Reversement auteurs/enseignants (60-70 %)</td><td>7-10 %</td></tr>
+      <tr><td>Frais bancaires + administratifs</td><td>2 %</td></tr>
+      <tr style="background:#FEE2E2"><td><strong>TOTAL coûts</strong></td><td><strong>55-75 %</strong></td></tr>
+      <tr style="background:#D1FAE5"><td><strong>MARGE NETTE</strong></td><td><strong>25-45 %</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>6.3 Économie unitaire (Unit Economics)</h2>
+  <div class="highlight-box">
+    <div class="label">Pour 1 abonné Pro à 3 000 F/mois sur 12 mois</div>
+    <table style="margin-top:10px;font-size:13px">
+      <tr><td><strong>LTV</strong> (Lifetime Value, retention 60 % an 2)</td><td><strong>57 600 F</strong></td></tr>
+      <tr><td><strong>CAC</strong> (Coût Acquisition Client)</td><td><strong>4 500 F</strong></td></tr>
+      <tr><td><strong>LTV/CAC ratio</strong></td><td><strong>12,8 ✓</strong> (excellent &gt; 5)</td></tr>
+      <tr><td>Marge brute par abonné</td><td>40 320 F</td></tr>
+      <tr><td><strong>Payback period</strong></td><td><strong>1,5 mois</strong></td></tr>
+    </table>
+  </div>
+  <div class="callout-success">
+    <strong>Conclusion</strong> : modèle ultra-rentable dès l'acquisition.
+  </div>
+</div>
+
+<!-- ═══════════════════════ SECTION 7 — MARKETING ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec7"></a>
+  <h1 class="section-title">7. Stratégie marketing & acquisition</h1>
+
+  <h2>7.1 Cinq canaux d'acquisition prioritaires</h2>
+
+  <h3>Canal 1 — Parrainage viral (40 % des nouveaux users)</h3>
+  <ul>
+    <li>Système intégré : parrain gagne 10-20 % du paiement de son filleul</li>
+    <li>Code unique par utilisateur · Récompense auto via MoMo</li>
+    <li><strong>CAC = 0 F</strong> (recommandation organique)</li>
+  </ul>
+
+  <h3>Canal 2 — Réseaux sociaux Cameroun (30 %)</h3>
+  <ul>
+    <li><strong>Facebook Ads CM</strong> : très efficace, CPM bas (~500 F/1000 vues)</li>
+    <li><strong>TikTok</strong> : démographique 13-19 ans très active</li>
+    <li><strong>WhatsApp Status</strong> : enseignants influenceurs</li>
+    <li><strong>Instagram</strong> : parents urbains (35-50 ans)</li>
+    <li>Budget : 1-3 M F/mois selon phase · CAC : 4 000-6 000 F/abonné</li>
+  </ul>
+
+  <h3>Canal 3 — Partenariats établissements (15 %)</h3>
+  <ul>
+    <li>30 lycées privés ciblés en priorité (Douala, Yaoundé, Bafoussam)</li>
+    <li>Démonstration gratuite 1 mois</li>
+    <li>Avantage : décideur unique → 800 élèves d'un coup</li>
+  </ul>
+
+  <h3>Canal 4 — Influence enseignants (10 %)</h3>
+  <ul>
+    <li>50 enseignants ambassadeurs sélectionnés</li>
+    <li>Compensation : abonnement gratuit + commission 70 % marketplace</li>
+    <li>Effet de levier : 1 prof recommande à 30-50 élèves</li>
+  </ul>
+
+  <h3>Canal 5 — Communication officielle (5 %)</h3>
+  <ul>
+    <li>TV : 5e Étoile, CRTV en partenariat éducation</li>
+    <li>Radio : Sweet FM, RFI Cameroun</li>
+    <li>Presse : Cameroon Tribune, Mutations, Le Messager</li>
+  </ul>
+
+  <h2>7.2 Calendrier d'acquisition</h2>
+  <pre>Mois 1-3    : Lancement Douala + Yaoundé (parrainage organique)
+Mois 4-6    : Expansion régionale CM + premières pubs FB
+Mois 7-12   : Campagne TV/radio + 1ère vague B2B
+Année 2     : 100 % CM + tests CEMAC (Gabon, Tchad)
+Année 3     : Domination CM + ouverture Gabon, Tchad
+Année 4-5   : Côte d'Ivoire, Sénégal, Mali</pre>
+</div>
+
+<!-- ═══════════════════════ SECTION 8 — ROADMAP ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec8"></a>
+  <h1 class="section-title">8. Roadmap produit (3 ans)</h1>
+
+  <h2>📅 Trimestre 1-2 (2026 S2) — Consolidation MVP</h2>
+  <ul>
+    <li>✅ Activer Plan Élite (Claude Sonnet + RAG + Cache validé)</li>
+    <li>✅ Système paiement récurrent automatique (Stripe + MoMo recurrent)</li>
+    <li>🟡 App mobile native iOS/Android (Capacitor)</li>
+    <li>🟡 Vidéos pédagogiques pré-enregistrées (50 cours BEPC + 50 BAC)</li>
+  </ul>
+
+  <h2>📅 Trimestre 3-4 (2026 S2) — Curation</h2>
+  <ul>
+    <li>Recrutement 5 enseignants validateurs</li>
+    <li>1 000 réponses validées en cache → hit rate 50 %</li>
+    <li>Marketplace ouverte aux profs externes</li>
+    <li>Lancement officiel public Cameroun (RP, TV)</li>
+  </ul>
+
+  <h2>📅 Année 2 (2027) — Croissance</h2>
+  <ul>
+    <li>Live classes enseignant-élèves (visio intégrée)</li>
+    <li>Examens blancs nationaux mensuel (battle à 10 000 participants)</li>
+    <li>Fine-tuning Mistral 7B-Cameroun (modèle propre)</li>
+    <li>Partenariat MINESEC officiel (pilote 3 régions)</li>
+    <li>Expansion Gabon</li>
+  </ul>
+
+  <h2>📅 Année 3 (2028) — Domination</h2>
+  <ul>
+    <li>Plateforme blanche pour écoles privées (white-label)</li>
+    <li>Application parents (suivi notes, paiements scolarité)</li>
+    <li>Programme primaire (CM1-CM2) pour entrée 6e</li>
+    <li>Expansion Tchad, RCA, RDC</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════ SECTION 9 — ÉQUIPE ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec9"></a>
+  <h1 class="section-title">9. Équipe</h1>
+
+  <h2>9.1 Équipe actuelle (mai 2026)</h2>
+  <table>
+    <thead><tr><th>Rôle</th><th>Personne</th><th>Compétences</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>CEO & Fondateur</strong></td>
+        <td>Jacques Miterand TAKOU</td>
+        <td>Enseignant français 15 ans, dirige Centre VÉRITAS depuis 2018</td>
+      </tr>
+      <tr>
+        <td><strong>CTO</strong> (à recruter)</td>
+        <td>À pourvoir</td>
+        <td>Stack JS/PHP, IA, Firebase</td>
+      </tr>
+      <tr>
+        <td><strong>Lead Pédagogique</strong></td>
+        <td>Jacques (cumul)</td>
+        <td>Connaissance MINESEC, programmes officiels</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>9.2 Recrutements prioritaires (financement pre-seed)</h2>
+  <table>
+    <thead><tr><th>Poste</th><th>Profil</th><th>Salaire/mois FCFA</th></tr></thead>
+    <tbody>
+      <tr><td><strong>CTO</strong></td><td>Senior dev fullstack JS/PHP, 5+ ans</td><td>800 000</td></tr>
+      <tr><td><strong>Marketing Manager</strong></td><td>Digital marketer CM</td><td>400 000</td></tr>
+      <tr><td><strong>Community Manager</strong></td><td>Réseaux sociaux + WhatsApp</td><td>200 000</td></tr>
+      <tr><td><strong>2 Enseignants validateurs</strong></td><td>Agrégés français/maths MINESEC (mi-temps)</td><td>150 000</td></tr>
+      <tr style="background:#FEF3C7"><td colspan="2"><strong>TOTAL salaires/mois</strong></td><td><strong>1 550 000</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>9.3 Conseil d'administration cible</h2>
+  <ul>
+    <li>1 président indépendant (ancien proviseur ou universitaire reconnu CM)</li>
+    <li>1 représentant investisseurs (à venir)</li>
+    <li>1 expert tech (ex-Andela, Jumia, etc.)</li>
+    <li>1 expert éducation africaine (UNESCO, AFD)</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════ SECTION 10 — PROJECTIONS FINANCIÈRES ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec10"></a>
+  <h1 class="section-title">10. Projections financières (2026-2030)</h1>
+
+  <h2>10.1 Compte de résultat prévisionnel (en millions FCFA)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Poste</th><th>2026</th><th>2027</th><th>2028</th><th>2029</th><th>2030</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Utilisateurs totaux</strong></td><td>5 000</td><td>25 000</td><td>100 000</td><td>250 000</td><td>500 000</td></tr>
+      <tr><td><strong>Abonnés payants</strong></td><td>300</td><td>1 500</td><td>8 000</td><td>25 000</td><td>60 000</td></tr>
+      <tr><td>Revenu abonnements</td><td>13,5</td><td>70</td><td>360</td><td>1 050</td><td>2 400</td></tr>
+      <tr><td>Revenu boutique manuels</td><td>2,4</td><td>12</td><td>60</td><td>180</td><td>432</td></tr>
+      <tr><td>Revenu marketplace</td><td>0,6</td><td>4</td><td>30</td><td>90</td><td>240</td></tr>
+      <tr><td>Revenu B2B écoles</td><td>1</td><td>4</td><td>30</td><td>180</td><td>540</td></tr>
+      <tr style="background:#FEF3C7"><td><strong>TOTAL REVENUS</strong></td><td><strong>22</strong></td><td><strong>90</strong></td><td><strong>480</strong></td><td><strong>1 500</strong></td><td><strong>3 612</strong></td></tr>
+      <tr><td>Coûts variables (IA, paiement)</td><td>3</td><td>15</td><td>65</td><td>200</td><td>480</td></tr>
+      <tr><td>Salaires équipe</td><td>20</td><td>50</td><td>110</td><td>200</td><td>350</td></tr>
+      <tr><td>Marketing & acquisition</td><td>5</td><td>15</td><td>60</td><td>175</td><td>350</td></tr>
+      <tr><td>Reversement partenaires</td><td>1,5</td><td>8</td><td>50</td><td>150</td><td>360</td></tr>
+      <tr><td>Infrastructure tech</td><td>1,5</td><td>4</td><td>15</td><td>30</td><td>70</td></tr>
+      <tr><td>Frais administratifs</td><td>1</td><td>2</td><td>5</td><td>15</td><td>30</td></tr>
+      <tr style="background:#FEE2E2"><td><strong>TOTAL COÛTS</strong></td><td><strong>32</strong></td><td><strong>94</strong></td><td><strong>305</strong></td><td><strong>770</strong></td><td><strong>1 640</strong></td></tr>
+      <tr style="background:#FEF3C7"><td><strong>EBITDA</strong></td><td><strong>-10</strong></td><td><strong>-4</strong></td><td><strong>+175</strong></td><td><strong>+730</strong></td><td><strong>+1 972</strong></td></tr>
+      <tr><td><strong>EBITDA margin</strong></td><td>-45 %</td><td>-4 %</td><td>36 %</td><td>49 %</td><td>55 %</td></tr>
+      <tr><td>Amortissements</td><td>2</td><td>3</td><td>5</td><td>10</td><td>20</td></tr>
+      <tr><td>Impôts (33 % CM)</td><td>0</td><td>0</td><td>56</td><td>237</td><td>644</td></tr>
+      <tr style="background:#D1FAE5"><td><strong>RÉSULTAT NET</strong></td><td><strong>-12</strong></td><td><strong>-7</strong></td><td><strong>+114</strong></td><td><strong>+483</strong></td><td><strong>+1 308</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>10.2 Cash flow prévisionnel (millions FCFA)</h2>
+  <table>
+    <thead><tr><th></th><th>2026</th><th>2027</th><th>2028</th><th>2029</th><th>2030</th></tr></thead>
+    <tbody>
+      <tr><td>Trésorerie début</td><td>0</td><td>18</td><td>11</td><td>125</td><td>608</td></tr>
+      <tr><td>Investissement levé</td><td>30</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>Résultat net</td><td>-12</td><td>-7</td><td>+114</td><td>+483</td><td>+1 308</td></tr>
+      <tr><td>Cash flow opérationnel</td><td>-12</td><td>-7</td><td>+114</td><td>+483</td><td>+1 308</td></tr>
+      <tr style="background:#D1FAE5"><td><strong>Trésorerie fin</strong></td><td><strong>18</strong></td><td><strong>11</strong></td><td><strong>125</strong></td><td><strong>608</strong></td><td><strong>1 916</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>10.3 Hypothèses-clés</h2>
+  <table>
+    <thead><tr><th>Hypothèse</th><th>Valeur conservatrice</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>Taux conversion free → payant</td><td>6 %</td><td>Moyenne edtech freemium 5-10 %</td></tr>
+      <tr><td>Churn mensuel payants</td><td>7 %</td><td>Moyenne edtech CM 8-10 %</td></tr>
+      <tr><td>ARPU (Average Revenue Per User)</td><td>4 500 F/mois</td><td>Mix Starter/Pro/Élite</td></tr>
+      <tr><td>Croissance utilisateurs</td><td>5×/an</td><td>Comparable Eskuela CI an 1-2</td></tr>
+      <tr><td>Coût IA / requête</td><td>15 F moyen</td><td>Mix Haiku/Sonnet/Cache</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════ SECTION 11 — FINANCEMENT ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec11"></a>
+  <h1 class="section-title">11. Plan de financement</h1>
+
+  <h2>11.1 Levée Pre-Seed (en cours)</h2>
+  <div class="highlight-box">
+    <div class="label">Levée demandée</div>
+    <div style="font-family:'Libre Baskerville',serif;font-size:34px;color:var(--navy);font-weight:700">30 000 000 FCFA</div>
+    <div style="font-size:14px;color:var(--ink-light);margin-top:4px">~45 000 € · Valorisation pre-money 150 M FCFA · Dilution 16,7 %</div>
+  </div>
+
+  <h2>11.2 Usage des fonds (12 mois)</h2>
+  <table>
+    <thead><tr><th>Poste</th><th>Montant FCFA</th><th>%</th></tr></thead>
+    <tbody>
+      <tr><td>Recrutement CTO + Marketing Manager</td><td>13 000 000</td><td>43 %</td></tr>
+      <tr><td>Marketing & acquisition (FB ads, TV, RP)</td><td>8 000 000</td><td>27 %</td></tr>
+      <tr><td>Anthropic API Claude (15 mois réserve)</td><td>3 000 000</td><td>10 %</td></tr>
+      <tr><td>Infrastructure premium (Hetzner GPU + Cloudflare)</td><td>2 000 000</td><td>7 %</td></tr>
+      <tr><td>Création contenu (50 vidéos cours + studio)</td><td>2 500 000</td><td>8 %</td></tr>
+      <tr><td>Frais juridiques + comptabilité</td><td>1 000 000</td><td>3 %</td></tr>
+      <tr><td>Trésorerie de sécurité</td><td>500 000</td><td>2 %</td></tr>
+      <tr style="background:#FEF3C7"><td><strong>TOTAL</strong></td><td><strong>30 000 000</strong></td><td><strong>100 %</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>11.3 Levées suivantes prévues</h2>
+  <table>
+    <thead><tr><th>Tour</th><th>Année</th><th>Montant FCFA</th><th>Valo post-money</th><th>Dilution cumulée</th></tr></thead>
+    <tbody>
+      <tr><td>Pre-seed</td><td>2026 S2</td><td>30 M</td><td>180 M</td><td>16,7 %</td></tr>
+      <tr><td><strong>Seed</strong></td><td>2027 S1</td><td><strong>200 M</strong></td><td><strong>1,2 Md</strong></td><td>~28 %</td></tr>
+      <tr><td><strong>Series A</strong></td><td>2028 S2</td><td><strong>1 500 M</strong></td><td><strong>8 Md</strong></td><td>~36 %</td></tr>
+      <tr><td>Series B (option)</td><td>2030</td><td>5 Md</td><td>30 Md</td><td>~42 %</td></tr>
+    </tbody>
+  </table>
+
+  <h2>11.4 Retour pour investisseur Pre-Seed</h2>
+  <table>
+    <thead><tr><th>Scénario</th><th>Valorisation an 5</th><th>Multiple sur 30 M F</th><th>IRR</th></tr></thead>
+    <tbody>
+      <tr><td>Conservateur</td><td>5 Mds FCFA</td><td>28×</td><td><strong>95 %/an</strong></td></tr>
+      <tr><td>Réaliste</td><td>15 Mds FCFA</td><td>83×</td><td><strong>140 %/an</strong></td></tr>
+      <tr><td>Optimiste (Series B)</td><td>30 Mds FCFA</td><td>167×</td><td><strong>170 %/an</strong></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════ SECTION 12 — VALORISATION ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec12"></a>
+  <h1 class="section-title">12. Valorisation et sortie</h1>
+
+  <h2>12.1 Méthodes de valorisation appliquées</h2>
+
+  <h3>A. Multiple de revenu (SaaS edtech)</h3>
+  <ul>
+    <li>Multiple sectoriel edtech Afrique : <strong>6-12× revenu annuel</strong></li>
+    <li>Revenu 2030 : 3,6 milliards F → <strong>Valo : 21-43 milliards F</strong></li>
+  </ul>
+
+  <h3>B. Multiple EBITDA</h3>
+  <ul>
+    <li>Multiple EBITDA edtech : <strong>15-25×</strong></li>
+    <li>EBITDA 2030 : 1,97 milliard F → <strong>Valo : 30-49 milliards F</strong></li>
+  </ul>
+
+  <h3>C. Comparables transactions</h3>
+  <ul>
+    <li>Sortie Ubiq (Maroc edtech) 2024 : 6× ARR</li>
+    <li>Acquisition Olive (Sénégal) 2025 : 8× ARR</li>
+    <li><strong>Médiane = 7× ARR → 25 milliards F en 2030</strong></li>
+  </ul>
+
+  <div class="callout-navy">
+    <h2>Fourchette de valorisation 2030</h2>
+    <p style="font-family:'Libre Baskerville',serif;font-size:24px;color:var(--gold);margin:8px 0">25 à 49 milliards FCFA</p>
+    <p style="color:rgba(255,255,255,.8)">(~38 à 75 M €)</p>
+  </div>
+
+  <h2>12.2 Stratégies de sortie possibles</h2>
+  <table>
+    <thead><tr><th>Option</th><th>Probabilité</th><th>Acquéreur potentiel</th><th>Timing</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Acquisition stratégique</strong></td><td>60 %</td><td>Groupe télécom CM (Orange, MTN)</td><td>An 4-5</td></tr>
+      <tr><td>Acquisition edtech panafricaine</td><td>25 %</td><td>uLesson, Snapplify, AfricaCode</td><td>An 5</td></tr>
+      <tr><td>IPO Bourse régionale</td><td>10 %</td><td>BVMAC ou BRVM</td><td>An 6-7</td></tr>
+      <tr><td>Continuer en croissance</td><td>5 %</td><td>Dividendes actionnaires</td><td>An 5+</td></tr>
+    </tbody>
+  </table>
+
+  <h2>12.3 Plus-values prévues — investisseur Pre-Seed (30 M F)</h2>
+  <table>
+    <thead><tr><th>Sortie</th><th>Multiple récupéré</th><th>Plus-value brute</th><th>IRR</th></tr></thead>
+    <tbody>
+      <tr><td>Acquisition an 5 à 25 Mds F</td><td>28×</td><td>810 M F</td><td><strong>95 %/an</strong></td></tr>
+      <tr><td>Acquisition an 5 à 49 Mds F</td><td>54×</td><td>1 590 M F</td><td><strong>122 %/an</strong></td></tr>
+      <tr><td>Continuation + dividendes</td><td>n/a</td><td>200-500 M F cumulé</td><td>60-80 %</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════ SECTION 13 — RISQUES ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec13"></a>
+  <h1 class="section-title">13. Risques et mitigation</h1>
+
+  <h2>13.1 Huit risques identifiés</h2>
+  <table>
+    <thead><tr><th>Risque</th><th>Probabilité</th><th>Impact</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td>Faible adoption initiale</td><td><span class="badge badge-yellow">Moy.</span></td><td><span class="badge badge-red">Élevé</span></td><td>Gratuité 2 essais + parrainage rémunéré + offre lancement 50 %</td></tr>
+      <tr><td>Concurrent international (Khan, Coursera) entre au CM</td><td><span class="badge badge-green">Faible</span></td><td><span class="badge badge-red">Très élevé</span></td><td>Différenciation MINESEC + langue + paiement local + équipe CM</td></tr>
+      <tr><td>Coûts Anthropic API explosent</td><td><span class="badge badge-green">Faible</span></td><td><span class="badge badge-yellow">Moy.</span></td><td>Architecture hybride (cache 85 % + Mistral 10 % + Sonnet 5 %)</td></tr>
+      <tr><td>Coupures internet/électricité CM</td><td><span class="badge badge-red">Élevée</span></td><td><span class="badge badge-yellow">Moy.</span></td><td>PWA mode offline + sync auto au retour</td></tr>
+      <tr><td>Régulation MINESEC restrictive</td><td><span class="badge badge-green">Faible</span></td><td><span class="badge badge-red">Élevé</span></td><td>Partenariat officiel ministère dès an 2</td></tr>
+      <tr><td>Piratage / clonage contenu</td><td><span class="badge badge-yellow">Moy.</span></td><td><span class="badge badge-green">Faible</span></td><td>Anti-clonage IA + watermarking + login serveur</td></tr>
+      <tr><td>Départ équipe technique</td><td><span class="badge badge-yellow">Moy.</span></td><td><span class="badge badge-yellow">Moy.</span></td><td>Documentation exhaustive + actionnariat employé</td></tr>
+      <tr><td>Mobile money bloqué transfrontalier</td><td><span class="badge badge-yellow">Moy.</span></td><td><span class="badge badge-yellow">Moy.</span></td><td>Multi-provider (MoMo + Orange + Stripe + Flutterwave)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>13.2 Risques macroéconomiques</h2>
+  <ul>
+    <li><strong>Dévaluation FCFA</strong> : neutre (recettes et coûts en FCFA, sauf Anthropic en USD)</li>
+    <li><strong>Instabilité politique CM</strong> : modérée (élections présidentielles 2025 passées)</li>
+    <li><strong>Inflation papier (boutique manuels)</strong> : transmission au prix consommateur</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════ SECTION 14 — KPIs ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec14"></a>
+  <h1 class="section-title">14. KPIs de pilotage</h1>
+
+  <h2>14.1 KPIs mensuels</h2>
+  <table>
+    <thead><tr><th>KPI</th><th>An 1</th><th>An 3</th><th>An 5</th></tr></thead>
+    <tbody>
+      <tr><td><strong>MAU</strong> (Monthly Active Users)</td><td>5 000</td><td>100 000</td><td>500 000</td></tr>
+      <tr><td><strong>DAU</strong> (Daily Active)</td><td>1 500</td><td>30 000</td><td>150 000</td></tr>
+      <tr><td><strong>Abonnés payants</strong></td><td>300</td><td>8 000</td><td>60 000</td></tr>
+      <tr><td>Taux conversion free → paid</td><td>4 %</td><td>8 %</td><td>12 %</td></tr>
+      <tr><td>Churn mensuel payants</td><td>10 %</td><td>7 %</td><td>5 %</td></tr>
+      <tr><td><strong>MRR</strong> (Monthly Recurring Revenue)</td><td>1,5 M F</td><td>30 M F</td><td>270 M F</td></tr>
+      <tr><td>CAC moyen</td><td>5 000 F</td><td>4 000 F</td><td>3 000 F</td></tr>
+      <tr><td>LTV moyen</td><td>20 000 F</td><td>50 000 F</td><td>80 000 F</td></tr>
+      <tr><td><strong>LTV/CAC</strong></td><td>4×</td><td>12×</td><td>27×</td></tr>
+      <tr><td><strong>NPS</strong> (Net Promoter Score)</td><td>30</td><td>50</td><td>60</td></tr>
+    </tbody>
+  </table>
+
+  <h2>14.2 KPIs produit</h2>
+  <ul>
+    <li>Temps moyen passé/jour : <strong>25-40 min</strong></li>
+    <li>Questions IA / session : <strong>3-5</strong></li>
+    <li>Taux de complétion d'un cours : <strong>60 %+</strong></li>
+    <li>Cache hit rate IA : <strong>50 % an 1 → 85 % an 3</strong></li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════ SECTION 15 — ANNEXES ═══════════════════════ -->
+<div class="page">
+  <a class="section-anchor" id="sec15"></a>
+  <h1 class="section-title">15. Annexes</h1>
+
+  <h2>Annexe A — Stack technique détaillée</h2>
+  <p>Voir documentation <code>/CLAUDE.md</code> et <code>/GUIDE_ELITE_DEPLOIEMENT.md</code> sur GitHub.</p>
+
+  <h2>Annexe B — Captures d'écran produit</h2>
+  <ul>
+    <li>Interface visiteur (accueil + nav)</li>
+    <li>Modal Ambassa (IA pédagogique)</li>
+    <li>Mode QCM interactif (exercice → correction)</li>
+    <li>Page admin validation (cache curation)</li>
+    <li>Système paiement multi-canaux</li>
+  </ul>
+
+  <h2>Annexe C — Partenaires identifiés</h2>
+  <ul>
+    <li><strong>Anthropic</strong> : API Claude Sonnet (contrat Enterprise possible &gt;$10K/mois)</li>
+    <li><strong>LWS Hosting</strong> : hébergement infrastructure</li>
+    <li><strong>MTN MoMo</strong> : intégration paiements</li>
+    <li><strong>Orange Money</strong> : intégration paiements</li>
+    <li><strong>MINESEC</strong> : partenariat institutionnel en cours</li>
+    <li><strong>Éditions CLÉ, NEA-Edicef, Proximité, AFREDIT</strong> : fournisseurs manuels boutique</li>
+  </ul>
+
+  <h2>Annexe D — Documents fournis sur demande</h2>
+  <ul>
+    <li>Lettres d'intention enseignants / parents</li>
+    <li>État financier audité (expert-comptable agréé CM)</li>
+    <li>CV équipe fondatrice détaillé</li>
+    <li>Démonstration produit live</li>
+  </ul>
+
+  <div class="callout-navy" style="margin-top:40px">
+    <h2>📞 Contact investisseur</h2>
+    <p style="font-size:15px;line-height:1.8"><strong style="color:var(--gold)">Jacques Miterand TAKOU</strong> — Fondateur &amp; CEO VÉRITAS Academy</p>
+    <ul style="color:rgba(255,255,255,.92);margin-top:10px;list-style:none;margin-left:0">
+      <li>📧 contact@veritas-school.com</li>
+      <li>📱 WhatsApp : +237 697 637 739</li>
+      <li>🌐 https://veritas-school.com</li>
+      <li>📍 Centre VÉRITAS Academy, Douala — Cameroun</li>
+    </ul>
+  </div>
+
+  <p style="margin-top:40px;font-size:11px;color:var(--gray);text-align:center;font-style:italic">
+    Document confidentiel — Mai 2026. Reproduction interdite sans autorisation écrite.<br>
+    Toutes les projections financières sont indicatives et basées sur des hypothèses raisonnables ;<br>
+    les performances réelles peuvent varier.
+  </p>
+</div>
+
+</body>
+</html>
