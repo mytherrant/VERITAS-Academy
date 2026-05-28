@@ -739,10 +739,10 @@ if('MutationObserver' in window){
   --z-docked:  10;
   --z-sticky:  20;
   --z-overlay: 100;
-  --z-modal:   1000;
-  --z-popover: 1100;
-  --z-toast:   1200;
-  --z-tooltip: 1300;
+  --z-modal:   9500;   /* v1.2.1 FIX : doit être > #VISITOR (z-index 9000), sinon TOUTES les modales visiteur (commande, IA, menu langue) s'ouvrent DERRIÈRE le portail = invisibles ("rien ne se passe") */
+  --z-popover: 9600;
+  --z-toast:   9700;
+  --z-tooltip: 9800;
 }
 
 /* ════════════════════════════════════════════════════════════════════
@@ -6620,6 +6620,7 @@ function visitorOrderBook(bid){
       <div class="fg"><span class="fl">Classe de l&#39;élève</span><select class="fi" id="voCls">${CLS.map(c=>'<option'+(c===b.cls?' selected':'')+'>'+c+'</option>').join('')}</select></div>
       <div class="fg"><span class="fl">Email (optionnel)</span><input class="fi" id="voEmail" type="email" placeholder="email@exemple.com"></div>
     </div>
+    <div class="fg"><span class="fl">📍 Adresse de livraison *</span><input class="fi" id="voAdresse" placeholder="Quartier + ville (ex : Akwa, Douala)"></div>
     <div class="fg"><span class="fl">Code promo</span><input class="fi" id="voPromo" value="${autoPromo}" placeholder="ELEVE10" style="text-transform:uppercase"></div>
     ${autoPromo?'<div style="font-size:13px;color:var(--gr);margin:-8px 0 8px">✅ Code ELEVE10 appliqué (-10%)</div>':''}
     <div class="fg"><span class="fl">Message (optionnel)</span><textarea class="fi" id="voMsg" rows="2" placeholder="Précisions, quantité..."></textarea></div>
@@ -6632,13 +6633,15 @@ function confirmVisitorOrder(bid){
   const b=DB.books.find(x=>x.id===bid);if(!b)return;
   const nom=(document.getElementById('voNom')?.value||'').trim();
   const tel=(document.getElementById('voTel')?.value||'').trim();
+  const adresse=(document.getElementById('voAdresse')?.value||'').trim();
   if(!nom||!tel){toast('Nom et téléphone requis','warn');return;}
+  if(!adresse){toast('Adresse de livraison requise','warn');return;}
   if(!DB.visitorOrders)DB.visitorOrders=[];
   const promoCode=(document.getElementById('voPromo')?.value||'').trim().toUpperCase();
   let finalPrix=b.prix;let promoUsed='';
   if(promoCode){const promo=(DB.promoCodes||[]).find(p=>p.code===promoCode&&p.actif);
     if(promo){if(promo.type==='percent')finalPrix=Math.round(b.prix*(100-promo.reduction)/100);else finalPrix=Math.max(0,b.prix-promo.reduction);promoUsed=promoCode;promo.usage=(promo.usage||0)+1;}}
-  DB.visitorOrders.push({id:gid(),bid,bookTitle:b.titre,nom,tel,
+  DB.visitorOrders.push({id:gid(),bid,bookTitle:b.titre,nom,tel,adresse,
     email:document.getElementById('voEmail')?.value||'',
     cls:document.getElementById('voCls')?.value||'',
     msg:document.getElementById('voMsg')?.value||'',
@@ -6658,6 +6661,7 @@ function confirmVisitorOrder(bid){
         targetId: bid,
         customerNom: nom,
         customerTel: tel,
+        customerAdresse: adresse,
         customerEmail: document.getElementById('voEmail')?.value||''
       });
     } else {
