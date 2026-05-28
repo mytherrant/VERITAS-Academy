@@ -2589,8 +2589,11 @@ body { font-size: 15px !important; }
 /* ── 3. GLASSMORPHISM (nav, modals, cards premium) ── */
 .vnav {
   background: rgba(20,37,84,.92) !important;
-  backdrop-filter: blur(20px) saturate(1.4) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.4) !important;
+  /* v1.2.1 FIX : backdrop-filter RETIRÉ — il créait un bloc conteneur CSS qui piégeait
+     les menus déroulants en position:fixed (IA/Pratiquer/Communauté/Infos rendus en
+     0×0 px sur mobile → "rien ne s'ouvre"). Le fond est opaque à 92%, flou superflu. */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   border-right: 1px solid rgba(255,255,255,.08) !important;
 }
 .modal {
@@ -4145,7 +4148,6 @@ setInterval(_refreshCitation,15000);
     <div class="vnav-dropdown" role="menu">
       <button role="menuitem" onclick="_navGo();mAgentAmbassa()"><span style="font-size:18px;margin-right:6px">🎓</span><b>Prof. Ambassa</b><span class="vnav-dd-sub">Quiz · Évaluations · Fiches</span></button>
       <button role="menuitem" onclick="_navGo();mHubIA()"><span style="font-size:18px;margin-right:6px">🧠</span><b>Hub IA</b><span class="vnav-dd-sub">Devoir IA · Parcours adaptatif</span></button>
-      <button role="menuitem" onclick="_navGo();mPhotoMathIA()"><span style="font-size:18px;margin-right:6px">📸</span><b>Photo Math</b><span class="vnav-dd-sub">Corrige un exercice en photo</span></button>
       <button role="menuitem" onclick="_navGo();mVeritasGenome()"><span style="font-size:18px;margin-right:6px">🧬</span><b>Mon Genome</b><span class="vnav-dd-sub">ADN académique personnel</span></button>
     </div>
   </div>
@@ -34920,83 +34922,9 @@ window._genomeDownload = function(){
   }).catch(function(){toast('Échec capture','err');});
 };
 
-// ════════════════════════════════════════════════════════════════════
-// v2.4 — 📸 PHOTO MATH/CORRECTION IA (Vision Pollinations)
-// ════════════════════════════════════════════════════════════════════
-window.mPhotoMathIA = function(){
-  if(!_checkRateLimit('photo_ia', 5)) return;
-  M('📸 Correction IA par photo','Prenez votre exercice en photo · l\'IA explique',
-    '<div style="padding:8px">'
-    +'<div style="background:#EEF2FF;border:2px dashed #6366F1;border-radius:14px;padding:24px;text-align:center;margin-bottom:14px;cursor:pointer" onclick="document.getElementById(\'photoMathInput\').click()">'
-      +'<div style="font-size:48px;margin-bottom:10px">📷</div>'
-      +'<div style="font-weight:700;color:#3730A3">Cliquez pour prendre une photo</div>'
-      +'<div style="font-size:12px;color:#6B7280;margin-top:6px">Maths, physique, chimie, français, histoire-géo</div>'
-    +'</div>'
-    +'<input type="file" id="photoMathInput" accept="image/*" capture="environment" style="display:none" onchange="_handlePhotoMath(event)">'
-    +'<div id="photoMathPreview"></div>'
-    +'<div id="photoMathResult"></div>'
-    +'<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:10px;border-radius:8px;font-size:11px;color:#92400E;margin-top:10px">⚡ Limite : 5 photos/min · IA Pollinations gratuite</div>'
-    +'</div>',
-    '<button class="btn bi" onclick="cm()">Fermer</button>', true);
-};
-
-window._handlePhotoMath = function(e){
-  var file = e.target.files[0];
-  if(!file) return;
-  if(file.size > 5 * 1024 * 1024){ toast('Fichier trop volumineux (max 5 Mo)','warn'); return; }
-  var reader = new FileReader();
-  reader.onload = function(ev){
-    var dataUrl = ev.target.result;
-    document.getElementById('photoMathPreview').innerHTML =
-      '<img src="'+dataUrl+'" alt="Aperçu" style="max-width:100%;border-radius:10px;margin-bottom:12px;max-height:240px;display:block;margin:0 auto">';
-    document.getElementById('photoMathResult').innerHTML =
-      '<div style="text-align:center;padding:14px"><div style="font-size:24px;animation:pulse 1.2s infinite">🤖</div><div style="font-weight:700;margin-top:6px;color:#3730A3">L\'IA analyse votre exercice…</div></div>';
-    _solvePhotoMath(dataUrl);
-  };
-  reader.readAsDataURL(file);
-};
-
-window._solvePhotoMath = function(dataUrl){
-  // v2.7 : quota check par plan
-  if(typeof _aiGate === 'function' && !_aiGate('photo_ia')) return;
-  // Utilise Pollinations.ai vision (gratuit, supporte image)
-  // Prompt structuré pour réponse en étapes
-  var prompt = encodeURIComponent("Tu es un professeur expert au programme MINESEC du Cameroun. Analyse l'exercice scolaire dans l'image et fournis : 1) Le sujet/discipline, 2) L'énoncé reformulé, 3) La résolution complète étape par étape, 4) La réponse finale. Sois pédagogique, en français.");
-  var url = 'https://text.pollinations.ai/openai';
-  fetch(url, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({
-      model: 'openai',
-      messages: [{
-        role:'user',
-        content:[
-          {type:'text', text: decodeURIComponent(prompt)},
-          {type:'image_url', image_url:{url: dataUrl}}
-        ]
-      }],
-      max_tokens: 1500
-    })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    var answer = (d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content) || 'Désolé, l\'IA n\'a pas pu analyser votre image. Réessayez avec une photo plus nette.';
-    document.getElementById('photoMathResult').innerHTML =
-      '<div style="background:#F0FDF4;border:2px solid #6EE7B7;border-radius:12px;padding:14px;margin-top:10px">'
-      +'<div style="font-size:11px;color:#059669;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">✅ Correction IA</div>'
-      +'<div style="font-size:13px;color:#065F46;line-height:1.7;white-space:pre-line">'+_sanitizeHTML(answer)+'</div>'
-      +'</div>';
-    // +XP + compteur badge (photo_ia_first + all_modules)
-    if(typeof _addXP === 'function') _addXP('devoir');
-    try { DB._photoIACount = (DB._photoIACount||0) + 1; save(); } catch(e){}
-    if(typeof _checkBadges==='function') setTimeout(_checkBadges, 300);
-    _auditLog('photo_math_success', {len: answer.length});
-  })
-  .catch(function(err){
-    document.getElementById('photoMathResult').innerHTML =
-      '<div style="background:#FEE2E2;border:1px solid #FCA5A5;border-radius:10px;padding:12px;color:#991B1B;font-size:13px">Erreur réseau. Vérifiez votre connexion et réessayez. <br>Détail : '+_sanitizeHTML(err.message||String(err))+'</div>';
-  });
-};
+// v1.2.1 : « Photo Math » (correction par image) RETIRÉ.
+// Raison : l'appel "vision" envoyait l'image en base64 → très coûteux en tokens,
+// et l'endpoint Pollinations vision est déprécié. Fonctionnalité supprimée.
 
 // ════════════════════════════════════════════════════════════════════
 // v2.4 — 👥 MODE ÉTUDE EN GROUPE — Room avec code 6 chiffres

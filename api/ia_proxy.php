@@ -125,6 +125,13 @@ if ($useElite) {
     $source = 'pollinations';
 }
 
+// 🔁 v1.2.1 : repli automatique si le moteur principal échoue (ex. Gemini 503 « high demand »).
+// L'élève obtient toujours une réponse plutôt qu'une erreur.
+if (!$ok && strpos($source, 'pollinations') === false) {
+    [$okP, $textP, $errP] = call_pollinations($sysPrompt, $ragContext, $prompt);
+    if ($okP) { $ok = true; $text = $textP; $error = null; $source .= '_fallback_pollinations'; }
+}
+
 if (!$ok) {
     http_response_code(502);
     echo json_encode(['error' => $error ?: 'IA indisponible', 'source' => $source]);
