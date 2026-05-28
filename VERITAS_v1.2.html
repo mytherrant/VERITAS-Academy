@@ -8490,10 +8490,17 @@ function vShowSec(sec,btn){
         const stockLbl=b.stock>5?'En stock':b.stock>0?b.stock+' restants':'Rupture';
         const stockIco=b.stock>5?'✓':b.stock>0?'⚠':'✕';
         const discount=b.ancienPrix?Math.round((1-b.prix/b.ancienPrix)*100):0;
+        const _rt=(typeof getBookRating==='function')?getBookRating(b.id):{avg:0,count:0};
+        const _full=Math.max(0,Math.min(5,Math.round(_rt.avg||0)));
+        const _stars='★★★★★'.slice(0,_full)+'☆☆☆☆☆'.slice(0,5-_full);
+        const _ratingHtml=_rt.count>0
+          ? `<div class="vbook-rating"><span class="vbook-stars">${_stars}</span><span class="vbook-rating-num">${_rt.avg.toFixed(1)}</span><span class="vbook-rating-count">(${_rt.count} avis)</span></div>`
+          : `<div class="vbook-rating vbook-rating-none"><span class="vbook-stars">☆☆☆☆☆</span><span class="vbook-rating-count">Nouveau</span></div>`;
         return `<div class="vbook-card${b.featured?' is-featured':''}" style="--vbk-color:${cc}" onclick="viewBookDetail('${b.id}')">
           <div class="vbook-cover">
             ${b.coverImg?`<img src="${b.coverImg}" alt="${_esc(b.titre)}" onerror="this.style.display='none'">`:`<span class="vbook-cover-emoji">${b.ico||'📘'}</span>`}
             <div class="vbook-class-badge">${_esc(b.cls)}</div>
+            <div class="vbook-minesec-badge">📚 MINESEC</div>
             ${b.stock<=0?'<div class="vbook-stock-out">Rupture</div>':''}
             ${hasPreview?'<div class="vbook-preview-badge">Aperçu gratuit</div>':''}
             <div class="vbook-pages">${b.pages||0}p · ${(b.chaps||[]).length} chap.</div>
@@ -8501,6 +8508,7 @@ function vShowSec(sec,btn){
           <div class="vbook-body">
             <div class="vbook-title">${_esc(b.titre)}</div>
             <div class="vbook-author">${_esc(b.auteur||'')}</div>
+            ${_ratingHtml}
             <div class="vbook-desc">${_esc((b.desc||'').substring(0,90))}</div>
             ${discount?`<div class="vbook-old-price"><s>${fmt(b.ancienPrix)} FCFA</s><span class="vbook-discount">-${discount}%</span></div>`:''}
             <div class="vbook-price-row">
@@ -39228,7 +39236,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .vbook-pages{position:absolute;bottom:10px;left:10px;background:rgba(0,0,0,.55);color:#fff;padding:3px 8px;border-radius:8px;font-size:10px;font-weight:600;z-index:2;backdrop-filter:blur(8px)}
 
 /* Badge rupture */
-.vbook-stock-out{position:absolute;top:10px;right:10px;background:linear-gradient(135deg,#DC2626,#991B1B);color:#fff;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:800;z-index:2;box-shadow:0 4px 12px rgba(220,38,38,.5)}
+.vbook-stock-out{position:absolute;top:42px;right:10px;background:linear-gradient(135deg,#DC2626,#991B1B);color:#fff;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:800;z-index:2;box-shadow:0 4px 12px rgba(220,38,38,.5)}
 
 /* Body : titre, auteur, description */
 .vbook-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column}
@@ -39236,6 +39244,14 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .vbook-author{font-size:11.5px;color:#6B7A99;margin-bottom:8px;display:flex;align-items:center;gap:5px;font-style:italic}
 .vbook-author::before{content:"✍️";font-style:normal}
 .vbook-desc{font-size:11.5px;color:var(--ink3,#475569);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+/* v1.2.1 — Étoiles d'avis (style Babelio/FNAC) + badge MINESEC */
+.vbook-minesec-badge{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.95);color:#0d5c3a;padding:4px 9px;border-radius:10px;font-size:9.5px;font-weight:900;letter-spacing:.4px;z-index:2;box-shadow:0 3px 10px rgba(0,0,0,.18);backdrop-filter:blur(6px)}
+.vbook-rating{display:flex;align-items:center;gap:6px;margin:-2px 0 9px;font-size:12px}
+.vbook-stars{color:#F59E0B;letter-spacing:1.5px;font-size:13px;line-height:1}
+.vbook-rating-num{font-weight:800;color:#142554;font-size:12px}
+.vbook-rating-count{color:#8A94A6;font-size:10.5px}
+.vbook-rating-none .vbook-stars{color:#D9DEE8}
+.vbook-rating-none .vbook-rating-count{color:#10B981;font-weight:700}
 
 /* Prix avec gradient or */
 .vbook-price-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;padding:8px 12px;background:linear-gradient(135deg,#FFF8E1,#FFE082);border-radius:12px;border:1px solid rgba(255,201,60,.3)}
