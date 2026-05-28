@@ -18270,7 +18270,14 @@ async function callClaudeAPI(prompt, sysPrompt){
   try {
     var _base=(DB&&DB.cloudConfig&&DB.cloudConfig.url|| ((location.origin.indexOf('veritas-school.com')>=0)?location.origin+'/api':'https://veritas-school.com/api')).replace(/\/+$/,'');
     var _ses=(typeof SES!=='undefined'&&SES)?SES:null;
-    var _r=await fetch(_base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:String(prompt||''),sysPrompt:sys,userId:_ses&&_ses.id?_ses.id:'',plan:_ses&&_ses.type?_ses.type:'anon'})});
+    // v1.2.1 : RAG — chercher des passages d'annales/corpus (rag.php) pour ancrer la réponse.
+    // Dégradé proprement (contexte vide) si biblio_index.db n'est pas encore déposé sur le serveur.
+    var _ragCtx='';
+    try{
+      var _rr=await fetch(_base+'/rag.php?limit=4&q='+encodeURIComponent(String(prompt||'').slice(0,180)),{method:'GET'});
+      if(_rr.ok){ var _rj=await _rr.json(); if(_rj&&_rj.ok&&_rj.passages&&_rj.passages.length){ _ragCtx=_rj.passages.map(function(p){return '— '+(p.auteur||'?')+', '+(p.titre||'?')+(p.annee?(' ('+p.annee+')'):'')+' : '+p.extrait;}).join('\n'); } }
+    }catch(_eRag){}
+    var _r=await fetch(_base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:String(prompt||''),sysPrompt:sys,ragContext:_ragCtx,userId:_ses&&_ses.id?_ses.id:'',plan:_ses&&_ses.type?_ses.type:'anon'})});
     if(_r.ok){
       var _j=await _r.json();
       if(_j&&_j.text&&!/legacy text API|deprecat|enter\.pollinations/i.test(_j.text)){ console.log('[IA] via ia_proxy ('+(_j.source||'?')+')'); return _j.text; }
