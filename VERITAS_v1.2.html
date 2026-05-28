@@ -5294,8 +5294,30 @@ async function load(){
   // BUG-01 FIX: migration centralisée (champs manquants, cartes, auth)
   _migrateDB();
   // ── LWS_API : pull données depuis le serveur (non-bloquant) ─────────────────
+  // v2.9.15 : Le sync LWS (api/db.php) ne concerne QUE l'admin/enseignant.
+  // Le visiteur travaille en LocalStorage avec le contenu public déjà embarqué
+  // dans le HTML (œuvres, manuels, jeux). Inutile (et 401) de lire la DB admin.
+  // On détecte une session admin via sessionStorage VERITAS_SES ou DB.cloudConfig.secret.
+  var _isAdminSession = false;
+  try {
+    var _rawSes = sessionStorage.getItem('VERITAS_SES');
+    if (_rawSes) {
+      var _s = JSON.parse(_rawSes);
+      _isAdminSession = _s && (_s.type === 'admin' || _s.type === 'superadmin' || _s.type === 'enseignant');
+    }
+  } catch(e) {}
+
+  if (!_isAdminSession) {
+    // Visiteur / élève non-admin : pas de pull DB serveur, on reste en local.
+    console.log('[LWS] Mode local (visiteur) — contenu public chargé depuis le HTML');
+    return;
+  }
+
   try{
-    var _lwsRes=await _fbFetch(LWS_API.db+'?t='+Date.now());
+    var _token = (DB.cloudConfig && DB.cloudConfig.secret) ? DB.cloudConfig.secret : '';
+    var _lwsRes=await _fbFetch(LWS_API.db+'?t='+Date.now(), {
+      headers: _token ? { 'Authorization': 'Bearer ' + _token } : {}
+    });
     if(!_lwsRes.ok) throw new Error('HTTP '+_lwsRes.status);
     var _lwsRemote=await _lwsRes.json();
     if(_lwsRemote&&Object.keys(_lwsRemote).length>0){
@@ -5686,6 +5708,18 @@ function save(){
     } else throw e;
   }
   // ── 2. Sync LWS_API debounced 800 ms (async, non-bloquant) ───────────────
+  // v2.9.15 : Ne synchroniser vers le serveur QUE si session admin/enseignant.
+  // Le visiteur/élève sauvegarde en LocalStorage uniquement (pas de 401 inutile).
+  var _canSync = false;
+  try {
+    var _rs = sessionStorage.getItem('VERITAS_SES');
+    if (_rs) {
+      var _ss = JSON.parse(_rs);
+      _canSync = _ss && (_ss.type === 'admin' || _ss.type === 'superadmin' || _ss.type === 'enseignant');
+    }
+  } catch(e) {}
+  if (!_canSync) return; // visiteur → local only, pas de push serveur
+
   clearTimeout(_syncTimeout);
   _syncTimeout=setTimeout(async function(){
     try{
