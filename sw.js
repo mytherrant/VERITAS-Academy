@@ -5,7 +5,7 @@
 // (cause du bug "Failed to convert value to 'Response'" en v2.9.7-v2.9.10)
 // ═══════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'veritas-v2.9.15';
+const CACHE_VERSION = 'veritas-v2.9.16';
 const STATIC_CACHE  = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 

@@ -4329,10 +4329,24 @@ setInterval(_refreshCitation,15000);
 // APRÈS : db pointe vers api/db.php (PHP sur LWS, stable, sous notre contrôle)
 //         → latence + accessibilité bien meilleures
 // Pour réactiver Firebase un jour : remettre l'ancienne URL
+// v2.9.16 : FIX CORS www vs non-www — utiliser l'ORIGINE de la page courante.
+// Si l'utilisateur charge www.veritas-school.com, les API doivent aussi être sur
+// www (même origine) sinon CORS bloque. _VRT_ORIGIN s'adapte automatiquement.
+var _VRT_ORIGIN = (function(){
+  try {
+    if (typeof location !== 'undefined' && location.origin &&
+        location.origin.indexOf('veritas-school.com') >= 0) {
+      return location.origin;  // ex: https://www.veritas-school.com OU https://veritas-school.com
+    }
+  } catch(e){}
+  return 'https://veritas-school.com'; // fallback (mode file:// ou autre)
+})();
+var _VRT_API = _VRT_ORIGIN + '/api';
+
 const LWS_API = {
-  db:     'https://veritas-school.com/api/db.php',
-  upload: 'https://veritas-school.com/api/upload.php',
-  files:  'https://veritas-school.com/uploads/veritas/'
+  db:     _VRT_ORIGIN + '/api/db.php',
+  upload: _VRT_ORIGIN + '/api/upload.php',
+  files:  _VRT_ORIGIN + '/uploads/veritas/'
 };
 const FIREBASE_DB_URL_BACKUP = 'https://veritas-school-a39ab-default-rtdb.europe-west1.firebasedatabase.app/db.json'; // Conservée si on veut réactiver Firebase
 
@@ -5240,9 +5254,13 @@ function _migrateDB(){
     } catch(e){}
   }, 4000);
   // Cloud config
-  if(!DB.cloudConfig)DB.cloudConfig={url:'https://veritas-school.com/api',secret:'VERITAS-CLOUD-2026-xK9m',lastSync:'Jamais'};
-  if(!DB.cloudConfig.url)DB.cloudConfig.url='https://veritas-school.com/api';
+  if(!DB.cloudConfig)DB.cloudConfig={url:_VRT_API,secret:'VERITAS-CLOUD-2026-xK9m',lastSync:'Jamais'};
   if(!DB.cloudConfig.secret)DB.cloudConfig.secret='VERITAS-CLOUD-2026-xK9m';
+  // v2.9.16 : FORCER l'URL API sur l'origine courante (corrige CORS www/non-www
+  // si une ancienne valeur figée en localStorage pointait vers le mauvais domaine)
+  if(!DB.cloudConfig.url || DB.cloudConfig.url.indexOf('veritas-school.com')>=0){
+    DB.cloudConfig.url=_VRT_API;
+  }
   // WhatsApp groupes
   if(!DB.whatsappGroupes||!DB.whatsappGroupes.length){
     DB.whatsappGroupes=defaultDB().whatsappGroupes;
