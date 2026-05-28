@@ -88,7 +88,7 @@ if ($action === 'init' && $method === 'POST') {
             'Content-Type: application/json'
         ],
         CURLOPT_TIMEOUT        => 30,
-        CURLOPT_SSL_VERIFYPEER => false
+        CURLOPT_SSL_VERIFYPEER => true
     ]);
     $resp = curl_exec($ch);
     $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -150,20 +150,53 @@ if ($action === 'notify' && ($method === 'POST' || $method === 'PUT')) {
     }
 
     $state = json_decode(file_get_contents($stateFile), true);
-
-    $newStatus = strtoupper($data['status'] ?? 'UNKNOWN');
-    $state['provider_status'] = $newStatus;
-    $state['mtn_financial_transaction_id'] = $data['financialTransactionId'] ?? '';
     $state['notified_at'] = date('c');
     $state['raw_webhook'] = $data;
 
-    if ($newStatus === 'SUCCESSFUL') {
-        $state['status']  = 'paid';
-        $state['paid_at'] = date('c');
-    } elseif (in_array($newStatus, ['FAILED', 'REJECTED', 'TIMEOUT', 'EXPIRED'])) {
-        $state['status']    = 'failed';
-        $state['failed_at'] = date('c');
-        $state['reason']    = $data['reason'] ?? 'Refusé par le payeur ou expiration';
+    // 🔐 v1.2.1 : NE PAS faire confiance au statut du payload (webhook falsifiable).
+    // On interroge MTN directement avec notre mtn_reference_id pour obtenir le statut autoritatif.
+    $authStatus = null;
+    if (!empty($state['mtn_reference_id'])) {
+        $vtok = mtnGetAuthToken();
+        if ($vtok) {
+            $vch = curl_init(MTN_API_BASE . '/collection/v1_0/requesttopay/' . $state['mtn_reference_id']);
+            curl_setopt_array($vch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_HTTPHEADER => [
+                    'Authorization: Bearer ' . $vtok,
+                    'X-Target-Environment: ' . MTN_TARGET_ENV,
+                    'Ocp-Apim-Subscription-Key: ' . MTN_SUBSCRIPTION_KEY
+                ],
+                CURLOPT_TIMEOUT => 15,
+                CURLOPT_SSL_VERIFYPEER => true
+            ]);
+            $vresp = curl_exec($vch);
+            $vhttp = curl_getinfo($vch, CURLINFO_HTTP_CODE);
+            curl_close($vch);
+            if ($vhttp === 200) {
+                $vdata = json_decode($vresp, true) ?: [];
+                $authStatus = strtoupper($vdata['status'] ?? '');
+                $state['mtn_financial_transaction_id'] = $vdata['financialTransactionId'] ?? ($state['mtn_financial_transaction_id'] ?? '');
+                if (isset($vdata['reason'])) $state['reason'] = $vdata['reason'];
+            }
+        }
+    }
+
+    if ($authStatus !== null && $authStatus !== '') {
+        $state['provider_status'] = $authStatus;
+        if ($authStatus === 'SUCCESSFUL') {
+            $state['status']  = 'paid';
+            $state['paid_at'] = date('c');
+        } elseif (in_array($authStatus, ['FAILED', 'REJECTED', 'TIMEOUT', 'EXPIRED'])) {
+            $state['status']    = 'failed';
+            $state['failed_at'] = date('c');
+            $state['reason']    = $state['reason'] ?? 'Refusé par le payeur ou expiration';
+        }
+        // PENDING → on laisse 'pending' ; le polling status confirmera.
+    } else {
+        // Impossible de vérifier auprès de MTN → ne PAS changer le statut, journaliser.
+        @file_put_contents($stateDir . '_webhook_mtn_log.txt',
+            date('c') . ' [UNVERIFIED_NO_AUTH_STATUS] ref=' . $ref . "\n", FILE_APPEND);
     }
 
     file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT));
@@ -199,7 +232,7 @@ if ($action === 'status' && $method === 'GET') {
                     'Ocp-Apim-Subscription-Key: ' . MTN_SUBSCRIPTION_KEY
                 ],
                 CURLOPT_TIMEOUT => 15,
-                CURLOPT_SSL_VERIFYPEER => false
+                CURLOPT_SSL_VERIFYPEER => true
             ]);
             $resp = curl_exec($ch);
             $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -297,7 +330,7 @@ function mtnGetAuthToken() {
             'Content-Type: application/json'
         ],
         CURLOPT_TIMEOUT        => 20,
-        CURLOPT_SSL_VERIFYPEER => false
+        CURLOPT_SSL_VERIFYPEER => true
     ]);
     $resp = curl_exec($ch);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);

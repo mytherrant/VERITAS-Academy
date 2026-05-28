@@ -38,6 +38,20 @@ function emptyResponse(status) {
   });
 }
 
+// v2.9.17 : PNG transparent 1×1 — fallback pour les images qui échouent
+// (ex: emojis 3D em-content.zobj.net inaccessibles/lents depuis le Cameroun).
+// Évite l'icône "cassée" disgracieuse → affiche un pixel transparent à la place.
+function transparentPng() {
+  // PNG 1×1 transparent en base64
+  const b64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==';
+  const bytes = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+  return new Response(bytes, {
+    status: 200,
+    statusText: 'OK (transparent fallback)',
+    headers: { 'Content-Type': 'image/png', 'Cache-Control': 'no-store' }
+  });
+}
+
 // ═══════════════════════════════════════════════════════════════════
 // INSTALLATION : pré-cache + skipWaiting agressif
 // ═══════════════════════════════════════════════════════════════════

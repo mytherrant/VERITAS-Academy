@@ -71,7 +71,7 @@ if ($action === 'init' && $method === 'POST') {
             'Accept: application/json'
         ],
         CURLOPT_TIMEOUT        => 30,
-        CURLOPT_SSL_VERIFYPEER => false   // laisser à true en prod
+        CURLOPT_SSL_VERIFYPEER => true   // v1.2.1 : vérif TLS activée (anti-MITM)
     ]);
     $resp = curl_exec($ch);
     $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -148,10 +148,24 @@ if ($action === 'notify' && $method === 'POST') {
 
     $state = json_decode(file_get_contents($stateFile), true);
 
-    // Vérif token (sécurité)
-    if ($notifToken && $state['notif_token'] && $notifToken !== $state['notif_token']) {
-        http_response_code(403);
-        echo 'notif_token invalide';
+    // 🔐 v1.2.1 Vérif token OBLIGATOIRE (anti faux webhook) :
+    // si un notif_token a été émis à l'init, le webhook DOIT le présenter et il doit correspondre.
+    $expectedNotif = $state['notif_token'] ?? '';
+    if ($expectedNotif !== '') {
+        if (!hash_equals((string)$expectedNotif, (string)$notifToken)) {
+            @file_put_contents($stateDir . '_webhook_log.txt',
+                date('c') . ' [REJECTED_BAD_NOTIF_TOKEN] ref=' . $ref . "\n", FILE_APPEND);
+            http_response_code(403);
+            echo 'notif_token invalide';
+            exit;
+        }
+    } else {
+        // Aucun notif_token connu côté serveur → impossible de garantir l'authenticité.
+        // On NE marque PAS payé ; on journalise pour vérification manuelle.
+        @file_put_contents($stateDir . '_webhook_log.txt',
+            date('c') . ' [UNVERIFIABLE_WEBHOOK_IGNORED] ref=' . $ref . "\n", FILE_APPEND);
+        http_response_code(202);
+        echo 'unverifiable';
         exit;
     }
 
@@ -286,7 +300,7 @@ function orangeGetAuthToken() {
             'Content-Type: application/x-www-form-urlencoded'
         ],
         CURLOPT_TIMEOUT        => 20,
-        CURLOPT_SSL_VERIFYPEER => false
+        CURLOPT_SSL_VERIFYPEER => true   // v1.2.1 : vérif TLS activée (anti-MITM)
     ]);
     $resp = curl_exec($ch);
     $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);

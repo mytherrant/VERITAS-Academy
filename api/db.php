@@ -54,6 +54,15 @@ requireAuth();
 $DATA_DIR = dirname(__DIR__) . '/data';
 $DB_FILE  = $DATA_DIR . '/veritas_db.json';
 if (!is_dir($DATA_DIR)) mkdir($DATA_DIR, 0750, true);
+// 🔐 v1.2.1 : garantir la protection du dossier data/ MÊME si le déploiement l'oublie.
+//    Sans cela, /data/veritas_db.json serait téléchargeable directement (toute la base, sans token).
+if (!is_file($DATA_DIR . '/.htaccess')) {
+    @file_put_contents($DATA_DIR . '/.htaccess',
+        "# Aucun accès HTTP direct aux données VÉRITAS\nRequire all denied\n<IfModule !mod_authz_core.c>\nOrder deny,allow\nDeny from all\n</IfModule>\n");
+}
+if (!is_file($DATA_DIR . '/index.php')) {
+    @file_put_contents($DATA_DIR . '/index.php', "<?php http_response_code(403); exit;\n");
+}
 
 /* GET */
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {

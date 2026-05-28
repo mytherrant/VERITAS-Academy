@@ -24,9 +24,19 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     exit;
 }
 
-$backupFile = __DIR__ . '/../uploads/veritas_db_backup.json';
+// v1.2.1 FIX : lire la base réellement écrite par db.php (data/veritas_db.json).
+// Avant, on lisait uploads/veritas_db_backup.json — fichier qu'AUCUN endpoint n'écrit
+// → la page visiteur ne reflétait jamais les contenus publiés par l'admin.
+// On garde des replis vers les anciens emplacements pour compatibilité.
+$candidates = [
+    __DIR__ . '/../data/veritas_db.json',           // db.php (source principale actuelle)
+    __DIR__ . '/data/veritas_db_backup.json',       // sync.php (legacy)
+    __DIR__ . '/../uploads/veritas_db_backup.json', // ancien emplacement (compat)
+];
+$backupFile = '';
+foreach ($candidates as $c) { if (is_file($c)) { $backupFile = $c; break; } }
 
-if (!file_exists($backupFile)) {
+if ($backupFile === '' || !file_exists($backupFile)) {
     http_response_code(404);
     echo json_encode(['error' => 'Aucune donnée disponible', 'partenaires' => [], 'school' => null]);
     exit;

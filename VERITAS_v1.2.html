@@ -4522,6 +4522,27 @@ window._fbBreaker = {
 // Le code conservé compatibilité : on garde le nom _fbFetch pour ne pas
 // avoir à modifier les 12+ appels existants. La fonction route vers LWS.
 async function _fbFetch(url, options){
+  // v2.9.17 : Court-circuit db.php pour les non-admins.
+  // db.php exige requireAuth() côté serveur (données sensibles). Inutile que
+  // le visiteur tente l'appel → 401 garanti. On retourne une réponse vide
+  // silencieuse (200 {}) pour ne pas polluer la console.
+  if (typeof url === 'string' && url.indexOf('/api/db.php') >= 0) {
+    var _isAdm = false;
+    try {
+      var _r = sessionStorage.getItem('VERITAS_SES');
+      if (_r) { var _x = JSON.parse(_r); _isAdm = _x && (_x.type==='admin'||_x.type==='superadmin'||_x.type==='enseignant'); }
+    } catch(e){}
+    if (!_isAdm) {
+      return new Response('{}', { status: 200, headers: { 'Content-Type': 'application/json' } });
+    }
+    // Admin : s'assurer que le header Authorization est présent
+    options = options || {};
+    options.headers = options.headers || {};
+    if (!options.headers['Authorization'] && DB && DB.cloudConfig && DB.cloudConfig.secret) {
+      options.headers['Authorization'] = 'Bearer ' + DB.cloudConfig.secret;
+    }
+  }
+
   // Court-circuit : circuit breaker ouvert → réponse 503 silencieuse
   if (window._fbBreaker && window._fbBreaker.isOpen()) {
     return new Response('{"_offline":true,"_reason":"circuit_open"}', {
@@ -17118,8 +17139,9 @@ window._aiQuotaBadgeHtml = function(action){
 // La version active est définie ci-dessous après mAIOrientation().
 
 function mAIOrientation(){
-  if(!_aiGate('orient'))return;
+  // FIX v1.2 : ne pas gater au moment d'ouvrir le modal (perd un quota inutilement)
   var u=_aiUsed('orient'),lim=_aiLimit('orient'),rem=Math.max(0,lim-u);
+  if(lim!==-1 && u>=lim){ _showQuotaExceeded('orient', _aiTier(), u, lim); return; }
   var badge=lim>=999?'∞ Illimité':rem+' analyse'+(rem>1?'s':'')+' aujourd\'hui';
   M('🧭 Orientation IA','Découvrez les filières et métiers adaptés à votre profil',
     '<div class="ib ibt mb12"><span>🎯</span><span>L\'IA analyse votre profil scolaire et vous oriente vers les meilleures filières. <strong>'+badge+'</strong>.</span></div>'+
@@ -17156,7 +17178,7 @@ async function _runAIOrient(){
     'Maximum 400 mots. En français. Adapté au contexte camerounais.';
   try{
     var txt=await callClaudeAPI(prompt);
-    _aiInc('orient');
+    // FIX v1.2 : _aiGate() a déjà incrémenté — pas de second _aiInc
     var rem2=Math.max(0,_aiLimit('orient')-_aiUsed('orient'));
     if(res){res.style.display='block';res.textContent=txt;}
     if(btn){btn.disabled=false;btn.innerHTML='🔄 Nouvelle analyse ('+(rem2>0?rem2+' restant'+(rem2>1?'s':''):'0 restant')+')';}
@@ -17166,8 +17188,9 @@ async function _runAIOrient(){
   }
 }
 function mAICorrection(){
-  if(!_aiGate('correct'))return;
+  // FIX v1.2 : ne pas gater au moment d'ouvrir le modal
   var u=_aiUsed('correct'),lim=_aiLimit('correct'),rem=Math.max(0,lim-u);
+  if(lim!==-1 && u>=lim){ _showQuotaExceeded('correct', _aiTier(), u, lim); return; }
   var badge=lim>=999?'∞ Illimité':rem+' correction'+(rem>1?'s':'')+' aujourd\'hui';
   M('📝 Correction IA d\'Épreuve','Exercices et examens corrigés instantanément',
     '<div class="ib ibt mb12"><span>📝</span><span>L\'IA corrige votre exercice et explique la méthode étape par étape. <strong>'+badge+'</strong>.</span></div>'+
@@ -17212,7 +17235,7 @@ async function _runAICorrect(){
     )+' Maximum 450 mots. En français.';;
   try{
     var txt=await callClaudeAPI(prompt);
-    _aiInc('correct');
+    // FIX v1.2 : _aiGate() a déjà incrémenté — pas de second _aiInc
     var rem=Math.max(0,_aiLimit('correct')-_aiUsed('correct'));
     if(res){res.style.display='block';res.textContent=txt;}
     if(btn){btn.disabled=false;btn.innerHTML='🔄 Autre correction ('+(rem>0?rem+' restant'+(rem>1?'s':''):'0 restant')+')';}
@@ -18146,10 +18169,10 @@ setTimeout(function(){
 // ═══════════════════════════════════════════════════════════════════════════
 window.mDevoirCorrectionIA = function(){
   if(typeof M !== 'function') return;
-  // Gate IA (limite quotidienne selon plan)
-  if(typeof _aiGate==='function' && !_aiGate('devoir')) return;
+  // FIX v1.2 : ne pas gater à l'ouverture du modal, seulement à l'exécution
   var u = (typeof _aiUsed==='function')?_aiUsed('devoir'):0;
   var lim = (typeof _aiLimit==='function')?_aiLimit('devoir'):3;
+  if(lim!==-1 && u>=lim && typeof _showQuotaExceeded==='function'){ _showQuotaExceeded('devoir', (typeof _aiTier==='function'?_aiTier():'free'), u, lim); return; }
   var rem = Math.max(0, lim-u);
   var badge = lim>=999 ? '∞ Illimité' : rem+' correction'+(rem>1?'s':'')+' aujourd\'hui';
 
@@ -18200,7 +18223,7 @@ window._runCorrectionIA = async function(){
 
   try{
     var txt = await callClaudeAPI(prompt);
-    if(typeof _aiInc==='function') _aiInc('devoir');
+    // FIX v1.2 : _aiGate() a déjà incrémenté le compteur — ne pas appeler _aiInc() une 2ème fois
     var rem2 = (typeof _aiLimit==='function' && typeof _aiUsed==='function')
       ? Math.max(0, _aiLimit('devoir')-_aiUsed('devoir')) : 0;
     if(res){
@@ -18237,6 +18260,22 @@ async function callClaudeAPI(prompt, sysPrompt){
   // v2.9.10 — Avec logs de diagnostic pour identifier où ça échoue côté client
   console.log("[IA] callClaudeAPI appelée — prompt=" + (prompt||'').length + " chars, sys=" + (sysPrompt||'').length + " chars");
   var sys = sysPrompt || "Tu es un assistant pédagogique expert du système éducatif camerounais (MINESEC/MINESUP). Tu connais les programmes BEPC et BAC séries A/C/D, les grandes écoles camerounaises et tu contextualises dans la réalité camerounaise.";
+
+  // ── v1.2.1 : IA routée via le SERVEUR (api/ia_proxy.php) ──────────────────────
+  // Pollinations.ai (appel direct navigateur) a été DÉPRÉCIÉ en 2026 : il renvoie un
+  // message « legacy text API deprecated » au lieu d'une réponse. On passe donc par
+  // notre proxy serveur (clé IA gratuite côté serveur, jamais exposée au client).
+  try {
+    var _base=(DB&&DB.cloudConfig&&DB.cloudConfig.url|| ((location.origin.indexOf('veritas-school.com')>=0)?location.origin+'/api':'https://veritas-school.com/api')).replace(/\/+$/,'');
+    var _ses=(typeof SES!=='undefined'&&SES)?SES:null;
+    var _r=await fetch(_base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:String(prompt||''),sysPrompt:sys,userId:_ses&&_ses.id?_ses.id:'',plan:_ses&&_ses.type?_ses.type:'anon'})});
+    if(_r.ok){
+      var _j=await _r.json();
+      if(_j&&_j.text&&!/legacy text API|deprecat|enter\.pollinations/i.test(_j.text)){ console.log('[IA] via ia_proxy ('+(_j.source||'?')+')'); return _j.text; }
+      if(_j&&_j.error){ console.warn('[IA] ia_proxy:',_j.error); return "⚠️ "+_j.error; }
+    } else { console.warn('[IA] ia_proxy HTTP '+_r.status); }
+  } catch(_eP){ console.warn('[IA] ia_proxy injoignable:',_eP.message); }
+  return "⚠️ L'assistant IA est momentanément indisponible. Réessayez dans un instant. (Si le problème persiste, l'administrateur doit configurer la clé IA gratuite du serveur — voir api/payment_config.php.)";
 
   // ── ESSAI 1 : Pollinations.ai en POST (format OpenAI chat-completions, long context OK) ──
   try {
@@ -33621,19 +33660,24 @@ window.setLang = function(lang){
       'Labos':'Labs','Classes':'Classes','Orientation':'Guidance','Calendrier':'Calendar',
       'Épreuves':'Exams','Évals':'Tests','Devoir IA':'AI Tutor','Parrainage':'Referral',
       'Parcours IA':'AI Path','Forum':'Forum','Actualités':'News','Contact':'Contact',
+      'IA':'AI','Pratiquer':'Practice','Communauté':'Community','Infos':'Info','Partenaires':'Partners',
       'Panier':'Cart',"S'inscrire":'Sign up','Se connecter':'Log in','Enseignant':'Teacher'
     } : {
       'Home':'Accueil','Shop':'Boutique','Games':'Jeux','Labs':'Labos','Classes':'Classes',
       'Guidance':'Orientation','Calendar':'Calendrier','Exams':'Épreuves','Tests':'Évals',
       'AI Tutor':'Devoir IA','Referral':'Parrainage','AI Path':'Parcours IA','News':'Actualités',
+      'AI':'IA','Practice':'Pratiquer','Community':'Communauté','Info':'Infos','Partners':'Partenaires',
       'Cart':'Panier','Sign up':"S'inscrire",'Log in':'Se connecter','Teacher':'Enseignant'
     };
     document.querySelectorAll('.vnav-btn, .vlogin-btns .btn').forEach(function(btn){
-      // Récupérer le dernier nœud texte (après SVG icône)
+      // Récupérer le dernier nœud texte (après SVG icône), en préservant l'espace et la flèche ▾
       btn.childNodes.forEach(function(n){
         if(n.nodeType===3 && n.textContent.trim()){
-          var t0 = n.textContent.trim();
-          if(navMap[t0]) n.textContent = ' '+navMap[t0];
+          var raw = n.textContent;
+          var lead = (raw.match(/^\s*/)||[''])[0];
+          var hadArrow = /▾\s*$/.test(raw.trim());
+          var t0 = raw.trim().replace(/\s*▾\s*$/,'');
+          if(navMap[t0]) n.textContent = lead + navMap[t0] + (hadArrow?' ▾':'');
         }
       });
     });
@@ -34387,7 +34431,13 @@ window.mMonParcours = function(){
 // Hook automatique : incrémenter le streak chaque jour à l'ouverture
 try {
   var _ses = (typeof SES !== 'undefined' && SES) ? SES : null;
-  if(_ses && _ses.id) setTimeout(function(){ _addXP('login'); }, 2000);
+  if(_ses && _ses.id){
+    setTimeout(function(){
+      _addXP('login');
+      // FIX v1.2 : vérifier les badges au chargement de session
+      if(typeof _checkBadges === 'function') setTimeout(_checkBadges, 500);
+    }, 2000);
+  }
 } catch(e){}
 
 // ─── 2. BATTLES HEBDOMADAIRES + LEADERBOARD ─────────────────────────
@@ -34402,17 +34452,39 @@ window._currentWeekKey = function(){
 
 window._generateBattleQuestions = function(){
   // Tirer 10 QCM aléatoires depuis toutes les sources disponibles
+  // FIX v1.2 : conversion format {opts:[], ans:N} → {a,b,c,ok} attendu par le moteur de battle
+  var KEYS = ['a','b','c','d'];
+  function convertQ(q, src){
+    if(!q || !q.q) return null;
+    // Format natif {a,b,c,ok} déjà prêt
+    if(q.ok && q.a) return {q:q.q, a:q.a, b:q.b, c:q.c, ok:q.ok, src:src};
+    // Format {opts:[], ans:N} → conversion
+    if(Array.isArray(q.opts) && q.opts.length >= 2 && typeof q.ans === 'number'){
+      var entry = {q:q.q, src:src};
+      q.opts.forEach(function(opt, i){ if(i < 4) entry[KEYS[i]] = opt; });
+      entry.ok = KEYS[q.ans] || 'a';
+      return entry;
+    }
+    return null;
+  }
   var pool = [];
-  // LITT_OEUVRES
+  // LITT_OEUVRES — FIX : utilisent {opts, ans}, pas {a,b,c,ok}
   if(typeof LITT_OEUVRES !== 'undefined'){
     Object.values(LITT_OEUVRES).forEach(function(oe){
-      if(oe.qcm) oe.qcm.forEach(function(q){ pool.push({q:q.q,a:q.a,b:q.b,c:q.c,ok:q.ok,src:oe.titre}); });
+      if(oe.qcm) oe.qcm.forEach(function(q){
+        var c = convertQ(q, oe.titre || '?');
+        if(c) pool.push(c);
+      });
     });
   }
-  // JEUX_CATALOGUE QCM
+  // JEUX_CATALOGUE QCM — FIX : utilisent j.questions (pas j.data) + format {opts, ans}
   if(typeof JEUX_CATALOGUE !== 'undefined'){
-    JEUX_CATALOGUE.filter(function(j){return j.type==='qcm'&&j.data;}).forEach(function(j){
-      (j.data||[]).slice(0,3).forEach(function(q){ if(q.q && q.ok) pool.push({q:q.q,a:q.a||q.A,b:q.b||q.B,c:q.c||q.C,ok:q.ok,src:j.titre}); });
+    JEUX_CATALOGUE.filter(function(j){return j.type==='qcm' && (j.questions||j.data);}).forEach(function(j){
+      var qs = j.questions || j.data || [];
+      qs.slice(0,3).forEach(function(q){
+        var c = convertQ(q, j.titre || '?');
+        if(c) pool.push(c);
+      });
     });
   }
   if(pool.length < 5) return [];
@@ -34433,8 +34505,8 @@ window.mBattles = function(){
   var wk = _currentWeekKey();
   DB.battles[wk] = DB.battles[wk] || { participants: {}, questions: null };
   var battle = DB.battles[wk];
-  // Génère les questions si pas encore
-  if(!battle.questions){
+  // Génère les questions si pas encore (ou si vide — FIX v1.2 : [] est truthy)
+  if(!battle.questions || !battle.questions.length){
     battle.questions = _generateBattleQuestions();
     try { save(); } catch(e){}
   }
@@ -35138,6 +35210,8 @@ window.mAchievements = function(){
       '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire</button>');
     return;
   }
+  // FIX v1.2 : re-vérifier les conditions avant affichage
+  if(typeof _checkBadges === 'function') _checkBadges();
   DB.userBadges = DB.userBadges || {};
   var unlocked = DB.userBadges[ses.id] || [];
   var pct = Math.round((unlocked.length / VERITAS_BADGES.length) * 100);
@@ -36427,7 +36501,8 @@ window.AMBASSA_TACHES = [
   { id:'diff',       ic:'chart',     col:'#F59E0B', t:'Exercices différenciés',     d:'3 niveaux : facile, moyen, difficile sur le même thème' },
   { id:'remed',      ic:'compass',   col:'#EC4899', t:'Activité de remédiation',   d:'Pour élèves en difficulté sur une notion précise' },
   { id:'eval',       ic:'edit',      col:'#DC2626', t:'Évaluation notée',           d:'Sujet complet barème + corrigé prêt à imprimer' },
-  { id:'doc',        ic:'bookopen',  col:'#6366F1', t:'Analyser un document',       d:'Coller un texte → l\'IA génère questions/résumé/quiz dessus' }
+  { id:'doc',        ic:'bookopen',  col:'#6366F1', t:'Analyser un document',       d:'Coller un texte → l\'IA génère questions/résumé/quiz dessus' },
+  { id:'translate',  ic:'globe',     col:'#0EA5E9', t:'Traduction intelligente',    d:'FR ↔ EN ↔ ES — traduction pédagogique avec vocabulaire expliqué' }
 ];
 
 window.mAgentAmbassa = function(taskId){
@@ -36509,13 +36584,23 @@ window._ambassaTaskForm = function(taskId){
     formExtra += '<div class="fg"><span class="fl">Texte à analyser (collez ici)</span><textarea class="fi" id="mvDoc" rows="6" placeholder="Collez l\'extrait du cours, chapitre, article…" style="resize:vertical;min-height:120px"></textarea></div>';
     formExtra += '<div class="fg"><span class="fl">Que faire avec ce document ?</span><select class="fi" id="mvDocAction"><option value="quiz">Générer un quiz dessus</option><option value="resume">Résumer en 5 points</option><option value="questions">Générer 10 questions de réflexion</option><option value="lexique">Extraire le lexique technique</option></select></div>';
   }
+  if(taskId === 'translate'){
+    formExtra += '<div class="fg"><span class="fl">Texte à traduire *</span><textarea class="fi" id="mvTransText" rows="6" placeholder="Collez ici le texte à traduire (max 2000 caractères)…" style="resize:vertical;min-height:120px"></textarea></div>';
+    formExtra += '<div class="fg2"><div class="fg"><span class="fl">Langue source</span><select class="fi" id="mvSrcLang"><option value="fr">🇫🇷 Français</option><option value="en">🇬🇧 Anglais</option><option value="es">🇪🇸 Espagnol</option><option value="ar">🇸🇦 Arabe</option></select></div>'
+      +'<div class="fg"><span class="fl">Langue cible</span><select class="fi" id="mvTgtLang"><option value="en">🇬🇧 Anglais</option><option value="fr">🇫🇷 Français</option><option value="es">🇪🇸 Espagnol</option></select></div></div>';
+    formExtra += '<div class="ib ibi mb12 mt0"><span>💡</span><span>L\'IA traduit le texte ET explique le vocabulaire difficile + donne des alternatives. Idéal pour réviser les expressions idiomatiques en Anglais.</span></div>';
+  }
 
+  // FIX v1.2 : champ sujet adaptatif selon la tâche
+  var sujetField = taskId === 'translate'
+    ? '<div class="fg"><span class="fl">Contexte (optionnel)</span><input class="fi" id="mvSujet" placeholder="Ex: Texte de biologie, extrait littéraire, email professionnel…"></div>'
+    : '<div class="fg"><span class="fl">Sujet / Chapitre / Notion *</span><input class="fi" id="mvSujet" placeholder="Ex: Théorème de Thalès, La revanche de l\'amante, La 1ère Guerre Mondiale…"></div>';
   M('🎓 Ambassa — '+task.t, task.d,
     '<div class="fg2">'
     +'<div class="fg"><span class="fl">Classe</span><select class="fi" id="mvCls">'+CLS.map(function(c,i){return '<option'+(i===3?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div>'
     +'<div class="fg"><span class="fl">Matière</span><select class="fi" id="mvMat">'+MATS.map(function(m){return '<option>'+m+'</option>';}).join('')+'</select></div>'
     +'</div>'
-    +'<div class="fg"><span class="fl">Sujet / Chapitre / Notion</span><input class="fi" id="mvSujet" placeholder="Ex: Théorème de Thalès, La revanche de l\'amante, La 1ère Guerre Mondiale…"></div>'
+    +sujetField
     +formExtra
     +'<div class="fg"><span class="fl">Instructions supplémentaires (optionnel)</span><textarea class="fi" id="mvExtra" rows="2" placeholder="Ex: Contextualiser pour élèves de Douala / Inclure exemples concrets / Difficulté progressive…"></textarea></div>'
     +'<div id="mvResult" style="margin-top:14px"></div>',
@@ -36536,7 +36621,8 @@ window._ambassaGenerate = async function(taskId){
   var sujet = ((_ge('mvSujet')||{}).value||'').trim();
   var extra = ((_ge('mvExtra')||{}).value||'').trim();
 
-  if(!sujet || sujet.length < 3){
+  // FIX v1.2 : translate n'utilise pas le champ sujet — validation spécifique par tâche
+  if(taskId !== 'translate' && taskId !== 'doc' && (!sujet || sujet.length < 3)){
     toast('Indiquez le sujet, chapitre ou notion','warn'); return;
   }
 
@@ -36608,6 +36694,26 @@ window._ambassaGenerate = async function(taskId){
         'lexique': 'Extrais le lexique technique/notionnel de ce texte : pour chaque mot-clé donne définition courte (max 2 lignes), classe grammaticale, exemple d\'emploi dans une autre phrase. Présente sous forme de tableau.'
       };
       prompt = 'Document à analyser pour des élèves de '+cls+' en '+mat+', sujet "'+sujet+'" :\n\n«'+doc+'»\n\nTâche : '+actionMap[docAction]+'\n\nRappel : applique les méthodologies MINESEC, n\'invente AUCUN fait hors du texte.';
+      break;
+    case 'translate':
+      // FIX v1.2 : nouvelle fonctionnalité traduction automatique pédagogique
+      var transText = ((_ge('mvTransText')||{}).value||'').trim();
+      var srcLang = (_ge('mvSrcLang')||{}).value || 'fr';
+      var tgtLang = (_ge('mvTgtLang')||{}).value || 'en';
+      if(!transText || transText.length < 10){ toast('Collez un texte à traduire (10 car. min)','warn'); return; }
+      if(transText.length > 2000) transText = transText.substring(0,2000)+'…[tronqué]';
+      var langNames = {fr:'français', en:'anglais', es:'espagnol', ar:'arabe'};
+      var srcName = langNames[srcLang] || srcLang;
+      var tgtName = langNames[tgtLang] || tgtLang;
+      prompt = 'Tu es un traducteur pédagogique expert pour des élèves camerounais (niveau '+cls+').\n\n'
+        + 'Traduis ce texte du '+srcName+' vers le '+tgtName+' :\n\n«'+transText+'»\n\n'
+        + 'Structure ta réponse en 3 parties :\n'
+        + '**📝 TRADUCTION** — Traduis fidèlement en '+tgtName+', naturel et fluide.\n\n'
+        + '**📚 VOCABULAIRE CLÉ** — Tableau : mot original | traduction | exemple d\'usage | synonymes (5-8 mots difficiles).\n\n'
+        + '**💡 NOTES LINGUISTIQUES** — 2-3 observations sur les différences grammaticales, expressions idiomatiques ou faux-amis importants.\n\n'
+        + (extra ? 'Instructions supplémentaires : '+extra+'\n\n' : '')
+        + 'Sois pédagogique et précis. En cas de doute sur une traduction, propose deux variantes.';
+      extra = ''; // déjà inclus dans le prompt
       break;
   }
   if(extra) prompt += '\n\nInstructions supplémentaires : '+extra;

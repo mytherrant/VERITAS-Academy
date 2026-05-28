@@ -60,6 +60,34 @@ if ($userId) {
     @touch($rateFile);
 }
 
+// ── 3bis. 🔐 v1.2.1 RATE LIMIT PAR IP (borne les coûts, indépendant du userId client) ──
+$ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+$ip = explode(',', $ip)[0];
+$ip = preg_replace('/[^0-9a-fA-F:.]/', '', $ip);
+$rateDir = __DIR__ . '/data/_rate/';
+if (!is_dir($rateDir)) @mkdir($rateDir, 0750, true);
+$ipFile = $rateDir . 'ia_' . substr(md5($ip), 0, 16) . '.txt';
+$nowTs = time();
+$ipHits = [];
+if (is_file($ipFile)) {
+    $ipHits = array_filter(explode("\n", (string)file_get_contents($ipFile)), function($t) use ($nowTs){
+        return $t !== '' && ($nowTs - (int)$t) < 86400; // fenêtre glissante 24h
+    });
+}
+$lastMin = array_filter($ipHits, function($t) use ($nowTs){ return ($nowTs - (int)$t) < 60; });
+if (count($lastMin) >= 15) {
+    http_response_code(429);
+    echo json_encode(['error' => 'Trop de requêtes IA (max 15/min). Réessayez dans 1 minute.']);
+    exit;
+}
+if (count($ipHits) >= 300) {
+    http_response_code(429);
+    echo json_encode(['error' => 'Quota IA quotidien atteint pour cette connexion (300/jour).']);
+    exit;
+}
+$ipHits[] = $nowTs;
+@file_put_contents($ipFile, implode("\n", $ipHits), LOCK_EX);
+
 // ── 4. CACHE VALIDÉ : vérifier si la question a déjà une réponse validée ─
 $questionHash = sha1(strtolower(trim($prompt)));
 $cachedAnswer = check_validated_cache($questionHash);
@@ -74,14 +102,25 @@ if ($cachedAnswer !== null) {
 }
 
 // ── 5. CHOIX DU MODÈLE selon le plan ───────────────────────────────────
-$useElite = ($userPlan === 'elite' || $userPlan === 'admin') && $apiKey !== '';
+// 🔐 v1.2.1 : ne JAMAIS faire confiance au "plan" envoyé par le client (auto-déclaré côté navigateur).
+// On vérifie l'abonnement RÉEL côté serveur. En cas de doute → Pollinations (gratuit, zéro coût Anthropic).
+$useElite = ($apiKey !== '') && server_user_is_elite((string)$userId);
+// Moteur gratuit par défaut = Google Gemini Flash (quota gratuit généreux, multilingue FR).
+// ⚠️ Pollinations.ai a été DÉPRÉCIÉ en 2026 → ne plus l'utiliser.
+$geminiKey = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : (getenv('GEMINI_API_KEY') ?: '');
 
 if ($useElite) {
-    // Plan Élite : Claude 3.5 Sonnet via Anthropic
+    // Plan Élite : Claude Sonnet via Anthropic
     [$ok, $text, $error] = call_claude_sonnet($apiKey, $sysPrompt, $ragContext, $prompt);
     $source = 'claude_sonnet';
+} elseif ($geminiKey !== '') {
+    // Tier gratuit / visiteurs : Google Gemini Flash
+    [$ok, $text, $error] = call_gemini($geminiKey, $sysPrompt, $ragContext, $prompt);
+    $source = 'gemini_flash';
 } else {
-    // Autres plans : Pollinations.ai gratuit (fallback)
+    // Dernier recours GRATUIT : Pollinations côté serveur. L'appel navigateur direct est
+    // déprécié, mais depuis l'IP du serveur il répond encore. Si lui aussi tombe,
+    // call_pollinations renvoie un message clair invitant à configurer GEMINI_API_KEY.
     [$ok, $text, $error] = call_pollinations($sysPrompt, $ragContext, $prompt);
     $source = 'pollinations';
 }
@@ -150,10 +189,55 @@ function call_claude_sonnet(string $apiKey, string $sys, string $rag, string $pr
     return [true, $text, null];
 }
 
+function call_gemini(string $apiKey, string $sys, string $rag, string $prompt): array {
+    // Google Gemini Flash — quota gratuit généreux, bon support du français.
+    // Clé gratuite : https://aistudio.google.com/apikey
+    $fullSys = trim($sys);
+    if ($rag !== '') {
+        $fullSys .= "\n\n═══ CONTEXTE FACTUEL (annales et corrigés MINESEC) ═══\n" . $rag
+                  . "\nAppuie-toi sur ce contexte. Si une info manque, dis-le clairement.";
+    }
+    $model = defined('GEMINI_MODEL') ? GEMINI_MODEL : 'gemini-2.5-flash';
+    $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model
+         . ':generateContent?key=' . urlencode($apiKey);
+
+    $payload = json_encode([
+        'systemInstruction' => ['parts' => [['text' => $fullSys !== '' ? $fullSys : 'Tu es un assistant pédagogique.']]],
+        'contents'          => [['role' => 'user', 'parts' => [['text' => $prompt]]]],
+        'generationConfig'  => ['temperature' => 0.7, 'maxOutputTokens' => 2048]
+    ], JSON_UNESCAPED_UNICODE);
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $payload,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 60,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+        CURLOPT_SSL_VERIFYPEER => true
+    ]);
+    $raw  = curl_exec($ch);
+    $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err  = curl_error($ch);
+    curl_close($ch);
+
+    if ($err) return [false, '', 'cURL: ' . $err];
+    if ($http !== 200) return [false, '', 'Gemini HTTP ' . $http . ': ' . substr((string)$raw, 0, 200)];
+
+    $data = json_decode($raw, true);
+    $text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+    if ($text === '') {
+        $blocked = $data['promptFeedback']['blockReason'] ?? ($data['candidates'][0]['finishReason'] ?? '');
+        return [false, '', 'Réponse vide de Gemini' . ($blocked ? ' (' . $blocked . ')' : '')];
+    }
+    return [true, $text, null];
+}
+
 function call_pollinations(string $sys, string $rag, string $prompt): array {
+    // ⚠️ Service gratuit de DERNIER RECOURS — peut être déprécié sans préavis.
     $fullSys = trim($sys);
     if ($rag !== '') $fullSys .= "\n\n[Contexte]\n" . $rag;
-
     $payload = json_encode([
         'messages' => [
             ['role' => 'system', 'content' => $fullSys],
@@ -163,7 +247,6 @@ function call_pollinations(string $sys, string $rag, string $prompt): array {
         'private' => true,
         'stream'  => false
     ], JSON_UNESCAPED_UNICODE);
-
     $ch = curl_init('https://text.pollinations.ai/');
     curl_setopt_array($ch, [
         CURLOPT_POST           => true,
@@ -171,23 +254,26 @@ function call_pollinations(string $sys, string $rag, string $prompt): array {
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT        => 60,
         CURLOPT_CONNECTTIMEOUT => 10,
-        CURLOPT_HTTPHEADER     => ['content-type: application/json']
+        CURLOPT_HTTPHEADER     => ['content-type: application/json'],
+        CURLOPT_SSL_VERIFYPEER => true
     ]);
-    $raw = curl_exec($ch);
+    $raw  = curl_exec($ch);
     $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
+    if ($http !== 200 || $raw === false) return [false, '', 'Pollinations HTTP ' . $http];
 
-    if ($http !== 200 || $raw === false) {
-        return [false, '', 'Pollinations HTTP ' . $http];
-    }
-
-    // Pollinations peut renvoyer du JSON OpenAI OU du texte brut
     $tryJson = json_decode($raw, true);
+    $out = '';
     if (is_array($tryJson) && isset($tryJson['choices'][0]['message']['content'])) {
-        return [true, $tryJson['choices'][0]['message']['content'], null];
+        $out = $tryJson['choices'][0]['message']['content'];
+    } elseif (strlen(trim((string)$raw)) > 20) {
+        $out = trim($raw);
     }
-    if (strlen(trim($raw)) > 20) return [true, trim($raw), null];
-    return [false, '', 'Réponse Pollinations vide'];
+    // Ne JAMAIS renvoyer le message de dépréciation comme une vraie réponse.
+    if ($out === '' || preg_match('/legacy text API|being deprecated|enter\.pollinations/i', $out)) {
+        return [false, '', 'IA gratuite momentanément indisponible — configurez GEMINI_API_KEY (gratuit) dans api/payment_config.php.'];
+    }
+    return [true, $out, null];
 }
 
 function check_validated_cache(string $hash): ?string {
@@ -223,6 +309,51 @@ function store_pending_answer(string $hash, string $q, string $a, string $userId
 function log_request(string $userId, string $plan, string $action, int $bytes): void {
     $line = date('Y-m-d H:i:s') . " | " . $plan . " | " . $userId . " | " . $action . " | " . $bytes . " bytes\n";
     @file_put_contents(__DIR__ . '/data/ia_proxy.log', $line, FILE_APPEND | LOCK_EX);
+}
+
+/**
+ * 🔐 v1.2.1 — Vérifie CÔTÉ SERVEUR si l'utilisateur a droit au modèle Élite (Anthropic).
+ * Lit la base réelle (data/veritas_db.json) au lieu de croire le "plan" envoyé par le client.
+ * Politique fail-safe : toute incertitude (fichier absent, structure inattendue, plan non
+ * identifiable, abonnement expiré) renvoie false → on bascule sur Pollinations (gratuit).
+ */
+function server_user_is_elite(string $userId): bool {
+    if ($userId === '') return false;
+    $dbFile = __DIR__ . '/../data/veritas_db.json';
+    if (!is_file($dbFile)) return false;
+    try {
+        $db = json_decode((string)file_get_contents($dbFile), true);
+        if (!is_array($db)) return false;
+
+        // Admin / super-admin → toujours autorisés
+        foreach (($db['admins'] ?? []) as $a) {
+            if (($a['id'] ?? null) === $userId || ($a['user'] ?? null) === $userId) return true;
+        }
+        if (($db['superAdmin']['user'] ?? null) === $userId) return true;
+
+        // Identifier les plans "Élite" par leur libellé
+        $elitePlanIds = [];
+        foreach (($db['elearning']['plans'] ?? []) as $p) {
+            $hay = strtolower(($p['nom'] ?? '') . ' ' . ($p['tier'] ?? '') . ' ' . ($p['niveau'] ?? ''));
+            if (strpos($hay, 'elite') !== false || strpos($hay, 'élite') !== false) {
+                if (isset($p['id'])) $elitePlanIds[] = $p['id'];
+            }
+        }
+        if (!$elitePlanIds) return false; // aucun plan élite identifié → fail-safe
+
+        // Abonnement actif, non expiré, sur un plan élite, pour ce compte
+        $now = time();
+        foreach (($db['elearning']['abonnements'] ?? []) as $abo) {
+            if (($abo['accountId'] ?? null) !== $userId) continue;
+            if (strtolower($abo['statut'] ?? '') !== 'actif') continue;
+            $fin = !empty($abo['dateFin']) ? strtotime($abo['dateFin']) : 0;
+            if ($fin && $fin < $now) continue; // expiré
+            if (in_array(($abo['planId'] ?? null), $elitePlanIds, true)) return true;
+        }
+    } catch (Throwable $e) {
+        return false;
+    }
+    return false;
 }
 
 function get_pdo(): ?PDO {

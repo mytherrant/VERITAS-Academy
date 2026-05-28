@@ -46,6 +46,7 @@ jobs:
       - name: 📋 Préparer les fichiers
         run: |
           mkdir -p deploy/api \
+                   deploy/data \
                    deploy/api/data \
                    deploy/uploads/veritas \
                    deploy/uploads/media \
@@ -131,6 +132,13 @@ jobs:
           if [ -f api/data/index.php ]; then
             cp api/data/index.php deploy/api/data/
           fi
+          # ── v1.2.1 : protéger le dossier data/ RACINE où db.php écrit veritas_db.json ──
+          #    Sans .htaccess ici, /data/veritas_db.json serait téléchargeable directement (toute la base).
+          if [ -f data/.htaccess ]; then
+            cp data/.htaccess deploy/data/
+            echo "  ✓ data/.htaccess (bloque le téléchargement direct de la base)"
+          fi
+          printf '<?php http_response_code(403); exit;' > deploy/data/index.php
 
           # ── Évaluations et cours interactifs ────────────────────
           if [ -d evaluations ]; then cp -r evaluations/ deploy/evaluations/; fi

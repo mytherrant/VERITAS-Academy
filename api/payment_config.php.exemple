@@ -61,6 +61,28 @@ define('PUBLIC_FRONTEND_URL',  'https://veritas-school.com');     // page d'accu
 define('PAY_API_SECRET',       'VERITAS-CLOUD-2026-xK9m');
 
 // ============================================================
+// 🤖 IA — Prof. Ambassa (api/ia_proxy.php)
+// ============================================================
+// La clé reste CÔTÉ SERVEUR (jamais exposée au navigateur).
+//
+// 👉 GRATUIT (recommandé) — Google Gemini Flash :
+//    1. Allez sur https://aistudio.google.com/apikey
+//    2. « Create API key » (gratuit, quota généreux ~1500 req/jour)
+//    3. Collez la clé ci-dessous.
+define('GEMINI_API_KEY',  '');                 // ← clé Gemini gratuite (laisser vide = IA désactivée)
+define('GEMINI_MODEL',    'gemini-2.5-flash'); // rapide & multilingue (gemini-2.0-flash hors tier gratuit en 2026)
+//
+// 👉 PAYANT (optionnel) — Claude pour le « Plan Élite » :
+//    https://console.anthropic.com → API Keys. Si vide, l'Élite utilise aussi Gemini.
+define('ANTHROPIC_API_KEY', '');               // ← clé Anthropic (optionnel, pour Sonnet)
+
+// ============================================================
+// 🔐 TOKEN ADMIN — validation des réponses IA (api/admin_validate.php)
+// ============================================================
+// Choisissez une longue chaîne aléatoire et gardez-la secrète.
+define('ADMIN_TOKEN',     'CHANGEZ_MOI_token_admin_long_et_aleatoire');
+
+// ============================================================
 // 🔧 CORS — ne pas modifier sauf nécessité
 // ============================================================
 header('Access-Control-Allow-Origin: *');
