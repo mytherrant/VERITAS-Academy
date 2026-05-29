@@ -3939,6 +3939,14 @@ tr:hover td:first-child {
     transition-duration:.001ms !important; scroll-behavior:auto !important;
   }
 }
+/* ── DS v3 : focus clavier visible sur tous les éléments interactifs (a11y) ── */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible,
+textarea:focus-visible, [role="button"]:focus-visible, [role="menuitem"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--ds-accent,#FFC93C) !important;
+  outline-offset: 2px !important;
+  border-radius: 6px;
+}
 
 /* ── B8. CHAMPS FORMULAIRE — ring visible même sans focus ── */
 .fi, .lf input, .fg input, .fg select, .fg textarea {
