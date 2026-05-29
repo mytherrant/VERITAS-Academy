@@ -4436,7 +4436,7 @@ const FIREBASE_DB_URL_BACKUP = 'https://veritas-school-a39ab-default-rtdb.europe
 // (l'auth anonyme générait un userId qu'on peut désormais générer côté client).
 // Pour réactiver Firebase un jour : remettre la clé API ici.
 const FIREBASE_API_KEY = ''; // Désactivé — backend unique = LWS api/db.php
-const FIREBASE_API_KEY_BACKUP = 'AIzaSyAIw7PFgQTCkIEgCv32DbqGVfwR-_UwC-E'; // Conservée pour réactivation future
+const FIREBASE_API_KEY_BACKUP = ''; // v1.2.2 : clé retirée du source (sensible). Conservez-la hors-ligne (gestionnaire de mots de passe) pour une éventuelle réactivation.
 
 // Cache persistant : 1 utilisateur anonyme par navigateur (pas un à chaque ouverture)
 window._fbAuth = (function(){
@@ -4830,26 +4830,26 @@ function defaultDB(){return{
     {id:'pc3',code:'LOT3LIVRES',reduction:15,type:'percent',desc:'15% pour 3 livres ou plus',actif:true,usage:0},
   ],
   admins:[
-    {id:'a1',user:'directeur',pwd:'Veritas2024!',nom:'M. Jacques Miterand TAKOU',role:'Directeur',role2:'admin'},
-    {id:'a2',user:'secretaire',pwd:'Secret@2024',nom:'Secrétaire Générale',role:'Secrétaire',role2:'secretaire'},
+    {id:'a1',user:'directeur',pwd:'S256$d37dbcfb73065406d0a5dfc505d5d4151cedb105e040f355fa65e94e8dbf64fd',nom:'M. Jacques Miterand TAKOU',role:'Directeur',role2:'admin'},
+    {id:'a2',user:'secretaire',pwd:'S256$bf20435047cdcc54f4ecf9784b254df9fd791c719f03f92d69824d67c119a710',nom:'Secrétaire Générale',role:'Secrétaire',role2:'secretaire'},
   ],
-  superAdmin:{user:'superadmin',pwd:'VERITAS_Super@2024!',nom:'Super Administrateur'},
+  superAdmin:{user:'superadmin',pwd:'S256$a8db425c67bd37c70b295aaf010169d7ffd2c98f0ee88f7b766d77c870fbc330',nom:'Super Administrateur'},
   studentAccounts:[
-    {id:'sa1',eid:'s1',user:'VRT-001',pwd:'Mballa2024!',lastLogin:null},
-    {id:'sa2',eid:'s2',user:'VRT-002',pwd:'Nkeng2024!',lastLogin:null},
-    {id:'sa3',eid:'s3',user:'VRT-003',pwd:'Fouda2024!',lastLogin:null},
-    {id:'sa4',eid:'s4',user:'VRT-004',pwd:'Bella2024!',lastLogin:null},
-    {id:'sa5',eid:'s5',user:'VRT-005',pwd:'Tchinda2024!',lastLogin:null},
+    {id:'sa1',eid:'s1',user:'VRT-001',pwd:'S256$079f4c6e2c9604d690ced677b78d7ddf8aae39eb0aee33b235dd2b7902d67268',lastLogin:null},
+    {id:'sa2',eid:'s2',user:'VRT-002',pwd:'S256$bde3475bd135d53c475c6cd18c73eb130b62dc28aad6e29830e0ae75325cd468',lastLogin:null},
+    {id:'sa3',eid:'s3',user:'VRT-003',pwd:'S256$d4b3b12bc64579c98615dc4b3bc197cb204978c439c8384118eaba84fd662aef',lastLogin:null},
+    {id:'sa4',eid:'s4',user:'VRT-004',pwd:'S256$7bcf6362a10dbff8877d07d08c10d5b72943da818052a96229cd07fb7ebad3b7',lastLogin:null},
+    {id:'sa5',eid:'s5',user:'VRT-005',pwd:'S256$d552f59b0c7385a0c9edd1ab7e7dbb405d0ff4f0ff1b2c6b256552e3bf7b6e1b',lastLogin:null},
     // ═══ Comptes classe virtuelle 3ème ═══
-    {id:'sa19',eid:'s19',user:'VRT-019',pwd:'Atangana2024!',lastLogin:null},
-    {id:'sa20',eid:'s20',user:'VRT-020',pwd:'Fouda2024!',lastLogin:null},
-    {id:'sa21',eid:'s21',user:'VRT-021',pwd:'Nkoulou2024!',lastLogin:null},
-    {id:'sa22',eid:'s22',user:'VRT-022',pwd:'Minkoulou2024!',lastLogin:null},
-    {id:'sa23',eid:'s23',user:'VRT-023',pwd:'Essomba2024!',lastLogin:null},
-    {id:'sa24',eid:'s24',user:'VRT-024',pwd:'Bella2024!',lastLogin:null},
-    {id:'sa25',eid:'s25',user:'VRT-025',pwd:'Owono2024!',lastLogin:null},
+    {id:'sa19',eid:'s19',user:'VRT-019',pwd:'S256$fb33bfaac68fc75200aadb3e16826008c67f6c51de75b8b5d4f1cca7dad0f9f5',lastLogin:null},
+    {id:'sa20',eid:'s20',user:'VRT-020',pwd:'S256$9d8217e2d6cfa82b73c017b8a630a2f7ded4859ff4a84c029fb841128ddbca0e',lastLogin:null},
+    {id:'sa21',eid:'s21',user:'VRT-021',pwd:'S256$715dd322c9a5d5b31dea7d2cb654bf173e74dd451ce12cbb13e809700c9620f8',lastLogin:null},
+    {id:'sa22',eid:'s22',user:'VRT-022',pwd:'S256$1d35fbf1c6fca9103d0d5ff98620bcc8eba37a79140c526a665fa1c7ce15b4fa',lastLogin:null},
+    {id:'sa23',eid:'s23',user:'VRT-023',pwd:'S256$17a424168b23aba8f20209d5946038ba821fc22c2feab6b9bf2fdf6033e4caf9',lastLogin:null},
+    {id:'sa24',eid:'s24',user:'VRT-024',pwd:'S256$93f7cdd7fa305a4f692eef70a975e305a06b44db6ecfbf503c4cb5aebd1f29d0',lastLogin:null},
+    {id:'sa25',eid:'s25',user:'VRT-025',pwd:'S256$458953c8eacab25253db7cfab9ef7ab7924e3054dc351080722d593de0a2ce48',lastLogin:null},
   ],
-  tpwd:{'kofi.diallo':'Maths2024!','rose.adjobi':'Francais2024!','thomas.mbem':'Physique2024!','cecile.essono':'SVT2024!'},
+  tpwd:{'kofi.diallo':'S256$66aed16ea24091321c404c74f263d5b81d480461b6bd7e23c4b67a701dfe6744','rose.adjobi':'S256$82a0c5ead72ce3f521709b89a82cd5f0c5ae074dc2bdf6a86c7f70951422047a','thomas.mbem':'S256$a53d8153547781cfb92d6a3e0101186a351a9ffe74ec1c3ccb6457967386f69c','cecile.essono':'S256$bc18521cdc97dfaea76b1586555bc17baeb40fb0ce7b943e25da9d0bc08cb167'},
   announce:[
     {id:'an1',titre:"Réunion parents d\'élèves — Novembre",date:'2024-11-15',desc:'Réunion pour présenter les résultats du 1er trimestre. Présence obligatoire.',type:'reunion',urg:false},
     {id:'an2',titre:'Examens blancs BEPC — Décembre',date:'2024-12-05',desc:'Les examens blancs auront lieu du 5 au 10 décembre.',type:'exam',urg:true},
@@ -5150,8 +5150,8 @@ function defaultDB(){return{
     {id:'rv8',bid:'b2',nom:'Marie-Claire BELLA',role:'Élève - Tle A',stars:5,text:'La méthodologie de dissertation est excellente. J\'ai gagné 3 points grâce à ce livre !',date:'2024-10-10',verified:true},
   ],
   authors:[
-    {id:'au1',user:'minesec_ed',pwd:'Author2024!',nom:'MINESEC Éditions',email:'',tel:'',bio:'Éditeur officiel du Ministère de l\'Enseignement Secondaire du Cameroun.',share:60,status:'approved',books:['b1','b3'],gains:0},
-    {id:'au2',user:'editions_cle',pwd:'Author2024!',nom:'Éditions Clé',email:'',tel:'',bio:'Maison d\'édition camerounaise spécialisée en littérature et sciences humaines.',share:60,status:'approved',books:['b2'],gains:0},
+    {id:'au1',user:'minesec_ed',pwd:'S256$3a93516ced34b148af7ec14b4cb29d76ae414666b7152461ccbb205d03e74b61',nom:'MINESEC Éditions',email:'',tel:'',bio:'Éditeur officiel du Ministère de l\'Enseignement Secondaire du Cameroun.',share:60,status:'approved',books:['b1','b3'],gains:0},
+    {id:'au2',user:'editions_cle',pwd:'S256$df9772e6d67ead67802e5c97f41b3c7cbb870e3384c3526ee595dceeb64a8942',nom:'Éditions Clé',email:'',tel:'',bio:'Maison d\'édition camerounaise spécialisée en littérature et sciences humaines.',share:60,status:'approved',books:['b2'],gains:0},
   ],
   authorShare:60,
   citations:[
@@ -5320,7 +5320,7 @@ function _migrateDB(){
   if(!DB.tpwd)DB.tpwd=defaultDB().tpwd;
   DB.admins.forEach(function(a){if(!a.role2)a.role2=a.role==='Directeur'?'admin':'secretaire';});
   if(!DB.admins.find(function(a){return a.user==='directeur';})){
-    DB.admins.push({id:'a1',user:'directeur',pwd:'Veritas2024!',nom:'M. Jacques Miterand TAKOU',role:'Directeur',role2:'admin',_pwdMustChange:true});
+    DB.admins.push({id:'a1',user:'directeur',pwd:'S256$d37dbcfb73065406d0a5dfc505d5d4151cedb105e040f355fa65e94e8dbf64fd',nom:'M. Jacques Miterand TAKOU',role:'Directeur',role2:'admin',_pwdMustChange:true});
   }
   // ── 🔐 v1.2.2 SÉCURITÉ : alerter si mots de passe par défaut encore actifs ──
   // CORRECTIF : l'ancienne version comparait au mot de passe EN CLAIR → inopérante
@@ -6022,12 +6022,16 @@ async function _warnDefaultPasswords(){
   // Ne déranger qu'un admin connecté (pas un visiteur sur une DB fraîchement initialisée)
   if(typeof iA!=='function'||!iA())return;
   try{
-    var defaults=[{user:'directeur',pwd:'Veritas2024!'},{user:'superadmin',pwd:'VERITAS_Super@2024!'}];
+    // v1.2.2 : comparaison par HASH (plus aucun mot de passe en clair dans le source).
+    var defaults=[
+      {user:'directeur', hash:'S256$d37dbcfb73065406d0a5dfc505d5d4151cedb105e040f355fa65e94e8dbf64fd'},
+      {user:'superadmin',hash:'S256$a8db425c67bd37c70b295aaf010169d7ffd2c98f0ee88f7b766d77c870fbc330'}
+    ];
     for(var i=0;i<defaults.length;i++){
       var d=defaults[i], who=null;
       var a=(DB.admins||[]).find(function(x){return x.user===d.user;});
-      if(a && (await _pwdIsDefault(a.pwd,d.pwd,a.user))) who='Le compte « '+d.user+' »';
-      if(!who && DB.superAdmin && DB.superAdmin.user===d.user && (await _pwdIsDefault(DB.superAdmin.pwd,d.pwd,DB.superAdmin.user))) who='Le Super Admin « '+d.user+' »';
+      if(a && a.pwd===d.hash) who='Le compte « '+d.user+' »';
+      if(!who && DB.superAdmin && DB.superAdmin.user===d.user && DB.superAdmin.pwd===d.hash) who='Le Super Admin « '+d.user+' »';
       if(who){
         console.warn('⚠️ SÉCURITÉ : '+who+' utilise encore le mot de passe par défaut.');
         if(typeof toast==='function')toast('🚨 '+who+' : mot de passe par défaut — à changer','warn');
@@ -10912,14 +10916,27 @@ function createAuthorAccount(){
   if(!nom||!user){toast('Nom et identifiant requis','warn');return;}
   if((DB.authors||[]).find(function(a){return a.user===user;})){toast('Identifiant déjà utilisé','warn');return;}
   if(!DB.authors)DB.authors=[];
+  // v1.2.2 : mot de passe ALÉATOIRE par auteur (plus de défaut codé en dur).
+  // Stocké tel quel puis haché au prochain chargement (_migratePasswords).
+  var _tmpPwd='VRT'+Math.random().toString(36).slice(2,7)+'@'+Math.floor(100+Math.random()*900);
   DB.authors.push({
-    id:gid(),user:user,pwd:'Author2024!',nom:nom,
+    id:gid(),user:user,pwd:_tmpPwd,nom:nom,
     email:document.getElementById('auEmail')?.value||'',
     tel:document.getElementById('auTel')?.value||'',
     bio:document.getElementById('auBio')?.value||'',
     share:DB.authorShare||60,status:'approved',books:[],gains:0
   });
-  save();re();toast('✓ Compte auteur créé pour '+nom+'. Mot de passe: Author2024!');
+  save();re();
+  // Afficher les identifiants UNE fois (à transmettre à l'auteur) — non réaffichés ensuite.
+  if(typeof M==='function'){
+    M('✓ Compte auteur créé','Transmettez ces identifiants à '+_esc(nom),
+      '<div class="fg"><span class="fl">Identifiant</span><input class="fi" value="'+_esc(user)+'" readonly onclick="this.select()"></div>'
+      +'<div class="fg"><span class="fl">Mot de passe provisoire</span><input class="fi" value="'+_esc(_tmpPwd)+'" readonly onclick="this.select()"></div>'
+      +'<p style="font-size:13px;color:var(--ds-text-3,#7A88A6);line-height:1.5">Notez-le maintenant : il ne sera plus affiché et sera stocké sous forme hachée. L\'auteur pourra le modifier ensuite.</p>',
+      '<button class="btn bi" onclick="cm()">✓ J\'ai noté</button>');
+  } else {
+    toast('✓ Compte auteur créé. Mot de passe provisoire : '+_tmpPwd,'ok');
+  }
 }
 
 function pgReleveTemplate(){
