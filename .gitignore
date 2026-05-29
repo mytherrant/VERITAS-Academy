@@ -59,6 +59,9 @@ _check*.js
 # Build local FTP
 deploy/
 
+# Graphe de connaissance graphify — local uniquement (régénérable, jamais déployé)
+graphify-out/
+
 # Fichiers de travail temporaires
 app.html
 VERITAS_v1.0.html

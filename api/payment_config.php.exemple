@@ -57,8 +57,13 @@ define('PUBLIC_FRONTEND_URL',  'https://veritas-school.com');     // page d'accu
 // ============================================================
 // Doit correspondre à DB.cloudConfig.secret côté frontend
 // (visible dans VÉRITAS → Admin → Paramètres → Cloud)
-
-define('PAY_API_SECRET',       'VERITAS-CLOUD-2026-xK9m');
+//
+// 🔁 ROTATION v1.2.2 : GÉNÉREZ une nouvelle valeur aléatoire longue
+//    (ex. en SSH : `openssl rand -hex 24`) et NE RÉUTILISEZ PAS l'ancienne
+//    'VERITAS-CLOUD-2026-xK9m' qui a fuité (elle était dans le HTML public).
+//    Mettez la MÊME valeur dans l'admin VÉRITAS → Paramètres → Cloud.
+define('API_SECRET',           'GENEREZ_UN_SECRET_ALEATOIRE_LONG'); // ← sync DB (config_sync.php / db.php)
+define('PAY_API_SECRET',       'GENEREZ_UN_SECRET_ALEATOIRE_LONG'); // ← peut être identique à API_SECRET
 
 // ============================================================
 // 🤖 IA — Prof. Ambassa (api/ia_proxy.php)
@@ -83,9 +88,19 @@ define('ANTHROPIC_API_KEY', '');               // ← clé Anthropic (optionnel,
 define('ADMIN_TOKEN',     'CHANGEZ_MOI_token_admin_long_et_aleatoire');
 
 // ============================================================
-// 🔧 CORS — ne pas modifier sauf nécessité
+// 🔧 CORS — v1.2.2 : allowlist stricte (plus de '*')
 // ============================================================
-header('Access-Control-Allow-Origin: *');
+// Inclus par ia_proxy.php / admin_validate.php / payment_*.php.
+// L'app web et l'app mobile Capacitor sont servies depuis veritas-school.com.
+$__pc_allowed = [
+    'https://veritas-school.com', 'https://www.veritas-school.com',
+    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+];
+$__pc_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__pc_origin, $__pc_allowed, true)) {
+    header('Access-Control-Allow-Origin: ' . $__pc_origin);
+    header('Vary: Origin');
+}
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Max-Age: 86400');

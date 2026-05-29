@@ -19,7 +19,17 @@
 declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
-header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
+// 🔐 v1.2.2 : CORS en allowlist (ne plus refléter aveuglément l'origine →
+// empêche un site tiers de bruler votre quota IA depuis le navigateur d'un visiteur).
+$__ia_allowed = [
+    'https://veritas-school.com', 'https://www.veritas-school.com',
+    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+];
+$__ia_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__ia_origin, $__ia_allowed, true)) {
+    header('Access-Control-Allow-Origin: ' . $__ia_origin);
+    header('Vary: Origin');
+}
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-User-Id, X-User-Plan');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 
