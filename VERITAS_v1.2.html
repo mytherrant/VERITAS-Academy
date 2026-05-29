@@ -7940,7 +7940,9 @@ function vShowSec(sec,btn){
   if(!c){if(typeof window._pendingVShowSec!=="undefined")return;window._pendingVShowSec={sec:sec,btn:btn};setTimeout(function(){delete window._pendingVShowSec;vShowSec(sec,btn);},200);return;}
   if(sec==="presentation"){
     const pi=DB.publicInfo||{};
-    var _heroVideoHtml=buildIntroVideoHtml();
+    var _iv=(DB&&DB.introVideo)||{};
+    // Si aucune vidéo d'intro n'est configurée, on remplit le panneau gauche par le Palmarès (émulation)
+    var _heroVideoHtml=(_iv.src||_iv.idbKey||typeof _palmaresHtml!=='function')?buildIntroVideoHtml():_palmaresHtml();
     c.innerHTML=`<div class="vsec">
     <!-- ═══ VIDÉO + ACTUALITÉS CÔTE À CÔTE ═══ -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;min-height:320px" id="vHeroGrid">
@@ -16697,6 +16699,42 @@ function mManageTicker(){
 // Nouveau comportement : la vidéo remplit entièrement sa cellule (même dimension que le
 // panneau Hero de gauche). Overlay texte transparent posé sur la vidéo.
 // Autoplay : muet au démarrage (imposé par les navigateurs), bouton 🔊 pour activer le son.
+// v1.2.1 — Widget « Palmarès de la semaine » : remplit le panneau hero si pas de vidéo.
+// Émulation : manuel star, mieux noté, battle hebdo, rejoindre le classement.
+window._palmaresHtml = function(){
+  var books=DB.books||[];
+  var orders=(DB.visitorOrders||[]).concat(DB.bookPurchases||[]);
+  var cnt={}; orders.forEach(function(o){ if(o&&o.bid) cnt[o.bid]=(cnt[o.bid]||0)+1; });
+  var topBid=null,topN=0; for(var k in cnt){ if(cnt[k]>topN){topN=cnt[k];topBid=k;} }
+  var topBook=(topBid&&books.find(function(b){return b.id===topBid;})) || books.find(function(b){return b.featured;}) || books[0] || null;
+  var bestRated=null,bestAvg=0;
+  if(typeof getBookRating==='function'){ books.forEach(function(b){ var r=getBookRating(b.id); if(r.count>0 && r.avg>bestAvg){bestAvg=r.avg;bestRated=b;} }); }
+  var battleN=0; try{ if(DB.battles){ var bs=Array.isArray(DB.battles)?DB.battles:Object.values(DB.battles); battleN=bs.length; } }catch(e){}
+  var nApp=(DB.students||[]).length+(DB.visitorAccounts||[]).length;
+  var tile=function(o){
+    return '<div onclick="'+o.click+'" style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:13px;background:#fff;border:1px solid #E6EAF2;border-left:4px solid '+o.color+';cursor:pointer;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 10px 22px rgba(20,37,84,.10)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">'
+      +'<div style="flex-shrink:0;width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:21px;background:color-mix(in srgb,'+o.color+' 14%,#fff)">'+o.ico+'</div>'
+      +'<div style="min-width:0;flex:1">'
+        +'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:color-mix(in srgb,'+o.color+' 60%,#0D1B3E)">'+o.label+'</div>'
+        +'<div style="font-size:13.5px;font-weight:800;color:#142554;line-height:1.25;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+o.title+'</div>'
+        +(o.sub?'<div style="font-size:10.5px;color:#5B6B85;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+o.sub+'</div>':'')
+      +'</div><div style="color:#C3CCDD;font-size:15px;flex-shrink:0">→</div></div>';
+  };
+  var tiles='';
+  if(topBook){ tiles+=tile({color:'#F59E0B',ico:(topBook.ico||'📘'),label:topN>0?'Manuel le plus commandé':'Manuel à la une',title:_esc(topBook.titre),sub:topN>0?(topN+' commande'+(topN>1?'s':'')+' · '+_esc(topBook.cls)):_esc(topBook.cls),click:"viewBookDetail('"+topBook.id+"')"}); }
+  if(bestRated&&bestRated!==topBook){ tiles+=tile({color:'#10B981',ico:'⭐',label:'Le mieux noté',title:_esc(bestRated.titre),sub:'Note '+bestAvg.toFixed(1)+'/5 par les élèves',click:"viewBookDetail('"+bestRated.id+"')"}); }
+  tiles+=tile({color:'#FB923C',ico:'⚔️',label:'Battle de la semaine',title:'10 QCM · Classement national',sub:battleN>0?(battleN+' duel'+(battleN>1?'s':'')+' en cours'):'+50 XP — relevez le défi !',click:"(typeof mBattles===\'function\'?mBattles():showJeuxEdu())"});
+  tiles+=tile({color:'#7C3AED',ico:'🔥',label:'Rejoignez le palmarès',title:'XP · Badges · Niveaux',sub:nApp>0?('Déjà '+nApp+' apprenants inscrits'):'Soyez le premier !',click:"(typeof showRegisterForm===\'function\'?showRegisterForm():null)"});
+  return '<div style="min-height:300px;height:100%;background:linear-gradient(180deg,#fff,#F7F9FF);border:1px solid #E6EAF2;border-radius:var(--r3,20px);box-shadow:0 4px 24px rgba(20,37,84,.08);display:flex;flex-direction:column;overflow:hidden">'
+    +'<div style="padding:14px 16px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;display:flex;align-items:center;gap:10px;flex-shrink:0">'
+      +'<span style="font-size:22px">🏆</span>'
+      +'<div><div style="font-family:var(--ds-font-display,Montserrat),sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px">Palmarès de la semaine</div>'
+      +'<div style="font-size:10px;color:#FFC93C;font-weight:700;letter-spacing:1px;text-transform:uppercase">L\'émulation VÉRITAS</div></div>'
+    +'</div>'
+    +'<div style="padding:12px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto">'+tiles+'</div>'
+  +'</div>';
+};
+
 function buildIntroVideoHtml(){
   var v=DB&&DB.introVideo;
   var nom=(DB&&DB.school&&DB.school.nom)||"VÉRITAS";
