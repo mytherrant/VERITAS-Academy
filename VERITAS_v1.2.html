@@ -34811,21 +34811,20 @@ window._engagementBannerHtml = function(){
   // Lisibilité maximale avec texte clair sur fond contrôlé
   var cardStyle = function(accent){
     return 'background:'
-      + 'radial-gradient(circle at top right, '+accent+'33 0%, transparent 55%),'
-      + 'linear-gradient(160deg, rgba(20,37,84,.92), rgba(13,27,62,.96));'
-      + 'color:#fff;padding:16px;border-radius:16px;cursor:pointer;'
-      + 'border:1px solid '+accent+'30;'
-      + 'box-shadow:0 6px 20px rgba(13,27,62,.25), inset 0 1px 0 rgba(255,255,255,.06);'
-      + 'backdrop-filter:blur(10px);transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;'
+      + 'linear-gradient(160deg, color-mix(in srgb, '+accent+' 14%, #fff) 0%, color-mix(in srgb, '+accent+' 5%, #fff) 55%, #ffffff 100%);'
+      + 'color:#142554;padding:16px;border-radius:16px;cursor:pointer;'
+      + 'border:1px solid color-mix(in srgb, '+accent+' 28%, #E6EAF2);border-top:3px solid '+accent+';'
+      + 'box-shadow:0 6px 20px rgba(20,37,84,.08), 0 1px 3px rgba(20,37,84,.06);'
+      + 'transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;'
       + 'position:relative;overflow:hidden';
   };
   var cardHover = function(accent){
-    return 'this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 14px 32px rgba(13,27,62,.35), 0 0 0 1px '+accent+'55, inset 0 1px 0 rgba(255,255,255,.08)\'';
+    return 'this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 18px 40px rgba(20,37,84,.16)\'';
   };
-  var cardOut = 'this.style.transform=\'\';this.style.boxShadow=\'0 6px 20px rgba(13,27,62,.25), inset 0 1px 0 rgba(255,255,255,.06)\'';
-  // Labels avec accent doré subtil pour lisibilité
+  var cardOut = 'this.style.transform=\'\';this.style.boxShadow=\'0 6px 20px rgba(20,37,84,.08), 0 1px 3px rgba(20,37,84,.06)\'';
+  // Labels : accent assombri pour rester lisible sur fond clair
   var labelStyle = function(accent){
-    return 'font-size:10px;color:'+accent+';text-transform:uppercase;letter-spacing:1.8px;font-weight:800;opacity:.95';
+    return 'font-size:10px;color:color-mix(in srgb, '+accent+' 62%, #0D1B3E);text-transform:uppercase;letter-spacing:1.8px;font-weight:800';
   };
 
   // Couleurs d'accent (en hex pour permettre l'ajout de 33/55 d'opacité)
@@ -34839,32 +34838,32 @@ window._engagementBannerHtml = function(){
     // Sujet du jour — accent violet doux
     +'<div onclick="mSujetDuJour()" style="'+cardStyle(accentSujet)+'" onmouseover="'+cardHover(accentSujet)+'" onmouseout="'+cardOut+'">'
       +'<div style="'+labelStyle(accentSujet)+'">☀ Sujet du jour</div>'
-      +'<div style="font-size:14px;font-weight:800;margin-top:6px;line-height:1.4;color:rgba(255,255,255,.95)">'+_esc(sj.q.substring(0,70))+(sj.q.length>70?'…':'')+'</div>'
-      +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">Niveau : '+sj.lvl+' →</div>'
+      +'<div style="font-size:14px;font-weight:800;margin-top:6px;line-height:1.4;color:#142554">'+_esc(sj.q.substring(0,70))+(sj.q.length>70?'…':'')+'</div>'
+      +'<div style="font-size:11px;color:#5B6B85;margin-top:8px">'+(sj.mat?_esc(sj.mat)+' · ':'')+'Niveau : '+_esc(sj.lvl)+' →</div>'
     +'</div>'
     // BAC countdown — accent dynamique (rouge/jaune/bleu) doux
     +'<div onclick="mBacCountdown()" style="'+cardStyle(accentBAC)+'" onmouseover="'+cardHover(accentBAC)+'" onmouseout="'+cardOut+'">'
       +'<div style="'+labelStyle(accentBAC)+'">◷ Compte à rebours BAC</div>'
-      +'<div style="font-size:34px;font-weight:900;line-height:1;margin-top:6px;color:#fff;font-family:\'Libre Baskerville\',serif">'+days+'<span style="font-size:14px;font-weight:600;color:rgba(255,255,255,.6);margin-left:6px">jours</span></div>'
-      +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">→ Mission du jour</div>'
+      +'<div style="font-size:34px;font-weight:900;line-height:1;margin-top:6px;color:#142554;font-family:\'Libre Baskerville\',serif">'+days+'<span style="font-size:14px;font-weight:600;color:#5B6B85;margin-left:6px">jours</span></div>'
+      +'<div style="font-size:11px;color:#5B6B85;margin-top:8px">→ Mission du jour</div>'
     +'</div>'
     // Battles — accent orange doux
     +'<div onclick="mBattles()" style="'+cardStyle(accentBattle)+'" onmouseover="'+cardHover(accentBattle)+'" onmouseout="'+cardOut+'">'
       +'<div style="'+labelStyle(accentBattle)+'">⚔ Battle hebdo</div>'
-      +'<div style="font-size:14px;font-weight:800;margin-top:6px;color:rgba(255,255,255,.95)">10 QCM · Classement national</div>'
-      +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">+ 50 XP par participation →</div>'
+      +'<div style="font-size:14px;font-weight:800;margin-top:6px;color:#142554">10 QCM · Classement national</div>'
+      +'<div style="font-size:11px;color:#5B6B85;margin-top:8px">+ 50 XP par participation →</div>'
     +'</div>'
     // Mon parcours (si connecté) — accent vert doux / sinon jaune doux
     +(ses && streak
       ? '<div onclick="mMonParcours()" style="'+cardStyle(accentParcoursOK)+'" onmouseover="'+cardHover(accentParcoursOK)+'" onmouseout="'+cardOut+'">'
         +'<div style="'+labelStyle(accentParcoursOK)+'">✦ Mon parcours</div>'
-        +'<div style="font-size:24px;font-weight:900;margin-top:6px;color:#fff;font-family:\'Libre Baskerville\',serif">'+streak.current+' j · '+streak.xp+' XP</div>'
-        +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">'+_currentLevel(streak.xp).current.title+' →</div>'
+        +'<div style="font-size:24px;font-weight:900;margin-top:6px;color:#142554;font-family:\'Libre Baskerville\',serif">'+streak.current+' j · '+streak.xp+' XP</div>'
+        +'<div style="font-size:11px;color:#5B6B85;margin-top:8px">'+_currentLevel(streak.xp).current.title+' →</div>'
       +'</div>'
       : '<div onclick="showRegisterForm()" style="'+cardStyle(accentParcoursKO)+'" onmouseover="'+cardHover(accentParcoursKO)+'" onmouseout="'+cardOut+'">'
         +'<div style="'+labelStyle(accentParcoursKO)+'">✦ Mon parcours</div>'
-        +'<div style="font-size:14px;font-weight:800;margin-top:6px;color:rgba(255,255,255,.95)">Inscrivez-vous gratuitement</div>'
-        +'<div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:8px">Streak · XP · Niveaux →</div>'
+        +'<div style="font-size:14px;font-weight:800;margin-top:6px;color:#142554">Inscrivez-vous gratuitement</div>'
+        +'<div style="font-size:11px;color:#5B6B85;margin-top:8px">Streak · XP · Niveaux →</div>'
       +'</div>'
     )
     +'</div>';
