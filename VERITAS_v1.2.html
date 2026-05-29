@@ -13008,6 +13008,7 @@ const SANAV=[
     {k:"calendrier_admin",i:"📅",l:"Calendrier scolaire"}
   ]},
   {s:"⚙️ Système",i:[
+    {k:"sacontrol",i:"👑",l:"Centre de contrôle SA"},
     {k:"accounts",i:"⨡",l:"Comptes admin/enseignants"},
     {k:"visitor_accounts",i:"👥",l:"Comptes visiteurs inscrits"},
     {k:"settings",i:"⊙",l:"Paramètres école"},
@@ -13067,6 +13068,7 @@ const PT={
   cms:"Portail visiteur (CMS)",
   // Super Admin
   superoverview:"Vue d'ensemble système",
+  sacontrol:"Centre de contrôle Super Admin",
   loginlog:"Journal des connexions",
   allaccounts:"Tous les comptes",
   // Pages enseignant
@@ -13145,7 +13147,7 @@ function render(p){
     marketplace_teacher:pgMarketplaceEnseignant,parrainage_teacher:pgParrainageEns,
     ambassa:pgAmbassa,
     // Super Admin
-    superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,
+    superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,sacontrol:pgSAControl,
     // Guide d'utilisation (tous rôles)
     guide:pgGuide,
   };
@@ -13947,6 +13949,185 @@ function _cmsAddNiveau(ei){
 function _cmsDelNiveau(ei,ni){
   if(!DB.examResults[ei])return;
   DB.examResults[ei].niveaux.splice(ni,1);save();re();toast('Niveau supprimé');
+}
+// ════════════════════════════════════════════════════════════════════════
+// 👑 v1.2.2 — CENTRE DE CONTRÔLE SUPER ADMIN (bundles 1 Config/Sauvegarde,
+// 2 Comptes/Sécurité, 4 Finances/Intégrité). Gated isSA(). Réutilise
+// mSyncDiag, exportSQL, mPayAttempts, hashPassword, _loginLock.
+// ════════════════════════════════════════════════════════════════════════
+function pgSAControl(){
+  if(!isSA()) return na();
+  if(!DB.parrainRate) DB.parrainRate={forfait:500,pct:0};
+  var lastBak = DB.lastBackup ? DB.lastBackup : 'jamais';
+  var locks=(typeof _loginLock!=='undefined'&&_loginLock)?_loginLock:{};
+  var lockedKeys=Object.keys(locks).filter(function(k){return locks[k]&&locks[k].locked;});
+  var h='';
+  // ── Bundle 1 : Config & sauvegarde ──
+  h+='<div class="card mb16"><div class="pgt" style="font-size:18px">⚙️ Configuration & sauvegarde</div>'
+    +'<div class="ib ibi mb12"><span>💾</span><span>Dernière sauvegarde : <strong>'+_esc(String(lastBak))+'</strong></span></div>'
+    +'<div class="fl2 fw g8">'
+    +'<button class="btn bi" onclick="_saBackupJSON()">⬇️ Sauvegarder (JSON complet)</button>'
+    +'<button class="btn bo" onclick="if(typeof exportSQL===\'function\')exportSQL()">🗄️ Export SQL</button>'
+    +'<button class="btn bo" onclick="_saRestoreModal()">⬆️ Restaurer une sauvegarde</button>'
+    +'<button class="btn bo" onclick="if(typeof mSyncDiag===\'function\')mSyncDiag()">🔌 Tester serveur / IA / RAG</button>'
+    +'<button class="btn bo" onclick="_saCloudSecretModal()">🔑 Clé de synchronisation Cloud</button>'
+    +'</div></div>';
+  // ── Bundle 2 : Comptes & sécurité ──
+  h+='<div class="card mb16"><div class="pgt" style="font-size:18px">🛡️ Comptes & sécurité</div>'
+    +'<div class="fl2 fw g8 mb12">'
+    +'<button class="btn bi" onclick="_saResetPwdModal()">🔁 Réinitialiser un mot de passe</button>'
+    +'<button class="btn bo" onclick="goTo(\'loginlog\')">◌ Journal des connexions</button>'
+    +'<button class="btn bo" onclick="goTo(\'allaccounts\')">⊡ Tous les comptes</button>'
+    +'</div>'
+    +'<div class="ib ibi mb0"><span>'+(lockedKeys.length>0?'🔒':'✅')+'</span><span>'+(lockedKeys.length>0?(lockedKeys.length+' compte(s) verrouillé(s) (anti-bruteforce).'):'Aucun compte verrouillé.')+'</span></div>';
+  if(lockedKeys.length>0){
+    h+='<div class="tw mt8"><table><thead><tr><th>Identifiant</th><th>Tentatives</th><th></th></tr></thead><tbody>';
+    lockedKeys.forEach(function(k){
+      h+='<tr><td>'+_esc(k)+'</td><td>'+(locks[k].attempts||0)+'</td><td><button class="btn bo xs" onclick="_saUnlock(\''+_esc(k).replace(/'/g,"")+'\')">🔓 Déverrouiller</button></td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  h+='</div>';
+  // ── Bundle 4 : Finances & intégrité ──
+  h+='<div class="card mb16"><div class="pgt" style="font-size:18px">💰 Finances & intégrité</div>'
+    +'<div class="ib ibi mb12"><span>📊</span><span>Part auteur : <strong>'+(DB.authorShare||60)+'%</strong> · Parrainage : <strong>'+(DB.parrainRate.forfait||0)+' FCFA</strong> + <strong>'+(DB.parrainRate.pct||0)+'%</strong></span></div>'
+    +'<div class="fl2 fw g8">'
+    +'<button class="btn bi" onclick="_saRatesModal()">⚖️ Taux globaux (auteur / parrain / promos)</button>'
+    +'<button class="btn bo" onclick="if(typeof mPayAttempts===\'function\')mPayAttempts()">💳 Override des paiements</button>'
+    +'<button class="btn bo" onclick="_saIntegrity()">🧪 Vérifier l\'intégrité des données</button>'
+    +'</div></div>';
+  return h;
+}
+function _saBackupJSON(){
+  try{
+    var blob=new Blob([JSON.stringify(DB)],{type:'application/json'});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');
+    a.href=url; a.download='veritas_backup_'+(new Date().toISOString().slice(0,10))+'.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(url);},2000);
+    DB.lastBackup=new Date().toLocaleString('fr-FR'); save();
+    if(typeof toast==='function')toast('✓ Sauvegarde téléchargée','ok');
+    if(pg==='sacontrol')re();
+  }catch(e){ if(typeof toast==='function')toast('Échec sauvegarde : '+e.message,'err'); }
+}
+function _saRestoreModal(){
+  M('⬆️ Restaurer une sauvegarde','Remplace TOUTES les données actuelles',
+    '<div class="ib ibi mb12"><span>⚠️</span><span>La base actuelle sera <strong>écrasée</strong> par le fichier importé. Faites une sauvegarde avant, au besoin.</span></div>'
+    +'<input type="file" id="_saRestoreFile" accept="application/json,.json" class="fi">',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn br2" onclick="_saRestoreDo()">⚠️ Restaurer (écraser)</button>');
+}
+function _saRestoreDo(){
+  var f=_ge('_saRestoreFile');
+  if(!f||!f.files||!f.files[0]){ if(typeof toast==='function')toast('Choisissez un fichier','warn'); return; }
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var obj=JSON.parse(rd.result);
+      if(!obj||typeof obj!=='object'||!obj.school){ toast('Fichier invalide (pas une base VÉRITAS)','err'); return; }
+      DB=obj; save(); cm(); toast('✓ Données restaurées — rechargement…','ok');
+      setTimeout(function(){location.reload();},800);
+    }catch(e){ if(typeof toast==='function')toast('JSON invalide : '+e.message,'err'); }
+  };
+  rd.readAsText(f.files[0]);
+}
+function _saCloudSecretModal(){
+  var cur=(DB.cloudConfig&&DB.cloudConfig.secret)?'définie':'vide';
+  M('🔑 Clé de synchronisation Cloud','État actuel : '+cur,
+    '<div class="fg"><span class="fl">Nouvelle clé (laisser vide = ne pas changer)</span><input class="fi" id="_saSec" type="password" autocomplete="off"></div>'
+    +'<p style="font-size:13px;color:var(--ds-text-3,#7A88A6);line-height:1.5">Doit correspondre à <code>API_SECRET</code> côté serveur (api/payment_config.php). Conservée localement, jamais écrite dans le code.</p>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +'<button class="btn bi" onclick="_saCloudSecretSave()">✓ Enregistrer</button>');
+}
+function _saCloudSecretSave(){
+  var v=(_ge('_saSec')&&_ge('_saSec').value||'').trim();
+  if(!v){ cm(); return; }
+  if(!DB.cloudConfig)DB.cloudConfig={url:_VRT_API,secret:'',lastSync:'Jamais'};
+  DB.cloudConfig.secret=v; if(!DB.cloudConfig.url)DB.cloudConfig.url=_VRT_API;
+  save(); if(typeof _saveCloudConfigCache==='function')_saveCloudConfigCache();
+  cm(); if(typeof toast==='function')toast('✓ Clé Cloud enregistrée','ok');
+}
+function _saResetPwdModal(){
+  var opts='';
+  (DB.admins||[]).forEach(function(a){opts+='<option value="admin:'+a.id+'">Admin — '+_esc(a.nom||a.user)+' ('+_esc(a.user)+')</option>';});
+  if(DB.superAdmin)opts+='<option value="sa:_">Super Admin ('+_esc(DB.superAdmin.user)+')</option>';
+  (DB.authors||[]).forEach(function(a){opts+='<option value="author:'+a.id+'">Auteur — '+_esc(a.nom||a.user)+'</option>';});
+  (DB.visitorAccounts||[]).forEach(function(v){opts+='<option value="visitor:'+v.id+'">Visiteur — '+_esc(v.nom||v.user||v.mail)+'</option>';});
+  M('🔁 Réinitialiser un mot de passe','Génère un mot de passe provisoire (haché au stockage)',
+    '<div class="fg"><span class="fl">Compte</span><select class="fi" id="_saAcct">'+opts+'</select></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_saResetPwdDo()">🔁 Générer un nouveau mot de passe</button>');
+}
+async function _saResetPwdDo(){
+  var sel=_ge('_saAcct'); if(!sel){return;}
+  var parts=(sel.value||'').split(':'); var scope=parts[0], id=parts[1];
+  var rec=null;
+  if(scope==='admin')rec=(DB.admins||[]).find(function(a){return a.id===id;});
+  else if(scope==='sa')rec=DB.superAdmin;
+  else if(scope==='author')rec=(DB.authors||[]).find(function(a){return a.id===id;});
+  else if(scope==='visitor')rec=(DB.visitorAccounts||[]).find(function(a){return a.id===id;});
+  if(!rec){ if(typeof toast==='function')toast('Compte introuvable','err'); return; }
+  var salt=rec.user||'VERITAS';
+  var tmp='VRT'+Math.random().toString(36).slice(2,7)+'@'+Math.floor(100+Math.random()*900);
+  try{ rec.pwd = (typeof hashPassword==='function') ? await hashPassword(tmp, salt) : tmp; }
+  catch(e){ rec.pwd=tmp; }
+  save(); cm();
+  M('✓ Mot de passe réinitialisé','À transmettre à l\'utilisateur',
+    '<div class="fg"><span class="fl">Identifiant</span><input class="fi" value="'+_esc(rec.user||'')+'" readonly onclick="this.select()"></div>'
+    +'<div class="fg"><span class="fl">Mot de passe provisoire</span><input class="fi" value="'+_esc(tmp)+'" readonly onclick="this.select()"></div>'
+    +'<p style="font-size:13px;color:var(--ds-text-3,#7A88A6)">Affiché une seule fois. Stocké sous forme hachée.</p>',
+    '<button class="btn bi" onclick="cm()">✓ J\'ai noté</button>');
+}
+function _saUnlock(k){
+  if(typeof _loginLock!=='undefined'&&_loginLock&&_loginLock[k])_loginLock[k]={attempts:0,locked:false,until:0};
+  if(typeof toast==='function')toast('🔓 Compte déverrouillé','ok');
+  if(pg==='sacontrol')re();
+}
+function _saRatesModal(){
+  if(!DB.parrainRate)DB.parrainRate={forfait:500,pct:0};
+  M('⚖️ Taux globaux','Appliqués aux ventes et au parrainage',
+    '<div class="fg"><span class="fl">Part auteur (%)</span><input class="fi" id="_saAuthor" type="number" min="0" max="100" value="'+(DB.authorShare||60)+'"></div>'
+    +'<div class="fg"><span class="fl">Parrainage — forfait par filleul (FCFA)</span><input class="fi" id="_saParF" type="number" min="0" value="'+(DB.parrainRate.forfait||0)+'"></div>'
+    +'<div class="fg"><span class="fl">Parrainage — % des paiements du filleul</span><input class="fi" id="_saParP" type="number" min="0" max="100" value="'+(DB.parrainRate.pct||0)+'"></div>'
+    +'<p style="font-size:13px;color:var(--ds-text-3,#7A88A6)">Les codes promo (%) se gèrent dans la page « Programme parrainage / Boutique ».</p>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_saRatesSave()">✓ Enregistrer</button>');
+}
+function _saRatesSave(){
+  var a=parseInt((_ge('_saAuthor')&&_ge('_saAuthor').value)||'',10);
+  var pf=parseInt((_ge('_saParF')&&_ge('_saParF').value)||'',10);
+  var pp=parseInt((_ge('_saParP')&&_ge('_saParP').value)||'',10);
+  if(!isNaN(a)&&a>=0&&a<=100)DB.authorShare=a;
+  if(!DB.parrainRate)DB.parrainRate={forfait:500,pct:0};
+  if(!isNaN(pf)&&pf>=0)DB.parrainRate.forfait=pf;
+  if(!isNaN(pp)&&pp>=0&&pp<=100)DB.parrainRate.pct=pp;
+  save(); cm(); if(typeof toast==='function')toast('✓ Taux enregistrés','ok'); if(pg==='sacontrol')re();
+}
+function _saIntegrity(){
+  var stu=DB.students||[], grades=DB.grades||[], pays=DB.payments||[];
+  var ids={}; stu.forEach(function(s){ids[s.id]=true;});
+  var seen={}, dup=0;
+  stu.forEach(function(s){ if(s.mat){ if(seen[s.mat])dup++; else seen[s.mat]=true; } });
+  var orphG=grades.filter(function(g){return g.eid&&!ids[g.eid];}).length;
+  var orphP=pays.filter(function(p){return p.eid&&!ids[p.eid];}).length;
+  var anomalies=dup+orphG+orphP;
+  var body='<ul style="line-height:1.9;margin:0;padding-left:18px">'
+    +'<li>Élèves : <strong>'+stu.length+'</strong></li>'
+    +'<li>Matricules en doublon : <strong>'+dup+'</strong></li>'
+    +'<li>Notes orphelines (élève supprimé) : <strong>'+orphG+'</strong></li>'
+    +'<li>Paiements orphelins : <strong>'+orphP+'</strong></li></ul>';
+  var foot='<button class="btn bo" onclick="cm()">Fermer</button>';
+  if(orphG+orphP>0) foot+='<button class="btn br2" onclick="_saIntegrityFix()">🧹 Supprimer les orphelins ('+(orphG+orphP)+')</button>';
+  M('🧪 Intégrité des données', anomalies>0?'Anomalies détectées':'Aucune anomalie ✅', body, foot);
+}
+function _saIntegrityFix(){
+  var ids={}; (DB.students||[]).forEach(function(s){ids[s.id]=true;});
+  var g0=(DB.grades||[]).length, p0=(DB.payments||[]).length;
+  DB.grades=(DB.grades||[]).filter(function(g){return !g.eid||ids[g.eid];});
+  DB.payments=(DB.payments||[]).filter(function(p){return !p.eid||ids[p.eid];});
+  save(); cm();
+  if(typeof toast==='function')toast('🧹 '+((g0-DB.grades.length)+(p0-DB.payments.length))+' orphelin(s) supprimé(s)','ok');
 }
 function pgSuperOverview(){
   if(!isSA())return na();
