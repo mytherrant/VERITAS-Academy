@@ -34529,7 +34529,7 @@ window.mIAAdaptative = function(){
           +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(168,85,247,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-brain"/></svg></div>'
           +'<div><div style="font-weight:800;color:#6B21A8">🎯 Parcours personnalisé (connexion requise)</div><div style="font-size:12px;color:#7E22CE;margin-top:3px">L\'IA analyse vos perfs et propose les bons exercices</div></div>'
         +'</div>'
-        +'<div style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);padding:14px;border-radius:14px;border:1px solid #6EE7B7;display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="cm();(typeof mOrientationIA===\'function\'?mOrientationIA():toast(\'Cette fonctionnalité arrive bientôt !\'))">'
+        +'<div style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);padding:14px;border-radius:14px;border:1px solid #6EE7B7;display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="cm();(typeof mAIOrientation===\'function\'?mAIOrientation():toast(\'Cette fonctionnalité arrive bientôt !\'))">'
           +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(16,185,129,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-compass"/></svg></div>'
           +'<div><div style="font-weight:800;color:#065F46">🧭 Orientation par IA</div><div style="font-size:12px;color:#047857;margin-top:3px">Découvrez les filières adaptées à votre profil</div></div>'
         +'</div></div>'
@@ -34594,7 +34594,7 @@ window.mHubIA = function(){
       +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#6B21A8;font-size:15px">🎯 Parcours personnalisé '+(connected?'':'<span style="font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 6px;border-radius:6px;font-weight:600;margin-left:4px">connexion requise</span>')+'</div><div style="font-size:12px;color:#7E22CE;margin-top:3px;line-height:1.4">L\'IA analyse vos performances et propose les bons exercices au bon moment (algorithme SuperMemo)</div></div>'
       +'<div style="color:#7C3AED;font-size:20px;align-self:center">→</div>'
     +'</div>'
-    +'<div style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);padding:14px;border-radius:14px;border:1px solid #6EE7B7;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();(typeof mOrientationIA===\'function\'?mOrientationIA():vShowSec(\'orientation\',document.querySelector(\'.vnav-btn[onclick*=orientation]\')))">'
+    +'<div style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);padding:14px;border-radius:14px;border:1px solid #6EE7B7;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();(typeof mAIOrientation===\'function\'?mAIOrientation():vShowSec(\'orientation\',document.querySelector(\'.vnav-btn[onclick*=orientation]\')))">'
       +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(16,185,129,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-compass"/></svg></div>'
       +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#065F46;font-size:15px">🧭 Orientation par IA</div><div style="font-size:12px;color:#047857;margin-top:3px;line-height:1.4">Découvrez les filières et écoles adaptées à votre profil et vos résultats</div></div>'
       +'<div style="color:#059669;font-size:20px;align-self:center">→</div>'
@@ -36029,7 +36029,7 @@ window.showForum = function(){
       +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">'
       +'<h2 style="margin:0;color:#142554">💬 Forum Communauté VÉRITAS</h2>'
       +(isLogged ? '<button class="btn bi" onclick="mNewForumPost()">✏️ Poser une question</button>' :
-        '<button class="btn bi" onclick="showInscription&&showInscription()">🔓 Se connecter pour poster</button>')
+        '<button class="btn bi" onclick="showRegisterForm&&showRegisterForm()">🔓 Se connecter pour poster</button>')
       +'</div>'
       +'<div style="background:linear-gradient(135deg,rgba(60,141,255,.08),rgba(124,58,237,.05));padding:14px;border-radius:14px;margin-bottom:14px">'
       +'<div style="font-size:12px;color:#374151;margin-bottom:8px;font-weight:700">📂 Catégories</div>'
