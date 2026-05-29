@@ -2337,6 +2337,20 @@ body { font-size: 15px !important; }
 .jeu-free{position:absolute;top:8px;right:8px;background:rgba(5,150,105,.85);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;letter-spacing:.5px}
 .grid-auto-sm{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .ai-res{background:#FAFBFF;border:1px solid #E0EAFF;border-radius:14px;padding:16px;font-family:Georgia,serif;font-size:13px;color:#2D3748;line-height:1.9;margin-top:14px;max-height:360px;overflow-y:auto;white-space:pre-wrap}
+/* ── DS v3 : rendu Markdown pédagogique des réponses IA ── */
+.ai-md{font-family:var(--ds-font-text,'Inter',sans-serif);color:#1f2d4d;line-height:1.7;font-size:14px}
+.ai-md .ai-h{font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif);color:#142554;font-weight:800;margin:16px 0 6px;font-size:15px;letter-spacing:.2px;padding-bottom:4px;border-bottom:2px solid #EEF1F7}
+.ai-md .ai-p{margin:0 0 10px}
+.ai-md .ai-ul,.ai-md .ai-ol{margin:6px 0 12px;padding-left:22px}
+.ai-md .ai-ul li,.ai-md .ai-ol li{margin:3px 0}
+.ai-md .ai-hr{border:none;border-top:1px solid #E6EAF2;margin:14px 0}
+.ai-md code{background:#EEF2FF;color:#3730A3;padding:1px 6px;border-radius:6px;font-family:'Fira Code',monospace;font-size:12.5px}
+.ai-md strong{color:#142554;font-weight:800}
+.ai-md em{color:#475882}
+.ai-md .ai-tbl{width:100%;border-collapse:collapse;margin:10px 0;font-size:13px;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(20,37,84,.10)}
+.ai-md .ai-tbl th{background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:8px 11px;text-align:left;font-weight:700;font-size:12px}
+.ai-md .ai-tbl td{padding:7px 11px;border-bottom:1px solid #EEF1F7;color:#334155;vertical-align:top}
+.ai-md .ai-tbl tr:nth-child(even) td{background:#F8FAFD}
 
 /* ═══ VERITAS v31 — LAYOUT PC AMÉLIORÉ ═══ */
 
@@ -17229,7 +17243,7 @@ async function _runAIOrient(){
     var txt=await callClaudeAPI(prompt);
     // FIX v1.2 : _aiGate() a déjà incrémenté — pas de second _aiInc
     var rem2=Math.max(0,_aiLimit('orient')-_aiUsed('orient'));
-    if(res){res.style.display='block';res.textContent=txt;}
+    if(res){res.style.display='block';res.style.whiteSpace='normal';res.innerHTML='<div class="ai-md">'+(typeof _aiMarkdown==='function'?_aiMarkdown(txt):_esc(txt).replace(/\n/g,'<br>'))+'</div>';}
     if(btn){btn.disabled=false;btn.innerHTML='🔄 Nouvelle analyse ('+(rem2>0?rem2+' restant'+(rem2>1?'s':''):'0 restant')+')';}
   }catch(e){
     toast('Erreur IA : '+e.message,'err');
@@ -17286,7 +17300,7 @@ async function _runAICorrect(){
     var txt=await callClaudeAPI(prompt);
     // FIX v1.2 : _aiGate() a déjà incrémenté — pas de second _aiInc
     var rem=Math.max(0,_aiLimit('correct')-_aiUsed('correct'));
-    if(res){res.style.display='block';res.textContent=txt;}
+    if(res){res.style.display='block';res.style.whiteSpace='normal';res.innerHTML='<div class="ai-md">'+(typeof _aiMarkdown==='function'?_aiMarkdown(txt):_esc(txt).replace(/\n/g,'<br>'))+'</div>';}
     if(btn){btn.disabled=false;btn.innerHTML='🔄 Autre correction ('+(rem>0?rem+' restant'+(rem>1?'s':''):'0 restant')+')';}
   }catch(e){
     toast('Erreur IA : '+e.message,'err');
@@ -18278,10 +18292,8 @@ window._runCorrectionIA = async function(){
     if(res){
       res.style.display='block';
       // Formatter le markdown léger ** ** → <strong>
-      var html = _esc(txt)
-        .replace(/\*\*([^*]+)\*\*/g,'<strong style="color:#7C3AED;font-size:15px;display:inline-block;margin-top:8px">$1</strong>')
-        .replace(/\n/g,'<br>');
-      res.innerHTML = '<div style="background:linear-gradient(135deg,#FAF5FF,#EDE9FE);border-left:4px solid #7C3AED;border-radius:12px;padding:16px 20px;font-family:Georgia,serif;font-size:13.5px;line-height:1.85;color:#1E293B">'+html+'</div>'+
+      var html = (typeof _aiMarkdown==='function') ? _aiMarkdown(txt) : _esc(txt).replace(/\n/g,'<br>');
+      res.innerHTML = '<div class="ai-md" style="background:linear-gradient(135deg,#FAF5FF,#EDE9FE);border-left:4px solid #7C3AED;border-radius:12px;padding:16px 20px">'+html+'</div>'+
         '<div style="margin-top:12px;font-size:11px;color:#64748B;text-align:right;font-style:italic">Correction générée par IA pédagogique — Centre VÉRITAS</div>';
       res.scrollIntoView({behavior:'smooth',block:'nearest'});
     }
@@ -36503,6 +36515,42 @@ window.AMBASSA_TACHES = [
   { id:'translate',  ic:'globe',     col:'#0EA5E9', t:'Traduction intelligente',    d:'FR ↔ EN ↔ ES — traduction pédagogique avec vocabulaire expliqué' }
 ];
 
+// v1.2.1 — Rendu Markdown -> HTML stylé et pédagogique pour les réponses IA
+window._aiMarkdown = function(src){
+  if(!src) return '';
+  var esc=function(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');};
+  var inl=function(t){
+    t=esc(t);
+    t=t.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+    t=t.replace(/`([^`]+)`/g,'<code>$1</code>');
+    t=t.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,'$1<em>$2</em>');
+    return t;
+  };
+  var lines=String(src).replace(/\r\n/g,'\n').split('\n');
+  var out='',i=0;
+  var isSep=function(s){return /^\s*\|?[\s:|-]+\|?\s*$/.test(s)&&s.indexOf('-')>=0;};
+  while(i<lines.length){
+    var ln=lines[i];
+    if(/^\s*\|.*\|\s*$/.test(ln)&&i+1<lines.length&&isSep(lines[i+1])){
+      var hd=ln.trim().replace(/^\||\|$/g,'').split('|').map(function(c){return c.trim();});
+      i+=2; var rs=[];
+      while(i<lines.length&&/^\s*\|.*\|\s*$/.test(lines[i])){ rs.push(lines[i].trim().replace(/^\||\|$/g,'').split('|').map(function(c){return c.trim();})); i++; }
+      out+='<table class="ai-tbl"><thead><tr>'+hd.map(function(h){return '<th>'+inl(h)+'</th>';}).join('')+'</tr></thead><tbody>'+rs.map(function(r){return '<tr>'+r.map(function(c){return '<td>'+inl(c)+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>';
+      continue;
+    }
+    var hm=ln.match(/^\s*(#{1,4})\s+(.*)$/);
+    if(hm){ var lv=Math.min(4,hm[1].length)+2; out+='<h'+lv+' class="ai-h">'+inl(hm[2])+'</h'+lv+'>'; i++; continue; }
+    if(/^\s*([-*_])\1{2,}\s*$/.test(ln)){ out+='<hr class="ai-hr">'; i++; continue; }
+    if(/^\s*[-*]\s+/.test(ln)){ var it=[]; while(i<lines.length&&/^\s*[-*]\s+/.test(lines[i])){ it.push(inl(lines[i].replace(/^\s*[-*]\s+/,''))); i++; } out+='<ul class="ai-ul">'+it.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>'; continue; }
+    if(/^\s*\d+\.\s+/.test(ln)){ var oi=[]; while(i<lines.length&&/^\s*\d+\.\s+/.test(lines[i])){ oi.push(inl(lines[i].replace(/^\s*\d+\.\s+/,''))); i++; } out+='<ol class="ai-ol">'+oi.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ol>'; continue; }
+    if(/^\s*$/.test(ln)){ i++; continue; }
+    var p=[ln]; i++;
+    while(i<lines.length&&!/^\s*$/.test(lines[i])&&!/^\s*[-*]\s+/.test(lines[i])&&!/^\s*\d+\.\s+/.test(lines[i])&&!/^\s*#{1,4}\s+/.test(lines[i])&&!/^\s*\|.*\|\s*$/.test(lines[i])&&!/^\s*([-*_])\1{2,}\s*$/.test(lines[i])){ p.push(lines[i]); i++; }
+    out+='<p class="ai-p">'+p.map(inl).join('<br>')+'</p>';
+  }
+  return out;
+};
+
 window.mAgentAmbassa = function(taskId){
   // v2.7 : ouvert à tous (anonymes inclus, avec quota 2 essais lifetime)
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
@@ -36743,8 +36791,8 @@ window._ambassaGenerate = async function(taskId){
       displayHtml = _renderQCMInteractive(parsedQuiz);
     } else {
       // Mode classique : afficher le texte brut formaté
-      displayHtml = '<div id="mvOutput" style="font-size:13px;color:#065F46;line-height:1.7;max-height:400px;overflow-y:auto">'
-        + _sanitizeHTML(resp).replace(/\n/g,'<br>')
+      displayHtml = '<div id="mvOutput" class="ai-md" style="max-height:440px;overflow-y:auto;padding-right:4px">'
+        + _aiMarkdown(resp)
         + '</div>';
     }
 
