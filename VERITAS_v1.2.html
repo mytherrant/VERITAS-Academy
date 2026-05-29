@@ -34628,24 +34628,41 @@ window._lancerBattle = function(){
 };
 
 // ─── 3. SUJET DU JOUR (auto-IA, fallback statique) ──────────────────
+// Banque MINESEC multi-disciplines (Cameroun/Afrique en priorité), ordonnée pour
+// ALTERNER les disciplines d'un jour à l'autre. Réponses concises et vérifiées.
 window.SUJETS_FALLBACK = [
-  { q:"Expliquez la fonction du chœur dans une tragédie grecque.", a:"Le chœur a 3 fonctions : narrative (résumer/anticiper), morale (commenter), lyrique (chanter les émotions collectives).", lvl:'1ère/Tle' },
-  { q:"Citez 3 figures de style dans 'L'Albatros' de Baudelaire et leur effet.", a:"Comparaison (poète=albatros), métaphore (ailes=poésie), antithèse (gloire céleste/honte terrestre).", lvl:'2nde/1ère' },
-  { q:"Quelle est la différence entre subjonctif présent et imparfait du subjonctif ?", a:"Présent : action contemporaine/postérieure dans contexte présent. Imparfait : action contemporaine/postérieure dans contexte passé (langue soutenue).", lvl:'4e-Tle' },
-  { q:"En géométrie, énoncez le théorème de Thalès.", a:"Si 2 droites sécantes sont coupées par 2 droites parallèles, les longueurs sont proportionnelles : AM/AB = AN/AC = MN/BC.", lvl:'3e/2nde' },
-  { q:"Quels sont les 4 grands traités de la décolonisation africaine ?", a:"Conférence de Bandung (1955), Brazzaville (1944), Lancaster House (1959), traité d'Évian (1962).", lvl:'Tle' },
-  { q:"Dans Une si longue lettre, qui sont Ramatoulaye et Aïssatou ?", a:"Deux amies sénégalaises qui réagissent différemment à la polygamie : Ramatoulaye reste, Aïssatou divorce et émigre aux USA.", lvl:'1ère/Tle' },
-  { q:"Quelle est la racine de l'équation x² - 5x + 6 = 0 ?", a:"Discriminant Δ=25-24=1. Solutions : (5±1)/2 = 3 ou 2.", lvl:'3e/2nde' }
+  { mat:'Français', q:"Qui est l'auteur de « Ville Cruelle » et quel en est le thème central ?", a:"Eza Boto (pseudonyme de Mongo Beti). Thème : la confrontation brutale entre le village traditionnel et la ville coloniale qui exploite et corrompt.", lvl:'3e/2nde' },
+  { mat:'Maths', q:"Énoncez le théorème de Pythagore.", a:"Dans un triangle rectangle, le carré de l'hypoténuse est égal à la somme des carrés des deux autres côtés : a² = b² + c².", lvl:'4e/3e' },
+  { mat:'Histoire', q:"Quand le Cameroun oriental a-t-il accédé à l'indépendance, et quand a eu lieu la réunification ?", a:"Indépendance du Cameroun oriental (francophone) : 1er janvier 1960. Réunification avec le Cameroun occidental (anglophone) : 1er octobre 1961.", lvl:'3e/Tle' },
+  { mat:'SVT', q:"Où se déroulent la transcription et la traduction de l'information génétique ?", a:"Transcription (ADN → ARNm) : dans le noyau. Traduction (ARNm → protéine) : dans le cytoplasme, au niveau des ribosomes.", lvl:'1ère/Tle D' },
+  { mat:'PCT', q:"Énoncez la loi d'Ohm.", a:"La tension aux bornes d'un conducteur ohmique est proportionnelle à l'intensité : U = R × I (U en volts, R en ohms, I en ampères).", lvl:'4e/3e' },
+  { mat:'Anglais', q:"Give the past simple and past participle of: to write, to go, to take.", a:"write / wrote / written ; go / went / gone ; take / took / taken.", lvl:'5e-2nde' },
+  { mat:'Français', q:"Dans « Le Vieux Nègre et la médaille » de Ferdinand Oyono, que symbolise la médaille ?", a:"L'illusion de la reconnaissance coloniale : Meka, fidèle à la France, est finalement humilié. Oyono dénonce l'ingratitude et l'injustice du système colonial.", lvl:'1ère/Tle A' },
+  { mat:'Maths', q:"Résolvez l'équation x² − 5x + 6 = 0.", a:"Discriminant Δ = 25 − 24 = 1. Solutions : x = (5 ± 1)/2, soit x = 3 ou x = 2.", lvl:'3e/2nde' },
+  { mat:'Géographie', q:"Citez trois grands fleuves du Cameroun.", a:"La Sanaga (le plus long), le Wouri, le Nyong ; aussi la Bénoué et le Logone au Nord.", lvl:'5e/4e' },
+  { mat:'SVT', q:"Qu'est-ce que la photosynthèse ? Donnez son équation simplifiée.", a:"Production de matière organique par les plantes chlorophylliennes à la lumière : 6 CO₂ + 6 H₂O → (lumière) C₆H₁₂O₆ + 6 O₂.", lvl:'5e/2nde' },
+  { mat:'PCT', q:"Qu'est-ce qu'une mole et que vaut le nombre d'Avogadro ?", a:"Une mole est la quantité de matière contenant 6,02 × 10²³ entités (atomes, molécules…). Ce nombre est le nombre d'Avogadro.", lvl:'2nde/1ère' },
+  { mat:'Français', q:"Quelles sont les grandes étapes d'un commentaire composé selon la méthode MINESEC (OBC) ?", a:"1) Situation du texte. 2) Idée générale. 3) Axes de lecture + analyse des procédés. 4) Conclusion ouverte. Grille OBC : C1 6 + C2 6 + C3 6 + C4 2 = 20.", lvl:'1ère/Tle' },
+  { mat:'ECM', q:"Citez les trois pouvoirs de l'État et leur rôle.", a:"Législatif (voter les lois — le Parlement), Exécutif (appliquer les lois — Président et Gouvernement), Judiciaire (rendre la justice — les tribunaux).", lvl:'4e/3e' },
+  { mat:'Maths', q:"Quelle est la dérivée de la fonction f(x) = x² ?", a:"f'(x) = 2x.", lvl:'1ère/Tle' },
+  { mat:'Histoire', q:"Qui était Ruben Um Nyobè et quel mouvement dirigeait-il ?", a:"Figure du nationalisme camerounais, secrétaire général de l'UPC (Union des Populations du Cameroun) ; acteur de la lutte pour l'indépendance, tué en 1958.", lvl:'3e/Tle' },
+  { mat:'SVT', q:"Citez les groupes sanguins du système ABO et le donneur universel.", a:"Groupes A, B, AB et O. Donneur universel : O (négatif). Receveur universel : AB (positif).", lvl:'3e/1ère' },
+  { mat:'Français', q:"Dans « L'Enfant noir » de Camara Laye, quel thème majeur est développé ?", a:"Récit autobiographique d'enfance : la transmission des traditions africaines, le passage à l'âge adulte, et la tension entre culture du village et école coloniale.", lvl:'3e/2nde' },
+  { mat:'PCT', q:"Quelle est la différence entre transformation physique et transformation chimique ?", a:"Physique : pas de nouvelle substance (ex. fusion de la glace). Chimique : formation de nouvelles substances (ex. combustion du bois).", lvl:'5e/4e' },
+  { mat:'Géographie', q:"Qu'est-ce que l'exode rural ? Donnez deux causes.", a:"Déplacement des populations des campagnes vers les villes. Causes : recherche d'emploi/de meilleures conditions de vie ; manque d'infrastructures et de services en zone rurale.", lvl:'4e/3e' },
+  { mat:'Maths', q:"Énoncez le théorème de Thalès.", a:"Si deux droites sécantes sont coupées par deux parallèles, elles déterminent des segments proportionnels : AM/AB = AN/AC = MN/BC.", lvl:'3e/2nde' },
+  { mat:'Histoire', q:"Quelles puissances ont colonisé le Cameroun ?", a:"L'Allemagne d'abord (à partir de 1884), puis, après 1916, la France et le Royaume-Uni sous mandat de la SDN puis tutelle de l'ONU.", lvl:'4e/3e' },
+  { mat:'Français', q:"Qu'est-ce qu'une figure de style ? Donnez-en trois avec leur définition.", a:"Procédé d'expression créant un effet. Métaphore (image sans outil de comparaison), comparaison (avec « comme »), personnification (attribuer des traits humains à une chose ou idée).", lvl:'5e/4e' }
 ];
 
 window._getSujetDuJour = function(){
   DB._sujetJour = DB._sujetJour || {};
   var today = new Date().toISOString().slice(0,10);
-  if(DB._sujetJour.date === today && DB._sujetJour.q) return DB._sujetJour;
+  if(DB._sujetJour.date === today && DB._sujetJour.q && DB._sujetJour.mat) return DB._sujetJour;
   // Sélection déterministe basée sur la date (toujours le même sujet par jour)
   var dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,1)) / 86400000);
   var sj = SUJETS_FALLBACK[dayOfYear % SUJETS_FALLBACK.length];
-  DB._sujetJour = { date:today, q:sj.q, a:sj.a, lvl:sj.lvl, revealed:false };
+  DB._sujetJour = { date:today, q:sj.q, a:sj.a, lvl:sj.lvl, mat:sj.mat||'', revealed:false };
   try { save(); } catch(e){}
   return DB._sujetJour;
 };
@@ -34657,7 +34674,7 @@ window.mSujetDuJour = function(){
   var body = '<div style="padding:8px">'
     +'<div style="background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;padding:14px;border-radius:12px;margin-bottom:14px;text-align:center">'
       +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;opacity:.9">☀️ Sujet du '+new Date(sj.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+'</div>'
-      +'<div style="font-size:11px;margin-top:6px;background:rgba(0,0,0,.2);padding:2px 10px;border-radius:99px;display:inline-block">Niveau : '+sj.lvl+'</div>'
+      +'<div style="font-size:11px;margin-top:6px;background:rgba(0,0,0,.2);padding:2px 10px;border-radius:99px;display:inline-block">'+(sj.mat?'📚 '+_esc(sj.mat)+' · ':'')+'Niveau : '+_esc(sj.lvl)+'</div>'
     +'</div>'
     +'<div style="background:#fff;border:2px solid #E5E7EB;border-radius:12px;padding:18px;margin-bottom:14px">'
       +'<div style="font-size:11px;color:#6B7280;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">❓ Question</div>'
@@ -39092,9 +39109,9 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .vgz-bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:14px;margin:20px 0}
 /* Base commune : navy profond + glassmorphisme, lisibilité garantie */
 .vgz-bento-card{position:relative;border-radius:16px;overflow:hidden;
-  background:linear-gradient(180deg,#ffffff 0%,#F7F9FF 100%);
+  background:linear-gradient(155deg, color-mix(in srgb, var(--accent,#FFC93C) 16%, #fff) 0%, color-mix(in srgb, var(--accent,#FFC93C) 6%, #fff) 48%, #ffffff 100%);
   transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .35s,border-color .35s;
-  cursor:pointer;border:1px solid rgba(20,37,84,.08);border-top:4px solid var(--accent,#FFC93C);
+  cursor:pointer;border:1px solid color-mix(in srgb, var(--accent,#FFC93C) 22%, rgba(20,37,84,.08));border-top:4px solid var(--accent,#FFC93C);
   box-shadow:0 6px 20px rgba(20,37,84,.08),0 1px 3px rgba(20,37,84,.06)}
 .vgz-bento-card:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 24px 56px rgba(20,37,84,.16);border-color:var(--accent,#FFC93C)}
 /* Halo coloré du fond — restant subtil */
