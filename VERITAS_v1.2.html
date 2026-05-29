@@ -1862,13 +1862,13 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
    ═══════════════════════════════════════════════ */
 
 /* ── Typography upgrade — Poppins + Montserrat ── */
-body{font-family:'Poppins','Inter',system-ui,sans-serif!important}
+body{font-family:var(--ds-font-text)!important}
 h1,h2,h3,.vsec-title,.ct,.mtt,.pgt,.vhero-title{font-family:'Montserrat','Montserrat',sans-serif!important}
 .serif, .pack-feat, .rc-preview, .ai-res, .ai-result-box{font-family:Georgia,'Libre Baskerville',serif!important}
 input,select,textarea,button{font-family:'Poppins','Inter',sans-serif!important}
 
 /* ── Visitor Portal enhanced ── */
-#VISITOR{background:linear-gradient(160deg,#F0F4FF 0%,#EEF0FF 50%,#F5F0FF 100%)}
+#VISITOR{background:var(--ds-bg,#F5F7FB)}
 .vsec{max-width:1180px;margin:0 auto;padding:20px 28px 40px}
 .vsec-title{font-family:'Plus Jakarta Sans','Montserrat',sans-serif!important;font-size:24px;font-weight:800;
   color:#142554;margin-bottom:6px;display:flex;align-items:center;gap:12px;letter-spacing:-.015em;
