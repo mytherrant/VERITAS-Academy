@@ -53,6 +53,24 @@ $userId    = $body['userId'] ?? '';
 $userPlan  = strtolower($body['plan'] ?? 'anon');
 $tier      = $body['tier'] ?? 'free';  // pour stats
 
+// ── v1.2.2 : SOCLE DE SPÉCIALISATION MINESEC ────────────────────────────
+// Appliqué à TOUTES les réponses (Gemini/Groq/Mistral/Pollinations) et à TOUS
+// les appelants (y compris Prof. Ambassa), AVANT le sysPrompt du client et le RAG.
+// → garantit que l'IA reste ancrée dans le secondaire camerounais même si le
+//   client envoie un prompt faible/vide.
+$MINESEC_BASE =
+    "Tu es un assistant pédagogique expert du système éducatif SECONDAIRE camerounais (MINESEC). "
+  . "Tu maîtrises : les classes de la 6e à la Terminale (sous-systèmes francophone ET anglophone), "
+  . "l'Approche Par les Compétences (APC), les programmes officiels par matière, les examens BEPC, "
+  . "Probatoire et BAC (séries A, C, D, E, TI), leurs coefficients et barèmes, ainsi que la "
+  . "littérature et les auteurs au programme (camerounais et africains : Mongo Beti, Ferdinand Oyono, "
+  . "Bernard Dadié, Calixthe Beyala, etc.). "
+  . "Réponds en français clair, structuré et adapté au niveau de l'élève (définitions, étapes, exemples). "
+  . "Quand un CONTEXTE FACTUEL (annales/corpus MINESEC) est fourni ci-dessous, appuie-toi DESSUS en "
+  . "priorité et mentionne la source. Si une information manque ou sort du programme officiel, dis-le "
+  . "honnêtement plutôt que d'inventer.";
+$sysPrompt = $MINESEC_BASE . ($sysPrompt !== '' ? ("\n\n" . $sysPrompt) : '');
+
 if ($prompt === '' || strlen($prompt) > 8000) {
     http_response_code(400);
     echo json_encode(['error' => 'Prompt invalide (1-8000 chars)']);
@@ -111,35 +129,52 @@ if ($cachedAnswer !== null) {
     exit;
 }
 
-// ── 5. CHOIX DU MODÈLE selon le plan ───────────────────────────────────
-// 🔐 v1.2.1 : ne JAMAIS faire confiance au "plan" envoyé par le client (auto-déclaré côté navigateur).
-// On vérifie l'abonnement RÉEL côté serveur. En cas de doute → Pollinations (gratuit, zéro coût Anthropic).
-$useElite = ($apiKey !== '') && server_user_is_elite((string)$userId);
-// Moteur gratuit par défaut = Google Gemini Flash (quota gratuit généreux, multilingue FR).
-// ⚠️ Pollinations.ai a été DÉPRÉCIÉ en 2026 → ne plus l'utiliser.
-$geminiKey = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : (getenv('GEMINI_API_KEY') ?: '');
+// ── 5. CHOIX DU MODÈLE — v1.2.2 : TOUT sur Google Gemini ────────────────
+// Le PLAN ne choisit plus le fournisseur, seulement le MODÈLE Gemini :
+//   • visiteurs / tier gratuit  → Gemini Flash    (gros quota : 250-1000 req/jour)
+//   • abonnés Élite (vérifiés serveur) → Gemini 2.5 Pro (raisonnement avancé)
+// 🔐 On vérifie l'abonnement RÉEL côté serveur (jamais le "plan" envoyé par le client).
+// Claude/Anthropic n'est plus appelé par défaut (clé vide). Pollinations = ultime secours.
+$geminiKey  = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : (getenv('GEMINI_API_KEY') ?: '');
+$isElite    = server_user_is_elite((string)$userId);
+$modelFree  = defined('GEMINI_MODEL')       ? GEMINI_MODEL       : 'gemini-2.5-flash';
+$modelElite = defined('GEMINI_MODEL_ELITE') ? GEMINI_MODEL_ELITE : 'gemini-2.5-pro';
+$model      = $isElite ? $modelElite : $modelFree;
 
-if ($useElite) {
-    // Plan Élite : Claude Sonnet via Anthropic
-    [$ok, $text, $error] = call_claude_sonnet($apiKey, $sysPrompt, $ragContext, $prompt);
-    $source = 'claude_sonnet';
-} elseif ($geminiKey !== '') {
-    // Tier gratuit / visiteurs : Google Gemini Flash
-    [$ok, $text, $error] = call_gemini($geminiKey, $sysPrompt, $ragContext, $prompt);
-    $source = 'gemini_flash';
+if ($geminiKey !== '') {
+    [$ok, $text, $error] = call_gemini($geminiKey, $sysPrompt, $ragContext, $prompt, $model);
+    $source = $isElite ? 'gemini_pro' : 'gemini_flash';
 } else {
-    // Dernier recours GRATUIT : Pollinations côté serveur. L'appel navigateur direct est
-    // déprécié, mais depuis l'IP du serveur il répond encore. Si lui aussi tombe,
-    // call_pollinations renvoie un message clair invitant à configurer GEMINI_API_KEY.
+    // Aucune clé Gemini configurée → dernier recours gratuit (déprécié).
     [$ok, $text, $error] = call_pollinations($sysPrompt, $ragContext, $prompt);
     $source = 'pollinations';
 }
 
-// 🔁 v1.2.1 : repli automatique si le moteur principal échoue (ex. Gemini 503 « high demand »).
-// L'élève obtient toujours une réponse plutôt qu'une erreur.
-if (!$ok && strpos($source, 'pollinations') === false) {
-    [$okP, $textP, $errP] = call_pollinations($sysPrompt, $ragContext, $prompt);
-    if ($okP) { $ok = true; $text = $textP; $error = null; $source .= '_fallback_pollinations'; }
+// 🔁 Repli 1 : si Gemini Pro échoue (quota Élite ~100/j, ou 503/429), réessayer en Flash
+// → l'abonné garde une réponse, toujours sur Gemini.
+if (!$ok && $isElite && $geminiKey !== '') {
+    [$okF, $textF, $errF] = call_gemini($geminiKey, $sysPrompt, $ragContext, $prompt, $modelFree);
+    if ($okF) { $ok = true; $text = $textF; $error = null; $source = 'gemini_flash_fallback'; }
+}
+
+// 🔁 Repli 2 : autres moteurs gratuits puissants, dans l'ordre Groq → Mistral → Pollinations.
+// L'élève obtient toujours une réponse même si Gemini est indisponible/saturé.
+if (!$ok) {
+    $groqKey    = defined('GROQ_API_KEY')    ? GROQ_API_KEY    : (getenv('GROQ_API_KEY') ?: '');
+    $mistralKey = defined('MISTRAL_API_KEY') ? MISTRAL_API_KEY : (getenv('MISTRAL_API_KEY') ?: '');
+
+    if ($groqKey !== '') {  // Groq = le plus rapide (Llama 70B, ~1000 req/jour gratuit)
+        [$okG, $textG, $errG] = call_groq($groqKey, $sysPrompt, $ragContext, $prompt);
+        if ($okG) { $ok = true; $text = $textG; $error = null; $source .= '_fallback_groq'; }
+    }
+    if (!$ok && $mistralKey !== '') {  // Mistral = excellent français (société française)
+        [$okM, $textM, $errM] = call_mistral($mistralKey, $sysPrompt, $ragContext, $prompt);
+        if ($okM) { $ok = true; $text = $textM; $error = null; $source .= '_fallback_mistral'; }
+    }
+    if (!$ok && strpos($source, 'pollinations') === false) {  // ultime secours (déprécié)
+        [$okP, $textP, $errP] = call_pollinations($sysPrompt, $ragContext, $prompt);
+        if ($okP) { $ok = true; $text = $textP; $error = null; $source .= '_fallback_pollinations'; }
+    }
 }
 
 if (!$ok) {
@@ -206,15 +241,16 @@ function call_claude_sonnet(string $apiKey, string $sys, string $rag, string $pr
     return [true, $text, null];
 }
 
-function call_gemini(string $apiKey, string $sys, string $rag, string $prompt): array {
-    // Google Gemini Flash — quota gratuit généreux, bon support du français.
+function call_gemini(string $apiKey, string $sys, string $rag, string $prompt, string $model = ''): array {
+    // Google Gemini — quota gratuit généreux, bon support du français.
     // Clé gratuite : https://aistudio.google.com/apikey
     $fullSys = trim($sys);
     if ($rag !== '') {
         $fullSys .= "\n\n═══ CONTEXTE FACTUEL (annales et corrigés MINESEC) ═══\n" . $rag
                   . "\nAppuie-toi sur ce contexte. Si une info manque, dis-le clairement.";
     }
-    $model = defined('GEMINI_MODEL') ? GEMINI_MODEL : 'gemini-2.5-flash';
+    // v1.2.2 : le modèle peut être imposé par l'appelant (Pro pour l'Élite, Flash sinon).
+    if ($model === '') $model = defined('GEMINI_MODEL') ? GEMINI_MODEL : 'gemini-2.5-flash';
     $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model
          . ':generateContent?key=' . urlencode($apiKey);
 
@@ -298,6 +334,65 @@ function call_pollinations(string $sys, string $rag, string $prompt): array {
         return [false, '', 'IA gratuite momentanément indisponible — configurez GEMINI_API_KEY (gratuit) dans api/payment_config.php.'];
     }
     return [true, $out, null];
+}
+
+/**
+ * v1.2.2 — Helper générique pour les API "OpenAI-compatible" (Groq, Mistral, etc.).
+ * Même format de requête/réponse → un seul code pour plusieurs fournisseurs.
+ */
+function call_openai_chat(string $url, string $apiKey, string $model, string $sys, string $rag, string $prompt, string $label): array {
+    $fullSys = trim($sys);
+    if ($rag !== '') {
+        $fullSys .= "\n\n═══ CONTEXTE FACTUEL (annales et corrigés MINESEC) ═══\n" . $rag
+                  . "\nAppuie-toi sur ce contexte. Si une info manque, dis-le clairement.";
+    }
+    $messages = [];
+    if ($fullSys !== '') $messages[] = ['role' => 'system', 'content' => $fullSys];
+    $messages[] = ['role' => 'user', 'content' => $prompt];
+
+    $payload = json_encode([
+        'model'       => $model,
+        'messages'    => $messages,
+        'max_tokens'  => 2048,
+        'temperature' => 0.7
+    ], JSON_UNESCAPED_UNICODE);
+
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $payload,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 60,
+        CURLOPT_CONNECTTIMEOUT => 10,
+        CURLOPT_HTTPHEADER     => ['Authorization: Bearer ' . $apiKey, 'Content-Type: application/json'],
+        CURLOPT_SSL_VERIFYPEER => true
+    ]);
+    $raw  = curl_exec($ch);
+    $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $err  = curl_error($ch);
+    curl_close($ch);
+
+    if ($err) return [false, '', $label . ' cURL: ' . $err];
+    if ($http !== 200) return [false, '', $label . ' HTTP ' . $http . ': ' . substr((string)$raw, 0, 200)];
+
+    $data = json_decode($raw, true);
+    $text = $data['choices'][0]['message']['content'] ?? '';
+    if ($text === '') return [false, '', $label . ' : réponse vide'];
+    return [true, $text, null];
+}
+
+function call_groq(string $apiKey, string $sys, string $rag, string $prompt): array {
+    // Groq — ultra-rapide (Llama 70B). Clé gratuite : https://console.groq.com/keys
+    $model = defined('GROQ_MODEL') ? GROQ_MODEL : 'llama-3.3-70b-versatile';
+    return call_openai_chat('https://api.groq.com/openai/v1/chat/completions',
+                            $apiKey, $model, $sys, $rag, $prompt, 'Groq');
+}
+
+function call_mistral(string $apiKey, string $sys, string $rag, string $prompt): array {
+    // Mistral — excellent en français. Clé gratuite : https://console.mistral.ai/api-keys
+    $model = defined('MISTRAL_MODEL') ? MISTRAL_MODEL : 'mistral-large-latest';
+    return call_openai_chat('https://api.mistral.ai/v1/chat/completions',
+                            $apiKey, $model, $sys, $rag, $prompt, 'Mistral');
 }
 
 function check_validated_cache(string $hash): ?string {

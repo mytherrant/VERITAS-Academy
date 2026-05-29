@@ -5,7 +5,10 @@
 // (cause du bug "Failed to convert value to 'Response'" en v2.9.7-v2.9.10)
 // ═══════════════════════════════════════════════════════════════════
 
-const CACHE_VERSION = 'veritas-v1.2.1';
+// 🔄 v1.2.2 : INCRÉMENTER ce numéro à CHAQUE déploiement de contenu.
+// Changer la version force le SW à se réinstaller, à purger les anciens caches
+// et à recharger le nouveau code sur tous les appareils (corrige "le site ne change pas").
+const CACHE_VERSION = 'veritas-v1.2.2';
 const STATIC_CACHE  = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 

@@ -43,6 +43,12 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+// 🔄 v1.2.2 : interdire toute mise en cache de la base (sinon LiteSpeed/CDN sert
+// une version périmée → les autres appareils ne voient pas les dernières données).
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('X-LiteSpeed-Cache-Control: no-cache, esi=off');
+header('Vary: Authorization');
 // On a déjà CORS depuis config_sync.php
 header('Content-Type: application/json; charset=utf-8');
 

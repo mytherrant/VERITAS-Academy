@@ -75,7 +75,28 @@ define('PAY_API_SECRET',       'GENEREZ_UN_SECRET_ALEATOIRE_LONG'); // ← peut 
 //    2. « Create API key » (gratuit, quota généreux ~1500 req/jour)
 //    3. Collez la clé ci-dessous.
 define('GEMINI_API_KEY',  '');                 // ← clé Gemini gratuite (laisser vide = IA désactivée)
-define('GEMINI_MODEL',    'gemini-2.5-flash'); // rapide & multilingue (gemini-2.0-flash hors tier gratuit en 2026)
+// v1.2.2 : TOUT passe par Gemini. Le plan choisit le MODÈLE.
+//   GEMINI_MODEL       = tier gratuit/visiteurs. Options (mai 2026) :
+//     'gemini-2.5-flash'      → 250 req/jour (bon équilibre, défaut)
+//     'gemini-2.5-flash-lite' → 1000 req/jour (plus de volume, un peu moins fin)
+//   GEMINI_MODEL_ELITE = abonnés Élite (raisonnement avancé) :
+//     'gemini-2.5-pro'        → 100 req/jour gratuit (le plus puissant encore gratuit)
+//   ⚠️ Gemini 3.x = payant uniquement en 2026.
+define('GEMINI_MODEL',       'gemini-2.5-flash');
+define('GEMINI_MODEL_ELITE', 'gemini-2.5-pro');
+//
+// 🔁 REPLIS AUTOMATIQUES (remplacent Pollinations déprécié). Laisser vide = repli ignoré.
+//    Ordre de bascule si Gemini échoue/sature : Groq → Mistral → Pollinations.
+//
+// 👉 GROQ (le plus rapide, Llama 70B, ~1000 req/jour gratuit) :
+//    https://console.groq.com/keys
+define('GROQ_API_KEY',    '');                          // ← clé Groq (gratuite)
+define('GROQ_MODEL',      'llama-3.3-70b-versatile');
+//
+// 👉 MISTRAL (excellent français, 1 milliard de tokens/mois gratuit) :
+//    https://console.mistral.ai/api-keys
+define('MISTRAL_API_KEY', '');                          // ← clé Mistral (gratuite)
+define('MISTRAL_MODEL',   'mistral-large-latest');
 //
 // 👉 PAYANT (optionnel) — Claude pour le « Plan Élite » :
 //    https://console.anthropic.com → API Keys. Si vide, l'Élite utilise aussi Gemini.
