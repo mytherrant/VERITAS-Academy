@@ -214,20 +214,27 @@ function call_gemini(string $apiKey, string $sys, string $rag, string $prompt): 
         'generationConfig'  => ['temperature' => 0.7, 'maxOutputTokens' => 2048]
     ], JSON_UNESCAPED_UNICODE);
 
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => $payload,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 60,
-        CURLOPT_CONNECTTIMEOUT => 10,
-        CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
-        CURLOPT_SSL_VERIFYPEER => true
-    ]);
-    $raw  = curl_exec($ch);
-    $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $err  = curl_error($ch);
-    curl_close($ch);
+    // v1.2.1 : retry sur 503 "high demand" / 429 / 5xx (le tier gratuit Gemini sature par moments)
+    $raw = ''; $http = 0; $err = '';
+    for ($try = 1; $try <= 3; $try++) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $payload,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => 60,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_HTTPHEADER     => ['Content-Type: application/json'],
+            CURLOPT_SSL_VERIFYPEER => true
+        ]);
+        $raw  = curl_exec($ch);
+        $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $err  = curl_error($ch);
+        curl_close($ch);
+        if ($http === 200) break;
+        if ($http === 503 || $http === 429 || $http >= 500) { usleep(900000); continue; } // transitoire → réessai
+        break; // autre erreur → pas de réessai
+    }
 
     if ($err) return [false, '', 'cURL: ' . $err];
     if ($http !== 200) return [false, '', 'Gemini HTTP ' . $http . ': ' . substr((string)$raw, 0, 200)];
