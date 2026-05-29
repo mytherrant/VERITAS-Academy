@@ -622,6 +622,25 @@ if('MutationObserver' in window){
    Coexiste avec les anciennes variables (rétrocompatibilité totale)
    ════════════════════════════════════════════════════════════════════ */
 :root{
+  /* ════════ DESIGN SYSTEM v3 — TOKENS (passe 1, additif) ════════ */
+  /* Surfaces neutres : ni blanc pur ni navy → base calme et cohérente */
+  --ds-bg:#F5F7FB; --ds-surface:#FFFFFF; --ds-surface-2:#FAFBFE;
+  --ds-border:#E6EAF2; --ds-border-strong:#D5DBE8;
+  --ds-text:#142554; --ds-text-2:#475882; --ds-text-3:#7A88A6;
+  --ds-primary:#142554; --ds-accent:#FFC93C;
+  --ds-ok:#059669; --ds-warn:#D97706; --ds-err:#DC2626;
+  /* Typo : 2 familles (titres + texte) + 1 serif réservée à l'éditorial */
+  --ds-font-display:'Plus Jakarta Sans','Montserrat',system-ui,sans-serif;
+  --ds-font-text:'Inter',system-ui,-apple-system,sans-serif;
+  --ds-font-serif:'Libre Baskerville',Georgia,serif;
+  /* Espacement (échelle 4px) */
+  --ds-1:4px; --ds-2:8px; --ds-3:12px; --ds-4:16px; --ds-5:24px; --ds-6:32px; --ds-7:48px;
+  /* Rayons & ombres (2-3 seulement) */
+  --ds-r-sm:8px; --ds-r:14px; --ds-r-lg:20px;
+  --ds-sh-sm:0 1px 3px rgba(20,37,84,.08);
+  --ds-sh:0 6px 20px rgba(20,37,84,.08),0 1px 3px rgba(20,37,84,.06);
+  --ds-sh-lg:0 24px 56px rgba(20,37,84,.16);
+  /* ───────────────────────────────────────────────────────────── */
   /* ─── ANCIENNES VARIABLES (rétrocompatibilité) ────────────────── */
   --ink1:#0F1E47; --w:100%; --wa:#F59E0B;
   --bg:#F0F2F7;--bg2:#E4E8F0;--bg3:#CDD3DF;--sur:#FFFFFF;--sur2:#F8F9FC;
@@ -3903,15 +3922,23 @@ tr:hover td:first-child {
   border-left: 3px solid #FFC93C;
 }
 
-/* ── B7. BADGES — glow doré permanent ── */
+/* ── B7. BADGES — glow doré (DS v3 : apaisé + limité aux badges de notification) ── */
 @keyframes badgeGlow {
   0%,100% { box-shadow: 0 0 0 0 rgba(255,201,60,.0); }
-  50%     { box-shadow: 0 0 0 5px rgba(255,201,60,.25); }
+  50%     { box-shadow: 0 0 0 3px rgba(255,201,60,.12); }
 }
-.badge, .pk-badge, .sbbg, .nb {
+.sbbg {
   animation: badgeGlow 2.5s ease-in-out infinite;
 }
 .badge:hover, .pk-badge:hover { transform: scale(1.12) !important; }
+
+/* ── DS v3 : Accessibilité — couper les animations si l'utilisateur le demande ── */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important; animation-iteration-count:1 !important;
+    transition-duration:.001ms !important; scroll-behavior:auto !important;
+  }
+}
 
 /* ── B8. CHAMPS FORMULAIRE — ring visible même sans focus ── */
 .fi, .lf input, .fg input, .fg select, .fg textarea {
