@@ -6610,9 +6610,9 @@ function visitorOrderBook(bid){
   if(b.stock<=0){toast('Ce manuel est en rupture de stock','warn');return;}
   const overlay=document.createElement('div');
   if(overlay)overlay.className='mov';
-  overlay.innerHTML=`<div class="modal"><div class="mhd"><div><div class="mtt">🛒 Commander: ${_esc(b.titre)}</div><div class="mst">${_esc(b.cls)} · ${_esc(b.auteur)} · ${fmt(b.prix)} FCFA</div></div><button class="mc" onclick="this.closest('.mov').remove()">✕</button></div>
+  overlay.innerHTML=`<div class="modal"><div class="mhd"><div><div class="mtt">🛒 Commander: ${_esc(b.titre)}</div><div class="mst">${_esc(b.cls)} · ${_esc(b.auteur)} · ${fmt(b.prix)}</div></div><button class="mc" onclick="this.closest('.mov').remove()">✕</button></div>
   <div class="mb">
-    <div style="text-align:center;margin-bottom:16px"><div style="font-size:48px">${b.ico}</div><div class="mono bold" style="font-size:24px;color:var(--gold);margin-top:8px">${fmt(b.prix)} FCFA</div></div>
+    <div style="text-align:center;margin-bottom:16px"><div style="font-size:48px">${b.ico}</div><div class="mono bold" style="font-size:24px;color:var(--gold);margin-top:8px">${fmt(b.prix)}</div></div>
     <div class="ib ibt mb14"><span>📋</span><span>Remplissez ce formulaire pour réserver votre manuel. Nous vous contacterons pour confirmer.</span></div>
     <div class="fg2">
       <div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="voNom" placeholder="Nom et prénom"></div>
