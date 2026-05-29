@@ -14174,7 +14174,7 @@ function mAddAdmin(){
   M('Créer un administrateur','Nouveau compte admin',
   '<div class="fg2">'+
   '<div class="fg"><span class="fl">Identifiant *</span><input class="fi" id="naUser" placeholder="ex: comptable"></div>'+
-  '<div class="fg"><span class="fl">Mot de passe *</span><input class="fi" id="naPwd" value="Veritas2024!"></div>'+
+  '<div class="fg"><span class="fl">Mot de passe *</span><input class="fi" id="naPwd" type="text" autocomplete="off" placeholder="Mot de passe fort (8+ caractères)"></div>'+
   '<div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="naNom" placeholder="M./Mme ..."></div>'+
   '<div class="fg"><span class="fl">Rôle / Fonction</span><select class="fi" id="naRole"><option>Administrateur</option><option>Secrétaire</option><option>Comptable</option><option>Surveillant</option><option>Censeur</option></select></div>'+
   '</div>',
@@ -33443,8 +33443,13 @@ window._computeSplits = function(payAttempt){
     if(userId){
       var parr = (DB.parrainages || []).find(function(p){ return p.filleulId === userId && p.confirmed; });
       if(parr && parr.parrainId && parr.parrainId !== userId){
-        var pct = (payAttempt.intent === 'subscription') ? cfg.parrain_abo : cfg.parrain_boutique;
-        var amount = Math.round((payAttempt.montant * pct) / 100);
+        // v1.2.2 : barème admin DB.parrainRate {forfait, pct} (forfait + %),
+        // repli sur SPLIT_CONFIG si non défini. → un seul barème, éditable par le superadmin.
+        var pr = DB.parrainRate || {};
+        var pPct = (typeof pr.pct === 'number') ? pr.pct
+                 : ((payAttempt.intent === 'subscription') ? cfg.parrain_abo : cfg.parrain_boutique);
+        var pForfait = (typeof pr.forfait === 'number') ? pr.forfait : 0;
+        var amount = pForfait + Math.round((payAttempt.montant * pPct) / 100);
         if(amount > 0){
           splits.push({
             id: gid(),
@@ -33453,7 +33458,8 @@ window._computeSplits = function(payAttempt){
             partenaireId: parr.parrainId,
             description: 'Parrainage de '+(payAttempt.customerNom || 'filleul'),
             montantBase: payAttempt.montant,
-            pct: pct,
+            forfait: pForfait,
+            pct: pPct,
             montant: amount,
             etat: 'pending',
             createdAt: Date.now()
@@ -33469,7 +33475,9 @@ window._computeSplits = function(payAttempt){
       var bid = payAttempt.targetId;
       var book = (DB.books || []).find(function(b){ return b.id === bid; });
       if(book && book.authorId){
-        var pct = cfg.auteur_livre;
+        // v1.2.2 : part réelle du livre (book.share) sinon part globale (DB.authorShare), sinon défaut.
+        var pct = (typeof book.share === 'number') ? book.share
+                : (typeof DB.authorShare === 'number') ? DB.authorShare : cfg.auteur_livre;
         var amount = Math.round((payAttempt.montant * pct) / 100);
         splits.push({
           id: gid(),
@@ -33521,6 +33529,16 @@ window._computeSplits = function(payAttempt){
     DB.partenairesSplit[s.partenaireId].solde += s.montant;
     DB.partenairesSplit[s.partenaireId].splits.push(s.id);
   });
+  // v1.2.2 : ventilation lisible enregistrée sur le paiement (affichable dans mPayAttempts).
+  try {
+    var partTotal = splits.reduce(function(s,x){ return s + (x.montant||0); }, 0);
+    payAttempt.ventilation = {
+      brut: payAttempt.montant,
+      parts: splits.map(function(x){ return {type:x.type, beneficiaire:x.partenaireId, forfait:x.forfait||0, pct:x.pct||0, montant:x.montant}; }),
+      totalReverse: partTotal,
+      netVeritas: Math.max(0, (payAttempt.montant||0) - partTotal)
+    };
+  } catch(e){}
   if(splits.length) try { save(); } catch(e){}
   return splits;
 };
