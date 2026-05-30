@@ -3552,3 +3552,36 @@ body{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
   transform:translateY(-3px);
   box-shadow:0 4px 10px rgba(20,37,84,.08), 0 22px 50px rgba(20,37,84,.13);
 }
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — PICTOGRAMMES + BORDURES COLORÉES + ANIMATIONS
+   Public : jeunes apprenants du secondaire (Cameroun). Identité navy/or
+   conservée ; vivacité via accents de couleur par matière + micro-anims.
+   (respecte prefers-reduced-motion — règle globale plus haut)
+   ════════════════════════════════════════════════════════════════ */
+
+/* 1) PICTOGRAMMES — rendu net + "pop" ludique au survol de la carte/bouton parent */
+.v-ico,.ico,.material-symbols-rounded{
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1), color .2s ease;
+}
+.vcard:hover .v-ico,.vgz-bento-card:hover .v-ico,.gallery-card:hover .v-ico,
+.btn:hover .v-ico,.bi:hover .v-ico,a:hover > .v-ico{
+  transform:scale(1.18) rotate(-6deg);
+}
+
+/* 2) BORDURES COLORÉES — accent par matière (rotation de teintes de la charte) */
+.vcard,.vgz-bento-card,.gallery-card{ border-top:3px solid var(--bl2,#3C8DFF); }
+.vcard:nth-child(6n+2),.vgz-bento-card:nth-child(6n+2),.gallery-card:nth-child(6n+2){ border-top-color:var(--gold,#FFC93C); }
+.vcard:nth-child(6n+3),.vgz-bento-card:nth-child(6n+3),.gallery-card:nth-child(6n+3){ border-top-color:var(--pu,#7C3AED); }
+.vcard:nth-child(6n+4),.vgz-bento-card:nth-child(6n+4),.gallery-card:nth-child(6n+4){ border-top-color:var(--gr,#059669); }
+.vcard:nth-child(6n+5),.vgz-bento-card:nth-child(6n+5),.gallery-card:nth-child(6n+5){ border-top-color:var(--or,#F59E0B); }
+.vcard:nth-child(6n),.vgz-bento-card:nth-child(6n),.gallery-card:nth-child(6n){ border-top-color:var(--vi,#0D9488); }
+
+/* 3) ANIMATIONS d'accent (douces, non envahissantes) */
+@keyframes vtFloat{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+@keyframes vtPulseGold{ 0%,100%{box-shadow:0 4px 14px rgba(245,184,0,.35)} 50%{box-shadow:0 6px 22px rgba(245,184,0,.6)} }
+/* Icônes rondes des stats / héros : flottement doux */
+.vgz-stat .v-ico,.vgz-stat .ico{ animation:vtFloat 3.2s ease-in-out infinite; }
+/* Apparition "pop" des cartes déjà révélées (complète v-reveal) */
+.vcard.is-visible,.vgz-bento-card.is-visible{ animation:vtPopIn .45s cubic-bezier(.34,1.56,.64,1) both; }
+@keyframes vtPopIn{ 0%{transform:scale(.94);opacity:0} 60%{transform:scale(1.03)} 100%{transform:scale(1);opacity:1} }
