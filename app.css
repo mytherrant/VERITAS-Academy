@@ -3585,3 +3585,37 @@ body{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
 /* Apparition "pop" des cartes déjà révélées (complète v-reveal) */
 .vcard.is-visible,.vgz-bento-card.is-visible{ animation:vtPopIn .45s cubic-bezier(.34,1.56,.64,1) both; }
 @keyframes vtPopIn{ 0%{transform:scale(.94);opacity:0} 60%{transform:scale(1.03)} 100%{transform:scale(1);opacity:1} }
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — SOCLE PREMIUM (typographie soignée + finitions globales)
+   Élève l'ensemble du site sans toucher à la mise en page.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Titres : équilibre des lignes (premium), kerning, interlettrage resserré */
+h1,h2,h3,.vhero-title,.vsec-title,.pgt,.h-display,.h-1,.h-2,.sc-title,.b-title{
+  text-wrap:balance;
+  letter-spacing:-0.02em;
+  font-feature-settings:'kern' 1,'liga' 1,'calt' 1;
+}
+/* Paragraphes longs : meilleure césure/veuves */
+p,li,.text-body,.mut{ text-wrap:pretty; font-feature-settings:'kern' 1,'liga' 1; }
+
+/* Transitions douces génériques sur les éléments interactifs */
+a,button,.btn,[role="button"],.vcard,.gallery-card,.vgz-bento-card{
+  transition:color .18s ease, background-color .18s ease, border-color .18s ease,
+             box-shadow .22s ease, transform .16s ease;
+}
+
+/* Sélection de texte à la charte (or translucide sur navy) */
+::selection{ background:rgba(255,201,60,.45); color:#142554; }
+
+/* Images : pas de débordement + coins cohérents dans les cartes */
+.vcard img,.gallery-card img,.vgz-bento-card img{ max-width:100%; height:auto; }
+
+/* Liens : soulignement animé discret (finition premium) */
+a.vlink, .v-link, a.link-anim{
+  background-image:linear-gradient(var(--gold,#FFC93C),var(--gold,#FFC93C));
+  background-size:0% 2px; background-position:0 100%; background-repeat:no-repeat;
+  transition:background-size .25s ease;
+}
+a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
