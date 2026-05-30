@@ -3640,3 +3640,37 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
   transform:skewX(-20deg); transition:left .6s ease; pointer-events:none;
 }
 .vlit-banner[onclick]:hover::after{ left:150%; }
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — COMMERCE premium (E-Learning + Boutique) : cartes produits,
+   livres, cours. Profondeur, lift au survol, prix mis en valeur.
+   ════════════════════════════════════════════════════════════════ */
+.sc, .vbook-card, .vprod-card{
+  border-radius:16px;
+  box-shadow:0 1px 2px rgba(20,37,84,.05), 0 12px 30px rgba(20,37,84,.08);
+  transition:transform .2s ease, box-shadow .25s ease;
+  overflow:hidden;
+}
+.sc:hover, .vbook-card:hover, .vprod-card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 6px 14px rgba(20,37,84,.10), 0 24px 54px rgba(20,37,84,.16);
+}
+/* Vignette qui zoome doucement au survol de la carte */
+.sc-thumb, .vbook-card img, .vprod-card img{ transition:transform .35s ease; }
+.sc:hover .sc-thumb, .vbook-card:hover img, .vprod-card:hover img{ transform:scale(1.05); }
+
+/* Prix : plus lisibles et hiérarchisés */
+.sc-price, .vbook-price, .vprod-price{
+  font-weight:900; color:var(--ds-primary,#142554); letter-spacing:-.01em;
+}
+.sc-old, .vbook-old-price, .vprod-old{
+  color:var(--ds-text-3,#7A88A6); text-decoration:line-through; opacity:.85;
+}
+/* CTA produit : plein, contrasté, interactif */
+.vprod-cta, .sc-btn{
+  background:linear-gradient(135deg,var(--ds-primary,#142554),#1E3A8A);
+  color:#fff; border-radius:10px; font-weight:800;
+  transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
+}
+.vprod-cta:hover, .sc-btn:hover{ transform:translateY(-1px); filter:brightness(1.08);
+  box-shadow:0 8px 20px rgba(20,37,84,.22); }
