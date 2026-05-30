@@ -1,10 +1,20 @@
 <?php
-// ============================================================
-// VÉRITAS Academy — Wrapper PHP anti-cache LiteSpeed v2
-// Ce fichier sert app.html avec des en-têtes no-cache forcés.
-// LiteSpeed met en cache les fichiers .html statiques et ignore
-// les directives .htaccess — passer par PHP bypass ce cache.
-// ============================================================
+/**
+ * ============================================================================
+ *  VÉRITAS Academy — Wrapper PHP anti-cache LiteSpeed v2  ·  index.php
+ *  © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+ *
+ *  Œuvre originale protégée par le droit d'auteur (Loi camerounaise
+ *  n° 2000/011 du 19 décembre 2000 et Convention de Berne).
+ *  Reproduction, distribution, modification interdites sans accord écrit.
+ *  Contrefaçon : 5-10 ans prison + 500 000 à 10 000 000 FCFA d'amende.
+ *  Contact : contact@veritas-school.com  ·  https://veritas-school.com
+ *
+ *  Ce fichier sert app.html avec des en-têtes no-cache forcés.
+ *  LiteSpeed met en cache les fichiers .html statiques et ignore
+ *  les directives .htaccess — passer par PHP bypass ce cache.
+ * ============================================================================
+ */
 $appFile = __DIR__ . '/app.html';
 
 // ETag basé sur la date de modification du fichier → invalide le cache à chaque déploiement

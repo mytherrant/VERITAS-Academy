@@ -1,6 +1,11 @@
 <?php
 /**
  * api/ia_proxy.php — Proxy sécurisé vers Anthropic Claude (Plan Élite)
+ * © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+ * Œuvre protégée — Loi camerounaise n° 2000/011 + Convention de Berne.
+ * Reproduction, distribution, modification interdites sans accord écrit.
+ * Contrefaçon : 5-10 ans prison + 500 000 à 10 000 000 FCFA d'amende.
+ * Contact : contact@veritas-school.com
  *
  * SÉCURITÉ : la clé API Anthropic n'apparaît JAMAIS côté client.
  * Elle est stockée dans api/payment_config.php (ignoré par git).

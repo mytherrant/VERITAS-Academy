@@ -1,6 +1,10 @@
 <?php
 // ============================================================
 // VÉRITAS — Intégration MTN MoMo Collection API (Cameroun)
+// © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+// Œuvre protégée — Loi n° 2000/011 + Convention de Berne.
+// Reproduction interdite sans accord écrit. Contrefaçon : 5-10 ans prison +
+// 500 000 à 10 000 000 FCFA d'amende. contact@veritas-school.com
 // ──────────────────────────────────────────────────────────
 // Endpoints:
 //   POST /api/payment_mtn.php?action=init    → Initialise un paiement, envoie USSD au client

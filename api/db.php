@@ -1,6 +1,12 @@
 <?php
 /**
  * VÉRITAS Academy — api/db.php
+ * © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+ * Œuvre protégée — Loi camerounaise n° 2000/011 du 19 déc. 2000 + Convention de Berne.
+ * Reproduction, distribution, modification interdites sans accord écrit.
+ * Contrefaçon : 5-10 ans prison + 500 000 à 10 000 000 FCFA d'amende.
+ * Contact : contact@veritas-school.com
+ *
  * GET  → renvoie le JSON courant (authentification requise)
  * POST application/json → sauvegarde la DB synchronisée
  *

@@ -62,6 +62,10 @@ deploy/
 # Graphe de connaissance graphify — local uniquement (régénérable, jamais déployé)
 graphify-out/
 
+# Horodatage / preuve d'antériorité (LOCAL UNIQUEMENT — contient un ZIP du code
+# source : ne JAMAIS committer ni déployer, sinon tout le code serait téléchargeable).
+horodatage/
+
 # Fichiers de travail temporaires
 app.html
 # index.html = copie générée (déploiement / aperçu local) — ne pas versionner

@@ -1,5 +1,13 @@
 // ═══════════════════════════════════════════════════════════════════
-// VÉRITAS Academy — Service Worker v2.9.11
+// VÉRITAS Academy — Service Worker v2.9.11  ·  sw.js
+// © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+//
+// Œuvre originale protégée par le droit d'auteur (Loi camerounaise
+// n° 2000/011 du 19 déc. 2000 et Convention de Berne).
+// Reproduction, modification, distribution interdites sans accord écrit.
+// Contrefaçon : 5-10 ans prison + 500 000 à 10 000 000 FCFA d'amende.
+// Contact : contact@veritas-school.com  ·  https://veritas-school.com
+//
 // Stratégie : Network First pour HTML, Cache First pour assets.
 // CORRECTION v2.9.11 : robustesse maximale — jamais de respondWith(undefined)
 // (cause du bug "Failed to convert value to 'Response'" en v2.9.7-v2.9.10)
