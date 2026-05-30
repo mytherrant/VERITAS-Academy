@@ -4,14 +4,14 @@
 // Utilisé par sync.php et files.php uniquement
 // ============================================================
 
-// 🔐 v1.2.2 : le secret de synchronisation ne doit PLUS vivre dans ce fichier
-// versionné. On le lit depuis api/payment_config.php (gitignoré). Repli sur
-// l'ancienne valeur UNIQUEMENT si non défini, pour ne pas casser un déploiement
-// existant pendant la rotation. → Définir API_SECRET dans payment_config.php,
-// puis SUPPRIMER ce repli une fois la rotation effectuée.
+// 🔐 v1.2.2 : le secret de synchronisation vit UNIQUEMENT dans api/payment_config.php
+// (gitignoré). Rotation effectuée → plus aucun secret par défaut dans ce fichier versionné.
+// FAIL-CLOSED : si API_SECRET n'est pas défini côté serveur, on génère une valeur
+// aléatoire inconnue (toutes les requêtes seront refusées) plutôt que d'accepter un
+// secret connu. → Toujours définir API_SECRET dans payment_config.php.
 @include_once __DIR__ . '/payment_config.php';
 if (!defined('API_SECRET')) {
-    define('API_SECRET', 'VERITAS-CLOUD-2026-xK9m'); // ⚠️ LEGACY — à roter (voir payment_config.php)
+    define('API_SECRET', bin2hex(random_bytes(32)));
 }
 
 // ── CORS (v1.2.2 : allowlist stricte au lieu de '*') ──

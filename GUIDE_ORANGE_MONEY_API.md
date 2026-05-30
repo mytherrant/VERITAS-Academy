@@ -54,7 +54,7 @@ define('ORANGE_CURRENCY',      'XAF');   // 'OUV' = sandbox, 'XAF' = production
 6. Le **token API** doit correspondre au secret que vous avez configuré dans VÉRITAS (Paramètres → Cloud) :
 
 ```php
-define('PAY_API_SECRET',       'VERITAS-CLOUD-2026-xK9m');  // ← identique à DB.cloudConfig.secret
+define('PAY_API_SECRET',       'VOTRE_SECRET_DE_SYNC');  // ← identique à DB.cloudConfig.secret
 ```
 
 7. **Sauvegardez** le fichier.

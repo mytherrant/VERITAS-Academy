@@ -43,7 +43,7 @@ define('PAY_API_SECRET', 'COLLEZ_ICI_LE_NOUVEAU_SECRET'); // peut être identiqu
 ```
 
 ### Étape 3 — Générer et roter le secret
-L'ancien `VERITAS-CLOUD-2026-xK9m` a **fuité** (il était dans le HTML public) → à abandonner.
+L'ancien `VOTRE_SECRET_DE_SYNC` a **fuité** (il était dans le HTML public) → à abandonner.
 ```bash
 openssl rand -hex 24      # ex. 3f9a...e7  (48 caractères)
 ```
@@ -51,7 +51,7 @@ openssl rand -hex 24      # ex. 3f9a...e7  (48 caractères)
 - Une fois `API_SECRET` défini dans `payment_config.php`, **supprimer le repli legacy** dans `config_sync.php` :
   ```php
   // dans api/config_sync.php, retirer ce bloc une fois la rotation faite :
-  if (!defined('API_SECRET')) { define('API_SECRET', 'VERITAS-CLOUD-2026-xK9m'); }
+  if (!defined('API_SECRET')) { define('API_SECRET', 'VOTRE_SECRET_DE_SYNC'); }
   ```
 
 ### Étape 4 — Mettre à jour les appareils admin
@@ -75,7 +75,7 @@ Le `defaultDB()` embarque des mots de passe de démarrage **lisibles dans le sou
 
 ```bash
 # (a) Le secret n'est plus dans le HTML servi
-curl -s https://veritas-school.com/ | grep -c "VERITAS-CLOUD-2026-xK9m"   # → 0
+curl -s https://veritas-school.com/ | grep -c "VOTRE_SECRET_DE_SYNC"   # → 0
 
 # (b) CORS : une origine étrangère ne reçoit PAS d'en-tête Allow-Origin
 curl -s -I -H "Origin: https://evil.example" https://veritas-school.com/api/public_data.php \
@@ -90,7 +90,7 @@ curl -s -o /dev/null -w "%{http_code}\n" https://veritas-school.com/api/db.php  
 
 # (e) db.php avec l'ANCIEN secret doit désormais être refusé (rotation OK)
 curl -s -o /dev/null -w "%{http_code}\n" \
-  -H "Authorization: Bearer VERITAS-CLOUD-2026-xK9m" https://veritas-school.com/api/db.php   # → 401
+  -H "Authorization: Bearer VOTRE_SECRET_DE_SYNC" https://veritas-school.com/api/db.php   # → 401
 ```
 
 Côté navigateur : se connecter en admin → vérifier que le pastille de sync passe au vert (sync OK) après saisie de la nouvelle clé.
