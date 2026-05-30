@@ -52,7 +52,7 @@ Ces points **ne peuvent pas être corrigés sans backend complet** (voir CLAUDE.
 
 2. **Changer le `API_SECRET`** dans `api/config_sync.php` :
    ```php
-   define('API_SECRET', 'VERITAS-CLOUD-2026-xK9m');   // ← REMPLACER par votre propre clé aléatoire
+   define('API_SECRET', 'VOTRE_SECRET_DE_SYNC');   // ← REMPLACER par votre propre clé aléatoire
    ```
    → Générez une chaîne aléatoire de 32 caractères sur https://www.random.org/strings/
    → **Mettre à jour aussi** `DB.cloudConfig.secret` dans VÉRITAS (Paramètres → Cloud)

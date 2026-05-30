@@ -338,7 +338,7 @@ Numéros de test MTN sandbox :
 
 → Allez dans **Paramètres → ☁️ VÉRITAS Cloud — Synchronisation en ligne** et renseignez :
 - URL du serveur API : `https://veritas-school.com/api`
-- Clé API : `VERITAS-CLOUD-2026-xK9m` (la même que `PAY_API_SECRET` dans payment_config.php)
+- Clé API : `VOTRE_SECRET_DE_SYNC` (la même que `PAY_API_SECRET` dans payment_config.php)
 
 ## Erreur "OAuth Orange échoué"
 
