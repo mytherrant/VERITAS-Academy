@@ -14,6 +14,7 @@ on:
       - 'reset.html'
       - 'admin-validation.html'
       - 'index.php'
+      - 'app.css'
       - '.htaccess'
       - 'api/**'
       - 'evaluations/**'
@@ -70,6 +71,8 @@ jobs:
             echo "  ✓ VERITAS_v1.1.html → app.html + index.html"
           fi
           cp index.php         deploy/index.php
+          # v1.2.2 : CSS principal extrait (cacheable séparément → 1er chargement allégé)
+          if [ -f app.css ]; then cp app.css deploy/; echo "  ✓ app.css"; fi
 
           # Logo
           if [ -f "Logo détouré.png" ]; then cp "Logo détouré.png" deploy/; fi
