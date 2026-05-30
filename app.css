@@ -3734,3 +3734,57 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
   font-weight:900; letter-spacing:-.02em; color:var(--ds-primary,#142554);
   font-variant-numeric:tabular-nums;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — REFONTE PREMIUM DES SECTIONS (E-Learning · Boutique · Produits)
+   Additif, identité navy/or conservée. Animations pour public jeune.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Titres de section : accent doré sous le titre (signature premium) */
+.vsec-title{ position:relative; padding-bottom:10px; }
+.vsec-title::after{
+  content:""; position:absolute; left:0; bottom:0; height:4px; width:54px;
+  border-radius:99px;
+  background:linear-gradient(90deg,var(--gold,#FFC93C),var(--or,#F59E0B));
+  box-shadow:0 2px 8px rgba(245,184,0,.4);
+}
+
+/* Cartes Boutique / E-Learning / Produits : profondeur + lift + accent haut */
+.vbook-card,.vplan-card,.vprod-card{
+  border:1px solid var(--ds-border,#E6EAF2);
+  border-top:3px solid var(--bl2,#3C8DFF);
+  border-radius:16px;
+  box-shadow:0 1px 2px rgba(20,37,84,.05), 0 10px 26px rgba(20,37,84,.06);
+  transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+.vplan-card{ border-top-color:var(--pu,#7C3AED); }
+.vprod-card{ border-top-color:var(--gr,#059669); }
+.vbook-card:hover,.vplan-card:hover,.vprod-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 6px 14px rgba(20,37,84,.08), 0 26px 56px rgba(20,37,84,.14);
+}
+
+/* Zoom doux de la couverture/visuel au survol de la carte (vivant) */
+.vbook-card img,.vprod-card img{ transition:transform .4s cubic-bezier(.2,.7,.2,1); will-change:transform; }
+.vbook-card:hover img,.vprod-card:hover img{ transform:scale(1.06); }
+
+/* Prix : plus lisible, à la charte */
+.vplan-price,.vbook-price{ color:var(--ink,#142554); font-weight:900; letter-spacing:-.5px; }
+
+/* Plan POPULAIRE : halo doré animé (entonnoir d'abonnement → attire l'œil) */
+.vplan-card.vplan-popular,.vplan-popular{
+  border:2px solid var(--gold,#FFC93C);
+  animation:vtPlanGlow 2.6s ease-in-out infinite;
+}
+@keyframes vtPlanGlow{
+  0%,100%{ box-shadow:0 8px 22px rgba(245,184,0,.22), 0 0 0 0 rgba(255,201,60,.45); }
+  50%{ box-shadow:0 12px 30px rgba(245,184,0,.34), 0 0 0 7px rgba(255,201,60,0); }
+}
+
+/* Badge "populaire" : petit rebond d'appel */
+.vplan-popular .vplan-badge,.vplan-card .badge-pop{ animation:vtBadgePop 2.6s ease-in-out infinite; }
+@keyframes vtBadgePop{ 0%,90%,100%{transform:scale(1)} 95%{transform:scale(1.12)} }
+
+/* Boutons CTA d'achat/abonnement : éclat au survol */
+.vbook-card .btn:hover,.vplan-card .btn:hover,.vprod-card .btn:hover,
+.vprod-cta:hover,.sc-btn:hover{ filter:brightness(1.05); transform:translateY(-1px); }
