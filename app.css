@@ -3674,3 +3674,41 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 }
 .vprod-cta:hover, .sc-btn:hover{ transform:translateY(-1px); filter:brightness(1.08);
   box-shadow:0 8px 20px rgba(20,37,84,.22); }
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — PLANS d'abonnement premium (.vplan-*) : offre payante.
+   Profondeur, plan "populaire" mis en avant, prix proéminent, CTA fort.
+   ════════════════════════════════════════════════════════════════ */
+.vplan-card{
+  border-radius:20px;
+  box-shadow:0 2px 6px rgba(20,37,84,.07), 0 14px 36px rgba(20,37,84,.10);
+  transition:transform .22s ease, box-shadow .25s ease;
+  position:relative; overflow:hidden;
+}
+.vplan-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 8px 18px rgba(20,37,84,.12), 0 28px 64px rgba(20,37,84,.20);
+}
+/* Plan populaire : bordure or + léger relief permanent */
+.vplan-card.is-popular{
+  border:2px solid var(--gold,#FFC93C);
+  box-shadow:0 4px 12px rgba(245,184,0,.20), 0 22px 54px rgba(20,37,84,.16);
+}
+.vplan-card.is-popular:hover{ transform:translateY(-6px) scale(1.01); }
+.vplan-badge-pop:not(:empty){
+  background:linear-gradient(135deg,var(--gold,#FFC93C),#F5B800);
+  color:#142554; font-weight:900; letter-spacing:.5px;
+  border-radius:0 0 12px 12px; padding:4px 12px; display:inline-block;
+}
+/* Prix proéminent */
+.vplan-price{ font-weight:900; color:var(--ds-primary,#142554); letter-spacing:-.02em; line-height:1; }
+.vplan-old-price{ text-decoration:line-through; color:var(--ds-text-3,#7A88A6); }
+/* CTA d'abonnement : plein, contrasté, interactif */
+.vplan-cta{
+  background:linear-gradient(135deg,var(--ds-primary,#142554),#1E3A8A);
+  color:#fff; font-weight:800; border-radius:12px;
+  transition:transform .15s ease, box-shadow .2s ease, filter .2s ease;
+}
+.vplan-cta:hover{ transform:translateY(-2px); filter:brightness(1.1);
+  box-shadow:0 10px 24px rgba(20,37,84,.25); }
+.vplan-card.is-popular .vplan-cta{ background:linear-gradient(135deg,var(--gold,#FFC93C),#F5B800); color:#142554; }
