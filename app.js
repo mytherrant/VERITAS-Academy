@@ -12738,21 +12738,42 @@ window._palmaresHtml = function(){
   var champHtml='';
   if(champ){
     var _cn=_esc(champ.nom||'Anonyme'); var _ci=((_cn.replace(/[^A-Za-zÀ-ÿ]/g,'').trim()[0])||'?').toUpperCase();
+    // Récompense du champion (configurable : DB.battleReward) sinon valeur par défaut
+    var _reward=_esc((DB.battleReward||champ.reward||'1 mois Premium offert + badge 👑'));
+    var _cls=champ.cls?(' · '+_esc(champ.cls)):'';
     champHtml='<div onclick="(typeof mBattles===\'function\'?mBattles():null)" style="cursor:pointer;padding:14px;border-radius:15px;background:linear-gradient(135deg,#FFC93C,#FB923C);box-shadow:0 8px 22px rgba(251,146,60,.28);position:relative;overflow:hidden">'
       +'<div style="position:absolute;top:8px;right:12px;font-size:10px;font-weight:800;color:#7C2D12;letter-spacing:.5px;text-transform:uppercase">👑 Champion</div>'
       +'<div style="display:flex;align-items:center;gap:12px">'
-        +'<div style="flex-shrink:0;width:48px;height:48px;border-radius:50%;background:#142554;color:#FFC93C;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:900;border:2px solid #fff">'+_ci+'</div>'
+        +'<div style="flex-shrink:0;width:52px;height:52px;border-radius:50%;background:#142554;color:#FFC93C;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.25)">'+_ci+'</div>'
         +'<div style="min-width:0;flex:1">'
-          +'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7C2D12">Battle de la semaine</div>'
+          +'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7C2D12">Battle de la semaine'+_cls+'</div>'
           +'<div style="font-size:16px;font-weight:900;color:#142554;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_cn+'</div>'
           +'<div style="font-size:12px;font-weight:700;color:#7C2D12;margin-top:1px">🏆 '+(champ.score||0)+'/10'+(champ.timeMs?' · '+Math.round(champ.timeMs/1000)+'s':'')+'</div>'
         +'</div>'
       +'</div>'
+      +'<div style="margin-top:10px;padding:8px 10px;border-radius:10px;background:rgba(20,37,84,.12);font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px"><span>🎁</span><span style="min-width:0;flex:1">Récompense : '+_reward+'</span></div>'
+      +'<button onclick="event.stopPropagation();(typeof mBattles===\'function\'?mBattles():showJeuxEdu())" style="margin-top:8px;width:100%;border:none;cursor:pointer;padding:9px;border-radius:10px;background:#142554;color:#FFC93C;font-weight:800;font-size:12px;letter-spacing:.3px">⚔️ Détrône le champion →</button>'
     +'</div>';
   } else {
     tiles+=tile({color:'#FB923C',ico:'⚔️',label:'Battle de la semaine',title:'10 QCM · Classement national',sub:battleN>0?(battleN+' duel'+(battleN>1?'s':'')+' en cours'):'+50 XP — relevez le défi !',click:"(typeof mBattles===\'function\'?mBattles():showJeuxEdu())"});
   }
-  tiles+=tile({color:'#7C3AED',ico:'🔥',label:'Rejoignez le palmarès',title:'XP · Badges · Niveaux',sub:nApp>0?('Déjà '+nApp+' apprenants inscrits'):'Soyez le premier !',click:"(typeof showRegisterForm===\'function\'?showRegisterForm():null)"});
+  // ── Plan d'abonnement le PLUS souscrit (émulation : « rejoignez les autres ») ──
+  var _plans=(DB.elearning&&DB.elearning.plans)||[];
+  var _abos=(DB.elearning&&DB.elearning.abonnements)||[];
+  var _pcnt={}; _abos.forEach(function(a){ var p=a&&(a.planId||a.plan); if(p)_pcnt[p]=(_pcnt[p]||0)+1; });
+  var _topPlanId=null,_topPlanN=0; for(var _pk in _pcnt){ if(_pcnt[_pk]>_topPlanN){_topPlanN=_pcnt[_pk];_topPlanId=_pk;} }
+  var _topPlan=(_topPlanId&&_plans.find(function(p){return p.id===_topPlanId;}))
+            || _plans.find(function(p){return p.populaire||p.featured;})
+            || _plans[0] || null;
+  if(_topPlan){
+    var _pp=(typeof fmt==='function'&&_topPlan.prix!=null)?fmt(_topPlan.prix):'';
+    var _psub=_topPlanN>0
+      ? ('🔥 '+_topPlanN+' élève'+(_topPlanN>1?'s ont':' a')+' déjà choisi ce plan — rejoignez-les !')
+      : (_pp?('Dès '+_pp+' — débloquez tout le contenu'):'Débloquez tout le contenu premium');
+    tiles+=tile({color:'#7C3AED',ico:'🚀',label:'Abonnement le plus choisi',title:_esc(_topPlan.nom||'Plan Premium')+(_pp?(' · '+_pp):''),sub:_psub,click:"(typeof vShowSec===\'function\'?vShowSec(\'elearning\'):(typeof showRegisterForm===\'function\'?showRegisterForm():null))"});
+  } else {
+    tiles+=tile({color:'#7C3AED',ico:'🔥',label:'Rejoignez le palmarès',title:'XP · Badges · Niveaux',sub:nApp>0?('Déjà '+nApp+' apprenants inscrits — rejoignez-les !'):'Soyez le premier !',click:"(typeof showRegisterForm===\'function\'?showRegisterForm():null)"});
+  }
   return '<div style="min-height:300px;height:100%;background:linear-gradient(180deg,#fff,#F7F9FF);border:1px solid #E6EAF2;border-radius:var(--r3,20px);box-shadow:0 4px 24px rgba(20,37,84,.08);display:flex;flex-direction:column;overflow:hidden">'
     +'<div style="padding:14px 16px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;display:flex;align-items:center;gap:10px;flex-shrink:0">'
       +'<span style="font-size:22px">🏆</span>'
