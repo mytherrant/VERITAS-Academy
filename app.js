@@ -2964,7 +2964,7 @@ function applyPromo(bid){
   let newPrice=b.prix;let savings=0;
   if(promo.type==='percent'){savings=Math.round(b.prix*promo.reduction/100);newPrice=b.prix-savings;}
   else{savings=promo.reduction;newPrice=Math.max(0,b.prix-promo.reduction);}
-  if(result)result.innerHTML='<div style="font-size:13px;color:var(--gr);margin-top:4px;padding:6px;background:var(--grb);border-radius:var(--r)">✅ <strong>'+promo.desc+'</strong> — Vous économisez <strong>'+fmt(savings)+' FCFA</strong><br><span class="mono bold" style="font-size:14px;color:var(--gold)">Nouveau prix: '+fmt(newPrice)+' FCFA</span></div>';
+  if(result)result.innerHTML='<div style="font-size:13px;color:var(--gr);margin-top:4px;padding:6px;background:var(--grb);border-radius:var(--r)">✅ <strong>'+promo.desc+'</strong> — Vous économisez <strong>'+fmt(savings)+'</strong><br><span class="mono bold" style="font-size:14px;color:var(--gold)">Nouveau prix: '+fmt(newPrice)+'</span></div>';
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -4333,12 +4333,12 @@ function vShowSec(sec,btn){
             var thumb=s.photo
               ? '<img src="'+s.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">'
               : (s.ico||'📦');
-            var oldP=s.ancien?fmt(s.ancien)+' FCFA':'';
+            var oldP=s.ancien?fmt(s.ancien):'';
             return '<div class="sc"><div class="sc-thumb" style="background:'+bg+'">'+thumb
               +(s.nouveau?'<span class="sc-new">NEW</span>':'')
               +'</div><div class="sc-body"><h4>'+_esc(s.titre)+'</h4>'
               +'<p class="sc-desc">'+_esc(s.desc||'')+'</p>'
-              +'<div class="shoprow"><span class="sc-price">'+fmt(s.prix)+' FCFA</span>'
+              +'<div class="shoprow"><span class="sc-price">'+fmt(s.prix)+'</span>'
               +(oldP?'<span class="sc-old">'+oldP+'</span>':'')+'</div>'
               +'<button class="btn bi" style="width:100%;justify-content:center;font-size:11px;padding:5px 8px;margin-top:6px;border-radius:8px" onclick="visitorOrderProduct(\''+s.titre.replace(/'/g,'')+'\','+s.prix+')">🛒 Commander</button>'
               +'</div></div>';
@@ -4376,9 +4376,9 @@ function vShowSec(sec,btn){
             <div class="vbook-author">${_esc(b.auteur||'')}</div>
             ${_ratingHtml}
             <div class="vbook-desc">${_esc((b.desc||'').substring(0,90))}</div>
-            ${discount?`<div class="vbook-old-price"><s>${fmt(b.ancienPrix)} FCFA</s><span class="vbook-discount">-${discount}%</span></div>`:''}
+            ${discount?`<div class="vbook-old-price"><s>${fmt(b.ancienPrix)}</s><span class="vbook-discount">-${discount}%</span></div>`:''}
             <div class="vbook-price-row">
-              <span class="vbook-price">${fmt(b.prix)} F</span>
+              <span class="vbook-price">${fmt(b.prix)}</span>
               <span class="vbook-stock ${stockCls}">${stockIco} ${stockLbl}</span>
             </div>
             <div class="vbook-actions">
@@ -4413,8 +4413,8 @@ function vShowSec(sec,btn){
               '<div class="vprod-title">'+_esc(p.titre)+'</div>'+
               '<div class="vprod-desc">'+_esc(p.desc||'')+'</div>'+
               '<div class="vprod-pricing">'+
-                (p.ancien?'<div class="vprod-old">'+fmt(p.ancien)+' FCFA</div>':'')+
-                '<div class="vprod-price">'+fmt(p.prix)+' FCFA</div>'+
+                (p.ancien?'<div class="vprod-old">'+fmt(p.ancien)+'</div>':'')+
+                '<div class="vprod-price">'+fmt(p.prix)+'</div>'+
                 '<div class="vprod-cta">🛒 Commander</div>'+
               '</div>'+
             '</div>'+
