@@ -3483,3 +3483,36 @@ textarea:focus-visible, [role="button"]:focus-visible, [role="menuitem"]:focus-v
   box-shadow: 0 0 0 6px rgba(255,201,60,.18) !important;
   border-radius: 6px !important;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — PASSE DE FINITION (sûre, additive, sans impact layout)
+   Cohérence charte : rendu typographique, focus clavier, mouvement,
+   scrollbars. Spécificité 0 via :where() → n'écrase aucun style existant.
+   ════════════════════════════════════════════════════════════════ */
+html{ scroll-behavior:smooth; }
+body{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; text-rendering:optimizeLegibility; }
+*{ -webkit-tap-highlight-color:transparent; }
+
+/* Focus clavier visible et homogène (accessibilité + finition) */
+:where(a,button,input,select,textarea,[tabindex],[role="button"]):focus-visible{
+  outline:2px solid var(--ds-accent,#FFC93C);
+  outline-offset:2px;
+  border-radius:4px;
+}
+
+/* Respect de « réduire les animations » (système) */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+/* Barres de défilement discrètes, alignées sur la charte */
+*{ scrollbar-width:thin; scrollbar-color:var(--ds-border-strong,#D5DBE8) transparent; }
+::-webkit-scrollbar{ width:10px; height:10px; }
+::-webkit-scrollbar-track{ background:transparent; }
+::-webkit-scrollbar-thumb{ background:var(--ds-border-strong,#D5DBE8); border-radius:8px; }
+::-webkit-scrollbar-thumb:hover{ background:var(--ds-text-3,#7A88A6); }
