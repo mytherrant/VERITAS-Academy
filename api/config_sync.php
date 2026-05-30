@@ -4,11 +4,34 @@
 // Utilisé par sync.php et files.php uniquement
 // ============================================================
 
-// Clé API : doit correspondre à DB.cloudConfig.secret dans VERITAS
-define('API_SECRET', 'VERITAS-CLOUD-2026-xK9m');
+// 🔐 v1.2.2 : le secret de synchronisation ne doit PLUS vivre dans ce fichier
+// versionné. On le lit depuis api/payment_config.php (gitignoré). Repli sur
+// l'ancienne valeur UNIQUEMENT si non défini, pour ne pas casser un déploiement
+// existant pendant la rotation. → Définir API_SECRET dans payment_config.php,
+// puis SUPPRIMER ce repli une fois la rotation effectuée.
+@include_once __DIR__ . '/payment_config.php';
+if (!defined('API_SECRET')) {
+    define('API_SECRET', 'VERITAS-CLOUD-2026-xK9m'); // ⚠️ LEGACY — à roter (voir payment_config.php)
+}
 
-// ── CORS ──
-header('Access-Control-Allow-Origin: *');
+// ── CORS (v1.2.2 : allowlist stricte au lieu de '*') ──
+// L'app web ET l'app mobile Capacitor sont servies depuis veritas-school.com
+// (même origine) → on peut fermer le CORS sans rien casser. Les sites tiers
+// ne peuvent plus appeler l'API depuis un navigateur.
+$__veritas_allowed_origins = [
+    'https://veritas-school.com',
+    'https://www.veritas-school.com',
+    'http://localhost:8000',   // dev local (python -m http.server)
+    'https://localhost',       // webview mobile éventuelle
+    'capacitor://localhost',   // iOS WebView
+];
+$__origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__origin, $__veritas_allowed_origins, true)) {
+    header('Access-Control-Allow-Origin: ' . $__origin);
+    header('Vary: Origin');
+}
+// (origine absente = appel same-origin/serveur → aucun header CORS nécessaire ;
+//  origine non listée = pas de header ACAO → le navigateur bloque la réponse)
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 header('Access-Control-Max-Age: 86400');

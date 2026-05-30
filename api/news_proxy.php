@@ -4,7 +4,16 @@
 // GET /api/news_proxy.php?cat=education|minesec|grandes_ecoles|bourses
 // ── Public (pas d'auth), cache 30 min ──
 // ============================================================
-header('Access-Control-Allow-Origin: *');
+// v1.2.2 : allowlist au lieu de '*'
+$__np_allowed = [
+    'https://veritas-school.com', 'https://www.veritas-school.com',
+    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+];
+$__np_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__np_origin, $__np_allowed, true)) {
+    header('Access-Control-Allow-Origin: ' . $__np_origin);
+    header('Vary: Origin');
+}
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: public, max-age=1800');
 

@@ -14,6 +14,8 @@ on:
       - 'reset.html'
       - 'admin-validation.html'
       - 'index.php'
+      - 'app.css'
+      - 'app.js'
       - '.htaccess'
       - 'api/**'
       - 'evaluations/**'
@@ -70,6 +72,9 @@ jobs:
             echo "  ✓ VERITAS_v1.1.html → app.html + index.html"
           fi
           cp index.php         deploy/index.php
+          # v1.2.2 : CSS + JS principaux extraits (cacheables séparément → 1er chargement allégé)
+          if [ -f app.css ]; then cp app.css deploy/; echo "  ✓ app.css"; fi
+          if [ -f app.js ];  then cp app.js  deploy/; echo "  ✓ app.js"; fi
 
           # Logo
           if [ -f "Logo détouré.png" ]; then cp "Logo détouré.png" deploy/; fi
@@ -165,6 +170,25 @@ jobs:
             **/.git*
             **/.gitkeep
           log-level: standard
+
+      - name: 🔎 Vérifier le RAG (biblio_index.db présent sur le serveur)
+        if: always()
+        run: |
+          echo "Vérification de l'index RAG sur https://veritas-school.com ..."
+          RESP=$(curl -s --max-time 25 "https://veritas-school.com/api/rag.php?q=cameroun+minesec+francais&limit=1" || echo "")
+          echo "Réponse rag.php : ${RESP:0:300}"
+          if echo "$RESP" | grep -qE '"ok"[[:space:]]*:[[:space:]]*true'; then
+            echo "✅ RAG actif : biblio_index.db répond sur le serveur."
+          else
+            echo "::warning title=RAG inactif (corpus absent)::biblio_index.db n'est PAS sur le serveur — l'IA répond SANS le corpus MINESEC. Il est gitignoré (22 Mo) donc jamais déployé par la CI : uploadez-le manuellement en FTP vers …/api/data/biblio_index.db. Régénérez-le au besoin avec 'python index_corpus.py'."
+          fi
+
+      - name: 🔁 Rappel — version du Service Worker
+        if: always()
+        run: |
+          SW_VER=$(grep -oE "veritas-v[0-9]+\.[0-9]+(\.[0-9]+)?" sw.js | head -1)
+          echo "Service Worker déployé : ${SW_VER:-inconnu}"
+          echo "::notice title=Service Worker (cache)::Incrémentez CACHE_VERSION dans sw.js à CHAQUE déploiement de contenu, sinon les appareils gardent l'ancienne version en cache. Version actuelle : ${SW_VER:-inconnu}."
 
       - name: ✅ Résumé du déploiement
         if: success()

@@ -57,8 +57,13 @@ define('PUBLIC_FRONTEND_URL',  'https://veritas-school.com');     // page d'accu
 // ============================================================
 // Doit correspondre à DB.cloudConfig.secret côté frontend
 // (visible dans VÉRITAS → Admin → Paramètres → Cloud)
-
-define('PAY_API_SECRET',       'VERITAS-CLOUD-2026-xK9m');
+//
+// 🔁 ROTATION v1.2.2 : GÉNÉREZ une nouvelle valeur aléatoire longue
+//    (ex. en SSH : `openssl rand -hex 24`) et NE RÉUTILISEZ PAS l'ancienne
+//    'VERITAS-CLOUD-2026-xK9m' qui a fuité (elle était dans le HTML public).
+//    Mettez la MÊME valeur dans l'admin VÉRITAS → Paramètres → Cloud.
+define('API_SECRET',           'GENEREZ_UN_SECRET_ALEATOIRE_LONG'); // ← sync DB (config_sync.php / db.php)
+define('PAY_API_SECRET',       'GENEREZ_UN_SECRET_ALEATOIRE_LONG'); // ← peut être identique à API_SECRET
 
 // ============================================================
 // 🤖 IA — Prof. Ambassa (api/ia_proxy.php)
@@ -70,7 +75,28 @@ define('PAY_API_SECRET',       'VERITAS-CLOUD-2026-xK9m');
 //    2. « Create API key » (gratuit, quota généreux ~1500 req/jour)
 //    3. Collez la clé ci-dessous.
 define('GEMINI_API_KEY',  '');                 // ← clé Gemini gratuite (laisser vide = IA désactivée)
-define('GEMINI_MODEL',    'gemini-2.5-flash'); // rapide & multilingue (gemini-2.0-flash hors tier gratuit en 2026)
+// v1.2.2 : TOUT passe par Gemini. Le plan choisit le MODÈLE.
+//   GEMINI_MODEL       = tier gratuit/visiteurs. Options (mai 2026) :
+//     'gemini-2.5-flash'      → 250 req/jour (bon équilibre, défaut)
+//     'gemini-2.5-flash-lite' → 1000 req/jour (plus de volume, un peu moins fin)
+//   GEMINI_MODEL_ELITE = abonnés Élite (raisonnement avancé) :
+//     'gemini-2.5-pro'        → 100 req/jour gratuit (le plus puissant encore gratuit)
+//   ⚠️ Gemini 3.x = payant uniquement en 2026.
+define('GEMINI_MODEL',       'gemini-2.5-flash');
+define('GEMINI_MODEL_ELITE', 'gemini-2.5-pro');
+//
+// 🔁 REPLIS AUTOMATIQUES (remplacent Pollinations déprécié). Laisser vide = repli ignoré.
+//    Ordre de bascule si Gemini échoue/sature : Groq → Mistral → Pollinations.
+//
+// 👉 GROQ (le plus rapide, Llama 70B, ~1000 req/jour gratuit) :
+//    https://console.groq.com/keys
+define('GROQ_API_KEY',    '');                          // ← clé Groq (gratuite)
+define('GROQ_MODEL',      'llama-3.3-70b-versatile');
+//
+// 👉 MISTRAL (excellent français, 1 milliard de tokens/mois gratuit) :
+//    https://console.mistral.ai/api-keys
+define('MISTRAL_API_KEY', '');                          // ← clé Mistral (gratuite)
+define('MISTRAL_MODEL',   'mistral-large-latest');
 //
 // 👉 PAYANT (optionnel) — Claude pour le « Plan Élite » :
 //    https://console.anthropic.com → API Keys. Si vide, l'Élite utilise aussi Gemini.
@@ -83,9 +109,19 @@ define('ANTHROPIC_API_KEY', '');               // ← clé Anthropic (optionnel,
 define('ADMIN_TOKEN',     'CHANGEZ_MOI_token_admin_long_et_aleatoire');
 
 // ============================================================
-// 🔧 CORS — ne pas modifier sauf nécessité
+// 🔧 CORS — v1.2.2 : allowlist stricte (plus de '*')
 // ============================================================
-header('Access-Control-Allow-Origin: *');
+// Inclus par ia_proxy.php / admin_validate.php / payment_*.php.
+// L'app web et l'app mobile Capacitor sont servies depuis veritas-school.com.
+$__pc_allowed = [
+    'https://veritas-school.com', 'https://www.veritas-school.com',
+    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+];
+$__pc_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__pc_origin, $__pc_allowed, true)) {
+    header('Access-Control-Allow-Origin: ' . $__pc_origin);
+    header('Vary: Origin');
+}
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Access-Control-Max-Age: 86400');

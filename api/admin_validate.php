@@ -17,7 +17,16 @@
 
 declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
+// 🔐 v1.2.2 : CORS en allowlist (endpoint admin → jamais '*' ni reflet d'origine).
+$__av_allowed = [
+    'https://veritas-school.com', 'https://www.veritas-school.com',
+    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+];
+$__av_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__av_origin, $__av_allowed, true)) {
+    header('Access-Control-Allow-Origin: ' . $__av_origin);
+    header('Vary: Origin');
+}
 header('Access-Control-Allow-Headers: Content-Type, X-Admin-Token');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 

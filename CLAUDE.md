@@ -1,43 +1,51 @@
 # VÉRITAS — Guide Claude Code
 
-> **Projet** : Centre VÉRITAS — application de gestion scolaire single-file HTML/JS
-> **Propriétaire** : Jacques Miterand TAKOU, Yaoundé, Cameroun
-> **Version courante** : v39.2 (fichier `VERITAS_v39_2.html`)
-> **Architecture** : HTML/CSS/JS vanilla dans un seul fichier, stockage `localStorage` + `IndexedDB` pour les fichiers binaires
-> **Dernière mise à jour** : avril 2026
+> **Projet** : Centre VÉRITAS — application de gestion scolaire (frontend HTML/JS single-file + backend PHP)
+> **Propriétaire** : Jacques Miterand TAKOU, Douala, Cameroun
+> **Version courante** : **v1.2.x** (fichier `VERITAS_v1.2.html`, ~3,7 Mo, ~40 000 lignes — servi comme `app.html` via `index.php`)
+> **Architecture** : frontend HTML/CSS/JS vanilla **+ backend PHP** (`api/`, MySQL + fichiers plats). Stockage client `localStorage` + `IndexedDB` ; synchronisation cloud via `api/db.php`.
+> **Domaine de prod** : `https://veritas-school.com`
+> **Dernière mise à jour** : mai 2026
+
+> ⚠️ **Note de cohérence** : ce guide a longtemps décrit une app « single-file, zéro backend, `v39_2` ». **C'est faux désormais.** Le projet est devenu **client-serveur** (backend PHP réel : proxy IA, paiements MoMo/Orange, upload, sync). Le fichier réel est `VERITAS_v1.2.html`. En cas de doute, le code fait foi, pas l'historique.
 
 ---
 
 ## 1. Vue d'ensemble
 
-VÉRITAS est une application web autonome (pas de backend, pas d'installation) qui tient **dans un seul fichier HTML de ~1,2 Mo**. Elle gère un centre de tutorat/répétition : élèves, enseignants, notes, paiements, bulletins APC, boutique de manuels, e-learning avec abonnements, jeux éducatifs, cartes mentales littéraires, et un espace visiteur public avec authentification.
+VÉRITAS gère un centre de tutorat/répétition : élèves, enseignants, notes, paiements, bulletins APC, boutique de manuels, e-learning avec abonnements, jeux éducatifs, cartes mentales littéraires, IA pédagogique (Prof. Ambassa), et un espace visiteur public avec authentification.
 
-**Design** : palette bleu nuit + or (`#142554` / `#FFC93C`), typographie Space Grotesk + Libre Baskerville + Inter. Thème "cream/ivory" pour les bulletins imprimables.
+Le **frontend** est un gros fichier HTML/JS unique. Le **backend PHP** (`api/`) gère ce qui ne peut pas vivre côté client : clés IA (jamais exposées au navigateur), paiements mobiles, upload de fichiers, et la synchronisation/persistance serveur de la base.
+
+**Design** : palette bleu nuit + or (`#142554` / `#FFC93C`). ⚠️ Trois systèmes de tokens CSS coexistent (legacy `--ink/--bl`, v2 `--primary-*`, v3 `--ds-*`) — privilégier `--ds-*` et **ne pas en empiler un 4e**.
 
 ### Ce qui distingue ce projet des templates habituels
 
-- **Zéro dépendance serveur** — tout tourne dans le navigateur. Trois CDN externes seulement : html2canvas, jsPDF, xlsx (SheetJS).
-- **Un seul fichier** — toute modification se fait directement dans `VERITAS_v39_2.html`. Pas de build, pas de bundler, pas de framework.
-- **Persistance hybride** — les données relationnelles (élèves, notes, paiements) sont dans `localStorage` sous la clé `VERITAS_DB`. Les fichiers binaires volumineux (vidéos, PDFs) sont dans IndexedDB via des helpers `idbSaveFile` / `idbGetFile`.
-- **Un gros script** — le bloc `<script>` principal commence à la ligne ~1152 et contient ~20 000 lignes. Tout le reste du fichier est du CSS (~1000 lignes) et la coquille HTML.
+- **Frontend monolithique** — un seul HTML de ~40 000 lignes (CSS + ~1 080 fonctions JS). Pas de build/bundler. Toute modif frontend se fait dans `VERITAS_v1.2.html` ; **vérifier la syntaxe JS du gros bloc `<script>` après chaque édition** (voir §11).
+- **Backend PHP réel** (`api/`) — `db.php` (sync base, auth Bearer), `ia_proxy.php` (Claude/Gemini, clé côté serveur), `payment_mtn.php` / `payment_orange.php`, `upload.php`, `rag.php`, `public_data.php`. Secrets dans `api/config.php` + `api/payment_config.php` (**gitignorés**).
+- **Persistance hybride** — données relationnelles dans `localStorage` (clé `vrt10`) ; binaires lourds (vidéos, PDFs) dans IndexedDB (`idbSaveFile` / `idbGetFile`) ; synchro serveur dans `data/veritas_db.json` via `api/db.php`.
+- **PWA + mobile** — `sw.js` (service worker), `manifest.webmanifest`, et app **Capacitor** (`capacitor.config.json`) servie depuis `veritas-school.com` (donc same-origin que le web).
+- **Sécurité (v1.2.2)** — le secret de sync n'est **plus** codé en dur dans le HTML : saisie admin unique (`_ensureCloudSecret`), conservée en local (`vrt10_cc`). CORS des endpoints en allowlist. Voir `CORRECTIFS_SECURITE_v1.2.2.md`.
 
 ---
 
 ## 2. Démarrage rapide
 
 ```bash
-# Ouvrir le fichier — c'est tout
-open VERITAS_v39_2.html
-# ou double-cliquer depuis l'explorateur de fichiers
+# Frontend seul (sans backend) — ouvrir le fichier
+open VERITAS_v1.2.html
 ```
 
-Pour développer :
+Pour développer avec le backend (recommandé : PHP requis pour l'IA, les paiements, la sync) :
 
 ```bash
-# Lancer un serveur local pour éviter les restrictions file://
-python3 -m http.server 8000
-# puis http://localhost:8000/VERITAS_v39_2.html
+# Serveur PHP local (sert aussi les endpoints api/*.php)
+php -S localhost:8000
+# puis http://localhost:8000/VERITAS_v1.2.html
+# ⚠️ En prod, index.php sert le fichier renommé app.html (anti-cache LiteSpeed).
 ```
+
+> L'allowlist CORS des endpoints inclut `http://localhost:8000` pour le dev local.
 
 **Comptes par défaut** (à changer — voir section Sécurité) :
 - Super-admin : `jacques` / `veritas2026`
@@ -51,26 +59,33 @@ python3 -m http.server 8000
 ### 3.1 Structure du fichier
 
 ```
-VERITAS_v39_2.html
+VERITAS_v1.2.html  (~40 000 lignes)
 ├─ <head>
-│  ├─ Meta + favicon inline
+│  ├─ Meta SEO/OG/Schema.org + CSP + opt-out IA
 │  ├─ CDN scripts (html2canvas, jsPDF, xlsx)
-│  ├─ <script> de chargement QR code (~ligne 11)
-│  └─ <style> CSS principal (~lignes 25-1025)
+│  └─ <style> CSS principal + tokens DS (:root ~ligne 624)
 ├─ <body>
 │  ├─ Header visiteur + navigation
 │  ├─ #vContent (zone de rendu dynamique)
 │  ├─ #login, #app (espaces admin/enseignant/élève)
-│  ├─ Modales réutilisables
-│  └─ <script> principal (lignes 1152-14200)
-│     ├─ Constantes & helpers (~1152-1700)
-│     ├─ Base de données par défaut (defaultDB)
-│     ├─ Fonctions de rendu par page (pg*)
-│     ├─ Fonctions modales (m*)
-│     ├─ JEUX_CATALOGUE + LITT_OEUVRES
-│     └─ Module paiements (fin de fichier)
+│  └─ <script> principal (bloc le plus gros, débute ~ligne 4325)
+│     ├─ Helpers null-safe (_ge, _vc, _si, _st), _fbFetch, defaultDB (~4685)
+│     ├─ load / _migrateDB / save / sync cloud (_cloud*, _startBgPoll)
+│     ├─ Fonctions de rendu par page (pg*), modales (m*)
+│     └─ JEUX_CATALOGUE, LITT_OEUVRES, paiements
 └─ </html>
+
+api/                      (backend PHP)
+├─ db.php                 sync base (GET/POST, auth Bearer + rate-limit)
+├─ ia_proxy.php           proxy Claude/Gemini (clé serveur, cache validé)
+├─ payment_mtn.php / payment_orange.php
+├─ upload.php             upload sécurisé (whitelist MIME)
+├─ rag.php / public_data.php / news_proxy.php / admin_validate.php
+├─ config_sync.php        requireAuth() + CORS allowlist
+└─ config.php, payment_config.php   ← SECRETS (gitignorés)
 ```
+
+> Repère de ligne le plus fiable : `graphify-out/JS_FUNCTION_INDEX.md` (fonction → ligne réelle). Le lire AVANT de grep/charger le fichier de 3,7 Mo.
 
 ### 3.2 L'objet `DB` (état global)
 
@@ -631,6 +646,9 @@ Pour toute question sur ce CLAUDE.md ou le code, rouvrir une session Claude Code
 This project has a graphify knowledge graph at graphify-out/.
 
 Rules:
-- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure
+- **AVANT de lire/grep `VERITAS_v1.2.html` (3,8 Mo)** : ouvrir `graphify-out/JS_FUNCTION_INDEX.md` (909 fonctions JS → ligne réelle) et lire seulement la plage utile avec `Read(offset, limit)`. Ne jamais charger le fichier entier.
+- Before answering architecture or codebase questions, read graphify-out/GRAPH_REPORT.md for god nodes and community structure (backend PHP + sw.js)
 - If graphify-out/wiki/index.md exists, navigate it instead of reading raw files
 - After modifying code files in this session, run `graphify update .` to keep the graph current (AST-only, no API cost)
+- Le JS inline du HTML n'est PAS couvert par `graphify update` : après gros changement de fonctions, régénérer `JS_FUNCTION_INDEX.md` via `extract_js` sur le plus gros bloc `<script>` (offset ligne ~4325).
+- `graphify-out/` reste local (jamais déployé — la CI utilise une allow-list).

@@ -5,7 +5,16 @@
 // ════════════════════════════════════════════════════════════════════
 
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
+// v1.2.2 : allowlist au lieu de '*'
+$__bl_allowed = [
+    'https://veritas-school.com', 'https://www.veritas-school.com',
+    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+];
+$__bl_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__bl_origin, $__bl_allowed, true)) {
+    header('Access-Control-Allow-Origin: ' . $__bl_origin);
+    header('Vary: Origin');
+}
 header('X-Robots-Tag: noindex, nofollow, noai');
 
 // Accept POST only (beacons sont des POST)

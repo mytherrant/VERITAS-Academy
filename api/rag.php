@@ -32,7 +32,16 @@
 declare(strict_types=1);
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: public, max-age=600');  // cache navigateur 10 min
-header('Access-Control-Allow-Origin: ' . ($_SERVER['HTTP_ORIGIN'] ?? '*'));
+// v1.2.2 : allowlist réelle (le code reflétait toute origine malgré le commentaire).
+$__rag_allowed = [
+    'https://veritas-school.com', 'https://www.veritas-school.com',
+    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+];
+$__rag_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__rag_origin, $__rag_allowed, true)) {
+    header('Access-Control-Allow-Origin: ' . $__rag_origin);
+    header('Vary: Origin');
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 

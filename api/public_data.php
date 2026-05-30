@@ -7,8 +7,17 @@
 // ── Lecture seule, pas d'auth requise ──
 // ============================================================
 
-// CORS
-header('Access-Control-Allow-Origin: *');
+// CORS (v1.2.2 : allowlist — même si les données sont publiques, on évite
+// que des sites tiers consomment l'endpoint depuis le navigateur des visiteurs).
+$__pd_allowed = [
+    'https://veritas-school.com', 'https://www.veritas-school.com',
+    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+];
+$__pd_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__pd_origin, $__pd_allowed, true)) {
+    header('Access-Control-Allow-Origin: ' . $__pd_origin);
+    header('Vary: Origin');
+}
 header('Access-Control-Allow-Methods: GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json; charset=utf-8');
