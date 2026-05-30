@@ -28571,6 +28571,10 @@ window.VERITAS_PAYMENTS = (function(){
   return defaults;
 })();
 
+// v1.2.2 : une méthode optionnelle n'est affichée que si réellement configurée
+// (évite un lien Stripe de test cassé ou un IBAN « À configurer » visibles par le client).
+function _payOK(v){ return !!v && !/replace_me|test_replace|À configurer|REMPLACER|Votre[A-Z]|exemple|example|XXXX/i.test(String(v)); }
+
 function _payRef(prefix){
   var d = new Date();
   var y = d.getFullYear().toString().slice(2);
@@ -28661,7 +28665,7 @@ function openPaymentModal(payInfo){
       + '</div>'
 
       // PayPal
-      + '<a href="'+P.paypal.url+'" target="_blank" rel="noopener" class="paymethod" style="text-decoration:none;background:#fff;border:2px solid '+P.paypal.couleur+';border-radius:12px;padding:14px;display:block">'
+      + (_payOK(P.paypal.url) ? ('<a href="'+P.paypal.url+'" target="_blank" rel="noopener" class="paymethod" style="text-decoration:none;background:#fff;border:2px solid '+P.paypal.couleur+';border-radius:12px;padding:14px;display:block">'
         + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
           + '<div style="font-size:28px">'+P.paypal.ico+'</div>'
           + '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">'+P.paypal.label+'</div>'
@@ -28669,10 +28673,10 @@ function openPaymentModal(payInfo){
         + '<div style="font-family:monospace;font-size:12px;color:'+P.paypal.couleur+';margin-bottom:4px;word-break:break-all">'+P.paypal.url+'</div>'
         + '<div style="font-size:11px;color:var(--ink4)">Paiement international sécurisé<br>Depuis n\'importe quel pays</div>'
         + '<div style="font-size:10px;color:'+P.paypal.couleur+';margin-top:6px;font-weight:700">→ Ouvrir PayPal</div>'
-      + '</a>'
+      + '</a>') : '')
 
       // Stripe / Carte bancaire
-      + '<a href="'+P.stripe.url+'" target="_blank" rel="noopener" class="paymethod" style="text-decoration:none;background:#fff;border:2px solid '+P.stripe.couleur+';border-radius:12px;padding:14px;display:block">'
+      + (_payOK(P.stripe.url) ? ('<a href="'+P.stripe.url+'" target="_blank" rel="noopener" class="paymethod" style="text-decoration:none;background:#fff;border:2px solid '+P.stripe.couleur+';border-radius:12px;padding:14px;display:block">'
         + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
           + '<div style="font-size:28px">'+P.stripe.ico+'</div>'
           + '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">'+P.stripe.label+'</div>'
@@ -28680,10 +28684,10 @@ function openPaymentModal(payInfo){
         + '<div style="font-size:12px;color:var(--ink3);margin-bottom:4px">Visa · Mastercard · Amex</div>'
         + '<div style="font-size:11px;color:var(--ink4)">Paiement sécurisé Stripe<br>Pas besoin de compte</div>'
         + '<div style="font-size:10px;color:'+P.stripe.couleur+';margin-top:6px;font-weight:700">→ Payer par carte</div>'
-      + '</a>'
+      + '</a>') : '')
 
-      // Virement bancaire
-      + '<div class="paymethod" style="background:#fff;border:2px solid '+P.bank.couleur+';border-radius:12px;padding:14px;grid-column:1/-1">'
+      // Virement bancaire (affiché seulement si configuré)
+      + (_payOK(P.bank.iban) ? ('<div class="paymethod" style="background:#fff;border:2px solid '+P.bank.couleur+';border-radius:12px;padding:14px;grid-column:1/-1">'
         + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
           + '<div style="font-size:28px">'+P.bank.ico+'</div>'
           + '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">'+P.bank.label+'</div>'
@@ -28694,7 +28698,7 @@ function openPaymentModal(payInfo){
           + '<strong>IBAN :</strong> <span style="font-family:monospace;background:var(--bg2);padding:2px 6px;border-radius:4px">'+P.bank.iban+'</span><br>'
           + '<strong>SWIFT/BIC :</strong> '+P.bank.swift
         + '</div>'
-      + '</div>'
+      + '</div>') : '')
     + '</div>'
 
     // Bouton WhatsApp de confirmation (obligatoire pour tracer)
@@ -33987,15 +33991,15 @@ openPaymentModal = function(payInfo){
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-size:24px">'+P.paypal.ico+'</div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#142554">'+P.paypal.label+'</div></div>'
     +'<div style="font-size:11px;color:var(--ink4)">Paiement international sécurisé</div>'
     +'<div style="font-size:10px;color:'+P.paypal.couleur+';margin-top:4px;font-weight:700">→ Ouvrir PayPal</div></a>'
-    // Stripe
-    +'<a href="'+P.stripe.url+'" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:2px solid '+P.stripe.couleur+';border-radius:12px;padding:12px;display:block">'
+    // Stripe (affiché seulement si configuré)
+    + (_payOK(P.stripe.url) ? ('<a href="'+P.stripe.url+'" target="_blank" rel="noopener" style="text-decoration:none;background:#fff;border:2px solid '+P.stripe.couleur+';border-radius:12px;padding:12px;display:block">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-size:24px">'+P.stripe.ico+'</div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#142554">'+P.stripe.label+'</div></div>'
     +'<div style="font-size:11px;color:var(--ink4)">Visa · Mastercard · Amex</div>'
-    +'<div style="font-size:10px;color:'+P.stripe.couleur+';margin-top:4px;font-weight:700">→ Payer par carte</div></a>'
-    // Bank
-    +'<div style="background:#fff;border:2px solid '+P.bank.couleur+';border-radius:12px;padding:12px;grid-column:1/-1">'
+    +'<div style="font-size:10px;color:'+P.stripe.couleur+';margin-top:4px;font-weight:700">→ Payer par carte</div></a>') : '')
+    // Bank (affiché seulement si configuré)
+    + (_payOK(P.bank.iban) ? ('<div style="background:#fff;border:2px solid '+P.bank.couleur+';border-radius:12px;padding:12px;grid-column:1/-1">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-size:24px">'+P.bank.ico+'</div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#142554">'+P.bank.label+'</div></div>'
-    +'<div style="font-size:11px;color:var(--ink3);line-height:1.6"><strong>Titulaire:</strong> '+P.bank.titulaire+' · <strong>Banque:</strong> '+P.bank.banque+'<br><strong>IBAN:</strong> <span style="font-family:monospace;background:var(--bg2);padding:2px 4px;border-radius:4px;font-size:10px">'+P.bank.iban+'</span> · <strong>SWIFT:</strong> '+P.bank.swift+'</div></div>'
+    +'<div style="font-size:11px;color:var(--ink3);line-height:1.6"><strong>Titulaire:</strong> '+P.bank.titulaire+' · <strong>Banque:</strong> '+P.bank.banque+'<br><strong>IBAN:</strong> <span style="font-family:monospace;background:var(--bg2);padding:2px 4px;border-radius:4px;font-size:10px">'+P.bank.iban+'</span> · <strong>SWIFT:</strong> '+P.bank.swift+'</div></div>') : '')
     +'</div>'
     +'<div style="display:flex;justify-content:space-between;margin-top:12px"><button class="btn bo" onclick="_payGoStep(1)">← Précédent</button><button class="btn bi" onclick="_payGoStep(3)">J\'ai payé → Confirmer</button></div>'
     +'</div>';
