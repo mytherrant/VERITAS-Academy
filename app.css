@@ -3619,3 +3619,24 @@ a.vlink, .v-link, a.link-anim{
   transition:background-size .25s ease;
 }
 a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — ACCUEIL premium : bannières d'engagement (Ambassa, œuvres…)
+   Profondeur + lift au survol + reflet diagonal (vivant, jeune public).
+   ════════════════════════════════════════════════════════════════ */
+.vlit-banner{
+  border-radius:20px;
+  box-shadow:0 2px 6px rgba(20,37,84,.08), 0 16px 40px rgba(20,37,84,.12);
+  transition:transform .2s ease, box-shadow .25s ease;
+  position:relative; overflow:hidden;
+}
+.vlit-banner[onclick]:hover{
+  transform:translateY(-3px);
+  box-shadow:0 6px 14px rgba(20,37,84,.12), 0 26px 60px rgba(20,37,84,.20);
+}
+.vlit-banner::after{
+  content:''; position:absolute; top:0; left:-60%; width:55%; height:100%;
+  background:linear-gradient(120deg,transparent,rgba(255,255,255,.20),transparent);
+  transform:skewX(-20deg); transition:left .6s ease; pointer-events:none;
+}
+.vlit-banner[onclick]:hover::after{ left:150%; }
