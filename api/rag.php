@@ -1,6 +1,10 @@
 <?php
 /**
  * api/rag.php — Retrieval-Augmented Generation (Plan Élite)
+ * © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+ * Œuvre protégée — Loi n° 2000/011 + Convention de Berne.
+ * Reproduction interdite sans accord écrit. Contrefaçon : 5-10 ans prison +
+ * 500 000 à 10 000 000 FCFA d'amende. contact@veritas-school.com
  *
  * Recherche dans la bibliothèque littéraire africaine (biblio_index.db) les
  * passages les plus pertinents pour enrichir le prompt de l'IA.

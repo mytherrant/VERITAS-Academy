@@ -8012,7 +8012,7 @@ function commanderAbonnement(planId){
   '<div style="text-align:center;margin-bottom:16px">'+
   '<div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:4px">'+plan.nom+'</div>'+
   '<div style="font-size:13px;color:var(--ink3)">'+plan.cible+'</div>'+
-  '<div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#3C8DFF;margin:8px 0">'+fmt(plan.prix)+' FCFA <span style="font-size:13px;color:var(--ink4)">/ '+plan.duree+'</span></div>'+
+  '<div style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#3C8DFF;margin:8px 0">'+fmt(plan.prix)+' <span style="font-size:13px;color:var(--ink4)">/ '+plan.duree+'</span></div>'+
   '</div>'+
   '<div class="ib ibt mb13"><span>💡</span><span>Après paiement, vous recevrez vos accès par WhatsApp sous 24h.</span></div>'+
   '<div class="fg2">'+
@@ -8094,7 +8094,7 @@ function commanderContenu(itemId){
   '<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:700;color:#142554">'+item.titre+'</div>'+
   '<div style="font-size:12px;color:var(--ink3)">'+item.classe+' · '+item.matiere+' · '+item.seq+'</div>'+
   '<div style="font-family:Georgia,serif;font-size:13px;color:var(--ink3);margin-top:6px;font-style:italic">'+item.desc+'</div>'+
-  '<div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#FFC93C;margin:10px 0">'+fmt(item.prix)+' FCFA</div>'+
+  '<div style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#FFC93C;margin:10px 0">'+fmt(item.prix)+'</div>'+
   '</div>'+
   '<div class="fg2">'+
   '<div class="fg"><span class="fl">Votre nom *</span><input class="fi" id="cmdNom" placeholder="Nom complet"></div>'+
@@ -9954,7 +9954,7 @@ function deleteAdmin(aid){
 function mManagePromos(){
   if(!DB.promoCodes)DB.promoCodes=[];
   var rows=DB.promoCodes.map(function(p){
-    return '<tr><td class="mono s" style="color:var(--gold)">'+p.code+'</td><td class="xs2">'+p.desc+'</td><td class="mono xs2">'+(p.type==="percent"?p.reduction+"%":p.reduction+" FCFA")+'</td><td><span class="bg '+(p.actif?"bgg":"bgr")+'">'+(p.actif?"Actif":"Inactif")+'</span></td><td class="mono xs2">'+(p.usage||0)+'</td><td><button class="btn bo xs" onclick="togglePromo(&apos;'+p.code+'&apos;)">'+(p.actif?"⏸":"▶")+'</button></td></tr>';
+    return '<tr><td class="mono s" style="color:var(--gold)">'+p.code+'</td><td class="xs2">'+p.desc+'</td><td class="mono xs2">'+(p.type==="percent"?p.reduction+"%":fmt(p.reduction))+'</td><td><span class="bg '+(p.actif?"bgg":"bgr")+'">'+(p.actif?"Actif":"Inactif")+'</span></td><td class="mono xs2">'+(p.usage||0)+'</td><td><button class="btn bo xs" onclick="togglePromo(&apos;'+p.code+'&apos;)">'+(p.actif?"⏸":"▶")+'</button></td></tr>';
   }).join("");
   M("🎟️ Gestion des codes promo","Valables sur la boutique et les commandes",
   '<div class="tw"><table><thead><tr><th>Code</th><th>Description</th><th>Réduction</th><th>Statut</th><th>Utilisations</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
@@ -29386,7 +29386,7 @@ window._executerVersement = function(partenaireId){
   }
 
   // Mode manuel : enregistrer le versement
-  if(!confirm('Confirmer le versement de '+fmt(montant)+' FCFA à '+name+' au '+tel+' ?\n\nVous devrez envoyer la somme via votre app '+(op==='mtn'?'MTN MoMo':'Orange Money')+' manuellement.')){
+  if(!confirm('Confirmer le versement de '+fmt(montant)+' à '+name+' au '+tel+' ?\n\nVous devrez envoyer la somme via votre app '+(op==='mtn'?'MTN MoMo':'Orange Money')+' manuellement.')){
     return;
   }
 
@@ -29425,11 +29425,11 @@ window._executerVersement = function(partenaireId){
   save();
 
   // 4. Notification WhatsApp au partenaire
-  var msg = '✅ VÉRITAS Academy — Versement de '+fmt(montant)+' FCFA effectué à votre numéro '+tel+' ('+(op==='mtn'?'MTN MoMo':'Orange Money')+'). Réf: '+versement.id.substring(0,8)+'. Merci pour votre collaboration ! '+(note?'Note: '+note:'');
+  var msg = '✅ VÉRITAS Academy — Versement de '+fmt(montant)+' effectué à votre numéro '+tel+' ('+(op==='mtn'?'MTN MoMo':'Orange Money')+'). Réf: '+versement.id.substring(0,8)+'. Merci pour votre collaboration ! '+(note?'Note: '+note:'');
   var waUrl = 'https://wa.me/'+tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg);
   // Notification admin
   if(typeof autoNotify==='function'){
-    autoNotify('💰 Versement effectué',name+' — '+fmt(montant)+' FCFA via '+(op==='mtn'?'MTN':'Orange'),'admin');
+    autoNotify('💰 Versement effectué',name+' — '+fmt(montant)+' via '+(op==='mtn'?'MTN':'Orange'),'admin');
   }
 
   cm();
@@ -29476,7 +29476,7 @@ window.mDetailPartenaire = function(partenaireId){
       '<div style="max-height:160px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px;padding:8px">'
       +versements.map(function(v){
         return '<div style="padding:6px;border-bottom:1px solid #F3F4F6;font-size:12px">'
-          +'<b>'+fmt(v.montant)+' FCFA</b> via '+(v.operateur==='mtn'?'MTN MoMo':'Orange Money')+' — '+new Date(v.date).toLocaleDateString('fr-FR')
+          +'<b>'+fmt(v.montant)+'</b> via '+(v.operateur==='mtn'?'MTN MoMo':'Orange Money')+' — '+new Date(v.date).toLocaleDateString('fr-FR')
           +(v.note?'<br><span style="color:#6B7280">'+_esc(v.note)+'</span>':'')
         +'</div>';
       }).join('')

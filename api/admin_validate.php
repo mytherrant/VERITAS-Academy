@@ -1,6 +1,10 @@
 <?php
 /**
  * api/admin_validate.php — API admin pour valider/rejeter les réponses IA
+ * © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+ * Œuvre protégée — Loi n° 2000/011 + Convention de Berne.
+ * Reproduction interdite sans accord écrit. Contrefaçon : 5-10 ans prison +
+ * 500 000 à 10 000 000 FCFA d'amende. contact@veritas-school.com
  *
  * ENDPOINTS :
  *   GET  /api/admin_validate.php?action=list&status=pending     → liste à valider

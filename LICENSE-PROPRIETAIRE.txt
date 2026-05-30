@@ -1,0 +1,186 @@
+================================================================================
+                  VÉRITAS — LICENCE PROPRIÉTAIRE
+                       (Proprietary License)
+================================================================================
+
+Version :        1.0
+Entrée en vigueur : 1er janvier 2024
+Dernière mise à jour : mai 2026
+Œuvre couverte : VÉRITAS — Plateforme scolaire et e-learning, dans son
+                 intégralité (code source, contenus pédagogiques, identité
+                 visuelle, données, configurations, ressources annexes).
+
+================================================================================
+                         IDENTIFICATION DU TITULAIRE
+================================================================================
+
+Concédant unique des droits :
+    Jacques Miterand TAKOU (pseudonyme : Mythe Errant)
+    Douala — République du Cameroun
+    contact@veritas-school.com  ·  https://veritas-school.com
+
+================================================================================
+                              1.  DÉFINITIONS
+================================================================================
+
+"L'Œuvre" désigne le logiciel VÉRITAS, ses fichiers source, fichiers
+compilés, contenus pédagogiques, identité visuelle, schéma de base de
+données et toute documentation associée.
+
+"Le Titulaire" désigne Jacques Miterand TAKOU, seul détenteur des droits
+patrimoniaux et moraux sur l'Œuvre.
+
+"L'Utilisateur" désigne toute personne physique ou morale ayant accès,
+même partiel, au code source ou à l'Œuvre par quelque moyen que ce soit.
+
+================================================================================
+            2.  NATURE DE LA LICENCE — TOUS DROITS RÉSERVÉS
+================================================================================
+
+L'Œuvre est protégée et SOUS LICENCE STRICTEMENT PROPRIÉTAIRE.
+
+Aucun droit d'usage, de copie, de modification, de distribution, de
+représentation publique, de mise à disposition, d'adaptation, de
+traduction ou d'exploitation commerciale ou non commerciale n'est concédé
+implicitement par la mise à disposition du code, sa publication sur un
+dépôt versionné (public ou privé), son envoi par courrier électronique
+ou tout autre canal.
+
+L'Utilisateur reconnaît expressément que l'accès au code ne vaut PAS
+licence d'usage. Aucun droit n'est transmis par défaut.
+
+================================================================================
+        3.  CE QUI EST EXPRESSÉMENT PERMIS (et seulement ceci)
+================================================================================
+
+Sont seules autorisées, sans formalité préalable :
+
+  3.1  La CONSULTATION du code à des fins strictement personnelles et
+       d'étude individuelle, à la condition expresse :
+         - de ne procéder à aucune copie permanente locale,
+         - de ne pas reproduire l'Œuvre, même partiellement, sur tout
+           autre support ou plateforme,
+         - de ne pas en utiliser tout ou partie pour développer un
+           produit, service ou outil concurrent ou non.
+
+  3.2  La CITATION du nom "VÉRITAS" dans un contexte d'information,
+       d'actualité, de pédagogie ou de critique, dans la limite du
+       droit de citation reconnu par la loi camerounaise.
+
+  3.3  L'ARCHIVAGE technique strictement temporaire effectué par les
+       moteurs de recherche, agrégateurs RSS et services miroir
+       conformes aux standards (robots.txt, X-Robots-Tag).
+
+================================================================================
+                4.  CE QUI EST EXPRESSÉMENT INTERDIT
+================================================================================
+
+Sans autorisation écrite préalable du Titulaire, il est INTERDIT à
+quiconque :
+
+  4.1  De REPRODUIRE l'Œuvre, en tout ou en partie, sur quelque support
+       que ce soit (papier, numérique, hébergement web, application
+       mobile, machine virtuelle, conteneur, etc.).
+
+  4.2  De MODIFIER, traduire, adapter, transformer ou créer une œuvre
+       dérivée à partir de tout ou partie de l'Œuvre.
+
+  4.3  De DISTRIBUER l'Œuvre, modifiée ou non, à titre gratuit ou
+       onéreux, à tout tiers.
+
+  4.4  D'EXPLOITER COMMERCIALEMENT tout ou partie de l'Œuvre, y compris
+       en tant que service hébergé, plateforme SaaS, marque blanche
+       ou produit dérivé.
+
+  4.5  De DÉPLOYER une instance de l'Œuvre sur un nom de domaine, un
+       serveur ou un système d'information autre que ceux exploités
+       directement par le Titulaire.
+
+  4.6  D'INDEXER ou d'ENTRAÎNER tout système d'apprentissage automatique
+       (IA, modèles de langage, embeddings, RAG, fine-tuning, RLHF ou
+       toute autre forme d'apprentissage statistique) sur tout ou partie
+       du code source, des contenus pédagogiques ou des données.
+
+  4.7  De PROCÉDER à de la rétro-ingénierie, de la décompilation, du
+       désassemblage ou de tout autre procédé visant à obtenir le code
+       source à partir de versions compilées ou obscurcies.
+
+  4.8  De SUPPRIMER, masquer, altérer ou contourner les mentions de
+       copyright, les filigranes numériques, les signatures
+       cryptographiques ou tout autre dispositif d'identification du
+       Titulaire.
+
+  4.9  De PROCÉDER à du scraping automatisé en vue de constituer une
+       base de données, un index, un dataset d'entraînement ou un
+       miroir.
+
+  4.10 De CÉDER, sous-licencier, transférer ou prêter les droits
+       conférés par la présente licence à un tiers.
+
+================================================================================
+                   5.  PROPRIÉTÉ INTELLECTUELLE — RAPPEL
+================================================================================
+
+Tous les droits, titres et intérêts attachés à l'Œuvre — y compris les
+droits d'auteur, marques (déposées ou non), bases de données, savoir-faire
+et secrets d'affaires — demeurent la PROPRIÉTÉ EXCLUSIVE du Titulaire.
+
+La présente licence ne confère aucun droit, expresse ou implicite, sur
+les marques, noms commerciaux, logotypes, slogans ou tout autre signe
+distinctif du Titulaire.
+
+================================================================================
+                     6.  RESPONSABILITÉ ET GARANTIES
+================================================================================
+
+L'Œuvre est mise à disposition "EN L'ÉTAT", sans garantie d'aucune sorte.
+
+Le Titulaire ne saurait être tenu responsable de tout dommage, direct ou
+indirect, résultant d'un usage non autorisé ou abusif de l'Œuvre.
+
+L'Utilisateur s'engage à indemniser le Titulaire de tout préjudice causé
+par un usage contraire à la présente licence.
+
+================================================================================
+                  7.  SANCTIONS EN CAS DE VIOLATION
+================================================================================
+
+Toute violation de la présente licence constitue une atteinte au droit
+d'auteur, sanctionnée :
+
+  - PÉNALEMENT, conformément à la loi camerounaise n° 2000/011 du 19
+    décembre 2000 (articles 80 et suivants) : EMPRISONNEMENT DE 5 À 10
+    ANS et AMENDE DE 500 000 À 10 000 000 FCFA.
+
+  - CIVILEMENT, par une action en RÉPARATION DU PRÉJUDICE et toutes
+    mesures conservatoires utiles (saisie-contrefaçon, astreinte
+    journalière, destruction des supports, publication du jugement).
+
+================================================================================
+                     8.  DROIT APPLICABLE ET JURIDICTION
+================================================================================
+
+La présente licence est régie par le droit camerounais et, le cas
+échéant, par les dispositions de l'Accord de Bangui révisé instituant
+l'OAPI et de la Convention de Berne.
+
+Tout litige relatif à la présente licence sera soumis aux juridictions
+compétentes de Douala, Cameroun, sauf disposition impérative contraire
+du droit international privé.
+
+================================================================================
+                        9.  POUR DEMANDER UNE LICENCE
+================================================================================
+
+Toute personne souhaitant obtenir une licence d'usage spécifique
+(éducative, commerciale, technique, partenariat, marque blanche) doit
+adresser une demande motivée par écrit à :
+
+    Jacques Miterand TAKOU
+    contact@veritas-school.com
+    WhatsApp : +237 697 637 739
+    Centre VÉRITAS — Douala, Cameroun
+
+================================================================================
+                              FIN DE LA LICENCE
+================================================================================

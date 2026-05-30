@@ -1,6 +1,11 @@
 <?php
 // ============================================================
 // VÉRITAS — Proxy RSS Actualités Éducatives
+// © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+// Œuvre protégée — Loi n° 2000/011 + Convention de Berne.
+// Reproduction interdite sans accord écrit. Contrefaçon : 5-10 ans prison +
+// 500 000 à 10 000 000 FCFA d'amende. contact@veritas-school.com
+//
 // GET /api/news_proxy.php?cat=education|minesec|grandes_ecoles|bourses
 // ── Public (pas d'auth), cache 30 min ──
 // ============================================================

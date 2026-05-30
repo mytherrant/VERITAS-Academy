@@ -1,6 +1,11 @@
 <?php
 // ════════════════════════════════════════════════════════════════════
 // VÉRITAS — Bot detection log (v2.5)
+// © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+// Œuvre protégée — Loi n° 2000/011 + Convention de Berne.
+// Reproduction interdite sans accord écrit. Contrefaçon : 5-10 ans prison +
+// 500 000 à 10 000 000 FCFA d'amende. contact@veritas-school.com
+//
 // Reçoit les beacons du JS anti-clonage et enregistre les bots détectés.
 // ════════════════════════════════════════════════════════════════════
 
