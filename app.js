@@ -3899,12 +3899,8 @@ function vShowSec(sec,btn){
         ${[['2023','Fondation','Ouverture avec 15 élèves et 3 enseignants'],['2024','Croissance','Nouveaux locaux, 4 enseignants supplémentaires'],['2024','Numérique','Lancement e-learning et boutique en ligne'],['2025','Excellence',''+DB.students.length+'+ élèves · taux réussite > 85%']].map(([an,t,d])=>`<div style="border-left:3px solid var(--gold);padding:8px 12px;background:var(--gp);border-radius:0 var(--r) var(--r) 0"><div style="font-family:Georgia,serif;font-size:16px;color:var(--gold2);font-weight:700">${an}</div><div class="semi xs2 mt4 mb2">${t}</div><div style="font-size:11px;color:var(--ink4)">${d}</div></div>`).join('')}
       </div>
     </div>
-    <!-- RÉSULTATS inline -->
-    <div class="vcard mt16">
-      <div class="ct">🏆 Résultats aux Examens Nationaux</div>
-      ${DB.examResults.slice(0,1).map(er=>`<div><div class="xs2 semi mut mb8">📅 ${er.annee}</div>${er.niveaux.map(n=>`<div class="exam-row"><div style="min-width:70px;font-weight:700;font-size:12px">${n.cls}</div><div class="exam-bar"><div class="exam-fill" style="width:${n.taux}%;background:${n.taux>=80?'var(--gr)':n.taux>=60?'var(--or)':'var(--re)'}"></div></div><span class="mono bold xs2" style="color:${n.taux>=80?'var(--gr)':n.taux>=60?'var(--or)':'var(--re)'}">${n.taux}%</span></div>`).join('')}</div>`).join('')}
-      <div class="ib ibg mt10 mb0"><span>✅</span><span>Moyenne de <strong>82%</strong> de réussite aux examens nationaux sur 3 ans.</span></div>
-    </div>`;
+    <!-- v1.2.2 : doublon « Résultats aux Examens Nationaux » retiré
+         (la section détaillée complète existe plus bas, toutes années). -->`;
     setTimeout(_vRevealInit,100);
     setTimeout(function(){_heroActuLoad(_heroCurCat||'education');},600);
     // Vérifier autoplay 2s après le rendu (fallback bouton ▶ si bloqué)
