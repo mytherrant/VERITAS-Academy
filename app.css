@@ -3788,3 +3788,56 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 /* Boutons CTA d'achat/abonnement : éclat au survol */
 .vbook-card .btn:hover,.vplan-card .btn:hover,.vprod-card .btn:hover,
 .vprod-cta:hover,.sc-btn:hover{ filter:brightness(1.05); transform:translateY(-1px); }
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — JEUX & QUIZ premium (public jeune : ludique + animé)
+   Additif. Charte navy/or. Respecte prefers-reduced-motion (règle globale).
+   ════════════════════════════════════════════════════════════════ */
+
+/* Conteneur de quiz : carte nette, profondeur, apparition douce */
+.quiz-container{
+  border-radius:18px;
+  box-shadow:0 2px 6px rgba(20,37,84,.06), 0 18px 44px rgba(20,37,84,.10);
+  animation:vtPopIn .4s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* Question : titre lisible et bien rythmé */
+.quiz-q,.qcm-q{ font-weight:800; letter-spacing:-.01em; line-height:1.35; }
+
+/* Options de réponse : pastilles cliquables vivantes */
+.quiz-opt,.qcm-item{
+  border:2px solid var(--ds-border-strong,#D5DBE8);
+  border-radius:14px;
+  transition:transform .14s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+  cursor:pointer;
+}
+.quiz-opt:hover,.qcm-item:hover{
+  transform:translateY(-2px);
+  border-color:var(--bl2,#3C8DFF);
+  background:var(--ds-surface-2,#FAFBFE);
+  box-shadow:0 6px 16px rgba(60,141,255,.16);
+}
+/* Bonne / mauvaise réponse : feedback coloré + petite anim */
+.quiz-opt.correct,.qcm-item.correct{
+  border-color:var(--gr,#059669); background:var(--grb,#D1FAE5);
+  animation:vtPopIn .35s cubic-bezier(.34,1.56,.64,1) both;
+}
+.quiz-opt.wrong,.qcm-item.wrong{
+  border-color:var(--re,#DC2626); background:var(--reb,#FEE2E2);
+  animation:vtShake .4s ease;
+}
+@keyframes vtShake{ 0%,100%{transform:translateX(0)} 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+
+/* Barre de progression : dégradé doré animé */
+.quiz-progress-fill{
+  background:linear-gradient(90deg,var(--gold,#FFC93C),var(--or,#F59E0B));
+  box-shadow:0 1px 6px rgba(245,184,0,.5);
+  transition:width .4s cubic-bezier(.2,.7,.2,1);
+}
+
+/* Boîte de score finale : mise en avant festive */
+.quiz-score-box{
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(20,37,84,.14);
+  animation:vtPopIn .5s cubic-bezier(.34,1.56,.64,1) both;
+}
