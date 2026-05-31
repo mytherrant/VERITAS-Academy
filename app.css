@@ -3841,3 +3841,35 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
   box-shadow:0 10px 30px rgba(20,37,84,.14);
   animation:vtPopIn .5s cubic-bezier(.34,1.56,.64,1) both;
 }
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — JEUX (catalogue) à la charte premium (.jeu-*)
+   Aligne les cartes de jeux sur .vbook-card/.vplan-card : accent coloré
+   par matière, ombre en couches, lift + pop d'icône, entrée animée.
+   ════════════════════════════════════════════════════════════════ */
+.jeu-card{
+  border:1px solid var(--ds-border,#E6EAF2);
+  border-top:3px solid var(--bl2,#3C8DFF);
+  border-radius:16px;
+  box-shadow:0 1px 2px rgba(20,37,84,.05), 0 10px 26px rgba(20,37,84,.06);
+  transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+.jeu-card:nth-child(6n+2){ border-top-color:var(--gold,#FFC93C); }
+.jeu-card:nth-child(6n+3){ border-top-color:var(--pu,#7C3AED); }
+.jeu-card:nth-child(6n+4){ border-top-color:var(--gr,#059669); }
+.jeu-card:nth-child(6n+5){ border-top-color:var(--or,#F59E0B); }
+.jeu-card:nth-child(6n){   border-top-color:var(--vi,#0D9488); }
+.jeu-card:hover{
+  transform:translateY(-5px);
+  box-shadow:0 6px 14px rgba(20,37,84,.08), 0 26px 56px rgba(20,37,84,.14);
+}
+.jeu-card .jeu-thumb, .jeu-card .material-symbols-rounded{
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1);
+}
+.jeu-card:hover .jeu-thumb, .jeu-card:hover .material-symbols-rounded{
+  transform:scale(1.12) rotate(-5deg);
+}
+/* Badge (Nouveau / catégorie) : petit rebond d'appel */
+.jeu-card:hover .jeu-badge{ animation:vtBadgePop 1.4s ease-in-out infinite; }
+/* CTA : éclat au survol (cohérent avec boutique) */
+.jeu-cta:hover{ filter:brightness(1.05); transform:translateY(-1px); }
