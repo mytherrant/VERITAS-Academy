@@ -1664,7 +1664,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .vgz-stat-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.78);text-transform:uppercase;letter-spacing:1.5px;margin-top:10px}
 
 /* ═════ #7 — BENTO GRID — fond navy commun + halos subtils par carte ═════ */
-.vgz-bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:140px;gap:14px;margin:20px 0}
+.vgz-bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:104px;gap:14px;margin:20px 0}
 /* Base commune : navy profond + glassmorphisme, lisibilité garantie */
 .vgz-bento-card{position:relative;border-radius:16px;overflow:hidden;
   background:linear-gradient(155deg, color-mix(in srgb, var(--accent,#FFC93C) 16%, #fff) 0%, color-mix(in srgb, var(--accent,#FFC93C) 6%, #fff) 48%, #ffffff 100%);
@@ -1677,7 +1677,8 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
   background:radial-gradient(circle at 80% 20%, var(--accent,#FFC93C)2e 0%, transparent 60%),
              radial-gradient(circle at 20% 90%, var(--accent,#FFC93C)1a 0%, transparent 55%)}
 .vgz-bento-card:hover .b-bg{opacity:.8}
-.vgz-bento-card .b-content{position:relative;z-index:2;height:100%;padding:20px;display:flex;flex-direction:column;justify-content:space-between;color:#142554}
+.vgz-bento-card .b-content{position:relative;z-index:2;height:100%;padding:16px 18px;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;color:#142554}
+.vgz-bento-card .b-ico{margin-bottom:auto}
 /* Pictogramme : badge circulaire avec verre teinté */
 .vgz-bento-card .b-ico{
   width:48px;height:48px;border-radius:14px;
@@ -1706,7 +1707,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .bento-6{--accent:#FBBF24}
 
 /* ═════ WRAPPER SOMBRE PREMIUM — gradient animé + aurora ═════ */
-.vgz-dark-section{background:linear-gradient(135deg,#0D1B3E 0%,#142554 25%,#1E3A8A 50%,#142554 75%,#0F172A 100%);background-size:400% 400%;animation:vgzAurora 15s ease infinite;border-radius:10px;padding:40px 28px;margin:30px 0;position:relative;overflow:hidden;box-shadow:0 25px 80px rgba(13,27,62,.5),0 0 0 1px rgba(255,201,60,.1)}
+.vgz-dark-section{background:linear-gradient(135deg,#1E3A8A 0%,#2A56B0 30%,#3C6BD4 50%,#2A56B0 70%,#1E3A8A 100%);background-size:400% 400%;animation:vgzAurora 15s ease infinite;border-radius:22px;padding:34px 26px;margin:28px 0;position:relative;overflow:hidden;box-shadow:0 20px 56px rgba(30,58,138,.32),0 0 0 1px rgba(255,201,60,.18)}
 @keyframes vgzAurora{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 .vgz-dark-section::before{content:"";position:absolute;inset:0;background:
   radial-gradient(circle at 15% 25%,rgba(255,201,60,.18) 0%,transparent 40%),
@@ -1717,7 +1718,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
   radial-gradient(circle at 20% 30%,#FFC93C 1px,transparent 1px),
   radial-gradient(circle at 70% 60%,#3C8DFF 1px,transparent 1px),
   radial-gradient(circle at 40% 80%,#FFC93C 1px,transparent 1px);
-  background-size:100px 100px,150px 150px,80px 80px;opacity:.25;animation:vgzStarsDrift 30s linear infinite;pointer-events:none}
+  background-size:100px 100px,150px 150px,80px 80px;opacity:.15;animation:vgzStarsDrift 30s linear infinite;pointer-events:none}
 @keyframes vgzFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-20px,15px) scale(1.05)}66%{transform:translate(15px,-10px) scale(.95)}}
 @keyframes vgzStarsDrift{from{transform:translate(0,0)}to{transform:translate(-100px,100px)}}
 .vgz-dark-section > *{position:relative;z-index:2}
@@ -1727,7 +1728,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 
 /* ═════ #8 — CARTES "POUR QUI" — Pictos 3D + animations multi-couleurs ═════ */
 .vgz-roles{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:24px 0;perspective:1500px}
-.vgz-role{position:relative;border-radius:22px;padding:28px 20px 24px;background:linear-gradient(160deg,rgba(255,255,255,.12),rgba(255,201,60,.05));border:1.5px solid rgba(255,201,60,.3);transition:transform .15s ease-out,box-shadow .3s,border-color .3s;transform-style:preserve-3d;cursor:pointer;text-align:center;color:#fff;overflow:hidden;backdrop-filter:blur(12px)}
+.vgz-role{position:relative;border-radius:20px;padding:24px 18px 22px;background:linear-gradient(160deg,rgba(255,255,255,.20),rgba(255,255,255,.08));border:1.5px solid rgba(255,255,255,.28);transition:transform .15s ease-out,box-shadow .3s,border-color .3s;transform-style:preserve-3d;cursor:pointer;text-align:center;color:#fff;overflow:hidden;backdrop-filter:blur(12px)}
 .vgz-role::before{content:"";position:absolute;inset:-2px;background:conic-gradient(from var(--ang,0deg),transparent 0deg,#FFC93C 90deg,#3C8DFF 180deg,#7C3AED 270deg,transparent 360deg);border-radius:22px;opacity:0;z-index:-1;transition:opacity .4s;animation:vgzSpin 6s linear infinite paused}
 .vgz-role::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,201,60,.28) 0%,transparent 50%);opacity:0;transition:opacity .3s;pointer-events:none;border-radius:22px}
 @keyframes vgzSpin{to{--ang:360deg}}
