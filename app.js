@@ -3153,38 +3153,58 @@ var _ONBOARDING_STEPS=[
   {
     emoji:'👋',
     title:'Bienvenue sur VÉRITAS !',
-    text:'Découvrez en 5 étapes ce que vous pouvez faire ici. C\'est rapide, promis.',
+    text:'Découvrez en 8 étapes tout ce que vous pouvez faire ici. C\'est rapide, promis.',
     cta:'C\'est parti !'
   },
   {
+    emoji:'🎓',
+    title:'1 — Prof. Ambassa, votre IA',
+    text:'Posez vos questions au <b>Professeur Ambassa</b>, l\'assistant IA pédagogique : quiz, corrigés, fiches de révision et <b>évaluations notées en 30 secondes</b>. Spécialisé programme MINESEC. <b>100% gratuit</b> pour démarrer.',
+    cta:'Suivant →',
+    target:'.vnav-btn[onclick*=ambassa],.vnav-btn[onclick*=IA]'
+  },
+  {
     emoji:'📚',
-    title:'1 — Boutique de manuels',
+    title:'2 — Boutique de manuels',
     text:'Achetez vos manuels scolaires officiels MINESEC. Aperçus gratuits, paiement MoMo/Orange, livraison à Douala. Cliquez sur l\'onglet <b>Boutique</b> dans le menu.',
     cta:'Suivant →',
     target:'.vnav-btn[onclick*=boutique]'
   },
   {
-    emoji:'🎓',
-    title:'2 — Plateforme E-Learning',
+    emoji:'📝',
+    title:'3 — Plateforme E-Learning',
     text:'Cours, épreuves corrigées, fiches de révision pour BEPC, Probatoire et BAC. <b>5 contenus gratuits</b> pour tester avant abonnement.',
     cta:'Suivant →',
     target:'.vnav-btn[onclick*=elearning]'
   },
   {
+    emoji:'🎮',
+    title:'4 — Jeux éducatifs',
+    text:'Apprends en t\'amusant : <b>quiz, vrai/faux, pendu, textes à trous</b> sur les capitales, les verbes anglais, la physique, l\'histoire du Cameroun… Gagne des points et grimpe au <b>Palmarès de la semaine</b> !',
+    cta:'Suivant →',
+    target:'.vnav-btn[onclick*=jeux],.vnav-btn[onclick*=Pratiquer]'
+  },
+  {
     emoji:'📖',
-    title:'3 — Analyses littéraires',
-    text:'22 œuvres au programme MINESEC <b>analysées en profondeur</b> avec angles de lecture inédits, citations clés, et QCM corrigés.',
+    title:'5 — Analyses littéraires',
+    text:'22 œuvres au programme MINESEC <b>analysées en profondeur</b> : cartes mentales, citations clés, figures de style et QCM corrigés.',
     cta:'Suivant →'
   },
   {
     emoji:'🎬',
-    title:'4 — Classes virtuelles & labos',
-    text:'Suivez les cours en direct ou en différé, expérimentez en laboratoire virtuel (chimie, physique, SVT). Le tout depuis votre téléphone.',
+    title:'6 — Classes virtuelles & labos',
+    text:'Suis les cours en direct ou en différé, et expérimente en <b>laboratoire virtuel</b> (chimie, physique, SVT). Le tout depuis ton téléphone.',
+    cta:'Suivant →'
+  },
+  {
+    emoji:'📊',
+    title:'7 — Suivi & bulletins',
+    text:'Notes, bulletins APC, devoirs et absences <b>en temps réel</b>. Élèves et parents suivent les progrès ; les enseignants saisissent tout en ligne.',
     cta:'Suivant →'
   },
   {
     emoji:'🚀',
-    title:'5 — Inscrivez-vous gratuitement',
+    title:'8 — Inscrivez-vous gratuitement',
     text:'Créez un compte gratuit pour <b>sauvegarder votre progression, débloquer des contenus premium et gagner 500 FCFA</b> en parrainant un ami !',
     cta:'Créer mon compte gratuit',
     action:'showRegisterForm'
@@ -34670,3 +34690,40 @@ setTimeout(function(){initTickerFixed();},3000);
 
 })();
 
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — FALLBACK GLOBAL des emojis 3D (CDN em-content.zobj.net)
+   Ce CDN est lent/inaccessible depuis le Cameroun → images cassées.
+   Quand une <img> de ce CDN échoue, on dérive l'emoji NATIF depuis le
+   nom de fichier (ex. graduation-cap_1f393.png → 🎓) et on le substitue.
+   Répare TOUT le site d'un coup, sans dépendance réseau. (capture=true
+   pour intercepter les erreurs d'images injectées dynamiquement.)
+   ════════════════════════════════════════════════════════════════ */
+(function(){
+  function emojiFromUrl(url){
+    try{
+      var file=url.split('/').pop().split('?')[0].replace(/\.(png|webp|svg|gif)$/i,'');
+      var tail=file.split('_').pop();                 // ex: 1f468-1f3fd-200d-1f3eb
+      var parts=tail.split('-').filter(function(h){return /^[0-9a-f]{2,6}$/i.test(h);});
+      if(!parts.length) return '';
+      return parts.map(function(h){return String.fromCodePoint(parseInt(h,16));}).join('');
+    }catch(e){ return ''; }
+  }
+  document.addEventListener('error', function(ev){
+    var img=ev.target;
+    if(!img || img.tagName!=='IMG') return;
+    if(img.dataset && img.dataset._emojiFixed) return;
+    var src=img.currentSrc || img.src || '';
+    if(src.indexOf('em-content.zobj.net')<0 && src.indexOf('zobj.net')<0) return;
+    var emo=emojiFromUrl(src) || '🎓';
+    if(img.dataset) img.dataset._emojiFixed='1';
+    var span=document.createElement('span');
+    span.setAttribute('role','img');
+    if(img.alt) span.setAttribute('aria-label', img.alt);
+    var sz=Math.max(img.width||0, parseInt(getComputedStyle(img).width)||0, 40);
+    span.style.cssText='display:inline-flex;align-items:center;justify-content:center;'
+      +'font-size:'+Math.round(sz*0.82)+'px;line-height:1;width:100%;height:100%';
+    span.textContent=emo;
+    if(img.parentNode) img.parentNode.replaceChild(span, img);
+  }, true); // capture : nécessaire car 'error' ne bulle pas
+})();
