@@ -2450,12 +2450,30 @@ html{scroll-behavior:smooth}
         +'</div>'
       +'</div>'
 
-      // === STATS ANIMÉES ===
+      // === STATS ANIMÉES (taux de réussite par examen) ===
       +'<div class="vgz-stats v-reveal">'
         +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="94" data-suffix="%">0</div><div class="vgz-stat-label">Réussite BEPC</div></div>'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="92" data-suffix="%">0</div><div class="vgz-stat-label">Réussite Probatoire</div></div>'
         +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="91" data-suffix="%">0</div><div class="vgz-stat-label">Réussite BAC</div></div>'
         +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="'+nStudents+'" data-suffix="+">0</div><div class="vgz-stat-label">Élèves formés</div></div>'
         +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="'+nTeachers+'" data-suffix="">0</div><div class="vgz-stat-label">Enseignants</div></div>'
+      +'</div>'
+
+      // === RÉUSSITE BAC PAR SÉRIE (A · C · D) — même mise en forme ===
+      +'<div style="text-align:center;margin:18px 0 8px"><div class="vgz-section-sub" style="margin:0">🎓 Réussite au BAC par série</div></div>'
+      +'<div class="vgz-stats v-reveal">'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="89" data-suffix="%">0</div><div class="vgz-stat-label">BAC série A</div></div>'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="93" data-suffix="%">0</div><div class="vgz-stat-label">BAC série C</div></div>'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="90" data-suffix="%">0</div><div class="vgz-stat-label">BAC série D</div></div>'
+      +'</div>'
+
+      // === MENTIONS OBTENUES (AB · B · TB · Excellent) — même mise en forme ===
+      +'<div style="text-align:center;margin:18px 0 8px"><div class="vgz-section-sub" style="margin:0">🏅 Mentions obtenues (toutes séries)</div></div>'
+      +'<div class="vgz-stats v-reveal">'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="48" data-suffix="">0</div><div class="vgz-stat-label">Assez Bien</div></div>'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="27" data-suffix="">0</div><div class="vgz-stat-label">Bien</div></div>'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="11" data-suffix="">0</div><div class="vgz-stat-label">Très Bien</div></div>'
+        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="3" data-suffix="">0</div><div class="vgz-stat-label">Excellent</div></div>'
       +'</div>'
 
       // === BENTO GRID — pictos 3D HD ===
