@@ -38,10 +38,25 @@ from pathlib import Path
 
 DEFAULT_DB = "api/data/biblio_index.db"
 DEFAULT_DIRS = ["evaluations", "cours", "reference"]
-EXTS = {".html", ".htm", ".txt", ".md"}
+EXTS = {".html", ".htm", ".txt", ".md", ".docx"}
 CHUNK = 800      # caractères par passage
 OVERLAP = 120    # chevauchement entre passages (continuité du sens)
 MIN_LEN = 40     # ignorer les fragments trop courts
+
+
+def extract_docx(path: Path) -> str:
+    """Extrait le texte d'un .docx (zip XML) — stdlib uniquement, pas de dépendance."""
+    import zipfile
+    try:
+        z = zipfile.ZipFile(str(path))
+        xml = z.read("word/document.xml").decode("utf-8", "replace")
+    except Exception:
+        return ""
+    xml = re.sub(r"</w:p>", "\n", xml)
+    xml = re.sub(r"<w:tab[^>]*/>", " ", xml)
+    txt = re.sub(r"<[^>]+>", "", xml)
+    txt = html.unescape(txt)
+    return re.sub(r"[ \t]+", " ", re.sub(r"\n{2,}", "\n", txt)).strip()
 
 
 def strip_html(raw: str) -> str:
@@ -97,18 +112,22 @@ def ensure_schema(con: sqlite3.Connection) -> None:
 
 
 def reindex_file(con: sqlite3.Connection, path: Path, author: str) -> int:
-    try:
-        raw = path.read_text(encoding="utf-8", errors="ignore")
-    except Exception as e:  # noqa: BLE001
-        print(f"  ⚠ lecture impossible {path}: {e}")
-        return 0
     fmt = path.suffix.lower().lstrip(".")
-    if fmt in ("html", "htm"):
-        text = strip_html(raw)
-        title = extract_title(raw, path.stem)
-    else:
-        text = re.sub(r"\s+", " ", raw).strip()
+    if fmt == "docx":
+        text = extract_docx(path)
         title = path.stem
+    else:
+        try:
+            raw = path.read_text(encoding="utf-8", errors="ignore")
+        except Exception as e:  # noqa: BLE001
+            print(f"  ⚠ lecture impossible {path}: {e}")
+            return 0
+        if fmt in ("html", "htm"):
+            text = strip_html(raw)
+            title = extract_title(raw, path.stem)
+        else:
+            text = re.sub(r"\s+", " ", raw).strip()
+            title = path.stem
     if len(text) < MIN_LEN:
         return 0
 
