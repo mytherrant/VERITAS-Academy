@@ -7360,6 +7360,8 @@ function activerAbonnement(id){
   if(!abo){toast('Abonnement introuvable','warn');return;}
   abo.statut='Activé';
   abo.dateActivation=today();
+  // v1.2.2 (bug #3) : paiement validé → confirmer la commission partenaire liée
+  try{ if(typeof confirmCommissionsForSale==='function') confirmCommissionsForSale('elearning', abo.plan); }catch(e){}
 
   // ── Retrouver le compte visiteur lié (via accountId ou normalisation du tel) ──
   var acc=null;
@@ -11561,7 +11563,10 @@ function saveSale(){
 function markBPPaid(bpid){
   const bp=DB.bookPurchases.find(x=>x.id===bpid);
   if(bp){
-    bp.statut='Payé';save();re();toast('✓ Paiement confirmé');
+    bp.statut='Payé';
+    // v1.2.2 (bug #3) : paiement livre validé → confirmer la commission partenaire liée
+    try{ if(typeof confirmCommissionsForSale==='function') confirmCommissionsForSale('book', bp.bid); }catch(e){}
+    save();re();toast('✓ Paiement confirmé');
     // Notification vers l'acheteur
     if(typeof autoNotify==='function'&&bp.eid){
       var _bk=DB.books&&DB.books.find(x=>x.id===bp.bid);
@@ -13266,6 +13271,13 @@ window.AI_QUOTAS = {
 };
 
 // Helper : déterminer le tier de l'utilisateur courant
+// v1.2.2 (bug de chaîne #2) : source de vérité unique pour « abonnement actif ».
+// Tolère les libellés historiques ('Activé','actif','Payé','confirmed') pour
+// éviter qu'un statut divergent prive un payant de ses accès.
+window._statutActif = function(statut){
+  var s = String(statut||'').toLowerCase();
+  return s==='activé' || s==='active' || s==='actif' || s==='payé' || s==='paye' || s==='confirmed';
+};
 window._aiTier = function(){
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
   if(!ses || !ses.id) return 'anon';
@@ -13276,10 +13288,14 @@ window._aiTier = function(){
   // Élève / visiteur inscrit : chercher abonnement actif
   var abos = (DB.elearning && DB.elearning.abonnements) || [];
   var a = abos.find(function(x){
-    if(x.statut!=='Activé' && x.statut!=='actif') return false;
-    return x.userId===ses.id ||
+    if(!_statutActif(x.statut)) return false;
+    // v1.2.2 FIX (bug de chaîne #1) : matcher aussi accountId — c'est le champ
+    // réellement stocké par validerAbonnement (userId n'existe pas).
+    return (x.accountId && (x.accountId===ses.id || x.accountId===ses.accountId)) ||
+      x.userId===ses.id ||
       (ses.pre && x.nom===(ses.pre+' '+ses.nom)) ||
-      x.nom===ses.nom || x.tel===ses.tel;
+      x.nom===ses.nom ||
+      (ses.tel && x.tel===ses.tel);
   });
   if(a){
     // Mapper plan vers tier
@@ -35688,14 +35704,34 @@ function applyPartnerCode(code, data){
   return c;
 }
 
+// v1.2.2 (bug de chaîne #3) : confirme les commissions d'une vente quand le
+// paiement est VALIDÉ par l'admin → elles comptent alors pour le palier/bonus.
+// Appelé à l'activation d'abonnement et à la validation d'un achat.
+function confirmCommissionsForSale(refType, refId){
+  if(!DB.commissions) return 0;
+  var n=0;
+  DB.commissions.forEach(function(c){
+    if(c.status==='pending' && c.refType===refType && String(c.refId)===String(refId)){
+      c.status='validated'; c.validatedAt=(typeof today==='function')?today():''; n++;
+      var p=(DB.partners||[]).find(function(x){return x.id===c.partnerId;});
+      if(p){ calculatePartnerLevel(p.id); }
+    }
+  });
+  if(n>0){ try{_prtSave&&_prtSave();}catch(e){} try{save&&save();}catch(e){} }
+  return n;
+}
+window.confirmCommissionsForSale = confirmCommissionsForSale;
+
 // ── RECALCUL du palier — MIX ouvrages + abos + autres ──────────────────────
 function calculatePartnerLevel(partnerId){
   var partner = (DB.partners||[]).find(function(p){return p.id===partnerId;});
   if(!partner) return;
   var L = _prtL();
-  // Compte TOUTES les commissions de type 'sale' non annulées (mix demandé par Jacques)
+  // v1.2.2 FIX (bug de chaîne #3) : le PALIER ne compte que les ventes CONFIRMÉES
+  // (paiement validé). Les commissions 'pending' (paiement non encore vérifié) ne
+  // doivent pas faire monter le palier ni débloquer des bonus → anti-fraude.
   var totalSales = (DB.commissions||[])
-    .filter(function(c){return c.partnerId===partnerId && c.type==='sale' && c.status!=='cancelled';})
+    .filter(function(c){return c.partnerId===partnerId && c.type==='sale' && (c.status==='validated'||c.status==='paid');})
     .reduce(function(s,c){return s + (c.qty||1);}, 0);
   var newLevel = 'bronze';
   ['diamant','or','argent','bronze'].forEach(function(lv){
