@@ -376,6 +376,12 @@ function defaultDB(){return{
     {id:'ph5',titre:'Laboratoire',emoji:'🔬',desc:'Équipement pour les sciences'},
     {id:'ph6',titre:'Salle informatique',emoji:'💻',desc:'Accès aux ressources numériques'},
   ],
+  // v1.2.2 : statistiques VITRINE groupées par examen (panneau d'accueil, éditable admin)
+  statsVitrine:[
+    {ex:'BEPC',      taux:94, series:[], mentions:{ab:40,b:22,tb:9,exc:2}},
+    {ex:'Probatoire',taux:92, series:[{nom:'A',taux:90},{nom:'C',taux:94},{nom:'D',taux:91}], mentions:{ab:34,b:18,tb:7,exc:1}},
+    {ex:'BAC',       taux:91, series:[{nom:'A',taux:89},{nom:'C',taux:93},{nom:'D',taux:90}], mentions:{ab:48,b:27,tb:11,exc:3}},
+  ],
   examResults:[
     {annee:'2022–2023',niveaux:[{cls:'3ème',taux:85,candidats:42,admis:36},{cls:'Tle A',taux:78,candidats:28,admis:22},{cls:'Tle C',taux:90,candidats:20,admis:18},{cls:'Tle D',taux:82,candidats:15,admis:13}]},
     {annee:'2021–2022',niveaux:[{cls:'3ème',taux:80,candidats:38,admis:31},{cls:'Tle A',taux:75,candidats:24,admis:18},{cls:'Tle C',taux:88,candidats:18,admis:16},{cls:'Tle D',taux:79,candidats:12,admis:10}]},
@@ -1007,6 +1013,7 @@ function _migrateDB(){
   if(!DB.forumPosts)DB.forumPosts=[];
   if(!DB.photos)DB.photos=defaultDB().photos||[];
   if(!DB.examResults)DB.examResults=defaultDB().examResults||[];
+  if(!DB.statsVitrine)DB.statsVitrine=defaultDB().statsVitrine||[];
   if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts||[];
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
   // E-learning
@@ -12817,6 +12824,82 @@ function mManageTicker(){
 // Autoplay : muet au démarrage (imposé par les navigateurs), bouton 🔊 pour activer le son.
 // v1.2.1 — Widget « Palmarès de la semaine » : remplit le panneau hero si pas de vidéo.
 // Émulation : manuel star, mieux noté, battle hebdo, rejoindre le classement.
+// v1.2.2 : panneau stats VITRINE groupé PAR EXAMEN (éditable via DB.statsVitrine).
+// Chaque examen = une carte navy : taux principal (compteur or) + séries + mentions.
+window._statsVitrineHtml = function(){
+  var list=(typeof DB!=='undefined'&&DB.statsVitrine&&DB.statsVitrine.length)?DB.statsVitrine:[];
+  if(!list.length) return '';
+  var accents=['#3C8DFF','#FFC93C','#7C3AED','#059669','#F59E0B','#0D9488'];
+  var mLabels={ab:'Assez Bien',b:'Bien',tb:'Très Bien',exc:'Excellent'};
+  var cards=list.map(function(s,i){
+    var col=accents[i%accents.length];
+    var series=(s.series||[]).map(function(se){
+      return '<div style="flex:1;min-width:60px;text-align:center;background:rgba(255,255,255,.06);border-radius:10px;padding:8px 6px">'
+        +'<div style="font-family:Montserrat,sans-serif;font-weight:900;font-size:18px;color:#FFC93C">'+(se.taux||0)+'%</div>'
+        +'<div style="font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.5px">Série '+_esc(se.nom||'')+'</div></div>';
+    }).join('');
+    var m=s.mentions||{};
+    var mentions=['ab','b','tb','exc'].filter(function(k){return m[k]!=null;}).map(function(k){
+      return '<div style="flex:1;min-width:54px;text-align:center"><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:16px;color:#fff">'+(m[k]||0)+'</div>'
+        +'<div style="font-size:9.5px;color:rgba(255,255,255,.65);letter-spacing:.3px">'+mLabels[k]+'</div></div>';
+    }).join('');
+    return '<div class="vgz-stat" style="text-align:left;border-top:3px solid '+col+';padding:18px 18px 16px">'
+      +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">'
+        +'<div style="font-family:Montserrat,sans-serif;font-weight:900;font-size:15px;color:#fff;letter-spacing:.5px;text-transform:uppercase">'+_esc(s.ex||'')+'</div>'
+        +'<div class="vgz-stat-num" data-count="'+(s.taux||0)+'" data-suffix="%" style="font-size:30px">0</div>'
+      +'</div>'
+      +'<div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-top:-4px">Taux de réussite</div>'
+      +(series?'<div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">'+series+'</div>':'')
+      +(mentions?'<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)"><div style="font-size:10px;color:#FFC93C;font-weight:700;letter-spacing:.5px;margin-bottom:6px" data-keep-emoji="1"><span role="img" aria-label="médaille">🏅</span> MENTIONS</div><div style="display:flex;gap:4px">'+mentions+'</div></div>':'')
+    +'</div>';
+  }).join('');
+  var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:10px"><button class="btn bo sm" onclick="mEditStatsVitrine()">✏️ Modifier les résultats</button></div>':'';
+  return '<div style="text-align:center;margin:6px 0 10px"><div class="vgz-section-sub" style="margin:0">🏆 Nos résultats aux examens officiels</div></div>'
+    +'<div class="vgz-stats v-reveal" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">'+cards+'</div>'+editBtn;
+};
+
+// v1.2.2 : éditeur admin des stats vitrine (taux, séries, mentions par examen)
+window.mEditStatsVitrine = function(){
+  if(typeof iA!=='function'||!iA()){ if(typeof toast==='function')toast('Réservé à l\'administration','warn'); return; }
+  if(!DB.statsVitrine)DB.statsVitrine=(typeof defaultDB==='function'?defaultDB().statsVitrine:[])||[];
+  var body=DB.statsVitrine.map(function(s,i){
+    var ser=(s.series||[]).map(function(se,j){
+      return '<div class="fl2 g6" style="margin:4px 0"><input class="fi" style="width:70px" value="'+_esc(se.nom||'')+'" onchange="_svSet('+i+',\'serieNom\','+j+',this.value)" placeholder="Série">'
+        +'<input class="fi" type="number" min="0" max="100" style="width:80px" value="'+(se.taux||0)+'" onchange="_svSet('+i+',\'serieTaux\','+j+',this.value)" placeholder="%">'
+        +'<button class="btn bo xs" onclick="_svDelSerie('+i+','+j+')">✕</button></div>';
+    }).join('');
+    var m=s.mentions||{};
+    return '<div style="background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:12px;border:var(--br)">'
+      +'<div class="fl2 g6 fic"><input class="fi" style="font-weight:800;flex:1" value="'+_esc(s.ex||'')+'" onchange="_svSet('+i+',\'ex\',null,this.value)" placeholder="Nom de l\'examen">'
+        +'<input class="fi" type="number" min="0" max="100" style="width:90px" value="'+(s.taux||0)+'" onchange="_svSet('+i+',\'taux\',null,this.value)" placeholder="Taux %">'
+        +'<span class="semi">%</span>'
+        +'<button class="btn bo xs" onclick="_svDelExam('+i+')" title="Supprimer">🗑️</button></div>'
+      +'<div style="font-size:11px;color:var(--ink4);margin:8px 0 2px">Séries (optionnel)</div>'+ser
+      +'<button class="btn bo xs" onclick="_svAddSerie('+i+')" style="margin-top:4px">+ Série</button>'
+      +'<div style="font-size:11px;color:var(--ink4);margin:10px 0 4px">🏅 Mentions (nombre d\'élèves)</div>'
+      +'<div class="fl2 g6" style="flex-wrap:wrap">'
+        +['ab','b','tb','exc'].map(function(k){var lab={ab:'AB',b:'B',tb:'TB',exc:'Exc'}[k];return '<label style="font-size:11px">'+lab+' <input class="fi" type="number" min="0" style="width:64px" value="'+(m[k]||0)+'" onchange="_svSet('+i+',\'ment\',\''+k+'\',this.value)"></label>';}).join('')
+      +'</div></div>';
+  }).join('');
+  M('📊 Résultats aux examens','Édition du panneau d\'accueil',
+    '<div class="ib ibi mb12"><span>💡</span><span>Ces chiffres alimentent le panneau « Nos résultats » sur la page d\'accueil. Laissez les séries vides pour le BEPC.</span></div>'
+    +body+'<button class="btn bo sm" onclick="_svAddExam()">+ Ajouter un examen</button>',
+    '<button class="btn bi" onclick="cm();re&&re()">✓ Terminé</button>', true);
+};
+window._svSet=function(i,field,key,val){
+  var s=DB.statsVitrine[i]; if(!s)return;
+  if(field==='ex')s.ex=val;
+  else if(field==='taux')s.taux=Math.max(0,Math.min(100,parseInt(val)||0));
+  else if(field==='serieNom')s.series[key].nom=val;
+  else if(field==='serieTaux')s.series[key].taux=Math.max(0,Math.min(100,parseInt(val)||0));
+  else if(field==='ment'){s.mentions=s.mentions||{};s.mentions[key]=Math.max(0,parseInt(val)||0);}
+  save();
+};
+window._svAddSerie=function(i){DB.statsVitrine[i].series=DB.statsVitrine[i].series||[];DB.statsVitrine[i].series.push({nom:'',taux:0});save();mEditStatsVitrine();};
+window._svDelSerie=function(i,j){DB.statsVitrine[i].series.splice(j,1);save();mEditStatsVitrine();};
+window._svAddExam=function(){DB.statsVitrine.push({ex:'Nouvel examen',taux:0,series:[],mentions:{ab:0,b:0,tb:0,exc:0}});save();mEditStatsVitrine();};
+window._svDelExam=function(i){if(!confirm('Supprimer cet examen ?'))return;DB.statsVitrine.splice(i,1);save();mEditStatsVitrine();};
+
 window._palmaresHtml = function(){
   var books=DB.books||[];
   var orders=(DB.visitorOrders||[]).concat(DB.bookPurchases||[]);
