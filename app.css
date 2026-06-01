@@ -3905,3 +3905,13 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 .sc{ transition:transform .2s ease, box-shadow .22s ease, border-color .2s ease; }
 .sc:hover{ transform:translateY(-4px); }
 .sc-new,.sc .badge,.jeu-free{ letter-spacing:.3px; }
+
+/* ── v1.2.2 : bordures colorées rotatives sur les tuiles stats (.vgz-stat) ──
+   Les cartes "par examen" ont déjà un border-top inline ; cette règle colore
+   les autres tuiles (chiffres-clés, séries…) selon la charte, par rotation. */
+.vgz-stats .vgz-stat:not([style*="border-top"]){ border-top-width:3px; border-top-style:solid; border-top-color:var(--bl2,#3C8DFF); }
+.vgz-stats .vgz-stat:not([style*="border-top"]):nth-child(6n+2){ border-top-color:var(--gold,#FFC93C); }
+.vgz-stats .vgz-stat:not([style*="border-top"]):nth-child(6n+3){ border-top-color:var(--pu,#7C3AED); }
+.vgz-stats .vgz-stat:not([style*="border-top"]):nth-child(6n+4){ border-top-color:var(--gr,#059669); }
+.vgz-stats .vgz-stat:not([style*="border-top"]):nth-child(6n+5){ border-top-color:var(--or,#F59E0B); }
+.vgz-stats .vgz-stat:not([style*="border-top"]):nth-child(6n){ border-top-color:var(--vi,#0D9488); }
