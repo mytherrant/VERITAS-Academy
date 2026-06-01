@@ -2525,22 +2525,21 @@ html{scroll-behavior:smooth}
       +'<div class="vgz-marquee v-reveal">'
         +'<div class="vgz-marquee-track">'
           +(function(){
+            // v1.2.2 : emojis NATIFS (zéro CDN — em-content.zobj.net est lent/bloqué au Cameroun)
             var items = [
-              {img:'school_1f3eb',                   txt:'MINESEC'},
-              {img:'books_1f4da',                    txt:'Programmes officiels'},
-              {img:'high-voltage_26a1',              txt:'MTN MoMo'},
-              {img:'orange-circle_1f7e0',            txt:'Orange Money'},
-              {img:'graduation-cap_1f393',           txt:'ENS Yaoundé'},
-              {img:'microscope_1f52c',               txt:'Polytechnique'},
-              {img:'open-book_1f4d6',                txt:'CLE International'},
-              {img:'handshake_1f91d',                txt:'Afrédit'}
+              {emo:'🏫', txt:'MINESEC'},
+              {emo:'📚', txt:'Programmes officiels'},
+              {emo:'📱', txt:'MTN MoMo'},
+              {emo:'🟠', txt:'Orange Money'},
+              {emo:'🎓', txt:'ENS Yaoundé'},
+              {emo:'🔬', txt:'Polytechnique'},
+              {emo:'📖', txt:'CLE International'},
+              {emo:'🤝', txt:'Afrédit'}
             ];
-            var pictBase='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
             var html='';
-            // Boucle x2 pour défilement infini
             for(var i=0;i<2;i++){
               items.forEach(function(it){
-                html+='<div class="vgz-marquee-item"><span class="ico"><img src="'+pictBase+it.img+'.png" alt="" loading="lazy"></span>'+it.txt+'</div>';
+                html+='<div class="vgz-marquee-item"><span class="ico" data-keep-emoji="1" style="font-size:22px"><span role="img" aria-hidden="true">'+it.emo+'</span></span>'+it.txt+'</div>';
               });
             }
             return html;
