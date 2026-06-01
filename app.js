@@ -3895,8 +3895,14 @@ function vShowSec(sec,btn){
          ❌ Promo E-Learning → déjà dans .vgz-bento "E-Learning Premium"
     -->
 
+    <!-- ═════ COMPTE À REBOURS EXAMENS 2026 (v1.2.2) ═════ -->
+    ${(typeof _examCountdownHtml==='function'?_examCountdownHtml():'')}
+
     <!-- ═════ CITATION DU JOUR (v2.4) — Auteurs camerounais ═════ -->
     ${(typeof _citationBannerHtml==='function'?_citationBannerHtml():'')}
+
+    <!-- ═════ QUESTION DU JOUR — partage WhatsApp (v1.2.2) ═════ -->
+    ${(typeof _questionJourHtml==='function'?_questionJourHtml():'')}
 
     <!-- ═════ ENGAGEMENT QUOTIDIEN (v2.3) — 4 cartes dynamiques ═════ -->
     ${(typeof _engagementBannerHtml==='function'?_engagementBannerHtml():'')}
@@ -12905,6 +12911,143 @@ window._svDelSerie=function(i,j){DB.statsVitrine[i].series.splice(j,1);save();mE
 window._svAddExam=function(){DB.statsVitrine.push({ex:'Nouvel examen',taux:0,series:[],mentions:{ab:0,b:0,tb:0,exc:0}});save();mEditStatsVitrine();};
 window._svDelExam=function(i){if(!confirm('Supprimer cet examen ?'))return;DB.statsVitrine.splice(i,1);save();mEditStatsVitrine();};
 
+// ════════════════════════════════════════════════════════════════════
+// v1.2.2 — COMPTE À REBOURS EXAMENS + PROMO AUTO (marketing saisonnier)
+// Dates ISO des examens officiels MINESEC 2026 (début des épreuves écrites).
+// Le widget affiche le prochain examen pertinent + active une promo automatique
+// dans la fenêtre des 60 jours avant l'épreuve. Éditable via DB.examCountdown.
+// ════════════════════════════════════════════════════════════════════
+window.EXAM_COUNTDOWN_DEFAULT = [
+  {ex:'Concours 6ème', date:'2026-05-13', cycles:['I']},
+  {ex:'Baccalauréat',  date:'2026-05-25', cycles:['III']},
+  {ex:'BEPC',          date:'2026-06-01', cycles:['II']},
+  {ex:'GCE O/A Level', date:'2026-06-02', cycles:['II','III']},
+  {ex:'Probatoire',    date:'2026-06-08', cycles:['III']}
+];
+window._examList = function(){
+  return (typeof DB!=='undefined' && DB.examCountdown && DB.examCountdown.length) ? DB.examCountdown : EXAM_COUNTDOWN_DEFAULT;
+};
+// Prochain examen à venir (optionnellement filtré sur le cycle de l'élève connecté)
+window._nextExam = function(filterByCycle){
+  var now = new Date(); now.setHours(0,0,0,0);
+  var myCycle = (filterByCycle && typeof _battleCycle==='function' && typeof SES!=='undefined' && SES && SES.cls) ? _battleCycle(SES.cls) : null;
+  var up = _examList().map(function(e){
+    var d = new Date(e.date+'T00:00:00');
+    return {ex:e.ex, date:e.date, d:d, days:Math.ceil((d-now)/86400000), cycles:e.cycles||[]};
+  }).filter(function(e){ return e.days>=0 && (!myCycle || !e.cycles.length || e.cycles.indexOf(myCycle)>=0); })
+    .sort(function(a,b){ return a.d-b.d; });
+  return up[0] || null;
+};
+// Promo active si un examen pertinent est dans la fenêtre (<= 60 j)
+window._examPromoActive = function(){
+  var n = _nextExam(true);
+  return (n && n.days<=60) ? n : null;
+};
+// Widget bannière (accueil) — renvoie '' si aucun examen à venir
+window._examCountdownHtml = function(){
+  var n = _nextExam(true) || _nextExam(false);
+  if(!n) return '';
+  var urgent = n.days<=60;
+  var dd = n.days===0 ? "aujourd'hui" : (n.days===1 ? "demain" : ("dans "+n.days+" jours"));
+  var bg = urgent ? 'linear-gradient(135deg,#DC2626,#F59E0B)' : 'linear-gradient(135deg,#142554,#1E3A8A)';
+  return '<div class="v-reveal" style="background:'+bg+';color:#fff;border-radius:16px;padding:16px 20px;margin:16px 0;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 12px 30px rgba(20,37,84,.22);position:relative;overflow:hidden">'
+    +'<div style="font-size:13px" aria-hidden="true">⏳</div>'
+    +'<div style="flex:1;min-width:200px">'
+      +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#FFC93C;font-weight:800">Compte à rebours examens 2026</div>'
+      +'<div style="font-family:Montserrat,sans-serif;font-size:19px;font-weight:900;line-height:1.2">'+_esc(n.ex)+' '+dd+'</div>'
+      +(urgent?'<div style="font-family:Crimson Pro,serif;font-size:13px;font-style:italic;color:rgba(255,255,255,.92);margin-top:3px">Dernière ligne droite — révise chaque jour avec Ambassa pour viser la mention.</div>':'<div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:3px">Prépare-toi sereinement, jour après jour.</div>')
+    +'</div>'
+    +'<div style="text-align:center;background:rgba(255,255,255,.12);border-radius:14px;padding:10px 16px;min-width:74px">'
+      +'<div style="font-family:Montserrat,sans-serif;font-size:30px;font-weight:900;color:#FFC93C;line-height:1">'+n.days+'</div>'
+      +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;opacity:.85">jour'+(n.days>1?'s':'')+'</div>'
+    +'</div>'
+    +(urgent?'<button class="btn" style="background:#FFC93C;color:#142554;border:none;border-radius:99px;font-weight:800;padding:11px 20px;cursor:pointer;white-space:nowrap" onclick="(typeof vShowSec===\'function\'?vShowSec(\'elearning\'):0);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)">🎯 Pack révision</button>':'')
+  +'</div>';
+};
+
+// ════════════════════════════════════════════════════════════════════
+// v1.2.2 — RÉVISION ESPACÉE (spaced repetition) des questions ratées
+// Quand un élève rate un QCM, la question entre dans une file et est
+// re-proposée à J+1, J+3, J+7 (puis archivée). Stockage par compte (DB._srs).
+// ════════════════════════════════════════════════════════════════════
+window._SRS_STEPS = [1,3,7]; // jours
+window._srsKey = function(){ var s=(typeof SES!=='undefined'&&SES)?SES:null; return (s&&s.id)?s.id:'anon'; };
+window._srsAdd = function(q, matiere){
+  try{
+    if(!q || !q.q) return;
+    DB._srs = DB._srs || {};
+    var k=_srsKey(); DB._srs[k]=DB._srs[k]||[];
+    var sig = (q.q||'').slice(0,120);
+    var existing = DB._srs[k].find(function(x){return x.sig===sig;});
+    var now=Date.now();
+    if(existing){ existing.step=0; existing.due=now+_SRS_STEPS[0]*86400000; } // raté à nouveau → on repart
+    else{
+      DB._srs[k].push({ sig:sig, q:q.q, opts:q.opts||[], ans:(typeof q.ans==='number'?q.ans:0),
+        exp:q.exp||'', mat:matiere||'', step:0, due:now+_SRS_STEPS[0]*86400000, added:now });
+    }
+    if(DB._srs[k].length>200) DB._srs[k]=DB._srs[k].slice(-200);
+    save();
+  }catch(e){}
+};
+// Questions à réviser maintenant (échéance passée)
+window._srsDue = function(){
+  var k=_srsKey(); var arr=(DB._srs&&DB._srs[k])||[]; var now=Date.now();
+  return arr.filter(function(x){return x.step<_SRS_STEPS.length && x.due<=now;});
+};
+// Marquer une question revue avec succès → étape suivante (ou archivée)
+window._srsPass = function(sig){
+  var k=_srsKey(); var arr=(DB._srs&&DB._srs[k])||[];
+  var x=arr.find(function(e){return e.sig===sig;}); if(!x) return;
+  x.step++; if(x.step<_SRS_STEPS.length){ x.due=Date.now()+_SRS_STEPS[x.step]*86400000; }
+  save();
+};
+window._srsFail = function(sig){
+  var k=_srsKey(); var arr=(DB._srs&&DB._srs[k])||[];
+  var x=arr.find(function(e){return e.sig===sig;}); if(!x) return;
+  x.step=0; x.due=Date.now()+_SRS_STEPS[0]*86400000; save();
+};
+// Badge / point d'entrée : nombre de questions à réviser aujourd'hui
+window._srsDueCount = function(){ return _srsDue().length; };
+
+// ════════════════════════════════════════════════════════════════════
+// v1.2.2 — QUESTION DU JOUR (partage WhatsApp = canal n°1 au Cameroun)
+// Une question quotidienne (déterministe selon la date) à partager en statut/
+// contact WhatsApp, avec lien vers le site → acquisition virale gratuite.
+// ════════════════════════════════════════════════════════════════════
+window.QUESTION_JOUR = [
+  "Qui est l'auteur de « Ville Cruelle » ? (Indice : un pseudonyme de Mongo Beti)",
+  "Quelle est la formule de l'aire d'un trapèze ?",
+  "En quelle année le Cameroun a-t-il accédé à l'indépendance ?",
+  "Qu'est-ce qu'une métaphore ? Donne un exemple.",
+  "Quelle est la capitale économique du Cameroun ?",
+  "Résous : 2x + 5 = 17. Que vaut x ?",
+  "Cite les 3 états de la matière et un exemple de chacun.",
+  "Quel temps exprime une action future : « je mangerai » ?"
+];
+window._questionDuJour = function(){
+  var q=QUESTION_JOUR; if(!q.length) return '';
+  var d=new Date(); var idx=(d.getFullYear()*1000 + (d.getMonth()*31+d.getDate())) % q.length;
+  return q[idx];
+};
+window._questionJourHtml = function(){
+  var q=_questionDuJour(); if(!q) return '';
+  var site='https://veritas-school.com';
+  var msg='🎓 QUESTION DU JOUR — Centre VÉRITAS\n\n'+q+'\n\n💡 La réponse avec le Prof. Ambassa (IA gratuite) : '+site;
+  var waShare='https://wa.me/?text='+encodeURIComponent(msg); // partage générique (statut/contact)
+  return '<div class="v-reveal" style="background:linear-gradient(135deg,#0D9488,#10B981);color:#fff;border-radius:16px;padding:16px 20px;margin:16px 0;box-shadow:0 12px 30px rgba(13,148,136,.22)">'
+    +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+      +'<div style="flex:1;min-width:220px">'
+        +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#A7F3D0;font-weight:800">❓ Question du jour</div>'
+        +'<div style="font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;line-height:1.35;margin-top:4px">'+_esc(q)+'</div>'
+      +'</div>'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'
+      +'<button class="btn" style="background:#fff;color:#0D9488;border:none;border-radius:99px;font-weight:800;padding:9px 18px;cursor:pointer" onclick="(typeof mAgentAmbassa===\'function\'?mAgentAmbassa():(typeof vShowSec===\'function\'?vShowSec(\'elearning\'):0))">🎓 Répondre avec Ambassa</button>'
+      +'<a href="'+waShare+'" target="_blank" rel="noopener" class="btn" style="background:#25D366;color:#fff;border:none;border-radius:99px;font-weight:800;padding:9px 18px;text-decoration:none">📲 Partager sur WhatsApp</a>'
+    +'</div>'
+  +'</div>';
+};
+
 window._palmaresHtml = function(){
   var books=DB.books||[];
   var orders=(DB.visitorOrders||[]).concat(DB.bookPurchases||[]);
@@ -13495,7 +13638,12 @@ window._showQuotaExceeded = function(action, tier, used, limit){
         +'<tr><td><b>Pro</b></td><td>30 essais/jour</td><td><b>8 000 FCFA/mois</b></td></tr>'
         +'<tr><td><b>Elite</b></td><td>Illimité</td><td><b>15 000 FCFA/mois</b></td></tr></table>'
       +'</div>'
+      // v1.2.2 (#6) : UPGRADE CONTEXTUEL — si un examen approche, créer l'urgence ici (le bon moment)
+      +((function(){ try{ var n=(typeof _examPromoActive==='function')?_examPromoActive():null;
+          return n ? ('<div style="background:linear-gradient(135deg,#DC2626,#F59E0B);color:#fff;padding:12px;border-radius:12px;margin-bottom:12px;font-size:13px;font-weight:700">⏳ '+_esc(n.ex)+' dans '+n.days+' jour'+(n.days>1?'s':'')+' — ne casse pas ta révision maintenant. Débloque Ambassa sans limite pour la dernière ligne droite.</div>') : ''; }catch(e){return '';} })())
       +'<button class="btn bi" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:14px 28px;font-size:14px;font-weight:800;width:100%" onclick="cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)">⭐ Choisir un plan d\'abonnement</button>'
+      // v1.2.2 (#3) : alternative micro-paiement immédiate (lève le frein du forfait)
+      +((typeof _microBuyBtn==='function')?('<div style="margin-top:8px">'+_microBuyBtn('epreuve','ambassa','Continuer avec Ambassa (à l\'unité)')+'</div>'):'')
       +'<button class="btn bo" style="margin-top:8px;width:100%" onclick="cm();mParrainage()">🎁 Ou parrainer un ami (+500 FCFA crédit)</button>'
       +'</div>';
   } else {
@@ -25012,6 +25160,8 @@ function _passerEval(evalId,force){
     });
     if(i===q.ans)score++;
     userAnswers.push({qi:qi,ans:i,correct:i===q.ans});
+    // v1.2.2 : question ratée → file de révision espacée (J+1/J+3/J+7)
+    if(i!==q.ans && typeof _srsAdd==='function'){ try{ _srsAdd(q, ev.matiere||ev.titre||''); }catch(e){} }
     if(fb)fb.innerHTML="<div style='padding:10px;background:"+(i===q.ans?"#D1FAE5":"#FEE2E2")+";border-radius:10px;font-size:13px;color:"+(i===q.ans?"#059669":"#DC2626")+"'>"+(i===q.ans?"✅ ":"❌ ")+(q.exp||"")+"</div>";
     setTimeout(function(){qi++;renderQ();},2000);
   };
@@ -29900,6 +30050,31 @@ window.openPaymentModal = openPaymentModal;
 window.mPayAttempts = mPayAttempts;
 
 // ════════════════════════════════════════════════════════════════════
+// v1.2.2 — MICRO-PAIEMENTS (pay-per-use) : alternative à l'abonnement annuel.
+// 200 FCFA = 1 épreuve corrigée, etc. S'appuie sur openPaymentModal (MoMo/Orange).
+// ════════════════════════════════════════════════════════════════════
+window.MICRO_PRIX_DEFAULT = {
+  epreuve:  { montant:200, label:'1 épreuve corrigée' },
+  chapitre: { montant:500, label:'1 chapitre complet (cours + exercices)' },
+  fiche:    { montant:300, label:'1 fiche de révision premium' },
+  labo:     { montant:300, label:'1 expérience de laboratoire virtuel' }
+};
+window._microPrix = function(type){
+  return (typeof DB!=='undefined' && DB.microPrix && DB.microPrix[type]) ? DB.microPrix[type] : (MICRO_PRIX_DEFAULT[type]||null);
+};
+window.acheterUnite = function(type, refId, refLabel){
+  var p=_microPrix(type);
+  if(!p){ if(typeof toast==='function')toast('Tarif indisponible','warn'); return; }
+  openPaymentModal({ montant:p.montant, label:'🎯 '+(refLabel||p.label),
+    intent:'micro_'+type, targetId:refId||'', refPrefix:'U'+type.slice(0,3).toUpperCase() });
+};
+window._microBuyBtn = function(type, refId, refLabel){
+  var p=_microPrix(type); if(!p) return '';
+  return '<button class="btn bo sm" onclick="acheterUnite(\''+type+'\',\''+_esc(String(refId||''))+'\',\''+_esc(String(refLabel||'')).replace(/\x27/g,"")+'\')" '
+    +'style="border-color:var(--gold,#FFC93C);color:#142554">💡 À l\'unité — '+(typeof fmt==='function'?fmt(p.montant):p.montant+' FCFA')+'</button>';
+};
+
+// ════════════════════════════════════════════════════════════════════
 // ── v1.2 P2 — MODULE STATS BUSINESS DASHBOARD ADMIN ────────────────
 // ════════════════════════════════════════════════════════════════════
 window.mBusinessStats = function(){
@@ -33402,6 +33577,7 @@ window._ambassaGenerate = async function(taskId){
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:1px">'+(hasQuiz?'📝 Quiz prêt — '+parsedQuiz.length+' questions':'✓ Ambassa a généré')+'</div>'
       +'<div style="display:flex;gap:6px">'
       +'<button class="btn sm" style="background:#fff;border:1px solid #6EE7B7;color:#059669;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaCopy()">📋 Copier</button>'
+      +'<button class="btn sm" style="background:#fff;border:1px solid #C7D2FE;color:#3730A3;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSpeak(this)">🔊 Écouter</button>'
       +(taskId==='eval'?'<button class="btn sm" style="background:#10B981;color:#fff;border:none;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSaveEval(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/'/g,"\\'")+'\')">💾 Enregistrer dans Évaluations</button>':'')
       +'</div></div>'
       + displayHtml
@@ -33476,6 +33652,28 @@ window._ambassaCorrigerProposition = async function(cls, mat, sujet, taskId){
   } finally {
     if(btn){ btn.disabled = false; btn.textContent = '✅ Corrige ma proposition'; }
   }
+};
+
+// v1.2.2 : lecture audio des corrigés Ambassa (Web Speech API, gratuit, hors-ligne).
+// Utile pour les langues/anglais et la révision mobile (écouter en transport).
+window._ambassaSpeak = function(btn){
+  try{
+    if(!('speechSynthesis' in window)){ if(typeof toast==='function')toast('Lecture audio non supportée par ce navigateur','warn'); return; }
+    var synth = window.speechSynthesis;
+    if(synth.speaking){ synth.cancel(); if(btn){btn.innerHTML='🔊 Écouter';} return; } // toggle stop
+    // Source : texte brut de la dernière réponse (quiz brut sinon zone visible)
+    var txt='';
+    if(window._ambassaQuizData && window._ambassaQuizData.raw) txt=window._ambassaQuizData.raw;
+    if(!txt){ var o=document.getElementById('mvOutput')||document.querySelector('.ai-md'); if(o) txt=o.textContent||''; }
+    txt = (txt||'').replace(/[#*_`>•]/g,' ').replace(/\s+/g,' ').trim().slice(0,4000);
+    if(!txt){ if(typeof toast==='function')toast('Rien à lire','warn'); return; }
+    var u = new SpeechSynthesisUtterance(txt);
+    u.lang='fr-FR'; u.rate=0.95; u.pitch=1;
+    // voix française si dispo
+    var voices=synth.getVoices(); var fr=voices.find(function(v){return /fr/i.test(v.lang);}); if(fr)u.voice=fr;
+    if(btn){ btn.innerHTML='⏸️ Arrêter'; u.onend=function(){btn.innerHTML='🔊 Écouter';}; }
+    synth.speak(u);
+  }catch(e){ if(typeof toast==='function')toast('Erreur lecture audio','warn'); }
 };
 
 window._ambassaCopy = function(){
