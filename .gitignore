@@ -82,3 +82,7 @@ VERITAS_Guide_*.pdf
 # Exception : avatar de l'IA Ambassa (portrait stylisé)
 !ambassa-avatar.jpg
 !ambassa-avatar.png
+# Exception : couvertures des œuvres littéraires (versionnées + déployées)
+!uploads/oeuvres/
+!uploads/oeuvres/*.jpg
+!uploads/oeuvres/*.png
