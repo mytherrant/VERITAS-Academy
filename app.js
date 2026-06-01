@@ -16161,6 +16161,31 @@ var LITT_ANALYSES = [
 ];
 
 // ── BASE DE DONNÉES LITTÉRAIRE ─────────────────────────────────────
+// v1.2.2 : vraies couvertures des œuvres (fichiers dans /uploads/oeuvres/).
+// Clé = clé LITT_OEUVRES. Affichées en couverture si présentes (sinon fallback dégradé+icône).
+var OEUVRE_COVERS = {
+  "3e_ville_cruelle":"3e_ville_cruelle.jpg",
+  "3e_marmite_koka":"3e_marmite_koka.jpg",
+  "3e_petites_gouttes":"3e_petites_gouttes.jpg",
+  "2nde_tribus_capitoline":"2nde_tribus_capitoline.jpg",
+  "2nde_poemes_sauvages":"2nde_poemes_sauvages.jpg",
+  "1ere_coeur_tenebres":"1ere_coeur_tenebres.jpg",
+  "1ere_balafon":"1ere_balafon.jpg",
+  "1ere_lion_perle":"1ere_lion_perle.jpg",
+  "tle_stances_poemes":"tle_stances_poemes.jpg",
+  "tle_vieux_negro":"tle_vieux_negro.jpg",
+  "tle_ngum_jemea":"tle_ngum_jemea.jpg",
+  "6e_chants_foret":"6e_chants_foret.jpg",
+  "6e_bimanes":"6e_bimanes.jpg",
+  "6e_contes_korotoumou":"6e_contes_korotoumou.jpg",
+  "5e_arbre_fetiche":"5e_arbre_fetiche.png",
+  "5e_pere_inconnu":"5e_pere_inconnu.jpg",
+  "4e_trois_pretendants":"4e_trois_pretendants.jpg",
+  "4e_coeur_sahel":"4e_coeur_sahel.jpg",
+  "4e_attachement_sol":"4e_attachement_sol.jpg"
+};
+window._oeuvreCover = function(key){ return OEUVRE_COVERS[key] ? ('uploads/oeuvres/'+OEUVRE_COVERS[key]) : ''; };
+
 var LITT_OEUVRES = {
 
   // ─── 3e ────────────────────────────────────────────────────────
@@ -19487,15 +19512,27 @@ function showJeuxEdu(){
       var hasCtrl=!!(it.oe.controle&&it.oe.controle.length);
 
       h+="<div class='voeuvre-card "+cssCls+"' onclick=\"_showLittMenu('"+it.key+"','"+it.key+"')\">";
-      // v2.2 : couverture livre stylisée
-      h+="  <div class='voeuvre-head voeuvre-cover' style='background:linear-gradient(135deg,"+(it.col||'#142554')+",#0F1E47);position:relative'>";
-      h+="    <div style='position:absolute;left:0;top:0;bottom:0;width:6px;background:rgba(0,0,0,.25);box-shadow:inset -2px 0 4px rgba(0,0,0,.3)'></div>";
-      h+="    <div class='voeuvre-cls-badge' style='background:rgba(255,201,60,.95);color:#142554'>"+_esc(cls)+"</div>";
-      h+="    <div class='voeuvre-ico' style='background:rgba(255,255,255,.12);border:2px solid rgba(255,201,60,.4);border-radius:50%;padding:8px'><img src='"+_esc(it.picUrl)+"' alt='' loading='lazy'></div>";
-      h+="    <div class='voeuvre-title' style='color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.4);font-family:Plus Jakarta Sans,Libre Baskerville,serif;font-weight:800'>"+_esc(it.oe.titre)+"</div>";
-      h+="    <div class='voeuvre-author' style='color:rgba(255,255,255,.85);font-style:italic;font-family:Crimson Pro,Libre Baskerville,Georgia,serif'>"+_esc(it.oe.auteur||'')+"</div>";
-      h+="    <div style='position:absolute;bottom:8px;right:10px;font-family:Plus Jakarta Sans,sans-serif;font-size:9px;color:rgba(255,201,60,.6);font-weight:700;letter-spacing:1px;text-transform:uppercase'>VÉRITAS</div>";
-      h+="  </div>";
+      // v1.2.2 : vraie couverture du livre si disponible (sinon dégradé stylisé)
+      var _cover=(typeof _oeuvreCover==='function')?_oeuvreCover(it.key):'';
+      if(_cover){
+        h+="  <div class='voeuvre-head voeuvre-cover' style='position:relative;padding:0;overflow:hidden;background:#0F1E47'>";
+        h+="    <img src='"+_esc(_cover)+"' alt='Couverture — "+_esc(it.oe.titre)+"' loading='lazy' style='width:100%;height:100%;object-fit:cover;display:block' onerror=\"this.style.display='none';this.parentNode.style.background='linear-gradient(135deg,"+(it.col||'#142554')+",#0F1E47)'\">";
+        h+="    <div class='voeuvre-cls-badge' style='background:rgba(255,201,60,.95);color:#142554'>"+_esc(cls)+"</div>";
+        h+="    <div style='position:absolute;left:0;right:0;bottom:0;padding:20px 12px 8px;background:linear-gradient(0deg,rgba(15,30,71,.92),transparent)'>";
+        h+="      <div class='voeuvre-title' style='color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.6);font-family:Plus Jakarta Sans,Libre Baskerville,serif;font-weight:800'>"+_esc(it.oe.titre)+"</div>";
+        h+="      <div class='voeuvre-author' style='color:rgba(255,255,255,.9);font-style:italic;font-family:Crimson Pro,Libre Baskerville,Georgia,serif'>"+_esc(it.oe.auteur||'')+"</div>";
+        h+="    </div>";
+        h+="  </div>";
+      } else {
+        h+="  <div class='voeuvre-head voeuvre-cover' style='background:linear-gradient(135deg,"+(it.col||'#142554')+",#0F1E47);position:relative'>";
+        h+="    <div style='position:absolute;left:0;top:0;bottom:0;width:6px;background:rgba(0,0,0,.25);box-shadow:inset -2px 0 4px rgba(0,0,0,.3)'></div>";
+        h+="    <div class='voeuvre-cls-badge' style='background:rgba(255,201,60,.95);color:#142554'>"+_esc(cls)+"</div>";
+        h+="    <div class='voeuvre-ico' style='background:rgba(255,255,255,.12);border:2px solid rgba(255,201,60,.4);border-radius:50%;padding:8px'><img src='"+_esc(it.picUrl)+"' alt='' loading='lazy'></div>";
+        h+="    <div class='voeuvre-title' style='color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.4);font-family:Plus Jakarta Sans,Libre Baskerville,serif;font-weight:800'>"+_esc(it.oe.titre)+"</div>";
+        h+="    <div class='voeuvre-author' style='color:rgba(255,255,255,.85);font-style:italic;font-family:Crimson Pro,Libre Baskerville,Georgia,serif'>"+_esc(it.oe.auteur||'')+"</div>";
+        h+="    <div style='position:absolute;bottom:8px;right:10px;font-family:Plus Jakarta Sans,sans-serif;font-size:9px;color:rgba(255,201,60,.6);font-weight:700;letter-spacing:1px;text-transform:uppercase'>VÉRITAS</div>";
+        h+="  </div>";
+      }
       h+="  <div class='voeuvre-body'>";
       h+="    <div class='voeuvre-stats'>";
       h+="      <div class='voeuvre-stat"+(hasCarte?' active':'')+"' title='Carte mentale'><div class='voeuvre-stat-ico'>🗺️</div><div class='voeuvre-stat-lbl'>Carte</div></div>";

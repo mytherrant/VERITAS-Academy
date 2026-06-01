@@ -19,6 +19,7 @@ on:
       - '.htaccess'
       - 'api/**'
       - 'evaluations/**'
+      - 'uploads/oeuvres/**'
       - 'cours/**'
       - 'Logo détouré.png'
       - 'ambassa-avatar.jpg'
@@ -148,6 +149,13 @@ jobs:
           # ── Évaluations et cours interactifs ────────────────────
           if [ -d evaluations ]; then cp -r evaluations/ deploy/evaluations/; fi
           if [ -d cours ];       then cp -r cours/       deploy/cours/;       fi
+
+          # ── Couvertures des œuvres littéraires (v1.2.2) ─────────
+          if [ -d uploads/oeuvres ]; then
+            mkdir -p deploy/uploads/oeuvres
+            cp uploads/oeuvres/* deploy/uploads/oeuvres/ 2>/dev/null || true
+            echo "  ✓ uploads/oeuvres/ ($(ls uploads/oeuvres | wc -l) couvertures)"
+          fi
 
           # Placeholders uploads (vides au départ, gérés par PHP)
           touch deploy/uploads/.gitkeep
