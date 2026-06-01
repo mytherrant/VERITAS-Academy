@@ -35327,23 +35327,40 @@ setTimeout(function(){initTickerFixed();},3000);
       return parts.map(function(h){return String.fromCodePoint(parseInt(h,16));}).join('');
     }catch(e){ return ''; }
   }
-  document.addEventListener('error', function(ev){
-    var img=ev.target;
+  function _replaceCdnImg(img){
     if(!img || img.tagName!=='IMG') return;
     if(img.dataset && img.dataset._emojiFixed) return;
-    var src=img.currentSrc || img.src || '';
-    if(src.indexOf('em-content.zobj.net')<0 && src.indexOf('zobj.net')<0) return;
+    var src=img.getAttribute('src')||img.currentSrc||img.src||'';
+    if(src.indexOf('zobj.net')<0) return;
     var emo=emojiFromUrl(src) || '🎓';
     if(img.dataset) img.dataset._emojiFixed='1';
     var span=document.createElement('span');
     span.setAttribute('role','img');
+    span.setAttribute('aria-hidden','true');
     if(img.alt) span.setAttribute('aria-label', img.alt);
     var sz=Math.max(img.width||0, parseInt(getComputedStyle(img).width)||0, 40);
     span.style.cssText='display:inline-flex;align-items:center;justify-content:center;'
       +'font-size:'+Math.round(sz*0.82)+'px;line-height:1;width:100%;height:100%';
     span.textContent=emo;
     if(img.parentNode) img.parentNode.replaceChild(span, img);
-  }, true); // capture : nécessaire car 'error' ne bulle pas
+  }
+  // 1) Réactif : si une image CDN échoue (capture car 'error' ne bulle pas)
+  document.addEventListener('error', function(ev){ _replaceCdnImg(ev.target); }, true);
+  // 2) PROACTIF : convertir SANS attendre l'échec réseau (le CDN zobj est lent au
+  //    Cameroun → on évite le timeout/clignotement). Au chargement + contenu dynamique.
+  function _sweepCdnImgs(root){
+    try{ (root||document).querySelectorAll('img[src*="zobj.net"]').forEach(_replaceCdnImg); }catch(e){}
+  }
+  function _bootCdn(){
+    _sweepCdnImgs(document);
+    if('MutationObserver' in window){
+      var t=null;
+      new MutationObserver(function(){ clearTimeout(t); t=setTimeout(function(){_sweepCdnImgs(document);},120); })
+        .observe(document.body, {childList:true, subtree:true});
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', _bootCdn);
+  else _bootCdn();
 })();
 
 /* ════════════════════════════════════════════════════════════════════════════
