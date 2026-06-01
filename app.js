@@ -34564,8 +34564,18 @@ setTimeout(function(){initTickerFixed();},3000);
   }
 
   // Replace emoji text nodes with Material Icons spans
+  // v1.2.2 : un nœud est "protégé" si lui ou un ancêtre veut garder l'emoji natif.
+  function _emojiProtected(el){
+    for(var p=el; p && p.nodeType===1; p=p.parentNode){
+      if(p.getAttribute && p.getAttribute('role')==='img') return true;
+      if(p.hasAttribute && p.hasAttribute('data-keep-emoji')) return true;
+      if(p.classList && (p.classList.contains('vgz-role-ico')||p.classList.contains('b-ico')||p.classList.contains('jeu-thumb'))) return true;
+    }
+    return false;
+  }
   function replaceEmojisInNode(node){
     if(node.nodeType === 3){ // Text node
+      if(node.parentNode && _emojiProtected(node.parentNode)) return; // garder l'emoji natif
       var text = node.textContent;
       var found = false;
       var keys = Object.keys(EMOJI_ICON_MAP);
@@ -34603,6 +34613,14 @@ setTimeout(function(){initTickerFixed();},3000);
               && !node.classList.contains('material-icons-round')
               && !node.classList.contains('material-symbols-rounded')
               && !node.classList.contains('v-ico')
+              // v1.2.2 : NE PAS transformer les pictos volontairement en emoji natif
+              // (cartes rôles, bento, icônes labellisées) — la police Material ne
+              // s'applique pas partout → on verrait le mot « school » au lieu de 🎓.
+              && node.getAttribute && node.getAttribute('role') !== 'img'
+              && !node.hasAttribute('data-keep-emoji')
+              && !node.classList.contains('vgz-role-ico')
+              && !node.classList.contains('b-ico')
+              && !node.classList.contains('jeu-thumb')
               && node.tagName !== 'OPTION'){
       // Iterate children in reverse (replacing may change length)
       var children = Array.prototype.slice.call(node.childNodes);
