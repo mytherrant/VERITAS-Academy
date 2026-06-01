@@ -35013,26 +35013,47 @@ setTimeout(function(){initTickerFixed();},3000);
     }
   }
 
+  // v1.2.2 FIX : ne convertir les emojis en Material Symbols QUE si la police
+  // est réellement chargée. Sinon (cas fréquent au Cameroun : police CDN bloquée/
+  // lente) on afficherait le MOT « school » au lieu de l'icône → on garde l'emoji natif.
+  function _materialFontReady(){
+    try{
+      if(!document.fonts || !document.fonts.check) return false;
+      return document.fonts.check('24px "Material Symbols Rounded"');
+    }catch(e){ return false; }
+  }
   function runEmojiReplace(){
+    if(!_materialFontReady()) return; // police absente → emojis natifs conservés
     replaceEmojisInNode(document.body);
-    // Fix colors after a frame so DOM is settled
     requestAnimationFrame(_fixIconColors);
   }
 
   // MutationObserver to catch dynamically rendered content
   function initEmojiReplacer(){
-    runEmojiReplace();
-
-    if('MutationObserver' in window){
-      var debounceTimer = null;
-      var mo = new MutationObserver(function(){
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(runEmojiReplace, 150);
-      });
-      mo.observe(document.body, { childList: true, subtree: true });
+    // Attendre que les polices soient prêtes avant la 1re passe
+    var started=false;
+    function start(){
+      if(started) return; started=true;
+      runEmojiReplace();
+      if('MutationObserver' in window){
+        var debounceTimer = null;
+        var mo = new MutationObserver(function(){
+          clearTimeout(debounceTimer);
+          debounceTimer = setTimeout(runEmojiReplace, 150);
+        });
+        mo.observe(document.body, { childList: true, subtree: true });
+      }
+      // v1.2.2 : scan périodique BORNÉ (10 passes max) au lieu d'un setInterval
+      // permanent → évite le coût batterie/CPU continu sur mobile.
+      var passes=0;
+      var iv=setInterval(function(){ runEmojiReplace(); if(++passes>=10) clearInterval(iv); }, 3000);
     }
-    // Fallback periodic scan
-    setInterval(runEmojiReplace, 3000);
+    if(document.fonts && document.fonts.ready && document.fonts.ready.then){
+      document.fonts.ready.then(start);
+      setTimeout(start, 1500); // filet de sécurité si fonts.ready ne résout pas
+    } else {
+      start();
+    }
   }
 
   // ── INIT ──
