@@ -756,6 +756,9 @@ setInterval(_refreshCitation,15000);
     <div class="vnav-dropdown" role="menu">
       <button role="menuitem" onclick="_navGo();showClasseVirtuelle()"><span style="font-size:18px;margin-right:6px">🏫</span><b>Classes &amp; Forum</b><span class="vnav-dd-sub">Échanges avec enseignants &amp; pairs</span></button>
       <button role="menuitem" onclick="_navGo();mParrainage()"><span style="font-size:18px;margin-right:6px">🎁</span><b>Parrainage</b><span class="vnav-dd-sub">+500 FCFA crédit par filleul</span></button>
+      <button role="menuitem" onclick="_navGo();vShowSec('partenariat',null)" data-new="1"><span style="font-size:18px;margin-right:6px">🤝</span><b>Partenariat VÉRITAS</b><span class="vnav-dd-sub">9 programmes · Bronze/Argent/Or/Diamant</span></button>
+      <button role="menuitem" onclick="_navGo();vShowSec('leaderboard-junior',null)"><span style="font-size:18px;margin-right:6px">🏆</span><b>Classement Junior</b><span class="vnav-dd-sub">Top 100 ambassadeurs élèves</span></button>
+      <button role="menuitem" onclick="_navGo();vShowSec('nos-partenaires',null)"><span style="font-size:18px;margin-right:6px">🏛️</span><b>Nos partenaires</b><span class="vnav-dd-sub">Sponsors · Universités · Libraires</span></button>
       <button role="menuitem" onclick="_navGo();mMonParcours()"><span style="font-size:18px;margin-right:6px">🔥</span><b>Mon parcours</b><span class="vnav-dd-sub">XP, streak, niveau</span></button>
     </div>
   </div>
@@ -2447,10 +2450,10 @@ html{scroll-behavior:smooth}
         +'</div>'
       +'</div>'
 
-      // === STATS ANIMÉES ===
-      +'<div class="vgz-stats v-reveal">'
-        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="94" data-suffix="%">0</div><div class="vgz-stat-label">Réussite BEPC</div></div>'
-        +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="91" data-suffix="%">0</div><div class="vgz-stat-label">Réussite BAC</div></div>'
+      // === STATS PAR EXAMEN (éditable via DB.statsVitrine) ===
+      +(typeof _statsVitrineHtml==='function'?_statsVitrineHtml():'')
+      // === Chiffres clés du centre (même mise en forme) ===
+      +'<div class="vgz-stats v-reveal" style="margin-top:14px">'
         +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="'+nStudents+'" data-suffix="+">0</div><div class="vgz-stat-label">Élèves formés</div></div>'
         +'<div class="vgz-stat"><div class="vgz-stat-num" data-count="'+nTeachers+'" data-suffix="">0</div><div class="vgz-stat-label">Enseignants</div></div>'
       +'</div>'

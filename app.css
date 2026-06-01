@@ -3873,3 +3873,45 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 .jeu-card:hover .jeu-badge{ animation:vtBadgePop 1.4s ease-in-out infinite; }
 /* CTA : éclat au survol (cohérent avec boutique) */
 .jeu-cta:hover{ filter:brightness(1.05); transform:translateY(-1px); }
+
+/* ════════════════════════════════════════════════════════════════
+   v1.2.2 — ŒUVRES · LABOS · RESSOURCES à la charte premium
+   Harmonisation finale (additif, navy/or, animations public jeune).
+   ════════════════════════════════════════════════════════════════ */
+
+/* ── ŒUVRES LITTÉRAIRES (.voeuvre-card) : accent coloré rotatif + lift ──
+   sélecteur renforcé : le shorthand `border` du <style> HTML écrase sinon border-top */
+.voeuvre-grid .voeuvre-card,.voeuvre-card{ border-top-width:3px;border-top-style:solid;border-top-color:var(--bl2,#3C8DFF); }
+.voeuvre-grid .voeuvre-card:nth-child(5n+2),.voeuvre-card:nth-child(5n+2){ border-top-color:var(--gold,#FFC93C); }
+.voeuvre-grid .voeuvre-card:nth-child(5n+3),.voeuvre-card:nth-child(5n+3){ border-top-color:var(--pu,#7C3AED); }
+.voeuvre-grid .voeuvre-card:nth-child(5n+4),.voeuvre-card:nth-child(5n+4){ border-top-color:var(--gr,#059669); }
+.voeuvre-grid .voeuvre-card:nth-child(5n+5),.voeuvre-card:nth-child(5n+5){ border-top-color:var(--or,#F59E0B); }
+.voeuvre-card:hover{ transform:translateY(-6px); box-shadow:0 6px 14px rgba(20,37,84,.08),0 26px 56px rgba(20,37,84,.14); }
+.voeuvre-card:hover .voeuvre-cover{ filter:saturate(1.1) brightness(1.04); }
+.voeuvre-cover{ transition:filter .35s ease; }
+.voeuvre-btn{ transition:transform .15s ease, box-shadow .2s ease, filter .2s ease; }
+.voeuvre-btn:hover{ transform:translateY(-1px); filter:brightness(1.06); box-shadow:0 6px 16px rgba(20,37,84,.18); }
+
+/* ── LABOS : cartes .vcard en contexte labo — profondeur + lift premium ── */
+#vContent .vcard{ transition:transform .2s ease, box-shadow .22s ease, border-color .2s ease; }
+.vsec-title-hero{ position:relative; }
+.vsec-title-hero::after{
+  content:""; display:block; height:4px; width:64px; margin-top:8px; border-radius:99px;
+  background:linear-gradient(90deg,var(--gold,#FFC93C),var(--or,#F59E0B));
+  box-shadow:0 2px 8px rgba(245,184,0,.4);
+}
+
+/* ── RESSOURCES e-learning (.sc) : badge "gratuit"/"premium" plus lisible + lift ── */
+.sc{ transition:transform .2s ease, box-shadow .22s ease, border-color .2s ease; }
+.sc:hover{ transform:translateY(-4px); }
+.sc-new,.sc .badge,.jeu-free{ letter-spacing:.3px; }
+
+/* ── v1.2.2 : bordures colorées rotatives sur les tuiles stats (.vgz-stat) ──
+   Les cartes "par examen" ont déjà un border-top inline ; cette règle colore
+   les autres tuiles (chiffres-clés, séries…) selon la charte, par rotation. */
+.vgz-stats .vgz-stat:not([style*="border-top"]){ border-top-width:3px; border-top-style:solid; border-top-color:var(--bl2,#3C8DFF); }
+.vgz-stats .vgz-stat:not([style*="border-top"]):nth-child(6n+2){ border-top-color:var(--gold,#FFC93C); }
+.vgz-stats .vgz-stat:not([style*="border-top"]):nth-child(6n+3){ border-top-color:var(--pu,#7C3AED); }
+.vgz-stats .vgz-stat:not([style*="border-top"]):nth-child(6n+4){ border-top-color:var(--gr,#059669); }
+.vgz-stats .vgz-stat:not([style*="border-top"]):nth-child(6n+5){ border-top-color:var(--or,#F59E0B); }
+.vgz-stats .vgz-stat:not([style*="border-top"]):nth-child(6n){ border-top-color:var(--vi,#0D9488); }

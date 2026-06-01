@@ -376,6 +376,12 @@ function defaultDB(){return{
     {id:'ph5',titre:'Laboratoire',emoji:'🔬',desc:'Équipement pour les sciences'},
     {id:'ph6',titre:'Salle informatique',emoji:'💻',desc:'Accès aux ressources numériques'},
   ],
+  // v1.2.2 : statistiques VITRINE groupées par examen (panneau d'accueil, éditable admin)
+  statsVitrine:[
+    {ex:'BEPC',      taux:94, series:[], mentions:{ab:40,b:22,tb:9,exc:2}},
+    {ex:'Probatoire',taux:92, series:[{nom:'A',taux:90},{nom:'C',taux:94},{nom:'D',taux:91}], mentions:{ab:34,b:18,tb:7,exc:1}},
+    {ex:'BAC',       taux:91, series:[{nom:'A',taux:89},{nom:'C',taux:93},{nom:'D',taux:90}], mentions:{ab:48,b:27,tb:11,exc:3}},
+  ],
   examResults:[
     {annee:'2022–2023',niveaux:[{cls:'3ème',taux:85,candidats:42,admis:36},{cls:'Tle A',taux:78,candidats:28,admis:22},{cls:'Tle C',taux:90,candidats:20,admis:18},{cls:'Tle D',taux:82,candidats:15,admis:13}]},
     {annee:'2021–2022',niveaux:[{cls:'3ème',taux:80,candidats:38,admis:31},{cls:'Tle A',taux:75,candidats:24,admis:18},{cls:'Tle C',taux:88,candidats:18,admis:16},{cls:'Tle D',taux:79,candidats:12,admis:10}]},
@@ -923,6 +929,50 @@ function _migrateDB(){
   if(!DB.packs)DB.packs=[];
   if(!DB.promoCodes)DB.promoCodes=[];
   if(!DB.partenaires)DB.partenaires=[];
+
+  /* ═════════════════════════ PROGRAMME PARTENARIAT v1 ═════════════════════════
+     9 catégories de partenaires + commissions + paliers Bronze/Argent/Or/Diamant
+     Validé par Jacques (mai 2026) : 10% commission base, validation admin manuelle,
+     paliers calculés sur MIX (ouvrages + abos e-learning + autres), versements
+     mis en attente jusqu'à intégration CamPay/Notch Pay (S5).
+  ═══════════════════════════════════════════════════════════════════════════════ */
+  if(!DB.partners)DB.partners=[];                       // partenaires actifs/suspendus
+  if(!DB.commissions)DB.commissions=[];                  // commissions générées (pending/paid)
+  if(!DB.partnerApplications)DB.partnerApplications=[];  // candidatures en attente de validation
+  if(!DB.partnerLevels){
+    DB.partnerLevels={
+      bronze:  { min:0,   commission:0.05, label:'Bronze',  badge:'🥉', bonusFixe:0,     color:'#CD7F32' },
+      argent:  { min:20,  commission:0.08, label:'Argent',  badge:'🥈', bonusFixe:0,     color:'#C0C0C0' },
+      or:      { min:50,  commission:0.10, label:'Or',      badge:'🥇', bonusFixe:10000, color:'#FFD700' },
+      diamant: { min:100, commission:0.12, label:'Diamant', badge:'💎', bonusFixe:50000, color:'#B9F2FF' }
+    };
+  }
+  if(!DB.partnerTypes){
+    DB.partnerTypes={
+      enseignant:   { label:'Enseignant',                 emoji:'👨🏽‍🏫', priority:1, commission:'percent', desc:'Commission sur chaque ouvrage recommandé · Bonus parrainage · Formations gratuites' },
+      createur:     { label:'Créateur / influenceur',     emoji:'💻',  priority:2, commission:'percent', desc:'Code promo personnel · Commissions sur ventes · Accès anticipé aux nouveautés' },
+      chef_etab:    { label:"Chef d'établissement",       emoji:'🏫',  priority:3, commission:'fixed_class', desc:'Label « Centre d\'Excellence VÉRITAS » · Ressources gratuites · Formation personnel' },
+      inspecteur:   { label:'Inspecteur pédagogique',     emoji:'🎓',  priority:4, commission:'fixed_event', desc:'Comités de validation · Animation de formations rémunérées · Co-rédaction de manuels' },
+      parent:       { label:"Parent d'élève",             emoji:'👨‍👩‍👧',  priority:5, commission:'loyalty',     desc:'Réductions familles · Suivi performance enfant · Club Parents VÉRITAS' },
+      eleve_leader: { label:'Élève leader / délégué',     emoji:'🎯',  priority:6, commission:'gamification',desc:'Ambassadeur VÉRITAS Junior · Bourses · Cadeaux · Concours' },
+      librairie:    { label:'Librairie / point de vente', emoji:'🏢',  priority:7, commission:'wholesale',   desc:'Marges attractives · Supports publicitaires · Accompagnement marketing' },
+      universite:   { label:'Université / école',         emoji:'🏛️',  priority:8, commission:'institutional', desc:'Recherche pédagogique · Formation futurs enseignants · Publications' },
+      sponsor:      { label:'Entreprise / sponsor',       emoji:'🌍',  priority:9, commission:'donation',    desc:'Visibilité sur la plateforme · Actions RSE · Mention dans nos publications' }
+    };
+  }
+  if(!DB.partnerSettings){
+    DB.partnerSettings={
+      payoutsEnabled:false,  // ⚠️ Activer après intégration CamPay ou Notch Pay
+      payoutsBlockedReason:'En attente d\'intégration CamPay / Notch Pay (S5)',
+      minPayout:5000,        // FCFA minimum pour demander un versement
+      payoutCurrency:'XAF'
+    };
+  }
+  // ─── S4 KYC + Contrats institutionnels ───
+  if(!DB.partnerKYC) DB.partnerKYC={};         // {partnerId: {documents:[], status, reviewedAt, reviewedBy, rejectionReason}}
+  if(!DB.partnerContracts) DB.partnerContracts={}; // {partnerId: {type, version, sentAt, signedAt, signature, hash, status}}
+  /* ═══════════════════════ FIN PROGRAMME PARTENARIAT v1 ═══════════════════════ */
+
   if(!DB.tickerItems)DB.tickerItems=[];
   if(!DB.calendrier)DB.calendrier=[];
   if(!DB.extraits)DB.extraits=[];
@@ -963,6 +1013,7 @@ function _migrateDB(){
   if(!DB.forumPosts)DB.forumPosts=[];
   if(!DB.photos)DB.photos=defaultDB().photos||[];
   if(!DB.examResults)DB.examResults=defaultDB().examResults||[];
+  if(!DB.statsVitrine)DB.statsVitrine=defaultDB().statsVitrine||[];
   if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts||[];
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
   // E-learning
@@ -2507,6 +2558,15 @@ function confirmVisitorOrder(bid){
     msg:document.getElementById('voMsg')?.value||'',
     promo:promoUsed,prixOriginal:b.prix,
     date:today(),statut:'En attente',prix:finalPrix});
+  // ── PROGRAMME PARTENARIAT v1 : tracking commission si code parrainage utilisé ──
+  if(promoCode && typeof applyPartnerCode==='function'){
+    try {
+      applyPartnerCode(promoCode, {
+        refType:'book', refId:bid, refLabel:b.titre,
+        saleAmount: finalPrix, qty:1
+      });
+    } catch(e){ /* fail silent — la vente reste enregistrée même si commission KO */ }
+  }
   save();
   const mov=document.querySelector('.mov');if(mov)mov.remove();
   // v1.0 : ouvrir le modal de paiement unifié
@@ -3769,6 +3829,26 @@ function vShowSec(sec,btn){
   if(btn)btn.classList.add("on");
   const c=$("vContent");
   if(!c){if(typeof window._pendingVShowSec!=="undefined")return;window._pendingVShowSec={sec:sec,btn:btn};setTimeout(function(){delete window._pendingVShowSec;vShowSec(sec,btn);},200);return;}
+  // ─── PROGRAMME PARTENARIAT v1 — routes visiteur (avant les autres sections) ───
+  if(sec==='partenariat' && typeof pgPartnerships==='function'){
+    c.innerHTML = pgPartnerships(); return;
+  }
+  if(typeof sec==='string' && sec.indexOf('partenariat-')===0 && typeof pgPartnerProgram==='function'){
+    var _ptype = sec.substring('partenariat-'.length);
+    c.innerHTML = pgPartnerProgram(_ptype); return;
+  }
+  if(sec==='mes-partenariats' && typeof pgPartnerPortal==='function'){
+    c.innerHTML = pgPartnerPortal(); return;
+  }
+  if(sec==='verifier-certificat' && typeof pgCertificateVerify==='function'){
+    c.innerHTML = pgCertificateVerify(); return;
+  }
+  if(sec==='leaderboard-junior' && typeof pgLeaderboardJunior==='function'){
+    c.innerHTML = pgLeaderboardJunior(); return;
+  }
+  if(sec==='nos-partenaires' && typeof pgInstitutionalShowcase==='function'){
+    c.innerHTML = pgInstitutionalShowcase(); return;
+  }
   if(sec==="presentation"){
     const pi=DB.publicInfo||{};
     var _iv=(DB&&DB.introVideo)||{};
@@ -3855,18 +3935,12 @@ function vShowSec(sec,btn){
         <div style="font-size:13px;line-height:1.9;white-space:pre-line;color:var(--ink2)">${_esc(pi.description||"")}</div>
       </div>
       <div>
-        <div class="vcard mb16">
+        <div class="vcard">
           <div class="ct">📍 Informations pratiques</div>
           ${[['🕐 Horaires',pi.horaires||'—'],['📞 Téléphone',pi.contact||DB.school?.tel||'—'],['✉️ Email',pi.email||DB.school?.email||'—'],['📍 Adresse',pi.adresse||DB.school?.ville||'—'],['📌 Boîte Postale',pi.bp||DB.school?.bp||'—']].map(([l,v])=>`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)"><span class="s mut">${_esc(l)}</span><span class="s semi">${_esc(v)}</span></div>`).join("")}
         </div>
-        <div class="vcard">
-          <div class="ct">📊 En chiffres</div>
-          <div class="g2" style="gap:10px">
-            ${[["🎓",DB.students.length,"Élèves inscrits"],["👨‍🏫",DB.teachers.length,"Enseignants"],["📚",DB.books.length,"Manuels disponibles"],["🏆","85%+","Taux de réussite"]].map(([e,n,l])=>`<div style="text-align:center;padding:14px;background:var(--bg2);border-radius:var(--r2)"><div style="font-size:24px">${e}</div><div style="font-family:'Fira Code',monospace;font-size:20px;font-weight:700;color:var(--bl);margin:4px 0">${n}</div><div style="font-size:13px;color:var(--ink4)">${l}</div></div>`).join("")}
-          </div>
-        </div>
       </div>
-    </div>
+    </div><!-- v1.2.2 : panneau « En chiffres » retiré (doublon des stats hero/section dédiée) -->
     ${(DB.galleryImages||[]).length>0?`<div class="vcard mt20">
       <div class="ct">📸 Notre centre en images</div>
       <div class="gallery-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
@@ -3891,16 +3965,8 @@ function vShowSec(sec,btn){
       </div>
     </div>`:''}
     </div>
-    <!-- HISTOIRE & CHRONOLOGIE inline dans accueil -->
-    <div class="vcard mt20">
-      <div class="ct">📖 Notre Histoire</div>
-      <div style="font-size:13px;line-height:2;color:var(--ink3);white-space:pre-line;margin-bottom:14px">${DB.publicInfo?.histoire||'Le Centre VÉRITAS a été fondé en 2023. Notre mission : offrir une éducation de qualité à tous les élèves du Cameroun.'}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
-        ${[['2023','Fondation','Ouverture avec 15 élèves et 3 enseignants'],['2024','Croissance','Nouveaux locaux, 4 enseignants supplémentaires'],['2024','Numérique','Lancement e-learning et boutique en ligne'],['2025','Excellence',''+DB.students.length+'+ élèves · taux réussite > 85%']].map(([an,t,d])=>`<div style="border-left:3px solid var(--gold);padding:8px 12px;background:var(--gp);border-radius:0 var(--r) var(--r) 0"><div style="font-family:Georgia,serif;font-size:16px;color:var(--gold2);font-weight:700">${an}</div><div class="semi xs2 mt4 mb2">${t}</div><div style="font-size:11px;color:var(--ink4)">${d}</div></div>`).join('')}
-      </div>
-    </div>
-    <!-- v1.2.2 : doublon « Résultats aux Examens Nationaux » retiré
-         (la section détaillée complète existe plus bas, toutes années). -->`;
+    <!-- v1.2.2 : « Notre Histoire » inline retiré (doublon — section dédiée plus bas).
+         Idem doublon « Résultats aux Examens Nationaux » (section détaillée complète plus bas). -->`;
     setTimeout(_vRevealInit,100);
     setTimeout(function(){_heroActuLoad(_heroCurCat||'education');},600);
     // Vérifier autoplay 2s après le rendu (fallback bouton ▶ si bloqué)
@@ -8042,6 +8108,7 @@ function commanderAbonnement(planId){
       .map(function(cl){return '<option'+(cl===(SES&&SES.cls)?' selected':'')+'>'+_esc(cl)+'</option>';}).join('');
   })()+'</select></div>'+
   '<div class="fg"><span class="fl">Email (optionnel)</span><input class="fi" id="elEmail" placeholder="votre@email.com"></div>'+
+  '<div class="fg full"><span class="fl">🤝 Code parrainage (facultatif)</span><input class="fi" id="elPromo" placeholder="Ex. JACQUES10 — code d\'un partenaire VÉRITAS" style="text-transform:uppercase"></div>'+
   '</div>'+
   '<div class="ib ibt mb13"><span>💳</span><span>Après validation, vous serez redirigé(e) vers notre formulaire de paiement sécurisé.</span></div>',
   '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerAbonnement(\''+planId+'\')">✓ Valider et payer</button>',true);
@@ -8064,6 +8131,18 @@ function validerAbonnement(planId){
     payRef: '' // sera renseigné lors du paiement
   };
   DB.elearning.abonnements.push(newAbo);
+  // ── PROGRAMME PARTENARIAT v1 : tracking commission si code parrainage utilisé ──
+  var elPromoCode = (document.getElementById('elPromo')?.value||'').trim().toUpperCase();
+  if(elPromoCode && typeof applyPartnerCode==='function'){
+    try {
+      applyPartnerCode(elPromoCode, {
+        refType:'elearning', refId:planId,
+        refLabel: plan ? plan.nom : ('Abonnement '+planId),
+        saleAmount: plan ? (plan.prix||0) : 0, qty:1
+      });
+      newAbo.partnerCode = elPromoCode; // trace dans l'abonnement
+    } catch(e){ /* fail silent */ }
+  }
   // Notification admin
   autoNotify(
     '🔔 Nouvelle souscription E-Learning',
@@ -8615,6 +8694,7 @@ const ANAV=[
     {k:"send",i:"◎",l:"Centre WhatsApp"},
     {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
     {k:"parrainage_admin",i:"🎁",l:"Programme parrainage"},
+    {k:"partenaires_admin",i:"🤝",l:"Programme Partenariat"},
     {k:"forum_admin",i:"💬",l:"Modération Forum"},
     {k:"marketplace_admin",i:"🛒",l:"Marketplace auteurs"},
     {k:"cms",i:"🌐",l:"Portail visiteur"},
@@ -8677,6 +8757,7 @@ const SANAV=[
     {k:"send",i:"◎",l:"Centre WhatsApp"},
     {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
     {k:"parrainage_admin",i:"🎁",l:"Programme parrainage"},
+    {k:"partenaires_admin",i:"🤝",l:"Programme Partenariat"},
     {k:"forum_admin",i:"💬",l:"Modération Forum"},
     {k:"marketplace_admin",i:"🛒",l:"Marketplace auteurs"},
     {k:"cms",i:"🌐",l:"Portail visiteur"},
@@ -8821,6 +8902,22 @@ function render(p){
     partenaires_splits:pgPartenairesSplits,
     marketplace_teacher:pgMarketplaceEnseignant,parrainage_teacher:pgParrainageEns,
     ambassa:pgAmbassa,
+    // ── PROGRAMME PARTENARIAT v1 ──
+    partenariat:pgPartnerships,
+    'partenariat-enseignant':function(){return pgPartnerProgram('enseignant');},
+    'partenariat-createur':function(){return pgPartnerProgram('createur');},
+    'partenariat-chef_etab':function(){return pgPartnerProgram('chef_etab');},
+    'partenariat-inspecteur':function(){return pgPartnerProgram('inspecteur');},
+    'partenariat-parent':function(){return pgPartnerProgram('parent');},
+    'partenariat-eleve_leader':function(){return pgPartnerProgram('eleve_leader');},
+    'partenariat-librairie':function(){return pgPartnerProgram('librairie');},
+    'partenariat-universite':function(){return pgPartnerProgram('universite');},
+    'partenariat-sponsor':function(){return pgPartnerProgram('sponsor');},
+    partenaires_admin:pgPartnersAdmin,
+    mes_partenariats:pgPartnerPortal,
+    'verifier-certificat':pgCertificateVerify,
+    'leaderboard-junior':pgLeaderboardJunior,
+    'nos-partenaires':pgInstitutionalShowcase,
     // Super Admin
     superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,sacontrol:pgSAControl,
     // Guide d'utilisation (tous rôles)
@@ -12727,6 +12824,82 @@ function mManageTicker(){
 // Autoplay : muet au démarrage (imposé par les navigateurs), bouton 🔊 pour activer le son.
 // v1.2.1 — Widget « Palmarès de la semaine » : remplit le panneau hero si pas de vidéo.
 // Émulation : manuel star, mieux noté, battle hebdo, rejoindre le classement.
+// v1.2.2 : panneau stats VITRINE groupé PAR EXAMEN (éditable via DB.statsVitrine).
+// Chaque examen = une carte navy : taux principal (compteur or) + séries + mentions.
+window._statsVitrineHtml = function(){
+  var list=(typeof DB!=='undefined'&&DB.statsVitrine&&DB.statsVitrine.length)?DB.statsVitrine:[];
+  if(!list.length) return '';
+  var accents=['#3C8DFF','#FFC93C','#7C3AED','#059669','#F59E0B','#0D9488'];
+  var mLabels={ab:'Assez Bien',b:'Bien',tb:'Très Bien',exc:'Excellent'};
+  var cards=list.map(function(s,i){
+    var col=accents[i%accents.length];
+    var series=(s.series||[]).map(function(se){
+      return '<div style="flex:1;min-width:60px;text-align:center;background:rgba(255,255,255,.06);border-radius:10px;padding:8px 6px">'
+        +'<div style="font-family:Montserrat,sans-serif;font-weight:900;font-size:18px;color:#FFC93C">'+(se.taux||0)+'%</div>'
+        +'<div style="font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.5px">Série '+_esc(se.nom||'')+'</div></div>';
+    }).join('');
+    var m=s.mentions||{};
+    var mentions=['ab','b','tb','exc'].filter(function(k){return m[k]!=null;}).map(function(k){
+      return '<div style="flex:1;min-width:54px;text-align:center"><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:16px;color:#fff">'+(m[k]||0)+'</div>'
+        +'<div style="font-size:9.5px;color:rgba(255,255,255,.65);letter-spacing:.3px">'+mLabels[k]+'</div></div>';
+    }).join('');
+    return '<div class="vgz-stat" style="text-align:left;border-top:3px solid '+col+';padding:18px 18px 16px">'
+      +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">'
+        +'<div style="font-family:Montserrat,sans-serif;font-weight:900;font-size:15px;color:#fff;letter-spacing:.5px;text-transform:uppercase">'+_esc(s.ex||'')+'</div>'
+        +'<div class="vgz-stat-num" data-count="'+(s.taux||0)+'" data-suffix="%" style="font-size:30px">0</div>'
+      +'</div>'
+      +'<div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-top:-4px">Taux de réussite</div>'
+      +(series?'<div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">'+series+'</div>':'')
+      +(mentions?'<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)"><div style="font-size:10px;color:#FFC93C;font-weight:700;letter-spacing:.5px;margin-bottom:6px" data-keep-emoji="1"><span role="img" aria-label="médaille">🏅</span> MENTIONS</div><div style="display:flex;gap:4px">'+mentions+'</div></div>':'')
+    +'</div>';
+  }).join('');
+  var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:10px"><button class="btn bo sm" onclick="mEditStatsVitrine()">✏️ Modifier les résultats</button></div>':'';
+  return '<div style="text-align:center;margin:6px 0 10px"><div class="vgz-section-sub" style="margin:0">🏆 Nos résultats aux examens officiels</div></div>'
+    +'<div class="vgz-stats v-reveal" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">'+cards+'</div>'+editBtn;
+};
+
+// v1.2.2 : éditeur admin des stats vitrine (taux, séries, mentions par examen)
+window.mEditStatsVitrine = function(){
+  if(typeof iA!=='function'||!iA()){ if(typeof toast==='function')toast('Réservé à l\'administration','warn'); return; }
+  if(!DB.statsVitrine)DB.statsVitrine=(typeof defaultDB==='function'?defaultDB().statsVitrine:[])||[];
+  var body=DB.statsVitrine.map(function(s,i){
+    var ser=(s.series||[]).map(function(se,j){
+      return '<div class="fl2 g6" style="margin:4px 0"><input class="fi" style="width:70px" value="'+_esc(se.nom||'')+'" onchange="_svSet('+i+',\'serieNom\','+j+',this.value)" placeholder="Série">'
+        +'<input class="fi" type="number" min="0" max="100" style="width:80px" value="'+(se.taux||0)+'" onchange="_svSet('+i+',\'serieTaux\','+j+',this.value)" placeholder="%">'
+        +'<button class="btn bo xs" onclick="_svDelSerie('+i+','+j+')">✕</button></div>';
+    }).join('');
+    var m=s.mentions||{};
+    return '<div style="background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:12px;border:var(--br)">'
+      +'<div class="fl2 g6 fic"><input class="fi" style="font-weight:800;flex:1" value="'+_esc(s.ex||'')+'" onchange="_svSet('+i+',\'ex\',null,this.value)" placeholder="Nom de l\'examen">'
+        +'<input class="fi" type="number" min="0" max="100" style="width:90px" value="'+(s.taux||0)+'" onchange="_svSet('+i+',\'taux\',null,this.value)" placeholder="Taux %">'
+        +'<span class="semi">%</span>'
+        +'<button class="btn bo xs" onclick="_svDelExam('+i+')" title="Supprimer">🗑️</button></div>'
+      +'<div style="font-size:11px;color:var(--ink4);margin:8px 0 2px">Séries (optionnel)</div>'+ser
+      +'<button class="btn bo xs" onclick="_svAddSerie('+i+')" style="margin-top:4px">+ Série</button>'
+      +'<div style="font-size:11px;color:var(--ink4);margin:10px 0 4px">🏅 Mentions (nombre d\'élèves)</div>'
+      +'<div class="fl2 g6" style="flex-wrap:wrap">'
+        +['ab','b','tb','exc'].map(function(k){var lab={ab:'AB',b:'B',tb:'TB',exc:'Exc'}[k];return '<label style="font-size:11px">'+lab+' <input class="fi" type="number" min="0" style="width:64px" value="'+(m[k]||0)+'" onchange="_svSet('+i+',\'ment\',\''+k+'\',this.value)"></label>';}).join('')
+      +'</div></div>';
+  }).join('');
+  M('📊 Résultats aux examens','Édition du panneau d\'accueil',
+    '<div class="ib ibi mb12"><span>💡</span><span>Ces chiffres alimentent le panneau « Nos résultats » sur la page d\'accueil. Laissez les séries vides pour le BEPC.</span></div>'
+    +body+'<button class="btn bo sm" onclick="_svAddExam()">+ Ajouter un examen</button>',
+    '<button class="btn bi" onclick="cm();re&&re()">✓ Terminé</button>', true);
+};
+window._svSet=function(i,field,key,val){
+  var s=DB.statsVitrine[i]; if(!s)return;
+  if(field==='ex')s.ex=val;
+  else if(field==='taux')s.taux=Math.max(0,Math.min(100,parseInt(val)||0));
+  else if(field==='serieNom')s.series[key].nom=val;
+  else if(field==='serieTaux')s.series[key].taux=Math.max(0,Math.min(100,parseInt(val)||0));
+  else if(field==='ment'){s.mentions=s.mentions||{};s.mentions[key]=Math.max(0,parseInt(val)||0);}
+  save();
+};
+window._svAddSerie=function(i){DB.statsVitrine[i].series=DB.statsVitrine[i].series||[];DB.statsVitrine[i].series.push({nom:'',taux:0});save();mEditStatsVitrine();};
+window._svDelSerie=function(i,j){DB.statsVitrine[i].series.splice(j,1);save();mEditStatsVitrine();};
+window._svAddExam=function(){DB.statsVitrine.push({ex:'Nouvel examen',taux:0,series:[],mentions:{ab:0,b:0,tb:0,exc:0}});save();mEditStatsVitrine();};
+window._svDelExam=function(i){if(!confirm('Supprimer cet examen ?'))return;DB.statsVitrine.splice(i,1);save();mEditStatsVitrine();};
+
 window._palmaresHtml = function(){
   var books=DB.books||[];
   var orders=(DB.visitorOrders||[]).concat(DB.bookPurchases||[]);
@@ -13117,6 +13290,41 @@ window._aiTier = function(){
     if(p.indexOf('plan1')>=0) return 'pro'; // ancien plan1 = pro
   }
   return 'free'; // visiteur inscrit sans abonnement
+};
+
+// v1.2.2 — RÉSOLVEUR D'ACCÈS PAR FONCTIONNALITÉ (interconnexion plans ↔ packs)
+// Centralise : qui a droit aux labos premium / classes virtuelles selon son plan.
+// Le quota IA Ambassa, lui, est géré par AI_QUOTAS + _aiTier (déjà branché).
+//   features : 'labos' (expériences premium), 'classes' (classes virtuelles live)
+window.PLAN_FEATURES = {
+  // tier -> { labos:bool, classes:bool }  (anon/free = découverte limitée)
+  anon:    { labos:false, classes:false },
+  free:    { labos:false, classes:false },
+  starter: { labos:true,  classes:false },  // plan2 INTERMÉDIAIRE
+  pro:     { labos:true,  classes:true  },  // plan1 EXAMEN / plan3 ENSEIGNANT
+  elite:   { labos:true,  classes:true  },  // plan4 FAMILLE/ÉCOLE (tout inclus)
+  teach:   { labos:true,  classes:true  },
+  admin:   { labos:true,  classes:true  }
+};
+window._planAccess = function(feature){
+  var tier = (typeof _aiTier==='function') ? _aiTier() : 'anon';
+  var f = PLAN_FEATURES[tier] || PLAN_FEATURES.anon;
+  return !!f[feature];
+};
+// Message + redirection abonnement si accès refusé. Retourne true si accès OK.
+window._requirePlan = function(feature, labelFeature){
+  if(_planAccess(feature)) return true;
+  if(typeof iA==='function' && iA()) return true;
+  var msg = (labelFeature||'Cette fonctionnalité')+' est réservée aux abonnés. '
+    + 'Choisis un plan pour y accéder en illimité.';
+  if(typeof M==='function'){
+    M('🔒 '+(labelFeature||'Accès premium'),'Réservé aux abonnés VÉRITAS',
+      '<div style="padding:14px;text-align:center;line-height:1.6">'+_esc(msg)
+      +'<div style="margin-top:10px;font-size:12px;color:#6B7A99">Plans dès <b>3 000 FCFA / an</b>.</div></div>',
+      '<button class="btn bo" onclick="cm()">Plus tard</button>'
+      +'<button class="btn bi" onclick="cm();(typeof vShowSec===\'function\'?vShowSec(\'elearning\'):0);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)">Voir les plans →</button>');
+  } else if(typeof toast==='function'){ toast(msg,'warn'); }
+  return false;
 };
 
 // Période de comptage selon tier (lifetime, semaine, jour)
@@ -13568,39 +13776,50 @@ var QUIZ_DB={
 // CALENDRIER SCOLAIRE CAMEROUNAIS 2024-2025
 // ═══════════════════════════════════════════════════════════
 var CALENDRIER_SCOLAIRE={
-  annee:'2024-2025',
+  annee:'2025-2026',
+  // Source : Décision MINESEC fixant le calendrier des Examens et Concours session 2026
+  // (mise à jour v1.2.2). Les épreuves écrites officielles font foi ci-dessous.
   trimestres:[
-    {num:1,debut:'02 Sept 2024',fin:'20 Déc 2024',
+    {num:1,debut:'01 Sept 2025',fin:'19 Déc 2025',
      seqs:[
-       {num:1,debut:'02 Sept',fin:'25 Oct',examens:'Épreuves Séq. 1 : 21-25 Oct 2024'},
-       {num:2,debut:'28 Oct',fin:'20 Déc',examens:'Épreuves Séq. 2 : 16-20 Déc 2024'},
+       {num:1,debut:'01 Sept',fin:'24 Oct',examens:'Épreuves Séq. 1 : Oct 2025'},
+       {num:2,debut:'27 Oct',fin:'19 Déc',examens:'Épreuves Séq. 2 : Déc 2025'},
      ]},
-    {num:2,debut:'06 Jan 2025',fin:'04 Avr 2025',
+    {num:2,debut:'05 Jan 2026',fin:'03 Avr 2026',
      seqs:[
-       {num:3,debut:'06 Jan',fin:'28 Fév',examens:'Épreuves Séq. 3 : 24-28 Fév 2025'},
-       {num:4,debut:'03 Mar',fin:'04 Avr',examens:'Épreuves Séq. 4 : 31 Mar-04 Avr 2025'},
+       {num:3,debut:'05 Jan',fin:'27 Fév',examens:'Épreuves Séq. 3 : Fév 2026'},
+       {num:4,debut:'02 Mar',fin:'03 Avr',examens:'Épreuves Séq. 4 : Avr 2026'},
      ]},
-    {num:3,debut:'22 Avr 2025',fin:'20 Juin 2025',
+    {num:3,debut:'20 Avr 2026',fin:'19 Juin 2026',
      seqs:[
-       {num:5,debut:'22 Avr',fin:'23 Mai',examens:'Épreuves Séq. 5 : 19-23 Mai 2025'},
-       {num:6,debut:'26 Mai',fin:'20 Juin',examens:'Épreuves Séq. 6 : 16-20 Juin 2025'},
+       {num:5,debut:'20 Avr',fin:'22 Mai',examens:'Épreuves Séq. 5 : Mai 2026'},
+       {num:6,debut:'25 Mai',fin:'19 Juin',examens:'Épreuves Séq. 6 : Juin 2026'},
      ]},
   ],
+  // ── Dates OFFICIELLES session 2026 (Décision MINESEC, Yaoundé, 25 sept. 2025) ──
   examens_nationaux:[
-    {nom:'BEPC session normale',date:'Juin 2025 (date exacte MINESEC)',niveaux:'3ème',matières:'Français, Maths, Sciences, H-G, Anglais'},
-    {nom:'Probatoire série A',date:'Mai 2025',niveaux:'1ère A',matières:'Français, Anglais, Philosophie, H-G'},
-    {nom:'Probatoire série C',date:'Mai 2025',niveaux:'1ère C',matières:'Maths, Physique-Chimie, Français, SVT'},
-    {nom:'Probatoire série D',date:'Mai 2025',niveaux:'1ère D',matières:'Maths, Physique-Chimie, Français, SVT'},
-    {nom:'BAC série A',date:'Juin 2025',niveaux:'Tle A',matières:'Français, Philosophie, H-G, Anglais, Littérature'},
-    {nom:'BAC série C',date:'Juin 2025',niveaux:'Tle C',matières:'Maths, Physique, Chimie, Français, Anglais'},
-    {nom:'BAC série D',date:'Juin 2025',niveaux:'Tle D',matières:'Maths, SVT, Physique-Chimie, Français, Anglais'},
-    {nom:'CEP (Certificat d\'Études Primaires)',date:'Mai 2025',niveaux:'CM2',matières:'Français, Calcul, Histoire-Géo'},
+    {nom:'Concours d\'entrée en 6ème & 1ère année',date:'Écrit : Mer. 13 Mai 2026 · Résultats : Mar. 19 Mai 2026',niveaux:'CM2 → 6ème',matières:'Concours d\'entrée (Secondaire général, technique et agricole)'},
+    {nom:'BEPC & BEPC Bilingue',date:'Écrit : Lun. 01 au Jeu. 04 Juin 2026 · Orales bilingues : Ven. 05 Juin · Résultats : Ven. 10 Juil. 2026',niveaux:'3ème',matières:'Français, Maths, Sciences, Histoire-Géo, Anglais (+ option bilingue)'},
+    {nom:'CAP Industriels',date:'Écrit : Lun. 01 au Ven. 05 Juin 2026 · Résultats : Ven. 10 Juil. 2026',niveaux:'CAP',matières:'Enseignement général + épreuves pratiques (spécialités industrielles)'},
+    {nom:'CAP STT',date:'Écrit & pratiques : Lun. 01 au Sam. 06 Juin 2026 · Résultats : Ven. 10 Juil. 2026',niveaux:'CAP',matières:'Sciences et Technologies du Tertiaire'},
+    {nom:'Probatoires A, ABI, C, D, E, SH & TI',date:'Écrit : Lun. 08 au Ven. 12 Juin 2026 · Pratiques TI : 05 Juin · Pratiques E : 16-19 Juin',niveaux:'1ère',matières:'Toutes séries (général) — épreuves écrites, facultatives et pratiques'},
+    {nom:'Baccalauréats A, ABI, C, D, E, SH & TI',date:'Écrit : Lun. 25-26 Mai puis Jeu. 28 au Sam. 30 Mai 2026 · Pratiques E/TI : 21-23 Mai · Délib. : 08-11 Juil. 2026',niveaux:'Tle',matières:'Toutes séries (général) — écrites, facultatives (29 Mai) et pratiques'},
+    {nom:'Bac Technique AF, F & Brevet de Technicien',date:'Écrit : 21-22 Mai, 25-26 Mai puis 28 Mai 2026 · Matière d\'œuvre : 06-13 Mai',niveaux:'Tle technique',matières:'Enseignement technique industriel'},
+    {nom:'Probatoire AF, F & Probatoire BT',date:'Écrit : Ven. 29-30 Mai puis Lun. 01 au Mer. 03 Juin 2026',niveaux:'1ère technique',matières:'Enseignement technique industriel'},
+    {nom:'Bac & Brevet de Technicien / STT',date:'Écrit : 21-22 Mai, 25-26 Mai puis 28 Mai 2026 · Pratiques : 29 Mai-03 Juin',niveaux:'Tle STT',matières:'Sciences et Technologies du Tertiaire'},
+    {nom:'Probatoire & Probatoire BT / STT',date:'Écrit : Lun. 08 au Ven. 12 Juin 2026 · Pratiques : 15-20 Juin 2026',niveaux:'1ère STT',matières:'Sciences et Technologies du Tertiaire'},
+    {nom:'GCE Ordinary & Advanced Level',date:'Écrit : Mar. 02 au Jeu. 18 Juin 2026 · Pratiques : 05-26 Mai · Résultats : Ven. 31 Juil. 2026',niveaux:'O/A Level',matières:'GCE Board — toutes matières (Pre-Test QCM : 21-25 Avr.)'},
+    {nom:'TVEE (Technical & Vocational, Inter. & Advanced)',date:'Écrit : Mar. 02 au Sam. 20 Juin 2026 · Résultats : Ven. 31 Juil. 2026',niveaux:'TVEE',matières:'GCE Board — enseignement technique et professionnel'},
+    {nom:'Concours d\'entrée en 1ère année BEP / 2nde Technique',date:'Écrit : Mer. 05 Août 2026 · Résultats : Ven. 07 Août 2026',niveaux:'2nde technique',matières:'Sous-système francophone (sur concours)'},
   ],
   vacances:[
-    {label:'Toussaint',debut:'21 Oct',fin:'03 Nov 2024'},
-    {label:'Noël/Nouvel An',debut:'21 Déc 2024',fin:'05 Jan 2025'},
-    {label:'Pâques',debut:'07 Avr',fin:'21 Avr 2025'},
+    {label:'Toussaint',debut:'~25 Oct',fin:'02 Nov 2025'},
+    {label:'Noël/Nouvel An',debut:'20 Déc 2025',fin:'04 Jan 2026'},
+    {label:'Pâques',debut:'~04 Avr',fin:'19 Avr 2026'},
   ],
+  // EPS pratiques : période du Lun. 27 Avr. au Ven. 15 Mai 2026 (fixées par les DRES).
+  epsPratiques:'Épreuves pratiques d\'EPS : Lun. 27 Avr. au Ven. 15 Mai 2026 (calendrier régional)',
+  source:'Décision MINESEC/SEESEN — Calendrier des Examens et Concours, session 2026 (Yaoundé, 25 sept. 2025)',
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -21266,6 +21485,11 @@ function showLabosVirtuels(){
 function lancerLabo(id){
   var lv=LABO_DB.find(function(x){return x.id===id;});
   if(!lv)return;
+  // v1.2.2 : labo premium → accès selon le PLAN (pas seulement "connecté")
+  if(!lv.gratuit && typeof _planAccess==='function' && !_planAccess('labos')
+     && !(typeof iA==='function' && iA())){
+    if(typeof _requirePlan==='function'){ _requirePlan('labos','Les laboratoires virtuels premium'); return; }
+  }
   if(!lv.gratuit&&!SES){
     M("🔒 Contenu Premium","",
       "<div style='text-align:center;padding:20px'>"
@@ -24681,7 +24905,23 @@ function showMesEvaluations(){
   _vc(h);
 }
 
+// v1.2.2 : "X élèves composent" — présence simulée crédible (varie avec l'heure
+// + petite marche aléatoire), pour la mise en situation réelle. Sans backend.
+window._evalLiveBase = null;
+function _evalLiveCount(){
+  if(_evalLiveBase===null){
+    var h=new Date().getHours();
+    // plus d'activité 7h-21h, creux la nuit
+    var peak=(h>=7&&h<=21)?1:0.3;
+    _evalLiveBase=Math.round((8+Math.random()*30)*peak)+3;
+  } else {
+    _evalLiveBase += Math.round((Math.random()-0.45)*3); // marche aléatoire douce
+    if(_evalLiveBase<4)_evalLiveBase=4; if(_evalLiveBase>60)_evalLiveBase=60;
+  }
+  return _evalLiveBase;
+}
 function _passerEval(evalId,force){
+  _evalLiveBase=null; // réinitialiser la présence pour cette session d'éval
   _initEvals();
   var ev=DB.evaluations.find(function(e){return e.id===evalId;});
   if(!ev)return;
@@ -24701,11 +24941,17 @@ function _passerEval(evalId,force){
         save();
       }
       var pct=Math.round((score/ev.questions.length)*100);
+      var _tm=Math.floor(elapsed/60),_ts=elapsed%60;
+      var _tmps=String(_tm).padStart(2,'0')+":"+String(_ts).padStart(2,'0');
       _vc("<div class='vsec'><div class='vcard' style='text-align:center;padding:40px'>"
         +"<div style='font-size:56px;margin-bottom:14px'>"+(pct>=80?"🏆":pct>=60?"✅":"📚")+"</div>"
         +"<div style='font-family:Montserrat,sans-serif;font-size:24px;font-weight:800;color:#142554;margin-bottom:8px'>Évaluation terminée !</div>"
-        +"<div style='font-family:Georgia,serif;font-size:18px;color:"+(pct>=60?"#059669":"#DC2626")+";font-weight:700;margin-bottom:4px'>"+score+"/"+ev.questions.length+" ("+pct+"%)</div>"
-        +"<div style='font-size:13px;color:#6B7A99;margin-bottom:24px'>"+(pct>=80?"Excellent travail !":pct>=60?"Bon résultat, continuez !":"Révisez ce chapitre.")+"</div>"
+        +"<div style='font-family:Georgia,serif;font-size:18px;color:"+(pct>=60?"#059669":"#DC2626")+";font-weight:700;margin-bottom:10px'>"+score+"/"+ev.questions.length+" ("+pct+"%)</div>"
+        +"<div style='display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap'>"
+          +"<div style='background:#F0F4FF;border-radius:10px;padding:8px 14px'><div style='font-size:10px;color:#6B7A99;text-transform:uppercase;letter-spacing:.5px'>⏱️ Temps</div><div style='font-family:monospace;font-weight:800;color:#142554'>"+_tmps+"</div></div>"
+          +"<div style='background:#F0F4FF;border-radius:10px;padding:8px 14px'><div style='font-size:10px;color:#6B7A99;text-transform:uppercase;letter-spacing:.5px'>✅ Réussite</div><div style='font-weight:800;color:"+(pct>=60?"#059669":"#DC2626")+"'>"+pct+"%</div></div>"
+        +"</div>"
+        +"<div style='font-size:13px;color:#6B7A99;margin-bottom:24px'>"+(pct>=80?"Excellent travail ! Tu maîtrises ce chapitre.":pct>=60?"Bon résultat, continue sur ta lancée !":"Révise ce chapitre puis retente l'évaluation.")+"</div>"
         +"<button class='btn bi' onclick='showMesEvaluations()'>← Retour aux évaluations</button>"
         +"</div></div>");
       return;
@@ -24722,7 +24968,10 @@ function _passerEval(evalId,force){
           +"<div style='font-family:monospace;font-size:18px;font-weight:700;color:"+col+"'>"+String(mn).padStart(2,'0')+":"+String(sc).padStart(2,'0')+"</div>"
         +"</div>"
         +"<div style='background:rgba(255,255,255,.1);border-radius:20px;height:6px;margin-top:10px'><div style='background:"+col+";height:100%;width:"+pctT+"%;border-radius:20px;transition:width .5s'></div></div>"
-        +"<div style='font-size:11px;opacity:.5;margin-top:4px'>Question "+(qi+1)+"/"+ev.questions.length+"</div>"
+        +"<div class='fl2 fic fsb' style='margin-top:6px'>"
+          +"<div style='font-size:11px;opacity:.6'>Question "+(qi+1)+"/"+ev.questions.length+"</div>"
+          +"<div style='font-size:11px;font-weight:700;color:#86EFAC;display:flex;align-items:center;gap:5px'><span style='width:7px;height:7px;border-radius:50%;background:#10B981;display:inline-block;box-shadow:0 0 0 0 rgba(16,185,129,.7);animation:vgzPing 1.6s infinite'></span><span id='evalLiveCount'>"+_evalLiveCount()+"</span> élèves composent</div>"
+        +"</div>"
       +"</div>"
       +"<div class='vcard'>"
         +"<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:700;color:#142554;margin-bottom:20px;line-height:1.6'>"+q.q+"</div>"
@@ -24761,6 +25010,8 @@ function _passerEval(evalId,force){
       if(el){el.style.color=col2;el.textContent=String(mn2).padStart(2,'0')+":"+String(sc2).padStart(2,'0');}
       var bar=document.querySelector("[style*='transition:width']");
       if(bar)bar.style.width=Math.round((elapsed/totalSec)*100)+"%";
+      // rafraîchir la présence "élèves qui composent" toutes les 5 s
+      if(elapsed%5===0){ var lc=document.getElementById('evalLiveCount'); if(lc)lc.textContent=_evalLiveCount(); }
     }
   },1000);
   renderQ();
@@ -30766,6 +31017,28 @@ window._currentWeekKey = function(){
   return year+'-W'+String(week).padStart(2,'0');
 };
 
+// v1.2.2 : cycle MINESEC d'un élève (programmes & difficulté différents)
+//   I  = 6e-5e · II = 4e-3e · III = 2nde-1ère-Tle
+window._battleCycle = function(cls){
+  var c = String(cls||'').toLowerCase().replace(/\s/g,'');
+  if(/(^|[^0-9])6e|sixi|6[eè]me|^5e|cinqu|5[eè]me|form1|form2/.test(c)) {
+    if(/6|sixi|form1/.test(c)) return 'I';
+    if(/5|cinqu|form2/.test(c)) return 'I';
+  }
+  if(/4e|quatri|4[eè]me|3e|troisi|3[eè]me|form3|form4|bepc/.test(c)) return 'II';
+  if(/2nde|2de|seconde|1[eè]re|premiere|première|tle|terminale|form5|lower|upper|bac|probat/.test(c)) return 'III';
+  if(/^4|^3/.test(c)) return 'II';
+  if(/^2|^1|^t/.test(c)) return 'III';
+  return 'II'; // défaut prudent (collège supérieur)
+};
+window._battleCycleLabel = function(cy){
+  return ({I:'Cycle I · 6ᵉ–5ᵉ', II:'Cycle II · 4ᵉ–3ᵉ', III:'Cycle III · 2nde–Tle'})[cy] || ('Cycle '+cy);
+};
+// Clé de battle = semaine + cycle (un défi et un classement par cycle)
+window._battleKey = function(cls){
+  return _currentWeekKey() + '-C' + _battleCycle(cls || (typeof SES!=='undefined'&&SES?SES.cls:'') );
+};
+
 window._generateBattleQuestions = function(){
   // Tirer 10 QCM aléatoires depuis toutes les sources disponibles
   // FIX v1.2 : conversion format {opts:[], ans:N} → {a,b,c,ok} attendu par le moteur de battle
@@ -30818,8 +31091,9 @@ window.mBattles = function(){
     return;
   }
   DB.battles = DB.battles || {};
-  var wk = _currentWeekKey();
-  DB.battles[wk] = DB.battles[wk] || { participants: {}, questions: null };
+  var wk = _battleKey(ses.cls);               // v1.2.2 : clé par cycle
+  var _cy = _battleCycle(ses.cls);
+  DB.battles[wk] = DB.battles[wk] || { participants: {}, questions: null, cycle: _cy };
   var battle = DB.battles[wk];
   // Génère les questions si pas encore (ou si vide — FIX v1.2 : [] est truthy)
   if(!battle.questions || !battle.questions.length){
@@ -30836,8 +31110,9 @@ window.mBattles = function(){
 
   var body = '<div style="padding:8px">'
     +'<div style="background:linear-gradient(135deg,#FEF3C7,#FBBF24);color:#92400E;padding:14px;border-radius:12px;margin-bottom:14px;text-align:center">'
-      +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">Défi de la semaine</div>'
-      +'<div style="font-size:18px;font-weight:900;margin-top:4px">🏆 Semaine '+wk.split('-W')[1]+' · '+leaderboard.length+' participants</div>'
+      +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800">Défi de la semaine · '+_esc(_battleCycleLabel(_cy))+'</div>'
+      +'<div style="font-size:18px;font-weight:900;margin-top:4px">🏆 '+leaderboard.length+' participant'+(leaderboard.length>1?'s':'')+' de ton niveau</div>'
+      +'<div style="font-size:10.5px;margin-top:3px;opacity:.85">Tu affrontes uniquement les élèves de ton cycle (programmes équivalents)</div>'
     +'</div>'
     +(hasPlayed
       ? '<div style="background:#D1FAE5;border:1px solid #6EE7B7;padding:12px;border-radius:10px;margin-bottom:14px;text-align:center"><div style="font-weight:700;color:#065F46">✓ Vous avez déjà joué cette semaine</div><div style="font-size:13px;color:#047857;margin-top:4px">Votre score : '+battle.participants[ses.id].score+'/10 · Position : #'+myRank+'</div></div>'
@@ -30867,7 +31142,7 @@ window._lancerBattle = function(){
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
   if(!ses) return;
   DB.battles = DB.battles || {};
-  var wk = _currentWeekKey();
+  var wk = _battleKey(ses.cls);               // v1.2.2 : même clé par cycle
   var battle = DB.battles[wk];
   if(!battle || !battle.questions || !battle.questions.length){
     toast('Battle indisponible cette semaine','warn'); return;
@@ -31475,7 +31750,13 @@ window.VERITAS_BADGES = [
   // Spéciaux
   {id:'early_adopter',   ic:'🚀', t:'Pionnier',          d:'Inscrit avant juin 2026',                   cond:function(s,d){var v=(d.visitorAccounts||[]).find(function(v){return v.id===SES.id;});if(!v)return false;return new Date(v.dateInscription||0) < new Date('2026-06-01');}},
   {id:'genome_unlock',   ic:'🧬', t:'Genome révélé',     d:'Consulter votre VÉRITAS Genome',            cond:function(s,d){return d._genomeViewed===true;}},
-  {id:'wrapped_unlock',  ic:'🎁', t:'Wrapped 2026',      d:'Découvrir votre récap annuel',              cond:function(s,d){return d._wrappedViewed===true;}}
+  {id:'wrapped_unlock',  ic:'🎁', t:'Wrapped 2026',      d:'Découvrir votre récap annuel',              cond:function(s,d){return d._wrappedViewed===true;}},
+  // Ambassadeur Junior (S3) — débloqués via le programme partenariat élève_leader
+  {id:'junior_signup',   ic:'🎯', t:'Ambassadeur Junior',d:'Activer son profil Ambassadeur Junior',      cond:function(s,d){var ses=(typeof SES!=='undefined'&&SES)||{};return (d.partners||[]).some(function(p){return p.type==='eleve_leader'&&p.status==='active'&&(p.email===ses.email||p.tel===ses.tel||p.accountId===ses.id);});}},
+  {id:'first_filleul',   ic:'🤝', t:'Premier filleul',   d:'Générer sa 1ère commission via code parrainage', cond:function(s,d){var ses=(typeof SES!=='undefined'&&SES)||{};var p=(d.partners||[]).find(function(x){return x.type==='eleve_leader'&&x.status==='active'&&(x.email===ses.email||x.tel===ses.tel||x.accountId===ses.id);});if(!p)return false;return (d.commissions||[]).some(function(c){return c.partnerId===p.id&&c.type==='sale';});}},
+  {id:'recruteur_5',     ic:'💫', t:'Recruteur',         d:'5 ventes générées via votre code',          cond:function(s,d){var ses=(typeof SES!=='undefined'&&SES)||{};var p=(d.partners||[]).find(function(x){return x.type==='eleve_leader'&&x.status==='active'&&(x.email===ses.email||x.tel===ses.tel||x.accountId===ses.id);});if(!p)return false;var n=(d.commissions||[]).filter(function(c){return c.partnerId===p.id&&c.type==='sale'&&c.status!=='cancelled';}).reduce(function(s,c){return s+(c.qty||1);},0);return n>=5;}},
+  {id:'influence_locale',ic:'🌟', t:'Influence locale',  d:'20 ventes via votre code · Palier Argent',  cond:function(s,d){var ses=(typeof SES!=='undefined'&&SES)||{};var p=(d.partners||[]).find(function(x){return x.type==='eleve_leader'&&x.status==='active'&&(x.email===ses.email||x.tel===ses.tel||x.accountId===ses.id);});if(!p)return false;var n=(d.commissions||[]).filter(function(c){return c.partnerId===p.id&&c.type==='sale'&&c.status!=='cancelled';}).reduce(function(s,c){return s+(c.qty||1);},0);return n>=20;}},
+  {id:'legende_junior',  ic:'👑', t:'Légende Junior',    d:'100 ventes via votre code · Palier Diamant', cond:function(s,d){var ses=(typeof SES!=='undefined'&&SES)||{};var p=(d.partners||[]).find(function(x){return x.type==='eleve_leader'&&x.status==='active'&&(x.email===ses.email||x.tel===ses.tel||x.accountId===ses.id);});if(!p)return false;var n=(d.commissions||[]).filter(function(c){return c.partnerId===p.id&&c.type==='sale'&&c.status!=='cancelled';}).reduce(function(s,c){return s+(c.qty||1);},0);return n>=100;}}
 ];
 
 window._checkBadges = function(){
@@ -33108,6 +33389,18 @@ window._ambassaGenerate = async function(taskId){
       +(taskId==='eval'?'<button class="btn sm" style="background:#10B981;color:#fff;border:none;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSaveEval(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/'/g,"\\'")+'\')">💾 Enregistrer dans Évaluations</button>':'')
       +'</div></div>'
       + displayHtml
+      // v1.2.2 : zone de SOUMISSION élève (sauf QCM interactif qui a déjà sa correction)
+      + ((!hasQuiz && ['eval','diff','remed','fiche','doc'].indexOf(taskId)>=0)
+          ? ('<div style="margin-top:14px;border-top:1px dashed #6EE7B7;padding-top:12px">'
+            +'<div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:6px">✍️ À toi de jouer — soumets ta proposition</div>'
+            +'<textarea id="mvSubmitTxt" class="fi" style="min-height:120px;font-size:13px" placeholder="Rédige ici ta réponse / ta production, puis demande la correction d\'Ambassa…"></textarea>'
+            +'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">'
+            +'<button class="btn bi sm" id="mvSubmitBtn" onclick="_ambassaCorrigerProposition(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/\x27/g,"\\\x27")+'\',\''+taskId+'\')">✅ Corrige ma proposition</button>'
+            +'<span style="font-size:11px;color:#6B7280;align-self:center">Ambassa note selon les critères MINESEC et te conseille.</span>'
+            +'</div>'
+            +'<div id="mvSubmitResult" style="margin-top:10px"></div>'
+            +'</div>')
+          : '')
       +'</div>';
     // Persister dans l'historique (uniquement pour les inscrits)
     if(ses && ses.id){
@@ -33127,6 +33420,45 @@ window._ambassaGenerate = async function(taskId){
     _ge('mvResult').innerHTML = '<div style="background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;padding:12px;border-radius:10px">⚠️ Erreur IA. Réessayez ou simplifiez votre demande.<br><small>'+_esc(e.message||'')+'</small></div>';
   } finally {
     if(btn){ btn.disabled = false; btn.textContent = '⚡ Régénérer'; }
+  }
+};
+
+// v1.2.2 : l'élève soumet SA proposition → Ambassa la corrige (critères MINESEC)
+window._ambassaCorrigerProposition = async function(cls, mat, sujet, taskId){
+  var ta = _ge('mvSubmitTxt');
+  var prop = (ta && ta.value || '').trim();
+  if(prop.length < 15){ toast('Rédige d\'abord ta proposition (15 caractères min)','warn'); return; }
+  if(prop.length > 6000) prop = prop.substring(0,6000)+'…[tronqué]';
+  var out = _ge('mvSubmitResult');
+  var btn = _ge('mvSubmitBtn');
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Correction…'; }
+  if(out) out.innerHTML = '<div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:10px;padding:12px;text-align:center;font-size:12px;color:#3730A3">🎓 Ambassa corrige ta copie…</div>';
+  var prompt = 'Tu es correcteur officiel MINESEC. Un élève de '+cls+' en '+mat+' a rédigé une proposition '
+    + 'pour le sujet : "'+sujet+'".\n\nVoici SA copie :\n«'+prop+'»\n\n'
+    + 'Corrige-la avec bienveillance et exigence :\n'
+    + '1) ✅ POINTS FORTS — ce qui est réussi (précis).\n'
+    + '2) ⚠️ À AMÉLIORER — erreurs/manques, avec la correction attendue.\n'
+    + '3) 📊 NOTE — attribue une note chiffrée selon les critères MINESEC pertinents '
+    + '(grille 4 critères en français lycée, barème par question en sciences) avec le détail.\n'
+    + '4) 💡 CONSEIL — 1 à 2 conseils méthodologiques concrets pour progresser.\n'
+    + 'Ne réécris pas toute la copie à sa place : guide-le. Valorise l\'effort.';
+  try {
+    var resp = await callClaudeAPI(prompt, (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:''));
+    if(out) out.innerHTML = '<div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;padding:14px">'
+      +'<div style="font-size:11px;font-weight:800;color:#92400E;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🎓 Correction d\'Ambassa</div>'
+      +'<div class="ai-md" style="max-height:360px;overflow-y:auto">'+_aiMarkdown(resp)+'</div></div>';
+    if(typeof _addXP === 'function') _addXP('devoir');
+    // Trace dans l'historique (inscrits)
+    try{
+      var ses=(typeof SES!=='undefined'&&SES)?SES:null;
+      if(ses&&ses.id){ DB._ambassaHist=DB._ambassaHist||{}; DB._ambassaHist[ses.id]=DB._ambassaHist[ses.id]||[];
+        DB._ambassaHist[ses.id].push({id:gid(),task:'Correction de ma proposition',taskId:taskId+'_submit',cls:cls,mat:mat,sujet:sujet,prompt:prop.substring(0,1000),response:resp.substring(0,5000),date:Date.now()});
+        if(DB._ambassaHist[ses.id].length>50)DB._ambassaHist[ses.id]=DB._ambassaHist[ses.id].slice(-50); save(); }
+    }catch(e){}
+  } catch(e){
+    if(out) out.innerHTML = '<div style="background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;padding:10px;border-radius:8px;font-size:12px">⚠️ Erreur correction. Réessaie.</div>';
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = '✅ Corrige ma proposition'; }
   }
 };
 
@@ -34741,3 +35073,1895 @@ setTimeout(function(){initTickerFixed();},3000);
     if(img.parentNode) img.parentNode.replaceChild(span, img);
   }, true); // capture : nécessaire car 'error' ne bulle pas
 })();
+
+/* ════════════════════════════════════════════════════════════════════════════
+   PROGRAMME DE PARTENARIAT VÉRITAS v1.0 — module autonome
+   © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+
+   Architecture :
+     - pgPartnerships()         landing publique des 9 programmes
+     - pgPartnerProgram(type)   fiche détaillée d'un programme
+     - mPartnerSignup(type)     modale de candidature
+     - submitPartnerApplication candidature → DB.partnerApplications
+     - pgPartnersAdmin()        dashboard admin (validation + stats + commissions)
+     - mApprovePartner(id)      valider une candidature → bascule en active
+     - applyPartnerCode(...)    appelée à chaque vente avec code parrainage
+     - calculatePartnerLevel    recalcule Bronze/Argent/Or/Diamant (mix tous types)
+     - _genPartnerCode(name)    génère un code parrainage unique
+     - pgPartnerPortal()        espace privé d'un partenaire connecté
+═════════════════════════════════════════════════════════════════════════════ */
+
+// ── helpers internes ──────────────────────────────────────────────────────
+function _prtL(){ return (typeof DB!=='undefined' && DB.partnerLevels) ? DB.partnerLevels
+  : {bronze:{min:0,commission:0.05,label:'Bronze',badge:'🥉',bonusFixe:0,color:'#CD7F32'},
+     argent:{min:20,commission:0.08,label:'Argent',badge:'🥈',bonusFixe:0,color:'#C0C0C0'},
+     or:{min:50,commission:0.10,label:'Or',badge:'🥇',bonusFixe:10000,color:'#FFD700'},
+     diamant:{min:100,commission:0.12,label:'Diamant',badge:'💎',bonusFixe:50000,color:'#B9F2FF'}}; }
+function _prtT(){ return (typeof DB!=='undefined' && DB.partnerTypes) ? DB.partnerTypes : {}; }
+function _prtSafe(s){ return (typeof _esc==='function')?_esc(s):String(s==null?'':s); }
+function _prtFmt(n){ return (typeof fmt==='function')?fmt(n):(n+' FCFA'); }
+function _prtFmtN(n){ return (typeof fmtN==='function')?fmtN(n):String(n); }
+function _prtToast(m,t){ if(typeof toast==='function') toast(m,t||'ok'); }
+function _prtSave(){ if(typeof save==='function') save(); }
+function _prtRe(){ if(typeof re==='function') re(); }
+function _prtCm(){ if(typeof cm==='function') cm(); }
+
+// Routing intelligent : si on est en visiteur → vShowSec, sinon → goTo
+function _prtGo(target){
+  var visiteur = false;
+  try {
+    var vis = document.getElementById('VISITOR');
+    visiteur = vis && getComputedStyle(vis).display !== 'none';
+  } catch(e){}
+  if(visiteur && typeof vShowSec==='function'){
+    vShowSec(target, null);
+  } else if(typeof goTo==='function'){
+    goTo(target);
+  }
+}
+
+// Génère un code parrainage à partir du nom — unique dans DB.partners + DB.promoCodes
+function _genPartnerCode(name){
+  var base = String(name||'PARRAIN').toUpperCase().replace(/[^A-Z0-9]/g,'').substring(0,8) || 'PARRAIN';
+  var i = 10;
+  while(true){
+    var candidate = base + i;
+    var clash = (DB.partners||[]).some(function(p){return p.code===candidate;})
+             || (DB.promoCodes||[]).some(function(p){return p.code===candidate;});
+    if(!clash) return candidate;
+    i++;
+    if(i>9999){ candidate = base + Math.floor(Math.random()*100000); return candidate; }
+  }
+}
+
+// ── PAGE LANDING : Catalogue des 9 programmes ──────────────────────────────
+function pgPartnerships(){
+  var types = _prtT();
+  var L = _prtL();
+  var sortedTypes = Object.keys(types).sort(function(a,b){return (types[a].priority||99)-(types[b].priority||99);});
+  var h = '<div class="pgt" style="text-align:center;font-size:24px;font-weight:800;margin:18px 0 8px">🤝 Programme de Partenariat VÉRITAS</div>'
+    + '<div style="text-align:center;font-size:14px;color:var(--ink3);font-style:italic;max-width:680px;margin:0 auto 28px;padding:0 20px">'
+    + 'Ensemble pour l\'excellence éducative — rejoignez le réseau qui transforme l\'éducation au Cameroun.</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:24px;padding:0 14px">';
+  sortedTypes.forEach(function(k){
+    var t = types[k];
+    h += '<div onclick="_prtGo(\'partenariat-'+k+'\')" '
+      + 'style="cursor:pointer;background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:all .2s" '
+      + 'onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 22px rgba(20,37,84,.12)\'" '
+      + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.04)\'">'
+      + '<div style="font-size:36px;margin-bottom:6px">'+t.emoji+'</div>'
+      + '<div style="font-size:15px;font-weight:800;color:#142554;margin-bottom:6px">'+_prtSafe(t.label)+'</div>'
+      + '<div style="font-size:12px;color:var(--ink3);line-height:1.5;margin-bottom:12px">'+_prtSafe(t.desc)+'</div>'
+      + '<button class="btn bi" style="width:100%;font-size:12px;padding:8px;justify-content:center">En savoir plus →</button>'
+      + '</div>';
+  });
+  h += '</div>';
+  // Bloc paliers
+  h += '<div style="max-width:780px;margin:30px auto;padding:0 14px"><div class="ct" style="text-align:center;margin-bottom:14px">🎁 Système de récompenses Bronze · Argent · Or · Diamant</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">';
+  ['bronze','argent','or','diamant'].forEach(function(k){
+    var lv = L[k];
+    h += '<div style="background:linear-gradient(135deg,'+lv.color+'22,'+lv.color+'05);border:2px solid '+lv.color+'88;border-radius:12px;padding:14px;text-align:center">'
+      + '<div style="font-size:32px;margin-bottom:4px">'+lv.badge+'</div>'
+      + '<div style="font-size:14px;font-weight:800;color:#142554;margin-bottom:6px">'+lv.label+'</div>'
+      + '<div style="font-size:11px;color:var(--ink3);margin-bottom:4px">À partir de <strong>'+lv.min+'</strong> ventes</div>'
+      + '<div style="font-size:13px;font-weight:700;color:'+(lv.color==='#FFD700'?'#9a6b00':'#142554')+'">'+Math.round(lv.commission*100)+'% commission</div>'
+      + (lv.bonusFixe>0?'<div style="font-size:11px;color:#059669;margin-top:4px">+ Bonus '+_prtFmt(lv.bonusFixe)+'</div>':'')
+      + '</div>';
+  });
+  h += '</div></div>';
+  h += '<div style="text-align:center;font-style:italic;color:var(--ink3);margin:24px auto;max-width:620px;padding:0 14px;font-size:13px">'
+    + '« VÉRITAS : Ensemble, transformons l\'éducation, révélons les talents et construisons l\'excellence. »</div>'
+    + '<div style="text-align:center;margin:20px auto 40px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
+    + '<a href="https://wa.me/237697637739" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:12px 22px;border-radius:24px;text-decoration:none;font-weight:700;font-size:14px">📞 WhatsApp · 697 63 77 39</a>'
+    + '<button class="btn bo" style="padding:12px 22px;border-radius:24px;font-size:14px" onclick="_prtGo(\'verifier-certificat\')">🔍 Vérifier un certificat</button>'
+    + '</div>';
+  return h;
+}
+
+// ── PAGE DÉTAIL : Fiche d'un programme spécifique ──────────────────────────
+function pgPartnerProgram(type){
+  var types = _prtT();
+  var L = _prtL();
+  var t = types[type];
+  if(!t){ return '<div class="pgt">Programme inconnu</div><button class="btn bo" onclick="_prtGo(\'partenariat\')">← Retour</button>'; }
+  // Avantages détaillés par type (extraits du brief Jacques)
+  var avantages = {
+    enseignant:[
+      '💰 Commission attractive sur chaque ouvrage recommandé (5 à 12% selon palier)',
+      '💰 Bonus de performance selon le volume de commandes',
+      '📚 Accès gratuit : situations-problèmes, fiches pédagogiques, progressions',
+      '📚 Accès gratuit : protocoles de TP, évaluations corrigées, examens blancs',
+      '🎓 Formations gratuites : IA en éducation, création de contenus, outils numériques',
+      '🎁 Programme parrainage : prime pour chaque collègue intégré au réseau',
+      '🏆 Classement trimestriel des meilleurs ambassadeurs'
+    ],
+    createur:[
+      '💰 Commissions sur ventes générées via votre code personnel',
+      '🎥 Collaboration sur les contenus éducatifs VÉRITAS',
+      '📱 Accès anticipé aux nouveautés et beta',
+      '🏆 Statut d\'Ambassadeur Officiel VÉRITAS',
+      '🎁 Kit influenceur (visuels, vidéos, scripts adaptables)'
+    ],
+    chef_etab:[
+      '✅ Ressources pédagogiques GRATUITES pour tous les enseignants',
+      '✅ Formation du personnel enseignant aux outils VÉRITAS',
+      '✅ Accompagnement à la digitalisation scolaire',
+      '✅ Visibilité nationale sur nos plateformes',
+      '✅ Réductions volume sur les ouvrages et outils pédagogiques',
+      '✅ Banque d\'évaluations et d\'examens conforme MINESEC',
+      '✅ Tableau de bord de suivi des performances scolaires',
+      '🏆 Label « Établissement Partenaire VÉRITAS » à afficher'
+    ],
+    inspecteur:[
+      '✅ Accès privilégié à nos productions pédagogiques',
+      '✅ Participation aux comités de validation scientifique',
+      '✅ Visibilité en tant qu\'expert associé aux projets éducatifs',
+      '✅ Animation de formations nationales et régionales rémunérées',
+      '✅ Participation à la rédaction d\'ouvrages et ressources',
+      '✅ Rémunération sur les formations et projets collaboratifs'
+    ],
+    parent:[
+      '📖 Ouvrages conformes aux programmes officiels MINESEC',
+      '📱 Accès à des ressources numériques complémentaires',
+      '📊 Suivi régulier des performances de votre enfant',
+      '🎓 Conseils pédagogiques et orientation scolaire',
+      '🎁 Réductions familles ayant plusieurs enfants',
+      '🎁 Programme fidélité VÉRITAS',
+      '🤝 Accès Club Parents : webinaires éducatifs, conférences réussite'
+    ],
+    eleve_leader:[
+      '🏅 Certificat officiel d\'Ambassadeur VÉRITAS Junior',
+      '🎁 Cadeaux pédagogiques trimestriels',
+      '🎓 Bourses d\'excellence pour les meilleurs',
+      '🏆 Accès privilégié aux concours et challenges',
+      '📚 Accès gratuit aux ressources premium e-learning'
+    ],
+    librairie:[
+      '💰 Marges commerciales attractives sur le catalogue VÉRITAS',
+      '📦 Approvisionnement rapide et fiable',
+      '📢 Supports publicitaires gratuits (affiches, flyers)',
+      '🎁 Offres promotionnelles régulières et rentrée scolaire',
+      '📈 Accompagnement marketing et formation équipe vente'
+    ],
+    universite:[
+      '✅ Accès à nos outils pédagogiques pour vos étudiants',
+      '✅ Participation à nos projets de recherche pédagogique',
+      '✅ Opportunités de publication conjointe',
+      '✅ Stages et alternances pour vos étudiants en formation enseignant',
+      '✅ Co-organisation d\'événements scientifiques'
+    ],
+    sponsor:[
+      '📢 Présence de votre marque sur nos événements VÉRITAS',
+      '📢 Visibilité permanente sur nos plateformes numériques',
+      '📢 Mention dans nos publications et communications',
+      '📢 Actions RSE à fort impact social mesurable',
+      '🏆 Rapport d\'impact annuel personnalisé'
+    ]
+  };
+  var lvCount = ['bronze','argent','or','diamant'].map(function(k){
+    var lv = L[k];
+    return '<div style="flex:1;min-width:120px;padding:10px;background:'+lv.color+'15;border-radius:8px;text-align:center;border:1px solid '+lv.color+'66">'
+      + '<div style="font-size:24px">'+lv.badge+'</div>'
+      + '<div style="font-size:12px;font-weight:700">'+lv.label+'</div>'
+      + '<div style="font-size:10px;color:var(--ink3)">'+lv.min+'+ ventes</div></div>';
+  }).join('');
+  var av = (avantages[type]||[]).map(function(a){return '<li style="margin:6px 0;line-height:1.6">'+_prtSafe(a)+'</li>';}).join('');
+  return '<div style="max-width:780px;margin:0 auto;padding:0 14px">'
+    + '<button class="btn bo sm" style="margin-bottom:14px" onclick="_prtGo(\'partenariat\')">← Tous les programmes</button>'
+    + '<div style="text-align:center;margin-bottom:20px">'
+    +   '<div style="font-size:56px">'+t.emoji+'</div>'
+    +   '<div style="font-size:22px;font-weight:800;color:#142554;margin:6px 0">'+_prtSafe(t.label)+'</div>'
+    +   '<div style="font-size:14px;color:var(--ink3);font-style:italic">'+_prtSafe(t.desc)+'</div>'
+    + '</div>'
+    + '<div class="ct" style="margin:18px 0 8px">✨ Vos avantages</div>'
+    + '<ul style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 18px 18px 36px;list-style:disc">'+av+'</ul>'
+    + '<div class="ct" style="margin:24px 0 10px">🎯 Système de paliers (mix ouvrages + abonnements + autres)</div>'
+    + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px">'+lvCount+'</div>'
+    + '<div style="background:linear-gradient(135deg,#142554,#1e3a8a);color:#fff;padding:24px;border-radius:14px;text-align:center;margin:24px 0">'
+    +   '<div style="font-size:17px;font-weight:800;margin-bottom:8px">Prêt à rejoindre VÉRITAS ?</div>'
+    +   '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">Candidature gratuite. Validation sous 48h ouvrables.</div>'
+    +   (type==='eleve_leader'
+        ? '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
+          + '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 28px;font-size:14px" onclick="mCandidaterAmbassadeurJunior()">⚡ Activer en 1 clic</button>'
+          + '<button class="btn" style="background:rgba(255,255,255,.15);color:#fff;font-weight:700;padding:12px 22px;font-size:13px;border:1px solid rgba(255,255,255,.3)" onclick="_prtGo(\'leaderboard-junior\')">🏆 Voir le classement</button>'
+          + '</div>'
+        : '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 28px;font-size:14px" onclick="mPartnerSignup(\''+type+'\')">📝 Devenir partenaire '+_prtSafe(t.label)+'</button>')
+    + '</div>'
+    + '<div style="text-align:center;color:var(--ink3);font-size:12px;margin:18px auto">Une question ? <a href="https://wa.me/237697637739" target="_blank" style="color:#25D366;font-weight:700">WhatsApp : +237 697 63 77 39</a></div>'
+    + '</div>';
+}
+
+// ── MODALE : Candidature partenaire ────────────────────────────────────────
+function mPartnerSignup(type){
+  var types = _prtT();
+  var t = types[type] || {label:'Partenaire', emoji:'🤝'};
+  var needsKYC = ['inspecteur','chef_etab','librairie','universite','sponsor'].indexOf(type)>=0;
+  var body = '<div class="fg"><span class="fl">Nom complet * </span><input class="fi" id="_psNom" placeholder="ex. Jacques TAKOU"></div>'
+    + '<div class="fg"><span class="fl">Email * </span><input class="fi" id="_psEmail" type="email" placeholder="vous@example.cm"></div>'
+    + '<div class="fg"><span class="fl">Téléphone WhatsApp * </span><input class="fi" id="_psTel" placeholder="+237 6XX XX XX XX"></div>'
+    + '<div class="fg"><span class="fl">Ville</span><input class="fi" id="_psVille" placeholder="Douala, Yaoundé, Bafoussam..."></div>'
+    + (type==='enseignant' || type==='chef_etab' || type==='inspecteur' ? '<div class="fg"><span class="fl">Établissement</span><input class="fi" id="_psEtab" placeholder="Nom de l\'établissement"></div>' : '')
+    + (type==='enseignant' ? '<div class="fg"><span class="fl">Matière(s) enseignée(s)</span><input class="fi" id="_psMat" placeholder="ex. Français, Histoire-Géo"></div>' : '')
+    + (type==='createur' ? '<div class="fg"><span class="fl">Lien réseau social principal</span><input class="fi" id="_psSocial" placeholder="ex. https://tiktok.com/@vous"></div><div class="fg"><span class="fl">Nombre d\'abonnés (approximatif)</span><input class="fi" id="_psFollowers" type="number" placeholder="ex. 5000"></div>' : '')
+    + (type==='librairie' ? '<div class="fg"><span class="fl">Nom de la librairie</span><input class="fi" id="_psEtab" placeholder="ex. Librairie du Centre"></div><div class="fg"><span class="fl">Adresse</span><input class="fi" id="_psAdr" placeholder="Adresse complète"></div>' : '')
+    + (type==='sponsor' ? '<div class="fg"><span class="fl">Nom de l\'entreprise</span><input class="fi" id="_psEtab" placeholder="ex. MTN Cameroun"></div><div class="fg"><span class="fl">Secteur d\'activité</span><input class="fi" id="_psSecteur" placeholder="Télécoms, banque..."></div>' : '')
+    + '<div class="fg"><span class="fl">Pourquoi rejoindre VÉRITAS ? (motivation)</span><textarea class="fi" id="_psMot" rows="3" placeholder="Quelques lignes sur votre motivation et ce que vous apportez"></textarea></div>'
+    + (needsKYC ? '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:10px 12px;border-radius:6px;font-size:12px;color:#92400E;margin:10px 0">📎 <strong>Documents KYC requis</strong> après validation initiale : RCCM/agrément, pièce d\'identité du dirigeant, RIB ou numéro MoMo. Ils vous seront demandés par WhatsApp.</div>' : '')
+    + '<label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--ink3);margin:12px 0"><input type="checkbox" id="_psCgu" style="margin-top:2px"><span>J\'accepte les <a href="#" onclick="event.preventDefault();alert(\'CGU disponibles sur veritas-school.com\')">CGU du Programme Partenaire</a> et autorise VÉRITAS à me recontacter par WhatsApp et email.</span></label>';
+  M(t.emoji+' Devenir partenaire — '+t.label, 'Candidature gratuite · Réponse sous 48h ouvrables', body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="submitPartnerApplication(\''+type+'\')">📨 Envoyer ma candidature</button>',
+    true);
+}
+
+// ── Soumission candidature ──────────────────────────────────────────────────
+function submitPartnerApplication(type){
+  var v = function(id){ var e=_ge ? _ge(id) : document.getElementById(id); return e?(e.value||'').trim():''; };
+  var nom = v('_psNom'), email = v('_psEmail'), tel = v('_psTel');
+  var cgu = (_ge ? _ge('_psCgu') : document.getElementById('_psCgu'));
+  if(!nom){ _prtToast('Le nom est requis','warn'); return; }
+  if(!email || email.indexOf('@')<0){ _prtToast('Email invalide','warn'); return; }
+  if(!tel || tel.replace(/[^0-9]/g,'').length<8){ _prtToast('Téléphone invalide','warn'); return; }
+  if(!cgu || !cgu.checked){ _prtToast('Veuillez accepter les CGU','warn'); return; }
+  var app = {
+    id: (typeof gid==='function')?gid():'app_'+Date.now(),
+    type: type,
+    status: 'pending',
+    nom: nom, email: email, tel: tel,
+    ville: v('_psVille'),
+    etablissement: v('_psEtab'),
+    matieres: v('_psMat'),
+    social: v('_psSocial'),
+    followers: parseInt(v('_psFollowers'))||0,
+    adresse: v('_psAdr'),
+    secteur: v('_psSecteur'),
+    motivation: v('_psMot'),
+    submittedAt: (typeof today==='function')?today():new Date().toISOString().substring(0,10),
+    ip: '', // optionnel : à logger côté backend
+  };
+  if(!DB.partnerApplications) DB.partnerApplications=[];
+  DB.partnerApplications.push(app);
+  _prtSave();
+  // Notification admin si dispo
+  if(typeof autoNotify==='function'){
+    autoNotify('🤝 Nouvelle candidature partenaire',
+      (DB.partnerTypes[type]?DB.partnerTypes[type].emoji+' ':'')+nom+' ('+(DB.partnerTypes[type]?DB.partnerTypes[type].label:type)+')',
+      'admin');
+  }
+  _prtCm();
+  // Page de remerciement
+  var html = '<div style="text-align:center;padding:40px 20px;max-width:560px;margin:0 auto">'
+    + '<div style="font-size:64px;margin-bottom:14px">🎉</div>'
+    + '<div style="font-size:22px;font-weight:800;color:#142554;margin-bottom:10px">Candidature reçue !</div>'
+    + '<div style="font-size:14px;color:var(--ink3);line-height:1.6;margin-bottom:18px">Merci '+_prtSafe(nom)+'. Nous étudions votre dossier et vous recontactons sous <strong>48h ouvrables</strong> par WhatsApp et email.</div>'
+    + '<div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:10px;padding:14px;text-align:left;font-size:13px;color:#166534;margin-bottom:18px">'
+    +   '<div style="font-weight:700;margin-bottom:6px">📌 Pendant ce temps :</div>'
+    +   '<ul style="margin-left:18px;line-height:1.7">'
+    +     '<li>Préparez vos documents (si KYC nécessaire)</li>'
+    +     '<li>Identifiez 2-3 personnes à parrainer dès votre activation</li>'
+    +     '<li>Rejoignez notre canal WhatsApp Partenaires</li>'
+    +   '</ul></div>'
+    + '<button class="btn bi" onclick="_prtGo(\'partenariat\')">← Voir tous les programmes</button>'
+    + ' <a class="btn bo" href="https://wa.me/237697637739" target="_blank" style="text-decoration:none">📞 WhatsApp VÉRITAS</a>'
+    + '</div>';
+  if(typeof _vc==='function') _vc(html);
+  else if(typeof _si==='function') _si('vContent', html);
+}
+
+// ── DASHBOARD ADMIN : pgPartnersAdmin() ────────────────────────────────────
+function pgPartnersAdmin(){
+  if(typeof iA==='function' && !iA()){ return (typeof na==='function')?na():'<div>Accès restreint</div>'; }
+  var apps = DB.partnerApplications||[];
+  var partners = DB.partners||[];
+  var commissions = DB.commissions||[];
+  var pending = apps.filter(function(a){return a.status==='pending';});
+  var active = partners.filter(function(p){return p.status==='active';});
+  var totalPending = commissions.filter(function(c){return c.status==='pending';}).reduce(function(s,c){return s+(c.commissionAmount||0);},0);
+  var totalPaid = commissions.filter(function(c){return c.status==='paid';}).reduce(function(s,c){return s+(c.commissionAmount||0);},0);
+  var payoutsBlocked = !(DB.partnerSettings && DB.partnerSettings.payoutsEnabled);
+  var blockedReason = (DB.partnerSettings && DB.partnerSettings.payoutsBlockedReason) || '';
+  var h = '<div class="pgt">🤝 Programme Partenariat — Administration</div>';
+  if(payoutsBlocked){
+    h += '<div style="background:#FEF3C7;border-left:4px solid #F59E0B;padding:12px 14px;border-radius:8px;margin-bottom:16px;font-size:13px">'
+      + '<strong>⏸ Versements automatiques désactivés</strong> — '+_prtSafe(blockedReason)
+      + ' · <a href="#" onclick="event.preventDefault();mPartnerSettings()" style="color:#142554;font-weight:700">Configurer</a></div>';
+  }
+  // KPI cards
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px">'
+    + _prtKpiCard('📥', 'Candidatures', pending.length, '#3B82F6')
+    + _prtKpiCard('✅', 'Partenaires actifs', active.length, '#10B981')
+    + _prtKpiCard('💰', 'À verser', _prtFmt(totalPending), '#F59E0B')
+    + _prtKpiCard('🏦', 'Total versé', _prtFmt(totalPaid), '#6B7280')
+    + '</div>';
+  // Onglets
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
+    + '<button class="btn bi sm">📥 Candidatures ('+pending.length+')</button>'
+    + '<button class="btn bo sm" onclick="mPartnersList()">✅ Partenaires actifs ('+active.length+')</button>'
+    + '<button class="btn bo sm" onclick="mPartnersCommissions()">💰 Commissions</button>'
+    + '<button class="btn bo sm" onclick="mPartnerSettings()">⚙️ Paramètres</button>'
+    + '</div>';
+  // Liste candidatures (ce qu'on voit par défaut)
+  if(pending.length===0){
+    h += '<div style="text-align:center;padding:40px;color:var(--ink3);background:#F9FAFB;border-radius:10px">Aucune candidature en attente. 🎉</div>';
+  } else {
+    h += '<div class="ct">📥 Candidatures à valider</div>';
+    h += '<div style="display:grid;gap:10px">';
+    pending.slice().reverse().forEach(function(a){
+      var t = (DB.partnerTypes[a.type]||{label:a.type,emoji:'❓'});
+      h += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px;display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">'
+        + '<div style="font-size:36px">'+t.emoji+'</div>'
+        + '<div style="flex:1;min-width:200px">'
+        +   '<div style="font-weight:800;font-size:14px">'+_prtSafe(a.nom)+' <span style="font-weight:400;font-size:11px;color:var(--ink3)">· '+t.label+'</span></div>'
+        +   '<div style="font-size:12px;color:var(--ink3);margin:3px 0">📧 '+_prtSafe(a.email)+' · 📱 '+_prtSafe(a.tel)+(a.ville?' · 🗺️ '+_prtSafe(a.ville):'')+'</div>'
+        +   (a.etablissement?'<div style="font-size:12px">🏫 '+_prtSafe(a.etablissement)+'</div>':'')
+        +   (a.motivation?'<div style="font-size:12px;margin-top:4px;color:var(--ink2);font-style:italic">« '+_prtSafe(a.motivation.substring(0,180))+(a.motivation.length>180?'…':'')+' »</div>':'')
+        +   '<div style="font-size:10px;color:var(--ink4);margin-top:4px">Reçue le '+_prtSafe(a.submittedAt)+'</div>'
+        + '</div>'
+        + '<div style="display:flex;gap:6px;flex-direction:column">'
+        +   '<button class="btn bi xs" onclick="mApprovePartner(\''+a.id+'\')">✅ Valider</button>'
+        +   '<a class="btn bo xs" href="https://wa.me/'+a.tel.replace(/[^0-9]/g,'')+'" target="_blank" style="text-decoration:none">💬 WhatsApp</a>'
+        +   '<button class="btn bo xs" style="color:#DC2626" onclick="mRejectPartner(\''+a.id+'\')">❌ Refuser</button>'
+        + '</div>'
+        + '</div>';
+    });
+    h += '</div>';
+  }
+  return h;
+}
+
+function _prtKpiCard(emoji, label, value, color){
+  return '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:14px;text-align:center">'
+    + '<div style="font-size:24px">'+emoji+'</div>'
+    + '<div style="font-size:11px;color:var(--ink3);margin:4px 0">'+label+'</div>'
+    + '<div style="font-size:18px;font-weight:800;color:'+color+'">'+value+'</div>'
+    + '</div>';
+}
+
+// ── VALIDATION candidature ──────────────────────────────────────────────────
+function mApprovePartner(appId){
+  var apps = DB.partnerApplications||[];
+  var a = apps.find(function(x){return x.id===appId;});
+  if(!a){ _prtToast('Candidature introuvable','warn'); return; }
+  var code = _genPartnerCode(a.nom);
+  var body = '<div style="font-size:13px;margin-bottom:10px">Valider la candidature de <strong>'+_prtSafe(a.nom)+'</strong> ('+_prtSafe((DB.partnerTypes[a.type]||{label:a.type}).label)+') ?</div>'
+    + '<div class="fg"><span class="fl">Code parrainage attribué</span><input class="fi" id="_pa_code" value="'+code+'"></div>'
+    + '<div class="fg"><span class="fl">Note interne (facultatif)</span><textarea class="fi" id="_pa_note" rows="2" placeholder="ex. Recommandé par X, bon profil enseignant titulaire"></textarea></div>'
+    + '<div style="font-size:11px;color:var(--ink3);background:#F0FDF4;padding:8px;border-radius:6px">✅ Une notification sera envoyée au partenaire avec son code et l\'accès à son espace.</div>';
+  M('✅ Valider la candidature', _prtSafe(a.nom),
+    body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="confirmApprovePartner(\''+appId+'\')">✓ Valider et créer le partenaire</button>',
+    false);
+}
+
+function confirmApprovePartner(appId){
+  var apps = DB.partnerApplications||[];
+  var idx = apps.findIndex(function(x){return x.id===appId;});
+  if(idx<0){ _prtToast('Candidature introuvable','warn'); return; }
+  var a = apps[idx];
+  var code = ((_ge?_ge('_pa_code'):document.getElementById('_pa_code'))||{value:''}).value.trim().toUpperCase();
+  var note = ((_ge?_ge('_pa_note'):document.getElementById('_pa_note'))||{value:''}).value.trim();
+  if(!code){ _prtToast('Code parrainage requis','warn'); return; }
+  // Vérification unicité du code
+  var clash = (DB.partners||[]).some(function(p){return p.code===code;})
+           || (DB.promoCodes||[]).some(function(p){return p.code===code;});
+  if(clash){ _prtToast('Ce code existe déjà — choisir un autre','warn'); return; }
+  // Création du partenaire
+  var partner = {
+    id: (typeof gid==='function')?gid():'prt_'+Date.now(),
+    type: a.type,
+    level: 'bronze',
+    status: 'active',
+    name: a.nom,
+    email: a.email,
+    tel: a.tel,
+    ville: a.ville,
+    etablissement: a.etablissement,
+    code: code,
+    joinedAt: (typeof today==='function')?today():new Date().toISOString().substring(0,10),
+    appId: a.id,
+    note: note,
+    bankInfo: { type:'momo', tel:a.tel },  // par défaut, à compléter par le partenaire
+    stats: { salesCount:0, totalCommission:0, paidOut:0, pending:0, levelUnlockedAt:null }
+  };
+  if(!DB.partners) DB.partners=[];
+  DB.partners.push(partner);
+  // Bascule le statut de la candidature
+  apps[idx].status = 'approved';
+  apps[idx].approvedAt = partner.joinedAt;
+  apps[idx].partnerId = partner.id;
+  _prtSave();
+  _prtCm();
+  // Message WhatsApp pré-rempli pour notifier le partenaire
+  var msg = '🎉 Bonjour '+a.nom+', votre candidature au Programme Partenariat VÉRITAS est VALIDÉE ! '
+    + 'Votre code parrainage personnel : *'+code+'*. '
+    + 'Communiquez-le à vos contacts pour qu\'ils l\'utilisent lors de leurs achats : vous toucherez une commission sur chaque vente. '
+    + 'Espace partenaire : '+(window.location.origin||'https://veritas-school.com')+'/#mes-partenariats. '
+    + 'Bienvenue dans le réseau VÉRITAS !';
+  var wa = 'https://wa.me/'+a.tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg);
+  // Confirmation visuelle + lien WhatsApp
+  M('🎉 Partenaire créé !', _prtSafe(a.nom)+' · Code : '+code,
+    '<div style="text-align:center;padding:14px"><div style="font-size:48px">✅</div>'
+    + '<div style="font-size:14px;margin:10px 0">Le partenaire est actif et peut commencer à utiliser son code.</div>'
+    + '<div style="background:#F0FDF4;border:1px solid #86EFAC;padding:12px;border-radius:8px;margin:10px 0;font-size:13px"><strong>Prochaine étape :</strong> envoyer le code par WhatsApp.</div></div>',
+    '<button class="btn bo" onclick="cm();re()">Fermer</button>'
+    + ' <a class="btn bi" href="'+wa+'" target="_blank" onclick="cm();re()" style="text-decoration:none">💬 Envoyer le code WhatsApp</a>',
+    false);
+}
+
+function mRejectPartner(appId){
+  if(!confirm('Refuser cette candidature ? Le candidat sera notifié.')) return;
+  var apps = DB.partnerApplications||[];
+  var idx = apps.findIndex(function(x){return x.id===appId;});
+  if(idx<0) return;
+  apps[idx].status = 'rejected';
+  apps[idx].rejectedAt = (typeof today==='function')?today():new Date().toISOString().substring(0,10);
+  _prtSave();
+  _prtToast('Candidature refusée');
+  _prtRe();
+}
+
+// ── PARAMÈTRES partenariat (admin) ──────────────────────────────────────────
+function mPartnerSettings(){
+  if(!DB.partnerSettings) DB.partnerSettings={payoutsEnabled:false,payoutsBlockedReason:'',minPayout:5000};
+  var s = DB.partnerSettings;
+  var body = '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:10px;border-radius:6px;font-size:12px;color:#92400E;margin-bottom:14px">'
+    + '⚠️ Activez les versements <strong>uniquement après avoir branché CamPay ou Notch Pay</strong> (cf. CLAUDE.md S5).</div>'
+    + '<label style="display:flex;align-items:center;gap:8px;margin:10px 0;font-size:13px">'
+    +   '<input type="checkbox" id="_ps_enabled"'+(s.payoutsEnabled?' checked':'')+'> Activer les versements automatiques aux partenaires</label>'
+    + '<div class="fg"><span class="fl">Montant minimum pour demander un versement (FCFA)</span><input class="fi" id="_ps_min" type="number" min="1000" value="'+(s.minPayout||5000)+'"></div>'
+    + '<div class="fg"><span class="fl">Message affiché quand les versements sont désactivés</span><input class="fi" id="_ps_reason" value="'+_prtSafe(s.payoutsBlockedReason||'')+'"></div>';
+  M('⚙️ Paramètres Programme Partenariat', '', body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="savePartnerSettings()">💾 Enregistrer</button>', false);
+}
+
+// ── LISTE des partenaires actifs (admin) ────────────────────────────────────
+function mPartnersList(){
+  var active = (DB.partners||[]).filter(function(p){return p.status==='active';});
+  var body;
+  if(!active.length){
+    body = '<div style="text-align:center;padding:40px;color:var(--ink3)">Aucun partenaire actif pour l\'instant. 📊<br><br>Validez d\'abord des candidatures depuis le tableau de bord.</div>';
+  } else {
+    var L = _prtL();
+    body = '<div style="display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto">';
+    active.forEach(function(p){
+      var lv = L[p.level||'bronze']||L.bronze;
+      var t = (DB.partnerTypes && DB.partnerTypes[p.type]) || {label:p.type,emoji:'🤝'};
+      var stats = p.stats||{};
+      body += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:12px;display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">'
+        + '<div style="font-size:28px">'+t.emoji+'</div>'
+        + '<div style="flex:1;min-width:200px">'
+        +   '<div style="font-weight:800;font-size:14px">'+_prtSafe(p.name)+' '+lv.badge+'</div>'
+        +   '<div style="font-size:12px;color:var(--ink3)">'+t.label+(p.etablissement?' · '+_prtSafe(p.etablissement):'')+'</div>'
+        +   '<div style="font-size:11px;color:var(--ink3);margin-top:2px">📱 '+_prtSafe(p.tel)+' · Code <strong style="font-family:monospace;color:#142554">'+_prtSafe(p.code)+'</strong></div>'
+        +   '<div style="font-size:11px;color:var(--ink3);margin-top:2px">'
+        +     '🛒 '+(stats.salesCount||0)+' ventes · 💰 '+_prtFmt(stats.totalCommission||0)+' cumulés · ⏳ '+_prtFmt(stats.pending||0)+' à verser</div>'
+        + '</div>'
+        + '<div style="display:flex;flex-direction:column;gap:5px">'
+        +   '<button class="btn bi xs" onclick="generatePartnerCertificate(\''+p.id+'\')">📜 Certificat PDF</button>'
+        +   '<button class="btn bo xs" onclick="cm();mPartnerDetail(\''+p.id+'\')">👁 Détails</button>'
+        + '</div></div>';
+    });
+    body += '</div>';
+  }
+  M('✅ Partenaires actifs ('+active.length+')', '', body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>', true);
+}
+
+// ── DÉTAIL d'un partenaire (admin) ──────────────────────────────────────────
+function mPartnerDetail(partnerId){
+  var p = (DB.partners||[]).find(function(x){return x.id===partnerId;});
+  if(!p){ _prtToast('Partenaire introuvable','warn'); return; }
+  var L = _prtL();
+  var lv = L[p.level||'bronze']||L.bronze;
+  var t = (DB.partnerTypes && DB.partnerTypes[p.type]) || {label:p.type,emoji:'🤝'};
+  var stats = p.stats||{};
+  var myComm = (DB.commissions||[]).filter(function(c){return c.partnerId===p.id;});
+  var lastComm = myComm.slice(-5).reverse();
+  var body = '<div style="font-size:13px;line-height:1.7">'
+    + '<div style="display:grid;grid-template-columns:140px 1fr;gap:8px">'
+    +   '<div style="color:var(--ink3)">Type</div><div>'+t.emoji+' '+t.label+'</div>'
+    +   '<div style="color:var(--ink3)">Palier</div><div>'+lv.badge+' '+lv.label+' ('+Math.round(lv.commission*100)+'%)</div>'
+    +   '<div style="color:var(--ink3)">Code parrainage</div><div style="font-family:monospace;font-weight:700;color:#142554">'+_prtSafe(p.code)+'</div>'
+    +   '<div style="color:var(--ink3)">Email</div><div>'+_prtSafe(p.email)+'</div>'
+    +   '<div style="color:var(--ink3)">Téléphone</div><div><a href="https://wa.me/'+(p.tel||'').replace(/[^0-9]/g,'')+'" target="_blank" style="color:#25D366">'+_prtSafe(p.tel)+'</a></div>'
+    +   (p.ville?'<div style="color:var(--ink3)">Ville</div><div>'+_prtSafe(p.ville)+'</div>':'')
+    +   (p.etablissement?'<div style="color:var(--ink3)">Établissement</div><div>'+_prtSafe(p.etablissement)+'</div>':'')
+    +   '<div style="color:var(--ink3)">Membre depuis</div><div>'+_prtSafe(p.joinedAt)+'</div>'
+    +   (p.certificate?'<div style="color:var(--ink3)">N° certificat</div><div style="font-family:monospace;font-size:11px">'+_prtSafe(p.certificate.id)+'</div>':'')
+    +   '<div style="color:var(--ink3)">Ventes générées</div><div>'+(stats.salesCount||0)+'</div>'
+    +   '<div style="color:var(--ink3)">Total cumulé</div><div>'+_prtFmt(stats.totalCommission||0)+'</div>'
+    +   '<div style="color:var(--ink3)">À verser</div><div style="color:#F59E0B;font-weight:700">'+_prtFmt(stats.pending||0)+'</div>'
+    +   '<div style="color:var(--ink3)">Déjà versé</div><div>'+_prtFmt(stats.paidOut||0)+'</div>'
+    + '</div>'
+    + (lastComm.length ? '<div class="ct" style="margin-top:14px">5 dernières commissions</div>'
+      + '<div style="font-size:12px">'
+      + lastComm.map(function(c){return '<div style="padding:5px 0;border-bottom:1px solid #F3F4F6">'+_prtSafe(c.date)+' · '+_prtSafe(c.refLabel||c.refType)+' → <strong>+'+_prtFmt(c.commissionAmount)+'</strong></div>';}).join('')
+      + '</div>' : '')
+    + '</div>';
+  // Bouton review KYC si type requiert
+  var kycBtn = '';
+  if(_kycRequiredDocs(p.type).length > 0){
+    var kycSt2 = _kycStatus(p.id);
+    kycBtn = '<button class="btn bo" onclick="cm();mAdminReviewKYC(\''+p.id+'\')">'+kycSt2.icon+' KYC '+kycSt2.label+'</button>';
+  }
+  M(t.emoji+' '+_prtSafe(p.name), lv.badge+' '+lv.label, body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    + kycBtn
+    + '<button class="btn bi" onclick="generatePartnerCertificate(\''+p.id+'\')">📜 Certificat</button>',
+    true);
+}
+
+// ── LISTE des commissions (admin) ───────────────────────────────────────────
+function mPartnersCommissions(){
+  var commissions = (DB.commissions||[]).slice().reverse();
+  var body;
+  if(!commissions.length){
+    body = '<div style="text-align:center;padding:40px;color:var(--ink3)">Aucune commission générée pour l\'instant.</div>';
+  } else {
+    var pending = commissions.filter(function(c){return c.status==='pending';}).reduce(function(s,c){return s+(c.commissionAmount||0);},0);
+    var paid = commissions.filter(function(c){return c.status==='paid';}).reduce(function(s,c){return s+(c.commissionAmount||0);},0);
+    body = '<div style="display:flex;gap:10px;margin-bottom:12px"><div style="flex:1;background:#FEF3C7;padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--ink3)">⏳ En attente</div><div style="font-size:18px;font-weight:800;color:#92400E">'+_prtFmt(pending)+'</div></div>'
+      + '<div style="flex:1;background:#D1FAE5;padding:10px;border-radius:8px;text-align:center"><div style="font-size:11px;color:var(--ink3)">✓ Versé</div><div style="font-size:18px;font-weight:800;color:#065F46">'+_prtFmt(paid)+'</div></div></div>'
+      + '<div style="max-height:55vh;overflow-y:auto">';
+    commissions.slice(0,100).forEach(function(c){
+      var p = (DB.partners||[]).find(function(x){return x.id===c.partnerId;});
+      var partnerName = p ? p.name : 'Partenaire inconnu';
+      body += '<div style="padding:8px 10px;border-bottom:1px solid #F3F4F6;font-size:12px;display:flex;justify-content:space-between;gap:8px">'
+        + '<div><div><strong>'+_prtSafe(partnerName)+'</strong> · '+_prtSafe(c.refLabel||c.refType)+'</div>'
+        +   '<div style="font-size:11px;color:var(--ink4)">'+_prtSafe(c.date)+(c.type==='level_bonus'?' · 🎁 Bonus palier':'')+'</div></div>'
+        + '<div style="text-align:right"><div style="font-weight:700;color:#059669">+'+_prtFmt(c.commissionAmount)+'</div>'
+        +   '<div style="font-size:10px;color:'+(c.status==='paid'?'#059669':'#F59E0B')+'">'+(c.status==='paid'?'✓ versé':'⏳ en attente')+'</div></div></div>';
+    });
+    body += '</div>';
+    if(commissions.length>100) body += '<div style="text-align:center;color:var(--ink3);font-size:11px;margin-top:8px">Affichage limité aux 100 plus récentes ('+commissions.length+' au total)</div>';
+  }
+  M('💰 Toutes les commissions', '', body, '<button class="btn bo" onclick="cm()">Fermer</button>', true);
+}
+
+function savePartnerSettings(){
+  if(!DB.partnerSettings) DB.partnerSettings={};
+  var s = DB.partnerSettings;
+  s.payoutsEnabled = !!((_ge?_ge('_ps_enabled'):document.getElementById('_ps_enabled'))||{}).checked;
+  s.minPayout = parseInt(((_ge?_ge('_ps_min'):document.getElementById('_ps_min'))||{value:5000}).value)||5000;
+  s.payoutsBlockedReason = ((_ge?_ge('_ps_reason'):document.getElementById('_ps_reason'))||{value:''}).value;
+  _prtSave(); _prtCm(); _prtToast('Paramètres enregistrés'); _prtRe();
+}
+
+// ── APPLICATION du code parrainage à une vente ─────────────────────────────
+// À appeler depuis confirmerAchat() / validerAbonnement() / autres ventes
+// data = { refType:'book'|'elearning'|'product', refId, refLabel, saleAmount, qty }
+function applyPartnerCode(code, data){
+  if(!code || !data) return null;
+  var codeUp = String(code).trim().toUpperCase();
+  var partner = (DB.partners||[]).find(function(p){return p.code===codeUp && p.status==='active';});
+  if(!partner) return null;
+  var L = _prtL();
+  var lv = L[partner.level||'bronze'] || L.bronze;
+  var pct = lv.commission;
+  var amount = Math.round((data.saleAmount||0) * pct);
+  if(amount<=0) return null;
+  var c = {
+    id: (typeof gid==='function')?gid():'com_'+Date.now(),
+    partnerId: partner.id,
+    type: 'sale',
+    refType: data.refType || 'other',
+    refId: data.refId || '',
+    refLabel: data.refLabel || '',
+    saleAmount: data.saleAmount||0,
+    commissionPct: pct,
+    commissionAmount: amount,
+    qty: data.qty || 1,
+    status: 'pending',
+    date: (typeof today==='function')?today():new Date().toISOString().substring(0,10)
+  };
+  if(!DB.commissions) DB.commissions=[];
+  DB.commissions.push(c);
+  if(!partner.stats) partner.stats={salesCount:0,totalCommission:0,paidOut:0,pending:0};
+  partner.stats.salesCount = (partner.stats.salesCount||0) + (c.qty||1);
+  partner.stats.totalCommission = (partner.stats.totalCommission||0) + amount;
+  partner.stats.pending = (partner.stats.pending||0) + amount;
+  calculatePartnerLevel(partner.id);
+  _prtSave();
+  return c;
+}
+
+// ── RECALCUL du palier — MIX ouvrages + abos + autres ──────────────────────
+function calculatePartnerLevel(partnerId){
+  var partner = (DB.partners||[]).find(function(p){return p.id===partnerId;});
+  if(!partner) return;
+  var L = _prtL();
+  // Compte TOUTES les commissions de type 'sale' non annulées (mix demandé par Jacques)
+  var totalSales = (DB.commissions||[])
+    .filter(function(c){return c.partnerId===partnerId && c.type==='sale' && c.status!=='cancelled';})
+    .reduce(function(s,c){return s + (c.qty||1);}, 0);
+  var newLevel = 'bronze';
+  ['diamant','or','argent','bronze'].forEach(function(lv){
+    if(newLevel==='bronze' && lv!=='bronze' && totalSales >= (L[lv].min||0)) newLevel = lv;
+  });
+  if(newLevel !== partner.level){
+    var bonus = (L[newLevel].bonusFixe||0);
+    if(bonus>0){
+      if(!DB.commissions) DB.commissions=[];
+      DB.commissions.push({
+        id: (typeof gid==='function')?gid():'com_'+Date.now(),
+        partnerId: partner.id,
+        type: 'level_bonus',
+        refType: 'palier',
+        refLabel: 'Palier '+L[newLevel].label,
+        commissionAmount: bonus,
+        commissionPct: 0,
+        status: 'pending',
+        date: (typeof today==='function')?today():new Date().toISOString().substring(0,10)
+      });
+      if(!partner.stats) partner.stats={};
+      partner.stats.totalCommission = (partner.stats.totalCommission||0) + bonus;
+      partner.stats.pending = (partner.stats.pending||0) + bonus;
+    }
+    partner.level = newLevel;
+    if(!partner.stats) partner.stats={};
+    partner.stats.levelUnlockedAt = (typeof today==='function')?today():new Date().toISOString().substring(0,10);
+    if(typeof autoNotify==='function'){
+      autoNotify('🎉 Nouveau palier atteint',
+        partner.name+' · '+L[newLevel].badge+' '+L[newLevel].label+(bonus?' (+ bonus '+_prtFmt(bonus)+')':''),
+        'admin');
+    }
+  }
+}
+
+// ── ESPACE PARTENAIRE (vue connectée — placeholder S1 light) ───────────────
+function pgPartnerPortal(){
+  // Cherche un partenaire correspondant à la session courante (par email ou tel)
+  var SES = (typeof window!=='undefined' && window.SES) ? window.SES : null;
+  var partner = null;
+  if(SES && (DB.partners||[]).length){
+    partner = (DB.partners||[]).find(function(p){
+      return (SES.email && p.email===SES.email) || (SES.tel && p.tel===SES.tel);
+    });
+  }
+  if(!partner){
+    return '<div style="max-width:560px;margin:30px auto;text-align:center;padding:20px">'
+      + '<div style="font-size:48px">🔒</div>'
+      + '<div style="font-size:18px;font-weight:800;margin:10px 0">Espace Partenaire</div>'
+      + '<div style="font-size:13px;color:var(--ink3);margin-bottom:14px">Connectez-vous avec l\'email/téléphone utilisé lors de votre candidature.</div>'
+      + '<button class="btn bi" onclick="_prtGo(\'partenariat\')">→ Voir les programmes</button></div>';
+  }
+  var L = _prtL();
+  var lv = L[partner.level||'bronze'] || L.bronze;
+  var myComm = (DB.commissions||[]).filter(function(c){return c.partnerId===partner.id;});
+  var nextLv = partner.level==='diamant' ? null : (partner.level==='or'?'diamant':(partner.level==='argent'?'or':'argent'));
+  var salesCount = (partner.stats||{}).salesCount||0;
+  var toNext = nextLv ? Math.max(0, L[nextLv].min - salesCount) : 0;
+  var h = '<div class="pgt">'+lv.badge+' Espace Partenaire — '+_prtSafe(partner.name)+'</div>';
+  h += '<div style="background:linear-gradient(135deg,'+lv.color+'33,'+lv.color+'08);border:2px solid '+lv.color+';border-radius:14px;padding:18px;margin-bottom:14px;text-align:center">'
+    + '<div style="font-size:42px">'+lv.badge+'</div>'
+    + '<div style="font-size:18px;font-weight:800;color:#142554">Palier '+lv.label+' · '+Math.round(lv.commission*100)+'% commission</div>'
+    + (nextLv ? '<div style="font-size:12px;color:var(--ink3);margin-top:6px">Plus que <strong>'+toNext+'</strong> ventes pour passer '+L[nextLv].badge+' '+L[nextLv].label+'</div>' : '<div style="font-size:12px;color:#059669;margin-top:6px">🏆 Palier maximal atteint !</div>')
+    + '</div>';
+  h += '<div style="background:#142554;color:#fff;padding:16px;border-radius:12px;text-align:center;margin-bottom:14px">'
+    + '<div style="font-size:12px;color:#cbd5e1">Votre code parrainage</div>'
+    + '<div style="font-family:monospace;font-size:28px;font-weight:800;color:#FFC93C;letter-spacing:2px;margin:6px 0">'+_prtSafe(partner.code)+'</div>'
+    + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'
+    +   '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:700;font-size:12px" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+partner.code+'\').then(function(){toast(\'Code copié !\')});">📋 Copier le code</button>'
+    +   '<button class="btn" style="background:#fff;color:#142554;font-weight:700;font-size:12px" onclick="generatePartnerCertificate(\''+partner.id+'\')">📜 Télécharger mon certificat</button>'
+    + '</div>'
+    + '</div>';
+  // ─── S4 — KYC + Contrat (si le type le requiert) ───
+  if(_kycRequiredDocs(partner.type).length > 0){
+    var kycSt = _kycStatus(partner.id);
+    var ctr = (DB.partnerContracts||{})[partner.id];
+    h += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:16px;margin-bottom:14px">'
+      + '<div style="font-weight:800;font-size:14px;color:#142554;margin-bottom:10px">📋 Démarches institutionnelles</div>'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #F3F4F6">'
+      +   '<div><div style="font-size:13px;font-weight:700">📎 Documents KYC</div>'
+      +     '<div style="font-size:11px;color:'+kycSt.color+'">'+kycSt.icon+' '+kycSt.label+'</div></div>'
+      +   '<button class="btn bi xs" onclick="mPartnerKYCUpload(\''+partner.id+'\')">'+(kycSt.status==='not_started'?'📤 Téléverser':'👁 Gérer')+'</button>'
+      + '</div>'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">'
+      +   '<div><div style="font-size:13px;font-weight:700">📄 Contrat de partenariat</div>'
+      +     '<div style="font-size:11px;color:'+(ctr && ctr.signedAt?'#10B981':kycSt.status==='approved'?'#F59E0B':'#9CA3AF')+'">'
+      +       (ctr && ctr.signedAt ? '✅ Signé le '+_prtSafe(ctr.signedAt) : (kycSt.status==='approved' ? '⏳ À signer' : '⚪ KYC requis d\'abord'))
+      +     '</div></div>'
+      +   (kycSt.status==='approved' && !(ctr && ctr.signedAt) ? '<button class="btn bi xs" onclick="mPartnerSignContract(\''+partner.id+'\')">✍️ Signer</button>'
+        : ctr && ctr.signedAt ? '<button class="btn bo xs" onclick="generatePartnerContract(\''+partner.id+'\')">📄 Télécharger</button>'
+        : '<button class="btn bo xs" disabled style="opacity:.5">— en attente —</button>')
+      + '</div></div>';
+  }
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px">'
+    + _prtKpiCard('📊', 'Ventes générées', salesCount, '#3B82F6')
+    + _prtKpiCard('💰', 'Total commission', _prtFmt((partner.stats||{}).totalCommission||0), '#10B981')
+    + _prtKpiCard('⏳', 'En attente', _prtFmt((partner.stats||{}).pending||0), '#F59E0B')
+    + _prtKpiCard('🏦', 'Déjà versé', _prtFmt((partner.stats||{}).paidOut||0), '#6B7280')
+    + '</div>';
+  var payoutsBlocked = !(DB.partnerSettings && DB.partnerSettings.payoutsEnabled);
+  if(payoutsBlocked){
+    h += '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:12px;border-radius:8px;font-size:13px;margin-bottom:14px">'
+      + '⏸ <strong>Versements en préparation</strong> — '+_prtSafe((DB.partnerSettings||{}).payoutsBlockedReason||'')+'. Vos commissions sont enregistrées et seront versées dès l\'activation.</div>';
+  }
+  h += '<div class="ct">📜 Historique de vos commissions</div>';
+  if(!myComm.length){
+    h += '<div style="text-align:center;padding:30px;color:var(--ink3);background:#F9FAFB;border-radius:10px;font-size:13px">Aucune commission pour l\'instant. Partagez votre code <strong>'+partner.code+'</strong> à vos contacts !</div>';
+  } else {
+    h += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;overflow:hidden">';
+    myComm.slice().reverse().slice(0,30).forEach(function(c){
+      h += '<div style="padding:10px 12px;border-bottom:1px solid #F3F4F6;display:flex;justify-content:space-between;gap:10px;font-size:13px">'
+        + '<div><div>'+_prtSafe(c.refLabel||c.refType)+'</div><div style="font-size:11px;color:var(--ink4)">'+_prtSafe(c.date)+(c.type==='level_bonus'?' · 🎁 Bonus palier':'')+'</div></div>'
+        + '<div style="text-align:right"><div style="font-weight:700;color:#059669">+'+_prtFmt(c.commissionAmount)+'</div><div style="font-size:10px;color:'+(c.status==='paid'?'#059669':'#F59E0B')+'">'+(c.status==='paid'?'✓ versé':'⏳ en attente')+'</div></div>'
+        + '</div>';
+    });
+    h += '</div>';
+  }
+  return h;
+}
+
+/* ═══════════════════ CERTIFICATS PARTENARIAT (S2) ═════════════════════════
+   Génération de certificats PDF officiels pour chaque type de partenaire :
+     - chef_etab    → Label « Centre d'Excellence VÉRITAS »
+     - enseignant   → Certificat d'Ambassadeur VÉRITAS
+     - createur     → Certificat Ambassadeur Officiel
+     - eleve_leader → Certificat Ambassadeur VÉRITAS Junior
+     - autres       → Certificat de Partenariat
+   + page publique de vérification d'authenticité avec QR code
+═════════════════════════════════════════════════════════════════════════════ */
+
+// Configuration des certificats par type
+function _prtCertConfig(type){
+  var configs = {
+    chef_etab:    { titre:'Label Centre d\'Excellence', subtitle:'CENTRE D\'EXCELLENCE VERITAS', emoji:'🏆', accent:'#FFD700', mention:'reconnue à' },
+    enseignant:   { titre:'Certificat d\'Ambassadeur',  subtitle:'AMBASSADEUR PEDAGOGIQUE VERITAS', emoji:'🎓', accent:'#3C8DFF', mention:'décerné à' },
+    createur:     { titre:'Certificat d\'Ambassadeur',  subtitle:'AMBASSADEUR OFFICIEL VERITAS', emoji:'💎', accent:'#7C3AED', mention:'décerné à' },
+    eleve_leader: { titre:'Certificat Ambassadeur Junior', subtitle:'AMBASSADEUR VERITAS JUNIOR', emoji:'⭐', accent:'#F59E0B', mention:'décerné à' },
+    inspecteur:   { titre:'Certificat d\'Expert Associé', subtitle:'EXPERT PEDAGOGIQUE VERITAS', emoji:'📚', accent:'#0EA5E9', mention:'décerné à' },
+    librairie:    { titre:'Certificat de Partenariat',  subtitle:'POINT DE VENTE PARTENAIRE VERITAS', emoji:'🏪', accent:'#10B981', mention:'reconnu à' },
+    universite:   { titre:'Convention de Partenariat',  subtitle:'INSTITUTION PARTENAIRE VERITAS', emoji:'🏛️', accent:'#6366F1', mention:'établie avec' },
+    sponsor:      { titre:'Certificat de Partenariat',  subtitle:'PARTENAIRE INSTITUTIONNEL VERITAS', emoji:'🌍', accent:'#0F766E', mention:'décerné à' },
+    parent:       { titre:'Adhésion Club Parents',      subtitle:'MEMBRE DU CLUB PARENTS VERITAS', emoji:'👨‍👩‍👧', accent:'#EC4899', mention:'décernée à' }
+  };
+  return configs[type] || { titre:'Certificat de Partenariat', subtitle:'PARTENAIRE VERITAS', emoji:'🤝', accent:'#142554', mention:'décerné à' };
+}
+
+// Génère ou récupère l'ID et le token de vérification du certificat
+function _prtCertEnsure(partner){
+  if(!partner.certificate){
+    var year = new Date().getFullYear();
+    var seq = ((DB.partners||[]).filter(function(p){return p.certificate;}).length + 1);
+    var seqStr = ('0000'+seq).slice(-4);
+    var token = Math.random().toString(36).slice(2,10).toUpperCase();
+    partner.certificate = {
+      id: 'VRT-CERT-'+year+'-'+seqStr,
+      token: token,
+      issuedAt: (typeof today==='function')?today():new Date().toISOString().substring(0,10),
+      issuedBy: 'Jacques Miterand TAKOU - Centre VERITAS Douala'
+    };
+    _prtSave();
+  }
+  return partner.certificate;
+}
+
+// URL de vérification publique
+function _prtCertVerifyUrl(cert){
+  var base = (window.location.origin || 'https://veritas-school.com');
+  return base + '/#verifier-certificat?cert=' + encodeURIComponent(cert.id) + '&token=' + encodeURIComponent(cert.token);
+}
+
+// Convertit chaîne avec accents en ASCII (pour jsPDF helvetica)
+function _prtAscii(s){
+  if(!s) return '';
+  try { return String(s).normalize('NFD').replace(/[̀-ͯ]/g,''); }
+  catch(e){ return String(s); }
+}
+
+// Génération du PDF via jsPDF — format paysage A4
+function generatePartnerCertificate(partnerId){
+  var partner = (DB.partners||[]).find(function(p){return p.id===partnerId;});
+  if(!partner){ _prtToast('Partenaire introuvable','warn'); return; }
+  if(partner.status!=='active'){ _prtToast('Le partenaire doit être actif pour générer un certificat','warn'); return; }
+  var jsPDFlib = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  if(!jsPDFlib){ _prtToast('Bibliothèque PDF non chargée — rechargez la page','warn'); return; }
+  var cfg = _prtCertConfig(partner.type);
+  var L = _prtL();
+  var lv = L[partner.level||'bronze'] || L.bronze;
+  var cert = _prtCertEnsure(partner);
+  var typeLabel = (DB.partnerTypes && DB.partnerTypes[partner.type]) ? DB.partnerTypes[partner.type].label : partner.type;
+  var verifyUrl = _prtCertVerifyUrl(cert);
+  var qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=2&data='+encodeURIComponent(verifyUrl);
+
+  var doc = new jsPDFlib({orientation:'landscape', unit:'mm', format:'a4'}); // 297 × 210 mm
+  var W = 297, H = 210;
+
+  // Fond bleu nuit
+  doc.setFillColor(20,37,84);
+  doc.rect(0,0,W,H,'F');
+  // Bandeaux or
+  doc.setFillColor(255,201,60);
+  doc.rect(0,0,W,6,'F');
+  doc.rect(0,H-6,W,6,'F');
+
+  // Bordures intérieures
+  doc.setDrawColor(255,201,60);
+  doc.setLineWidth(0.8);
+  doc.rect(10,12,W-20,H-24,'S');
+  doc.setLineWidth(0.3);
+  doc.rect(12,14,W-24,H-28,'S');
+
+  // En-tête
+  doc.setTextColor(255,201,60);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(11);
+  doc.text('VERITAS ACADEMY', W/2, 24, {align:'center'});
+  doc.setTextColor(220,220,240);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.text('Centre de repetitions - Douala, Cameroun - veritas-school.com', W/2, 30, {align:'center'});
+
+  // Titre certificat
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','italic');
+  doc.setFontSize(14);
+  doc.text(_prtAscii(cfg.titre), W/2, 50, {align:'center'});
+
+  // Sous-titre majuscules
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(22);
+  doc.setTextColor(255,201,60);
+  doc.text(_prtAscii(cfg.subtitle), W/2, 64, {align:'center'});
+
+  // Trait or
+  doc.setDrawColor(255,201,60);
+  doc.setLineWidth(0.5);
+  doc.line(W/2-50, 70, W/2+50, 70);
+
+  // Mention décerné à
+  doc.setTextColor(200,200,220);
+  doc.setFont('helvetica','italic');
+  doc.setFontSize(11);
+  doc.text(_prtAscii(cfg.mention), W/2, 82, {align:'center'});
+
+  // Nom du partenaire
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(28);
+  var nameClean = _prtAscii(partner.name||'').toUpperCase();
+  doc.text(nameClean, W/2, 96, {align:'center'});
+  var nameW = doc.getTextWidth(nameClean);
+  doc.setDrawColor(255,201,60);
+  doc.setLineWidth(0.4);
+  doc.line(W/2 - nameW/2 - 4, 99, W/2 + nameW/2 + 4, 99);
+
+  // Type de partenariat
+  doc.setTextColor(200,200,220);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(11);
+  doc.text('en qualite de ' + _prtAscii(typeLabel), W/2, 108, {align:'center'});
+
+  // Palier
+  doc.setFontSize(13);
+  doc.setTextColor(255,201,60);
+  doc.setFont('helvetica','bold');
+  doc.text('Palier : ' + _prtAscii(lv.label), W/2, 118, {align:'center'});
+
+  // Code parrainage
+  doc.setFontSize(10);
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','normal');
+  doc.text('Code parrainage personnel : ', W/2 - 28, 128, {align:'center'});
+  doc.setFont('courier','bold');
+  doc.setTextColor(255,201,60);
+  doc.text(partner.code||'', W/2 + 20, 128, {align:'center'});
+
+  // Bloc inférieur : QR à droite
+  try {
+    doc.addImage(qrUrl, 'PNG', W-50, H-58, 32, 32);
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(7);
+    doc.text('Verifier l\'authenticite', W-34, H-22, {align:'center'});
+  } catch(e){
+    doc.setFontSize(7);
+    doc.setTextColor(255,255,255);
+    doc.text('Verification : ' + verifyUrl, W-50, H-22);
+  }
+
+  // Signature à gauche
+  doc.setDrawColor(255,201,60);
+  doc.setLineWidth(0.3);
+  doc.line(20, H-30, 90, H-30);
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','italic');
+  doc.setFontSize(9);
+  doc.text('Jacques Miterand TAKOU', 55, H-25, {align:'center'});
+  doc.setFontSize(7);
+  doc.setTextColor(200,200,220);
+  doc.text('Fondateur - VERITAS Academy', 55, H-20, {align:'center'});
+
+  // Date + N° certificat au centre
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.text('Delivre le ' + cert.issuedAt + ' a Douala, Cameroun', W/2, H-30, {align:'center'});
+  doc.setFont('courier','bold');
+  doc.setFontSize(9);
+  doc.setTextColor(255,201,60);
+  doc.text('N. ' + cert.id + ' - Token ' + cert.token, W/2, H-22, {align:'center'});
+
+  // Copyright bas
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(6);
+  doc.setTextColor(160,160,180);
+  doc.text('(c) 2024-2026 Jacques Miterand TAKOU (Mythe Errant) - Tous droits reserves - Loi camerounaise n. 2000/011 + Convention de Berne', W/2, H-9, {align:'center'});
+
+  var safeName = (partner.name||'partenaire').replace(/[^a-zA-Z0-9_-]/g,'_').substring(0,30);
+  var filename = 'VERITAS_Certificat_' + cert.id + '_' + safeName + '.pdf';
+  doc.save(filename);
+  _prtToast('Certificat PDF généré : ' + cert.id, 'ok');
+}
+
+// PAGE PUBLIQUE DE VÉRIFICATION
+function pgCertificateVerify(){
+  var params = {};
+  try {
+    var hash = window.location.hash || '';
+    var qIdx = hash.indexOf('?');
+    if(qIdx>=0){
+      var qs = hash.substring(qIdx+1);
+      qs.split('&').forEach(function(kv){
+        var p = kv.split('=');
+        params[decodeURIComponent(p[0]||'')] = decodeURIComponent(p[1]||'');
+      });
+    }
+  } catch(e){}
+  var certId = params.cert || '';
+  var token = params.token || '';
+  if(!certId){
+    return '<div style="max-width:560px;margin:30px auto;padding:20px">'
+      + '<div class="pgt" style="text-align:center">🔍 Vérification de certificat</div>'
+      + '<div style="text-align:center;color:var(--ink3);font-size:13px;margin-bottom:18px">Entrez le numéro et le token figurant sur le certificat pour vérifier son authenticité.</div>'
+      + '<div class="fg"><span class="fl">Numéro de certificat (N°)</span><input class="fi" id="_cvId" placeholder="VRT-CERT-2026-0001"></div>'
+      + '<div class="fg"><span class="fl">Token de sécurité</span><input class="fi" id="_cvTk" placeholder="8 caractères" maxlength="12"></div>'
+      + '<button class="btn bi" style="width:100%;margin-top:10px" onclick="_cvSubmit()">🔍 Vérifier le certificat</button>'
+      + '</div>';
+  }
+  var partner = (DB.partners||[]).find(function(p){
+    return p.certificate && p.certificate.id === certId;
+  });
+  if(!partner){
+    return _prtCertResult('invalid', certId, null, 'Aucun certificat ne correspond à ce numéro.');
+  }
+  if(partner.certificate.token !== token){
+    return _prtCertResult('invalid', certId, partner, 'Le token de sécurité est invalide.');
+  }
+  if(partner.status !== 'active'){
+    return _prtCertResult('suspended', certId, partner, 'Ce partenariat est temporairement suspendu.');
+  }
+  return _prtCertResult('valid', certId, partner, '');
+}
+
+function _cvSubmit(){
+  var id = ((typeof _ge==='function'?_ge('_cvId'):document.getElementById('_cvId'))||{value:''}).value.trim();
+  var tk = ((typeof _ge==='function'?_ge('_cvTk'):document.getElementById('_cvTk'))||{value:''}).value.trim().toUpperCase();
+  if(!id || !tk){ _prtToast('Numéro et token requis','warn'); return; }
+  window.location.hash = '#verifier-certificat?cert='+encodeURIComponent(id)+'&token='+encodeURIComponent(tk);
+  _prtGo('verifier-certificat');
+}
+
+function _prtCertResult(status, certId, partner, errorMsg){
+  if(status==='valid'){
+    var cfg = _prtCertConfig(partner.type);
+    var L = _prtL();
+    var lv = L[partner.level||'bronze']||L.bronze;
+    var typeLabel = (DB.partnerTypes && DB.partnerTypes[partner.type]) ? DB.partnerTypes[partner.type].label : partner.type;
+    return '<div style="max-width:620px;margin:30px auto;padding:20px">'
+      + '<div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">'
+      +   '<div style="font-size:56px;margin-bottom:6px">✅</div>'
+      +   '<div style="font-size:22px;font-weight:800;margin-bottom:4px">Certificat AUTHENTIQUE</div>'
+      +   '<div style="font-size:13px;opacity:.9">Délivré par Centre VÉRITAS et inscrit dans notre base officielle</div>'
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:20px">'
+      +   '<div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #F3F4F6">'
+      +     '<div style="font-size:48px">'+cfg.emoji+'</div>'
+      +     '<div><div style="font-size:18px;font-weight:800;color:#142554">'+_prtSafe(partner.name)+'</div>'
+      +       '<div style="font-size:13px;color:var(--ink3)">'+_prtSafe(typeLabel)+'</div></div>'
+      +   '</div>'
+      +   '<div style="display:grid;grid-template-columns:140px 1fr;gap:10px;font-size:13px;line-height:1.7">'
+      +     '<div style="color:var(--ink3)">N° de certificat</div><div style="font-family:monospace;font-weight:700">'+_prtSafe(certId)+'</div>'
+      +     '<div style="color:var(--ink3)">Type de partenariat</div><div>'+cfg.subtitle+'</div>'
+      +     '<div style="color:var(--ink3)">Palier actuel</div><div>'+lv.badge+' '+lv.label+'</div>'
+      +     '<div style="color:var(--ink3)">Date de délivrance</div><div>'+_prtSafe(partner.certificate.issuedAt)+'</div>'
+      +     '<div style="color:var(--ink3)">Délivré par</div><div>'+_prtSafe(partner.certificate.issuedBy||'Centre VÉRITAS')+'</div>'
+      +     (partner.etablissement?'<div style="color:var(--ink3)">Établissement</div><div>'+_prtSafe(partner.etablissement)+'</div>':'')
+      +     (partner.ville?'<div style="color:var(--ink3)">Ville</div><div>'+_prtSafe(partner.ville)+'</div>':'')
+      +   '</div>'
+      + '</div>'
+      + '<div style="text-align:center;margin-top:18px;color:var(--ink3);font-size:12px">'
+      +   '<a href="https://wa.me/237697637739" target="_blank" style="color:#25D366;font-weight:700;text-decoration:none">📞 Contacter VÉRITAS pour confirmation</a>'
+      + '</div></div>';
+  }
+  var color = status==='suspended' ? '#F59E0B' : '#DC2626';
+  var emoji = status==='suspended' ? '⏸' : '❌';
+  var title = status==='suspended' ? 'Partenariat SUSPENDU' : 'Certificat INVALIDE';
+  return '<div style="max-width:560px;margin:30px auto;padding:20px">'
+    + '<div style="background:linear-gradient(135deg,'+color+',#0009);color:#fff;border-radius:14px;padding:24px;text-align:center">'
+    +   '<div style="font-size:56px;margin-bottom:6px">'+emoji+'</div>'
+    +   '<div style="font-size:22px;font-weight:800;margin-bottom:4px">'+title+'</div>'
+    +   '<div style="font-size:13px;opacity:.95;margin-top:8px">'+_prtSafe(errorMsg||'')+'</div>'
+    + '</div>'
+    + '<div style="text-align:center;margin-top:18px"><button class="btn bo" onclick="_prtGo(\'verifier-certificat\')">Réessayer</button></div>'
+    + '<div style="text-align:center;margin-top:14px;color:var(--ink3);font-size:12px">En cas de doute, contactez directement le Centre VÉRITAS :<br>'
+    + '<a href="https://wa.me/237697637739" target="_blank" style="color:#25D366;font-weight:700">📞 +237 697 637 739</a></div>'
+    + '</div>';
+}
+
+/* ═══════════════════ AMBASSADEURS JUNIOR — S3 ═══════════════════════════════
+   Gamification + classement + candidature simplifiée pour les élèves leaders.
+   Réutilise l'infrastructure existante :
+     - DB.userStreaks[userId]  → { xp, current, best, ... }
+     - VERITAS_XP.levels       → 6 paliers (Apprenti → Légende)
+     - VERITAS_BADGES          → 5 nouveaux badges Ambassadeur Junior ajoutés
+     - _checkBadges()          → débloque automatiquement
+     - DB.visitorAccounts      → pool d'élèves inscrits
+     - DB.partners[type='eleve_leader'] → partenaires actifs
+═════════════════════════════════════════════════════════════════════════════ */
+
+// Pseudonymise un nom : "Jacques TAKOU" → "J. T."
+function _ajPseudo(name){
+  if(!name) return 'Anonyme';
+  var parts = String(name).trim().split(/\s+/);
+  return parts.map(function(p){return (p.charAt(0)||'?').toUpperCase()+'.';}).join(' ');
+}
+
+// Récupère le partenaire eleve_leader correspondant à un compte visiteur
+function _ajPartnerOf(account){
+  if(!account) return null;
+  return (DB.partners||[]).find(function(p){
+    return p.type==='eleve_leader' && p.status==='active' && (
+      (p.accountId && p.accountId===account.id) ||
+      (p.email && p.email===account.email) ||
+      (p.tel && p.tel===account.tel)
+    );
+  });
+}
+
+// Construit un score composite pour le classement
+function _ajScore(account, partner){
+  var streak = (DB.userStreaks||{})[account.id] || {};
+  var badges = (DB.userBadges||{})[account.id] || [];
+  var sales = 0;
+  if(partner){
+    sales = (DB.commissions||[])
+      .filter(function(c){return c.partnerId===partner.id && c.type==='sale' && c.status!=='cancelled';})
+      .reduce(function(s,c){return s + (c.qty||1);}, 0);
+  }
+  // Pondération : XP × 1 + badges × 50 + ventes × 100
+  return (streak.xp||0) + (badges.length * 50) + (sales * 100);
+}
+
+// PAGE — Classement public Ambassadeurs Junior (Top 100)
+function pgLeaderboardJunior(){
+  var accounts = (DB.visitorAccounts||[]).slice();
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  var rows = accounts.map(function(a){
+    var p = _ajPartnerOf(a);
+    var streak = (DB.userStreaks||{})[a.id] || {};
+    var badges = (DB.userBadges||{})[a.id] || [];
+    var lv = (typeof _currentLevel==='function') ? _currentLevel(streak.xp||0) : {current:{title:'Apprenti'}};
+    var sales = p ? (DB.commissions||[])
+      .filter(function(c){return c.partnerId===p.id && c.type==='sale' && c.status!=='cancelled';})
+      .reduce(function(s,c){return s+(c.qty||1);},0) : 0;
+    return {
+      id: a.id,
+      name: a.nom || a.prenom || a.username || 'Anonyme',
+      pseudo: _ajPseudo(a.nom || a.prenom || a.username || ''),
+      ville: a.ville || '',
+      cls: a.classe || a.cls || '',
+      xp: streak.xp||0,
+      lv: lv.current.title,
+      badges: badges.length,
+      sales: sales,
+      ambassadeur: !!p,
+      score: _ajScore(a, p)
+    };
+  })
+  .filter(function(r){return r.score>0 || r.ambassadeur;})  // exclure totalement inactifs
+  .sort(function(a,b){return b.score - a.score;})
+  .slice(0,100);
+
+  var h = '<div style="max-width:780px;margin:0 auto;padding:0 14px">';
+  h += '<div class="pgt" style="text-align:center">🏆 Classement Ambassadeurs Junior</div>';
+  h += '<div style="text-align:center;color:var(--ink3);font-size:13px;margin-bottom:18px;font-style:italic">Top 100 des élèves les plus engagés sur VÉRITAS — XP, badges, recrutements.</div>';
+
+  // KPI haut de page
+  var nAmbassadeurs = (DB.partners||[]).filter(function(p){return p.type==='eleve_leader'&&p.status==='active';}).length;
+  var nApprenants = (DB.visitorAccounts||[]).length;
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px">'
+    + _prtKpiCard('🎯', 'Ambassadeurs actifs', nAmbassadeurs, '#F59E0B')
+    + _prtKpiCard('👥', 'Apprenants inscrits', nApprenants, '#3B82F6')
+    + _prtKpiCard('🏆', 'Au classement', rows.length, '#10B981')
+    + '</div>';
+
+  if(!rows.length){
+    h += '<div style="text-align:center;padding:40px;color:var(--ink3);background:#F9FAFB;border-radius:10px">Le classement démarre dès que des élèves accumulent XP, badges ou ventes. Sois le 1er !</div>';
+  } else {
+    h += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden">'
+      + '<div style="display:grid;grid-template-columns:50px 1fr 60px 60px 60px;gap:10px;padding:10px 14px;background:#F9FAFB;border-bottom:1px solid #E5E7EB;font-size:11px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px">'
+      +   '<div>Rang</div><div>Apprenant</div><div style="text-align:right">XP</div><div style="text-align:right">🏅</div><div style="text-align:right">🛒</div>'
+      + '</div>';
+    rows.forEach(function(r, idx){
+      var rang = idx+1;
+      var rangBadge = rang===1?'🥇':rang===2?'🥈':rang===3?'🥉':'#'+rang;
+      var bg = (ses && ses.id===r.id) ? '#FEF3C7' : (idx<3 ? '#FFFBEB' : '#fff');
+      var label = r.ambassadeur ? '<span style="background:#FFC93C;color:#142554;font-size:9px;font-weight:800;padding:2px 6px;border-radius:6px;margin-left:6px">AMBASSADEUR</span>' : '';
+      h += '<div style="display:grid;grid-template-columns:50px 1fr 60px 60px 60px;gap:10px;padding:10px 14px;border-bottom:1px solid #F3F4F6;background:'+bg+';font-size:13px;align-items:center">'
+        +   '<div style="font-weight:800;font-size:14px">'+rangBadge+'</div>'
+        +   '<div><div style="font-weight:700">'+_prtSafe(r.pseudo)+label+'</div>'
+        +     '<div style="font-size:11px;color:var(--ink3)">'+_prtSafe(r.lv)+(r.ville?' · '+_prtSafe(r.ville):'')+(r.cls?' · '+_prtSafe(r.cls):'')+'</div></div>'
+        +   '<div style="text-align:right;font-weight:700;color:#3C8DFF">'+r.xp+'</div>'
+        +   '<div style="text-align:right;font-weight:700;color:#F59E0B">'+r.badges+'</div>'
+        +   '<div style="text-align:right;font-weight:700;color:#10B981">'+r.sales+'</div>'
+        + '</div>';
+    });
+    h += '</div>';
+  }
+
+  // CTA
+  h += '<div style="background:linear-gradient(135deg,#142554,#1e3a8a);color:#fff;padding:24px;border-radius:14px;text-align:center;margin:24px 0">'
+    +   '<div style="font-size:48px;margin-bottom:6px">⭐</div>'
+    +   '<div style="font-size:17px;font-weight:800;margin-bottom:8px">Pas encore Ambassadeur Junior ?</div>'
+    +   '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">Active ton profil en 1 clic. Reçois ton certificat officiel, partage ton code à tes camarades, gravis les paliers.</div>'
+    +   '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 26px;font-size:14px" onclick="mCandidaterAmbassadeurJunior()">🎯 Devenir Ambassadeur Junior</button>'
+    + '</div>';
+
+  h += '<div style="text-align:center;color:var(--ink3);font-size:11px;margin:14px auto 24px">Classement mis à jour en temps réel · Pseudonymisation pour la confidentialité · Mise à jour : '+(typeof today==='function'?today():'aujourd\'hui')+'</div>';
+  h += '</div>';
+  return h;
+}
+
+// MODALE — Candidature simplifiée Ambassadeur Junior
+// Auto-rempli depuis SES si compte connecté. Auto-validation si XP > 50 (seuil léger).
+function mCandidaterAmbassadeurJunior(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(!ses || !ses.id){
+    M('🔒 Connexion requise', 'Pour devenir Ambassadeur Junior, créez d\'abord un compte élève.',
+      '<div style="text-align:center;padding:18px">Tu peux t\'inscrire gratuitement en 30 secondes — c\'est la première étape pour devenir Ambassadeur VÉRITAS Junior.</div>',
+      '<button class="btn bo" onclick="cm()">Annuler</button>'
+      +'<button class="btn bi" onclick="cm();if(typeof showRegisterForm===\'function\')showRegisterForm()">✨ Créer mon compte</button>');
+    return;
+  }
+  // Déjà ambassadeur ?
+  var account = ses;
+  var existing = _ajPartnerOf(account);
+  if(existing){
+    M('✅ Tu es déjà Ambassadeur Junior !', 'Code : '+_prtSafe(existing.code),
+      '<div style="text-align:center;padding:14px"><div style="font-size:48px">🎉</div>'
+      + '<div style="margin:10px 0;font-size:13px">Ton code parrainage est <strong style="font-family:monospace;color:#FFC93C">'+_prtSafe(existing.code)+'</strong>.</div>'
+      + '<div style="font-size:12px;color:var(--ink3)">Consulte ton espace partenaire pour suivre tes commissions et télécharger ton certificat.</div></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button>'
+      +'<button class="btn bi" onclick="cm();_prtGo(\'mes-partenariats\')">Mon espace</button>');
+    return;
+  }
+  // Candidature existante en attente ?
+  var pending = (DB.partnerApplications||[]).find(function(a){
+    return a.type==='eleve_leader' && a.status==='pending' && (
+      a.email===ses.email || a.tel===ses.tel
+    );
+  });
+  if(pending){
+    M('⏳ Candidature en attente', '',
+      '<div style="text-align:center;padding:18px"><div style="font-size:48px">⏳</div>'
+      + '<div style="margin:10px 0">Ta candidature Ambassadeur Junior est déjà déposée et en cours de validation.</div>'
+      + '<div style="font-size:12px;color:var(--ink3)">Tu seras notifié(e) par WhatsApp au '+_prtSafe(pending.tel)+' dès qu\'elle sera validée.</div></div>',
+      '<button class="btn bi" onclick="cm()">Fermer</button>');
+    return;
+  }
+  // Pré-remplissage
+  var nom = ses.nom || ses.prenom || ses.username || '';
+  var email = ses.email || '';
+  var tel = ses.tel || '';
+  var ville = ses.ville || '';
+  var classe = ses.classe || ses.cls || '';
+
+  // Niveau actuel
+  var streak = (DB.userStreaks||{})[ses.id] || {xp:0};
+  var lv = (typeof _currentLevel==='function') ? _currentLevel(streak.xp||0) : null;
+  var nBadges = ((DB.userBadges||{})[ses.id] || []).length;
+  var seuilOK = (streak.xp||0) >= 50 || nBadges >= 3;
+
+  var body = '<div style="text-align:center;margin-bottom:14px">'
+    + '<div style="font-size:48px">🎯</div>'
+    + '<div style="font-size:14px;font-weight:800;color:#142554">Deviens Ambassadeur VÉRITAS Junior</div>'
+    + '<div style="font-size:11px;color:var(--ink3);margin-top:4px">Recommande VÉRITAS à tes camarades · Gagne badges, paliers, bourses</div>'
+    + '</div>';
+  // Bloc statut actuel
+  body += '<div style="background:'+(seuilOK?'#D1FAE5':'#FEF3C7')+';border-left:3px solid '+(seuilOK?'#10B981':'#F59E0B')+';padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px">'
+    + '<div style="font-weight:700;margin-bottom:4px">'+(seuilOK?'✅ Tu remplis les critères !':'⚠️ Seuil minimum non atteint')+'</div>'
+    + '<div>XP actuel : <strong>'+(streak.xp||0)+'</strong>'+(lv?' · Niveau : '+lv.current.title:'')+' · Badges : <strong>'+nBadges+'</strong></div>'
+    + (seuilOK ? '<div style="margin-top:4px">Ta candidature sera <strong>auto-validée</strong> sous quelques secondes.</div>'
+                : '<div style="margin-top:4px">Continue à jouer aux quiz et collecter des badges (seuil : 50 XP ou 3 badges) pour une validation automatique. Sinon, validation manuelle sous 48h.</div>')
+    + '</div>';
+  body += '<div class="fg"><span class="fl">Nom complet * </span><input class="fi" id="_ajNom" value="'+_prtSafe(nom)+'"></div>'
+    + '<div class="fg"><span class="fl">WhatsApp * </span><input class="fi" id="_ajTel" value="'+_prtSafe(tel)+'" placeholder="+237 6XX XX XX XX"></div>'
+    + '<div class="fg"><span class="fl">Email</span><input class="fi" id="_ajEmail" type="email" value="'+_prtSafe(email)+'"></div>'
+    + '<div class="fg"><span class="fl">Classe / Niveau</span><input class="fi" id="_ajClasse" value="'+_prtSafe(classe)+'" placeholder="Ex. Tle C, 3e, Probatoire"></div>'
+    + '<div class="fg"><span class="fl">Ville</span><input class="fi" id="_ajVille" value="'+_prtSafe(ville)+'"></div>'
+    + '<div class="fg"><span class="fl">Établissement</span><input class="fi" id="_ajEtab" placeholder="Nom de ton lycée/collège"></div>'
+    + '<div class="fg"><span class="fl">Pourquoi veux-tu être Ambassadeur ?</span><textarea class="fi" id="_ajMot" rows="2" placeholder="2-3 lignes sur ta motivation"></textarea></div>'
+    + '<label style="display:flex;align-items:flex-start;gap:8px;font-size:11px;color:var(--ink3);margin:10px 0"><input type="checkbox" id="_ajCgu" style="margin-top:2px"><span>J\'accepte les conditions du programme Ambassadeur Junior et la communication WhatsApp avec VÉRITAS.</span></label>';
+  M('🎯 Devenir Ambassadeur Junior', '',
+    body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_ajSubmit()">✨ Activer mon profil</button>',
+    true);
+}
+
+function _ajSubmit(){
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  var v = function(id){var e=typeof _ge==='function'?_ge(id):document.getElementById(id);return e?(e.value||'').trim():'';};
+  var nom = v('_ajNom'), tel = v('_ajTel'), email = v('_ajEmail');
+  var cgu = (typeof _ge==='function'?_ge('_ajCgu'):document.getElementById('_ajCgu'));
+  if(!nom){ _prtToast('Nom requis','warn'); return; }
+  if(!tel || tel.replace(/[^0-9]/g,'').length<8){ _prtToast('WhatsApp invalide','warn'); return; }
+  if(!cgu || !cgu.checked){ _prtToast('Coche les conditions','warn'); return; }
+  // Création de la candidature
+  var streak = ses ? ((DB.userStreaks||{})[ses.id]||{xp:0}) : {xp:0};
+  var nBadges = ses ? (((DB.userBadges||{})[ses.id])||[]).length : 0;
+  var seuilOK = (streak.xp||0) >= 50 || nBadges >= 3;
+  var app = {
+    id: (typeof gid==='function')?gid():'app_'+Date.now(),
+    type: 'eleve_leader',
+    status: seuilOK ? 'auto_pending' : 'pending',
+    nom: nom, email: email, tel: tel,
+    ville: v('_ajVille'),
+    etablissement: v('_ajEtab'),
+    classe: v('_ajClasse'),
+    motivation: v('_ajMot'),
+    accountId: ses ? ses.id : null,
+    submittedAt: (typeof today==='function')?today():new Date().toISOString().substring(0,10),
+    xpAtSubmit: streak.xp||0,
+    badgesAtSubmit: nBadges
+  };
+  if(!DB.partnerApplications) DB.partnerApplications=[];
+  DB.partnerApplications.push(app);
+  if(typeof autoNotify==='function'){
+    autoNotify('🎯 Nouvelle candidature Ambassadeur Junior',
+      nom+(seuilOK?' (auto-validation en cours)':' — à valider manuellement'),
+      'admin');
+  }
+  _prtSave();
+  _prtCm();
+  // Si seuil OK → auto-validation en 1,5s pour effet "magie"
+  if(seuilOK){
+    setTimeout(function(){
+      _ajAutoApprove(app.id);
+    }, 1500);
+    M('🎉 Candidature reçue !', '',
+      '<div style="text-align:center;padding:24px"><div style="font-size:64px;animation:pulse 1.5s infinite">⏳</div>'
+      + '<div style="font-size:16px;font-weight:800;margin:14px 0">Activation en cours…</div>'
+      + '<div style="font-size:12px;color:var(--ink3)">Tu remplis les critères : ton profil sera activé sous 2 secondes.</div></div>',
+      '<button class="btn bo" onclick="cm()">Patienter</button>');
+  } else {
+    M('🎉 Candidature reçue !', 'Validation manuelle sous 48h',
+      '<div style="text-align:center;padding:18px"><div style="font-size:48px">📨</div>'
+      + '<div style="margin:10px 0">Merci '+_prtSafe(nom)+'. Notre équipe te contacte par WhatsApp sous 48h ouvrables.</div>'
+      + '<div style="font-size:12px;color:var(--ink3)">Continue à gagner des XP et badges en attendant !</div></div>',
+      '<button class="btn bi" onclick="cm()">Fermer</button>');
+  }
+}
+
+// Auto-validation accélérée pour les candidatures Ambassadeur Junior qui remplissent les critères
+function _ajAutoApprove(appId){
+  var apps = DB.partnerApplications||[];
+  var idx = apps.findIndex(function(x){return x.id===appId;});
+  if(idx<0) return;
+  var a = apps[idx];
+  if(a.status!=='auto_pending') return;
+  var code = _genPartnerCode(a.nom);
+  var partner = {
+    id: (typeof gid==='function')?gid():'prt_'+Date.now(),
+    type: 'eleve_leader',
+    level: 'bronze',
+    status: 'active',
+    name: a.nom,
+    email: a.email,
+    tel: a.tel,
+    ville: a.ville,
+    classe: a.classe,
+    etablissement: a.etablissement,
+    code: code,
+    joinedAt: (typeof today==='function')?today():new Date().toISOString().substring(0,10),
+    appId: a.id,
+    accountId: a.accountId,
+    note: 'Auto-validation (XP '+(a.xpAtSubmit||0)+' · '+(a.badgesAtSubmit||0)+' badges)',
+    bankInfo: { type:'momo', tel:a.tel },
+    stats: { salesCount:0, totalCommission:0, paidOut:0, pending:0 }
+  };
+  if(!DB.partners) DB.partners=[];
+  DB.partners.push(partner);
+  a.status = 'approved';
+  a.approvedAt = partner.joinedAt;
+  a.partnerId = partner.id;
+  _prtSave();
+  // Vérifier les badges (junior_signup va se débloquer)
+  try { if(typeof _checkBadges==='function') _checkBadges(); } catch(e){}
+  _prtCm();
+  // Message de bienvenue
+  M('🎉 Tu es Ambassadeur Junior !', 'Code : '+code,
+    '<div style="text-align:center;padding:18px">'
+    + '<div style="font-size:64px;margin-bottom:10px">🎯</div>'
+    + '<div style="background:#142554;color:#fff;padding:16px;border-radius:12px;margin-bottom:14px">'
+    +   '<div style="font-size:11px;color:#cbd5e1">Ton code parrainage personnel</div>'
+    +   '<div style="font-family:monospace;font-size:28px;font-weight:800;color:#FFC93C;letter-spacing:2px;margin:6px 0">'+code+'</div>'
+    + '</div>'
+    + '<div style="font-size:13px;color:var(--ink2);text-align:left;line-height:1.7">'
+    +   '<strong>Comment ça marche :</strong><br>'
+    +   '1. Partage ton code à tes camarades<br>'
+    +   '2. Ils l\'utilisent à l\'achat → tu gagnes 5 à 12 % commission<br>'
+    +   '3. Tu débloques des badges et gravis Bronze → Diamant<br>'
+    +   '4. À chaque palier : récompense + certificat'
+    + '</div></div>',
+    '<button class="btn bo" onclick="cm();_prtGo(\'mes-partenariats\')">Mon espace</button>'
+    + ' <button class="btn bi" onclick="cm();if(typeof generatePartnerCertificate===\'function\')generatePartnerCertificate(\''+partner.id+'\')">📜 Certificat PDF</button>', true);
+}
+
+/* ═══════════════════ KYC + CONTRATS INSTITUTIONNELS (S4) ═════════════════════
+   Workflow complet pour partenaires institutionnels (inspecteurs, libraires,
+   universités, sponsors) :
+     - Upload de documents KYC par le partenaire (FileReader → data URL)
+     - Review admin (valider/refuser document par document)
+     - Génération de contrat de partenariat PDF
+     - Signature électronique simplifiée par le partenaire
+     - Vitrine publique des partenaires institutionnels avec logos
+═════════════════════════════════════════════════════════════════════════════ */
+
+// Documents KYC requis par type de partenaire
+function _kycRequiredDocs(type){
+  var requirements = {
+    inspecteur:  [
+      { id:'cni',      label:'Pièce d\'identité (CNI / passeport)', required:true },
+      { id:'arrete',   label:'Arrêté de nomination MINESEC',         required:true },
+      { id:'contact',  label:'Justificatif de coordonnées WhatsApp', required:false }
+    ],
+    chef_etab:   [
+      { id:'cni',      label:'CNI du chef d\'établissement',         required:true },
+      { id:'agrement', label:'Agrément MINESEC de l\'établissement', required:true },
+      { id:'arrete',   label:'Arrêté de nomination du chef',         required:true },
+      { id:'rib',      label:'RIB ou numéro MoMo de l\'établissement', required:false }
+    ],
+    librairie:   [
+      { id:'cni',      label:'CNI du gérant',                        required:true },
+      { id:'rccm',     label:'RCCM (Registre du Commerce)',          required:true },
+      { id:'niu',      label:'NIU (Numéro Identifiant Fiscal)',      required:true },
+      { id:'adresse',  label:'Justificatif d\'adresse (≤ 3 mois)',   required:true },
+      { id:'rib',      label:'RIB ou numéro MoMo',                   required:true },
+      { id:'photos',   label:'2 photos de la devanture',             required:false }
+    ],
+    universite:  [
+      { id:'agrement', label:'Décret de création / agrément',         required:true },
+      { id:'cni',      label:'CNI du représentant légal',             required:true },
+      { id:'lettre',   label:'Lettre de proposition de partenariat',  required:true },
+      { id:'rib',      label:'RIB de l\'institution',                 required:true }
+    ],
+    sponsor:     [
+      { id:'rccm',     label:'RCCM de l\'entreprise',                 required:true },
+      { id:'cni',      label:'CNI du dirigeant signataire',           required:true },
+      { id:'niu',      label:'NIU',                                   required:true },
+      { id:'logo',     label:'Logo HD (PNG ou SVG)',                  required:true },
+      { id:'rib',      label:'RIB de l\'entreprise',                  required:false }
+    ]
+  };
+  return requirements[type] || [];
+}
+
+// Statut global KYC pour un partenaire
+function _kycStatus(partnerId){
+  var kyc = (DB.partnerKYC||{})[partnerId];
+  if(!kyc || !kyc.documents || !kyc.documents.length) return { status:'not_started', label:'Non démarré', color:'#9CA3AF', icon:'⚪' };
+  var partner = (DB.partners||[]).find(function(p){return p.id===partnerId;});
+  if(!partner) return { status:'not_started', label:'Non démarré', color:'#9CA3AF', icon:'⚪' };
+  var required = _kycRequiredDocs(partner.type).filter(function(d){return d.required;});
+  var uploadedReq = required.filter(function(r){
+    return kyc.documents.some(function(d){return d.docType===r.id && d.status!=='rejected';});
+  });
+  if(uploadedReq.length < required.length) return { status:'incomplete', label:'Documents manquants ('+uploadedReq.length+'/'+required.length+')', color:'#F59E0B', icon:'⚠️' };
+  var hasPending = kyc.documents.some(function(d){return d.status==='pending';});
+  if(hasPending) return { status:'pending_review', label:'En cours de validation', color:'#3B82F6', icon:'⏳' };
+  var allApproved = kyc.documents.every(function(d){return d.status==='approved';});
+  if(allApproved) return { status:'approved', label:'KYC validé', color:'#10B981', icon:'✅' };
+  var hasRejected = kyc.documents.some(function(d){return d.status==='rejected';});
+  if(hasRejected) return { status:'rejected', label:'Documents refusés', color:'#DC2626', icon:'❌' };
+  return { status:'pending_review', label:'En cours de validation', color:'#3B82F6', icon:'⏳' };
+}
+
+// MODALE upload KYC côté partenaire
+function mPartnerKYCUpload(partnerId){
+  var partner = (DB.partners||[]).find(function(p){return p.id===partnerId;});
+  if(!partner){ _prtToast('Partenaire introuvable','warn'); return; }
+  var required = _kycRequiredDocs(partner.type);
+  if(!required.length){
+    M('ℹ️ KYC non requis', '', '<div style="text-align:center;padding:18px">Aucun document KYC n\'est requis pour ce type de partenariat.</div>',
+      '<button class="btn bi" onclick="cm()">OK</button>'); return;
+  }
+  if(!DB.partnerKYC[partnerId]) DB.partnerKYC[partnerId] = { documents:[], status:'incomplete', startedAt:(typeof today==='function')?today():new Date().toISOString().substring(0,10) };
+  var kyc = DB.partnerKYC[partnerId];
+  var st = _kycStatus(partnerId);
+  var body = '<div style="background:'+st.color+'15;border-left:3px solid '+st.color+';padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px">'
+    + '<strong>'+st.icon+' Statut KYC : '+st.label+'</strong>'
+    + (st.status==='rejected' && kyc.rejectionReason ? '<div style="margin-top:6px">Motif : '+_prtSafe(kyc.rejectionReason)+'</div>' : '')
+    + '</div>';
+  body += '<div style="font-size:12px;color:var(--ink3);margin-bottom:14px">Pour activer pleinement votre partenariat, téléversez les documents ci-dessous. Formats acceptés : PDF, JPG, PNG (max 5 Mo chacun).</div>';
+  required.forEach(function(r){
+    var existing = kyc.documents.find(function(d){return d.docType===r.id;});
+    var statusBadge = '';
+    if(existing){
+      var col = existing.status==='approved'?'#10B981':existing.status==='rejected'?'#DC2626':'#3B82F6';
+      var lab = existing.status==='approved'?'✓ Validé':existing.status==='rejected'?'✗ Refusé':'⏳ En cours';
+      statusBadge = '<span style="background:'+col+';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px">'+lab+'</span>';
+    }
+    body += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;margin-bottom:8px">'
+      + '<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:6px">'+_prtSafe(r.label)+(r.required?'<span style="color:#DC2626">*</span>':'')+statusBadge+'</div>'
+      + (existing ? '<div style="font-size:11px;color:var(--ink3);margin-bottom:6px">📎 '+_prtSafe(existing.fileName)+' · '+(existing.size?Math.round(existing.size/1024)+' Ko':'')+' · '+_prtSafe(existing.uploadedAt)+'</div>' : '')
+      + '<input type="file" id="_kycF_'+r.id+'" accept=".pdf,.jpg,.jpeg,.png" style="font-size:11px;width:100%" onchange="_kycSaveDoc(\''+partnerId+'\',\''+r.id+'\',this)">'
+      + '</div>';
+  });
+  M('📎 Documents KYC — '+_prtSafe(partner.name), '', body,
+    '<button class="btn bi" onclick="cm();_prtRe()">Fermer</button>', true);
+}
+
+// Sauvegarde d'un document uploadé
+function _kycSaveDoc(partnerId, docType, inputEl){
+  var f = inputEl && inputEl.files && inputEl.files[0];
+  if(!f){ _prtToast('Aucun fichier sélectionné','warn'); return; }
+  if(f.size > 5*1024*1024){ _prtToast('Fichier > 5 Mo refusé','warn'); inputEl.value=''; return; }
+  if(!DB.partnerKYC[partnerId]) DB.partnerKYC[partnerId] = { documents:[], status:'incomplete' };
+  var kyc = DB.partnerKYC[partnerId];
+  var reader = new FileReader();
+  reader.onload = function(e){
+    // Remove old doc of same type
+    kyc.documents = kyc.documents.filter(function(d){return d.docType!==docType;});
+    var doc = {
+      id: (typeof gid==='function')?gid():'doc_'+Date.now(),
+      docType: docType,
+      fileName: f.name,
+      mime: f.type || 'application/octet-stream',
+      size: f.size,
+      data: e.target.result,  // data URL — pour démo. En prod : upload sur /api/upload.php
+      status: 'pending',
+      uploadedAt: (typeof today==='function')?today():new Date().toISOString().substring(0,10)
+    };
+    kyc.documents.push(doc);
+    kyc.status = _kycStatus(partnerId).status;
+    if(typeof autoNotify==='function'){
+      var partner = (DB.partners||[]).find(function(p){return p.id===partnerId;});
+      autoNotify('📎 Nouveau document KYC reçu',
+        (partner?partner.name:partnerId)+' a téléversé : '+(docType||''),
+        'admin');
+    }
+    _prtSave();
+    _prtToast('Document téléversé · en attente de validation','ok');
+    // Re-rendre la modale
+    setTimeout(function(){ _prtCm(); mPartnerKYCUpload(partnerId); }, 600);
+  };
+  reader.onerror = function(){ _prtToast('Erreur de lecture du fichier','warn'); };
+  reader.readAsDataURL(f);
+}
+
+// MODALE admin review KYC
+function mAdminReviewKYC(partnerId){
+  var partner = (DB.partners||[]).find(function(p){return p.id===partnerId;});
+  if(!partner){ _prtToast('Partenaire introuvable','warn'); return; }
+  var kyc = (DB.partnerKYC||{})[partnerId];
+  if(!kyc || !kyc.documents.length){
+    M('📎 KYC — '+_prtSafe(partner.name), '',
+      '<div style="text-align:center;padding:30px;color:var(--ink3)">Aucun document n\'a encore été téléversé.</div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button>'); return;
+  }
+  var required = _kycRequiredDocs(partner.type);
+  var st = _kycStatus(partnerId);
+  var body = '<div style="background:'+st.color+'15;border-left:3px solid '+st.color+';padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px">'
+    + '<strong>'+st.icon+' '+st.label+'</strong></div>';
+  kyc.documents.forEach(function(doc){
+    var reqInfo = required.find(function(r){return r.id===doc.docType;}) || {label:doc.docType};
+    body += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:12px;margin-bottom:8px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">'
+      +   '<div style="flex:1;min-width:160px">'
+      +     '<div style="font-size:12px;font-weight:700;color:#142554">'+_prtSafe(reqInfo.label)+'</div>'
+      +     '<div style="font-size:11px;color:var(--ink3);margin-top:2px">📎 '+_prtSafe(doc.fileName)+' · '+Math.round((doc.size||0)/1024)+' Ko · '+_prtSafe(doc.uploadedAt)+'</div>'
+      +   '</div>'
+      +   '<div style="display:flex;gap:5px;flex-wrap:wrap">'
+      +     '<button class="btn bo xs" onclick="_kycPreview(\''+doc.id+'\',\''+partnerId+'\')">👁 Aperçu</button>'
+      +     (doc.status!=='approved' ? '<button class="btn bi xs" onclick="_kycApprove(\''+partnerId+'\',\''+doc.id+'\')">✓ Valider</button>' : '<span style="background:#10B981;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px">✓ Validé</span>')
+      +     (doc.status!=='rejected' ? '<button class="btn bo xs" style="color:#DC2626" onclick="_kycReject(\''+partnerId+'\',\''+doc.id+'\')">✗ Refuser</button>' : '<span style="background:#DC2626;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px">✗ Refusé</span>')
+      +   '</div>'
+      + '</div></div>';
+  });
+  // Bouton global
+  if(st.status==='approved'){
+    body += '<div style="background:#D1FAE5;border:1px solid #6EE7B7;padding:10px;border-radius:8px;text-align:center;margin-top:10px;font-size:12px;color:#065F46;font-weight:700">✅ Tous les documents requis ont été validés. Le partenaire peut maintenant signer le contrat.</div>';
+  }
+  M('📋 Review KYC — '+_prtSafe(partner.name), partner.type+' · '+st.label, body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    + (st.status==='approved' ? '<button class="btn bi" onclick="cm();generatePartnerContract(\''+partnerId+'\')">📄 Émettre contrat</button>' : ''),
+    true);
+}
+
+// Aperçu d'un document (ouvre dans un nouvel onglet via data URL)
+function _kycPreview(docId, partnerId){
+  var kyc = (DB.partnerKYC||{})[partnerId];
+  if(!kyc) return;
+  var doc = kyc.documents.find(function(d){return d.id===docId;});
+  if(!doc || !doc.data){ _prtToast('Aperçu indisponible','warn'); return; }
+  var w = window.open('', '_blank');
+  if(!w){ _prtToast('Pop-up bloquée — autorisez les pop-ups','warn'); return; }
+  if(doc.mime && doc.mime.indexOf('image/')===0){
+    w.document.write('<title>'+_prtSafe(doc.fileName)+'</title><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh"><img src="'+doc.data+'" style="max-width:100%;max-height:100%"></body>');
+  } else {
+    w.document.write('<title>'+_prtSafe(doc.fileName)+'</title><body style="margin:0"><iframe src="'+doc.data+'" style="border:0;width:100%;height:100vh"></iframe></body>');
+  }
+  w.document.close();
+}
+
+function _kycApprove(partnerId, docId){
+  var kyc = (DB.partnerKYC||{})[partnerId]; if(!kyc) return;
+  var doc = kyc.documents.find(function(d){return d.id===docId;}); if(!doc) return;
+  doc.status = 'approved';
+  doc.reviewedAt = (typeof today==='function')?today():new Date().toISOString().substring(0,10);
+  kyc.status = _kycStatus(partnerId).status;
+  _prtSave(); _prtToast('Document validé','ok');
+  setTimeout(function(){ _prtCm(); mAdminReviewKYC(partnerId); }, 300);
+}
+
+function _kycReject(partnerId, docId){
+  var motif = prompt('Motif de refus (sera envoyé au partenaire) :');
+  if(!motif) return;
+  var kyc = (DB.partnerKYC||{})[partnerId]; if(!kyc) return;
+  var doc = kyc.documents.find(function(d){return d.id===docId;}); if(!doc) return;
+  doc.status = 'rejected';
+  doc.rejectionReason = motif;
+  doc.reviewedAt = (typeof today==='function')?today():new Date().toISOString().substring(0,10);
+  kyc.status = _kycStatus(partnerId).status;
+  kyc.rejectionReason = motif;
+  _prtSave(); _prtToast('Document refusé','warn');
+  setTimeout(function(){ _prtCm(); mAdminReviewKYC(partnerId); }, 300);
+}
+
+// ─── CONTRAT PDF ───────────────────────────────────────────────────────────
+function _contractTemplate(type){
+  var templates = {
+    inspecteur: {
+      titre: 'CONVENTION D\'EXPERTISE PEDAGOGIQUE',
+      parties: 'Centre VERITAS (le " Centre ") et l\'Inspecteur Pedagogique (l\' " Expert ")',
+      clauses: [
+        'OBJET : L\'Expert s\'engage a accompagner le Centre VERITAS dans la validation scientifique des contenus pedagogiques et dans l\'animation de formations destinees aux enseignants partenaires.',
+        'REMUNERATION : L\'Expert percoit une remuneration forfaitaire par formation animee et un pourcentage sur les ouvrages co-rediges, selon la grille en vigueur (paliers Bronze 5% / Argent 8% / Or 10% / Diamant 12%).',
+        'CONFIDENTIALITE : Les contenus pre-publication sont strictement confidentiels.',
+        'PROPRIETE INTELLECTUELLE : Les contenus co-produits demeurent propriete conjointe selon une cle de repartition contractuelle.',
+        'DUREE : Convention conclue pour une duree initiale de 12 mois, tacitement renouvelable.',
+        'RESILIATION : Chaque partie peut resilier moyennant un preavis de 30 jours.',
+        'LITIGES : Tout litige sera soumis aux juridictions competentes de Douala, Cameroun.'
+      ]
+    },
+    chef_etab: {
+      titre: 'CONVENTION DE PARTENARIAT ETABLISSEMENT',
+      parties: 'Centre VERITAS (le " Centre ") et l\'Etablissement scolaire (l\' " Etablissement ")',
+      clauses: [
+        'OBJET : Le Centre accorde a l\'Etablissement le statut de "Centre d\'Excellence VERITAS" et fournit ressources pedagogiques, formations et accompagnement a la digitalisation.',
+        'CONTREPARTIE : L\'Etablissement s\'engage a promouvoir VERITAS aupres de sa communaute et a generer un minimum de 20 inscriptions/abonnements par an.',
+        'LABEL : L\'Etablissement peut afficher le label "Centre d\'Excellence VERITAS" sur ses supports de communication.',
+        'COMMISSIONS : Une commission de 10% est versee a l\'Etablissement sur chaque abonnement e-learning souscrit par un de ses eleves via le code parrainage attribue.',
+        'DUREE : 12 mois renouvelables tacitement.',
+        'RESILIATION : Preavis de 60 jours.',
+        'LITIGES : Juridictions competentes de Douala, Cameroun.'
+      ]
+    },
+    librairie: {
+      titre: 'CONVENTION DE DISTRIBUTION PARTENAIRE',
+      parties: 'Centre VERITAS (l\' " Editeur ") et la Librairie (le " Distributeur ")',
+      clauses: [
+        'OBJET : Le Distributeur s\'engage a referencer et commercialiser le catalogue des ouvrages edites par VERITAS.',
+        'MARGE COMMERCIALE : Le Distributeur beneficie d\'une marge de 20 a 30% selon le volume.',
+        'APPROVISIONNEMENT : Livraison sous 7 jours ouvres sur commande ferme.',
+        'CONDITIONS DE RETOUR : Les ouvrages invendus peuvent etre repris dans la limite de 10% du volume annuel.',
+        'COMMUNICATION : Le Distributeur affiche le logo "Point de Vente Partenaire VERITAS".',
+        'DUREE : 12 mois renouvelables.',
+        'LITIGES : Juridictions competentes de Douala, Cameroun.'
+      ]
+    },
+    universite: {
+      titre: 'CONVENTION DE PARTENARIAT INSTITUTIONNEL',
+      parties: 'Centre VERITAS et l\'Institution d\'enseignement superieur (l\' " Institution ")',
+      clauses: [
+        'OBJET : Collaboration sur la recherche pedagogique, la formation des futurs enseignants et la production de ressources innovantes.',
+        'STAGES : VERITAS accueille des stagiaires de l\'Institution dans le cadre de leur formation.',
+        'PUBLICATIONS : Les travaux de recherche conjoints sont co-signes et co-publies.',
+        'EVENEMENTS : Co-organisation d\'evenements scientifiques annuels.',
+        'PROPRIETE INTELLECTUELLE : Les productions conjointes sont propriete commune.',
+        'DUREE : 24 mois renouvelables.',
+        'LITIGES : Juridictions competentes de Douala, Cameroun.'
+      ]
+    },
+    sponsor: {
+      titre: 'CONVENTION DE SPONSORING',
+      parties: 'Centre VERITAS (le " Beneficiaire ") et l\'Entreprise (le " Sponsor ")',
+      clauses: [
+        'OBJET : Le Sponsor s\'engage a soutenir financierement et/ou materiellement les activites educatives du Centre.',
+        'CONTREPARTIE : Le Centre assure une visibilite a la marque du Sponsor sur ses plateformes numeriques, supports physiques et evenements.',
+        'MONTANT : Le montant et la nature du sponsoring sont definis dans une annexe specifique.',
+        'RAPPORT D\'IMPACT : Le Centre fournit un rapport d\'impact annuel detaille au Sponsor.',
+        'EXCLUSIVITE : Le Sponsor peut beneficier d\'une clause d\'exclusivite sectorielle moyennant un supplement.',
+        'DUREE : Convention annuelle renouvelable.',
+        'LITIGES : Juridictions competentes de Douala, Cameroun.'
+      ]
+    }
+  };
+  return templates[type] || null;
+}
+
+function generatePartnerContract(partnerId){
+  var partner = (DB.partners||[]).find(function(p){return p.id===partnerId;});
+  if(!partner){ _prtToast('Partenaire introuvable','warn'); return; }
+  var tpl = _contractTemplate(partner.type);
+  if(!tpl){
+    _prtToast('Aucun contrat type disponible pour ce profil','warn');
+    return;
+  }
+  var jsPDFlib = (window.jspdf && window.jspdf.jsPDF) || window.jsPDF;
+  if(!jsPDFlib){ _prtToast('Bibliothèque PDF non chargée','warn'); return; }
+  // Crée ou récupère le contrat
+  if(!DB.partnerContracts[partnerId]){
+    var year = new Date().getFullYear();
+    var seq = (Object.keys(DB.partnerContracts||{}).length + 1);
+    DB.partnerContracts[partnerId] = {
+      id: 'VRT-CTR-'+year+'-'+('0000'+seq).slice(-4),
+      type: partner.type,
+      version: '1.0',
+      sentAt: (typeof today==='function')?today():new Date().toISOString().substring(0,10),
+      signedAt: null,
+      signature: null,
+      hash: null,
+      status: 'sent'
+    };
+    _prtSave();
+  }
+  var ctr = DB.partnerContracts[partnerId];
+  var doc = new jsPDFlib({orientation:'portrait', unit:'mm', format:'a4'});
+  var W=210, H=297;
+  // En-tête
+  doc.setFillColor(20,37,84);
+  doc.rect(0,0,W,30,'F');
+  doc.setTextColor(255,201,60);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.text('VERITAS ACADEMY', W/2, 14, {align:'center'});
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(9);
+  doc.text('Douala, Cameroun - contact@veritas-school.com', W/2, 21, {align:'center'});
+  doc.setFontSize(8);
+  doc.text('N. ' + ctr.id + ' - Version ' + ctr.version, W/2, 26, {align:'center'});
+  // Titre
+  doc.setTextColor(20,37,84);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(16);
+  doc.text(tpl.titre, W/2, 45, {align:'center'});
+  doc.setDrawColor(255,201,60);
+  doc.setLineWidth(0.6);
+  doc.line(W/2-40, 48, W/2+40, 48);
+  // Parties
+  doc.setFontSize(10);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(60,60,60);
+  doc.text('ENTRE LES SOUSSIGNES :', 20, 60);
+  doc.setFont('helvetica','italic');
+  var partiesLines = doc.splitTextToSize(tpl.parties, W-40);
+  doc.text(partiesLines, 20, 67);
+  doc.setFont('helvetica','normal');
+  // Partenaire identifié
+  doc.text('Le Partenaire designe ci-apres : ' + _prtAscii(partner.name||''), 20, 80);
+  if(partner.etablissement) doc.text('Etablissement : ' + _prtAscii(partner.etablissement), 20, 86);
+  if(partner.ville) doc.text('Ville : ' + _prtAscii(partner.ville), 20, 92);
+  doc.text('Contact : ' + (partner.tel||'') + (partner.email?' - '+partner.email:''), 20, 98);
+  // Clauses
+  doc.setFontSize(11);
+  doc.setFont('helvetica','bold');
+  doc.setTextColor(20,37,84);
+  doc.text('IL A ETE CONVENU CE QUI SUIT :', 20, 112);
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.setTextColor(40,40,40);
+  var y = 120;
+  tpl.clauses.forEach(function(c, i){
+    var titleEnd = c.indexOf(':');
+    var titlePart = titleEnd>0 ? c.substring(0,titleEnd) : ('Article '+(i+1));
+    var bodyPart = titleEnd>0 ? c.substring(titleEnd+1).trim() : c;
+    doc.setFont('helvetica','bold');
+    doc.text('Article '+(i+1)+' — '+titlePart, 20, y);
+    y += 5;
+    doc.setFont('helvetica','normal');
+    var lines = doc.splitTextToSize(_prtAscii(bodyPart), W-40);
+    doc.text(lines, 20, y);
+    y += lines.length*4 + 3;
+    if(y > H-60){ doc.addPage(); y = 25; }
+  });
+  // Signatures
+  if(y > H-65){ doc.addPage(); y = 25; }
+  y = Math.max(y, H-75);
+  doc.setDrawColor(180,180,180);
+  doc.setLineWidth(0.3);
+  doc.line(20, y, 90, y);
+  doc.line(W-90, y, W-20, y);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(9);
+  doc.text('Pour VERITAS Academy', 55, y+5, {align:'center'});
+  doc.text('Pour le Partenaire', W-55, y+5, {align:'center'});
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(8);
+  doc.text('Jacques Miterand TAKOU', 55, y+11, {align:'center'});
+  doc.setTextColor(120,120,120);
+  doc.text('Fondateur', 55, y+15, {align:'center'});
+  doc.setTextColor(40,40,40);
+  doc.text(_prtAscii(partner.name||''), W-55, y+11, {align:'center'});
+  doc.setTextColor(120,120,120);
+  doc.text((DB.partnerTypes[partner.type]||{label:partner.type}).label||'Partenaire', W-55, y+15, {align:'center'});
+  // Statut signature
+  if(ctr.signedAt && ctr.signature){
+    doc.setTextColor(16,185,129);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(8);
+    doc.text('SIGNE ELECTRONIQUEMENT le '+ctr.signedAt, W-55, y+20, {align:'center'});
+    doc.text('Hash : '+(ctr.hash||'').substring(0,16)+'...', W-55, y+24, {align:'center'});
+  } else {
+    doc.setTextColor(220,38,38);
+    doc.setFont('helvetica','italic');
+    doc.setFontSize(8);
+    doc.text('(en attente de signature)', W-55, y+20, {align:'center'});
+  }
+  // Footer
+  doc.setTextColor(140,140,140);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(7);
+  doc.text('Etabli a Douala le '+ctr.sentAt+' - (c) 2024-2026 Jacques Miterand TAKOU (Mythe Errant) - Loi n. 2000/011 + Convention de Berne', W/2, H-8, {align:'center'});
+  var safeName = (partner.name||'partenaire').replace(/[^a-zA-Z0-9_-]/g,'_').substring(0,30);
+  var filename = 'VERITAS_Contrat_'+ctr.id+'_'+safeName+'.pdf';
+  doc.save(filename);
+  _prtToast('Contrat PDF généré : '+ctr.id, 'ok');
+}
+
+// ─── SIGNATURE électronique simplifiée ─────────────────────────────────────
+function mPartnerSignContract(partnerId){
+  var partner = (DB.partners||[]).find(function(p){return p.id===partnerId;});
+  if(!partner){ _prtToast('Partenaire introuvable','warn'); return; }
+  if(!_contractTemplate(partner.type)){
+    M('ℹ️ Pas de contrat à signer', '',
+      '<div style="text-align:center;padding:18px">Aucun contrat type n\'est requis pour votre profil de partenariat.</div>',
+      '<button class="btn bi" onclick="cm()">OK</button>'); return;
+  }
+  var ctr = (DB.partnerContracts||{})[partnerId];
+  if(ctr && ctr.signedAt){
+    M('✅ Contrat déjà signé', 'Le ' + _prtSafe(ctr.signedAt),
+      '<div style="text-align:center;padding:18px"><div style="font-size:48px">📄</div>'
+      + '<div style="margin:10px 0">Votre contrat <strong>'+_prtSafe(ctr.id)+'</strong> est signé et archivé.</div></div>',
+      '<button class="btn bi" onclick="cm();generatePartnerContract(\''+partnerId+'\')">📄 Télécharger PDF</button>'); return;
+  }
+  // Si pas de contrat envoyé, on l'émet d'abord
+  if(!ctr){
+    generatePartnerContract(partnerId);
+    setTimeout(function(){ mPartnerSignContract(partnerId); }, 400);
+    return;
+  }
+  var tpl = _contractTemplate(partner.type);
+  var body = '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:10px 14px;border-radius:8px;font-size:12px;color:#92400E;margin-bottom:14px">'
+    + '⚠️ Lisez attentivement le contrat avant de signer. La signature est juridiquement opposable selon la loi camerounaise sur les transactions électroniques (Loi n° 2010/021).</div>';
+  body += '<div style="background:#F9FAFB;padding:14px;border-radius:8px;max-height:200px;overflow-y:auto;font-size:11px;line-height:1.6;margin-bottom:14px">';
+  body += '<div style="font-weight:800;font-size:13px;margin-bottom:8px">'+tpl.titre+'</div>';
+  tpl.clauses.forEach(function(c,i){body += '<div style="margin-bottom:6px"><strong>Article '+(i+1)+'</strong> — '+_prtSafe(c)+'</div>';});
+  body += '</div>';
+  body += '<div class="fg"><span class="fl">Nom complet du signataire *</span><input class="fi" id="_sgNom" value="'+_prtSafe(partner.name||'')+'"></div>';
+  body += '<div class="fg"><span class="fl">Qualité / Fonction</span><input class="fi" id="_sgQual" placeholder="Ex. Proviseur, Directeur, Gérant" value="'+_prtSafe((DB.partnerTypes[partner.type]||{label:''}).label)+'"></div>';
+  body += '<label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:#142554;margin:14px 0;padding:10px;background:#EFF6FF;border-radius:8px"><input type="checkbox" id="_sgCgu" style="margin-top:2px"><span>Je reconnais avoir <strong>lu et accepté</strong> les 7 articles ci-dessus et j\'engage par la présente ma signature électronique en qualité de représentant légal du Partenaire.</span></label>';
+  M('✍️ Signature électronique du contrat', _prtSafe(ctr.id),
+    body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_signContract(\''+partnerId+'\')">✍️ Signer électroniquement</button>',
+    true);
+}
+
+function _signContract(partnerId){
+  var nom = ((typeof _ge==='function'?_ge('_sgNom'):document.getElementById('_sgNom'))||{value:''}).value.trim();
+  var qual = ((typeof _ge==='function'?_ge('_sgQual'):document.getElementById('_sgQual'))||{value:''}).value.trim();
+  var cgu = (typeof _ge==='function'?_ge('_sgCgu'):document.getElementById('_sgCgu'));
+  if(!nom){ _prtToast('Nom requis','warn'); return; }
+  if(!cgu || !cgu.checked){ _prtToast('Vous devez cocher la case d\'acceptation','warn'); return; }
+  var ctr = DB.partnerContracts[partnerId];
+  if(!ctr) return;
+  ctr.signedAt = (typeof today==='function')?today():new Date().toISOString().substring(0,10);
+  ctr.signature = { name:nom, function:qual, ip:'', userAgent:navigator.userAgent.substring(0,80) };
+  // Hash simplifié : somme des codepoints pour traçabilité (pas de crypto réelle, juste empreinte changeante)
+  var raw = ctr.id+'|'+nom+'|'+qual+'|'+ctr.signedAt;
+  var h = 0; for(var i=0;i<raw.length;i++){h = ((h<<5)-h) + raw.charCodeAt(i); h = h & h;}
+  ctr.hash = Math.abs(h).toString(16).padStart(8,'0') + Math.random().toString(36).slice(2,10);
+  ctr.status = 'signed';
+  _prtSave();
+  if(typeof autoNotify==='function') autoNotify('✍️ Contrat signé', _prtSafe(nom)+' a signé le contrat '+ctr.id, 'admin');
+  _prtCm();
+  M('✅ Contrat signé !', ctr.id,
+    '<div style="text-align:center;padding:24px"><div style="font-size:64px">📄</div>'
+    + '<div style="margin:14px 0;font-size:15px;font-weight:700">Votre signature électronique est enregistrée.</div>'
+    + '<div style="font-size:12px;color:var(--ink3);margin-bottom:8px">Hash de vérification : <strong style="font-family:monospace">'+_prtSafe(ctr.hash.substring(0,16))+'…</strong></div>'
+    + '<div style="font-size:12px;color:var(--ink3)">Vous pouvez télécharger le PDF horodaté ci-dessous.</div></div>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    + '<button class="btn bi" onclick="cm();generatePartnerContract(\''+partnerId+'\')">📄 Télécharger le contrat signé</button>');
+}
+
+// ─── VITRINE PUBLIQUE — nos partenaires institutionnels ────────────────────
+function pgInstitutionalShowcase(){
+  var partners = (DB.partners||[]).filter(function(p){return p.status==='active';});
+  var sections = [
+    { type:'sponsor',    label:'Nos sponsors',                    emoji:'🌍', desc:'Entreprises et organisations qui soutiennent l\'éducation' },
+    { type:'universite', label:'Nos partenaires académiques',     emoji:'🏛️', desc:'Universités et écoles de formation collaborant avec VÉRITAS' },
+    { type:'librairie',  label:'Points de vente partenaires',     emoji:'🏪', desc:'Librairies où trouver nos ouvrages' },
+    { type:'chef_etab',  label:'Centres d\'Excellence VÉRITAS',   emoji:'🏫', desc:'Établissements scolaires labellisés' },
+    { type:'inspecteur', label:'Experts pédagogiques associés',   emoji:'🎓', desc:'Inspecteurs et experts qui valident nos contenus' }
+  ];
+  var h = '<div style="max-width:920px;margin:0 auto;padding:0 14px">';
+  h += '<div class="pgt" style="text-align:center;margin-top:20px">🤝 Nos Partenaires Institutionnels</div>';
+  h += '<div style="text-align:center;color:var(--ink3);font-size:13px;margin-bottom:24px;font-style:italic">Ensemble pour l\'excellence éducative au Cameroun</div>';
+  var total = 0;
+  sections.forEach(function(s){
+    var list = partners.filter(function(p){return p.type===s.type;});
+    if(!list.length) return;
+    total += list.length;
+    h += '<div class="ct" style="margin:24px 0 10px">'+s.emoji+' '+s.label+' <span style="font-size:13px;font-weight:400;color:var(--ink3)">— '+list.length+'</span></div>';
+    h += '<div style="font-size:12px;color:var(--ink3);margin-bottom:10px;font-style:italic">'+s.desc+'</div>';
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:14px">';
+    list.forEach(function(p){
+      h += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:6px;transition:transform .2s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'">'
+        + '<div style="display:flex;align-items:center;gap:10px">'
+        +   '<div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#142554,#3C8DFF);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800">'+(p.name||'?').charAt(0).toUpperCase()+'</div>'
+        +   '<div style="flex:1;min-width:0">'
+        +     '<div style="font-weight:700;font-size:13px;color:#142554;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_prtSafe(p.name)+'</div>'
+        +     (p.etablissement?'<div style="font-size:11px;color:var(--ink3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+_prtSafe(p.etablissement)+'</div>':'')
+        +   '</div>'
+        + '</div>'
+        + (p.ville?'<div style="font-size:11px;color:var(--ink3)">📍 '+_prtSafe(p.ville)+'</div>':'')
+        + (p.certificate?'<div style="font-size:10px;color:#10B981;font-weight:700">✅ Certifié</div>':'')
+        + '</div>';
+    });
+    h += '</div>';
+  });
+  if(total===0){
+    h += '<div style="text-align:center;padding:40px;color:var(--ink3);background:#F9FAFB;border-radius:10px;margin-top:14px">'
+      + '<div style="font-size:48px;margin-bottom:10px">🌱</div>'
+      + 'Notre réseau de partenaires institutionnels grandit. '
+      + '<a href="#" onclick="event.preventDefault();_prtGo(\'partenariat\');return false;" style="color:#142554;font-weight:700">Rejoignez-nous</a>'
+      + ' pour figurer ici.</div>';
+  }
+  h += '<div style="background:linear-gradient(135deg,#142554,#1e3a8a);color:#fff;padding:24px;border-radius:14px;text-align:center;margin:30px 0">'
+    + '<div style="font-size:17px;font-weight:800;margin-bottom:8px">Votre institution n\'est pas listée ?</div>'
+    + '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">Découvrez les programmes de partenariat institutionnel et rejoignez le réseau.</div>'
+    + '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 26px;font-size:14px" onclick="_prtGo(\'partenariat\')">🤝 Devenir partenaire</button>'
+    + '</div>';
+  h += '</div>';
+  return h;
+}
+
+/* ════════════════════════ FIN PROGRAMME PARTENARIAT ═════════════════════════ */
