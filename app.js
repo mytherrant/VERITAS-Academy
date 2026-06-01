@@ -3928,18 +3928,12 @@ function vShowSec(sec,btn){
         <div style="font-size:13px;line-height:1.9;white-space:pre-line;color:var(--ink2)">${_esc(pi.description||"")}</div>
       </div>
       <div>
-        <div class="vcard mb16">
+        <div class="vcard">
           <div class="ct">📍 Informations pratiques</div>
           ${[['🕐 Horaires',pi.horaires||'—'],['📞 Téléphone',pi.contact||DB.school?.tel||'—'],['✉️ Email',pi.email||DB.school?.email||'—'],['📍 Adresse',pi.adresse||DB.school?.ville||'—'],['📌 Boîte Postale',pi.bp||DB.school?.bp||'—']].map(([l,v])=>`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)"><span class="s mut">${_esc(l)}</span><span class="s semi">${_esc(v)}</span></div>`).join("")}
         </div>
-        <div class="vcard">
-          <div class="ct">📊 En chiffres</div>
-          <div class="g2" style="gap:10px">
-            ${[["🎓",DB.students.length,"Élèves inscrits"],["👨‍🏫",DB.teachers.length,"Enseignants"],["📚",DB.books.length,"Manuels disponibles"],["🏆","85%+","Taux de réussite"]].map(([e,n,l])=>`<div style="text-align:center;padding:14px;background:var(--bg2);border-radius:var(--r2)"><div style="font-size:24px">${e}</div><div style="font-family:'Fira Code',monospace;font-size:20px;font-weight:700;color:var(--bl);margin:4px 0">${n}</div><div style="font-size:13px;color:var(--ink4)">${l}</div></div>`).join("")}
-          </div>
-        </div>
       </div>
-    </div>
+    </div><!-- v1.2.2 : panneau « En chiffres » retiré (doublon des stats hero/section dédiée) -->
     ${(DB.galleryImages||[]).length>0?`<div class="vcard mt20">
       <div class="ct">📸 Notre centre en images</div>
       <div class="gallery-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
@@ -3964,16 +3958,8 @@ function vShowSec(sec,btn){
       </div>
     </div>`:''}
     </div>
-    <!-- HISTOIRE & CHRONOLOGIE inline dans accueil -->
-    <div class="vcard mt20">
-      <div class="ct">📖 Notre Histoire</div>
-      <div style="font-size:13px;line-height:2;color:var(--ink3);white-space:pre-line;margin-bottom:14px">${DB.publicInfo?.histoire||'Le Centre VÉRITAS a été fondé en 2023. Notre mission : offrir une éducation de qualité à tous les élèves du Cameroun.'}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
-        ${[['2023','Fondation','Ouverture avec 15 élèves et 3 enseignants'],['2024','Croissance','Nouveaux locaux, 4 enseignants supplémentaires'],['2024','Numérique','Lancement e-learning et boutique en ligne'],['2025','Excellence',''+DB.students.length+'+ élèves · taux réussite > 85%']].map(([an,t,d])=>`<div style="border-left:3px solid var(--gold);padding:8px 12px;background:var(--gp);border-radius:0 var(--r) var(--r) 0"><div style="font-family:Georgia,serif;font-size:16px;color:var(--gold2);font-weight:700">${an}</div><div class="semi xs2 mt4 mb2">${t}</div><div style="font-size:11px;color:var(--ink4)">${d}</div></div>`).join('')}
-      </div>
-    </div>
-    <!-- v1.2.2 : doublon « Résultats aux Examens Nationaux » retiré
-         (la section détaillée complète existe plus bas, toutes années). -->`;
+    <!-- v1.2.2 : « Notre Histoire » inline retiré (doublon — section dédiée plus bas).
+         Idem doublon « Résultats aux Examens Nationaux » (section détaillée complète plus bas). -->`;
     setTimeout(_vRevealInit,100);
     setTimeout(function(){_heroActuLoad(_heroCurCat||'education');},600);
     // Vérifier autoplay 2s après le rendu (fallback bouton ▶ si bloqué)
@@ -13707,39 +13693,50 @@ var QUIZ_DB={
 // CALENDRIER SCOLAIRE CAMEROUNAIS 2024-2025
 // ═══════════════════════════════════════════════════════════
 var CALENDRIER_SCOLAIRE={
-  annee:'2024-2025',
+  annee:'2025-2026',
+  // Source : Décision MINESEC fixant le calendrier des Examens et Concours session 2026
+  // (mise à jour v1.2.2). Les épreuves écrites officielles font foi ci-dessous.
   trimestres:[
-    {num:1,debut:'02 Sept 2024',fin:'20 Déc 2024',
+    {num:1,debut:'01 Sept 2025',fin:'19 Déc 2025',
      seqs:[
-       {num:1,debut:'02 Sept',fin:'25 Oct',examens:'Épreuves Séq. 1 : 21-25 Oct 2024'},
-       {num:2,debut:'28 Oct',fin:'20 Déc',examens:'Épreuves Séq. 2 : 16-20 Déc 2024'},
+       {num:1,debut:'01 Sept',fin:'24 Oct',examens:'Épreuves Séq. 1 : Oct 2025'},
+       {num:2,debut:'27 Oct',fin:'19 Déc',examens:'Épreuves Séq. 2 : Déc 2025'},
      ]},
-    {num:2,debut:'06 Jan 2025',fin:'04 Avr 2025',
+    {num:2,debut:'05 Jan 2026',fin:'03 Avr 2026',
      seqs:[
-       {num:3,debut:'06 Jan',fin:'28 Fév',examens:'Épreuves Séq. 3 : 24-28 Fév 2025'},
-       {num:4,debut:'03 Mar',fin:'04 Avr',examens:'Épreuves Séq. 4 : 31 Mar-04 Avr 2025'},
+       {num:3,debut:'05 Jan',fin:'27 Fév',examens:'Épreuves Séq. 3 : Fév 2026'},
+       {num:4,debut:'02 Mar',fin:'03 Avr',examens:'Épreuves Séq. 4 : Avr 2026'},
      ]},
-    {num:3,debut:'22 Avr 2025',fin:'20 Juin 2025',
+    {num:3,debut:'20 Avr 2026',fin:'19 Juin 2026',
      seqs:[
-       {num:5,debut:'22 Avr',fin:'23 Mai',examens:'Épreuves Séq. 5 : 19-23 Mai 2025'},
-       {num:6,debut:'26 Mai',fin:'20 Juin',examens:'Épreuves Séq. 6 : 16-20 Juin 2025'},
+       {num:5,debut:'20 Avr',fin:'22 Mai',examens:'Épreuves Séq. 5 : Mai 2026'},
+       {num:6,debut:'25 Mai',fin:'19 Juin',examens:'Épreuves Séq. 6 : Juin 2026'},
      ]},
   ],
+  // ── Dates OFFICIELLES session 2026 (Décision MINESEC, Yaoundé, 25 sept. 2025) ──
   examens_nationaux:[
-    {nom:'BEPC session normale',date:'Juin 2025 (date exacte MINESEC)',niveaux:'3ème',matières:'Français, Maths, Sciences, H-G, Anglais'},
-    {nom:'Probatoire série A',date:'Mai 2025',niveaux:'1ère A',matières:'Français, Anglais, Philosophie, H-G'},
-    {nom:'Probatoire série C',date:'Mai 2025',niveaux:'1ère C',matières:'Maths, Physique-Chimie, Français, SVT'},
-    {nom:'Probatoire série D',date:'Mai 2025',niveaux:'1ère D',matières:'Maths, Physique-Chimie, Français, SVT'},
-    {nom:'BAC série A',date:'Juin 2025',niveaux:'Tle A',matières:'Français, Philosophie, H-G, Anglais, Littérature'},
-    {nom:'BAC série C',date:'Juin 2025',niveaux:'Tle C',matières:'Maths, Physique, Chimie, Français, Anglais'},
-    {nom:'BAC série D',date:'Juin 2025',niveaux:'Tle D',matières:'Maths, SVT, Physique-Chimie, Français, Anglais'},
-    {nom:'CEP (Certificat d\'Études Primaires)',date:'Mai 2025',niveaux:'CM2',matières:'Français, Calcul, Histoire-Géo'},
+    {nom:'Concours d\'entrée en 6ème & 1ère année',date:'Écrit : Mer. 13 Mai 2026 · Résultats : Mar. 19 Mai 2026',niveaux:'CM2 → 6ème',matières:'Concours d\'entrée (Secondaire général, technique et agricole)'},
+    {nom:'BEPC & BEPC Bilingue',date:'Écrit : Lun. 01 au Jeu. 04 Juin 2026 · Orales bilingues : Ven. 05 Juin · Résultats : Ven. 10 Juil. 2026',niveaux:'3ème',matières:'Français, Maths, Sciences, Histoire-Géo, Anglais (+ option bilingue)'},
+    {nom:'CAP Industriels',date:'Écrit : Lun. 01 au Ven. 05 Juin 2026 · Résultats : Ven. 10 Juil. 2026',niveaux:'CAP',matières:'Enseignement général + épreuves pratiques (spécialités industrielles)'},
+    {nom:'CAP STT',date:'Écrit & pratiques : Lun. 01 au Sam. 06 Juin 2026 · Résultats : Ven. 10 Juil. 2026',niveaux:'CAP',matières:'Sciences et Technologies du Tertiaire'},
+    {nom:'Probatoires A, ABI, C, D, E, SH & TI',date:'Écrit : Lun. 08 au Ven. 12 Juin 2026 · Pratiques TI : 05 Juin · Pratiques E : 16-19 Juin',niveaux:'1ère',matières:'Toutes séries (général) — épreuves écrites, facultatives et pratiques'},
+    {nom:'Baccalauréats A, ABI, C, D, E, SH & TI',date:'Écrit : Lun. 25-26 Mai puis Jeu. 28 au Sam. 30 Mai 2026 · Pratiques E/TI : 21-23 Mai · Délib. : 08-11 Juil. 2026',niveaux:'Tle',matières:'Toutes séries (général) — écrites, facultatives (29 Mai) et pratiques'},
+    {nom:'Bac Technique AF, F & Brevet de Technicien',date:'Écrit : 21-22 Mai, 25-26 Mai puis 28 Mai 2026 · Matière d\'œuvre : 06-13 Mai',niveaux:'Tle technique',matières:'Enseignement technique industriel'},
+    {nom:'Probatoire AF, F & Probatoire BT',date:'Écrit : Ven. 29-30 Mai puis Lun. 01 au Mer. 03 Juin 2026',niveaux:'1ère technique',matières:'Enseignement technique industriel'},
+    {nom:'Bac & Brevet de Technicien / STT',date:'Écrit : 21-22 Mai, 25-26 Mai puis 28 Mai 2026 · Pratiques : 29 Mai-03 Juin',niveaux:'Tle STT',matières:'Sciences et Technologies du Tertiaire'},
+    {nom:'Probatoire & Probatoire BT / STT',date:'Écrit : Lun. 08 au Ven. 12 Juin 2026 · Pratiques : 15-20 Juin 2026',niveaux:'1ère STT',matières:'Sciences et Technologies du Tertiaire'},
+    {nom:'GCE Ordinary & Advanced Level',date:'Écrit : Mar. 02 au Jeu. 18 Juin 2026 · Pratiques : 05-26 Mai · Résultats : Ven. 31 Juil. 2026',niveaux:'O/A Level',matières:'GCE Board — toutes matières (Pre-Test QCM : 21-25 Avr.)'},
+    {nom:'TVEE (Technical & Vocational, Inter. & Advanced)',date:'Écrit : Mar. 02 au Sam. 20 Juin 2026 · Résultats : Ven. 31 Juil. 2026',niveaux:'TVEE',matières:'GCE Board — enseignement technique et professionnel'},
+    {nom:'Concours d\'entrée en 1ère année BEP / 2nde Technique',date:'Écrit : Mer. 05 Août 2026 · Résultats : Ven. 07 Août 2026',niveaux:'2nde technique',matières:'Sous-système francophone (sur concours)'},
   ],
   vacances:[
-    {label:'Toussaint',debut:'21 Oct',fin:'03 Nov 2024'},
-    {label:'Noël/Nouvel An',debut:'21 Déc 2024',fin:'05 Jan 2025'},
-    {label:'Pâques',debut:'07 Avr',fin:'21 Avr 2025'},
+    {label:'Toussaint',debut:'~25 Oct',fin:'02 Nov 2025'},
+    {label:'Noël/Nouvel An',debut:'20 Déc 2025',fin:'04 Jan 2026'},
+    {label:'Pâques',debut:'~04 Avr',fin:'19 Avr 2026'},
   ],
+  // EPS pratiques : période du Lun. 27 Avr. au Ven. 15 Mai 2026 (fixées par les DRES).
+  epsPratiques:'Épreuves pratiques d\'EPS : Lun. 27 Avr. au Ven. 15 Mai 2026 (calendrier régional)',
+  source:'Décision MINESEC/SEESEN — Calendrier des Examens et Concours, session 2026 (Yaoundé, 25 sept. 2025)',
 };
 
 // ═══════════════════════════════════════════════════════════
