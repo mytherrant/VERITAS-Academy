@@ -1,0 +1,43 @@
+# ============================================================
+# VÉRITAS — Filet de tests E2E (smoke) — Playwright
+# Tourne sur chaque push de branche qui touche le frontend, et sur les PR
+# vers master. Objectif : attraper un « écran blanc » AVANT le déploiement.
+# ============================================================
+name: 🧪 Tests E2E (smoke)
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'VERITAS_v1.2.html'
+      - 'app.js'
+      - 'app.css'
+      - 'tests/**'
+      - 'playwright.config.cjs'
+      - 'package.json'
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    name: 🌐 Boot du portail (Chromium headless)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: 📦 Installer les dépendances
+        run: npm ci || npm install
+      - name: 🌐 Installer Chromium
+        run: npx playwright install --with-deps chromium
+      - name: 🧪 Lancer les tests
+        run: npx playwright test
+      - name: 📤 Rapport (artefact)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

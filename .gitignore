@@ -27,6 +27,12 @@ npm-debug.log*
 node_modules/
 veritas-backend/
 
+# Tests E2E Playwright — artefacts régénérables (rapports, captures, traces)
+/test-results/
+/playwright-report/
+/blob-report/
+/.cache/
+
 # Credentials serveur — ne jamais versionner
 api/config.php
 api/payment_config.php
