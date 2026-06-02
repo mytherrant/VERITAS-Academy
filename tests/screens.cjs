@@ -27,14 +27,14 @@ const { spawn } = require('child_process');
 
   // Capture ciblée du panneau "Tu es..." (.vgz-roles) — avant refonte
   try {
-    const roles = page.locator('.vgz-roles').first();
-    if (await roles.count()) {
-      await roles.scrollIntoViewIfNeeded();
+    const sec = page.locator('.vgz-dark-section').first();
+    if (await sec.count()) {
+      await sec.scrollIntoViewIfNeeded();
       await page.waitForTimeout(700);
-      await roles.screenshot({ path: 'test-results/roles-before.png' });
-      console.log('roles capturé');
-    } else { console.log('.vgz-roles absent du rendu'); }
-  } catch (e) { console.log('roles capture skip:', e.message); }
+      await sec.screenshot({ path: 'test-results/darksection.png' });
+      console.log('section capturée');
+    } else { console.log('.vgz-dark-section absent du rendu'); }
+  } catch (e) { console.log('capture skip:', e.message); }
 
   // Naviguer dans quelques sections visiteur
   const sections = [['E-learning', '03-elearning'], ['Boutique', '04-boutique'], ['IA', '05-ia'], ['Pratiquer', '06-pratiquer']];

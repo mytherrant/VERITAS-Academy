@@ -1711,18 +1711,10 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .bento-6{--accent:#FBBF24}
 
 /* ═════ WRAPPER SOMBRE PREMIUM — gradient animé + aurora ═════ */
-.vgz-dark-section{background:linear-gradient(135deg,#1E3A8A 0%,#2A56B0 30%,#3C6BD4 50%,#2A56B0 70%,#1E3A8A 100%);background-size:400% 400%;animation:vgzAurora 15s ease infinite;border-radius:22px;padding:34px 26px;margin:28px 0;position:relative;overflow:hidden;box-shadow:0 20px 56px rgba(30,58,138,.32),0 0 0 1px rgba(255,201,60,.18)}
+.vgz-dark-section{background:linear-gradient(135deg,rgba(30,58,138,.06),rgba(60,107,212,.045));border-radius:var(--ds-r-lg,20px);padding:34px 26px;margin:28px 0;position:relative;overflow:hidden;border:1px solid rgba(30,58,138,.10);box-shadow:var(--ds-sh,0 6px 20px rgba(20,37,84,.08))}
 @keyframes vgzAurora{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-.vgz-dark-section::before{content:"";position:absolute;inset:0;background:
-  radial-gradient(circle at 15% 25%,rgba(255,201,60,.18) 0%,transparent 40%),
-  radial-gradient(circle at 85% 75%,rgba(60,141,255,.18) 0%,transparent 40%),
-  radial-gradient(circle at 50% 50%,rgba(124,58,237,.10) 0%,transparent 60%);
-  pointer-events:none;animation:vgzFloat 12s ease-in-out infinite}
-.vgz-dark-section::after{content:"";position:absolute;inset:0;background-image:
-  radial-gradient(circle at 20% 30%,#FFC93C 1px,transparent 1px),
-  radial-gradient(circle at 70% 60%,#3C8DFF 1px,transparent 1px),
-  radial-gradient(circle at 40% 80%,#FFC93C 1px,transparent 1px);
-  background-size:100px 100px,150px 150px,80px 80px;opacity:.15;animation:vgzStarsDrift 30s linear infinite;pointer-events:none}
+/* v1.2.3 : sur-couches animées (glows + dots) retirées — section en thème clair */
+.vgz-dark-section::before,.vgz-dark-section::after{display:none}
 @keyframes vgzFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-20px,15px) scale(1.05)}66%{transform:translate(15px,-10px) scale(.95)}}
 @keyframes vgzStarsDrift{from{transform:translate(0,0)}to{transform:translate(-100px,100px)}}
 .vgz-dark-section > *{position:relative;z-index:2}
@@ -1777,6 +1769,25 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .vgz-testi-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFC93C,#FFA500);display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-weight:900;color:#142554;font-size:17px;flex-shrink:0;box-shadow:0 4px 16px rgba(255,201,60,.4)}
 .vgz-testi-info-name{font-size:13.5px;font-weight:800;color:#FFC93C}
 .vgz-testi-info-meta{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px}
+
+/* ═════ v1.2.3 — Section "Tu es… / témoignages" en THÈME CLAIR ═════
+   Fond bleu ~6% (cf. .vgz-dark-section) → cartes claires, bordures & ombres
+   douces de la charte, texte foncé lisible. Scopé pour ne rien changer ailleurs. */
+.vgz-dark-section .vgz-section-title{font-size:30px;background:none;-webkit-text-fill-color:var(--ds-primary,#142554);color:var(--ds-primary,#142554);animation:none;letter-spacing:.3px}
+.vgz-dark-section .vgz-section-sub{color:var(--ds-text-2,#475882)}
+.vgz-dark-section .vgz-role{background:var(--ds-surface,#fff);border:1px solid var(--ds-border,#E6EAF2);color:var(--ds-text,#142554);box-shadow:var(--ds-sh-sm,0 1px 3px rgba(20,37,84,.08))}
+.vgz-dark-section .vgz-role:hover{background:#fff;border-color:var(--vgz-role-color,#FFC93C);box-shadow:0 14px 30px rgba(20,37,84,.12)}
+.vgz-dark-section .vgz-role-title{color:var(--ds-text,#142554)}
+.vgz-dark-section .vgz-role-desc{color:var(--ds-text-2,#475882)}
+.vgz-dark-section .vgz-role-cta{color:var(--ds-text,#142554);border-color:var(--ds-border-strong,#D5DBE8)}
+.vgz-dark-section .vgz-role:hover .vgz-role-cta{background:var(--vgz-role-color,#FFC93C);border-color:var(--vgz-role-color,#FFC93C);color:#142554}
+.vgz-dark-section .vgz-testi{background:var(--ds-surface,#fff);border:1px solid var(--ds-border,#E6EAF2);color:var(--ds-text,#142554);backdrop-filter:none;box-shadow:var(--ds-sh-sm,0 1px 3px rgba(20,37,84,.08))}
+.vgz-dark-section .vgz-testi:hover{box-shadow:0 14px 30px rgba(20,37,84,.12)}
+.vgz-dark-section .vgz-testi::before{color:rgba(20,37,84,.10)}
+.vgz-dark-section .vgz-testi-text{color:var(--ds-text-2,#475882)}
+.vgz-dark-section .vgz-testi-author{border-top-color:var(--ds-border,#E6EAF2)}
+.vgz-dark-section .vgz-testi-info-name{color:var(--ds-primary,#142554)}
+.vgz-dark-section .vgz-testi-info-meta{color:var(--ds-text-3,#7A88A6)}
 
 /* ════════════════════════════════════════════════════════════════ */
 /* ═════ CARTES PREMIUM v2 — Livres / Articles / E-Learning ═════ */
