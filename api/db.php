@@ -86,8 +86,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     exit;
 }
 
-/* POST */
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+/* POST ou PUT — écriture de la base.
+   🐛 v1.2.3 FIX CRITIQUE : le client pousse en PUT (héritage de la migration
+   Firebase→PHP : save(), cloudSaveDB(), _cloudSilentPushDB(), forceFullSync()
+   appellent tous _fbFetch(LWS_API.db, {method:'PUT'})). Or db.php ne gérait que
+   POST → renvoyait 405 sur chaque PUT → la synchro serveur ne s'écrivait JAMAIS
+   (les données ne vivaient qu'en localStorage, perdues au changement d'appareil
+   ou au vidage du cache). On accepte désormais les deux verbes.
+   Accepter PUT est sans risque : cela ne peut que réparer le chemin PUT, jamais
+   casser le chemin POST (filet de secours _backupDBToLWS) ni les lectures GET. */
+if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT') {
     $raw = file_get_contents('php://input');
     if (!$raw) { http_response_code(400); echo json_encode(['ok'=>false,'error'=>'Corps vide']); exit; }
     if (strlen($raw) > 20*1024*1024) { http_response_code(413); echo json_encode(['ok'=>false,'error'=>'Données > 20 Mo']); exit; }
@@ -101,6 +109,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode(['ok'=>false,'error'=>'Mot de passe en clair détecté — refus pour sécurité']);
         exit;
     }
+
+    // ── 🛟 v1.2.3 Garde-fou anti-écrasement catastrophique ──────────────────
+    // Empêche qu'un état client vide / à moitié initialisé n'écrase une vraie base.
+    // Seuil ultra-conservateur (un payload < 2 Ko remplaçant une base > 50 Ko est
+    // forcément un bug : la base par défaut seule pèse déjà bien plus). Aucun
+    // risque de faux positif sur une vraie sauvegarde.
+    $existsLen = is_file($DB_FILE) ? (int) filesize($DB_FILE) : 0;
+    if ($existsLen > 50000 && strlen($raw) < 2000) {
+        @file_put_contents(__DIR__ . '/data/_security_log.txt',
+            date('c') . ' [TINY_OVERWRITE_BLOCKED] db.php ip=' . $ip
+            . ' new=' . strlen($raw) . 'o vs existant=' . $existsLen . "o\n", FILE_APPEND);
+        http_response_code(409);
+        echo json_encode(['ok' => false, 'error' =>
+            'Écriture refusée : données anormalement petites (' . strlen($raw)
+            . ' o) face à une base de ' . $existsLen . ' o. Rechargez la page puis réessayez.']);
+        exit;
+    }
+
+    // ── 💾 v1.2.3 Sauvegarde horodatée AVANT écrasement (rétention 30) ───────
+    // La synchro est en « dernière écriture gagne » (le verrou optimiste côté
+    // client est inopérant). Cette copie convertit une perte SILENCIEUSE en perte
+    // RÉCUPÉRABLE : si un appareil clobber les données d'un autre, la version
+    // précédente reste dans data/_backups/ (protégé par data/.htaccess).
+    if (is_file($DB_FILE)) {
+        $bkDir = $DATA_DIR . '/_backups';
+        if (!is_dir($bkDir)) @mkdir($bkDir, 0750, true);
+        @copy($DB_FILE, $bkDir . '/veritas_db.' . date('Ymd_His') . '.'
+            . bin2hex(random_bytes(3)) . '.json');
+        $bks = glob($bkDir . '/veritas_db.*.json');
+        if ($bks && count($bks) > 30) {
+            sort($bks);
+            foreach (array_slice($bks, 0, count($bks) - 30) as $old) { @unlink($old); }
+        }
+    }
+
     $tmp = $DB_FILE . '.tmp';
     if (file_put_contents($tmp, $raw, LOCK_EX) === false) { http_response_code(500); echo json_encode(['ok'=>false,'error'=>'Écriture impossible']); exit; }
     if (!rename($tmp, $DB_FILE)) { @unlink($tmp); http_response_code(500); echo json_encode(['ok'=>false,'error'=>'Rename échoué']); exit; }

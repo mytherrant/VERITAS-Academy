@@ -134,6 +134,33 @@ if ($cachedAnswer !== null) {
     exit;
 }
 
+// ── 4bis. 🔐 v1.2.3 PLAFOND GLOBAL QUOTIDIEN (borne les coûts, tous appelants confondus) ──
+// L'endpoint IA n'exige pas d'auth (entonnoir visiteur) ; seul un rate-limit par IP existait.
+// Un plafond global protège contre l'abus distribué ou un pic viral. On ne compte QUE les
+// vrais appels amont (on est ici APRÈS le cache → cache miss = coût réel).
+// 🛟 FAIL-OPEN : toute erreur de compteur => on autorise (ne JAMAIS casser le funnel IA).
+$IA_GLOBAL_DAILY_MAX = defined('IA_GLOBAL_DAILY_MAX') ? (int) IA_GLOBAL_DAILY_MAX : 3000;
+$gFile  = $rateDir . 'ia_global_' . date('Ymd') . '.txt';
+$gCount = is_file($gFile) ? (int) @file_get_contents($gFile) : 0;
+if ($IA_GLOBAL_DAILY_MAX > 0 && $gCount >= $IA_GLOBAL_DAILY_MAX) {
+    // Alerte e-mail best-effort, une seule fois par jour (si IA_ALERT_EMAIL défini)
+    $alertFlag = $rateDir . 'ia_alert_' . date('Ymd') . '.txt';
+    if (defined('IA_ALERT_EMAIL') && IA_ALERT_EMAIL && !is_file($alertFlag)) {
+        @file_put_contents($alertFlag, '1');
+        @mail(IA_ALERT_EMAIL, 'VERITAS — plafond IA quotidien atteint',
+            'Le plafond global de ' . $IA_GLOBAL_DAILY_MAX . " requetes IA/jour a ete atteint le " . date('c')
+            . ".\nLes nouvelles requetes sont temporairement refusees (les reponses validees en cache restent servies)."
+            . "\nAjustez IA_GLOBAL_DAILY_MAX dans api/payment_config.php si besoin.");
+    }
+    @file_put_contents(__DIR__ . '/data/_security_log.txt',
+        date('c') . ' [IA_GLOBAL_CAP] count=' . $gCount . ' max=' . $IA_GLOBAL_DAILY_MAX . ' ip=' . $ip . "\n", FILE_APPEND);
+    http_response_code(503);
+    echo json_encode(['error' => 'Assistant IA très sollicité aujourd’hui — réessayez plus tard. Les réponses déjà validées restent disponibles.']);
+    exit;
+}
+// Incrément best-effort (lecture-écriture non atomique = tolérable pour un plafond souple)
+@file_put_contents($gFile, ($gCount + 1) . '');
+
 // ── 5. CHOIX DU MODÈLE — v1.2.2 : TOUT sur Google Gemini ────────────────
 // Le PLAN ne choisit plus le fournisseur, seulement le MODÈLE Gemini :
 //   • visiteurs / tier gratuit  → Gemini Flash    (gros quota : 250-1000 req/jour)

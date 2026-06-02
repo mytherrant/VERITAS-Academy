@@ -46,6 +46,33 @@ jobs:
         env:
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+      # ── 🧪 Garde-fou syntaxe — bloque le déploiement si PHP ou JS est invalide ──
+      # Ajouté après l'incident HTTP 500 (directive .htaccess incompatible déployée
+      # sans vérification) : aucune erreur de syntaxe ne doit plus atteindre la prod.
+      - name: 🧪 Vérifier la syntaxe (PHP + JS) avant déploiement
+        run: |
+          php_fail=0
+          echo "→ Lint PHP (php -l) sur api/*.php"
+          if command -v php >/dev/null 2>&1; then
+            for f in api/*.php; do
+              [ -f "$f" ] || continue
+              if ! php -l "$f"; then php_fail=1; fi
+            done
+          else
+            echo "::warning::php introuvable sur le runner — lint PHP ignoré"
+          fi
+          js_fail=0
+          echo "→ Lint JS (node --check) sur app.js et sw.js"
+          for j in app.js sw.js; do
+            [ -f "$j" ] || continue
+            if ! node --check "$j"; then js_fail=1; fi
+          done
+          if [ "$php_fail" != "0" ] || [ "$js_fail" != "0" ]; then
+            echo "::error title=Syntaxe invalide::Déploiement ANNULÉ — corrigez les erreurs ci-dessus."
+            exit 1
+          fi
+          echo "✅ Syntaxe PHP + JS valide — déploiement autorisé."
+
       - name: 📋 Préparer les fichiers
         run: |
           mkdir -p deploy/api \
