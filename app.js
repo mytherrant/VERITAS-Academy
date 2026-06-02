@@ -3909,11 +3909,13 @@ function vShowSec(sec,btn){
     <!-- ═════ CITATION DU JOUR (v2.4) — Auteurs camerounais ═════ -->
     ${(typeof _citationBannerHtml==='function'?_citationBannerHtml():'')}
 
-    <!-- ═════ QUESTION DU JOUR — partage WhatsApp (v1.2.2) ═════ -->
-    ${(typeof _questionJourHtml==='function'?_questionJourHtml():'')}
+    <!-- QUESTION DU JOUR : retirée de la vitrine visiteur (désencombrement accueil v1.2.3).
+         Feature conservée (fonction _questionJourHtml intacte) — à resurfacer dans l'espace élève. -->
+    ${''}
 
-    <!-- ═════ ENGAGEMENT QUOTIDIEN (v2.3) — 4 cartes dynamiques ═════ -->
-    ${(typeof _engagementBannerHtml==='function'?_engagementBannerHtml():'')}
+    <!-- ENGAGEMENT QUOTIDIEN : retiré de la vitrine visiteur (désencombrement accueil v1.2.3).
+         Feature conservée (fonction _engagementBannerHtml intacte) — à resurfacer dans l'espace élève. -->
+    ${''}
 
     <!-- v2.6 : Innovations IA déplacées dans nav 'IA ▾' (supprimé d'ici pour éviter doublon) -->
 
