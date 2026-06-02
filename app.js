@@ -14102,10 +14102,10 @@ function showCalendrier(){
   var cal = (DB.calendrierData && DB.calendrierData.annee) ? DB.calendrierData : CALENDRIER_SCOLAIRE;
   var _picB='https://em-content.zobj.net/source/microsoft-3D-fluent/406/';
   var examPictos={
-    'BEPC':{cls:'bepc',pic:'graduation-cap_1f393.png'},
-    'Probatoire':{cls:'probatoire',pic:'open-book_1f4d6.png'},
-    'BAC':{cls:'bac',pic:'trophy_1f3c6.png'},
-    'CEP':{cls:'concours',pic:'memo_1f4dd.png'}
+    'BEPC':{cls:'bepc',ico:'school'},
+    'Probatoire':{cls:'probatoire',ico:'menu_book'},
+    'BAC':{cls:'bac',ico:'emoji_events'},
+    'CEP':{cls:'concours',ico:'workspace_premium'}
   };
   function classifyExam(nom){
     var n=(nom||'').toLowerCase();
@@ -14149,7 +14149,7 @@ function showCalendrier(){
   (cal.examens_nationaux||[]).forEach(function(ex){
     var theme=classifyExam(ex.nom);
     h+='<div class="vexam-card '+theme.cls+'">';
-    h+='  <div class="vexam-ico"><img src="'+_picB+theme.pic+'" alt="" loading="lazy"></div>';
+    h+='  <div class="vexam-ico"><span class="material-symbols-rounded" aria-hidden="true">'+(theme.ico||'school')+'</span></div>';
     h+='  <div class="vexam-title">'+_esc(ex.nom)+'</div>';
     h+='  <div class="vexam-cls">'+_esc(ex.niveaux)+' · '+_esc((ex.matières||'').substring(0,40))+(ex.matières&&ex.matières.length>40?'...':'')+'</div>';
     h+='  <div class="vexam-date">📅 '+_esc(ex.date)+'</div>';
@@ -35486,13 +35486,13 @@ function pgPartnerships(){
   sortedTypes.forEach(function(k){
     var t = types[k];
     h += '<div onclick="_prtGo(\'partenariat-'+k+'\')" '
-      + 'style="cursor:pointer;background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);transition:all .2s" '
-      + 'onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 22px rgba(20,37,84,.12)\'" '
-      + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 2px 8px rgba(0,0,0,.04)\'">'
-      + '<div style="font-size:36px;margin-bottom:6px">'+t.emoji+'</div>'
+      + 'style="cursor:pointer;background:#fff;border:1px solid var(--ds-border,#E6EAF2);border-top:3px solid var(--gold,#FFC93C);border-radius:var(--ds-r,14px);padding:22px 18px;text-align:center;box-shadow:var(--ds-sh-sm,0 1px 3px rgba(20,37,84,.08));transition:transform .2s,box-shadow .2s" '
+      + 'onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 16px 34px rgba(20,37,84,.14)\'" '
+      + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'var(--ds-sh-sm,0 1px 3px rgba(20,37,84,.08))\'">'
+      + '<div style="font-size:34px;margin-bottom:8px">'+t.emoji+'</div>'
       + '<div style="font-size:15px;font-weight:800;color:#142554;margin-bottom:6px">'+_prtSafe(t.label)+'</div>'
-      + '<div style="font-size:12px;color:var(--ink3);line-height:1.5;margin-bottom:12px">'+_prtSafe(t.desc)+'</div>'
-      + '<button class="btn bi" style="width:100%;font-size:12px;padding:8px;justify-content:center">En savoir plus →</button>'
+      + '<div style="font-size:12px;color:var(--ink3);line-height:1.55;margin-bottom:14px">'+_prtSafe(t.desc)+'</div>'
+      + '<button class="btn bi" style="width:100%;font-size:12px;padding:9px;justify-content:center">En savoir plus →</button>'
       + '</div>';
   });
   h += '</div>';
@@ -35501,12 +35501,14 @@ function pgPartnerships(){
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px">';
   ['bronze','argent','or','diamant'].forEach(function(k){
     var lv = L[k];
-    h += '<div style="background:linear-gradient(135deg,'+lv.color+'22,'+lv.color+'05);border:2px solid '+lv.color+'88;border-radius:12px;padding:14px;text-align:center">'
-      + '<div style="font-size:32px;margin-bottom:4px">'+lv.badge+'</div>'
-      + '<div style="font-size:14px;font-weight:800;color:#142554;margin-bottom:6px">'+lv.label+'</div>'
-      + '<div style="font-size:11px;color:var(--ink3);margin-bottom:4px">À partir de <strong>'+lv.min+'</strong> ventes</div>'
-      + '<div style="font-size:13px;font-weight:700;color:'+(lv.color==='#FFD700'?'#9a6b00':'#142554')+'">'+Math.round(lv.commission*100)+'% commission</div>'
-      + (lv.bonusFixe>0?'<div style="font-size:11px;color:#059669;margin-top:4px">+ Bonus '+_prtFmt(lv.bonusFixe)+'</div>':'')
+    h += '<div style="position:relative;background:linear-gradient(135deg,'+lv.color+'2e,'+lv.color+'0a);border:2px solid '+lv.color+';border-radius:16px;padding:18px 14px;text-align:center;box-shadow:0 8px 24px '+lv.color+'40;transition:transform .25s,box-shadow .25s;overflow:hidden" '
+      + 'onmouseover="this.style.transform=\'translateY(-6px) scale(1.03)\';this.style.boxShadow=\'0 16px 38px '+lv.color+'66\'" '
+      + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 8px 24px '+lv.color+'40\'">'
+      + '<div style="font-size:40px;margin-bottom:6px;line-height:1;filter:drop-shadow(0 4px 10px '+lv.color+'80)">'+lv.badge+'</div>'
+      + '<div style="font-size:15px;font-weight:900;color:#142554;margin-bottom:6px;letter-spacing:.3px">'+lv.label+'</div>'
+      + '<div style="font-size:11px;color:var(--ink3);margin-bottom:8px">À partir de <strong>'+lv.min+'</strong> ventes</div>'
+      + '<div style="display:inline-block;font-size:13px;font-weight:800;color:#142554;background:'+lv.color+'33;border-radius:20px;padding:3px 12px">'+Math.round(lv.commission*100)+'% commission</div>'
+      + (lv.bonusFixe>0?'<div style="font-size:11px;color:#059669;font-weight:700;margin-top:6px">+ Bonus '+_prtFmt(lv.bonusFixe)+'</div>':'')
       + '</div>';
   });
   h += '</div></div>';
