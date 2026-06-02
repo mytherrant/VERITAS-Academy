@@ -192,6 +192,25 @@ jobs:
           echo "✅ Fichiers prêts pour déploiement :"
           find deploy -type f | sort
 
+      # ── 🗜️ Minifier app.js déployé (réduit le poids + le parsing au 1er chargement) ──
+      # On minifie UNIQUEMENT la copie deploy/ (la source app.js reste lisible).
+      # Mode SÛR : whitespace + syntaxe, SANS renommage d'identifiants (sinon les
+      # onclick="fonction()" du HTML casseraient). Repli automatique si invalide.
+      - name: 🗜️ Minifier app.js (mode sûr, sans renommage)
+        run: |
+          if [ -f deploy/app.js ]; then
+            before=$(wc -c < deploy/app.js)
+            if npx --yes esbuild deploy/app.js --minify-whitespace --minify-syntax --legal-comments=none --outfile=deploy/app.min.js 2>/dev/null \
+               && node --check deploy/app.min.js && [ -s deploy/app.min.js ]; then
+              mv deploy/app.min.js deploy/app.js
+              after=$(wc -c < deploy/app.js)
+              echo "✅ app.js minifié : ${before} → ${after} octets"
+            else
+              echo "::warning title=Minification ignorée::Sortie esbuild invalide — app.js original conservé (déploiement sûr)."
+              rm -f deploy/app.min.js
+            fi
+          fi
+
       - name: 🚀 Déployer via FTP vers veritas-school.com
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
