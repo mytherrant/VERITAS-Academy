@@ -35205,7 +35205,7 @@ setTimeout(function(){initTickerFixed();},3000);
     for(var p=el; p && p.nodeType===1; p=p.parentNode){
       if(p.getAttribute && p.getAttribute('role')==='img') return true;
       if(p.hasAttribute && p.hasAttribute('data-keep-emoji')) return true;
-      if(p.classList && (p.classList.contains('vgz-role-ico')||p.classList.contains('b-ico')||p.classList.contains('jeu-thumb'))) return true;
+      if(p.classList && p.classList.contains('vgz-role-ico')) return true;
     }
     return false;
   }
@@ -35255,8 +35255,6 @@ setTimeout(function(){initTickerFixed();},3000);
               && node.getAttribute && node.getAttribute('role') !== 'img'
               && !node.hasAttribute('data-keep-emoji')
               && !node.classList.contains('vgz-role-ico')
-              && !node.classList.contains('b-ico')
-              && !node.classList.contains('jeu-thumb')
               && node.tagName !== 'OPTION'){
       // Iterate children in reverse (replacing may change length)
       var children = Array.prototype.slice.call(node.childNodes);
