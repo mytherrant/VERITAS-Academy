@@ -37,7 +37,7 @@ if (in_array($__origin, $__veritas_allowed_origins, true)) {
 }
 // (origine absente = appel same-origin/serveur → aucun header CORS nécessaire ;
 //  origine non listée = pas de header ACAO → le navigateur bloque la réponse)
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
 header('Access-Control-Max-Age: 86400');
 

@@ -15,13 +15,13 @@
       }
     }
 
-    // 2. Désactivation clic droit / sélection sur zones admin (sans bloquer la page)
-    document.addEventListener('contextmenu', function(e){
-      try { if(e.target.closest && e.target.closest('#APP,#VISITOR')) e.preventDefault(); } catch(_){}
-    });
-    document.addEventListener('selectstart', function(e){
-      try { if(e.target.closest && e.target.closest('#APP')) e.preventDefault(); } catch(_){}
-    });
+    // 2. (Assaini v1.2.3) Clic droit + sélection de texte RÉACTIVÉS.
+    //    Le blocage global (contextmenu/selectstart sur #APP/#VISITOR) dégradait
+    //    l'UX et l'accessibilité (impossible de copier un nom, sélectionner du texte)
+    //    sans rien protéger — le code reste lisible côté client de toute façon.
+    //    La détection bot passive (ci-dessous) + le filigrane des exports suffisent.
+    //    La protection des médias payants reste au niveau de chaque lecteur
+    //    (oncontextmenu / controlsList="nodownload" sur les <video>/<embed>/<img>).
 
     // 3. Détection bot LIGHT (passive, log uniquement, ne bloque pas)
     try {
