@@ -1550,25 +1550,33 @@ function save(){
       // Stripping binaires lourds (videos, PDFs base64)
       (dbLight.elearning&&dbLight.elearning.contenus||[]).forEach(function(c){delete c.fichierData;});
       (dbLight.books||[]).forEach(function(b){delete b.content;});
-      // ── OPTIMISTIC LOCK : avant PUT, vérifier que personne n'a écrit après notre dernière sync ──
-      // Firebase REST : GET /db/lastModified.json renvoie juste le timestamp (pas tout le DB)
+      // ── DÉTECTION DE CONFLIT (v1.2.3) ───────────────────────────────────
+      // Avant le PUT, demander au serveur ses métadonnées LÉGÈRES (?meta=1, pas
+      // toute la base) et différer si un autre appareil a écrit depuis notre
+      // dernière synchro réussie. (Remplace l'ancien verrou inopérant qui visait
+      // un chemin Firebase /db/lastModified.json inexistant sur db.php.)
+      // Garde-fous : non bloquant (try/catch) + ne se déclenche pas au 1er save
+      // (_seenTS>0) + plafond de 2 re-tentatives → JAMAIS de boucle infinie.
+      // Le filet de sauvegarde serveur (data/_backups) reste le garde-fou ultime.
       try{
-        var _tsUrl=LWS_API.db.replace(/\/db\.json$/,'/db/lastModified.json')+'?t='+Date.now();
-        var _checkRes=await _fbFetch(_tsUrl,{method:'GET'});
+        var _metaUrl=LWS_API.db+(LWS_API.db.indexOf('?')>=0?'&':'?')+'meta=1&t='+Date.now();
+        var _checkRes=await _fbFetch(_metaUrl,{method:'GET'});
         if(_checkRes.ok){
-          var _remoteTS=parseInt(await _checkRes.json())||0;
-          var _localKnownTS=window._fbLastSyncedMs||0;
-          // Conflit détecté : cloud a une version plus récente que notre dernier push, ET plus récente que notre DB locale
-          if(_remoteTS>_localKnownTS+2000 && _remoteTS>(DB.lastModified||0)+2000){
-            console.warn('[Firebase] Conflit détecté — pull avant push');
-            toast('⟳ Re-synchro (autre appareil a modifié)','info');
-            // Différer le PUT : laisser le poller faire le merge, puis re-tenter
+          var _meta=await _checkRes.json();
+          var _remoteTS=(_meta&&parseInt(_meta.lastModified,10))||0;
+          var _seenTS=window._fbLastSyncedMs||0;
+          var _retries=window._vrtConflictRetries||0;
+          if(_seenTS>0 && _remoteTS>_seenTS+2000 && _retries<2){
+            window._vrtConflictRetries=_retries+1;
+            console.warn('[sync] Conflit détecté (serveur plus récent) — pull avant push');
+            toast('⟳ Re-synchro (un autre appareil a modifié les données)','info');
             clearTimeout(_syncTimeout);
             _syncTimeout=setTimeout(function(){save();},2500);
             return;
           }
+          window._vrtConflictRetries=0;
         }
-      }catch(eLock){/* check non-bloquant — continuer le PUT */}
+      }catch(eLock){/* non bloquant — continuer le PUT */}
       var res=await _fbFetch(LWS_API.db,{
         method:'PUT',
         headers:{'Content-Type':'application/json'},
@@ -16186,6 +16194,20 @@ var OEUVRE_COVERS = {
 };
 window._oeuvreCover = function(key){ return OEUVRE_COVERS[key] ? ('uploads/oeuvres/'+OEUVRE_COVERS[key]) : ''; };
 
+// v1.2.2 : corrigés modèles (commentaire composé + dissertation) par œuvre.
+// Fichiers .md dans /evaluations/ (déployés), chargés à la demande dans la fiche.
+var OEUVRE_CORRIGES = {
+  "2nde_tartuffe":          "corrige_2nde_tartuffe_moliere.md",
+  "2nde_tribus_capitoline": "corrige_2nde_tribus_capitoline.md",
+  "1ere_coeur_tenebres":    "corrige_1ere_au_coeur_des_tenebres.md",
+  "1ere_lion_perle":        "corrige_1ere_lion_et_la_perle.md",
+  "1ere_balafon":           "corrige_1ere_balafon_mveng.md",
+  "tle_stances_poemes":     "corrige_tle_stances_et_poemes.md",
+  "tle_vieux_negro":        "corrige_tle_vieux_negre_medaille.md",
+  "tle_ngum_jemea":         "corrige_tle_ngum_a_jemea.md"
+};
+window._oeuvreCorrige = function(key){ return OEUVRE_CORRIGES[key] || ''; };
+
 var LITT_OEUVRES = {
 
   // ─── 3e ────────────────────────────────────────────────────────
@@ -17792,6 +17814,33 @@ function _mmDownload(oeuvreKey){
 }
 
 // ── MENU PRINCIPAL PAR ŒUVRE ────────────────────────────────────────
+// ── CORRIGÉS MODÈLES (commentaire composé + dissertation) ───────────────
+// v1.2.2 : charge le .md de /evaluations/ et l'affiche dans la fiche de l'œuvre.
+function _showLittCorriges(oeuvreKey){
+  var oe=LITT_OEUVRES[oeuvreKey];
+  if(!oe){toast("Œuvre introuvable","warn");return;}
+  var file=(typeof _oeuvreCorrige==='function')?_oeuvreCorrige(oeuvreKey):'';
+  if(!file){toast("Aucun corrigé disponible pour cette œuvre","warn");return;}
+  _vc('<div class="vsec">'
+    +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
+    +'<div class="vsec-title">🏆 Corrigés modèles — '+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-sub" style="font-style:italic;color:var(--ink3)">Commentaire composé &amp; dissertation entièrement rédigés · '+_esc(oe.classe)+'</div>'
+    +'<div id="littCorrigeBox" class="vcard ai-md" style="margin-top:16px;line-height:1.7">'
+      +'<div style="text-align:center;color:var(--ink4);padding:24px"><span style="animation:pulse 1.2s infinite;font-size:28px">📖</span><br>Chargement du corrigé…</div>'
+    +'</div></div>');
+  var base=(typeof location!=='undefined'&&location.origin&&location.origin.indexOf('http')===0)?'':'';
+  fetch(base+'evaluations/'+file+'?t='+Date.now())
+    .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+    .then(function(md){
+      var box=document.getElementById('littCorrigeBox');
+      if(box) box.innerHTML=(typeof _aiMarkdown==='function')?_aiMarkdown(md):('<pre style="white-space:pre-wrap">'+_esc(md)+'</pre>');
+    })
+    .catch(function(e){
+      var box=document.getElementById('littCorrigeBox');
+      if(box) box.innerHTML='<div class="ib ibt"><span>⚠️</span><span>Corrigé momentanément indisponible. Réessayez plus tard.<br><small>'+_esc(e.message||'')+'</small></span></div>';
+    });
+}
+
 function _showLittMenu(jid,oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe){toast("Œuvre introuvable","warn");return;}
@@ -17830,9 +17879,11 @@ function _showLittMenu(jid,oeuvreKey){
         //   2. FICHE D'IDENTITÉ    → infos biblio + carte mentale + thèmes + axes
         //   3. CONTRÔLE DE LECTURE → citations + figures + techniques + QCM + questions ouvertes
         var nbControle = ((oe.citations||[]).length) + ((oe.techniques||[]).length) + ((oe.qcm||[]).length) + ((oe.controle||[]).length);
+        var _hasCorrige = (typeof _oeuvreCorrige==='function') && _oeuvreCorrige(oeuvreKey);
         return (oe.analyse ? _lcard('bookopen','#7C3AED', 'rgba(124,58,237,0.12)','Analyse littéraire',   'Style accessible &amp; extraits phares', '_showLittAnalyse(\''+oeuvreKey+'\')', true) : '')
              + _lcard('clipboard', '#142554', 'rgba(16,185,129,0.12)',  'Fiche d\'identité',      _esc(ficheDesc)+' · Carte mentale',          '_showLittFiche(\''+oeuvreKey+'\')', false)
-             + _lcard('pencil',    '#DC2626', 'rgba(220,38,38,0.12)',   'Contrôle de lecture',    nbControle+' éléments à maîtriser',          '_showLittControleComplet(\''+oeuvreKey+'\')', false);
+             + _lcard('pencil',    '#DC2626', 'rgba(220,38,38,0.12)',   'Contrôle de lecture',    nbControle+' éléments à maîtriser',          '_showLittControleComplet(\''+oeuvreKey+'\')', false)
+             + (_hasCorrige ? _lcard('award','#F59E0B', 'rgba(245,158,11,0.14)', 'Corrigés modèles', 'Commentaire composé &amp; dissertation rédigés', '_showLittCorriges(\''+oeuvreKey+'\')', true) : '');
       })()
     +'</div>'
     // Bandeau auteur/classe
