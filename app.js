@@ -3918,7 +3918,7 @@ function vShowSec(sec,btn){
     <!-- v2.6 : Innovations IA déplacées dans nav 'IA ▾' (supprimé d'ici pour éviter doublon) -->
 
     <!-- ═════ 🎓 BANDEAU AMBASSA — Star feature mise en avant (v2.6) ═════ -->
-    <div class="v-reveal" onclick="mAgentAmbassa()" role="link" tabindex="0" style="background:linear-gradient(135deg,#142554 0%,#7C3AED 60%,#EC4899 100%);color:#fff;padding:18px 22px;margin:18px 0;border-radius:18px;cursor:pointer;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(124,58,237,.3);transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+    <div class="v-reveal" onclick="mAgentAmbassa()" role="link" tabindex="0" style="background:linear-gradient(135deg,#142554 0%,#1E3A8A 100%);color:#fff;padding:18px 22px;margin:18px 0;border-radius:var(--ds-r-lg,18px);cursor:pointer;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden;box-shadow:0 10px 28px rgba(20,37,84,.28);transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
       <div style="position:absolute;top:-20px;right:-20px;font-size:140px;opacity:.08;font-weight:900;font-family:Plus Jakarta Sans">M</div>
       <div style="position:relative;width:60px;height:60px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;font-family:Plus Jakarta Sans;flex-shrink:0;box-shadow:0 8px 24px rgba(0,0,0,.2)">M</div>
       <div style="position:relative;flex:1;min-width:240px">
