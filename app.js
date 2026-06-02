@@ -15170,7 +15170,7 @@ function showPartenaires(){
     +"<div style='font-size:38px;margin-bottom:12px'>🤝</div>"
     +"<div style='font-family:Montserrat,sans-serif;font-size:17px;font-weight:800;color:#142554;margin-bottom:8px'>Rejoignez l'aventure VÉRITAS</div>"
     +"<div style='font-family:Georgia,serif;font-size:13px;color:var(--ink3);line-height:1.7;font-style:italic;margin-bottom:18px'>Auteurs, enseignants, entreprises et mécènes : contribuez à l'éducation camerounaise — et soyez rémunérés ou mis en avant.</div>"
-    +"<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;text-align:left'>"
+    +"<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;text-align:center'>"
       +"<div style='background:#fff;border:1px solid #E6EAF2;border-radius:14px;padding:16px;display:flex;flex-direction:column'>"
         +"<div style='font-size:26px'>✍️</div>"
         +"<div style='font-family:Montserrat,sans-serif;font-weight:800;color:#142554;margin:6px 0 4px'>Devenir auteur</div>"
