@@ -1,13 +1,16 @@
 # VÉRITAS — Guide Claude Code
 
-> **Projet** : Centre VÉRITAS — application de gestion scolaire (frontend HTML/JS single-file + backend PHP)
+> **Projet** : Centre VÉRITAS — application de gestion scolaire (frontend HTML + JS/CSS externes + backend PHP)
 > **Propriétaire** : Jacques Miterand TAKOU, Douala, Cameroun
-> **Version courante** : **v1.2.x** (fichier `VERITAS_v1.2.html`, ~3,7 Mo, ~40 000 lignes — servi comme `app.html` via `index.php`)
-> **Architecture** : frontend HTML/CSS/JS vanilla **+ backend PHP** (`api/`, MySQL + fichiers plats). Stockage client `localStorage` + `IndexedDB` ; synchronisation cloud via `api/db.php`.
+> **Version courante** : **v1.2.3** — le frontend n'est PLUS « single-file ». `VERITAS_v1.2.html` est une coquille (~440 Ko) qui charge **`app.js`** (~3,4 Mo, ~37 000 lignes — **tout le JS applicatif**) et **`app.css`** (~200 Ko) en externe. Servi comme `app.html` via `index.php`.
+> **Architecture** : frontend HTML/CSS/JS vanilla **+ backend PHP** (`api/`, MySQL + fichiers plats). Stockage client `localStorage` + `IndexedDB` ; synchronisation cloud via `api/db.php` (le client pousse en **PUT** ; db.php accepte PUT≡POST depuis v1.2.3).
 > **Domaine de prod** : `https://veritas-school.com`
-> **Dernière mise à jour** : mai 2026
+> **Dernière mise à jour** : juin 2026 (v1.2.3)
 
-> ⚠️ **Note de cohérence** : ce guide a longtemps décrit une app « single-file, zéro backend, `v39_2` ». **C'est faux désormais.** Le projet est devenu **client-serveur** (backend PHP réel : proxy IA, paiements MoMo/Orange, upload, sync). Le fichier réel est `VERITAS_v1.2.html`. En cas de doute, le code fait foi, pas l'historique.
+> ⚠️ **Note de cohérence — LIRE EN PREMIER.** Ce guide a accumulé des affirmations périmées ; le **code fait foi**, pas ce document.
+> - **Le JS applicatif vit dans `app.js`** (~37 000 lignes), PAS dans `VERITAS_v1.2.html`. → Les numéros de ligne du §5 ci-dessous sont **obsolètes**. Pour localiser une fonction : `graphify-out/JS_FUNCTION_INDEX.md` puis `Read(app.js, offset, limit)`.
+> - **Les paiements Orange Money / MTN MoMo sont de VRAIES intégrations serveur** (OAuth + WebPayment + webhook `notify` vérifié par `notif_token` / `hash_equals`), PAS « purement déclaratives » comme l'affirme encore le §6.4.
+> - **Correctifs v1.2.3 (juin 2026)** : (1) `db.php` accepte enfin `PUT` → la synchro serveur, jusque-là cassée (405 silencieux → données en localStorage seulement), fonctionne ; (2) sauvegardes horodatées avant écrasement dans `data/_backups/` + endpoint `db.php?meta=1` (détection de conflit côté client) ; (3) plafond de dépense IA + alerte dans `ia_proxy.php` ; (4) garde-fou CI `php -l` + `node --check` dans `deploy.yml` (bloque un déploiement à syntaxe invalide) ; (5) anti-clonage assaini (clic droit / sélection réactivés ; filigrane des exports conservé).
 
 ---
 
@@ -15,7 +18,7 @@
 
 VÉRITAS gère un centre de tutorat/répétition : élèves, enseignants, notes, paiements, bulletins APC, boutique de manuels, e-learning avec abonnements, jeux éducatifs, cartes mentales littéraires, IA pédagogique (Prof. Ambassa), et un espace visiteur public avec authentification.
 
-Le **frontend** est un gros fichier HTML/JS unique. Le **backend PHP** (`api/`) gère ce qui ne peut pas vivre côté client : clés IA (jamais exposées au navigateur), paiements mobiles, upload de fichiers, et la synchronisation/persistance serveur de la base.
+Le **frontend** : un HTML coquille (`VERITAS_v1.2.html`) qui charge tout le JS applicatif depuis **`app.js`** (~37 000 lignes) + **`app.css`** en externe (cacheables séparément, compressés Brotli par LiteSpeed). Le **backend PHP** (`api/`) gère ce qui ne peut pas vivre côté client : clés IA (jamais exposées au navigateur), paiements mobiles, upload de fichiers, et la synchronisation/persistance serveur de la base.
 
 **Design** : palette bleu nuit + or (`#142554` / `#FFC93C`). ⚠️ Trois systèmes de tokens CSS coexistent (legacy `--ink/--bl`, v2 `--primary-*`, v3 `--ds-*`) — privilégier `--ds-*` et **ne pas en empiler un 4e**.
 

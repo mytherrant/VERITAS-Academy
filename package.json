@@ -1,0 +1,14 @@
+{
+  "name": "veritas-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Filet de tests E2E (smoke) pour VÉRITAS — outillage de dev, ne fait PAS partie de l'app déployée (non copié par deploy.yml).",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

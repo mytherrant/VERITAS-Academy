@@ -3909,16 +3909,18 @@ function vShowSec(sec,btn){
     <!-- ═════ CITATION DU JOUR (v2.4) — Auteurs camerounais ═════ -->
     ${(typeof _citationBannerHtml==='function'?_citationBannerHtml():'')}
 
-    <!-- ═════ QUESTION DU JOUR — partage WhatsApp (v1.2.2) ═════ -->
-    ${(typeof _questionJourHtml==='function'?_questionJourHtml():'')}
+    <!-- QUESTION DU JOUR : retirée de la vitrine visiteur (désencombrement accueil v1.2.3).
+         Feature conservée (fonction _questionJourHtml intacte) — à resurfacer dans l'espace élève. -->
+    ${''}
 
-    <!-- ═════ ENGAGEMENT QUOTIDIEN (v2.3) — 4 cartes dynamiques ═════ -->
-    ${(typeof _engagementBannerHtml==='function'?_engagementBannerHtml():'')}
+    <!-- ENGAGEMENT QUOTIDIEN : retiré de la vitrine visiteur (désencombrement accueil v1.2.3).
+         Feature conservée (fonction _engagementBannerHtml intacte) — à resurfacer dans l'espace élève. -->
+    ${''}
 
     <!-- v2.6 : Innovations IA déplacées dans nav 'IA ▾' (supprimé d'ici pour éviter doublon) -->
 
     <!-- ═════ 🎓 BANDEAU AMBASSA — Star feature mise en avant (v2.6) ═════ -->
-    <div class="v-reveal" onclick="mAgentAmbassa()" role="link" tabindex="0" style="background:linear-gradient(135deg,#142554 0%,#7C3AED 60%,#EC4899 100%);color:#fff;padding:18px 22px;margin:18px 0;border-radius:18px;cursor:pointer;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden;box-shadow:0 12px 32px rgba(124,58,237,.3);transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+    <div class="v-reveal" onclick="mAgentAmbassa()" role="link" tabindex="0" style="background:linear-gradient(135deg,#142554 0%,#1E3A8A 100%);color:#fff;padding:18px 22px;margin:18px 0;border-radius:var(--ds-r-lg,18px);cursor:pointer;display:flex;align-items:center;gap:18px;flex-wrap:wrap;position:relative;overflow:hidden;box-shadow:0 10px 28px rgba(20,37,84,.28);transition:transform .25s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
       <div style="position:absolute;top:-20px;right:-20px;font-size:140px;opacity:.08;font-weight:900;font-family:Plus Jakarta Sans">M</div>
       <div style="position:relative;width:60px;height:60px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;font-family:Plus Jakarta Sans;flex-shrink:0;box-shadow:0 8px 24px rgba(0,0,0,.2)">M</div>
       <div style="position:relative;flex:1;min-width:240px">
@@ -35203,7 +35205,7 @@ setTimeout(function(){initTickerFixed();},3000);
     for(var p=el; p && p.nodeType===1; p=p.parentNode){
       if(p.getAttribute && p.getAttribute('role')==='img') return true;
       if(p.hasAttribute && p.hasAttribute('data-keep-emoji')) return true;
-      if(p.classList && (p.classList.contains('vgz-role-ico')||p.classList.contains('b-ico')||p.classList.contains('jeu-thumb'))) return true;
+      if(p.classList && p.classList.contains('vgz-role-ico')) return true;
     }
     return false;
   }
@@ -35253,8 +35255,6 @@ setTimeout(function(){initTickerFixed();},3000);
               && node.getAttribute && node.getAttribute('role') !== 'img'
               && !node.hasAttribute('data-keep-emoji')
               && !node.classList.contains('vgz-role-ico')
-              && !node.classList.contains('b-ico')
-              && !node.classList.contains('jeu-thumb')
               && node.tagName !== 'OPTION'){
       // Iterate children in reverse (replacing may change length)
       var children = Array.prototype.slice.call(node.childNodes);
