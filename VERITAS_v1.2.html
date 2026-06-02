@@ -1731,38 +1731,29 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .vgz-section-sub{text-align:center;font-size:14px;color:rgba(255,255,255,.75);margin-bottom:28px;letter-spacing:.5px}
 
 /* ═════ #8 — CARTES "POUR QUI" — Pictos 3D + animations multi-couleurs ═════ */
-.vgz-roles{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin:24px 0;perspective:1500px}
-.vgz-role{position:relative;border-radius:20px;padding:24px 18px 22px;background:linear-gradient(160deg,rgba(255,255,255,.20),rgba(255,255,255,.08));border:1.5px solid rgba(255,255,255,.28);transition:transform .15s ease-out,box-shadow .3s,border-color .3s;transform-style:preserve-3d;cursor:pointer;text-align:center;color:#fff;overflow:hidden;backdrop-filter:blur(12px)}
-.vgz-role::before{content:"";position:absolute;inset:-2px;background:conic-gradient(from var(--ang,0deg),transparent 0deg,#FFC93C 90deg,#3C8DFF 180deg,#7C3AED 270deg,transparent 360deg);border-radius:22px;opacity:0;z-index:-1;transition:opacity .4s;animation:vgzSpin 6s linear infinite paused}
-.vgz-role::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at var(--mx,50%) var(--my,50%),rgba(255,201,60,.28) 0%,transparent 50%);opacity:0;transition:opacity .3s;pointer-events:none;border-radius:22px}
-@keyframes vgzSpin{to{--ang:360deg}}
-.vgz-role:hover::before{opacity:.55;animation-play-state:running}
-.vgz-role:hover::after{opacity:1}
-.vgz-role:hover{box-shadow:0 30px 90px rgba(0,0,0,.5),0 0 60px rgba(255,201,60,.25);border-color:transparent}
+/* v1.2.3 — refonte sobre & pro : cartes uniformes, accent couleur réduit à un
+   fin liseré en haut, CTA discret, aucune animation gadget (conic/halo/3D). */
+.vgz-roles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0}
+.vgz-role{position:relative;border-radius:var(--ds-r,14px);padding:26px 20px 22px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease,background .2s ease;cursor:pointer;text-align:center;color:#fff;overflow:hidden}
+.vgz-role::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:var(--vgz-role-color,#FFC93C);opacity:.85}
+.vgz-role:hover{transform:translateY(-4px);background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);box-shadow:0 16px 38px rgba(0,0,0,.26)}
 
-/* Couleur unique par carte */
+/* Couleur d'accent par carte (rappel discret, pas un arc-en-ciel) */
 .vgz-role.r-eleve     {--vgz-role-color:#FFC93C}
 .vgz-role.r-parent    {--vgz-role-color:#3C8DFF}
 .vgz-role.r-enseignant{--vgz-role-color:#10B981}
 .vgz-role.r-etab      {--vgz-role-color:#A855F7}
-.vgz-role .vgz-role-glow{position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,var(--vgz-role-color,#FFC93C) 0%,transparent 65%);opacity:.35;filter:blur(20px);transition:opacity .4s,transform .4s;pointer-events:none}
-.vgz-role:hover .vgz-role-glow{opacity:.7;transform:translateX(-50%) scale(1.2)}
 
-/* Pictogramme 3D HD */
-.vgz-role-ico{width:88px;height:88px;margin:0 auto 14px;display:block;position:relative;animation:vgzFloatIco 3.5s ease-in-out infinite;filter:drop-shadow(0 12px 24px rgba(0,0,0,.5))}
-.vgz-role-ico img{width:100%;height:100%;object-fit:contain;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
-@keyframes vgzFloatIco{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.vgz-role:hover .vgz-role-ico img{transform:scale(1.18) rotate(-6deg) translateZ(50px)}
+/* Pictogramme — net, sans flottement ni ombre excessive */
+.vgz-role-ico{width:60px;height:60px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;font-size:40px;line-height:1}
+.vgz-role-ico img{width:100%;height:100%;object-fit:contain}
+.vgz-role-ico .material-symbols-rounded{font-size:46px;line-height:1;color:var(--vgz-role-color,#FFC93C);font-variation-settings:'wght' 500,'GRAD' 0,'opsz' 48}
 
-.vgz-role-title{font-family:Montserrat,sans-serif;font-size:19px;font-weight:900;color:#fff;margin-bottom:10px;letter-spacing:1.5px;position:relative}
-.vgz-role-title::after{content:"";position:absolute;left:50%;bottom:-5px;transform:translateX(-50%);width:0;height:2px;background:var(--vgz-role-color,#FFC93C);transition:width .4s;box-shadow:0 0 10px var(--vgz-role-color,#FFC93C)}
-.vgz-role:hover .vgz-role-title::after{width:50px}
-.vgz-role-desc{font-size:13px;color:rgba(255,255,255,.92);line-height:1.6;font-weight:500;margin-top:8px}
-.vgz-role-cta{display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:10px 20px;background:linear-gradient(135deg,var(--vgz-role-color,#FFC93C),#FFE082);color:#142554;border-radius:26px;font-size:12px;font-weight:900;text-decoration:none;transition:all .3s;box-shadow:0 6px 18px rgba(255,201,60,.4);letter-spacing:.5px;text-transform:uppercase}
-.vgz-role.r-parent     .vgz-role-cta{box-shadow:0 6px 18px rgba(60,141,255,.4)}
-.vgz-role.r-enseignant .vgz-role-cta{box-shadow:0 6px 18px rgba(16,185,129,.4)}
-.vgz-role.r-etab       .vgz-role-cta{box-shadow:0 6px 18px rgba(168,85,247,.4)}
-.vgz-role:hover .vgz-role-cta{transform:translateY(-3px) scale(1.05);box-shadow:0 12px 32px rgba(255,201,60,.55)}
+.vgz-role-title{font-family:var(--font-display,'Plus Jakarta Sans'),sans-serif;font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:.2px}
+.vgz-role-desc{font-size:13px;color:rgba(255,255,255,.82);line-height:1.6;font-weight:400}
+/* CTA uniforme et discret : contour translucide qui se teinte au survol */
+.vgz-role-cta{display:inline-flex;align-items:center;gap:6px;margin-top:18px;padding:9px 18px;background:transparent;color:#fff;border:1px solid rgba(255,255,255,.30);border-radius:var(--ds-r-sm,8px);font-size:12px;font-weight:700;text-decoration:none;letter-spacing:.3px;transition:background .2s,border-color .2s,color .2s}
+.vgz-role:hover .vgz-role-cta{background:var(--vgz-role-color,#FFC93C);border-color:var(--vgz-role-color,#FFC93C);color:#142554}
 
 /* ═════ #9 — MARQUEE PARTENAIRES — pictos 3D + glow ═════ */
 .vgz-marquee{margin:28px 0;padding:18px 0;background:linear-gradient(90deg,transparent,rgba(255,201,60,.1),rgba(60,141,255,.08),rgba(255,201,60,.1),transparent);border-radius:16px;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);border-top:1px solid rgba(255,201,60,.2);border-bottom:1px solid rgba(255,201,60,.2);position:relative}
@@ -2494,28 +2485,28 @@ html{scroll-behavior:smooth}
       +'<div class="vgz-roles v-reveal">'
         +'<div class="vgz-role r-eleve" onclick="showLogin(\'eleve\')">'
           +'<div class="vgz-role-glow"></div>'
-          +'<div class="vgz-role-ico"><span role="img" aria-label="Élève" style="font-size:72px;line-height:88px;display:block">🎓</span></div>'
+          +'<div class="vgz-role-ico"><span class="material-symbols-rounded" role="img" aria-label="Élève">school</span></div>'
           +'<div class="vgz-role-title">ÉLÈVE</div>'
           +'<div class="vgz-role-desc">Notes, bulletins, devoirs et cours en ligne. Tout ce qu\'il te faut pour réussir.</div>'
           +'<div class="vgz-role-cta">Se connecter →</div>'
         +'</div>'
         +'<div class="vgz-role r-parent" onclick="showRegisterForm()">'
           +'<div class="vgz-role-glow"></div>'
-          +'<div class="vgz-role-ico"><span role="img" aria-label="Parent" style="font-size:72px;line-height:88px;display:block">👨‍👩‍👧</span></div>'
+          +'<div class="vgz-role-ico"><span class="material-symbols-rounded" role="img" aria-label="Parent">family_restroom</span></div>'
           +'<div class="vgz-role-title">PARENT</div>'
           +'<div class="vgz-role-desc">Suis la progression de ton enfant, paie en MoMo et reçois les notifs en direct.</div>'
           +'<div class="vgz-role-cta">S\'inscrire →</div>'
         +'</div>'
         +'<div class="vgz-role r-enseignant" onclick="showLogin(\'enseignant\')">'
           +'<div class="vgz-role-glow"></div>'
-          +'<div class="vgz-role-ico"><span role="img" aria-label="Enseignant" style="font-size:72px;line-height:88px;display:block">👨‍🏫</span></div>'
+          +'<div class="vgz-role-ico"><span class="material-symbols-rounded" role="img" aria-label="Enseignant">co_present</span></div>'
           +'<div class="vgz-role-title">ENSEIGNANT</div>'
           +'<div class="vgz-role-desc">Saisis tes notes en lot, publie tes manuels, suis les performances de tes classes.</div>'
           +'<div class="vgz-role-cta">Accéder →</div>'
         +'</div>'
         +'<div class="vgz-role r-etab" onclick="window.open(\'https://wa.me/237697637739?text=Bonjour%20VERITAS%20pour%20mon%20etablissement\',\'_blank\')">'
           +'<div class="vgz-role-glow"></div>'
-          +'<div class="vgz-role-ico"><span role="img" aria-label="Établissement" style="font-size:72px;line-height:88px;display:block">🏫</span></div>'
+          +'<div class="vgz-role-ico"><span class="material-symbols-rounded" role="img" aria-label="Établissement">apartment</span></div>'
           +'<div class="vgz-role-title">ÉTABLISSEMENT</div>'
           +'<div class="vgz-role-desc">Digitalise ton école : inscriptions, paiements, bulletins APC, e-learning complet.</div>'
           +'<div class="vgz-role-cta">Contacter →</div>'
