@@ -65,6 +65,7 @@ requireAuth();
 
 $DATA_DIR = dirname(__DIR__) . '/data';
 $DB_FILE  = $DATA_DIR . '/veritas_db.json';
+$META_FILE = $DATA_DIR . '/veritas_db.meta.json'; // sidecar léger : {rev, lastModified, size}
 if (!is_dir($DATA_DIR)) mkdir($DATA_DIR, 0750, true);
 // 🔐 v1.2.1 : garantir la protection du dossier data/ MÊME si le déploiement l'oublie.
 //    Sans cela, /data/veritas_db.json serait téléchargeable directement (toute la base, sans token).
@@ -78,6 +79,24 @@ if (!is_file($DATA_DIR . '/index.php')) {
 
 /* GET */
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // ── v1.2.3 ?meta=1 : métadonnées LÉGÈRES (rev/lastModified/size) sans renvoyer
+    //    toute la base → le client détecte un conflit avant d'écrire sans télécharger
+    //    plusieurs Mo à chaque pré-vérification de sauvegarde. ──
+    if (isset($_GET['meta'])) {
+        if (is_file($META_FILE)) {
+            echo (string) @file_get_contents($META_FILE);
+        } elseif (is_file($DB_FILE)) {
+            $d = json_decode((string) file_get_contents($DB_FILE), true);
+            echo json_encode([
+                'rev'          => 0,
+                'lastModified' => (is_array($d) && isset($d['lastModified'])) ? $d['lastModified'] : null,
+                'size'         => filesize($DB_FILE),
+            ]);
+        } else {
+            echo json_encode(['rev' => 0, 'lastModified' => null, 'size' => 0]);
+        }
+        exit;
+    }
     if (file_exists($DB_FILE)) {
         $c = file_get_contents($DB_FILE);
         json_decode($c);
@@ -147,6 +166,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT
     $tmp = $DB_FILE . '.tmp';
     if (file_put_contents($tmp, $raw, LOCK_EX) === false) { http_response_code(500); echo json_encode(['ok'=>false,'error'=>'Écriture impossible']); exit; }
     if (!rename($tmp, $DB_FILE)) { @unlink($tmp); http_response_code(500); echo json_encode(['ok'=>false,'error'=>'Rename échoué']); exit; }
+    // ── v1.2.3 Mettre à jour le sidecar de métadonnées (rev monotone + lastModified) ──
+    $rev = 0;
+    if (is_file($META_FILE)) {
+        $mPrev = json_decode((string) @file_get_contents($META_FILE), true);
+        if (is_array($mPrev) && isset($mPrev['rev'])) $rev = (int) $mPrev['rev'];
+    }
+    $rev++;
+    @file_put_contents($META_FILE, json_encode([
+        'rev'          => $rev,
+        'lastModified' => $data['lastModified'] ?? null,
+        'size'         => strlen($raw),
+        'time'         => time(),
+    ]));
     // Log accès succès (rotation à 1000 lignes)
     $logF = __DIR__.'/data/_access_log.txt';
     @file_put_contents($logF, date('c').' SAVE '.round(strlen($raw)/1024).'kb ip='.$ip."\n", FILE_APPEND);
@@ -154,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT
         $lines = file($logF);
         @file_put_contents($logF, implode('', array_slice($lines, -500)));
     }
-    echo json_encode(['ok'=>true,'size_ko'=>round(strlen($raw)/1024,1),'lastModified'=>$data['lastModified']??null,'time'=>time()]);
+    echo json_encode(['ok'=>true,'rev'=>$rev,'size_ko'=>round(strlen($raw)/1024,1),'lastModified'=>$data['lastModified']??null,'time'=>time()]);
     exit;
 }
 

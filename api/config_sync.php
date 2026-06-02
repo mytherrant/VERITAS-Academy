@@ -74,7 +74,9 @@ function requireAuth() {
     }
 
     $token = trim(str_ireplace('bearer', '', $auth));
-    if ($token !== API_SECRET) {
+    // Comparaison à temps constant (anti timing-attack) — hash_equals gère les
+    // longueurs différentes sans court-circuit prématuré.
+    if (!hash_equals(API_SECRET, $token)) {
         http_response_code(401);
         echo json_encode(['error' => 'Non autorisé — clé API invalide']);
         exit;
