@@ -4420,12 +4420,12 @@ function vShowSec(sec,btn){
     h+='<div style="background:linear-gradient(135deg,#0F172A 0%,#1E293B 50%,#1E3A8A 100%);border-radius:24px;padding:40px 32px;text-align:center;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.08)">';
     h+='<div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(59,130,246,.12),transparent 50%),radial-gradient(circle at 80% 50%,rgba(255,201,60,.08),transparent 50%)"></div>';
     h+='<div style="position:relative;z-index:1">';
-    h+='<div style="width:52px;height:52px;border-radius:16px;background:rgba(255,201,60,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border:1px solid rgba(255,201,60,.3)"><span class="material-icons-round" style="font-size:28px;color:#FFC93C">design_services</span></div>';
+    h+='<div style="width:52px;height:52px;border-radius:16px;background:rgba(255,201,60,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border:1px solid rgba(255,201,60,.3)"><span class="material-symbols-rounded" style="font-size:28px;color:#FFC93C">design_services</span></div>';
     h+='<div style="font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:.5px">Besoin d&#39;un contenu <span style="color:#FFC93C;text-decoration:underline;text-decoration-color:rgba(255,201,60,.4);text-underline-offset:4px">sur mesure</span> ?</div>';
     h+='<div style="font-family:Poppins,sans-serif;font-size:14px;color:rgba(255,255,255,.65);max-width:500px;margin:0 auto 24px;line-height:1.75">Commandez des épreuves, cours ou corpus adaptés à vos séquences et progressions. Nos enseignants préparent du contenu personnalisé.</div>';
     h+='<div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">';
-    h+='<button class="btn" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#1E293B;font-family:Montserrat,sans-serif;font-weight:800;border-radius:16px;padding:14px 28px;font-size:14px;border:none;box-shadow:0 4px 16px rgba(255,201,60,.3)" onclick="commanderPersonnalise()"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px;margin-right:6px">edit_note</span>Commande personnalisée</button>';
-    h+='<a href="https://wa.me/237697637739?text=Bonjour%20VÉRITAS%20!%20Je%20souhaite%20des%20ressources%20e-learning." target="_blank" class="btn" style="background:rgba(255,255,255,.08);color:#fff;border:1.5px solid rgba(255,255,255,.2);border-radius:16px;padding:14px 28px;font-size:14px;text-decoration:none;font-family:Poppins,sans-serif;font-weight:600;backdrop-filter:blur(4px)"><span class="material-icons-round" style="font-size:18px;vertical-align:-3px;margin-right:6px">chat</span>WhatsApp</a>';
+    h+='<button class="btn" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#1E293B;font-family:Montserrat,sans-serif;font-weight:800;border-radius:16px;padding:14px 28px;font-size:14px;border:none;box-shadow:0 4px 16px rgba(255,201,60,.3)" onclick="commanderPersonnalise()"><span class="material-symbols-rounded" style="font-size:18px;vertical-align:-3px;margin-right:6px">edit_note</span>Commande personnalisée</button>';
+    h+='<a href="https://wa.me/237697637739?text=Bonjour%20VÉRITAS%20!%20Je%20souhaite%20des%20ressources%20e-learning." target="_blank" class="btn" style="background:rgba(255,255,255,.08);color:#fff;border:1.5px solid rgba(255,255,255,.2);border-radius:16px;padding:14px 28px;font-size:14px;text-decoration:none;font-family:Poppins,sans-serif;font-weight:600;backdrop-filter:blur(4px)"><span class="material-symbols-rounded" style="font-size:18px;vertical-align:-3px;margin-right:6px">chat</span>WhatsApp</a>';
     h+='</div></div></div>';
 
     h+='</div>';
@@ -30246,7 +30246,7 @@ window.mBusinessStats = function(){
     if(topProd.length){
       body += '<div style="background:linear-gradient(135deg,rgba(255,201,60,.08),rgba(60,141,255,.05));padding:14px;border-radius:14px;margin-top:8px">'
         +'<div style="font-weight:700;color:#142554;margin-bottom:10px;display:flex;align-items:center;gap:6px">'
-        +'<span class="material-icons-round" style="color:#FFC93C">trending_up</span> Top 3 produits</div>';
+        +'<span class="material-symbols-rounded" style="color:#FFC93C">trending_up</span> Top 3 produits</div>';
       topProd.forEach(function(t,i){
         var medal = ['🥇','🥈','🥉'][i]||'•';
         body += '<div style="display:flex;justify-content:space-between;padding:8px;background:#fff;border-radius:8px;margin-bottom:6px">'
