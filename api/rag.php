@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 $q     = trim((string)($_GET['q'] ?? ''));
 $limit = min(10, max(1, (int)($_GET['limit'] ?? 5)));
 
-if (strlen($q) < 3) {
+if (!isset($_GET['daily']) && strlen($q) < 3) {
     echo json_encode(['ok' => false, 'passages' => [], 'note' => 'Query trop courte (3 chars min)']);
     exit;
 }
@@ -74,6 +74,32 @@ if (!file_exists($dbPath)) {
         'passages' => [],
         'note' => 'Base RAG non encore déployée sur le serveur. L\'IA fonctionne sans contexte enrichi.'
     ]);
+    exit;
+}
+
+// ── 2bis. v1.2.3 : PASSAGE DU JOUR (?daily=1) — tirage déterministe par date,
+//    sans requête. Sert le widget « Passage du jour » (œuvres du corpus isolé). ──
+if (isset($_GET['daily'])) {
+    try {
+        $pdo = new PDO('sqlite:' . $dbPath);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->exec("PRAGMA query_only = 1");
+        $cnt = (int)$pdo->query("SELECT COUNT(*) FROM passages WHERE LENGTH(text) > 240")->fetchColumn();
+        if ($cnt < 1) { echo json_encode(['ok' => false, 'passages' => []]); exit; }
+        $off = ((int)date('z') * 7 + (int)date('Y')) % $cnt;
+        $r = $pdo->query("SELECT f.author AS auteur, COALESCE(f.title, f.filename) AS titre, p.text AS extrait
+                          FROM passages p JOIN files f ON p.file_id = f.id
+                          WHERE LENGTH(p.text) > 240 LIMIT 1 OFFSET " . $off)->fetch(PDO::FETCH_ASSOC);
+        if (!$r) { echo json_encode(['ok' => false, 'passages' => []]); exit; }
+        $ex = preg_replace('/\s+/u', ' ', (string)$r['extrait']);
+        echo json_encode(['ok' => true, 'daily' => true, 'passages' => [[
+            'auteur'  => trim((string)$r['auteur']) ?: 'Anonyme',
+            'titre'   => trim((string)$r['titre']),
+            'extrait' => function_exists('mb_substr') ? mb_substr($ex, 0, 480) : substr($ex, 0, 480),
+        ]]], JSON_UNESCAPED_UNICODE);
+    } catch (Throwable $e) {
+        echo json_encode(['ok' => false, 'passages' => [], 'error' => $e->getMessage()]);
+    }
     exit;
 }
 
