@@ -16,16 +16,29 @@
 // 🔄 v1.2.2 : INCRÉMENTER ce numéro à CHAQUE déploiement de contenu.
 // Changer la version force le SW à se réinstaller, à purger les anciens caches
 // et à recharger le nouveau code sur tous les appareils (corrige "le site ne change pas").
-const CACHE_VERSION = 'veritas-v1.2.13';
+const CACHE_VERSION = 'veritas-v1.2.14';
 const STATIC_CACHE  = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
+// v1.2.14 (P2) : cache fournisseurs INDÉPENDANT de la version de l'app — polices
+// Google, libs CDN (jsPDF/xlsx/html2canvas/qrcode), emojis. Ces URLs sont stables :
+// elles SURVIVENT aux déploiements (plus de re-téléchargement à chaque bump de version).
+const VENDOR_CACHE  = 'veritas-vendor';
 
-// Assets critiques pré-cachés à l'installation
+// v1.2.14 (P2) : version d'asset déduite de CACHE_VERSION → app.js / app.css sont
+// précachés à leur URL versionnée (aucun numéro supplémentaire à maintenir).
+const ASSET_VER = CACHE_VERSION.replace('veritas-v', '');
+
+// Assets critiques pré-cachés à l'installation.
+// v1.2.14 : app.css + app.js inclus → après une mise à jour du SW, le nouveau code est
+// mis en cache EN ARRIÈRE-PLAN avant la prochaine navigation = chargement quasi instantané
+// (au lieu de re-télécharger ~0,75 Mo au prochain affichage).
 const PRECACHE_URLS = [
   '/',
   '/index.html',
   '/app.html',
-  '/manifest.webmanifest'
+  '/manifest.webmanifest',
+  '/app.css?v=' + ASSET_VER,
+  '/app.js?v='  + ASSET_VER
 ];
 
 // Domaines à mettre en cache runtime (CDN images/pictos)
@@ -95,7 +108,8 @@ self.addEventListener('activate', event => {
     Promise.all([
       // 1. Supprimer TOUS les anciens caches (même partiels d'autres versions)
       caches.keys().then(keys => Promise.all(
-        keys.filter(k => !k.startsWith(CACHE_VERSION))
+        // v1.2.14 (P2) : conserver VENDOR_CACHE (polices/CDN stables) entre déploiements.
+        keys.filter(k => !k.startsWith(CACHE_VERSION) && k !== VENDOR_CACHE)
             .map(k => { console.log('[SW] Suppression cache:', k); return caches.delete(k); })
       )),
       // 2. Prendre le contrôle de tous les clients IMMÉDIATEMENT
@@ -156,12 +170,17 @@ self.addEventListener('fetch', event => {
   }
 
   // ── Stratégie 2 : CACHE FIRST pour assets statiques ──
-  const isCacheable = RUNTIME_DOMAINS.some(d => url.hostname.includes(d)) ||
+  // v1.2.14 (P2) : assets tiers (polices/CDN, URLs stables) → VENDOR_CACHE (conservé
+  // entre versions) ; assets same-origin (app.js/css versionnés, images) → RUNTIME_CACHE
+  // (purgé à chaque déploiement, car app.js change de contenu sous une nouvelle ?v).
+  const isVendor = RUNTIME_DOMAINS.some(d => url.hostname.includes(d));
+  const isCacheable = isVendor ||
                       req.destination === 'image' ||
                       req.destination === 'font' ||
                       req.destination === 'style' ||
                       req.destination === 'script';
   if (isCacheable) {
+    const targetCache = isVendor ? VENDOR_CACHE : RUNTIME_CACHE;
     event.respondWith(
       caches.match(req)
         .then(cached => {
@@ -170,7 +189,7 @@ self.addEventListener('fetch', event => {
             .then(res => {
               if (res && res.ok) {
                 const clone = res.clone();
-                caches.open(RUNTIME_CACHE).then(c => c.put(req, clone)).catch(()=>{});
+                caches.open(targetCache).then(c => c.put(req, clone)).catch(()=>{});
               }
               return res || emptyResponse(504);
             })
