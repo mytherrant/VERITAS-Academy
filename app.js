@@ -9330,10 +9330,10 @@ function pgMonBulletin(){
   const moy=gr.length?gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tc:null;
   const ap=moy!==null?getAppr(moy):null;
   // Calcul rang
-  let rang='—',classEff=DB.students.filter(st=>st.cls===s.cls).length;
+  let rang='—',classEff=DB.students.filter(st=>st.cls===s.cls).length,nbRanked=0;
   if(moy!==null){
     const allMoy=DB.students.filter(st=>st.cls===s.cls).map(st=>{const gG=DB.grades.filter(g=>g.eid===st.id&&g.tri===selT);const tC=gG.reduce((a,g)=>a+(+g.coef||1),0)||1;return gG.length?gG.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tC:null;}).filter(m=>m!==null).sort((a,b)=>b-a);
-    rang=allMoy.findIndex(m=>Math.abs(m-moy)<0.001)+1;
+    rang=allMoy.findIndex(m=>Math.abs(m-moy)<0.001)+1;nbRanked=allMoy.length;
   }
   return`<div class="fl2 fic g8 mb20 fw">
     ${TRS.map(t=>`<button class="tab${t===selT?' on':''}" onclick="window._bT='${t}';re()">${t}</button>`).join("")}
@@ -9347,7 +9347,7 @@ function pgMonBulletin(){
       </div>
       <div class="fl2 g16 fw">
         <div style="text-align:center"><div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px">Moyenne</div><div class="mono bold" style="font-size:28px;color:${ap?.col||'#fff'}">${moy!==null?moy.toFixed(2):'—'}</div><div style="font-size:13px;color:${ap?.col||'rgba(255,255,255,.5)'}">${ap?.lbl||'—'}</div></div>
-        <div style="text-align:center"><div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px">Rang</div><div class="mono bold" style="font-size:28px;color:#FFC93C">${rang}</div><div style="font-size:13px;color:rgba(255,255,255,.4)">sur ${classEff} élèves</div></div>
+        <div style="text-align:center"><div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px">Rang</div><div class="mono bold" style="font-size:28px;color:#FFC93C">${rang}</div><div style="font-size:13px;color:rgba(255,255,255,.4)">sur ${nbRanked||classEff} classés</div></div>
       </div>
     </div>
   </div>
@@ -10882,7 +10882,7 @@ function printBulletinHtml(sid,tri){
     <div style="flex-shrink:0">${photoHtml}</div>
     <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px 12px;font-size:9px">
       <div><span style="color:#888">Nom & Prénoms :</span> <strong>${s.pre} ${s.nom}</strong></div>
-      <div><span style="color:#888">Classe :</span> <strong>${s.cls}</strong> — Effectif : <strong>${allMoy.length}</strong></div>
+      <div><span style="color:#888">Classe :</span> <strong>${s.cls}</strong> — Effectif : <strong>${DB.students.filter(st=>st.cls===s.cls).length}</strong></div>
       <div><span style="color:#888">Né(e) le :</span> <strong>${s.dob||'—'}</strong></div>
       <div><span style="color:#888">Matricule :</span> <strong style="color:#9a7228">${s.mat}</strong></div>
       <div><span style="color:#888">Sexe :</span> <strong>${s.sex==='F'?'Féminin':'Masculin'}</strong></div>
@@ -26429,7 +26429,12 @@ function waGroupId(){ return 'wg_'+gid(); }
 function getStudentAboPlan(eid){
   var st=DB.students.find(function(s){return s.id===eid;})||{};
   var va=(DB.visitorAccounts||[]).find(function(a){return a.eid===eid;})||{};
-  return va.plans||st.plans||[];
+  // FIX : un tableau vide [] est TRUTHY en JS → "va.plans||st.plans" renvoyait []
+  // (et masquait les plans de l'élève) quand le compte visiteur avait plans:[].
+  // On prend le premier tableau NON VIDE.
+  if(va.plans&&va.plans.length) return va.plans;
+  if(st.plans&&st.plans.length) return st.plans;
+  return [];
 }
 function studentHasPlan(eid,planId){
   return getStudentAboPlan(eid).includes(planId);
@@ -30471,7 +30476,7 @@ window.pgParrainageEns = function(){
         || (DB.students||[]).find(function(s){return s.id===uid;}) || null;
   }
   function isAbonne(uid){
-    return abos.some(function(a){ return (a.userId===uid||a.accountId===uid||a.eleveId===uid||a.uid===uid) && a.statut!=='annule' && a.statut!=='expire'; });
+    return abos.some(function(a){ return (a.userId===uid||a.accountId===uid||a.eleveId===uid||a.uid===uid) && a.statut!=='annule' && a.statut!=='expire' && a.statut!=='En attente'; });
   }
   function xpOf(uid){ var st=(DB.userStreaks||{})[uid]; return st?(st.xp||0):0; }
   var nbAb = filleuls.filter(function(p){ return isAbonne(p.filleulId); }).length;
