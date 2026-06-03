@@ -61,7 +61,11 @@ if (strlen($q) < 3) {
 // ── 2. CHEMIN DE LA BASE biblio_index.db ───────────────────────────────
 // Cette base provient de biblio_search.py (D:\Bibliothèque local).
 // Elle doit être uploadée sur LWS dans /api/data/biblio_index.db
-$dbPath = __DIR__ . '/data/biblio_index.db';
+// v1.2.3 : ?src=oeuvres → index ISOLÉ des œuvres au programme (passages &
+// références précis) ; sinon → grand corpus général. Whitelist stricte.
+$src    = (string)($_GET['src'] ?? '');
+$dbName = ($src === 'oeuvres') ? 'oeuvres_index.db' : 'biblio_index.db';
+$dbPath = __DIR__ . '/data/' . $dbName;
 
 if (!file_exists($dbPath)) {
     // Mode dégradé : retourner un avertissement plutôt qu'une erreur
