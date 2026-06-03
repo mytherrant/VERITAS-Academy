@@ -5054,6 +5054,17 @@ function _recordLoginFail(user){
   else if(a>=9){_loginLock[k].locked=true;_loginLock[k].until=Date.now()+5*60000;}
   else if(a>=6){_loginLock[k].locked=true;_loginLock[k].until=Date.now()+2*60000;}
   else if(a>=3){_loginLock[k].locked=true;_loginLock[k].until=Date.now()+30000;}
+  // v1.2.x : verrou GLOBAL (par ÉCHEC) — 5 échecs cumulés → pause de 2 min sur l'appareil.
+  if(typeof _loginAttempts!=='undefined'){
+    _loginAttempts.count=(_loginAttempts.count||0)+1;
+    if(_loginAttempts.count>=5&&!_loginAttempts.locked){
+      _loginAttempts.locked=true;
+      var _le=document.getElementById('lerr');
+      if(_le){_le.textContent='Trop de tentatives. Veuillez patienter 2 minutes.';_le.style.display='block';}
+      if(_loginAttempts.timer)clearTimeout(_loginAttempts.timer);
+      _loginAttempts.timer=setTimeout(function(){_loginAttempts.count=0;_loginAttempts.locked=false;if(_le)_le.style.display='none';},120000);
+    }
+  }
   // Log failed attempt
   if(!DB.loginLog)DB.loginLog=[];
   DB.loginLog.push({user:user,role:'echec',date:today(),time:new Date().toLocaleTimeString('fr-FR'),ip:'local'});
@@ -8552,19 +8563,10 @@ function _safeCmp(a,b){
 // [SEC v1.2] Rate limiting login (couche supplémentaire au-dessus de _checkLoginLock)
 var _loginAttempts={count:0,locked:false,timer:null};
 function _checkLoginRateLimit(){
-  if(_loginAttempts.locked)return false;
-  _loginAttempts.count++;
-  if(_loginAttempts.count>=5){
-    _loginAttempts.locked=true;
-    var errEl=document.getElementById('lerr');
-    if(errEl){errEl.textContent='Trop de tentatives. Veuillez patienter 2 minutes.';errEl.style.display='block';}
-    _loginAttempts.timer=setTimeout(function(){
-      _loginAttempts.count=0;_loginAttempts.locked=false;
-      if(errEl)errEl.style.display='none';
-    },120000);
-    return false;
-  }
-  return true;
+  // v1.2.x : ne bloque QUE si déjà verrouillé. Le compteur d'échecs monte désormais
+  // dans _recordLoginFail (sur ÉCHEC réel), plus à chaque tentative : un mot de passe
+  // CORRECT (même au 5e essai) ou le mode visiteur ne doivent JAMAIS être bloqués.
+  return !_loginAttempts.locked;
 }
 
 var _otpPending={code:null,user:null,data:null,expires:0,attempts:0};
