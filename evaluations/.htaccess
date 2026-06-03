@@ -1,0 +1,15 @@
+# v1.2.3 — Les corrigés modèles (.md) sont du CONTENU PUBLIC servi à l'app
+# (fiche d'œuvre → _showLittCorriges fetch evaluations/corrige_*.md).
+# Le .htaccess RACINE bloque les .md (docs internes type README/AUDIT) → 403.
+# Ce sous-dossier RÉAUTORISE les .md ici uniquement → corrige le HTTP 403.
+<IfModule mod_authz_core.c>
+  <FilesMatch "\.md$">
+    Require all granted
+  </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+  <FilesMatch "\.md$">
+    Order allow,deny
+    Allow from all
+  </FilesMatch>
+</IfModule>
