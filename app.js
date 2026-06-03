@@ -16199,14 +16199,14 @@ window._oeuvreCover = function(key){ return OEUVRE_COVERS[key] ? ('uploads/oeuvr
 // v1.2.2 : corrigés modèles (commentaire composé + dissertation) par œuvre.
 // Fichiers .md dans /evaluations/ (déployés), chargés à la demande dans la fiche.
 var OEUVRE_CORRIGES = {
-  "2nde_tartuffe":          "corrige_2nde_tartuffe_moliere.md",
-  "2nde_tribus_capitoline": "corrige_2nde_tribus_capitoline.md",
-  "1ere_coeur_tenebres":    "corrige_1ere_au_coeur_des_tenebres.md",
-  "1ere_lion_perle":        "corrige_1ere_lion_et_la_perle.md",
-  "1ere_balafon":           "corrige_1ere_balafon_mveng.md",
-  "tle_stances_poemes":     "corrige_tle_stances_et_poemes.md",
-  "tle_vieux_negro":        "corrige_tle_vieux_negre_medaille.md",
-  "tle_ngum_jemea":         "corrige_tle_ngum_a_jemea.md"
+  "2nde_tartuffe":          "corrige_2nde_tartuffe_moliere.txt",
+  "2nde_tribus_capitoline": "corrige_2nde_tribus_capitoline.txt",
+  "1ere_coeur_tenebres":    "corrige_1ere_au_coeur_des_tenebres.txt",
+  "1ere_lion_perle":        "corrige_1ere_lion_et_la_perle.txt",
+  "1ere_balafon":           "corrige_1ere_balafon_mveng.txt",
+  "tle_stances_poemes":     "corrige_tle_stances_et_poemes.txt",
+  "tle_vieux_negro":        "corrige_tle_vieux_negre_medaille.txt",
+  "tle_ngum_jemea":         "corrige_tle_ngum_a_jemea.txt"
 };
 window._oeuvreCorrige = function(key){ return OEUVRE_CORRIGES[key] || ''; };
 
