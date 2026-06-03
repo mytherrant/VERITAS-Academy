@@ -1685,8 +1685,10 @@ function _ensureCloudSecret(){
     var cc=_loadCloudConfigCache();
     if(cc&&cc.secret){DB.cloudConfig.secret=cc.secret;if(cc.url)DB.cloudConfig.url=cc.url;}
   }
-  if(DB.cloudConfig.secret)return;            // déjà configurée → rien à faire
-  if(window._cloudSecretPrompted)return;      // ne pas redemander en boucle dans la session
+  if(DB.cloudConfig.secret){var _nsb=document.getElementById('_notSyncBanner');if(_nsb)_nsb.remove();return;} // configurée → rien à faire
+  // S2 (v1.2.13) : pas de clé sur cet appareil → bannière persistante (admins/enseignants).
+  if(typeof iA==='function'&&iA())_showNotSyncedBanner();
+  if(window._cloudSecretPrompted)return;      // ne pas rouvrir la modale en boucle dans la session
   window._cloudSecretPrompted=true;
   if(typeof M!=='function')return;
   M('🔐 Clé de synchronisation Cloud','À saisir une seule fois sur cet appareil',
@@ -1711,6 +1713,7 @@ function _saveCloudSecret(){
   _saveCloudConfigCache();
   if(typeof cm==='function')cm();
   if(typeof toast==='function')toast('✓ Clé Cloud enregistrée','ok');
+  try{var _nsb=document.getElementById('_notSyncBanner');if(_nsb)_nsb.remove();}catch(e){}
   try{if(typeof _triggerAutoSync==='function')_triggerAutoSync();}catch(e){}
 }
 
@@ -1733,6 +1736,22 @@ function _showSecurityBanner(msg){
     b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:999998;background:#DC2626;color:#fff;padding:10px 44px 10px 16px;font:600 14px/1.4 Inter,system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.3);text-align:center';
     b.innerHTML='🚨 Sécurité : '+(typeof _esc==='function'?_esc(msg):msg)+' utilise encore le mot de passe par défaut. Changez-le dans Admin → Comptes &amp; Accès.'
       +'<button type="button" aria-label="Fermer l\'alerte" onclick="this.parentNode.remove()" style="position:absolute;right:8px;top:6px;background:transparent;border:none;color:#fff;font-size:20px;line-height:1;cursor:pointer">×</button>';
+    document.body.appendChild(b);
+  }catch(e){}
+}
+// S2 (v1.2.13) : bannière persistante « appareil non synchronisé » — évite que
+// des données saisies sur un appareil admin SANS clé cloud restent piégées en local.
+function _showNotSyncedBanner(){
+  try{
+    if(document.getElementById('_notSyncBanner'))return;
+    if(typeof iA!=='function'||!iA())return;
+    if(DB&&DB.cloudConfig&&DB.cloudConfig.secret)return;
+    var b=document.createElement('div');
+    b.id='_notSyncBanner'; b.setAttribute('role','alert');
+    b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:999997;background:#B45309;color:#fff;padding:10px 44px 10px 16px;font:600 13.5px/1.45 Inter,system-ui,sans-serif;box-shadow:0 -4px 16px rgba(0,0,0,.25);text-align:center';
+    b.innerHTML='⚠️ Cet appareil n\'est pas synchronisé — les données saisies ici restent <strong>locales</strong>, non envoyées aux autres appareils. '
+      +'<button type="button" onclick="window._cloudSecretPrompted=false;_ensureCloudSecret()" style="background:#fff;color:#B45309;border:none;border-radius:8px;padding:5px 12px;font-weight:800;cursor:pointer;margin-left:6px">🔐 Saisir la clé</button>'
+      +'<button type="button" aria-label="Fermer" onclick="this.parentNode.remove()" style="position:absolute;right:8px;top:6px;background:transparent;border:none;color:#fff;font-size:20px;line-height:1;cursor:pointer">×</button>';
     document.body.appendChild(b);
   }catch(e){}
 }
@@ -1842,11 +1861,25 @@ function _startBgPoll(){
   // FIX: polling Firebase (plus de dépendance LWS sync.php)
   _bgPollTimer=setInterval(function(){
     if(!navigator.onLine)return;
-    // Firebase Realtime Database REST GET — cache-buster pour éviter cache navigateur
-    var url=LWS_API.db+'?t='+Date.now();
-    _fbFetch(url,{})
-    .then(function(r){return r.ok?r.json():null;})
-    .then(function(serverDB){
+    // S1 (v1.2.13) : sonder d'abord ?meta=1 (~50 o) ; ne télécharger la base
+    // entière (centaines de Ko) que si le serveur a réellement changé. Évite un
+    // téléchargement complet toutes les 15 s sur chaque appareil admin.
+    var _metaUrl=LWS_API.db+(LWS_API.db.indexOf('?')>=0?'&':'?')+'meta=1&t='+Date.now();
+    _fbFetch(_metaUrl,{}).then(function(r){return r.ok?r.json():null;}).then(function(_meta){
+      var _remoteTS=(_meta&&parseInt(_meta.lastModified,10))||0;
+      var _remoteSize=(_meta&&parseInt(_meta.size,10))||0;
+      var _localTS=DB.lastModified||0;
+      var _srvEmpty=(_remoteSize>0&&_remoteSize<1000);
+      var _needFull=(_meta===null)||(_remoteTS>_localTS+3000)||(_srvEmpty&&iA()&&DB.school&&(DB.students||[]).length);
+      if(!_needFull){
+        // Rien de neuf côté serveur. Si NOUS sommes plus récents → push sans télécharger.
+        if(iA()&&!_autoSyncDirty&&!_srvEmpty&&_localTS>_remoteTS+3000) save();
+        return;
+      }
+      var url=LWS_API.db+'?t='+Date.now();
+      _fbFetch(url,{})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(serverDB){
       if(!serverDB)return;
       // Si la DB serveur est corrompue/vide (pas de school), un admin peut la restaurer
       if(!serverDB.school){
@@ -1979,9 +2012,10 @@ function _startBgPoll(){
         // Push local plus récent vers Firebase via save() (toujours PUT, jamais sync.php)
         save();
       }
-    })
-    .catch(function(){});
-  },15000); // ── v1.2 sync v2 : 15s (au lieu de 30s) pour quasi-temps réel ──
+      })
+      .catch(function(){});
+    }).catch(function(){});
+  },15000); // ── v1.2 sync v2 : 15s ; allégé en v1.2.13 (meta-first, S1) ──
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
