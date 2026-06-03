@@ -23,6 +23,13 @@ npm-debug.log*
 /tmp/
 *.tmp
 
+# Python (indexation corpus) — cache régénérable
+__pycache__/
+*.pyc
+
+# Documents juridiques / business locaux (SARL) — ne jamais versionner ni déployer
+SARL/
+
 # Node / backend non utilisé
 node_modules/
 veritas-backend/

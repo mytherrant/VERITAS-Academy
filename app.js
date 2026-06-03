@@ -1592,6 +1592,8 @@ function save(){
       setTimeout(function(){
         if(typeof _backupDBToLWS==='function')_backupDBToLWS(dbLight);
       },0);
+      // v1.2.x : miroir relationnel MySQL (db_sql.php) — non bloquant, débounce 60s, admin only.
+      setTimeout(function(){ if(typeof _mirrorDBToMySQL==='function') _mirrorDBToMySQL(); },0);
     }catch(e){
       console.warn('[Firebase] save error:',e);
       // Compteur d'échecs pour éviter de spammer le toast au démarrage
@@ -1617,6 +1619,21 @@ function save(){
   },800);
 }
 var _autoUploadTimer=null;
+// ── Miroir relationnel MySQL (db_sql.php) — déclenché après une sync admin réussie ──
+// Non bloquant, débounce 60s, admin uniquement. Si MySQL est absent/non configuré,
+// l'endpoint renvoie une erreur JSON ignorée → aucun impact sur le sync JSON live.
+var _lastMysqlMirror=0;
+function _mirrorDBToMySQL(){
+  try{
+    if(typeof iA!=='function'||!iA())return;
+    var cfg=DB.cloudConfig; if(!cfg||!cfg.secret)return;
+    var now=Date.now(); if(now-_lastMysqlMirror<60000)return; // au plus une fois / minute
+    _lastMysqlMirror=now;
+    var url=(LWS_API.db||'').replace(/db\.php(\?.*)?$/,'db_sql.php');
+    fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+cfg.secret,'Content-Type':'application/json'},body:'{}'})
+      .then(function(r){return r.ok?r.json():null;}).then(function(){}).catch(function(){});
+  }catch(e){}
+}
 
 // ── Auto-sync différée (20 s après le dernier save()) ───────────────────────
 var _autoSyncTimer=null;

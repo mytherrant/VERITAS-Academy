@@ -152,6 +152,7 @@ jobs:
             api/ia_proxy.php \
             api/rag.php \
             api/student_data.php \
+            api/db_sql.php \
             api/admin_validate.php; do
             [ -f "$f" ] && cp "$f" deploy/api/ && echo "  ✓ $f"
           done
