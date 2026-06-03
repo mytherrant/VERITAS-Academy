@@ -26468,15 +26468,21 @@ function _expireAbonnements(){
   try{
     var el=DB&&DB.elearning; if(!el||!Array.isArray(el.abonnements)) return 0;
     var now=Date.now(), changed=0;
+    // Actif = 'Activé' (flux manuel) OU 'Actif' (flux paiement auto, legacy).
+    var _act=function(s){return s==='Activé'||s==='Actif';};
+    // Fin = dateFinTs (epoch fiable) OU dateFin au format ISO (YYYY-MM-DD…). On NE
+    // parse PAS le format fr-FR (DD/MM/YYYY) — ambigu — ; ces enregistrements ont dateFinTs.
+    var _end=function(a){ if(a.dateFinTs) return +a.dateFinTs; if(a.dateFin&&/^\d{4}-\d{2}-\d{2}/.test(a.dateFin)){var t=Date.parse(a.dateFin);return isNaN(t)?0:t;} return 0; };
     el.abonnements.forEach(function(a){
-      if(a && a.statut==='Activé' && a.dateFinTs && now>a.dateFinTs){ a.statut='expire'; changed++; }
+      if(!a)return; var end=_end(a);
+      if(_act(a.statut) && end && now>end){ a.statut='Expiré'; changed++; }
     });
     if(!changed) return 0;
     (DB.visitorAccounts||[]).forEach(function(acc){
       if(!acc || !Array.isArray(acc.plans) || !acc.plans.length) return;
       var mine=el.abonnements.filter(function(a){return a&&a.accountId===acc.id;});
       var actifs={}, expires={};
-      mine.forEach(function(a){ if(a.statut==='Activé') actifs[a.plan]=1; else if(a.statut==='expire') expires[a.plan]=1; });
+      mine.forEach(function(a){ var pk=a.plan||a.planId; if(!pk)return; if(_act(a.statut)) actifs[pk]=1; else if(a.statut==='Expiré'||a.statut==='expire') expires[pk]=1; });
       acc.plans=acc.plans.filter(function(p){ return !expires[p] || actifs[p]; });
     });
     return changed;
@@ -30235,14 +30241,17 @@ function _payAutoActivate(a){
         if(!DB.elearning) DB.elearning={};
         if(!DB.elearning.abonnements) DB.elearning.abonnements=[];
         var plan = (DB.elearning.plans||[]).find(function(p){return p.id===a.targetId;});
-        var endDate = new Date(); endDate.setMonth(endDate.getMonth()+12);
+        // v1.2.x : shape CANONIQUE (= activerAbonnement) → expiration + affichage admin
+        // cohérents, ET durée RÉELLE du plan (avant : toujours +12 mois, même pour un
+        // abonnement mensuel). Champs legacy (planId/dateDebut) conservés pour compat.
+        var _dfTs = Date.now() + (typeof _aboDureeMs==='function'?_aboDureeMs(plan&&plan.duree):365*864e5);
         DB.elearning.abonnements.push({
           id:'abo_'+Date.now(), ref:a.ref,
-          accountId:a.accountId, planId:a.targetId,
-          planNom:plan?plan.nom:a.label,
-          montant:a.montant, dateDebut:new Date().toISOString(),
-          dateFin:endDate.toISOString(),
-          statut:'Actif'
+          accountId:a.accountId, plan:a.targetId, planId:a.targetId,
+          planNom:plan?plan.nom:a.label, nom:a.customerNom||'', tel:a.customerTel||'',
+          montant:a.montant, date:today(), dateDebut:new Date().toISOString(),
+          dateActivation:today(), dateFinTs:_dfTs, dateFin:new Date(_dfTs).toLocaleDateString('fr-FR'),
+          statut:'Activé'
         });
         // Ajouter le plan au compte visiteur
         if(a.accountId){
@@ -30253,7 +30262,7 @@ function _payAutoActivate(a){
             acc.statut='actif';
           }
         }
-        return {msg:'Abonnement '+(plan?plan.nom:'')+' activé', userMsg:'Votre abonnement est actif pour 12 mois. Connectez-vous pour accéder à vos contenus premium.'};
+        return {msg:'Abonnement '+(plan?plan.nom:'')+' activé', userMsg:'Votre abonnement est actif'+(plan&&plan.duree?' ('+plan.duree+')':'')+'. Connectez-vous pour accéder à vos contenus premium.'};
       }
 
       // ── 4. Accès à un groupe WhatsApp ──
@@ -30515,7 +30524,7 @@ window.pgParrainageEns = function(){
         || (DB.students||[]).find(function(s){return s.id===uid;}) || null;
   }
   function isAbonne(uid){
-    return abos.some(function(a){ return (a.userId===uid||a.accountId===uid||a.eleveId===uid||a.uid===uid) && a.statut!=='annule' && a.statut!=='expire' && a.statut!=='En attente'; });
+    return abos.some(function(a){ return (a.userId===uid||a.accountId===uid||a.eleveId===uid||a.uid===uid) && a.statut!=='annule' && a.statut!=='expire' && a.statut!=='Expiré' && a.statut!=='En attente'; });
   }
   function xpOf(uid){ var st=(DB.userStreaks||{})[uid]; return st?(st.xp||0):0; }
   var nbAb = filleuls.filter(function(p){ return isAbonne(p.filleulId); }).length;
