@@ -9682,8 +9682,8 @@ function pgCMS(){
     <div class="mb10">${(DB.citations||[]).length} citation(s) enregistrée(s)</div>
     <button class="btn bi sm" onclick="mManageCitations()">💬 Gérer les citations</button>
   </div>
-  <div class="card mt16"><div class="ct">📚 Manuels — Contenu libre</div>
-    <div class="ib ibt mb12"><span>📖</span><span>Ajoutez des extraits, captures de pages et couvertures pour que les visiteurs puissent feuilleter les livres.</span></div>
+  <div class="card mt16"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:6px"><div class="ct" style="margin:0">📚 Manuels — Contenu libre</div><button class="btn bi sm" onclick="mAddBk()">➕ Nouveau manuel</button></div>
+    <div class="ib ibt mb12"><span>📖</span><span>Ajoutez un manuel puis ses extraits, captures de pages et couvertures — tout au même endroit, pour que les visiteurs puissent feuilleter les livres.</span></div>
     <div class="tw"><table><thead><tr><th>Manuel</th><th>Extrait</th><th>Images</th><th>Couverture</th><th>Actions</th></tr></thead>
     <tbody>${DB.books.map(b=>`<tr><td class="semi s">${b.ico} ${b.titre}</td><td>${b.extrait?'<span class="bg bgg">✓ '+b.extrait.length+' car.</span>':'<span class="bg bgr">Aucun</span>'}</td><td>${(b.previewImages?.length||0)} img</td><td>${b.coverImg?'<span class="bg bgg">✓</span>':'<span class="bg bgo">Non</span>'}</td><td><button class="btn bvi xs" onclick="addBookContent('${b.id}')">📖 Gérer</button></td></tr>`).join('')}</tbody></table></div>
   </div>`;
@@ -11064,8 +11064,11 @@ function saveBk(){
   if(!titre){toast('Titre requis','warn');return;}
   toast('Enregistrement en cours...');
   const prix=+document.getElementById('bkP')?.value;if(!prix){toast('Prix requis','warn');return;}
-  DB.books.push({id:gid(),titre,cls:document.getElementById('bkCl')?.value||'—',auteur:document.getElementById('bkA')?.value||'—',prix,stock:+document.getElementById('bkSt')?.value||0,vendu:0,pages:+document.getElementById('bkPg')?.value||0,ico:document.getElementById('bkI')?.value||'📚',desc:document.getElementById('bkD')?.value||'',chaps:[],content:{}});
-  save();cm();re();toast('✓ Manuel ajouté');
+  var _newBkId=gid();
+  DB.books.push({id:_newBkId,titre,cls:document.getElementById('bkCl')?.value||'—',auteur:document.getElementById('bkA')?.value||'—',prix,stock:+document.getElementById('bkSt')?.value||0,vendu:0,pages:+document.getElementById('bkPg')?.value||0,ico:document.getElementById('bkI')?.value||'📚',desc:document.getElementById('bkD')?.value||'',chaps:[],content:{}});
+  save();cm();re();toast('✓ Manuel ajouté — ajoutez maintenant son contenu (extraits, couverture)');
+  // v1.2.3 : réunit ajout + gestion → enchaîne directement sur « Gérer le contenu » du nouveau manuel.
+  setTimeout(function(){ if(typeof addBookContent==='function') addBookContent(_newBkId); },350);
 }
 function viewBook(id){
   const b=DB.books.find(x=>x.id===id);if(!b)return;
