@@ -32228,13 +32228,13 @@ window._pdjLoadExpl = function(){
   try{
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
     fetch(base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      prompt:'Citation de l\'œuvre "'+p.titre+'"'+(p.auteur?' de '+p.auteur:'')+' (programme MINESEC) :\n« '+p.passage.substring(0,400)+' »\n\nEn 2 ou 3 phrases : explique simplement ce passage à un élève, puis termine par UNE question intrigante qui donne envie de lire la suite (sans rien dévoiler).',
-      sysPrompt:'Tu es un professeur de français camerounais passionnant et concis.',
+      prompt:'Passage de l\'œuvre "'+p.titre+'"'+(p.auteur?' de '+p.auteur:'')+' (programme MINESEC camerounais) :\n« '+p.passage.substring(0,420)+' »\n\nÉcris une MINI-ANALYSE de 2 ou 3 phrases, au ton COMIQUE, IRONIQUE et DIDACTIQUE (un prof drôle et mordant qui adore son texte) : fais comprendre ce qui se joue, situe brièvement le moment ou la partie dans l\'œuvre UNIQUEMENT si tu en es sûr (sinon n\'invente AUCUN numéro de chapitre), et TERMINE par une question taquine qui donne furieusement envie de lire la suite. Aucun spoiler. Réponds en FRANÇAIS.',
+      sysPrompt:'Tu es le Professeur Ambassa : prof de français camerounais drôle, ironique, cultivé, jamais ennuyeux. Tu réponds TOUJOURS en français.',
       userId:'pdj',plan:'anon'
     })}).then(function(r){return r.json();}).then(function(d){
       var t=(d&&d.text)?String(d.text).trim():'';
-      var html=t?('💡 '+_esc(t)):fb;
-      box.innerHTML=html; try{ localStorage.setItem(dk,html); }catch(e){}
+      if(t){ box.innerHTML='💡 '+_esc(t); try{ localStorage.setItem(dk,box.innerHTML); }catch(e){} }
+      else { box.innerHTML=fb; }
     }).catch(function(){ box.innerHTML=fb; });
   }catch(e){ box.innerHTML=fb; }
 };
@@ -32278,7 +32278,7 @@ window._passageDuJourHtml = function(){
     +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800;margin-bottom:8px">📖 Passage du jour · une œuvre au programme</div>'
     +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:16px;line-height:1.6;font-style:italic;margin-bottom:8px">« '+_esc(p.passage.substring(0,320))+(p.passage.length>320?'…':'')+' »</div>'
     +'<div id="vPdjRef" style="font-size:12px;color:#FFC93C;font-weight:700;margin-bottom:12px">— '+ref+'</div>'
-    +'<div id="vPdjExpl" style="font-size:13px;line-height:1.6;color:rgba(255,255,255,.92);background:rgba(255,255,255,.06);border-radius:10px;padding:12px;margin-bottom:14px"><span style="opacity:.7">✨ Explication en cours…</span></div>'
+    +'<div id="vPdjExpl" style="font-size:13px;line-height:1.65;color:#FFF6DD;background:linear-gradient(135deg,rgba(255,201,60,.22),rgba(255,201,60,.07));border:1px solid rgba(255,201,60,.5);border-radius:12px;padding:13px 15px;margin-bottom:14px;box-shadow:0 4px 14px rgba(255,201,60,.12)"><span style="opacity:.75">✨ Analyse en cours…</span></div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
       +'<span style="font-size:11px;color:rgba(255,255,255,.6);margin-right:2px">Partager :</span>'
       +'<button onclick="_pdjShare(\'wa\')" style="background:#25D366;color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer">WhatsApp</button>'

@@ -84,12 +84,15 @@ if (isset($_GET['daily'])) {
         $pdo = new PDO('sqlite:' . $dbPath);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->exec("PRAGMA query_only = 1");
-        $cnt = (int)$pdo->query("SELECT COUNT(*) FROM passages WHERE LENGTH(text) > 240")->fetchColumn();
+        // v1.2.3 : ne tirer que des passages FRANÇAIS (les œuvres en V.O. anglaise,
+        // ex. l'epub de Conrad, n'ont pas d'accents français) → heuristique accents.
+        $fr = "(text LIKE '%é%' OR text LIKE '%è%' OR text LIKE '%à%' OR text LIKE '%ç%' OR text LIKE '%ê%')";
+        $cnt = (int)$pdo->query("SELECT COUNT(*) FROM passages WHERE LENGTH(text) > 240 AND " . $fr)->fetchColumn();
         if ($cnt < 1) { echo json_encode(['ok' => false, 'passages' => []]); exit; }
         $off = ((int)date('z') * 7 + (int)date('Y')) % $cnt;
         $r = $pdo->query("SELECT f.author AS auteur, COALESCE(f.title, f.filename) AS titre, p.text AS extrait
                           FROM passages p JOIN files f ON p.file_id = f.id
-                          WHERE LENGTH(p.text) > 240 LIMIT 1 OFFSET " . $off)->fetch(PDO::FETCH_ASSOC);
+                          WHERE LENGTH(p.text) > 240 AND (p.text LIKE '%é%' OR p.text LIKE '%è%' OR p.text LIKE '%à%' OR p.text LIKE '%ç%' OR p.text LIKE '%ê%') LIMIT 1 OFFSET " . $off)->fetch(PDO::FETCH_ASSOC);
         if (!$r) { echo json_encode(['ok' => false, 'passages' => []]); exit; }
         $ex = preg_replace('/\s+/u', ' ', (string)$r['extrait']);
         echo json_encode(['ok' => true, 'daily' => true, 'passages' => [[
