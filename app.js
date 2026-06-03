@@ -32223,7 +32223,7 @@ window._pdjLoadExpl = function(){
   var box=document.getElementById('vPdjExpl'), p=window._pdjCurrent;
   if(!box||!p) return;
   var fb='💡 Un passage clé de « '+p.titre+' ». Et ensuite ? Lis l\'œuvre pour le découvrir.';
-  var dk='vrt_pdj_'+new Date().toISOString().slice(0,10);
+  var dk='vrt_pdj_'+new Date().toISOString().slice(0,10)+'_'+(p.titre+'|'+p.passage).substring(0,40).replace(/[^a-z0-9]/gi,'');
   try{ var c=localStorage.getItem(dk); if(c){ box.innerHTML=c; return; } }catch(e){}
   try{
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
@@ -32239,17 +32239,45 @@ window._pdjLoadExpl = function(){
   }catch(e){ box.innerHTML=fb; }
 };
 
+// Nettoie un titre tiré d'un nom de fichier (suffixes @Epub, "(Z-Library)",
+// " -- Auteur -- … -- Anna's Archive", extension) → titre lisible.
+window._pdjCleanTitle = function(s){
+  s=String(s||'').replace(/\.(docx|epub|pdf|txt|md|html?)$/i,'');
+  s=s.split(/\s--\s/)[0];
+  s=s.replace(/@\w+/g,'').replace(/\((Z-Library|best)\)/gi,'').replace(/\s*\(\s*\)\s*/g,' ');
+  return s.replace(/\s{2,}/g,' ').trim() || 'Œuvre';
+};
+
+// Upgrade le passage du jour vers le CORPUS ISOLÉ (116 œuvres) via rag.php?src=oeuvres&daily=1.
+// Repli silencieux sur le passage des œuvres au programme (déjà rendu) si indispo.
+window._pdjLoad = function(){
+  try{
+    var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
+    fetch(base+'/rag.php?src=oeuvres&daily=1').then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok&&d.passages&&d.passages.length){
+        var pp=d.passages[0], txt=String(pp.extrait||'').replace(/^[«"﻿\s]+|[»"\s]+$/g,'');
+        if(txt.length>40){
+          var au=(pp.auteur&&pp.auteur.indexOf('programme')<0&&pp.auteur!=='Anonyme')?pp.auteur:'';
+          window._pdjCurrent={passage:txt,titre:_pdjCleanTitle(pp.titre||''),auteur:au,classe:''};
+          var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML='« '+_esc(txt.substring(0,320))+(txt.length>320?'…':'')+' »';
+          var rb=document.getElementById('vPdjRef'); if(rb) rb.innerHTML='— '+_esc(window._pdjCurrent.titre)+(au?' · '+_esc(au):'');
+        }
+      }
+    }).catch(function(){}).then(function(){ if(window._pdjLoadExpl) _pdjLoadExpl(); });
+  }catch(e){ if(window._pdjLoadExpl) _pdjLoadExpl(); }
+};
+
 window._passageDuJourHtml = function(){
   var p=_getPassageDuJour();
   if(!p) return (typeof _citationBannerHtml==='function'?_citationBannerHtml():'');
   window._pdjCurrent=p;
   var ref=_esc(p.titre)+(p.auteur?' · '+_esc(p.auteur):'')+(p.classe?' · '+_esc(p.classe):'');
-  setTimeout(function(){ if(window._pdjLoadExpl) _pdjLoadExpl(); },800);
+  setTimeout(function(){ if(window._pdjLoad) _pdjLoad(); },800);
   return '<div style="background:linear-gradient(135deg,#0F1E47 0%,#1E3A8A 100%);color:#fff;padding:20px 22px;border-radius:16px;margin:16px 0;position:relative;overflow:hidden;border-left:4px solid #FFC93C">'
     +'<div style="position:absolute;top:-12px;right:8px;font-family:Georgia,serif;font-size:90px;line-height:1;color:rgba(255,201,60,.13);font-weight:900">“</div>'
     +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800;margin-bottom:8px">📖 Passage du jour · une œuvre au programme</div>'
-    +'<div style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:16px;line-height:1.6;font-style:italic;margin-bottom:8px">« '+_esc(p.passage.substring(0,320))+(p.passage.length>320?'…':'')+' »</div>'
-    +'<div style="font-size:12px;color:#FFC93C;font-weight:700;margin-bottom:12px">— '+ref+'</div>'
+    +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:16px;line-height:1.6;font-style:italic;margin-bottom:8px">« '+_esc(p.passage.substring(0,320))+(p.passage.length>320?'…':'')+' »</div>'
+    +'<div id="vPdjRef" style="font-size:12px;color:#FFC93C;font-weight:700;margin-bottom:12px">— '+ref+'</div>'
     +'<div id="vPdjExpl" style="font-size:13px;line-height:1.6;color:rgba(255,255,255,.92);background:rgba(255,255,255,.06);border-radius:10px;padding:12px;margin-bottom:14px"><span style="opacity:.7">✨ Explication en cours…</span></div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
       +'<span style="font-size:11px;color:rgba(255,255,255,.6);margin-right:2px">Partager :</span>'
