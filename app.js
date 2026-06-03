@@ -14181,12 +14181,19 @@ function showCalendrier(){
   h+='<div class="vcard">';
   h+='<div class="ct mb12">🏖️ Vacances scolaires</div>';
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px">';
-  cal.vacances.forEach(function(v){
-    h+='<div style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-radius:18px;padding:18px;border:1px solid #F59E0B;box-shadow:0 6px 16px rgba(245,158,11,.15);transition:transform .3s,box-shadow .3s;position:relative;overflow:hidden" onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 16px 40px rgba(245,158,11,.3)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 6px 16px rgba(245,158,11,.15)\'">';
-    h+='<div style="position:absolute;top:-20px;right:-20px;font-size:80px;opacity:.15">🏖️</div>';
-    h+='<div style="font-size:32px;margin-bottom:8px">🌴</div>';
-    h+='<div style="font-family:Montserrat,sans-serif;font-size:15px;font-weight:900;color:#92400E;letter-spacing:.5px">'+_esc(v.label)+'</div>';
-    h+='<div style="font-size:12px;color:#78350F;margin-top:6px;font-weight:600">📅 '+_esc(v.debut)+' → '+_esc(v.fin)+'</div>';
+  var _vacThemes=[
+    {c1:'#FFE7C2',c2:'#FFD79A',br:'#F59E0B',ink:'#92400E',ink2:'#78350F',emo:'🍂'}, // automne (Toussaint)
+    {c1:'#DCEAFF',c2:'#BFD8FF',br:'#3C8DFF',ink:'#1E3A8A',ink2:'#274690',emo:'❄️'}, // hiver (Noël)
+    {c1:'#D7F5E3',c2:'#B6ECCB',br:'#10B981',ink:'#065F46',ink2:'#047857',emo:'🌸'}, // printemps (Pâques)
+    {c1:'#F3E8FF',c2:'#E4CCFF',br:'#A855F7',ink:'#6B21A8',ink2:'#7C3AED',emo:'🎒'}  // secours
+  ];
+  cal.vacances.forEach(function(v,i){
+    var t=_vacThemes[i % _vacThemes.length];
+    h+='<div style="background:linear-gradient(135deg,'+t.c1+','+t.c2+');border-radius:18px;padding:18px;border:1px solid '+t.br+';box-shadow:0 6px 16px '+t.br+'26;transition:transform .25s,box-shadow .25s;position:relative;overflow:hidden" onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 16px 36px '+t.br+'40\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 6px 16px '+t.br+'26\'">';
+    h+='<div style="position:absolute;top:-16px;right:-12px;font-size:72px;opacity:.12">'+t.emo+'</div>';
+    h+='<div style="font-size:30px;margin-bottom:8px">'+t.emo+'</div>';
+    h+='<div style="font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:15px;font-weight:800;color:'+t.ink+';letter-spacing:.3px">'+_esc(v.label)+'</div>';
+    h+='<div style="font-size:12px;color:'+t.ink2+';margin-top:6px;font-weight:600">📅 '+_esc(v.debut)+' → '+_esc(v.fin)+'</div>';
     h+='</div>';
   });
   h+='</div></div>';
@@ -19587,17 +19594,12 @@ function showJeuxEdu(){
         h+="  </div>";
       }
       h+="  <div class='voeuvre-body'>";
-      h+="    <div class='voeuvre-stats'>";
-      h+="      <div class='voeuvre-stat"+(hasCarte?' active':'')+"' title='Carte mentale'><div class='voeuvre-stat-ico'>🗺️</div><div class='voeuvre-stat-lbl'>Carte</div></div>";
-      h+="      <div class='voeuvre-stat"+(hasQcm?' active':'')+"' title='Questionnaire'><div class='voeuvre-stat-ico'>📝</div><div class='voeuvre-stat-lbl'>QCM</div></div>";
-      h+="      <div class='voeuvre-stat"+(hasFiche?' active':'')+"' title='Fiche de lecture'><div class='voeuvre-stat-ico'>📋</div><div class='voeuvre-stat-lbl'>Fiche</div></div>";
-      h+="      <div class='voeuvre-stat"+(hasCit?' active':'')+"' title='Citations clés'><div class='voeuvre-stat-ico'>💬</div><div class='voeuvre-stat-lbl'>Citat.</div></div>";
-      h+="      <div class='voeuvre-stat"+(hasCtrl?' active':'')+"' title='Contrôle lecture'><div class='voeuvre-stat-ico'>📚</div><div class='voeuvre-stat-lbl'>Ctrl</div></div>";
-      h+="    </div>";
-      h+="    <div class='voeuvre-actions'>";
-      h+="      <button class='voeuvre-btn btn-carte' onclick=\"event.stopPropagation();_showLittCarte('"+it.key+"')\">🗺️ Carte</button>";
-      h+="      <button class='voeuvre-btn btn-jeux' onclick=\"event.stopPropagation();"+clickAction+"\">🎮 Jeux</button>";
-      h+="    </div>";
+      // v1.2.3 : badges (Carte/QCM/Fiche/Citat./Ctrl) + boutons retirés des couvertures
+      // → message incitatif à lire. La carte ENTIÈRE reste cliquable (_showLittMenu)
+      //   → accès à carte mentale / fiche / QCM / citations / contrôle / corrigés.
+      var _oeT=["📖 Une histoire qui mérite d'être lue — explore-la ici.","✨ Résumé, citations et quiz t'attendent : et si tu la lisais ?","📚 Plonge dans cette œuvre du programme MINESEC.","🔎 Découvre de quoi ça parle… puis laisse-toi tenter par la lecture."];
+      h+="    <div style='font-size:12.5px;color:var(--ds-text-2,#475882);line-height:1.5;font-style:italic;margin:2px 0 10px'>"+_oeT[(it.key||'').length % _oeT.length]+"</div>";
+      h+="    <div style='font-size:12px;font-weight:800;color:var(--ds-primary,#142554);letter-spacing:.3px'>Explorer l'œuvre →</div>";
       if(iA()) h+="    <div class='voeuvre-admin'>"+
         "<button class='voeuvre-admin-btn edit' onclick=\"event.stopPropagation();mEditCarteMentale('"+it.key+"')\">✏️ Modifier</button>"+
         "<button class='voeuvre-admin-btn del' onclick=\"event.stopPropagation();_delCarteMentale('"+it.key+"')\">🗑 Supprimer</button>"+
@@ -21693,12 +21695,12 @@ function showLabosVirtuels(){
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-bottom:28px'>";
   list.forEach(function(lv){
     var locked=!lv.gratuit&&!SES;
-    h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:2px solid "+(locked?"#EDE9FE":"#E8EEFF")+";overflow:hidden;cursor:pointer;transition:all .25s;box-shadow:0 2px 8px rgba(0,0,0,.04)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 14px 36px rgba(0,0,0,.1)'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 2px 8px rgba(0,0,0,.04)'\">";
-    h+="<div style='background:linear-gradient(135deg,"+lv.color+","+lv.color+"99);padding:20px;position:relative'>";
-    h+="<div style='position:absolute;top:10px;right:10px;background:"+(lv.gratuit?"rgba(5,150,105,.9)":"rgba(124,58,237,.85)")+";color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:10px'>"+(lv.gratuit?"GRATUIT":lv.plan||"PREMIUM")+"</div>";
-    h+="<div style='font-size:42px;margin-bottom:8px'>"+lv.ico+"</div>";
-    h+="<div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#fff'>"+lv.titre+"</div>";
-    h+="<div style='font-size:11px;color:rgba(255,255,255,.7);margin-top:3px'>"+lv.matiere+" · "+lv.classe+"</div>";
+    h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:1px solid "+lv.color+"4d;border-top:4px solid "+lv.color+";overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s;box-shadow:0 2px 10px rgba(20,37,84,.06)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 16px 38px "+lv.color+"26'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 2px 10px rgba(20,37,84,.06)'\">";
+    h+="<div style='background:linear-gradient(135deg,"+lv.color+"1f,"+lv.color+"08);padding:18px 18px 16px;position:relative'>";
+    h+="<div style='position:absolute;top:10px;right:10px;background:"+(lv.gratuit?"#059669":"#7C3AED")+";color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:10px'>"+(lv.gratuit?"GRATUIT":lv.plan||"PREMIUM")+"</div>";
+    h+="<div style='width:52px;height:52px;border-radius:14px;background:"+lv.color+"26;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:10px'>"+lv.ico+"</div>";
+    h+="<div style='font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:14px;font-weight:800;color:#142554'>"+lv.titre+"</div>";
+    h+="<div style='font-size:11px;color:#6B7A99;margin-top:3px;font-weight:600'>"+lv.matiere+" · "+lv.classe+"</div>";
     h+="</div>";
     h+="<div style='padding:14px'>";
     h+="<div style='font-size:12px;color:#6B7A99;line-height:1.6;margin-bottom:10px'>"+lv.desc+"</div>";
