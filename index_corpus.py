@@ -38,7 +38,7 @@ from pathlib import Path
 
 DEFAULT_DB = "api/data/biblio_index.db"
 DEFAULT_DIRS = ["evaluations", "cours", "reference"]
-EXTS = {".html", ".htm", ".txt", ".md", ".docx"}
+EXTS = {".html", ".htm", ".txt", ".md", ".docx", ".epub"}
 CHUNK = 800      # caractères par passage
 OVERLAP = 120    # chevauchement entre passages (continuité du sens)
 MIN_LEN = 40     # ignorer les fragments trop courts
@@ -64,6 +64,24 @@ def strip_html(raw: str) -> str:
     raw = re.sub(r"(?s)<[^>]+>", " ", raw)
     raw = html.unescape(raw)
     return re.sub(r"\s+", " ", raw).strip()
+
+
+def extract_epub(path: Path) -> str:
+    """Extrait le texte d'un .epub (zip de fichiers (X)HTML) — stdlib uniquement."""
+    import zipfile
+    parts = []
+    try:
+        z = zipfile.ZipFile(str(path))
+        names = sorted(n for n in z.namelist()
+                       if n.lower().endswith((".xhtml", ".html", ".htm")))
+        for n in names:
+            try:
+                parts.append(strip_html(z.read(n).decode("utf-8", "replace")))
+            except Exception:  # noqa: BLE001
+                continue
+    except Exception:  # noqa: BLE001
+        return ""
+    return re.sub(r"\s+", " ", " ".join(parts)).strip()
 
 
 def extract_title(raw: str, fallback: str) -> str:
@@ -115,6 +133,9 @@ def reindex_file(con: sqlite3.Connection, path: Path, author: str) -> int:
     fmt = path.suffix.lower().lstrip(".")
     if fmt == "docx":
         text = extract_docx(path)
+        title = path.stem
+    elif fmt == "epub":
+        text = extract_epub(path)
         title = path.stem
     else:
         try:
