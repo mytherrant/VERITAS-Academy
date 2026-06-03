@@ -3906,8 +3906,8 @@ function vShowSec(sec,btn){
     <!-- ═════ COMPTE À REBOURS EXAMENS 2026 (v1.2.2) ═════ -->
     ${(typeof _examCountdownHtml==='function'?_examCountdownHtml():'')}
 
-    <!-- ═════ CITATION DU JOUR (v2.4) — Auteurs camerounais ═════ -->
-    ${(typeof _citationBannerHtml==='function'?_citationBannerHtml():'')}
+    <!-- ═════ PASSAGE DU JOUR (v1.2.3) — tiré des œuvres au programme + partage ═════ -->
+    ${(typeof _passageDuJourHtml==='function'?_passageDuJourHtml():(typeof _citationBannerHtml==='function'?_citationBannerHtml():''))}
 
     <!-- QUESTION DU JOUR : retirée de la vitrine visiteur (désencombrement accueil v1.2.3).
          Feature conservée (fonction _questionJourHtml intacte) — à resurfacer dans l'espace élève. -->
@@ -32179,6 +32179,85 @@ window._citationBannerHtml = function(){
     +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800;margin-bottom:6px">📜 Citation du jour</div>'
     +'<div style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:16px;line-height:1.5;font-style:italic;margin-bottom:8px">'+_esc(c.t)+'</div>'
     +'<div style="font-size:11px;color:#FFC93C;font-weight:700">— '+_esc(c.a)+'</div>'
+    +'</div>';
+};
+
+// ════════════════════════════════════════════════════════════════════
+// v1.2.3 — 📖 PASSAGE DU JOUR — tiré des ŒUVRES au programme + partage
+// Référence réelle + explication IA (cache 1×/jour, repli template) +
+// question incitative + partage WhatsApp/Facebook/X/Copier AVEC lien + © .
+// Source v1 : LITT_OEUVRES (œuvres au programme). v2 : corpus isolé (rag.php?src=oeuvres).
+// ════════════════════════════════════════════════════════════════════
+window._getPassageDuJour = function(){
+  try{
+    if(typeof LITT_OEUVRES!=='object'||!LITT_OEUVRES) return null;
+    var keys=Object.keys(LITT_OEUVRES).filter(function(k){
+      var o=LITT_OEUVRES[k]; return o&&o.citations&&o.citations.length;
+    });
+    if(!keys.length) return null;
+    var day=Math.floor((new Date()-new Date(new Date().getFullYear(),0,1))/86400000);
+    var oe=LITT_OEUVRES[keys[day%keys.length]];
+    var cit=oe.citations[day%oe.citations.length];
+    var txt=(typeof cit==='string')?cit:(cit&&(cit.texte||cit.t||cit.citation||cit.text||cit.extrait)||'');
+    if(!txt) return null;
+    return {passage:String(txt).replace(/^[«"\s]+|[»"\s]+$/g,''),titre:oe.titre||'',auteur:oe.auteur||'',classe:oe.classe||oe.niveau||''};
+  }catch(e){ return null; }
+};
+
+window._pdjMsg = function(){
+  var p=window._pdjCurrent; if(!p) return '';
+  var ref=p.titre+(p.auteur?' — '+p.auteur:'');
+  return '📖 Passage du jour — VÉRITAS\n\n« '+p.passage.substring(0,260)+(p.passage.length>260?'…':'')+' »\n— '+ref+'\n\n📚 Lis la suite et découvre les corrigés sur https://veritas-school.com\n© VÉRITAS Academy';
+};
+
+window._pdjShare = function(kind){
+  if(!window._pdjCurrent) return;
+  var url='https://veritas-school.com', msg=_pdjMsg();
+  if(kind==='wa') window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+  else if(kind==='fb') window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url)+'&quote='+encodeURIComponent(msg),'_blank');
+  else if(kind==='x') window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(msg.substring(0,240))+'&url='+encodeURIComponent(url),'_blank');
+  else { try{ navigator.clipboard.writeText(msg); if(typeof toast==='function')toast('Copié ! Colle-le sur TikTok, Instagram, etc. 📋','ok'); }catch(e){ if(typeof toast==='function')toast('Copie impossible','warn'); } }
+};
+
+window._pdjLoadExpl = function(){
+  var box=document.getElementById('vPdjExpl'), p=window._pdjCurrent;
+  if(!box||!p) return;
+  var fb='💡 Un passage clé de « '+p.titre+' ». Et ensuite ? Lis l\'œuvre pour le découvrir.';
+  var dk='vrt_pdj_'+new Date().toISOString().slice(0,10);
+  try{ var c=localStorage.getItem(dk); if(c){ box.innerHTML=c; return; } }catch(e){}
+  try{
+    var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
+    fetch(base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      prompt:'Citation de l\'œuvre "'+p.titre+'"'+(p.auteur?' de '+p.auteur:'')+' (programme MINESEC) :\n« '+p.passage.substring(0,400)+' »\n\nEn 2 ou 3 phrases : explique simplement ce passage à un élève, puis termine par UNE question intrigante qui donne envie de lire la suite (sans rien dévoiler).',
+      sysPrompt:'Tu es un professeur de français camerounais passionnant et concis.',
+      userId:'pdj',plan:'anon'
+    })}).then(function(r){return r.json();}).then(function(d){
+      var t=(d&&d.text)?String(d.text).trim():'';
+      var html=t?('💡 '+_esc(t)):fb;
+      box.innerHTML=html; try{ localStorage.setItem(dk,html); }catch(e){}
+    }).catch(function(){ box.innerHTML=fb; });
+  }catch(e){ box.innerHTML=fb; }
+};
+
+window._passageDuJourHtml = function(){
+  var p=_getPassageDuJour();
+  if(!p) return (typeof _citationBannerHtml==='function'?_citationBannerHtml():'');
+  window._pdjCurrent=p;
+  var ref=_esc(p.titre)+(p.auteur?' · '+_esc(p.auteur):'')+(p.classe?' · '+_esc(p.classe):'');
+  setTimeout(function(){ if(window._pdjLoadExpl) _pdjLoadExpl(); },800);
+  return '<div style="background:linear-gradient(135deg,#0F1E47 0%,#1E3A8A 100%);color:#fff;padding:20px 22px;border-radius:16px;margin:16px 0;position:relative;overflow:hidden;border-left:4px solid #FFC93C">'
+    +'<div style="position:absolute;top:-12px;right:8px;font-family:Georgia,serif;font-size:90px;line-height:1;color:rgba(255,201,60,.13);font-weight:900">“</div>'
+    +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800;margin-bottom:8px">📖 Passage du jour · une œuvre au programme</div>'
+    +'<div style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:16px;line-height:1.6;font-style:italic;margin-bottom:8px">« '+_esc(p.passage.substring(0,320))+(p.passage.length>320?'…':'')+' »</div>'
+    +'<div style="font-size:12px;color:#FFC93C;font-weight:700;margin-bottom:12px">— '+ref+'</div>'
+    +'<div id="vPdjExpl" style="font-size:13px;line-height:1.6;color:rgba(255,255,255,.92);background:rgba(255,255,255,.06);border-radius:10px;padding:12px;margin-bottom:14px"><span style="opacity:.7">✨ Explication en cours…</span></div>'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">'
+      +'<span style="font-size:11px;color:rgba(255,255,255,.6);margin-right:2px">Partager :</span>'
+      +'<button onclick="_pdjShare(\'wa\')" style="background:#25D366;color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer">WhatsApp</button>'
+      +'<button onclick="_pdjShare(\'fb\')" style="background:#1877F2;color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer">Facebook</button>'
+      +'<button onclick="_pdjShare(\'x\')" style="background:#111;color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer">X</button>'
+      +'<button onclick="_pdjShare(\'copy\')" style="background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer">🔗 Copier (TikTok, Insta…)</button>'
+    +'</div>'
     +'</div>';
 };
 
