@@ -2517,6 +2517,12 @@ function getBookRating(bid){var rvs=(DB.bookReviews||[]).filter(function(r){retu
 function fmt(n){return new Intl.NumberFormat('fr-FR').format(n)+' FCFA';}
 function fmtN(n){return new Intl.NumberFormat('fr-FR').format(n);}
 function S(id){return DB.students.find(s=>s.id===id||s.mat===id);}
+// Moyenne d'une matière, ROBUSTE au type : coerce n1/n2 en nombres (évite la
+// concaténation de chaînes "12"+"8"="128"/2=64 si les notes arrivent en texte —
+// ex. lecture future depuis MySQL où PDO renvoie les DECIMAL en string). Si une
+// seule note est présente, on l'utilise ; si aucune, 0 (au lieu de NaN). Pour des
+// nombres propres (saisie normale), le résultat est STRICTEMENT identique à avant.
+function _subMoy(g){ if(!g)return 0; var a=+g.n1, b=+g.n2; if(isNaN(a)&&isNaN(b))return 0; if(isNaN(a))return b; if(isNaN(b))return a; return (a+b)/2; }
 function SN(nom){return DB.students.find(s=>s.pre+' '+s.nom===nom);}
 function T(id){return DB.teachers.find(t=>t.id===id);}
 function tp(id,btn){const i=$(id);i.type=i.type==='password'?'text':'password';btn.textContent=i.type==='password'?'👁':'🙈';}
@@ -5236,7 +5242,7 @@ function exportTeacherGrades(){
   const sts=DB.students.filter(function(s){return s.cls===selC;}).sort(function(a,b){return(a.nom+a.pre).localeCompare(b.nom+b.pre);});
   const data=sts.map(function(s){
     const g=DB.grades.find(function(gr){return gr.eid===s.id&&gr.sub===t.mat2&&gr.tri===selT;});
-    return{'Nom':s.nom,'Prénom':s.pre,'Matricule':s.mat,'Classe':selC,'Matière':t.mat2,'Trimestre':selT,'Devoir 1':g?g.n1:'','Devoir 2':g?g.n2:'','Moyenne':g?((g.n1+g.n2)/2).toFixed(2):''};
+    return{'Nom':s.nom,'Prénom':s.pre,'Matricule':s.mat,'Classe':selC,'Matière':t.mat2,'Trimestre':selT,'Devoir 1':g?g.n1:'','Devoir 2':g?g.n2:'','Moyenne':g?(_subMoy(g)).toFixed(2):''};
   });
   exportToExcel(data,t.mat2+'_'+selC+'_'+selT,t.mat2);
 }
@@ -5256,7 +5262,7 @@ function exportGrades(cls,tri){
   const list=DB.grades.filter(g=>(cls==='Toutes'||g.cls===cls)&&g.tri===tri);
   const data=list.map(g=>({
     'Matricule':g.mat,'Élève':g.enom,'Classe':g.cls,'Matière':g.sub,
-    'Devoir 1':g.n1,'Devoir 2':g.n2,'Coef':g.coef,'Moyenne':((g.n1+g.n2)/2).toFixed(2),
+    'Devoir 1':g.n1,'Devoir 2':g.n2,'Coef':g.coef,'Moyenne':(_subMoy(g)).toFixed(2),
     'Trimestre':g.tri,'Enseignant':g.ens||''
   }));
   exportToExcel(data,'Notes_'+cls+'_'+tri,'Notes');
@@ -6765,10 +6771,10 @@ function pgReleveTemplate(){
     h+='<tr><td class="xs2">'+(i+1)+'</td><td class="semi" style="font-size:13px">'+s.nom+' '+s.pre+'</td>';
     TRS.forEach(function(tri){
       var g=DB.grades.find(function(gr){return gr.eid===s.id&&gr.sub===sub&&gr.tri===tri;});
-      var m=g?((g.n1+g.n2)/2).toFixed(1):'';
+      var m=g?(_subMoy(g)).toFixed(1):'';
       h+='<td class="mono" style="color:'+(g&&g.n1<10?'var(--re)':'')+'">'+( g?g.n1:'')+'</td>';
       h+='<td class="mono" style="color:'+(g&&g.n2<10?'var(--re)':'')+'">'+( g?g.n2:'')+'</td>';
-      h+='<td class="mono bold" style="color:'+(g&&(g.n1+g.n2)/2<10?'var(--re)':'var(--gr)')+'">'+m+'</td>';
+      h+='<td class="mono bold" style="color:'+(g&&_subMoy(g)<10?'var(--re)':'var(--gr)')+'">'+m+'</td>';
     });
     h+='</tr>';
   });
@@ -9158,8 +9164,8 @@ function docHeader(titre){const sc=DB.school;return`<div style="background:#1425
 function pgDash(){
   if(isEleve()){
     const s=SES;const gr=DB.grades.filter(g=>g.eid===s.id&&g.tri===TRS[0]);
-    const tc=gr.reduce((a,g)=>a+g.coef,0)||1;
-    const moy=gr.length?gr.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0)/tc:null;
+    const tc=gr.reduce((a,g)=>a+(+g.coef||1),0)||1;
+    const moy=gr.length?gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tc:null;
     const ap=moy!==null?getAppr(moy):null;
     const absE=DB.absences.filter(a=>a.eid===s.id);
     const totH=absE.reduce((a,b)=>a+b.heures,0);
@@ -9198,7 +9204,7 @@ function pgDash(){
     })()}
     <div class="g2">
       <div class="card"><div class="ct">📝 Mes dernières notes — ${TRS[0]}</div>
-        ${gr.length===0?'<div class="empty"><div class="empty-ico">📋</div>Aucune note disponible</div>':gr.map(g=>{const m=(g.n1+g.n2)/2;const ap2=getAppr(m);return`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)">
+        ${gr.length===0?'<div class="empty"><div class="empty-ico">📋</div>Aucune note disponible</div>':gr.map(g=>{const m=_subMoy(g);const ap2=getAppr(m);return`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)">
           <div><div class="semi s">${g.sub}</div><div class="xs2 mut">Coef. ${g.coef} · ${g.ens}</div></div>
           <div class="fl2 fic g8"><span class="mono xs2">${g.n1}/20 + ${g.n2}/20</span><span class="bg" style="background:${ap2.col}20;color:${ap2.col};border:1px solid ${ap2.col}44">${m.toFixed(1)}</span></div>
         </div>`;}).join("")}
@@ -9237,7 +9243,7 @@ function pgDash(){
     <div class="g2">
       <div class="card"><div class="ct">Mes dernières saisies</div>
         ${mg.length===0?'<div class="empty"><div class="empty-ico">📋</div>Aucune note saisie</div>':`<div class="tw"><table><thead><tr><th>Élève</th><th>Classe</th><th>Dev.1</th><th>Dev.2</th><th>Moy.</th></tr></thead><tbody>
-        ${mg.slice(-8).reverse().map(g=>{const m=(g.n1+g.n2)/2;const ap2=getAppr(m);return`<tr><td class="bold s">${g.enom}</td><td><span class="bg bgt">${g.cls}</span></td><td class="mono s">${g.n1}/20</td><td class="mono s">${g.n2}/20</td><td class="mono bold s" style="color:${ap2.col}">${m.toFixed(2)}</td></tr>`;}).join("")}
+        ${mg.slice(-8).reverse().map(g=>{const m=_subMoy(g);const ap2=getAppr(m);return`<tr><td class="bold s">${g.enom}</td><td><span class="bg bgt">${g.cls}</span></td><td class="mono s">${g.n1}/20</td><td class="mono s">${g.n2}/20</td><td class="mono bold s" style="color:${ap2.col}">${m.toFixed(2)}</td></tr>`;}).join("")}
         </tbody></table></div>`}
         <button class="btn bgr2 sm mt14" onclick="goTo('grades')">📝 Saisir des notes →</button>
       </div>
@@ -9247,7 +9253,7 @@ function pgDash(){
           <button class="btn bvi sm mt8" onclick="goTo('devoirs_teacher')">📋 Gérer mes devoirs →</button>
         </div>
         <div class="card"><div class="ct">📊 Performance par classe</div>
-          ${clsSet.map(cls=>{const clsGr=mg.filter(g=>g.cls===cls);const moysAll=clsGr.reduce((acc,g)=>{if(!acc[g.eid])acc[g.eid]={total:0,coef:0};acc[g.eid].total+=(g.n1+g.n2)/2*g.coef;acc[g.eid].coef+=g.coef;return acc;},{});const moyClasses=Object.values(moysAll).map(x=>x.total/x.coef);const avg=moyClasses.length?moyClasses.reduce((a,b)=>a+b,0)/moyClasses.length:0;return`<div class="fl2 fic fsb mb10"><div><div class="semi s">${cls}</div><div class="xs2 mut">${[...new Set(clsGr.map(g=>g.eid))].length} élèves</div></div><div class="fl2 fic g8"><div class="pb" style="width:100px"><div class="pf pfg" style="width:${Math.round(avg/20*100)}%"></div></div><span class="mono xs2" style="color:var(--gold)">${avg.toFixed(1)}/20</span></div></div>`;}).join("") || '<div class="xs2 mut">Aucune donnée</div>'}
+          ${clsSet.map(cls=>{const clsGr=mg.filter(g=>g.cls===cls);const moysAll=clsGr.reduce((acc,g)=>{if(!acc[g.eid])acc[g.eid]={total:0,coef:0};acc[g.eid].total+=_subMoy(g)*g.coef;acc[g.eid].coef+=g.coef;return acc;},{});const moyClasses=Object.values(moysAll).map(x=>x.total/x.coef);const avg=moyClasses.length?moyClasses.reduce((a,b)=>a+b,0)/moyClasses.length:0;return`<div class="fl2 fic fsb mb10"><div><div class="semi s">${cls}</div><div class="xs2 mut">${[...new Set(clsGr.map(g=>g.eid))].length} élèves</div></div><div class="fl2 fic g8"><div class="pb" style="width:100px"><div class="pf pfg" style="width:${Math.round(avg/20*100)}%"></div></div><span class="mono xs2" style="color:var(--gold)">${avg.toFixed(1)}/20</span></div></div>`;}).join("") || '<div class="xs2 mut">Aucune donnée</div>'}
           <button class="btn bo sm mt8" onclick="goTo('perf_teacher')">📊 Analyse complète →</button>
         </div>
       </div>
@@ -9263,7 +9269,7 @@ function pgDash(){
   const bnet=paid+bkr-sal-totDep;
   const cd=CLS.map(c=>({c,n:DB.students.filter(s=>s.cls===c).length})).filter(x=>x.n>0);
   const mx=Math.max(...cd.map(x=>x.n),1);
-  const tops=DB.students.map(s=>{const gr=DB.grades.filter(g=>g.eid===s.id&&g.tri===TRS[0]);const tc=gr.reduce((a,g)=>a+g.coef,0)||1;const moy=gr.length?gr.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0)/tc:null;return{...s,moy};}).filter(s=>s.moy!==null).sort((a,b)=>b.moy-a.moy);
+  const tops=DB.students.map(s=>{const gr=DB.grades.filter(g=>g.eid===s.id&&g.tri===TRS[0]);const tc=gr.reduce((a,g)=>a+(+g.coef||1),0)||1;const moy=gr.length?gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tc:null;return{...s,moy};}).filter(s=>s.moy!==null).sort((a,b)=>b.moy-a.moy);
   const rp=DB.payments.slice(-5).reverse();
   const ua=DB.announce.filter(a=>new Date(a.date)>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,3);
   const totAbs=DB.absences?.length||0;
@@ -9320,13 +9326,13 @@ function pgDash(){
 function pgMonBulletin(){
   const s=SES;const selT=window._bT||TRS[0];
   const gr=DB.grades.filter(g=>g.eid===s.id&&g.tri===selT);
-  const tc=gr.reduce((a,g)=>a+g.coef,0)||1;
-  const moy=gr.length?gr.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0)/tc:null;
+  const tc=gr.reduce((a,g)=>a+(+g.coef||1),0)||1;
+  const moy=gr.length?gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tc:null;
   const ap=moy!==null?getAppr(moy):null;
   // Calcul rang
   let rang='—',classEff=DB.students.filter(st=>st.cls===s.cls).length;
   if(moy!==null){
-    const allMoy=DB.students.filter(st=>st.cls===s.cls).map(st=>{const gG=DB.grades.filter(g=>g.eid===st.id&&g.tri===selT);const tC=gG.reduce((a,g)=>a+g.coef,0)||1;return gG.length?gG.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0)/tC:null;}).filter(m=>m!==null).sort((a,b)=>b-a);
+    const allMoy=DB.students.filter(st=>st.cls===s.cls).map(st=>{const gG=DB.grades.filter(g=>g.eid===st.id&&g.tri===selT);const tC=gG.reduce((a,g)=>a+(+g.coef||1),0)||1;return gG.length?gG.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tC:null;}).filter(m=>m!==null).sort((a,b)=>b-a);
     rang=allMoy.findIndex(m=>Math.abs(m-moy)<0.001)+1;
   }
   return`<div class="fl2 fic g8 mb20 fw">
@@ -9349,7 +9355,7 @@ function pgMonBulletin(){
   `<div class="card"><div class="ct">Résultats détaillés — ${selT}</div>
     <div class="tw"><table>
       <thead><tr><th>Matière</th><th>Coef.</th><th>Devoir 1</th><th>Devoir 2</th><th>Moyenne</th><th>Appréc.</th></tr></thead>
-      <tbody>${gr.map(g=>{const m=(g.n1+g.n2)/2;const ap2=getAppr(m);return`<tr>
+      <tbody>${gr.map(g=>{const m=_subMoy(g);const ap2=getAppr(m);return`<tr>
         <td><div class="semi s">${g.sub}</div><div class="xs2 mut">${g.ens||'—'}</div></td>
         <td class="mono xs2">${g.coef}</td>
         <td class="mono s">${g.n1}/20</td>
@@ -9586,7 +9592,7 @@ function pgPerfTeacher(){
   const selC=window._pC||'Toutes';
   const allCls=[...new Set(DB.students.map(s=>s.cls))];
   const myGrades=DB.grades.filter(g=>g.sub===sub&&g.tri===selT&&(selC==='Toutes'||g.cls===selC));
-  const stats=myGrades.map(g=>{const m=(g.n1+g.n2)/2;return{...g,moy:m};});
+  const stats=myGrades.map(g=>{const m=_subMoy(g);return{...g,moy:m};});
   const avg=stats.length?stats.reduce((a,b)=>a+b.moy,0)/stats.length:null;
   const dist=[{label:'Excellent (≥18)',col:'var(--gr)',fn:m=>m>=18},{label:'Très Bien (16-17)',col:'#228844',fn:m=>m>=16&&m<18},{label:'Bien (14-15)',col:'var(--bl)',fn:m=>m>=14&&m<16},{label:'Assez Bien (12-13)',col:'#3a70d0',fn:m=>m>=12&&m<14},{label:'Passable (10-11)',col:'var(--or)',fn:m=>m>=10&&m<12},{label:'Insuffisant (<10)',col:'var(--re)',fn:m=>m<10}];
   return`<div class="fl2 fic g12 mb20 fw">
@@ -10264,16 +10270,16 @@ function pgHonneur(){
   CLS.forEach(function(cls){
     DB.students.filter(function(s){return s.cls===cls;}).forEach(function(s){
       var gr=DB.grades.filter(function(g){return g.eid===s.id&&g.tri===tri;});
-      var tc=gr.reduce(function(a,g){return a+g.coef;},0)||1;
+      var tc=gr.reduce(function(a,g){return a+(+g.coef||1);},0)||1;
       if(!gr.length)return;
-      var moy=gr.reduce(function(a,g){return a+((g.n1+g.n2)/2)*g.coef;},0)/tc;
+      var moy=gr.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tc;
       var mention=moy>=16?'Félicitations':moy>=14?'Tableau d\'honneur':moy>=12?'Encouragements':'';
       var sanctions=[];
       var abs=(DB.absences||[]).filter(function(a){return a.eid===s.id;});
       var absNJ=abs.filter(function(a){return!a.justifie;}).reduce(function(sum,a){return sum+(a.heures||0);},0);
       if(absNJ>10)sanctions.push('Abs. non justifiées: '+absNJ+'h');
       // Sub-average subjects
-      var subMoy=gr.filter(function(g){return(g.n1+g.n2)/2<10;}).map(function(g){return g.sub+' ('+(((g.n1+g.n2)/2).toFixed(1))+')';});
+      var subMoy=gr.filter(function(g){return_subMoy(g)<10;}).map(function(g){return g.sub+' ('+((_subMoy(g)).toFixed(1))+')';});
       allData.push({s:s,cls:cls,moy:moy,mention:mention,sanctions:sanctions,subMoy:subMoy,gr:gr});
     });
   });
@@ -10353,9 +10359,9 @@ function printHonneur(){
   CLS.forEach(function(cls){
     DB.students.filter(function(s){return s.cls===cls;}).forEach(function(s){
       var gr=DB.grades.filter(function(g){return g.eid===s.id&&g.tri===tri;});
-      var tc=gr.reduce(function(a,g){return a+g.coef;},0)||1;
+      var tc=gr.reduce(function(a,g){return a+(+g.coef||1);},0)||1;
       if(!gr.length)return;
-      var moy=gr.reduce(function(a,g){return a+((g.n1+g.n2)/2)*g.coef;},0)/tc;
+      var moy=gr.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tc;
       if(moy>=12)allData.push({nom:s.pre+' '+s.nom,cls:cls,moy:moy,mention:moy>=16?'Félicitations':moy>=14?'Tableau d\'honneur':'Encouragements'});
     });
   });
@@ -10373,17 +10379,17 @@ function printHonneur(){
 function printStudentHonneur(sid,tri){
   var s=S(sid);if(!s)return;
   var gr=DB.grades.filter(function(g){return g.eid===sid&&g.tri===(tri||window._hTri||TRS[0]);});
-  var tc=gr.reduce(function(a,g){return a+g.coef;},0)||1;
+  var tc=gr.reduce(function(a,g){return a+(+g.coef||1);},0)||1;
   if(!gr.length)return toast('Pas de notes','warn');
-  var moy=gr.reduce(function(a,g){return a+((g.n1+g.n2)/2)*g.coef;},0)/tc;
+  var moy=gr.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tc;
   if(moy<12)return toast('Moyenne insuffisante pour un tableau d\'honneur','warn');
   var mention=moy>=16?'FÉLICITATIONS':moy>=14?'TABLEAU D\'HONNEUR':'ENCOURAGEMENTS';
   var mentionColor=moy>=16?'#c49a3c':moy>=14?'#1a3a8a':'#1a6e40';
   var sc=DB.school;var logo=getLogo();var tri2=tri||window._hTri||TRS[0];
   var allMoy=DB.students.filter(function(st){return st.cls===s.cls;}).map(function(st){
     var gG=DB.grades.filter(function(g){return g.eid===st.id&&g.tri===tri2;});
-    var tC=gG.reduce(function(a,g){return a+g.coef;},0)||1;
-    return gG.length?gG.reduce(function(a,g){return a+((g.n1+g.n2)/2)*g.coef;},0)/tC:null;
+    var tC=gG.reduce(function(a,g){return a+(+g.coef||1);},0)||1;
+    return gG.length?gG.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tC:null;
   }).filter(function(m){return m!==null;}).sort(function(a,b){return b-a;});
   var rang=allMoy.findIndex(function(m){return Math.abs(m-moy)<0.001;})+1;
   var html='<div style="max-width:600px;margin:0 auto;font-family:Outfit,sans-serif;border:3px double '+mentionColor+';padding:0">';
@@ -10591,8 +10597,8 @@ function viewStu(id){
   const pays=DB.payments.filter(p=>p.eid===s.id);
   const tpays=pays.filter(p=>p.stat==='Payé').reduce((a,p)=>a+p.mnt,0);
   const gr=DB.grades.filter(g=>g.eid===s.id&&g.tri===TRS[0]);
-  const tc=gr.reduce((a,g)=>a+g.coef,0)||1;
-  const moy=gr.length?gr.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0)/tc:null;
+  const tc=gr.reduce((a,g)=>a+(+g.coef||1),0)||1;
+  const moy=gr.length?gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tc:null;
   const ap=moy!==null?getAppr(moy):null;
   const absE=DB.absences?.filter(a=>a.eid===s.id)||[];
   M('Fiche élève',s.mat,`
@@ -10749,8 +10755,8 @@ function pgGrades(){
       <thead><tr><th>Élève</th>${(subFilt?[subFilt]:SUBS.filter(s=>DB.grades.some(g=>g.sub===s&&g.cls===selC&&g.tri===selT))).map(s=>`<th style="text-align:center">${s.replace('Physique-Chimie','Phy-Ch').replace('Histoire-Géographie','H-G')}</th>`).join('')}<th>Moy.</th></tr></thead>
       <tbody>${sts.map(s=>{
         const sg=gr.filter(g=>g.eid===s.id);
-        const tc=sg.reduce((a,g)=>a+g.coef,0)||1;
-        const moy=sg.length?sg.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0)/tc:null;
+        const tc=sg.reduce((a,g)=>a+(+g.coef||1),0)||1;
+        const moy=sg.length?sg.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tc:null;
         const ap=moy!==null?getAppr(moy):null;
         const subsToShow=subFilt?[subFilt]:SUBS.filter(sub=>DB.grades.some(g=>g.sub===sub&&g.cls===selC&&g.tri===selT));
         return`<tr><td><div class="bold s">${s.pre} ${s.nom}</div></td>
@@ -10785,8 +10791,8 @@ function mBulkGrades(){
     return'<tr><td class="xs2 mut">'+(i+1)+'</td><td class="semi s">'+s.nom+' '+s.pre+'</td>'+
     '<td><input class="fi" style="padding:5px 8px;width:60px;text-align:center;'+(g&&g.n1<10?'color:var(--re);font-weight:700':'')+'" id="bn1_'+s.id+'" type="number" step=".5" min="0" max="20" value="'+(g?g.n1:'')+'" "></td>'+
     '<td><input class="fi" style="padding:5px 8px;width:60px;text-align:center;'+(g&&g.n2<10?'color:var(--re);font-weight:700':'')+'" id="bn2_'+s.id+'" type="number" step=".5" min="0" max="20" value="'+(g?g.n2:'')+'" "></td>'+
-    '<td class="mono xs2" style="color:'+(g?((g.n1+g.n2)/2>=10?'var(--gr)':'var(--re)'):'var(--ink4)')+'">'+
-    (g?((g.n1+g.n2)/2).toFixed(1):'—')+'</td></tr>';
+    '<td class="mono xs2" style="color:'+(g?(_subMoy(g)>=10?'var(--gr)':'var(--re)'):'var(--ink4)')+'">'+
+    (g?(_subMoy(g)).toFixed(1):'—')+'</td></tr>';
   }).join('');
   M('Saisie par classe (alphabétique)',selC+' · '+sub+' · '+selT,
     '<div class="ib ibt mb12"><span>📝</span><span>Saisissez les notes de <strong>'+sub+'</strong> pour tous les élèves de <strong>'+selC+'</strong>. Ordre alphabétique. <span style="color:var(--re)">Notes &lt;10 en rouge</span>.</span></div>'+
@@ -10838,10 +10844,10 @@ function printBulletin(sid,tri){printDoc(printBulletinHtml(sid,tri),`Bulletin ${
 function printBulletinHtml(sid,tri){
   const s=S(sid);if(!s)return '';
   const gr=DB.grades.filter(g=>g.eid===sid&&g.tri===tri);
-  const tc=gr.reduce((a,g)=>a+g.coef,0)||1;
-  const moy=gr.length?gr.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0)/tc:0;
+  const tc=gr.reduce((a,g)=>a+(+g.coef||1),0)||1;
+  const moy=gr.length?gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tc:0;
   const ap=getAppr(moy);
-  const allMoy=DB.students.filter(st=>st.cls===s.cls).map(st=>{const gG=DB.grades.filter(g=>g.eid===st.id&&g.tri===tri);const tC=gG.reduce((a,g)=>a+g.coef,0)||1;return gG.length?gG.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0)/tC:null;}).filter(m=>m!==null).sort((a,b)=>b-a);
+  const allMoy=DB.students.filter(st=>st.cls===s.cls).map(st=>{const gG=DB.grades.filter(g=>g.eid===st.id&&g.tri===tri);const tC=gG.reduce((a,g)=>a+(+g.coef||1),0)||1;return gG.length?gG.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tC:null;}).filter(m=>m!==null).sort((a,b)=>b-a);
   const rang=gr.length?allMoy.findIndex(m=>Math.abs(m-moy)<0.001)+1:'—';
   const classAvg=allMoy.length?allMoy.reduce((a,b)=>a+b,0)/allMoy.length:0;
   const classMin=allMoy.length?Math.min(...allMoy):0;
@@ -10899,9 +10905,9 @@ function printBulletinHtml(sid,tri){
       </tr></thead>
       <tbody>
       ${gr.map(g=>{
-        const m=(g.n1+g.n2)/2;const ap2=getAppr(m);const pts=m*g.coef;
+        const m=_subMoy(g);const ap2=getAppr(m);const pts=m*g.coef;
         const gt=cote;
-        const subGrades=DB.grades.filter(x=>x.sub===g.sub&&x.cls===s.cls&&x.tri===tri).map(x=>(x.n1+x.n2)/2);
+        const subGrades=DB.grades.filter(x=>x.sub===g.sub&&x.cls===s.cls&&x.tri===tri).map(x=>_subMoy(x));
         const subMin=subGrades.length?Math.min(...subGrades).toFixed(1):'—';
         const subMax=subGrades.length?Math.max(...subGrades).toFixed(1):'—';
         const coteLetter=m>=16?'A+':m>=14?'A':m>=12?'B+':m>=10?'B':m>=8?'C':'D';
@@ -10922,7 +10928,7 @@ function printBulletinHtml(sid,tri){
         <td style="padding:7px 8px" colspan="3">TOTAL</td>
         <td style="text-align:center;font-family:'Fira Code';font-size:10px;color:${ap.col}">${moy.toFixed(2)}</td>
         <td style="text-align:center;font-family:'Fira Code'">${tc}</td>
-        <td style="text-align:center;font-family:'Fira Code'">${gr.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0).toFixed(2)}</td>
+        <td style="text-align:center;font-family:'Fira Code'">${gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0).toFixed(2)}</td>
         <td style="text-align:center;font-weight:700;color:${ap.col}">${cote}</td>
         <td colspan="2" style="text-align:right;padding-right:8px">Rang : <strong style="color:#142554">${rang}</strong> / ${allMoy.length}</td>
       </tr></tfoot>
@@ -10936,7 +10942,7 @@ function printBulletinHtml(sid,tri){
     </div>
     <div style="border:1px solid #ddd;border-left:0;padding:6px 8px">
       <div style="font-weight:700;color:#142554;font-size:9px;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Travail de l&#39;élève</div>
-      ${[['Total Général',gr.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0).toFixed(2)],['Total Coefficients',tc],['Moyenne Trimestrielle',moy.toFixed(2)+'/20'],['Mention',mention],['Cote',cote],['Rang',rang+' / '+allMoy.length]].map(([l,v])=>'<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px dotted #eee"><span style="color:#666">'+l+'</span><strong style="color:'+(l==='Moyenne Trimestrielle'?ap.col:'#1c1814')+'">'+v+'</strong></div>').join('')}
+      ${[['Total Général',gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0).toFixed(2)],['Total Coefficients',tc],['Moyenne Trimestrielle',moy.toFixed(2)+'/20'],['Mention',mention],['Cote',cote],['Rang',rang+' / '+allMoy.length]].map(([l,v])=>'<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px dotted #eee"><span style="color:#666">'+l+'</span><strong style="color:'+(l==='Moyenne Trimestrielle'?ap.col:'#1c1814')+'">'+v+'</strong></div>').join('')}
     </div>
     <div style="border:1px solid #ddd;border-left:0;padding:6px 8px">
       <div style="font-weight:700;color:#142554;font-size:9px;margin-bottom:3px;text-transform:uppercase;letter-spacing:.5px">Profil de la classe</div>
@@ -11434,8 +11440,8 @@ function pgSend(){
     ${DB.students.filter(s=>s.ptel).map(s=>{
       const tri=window._waTriB||TRS[0];
       const gr=DB.grades.filter(g=>g.eid===s.id&&g.tri===tri);
-      const tc=gr.reduce((a,g)=>a+g.coef,0)||1;
-      const moy=gr.length?gr.reduce((a,g)=>a+((g.n1+g.n2)/2)*g.coef,0)/tc:null;
+      const tc=gr.reduce((a,g)=>a+(+g.coef||1),0)||1;
+      const moy=gr.length?gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tc:null;
       const ap=moy!==null?getAppr(moy):null;
       const msg=`Bonjour ${s.parent||'cher parent'},\n\nVoici les résultats de ${s.pre} ${s.nom} (${s.cls}) pour le ${tri}:\n\nMoyenne générale: *${moy!==null?moy.toFixed(2):'-'}/20* — ${ap?.lbl||'-'}\n\nPour plus de détails, contactez l\'établissement.\n\n_${DB.school?.nom||'VÉRITAS Academy'}_`;
       return`<div class="fl2 fic fsb"><div class="fl2 fic g8"><div class="av" style="width:26px;height:26px;background:var(--gp);color:var(--gold);border:1.5px solid var(--gb);font-size:12px">${s.pre[0]}</div>
@@ -11775,8 +11781,8 @@ function pgClassStats(){
     var sts=DB.students.filter(function(s){return s.cls===cls;});
     var moys=sts.map(function(s){
       var gr=DB.grades.filter(function(g){return g.eid===s.id&&g.tri===tri;});
-      var tc=gr.reduce(function(a,g){return a+g.coef;},0)||1;
-      return gr.length?gr.reduce(function(a,g){return a+((g.n1+g.n2)/2)*g.coef;},0)/tc:null;
+      var tc=gr.reduce(function(a,g){return a+(+g.coef||1);},0)||1;
+      return gr.length?gr.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tc:null;
     }).filter(function(m){return m!==null;});
     var avg=moys.length?moys.reduce(function(a,b){return a+b;},0)/moys.length:0;
     var mn=moys.length?Math.min.apply(null,moys):0;
@@ -11793,7 +11799,7 @@ function pgClassStats(){
   // Subject data
   var allSubs=[...new Set(DB.grades.filter(function(g){return g.tri===tri;}).map(function(g){return g.sub;}))];
   var subData=allSubs.map(function(sub){
-    var gs=DB.grades.filter(function(g){return g.tri===tri&&g.sub===sub;}).map(function(g){return(g.n1+g.n2)/2;});
+    var gs=DB.grades.filter(function(g){return g.tri===tri&&g.sub===sub;}).map(function(g){return_subMoy(g);});
     var a=gs.length?gs.reduce(function(x,y){return x+y;},0)/gs.length:0;
     var tx=gs.length?Math.round(gs.filter(function(m){return m>=10;}).length/gs.length*100):0;
     return{sub:sub,c:gs.length,avg:a,mn:gs.length?Math.min.apply(null,gs):0,mx:gs.length?Math.max.apply(null,gs):0,tx:tx};
@@ -11866,8 +11872,8 @@ function exportClassStats(){
     var sts=DB.students.filter(function(s){return s.cls===cls;});
     var moyennes=sts.map(function(s){
       var gr=DB.grades.filter(function(g){return g.eid===s.id&&g.tri===tri;});
-      var tc=gr.reduce(function(a,g){return a+g.coef;},0)||1;
-      return gr.length?gr.reduce(function(a,g){return a+((g.n1+g.n2)/2)*g.coef;},0)/tc:null;
+      var tc=gr.reduce(function(a,g){return a+(+g.coef||1);},0)||1;
+      return gr.length?gr.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tc:null;
     }).filter(function(m){return m!==null;});
     var avg=moyennes.length?moyennes.reduce(function(a,b){return a+b;},0)/moyennes.length:0;
     return{'Classe':cls,'Effectif':sts.length,'Notes saisies':moyennes.length,
@@ -18623,8 +18629,8 @@ function pgReleve(){
   function moyTri(tri){
     var gT=sGr.filter(function(g){return g.tri===tri;});
     if(!gT.length)return null;
-    var tc=gT.reduce(function(a,g){return a+g.coef;},0)||1;
-    return gT.reduce(function(a,g){return a+((g.n1+g.n2)/2)*g.coef;},0)/tc;
+    var tc=gT.reduce(function(a,g){return a+(+g.coef||1);},0)||1;
+    return gT.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tc;
   }
   var moyTris=TRS.map(function(tri){return{tri:tri,moy:moyTri(tri)};});
   var valid=moyTris.filter(function(m){return m.moy!==null;});
@@ -18635,7 +18641,7 @@ function pgReleve(){
     var cls=DB.students.filter(function(st){return st.cls===s.cls;});
     var allM=cls.map(function(st){
       var stG=gr.filter(function(g){return g.eid===st.id;});
-      var v2=TRS.map(function(tri){var tg=stG.filter(function(g){return g.tri===tri;});if(!tg.length)return null;var tc=tg.reduce(function(a,g){return a+g.coef;},0)||1;return tg.reduce(function(a,g){return a+((g.n1+g.n2)/2)*g.coef;},0)/tc;}).filter(function(m){return m!==null;});
+      var v2=TRS.map(function(tri){var tg=stG.filter(function(g){return g.tri===tri;});if(!tg.length)return null;var tc=tg.reduce(function(a,g){return a+(+g.coef||1);},0)||1;return tg.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tc;}).filter(function(m){return m!==null;});
       return v2.length?v2.reduce(function(a,m){return a+m;},0)/v2.length:null;
     }).filter(function(m){return m!==null;}).sort(function(a,b){return b-a;});
     rangAnn=allM.findIndex(function(m){return Math.abs(m-moyAnn)<0.001;})+1;
@@ -18673,7 +18679,7 @@ function pgReleve(){
       h+="<th style='text-align:center;padding:6px 8px;font-size:11px;color:#6B7A99;font-weight:700'>Moy.</th>";
       h+="</tr></thead><tbody>";
       gT.sort(function(a,b){return b.coef-a.coef;}).forEach(function(g){
-        var mg=(g.n1+g.n2)/2;var col=mg>=10?"#059669":mg>=7?"#D97706":"#DC2626";
+        var mg=_subMoy(g);var col=mg>=10?"#059669":mg>=7?"#D97706":"#DC2626";
         h+="<tr style='border-bottom:1px solid #F0F4FF'>";
         h+="<td style='padding:7px 8px;font-size:12px;font-weight:600'>"+g.sub+"</td>";
         h+="<td style='text-align:center;padding:7px 8px;font-size:11px;color:#6B7A99'>"+g.coef+"</td>";
