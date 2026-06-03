@@ -1100,6 +1100,9 @@ async function load(){
   if(!DB.galleryImages)DB.galleryImages=defaultDB().galleryImages;
   // BUG-01 FIX: migration centralisée (champs manquants, cartes, auth)
   _migrateDB();
+  // v1.2.x : expirer les abonnements e-learning échus (récurrent). Idempotent ;
+  // persiste seulement si quelque chose a changé. Grandfather des abos legacy.
+  try{ if(typeof _expireAbonnements==='function' && _expireAbonnements()>0){ localStorage.setItem('vrt10',JSON.stringify(DB)); } }catch(e){}
   // ── LWS_API : pull données depuis le serveur (non-bloquant) ─────────────────
   // v2.9.15 : Le sync LWS (api/db.php) ne concerne QUE l'admin/enseignant.
   // Le visiteur travaille en LocalStorage avec le contenu public déjà embarqué
@@ -7433,6 +7436,10 @@ function activerAbonnement(id){
   if(!abo){toast('Abonnement introuvable','warn');return;}
   abo.statut='Activé';
   abo.dateActivation=today();
+  // v1.2.x : abonnement RÉCURRENT → date de fin calculée selon la durée du plan.
+  var _planAbo=(DB.elearning&&DB.elearning.plans||[]).find(function(p){return p.id===abo.plan;});
+  abo.dateFinTs=Date.now()+_aboDureeMs(_planAbo&&_planAbo.duree);
+  abo.dateFin=new Date(abo.dateFinTs).toLocaleDateString('fr-FR');
   // v1.2.2 (bug #3) : paiement validé → confirmer la commission partenaire liée
   try{ if(typeof confirmCommissionsForSale==='function') confirmCommissionsForSale('elearning', abo.plan); }catch(e){}
 
@@ -26442,6 +26449,38 @@ function studentHasPlan(eid,planId){
 function canAccessCV(cv,eid){
   if(!cv.planRequis||cv.planRequis==='gratuit') return true;
   return studentHasPlan(eid, cv.planRequis);
+}
+// ── Abonnements RÉCURRENTS : expiration automatique (v1.2.x) ─────────────────
+// Durée d'un plan → millisecondes (mots-clés FR ; défaut = annuel).
+function _aboDureeMs(duree){
+  var d=(duree||'').toString().toLowerCase();
+  if(d.indexOf('hebdo')>=0)   return 7*864e5;
+  if(d.indexOf('mens')>=0)    return 30*864e5;
+  if(d.indexOf('trim')>=0)    return 90*864e5;
+  if(d.indexOf('semestr')>=0) return 182*864e5;
+  return 365*864e5; // annuel + défaut
+}
+// Passe à 'expire' les abonnements activés dont la date de fin est dépassée, puis
+// retire des comptes les plans qui ne sont plus accordés par AUCUN abo actif.
+// Grandfather : les abos SANS dateFinTs (activés avant cette fonctionnalité) ne
+// sont jamais expirés (pas de révocation surprise). Renvoie le nb d'abos expirés.
+function _expireAbonnements(){
+  try{
+    var el=DB&&DB.elearning; if(!el||!Array.isArray(el.abonnements)) return 0;
+    var now=Date.now(), changed=0;
+    el.abonnements.forEach(function(a){
+      if(a && a.statut==='Activé' && a.dateFinTs && now>a.dateFinTs){ a.statut='expire'; changed++; }
+    });
+    if(!changed) return 0;
+    (DB.visitorAccounts||[]).forEach(function(acc){
+      if(!acc || !Array.isArray(acc.plans) || !acc.plans.length) return;
+      var mine=el.abonnements.filter(function(a){return a&&a.accountId===acc.id;});
+      var actifs={}, expires={};
+      mine.forEach(function(a){ if(a.statut==='Activé') actifs[a.plan]=1; else if(a.statut==='expire') expires[a.plan]=1; });
+      acc.plans=acc.plans.filter(function(p){ return !expires[p] || actifs[p]; });
+    });
+    return changed;
+  }catch(e){ return 0; }
 }
 function cvColor(matiere){
   var m={'Mathématiques':'#3C8DFF','Français':'#DC2626','Anglais':'#059669',
