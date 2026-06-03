@@ -8561,6 +8561,62 @@ function verifyOTP(){
 }
 
 
+// ═══════════════════════════════════════════════════════════════════════════
+// S3 (v1.2.x) — Sync PAR UTILISATEUR (élève/parent) côté client.
+// Récupère la tranche de données de l'élève authentifié depuis student_data.php
+// pour qu'il voie SES notes/paiements sur N'IMPORTE QUEL appareil. Lecture seule
+// ici (l'écriture viendra brancher action=submit). Repli silencieux si hors-ligne.
+// ═══════════════════════════════════════════════════════════════════════════
+function _studentSyncUrl(){
+  try{ return (LWS_API.db||'').replace(/db\.php(\?.*)?$/,'student_data.php'); }catch(e){ return ''; }
+}
+async function _studentSyncFetch(login,password){
+  var url=_studentSyncUrl(); if(!url||!navigator.onLine) return null;
+  try{
+    var ctrl=(typeof AbortController!=='undefined')?new AbortController():null;
+    var tmt=ctrl?setTimeout(function(){ctrl.abort();},10000):null;
+    var r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'fetch',login:login,password:password}),signal:ctrl?ctrl.signal:undefined});
+    if(tmt)clearTimeout(tmt);
+    if(!r.ok) return null;
+    var j=await r.json();
+    return (j&&j.ok)?j:null;
+  }catch(e){ return null; }
+}
+// Fusionne la tranche serveur dans la base locale par UPSERT (id) — n'efface JAMAIS
+// les enregistrements d'autres élèves (sûr sur un appareil admin/partagé). Persiste
+// en local ; save() ne pousse pas vers le serveur pour un non-admin.
+function _studentApplySlice(slice){
+  if(!slice||!slice.student||!slice.student.id) return;
+  var sid=slice.student.id;
+  DB.students=DB.students||[];
+  var si=DB.students.findIndex(function(s){return s.id===sid;});
+  if(si>=0) DB.students[si]=slice.student; else DB.students.push(slice.student);
+  function _upsert(arrName,list){
+    DB[arrName]=DB[arrName]||[];
+    var byId={}; DB[arrName].forEach(function(x,idx){ if(x&&x.id!=null) byId[x.id]=idx; });
+    (list||[]).forEach(function(x){
+      if(!x) return;
+      if(x.id!=null && byId[x.id]!=null){ DB[arrName][byId[x.id]]=x; }
+      else { DB[arrName].push(x); if(x.id!=null) byId[x.id]=DB[arrName].length-1; }
+    });
+  }
+  _upsert('grades',slice.grades);
+  _upsert('payments',slice.payments);
+  _upsert('absences',slice.absences);
+  _upsert('submissions',slice.submissions);
+  _upsert('devoirs',slice.devoirs);
+  try{ if(typeof save==='function') save(); }catch(e){}
+}
+// Rafraîchissement en arrière-plan (appareil déjà connu) — non bloquant.
+function _studentSyncBg(login,password){
+  try{
+    _studentSyncFetch(login,password).then(function(slice){
+      if(slice){ _studentApplySlice(slice); try{ if(typeof re==='function') re(); }catch(e){} }
+    });
+  }catch(e){}
+}
+
 async function doLogin(){
   // [SEC v1.2] Rate limiting global (bloque après 5 tentatives toutes cibles)
   if(!_checkLoginRateLimit())return;
@@ -8577,14 +8633,29 @@ async function doLogin(){
       var a2=DB.studentAccounts[i];
       if(a2.user.toLowerCase()===u.toLowerCase()){var ok=await verifyPassword(p,a2.pwd,a2.user,a2);if(ok){sa2=a2;break;}}
     }}
-    if(sa2){var s=S(sa2.eid);if(s){sa2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;go2SES({...s,type:'eleve',sid:s.id,accountId:sa2.id,plans:sa2.plans||[]});return;}}
+    if(sa2){var s=S(sa2.eid);if(s){sa2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;go2SES({...s,type:'eleve',sid:s.id,accountId:sa2.id,plans:sa2.plans||[]});_studentSyncBg(u,p);return;}}
     // Visiteurs inscrits en ligne
     var va2=null;
     if(DB.visitorAccounts){for(var j=0;j<DB.visitorAccounts.length;j++){
       var v2=DB.visitorAccounts[j];
       if(v2.user.toLowerCase()===u.toLowerCase()&&v2.statut!=='suspendu'){var ok2=await verifyPassword(p,v2.pwd,v2.user,v2);if(ok2){va2=v2;break;}}
     }}
-    if(va2){va2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur',accountId:va2.id,plans:va2.plans||[]});hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);return;}
+    if(va2){va2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur',accountId:va2.id,plans:va2.plans||[]});hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);_studentSyncBg(u,p);return;}
+    // S3 (v1.2.x) : appareil neuf — aucun compte en local → tenter le serveur (lecture).
+    var _slice=await _studentSyncFetch(u,p);
+    if(_slice&&_slice.student&&_slice.student.id){
+      _studentApplySlice(_slice);
+      _recordLoginSuccess(u);_loginAttempts.count=0;
+      go2SES({..._slice.student,type:'eleve',sid:_slice.student.id,accountId:(_slice.account&&_slice.account.user)||u,plans:(_slice.account&&_slice.account.plans)||[]});
+      toast('☁️ Données chargées depuis le serveur','ok');
+      return;
+    } else if(_slice&&_slice.account){
+      var _ac=_slice.account;
+      _recordLoginSuccess(u);_loginAttempts.count=0;
+      _createSession({id:_ac.user,nom:_ac.nom||'',pre:_ac.pre||'',mat:_ac.user,cls:_ac.cls||'',type:'visiteur',accountId:_ac.user,plans:_ac.plans||[]});
+      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);
+      return;
+    }
   } else if(lr==="enseignant"){
     var t=DB.teachers.find(function(t2){return t2.user===u;});
     if(t&&DB.tpwd[u]){
