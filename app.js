@@ -11449,7 +11449,7 @@ function pgSend(){
       <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="(function(){var p=document.querySelector('a[href*=\\'whatsapp\\']');toast('Vous gérez les liens d\\'invitation directement sur WhatsApp')})()">🔗 Gérer les invitations</button>
     </div>
   </div>
-  <div class="tabs mb16">${[['individual','Message individuel'],['group','Message de groupe'],['bulletin','Envoi bulletins'],['announce','Annonces parents']].map(([k,l])=>`<button class="tab${selT===k?' on':''}" onclick="window._waT='${k}';re()">${l}</button>`).join('')}</div>
+  <div class="tabs mb16">${[['individual','Message individuel'],['group','Message de groupe'],['bulletin','Envoi bulletins'],['announce','Annonces parents'],['email','📧 E-mail (diffusion)']].map(([k,l])=>`<button class="tab${selT===k?' on':''}" onclick="window._waT='${k}';re()">${l}</button>`).join('')}</div>
   ${selT==='individual'?`<div class="card">
     <div class="ct">📱 Message WhatsApp individuel</div>
     <div class="fg2"><div class="fg"><span class="fl">Destinataire</span><select class="fi" id="waEtu" onchange="prevWA()">${stu.map(s=>`<option value="${s.id}">${s.pre} ${s.nom} (${s.cls})</option>`).join('')}</select></div>
@@ -11495,7 +11495,49 @@ function pgSend(){
         ${DB.students.filter(s=>s.ptel).length>3?`<span class="xs2 mut">+ ${DB.students.filter(s=>s.ptel).length-3} autres</span>`:''}
       </div>
     </div>`).join('') || '<div class="empty">Aucune annonce</div>'}
-  </div>`:''}`;
+  </div>`:''}
+  ${selT==='email'?(function(){
+    var emails=[...new Set((DB.visitorAccounts||[]).map(function(v){return (v.email||'').trim();}).filter(function(e){return e.indexOf('@')>1;}))];
+    var phones=[]; DB.students.forEach(function(s){if(s.ptel)phones.push(s.ptel);}); (DB.visitorAccounts||[]).forEach(function(v){if(v.tel)phones.push(v.tel);}); phones=[...new Set(phones)];
+    return '<div class="card">'
+      +'<div class="ct">📧 Diffusion par e-mail (liens pré-remplis)</div>'
+      +'<div class="ib ibi mb12"><span>💡</span><span>Génère un lien <strong>mailto:</strong> avec tous les e-mails en copie cachée (BCC) — un clic ouvre votre messagerie, prête à envoyer. Gratuit, sans configuration. (Pour un envoi 100% automatique, sans clic, il faut un service e-mail/SMS — voir roadmap.)</span></div>'
+      +'<div class="fg mb10"><span class="fl">Objet</span><input class="fi" id="emObj" placeholder="Ex : Réunion de parents — samedi 14h"></div>'
+      +'<div class="fg mb12"><span class="fl">Message</span><textarea class="fi" id="emBody" rows="6" placeholder="Chers parents,&#10;&#10;..."></textarea></div>'
+      +'<div class="ib ibg mb12"><span>✅</span><span><strong>'+emails.length+'</strong> e-mail(s) collecté(s) · <strong>'+phones.length+'</strong> numéro(s) WhatsApp/SMS</span></div>'
+      +'<div class="fl2 g8 fw">'
+        +'<button class="btn bi" onclick="_bulkMailto()">📧 Ouvrir l\'e-mail groupé (BCC)</button>'
+        +'<button class="btn bo" onclick="_bulkCopy(\'email\')">📋 Copier les e-mails</button>'
+        +'<button class="btn bgr2" onclick="_bulkCopy(\'wa\')">📋 Copier les numéros</button>'
+      +'</div>'
+      +(emails.length===0?'<div class="ib ibr mt12"><span>⚠️</span><span>Aucune adresse e-mail collectée pour l\'instant (elles proviennent des inscriptions visiteurs en ligne).</span></div>':'')
+    +'</div>';
+  })():''}`;
+}
+// ── v1.2.4 (#12) — Diffusion de masse semi-automatique : liens pré-remplis ──
+// mailto: avec tous les e-mails en BCC (1 clic) + copie de tous les e-mails/numéros.
+// Gratuit, sans identifiants. L'envoi 100% automatique exige un fournisseur (Twilio/SMTP).
+function _bulkMailto(){
+  var obj=encodeURIComponent((document.getElementById('emObj')||{}).value||'');
+  var body=encodeURIComponent((document.getElementById('emBody')||{}).value||'');
+  var emails=[...new Set((DB.visitorAccounts||[]).map(function(v){return (v.email||'').trim();}).filter(function(e){return e.indexOf('@')>1;}))];
+  if(!emails.length){toast('Aucune adresse e-mail collectée','warn');return;}
+  var url='mailto:?bcc='+encodeURIComponent(emails.join(','))+'&subject='+obj+'&body='+body;
+  if(url.length>1800) toast('Beaucoup de destinataires : si la messagerie tronque, utilisez « Copier les e-mails ».','warn');
+  try{ window.location.href=url; toast('📧 Messagerie ouverte ('+emails.length+' destinataires en BCC)'); }catch(e){ toast('Impossible d\'ouvrir la messagerie','warn'); }
+}
+function _bulkCopy(type){
+  var list;
+  if(type==='email'){ list=[...new Set((DB.visitorAccounts||[]).map(function(v){return (v.email||'').trim();}).filter(function(e){return e.indexOf('@')>1;}))]; }
+  else { var ph=[]; DB.students.forEach(function(s){if(s.ptel)ph.push(s.ptel);}); (DB.visitorAccounts||[]).forEach(function(v){if(v.tel)ph.push(v.tel);}); list=[...new Set(ph)]; }
+  if(!list.length){ toast('Aucun contact à copier','warn'); return; }
+  var txt=list.join(type==='email'?', ':'\n');
+  function done(){ toast('✓ '+list.length+' '+(type==='email'?'e-mails':'numéros')+' copiés'); }
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done).catch(function(){_bulkCopyFallback(txt,done);}); }
+  else { _bulkCopyFallback(txt,done); }
+}
+function _bulkCopyFallback(txt,done){
+  try{ var ta=document.createElement('textarea'); ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }catch(e){ toast('Copie impossible','warn'); }
 }
 function fillWATpl(){
   const sel=document.getElementById('waEtu')?.value;const s=sel?S(sel):null;const tpl=document.getElementById('waTpl')?.value;
