@@ -241,7 +241,7 @@ function call_claude_sonnet(string $apiKey, string $sys, string $rag, string $pr
 
     $payload = json_encode([
         'model'      => 'claude-3-5-sonnet-20241022',
-        'max_tokens' => 2048,
+        'max_tokens' => 4096,
         'system'     => $fullSys,
         'messages'   => [['role' => 'user', 'content' => $prompt]]
     ], JSON_UNESCAPED_UNICODE);
@@ -385,7 +385,7 @@ function call_openai_chat(string $url, string $apiKey, string $model, string $sy
     $payload = json_encode([
         'model'       => $model,
         'messages'    => $messages,
-        'max_tokens'  => 2048,
+        'max_tokens'  => 4096,
         'temperature' => 0.7
     ], JSON_UNESCAPED_UNICODE);
 
