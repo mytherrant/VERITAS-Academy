@@ -20748,6 +20748,8 @@ var _origVShowSecEl=window.vShowSec;
     // section s'ouvrait « loin en bas » et échappait à l'utilisateur (surtout mobile
     // où le menu pousse le contenu sous la ligne de flottaison).
     setTimeout(function(){ try{ var c=document.getElementById('vContent'); if(c){ var y=c.getBoundingClientRect().top+window.pageYOffset-72; window.scrollTo({top:y<0?0:y,behavior:'smooth'}); } }catch(e){} },80);
+    // Reposer la traduction des sous-titres après chaque navigation (EN persistant)
+    setTimeout(function(){ try{ if(typeof _translateSubs==='function') _translateSubs(); }catch(e){} },120);
     if(sec!=="epreuves"){
       // Réinitialiser les filtres épreuves quand on navigue ailleurs
       window._epMat='';window._epClasse='';window._epSeq='';
@@ -30827,6 +30829,86 @@ window.I18N_DICT = {
   }
 };
 
+// v1.2.4 : dictionnaire des SOUS-TITRES de panneaux (FR -> EN). Texte d'interface
+// uniquement — les contenus pédagogiques (œuvres, cours, épreuves) restent en français.
+// Ajouter ici les sous-titres au fur et à mesure pour étendre la couverture bilingue.
+window.I18N_SUBS_EN = {
+  // Accueil
+  "L'excellence scolaire de la 6ᵉ à la Terminale — préparation BEPC · Probatoire · BAC · GCE":
+    "Excellence in schooling from Form 1 to Upper Sixth — BEPC · Probatoire · BAC & GCE preparation",
+  "Le tableau d'honneur de la semaine : manuels stars, champion des battles et plan le plus choisi.":
+    "This week's honour roll: star textbooks, battle champion and most-subscribed plan.",
+  "Rejoignez l'aventure VÉRITAS. Choisissez votre profil et découvrez le programme de partenariat qui vous est dédié.":
+    "Join the VÉRITAS adventure. Pick your role and discover the partnership programme tailored for you.",
+  "Un extrait d'une œuvre au programme, décrypté chaque jour par le Professeur Ambassa.":
+    "A daily extract from a set book, decoded by Professor Ambassa.",
+  "Le Professeur Ambassa, votre tuteur IA : quiz, corrigés, fiches et évaluations notées — 100% gratuit.":
+    "Professor Ambassa, your AI tutor: quizzes, marking schemes, revision sheets and graded tests — 100% free.",
+  // Sections visiteur courantes
+  "Bienvenue au VÉRITAS Academy": "Welcome to VÉRITAS Academy",
+  "20 ans d'excellence au service des élèves camerounais":
+    "Two decades of excellence in service of Cameroonian learners",
+  "Découvrez la vie au Centre VÉRITAS": "Discover life at Centre VÉRITAS",
+  "Taux de réussite de nos élèves aux examens BEPC et BAC":
+    "Our students' pass rates at the BEPC and BAC exams",
+  "Épreuves officielles, cours vidéos, fiches de révision — tout ce qu'il faut pour réussir le BEPC et le BAC.":
+    "Official past papers, video lessons and revision sheets — everything you need to pass BEPC and BAC.",
+  // Bandeaux récurrents
+  "Commentaire composé & dissertation entièrement rédigés":
+    "Fully written commentary and essay",
+  "Rédigés par le Professeur Ambassa": "Written by Professor Ambassa",
+  "Cartes mentales · Citations · Figures de style · QCM · Contrôle de lecture":
+    "Mind maps · Quotes · Stylistic devices · MCQs · Reading test",
+  // Slogans et bannières dynamiques fréquents
+  "Centre d'Excellence Scolaire": "School of Excellence",
+  "La Réussite Assurée": "Success Guaranteed",
+  "Plateforme E-Learning": "E-Learning platform",
+  "Apprenez à votre rythme": "Learn at your own pace",
+  "Ressources officielles MINESEC": "Official MINESEC resources",
+  "Épreuves officielles, laboratoires virtuels et cours vidéo du Ministère des Enseignements Secondaires du Cameroun":
+    "Official past papers, virtual labs and video lessons from the Cameroon Ministry of Secondary Education",
+  "Choisissez une catégorie": "Pick a category",
+  "Cliquez pour explorer": "Click to explore",
+  "Nos résultats aux examens officiels": "Our results at the official exams",
+  "Une plateforme. Un accès personnalisé pour chaque rôle.":
+    "One platform. A tailored access for every role.",
+  "Ils nous font confiance": "They trust us",
+  "Plus de 500 familles ont choisi VÉRITAS": "Over 500 families have chosen VÉRITAS",
+  "Émulation VÉRITAS": "VÉRITAS emulation",
+  "Tu es… ?": "You are… ?",
+  "Passage du jour · une œuvre au programme": "Quote of the day · a set book",
+  "Passage du jour": "Quote of the day",
+  "Intelligence Artificielle": "Artificial Intelligence",
+  "Quiz · Corrigés · Fiches de révision · Évaluations notées en 30 secondes — 100% gratuit":
+    "Quizzes · Marking schemes · Revision sheets · Graded tests in 30 seconds — 100% free"
+};
+// Cherche-et-remplace les sous-titres (.vsec-sub / .acc-sub) selon la langue active.
+// Sûr : on ne touche qu'aux nœuds texte EXACTEMENT connus, pas aux contenus pédagogiques.
+window._translateSubs = function(){
+  try{
+    var lang = (DB && DB._lang) || localStorage.getItem('_vrtLang') || 'fr';
+    if(lang!=='en') return;
+    var sel = '.vsec-sub, .acc-sub, .vlit-banner__sub, .vgz-section-sub, .acc-pill, .vgz-section-title, .scl, .vsec-title';
+    document.querySelectorAll(sel).forEach(function(el){
+      // 1) Élément de pur texte : remplacer son textContent.
+      // 2) Élément avec icône en enfant : traduire UNIQUEMENT le dernier nœud texte
+      //    (préserve l'icône/SVG, évite les faux positifs).
+      var last = el.lastChild;
+      if(last && last.nodeType===3){
+        var raw = last.textContent;
+        var trimmed = raw.replace(/\s+$/,'').replace(/^\s+/,'');
+        if(trimmed && I18N_SUBS_EN[trimmed]){
+          last.textContent = ' ' + I18N_SUBS_EN[trimmed];
+          return;
+        }
+      }
+      if(el.children.length===0){
+        var full = (el.textContent||'').trim();
+        if(I18N_SUBS_EN[full]) el.textContent = I18N_SUBS_EN[full];
+      }
+    });
+  }catch(e){}
+};
 window.t = function(key, fallback){
   try {
     var lang = (DB && DB._lang) || localStorage.getItem('_vrtLang') || 'fr';
@@ -30877,6 +30959,8 @@ window.setLang = function(lang, silent){
       });
     });
 
+    // v1.2.4 : traduire aussi les sous-titres des panneaux (interface seulement)
+    try{ if(typeof _translateSubs==='function') _translateSubs(); }catch(e){}
     if(!silent) toast(lang==='en'?'🌐 Language: English ✓':'🌐 Langue : Français ✓','ok');
   } catch(e){ console.warn('setLang:',e); if(!silent) toast('Erreur changement langue','warn'); }
 };
