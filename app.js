@@ -12077,7 +12077,7 @@ function pgListeClasse(){
         <td class="mono xs2" style="color:var(--gold)">${s.mat}</td>
         <td class="bold s">${s.nom}</td>
         <td>${s.pre}</td>
-        <td>${s.sex==='F'?'♀':'♂'}</td>
+        <td class="semi">${s.sex==='F'?'F':'M'}</td>
         <td class="xs2 mut">${s.dob||'—'}</td>
         <td class="xs2">${s.parent||'—'}</td>
         <td class="mono xs2">${s.ptel||'—'}</td>
@@ -12094,8 +12094,8 @@ function printListeClasse(){
   <div style="padding:12px 20px;background:#f5f3ef;border-bottom:1px solid #ddd8d0"><strong>Classe :</strong> ${selC} — ${list.length} élèves — Année ${DB.school?.annee||'2024–2025'}</div>
   <div style="padding:12px 20px">
     <table style="width:100%;border-collapse:collapse;font-size:12px">
-      <thead><tr style="background:#142554">${['#','Matricule','Nom & Prénom','Sexe','Né(e) le','Parent / Tuteur','Tél. parent','Statut'].map(h=>`<th style="padding:6px 8px;text-align:left;color:rgba(255,255,255,.7);font-size:13px;font-weight:600">${h}</th>`).join('')}</tr></thead>
-      <tbody>${list.map((s,i)=>`<tr style="${i%2===0?'':'background:#f8f7f5'}border-bottom:1px solid #e8e4dc">${[i+1,s.mat,s.nom+' '+s.pre,s.sex==='F'?'♀':'♂',s.dob||'—',s.parent||'—',s.ptel||'—',s.stat].map(v=>`<td style="padding:6px 8px">${v}</td>`).join('')}</tr>`).join('')}</tbody>
+      <thead><tr>${['#','Matricule','Nom &amp; Prénom','Sexe','Né(e) le','Parent / Tuteur','Tél. parent','Statut'].map(h=>`<th style="padding:6px 7px;text-align:left;color:#ffffff;background:#142554;font-size:11px;font-weight:700;letter-spacing:.2px;-webkit-print-color-adjust:exact;print-color-adjust:exact">${h}</th>`).join('')}</tr></thead>
+      <tbody>${list.map((s,i)=>`<tr style="${i%2===0?'':'background:#f8f7f5'}border-bottom:1px solid #e8e4dc">${[i+1,s.mat,s.nom+' '+s.pre,s.sex==='F'?'F':'M',s.dob||'—',s.parent||'—',s.ptel||'—',s.stat].map(v=>`<td style="padding:4px 7px;font-size:11px">${v}</td>`).join('')}</tr>`).join('')}</tbody>
     </table>
   </div>
   <div style="background:#f0ede7;border-top:1px solid #ddd8d0;padding:7px 20px;display:flex;justify-content:space-between">
@@ -20744,6 +20744,10 @@ var _origVShowSecEl=window.vShowSec;
 (function(){
   var _ov=window.vShowSec;
   window.vShowSec=function(sec,btn){
+    // v1.2.4 : après chaque navigation, remonter en haut du contenu. Sans cela la
+    // section s'ouvrait « loin en bas » et échappait à l'utilisateur (surtout mobile
+    // où le menu pousse le contenu sous la ligne de flottaison).
+    setTimeout(function(){ try{ var c=document.getElementById('vContent'); if(c){ var y=c.getBoundingClientRect().top+window.pageYOffset-72; window.scrollTo({top:y<0?0:y,behavior:'smooth'}); } }catch(e){} },80);
     if(sec!=="epreuves"){
       // Réinitialiser les filtres épreuves quand on navigue ailleurs
       window._epMat='';window._epClasse='';window._epSeq='';

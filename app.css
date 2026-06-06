@@ -903,7 +903,7 @@ input,select,textarea,button{font-family:'Inter',sans-serif;font-size:15px}
 .scl{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--ink4);margin-bottom:6px}
 .scv{font-family:'Fira Code',monospace;font-size:24px;font-weight:500;line-height:1;margin-bottom:4px}
 .scs{font-size:13px;color:var(--ink4)}
-.sci{position:absolute;top:14px;right:14px;font-size:26px;opacity:.09}
+.sci{position:absolute;top:13px;right:14px;font-size:28px;opacity:.9;filter:drop-shadow(0 1px 3px rgba(20,37,84,.20))}
 .scg{background:linear-gradient(135deg,var(--gp),#fffaf0)}.scgr{background:linear-gradient(135deg,var(--grb),#f3faf6)}.scr{background:linear-gradient(135deg,var(--reb),#fefaf9)}.scb{background:linear-gradient(135deg,var(--blb),#f4f8ff)}.scpu{background:linear-gradient(135deg,var(--pub),#f8f4ff)}.scvi{background:linear-gradient(135deg,var(--vib),#f0fafa)}
 .vg{color:var(--gold)}.vgr{color:var(--gr)}.vr{color:var(--re)}.vb{color:var(--bl)}.vpu{color:var(--pu)}.vvi{color:var(--vi)}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -2996,7 +2996,7 @@ html { scroll-behavior: smooth; }
   0%,100% { transform: translateY(0) rotate(0deg); }
   50%     { transform: translateY(-6px) rotate(5deg); }
 }
-.sc:hover .sci { opacity: .22; transform: scale(1.18) rotate(-7deg) !important; }
+.sc:hover .sci { opacity: 1; transform: scale(1.12) rotate(-5deg) !important; }
 .scg:hover  { box-shadow: 0 8px 28px rgba(255,201,60,.16); }
 .scgr:hover { box-shadow: 0 8px 28px rgba(5,150,105,.15); }
 .scr:hover  { box-shadow: 0 8px 28px rgba(220,38,38,.12); }
