@@ -10426,7 +10426,7 @@ function printStudentHonneur(sid,tri){
     return gG.length?gG.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tC:null;
   }).filter(function(m){return m!==null;}).sort(function(a,b){return b-a;});
   var rang=allMoy.findIndex(function(m){return Math.abs(m-moy)<0.001;})+1;
-  var html='<div style="max-width:600px;margin:0 auto;font-family:Outfit,sans-serif;border:3px double '+mentionColor+';padding:0">';
+  var html='<div style="max-width:900px;margin:0 auto;font-family:Outfit,sans-serif;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px '+mentionColor+',inset 0 0 0 6px #142554,inset 0 0 0 8px '+mentionColor+';-webkit-print-color-adjust:exact;print-color-adjust:exact">';
   html+='<div style="background:linear-gradient(135deg,#142554,#1a3a8a);padding:16px 24px;text-align:center">';
   html+='<div style="display:flex;justify-content:space-between;font-size:13px;color:rgba(255,255,255,.5);margin-bottom:8px"><span>RÉPUBLIQUE DU CAMEROUN</span><span>REPUBLIC OF CAMEROON</span></div>';
   html+='<img src="'+logo+'" style="width:50px;height:50px;border-radius:50%;background:#fff;padding:2px;object-fit:contain;margin-bottom:6px">';
@@ -10464,7 +10464,7 @@ function printStudentHonneur(sid,tri){
   html+='<div style="text-align:right;line-height:1.3"><div style="font-size:7px;color:'+mentionColor+';font-weight:800;letter-spacing:1.5px;text-transform:uppercase">Document Authentifié</div>';
   html+='<div style="font-size:6px;color:#888;margin-top:1px">'+today()+' · Réf: <strong style="color:#142554;font-family:monospace">'+certRef+'</strong></div>';
   html+='<div style="font-size:5px;color:#aaa;margin-top:1px">Scannez le QR code pour vérifier</div></div>';
-  html+='<div style="flex-shrink:0;border:1.5px solid '+mentionColor+';border-radius:4px;padding:2px;background:#fff;line-height:0">'+_qrSvg.toSVG(certQRData,2)+'</div>';
+  html+='<div style="flex-shrink:0;border:1.5px solid '+mentionColor+';border-radius:4px;padding:2px;background:#fff;line-height:0">'+_qrSvg.toSVG(certQRData,1)+'</div>';
   html+='</div>';
   html+='<div style="background:#f5f3ef;border-top:1px solid #ddd;padding:6px;text-align:center;font-size:13px;color:#bbb">'+(sc?.nom||'VÉRITAS')+' · '+new Date().toLocaleDateString('fr-FR')+'</div>';
   html+='</div>';
@@ -12039,7 +12039,7 @@ function filterCsStudents(){var q=(document.getElementById('csSearch')?.value||'
 function genCertScolFor(sid){var el=document.getElementById('csEtu');if(!el){var tmp=document.createElement('select');tmp.id='csEtu';tmp.innerHTML='<option value="'+sid+'">x</option>';document.body.appendChild(tmp);genCertScol();tmp.remove();}else{el.value=sid;genCertScol();}}
 function genCertScol(){
   const s=S(document.getElementById('csEtu')?.value);if(!s)return;
-  printDoc(`<div style="max-width:600px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center">
+  printDoc(`<div style="max-width:900px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px #9a7228,inset 0 0 0 6px #142554,inset 0 0 0 8px #9a7228;-webkit-print-color-adjust:exact;print-color-adjust:exact">
   ${docHeader('Certificat de Scolarité')}
   <div style="padding:30px 40px">
     <div style="font-family:'Libre Baskerville',serif;font-size:17px;font-weight:700;color:#142554;margin-bottom:20px">CERTIFICAT DE SCOLARITÉ</div>
@@ -12113,7 +12113,7 @@ function printPresence(){const cls=window._prCl||CLS[0];const sts=DB.students.fi
 function pgAttestTravail(){if(!iA())return na();return`<div class="card"><div class="ct">Attestations de travail</div><div class="fg mb14"><span class="fl">Enseignant</span><select class="fi" id="atEns">${DB.teachers.map(t=>`<option value="${t.id}">${t.pre} ${t.nom} — ${t.mat2}</option>`).join('')}</select></div><button class="btn bi" onclick="genAttestTravail()">📄 Générer attestation</button></div>`;}
 function genAttestTravail(){
   const t=T(document.getElementById('atEns')?.value);if(!t)return;
-  printDoc(`<div style="max-width:600px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center">${docHeader("Attestation de Travail")}<div style="padding:30px 40px"><div style="font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:20px">ATTESTATION DE TRAVAIL</div>
+  printDoc(`<div style="max-width:900px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px #9a7228,inset 0 0 0 6px #142554,inset 0 0 0 8px #9a7228;-webkit-print-color-adjust:exact;print-color-adjust:exact">${docHeader("Attestation de Travail")}<div style="padding:30px 40px"><div style="font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:20px">ATTESTATION DE TRAVAIL</div>
   <div style="font-size:13px;line-height:2;text-align:left"><p>Je soussigné(e), <strong>${DB.school?.directeur||'Le Directeur'}</strong>, Directeur du <strong>${DB.school?.nom||'Centre VÉRITAS'}</strong>, atteste que :</p>
   <div style="margin:16px 0;padding:14px;border-left:4px solid #9a7228;background:#f5f3ef"><div style="font-size:18px;font-weight:700;color:#142554">${t.pre.toUpperCase()} ${t.nom.toUpperCase()}</div><div style="font-size:13px;color:#6b5e52;margin-top:4px">Grade: ${t.grade} · Matière: ${t.mat2}</div></div>
   <p>est employé(e) en qualité de <strong>Professeur de ${t.mat2}</strong> au sein de notre établissement depuis la rentrée scolaire <strong>${DB.school?.annee||'2024–2025'}</strong>.</p>
