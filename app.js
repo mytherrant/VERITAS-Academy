@@ -10895,6 +10895,54 @@ function printBulletinHtml(sid,tri){
   const cote=moy>=16?'A+':moy>=14?'A':moy>=12?'B+':moy>=10?'B':moy>=8?'C':'D';
   const isHonneur=moy>=14;const isEncouragement=moy>=12&&moy<14;const isFelicitations=moy>=16;
   const sc=DB.school;const logo=getLogo();
+  // ═══ v1.2.4 — ENRICHISSEMENTS BULLETIN (modèle Lycée Bilingue) ═══
+  // 1) Professeur principal / titulaire de la classe (depuis DB.teachers où titulaire===cls)
+  const profPrincipal=(DB.teachers||[]).find(t=>t.titulaire===s.cls);
+  const ppName=profPrincipal?(profPrincipal.pre+' '+profPrincipal.nom):'';
+  // 2) Rang de l'élève DANS CHAQUE matière (utilisé dans la table)
+  const subjectRanks={};
+  const subjects=[...new Set(DB.grades.filter(g=>g.cls===s.cls&&g.tri===tri).map(g=>g.sub))];
+  subjects.forEach(sub=>{
+    const subMoys=DB.grades.filter(g=>g.sub===sub&&g.cls===s.cls&&g.tri===tri).map(g=>({eid:g.eid,m:_subMoy(g)})).sort((a,b)=>b.m-a.m);
+    const idx=subMoys.findIndex(x=>x.eid===sid);
+    subjectRanks[sub]=idx>=0?(idx+1)+'/'+subMoys.length:'—';
+  });
+  // 3) Groupes de matières + sous-totaux pondérés (Sciences, Lettres, Langues, Autres)
+  const _groupOf=function(sub){
+    const k=(sub||'').toLowerCase();
+    if(/math|physi|chimi|svt|biolog|sciences/.test(k)) return 'Sciences';
+    if(/franç|frança|fr$|philo|litt|histoire|géo|geo|ecm|education civ/.test(k)) return 'Lettres & Humanités';
+    if(/angl|allem|espagn|langue|english|german|spanish/.test(k)) return 'Langues';
+    return 'Autres / EPS-Arts';
+  };
+  const groups={};
+  gr.forEach(g=>{const k=_groupOf(g.sub);if(!groups[k])groups[k]={tot:0,coef:0,n:0};const m=_subMoy(g);groups[k].tot+=m*g.coef;groups[k].coef+=(+g.coef||1);groups[k].n++;});
+  // 4) Sub-10 grades highlighted red (computed inline below)
+  // 5) Statut redoublant (DB.studentMeta[sid].redoublant ou s.redoublant)
+  const isRedoublant=!!(s.redoublant||(DB.studentMeta&&DB.studentMeta[sid]&&DB.studentMeta[sid].redoublant));
+  // 6) Progression vs trimestre précédent
+  const TRSorder=(typeof TRS!=='undefined'?TRS:['1er Trimestre','2ème Trimestre','3ème Trimestre']);
+  const iTri=TRSorder.indexOf(tri); const prevTri=iTri>0?TRSorder[iTri-1]:null;
+  let prevMoy=null;
+  if(prevTri){
+    const gp=DB.grades.filter(g=>g.eid===sid&&g.tri===prevTri);
+    if(gp.length){const tcp=gp.reduce((a,g)=>a+(+g.coef||1),0)||1;prevMoy=gp.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tcp;}
+  }
+  const delta=(prevMoy!=null)?(moy-prevMoy):null;
+  // 7) Décision de fin d'année (seulement si dernier trimestre)
+  const isLastTri=iTri===TRSorder.length-1;
+  let decision='';
+  if(isLastTri){
+    if(moy>=10) decision=isRedoublant?'ADMIS(E) EN CLASSE SUPÉRIEURE / PROMOTED':'ADMIS(E) EN CLASSE SUPÉRIEURE / PROMOTED';
+    else if(moy>=8) decision='ADMIS(E) SOUS RÉSERVE / CONDITIONALLY PROMOTED';
+    else decision=isRedoublant?'EXCLU(E) / EXPELLED':'REDOUBLE LA CLASSE / TO REPEAT';
+  }
+  // 8) Top 3 forces / Top 3 faiblesses (matières)
+  const subjectMoys=gr.map(g=>({sub:g.sub,m:_subMoy(g)})).sort((a,b)=>b.m-a.m);
+  const top3=subjectMoys.slice(0,3);
+  const weak3=subjectMoys.slice(-3).reverse();
+  // 9) Examen candidat : 3ème (BEPC), 1ère (Probatoire), Tle (BAC)
+  const examTag=/3[èe]?me/i.test(s.cls)?'BEPC':/1[èe]?re/i.test(s.cls)?'PROBATOIRE':/T(le|erm)/i.test(s.cls)?'BAC':'';
   const photoHtml=s.photo?'<img src="'+s.photo+'" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #c49a3c">':'<div style="width:50px;height:50px;border-radius:50%;background:#edf2fc;border:2px solid #a8c0e8;display:flex;align-items:center;justify-content:center;font-size:20px;color:#1a3a8a;font-weight:700">'+s.pre[0]+s.nom[0]+'</div>';
 
   return`<div style="padding:0;font-family:'Inter',sans-serif;font-size:10px;color:#1c1814;max-width:720px;margin:0 auto">
@@ -10908,63 +10956,92 @@ function printBulletinHtml(sid,tri){
     <img src="${logo}" style="width:48px;height:48px;border-radius:50%;background:#fff;padding:2px;object-fit:contain">
     <div style="flex:1"><div style="font-family:'Libre Baskerville',serif;font-size:13px;color:#FFC93C;letter-spacing:1px">${sc?.nom||'Centre VÉRITAS'}</div>
     <div style="font-size:13px;color:rgba(255,255,255,.5)">${sc?.ville||''} · Tél: ${sc?.tel||''} · ${sc?.bp||''}</div></div>
-    <div style="text-align:right"><div style="font-size:13px;color:#FFC93C;font-weight:700">BULLETIN DE NOTES</div>
+    <div style="text-align:right"><div style="font-size:13px;color:#FFC93C;font-weight:700">BULLETIN DE NOTES / REPORT CARD</div>
     <div style="font-size:13px;color:rgba(255,255,255,.6)">${tri} — ${sc?.annee||'2024–2025'}</div></div>
   </div>
   <!-- INFOS ÉLÈVE -->
   <div style="display:flex;gap:12px;padding:10px 20px;background:#f5f3ef;border-bottom:1px solid #ddd8d0">
     <div style="flex-shrink:0">${photoHtml}</div>
     <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px 12px;font-size:9px">
-      <div><span style="color:#888">Nom & Prénoms :</span> <strong>${s.pre} ${s.nom}</strong></div>
-      <div><span style="color:#888">Classe :</span> <strong>${s.cls}</strong> — Effectif : <strong>${DB.students.filter(st=>st.cls===s.cls).length}</strong></div>
-      <div><span style="color:#888">Né(e) le :</span> <strong>${s.dob||'—'}</strong></div>
-      <div><span style="color:#888">Matricule :</span> <strong style="color:#9a7228">${s.mat}</strong></div>
-      <div><span style="color:#888">Sexe :</span> <strong>${s.sex==='F'?'Féminin':'Masculin'}</strong></div>
-      <div><span style="color:#888">Parent / Tuteur :</span> <strong>${s.parent||'—'}</strong> ${s.ptel?'· <span style="color:#1a3a8a">'+s.ptel+'</span>':''}</div>
+      <div><span style="color:#888">Nom & Prénoms / Full name :</span> <strong>${s.pre} ${s.nom}</strong></div>
+      <div><span style="color:#888">Classe / Class :</span> <strong>${s.cls}</strong> — Effectif / Enrolment : <strong>${DB.students.filter(st=>st.cls===s.cls).length}</strong></div>
+      <div><span style="color:#888">Né(e) le / Date of birth :</span> <strong>${s.dob||'—'}</strong></div>
+      <div><span style="color:#888">Matricule / ID :</span> <strong style="color:#9a7228">${s.mat}</strong></div>
+      <div><span style="color:#888">Sexe / Sex :</span> <strong>${s.sex==='F'?'Féminin / Female':'Masculin / Male'}</strong></div>
+      <div><span style="color:#888">Parent/Tuteur / Parent or guardian :</span> <strong>${s.parent||'—'}</strong> ${s.ptel?'· <span style="color:#1a3a8a">'+s.ptel+'</span>':''}</div>
+      <div><span style="color:#888">Statut / Status :</span> <strong style="color:${isRedoublant?'#b82828':'#1a6e40'}">${isRedoublant?'Redoublant(e) / Repeating':'Non-redoublant(e) / First attempt'}</strong></div>
+      <div><span style="color:#888">Prof. principal / Class teacher :</span> <strong>${ppName||'—'}</strong>${examTag?' · <span style="background:#142554;color:#FFC93C;padding:1px 6px;border-radius:4px;font-size:8px;font-weight:800;letter-spacing:.8px">CANDIDAT '+examTag+'</span>':''}</div>
     </div>
   </div>
   <!-- TABLEAU DES NOTES -->
   <div style="padding:4px 12px">
     <table style="width:100%;border-collapse:collapse;font-size:12px">
-      <thead><tr style="background:#142554;color:rgba(255,255,255,.85)">
-        <th style="padding:6px 8px;text-align:left;font-size:8px;letter-spacing:.5px;width:25%">MATIÈRE & ENSEIGNANT</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%">Dev.1</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%">Dev.2</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%">MOY/20</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:6%">COEF</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:9%">M×Coef</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:6%">COTE</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:10%">[Min-Max]</th>
-        <th style="padding:6px 4px;text-align:left;font-size:8px;width:20%">APPRÉCIATION</th>
+      <thead><tr style="background:#142554;color:rgba(255,255,255,.85);-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <th style="padding:6px 8px;text-align:left;font-size:8px;letter-spacing:.5px;width:22%;color:#fff">MATIÈRE / SUBJECT</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:7%;color:#fff">Dev.1</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:7%;color:#fff">Dev.2</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%;color:#fff">MOY/20</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:5%;color:#fff">COEF</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%;color:#fff">M×Coef</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:6%;color:#fff">COTE</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%;color:#fff">RANG / Rank</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:9%;color:#fff">[Min-Max]</th>
+        <th style="padding:6px 4px;text-align:left;font-size:8px;width:20%;color:#fff">APPRÉCIATION / Remark</th>
       </tr></thead>
       <tbody>
-      ${gr.map(g=>{
-        const m=_subMoy(g);const ap2=getAppr(m);const pts=m*g.coef;
-        const gt=cote;
-        const subGrades=DB.grades.filter(x=>x.sub===g.sub&&x.cls===s.cls&&x.tri===tri).map(x=>_subMoy(x));
-        const subMin=subGrades.length?Math.min(...subGrades).toFixed(1):'—';
-        const subMax=subGrades.length?Math.max(...subGrades).toFixed(1):'—';
-        const coteLetter=m>=16?'A+':m>=14?'A':m>=12?'B+':m>=10?'B':m>=8?'C':'D';
-        const appText=m>=16?'Excellent travail':m>=14?'Très bon travail':m>=12?'Bon travail':m>=10?'Travail acceptable':m>=8?'Insuffisant, efforts à fournir':'Très insuffisant';
-        return`<tr style="border-bottom:1px solid #e8e4dc">
-        <td style="padding:5px 8px"><div style="font-weight:700;font-size:12px">${g.sub}</div><div style="font-size:8px;color:#888;font-style:italic">${g.ens||'—'}</div></td>
-        <td style="padding:5px 4px;text-align:center;font-family:'Fira Code';font-size:9px">${g.n1}</td>
-        <td style="padding:5px 4px;text-align:center;font-family:'Fira Code';font-size:9px">${g.n2}</td>
-        <td style="padding:5px 4px;text-align:center;font-family:'Fira Code';font-weight:700;color:${ap2.col};font-size:12px">${m.toFixed(2)}</td>
-        <td style="padding:5px 4px;text-align:center;font-family:'Fira Code'">${g.coef}</td>
-        <td style="padding:5px 4px;text-align:center;font-family:'Fira Code'">${pts.toFixed(2)}</td>
-        <td style="padding:5px 4px;text-align:center;font-weight:700;color:${ap2.col}">${coteLetter}</td>
-        <td style="padding:5px 4px;text-align:center;font-size:8px;color:#888">[${subMin}-${subMax}]</td>
-        <td style="padding:5px 4px;font-size:8px;color:${ap2.col}">${appText}</td>
-      </tr>`;}).join('')}
+      ${(function(){
+        // Tri par groupe pour insérer des sous-totaux pondérés (Sciences, Lettres…)
+        const order=['Sciences','Lettres & Humanités','Langues','Autres / EPS-Arts'];
+        const grBy={};gr.forEach(g=>{const k=_groupOf(g.sub);(grBy[k]=grBy[k]||[]).push(g);});
+        let out='';
+        order.forEach(k=>{
+          const list=grBy[k]; if(!list||!list.length) return;
+          // Sous-total du groupe
+          const gTot=list.reduce((a,g)=>a+_subMoy(g)*g.coef,0);
+          const gCoef=list.reduce((a,g)=>a+(+g.coef||1),0)||1;
+          const gMoy=gTot/gCoef;
+          const gCol=gMoy<10?'#b82828':getAppr(gMoy).col;
+          out+='<tr style="background:#eef1f8;border-top:1px solid #142554"><td colspan="10" style="padding:3px 8px;font-size:8px;font-weight:800;color:#142554;letter-spacing:.5px;text-transform:uppercase">▸ '+k+'</td></tr>';
+          list.forEach(g=>{
+            const m=_subMoy(g);const ap2=getAppr(m);const pts=m*g.coef;
+            const subGrades=DB.grades.filter(x=>x.sub===g.sub&&x.cls===s.cls&&x.tri===tri).map(x=>_subMoy(x));
+            const subMin=subGrades.length?Math.min(...subGrades).toFixed(1):'—';
+            const subMax=subGrades.length?Math.max(...subGrades).toFixed(1):'—';
+            const coteLetter=m>=16?'A+':m>=14?'A':m>=12?'B+':m>=10?'B':m>=8?'C':'D';
+            const appText=m>=16?'Excellent / Excellent':m>=14?'Très bien / Very good':m>=12?'Bien / Good':m>=10?'Passable / Pass':m>=8?'Insuffisant / Below average':'Très insuffisant / Very poor';
+            const isLow=m<10;
+            const rowBg=isLow?'background:#fdecec;':'';
+            const numColor=isLow?'#b82828':ap2.col;
+            out+='<tr style="border-bottom:1px solid #e8e4dc;'+rowBg+'">'
+              +'<td style="padding:5px 8px"><div style="font-weight:700;font-size:12px">'+g.sub+'</div><div style="font-size:8px;color:#888;font-style:italic">'+(g.ens||'—')+'</div></td>'
+              +'<td style="padding:5px 4px;text-align:center;font-family:\'Fira Code\';font-size:9px;color:'+(g.n1<10?'#b82828':'inherit')+'">'+g.n1+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-family:\'Fira Code\';font-size:9px;color:'+(g.n2<10?'#b82828':'inherit')+'">'+g.n2+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-family:\'Fira Code\';font-weight:700;color:'+numColor+';font-size:12px">'+m.toFixed(2)+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-family:\'Fira Code\'">'+g.coef+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-family:\'Fira Code\';color:'+numColor+'">'+pts.toFixed(2)+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-weight:700;color:'+numColor+'">'+coteLetter+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-size:9px;font-weight:700;color:#142554">'+(subjectRanks[g.sub]||'—')+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-size:8px;color:#888">['+subMin+'-'+subMax+']</td>'
+              +'<td style="padding:5px 4px;font-size:8px;color:'+numColor+'">'+appText+'</td>'
+            +'</tr>';
+          });
+          // Ligne sous-total du groupe
+          out+='<tr style="background:#f8f6ef;font-size:9px;font-style:italic"><td colspan="3" style="padding:3px 8px;text-align:right;color:#555">Sous-total / Subtotal '+k+'</td>'
+            +'<td style="text-align:center;font-family:\'Fira Code\';font-weight:700;color:'+gCol+'">'+gMoy.toFixed(2)+'</td>'
+            +'<td style="text-align:center;font-family:\'Fira Code\'">'+gCoef+'</td>'
+            +'<td style="text-align:center;font-family:\'Fira Code\';color:'+gCol+'">'+gTot.toFixed(2)+'</td>'
+            +'<td colspan="4"></td></tr>';
+        });
+        return out;
+      })()}
       </tbody>
       <tfoot><tr style="background:#f5f3ef;font-weight:700;border-top:2px solid #142554">
-        <td style="padding:7px 8px" colspan="3">TOTAL</td>
-        <td style="text-align:center;font-family:'Fira Code';font-size:10px;color:${ap.col}">${moy.toFixed(2)}</td>
+        <td style="padding:7px 8px" colspan="3">TOTAL GÉNÉRAL / OVERALL</td>
+        <td style="text-align:center;font-family:'Fira Code';font-size:10px;color:${moy<10?'#b82828':ap.col}">${moy.toFixed(2)}</td>
         <td style="text-align:center;font-family:'Fira Code'">${tc}</td>
         <td style="text-align:center;font-family:'Fira Code'">${gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0).toFixed(2)}</td>
-        <td style="text-align:center;font-weight:700;color:${ap.col}">${cote}</td>
-        <td colspan="2" style="text-align:right;padding-right:8px">Rang : <strong style="color:#142554">${rang}</strong> / ${allMoy.length}</td>
+        <td style="text-align:center;font-weight:700;color:${moy<10?'#b82828':ap.col}">${cote}</td>
+        <td colspan="3" style="text-align:right;padding-right:8px">Rang / Rank : <strong style="color:#142554">${rang}</strong> / ${allMoy.length}</td>
       </tr></tfoot>
     </table>
   </div>
@@ -10983,18 +11060,47 @@ function printBulletinHtml(sid,tri){
       ${[['Moy. Classe',classAvg.toFixed(2)],['[Min — Max]','['+classMin.toFixed(2)+' — '+classMax.toFixed(2)+']'],['Taux de réussite',tauxR+'%'],['Nb moyennes ≥10',nbMoy+' / '+allMoy.length],['Effectif noté',allMoy.length]].map(([l,v])=>'<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px dotted #eee"><span style="color:#666">'+l+'</span><strong>'+v+'</strong></div>').join('')}
     </div>
   </div>
-  <!-- TABLEAU D&#39;HONNEUR -->
-  ${(isHonneur||isEncouragement||isFelicitations)?`<div style="margin:8px 12px;padding:10px 14px;background:${isFelicitations?'linear-gradient(135deg,#fef7e8,#fff8e0)':isHonneur?'linear-gradient(135deg,#edf7f1,#e0f5ec)':'linear-gradient(135deg,#edf2fc,#dceeff)'};border:2px solid ${isFelicitations?'#FFC93C':isHonneur?'#059669':'#3C8DFF'};border-radius:10px;text-align:center;font-size:10px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
-    <strong style="color:${isFelicitations?'#9a7228':isHonneur?'#1a6e40':'#1a3a8a'}">${isFelicitations?'🏆 FÉLICITATIONS DU CONSEIL DE CLASSE':isHonneur?'⭐ TABLEAU D&#39;HONNEUR':'📌 ENCOURAGEMENTS'}</strong>
-  </div>`:''}
-  <!-- APPRÉCIATION GÉNÉRALE -->
-  <div style="margin:4px 12px;padding:8px 10px;border:1px solid #ddd;border-radius:4px;min-height:40px;text-align:center">
-    <div style="font-size:10px;font-weight:800;color:#142554;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">✦ Décision du Conseil de Classe ✦</div>
-    <div style="font-size:11px;color:#142554;font-weight:600;font-style:italic;line-height:1.6">${moy>=14?'Excellent trimestre. Continuez ainsi !':moy>=12?'Bon trimestre. Quelques efforts supplémentaires vous mèneront plus loin.':moy>=10?'Trimestre passable. Des efforts réguliers sont nécessaires pour progresser.':'Trimestre difficile. Un travail sérieux et régulier est indispensable. Rencontrez les enseignants.'}</div>
+  <!-- BILAN VISUEL : Progression + Jauge + Forces/Faiblesses (v1.2.4) -->
+  <div style="display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:6px;padding:6px 12px 0;font-size:9px">
+    <!-- Progression vs trimestre précédent -->
+    <div style="border:1px solid #ddd;padding:6px 8px;border-radius:4px;text-align:center">
+      <div style="font-weight:700;color:#142554;font-size:8px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Progression / Trend</div>
+      ${delta!=null?`<div style="font-size:18px;font-weight:800;color:${delta>=0?'#1a6e40':'#b82828'}">${delta>=0?'▲':'▼'} ${Math.abs(delta).toFixed(2)}</div>
+        <div style="font-size:8px;color:#666">${prevTri} : ${prevMoy.toFixed(2)}/20</div>
+        <div style="font-size:7px;color:#888;margin-top:2px">${delta>=0?'Amélioration / Improvement':'Baisse / Decline'}</div>`:`<div style="font-size:11px;color:#999;padding:8px 0">— 1er trimestre —<br><span style="font-size:8px">First term</span></div>`}
+    </div>
+    <!-- Jauge de moyenne -->
+    <div style="border:1px solid #ddd;padding:6px 8px;border-radius:4px">
+      <div style="font-weight:700;color:#142554;font-size:8px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;text-align:center">Niveau de performance / Performance level</div>
+      <div style="height:18px;background:linear-gradient(90deg,#b82828 0%,#b82828 50%,#FFC93C 50%,#FFC93C 70%,#1a6e40 70%);border-radius:9px;position:relative;margin:8px 4px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <div style="position:absolute;left:${Math.min(100,Math.max(0,moy/20*100))}%;top:-5px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:8px solid #142554"></div>
+        <div style="position:absolute;left:${Math.min(100,Math.max(0,moy/20*100))}%;top:22px;transform:translateX(-50%);font-size:9px;font-weight:800;color:#142554">${moy.toFixed(2)}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:7px;color:#888;margin-top:18px;padding:0 4px">
+        <span>0</span><span>10</span><span>14</span><span>20</span>
+      </div>
+      <div style="text-align:center;margin-top:3px;font-size:9px;font-weight:700;color:${moy<10?'#b82828':ap.col}">${mention} · ${cote}</div>
+    </div>
+    <!-- Forces / Faiblesses -->
+    <div style="border:1px solid #ddd;padding:6px 8px;border-radius:4px">
+      <div style="font-weight:700;color:#142554;font-size:8px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Bilan / Highlights</div>
+      ${top3.length?`<div style="font-size:8px;color:#1a6e40;font-weight:700;margin-top:2px">💪 Forces / Strengths</div>${top3.map(x=>`<div style="font-size:8px;color:#444;padding:1px 0">• ${x.sub} <strong>(${x.m.toFixed(1)})</strong></div>`).join('')}`:''}
+      ${weak3.length&&weak3[0].m<14?`<div style="font-size:8px;color:#b82828;font-weight:700;margin-top:3px">⚠️ À renforcer / To work on</div>${weak3.filter(x=>x.m<14).map(x=>`<div style="font-size:8px;color:#444;padding:1px 0">• ${x.sub} <strong style="color:${x.m<10?'#b82828':'#9a7228'}">(${x.m.toFixed(1)})</strong></div>`).join('')}`:''}
+    </div>
   </div>
-  <!-- SIGNATURES -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:6px 12px 10px;font-size:12px">
-    ${['Prof. Principal','Parent / Tuteur','Le Chef d&#39;Établissement'].map((l,i)=>`<div style="text-align:center;padding-top:4px"><div style="font-size:13px;text-transform:uppercase;color:#888;letter-spacing:.5px">${l}</div><div style="margin-top:24px;border-top:1px solid #ccc;padding-top:3px;font-size:13px;color:#bbb">${i===2?(sc?.directeur||'Le Directeur'):'Signature'}</div></div>`).join('')}
+  <!-- TABLEAU D'HONNEUR -->
+  ${(isHonneur||isEncouragement||isFelicitations)?`<div style="margin:8px 12px;padding:10px 14px;background:${isFelicitations?'linear-gradient(135deg,#fef7e8,#fff8e0)':isHonneur?'linear-gradient(135deg,#edf7f1,#e0f5ec)':'linear-gradient(135deg,#edf2fc,#dceeff)'};border:2px solid ${isFelicitations?'#FFC93C':isHonneur?'#059669':'#3C8DFF'};border-radius:10px;text-align:center;font-size:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);-webkit-print-color-adjust:exact;print-color-adjust:exact">
+    <strong style="color:${isFelicitations?'#9a7228':isHonneur?'#1a6e40':'#1a3a8a'};font-size:11px">${isFelicitations?'🏆 FÉLICITATIONS DU CONSEIL DE CLASSE / Honours':isHonneur?'⭐ TABLEAU D\'HONNEUR / Honour Roll':'📌 ENCOURAGEMENTS / Encouragement'}</strong>
+  </div>`:''}
+  <!-- DÉCISION DU CONSEIL DE CLASSE -->
+  <div style="margin:4px 12px;padding:10px;border:2px solid ${moy<10?'#b82828':'#142554'};border-radius:6px;text-align:center;background:${moy<10?'#fdecec':'#f7f9ff'};-webkit-print-color-adjust:exact;print-color-adjust:exact">
+    <div style="font-size:10px;font-weight:800;color:#142554;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">✦ Décision du Conseil de Classe / Class Council Decision ✦</div>
+    ${isLastTri&&decision?`<div style="font-size:14px;font-weight:900;color:${moy<10?'#b82828':'#1a6e40'};letter-spacing:1px;margin:4px 0 8px;text-transform:uppercase">${decision}</div>`:''}
+    <div style="font-size:11px;color:#142554;font-weight:600;font-style:italic;line-height:1.6">${moy>=14?'Excellent trimestre, continuez ainsi ! / Excellent term — keep it up!':moy>=12?'Bon trimestre, quelques efforts supplémentaires vous mèneront plus loin. / Good term — keep pushing.':moy>=10?'Trimestre passable, des efforts réguliers sont nécessaires. / Average term — sustained effort needed.':'Trimestre difficile, un travail sérieux et régulier est indispensable. Rencontrez les enseignants. / Difficult term — please meet with the teachers.'}</div>
+  </div>
+  <!-- SIGNATURES (avec prof titulaire) -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;padding:6px 12px 10px;font-size:11px">
+    ${[['Prof. principal / Class teacher',ppName],['Parent / Tuteur — Parent or guardian',''],['Censeur / Vice-principal',''],['Chef d\'Établissement / Principal',sc?.directeur||'']].map(([l,name])=>`<div style="text-align:center;padding-top:4px"><div style="font-size:9px;text-transform:uppercase;color:#888;letter-spacing:.4px">${l}</div><div style="margin-top:22px;border-top:1px solid #ccc;padding-top:3px;font-size:10px;color:#555;font-weight:600">${name||'Signature'}</div></div>`).join('')}
   </div>
   <!-- QR CODE AUTHENTIFICATION -->
   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 12px;border-top:1.5px solid #142554;text-align:center">
