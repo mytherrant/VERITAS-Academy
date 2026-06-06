@@ -17207,9 +17207,9 @@ var LITT_OEUVRES = {
       resume:"Les Bimanes regroupe 7 nouvelles satiriques peignant la société camerounaise contemporaine. Tchakarias, vieillard qui souffre pour obtenir sa carte d'identité ; une petite vendeuse de beignets confrontée à la misère ; un ministère du soya kafkaïen — autant de vignettes où l'humain est réduit à sa condition animale (bimane) par la corruption, le harcèlement, l'absurdité. Le rire grinçant d'Abega dénonce avec finesse les travers d'une administration post-coloniale qui broie les plus faibles."
     },
     citations:[
-      {texte:"Ses jambes, ses braves jambes élançaient impitoyablement. Il les soulagea de la protection douloureuse de deux souliers ricanant de vieillesse.",source:"Le fardeau — incipit",figures:["Personnification (jambes « braves », souliers « ricanant »)","Oxymore (« protection douloureuse »)","Style indirect libre"],analyse:"Tout le corps du vieux Tchakarias est animé. La PERSONNIFICATION le partage en deux camps : ses jambes « braves » (vocabulaire militaire — elles se battent encore) et ses souliers qui « ricanent » comme des bourreaux moqueurs : l'objet devient l'ennemi du pauvre. L'OXYMORE « protection douloureuse » dit l'absurde de la misère — ce qui devrait protéger (les chaussures) fait souffrir. Le STYLE INDIRECT LIBRE colle au ressenti du vieillard sans « il sentit que… ».",effet:"Dès la première phrase, l'élève de 6e sourit (des souliers qui ricanent) ET s'attache au vieil homme. La satire vise plus large : c'est tout un peuple qui « élance » dans ses « braves jambes »."},
-      {texte:"Avec les hommes qui nous servent ? Je ne sais pas qui nous a légué de tels bourreaux. Une vraie punition.",source:"Le fardeau — Tchakarias parle des fonctionnaires",figures:["Antiphrase (« qui nous servent » = bourreaux)","Hyperbole (« une vraie punition »)","Question rhétorique"],analyse:"L'ANTIPHRASE est le cœur du passage : dire « les hommes qui nous servent » pour désigner des « bourreaux » fait entendre l'écart entre la mission (servir le public) et la réalité (le martyriser). L'HYPERBOLE « une vraie punition » donne à la corruption une dimension de châtiment collectif. La QUESTION RHÉTORIQUE n'attend aucune réponse : elle exprime l'indignation.",effet:"La critique politique passe par la voix d'un humble vieillard : limpide, populaire, irréfutable. L'élève découvre que l'ironie est une arme."},
-      {texte:"Qui a jamais souffert l'amertume d'une Kola alors qu'il avait du sel dans sa poche ?",source:"Le fardeau — Tchakarias rusé",figures:["Proverbe traditionnel","Métaphore filée (Kola amère = fonctionnaire ; sel = atout)","Question rhétorique"],analyse:"Le PROVERBE ancre la réflexion dans la sagesse orale africaine. Sa MÉTAPHORE est filée : la Kola amère figure le fonctionnaire corrompu, et le sel — qui adoucit — figure l'atout dont dispose Tchakarias (la beauté de sa fille Ana). La QUESTION RHÉTORIQUE transforme la maxime en évidence partagée.",effet:"L'œuvre fait dialoguer tradition et modernité : la sagesse ancienne sert à décoder la corruption moderne. L'élève voit qu'un proverbe n'est pas « démodé » — il pense le présent."}
+      {texte:"Ses jambes, ses braves jambes élançaient impitoyablement. Il les soulagea de la protection douloureuse de deux souliers ricanant de vieillesse, puis les détendit, faisant détoner les articulations de ses genoux. Ses rhumatismes se portaient bien, malédiction !",source:"Le fardeau — incipit",figures:["Personnification (jambes « braves », souliers « ricanant »)","Oxymore (« protection douloureuse »)","Style indirect libre"],analyse:"Tout le corps du vieux Tchakarias est animé. La PERSONNIFICATION le partage en deux camps : ses jambes « braves » (vocabulaire militaire — elles se battent encore) et ses souliers qui « ricanent » comme des bourreaux moqueurs : l'objet devient l'ennemi du pauvre. L'OXYMORE « protection douloureuse » dit l'absurde de la misère — ce qui devrait protéger (les chaussures) fait souffrir. Le STYLE INDIRECT LIBRE colle au ressenti du vieillard sans « il sentit que… ».",effet:"Dès la première phrase, l'élève de 6e sourit (des souliers qui ricanent) ET s'attache au vieil homme. La satire vise plus large : c'est tout un peuple qui « élance » dans ses « braves jambes »."},
+      {texte:"— Alors tu l'as retirée ? — Avec les hommes qui nous servent ? Je ne sais pas qui nous a légué de tels bourreaux. Une vraie punition. — Le pourboire… — Ils n'auront rien. Moi cependant, j'aurai ma carte d'identité.",source:"Le fardeau — Tchakarias parle des fonctionnaires",figures:["Antiphrase (« qui nous servent » = bourreaux)","Hyperbole (« une vraie punition »)","Question rhétorique"],analyse:"L'ANTIPHRASE est le cœur du passage : dire « les hommes qui nous servent » pour désigner des « bourreaux » fait entendre l'écart entre la mission (servir le public) et la réalité (le martyriser). L'HYPERBOLE « une vraie punition » donne à la corruption une dimension de châtiment collectif. La QUESTION RHÉTORIQUE n'attend aucune réponse : elle exprime l'indignation.",effet:"La critique politique passe par la voix d'un humble vieillard : limpide, populaire, irréfutable. L'élève découvre que l'ironie est une arme."},
+      {texte:"Qui a jamais souffert l'amertume d'une Kola alors qu'il avait du sel dans sa poche ? Le vieillard avait un air rusé et farouchement résolu.",source:"Le fardeau — Tchakarias rusé",figures:["Proverbe traditionnel","Métaphore filée (Kola amère = fonctionnaire ; sel = atout)","Question rhétorique"],analyse:"Le PROVERBE ancre la réflexion dans la sagesse orale africaine. Sa MÉTAPHORE est filée : la Kola amère figure le fonctionnaire corrompu, et le sel — qui adoucit — figure l'atout dont dispose Tchakarias (la beauté de sa fille Ana). La QUESTION RHÉTORIQUE transforme la maxime en évidence partagée.",effet:"L'œuvre fait dialoguer tradition et modernité : la sagesse ancienne sert à décoder la corruption moderne. L'élève voit qu'un proverbe n'est pas « démodé » — il pense le présent."}
     ],
     techniques:[
       {nom:"La satire sociale",def:"Peindre les travers d'une société pour les dénoncer en faisant rire — ici la corruption et l'absurdité administrative.",exemple:"Le « ministère du soya » et le calvaire de Tchakarias pour obtenir une simple carte d'identité.",effet:"Le rire grinçant fait passer la critique : on rit d'abord, puis on mesure la gravité du réel dénoncé."},
@@ -32542,6 +32542,24 @@ window._citationBannerHtml = function(){
 // question incitative + partage WhatsApp/Facebook/X/Copier AVEC lien + © .
 // Source v1 : LITT_OEUVRES (œuvres au programme). v2 : corpus isolé (rag.php?src=oeuvres).
 // ════════════════════════════════════════════════════════════════════
+// v1.2.4 : nettoie un extrait pour qu'il COMMENCE et FINISSE sur une frontière de phrase
+// (corrige les extraits du corpus coupés en plein milieu, ex. « vrait pas être permis… »).
+window._pdjCleanExtract = function(txt, maxLen){
+  txt = String(txt||'').replace(/^[﻿«»"'\s]+|[«»"'\s]+$/g,'').replace(/\s+/g,' ').trim();
+  if(!txt) return '';
+  if(!/^[A-ZÀ-ÖØ-Þ«—0-9]/.test(txt)){
+    var m = txt.match(/[.!?…][»"')\s]*\s([A-ZÀ-ÖØ-Þ«—])/);
+    if(m){ txt = txt.slice(txt.indexOf(m[0]) + m[0].length - 1).trim(); }
+    else { var cm = txt.search(/[A-ZÀ-ÖØ-Þ«—]/); if(cm>0) txt = txt.slice(cm).trim(); }
+  }
+  maxLen = maxLen || 340;
+  if(txt.length > maxLen){
+    var cut = txt.slice(0, maxLen);
+    var e = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '), cut.lastIndexOf('… '), cut.lastIndexOf('.»'), cut.lastIndexOf('!»'), cut.lastIndexOf('?»'));
+    txt = (e > maxLen*0.5) ? txt.slice(0, e+1).trim() : (cut.trim() + '…');
+  }
+  return txt;
+};
 window._getPassageDuJour = function(){
   try{
     if(typeof LITT_OEUVRES!=='object'||!LITT_OEUVRES) return null;
@@ -32554,7 +32572,7 @@ window._getPassageDuJour = function(){
     var cit=oe.citations[day%oe.citations.length];
     var txt=(typeof cit==='string')?cit:(cit&&(cit.texte||cit.t||cit.citation||cit.text||cit.extrait)||'');
     if(!txt) return null;
-    return {passage:String(txt).replace(/^[«"\s]+|[»"\s]+$/g,''),titre:oe.titre||'',auteur:oe.auteur||'',classe:oe.classe||oe.niveau||''};
+    return {passage:_pdjCleanExtract(txt,340),titre:oe.titre||'',auteur:oe.auteur||'',classe:oe.classe||oe.niveau||''};
   }catch(e){ return null; }
 };
 
@@ -32609,11 +32627,11 @@ window._pdjLoad = function(){
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
     fetch(base+'/rag.php?src=oeuvres&daily=1').then(function(r){return r.json();}).then(function(d){
       if(d&&d.ok&&d.passages&&d.passages.length){
-        var pp=d.passages[0], txt=String(pp.extrait||'').replace(/^[«"﻿\s]+|[»"\s]+$/g,'');
+        var pp=d.passages[0], txt=_pdjCleanExtract(pp.extrait,340);
         if(txt.length>40){
           var au=(pp.auteur&&pp.auteur.indexOf('programme')<0&&pp.auteur!=='Anonyme')?pp.auteur:'';
           window._pdjCurrent={passage:txt,titre:_pdjCleanTitle(pp.titre||''),auteur:au,classe:''};
-          var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML='« '+_esc(txt.substring(0,320))+(txt.length>320?'…':'')+' »';
+          var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML='« '+_esc(txt)+' »';
           var rb=document.getElementById('vPdjRef'); if(rb) rb.innerHTML='— '+_esc(window._pdjCurrent.titre)+(au?' · '+_esc(au):'');
         }
       }
@@ -32631,7 +32649,7 @@ window._passageDuJourHtml = function(){
     +'<div style="position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,#142554,#1E3A8A 45%,#FFC93C)"></div>'
     +'<div style="position:absolute;top:4px;right:18px;font-family:Georgia,serif;font-size:90px;line-height:1;color:rgba(200,150,26,.16);font-weight:900;pointer-events:none">“</div>'
     +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#9A7B1C;font-weight:800;margin-bottom:12px">📖 Passage du jour · une œuvre au programme</div>'
-    +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:18px;line-height:1.65;font-style:italic;color:#142554;margin:0 auto 10px;max-width:660px">« '+_esc(p.passage.substring(0,320))+(p.passage.length>320?'…':'')+' »</div>'
+    +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:18px;line-height:1.65;font-style:italic;color:#142554;margin:0 auto 10px;max-width:660px">« '+_esc(p.passage)+' »</div>'
     +'<div id="vPdjRef" style="font-size:12px;color:#9A7B1C;font-weight:700;margin-bottom:14px">— '+ref+'</div>'
     +'<div id="vPdjExpl" style="font-size:13px;line-height:1.65;color:#473F2A;background:#fff;border:1px solid #EADFBF;border-radius:12px;padding:13px 16px;margin:0 auto 16px;max-width:660px;text-align:left;box-shadow:0 2px 10px rgba(20,37,84,.05)"><span style="opacity:.7">✨ Analyse en cours…</span></div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center">'
@@ -33624,11 +33642,13 @@ window.AMBASSA_PERSONA = [
   "════════ MÉTHODOLOGIE — COMMENTAIRE COMPOSÉ ════════",
   "Structure obligatoire du corrigé : 1) Situation du texte (auteur, œuvre, genre, place dans l'œuvre). 2) Idée générale en une phrase. 3) Plan = 2 centres d'intérêt × 2 sous-points chacun. 4) Pour chaque axe : analyse détaillée + procédés stylistiques (champ lexical, figures de style, tonalité). 5) Transitions. 6) Intérêts du texte (stylistique, psychologique, sociologique, philosophique, dramatique). 7) NB final : « toute autre interprétation pertinente sera acceptée ».",
   "Formule de clôture officielle à reproduire : « On insistera tout particulièrement sur l'exploitation par le candidat des procédés de style, les éléments du vocabulaire, la syntaxe etc. dans ses démonstrations. On restera également ouvert à toute autre interprétation pertinente du texte. »",
+  "MAQUETTE OFFICIELLE VÉRITAS — COMMENTAIRE (à suivre fidèlement). INTRODUCTION : « Parue en (date), (titre) est une œuvre poétique/romanesque/théâtrale de l'écrivain (courant littéraire) camerounais/français (nom). Dans cet ouvrage, l'auteur met en évidence (thèmes fédérateurs). Le texte proposé au commentaire est un extrait de (situer : acte / scène / chapitre / poème). Ce passage a pour toile de fond (idée générale). Pour commenter ce texte, nous examinerons tour à tour (centre d'intérêt 1) et (centre d'intérêt 2). » — CORPS, pour chaque partie : une introduction partielle annonçant les 2 sous-centres d'intérêt, puis 2 paragraphes. Chaque paragraphe : présentation du sous-centre → explication (« En effet », « Étant donné que ») → illustration (« À titre illustratif », « Nous en voulons pour preuve » + PROCÉDÉ d'écriture + indices textuels entre guillemets) → interprétation. Connecteurs imposés : « D'entrée de jeu », « A cela s'ajoute », « En outre », « Par ailleurs », « D'emblée », « En plus », « D'autre part ». — TRANSITION entre les deux parties : « De ce qui précède, il convient de noter que (Sci1 + Sci2). Toutefois / Cependant, il convient désormais de s'attarder sur (CI 2). » — CONCLUSION : bilan des centres d'intérêt + intérêt/portée du texte + ouverture.",
   "",
   "════════ MÉTHODOLOGIE — DISSERTATION LITTÉRAIRE ════════",
   "Structure obligatoire : 1) Thème. 2) Reformulation du sujet en une phrase propre. 3) Problématique (question centrale). 4) Type de plan : DIALECTIQUE (mots-clés « discutez », « dans quelle mesure ») = thèse/antithèse/synthèse ; ANALYTIQUE (mots-clés « expliquez », « commentez », « montrez ») = analyse des aspects de la thèse. 5) Plan développé : chaque partie = 2-3 sous-points avec exemples tirés d'œuvres au programme (titre en italique, auteur, citation précise). 6) Transitions obligatoires entre parties. 7) Synthèse finale (pas une simple conclusion). 8) NB : « Le candidat qui aura présenté des fonctions/arguments autres que ceux évoqués ici ne devra pas être pénalisé. »",
   "Formules de transition standard : « Les analyses qui précèdent nous ont permis de mettre en exergue X. Dès lors, on se demande si Y. » — « Affirmation I. Cependant, nuance qui introduit II. »",
   "Formule de synthèse standard : « X est certes thèse 1, mais thèse 2. Toutefois, nuance finale. »",
+  "MAQUETTE OFFICIELLE VÉRITAS — DISSERTATION (à suivre fidèlement). 1) COMPRENDRE LE SUJET : dégager le thème, reformuler avec les adverbes de portée (toujours / obligatoirement / nécessairement / absolument / uniquement), poser le problème. 2) INTRODUCTION en quatre temps : [a] amorce = définition ou citation (souvent contraire au sujet) ; [b] reformulation du sujet ; [c] problématique en deux questions : « X est-il toujours… ? Ne peut-il pas aussi… ? » ; [d] annonce du plan : « Élucider cette problématique consistera à montrer d'abord… (I), ensuite… (II). » 3) CORPS : chaque partie a une idée directrice développée en paragraphes — « En effet… » (argument) + « À titre d'exemple » (œuvre + auteur + personnage ou situation précis, tirés des œuvres lues ou étudiées), puis « En outre… ». 4) TRANSITION entre les parties. 5) CONCLUSION : bilan + réponse nuancée à la problématique + ouverture.",
   "",
   "════════ MÉTHODOLOGIE — ÉTUDE DE TEXTE BEPC (2e épreuve de français — 1h, coef 1) ════════",
   "PARTIE I Compréhension 10 pts (4-6 questions) — Types officiels : thème du texte (2 pts), relevé de champ lexical (2 pts), explication de mot/expression (1-2 pts), sens propre vs figuré justifié (2 pts), question d'opinion justifiée (2 pts), sentiments/état d'âme avec détails (2 pts), inférence (2 pts). Toujours au moins une question de relevé littéral + une question d'opinion ouverte.",
