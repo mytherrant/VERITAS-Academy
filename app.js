@@ -3959,7 +3959,7 @@ function vShowSec(sec,btn){
           <a class="acc-news-item" href="javascript:void(0)" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span><span class="tx"><b>Orientation</b> — grandes écoles, concours et bourses post-BAC au Cameroun.</span></a>
           <a class="acc-news-item" href="javascript:void(0)" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-bookopen"/></svg></span><span class="tx"><b>Révisions</b> — nouvelles fiches et méthodes publiées chaque semaine.</span></a>
         </div>
-        <button class="acc-news-cta" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))">📡 Voir toutes les actualités →</button>
+        <button class="acc-news-cta" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:6px;vertical-align:-3px"><use href="#lc-news"/></svg>Voir toutes les actualités →</button>
       </div>
     </div>
 
@@ -4014,7 +4014,7 @@ function vShowSec(sec,btn){
       <div style="position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,#142554,#1E3A8A 45%,#FFC93C)"></div>
       <div style="position:absolute;top:-26px;right:-6px;font-size:150px;opacity:.05;font-weight:900;color:#142554;font-family:Plus Jakarta Sans;pointer-events:none">M</div>
       <img src="ambassa-avatar.png" alt="Professeur Ambassa" loading="lazy" style="position:relative;width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid #FFC93C;background:#142554;box-shadow:0 8px 22px rgba(20,37,84,.20)">
-      <div style="position:relative;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#9A7B1C;font-weight:800;margin-top:10px">✨ Nouveau · Agent IA pédagogique</div>
+      <div style="position:relative;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#9A7B1C;font-weight:800;margin-top:10px;display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg> Nouveau · Agent IA pédagogique</div>
       <div style="position:relative;font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-size:24px;font-weight:900;line-height:1.15;color:#142554">Découvrez le Professeur Ambassa</div>
       <div style="position:relative;font-family:Crimson Pro,Libre Baskerville,serif;font-size:13.5px;font-style:italic;color:#5B5337;max-width:560px;margin:2px auto 0">Quiz · Corrigés · Fiches de révision · Évaluations notées en 30 secondes — 100% gratuit</div>
       <div style="position:relative;background:linear-gradient(135deg,#FFD86E,#FFC93C);color:#142554;padding:11px 28px;border-radius:99px;font-weight:800;font-size:13.5px;font-family:Plus Jakarta Sans;margin-top:12px;box-shadow:0 6px 18px rgba(200,150,26,.30)">Essayer Ambassa →</div>
@@ -13438,10 +13438,10 @@ window._palmaresHtml = function(){
     tiles+=tile({color:'#7C3AED',ico:'🔥',lc:'flame',label:'Rejoignez le palmarès',title:'XP · Badges · Niveaux',sub:nApp>0?('Déjà '+nApp+' apprenants inscrits — rejoignez-les !'):'Soyez le premier !',click:"(typeof showRegisterForm===\'function\'?showRegisterForm():null)"});
   }
   return '<div style="min-height:300px;height:100%;background:linear-gradient(180deg,#fff,#F7F9FF);border:1px solid #E6EAF2;border-radius:var(--r3,20px);box-shadow:0 4px 24px rgba(20,37,84,.08);display:flex;flex-direction:column;overflow:hidden">'
-    +'<div style="padding:14px 16px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;display:flex;align-items:center;gap:10px;flex-shrink:0">'
-      +'<span style="font-size:22px">🏆</span>'
-      +'<div><div style="font-family:var(--ds-font-display,Montserrat),sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px">Palmarès de la semaine</div>'
-      +'<div style="font-size:10px;color:#FFC93C;font-weight:700;letter-spacing:1px;text-transform:uppercase">L\'émulation VÉRITAS</div></div>'
+    +'<div style="padding:14px 16px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;flex-shrink:0;text-align:center">'
+      +'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg>'
+      +'<div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px;line-height:1.15">Palmarès de la semaine</div>'
+      +'<div style="font-size:10px;color:#FFC93C;font-weight:700;letter-spacing:1.2px;text-transform:uppercase">L\'émulation VÉRITAS</div>'
     +'</div>'
     +'<div style="padding:12px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto">'+champHtml+tiles+'</div>'
   +'</div>';
@@ -32882,7 +32882,7 @@ window._passageDuJourHtml = function(){
   return '<div style="background:linear-gradient(180deg,#FFFDF8,#FBF4E2);color:#473F2A;padding:26px 24px;border-radius:18px;margin:14px auto;max-width:720px;position:relative;overflow:hidden;border:1px solid #ECE3CB;box-shadow:0 10px 30px rgba(20,37,84,.08);text-align:center">'
     +'<div style="position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,#142554,#1E3A8A 45%,#FFC93C)"></div>'
     +'<div style="position:absolute;top:4px;right:18px;font-family:Georgia,serif;font-size:90px;line-height:1;color:rgba(200,150,26,.16);font-weight:900;pointer-events:none">“</div>'
-    +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#9A7B1C;font-weight:800;margin-bottom:12px">📖 Passage du jour · une œuvre au programme</div>'
+    +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#9A7B1C;font-weight:800;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg> Passage du jour · une œuvre au programme</div>'
     +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:18px;line-height:1.65;font-style:italic;color:#142554;margin:0 auto 10px;max-width:660px">« '+_esc(p.passage)+' »</div>'
     +'<div id="vPdjRef" style="font-size:12px;color:#9A7B1C;font-weight:700;margin-bottom:14px">— '+ref+'</div>'
     +'<div id="vPdjExpl" style="font-size:13px;line-height:1.65;color:#473F2A;background:#fff;border:1px solid #EADFBF;border-radius:12px;padding:13px 16px;margin:0 auto 16px;max-width:660px;text-align:left;box-shadow:0 2px 10px rgba(20,37,84,.05)"><span style="opacity:.7">✨ Analyse en cours…</span></div>'
