@@ -4590,6 +4590,11 @@ function vShowSec(sec,btn){
         var g=document.querySelector('.velearn-grid');
         if(g){g.classList.add('entering');setTimeout(function(){g.classList.remove('entering');},2000);}
       },50);
+      // Pré-calcul des compteurs par catégorie (1 seule passe sur tous les contenus)
+      var _catCounts={},_catFree={};
+      (el.contenus||[]).forEach(function(x){
+        if(x.cat){_catCounts[x.cat]=(_catCounts[x.cat]||0)+1;if(x.gratuit)_catFree[x.cat]=(_catFree[x.cat]||0)+1;}
+      });
       // v2.2 : Mapping catégorie → couleur Lucide + icône SVG (style analyse littéraire)
       var _catLcMap={
         'cat1':{ic:'doc',       col:'#3B82F6', bg:'rgba(59,130,246,0.12)'}, // Épreuves
@@ -4602,8 +4607,8 @@ function vShowSec(sec,btn){
       h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px" class="v-reveal">';
       el.categories.forEach(function(cat,i){
         var theme=_catLcMap[cat.id]||{ic:'book',col:'#142554',bg:'rgba(20,37,84,0.08)'};
-        var cnt=(el.contenus||[]).filter(function(x){return x.cat===cat.id;}).length;
-        var free=(el.contenus||[]).filter(function(x){return x.cat===cat.id&&x.gratuit;}).length;
+        var cnt=_catCounts[cat.id]||0;
+        var free=_catFree[cat.id]||0;
         var isPopular=(i===0)||cat.populaire;
         h+='<div class="vcard" style="cursor:pointer;text-align:center;position:relative;padding:18px 12px;transition:all .25s ease-out" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 24px rgba(20,37,84,.12)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'" onclick="window._elCat=\''+cat.id+'\';vShowSec(\'elearning\',null)">';
         if(isPopular){
@@ -4638,9 +4643,14 @@ function vShowSec(sec,btn){
 
       // Class filter
       h+='<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center">';
-      h+='<select class="fi" style="min-width:110px;font-size:12px;border-radius:10px" onchange="window._elCls=this.value;vShowSec(\'elearning\',null)">';
-      ['Toutes'].concat(CLS).forEach(function(cl){h+='<option'+(cl===selCls?' selected':'')+'>'+cl+'</option>';});
-      h+='</select>';
+      // Cache des options CLS (157+ entrées) — reconstruire seulement si cat change
+      if(!window._elClsOpts||window._elClsOptsKey!==selCat){
+        window._elClsOptsKey=selCat;
+        var _clsFilt=['Toutes'].concat((el.contenus||[]).filter(function(x){return x.cat===selCat&&x.classe;}).reduce(function(a,x){if(a.indexOf(x.classe)<0)a.push(x.classe);return a;},[]));
+        window._elClsOpts=_clsFilt.map(function(cl){return '<option>'+cl+'</option>';}).join('');
+      }
+      var _clsOpts=window._elClsOpts.replace('>'+selCls+'<','selected>'+selCls+'<');
+      h+='<select class="fi" style="min-width:110px;font-size:12px;border-radius:10px" onchange="window._elCls=this.value;vShowSec(\'elearning\',null)">'+_clsOpts+'</select>';
       h+='<input class="fi" style="flex:1;min-width:140px;font-size:12px;border-radius:10px" placeholder="🔍 Rechercher..." id="elSearch" oninput="filterElContents()">';
       h+='</div>';
 
@@ -4652,6 +4662,13 @@ function vShowSec(sec,btn){
         return true;
       });
 
+      // Calculs d'accès hoistés hors de la boucle (mêmes valeurs pour tous les items)
+      var _accId=SES&&SES.accountId;
+      var _visAcc=_accId?(DB.visitorAccounts||[]).find(function(a){return a.id===_accId;}):null;
+      var _vPlansH=_visAcc?_visAcc.plans||[]:[];
+      var _elDefsH=DB&&DB.elearning&&DB.elearning.plans||[];
+      var _effPlansH=_vPlansH.reduce(function(ef,pid){if(ef.indexOf(pid)<0)ef.push(pid);var pd=_elDefsH.find(function(p){return p.id===pid;});if(pd&&pd.planTags)pd.planTags.forEach(function(t){if(ef.indexOf(t)<0)ef.push(t);});return ef;},[]);
+      var _dlDate=new Date().toDateString();
       if(!filtered.length){
         h+='<div style="text-align:center;padding:50px 20px;background:#F8FAFF;border-radius:18px;border:2px dashed #C7D2FE">';
         h+='<div style="font-size:52px;margin-bottom:12px">📭</div>';
@@ -4662,23 +4679,15 @@ function vShowSec(sec,btn){
         h+='<div id="elCatalog" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px">';
         filtered.forEach(function(item){
           var isFree=item.gratuit||false;
-          // Pour les contenus avec URL externe : vérifier accès individuel
-          var accId=SES&&SES.accountId;
-          var isBlocked=accId&&(item.blockedFor||[]).indexOf(accId)>=0;
-          var isManuallyUnlocked=accId&&(item.unlockedFor||[]).indexOf(accId)>=0;
-          var visAcc=accId?(DB.visitorAccounts||[]).find(function(a){return a.id===accId;}):null;
-          var vPlans=visAcc?visAcc.plans||[]:[];
-          var _elDefs=DB&&DB.elearning&&DB.elearning.plans||[];
-          var _effPlans=vPlans.reduce(function(ef,pid){if(ef.indexOf(pid)<0)ef.push(pid);var pd=_elDefs.find(function(p){return p.id===pid;});if(pd&&pd.planTags)pd.planTags.forEach(function(t){if(ef.indexOf(t)<0)ef.push(t);});return ef;},[]);
-          var hasPlanAccess=item.plans&&item.plans.length&&item.plans.some(function(p){return _effPlans.indexOf(p)>=0;});
+          var isBlocked=_accId&&(item.blockedFor||[]).indexOf(_accId)>=0;
+          var isManuallyUnlocked=_accId&&(item.unlockedFor||[]).indexOf(_accId)>=0;
+          var hasPlanAccess=item.plans&&item.plans.length&&item.plans.some(function(p){return _effPlansH.indexOf(p)>=0;});
           var hasRealAccess=(isFree&&!isBlocked)||isManuallyUnlocked||hasPlanAccess||iA();
           var isUnlocked=hasRealAccess||(isFree)||(free2<2);
           if(!isFree) free2++;
           var isLocked=!isUnlocked;
           var pLabels={plan1:'EXAMEN',plan2:'INTERMÉD.',plan3:'ENSEIGNANT',plan4:'FAMILLE',plan5:'TECHNIQUE',plan6:'GCE'};
-          
-          // Download counter display
-          var dlKey='dl_'+item.id+'_'+(new Date().toDateString());
+          var dlKey='dl_'+item.id+'_'+_dlDate;
           var dlUsed=parseInt(localStorage.getItem(dlKey)||'0');
           
           h+='<div class="rc elItem" data-titre="'+item.titre.toLowerCase()+'" style="border-color:'+(isLocked?'#E8EEFF':catColor+'44')+';position:relative">';
