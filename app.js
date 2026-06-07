@@ -381,6 +381,7 @@ function defaultDB(){return{
     {ex:'BEPC',      taux:94, series:[], mentions:{ab:40,b:22,tb:9,exc:2}},
     {ex:'Probatoire',taux:92, series:[{nom:'A',taux:90},{nom:'C',taux:94},{nom:'D',taux:91}], mentions:{ab:34,b:18,tb:7,exc:1}},
     {ex:'BAC',       taux:91, series:[{nom:'A',taux:89},{nom:'C',taux:93},{nom:'D',taux:90}], mentions:{ab:48,b:27,tb:11,exc:3}},
+    {ex:'GCE',       taux:89, series:[{nom:'O Level',taux:91},{nom:'A Level',taux:87}],         mentions:{ab:32,b:19,tb:8,exc:2}},
   ],
   examResults:[
     {annee:'2022–2023',niveaux:[{cls:'3ème',taux:85,candidats:42,admis:36},{cls:'Tle A',taux:78,candidats:28,admis:22},{cls:'Tle C',taux:90,candidats:20,admis:18},{cls:'Tle D',taux:82,candidats:15,admis:13}]},
@@ -1034,6 +1035,12 @@ function _migrateDB(){
   if(!DB.photos)DB.photos=defaultDB().photos||[];
   if(!DB.examResults)DB.examResults=defaultDB().examResults||[];
   if(!DB.statsVitrine)DB.statsVitrine=defaultDB().statsVitrine||[];
+  // v1.2.4 : migration GCE — ajoute le panneau GCE (O Level + A Level) s'il manque
+  // sur les installations existantes. Respecte les suppressions explicites de l'admin.
+  if(DB.statsVitrine && !DB.statsVitrine.some(function(s){return s&&s.ex==='GCE';})
+     && !(DB.deletedDefaults||[]).includes('stats_gce')){
+    DB.statsVitrine.push({ex:'GCE',taux:89,series:[{nom:'O Level',taux:91},{nom:'A Level',taux:87}],mentions:{ab:32,b:19,tb:8,exc:2}});
+  }
   if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts||[];
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
   // E-learning
@@ -3959,7 +3966,7 @@ function vShowSec(sec,btn){
           <a class="acc-news-item" href="javascript:void(0)" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span><span class="tx"><b>Orientation</b> — grandes écoles, concours et bourses post-BAC au Cameroun.</span></a>
           <a class="acc-news-item" href="javascript:void(0)" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-bookopen"/></svg></span><span class="tx"><b>Révisions</b> — nouvelles fiches et méthodes publiées chaque semaine.</span></a>
         </div>
-        <button class="acc-news-cta" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))">📡 Voir toutes les actualités →</button>
+        <button class="acc-news-cta" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:6px;vertical-align:-3px"><use href="#lc-news"/></svg>Voir toutes les actualités →</button>
       </div>
     </div>
 
@@ -4014,7 +4021,7 @@ function vShowSec(sec,btn){
       <div style="position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,#142554,#1E3A8A 45%,#FFC93C)"></div>
       <div style="position:absolute;top:-26px;right:-6px;font-size:150px;opacity:.05;font-weight:900;color:#142554;font-family:Plus Jakarta Sans;pointer-events:none">M</div>
       <img src="ambassa-avatar.png" alt="Professeur Ambassa" loading="lazy" style="position:relative;width:84px;height:84px;border-radius:50%;object-fit:cover;border:3px solid #FFC93C;background:#142554;box-shadow:0 8px 22px rgba(20,37,84,.20)">
-      <div style="position:relative;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#9A7B1C;font-weight:800;margin-top:10px">✨ Nouveau · Agent IA pédagogique</div>
+      <div style="position:relative;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#9A7B1C;font-weight:800;margin-top:10px;display:inline-flex;align-items:center;gap:6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg> Nouveau · Agent IA pédagogique</div>
       <div style="position:relative;font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-size:24px;font-weight:900;line-height:1.15;color:#142554">Découvrez le Professeur Ambassa</div>
       <div style="position:relative;font-family:Crimson Pro,Libre Baskerville,serif;font-size:13.5px;font-style:italic;color:#5B5337;max-width:560px;margin:2px auto 0">Quiz · Corrigés · Fiches de révision · Évaluations notées en 30 secondes — 100% gratuit</div>
       <div style="position:relative;background:linear-gradient(135deg,#FFD86E,#FFC93C);color:#142554;padding:11px 28px;border-radius:99px;font-weight:800;font-size:13.5px;font-family:Plus Jakarta Sans;margin-top:12px;box-shadow:0 6px 18px rgba(200,150,26,.30)">Essayer Ambassa →</div>
@@ -13191,7 +13198,7 @@ window._statsVitrineHtml = function(){
     +'</div>';
   }).join('');
   var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:10px"><button class="btn bo sm" onclick="mEditStatsVitrine()">✏️ Modifier les résultats</button></div>':'';
-  return '<div style="text-align:center;margin:6px 0 14px"><div class="vgz-section-sub" style="margin:0;color:#142554;font-weight:800;font-size:18px;letter-spacing:.3px">🏆 Nos résultats aux examens officiels</div></div>'
+  return '<div class="acc-head"><div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</div><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>'
     +'<div class="vgz-stats v-reveal" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">'+cards+'</div>'+editBtn;
 };
 
@@ -13438,10 +13445,10 @@ window._palmaresHtml = function(){
     tiles+=tile({color:'#7C3AED',ico:'🔥',lc:'flame',label:'Rejoignez le palmarès',title:'XP · Badges · Niveaux',sub:nApp>0?('Déjà '+nApp+' apprenants inscrits — rejoignez-les !'):'Soyez le premier !',click:"(typeof showRegisterForm===\'function\'?showRegisterForm():null)"});
   }
   return '<div style="min-height:300px;height:100%;background:linear-gradient(180deg,#fff,#F7F9FF);border:1px solid #E6EAF2;border-radius:var(--r3,20px);box-shadow:0 4px 24px rgba(20,37,84,.08);display:flex;flex-direction:column;overflow:hidden">'
-    +'<div style="padding:14px 16px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;display:flex;align-items:center;gap:10px;flex-shrink:0">'
-      +'<span style="font-size:22px">🏆</span>'
-      +'<div><div style="font-family:var(--ds-font-display,Montserrat),sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px">Palmarès de la semaine</div>'
-      +'<div style="font-size:10px;color:#FFC93C;font-weight:700;letter-spacing:1px;text-transform:uppercase">L\'émulation VÉRITAS</div></div>'
+    +'<div style="padding:14px 16px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;flex-shrink:0;text-align:center">'
+      +'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg>'
+      +'<div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px;line-height:1.15">Palmarès de la semaine</div>'
+      +'<div style="font-size:10px;color:#FFC93C;font-weight:700;letter-spacing:1.2px;text-transform:uppercase">L\'émulation VÉRITAS</div>'
     +'</div>'
     +'<div style="padding:12px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto">'+champHtml+tiles+'</div>'
   +'</div>';
@@ -18499,7 +18506,50 @@ function _showLittAnalyse(oeuvreKey){
     +'<div style="padding:32px 36px">'
       +paragraphesHtml
     +'</div>'
-    // Footer retiré — l'analyse parle d'elle-même, plus besoin de mention de style
+    // ── v1.2.4 — Enrichissements : Thèmes / Axes / Procédés clés / Aller plus loin ──
+    +(function(){
+      var fi=oe.fiche||{};
+      var themes=(fi.themes||[]).slice(0,6);
+      var axes=(fi.axes||[]).slice(0,3);
+      var techs=(oe.techniques||[]).filter(function(t){return t&&t.nom;}).slice(0,4);
+      var out='';
+      // 1) Thèmes en chips
+      if(themes.length){
+        out+='<div style="padding:0 36px 18px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#7C3AED;text-transform:uppercase;margin-bottom:10px;display:inline-flex;align-items:center;gap:6px">'
+          +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg> Thèmes clés</div>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:8px">'
+          +themes.map(function(t){return '<span style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);color:#6B21A8;border:1px solid rgba(124,58,237,.22);border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:600">'+_esc(t)+'</span>';}).join('')
+          +'</div></div>';
+      }
+      // 2) Axes de lecture (numérotés)
+      if(axes.length){
+        out+='<div style="padding:0 36px 18px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#7C3AED;text-transform:uppercase;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px">'
+          +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-compass"/></svg> Axes de lecture</div>'
+          +'<div style="display:grid;gap:10px">'
+          +axes.map(function(a,i){return '<div style="display:flex;gap:12px;background:#FAFBFF;border:1px solid #E9E2FF;border-radius:12px;padding:12px 16px"><div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">'+(i+1)+'</div><div style="font-family:Georgia,serif;font-size:14px;line-height:1.55;color:#1E293B">'+_esc(a)+'</div></div>';}).join('')
+          +'</div></div>';
+      }
+      // 3) Procédés d'écriture en avant-goût (3 max, lien vers techniques complet)
+      if(techs.length){
+        out+='<div style="padding:0 36px 22px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#7C3AED;text-transform:uppercase;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px">'
+          +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-tool"/></svg> Procédés d\'écriture · aperçu</div>'
+          +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">'
+          +techs.map(function(t){return '<div style="background:#fff;border:1px solid #E9E2FF;border-left:3px solid #7C3AED;border-radius:8px;padding:10px 14px"><div style="font-weight:800;color:#6B21A8;font-size:13px;line-height:1.2;margin-bottom:4px">'+_esc(t.nom)+'</div>'+(t.def?'<div style="font-size:11.5px;color:#475569;font-style:italic;line-height:1.4">'+_esc(t.def.length>110?t.def.substring(0,110)+'…':t.def)+'</div>':'')+'</div>';}).join('')
+          +'</div>'
+          +'<div style="text-align:center;margin-top:10px"><a onclick="_showLittTechniques(\''+oeuvreKey+'\')" style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;color:#7C3AED;font-size:12.5px;font-weight:700;text-decoration:none">→ Tous les procédés &amp; effets</a></div>'
+          +'</div>';
+      }
+      // 4) Bandeau « Aller plus loin »
+      out+='<div style="margin:0 28px 8px;padding:18px 22px;background:linear-gradient(135deg,#1E1B4B,#312E81);border-radius:14px;color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
+        +'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><use href="#lc-sparkles"/></svg>'
+        +'<div style="flex:1;min-width:200px"><div style="font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-weight:800;font-size:15px">Aller plus loin avec le Professeur Ambassa</div>'
+        +'<div style="font-size:12.5px;color:rgba(255,255,255,.78);font-style:italic;margin-top:2px">Commentaire composé · Dissertation · Citations · Contrôle de lecture</div></div>'
+        +(oe.citations&&oe.citations.length?'<button onclick="_showLittCitations(\''+oeuvreKey+'\')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:10px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer">💬 Citations</button>':'')
+        +'<button onclick="_littCorrigeIA(\''+oeuvreKey+'\')" style="background:#FFC93C;border:none;color:#142554;border-radius:10px;padding:9px 18px;font-size:12.5px;font-weight:800;cursor:pointer">✨ Corrigés IA →</button>'
+      +'</div>'
+      ;
+      return out;
+    })()
     // Actions
     +'<div style="padding:18px 32px 26px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">'
       +'<button class="btn bi" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')" style="padding:10px 22px;border-radius:14px;font-weight:700">← Menu de l\'œuvre</button>'
@@ -30978,6 +31028,13 @@ window.I18N_SUBS_EN = {
   "Choisissez une catégorie": "Pick a category",
   "Cliquez pour explorer": "Click to explore",
   "Nos résultats aux examens officiels": "Our results at the official exams",
+  "Nos résultats officiels": "Our official exam results",
+  "Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE":
+    "Excellence at national exams: BEPC · Probatoire · BAC · GCE",
+  "Nos résultats aux examens": "Our exam results",
+  "Présentation du Centre": "About the Centre",
+  "Notre Histoire": "Our History",
+  "Tu es...": "You are...",
   "Une plateforme. Un accès personnalisé pour chaque rôle.":
     "One platform. A tailored access for every role.",
   "Ils nous font confiance": "They trust us",
@@ -32875,7 +32932,7 @@ window._passageDuJourHtml = function(){
   return '<div style="background:linear-gradient(180deg,#FFFDF8,#FBF4E2);color:#473F2A;padding:26px 24px;border-radius:18px;margin:14px auto;max-width:720px;position:relative;overflow:hidden;border:1px solid #ECE3CB;box-shadow:0 10px 30px rgba(20,37,84,.08);text-align:center">'
     +'<div style="position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,#142554,#1E3A8A 45%,#FFC93C)"></div>'
     +'<div style="position:absolute;top:4px;right:18px;font-family:Georgia,serif;font-size:90px;line-height:1;color:rgba(200,150,26,.16);font-weight:900;pointer-events:none">“</div>'
-    +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#9A7B1C;font-weight:800;margin-bottom:12px">📖 Passage du jour · une œuvre au programme</div>'
+    +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#9A7B1C;font-weight:800;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg> Passage du jour · une œuvre au programme</div>'
     +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:18px;line-height:1.65;font-style:italic;color:#142554;margin:0 auto 10px;max-width:660px">« '+_esc(p.passage)+' »</div>'
     +'<div id="vPdjRef" style="font-size:12px;color:#9A7B1C;font-weight:700;margin-bottom:14px">— '+ref+'</div>'
     +'<div id="vPdjExpl" style="font-size:13px;line-height:1.65;color:#473F2A;background:#fff;border:1px solid #EADFBF;border-radius:12px;padding:13px 16px;margin:0 auto 16px;max-width:660px;text-align:left;box-shadow:0 2px 10px rgba(20,37,84,.05)"><span style="opacity:.7">✨ Analyse en cours…</span></div>'
