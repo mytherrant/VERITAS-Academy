@@ -575,9 +575,9 @@ function defaultDB(){return{
     {ex:'Probatoire',      taux:92, series:[{nom:'A',taux:90},{nom:'C',taux:94},{nom:'D',taux:91}], mentions:{ab:34,b:18,tb:7,exc:1}},
     {ex:'BAC',             taux:91, series:[{nom:'A',taux:89},{nom:'C',taux:93},{nom:'D',taux:90}], mentions:{ab:48,b:27,tb:11,exc:3}},
     // ── Enseignement Technique ───────────────────────────────────────
-    {ex:'CAP',             taux:88, series:[{nom:'Industrie',taux:90},{nom:'Tertiaire',taux:86},{nom:'Artisanat',taux:87}], mentions:{ab:30,b:15,tb:5,exc:1}},
-    {ex:'Probatoire Tech', taux:85, series:[{nom:'F (Élec.)',taux:83},{nom:'G (Tert.)',taux:87},{nom:'TI',taux:84}], mentions:{ab:28,b:14,tb:5,exc:1}},
-    {ex:'BAC Tech',        taux:83, series:[{nom:'F (Élec.)',taux:81},{nom:'G (Tert.)',taux:85},{nom:'TI',taux:82}], mentions:{ab:25,b:13,tb:4,exc:1}},
+    {ex:'CAP',             taux:88, series:[{nom:'STT',taux:87},{nom:'Génie Méca',taux:90},{nom:'Génie Élec',taux:89},{nom:'Génie Civil',taux:88},{nom:'Arts & Modes',taux:85}], mentions:{ab:30,b:15,tb:5,exc:1}},
+    {ex:'Probatoire Tech', taux:85, series:[{nom:'STT',taux:87},{nom:'Génie Méca',taux:84},{nom:'Génie Élec',taux:83},{nom:'Génie Civil',taux:85},{nom:'Arts & Modes',taux:82}], mentions:{ab:28,b:14,tb:5,exc:1}},
+    {ex:'BAC Tech',        taux:83, series:[{nom:'STT',taux:85},{nom:'Génie Méca',taux:82},{nom:'Génie Élec',taux:81},{nom:'Génie Civil',taux:83},{nom:'Arts & Modes',taux:80}], mentions:{ab:25,b:13,tb:4,exc:1}},
     // ── Section Anglophone ───────────────────────────────────────────
     {ex:'GCE O Level',     taux:91, series:[{nom:'Sciences',taux:92},{nom:'Arts',taux:90},{nom:'Commercial',taux:91}], mentions:{ab:32,b:19,tb:8,exc:2}},
     {ex:'GCE A Level',     taux:87, series:[{nom:'Sciences',taux:88},{nom:'Arts',taux:85},{nom:'Commercial',taux:89}], mentions:{ab:20,b:12,tb:5,exc:1}},
@@ -1396,12 +1396,7 @@ function _migrateDB(){
   if(!DB.photos)DB.photos=defaultDB().photos||[];
   if(!DB.examResults)DB.examResults=defaultDB().examResults||[];
   if(!DB.statsVitrine)DB.statsVitrine=defaultDB().statsVitrine||[];
-  // v1.2.4 : migration GCE — ajoute le panneau GCE (O Level + A Level) s'il manque
-  // sur les installations existantes. Respecte les suppressions explicites de l'admin.
-  if(DB.statsVitrine && !DB.statsVitrine.some(function(s){return s&&s.ex==='GCE';})
-     && !(DB.deletedDefaults||[]).includes('stats_gce')){
-    DB.statsVitrine.push({ex:'GCE',taux:89,series:[{nom:'O Level',taux:91},{nom:'A Level',taux:87}],mentions:{ab:32,b:19,tb:8,exc:2}});
-  }
+  // GCE O Level et A Level sont désormais des panneaux séparés dans defaultDB().statsVitrine.
   if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts||[];
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
   // E-learning
