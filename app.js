@@ -32875,10 +32875,28 @@ window._pdjShare = function(kind){
   else { try{ navigator.clipboard.writeText(msg); if(typeof toast==='function')toast('Copié ! Colle-le sur TikTok, Instagram, etc. 📋','ok'); }catch(e){ if(typeof toast==='function')toast('Copie impossible','warn'); } }
 };
 
+// v1.2.35 — Fallback enrichi : si l'œuvre est dans LITT_OEUVRES, on récupère son
+// angle de lecture ou ses thèmes (factuels, jamais inventés). Sinon, on construit
+// un fallback contextuel avec auteur + accroche.
+window._pdjFallback = function(p){
+  if(!p) return '💡 Un extrait à savourer.';
+  try{
+    if(typeof LITT_OEUVRES==='object' && LITT_OEUVRES){
+      var k=Object.keys(LITT_OEUVRES).find(function(x){var o=LITT_OEUVRES[x]; return o && o.titre && p.titre && o.titre.toLowerCase()===p.titre.toLowerCase();});
+      if(k){
+        var o=LITT_OEUVRES[k];
+        if(o.analyse && o.analyse.angle) return '💡 ' + o.analyse.angle;
+        if(o.fiche && o.fiche.themes && o.fiche.themes.length) return '💡 Thèmes clés : ' + o.fiche.themes.slice(0,3).join(' · ') + '.';
+      }
+    }
+  }catch(e){}
+  var who = p.auteur ? (' (par '+p.auteur+')') : '';
+  return '💡 Un extrait de « ' + p.titre + ' »' + who + '. Quel choix dans le ton, le rythme, le vocabulaire ? Cherche ce qui te frappe d\'abord.';
+};
 window._pdjLoadExpl = function(){
   var box=document.getElementById('vPdjExpl'), p=window._pdjCurrent;
   if(!box||!p) return;
-  var fb='💡 Un passage clé de « '+p.titre+' ». Et ensuite ? Lis l\'œuvre pour le découvrir.';
+  var fb=_pdjFallback(p);
   var dk='vrt_pdj_'+new Date().toISOString().slice(0,10)+'_'+(p.titre+'|'+p.passage).substring(0,40).replace(/[^a-z0-9]/gi,'');
   try{ var c=localStorage.getItem(dk); if(c){ box.innerHTML=c; return; } }catch(e){}
   try{
@@ -32904,19 +32922,33 @@ window._pdjCleanTitle = function(s){
   return s.replace(/\s{2,}/g,' ').trim() || 'Œuvre';
 };
 
-// Upgrade le passage du jour vers le CORPUS ISOLÉ (116 œuvres) via rag.php?src=oeuvres&daily=1.
-// Repli silencieux sur le passage des œuvres au programme (déjà rendu) si indispo.
+// Upgrade le passage du jour vers le CORPUS ISOLÉ (116 œuvres) via rag.php.
+// v1.2.35 — Corrige la « même œuvre 2 jours de suite » :
+//   1. Passe le jour-de-l'année comme salt → force le serveur à varier.
+//   2. Mémorise le titre d'hier en localStorage ; si le serveur renvoie le même
+//      titre que la veille, on garde la pioche LITT_OEUVRES (déjà rotative).
 window._pdjLoad = function(){
   try{
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
-    fetch(base+'/rag.php?src=oeuvres&daily=1').then(function(r){return r.json();}).then(function(d){
+    var now=new Date(), dayN=Math.floor((now-new Date(now.getFullYear(),0,1))/86400000);
+    var yesterdayTitle=''; try{ yesterdayTitle=localStorage.getItem('_pdjYesterday')||''; }catch(e){}
+    fetch(base+'/rag.php?src=oeuvres&daily=1&day='+dayN).then(function(r){return r.json();}).then(function(d){
       if(d&&d.ok&&d.passages&&d.passages.length){
-        var pp=d.passages[0], txt=_pdjCleanExtract(pp.extrait,600);
+        // Choisir le 1er passage différent d'hier (anti-doublon)
+        var chosen=null;
+        for(var i=0;i<d.passages.length;i++){
+          var t=_pdjCleanTitle((d.passages[i]||{}).titre||'');
+          if(t && (!yesterdayTitle || t.toLowerCase()!==yesterdayTitle.toLowerCase())){ chosen=d.passages[i]; break; }
+        }
+        if(!chosen) return; // tous les passages sont = hier → on garde la pioche LITT_OEUVRES
+        var pp=chosen, txt=_pdjCleanExtract(pp.extrait,600);
         if(txt.length>40){
           var au=(pp.auteur&&pp.auteur.indexOf('programme')<0&&pp.auteur!=='Anonyme')?pp.auteur:'';
-          window._pdjCurrent={passage:txt,titre:_pdjCleanTitle(pp.titre||''),auteur:au,classe:''};
+          var newTitle=_pdjCleanTitle(pp.titre||'');
+          window._pdjCurrent={passage:txt,titre:newTitle,auteur:au,classe:''};
+          try{ localStorage.setItem('_pdjYesterday', newTitle); }catch(e){}
           var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML='« '+_esc(txt)+' »';
-          var rb=document.getElementById('vPdjRef'); if(rb) rb.innerHTML='— '+_esc(window._pdjCurrent.titre)+(au?' · '+_esc(au):'');
+          var rb=document.getElementById('vPdjRef'); if(rb) rb.innerHTML='— '+_esc(newTitle)+(au?' · '+_esc(au):'');
         }
       }
     }).catch(function(){}).then(function(){ if(window._pdjLoadExpl) _pdjLoadExpl(); });
