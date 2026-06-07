@@ -13191,7 +13191,7 @@ window._statsVitrineHtml = function(){
     +'</div>';
   }).join('');
   var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:10px"><button class="btn bo sm" onclick="mEditStatsVitrine()">✏️ Modifier les résultats</button></div>':'';
-  return '<div style="text-align:center;margin:6px 0 14px"><div class="vgz-section-sub" style="margin:0;color:#142554;font-weight:800;font-size:18px;letter-spacing:.3px">🏆 Nos résultats aux examens officiels</div></div>'
+  return '<div class="acc-head"><div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</div><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>'
     +'<div class="vgz-stats v-reveal" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">'+cards+'</div>'+editBtn;
 };
 
@@ -30978,6 +30978,13 @@ window.I18N_SUBS_EN = {
   "Choisissez une catégorie": "Pick a category",
   "Cliquez pour explorer": "Click to explore",
   "Nos résultats aux examens officiels": "Our results at the official exams",
+  "Nos résultats officiels": "Our official exam results",
+  "Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE":
+    "Excellence at national exams: BEPC · Probatoire · BAC · GCE",
+  "Nos résultats aux examens": "Our exam results",
+  "Présentation du Centre": "About the Centre",
+  "Notre Histoire": "Our History",
+  "Tu es...": "You are...",
   "Une plateforme. Un accès personnalisé pour chaque rôle.":
     "One platform. A tailored access for every role.",
   "Ils nous font confiance": "They trust us",

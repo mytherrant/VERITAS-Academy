@@ -3967,12 +3967,15 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 /* Le titre devient BLANC quand placé dans un .acc-head sombre — l'underline doré disparaît */
 .acc-head .acc-pill{color:#fff;font-size:18px;letter-spacing:-.005em}
 .acc-head .acc-pill::after{display:none}
-/* Icône style MoMo : badge translucide or, stroke or vif */
-.acc-pill .ic{width:30px;height:30px;border-radius:8px;
-  background:rgba(255,201,60,.16);border:1px solid rgba(255,201,60,.42);
-  box-shadow:0 2px 6px rgba(0,0,0,.18)}
-.acc-pill-ico{width:16px;height:16px;stroke:var(--acc-gold,#FFC93C);stroke-width:2;
-  filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+/* Icône style MoMo épuré : badge ivoire translucide, gold trait fin */
+.acc-pill .ic{width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,rgba(255,201,60,.20),rgba(255,201,60,.10));
+  border:1px solid rgba(255,201,60,.45);
+  box-shadow:0 2px 8px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.08);
+  display:inline-flex;align-items:center;justify-content:center}
+.acc-pill-ico{width:18px;height:18px;stroke:var(--acc-gold,#FFC93C);stroke-width:1.75;
+  fill:none;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.35))}
 .acc-pill.gold .ic{background:rgba(255,201,60,.16);border-color:rgba(255,201,60,.42)}
 .acc-pill.gold .acc-pill-ico{stroke:var(--acc-gold,#FFC93C);stroke-width:2}
 
