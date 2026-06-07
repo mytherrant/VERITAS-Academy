@@ -10426,7 +10426,7 @@ function printStudentHonneur(sid,tri){
     return gG.length?gG.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tC:null;
   }).filter(function(m){return m!==null;}).sort(function(a,b){return b-a;});
   var rang=allMoy.findIndex(function(m){return Math.abs(m-moy)<0.001;})+1;
-  var html='<div style="max-width:600px;margin:0 auto;font-family:Outfit,sans-serif;border:3px double '+mentionColor+';padding:0">';
+  var html='<div style="max-width:900px;margin:0 auto;font-family:Outfit,sans-serif;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px '+mentionColor+',inset 0 0 0 6px #142554,inset 0 0 0 8px '+mentionColor+';-webkit-print-color-adjust:exact;print-color-adjust:exact">';
   html+='<div style="background:linear-gradient(135deg,#142554,#1a3a8a);padding:16px 24px;text-align:center">';
   html+='<div style="display:flex;justify-content:space-between;font-size:13px;color:rgba(255,255,255,.5);margin-bottom:8px"><span>RÉPUBLIQUE DU CAMEROUN</span><span>REPUBLIC OF CAMEROON</span></div>';
   html+='<img src="'+logo+'" style="width:50px;height:50px;border-radius:50%;background:#fff;padding:2px;object-fit:contain;margin-bottom:6px">';
@@ -10464,7 +10464,7 @@ function printStudentHonneur(sid,tri){
   html+='<div style="text-align:right;line-height:1.3"><div style="font-size:7px;color:'+mentionColor+';font-weight:800;letter-spacing:1.5px;text-transform:uppercase">Document Authentifié</div>';
   html+='<div style="font-size:6px;color:#888;margin-top:1px">'+today()+' · Réf: <strong style="color:#142554;font-family:monospace">'+certRef+'</strong></div>';
   html+='<div style="font-size:5px;color:#aaa;margin-top:1px">Scannez le QR code pour vérifier</div></div>';
-  html+='<div style="flex-shrink:0;border:1.5px solid '+mentionColor+';border-radius:4px;padding:2px;background:#fff;line-height:0">'+_qrSvg.toSVG(certQRData,2)+'</div>';
+  html+='<div style="flex-shrink:0;border:1.5px solid '+mentionColor+';border-radius:4px;padding:2px;background:#fff;line-height:0">'+_qrSvg.toSVG(certQRData,1)+'</div>';
   html+='</div>';
   html+='<div style="background:#f5f3ef;border-top:1px solid #ddd;padding:6px;text-align:center;font-size:13px;color:#bbb">'+(sc?.nom||'VÉRITAS')+' · '+new Date().toLocaleDateString('fr-FR')+'</div>';
   html+='</div>';
@@ -10895,6 +10895,54 @@ function printBulletinHtml(sid,tri){
   const cote=moy>=16?'A+':moy>=14?'A':moy>=12?'B+':moy>=10?'B':moy>=8?'C':'D';
   const isHonneur=moy>=14;const isEncouragement=moy>=12&&moy<14;const isFelicitations=moy>=16;
   const sc=DB.school;const logo=getLogo();
+  // ═══ v1.2.4 — ENRICHISSEMENTS BULLETIN (modèle Lycée Bilingue) ═══
+  // 1) Professeur principal / titulaire de la classe (depuis DB.teachers où titulaire===cls)
+  const profPrincipal=(DB.teachers||[]).find(t=>t.titulaire===s.cls);
+  const ppName=profPrincipal?(profPrincipal.pre+' '+profPrincipal.nom):'';
+  // 2) Rang de l'élève DANS CHAQUE matière (utilisé dans la table)
+  const subjectRanks={};
+  const subjects=[...new Set(DB.grades.filter(g=>g.cls===s.cls&&g.tri===tri).map(g=>g.sub))];
+  subjects.forEach(sub=>{
+    const subMoys=DB.grades.filter(g=>g.sub===sub&&g.cls===s.cls&&g.tri===tri).map(g=>({eid:g.eid,m:_subMoy(g)})).sort((a,b)=>b.m-a.m);
+    const idx=subMoys.findIndex(x=>x.eid===sid);
+    subjectRanks[sub]=idx>=0?(idx+1)+'/'+subMoys.length:'—';
+  });
+  // 3) Groupes de matières + sous-totaux pondérés (Sciences, Lettres, Langues, Autres)
+  const _groupOf=function(sub){
+    const k=(sub||'').toLowerCase();
+    if(/math|physi|chimi|svt|biolog|sciences/.test(k)) return 'Sciences';
+    if(/franç|frança|fr$|philo|litt|histoire|géo|geo|ecm|education civ/.test(k)) return 'Lettres & Humanités';
+    if(/angl|allem|espagn|langue|english|german|spanish/.test(k)) return 'Langues';
+    return 'Autres / EPS-Arts';
+  };
+  const groups={};
+  gr.forEach(g=>{const k=_groupOf(g.sub);if(!groups[k])groups[k]={tot:0,coef:0,n:0};const m=_subMoy(g);groups[k].tot+=m*g.coef;groups[k].coef+=(+g.coef||1);groups[k].n++;});
+  // 4) Sub-10 grades highlighted red (computed inline below)
+  // 5) Statut redoublant (DB.studentMeta[sid].redoublant ou s.redoublant)
+  const isRedoublant=!!(s.redoublant||(DB.studentMeta&&DB.studentMeta[sid]&&DB.studentMeta[sid].redoublant));
+  // 6) Progression vs trimestre précédent
+  const TRSorder=(typeof TRS!=='undefined'?TRS:['1er Trimestre','2ème Trimestre','3ème Trimestre']);
+  const iTri=TRSorder.indexOf(tri); const prevTri=iTri>0?TRSorder[iTri-1]:null;
+  let prevMoy=null;
+  if(prevTri){
+    const gp=DB.grades.filter(g=>g.eid===sid&&g.tri===prevTri);
+    if(gp.length){const tcp=gp.reduce((a,g)=>a+(+g.coef||1),0)||1;prevMoy=gp.reduce((a,g)=>a+(_subMoy(g))*g.coef,0)/tcp;}
+  }
+  const delta=(prevMoy!=null)?(moy-prevMoy):null;
+  // 7) Décision de fin d'année (seulement si dernier trimestre)
+  const isLastTri=iTri===TRSorder.length-1;
+  let decision='';
+  if(isLastTri){
+    if(moy>=10) decision=isRedoublant?'ADMIS(E) EN CLASSE SUPÉRIEURE / PROMOTED':'ADMIS(E) EN CLASSE SUPÉRIEURE / PROMOTED';
+    else if(moy>=8) decision='ADMIS(E) SOUS RÉSERVE / CONDITIONALLY PROMOTED';
+    else decision=isRedoublant?'EXCLU(E) / EXPELLED':'REDOUBLE LA CLASSE / TO REPEAT';
+  }
+  // 8) Top 3 forces / Top 3 faiblesses (matières)
+  const subjectMoys=gr.map(g=>({sub:g.sub,m:_subMoy(g)})).sort((a,b)=>b.m-a.m);
+  const top3=subjectMoys.slice(0,3);
+  const weak3=subjectMoys.slice(-3).reverse();
+  // 9) Examen candidat : 3ème (BEPC), 1ère (Probatoire), Tle (BAC)
+  const examTag=/3[èe]?me/i.test(s.cls)?'BEPC':/1[èe]?re/i.test(s.cls)?'PROBATOIRE':/T(le|erm)/i.test(s.cls)?'BAC':'';
   const photoHtml=s.photo?'<img src="'+s.photo+'" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #c49a3c">':'<div style="width:50px;height:50px;border-radius:50%;background:#edf2fc;border:2px solid #a8c0e8;display:flex;align-items:center;justify-content:center;font-size:20px;color:#1a3a8a;font-weight:700">'+s.pre[0]+s.nom[0]+'</div>';
 
   return`<div style="padding:0;font-family:'Inter',sans-serif;font-size:10px;color:#1c1814;max-width:720px;margin:0 auto">
@@ -10908,63 +10956,92 @@ function printBulletinHtml(sid,tri){
     <img src="${logo}" style="width:48px;height:48px;border-radius:50%;background:#fff;padding:2px;object-fit:contain">
     <div style="flex:1"><div style="font-family:'Libre Baskerville',serif;font-size:13px;color:#FFC93C;letter-spacing:1px">${sc?.nom||'Centre VÉRITAS'}</div>
     <div style="font-size:13px;color:rgba(255,255,255,.5)">${sc?.ville||''} · Tél: ${sc?.tel||''} · ${sc?.bp||''}</div></div>
-    <div style="text-align:right"><div style="font-size:13px;color:#FFC93C;font-weight:700">BULLETIN DE NOTES</div>
+    <div style="text-align:right"><div style="font-size:13px;color:#FFC93C;font-weight:700">BULLETIN DE NOTES / REPORT CARD</div>
     <div style="font-size:13px;color:rgba(255,255,255,.6)">${tri} — ${sc?.annee||'2024–2025'}</div></div>
   </div>
   <!-- INFOS ÉLÈVE -->
   <div style="display:flex;gap:12px;padding:10px 20px;background:#f5f3ef;border-bottom:1px solid #ddd8d0">
     <div style="flex-shrink:0">${photoHtml}</div>
     <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1px 12px;font-size:9px">
-      <div><span style="color:#888">Nom & Prénoms :</span> <strong>${s.pre} ${s.nom}</strong></div>
-      <div><span style="color:#888">Classe :</span> <strong>${s.cls}</strong> — Effectif : <strong>${DB.students.filter(st=>st.cls===s.cls).length}</strong></div>
-      <div><span style="color:#888">Né(e) le :</span> <strong>${s.dob||'—'}</strong></div>
-      <div><span style="color:#888">Matricule :</span> <strong style="color:#9a7228">${s.mat}</strong></div>
-      <div><span style="color:#888">Sexe :</span> <strong>${s.sex==='F'?'Féminin':'Masculin'}</strong></div>
-      <div><span style="color:#888">Parent / Tuteur :</span> <strong>${s.parent||'—'}</strong> ${s.ptel?'· <span style="color:#1a3a8a">'+s.ptel+'</span>':''}</div>
+      <div><span style="color:#888">Nom & Prénoms / Full name :</span> <strong>${s.pre} ${s.nom}</strong></div>
+      <div><span style="color:#888">Classe / Class :</span> <strong>${s.cls}</strong> — Effectif / Enrolment : <strong>${DB.students.filter(st=>st.cls===s.cls).length}</strong></div>
+      <div><span style="color:#888">Né(e) le / Date of birth :</span> <strong>${s.dob||'—'}</strong></div>
+      <div><span style="color:#888">Matricule / ID :</span> <strong style="color:#9a7228">${s.mat}</strong></div>
+      <div><span style="color:#888">Sexe / Sex :</span> <strong>${s.sex==='F'?'Féminin / Female':'Masculin / Male'}</strong></div>
+      <div><span style="color:#888">Parent/Tuteur / Parent or guardian :</span> <strong>${s.parent||'—'}</strong> ${s.ptel?'· <span style="color:#1a3a8a">'+s.ptel+'</span>':''}</div>
+      <div><span style="color:#888">Statut / Status :</span> <strong style="color:${isRedoublant?'#b82828':'#1a6e40'}">${isRedoublant?'Redoublant(e) / Repeating':'Non-redoublant(e) / First attempt'}</strong></div>
+      <div><span style="color:#888">Prof. principal / Class teacher :</span> <strong>${ppName||'—'}</strong>${examTag?' · <span style="background:#142554;color:#FFC93C;padding:1px 6px;border-radius:4px;font-size:8px;font-weight:800;letter-spacing:.8px">CANDIDAT '+examTag+'</span>':''}</div>
     </div>
   </div>
   <!-- TABLEAU DES NOTES -->
   <div style="padding:4px 12px">
     <table style="width:100%;border-collapse:collapse;font-size:12px">
-      <thead><tr style="background:#142554;color:rgba(255,255,255,.85)">
-        <th style="padding:6px 8px;text-align:left;font-size:8px;letter-spacing:.5px;width:25%">MATIÈRE & ENSEIGNANT</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%">Dev.1</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%">Dev.2</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%">MOY/20</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:6%">COEF</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:9%">M×Coef</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:6%">COTE</th>
-        <th style="padding:6px 4px;text-align:center;font-size:8px;width:10%">[Min-Max]</th>
-        <th style="padding:6px 4px;text-align:left;font-size:8px;width:20%">APPRÉCIATION</th>
+      <thead><tr style="background:#142554;color:rgba(255,255,255,.85);-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <th style="padding:6px 8px;text-align:left;font-size:8px;letter-spacing:.5px;width:22%;color:#fff">MATIÈRE / SUBJECT</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:7%;color:#fff">Dev.1</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:7%;color:#fff">Dev.2</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%;color:#fff">MOY/20</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:5%;color:#fff">COEF</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%;color:#fff">M×Coef</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:6%;color:#fff">COTE</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:8%;color:#fff">RANG / Rank</th>
+        <th style="padding:6px 4px;text-align:center;font-size:8px;width:9%;color:#fff">[Min-Max]</th>
+        <th style="padding:6px 4px;text-align:left;font-size:8px;width:20%;color:#fff">APPRÉCIATION / Remark</th>
       </tr></thead>
       <tbody>
-      ${gr.map(g=>{
-        const m=_subMoy(g);const ap2=getAppr(m);const pts=m*g.coef;
-        const gt=cote;
-        const subGrades=DB.grades.filter(x=>x.sub===g.sub&&x.cls===s.cls&&x.tri===tri).map(x=>_subMoy(x));
-        const subMin=subGrades.length?Math.min(...subGrades).toFixed(1):'—';
-        const subMax=subGrades.length?Math.max(...subGrades).toFixed(1):'—';
-        const coteLetter=m>=16?'A+':m>=14?'A':m>=12?'B+':m>=10?'B':m>=8?'C':'D';
-        const appText=m>=16?'Excellent travail':m>=14?'Très bon travail':m>=12?'Bon travail':m>=10?'Travail acceptable':m>=8?'Insuffisant, efforts à fournir':'Très insuffisant';
-        return`<tr style="border-bottom:1px solid #e8e4dc">
-        <td style="padding:5px 8px"><div style="font-weight:700;font-size:12px">${g.sub}</div><div style="font-size:8px;color:#888;font-style:italic">${g.ens||'—'}</div></td>
-        <td style="padding:5px 4px;text-align:center;font-family:'Fira Code';font-size:9px">${g.n1}</td>
-        <td style="padding:5px 4px;text-align:center;font-family:'Fira Code';font-size:9px">${g.n2}</td>
-        <td style="padding:5px 4px;text-align:center;font-family:'Fira Code';font-weight:700;color:${ap2.col};font-size:12px">${m.toFixed(2)}</td>
-        <td style="padding:5px 4px;text-align:center;font-family:'Fira Code'">${g.coef}</td>
-        <td style="padding:5px 4px;text-align:center;font-family:'Fira Code'">${pts.toFixed(2)}</td>
-        <td style="padding:5px 4px;text-align:center;font-weight:700;color:${ap2.col}">${coteLetter}</td>
-        <td style="padding:5px 4px;text-align:center;font-size:8px;color:#888">[${subMin}-${subMax}]</td>
-        <td style="padding:5px 4px;font-size:8px;color:${ap2.col}">${appText}</td>
-      </tr>`;}).join('')}
+      ${(function(){
+        // Tri par groupe pour insérer des sous-totaux pondérés (Sciences, Lettres…)
+        const order=['Sciences','Lettres & Humanités','Langues','Autres / EPS-Arts'];
+        const grBy={};gr.forEach(g=>{const k=_groupOf(g.sub);(grBy[k]=grBy[k]||[]).push(g);});
+        let out='';
+        order.forEach(k=>{
+          const list=grBy[k]; if(!list||!list.length) return;
+          // Sous-total du groupe
+          const gTot=list.reduce((a,g)=>a+_subMoy(g)*g.coef,0);
+          const gCoef=list.reduce((a,g)=>a+(+g.coef||1),0)||1;
+          const gMoy=gTot/gCoef;
+          const gCol=gMoy<10?'#b82828':getAppr(gMoy).col;
+          out+='<tr style="background:#eef1f8;border-top:1px solid #142554"><td colspan="10" style="padding:3px 8px;font-size:8px;font-weight:800;color:#142554;letter-spacing:.5px;text-transform:uppercase">▸ '+k+'</td></tr>';
+          list.forEach(g=>{
+            const m=_subMoy(g);const ap2=getAppr(m);const pts=m*g.coef;
+            const subGrades=DB.grades.filter(x=>x.sub===g.sub&&x.cls===s.cls&&x.tri===tri).map(x=>_subMoy(x));
+            const subMin=subGrades.length?Math.min(...subGrades).toFixed(1):'—';
+            const subMax=subGrades.length?Math.max(...subGrades).toFixed(1):'—';
+            const coteLetter=m>=16?'A+':m>=14?'A':m>=12?'B+':m>=10?'B':m>=8?'C':'D';
+            const appText=m>=16?'Excellent / Excellent':m>=14?'Très bien / Very good':m>=12?'Bien / Good':m>=10?'Passable / Pass':m>=8?'Insuffisant / Below average':'Très insuffisant / Very poor';
+            const isLow=m<10;
+            const rowBg=isLow?'background:#fdecec;':'';
+            const numColor=isLow?'#b82828':ap2.col;
+            out+='<tr style="border-bottom:1px solid #e8e4dc;'+rowBg+'">'
+              +'<td style="padding:5px 8px"><div style="font-weight:700;font-size:12px">'+g.sub+'</div><div style="font-size:8px;color:#888;font-style:italic">'+(g.ens||'—')+'</div></td>'
+              +'<td style="padding:5px 4px;text-align:center;font-family:\'Fira Code\';font-size:9px;color:'+(g.n1<10?'#b82828':'inherit')+'">'+g.n1+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-family:\'Fira Code\';font-size:9px;color:'+(g.n2<10?'#b82828':'inherit')+'">'+g.n2+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-family:\'Fira Code\';font-weight:700;color:'+numColor+';font-size:12px">'+m.toFixed(2)+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-family:\'Fira Code\'">'+g.coef+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-family:\'Fira Code\';color:'+numColor+'">'+pts.toFixed(2)+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-weight:700;color:'+numColor+'">'+coteLetter+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-size:9px;font-weight:700;color:#142554">'+(subjectRanks[g.sub]||'—')+'</td>'
+              +'<td style="padding:5px 4px;text-align:center;font-size:8px;color:#888">['+subMin+'-'+subMax+']</td>'
+              +'<td style="padding:5px 4px;font-size:8px;color:'+numColor+'">'+appText+'</td>'
+            +'</tr>';
+          });
+          // Ligne sous-total du groupe
+          out+='<tr style="background:#f8f6ef;font-size:9px;font-style:italic"><td colspan="3" style="padding:3px 8px;text-align:right;color:#555">Sous-total / Subtotal '+k+'</td>'
+            +'<td style="text-align:center;font-family:\'Fira Code\';font-weight:700;color:'+gCol+'">'+gMoy.toFixed(2)+'</td>'
+            +'<td style="text-align:center;font-family:\'Fira Code\'">'+gCoef+'</td>'
+            +'<td style="text-align:center;font-family:\'Fira Code\';color:'+gCol+'">'+gTot.toFixed(2)+'</td>'
+            +'<td colspan="4"></td></tr>';
+        });
+        return out;
+      })()}
       </tbody>
       <tfoot><tr style="background:#f5f3ef;font-weight:700;border-top:2px solid #142554">
-        <td style="padding:7px 8px" colspan="3">TOTAL</td>
-        <td style="text-align:center;font-family:'Fira Code';font-size:10px;color:${ap.col}">${moy.toFixed(2)}</td>
+        <td style="padding:7px 8px" colspan="3">TOTAL GÉNÉRAL / OVERALL</td>
+        <td style="text-align:center;font-family:'Fira Code';font-size:10px;color:${moy<10?'#b82828':ap.col}">${moy.toFixed(2)}</td>
         <td style="text-align:center;font-family:'Fira Code'">${tc}</td>
         <td style="text-align:center;font-family:'Fira Code'">${gr.reduce((a,g)=>a+(_subMoy(g))*g.coef,0).toFixed(2)}</td>
-        <td style="text-align:center;font-weight:700;color:${ap.col}">${cote}</td>
-        <td colspan="2" style="text-align:right;padding-right:8px">Rang : <strong style="color:#142554">${rang}</strong> / ${allMoy.length}</td>
+        <td style="text-align:center;font-weight:700;color:${moy<10?'#b82828':ap.col}">${cote}</td>
+        <td colspan="3" style="text-align:right;padding-right:8px">Rang / Rank : <strong style="color:#142554">${rang}</strong> / ${allMoy.length}</td>
       </tr></tfoot>
     </table>
   </div>
@@ -10983,18 +11060,47 @@ function printBulletinHtml(sid,tri){
       ${[['Moy. Classe',classAvg.toFixed(2)],['[Min — Max]','['+classMin.toFixed(2)+' — '+classMax.toFixed(2)+']'],['Taux de réussite',tauxR+'%'],['Nb moyennes ≥10',nbMoy+' / '+allMoy.length],['Effectif noté',allMoy.length]].map(([l,v])=>'<div style="display:flex;justify-content:space-between;padding:2px 0;border-bottom:1px dotted #eee"><span style="color:#666">'+l+'</span><strong>'+v+'</strong></div>').join('')}
     </div>
   </div>
-  <!-- TABLEAU D&#39;HONNEUR -->
-  ${(isHonneur||isEncouragement||isFelicitations)?`<div style="margin:8px 12px;padding:10px 14px;background:${isFelicitations?'linear-gradient(135deg,#fef7e8,#fff8e0)':isHonneur?'linear-gradient(135deg,#edf7f1,#e0f5ec)':'linear-gradient(135deg,#edf2fc,#dceeff)'};border:2px solid ${isFelicitations?'#FFC93C':isHonneur?'#059669':'#3C8DFF'};border-radius:10px;text-align:center;font-size:10px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
-    <strong style="color:${isFelicitations?'#9a7228':isHonneur?'#1a6e40':'#1a3a8a'}">${isFelicitations?'🏆 FÉLICITATIONS DU CONSEIL DE CLASSE':isHonneur?'⭐ TABLEAU D&#39;HONNEUR':'📌 ENCOURAGEMENTS'}</strong>
-  </div>`:''}
-  <!-- APPRÉCIATION GÉNÉRALE -->
-  <div style="margin:4px 12px;padding:8px 10px;border:1px solid #ddd;border-radius:4px;min-height:40px;text-align:center">
-    <div style="font-size:10px;font-weight:800;color:#142554;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">✦ Décision du Conseil de Classe ✦</div>
-    <div style="font-size:11px;color:#142554;font-weight:600;font-style:italic;line-height:1.6">${moy>=14?'Excellent trimestre. Continuez ainsi !':moy>=12?'Bon trimestre. Quelques efforts supplémentaires vous mèneront plus loin.':moy>=10?'Trimestre passable. Des efforts réguliers sont nécessaires pour progresser.':'Trimestre difficile. Un travail sérieux et régulier est indispensable. Rencontrez les enseignants.'}</div>
+  <!-- BILAN VISUEL : Progression + Jauge + Forces/Faiblesses (v1.2.4) -->
+  <div style="display:grid;grid-template-columns:1fr 1.4fr 1fr;gap:6px;padding:6px 12px 0;font-size:9px">
+    <!-- Progression vs trimestre précédent -->
+    <div style="border:1px solid #ddd;padding:6px 8px;border-radius:4px;text-align:center">
+      <div style="font-weight:700;color:#142554;font-size:8px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Progression / Trend</div>
+      ${delta!=null?`<div style="font-size:18px;font-weight:800;color:${delta>=0?'#1a6e40':'#b82828'}">${delta>=0?'▲':'▼'} ${Math.abs(delta).toFixed(2)}</div>
+        <div style="font-size:8px;color:#666">${prevTri} : ${prevMoy.toFixed(2)}/20</div>
+        <div style="font-size:7px;color:#888;margin-top:2px">${delta>=0?'Amélioration / Improvement':'Baisse / Decline'}</div>`:`<div style="font-size:11px;color:#999;padding:8px 0">— 1er trimestre —<br><span style="font-size:8px">First term</span></div>`}
+    </div>
+    <!-- Jauge de moyenne -->
+    <div style="border:1px solid #ddd;padding:6px 8px;border-radius:4px">
+      <div style="font-weight:700;color:#142554;font-size:8px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;text-align:center">Niveau de performance / Performance level</div>
+      <div style="height:18px;background:linear-gradient(90deg,#b82828 0%,#b82828 50%,#FFC93C 50%,#FFC93C 70%,#1a6e40 70%);border-radius:9px;position:relative;margin:8px 4px;-webkit-print-color-adjust:exact;print-color-adjust:exact">
+        <div style="position:absolute;left:${Math.min(100,Math.max(0,moy/20*100))}%;top:-5px;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:8px solid #142554"></div>
+        <div style="position:absolute;left:${Math.min(100,Math.max(0,moy/20*100))}%;top:22px;transform:translateX(-50%);font-size:9px;font-weight:800;color:#142554">${moy.toFixed(2)}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:7px;color:#888;margin-top:18px;padding:0 4px">
+        <span>0</span><span>10</span><span>14</span><span>20</span>
+      </div>
+      <div style="text-align:center;margin-top:3px;font-size:9px;font-weight:700;color:${moy<10?'#b82828':ap.col}">${mention} · ${cote}</div>
+    </div>
+    <!-- Forces / Faiblesses -->
+    <div style="border:1px solid #ddd;padding:6px 8px;border-radius:4px">
+      <div style="font-weight:700;color:#142554;font-size:8px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Bilan / Highlights</div>
+      ${top3.length?`<div style="font-size:8px;color:#1a6e40;font-weight:700;margin-top:2px">💪 Forces / Strengths</div>${top3.map(x=>`<div style="font-size:8px;color:#444;padding:1px 0">• ${x.sub} <strong>(${x.m.toFixed(1)})</strong></div>`).join('')}`:''}
+      ${weak3.length&&weak3[0].m<14?`<div style="font-size:8px;color:#b82828;font-weight:700;margin-top:3px">⚠️ À renforcer / To work on</div>${weak3.filter(x=>x.m<14).map(x=>`<div style="font-size:8px;color:#444;padding:1px 0">• ${x.sub} <strong style="color:${x.m<10?'#b82828':'#9a7228'}">(${x.m.toFixed(1)})</strong></div>`).join('')}`:''}
+    </div>
   </div>
-  <!-- SIGNATURES -->
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:6px 12px 10px;font-size:12px">
-    ${['Prof. Principal','Parent / Tuteur','Le Chef d&#39;Établissement'].map((l,i)=>`<div style="text-align:center;padding-top:4px"><div style="font-size:13px;text-transform:uppercase;color:#888;letter-spacing:.5px">${l}</div><div style="margin-top:24px;border-top:1px solid #ccc;padding-top:3px;font-size:13px;color:#bbb">${i===2?(sc?.directeur||'Le Directeur'):'Signature'}</div></div>`).join('')}
+  <!-- TABLEAU D'HONNEUR -->
+  ${(isHonneur||isEncouragement||isFelicitations)?`<div style="margin:8px 12px;padding:10px 14px;background:${isFelicitations?'linear-gradient(135deg,#fef7e8,#fff8e0)':isHonneur?'linear-gradient(135deg,#edf7f1,#e0f5ec)':'linear-gradient(135deg,#edf2fc,#dceeff)'};border:2px solid ${isFelicitations?'#FFC93C':isHonneur?'#059669':'#3C8DFF'};border-radius:10px;text-align:center;font-size:10px;box-shadow:0 2px 8px rgba(0,0,0,.06);-webkit-print-color-adjust:exact;print-color-adjust:exact">
+    <strong style="color:${isFelicitations?'#9a7228':isHonneur?'#1a6e40':'#1a3a8a'};font-size:11px">${isFelicitations?'🏆 FÉLICITATIONS DU CONSEIL DE CLASSE / Honours':isHonneur?'⭐ TABLEAU D\'HONNEUR / Honour Roll':'📌 ENCOURAGEMENTS / Encouragement'}</strong>
+  </div>`:''}
+  <!-- DÉCISION DU CONSEIL DE CLASSE -->
+  <div style="margin:4px 12px;padding:10px;border:2px solid ${moy<10?'#b82828':'#142554'};border-radius:6px;text-align:center;background:${moy<10?'#fdecec':'#f7f9ff'};-webkit-print-color-adjust:exact;print-color-adjust:exact">
+    <div style="font-size:10px;font-weight:800;color:#142554;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">✦ Décision du Conseil de Classe / Class Council Decision ✦</div>
+    ${isLastTri&&decision?`<div style="font-size:14px;font-weight:900;color:${moy<10?'#b82828':'#1a6e40'};letter-spacing:1px;margin:4px 0 8px;text-transform:uppercase">${decision}</div>`:''}
+    <div style="font-size:11px;color:#142554;font-weight:600;font-style:italic;line-height:1.6">${moy>=14?'Excellent trimestre, continuez ainsi ! / Excellent term — keep it up!':moy>=12?'Bon trimestre, quelques efforts supplémentaires vous mèneront plus loin. / Good term — keep pushing.':moy>=10?'Trimestre passable, des efforts réguliers sont nécessaires. / Average term — sustained effort needed.':'Trimestre difficile, un travail sérieux et régulier est indispensable. Rencontrez les enseignants. / Difficult term — please meet with the teachers.'}</div>
+  </div>
+  <!-- SIGNATURES (avec prof titulaire) -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;padding:6px 12px 10px;font-size:11px">
+    ${[['Prof. principal / Class teacher',ppName],['Parent / Tuteur — Parent or guardian',''],['Censeur / Vice-principal',''],['Chef d\'Établissement / Principal',sc?.directeur||'']].map(([l,name])=>`<div style="text-align:center;padding-top:4px"><div style="font-size:9px;text-transform:uppercase;color:#888;letter-spacing:.4px">${l}</div><div style="margin-top:22px;border-top:1px solid #ccc;padding-top:3px;font-size:10px;color:#555;font-weight:600">${name||'Signature'}</div></div>`).join('')}
   </div>
   <!-- QR CODE AUTHENTIFICATION -->
   <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px 12px;border-top:1.5px solid #142554;text-align:center">
@@ -12039,7 +12145,7 @@ function filterCsStudents(){var q=(document.getElementById('csSearch')?.value||'
 function genCertScolFor(sid){var el=document.getElementById('csEtu');if(!el){var tmp=document.createElement('select');tmp.id='csEtu';tmp.innerHTML='<option value="'+sid+'">x</option>';document.body.appendChild(tmp);genCertScol();tmp.remove();}else{el.value=sid;genCertScol();}}
 function genCertScol(){
   const s=S(document.getElementById('csEtu')?.value);if(!s)return;
-  printDoc(`<div style="max-width:600px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center">
+  printDoc(`<div style="max-width:900px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px #9a7228,inset 0 0 0 6px #142554,inset 0 0 0 8px #9a7228;-webkit-print-color-adjust:exact;print-color-adjust:exact">
   ${docHeader('Certificat de Scolarité')}
   <div style="padding:30px 40px">
     <div style="font-family:'Libre Baskerville',serif;font-size:17px;font-weight:700;color:#142554;margin-bottom:20px">CERTIFICAT DE SCOLARITÉ</div>
@@ -12077,7 +12183,7 @@ function pgListeClasse(){
         <td class="mono xs2" style="color:var(--gold)">${s.mat}</td>
         <td class="bold s">${s.nom}</td>
         <td>${s.pre}</td>
-        <td>${s.sex==='F'?'♀':'♂'}</td>
+        <td class="semi">${s.sex==='F'?'F':'M'}</td>
         <td class="xs2 mut">${s.dob||'—'}</td>
         <td class="xs2">${s.parent||'—'}</td>
         <td class="mono xs2">${s.ptel||'—'}</td>
@@ -12094,8 +12200,8 @@ function printListeClasse(){
   <div style="padding:12px 20px;background:#f5f3ef;border-bottom:1px solid #ddd8d0"><strong>Classe :</strong> ${selC} — ${list.length} élèves — Année ${DB.school?.annee||'2024–2025'}</div>
   <div style="padding:12px 20px">
     <table style="width:100%;border-collapse:collapse;font-size:12px">
-      <thead><tr style="background:#142554">${['#','Matricule','Nom & Prénom','Sexe','Né(e) le','Parent / Tuteur','Tél. parent','Statut'].map(h=>`<th style="padding:6px 8px;text-align:left;color:rgba(255,255,255,.7);font-size:13px;font-weight:600">${h}</th>`).join('')}</tr></thead>
-      <tbody>${list.map((s,i)=>`<tr style="${i%2===0?'':'background:#f8f7f5'}border-bottom:1px solid #e8e4dc">${[i+1,s.mat,s.nom+' '+s.pre,s.sex==='F'?'♀':'♂',s.dob||'—',s.parent||'—',s.ptel||'—',s.stat].map(v=>`<td style="padding:6px 8px">${v}</td>`).join('')}</tr>`).join('')}</tbody>
+      <thead><tr>${['#','Matricule','Nom &amp; Prénom','Sexe','Né(e) le','Parent / Tuteur','Tél. parent','Statut'].map(h=>`<th style="padding:6px 7px;text-align:left;color:#ffffff;background:#142554;font-size:11px;font-weight:700;letter-spacing:.2px;-webkit-print-color-adjust:exact;print-color-adjust:exact">${h}</th>`).join('')}</tr></thead>
+      <tbody>${list.map((s,i)=>`<tr style="${i%2===0?'':'background:#f8f7f5'}border-bottom:1px solid #e8e4dc">${[i+1,s.mat,s.nom+' '+s.pre,s.sex==='F'?'F':'M',s.dob||'—',s.parent||'—',s.ptel||'—',s.stat].map(v=>`<td style="padding:4px 7px;font-size:11px">${v}</td>`).join('')}</tr>`).join('')}</tbody>
     </table>
   </div>
   <div style="background:#f0ede7;border-top:1px solid #ddd8d0;padding:7px 20px;display:flex;justify-content:space-between">
@@ -12113,7 +12219,7 @@ function printPresence(){const cls=window._prCl||CLS[0];const sts=DB.students.fi
 function pgAttestTravail(){if(!iA())return na();return`<div class="card"><div class="ct">Attestations de travail</div><div class="fg mb14"><span class="fl">Enseignant</span><select class="fi" id="atEns">${DB.teachers.map(t=>`<option value="${t.id}">${t.pre} ${t.nom} — ${t.mat2}</option>`).join('')}</select></div><button class="btn bi" onclick="genAttestTravail()">📄 Générer attestation</button></div>`;}
 function genAttestTravail(){
   const t=T(document.getElementById('atEns')?.value);if(!t)return;
-  printDoc(`<div style="max-width:600px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center">${docHeader("Attestation de Travail")}<div style="padding:30px 40px"><div style="font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:20px">ATTESTATION DE TRAVAIL</div>
+  printDoc(`<div style="max-width:900px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px #9a7228,inset 0 0 0 6px #142554,inset 0 0 0 8px #9a7228;-webkit-print-color-adjust:exact;print-color-adjust:exact">${docHeader("Attestation de Travail")}<div style="padding:30px 40px"><div style="font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:20px">ATTESTATION DE TRAVAIL</div>
   <div style="font-size:13px;line-height:2;text-align:left"><p>Je soussigné(e), <strong>${DB.school?.directeur||'Le Directeur'}</strong>, Directeur du <strong>${DB.school?.nom||'Centre VÉRITAS'}</strong>, atteste que :</p>
   <div style="margin:16px 0;padding:14px;border-left:4px solid #9a7228;background:#f5f3ef"><div style="font-size:18px;font-weight:700;color:#142554">${t.pre.toUpperCase()} ${t.nom.toUpperCase()}</div><div style="font-size:13px;color:#6b5e52;margin-top:4px">Grade: ${t.grade} · Matière: ${t.mat2}</div></div>
   <p>est employé(e) en qualité de <strong>Professeur de ${t.mat2}</strong> au sein de notre établissement depuis la rentrée scolaire <strong>${DB.school?.annee||'2024–2025'}</strong>.</p>
@@ -17156,9 +17262,9 @@ var LITT_OEUVRES = {
       resume:"Lucien Anya Noa, érudit beti et auteur de plusieurs ouvrages sur sa culture (La poésie beti, Mimbenge, Nnem, La Sagesse beti dans le chant des oiseaux), transcrit dans ce recueil les contes et chantefables transmis 'de père en fils' dans la grande forêt équatoriale du Sud Cameroun. À travers un bestiaire personnifié (Kulu la Tortue sage, Zee le Léopard fort mais peu réfléchi, Ndoe l'Aigle, Berne le Cochon stupide, Nkaa le Varan étourdi, Dzungo'o le Caméléon, Mvomo le Python), l'œuvre enseigne aux jeunes les valeurs ancestrales : patience, intelligence, respect de la forêt, héritage culturel. Préfacé par Séverin Cécil Abéga."
     },
     citations:[
-      {texte:"Les contes gardent vivante la sagesse des hommes d'autrefois. C'était leur école, une manière d'enseigner ce qui leur semblait important, et qui devait circuler et être conservé.",source:"Avant-propos de Lucien Anya Noa",figures:["Personnification (« les contes gardent vivante »)","Métaphore (« leur école »)","Doublet « circuler et être conservé »"],analyse:"Trois outils de langue se répondent. (1) La PERSONNIFICATION « les contes gardent vivante la sagesse » fait du conte un être actif, presque un gardien : ce n'est pas l'homme qui veille sur le conte, c'est le conte qui veille sur la sagesse — l'oralité est dotée d'une vie propre. (2) La MÉTAPHORE « leur école » assimile la veillée à une véritable institution : le conte instruit, transmet des valeurs et « évalue » par sa morale, exactement comme un établissement scolaire. (3) Le DOUBLET « circuler ET être conservé » dit le double mouvement de la tradition orale : se transmettre (le mouvement) sans jamais se perdre (la mémoire).",effet:"Pour l'élève de 6e, la leçon est limpide : écouter un conte n'est pas « perdre son temps », c'est entrer dans la plus ancienne des écoles. Au moment où l'écran menace de faire taire les grands-parents, le texte revalorise leur parole comme un savoir vivant."},
-      {texte:"Kulu, la Tortue, est l'image de la sagesse, de l'intelligence. Elle réfléchit d'abord avant d'agir. Zee le Léopard, par contre, compte surtout sur sa force, mais réfléchit peu.",source:"Avant-propos — présentation du bestiaire",figures:["Antithèse (Kulu / Zee)","Présent de vérité générale","Apposition explicative (« l'image de la sagesse »)"],analyse:"L'ANTITHÈSE structure tout le bestiaire : d'un côté Kulu, la sagesse qui « réfléchit d'abord » ; de l'autre Zee, la force qui « réfléchit peu ». Les deux animaux ne sont pas des personnages mais des IDÉES incarnées — c'est le propre de la fable. Le PRÉSENT DE VÉRITÉ GÉNÉRALE (« est », « réfléchit ») donne à ces traits une valeur de loi universelle, vraie hier comme aujourd'hui. L'APPOSITION « l'image de la sagesse » double le nom de l'animal d'une étiquette morale qui guide la lecture.",effet:"L'élève reçoit une grille de lecture explicite : dès qu'un animal paraît, il anticipe la leçon. Surtout, il retient une valeur pour sa propre vie — mieux vaut la réflexion patiente de Kulu que la force impulsive de Zee, conseil précieux à 11-12 ans."},
-      {texte:"C'est une grande richesse qu'ils nous ont laissée là, une partie de l'héritage que mère et père lèguent à leurs enfants.",source:"Avant-propos — sur la transmission",figures:["Métaphore économique (« richesse », « héritage »)","Apposition","Couple « mère et père »"],analyse:"La MÉTAPHORE ÉCONOMIQUE (« richesse », « héritage », « léguer ») emprunte son vocabulaire au droit familial : le conte n'est pas un loisir mais un CAPITAL culturel que l'on reçoit et que l'on doit faire fructifier. L'APPOSITION « une partie de l'héritage » précise et solennise le don. Enfin le couple « mère ET père » refuse le patriarcat exclusif : la transmission est BILATÉRALE, portée à égalité par les deux parents.",effet:"Le jeune lecteur ressent la dignité de ce qu'il reçoit : ce qu'on lui raconte le soir n'est pas un divertissement secondaire, c'est sa fortune, son patrimoine. Lire l'œuvre devient alors un acte de fidélité envers les siens."}
+      {texte:"Les contes gardent vivante la sagesse des hommes d'autrefois. C'était leur école, une manière d'enseigner ce qui leur semblait important, et qui devait circuler et être conservé. Cet enseignement est parvenu jusqu'à nous. Il contient des idées qui sont considérées comme sages partout dans le monde. Chaque pays, chaque société a sa manière de les enseigner. Nos ancêtres les avaient mises sous la forme de contes.",source:"Avant-propos de Lucien Anya Noa",figures:["Personnification (« les contes gardent vivante »)","Métaphore (« leur école »)","Doublet « circuler et être conservé »"],analyse:"Trois outils de langue se répondent. (1) La PERSONNIFICATION « les contes gardent vivante la sagesse » fait du conte un être actif, presque un gardien : ce n'est pas l'homme qui veille sur le conte, c'est le conte qui veille sur la sagesse — l'oralité est dotée d'une vie propre. (2) La MÉTAPHORE « leur école » assimile la veillée à une véritable institution : le conte instruit, transmet des valeurs et « évalue » par sa morale, exactement comme un établissement scolaire. (3) Le DOUBLET « circuler ET être conservé » dit le double mouvement de la tradition orale : se transmettre (le mouvement) sans jamais se perdre (la mémoire).",effet:"Pour l'élève de 6e, la leçon est limpide : écouter un conte n'est pas « perdre son temps », c'est entrer dans la plus ancienne des écoles. Au moment où l'écran menace de faire taire les grands-parents, le texte revalorise leur parole comme un savoir vivant."},
+      {texte:"Kulu, la Tortue, est l'image de la sagesse, de l'intelligence. Elle réfléchit d'abord avant d'agir. Zee le Léopard, par contre, compte surtout sur sa force, mais réfléchit peu. Ndoe l'Aigle réfléchit peut-être, mais pas assez. Berne le cochon sauvage est plein de stupidité, Nkaa le varan un étourdi. Et il y a aussi Dzungo'o le Caméléon, Mvomo le Python, et bien d'autres.",source:"Avant-propos — présentation du bestiaire",figures:["Antithèse (Kulu / Zee)","Présent de vérité générale","Apposition explicative (« l'image de la sagesse »)"],analyse:"L'ANTITHÈSE structure tout le bestiaire : d'un côté Kulu, la sagesse qui « réfléchit d'abord » ; de l'autre Zee, la force qui « réfléchit peu ». Les deux animaux ne sont pas des personnages mais des IDÉES incarnées — c'est le propre de la fable. Le PRÉSENT DE VÉRITÉ GÉNÉRALE (« est », « réfléchit ») donne à ces traits une valeur de loi universelle, vraie hier comme aujourd'hui. L'APPOSITION « l'image de la sagesse » double le nom de l'animal d'une étiquette morale qui guide la lecture.",effet:"L'élève reçoit une grille de lecture explicite : dès qu'un animal paraît, il anticipe la leçon. Surtout, il retient une valeur pour sa propre vie — mieux vaut la réflexion patiente de Kulu que la force impulsive de Zee, conseil précieux à 11-12 ans."},
+      {texte:"C'est pourquoi il est très utile de les connaître et de les transmettre à notre tour pour que notre jeunesse les connaisse et les partage et surtout, qu'elle les vive. C'est une grande richesse qu'ils nous ont laissée là, une partie de l'héritage que mère et père lèguent à leurs enfants.",source:"Avant-propos — sur la transmission",figures:["Métaphore économique (« richesse », « héritage »)","Apposition","Couple « mère et père »"],analyse:"La MÉTAPHORE ÉCONOMIQUE (« richesse », « héritage », « léguer ») emprunte son vocabulaire au droit familial : le conte n'est pas un loisir mais un CAPITAL culturel que l'on reçoit et que l'on doit faire fructifier. L'APPOSITION « une partie de l'héritage » précise et solennise le don. Enfin le couple « mère ET père » refuse le patriarcat exclusif : la transmission est BILATÉRALE, portée à égalité par les deux parents.",effet:"Le jeune lecteur ressent la dignité de ce qu'il reçoit : ce qu'on lui raconte le soir n'est pas un divertissement secondaire, c'est sa fortune, son patrimoine. Lire l'œuvre devient alors un acte de fidélité envers les siens."}
     ],
     techniques:[
       {nom:"La tradition orale transcrite",def:"Faire passer à l'écrit une parole vivante (contes dits et chantés) afin de fixer et sauver un patrimoine menacé de disparition.",exemple:"Anya Noa note les contes entendus des anciens beti et les publie (Afredit, 2011).",effet:"Le texte conserve la fraîcheur de l'oral (refrains, rythme) tout en assurant sa survie face à la télévision et au smartphone."},
@@ -17174,7 +17280,7 @@ var LITT_OEUVRES = {
     analyse:{
       angle:"Pourquoi les anciens chantaient-ils en forêt ? Et pourquoi tu devrais les écouter ?",
       citation:"La forêt chante. Il suffit de savoir l'écouter.",
-      contenu:"Bienvenue en 6e ! Pour ta toute première œuvre du collège, on te donne quelque chose de... pas commun. Pas un roman avec un héros. Pas une pièce avec des dialogues. Un recueil de CHANTS. Et pas n'importe lesquels — les chants de la forêt, transmis depuis des générations par les anciens du Cameroun.\n\n📖 SCÈNE — La veillée au village\nImagine la nuit. Pas la nuit de Douala avec ses lampadaires. La VRAIE nuit de la forêt. Pas un bruit de moteur. Juste les criquets, le vent dans les feuilles, et les braises qui crépitent. L'aïeul est assis sur un tabouret de bois. Autour de lui, les enfants, les yeux qui brillent. Il ouvre la bouche. Et la forêt entière commence à raconter une histoire à travers sa voix.\n\nC'est ça, Les Chants de la Forêt. Une littérature qui n'a pas besoin de papier. Une littérature qui se transmet de bouche à oreille. C'est ce qu'on appelle la LITTÉRATURE ORALE — retiens ce mot, il te servira jusqu'au BAC.\n\nLucien Anya Noa a fait un travail énorme : il a écouté les anciens, il a noté, il a sauvé. Parce qu'aujourd'hui, avec la télé et les smartphones, ces chants disparaissent. Toi qui lis ce livre, tu sauves un peu de la mémoire africaine.\n\nTu vas y trouver des chants sur la nature, sur les animaux, sur les esprits, sur la chasse, sur l'amour. Certains sont très courts. Certains sont longs comme des contes. Certains se chantent en groupe, d'autres seul devant le feu.\n\nPour ton année de 6e : ce livre te montre que la littérature, ce n'est pas seulement ce qu'on lit. C'est aussi ce qu'on raconte. Et ta grand-mère, ta tante, ton oncle qui te disent des histoires le soir... eux aussi sont des littéraires. Ils ne le savent peut-être pas. Mais maintenant, toi, tu le sais."
+      contenu:"Bienvenue en 6e ! Pour ta toute première œuvre du collège, on te donne quelque chose de... pas commun. Pas un roman avec un héros. Pas une pièce avec des dialogues. Un recueil de CHANTS. Et pas n'importe lesquels — les chants de la forêt, transmis depuis des générations par les anciens du Cameroun.\n\n📖 SCÈNE — La veillée au village\nImagine la nuit. Pas la nuit de Douala avec ses lampadaires. La VRAIE nuit de la forêt. Pas un bruit de moteur. Juste les criquets, le vent dans les feuilles, et les braises qui crépitent. L'aïeul est assis sur un tabouret de bois. Autour de lui, les enfants, les yeux qui brillent. Il ouvre la bouche. Et la forêt entière commence à raconter une histoire à travers sa voix.\n\nC'est ça, Les Chants de la Forêt. Une littérature qui n'a pas besoin de papier. Une littérature qui se transmet de bouche à oreille. C'est ce qu'on appelle la LITTÉRATURE ORALE — retiens ce mot, il te servira jusqu'au BAC.\n\nLucien Anya Noa a fait un travail énorme : il a écouté les anciens, il a noté, il a sauvé. Parce qu'aujourd'hui, avec la télé et les smartphones, ces chants disparaissent. Toi qui lis ce livre, tu sauves un peu de la mémoire africaine.\n\nTu vas y trouver des chants sur la nature, sur les animaux, sur les esprits, sur la chasse, sur l'amour. Certains sont très courts. Certains sont longs comme des contes. Certains se chantent en groupe, d'autres seul devant le feu.\n\n🐢 BESTIAIRE — Le monde animal d'Anya Noa\nMaintenant, regarde de plus près qui peuple ces chants. Tu vas rencontrer Kulu la Tortue (la sagesse, celle qui réfléchit avant d'agir), Zee le Léopard (la force brute qui réfléchit peu), Ndoe l'Aigle (qui réfléchit, mais pas assez), Berne le Cochon sauvage (la stupidité), Nkaa le Varan (l'étourdi), Dzungo'o le Caméléon, Mvomo le Python. Chaque animal n'est pas juste un personnage : c'est une IDÉE qui marche sur quatre pattes ou rampe sur le sol. Anya Noa te tend un miroir : à toi de retrouver ces traits dans les humains autour de toi. Qui est ton Kulu ? Qui est ton Zee ? Réponds en silence, dans ta tête.\n\n🎓 OUTIL DE LANGUE — Le présent de vérité générale\nDans son avant-propos, Anya Noa écrit que Kulu « réfléchit d'abord avant d'agir ». Pourquoi ce présent ? Parce qu'il ne décrit pas un moment précis : il énonce une LOI, valable hier, valable aujourd'hui, valable demain. Ce temps-là, on l'appelle le « présent de vérité générale ». C'est lui qui transforme un conte en leçon. Repère-le dans les autres livres que tu liras cette année : chaque fois qu'un auteur veut graver une idée comme un proverbe, il sort cette arme-là.\n\nPour ton année de 6e : ce livre te montre que la littérature, ce n'est pas seulement ce qu'on lit. C'est aussi ce qu'on raconte. Et ta grand-mère, ta tante, ton oncle qui te disent des histoires le soir... eux aussi sont des littéraires. Ils ne le savent peut-être pas. Mais maintenant, toi, tu le sais. Et la prochaine fois que tu entends « Kouncoun ! », tu sauras pourquoi tu te tais et tu tends l'oreille : une école est en train de commencer."
     }
   },
 
@@ -17207,9 +17313,9 @@ var LITT_OEUVRES = {
       resume:"Les Bimanes regroupe 7 nouvelles satiriques peignant la société camerounaise contemporaine. Tchakarias, vieillard qui souffre pour obtenir sa carte d'identité ; une petite vendeuse de beignets confrontée à la misère ; un ministère du soya kafkaïen — autant de vignettes où l'humain est réduit à sa condition animale (bimane) par la corruption, le harcèlement, l'absurdité. Le rire grinçant d'Abega dénonce avec finesse les travers d'une administration post-coloniale qui broie les plus faibles."
     },
     citations:[
-      {texte:"Ses jambes, ses braves jambes élançaient impitoyablement. Il les soulagea de la protection douloureuse de deux souliers ricanant de vieillesse.",source:"Le fardeau — incipit",figures:["Personnification (jambes « braves », souliers « ricanant »)","Oxymore (« protection douloureuse »)","Style indirect libre"],analyse:"Tout le corps du vieux Tchakarias est animé. La PERSONNIFICATION le partage en deux camps : ses jambes « braves » (vocabulaire militaire — elles se battent encore) et ses souliers qui « ricanent » comme des bourreaux moqueurs : l'objet devient l'ennemi du pauvre. L'OXYMORE « protection douloureuse » dit l'absurde de la misère — ce qui devrait protéger (les chaussures) fait souffrir. Le STYLE INDIRECT LIBRE colle au ressenti du vieillard sans « il sentit que… ».",effet:"Dès la première phrase, l'élève de 6e sourit (des souliers qui ricanent) ET s'attache au vieil homme. La satire vise plus large : c'est tout un peuple qui « élance » dans ses « braves jambes »."},
-      {texte:"Avec les hommes qui nous servent ? Je ne sais pas qui nous a légué de tels bourreaux. Une vraie punition.",source:"Le fardeau — Tchakarias parle des fonctionnaires",figures:["Antiphrase (« qui nous servent » = bourreaux)","Hyperbole (« une vraie punition »)","Question rhétorique"],analyse:"L'ANTIPHRASE est le cœur du passage : dire « les hommes qui nous servent » pour désigner des « bourreaux » fait entendre l'écart entre la mission (servir le public) et la réalité (le martyriser). L'HYPERBOLE « une vraie punition » donne à la corruption une dimension de châtiment collectif. La QUESTION RHÉTORIQUE n'attend aucune réponse : elle exprime l'indignation.",effet:"La critique politique passe par la voix d'un humble vieillard : limpide, populaire, irréfutable. L'élève découvre que l'ironie est une arme."},
-      {texte:"Qui a jamais souffert l'amertume d'une Kola alors qu'il avait du sel dans sa poche ?",source:"Le fardeau — Tchakarias rusé",figures:["Proverbe traditionnel","Métaphore filée (Kola amère = fonctionnaire ; sel = atout)","Question rhétorique"],analyse:"Le PROVERBE ancre la réflexion dans la sagesse orale africaine. Sa MÉTAPHORE est filée : la Kola amère figure le fonctionnaire corrompu, et le sel — qui adoucit — figure l'atout dont dispose Tchakarias (la beauté de sa fille Ana). La QUESTION RHÉTORIQUE transforme la maxime en évidence partagée.",effet:"L'œuvre fait dialoguer tradition et modernité : la sagesse ancienne sert à décoder la corruption moderne. L'élève voit qu'un proverbe n'est pas « démodé » — il pense le présent."}
+      {texte:"Ses jambes, ses braves jambes élançaient impitoyablement. Il les soulagea de la protection douloureuse de deux souliers ricanant de vieillesse, puis les détendit, faisant détoner les articulations de ses genoux. Ses rhumatismes se portaient bien, malédiction !",source:"Le fardeau — incipit",figures:["Personnification (jambes « braves », souliers « ricanant »)","Oxymore (« protection douloureuse »)","Style indirect libre"],analyse:"Tout le corps du vieux Tchakarias est animé. La PERSONNIFICATION le partage en deux camps : ses jambes « braves » (vocabulaire militaire — elles se battent encore) et ses souliers qui « ricanent » comme des bourreaux moqueurs : l'objet devient l'ennemi du pauvre. L'OXYMORE « protection douloureuse » dit l'absurde de la misère — ce qui devrait protéger (les chaussures) fait souffrir. Le STYLE INDIRECT LIBRE colle au ressenti du vieillard sans « il sentit que… ».",effet:"Dès la première phrase, l'élève de 6e sourit (des souliers qui ricanent) ET s'attache au vieil homme. La satire vise plus large : c'est tout un peuple qui « élance » dans ses « braves jambes »."},
+      {texte:"— Alors tu l'as retirée ? — Avec les hommes qui nous servent ? Je ne sais pas qui nous a légué de tels bourreaux. Une vraie punition. — Le pourboire… — Ils n'auront rien. Moi cependant, j'aurai ma carte d'identité.",source:"Le fardeau — Tchakarias parle des fonctionnaires",figures:["Antiphrase (« qui nous servent » = bourreaux)","Hyperbole (« une vraie punition »)","Question rhétorique"],analyse:"L'ANTIPHRASE est le cœur du passage : dire « les hommes qui nous servent » pour désigner des « bourreaux » fait entendre l'écart entre la mission (servir le public) et la réalité (le martyriser). L'HYPERBOLE « une vraie punition » donne à la corruption une dimension de châtiment collectif. La QUESTION RHÉTORIQUE n'attend aucune réponse : elle exprime l'indignation.",effet:"La critique politique passe par la voix d'un humble vieillard : limpide, populaire, irréfutable. L'élève découvre que l'ironie est une arme."},
+      {texte:"Qui a jamais souffert l'amertume d'une Kola alors qu'il avait du sel dans sa poche ? Le vieillard avait un air rusé et farouchement résolu.",source:"Le fardeau — Tchakarias rusé",figures:["Proverbe traditionnel","Métaphore filée (Kola amère = fonctionnaire ; sel = atout)","Question rhétorique"],analyse:"Le PROVERBE ancre la réflexion dans la sagesse orale africaine. Sa MÉTAPHORE est filée : la Kola amère figure le fonctionnaire corrompu, et le sel — qui adoucit — figure l'atout dont dispose Tchakarias (la beauté de sa fille Ana). La QUESTION RHÉTORIQUE transforme la maxime en évidence partagée.",effet:"L'œuvre fait dialoguer tradition et modernité : la sagesse ancienne sert à décoder la corruption moderne. L'élève voit qu'un proverbe n'est pas « démodé » — il pense le présent."}
     ],
     techniques:[
       {nom:"La satire sociale",def:"Peindre les travers d'une société pour les dénoncer en faisant rire — ici la corruption et l'absurdité administrative.",exemple:"Le « ministère du soya » et le calvaire de Tchakarias pour obtenir une simple carte d'identité.",effet:"Le rire grinçant fait passer la critique : on rit d'abord, puis on mesure la gravité du réel dénoncé."},
@@ -17226,7 +17332,7 @@ var LITT_OEUVRES = {
     analyse:{
       angle:"Pourquoi appeler les humains des « bimanes » ? La réponse va te surprendre.",
       citation:"Le bimane est cet être étrange qui a deux mains, mais qui s'en sert mal.",
-      contenu:"Premier piège du titre : un BIMANE, ça veut dire quoi ? Décompose : « bi » = deux, « mane » = main. Un bimane, c'est donc un être à deux mains. Bref... c'est NOUS. Les humains. Mais quand Séverin Cécile Abéga te dit « les bimanes », il y a déjà de l'ironie. Comme s'il regardait les humains comme un zoologue regarde une espèce bizarre. Et il a bien raison.\n\n📖 SCÈNE — La fête de quartier (récit type)\nTu connais la scène : un baptême au quartier. Tout le monde est invité. Personne n'a vraiment été invité, mais tout le monde vient. Les femmes apportent des plats (et critiquent ceux des autres). Les hommes discutent politique (sans rien y comprendre). Les enfants courent partout (et personne ne s'occupe d'eux). La musique est trop forte. Quelqu'un finit toujours par se disputer pour une bouteille. Et le lendemain matin, on dit : « C'était une belle fête. »\n\nVoilà ce qu'observe Abéga avec ses récits : nous, les bimanes camerounais, dans nos comportements les plus quotidiens. Et il le fait avec un humour si fin que tu te reconnais à toutes les pages.\n\nC'est de la SATIRE SOCIALE. Pas pour se moquer méchamment. Pour observer. Pour faire rire (et réfléchir). Abéga est ethnologue de formation : il regarde sa propre société comme un scientifique regarde des objets d'étude. Et ce qu'il décrit, c'est nous. Tous. Toi, ton père, ta mère, ta tante, ton voisin.\n\nPour ton année de 6e : ce livre te donne un super-pouvoir. Apprendre à OBSERVER ce qui t'entoure. Les comportements, les manies, les contradictions. Tu vas commencer à voir des « bimanes » partout. Au marché, à l'école, dans le taxi-brousse. Et tu comprendras qu'écrire, ça commence par regarder."
+      contenu:"Premier piège du titre : un BIMANE, ça veut dire quoi ? Décompose : « bi » = deux, « mane » = main. Un bimane, c'est donc un être à deux mains. Bref... c'est NOUS. Les humains. Mais quand Séverin Cécile Abéga te dit « les bimanes », il y a déjà de l'ironie. Comme s'il regardait les humains comme un zoologue regarde une espèce bizarre. Et il a bien raison.\n\n📖 SCÈNE — La fête de quartier (récit type)\nTu connais la scène : un baptême au quartier. Tout le monde est invité. Personne n'a vraiment été invité, mais tout le monde vient. Les femmes apportent des plats (et critiquent ceux des autres). Les hommes discutent politique (sans rien y comprendre). Les enfants courent partout (et personne ne s'occupe d'eux). La musique est trop forte. Quelqu'un finit toujours par se disputer pour une bouteille. Et le lendemain matin, on dit : « C'était une belle fête. »\n\nVoilà ce qu'observe Abéga avec ses récits : nous, les bimanes camerounais, dans nos comportements les plus quotidiens. Et il le fait avec un humour si fin que tu te reconnais à toutes les pages.\n\nC'est de la SATIRE SOCIALE. Pas pour se moquer méchamment. Pour observer. Pour faire rire (et réfléchir). Abéga est ethnologue de formation : il regarde sa propre société comme un scientifique regarde des objets d'étude. Et ce qu'il décrit, c'est nous. Tous. Toi, ton père, ta mère, ta tante, ton voisin.\n\n🎭 GALERIE — Les sept tableaux d'Abéga\nLes Bimanes, c'est 7 nouvelles, donc 7 petits films courts. Le vieux Tchakarias qui attend pendant des heures sa carte d'identité (« Le fardeau »). Une petite vendeuse de beignets qui doit nourrir sa famille avec rien. Un savon qui devient un trésor. Un étranger de passage que personne ne reconnaît. Des mots d'enfants qui disent plus de vérités que les discours des grands. Un ministère du soya où l'absurde règne en maître. Chaque nouvelle est une vignette : tu la lis en cinq minutes, et elle te poursuit pendant des jours. C'est la force de la NOUVELLE : court, mais qui marque.\n\n🔧 OUTIL DE LANGUE — La personnification ironique\nAbéga écrit que les souliers de Tchakarias « ricanent de vieillesse ». Arrête-toi sur ce verbe. Un soulier ne rit pas. Un soulier ne se moque pas. Mais en lui prêtant le ricanement d'un humain, Abéga fait deux choses : il rend l'objet vivant ET il en fait l'ennemi du pauvre. Cette technique, c'est la PERSONNIFICATION. Quand elle est moqueuse comme ici, on parle de personnification IRONIQUE. Repère-la partout : c'est l'arme préférée des écrivains satiriques.\n\nPour ton année de 6e : ce livre te donne un super-pouvoir. Apprendre à OBSERVER ce qui t'entoure. Les comportements, les manies, les contradictions. Tu vas commencer à voir des « bimanes » partout. Au marché, à l'école, dans le taxi-brousse. Et tu comprendras qu'écrire, ça commence par regarder. Tu vas peut-être même avoir envie d'écrire ta propre nouvelle : une scène de quartier, un dialogue de marché, un portrait de tante. Vas-y. Abéga te montre le chemin."
     }
   },
 
@@ -17260,14 +17366,14 @@ var LITT_OEUVRES = {
       resume:"Amadou Koné rassemble dans Les Contes de Korotoumou un florilège de récits issus de la tradition orale mandé d'Afrique de l'Ouest. À travers Korotoumou, conteuse et héroïne, le lecteur découvre la sagesse africaine : le triomphe de la ruse sur la force, la valeur de la parole donnée, le respect des anciens, et la solidarité comme socle de la société."
     },
     citations:[
-      {texte:"Écoutez ce que mes oreilles ont entendu, ce que ma bouche va transmettre.",source:"Formule d'ouverture",figures:["Parallélisme (« mes oreilles » / « ma bouche »)","Synecdoque (oreilles = écoute, bouche = parole)","Formule rituelle"],analyse:"Le PARALLÉLISME (« ce que mes oreilles… ce que ma bouche… ») met en miroir deux gestes : recevoir puis donner. La SYNECDOQUE remplace le conteur par ses organes (oreilles, bouche) pour souligner qu'il n'est qu'un relais : il ne crée pas, il transmet. La FORMULE RITUELLE, en ouverture, fait entrer l'auditoire dans un temps sacré, hors du quotidien.",effet:"L'élève de 6e comprend la règle d'or de l'oralité : on transmet fidèlement un héritage reçu. En écoutant, il devient à son tour un maillon de la chaîne."},
-      {texte:"Le lièvre vainquit l'éléphant non par sa force, mais par ses oreilles attentives.",source:"Conte du lièvre et de l'éléphant",figures:["Antithèse (force / intelligence)","Symbolisme animalier","Synecdoque (oreilles = écoute)"],analyse:"L'ANTITHÈSE oppose la force brute (l'éléphant) à l'intelligence patiente (le lièvre) — schéma universel du conte africain. Le SYMBOLISME ANIMALIER fait de chaque bête une valeur : l'éléphant la puissance, le lièvre la ruse. La SYNECDOQUE « oreilles attentives » résume toute une vertu : écouter, observer, comprendre avant d'agir.",effet:"Leçon valorisante pour les plus faibles : on peut l'emporter sans être fort, par l'écoute et la réflexion. C'est l'éloge de l'intelligence pratique."}
+      {texte:"Kouncoun, et si nous disions des contes ce soir ? Et si nous faisions comme autrefois quand nous étions petits, à Kongodjan, dans la plantation de nos parents ?",source:"Prologue — le narrateur à sa grande sœur Korotoumou",figures:["Formule d'appel du conte (« Kouncoun »)","Anaphore (« Et si… ? »)","Champ lexical de la mémoire et de l'enfance"],analyse:"Le récit s'ouvre par « Kouncoun », formule d'appel propre au conte (l'équivalent oral de « Il était une fois »). L'ANAPHORE des questions « Et si… ? » exprime un désir nostalgique : revenir à Kongodjan, la plantation de l'enfance. Le conte n'est pas présenté comme un jeu enfantin mais comme un acte de mémoire culturelle, menacé par la modernité (radio, télévision).",effet:"L'élève de 6e saisit d'emblée l'enjeu de l'œuvre : sauver la parole traditionnelle face aux écrans. La formule « Kouncoun » l'invite, lui aussi, à entrer dans le cercle des conteurs."},
+      {texte:"Et si, pour une nuit, nous retournions à Kongodjan, au milieu des plantations de café et de cacao, les plantations bercées par les chants des oiseaux, peuplées d'animaux et de génies ?",source:"Prologue — l'appel au retour à l'oralité",figures:["Question rhétorique","Personnification (« plantations bercées par les chants »)","Énumération (« animaux et génies »)","Opposition oralité / modernité"],analyse:"À la radio « qui parle en français » et à la télévision « qui montre des feuilletons américains » s'oppose Kongodjan, espace mythique où la nature elle-même est vivante : les plantations sont « bercées par les chants des oiseaux » (PERSONNIFICATION) et « peuplées d'animaux et de génies ». La modernité aliène ; l'oralité réenchante le monde.",effet:"Le lecteur ressent la perte que représente l'oubli des contes : ce n'est pas seulement une tradition qui s'efface, mais tout un monde habité et sensible. L'œuvre devient un plaidoyer pour la mémoire."}
     ],
     techniques:[
       {nom:"Le conte oral transcrit",def:"Mettre par écrit un récit de la tradition orale en gardant ses marques de performance (adresses au public, rythme).",exemple:"Amadou Koné transcrit les contes que disait Korotoumou en langue Cerma.",effet:"Le lecteur a l'impression d'entendre la conteuse ; la sagesse mandé reste vivante malgré le passage à l'écrit."},
-      {nom:"La formule rituelle",def:"Phrase d'ouverture ou de clôture codée qui signale l'entrée dans le temps du conte.",exemple:"« Écoutez ce que mes oreilles ont entendu, ce que ma bouche va transmettre. »",effet:"Elle sacralise la parole et inscrit le conteur dans une chaîne de transmission ininterrompue."},
+      {nom:"La formule rituelle",def:"Phrase d'ouverture ou de clôture codée qui signale l'entrée dans le temps du conte.",exemple:"« Kouncoun, et si nous disions des contes ce soir ? » — l'appel « Kouncoun » ouvre la veillée.",effet:"Elle sacralise la parole et inscrit le conteur dans une chaîne de transmission ininterrompue."},
       {nom:"La structure répétitive",def:"Reprise de schémas, d'épreuves ou de refrains qui rythment le récit et facilitent la mémorisation.",exemple:"Les rencontres successives du Lièvre et de l'Hyène suivent un même canevas.",effet:"La répétition installe une attente, fait participer l'auditoire et grave la leçon dans la mémoire."},
-      {nom:"La morale finale",def:"Leçon explicite énoncée à la fin du conte, qui en livre le sens éducatif.",exemple:"« Le lièvre vainquit l'éléphant non par sa force, mais par ses oreilles attentives. »",effet:"L'enfant repart avec un enseignement clair : l'intelligence et l'écoute valent mieux que la force brute."}
+      {nom:"La morale finale",def:"Leçon explicite énoncée à la fin du conte, qui en livre le sens éducatif.",exemple:"Chaque conte (« Lièvre et Hyène pêcheurs », « La proscrite et la femme du roi »…) se clôt sur une leçon de sagesse explicite.",effet:"L'enfant repart avec un enseignement clair : l'intelligence et l'écoute valent mieux que la force brute."}
     ],
     controle:[
       {q:"Quelles sont les fonctions traditionnelles du conte en Afrique ?",r:"1) Éducation morale (transmettre valeurs et interdits) ; 2) Préservation de l'histoire et de la généalogie ; 3) Divertissement collectif (le soir au village) ; 4) Cohésion sociale (rassemblement intergénérationnel) ; 5) Apprentissage de la langue et de l'art oratoire."}
@@ -17275,7 +17381,7 @@ var LITT_OEUVRES = {
     analyse:{
       angle:"Pourquoi une grand-mère qui raconte des contes est plus puissante qu'un téléphone ?",
       citation:"Écoute bien, mon enfant. Ce que je te dis aujourd'hui, c'est ce que ma grand-mère m'a dit.",
-      contenu:"Korotoumou, c'est le nom de la conteuse. La grand-mère. Celle qu'on écoute quand le soleil tombe et que les criquets commencent leur concert. Amadou Koné a écouté Korotoumou. Et il a écrit ce qu'elle disait. Tu vas pouvoir, toi aussi, t'asseoir près d'elle.\n\n📖 CONTE — Le genre d'histoire qu'on trouve ici\nUn homme avare se promène en brousse. Il rencontre une vieille femme affamée. Il refuse de partager sa nourriture. Plus loin, il trébuche, son sac s'ouvre, ses provisions roulent dans la rivière. Il meurt de faim... à 100 mètres de chez lui. La vieille femme, c'était un esprit qui testait sa générosité.\n\nTu vois la structure ? Court. Punchline morale claire. Et tu retiens le message pour la vie : partage, ou tu perdras tout. Les contes africains, c'est ça : on te raconte une histoire, on te fait rire ou frémir, et à la fin tu apprends une leçon que les grands livres de philosophie mettront 400 pages à expliquer.\n\nKorotoumou raconte des contes qui viennent de partout en Afrique de l'Ouest. Des histoires de lièvre malin, d'hyène stupide, de roi puni pour son orgueil, d'enfant orphelin protégé par les ancêtres. Chaque conte a sa morale. Chaque conte est un petit cadeau pour la vie.\n\nPour ton année de 6e : profite. Ces contes-là, tu peux les RACONTER. À ton petit frère, à tes cousins, à tes amis. Et chaque fois que tu en racontes un, tu deviens toi-même un peu Korotoumou. Tu transmets quelque chose qui ne meurt jamais. La sagesse de plusieurs générations passée par ta bouche. C'est ça, la magie."
+      contenu:"Korotoumou, c'est le nom de la conteuse. La grand-mère. Celle qu'on écoute quand le soleil tombe et que les criquets commencent leur concert. Amadou Koné a écouté Korotoumou. Et il a écrit ce qu'elle disait. Tu vas pouvoir, toi aussi, t'asseoir près d'elle.\n\n📖 CONTE — Le genre d'histoire qu'on trouve ici\nUn homme avare se promène en brousse. Il rencontre une vieille femme affamée. Il refuse de partager sa nourriture. Plus loin, il trébuche, son sac s'ouvre, ses provisions roulent dans la rivière. Il meurt de faim... à 100 mètres de chez lui. La vieille femme, c'était un esprit qui testait sa générosité.\n\nTu vois la structure ? Court. Punchline morale claire. Et tu retiens le message pour la vie : partage, ou tu perdras tout. Les contes africains, c'est ça : on te raconte une histoire, on te fait rire ou frémir, et à la fin tu apprends une leçon que les grands livres de philosophie mettront 400 pages à expliquer.\n\nKorotoumou raconte des contes qui viennent de partout en Afrique de l'Ouest. Des histoires de lièvre malin, d'hyène stupide, de roi puni pour son orgueil, d'enfant orphelin protégé par les ancêtres. Chaque conte a sa morale. Chaque conte est un petit cadeau pour la vie.\n\n🌳 LIEU — Kongodjan, le verger perdu\nKongodjan, c'est plus qu'un nom de plantation. C'est le mot magique du livre. La plantation de café et de cacao où vivaient les parents du narrateur et de sa sœur. Le lieu de l'enfance, des veillées, des contes au feu de bois. Aujourd'hui, dans le prologue, le narrateur en parle comme d'un « vieux mythe » — un mot très fort. Pourquoi mythe ? Parce que Kongodjan n'existe presque plus comme avant : la modernité (la radio qui « parle en français », la télévision qui montre « des feuilletons américains ») a envahi le village. Korotoumou dit alors : « Kouncoun, et si nous disions des contes ce soir ? Et si nous faisions comme autrefois ? » Tu sens la tristesse ? Ce livre est un acte de RÉSISTANCE contre l'oubli.\n\n🔧 OUTIL DE LANGUE — La formule rituelle du conte\nQuand Korotoumou commence par « Kouncoun ! », elle ne dit pas n'importe quoi. C'est une FORMULE RITUELLE — une phrase codée qui annonce : « Attention, on entre dans le temps du conte. » L'équivalent du « Il était une fois » européen. Repère ces formules dans toutes les cultures : « Krik ? Krak ! » aux Antilles, « Cric, crac, sac à puces ! » en France, « Kouncoun ! » chez les Cerma. Elles ont toutes la même fonction : faire taire les bavards et ouvrir l'oreille des auditeurs. La parole rituelle, c'est de la magie linguistique pure.\n\nPour ton année de 6e : profite. Ces contes-là, tu peux les RACONTER. À ton petit frère, à tes cousins, à tes amis. Et chaque fois que tu en racontes un, tu deviens toi-même un peu Korotoumou. Tu transmets quelque chose qui ne meurt jamais. La sagesse de plusieurs générations passée par ta bouche. C'est ça, la magie. Et si un soir, en famille, tu lances « Kouncoun ! » avant de raconter, regarde le visage des plus âgés : ils sourient. Tu viens de réveiller un souvenir d'enfance qui dormait dans leur mémoire."
     }
   },
 
@@ -20744,6 +20850,12 @@ var _origVShowSecEl=window.vShowSec;
 (function(){
   var _ov=window.vShowSec;
   window.vShowSec=function(sec,btn){
+    // v1.2.4 : après chaque navigation, remonter en haut du contenu. Sans cela la
+    // section s'ouvrait « loin en bas » et échappait à l'utilisateur (surtout mobile
+    // où le menu pousse le contenu sous la ligne de flottaison).
+    setTimeout(function(){ try{ var c=document.getElementById('vContent'); if(c){ var y=c.getBoundingClientRect().top+window.pageYOffset-72; window.scrollTo({top:y<0?0:y,behavior:'smooth'}); } }catch(e){} },80);
+    // Reposer la traduction des sous-titres après chaque navigation (EN persistant)
+    setTimeout(function(){ try{ if(typeof _translateSubs==='function') _translateSubs(); }catch(e){} },120);
     if(sec!=="epreuves"){
       // Réinitialiser les filtres épreuves quand on navigue ailleurs
       window._epMat='';window._epClasse='';window._epSeq='';
@@ -30823,6 +30935,117 @@ window.I18N_DICT = {
   }
 };
 
+// v1.2.4 : dictionnaire des SOUS-TITRES de panneaux (FR -> EN). Texte d'interface
+// uniquement — les contenus pédagogiques (œuvres, cours, épreuves) restent en français.
+// Ajouter ici les sous-titres au fur et à mesure pour étendre la couverture bilingue.
+window.I18N_SUBS_EN = {
+  // Accueil
+  "L'excellence scolaire de la 6ᵉ à la Terminale — préparation BEPC · Probatoire · BAC · GCE":
+    "Excellence in schooling from Form 1 to Upper Sixth — BEPC · Probatoire · BAC & GCE preparation",
+  "Le tableau d'honneur de la semaine : manuels stars, champion des battles et plan le plus choisi.":
+    "This week's honour roll: star textbooks, battle champion and most-subscribed plan.",
+  "Rejoignez l'aventure VÉRITAS. Choisissez votre profil et découvrez le programme de partenariat qui vous est dédié.":
+    "Join the VÉRITAS adventure. Pick your role and discover the partnership programme tailored for you.",
+  "Un extrait d'une œuvre au programme, décrypté chaque jour par le Professeur Ambassa.":
+    "A daily extract from a set book, decoded by Professor Ambassa.",
+  "Le Professeur Ambassa, votre tuteur IA : quiz, corrigés, fiches et évaluations notées — 100% gratuit.":
+    "Professor Ambassa, your AI tutor: quizzes, marking schemes, revision sheets and graded tests — 100% free.",
+  // Sections visiteur courantes
+  "Bienvenue au VÉRITAS Academy": "Welcome to VÉRITAS Academy",
+  "20 ans d'excellence au service des élèves camerounais":
+    "Two decades of excellence in service of Cameroonian learners",
+  "Découvrez la vie au Centre VÉRITAS": "Discover life at Centre VÉRITAS",
+  "Taux de réussite de nos élèves aux examens BEPC et BAC":
+    "Our students' pass rates at the BEPC and BAC exams",
+  "Épreuves officielles, cours vidéos, fiches de révision — tout ce qu'il faut pour réussir le BEPC et le BAC.":
+    "Official past papers, video lessons and revision sheets — everything you need to pass BEPC and BAC.",
+  // Bandeaux récurrents
+  "Commentaire composé & dissertation entièrement rédigés":
+    "Fully written commentary and essay",
+  "Rédigés par le Professeur Ambassa": "Written by Professor Ambassa",
+  "Cartes mentales · Citations · Figures de style · QCM · Contrôle de lecture":
+    "Mind maps · Quotes · Stylistic devices · MCQs · Reading test",
+  // Slogans et bannières dynamiques fréquents
+  "Centre d'Excellence Scolaire": "School of Excellence",
+  "La Réussite Assurée": "Success Guaranteed",
+  "Plateforme E-Learning": "E-Learning platform",
+  "Apprenez à votre rythme": "Learn at your own pace",
+  "Ressources officielles MINESEC": "Official MINESEC resources",
+  "Épreuves officielles, laboratoires virtuels et cours vidéo du Ministère des Enseignements Secondaires du Cameroun":
+    "Official past papers, virtual labs and video lessons from the Cameroon Ministry of Secondary Education",
+  "Choisissez une catégorie": "Pick a category",
+  "Cliquez pour explorer": "Click to explore",
+  "Nos résultats aux examens officiels": "Our results at the official exams",
+  "Une plateforme. Un accès personnalisé pour chaque rôle.":
+    "One platform. A tailored access for every role.",
+  "Ils nous font confiance": "They trust us",
+  "Plus de 500 familles ont choisi VÉRITAS": "Over 500 families have chosen VÉRITAS",
+  "Émulation VÉRITAS": "VÉRITAS emulation",
+  "Tu es… ?": "You are… ?",
+  "Passage du jour · une œuvre au programme": "Quote of the day · a set book",
+  "Passage du jour": "Quote of the day",
+  "Intelligence Artificielle": "Artificial Intelligence",
+  "Quiz · Corrigés · Fiches de révision · Évaluations notées en 30 secondes — 100% gratuit":
+    "Quizzes · Marking schemes · Revision sheets · Graded tests in 30 seconds — 100% free",
+  // Titres de sections (v1.2.4)
+  "🏫 Présentation du Centre": "🏫 About the Centre",
+  "📸 Notre centre en images": "📸 Our Centre in pictures",
+  "📸 Galerie Photos": "📸 Photo Gallery",
+  "📖 Notre Histoire": "📖 Our History",
+  "🏆 Résultats aux Examens Nationaux": "🏆 National Exam Results",
+  "📚 Nos Manuels les Mieux Notés": "📚 Our Best-Rated Textbooks",
+  "📬 Coordonnées": "📬 Contact details",
+  "🤝 Programme de Partenariat VÉRITAS": "🤝 VÉRITAS Partnership Programme",
+  "🎁 Système de récompenses Bronze · Argent · Or · Diamant":
+    "🎁 Rewards: Bronze · Silver · Gold · Diamond",
+  "🧠 Quiz Interactifs — Entraînez-vous par matière":
+    "🧠 Interactive quizzes — practise by subject",
+  "⭐ Avis de nos Clients": "⭐ What our learners say",
+  "Répartition par classe": "Breakdown by class",
+  "Meilleurs élèves — 1er Trimestre": "Top students — Term 1",
+  "Meilleurs élèves — 2ème Trimestre": "Top students — Term 2",
+  "Meilleurs élèves — 3ème Trimestre": "Top students — Term 3",
+  "Résultat financier": "Financial overview",
+  "Tableau de bord": "Dashboard",
+  "📚 Analyse littéraire": "📚 Literary analysis",
+  "22 œuvres MINESEC décryptées": "22 MINESEC set books decoded",
+  "Sciences": "Sciences",
+  "Lettres & Humanités": "Letters & Humanities",
+  "Langues": "Languages",
+  "Autres / EPS-Arts": "Others / PE & Arts",
+  "Plateforme E-Learning": "E-Learning platform",
+  "Apprenez à votre rythme": "Learn at your own pace",
+  "Ressources officielles MINESEC": "Official MINESEC resources",
+  "Plateforme tout-en-un pour la réussite scolaire au Cameroun.":
+    "All-in-one platform for school success in Cameroon."
+};
+// Cherche-et-remplace les sous-titres (.vsec-sub / .acc-sub) selon la langue active.
+// Sûr : on ne touche qu'aux nœuds texte EXACTEMENT connus, pas aux contenus pédagogiques.
+window._translateSubs = function(){
+  try{
+    var lang = (DB && DB._lang) || localStorage.getItem('_vrtLang') || 'fr';
+    if(lang!=='en') return;
+    var sel = '.vsec-sub, .acc-sub, .vlit-banner__sub, .vgz-section-sub, .acc-pill, .vgz-section-title, .scl, .vsec-title';
+    document.querySelectorAll(sel).forEach(function(el){
+      // 1) Élément de pur texte : remplacer son textContent.
+      // 2) Élément avec icône en enfant : traduire UNIQUEMENT le dernier nœud texte
+      //    (préserve l'icône/SVG, évite les faux positifs).
+      var last = el.lastChild;
+      if(last && last.nodeType===3){
+        var raw = last.textContent;
+        var trimmed = raw.replace(/\s+$/,'').replace(/^\s+/,'');
+        if(trimmed && I18N_SUBS_EN[trimmed]){
+          last.textContent = ' ' + I18N_SUBS_EN[trimmed];
+          return;
+        }
+      }
+      if(el.children.length===0){
+        var full = (el.textContent||'').trim();
+        if(I18N_SUBS_EN[full]) el.textContent = I18N_SUBS_EN[full];
+      }
+    });
+  }catch(e){}
+};
 window.t = function(key, fallback){
   try {
     var lang = (DB && DB._lang) || localStorage.getItem('_vrtLang') || 'fr';
@@ -30873,6 +31096,8 @@ window.setLang = function(lang, silent){
       });
     });
 
+    // v1.2.4 : traduire aussi les sous-titres des panneaux (interface seulement)
+    try{ if(typeof _translateSubs==='function') _translateSubs(); }catch(e){}
     if(!silent) toast(lang==='en'?'🌐 Language: English ✓':'🌐 Langue : Français ✓','ok');
   } catch(e){ console.warn('setLang:',e); if(!silent) toast('Erreur changement langue','warn'); }
 };
@@ -32542,6 +32767,24 @@ window._citationBannerHtml = function(){
 // question incitative + partage WhatsApp/Facebook/X/Copier AVEC lien + © .
 // Source v1 : LITT_OEUVRES (œuvres au programme). v2 : corpus isolé (rag.php?src=oeuvres).
 // ════════════════════════════════════════════════════════════════════
+// v1.2.4 : nettoie un extrait pour qu'il COMMENCE et FINISSE sur une frontière de phrase
+// (corrige les extraits du corpus coupés en plein milieu, ex. « vrait pas être permis… »).
+window._pdjCleanExtract = function(txt, maxLen){
+  txt = String(txt||'').replace(/^[﻿«»"'\s]+|[«»"'\s]+$/g,'').replace(/\s+/g,' ').trim();
+  if(!txt) return '';
+  if(!/^[A-ZÀ-ÖØ-Þ«—0-9]/.test(txt)){
+    var m = txt.match(/[.!?…][»"')\s]*\s([A-ZÀ-ÖØ-Þ«—])/);
+    if(m){ txt = txt.slice(txt.indexOf(m[0]) + m[0].length - 1).trim(); }
+    else { var cm = txt.search(/[A-ZÀ-ÖØ-Þ«—]/); if(cm>0) txt = txt.slice(cm).trim(); }
+  }
+  maxLen = maxLen || 340;
+  if(txt.length > maxLen){
+    var cut = txt.slice(0, maxLen);
+    var e = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '), cut.lastIndexOf('… '), cut.lastIndexOf('.»'), cut.lastIndexOf('!»'), cut.lastIndexOf('?»'));
+    txt = (e > maxLen*0.5) ? txt.slice(0, e+1).trim() : (cut.trim() + '…');
+  }
+  return txt;
+};
 window._getPassageDuJour = function(){
   try{
     if(typeof LITT_OEUVRES!=='object'||!LITT_OEUVRES) return null;
@@ -32554,7 +32797,7 @@ window._getPassageDuJour = function(){
     var cit=oe.citations[day%oe.citations.length];
     var txt=(typeof cit==='string')?cit:(cit&&(cit.texte||cit.t||cit.citation||cit.text||cit.extrait)||'');
     if(!txt) return null;
-    return {passage:String(txt).replace(/^[«"\s]+|[»"\s]+$/g,''),titre:oe.titre||'',auteur:oe.auteur||'',classe:oe.classe||oe.niveau||''};
+    return {passage:_pdjCleanExtract(txt,600),titre:oe.titre||'',auteur:oe.auteur||'',classe:oe.classe||oe.niveau||''};
   }catch(e){ return null; }
 };
 
@@ -32609,11 +32852,11 @@ window._pdjLoad = function(){
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
     fetch(base+'/rag.php?src=oeuvres&daily=1').then(function(r){return r.json();}).then(function(d){
       if(d&&d.ok&&d.passages&&d.passages.length){
-        var pp=d.passages[0], txt=String(pp.extrait||'').replace(/^[«"﻿\s]+|[»"\s]+$/g,'');
+        var pp=d.passages[0], txt=_pdjCleanExtract(pp.extrait,600);
         if(txt.length>40){
           var au=(pp.auteur&&pp.auteur.indexOf('programme')<0&&pp.auteur!=='Anonyme')?pp.auteur:'';
           window._pdjCurrent={passage:txt,titre:_pdjCleanTitle(pp.titre||''),auteur:au,classe:''};
-          var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML='« '+_esc(txt.substring(0,320))+(txt.length>320?'…':'')+' »';
+          var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML='« '+_esc(txt)+' »';
           var rb=document.getElementById('vPdjRef'); if(rb) rb.innerHTML='— '+_esc(window._pdjCurrent.titre)+(au?' · '+_esc(au):'');
         }
       }
@@ -32631,7 +32874,7 @@ window._passageDuJourHtml = function(){
     +'<div style="position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,#142554,#1E3A8A 45%,#FFC93C)"></div>'
     +'<div style="position:absolute;top:4px;right:18px;font-family:Georgia,serif;font-size:90px;line-height:1;color:rgba(200,150,26,.16);font-weight:900;pointer-events:none">“</div>'
     +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#9A7B1C;font-weight:800;margin-bottom:12px">📖 Passage du jour · une œuvre au programme</div>'
-    +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:18px;line-height:1.65;font-style:italic;color:#142554;margin:0 auto 10px;max-width:660px">« '+_esc(p.passage.substring(0,320))+(p.passage.length>320?'…':'')+' »</div>'
+    +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:18px;line-height:1.65;font-style:italic;color:#142554;margin:0 auto 10px;max-width:660px">« '+_esc(p.passage)+' »</div>'
     +'<div id="vPdjRef" style="font-size:12px;color:#9A7B1C;font-weight:700;margin-bottom:14px">— '+ref+'</div>'
     +'<div id="vPdjExpl" style="font-size:13px;line-height:1.65;color:#473F2A;background:#fff;border:1px solid #EADFBF;border-radius:12px;padding:13px 16px;margin:0 auto 16px;max-width:660px;text-align:left;box-shadow:0 2px 10px rgba(20,37,84,.05)"><span style="opacity:.7">✨ Analyse en cours…</span></div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center">'
@@ -33624,11 +33867,13 @@ window.AMBASSA_PERSONA = [
   "════════ MÉTHODOLOGIE — COMMENTAIRE COMPOSÉ ════════",
   "Structure obligatoire du corrigé : 1) Situation du texte (auteur, œuvre, genre, place dans l'œuvre). 2) Idée générale en une phrase. 3) Plan = 2 centres d'intérêt × 2 sous-points chacun. 4) Pour chaque axe : analyse détaillée + procédés stylistiques (champ lexical, figures de style, tonalité). 5) Transitions. 6) Intérêts du texte (stylistique, psychologique, sociologique, philosophique, dramatique). 7) NB final : « toute autre interprétation pertinente sera acceptée ».",
   "Formule de clôture officielle à reproduire : « On insistera tout particulièrement sur l'exploitation par le candidat des procédés de style, les éléments du vocabulaire, la syntaxe etc. dans ses démonstrations. On restera également ouvert à toute autre interprétation pertinente du texte. »",
+  "MAQUETTE OFFICIELLE VÉRITAS — COMMENTAIRE (à suivre fidèlement). INTRODUCTION : « Parue en (date), (titre) est une œuvre poétique/romanesque/théâtrale de l'écrivain (courant littéraire) camerounais/français (nom). Dans cet ouvrage, l'auteur met en évidence (thèmes fédérateurs). Le texte proposé au commentaire est un extrait de (situer : acte / scène / chapitre / poème). Ce passage a pour toile de fond (idée générale). Pour commenter ce texte, nous examinerons tour à tour (centre d'intérêt 1) et (centre d'intérêt 2). » — CORPS, pour chaque partie : une introduction partielle annonçant les 2 sous-centres d'intérêt, puis 2 paragraphes. Chaque paragraphe : présentation du sous-centre → explication (« En effet », « Étant donné que ») → illustration (« À titre illustratif », « Nous en voulons pour preuve » + PROCÉDÉ d'écriture + indices textuels entre guillemets) → interprétation. Connecteurs imposés : « D'entrée de jeu », « A cela s'ajoute », « En outre », « Par ailleurs », « D'emblée », « En plus », « D'autre part ». — TRANSITION entre les deux parties : « De ce qui précède, il convient de noter que (Sci1 + Sci2). Toutefois / Cependant, il convient désormais de s'attarder sur (CI 2). » — CONCLUSION : bilan des centres d'intérêt + intérêt/portée du texte + ouverture.",
   "",
   "════════ MÉTHODOLOGIE — DISSERTATION LITTÉRAIRE ════════",
   "Structure obligatoire : 1) Thème. 2) Reformulation du sujet en une phrase propre. 3) Problématique (question centrale). 4) Type de plan : DIALECTIQUE (mots-clés « discutez », « dans quelle mesure ») = thèse/antithèse/synthèse ; ANALYTIQUE (mots-clés « expliquez », « commentez », « montrez ») = analyse des aspects de la thèse. 5) Plan développé : chaque partie = 2-3 sous-points avec exemples tirés d'œuvres au programme (titre en italique, auteur, citation précise). 6) Transitions obligatoires entre parties. 7) Synthèse finale (pas une simple conclusion). 8) NB : « Le candidat qui aura présenté des fonctions/arguments autres que ceux évoqués ici ne devra pas être pénalisé. »",
   "Formules de transition standard : « Les analyses qui précèdent nous ont permis de mettre en exergue X. Dès lors, on se demande si Y. » — « Affirmation I. Cependant, nuance qui introduit II. »",
   "Formule de synthèse standard : « X est certes thèse 1, mais thèse 2. Toutefois, nuance finale. »",
+  "MAQUETTE OFFICIELLE VÉRITAS — DISSERTATION (à suivre fidèlement). 1) COMPRENDRE LE SUJET : dégager le thème, reformuler avec les adverbes de portée (toujours / obligatoirement / nécessairement / absolument / uniquement), poser le problème. 2) INTRODUCTION en quatre temps : [a] amorce = définition ou citation (souvent contraire au sujet) ; [b] reformulation du sujet ; [c] problématique en deux questions : « X est-il toujours… ? Ne peut-il pas aussi… ? » ; [d] annonce du plan : « Élucider cette problématique consistera à montrer d'abord… (I), ensuite… (II). » 3) CORPS : chaque partie a une idée directrice développée en paragraphes — « En effet… » (argument) + « À titre d'exemple » (œuvre + auteur + personnage ou situation précis, tirés des œuvres lues ou étudiées), puis « En outre… ». 4) TRANSITION entre les parties. 5) CONCLUSION : bilan + réponse nuancée à la problématique + ouverture.",
   "",
   "════════ MÉTHODOLOGIE — ÉTUDE DE TEXTE BEPC (2e épreuve de français — 1h, coef 1) ════════",
   "PARTIE I Compréhension 10 pts (4-6 questions) — Types officiels : thème du texte (2 pts), relevé de champ lexical (2 pts), explication de mot/expression (1-2 pts), sens propre vs figuré justifié (2 pts), question d'opinion justifiée (2 pts), sentiments/état d'âme avec détails (2 pts), inférence (2 pts). Toujours au moins une question de relevé littéral + une question d'opinion ouverte.",

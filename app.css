@@ -903,7 +903,7 @@ input,select,textarea,button{font-family:'Inter',sans-serif;font-size:15px}
 .scl{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--ink4);margin-bottom:6px}
 .scv{font-family:'Fira Code',monospace;font-size:24px;font-weight:500;line-height:1;margin-bottom:4px}
 .scs{font-size:13px;color:var(--ink4)}
-.sci{position:absolute;top:14px;right:14px;font-size:26px;opacity:.09}
+.sci{position:absolute;top:13px;right:14px;font-size:28px;opacity:.9;filter:drop-shadow(0 1px 3px rgba(20,37,84,.20))}
 .scg{background:linear-gradient(135deg,var(--gp),#fffaf0)}.scgr{background:linear-gradient(135deg,var(--grb),#f3faf6)}.scr{background:linear-gradient(135deg,var(--reb),#fefaf9)}.scb{background:linear-gradient(135deg,var(--blb),#f4f8ff)}.scpu{background:linear-gradient(135deg,var(--pub),#f8f4ff)}.scvi{background:linear-gradient(135deg,var(--vib),#f0fafa)}
 .vg{color:var(--gold)}.vgr{color:var(--gr)}.vr{color:var(--re)}.vb{color:var(--bl)}.vpu{color:var(--pu)}.vvi{color:var(--vi)}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -2996,7 +2996,7 @@ html { scroll-behavior: smooth; }
   0%,100% { transform: translateY(0) rotate(0deg); }
   50%     { transform: translateY(-6px) rotate(5deg); }
 }
-.sc:hover .sci { opacity: .22; transform: scale(1.18) rotate(-7deg) !important; }
+.sc:hover .sci { opacity: 1; transform: scale(1.12) rotate(-5deg) !important; }
 .scg:hover  { box-shadow: 0 8px 28px rgba(255,201,60,.16); }
 .scgr:hover { box-shadow: 0 8px 28px rgba(5,150,105,.15); }
 .scr:hover  { box-shadow: 0 8px 28px rgba(220,38,38,.12); }
@@ -3931,25 +3931,43 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 /* Conteneur : recadre l'accueil et évite tout décalage horizontal sur grand écran PC */
 .acc-wrap{max-width:1180px;margin:0 auto}
 
-/* Bandeau-titre en pilule (navy par défaut, .gold = variante or) */
-.acc-pill{display:inline-flex;align-items:center;gap:9px;
-  background:linear-gradient(135deg,var(--acc-navy),var(--acc-navy-2));
-  color:#fff;font-family:'Montserrat',sans-serif;font-weight:800;
-  font-size:13.5px;letter-spacing:2.4px;text-transform:uppercase;
-  padding:11px 30px;border-radius:999px;
-  box-shadow:0 8px 22px rgba(20,37,84,.20);
-  border:1px solid rgba(255,201,60,.22)}
-.acc-pill.gold{background:linear-gradient(135deg,#FFD86E,var(--acc-gold));
-  color:var(--acc-navy);box-shadow:0 8px 22px rgba(200,150,26,.28);
-  border-color:rgba(20,37,84,.10)}
-.acc-pill .ic{display:inline-flex;align-items:center;font-size:16px}
-.acc-pill-ico{width:17px;height:17px;fill:none;stroke:var(--acc-gold);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 2px rgba(0,0,0,.22))}
-.acc-pill.gold .acc-pill-ico{stroke:var(--acc-navy);filter:none}
+/* v1.2.4 — TITRES DE SECTION style MTN MoMo : titre navy bold (sans fond),
+   icône or compacte à gauche, filet doré court sous le titre, sous-titre sobre.
+   Le sélecteur reste `.acc-pill` pour compatibilité avec le markup existant. */
+.acc-pill{display:inline-flex;align-items:center;gap:11px;
+  background:transparent;color:var(--acc-navy);
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif;font-weight:800;
+  font-size:24px;letter-spacing:-.01em;text-transform:none;line-height:1.15;
+  padding:0;border-radius:0;box-shadow:none;border:0 none;position:relative}
+.acc-pill::after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);
+  width:46px;height:3px;border-radius:99px;
+  background:linear-gradient(90deg,var(--acc-gold),var(--acc-gold-deep))}
+.acc-pill.gold{color:var(--acc-navy);background:transparent;box-shadow:none;border:0 none}
+.acc-pill.gold::after{background:linear-gradient(90deg,var(--acc-navy),var(--acc-navy-2))}
+.acc-pill .ic{display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:10px;background:rgba(255,201,60,.14);
+  border:1px solid rgba(255,201,60,.30);flex-shrink:0}
+.acc-pill.gold .ic{background:rgba(20,37,84,.06);border-color:rgba(20,37,84,.18)}
+.acc-pill-ico{width:18px;height:18px;fill:none;stroke:var(--acc-navy);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:none}
+.acc-pill.gold .acc-pill-ico{stroke:var(--acc-navy)}
 
-/* En-tête de section CENTRÉ (corrige « titres non centrés ») + sous-titre serif italique */
-.acc-head{text-align:center;margin:40px 0 24px;display:flex;flex-direction:column;align-items:center;gap:12px}
-.acc-head .acc-sub{font-family:'Crimson Pro','Libre Baskerville',Georgia,serif;
-  font-style:italic;color:#6B6450;font-size:15.5px;line-height:1.5;max-width:640px;margin:0}
+/* v1.2.4 — En-tête de section ENCADRÉ style MoMo : carte ivoire bordée, ombre
+   douce, titre navy bold + sous-titre sobre, icône or au trait propre. */
+.acc-head{margin:44px auto 26px;max-width:760px;text-align:center;
+  background:linear-gradient(180deg,var(--acc-ivory),var(--acc-cream));
+  border:1px solid var(--acc-line);border-radius:18px;padding:24px 28px;
+  box-shadow:0 10px 28px rgba(20,37,84,.08);
+  display:flex;flex-direction:column;align-items:center;gap:14px;position:relative;overflow:hidden}
+.acc-head::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--acc-gold) 35%,var(--acc-gold-deep) 65%,transparent)}
+.acc-head .acc-sub{font-family:'Plus Jakarta Sans','Montserrat',sans-serif;font-style:normal;
+  color:#5B6B85;font-size:14px;line-height:1.55;max-width:640px;margin:0;font-weight:500}
+/* Icône style MoMo : stroke or fin sur fond ivoire, pas de filigrane */
+.acc-pill .ic{background:#FFF6DC;border:1px solid rgba(200,150,26,.32);
+  box-shadow:0 2px 6px rgba(200,150,26,.18)}
+.acc-pill-ico{stroke:var(--acc-gold-deep);stroke-width:1.8}
+.acc-pill.gold .ic{background:rgba(20,37,84,.06);border-color:rgba(20,37,84,.20)}
+.acc-pill.gold .acc-pill-ico{stroke:var(--acc-navy);stroke-width:1.8}
 
 /* Carte ivoire premium (liseré or supérieur) */
 .acc-card{background:linear-gradient(180deg,var(--acc-ivory),var(--acc-cream));
@@ -4032,7 +4050,8 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 /* ── Responsive : empilement propre sur tablette / mobile ─────────── */
 @media(max-width:820px){
   .acc-hero{grid-template-columns:1fr}
-  .acc-pill{font-size:12px;letter-spacing:1.8px;padding:10px 22px}
+  .acc-pill{font-size:20px}
+  .acc-head{margin:36px 0 22px}
 }
 
 /* ════ v1.2.4 — COHÉRENCE PC : titres & sous-titres de section CENTRÉS ════
