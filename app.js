@@ -4033,8 +4033,10 @@ function vShowSec(sec,btn){
       <div class="vlit-banner__arrow" aria-hidden="true">→</div>
     </div>
 
-    <div class="vsec-title v-reveal">🏫 Présentation du Centre</div>
-    <div class="vsec-sub v-reveal">Bienvenue au ${_esc(DB.school?.nom||"VÉRITAS Academy")}</div>
+    <div class="acc-head v-reveal">
+      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-home"/></svg></span> Présentation du Centre</div>
+      <div class="acc-sub">Bienvenue au ${_esc(DB.school?.nom||"VÉRITAS Academy")}</div>
+    </div>
     <div class="g2 v-reveal v-stagger">
       <div class="vcard v-shine">
         <div style="font-size:13px;line-height:1.9;white-space:pre-line;color:var(--ink2)">${_esc(pi.description||"")}</div>
@@ -4080,8 +4082,10 @@ function vShowSec(sec,btn){
   } else if(sec==="histoire"){
     const pi=DB.publicInfo||{};
     c.innerHTML=`<div class="vsec">
-    <div class="vsec-title">📖 Notre Histoire</div>
-    <div class="vsec-sub">20 ans d\'excellence au service des élèves camerounais</div>
+    <div class="acc-head">
+      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-bookopen"/></svg></span> Notre Histoire</div>
+      <div class="acc-sub">20 ans d'excellence au service des élèves camerounais</div>
+    </div>
     <div class="vcard mb20">
       <div style="font-size:14px;line-height:2;white-space:pre-line;color:var(--ink2)">${_esc(pi.histoire||"")}</div>
     </div>
@@ -4125,13 +4129,11 @@ function vShowSec(sec,btn){
   } else if(sec==="resultats"){
     var canEdit=iA&&iA();
     c.innerHTML=`<div class="vsec">
-    <div class="fl2 fic fsb mb4 fw g8">
-      <div>
-        <div class="vsec-title" style="margin-bottom:2px">🏆 Résultats aux Examens Nationaux</div>
-        <div class="vsec-sub" style="margin-bottom:0">Taux de réussite de nos élèves aux examens BEPC et BAC</div>
-      </div>
-      ${canEdit?'<button class="btn bi sm" onclick="mEditExamResults()">✏️ Modifier les statistiques</button>':''}
+    <div class="acc-head">
+      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats aux examens</div>
+      <div class="acc-sub">Taux de réussite de nos élèves aux examens BEPC, Probatoire, BAC et GCE</div>
     </div>
+    ${canEdit?'<div style="text-align:center;margin:-8px 0 16px"><button class="btn bi sm" onclick="mEditExamResults()">✏️ Modifier les statistiques</button></div>':''}
     ${DB.examResults.map((er,ei)=>`<div class="vcard mb16">
       <div class="fl2 fic fsb mb12">
         <div class="ct mb0">📅 Année scolaire ${er.annee}</div>
