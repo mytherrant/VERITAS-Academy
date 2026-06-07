@@ -381,6 +381,7 @@ function defaultDB(){return{
     {ex:'BEPC',      taux:94, series:[], mentions:{ab:40,b:22,tb:9,exc:2}},
     {ex:'Probatoire',taux:92, series:[{nom:'A',taux:90},{nom:'C',taux:94},{nom:'D',taux:91}], mentions:{ab:34,b:18,tb:7,exc:1}},
     {ex:'BAC',       taux:91, series:[{nom:'A',taux:89},{nom:'C',taux:93},{nom:'D',taux:90}], mentions:{ab:48,b:27,tb:11,exc:3}},
+    {ex:'GCE',       taux:89, series:[{nom:'O Level',taux:91},{nom:'A Level',taux:87}],         mentions:{ab:32,b:19,tb:8,exc:2}},
   ],
   examResults:[
     {annee:'2022–2023',niveaux:[{cls:'3ème',taux:85,candidats:42,admis:36},{cls:'Tle A',taux:78,candidats:28,admis:22},{cls:'Tle C',taux:90,candidats:20,admis:18},{cls:'Tle D',taux:82,candidats:15,admis:13}]},
@@ -1034,6 +1035,12 @@ function _migrateDB(){
   if(!DB.photos)DB.photos=defaultDB().photos||[];
   if(!DB.examResults)DB.examResults=defaultDB().examResults||[];
   if(!DB.statsVitrine)DB.statsVitrine=defaultDB().statsVitrine||[];
+  // v1.2.4 : migration GCE — ajoute le panneau GCE (O Level + A Level) s'il manque
+  // sur les installations existantes. Respecte les suppressions explicites de l'admin.
+  if(DB.statsVitrine && !DB.statsVitrine.some(function(s){return s&&s.ex==='GCE';})
+     && !(DB.deletedDefaults||[]).includes('stats_gce')){
+    DB.statsVitrine.push({ex:'GCE',taux:89,series:[{nom:'O Level',taux:91},{nom:'A Level',taux:87}],mentions:{ab:32,b:19,tb:8,exc:2}});
+  }
   if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts||[];
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
   // E-learning
