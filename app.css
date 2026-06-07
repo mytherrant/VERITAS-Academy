@@ -3931,25 +3931,30 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 /* Conteneur : recadre l'accueil et évite tout décalage horizontal sur grand écran PC */
 .acc-wrap{max-width:1180px;margin:0 auto}
 
-/* Bandeau-titre en pilule (navy par défaut, .gold = variante or) */
-.acc-pill{display:inline-flex;align-items:center;gap:9px;
-  background:linear-gradient(135deg,var(--acc-navy),var(--acc-navy-2));
-  color:#fff;font-family:'Montserrat',sans-serif;font-weight:800;
-  font-size:13.5px;letter-spacing:2.4px;text-transform:uppercase;
-  padding:11px 30px;border-radius:999px;
-  box-shadow:0 8px 22px rgba(20,37,84,.20);
-  border:1px solid rgba(255,201,60,.22)}
-.acc-pill.gold{background:linear-gradient(135deg,#FFD86E,var(--acc-gold));
-  color:var(--acc-navy);box-shadow:0 8px 22px rgba(200,150,26,.28);
-  border-color:rgba(20,37,84,.10)}
-.acc-pill .ic{display:inline-flex;align-items:center;font-size:16px}
-.acc-pill-ico{width:17px;height:17px;fill:none;stroke:var(--acc-gold);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 2px rgba(0,0,0,.22))}
-.acc-pill.gold .acc-pill-ico{stroke:var(--acc-navy);filter:none}
+/* v1.2.4 — TITRES DE SECTION style MTN MoMo : titre navy bold (sans fond),
+   icône or compacte à gauche, filet doré court sous le titre, sous-titre sobre.
+   Le sélecteur reste `.acc-pill` pour compatibilité avec le markup existant. */
+.acc-pill{display:inline-flex;align-items:center;gap:11px;
+  background:transparent;color:var(--acc-navy);
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif;font-weight:800;
+  font-size:24px;letter-spacing:-.01em;text-transform:none;line-height:1.15;
+  padding:0;border-radius:0;box-shadow:none;border:0 none;position:relative}
+.acc-pill::after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);
+  width:46px;height:3px;border-radius:99px;
+  background:linear-gradient(90deg,var(--acc-gold),var(--acc-gold-deep))}
+.acc-pill.gold{color:var(--acc-navy);background:transparent;box-shadow:none;border:0 none}
+.acc-pill.gold::after{background:linear-gradient(90deg,var(--acc-navy),var(--acc-navy-2))}
+.acc-pill .ic{display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:10px;background:rgba(255,201,60,.14);
+  border:1px solid rgba(255,201,60,.30);flex-shrink:0}
+.acc-pill.gold .ic{background:rgba(20,37,84,.06);border-color:rgba(20,37,84,.18)}
+.acc-pill-ico{width:18px;height:18px;fill:none;stroke:var(--acc-navy);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:none}
+.acc-pill.gold .acc-pill-ico{stroke:var(--acc-navy)}
 
-/* En-tête de section CENTRÉ (corrige « titres non centrés ») + sous-titre serif italique */
-.acc-head{text-align:center;margin:40px 0 24px;display:flex;flex-direction:column;align-items:center;gap:12px}
-.acc-head .acc-sub{font-family:'Crimson Pro','Libre Baskerville',Georgia,serif;
-  font-style:italic;color:#6B6450;font-size:15.5px;line-height:1.5;max-width:640px;margin:0}
+/* En-tête de section CENTRÉ — titre + sous-titre sobres, espacement aéré */
+.acc-head{text-align:center;margin:48px 0 26px;display:flex;flex-direction:column;align-items:center;gap:18px}
+.acc-head .acc-sub{font-family:'Plus Jakarta Sans','Montserrat',sans-serif;font-style:normal;
+  color:#5B6B85;font-size:14px;line-height:1.55;max-width:640px;margin:0;font-weight:500}
 
 /* Carte ivoire premium (liseré or supérieur) */
 .acc-card{background:linear-gradient(180deg,var(--acc-ivory),var(--acc-cream));
@@ -4032,7 +4037,8 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 /* ── Responsive : empilement propre sur tablette / mobile ─────────── */
 @media(max-width:820px){
   .acc-hero{grid-template-columns:1fr}
-  .acc-pill{font-size:12px;letter-spacing:1.8px;padding:10px 22px}
+  .acc-pill{font-size:20px}
+  .acc-head{margin:36px 0 22px}
 }
 
 /* ════ v1.2.4 — COHÉRENCE PC : titres & sous-titres de section CENTRÉS ════
