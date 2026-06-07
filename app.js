@@ -781,8 +781,14 @@ function defaultDB(){return{
        planTags:['plan3'],
        avantages:['✅ Épreuves + corrections toutes classes (6ème → Tle)','✅ Cours détaillés en PDF et Vidéos','✅ Anciens sujets BEPC / Probatoire / BAC avec corrigés','✅ Programmes officiels MINESEC & progressions','✅ Projets pédagogiques et fiches de préparation','✅ Corpus complets toutes séquences','✅ Modèles de sujets à personnaliser']},
       {id:'plan4',nom:'FAMILLE / ÉCOLE',cible:'Familles · Écoles · Centres',prix:25000,ancien:100000,duree:'Année scolaire',populaire:true,
-       planTags:['plan1','plan2','plan3','plan4'],
-       avantages:['✅ TOUT inclus — toutes classes, toutes matières','✅ Épreuves séquentielles + corrigés (6ème → Tle)','✅ Cours vidéo et PDF illimités','✅ Anciens sujets d\'examen nationaux','✅ Fiches de révision + corpus complets','✅ Accès multi-utilisateurs (toute la famille)','✅ Support WhatsApp prioritaire 7j/7','✅ Mise à jour continue tout au long de l\'année']}
+       planTags:['plan1','plan2','plan3','plan4','plan5','plan6'],
+       avantages:['✅ TOUT inclus — toutes classes, toutes matières','✅ Épreuves séquentielles + corrigés (6ème → Tle)','✅ Cours vidéo et PDF illimités','✅ Anciens sujets d\'examen nationaux','✅ Fiches de révision + corpus complets','✅ Accès multi-utilisateurs (toute la famille)','✅ Support WhatsApp prioritaire 7j/7','✅ Mise à jour continue tout au long de l\'année']},
+      {id:'plan5',nom:'TECHNIQUE',cible:'CAP · 2nde Tech · 1ère/Tle STT · F1/F3/F4/IH et toutes filières STI',prix:5000,ancien:25000,duree:'Année scolaire',populaire:false,
+       planTags:['plan1','plan3','plan5'],
+       avantages:['✅ Cours spécialisés par pôle (STT, Génie Méca, Génie Élec, Génie Civil, Arts & Modes)','✅ Fiches TP et protocoles de laboratoire (soudage, câblage, béton, moteur…)','✅ Épreuves types CAP, Probatoire Technique et BAC Technique avec corrigés','✅ Sujets officiels par filière (F1, F3, F4BA, CG, ACA, IH…)','✅ Ressources Agriculture & Génie Rural (PA, PV)','✅ Maths Techniques, Dessin Technique et Sciences Physiques Appliquées','✅ Suivi WhatsApp avec nos formateurs spécialisés enseignement technique']},
+      {id:'plan6',nom:'GCE O & A LEVEL',cible:'Form 1–5 · Lower Sixth · Upper Sixth',prix:5000,ancien:25000,duree:'Année scolaire',populaire:false,
+       planTags:['plan1','plan3','plan6'],
+       avantages:['✅ GCE O Level past papers with marking schemes (2018–2024)','✅ GCE A Level past papers with marking schemes (2018–2024)','✅ Detailed course notes — Biology, Chemistry, Physics, Maths, Economics, Literature','✅ GCE practical guides: protocols, specimen answers and examiners\' tips','✅ Revision cards and topic summaries (Form 1 → Upper Sixth)','✅ WhatsApp support from our GCE specialist teachers','✅ Study timetable, exam technique guides and past-paper analysis']}
     ],
     categories:[
       {id:'cat1',nom:'Épreuves séquentielles',ico:'📝',desc:'Évaluations des meilleurs établissements avec corrections détaillées'},
@@ -4662,12 +4668,14 @@ function vShowSec(sec,btn){
           var isManuallyUnlocked=accId&&(item.unlockedFor||[]).indexOf(accId)>=0;
           var visAcc=accId?(DB.visitorAccounts||[]).find(function(a){return a.id===accId;}):null;
           var vPlans=visAcc?visAcc.plans||[]:[];
-          var hasPlanAccess=item.plans&&item.plans.length&&item.plans.some(function(p){return vPlans.indexOf(p)>=0;});
+          var _elDefs=DB&&DB.elearning&&DB.elearning.plans||[];
+          var _effPlans=vPlans.reduce(function(ef,pid){if(ef.indexOf(pid)<0)ef.push(pid);var pd=_elDefs.find(function(p){return p.id===pid;});if(pd&&pd.planTags)pd.planTags.forEach(function(t){if(ef.indexOf(t)<0)ef.push(t);});return ef;},[]);
+          var hasPlanAccess=item.plans&&item.plans.length&&item.plans.some(function(p){return _effPlans.indexOf(p)>=0;});
           var hasRealAccess=(isFree&&!isBlocked)||isManuallyUnlocked||hasPlanAccess||iA();
           var isUnlocked=hasRealAccess||(isFree)||(free2<2);
           if(!isFree) free2++;
           var isLocked=!isUnlocked;
-          var pLabels={plan1:'EXAMEN',plan2:'INTERMÉD.',plan3:'ENSEIGNANT',plan4:'FAMILLE'};
+          var pLabels={plan1:'EXAMEN',plan2:'INTERMÉD.',plan3:'ENSEIGNANT',plan4:'FAMILLE',plan5:'TECHNIQUE',plan6:'GCE'};
           
           // Download counter display
           var dlKey='dl_'+item.id+'_'+(new Date().toDateString());
@@ -7761,7 +7769,8 @@ function mGererAccesContenu(itemId){
   accs.forEach(function(acc){
     var isUnlocked=item.unlockedFor.indexOf(acc.id)>=0;
     var isBlocked=item.blockedFor.indexOf(acc.id)>=0;
-    var hasPlan=acc.plans&&acc.plans.length&&item.plans&&item.plans.some(function(p){return acc.plans.indexOf(p)>=0;});
+    var _ap=acc.plans||[],_ed=DB&&DB.elearning&&DB.elearning.plans||[];var _ep=_ap.reduce(function(ef,pid){if(ef.indexOf(pid)<0)ef.push(pid);var pd=_ed.find(function(p){return p.id===pid;});if(pd&&pd.planTags)pd.planTags.forEach(function(t){if(ef.indexOf(t)<0)ef.push(t);});return ef;},[]);
+    var hasPlan=_ep.length&&item.plans&&item.plans.some(function(p){return _ep.indexOf(p)>=0;});
     var status=isBlocked?'<span style="background:#FEE2E2;color:#DC2626;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">🔒 Bloqué</span>':isUnlocked?'<span style="background:#D1FAE5;color:#059669;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">🔓 Débloqué</span>':hasPlan?'<span style="background:#E0EAFF;color:#3C8DFF;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">✅ Via plan</span>':'<span style="background:#F3F4F6;color:#6B7280;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">— Aucun accès</span>';
     rows+='<tr>'
       +'<td class="semi s">'+_esc(acc.pre)+' '+_esc(acc.nom)+'</td>'
