@@ -4014,7 +4014,7 @@ function vShowSec(sec,btn){
 
     <!-- ═════ 🎓 BANDEAU AMBASSA — Star feature (v2.6) · harmonisé premium v1.2.4 ═════ -->
     <div class="acc-head">
-      <div class="acc-pill gold"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-sparkles"/></svg></span> Intelligence Artificielle</div>
+      <div class="acc-pill gold"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-brain"/></svg></span> Intelligence Artificielle</div>
       <div class="acc-sub">Le Professeur Ambassa, votre tuteur IA : quiz, corrigés, fiches et évaluations notées — 100% gratuit.</div>
     </div>
     <div class="v-reveal" onclick="mAgentAmbassa()" role="link" tabindex="0" style="background:linear-gradient(180deg,#FFFDF8,#FBF4E2);color:#142554;padding:28px 24px;margin:14px 0;border-radius:18px;border:1px solid #ECE3CB;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(20,37,84,.08);transition:transform .25s,box-shadow .25s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 18px 40px rgba(20,37,84,.13)'" onmouseout="this.style.transform='';this.style.boxShadow='0 10px 30px rgba(20,37,84,.08)'">
@@ -4041,7 +4041,7 @@ function vShowSec(sec,btn){
     </div>
 
     <div class="acc-head v-reveal">
-      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-home"/></svg></span> Présentation du Centre</div>
+      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-building"/></svg></span> Présentation du Centre</div>
       <div class="acc-sub">Bienvenue au ${_esc(DB.school?.nom||"VÉRITAS Academy")}</div>
     </div>
     <div class="g2 v-reveal v-stagger">
@@ -4090,7 +4090,7 @@ function vShowSec(sec,btn){
     const pi=DB.publicInfo||{};
     c.innerHTML=`<div class="vsec">
     <div class="acc-head">
-      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-bookopen"/></svg></span> Notre Histoire</div>
+      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span> Notre Histoire</div>
       <div class="acc-sub">20 ans d'excellence au service des élèves camerounais</div>
     </div>
     <div class="vcard mb20">
@@ -4137,7 +4137,7 @@ function vShowSec(sec,btn){
     var canEdit=iA&&iA();
     c.innerHTML=`<div class="vsec">
     <div class="acc-head">
-      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats aux examens</div>
+      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-chart"/></svg></span> Nos résultats aux examens</div>
       <div class="acc-sub">Taux de réussite de nos élèves aux examens BEPC, Probatoire, BAC et GCE</div>
     </div>
     ${canEdit?'<div style="text-align:center;margin:-8px 0 16px"><button class="btn bi sm" onclick="mEditExamResults()">✏️ Modifier les statistiques</button></div>':''}
