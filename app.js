@@ -3954,7 +3954,7 @@ function vShowSec(sec,btn){
     c.innerHTML=`<div class="vsec acc-wrap">
     <!-- ═══ ACCUEIL PREMIUM v1.2.4 — bandeau + vidéo + widget actualités léger ═══ -->
     <div class="acc-head">
-      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-sparkles"/></svg></span> ${_esc(DB.school?.nom||"Centre VÉRITAS Academy")}</div>
+      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-graduation"/></svg></span> ${_esc(DB.school?.nom||"Centre VÉRITAS Academy")}</div>
       <div class="acc-sub">${_esc(pi.slogan||DB.school?.slogan||"L'excellence scolaire de la 6ᵉ à la Terminale — préparation BEPC · Probatoire · BAC · GCE")}</div>
     </div>
     <div class="acc-hero">
