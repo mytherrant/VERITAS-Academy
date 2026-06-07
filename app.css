@@ -1420,9 +1420,13 @@ input,select,textarea,button{font-family:'Poppins','Inter',sans-serif!important}
     z-index:1;
   }
 }
-/* Permettre au dropdown de sortir du conteneur .vnav (overflow visible nécessaire) */
+/* Permettre au dropdown de sortir du conteneur .vnav */
 .vnav{ overflow-x:auto; overflow-y:visible; }
-.vnav-group{ position:static; }
+/* PC : le dropdown est positionné en fixed via _navToggle (getBoundingClientRect) */
+@media (min-width:769px){
+  .vnav-group{ position:static; }
+  .vnav-dropdown{ position:fixed !important; z-index:9999 !important; }
+}
 @media (max-width:768px){ .vnav-group{ position:relative; } }
 
 /* ── ELEARNING — Category panels redesign ── */

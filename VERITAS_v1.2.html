@@ -384,11 +384,21 @@ window._navToggle = function(btn, ev){
   ev && ev.stopPropagation && ev.stopPropagation();
   var group = btn.closest('.vnav-group');
   if(!group) return;
-  // Fermer les autres groupes
   document.querySelectorAll('.vnav-group.open').forEach(function(g){ if(g !== group) g.classList.remove('open'); });
-  // Toggle ce groupe
   group.classList.toggle('open');
   btn.setAttribute('aria-expanded', group.classList.contains('open') ? 'true' : 'false');
+  // PC : positionner le dropdown juste sous le bouton en position fixed (viewport-safe)
+  if(group.classList.contains('open') && window.innerWidth > 768){
+    var dd = group.querySelector('.vnav-dropdown');
+    if(dd){
+      var r = btn.getBoundingClientRect();
+      dd.style.position = 'fixed';
+      dd.style.top = (r.bottom + 6) + 'px';
+      dd.style.left = Math.min(r.left, window.innerWidth - 280) + 'px';
+      dd.style.right = 'auto';
+      dd.style.bottom = 'auto';
+    }
+  }
 };
 
 // Fermer tous les dropdowns
