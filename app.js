@@ -18499,7 +18499,50 @@ function _showLittAnalyse(oeuvreKey){
     +'<div style="padding:32px 36px">'
       +paragraphesHtml
     +'</div>'
-    // Footer retiré — l'analyse parle d'elle-même, plus besoin de mention de style
+    // ── v1.2.4 — Enrichissements : Thèmes / Axes / Procédés clés / Aller plus loin ──
+    +(function(){
+      var fi=oe.fiche||{};
+      var themes=(fi.themes||[]).slice(0,6);
+      var axes=(fi.axes||[]).slice(0,3);
+      var techs=(oe.techniques||[]).filter(function(t){return t&&t.nom;}).slice(0,4);
+      var out='';
+      // 1) Thèmes en chips
+      if(themes.length){
+        out+='<div style="padding:0 36px 18px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#7C3AED;text-transform:uppercase;margin-bottom:10px;display:inline-flex;align-items:center;gap:6px">'
+          +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg> Thèmes clés</div>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:8px">'
+          +themes.map(function(t){return '<span style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);color:#6B21A8;border:1px solid rgba(124,58,237,.22);border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:600">'+_esc(t)+'</span>';}).join('')
+          +'</div></div>';
+      }
+      // 2) Axes de lecture (numérotés)
+      if(axes.length){
+        out+='<div style="padding:0 36px 18px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#7C3AED;text-transform:uppercase;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px">'
+          +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-compass"/></svg> Axes de lecture</div>'
+          +'<div style="display:grid;gap:10px">'
+          +axes.map(function(a,i){return '<div style="display:flex;gap:12px;background:#FAFBFF;border:1px solid #E9E2FF;border-radius:12px;padding:12px 16px"><div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">'+(i+1)+'</div><div style="font-family:Georgia,serif;font-size:14px;line-height:1.55;color:#1E293B">'+_esc(a)+'</div></div>';}).join('')
+          +'</div></div>';
+      }
+      // 3) Procédés d'écriture en avant-goût (3 max, lien vers techniques complet)
+      if(techs.length){
+        out+='<div style="padding:0 36px 22px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#7C3AED;text-transform:uppercase;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px">'
+          +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-tool"/></svg> Procédés d\'écriture · aperçu</div>'
+          +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">'
+          +techs.map(function(t){return '<div style="background:#fff;border:1px solid #E9E2FF;border-left:3px solid #7C3AED;border-radius:8px;padding:10px 14px"><div style="font-weight:800;color:#6B21A8;font-size:13px;line-height:1.2;margin-bottom:4px">'+_esc(t.nom)+'</div>'+(t.def?'<div style="font-size:11.5px;color:#475569;font-style:italic;line-height:1.4">'+_esc(t.def.length>110?t.def.substring(0,110)+'…':t.def)+'</div>':'')+'</div>';}).join('')
+          +'</div>'
+          +'<div style="text-align:center;margin-top:10px"><a onclick="_showLittTechniques(\''+oeuvreKey+'\')" style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;color:#7C3AED;font-size:12.5px;font-weight:700;text-decoration:none">→ Tous les procédés &amp; effets</a></div>'
+          +'</div>';
+      }
+      // 4) Bandeau « Aller plus loin »
+      out+='<div style="margin:0 28px 8px;padding:18px 22px;background:linear-gradient(135deg,#1E1B4B,#312E81);border-radius:14px;color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
+        +'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><use href="#lc-sparkles"/></svg>'
+        +'<div style="flex:1;min-width:200px"><div style="font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-weight:800;font-size:15px">Aller plus loin avec le Professeur Ambassa</div>'
+        +'<div style="font-size:12.5px;color:rgba(255,255,255,.78);font-style:italic;margin-top:2px">Commentaire composé · Dissertation · Citations · Contrôle de lecture</div></div>'
+        +(oe.citations&&oe.citations.length?'<button onclick="_showLittCitations(\''+oeuvreKey+'\')" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:10px;padding:9px 16px;font-size:12px;font-weight:700;cursor:pointer">💬 Citations</button>':'')
+        +'<button onclick="_littCorrigeIA(\''+oeuvreKey+'\')" style="background:#FFC93C;border:none;color:#142554;border-radius:10px;padding:9px 18px;font-size:12.5px;font-weight:800;cursor:pointer">✨ Corrigés IA →</button>'
+      +'</div>'
+      ;
+      return out;
+    })()
     // Actions
     +'<div style="padding:18px 32px 26px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">'
       +'<button class="btn bi" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')" style="padding:10px 22px;border-radius:14px;font-weight:700">← Menu de l\'œuvre</button>'
