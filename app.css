@@ -3951,10 +3951,23 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 .acc-pill-ico{width:18px;height:18px;fill:none;stroke:var(--acc-navy);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;filter:none}
 .acc-pill.gold .acc-pill-ico{stroke:var(--acc-navy)}
 
-/* En-tête de section CENTRÉ — titre + sous-titre sobres, espacement aéré */
-.acc-head{text-align:center;margin:48px 0 26px;display:flex;flex-direction:column;align-items:center;gap:18px}
+/* v1.2.4 — En-tête de section ENCADRÉ style MoMo : carte ivoire bordée, ombre
+   douce, titre navy bold + sous-titre sobre, icône or au trait propre. */
+.acc-head{margin:44px auto 26px;max-width:760px;text-align:center;
+  background:linear-gradient(180deg,var(--acc-ivory),var(--acc-cream));
+  border:1px solid var(--acc-line);border-radius:18px;padding:24px 28px;
+  box-shadow:0 10px 28px rgba(20,37,84,.08);
+  display:flex;flex-direction:column;align-items:center;gap:14px;position:relative;overflow:hidden}
+.acc-head::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;
+  background:linear-gradient(90deg,transparent,var(--acc-gold) 35%,var(--acc-gold-deep) 65%,transparent)}
 .acc-head .acc-sub{font-family:'Plus Jakarta Sans','Montserrat',sans-serif;font-style:normal;
   color:#5B6B85;font-size:14px;line-height:1.55;max-width:640px;margin:0;font-weight:500}
+/* Icône style MoMo : stroke or fin sur fond ivoire, pas de filigrane */
+.acc-pill .ic{background:#FFF6DC;border:1px solid rgba(200,150,26,.32);
+  box-shadow:0 2px 6px rgba(200,150,26,.18)}
+.acc-pill-ico{stroke:var(--acc-gold-deep);stroke-width:1.8}
+.acc-pill.gold .ic{background:rgba(20,37,84,.06);border-color:rgba(20,37,84,.20)}
+.acc-pill.gold .acc-pill-ico{stroke:var(--acc-navy);stroke-width:1.8}
 
 /* Carte ivoire premium (liseré or supérieur) */
 .acc-card{background:linear-gradient(180deg,var(--acc-ivory),var(--acc-cream));
