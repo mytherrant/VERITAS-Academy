@@ -618,8 +618,8 @@ if('MutationObserver' in window){
 }
 </script>
 
-<link rel="preload" as="script" href="/app.js?v=1.2.35">
-<link rel="stylesheet" href="/app.css?v=1.2.35">
+<link rel="preload" as="script" href="/app.js?v=1.2.36">
+<link rel="stylesheet" href="/app.css?v=1.2.36">
 </head>
 <body>
 <!-- ════════ A11Y v2 : Skip link pour lecteurs d'écran ════════ -->
@@ -908,7 +908,7 @@ setInterval(_refreshCitation,15000);
      Sûr : app.js s'auto-amorce (start() via readyState/DOMContentLoaded) et tous les
      appels inline à ses fonctions sont gardés (typeof) ou différés (setTimeout/DCL).
      Le rescue boot (anti-écran-blanc) reste le filet ultime. -->
-<script defer src="/app.js?v=1.2.35"></script>
+<script defer src="/app.js?v=1.2.36"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>
@@ -2583,13 +2583,13 @@ html{scroll-behavior:smooth}
 
       // === MARQUEE PARTENAIRES retiré (v1.2.3) : décoratif → allège l'accueil. ===
 
-      // === TÉMOIGNAGES — toujours dans le wrapper sombre ===
-      +'<div style="margin:34px 0 16px;text-align:center"><h2 class="vgz-section-title">Ils nous font confiance</h2><div class="vgz-section-sub">⭐ Plus de 500 familles ont choisi VÉRITAS</div></div>'
+      // === TÉMOIGNAGES — en-tête encadré (.acc-head navy) + 6 témoignages variés ===
+      +'<div class="acc-head" style="margin-top:32px"><div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-users"/></svg></span> Ils nous font confiance</div><div class="acc-sub">Plus de 500 familles, enseignants et partenaires ont choisi VÉRITAS</div></div>'
       +'<div class="vgz-testis v-reveal">'
         +'<div class="vgz-testi">'
           +'<div class="vgz-testi-stars">★★★★★</div>'
           +'<div class="vgz-testi-text">Grâce à VÉRITAS, j\'ai pu suivre les cours depuis Douala et préparer mon BAC à mon rythme. La plateforme est fluide et les enseignants disponibles 24/7.</div>'
-          +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">M</div><div><div class="vgz-testi-info-name">Marie K.</div><div class="vgz-testi-info-meta">Tle C · BAC mention Bien 2025</div></div></div>'
+          +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">M</div><div><div class="vgz-testi-info-name">Marie K.</div><div class="vgz-testi-info-meta">Élève · Tle C · BAC mention Bien 2025</div></div></div>'
         +'</div>'
         +'<div class="vgz-testi">'
           +'<div class="vgz-testi-stars">★★★★★</div>'
@@ -2599,7 +2599,22 @@ html{scroll-behavior:smooth}
         +'<div class="vgz-testi">'
           +'<div class="vgz-testi-stars">★★★★★</div>'
           +'<div class="vgz-testi-text">Les classes virtuelles sont fluides même avec une connexion modeste. Mes élèves participent plus qu\'en présentiel ! Et la saisie de notes en lot, un bonheur.</div>'
-          +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">G</div><div><div class="vgz-testi-info-name">M. Georges T.</div><div class="vgz-testi-info-meta">Prof Maths · 15 ans d\'expérience</div></div></div>'
+          +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">G</div><div><div class="vgz-testi-info-name">M. Georges T.</div><div class="vgz-testi-info-meta">Enseignant · Maths · 15 ans d\'expérience</div></div></div>'
+        +'</div>'
+        +'<div class="vgz-testi">'
+          +'<div class="vgz-testi-stars">★★★★★</div>'
+          +'<div class="vgz-testi-text">En tant qu\'inspecteur pédagogique, j\'ai trouvé en VÉRITAS un partenaire sérieux : conformité APC, grilles OBC respectées, et une vraie pédagogie camerounaise. Je recommande.</div>'
+          +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">A</div><div><div class="vgz-testi-info-name">M. Alphonse N.</div><div class="vgz-testi-info-meta">Inspecteur pédagogique · MINESEC Littoral</div></div></div>'
+        +'</div>'
+        +'<div class="vgz-testi">'
+          +'<div class="vgz-testi-stars">★★★★★</div>'
+          +'<div class="vgz-testi-text">J\'ai partagé mon code promo sur TikTok, les élèves ont adoré l\'IA Ambassa. Les commissions tombent chaque mois sans accroc — VÉRITAS tient ses promesses. 🔥</div>'
+          +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">S</div><div><div class="vgz-testi-info-name">Stella B.</div><div class="vgz-testi-info-meta">Créatrice · 42k abonnés · BAC+2</div></div></div>'
+        +'</div>'
+        +'<div class="vgz-testi">'
+          +'<div class="vgz-testi-stars">★★★★★</div>'
+          +'<div class="vgz-testi-text">Délégué de classe en 1ère D, j\'ai rallié 18 camarades à VÉRITAS. On gagne des XP, on monte le palmarès ensemble, et le Prof. Ambassa nous corrige nos devoirs en 30 sec. 🎯</div>'
+          +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">E</div><div><div class="vgz-testi-info-name">Émile T.</div><div class="vgz-testi-info-meta">Élève leader · 1ère D · Bafoussam</div></div></div>'
         +'</div>'
       +'</div>'
       +'</div>'  // close .vgz-dark-section
