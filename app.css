@@ -4089,3 +4089,66 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 .fl2 .vsec-sub, .fsb .vsec-sub,
 .fl2 .ct, .fsb .ct{ justify-content:flex-start !important; text-align:left !important; }
 .fl2 .vsec-title::after, .fsb .vsec-title::after{ left:0 !important; transform:none !important; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.3 — COUCHE « PREMIUM POLISH » (additive ; placée en dernier → surcharge
+   par ordre de cascade, sans toucher aux règles existantes).
+   But : harmonie navy + or, micro-interactions, ombres raffinées, focus visible.
+   100% non destructif : uniquement background / box-shadow / transform / transition
+   / outline. Retrait = supprimer ce bloc et bumper ?v= dans VERITAS_v1.2.html.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* 1. Harmonisation — hero E-Learning sur la charte (navy + lueur or) au lieu du violet */
+.v-hero-gradient{
+  background:
+    radial-gradient(120% 140% at 16% 0%, rgba(255,201,60,.16), transparent 55%),
+    linear-gradient(135deg,#0B1530 0%,#142554 48%,#1E3A7A 100%) !important;
+  box-shadow:0 18px 48px rgba(20,37,84,.28), inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+/* 2. Accessibilité + premium — anneau de focus visible et cohérent (or) */
+a:focus-visible, button:focus-visible, .btn:focus-visible,
+input:focus-visible, select:focus-visible, textarea:focus-visible,
+[onclick]:focus-visible, [role="button"]:focus-visible{
+  outline:2px solid var(--ds-accent,#FFC93C);
+  outline-offset:2px;
+  border-radius:8px;
+}
+
+/* 3. Élévation raffinée + transition douce sur les surfaces interactives */
+.card, .sc, .vcard, .bc, .vbook-card{
+  transition:transform .24s cubic-bezier(.16,1,.3,1), box-shadow .24s ease, border-color .24s ease;
+}
+.card:hover, .vcard:hover{
+  transform:translateY(-3px);
+  box-shadow:0 18px 40px rgba(20,37,84,.13), 0 3px 10px rgba(20,37,84,.06);
+}
+.sc:hover{ transform:translateY(-2px); box-shadow:0 14px 30px rgba(20,37,84,.12); }
+
+/* 4. Boutons — profondeur + retour tactile (press) cohérents */
+.btn{ transition:transform .14s cubic-bezier(.16,1,.3,1), box-shadow .18s ease, filter .18s ease; }
+.btn:hover:not(:disabled){ transform:translateY(-1px); filter:saturate(1.06); }
+.btn:active:not(:disabled){ transform:translateY(0) scale(.985); }
+.btn.bi{ box-shadow:0 6px 18px rgba(20,37,84,.22); }
+.btn.bi:hover:not(:disabled){ box-shadow:0 10px 26px rgba(20,37,84,.30); }
+
+/* 5. CTA OR — éclat doré cohérent partout */
+.btn.bgr2, .btn.bg{ box-shadow:0 6px 18px rgba(245,184,0,.28); }
+.btn.bgr2:hover:not(:disabled), .btn.bg:hover:not(:disabled){ box-shadow:0 10px 26px rgba(245,184,0,.38); }
+
+/* 6. Navigation latérale — transition + état actif raffiné (liseré or) */
+.sbit{ transition:background .18s ease, color .18s ease, box-shadow .18s ease; border-radius:10px; }
+.sbit:hover{ background:rgba(255,255,255,.06); }
+.sbit.on{ box-shadow:inset 3px 0 0 var(--ds-accent,#FFC93C); }
+
+/* 7. Barre de défilement discrète, aux couleurs de la marque (Webkit) */
+*::-webkit-scrollbar{ width:11px; height:11px; }
+*::-webkit-scrollbar-thumb{ background:rgba(20,37,84,.22); border-radius:8px; border:3px solid transparent; background-clip:content-box; }
+*::-webkit-scrollbar-thumb:hover{ background:rgba(20,37,84,.40); background-clip:content-box; }
+*::-webkit-scrollbar-track{ background:transparent; }
+
+/* 8. Accessibilité — couper les micro-animations si l'utilisateur le demande */
+@media (prefers-reduced-motion:reduce){
+  .card, .sc, .vcard, .bc, .vbook-card, .btn, .sbit{ transition:none !important; }
+  .card:hover, .vcard:hover, .sc:hover, .btn:hover, .btn:active{ transform:none !important; }
+}

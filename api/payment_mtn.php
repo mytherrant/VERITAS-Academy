@@ -16,8 +16,23 @@
 // ============================================================
 
 require_once __DIR__ . '/payment_config.php';
+require_once __DIR__ . '/_auth_lib.php'; // Étape 1 : octroi d'accès côté serveur
 
 header('Content-Type: application/json; charset=utf-8');
+
+// Étape 1 : octroi serveur idempotent quand un paiement passe à « paid »
+// (best-effort, ne bloque jamais la réponse). Appelé depuis notify ET status.
+function mtnGrant($state, $stateDir, $ref) {
+    if (($state['status'] ?? '') !== 'paid') return;
+    try {
+        $g = vrt_grant_entitlement_to_file($state);
+        @file_put_contents($stateDir . '_webhook_mtn_log.txt',
+            date('c') . ' [GRANT] ref=' . $ref . ' ' . json_encode($g) . "\n", FILE_APPEND);
+    } catch (\Throwable $e) {
+        @file_put_contents($stateDir . '_webhook_mtn_log.txt',
+            date('c') . ' [GRANT_ERR] ref=' . $ref . ' ' . $e->getMessage() . "\n", FILE_APPEND);
+    }
+}
 
 $action = $_GET['action'] ?? 'init';
 $method = $_SERVER['REQUEST_METHOD'];
@@ -116,7 +131,9 @@ if ($action === 'init' && $method === 'POST') {
         'clientTel'   => $payerNumber,
         'status'      => 'pending',
         'created_at'  => date('c'),
-        'provider'    => 'mtn_momo_cm'
+        'provider'    => 'mtn_momo_cm',
+        // Commissions auteurs/parrains pré-calculées par le client (persistées au paiement confirmé).
+        'commissions' => (isset($input['commissions']) && is_array($input['commissions'])) ? $input['commissions'] : []
     ];
     file_put_contents($stateDir . _safeRefMtn($ref) . '.json', json_encode($state, JSON_PRETTY_PRINT));
 
@@ -205,6 +222,8 @@ if ($action === 'notify' && ($method === 'POST' || $method === 'PUT')) {
 
     file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT));
 
+    mtnGrant($state, $stateDir, $ref); // Étape 1 : octroi serveur si paid
+
     http_response_code(200);
     echo 'OK';
     exit;
@@ -256,6 +275,7 @@ if ($action === 'status' && $method === 'GET') {
                     $state['reason']    = $data['reason'] ?? 'Refusé';
                 }
                 file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT));
+                mtnGrant($state, $stateDir, $ref); // Étape 1 : octroi serveur si paid
             }
         }
     }

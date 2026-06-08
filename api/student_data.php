@@ -33,6 +33,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/config_sync.php'; // CORS allowlist + préflight OPTIONS
+require_once __DIR__ . '/_auth_lib.php';    // S3 v1.2.x : auth (bcrypt+S256), token, droits contenu
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
@@ -127,12 +128,12 @@ if ($acc === null) {
     }
 }
 
+// S3 v1.2.x : vérification déléguée à _auth_lib (supporte bcrypt au repos ET
+// S256 hérité ; $pwNeedUpgrade=true quand le compte gagnerait à passer en bcrypt).
 $authOk = false;
+$pwNeedUpgrade = false;
 if ($acc !== null) {
-    $stored = (string)($acc['pwd'] ?? '');
-    if (strpos($stored, 'S256$') === 0) {
-        $authOk = hash_equals($stored, veritas_hash($pass, (string)$acc['user']));
-    }
+    $authOk = vrt_verify_password($pass, (string)($acc['pwd'] ?? ''), (string)$acc['user'], $pwNeedUpgrade);
 }
 if (!$authOk) {
     @file_put_contents(__DIR__ . '/data/_security_log.txt',
@@ -171,8 +172,33 @@ if ($action === 'fetch') {
         'slogan' => $school['slogan'] ?? '',
     ];
 
+    // ── S3 v1.2.x (Étape 2) : liste des contenus AUTORISÉS pour ce compte ──
+    // Métadonnées uniquement (jamais les octets) → l'octet passe par content.php
+    // après re-vérification des droits. Réplique exacte de l'entitlement client.
+    $contenusAutorises = [];
+    foreach (($db['elearning']['contenus'] ?? []) as $c) {
+        if (!is_array($c)) continue;
+        if (!vrt_account_can_access($acc, $c, $db)) continue;
+        $contenusAutorises[] = [
+            'id'             => $c['id'] ?? '',
+            'titre'          => $c['titre'] ?? ($c['nom'] ?? ''),
+            'type'           => $c['type'] ?? '',
+            'cat'            => $c['cat'] ?? ($c['categorie'] ?? ''),
+            'cls'            => $c['cls'] ?? '',
+            'matiere'        => $c['matiere'] ?? '',
+            'plans'          => $c['plans'] ?? [],
+            'fichier'        => $c['fichier'] ?? '',
+            'fileType'       => $c['fileType'] ?? '',
+            // Lisible via content.php (par id) seulement si le média est dans le store protégé.
+            'fichierProtege' => $c['fichierProtege'] ?? '',
+            'serveViaGate'   => !empty($c['fichierProtege']),
+        ];
+    }
+
     echo json_encode([
         'ok'      => true,
+        // S3 v1.2.x (Étape 3) : token par compte → content.php sans renvoyer le mot de passe.
+        'token'   => vrt_issue_token($acc, (string) $accType),
         'account' => [
             'user'  => $acc['user'],
             'type'  => $accType,
@@ -181,14 +207,15 @@ if ($action === 'fetch') {
             'pre'   => $acc['pre'] ?? ($student['pre'] ?? ''),
             'cls'   => $acc['cls'] ?? ($student['cls'] ?? ''),
         ],
-        'student'      => $student,
-        'grades'       => _by_owner($db['grades'] ?? [], $eid),
-        'payments'     => _by_owner($db['payments'] ?? [], $eid),
-        'absences'     => _by_owner($db['absences'] ?? [], $eid),
-        'submissions'  => _by_owner($db['submissions'] ?? [], $eid),
-        'devoirs'      => $db['devoirs'] ?? [],   // énoncés communs (non sensibles)
-        'lastModified' => $db['lastModified'] ?? 0,
-        'server_time'  => time(),
+        'student'           => $student,
+        'grades'            => _by_owner($db['grades'] ?? [], $eid),
+        'payments'          => _by_owner($db['payments'] ?? [], $eid),
+        'absences'          => _by_owner($db['absences'] ?? [], $eid),
+        'submissions'       => _by_owner($db['submissions'] ?? [], $eid),
+        'devoirs'           => $db['devoirs'] ?? [],   // énoncés communs (non sensibles)
+        'contenusAutorises' => $contenusAutorises,
+        'lastModified'      => $db['lastModified'] ?? 0,
+        'server_time'       => time(),
     ], JSON_UNESCAPED_UNICODE);
     exit;
 }

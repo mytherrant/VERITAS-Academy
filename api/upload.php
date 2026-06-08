@@ -95,22 +95,41 @@ if ($file['size'] > $maxBytes) {
     http_response_code(400); echo json_encode(['ok'=>false,'error'=>'Fichier > '.($maxBytes/1048576).' Mo']); exit;
 }
 
-/* Répertoire cible */
-$uploadBase = dirname(__DIR__) . '/uploads/veritas/' . $folder . '/';
-if (!is_dir($uploadBase)) mkdir($uploadBase, 0755, true);
+/* 🔐 Étape 2 — STORE PROTÉGÉ : folder='protected' → uploads/protected/ (deny-all),
+   servi UNIQUEMENT par api/content.php après vérification d'abonnement. Aucune URL
+   publique renvoyée. Les autres folders restent publics (galerie, logos, etc.). */
+$isProtected = ($folder === 'protected');
 
-/* 🔐 .htaccess de sécurité dans le dossier d'upload (bloque l'exécution PHP/CGI) */
-$htaccess = $uploadBase . '.htaccess';
-if (!file_exists($htaccess)) {
-    file_put_contents($htaccess,
-        "# Bloquer toute exécution serveur dans uploads/\n".
-        "Options -Indexes -ExecCGI\n".
-        "RemoveHandler .php .phtml .phar .cgi .pl .py\n".
-        "AddType text/plain .php .phtml .phar .cgi .pl .py\n".
-        "<FilesMatch \"\\.(php|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp|exe|bat)$\">\n".
-        "  Require all denied\n".
-        "</FilesMatch>\n"
-    );
+if ($isProtected) {
+    $uploadBase = dirname(__DIR__) . '/uploads/protected/';
+    if (!is_dir($uploadBase)) mkdir($uploadBase, 0750, true);
+    $htaccess = $uploadBase . '.htaccess';
+    if (!file_exists($htaccess)) {
+        file_put_contents($htaccess,
+            "# Contenu PREMIUM — aucun accès HTTP direct ; servi via api/content.php après contrôle de droits.\n".
+            "Require all denied\n".
+            "<IfModule !mod_authz_core.c>\nOrder deny,allow\nDeny from all\n</IfModule>\n".
+            "Options -Indexes -ExecCGI\n".
+            "RemoveHandler .php .phtml .phar .cgi .pl .py\n".
+            "<FilesMatch \"\\.(php|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp|exe|bat)$\">\n  Require all denied\n</FilesMatch>\n"
+        );
+    }
+} else {
+    $uploadBase = dirname(__DIR__) . '/uploads/veritas/' . $folder . '/';
+    if (!is_dir($uploadBase)) mkdir($uploadBase, 0755, true);
+    /* 🔐 .htaccess de sécurité dans le dossier d'upload (bloque l'exécution PHP/CGI) */
+    $htaccess = $uploadBase . '.htaccess';
+    if (!file_exists($htaccess)) {
+        file_put_contents($htaccess,
+            "# Bloquer toute exécution serveur dans uploads/\n".
+            "Options -Indexes -ExecCGI\n".
+            "RemoveHandler .php .phtml .phar .cgi .pl .py\n".
+            "AddType text/plain .php .phtml .phar .cgi .pl .py\n".
+            "<FilesMatch \"\\.(php|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp|exe|bat)$\">\n".
+            "  Require all denied\n".
+            "</FilesMatch>\n"
+        );
+    }
 }
 
 /* Nom de fichier sécurisé unique */
@@ -120,7 +139,12 @@ $dest = $uploadBase . $name;
 if (!move_uploaded_file($file['tmp_name'], $dest)) {
     http_response_code(500); echo json_encode(['ok'=>false,'error'=>'Impossible de déplacer le fichier']); exit;
 }
-chmod($dest, 0644);
+chmod($dest, $isProtected ? 0640 : 0644);
 
-$url = 'https://veritas-school.com/uploads/veritas/' . $folder . '/' . $name;
-echo json_encode(['ok'=>true,'url'=>$url,'name'=>$name,'size'=>$file['size'],'mime'=>$mime]);
+if ($isProtected) {
+    // Pas d'URL publique : le client stocke fichierProtege et lit via content.php.
+    echo json_encode(['ok'=>true,'protected'=>true,'fichierProtege'=>$name,'name'=>$name,'size'=>$file['size'],'mime'=>$mime]);
+} else {
+    $url = 'https://veritas-school.com/uploads/veritas/' . $folder . '/' . $name;
+    echo json_encode(['ok'=>true,'url'=>$url,'name'=>$name,'size'=>$file['size'],'mime'=>$mime]);
+}

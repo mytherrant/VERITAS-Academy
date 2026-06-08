@@ -63,17 +63,34 @@ $tier      = $body['tier'] ?? 'free';  // pour stats
 // les appelants (y compris Prof. Ambassa), AVANT le sysPrompt du client et le RAG.
 // → garantit que l'IA reste ancrée dans le secondaire camerounais même si le
 //   client envoie un prompt faible/vide.
-$MINESEC_BASE =
-    "Tu es un assistant pédagogique expert du système éducatif SECONDAIRE camerounais (MINESEC). "
-  . "Tu maîtrises : les classes de la 6e à la Terminale (sous-systèmes francophone ET anglophone), "
-  . "l'Approche Par les Compétences (APC), les programmes officiels par matière, les examens BEPC, "
-  . "Probatoire et BAC (séries A, C, D, E, TI), leurs coefficients et barèmes, ainsi que la "
-  . "littérature et les auteurs au programme (camerounais et africains : Mongo Beti, Ferdinand Oyono, "
-  . "Bernard Dadié, Calixthe Beyala, etc.). "
-  . "Réponds en français clair, structuré et adapté au niveau de l'élève (définitions, étapes, exemples). "
-  . "Quand un CONTEXTE FACTUEL (annales/corpus MINESEC) est fourni ci-dessous, appuie-toi DESSUS en "
-  . "priorité et mentionne la source. Si une information manque ou sort du programme officiel, dis-le "
-  . "honnêtement plutôt que d'inventer.";
+$MINESEC_BASE = <<<'MINESEC'
+Tu es « Professeur Ambassa », expert pédagogique du système éducatif SECONDAIRE camerounais (MINESEC). Tu connais en profondeur les DEUX sous-systèmes et l'Approche Par les Compétences (APC).
+
+STRUCTURE & EXAMENS
+• Sous-système FRANCOPHONE — 1er cycle : 6e, 5e, 4e, 3e (examen BEPC en fin de 3e ; CAP pour l'enseignement technique court). 2nd cycle : 2nde, 1ère (examen PROBATOIRE), Terminale (BACCALAURÉAT).
+  Séries générales : A (littéraire : A1/A2/A3/A4/A5), C (maths-sciences physiques), D (maths-SVT), E (maths-technique), TI (technologies de l'information).
+  Séries techniques : industrielles (F1-F4, génie civil, électrotechnique, électronique, fabrication mécanique…), commerciales/STT (G1 secrétariat, G2 comptabilité, G3 commerce ; ACA, ACC), agricoles. Adapte au référentiel de la spécialité.
+• Sous-système ANGLOPHONE — Forms 1-5 (GCE Ordinary Level en Form 5), Lower & Upper Sixth (GCE Advanced Level) ; filières Arts et Science.
+Maîtrise les COEFFICIENTS, la durée et la STRUCTURE de chaque épreuve par série et par examen (BEPC, CAP, Probatoire, BAC, GCE O/A Level).
+
+MATIÈRES (francophone et équivalents anglophones)
+Mathématiques (Mathematics), Physique-Chimie-Technologie / PCT (Physics, Chemistry), SVT (Biology, Earth Science), Français (French), Anglais et LV2 (English Language, Literature), Histoire-Géographie, ECM/Éducation à la Citoyenneté (Citizenship Education), Philosophie / Logique (Tle), Informatique (Computer Science), Économie (Economics), Littérature, EPS, Langues et Cultures Nationales, Arts, et les matières de spécialité technique.
+
+LITTÉRATURE & AUTEURS au programme : camerounais et africains (Mongo Beti, Ferdinand Oyono, Calixthe Beyala, Sembène Ousmane, Camara Laye, Mariama Bâ, Bernard Dadié, L. S. Senghor, Aimé Césaire), et auteurs anglophones (Chinua Achebe, Wole Soyinka, Ngugi wa Thiong'o…).
+
+MÉTHODE & RIGUEUR
+• Réponds en FRANÇAIS par défaut ; en ANGLAIS si l'élève écrit en anglais ou relève du sous-système anglophone.
+• Adapte le vocabulaire et la profondeur au NIVEAU (classe/série) indiqué.
+• Structure type : définition claire → explication → méthode/étapes → exemple concret en contexte camerounais/africain → point-clé d'examen ou mini-exercice.
+• Sciences : pose les formules, détaille les étapes de calcul, précise les unités (SI), décris les schémas.
+• Corrections : applique les GRILLES HARMONISÉES MINESEC (en français : pertinence des idées, correction de la langue, cohérence/organisation, perfectionnement ; barèmes officiels par type d'épreuve — dissertation, commentaire composé, résumé/contraction, dictée). Fournis barème détaillé, corrigé-type et critères d'évaluation.
+• APC : relie chaque notion à une compétence et à une situation-problème de la vie courante.
+• NE JAMAIS inventer une donnée factuelle (date, formule, citation, contenu de programme). En cas de doute, dis-le honnêtement.
+• Quand un CONTEXTE FACTUEL (annales/corpus MINESEC) est fourni ci-dessous, APPUIE-TOI DESSUS en priorité et cite la source (auteur, titre, année).
+• Encourage l'élève, valorise l'effort, donne des conseils de méthode et de gestion du temps d'examen.
+
+MISSION : faire RÉUSSIR l'élève au BEPC, au CAP, au Probatoire, au BACCALAURÉAT et au GCE, et appuyer l'enseignant dans sa préparation (cours, épreuves, corrigés, progressions APC).
+MINESEC;
 $sysPrompt = $MINESEC_BASE . ($sysPrompt !== '' ? ("\n\n" . $sysPrompt) : '');
 
 if ($prompt === '' || strlen($prompt) > 8000) {
@@ -161,6 +178,26 @@ if ($IA_GLOBAL_DAILY_MAX > 0 && $gCount >= $IA_GLOBAL_DAILY_MAX) {
 // Incrément best-effort (lecture-écriture non atomique = tolérable pour un plafond souple)
 @file_put_contents($gFile, ($gCount + 1) . '');
 
+// ── 4ter. 🔐 QUOTA PAR UTILISATEUR SELON L'ABONNEMENT (anti-bypass du quota client) ──
+// Le quota par fonctionnalité est géré côté client (UX), mais il est falsifiable. Ce
+// plafond quotidien PAR COMPTE, calculé serveur depuis l'abonnement réel, empêche un
+// compte de dépasser massivement sa formule. Plafonds souples (backstop), au-dessus
+// des quotas client par fonctionnalité. -1 = illimité (élite/enseignant/admin).
+$userTier  = server_user_tier((string) $userId);
+$tierDaily = ['anon' => 5, 'free' => 12, 'starter' => 25, 'pro' => 90, 'teach' => -1, 'elite' => -1, 'admin' => -1];
+if (defined('IA_TIER_DAILY_JSON')) { $cfg = json_decode(IA_TIER_DAILY_JSON, true); if (is_array($cfg)) $tierDaily = array_merge($tierDaily, $cfg); }
+$uDailyMax = $tierDaily[$userTier] ?? 12;
+if ($uDailyMax > 0 && $userId !== '') {
+    $uFile  = $rateDir . 'iauser_' . substr(md5((string) $userId), 0, 16) . '_' . date('Ymd') . '.txt';
+    $uCount = is_file($uFile) ? (int) @file_get_contents($uFile) : 0;
+    if ($uCount >= $uDailyMax) {
+        http_response_code(429);
+        echo json_encode(['error' => 'Quota IA du jour atteint pour votre formule. Passez à une formule supérieure pour plus de requêtes.', 'tier' => $userTier, 'limit' => $uDailyMax]);
+        exit;
+    }
+    @file_put_contents($uFile, ($uCount + 1) . '');
+}
+
 // ── 5. CHOIX DU MODÈLE — v1.2.2 : TOUT sur Google Gemini ────────────────
 // Le PLAN ne choisit plus le fournisseur, seulement le MODÈLE Gemini :
 //   • visiteurs / tier gratuit  → Gemini Flash    (gros quota : 250-1000 req/jour)
@@ -168,7 +205,9 @@ if ($IA_GLOBAL_DAILY_MAX > 0 && $gCount >= $IA_GLOBAL_DAILY_MAX) {
 // 🔐 On vérifie l'abonnement RÉEL côté serveur (jamais le "plan" envoyé par le client).
 // Claude/Anthropic n'est plus appelé par défaut (clé vide). Pollinations = ultime secours.
 $geminiKey  = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : (getenv('GEMINI_API_KEY') ?: '');
-$isElite    = server_user_is_elite((string)$userId);
+// Élite/enseignant/admin → modèle avancé. Basé sur le tier réel (corrige aussi le
+// bug : le statut d'abonnement est « Activé », pas « actif » → l'ancien test échouait).
+$isElite    = in_array($userTier, ['elite', 'admin', 'teach'], true);
 $modelFree  = defined('GEMINI_MODEL')       ? GEMINI_MODEL       : 'gemini-2.5-flash';
 $modelElite = defined('GEMINI_MODEL_ELITE') ? GEMINI_MODEL_ELITE : 'gemini-2.5-pro';
 $model      = $isElite ? $modelElite : $modelFree;
@@ -194,8 +233,13 @@ if (!$ok && $isElite && $geminiKey !== '') {
 if (!$ok) {
     $groqKey    = defined('GROQ_API_KEY')    ? GROQ_API_KEY    : (getenv('GROQ_API_KEY') ?: '');
     $mistralKey = defined('MISTRAL_API_KEY') ? MISTRAL_API_KEY : (getenv('MISTRAL_API_KEY') ?: '');
+    $orKey      = defined('OPENROUTER_API_KEY') ? OPENROUTER_API_KEY : (getenv('OPENROUTER_API_KEY') ?: '');
 
-    if ($groqKey !== '') {  // Groq = le plus rapide (Llama 70B, ~1000 req/jour gratuit)
+    if ($orKey !== '') {  // OpenRouter → DeepSeek V3/R1 (gratuit) : fort raisonnement maths/sciences + FR
+        [$okR, $textR, $errR] = call_openrouter($orKey, $sysPrompt, $ragContext, $prompt);
+        if ($okR) { $ok = true; $text = $textR; $error = null; $source .= '_fallback_openrouter'; }
+    }
+    if (!$ok && $groqKey !== '') {  // Groq = le plus rapide (Llama 70B, ~1000 req/jour gratuit)
         [$okG, $textG, $errG] = call_groq($groqKey, $sysPrompt, $ragContext, $prompt);
         if ($okG) { $ok = true; $text = $textG; $error = null; $source .= '_fallback_groq'; }
     }
@@ -427,6 +471,16 @@ function call_mistral(string $apiKey, string $sys, string $rag, string $prompt):
                             $apiKey, $model, $sys, $rag, $prompt, 'Mistral');
 }
 
+// OpenRouter — passerelle OpenAI-compatible vers des modèles GRATUITS très puissants
+// (DeepSeek V3 / R1, Llama, Qwen…). Une seule clé → de nombreux modèles.
+// Clé gratuite : https://openrouter.ai/keys . Modèle par défaut : DeepSeek V3 (free),
+// excellent en raisonnement maths/sciences et en français.
+function call_openrouter(string $apiKey, string $sys, string $rag, string $prompt): array {
+    $model = defined('OPENROUTER_MODEL') ? OPENROUTER_MODEL : 'deepseek/deepseek-chat-v3-0324:free';
+    return call_openai_chat('https://openrouter.ai/api/v1/chat/completions',
+                            $apiKey, $model, $sys, $rag, $prompt, 'OpenRouter');
+}
+
 function check_validated_cache(string $hash): ?string {
     $pdo = get_pdo();
     if (!$pdo) return null;
@@ -505,6 +559,52 @@ function server_user_is_elite(string $userId): bool {
         return false;
     }
     return false;
+}
+
+// Tier serveur (anon|free|starter|pro|elite|teach|admin) calculé depuis l'abonnement
+// RÉEL. Réplique de _aiTier() client : exclut les statuts expirés/annulés/en attente,
+// reconnaît « Activé » (et non l'ancien test === 'actif'), retient le MEILLEUR tier.
+function server_user_tier(string $userId): string {
+    if ($userId === '') return 'anon';
+    $dbFile = __DIR__ . '/../data/veritas_db.json';
+    if (!is_file($dbFile)) return 'anon';
+    try {
+        $db = json_decode((string) file_get_contents($dbFile), true);
+        if (!is_array($db)) return 'anon';
+        foreach (($db['admins'] ?? []) as $a) {
+            if (($a['id'] ?? null) === $userId || ($a['user'] ?? null) === $userId) return 'admin';
+        }
+        if (($db['superAdmin']['user'] ?? null) === $userId || ($db['superAdmin']['id'] ?? null) === $userId) return 'admin';
+        foreach (($db['teachers'] ?? []) as $t) {
+            if (($t['id'] ?? null) === $userId || ($t['user'] ?? null) === $userId) return 'teach';
+        }
+        $known = false;
+        foreach (['studentAccounts', 'visitorAccounts'] as $coll) {
+            foreach (($db[$coll] ?? []) as $acc) {
+                if (($acc['id'] ?? null) === $userId || ($acc['user'] ?? null) === $userId) { $known = true; break 2; }
+            }
+        }
+        $rank = ['free' => 0, 'starter' => 1, 'pro' => 2, 'elite' => 3];
+        $best = -1; $bestT = 'free';
+        $now = (int) round(microtime(true) * 1000);
+        foreach (($db['elearning']['abonnements'] ?? []) as $abo) {
+            if (!is_array($abo)) continue;
+            if (($abo['accountId'] ?? null) !== $userId && ($abo['userId'] ?? null) !== $userId) continue;
+            $st = strtolower((string) ($abo['statut'] ?? ''));
+            if (in_array($st, ['expiré', 'expire', 'annulé', 'annule', 'en attente', 'suspendu'], true)) continue;
+            $end = isset($abo['dateFinTs']) ? (int) $abo['dateFinTs'] : 0;
+            if ($end && $end < $now) continue;
+            $p = strtolower((string) ($abo['plan'] ?? $abo['planId'] ?? ''));
+            if (strpos($p, 'elite') !== false || $p === 'plan4') $t = 'elite';
+            elseif ($p === 'plan2' || strpos($p, 'starter') !== false) $t = 'starter';
+            else $t = 'pro';
+            if ($rank[$t] > $best) { $best = $rank[$t]; $bestT = $t; }
+        }
+        if ($best >= 0) return $bestT;
+        return $known ? 'free' : 'anon';
+    } catch (Throwable $e) {
+        return 'anon';
+    }
 }
 
 function get_pdo(): ?PDO {

@@ -16,6 +16,7 @@
 // ============================================================
 
 require_once __DIR__ . '/payment_config.php';
+require_once __DIR__ . '/_auth_lib.php'; // Étape 1 : octroi d'accès côté serveur
 
 // ── CORS (déjà géré par payment_config.php) ──
 header('Content-Type: application/json; charset=utf-8');
@@ -106,7 +107,9 @@ if ($action === 'init' && $method === 'POST') {
         'pay_token'   => $data['pay_token']   ?? '',
         'notif_token' => $data['notif_token'] ?? '',
         'payment_url' => $data['payment_url'],
-        'provider'    => 'orange_money_cm'
+        'provider'    => 'orange_money_cm',
+        // Commissions auteurs/parrains pré-calculées par le client (persistées au paiement confirmé).
+        'commissions' => (isset($input['commissions']) && is_array($input['commissions'])) ? $input['commissions'] : []
     ];
     file_put_contents($stateDir . _safeRef($ref) . '.json', json_encode($state, JSON_PRETTY_PRINT));
 
@@ -188,6 +191,19 @@ if ($action === 'notify' && $method === 'POST') {
     }
 
     file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT));
+
+    // ── Étape 1 : octroi d'accès côté serveur (best-effort, ne bloque JAMAIS la
+    //    réponse à Orange — sinon Orange retenterait en boucle). Idempotent. ──
+    if (($state['status'] ?? '') === 'paid') {
+        try {
+            $g = vrt_grant_entitlement_to_file($state);
+            @file_put_contents($stateDir . '_webhook_log.txt',
+                date('c') . ' [GRANT] ref=' . $ref . ' ' . json_encode($g) . "\n", FILE_APPEND);
+        } catch (\Throwable $e) {
+            @file_put_contents($stateDir . '_webhook_log.txt',
+                date('c') . ' [GRANT_ERR] ref=' . $ref . ' ' . $e->getMessage() . "\n", FILE_APPEND);
+        }
+    }
 
     // Répondre 200 OK à Orange (sinon Orange retentera)
     http_response_code(200);

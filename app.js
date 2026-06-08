@@ -1823,15 +1823,26 @@ function adminAddFile(itemId) {
     if (!contenu) return;
     showUploadProgress(0, 'Envoi en cours…');
     try {
-      var res = await uploadToLWS(file, 'elearning', function(pct) {
+      // Étape 2 : contenu PREMIUM (payant) → store PROTÉGÉ (deny-all, servi seulement
+      // par content.php après contrôle d'abonnement). Contenu GRATUIT → public (funnel).
+      var _prot = !contenu.gratuit;
+      var res = await uploadToLWS(file, _prot ? 'protected' : 'elearning', function(pct) {
         showUploadProgress(pct, file.name + ' — ' + pct + '%');
       });
-      contenu.fichierUrl = res.url;
+      if (_prot && res.fichierProtege) {
+        contenu.fichierProtege = res.fichierProtege;
+        delete contenu.fichierUrl;
+      } else {
+        contenu.fichierUrl = res.url;
+        delete contenu.fichierProtege;
+      }
+      contenu.fichier = file.name;     // nom d'origine → détection d'extension dans viewSecure
+      contenu.fileType = file.type;
       delete contenu.idbKey;
       delete contenu.fichierData;
       showUploadProgress(100);
       save();
-      toast('✓ Fichier uploadé et synchronisé');
+      toast(_prot ? '✓ Fichier uploadé (protégé)' : '✓ Fichier uploadé et synchronisé');
       if (typeof re === 'function') re();
     } catch(e) {
       showUploadProgress(100);
@@ -1839,6 +1850,33 @@ function adminAddFile(itemId) {
     }
   };
   inp.click();
+}
+
+// Étape 2 — déplace les médias premium PUBLICS existants vers le store protégé
+// (uploads/protected/, deny-all) via api/migrate_protected.php. dry=true simule.
+// Après une migration réelle, on TIRE la base serveur (qui a changé) pour éviter
+// que la base locale admin (encore en fichierUrl) ne réécrase la migration.
+function runProtectMigration(dry){
+  if(typeof iA==='function'&&!iA())return;
+  var cfg=(DB.cloudConfig&&DB.cloudConfig.url&&DB.cloudConfig.secret)?DB.cloudConfig:null;
+  if(!cfg){toast('Configuration cloud requise (URL + clé API)','err');return;}
+  var st=document.getElementById('protectMigrStatus');
+  if(st)st.innerHTML='<span class="mut">⏳ '+(dry?'Simulation':'Migration')+' en cours…</span>';
+  var url=cfg.url.replace(/\/+$/,'')+'/migrate_protected.php'+(dry?'?dry=1':'');
+  fetch(url,{method:'POST',headers:{'Authorization':'Bearer '+cfg.secret}})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(!res||!res.ok){if(st)st.innerHTML='<div class="ib ibr mb0"><span>✗</span><span>'+_esc((res&&res.error)||'Échec migration')+'</span></div>';return;}
+      var msg=(dry?'🧪 Simulation : ':'✅ Migration : ')+res.migrated+(dry?' à migrer':' migré(s)')+', '+res.skipped+' déjà protégé(s), '+res.missing+' introuvable(s).';
+      if(st)st.innerHTML='<div class="ib ibg mb0"><span>'+(dry?'🧪':'✅')+'</span><span>'+_esc(msg)+(dry&&res.migrated?' — relance « Migrer maintenant » pour appliquer.':'')+'</span></div>';
+      toast(msg,'ok');
+      if(!dry&&res.migrated){
+        toast('🔄 Mise à jour locale depuis le serveur…','info');
+        if(typeof cloudForcePull==='function'){try{cloudForcePull();}catch(e){}}
+        else if(typeof cloudRestoreDB==='function'){try{cloudRestoreDB();}catch(e){}}
+      }
+    })
+    .catch(function(e){if(st)st.innerHTML='<div class="ib ibr mb0"><span>✗</span><span>'+_esc(e.message)+'</span></div>';});
 }
 
 // Taille en Ko d'une chaîne
@@ -2196,6 +2234,30 @@ async function _warnDefaultPasswords(){
 // role="button") et activables via Entrée/Espace, y compris après chaque re-rendu.
 // NB : le LIBELLÉ pour lecteur d'écran (aria-label) reste une passe à part.
 // ════════════════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════════════════
+// PREMIUM — Fallback pictogramme : les pictos « 3D » sont des IMAGES servies par
+// un CDN emoji externe (em-content.zobj.net). Sur connexion lente/coupée (fréquent
+// au Cameroun) l'image échoue → picto cassé. Ce listener capture l'erreur de
+// chargement et remplace l'image par l'emoji natif (data-ef si fourni, sinon un
+// repli neutre) → JAMAIS de picto cassé, sans toucher chaque site de rendu.
+// ════════════════════════════════════════════════════════════════════════
+document.addEventListener('error', function(e){
+  try{
+    var el=e.target;
+    if(!el||el.tagName!=='IMG'||el.__ef) return;
+    var em=(el.getAttribute&&el.getAttribute('data-ef'))||'';
+    var src=(el.getAttribute&&el.getAttribute('src'))||'';
+    // Ne traiter QUE les pictogrammes emoji (pas les vraies photos/logos).
+    if(!em && src.indexOf('zobj.net')<0 && src.indexOf('em-content')<0) return;
+    el.__ef=1;
+    var s=document.createElement('span');
+    s.textContent=em||'📦';
+    s.setAttribute('aria-hidden','true');
+    s.style.cssText='display:inline-flex;align-items:center;justify-content:center;font-size:1.7em;line-height:1;width:100%;height:100%';
+    if(el.parentNode) el.parentNode.replaceChild(s,el);
+  }catch(_e){}
+}, true);
+
 (function(){
   var NATIVE=/^(A|BUTTON|INPUT|SELECT|TEXTAREA|LABEL|SUMMARY|OPTION)$/;
   function isNative(el){
@@ -4833,7 +4895,7 @@ function vShowSec(sec,btn){
       h+='  <div class="vplan-top"></div>';
       h+=  (isPopular?'<div class="vplan-badge-pop">Populaire</div>':'');
       h+='  <div class="vplan-body">';
-      h+='    <div class="vplan-ico"><img src="'+_esc(picto)+'" alt="" loading="lazy"></div>';
+      h+='    <div class="vplan-ico"><img src="'+_esc(picto)+'" alt="" loading="lazy" data-ef="🎓"></div>';
       h+=    (pct?'<div class="vplan-promo">🔥 -'+pct+'% ÉCONOMIE</div>':'');
       h+='    <div class="vplan-name">'+_esc(plan.nom)+'</div>';
       h+='    <div class="vplan-cible">'+_esc(plan.cible)+'</div>';
@@ -4973,7 +5035,7 @@ function vShowSec(sec,btn){
           var icoHtml=p.photo
             ? '<img src="'+_esc(p.photo)+'" alt="'+_esc(p.titre)+'">'
             : (pictoUrl
-                ? '<div class="vprod-thumb-ico"><img src="'+_esc(pictoUrl)+'" alt=""></div>'
+                ? '<div class="vprod-thumb-ico"><img src="'+_esc(pictoUrl)+'" alt="" data-ef="'+_esc(p.ico||'🎁')+'"></div>'
                 : '<div class="vprod-thumb-emoji">'+(p.ico||'🎁')+'</div>');
           return '<div class="vprod-card'+(p.nouveau?' has-new':'')+'" onclick="visitorOrderProduct(&apos;'+p.titre.replace(/'/g,'')+'&apos;,'+p.prix+')">'+
             '<div class="vprod-thumb" style="background:'+bg+'">'+icoHtml+'</div>'+
@@ -9027,8 +9089,49 @@ async function _studentSyncFetch(login,password){
     if(tmt)clearTimeout(tmt);
     if(!r.ok) return null;
     var j=await r.json();
+    // S3 v1.2.x (Étape 3) : mémoriser le token par compte émis par le serveur
+    // → permet à content.php d'authentifier sans renvoyer le mot de passe.
+    if(j&&j.token){try{window._vrtContentToken=j.token;sessionStorage.setItem('_vrtCT',j.token);}catch(e){}}
+    // S3 v1.2.x (Étape 2) : injecter les contenus PROTÉGÉS autorisés (métadonnées)
+    // pour que l'abonné les VOIE sur n'importe quel appareil (lecture via content.php).
+    if(j&&j.ok&&j.contenusAutorises){try{_studentApplyContenus(j.contenusAutorises);}catch(e){}}
     return (j&&j.ok)?j:null;
   }catch(e){ return null; }
+}
+// S3 v1.2.x (Étape 2) — fusionne les contenus PROTÉGÉS autorisés (métadonnées serveur)
+// sans JAMAIS écraser un contenu local complet. N'ajoute QUE ceux qui ont un
+// fichierProtege (lisibles via content.php par leur id) → aucune entrée injouable.
+function _studentApplyContenus(list){
+  if(!list||!list.length) return;
+  if(!DB.elearning) DB.elearning={};
+  if(!DB.elearning.contenus) DB.elearning.contenus=[];
+  var byId={}; DB.elearning.contenus.forEach(function(c){ if(c&&c.id) byId[c.id]=true; });
+  var added=0;
+  list.forEach(function(c){
+    if(!c||!c.id||byId[c.id]) return;     // ne jamais remplacer un contenu local existant
+    if(!c.fichierProtege) return;          // seul le contenu protégé est lisible via la porte
+    DB.elearning.contenus.push(c); byId[c.id]=true; added++;
+  });
+  if(added){ try{ if(typeof save==='function') save(); }catch(e){} }
+}
+function _contentToken(){
+  try{ return window._vrtContentToken || sessionStorage.getItem('_vrtCT') || ''; }catch(e){ return ''; }
+}
+// Étape 2 — diffusion par la porte serveur UNIQUEMENT pour le contenu PROTÉGÉ
+// (item.fichierProtege). Modèle piloté par la donnée : pas de flag global (qui
+// n'atteindrait pas les visiteurs, lesquels ne synchronisent pas db.php). content.php
+// n'a besoin que de l'id + du token. Le contenu non protégé (data:/idbKey/fichierUrl
+// public) conserve exactement son comportement actuel.
+function _serverGateUrl(item){
+  if(!item||!item.id||!item.fichierProtege) return null;
+  var tok=_contentToken(); if(!tok) return null;            // pas authentifié serveur → repli
+  var base; try{ base=(LWS_API.db||'').replace(/db\.php(\?.*)?$/,'content.php'); }catch(e){ base=''; }
+  if(!base) return null;
+  return {
+    url: base+'?id='+encodeURIComponent(item.id)+'&token='+encodeURIComponent(tok),
+    name: item.fichier||(item.titre||'document'),
+    type: item.fileType||''
+  };
 }
 // Fusionne la tranche serveur dans la base locale par UPSERT (id) — n'efface JAMAIS
 // les enregistrements d'autres élèves (sûr sur un appareil admin/partagé). Persiste
@@ -9453,6 +9556,11 @@ function goTo(p){pg=p;buildNav();$("pgt").textContent=PT[p]||p;csb();$("cnt").in
 function tsb(){$("sb").classList.toggle('open');$("sbov").classList.toggle('open');}
 function csb(){$("sb").classList.remove('open');$("sbov").classList.remove('open');}
 function render(p){
+  // Garde de session : plusieurs pages élève/enseignant lisent SES.id / SES.cls
+  // sans null-check. Une re() différée (setTimeout/sync) peut s'exécuter APRÈS un
+  // logout ou pendant la transition de session → SES null → TypeError non capturée
+  // (journalisée dans _veritasErrors). On ne rend rien plutôt que de planter.
+  if(typeof SES==='undefined'||!SES) return '';
   const P={
     dashboard:pgDash,students:pgStudents,payments:pgPayments,grades:pgGrades,
     schedule:pgSched,announce:pgAnn,books2:pgBooks2,send:pgSend,
@@ -12997,6 +13105,16 @@ function pgSettings(){
       <div class="ib ibg mt12 mb0" style="background:#F0FDF4;border:1px solid #A7F3D0"><span>✨</span><span><strong>Nouveau (v1.2)</strong> : les anciens raccourcis « Gestion avancée » ont été éclatés dans les bonnes sections du menu. Retrouvez-les dans : 🌐 <strong>Portail visiteur</strong> (ticker, vidéo, calendrier, partenaires, extraits), 🎓 <strong>E-Learning</strong> (packs, jeux, labos, coaching, import QCM), 📚 <strong>Pédagogie › Devoirs</strong> (épreuves, évals), 💰 <strong>Finances</strong> (tentatives paiement) et 📢 <strong>Communication</strong> (groupes WhatsApp).</span></div>
     </div>
     <div class="card mt16">
+      <div class="ct">🔒 Contenu premium protégé (Étape 2)</div>
+      <div class="ib ibt mb14"><span>🛡️</span><span>Les médias <strong>payants</strong> uploadés sont désormais stockés dans un dossier <strong>privé</strong> et servis uniquement après vérification d'abonnement (content.php). Migrez les anciens fichiers premium (aujourd'hui publics, téléchargeables par URL) vers ce dossier privé.</span></div>
+      <div class="fl2 g8 fw">
+        <button class="btn bgr2" onclick="runProtectMigration(true)">🧪 Simuler (dry-run)</button>
+        <button class="btn" style="background:#92400E;color:#fff;border-radius:10px;font-weight:700" onclick="runProtectMigration(false)">🚚 Migrer maintenant</button>
+      </div>
+      <div class="ib ibi mt12 mb0"><span>💡</span><span>Lance d'abord la <strong>simulation</strong>, puis <strong>Migrer</strong>. Une sauvegarde horodatée est créée avant toute modification. Le contenu <strong>gratuit</strong> reste public (funnel d'abonnement).</span></div>
+      <div id="protectMigrStatus" class="mt12"></div>
+    </div>
+    <div class="card mt16">
       <div class="ct">☁️ VÉRITAS Cloud — Synchronisation en ligne</div>
       <div class="ib ibg mb14"><span>🌐</span><span>Synchronisez vos données avec le serveur <strong>veritas-school.com</strong>. Sauvegardez automatiquement dans MySQL et uploadez vos fichiers (vidéos, épreuves, cours).</span></div>
       <div class="fg2">
@@ -14137,27 +14255,30 @@ window._aiTier = function(){
   if(typeof iA==='function' && iA()) return 'admin';
   // Enseignant
   if(ses.type==='enseignant') return 'teach';
-  // Élève / visiteur inscrit : chercher abonnement actif
+  // Élève / visiteur inscrit : choisir le MEILLEUR tier parmi les abonnements actifs.
+  // FIX : plan5 (TECHNIQUE) et plan6 (GCE) n'étaient PAS mappés → l'abonné payant
+  // retombait en 'free'. Désormais : tout abonnement actif vaut au moins 'pro',
+  // et on retient le tier le plus élevé si l'utilisateur cumule plusieurs plans.
   var abos = (DB.elearning && DB.elearning.abonnements) || [];
-  var a = abos.find(function(x){
-    if(!_statutActif(x.statut)) return false;
-    // v1.2.2 FIX (bug de chaîne #1) : matcher aussi accountId — c'est le champ
-    // réellement stocké par validerAbonnement (userId n'existe pas).
-    return (x.accountId && (x.accountId===ses.id || x.accountId===ses.accountId)) ||
+  var _rank = {free:0, starter:1, pro:2, elite:3};
+  var _best = 'free', _bestR = -1;
+  abos.forEach(function(x){
+    if(!_statutActif(x.statut)) return;
+    var match = (x.accountId && (x.accountId===ses.id || x.accountId===ses.accountId)) ||
       x.userId===ses.id ||
       (ses.pre && x.nom===(ses.pre+' '+ses.nom)) ||
       x.nom===ses.nom ||
       (ses.tel && x.tel===ses.tel);
+    if(!match) return;
+    var p = (x.plan||x.planId||'').toLowerCase();
+    var t;
+    if(p.indexOf('elite')>=0 || p==='plan4') t='elite';        // FAMILLE / Élite
+    else if(p==='plan2' || p.indexOf('starter')>=0) t='starter'; // INTERMÉDIAIRE
+    else t='pro';                                                // EXAMEN(plan1)/ENSEIGNANT(plan3)/TECHNIQUE(plan5)/GCE(plan6)/inconnu payant
+    if(_rank[t] > _bestR){ _bestR = _rank[t]; _best = t; }
   });
-  if(a){
-    // Mapper plan vers tier
-    var p = (a.plan||'').toLowerCase();
-    if(p.indexOf('elite')>=0 || p==='plan4') return 'elite';
-    if(p.indexOf('pro')>=0 || p==='plan3') return 'pro';
-    if(p.indexOf('starter')>=0 || p==='plan2') return 'starter';
-    if(p.indexOf('plan1')>=0) return 'pro'; // ancien plan1 = pro
-  }
-  return 'free'; // visiteur inscrit sans abonnement
+  if(_bestR >= 0) return _best;
+  return 'free'; // visiteur inscrit sans abonnement actif
 };
 
 // v1.2.2 — RÉSOLVEUR D'ACCÈS PAR FONCTIONNALITÉ (interconnexion plans ↔ packs)
@@ -14594,6 +14715,10 @@ function viewSecure(item){
     else{inner='<div class="ib ibt">📄 Aperçu non disponible pour ce format.</div>';}
     M('🔒 '+item.titre,fname||'',inner,'<button class="btn bo" onclick="cm()">Fermer</button>');
   }
+  // S3 v1.2.x (Étape 2) : porte serveur prioritaire si active (média jamais
+  // injecté en data: dans le DOM). Repli transparent sur l'ancien comportement.
+  var _gate=_serverGateUrl(item);
+  if(_gate){show(_gate.url,_gate.name,_gate.type);return;}
   if(item.fichierData&&item.fichierData.length>100){show(item.fichierData,item.fichier,item.fileType);}
   else if(item.idbKey){idbGetFile(item.idbKey,function(rec){if(!rec){toast('Ressource introuvable','warn');return;}show(rec.data,rec.name,rec.type);});}
   else if(item.fichierUrl){show(item.fichierUrl,item.fichier||item.fichierUrl.split('/').pop(),item.fileType||'');}
@@ -30168,6 +30293,16 @@ function openPaymentModal(payInfo){
 // ═══════════════════════════════════════════════════════════════════
 // ── v1.2 : INITIATION PAIEMENT ORANGE MONEY (API automatique) ──
 // ═══════════════════════════════════════════════════════════════════
+// Commissions auteurs/parrains DÉJÀ calculées (applyPartnerCode) pour cette vente —
+// transmises au serveur pour persistance au paiement confirmé (partage de revenus
+// automatique en self-service). Calcul d'argent inchangé (côté client).
+function _payPendingCommissions(intent, targetId){
+  try{
+    return (DB.commissions||[]).filter(function(c){
+      return c && c.status==='pending' && c.type==='sale' && String(c.refId)===String(targetId);
+    });
+  }catch(e){ return []; }
+}
 function _payInitOrange(ref, montant, label, intent, targetId, accountId, nom, tel){
   if(!DB.payApiConfig || !DB.payApiConfig.orangeEnabled){
     toast('Orange API non activée — voir Paramètres','warn');
@@ -30183,7 +30318,7 @@ function _payInitOrange(ref, montant, label, intent, targetId, accountId, nom, t
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+DB.cloudConfig.secret},
     body: JSON.stringify({ref:ref,montant:montant,label:label,intent:intent,targetId:targetId,
-      accountId:accountId,clientNom:nom,clientTel:tel})
+      accountId:accountId,clientNom:nom,clientTel:tel,commissions:_payPendingCommissions(intent,targetId)})
   })
   .then(function(r){return r.json();})
   .then(function(data){
@@ -30238,7 +30373,7 @@ function _payInitMtn(ref, montant, label, intent, targetId, accountId, nom){
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+DB.cloudConfig.secret},
     body: JSON.stringify({ref:ref,montant:montant,label:label,intent:intent,targetId:targetId,
-      accountId:accountId,clientNom:nom,clientTel:tel})
+      accountId:accountId,clientNom:nom,clientTel:tel,commissions:_payPendingCommissions(intent,targetId)})
   })
   .then(function(r){return r.json();})
   .then(function(data){
