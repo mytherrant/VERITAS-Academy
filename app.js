@@ -33367,7 +33367,7 @@ window._getPassageDuJour = function(){
     var cit=oe.citations[day%oe.citations.length];
     var txt=(typeof cit==='string')?cit:(cit&&(cit.texte||cit.t||cit.citation||cit.text||cit.extrait)||'');
     if(!txt) return null;
-    return {passage:_pdjCleanExtract(txt,600),titre:oe.titre||'',auteur:oe.auteur||'',classe:oe.classe||oe.niveau||''};
+    return {passage:_pdjCleanExtract(txt,900),titre:oe.titre||'',auteur:oe.auteur||'',classe:oe.classe||oe.niveau||''};
   }catch(e){ return null; }
 };
 
@@ -33452,7 +33452,7 @@ window._pdjLoad = function(){
           if(t && (!yesterdayTitle || t.toLowerCase()!==yesterdayTitle.toLowerCase())){ chosen=d.passages[i]; break; }
         }
         if(!chosen) return; // tous les passages sont = hier → on garde la pioche LITT_OEUVRES
-        var pp=chosen, txt=_pdjCleanExtract(pp.extrait,600);
+        var pp=chosen, txt=_pdjCleanExtract(pp.extrait,900);
         if(txt.length>40){
           var au=(pp.auteur&&pp.auteur.indexOf('programme')<0&&pp.auteur!=='Anonyme')?pp.auteur:'';
           var newTitle=_pdjCleanTitle(pp.titre||'');
