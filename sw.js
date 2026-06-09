@@ -16,7 +16,7 @@
 // 🔄 v1.2.2 : INCRÉMENTER ce numéro à CHAQUE déploiement de contenu.
 // Changer la version force le SW à se réinstaller, à purger les anciens caches
 // et à recharger le nouveau code sur tous les appareils (corrige "le site ne change pas").
-const CACHE_VERSION = 'veritas-v1.3.4';
+const CACHE_VERSION = 'veritas-v1.3.5';
 const STATIC_CACHE  = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 // v1.2.14 (P2) : cache fournisseurs INDÉPENDANT de la version de l'app — polices

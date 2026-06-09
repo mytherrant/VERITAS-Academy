@@ -84,11 +84,12 @@ if (!is_array($in)) {
 }
 
 $action = (string)($in['action'] ?? 'fetch');
+$token  = (string)($in['token'] ?? '');   // S3 v1.3.x : auth par token (le client soumet sans renvoyer le mot de passe)
 $login  = trim((string)($in['login'] ?? ''));
 $pass   = (string)($in['password'] ?? '');
-if ($login === '' || $pass === '') {
+if ($token === '' && ($login === '' || $pass === '')) {
     http_response_code(400);
-    echo json_encode(['ok' => false, 'error' => 'Identifiants requis']);
+    echo json_encode(['ok' => false, 'error' => 'Identifiants ou token requis']);
     exit;
 }
 
@@ -116,30 +117,38 @@ if (!is_array($db)) {
 
 $acc = null;
 $accType = null;
-$lc = strtolower($login);
-foreach (($db['studentAccounts'] ?? []) as $a) {
-    if (isset($a['user']) && strtolower((string)$a['user']) === $lc) { $acc = $a; $accType = 'eleve'; break; }
+
+// S3 v1.3.x — AUTH PAR TOKEN d'abord (le client soumet ses devoirs sans renvoyer
+// le mot de passe ; token émis à la connexion, vérifié par _auth_lib).
+if ($token !== '') {
+    $tk = vrt_verify_token($token, $db);
+    if ($tk !== null) { $acc = $tk['acc']; $accType = $tk['type']; }
 }
-if ($acc === null) {
-    foreach (($db['visitorAccounts'] ?? []) as $a) {
-        if (isset($a['user']) && strtolower((string)$a['user']) === $lc && (($a['statut'] ?? '') !== 'suspendu')) {
-            $acc = $a; $accType = 'visiteur'; break;
+
+// Sinon : auth login + mot de passe (bcrypt au repos OU S256 hérité, via _auth_lib).
+if ($acc === null && $login !== '') {
+    $lc = strtolower($login);
+    foreach (($db['studentAccounts'] ?? []) as $a) {
+        if (isset($a['user']) && strtolower((string)$a['user']) === $lc) { $acc = $a; $accType = 'eleve'; break; }
+    }
+    if ($acc === null) {
+        foreach (($db['visitorAccounts'] ?? []) as $a) {
+            if (isset($a['user']) && strtolower((string)$a['user']) === $lc && (($a['statut'] ?? '') !== 'suspendu')) {
+                $acc = $a; $accType = 'visiteur'; break;
+            }
         }
+    }
+    $pwNeedUpgrade = false;
+    if ($acc !== null && !vrt_verify_password($pass, (string)($acc['pwd'] ?? ''), (string)$acc['user'], $pwNeedUpgrade)) {
+        $acc = null; // mot de passe incorrect
     }
 }
 
-// S3 v1.2.x : vérification déléguée à _auth_lib (supporte bcrypt au repos ET
-// S256 hérité ; $pwNeedUpgrade=true quand le compte gagnerait à passer en bcrypt).
-$authOk = false;
-$pwNeedUpgrade = false;
-if ($acc !== null) {
-    $authOk = vrt_verify_password($pass, (string)($acc['pwd'] ?? ''), (string)$acc['user'], $pwNeedUpgrade);
-}
-if (!$authOk) {
+if ($acc === null) {
     @file_put_contents(__DIR__ . '/data/_security_log.txt',
         date('c') . ' [STUDENT_AUTH_FAIL] ip=' . $ip . ' login=' . substr($login, 0, 40) . "\n", FILE_APPEND);
     http_response_code(401);
-    echo json_encode(['ok' => false, 'error' => 'Identifiants incorrects']);
+    echo json_encode(['ok' => false, 'error' => 'Authentification requise']);
     exit;
 }
 
@@ -264,15 +273,25 @@ if ($action === 'submit' || $action === 'progress') {
     $result = ['ok' => true];
     if ($action === 'submit') {
         if (!isset($cdb['submissions']) || !is_array($cdb['submissions'])) $cdb['submissions'] = [];
+        $texte = substr((string)($payload['texte'] ?? $payload['contenu'] ?? ''), 0, 20000);
         $sub = [
             'id'         => 'sub' . bin2hex(random_bytes(5)),
             'eid'        => $eid,                                          // ← fixé serveur
             'dvid'       => substr((string)($payload['dvid'] ?? ''), 0, 64),
-            'texte'      => substr((string)($payload['texte'] ?? ''), 0, 20000),
+            'texte'      => $texte,
+            'contenu'    => $texte,                                        // alias lu par la vue prof
             'fichierUrl' => substr((string)($payload['fichierUrl'] ?? ''), 0, 500),
             'date'       => date('c'),
+            'note'       => null,
+            'commentaire' => '',
             'via'        => 'student_sync',
         ];
+        // Idempotence : ne pas dupliquer si l'élève re-soumet le même devoir.
+        $dup = false;
+        foreach ($cdb['submissions'] as $exist) {
+            if (is_array($exist) && (string)($exist['eid'] ?? '') === $eid && (string)($exist['dvid'] ?? '') === (string)$sub['dvid']) { $dup = true; break; }
+        }
+        if ($dup) { flock($fp, LOCK_UN); fclose($fp); echo json_encode(['ok' => true, 'duplicate' => true]); exit; }
         $cdb['submissions'][] = $sub;
         $result['submission'] = $sub;
     } else { // progress

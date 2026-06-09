@@ -9956,6 +9956,23 @@ function submitDevoir(dvid){
   if(DB.submissions.find(sb=>sb.dvid===dvid&&sb.eid===s.id)){toast('Devoir déjà soumis','warn');return;}
   DB.submissions.push({id:gid(),dvid,eid:s.id,date:today(),contenu:txt,note:null,commentaire:''});
   save();re();toast('✓ Devoir soumis avec succès');
+  // S3 v1.3.x : pousser AUSSI au serveur — sinon le prof ne voit jamais la soumission
+  // (save() n'envoie rien pour un élève). Non bloquant ; l'affichage local reste immédiat.
+  try{ _studentSubmitToServer({dvid:dvid, texte:txt}); }catch(e){}
+}
+// Envoie une soumission d'élève au serveur (student_data.php action=submit) via le
+// token de session (pas de mot de passe stocké). Silencieux si hors-ligne/sans token.
+function _studentSubmitToServer(payload){
+  try{
+    var url=(typeof _studentSyncUrl==='function')?_studentSyncUrl():'';
+    var tok=(typeof _contentToken==='function')?_contentToken():'';
+    if(!url||!tok||(typeof navigator!=='undefined'&&navigator.onLine===false)) return;
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({action:'submit',token:tok,payload:payload})})
+      .then(function(r){return r.ok?r.json():null;})
+      .then(function(j){ if(j&&j.ok&&!j.duplicate&&typeof toast==='function') toast('☁️ Transmis au professeur','ok'); })
+      .catch(function(){});
+  }catch(e){}
 }
 
 function pgMonPaiement(){
