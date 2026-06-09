@@ -2258,6 +2258,44 @@ document.addEventListener('error', function(e){
   }catch(_e){}
 }, true);
 
+// ════════════════════════════════════════════════════════════════════════
+// ÉPURE v1.3 — petits effets de DÉROULEMENT (scroll reveal). Progressive
+// enhancement : si IntersectionObserver indisponible OU reduced-motion, on NE
+// pose PAS html.js-reveal → rien n'est masqué (tout reste visible). Couvre le
+// contenu visiteur rendu dynamiquement (MutationObserver).
+// ════════════════════════════════════════════════════════════════════════
+(function(){
+  try{
+    if(!('IntersectionObserver' in window)) return;
+    if(window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    document.documentElement.classList.add('js-reveal');
+    var SEL='.vsec .card,.vsec .vcard,.vsec .sc,.vsec .vplan,.vsec .vprod-card,.vsec .vbook-card,.vsec .acc-pill,.v-hero-gradient';
+    var io=new IntersectionObserver(function(entries){
+      for(var i=0;i<entries.length;i++){ if(entries[i].isIntersecting){ entries[i].target.classList.add('ep-in'); io.unobserve(entries[i].target); } }
+    },{ rootMargin:'0px 0px -6% 0px', threshold:0.04 });
+    function obs(el){
+      if(!el||el.nodeType!==1||el.__epr) return; el.__epr=1;
+      // Déjà (presque) dans le viewport au moment du scan → révéler TOUT DE SUITE
+      // (jamais de carte visible coincée masquée). Le scroll-reveal ne s'applique
+      // qu'au contenu réellement SOUS le pli.
+      try{ var r=el.getBoundingClientRect(); if(r.bottom>0 && r.top < (window.innerHeight||800)*0.98){ el.classList.add('ep-in'); return; } }catch(e){}
+      io.observe(el);
+    }
+    function scan(root){ try{ var l=(root||document).querySelectorAll(SEL); for(var i=0;i<l.length;i++) obs(l[i]); }catch(e){} }
+    function start(){
+      scan(document);
+      try{
+        var mo=new MutationObserver(function(muts){
+          for(var i=0;i<muts.length;i++){ var add=muts[i].addedNodes; for(var j=0;j<add.length;j++){ var n=add[j];
+            if(n&&n.nodeType===1){ if(n.matches&&n.matches(SEL)) obs(n); scan(n); } } }
+        });
+        mo.observe(document.body,{childList:true,subtree:true});
+      }catch(e){}
+    }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start); else start();
+  }catch(e){}
+})();
+
 (function(){
   var NATIVE=/^(A|BUTTON|INPUT|SELECT|TEXTAREA|LABEL|SUMMARY|OPTION)$/;
   function isNative(el){
