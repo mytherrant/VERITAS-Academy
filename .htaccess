@@ -13,6 +13,23 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 # RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
+# ─────────────────────────────────────────────────────────
+# 1bis. Transmettre l'en-tête Authorization à PHP (CORRECTIF SYNCHRO)
+# Sur LiteSpeed/FastCGI, l'en-tête « Authorization: Bearer … » est retiré avant
+# d'atteindre PHP → requireAuth() reçoit un token vide → 401 → la synchro cloud
+# échoue en permanence (et le WAF LWS bloque le repli _secret= en URL/body).
+# On le ré-injecte dans l'environnement PHP : $_SERVER['HTTP_AUTHORIZATION'] et
+# REDIRECT_HTTP_AUTHORIZATION — les deux clés déjà lues par config_sync::requireAuth.
+# Directives portables (pas de CGIPassAuth → aucun risque d'« Invalid command »/500).
+# ─────────────────────────────────────────────────────────
+<IfModule mod_setenvif.c>
+  SetEnvIf Authorization "(.+)" HTTP_AUTHORIZATION=$1
+</IfModule>
+<IfModule mod_rewrite.c>
+  RewriteCond %{HTTP:Authorization} .
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+</IfModule>
+
 # index.php sert app.html avec headers no-cache PHP
 DirectoryIndex index.php index.html
 

@@ -4929,11 +4929,7 @@ function vShowSec(sec,btn){
     h+='</div></div></div>';
 
     h+='</div>';
-    c.innerHTML=h;
-
-
-    c.innerHTML=h;
-
+    c.innerHTML=h;  // (perf) rendu unique — supprime un double innerHTML qui peignait la section 2×
 
   } else if(sec==="boutique"){
     const promos=(DB.promoCodes||[]).filter(p=>p.actif);
