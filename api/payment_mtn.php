@@ -18,6 +18,20 @@
 require_once __DIR__ . '/payment_config.php';
 require_once __DIR__ . '/_auth_lib.php'; // Étape 1 : octroi d'accès côté serveur
 
+// ── CORS (allowlist stricte — BUG FIX #2 : plus délégué à payment_config.php) ──
+$__mp_allowed = [
+    'https://veritas-school.com', 'https://www.veritas-school.com',
+    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+];
+$__mp_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__mp_origin, $__mp_allowed, true)) {
+    header('Access-Control-Allow-Origin: ' . $__mp_origin);
+    header('Vary: Origin');
+}
+header('Access-Control-Allow-Methods: GET, POST, PUT, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Max-Age: 86400');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 header('Content-Type: application/json; charset=utf-8');
 
 // Étape 1 : octroi serveur idempotent quand un paiement passe à « paid »
@@ -38,7 +52,7 @@ $action = $_GET['action'] ?? 'init';
 $method = $_SERVER['REQUEST_METHOD'];
 
 $stateDir = __DIR__ . '/data/payments/';
-if (!is_dir($stateDir)) mkdir($stateDir, 0755, true);
+if (!is_dir($stateDir)) mkdir($stateDir, 0750, true); // 🔐 BUG FIX #8 : 0755→0750
 
 // ────────────────────────────────────────────────────────────
 // 1. INITIALISER UN PAIEMENT — envoie un prompt USSD au client

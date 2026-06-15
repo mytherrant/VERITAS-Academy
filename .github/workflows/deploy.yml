@@ -119,6 +119,14 @@ jobs:
             [ -f "$f" ] && cp "$f" deploy/ && echo "  ✓ $f"
           done
 
+          # ── v1.9 (#7) Pages SEO statiques des épreuves gratuites ──
+          # NON-BLOQUANT : un échec n'interrompt JAMAIS le déploiement.
+          if node tools/build_seo.cjs --base https://veritas-school.com; then
+            [ -d seo ] && cp -r seo deploy/ && echo "  ✓ seo/ ($(ls seo | wc -l) fichiers)"
+          else
+            echo "  ⚠ build_seo ignoré (non bloquant)"
+          fi
+
           # ── Vidéo promotionnelle ───────────────────────────────
           if [ -f VERITAS_Promo_Video.html ]; then
             cp VERITAS_Promo_Video.html deploy/
@@ -156,7 +164,9 @@ jobs:
             api/content.php \
             api/migrate_protected.php \
             api/db_sql.php \
-            api/admin_validate.php; do
+            api/admin_validate.php \
+            api/stats.php \
+            api/secure_pdf.php; do
             [ -f "$f" ] && cp "$f" deploy/api/ && echo "  ✓ $f"
           done
 

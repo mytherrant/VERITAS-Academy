@@ -364,6 +364,27 @@ if (!defined('VRT_AUTH_LIB')) {
             return ['changed' => true, 'msg' => 'Commande livre créée et confirmée'];
         }
 
+        // v1.7 : LIVRE NUMÉRIQUE — débloque la lecture sécurisée sur le compte
+        // (acc.unlockedBooks). Idempotent par ref. Lu par api/secure_pdf.php.
+        if ($intent === 'digitalbook') {
+            if ($accountId === '') return ['changed' => false, 'msg' => 'accountId manquant'];
+            $bookId = $targetId;
+            foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+                if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
+                foreach ($db[$coll] as &$acc) {
+                    if (is_array($acc) && (string) ($acc['id'] ?? '') === $accountId) {
+                        if (!isset($acc['unlockedBooks']) || !is_array($acc['unlockedBooks'])) $acc['unlockedBooks'] = [];
+                        if (in_array($bookId, $acc['unlockedBooks'], true)) { unset($acc); return ['changed' => false, 'msg' => 'livre déjà débloqué']; }
+                        $acc['unlockedBooks'][] = $bookId;
+                        unset($acc);
+                        return ['changed' => true, 'msg' => 'Livre numérique débloqué'];
+                    }
+                }
+                unset($acc);
+            }
+            return ['changed' => false, 'msg' => 'compte introuvable'];
+        }
+
         if ($intent === 'product') {
             if (!isset($db['visitorOrders']) || !is_array($db['visitorOrders'])) $db['visitorOrders'] = [];
             foreach ($db['visitorOrders'] as $o) {

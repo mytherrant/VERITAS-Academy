@@ -20,14 +20,26 @@ $appFile = __DIR__ . '/app.html';
 // ETag basé sur la date de modification du fichier → invalide le cache à chaque déploiement
 $etag = file_exists($appFile) ? '"' . filemtime($appFile) . '"' : '"0"';
 
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
-header('Pragma: no-cache');
-header('Expires: Thu, 01 Jan 1970 00:00:00 GMT');
+// v1.3.1 PERF : `no-cache` (et non `no-store`) → le navigateur garde une copie
+// privée mais REVALIDE à chaque visite. Combiné au 304 ci-dessous, les visites
+// répétées ne re-téléchargent plus les ~440 Ko du HTML (réponse 304 vide) tout
+// en restant toujours à jour (l'ETag change à chaque déploiement).
+// Le cache SERVEUR LiteSpeed reste désactivé (X-LiteSpeed-Cache-Control) :
+// aucun risque de servir une version périmée à un autre utilisateur.
+header('Cache-Control: private, no-cache, must-revalidate, max-age=0');
 header('Surrogate-Control: no-store');
 header('X-LiteSpeed-Cache-Control: no-cache, esi=off');
 header('ETag: ' . $etag);
 header('Last-Modified: ' . (file_exists($appFile) ? gmdate('D, d M Y H:i:s', filemtime($appFile)) . ' GMT' : 'Thu, 01 Jan 1970 00:00:00 GMT'));
 header('Content-Type: text/html; charset=utf-8');
+
+// v1.3.1 PERF : réponse 304 si le client possède déjà la version courante.
+// (L'ETag était envoyé mais If-None-Match n'était jamais lu → toujours 200 plein.)
+$inm = trim($_SERVER['HTTP_IF_NONE_MATCH'] ?? '');
+if ($inm !== '' && $inm === $etag && file_exists($appFile)) {
+    http_response_code(304);
+    exit;
+}
 
 if (!file_exists($appFile)) {
     http_response_code(503);

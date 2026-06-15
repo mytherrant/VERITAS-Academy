@@ -520,6 +520,66 @@ const COEFS={
   'Coupe-Couture':4,'Esthétique & Cosmétique':4,'Arts Plastiques Techniques':3
 };
 const TRS=['1er Trimestre','2ème Trimestre','3ème Trimestre'];
+
+// ── v1.4.2 : CLASSIFICATEUR de classes par SECTION / TYPE D'ENSEIGNEMENT ──
+// Remplace partout la « soupe » de ~150 boutons de classes en vrac (relevés,
+// épreuves…) par un regroupement : Général FR / Technique / CAP / Anglophone.
+window._SECTION_GROUPS=[
+  {id:'fr_gen', l:'🎓 Général',    c:'#142554'},
+  {id:'fr_tech',l:'🔧 Technique',  c:'#B45309'},
+  {id:'cap',    l:'🛠️ CAP',        c:'#0E7490'},
+  {id:'en',     l:'🇬🇧 Anglophone', c:'#7C3AED'}
+];
+window._classifySection=function(cls){
+  var c=String(cls||'').trim();
+  if(/^CAP\b/i.test(c)) return 'cap';
+  if(/form|sixth|year|o.?level|a.?level/i.test(c)) return 'en';
+  var m=c.match(/^(6ème|5ème|4ème|3ème|2nde|1ère|Tle|Terminale)\s*(.*)$/i);
+  if(m){
+    var suf=(m[2]||'').trim().toUpperCase();
+    // Séries GÉNÉRALES : (vide), A/A1-A5, C, D, E, TI — tout le reste = technique
+    if(suf===''||/^(A[1-5]?|C|D|E|TI)$/.test(suf)) return 'fr_gen';
+    return 'fr_tech';
+  }
+  return 'fr_tech'; // sigles techniques purs (GM, STT, F3…)
+};
+
+// ── v1.6 : CLÉ DE SEGMENT (sous-système × examen × filière) ──────────────────
+// Sert à router un apprenant anglophone/technique vers SON groupe WhatsApp et SA
+// classe virtuelle (et à cibler les abonnements). Renvoie '' si non concerné
+// (francophone général : on garde le routage par classe existant).
+window._segKey=function(profil){
+  if(!profil) return '';
+  var sys=profil.sys||'fr', ens=profil.ens||'gen', cls=String(profil.cls||''), ser=(profil.serie||'').toLowerCase();
+  if(sys==='en'){
+    var lvl=/upper sixth|a.?level/i.test(cls)?'alevel':(/form 5|o.?level/i.test(cls)?'olevel':'');
+    if(!lvl) return '';
+    var f=/sci/.test(ser)?'sci':(/art/.test(ser)?'arts':'');
+    return f?('en_'+lvl+'_'+f):'';
+  }
+  if(ens==='tech'){
+    var t=/bac|terminale/i.test(cls)?'bac':(/probatoire|1ère tech/i.test(cls)?'prob':'');
+    if(!t) return '';
+    var s=/com/.test(ser)?'com':(/ind/.test(ser)?'ind':'');
+    return s?('tech_'+t+'_'+s):'';
+  }
+  return '';
+};
+// Groupe WhatsApp correspondant au profil (segment d'abord, repli classe)
+window._resolveWaGroup=function(acc){
+  if(!acc) return null;
+  var seg=_segKey(acc.profil);
+  var gs=DB.whatsappGroupes||[];
+  if(seg){ var bySeg=gs.find(function(g){return g.actif&&g.seg===seg;}); if(bySeg) return bySeg; }
+  return gs.find(function(g){return g.actif&&g.niveau===(acc.cls||(acc.profil&&acc.profil.cls));})||null;
+};
+window._resolveClassroom=function(acc){
+  if(!acc) return null;
+  var seg=_segKey(acc.profil);
+  var cs=DB.classrooms||[];
+  if(seg){ var bySeg=cs.find(function(c){return c.seg===seg;}); if(bySeg) return bySeg; }
+  return cs.find(function(c){return c.nom===(acc.cls||(acc.profil&&acc.profil.cls));})||null;
+};
 const EVT={exam:{l:'Examen',c:'bgr'},reunion:{l:'Réunion',c:'bgb'},event:{l:'Événement',c:'bgg'},holiday:{l:'Congé',c:'bgd'},info:{l:'Info',c:'bgt'}};
 const APPRS=[{min:18,lbl:'Excellent',col:'#1a6e40'},{min:16,lbl:'Très Bien',col:'#228844'},{min:14,lbl:'Bien',col:'#1a50a0'},{min:12,lbl:'Assez Bien',col:'#3a70d0'},{min:10,lbl:'Passable',col:'#8a6010'},{min:0,lbl:'Insuffisant',col:'#b82828'}];
 
@@ -695,7 +755,7 @@ function defaultDB(){return{
     {id:'gv42',eid:'s25',enom:'OWONO David',mat:'VRT-025',cls:'3ème',sub:'Anglais',n1:16,n2:15,coef:2,tri:'1er Trimestre',ens:'Grace EFFA'},
   ],
   books:[
-    {id:'b1',titre:'Mathématiques 3ème',cls:'3ème',auteur:'MINESEC Éditions',prix:5000,stock:20,vendu:5,pages:280,ico:'📐',desc:'Manuel officiel conforme au programme MINESEC. Couvre l\'ensemble du programme de mathématiques de 3ème avec exercices corrigés, QCM et préparation au BEPC.',chaps:['Algèbre','Géométrie','Statistiques','Probabilités'],content:{},coverColor:'#1a5276',extrait:'Chapitre 1 — ALGÈBRE\n\n1.1 Les équations du premier degré\nUne équation du premier degré à une inconnue est une expression de la forme ax + b = 0, où a ≠ 0.\n\nExemple : Résoudre 3x + 7 = 22\n3x = 22 - 7 = 15\nx = 15/3 = 5\n\nExercice 1: Résoudre les équations suivantes...'},
+    {id:'b1',titre:'Mathématiques 3ème',cls:'3ème',auteur:'MINESEC Éditions',prix:5000,stock:20,vendu:5,pages:280,ico:'📐',digital:true,secureId:'b1',securePages:280,freePages:10,prixDigital:3000,desc:'Manuel officiel conforme au programme MINESEC. Couvre l\'ensemble du programme de mathématiques de 3ème avec exercices corrigés, QCM et préparation au BEPC.',chaps:['Algèbre','Géométrie','Statistiques','Probabilités'],content:{},coverColor:'#1a5276',extrait:'Chapitre 1 — ALGÈBRE\n\n1.1 Les équations du premier degré\nUne équation du premier degré à une inconnue est une expression de la forme ax + b = 0, où a ≠ 0.\n\nExemple : Résoudre 3x + 7 = 22\n3x = 22 - 7 = 15\nx = 15/3 = 5\n\nExercice 1: Résoudre les équations suivantes...'},
     {id:'b2',titre:'Français Tle A',cls:'Tle A',auteur:'Éditions Clé',prix:6000,stock:15,vendu:8,pages:320,ico:'📖',desc:'Manuel complet de littérature et expression écrite pour la Terminale A. Inclut des analyses de textes africains et européens, des méthodologies de dissertation et commentaire.',chaps:['Textes narratifs','Théâtre','Poésie','Rédaction'],content:{},coverColor:'#7d3c98',extrait:'Chapitre 2 — LE THÉÂTRE\n\n2.1 Le théâtre africain contemporain\nLe théâtre africain puise ses racines dans les traditions orales du continent. Les griots, conteurs traditionnels, sont les premiers dramaturges d\'Afrique.\n\nŒuvre étudiée : « Le Mandat » de Sembène Ousmane\nThèmes principaux : la corruption, la bureaucratie post-coloniale...'},
     {id:'b3',titre:'Physique-Chimie 2nde',cls:'2nde',auteur:'MINESEC Éditions',prix:5500,stock:12,vendu:3,pages:260,ico:'⚗️',desc:'Manuel officiel de sciences physiques avec travaux pratiques guidés, schémas détaillés et exercices de difficulté progressive.',chaps:['Mécanique','Thermodynamique','Chimie organique'],content:{},coverColor:'#1e8449',extrait:'Chapitre 1 — MÉCANIQUE\n\n1.1 Le mouvement rectiligne uniforme\nUn corps est en mouvement rectiligne uniforme (MRU) lorsqu\'il se déplace en ligne droite à vitesse constante.\n\nFormule fondamentale :\nd = v × t\n\noù d = distance (m), v = vitesse (m/s), t = temps (s)\n\nTP n°1 : Étude du mouvement d\'une bille sur un plan incliné...'},
     {id:'b4',titre:'SVT 4ème',cls:'4ème',auteur:'Bio-Sciences',prix:4500,stock:18,vendu:6,pages:240,ico:'🌿',desc:'Sciences de la Vie et de la Terre avec illustrations couleur, schémas anatomiques et exercices d\'observation. Conforme au programme officiel.',chaps:['Biologie cellulaire','Écologie','Géologie'],content:{},coverColor:'#196f3d',extrait:'Chapitre 1 — BIOLOGIE CELLULAIRE\n\n1.1 La cellule, unité du vivant\nTous les êtres vivants sont constitués de cellules. La cellule est la plus petite unité capable de manifester les propriétés du vivant.\n\nObservation au microscope :\n• Membrane cellulaire\n• Cytoplasme\n• Noyau\n\nActivité : Observer des cellules d\'oignon au microscope...'},
@@ -796,7 +856,7 @@ function defaultDB(){return{
       {id:'cat3',nom:'Cours vidéo',ico:'🎬',desc:'Explications visuelles par nos enseignants expérimentés'},
       {id:'cat4',nom:'Corpus par séquence',ico:'📋',desc:'Dossiers complets adaptés à chaque séquence de la progression'},
       {id:'cat5',nom:'Fiches de révision',ico:'📌',desc:'Résumés essentiels format poche pour réviser efficacement'},
-      {id:'cat6',nom:'Anciens sujets d&#39;examen',ico:'🎓',desc:'BEPC, Probatoire, BAC — toutes séries avec corrigés nationaux'},
+      {id:'cat6',nom:'Anciens sujets d\'examen',ico:'🎓',desc:'BEPC, Probatoire, BAC — toutes séries avec corrigés nationaux'},
       {id:'catbac',nom:'Ressources BAC',ico:'🎓',desc:'Épreuves, corrigés nationaux et fiches pour réussir le Baccalauréat (séries A, C, D, E, TI).'},
       {id:'catprob',nom:'Ressources Probatoire',ico:'📘',desc:'Épreuves et corrigés du Probatoire (fin de 1ère) — toutes séries.'},
       {id:'catbepc',nom:'Ressources BEPC',ico:'📗',desc:'Épreuves, corrigés et fiches pour le BEPC (fin de 3e).'},
@@ -1128,7 +1188,19 @@ function defaultDB(){return{
     {id:'wag4',niveau:'1ère C',nom:'VÉRITAS — 1ère C 2025-2026',lien:'https://chat.whatsapp.com/Cyd7e13QZNM6zNy7zUS9a3',actif:true},
     {id:'wag5',niveau:'3ème',nom:'VÉRITAS — 3ème 2025-2026',lien:'https://chat.whatsapp.com/KfCaRDhJhx36dj1ihLnedu',actif:true},
     {id:'wag6',niveau:'1ère A',nom:'VÉRITAS — 1ère A 2025-2026',lien:'https://chat.whatsapp.com/DVqUVRcCVvgJLbM6D06CnP',actif:true},
-    {id:'wag7',niveau:'Tle A',nom:'VÉRITAS — Terminale A 2025-2026',lien:'https://chat.whatsapp.com/K4y5AATBNZl26urdl28eZ0',actif:true}
+    {id:'wag7',niveau:'Tle A',nom:'VÉRITAS — Terminale A 2025-2026',lien:'https://chat.whatsapp.com/K4y5AATBNZl26urdl28eZ0',actif:true},
+    // ═══ v1.6 — SECTION ANGLOPHONE (GCE) — classes d'examen × filière (Arts/Science) ═══
+    // Liens VIDES : collez-les dans Admin → Communication → Groupes WhatsApp.
+    // accessMode 'abonnement' → l'accès s'ouvre dès qu'un plan couvrant le segment est actif.
+    {id:'wag_en_ol_art',niveau:'Form 5 (O Level) · Arts',seg:'en_olevel_arts',nom:'VÉRITAS — GCE O Level · Arts (Form 5)',lien:'',actif:true,accessMode:'abonnement',plansRequis:[]},
+    {id:'wag_en_ol_sci',niveau:'Form 5 (O Level) · Science',seg:'en_olevel_sci',nom:'VÉRITAS — GCE O Level · Science (Form 5)',lien:'',actif:true,accessMode:'abonnement',plansRequis:[]},
+    {id:'wag_en_al_art',niveau:'Upper Sixth (A Level) · Arts',seg:'en_alevel_arts',nom:'VÉRITAS — GCE A Level · Arts (Upper Sixth)',lien:'',actif:true,accessMode:'abonnement',plansRequis:[]},
+    {id:'wag_en_al_sci',niveau:'Upper Sixth (A Level) · Science',seg:'en_alevel_sci',nom:'VÉRITAS — GCE A Level · Science (Upper Sixth)',lien:'',actif:true,accessMode:'abonnement',plansRequis:[]},
+    // ═══ v1.6 — ENSEIGNEMENT TECHNIQUE — classes d'examen × section (Commercial/Industriel) ═══
+    {id:'wag_tc_pr_com',niveau:'1ère technique (Probatoire) · Commercial',seg:'tech_prob_com',nom:'VÉRITAS — Probatoire Technique · Commercial (STT)',lien:'',actif:true,accessMode:'abonnement',plansRequis:[]},
+    {id:'wag_tc_pr_ind',niveau:'1ère technique (Probatoire) · Industriel',seg:'tech_prob_ind',nom:'VÉRITAS — Probatoire Technique · Industriel (F)',lien:'',actif:true,accessMode:'abonnement',plansRequis:[]},
+    {id:'wag_tc_bc_com',niveau:'Terminale technique (BAC) · Commercial',seg:'tech_bac_com',nom:'VÉRITAS — BAC Technique · Commercial (STT)',lien:'',actif:true,accessMode:'abonnement',plansRequis:[]},
+    {id:'wag_tc_bc_ind',niveau:'Terminale technique (BAC) · Industriel',seg:'tech_bac_ind',nom:'VÉRITAS — BAC Technique · Industriel (F)',lien:'',actif:true,accessMode:'abonnement',plansRequis:[]}
   ],
   evaluations:[],
   coachingPacks:[],
@@ -1260,6 +1332,15 @@ function _migrateDB(){
   // FIX URLs /htdocs/ : toutes les URLs uploadées avant 12/05/2026 sont cassées
   // Réécriture systématique au chargement (idempotent — ne fait rien si pas de /htdocs/)
   _fixHtdocsUrls();
+  // v1.4.3 FIX : entités HTML stockées en dur dans les noms de catégories
+  // (« Anciens sujets d&#39;examen » s'affichait littéralement, car _esc()
+  // ré-échappait le &). Nettoyage idempotent des bases existantes.
+  try{
+    ((DB.elearning||{}).categories||[]).forEach(function(c){
+      if(c&&typeof c.nom==='string') c.nom=c.nom.replace(/&(amp;)?#39;/g,"'").replace(/&amp;/g,'&');
+      if(c&&typeof c.desc==='string') c.desc=c.desc.replace(/&(amp;)?#39;/g,"'").replace(/&amp;/g,'&');
+    });
+  }catch(e){}
   // FIX : filtrer les produits supprimés (tombstones) — empeche resurrection apres sync
   if(typeof _filterDeletedProducts==='function')_filterDeletedProducts();
   // FIX : effacer les valeurs placeholder (+237 6 00 00 00 00) — bloquait l'affichage du vrai numero
@@ -1451,9 +1532,30 @@ function _migrateDB(){
         if(eg&&!eg.lien&&dg.lien)eg.lien=dg.lien;
         if(eg&&!eg.accessMode)eg.accessMode='libre';
         if(eg&&!eg.plansRequis)eg.plansRequis=[];
+        if(eg&&dg.seg&&!eg.seg)eg.seg=dg.seg; // v1.6 : tag segment sur groupes existants
       }
     });
   }
+  // v1.7 : rendre TOUS les livres vendables en numérique (lecture sécurisée).
+  // Valeurs par défaut éditables ensuite par l'admin (aperçu 10 pages, prix ≈ 60%).
+  (DB.books||[]).forEach(function(b){
+    if(!b||typeof b!=='object') return;
+    if(b.digital===undefined) b.digital=true;
+    if(!b.secureId) b.secureId=b.id;
+    if(!b.securePages) b.securePages=b.pages||0;
+    if(b.freePages===undefined) b.freePages=10;
+    if(!b.prixDigital&&!b.priceDigital) b.prixDigital=Math.round((b.prix||0)*0.6/100)*100||2000;
+  });
+  // v1.6 : ajouter les classes virtuelles ANGLOPHONE/TECHNIQUE manquantes (par seg)
+  try{
+    if(DB.classrooms&&DB.classrooms.length){
+      (_cvDefaultClassrooms()||[]).forEach(function(dc){
+        if(dc.seg&&!DB.classrooms.find(function(c){return c.seg===dc.seg;})){
+          DB.classrooms.push(dc);
+        }
+      });
+    }
+  }catch(e){}
   // Merge e-learning contenus par défaut (respect masque suppressions)
   var _defC=defaultDB().elearning.contenus||[];
   var _curC=DB.elearning.contenus;
@@ -1512,11 +1614,33 @@ async function load(){
     return;
   }
 
+  // ── v1.4.3 PERF CRITIQUE : le pull serveur ne BLOQUE PLUS le premier rendu.
+  // Cause du « 1 minute avant de charger » : _initApp fait `await load()` AVANT
+  // initVisitor, et load() téléchargeait la base COMPLÈTE (plusieurs Mo, no-store)
+  // à CHAQUE chargement admin. Désormais : (1) pré-check ?meta=1 (~100 octets) —
+  // on ne télécharge la base que si le serveur est réellement plus récent ;
+  // (2) le pull part en ARRIÈRE-PLAN, re() rafraîchit à l'arrivée.
+  _lwsBackgroundPull();
+}
+
+async function _lwsBackgroundPull(){
   try{
     var _token = (DB.cloudConfig && DB.cloudConfig.secret) ? DB.cloudConfig.secret : '';
-    var _lwsRes=await _fbFetch(LWS_API.db+'?t='+Date.now(), {
-      headers: _token ? { 'Authorization': 'Bearer ' + _token } : {}
-    });
+    var _hdrs = _token ? { 'Authorization': 'Bearer ' + _token } : {};
+    // 1) Pré-check léger : métadonnées seules (rev/lastModified/size).
+    try{
+      var _mRes=await _fbFetch(LWS_API.db+'?meta=1&t='+Date.now(), {headers:_hdrs});
+      if(_mRes.ok){
+        var _m=await _mRes.json();
+        var _srvLM=(_m&&_m.lastModified!=null)?Number(_m.lastModified):NaN;
+        if(!isNaN(_srvLM)&&_srvLM<=(DB.lastModified||0)){
+          console.log('[LWS] Base serveur inchangée (meta) — téléchargement complet évité');
+          return;
+        }
+      }
+    }catch(_eM){ /* meta indisponible → pull complet ci-dessous */ }
+    // 2) Pull complet uniquement si nécessaire
+    var _lwsRes=await _fbFetch(LWS_API.db+'?t='+Date.now(), { headers: _hdrs });
     if(!_lwsRes.ok) throw new Error('HTTP '+_lwsRes.status);
     var _lwsRemote=await _lwsRes.json();
     if(_lwsRemote&&Object.keys(_lwsRemote).length>0){
@@ -1812,45 +1936,62 @@ function showUploadProgress(pct, label) {
 }
 
 // ── v1.1 LWS : Ajouter un fichier à un contenu e-learning ────────────────────
-function adminAddFile(itemId) {
-  var inp = document.createElement('input');
-  inp.type = 'file';
-  inp.accept = '.pdf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mp3,.wav,.ogg,.aac,.m4a,.html,.htm,.zip,.docx,.pptx';
-  inp.onchange = async function() {
-    var file = inp.files[0];
-    if (!file) return;
-    var contenu = (DB.elearning && DB.elearning.contenus || []).find(function(c){return c.id===itemId;});
-    if (!contenu) return;
-    showUploadProgress(0, 'Envoi en cours…');
-    try {
-      // Étape 2 : contenu PREMIUM (payant) → store PROTÉGÉ (deny-all, servi seulement
-      // par content.php après contrôle d'abonnement). Contenu GRATUIT → public (funnel).
-      var _prot = !contenu.gratuit;
-      var res = await uploadToLWS(file, _prot ? 'protected' : 'elearning', function(pct) {
-        showUploadProgress(pct, file.name + ' — ' + pct + '%');
+// v1.7 : l'admin CHOISIT le mode de diffusion avant l'upload.
+//   • PROTÉGÉ (lecture seule)  → lecteur sécurisé page par page (api/secure_pdf.php),
+//     aucune copie/partage/téléchargement, aperçu gratuit configurable.
+//   • TÉLÉCHARGEABLE            → fichier servi (gated par abonnement si premium),
+//     l'élève peut le télécharger.
+function adminAddFile(itemId){
+  var contenu=(DB.elearning&&DB.elearning.contenus||[]).find(function(c){return c.id===itemId;});
+  if(!contenu){toast('Contenu introuvable','warn');return;}
+  M('📤 Mode de diffusion','Comment cette ressource sera-t-elle accessible aux élèves ?',
+    '<div style="display:grid;gap:12px">'
+    +'<button class="vcard" style="text-align:left;cursor:pointer;border:2px solid #142554;padding:14px" onclick="cm();_adminPickFile(\''+itemId+'\',\'protege\')">'
+      +'<div style="font-weight:800;color:#142554;font-size:14px">🔒 Protégé — lecture seule (recommandé)</div>'
+      +'<div style="font-size:12px;color:var(--ink4);margin-top:4px">Consultation EN LIGNE uniquement, page par page. Impossible à copier, partager, télécharger ou capturer (filigrane traçable). Idéal pour les épreuves et cours payants.</div>'
+      +'<div class="fl2 fic g6" style="margin-top:8px" onclick="event.stopPropagation()"><span class="xs2 mut">Pages gratuites d\'aperçu :</span><input class="fi" id="afFreePages" type="number" min="0" max="50" value="'+(contenu.freePages||10)+'" style="width:70px;padding:4px 8px;font-size:12px"></div>'
+    +'</button>'
+    +'<button class="vcard" style="text-align:left;cursor:pointer;border:2px solid var(--bg3);padding:14px" onclick="cm();_adminPickFile(\''+itemId+'\',\'download\')">'
+      +'<div style="font-weight:800;color:var(--ink2);font-size:14px">📥 Téléchargeable</div>'
+      +'<div style="font-size:12px;color:var(--ink4);margin-top:4px">L\'élève autorisé peut télécharger le fichier (PDF, etc.). Accès toujours contrôlé par l\'abonnement si le contenu est payant.</div>'
+    +'</button>'
+    +'</div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>');
+}
+window._adminPickFile=function(itemId, mode){
+  var freePages=parseInt((document.getElementById('afFreePages')||{}).value);
+  var inp=document.createElement('input');
+  inp.type='file';
+  inp.accept='.pdf,.jpg,.jpeg,.png,.gif,.webp,.mp4,.mp3,.wav,.ogg,.aac,.m4a,.html,.htm,.zip,.docx,.pptx';
+  inp.onchange=async function(){
+    var file=inp.files[0]; if(!file) return;
+    var contenu=(DB.elearning&&DB.elearning.contenus||[]).find(function(c){return c.id===itemId;});
+    if(!contenu) return;
+    showUploadProgress(0,'Envoi en cours…');
+    try{
+      // PROTÉGÉ ou premium → store privé (deny-all). Téléchargeable gratuit → public.
+      var _prot=(mode==='protege')||!contenu.gratuit;
+      var res=await uploadToLWS(file, _prot?'protected':'elearning', function(pct){
+        showUploadProgress(pct, file.name+' — '+pct+'%');
       });
-      if (_prot && res.fichierProtege) {
-        contenu.fichierProtege = res.fichierProtege;
-        delete contenu.fichierUrl;
-      } else {
-        contenu.fichierUrl = res.url;
-        delete contenu.fichierProtege;
+      if(_prot&&res.fichierProtege){ contenu.fichierProtege=res.fichierProtege; delete contenu.fichierUrl; }
+      else { contenu.fichierUrl=res.url; delete contenu.fichierProtege; }
+      contenu.fichier=file.name;
+      contenu.fileType=file.type;
+      contenu.diffusion=(mode==='protege')?'protege':'download'; // v1.7
+      if(mode==='protege'){
+        contenu.secureId=contenu.secureId||contenu.id;
+        if(!isNaN(freePages)) contenu.freePages=Math.max(0,freePages);
+        // Le serveur rasterise le PDF en pages (Imagick) → securePages déduit à la lecture.
       }
-      contenu.fichier = file.name;     // nom d'origine → détection d'extension dans viewSecure
-      contenu.fileType = file.type;
-      delete contenu.idbKey;
-      delete contenu.fichierData;
-      showUploadProgress(100);
-      save();
-      toast(_prot ? '✓ Fichier uploadé (protégé)' : '✓ Fichier uploadé et synchronisé');
-      if (typeof re === 'function') re();
-    } catch(e) {
-      showUploadProgress(100);
-      toast('✗ ' + e.message, 'err');
-    }
+      delete contenu.idbKey; delete contenu.fichierData;
+      showUploadProgress(100); save();
+      toast(mode==='protege'?'✓ Uploadé en lecture protégée 🔒':'✓ Uploadé (téléchargeable)');
+      if(typeof re==='function') re();
+    }catch(e){ showUploadProgress(100); toast('✗ '+e.message,'err'); }
   };
   inp.click();
-}
+};
 
 // Étape 2 — déplace les médias premium PUBLICS existants vers le store protégé
 // (uploads/protected/, deny-all) via api/migrate_protected.php. dry=true simule.
@@ -3297,7 +3438,14 @@ function viewBookDetail(bid){
   h+='<div style="margin-top:8px;padding:8px;background:var(--grb);border:1px solid var(--grd);border-radius:var(--r);font-size:13px;color:var(--gr)">🎓 Code <span class="mono bold" style="background:var(--gp);padding:1px 6px;border-radius:3px;color:var(--gold)">ELEVE10</span> = -10%</div>';
   h+='<div style="margin-top:8px"><div class="fl2 g6" style="align-items:stretch"><input class="fi" id="promoInput_'+bid+'" placeholder="Code promo" style="font-size:13px;padding:8px;text-transform:uppercase;flex:1"><button class="btn bgr2 sm" onclick="applyPromo(\''+bid+'\')">Appliquer</button></div><div id="promoResult_'+bid+'"></div></div>';
   h+='</div>';
-  if(b.stock>0)h+='<button class="book-order-btn mt12" onclick="visitorOrderBook(\''+bid+'\')">🛒 Commander — '+fmt(b.prix)+'</button>';
+  if(b.stock>0)h+='<button class="book-order-btn mt12" onclick="visitorOrderBook(\''+bid+'\')">🛒 Commander (papier) — '+fmt(b.prix)+'</button>';
+  // v1.7 : LECTURE NUMÉRIQUE SÉCURISÉE — aperçu gratuit + achat débloque tout.
+  // Visible quand le livre a été préparé (b.secureId/securePages) ou marqué digital.
+  if(b.secureId||b.securePages||b.digital){
+    var _fp=b.freePages||10, _pd=b.prixDigital||b.priceDigital||b.prix;
+    h+='<button class="btn bi mt8" style="width:100%;background:linear-gradient(135deg,#142554,#1E3A7A)" onclick="openSecureBook(\''+bid+'\')">📖 Lire en ligne · '+_fp+' pages gratuites</button>';
+    h+='<div style="font-size:11px;color:var(--ink4);text-align:center;margin-top:6px">🔒 Version numérique '+fmtN(_pd)+' FCFA — consultation protégée, sans téléchargement ni partage</div>';
+  }
   h+='</div></div>';
   // Tabs
   h+='<div style="padding:16px 24px 24px"><div class="book-tabs">';
@@ -4603,20 +4751,20 @@ function vShowSec(sec,btn){
       <div class="acc-sub">Taux de réussite de nos élèves aux examens BEPC, Probatoire, BAC et GCE</div>
     </div>
     ${canEdit?'<div style="text-align:center;margin:-8px 0 16px"><button class="btn bi sm" onclick="mEditExamResults()">✏️ Modifier les statistiques</button></div>':''}
-    ${DB.examResults.map((er,ei)=>`<div class="vcard mb16">
+    ${DB.examResults.map((er,ei)=>{var _xa=['#3B82F6','#7C3AED','#059669','#D97706','#0891B2','#DC2626'][ei%6];return`<div class="vcard exam-card mb16" style="--exam-acc:${_xa}">
       <div class="fl2 fic fsb mb12">
-        <div class="ct mb0">📅 Année scolaire ${er.annee}</div>
+        <div class="exam-year-chip">📅 Année scolaire ${er.annee}</div>
         ${canEdit?`<button class="btn bo xs" onclick="mEditExamYear(${ei})">✏️ Modifier</button>`:''}
       </div>
-      ${er.niveaux.map(n=>`<div class="exam-row">
+      ${er.niveaux.map(n=>{var _fc=n.taux>=80?'#10B981':n.taux>=60?'#F59E0B':'#EF4444';return`<div class="exam-row">
         <div style="min-width:80px;font-weight:700;font-size:13px">${n.cls}</div>
-        <div class="exam-bar"><div class="exam-fill" style="width:${n.taux}%;background:${n.taux>=80?'var(--gr)':n.taux>=60?'var(--or)':'var(--re)'}"></div></div>
+        <div class="exam-bar"><div class="exam-fill" style="width:${n.taux}%;--exam-fill-c:${_fc}"></div></div>
         <div style="min-width:90px;text-align:right">
-          <span class="mono bold" style="color:${n.taux>=80?'var(--gr)':n.taux>=60?'var(--or)':'var(--re)'}">${n.taux}%</span>
+          <span class="mono bold" style="color:${_fc}">${n.taux}%</span>
           <div style="font-size:11px;color:var(--ink4)">${n.admis}/${n.candidats} candidats</div>
         </div>
-      </div>`).join("")}
-    </div>`).join("")}
+      </div>`;}).join("")}
+    </div>`;}).join("")}
     ${canEdit?`<div class="vcard mb16" style="border:2px dashed var(--bld);background:var(--blb)">
       <div class="fl2 fic g10"><span style="font-size:22px">➕</span>
       <div><div class="semi" style="color:var(--bl)">Ajouter une année scolaire</div>
@@ -4646,7 +4794,9 @@ function vShowSec(sec,btn){
   } else if(sec==="elearning"){
     var el=DB.elearning||defaultDB().elearning;
     if(!el.plans) el=defaultDB().elearning;
-    var selCls=window._elCls||'Toutes';
+    // v1.4.2 : pré-filtre automatique sur la CLASSE du profil apprenant
+    var _lpEl=(typeof _getLearnerProfile==='function')?_getLearnerProfile():null;
+    var selCls=window._elCls||(_lpEl&&_lpEl.cls)||'Toutes';
     var selCat=window._elCat||'';
     var h='<div class="vsec">';
     var catGrads=[
@@ -4671,17 +4821,21 @@ function vShowSec(sec,btn){
       h+='<div style="text-align:center"><div style="font-family:Lora,Georgia,serif;font-size:28px;font-weight:700;color:#FFC93C;line-height:1">'+el.contenus.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Ressources</div></div>';
       h+='<div style="text-align:center"><div style="font-family:Lora,Georgia,serif;font-size:28px;font-weight:700;color:#A5F3FC;line-height:1">'+el.categories.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Catégories</div></div>';
       h+='<div style="text-align:center"><div style="font-family:Lora,Georgia,serif;font-size:28px;font-weight:700;color:#FDE68A;line-height:1">'+(el.plans||[]).length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Packs</div></div>';
-      h+='</div></div></div>';
+      h+='</div>';
+      // v1.4.2 : bouton PROFIL — l'apprenant déclare section/enseignement/classe
+      h+='<div style="margin-top:14px"><button onclick="mLearnerProfile()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,201,60,.45);border-radius:24px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">🎯 '+(_lpEl&&_lpEl.cls?('Mon parcours : '+_esc(_lpEl.cls)+(_lpEl.sys==='en'?' · Anglophone':'')+(_lpEl.ens==='tech'?' · Technique':'')):'Personnaliser mon parcours')+'</button></div>';
+      h+='</div></div>';
       
 
-      // ── MINESEC RESSOURCES OFFICIELLES ──
-      h+='<div style="background:linear-gradient(135deg,#0F172A,#1E3A8A);border-radius:16px;padding:20px;margin-bottom:20px">';
-      h+='<div style="font-size:11px;font-weight:800;color:#FFC93C;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">🎓 Ressources officielles MINESEC</div>';
-      h+='<div style="font-family:Georgia,serif;font-size:13px;color:rgba(255,255,255,.75);margin-bottom:16px">Épreuves officielles, laboratoires virtuels et cours vidéo du Ministère des Enseignements Secondaires du Cameroun</div>';
+      // ── MINESEC RESSOURCES OFFICIELLES ── (v1.3.1 épure : carte CLAIRE — la page
+      // empilait 3 panneaux bleu nuit ; on ne garde qu'UN point focal sombre, le hero)
+      h+='<div style="background:#fff;border:1px solid rgba(20,37,84,.08);border-radius:16px;padding:20px;margin-bottom:20px;box-shadow:0 1px 2px rgba(16,30,69,.04),0 8px 24px rgba(16,30,69,.06)">';
+      h+='<div style="font-size:11px;font-weight:800;color:#B8860B;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">🎓 Ressources officielles MINESEC</div>';
+      h+='<div style="font-family:Georgia,serif;font-size:13px;color:#6B7A99;margin-bottom:16px">Épreuves officielles, laboratoires virtuels et cours vidéo du Ministère des Enseignements Secondaires du Cameroun</div>';
       h+='<div style="display:flex;gap:10px;flex-wrap:wrap">';
-      h+='<button onclick="showEpreuves()" style="background:#FFC93C;color:#0F172A;border:none;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:800;cursor:pointer;font-family:Montserrat,sans-serif">📝 Épreuves officielles</button>';
-      h+='<button onclick="showLabosVirtuels()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:24px;padding:10px 22px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">🔬 Labos virtuels</button>';
-      h+='<a href="https://minesec-distancelearning.cm" target="_blank" rel="noopener" style="background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);border-radius:24px;padding:10px 22px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px">🌐 Cours MINESEC officiels</a>';
+      h+='<button onclick="showEpreuves()" style="background:#142554;color:#FFC93C;border:none;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:800;cursor:pointer;font-family:Montserrat,sans-serif;box-shadow:0 4px 12px rgba(20,37,84,.22);transition:transform .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">📝 Épreuves officielles</button>';
+      h+='<button onclick="showLabosVirtuels()" style="background:#EEF2FF;color:#1E3A8A;border:1px solid #C7D2FE;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;transition:transform .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'">🔬 Labos virtuels</button>';
+      h+='<a href="https://minesec-distancelearning.cm" target="_blank" rel="noopener" style="background:#F6F8FC;color:#475882;border:1px solid #E4E8F0;border-radius:24px;padding:10px 22px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px">🌐 Cours MINESEC officiels</a>';
       h+='</div></div>';
       // ── CATEGORIES — TUILES PREMIUM v2 (pictos 3D + couleurs vibrantes + anim) ──
       h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#142554;margin-bottom:14px;display:flex;align-items:center;gap:8px">📂 Choisissez une catégorie<span style="font-size:11px;color:#94A3B8;font-weight:500">Cliquez pour explorer</span></div>';
@@ -4704,25 +4858,27 @@ function vShowSec(sec,btn){
         'cat5':{ic:'pencil',    col:'#D97706', bg:'rgba(217,119,6,0.12)'},  // Fiches
         'cat6':{ic:'check',     col:'#0891B2', bg:'rgba(8,145,178,0.12)'}   // Anciens sujets
       };
-      h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px" class="v-reveal">';
+      // v1.4.4 (étude vidéo Sharesub) : cartes à BANDEAU — en-tête navy sobre
+      // (icône + nom blancs), corps blanc épuré, CTA pilule bleu vif. Entrée en
+      // CASCADE au scroll (classe lx-catcard, délais nth-child en CSS).
+      h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px" class="v-reveal lx-catgrid">';
       el.categories.forEach(function(cat,i){
-        var theme=_catLcMap[cat.id]||{ic:'book',col:'#142554',bg:'rgba(20,37,84,0.08)'};
+        var theme=_catLcMap[cat.id]||{ic:'book',col:'#3B82F6',bg:'rgba(59,130,246,0.12)'};
         var cnt=_catCounts[cat.id]||0;
         var free=_catFree[cat.id]||0;
         var isPopular=(i===0)||cat.populaire;
-        h+='<div class="vcard" style="cursor:pointer;text-align:center;position:relative;padding:18px 12px;transition:all .25s ease-out" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 24px rgba(20,37,84,.12)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'" onclick="window._elCat=\''+cat.id+'\';vShowSec(\'elearning\',null)">';
-        if(isPopular){
-          h+='<div style="position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#FFC93C,#F5B800);color:#142554;font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;letter-spacing:.5px;z-index:2">★ POPULAIRE</div>';
-        } else if(free){
-          h+='<div style="position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#10B981,#059669);color:#fff;font-size:9px;font-weight:900;padding:2px 8px;border-radius:8px;letter-spacing:.5px;z-index:2">'+free+' GRATUIT'+(free>1?'S':'')+'</div>';
-        }
-        // Halo coloré avec icône Lucide SVG
-        h+='<div style="width:56px;height:56px;border-radius:50%;background:'+theme.bg+';display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 12px '+theme.bg.replace('0.12','0.25')+'">';
-        h+='<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="'+theme.col+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+theme.ic+'"/></svg>';
+        h+='<div class="lx-catcard" onclick="window._elCat=\''+cat.id+'\';vShowSec(\'elearning\',null)">';
+        // Bandeau navy
+        h+='<div class="lx-catcard-head">';
+        h+='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+theme.ic+'"/></svg>';
+        h+='<span>'+_esc(cat.nom)+'</span>';
+        h+=(isPopular?'<em class="lx-chip lx-chip-gold">★</em>':(free?'<em class="lx-chip lx-chip-green">'+free+' gratuit'+(free>1?'s':'')+'</em>':''));
         h+='</div>';
-        h+='<div style="font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-size:14px;font-weight:800;color:'+theme.col+';line-height:1.2;margin-bottom:5px">'+_esc(cat.nom)+'</div>';
-        h+='<div style="font-size:11px;color:var(--ink4);line-height:1.4;margin-bottom:10px;min-height:30px">'+_esc((cat.desc||'').slice(0,55))+'</div>';
-        h+='<div style="font-size:11px;color:'+theme.col+';font-weight:700;padding-top:8px;border-top:1px solid #E4E8F0">📚 '+cnt+' ressource'+(cnt>1?'s':'')+'</div>';
+        // Corps blanc sobre
+        h+='<div class="lx-catcard-body">';
+        h+='<div class="lx-catcard-desc">'+_esc((cat.desc||'').slice(0,64))+'</div>';
+        h+='<div class="lx-catcard-foot"><span class="lx-catcard-count">'+cnt+' ressource'+(cnt>1?'s':'')+'</span><span class="lx-catcard-cta">Explorer →</span></div>';
+        h+='</div>';
         h+='</div>';
       });
       h+='</div>';
@@ -4752,6 +4908,13 @@ function vShowSec(sec,btn){
       var _clsOpts=window._elClsOpts.replace('>'+selCls+'<','selected>'+selCls+'<');
       h+='<select class="fi" style="min-width:110px;font-size:12px;border-radius:10px" onchange="window._elCls=this.value;vShowSec(\'elearning\',null)">'+_clsOpts+'</select>';
       h+='<input class="fi" style="flex:1;min-width:140px;font-size:12px;border-radius:10px" placeholder="🔍 Rechercher..." id="elSearch" oninput="filterElContents()">';
+      // v1.4.3 : VRAI FILTRE PROFIL — interrupteur visible. ON par défaut quand un
+      // parcours est déclaré : seules les ressources de SA section s'affichent.
+      var _lpGrpEl=(typeof _profileGroup==='function')?_profileGroup():'';
+      var _pfOn=_lpGrpEl&&(window._elProfilFilter!==false);
+      if(_lpGrpEl){
+        h+='<button onclick="window._elProfilFilter='+(_pfOn?'false':'true')+';vShowSec(\'elearning\',null)" style="padding:8px 16px;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;border:1.5px solid '+(_pfOn?'#059669':'#C7D2FE')+';background:'+(_pfOn?'#D1FAE5':'#F0F4FF')+';color:'+(_pfOn?'#059669':'#4B5BDB')+'" title="N\'afficher que les ressources de mon parcours">🎯 Mon parcours : '+(_pfOn?'ON':'OFF')+'</button>';
+      }
       h+='</div>';
 
       var _delDef=DB.deletedDefaults||[];
@@ -4759,6 +4922,12 @@ function vShowSec(sec,btn){
         if(_delDef.indexOf(item.id)>=0) return false;
         if(item.cat!==selCat) return false;
         if(selCls!=='Toutes'&&item.classe!==selCls) return false;
+        // v1.4.3 : filtre RÉEL par section du profil (les classes composites type
+        // « 3ème-2nde » passent si l'un des niveaux appartient au groupe)
+        if(_pfOn&&item.classe){
+          var _okGrp=String(item.classe).split(/[-·,/]/).some(function(c){return _classifySection(c.trim())===_lpGrpEl;});
+          if(!_okGrp) return false;
+        }
         return true;
       });
 
@@ -4922,16 +5091,21 @@ function vShowSec(sec,btn){
     var planCssMap={plan1:'p1',plan2:'p2',plan3:'p3',plan4:'p4'};
 
     h+='<div class="vplan-grid v-reveal">';
-    el.plans.forEach(function(plan,idx){
+    // v1.4.2 : les plans qui correspondent au PROFIL apprenant remontent en tête
+    var _plansSorted=(el.plans||[]).slice().sort(function(a,b){
+      return ((typeof _planProfileScore==='function')?(_planProfileScore(b)-_planProfileScore(a)):0);
+    });
+    _plansSorted.forEach(function(plan,idx){
       var pct=plan.ancien?Math.round((1-plan.prix/plan.ancien)*100):0;
       var isPopular=plan.populaire||(idx===1);
+      var isReco=(typeof _planProfileScore==='function')&&_planProfileScore(plan)>0;
       var cssClass=planCssMap[plan.id]||'p1';
       var picto=plan.pictoUrl||planPictos[plan.id]||_picBaseP+'memo_1f4dd.png';
       var nbRessources=(el.contenus||[]).filter(function(c){return c.plans&&c.plans.indexOf(plan.id)>-1;}).length;
 
       h+='<div class="vplan-card '+cssClass+(isPopular?' is-popular':'')+'">';
       h+='  <div class="vplan-top"></div>';
-      h+=  (isPopular?'<div class="vplan-badge-pop">Populaire</div>':'');
+      h+=  (isReco?'<div class="vplan-badge-pop" style="background:linear-gradient(135deg,#059669,#10B981)">🎯 Recommandé pour vous</div>':(isPopular?'<div class="vplan-badge-pop">Populaire</div>':''));
       h+='  <div class="vplan-body">';
       h+='    <div class="vplan-ico"><img src="'+_esc(picto)+'" alt="" loading="lazy" data-ef="🎓"></div>';
       h+=    (pct?'<div class="vplan-promo">🔥 -'+pct+'% ÉCONOMIE</div>':'');
@@ -4954,16 +5128,17 @@ function vShowSec(sec,btn){
     });
     h+='</div></div>';
 
-    // ──── CUSTOM ORDER CTA ────
-    h+='<div style="background:linear-gradient(135deg,#0F172A 0%,#1E293B 50%,#1E3A8A 100%);border-radius:24px;padding:40px 32px;text-align:center;position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.08)">';
-    h+='<div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(59,130,246,.12),transparent 50%),radial-gradient(circle at 80% 50%,rgba(255,201,60,.08),transparent 50%)"></div>';
+    // ──── CUSTOM ORDER CTA ──── (v1.3.1 épure : carte claire — un seul panneau
+    // sombre par page suffit ; le bouton or reste le point d'accroche)
+    h+='<div style="background:linear-gradient(180deg,#FFFFFF,#F4F7FE);border-radius:24px;padding:36px 32px;text-align:center;position:relative;overflow:hidden;border:1px solid rgba(20,37,84,.08);box-shadow:0 1px 2px rgba(16,30,69,.04),0 12px 32px rgba(16,30,69,.07)">';
+    h+='<div style="position:absolute;inset:0;background:radial-gradient(circle at 15% 20%,rgba(59,130,246,.06),transparent 45%),radial-gradient(circle at 85% 80%,rgba(255,201,60,.08),transparent 45%)"></div>';
     h+='<div style="position:relative;z-index:1">';
-    h+='<div style="width:52px;height:52px;border-radius:16px;background:rgba(255,201,60,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border:1px solid rgba(255,201,60,.3)"><span class="material-symbols-rounded" style="font-size:28px;color:#FFC93C">design_services</span></div>';
-    h+='<div style="font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:.5px">Besoin d&#39;un contenu <span style="color:#FFC93C;text-decoration:underline;text-decoration-color:rgba(255,201,60,.4);text-underline-offset:4px">sur mesure</span> ?</div>';
-    h+='<div style="font-family:Poppins,sans-serif;font-size:14px;color:rgba(255,255,255,.65);max-width:500px;margin:0 auto 24px;line-height:1.75">Commandez des épreuves, cours ou corpus adaptés à vos séquences et progressions. Nos enseignants préparent du contenu personnalisé.</div>';
+    h+='<div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#FFF7E0,#FFEDB8);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border:1px solid rgba(218,165,32,.35)"><span class="material-symbols-rounded" style="font-size:28px;color:#B8860B">design_services</span></div>';
+    h+='<div style="font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#142554;margin-bottom:8px;letter-spacing:.5px">Besoin d&#39;un contenu <span style="color:#B8860B;text-decoration:underline;text-decoration-color:rgba(218,165,32,.4);text-underline-offset:4px">sur mesure</span> ?</div>';
+    h+='<div style="font-family:Poppins,sans-serif;font-size:14px;color:#6B7A99;max-width:500px;margin:0 auto 24px;line-height:1.75">Commandez des épreuves, cours ou corpus adaptés à vos séquences et progressions. Nos enseignants préparent du contenu personnalisé.</div>';
     h+='<div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">';
-    h+='<button class="btn" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#1E293B;font-family:Montserrat,sans-serif;font-weight:800;border-radius:16px;padding:14px 28px;font-size:14px;border:none;box-shadow:0 4px 16px rgba(255,201,60,.3)" onclick="commanderPersonnalise()"><span class="material-symbols-rounded" style="font-size:18px;vertical-align:-3px;margin-right:6px">edit_note</span>Commande personnalisée</button>';
-    h+='<a href="https://wa.me/237697637739?text=Bonjour%20VÉRITAS%20!%20Je%20souhaite%20des%20ressources%20e-learning." target="_blank" class="btn" style="background:rgba(255,255,255,.08);color:#fff;border:1.5px solid rgba(255,255,255,.2);border-radius:16px;padding:14px 28px;font-size:14px;text-decoration:none;font-family:Poppins,sans-serif;font-weight:600;backdrop-filter:blur(4px)"><span class="material-symbols-rounded" style="font-size:18px;vertical-align:-3px;margin-right:6px">chat</span>WhatsApp</a>';
+    h+='<button class="btn" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#1E293B;font-family:Montserrat,sans-serif;font-weight:800;border-radius:16px;padding:14px 28px;font-size:14px;border:none;box-shadow:0 4px 16px rgba(255,201,60,.3);transition:transform .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="commanderPersonnalise()"><span class="material-symbols-rounded" style="font-size:18px;vertical-align:-3px;margin-right:6px">edit_note</span>Commande personnalisée</button>';
+    h+='<a href="https://wa.me/237697637739?text=Bonjour%20VÉRITAS%20!%20Je%20souhaite%20des%20ressources%20e-learning." target="_blank" class="btn" style="background:#fff;color:#142554;border:1.5px solid rgba(20,37,84,.16);border-radius:16px;padding:14px 28px;font-size:14px;text-decoration:none;font-family:Poppins,sans-serif;font-weight:600"><span class="material-symbols-rounded" style="font-size:18px;vertical-align:-3px;margin-right:6px">chat</span>WhatsApp</a>';
     h+='</div></div></div>';
 
     h+='</div>';
@@ -4971,20 +5146,35 @@ function vShowSec(sec,btn){
 
   } else if(sec==="boutique"){
     const promos=(DB.promoCodes||[]).filter(p=>p.actif);
+    // v1.4.3 : accroche VENDEUSE — social proof dynamique + best-seller mis en avant
+    const _bks=DB.books||[];
+    const _totVendu=_bks.reduce((s,b)=>s+(b.vendu||0),0);
+    const _avgNote=(function(){var n=0,s=0;_bks.forEach(function(b){var r=(typeof getBookRating==='function')?getBookRating(b.id):{count:0};if(r.count){s+=r.avg;n++;}});return n?(s/n):0;})();
+    const _bestId=_bks.length?_bks.slice().sort((a,b)=>(b.vendu||0)-(a.vendu||0))[0].id:'';
+    const _firstExtrait=(_bks.find(b=>b.extrait||(b.previewImages&&b.previewImages.length))||{}).id||'';
     c.innerHTML=`<div class="vsec">
-    <div class="vsec-title vsec-title-hero">🛒 Boutique & Manuels Scolaires</div>
-    <div class="vsec-sub">Manuels officiels MINESEC, livraison à Douala et province</div>
-    <div class="vsec-sub">Commandez vos manuels, consultez les extraits gratuits et profitez de nos promotions</div>
 
-    <!-- PROMO BANNER -->
-    <div style="background:linear-gradient(135deg,#142554,#1a3a8a);border-radius:var(--r3);padding:20px;margin-bottom:20px;color:#fff;position:relative;overflow:hidden">
-      <div style="position:absolute;right:20px;top:10px;font-size:60px;opacity:.08">🎓</div>
-      <div style="font-family:'Libre Baskerville',serif;font-size:18px;color:#FFC93C;margin-bottom:6px">Offres Spéciales</div>
-      <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:12px">Élèves inscrits au Centre VÉRITAS, profitez de réductions exclusives sur tous nos manuels.</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        ${promos.map(p=>'<span style="padding:4px 12px;border-radius:20px;background:#DC2626;color:#fff;font-size:13px;font-weight:700;font-family:Fira Code">'+p.code+' : <span style="color:#FFE0A0">'+(p.type==='percent'?'-'+p.reduction+'%':'-'+fmt(p.reduction))+'</span></span>').join('')}
+    <!-- HERO BOUTIQUE — proposition de valeur + preuve sociale -->
+    <div class="v-hero-gradient" style="border-radius:22px;padding:30px 28px;margin-bottom:20px;color:#fff;position:relative;overflow:hidden">
+      <div style="position:relative;z-index:1">
+        <div style="font-size:11px;font-weight:800;color:#FFC93C;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">📚 Librairie VÉRITAS</div>
+        <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:clamp(22px,3.4vw,32px);font-weight:700;line-height:1.18;margin-bottom:8px">Le manuel qui fera<br>la <span style="color:#FFC93C">différence</span> à l'examen.</div>
+        <div style="font-family:'Crimson Pro',Georgia,serif;font-size:14.5px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.7;max-width:520px">Rédigés par nos enseignants, conformes aux programmes MINESEC. Feuilletez un extrait gratuit avant d'acheter — livraison à Douala et en province.</div>
+        <div style="display:flex;gap:22px;margin-top:16px;flex-wrap:wrap;align-items:center">
+          <div><span style="font-family:'Libre Baskerville',serif;font-size:24px;font-weight:700;color:#FFC93C">${_bks.length}</span> <span style="font-size:11px;color:rgba(255,255,255,.6)">manuels</span></div>
+          ${_totVendu>0?`<div><span style="font-family:'Libre Baskerville',serif;font-size:24px;font-weight:700;color:#A5F3FC">${fmtN(_totVendu)}</span> <span style="font-size:11px;color:rgba(255,255,255,.6)">exemplaires adoptés</span></div>`:''}
+          ${_avgNote>0?`<div><span style="font-family:'Libre Baskerville',serif;font-size:24px;font-weight:700;color:#FDE68A">${_avgNote.toFixed(1)}<span style="font-size:13px">/5</span></span> <span style="font-size:11px;color:rgba(255,255,255,.6)">note moyenne</span></div>`:''}
+          ${_firstExtrait?`<button onclick="_showExtrait('${_firstExtrait}')" style="background:#FFC93C;color:#142554;border:none;border-radius:24px;padding:10px 22px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:Montserrat,sans-serif;box-shadow:0 4px 14px rgba(255,201,60,.35)">👁 Feuilleter un extrait gratuit</button>`:''}
+        </div>
       </div>
     </div>
+
+    <!-- PROMO BANNER (uniquement s'il y a des codes actifs) -->
+    ${promos.length?`<div style="background:linear-gradient(135deg,#7F1D1D,#DC2626);border-radius:16px;padding:14px 20px;margin-bottom:20px;color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-size:24px">🎁</span>
+      <span style="font-weight:800;font-family:Montserrat,sans-serif;font-size:13px">Codes promo actifs :</span>
+      ${promos.map(p=>'<span style="padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.15);border:1px dashed rgba(255,255,255,.5);color:#fff;font-size:13px;font-weight:700;font-family:Fira Code">'+p.code+' → <span style="color:#FFE0A0">'+(p.type==='percent'?'-'+p.reduction+'%':'-'+fmt(p.reduction))+'</span></span>').join('')}
+    </div>`:''}
 
     <!-- MANUELS GRID -->
     <!-- SHOP ARTICLES (rendus depuis DB.products avec featured:true — éditables depuis Admin > Boutique) -->
@@ -5033,6 +5223,7 @@ function vShowSec(sec,btn){
             ${b.coverImg?`<img src="${b.coverImg}" alt="${_esc(b.titre)}" onerror="this.style.display='none'">`:`<span class="vbook-cover-emoji">${b.ico||'📘'}</span>`}
             <div class="vbook-class-badge">${_esc(b.cls)}</div>
             <div class="vbook-minesec-badge">📚 MINESEC</div>
+            ${b.id===_bestId&&(b.vendu||0)>0?'<div style="position:absolute;bottom:8px;left:8px;background:linear-gradient(135deg,#DC2626,#F87171);color:#fff;font-size:9.5px;font-weight:900;padding:3px 10px;border-radius:10px;letter-spacing:.5px;box-shadow:0 3px 10px rgba(220,38,38,.4);z-index:2">🔥 BEST-SELLER</div>':''}
             ${b.stock<=0?'<div class="vbook-stock-out">Rupture</div>':''}
             ${hasPreview?'<div class="vbook-preview-badge">Aperçu gratuit</div>':''}
             <div class="vbook-pages">${b.pages||0}p · ${(b.chaps||[]).length} chap.</div>
@@ -5041,6 +5232,7 @@ function vShowSec(sec,btn){
             <div class="vbook-title">${_esc(b.titre)}</div>
             <div class="vbook-author">${_esc(b.auteur||'')}</div>
             ${_ratingHtml}
+            ${(b.vendu||0)>=3?'<div style="font-size:11px;color:#B45309;font-weight:700;margin:2px 0 4px">👥 Déjà adopté par '+b.vendu+' élèves</div>':''}
             <div class="vbook-desc">${_esc((b.desc||'').substring(0,90))}</div>
             ${discount?`<div class="vbook-old-price"><s>${fmt(b.ancienPrix)}</s><span class="vbook-discount">-${discount}%</span></div>`:''}
             <div class="vbook-price-row">
@@ -7282,9 +7474,19 @@ function pgReleveTemplate(){
   var sub=t?t.mat2:'Mathématiques';
   var selC=window._rvCls||CLS[0];
   var sts=DB.students.filter(function(s){return s.cls===selC;}).sort(function(a,b){return(a.nom+a.pre).localeCompare(b.nom+b.pre);});
-  var h='<div class="fl2 fic fsb mb14 fw g8">';
-  h+='<div class="tabs">'+CLS.map(function(cl){return '<button class="tab'+(cl===selC?' on':'')+'" onclick="window._rvCls=\''+cl+'\';re()">'+cl+'</button>';}).join('')+'</div>';
-  h+='<button class="btn bi" onclick="printReleveTemplate(\''+selC+'\')">🖨️ Imprimer</button></div>';
+  // v1.4.2 : classes GROUPÉES par section/type d'enseignement (fini les ~150
+  // boutons en vrac). 1er niveau : groupe ; 2e niveau : classes du groupe.
+  var selG=window._rvGrp||_classifySection(selC);
+  var h='<div class="mb14">';
+  h+='<div class="fl2 g6 mb10" style="flex-wrap:wrap;align-items:center"><span class="xs2 mut semi" style="letter-spacing:1px">SECTION :</span>';
+  _SECTION_GROUPS.forEach(function(g){
+    var on=(selG===g.id);
+    h+='<button onclick="window._rvGrp=\''+g.id+'\';var f=CLS.filter(function(c){return _classifySection(c)===\''+g.id+'\';});if(f.length)window._rvCls=f[0];re()" style="padding:6px 16px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:'+(on?g.c:'#F0F4FF')+';color:'+(on?'#fff':g.c)+'">'+g.l+'</button>';
+  });
+  h+='</div>';
+  h+='<div class="fl2 fic fsb fw g8">';
+  h+='<div class="tabs">'+CLS.filter(function(cl){return _classifySection(cl)===selG;}).map(function(cl){return '<button class="tab'+(cl===selC?' on':'')+'" onclick="window._rvCls=\''+cl+'\';re()">'+cl+'</button>';}).join('')+'</div>';
+  h+='<button class="btn bi" onclick="printReleveTemplate(\''+selC+'\')">🖨️ Imprimer</button></div></div>';
   h+='<div class="ib ibt mb14"><span>📋</span><span>Relevé de notes vierge pour <strong>'+sub+'</strong> — Classe de <strong>'+selC+'</strong>. À remplir en classe puis saisir dans l\'application.</span></div>';
   h+='<div class="card"><div class="tw"><table><thead><tr><th style="width:30px">#</th><th>Nom et Prénom</th>';
   TRS.forEach(function(tri){h+='<th colspan="3" style="text-align:center;background:var(--blb);color:var(--bl)">'+tri+'</th>';});
@@ -8377,6 +8579,10 @@ function consulterGratuit(itemId){
     lancerRessourcePedago(item.resPedago, false); return;
   }
 
+  // v1.7 : contenu marqué « PROTÉGÉ » (lecture seule) → lecteur sécurisé page par
+  // page (aperçu gratuit + accès complet selon l'abonnement, jamais téléchargeable).
+  if(item.diffusion==='protege' && !iA()){ openSecureBook(itemId); return; }
+
   // Admin → accès total
   if(iA()){ viewResource(item, 'admin'); return; }
 
@@ -8691,6 +8897,7 @@ function filterElContents(){
 }
 
 function commanderAbonnement(planId){
+  try{ if(typeof _track==='function') _track('sub_click'); }catch(e){}
   var el=DB.elearning||{plans:[]};
   var plan=el.plans.find(function(p){return p.id===planId;});
   if(!plan) return;
@@ -9224,7 +9431,10 @@ async function doLogin(){
       var v2=DB.visitorAccounts[j];
       if(v2.user.toLowerCase()===u.toLowerCase()&&v2.statut!=='suspendu'){var ok2=await verifyPassword(p,v2.pwd,v2.user,v2);if(ok2){va2=v2;break;}}
     }}
-    if(va2){va2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur',accountId:va2.id,plans:va2.plans||[]});hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);_studentSyncBg(u,p);return;}
+    if(va2){va2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur',accountId:va2.id,plans:va2.plans||[]});
+      // v1.4.9 : compte au profil anglophone → interface intégralement en anglais au login
+      try{ if(va2.profil&&va2.profil.sys==='en'&&typeof setLang==='function') setLang('en', true); }catch(e){}
+      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);_studentSyncBg(u,p);return;}
     // S3 (v1.2.x) : appareil neuf — aucun compte en local → tenter le serveur (lecture).
     var _slice=await _studentSyncFetch(u,p);
     if(_slice&&_slice.student&&_slice.student.id){
@@ -10491,6 +10701,7 @@ function pgSAControl(){
     +'<button class="btn bi" onclick="_saRatesModal()">⚖️ Taux globaux (auteur / parrain / promos)</button>'
     +'<button class="btn bo" onclick="if(typeof mPayAttempts===\'function\')mPayAttempts()">💳 Override des paiements</button>'
     +'<button class="btn bo" onclick="_saIntegrity()">🧪 Vérifier l\'intégrité des données</button>'
+    +'<button class="btn bo" onclick="if(typeof mStatsFunnel===\'function\')mStatsFunnel()">📈 Tunnel d\'acquisition (30 j)</button>'
     +'</div></div>';
   return h;
 }
@@ -12617,9 +12828,9 @@ function pgFinance(){
   const tF=DB.payments.filter(p=>p.stat==='Payé').reduce((s,p)=>s+p.mnt,0);
   const tB=DB.books.reduce((s,b)=>s+b.vendu*b.prix,0);
   const tS=DB.teachers.reduce((s,t)=>s+t.sal,0);
-  const tD=DB.depenses.reduce((s,d)=>s+d.mnt,0);
+  const tD=(DB.depenses||[]).reduce((s,d)=>s+d.mnt,0); // BUG FIX #7
   const bNet=tF+tB-tS-tD;
-  const catD=DB.depenses.reduce((a,d)=>{a[d.cat]=(a[d.cat]||0)+d.mnt;return a},{});
+  const catD=(DB.depenses||[]).reduce((a,d)=>{a[d.cat]=(a[d.cat]||0)+d.mnt;return a},{});
   return`<div class="sg">
     <div class="sc scgr"><div class="sci">💰</div><div class="scl">Frais scolarité</div><div class="scv vgr" style="font-size:16px">${fmt(tF)}</div></div>
     <div class="sc scb"><div class="sci">📚</div><div class="scl">Ventes manuels</div><div class="scv vb" style="font-size:16px">${fmt(tB)}</div></div>
@@ -12646,7 +12857,7 @@ function printBilan(){
   const tF=DB.payments.filter(p=>p.stat==='Payé').reduce((s,p)=>s+p.mnt,0);
   const tB=DB.books.reduce((s,b)=>s+b.vendu*b.prix,0);
   const tS=DB.teachers.reduce((s,t)=>s+t.sal,0);
-  const tD=DB.depenses.reduce((s,d)=>s+d.mnt,0);
+  const tD=(DB.depenses||[]).reduce((s,d)=>s+d.mnt,0); // BUG FIX #7
   const bNet=tF+tB-tS-tD;
   printDoc(`<div style="max-width:660px;margin:0 auto;font-family:'Inter',sans-serif">${docHeader('Bilan Financier')}
   <div style="padding:16px 26px">
@@ -12654,7 +12865,7 @@ function printBilan(){
     ${[['Frais de scolarité encaissés',tF,true],['Vente de manuels scolaires',tB,true]].map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e8e4dc;font-size:12px"><span>${l}</span><span style="font-family:'Fira Code';color:#1a6e40;font-weight:700">+ ${fmt(v)}</span></div>`).join('')}
     <div style="display:flex;justify-content:space-between;padding:8px;background:#f5f3ef;font-weight:700;font-size:12px"><span>Total Produits</span><span style="font-family:'Fira Code';color:#1a6e40">+ ${fmt(tF+tB)}</span></div>
     <div style="margin:14px 0 10px;padding:10px;background:#fdf0ee;border:1px solid #e8b0a8;border-radius:7px"><div style="font-size:13px;text-transform:uppercase;color:#b82828">Charges</div></div>
-    ${[['Masse salariale (enseignants)',tS,false],...DB.depenses.map(d=>[d.desc+' ('+d.cat+')',d.mnt,false])].map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e8e4dc;font-size:12px"><span>${l}</span><span style="font-family:'Fira Code';color:#b82828">- ${fmt(v)}</span></div>`).join('')}
+    ${[['Masse salariale (enseignants)',tS,false],...(DB.depenses||[]).map(d=>[d.desc+' ('+d.cat+')',d.mnt,false])].map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #e8e4dc;font-size:12px"><span>${l}</span><span style="font-family:'Fira Code';color:#b82828">- ${fmt(v)}</span></div>`).join('')}
     <div style="display:flex;justify-content:space-between;padding:8px;background:#f5f3ef;font-weight:700;font-size:12px"><span>Total Charges</span><span style="font-family:'Fira Code';color:#b82828">- ${fmt(tS+tD)}</span></div>
     <div style="background:${bNet>=0?'#142554':'#b82828'};color:#fff;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-top:16px;border-radius:7px">
       <span style="font-size:13px;font-weight:700;text-transform:uppercase">RÉSULTAT NET</span>
@@ -13720,31 +13931,30 @@ window._statsVitrineHtml = function(){
   if(!list.length) return '';
   var accents=['#3C8DFF','#FFC93C','#7C3AED','#059669','#F59E0B','#0D9488'];
   var mLabels={ab:'Assez Bien',b:'Bien',tb:'Très Bien',exc:'Excellent'};
+  // v1.4.8 (demande Jacques) : MÊME style que les cartes catégories e-learning —
+  // bandeau navy sobre (examen + % or) et corps BLANC (séries en chips claires,
+  // mentions en ligne discrète). Compteur animé (.vgz-stat-num) conservé.
   var cards=list.map(function(s,i){
-    var col=accents[i%accents.length];
     var series=(s.series||[]).map(function(se){
-      return '<div style="flex:1;min-width:60px;text-align:center;background:rgba(255,255,255,.06);border-radius:10px;padding:8px 6px">'
-        +'<div style="font-family:Montserrat,sans-serif;font-weight:900;font-size:18px;color:#FFC93C">'+(se.taux||0)+'%</div>'
-        +'<div style="font-size:10px;color:rgba(255,255,255,.7);letter-spacing:.5px">Série '+_esc(se.nom||'')+'</div></div>';
+      return '<div class="lx-serie"><b>'+(se.taux||0)+'%</b><span>'+_esc(se.nom||'')+'</span></div>';
     }).join('');
     var m=s.mentions||{};
     var mentions=['ab','b','tb','exc'].filter(function(k){return m[k]!=null;}).map(function(k){
-      return '<div style="flex:1;min-width:54px;text-align:center"><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:16px;color:#fff">'+(m[k]||0)+'</div>'
-        +'<div style="font-size:9.5px;color:rgba(255,255,255,.65);letter-spacing:.3px">'+mLabels[k]+'</div></div>';
+      return '<div class="lx-ment"><b>'+(m[k]||0)+'</b><span>'+mLabels[k]+'</span></div>';
     }).join('');
-    return '<div class="vgz-stat" style="text-align:left;border-top:3px solid '+col+';padding:18px 18px 16px">'
-      +'<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px">'
-        +'<div style="font-family:Montserrat,sans-serif;font-weight:900;font-size:15px;color:#fff;letter-spacing:.5px;text-transform:uppercase">'+_esc(s.ex||'')+'</div>'
-        +'<div class="vgz-stat-num" data-count="'+(s.taux||0)+'" data-suffix="%" style="font-size:30px">0</div>'
+    return '<div class="lx-statcard">'
+      +'<div class="lx-statcard-head">'
+        +'<span class="lx-statcard-ex">'+_esc(s.ex||'')+'<small>Taux de réussite</small></span>'
+        +'<em class="vgz-stat-num lx-stat-pct" data-count="'+(s.taux||0)+'" data-suffix="%">0</em>'
       +'</div>'
-      +'<div style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px;margin-top:-4px">Taux de réussite</div>'
-      +(series?'<div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">'+series+'</div>':'')
-      +(mentions?'<div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)"><div style="font-size:10px;color:#FFC93C;font-weight:700;letter-spacing:.5px;margin-bottom:6px" data-keep-emoji="1"><span role="img" aria-label="médaille">🏅</span> MENTIONS</div><div style="display:flex;gap:4px">'+mentions+'</div></div>':'')
-    +'</div>';
+      +'<div class="lx-statcard-body">'
+      +(series?'<div class="lx-stat-series">'+series+'</div>':'')
+      +(mentions?'<div class="lx-stat-mentions"><span class="lx-stat-mlabel">🏅 Mentions</span><div class="lx-stat-mrow">'+mentions+'</div></div>':'')
+      +'</div></div>';
   }).join('');
   var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:10px"><button class="btn bo sm" onclick="mEditStatsVitrine()">✏️ Modifier les résultats</button></div>':'';
   return '<div class="acc-head"><div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</div><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>'
-    +'<div class="vgz-stats v-reveal" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">'+cards+'</div>'+editBtn;
+    +'<div class="vgz-stats v-reveal" style="grid-template-columns:repeat(auto-fit,minmax(185px,1fr));max-width:860px;margin:18px auto">'+cards+'</div>'+editBtn;
 };
 
 // v1.2.2 : éditeur admin des stats vitrine (taux, séries, mentions par examen)
@@ -13971,6 +14181,12 @@ window._palmaresHtml = function(){
     +'</div>';
   } else {
     tiles+=tile({color:'#FB923C',ico:'⚔️',lc:'swords',label:'Battle de la semaine',title:'10 QCM · Classement national',sub:battleN>0?(battleN+' duel'+(battleN>1?'s':'')+' en cours'):'+50 XP — relevez le défi !',click:"(typeof mBattles===\'function\'?mBattles():showJeuxEdu())"});
+    // v1.5 : boucle d'apprentissage — rejouer ses erreurs de quiz/battle
+    var _missedN=(typeof _missedCount==='function')?_missedCount():0;
+    tiles+=tile({color:'#DC2626',ico:'🎯',lc:'check',label:'Mes erreurs à revoir',title:_missedN>0?(_missedN+' question'+(_missedN>1?'s':'')+' à retravailler'):'Aucune erreur en attente',sub:_missedN>0?'Corrigez-les pour les faire disparaître':'Vos questions ratées arrivent ici',click:"(typeof mErreursARevoir==='function'?mErreursARevoir():null)"});
+    // v1.9 (#3) : test de positionnement — forces/faiblesses en 10 questions
+    var _posDone=false; try{ _posDone=!!localStorage.getItem('_posDone'); }catch(e){}
+    tiles+=tile({color:'#7C3AED',ico:'🎯',lc:'sparkles',label:'Test de positionnement',title:_posDone?'Refaire mon diagnostic':'Évalue ton niveau en 10 questions',sub:_posDone?'Mesure tes progrès':'Découvre tes forces et points faibles',click:"(typeof mPositionnement==='function'?mPositionnement():null)"});
   }
   // ── Plan d'abonnement le PLUS souscrit (émulation : « rejoignez les autres ») ──
   var _plans=(DB.elearning&&DB.elearning.plans)||[];
@@ -14920,6 +15136,7 @@ function _quizAnswer(idx){
   var q=_quizState.qbank[_quizState.current];
   var isCorrect=(idx===q.ans);
   if(isCorrect) _quizState.score++;
+  else if(typeof _recordMissed==='function') _recordMissed({q:q.q,opts:q.opts,ans:q.ans,exp:q.exp,src:_quizState.topicKey||'Quiz'}); // v1.5 : mémoriser l'erreur
   
   var opts=document.querySelectorAll('.quiz-opt');
   opts.forEach(function(btn,i){
@@ -15717,84 +15934,93 @@ async function callClaudeAPI(prompt, sysPrompt){
     var _r=await fetch(_base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:String(prompt||''),sysPrompt:sys,ragContext:_ragCtx,userId:_ses&&_ses.id?_ses.id:'',plan:_ses&&_ses.type?_ses.type:'anon'})});
     if(_r.ok){
       var _j=await _r.json();
+      // v1.5 : mémoriser la source — permet d'afficher le badge « ✓ Vérifié par
+      // un enseignant » quand la réponse vient du cache validé (admin_validate).
+      try{ window._iaLastSource=_j&&_j.source||''; }catch(_eS){}
+      try{ if(typeof _track==='function') _track('ia_try'); }catch(_eT){}
       if(_j&&_j.text&&!/legacy text API|deprecat|enter\.pollinations/i.test(_j.text)){ console.log('[IA] via ia_proxy ('+(_j.source||'?')+')'); return _j.text; }
       if(_j&&_j.error){ console.warn('[IA] ia_proxy:',_j.error); return "⚠️ "+_j.error; }
     } else { console.warn('[IA] ia_proxy HTTP '+_r.status); }
   } catch(_eP){ console.warn('[IA] ia_proxy injoignable:',_eP.message); }
-  return "⚠️ L'assistant IA est momentanément indisponible. Réessayez dans un instant. (Si le problème persiste, l'administrateur doit configurer la clé IA gratuite du serveur — voir api/payment_config.php.)";
-
-  // ── ESSAI 1 : Pollinations.ai en POST (format OpenAI chat-completions, long context OK) ──
-  try {
-    console.log("[IA] Essai 1 : POST https://text.pollinations.ai/ (body messages JSON)");
-    var resp = await fetch("https://text.pollinations.ai/", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        messages: [
-          { role: "system", content: sys },
-          { role: "user",   content: prompt }
-        ],
-        model: "openai",
-        private: true,
-        stream: false
-      })
-    });
-    console.log("[IA] POST → status " + resp.status + " (ok=" + resp.ok + ")");
-    if (resp.ok) {
-      var txt = await resp.text();
-      console.log("[IA] POST réponse : " + txt.length + " chars, début : " + txt.substring(0, 80));
-      if (txt && txt.trim().length > 20) {
-        try {
-          var parsed = JSON.parse(txt);
-          if (parsed.choices && parsed.choices[0] && parsed.choices[0].message) {
-            console.log("[IA] Format OpenAI détecté, extraction content");
-            return parsed.choices[0].message.content;
-          }
-          if (typeof parsed === "string") return parsed;
-        } catch(eParse){ console.log("[IA] Pas du JSON, retour texte brut"); }
-        return txt.trim();
-      } else {
-        console.warn("[IA] POST trop court ou vide → fallback GET");
-      }
-    } else {
-      console.warn("[IA] POST status " + resp.status + " → fallback GET");
-    }
-  } catch(e1) { console.warn("[IA] POST exception :", e1.message); }
-
-  // ── ESSAI 2 : Pollinations.ai en GET avec system PROMPT TRONQUÉ (fallback courte URL) ──
-  try {
-    var shortSys = sys.length > 1500 ? (sys.substring(0, 1500) + "\n[...persona tronqué...]") : sys;
-    var url = "https://text.pollinations.ai/" + encodeURIComponent(shortSys + "\n\nQuestion: " + prompt + "\n\nRéponds en français:") + "?model=openai";
-    console.log("[IA] Essai 2 : GET (URL " + url.length + " chars)");
-    if (url.length < 1900) {
-      var resp2 = await fetch(url, { method: "GET", headers: { "Accept": "text/plain" } });
-      console.log("[IA] GET sys+prompt → status " + resp2.status);
-      if (resp2.ok) {
-        var txt2 = await resp2.text();
-        if (txt2 && txt2.trim().length > 20) return txt2.trim();
-      }
-    } else {
-      console.warn("[IA] URL trop longue (" + url.length + " chars), saut");
-    }
-  } catch(e2) { console.warn("[IA] GET sys+prompt exception :", e2.message); }
-
-  // ── ESSAI 3 : Pollinations en GET avec UNIQUEMENT le prompt (dernier recours) ──
-  try {
-    var minimalUrl = "https://text.pollinations.ai/" + encodeURIComponent(prompt);
-    console.log("[IA] Essai 3 : GET minimal (URL " + minimalUrl.length + " chars)");
-    if (minimalUrl.length < 1900) {
-      var resp3 = await fetch(minimalUrl);
-      console.log("[IA] GET minimal → status " + resp3.status);
-      if (resp3.ok) {
-        var txt3 = await resp3.text();
-        if (txt3 && txt3.trim().length > 20) return txt3.trim();
-      }
-    }
-  } catch(e3) { console.warn("[IA] GET minimal exception :", e3.message); }
-
-  console.error("[IA] TOUS LES ESSAIS ONT ÉCHOUÉ — retour message d'erreur");
-  return "⚠️ Service IA temporairement indisponible. Si le problème persiste, ouvrez la console (F12) et envoyez les messages [IA] à votre administrateur.";
+  // v1.3.3 : message VISITEUR neutre — aucun détail technique/serveur exposé.
+  // Le diagnostic admin reste dans la console ([IA] …) et les logs serveur.
+  return "⚠️ Le Professeur Ambassa est momentanément indisponible. Vérifiez votre connexion et réessayez dans quelques instants.";
+  // v1.3.2 : le code mort Pollinations (3 essais navigateur, inatteignables après le
+  // return ci-dessus) a été SUPPRIMÉ. Toute l'IA passe par ia_proxy.php côté serveur :
+  // Gemini → DeepSeek (OpenRouter) → Groq → Mistral, clés jamais exposées au client.
 }
+
+// v1.5 — Badge de CONFIANCE : affiché quand la réponse IA provient du cache des
+// réponses VALIDÉES par un enseignant (admin_validate.php). Transforme le
+// mécanisme de validation en argument visible pour l'élève et le parent.
+window._iaBadgeHtml = function(){
+  if(window._iaLastSource!=='cache_validated') return '';
+  return '<div style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1px solid #6EE7B7;color:#047857;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;margin-bottom:10px">'
+    +'<span style="background:#059669;color:#fff;border-radius:50%;width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;font-size:10px">✓</span>'
+    +'Corrigé vérifié par un enseignant VÉRITAS</div>';
+};
+
+// ══ v1.5 — RÉPÉTITION ESPACÉE SIMPLE : « Mes erreurs à revoir » ═════════════
+// Chaque question ratée (quiz, battle) est mémorisée (50 max, dédupliquée) et
+// peut être rejouée. Une bonne réponse en révision retire la question du lot —
+// la boucle d'apprentissage se ferme : l'élève PROGRESSE au lieu de consommer.
+window._recordMissed=function(q){
+  try{
+    if(!q||!q.q) return;
+    if(!DB._missedQ) DB._missedQ={};
+    var uid=(typeof SES!=='undefined'&&SES&&SES.id)?SES.id:'anon';
+    var arr=DB._missedQ[uid]=DB._missedQ[uid]||[];
+    var key=String(q.q).substring(0,80);
+    if(arr.some(function(x){return String(x.q).substring(0,80)===key;})) return; // dédup
+    q.ts=Date.now();
+    arr.push(q);
+    if(arr.length>50) arr.shift();
+    save();
+  }catch(e){}
+};
+window._missedCount=function(){
+  var uid=(typeof SES!=='undefined'&&SES&&SES.id)?SES.id:'anon';
+  return ((DB._missedQ||{})[uid]||[]).length;
+};
+window.mErreursARevoir=function(){
+  var uid=(typeof SES!=='undefined'&&SES&&SES.id)?SES.id:'anon';
+  var arr=((DB._missedQ||{})[uid]||[]).slice();
+  if(!arr.length){
+    M('🎯 Mes erreurs à revoir','',
+      '<div style="text-align:center;padding:26px"><div style="font-size:46px;margin-bottom:10px">🏆</div>'
+      +'<div class="semi">Aucune erreur en attente — bravo !</div>'
+      +'<div class="xs2 mut mt8">Vos questions ratées en quiz et en battle apparaîtront ici pour être retravaillées.</div></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button>');
+    return;
+  }
+  // Rejouer la plus ancienne (file FIFO = espacement naturel)
+  var q=arr[0];
+  var opts=q.opts||['a','b','c','d'].filter(function(k){return q[k];}).map(function(k){return q[k];});
+  var ansIdx=(typeof q.ans==='number')?q.ans:['a','b','c','d'].indexOf(q.ok||'a');
+  M('🎯 Mes erreurs à revoir','Question 1 / '+arr.length+' · '+_esc(q.src||''),
+    '<div class="semi mb12" style="font-size:14.5px;line-height:1.5">'+_esc(q.q)+'</div>'
+    +opts.map(function(o,i){
+      return '<button class="btn" style="display:block;width:100%;text-align:left;padding:11px 14px;margin-bottom:8px;background:#fff;border:2px solid #E5E7EB;border-radius:10px;color:#142554;font-size:13.5px;font-weight:600" onclick="_missedAnswer('+i+','+ansIdx+')">'+String.fromCharCode(65+i)+'. '+_esc(o)+'</button>';
+    }).join('')
+    +'<div id="missedExpl" style="display:none;margin-top:10px;padding:12px;border-radius:10px;font-size:13px;line-height:1.6"></div>',
+    '<button class="btn bo" onclick="cm()">Plus tard</button>');
+};
+window._missedAnswer=function(i,ansIdx){
+  var uid=(typeof SES!=='undefined'&&SES&&SES.id)?SES.id:'anon';
+  var arr=(DB._missedQ||{})[uid]||[];
+  var q=arr[0]||{};
+  var box=document.getElementById('missedExpl');
+  var good=(i===ansIdx);
+  if(box){
+    box.style.display='block';
+    box.style.background=good?'#ECFDF5':'#FEF2F2';
+    box.style.border=good?'1px solid #6EE7B7':'1px solid #FCA5A5';
+    box.innerHTML=(good?'✅ <b>Corrigée !</b> Cette question quitte votre liste.':'❌ Pas encore. La bonne réponse était <b>'+String.fromCharCode(65+ansIdx)+'</b>.'+(q.exp?'<br>💡 '+_esc(q.exp):''))
+      +'<div style="margin-top:10px"><button class="btn bi sm" onclick="cm();mErreursARevoir()">Question suivante →</button></div>';
+  }
+  if(good){ arr.shift(); save(); }
+  else { var f=arr.shift(); if(f){ arr.push(f); save(); } } // ratée → repart en fin de file
+};
 
 // ════════════════════════════════════════════════════════════════════
 // VÉRITAS v29 — NOUVELLES FONCTIONNALITÉS (double-quotes safe)
@@ -18762,6 +18988,11 @@ function _showLittCorriges(oeuvreKey){
     +'<div class="vsec-sub" style="font-style:italic;color:var(--ink3)">Commentaire composé &amp; dissertation entièrement rédigés · '+_esc(oe.classe)+'</div>'
     +'<div id="littCorrigeBox" class="vcard ai-md" style="margin-top:16px;line-height:1.7">'
       +'<div style="text-align:center;color:var(--ink4);padding:24px"><span style="animation:pulse 1.2s infinite;font-size:28px">📖</span><br>Chargement du corrigé…</div>'
+    +'</div>'
+    // v1.3.2 : accès direct à la demande IA précise depuis les corrigés statiques
+    +'<div class="vcard mt12" style="text-align:center;background:linear-gradient(135deg,#FAF5FF,#EFF6FF);border:1px dashed rgba(124,58,237,.35)">'
+      +'<div style="font-size:13px;color:var(--ink3);margin-bottom:10px">Un autre sujet en tête ? Ambassa rédige une dissertation, un commentaire ou une fiche sur VOTRE sujet.</div>'
+      +'<button class="btn" style="background:#7C3AED;color:#fff;border:none;border-radius:24px;padding:10px 22px;font-weight:800;cursor:pointer" onclick="_littCorrigeIA(\''+oeuvreKey+'\')">✨ Demander à l\'IA (sujet précis)</button>'
     +'</div></div>');
   var base=(typeof location!=='undefined'&&location.origin&&location.origin.indexOf('http')===0)?'':'';
   fetch(base+'evaluations/'+file+'?t='+Date.now())
@@ -18776,35 +19007,77 @@ function _showLittCorriges(oeuvreKey){
     });
 }
 
-// ── COMMENTAIRE & DISSERTATION GÉNÉRÉS PAR L'IA AMBASSA (v1.2.4) ───────
-// Pour les œuvres SANS corrigé pré-rédigé : Ambassa (boosté max_tokens 4096 +
-// persona) compose à la demande un commentaire composé + une dissertation,
-// adaptés au niveau, citations et outils de langue analysés et interprétés.
-function _littCorrigeIA(oeuvreKey){
+// ── PRODUCTIONS IA AMBASSA SUR LES ŒUVRES (v1.3.2 — demande PRÉCISE) ───────
+// L'élève choisit le TYPE de production (dissertation, commentaire composé,
+// fiche de révision, pack complet) et peut imposer SON sujet exact ou coller
+// l'extrait à commenter. Prompts structurés grilles harmonisées MINESEC ;
+// réponses longues (ia_proxy 8192 tokens — plus de corrigés tronqués).
+function _littCorrigeIA(oeuvreKey, mode){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe){toast("Œuvre introuvable","warn");return;}
   var fi=oe.fiche||{};
-  _vc('<div class="vsec">'
-    +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-    +'<div class="vsec-title">🤖 Commentaire &amp; Dissertation (IA) — '+_esc(oe.titre)+'</div>'
-    +'<div class="vsec-sub" style="font-style:italic;color:var(--ink3)">Rédigés par le Professeur Ambassa · '+_esc(oe.classe)+'</div>'
-    +'<div id="littCorrigeBox" class="vcard ai-md" style="margin-top:16px;line-height:1.7">'
-      +'<div style="text-align:center;color:var(--ink4);padding:28px"><span style="animation:pulse 1.2s infinite;font-size:30px">🤖</span><br>Le Professeur Ambassa rédige le commentaire et la dissertation…<br><small>Cela peut prendre 20 à 40 secondes.</small></div>'
-    +'</div></div>');
   var th=(fi.themes||[]).join(', ');
   var ax=(fi.axes||[]).join(' ; ');
   var cites=(oe.citations||[]).slice(0,3).map(function(c){return '« '+(c.texte||'')+' » ('+(c.source||'')+')';}).join(' / ');
-  var prompt="Œuvre au programme MINESEC : « "+oe.titre+" » de "+oe.auteur+" (classe de "+oe.classe+").\n"
+  var base="Œuvre au programme MINESEC : « "+oe.titre+" » de "+oe.auteur+" (classe de "+oe.classe+").\n"
     +(th?("Thèmes : "+th+".\n"):'')
     +(ax?("Axes d'étude : "+ax+".\n"):'')
     +(cites?("Citations de référence (à exploiter, sans en inventer d'autres) : "+cites+".\n"):'')
-    +"\nRédige pour un élève de "+oe.classe+" DEUX corrigés modèles complets, adaptés à ce niveau :\n"
-    +"1) UN COMMENTAIRE COMPOSÉ : situation de l'œuvre, idée générale, plan en 2 centres d'intérêt (2 sous-parties chacun), analyse précise des procédés (figures, champs lexicaux, tonalité) AVEC citations, transitions, intérêts du texte, puis la formule de clôture officielle.\n"
-    +"2) UNE DISSERTATION LITTÉRAIRE : reformulation du sujet, problématique, plan (dialectique ou analytique) développé avec exemples tirés de l'œuvre (titre, auteur, citations précises), transitions et synthèse finale.\n"
-    +"Analyse ET interprète les outils de langue. Structure avec des titres en gras et des listes. N'invente AUCUNE citation : si tu n'es pas certain d'un passage, paraphrase. Termine par un conseil de méthode et une question pour guider l'élève.";
-  callClaudeAPI(prompt, (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:'')).then(function(txt){
+    +"N'invente AUCUNE citation : en cas de doute, paraphrase. Adapte le niveau à la classe de "+oe.classe+".\n\n";
+
+  // ── Sans mode → écran de CHOIX (demande précise) ──
+  if(!mode){
+    var _iaCard=function(ico,col,t,st,m){
+      return '<div class="vcard" style="cursor:pointer;text-align:center;padding:16px 12px;transition:transform .2s ease,box-shadow .2s ease" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'" onclick="_littCorrigeIA(\''+oeuvreKey+'\',\''+m+'\')">'
+        +'<div style="font-size:30px;margin-bottom:8px">'+ico+'</div>'
+        +'<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:'+col+'">'+t+'</div>'
+        +'<div style="font-size:11px;color:var(--ink4);margin-top:5px;line-height:1.45">'+st+'</div></div>';
+    };
+    _vc('<div class="vsec">'
+      +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
+      +'<div class="vsec-title">🤖 Prof. Ambassa — '+_esc(oe.titre)+'</div>'
+      +'<div class="vsec-sub" style="font-style:italic;color:var(--ink3)">Choisissez votre production · '+_esc(oe.classe)+' · grilles harmonisées MINESEC</div>'
+      +'<div class="fg" style="margin-top:12px"><span class="fl">🎯 Votre sujet précis (optionnel — sinon Ambassa propose un sujet type examen)</span>'
+      +'<textarea class="fi" id="littIaSujet" rows="2" placeholder="Ex : un sujet de dissertation exact, ou collez l\'extrait à commenter…"></textarea></div>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px;margin-top:14px">'
+      +_iaCard('🖋️','#7C3AED','Dissertation','Analyse du sujet, problématique, plan détaillé, rédaction + barème','dissertation')
+      +_iaCard('📖','#1E3A8A','Commentaire composé','Centres d\'intérêt, procédés analysés et interprétés, conclusion','commentaire')
+      +_iaCard('📋','#059669','Fiche de révision','Résumé, personnages, thèmes, citations clés, sujets probables','fiche')
+      +_iaCard('⚡','#D97706','Pack complet','Commentaire + dissertation modèles en une fois','complet')
+      +'</div></div>');
+    return;
+  }
+
+  // ── Avec mode → lire le sujet précis (le champ est encore dans le DOM) puis générer ──
+  var sujet=((typeof _ge==='function'&&_ge('littIaSujet'))?_ge('littIaSujet').value:'').trim();
+  var prompts={
+    dissertation:"MISSION : corrigé MODÈLE de DISSERTATION LITTÉRAIRE.\n"
+      +(sujet?("SUJET IMPOSÉ (à traiter tel quel) : « "+sujet+" »\n"):"Propose d'abord UN sujet type BAC/Probatoire sur l'œuvre, puis traite-le intégralement.\n")
+      +"Structure EXIGÉE : 1) Analyse du sujet (mots-clés, reformulation, problématique) ; 2) Plan détaillé (dialectique ou analytique selon le sujet) ; 3) Introduction ENTIÈREMENT rédigée ; 4) Développement complet (chaque partie : argument + exemple précis de l'œuvre + citation exploitée + transition) ; 5) Conclusion rédigée (bilan + ouverture) ; 6) Barème selon la grille harmonisée MINESEC (pertinence des idées, correction de la langue, cohérence, perfectionnement) ; 7) 3 conseils de méthode.",
+    commentaire:"MISSION : corrigé MODÈLE de COMMENTAIRE COMPOSÉ.\n"
+      +(sujet?("EXTRAIT / PASSAGE À COMMENTER : « "+sujet+" »\n"):"Choisis un passage clé de l'œuvre (situe-le précisément), puis commente-le intégralement.\n")
+      +"Structure EXIGÉE : 1) Situation du passage ; 2) Idée générale ; 3) Annonce des 2 centres d'intérêt ; 4) Développement (chaque centre : 2 sous-parties ; procédés NOMMÉS, ANALYSÉS et INTERPRÉTÉS — figures, champs lexicaux, tonalité, rythme — avec citations du passage) ; 5) Conclusion avec la formule de clôture officielle ; 6) Barème grille harmonisée MINESEC ; 7) 3 conseils de méthode.",
+    fiche:"MISSION : FICHE DE RÉVISION COMPLÈTE pour préparer l'examen.\n"
+      +(sujet?("Insiste particulièrement sur : "+sujet+"\n"):"")
+      +"Contenu EXIGÉ : 1) L'œuvre en 5 lignes ; 2) Résumé structuré (par parties/chapitres) ; 3) Personnages (rôle, évolution, relations) ; 4) Thèmes développés avec exemples ; 5) Style et procédés d'écriture marquants ; 6) 8 citations CLÉS à mémoriser (sans en inventer) avec leur intérêt ; 7) 5 sujets probables (dissertation et commentaire) avec pistes de plan ; 8) Pièges à éviter le jour J.",
+    complet:"MISSION : DEUX corrigés modèles complets.\n"
+      +(sujet?("Tiens compte de cette demande précise : "+sujet+"\n"):"")
+      +"1) UN COMMENTAIRE COMPOSÉ : situation, idée générale, plan en 2 centres d'intérêt (2 sous-parties chacun), procédés analysés et interprétés AVEC citations, transitions, formule de clôture officielle.\n"
+      +"2) UNE DISSERTATION LITTÉRAIRE : sujet type examen, problématique, plan développé avec exemples et citations de l'œuvre, transitions, synthèse finale.\n"
+      +"Termine par la grille harmonisée MINESEC et 3 conseils de méthode."
+  };
+  var labels={dissertation:'🖋️ Dissertation',commentaire:'📖 Commentaire composé',fiche:'📋 Fiche de révision',complet:'⚡ Commentaire + Dissertation'};
+  _vc('<div class="vsec">'
+    +'<button class="back-btn" onclick="_littCorrigeIA(\''+oeuvreKey+'\')">← Autre demande</button>'
+    +'<div class="vsec-title">'+(labels[mode]||'🤖 Production IA')+' — '+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-sub" style="font-style:italic;color:var(--ink3)">Rédigé par le Professeur Ambassa · '+_esc(oe.classe)+(sujet?' · sujet personnalisé':'')+'</div>'
+    +'<div id="littCorrigeBox" class="vcard ai-md" style="margin-top:16px;line-height:1.7">'
+      +'<div style="text-align:center;color:var(--ink4);padding:28px"><span style="animation:pulse 1.2s infinite;font-size:30px">🤖</span><br>Le Professeur Ambassa rédige…<br><small>Cela peut prendre 20 à 60 secondes.</small></div>'
+    +'</div></div>');
+  callClaudeAPI(base+(prompts[mode]||prompts.complet), (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:'')).then(function(txt){
     var box=document.getElementById('littCorrigeBox');
-    if(box) box.innerHTML=(typeof _aiMarkdown==='function')?_aiMarkdown(txt):('<pre style="white-space:pre-wrap">'+_esc(txt)+'</pre>');
+    if(box) box.innerHTML=((typeof _iaBadgeHtml==='function')?_iaBadgeHtml():'')
+      +((typeof _aiMarkdown==='function')?_aiMarkdown(txt):('<pre style="white-space:pre-wrap">'+_esc(txt)+'</pre>'));
   }).catch(function(e){
     var box=document.getElementById('littCorrigeBox');
     if(box) box.innerHTML='<div class="ib ibt"><span>⚠️</span><span>Le Professeur Ambassa est momentanément indisponible. Réessayez dans un instant.<br><small>'+_esc(e&&e.message||'')+'</small></span></div>';
@@ -18853,8 +19126,10 @@ function _showLittMenu(jid,oeuvreKey){
         return (oe.analyse ? _lcard('bookopen','#7C3AED', 'rgba(124,58,237,0.12)','Analyse littéraire',   'Style accessible &amp; extraits phares', '_showLittAnalyse(\''+oeuvreKey+'\')', true) : '')
              + _lcard('clipboard', '#142554', 'rgba(16,185,129,0.12)',  'Fiche d\'identité',      _esc(ficheDesc)+' · Carte mentale',          '_showLittFiche(\''+oeuvreKey+'\')', false)
              + _lcard('pencil',    '#DC2626', 'rgba(220,38,38,0.12)',   'Contrôle de lecture',    nbControle+' éléments à maîtriser',          '_showLittControleComplet(\''+oeuvreKey+'\')', false)
-             + (_hasCorrige ? _lcard('award','#F59E0B', 'rgba(245,158,11,0.14)', 'Corrigés modèles', 'Commentaire composé &amp; dissertation rédigés', '_showLittCorriges(\''+oeuvreKey+'\')', true)
-                            : _lcard('sparkles','#7C3AED', 'rgba(124,58,237,0.12)', 'Commentaire &amp; Dissertation', 'Rédigés par l\'IA Ambassa à la demande', '_littCorrigeIA(\''+oeuvreKey+'\')', true));
+             // v1.3.2 : la carte IA est TOUJOURS proposée (avant, une œuvre avec
+             // corrigé statique n'offrait AUCUN bouton de demande précise à l'IA).
+             + (_hasCorrige ? _lcard('award','#F59E0B', 'rgba(245,158,11,0.14)', 'Corrigés modèles', 'Commentaire composé &amp; dissertation rédigés', '_showLittCorriges(\''+oeuvreKey+'\')', true) : '')
+             + _lcard('sparkles','#7C3AED', 'rgba(124,58,237,0.12)', 'Demander à l\'IA Ambassa', 'Dissertation, commentaire ou fiche — sujet au choix', '_littCorrigeIA(\''+oeuvreKey+'\')', true);
       })()
     +'</div>'
     // Bandeau auteur/classe
@@ -21033,14 +21308,27 @@ function showEpreuves(){
   builtinEp.forEach(function(e){if(!seenIds[e.id]){seenIds[e.id]=1;allEpreuves.push(e);}});
   customEpreuves.forEach(function(e){if(!seenIds[e.id]){seenIds[e.id]=1;allEpreuves.push(e);}});
 
+  // v1.4.2 : filtre SECTION (Général/Technique/CAP/Anglophone) en amont —
+  // les niveaux et matières affichés se limitent à la section choisie.
+  // v1.4.3 : initialisé automatiquement sur le PARCOURS de l'apprenant (1ère visite) ;
+  // il peut l'élargir en re-cliquant la pilule active (→ toutes les sections).
+  if(window._epGrp===undefined&&typeof _profileGroup==='function'){window._epGrp=_profileGroup()||"";}
+  var grp=window._epGrp||"";
+  var pool=grp?allEpreuves.filter(function(e){return _classifySection(e.classe||'')===grp;}):allEpreuves;
+
   // Filtres
-  var list=allEpreuves.filter(function(e){
+  var list=pool.filter(function(e){
     return (!mat||e.matiere===mat)&&(!classe||e.classe===classe)&&(!seq||e.seq===seq);
   });
 
-  var mats=[...new Set(allEpreuves.map(function(e){return e.matiere||"";}).filter(Boolean))];
-  var classes=[...new Set(allEpreuves.map(function(e){return e.classe||"";}).filter(Boolean))];
-  var seqs=[...new Set(allEpreuves.map(function(e){return e.seq||"";}).filter(Boolean))].sort();
+  var mats=[...new Set(pool.map(function(e){return e.matiere||"";}).filter(Boolean))];
+  var classes=[...new Set(pool.map(function(e){return e.classe||"";}).filter(Boolean))];
+  var seqs=[...new Set(pool.map(function(e){return e.seq||"";}).filter(Boolean))].sort();
+
+  var grpSel=_SECTION_GROUPS.map(function(g){
+    var active=(grp===g.id);
+    return "<button onclick=\"window._epGrp='"+(active?"":g.id)+"';window._epClasse='';window._epMat='';showEpreuves()\" style='padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:none;transition:.2s;background:"+(active?g.c:"#F0F4FF")+";color:"+(active?"#fff":g.c)+"'>"+g.l+"</button>";
+  }).join("");
 
   var matSel=mats.map(function(m){
     var active=window._epMat===m;
@@ -21063,8 +21351,12 @@ function showEpreuves(){
 
   // Bouton réinitialiser les filtres si au moins un filtre actif
   if(mat||classe||seq){
-    h+="<div style='margin-bottom:12px'><button onclick=\"window._epMat='';window._epClasse='';window._epSeq='';showEpreuves()\" style='padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #DC2626;background:#FEE2E2;color:#DC2626'>✕ Réinitialiser les filtres</button></div>";
+    h+="<div style='margin-bottom:12px'><button onclick=\"window._epGrp='';window._epMat='';window._epClasse='';window._epSeq='';showEpreuves()\" style='padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #DC2626;background:#FEE2E2;color:#DC2626'>✕ Réinitialiser les filtres</button></div>";
   }
+
+  // v1.4.2 : filtre SECTION en premier (Général / Technique / CAP / Anglophone)
+  h+="<div style='margin-bottom:8px;font-size:12px;font-weight:700;color:#6B7A99;text-transform:uppercase;letter-spacing:.8px'>Section &amp; type d'enseignement</div>";
+  h+="<div class='fl2 g6 mb10' style='flex-wrap:wrap'>"+grpSel+"</div>";
 
   // Filtres matières
   if(matSel){
@@ -21457,7 +21749,9 @@ var _origVShowSecEl=window.vShowSec;
     // v1.2.4 : après chaque navigation, remonter en haut du contenu. Sans cela la
     // section s'ouvrait « loin en bas » et échappait à l'utilisateur (surtout mobile
     // où le menu pousse le contenu sous la ligne de flottaison).
-    setTimeout(function(){ try{ var c=document.getElementById('vContent'); if(c){ var y=c.getBoundingClientRect().top+window.pageYOffset-72; window.scrollTo({top:y<0?0:y,behavior:'smooth'}); } }catch(e){} },80);
+    // v1.3.1 perf : remontée INSTANTANÉE (behavior:'auto') — le défilement lissé
+    // sur une longue distance après un re-rendu donnait une impression de lenteur.
+    setTimeout(function(){ try{ var c=document.getElementById('vContent'); if(c){ var y=c.getBoundingClientRect().top+window.pageYOffset-72; window.scrollTo({top:y<0?0:y,behavior:'auto'}); } }catch(e){} },80);
     // Reposer la traduction des sous-titres après chaque navigation (EN persistant)
     setTimeout(function(){ try{ if(typeof _translateSubs==='function') _translateSubs(); }catch(e){} },120);
     if(sec!=="epreuves"){
@@ -21475,6 +21769,26 @@ var _origVShowSecEl=window.vShowSec;
       showLabosVirtuels();return;
     }
     if(_ov) _ov.call(this,sec,btn);
+    // v1.4.6 FIX CRITIQUE : ré-observer les éléments « reveal » créés par CE rendu.
+    // L'observer de la coquille (initReveal) ne couvre que le boot → les grilles
+    // re-rendues (catégories e-learning, stats…) restaient en opacity:0 = la
+    // « partie vide qui ne charge pas ». Ici : visible à l'écran → cascade
+    // immédiate ; plus bas → déclenchée au scroll (effet de déroulement).
+    setTimeout(function(){
+      try{
+        var els=document.querySelectorAll('.v-reveal:not(.is-visible), .lx-catgrid:not(.is-visible)');
+        if(!els.length) return;
+        if(!('IntersectionObserver' in window)){ els.forEach(function(el){el.classList.add('is-visible');}); return; }
+        var io=new IntersectionObserver(function(es){
+          es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+        },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+        els.forEach(function(el){
+          var r=el.getBoundingClientRect();
+          if(r.top<(window.innerHeight||800)*0.96&&r.bottom>0){ el.classList.add('is-visible'); }
+          else io.observe(el);
+        });
+      }catch(e){}
+    },180);
   };
 })();
 // ── LABORATOIRES VIRTUELS ENRICHIS ─────────────────────────────────
@@ -21824,51 +22138,6 @@ var LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   // ─ GÉOGRAPHIE & HISTOIRE ─
-  {id:"lv7",titre:"Carte du Cameroun Interactive",matiere:"Géographie",cat:"geo",
-   classe:"6ème-3ème",ico:"🗺️",color:"#D97706",gratuit:true,
-   desc:"10 régions, reliefs, fleuves, ressources naturelles et frontières du Cameroun.",
-   theorie:"🌍 Cameroun : 'Afrique en miniature' — 475 442 km², ~28 millions d'hab. (2024).\nCapitale politique : Yaoundé (Centre). Capitale économique : Douala (Littoral).\n\n🏔️ Reliefs : Mont Cameroun (4095m, volcan) ; Massif Adamaoua ; Plaine Diamaré ; Hauts Plateaux Ouest.\n\n💧 Bassins : Atlantique (Sanaga 920km, Wouri) ; Lac Tchad (Bénoué, Logone) ; Congo (Dja, Sangha).\n\n10 régions/chefs-lieux : Adamaoua/Ngaoundéré ; Centre/Yaoundé ; Est/Bertoua ; Ex-Nord/Maroua ; Littoral/Douala ; Nord/Garoua ; NW/Bamenda ; Ouest/Bafoussam ; Sud/Ebolowa ; SW/Buea.",
-   experience:[
-     "1️⃣ Trace les 10 régions. Colorie : forêt équatoriale (Sud/Est/Centre), savane (Nord/Adamaoua), sahel (Ex-Nord).",
-     "2️⃣ Place les 10 chefs-lieux + 3 villes > 500 000 hab : Douala (~4M), Yaoundé (~3M), Bafoussam.",
-     "3️⃣ Trace la Sanaga (la plus longue, 920km), la Bénoué, le Wouri. Identifie les 3 bassins.",
-     "4️⃣ Ressources : pétrole (offshore Kribi) ; bauxite (Ngaoundal) ; fer (Mbalam) ; cobalt (Lomié) ; bois (Est).",
-     "5️⃣ Densité : Ex-Nord (plus peuplée) vs Est (moins peuplée). Calcule la densité de ta région.",
-     "6️⃣ Frontières : 6 pays voisins (Nigeria, Tchad, RCA, Congo, Gabon, Guinée Éq.) + Golfe de Guinée.",
-     "7️⃣ Activités selon le relief : hauts plateaux → café/thé/maraîchage ; côte → pêche + port ; Nord → élevage.",
-   ],
-   quiz:[
-     {q:"La plus haute montagne du Cameroun :",opts:["Mont Mandara","Mont Oku","Mont Cameroun","Massif Adamaoua"],ans:2,exp:"Mont Cameroun (4 095m) = point culminant + volcan actif le plus élevé d'Afrique de l'Ouest."},
-     {q:"Chef-lieu de la région du Littoral :",opts:["Yaoundé","Douala","Limbé","Edéa"],ans:1,exp:"Douala : chef-lieu Littoral + capitale économique (port principal, industries)."},
-     {q:"Le Cameroun est surnommé :",opts:["Le géant de l'Afrique","L'Afrique en miniature","Le cœur de l'Afrique","La porte de l'Afrique"],ans:1,exp:"'Afrique en miniature' : réunit tous les milieux naturels africains (forêt, savane, sahel, montagne, côte)."},
-     {q:"Le fleuve Sanaga se jette dans :",opts:["Le lac Tchad","Le Congo","Le Golfe de Guinée","La Bénoué"],ans:2,exp:"Sanaga (920km) → Golfe de Guinée. Alimente les barrages de Song Loulou et Edéa."},
-     {q:"Combien de pays frontaliers a le Cameroun ?",opts:["4","5","6","7"],ans:2,exp:"6 voisins terrestres : Nigeria, Tchad, RCA, Congo, Gabon, Guinée Équatoriale."},
-     {q:"Capitale politique du Cameroun :",opts:["Douala","Bafoussam","Kribi","Yaoundé"],ans:3,exp:"Yaoundé = capitale politique depuis 1922 (région Centre). Douala = capitale économique."},
-   ],
-   ressource:"https://minesec-distancelearning.cm",pack:null},
-
-  {id:"lv8",titre:"La Décolonisation en Afrique",matiere:"Histoire",cat:"histoire",
-   classe:"3ème-1ère-Tle",ico:"🏛️",color:"#BE185D",gratuit:false,plan:"Complet",
-   desc:"Étapes de la décolonisation, leaders africains, cas du Cameroun et néocolonialisme.",
-   theorie:"🌍 Facteurs : Charte ONU (1945) ; Conférence de Brazzaville (1944) ; Guerre froide (USA/URSS anticoloniaux) ; mouvements nationalistes.\n\n📅 1957 : Ghana (Nkrumah), 1er pays Afrique subsaharienne.\n1960 = 'Année de l'Afrique' : 17 indépendances.\n1994 : fin apartheid Afrique du Sud (Mandela élu).\n\n🇨🇲 Cameroun : Kamerun allemand 1884 → mandats franco-britanniques 1919 → UPC/Um Nyobé → 1er janv. 1960 (Ahidjo) → réunification 1972.",
-   experience:[
-     "1️⃣ Chronologie : 1884 (Berlin, partage) → 1944 (Brazzaville) → 1957 (Ghana) → 1960 (17 indépendances) → 1994.",
-     "2️⃣ Leaders : Nkrumah (Ghana/panafricanisme) ; Lumumba (Congo, assassiné 1961) ; Sékou Touré (Guinée, premier 'Non' à De Gaulle).",
-     "3️⃣ Cameroun : mandat franco-britannique → UPC (Ruben Um Nyobé) → 1er janv. 1960 (Ahidjo, partie fr.) → 1er oct. 1961 (réunification).",
-     "4️⃣ Néocolonialisme : indépendance politique mais dépendance économique (Françafrique, CFA, bases militaires).",
-     "5️⃣ Analyse de documents : discours Nkrumah 1957 + déclaration d'indépendance camerounaise.",
-     "6️⃣ Apartheid : ségrégation légale 1948-1994. Mandela emprisonné 27 ans → prix Nobel Paix 1993 → élu 1994.",
-     "7️⃣ Bilan 60 ans après : progrès (démocratisation, croissance) et défis (gouvernance, sécurité, développement).",
-   ],
-   quiz:[
-     {q:"Indépendance du Cameroun francophone :",opts:["1958","1960","1961","1972"],ans:1,exp:"1er janvier 1960, Ahmadou Ahidjo = 1er président de la République du Cameroun."},
-     {q:"'Année de l'Afrique' (1960) car :",opts:["Fin de la guerre froide","17 pays africains indépendants","Création de l'OUA","Fin apartheid"],ans:1,exp:"17 États africains indépendants en 1960, dont Cameroun, Sénégal, Mali, Côte d'Ivoire, Congo."},
-     {q:"1er pays d'Afrique subsaharienne indépendant :",opts:["Nigeria","Cameroun","Ghana","Sénégal"],ans:2,exp:"Ghana sous Kwame Nkrumah, 1957 — premier pays d'Afrique noire."},
-     {q:"La Conférence de Berlin (1884-1885) a :",opts:["Accordé l'indépendance à l'Afrique","Partagé l'Afrique entre puissances européennes","Créé l'Union Africaine","Aboli l'esclavage"],ans:1,exp:"Partage de l'Afrique entre puissances européennes sans consulter les Africains."},
-     {q:"Nelson Mandela a été emprisonné pendant :",opts:["10 ans","20 ans","27 ans","35 ans"],ans:2,exp:"1964-1990 : 27 ans sur l'île de Robben Island. Prix Nobel Paix 1993, président 1994."},
-   ],
-   ressource:"https://minesec-distancelearning.cm",pack:"Complet"},
-
   {id:"lv18",titre:"La Mondialisation",matiere:"Géographie",cat:"geo",
    classe:"Tle",ico:"🌐",color:"#059669",gratuit:false,plan:"Complet",
    desc:"Flux mondiaux, acteurs, inégalités, IDH et place du Cameroun dans la mondialisation.",
@@ -21914,33 +22183,6 @@ var LABO_DB=[
      {q:"Structure de condition :",opts:["POUR i de 1 à n","TANTQUE x>0","SI x>0 ALORS","FONCTION f(x)"],ans:2,exp:"SI...ALORS...SINON = condition (branchement). POUR/TANTQUE = boucles."},
    ],
    ressource:"https://minesec-distancelearning.cm",pack:null},
-
-  {id:"lv20",titre:"Conjugaison & Grammaire Française",matiere:"Français",cat:"langues",
-   classe:"6ème-3ème",ico:"✍️",color:"#7C3AED",gratuit:true,
-   desc:"Temps verbaux, accords du participe passé, subjonctif et figures de style.",
-   theorie:"✍️ Temps principaux :\n• Présent : action en cours\n• Imparfait : durée/habitude dans le passé\n• Passé composé : action passée et achevée\n• Futur simple : action à venir\n• Conditionnel présent : hypothèse\n• Subjonctif présent : doute, volonté, nécessité\n\n📏 Accords :\n• Adjectif : genre + nombre du nom\n• PP avec 'être' : accord avec le sujet\n• PP avec 'avoir' : accord avec le COD si placé AVANT\n\n🎭 Figures de style : métaphore (sans outil) ; comparaison (avec 'comme') ; personnification ; hyperbole ; antithèse.",
-   experience:[
-     "1️⃣ Conjugue FINIR : présent (finis/finissons) ; imparfait (finissais) ; futur (finirai) ; conditionnel (finirais) ; subjonctif (finisse).",
-     "2️⃣ PP avec AVOIR : 'Les photos que j'AI PRISES' — COD 'que'=photos (fém. plur., avant) → accord.",
-     "3️⃣ PP avec ÊTRE : 'Elle EST PARTIE' — accord avec sujet 'elle' (fém. sing.) → partie.",
-     "4️⃣ Subjonctif : 'Il faut que tu VIENNES' ; 'Bien qu'elle SOIT fatiguée' ; 'Pour que nous PARTIONS'.",
-     "5️⃣ Figures dans une fable de La Fontaine : personnification (animaux qui parlent), métaphore, morale.",
-     "6️⃣ Analyse : 'Les élèves studieux de VÉRITAS réussissent brillamment' → sujet/verbe/CC/adverbe.",
-     "7️⃣ Rédaction : rédige une argumentation en 3 paragraphes (intro/développement/conclusion).",
-   ],
-   quiz:[
-     {q:"'J'avais mangé' est au :",opts:["Passé composé","Plus-que-parfait","Imparfait","Passé simple"],ans:1,exp:"Plus-que-parfait = auxiliaire à l'imparfait + PP : j'avais mangé. Exprime l'antériorité dans le passé."},
-     {q:"'Les robes que j'ai achetées' — accord de 'achetées' car :",opts:["Sujet féminin","COD 'que'=robes (fém. plur.) placé AVANT","Avec avoir on accorde toujours","Verbe d'état"],ans:1,exp:"Avec AVOIR : accord avec le COD seulement s'il est placé AVANT le verbe."},
-     {q:"'Il faut que tu ___ tes devoirs.' Temps correct :",opts:["Indicatif présent","Futur simple","Subjonctif présent","Imparfait"],ans:2,exp:"'Il faut que' impose le subjonctif : 'Il faut que tu FASSES tes devoirs.'"},
-     {q:"'Le temps est un grand maître' est une :",opts:["Comparaison","Personnification","Métaphore","Hyperbole"],ans:2,exp:"Métaphore : assimilation directe sans outil comparatif ('comme'). Comparaison = 'le temps est COMME un maître'."},
-     {q:"'Ils sont partis' — accord de 'partis' car :",opts:["Avec être, accord avec le sujet","Partir est transitif","Le COD est masc. plur.","C'est une faute"],ans:0,exp:"Avec ÊTRE, PP s'accorde toujours avec le SUJET. 'Ils' = masc. plur. → partis."},
-     {q:"L'imparfait s'utilise pour :",opts:["Action ponctuelle terminée","Description, habitude dans le passé","Action future","Hypothèse"],ans:1,exp:"Imparfait = durée, description, habitude : 'Chaque matin il se levait à 6h'. Ponctuel terminé → passé composé."},
-   ],
-   ressource:"https://minesec-distancelearning.cm",pack:null},
-
-  // ═══════════════════════════════════════════════════════════════════════
-  // ── 8 NOUVEAUX LABOS CAPTIVANTS (programme MINESEC) ───────────────────
-  // ═══════════════════════════════════════════════════════════════════════
 
   {id:"lv27",titre:"Le Système Immunitaire & Vaccination",matiere:"SVT",cat:"svt",
    classe:"Tle D",ico:"🛡️",color:"#16A34A",gratuit:true,
@@ -22103,28 +22345,126 @@ var LABO_DB=[
    ],
    ressource:"https://minesec-distancelearning.cm",pack:"Sciences"},
 
-  {id:"lv34",titre:"Cameroun Colonial & Indépendance",matiere:"Histoire",cat:"histoire",
-   classe:"3ème-2nde",ico:"🇨🇲",color:"#15803D",gratuit:true,
-   desc:"Du protectorat allemand à l'indépendance (1884-1960). Personnages, dates, événements clés. Programme MINESEC.",
-   theorie:"🇨🇲 1884 : Traité germano-douala (Rois Bell et Akwa signent avec Nachtigal). Cameroun devient protectorat allemand → Kamerun.\n\n⚔️ RÉSISTANCES : Douala Manga Bell pendu en 1914. Martin-Paul Samba fusillé. Madola Bell.\n\n🌍 1916-1922 : Première Guerre mondiale. Allemagne perd. Cameroun = mandat SDN partagé France (4/5) + Royaume-Uni (1/5).\n\n📜 1946 : Trusteeship ONU (tutelle). Création UPC (Union des Populations du Cameroun) par Ruben UM NYOBÉ.\n\n💥 1955-1971 : Guerre du Cameroun. UPC interdite, maquis. Ruben Um Nyobé assassiné 1958.\n\n🎉 1er janvier 1960 : INDÉPENDANCE (Cameroun français). Ahmadou AHIDJO 1er président.\n\n🤝 1er octobre 1961 : RÉUNIFICATION avec Cameroun anglais (sud). État fédéral.\n\n🌟 1972 : République unitaire. 1982 : Paul BIYA succède à Ahidjo.",
+  // ═══ SECTION ANGLOPHONE (GCE) — labs in English ═══
+  {id:"lv40",titre:"Electric Circuits Lab (GCE Physics)",matiere:"Physics",cat:"english",
+   classe:"Form 3-5",ico:"🔌",color:"#0891B2",gratuit:true,
+   desc:"Build series and parallel circuits. Apply Ohm's Law, measure current, voltage and power. GCE O Level Physics (0580).",
+   theorie:"⚡ Ohm's Law: V = I × R (V in volts, I in amperes, R in ohms).\n\n🔴 SERIES circuit: same current everywhere. V_total = V₁ + V₂. R_total = R₁ + R₂.\n🔵 PARALLEL circuit: same voltage across branches. I_total = I₁ + I₂. 1/R_total = 1/R₁ + 1/R₂.\n\n⚙️ Power: P = VI = I²R = V²/R (watts). Energy: E = Pt (joules). 1 kWh = 3.6 × 10⁶ J.\n\nGCE tip: Paper 1 MCQs often test unit conversions and circuit reasoning — show ALL working in Paper 2.",
    experience:[
-     "1️⃣ FRISE CHRONOLOGIQUE : place sur une ligne 1884, 1914, 1916, 1922, 1946, 1955, 1958, 1960, 1961, 1972, 1982. Indique l'événement de chaque date.",
-     "2️⃣ CARTE DU KAMERUN ALLEMAND : Douala, Kribi, Édéa, Yaoundé (capitale 1909), Garoua. Frontières s'étendaient jusqu'au lac Tchad et nord du Gabon.",
-     "3️⃣ FIGURES DE LA RÉSISTANCE : Rudolph Douala Manga Bell (pendu 8 août 1914), Martin-Paul Samba (fusillé même jour), Madola Bell, Ngoso Din. Tous accusés de 'haute trahison'.",
-     "4️⃣ RUBEN UM NYOBÉ : né 1913 Boumnyebel, fondateur UPC 1948. Discours ONU New York 1952. Maquis 1955-1958. Tué par armée française 13 sept 1958. Surnommé 'Mpodol'.",
-     "5️⃣ AHMADOU AHIDJO : né 1924 Garoua, 1er Premier ministre 1958, 1er Président 1960-1982. Régime autoritaire, parti unique UNC. Démission étrange 1982.",
-     "6️⃣ COMPARAISON 2 ZONES : Cameroun FR (1/5 → Yaoundé, langue française, droit civil) vs Cameroun ANG (4/5 → Buéa, anglais, common law). Différences héritées jusqu'aujourd'hui (crise anglophone 2016).",
-     "7️⃣ ANALYSE DOCUMENT : extrait discours Um Nyobé ONU 1952 : 'Notre pays doit accéder à l'indépendance...'. Comparer avec discours Ahidjo 1er janvier 1960. Ce qui change : qui dirige ? Ce qui ne change pas : pacte colonial économique.",
+     "1️⃣ APPARATUS: 4.5 V dry cell, two lamps, connecting wires, switch, ammeter, voltmeter. Close the switch and observe the lamp light up.",
+     "2️⃣ SERIES: connect two lamps one after the other. Note both are dimmer; unscrew one — the other goes off. Conclusion: one path only.",
+     "3️⃣ PARALLEL: connect the lamps side by side. Each glows at full brightness; unscrew one — the other stays on.",
+     "4️⃣ AMMETER: connect IN SERIES. Record the current I in amperes.",
+     "5️⃣ VOLTMETER: connect IN PARALLEL across a lamp. Record V and verify V = IR.",
+     "6️⃣ Calculate the power of one lamp: P = VI. Express your answer in watts to 2 significant figures.",
    ],
    quiz:[
-     {q:"Année du traité germano-douala :",opts:["1860","1884","1900","1914"],ans:1,exp:"12 juillet 1884 : Nachtigal signe avec les rois Bell et Akwa. Naissance du 'Kamerun' allemand."},
-     {q:"Date de l'indépendance du Cameroun (français) :",opts:["1er janvier 1960","1er octobre 1961","13 sept 1958","20 mai 1972"],ans:0,exp:"1er janvier 1960 : indépendance du Cameroun français. Le 1er octobre 1961 = réunification avec le sud anglophone."},
-     {q:"Premier président du Cameroun :",opts:["Paul Biya","Ruben Um Nyobé","Ahmadou Ahidjo","Douala Manga Bell"],ans:2,exp:"Ahmadou Ahidjo, président de 1960 à 1982. Successeur : Paul Biya en novembre 1982."},
-     {q:"Fondateur de l'UPC (1948) :",opts:["Ahidjo","Ruben Um Nyobé","Charles Atangana","Paul Soppo Priso"],ans:1,exp:"Ruben Um Nyobé, 'Mpodol', fonde l'UPC le 10 avril 1948 à Douala. Assassiné par armée française 13 septembre 1958."},
-     {q:"Après défaite allemande en 1916, le Cameroun passe sous :",opts:["Indépendance immédiate","Mandat SDN partagé France/UK","Tutelle américaine","Tutelle belge"],ans:1,exp:"Conférence Paris 1919 : 4/5 France, 1/5 Royaume-Uni. Mandat de la Société Des Nations (1922) puis tutelle ONU (1946)."},
-     {q:"Date de la réunification (FR + ANG) :",opts:["1960","1er octobre 1961","20 mai 1972","1982"],ans:1,exp:"1er octobre 1961 : Cameroun anglais (sud) rejoint le Cameroun français après référendum. État fédéral jusqu'en 1972."},
+     {q:"V = 12 V and R = 400 Ω. The current I is:",opts:["0.02 A","0.03 A","0.06 A","0.12 A"],ans:1,exp:"I = V/R = 12/400 = 0.03 A (Ohm's Law)."},
+     {q:"Two 100 Ω resistors in parallel give a total resistance of:",opts:["200 Ω","100 Ω","50 Ω","25 Ω"],ans:2,exp:"For two equal resistors in parallel: R/2 = 100/2 = 50 Ω."},
+     {q:"In a series circuit, the current:",opts:["splits between components","is the same everywhere","is zero","doubles at each lamp"],ans:1,exp:"Series = one single path, so the same current flows through every component."},
+     {q:"A 2 kW heater runs for 3 hours. Energy used:",opts:["6 J","6 kWh","2 kWh","666 kWh"],ans:1,exp:"E = P × t = 2 kW × 3 h = 6 kWh."},
    ],
-   ressource:"https://minesec-distancelearning.cm",pack:null},
+   ressource:"https://camgceb.org",pack:null},
+
+  {id:"lv41",titre:"Titration Lab — Acids & Bases (GCE Chemistry)",matiere:"Chemistry",cat:"english",
+   classe:"Form 4-5 · Lower Sixth",ico:"🧪",color:"#7C3AED",gratuit:true,
+   desc:"Neutralise an acid with a base using an indicator. Calculate concentration from titre values. GCE Chemistry (0515/0715).",
+   theorie:"🧪 Neutralisation: acid + base → salt + water (e.g. HCl + NaOH → NaCl + H₂O).\n\npH scale: 0-6 acidic, 7 neutral, 8-14 alkaline. Indicators: methyl orange (red→yellow), phenolphthalein (colourless→pink).\n\n📐 Titration formula: (C₁V₁)/n₁ = (C₂V₂)/n₂ where C = concentration (mol/dm³), V = volume, n = mole ratio from the balanced equation.\n\nGCE tip: always read the burette at eye level, record titres to 2 decimal places, and average only CONCORDANT results (within 0.10 cm³).",
+   experience:[
+     "1️⃣ APPARATUS: burette, pipette (25.0 cm³), conical flask, white tile, NaOH solution (unknown), 0.10 mol/dm³ HCl, phenolphthalein.",
+     "2️⃣ Pipette 25.0 cm³ of NaOH into the flask. Add 2-3 drops of phenolphthalein → solution turns pink.",
+     "3️⃣ Fill the burette with HCl. Record the initial reading (e.g. 0.00 cm³).",
+     "4️⃣ Add acid slowly while swirling. Near the end-point, add DROP BY DROP until the pink JUST disappears.",
+     "5️⃣ Record the final reading. Titre = final − initial. Repeat until two concordant titres.",
+     "6️⃣ Calculate: moles HCl = C × V/1000, then use the 1:1 ratio to find the NaOH concentration.",
+   ],
+   quiz:[
+     {q:"25.0 cm³ of NaOH needs 20.0 cm³ of 0.10 mol/dm³ HCl. C(NaOH) = ?",opts:["0.05 mol/dm³","0.08 mol/dm³","0.10 mol/dm³","0.125 mol/dm³"],ans:1,exp:"Moles HCl = 0.10 × 0.020 = 0.002. 1:1 ratio → C = 0.002/0.025 = 0.08 mol/dm³."},
+     {q:"Phenolphthalein in alkali is:",opts:["red","colourless","pink","blue"],ans:2,exp:"Phenolphthalein: colourless in acid, pink in alkali."},
+     {q:"Concordant titres must agree within:",opts:["1.0 cm³","0.5 cm³","0.10 cm³","0.01 cm³"],ans:2,exp:"GCE practical standard: titres within 0.10 cm³ are concordant and may be averaged."},
+     {q:"The salt formed from HCl + NaOH is:",opts:["Na₂SO₄","NaCl","NaNO₃","Na₂CO₃"],ans:1,exp:"Hydrochloric acid gives chlorides: NaCl (common salt)."},
+   ],
+   ressource:"https://camgceb.org",pack:null},
+
+  {id:"lv42",titre:"Cell Division — Mitosis & Meiosis (GCE Biology)",matiere:"Biology",cat:"english",
+   classe:"Form 5 · Sixth Form",ico:"🧫",color:"#059669",gratuit:false,plan:"Complet",
+   desc:"Observe the stages of mitosis and meiosis, compare both processes and link them to growth and reproduction. GCE Biology (0510/0710).",
+   theorie:"🧬 MITOSIS: one division → 2 identical diploid cells (growth, repair, asexual reproduction). Stages: Prophase, Metaphase, Anaphase, Telophase (PMAT).\n\n🧬 MEIOSIS: two divisions → 4 genetically different haploid gametes (sexual reproduction). Crossing-over in Prophase I creates variation.\n\nKey comparison: mitosis keeps the chromosome number (2n→2n); meiosis halves it (2n→n).\n\nGCE tip: examiners reward correctly LABELLED diagrams and the spelling of each phase.",
+   experience:[
+     "1️⃣ Observe the prepared onion root tip slide: identify cells in interphase (most numerous) and the four mitosis phases.",
+     "2️⃣ Draw one cell in METAPHASE: chromosomes aligned on the equator, spindle fibres attached to centromeres.",
+     "3️⃣ Count 50 cells and record how many are in each phase → estimate the relative duration of each phase.",
+     "4️⃣ Compare with a meiosis diagram: spot crossing-over (chiasmata) in Prophase I.",
+     "5️⃣ Build the comparison table: number of divisions, daughter cells, chromosome number, genetic identity.",
+   ],
+   quiz:[
+     {q:"Mitosis produces:",opts:["4 haploid cells","2 identical diploid cells","2 haploid cells","4 different diploid cells"],ans:1,exp:"Mitosis = one division, two genetically identical diploid daughter cells."},
+     {q:"Crossing-over happens during:",opts:["Metaphase II","Prophase I","Anaphase II","Telophase I"],ans:1,exp:"Crossing-over (exchange between homologous chromatids) occurs in Prophase I of meiosis."},
+     {q:"In humans (2n = 46), a gamete contains:",opts:["46 chromosomes","92 chromosomes","23 chromosomes","12 chromosomes"],ans:2,exp:"Meiosis halves the number: n = 23 chromosomes in sperm and egg cells."},
+     {q:"The phase where chromosomes line up at the equator:",opts:["Prophase","Metaphase","Anaphase","Telophase"],ans:1,exp:"Metaphase = Middle: chromosomes align on the metaphase plate."},
+   ],
+   ressource:"https://camgceb.org",pack:null},
+
+  // ═══ ENSEIGNEMENT TECHNIQUE — labos pratiques ═══
+  {id:"lv43",titre:"Compta OHADA : du Journal au Bilan",matiere:"Comptabilité",cat:"technique",
+   classe:"2nde-Tle CG/G2 · STT",ico:"📒",color:"#B45309",gratuit:true,
+   desc:"Enregistre les opérations d'une PME de Douala, monte la balance et établis le bilan OHADA. Série CG/G2, Probatoire et BAC STT.",
+   theorie:"📒 PARTIE DOUBLE : tout enregistrement a un DÉBIT = un CRÉDIT.\n\nClasses de comptes OHADA : 1 capitaux ; 2 immobilisations ; 3 stocks ; 4 tiers (clients 411, fournisseurs 401) ; 5 trésorerie (521 banque, 571 caisse) ; 6 charges ; 7 produits.\n\n🧾 TVA Cameroun : 19,25 %. TVA collectée (4431) sur ventes ; TVA récupérable (4452) sur achats.\n\nChaîne comptable : pièce justificative → JOURNAL → GRAND-LIVRE → BALANCE → BILAN + COMPTE DE RÉSULTAT.\nÉquilibre du bilan : ACTIF = PASSIF, toujours.",
+   experience:[
+     "1️⃣ Une PME de Douala achète des marchandises à 500 000 F HT à crédit. Calcule la TVA (19,25 %) et passe l'écriture : 601 Achats (D), 4452 TVA (D), 401 Fournisseurs (C).",
+     "2️⃣ Vente de marchandises 800 000 F HT, encaissée en banque. Passe l'écriture : 521 (D 954 000), 701 (C 800 000), 4431 (C 154 000).",
+     "3️⃣ Paiement du loyer 150 000 F en espèces : 622 Locations (D), 571 Caisse (C).",
+     "4️⃣ Reporte chaque compte au grand-livre et calcule les soldes.",
+     "5️⃣ Monte la balance : total des débits = total des crédits, sinon cherche l'erreur.",
+     "6️⃣ Établis le bilan simplifié OHADA et vérifie ACTIF = PASSIF.",
+   ],
+   quiz:[
+     {q:"TVA sur un achat de 500 000 F HT (19,25 %) :",opts:["75 000 F","96 250 F","100 000 F","192 500 F"],ans:1,exp:"500 000 × 0,1925 = 96 250 F."},
+     {q:"Le compte 411 enregistre :",opts:["Les fournisseurs","Les clients","La banque","Le capital"],ans:1,exp:"411 = Clients (classe 4, tiers). Les fournisseurs sont au 401."},
+     {q:"Dans la partie double, tout débit a :",opts:["Un solde","Un crédit équivalent","Une TVA","Un report"],ans:1,exp:"Principe fondamental : total débits = total crédits pour chaque écriture."},
+     {q:"L'équilibre du bilan s'écrit :",opts:["Charges = Produits","Actif = Passif","Débit > Crédit","Capital = Trésorerie"],ans:1,exp:"Le bilan est TOUJOURS équilibré : Actif = Passif."},
+   ],
+   ressource:"https://officedubac.cm",pack:null},
+
+  {id:"lv44",titre:"Câblage Industriel : Démarrage Étoile-Triangle (F3)",matiere:"Électrotechnique",cat:"technique",
+   classe:"1ère-Tle F3",ico:"⚙️",color:"#0E7490",gratuit:true,
+   desc:"Câble le circuit de puissance et de commande d'un démarrage étoile-triangle d'un moteur asynchrone triphasé. Série F3, BAC industriel.",
+   theorie:"⚙️ Moteur asynchrone triphasé : le démarrage direct appelle 6 à 8 × In → le démarrage ÉTOILE-TRIANGLE réduit le courant de démarrage à ~1/3.\n\nPrincipe : démarrage en ÉTOILE (chaque enroulement sous U/√3) puis passage en TRIANGLE (pleine tension) après quelques secondes.\n\nCircuit de PUISSANCE : sectionneur Q1, contacteurs KM1 (ligne), KM2 (étoile), KM3 (triangle), relais thermique F1.\nCircuit de COMMANDE : BP marche S2, BP arrêt S1, temporisateur KA1, verrouillage électrique KM2/KM3 (jamais fermés ensemble !).\n\n⚠️ Sécurité : consignation, VAT (vérification d'absence de tension), EPI obligatoires.",
+   experience:[
+     "1️⃣ Identifie les bornes U1-V1-W1 / U2-V2-W2 de la plaque à bornes du moteur.",
+     "2️⃣ Schéma de puissance : trace Q1 → KM1 → F1 → moteur ; KM2 court-circuite U2-V2-W2 (étoile) ; KM3 relie U1-W2, V1-U2, W1-V2 (triangle).",
+     "3️⃣ Schéma de commande : S1 (NC) → S2 (NO) → KM1 auto-maintenu ; KA1 temporise 5 s puis ouvre KM2 et ferme KM3.",
+     "4️⃣ VERROUILLAGE : place les contacts NC de KM2 et KM3 croisés — justifie pourquoi (court-circuit sinon).",
+     "5️⃣ Simule la séquence : marche → étoile 5 s → triangle. Note le courant relevé à chaque phase.",
+     "6️⃣ Liste les EPI et les étapes de consignation avant toute intervention.",
+   ],
+   quiz:[
+     {q:"Le démarrage étoile-triangle réduit le courant de démarrage à environ :",opts:["1/2","1/3","1/√3","2/3"],ans:1,exp:"En étoile, chaque enroulement reçoit U/√3 → couple et courant divisés par 3."},
+     {q:"KM2 (étoile) et KM3 (triangle) ne doivent JAMAIS être fermés ensemble car :",opts:["le moteur s'arrête","cela crée un court-circuit","le thermique déclenche","la tension chute"],ans:1,exp:"Fermés ensemble = court-circuit franc entre phases → verrouillage électrique ET mécanique obligatoire."},
+     {q:"Le relais thermique F1 protège contre :",opts:["les courts-circuits","les surcharges prolongées","la foudre","l'inversion de phases"],ans:1,exp:"Le thermique protège des SURCHARGES ; les courts-circuits relèvent des fusibles/disjoncteur."},
+     {q:"Avant d'intervenir sur l'armoire, la 1ère étape est :",opts:["mettre les gants","la consignation + VAT","démonter le moteur","appeler le chef"],ans:1,exp:"Consignation (séparation, condamnation) puis Vérification d'Absence de Tension : la base de la sécurité électrique."},
+   ],
+   ressource:"https://officedubac.cm",pack:null},
+
+  {id:"lv45",titre:"Dessin Technique : Projections Orthogonales",matiere:"Dessin Technique",cat:"technique",
+   classe:"1ère-4e année · 2nde-Tle F",ico:"📐",color:"#475569",gratuit:false,plan:"Complet",
+   desc:"Représente une pièce mécanique en vues de face, dessus et gauche (méthode européenne). Toutes séries industrielles, CAP et BAC technique.",
+   theorie:"📐 PROJECTION ORTHOGONALE (méthode européenne, symbole du tronc de cône) : la pièce est entre l'observateur et le plan de projection.\n\nDisposition : vue de FACE (principale) ; vue de DESSUS en dessous ; vue de GAUCHE à droite.\n\nTraits normalisés : fort continu (arêtes vues) ; interrompu fin (arêtes cachées) ; mixte fin (axes) ; fin continu (cotation).\n\n✏️ COTATION : ligne d'attache, ligne de cote, flèches, valeur en mm SANS unité. Jamais de cote répétée, jamais de cote sur trait caché si évitable.",
+   experience:[
+     "1️⃣ Observe la pièce en perspective (cale étagée percée). Choisis la vue de face = la plus représentative.",
+     "2️⃣ Trace le cadre et le cartouche aux instruments (format A4, échelle 1:1).",
+     "3️⃣ Dessine la vue de face : arêtes vues en trait fort, perçage caché en interrompu fin, axes en mixte fin.",
+     "4️⃣ Déduis la vue de dessus par correspondance verticale (lignes de rappel).",
+     "5️⃣ Déduis la vue de gauche par correspondance horizontale (utilise la ligne à 45°).",
+     "6️⃣ Cote la pièce : longueur, largeur, hauteur, position et diamètre du perçage (Ø).",
+   ],
+   quiz:[
+     {q:"En méthode européenne, la vue de dessus se place :",opts:["au-dessus de la vue de face","en dessous de la vue de face","à gauche","à droite"],ans:1,exp:"Méthode E : l'objet est entre l'œil et le plan → la vue de dessus se projette EN DESSOUS."},
+     {q:"Les arêtes cachées se tracent en :",opts:["trait fort continu","trait interrompu fin","trait mixte fin","trait fin continu"],ans:1,exp:"Arêtes cachées = trait interrompu fin (pointillés)."},
+     {q:"Un diamètre se cote avec le symbole :",opts:["R","Ø","D","⌀⌀"],ans:1,exp:"Ø devant la valeur (ex. Ø12) ; R est réservé aux rayons."},
+     {q:"Le trait mixte fin sert à représenter :",opts:["les contours vus","les axes de symétrie","les hachures","le cartouche"],ans:1,exp:"Axes et plans de symétrie = trait mixte fin (tiret-point)."},
+   ],
+   ressource:"https://officedubac.cm",pack:null},
 ];
 
 // ─ PACKS LABOS ─
@@ -22154,7 +22494,7 @@ function _cvDefaultClassrooms(){
   if(!classes.length)classes=['6ème','5ème','4ème','3ème','2nde','1ère A','Tle A'];
   var palette=['#3C8DFF','#7C3AED','#059669','#DC2626','#F59E0B','#0891B2','#4F46E5','#BE185D'];
   var icos={};
-  return classes.map(function(cls,i){
+  var base=classes.map(function(cls,i){
     var key=cls.replace(/[^a-z0-9]/gi,'').toLowerCase();
     return {
       id:'cls_'+key,nom:cls,
@@ -22170,6 +22510,26 @@ function _cvDefaultClassrooms(){
       enseignants:(DB.teachers||[]).map(function(t){return t.id;})
     };
   });
+  // ── v1.6 : classes virtuelles ANGLOPHONE (GCE) & TECHNIQUE — examen × filière ──
+  // Salons adaptés (Subjects EN / matières techniques). membres remplis à l'inscription.
+  var seg=[
+    {seg:'en_olevel_arts',nom:'GCE O Level · Arts (Form 5)',col:'#7C3AED',chans:['General','Announcements','English','Literature','History/Geo','French']},
+    {seg:'en_olevel_sci', nom:'GCE O Level · Science (Form 5)',col:'#0891B2',chans:['General','Announcements','Mathematics','Physics','Chemistry','Biology']},
+    {seg:'en_alevel_arts',nom:'GCE A Level · Arts (Upper Sixth)',col:'#BE185D',chans:['General','Announcements','Literature','History','Geography','Philosophy']},
+    {seg:'en_alevel_sci', nom:'GCE A Level · Science (Upper Sixth)',col:'#4F46E5',chans:['General','Announcements','Pure Maths','Physics','Chemistry','Biology']},
+    {seg:'tech_prob_com', nom:'Probatoire Technique · Commercial',col:'#B45309',chans:['Général','Annonces','Comptabilité OHADA','Éco-Droit','Maths','Techniques Commerciales']},
+    {seg:'tech_prob_ind', nom:'Probatoire Technique · Industriel',col:'#0E7490',chans:['Général','Annonces','Électrotechnique','Dessin Technique','Maths','Sciences Physiques']},
+    {seg:'tech_bac_com',  nom:'BAC Technique · Commercial',col:'#92400E',chans:['Général','Annonces','Comptabilité OHADA','Maths Financières','Droit','Économie d\'Entreprise']},
+    {seg:'tech_bac_ind',  nom:'BAC Technique · Industriel',col:'#155E75',chans:['Général','Annonces','Électrotechnique','Construction Méca.','Maths Techniques','Sciences Physiques Appl.']}
+  ];
+  seg.forEach(function(s){
+    base.push({
+      id:'cls_'+s.seg, nom:s.nom, seg:s.seg, couleur:s.col, ico:'🎓',
+      channels:s.chans.map(function(n,j){return {id:'ch_'+s.seg+'_'+j,nom:n,ico:j===1?'📢':(j===0?'💬':'📘'),ordre:j,teacherOnly:j===1};}),
+      membres:[], enseignants:(DB.teachers||[]).map(function(t){return t.id;})
+    });
+  });
+  return base;
 }
 
 function showClasseVirtuelle(cid,chid){
@@ -22671,9 +23031,15 @@ function _cvModeratePanel(clsId){
 // ═══════════════════════════════════════════════════════════════════
 
 function showLabosVirtuels(){
-  var cat=window._laboCat||"tous";
-  var cats=["tous","physique","chimie","svt","maths","geo","histoire","info","langues"];
-  var catLabels={"tous":"Tous","physique":"⚡ Physique","chimie":"⚗️ Chimie","svt":"🧬 SVT","maths":"📐 Maths","geo":"🗺️ Géo","histoire":"🏛️ Histoire","info":"💻 Info","langues":"✍️ Langues"};
+  // v1.4.3 : catégorie initiale alignée sur le PARCOURS (anglophone → English,
+  // technique/CAP → Technique) ; l'apprenant reste libre de changer.
+  var cat=window._laboCat||(function(){
+    var g=(typeof _profileGroup==='function')?_profileGroup():'';
+    return g==='en'?'english':(g==='fr_tech'||g==='cap')?'technique':'tous';
+  })();
+  // v1.4.2 : + catégories Anglophone (GCE) et Enseignement technique
+  var cats=["tous","physique","chimie","svt","maths","english","technique","geo","histoire","info","langues"];
+  var catLabels={"tous":"Tous","physique":"⚡ Physique","chimie":"⚗️ Chimie","svt":"🧬 SVT","maths":"📐 Maths","english":"🇬🇧 English (GCE)","technique":"🔧 Technique","geo":"🗺️ Géo","histoire":"🏛️ Histoire","info":"💻 Info","langues":"✍️ Langues"};
   var _hiddenLV=DB.hiddenLabos||[];
   var _purgedLV=DB.purgedLabos||[];
   var _visibleLabo=LABO_DB.filter(function(l){return _hiddenLV.indexOf(l.id)<0&&_purgedLV.indexOf(l.id)<0;});
@@ -26391,25 +26757,24 @@ function _buildRegisterHTML(){
     +"<div class='fg'><span class='fl'>WhatsApp *</span><input class='fi' id='rTel' placeholder='+237 6 00 00 00 00'></div>"
     +"<div class='fg'><span class='fl'>Email</span><input class='fi' type='email' id='rEmail' placeholder='jean@email.cm'></div>"
     +"<div class='fg'><span class='fl'>🎁 Code parrainage (optionnel)</span><input class='fi' id='rRef' placeholder='VRT...' value='"+(sessionStorage.getItem('_vrtRef')||'')+"' style='text-transform:uppercase;letter-spacing:1px'></div>"
+    // v1.4.8 : PARCOURS dès l'inscription — section, type d'enseignement, niveau.
+    // Le compte naît avec son profil → e-learning, épreuves, labos, plans et
+    // Ambassa sont personnalisés dès la première connexion.
+    +"<div class='fg'><span class='fl'>Sous-système *</span><select class='fi' id='rSys' onchange='_regSysChange()'><option value='fr'>🇨🇲 Francophone</option><option value='en'>🇨🇲 Anglophone (GCE)</option></select></div>"
+    +"<div class='fg'><span class='fl'>Enseignement *</span><select class='fi' id='rEns' onchange='_regSysChange()'><option value='gen'>🎓 Général</option><option value='tech'>🔧 Technique</option></select></div>"
     +(function(){
-      // Filtrer : n'afficher que les classes qui ont un groupe WhatsApp actif
-      // Fallback sur toutes les classes si aucun groupe configuré
-      var grps=(DB.whatsappGroupes||[]).filter(function(g){return g.actif&&g.niveau&&g.niveau!=='tous';});
-      var clsActives=grps.length ? grps.map(function(g){return g.niveau;}) : CLS.slice();
-      // Toujours dédupliquer et trier
-      var seen={};
-      var opts=clsActives.filter(function(c){if(seen[c])return false;seen[c]=true;return true;})
-        .sort(function(a,b){return a.localeCompare(b,'fr');});
+      var cfg=(typeof _AMBASSA_SYS!=='undefined')?_AMBASSA_SYS.fr_gen:{classes:CLS.slice()};
       var userCls=SES&&SES.cls;
-      return "<div class='fg'><span class='fl'>Classe</span><select class='fi' id='rCls'>"
-        +opts.map(function(cl){
+      return "<div class='fg'><span class='fl'>Classe / Niveau *</span><select class='fi' id='rCls'>"
+        +cfg.classes.map(function(cl){
           return "<option"+(cl===userCls?' selected':'')+">"+_esc(cl)+"</option>";
         }).join("")+"</select>"
-        +(grps.length
-          ? "<div style='font-size:11px;color:#059669;margin-top:3px'>✓ "+grps.length+" groupe(s) actif(s) disponible(s)</div>"
-          : "<div style='font-size:11px;color:#9CA3AF;margin-top:3px'>Toutes les classes (groupes non filtrés)</div>")
+        +"<div style='font-size:11px;color:#059669;margin-top:3px'>✓ Vos ressources seront personnalisées pour ce parcours</div>"
         +"</div>";
     })()
+    // v1.6 : Filière (Arts/Science en anglophone, Commercial/Industriel en technique).
+    // Masqué pour le francophone général. Détermine le groupe WA + la classe virtuelle.
+    +"<div class='fg' id='rSerieWrap' style='display:none'><span class='fl'>Filière *</span><select class='fi' id='rSerie'></select></div>"
     +"<div class='fg full'><span class='fl'>Identifiant (sans espaces) *</span>"
     +"<input class='fi' id='rUser' placeholder='jean.mballa' oninput='_chkUser(this.value)'>"
     +"<div id='uAvail' style='font-size:11px;margin-top:3px;color:#9CA3AF'>Minimum 3 caractères</div></div>"
@@ -26421,6 +26786,25 @@ function _buildRegisterHTML(){
     +"<button onclick=\"hideAll();$('LS').style.display='flex';swLR('visiteur')\" style='background:none;border:none;color:#3C8DFF;font-weight:700;cursor:pointer;font-size:12px'>Se connecter</button></div>"
     +"</div>";
 }
+
+// v1.4.8 : cascade du formulaire d'inscription — la liste des classes suit
+// le couple sous-système × enseignement (même référentiel que _AMBASSA_SYS).
+window._regSysChange=function(){
+  var s=(document.getElementById('rSys')||{}).value||'fr';
+  var e=(document.getElementById('rEns')||{}).value||'gen';
+  var cfg=(typeof _AMBASSA_SYS!=='undefined'&&_AMBASSA_SYS[s+'_'+e])||{classes:CLS.slice()};
+  var sel=document.getElementById('rCls');
+  if(sel) sel.innerHTML=cfg.classes.map(function(c){return '<option>'+_esc(c)+'</option>';}).join('');
+  // v1.6 : filière contextuelle (Arts/Science vs Commercial/Industriel)
+  var wrap=document.getElementById('rSerieWrap'), serSel=document.getElementById('rSerie');
+  if(wrap&&serSel){
+    var opts=null;
+    if(s==='en') opts=[['Arts','🎨 Arts'],['Science','🔬 Science']];
+    else if(e==='tech') opts=[['Commercial','💼 Commercial (STT)'],['Industriel','⚙️ Industriel (F)']];
+    if(opts){ serSel.innerHTML=opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join(''); wrap.style.display=''; }
+    else { wrap.style.display='none'; serSel.innerHTML=''; }
+  }
+};
 
 function _chkUser(u){
   if(!u||u.length<3){_si("uAvail","<span style='color:#9CA3AF'>Min 3 caracteres</span>");return;}
@@ -26447,12 +26831,29 @@ function doRegister(){
     ||(DB.studentAccounts||[]).find(function(a){return a.user.toLowerCase()===user.toLowerCase();})){
     toast("Cet identifiant est déjà pris, choisissez-en un autre","warn");return;
   }
+  var _rSerie=document.getElementById("rSerie")?.value||"";
   var acc={id:"va_"+Date.now(),user:user,pwd:pwd,nom:nom,pre:pre,tel:tel,
     email:document.getElementById("rEmail")?.value||"",
     cls:document.getElementById("rCls")?.value||CLS[0],
+    serie:_rSerie, // v1.6 : filière (Arts/Science · Commercial/Industriel)
+    // v1.4.8 : le PROFIL PARCOURS naît avec le compte (section + enseignement + niveau)
+    profil:{sys:(document.getElementById("rSys")?.value||"fr"),
+            ens:(document.getElementById("rEns")?.value||"gen"),
+            cls:(document.getElementById("rCls")?.value||CLS[0]),
+            serie:_rSerie},
     plans:[],statut:"actif",
     dateInscription:new Date().toLocaleDateString("fr-FR"),lastLogin:today()};
-  DB.visitorAccounts.push(acc);save();
+  DB.visitorAccounts.push(acc);
+  // v1.6 : auto-inscription dans la classe virtuelle correspondant au segment
+  try{
+    var _cv=(typeof _resolveClassroom==='function')?_resolveClassroom(acc):null;
+    if(_cv){ _cv.membres=_cv.membres||[]; if(_cv.membres.indexOf(acc.id)<0) _cv.membres.push(acc.id); }
+  }catch(e){}
+  save();
+  try{ if(typeof _saveLearnerProfile==='function') _saveLearnerProfile(acc.profil); }catch(e){}
+  // v1.4.9 : élève anglophone → interface intégralement en anglais dès l'inscription
+  try{ if(acc.profil&&acc.profil.sys==='en'&&typeof setLang==='function') setLang('en', true); }catch(e){}
+  try{ if(typeof _track==='function') _track('signup'); }catch(e){}
   // P2 : appliquer parrainage si code présent dans sessionStorage
   try { if(typeof _processReferralOnSignup==='function') _processReferralOnSignup(acc.id); } catch(e){}
   // == Notification admin - nouvelle inscription ==
@@ -26496,16 +26897,95 @@ function _monCompte(){
       +"<div style='font-size:13px;font-weight:700;color:#142554;margin-bottom:6px'>🔓 Accès gratuit</div>"
       +"<div style='font-size:12px;color:#6B7A99;margin-bottom:12px'>Vous accédez aux ressources gratuites. Souscrivez un abonnement pour débloquer les épreuves premium, labos avancés et le coaching.</div>"
       +"<button class='btn bi sm' onclick=\"cm();vShowSec('contact',null)\">📞 Souscrire un abonnement</button></div>";
+  // v1.6 : GROUPE WhatsApp + CLASSE VIRTUELLE du parcours (segment-aware)
+  var segHTML=(function(){
+    if(!acc) return '';
+    var en=acc.profil&&acc.profil.sys==='en';
+    var g=(typeof _resolveWaGroup==='function')?_resolveWaGroup(acc):null;
+    var cv=(typeof _resolveClassroom==='function')?_resolveClassroom(acc):null;
+    if(!g&&!cv) return '';
+    var out="<div class='fg full'><span class='fl'>"+(en?'My class group & virtual class':'Mon groupe & ma classe virtuelle')+"</span><div style='display:flex;flex-direction:column;gap:8px;margin-top:6px'>";
+    if(g){
+      var ac=(typeof _waGroupAccess==='function')?_waGroupAccess(g,acc,null):{eligible:true};
+      if(ac.eligible&&g.lien){
+        out+="<a href='"+g.lien+"' target='_blank' style='background:linear-gradient(135deg,#25D366,#128C7E);color:#fff;text-decoration:none;border-radius:12px;padding:11px 14px;font-size:12px;font-weight:800;display:flex;align-items:center;gap:8px'>📲 "+_esc(g.nom)+" — "+(en?'Join':'Rejoindre')+"</a>";
+      } else if(ac.eligible&&!g.lien){
+        out+="<div style='background:#FFF7E6;border:1px solid #FCD34D;border-radius:12px;padding:11px 14px;font-size:11.5px;color:#92400E'>📲 "+_esc(g.nom)+" — "+(en?'link coming soon':'lien bientôt disponible')+"</div>";
+      } else {
+        out+="<div style='background:#F1F5F9;border:1px solid #CBD5E1;border-radius:12px;padding:11px 14px;font-size:11.5px;color:#475569'>🔒 "+_esc(g.nom)+" — "+_esc(en?'subscribe to unlock':ac.reason||'abonnement requis')+"</div>";
+      }
+    }
+    if(cv){
+      out+="<button onclick=\"cm();showClasseVirtuelle('"+cv.id+"')\" style='background:#142554;color:#fff;border:none;border-radius:12px;padding:11px 14px;font-size:12px;font-weight:800;cursor:pointer;text-align:left'>🎓 "+_esc(cv.nom)+" — "+(en?'open virtual class':'ouvrir la classe virtuelle')+"</button>";
+    }
+    return out+"</div></div>";
+  })();
   M("👤 Mon compte","",
     "<div class='fg2'>"
     +"<div class='fg'><span class='fl'>Nom complet</span><div style='font-size:14px;font-weight:700;color:#142554'>"+SES.pre+" "+SES.nom+"</div></div>"
     +"<div class='fg'><span class='fl'>Identifiant</span><div style='font-size:13px;color:#475882;font-family:monospace'>"+SES.mat+"</div></div>"
-    +"<div class='fg'><span class='fl'>Classe</span><div style='font-size:13px'>"+SES.cls+"</div></div>"
+    +"<div class='fg'><span class='fl'>Classe</span><div style='font-size:13px'>"+SES.cls+(acc&&acc.serie?(' · '+_esc(acc.serie)):'')+"</div></div>"
     +"<div class='fg'><span class='fl'>Téléphone</span><div style='font-size:13px'>"+SES.tel+"</div></div>"
     +"<div class='fg full'><span class='fl'>Abonnements actifs</span><div style='margin-top:8px'>"+planHTML+"</div></div>"
+    +segHTML
     +"</div>",
-    "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
+    "<button class='btn bo' onclick='cm()'>Fermer</button>"
+    +"<button class='btn bi' onclick='mRapportParent()'>📲 Rapport au parent</button>",true);
 }
+
+// ══ v1.5 — RAPPORT HEBDOMADAIRE AU PARENT (WhatsApp) ════════════════════════
+// Le parent est le PAYEUR : ce rapport rend visible ce que l'élève fait sur
+// VÉRITAS (quiz, battle, points à revoir) → confiance + renouvellement.
+// Compose un message wa.me prérempli vers le numéro du parent (mémorisé).
+window._collectWeekStats=function(){
+  var s={quizN:0,quizPct:0,battle:null,missed:0};
+  try{
+    var pcts=[],now=Date.now();
+    for(var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if(k&&k.indexOf('quiz_')===0){
+        try{var v=JSON.parse(localStorage.getItem(k));
+          if(v&&typeof v.pct==='number'){s.quizN++;pcts.push(v.pct);}}catch(e){}
+      }
+    }
+    if(pcts.length)s.quizPct=Math.round(pcts.reduce(function(a,b){return a+b;},0)/pcts.length);
+    if(typeof SES!=='undefined'&&SES&&DB.battles&&typeof _currentWeekKey==='function'){
+      var wk=Object.keys(DB.battles).filter(function(k){return k.indexOf(_currentWeekKey())===0;});
+      wk.forEach(function(k){var b=DB.battles[k];if(b&&b.participants&&b.participants[SES.id])s.battle=b.participants[SES.id];});
+    }
+    s.missed=((DB._missedQ||{})[(SES&&SES.id)||'anon']||[]).length;
+  }catch(e){}
+  return s;
+};
+window.mRapportParent=function(){
+  if(!SES){toast('Connectez-vous d\'abord','warn');return;}
+  var saved='';try{saved=localStorage.getItem('_vrtParentTel')||'';}catch(e){}
+  M('📲 Rapport au parent','Votre parent reçoit votre activité de la semaine sur WhatsApp',
+    '<div class="fg"><span class="fl">Numéro WhatsApp du parent *</span><input class="fi" id="rpTel" placeholder="+237 6XX XX XX XX" value="'+_esc(saved)+'"></div>'
+    +'<div class="ib ibi mt8"><span>💡</span><span>Le message est prérempli — vous pourrez le relire avant l\'envoi.</span></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_sendRapportParent()">📲 Composer le message</button>');
+};
+window._sendRapportParent=function(){
+  var tel=((_ge('rpTel')||{}).value||'').replace(/[^0-9+]/g,'');
+  if(tel.length<9){toast('Numéro WhatsApp invalide','warn');return;}
+  try{localStorage.setItem('_vrtParentTel',tel);}catch(e){}
+  var st=_collectWeekStats();
+  var p=(typeof _getLearnerProfile==='function')?_getLearnerProfile():null;
+  var en=p&&p.sys==='en';
+  var msg=en
+    ? ('📋 VÉRITAS WEEKLY REPORT\n\nStudent: '+SES.pre+' '+SES.nom+' ('+(SES.cls||'')+')\nWeek of '+new Date().toLocaleDateString('en-GB')+'\n\n'
+      +'📝 Quizzes completed: '+st.quizN+(st.quizN?' (average '+st.quizPct+'%)':'')+'\n'
+      +(st.battle?('⚔️ Weekly battle: '+st.battle.score+'/10\n'):'⚔️ Weekly battle: not attempted yet\n')
+      +(st.missed?('🎯 Questions to review: '+st.missed+'\n'):'')
+      +'\n💡 Encourage your child to keep a daily 20-minute practice routine.\n\n— VÉRITAS Academy · https://veritas-school.com')
+    : ('📋 RAPPORT HEBDOMADAIRE VÉRITAS\n\nÉlève : '+SES.pre+' '+SES.nom+' ('+(SES.cls||'')+')\nSemaine du '+new Date().toLocaleDateString('fr-FR')+'\n\n'
+      +'📝 Quiz réalisés : '+st.quizN+(st.quizN?' (moyenne '+st.quizPct+' %)':'')+'\n'
+      +(st.battle?('⚔️ Battle de la semaine : '+st.battle.score+'/10\n'):'⚔️ Battle de la semaine : pas encore tentée\n')
+      +(st.missed?('🎯 Questions à revoir : '+st.missed+'\n'):'')
+      +'\n💡 Encouragez votre enfant à garder 20 minutes de pratique par jour.\n\n— VÉRITAS Academy · https://veritas-school.com');
+  cm();
+  window.open('https://wa.me/'+tel.replace(/^\+/,'')+'?text='+encodeURIComponent(msg),'_blank');
+};
 
 function deconnecter(){
   SES=null;
@@ -26860,7 +27340,220 @@ setTimeout(_addVisitorAccountsToNav,300);
   // On load visitor
   initVisitor();
   swLR('visiteur');
+  // v1.9 (#7) : deep-link depuis les pages SEO (?epreuve=<id>) → ouvre les épreuves
+  try{
+    var _ep=new URLSearchParams(location.search).get('epreuve');
+    if(_ep&&typeof showEpreuves==='function'){ setTimeout(function(){ try{ showEpreuves(); }catch(e){} },600); }
+  }catch(e){}
 })();
+
+// ══ v1.7 — LECTEUR PDF SÉCURISÉ (vente numérique, consultation on-site) ══════
+// Affiche un document page par page comme IMAGES servies par api/secure_pdf.php
+// (le PDF brut ne quitte jamais le serveur). Aperçu gratuit = N premières pages ;
+// l'achat débloque le reste. Anti-copie/-capture en couches + filigrane serveur.
+window._secureApiBase=function(){
+  try{ return (LWS_API.db||'').replace(/\/db\.php(\?.*)?$/,''); }catch(e){ return '/api'; }
+};
+window._secureToken=function(){
+  try{ return window._vrtContentToken||sessionStorage.getItem('_vrtCT')||''; }catch(e){ return ''; }
+};
+window.openSecureBook=function(bookId){
+  // v1.7 : généralisé — accepte un LIVRE (boutique) OU un CONTENU e-learning
+  // (épreuve/cours) marqué « protégé ». Le type pilote le paywall.
+  var book=(DB.books||[]).find(function(b){return b.id===bookId;}), kind='book';
+  if(!book){
+    book=((DB.elearning||{}).contenus||[]).find(function(c){return c.id===bookId;});
+    kind='contenu';
+  }
+  if(!book){ toast('Document introuvable','warn'); return; }
+  var base=_secureApiBase(), tok=_secureToken();
+  var ov=document.createElement('div');
+  ov.id='secureReader'; ov.className='sread';
+  ov.innerHTML='<div class="sread-bar">'
+    +'<div class="sread-title">🔒 '+_esc(book.titre||'Document')+'</div>'
+    +'<div class="sread-page" id="sreadPageLbl">…</div>'
+    +'<button class="sread-x" onclick="closeSecureBook()" aria-label="Fermer">✕</button>'
+    +'</div>'
+    +'<div class="sread-stage" id="sreadStage"><div class="sread-load">📖 Chargement…</div></div>'
+    +'<div class="sread-shield" id="sreadShield"><div>👁️ Lecture protégée mise en pause</div><small>Revenez sur la fenêtre pour reprendre</small></div>'
+    +'<div class="sread-nav">'
+    +'<button class="sread-btn" id="sreadPrev" onclick="_secureGo(-1)">‹ Préc.</button>'
+    +'<span class="sread-foot">Protégé · sans copie ni partage</span>'
+    +'<button class="sread-btn" id="sreadNext" onclick="_secureGo(1)">Suiv. ›</button>'
+    +'</div>';
+  document.body.appendChild(ov);
+  document.body.style.overflow='hidden';
+  window._secureState={id:bookId,kind:kind,page:1,pages:0,freePages:10,hasAccess:false,prepared:false,base:base,tok:tok,book:book};
+  _secureInstallGuards();
+  // Métadonnées (nombre de pages, droits)
+  fetch(base+'/secure_pdf.php?id='+encodeURIComponent(bookId)+'&meta=1'+(tok?('&token='+encodeURIComponent(tok)):''))
+    .then(function(r){return r.json();})
+    .then(function(m){
+      if(!m||!m.ok){ _secureStageMsg('⚠️ Document indisponible pour le moment.'); return; }
+      var st=window._secureState; st.pages=m.pages||0; st.freePages=m.freePages||10; st.hasAccess=!!m.hasAccess; st.prepared=!!m.prepared;
+      if(!m.prepared){ _secureStageMsg('📄 Ce document n\'est pas encore disponible à la lecture en ligne.'); return; }
+      _secureRender(1);
+    })
+    .catch(function(){ _secureStageMsg('⚠️ Connexion au lecteur impossible.'); });
+};
+window._secureStageMsg=function(html){
+  var s=document.getElementById('sreadStage'); if(s) s.innerHTML='<div class="sread-load">'+html+'</div>';
+};
+window._secureRender=function(n){
+  var st=window._secureState; if(!st) return;
+  var locked=(!st.hasAccess && n>st.freePages);
+  var stage=document.getElementById('sreadStage'); if(!stage) return;
+  document.getElementById('sreadPageLbl').textContent='Page '+n+(st.pages?(' / '+st.pages):'');
+  st.page=n;
+  if(locked){
+    if(st.kind==='contenu'){
+      // Contenu e-learning protégé → débloqué par ABONNEMENT (pas achat unitaire)
+      stage.innerHTML='<div class="sread-pay">'
+        +'<div style="font-size:46px">🔒</div>'
+        +'<div class="sread-pay-t">Aperçu de '+st.freePages+' pages terminé</div>'
+        +'<div class="sread-pay-s">« '+_esc(st.book.titre||'')+' » fait partie des ressources premium. Abonnez-vous pour la lecture intégrale, en ligne et sans téléchargement.</div>'
+        +'<button class="sread-pay-btn" onclick="closeSecureBook();(typeof vShowSec===\'function\'?vShowSec(\'elearning\',null):0);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)">📦 Voir les abonnements</button>'
+        +'<div class="sread-pay-note">Lecture sécurisée · incluse dans votre formule</div>'
+        +'</div>';
+    } else {
+      var prix=(st.book.prixDigital||st.book.priceDigital||st.book.prix||0);
+      stage.innerHTML='<div class="sread-pay">'
+        +'<div style="font-size:46px">🔓</div>'
+        +'<div class="sread-pay-t">Vous avez lu les '+st.freePages+' pages gratuites</div>'
+        +'<div class="sread-pay-s">Débloquez l\'intégralité de « '+_esc(st.book.titre||'')+' » — lecture en ligne illimitée, sans téléchargement.</div>'
+        +'<div class="sread-pay-price">'+fmtN(prix)+' FCFA</div>'
+        +'<button class="sread-pay-btn" onclick="_secureBuy()">💳 Débloquer la version numérique</button>'
+        +'<div class="sread-pay-note">Lecture sécurisée · valable sur tous vos appareils connectés</div>'
+        +'</div>';
+    }
+  } else {
+    var url=st.base+'/secure_pdf.php?id='+encodeURIComponent(st.id)+'&page='+n+(st.tok?('&token='+encodeURIComponent(st.tok)):'');
+    stage.innerHTML='<img class="sread-img" id="sreadImg" alt="page" draggable="false" '
+      +'oncontextmenu="return false" src="'+url+'?_t='+Date.now()+'" '
+      +'onerror="_secureStageMsg(\'🔒 Page réservée — débloquez la version numérique.\')">';
+  }
+  var prevB=document.getElementById('sreadPrev'), nextB=document.getElementById('sreadNext');
+  if(prevB) prevB.disabled=(n<=1);
+  if(nextB) nextB.disabled=(st.pages>0&&n>=st.pages);
+};
+window._secureGo=function(d){
+  var st=window._secureState; if(!st) return;
+  var n=st.page+d; if(n<1) n=1; if(st.pages&&n>st.pages) n=st.pages;
+  _secureRender(n);
+};
+window._secureBuy=function(){
+  var st=window._secureState; if(!st) return;
+  if(typeof SES==='undefined'||!SES){ toast('Connectez-vous pour acheter','warn'); if(typeof showRegisterForm==='function'){ closeSecureBook(); showRegisterForm(); } return; }
+  var prix=(st.book.prixDigital||st.book.priceDigital||st.book.prix||0);
+  if(typeof openPaymentModal!=='function'){ toast('Paiement indisponible','warn'); return; }
+  openPaymentModal({
+    montant:prix, label:'📘 Version numérique — '+(st.book.titre||''),
+    refPrefix:'EBOOK', intent:'digitalbook', targetId:st.id,
+    customerAccountId:SES.accountId, customerNom:(SES.pre||'')+' '+(SES.nom||''), customerTel:SES.tel||''
+  });
+};
+// Anti-copie / anti-capture (dissuasion — voir note d'honnêteté dans secure_pdf.php)
+window._secureInstallGuards=function(){
+  var ov=document.getElementById('secureReader'); if(!ov) return;
+  ov.addEventListener('contextmenu',function(e){e.preventDefault();});
+  ov.addEventListener('dragstart',function(e){e.preventDefault();});
+  ov.addEventListener('selectstart',function(e){e.preventDefault();});
+  window._secureKeyGuard=function(e){
+    // Bloque Ctrl+S / Ctrl+P / Ctrl+C / PrintScreen pendant la lecture
+    if((e.ctrlKey||e.metaKey)&&['s','p','c','u'].indexOf((e.key||'').toLowerCase())>=0){ e.preventDefault(); toast('Action désactivée sur un document protégé','warn'); }
+    if((e.key||'')==='PrintScreen'){ _secureShield(true); setTimeout(function(){_secureShield(false);},1200); try{navigator.clipboard&&navigator.clipboard.writeText('© VÉRITAS — capture interdite');}catch(_){} }
+  };
+  document.addEventListener('keydown',window._secureKeyGuard,true);
+  // Floutage dès perte de focus / changement d'onglet (anti-capture d'arrière-plan)
+  window._secureVis=function(){ _secureShield(document.hidden); };
+  document.addEventListener('visibilitychange',window._secureVis);
+  window._secureBlur=function(){ _secureShield(true); };
+  window._secureFocus=function(){ _secureShield(false); };
+  window.addEventListener('blur',window._secureBlur);
+  window.addEventListener('focus',window._secureFocus);
+};
+window._secureShield=function(on){
+  var sh=document.getElementById('sreadShield'); if(sh) sh.style.display=on?'flex':'none';
+};
+window.closeSecureBook=function(){
+  var ov=document.getElementById('secureReader'); if(ov) ov.remove();
+  document.body.style.overflow='';
+  try{
+    document.removeEventListener('keydown',window._secureKeyGuard,true);
+    document.removeEventListener('visibilitychange',window._secureVis);
+    window.removeEventListener('blur',window._secureBlur);
+    window.removeEventListener('focus',window._secureFocus);
+  }catch(e){}
+  window._secureState=null;
+};
+
+// ══ v1.5 — ANALYTICS MINIMALISTE : tunnel chiffré (api/stats.php) ═══════════
+// 5 événements clés, fire-and-forget (sendBeacon), zéro donnée personnelle,
+// jamais pour l'admin. Sans ces chiffres, le marketing pilote à l'aveugle.
+window._track=function(ev){
+  try{
+    if(typeof SES!=='undefined'&&SES&&(SES.type==='admin'||SES.type==='superadmin'))return;
+    // anti-doublon : 1 même événement / jour / appareil
+    var k='_trk_'+ev+'_'+new Date().toDateString();
+    if(localStorage.getItem(k))return;
+    localStorage.setItem(k,'1');
+    var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
+    var data=JSON.stringify({ev:ev});
+    if(navigator.sendBeacon){ navigator.sendBeacon(base+'/stats.php', new Blob([data],{type:'application/json'})); }
+    else{ fetch(base+'/stats.php',{method:'POST',headers:{'Content-Type':'application/json'},body:data,keepalive:true}).catch(function(){}); }
+  }catch(e){}
+};
+setTimeout(function(){ try{ var V=document.getElementById('VISITOR'); if(V&&V.style.display!=='none') _track('visit'); }catch(e){} },3000);
+
+// Tableau de bord du tunnel (admin) : visites → inscriptions → essais IA →
+// clics abonnement → paiements initiés, par jour sur 30 jours.
+window.mStatsFunnel=function(){
+  if(typeof iA!=='function'||!iA()){ toast('Réservé à l\'administration','warn'); return; }
+  var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
+  var tok=(DB.cloudConfig&&DB.cloudConfig.secret)||'';
+  M('📈 Tunnel d\'acquisition','30 derniers jours — données api/stats.php',
+    '<div id="funnelBox" style="max-height:420px;overflow-y:auto"><div class="empty">Chargement…</div></div>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>',true);
+  fetch(base+'/stats.php?summary=1',{headers:tok?{'Authorization':'Bearer '+tok}:{}})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      var box=document.getElementById('funnelBox'); if(!box)return;
+      if(!d||!d.ok){ box.innerHTML='<div class="ib ibt"><span>⚠️</span><span>Données indisponibles ('+_esc((d&&d.error)||'serveur')+').</span></div>'; return; }
+      var days=Object.keys(d.days||{});
+      if(!days.length){ box.innerHTML='<div class="empty">Aucun événement encore — les chiffres arrivent dès les premières visites.</div>'; return; }
+      var tot={visit:0,signup:0,ia_try:0,sub_click:0,pay_init:0};
+      var rows=days.map(function(t){
+        var e=d.days[t]||{};
+        Object.keys(tot).forEach(function(k){tot[k]+=(e[k]||0);});
+        return '<tr><td class="xs2">'+t+'</td><td>'+(e.visit||0)+'</td><td>'+(e.signup||0)+'</td><td>'+(e.ia_try||0)+'</td><td>'+(e.sub_click||0)+'</td><td>'+(e.pay_init||0)+'</td></tr>';
+      }).join('');
+      var conv=function(a,b){return a?Math.round(b/a*100)+'%':'—';};
+      box.innerHTML='<div class="g2 mb12">'
+        +'<div class="card" style="padding:12px"><div class="xs2 mut">VISITES → INSCRIPTIONS</div><div class="bold" style="font-size:22px;color:#2563EB">'+conv(tot.visit,tot.signup)+'</div><div class="xs2 mut">'+tot.visit+' → '+tot.signup+'</div></div>'
+        +'<div class="card" style="padding:12px"><div class="xs2 mut">INSCRIPTIONS → PAIEMENTS</div><div class="bold" style="font-size:22px;color:#059669">'+conv(tot.signup,tot.pay_init)+'</div><div class="xs2 mut">'+tot.signup+' → '+tot.pay_init+'</div></div>'
+        +'</div>'
+        +'<div class="tw"><table><thead><tr><th>Jour</th><th>👁 Visites</th><th>✨ Inscr.</th><th>🤖 IA</th><th>📋 Abo clic</th><th>💳 Paiement</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    })
+    .catch(function(){ var box=document.getElementById('funnelBox'); if(box)box.innerHTML='<div class="ib ibt"><span>⚠️</span><span>Serveur stats injoignable.</span></div>'; });
+};
+
+// ── v1.4.4 (étude vidéo Sharesub) : BANDEAU STICKY DE CONVERSION ───────────
+// Sobre : apparaît après 12 s de visite, une seule fois par session, fermable,
+// jamais pour un utilisateur connecté. CTA → essai gratuit du Prof. Ambassa.
+setTimeout(function(){
+  try{
+    if(sessionStorage.getItem('_lxCtaSeen')) return;
+    if(typeof SES!=='undefined'&&SES) return; // connecté → pas de bandeau
+    var V=document.getElementById('VISITOR');
+    if(!V||V.style.display==='none') return;
+    var d=document.createElement('div');
+    d.className='lx-sticky-cta';
+    d.innerHTML='<span>🎓 Testez le <b>Prof. Ambassa</b> — corrigés et quiz IA <b>gratuits</b></span>'
+      +'<button class="lx-go" onclick="sessionStorage.setItem(\'_lxCtaSeen\',\'1\');this.parentNode.remove();if(typeof mAgentAmbassa===\'function\')mAgentAmbassa();">Essayer →</button>'
+      +'<button class="lx-x" aria-label="Fermer" onclick="sessionStorage.setItem(\'_lxCtaSeen\',\'1\');this.parentNode.remove();">✕</button>';
+    document.body.appendChild(d);
+  }catch(e){}
+},12000);
 
 // ════════════════════════════════════════════════════════════════════════════
 // VERITAS — MODULE NAVIGATION HISTORIQUE (touche Retour = page précédente)
@@ -27122,6 +27815,35 @@ if(typeof EPREUVES_DB==='undefined'){
     {id:"ep_sci_bepc",titre:"BEPC Blanc Sciences — 3ème (PCT + SVT)",matiere:"Sciences",classe:"3ème",seq:"BEPC",cat:"cat1",gratuit:true,
      desc:"BEPC blanc 2026 conforme MINESEC : PCT (Physique-Chimie-Tech) + SVT. 20 points.",
      apercu:"PARTIE A — PHYSIQUE (5 pts)\n1) Un conducteur ohmique de résistance R = 220 Ω est traversé par I = 0,5 A. Calculez U.\n2) Un appareil de puissance 60 W fonctionne 4h/jour. Calculez l'énergie consommée en kWh par jour.\n3) Comment éviter un court-circuit ? (2 sécurités électriques)\n\nPARTIE B — CHIMIE (5 pts)\n1) Donnez la formule du dioxyde de carbone.\n2) On dissout 5 g de NaCl dans 250 mL d'eau. Calculez la concentration massique.\n3) Équilibrez : __ Fe + __ O₂ → __ Fe₂O₃.\n4) Test du dioxygène : __ ? Test du dihydrogène : __ ?\n\nPARTIE C — SVT (10 pts)\n1) Faites un schéma annoté de l'appareil reproducteur féminin (4 pts).\n2) Donnez les étapes du cycle menstruel (3 pts).\n3) Citez 3 méthodes contraceptives et expliquez leur principe (3 pts)."},
+
+    // ═════════════════════════════════════════════════════════════════
+    // ── v1.4.3 — SECTION ANGLOPHONE (GCE) : matières phares, format officiel ──
+    {id:"ep_gce_m1",titre:"GCE O Level Mathematics (0570) — Paper 1 Practice",matiere:"Mathematics",classe:"Form 5",seq:"O Level",cat:"cat1",gratuit:true,
+     desc:"Multiple-choice practice paper in the official GCE Board format (Paper 1 = 50 MCQs). Sample of 10 items with answers.",
+     apercu:"CAMEROON GCE BOARD — Ordinary Level · Mathematics (0570) Paper 1 · Time: 1½ hours\nAnswer ALL questions. Each question is followed by options A-D.\n\n1. Simplify: 3(2x − 4) − 2(x − 5)   A. 4x − 2  B. 4x − 22  C. 8x − 2  D. 4x + 2\n2. Express 0.00045 in standard form.   A. 4.5×10⁻³  B. 4.5×10⁻⁴  C. 45×10⁻⁵  D. 4.5×10⁴\n3. The bearing of B from A is 065°. The bearing of A from B is:   A. 115°  B. 245°  C. 295°  D. 065°\n4. Factorise completely: x² − 9x + 18   A. (x−3)(x−6)  B. (x+3)(x+6)  C. (x−2)(x−9)  D. (x−1)(x−18)\n5. A trader buys an article at 8 000 FCFA and sells it at 10 000 FCFA. The percentage profit is:   A. 20%  B. 25%  C. 80%  D. 12.5%\n…(45 more questions in the full paper)\n\nANSWERS: 1-D, 2-B, 3-B, 4-A, 5-B …"},
+    {id:"ep_gce_e1",titre:"GCE O Level English Language (0530) — Paper 2",matiere:"English Language",classe:"Form 5",seq:"O Level",cat:"cat1",gratuit:true,
+     desc:"Composition and comprehension in the official format — directed writing, essay choice and reading passage with mark allocations.",
+     apercu:"CAMEROON GCE BOARD — Ordinary Level · English Language (0530) Paper 2 · Time: 2 hours\n\nSECTION A — DIRECTED WRITING (10 marks)\nYour school recently organised a clean-up campaign in Buea. As the senior prefect, write a report of about 150 words for the school magazine.\n\nSECTION B — CONTINUOUS WRITING (20 marks) — Choose ONE topic, 250-350 words:\n1. Describe a market day in your town.\n2. 'Mobile phones do more harm than good to students.' Discuss.\n3. Write a story ending with: '…I learnt never to judge people by their appearance.'\n\nSECTION C — COMPREHENSION (20 marks)\nRead the passage on cocoa farming in the South West Region and answer questions 1-8 (literal, inferential and vocabulary questions)."},
+    {id:"ep_gce_b1",titre:"GCE O Level Biology (0510) — Paper 2 Structured",matiere:"Biology",classe:"Form 5",seq:"O Level",cat:"cat1",gratuit:false,prix:1500,
+     desc:"Structured questions paper: cell biology, nutrition, transport in humans, reproduction — with marking guide.",
+     apercu:"CAMEROON GCE BOARD — Ordinary Level · Biology (0510) Paper 2 · Time: 2½ hours\nAnswer ALL questions in Section I and any TWO in Section II.\n\nSECTION I\n1. (a) Draw and label a palisade cell. [5] (b) State THREE differences between plant and animal cells. [3]\n2. The diagram shows the human heart. (a) Name parts A-D. [4] (b) Describe the path of blood from the lungs to the body tissues. [5]\n3. (a) Define balanced diet. [2] (b) A Form 5 student eats only fufu and eru daily. Explain TWO deficiency risks. [4]\n\nSECTION II (essay)\n4. Describe the process of photosynthesis and explain THREE factors that affect its rate. [15]\n5. Explain the menstrual cycle and the role of hormones involved. [15]"},
+    {id:"ep_gce_p1",titre:"GCE A Level Physics (0780) — Paper 2 (Mechanics & Electricity)",matiere:"Physics",classe:"Upper Sixth",seq:"A Level",cat:"cat1",gratuit:false,prix:2000,
+     desc:"Advanced Level structured/essay paper: kinematics, Newton's laws, DC circuits, capacitors — with full marking scheme.",
+     apercu:"CAMEROON GCE BOARD — Advanced Level · Physics (0780) Paper 2 · Time: 3 hours\n\n1. (a) A stone is projected at 25 m s⁻¹ at 40° to the horizontal. Calculate (i) the time of flight, (ii) the range, (iii) the maximum height. [g = 9.8 m s⁻²] [8]\n(b) State Newton's second law and use it to derive F = ma for constant mass. [4]\n\n2. (a) Three resistors of 4 Ω, 6 Ω and 12 Ω are connected in parallel across a 12 V battery of internal resistance 1 Ω. Calculate (i) the effective resistance, (ii) the current through the battery, (iii) the terminal p.d. [9]\n(b) A 470 µF capacitor is charged to 12 V then discharged through a 10 kΩ resistor. Calculate the time constant and the charge remaining after 4.7 s. [6]"},
+
+    // ── v1.4.3 — ENSEIGNEMENT TECHNIQUE : matières phares, format OBC ──
+    {id:"ep_tec_cg1",titre:"Comptabilité Générale OHADA — Probatoire CG (dossiers type)",matiere:"Comptabilité",classe:"1ère CG",seq:"Probatoire",cat:"cat1",gratuit:true,
+     desc:"Sujet type Probatoire STT-CG : journal, TVA 19,25 %, balance et bilan OHADA. Dossiers progressifs avec barème.",
+     apercu:"MINESEC/OBC — Probatoire STT-CG · Épreuve de Comptabilité Générale · Durée : 4 h\n\nDOSSIER 1 — Opérations courantes (8 pts)\nL'entreprise KAMDEM & Fils (Douala) réalise en mars : 05/03 achat de marchandises 1 200 000 F HT à crédit ; 12/03 vente 1 800 000 F HT, moitié au comptant (banque) ; 20/03 règlement fournisseur par chèque ; 25/03 paiement loyer 250 000 F en espèces. TAF : journaliser (TVA 19,25 %).\n\nDOSSIER 2 — Travaux d'inventaire (6 pts)\nMatériel acquis le 01/01/N à 4 500 000 F, amortissement linéaire sur 5 ans. TAF : tableau d'amortissement et écriture de dotation au 31/12/N+2.\n\nDOSSIER 3 — États financiers (6 pts)\nÀ partir de la balance fournie : montez le bilan OHADA simplifié et calculez le résultat net. Vérifiez ACTIF = PASSIF."},
+    {id:"ep_tec_f31",titre:"Électrotechnique — BAC F3 (moteur asynchrone + schémas)",matiere:"Électrotechnique",classe:"Tle F3",seq:"BAC",cat:"cat1",gratuit:false,prix:2000,
+     desc:"Sujet type BAC F3 : moteur asynchrone triphasé, démarrage étoile-triangle, schémas de puissance et de commande, bilan de puissances.",
+     apercu:"MINESEC/OBC — BAC F3 · Épreuve d'Électrotechnique · Durée : 4 h\n\nPARTIE A — Moteur asynchrone triphasé (8 pts)\nPlaque signalétique : 400 V / 690 V — 50 Hz — 15 kW — cos φ = 0,85 — η = 0,90 — 1455 tr/min.\n1) Justifiez le couplage sur réseau 400 V. 2) Calculez le courant en ligne nominal. 3) Calculez le glissement. 4) Calculez la puissance absorbée et les pertes totales.\n\nPARTIE B — Démarrage étoile-triangle (7 pts)\n1) Schéma de PUISSANCE complet (Q1, KM1, KM2, KM3, F1, moteur). 2) Schéma de COMMANDE avec temporisation 5 s et verrouillages. 3) Justifiez la réduction du courant de démarrage (rapport 1/3).\n\nPARTIE C — Sécurité (5 pts)\nÉtapes de consignation + 4 EPI obligatoires avant intervention sur l'armoire."},
+    {id:"ep_tec_mt1",titre:"Maths Techniques — BAC séries industrielles (F)",matiere:"Mathématiques",classe:"Tle F3",seq:"BAC",cat:"cat1",gratuit:true,
+     desc:"Sujet type BAC technique industriel : fonctions appliquées, trigonométrie, nombres complexes appliqués à l'électricité.",
+     apercu:"MINESEC/OBC — BAC Technique (séries F) · Mathématiques · Durée : 3 h\n\nEXERCICE 1 — Complexes & électricité (6 pts)\nUn circuit RL série : R = 40 Ω, L = 0,1 H, ω = 314 rad/s. On pose Z = R + jLω.\n1) Calculez |Z| et arg(Z). 2) Déduisez l'intensité efficace si U = 230 V. 3) Calculez le déphasage courant/tension.\n\nEXERCICE 2 — Étude de fonction (8 pts)\nf(t) = 5e⁻²ᵗ + 3 modélise la décharge d'un condensateur.\n1) Étudiez les variations de f sur [0 ; +∞[. 2) Calculez lim f(t) en +∞ et interprétez physiquement. 3) Résolvez f(t) = 4 (durée pour atteindre 4 V).\n\nEXERCICE 3 — Trigonométrie (6 pts)\nu(t) = 311 sin(100πt + π/6). Déterminez l'amplitude, la fréquence, la période et la valeur efficace."},
+    {id:"ep_tec_acc1",titre:"Techniques Commerciales — Probatoire ACC (étude de cas)",matiere:"Techniques Commerciales",classe:"1ère ACC",seq:"Probatoire",cat:"cat1",gratuit:false,prix:1500,
+     desc:"Étude de cas commerciale type Probatoire STT-ACC : calculs commerciaux (TVA, marges), argumentaire de vente, document commercial.",
+     apercu:"MINESEC/OBC — Probatoire STT-ACC · Techniques Commerciales · Durée : 3 h\n\nCAS : La boutique « Élégance 237 » (marché Mboppi, Douala).\n\nDOSSIER 1 — Calculs commerciaux (8 pts)\nUn article est acheté 12 000 F HT. Frais d'achat : 800 F. Taux de marque souhaité : 25 %.\n1) Calculez le coût d'achat. 2) Calculez le prix de vente HT puis TTC (TVA 19,25 %). 3) Le client négocie une remise de 5 % : nouveau prix TTC et marge réelle ?\n\nDOSSIER 2 — Négociation (6 pts)\nRédigez un argumentaire CAP (Caractéristique-Avantage-Preuve) pour vendre un smartphone à un étudiant.\n\nDOSSIER 3 — Document commercial (6 pts)\nÉtablissez la facture n° F-0245 (en-tête complet, mentions obligatoires, net à payer)."},
   ];
 }
 
@@ -30188,6 +30910,7 @@ function _payRef(prefix){
 // payInfo: {montant: 5000, label: 'Pack Premium', ref?: 'VT250407-XXXX', onConfirm?: fn}
 function openPaymentModal(payInfo){
   payInfo = payInfo || {};
+  try{ if(typeof _track==='function') _track('pay_init'); }catch(e){}
   var montant = payInfo.montant || 0;
   var label = payInfo.label || 'Paiement VÉRITAS';
   var ref = payInfo.ref || _payRef(payInfo.refPrefix || 'VT');
@@ -31119,6 +31842,19 @@ function _payAutoActivate(a){
         return {msg:'Commande activée', userMsg:'Votre commande est confirmée.'};
       }
 
+      // ── v1.7 : Achat d'un LIVRE NUMÉRIQUE → déblocage lecture sécurisée ──
+      case 'digitalbook': {
+        if(a.accountId){
+          var accB=(DB.visitorAccounts||[]).find(function(x){return x.id===a.accountId;})
+                 ||(DB.studentAccounts||[]).find(function(x){return x.id===a.accountId;});
+          if(accB){
+            if(!accB.unlockedBooks) accB.unlockedBooks=[];
+            if(accB.unlockedBooks.indexOf(a.targetId)<0) accB.unlockedBooks.push(a.targetId);
+          }
+        }
+        return {msg:'Livre numérique débloqué', userMsg:'Votre livre est débloqué — lisez-le en ligne sans limite.'};
+      }
+
       // ── 3. Souscription à un plan e-learning ──
       case 'subscription': {
         if(!DB.elearning) DB.elearning={};
@@ -31432,6 +32168,7 @@ window.pgParrainageEns = function(){
         +'<button class="btn" style="background:rgba(20,37,84,.92);color:#FFC93C;border:none" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié !\');});">📋 Copier le code</button>'
         +'<a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text='+shareMsg+'">📱 Partager (WhatsApp)</a>'
         +'<button class="btn" style="background:rgba(20,37,84,.92);color:#fff;border:none" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(function(){toast(\'Lien copié !\');});">🔗 Copier le lien</button>'
+        +'<button class="btn" style="background:#142554;color:#FFC93C;border:none" onclick="genAmbassadorKit(\''+code+'\')">🖨️ Mon kit ambassadeur (A4)</button>'
       +'</div>'
     +'</div>'
     +'<div class="card mt12"><div class="ct">📊 Vue d\'ensemble</div>'
@@ -31446,6 +32183,108 @@ window.pgParrainageEns = function(){
     +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
     +'<thead><tr><th>Filleul</th><th>Inscrit le</th><th style="text-align:center">Statut</th><th style="text-align:right">Progression</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div></div>';
+};
+
+// ══ v1.9 (#3) — TEST DE POSITIONNEMENT (diagnostic forces/faiblesses) ════════
+// 10 questions adaptées au profil (banque battle profil-aware). Affiche un bilan
+// par thème, mémorise sur le compte et injecte les ratés dans « Mes erreurs à
+// revoir ». Transforme un site de ressources en outil qui FAIT progresser.
+window.mPositionnement=function(){
+  var qs=(typeof _generateBattleQuestions==='function')?_generateBattleQuestions():[];
+  if(!qs||qs.length<5){ if(typeof toast==='function') toast('Test indisponible pour le moment','warn'); return; }
+  window._posState={qs:qs.slice(0,10), i:0, ok:0, byTopic:{}};
+  M('🎯 Test de positionnement','Réponds à '+Math.min(10,qs.length)+' questions — découvre tes forces et tes points à travailler',
+    '<div id="posBox"></div>',
+    '<button class="btn bo" onclick="cm()">Plus tard</button>', true);
+  _posRender();
+};
+window._posRender=function(){
+  var s=window._posState; if(!s) return;
+  var box=document.getElementById('posBox'); if(!box) return;
+  if(s.i>=s.qs.length){ _posFinish(); return; }
+  var q=s.qs[s.i];
+  var opts=['a','b','c','d'].filter(function(L){return q[L]!=null&&q[L]!=='';});
+  box.innerHTML='<div style="margin-bottom:10px"><div style="height:6px;background:#EEF1F7;border-radius:99px;overflow:hidden"><div style="height:100%;width:'+Math.round(s.i/s.qs.length*100)+'%;background:linear-gradient(90deg,#2563EB,#FFC93C)"></div></div>'
+    +'<div style="font-size:11px;color:var(--ink4);margin-top:4px">Question '+(s.i+1)+' / '+s.qs.length+'</div></div>'
+    +'<div style="font-weight:700;font-size:15px;color:#142554;margin-bottom:14px;line-height:1.5">'+_esc(q.q)+'</div>'
+    +opts.map(function(L){return '<button class="btn" style="display:block;width:100%;text-align:left;margin-bottom:8px;background:#fff;border:1.5px solid #E5E7EB;color:#142554;padding:11px 14px;border-radius:10px;font-size:14px" onclick="_posAnswer(\''+L+'\')">'+L.toUpperCase()+'. '+_esc(q[L])+'</button>';}).join('');
+};
+window._posAnswer=function(L){
+  var s=window._posState; if(!s) return;
+  var q=s.qs[s.i];
+  var topic=(q.src||'Général').replace(/^Quiz\s+/,'').substring(0,26);
+  if(!s.byTopic[topic]) s.byTopic[topic]={ok:0,n:0};
+  s.byTopic[topic].n++;
+  if(L===q.ok){ s.ok++; s.byTopic[topic].ok++; }
+  else if(typeof _recordMissed==='function'){ _recordMissed({q:q.q,a:q.a,b:q.b,c:q.c,d:q.d,ok:q.ok,src:q.src||'Positionnement'}); }
+  s.i++;
+  _posRender();
+};
+window._posFinish=function(){
+  var s=window._posState; if(!s) return;
+  var pct=Math.round(s.ok/s.qs.length*100);
+  var topics=Object.keys(s.byTopic).map(function(t){var o=s.byTopic[t];return {t:t,pct:Math.round(o.ok/o.n*100),n:o.n};});
+  var strong=topics.filter(function(x){return x.pct>=70;}).sort(function(a,b){return b.pct-a.pct;});
+  var weak=topics.filter(function(x){return x.pct<50;}).sort(function(a,b){return a.pct-b.pct;});
+  // Mémoriser sur le compte
+  try{
+    if(typeof SES!=='undefined'&&SES&&SES.accountId){
+      var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===SES.accountId;});
+      if(acc){ acc.positionnement={date:today(),score:pct,weak:weak.map(function(x){return x.t;}),strong:strong.map(function(x){return x.t;})}; save(); }
+    }
+    localStorage.setItem('_posDone','1');
+  }catch(e){}
+  var box=document.getElementById('posBox'); if(!box) return;
+  var bar=function(x){var c=x.pct>=70?'#10B981':x.pct>=50?'#F59E0B':'#EF4444';return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>'+_esc(x.t)+'</span><span style="font-weight:700;color:'+c+'">'+x.pct+'%</span></div><div style="height:7px;background:#EEF1F7;border-radius:99px;overflow:hidden"><div style="height:100%;width:'+x.pct+'%;background:'+c+'"></div></div></div>';};
+  box.innerHTML='<div style="text-align:center;margin-bottom:14px"><div style="font-size:40px">'+(pct>=70?'🌟':pct>=50?'💪':'📚')+'</div>'
+    +'<div style="font-family:Libre Baskerville,Georgia,serif;font-size:30px;font-weight:700;color:#142554">'+pct+'%</div>'
+    +'<div style="font-size:12px;color:var(--ink4)">'+s.ok+' / '+s.qs.length+' bonnes réponses</div></div>'
+    +(strong.length?'<div style="font-weight:800;font-size:13px;color:#059669;margin:10px 0 6px">✅ Tes points forts</div>'+strong.slice(0,4).map(bar).join(''):'')
+    +(weak.length?'<div style="font-weight:800;font-size:13px;color:#DC2626;margin:12px 0 6px">🎯 À travailler en priorité</div>'+weak.slice(0,4).map(bar).join(''):'')
+    +'<div class="ib ibi mt12"><span>💡</span><span>Tes erreurs ont été ajoutées à <b>« Mes erreurs à revoir »</b>. Révise-les puis refais le test pour mesurer tes progrès.</span></div>'
+    +'<button class="btn bi" style="width:100%;margin-top:10px" onclick="cm();(typeof mErreursARevoir===\'function\'?mErreursARevoir():(typeof vShowSec===\'function\'?vShowSec(\'elearning\',null):0))">📚 Réviser mes points faibles</button>';
+};
+
+// ══ v1.9 (#9) — KIT AMBASSADEUR ENSEIGNANT (fiche A4 imprimable) ════════════
+// Coût d'acquisition minimal : un répétiteur convaincu amène 30-60 élèves. Cette
+// fiche (code perso + barème de commission + QR d'inscription) se distribue en
+// salle. Génère un document A4 prêt à imprimer via printDoc.
+window.genAmbassadorKit = function(code){
+  var ses=(typeof SES!=='undefined'&&SES)?SES:null;
+  var nom=ses?((ses.pre||'')+' '+(ses.nom||'')).trim():'';
+  var pctAbo=(typeof _getSplitConfig==='function'?_getSplitConfig().parrain_abo:10);
+  var shareUrl=(location.origin||'https://veritas-school.com')+'/?ref='+code;
+  var qr='https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data='+encodeURIComponent(shareUrl);
+  var L=(typeof _prtL==='function')?_prtL():null;
+  var paliers=L?Object.keys(L).map(function(k){var lv=L[k];return '<tr><td style="padding:6px 10px;font-weight:700">'+lv.badge+' '+lv.label+'</td><td style="padding:6px 10px;text-align:center">'+lv.min+'+ ventes</td><td style="padding:6px 10px;text-align:right;font-weight:800;color:#142554">'+Math.round(lv.commission*100)+'%</td></tr>';}).join(''):'';
+  var html='<div style="max-width:760px;margin:0 auto;font-family:Inter,Arial,sans-serif;color:#142554">'
+    +(typeof docHeader==='function'?docHeader('Kit Ambassadeur VÉRITAS'):'<h1>VÉRITAS</h1>')
+    +'<div style="padding:24px 34px">'
+    +'<div style="text-align:center;margin-bottom:18px"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:22px;font-weight:700">Ambassadeur VÉRITAS</div>'
+    +(nom?'<div style="font-size:15px;color:#475882;margin-top:4px">'+_esc(nom)+'</div>':'')+'</div>'
+    +'<div style="display:flex;gap:26px;align-items:center;flex-wrap:wrap;justify-content:center;margin-bottom:22px">'
+    +'<div style="text-align:center"><img src="'+qr+'" alt="QR" style="width:180px;height:180px;border:1px solid #ddd;border-radius:10px"><div style="font-size:11px;color:#6b5e52;margin-top:6px">Scannez pour vous inscrire</div></div>'
+    +'<div style="text-align:center">'
+      +'<div style="font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#9a7b1c;font-weight:800">Code de parrainage</div>'
+      +'<div style="font-family:Fira Code,monospace;font-size:38px;font-weight:900;letter-spacing:3px;background:#142554;color:#FFC93C;padding:10px 22px;border-radius:12px;margin:8px 0">'+_esc(code)+'</div>'
+      +'<div style="font-size:12px;color:#475882">'+_esc(shareUrl)+'</div>'
+    +'</div></div>'
+    +'<div style="background:#f5f3ef;border-radius:10px;padding:14px 18px;margin-bottom:18px">'
+      +'<div style="font-weight:800;margin-bottom:8px">💰 Votre commission par palier</div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:13px"><tbody>'+paliers+'</tbody></table>'
+      +'<div style="font-size:12px;color:#6b5e52;margin-top:8px">+ '+pctAbo+'% sur chaque abonnement payé par un filleul. Versement MoMo/Orange après validation.</div>'
+    +'</div>'
+    +'<div style="font-weight:800;margin-bottom:6px">🚀 Comment ça marche</div>'
+    +'<ol style="margin:0 0 14px 0;padding-left:20px;font-size:13px;line-height:1.9">'
+      +'<li>Distribuez cette fiche (ou le code) à vos élèves et parents.</li>'
+      +'<li>Ils s\'inscrivent gratuitement en scannant le QR ou en saisissant votre code.</li>'
+      +'<li>Vous touchez une commission sur leurs achats et abonnements.</li>'
+      +'<li>Suivez vos filleuls et vos gains dans votre espace enseignant.</li>'
+    +'</ol>'
+    +'<div style="text-align:center;font-size:11px;color:#aaa;border-top:1px solid #eee;padding-top:10px">VÉRITAS Academy · veritas-school.com · Émis le '+(typeof today==='function'?today():new Date().toLocaleDateString('fr-FR'))+'</div>'
+    +'</div></div>';
+  if(typeof printDoc==='function') printDoc(html,'Kit Ambassadeur — '+(nom||code));
+  else { var w=window.open('','_blank'); if(w){w.document.write(html);w.document.close();w.print();} }
 };
 
 // Capture ref code depuis URL ?ref=VRT...
@@ -31638,7 +32477,67 @@ window.I18N_SUBS_EN = {
   "Apprenez à votre rythme": "Learn at your own pace",
   "Ressources officielles MINESEC": "Official MINESEC resources",
   "Plateforme tout-en-un pour la réussite scolaire au Cameroun.":
-    "All-in-one platform for school success in Cameroon."
+    "All-in-one platform for school success in Cameroon.",
+  // ── v1.4.2 : couverture ÉLARGIE (inclusion anglophone totale) ──
+  // E-learning & abonnements
+  "Choisissez votre abonnement": "Choose your plan",
+  "Accès illimité aux épreuves, cours et corpus selon votre niveau — prix imbattables !":
+    "Unlimited access to past papers, lessons and corpora for your level — unbeatable prices!",
+  "S'abonner maintenant": "Subscribe now",
+  "Valable toute l'année scolaire": "Valid for the whole school year",
+  "ressources incluses": "resources included",
+  "Besoin d'un contenu sur mesure ?": "Need tailor-made content?",
+  "Commande personnalisée": "Custom order",
+  "Épreuves officielles": "Official past papers",
+  "Labos virtuels": "Virtual labs",
+  "Cours MINESEC officiels": "Official MINESEC lessons",
+  // Épreuves & filtres
+  "📝 Épreuves & Annales": "📝 Past Papers & Exams",
+  "BEPC, Probatoire, BAC — sujets corrigés et fascicules officiels":
+    "BEPC, Probatoire, BAC & GCE — marked papers and official booklets",
+  "Épreuves séquentielles, corpus, anciens sujets BEPC/Probatoire/BAC — tous niveaux":
+    "Sequence tests, corpora and past BEPC/Probatoire/BAC/GCE papers — all levels",
+  "Section & type d'enseignement": "Section & type of education",
+  "Matière": "Subject",
+  "Classe / Série": "Class / Series",
+  "Séquence": "Sequence",
+  "✕ Réinitialiser les filtres": "✕ Reset filters",
+  "🎓 Général": "🎓 General",
+  "🔧 Technique": "🔧 Technical",
+  "🛠️ CAP": "🛠️ CAP",
+  "🇬🇧 Anglophone": "🇬🇧 Anglophone",
+  // Labos virtuels
+  "🔬 Laboratoires Virtuels": "🔬 Virtual Laboratories",
+  "expériences interactives basées sur le programme MINESEC — Sans risque, sans matériel":
+    "interactive experiments based on the MINESEC syllabus — no risk, no equipment",
+  "Expériences": "Experiments",
+  "Gratuites": "Free",
+  "🇬🇧 English (GCE)": "🇬🇧 English (GCE)",
+  // Ambassa & formulaires
+  "Que souhaitez-vous créer ?": "What would you like to create?",
+  "Agent IA pédagogique": "AI teaching assistant",
+  "Sous-système": "Sub-system",
+  "Enseignement": "Education type",
+  "Classe": "Class",
+  "Série / Spécialité": "Series / Specialty",
+  "⚡ Générer": "⚡ Generate",
+  "Sujet / Chapitre / Notion *": "Topic / Chapter / Notion *",
+  "Instructions supplémentaires (optionnel)": "Extra instructions (optional)",
+  // Productions IA sur les œuvres
+  "Choisissez votre production · grilles harmonisées MINESEC": "Choose your output · MINESEC harmonised marking grids",
+  "Dissertation": "Essay (dissertation)",
+  "Commentaire composé": "Literary commentary",
+  "Fiche de révision": "Revision sheet",
+  "Pack complet": "Full pack",
+  // Génériques
+  "Gratuit": "Free",
+  "Voir les abonnements": "See the plans",
+  "Inclus dans votre abonnement": "Included in your plan",
+  "Continuer": "Continue",
+  "Annuler": "Cancel",
+  "Fermer": "Close",
+  "Retour": "Back",
+  "← Catégories": "← Categories"
 };
 // Cherche-et-remplace les sous-titres (.vsec-sub / .acc-sub) selon la langue active.
 // Sûr : on ne touche qu'aux nœuds texte EXACTEMENT connus, pas aux contenus pédagogiques.
@@ -31646,7 +32545,9 @@ window._translateSubs = function(){
   try{
     var lang = (DB && DB._lang) || localStorage.getItem('_vrtLang') || 'fr';
     if(lang!=='en') return;
-    var sel = '.vsec-sub, .acc-sub, .vlit-banner__sub, .vgz-section-sub, .acc-pill, .vgz-section-title, .scl, .vsec-title';
+    // v1.4.2 : sélecteurs ÉLARGIS — labels de formulaires (.fl), CTA des plans,
+    // pieds de cartes, bouton retour → l'anglophone est servi sur tout le parcours.
+    var sel = '.vsec-sub, .acc-sub, .vlit-banner__sub, .vgz-section-sub, .acc-pill, .vgz-section-title, .scl, .vsec-title, .fl, .vplan-cta, .vplan-footer, .back-btn, .rc-tag';
     document.querySelectorAll(sel).forEach(function(el){
       // 1) Élément de pur texte : remplacer son textContent.
       // 2) Élément avec icône en enfant : traduire UNIQUEMENT le dernier nœud texte
@@ -32545,7 +33446,7 @@ window._generateBattleQuestions = function(){
     Object.values(LITT_OEUVRES).forEach(function(oe){
       if(oe.qcm) oe.qcm.forEach(function(q){
         var c = convertQ(q, oe.titre || '?');
-        if(c) pool.push(c);
+        if(c){ c.litt = true; pool.push(c); } // v1.4.9 : tag littérature (plafonné à 4/10)
       });
     });
   }
@@ -32559,10 +33460,48 @@ window._generateBattleQuestions = function(){
       });
     });
   }
+  // ── v1.4.9 : sources ÉLARGIES — fini le « tout littérature » ──────────────
+  // 1. QUIZ_DB : maths, physique-chimie, SVT, histoire-géo, français (BEPC)
+  if(typeof QUIZ_DB !== 'undefined'){
+    Object.keys(QUIZ_DB).forEach(function(k){
+      (QUIZ_DB[k]||[]).slice(0,8).forEach(function(q){
+        var c = convertQ(q, 'Quiz '+k.replace(/_/g,' '));
+        if(c) pool.push(c);
+      });
+    });
+  }
+  // 2. LABO_DB : quiz des labos — dont les labos GCE (questions EN ANGLAIS,
+  //    cat 'english') et les labos de l'ENSEIGNEMENT TECHNIQUE (cat 'technique')
+  if(typeof LABO_DB !== 'undefined'){
+    LABO_DB.forEach(function(lv){
+      (lv.quiz||[]).forEach(function(q){
+        var c = convertQ(q, lv.titre || 'Labo');
+        if(c){ c.lang = (lv.cat==='english') ? 'en' : 'fr'; c.tech = (lv.cat==='technique'); pool.push(c); }
+      });
+    });
+  }
   if(pool.length < 5) return [];
-  // Shuffle + 10
   pool.sort(function(){return Math.random()-0.5;});
-  return pool.slice(0,10);
+  // ── v1.4.9 : adaptation au PROFIL — l'anglophone reçoit ses questions en
+  // anglais en priorité, l'élève du technique reçoit une majorité technique. ──
+  var p=(typeof _getLearnerProfile==='function')?_getLearnerProfile():null;
+  if(p&&p.sys==='en'){
+    var en=pool.filter(function(q){return q.lang==='en';});
+    var rest=pool.filter(function(q){return q.lang!=='en';});
+    return en.slice(0,10).concat(rest).slice(0,10); // EN d'abord, complété si <10
+  }
+  if(p&&p.ens==='tech'){
+    var tech=pool.filter(function(q){return q.tech;});
+    var gen=pool.filter(function(q){return !q.tech;});
+    return tech.slice(0,6).concat(gen).slice(0,10); // jusqu'à 6 techniques + général
+  }
+  // Défaut : VARIÉTÉ GARANTIE — max 4 questions de littérature sur 10
+  // (avant : le battle pouvait tomber 100 % littérature).
+  var litt=pool.filter(function(q){return q.litt;});
+  var autres=pool.filter(function(q){return !q.litt;});
+  var sel=litt.slice(0,4).concat(autres).slice(0,10);
+  sel.sort(function(){return Math.random()-0.5;});
+  return sel;
 };
 
 window.mBattles = function(){
@@ -32673,6 +33612,7 @@ window._lancerBattle = function(){
     M('⚔️ Battle en cours','Q '+(idx+1)+'/10',body,'', true);
     window._answerBattle = function(ans){
       if(ans === q.ok) score++;
+      else if(typeof _recordMissed==='function') _recordMissed({q:q.q,a:q.a,b:q.b,c:q.c,d:q.d,ok:q.ok,src:q.src||'Battle'}); // v1.5 : mémoriser l'erreur
       idx++;
       setTimeout(_renderQ, 150);
     };
@@ -33418,7 +34358,7 @@ window._getPassageDuJour = function(){
     var cit=oe.citations[day%oe.citations.length];
     var txt=(typeof cit==='string')?cit:(cit&&(cit.texte||cit.t||cit.citation||cit.text||cit.extrait)||'');
     if(!txt) return null;
-    return {passage:_pdjCleanExtract(txt,900),titre:oe.titre||'',auteur:oe.auteur||'',classe:oe.classe||oe.niveau||''};
+    return {passage:_pdjCleanExtract(txt,1600),titre:oe.titre||'',auteur:oe.auteur||'',classe:oe.classe||oe.niveau||''}; // v1.4.8 : extrait long
   }catch(e){ return null; }
 };
 
@@ -33435,6 +34375,72 @@ window._pdjShare = function(kind){
   else if(kind==='fb') window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(url)+'&quote='+encodeURIComponent(msg),'_blank');
   else if(kind==='x') window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(msg.substring(0,240))+'&url='+encodeURIComponent(url),'_blank');
   else { try{ navigator.clipboard.writeText(msg); if(typeof toast==='function')toast('Copié ! Colle-le sur TikTok, Instagram, etc. 📋','ok'); }catch(e){ if(typeof toast==='function')toast('Copie impossible','warn'); } }
+};
+
+// ══ v1.5 — IMAGE DE PARTAGE (statut WhatsApp) ═══════════════════════════════
+// Rend le Passage du jour en PNG 1080×1350 (format statut/feed) aux couleurs
+// VÉRITAS : acquisition gratuite quotidienne — chaque élève devient une affiche.
+// Mobile : partage natif (navigator.share, fichier joint) ; sinon téléchargement.
+window._pdjShareImage = function(){
+  var p=window._pdjCurrent;
+  if(!p||!p.passage){ if(typeof toast==='function')toast('Passage indisponible','warn'); return; }
+  try{
+    var W=1080,H=1350,cv=document.createElement('canvas');cv.width=W;cv.height=H;
+    var x=cv.getContext('2d');
+    // Fond navy + halos (identité)
+    var g=x.createLinearGradient(0,0,W,H);
+    g.addColorStop(0,'#0A1430');g.addColorStop(.55,'#142554');g.addColorStop(1,'#1E3A7A');
+    x.fillStyle=g;x.fillRect(0,0,W,H);
+    var r1=x.createRadialGradient(W*.15,0,0,W*.15,0,520);
+    r1.addColorStop(0,'rgba(39,66,245,.30)');r1.addColorStop(1,'rgba(39,66,245,0)');
+    x.fillStyle=r1;x.fillRect(0,0,W,H);
+    var r2=x.createRadialGradient(W*.9,H,0,W*.9,H,480);
+    r2.addColorStop(0,'rgba(255,201,60,.22)');r2.addColorStop(1,'rgba(255,201,60,0)');
+    x.fillStyle=r2;x.fillRect(0,0,W,H);
+    // En-tête
+    x.fillStyle='#FFC93C';x.font='800 34px Montserrat, sans-serif';x.textAlign='center';
+    x.fillText('📖 PASSAGE DU JOUR',W/2,150);
+    x.fillStyle='rgba(255,255,255,.55)';x.font='600 24px Montserrat, sans-serif';
+    x.fillText('Une œuvre au programme MINESEC',W/2,196);
+    // Filet or
+    x.strokeStyle='#FFC93C';x.lineWidth=4;x.beginPath();x.moveTo(W/2-80,228);x.lineTo(W/2+80,228);x.stroke();
+    // Extrait (wrap, max ~430 caractères pour rester lisible)
+    var txt=String(p.passage).substring(0,430);
+    if(p.passage.length>430)txt+='…';
+    txt='« '+txt+' »';
+    x.fillStyle='#FFFFFF';x.font='italic 400 38px Georgia, serif';x.textAlign='left';
+    var words=txt.split(/\s+/),line='',lines=[],maxW=W-200;
+    words.forEach(function(w){
+      var t=line?line+' '+w:w;
+      if(x.measureText(t).width>maxW){lines.push(line);line=w;}else line=t;
+    });
+    if(line)lines.push(line);
+    lines=lines.slice(0,14);
+    var y0=H/2-(lines.length*54)/2+20;
+    lines.forEach(function(l,i){x.fillText(l,100,y0+i*54);});
+    // Référence
+    x.fillStyle='#FFC93C';x.font='700 30px Montserrat, sans-serif';x.textAlign='center';
+    var ref='— '+(p.titre||'')+(p.auteur?(' · '+p.auteur):'');
+    x.fillText(ref.substring(0,60),W/2,y0+lines.length*54+70);
+    // Pied
+    x.fillStyle='rgba(255,255,255,.35)';x.fillRect(0,H-130,W,2);
+    x.fillStyle='#FFFFFF';x.font='800 30px Montserrat, sans-serif';
+    x.fillText('🎓 VÉRITAS Academy',W/2,H-72);
+    x.fillStyle='#FFC93C';x.font='700 26px Montserrat, sans-serif';
+    x.fillText('veritas-school.com — lis la suite + corrigés gratuits',W/2,H-32);
+    cv.toBlob(function(blob){
+      if(!blob){ if(typeof toast==='function')toast('Génération impossible','warn'); return; }
+      var file=new File([blob],'veritas-passage-du-jour.png',{type:'image/png'});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        navigator.share({files:[file],title:'Passage du jour — VÉRITAS',text:'📖 '+(p.titre||'')+' · veritas-school.com'}).catch(function(){});
+      } else {
+        var a=document.createElement('a');a.href=URL.createObjectURL(blob);
+        a.download='veritas-passage-du-jour.png';a.click();
+        setTimeout(function(){URL.revokeObjectURL(a.href);},4000);
+        if(typeof toast==='function')toast('🖼️ Image téléchargée — postez-la en statut !','ok');
+      }
+    },'image/png');
+  }catch(e){ if(typeof toast==='function')toast('Erreur de génération','warn'); }
 };
 
 // v1.2.35 — Fallback enrichi : si l'œuvre est dans LITT_OEUVRES, on récupère son
@@ -33496,14 +34502,17 @@ window._pdjLoad = function(){
     var yesterdayTitle=''; try{ yesterdayTitle=localStorage.getItem('_pdjYesterday')||''; }catch(e){}
     fetch(base+'/rag.php?src=oeuvres&daily=1&day='+dayN).then(function(r){return r.json();}).then(function(d){
       if(d&&d.ok&&d.passages&&d.passages.length){
-        // Choisir le 1er passage différent d'hier (anti-doublon)
-        var chosen=null;
+        // v1.4.8 : pioche ALÉATOIRE parmi les passages ≠ hier → le passage VARIE
+        // à chaque visite (avant : toujours le 1er du lot → impression de fixité)
+        var cands=[];
         for(var i=0;i<d.passages.length;i++){
           var t=_pdjCleanTitle((d.passages[i]||{}).titre||'');
-          if(t && (!yesterdayTitle || t.toLowerCase()!==yesterdayTitle.toLowerCase())){ chosen=d.passages[i]; break; }
+          if(t && (!yesterdayTitle || t.toLowerCase()!==yesterdayTitle.toLowerCase())) cands.push(d.passages[i]);
         }
-        if(!chosen) return; // tous les passages sont = hier → on garde la pioche LITT_OEUVRES
-        var pp=chosen, txt=_pdjCleanExtract(pp.extrait,900);
+        if(!cands.length) return; // tous = hier → on garde la pioche LITT_OEUVRES
+        var chosen=cands[Math.floor(Math.random()*cands.length)];
+        // v1.4.8 : extrait PLUS LONG (900 → 1600) — un vrai passage qui happe le lecteur
+        var pp=chosen, txt=_pdjCleanExtract(pp.extrait,1600);
         if(txt.length>40){
           var au=(pp.auteur&&pp.auteur.indexOf('programme')<0&&pp.auteur!=='Anonyme')?pp.auteur:'';
           var newTitle=_pdjCleanTitle(pp.titre||'');
@@ -33536,6 +34545,7 @@ window._passageDuJourHtml = function(){
       +'<button onclick="_pdjShare(\'fb\')" style="background:#1877F2;color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer">Facebook</button>'
       +'<button onclick="_pdjShare(\'x\')" style="background:#111;color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer">X</button>'
       +'<button onclick="_pdjShare(\'copy\')" style="background:#142554;color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer">🔗 Copier (TikTok, Insta…)</button>'
+      +'<button onclick="_pdjShareImage()" style="background:linear-gradient(135deg,#FFC93C,#F5B800);color:#142554;border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:800;cursor:pointer">🖼️ Image pour statut</button>'
     +'</div>'
     +'</div>';
 };
@@ -34844,12 +35854,114 @@ window.mAgentAmbassa = function(taskId){
     +'<button class="btn bi" onclick="cm();mAmbassaHistorique()">📚 Historique complet</button>', true);
 };
 
+// ── v1.3.2 : COUVERTURE COMPLÈTE MINESEC — sous-système (francophone/anglophone)
+// × enseignement (général/technique). Classes, séries et matières dépendent du
+// couple choisi ; le contexte exact est injecté dans le prompt (_ambassaGenerate).
+window._AMBASSA_SYS = {
+  fr_gen:  { classes:['6ème','5ème','4ème','3ème','2nde','1ère','Terminale'],
+             series:['—','A1 (Lettres-Latin)','A4 (Lettres-Langues)','C','D','E','TI'],
+             mats:['Mathématiques','Français','Littérature','Anglais','Allemand (LV2)','Espagnol (LV2)','Italien (LV2)','Arabe (LV2)','Chinois (LV2)','Latin','Histoire','Géographie','ECM','SVT','Physique-Chimie','PCT (1er cycle)','Philosophie','Économie','Informatique','Langues et Cultures Nationales','Éducation artistique','EPS'] },
+  fr_tech: { classes:['1ère année','2ème année','3ème année','4ème année (CAP)','2nde technique','1ère technique (Probatoire)','Terminale technique (BAC)'],
+             // v1.3.2 : nomenclature officielle OBC (officedubac.cm) — industrielles F + tertiaires STT
+             series:['—','F1 (Fabrication mécanique)','F2 (Électronique)','F3 (Électrotechnique)','F4/BA (Génie civil)','F5 (Froid et climatisation)','F6 (Génie chimique)','MA/MEM (Mécanique auto)','STT-ACA (Secrétariat)','STT-CG (Comptabilité-Gestion)','STT-ACC (Commerce)','STT-FIG (Finances-Info. de gestion)','STT-SES (Sc. éco. et sociales)','ESF'],
+             mats:['Comptabilité générale','Mathématiques','Techniques commerciales','Économie d\'entreprise','Droit','Mathématiques financières','Électrotechnique','Électronique','Mécanique / Construction','Dessin technique','Technologie','Génie civil','Informatique de gestion','ESF','Français','Anglais'] },
+  // v1.3.3 : matières OFFICIELLES GCE Board (camgceb.org) — O Level 21 matières
+  // (codes 05xx), A Level 20 matières (codes 07xx). Liste unifiée pour le select.
+  en_gen:  { classes:['Form 1','Form 2','Form 3','Form 4','Form 5 (O Level)','Lower Sixth','Upper Sixth (A Level)'],
+             series:['—','Arts','Science'],
+             mats:['Mathematics','Additional Mathematics (O.L.)','Pure Maths with Mechanics (A.L.)','Pure Maths with Statistics (A.L.)','Further Mathematics (A.L.)','English Language','Literature in English','French','Special Bilingual Education French','Biology','Human Biology (O.L.)','Chemistry','Physics','Geology','Geography','History','Citizenship Education (O.L.)','Economics','Commerce (O.L.)','Accounting','Food Science and Nutrition','Religious Studies','Logic (O.L.)','Philosophy (A.L.)','Computer Science','ICT (A.L.)'] },
+  // v1.3.2 : spécialités OFFICIELLES GCE TVE (camgceb.org) — ITC (Year 4) / ATC (Upper Sixth Tech.)
+  en_tech: { classes:['Year 1','Year 2','Year 3','Year 4 (ITC)','Form 5 Technical','Lower Sixth Technical','Upper Sixth Technical (ATC)'],
+             series:['—','Accounting (ACC)','Marketing (MKT)','Secretarial Admin. & Communication (SAC)','Taxation & Information Mgt Systems (TIMS)','Home Economics (HEC)','Automobile','Civil Engineering','Electrical Power Systems','Electronics','Manufacturing Mechanics','Metal Works & Industrial Piping','Plumbing & Hydraulic Installations','Surveying','Wood Cabinet-Making','Clothing Industry','HVAC'],
+             mats:['Professional Subject (specialty)','Accounting','Marketing','Engineering Science','Technical Drawing','Building Construction','Electricity / Electronics','Mechanical Engineering','Mathematics','English Language','Economics','Computer Science','French'] }
+};
+window._ambassaSysKey = function(){
+  var s=(_ge('mvSousSys')||{}).value||'fr', e=(_ge('mvEns')||{}).value||'gen';
+  return s+'_'+e;
+};
+window._ambassaSysChange = function(){
+  var cfg=_AMBASSA_SYS[_ambassaSysKey()]||_AMBASSA_SYS.fr_gen;
+  var selC=_ge('mvCls'), selS=_ge('mvSerie'), selM=_ge('mvMat');
+  if(selC) selC.innerHTML=cfg.classes.map(function(c,i){return '<option'+(i===3?' selected':'')+'>'+c+'</option>';}).join('');
+  if(selS) selS.innerHTML=cfg.series.map(function(s){return '<option>'+s+'</option>';}).join('');
+  if(selM) selM.innerHTML=cfg.mats.map(function(m){return '<option>'+m+'</option>';}).join('');
+};
+
+// ══ v1.4.2 — PROFIL APPRENANT : section + enseignement + classe ═══════════
+// Interconnecte e-learning, plans, épreuves et Ambassa : l'apprenant déclare
+// son parcours UNE fois → toutes les ressources se pré-filtrent pour lui.
+// Stocké sur le compte visiteur (synchronisé) + localStorage (invité).
+window._getLearnerProfile=function(){
+  try{
+    if(typeof SES!=='undefined'&&SES&&SES.accountId){
+      var a=(DB.visitorAccounts||[]).find(function(x){return x.id===SES.accountId;});
+      if(a&&a.profil) return a.profil;
+    }
+    var p=localStorage.getItem('_vrtProfil');
+    return p?JSON.parse(p):null;
+  }catch(e){return null;}
+};
+window._saveLearnerProfile=function(p){
+  try{
+    localStorage.setItem('_vrtProfil',JSON.stringify(p));
+    if(typeof SES!=='undefined'&&SES&&SES.accountId){
+      var a=(DB.visitorAccounts||[]).find(function(x){return x.id===SES.accountId;});
+      if(a){a.profil=p;save();}
+    }
+  }catch(e){}
+};
+window.mLearnerProfile=function(){
+  var p=_getLearnerProfile()||{sys:'fr',ens:'gen',cls:''};
+  var cfg=_AMBASSA_SYS[(p.sys||'fr')+'_'+(p.ens||'gen')]||_AMBASSA_SYS.fr_gen;
+  M('🎯 Mon parcours','Personnalisez les ressources affichées partout sur VÉRITAS',
+    '<div class="fg2">'
+    +'<div class="fg"><span class="fl">Sous-système</span><select class="fi" id="lpSys" onchange="_lpRefresh()"><option value="fr"'+(p.sys!=='en'?' selected':'')+'>🇨🇲 Francophone</option><option value="en"'+(p.sys==='en'?' selected':'')+'>🇨🇲 Anglophone (GCE)</option></select></div>'
+    +'<div class="fg"><span class="fl">Enseignement</span><select class="fi" id="lpEns" onchange="_lpRefresh()"><option value="gen"'+(p.ens!=='tech'?' selected':'')+'>🎓 Général</option><option value="tech"'+(p.ens==='tech'?' selected':'')+'>🔧 Technique</option></select></div>'
+    +'</div>'
+    +'<div class="fg"><span class="fl">Classe</span><select class="fi" id="lpCls">'+cfg.classes.map(function(c){return '<option'+(c===p.cls?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div>'
+    +'<div class="ib ibi mt8"><span>💡</span><span>L\'e-learning, les plans d\'abonnement et le Professeur Ambassa se règlent automatiquement sur votre parcours.</span></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_lpSave()">✓ Enregistrer mon parcours</button>');
+};
+window._lpRefresh=function(){
+  var cfg=_AMBASSA_SYS[(((_ge('lpSys')||{}).value)||'fr')+'_'+(((_ge('lpEns')||{}).value)||'gen')]||_AMBASSA_SYS.fr_gen;
+  if(_ge('lpCls'))_ge('lpCls').innerHTML=cfg.classes.map(function(c){return '<option>'+c+'</option>';}).join('');
+};
+window._lpSave=function(){
+  var _p={sys:((_ge('lpSys')||{}).value)||'fr',ens:((_ge('lpEns')||{}).value)||'gen',cls:((_ge('lpCls')||{}).value)||''};
+  _saveLearnerProfile(_p);
+  // v1.4.9 : l'anglophone bascule TOUTE l'interface en anglais (et inversement)
+  try{ if(typeof setLang==='function') setLang(_p.sys==='en'?'en':'fr', true); }catch(e){}
+  cm();toast(_p.sys==='en'?'✓ Profile saved — your resources are now personalised':'✓ Parcours enregistré — ressources personnalisées','ok');
+  window._elCls='';window._elCat='';
+  if(typeof vShowSec==='function')vShowSec('elearning',null);
+};
+// v1.4.3 : GROUPE de section du profil (fr_gen / fr_tech / cap / en) — pivot du
+// VRAI filtre appliqué à l'e-learning, aux épreuves et aux labos.
+window._profileGroup=function(){
+  var p=(typeof _getLearnerProfile==='function')?_getLearnerProfile():null;
+  if(!p) return '';
+  if(p.sys==='en') return 'en';
+  if(p.ens==='tech') return /^CAP\b/i.test(p.cls||'')?'cap':'fr_tech';
+  return 'fr_gen';
+};
+
+// Score d'affinité d'un plan d'abonnement avec le profil (tri + badge « Recommandé »)
+window._planProfileScore=function(plan){
+  var p=_getLearnerProfile(); if(!p) return 0;
+  var hay=((plan.nom||'')+' '+(plan.cible||'')+' '+((plan.avantages||[]).join(' '))).toLowerCase();
+  var s=0;
+  if(p.sys==='en'){ s+=(/gce|anglo|english/.test(hay)?2:0); } else { s-=(/gce only|anglophone uniquement/.test(hay)?2:0); }
+  if(p.ens==='tech'){ s+=(/tech|industriel|stt|cap|f[1-6]|g[1-3]/.test(hay)?2:0); }
+  return s;
+};
+
 window._ambassaTaskForm = function(taskId){
   var task = AMBASSA_TACHES.find(function(t){return t.id===taskId;});
   if(!task){ mAgentAmbassa(); return; }
-  var CLS = ['6ème','5ème','4ème','3ème','2nde','1ère','Terminale'];
-  var MATS = ['Mathématiques','Français','Anglais','Histoire-Géo','SVT','Physique-Chimie','Philosophie','Économie','Informatique','EPS'];
-  var SERIES = ['—','A4','C','D','TI','ESF','STT'];
+  var _cfg0 = _AMBASSA_SYS.fr_gen;
+  var CLS = _cfg0.classes;
+  var MATS = _cfg0.mats;
+  var SERIES = _cfg0.series;
 
   var formExtra = '';
   if(taskId === 'quiz' || taskId === 'eval'){
@@ -34879,16 +35991,35 @@ window._ambassaTaskForm = function(taskId){
     ? '<div class="fg"><span class="fl">Contexte (optionnel)</span><input class="fi" id="mvSujet" placeholder="Ex: Texte de biologie, extrait littéraire, email professionnel…"></div>'
     : '<div class="fg"><span class="fl">Sujet / Chapitre / Notion *</span><input class="fi" id="mvSujet" placeholder="Ex: Théorème de Thalès, La revanche de l\'amante, La 1ère Guerre Mondiale…"></div>';
   M('🎓 Ambassa — '+task.t, task.d,
+    // v1.3.2 : l'utilisateur choisit D'ABORD le sous-système puis l'enseignement —
+    // les classes, séries et matières se mettent à jour automatiquement.
     '<div class="fg2">'
-    +'<div class="fg"><span class="fl">Classe</span><select class="fi" id="mvCls">'+CLS.map(function(c,i){return '<option'+(i===3?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div>'
-    +'<div class="fg"><span class="fl">Matière</span><select class="fi" id="mvMat">'+MATS.map(function(m){return '<option>'+m+'</option>';}).join('')+'</select></div>'
+    +'<div class="fg"><span class="fl">Sous-système</span><select class="fi" id="mvSousSys" onchange="_ambassaSysChange()"><option value="fr">🇨🇲 Francophone</option><option value="en">🇨🇲 Anglophone (GCE)</option></select></div>'
+    +'<div class="fg"><span class="fl">Enseignement</span><select class="fi" id="mvEns" onchange="_ambassaSysChange()"><option value="gen">🎓 Général</option><option value="tech">🔧 Technique</option></select></div>'
     +'</div>'
+    +'<div class="fg2">'
+    +'<div class="fg"><span class="fl">Classe</span><select class="fi" id="mvCls">'+CLS.map(function(c,i){return '<option'+(i===3?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div>'
+    +'<div class="fg"><span class="fl">Série / Spécialité</span><select class="fi" id="mvSerie">'+SERIES.map(function(s){return '<option>'+s+'</option>';}).join('')+'</select></div>'
+    +'</div>'
+    +'<div class="fg"><span class="fl">Matière</span><select class="fi" id="mvMat">'+MATS.map(function(m){return '<option>'+m+'</option>';}).join('')+'</select></div>'
     +sujetField
     +formExtra
     +'<div class="fg"><span class="fl">Instructions supplémentaires (optionnel)</span><textarea class="fi" id="mvExtra" rows="2" placeholder="Ex: Contextualiser pour élèves de Douala / Inclure exemples concrets / Difficulté progressive…"></textarea></div>'
     +'<div id="mvResult" style="margin-top:14px"></div>',
     '<button class="btn bo" onclick="cm();mAgentAmbassa()">← Retour</button>'
     +'<button class="btn bi" id="mvGenBtn" onclick="_ambassaGenerate(\''+taskId+'\')">⚡ Générer</button>', true);
+  // v1.4.2 : pré-régler le formulaire sur le PROFIL APPRENANT (section/enseignement/classe)
+  setTimeout(function(){
+    try{
+      var p=(typeof _getLearnerProfile==='function')?_getLearnerProfile():null;
+      if(!p) return;
+      var s=_ge('mvSousSys'), e=_ge('mvEns'), c=_ge('mvCls');
+      if(s&&p.sys) s.value=p.sys;
+      if(e&&p.ens) e.value=p.ens;
+      _ambassaSysChange();
+      if(c&&p.cls){ for(var i=0;i<c.options.length;i++){ if(c.options[i].text===p.cls){ c.selectedIndex=i; break; } } }
+    }catch(_e){}
+  },60);
 };
 
 window._ambassaGenerate = async function(taskId){
@@ -34903,6 +36034,12 @@ window._ambassaGenerate = async function(taskId){
   var mat = (_ge('mvMat')||{}).value || '';
   var sujet = ((_ge('mvSujet')||{}).value||'').trim();
   var extra = ((_ge('mvExtra')||{}).value||'').trim();
+  // v1.3.2 : contexte sous-système / enseignement / série (technique inclus)
+  var _sys = (_ge('mvSousSys')||{}).value || 'fr';
+  var _ens = (_ge('mvEns')||{}).value || 'gen';
+  var _serie = ((_ge('mvSerie')||{}).value||'').trim();
+  if(_serie==='—') _serie='';
+  if(_serie) cls = cls+' (série '+_serie+')';
 
   // FIX v1.2 : translate n'utilise pas le champ sujet — validation spécifique par tâche
   if(taskId !== 'translate' && taskId !== 'doc' && (!sujet || sujet.length < 3)){
@@ -35007,6 +36144,16 @@ window._ambassaGenerate = async function(taskId){
   }
   if(extra) prompt += '\n\nInstructions supplémentaires : '+extra;
 
+  // v1.3.2 : préfixer le CONTEXTE SYSTÈME exact (sous-système + enseignement + série)
+  // → Ambassa applique le bon référentiel (GCE vs MINESEC FR, technique vs général)
+  // et répond en anglais pour le sous-système anglophone.
+  var _ctx = 'CONTEXTE OBLIGATOIRE : sous-système '+(_sys==='en'?'ANGLOPHONE (référentiel GCE camerounais — O Level / A Level)':'FRANCOPHONE (référentiel MINESEC)')
+    +', enseignement '+(_ens==='tech'?'TECHNIQUE (référentiel de la spécialité : adapte programmes, épreuves et coefficients aux séries techniques)':'GÉNÉRAL')
+    +(_serie?(', série/spécialité '+_serie):'')+'.'
+    +(_sys==='en'?' RÉPONDS INTÉGRALEMENT EN ANGLAIS, conforme aux syllabus GCE Board.':'')
+    +'\n\n';
+  prompt = _ctx + prompt;
+
   // UI Loading
   var btn = _ge('mvGenBtn');
   if(btn){ btn.disabled = true; btn.textContent = '⏳ Ambassa réfléchit…'; }
@@ -35035,6 +36182,7 @@ window._ambassaGenerate = async function(taskId){
 
     _ge('mvResult').innerHTML =
       '<div style="background:#F0FDF4;border:2px solid #6EE7B7;border-radius:14px;padding:18px;margin-top:12px">'
+      +((typeof _iaBadgeHtml==='function')?_iaBadgeHtml():'')
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:1px">'+(hasQuiz?'📝 Quiz prêt — '+parsedQuiz.length+' questions':'✓ Ambassa a généré')+'</div>'
       +'<div style="display:flex;gap:6px">'
       +'<button class="btn sm" style="background:#fff;border:1px solid #6EE7B7;color:#059669;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaCopy()">📋 Copier</button>'
@@ -36987,6 +38135,7 @@ function pgPartnerProgram(type){
     +   '<div style="font-size:22px;font-weight:800;color:#142554;margin:6px 0">'+_prtSafe(t.label)+'</div>'
     +   '<div style="font-size:14px;color:var(--ink3);font-style:italic">'+_prtSafe(t.desc)+'</div>'
     + '</div>'
+    + _prtRoleBlockHtml(type, false)  // v1.8 : rôle dans la chaîne + attributions (sans boutons en public)
     + '<div class="ct" style="margin:18px 0 8px">✨ Vos avantages</div>'
     + '<ul style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 18px 18px 36px;list-style:disc">'+av+'</ul>'
     + '<div class="ct" style="margin:24px 0 10px">🎯 Système de paliers (mix ouvrages + abonnements + autres)</div>'
@@ -37465,6 +38614,85 @@ function calculatePartnerLevel(partnerId){
 }
 
 // ── ESPACE PARTENAIRE (vue connectée — placeholder S1 light) ───────────────
+// ══ v1.8 — ATTRIBUTIONS & INTERCONNEXION DES RÔLES PARTENAIRES ═══════════════
+// Définit, pour chaque type, SON RÔLE DANS LA CHAÎNE, ses missions concrètes et
+// les OUTILS (boutons) reliés aux fonctionnalités réelles de la plateforme.
+// Affiché (1) sur la fiche publique du programme et (2) dans le portail privé.
+window._PARTNER_ROLE_SPEC = {
+  enseignant: {
+    chain:'Producteur de contenu & prescripteur — il alimente le catalogue et oriente les élèves.',
+    missions:['Vendre ses cours/épreuves sur la marketplace (part auteur 60%)','Recommander des manuels via son code','Encadrer les élèves de ses classes'],
+    actions:[{l:'🛒 Ma marketplace',fn:"goTo('marketplace_teacher')"},{l:'📚 Recommander un manuel',fn:"_prtGo('boutique')"}]
+  },
+  createur: {
+    chain:'Amplificateur — il fait connaître VÉRITAS et convertit son audience.',
+    missions:['Partager son code promo personnel','Toucher une commission sur chaque vente générée','Accès anticipé aux nouveautés à présenter'],
+    actions:[{l:'📋 Copier mon code',fn:"_prtCopyMyCode()"},{l:'✨ Voir les nouveautés',fn:"_prtGo('elearning')"}]
+  },
+  chef_etab: {
+    chain:'Déploiement institutionnel — il fait adopter VÉRITAS par tout un établissement.',
+    missions:['Obtenir le label « Centre d\'Excellence VÉRITAS »','Inscrire ses classes (licence établissement)','Former son personnel'],
+    actions:[{l:'🏫 Demander une licence établissement',fn:"_prtContact('Licence établissement')"},{l:'📊 Tableau de bord école',fn:"goTo('dashboard')"}]
+  },
+  inspecteur: {
+    chain:'Garant de la qualité — il valide la conformité pédagogique des contenus et de l\'IA.',
+    missions:['Valider les réponses de l\'IA (file de validation)','Co-rédiger les manuels officiels','Animer des formations rémunérées'],
+    actions:[{l:'✓ File de validation IA',fn:"window.open('admin-validation.html','_blank')"},{l:'✍️ Co-rédaction manuels',fn:"_prtContact('Co-rédaction manuel')"}]
+  },
+  parent: {
+    chain:'Relais familial — il suit l\'élève et fidélise le foyer.',
+    missions:['Suivre la performance de son enfant','Recevoir le rapport hebdomadaire','Bénéficier des réductions familles'],
+    actions:[{l:'📲 Rapport de mon enfant',fn:"(typeof mRapportParent==='function'?mRapportParent():_prtToast('Connectez le compte élève'))"},{l:'👨‍👩‍👧 Club Parents',fn:"_prtContact('Club Parents')"}]
+  },
+  eleve_leader: {
+    chain:'Ambassadeur junior — il recrute ses pairs et anime la communauté élève.',
+    missions:['Parrainer ses camarades avec son code','Gagner bourses, cadeaux et points','Représenter VÉRITAS dans son établissement'],
+    actions:[{l:'📋 Mon code de parrainage',fn:"_prtCopyMyCode()"},{l:'🏆 Concours & battles',fn:"_prtGo('jeux')"}]
+  },
+  librairie: {
+    chain:'Distribution physique — elle écoule les manuels au détail.',
+    missions:['Commander en gros à marge attractive','Recevoir les supports publicitaires','Accompagnement marketing local'],
+    actions:[{l:'📦 Catalogue de gros',fn:"_prtGo('boutique')"},{l:'🎨 Kit marketing',fn:"_prtContact('Kit marketing librairie')"}]
+  },
+  universite: {
+    chain:'Partenaire académique — recherche, formation des futurs enseignants, publications.',
+    missions:['Co-publier des ressources','Former les futurs enseignants','Mener des études pédagogiques'],
+    actions:[{l:'🏛️ Proposer un partenariat',fn:"_prtContact('Partenariat université')"}]
+  },
+  sponsor: {
+    chain:'Soutien financier & RSE — il finance l\'accès et gagne en visibilité.',
+    missions:['Financer des bourses / contenus','Visibilité logo sur la plateforme','Mention dans nos publications RSE'],
+    actions:[{l:'🌍 Devenir sponsor',fn:"_prtContact('Sponsoring / RSE')"}]
+  }
+};
+window._prtCopyMyCode=function(){
+  var SES=window.SES||null, p=null;
+  if(SES&&(DB.partners||[]).length) p=(DB.partners||[]).find(function(x){return (SES.email&&x.email===SES.email)||(SES.tel&&x.tel===SES.tel);});
+  if(p&&p.code&&navigator.clipboard){ navigator.clipboard.writeText(p.code); _prtToast('Code '+p.code+' copié !'); }
+  else _prtToast('Code indisponible','warn');
+};
+window._prtContact=function(sujet){
+  var wa=((DB.publicInfo&&DB.publicInfo.whatsapp)||'237697637739').replace(/[^0-9]/g,'');
+  window.open('https://wa.me/'+wa+'?text='+encodeURIComponent('Bonjour VÉRITAS, je suis partenaire et je souhaite : '+sujet+'.'),'_blank');
+};
+// Bloc HTML « attributions & outils » pour un type donné (réutilisable)
+window._prtRoleBlockHtml=function(type, withActions){
+  var s=_PARTNER_ROLE_SPEC[type]; if(!s) return '';
+  var h='<div style="background:#fff;border:1px solid #E5E7EB;border-left:4px solid #142554;border-radius:12px;padding:16px;margin-bottom:14px">'
+    +'<div style="font-weight:800;font-size:14px;color:#142554;margin-bottom:6px">🎯 Votre rôle dans la chaîne</div>'
+    +'<div style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:10px">'+_prtSafe(s.chain)+'</div>'
+    +'<div style="font-weight:700;font-size:12px;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Vos attributions</div>'
+    +'<ul style="margin:0 0 '+(withActions?'12px':'0')+' 0;padding-left:18px;font-size:13px;color:var(--ink2);line-height:1.8">'
+    + s.missions.map(function(m){return '<li>'+_prtSafe(m)+'</li>';}).join('')
+    +'</ul>';
+  if(withActions && s.actions && s.actions.length){
+    h+='<div style="display:flex;gap:8px;flex-wrap:wrap">'
+      + s.actions.map(function(a){return '<button class="btn bi sm" onclick="'+a.fn+'">'+_prtSafe(a.l)+'</button>';}).join('')
+      +'</div>';
+  }
+  return h+'</div>';
+};
+
 function pgPartnerPortal(){
   // Cherche un partenaire correspondant à la session courante (par email ou tel)
   var SES = (typeof window!=='undefined' && window.SES) ? window.SES : null;
@@ -37501,6 +38729,8 @@ function pgPartnerPortal(){
     +   '<button class="btn" style="background:#fff;color:#142554;font-weight:700;font-size:12px" onclick="generatePartnerCertificate(\''+partner.id+'\')">📜 Télécharger mon certificat</button>'
     + '</div>'
     + '</div>';
+  // v1.8 — ATTRIBUTIONS & OUTILS propres au rôle (interconnectés aux fonctionnalités)
+  h += _prtRoleBlockHtml(partner.type, true);
   // ─── S4 — KYC + Contrat (si le type le requiert) ───
   if(_kycRequiredDocs(partner.type).length > 0){
     var kycSt = _kycStatus(partner.id);

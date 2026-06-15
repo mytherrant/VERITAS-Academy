@@ -98,6 +98,22 @@ define('GROQ_MODEL',      'llama-3.3-70b-versatile');
 define('MISTRAL_API_KEY', '');                          // ← clé Mistral (gratuite)
 define('MISTRAL_MODEL',   'mistral-large-latest');
 //
+// 🚀 v1.4.2 — « JAMAIS À COURT DE TOKENS » :
+// 👉 CEREBRAS — 1 MILLION de tokens/JOUR gratuits (le plus généreux 2026),
+//    inférence ~20× plus rapide. Clé : https://cloud.cerebras.ai
+define('CEREBRAS_API_KEY', '');                         // ← clé Cerebras (gratuite)
+define('CEREBRAS_MODEL',   'llama-3.3-70b');
+//
+// 👉 SAMBANOVA — tier gratuit PERSISTANT (Llama 3.3 70B → 405B).
+//    Clé : https://cloud.sambanova.ai
+define('SAMBANOVA_API_KEY', '');                        // ← clé SambaNova (gratuite)
+define('SAMBANOVA_MODEL',   'Meta-Llama-3.3-70B-Instruct');
+//
+// 👉 ROTATION MULTI-CLÉS GEMINI — créez 2-3 clés AI Studio (comptes Google
+//    distincts) pour MULTIPLIER le quota du moteur primaire :
+define('GEMINI_API_KEY_2', '');                         // ← 2e clé Gemini (optionnel)
+define('GEMINI_API_KEY_3', '');                         // ← 3e clé Gemini (optionnel)
+//
 // 👉 PAYANT (optionnel) — Claude pour le « Plan Élite » :
 //    https://console.anthropic.com → API Keys. Si vide, l'Élite utilise aussi Gemini.
 define('ANTHROPIC_API_KEY', '');               // ← clé Anthropic (optionnel, pour Sonnet)
@@ -109,26 +125,15 @@ define('ANTHROPIC_API_KEY', '');               // ← clé Anthropic (optionnel,
 define('ADMIN_TOKEN',     'CHANGEZ_MOI_token_admin_long_et_aleatoire');
 
 // ============================================================
-// 🔧 CORS — v1.2.2 : allowlist stricte (plus de '*')
+// 🔧 CORS — BUG FIX #2 (juin 2026) : AUCUN header émis ici.
 // ============================================================
-// Inclus par ia_proxy.php / admin_validate.php / payment_*.php.
-// L'app web et l'app mobile Capacitor sont servies depuis veritas-school.com.
-$__pc_allowed = [
-    'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
-];
-$__pc_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
-if (in_array($__pc_origin, $__pc_allowed, true)) {
-    header('Access-Control-Allow-Origin: ' . $__pc_origin);
-    header('Vary: Origin');
-}
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
-header('Access-Control-Max-Age: 86400');
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(204);
-    exit;
-}
+// payment_config.php est une BIBLIOTHÈQUE DE CONFIG incluse par de nombreux
+// endpoints (db.php via config_sync, payment_*.php, ia_proxy, content.php via
+// _auth_lib…). Émettre des headers + `exit` sur OPTIONS ici :
+//   • répondait au preflight AVANT config_sync.php avec Allow-Methods SANS PUT
+//     → le navigateur refusait le PUT de la synchro vers db.php ;
+//   • corrompait content.php (header JSON avant diffusion d'un binaire).
+// Chaque endpoint gère désormais ses propres headers CORS (allowlist stricte).
 
 // ============================================================
 // 🛡️ Vérification du token (utilisé par les endpoints init/list)
@@ -144,7 +149,8 @@ function requirePayAuth() {
     if (!$auth && isset($_GET['secret'])) $auth = 'Bearer ' . $_GET['secret'];
 
     $token = trim(str_replace(['Bearer ', 'bearer '], '', $auth));
-    if (!$token || $token !== PAY_API_SECRET) {
+    // 🔐 BUG FIX #3 : comparaison à temps constant (anti timing-oracle).
+    if ($token === '' || !hash_equals(PAY_API_SECRET, $token)) {
         http_response_code(401);
         echo json_encode(['error' => 'Token API requis ou invalide']);
         exit;

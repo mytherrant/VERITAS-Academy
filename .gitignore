@@ -99,3 +99,5 @@ VERITAS_Guide_*.pdf
 !uploads/oeuvres/
 !uploads/oeuvres/*.jpg
 !uploads/oeuvres/*.png
+seo/
+_build/

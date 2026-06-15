@@ -18,7 +18,20 @@
 require_once __DIR__ . '/payment_config.php';
 require_once __DIR__ . '/_auth_lib.php'; // Étape 1 : octroi d'accès côté serveur
 
-// ── CORS (déjà géré par payment_config.php) ──
+// ── CORS (allowlist stricte — BUG FIX #2 : plus délégué à payment_config.php) ──
+$__op_allowed = [
+    'https://veritas-school.com', 'https://www.veritas-school.com',
+    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+];
+$__op_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+if (in_array($__op_origin, $__op_allowed, true)) {
+    header('Access-Control-Allow-Origin: ' . $__op_origin);
+    header('Vary: Origin');
+}
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Max-Age: 86400');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 header('Content-Type: application/json; charset=utf-8');
 
 $action = $_GET['action'] ?? 'init';
@@ -26,7 +39,7 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 // Dossier d'état des paiements (fichier plat, pas de MySQL requis)
 $stateDir = __DIR__ . '/data/payments/';
-if (!is_dir($stateDir)) mkdir($stateDir, 0755, true);
+if (!is_dir($stateDir)) mkdir($stateDir, 0750, true); // 🔐 BUG FIX #8 : 0755→0750
 
 // ────────────────────────────────────────────────────────────
 // 1. INITIALISER UN PAIEMENT

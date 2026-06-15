@@ -39,9 +39,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 // ── 1. AUTHENTIFICATION ADMIN ──────────────────────────────────────────
 @include_once __DIR__ . '/payment_config.php';  // doit définir ADMIN_TOKEN
 $expected = defined('ADMIN_TOKEN') ? ADMIN_TOKEN : '';
-$provided = $_SERVER['HTTP_X_ADMIN_TOKEN'] ?? ($_GET['token'] ?? '');
+$provided = (string) ($_SERVER['HTTP_X_ADMIN_TOKEN'] ?? ($_GET['token'] ?? ''));
 
-if ($expected === '' || $provided !== $expected) {
+// 🔐 BUG FIX #6 : refus si token par défaut non changé (fail-closed) + hash_equals anti timing-oracle.
+if ($expected === '' || $expected === 'CHANGEZ_MOI_token_admin_long_et_aleatoire'
+    || $provided === '' || !hash_equals($expected, $provided)) {
     http_response_code(403);
     echo json_encode(['error' => 'Token admin manquant ou invalide']);
     exit;

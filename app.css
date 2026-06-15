@@ -4207,3 +4207,664 @@ html.js-reveal .ep-in{ opacity:1 !important; transform:none !important; }
   html.js-reveal .vsec .vbook-card, html.js-reveal .vsec .acc-pill,
   html.js-reveal .v-hero-gradient{ opacity:1 !important; transform:none !important; transition:none !important; }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.3.1 — ÉPURE 2 : en-têtes clairs, résultats colorés, PERF rendu
+   (additif, dernier → surcharge par ordre. Supprimer ce bloc = retour arrière)
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* (e) EN-TÊTES DE SECTION — fond sombre CONSERVÉ (identité de marque) mais
+   modernisé : dégradé navy plus aéré qui se termine clair, hairline or en
+   transparence, liseré lumineux en haut, halo doux teinté, coins plus ronds. */
+.acc-head{
+  background:linear-gradient(135deg,#0D1B3E 0%,#142554 48%,#1E3A7A 100%);
+  border:1px solid rgba(255,201,60,.30);
+  border-radius:18px;
+  box-shadow:0 14px 36px rgba(13,27,62,.26),
+             inset 0 1px 0 rgba(255,255,255,.10),
+             0 0 0 5px rgba(20,37,84,.045);
+  position:relative;
+}
+.acc-head::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background:radial-gradient(ellipse at 18% 0%, rgba(255,255,255,.10), transparent 55%),
+             radial-gradient(ellipse at 85% 110%, rgba(255,201,60,.08), transparent 50%);
+}
+.acc-head .acc-pill{ color:#fff; }
+.acc-head .acc-sub{ color:rgba(255,255,255,.74); }
+
+/* (f) PERF — STOP aux animations infinies des titres et cartes :
+   elles forcent un repaint permanent (jank sur mobiles d'entrée de gamme). */
+.vsec-title::after, .vsec-title-hero::after{ animation:none !important; width:46px !important; }
+.vsec-title > span:first-child, .vsec-title > svg:first-child,
+.vsec-title-hero > span:first-child, .vsec-title-hero > svg:first-child{ animation:none !important; }
+.vcard:hover::before{ animation:none !important; }
+
+/* (g) PERF — ne peindre que ce qui est visible (catalogue e-learning, boutique,
+   plans) : le navigateur saute le layout/paint des cartes hors écran. */
+.rc, .vplan-card, .vbook-card, .featured-card, .gallery-card{
+  content-visibility:auto;
+  contain-intrinsic-size:auto 320px;
+}
+
+/* (h) PERF — transitions ciblées (transform/ombre) au lieu de `all` (recalculs
+   de layout au survol). */
+.vcard, .card, .bc, .vbook-card{
+  transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+}
+
+/* (i) PANNEAUX RÉSULTATS — accent coloré rotatif par carte (posé par le JS via
+   --exam-acc) + barres en dégradé arrondi plus généreuses : fini le monotone. */
+.exam-card{ border-left:4px solid var(--exam-acc,#3B82F6) !important; }
+.exam-card .ct{ color:var(--exam-acc,#142554); }
+.exam-year-chip{
+  display:inline-flex; align-items:center; gap:6px;
+  background:color-mix(in srgb, var(--exam-acc,#3B82F6) 12%, #fff);
+  color:var(--exam-acc,#3B82F6);
+  border-radius:99px; padding:4px 14px; font-weight:800; font-size:13px;
+}
+.exam-bar{
+  height:12px; border-radius:99px;
+  background:rgba(20,37,84,.07);
+  border:1px solid rgba(20,37,84,.06);
+}
+/* Barres : identité navy→or CONSERVÉE mais éclaircie — navy adouci en départ,
+   transition dorée plus tôt, fines rayures statiques (texture « carreaux »),
+   liseré blanc translucide et opacité légère. !important requis : les règles
+   « progress bars enhanced » (~2241/~3449) forçaient un shimmer INFINI (repaint
+   permanent = lenteur mobile) — l'animation reste coupée, la texture est figée. */
+.exam-fill{
+  border-radius:99px;
+  background-image:
+    repeating-linear-gradient(115deg, rgba(255,255,255,.13) 0 6px, transparent 6px 14px),
+    linear-gradient(90deg,#4C6FBF 0%,#7FA3E8 38%,#E8C45C 72%,#FFC93C 100%) !important;
+  background-size:100% auto !important;
+  border:1px solid rgba(255,255,255,.35);
+  box-shadow:0 1px 5px rgba(20,37,84,.22);
+  opacity:.94;
+  animation:none !important;
+  transition:width .8s cubic-bezier(.16,1,.3,1);
+}
+.exam-row{ padding:13px 0; }
+.exam-row:hover{ background:linear-gradient(90deg,transparent,rgba(20,37,84,.025),transparent); }
+
+/* (j) NAVIGATION — retour de page instantané : le défilement lissé sur de longues
+   distances après un re-rendu donnait une impression de lenteur. */
+html{ scroll-behavior:auto; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.3.2 — RÉSULTATS PREMIUM, SOUS-TITRES OR, REVEAL, NETTOYAGE FORMES
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* (k) SUPPRESSION de l'effet « bordure téléphone incurvée » : les orbes
+   ambiants flottants (#VISITOR::before/::after — cercles radiaux 500-600px en
+   ANIMATION INFINIE) et la bande dégradée claire .vhero::after dessinaient un
+   arc clair incurvé sous la nav sur fond navy. Purement décoratifs → retirés
+   (gain perf : 2 animations permanentes en moins). */
+#VISITOR::before, #VISITOR::after{ display:none !important; animation:none !important; }
+.vhero::after{ display:none !important; }
+/* CSS mort associé : .vgz-phone (mockup téléphone 3D) n'est plus utilisé nulle part. */
+.vgz-phone{ display:none !important; }
+
+/* (l) PANNEAUX RÉSULTATS BEPC/BAC/CAP (.vgz-stat) — ÉCLAIRCIS & PREMIUM.
+   L'original (coquille HTML ~1712) : navy quasi opaque (.96/.99) = trop sombre.
+   → navy plus lumineux et translucide (laisse respirer le fond), liseré or
+   plus présent, reflet haut, coins 16px, halo doré subtil. Spécificité
+   .vgz-stats .vgz-stat > .vgz-stat pour gagner sans !important. */
+.vgz-stats .vgz-stat{
+  background:
+    radial-gradient(circle at 85% 0%, rgba(255,201,60,.16) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(96,140,255,.14) 0%, transparent 55%),
+    linear-gradient(160deg, rgba(38,66,140,.90), rgba(22,40,92,.84));
+  border:1px solid rgba(255,201,60,.34);
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(13,27,62,.20),
+             inset 0 1px 0 rgba(255,255,255,.14),
+             0 0 24px rgba(255,201,60,.05);
+}
+.vgz-stats .vgz-stat:hover{
+  border-color:rgba(255,201,60,.55);
+  box-shadow:0 18px 44px rgba(13,27,62,.28),
+             inset 0 1px 0 rgba(255,255,255,.18),
+             0 0 32px rgba(255,201,60,.10);
+}
+/* Sous-tuiles « Série X » : voile plus lumineux + hairline (étaient .06 presque
+   invisibles sur le navy) */
+.vgz-stats .vgz-stat [style*="background:rgba(255,255,255,.06)"]{
+  background:rgba(255,255,255,.11) !important;
+  border:1px solid rgba(255,255,255,.13);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08);
+}
+
+/* (m) EFFETS DE DÉROULEMENT (style Sharesub) sur les cartes résultats :
+   l'observer de la coquille pose .is-visible sur .vgz-stats → les cartes
+   entrent une à une (pop + fondu), puis restent stables (animation finie,
+   aucun coût permanent). Sans JS/observer, tout reste visible (progressif). */
+.vgz-stats.v-reveal .vgz-stat{ opacity:0; }
+.vgz-stats.is-visible .vgz-stat{
+  animation:vtPopIn .55s cubic-bezier(.34,1.56,.64,1) both;
+}
+.vgz-stats.is-visible .vgz-stat:nth-child(2){ animation-delay:.10s }
+.vgz-stats.is-visible .vgz-stat:nth-child(3){ animation-delay:.20s }
+.vgz-stats.is-visible .vgz-stat:nth-child(4){ animation-delay:.30s }
+.vgz-stats.is-visible .vgz-stat:nth-child(5){ animation-delay:.40s }
+.vgz-stats.is-visible .vgz-stat:nth-child(6){ animation-delay:.50s }
+@media (prefers-reduced-motion:reduce){
+  .vgz-stats.v-reveal .vgz-stat{ opacity:1; animation:none !important; }
+}
+
+/* (n) SOUS-TITRES DES EN-TÊTES EN OR + ICÔNE PREMIUM.
+   Sous-titre : or sable doux, lisible sur navy. Icône : badge or riche avec
+   reflet de verre, anneau lumineux et léger ressort au survol. */
+.acc-head .acc-sub{ color:#F2CE6B; }
+.acc-head .acc-pill .ic{
+  width:44px; height:44px; border-radius:13px;
+  background:linear-gradient(150deg,#FFE9A8 0%,#FFC93C 45%,#E8B225 100%);
+  border:1px solid rgba(255,235,170,.65);
+  box-shadow:0 4px 14px rgba(232,178,37,.38),
+             inset 0 1px 0 rgba(255,255,255,.55),
+             inset 0 -8px 12px rgba(154,114,40,.28);
+}
+.acc-head .acc-pill .ic::after{
+  background:radial-gradient(ellipse at 32% 16%, rgba(255,255,255,.5) 0%, transparent 48%);
+}
+.acc-head .acc-pill-ico{
+  stroke:#142554; stroke-width:2;
+  filter:drop-shadow(0 1px 1px rgba(255,255,255,.35));
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.4 — « ÉDITORIAL LUMINEUX » : refonte premium du portail visiteur
+   Direction design issue de l'étude des références 2025-26 (Wix/Elias/Leeroy) :
+   contrastes typographiques forts, fond chaud éditorial, accent électrique,
+   espaces généreux, animations à petites doses. Scopé #VISITOR (l'admin garde
+   son interface). Polices DÉJÀ chargées (zéro requête réseau supplémentaire).
+   Supprimer ce bloc = retour intégral à l'existant.
+   ════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  --lx-paper:#FAF7F1;        /* ivoire papier premium */
+  --lx-paper-2:#F3EEE5;      /* ivoire ombré */
+  /* v1.4.1 (retour Jacques) : fonds BLEUS, pas noirs — l'encre quasi-noire
+     #0E1320 est remplacée par le bleu nuit de marque sur tout ce qui est sombre. */
+  --lx-ink:#142554;          /* bleu nuit (fonds sombres, boutons, nav active) */
+  --lx-ink-2:#3A4768;        /* bleu-encre secondaire (texte) */
+  --lx-ink-3:#6E7BA0;        /* bleu-encre tertiaire (texte doux) */
+  --lx-cobalt:#2742F5;       /* accent électrique signature */
+  --lx-cobalt-soft:#E9EDFF;
+  --lx-gold:#E8A413;         /* or chaud, en touche */
+  --lx-line:1px solid rgba(14,19,32,.09);
+  --lx-shadow:0 1px 2px rgba(14,19,32,.04), 0 16px 40px rgba(14,19,32,.07);
+  --lx-shadow-lg:0 2px 4px rgba(14,19,32,.05), 0 28px 64px rgba(14,19,32,.12);
+  --lx-ease:cubic-bezier(.16,1,.3,1);
+}
+
+/* ── 1. FOND ÉDITORIAL — papier chaud, fini le gris SaaS ── */
+#VISITOR{ background:var(--lx-paper) !important; }
+#VISITOR #vContent{ background:transparent; }
+
+/* ── 2. TYPOGRAPHIE — v1.4.4 (étude vidéo Sharesub) : sans-serif EXTRA-BOLD,
+   très grands corps, soulignement « marker » dessiné sous les titres héros. ── */
+#VISITOR .vsec-title, #VISITOR .vsec-title-hero{
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif !important;
+  font-weight:800 !important;
+  font-size:clamp(26px,4vw,40px) !important;
+  letter-spacing:-0.02em !important;
+  color:var(--lx-ink) !important;
+  line-height:1.12 !important;
+}
+#VISITOR .vsec-title::after{
+  width:54px !important; height:4px !important; border-radius:99px;
+  background:linear-gradient(90deg,var(--lx-gold),#F5B800) !important;
+}
+/* Squiggle « marker » or dessiné à la main (signature Sharesub) sous les titres héros */
+#VISITOR .vsec-title-hero::after{
+  content:'' !important; display:block !important;
+  width:150px !important; height:12px !important; margin-top:8px;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 150 12'%3E%3Cpath d='M3 8 C30 3, 60 9, 85 5 S130 7, 147 4' fill='none' stroke='%23FFC93C' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M8 10 C40 6, 80 11, 142 7' fill='none' stroke='%23E8A413' stroke-width='2.5' stroke-linecap='round' opacity='.7'/%3E%3C/svg%3E") no-repeat center/contain !important;
+}
+#VISITOR .vsec-sub{
+  font-family:'Crimson Pro',Georgia,serif !important;
+  font-size:15.5px !important; font-style:italic;
+  color:var(--lx-ink-3) !important; max-width:560px;
+}
+/* En-têtes de section sombres → encre éditoriale + halo cobalt/or */
+#VISITOR .acc-head{
+  background:linear-gradient(135deg,#0D1B3E 0%,#142554 50%,#1E3A7A 100%); /* v1.4.1 : bleu, pas noir */
+  border:1px solid rgba(39,66,245,.28);
+  max-width:640px;
+}
+#VISITOR .acc-head::before{
+  background:linear-gradient(90deg,transparent,var(--lx-cobalt) 30%,var(--lx-gold) 70%,transparent);
+}
+#VISITOR .acc-head::after{
+  background:radial-gradient(ellipse at 15% 0%, rgba(39,66,245,.16), transparent 55%),
+             radial-gradient(ellipse at 88% 110%, rgba(232,164,19,.12), transparent 50%);
+}
+#VISITOR .acc-head .acc-pill{ font-family:'Libre Baskerville',Georgia,serif; font-weight:700; }
+
+/* ── 3. NAVIGATION — pilules sur verre ivoire (sticky, blur) ── */
+#VISITOR .vnav{
+  background:rgba(250,247,241,.86) !important;
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:var(--lx-line) !important;
+}
+#VISITOR .vnav-btn{
+  color:var(--lx-ink-2);
+  border-radius:99px !important;
+  transition:background .2s var(--lx-ease), color .2s var(--lx-ease), transform .2s var(--lx-ease);
+}
+#VISITOR .vnav-btn:hover{ background:rgba(14,19,32,.05); transform:translateY(-1px); }
+#VISITOR .vnav-btn.on{
+  background:var(--lx-ink) !important; color:#fff !important;
+  box-shadow:0 6px 16px rgba(14,19,32,.22);
+}
+
+/* ── 4. CARTES — porcelaine sur ivoire, radius généreux, ombre diffuse ── */
+#VISITOR .vcard, #VISITOR .rc, #VISITOR .vbook-card, #VISITOR .featured-card{
+  background:#FFFFFF;
+  border:var(--lx-line) !important;
+  border-radius:22px !important;
+  box-shadow:var(--lx-shadow) !important;
+}
+#VISITOR .vcard:hover, #VISITOR .rc:hover, #VISITOR .vbook-card:hover{
+  box-shadow:var(--lx-shadow-lg) !important;
+  transform:translateY(-4px);
+}
+#VISITOR .vcard{ transition:transform .28s var(--lx-ease), box-shadow .28s var(--lx-ease), border-color .28s var(--lx-ease); }
+/* Liseré supérieur coloré : plus discret */
+#VISITOR .vcard, #VISITOR .vgz-bento-card, #VISITOR .gallery-card{ border-top-width:2px !important; }
+
+/* ── 5. BOUTONS — pilules tactiles, encre pleine, focus accessible ── */
+#VISITOR .btn{
+  border-radius:99px !important;
+  font-weight:700;
+  transition:transform .18s var(--lx-ease), box-shadow .18s var(--lx-ease), background .18s var(--lx-ease);
+}
+#VISITOR .btn:hover{ transform:translateY(-2px); }
+#VISITOR .btn:active{ transform:translateY(0) scale(.98); }
+#VISITOR .btn:focus-visible{ outline:3px solid var(--lx-cobalt-soft); outline-offset:2px; }
+#VISITOR .btn.bi{
+  background:var(--lx-ink) !important; color:#fff !important; border:none !important;
+  box-shadow:0 8px 20px rgba(14,19,32,.18);
+}
+#VISITOR .btn.bi:hover{ background:#1E3A7A !important; box-shadow:0 12px 28px rgba(30,58,122,.30); }
+#VISITOR .btn.bo{
+  background:transparent !important; color:var(--lx-ink) !important;
+  border:1.5px solid rgba(14,19,32,.18) !important;
+}
+#VISITOR .btn.bo:hover{ border-color:var(--lx-ink) !important; background:rgba(14,19,32,.04) !important; }
+
+/* ── 6. HERO — encre profonde, halos cobalt + or (signature) ── */
+#VISITOR .vhero, #VISITOR .v-hero-gradient{
+  background:
+    radial-gradient(900px 420px at 12% -10%, rgba(39,66,245,.22), transparent 55%),
+    radial-gradient(700px 380px at 95% 115%, rgba(232,164,19,.14), transparent 55%),
+    linear-gradient(150deg,#0A1430 0%,#142554 55%,#1E3A7A 100%) !important; /* v1.4.1 : bleu, pas noir */
+}
+#VISITOR .vhero-title{
+  font-family:'Libre Baskerville',Georgia,serif !important;
+  letter-spacing:-0.01em;
+  animation:none !important;
+  background:linear-gradient(110deg,#FFF6DC,#FFC93C 55%,#E8A413) !important;
+  -webkit-background-clip:text !important; background-clip:text !important;
+}
+
+/* ── 7. SOULIGNEMENT « MARQUEUR » — signature éditoriale sur les emphases ── */
+#VISITOR .lx-mark, #VISITOR .vsec-title em{
+  font-style:normal;
+  background:linear-gradient(180deg,transparent 58%, rgba(232,164,19,.38) 58%, rgba(232,164,19,.38) 92%, transparent 92%);
+  border-radius:2px; padding:0 2px;
+}
+
+/* ── 8. PANNEAUX RÉSULTATS & STATS — alignés sur l'encre + cobalt ── */
+#VISITOR .vgz-stats .vgz-stat{
+  background:
+    radial-gradient(circle at 85% 0%, rgba(232,164,19,.13) 0%, transparent 50%),
+    radial-gradient(circle at 0% 100%, rgba(39,66,245,.16) 0%, transparent 55%),
+    linear-gradient(160deg, rgba(30,58,122,.92), rgba(20,37,84,.88)); /* v1.4.1 : bleu, pas noir */
+  border:1px solid rgba(39,66,245,.30);
+  border-radius:20px;
+}
+#VISITOR .exam-year-chip{ font-family:'Plus Jakarta Sans',sans-serif; }
+#VISITOR .exam-bar{ background:rgba(14,19,32,.06); border-color:rgba(14,19,32,.05); }
+
+/* ── 9. PLANS D'ABONNEMENT — porcelaine premium, CTA encre ── */
+#VISITOR .vplan-card{
+  border-radius:24px !important;
+  border:var(--lx-line) !important;
+  box-shadow:var(--lx-shadow) !important;
+  background:#fff;
+}
+#VISITOR .vplan-card:hover{ box-shadow:var(--lx-shadow-lg) !important; }
+#VISITOR .vplan-cta{
+  border-radius:99px !important;
+  background:var(--lx-ink) !important; color:#fff !important;
+  box-shadow:0 10px 24px rgba(14,19,32,.20) !important;
+  transition:transform .18s var(--lx-ease), box-shadow .18s var(--lx-ease);
+}
+#VISITOR .vplan-cta:hover{ transform:translateY(-2px); background:var(--lx-cobalt) !important;
+  box-shadow:0 14px 32px rgba(39,66,245,.32) !important; }
+#VISITOR .vplan-price{ font-family:'Libre Baskerville',Georgia,serif !important; color:var(--lx-ink) !important; }
+
+/* ── 10. INPUTS & DIVERS — finition ── */
+#VISITOR .fi{
+  border-radius:14px !important; border:var(--lx-line) !important; background:#fff;
+  transition:border-color .2s, box-shadow .2s;
+}
+#VISITOR .fi:focus{ border-color:var(--lx-cobalt) !important; box-shadow:0 0 0 4px var(--lx-cobalt-soft) !important; }
+#VISITOR .back-btn{
+  border-radius:99px; background:#fff; border:var(--lx-line);
+  box-shadow:0 2px 8px rgba(14,19,32,.06);
+}
+#VISITOR ::selection{ background:rgba(39,66,245,.16); }
+
+/* ── 11. Mobile : titres display raisonnés ── */
+@media (max-width:760px){
+  #VISITOR .vsec-title, #VISITOR .vsec-title-hero{ font-size:24px !important; }
+}
+@media (prefers-reduced-motion:reduce){
+  #VISITOR .btn, #VISITOR .vcard, #VISITOR .vnav-btn{ transition:none !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.4.4 — CARTES À BANDEAU (étude vidéo Sharesub) : sobres, en-tête navy,
+   corps blanc, CTA pilule — entrée en CASCADE au scroll. + Bandeau sticky CTA.
+   ════════════════════════════════════════════════════════════════════════ */
+.lx-catcard{
+  background:#fff; border:1px solid rgba(20,37,84,.10); border-radius:16px;
+  overflow:hidden; cursor:pointer;
+  box-shadow:0 1px 2px rgba(14,19,32,.04), 0 10px 26px rgba(14,19,32,.06);
+  transition:transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease, border-color .22s ease;
+}
+.lx-catcard:hover{
+  transform:translateY(-4px);
+  border-color:rgba(39,66,245,.35);
+  box-shadow:0 2px 4px rgba(14,19,32,.05), 0 22px 48px rgba(14,19,32,.12);
+}
+.lx-catcard-head{
+  display:flex; align-items:center; gap:9px;
+  background:linear-gradient(135deg,#0D1B3E,#142554);
+  color:#fff; padding:12px 14px;
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif;
+  font-size:13.5px; font-weight:800; letter-spacing:-.01em;
+}
+.lx-catcard-head span{ flex:1; line-height:1.2; }
+.lx-chip{
+  font-style:normal; font-size:9px; font-weight:900; letter-spacing:.4px;
+  padding:2px 8px; border-radius:99px; flex-shrink:0;
+}
+.lx-chip-gold{ background:#FFC93C; color:#142554; }
+.lx-chip-green{ background:rgba(16,185,129,.92); color:#fff; }
+.lx-catcard-body{ padding:12px 14px 13px; }
+.lx-catcard-desc{
+  font-size:11.5px; color:#6E7BA0; line-height:1.5; min-height:34px; margin-bottom:10px;
+}
+.lx-catcard-foot{
+  display:flex; align-items:center; justify-content:space-between;
+  padding-top:10px; border-top:1px solid rgba(20,37,84,.07);
+}
+.lx-catcard-count{ font-size:11px; font-weight:700; color:#3A4768; }
+.lx-catcard-cta{
+  font-size:11px; font-weight:800; color:#fff;
+  background:#2563EB; border-radius:99px; padding:5px 12px;
+  transition:background .18s ease, transform .18s ease;
+}
+.lx-catcard:hover .lx-catcard-cta{ background:#1D4ED8; transform:translateX(2px); }
+
+/* Effet de DÉROULEMENT : cascade des cartes quand la grille entre à l'écran
+   (observer existant pose .is-visible). Sans JS : tout reste visible. */
+.lx-catgrid.v-reveal .lx-catcard{ opacity:0; }
+.lx-catgrid.is-visible .lx-catcard{
+  animation:vtPopIn .5s cubic-bezier(.34,1.56,.64,1) both;
+}
+.lx-catgrid.is-visible .lx-catcard:nth-child(2){ animation-delay:.07s }
+.lx-catgrid.is-visible .lx-catcard:nth-child(3){ animation-delay:.14s }
+.lx-catgrid.is-visible .lx-catcard:nth-child(4){ animation-delay:.21s }
+.lx-catgrid.is-visible .lx-catcard:nth-child(5){ animation-delay:.28s }
+.lx-catgrid.is-visible .lx-catcard:nth-child(6){ animation-delay:.35s }
+.lx-catgrid.is-visible .lx-catcard:nth-child(7){ animation-delay:.42s }
+.lx-catgrid.is-visible .lx-catcard:nth-child(8){ animation-delay:.49s }
+.lx-catgrid.is-visible .lx-catcard:nth-child(n+9){ animation-delay:.56s }
+@media (prefers-reduced-motion:reduce){
+  .lx-catgrid.v-reveal .lx-catcard{ opacity:1; animation:none !important; }
+}
+
+/* ── Bandeau sticky de conversion (signature Sharesub, version VÉRITAS) ── */
+.lx-sticky-cta{
+  position:fixed; left:50%; bottom:14px; transform:translateX(-50%);
+  z-index:8800; display:flex; align-items:center; gap:14px;
+  background:linear-gradient(135deg,#1D4ED8,#2563EB);
+  color:#fff; border-radius:99px; padding:10px 12px 10px 22px;
+  box-shadow:0 12px 36px rgba(29,78,216,.40);
+  font-size:13px; font-weight:600; max-width:min(94vw,560px);
+  animation:lxSlideUp .5s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes lxSlideUp{ from{opacity:0;transform:translate(-50%,24px)} to{opacity:1;transform:translate(-50%,0)} }
+.lx-sticky-cta b{ color:#FFE08A; }
+.lx-sticky-cta .lx-go{
+  background:#FFC93C; color:#142554; border:none; border-radius:99px;
+  padding:9px 18px; font-size:12.5px; font-weight:800; cursor:pointer;
+  font-family:'Montserrat',sans-serif; white-space:nowrap;
+  transition:transform .18s ease;
+}
+.lx-sticky-cta .lx-go:hover{ transform:translateY(-2px); }
+.lx-sticky-cta .lx-x{
+  background:rgba(255,255,255,.15); color:#fff; border:none; border-radius:50%;
+  width:28px; height:28px; cursor:pointer; font-size:13px; flex-shrink:0;
+}
+@media (max-width:560px){ .lx-sticky-cta{ font-size:11.5px; gap:8px; padding-left:14px; } }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.4.5 — ÉPURE ACCUEIL : polices réduites, panneaux resserrés, effet
+   « shine » premium sur les statistiques de résultats.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* (a) Polices un cran plus bas, partout sur le portail */
+#VISITOR .vsec-title, #VISITOR .vsec-title-hero{
+  font-size:clamp(21px,3vw,30px) !important;
+}
+#VISITOR .vsec-sub{ font-size:14px !important; }
+#VISITOR .vgz-stat-num{ font-size:24px !important; text-shadow:0 1px 8px rgba(255,201,60,.28); }
+#VISITOR .acc-head .acc-pill{ font-size:16px; }
+#VISITOR .acc-head .acc-sub{ font-size:12.5px; }
+
+/* (b) Panneaux resserrés : en-têtes de section et hero plus contenus */
+#VISITOR .acc-head{ max-width:540px; padding:13px 20px; }
+#VISITOR .acc-head .acc-pill .ic{ width:36px; height:36px; border-radius:10px; }
+#VISITOR .vhero-content{ max-width:980px !important; }
+#VISITOR .vgz-stats{ gap:12px !important; }
+
+/* (c) PREMIUM — effet « shine » diagonal qui balaie chaque panneau de stats
+   une seule fois à son apparition (aucun coût permanent), et au survol. */
+#VISITOR .vgz-stats .vgz-stat{ position:relative; overflow:hidden; }
+#VISITOR .vgz-stats .vgz-stat::after{
+  content:''; position:absolute; top:0; bottom:0; left:-80%; width:55%;
+  background:linear-gradient(105deg, transparent 0%, rgba(255,255,255,.14) 45%, rgba(255,201,60,.10) 55%, transparent 100%);
+  transform:skewX(-18deg); pointer-events:none; opacity:0;
+}
+#VISITOR .vgz-stats.is-visible .vgz-stat::after{
+  animation:lxShine 1.1s ease-out .45s 1 both;
+}
+#VISITOR .vgz-stats .vgz-stat:hover::after{
+  animation:lxShine .8s ease-out 1;
+}
+@keyframes lxShine{
+  0%{ left:-80%; opacity:0; }
+  25%{ opacity:1; }
+  100%{ left:130%; opacity:0; }
+}
+@media (prefers-reduced-motion:reduce){
+  #VISITOR .vgz-stats .vgz-stat::after{ animation:none !important; opacity:0 !important; }
+}
+
+/* ── v1.4.6 — NAVIGATION SUBTILE : fini les grosses pilules encombrantes.
+   Radius modéré, padding réduit, état actif = fond léger + fin souligné or
+   (au lieu du bloc encre massif). !important requis : radius 20px inline. ── */
+#VISITOR .vnav-btn{
+  border-radius:10px !important;
+  padding:6px 12px !important;
+  box-shadow:none !important;
+  position:relative;
+  font-size:12.5px !important;
+}
+#VISITOR .vnav-btn:hover{ background:rgba(20,37,84,.05) !important; transform:none; }
+#VISITOR .vnav-btn.on{
+  background:rgba(20,37,84,.06) !important;
+  color:var(--lx-ink,#142554) !important;
+  box-shadow:none !important;
+}
+#VISITOR .vnav-btn.on::after{
+  content:''; position:absolute; left:12px; right:12px; bottom:1px; height:2.5px;
+  border-radius:99px;
+  background:linear-gradient(90deg,#FFC93C,#E8A413);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.4.7 — ÉPURE ACCUEIL : typo plus douce, panneaux resserrés,
+   stats de résultats premium (shine UNIQUE à l'apparition — zéro boucle).
+   ════════════════════════════════════════════════════════════════════════ */
+/* Sections moins larges, plus d'air sur les côtés */
+#VISITOR .vsec{ max-width:1000px !important; }
+/* Polices des grands titres réduites d'un cran */
+#VISITOR .vsec-title, #VISITOR .vsec-title-hero{ font-size:clamp(22px,3.2vw,32px) !important; }
+#VISITOR .vsec-sub{ font-size:14px !important; }
+
+/* Panneaux STATISTIQUES DES RÉSULTATS : resserrés et centrés, padding réduit,
+   pourcentage moins criard, labels plus fins. */
+#VISITOR .vgz-stats{
+  max-width:920px; margin-left:auto !important; margin-right:auto !important;
+  gap:12px !important;
+}
+#VISITOR .vgz-stats .vgz-stat{ padding:16px 16px 14px !important; }
+#VISITOR .vgz-stat-num{ font-size:26px !important; letter-spacing:-.5px !important; }
+#VISITOR .vgz-stats .vgz-stat [style*="letter-spacing:1px"]{ font-size:9.5px !important; opacity:.75; }
+
+/* Effet PREMIUM : reflet lumineux qui traverse chaque panneau UNE SEULE FOIS
+   à son apparition (escaladé par carte), puis plus aucun coût de rendu. */
+#VISITOR .vgz-stats.is-visible .vgz-stat{ position:relative; overflow:hidden; }
+#VISITOR .vgz-stats.is-visible .vgz-stat::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.16) 50%,transparent 68%);
+  background-size:260% 100%; background-position:220% 0;
+  animation:lxShine 1.3s ease-out .45s 1 both;
+}
+#VISITOR .vgz-stats.is-visible .vgz-stat:nth-child(2)::after{ animation-delay:.65s }
+#VISITOR .vgz-stats.is-visible .vgz-stat:nth-child(3)::after{ animation-delay:.85s }
+#VISITOR .vgz-stats.is-visible .vgz-stat:nth-child(4)::after{ animation-delay:1.05s }
+@keyframes lxShine{ from{background-position:220% 0} to{background-position:-80% 0} }
+@media (prefers-reduced-motion:reduce){
+  #VISITOR .vgz-stats.is-visible .vgz-stat::after{ animation:none !important; opacity:0; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.4.8 — « NOS RÉSULTATS » au style carte-bandeau (aligné lx-catcard) :
+   bandeau navy (examen + % or animé), corps blanc (séries chips, mentions).
+   ════════════════════════════════════════════════════════════════════════ */
+.lx-statcard{
+  background:#fff; border:1px solid rgba(20,37,84,.10); border-radius:16px;
+  overflow:hidden; text-align:left;
+  box-shadow:0 1px 2px rgba(14,19,32,.04), 0 10px 26px rgba(14,19,32,.06);
+  transition:transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease;
+  position:relative;
+}
+.lx-statcard:hover{
+  transform:translateY(-4px);
+  box-shadow:0 2px 4px rgba(14,19,32,.05), 0 22px 48px rgba(14,19,32,.12);
+}
+.lx-statcard-head{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+  background:linear-gradient(135deg,#0D1B3E,#142554);
+  padding:12px 14px;
+}
+.lx-statcard-ex{
+  font-family:'Plus Jakarta Sans','Montserrat',sans-serif;
+  font-size:13.5px; font-weight:800; color:#fff; letter-spacing:.4px;
+  text-transform:uppercase; line-height:1.15; display:flex; flex-direction:column;
+}
+.lx-statcard-ex small{
+  font-size:8px; font-weight:700; color:rgba(255,255,255,.55);
+  letter-spacing:1.2px; margin-top:2px;
+}
+.lx-stat-pct{
+  font-style:normal; font-family:'Libre Baskerville',Georgia,serif;
+  font-size:24px; font-weight:700; color:#FFC93C; letter-spacing:-.5px;
+  text-shadow:0 1px 8px rgba(255,201,60,.3); flex-shrink:0;
+}
+.lx-statcard-body{ padding:12px 14px 13px; }
+.lx-stat-series{ display:flex; gap:6px; flex-wrap:wrap; }
+.lx-serie{
+  flex:1; min-width:54px; text-align:center;
+  background:#F4F7FE; border:1px solid rgba(20,37,84,.07); border-radius:9px;
+  padding:6px 5px;
+}
+.lx-serie b{ display:block; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:800; color:#2563EB; }
+.lx-serie span{ font-size:9.5px; color:#3A4768; font-weight:600; letter-spacing:.3px; } /* v1.4.9 : foncé (lisibilité) */
+.lx-stat-mentions{ margin-top:10px; padding-top:9px; border-top:1px solid rgba(20,37,84,.07); }
+.lx-stat-mlabel{ font-size:8.5px; font-weight:800; color:#B45309; letter-spacing:.8px; text-transform:uppercase; }
+.lx-stat-mrow{ display:flex; gap:4px; margin-top:5px; }
+.lx-ment{ flex:1; min-width:46px; text-align:center; }
+.lx-ment b{ display:block; font-family:'Plus Jakarta Sans',sans-serif; font-size:13px; font-weight:800; color:#142554; }
+.lx-ment span{ font-size:9px; color:#3A4768; font-weight:600; letter-spacing:.2px; } /* v1.4.9 : foncé (lisibilité) */
+
+/* Cascade + shine UNIQUE (réutilise l'observer .vgz-stats.is-visible) */
+.vgz-stats.v-reveal .lx-statcard{ opacity:0; }
+.vgz-stats.is-visible .lx-statcard{ animation:vtPopIn .55s cubic-bezier(.34,1.56,.64,1) both; }
+.vgz-stats.is-visible .lx-statcard:nth-child(2){ animation-delay:.10s }
+.vgz-stats.is-visible .lx-statcard:nth-child(3){ animation-delay:.20s }
+.vgz-stats.is-visible .lx-statcard:nth-child(4){ animation-delay:.30s }
+.vgz-stats.is-visible .lx-statcard .lx-statcard-head{ position:relative; overflow:hidden; }
+.vgz-stats.is-visible .lx-statcard .lx-statcard-head::after{
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg,transparent 32%,rgba(255,255,255,.18) 50%,transparent 68%);
+  background-size:260% 100%; background-position:220% 0;
+  animation:lxShine 1.2s ease-out .5s 1 both;
+}
+.vgz-stats.is-visible .lx-statcard:nth-child(2) .lx-statcard-head::after{ animation-delay:.7s }
+.vgz-stats.is-visible .lx-statcard:nth-child(3) .lx-statcard-head::after{ animation-delay:.9s }
+.vgz-stats.is-visible .lx-statcard:nth-child(4) .lx-statcard-head::after{ animation-delay:1.1s }
+@media (prefers-reduced-motion:reduce){
+  .vgz-stats.v-reveal .lx-statcard{ opacity:1; animation:none !important; }
+  .vgz-stats.is-visible .lx-statcard .lx-statcard-head::after{ animation:none !important; opacity:0; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.7 — LECTEUR PDF SÉCURISÉ (consultation on-site, anti-copie/capture)
+   ════════════════════════════════════════════════════════════════════════ */
+.sread{position:fixed;inset:0;z-index:99000;background:#0B1224;display:flex;flex-direction:column;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;animation:sreadIn .25s ease}
+@keyframes sreadIn{from{opacity:0}to{opacity:1}}
+.sread-bar{display:flex;align-items:center;gap:12px;padding:12px 16px;background:linear-gradient(135deg,#0D1B3E,#142554);
+  color:#fff;border-bottom:1px solid rgba(255,201,60,.25);flex-shrink:0}
+.sread-title{flex:1;font-family:'Plus Jakarta Sans',Montserrat,sans-serif;font-weight:800;font-size:14px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sread-page{font-size:12px;color:#FFC93C;font-weight:700;white-space:nowrap}
+.sread-x{background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:50%;width:32px;height:32px;
+  cursor:pointer;font-size:14px;flex-shrink:0}
+.sread-stage{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:18px;position:relative}
+.sread-img{max-width:min(900px,96%);width:auto;height:auto;border-radius:8px;box-shadow:0 12px 40px rgba(0,0,0,.5);
+  pointer-events:none;-webkit-user-drag:none;user-drag:none}
+.sread-load{color:rgba(255,255,255,.7);font-size:15px;padding:60px 20px;text-align:center;line-height:1.7}
+.sread-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;
+  background:#0D1B3E;border-top:1px solid rgba(255,255,255,.08);flex-shrink:0}
+.sread-btn{background:#FFC93C;color:#142554;border:none;border-radius:99px;padding:10px 20px;font-weight:800;
+  font-size:13px;cursor:pointer;font-family:Montserrat,sans-serif}
+.sread-btn:disabled{opacity:.35;cursor:not-allowed}
+.sread-foot{font-size:11px;color:rgba(255,255,255,.45);letter-spacing:.5px}
+/* Bouclier anti-capture (floutage à la perte de focus) */
+.sread-shield{display:none;position:absolute;inset:0;z-index:5;background:rgba(11,18,36,.97);
+  backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);flex-direction:column;align-items:center;
+  justify-content:center;color:#FFC93C;font-family:Montserrat,sans-serif;font-weight:800;font-size:17px;gap:8px;text-align:center}
+.sread-shield small{color:rgba(255,255,255,.6);font-weight:500;font-size:12px}
+/* Paywall après l'aperçu gratuit */
+.sread-pay{max-width:420px;margin:auto;text-align:center;color:#fff;padding:40px 24px;
+  background:linear-gradient(160deg,rgba(20,37,84,.6),rgba(13,27,62,.6));border:1px solid rgba(255,201,60,.3);
+  border-radius:20px}
+.sread-pay-t{font-family:Montserrat,sans-serif;font-weight:800;font-size:18px;margin:14px 0 6px}
+.sread-pay-s{font-size:13px;color:rgba(255,255,255,.7);line-height:1.6;margin-bottom:16px}
+.sread-pay-price{font-family:'Libre Baskerville',Georgia,serif;font-size:30px;font-weight:700;color:#FFC93C;margin-bottom:16px}
+.sread-pay-btn{background:linear-gradient(135deg,#FFC93C,#F5B800);color:#142554;border:none;border-radius:99px;
+  padding:14px 28px;font-weight:800;font-size:14px;cursor:pointer;font-family:Montserrat,sans-serif;
+  box-shadow:0 8px 24px rgba(255,201,60,.3)}
+.sread-pay-note{font-size:11px;color:rgba(255,255,255,.5);margin-top:12px}
+@media (prefers-reduced-motion:reduce){ .sread{animation:none} }
