@@ -629,15 +629,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.9.3">
+<link rel="preload" as="script" href="/app.js?v=1.9.4">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.9.3" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.9.3"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.9.4" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.9.4"></noscript>
 </head>
 <body>
 <!-- ════════ A11Y v2 : Skip link pour lecteurs d'écran ════════ -->
@@ -926,7 +926,7 @@ setInterval(_refreshCitation,15000);
      Sûr : app.js s'auto-amorce (start() via readyState/DOMContentLoaded) et tous les
      appels inline à ses fonctions sont gardés (typeof) ou différés (setTimeout/DCL).
      Le rescue boot (anti-écran-blanc) reste le filet ultime. -->
-<script defer src="/app.js?v=1.9.3"></script>
+<script defer src="/app.js?v=1.9.4"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>
@@ -1835,12 +1835,12 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 
 /* ═════ #10 — TÉMOIGNAGES (fond plus contrasté) ═════ */
 .vgz-testis{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin:24px 0}
-.vgz-testi{background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,201,60,.03));border:1px solid rgba(255,201,60,.2);border-radius:20px;padding:24px;color:#fff;position:relative;transition:transform .3s,box-shadow .3s;backdrop-filter:blur(6px)}
+.vgz-testi{background:linear-gradient(160deg,rgba(255,255,255,.08),rgba(255,201,60,.03));border:1px solid rgba(255,201,60,.2);border-radius:20px;padding:24px;display:flex;flex-direction:column;color:#fff;position:relative;transition:transform .3s,box-shadow .3s;backdrop-filter:blur(6px)}
 .vgz-testi:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(255,201,60,.15)}
-.vgz-testi::before{content:"\201C";position:absolute;top:-10px;left:14px;font-family:Georgia,serif;font-size:80px;color:rgba(255,201,60,.35);line-height:1}
+.vgz-testi::before{content:"\201C";position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:Georgia,serif;font-size:54px;color:rgba(255,201,60,.22);line-height:1;pointer-events:none}
 .vgz-testi-stars{color:#FFC93C;font-size:15px;letter-spacing:2px;margin-bottom:10px;position:relative;filter:drop-shadow(0 0 6px rgba(255,201,60,.4))}
 .vgz-testi-text{font-family:Georgia,serif;font-style:italic;font-size:13.5px;line-height:1.7;color:rgba(255,255,255,.92);margin-bottom:14px}
-.vgz-testi-author{display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px solid rgba(255,201,60,.15)}
+.vgz-testi-author{order:-1;display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:2px 0 14px;margin-bottom:4px;border-bottom:1px solid rgba(255,201,60,.15)}
 .vgz-testi-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#FFC93C,#FFA500);display:flex;align-items:center;justify-content:center;font-family:Montserrat,sans-serif;font-weight:900;color:#142554;font-size:17px;flex-shrink:0;box-shadow:0 4px 16px rgba(255,201,60,.4)}
 .vgz-testi-info-name{font-size:13.5px;font-weight:800;color:#FFC93C}
 .vgz-testi-info-meta{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px}
@@ -1860,7 +1860,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .vgz-dark-section .vgz-testi:hover{box-shadow:0 14px 30px rgba(20,37,84,.12)}
 .vgz-dark-section .vgz-testi::before{color:rgba(20,37,84,.10)}
 .vgz-dark-section .vgz-testi-text{color:var(--ds-text-2,#475882)}
-.vgz-dark-section .vgz-testi-author{border-top-color:var(--ds-border,#E6EAF2)}
+.vgz-dark-section .vgz-testi-author{border-bottom-color:var(--ds-border,#E6EAF2)}
 .vgz-dark-section .vgz-testi-info-name{color:var(--ds-primary,#142554)}
 .vgz-dark-section .vgz-testi-info-meta{color:var(--ds-text-3,#7A88A6)}
 
@@ -2504,7 +2504,7 @@ html{scroll-behavior:smooth}
       //     de bord → accueil épuré (on garde le Palmarès pour l'émulation). ===
 
       // === STATS PAR EXAMEN (éditable via DB.statsVitrine) ===
-      +(typeof _statsVitrineHtml==='function'?_statsVitrineHtml():'')
+      +(typeof _reussitesScroller==='function'?_reussitesScroller():'')
       // === v1.2.4 : panneaux « Élèves formés » / « Enseignants » retirés (illisibles + chiffres indicatifs). ===
 
       // === BENTO GRID retiré (v1.2.3) : redondant avec la nav visiteur ===

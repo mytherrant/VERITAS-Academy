@@ -1483,6 +1483,16 @@ function _migrateDB(){
   if(!DB.photos)DB.photos=defaultDB().photos||[];
   if(!DB.examResults)DB.examResults=defaultDB().examResults||[];
   if(!DB.statsVitrine)DB.statsVitrine=defaultDB().statsVitrine||[];
+  // v1.2.x — backfill mentions : toute entrée vitrine sans mentions reçoit des
+  // valeurs d'exemple (Excellent/Très Bien/Bien/Assez Bien) → cartes pleines.
+  // Indicatif, éditable via « ✏️ Modifier les résultats ».
+  (DB.statsVitrine||[]).forEach(function(_sv){
+    var _m=_sv.mentions||{};
+    if(!['ab','b','tb','exc'].some(function(k){return _m[k]!=null&&_m[k]!=='';})){
+      var _t=Math.max(0,Math.min(100,+_sv.taux||0));
+      _sv.mentions={ ab:Math.round(_t*0.42), b:Math.round(_t*0.24), tb:Math.round(_t*0.11), exc:Math.max(1,Math.round(_t*0.03)) };
+    }
+  });
   // GCE O Level et A Level sont désormais des panneaux séparés dans defaultDB().statsVitrine.
   if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts||[];
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
@@ -2448,6 +2458,7 @@ document.addEventListener('error', function(e){
     try{
       if(!el||el.nodeType!==1||el.__a11y)return;
       if(isNative(el))return;
+      if(el.getAttribute('aria-hidden')==='true')return;   // éléments invisibles/décoratifs (ex. point d'accès admin secret) : ne pas les rendre focusables ni nommés
       if(!el.hasAttribute('tabindex'))el.setAttribute('tabindex','0');
       if(!el.hasAttribute('role'))el.setAttribute('role','button');
       el.__a11y=true;
@@ -4012,14 +4023,14 @@ function _showOnboardingStep(idx){
       '<p id="_obText" style="font-size:14px;color:#475569;line-height:1.65;margin:0 0 24px">'+step.text+'</p>'+
       // Progress
       '<div style="background:#E2E8F0;height:6px;border-radius:3px;overflow:hidden;margin:0 0 18px"><div style="height:100%;width:'+progress+'%;background:linear-gradient(90deg,#FFC93C,#F59E0B);transition:width .4s"></div></div>'+
-      '<div style="font-size:11px;color:#94A3B8;margin-bottom:14px">Étape '+(idx+1)+' / '+totalSteps+'</div>'+
+      '<div style="font-size:11px;color:#5A6B85;margin-bottom:14px">Étape'+(idx+1)+' / '+totalSteps+'</div>'+
       // Boutons : Retour (si idx>0) + CTA
       '<div style="display:flex;gap:10px">'+
         (idx>0 ? '<button type="button" id="_obBackBtn" onclick="window._showOnboardingStep('+(idx-1)+');return false;" style="background:#F1F5F9;color:#142554;border:1px solid #E2E8F0;border-radius:14px;padding:14px 20px;font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-weight:700;font-size:14px;cursor:pointer;min-width:80px;letter-spacing:.5px" aria-label="Étape précédente">←</button>' : '')+
         '<button type="button" id="_obCtaBtn" onclick="window._onboardingNext('+idx+');return false;" style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;border:none;border-radius:14px;padding:14px 28px;font-family:Plus Jakarta Sans,Montserrat,sans-serif;font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 6px 20px rgba(20,37,84,.3);flex:1;letter-spacing:.5px;min-height:50px" autofocus>'+step.cta+'</button>'+
       '</div>'+
       // Indication clavier discrète
-      '<div style="font-size:10px;color:#94A3B8;margin-top:12px;letter-spacing:.3px">⌨️ Entrée pour continuer · Échap pour passer · ← → pour naviguer</div>'+
+      '<div style="font-size:10px;color:#5A6B85;margin-top:12px;letter-spacing:.3px">⌨️ Entrée pour continuer · Échap pour passer · ← → pour naviguer</div>'+
     '</div>';
   document.body.appendChild(ov);
 
@@ -4572,15 +4583,13 @@ function vShowSec(sec,btn){
       <div class="acc-news">
         <div class="acc-news-hd"><span class="dot"></span><span class="ttl">Actualités éducatives</span></div>
         <div class="acc-news-body">
-          <a class="acc-news-item" href="javascript:void(0)" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-university"/></svg></span><span class="tx"><b>MINESEC</b> — calendrier officiel des examens 2026 : BEPC, Probatoire, BAC &amp; GCE.</span></a>
-          <a class="acc-news-item" href="javascript:void(0)" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span><span class="tx"><b>Orientation</b> — grandes écoles, concours et bourses post-BAC au Cameroun.</span></a>
-          <a class="acc-news-item" href="javascript:void(0)" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-bookopen"/></svg></span><span class="tx"><b>Révisions</b> — nouvelles fiches et méthodes publiées chaque semaine.</span></a>
+          <a class="acc-news-item" href="#actualites" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'));return false"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-university"/></svg></span><span class="tx"><b>MINESEC</b> — calendrier officiel des examens 2026 : BEPC, Probatoire, BAC &amp; GCE.</span></a>
+          <a class="acc-news-item" href="#actualites" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'));return false"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span><span class="tx"><b>Orientation</b> — grandes écoles, concours et bourses post-BAC au Cameroun.</span></a>
+          <a class="acc-news-item" href="#actualites" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'));return false"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-bookopen"/></svg></span><span class="tx"><b>Révisions</b> — nouvelles fiches et méthodes publiées chaque semaine.</span></a>
         </div>
         <button class="acc-news-cta" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:6px;vertical-align:-3px"><use href="#lc-news"/></svg>Voir toutes les actualités →</button>
       </div>
     </div>
-
-    ${_reussitesMarquee()}
 
     <!-- ═══ PALMARÈS / ÉMULATION — restauré v1.2.4 : la vidéo ET le panneau d'émulation coexistent désormais ═══ -->
     <div class="acc-head">
@@ -13941,7 +13950,7 @@ window._statsVitrineHtml = function(){
       return '<div class="lx-serie"><b>'+(se.taux||0)+'%</b><span>'+_esc(se.nom||'')+'</span></div>';
     }).join('');
     var m=s.mentions||{};
-    var mentions=['ab','b','tb','exc'].filter(function(k){return m[k]!=null;}).map(function(k){
+    var mentions=['exc','tb','b','ab'].filter(function(k){return m[k]!=null;}).map(function(k){
       return '<div class="lx-ment"><b>'+(m[k]||0)+'</b><span>'+mLabels[k]+'</span></div>';
     }).join('');
     return '<div class="lx-statcard">'
@@ -13979,7 +13988,7 @@ window.mEditStatsVitrine = function(){
       +'<button class="btn bo xs" onclick="_svAddSerie('+i+')" style="margin-top:4px">+ Série</button>'
       +'<div style="font-size:11px;color:var(--ink4);margin:10px 0 4px">🏅 Mentions (nombre d\'élèves)</div>'
       +'<div class="fl2 g6" style="flex-wrap:wrap">'
-        +['ab','b','tb','exc'].map(function(k){var lab={ab:'AB',b:'B',tb:'TB',exc:'Exc'}[k];return '<label style="font-size:11px">'+lab+' <input class="fi" type="number" min="0" style="width:64px" value="'+(m[k]||0)+'" onchange="_svSet('+i+',\'ment\',\''+k+'\',this.value)"></label>';}).join('')
+        +['exc','tb','b','ab'].map(function(k){var lab={ab:'AB',b:'B',tb:'TB',exc:'Exc'}[k];return '<label style="font-size:11px">'+lab+' <input class="fi" type="number" min="0" style="width:64px" value="'+(m[k]||0)+'" onchange="_svSet('+i+',\'ment\',\''+k+'\',this.value)"></label>';}).join('')
       +'</div></div>';
   }).join('');
   M('📊 Résultats aux examens','Édition du panneau d\'accueil',
@@ -14170,6 +14179,41 @@ window._reussitesMarquee = function(){
   return '<div class="rmq" aria-label="Réussites du Centre VÉRITAS"><div class="rmq-track">'+html+html+'</div></div>';
 };
 
+// v1.2.x — CARROUSEL DE RÉSULTATS (remplace le marquee de chips sur l'accueil) :
+// les VRAIS panneaux .lx-statcard (en-tête navy + % or, thème accueil) défilent
+// horizontalement. Icône façon nav (SVG en pastille teintée) par carte. Pause au
+// survol + reduced-motion → rangée à défilement manuel. Voir .rsc dans app.css.
+window._reussitesScroller = function(){
+  var list=(typeof DB!=='undefined'&&DB.statsVitrine&&DB.statsVitrine.length)?DB.statsVitrine:[];
+  if(!list.length) return '';
+  var mLabels={ab:'Assez Bien',b:'Bien',tb:'Très Bien',exc:'Excellent'};
+  var icoFor=function(ex){ ex=(ex||'').toUpperCase();
+    if(ex.indexOf('BAC')>=0||ex.indexOf('PROBA')>=0||ex.indexOf('TLE')>=0) return 'graduation';
+    if(ex.indexOf('GCE')>=0) return 'university';
+    if(ex.indexOf('BEPC')>=0) return 'book';
+    return 'award'; };
+  var card=function(s){
+    var series=(s.series||[]).map(function(se){ return '<div class="lx-serie"><b>'+(se.taux||0)+'%</b><span>'+_esc(se.nom||'')+'</span></div>'; }).join('');
+    var m=s.mentions||{};
+    var mentions=['exc','tb','b','ab'].filter(function(k){return m[k]!=null;}).map(function(k){ return '<div class="lx-ment"><b>'+(m[k]||0)+'</b><span>'+mLabels[k]+'</span></div>'; }).join('');
+    return '<div class="lx-statcard">'
+      +'<div class="lx-statcard-head">'
+        +'<span class="lx-statcard-hl"><span class="lx-statcard-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+icoFor(s.ex)+'"/></svg></span>'
+          +'<span class="lx-statcard-ex">'+_esc(s.ex||'')+'<small>Taux de réussite</small></span></span>'
+        +'<em class="lx-stat-pct">'+(s.taux||0)+'%</em>'
+      +'</div>'
+      +'<div class="lx-statcard-body">'
+        +(series?'<div class="lx-stat-series">'+series+'</div>':'')
+        +(mentions?'<div class="lx-stat-mentions"><span class="lx-stat-mlabel">🏅 Mentions</span><div class="lx-stat-mrow">'+mentions+'</div></div>':'')
+      +'</div></div>';
+  };
+  var cards=list.map(card).join('');
+  var head='<div class="acc-head"><div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</div><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>';
+  var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:8px"><button class="btn bo sm" onclick="mEditStatsVitrine()">✏️ Modifier les résultats</button></div>':'';
+  // 2 copies de la liste → boucle continue (translateX -50%)
+  return head+'<div class="rsc" tabindex="0" aria-label="Résultats officiels du Centre VÉRITAS"><div class="rsc-track">'+cards+cards+'</div></div>'+editBtn;
+};
+
 window._palmaresHtml = function(){
   var books=DB.books||[];
   var orders=(DB.visitorOrders||[]).concat(DB.bookPurchases||[]);
@@ -14283,7 +14327,7 @@ function buildIntroVideoHtml(){
   var bg = poster
     ? "background:#0F172A url('"+poster.replace(/['\"\\]/g,'')+"') center/cover no-repeat;"
     : "background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A);";
-  return '<div class="vhero-video-wrap" data-vtype="facade" style="'+bg+'cursor:pointer" onclick="_vheroPlay(event)" role="button" tabindex="0" aria-label="Lire la video de presentation" onkeydown="if(event.key===\'Enter\'){_vheroPlay(event)}">'
+  return '<div class="vhero-video-wrap" data-vtype="facade" style="'+bg+'cursor:pointer" onclick="_vheroPlay(event)" role="button" tabindex="0" onkeydown="if(event.key===\'Enter\'){_vheroPlay(event)}">'
     + '<div class="vhero-video-overlay" style="background:linear-gradient(to bottom,rgba(13,27,62,.22),rgba(13,27,62,.55))">'
       + '<div></div>'
       + '<div style="margin:auto;display:flex;flex-direction:column;align-items:center;gap:10px">'
@@ -14905,7 +14949,7 @@ async function _runAIOrient(){
     '**Conseil BEPC/BAC** : stratégie pour les examens en vue de cette orientation. '+
     'Maximum 400 mots. En français. Adapté au contexte camerounais.';
   try{
-    var txt=await callClaudeAPI(prompt);
+    var txt=await callAmbassaIA(prompt);
     // FIX v1.2 : _aiGate() a déjà incrémenté — pas de second _aiInc
     var rem2=Math.max(0,_aiLimit('orient')-_aiUsed('orient'));
     if(res){res.style.display='block';res.style.whiteSpace='normal';res.innerHTML='<div class="ai-md">'+(typeof _aiMarkdown==='function'?_aiMarkdown(txt):_esc(txt).replace(/\n/g,'<br>'))+'</div>';}
@@ -14962,7 +15006,7 @@ async function _runAICorrect(){
       '**Piège classique** : erreur fréquente des élèves camerounais sur ce sujet.'
     )+' Maximum 450 mots. En français.';;
   try{
-    var txt=await callClaudeAPI(prompt);
+    var txt=await callAmbassaIA(prompt);
     // FIX v1.2 : _aiGate() a déjà incrémenté — pas de second _aiInc
     var rem=Math.max(0,_aiLimit('correct')-_aiUsed('correct'));
     if(res){res.style.display='block';res.style.whiteSpace='normal';res.innerHTML='<div class="ai-md">'+(typeof _aiMarkdown==='function'?_aiMarkdown(txt):_esc(txt).replace(/\n/g,'<br>'))+'</div>';}
@@ -15973,7 +16017,7 @@ window._runCorrectionIA = async function(){
     'Sois précis, encourageant, et toujours pédagogique. Max 500 mots. En français standard.';
 
   try{
-    var txt = await callClaudeAPI(prompt);
+    var txt = await callAmbassaIA(prompt);
     // FIX v1.2 : _aiGate() a déjà incrémenté le compteur — ne pas appeler _aiInc() une 2ème fois
     var rem2 = (typeof _aiLimit==='function' && typeof _aiUsed==='function')
       ? Math.max(0, _aiLimit('devoir')-_aiUsed('devoir')) : 0;
@@ -16005,9 +16049,12 @@ window._runCorrectionIA = async function(){
   }
 };
 
-async function callClaudeAPI(prompt, sysPrompt){
+// Cœur de l'IA Prof. Ambassa. Aucun moteur propriétaire unique : route via
+// api/ia_proxy.php, qui enchaîne Gemini → DeepSeek (OpenRouter) → Groq → Mistral,
+// clés jamais exposées au client. (Le nom historique vendeur a été retiré en v1.2.x.)
+async function callAmbassaIA(prompt, sysPrompt){
   // v2.9.10 — Avec logs de diagnostic pour identifier où ça échoue côté client
-  console.log("[IA] callClaudeAPI appelée — prompt=" + (prompt||'').length + " chars, sys=" + (sysPrompt||'').length + " chars");
+  console.log("[IA] callAmbassaIA appelée — prompt=" + (prompt||'').length + " chars, sys=" + (sysPrompt||'').length + " chars");
   var sys = sysPrompt || "Tu es un assistant pédagogique expert du système éducatif camerounais (MINESEC/MINESUP). Tu connais les programmes BEPC et BAC séries A/C/D, les grandes écoles camerounaises et tu contextualises dans la réalité camerounaise.";
 
   // ── v1.2.1 : IA routée via le SERVEUR (api/ia_proxy.php) ──────────────────────
@@ -19167,7 +19214,7 @@ function _littCorrigeIA(oeuvreKey, mode){
     +'<div id="littCorrigeBox" class="vcard ai-md" style="margin-top:16px;line-height:1.7">'
       +'<div style="text-align:center;color:var(--ink4);padding:28px"><span style="animation:pulse 1.2s infinite;font-size:30px">🤖</span><br>Le Professeur Ambassa rédige…<br><small>Cela peut prendre 20 à 60 secondes.</small></div>'
     +'</div></div>');
-  callClaudeAPI(base+(prompts[mode]||prompts.complet), (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:'')).then(function(txt){
+  callAmbassaIA(base+(prompts[mode]||prompts.complet), (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:'')).then(function(txt){
     var box=document.getElementById('littCorrigeBox');
     if(box) box.innerHTML=((typeof _iaBadgeHtml==='function')?_iaBadgeHtml():'')
       +((typeof _aiMarkdown==='function')?_aiMarkdown(txt):('<pre style="white-space:pre-wrap">'+_esc(txt)+'</pre>'));
@@ -27095,7 +27142,7 @@ function deconnecter(){
     +' <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin(\'eleve\')">🎓 Se connecter</button>'
     +' <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin(\'enseignant\')">👨\u200d🏫 Enseignant</button>'
     +'<span id="vSyncDot" onclick="iA()&&mSyncMenu()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>'
-    +'<span id="adminAccessPoint" style="display:inline-block;width:44px;height:44px;cursor:default;opacity:0;vertical-align:middle" onclick="_adminTriple()" title=""></span>';
+    +'<span id="adminAccessPoint" aria-hidden="true" style="display:inline-block;width:44px;height:44px;cursor:default;opacity:0;vertical-align:middle" onclick="_adminTriple()" title=""></span>';
   initVisitor();toast("Déconnecté");
 }
 
@@ -27469,19 +27516,21 @@ window.openSecureBook=function(bookId){
   ov.id='secureReader'; ov.className='sread';
   ov.innerHTML='<div class="sread-bar">'
     +'<div class="sread-title">🔒 '+_esc(book.titre||'Document')+'</div>'
+    +'<div class="sread-zoom" role="group" aria-label="Zoom du texte">'
+      +'<button class="sread-zbtn" onclick="_secureZoom(-1)" aria-label="Réduire le texte" title="Réduire">−</button>'
+      +'<span class="sread-zlbl" id="sreadZoomLbl">100%</span>'
+      +'<button class="sread-zbtn" onclick="_secureZoom(1)" aria-label="Agrandir le texte" title="Agrandir">+</button>'
+    +'</div>'
     +'<div class="sread-page" id="sreadPageLbl">…</div>'
+    +'<button class="sread-unlock" id="sreadUnlock" style="display:none" onclick="_secureUnlock()">🔓 Débloquer</button>'
     +'<button class="sread-x" onclick="closeSecureBook()" aria-label="Fermer">✕</button>'
     +'</div>'
     +'<div class="sread-stage" id="sreadStage"><div class="sread-load">📖 Chargement…</div></div>'
     +'<div class="sread-shield" id="sreadShield"><div>👁️ Lecture protégée mise en pause</div><small>Revenez sur la fenêtre pour reprendre</small></div>'
-    +'<div class="sread-nav">'
-    +'<button class="sread-btn" id="sreadPrev" onclick="_secureGo(-1)">‹ Préc.</button>'
-    +'<span class="sread-foot">Protégé · sans copie ni partage</span>'
-    +'<button class="sread-btn" id="sreadNext" onclick="_secureGo(1)">Suiv. ›</button>'
-    +'</div>';
+    +'<div class="sread-nav"><span class="sread-foot">📖 Lecture continue — faites défiler · Protégé, sans copie ni partage</span></div>';
   document.body.appendChild(ov);
   document.body.style.overflow='hidden';
-  window._secureState={id:bookId,kind:kind,page:1,pages:0,freePages:10,hasAccess:false,prepared:false,base:base,tok:tok,book:book};
+  window._secureState={id:bookId,kind:kind,page:1,pages:0,freePages:10,hasAccess:false,prepared:false,base:base,tok:tok,book:book,zoom:1};
   _secureInstallGuards();
   // Métadonnées (nombre de pages, droits)
   fetch(base+'/secure_pdf.php?id='+encodeURIComponent(bookId)+'&meta=1'+(tok?('&token='+encodeURIComponent(tok)):''))
@@ -27489,55 +27538,82 @@ window.openSecureBook=function(bookId){
     .then(function(m){
       if(!m||!m.ok){ _secureStageMsg('⚠️ Document indisponible pour le moment.'); return; }
       var st=window._secureState; st.pages=m.pages||0; st.freePages=m.freePages||10; st.hasAccess=!!m.hasAccess; st.prepared=!!m.prepared;
+      var ub=document.getElementById('sreadUnlock'); if(ub) ub.style.display=st.hasAccess?'none':'inline-flex';
       if(!m.prepared){ _secureStageMsg('📄 Ce document n\'est pas encore disponible à la lecture en ligne.'); return; }
-      _secureRender(1);
+      _secureRenderScroll();
     })
     .catch(function(){ _secureStageMsg('⚠️ Connexion au lecteur impossible.'); });
 };
 window._secureStageMsg=function(html){
   var s=document.getElementById('sreadStage'); if(s) s.innerHTML='<div class="sread-load">'+html+'</div>';
 };
-window._secureRender=function(n){
-  var st=window._secureState; if(!st) return;
-  var locked=(!st.hasAccess && n>st.freePages);
-  var stage=document.getElementById('sreadStage'); if(!stage) return;
-  document.getElementById('sreadPageLbl').textContent='Page '+n+(st.pages?(' / '+st.pages):'');
-  st.page=n;
-  if(locked){
-    if(st.kind==='contenu'){
-      // Contenu e-learning protégé → débloqué par ABONNEMENT (pas achat unitaire)
-      stage.innerHTML='<div class="sread-pay">'
-        +'<div style="font-size:46px">🔒</div>'
-        +'<div class="sread-pay-t">Aperçu de '+st.freePages+' pages terminé</div>'
-        +'<div class="sread-pay-s">« '+_esc(st.book.titre||'')+' » fait partie des ressources premium. Abonnez-vous pour la lecture intégrale, en ligne et sans téléchargement.</div>'
-        +'<button class="sread-pay-btn" onclick="closeSecureBook();(typeof vShowSec===\'function\'?vShowSec(\'elearning\',null):0);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)">📦 Voir les abonnements</button>'
-        +'<div class="sread-pay-note">Lecture sécurisée · incluse dans votre formule</div>'
-        +'</div>';
-    } else {
-      var prix=(st.book.prixDigital||st.book.priceDigital||st.book.prix||0);
-      stage.innerHTML='<div class="sread-pay">'
-        +'<div style="font-size:46px">🔓</div>'
-        +'<div class="sread-pay-t">Vous avez lu les '+st.freePages+' pages gratuites</div>'
-        +'<div class="sread-pay-s">Débloquez l\'intégralité de « '+_esc(st.book.titre||'')+' » — lecture en ligne illimitée, sans téléchargement.</div>'
-        +'<div class="sread-pay-price">'+fmtN(prix)+' FCFA</div>'
-        +'<button class="sread-pay-btn" onclick="_secureBuy()">💳 Débloquer la version numérique</button>'
-        +'<div class="sread-pay-note">Lecture sécurisée · valable sur tous vos appareils connectés</div>'
-        +'</div>';
-    }
-  } else {
-    var url=st.base+'/secure_pdf.php?id='+encodeURIComponent(st.id)+'&page='+n+(st.tok?('&token='+encodeURIComponent(st.tok)):'');
-    stage.innerHTML='<img class="sread-img" id="sreadImg" alt="page" draggable="false" '
-      +'oncontextmenu="return false" src="'+url+'?_t='+Date.now()+'" '
-      +'onerror="_secureStageMsg(\'🔒 Page réservée — débloquez la version numérique.\')">';
+// Paywall (affichée EN BAS du flux, après les pages gratuites).
+window._securePaywallHtml=function(st){
+  if(st.kind==='contenu'){
+    return '<div class="sread-pay">'
+      +'<div style="font-size:46px">🔒</div>'
+      +'<div class="sread-pay-t">Aperçu de '+st.freePages+' pages terminé</div>'
+      +'<div class="sread-pay-s">« '+_esc(st.book.titre||'')+' » fait partie des ressources premium. Abonnez-vous pour la lecture intégrale, en ligne et sans téléchargement.</div>'
+      +'<button class="sread-pay-btn" onclick="_secureUnlock()">📦 Voir les abonnements</button>'
+      +'<div class="sread-pay-note">Lecture sécurisée · incluse dans votre formule</div>'
+      +'</div>';
   }
-  var prevB=document.getElementById('sreadPrev'), nextB=document.getElementById('sreadNext');
-  if(prevB) prevB.disabled=(n<=1);
-  if(nextB) nextB.disabled=(st.pages>0&&n>=st.pages);
+  var prix=(st.book.prixDigital||st.book.priceDigital||st.book.prix||0);
+  return '<div class="sread-pay">'
+    +'<div style="font-size:46px">🔓</div>'
+    +'<div class="sread-pay-t">Vous avez lu les '+st.freePages+' pages gratuites</div>'
+    +'<div class="sread-pay-s">Débloquez l\'intégralité de « '+_esc(st.book.titre||'')+' » — lecture en ligne illimitée, sans téléchargement.</div>'
+    +'<div class="sread-pay-price">'+fmtN(prix)+' FCFA</div>'
+    +'<button class="sread-pay-btn" onclick="_secureBuy()">💳 Débloquer la version numérique</button>'
+    +'<div class="sread-pay-note">Lecture sécurisée · valable sur tous vos appareils connectés</div>'
+    +'</div>';
 };
-window._secureGo=function(d){
+// DÉFILEMENT VERTICAL CONTINU : toutes les pages accessibles empilées ; on fait
+// défiler (de bas en haut), plus de Préc./Suiv. Paywall en bas après l'aperçu.
+window._secureRenderScroll=function(){
   var st=window._secureState; if(!st) return;
-  var n=st.page+d; if(n<1) n=1; if(st.pages&&n>st.pages) n=st.pages;
-  _secureRender(n);
+  var stage=document.getElementById('sreadStage'); if(!stage) return;
+  var total=st.pages||0;
+  var readable=st.hasAccess?total:Math.min(st.freePages,(total||st.freePages));
+  if(readable<1) readable=st.hasAccess?(total||1):st.freePages;
+  var html='';
+  for(var n=1;n<=readable;n++){
+    var url=st.base+'/secure_pdf.php?id='+encodeURIComponent(st.id)+'&page='+n+(st.tok?('&token='+encodeURIComponent(st.tok)):'');
+    html+='<img class="sread-img" data-pg="'+n+'" alt="page '+n+'" draggable="false" loading="lazy" '
+      +'oncontextmenu="return false" src="'+url+'" onerror="this.style.opacity=.25">';
+  }
+  if(!st.hasAccess && (total===0 || total>st.freePages)){ html+=_securePaywallHtml(st); }
+  stage.innerHTML=html || '<div class="sread-load">📖 Chargement…</div>';
+  _secureApplyZoom();
+  _secureUpdatePageLbl();
+  if(!stage._vrtScroll){ stage._vrtScroll=1; stage.addEventListener('scroll',_secureUpdatePageLbl,{passive:true}); }
+};
+window._secureUpdatePageLbl=function(){
+  var st=window._secureState, stage=document.getElementById('sreadStage'), lbl=document.getElementById('sreadPageLbl');
+  if(!st||!stage||!lbl) return;
+  var imgs=stage.querySelectorAll('.sread-img'), cur=imgs.length?1:0, mid=stage.scrollTop+stage.clientHeight*0.35;
+  for(var i=0;i<imgs.length;i++){ if(imgs[i].offsetTop<=mid) cur=parseInt(imgs[i].getAttribute('data-pg'),10)||cur; }
+  lbl.textContent=cur?('Page '+cur+(st.pages?(' / '+st.pages):'')):'…';
+};
+window._secureZoom=function(d){
+  var st=window._secureState; if(!st) return;
+  st.zoom=Math.min(3,Math.max(0.6,Math.round(((st.zoom||1)+d*0.15)*100)/100));
+  _secureApplyZoom();
+};
+window._secureApplyZoom=function(){
+  var st=window._secureState; if(!st) return;
+  var lbl=document.getElementById('sreadZoomLbl'); if(lbl) lbl.textContent=Math.round((st.zoom||1)*100)+'%';
+  var stage=document.getElementById('sreadStage'); if(!stage) return;
+  var w=Math.round(Math.min(900,stage.clientWidth*0.96)*(st.zoom||1))+'px';
+  stage.querySelectorAll('.sread-img').forEach(function(img){ img.style.maxWidth='none'; img.style.width=w; });
+};
+window._secureUnlock=function(){
+  var st=window._secureState; if(!st) return;
+  if(st.kind==='contenu'){
+    closeSecureBook();
+    if(typeof vShowSec==='function') vShowSec('elearning',null);
+    setTimeout(function(){var p=document.getElementById('elPlans'); if(p) p.scrollIntoView({behavior:'smooth'});},400);
+  } else { _secureBuy(); }
 };
 window._secureBuy=function(){
   var st=window._secureState; if(!st) return;
@@ -34565,6 +34641,8 @@ window._pdjLoadExpl = function(){
   var fb=_pdjFallback(p);
   var dk='vrt_pdj_'+new Date().toISOString().slice(0,10)+'_'+(p.titre+'|'+p.passage).substring(0,40).replace(/[^a-z0-9]/gi,'');
   try{ var c=localStorage.getItem(dk); if(c){ box.innerHTML=c; return; } }catch(e){}
+  if(window._pdjExplBusy) return;   // v1.2.x : verrou anti-concurrence — au 1er chargement, l'accueil se re-rend ~4× et déclenchait 4 appels simultanés à ia_proxy (→ HTTP 429). Un seul appel en vol.
+  window._pdjExplBusy=true;
   try{
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
     fetch(base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
@@ -34575,8 +34653,9 @@ window._pdjLoadExpl = function(){
       var t=(d&&d.text)?String(d.text).trim():'';
       if(t){ box.innerHTML='💡 '+_esc(t); try{ localStorage.setItem(dk,box.innerHTML); }catch(e){} }
       else { box.innerHTML=fb; }
-    }).catch(function(){ box.innerHTML=fb; });
-  }catch(e){ box.innerHTML=fb; }
+      window._pdjExplBusy=false;
+    }).catch(function(){ box.innerHTML=fb; window._pdjExplBusy=false; });
+  }catch(e){ box.innerHTML=fb; window._pdjExplBusy=false; }
 };
 
 // Nettoie un titre tiré d'un nom de fichier (suffixes @Epub, "(Z-Library)",
@@ -36258,7 +36337,7 @@ window._ambassaGenerate = async function(taskId){
   _ge('mvResult').innerHTML = '<div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:14px;text-align:center"><div style="font-size:32px;margin-bottom:6px;animation:pulse 1.2s infinite">🎓</div><div style="font-weight:700;color:#3730A3">Le professeur Ambassa rédige…</div><div style="font-size:11px;color:#6366F1;margin-top:4px;font-style:italic">Cela peut prendre 10-30 secondes pour les contenus longs</div></div>';
 
   try {
-    var resp = await callClaudeAPI(prompt, AMBASSA_PERSONA);
+    var resp = await callAmbassaIA(prompt, AMBASSA_PERSONA);
 
     // ═══ v2.9.12 : Mode QCM INTERACTIF si c'est un quiz QCM ═══
     // L'apprenant fait l'exercice d'abord, puis voit les corrigés
@@ -36342,7 +36421,7 @@ window._ambassaCorrigerProposition = async function(cls, mat, sujet, taskId){
     + '4) 💡 CONSEIL — 1 à 2 conseils méthodologiques concrets pour progresser.\n'
     + 'Ne réécris pas toute la copie à sa place : guide-le. Valorise l\'effort.';
   try {
-    var resp = await callClaudeAPI(prompt, (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:''));
+    var resp = await callAmbassaIA(prompt, (typeof AMBASSA_PERSONA!=='undefined'?AMBASSA_PERSONA:''));
     if(out) out.innerHTML = '<div style="background:#FFFBEB;border:2px solid #FCD34D;border-radius:12px;padding:14px">'
       +'<div style="font-size:11px;font-weight:800;color:#92400E;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🎓 Correction d\'Ambassa</div>'
       +'<div class="ai-md" style="max-height:360px;overflow-y:auto">'+_aiMarkdown(resp)+'</div></div>';
