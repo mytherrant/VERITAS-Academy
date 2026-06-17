@@ -5140,3 +5140,36 @@ html{ scroll-behavior:auto; }
 #VISITOR .acc-head{ padding:7px 14px !important; margin:12px auto 8px !important; }
 #VISITOR .acc-head .acc-pill{ font-size:14.5px !important; }
 #VISITOR .acc-head .acc-sub, #VISITOR .acc-sub{ font-size:11px !important; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.1 — ACCUEIL PRO & TRÈS PREMIUM (retour Jacques). Objectif : épuré,
+   pro. En-têtes = titres compacts (plus de bandeau navy qui « bouffe la
+   place »), cartes SANS contour lourd, espaces resserrés, panneaux équilibrés.
+   Scopé #VISITOR. Identité conservée : titre NAVY + accent OR.
+   ════════════════════════════════════════════════════════════════════════ */
+/* 1. EN-TÊTES : on GARDE les bandeaux NAVY/BLEUS (identité VÉRITAS — Émulation,
+   Passage du jour, IA…). Le « titre compact sans boîte » est RETIRÉ (allé trop
+   loin) : seul l'ICÔNE de l'en-tête IA était à corriger (navy sur or, géré dans
+   le bloc « AFFINAGE LIVE » plus haut). Les bandeaux navy restent donc tels quels. */
+
+/* 2. CARTES SANS CONTOUR LOURD (témoignages + actus) : bordure retirée, ombre douce */
+#VISITOR .vgz-testi, #VISITOR .acc-news{
+  border:0 !important; box-shadow:0 10px 26px -16px rgba(20,37,84,.20) !important;
+}
+#VISITOR .vgz-testi{ padding:18px !important; }
+
+/* 3. ESPACES RESSERRÉS / PANNEAUX ÉQUILIBRÉS */
+#VISITOR .vgz-testis{ gap:14px !important; margin:14px 0 !important; }
+#VISITOR .vsec.acc-wrap{ padding-top:6px !important; padding-bottom:14px !important; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.1 — NAVIGATION UNIFORME + SOUS-MENUS AU SURVOL (retour Jacques).
+   Tous les boutons adoptent le style « Accueil » (fini les fonds pastel par
+   item, fixés en inline par le rendu) ; le bouton actif (.on) garde son
+   surlignage. Les sous-menus (IA, Pratiquer, Communauté, Infos…) se dévoilent
+   au SURVOL du bouton (avant : clic seulement). Scopé #VISITOR.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR .vnav-btn:not(.on){ background:transparent !important; background-image:none !important; }
+#VISITOR .vnav-group:hover .vnav-dropdown{
+  opacity:1 !important; transform:translateY(0) !important; pointer-events:auto !important; visibility:visible !important;
+}
