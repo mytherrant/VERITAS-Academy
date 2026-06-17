@@ -4501,7 +4501,7 @@ html{ scroll-behavior:auto; }
 }
 #VISITOR .vnav-btn:hover{ background:rgba(14,19,32,.05); transform:translateY(-1px); }
 #VISITOR .vnav-btn.on{
-  background:var(--lx-ink) !important; color:#fff !important;
+  background:var(--lx-ink) !important; color:#142554 !important;
   box-shadow:0 6px 16px rgba(14,19,32,.22);
 }
 
@@ -5131,11 +5131,9 @@ html{ scroll-behavior:auto; }
 }
 #VISITOR .acc-head .acc-pill-ico,
 #VISITOR .acc-head .acc-pill.gold .acc-pill-ico{ stroke:#142554 !important; }
-/* 2. PANNEAUX MOINS LARGES : colonne confortable centrée sur tablette / écran moyen.
-   Téléphone <440px = pleine largeur (pas d'effet boîte) ; desktop >899px intact. */
-@media (min-width:440px) and (max-width:899px){
-  #VISITOR #vContent .vsec.acc-wrap{ max-width:470px !important; }
-}
+/* 2. (ANNULÉ v1.9.3 — retour Jacques) : le resserrement de colonne (max-width:470px
+   sur écran moyen) rendait les panneaux TROP ÉTROITS. Règle retirée → les panneaux
+   retrouvent leur largeur normale. Les effets de défilé/reveal sont conservés. */
 /* 3. EN-TÊTES ALLÉGÉES (moins « boîte qui bouffe la place ») */
 #VISITOR .acc-head{ padding:7px 14px !important; margin:12px auto 8px !important; }
 #VISITOR .acc-head .acc-pill{ font-size:14.5px !important; }

@@ -3,7 +3,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
 <!-- ════════════════════════════════════════════════════════════
      🔐 SÉCURITÉ
@@ -629,15 +629,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.9.2">
+<link rel="preload" as="script" href="/app.js?v=1.9.3">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.9.2" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.9.2"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.9.3" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.9.3"></noscript>
 </head>
 <body>
 <!-- ════════ A11Y v2 : Skip link pour lecteurs d'écran ════════ -->
@@ -733,7 +733,7 @@ if('MutationObserver' in window){
     <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin('eleve')">🎓 Se connecter</button>
     <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin('enseignant')">👨‍🏫 Enseignant</button>
     <span id="vSyncDot" onclick="iA()&&mSyncMenu()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>
-    <span id="adminAccessPoint" style="display:inline-block;width:44px;height:44px;cursor:default;opacity:0;vertical-align:middle" onclick="_adminTriple()" title=""></span>
+    <span id="adminAccessPoint" aria-hidden="true" style="display:inline-block;width:44px;height:44px;cursor:default;opacity:0;vertical-align:middle" onclick="_adminTriple()" title=""></span>
   </div>
 </div>
 <div class="vhero" style="padding:4px 0 3px">
@@ -780,17 +780,17 @@ setInterval(_refreshCitation,15000);
 <nav class="vnav" id="vNav" role="navigation" aria-label="Navigation principale">
   <!-- v2.6 : Nav simplifiée 13 → 7 groupes hiérarchisés -->
   <!-- 1. Accueil -->
-  <button class="vnav-btn on" onclick="vShowSec('presentation',this)" aria-label="Accueil"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-home"/></svg> Accueil</button>
+  <button class="vnav-btn on" onclick="vShowSec('presentation',this)" style="color:#142554;background:linear-gradient(135deg,rgba(20,37,84,.10),rgba(20,37,84,.03));border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Accueil"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-home"/></svg> Accueil</button>
 
   <!-- 2. E-Learning (entrée directe — service phare) -->
-  <button class="vnav-btn" onclick="vShowSec('elearning',this)" style="background:linear-gradient(135deg,rgba(60,141,255,.15),rgba(60,141,255,.05));color:#3C8DFF;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="E-Learning"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-book"/></svg> E-Learning</button>
+  <button class="vnav-btn" onclick="vShowSec('elearning',this)" style="background:linear-gradient(135deg,rgba(60,141,255,.15),rgba(60,141,255,.05));color:#1D5FBF;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="E-Learning"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-book"/></svg> E-Learning</button>
 
   <!-- 3. Boutique (entrée directe — service phare) -->
-  <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#FFC93C;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Boutique"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-shop"/></svg> Boutique</button>
+  <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#856404;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Boutique"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-shop"/></svg> Boutique</button>
 
   <!-- 4. 🤖 IA & Ambassa (groupe) -->
   <div class="vnav-group">
-    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(99,102,241,.05));color:#6366F1;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Outils IA"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-brain"/></svg> IA <span style="opacity:.6;font-size:10px">▾</span></button>
+    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(99,102,241,.05));color:#4F46E5;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Outils IA"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-brain"/></svg> IA <span style="opacity:.6;font-size:10px">▾</span></button>
     <div class="vnav-dropdown" role="menu">
       <button role="menuitem" onclick="_navGo();mAgentAmbassa()"><span style="font-size:18px;margin-right:6px">🎓</span><b>Prof. Ambassa</b><span class="vnav-dd-sub">Quiz · Évaluations · Fiches</span></button>
       <button role="menuitem" onclick="_navGo();mHubIA()"><span style="font-size:18px;margin-right:6px">🧠</span><b>Hub IA</b><span class="vnav-dd-sub">Devoir IA · Parcours adaptatif</span></button>
@@ -800,7 +800,7 @@ setInterval(_refreshCitation,15000);
 
   <!-- 5. 🎮 Pratiquer (groupe : Jeux + Labos + Épreuves + Évals + Étude groupe) -->
   <div class="vnav-group">
-    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(245,158,11,.05));color:#D97706;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Pratiquer"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-game"/></svg> Pratiquer <span style="opacity:.6;font-size:10px">▾</span></button>
+    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(245,158,11,.05));color:#92400E;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Pratiquer"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-game"/></svg> Pratiquer <span style="opacity:.6;font-size:10px">▾</span></button>
     <div class="vnav-dropdown" role="menu">
       <button role="menuitem" onclick="_navGo();showJeuxEdu()"><span style="font-size:18px;margin-right:6px">🎮</span><b>Jeux éducatifs</b><span class="vnav-dd-sub">QCM, pendu, cartes mentales</span></button>
       <button role="menuitem" onclick="_navGo();showLabosVirtuels()"><span style="font-size:18px;margin-right:6px">🔬</span><b>Labos virtuels</b><span class="vnav-dd-sub">Physique, chimie, SVT</span></button>
@@ -926,7 +926,7 @@ setInterval(_refreshCitation,15000);
      Sûr : app.js s'auto-amorce (start() via readyState/DOMContentLoaded) et tous les
      appels inline à ses fonctions sont gardés (typeof) ou différés (setTimeout/DCL).
      Le rescue boot (anti-écran-blanc) reste le filet ultime. -->
-<script defer src="/app.js?v=1.9.2"></script>
+<script defer src="/app.js?v=1.9.3"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>
@@ -2316,7 +2316,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .btn:focus-visible,.vbook-btn:focus-visible{outline:2px solid #FFC93C;outline-offset:2px}
 /* 6. Indicateur online/offline dans header */
 .vgz-online-indicator{position:fixed;top:14px;right:14px;z-index:8000;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:800;letter-spacing:.5px;backdrop-filter:blur(8px);transition:all .4s;pointer-events:none;display:flex;align-items:center;gap:6px;text-transform:uppercase}
-.vgz-online-indicator.online{background:rgba(16,185,129,.95);color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.4)}
+.vgz-online-indicator.online{background:rgba(4,120,87,.97);color:#fff;box-shadow:0 4px 14px rgba(16,185,129,.4)}
 .vgz-online-indicator.offline{background:rgba(220,38,38,.95);color:#fff;box-shadow:0 4px 14px rgba(220,38,38,.4)}
 .vgz-online-indicator .dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:vgzPulseGreen 1.8s ease-in-out infinite}
 .vgz-online-indicator.offline .dot{animation:none}
