@@ -40,7 +40,7 @@
 
     // 4. Watermark invisible (signature copyright)
     try {
-      var c = document.createComment(' © 2026 Mythe Errant · Jacques Miterand TAKOU · VÉRITAS Academy · Tous droits réservés · Watermark: VRT-'+Date.now().toString(36)+' · Toute reproduction ou utilisation pour entraînement IA est interdite (CPI L335-2/L335-3). ');
+      var c = document.createComment(' © 2026 Centre VÉRITAS Academy · Tous droits réservés · Watermark: VRT-'+Date.now().toString(36)+' · Toute reproduction ou utilisation pour entraînement IA est interdite (CPI L335-2/L335-3). ');
       if(document.documentElement) document.documentElement.appendChild(c);
     } catch(_){}
   } catch(e){
@@ -611,7 +611,7 @@ const LOGO_B64=document.getElementById('_logoData')?.src||'';
 const WATERMARK_B64=document.getElementById('_watermarkData')?.src||'';
 
 function defaultDB(){return{
-  school:{nom:'VÉRITAS Academy',slogan:'Centre d\u0027Excellence Scolaire',ville:'Douala, Cameroun',tel:'656 720 476 / 650 435 106',bp:'Douala, Cameroun',logo:'',directeur:'M. Jacques Miterand TAKOU',annee:'2024–2025'},
+  school:{nom:'VÉRITAS Academy',slogan:'Centre d\u0027Excellence Scolaire',ville:'Douala, Cameroun',tel:'656 720 476 / 650 435 106',bp:'Douala, Cameroun',logo:'',directeur:'La Direction',annee:'2024–2025'},
   publicInfo:{
     slogan2:'Excellence académique depuis 2023',
     description:'Le Centre VÉRITAS est un établissement d\'enseignement secondaire de renom basé à Douala, Cameroun. Fondé sur des valeurs d\'excellence et de rigueur académique, nous accompagnons les élèves du secondaire vers la réussite avec:\n\n• Des enseignants qualifiés et expérimentés\n• Des cours de répétition personnalisés\n• Un suivi continu des performances\n• Des cours d\'examens (BEPC, BAC)\n• Un environnement favorable à l\'apprentissage',
@@ -4579,6 +4579,8 @@ function vShowSec(sec,btn){
         <button class="acc-news-cta" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:6px;vertical-align:-3px"><use href="#lc-news"/></svg>Voir toutes les actualités →</button>
       </div>
     </div>
+
+    ${_reussitesMarquee()}
 
     <!-- ═══ PALMARÈS / ÉMULATION — restauré v1.2.4 : la vidéo ET le panneau d'émulation coexistent désormais ═══ -->
     <div class="acc-head">
@@ -13898,7 +13900,7 @@ function initTicker(){
   if(bar)bar.style.display='block';bar.style.visibility='visible';
   var html=items.map(function(it){return'<span class="t-item">'+it.t+'</span><span class="t-dot">●</span>';}).join('');
   if(sc)sc.innerHTML=html+html; // duplicate for seamless loop
-  var dur=Math.max(20,Math.min(60,items.length*4));
+  var dur=Math.max(70,items.length*8); // ralenti (demande Jacques) : circulation plus lente
   if(sc)sc.style.animationDuration=dur+'s';
 }
 
@@ -14136,6 +14138,38 @@ window._questionJourHtml = function(){
   +'</div>';
 };
 
+// v1.9.1 — MARQUEE DE RÉUSSITES (preuve sociale défilante, inspiration 21st.dev,
+// adaptée vanilla). Bandeau horizontal auto-défilant : taux de réussite officiels,
+// champions de la semaine (classement score puis chrono), apprenants, sous-systèmes.
+// transform GPU + pause au survol + reduced-motion statique (voir .rmq dans app.css).
+window._reussitesMarquee = function(){
+  var chips=[];
+  (DB.statsVitrine||[]).forEach(function(s){ if(s && s.ex && s.taux!=null) chips.push({lc:'award',c:'#10B981',t:_esc(s.ex),v:(s.taux||0)+'% de réussite'}); });
+  try{
+    if(DB.battles && typeof _currentWeekKey==='function'){
+      var wk=DB.battles[_currentWeekKey()];
+      if(wk && wk.participants){
+        Object.keys(wk.participants).map(function(k){return wk.participants[k];})
+          .sort(function(a,b){ return (b.score-a.score)||(a.timeMs-b.timeMs); })
+          .slice(0,3).forEach(function(p,i){
+            chips.push({lc:'star',c:['#F59E0B','#94A3B8','#CD7F32'][i]||'#F59E0B',t:_esc(p.nom||'Champion')+(p.cls?(' · '+_esc(p.cls)):''),v:(p.score||0)+'/10 au Battle'});
+          });
+      }
+    }
+  }catch(e){}
+  var nApp=((DB.students||[]).length)+((DB.visitorAccounts||[]).length);
+  if(nApp>0) chips.push({lc:'users',c:'#3C8DFF',t:nApp+' apprenant'+(nApp>1?'s':''),v:'nous font confiance'});
+  chips.push({lc:'award',c:'#FFC93C',t:'BEPC · Probatoire · BAC · GCE',v:'préparation complète'});
+  chips.push({lc:'graduation',c:'#7C3AED',t:'Général · Technique · Anglophone',v:'tous les sous-systèmes'});
+  if(chips.length<4) return '';
+  var html=chips.map(function(o){
+    return '<span class="rmq-chip">'
+      +'<span class="rmq-ic" style="color:'+o.c+';background:color-mix(in srgb,'+o.c+' 14%,#fff)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+o.lc+'"/></svg></span>'
+      +'<span class="rmq-tx"><b>'+o.t+'</b> '+o.v+'</span></span>';
+  }).join('');
+  return '<div class="rmq" aria-label="Réussites du Centre VÉRITAS"><div class="rmq-track">'+html+html+'</div></div>';
+};
+
 window._palmaresHtml = function(){
   var books=DB.books||[];
   var orders=(DB.visitorOrders||[]).concat(DB.bookPurchases||[]);
@@ -14146,47 +14180,67 @@ window._palmaresHtml = function(){
   if(typeof getBookRating==='function'){ books.forEach(function(b){ var r=getBookRating(b.id); if(r.count>0 && r.avg>bestAvg){bestAvg=r.avg;bestRated=b;} }); }
   var battleN=0; try{ if(DB.battles){ var bs=Array.isArray(DB.battles)?DB.battles:Object.values(DB.battles); battleN=bs.length; } }catch(e){}
   // Champion de la semaine en cours (1er du leaderboard de la battle courante)
-  var champ=null; try{ if(DB.battles && typeof _currentWeekKey==='function'){ var _wkb=DB.battles[_currentWeekKey()]; if(_wkb && _wkb.participants){ var _pa=Object.values(_wkb.participants).sort(function(a,b){ return (b.score-a.score) || (a.timeMs-b.timeMs); }); if(_pa.length) champ=_pa[0]; } } }catch(e){}
+  // Classement = score décroissant, puis CHRONO croissant en cas d'égalité (le + rapide gagne).
+  var champ=null, _battleTop=[]; try{ if(DB.battles && typeof _currentWeekKey==='function'){ var _wkb=DB.battles[_currentWeekKey()]; if(_wkb && _wkb.participants){ var _pa=Object.values(_wkb.participants).sort(function(a,b){ return (b.score-a.score) || (a.timeMs-b.timeMs); }); _battleTop=_pa.slice(0,3); if(_pa.length) champ=_pa[0]; } } }catch(e){}
   var nApp=(DB.students||[]).length+(DB.visitorAccounts||[]).length;
   var tile=function(o){
-    return '<div onclick="'+o.click+'" style="display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:13px;background:#fff;border:1px solid #E6EAF2;border-left:4px solid '+o.color+';cursor:pointer;transition:transform .2s,box-shadow .2s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 10px 22px rgba(20,37,84,.10)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">'
-      +'<div style="flex-shrink:0;width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:21px;background:color-mix(in srgb,'+o.color+' 14%,#fff)">'+(o.lc?'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+o.color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+o.lc+'"/></svg>':o.ico)+'</div>'
+    return '<div onclick="'+o.click+'" class="vemu-tile" style="--tile-c:'+o.color+';display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:13px;background:#fff;border:1px solid #E6EAF2;border-left:4px solid '+o.color+';cursor:pointer">'
+      +'<div class="vemu-ic" style="flex-shrink:0;width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:21px;background:color-mix(in srgb,'+o.color+' 14%,#fff)">'+(o.lc?'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+o.color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+o.lc+'"/></svg>':o.ico)+'</div>'
       +'<div style="min-width:0;flex:1">'
         +'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:color-mix(in srgb,'+o.color+' 60%,#0D1B3E)">'+o.label+'</div>'
         +'<div style="font-size:13.5px;font-weight:800;color:#142554;line-height:1.25;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+o.title+'</div>'
         +(o.sub?'<div style="font-size:10.5px;color:#5B6B85;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+o.sub+'</div>':'')
-      +'</div><div style="color:#C3CCDD;font-size:15px;flex-shrink:0">→</div></div>';
+      +'</div><div class="vemu-arrow" style="color:var(--tile-c,#C3CCDD);font-size:15px;flex-shrink:0">→</div></div>';
   };
   var tiles='';
   if(topBook){ tiles+=tile({color:'#F59E0B',ico:(topBook.ico||'📘'),label:topN>0?'Manuel le plus commandé':'Manuel à la une',title:_esc(topBook.titre),sub:topN>0?(topN+' commande'+(topN>1?'s':'')+' · '+_esc(topBook.cls)):_esc(topBook.cls),click:"viewBookDetail('"+topBook.id+"')"}); }
   if(bestRated&&bestRated!==topBook){ tiles+=tile({color:'#10B981',ico:'⭐',lc:'star',label:'Le mieux noté',title:_esc(bestRated.titre),sub:'Note '+bestAvg.toFixed(1)+'/5 par les élèves',click:"viewBookDetail('"+bestRated.id+"')"}); }
+  // ── v1.9.1 PODIUM « GAGNANTS DE LA SEMAINE » — émulation : mettre en relief les
+  //    MEILLEURS + le PRIX reçu PAR NIVEAU (1er/2e/3e). Classement par score puis
+  //    chrono (cf. tri ci-dessus). « Mes erreurs » et « Test de positionnement » ont
+  //    été retirés du panneau (levier d'émulation, pas tableau de bord personnel). ──
   var champHtml='';
-  if(champ){
-    var _cn=_esc(champ.nom||'Anonyme'); var _ci=((_cn.replace(/[^A-Za-zÀ-ÿ]/g,'').trim()[0])||'?').toUpperCase();
-    // Récompense du champion (configurable : DB.battleReward) sinon valeur par défaut
-    var _reward=_esc((DB.battleReward||champ.reward||'1 mois Premium offert + badge 👑'));
-    var _cls=champ.cls?(' · '+_esc(champ.cls)):'';
-    champHtml='<div onclick="(typeof mBattles===\'function\'?mBattles():null)" style="cursor:pointer;padding:14px;border-radius:15px;background:linear-gradient(135deg,#FFC93C,#FB923C);box-shadow:0 8px 22px rgba(251,146,60,.28);position:relative;overflow:hidden">'
-      +'<div style="position:absolute;top:8px;right:12px;font-size:10px;font-weight:800;color:#7C2D12;letter-spacing:.5px;text-transform:uppercase">👑 Champion</div>'
-      +'<div style="display:flex;align-items:center;gap:12px">'
-        +'<div style="flex-shrink:0;width:52px;height:52px;border-radius:50%;background:#142554;color:#FFC93C;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;border:2px solid #fff;box-shadow:0 4px 12px rgba(0,0,0,.25)">'+_ci+'</div>'
+  if(_battleTop.length){
+    // Sous-systeme depuis la classe -> INCLUT Technique & Anglophone (GCE), pas que le general.
+    var _subsys=function(cls){
+      var c=String(cls||'');
+      if(/\b(Form|Lower\s*Sixth|Upper\s*Sixth|GCE|L6|U6)\b/i.test(c)) return {t:'Anglophone',col:'#0E8C66'};
+      if(/technique/i.test(c)||/\b(CAP|STT|ACA|ACC|CG|FIG|SES|ESF|HO|HE|TO|AAT|AV|BPA|IH|MEM|MEB|F[1-6]|G[1-3]|MA)\b/.test(c)) return {t:'Technique',col:'#2563C9'};
+      return {t:'Général',col:'#6B5BD6'};
+    };
+    // Tons metalliques DOUX (patines) — plus de degrade or/orange agressif.
+    var _rk=[{ink:'#9A6B0F',chip:'#F3E4BC',row:'#FCF8EE'},{ink:'#5C6675',chip:'#E7EAF1',row:'#F7F8FB'},{ink:'#8A5A2B',chip:'#EAD6C1',row:'#FBF6F0'}];
+    // Prix PAR NIVEAU — configurable via DB.battleRewards[] ; defauts sobres (sans emoji criard).
+    var _rewards=(DB.battleRewards&&DB.battleRewards.length)?DB.battleRewards:['Abonnement Premium · 1 mois','Un manuel au choix offert','Badge champion + bon de révision'];
+    var _gift='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><use href="#lc-gift"/></svg>';
+    var _rows='';
+    _battleTop.forEach(function(p,i){
+      var _nm=_esc(p.nom||'Anonyme'); var _ss=_subsys(p.cls); var _pc=p.cls?_esc(p.cls):'';
+      var _tm=p.timeMs?(Math.round(p.timeMs/1000)+'s'):'';
+      var _prize=_esc(p.reward||_rewards[i]||_rewards[_rewards.length-1]||'Prix surprise'); var r=_rk[i];
+      _rows+='<div style="display:flex;align-items:center;gap:11px;padding:9px 10px;border-radius:12px;background:'+r.row+';border:1px solid '+r.chip+';'+(i?'margin-top:7px':'')+'">'
+        +'<div style="flex-shrink:0;width:30px;height:30px;border-radius:50%;background:'+r.chip+';color:'+r.ink+';display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;font-family:Georgia,serif">'+(i+1)+'</div>'
         +'<div style="min-width:0;flex:1">'
-          +'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#7C2D12">Battle de la semaine'+_cls+'</div>'
-          +'<div style="font-size:16px;font-weight:900;color:#142554;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_cn+'</div>'
-          +'<div style="font-size:12px;font-weight:700;color:#7C2D12;margin-top:1px">🏆 '+(champ.score||0)+'/10'+(champ.timeMs?' · '+Math.round(champ.timeMs/1000)+'s':'')+'</div>'
+          +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:nowrap"><span style="font-size:12.5px;font-weight:800;color:#142554;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+_nm+'</span>'
+            +(_pc?'<span style="font-size:9px;color:#64748B;font-weight:700;flex-shrink:0">'+_pc+'</span>':'')
+            +'<span style="font-size:8.5px;font-weight:800;letter-spacing:.3px;text-transform:uppercase;color:'+_ss.col+';background:color-mix(in srgb,'+_ss.col+' 12%,#fff);padding:1px 6px;border-radius:99px;white-space:nowrap;flex-shrink:0">'+_ss.t+'</span></div>'
+          +'<div style="font-size:10px;color:#64748B;font-weight:600;margin-top:2px;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden">'
+            +'<span style="font-weight:800;color:#142554">'+(p.score||0)+'/10</span>'+(_tm?'<span>· '+_tm+'</span>':'')
+            +'<span style="color:#CBD5E1">·</span><span style="display:inline-flex;align-items:center;gap:4px;color:'+r.ink+';font-weight:700;overflow:hidden;text-overflow:ellipsis">'+_gift+_prize+'</span></div>'
         +'</div>'
+      +'</div>';
+    });
+    champHtml='<div onclick="(typeof mBattles===\'function\'?mBattles():null)" style="cursor:pointer;padding:13px;border-radius:15px;background:#fff;border:1px solid #ECEFF4;box-shadow:0 12px 28px -16px rgba(20,37,84,.30)">'
+      +'<div style="display:flex;align-items:center;gap:9px;margin-bottom:11px;padding-bottom:10px;border-bottom:1px solid #F1F3F7">'
+        +'<div style="flex-shrink:0;width:30px;height:30px;border-radius:9px;background:color-mix(in srgb,#FFC93C 16%,#fff);display:flex;align-items:center;justify-content:center"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C8961A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></div>'
+        +'<div style="min-width:0;flex:1"><div style="font-size:12.5px;font-weight:800;color:#142554;line-height:1.1">Gagnants de la semaine</div><div style="font-size:9px;color:#94A3B8;font-weight:600">Général · Technique · Anglophone (GCE)</div></div>'
       +'</div>'
-      +'<div style="margin-top:10px;padding:8px 10px;border-radius:10px;background:rgba(20,37,84,.12);font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px"><span>🎁</span><span style="min-width:0;flex:1">Récompense : '+_reward+'</span></div>'
-      +'<button onclick="event.stopPropagation();(typeof mBattles===\'function\'?mBattles():showJeuxEdu())" style="margin-top:8px;width:100%;border:none;cursor:pointer;padding:9px;border-radius:10px;background:#142554;color:#FFC93C;font-weight:800;font-size:12px;letter-spacing:.3px">⚔️ Détrône le champion →</button>'
+      +_rows
+      +'<div style="margin-top:10px;font-size:9px;color:#94A3B8;font-weight:600;text-align:center">À égalité de score, le chrono départage</div>'
+      +'<button onclick="event.stopPropagation();(typeof mBattles===\'function\'?mBattles():showJeuxEdu())" style="margin-top:9px;width:100%;border:none;cursor:pointer;padding:10px;border-radius:11px;background:#142554;color:#FFC93C;font-weight:800;font-size:12px;letter-spacing:.3px">Participe et gagne ton prix →</button>'
     +'</div>';
   } else {
-    tiles+=tile({color:'#FB923C',ico:'⚔️',lc:'swords',label:'Battle de la semaine',title:'10 QCM · Classement national',sub:battleN>0?(battleN+' duel'+(battleN>1?'s':'')+' en cours'):'+50 XP — relevez le défi !',click:"(typeof mBattles===\'function\'?mBattles():showJeuxEdu())"});
-    // v1.5 : boucle d'apprentissage — rejouer ses erreurs de quiz/battle
-    var _missedN=(typeof _missedCount==='function')?_missedCount():0;
-    tiles+=tile({color:'#DC2626',ico:'🎯',lc:'check',label:'Mes erreurs à revoir',title:_missedN>0?(_missedN+' question'+(_missedN>1?'s':'')+' à retravailler'):'Aucune erreur en attente',sub:_missedN>0?'Corrigez-les pour les faire disparaître':'Vos questions ratées arrivent ici',click:"(typeof mErreursARevoir==='function'?mErreursARevoir():null)"});
-    // v1.9 (#3) : test de positionnement — forces/faiblesses en 10 questions
-    var _posDone=false; try{ _posDone=!!localStorage.getItem('_posDone'); }catch(e){}
-    tiles+=tile({color:'#7C3AED',ico:'🎯',lc:'sparkles',label:'Test de positionnement',title:_posDone?'Refaire mon diagnostic':'Évalue ton niveau en 10 questions',sub:_posDone?'Mesure tes progrès':'Découvre tes forces et points faibles',click:"(typeof mPositionnement==='function'?mPositionnement():null)"});
+    tiles+=tile({color:'#C8961A',ico:'⚔️',lc:'swords',label:'Battle de la semaine',title:'10 QCM · Gagne ton prix !',sub:battleN>0?(battleN+' duel'+(battleN>1?'s':'')+' en cours'):'Général, technique & anglophone — abonnement & manuel à gagner',click:"(typeof mBattles===\'function\'?mBattles():showJeuxEdu())"});
   }
   // ── Plan d'abonnement le PLUS souscrit (émulation : « rejoignez les autres ») ──
   var _plans=(DB.elearning&&DB.elearning.plans)||[];
@@ -14211,11 +14265,50 @@ window._palmaresHtml = function(){
       +'<div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;font-weight:800;font-size:15px;letter-spacing:.3px;line-height:1.15">Palmarès de la semaine</div>'
       +'<div style="font-size:10px;color:#FFC93C;font-weight:700;letter-spacing:1.2px;text-transform:uppercase">L\'émulation VÉRITAS</div>'
     +'</div>'
-    +'<div style="padding:12px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto">'+champHtml+tiles+'</div>'
+    +'<div class="v-stagger" style="padding:12px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto">'+champHtml+tiles+'</div>'
   +'</div>';
 };
 
+// B (perf v1.5) : FAÇADE légère poster + ▶. Le média réel (iframe YouTube / vidéo)
+// n'est chargé qu'au CLIC via _vheroPlay → fini le rechargement de l'embed à chaque
+// retour sur l'accueil (cause n°1 de la lenteur). UX validée : poster + lecture manuelle.
 function buildIntroVideoHtml(){
+  var v=DB&&DB.introVideo;
+  var nom=(DB&&DB.school&&DB.school.nom)||"VÉRITAS";
+  var poster='';
+  if(v&&v.src&&(v.src.indexOf('youtube')>=0||v.src.indexOf('youtu.be')>=0)){
+    var _pm=v.src.match(/(?:embed\/|[?&]v=|youtu\.be\/)([^?&/]+)/);
+    if(_pm) poster='https://img.youtube.com/vi/'+_pm[1]+'/hqdefault.jpg';
+  } else if(v&&v.poster){ poster=String(v.poster); }
+  var bg = poster
+    ? "background:#0F172A url('"+poster.replace(/['\"\\]/g,'')+"') center/cover no-repeat;"
+    : "background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A);";
+  return '<div class="vhero-video-wrap" data-vtype="facade" style="'+bg+'cursor:pointer" onclick="_vheroPlay(event)" role="button" tabindex="0" aria-label="Lire la video de presentation" onkeydown="if(event.key===\'Enter\'){_vheroPlay(event)}">'
+    + '<div class="vhero-video-overlay" style="background:linear-gradient(to bottom,rgba(13,27,62,.22),rgba(13,27,62,.55))">'
+      + '<div></div>'
+      + '<div style="margin:auto;display:flex;flex-direction:column;align-items:center;gap:10px">'
+        + '<div style="width:74px;height:74px;border-radius:50%;background:rgba(255,255,255,.93);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 30px rgba(0,0,0,.45)">'
+          + '<div style="width:0;height:0;border-style:solid;border-width:15px 0 15px 26px;border-color:transparent transparent transparent #142554;margin-left:6px"></div>'
+        + '</div>'
+        + '<div style="color:#fff;font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;letter-spacing:.3px;text-shadow:0 2px 10px rgba(0,0,0,.6)">Regarder la presentation</div>'
+      + '</div>'
+      + '<div style="text-align:center;color:#fff;font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;text-shadow:0 2px 10px rgba(0,0,0,.7)">'+_esc(nom)+'</div>'
+    + '</div>'
+  + '</div>';
+}
+// Charge le media reel au clic (remplace la facade). Mode d'echec benin.
+function _vheroPlay(ev){
+  try{ if(ev&&ev.preventDefault) ev.preventDefault(); }catch(e){}
+  var wrap=null;
+  try{ if(ev&&ev.currentTarget&&ev.currentTarget.classList&&ev.currentTarget.classList.contains('vhero-video-wrap')) wrap=ev.currentTarget; }catch(e){}
+  if(!wrap) wrap=document.querySelector('.vhero-video-wrap[data-vtype="facade"]')||document.querySelector('.vhero-video-wrap');
+  if(!wrap) return;
+  var html=_buildHeroMediaHtml();
+  html=html.replace('autoplay=1&mute=1','autoplay=1&mute=0'); // clic utilisateur -> son autorise (YouTube)
+  try{ wrap.outerHTML=html; }catch(e){ try{ wrap.innerHTML=html; }catch(e2){} }
+}
+// Constructeur du media reel (ex-buildIntroVideoHtml, inchange) — appele par _vheroPlay.
+function _buildHeroMediaHtml(){
   var v=DB&&DB.introVideo;
   var nom=(DB&&DB.school&&DB.school.nom)||"VÉRITAS";
   var sl=(DB&&DB.publicInfo&&DB.publicInfo.slogan)||"La Réussite Assurée";
@@ -15341,8 +15434,8 @@ function initTickerFixed(){
   bar.style.display='block'; bar.style.visibility='visible';
   var html=items.map(function(it){return'<span class="t-item">'+it.t+'</span><span class="t-dot">●</span>';}).join('');
   sc.innerHTML=html+html; // duplicate pour boucle sans couture
-  // Vitesse lente : 5s par item, minimum 40s
-  var dur=Math.max(40, items.length*5);
+  // Vitesse RALENTIE (demande Jacques) : 8s par item, minimum 70s
+  var dur=Math.max(70, items.length*8);
   // Reset animation proprement
   sc.style.animation='none';
   sc.offsetWidth; // force reflow
@@ -21774,21 +21867,26 @@ var _origVShowSecEl=window.vShowSec;
     // re-rendues (catégories e-learning, stats…) restaient en opacity:0 = la
     // « partie vide qui ne charge pas ». Ici : visible à l'écran → cascade
     // immédiate ; plus bas → déclenchée au scroll (effet de déroulement).
+    // v1.9.1 FIX « retour à l'accueil tarde à charger » : les .v-reveal / .v-stagger
+    // RE-RENDUS restaient en opacity:0 car on ajoutait .is-visible alors que leur CSS
+    // se révèle avec .visible -> contenu invisible après navigation (« partie vide »).
+    // On ajoute DÉSORMAIS les deux classes (+ .v-stagger), et plus vite (60ms) pour un
+    // affichage quasi instant. Les éléments déjà à l'écran sont révélés immédiatement.
     setTimeout(function(){
       try{
-        var els=document.querySelectorAll('.v-reveal:not(.is-visible), .lx-catgrid:not(.is-visible)');
+        var els=document.querySelectorAll('.v-reveal:not(.visible), .v-stagger:not(.visible), .lx-catgrid:not(.is-visible)');
         if(!els.length) return;
-        if(!('IntersectionObserver' in window)){ els.forEach(function(el){el.classList.add('is-visible');}); return; }
+        if(!('IntersectionObserver' in window)){ els.forEach(function(el){el.classList.add('is-visible','visible');}); return; }
         var io=new IntersectionObserver(function(es){
-          es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('is-visible'); io.unobserve(e.target); } });
+          es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('is-visible','visible'); io.unobserve(e.target); } });
         },{threshold:.12,rootMargin:'0px 0px -40px 0px'});
         els.forEach(function(el){
           var r=el.getBoundingClientRect();
-          if(r.top<(window.innerHeight||800)*0.96&&r.bottom>0){ el.classList.add('is-visible'); }
+          if(r.top<(window.innerHeight||800)*0.96&&r.bottom>0){ el.classList.add('is-visible','visible'); }
           else io.observe(el);
         });
       }catch(e){}
-    },180);
+    },60);
   };
 })();
 // ── LABORATOIRES VIRTUELS ENRICHIS ─────────────────────────────────
@@ -37861,12 +37959,38 @@ setTimeout(function(){initTickerFixed();},3000);
     }
   }
 
+  // v1.9.1 — FILET DE SÉCURITÉ RÉVÉLATION (anti « partie vide » / « retour accueil lent »).
+  // vShowSec est patché 4× (override + bloc Gen Z injecté à +100ms + historique nav) :
+  // les .v-reveal RE-RENDUS / INJECTÉS restaient en opacity:0 (mauvaise classe / pass de
+  // révélation trop tôt). Ce MutationObserver révèle TOUT .v-reveal/.v-stagger de #vContent
+  // — immédiat si à l'écran, au scroll sinon — quelle que soit la couche qui l'a créé.
+  function initRevealSafety(){
+    var vc=document.getElementById('vContent'); if(!vc) return;
+    var hasIO=('IntersectionObserver' in window);
+    var io=hasIO?new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('visible','is-visible'); io.unobserve(e.target); } });
+    },{threshold:.06,rootMargin:'0px 0px -28px 0px'}):null;
+    function arm(){
+      vc.querySelectorAll('.v-reveal:not(.visible):not([data-vr]),.v-reveal-left:not(.visible):not([data-vr]),.v-reveal-right:not(.visible):not([data-vr]),.v-reveal-scale:not(.visible):not([data-vr]),.v-stagger:not(.visible):not([data-vr])').forEach(function(el){
+        el.setAttribute('data-vr','1');
+        if(!hasIO){ el.classList.add('visible','is-visible'); return; }
+        var r=el.getBoundingClientRect();
+        if(r.top<(window.innerHeight||800) && r.bottom>-40) el.classList.add('visible','is-visible');
+        else io.observe(el);
+      });
+    }
+    arm();
+    try{ new MutationObserver(function(){ arm(); }).observe(vc,{childList:true,subtree:true}); }catch(e){}
+    setInterval(arm,1500); // ultime filet pour tout résidu (idempotent via data-vr)
+  }
+
   // ── INIT ──
   function bootDesign(){
     initScrollReveal();
     initRipple();
     initScrollProgress();
     initCounterAnim();
+    initRevealSafety();
     initEmojiReplacer();
   }
 

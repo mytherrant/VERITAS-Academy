@@ -4306,6 +4306,51 @@ html{ scroll-behavior:auto; }
 /* CSS mort associé : .vgz-phone (mockup téléphone 3D) n'est plus utilisé nulle part. */
 .vgz-phone{ display:none !important; }
 
+/* (k-bis) v1.9.1 — SUPPRESSION DE L'« EFFET TÉLÉPHONE INCURVÉ » SUR L'ACCUEIL.
+   Diagnostic (DOM live) : les bandes verticales gauche/droite signalées sur le
+   héros = les BORDURES + liserés or + ombres LATÉRALES des cartes empilées
+   (.acc-head navy, .acc-hero-video + son liseré ::after, .vhero-video-wrap).
+   Leurs arêtes arrondies alignées dessinaient une « tranche d'écran » de chaque côté.
+   → On retire bordures et liserés, et on remplace les ombres tout-autour par une
+   ombre douce VERS LE BAS uniquement (offset-y, blur, étalement négatif) : plus
+   aucune arête verticale sur les flancs. Coins conservés (douceur), aucun impact JS. */
+#VISITOR .acc-hero-video{
+  border:0 !important;
+  box-shadow:0 12px 26px -10px rgba(20,37,84,.18) !important;
+}
+#VISITOR .acc-hero-video::after{ display:none !important; }   /* liseré or interne (bezel) */
+#VISITOR .vhero-video-wrap{
+  border:0 !important;
+  box-shadow:0 12px 26px -10px rgba(20,37,84,.18) !important;
+}
+#VISITOR .acc-head{
+  border:0 !important;
+  box-shadow:0 12px 26px -12px rgba(13,27,62,.26) !important;
+}
+#VISITOR .acc-news{
+  border:0 !important;
+  box-shadow:0 12px 26px -12px rgba(20,37,84,.12) !important;
+}
+
+/* (k-ter) v1.9.1 — DE-BOX MOBILE : l'« effet boîte de téléphone » restant vient de
+   la GOUTTIÈRE latérale (.vsec) + des COINS ARRONDIS des cartes du héros qui les
+   font flotter comme des écrans. Sur téléphone (<900px) on passe le héros BORD À
+   BORD (gouttière annulée) et coins plats → page continue, plus de « boîte ».
+   Le contenu garde sa respiration via le padding interne des cartes. */
+@media (max-width:899px){
+  #VISITOR #vContent .vsec.acc-wrap{ padding-left:0 !important; padding-right:0 !important; }
+  #VISITOR .acc-hero{ gap:0 !important; }
+  #VISITOR .acc-hero-video,
+  #VISITOR .vhero-video-wrap,
+  #VISITOR .acc-head,
+  #VISITOR .acc-news{
+    border-radius:0 !important;
+    box-shadow:0 8px 18px -12px rgba(20,37,84,.16) !important;
+  }
+  /* la carte navy reprend toute la largeur (annule max-width:540/640px qui la centrait en « chip ») */
+  #VISITOR .acc-head{ max-width:none !important; }
+}
+
 /* (l) PANNEAUX RÉSULTATS BEPC/BAC/CAP (.vgz-stat) — ÉCLAIRCIS & PREMIUM.
    L'original (coquille HTML ~1712) : navy quasi opaque (.96/.99) = trop sombre.
    → navy plus lumineux et translucide (laisse respirer le fond), liseré or
@@ -4698,27 +4743,41 @@ html{ scroll-behavior:auto; }
   #VISITOR .vgz-stats .vgz-stat::after{ animation:none !important; opacity:0 !important; }
 }
 
-/* ── v1.4.6 — NAVIGATION SUBTILE : fini les grosses pilules encombrantes.
-   Radius modéré, padding réduit, état actif = fond léger + fin souligné or
-   (au lieu du bloc encre massif). !important requis : radius 20px inline. ── */
+/* ── v1.4.6 → v1.5 — NAVIGATION ÉPURÉE : suppression des PILULES colorées
+   arrondies (fond dégradé + margin inline) qui occupaient trop de place.
+   Onglet = simple texte + icône (couleur de texte conservée) ; actif = fond
+   très léger + fin souligné or. !important requis pour écraser l'inline
+   (background, border-radius:20px, margin:3px 2px). Zéro animation infinie. ── */
+#VISITOR .vnav{ padding:5px 10px !important; gap:2px !important; }
 #VISITOR .vnav-btn{
-  border-radius:10px !important;
-  padding:6px 12px !important;
+  background:none !important;          /* retire la pilule colorée inline */
+  margin:0 1px !important;             /* retire le margin:3px 2px inline */
+  border-radius:6px !important;        /* retire l'arrondi 20px inline */
+  padding:6px 10px !important;
   box-shadow:none !important;
   position:relative;
   font-size:12.5px !important;
 }
-#VISITOR .vnav-btn:hover{ background:rgba(20,37,84,.05) !important; transform:none; }
+#VISITOR .vnav-btn .icon-v2{ width:15px !important; height:15px !important; }
+#VISITOR .vnav-btn::before{ display:none !important; }   /* halo flou supprimé */
+#VISITOR .vnav-btn:not(.on) .icon-v2,
+#VISITOR .vnav-btn:not(.on) span:first-child{ animation:none !important; }  /* fin des pulses infinis */
+#VISITOR .vnav-btn:hover{ background:rgba(20,37,84,.05) !important; transform:none !important; filter:none !important; }
 #VISITOR .vnav-btn.on{
   background:rgba(20,37,84,.06) !important;
-  color:var(--lx-ink,#142554) !important;
   box-shadow:none !important;
+  transform:none !important;
 }
 #VISITOR .vnav-btn.on::after{
-  content:''; position:absolute; left:12px; right:12px; bottom:1px; height:2.5px;
+  content:''; position:absolute; left:10px; right:10px; bottom:1px; height:2.5px;
   border-radius:99px;
   background:linear-gradient(90deg,#FFC93C,#E8A413);
 }
+/* Barre du haut resserrée (panier/globe/contact + S'inscrire / Se connecter) */
+#VISITOR .vlogin-bar{ min-height:36px !important; padding:4px 12px !important; }
+#VISITOR .vlogin-btns .btn.sm{ padding:4px 9px !important; font-size:10.5px !important; border-radius:8px !important; }
+#VISITOR .vlogin-btns .btn.sm.icon-only{ width:28px !important; height:28px !important; padding:0 !important; }
+#VISITOR .vlogin-btns .btn.sm svg{ width:14px !important; height:14px !important; }
 
 /* ════════════════════════════════════════════════════════════════════════
    v1.4.7 — ÉPURE ACCUEIL : typo plus douce, panneaux resserrés,
@@ -4868,3 +4927,195 @@ html{ scroll-behavior:auto; }
   box-shadow:0 8px 24px rgba(255,201,60,.3)}
 .sread-pay-note{font-size:11px;color:rgba(255,255,255,.5);margin-top:12px}
 @media (prefers-reduced-motion:reduce){ .sread{animation:none} }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.1 — PASSE PREMIUM « MODERNE & VIVANT » · ACCUEIL VISITEUR (#VISITOR)
+   Direction validee avec le proprietaire : esprit app grand public
+   (Duolingo / Revolut) sur la charte navy/or. Skills : design-taste +
+   mobile-app-ui-design. Principes : hierarchie typo nette, regle 60/30/10,
+   grille 8pt, ombres DOUCES tintees navy, coins coherents, micro-interactions
+   au survol/pression (transform GPU, AUCUNE animation infinie -> perf mobile).
+   Scope #VISITOR : admin / enseignant / eleve NON touches.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR{
+  --pm-ease:cubic-bezier(.22,1,.36,1);
+  --pm-shadow-hover:0 20px 40px -18px rgba(20,37,84,.34);
+}
+/* Micro-interactions : survol = elevation douce, pression = retour tactile */
+#VISITOR .vcard, #VISITOR .gallery-card, #VISITOR .lx-statcard, #VISITOR .acc-role,
+#VISITOR .vplan-card, #VISITOR .vbook-card, #VISITOR .rc, #VISITOR .featured-card{
+  transition:transform .24s var(--pm-ease), box-shadow .24s ease, border-color .24s ease !important;
+}
+#VISITOR .vcard:hover, #VISITOR .gallery-card:hover, #VISITOR .lx-statcard:hover,
+#VISITOR .acc-role:hover, #VISITOR .vplan-card:hover, #VISITOR .vbook-card:hover,
+#VISITOR .rc:hover, #VISITOR .featured-card:hover{
+  transform:translateY(-4px) !important; box-shadow:var(--pm-shadow-hover) !important;
+}
+#VISITOR .vcard:active, #VISITOR .gallery-card:active, #VISITOR .acc-role:active,
+#VISITOR .vplan-card:active, #VISITOR .vbook-card:active, #VISITOR .rc:active{
+  transform:translateY(-1px) scale(.985) !important;
+}
+/* Boutons : transition + pression nette + reflet interne sur le primaire */
+#VISITOR .btn{ transition:transform .18s var(--pm-ease), box-shadow .2s ease, filter .2s ease !important; }
+#VISITOR .btn:active{ transform:translateY(0) scale(.96) !important; }
+#VISITOR .btn.bi{ box-shadow:0 10px 22px -8px rgba(20,37,84,.42), inset 0 1px 0 rgba(255,255,255,.18) !important; }
+#VISITOR .btn.bi:hover{ filter:brightness(1.05) !important; transform:translateY(-2px) !important; }
+/* Typographie : equilibre des lignes + display plus serre */
+#VISITOR .acc-head .acc-pill, #VISITOR .vsec-title, #VISITOR .vsec-title-hero{ text-wrap:balance; }
+#VISITOR .vhero-title, #VISITOR .acc-hero-title{ text-wrap:balance; letter-spacing:-.02em; }
+/* Fleches d'affordance (->) : glissent au survol (sans effet si absentes) */
+#VISITOR [class*="arrow"], #VISITOR .vgz-arrow{ transition:transform .22s var(--pm-ease); }
+#VISITOR a:hover [class*="arrow"], #VISITOR .vcard:hover .vgz-arrow{ transform:translateX(4px); }
+/* Cibles tactiles >= 44px sur les actions principales (a11y mobile) */
+#VISITOR .btn.bi, #VISITOR .btn.bo, #VISITOR .vplan-cta{ min-height:44px; }
+
+/* v1.9.1 — CARTES « ÉMULATION » JEUNES & VIVANTES (.vemu-tile générées par tile()).
+   Entrée en RESSORT (overshoot) + survol : carte qui s'élève, picto qui pop/pivote,
+   flèche color-codée qui glisse. Spring = cubic-bezier(.34,1.56,.64,1) (rebond jeune).
+   Reduced-motion respecté. */
+#VISITOR .vemu-tile{
+  transition:transform .26s cubic-bezier(.34,1.56,.64,1), box-shadow .26s ease, border-color .26s ease;
+  will-change:transform;
+}
+/* Entree en cascade au scroll : geree par .v-stagger sur le conteneur (cf. tile()),
+   avec le ressort universel #VISITOR .v-stagger>* defini plus haut. */
+#VISITOR .vemu-tile:hover{
+  transform:translateY(-4px);
+  box-shadow:0 16px 32px -14px rgba(20,37,84,.30);
+  border-color:color-mix(in srgb, var(--tile-c,#E6EAF2) 35%, #E6EAF2);
+}
+#VISITOR .vemu-tile:active{ transform:translateY(-1px) scale(.985); }
+#VISITOR .vemu-ic{ transition:transform .3s cubic-bezier(.34,1.56,.64,1); }
+#VISITOR .vemu-tile:hover .vemu-ic{ transform:scale(1.14) rotate(-7deg); }
+#VISITOR .vemu-arrow{ transition:transform .24s cubic-bezier(.34,1.56,.64,1); opacity:.9; }
+#VISITOR .vemu-tile:hover .vemu-arrow{ transform:translateX(5px); opacity:1; }
+@keyframes vemuUp{ 0%{opacity:0;transform:translateY(16px) scale(.95)} 100%{opacity:1;transform:none} }
+@media (prefers-reduced-motion:reduce){ #VISITOR .vemu-tile{ animation:none } }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.1 — RÉVÉLATION AU SCROLL « JEUNE » (RESSORT) · TOUT LE PORTAIL VISITEUR
+   Le système .v-reveal (observateur IntersectionObserver deja en place) utilisait
+   un ease lisse cubic-bezier(.4,0,.2,1). On le passe en courbe a REBOND (overshoot)
+   -> chaque section/carte « pope » a son apparition, sur MOBILE ET BUREAU, via une
+   seule regle (toutes les sections deja en .v-reveal en beneficient). perf : ne
+   touche qu'opacity+transform (GPU), declenche une fois au scroll, pas d'infini.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR .v-reveal, #VISITOR .v-reveal-left, #VISITOR .v-reveal-right,
+#VISITOR .v-reveal-scale, #VISITOR .v-stagger > *{
+  transition-timing-function:cubic-bezier(.34,1.56,.64,1) !important;
+  transition-duration:.62s !important;
+}
+/* Pictogrammes & icones : pop ludique au survol/pression, partout (cartes, roles, plans) */
+#VISITOR .acc-role-ic, #VISITOR .vbook-ico, #VISITOR .vplan-ico, #VISITOR .rc-ico,
+#VISITOR .vgz-stat-ic, #VISITOR .vcard .ico, #VISITOR .featured-ico{
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1) !important;
+}
+#VISITOR .acc-role:hover .acc-role-ic, #VISITOR .vbook-card:hover .vbook-ico,
+#VISITOR .vplan-card:hover .vplan-ico, #VISITOR .rc:hover .rc-ico,
+#VISITOR .featured-card:hover .featured-ico{
+  transform:scale(1.12) rotate(-6deg) !important;
+}
+@media (prefers-reduced-motion:reduce){
+  #VISITOR .v-reveal, #VISITOR .v-reveal-left, #VISITOR .v-reveal-right,
+  #VISITOR .v-reveal-scale, #VISITOR .v-stagger > *{ transition-duration:.01s !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.1 — DE-BOX GÉNÉRAL DE L'ACCUEIL (mobile). L'effet « cadre / boîte de
+   téléphone » persistait sur les sections de CONTENU (Passage du jour, IA,
+   Prof. Ambassa, témoignages .vgz-dark-section…) : cartes arrondies bordées
+   avec marges latérales. On aplatit TOUS les blocs de section de l'accueil :
+   coins plats + plus de bordure/ombre LATÉRALE → sections pleine largeur, à plat.
+   Le contenu et la respiration verticale restent. Scopé #VISITOR + <900px.
+   ════════════════════════════════════════════════════════════════════════ */
+@media (max-width:899px){
+  #VISITOR #vContent .vsec.acc-wrap > div,
+  #VISITOR .vgz-dark-section,
+  #VISITOR .acc-card,
+  #VISITOR .vlit-banner{
+    border-radius:0 !important;
+    border-left-width:0 !important;
+    border-right-width:0 !important;
+  }
+  /* le panneau navy des témoignages garde son fond mais sans cadre ni ombre latérale */
+  #VISITOR .vgz-dark-section{ box-shadow:none !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.1 — ENTÊTES COMPACTES & RYTHME MODERNE (inspiration SofaScore / L'Équipe
+   / beIN Sports). Les bandeaux de section .acc-head prenaient ~146px chacun
+   (88px de haut + marges 36/22) → empilés sur ~8 sections = gâchis vertical
+   massif. On les RESSERRE (entête compacte, icône + type plus fines, marges
+   réduites) → appli plus dense, moderne et fluide, sans étouffer le contenu
+   (la respiration reste dans les cartes). Scopé #VISITOR.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR .acc-head{
+  margin:18px auto 11px !important;
+  padding:9px 18px !important;
+  gap:4px !important;
+}
+#VISITOR .acc-head .acc-pill{ font-size:15.5px !important; }
+#VISITOR .acc-head .acc-pill .ic{ width:30px !important; height:30px !important; border-radius:9px !important; }
+#VISITOR .acc-head .acc-pill-ico{ width:18px !important; height:18px !important; }
+#VISITOR .acc-head .acc-sub, #VISITOR .acc-sub{ font-size:12px !important; line-height:1.35 !important; }
+/* 1er bandeau collé sous la nav (moins d'espace mort en tête de page) */
+#VISITOR #vContent .vsec.acc-wrap > .acc-head:first-child{ margin-top:8px !important; }
+/* Titres de section libres (.vsec-title) resserrés aussi */
+#VISITOR .vsec-title{ margin-top:18px !important; margin-bottom:8px !important; }
+/* Ticker info un peu plus fin (gain vertical en tête) */
+#VISITOR #tickerBar{ min-height:36px !important; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.1 — MARQUEE DE RÉUSSITES (.rmq) : bandeau de preuve sociale auto-défilant
+   (taux de réussite, champions de la semaine, apprenants…). transform GPU,
+   pause au survol, fondu des bords, reduced-motion = statique. Inspiration
+   21st.dev « marquee », réimplémenté en vanilla sur la charte VÉRITAS.
+   ════════════════════════════════════════════════════════════════════════ */
+.rmq{ overflow:hidden; position:relative; margin:6px 0 2px;
+  -webkit-mask:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);
+  mask:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent); }
+.rmq-track{ display:flex; width:max-content; gap:10px; padding:4px 2px;
+  animation:rmqScroll 40s linear infinite; will-change:transform; }
+.rmq:hover .rmq-track, .rmq:focus-within .rmq-track{ animation-play-state:paused; }
+.rmq-chip{ display:inline-flex; align-items:center; gap:8px; flex-shrink:0;
+  background:#fff; border:1px solid #E6EAF2; border-radius:999px; padding:6px 14px 6px 7px;
+  box-shadow:0 6px 16px -11px rgba(20,37,84,.32); }
+.rmq-ic{ width:26px; height:26px; border-radius:50%; display:inline-flex;
+  align-items:center; justify-content:center; flex-shrink:0; }
+.rmq-tx{ font-size:12px; color:#5B6B85; white-space:nowrap; line-height:1.1; }
+.rmq-tx b{ color:#142554; font-weight:800; }
+@keyframes rmqScroll{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@media (prefers-reduced-motion:reduce){
+  .rmq-track{ animation:none; flex-wrap:wrap; justify-content:center }
+  .rmq{ -webkit-mask:none; mask:none }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.5 — PASSE PERFORMANCE / FLUIDITÉ (demande Jacques : « tout l'accueil rame »)
+   Cause : ~45 animations CSS *infinite* (glows, pulses, shimmers, floats…) qui
+   repeignent en continu + backdrop-filter (flou recalculé à chaque frame au
+   scroll) sur la nav collante. Cela contredisait la règle projet « jamais
+   d'animations infinies, perf mobile ».
+   (1) On force animation-iteration-count:1 sur TOUT le portail visiteur ET
+       l'espace app (admin/élève) — les boucles décoratives jouent une fois puis
+       s'arrêtent (états de repos identiques au début → aucun saut visuel).
+   (2) On EXEMPTE les boucles FONCTIONNELLES : ticker info (.ticker-scroll),
+       marquee réussites (.rmq-track), barres/skeletons/spinners de chargement.
+   (3) On retire le backdrop-filter de la nav et du ticker (gain de scroll net).
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR :not(.ticker-scroll):not(.rmq-track):not(.loading-bar):not(.sync-dot):not([class*="skel"]):not([class*="spin"]),
+#app :not(.ticker-scroll):not(.rmq-track):not(.loading-bar):not(.sync-dot):not([class*="skel"]):not([class*="spin"]){
+  animation-iteration-count: 1 !important;
+}
+/* Flou de fond retiré là où il coûte cher au scroll (fonds déjà opaques) */
+#VISITOR .vnav, #VISITOR .ticker-in, #app .sb{
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+/* A (perf) — content-visibility : le navigateur SAUTE le layout/paint des grosses
+   sections d'accueil hors écran → re-rendu de l'accueil bien plus léger. Conservateur :
+   seulement les blocs lourds clairement SOUS le hero (témoignages vgz, bannière litt.).
+   contain-intrinsic-size = hauteur estimée (le mot-clé auto mémorise la vraie taille
+   après 1er rendu) pour limiter les sauts de scroll. */
+#VISITOR .vgz-dark-section{ content-visibility:auto; contain-intrinsic-size:auto 2000px; }
+#VISITOR .vlit-banner{ content-visibility:auto; contain-intrinsic-size:auto 130px; }

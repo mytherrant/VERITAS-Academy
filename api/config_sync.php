@@ -19,6 +19,28 @@ if (!defined('API_SECRET')) {
     define('API_SECRET', bin2hex(random_bytes(32)));
 }
 
+// 🔐 v1.9.1 — Refuser tout secret CONNU/FUITÉ (fail-closed). Le secret historique
+// « VERITAS-CLOUD-2026-xK9m » a été committé dans le dépôt public puis jamais
+// rotaté : quiconque lit l'historique Git pouvait s'authentifier sur db.php et
+// vider/écraser toute la base. On bloque ces valeurs : la seule issue est de poser
+// un secret fort unique (openssl rand -hex 32) dans api/payment_config.php.
+// (Défini AUSSI dans _auth_lib.php → garde function_exists pour éviter le redéclare
+//  quand un endpoint inclut les deux, ex. migrate_protected.php / student_data.php.)
+if (!function_exists('vrt_secret_is_compromised')) {
+    function vrt_secret_is_compromised($s): bool {
+        $bad = [
+            'VERITAS-CLOUD-2026-xK9m',
+            'VERITAS-CLOUD-2026',
+            'CHANGEZ_MOI_cle_secrete_veritas_2026',
+            'CHANGEZ_MOI',
+            'CHANGEZ_MOI_token_admin_long_et_aleatoire',
+            'À_REMPLIR_DEPUIS_DEVELOPER_ORANGE',
+            'À_REMPLIR_DEPUIS_MOMODEVELOPER',
+        ];
+        return in_array((string) $s, $bad, true);
+    }
+}
+
 // ── CORS (v1.2.2 : allowlist stricte au lieu de '*') ──
 // L'app web ET l'app mobile Capacitor sont servies depuis veritas-school.com
 // (même origine) → on peut fermer le CORS sans rien casser. Les sites tiers
@@ -74,6 +96,15 @@ function requireAuth() {
     }
 
     $token = trim(str_ireplace('bearer', '', $auth));
+    // 🔐 Fail-closed : si le secret du SERVEUR est un secret connu/fuité non rotaté,
+    // on refuse TOUTE requête (même avec le bon token) plutôt que d'exposer la base.
+    if (vrt_secret_is_compromised(API_SECRET)) {
+        http_response_code(503);
+        echo json_encode(['error' => 'Synchronisation désactivée par sécurité : le secret API du serveur est compromis et doit être renouvelé (openssl rand -hex 32 dans api/payment_config.php).']);
+        @file_put_contents(__DIR__ . '/data/_security_log.txt',
+            date('c') . " [COMPROMISED_SECRET_BLOCKED] config_sync.php — rotation du secret requise\n", FILE_APPEND);
+        exit;
+    }
     // Comparaison à temps constant (anti timing-attack) — hash_equals gère les
     // longueurs différentes sans court-circuit prématuré.
     if (!hash_equals(API_SECRET, $token)) {

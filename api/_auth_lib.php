@@ -35,6 +35,35 @@ if (!defined('VRT_AUTH_LIB')) {
     if (!defined('API_SECRET')) {
         define('API_SECRET', bin2hex(random_bytes(32))); // fail-closed
     }
+
+    // 🔐 v1.9.1 — BLOCKLIST DES SECRETS COMPROMIS / PLACEHOLDERS.
+    //   « VERITAS-CLOUD-2026-xK9m » a FUITÉ : présent dans l'historique Git public
+    //   (cf. AUDIT_VERITAS_v1.2.md « à abandonner ») et jamais réellement remplacé.
+    //   Tant qu'un secret connu reste actif, n'importe qui peut (1) lire/écrire toute
+    //   la base via db.php et (2) FORGER des tokens de compte (cette lib les signe en
+    //   HMAC avec API_SECRET). On neutralise les deux vecteurs : fail-closed.
+    if (!function_exists('vrt_secret_is_compromised')) {
+        function vrt_secret_is_compromised($s): bool {
+            $bad = [
+                'VERITAS-CLOUD-2026-xK9m',
+                'VERITAS-CLOUD-2026',
+                'CHANGEZ_MOI_cle_secrete_veritas_2026',
+                'CHANGEZ_MOI',
+                'CHANGEZ_MOI_token_admin_long_et_aleatoire',
+                'À_REMPLIR_DEPUIS_DEVELOPER_ORANGE',
+                'À_REMPLIR_DEPUIS_MOMODEVELOPER',
+            ];
+            return in_array((string) $s, $bad, true);
+        }
+    }
+    // Clé de SIGNATURE des tokens : si API_SECRET est un secret fuité/placeholder, on
+    // bascule sur une clé aléatoire par processus → les tokens deviennent invalides
+    // (re-login requis) mais AUCUNE forge n'est possible avec le secret public.
+    if (!defined('VRT_HMAC_KEY')) {
+        define('VRT_HMAC_KEY', vrt_secret_is_compromised(API_SECRET)
+            ? bin2hex(random_bytes(32)) : API_SECRET);
+    }
+
     if (!defined('VRT_TOKEN_TTL')) {
         define('VRT_TOKEN_TTL', 7 * 24 * 3600); // 7 jours
     }
@@ -128,7 +157,7 @@ if (!defined('VRT_AUTH_LIB')) {
             'v'   => (int) ($acc['tokenVer'] ?? 0),
         ];
         $body = vrt_b64url_encode(json_encode($payload, JSON_UNESCAPED_UNICODE));
-        $sig  = vrt_b64url_encode(hash_hmac('sha256', $body, API_SECRET, true));
+        $sig  = vrt_b64url_encode(hash_hmac('sha256', $body, VRT_HMAC_KEY, true));
         return $body . '.' . $sig;
     }
 
@@ -142,7 +171,7 @@ if (!defined('VRT_AUTH_LIB')) {
         $parts = explode('.', $token);
         if (count($parts) !== 2) return null;
         [$body, $sig] = $parts;
-        $expected = vrt_b64url_encode(hash_hmac('sha256', $body, API_SECRET, true));
+        $expected = vrt_b64url_encode(hash_hmac('sha256', $body, VRT_HMAC_KEY, true));
         if (!hash_equals($expected, $sig)) return null;
 
         $payload = json_decode(vrt_b64url_decode($body), true);
