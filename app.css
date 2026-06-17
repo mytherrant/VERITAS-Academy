@@ -5119,3 +5119,24 @@ html{ scroll-behavior:auto; }
    après 1er rendu) pour limiter les sauts de scroll. */
 #VISITOR .vgz-dark-section{ content-visibility:auto; contain-intrinsic-size:auto 2000px; }
 #VISITOR .vlit-banner{ content-visibility:auto; contain-intrinsic-size:auto 130px; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.1 — AFFINAGE LIVE (retour Jacques) : icône d'en-tête lisible, panneaux
+   moins larges sur écran moyen, en-têtes allégées (moins d'encadrés/surcharge).
+   ════════════════════════════════════════════════════════════════════════ */
+/* 1. ICÔNES D'EN-TÊTE : pastille or + icône NAVY (fin du « or sur or » invisible) */
+#VISITOR .acc-head .acc-pill .ic{
+  background:radial-gradient(circle at 30% 25%,#FFE9A8,#FFC93C 55%,#E8B225) !important;
+  border:1px solid rgba(255,201,60,.6) !important;
+}
+#VISITOR .acc-head .acc-pill-ico,
+#VISITOR .acc-head .acc-pill.gold .acc-pill-ico{ stroke:#142554 !important; }
+/* 2. PANNEAUX MOINS LARGES : colonne confortable centrée sur tablette / écran moyen.
+   Téléphone <440px = pleine largeur (pas d'effet boîte) ; desktop >899px intact. */
+@media (min-width:440px) and (max-width:899px){
+  #VISITOR #vContent .vsec.acc-wrap{ max-width:470px !important; }
+}
+/* 3. EN-TÊTES ALLÉGÉES (moins « boîte qui bouffe la place ») */
+#VISITOR .acc-head{ padding:7px 14px !important; margin:12px auto 8px !important; }
+#VISITOR .acc-head .acc-pill{ font-size:14.5px !important; }
+#VISITOR .acc-head .acc-sub, #VISITOR .acc-sub{ font-size:11px !important; }

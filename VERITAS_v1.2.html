@@ -629,15 +629,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.9.0">
+<link rel="preload" as="script" href="/app.js?v=1.9.1">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.9.0" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.9.0"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.9.1" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.9.1"></noscript>
 </head>
 <body>
 <!-- ════════ A11Y v2 : Skip link pour lecteurs d'écran ════════ -->
@@ -926,7 +926,7 @@ setInterval(_refreshCitation,15000);
      Sûr : app.js s'auto-amorce (start() via readyState/DOMContentLoaded) et tous les
      appels inline à ses fonctions sont gardés (typeof) ou différés (setTimeout/DCL).
      Le rescue boot (anti-écran-blanc) reste le filet ultime. -->
-<script defer src="/app.js?v=1.9.0"></script>
+<script defer src="/app.js?v=1.9.1"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>
