@@ -31,7 +31,7 @@
 declare(strict_types=1);
 
 // Tampon défensif : _auth_lib inclut payment_config.php, qui émet des en-têtes
-// (et pourrait émettre un caractère parasite, ex. un saut de ligne après ?>).
+// (et pourrait émettre un caractère parasite, ex. un saut de ligne après la balise PHP fermante).
 // On capture toute sortie d'inclusion pour la jeter AVANT de diffuser le binaire,
 // sinon le moindre octet parasite corromprait le fichier servi.
 ob_start();

@@ -208,27 +208,36 @@
        - 0000000000   → ID Facebook Pixel (business.facebook.com)
      ════════════════════════════════════════════════════════════ -->
 
-<!-- ── 1. Google Analytics 4 (GA4) — Mesure d'audience ── -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<!-- ── 1. Google Analytics 4 (GA4) — chargé UNIQUEMENT si un ID réel est configuré ── -->
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-XXXXXXXXXX', {
-    anonymize_ip: true,
-    cookie_flags: 'SameSite=Strict;Secure',
-    page_title: document.title,
-    page_location: window.location.href
-  });
-  // Helper global pour tracker des événements custom
-  window.veritasTrack = function(action, params){
-    if(typeof gtag==='function') gtag('event', action, params||{});
-  };
+  (function(){
+    var GA4_ID = 'G-XXXXXXXXXX'; /* ← Remplacer par votre ID GA4 réel (console.google.com/analytics) pour activer GA4 */
+    /* Helper global toujours défini : les appels veritasTrack() ailleurs dans l'app ne plantent pas même sans GA4 */
+    window.veritasTrack = function(action, params){
+      if(typeof window.gtag==='function') window.gtag('event', action, params||{});
+    };
+    /* Placeholder non remplacé → on n'injecte PAS le script tiers (évite une requête inutile + les erreurs 503 sur /g/collect à chaque visite) */
+    if(!GA4_ID || /^G-X+$/i.test(GA4_ID)) return;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function(){ window.dataLayer.push(arguments); };
+    var s = document.createElement('script');
+    s.async = true; s.src = 'https://www.googletagmanager.com/gtag/js?id=' + GA4_ID;
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', GA4_ID, {
+      anonymize_ip: true,
+      cookie_flags: 'SameSite=Strict;Secure',
+      page_title: document.title,
+      page_location: window.location.href
+    });
+  })();
 </script>
 
-<!-- ── 2. Microsoft Clarity — Heatmaps + Session Replay (gratuit illimité) ── -->
+<!-- ── 2. Microsoft Clarity — chargé UNIQUEMENT si un ID réel est configuré ── -->
 <script>
   (function(c,l,a,r,i,t,y){
+    /* Placeholder non remplacé → on n'injecte PAS Clarity (évite une requête tierce inutile à chaque visite) */
+    if(!i || i==='cccccccccc') return;
     c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
     t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
     y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
@@ -256,15 +265,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <!-- v1.2.14 (P1) : « Material Icons Round » retiré (redondant avec Material Symbols ; les 4 glyphs legacy ont été migrés). → une feuille de style bloquante + une police en moins. -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet" media="print" onload="this.media='all'">
-<!-- v1.2.2 perf : librairies d'export (PDF/Excel) en defer → ne bloquent plus le rendu initial (utilisées seulement sur action utilisateur). -->
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script>
-(function(){var u=['https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js','https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'];var i=0;
-function tryLoad(){if(i>=u.length)return;var s=document.createElement('script');s.src=u[i];s.onload=function(){window._qrOK=true;};s.onerror=function(){i++;tryLoad();};document.head.appendChild(s);}
-tryLoad();})();
-</script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- ⚡ perf (lazy-load v1.9.5) : html2canvas / jsPDF / xlsx / qrcodejs NE sont plus chargées
+     au démarrage (elles l'étaient à CHAQUE visite via defer, alors que seuls les exports
+     PDF/Excel/image et les QR — admin/prof — s'en servent). Économie ~300 Ko de bande
+     passante par visite sur le chemin critique. Injectées à la 1re utilisation par
+     window._ensureLib(key) dans app.js (avec fallback CDN multi-source). -->
+<!-- (libs d'export retirées du <head> — chargées à la demande, cf. _ensureLib dans app.js) -->
 
 <!-- ═══ v1.2 OPTIMISATION : Service Worker + Lazy Loading auto ═══ -->
 <script>
@@ -629,15 +635,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.9.4">
+<link rel="preload" as="script" href="/app.js?v=1.9.5">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.9.4" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.9.4"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.9.5" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.9.5"></noscript>
 </head>
 <body>
 <!-- ════════ A11Y v2 : Skip link pour lecteurs d'écran ════════ -->
@@ -926,7 +932,7 @@ setInterval(_refreshCitation,15000);
      Sûr : app.js s'auto-amorce (start() via readyState/DOMContentLoaded) et tous les
      appels inline à ses fonctions sont gardés (typeof) ou différés (setTimeout/DCL).
      Le rescue boot (anti-écran-blanc) reste le filet ultime. -->
-<script defer src="/app.js?v=1.9.4"></script>
+<script defer src="/app.js?v=1.9.5"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>

@@ -4144,6 +4144,13 @@ function initVisitor(){
 }
 
 function _fetchPublicData(){
+  // ⚡ perf — Idempotence anti-refetch : l'init est rejoué à chaque navigation, et
+  // le succès ci-dessous RE-REND la section (vShowSec) → cascade. Sans garde,
+  // public_data.php était appelé ~4× au chargement. On saute l'appel si un succès
+  // date de < 5 min ou si un fetch est déjà en cours. (Le retry sur ÉCHEC reste actif.)
+  if(_fetchPublicData._inflight) return;
+  if(_fetchPublicData._lastOk && (Date.now()-_fetchPublicData._lastOk)<300000) return;
+  _fetchPublicData._inflight=true;
   // Stratégie d'URL : 1) URL relative au fichier HTML (fonctionne si l'app et l'API sont sur le même serveur)
   //                   2) URL cloud configurée par l'admin
   var relUrl='';
@@ -4170,6 +4177,7 @@ function _fetchPublicData(){
 
   _doFetch(url,(url!==cfgUrl)?cfgUrl:null)
   .then(function(data){
+    _fetchPublicData._inflight=false; _fetchPublicData._lastOk=Date.now();
     var isAdmin=iA();
     var changed=false;
 
@@ -4246,6 +4254,7 @@ function _fetchPublicData(){
     // doivent pas remplacer le localStorage admin (qui fait foi côté gestion)
   })
   .catch(function(e){
+    _fetchPublicData._inflight=false;
     // Silencieux — offline, serveur non configuré, ou premier lancement
     // Réessayer une seule fois après 8 s (utile sur connexions mobiles lentes)
     if(!_fetchPublicData._retried){
@@ -5928,16 +5937,53 @@ function addQRToDoc(containerId,docType,docId){
   },200);
 }
 
+// ⚡ perf (lazy-load) — libs lourdes (html2canvas/jsPDF/xlsx/qrcode) retirées du <head> :
+// elles étaient téléchargées à CHAQUE visite alors que seuls les exports/QR (admin/prof)
+// s'en servent. Injectées à la 1re utilisation via window._ensureLib(key) → Promise
+// (avec fallback CDN). Le visiteur qui ne fait aucun export ne les télécharge jamais.
+window._libSrc = {
+  html2canvas:['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'],
+  jspdf:['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'],
+  xlsx:['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'],
+  qrcode:['https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js','https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js']
+};
+window._libReady = {
+  html2canvas:function(){return typeof window.html2canvas!=='undefined';},
+  jspdf:function(){return !!(window.jspdf&&window.jspdf.jsPDF)||typeof window.jsPDF!=='undefined';},
+  xlsx:function(){return typeof window.XLSX!=='undefined';},
+  qrcode:function(){return typeof window.QRCode!=='undefined';}
+};
+window._libCache = {};
+window._ensureLib = function(key){
+  if(window._libCache[key]) return window._libCache[key];
+  var ready=window._libReady[key], srcs=(window._libSrc[key]||[]).slice();
+  var p=new Promise(function(resolve,reject){
+    if(ready&&ready()){resolve();return;}
+    var i=0;
+    (function next(){
+      if(i>=srcs.length){reject(new Error('lib '+key+' indisponible'));return;}
+      var s=document.createElement('script');s.async=true;s.src=srcs[i++];
+      s.onload=function(){ (ready&&ready())?resolve():next(); };
+      s.onerror=next;
+      document.head.appendChild(s);
+    })();
+  });
+  p.catch(function(){ window._libCache[key]=null; }); // échec → autorise un nouvel essai
+  window._libCache[key]=p;
+  return p;
+};
+
 // ═══════════════════════════════════════════════
 // IMPORT/EXPORT EXCEL (SheetJS)
 // ═══════════════════════════════════════════════
 function exportToExcel(data,filename,sheetName){
-  if(typeof XLSX==='undefined'){toast('Librairie Excel non chargée','warn');return;}
-  const ws=XLSX.utils.json_to_sheet(data);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,sheetName||'Données');
-  XLSX.writeFile(wb,filename+'.xlsx');
-  toast('✓ Fichier Excel exporté: '+filename+'.xlsx');
+  _ensureLib('xlsx').then(function(){
+    const ws=XLSX.utils.json_to_sheet(data);
+    const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,sheetName||'Données');
+    XLSX.writeFile(wb,filename+'.xlsx');
+    toast('✓ Fichier Excel exporté: '+filename+'.xlsx');
+  }).catch(function(){toast('Librairie Excel indisponible','warn');});
 }
 
 function importTeacherGrades(){
@@ -6011,6 +6057,7 @@ function importFromExcel(callback){
   input.type='file';input.accept='.xlsx,.xls,.csv';
   input.onchange=function(e){
     const file=e.target.files[0];if(!file)return;
+    _ensureLib('xlsx').then(function(){
     const reader=new FileReader();
     reader.onload=function(evt){
       try{
@@ -6022,6 +6069,7 @@ function importFromExcel(callback){
       }catch(err){toast('Erreur d\'import: '+err.message,'warn');}
     };
     reader.readAsBinaryString(file);
+    }).catch(function(){toast('Librairie Excel indisponible','warn');});
   };
   input.click();
 }
@@ -9938,9 +9986,9 @@ function addQRToCurrentDoc(title){
   dc.appendChild(wrap);
 }
 function doPrint(){const c=$("docContent");if(!c){toast('Contenu introuvable','err');return;}var pw=_printOrient==='landscape'?1100:830,ph=_printOrient==='landscape'?830:1100;const w=window.open('','_blank','width='+pw+',height='+ph);if(!w){toast('Autorisez les popups','warn');return;}const fonts=`<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">`;w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">${fonts}<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;color:#1c1814;-webkit-print-color-adjust:exact;print-color-adjust:exact}@page{size:A4 ${_printOrient};margin:8mm 10mm}img{max-width:100%}</style></head><body>${c.innerHTML}<scr`+`ipt>window.onload=()=>setTimeout(()=>{document.body.setAttribute('data-print-date',new Date().toLocaleDateString('fr-FR')+' '+new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));window.print();},900);<\/script></body></html>`);w.document.close();}
-async function doExportPDF(enc){const c=$("docContent");if(!c)return;const title=decodeURIComponent(enc);toast('⏳ Génération PDF…');try{await document.fonts.ready;await new Promise(r=>setTimeout(r,500));const canvas=await html2canvas(c,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#fff',logging:false});// [WATERMARK v1.2] Filigrane avant export PDF
+async function doExportPDF(enc){const c=$("docContent");if(!c)return;const title=decodeURIComponent(enc);toast('⏳ Génération PDF…');try{await _ensureLib('html2canvas');await _ensureLib('jspdf');await document.fonts.ready;await new Promise(r=>setTimeout(r,500));const canvas=await html2canvas(c,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#fff',logging:false});// [WATERMARK v1.2] Filigrane avant export PDF
 applyWatermark(canvas,canvas.getContext('2d'));const{jsPDF}=window.jspdf;const pdf=new jsPDF({orientation:_printOrient||'portrait',unit:'mm',format:'a4'});const pw=pdf.internal.pageSize.getWidth(),ph=pdf.internal.pageSize.getHeight();const img=canvas.toDataURL('image/jpeg',.95);const ih=(canvas.height*pw)/canvas.width;if(ih<=ph){pdf.addImage(img,'JPEG',0,0,pw,ih);}else{let y=0;while(y<ih){if(y>0)pdf.addPage();pdf.addImage(img,'JPEG',0,-y,pw,ih);y+=ph;}}pdf.save(title.replace(/[^\w\sÀ-ÿ\-]/g,'_')+'.pdf');toast('✓ PDF enregistré');}catch(e){console.error(e);toast('Erreur PDF','err');}}
-async function doExportImg(enc){const c=$("docContent");if(!c)return;const title=decodeURIComponent(enc);toast('⏳ Génération image…');try{await document.fonts.ready;await new Promise(r=>setTimeout(r,500));const canvas=await html2canvas(c,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#fff',logging:false});// [WATERMARK v1.2] Filigrane avant export image
+async function doExportImg(enc){const c=$("docContent");if(!c)return;const title=decodeURIComponent(enc);toast('⏳ Génération image…');try{await _ensureLib('html2canvas');await document.fonts.ready;await new Promise(r=>setTimeout(r,500));const canvas=await html2canvas(c,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#fff',logging:false});// [WATERMARK v1.2] Filigrane avant export image
 applyWatermark(canvas,canvas.getContext('2d'));const link=document.createElement('a');link.download=title.replace(/[^\w\sÀ-ÿ\-]/g,'_')+'.png';link.href=canvas.toDataURL('image/png');link.click();toast('✓ Image téléchargée');}catch(e){console.error(e);toast('Erreur image','err');}}
 
 function docHeader(titre){const sc=DB.school;return`<div style="background:#142554;padding:16px 26px;display:flex;align-items:center;gap:14px"><img src="${getLogo()}" style="width:42px;height:42px;border-radius:50%;background:#fff;padding:2px;object-fit:contain;flex-shrink:0"><div style="flex:1"><div style="font-family:'Libre Baskerville',serif;font-size:16px;color:#FFC93C;letter-spacing:2px">${sc?.nom||'VÉRITAS'}</div><div style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">${sc?.slogan||'La Réussite Assurée'} · ${sc?.ville||'Yaoundé'}</div></div><div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${titre}</div><div style="font-size:8px;font-family:'Fira Code',monospace;color:rgba(255,255,255,.3)">Tél: ${sc?.tel||'—'} · ${sc?.bp||'—'}</div><div style="font-size:8px;color:rgba(255,255,255,.3);margin-top:2px">Année ${sc?.annee||'2024–2025'}</div></div></div>`;}
@@ -13304,7 +13352,8 @@ function _guideContent(section,role){
 }
 
 // Téléchargement du guide en PDF
-function _guideDownloadPDF(){
+async function _guideDownloadPDF(){
+  await _ensureLib('jspdf');
   var jsPDFCls=(typeof jspdf!=='undefined'&&jspdf.jsPDF)?jspdf.jsPDF:(typeof jsPDF!=='undefined'?jsPDF:null);
   if(!jsPDFCls){toast('jsPDF non disponible','warn');return;}
   toast('📥 Génération du guide PDF…','info');
@@ -21655,7 +21704,7 @@ function _formatEpreuveContent(text){
 function _generateQRDataUrl(text, size){
   size = size || 120;
   return new Promise(function(resolve){
-    if(typeof QRCode==='undefined'){resolve(null);return;}
+    _ensureLib('qrcode').then(function(){
     try{
       var div=document.createElement('div');
       div.style.cssText='position:absolute;left:-9999px;top:0';
@@ -21671,6 +21720,7 @@ function _generateQRDataUrl(text, size){
         resolve(url);
       },150);
     }catch(e){resolve(null);}
+    }).catch(function(){resolve(null);});
   });
 }
 
@@ -21678,6 +21728,7 @@ function _generateQRDataUrl(text, size){
 async function _downloadEpreuvePDF(){
   var ep=window._currentEpreuve;
   if(!ep){toast('Épreuve non chargée','warn');return;}
+  await _ensureLib('jspdf');
   var jsPDFCls=(typeof jspdf!=='undefined'&&jspdf.jsPDF)?jspdf.jsPDF:(typeof jsPDF!=='undefined'?jsPDF:null);
   if(!jsPDFCls){toast('jsPDF non disponible — réessayez dans quelques secondes','warn');return;}
   toast('📥 Génération du PDF en cours…','info');
@@ -34163,12 +34214,9 @@ window._genomeShareWA = function(){
   window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
 };
 
-window._genomeDownload = function(){
-  // Utilise html2canvas pour capturer la carte
-  if(typeof html2canvas === 'undefined'){
-    toast('Module export indisponible — copiez la capture manuellement','warn');
-    return;
-  }
+window._genomeDownload = async function(){
+  // Utilise html2canvas pour capturer la carte (lazy-load à la demande)
+  try{ await _ensureLib('html2canvas'); }catch(e){ toast('Module export indisponible','warn'); return; }
   var card = document.getElementById('genomeCard');
   if(!card) return;
   html2canvas(card,{backgroundColor:null,scale:2}).then(function(canvas){
@@ -34673,6 +34721,11 @@ window._pdjCleanTitle = function(s){
 //   2. Mémorise le titre d'hier en localStorage ; si le serveur renvoie le même
 //      titre que la veille, on garde la pioche LITT_OEUVRES (déjà rotative).
 window._pdjLoad = function(){
+  // ⚡ perf — une seule fetch rag.php par session : _passageDuJourHtml() est rendu
+  // plusieurs fois (re-renders de l'accueil) et planifie _pdjLoad à chaque fois →
+  // rag.php?daily était appelé ~8×. Le passage du jour ne change pas dans la session.
+  if(window._pdjLoaded || window._pdjInflight) return;
+  window._pdjInflight=true;
   try{
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
     var now=new Date(), dayN=Math.floor((now-new Date(now.getFullYear(),0,1))/86400000);
@@ -34699,8 +34752,8 @@ window._pdjLoad = function(){
           var rb=document.getElementById('vPdjRef'); if(rb) rb.innerHTML='— '+_esc(newTitle)+(au?' · '+_esc(au):'');
         }
       }
-    }).catch(function(){}).then(function(){ if(window._pdjLoadExpl) _pdjLoadExpl(); });
-  }catch(e){ if(window._pdjLoadExpl) _pdjLoadExpl(); }
+    }).catch(function(){}).then(function(){ window._pdjInflight=false; window._pdjLoaded=true; if(window._pdjLoadExpl) _pdjLoadExpl(); });
+  }catch(e){ window._pdjInflight=false; window._pdjLoaded=true; if(window._pdjLoadExpl) _pdjLoadExpl(); }
 };
 
 window._passageDuJourHtml = function(){
