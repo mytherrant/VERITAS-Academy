@@ -34757,18 +34757,45 @@ window._pdjLoad = function(){
 };
 
 window._passageDuJourHtml = function(){
-  var p=_getPassageDuJour();
+  // v1.9.6 — garder l'extrait DÉJÀ remonté (long, via _pdjLoad) à travers les
+  // re-renders de l'accueil : sans ça, chaque re-render réécrasait _pdjCurrent
+  // avec la courte citation (→ « passages trop courts ») et repartait sur
+  // « Analyse en cours… » sans jamais relancer l'IA. _pdjCurrent est « collant ».
+  var p = window._pdjCurrent || _getPassageDuJour();
   if(!p) return (typeof _citationBannerHtml==='function'?_citationBannerHtml():'');
   window._pdjCurrent=p;
   var ref=_esc(p.titre)+(p.auteur?' · '+_esc(p.auteur):'')+(p.classe?' · '+_esc(p.classe):'');
-  setTimeout(function(){ if(window._pdjLoad) _pdjLoad(); },800);
+  // analyse déjà calculée aujourd'hui → l'injecter d'emblée (évite le flash « en cours »)
+  var explInit='<span style="opacity:.7">✨ Analyse en cours…</span>';
+  try{
+    var _dk='vrt_pdj_'+new Date().toISOString().slice(0,10)+'_'+(p.titre+'|'+p.passage).substring(0,40).replace(/[^a-z0-9]/gi,'');
+    var _c=localStorage.getItem(_dk); if(_c) explInit=_c;
+  }catch(e){}
+  // v1.9.6 — l'accueil se re-rend plusieurs fois : à CHAQUE rendu le HTML du bloc
+  // est régénéré (→ #vPdjPassage repasse à la courte citation et #vPdjExpl à
+  // « Analyse en cours… »). _pdjLoad/_pdjLoadExpl étant one-shot (verrou _pdjLoaded),
+  // sans ré-application le passage restait court et l'analyse IA ne réapparaissait
+  // jamais. On ré-applique donc le passage déjà remonté + on relance l'analyse
+  // (cache localStorage + verrou _pdjExplBusy → pas de rafale d'appels IA).
+  setTimeout(function(){
+    if(window._pdjLoaded){
+      var pc=window._pdjCurrent;
+      if(pc){
+        var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML='« '+_esc(pc.passage)+' »';
+        var rb=document.getElementById('vPdjRef'); if(rb) rb.innerHTML='— '+_esc(pc.titre||'')+(pc.auteur?' · '+_esc(pc.auteur):'');
+      }
+      if(window._pdjLoadExpl) _pdjLoadExpl();
+    } else if(window._pdjLoad){
+      _pdjLoad();
+    }
+  },800);
   return '<div style="background:linear-gradient(180deg,#FFFDF8,#FBF4E2);color:#473F2A;padding:26px 24px;border-radius:18px;margin:14px auto;max-width:720px;position:relative;overflow:hidden;border:1px solid #ECE3CB;box-shadow:0 10px 30px rgba(20,37,84,.08);text-align:center">'
     +'<div style="position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,#142554,#1E3A8A 45%,#FFC93C)"></div>'
     +'<div style="position:absolute;top:4px;right:18px;font-family:Georgia,serif;font-size:90px;line-height:1;color:rgba(200,150,26,.16);font-weight:900;pointer-events:none">“</div>'
     +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#9A7B1C;font-weight:800;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg> Passage du jour · une œuvre au programme</div>'
     +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:18px;line-height:1.65;font-style:italic;color:#142554;margin:0 auto 10px;max-width:660px">« '+_esc(p.passage)+' »</div>'
     +'<div id="vPdjRef" style="font-size:12px;color:#9A7B1C;font-weight:700;margin-bottom:14px">— '+ref+'</div>'
-    +'<div id="vPdjExpl" style="font-size:13px;line-height:1.65;color:#473F2A;background:#fff;border:1px solid #EADFBF;border-radius:12px;padding:13px 16px;margin:0 auto 16px;max-width:660px;text-align:left;box-shadow:0 2px 10px rgba(20,37,84,.05)"><span style="opacity:.7">✨ Analyse en cours…</span></div>'
+    +'<div id="vPdjExpl" style="font-size:13px;line-height:1.65;color:#473F2A;background:#fff;border:1px solid #EADFBF;border-radius:12px;padding:13px 16px;margin:0 auto 16px;max-width:660px;text-align:left;box-shadow:0 2px 10px rgba(20,37,84,.05)">'+explInit+'</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center">'
       +'<span style="font-size:11px;color:#8C8160;margin-right:2px">Partager :</span>'
       +'<button onclick="_pdjShare(\'wa\')" style="background:#25D366;color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:700;cursor:pointer">WhatsApp</button>'
