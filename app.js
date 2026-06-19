@@ -16149,10 +16149,23 @@ window._iaBadgeHtml = function(){
     +'Corrigé vérifié par un enseignant VÉRITAS</div>';
 };
 
-// ══ v1.5 — RÉPÉTITION ESPACÉE SIMPLE : « Mes erreurs à revoir » ═════════════
-// Chaque question ratée (quiz, battle) est mémorisée (50 max, dédupliquée) et
-// peut être rejouée. Une bonne réponse en révision retire la question du lot —
-// la boucle d'apprentissage se ferme : l'élève PROGRESSE au lieu de consommer.
+// ══ v1.5 — RÉPÉTITION ESPACÉE : « Mes erreurs à revoir » ════════════════════
+// Chaque question ratée (quiz, battle, positionnement) est mémorisée (50 max,
+// dédupliquée). Calibré sur les intervalles EXPANSIFS de Cepeda et al. (2006) :
+// une bonne réponse n'efface plus la question — elle la replanifie PLUS LOIN
+// (≈2 j → 10 j → 28 j). Il faut plusieurs récupérations espacées réussies avant
+// qu'elle soit « maîtrisée » (retrait) ; une erreur remet l'espacement à zéro.
+// La fenêtre ne montre que les questions ARRIVÉES À ÉCHÉANCE : l'effort de
+// récupération tombe au bon moment, au lieu d'une boucle immédiate qui glisse
+// vers la simple re-lecture (peu d'effet sur la mémoire).
+var _SR_INTERVALS=[2,10,28]; // jours : 1re révision ~2j, puis ~10j, puis ~4 sem
+var _SR_DAY=86400000;
+window._srDueList=function(arr){ // questions à échéance, la plus en retard d'abord
+  var now=Date.now();
+  return (arr||[]).map(function(q,i){return {q:q,i:i};})
+    .filter(function(o){return (o.q.due||0)<=now;})
+    .sort(function(a,b){return (a.q.due||0)-(b.q.due||0);});
+};
 window._recordMissed=function(q){
   try{
     if(!q||!q.q) return;
@@ -16161,32 +16174,46 @@ window._recordMissed=function(q){
     var arr=DB._missedQ[uid]=DB._missedQ[uid]||[];
     var key=String(q.q).substring(0,80);
     if(arr.some(function(x){return String(x.q).substring(0,80)===key;})) return; // dédup
-    q.ts=Date.now();
+    q.ts=Date.now(); q.box=0; q.due=Date.now(); // à réviser dès maintenant
     arr.push(q);
     if(arr.length>50) arr.shift();
     save();
   }catch(e){}
 };
-window._missedCount=function(){
+window._missedCount=function(){ // total en cours d'apprentissage
   var uid=(typeof SES!=='undefined'&&SES&&SES.id)?SES.id:'anon';
   return ((DB._missedQ||{})[uid]||[]).length;
 };
+window._missedDueCount=function(){ // combien sont à réviser maintenant
+  var uid=(typeof SES!=='undefined'&&SES&&SES.id)?SES.id:'anon';
+  return _srDueList((DB._missedQ||{})[uid]||[]).length;
+};
 window.mErreursARevoir=function(){
   var uid=(typeof SES!=='undefined'&&SES&&SES.id)?SES.id:'anon';
-  var arr=((DB._missedQ||{})[uid]||[]).slice();
+  var arr=((DB._missedQ||{})[uid]||[]);
   if(!arr.length){
     M('🎯 Mes erreurs à revoir','',
       '<div style="text-align:center;padding:26px"><div style="font-size:46px;margin-bottom:10px">🏆</div>'
       +'<div class="semi">Aucune erreur en attente — bravo !</div>'
-      +'<div class="xs2 mut mt8">Vos questions ratées en quiz et en battle apparaîtront ici pour être retravaillées.</div></div>',
+      +'<div class="xs2 mut mt8">Vos questions ratées en quiz et en battle apparaîtront ici pour être retravaillées au bon moment.</div></div>',
       '<button class="btn bo" onclick="cm()">Fermer</button>');
     return;
   }
-  // Rejouer la plus ancienne (file FIFO = espacement naturel)
-  var q=arr[0];
+  var due=_srDueList(arr);
+  if(!due.length){ // rien à échéance : indiquer la prochaine date de révision
+    var next=arr.reduce(function(m,q){var d=q.due||0;return (m===null||d<m)?d:m;},null);
+    var dStr=next?new Date(next).toLocaleDateString('fr-FR'):'bientôt';
+    M('🎯 Mes erreurs à revoir','',
+      '<div style="text-align:center;padding:24px"><div style="font-size:44px;margin-bottom:10px">✅</div>'
+      +'<div class="semi">Rien à réviser pour le moment.</div>'
+      +'<div class="xs2 mut mt8">'+arr.length+' question'+(arr.length>1?'s':'')+' à consolider. Espacer les révisions renforce la mémoire — prochaine échéance le <b>'+dStr+'</b>.</div></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button>');
+    return;
+  }
+  var q=due[0].q;
   var opts=q.opts||['a','b','c','d'].filter(function(k){return q[k];}).map(function(k){return q[k];});
   var ansIdx=(typeof q.ans==='number')?q.ans:['a','b','c','d'].indexOf(q.ok||'a');
-  M('🎯 Mes erreurs à revoir','Question 1 / '+arr.length+' · '+_esc(q.src||''),
+  M('🎯 Mes erreurs à revoir',due.length+' à réviser maintenant · '+_esc(q.src||''),
     '<div class="semi mb12" style="font-size:14.5px;line-height:1.5">'+_esc(q.q)+'</div>'
     +opts.map(function(o,i){
       return '<button class="btn" style="display:block;width:100%;text-align:left;padding:11px 14px;margin-bottom:8px;background:#fff;border:2px solid #E5E7EB;border-radius:10px;color:#142554;font-size:13.5px;font-weight:600" onclick="_missedAnswer('+i+','+ansIdx+')">'+String.fromCharCode(65+i)+'. '+_esc(o)+'</button>';
@@ -16197,18 +16224,30 @@ window.mErreursARevoir=function(){
 window._missedAnswer=function(i,ansIdx){
   var uid=(typeof SES!=='undefined'&&SES&&SES.id)?SES.id:'anon';
   var arr=(DB._missedQ||{})[uid]||[];
-  var q=arr[0]||{};
+  var due=_srDueList(arr);
+  if(!due.length){ cm(); return; }
+  var idx=due[0].i, q=arr[idx]||{};
   var box=document.getElementById('missedExpl');
   var good=(i===ansIdx);
+  var nb=(q.box||0)+1, mastered=false, nextTxt='';
+  if(good){
+    if(nb>_SR_INTERVALS.length){ mastered=true; }
+    else { q.box=nb; q.due=Date.now()+_SR_INTERVALS[nb-1]*_SR_DAY; nextTxt='Prochaine révision dans '+_SR_INTERVALS[nb-1]+' jours.'; }
+  } else {
+    q.box=0; q.due=Date.now(); // lapsus : on recommence l'espacement à zéro
+  }
   if(box){
     box.style.display='block';
     box.style.background=good?'#ECFDF5':'#FEF2F2';
     box.style.border=good?'1px solid #6EE7B7':'1px solid #FCA5A5';
-    box.innerHTML=(good?'✅ <b>Corrigée !</b> Cette question quitte votre liste.':'❌ Pas encore. La bonne réponse était <b>'+String.fromCharCode(65+ansIdx)+'</b>.'+(q.exp?'<br>💡 '+_esc(q.exp):''))
-      +'<div style="margin-top:10px"><button class="btn bi sm" onclick="cm();mErreursARevoir()">Question suivante →</button></div>';
+    box.innerHTML=(good
+        ?(mastered?'🏆 <b>Maîtrisée !</b> Cette question quitte définitivement votre liste.'
+                  :'✅ <b>Bien !</b> '+nextTxt+' (espacer renforce la mémoire)')
+        :'❌ Pas encore. La bonne réponse était <b>'+String.fromCharCode(65+ansIdx)+'</b>.'+(q.exp?'<br>💡 '+_esc(q.exp):''))
+      +'<div style="margin-top:10px"><button class="btn bi sm" onclick="cm();mErreursARevoir()">Continuer →</button></div>';
   }
-  if(good){ arr.shift(); save(); }
-  else { var f=arr.shift(); if(f){ arr.push(f); save(); } } // ratée → repart en fin de file
+  if(good && mastered){ arr.splice(idx,1); }
+  save();
 };
 
 // ════════════════════════════════════════════════════════════════════
@@ -23249,10 +23288,10 @@ function showLabosVirtuels(){
   // Bandeau stats
   h+="<div style='display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px'>";
   [{n:_visibleLabo.length,l:"Expériences",c:"#142554",i:"🔬"},{n:gratuits,l:"Gratuites",c:"#059669",i:"✅"},{n:_visibleLabo.filter(function(l){return !l.gratuit;}).length,l:"Premium",c:"#7C3AED",i:"⭐"}].forEach(function(s){
-    h+="<div style='background:linear-gradient(135deg,"+s.c+"15,"+s.c+"08);border:1px solid "+s.c+"30;border-radius:14px;padding:14px;text-align:center'>";
+    h+="<div style='background:"+s.c+"0f;border:0;border-radius:16px;padding:16px 12px;text-align:center;box-shadow:0 8px 22px -15px rgba(20,37,84,.22)'>";
     h+="<div style='font-size:22px;margin-bottom:4px'>"+s.i+"</div>";
-    h+="<div style='font-family:Montserrat,sans-serif;font-size:22px;font-weight:900;color:"+s.c+"'>"+s.n+"</div>";
-    h+="<div style='font-size:11px;color:#6B7A99'>"+s.l+"</div>";
+    h+="<div style='font-family:Montserrat,sans-serif;font-size:24px;font-weight:900;color:"+s.c+";line-height:1'>"+s.n+"</div>";
+    h+="<div style='font-size:11px;color:#6B7A99;margin-top:3px;font-weight:600'>"+s.l+"</div>";
     h+="</div>";
   });
   h+="</div>";
@@ -23268,7 +23307,7 @@ function showLabosVirtuels(){
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-bottom:28px'>";
   list.forEach(function(lv){
     var locked=!lv.gratuit&&!SES;
-    h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:1px solid "+lv.color+"4d;border-top:4px solid "+lv.color+";overflow:hidden;cursor:pointer;transition:transform .25s,box-shadow .25s;box-shadow:0 2px 10px rgba(20,37,84,.06)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 16px 38px "+lv.color+"26'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 2px 10px rgba(20,37,84,.06)'\">";
+    h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:0;border-top:3px solid "+lv.color+";overflow:hidden;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;box-shadow:0 10px 26px -16px rgba(20,37,84,.16)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px -18px "+lv.color+"55'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 10px 26px -16px rgba(20,37,84,.16)'\">";
     h+="<div style='background:linear-gradient(135deg,"+lv.color+"1f,"+lv.color+"08);padding:18px 18px 16px;position:relative'>";
     h+="<div style='position:absolute;top:10px;right:10px;background:"+(lv.gratuit?"#059669":"#7C3AED")+";color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:10px'>"+(lv.gratuit?"GRATUIT":lv.plan||"PREMIUM")+"</div>";
     h+="<div style='width:52px;height:52px;border-radius:14px;background:"+lv.color+"26;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:10px'>"+lv.ico+"</div>";
@@ -26617,7 +26656,7 @@ function _evalFormUI(ev){
   var existing_q=ev?(ev.questions||[]).map(function(q,qi){
     return "<div style='background:#F8FAFF;border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #142554'>"
       +"<div style='font-size:12px;font-weight:700;margin-bottom:4px'>Q"+(qi+1)+": "+q.q+"</div>"
-      +"<div style='font-size:11px;color:#6B7A99'>Options: "+q.opts.join(" / ")+" | Bonne: "+q.opts[q.ans]+"</div>"
+      +"<div style='font-size:11px;color:#6B7A99'>"+(_evalIsOpen(q)?("✍️ Réponse libre · barème "+(q.bareme||q.points||"?")+" pts"):("Options: "+(q.opts||[]).join(" / ")+" | Bonne: "+((q.opts||[])[q.ans]||"?")))+"</div>"
       +"<button class='btn br2 xs' onclick='_delEvalQ("+qi+")' style='margin-top:4px'>🗑 Supprimer</button>"
       +"</div>";
   }).join(""):"";
@@ -26635,6 +26674,12 @@ function _evalFormUI(ev){
     +"<div style='border-top:var(--br);padding-top:12px'>"
     +"<div class='fl mb8' style='font-weight:700;font-size:13px'>➕ Ajouter une question</div>"
     +"<div class='fg mb8'><span class='fl'>Question *</span><input class='fi' id='evQ' placeholder='Quelle est la formule de l'eau ?'></div>"
+    +"<div class='fg mb8'><span class='fl'>Type de question</span><select class='fi' id='evType' onchange='_evalTypeToggle()'><option value='qcm'>QCM (choix multiple)</option><option value='ouverte'>Réponse libre — notée par l'IA</option></select></div>"
+    +"<div id='openFields' style='display:none'>"
+    +"<div class='fg2 mb8'><div class='fg'><span class='fl'>Barème (points)</span><input class='fi' id='evBareme' type='number' value='4' min='1'></div></div>"
+    +"<div class='fg full mb8'><span class='fl'>Éléments de réponse attendus (corrigé pour l'IA)</span><textarea class='fi' id='evAttendu' rows='3' placeholder='Liste les points clés attendus : Ambassa s'en sert pour noter équitablement.'></textarea></div>"
+    +"</div>"
+    +"<div id='qcmFields'>"
     +"<div class='fg2 mb8'>"
     +"<div class='fg'><span class='fl'>Option A</span><input class='fi' id='evA0' placeholder='H2O'></div>"
     +"<div class='fg'><span class='fl'>Option B</span><input class='fi' id='evA1' placeholder='CO2'></div>"
@@ -26645,6 +26690,7 @@ function _evalFormUI(ev){
     +"<option value='0'>A</option><option value='1'>B</option><option value='2'>C</option><option value='3'>D</option>"
     +"</select></div>"
     +"<div class='fg full mb8'><span class='fl'>Explication (optionnel)</span><input class='fi' id='evExp' placeholder='Explication de la bonne réponse'></div>"
+    +"</div>"
     +"<button class='btn' style='background:#E8EEFF;color:#142554;border-radius:10px;padding:8px 16px;font-size:12px;font-weight:700;border:none;cursor:pointer' onclick='_addEvalQ()'>➕ Ajouter cette question</button>"
     +"</div>",
     "<button class='btn bo' onclick='cm()'>Annuler</button>"
@@ -26652,6 +26698,25 @@ function _evalFormUI(ev){
 }
 function _addEvalQ(){
   var q=document.getElementById("evQ")?.value.trim()||"";
+  var _qtype=document.getElementById("evType")?.value||"qcm";
+  if(_qtype==='ouverte'){
+    if(!q){toast("Question requise","warn");return;}
+    var _bar=parseInt(document.getElementById("evBareme")?.value)||4;
+    var _att=document.getElementById("evAttendu")?.value||"";
+    window._evalFormQuestions.push({q:q,type:'ouverte',bareme:_bar,attendu:_att});
+    var _qlo=document.getElementById("evQList");
+    if(_qlo){
+      var _qio=window._evalFormQuestions.length-1;
+      var _dvo=document.createElement("div");
+      _dvo.style.cssText="background:#F8FAFF;border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #7C3AED";
+      _dvo.innerHTML="<div style='font-size:12px;font-weight:700;margin-bottom:4px'>Q"+(_qio+1)+": "+q+"</div><div style='font-size:11px;color:#6B7A99'>✍️ Réponse libre · barème "+_bar+" pts</div>";
+      _qlo.appendChild(_dvo); _qlo.scrollTop=_qlo.scrollHeight;
+    }
+    var _eqo=document.getElementById("evQ"); if(_eqo)_eqo.value="";
+    var _ato=document.getElementById("evAttendu"); if(_ato)_ato.value="";
+    toast("Question "+(window._evalFormQuestions.length)+" ajoutée");
+    return;
+  }
   var a0=document.getElementById("evA0")?.value.trim()||"";
   var a1=document.getElementById("evA1")?.value.trim()||"";
   var a2=document.getElementById("evA2")?.value.trim()||"";
@@ -26762,7 +26827,26 @@ function _passerEval(evalId,force){
   function renderQ(){
     if(qi>=ev.questions.length){
       clearInterval(timer);
-      // Sauvegarder le résultat
+      // v1.10 : si l'éval contient des questions OUVERTES → correction IA (Ambassa).
+      // Sinon (QCM pur, déjà auto-noté) → carte de score instantanée (zéro coût IA).
+      if(_evalHasOpen(ev)){
+        var _byQi={}; userAnswers.forEach(function(a){ _byQi[a.qi]=a; });
+        var _qa=ev.questions.map(function(q,i){
+          var a=_byQi[i]||{};
+          return _evalIsOpen(q)?{type:'open',text:a.text||""}:{type:'qcm',ans:(typeof a.ans==='number'?a.ans:-1),correct:!!a.correct};
+        });
+        var _who=SES?{id:SES.id,nom:(SES.pre||"")+" "+(SES.nom||""),tel:SES.tel||SES.phone||""}:{id:"",nom:"Élève",tel:""};
+        _evalRunCorrection(ev,_qa,_who,function(result){
+          if(SES){
+            if(!ev.reponses)ev.reponses=[];
+            ev.reponses=ev.reponses.filter(function(r){return r.eid!==SES.id;});
+            ev.reponses.push({eid:SES.id,nom:(SES.pre||"")+" "+(SES.nom||""),score:score,total:ev.questions.length,noteSur20:result.noteSur20,bilanIA:result,date:new Date().toLocaleDateString("fr-FR"),answers:userAnswers});
+            save();
+          }
+        });
+        return;
+      }
+      // QCM pur : comportement d'origine (score instantané)
       if(SES){
         if(!ev.reponses)ev.reponses=[];
         ev.reponses=ev.reponses.filter(function(r){return r.eid!==SES.id;});
@@ -26786,6 +26870,7 @@ function _passerEval(evalId,force){
       return;
     }
     var q=ev.questions[qi];
+    if(_evalIsOpen(q)){ _passerEvalOpen(q); return; }
     var remaining=totalSec-elapsed;
     var mn=Math.floor(remaining/60);var sc=remaining%60;
     var pctT=Math.round((elapsed/totalSec)*100);
@@ -26829,6 +26914,27 @@ function _passerEval(evalId,force){
     if(i!==q.ans && typeof _srsAdd==='function'){ try{ _srsAdd(q, ev.matiere||ev.titre||''); }catch(e){} }
     if(fb)fb.innerHTML="<div style='padding:10px;background:"+(i===q.ans?"#D1FAE5":"#FEE2E2")+";border-radius:10px;font-size:13px;color:"+(i===q.ans?"#059669":"#DC2626")+"'>"+(i===q.ans?"✅ ":"❌ ")+(q.exp||"")+"</div>";
     setTimeout(function(){qi++;renderQ();},2000);
+  };
+
+  function _passerEvalOpen(q){
+    var rem=totalSec-elapsed, mnO=Math.floor(rem/60), scO=rem%60;
+    var colO=rem<120?"#DC2626":rem<600?"#D97706":"#059669";
+    _vc("<div class='vsec'>"
+      +"<div style='background:linear-gradient(135deg,#142554,#1E3A8A);border-radius:16px;padding:16px 20px;color:#fff;margin-bottom:16px'>"
+        +"<div class='fl2 fic fsb'><div style='font-size:13px;opacity:.7'>"+ev.titre+"</div>"
+        +"<div style='font-family:monospace;font-size:18px;font-weight:700;color:"+colO+"'>"+String(mnO).padStart(2,'0')+":"+String(scO).padStart(2,'0')+"</div></div>"
+        +"<div style='font-size:11px;opacity:.6;margin-top:6px'>Question "+(qi+1)+"/"+ev.questions.length+" · ✍️ Réponse libre</div>"
+      +"</div>"
+      +"<div class='vcard'>"
+        +"<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:700;color:#142554;margin-bottom:14px;line-height:1.6'>"+q.q+"</div>"
+        +"<textarea id='evalOpenTxt' class='fi' rows='6' placeholder='Rédige ta réponse ici…' style='width:100%'></textarea>"
+        +"<div class='fl2 fc' style='margin-top:12px'><button class='btn bi' onclick='_answerEvalOpen()'>Valider ma réponse →</button></div>"
+      +"</div></div>");
+  }
+  window._answerEvalOpen=function(){
+    var t=(document.getElementById('evalOpenTxt')?document.getElementById('evalOpenTxt').value:'').trim();
+    userAnswers.push({qi:qi,text:t,open:true});
+    qi++; renderQ();
   };
 
   timer=setInterval(function(){
@@ -27369,9 +27475,25 @@ function lancerEvaluation(evId){
   function renderQ(){
     if(qIdx>=ev.questions.length){
       clearInterval(timer);
-      var correct=answers.filter(function(a,i){return ev.questions[i]&&a===ev.questions[i].ans;}).length;
+      var correct=answers.filter(function(a,i){return ev.questions[i]&&!_evalIsOpen(ev.questions[i])&&a===ev.questions[i].ans;}).length;
       var pct=Math.round((correct/ev.questions.length)*100);
       var uid=SES.accountId||SES.id;
+      // v1.10 : questions OUVERTES → correction IA (Ambassa) ; QCM pur → bilan instantané (zéro coût IA).
+      if(_evalHasOpen(ev)){
+        var _qa=ev.questions.map(function(q,i){
+          return _evalIsOpen(q)?{type:'open',text:(answers[i]&&answers[i].text)||""}:{type:'qcm',ans:(typeof answers[i]==='number'?answers[i]:-1),correct:(answers[i]===q.ans)};
+        });
+        var _who={id:uid,nom:(SES.pre||"")+" "+(SES.nom||""),tel:SES.tel||SES.phone||""};
+        _evalRunCorrection(ev,_qa,_who,function(result){
+          if(!ev.resultats)ev.resultats=[];
+          ev.resultats=ev.resultats.filter(function(r){return r.uid!==uid;});
+          ev.resultats.push({uid:uid,nom:(SES.pre||"")+" "+(SES.nom||""),score:pct,
+            correct:correct,total:ev.questions.length,noteSur20:result.noteSur20,bilanIA:result,
+            date:new Date().toLocaleDateString("fr-FR"),temps:Math.round(elapsed/60)+"min"});
+          save();
+        });
+        return;
+      }
       if(!ev.resultats)ev.resultats=[];
       ev.resultats=ev.resultats.filter(function(r){return r.uid!==uid;});
       ev.resultats.push({uid:uid,nom:(SES.pre||"")+" "+(SES.nom||""),score:pct,
@@ -27400,6 +27522,26 @@ function lancerEvaluation(evId){
     }
     var q=ev.questions[qIdx],rem=total-elapsed;
     var mn=String(Math.floor(rem/60)).padStart(2,"0"),sc2=String(rem%60).padStart(2,"0");
+    if(_evalIsOpen(q)){
+      _vc(
+        "<div class='vsec'>"
+        +"<div style='background:linear-gradient(135deg,#142554,#1E3A8A);border-radius:16px;padding:18px 24px;color:#fff;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center'>"
+        +"<div><div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800'>"+ev.titre+"</div>"
+        +"<div style='font-size:12px;opacity:.65'>Question "+(qIdx+1)+" / "+ev.questions.length+" · ✍️ Réponse libre</div></div>"
+        +"<div id='evTimer' style='font-family:monospace;font-size:26px;font-weight:900;color:"+(rem<120?"#FCA5A5":"#A5F3FC")+"'>"+mn+":"+sc2+"</div>"
+        +"</div>"
+        +"<div class='vcard'>"
+        +"<div style='font-family:Montserrat,sans-serif;font-size:16px;font-weight:700;color:#142554;margin-bottom:18px;line-height:1.5'>"+q.q+"</div>"
+        +"<textarea id='evOpenTxt' class='fi' rows='6' placeholder='Rédige ta réponse ici…' style='width:100%'></textarea>"
+        +"<div class='fl2 fc' style='margin-top:14px'><button class='btn bi' onclick='_evAnsOpen()'>Valider ma réponse →</button></div>"
+        +"</div></div>");
+      window._evAnsOpen=function(){
+        var t=(document.getElementById('evOpenTxt')?document.getElementById('evOpenTxt').value:'').trim();
+        answers[qIdx]={text:t,open:true};
+        qIdx++; renderQ();
+      };
+      return;
+    }
     _vc(
       "<div class='vsec'>"
       +"<div style='background:linear-gradient(135deg,#142554,#1E3A8A);border-radius:16px;padding:18px 24px;color:#fff;margin-bottom:18px;display:flex;justify-content:space-between;align-items:center'>"
@@ -27440,6 +27582,297 @@ function lancerEvaluation(evId){
   renderQ();
 }
 
+// ════════════════════════════════════════════════════════════════════
+// AMBASSA — CORRECTION & BILAN AUTOMATISÉS DES ÉVALUATIONS (v1.10)
+// QCM auto-noté + questions OUVERTES notées par l'IA + bilan personnalisé
+// + livraison (notification in-app & WhatsApp). Moteur partagé par
+// _passerEval et lancerEvaluation. Source IA : callAmbassaIA →
+// api/ia_proxy.php (grilles MINESEC déjà injectées côté serveur).
+// ════════════════════════════════════════════════════════════════════
+
+// Une question est "ouverte" si son type le dit OU si elle n'a aucune option.
+function _evalIsOpen(q){
+  return !!(q && (q.type==='ouverte'||q.type==='libre'||q.type==='open'||((!q.opts||!q.opts.length)&&q.q)));
+}
+function _evalHasOpen(ev){
+  return !!(ev&&ev.questions&&ev.questions.some(_evalIsOpen));
+}
+
+// Extrait un objet JSON même s'il est entouré de texte ou de balises ```json
+function _evalParseJSON(txt){
+  if(!txt) return null;
+  try{ return JSON.parse(txt); }catch(e){}
+  var s=String(txt).replace(/```json/gi,'```');
+  var f=s.indexOf('```'); if(f>=0){ var e2=s.indexOf('```',f+3); if(e2>f) s=s.slice(f+3,e2); }
+  var i=s.indexOf('{'), j=s.lastIndexOf('}');
+  if(i>=0&&j>i){ try{ return JSON.parse(s.slice(i,j+1)); }catch(e3){} }
+  return null;
+}
+
+// Construit le prompt de correction structuré (sortie JSON STRICTE).
+// qa = tableau aligné sur ev.questions : {type:'qcm',ans,correct} | {type:'open',text}
+function _evalBuildPrompt(ev, qa){
+  var L=[];
+  L.push("Tu corriges une évaluation du système éducatif camerounais (MINESEC, APC).");
+  L.push("Évaluation : « "+(ev.titre||"")+" » — Matière : "+(ev.matiere||"?")+" — Classe : "+(ev.classe||"?")+".");
+  L.push("Applique les GRILLES HARMONISÉES MINESEC et un barème équitable. Sois bienveillant, précis et encourageant. Tutoie l'élève.");
+  L.push("");
+  L.push("DÉTAIL DES QUESTIONS ET RÉPONSES :");
+  ev.questions.forEach(function(q,i){
+    var a=qa[i]||{};
+    if(_evalIsOpen(q)){
+      L.push("Q"+(i+1)+" (ouverte, barème "+(q.bareme||q.points||"?")+" pts) : "+q.q);
+      if(q.attendu||q.corrige) L.push("  Éléments attendus : "+(q.attendu||q.corrige));
+      L.push("  Réponse de l'élève : « "+(a.text||"(vide)")+" »");
+    } else {
+      var chosen=(a.ans>=0&&q.opts)?q.opts[a.ans]:"(aucune)";
+      var good=(q.opts&&q.opts[q.ans]!=null)?q.opts[q.ans]:"?";
+      L.push("Q"+(i+1)+" (QCM) : "+q.q+" | Choix élève : "+chosen+" | Bonne réponse : "+good+" | "+(a.correct?"CORRECT":"FAUX"));
+    }
+  });
+  L.push("");
+  L.push("RÉPONDS UNIQUEMENT par un objet JSON valide (aucun texte autour), de la forme EXACTE :");
+  L.push('{"note_sur_20": <number>, "appreciation": "<1 phrase>", "points_forts": ["..."], "points_faibles": ["..."], "corrections": [{"q": <num>, "note": <number>, "sur": <number>, "commentaire": "<correction de la question ouverte>"}], "remediation": ["<action concrète>"], "message_eleve": "<message bienveillant et personnalisé, 4-6 phrases, tutoiement>"}');
+  L.push("Le champ « corrections » ne concerne QUE les questions ouvertes. La note_sur_20 doit refléter l'ensemble (QCM + ouvertes).");
+  return L.join("\n");
+}
+
+// Correction complète (Promise) → objet bilan unifié. QCM noté localement,
+// questions ouvertes + bilan personnalisé via Ambassa, avec repli déterministe.
+async function _evalAutoCorrect(ev, qa){
+  var qcmTotal=0, qcmOk=0;
+  ev.questions.forEach(function(q,i){
+    if(!_evalIsOpen(q)){ qcmTotal++; if(qa[i]&&qa[i].correct) qcmOk++; }
+  });
+  var qcmPct=qcmTotal?Math.round((qcmOk/qcmTotal)*100):null;
+  var result={
+    qcmOk:qcmOk, qcmTotal:qcmTotal, qcmPct:qcmPct, noteSur20:null,
+    appreciation:"", pointsForts:[], pointsFaibles:[], corrections:[],
+    remediation:[], message:"", source:"ia", valide:false, officiel:false
+  };
+  try{
+    var prompt=_evalBuildPrompt(ev, qa);
+    var sys="Tu es Professeur Ambassa, correcteur expert MINESEC. Quand on te le demande, tu réponds UNIQUEMENT par du JSON strict, sans aucun texte autour.";
+    var txt=await callAmbassaIA(prompt, sys);
+    var j=_evalParseJSON(txt);
+    if(j){
+      var n=(typeof j.note_sur_20==='number')?j.note_sur_20:parseFloat(j.note_sur_20);
+      result.noteSur20=n;
+      result.appreciation=j.appreciation||"";
+      result.pointsForts=Array.isArray(j.points_forts)?j.points_forts:[];
+      result.pointsFaibles=Array.isArray(j.points_faibles)?j.points_faibles:[];
+      result.corrections=Array.isArray(j.corrections)?j.corrections:[];
+      result.remediation=Array.isArray(j.remediation)?j.remediation:[];
+      result.message=j.message_eleve||"";
+    }
+  }catch(e){}
+  if(result.noteSur20==null||isNaN(result.noteSur20)){
+    result.source="fallback";
+    result.noteSur20=(qcmPct!=null)?Math.round((qcmPct/100)*20*10)/10:0;
+    if(!result.appreciation) result.appreciation=(qcmPct!=null?(qcmPct>=60?"Bon travail au QCM":"À retravailler"):"Bilan automatique indisponible");
+    if(!result.message) result.message="Le bilan détaillé d'Ambassa est momentanément indisponible. "+(qcmPct!=null?("Tu as obtenu "+qcmPct+"% au QCM. "):"")+"Réessaie plus tard pour la correction complète.";
+  }
+  result.noteSur20=Math.max(0,Math.min(20,Math.round(result.noteSur20*10)/10));
+  return result;
+}
+
+// Rendu HTML du bilan (injecté dans #vContent)
+function _evalBilanHtml(ev, result){
+  var col=result.noteSur20>=14?"#059669":result.noteSur20>=10?"#D97706":"#DC2626";
+  var ico=result.noteSur20>=14?"🏆":result.noteSur20>=10?"✅":"📚";
+  function ul(arr,c){ return (arr&&arr.length)?"<ul style='margin:6px 0 0;padding-left:18px'>"+arr.map(function(x){return "<li style='font-size:13px;color:"+(c||"#334155")+";margin-bottom:4px'>"+_esc(typeof x==='string'?x:JSON.stringify(x))+"</li>";}).join("")+"</ul>":"<div class='xs2 mut'>—</div>"; }
+  var corrH=(result.corrections&&result.corrections.length)?result.corrections.map(function(c){
+    return "<div style='background:#F8FAFF;border-left:3px solid #142554;border-radius:8px;padding:10px;margin-bottom:8px'>"
+      +"<div style='font-size:12px;font-weight:700;color:#142554'>Question "+_esc(String(c.q!=null?c.q:"?"))+" — "+_esc(String(c.note!=null?c.note:"?"))+"/"+_esc(String(c.sur!=null?c.sur:"?"))+"</div>"
+      +"<div style='font-size:12px;color:#475569;margin-top:4px'>"+_esc(c.commentaire||"")+"</div></div>";
+  }).join(""):"";
+  // v1.10 — Couche CONFIANCE : mise en garde honnête, jamais bloquante.
+  var disclaimer;
+  if(result.valide){
+    disclaimer="<div style='display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ECFDF5,#D1FAE5);border:1px solid #6EE7B7;color:#047857;font-size:12px;font-weight:700;padding:9px 12px;border-radius:10px;margin-bottom:14px'>"
+      +"<span style='background:#059669;color:#fff;border-radius:50%;width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;font-size:11px'>✓</span>"
+      +"Correction vérifiée par ton enseignant VÉRITAS.</div>";
+  } else if(result.source==='fallback'){
+    disclaimer="<div style='background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:14px;line-height:1.5'>"
+      +"⚠️ <strong>Bilan IA momentanément indisponible.</strong> Seul ton score au QCM est fiable. Cette note n'est pas officielle — réessaie plus tard ou demande un suivi ci-dessous.</div>";
+  } else {
+    disclaimer="<div style='background:#FFFBEB;border:1px solid #FDE68A;color:#92400E;font-size:12px;padding:10px 12px;border-radius:10px;margin-bottom:14px;line-height:1.5'>"
+      +"🤖 <strong>Correction automatique par l'IA Ambassa</strong> — une estimation pour t'aider à réviser tout de suite. Elle peut contenir des imprécisions. Note <strong>indicative</strong> (elle ne va pas au bulletin officiel) ; ta note officielle est confirmée par ton enseignant. Un doute&nbsp;? Demande un suivi ci-dessous.</div>";
+  }
+  return "<div class='vsec'><div class='vcard' style='padding:28px'>"
+    +"<div style='text-align:center;margin-bottom:18px'>"
+      +"<div style='font-size:54px'>"+ico+"</div>"
+      +"<div style='font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#142554'>Correction d'Ambassa</div>"
+      +"<div style='font-family:Georgia,serif;font-size:30px;font-weight:700;color:"+col+";margin-top:6px'>"+result.noteSur20+"/20</div>"
+      +(result.qcmPct!=null?"<div class='xs2 mut'>QCM : "+result.qcmOk+"/"+result.qcmTotal+" ("+result.qcmPct+"%)</div>":"")
+      +"<div style='font-size:13px;color:#475569;margin-top:8px;font-style:italic'>"+_esc(result.appreciation||"")+"</div>"
+    +"</div>"
+    +disclaimer
+    +(result.message?"<div class='ib ibt mb12' style='white-space:pre-wrap'><span>💬</span><span>"+_esc(result.message)+"</span></div>":"")
+    +"<div class='fl2' style='gap:14px;flex-wrap:wrap'>"
+      +"<div style='flex:1;min-width:200px'><div style='font-weight:700;color:#059669;font-size:13px'>✅ Points forts</div>"+ul(result.pointsForts,"#065F46")+"</div>"
+      +"<div style='flex:1;min-width:200px'><div style='font-weight:700;color:#DC2626;font-size:13px'>⚠️ À améliorer</div>"+ul(result.pointsFaibles,"#7F1D1D")+"</div>"
+    +"</div>"
+    +(corrH?"<div style='margin-top:16px'><div style='font-weight:700;color:#142554;font-size:13px;margin-bottom:8px'>📝 Correction détaillée</div>"+corrH+"</div>":"")
+    +"<div style='margin-top:16px'><div style='font-weight:700;color:#7C3AED;font-size:13px'>🎯 Plan de remédiation</div>"+ul(result.remediation,"#5B21B6")+"</div>"
+    +"<div style='margin-top:18px;padding-top:14px;border-top:1px solid #EEF2F7'>"
+      +"<div style='font-size:12px;font-weight:700;color:#142554;margin-bottom:8px'>Besoin d'un humain&nbsp;? Suivi de proximité</div>"
+      +"<div class='fl2' style='gap:8px;flex-wrap:wrap'>"
+        +"<button class='btn bo sm' onclick='_evalRequestFollowup()'>📲 Demander un suivi (WhatsApp)</button>"
+        +"<button class='btn bo sm' onclick='_evalAskAmbassa()'>💬 Poser une question à Ambassa</button>"
+        +"<button class='btn bo sm' onclick='_evalFlagError()'>✋ Signaler une erreur de correction</button>"
+      +"</div>"
+    +"</div>"
+    +"<div class='fl2 fc' style='gap:10px;margin-top:20px;flex-wrap:wrap'>"
+      +"<button class='btn bi' onclick='_evalWhatsAppBilan()'>📥 Recevoir mon bilan sur WhatsApp</button>"
+      +"<button class='btn bo' onclick='(typeof showEvaluations===\"function\"?showEvaluations:showMesEvaluations)()'>← Retour aux évaluations</button>"
+    +"</div>"
+  +"</div></div>";
+}
+
+// Livraison : notification in-app + préparation du message WhatsApp.
+function _evalDeliver(ev, result, who){
+  try{
+    if(!DB.notifications) DB.notifications=[];
+    DB.notifications.push({
+      id:gid(),
+      to:(who&&who.id)||'eleve',
+      titre:"📝 Correction : "+(ev.titre||"Évaluation"),
+      msg:"Note "+result.noteSur20+"/20"+(result.valide?" (vérifiée par ton enseignant)":" (estimation IA)")+". "+(result.appreciation||""),
+      date:new Date().toISOString().split('T')[0],
+      read:[], type:result.source==='fallback'?'warn':'success'
+    });
+    save();
+  }catch(e){}
+  var msg="📝 *Correction VÉRITAS — "+(ev.titre||"Évaluation")+"*\n\n"
+    +"👤 "+((who&&who.nom)||"")+"\n"
+    +"🎯 *Note : "+result.noteSur20+"/20*"+(result.qcmPct!=null?(" (QCM "+result.qcmPct+"%)"):"")+"\n\n"
+    +(result.appreciation?("📌 "+result.appreciation+"\n\n"):"")
+    +(result.message?(result.message+"\n\n"):"")
+    +(result.pointsFaibles&&result.pointsFaibles.length?("⚠️ À revoir :\n- "+result.pointsFaibles.join("\n- ")+"\n\n"):"")
+    +(result.remediation&&result.remediation.length?("🎯 Pour progresser :\n- "+result.remediation.join("\n- ")+"\n\n"):"")
+    +"— Professeur Ambassa, Centre VÉRITAS";
+  var tel=((who&&who.tel)||"").replace(/[\s\-\(\)]/g,"");
+  if(tel&&tel.charAt(0)!=='+') tel="+237"+tel;
+  window._evalWAUrl="https://wa.me/"+(tel?tel.replace("+",""):"")+"?text="+encodeURIComponent(msg);
+}
+window._evalWhatsAppBilan=function(){
+  if(window._evalWAUrl) window.open(window._evalWAUrl,"_blank");
+  else toast("Lien WhatsApp indisponible","warn");
+};
+
+// Orchestrateur : écran d'attente → correction IA → bilan → livraison.
+// doneCb(result) permet à chaque parcours d'enregistrer son résultat natif.
+function _evalRunCorrection(ev, qa, who, doneCb){
+  _vc("<div class='vsec'><div class='vcard' style='text-align:center;padding:48px'>"
+    +"<div style='font-size:48px;margin-bottom:14px'>🤖</div>"
+    +"<div style='font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;color:#142554;margin-bottom:8px'>Le Professeur Ambassa corrige ta copie…</div>"
+    +"<div class='xs2 mut'>Analyse de tes réponses et préparation de ton bilan personnalisé.</div>"
+    +"<div style='margin-top:18px'><span style='width:9px;height:9px;border-radius:50%;background:#10B981;display:inline-block;animation:vgzPing 1.2s infinite'></span></div>"
+  +"</div></div>");
+  return _evalAutoCorrect(ev, qa).then(function(result){
+    window._evalLast={ev:ev, result:result, who:who};
+    try{ _evalDeliver(ev, result, who); }catch(e){}
+    _vc(_evalBilanHtml(ev, result));
+    if(typeof doneCb==='function'){ try{ doneCb(result); }catch(e){} }
+    return result;
+  });
+}
+
+// Affiche/masque les champs QCM vs ouverte dans le constructeur d'évaluation.
+window._evalTypeToggle=function(){
+  var t=document.getElementById('evType')?document.getElementById('evType').value:'qcm';
+  var qf=document.getElementById('qcmFields'), of=document.getElementById('openFields');
+  if(qf) qf.style.display=(t==='ouverte')?'none':'';
+  if(of) of.style.display=(t==='ouverte')?'':'none';
+};
+
+// ════════════════════════════════════════════════════════════════════
+// v1.10 — COUCHE SUIVI HUMAIN (non bloquant) + VALIDATION A POSTERIORI
+// ════════════════════════════════════════════════════════════════════
+
+// Demander un suivi : ouvre WhatsApp vers le centre, message pré-rempli.
+window._evalRequestFollowup=function(){
+  var L=window._evalLast||{}; var ev=L.ev||{}, r=L.result||{}, who=L.who||{};
+  var centre=''; try{ centre=(window.VERITAS_PAYMENTS&&VERITAS_PAYMENTS.whatsapp)||''; }catch(e){}
+  centre=(centre||'').replace(/[\s\-\(\)]/g,''); if(centre&&centre.charAt(0)!=='+') centre='+'+centre;
+  if(!centre){ toast("Numéro du centre non configuré","warn"); return; }
+  var msg="Bonjour, je suis "+(who.nom||"un élève")+". Je viens de passer l'évaluation « "+(ev.titre||"")+" » (note IA : "+(r.noteSur20!=null?r.noteSur20+"/20":"—")+"). J'aimerais un suivi ou des explications d'un enseignant. Merci.";
+  window.open("https://wa.me/"+centre.replace("+","")+"?text="+encodeURIComponent(msg),"_blank");
+};
+
+// Poser une question à Ambassa : ouvre l'assistant pédagogique.
+window._evalAskAmbassa=function(){
+  if(typeof mAgentAmbassa==='function') mAgentAmbassa();
+  else if(typeof vShowSec==='function') vShowSec('contact');
+  else toast("Assistant momentanément indisponible","warn");
+};
+
+// Signaler une erreur de correction → file de révision enseignant + notif.
+window._evalFlagError=function(){
+  var L=window._evalLast||{}; var ev=L.ev||{}, r=L.result||{}, who=L.who||{};
+  if(!DB.evalCorrectionFlags) DB.evalCorrectionFlags=[];
+  DB.evalCorrectionFlags.push({
+    id:gid(), evalId:ev.id||'', evalTitre:ev.titre||'', eleveId:who.id||'',
+    eleveNom:who.nom||'', noteIA:(r.noteSur20!=null?r.noteSur20:null),
+    date:new Date().toISOString().split('T')[0], statut:'ouvert'
+  });
+  try{ if(!DB.notifications)DB.notifications=[];
+    DB.notifications.push({id:gid(),to:'enseignant',titre:"✋ Correction contestée",
+      msg:(who.nom||'Un élève')+" conteste la correction IA de « "+(ev.titre||'')+" » (note "+(r.noteSur20!=null?r.noteSur20+"/20":"—")+"). À revoir.",
+      date:new Date().toISOString().split('T')[0],read:[],type:'warn'}); }catch(e){}
+  save();
+  toast("✓ Signalé — un enseignant va revoir ta copie");
+};
+
+// File de validation : liste les corrections IA non encore validées
+// (ev.reponses ET ev.resultats). L'enseignant confirme ou ajuste la note.
+function mEvalValidations(){
+  if(!iA() && !(typeof isEnseignant==='function'&&isEnseignant())){ if(typeof na==='function') na(); return; }
+  _initEvals();
+  var items=[];
+  (DB.evaluations||[]).forEach(function(ev){
+    (ev.reponses||[]).forEach(function(r){ if(r.bilanIA && !r.bilanIA.valide) items.push({ev:ev,store:'reponses',uid:r.eid,nom:r.nom,note:r.bilanIA.noteSur20}); });
+    (ev.resultats||[]).forEach(function(r){ if(r.bilanIA && !r.bilanIA.valide) items.push({ev:ev,store:'resultats',uid:r.uid,nom:r.nom,note:r.bilanIA.noteSur20}); });
+  });
+  var rows=items.map(function(it,idx){
+    return "<tr>"
+      +"<td style='padding:6px 8px;font-size:13px'>"+_esc(it.nom||'?')+"</td>"
+      +"<td style='padding:6px 8px;font-size:12px;color:var(--ink4)'>"+_esc(it.ev.titre||'')+"</td>"
+      +"<td style='padding:6px 8px;text-align:center;font-weight:700'>"+(it.note!=null?it.note+"/20":"—")+"</td>"
+      +"<td style='padding:6px 8px;text-align:center'><input type='number' min='0' max='20' step='0.5' id='evV"+idx+"' value='"+(it.note!=null?it.note:'')+"' style='width:64px;padding:4px;border:1px solid var(--bg3);border-radius:6px'></td>"
+      +"<td style='padding:6px 8px;text-align:center'><button class='btn bi xs' onclick='_evalValidate(\""+(it.ev.id||'')+"\",\""+it.store+"\",\""+_esc(String(it.uid||''))+"\","+idx+")'>✓ Valider</button></td>"
+      +"</tr>";
+  }).join("");
+  M("✅ Corrections IA à valider","L'élève a déjà reçu son bilan. Confirmez ou ajustez la note → il verra « vérifié par l'enseignant ».",
+    (rows?"<div class='tw'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th style='text-align:left;padding:6px 8px'>Élève</th><th style='text-align:left;padding:6px 8px'>Évaluation</th><th>Note IA</th><th>Note retenue</th><th>Action</th></tr></thead><tbody>"+rows+"</tbody></table></div>"
+        :"<div class='empty'><div class='empty-ico'>✅</div>Aucune correction IA en attente de validation</div>"),
+    "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
+}
+window._evalValidate=function(evalId,store,uid,idx){
+  var ev=(DB.evaluations||[]).find(function(e){return e.id===evalId;}); if(!ev) return;
+  var arr=ev[store]||[];
+  var rec=arr.find(function(r){ return (store==='reponses'?r.eid:r.uid)===uid && r.bilanIA && !r.bilanIA.valide; });
+  if(!rec){ toast("Résultat introuvable","warn"); return; }
+  var inp=document.getElementById('evV'+idx);
+  var newNote=inp?parseFloat(inp.value):rec.bilanIA.noteSur20;
+  if(isNaN(newNote)) newNote=rec.bilanIA.noteSur20;
+  newNote=Math.max(0,Math.min(20,newNote));
+  rec.bilanIA.valide=true;
+  rec.bilanIA.noteSur20=newNote;
+  rec.noteSur20=newNote;
+  rec.bilanIA.validePar=(SES&&((SES.pre||'')+" "+(SES.nom||'')).trim())||'Enseignant';
+  rec.bilanIA.dateValidation=new Date().toISOString().split('T')[0];
+  try{ if(!DB.notifications)DB.notifications=[];
+    DB.notifications.push({id:gid(),to:uid,titre:"✅ Correction vérifiée",
+      msg:"Ton enseignant a vérifié ta correction de « "+(ev.titre||'')+" » : "+newNote+"/20.",
+      date:new Date().toISOString().split('T')[0],read:[],type:'success'}); }catch(e){}
+  (DB.evalCorrectionFlags||[]).forEach(function(f){ if(f.evalId===evalId && f.eleveId===uid && f.statut==='ouvert') f.statut='traite'; });
+  save();
+  toast("✓ Validé : "+newNote+"/20");
+  setTimeout(mEvalValidations,60);
+};
+
 // ── ADMIN: GESTION ÉVALUATIONS ────────────────────────────────────
 function mManageEvals(){
   if(!iA())return;
@@ -27464,7 +27897,7 @@ function mManageEvals(){
   M("📊 Évaluations","Gérez les tests chronométrés avec correction instantanée",
     "<div class='ib ibt mb12'><span>📊</span><span>"+DB.evaluations.length+" évaluation(s). Les élèves et visiteurs connectés les passent depuis leur espace.</span></div>"
     +(rows||"<div class='mgr-empty'>Aucune évaluation créée. Commencez par en créer une.</div>")
-    +"<div style='border-top:var(--br);padding-top:12px;margin-top:10px'><button class='btn bi' onclick='_evalNew()'>➕ Créer une évaluation</button></div>",
+    +"<div style='border-top:var(--br);padding-top:12px;margin-top:10px;display:flex;gap:8px;flex-wrap:wrap'><button class='btn bi' onclick='_evalNew()'>➕ Créer une évaluation</button><button class='btn bo' onclick='cm();mEvalValidations()'>✅ Corrections IA à valider</button></div>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
 }
 function _evalToggle(i){var ev=DB.evaluations[i];if(!ev)return;ev.actif=!ev.actif;save();cm();toast(ev.actif?"Activée":"Désactivée");setTimeout(mManageEvals,80);}
@@ -27483,7 +27916,8 @@ function _evalForm(ev){
     +"<div class='fg full'><span class='fl'>Questions JSON *</span>"
     +"<textarea class='fi' id='evQ' rows='12' style='font-family:monospace;font-size:11px;line-height:1.6' placeholder='[\n  {\n    \"q\": \"Texte de la question ?\",\n    \"opts\": [\"Réponse A\",\"Réponse B\",\"Réponse C\",\"Réponse D\"],\n    \"ans\": 0,\n    \"exp\": \"Explication de la bonne réponse\"\n  }\n]'>"+(ev?JSON.stringify(ev.questions,null,2):"")+"</textarea>"
     +"<div style='font-size:11px;color:var(--ink4);margin-top:4px;line-height:1.6'>"
-    +"<strong>Format requis :</strong> tableau JSON · <code>q</code>=question · <code>opts</code>=[4 options] · <code>ans</code>=index correct(0-3) · <code>exp</code>=explication</div></div>"
+    +"<strong>QCM :</strong> <code>q</code> · <code>opts</code>=[options] · <code>ans</code>=index correct(0-3) · <code>exp</code>=explication.<br>"
+    +"<strong>Réponse libre (notée par l'IA) :</strong> <code>q</code> · <code>\"type\":\"ouverte\"</code> · <code>bareme</code>=points · <code>attendu</code>=éléments de réponse attendus.</div></div>"
     +"</div>",
     "<button class='btn bo' onclick='cm()'>Annuler</button>"
     +"<button class='btn bi' onclick='_evalSave()'>"+(ev?"Modifier":"Créer l'évaluation")+"</button>",true);
