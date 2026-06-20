@@ -1332,8 +1332,10 @@ function _migrateDB(){
   // FIX URLs /htdocs/ : toutes les URLs uploadées avant 12/05/2026 sont cassées
   // Réécriture systématique au chargement (idempotent — ne fait rien si pas de /htdocs/)
   _fixHtdocsUrls();
-  // v1.11 : classes éditables — seed DB.classes (+ anglophone GCE) et synchronise CLS
+  // v1.11 : classes & matières éditables — seed DB.classes (+ anglophone GCE) / DB.subjects
+  // et synchronise CLS / SUBS / COEFS en place (répercuté dans tous les menus).
   try{ _initClasses(); }catch(e){}
+  try{ _initSubjects(); }catch(e){}
   // v1.4.3 FIX : entités HTML stockées en dur dans les noms de catégories
   // (« Anciens sujets d&#39;examen » s'affichait littéralement, car _esc()
   // ré-échappait le &). Nettoyage idempotent des bases existantes.
@@ -11645,6 +11647,73 @@ window._delClasse=function(nom){
   _syncCLS(); if(typeof save==='function') save();
   toast('Classe retirée'); mManageClasses();
 };
+
+// v1.11 — MATIÈRES & COEFFICIENTS ÉDITABLES (même principe : DB.subjects source,
+// SUBS (array) + COEFS (object) re-synchronisés en place → répercuté partout).
+function _initSubjects(){
+  try{
+    if(!DB.subjects||!DB.subjects.length){
+      DB.subjects=SUBS.map(function(n){return {nom:n,coef:(COEFS[n]||1)};});
+      if(typeof save==='function') save();
+    }
+  }catch(e){}
+  _syncSUBS();
+}
+function _syncSUBS(){
+  if(!DB.subjects||!DB.subjects.length) return;
+  var seen={},out=[];
+  DB.subjects.forEach(function(s){var n=s&&s.nom; if(n&&!seen[n]){seen[n]=1;out.push(s);}});
+  if(!out.length) return;
+  SUBS.length=0; Object.keys(COEFS).forEach(function(k){delete COEFS[k];});
+  out.forEach(function(s){ SUBS.push(s.nom); COEFS[s.nom]=(+s.coef||1); });
+}
+function mManageSubjects(){
+  if(!iA()) return;
+  _initSubjects();
+  var rows=(DB.subjects||[]).map(function(s,i){
+    var nm=String(s.nom).replace(/'/g,"\\'");
+    return '<tr>'
+      +'<td style="padding:4px 8px"><input class="fi" id="msNom'+i+'" value="'+_esc(s.nom)+'" style="padding:5px 8px;font-size:13px;width:100%"></td>'
+      +'<td style="padding:4px 8px;width:80px"><input class="fi" id="msCoef'+i+'" type="number" min="1" max="10" value="'+(+s.coef||1)+'" style="padding:5px;width:62px;text-align:center"></td>'
+      +'<td style="padding:4px 8px;width:110px;white-space:nowrap"><button class="btn bo xs" title="Enregistrer" onclick="_saveSubject('+i+',\''+nm+'\')">💾</button> <button class="btn br2 xs" title="Supprimer" onclick="_delSubject(\''+nm+'\')">🗑</button></td>'
+      +'</tr>';
+  }).join('');
+  M('📚 Matières & coefficients','Modifiez librement les matières et leurs coefficients — répercuté partout (saisie des notes, moyennes, bulletins).',
+    '<div class="ib ibt mb12"><span>📚</span><span><strong>'+(DB.subjects||[]).length+'</strong> matières. Le coefficient pondère le calcul des moyennes et des bulletins.</span></div>'
+    +'<div class="fg2 mb12" style="align-items:end">'
+    +'<div class="fg"><span class="fl">Nouvelle matière *</span><input class="fi" id="nsNom" placeholder="Ex: Littérature · Latin · Computer Science"></div>'
+    +'<div class="fg"><span class="fl">Coefficient</span><input class="fi" id="nsCoef" type="number" min="1" max="10" value="2"></div>'
+    +'<div class="fg"><button class="btn bi" onclick="_addSubject()">➕ Ajouter</button></div>'
+    +'</div>'
+    +'<div class="tw" style="max-height:320px;overflow:auto"><table style="width:100%"><thead><tr style="background:var(--bg2)"><th style="text-align:left;padding:5px 8px">Matière</th><th style="padding:5px 8px">Coef.</th><th style="padding:5px 8px">Action</th></tr></thead><tbody>'+rows+'</tbody></table></div>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>',true);
+}
+window._addSubject=function(){
+  var el=document.getElementById('nsNom'); var nom=(el&&el.value||'').trim();
+  if(!nom){toast('Nom de matière requis','warn');return;}
+  _initSubjects();
+  if((DB.subjects||[]).some(function(s){return (s.nom||'').toLowerCase()===nom.toLowerCase();})){toast('Cette matière existe déjà','warn');return;}
+  var ce=document.getElementById('nsCoef'); var coef=parseInt(ce&&ce.value)||1;
+  DB.subjects.push({nom:nom,coef:coef});
+  _syncSUBS(); if(typeof save==='function') save();
+  toast('✓ Matière « '+nom+' » ajoutée'); mManageSubjects();
+};
+window._saveSubject=function(i,oldNom){
+  var ni=document.getElementById('msNom'+i), ci=document.getElementById('msCoef'+i);
+  if(!ni) return;
+  var nom=(ni.value||'').trim(); var coef=parseInt(ci&&ci.value)||1;
+  if(!nom){toast('Nom requis','warn');return;}
+  var s=(DB.subjects||[]).find(function(x){return x.nom===oldNom;});
+  if(s){ s.nom=nom; s.coef=coef; }
+  _syncSUBS(); if(typeof save==='function') save();
+  toast('✓ Enregistré'); mManageSubjects();
+};
+window._delSubject=function(nom){
+  if(!confirm('Supprimer la matière « '+nom+' » ?')) return;
+  DB.subjects=(DB.subjects||[]).filter(function(s){return s.nom!==nom;});
+  _syncSUBS(); if(typeof save==='function') save();
+  toast('Matière supprimée'); mManageSubjects();
+};
 window._gPickGroup=function(el,grp){
   window._gGrp=grp;
   var row=el.parentNode; if(row) row.querySelectorAll('[data-grpchip]').forEach(function(b){var on=b.getAttribute('data-grpchip')===grp;b.style.background=on?'var(--bl)':'transparent';b.style.color=on?'#fff':'var(--ink3)';});
@@ -11683,7 +11752,7 @@ function pgGrades(){
     </div>
     <div class="fl2 fic g6 fw" id="gClsChips" style="margin-top:10px">
       ${cls.map(c=>`<button data-cls="${c}" data-grp="${_clsGroup(c)}" style="display:${_clsGroup(c)===selG?'inline-block':'none'};padding:4px 11px;border-radius:6px;border:none;background:${c===selC?'var(--bl)':'var(--sur,#f3f5fa)'};color:${c===selC?'#fff':'var(--ink2)'};font-size:13px;font-weight:600;cursor:pointer" onclick="window._gC='${c}';window._gGrp='${_clsGroup(c)}';re()">${c}</button>`).join('')}
-      ${!isEnseignant()?`<button onclick="mManageClasses()" style="padding:4px 11px;border-radius:6px;border:1px dashed var(--bl);background:transparent;color:var(--bl);font-size:12px;font-weight:700;cursor:pointer">🏫 Gérer / créer…</button>`:''}
+      ${!isEnseignant()?`<button onclick="mManageClasses()" style="padding:4px 11px;border-radius:6px;border:1px dashed var(--bl);background:transparent;color:var(--bl);font-size:12px;font-weight:700;cursor:pointer">🏫 Gérer les classes</button><button onclick="mManageSubjects()" style="padding:4px 11px;border-radius:6px;border:1px dashed #7C3AED;background:transparent;color:#7C3AED;font-size:12px;font-weight:700;cursor:pointer">📚 Matières &amp; coef.</button>`:''}
     </div>
   </div>
   <div class="fl2 fic fsb mb16 fw g8">
@@ -11859,19 +11928,23 @@ function printBulletinHtml(sid,tri){
   const examTag=/3[èe]?me/i.test(s.cls)?'BEPC':/1[èe]?re/i.test(s.cls)?'PROBATOIRE':/T(le|erm)/i.test(s.cls)?'BAC':'';
   const photoHtml=s.photo?'<img src="'+s.photo+'" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #c49a3c">':'<div style="width:50px;height:50px;border-radius:50%;background:#edf2fc;border:2px solid #a8c0e8;display:flex;align-items:center;justify-content:center;font-size:20px;color:#1a3a8a;font-weight:700">'+s.pre[0]+s.nom[0]+'</div>';
 
-  return`<div style="padding:0;font-family:'Inter',sans-serif;font-size:10px;color:#1c1814;max-width:720px;margin:0 auto">
-  <!-- EN-TÊTE OFFICIEL -->
-  <div style="display:flex;justify-content:space-between;padding:10px 20px;border-bottom:2px solid #142554;font-size:9px;text-align:center">
-    <div style="width:45%"><div style="font-weight:700">RÉPUBLIQUE DU CAMEROUN</div><div style="font-style:italic;color:#666">Paix — Travail — Patrie</div></div>
-    <div style="width:45%"><div style="font-weight:700">REPUBLIC OF CAMEROON</div><div style="font-style:italic;color:#666">Peace — Work — Fatherland</div></div>
+  return`<div style="padding:0;font-family:'Inter',sans-serif;font-size:10px;color:#1c1814;max-width:720px;margin:0 auto;position:relative;z-index:0;overflow:hidden">
+  <!-- FILIGRANE (logo établissement) — modèle VÉRITAS Campus -->
+  <div style="position:absolute;inset:0;z-index:-1;display:flex;align-items:center;justify-content:center;opacity:.05;pointer-events:none;overflow:hidden"><img src="${logo}" style="width:55%;max-width:360px;object-fit:contain"></div>
+  <!-- EN-TÊTE OFFICIEL BILINGUE (3 colonnes, MINESEC) — modèle VÉRITAS Campus -->
+  <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;padding:8px 18px 6px;border-bottom:2px solid #142554;text-align:center;font-size:8px;line-height:1.4">
+    <div><b style="color:#142554">RÉPUBLIQUE DU CAMEROUN</b><br>Paix – Travail – Patrie<br>MINISTÈRE DES ENSEIGNEMENTS SECONDAIRES<br><b>${sc?.nom||'Centre VÉRITAS'}</b><br>${sc?.ville||''}</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+      <div style="width:46px;height:46px;border-radius:10px;background:#142554;display:flex;align-items:center;justify-content:center;overflow:hidden"><img src="${logo}" style="width:100%;height:100%;object-fit:cover"></div>
+      <div style="border:1px solid #142554;border-radius:3px;padding:1px;background:#fff;line-height:0">${_qrSvg.toSVG((sc?.nom||'VERITAS')+'\\nBulletin '+tri+'\\n'+s.pre+' '+s.nom,1)}</div>
+      <div style="font-size:6px;color:#888">Vérifiable</div>
+    </div>
+    <div><b style="color:#142554">REPUBLIC OF CAMEROON</b><br>Peace – Work – Fatherland<br>MINISTRY OF SECONDARY EDUCATION<br><b>${sc?.nom||'VÉRITAS'}</b><br>Tél. ${sc?.tel||'—'}</div>
   </div>
-  <!-- BANDEAU ÉCOLE -->
-  <div style="background:#142554;padding:12px 20px;display:flex;align-items:center;gap:12px">
-    <img src="${logo}" style="width:48px;height:48px;border-radius:50%;background:#fff;padding:2px;object-fit:contain">
-    <div style="flex:1"><div style="font-family:'Libre Baskerville',serif;font-size:13px;color:#FFC93C;letter-spacing:1px">${sc?.nom||'Centre VÉRITAS'}</div>
-    <div style="font-size:13px;color:rgba(255,255,255,.5)">${sc?.ville||''} · Tél: ${sc?.tel||''} · ${sc?.bp||''}</div></div>
-    <div style="text-align:right"><div style="font-size:13px;color:#FFC93C;font-weight:700">BULLETIN DE NOTES / REPORT CARD</div>
-    <div style="font-size:13px;color:rgba(255,255,255,.6)">${tri} — ${sc?.annee||'2024–2025'}</div></div>
+  <!-- TITRE -->
+  <div style="text-align:center;margin:6px 0 4px">
+    <div style="font-family:'Libre Baskerville',serif;font-size:14px;font-weight:700;color:#142554;letter-spacing:1px;text-transform:uppercase">Bulletin de notes / Report Card</div>
+    <div style="font-size:9px;color:#555">${tri} · Classe ${s.cls} · Effectif ${DB.students.filter(st=>st.cls===s.cls).length} · ${sc?.annee||'2024–2025'}</div>
   </div>
   <!-- INFOS ÉLÈVE -->
   <div style="display:flex;gap:12px;padding:10px 20px;background:#f5f3ef;border-bottom:1px solid #ddd8d0">
@@ -12012,7 +12085,7 @@ function printBulletinHtml(sid,tri){
   <div style="margin:4px 12px;padding:10px;border:2px solid ${moy<10?'#b82828':'#142554'};border-radius:6px;text-align:center;background:${moy<10?'#fdecec':'#f7f9ff'};-webkit-print-color-adjust:exact;print-color-adjust:exact">
     <div style="font-size:10px;font-weight:800;color:#142554;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">✦ Décision du Conseil de Classe / Class Council Decision ✦</div>
     ${isLastTri&&decision?`<div style="font-size:14px;font-weight:900;color:${moy<10?'#b82828':'#1a6e40'};letter-spacing:1px;margin:4px 0 8px;text-transform:uppercase">${decision}</div>`:''}
-    <div style="font-size:11px;color:#142554;font-weight:600;font-style:italic;line-height:1.6">${moy>=14?'Excellent trimestre, continuez ainsi ! / Excellent term — keep it up!':moy>=12?'Bon trimestre, quelques efforts supplémentaires vous mèneront plus loin. / Good term — keep pushing.':moy>=10?'Trimestre passable, des efforts réguliers sont nécessaires. / Average term — sustained effort needed.':'Trimestre difficile, un travail sérieux et régulier est indispensable. Rencontrez les enseignants. / Difficult term — please meet with the teachers.'}</div>
+    <div style="font-size:14px;color:#16407a;font-weight:600;line-height:1.5;font-family:'Segoe Script','Lucida Handwriting','Bradley Hand','Comic Sans MS',cursive">${moy>=14?'Excellent trimestre, continuez ainsi ! / Excellent term — keep it up!':moy>=12?'Bon trimestre, quelques efforts supplémentaires vous mèneront plus loin. / Good term — keep pushing.':moy>=10?'Trimestre passable, des efforts réguliers sont nécessaires. / Average term — sustained effort needed.':'Trimestre difficile, un travail sérieux et régulier est indispensable. Rencontrez les enseignants. / Difficult term — please meet with the teachers.'}</div>
   </div>
   <!-- SIGNATURES (avec prof titulaire) -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;padding:6px 12px 10px;font-size:11px">
