@@ -11858,7 +11858,173 @@ function printBulletins(cls,tri){
   printDoc(html,`Bulletins ${cls} — ${tri}`);
 }
 function printBulletin(sid,tri){printDoc(printBulletinHtml(sid,tri),`Bulletin ${tri}`);}
+// v1.11.2 — BULLETIN au modèle VÉRITAS Campus (documents.html renderBulletin),
+// alimenté par les VRAIES données. Styles embarqués (.vbul) car printDoc imprime
+// dans une fenêtre séparée (pas de campus.css). printBulletinHtml délègue ici.
+function _campusBulletinHtml(sid,tri){
+  const s=S(sid); if(!s) return '';
+  const sc=DB.school||{}; const logo=(typeof getLogo==='function')?getLogo():'';
+  const _sm=(g)=>(typeof _subMoy==='function')?_subMoy(g):((+g.n1+ +g.n2)/2);
+  const gr=DB.grades.filter(g=>g.eid===sid&&g.tri===tri);
+  const tc=gr.reduce((a,g)=>a+(+g.coef||1),0)||1;
+  const moyG=gr.length?gr.reduce((a,g)=>a+_sm(g)*(+g.coef||1),0)/tc:0;
+  const classStudents=DB.students.filter(st=>st.cls===s.cls); const eff=classStudents.length;
+  const allMoy=classStudents.map(st=>{const gg=DB.grades.filter(g=>g.eid===st.id&&g.tri===tri);const t=gg.reduce((a,g)=>a+(+g.coef||1),0)||1;return gg.length?gg.reduce((a,g)=>a+_sm(g)*(+g.coef||1),0)/t:null;}).filter(m=>m!=null).sort((a,b)=>b-a);
+  const rang=gr.length&&allMoy.length?(allMoy.findIndex(m=>Math.abs(m-moyG)<1e-6)+1):'—';
+  const classAvg=allMoy.length?allMoy.reduce((a,b)=>a+b,0)/allMoy.length:0;
+  const classMax=allMoy.length?allMoy[0]:0, classMin=allMoy.length?allMoy[allMoy.length-1]:0;
+  const cote=m=>m>=16?'CTBA':m>=14?'CBA':m>=12?'CA':m>=10?'CMA':'CNA';
+  const appr=m=>m>=16?'Très bien':m>=14?'Bien':m>=12?'Assez bien':m>=10?'Passable':'À renforcer';
+  const groupOf=sub=>{const k=(sub||'').toLowerCase();
+    if(/math|physi|chimi|svt|biolog|sciences|info|technolog|pct/.test(k))return 'Sciences et Technologies';
+    if(/histoire|géo|geo|ecm|education civ|philo|citizen/.test(k))return 'Sciences Humaines et Sociales';
+    if(/franç|frança|fr$|littér|litter|angl|allem|espagn|latin|langue|english|german|spanish/.test(k))return 'Langues et Lettres';
+    return 'Arts, Sport et Vie pratique';};
+  const domEN={'Langues et Lettres':'Languages & Literature','Sciences et Technologies':'Science & Technology','Sciences Humaines et Sociales':'Humanities','Arts, Sport et Vie pratique':'Arts, Sports & Life Skills'};
+  const order=['Langues et Lettres','Sciences et Technologies','Sciences Humaines et Sociales','Arts, Sport et Vie pratique'];
+  // Rang + max/min par matière dans la classe
+  const subStat={};
+  [...new Set(DB.grades.filter(g=>g.cls===s.cls&&g.tri===tri).map(g=>g.sub))].forEach(sub=>{
+    const a=DB.grades.filter(g=>g.sub===sub&&g.cls===s.cls&&g.tri===tri).map(g=>({eid:g.eid,m:_sm(g)})).sort((x,y)=>y.m-x.m);
+    const i=a.findIndex(x=>x.eid===sid);
+    subStat[sub]={rank:i>=0?i+1:null,max:a.length?a[0].m:null,min:a.length?a[a.length-1].m:null};
+  });
+  const grBy={}; gr.forEach(g=>{(grBy[groupOf(g.sub)]=grBy[groupOf(g.sub)]||[]).push(g);});
+  let body='';
+  order.forEach(dom=>{const list=grBy[dom]; if(!list||!list.length)return;
+    body+=`<tr class="dom"><td colspan="9">${dom} — ${domEN[dom]}</td></tr>`;
+    let sW=0,sC=0;
+    list.forEach(g=>{const m=_sm(g),coef=(+g.coef||1);sW+=m*coef;sC+=coef;const st=subStat[g.sub]||{};
+      body+=`<tr><td><b>${_esc(g.sub)}</b> <span class="t">${_esc(g.ens||'')}</span></td>`
+        +`<td class="n${(+g.n1<10)?' gred':''}">${(+g.n1).toFixed(2)}</td>`
+        +`<td class="n${(+g.n2<10)?' gred':''}">${(+g.n2).toFixed(2)}</td>`
+        +`<td class="n"><b class="${m<10?'gred':''}">${m.toFixed(2)}</b></td>`
+        +`<td class="n">${coef}</td>`
+        +`<td class="n">${st.rank?st.rank+'<sup>e</sup>':'—'}</td>`
+        +`<td class="n">${st.max!=null?st.max.toFixed(1)+'&nbsp;/&nbsp;'+st.min.toFixed(1):'—'}</td>`
+        +`<td class="n">${cote(m)}</td><td>${appr(m)}</td></tr>`;});
+    const gm=sC?sW/sC:0;
+    body+=`<tr class="sub"><td>Sous-total / Subtotal</td><td class="n">—</td><td class="n">—</td><td class="n"><b class="${gm<10?'gred':''}">${gm.toFixed(2)}</b></td><td class="n">${sC}</td><td class="n">—</td><td class="n">—</td><td class="n">${cote(gm)}</td><td>Moyenne du domaine</td></tr>`;
+  });
+  // Progression (moyennes par trimestre)
+  const TRSo=(typeof TRS!=='undefined')?TRS:['1er Trimestre','2ème Trimestre','3ème Trimestre'];
+  const triMoy=t=>{const gg=DB.grades.filter(g=>g.eid===sid&&g.tri===t);if(!gg.length)return null;const tt=gg.reduce((a,g)=>a+(+g.coef||1),0)||1;return gg.reduce((a,g)=>a+_sm(g)*(+g.coef||1),0)/tt;};
+  const Tm=TRSo.map(triMoy); const iTri=TRSo.indexOf(tri); const isLast=iTri===TRSo.length-1;
+  const annuals=Tm.filter(m=>m!=null); const annual=(isLast&&annuals.length)?(annuals.reduce((a,b)=>a+b,0)/annuals.length):null;
+  const progTxt=TRSo.map((t,i)=>'Trim. '+(i+1)+' : '+(Tm[i]!=null?Tm[i].toFixed(2):'—')).join(' &nbsp;→&nbsp; ');
+  // Discipline
+  const abs=(DB.absences||[]).filter(a=>a.eid===sid);
+  const absJ=abs.filter(a=>a.justifie).reduce((x,a)=>x+(+a.heures||0),0);
+  const absNJ=abs.filter(a=>!a.justifie).reduce((x,a)=>x+(+a.heures||0),0);
+  // Distinctions
+  const dist=moyG>=16?'Félicitations / Commendation':moyG>=14?"Tableau d'honneur / Honour roll":moyG>=12?'Encouragements / Distinction':moyG>=8?'Avertissement travail / Academic warning':'Blâme travail / Serious warning';
+  const DISTS=['Félicitations / Commendation',"Tableau d'honneur / Honour roll",'Encouragements / Distinction','Avertissement travail / Academic warning','Blâme travail / Serious warning'];
+  const remark=moyG>=16?'Excellent travail, félicitations !':moyG>=14?'Très bon trimestre, continuez ainsi.':moyG>=12?'Assez bien, élève méritant(e).':moyG>=10?'Passable, peut mieux faire.':'Travail insuffisant, ressaisissez-vous.';
+  const decision=isLast?(moyG>=10?'en classe supérieure / promoted':moyG>=8?'admis(e) sous réserve / conditional':'redouble / to repeat'):'';
+  const isRed=!!(s.redoublant||(DB.studentMeta&&DB.studentMeta[sid]&&DB.studentMeta[sid].redoublant));
+  const ppT=(DB.teachers||[]).find(t=>t.titulaire===s.cls); const ppName=ppT?(ppT.pre+' '+ppT.nom):'—';
+  const photo=s.photo?`<img src="${s.photo}" alt="">`:'👤';
+  const qr=(typeof _qrSvg!=='undefined'&&_qrSvg.toSVG)?_qrSvg.toSVG((sc.nom||'VERITAS')+'\\nBulletin '+tri+'\\n'+s.pre+' '+s.nom+'\\n'+s.cls+' '+s.mat,1):'';
+  const ln=(l,v)=>`<div class="b-line"><span>${l}</span><span>${v}</span></div>`;
+  const dl=(l,on)=>`<div class="b-line"><span>${l}</span><span>${on?'<span class="hand">✔ Oui</span>':'—'}</span></div>`;
+  const mgClass=moyG<10?'gred':'ggreen';
+  return `<div class="vbul">
+  <style>
+  .vbul{position:relative;z-index:0;overflow:hidden;max-width:760px;margin:0 auto;background:#fff;color:#1a1a1a;font-family:'Inter',system-ui,sans-serif;font-size:9.5px;line-height:1.4;padding:6mm 8mm}
+  .vbul .wm{position:absolute;inset:0;z-index:-1;display:flex;align-items:center;justify-content:center;opacity:.05;pointer-events:none;overflow:hidden}
+  .vbul .wm img{width:55%;max-width:360px;object-fit:contain}
+  .vbul .dhead-bi{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:center;border-bottom:2px solid #142554;padding-bottom:6px;text-align:center;font-size:8px;line-height:1.35}
+  .vbul .dhead-bi b{color:#142554}
+  .vbul .dhead-bi .ctr{display:flex;flex-direction:column;align-items:center;gap:2px}
+  .vbul .dhead-bi .ctr .dlogo{width:46px;height:46px;border-radius:10px;display:grid;place-items:center;background:#142554;color:#FFC93C;font-weight:800;overflow:hidden}
+  .vbul .dhead-bi .ctr .dlogo img{width:100%;height:100%;object-fit:cover}
+  .vbul .dhead-bi .ctr .qrx{border:1px solid #142554;border-radius:3px;padding:1px;background:#fff;line-height:0}
+  .vbul .dhead-bi .ctr .qrx svg{width:54px;height:54px;display:block}
+  .vbul .dtitle{text-align:center;margin:6px 0 4px}
+  .vbul .dtitle h2{margin:0;font-size:16px;color:#142554;letter-spacing:1px;text-transform:uppercase;font-family:'Libre Baskerville',Georgia,serif}
+  .vbul .dtitle .per{font-size:9px;color:#555}
+  .vbul .b-student{display:flex;gap:12px;align-items:flex-start;margin:6px 0}
+  .vbul .b-photo{width:60px;height:74px;flex:0 0 auto;border:2px solid #142554;border-radius:6px;background:#eef1f8;display:grid;place-items:center;color:#142554;font-size:24px;overflow:hidden}
+  .vbul .b-photo img{width:100%;height:100%;object-fit:cover}
+  .vbul .dinfo{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;font-size:9.5px}
+  .vbul .dinfo .l{color:#666}.vbul .dinfo b{color:#111}
+  .vbul .b-weights{font-size:8.5px;color:#555;background:#eef1f8;border-radius:5px;padding:4px 8px;margin:5px 0}
+  .vbul table.grades{width:100%;border-collapse:collapse;margin:3px 0;font-size:8px}
+  .vbul table.grades th,.vbul table.grades td{border:1px solid #cfd6e4;padding:1.6px 4px}
+  .vbul table.grades th{background:#142554;color:#fff;font-weight:600;text-align:left;font-size:7.5px}
+  .vbul table.grades td.n{text-align:center}
+  .vbul table.grades .t{color:#9aa3b2;font-size:.85em;font-weight:400}
+  .vbul table.grades tr.dom td{background:#142554;color:#fff;font-weight:700;text-transform:uppercase;letter-spacing:.4px;font-size:8.5px}
+  .vbul table.grades tr.sub td{background:#e7ebf5;font-weight:700}
+  .vbul table.grades tfoot td{background:#fdf3d6;font-weight:800}
+  .vbul .legend{font-size:8px;margin:2px 0 4px;color:#444}
+  .vbul .b-prog{font-size:8px;background:#eef1f8;border-radius:5px;padding:3px 8px;margin:4px 0;line-height:1.5}
+  .vbul .b-bottom{display:grid;grid-template-columns:1fr 1fr 1.15fr;gap:6px;margin-top:5px}
+  .vbul .b-box{border:1px solid #cfd6e4;border-radius:6px;padding:5px 7px;font-size:8px}
+  .vbul .b-box .h{font-weight:800;color:#142554;text-transform:uppercase;font-size:8.5px;letter-spacing:.3px;margin-bottom:3px;border-bottom:1px solid #e6ebf5;padding-bottom:2px}
+  .vbul .b-line{display:flex;justify-content:space-between;gap:6px;padding:1px 0;border-bottom:1px dotted #e6ebf5}
+  .vbul .b-annual{display:flex;gap:5px;margin-bottom:4px}
+  .vbul .b-annual .ab{flex:1;border:1.5px solid #c0392b;border-radius:6px;padding:3px 5px;text-align:center}
+  .vbul .b-annual .ab .l{font-size:7px;color:#666;text-transform:uppercase;line-height:1.1}
+  .vbul .b-annual .ab .v{font-size:14px;font-weight:800;color:#c0392b}
+  .vbul .hand{font-family:'Segoe Script','Lucida Handwriting','Bradley Hand','Comic Sans MS',cursive;color:#16407a;font-weight:600;font-size:1.25em}
+  .vbul .dsign{display:flex;justify-content:space-between;margin-top:10px;font-size:8.5px}
+  .vbul .dsign .s{text-align:center;min-width:170px}
+  .vbul .dsign .s .line{margin-top:24px;border-top:1px solid #333;padding-top:3px;color:#555}
+  .vbul .dfoot{margin-top:8px;border-top:1px solid #cfd6e4;padding-top:6px;font-size:8px;color:#777;display:flex;justify-content:space-between}
+  .vbul .gred{color:#c0392b;font-weight:700}.vbul .ggreen{color:#1aa463;font-weight:800}
+  </style>
+  <div class="wm">${logo?`<img src="${logo}" alt="">`:''}</div>
+  <div class="dhead-bi">
+    <div><b>RÉPUBLIQUE DU CAMEROUN</b><br>Paix – Travail – Patrie<br>MINISTÈRE DES ENSEIGNEMENTS SECONDAIRES<br><b>${_esc(sc.nom||'Centre VÉRITAS')}</b><br>${_esc(sc.ville||'')}</div>
+    <div class="ctr"><div class="dlogo">${logo?`<img src="${logo}" alt="">`:'ET'}</div>${qr?`<div class="qrx">${qr}</div>`:''}<div style="font-size:7px">Vérifiable</div></div>
+    <div><b>REPUBLIC OF CAMEROON</b><br>Peace – Work – Fatherland<br>MINISTRY OF SECONDARY EDUCATION<br><b>${_esc(sc.nom||'VÉRITAS')}</b><br>Tél. ${_esc(sc.tel||'—')}</div>
+  </div>
+  <div class="dtitle"><h2>Bulletin de notes / Report Card</h2><div class="per">${_esc(tri)} · Classe de ${_esc(s.cls)} · Effectif / Class size : ${eff} · ${_esc(sc.annee||'2025–2026')}</div></div>
+  <div class="b-student">
+    <div class="b-photo">${photo}</div>
+    <div class="dinfo">
+      <div><span class="l">Nom &amp; prénoms / Name :</span> <b>${_esc(s.nom+' '+(s.pre||''))}</b></div>
+      <div><span class="l">Matricule / ID :</span> <b>${_esc(s.mat||'—')}</b></div>
+      <div><span class="l">Né(e) le / Born :</span> <b>${_esc(s.dob||'—')}</b></div>
+      <div><span class="l">Genre / Sex :</span> <b>${s.sex==='F'?'F':'M'}</b> &nbsp; <span class="l">Redoublant / Repeater :</span> <b>${isRed?'Oui':'Non'}</b></div>
+      <div><span class="l">Prof. principal / Form master :</span> <b>${_esc(ppName)}</b></div>
+      <div><span class="l">Parent/Tuteur :</span> <b>${_esc(s.parent||'—')}${s.ptel?(' — '+_esc(s.ptel)):''}</b></div>
+    </div>
+  </div>
+  <div class="b-weights"><b>Note trimestrielle / Term mark :</b> synthèse pondérée des évaluations &nbsp;→&nbsp; Devoir 1 50% · Devoir 2 50% &nbsp;(Moy. trim. = (Devoir 1 + Devoir 2) / 2).</div>
+  <table class="grades"><thead><tr><th>Matière / Subject</th><th>Devoir 1</th><th>Devoir 2</th><th>Moy. trim. / Term</th><th>Coef</th><th>Rang/Rank</th><th>Max/Min cl.</th><th>Cote</th><th>Appréciation / Remark</th></tr></thead>
+  <tbody>${body||'<tr><td colspan="9" style="text-align:center;color:#999;padding:8px">Aucune note saisie pour ce trimestre.</td></tr>'}</tbody>
+  <tfoot><tr><td>TOTAL GÉNÉRAL / OVERALL</td><td class="n">—</td><td class="n">—</td><td class="n ${mgClass}">${moyG.toFixed(2)}</td><td class="n">${tc}</td><td class="n">${rang}${typeof rang==='number'?'<sup>e</sup>/'+allMoy.length:''}</td><td class="n">—</td><td class="n">${cote(moyG)}</td><td>Moyenne générale / Overall average</td></tr></tfoot></table>
+  <p class="legend"><b>Cotes :</b> CTBA · CBA · CA · CMA · CNA. <b class="gred">Rouge / Red = sous-moyenne (&lt;10).</b></p>
+  <table class="grades b-recap"><thead><tr><th>Profil de la classe / Class profile</th><th>Moy. élève / Pupil</th><th>Rang / Rank</th><th>Moy. 1er / Top</th><th>Moy. dern. / Last</th><th>Moy. classe / Class</th></tr></thead>
+  <tbody><tr><td>${_esc(tri)}</td><td class="n ${mgClass}">${moyG.toFixed(2)}</td><td class="n">${rang}${typeof rang==='number'?'<sup>e</sup>/'+allMoy.length:''}</td><td class="n">${classMax.toFixed(2)}</td><td class="n gred">${classMin.toFixed(2)}</td><td class="n">${classAvg.toFixed(2)}</td></tr></tbody></table>
+  <div class="b-prog">📈 <b>Progression / Progress :</b> ${progTxt} &nbsp;→&nbsp; <b>Moy. annuelle / Annual :</b> ${annual!=null?annual.toFixed(2):'—'} <span style="color:#888">(= (T1+T2+T3)/3 au 3<sup>e</sup> trim.)</span></div>
+  <div class="b-bottom">
+    <div class="b-box"><div class="h">Discipline</div>
+      ${ln('Absences just. / Justified',absJ+' h')}${ln('Absences non just. / Unjust.','<span class="gred">'+absNJ+' h</span>')}
+      ${ln('Exclusion (jours) / Suspension','0')}${ln('Consignes / Punishment','0 h')}
+      ${ln('Blâme conduite / Serious warn.','Néant')}${ln('Avert. conduite / Warning','Néant')}
+    </div>
+    <div class="b-box"><div class="h">Travail / Distinctions</div>
+      ${DISTS.map(d=>dl(d,dist===d)).join('')}
+    </div>
+    <div class="b-box">
+      <div class="b-annual"><div class="ab"><div class="l">Moy. annuelle / Annual</div><div class="v">${annual!=null?annual.toFixed(2):'—'}</div></div><div class="ab"><div class="l">Rang annuel / Rank</div><div class="v">—</div></div></div>
+      <div class="h" style="border:0;margin:1px 0">Décision du conseil / Council decision</div>
+      ${ln('Admis(e) / Promoted',decision?('<span class="hand">'+decision+'</span>'):'—')}
+      <div style="margin-top:2px;font-size:7.8px"><b>Obs. du chef d'étab. / Principal :</b><br><span class="hand">${remark}</span></div>
+      <div style="margin-top:4px;text-align:right;font-size:7.4px">${_esc(sc.ville||'Douala')}, le ${today()}<br>Le Proviseur / The Principal</div>
+    </div>
+  </div>
+  <div class="dsign"><div class="s">Visa Prof. principal / Form master<div class="line"></div></div><div class="s">Visa Parent / Tuteur<div class="line"></div></div></div>
+  <div class="dfoot"><span>Document généré le ${today()} via ${_esc(sc.nom||'VÉRITAS')}</span><span>Réf. ${('BUL-'+(new Date().getFullYear())+'-'+gid().substring(0,6)).toUpperCase()}</span></div>
+  </div>`;
+}
 function printBulletinHtml(sid,tri){
+  return _campusBulletinHtml(sid,tri);
+}
+function _printBulletinHtmlLegacy(sid,tri){
   const s=S(sid);if(!s)return '';
   const gr=DB.grades.filter(g=>g.eid===sid&&g.tri===tri);
   const tc=gr.reduce((a,g)=>a+(+g.coef||1),0)||1;
