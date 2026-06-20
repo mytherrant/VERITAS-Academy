@@ -1332,6 +1332,8 @@ function _migrateDB(){
   // FIX URLs /htdocs/ : toutes les URLs uploadées avant 12/05/2026 sont cassées
   // Réécriture systématique au chargement (idempotent — ne fait rien si pas de /htdocs/)
   _fixHtdocsUrls();
+  // v1.11 : classes éditables — seed DB.classes (+ anglophone GCE) et synchronise CLS
+  try{ _initClasses(); }catch(e){}
   // v1.4.3 FIX : entités HTML stockées en dur dans les noms de catégories
   // (« Anciens sujets d&#39;examen » s'affichait littéralement, car _esc()
   // ré-échappait le &). Nettoyage idempotent des bases existantes.
@@ -11573,6 +11575,90 @@ function printRec(pid){
 // ═══════════════════════════════════════════════
 // NOTES & BULLETINS
 // ═══════════════════════════════════════════════
+// v1.11 — CLASSES ÉDITABLES PAR L'ADMIN + sélecteur regroupé/recherchable.
+// Source éditable = DB.classes [{nom,sec}]. CLS (const, mais tableau au contenu
+// MUTABLE) est re-synchronisé en place → tous les menus de l'app (notes, bulletins,
+// élèves, emploi du temps, e-learning…) reflètent les classes créées, sans toucher
+// aux ~40 sites d'appel qui font CLS.map(...).
+function _initClasses(){
+  try{
+    if(!DB.classes||!DB.classes.length){
+      var fr=CLS.slice().map(function(n){return {nom:n,sec:(window._classifySection?window._classifySection(n):'')};});
+      // Anglophone GCE (absent de CLS jusqu'ici) — général + technique
+      var en=['Form 1','Form 2','Form 3','Form 4','Form 5','Lower Sixth Arts','Lower Sixth Science','Upper Sixth Arts','Upper Sixth Science','Form 5 Technical (ITC)','Upper Sixth Technical (ATC)'];
+      DB.classes=fr.concat(en.map(function(n){return {nom:n,sec:'en'};}));
+      if(typeof save==='function') save();
+    }
+  }catch(e){}
+  _syncCLS();
+}
+function _syncCLS(){
+  if(!DB.classes||!DB.classes.length) return;
+  var seen={},out=[];
+  DB.classes.forEach(function(c){ var n=c&&c.nom; if(n&&!seen[n]){seen[n]=1;out.push(n);} });
+  if(out.length){ CLS.length=0; out.forEach(function(n){CLS.push(n);}); }
+}
+// Section d'une classe : override explicite (DB.classes.sec) sinon classifieur global.
+function _clsGroup(c){
+  try{ var f=(DB.classes||[]).find(function(x){return x.nom===c;}); if(f&&f.sec) return f.sec; }catch(e){}
+  return window._classifySection?window._classifySection(c):'fr_gen';
+}
+// CRUD admin des classes — « créer autant de classes que possible »
+function mManageClasses(){
+  if(!iA()) return;
+  _initClasses();
+  var secs=window._SECTION_GROUPS||[];
+  var byS={}; (DB.classes||[]).forEach(function(c){ var s=_clsGroup(c.nom); (byS[s]=byS[s]||[]).push(c); });
+  var body=secs.filter(function(g){return byS[g.id]&&byS[g.id].length;}).map(function(g){
+    return '<div style="margin-bottom:12px"><div style="font-weight:800;color:'+g.c+';font-size:12px;margin-bottom:6px">'+g.l+' <span class="xs2 mut">('+byS[g.id].length+')</span></div>'
+      +'<div class="fl2 fic g6 fw">'+byS[g.id].map(function(c){
+        var nm=String(c.nom).replace(/'/g,"\\'");
+        return '<span style="display:inline-flex;align-items:center;gap:5px;background:var(--sur,#f3f5fa);border-radius:7px;padding:3px 5px 3px 10px;font-size:12px;font-weight:600">'+_esc(c.nom)
+          +'<button class="btn br2 xs" title="Supprimer" style="padding:1px 6px" onclick="_delClasse(\''+nm+'\')">🗑</button></span>';
+      }).join('')+'</div></div>';
+  }).join('');
+  M('🏫 Gérer les classes','Créez autant de classes que nécessaire — tous les sous-systèmes (francophone général/technique, CAP, anglophone GCE).',
+    '<div class="ib ibt mb12"><span>🏫</span><span><strong>'+(DB.classes||[]).length+'</strong> classes. Toute classe ajoutée apparaît partout : notes, bulletins, élèves, emploi du temps, e-learning…</span></div>'
+    +'<div class="fg2 mb12" style="align-items:end">'
+    +'<div class="fg"><span class="fl">Nom de la classe *</span><input class="fi" id="ncNom" placeholder="Ex: Form 4 · 1ère F4 · Tle ACC · Upper Sixth Science"></div>'
+    +'<div class="fg"><span class="fl">Sous-système</span><select class="fi" id="ncSec">'+secs.map(function(g){return '<option value="'+g.id+'">'+g.l+'</option>';}).join('')+'</select></div>'
+    +'<div class="fg"><button class="btn bi" onclick="_addClasse()">➕ Ajouter</button></div>'
+    +'</div>'
+    +'<div style="max-height:330px;overflow:auto">'+(body||'<div class="empty">Aucune classe</div>')+'</div>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>',true);
+}
+window._addClasse=function(){
+  var el=document.getElementById('ncNom'); var nom=(el&&el.value||'').trim();
+  if(!nom){toast('Nom de classe requis','warn');return;}
+  _initClasses();
+  if((DB.classes||[]).some(function(c){return (c.nom||'').toLowerCase()===nom.toLowerCase();})){toast('Cette classe existe déjà','warn');return;}
+  var se=document.getElementById('ncSec'); var sec=(se&&se.value)||(window._classifySection?_classifySection(nom):'');
+  DB.classes.push({nom:nom,sec:sec});
+  _syncCLS(); if(typeof save==='function') save();
+  toast('✓ Classe « '+nom+' » créée');
+  mManageClasses();
+};
+window._delClasse=function(nom){
+  var used=(DB.students||[]).some(function(s){return s.cls===nom;});
+  if(used && !confirm('Des élèves sont rattachés à « '+nom+' ». Retirer quand même cette classe de la liste ?')) return;
+  DB.classes=(DB.classes||[]).filter(function(c){return c.nom!==nom;});
+  _syncCLS(); if(typeof save==='function') save();
+  toast('Classe retirée'); mManageClasses();
+};
+window._gPickGroup=function(el,grp){
+  window._gGrp=grp;
+  var row=el.parentNode; if(row) row.querySelectorAll('[data-grpchip]').forEach(function(b){var on=b.getAttribute('data-grpchip')===grp;b.style.background=on?'var(--bl)':'transparent';b.style.color=on?'#fff':'var(--ink3)';});
+  var s=document.getElementById('gClsSearch'); if(s) s.value='';
+  window._gFilterClsChips('');
+};
+window._gFilterClsChips=function(q){
+  q=(q||'').trim().toLowerCase();
+  var grp=window._gGrp||'';
+  document.querySelectorAll('#gClsChips [data-cls]').forEach(function(ch){
+    var cls=ch.getAttribute('data-cls').toLowerCase(), g=ch.getAttribute('data-grp');
+    ch.style.display=(q? cls.indexOf(q)>=0 : (g===grp))?'inline-block':'none';
+  });
+};
 function pgGrades(){
   const selT=window._gT||TRS[0],selC=window._gC||CLS[0];
   const cls=isEnseignant()?[...new Set(DB.students.map(s=>s.cls))]:CLS;
@@ -11580,14 +11666,28 @@ function pgGrades(){
   const subFilt=isEnseignant()?t?.mat2:null;
   const sts=DB.students.filter(s=>s.cls===selC);
   const gr=DB.grades.filter(g=>g.cls===selC&&g.tri===selT&&(!subFilt||g.sub===subFilt));
+  _initClasses();
+  const _secs=(window._SECTION_GROUPS||[]);
+  const _availGrps=_secs.filter(g=>cls.some(c=>_clsGroup(c)===g.id));
+  const selG=(_availGrps.some(g=>g.id===window._gGrp)?window._gGrp:_clsGroup(selC));
   return`
   <div class="fl2 fic g8 mb16 fw">
     <div class="tabs">${TRS.map(tr=>`<button class="tab${tr===selT?' on':''}" onclick="window._gT='${tr}';re()">${tr}</button>`).join('')}</div>
   </div>
-  <div class="fl2 fic fsb mb16 fw g8">
-    <div class="fl2 fic g8 fw">
-      ${cls.map(c=>`<button class="tab${c===selC?' on':''}" style="padding:4px 10px;border-radius:5px;border:none;background:${c===selC?'var(--sur)':'transparent'};color:${c===selC?'var(--bl)':'var(--ink3)'};font-size:13px;font-weight:600;cursor:pointer;box-shadow:${c===selC?'0 1px 3px rgba(28,24,20,.08)':'none'}" onclick="window._gC='${c}';re()">${c}</button>`).join('')}
+  <div class="card" style="padding:10px 12px;margin-bottom:12px">
+    <div class="fl2 fic fsb g8 fw">
+      <div class="fl2 fic g6 fw">
+        ${_availGrps.map(g=>`<button data-grpchip="${g.id}" onclick="_gPickGroup(this,'${g.id}')" style="padding:5px 12px;border-radius:99px;border:1px solid var(--bd,#e3e8f0);background:${g.id===selG?g.c:'transparent'};color:${g.id===selG?'#fff':'var(--ink3)'};font-size:12px;font-weight:700;cursor:pointer">${g.l} <span style="opacity:.6">${cls.filter(c=>_clsGroup(c)===g.id).length}</span></button>`).join('')}
+      </div>
+      <input class="fi" id="gClsSearch" placeholder="🔎 Rechercher une classe…" style="max-width:220px;padding:6px 10px" oninput="_gFilterClsChips(this.value)">
     </div>
+    <div class="fl2 fic g6 fw" id="gClsChips" style="margin-top:10px">
+      ${cls.map(c=>`<button data-cls="${c}" data-grp="${_clsGroup(c)}" style="display:${_clsGroup(c)===selG?'inline-block':'none'};padding:4px 11px;border-radius:6px;border:none;background:${c===selC?'var(--bl)':'var(--sur,#f3f5fa)'};color:${c===selC?'#fff':'var(--ink2)'};font-size:13px;font-weight:600;cursor:pointer" onclick="window._gC='${c}';window._gGrp='${_clsGroup(c)}';re()">${c}</button>`).join('')}
+      ${!isEnseignant()?`<button onclick="mManageClasses()" style="padding:4px 11px;border-radius:6px;border:1px dashed var(--bl);background:transparent;color:var(--bl);font-size:12px;font-weight:700;cursor:pointer">🏫 Gérer / créer…</button>`:''}
+    </div>
+  </div>
+  <div class="fl2 fic fsb mb16 fw g8">
+    <div class="xs2 mut">Classe : <b style="color:var(--bl)">${selC}</b> · ${sts.length} élève${sts.length>1?'s':''}</div>
     <div class="fl2 g8 fw">
       <button class="btn bi" onclick="mAddGr()">＋ Note</button>
       <button class="btn bg2" onclick="mBulkGrades()">📝 Saisie classe</button>
@@ -11706,7 +11806,7 @@ function printBulletinHtml(sid,tri){
   const absNJ=abs.filter(a=>!a.justifie).reduce((s,a)=>s+a.heures,0);
   const absJ=abs.filter(a=>a.justifie).reduce((s,a)=>s+a.heures,0);
   const mention=moy>=16?'TRÈS BIEN':moy>=14?'BIEN':moy>=12?'ASSEZ BIEN':moy>=10?'PASSABLE':moy>=8?'INSUFFISANT':'FAIBLE';
-  const cote=moy>=16?'A+':moy>=14?'A':moy>=12?'B+':moy>=10?'B':moy>=8?'C':'D';
+  const cote=moy>=16?'CTBA':moy>=14?'CBA':moy>=12?'CA':moy>=10?'CMA':'CNA';
   const isHonneur=moy>=14;const isEncouragement=moy>=12&&moy<14;const isFelicitations=moy>=16;
   const sc=DB.school;const logo=getLogo();
   // ═══ v1.2.4 — ENRICHISSEMENTS BULLETIN (modèle Lycée Bilingue) ═══
@@ -11724,10 +11824,10 @@ function printBulletinHtml(sid,tri){
   // 3) Groupes de matières + sous-totaux pondérés (Sciences, Lettres, Langues, Autres)
   const _groupOf=function(sub){
     const k=(sub||'').toLowerCase();
-    if(/math|physi|chimi|svt|biolog|sciences/.test(k)) return 'Sciences';
-    if(/franç|frança|fr$|philo|litt|histoire|géo|geo|ecm|education civ/.test(k)) return 'Lettres & Humanités';
-    if(/angl|allem|espagn|langue|english|german|spanish/.test(k)) return 'Langues';
-    return 'Autres / EPS-Arts';
+    if(/math|physi|chimi|svt|biolog|sciences|info|technolog|pct/.test(k)) return 'Sciences et Technologies';
+    if(/histoire|géo|geo|ecm|education civ|philo|citizen/.test(k)) return 'Sciences Humaines et Sociales';
+    if(/franç|frança|fr$|littér|litter|angl|allem|espagn|latin|langue|english|german|spanish/.test(k)) return 'Langues et Lettres';
+    return 'Arts, Sport et Vie pratique';
   };
   const groups={};
   gr.forEach(g=>{const k=_groupOf(g.sub);if(!groups[k])groups[k]={tot:0,coef:0,n:0};const m=_subMoy(g);groups[k].tot+=m*g.coef;groups[k].coef+=(+g.coef||1);groups[k].n++;});
@@ -11805,7 +11905,7 @@ function printBulletinHtml(sid,tri){
       <tbody>
       ${(function(){
         // Tri par groupe pour insérer des sous-totaux pondérés (Sciences, Lettres…)
-        const order=['Sciences','Lettres & Humanités','Langues','Autres / EPS-Arts'];
+        const order=['Langues et Lettres','Sciences et Technologies','Sciences Humaines et Sociales','Arts, Sport et Vie pratique'];
         const grBy={};gr.forEach(g=>{const k=_groupOf(g.sub);(grBy[k]=grBy[k]||[]).push(g);});
         let out='';
         order.forEach(k=>{
@@ -11821,7 +11921,7 @@ function printBulletinHtml(sid,tri){
             const subGrades=DB.grades.filter(x=>x.sub===g.sub&&x.cls===s.cls&&x.tri===tri).map(x=>_subMoy(x));
             const subMin=subGrades.length?Math.min(...subGrades).toFixed(1):'—';
             const subMax=subGrades.length?Math.max(...subGrades).toFixed(1):'—';
-            const coteLetter=m>=16?'A+':m>=14?'A':m>=12?'B+':m>=10?'B':m>=8?'C':'D';
+            const coteLetter=m>=16?'CTBA':m>=14?'CBA':m>=12?'CA':m>=10?'CMA':'CNA';
             const appText=m>=16?'Excellent / Excellent':m>=14?'Très bien / Very good':m>=12?'Bien / Good':m>=10?'Passable / Pass':m>=8?'Insuffisant / Below average':'Très insuffisant / Very poor';
             const isLow=m<10;
             const rowBg=isLow?'background:#fdecec;':'';
@@ -11859,6 +11959,8 @@ function printBulletinHtml(sid,tri){
       </tr></tfoot>
     </table>
   </div>
+  <!-- LÉGENDE DES COTES APC (modèle VÉRITAS Campus) -->
+  <div style="padding:1px 12px 2px;font-size:8px;color:#555"><b style="color:#142554">Cotes APC :</b> CTBA [16–20] · CBA [14–16[ · CA [12–14[ · CMA [10–12[ · CNA [00–10[. <b style="color:#b82828">Rouge = sous-moyenne (&lt;10).</b></div>
   <!-- SECTION BASSE : DISCIPLINE + TRAVAIL + CLASSE -->
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;padding:0 12px;font-size:12px">
     <div style="border:1px solid #ddd;padding:6px 8px">
