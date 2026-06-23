@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Documents — VÉRITAS Campus</title>
+  <link rel="stylesheet" href="campus.css">
+</head>
+<body data-page="documents">
+
+  <header class="cmp-bar">
+    <div class="logo" data-brand-logo>VC</div>
+    <div class="brand"><b data-brand-name>VÉRITAS Campus</b><small>Documents officiels</small></div>
+    <div class="spacer"></div>
+    <a class="powered" href="dashboard.html" style="color:inherit;text-decoration:none">← Tableau de bord</a>
+  </header>
+
+  <main class="work">
+    <div class="demo-switch" id="demoSwitch"></div>
+
+    <div class="doc-toolbar">
+      <div class="seg" id="docSeg">
+        <button data-doc="bulletin" aria-pressed="true">📄 Bulletin</button>
+        <button data-doc="recu">🧾 Reçu</button>
+        <button data-doc="certificat">🎓 Certificat de scolarité</button>
+        <button data-doc="attestation">💼 Attestation de travail</button>
+        <button data-doc="carte">🪪 Carte scolaire</button>
+        <button data-doc="biblio">📚 Reçu bibliothèque</button>
+        <button data-doc="cantine">🍽️ Reçu cantine</button>
+        <button data-doc="bus">🚌 Reçu transport</button>
+      </div>
+      <div style="flex:1"></div>
+      <button class="btn btn-accent" onclick="window.print()" style="width:auto">🖨️ Imprimer / PDF</button>
+    </div>
+
+    <div id="docHost"></div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="config.js"></script>
+  <script src="qrcode.js"></script>
+  <script src="campus.js"></script>
+  <script>
+  (function () {
+    var C = window.CAMPUS, esc = C.esc;
+    var cfg = C.MOCK.demo;            // mis à jour par onCampusConfig
+    // Bulletin calculé depuis la saisie (notes.html) : s'il existe, on affiche le vrai élève.
+    window.CMP_BULLETIN = null;
+    try { window.CMP_BULLETIN = JSON.parse(sessionStorage.getItem('cmp_bulletin') || 'null'); } catch (e) {}
+    var current = (location.hash || '#bulletin').slice(1);
+    if (['bulletin','recu','certificat','attestation','carte','biblio','cantine','bus'].indexOf(current) < 0) current = 'bulletin';
+
+    /* ── Nombre en toutes lettres (FR) pour les reçus ── */
+    function trois(n){
+      var u=['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze','treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+      var s='', c=Math.floor(n/100), r=n%100;
+      if(c>0){ s += (c>1?u[c]+' ':'')+'cent'+((c>1&&r===0)?'s':''); if(r>0) s+=' '; }
+      if(r>0){
+        if(r<20){ s+=u[r]; }
+        else{
+          var d=Math.floor(r/10), un=r%10;
+          if(d===7||d===9){ var b=(d===7?'soixante':'quatre-vingt'); s += (un===1&&d===7)? b+'-et-'+u[11] : b+'-'+u[10+un]; }
+          else{ var nm=['','','vingt','trente','quarante','cinquante','soixante','','quatre-vingt','']; s+=nm[d]; if(d===8&&un===0) s+='s'; else if(un===1) s+='-et-un'; else if(un>0) s+='-'+u[un]; }
+        }
+      }
+      return s.trim();
+    }
+    function enLettres(n){
+      n=Math.round(n); if(n===0) return 'zéro';
+      var M=Math.floor(n/1000000), reste=n%1000000, mil=Math.floor(reste/1000), c=reste%1000, s='';
+      if(M>0){ s += (M>1?trois(M)+' ':'un ')+'million'+(M>1?'s':''); if(reste>0) s+=' '; }
+      if(mil>0){ s += (mil>1?trois(mil)+' ':'')+'mille'; if(c>0) s+=' '; }
+      if(c>0){ s += trois(c); }
+      return s.trim();
+    }
+    function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+    function fcfa(n){ return n.toLocaleString('fr-FR') + ' FCFA'; }
+
+    /* ── Pseudo-QR (visuel, déterministe) — le vrai QR sera généré côté serveur ── */
+    function verifyUrl(code){
+      var slug=(cfg && cfg.tenant && cfg.tenant.slug) || 'demo';
+      return 'https://'+slug+'.veritas-campus.com/api/campus/verify.php?code='+encodeURIComponent(code);
+    }
+    // Vrai QR scannable (lib qrcode-generator) encodant l'URL de vérification publique.
+    function qr(code, cls){
+      var url=verifyUrl(code);
+      if(typeof qrcode!=='undefined'){
+        try{ var q=qrcode(0,'M'); q.addData(url); q.make();
+          return q.createSvgTag({cellSize:2,margin:2,scalable:true}).replace('<svg ','<svg class="'+(cls||'qr')+'" '); }catch(e){}
+      }
+      // Repli visuel si la lib n'est pas chargée.
+      var g=11, cell=64/g, rects='', x=0;
+      for(var i=0;i<code.length;i++){ x=(x*31+code.charCodeAt(i))>>>0; }
+      for(var r=0;r<g;r++) for(var c2=0;c2<g;c2++){ x=(x*1103515245+12345)>>>0;
+        if((x>>16&1)){ rects+='<rect x="'+(c2*cell)+'" y="'+(r*cell)+'" width="'+cell+'" height="'+cell+'"/>'; } }
+      return '<svg class="'+(cls||'qr')+'" viewBox="0 0 64 64" fill="#142554"><rect width="64" height="64" fill="#fff"/>'+rects+'</svg>';
+    }
+    // Filigrane : logo de l'établissement en watermark (ou nom si pas de logo).
+    function wm(b){
+      var inner = b.logo_url ? '<img src="'+esc(b.logo_url)+'" alt="">' : '<span>'+esc(b.product_name||'VÉRITAS')+'</span>';
+      return '<div class="wm">'+inner+'</div>';
+    }
+    // En-tête officiel bilingue (style MINESEC) + petit QR.
+    function dheadOfficial(b, code){
+      var logo = b.logo_url ? '<img src="'+esc(b.logo_url)+'" alt="">' : esc(C.initials(b.product_name||'ET'));
+      return '<div class="dhead-bi">'
+        + '<div><b>RÉPUBLIQUE DU CAMEROUN</b><br>Paix – Travail – Patrie<br>MINISTÈRE DES ENSEIGNEMENTS SECONDAIRES<br><b>'+esc(b.product_name||'Établissement')+'</b><br>'+esc(b.address||'')+'</div>'
+        + '<div class="ctr"><div class="dlogo">'+logo+'</div>'+qr(code||'BUL','qr-sm')+'<div style="font-size:8px">Vérifiable</div></div>'
+        + '<div><b>REPUBLIC OF CAMEROON</b><br>Peace – Work – Fatherland<br>MINISTRY OF SECONDARY EDUCATION<br><b>'+esc(b.product_name||'School')+'</b><br>Tél. '+esc(b.contact_tel||'—')+'</div>'
+        + '</div>';
+    }
+
+    function dhead(b, right){
+      var logo = b.logo_url ? '<img src="'+esc(b.logo_url)+'" alt="">' : esc(C.initials(b.product_name||'École'));
+      return '<div class="dhead">'
+        + '<div class="dlogo">'+logo+'</div>'
+        + '<div class="dmeta"><b>'+esc(b.product_name||'Établissement')+'</b>'
+        + '<div>'+esc(b.slogan||'')+'</div>'
+        + '<div>République du Cameroun · Paix – Travail – Patrie</div>'
+        + '<div>'+esc(b.contact_tel||'Tél. —')+' · '+esc(b.contact_email||'')+'</div></div>'
+        + '<div class="dstate">'+(right||'')+'</div></div>';
+    }
+    function signs(arr){
+      return '<div class="dsign">'+arr.map(function(s){ return '<div class="s">'+esc(s.role)+'<div class="line">'+esc(s.name||'')+'</div></div>'; }).join('')+'</div>';
+    }
+    function foot(code){
+      return '<div class="dfoot"><span>Document généré le '+new Date().toLocaleDateString('fr-FR')+' via VÉRITAS Campus</span><span>Réf. '+esc(code)+'</span></div>';
+    }
+
+    /* ── 1. BULLETIN APC (matières regroupées par domaine + sous-totaux) ── */
+    function cote(m){
+      if(m>=16) return ['CTBA','[16–20]']; if(m>=14) return ['CBA','[14–16['];
+      if(m>=12) return ['CA','[12–14['];  if(m>=10) return ['CMA','[10–12['];
+      return ['CNA','[00–10['];
+    }
+    function appr(m){ return m>=16?'Très bien':m>=14?'Bien':m>=12?'Assez bien':m>=10?'Passable':'À renforcer'; }
+
+    // Politique d'évaluation par défaut (si l'établissement n'a rien configuré).
+    var DEFAULT_GRADING = {
+      evals: [ {key:'dev1',label:'Devoir 1',weight:50}, {key:'dev2',label:'Devoir 2',weight:50} ],
+      distinctions: [
+        {label:'Félicitations', en:'Commendation', min:16}, {label:"Tableau d'honneur", en:'Honour roll', min:14},
+        {label:'Encouragements', en:'Distinction', min:12}, {label:'Avertissement travail', en:'Academic warning', min:8},
+        {label:'Blâme travail', en:'Serious warning', min:0}
+      ]
+    };
+    // Politique de l'établissement courant (tenant ou 1re section configurée), sinon défaut.
+    function activeGrading(){
+      if(cfg && cfg.academics && cfg.academics.grading && cfg.academics.grading.evals) return cfg.academics.grading;
+      var secs=(cfg && cfg.academics && cfg.academics.sections) || [];
+      for(var i=0;i<secs.length;i++){ if(secs[i].enabled!==false && secs[i].grading && secs[i].grading.evals) return secs[i].grading; }
+      return DEFAULT_GRADING;
+    }
+    function rk(moy){ return Math.min(52, Math.max(1, Math.round((20 - moy) / 20 * 51) + 1)); }
+    function clamp20(v){ return Math.max(0, Math.min(20, v)); }
+    // Notes d'évaluation de DÉMO réparties autour d'une moyenne de base (pour n composantes).
+    function demoEvals(base, n){
+      if(n<=1) return [base];
+      if(n===2) return [clamp20(base-0.5), clamp20(base+0.5)];
+      var out=[], step=2/(n-1); for(var i=0;i<n;i++) out.push(clamp20(base-1+i*step)); return out;
+    }
+
+    // Rendu d'un bulletin À PARTIR DES NOTES SAISIES (données calculées passées par notes.html).
+    function renderBulletinFrom(d, b){
+      var totCoef = 0, totW = 0;
+      var rows = d.subjects.map(function (s) {
+        var note = +s.note; totCoef += s.coef; totW += note * s.coef; var ct = cote(note);
+        return '<tr><td><b>' + esc(s.name) + '</b></td>'
+          + '<td class="n' + (note < 10 ? ' gred' : '') + '"><b>' + note.toFixed(2) + '</b></td>'
+          + '<td class="n">' + s.coef + '</td><td class="n">' + s.rang + '<sup>e</sup></td>'
+          + '<td class="n">' + (+s.max).toFixed(1) + ' / ' + (+s.min).toFixed(1) + '</td>'
+          + '<td class="n">' + (+s.moyClasse).toFixed(2) + '</td>'
+          + '<td class="n">' + ct[0] + '</td><td>' + appr(note) + '</td></tr>';
+      }).join('');
+      var moyG = +d.moyenne, mg = moyG < 10 ? 'gred' : 'ggreen', ctG = cote(moyG);
+      return '<div class="sheet bulletin">'
+        + wm(b) + dheadOfficial(b, 'BUL-' + esc(d.student.mat))
+        + '<div style="background:color-mix(in srgb,var(--ds-ok) 12%,#fff);border:1px solid var(--ds-ok);border-radius:6px;padding:4px 10px;font-size:9px;margin:4px 0">✅ Bulletin généré automatiquement à partir des notes saisies.</div>'
+        + '<div class="dtitle"><h2>Bulletin de notes / Report Card</h2><div class="per">' + esc(d.periode) + ' · Classe ' + esc(d.student.classe) + ' · Effectif ' + d.effectif + ' · 2025–2026</div></div>'
+        + '<div class="b-student"><div class="b-photo">👤</div>'
+        + '<div class="dinfo"><div><span class="l">Nom / Name :</span> <b>' + esc(d.student.nom) + '</b></div><div><span class="l">Matricule / ID :</span> <b>' + esc(d.student.mat) + '</b></div>'
+        + '<div><span class="l">Classe / Class :</span> <b>' + esc(d.student.classe) + '</b></div><div><span class="l">Sexe / Sex :</span> <b>' + esc(d.student.sexe || '') + '</b></div></div></div>'
+        + '<table class="grades"><thead><tr><th>Matière / Subject</th><th>Moy/20</th><th>Coef</th><th>Rang</th><th>Max/Min cl.</th><th>Moy. cl.</th><th>Cote</th><th>Appréciation</th></tr></thead>'
+        + '<tbody>' + rows + '</tbody>'
+        + '<tfoot><tr><td>TOTAL GÉNÉRAL / OVERALL</td><td class="n ' + mg + '"><b>' + moyG.toFixed(2) + '</b></td><td class="n">' + totCoef + '</td><td class="n">' + d.rang + '<sup>e</sup>/' + d.effectif + '</td><td class="n">—</td><td class="n">—</td><td class="n">' + ctG[0] + '</td><td>Moyenne générale</td></tr></tfoot></table>'
+        + '<div class="dsummary">'
+        + '<div class="box"><div class="l">Moyenne / Average</div><div class="v ' + mg + '">' + moyG.toFixed(2) + '</div></div>'
+        + '<div class="box"><div class="l">Rang / Rank</div><div class="v">' + d.rang + '<sup>e</sup>/' + d.effectif + '</div></div>'
+        + '<div class="box"><div class="l">Cote</div><div class="v" style="font-size:1.1rem">' + ctG[0] + '</div></div>'
+        + '<div class="box"><div class="l">Mention</div><div class="v" style="font-size:.8rem">' + esc(d.mention) + '</div></div></div>'
+        + '<div class="b-decision"><div class="h">Décision du conseil / Council decision</div><b>Mention / Distinction :</b> <span class="hand">' + esc(d.mention) + '</span></div>'
+        + signs([{ role: 'Le Professeur principal' }, { role: 'Le Censeur' }, { role: 'Le Chef d\'établissement' }])
+        + foot('BUL-' + esc(d.student.mat));
+    }
+
+    function renderBulletin(b){
+      if (window.CMP_BULLETIN) { return renderBulletinFrom(window.CMP_BULLETIN, b); }
+      var G = activeGrading(), EV = G.evals, NEV = EV.length;
+      var DIST = (G.distinctions || DEFAULT_GRADING.distinctions).slice().sort(function(a,c){ return c.min-a.min; });
+      var NC = 7 + NEV;   // colonnes : Matière + n évals + MoyTrim + Coef + Rang + Max/Min + Cote + Appréciation
+      // [matière, coef, moyenne de base (démo), enseignant] regroupées par domaine.
+      var groups=[
+        { name:'Langues et Lettres', en:'Languages & Literature', subs:[
+          ['Français / French',6,16.5,'Mme MBALLA'],['Anglais / English',3,14.5,'Mr TABI'],
+          ['Lettres classiques / Latin',2,14.5,'Mme ONANA'],['Langues nat. / Nat. languages',1,15,'Mr ELA'] ] },
+        { name:'Sciences et Technologies', en:'Science & Technology', subs:[
+          ['Mathématiques / Maths',4,8.5,'Mr ATANGANA'],['Sciences / Science (SVTEEHB)',2,13,'Mme NGO'],
+          ['Informatique / ICT',2,15.5,'Mr FOUDA'] ] },
+        { name:'Sciences Humaines et Sociales', en:'Humanities', subs:[
+          ['Histoire / History',2,13.5,'Mme KOM'],['Géographie / Geography',2,14,'Mme KOM'],
+          ['ECM / Citizenship',2,16,'Mr BIYA'],['Cultures nat. / Nat. cultures',1,15,'Mr ELA'] ] },
+        { name:'Arts, Sport et Vie pratique', en:'Arts, Sports & Life Skills', subs:[
+          ['Éducation artistique / Arts',1,17,'Mr ABE'],['EPS / PE',2,15.5,'Mr SUH'],
+          ['ESF / Home econ.',1,8,'Mme SAA'],['Travail manuel / Handicraft',1,14,'Mr OWONA'] ] }
+      ];
+      var gW=0, gC=0, body='';
+      groups.forEach(function(g){
+        body += '<tr class="dom"><td colspan="'+NC+'">'+g.name+' — '+g.en+'</td></tr>';
+        var sW=0, sC=0;
+        g.subs.forEach(function(s){
+          var coef=s[1], vals=demoEvals(s[2], NEV), moy=0;
+          for(var i=0;i<NEV;i++){ moy += vals[i]*(EV[i].weight/100); }
+          var w=moy*coef, ct=cote(moy); sW+=w; sC+=coef;
+          var cells=vals.map(function(v){ return '<td class="n'+(v<10?' gred':'')+'">'+v.toFixed(2)+'</td>'; }).join('');
+          body += '<tr><td><b>'+s[0]+'</b> <span style="color:#999;font-size:.82em">'+s[3]+'</span></td>'
+                + cells + '<td class="n'+(moy<10?' gred':'')+'"><b>'+moy.toFixed(2)+'</b></td>'
+                + '<td class="n">'+coef+'</td>'
+                + '<td class="n">'+rk(moy)+'<sup>e</sup></td><td class="n">'+clamp20(s[2]+3).toFixed(1)+'&nbsp;/&nbsp;'+clamp20(s[2]-5).toFixed(1)+'</td><td class="n">'+ct[0]+'</td><td>'+appr(moy)+'</td></tr>';
+        });
+        var gm=sW/sC; gW+=sW; gC+=sC; var dash=''; for(var k=0;k<NEV;k++){ dash+='<td class="n">—</td>'; }
+        body += '<tr class="sub"><td>Sous-total / Subtotal</td>'+dash
+              + '<td class="n'+(gm<10?' gred':'')+'">'+gm.toFixed(2)+'</td><td class="n">'+sC+'</td>'
+              + '<td class="n">—</td><td class="n">—</td><td class="n">'+cote(gm)[0]+'</td><td>Moyenne du domaine</td></tr>';
+      });
+      var moyG=gW/gC, ctG=cote(moyG), mgClass = moyG<10?'gred':'ggreen', photo='👤';
+      var dist = DIST[DIST.length-1].label;
+      for(var d=0; d<DIST.length; d++){ if(moyG>=DIST[d].min){ dist=DIST[d].label; break; } }
+      var remark = moyG>=16?'Excellent travail, félicitations !':moyG>=14?'Très bon trimestre, continuez ainsi.':moyG>=12?'Assez bien, élève méritante.':moyG>=10?'Passable, peut mieux faire.':'Travail insuffisant, ressaisissez-vous.';
+      function ln(l,v){ return '<div class="b-line"><span>'+l+'</span><span>'+v+'</span></div>'; }
+      function dl(l,on){ return '<div class="b-line"><span>'+l+'</span><span>'+(on?'<span class="hand">✔ Oui</span>':'—')+'</span></div>'; }
+      var evalTh = EV.map(function(e){ return '<th>'+esc(e.label)+'</th>'; }).join('');
+      var weightTxt = EV.map(function(e){ return esc(e.label)+' '+e.weight+'%'; }).join(' · ');
+      var dashHead=''; for(var z=0;z<NEV;z++){ dashHead+='<td class="n">—</td>'; }
+      var t1=13.20, t2=moyG;
+      var contact = b.contact_email || b.contact_whatsapp || 'www.veritas-campus.com';
+      return '<div class="sheet bulletin">'
+        + wm(b)
+        + dheadOfficial(b, 'BUL-2026-T2-0481')
+        + '<div class="dtitle"><h2>Bulletin de notes / Report Card</h2><div class="per">Deuxième trimestre / Second Term · Classe de 5<sup>e</sup> · Effectif / Class size : 52 · 2025–2026</div></div>'
+        + '<div class="b-student"><div class="b-photo">'+(b.student_photo?'<img src="'+esc(b.student_photo)+'" alt="">':photo)+'</div>'
+        + '<div class="dinfo"><div><span class="l">Nom & prénoms / Name :</span> <b>NGUEMA Sandrine</b></div><div><span class="l">Matricule / ID :</span> <b>CMP-2026-0481</b></div>'
+        + '<div><span class="l">Né(e) le / Born :</span> <b>12/03/2012 à Douala</b></div><div><span class="l">Genre / Sex :</span> <b>F</b> &nbsp; <span class="l">Redoublant / Repeater :</span> <b>Non</b></div>'
+        + '<div><span class="l">Prof. principal / Form master :</span> <b>Mme MBALLA</b></div><div><span class="l">Parent/Tuteur :</span> <b>M. NGUEMA Paul — 6 99 00 00 00</b></div></div></div>'
+        + '<div class="b-weights"><b>Note trimestrielle / Term mark :</b> synthèse pondérée des évaluations &nbsp;→&nbsp; '+weightTxt+' &nbsp;(Moy. trim. = Σ note × pondération).</div>'
+        + '<table class="grades"><thead><tr><th>Matière / Subject</th>'+evalTh+'<th>Moy. trim. / Term</th><th>Coef</th><th>Rang/Rank</th><th>Max/Min cl.</th><th>Cote</th><th>Appréciation / Remark</th></tr></thead>'
+        + '<tbody>'+body+'</tbody>'
+        + '<tfoot><tr><td>TOTAL GÉNÉRAL / OVERALL</td>'+dashHead+'<td class="n '+mgClass+'"><b>'+moyG.toFixed(2)+'</b></td><td class="n">'+gC+'</td><td class="n">7<sup>e</sup>/52</td><td class="n">—</td><td class="n">'+ctG[0]+'</td><td>Moyenne générale / Overall average</td></tr></tfoot></table>'
+        + '<p style="font-size:8px;margin:3px 0 2px"><b>Cotes :</b> CTBA · CBA · CA · CMA · CNA. <b style="color:#c0392b">Rouge / Red = sous-moyenne (&lt;10).</b></p>'
+        + '<table class="grades b-recap"><thead><tr><th>Profil de la classe / Class profile</th><th>Moy. élève / Pupil</th><th>Rang / Rank</th><th>Moy. 1er / Top</th><th>Moy. dern. / Last</th><th>Moy. classe / Class</th></tr></thead>'
+        + '<tbody><tr><td>2<sup>e</sup> trimestre / 2nd term</td><td class="n '+mgClass+'">'+moyG.toFixed(2)+'</td><td class="n">7<sup>e</sup>/52</td><td class="n">15,80</td><td class="n gred">4,20</td><td class="n">11,90</td></tr></tbody></table>'
+        + '<div class="b-prog">📈 <b>Progression / Progress :</b> Trim. 1 : '+t1.toFixed(2)+' (9<sup>e</sup>) &nbsp;→&nbsp; Trim. 2 : <b>'+t2.toFixed(2)+'</b> (7<sup>e</sup>) &nbsp;→&nbsp; Trim. 3 : — &nbsp;→&nbsp; <b>Moy. annuelle / Annual :</b> — <span style="color:#888">(= (T1+T2+T3)/3 au 3<sup>e</sup> trim. ; le bulletin annuel synthétise les 3 trimestres)</span></div>'
+        + '<div class="b-bottom">'
+        + '<div class="b-box"><div class="h">Discipline</div>'
+          + ln('Absences just. / Justified','6 h') + ln('Absences non just. / Unjust.','<span class="gred">2 h</span>')
+          + ln('Exclusion (jours) / Suspension','0') + ln('Consignes / Punishment','0 h')
+          + ln('Blâme conduite / Serious warn.','Néant') + ln('Avert. conduite / Warning','Néant')
+        + '</div>'
+        + '<div class="b-box"><div class="h">Travail / Distinctions</div>'
+          + DIST.map(function(dd){ return dl(dd.label+(dd.en?' / '+dd.en:''), dist===dd.label); }).join('')
+        + '</div>'
+        + '<div class="b-box">'
+          + '<div class="b-annual"><div class="ab"><div class="l">Moy. annuelle / Annual</div><div class="v">—</div><div style="font-size:6.5px;color:#888">(T1+T2+T3)/3</div></div>'
+            + '<div class="ab"><div class="l">Rang annuel / Rank</div><div class="v">—</div></div></div>'
+          + '<div class="h" style="border:0;margin:2px 0 1px">Décision du conseil / Council decision</div>'
+          + ln('Admis(e) / Promoted','<span class="hand">en classe supérieure</span>')
+          + '<div style="margin-top:2px;font-size:7.6px"><b>Obs. du chef d\'étab. / Principal :</b><br><span class="hand">'+remark+'</span></div>'
+          + '<div style="margin-top:4px;text-align:right;font-size:7.3px">Douala, le '+new Date().toLocaleDateString('fr-FR')+'<br>Le Proviseur / The Principal</div>'
+        + '</div></div>'
+        + '<div class="dsign" style="margin-top:6px"><div class="s">Visa Prof. principal / Form master<div class="line"></div></div><div class="s">Visa Parent / Tuteur<div class="line"></div></div></div>'
+        + foot('BUL-2026-T2-0481');
+    }
+
+    /* ── 2. REÇU ── */
+    function renderRecu(b){
+      var montant=75000, solde=45000;
+      return '<div class="sheet">'
+        + wm(b)
+        + dhead(b, 'Reçu N° 003154<br>'+new Date().toLocaleDateString('fr-FR'))
+        + '<div class="dtitle"><h2>Reçu de paiement</h2><div class="per">Frais de scolarité — 2<sup>e</sup> tranche</div></div>'
+        + '<div class="dinfo"><div><span class="l">Reçu de :</span> <b>M. NGUEMA Paul (parent)</b></div><div><span class="l">Élève :</span> <b>NGUEMA Sandrine</b></div>'
+        + '<div><span class="l">Classe :</span> <b>3e A</b></div><div><span class="l">Matricule :</span> <b>CMP-2026-0481</b></div>'
+        + '<div><span class="l">Mode :</span> <b>Mobile Money (MTN MoMo)</b></div><div><span class="l">Référence :</span> <b>VT260619-7Q3X</b></div></div>'
+        + '<table class="grades"><thead><tr><th>Désignation</th><th>Montant</th></tr></thead>'
+        + '<tbody><tr><td>Scolarité — 2<sup>e</sup> tranche</td><td class="r">'+fcfa(montant)+'</td></tr></tbody>'
+        + '<tfoot><tr><td>Total versé</td><td class="r">'+fcfa(montant)+'</td></tr></tfoot></table>'
+        + '<p style="font-size:11.5px"><b>Arrêté le présent reçu à la somme de :</b> '+cap(enLettres(montant))+' francs CFA.</p>'
+        + '<div class="dsummary" style="grid-template-columns:repeat(3,1fr)">'
+        + '<div class="box"><div class="l">Versé</div><div class="v" style="font-size:1rem">'+fcfa(montant)+'</div></div>'
+        + '<div class="box"><div class="l">Solde dû</div><div class="v" style="font-size:1rem">'+fcfa(solde)+'</div></div>'
+        + '<div class="box"><div class="l">Statut</div><div class="v" style="font-size:.9rem;color:var(--ds-ok)">Partiel</div></div></div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:18px">'
+        + '<div style="text-align:center;font-size:10px">'+qr('VT260619-7Q3X')+'<div>Vérifiable en ligne</div></div>'
+        + '<div class="dsign" style="margin:0"><div class="s">L\'Intendant<div class="line">Cachet &amp; signature</div></div></div></div>'
+        + foot('REC-2026-003154');
+    }
+
+    /* ── 3. CERTIFICAT DE SCOLARITÉ ── */
+    function renderCertificat(b){
+      return '<div class="sheet">'
+        + wm(b)
+        + dhead(b, 'Certificat N° 0207<br>'+new Date().toLocaleDateString('fr-FR'))
+        + '<div class="dtitle"><h2>Certificat de scolarité</h2></div>'
+        + '<div class="dbody">'
+        + '<p>Je soussigné, <b>le Chef de l\'établissement '+esc(b.product_name||'')+'</b>, certifie que l\'élève&nbsp;:</p>'
+        + '<p style="text-align:center;font-size:14px"><b>NGUEMA Sandrine</b>, née le <b>12 mars 2010</b> à <b>Douala</b>,<br>matricule <b>CMP-2026-0481</b>,</p>'
+        + '<p>est régulièrement inscrit(e) et fréquente assidûment les cours en classe de <b>3<sup>e</sup> A</b> au titre de l\'année scolaire <b>2025–2026</b>.</p>'
+        + '<p>En foi de quoi le présent certificat lui est délivré pour servir et valoir ce que de droit.</p></div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:30px">'
+        + '<div style="text-align:center;font-size:10px">'+qr('CERT-0207-0481')+'<div>Authentification</div></div>'
+        + '<div class="dsign" style="margin:0"><div class="s">Fait à '+esc((b.address||'Douala').split(',')[0])+', le '+new Date().toLocaleDateString('fr-FR')+'<div class="line">Le Chef d\'établissement</div></div></div></div>'
+        + foot('CERT-2026-0207');
+    }
+
+    /* ── 4. ATTESTATION DE TRAVAIL ── */
+    function renderAttestation(b){
+      return '<div class="sheet">'
+        + wm(b)
+        + dhead(b, 'Attestation N° 014<br>'+new Date().toLocaleDateString('fr-FR'))
+        + '<div class="dtitle"><h2>Attestation de travail</h2></div>'
+        + '<div class="dbody">'
+        + '<p>Je soussigné, <b>le Chef de l\'établissement '+esc(b.product_name||'')+'</b>, atteste que&nbsp;:</p>'
+        + '<p style="text-align:center;font-size:14px"><b>M. ATANGANA Jean-Pierre</b></p>'
+        + '<p>exerce au sein de notre établissement en qualité de <b>Enseignant de Mathématiques</b> depuis le <b>1<sup>er</sup> octobre 2021</b>, et y travaille à ce jour de manière satisfaisante.</p>'
+        + '<p>La présente attestation est délivrée à l\'intéressé pour servir et valoir ce que de droit.</p></div>'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:36px">'
+        + '<div style="text-align:center;font-size:9px">'+qr('ATT-2026-014','qr-sm')+'<div>Authentification</div></div>'
+        + '<div class="dsign" style="margin:0"><div class="s">Fait à '+esc((b.address||'Douala').split(',')[0])+', le '+new Date().toLocaleDateString('fr-FR')+'<div class="line">Le Chef d\'établissement</div></div></div></div>'
+        + foot('ATT-2026-014');
+    }
+
+    /* ── 5. CARTE SCOLAIRE (ID) ── */
+    function renderCarte(b){
+      return '<div class="sheet" style="min-height:auto">'
+        + '<p class="note" style="text-align:center;margin:0 0 10px">Carte scolaire / Student ID — format 85,6 × 54 mm (recto)</p>'
+        + '<div class="idcard">'
+          + '<div class="idc-head"><div class="idc-logo">'+(b.logo_url?'<img src="'+esc(b.logo_url)+'" alt="">':esc(C.initials(b.product_name||'ET')))+'</div>'
+            + '<div><b>'+esc(b.product_name||'Établissement')+'</b><div>Carte scolaire / Student ID · 2025–2026</div></div></div>'
+          + '<div class="idc-body"><div class="idc-photo">'+(b.student_photo?'<img src="'+esc(b.student_photo)+'" alt="">':'👤')+'</div>'
+            + '<div class="idc-fields"><div><span>Nom / Name :</span> <b>NGUEMA Sandrine</b></div>'
+            + '<div><span>Matricule / ID :</span> <b>CMP-2026-0481</b></div>'
+            + '<div><span>Classe / Class :</span> <b>5<sup>e</sup></b></div>'
+            + '<div><span>Né(e) le / DoB :</span> <b>12/03/2012</b></div></div>'
+            + '<div class="idc-qr">'+qr('CART-26-0481A1B2')+'</div></div>'
+          + '<div class="idc-foot">Valable année scolaire 2025–2026 · Authentifiable par QR</div>'
+        + '</div></div>';
+    }
+    /* ── 6. REÇU DE BIBLIOTHÈQUE ── */
+    function renderBiblio(b){
+      var dt=new Date().toLocaleDateString('fr-FR'), due=new Date(Date.now()+14*864e5).toLocaleDateString('fr-FR');
+      return '<div class="sheet">'+wm(b)+dhead(b,'Reçu biblio. N° L-0042<br>'+dt)
+        + '<div class="dtitle"><h2>Reçu de bibliothèque / Library slip</h2><div class="per">Prêt d\'ouvrage / Book loan</div></div>'
+        + '<div class="dinfo"><div><span class="l">Emprunteur / Borrower :</span> <b>NGUEMA Sandrine (5<sup>e</sup>)</b></div><div><span class="l">Matricule / ID :</span> <b>CMP-2026-0481</b></div>'
+        + '<div><span class="l">Date de prêt / Loan :</span> <b>'+dt+'</b></div><div><span class="l">Retour prévu / Due :</span> <b>'+due+'</b></div></div>'
+        + '<table class="grades"><thead><tr><th>Ouvrage / Title</th><th>Auteur / Author</th><th>Cote</th></tr></thead>'
+        + '<tbody><tr><td>Le Vieux Nègre et la médaille</td><td>F. Oyono</td><td class="n">LIT-114</td></tr></tbody></table>'
+        + '<p style="font-size:11px;margin-top:8px">À rendre en bon état avant la date prévue. Tout retard ou dégât peut entraîner une pénalité.</p>'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:16px"><div style="text-align:center;font-size:10px">'+qr('BIBL-26-0042L1')+'<div>Vérifiable</div></div>'
+        + '<div class="dsign" style="margin:0"><div class="s">Le/La Bibliothécaire<div class="line"></div></div></div></div>'
+        + foot('BIBL-2026-0042');
+    }
+    /* ── 7. REÇU DE CANTINE ── */
+    function renderCantine(b){
+      var dt=new Date().toLocaleDateString('fr-FR'), montant=15000;
+      return '<div class="sheet">'+wm(b)+dhead(b,'Reçu cantine N° C-0231<br>'+dt)
+        + '<div class="dtitle"><h2>Reçu de cantine / Canteen receipt</h2><div class="per">Restauration scolaire — Mars 2026</div></div>'
+        + '<div class="dinfo"><div><span class="l">Élève / Pupil :</span> <b>NGUEMA Sandrine (5<sup>e</sup>)</b></div><div><span class="l">Matricule / ID :</span> <b>CMP-2026-0481</b></div>'
+        + '<div><span class="l">Formule / Plan :</span> <b>Demi-pension (20 repas)</b></div><div><span class="l">Mode :</span> <b>Espèces / Caisse</b></div></div>'
+        + '<table class="grades"><thead><tr><th>Désignation / Item</th><th>Montant</th></tr></thead>'
+        + '<tbody><tr><td>Cantine — mars 2026 (20 repas)</td><td class="r">'+fcfa(montant)+'</td></tr></tbody>'
+        + '<tfoot><tr><td>Total versé / Paid</td><td class="r">'+fcfa(montant)+'</td></tr></tfoot></table>'
+        + '<p style="font-size:11.5px"><b>Arrêté à / Amount :</b> '+cap(enLettres(montant))+' francs CFA.</p>'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px"><div style="text-align:center;font-size:10px">'+qr('CANT-26-0231C1')+'<div>Vérifiable</div></div>'
+        + '<div class="dsign" style="margin:0"><div class="s">Le/La Gérant(e) de cantine<div class="line"></div></div></div></div>'
+        + foot('CANT-2026-0231');
+    }
+    /* ── 8. REÇU DE TRANSPORT / BUS ── */
+    function renderBus(b){
+      var dt=new Date().toLocaleDateString('fr-FR'), montant=20000;
+      return '<div class="sheet">'+wm(b)+dhead(b,'Reçu transport N° T-0177<br>'+dt)
+        + '<div class="dtitle"><h2>Reçu de transport / Bus receipt</h2><div class="per">Transport scolaire — Trimestre 2</div></div>'
+        + '<div class="dinfo"><div><span class="l">Élève / Pupil :</span> <b>NGUEMA Sandrine (5<sup>e</sup>)</b></div><div><span class="l">Matricule / ID :</span> <b>CMP-2026-0481</b></div>'
+        + '<div><span class="l">Ligne / Route :</span> <b>Ligne A — Bonabéri</b></div><div><span class="l">Arrêt / Stop :</span> <b>Carrefour Ndokoti</b></div>'
+        + '<div><span class="l">Véhicule / Bus :</span> <b>LT-883-AB</b></div><div><span class="l">Mode :</span> <b>Mobile Money</b></div></div>'
+        + '<table class="grades"><thead><tr><th>Désignation / Item</th><th>Montant</th></tr></thead>'
+        + '<tbody><tr><td>Transport — Trimestre 2</td><td class="r">'+fcfa(montant)+'</td></tr></tbody>'
+        + '<tfoot><tr><td>Total versé / Paid</td><td class="r">'+fcfa(montant)+'</td></tr></tfoot></table>'
+        + '<p style="font-size:11.5px"><b>Arrêté à / Amount :</b> '+cap(enLettres(montant))+' francs CFA.</p>'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:14px"><div style="text-align:center;font-size:10px">'+qr('TRSP-26-0177T1')+'<div>Vérifiable</div></div>'
+        + '<div class="dsign" style="margin:0"><div class="s">Le Responsable transport<div class="line"></div></div></div></div>'
+        + foot('TRSP-2026-0177');
+    }
+    var RENDER = { bulletin: renderBulletin, recu: renderRecu, certificat: renderCertificat, attestation: renderAttestation, carte: renderCarte, biblio: renderBiblio, cantine: renderCantine, bus: renderBus };
+
+    function draw(){
+      var b = (cfg && cfg.branding) || {};
+      b = Object.assign({ product_name: (cfg.tenant && cfg.tenant.name) || 'Établissement' }, b);
+      document.getElementById('docHost').innerHTML = RENDER[current](b);
+    }
+
+    document.getElementById('docSeg').addEventListener('click', function(e){
+      var btn = e.target.closest('button[data-doc]'); if(!btn) return;
+      current = btn.getAttribute('data-doc');
+      this.querySelectorAll('button').forEach(function(x){ x.setAttribute('aria-pressed', x===btn?'true':'false'); });
+      location.hash = current; draw();
+    });
+
+    // Sélection initiale (deep-link depuis le dashboard).
+    document.querySelectorAll('#docSeg button').forEach(function(x){ x.setAttribute('aria-pressed', x.getAttribute('data-doc')===current?'true':'false'); });
+
+    window.onCampusConfig = function(c){ cfg = c; draw(); };
+    draw();
+  })();
+  </script>
+</body>
+</html>

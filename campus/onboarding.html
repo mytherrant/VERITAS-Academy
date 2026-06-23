@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Créer mon établissement — VÉRITAS Campus</title>
+  <link rel="stylesheet" href="campus.css">
+</head>
+<body data-page="onboarding">
+
+  <header class="cmp-bar">
+    <div class="logo">VC</div>
+    <div class="brand"><b>VÉRITAS Campus</b><small>Assistant de création d'établissement</small></div>
+    <div class="spacer"></div>
+    <a class="powered" href="index.html" style="color:inherit;text-decoration:none">← Retour</a>
+  </header>
+
+  <main class="cmp-wrap">
+    <div class="steps">
+      <div class="s active" data-step="1"><span class="n">1</span> Établissement</div>
+      <div class="s" data-step="2"><span class="n">2</span> Marque</div>
+      <div class="s" data-step="3"><span class="n">3</span> Modules</div>
+      <div class="s" data-step="4"><span class="n">4</span> Scolarité</div>
+    </div>
+
+    <div class="cmp-grid split">
+      <section class="card">
+
+        <!-- Étape 1 — Établissement -->
+        <div class="wstep active" data-pane="1">
+          <h2>L'établissement</h2>
+          <p class="sub">Identité de base et compte administrateur.</p>
+          <div class="field"><label>Nom de l'établissement</label><input id="f_name" placeholder="Collège Bilingue La Réussite"></div>
+          <div class="row two">
+            <div class="field"><label>Sous-domaine (slug)</label><input id="f_slug" placeholder="la-reussite"></div>
+            <div class="field"><label>Forfait</label>
+              <select id="f_plan">
+                <option value="starter">Starter (≤ 200 élèves)</option>
+                <option value="croissance">Croissance (≤ 400)</option>
+                <option value="pro" selected>Pro (≤ 1 000)</option>
+                <option value="premium">Premium (≤ 1 500)</option>
+                <option value="entreprise">Entreprise (sur devis)</option>
+              </select>
+            </div>
+          </div>
+          <div class="row two">
+            <div class="field"><label>E-mail admin</label><input id="f_admin_email" type="email" placeholder="direction@la-reussite.cm"></div>
+            <div class="field"><label>Mot de passe admin (≥ 8)</label><input id="f_admin_pass" type="password" placeholder="••••••••"></div>
+          </div>
+        </div>
+
+        <!-- Étape 2 — Marque -->
+        <div class="wstep" data-pane="2">
+          <h2>La marque de l'école</h2>
+          <p class="sub">Logo, couleurs et nom affichés à vos élèves et parents.</p>
+          <div class="field"><label>Nom affiché (white-label)</label><input id="f_product" placeholder="Collège La Réussite"></div>
+          <div class="field"><label>Slogan</label><input id="f_slogan" placeholder="Savoir, rigueur, réussite"></div>
+          <div class="field"><label>URL du logo (facultatif)</label><input id="f_logo" placeholder="https://… .png"></div>
+          <div class="field">
+            <label>Couleurs de marque</label>
+            <div class="swatch-row">
+              <label class="swatch">Primaire <input type="color" id="f_primary" value="#142554"></label>
+              <label class="swatch">Accent <input type="color" id="f_accent" value="#FFC93C"></label>
+              <label class="swatch">En-tête
+                <select id="f_header" style="padding:8px 10px;border:1px solid var(--ds-line);border-radius:8px">
+                  <option value="sombre">Sombre</option><option value="clair">Clair</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <p class="note">→ Aperçu en direct à droite. Réglages modifiables à tout moment depuis l'admin.</p>
+        </div>
+
+        <!-- Étape 3 — Modules -->
+        <div class="wstep" data-pane="3">
+          <h2>Modules</h2>
+          <p class="sub">Activez ce dont l'établissement a besoin (modifiable ensuite).</p>
+          <div class="cmp-grid" id="moduleToggles" style="gap:10px"></div>
+        </div>
+
+        <!-- Étape 4 — Scolarité -->
+        <div class="wstep" data-pane="4">
+          <h2>Structure scolaire</h2>
+          <p class="sub">Sous-systèmes et filières actifs. Un établissement peut combiner les deux.</p>
+          <div class="cmp-grid" id="sectionToggles" style="gap:10px"></div>
+          <p class="note">Chaque section apporte ses cycles, classes, séries, examens (BEPC, Probatoire, BAC, GCE O/A Level, CAP…) et son barème — éditables après création.</p>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:22px">
+          <button class="btn btn-ghost" id="prevBtn" style="display:none">← Précédent</button>
+          <div style="flex:1"></div>
+          <button class="btn btn-primary" id="nextBtn" style="width:auto">Continuer →</button>
+          <button class="btn btn-accent" id="createBtn" style="display:none;width:auto">✓ Créer l'établissement</button>
+        </div>
+      </section>
+
+      <!-- Aperçu live -->
+      <section class="card" style="padding:18px">
+        <h2 style="font-size:1.05rem">Aperçu en direct</h2>
+        <p class="sub" style="margin-bottom:14px">Ce que verront vos utilisateurs.</p>
+        <div class="preview-live" id="pv">
+          <div style="padding:14px 16px;display:flex;align-items:center;gap:12px" id="pvBar">
+            <div style="width:36px;height:36px;border-radius:9px;display:grid;place-items:center;font-weight:800" id="pvLogo">VC</div>
+            <div style="line-height:1.15"><b id="pvName">VÉRITAS Campus</b><br><small id="pvSlogan" style="opacity:.8">Plateforme de gestion scolaire</small></div>
+          </div>
+          <div style="padding:18px 16px;background:var(--ds-bg)">
+            <div class="pills" id="pvModules" style="margin-bottom:12px"></div>
+            <div class="sec-grid" id="pvSections"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="config.js"></script>
+  <script src="campus.js"></script>
+  <script>
+  (function () {
+    var C = window.CAMPUS, $ = C.$;
+    var step = 1, MAX = 4;
+    var SECTIONS = [
+      { key: 'fr_general', sys: 'francophone', fil: 'general', label: 'Francophone — Général', scale: 'sur_20' },
+      { key: 'fr_technique', sys: 'francophone', fil: 'technique', label: 'Francophone — Technique', scale: 'sur_20' },
+      { key: 'en_general', sys: 'anglophone', fil: 'general', label: 'Anglophone — General', scale: 'gce_letter' },
+      { key: 'en_technical', sys: 'anglophone', fil: 'technique', label: 'Anglophone — Technical', scale: 'gce_letter' }
+    ];
+
+    // Modules toggles
+    $('#moduleToggles').innerHTML = Object.keys(C.MODULE_LABELS).map(function (k) {
+      var on = k !== 'rh' ? 'checked' : '';
+      return '<label class="toggle"><span>' + C.MODULE_LABELS[k] + '</span><input type="checkbox" data-mod="' + k + '" ' + on + '></label>';
+    }).join('');
+    // Sections toggles
+    $('#sectionToggles').innerHTML = SECTIONS.map(function (s) {
+      var on = s.key === 'fr_general' ? 'checked' : '';
+      return '<label class="toggle"><span>' + s.label + '</span><input type="checkbox" data-sec="' + s.key + '" ' + on + '></label>';
+    }).join('');
+
+    function chosenModules() { var o = {}; document.querySelectorAll('[data-mod]').forEach(function (i) { o[i.getAttribute('data-mod')] = i.checked; }); return o; }
+    function chosenSections() { var a = []; document.querySelectorAll('[data-sec]').forEach(function (i) { if (i.checked) a.push(i.getAttribute('data-sec')); }); return a; }
+
+    function buildPreview() {
+      var primary = $('#f_primary').value, accent = $('#f_accent').value, header = $('#f_header').value;
+      var name = $('#f_product').value || $('#f_name').value || 'Votre établissement';
+      var slogan = $('#f_slogan').value || 'Plateforme de gestion scolaire';
+      var logo = $('#f_logo').value;
+      var pv = $('#pv');
+      pv.style.setProperty('--ds-primary', primary);
+      pv.style.setProperty('--ds-accent', accent);
+      var bar = $('#pvBar');
+      bar.style.background = header === 'clair' ? '#fff' : primary;
+      bar.style.color = header === 'clair' ? 'var(--ds-ink)' : '#fff';
+      bar.style.borderBottom = '1px solid ' + (header === 'clair' ? 'var(--ds-line)' : 'transparent');
+      var lg = $('#pvLogo');
+      lg.style.background = header === 'clair' ? primary : 'rgba(255,255,255,.15)';
+      lg.style.color = accent;
+      if (logo) { lg.innerHTML = '<img src="' + C.esc(logo) + '" style="width:100%;height:100%;border-radius:inherit;object-fit:cover" alt="">'; }
+      else { lg.textContent = C.initials(name); }
+      $('#pvName').textContent = name;
+      $('#pvSlogan').textContent = slogan;
+
+      var mods = chosenModules();
+      $('#pvModules').innerHTML = Object.keys(C.MODULE_LABELS).map(function (k) {
+        return '<span class="pill" data-off="' + (mods[k] ? '0' : '1') + '">' + C.MODULE_LABELS[k] + '</span>';
+      }).join('');
+      var secs = chosenSections();
+      $('#pvSections').innerHTML = SECTIONS.filter(function (s) { return secs.indexOf(s.key) >= 0; }).map(function (s) {
+        var fr = s.sys === 'francophone';
+        return '<div class="sec ' + (fr ? 'fr' : 'en') + '"><span class="tag">' + (fr ? 'Francophone' : 'Anglophone') + ' · ' + (s.fil === 'technique' ? 'Technique' : 'Général') + '</span><b>' + s.label + '</b><small>' + (s.scale === 'gce_letter' ? 'Notes GCE (A–U)' : 'Sur 20') + ' · Trimestres</small></div>';
+      }).join('') || '<p class="note">Sélectionnez au moins une section à l\'étape 4.</p>';
+    }
+
+    function showStep(n) {
+      step = Math.max(1, Math.min(MAX, n));
+      document.querySelectorAll('.wstep').forEach(function (p) { p.classList.toggle('active', +p.getAttribute('data-pane') === step); });
+      document.querySelectorAll('.steps .s').forEach(function (s) {
+        var k = +s.getAttribute('data-step');
+        s.classList.toggle('active', k === step);
+        s.classList.toggle('done', k < step);
+      });
+      $('#prevBtn').style.display = step > 1 ? '' : 'none';
+      $('#nextBtn').style.display = step < MAX ? '' : 'none';
+      $('#createBtn').style.display = step === MAX ? '' : 'none';
+      buildPreview();
+    }
+
+    function validStep1() {
+      var slug = $('#f_slug').value.trim(), name = $('#f_name').value.trim();
+      var em = $('#f_admin_email').value.trim(), pw = $('#f_admin_pass').value;
+      if (!name) { C.toast('Nom requis.'); return false; }
+      if (!/^[a-z0-9\-]{2,}$/.test(slug)) { C.toast('Slug invalide (a-z, 0-9, tiret).'); return false; }
+      if (!/.+@.+\..+/.test(em)) { C.toast('E-mail admin invalide.'); return false; }
+      if (pw.length < 8) { C.toast('Mot de passe ≥ 8 caractères.'); return false; }
+      return true;
+    }
+
+    $('#nextBtn').addEventListener('click', function () { if (step === 1 && !validStep1()) return; showStep(step + 1); });
+    $('#prevBtn').addEventListener('click', function () { showStep(step - 1); });
+    document.addEventListener('input', buildPreview);
+
+    $('#createBtn').addEventListener('click', function () {
+      if (chosenSections().length === 0) { C.toast('Activez au moins une section scolaire.'); return; }
+      var payload = {
+        slug: $('#f_slug').value.trim(), name: $('#f_name').value.trim(), plan: $('#f_plan').value,
+        admin_email: $('#f_admin_email').value.trim(), admin_password: $('#f_admin_pass').value,
+        product_name: $('#f_product').value.trim() || $('#f_name').value.trim(),
+        sections: chosenSections()
+      };
+      // En prod : POST /platform/tenants (jeton plateforme requis). Puis PUT /tenant/branding + /tenant/modules.
+      C.api('/platform/tenants', { method: 'POST', body: payload }).then(function (j) {
+        if (j && j.ok) { C.toast('✓ Établissement créé : ' + (j.tenant.login_url || j.tenant.slug)); }
+        else { C.toast((j && j.error) ? j.error : 'Création impossible (jeton plateforme requis).'); }
+      }).catch(function () {
+        C.toast('Démo : établissement « ' + payload.name + ' » prêt à créer (' + payload.sections.length + ' section(s)).');
+      });
+    });
+
+    showStep(1);
+  })();
+  </script>
+</body>
+</html>

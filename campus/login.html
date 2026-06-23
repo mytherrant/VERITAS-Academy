@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connexion — VÉRITAS Campus</title>
+  <link rel="stylesheet" href="campus.css">
+</head>
+<body data-page="login">
+
+  <header class="cmp-bar">
+    <div class="logo" data-brand-logo>VC</div>
+    <div class="brand"><b data-brand-name>VÉRITAS Campus</b><small data-brand-slogan>Plateforme de gestion scolaire</small></div>
+    <div class="spacer"></div>
+    <div class="powered">Propulsé par <b>VÉRITAS</b></div>
+  </header>
+
+  <main class="cmp-wrap">
+    <div class="demo-switch" id="demoSwitch"></div>
+    <div class="cmp-grid split">
+
+      <section class="brandpane">
+        <span class="chip">Identification</span>
+        <div class="logoBig" data-brand-logo>VC</div>
+        <h1 class="big" data-brand-name>VÉRITAS Campus</h1>
+        <p class="lead">Avant toute opération, une identification est nécessaire. Choisissez votre <b>profil</b> : chacun accède uniquement à ses fonctions.</p>
+        <div class="feat">
+          <div><span class="dot">✓</span> Serveur local, en ligne ou hébergé par VÉRITAS</div>
+          <div><span class="dot">✓</span> Direction · Enseignant · Élève · Parent · Intendant…</div>
+          <div><span class="dot">✓</span> Accès précis et restreint par rôle</div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Connexion</h2>
+        <p class="sub">Sélectionnez le contexte puis identifiez-vous.</p>
+        <form id="loginForm" novalidate>
+          <div class="field"><label>Langue / Language</label>
+            <select id="fLang"><option>Français / French</option><option>English / Anglais</option></select></div>
+          <div class="field"><label>Serveur / Server</label>
+            <select id="fServer">
+              <option value="managed">Hébergé par VÉRITAS Campus (cloud)</option>
+              <option value="self">Serveur en ligne de l'établissement</option>
+              <option value="local">Serveur local (réseau de l'école)</option>
+            </select></div>
+          <div class="field"><label>École / School</label>
+            <select id="fSchool"></select></div>
+          <div class="field"><label>Année / Year</label>
+            <select id="fYear"><option>2025-2026</option><option>2026-2027</option></select></div>
+          <div class="field"><label>Profil / Profile</label>
+            <select id="fProfile"></select></div>
+          <div class="row two">
+            <div class="field"><label>Compte / Login</label><input id="fLogin" autocomplete="username" placeholder="identifiant"></div>
+            <div class="field"><label>Mot de passe</label><input id="fPass" type="password" autocomplete="current-password" placeholder="••••••••"></div>
+          </div>
+          <button class="btn btn-primary" type="submit">Se connecter</button>
+        </form>
+        <p class="note" style="margin-top:14px">Pas encore d'établissement ? <a href="onboarding.html">Créer mon école →</a></p>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="config.js"></script>
+  <script src="campus.js"></script>
+  <script>
+  (function () {
+    var C = window.CAMPUS, $ = C.$;
+    // Profils → rôles (accès restreint).
+    $('#fProfile').innerHTML = C.PROFILES.map(function (p) { return '<option value="' + p.role + '">' + C.esc(p.label) + '</option>'; }).join('');
+    // Écoles (démo) — en mode 'self'/'local', une seule (mono-établissement).
+    var schools = Object.keys(C.MOCK).map(function (k) { return C.MOCK[k].branding.product_name; });
+    function fillSchools(){
+      var mode = $('#fServer').value;
+      var list = (mode === 'managed') ? schools : [schools[0]];
+      $('#fSchool').innerHTML = list.map(function (s) { return '<option>' + C.esc(s) + '</option>'; }).join('');
+    }
+    $('#fServer').addEventListener('change', fillSchools);
+    fillSchools();
+
+    $('#loginForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var role = $('#fProfile').value;
+      sessionStorage.setItem('cmp_profile', role);
+      sessionStorage.setItem('cmp_school', $('#fSchool').value);
+      sessionStorage.setItem('cmp_year', $('#fYear').value);
+      sessionStorage.setItem('cmp_server', $('#fServer').value);
+      C.toast('Bienvenue — profil : ' + (C.ROLE_LABELS[role] || role));
+      setTimeout(function () { window.location.href = 'dashboard.html'; }, 500);
+    });
+
+    // Thème white-label
+    if (typeof C.mountDemoSwitch === 'function') C.mountDemoSwitch();
+    C.loadConfig().then(C.applyTenantTheme);
+    window.onCampusConfig = function (cfg) { C.applyTenantTheme(cfg); };
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Saisie des notes — VÉRITAS Campus</title>
+  <link rel="stylesheet" href="campus.css">
+</head>
+<body data-page="notes">
+
+  <header class="cmp-bar">
+    <div class="logo" data-brand-logo>VC</div>
+    <div class="brand"><b data-brand-name>VÉRITAS Campus</b><small>Saisie des notes</small></div>
+    <div class="spacer"></div>
+    <a class="powered" href="dashboard.html" style="color:inherit;text-decoration:none">← Tableau de bord</a>
+  </header>
+
+  <main class="cmp-wrap">
+    <div class="demo-switch" id="demoSwitch"></div>
+    <h1 style="margin:0 0 4px">Saisie des notes</h1>
+    <p class="note" style="margin:0 0 16px">Saisie simple · couplée · statistiques · performances — conforme au flux MINESEC (Devoir + pondération + mention).</p>
+
+    <div class="tabs" id="tabs">
+      <button data-tab="simple" aria-pressed="true">📝 Saisie simple</button>
+      <button data-tab="couple">📋 Saisie couplée (Dev 1 + Dev 2)</button>
+      <button data-tab="group">📚 Groupée (multi-matières)</button>
+      <button data-tab="stats">📊 Statistiques (devoir)</button>
+      <button data-tab="bulletins">🧾 Bulletins (depuis les notes)</button>
+      <button data-tab="ensemble">🏛️ Vue d'ensemble</button>
+      <button data-tab="suivi">🛂 Suivi des saisies</button>
+    </div>
+
+    <div class="card" id="filters">
+      <div class="row" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;align-items:end">
+        <div class="field" style="margin:0"><label>Classe</label><select id="fClasse"><option>6e A</option><option>5e A</option><option>4e A</option><option>3e A</option></select></div>
+        <div class="field" id="wMatiere" style="margin:0"><label>Matière</label><select id="fMatiere"><option>Français</option><option>Anglais</option><option>Mathématiques</option><option>Étude de texte</option></select></div>
+        <div class="field" id="wDevoir" style="margin:0"><label>Devoir / Évaluation</label><select id="fDevoir"><option>Devoir 1</option><option>Devoir 2</option><option>Composition</option></select></div>
+        <div class="field" style="margin:0"><label>Base de saisie</label><input id="fBase" type="number" value="20" min="1" max="100"></div>
+        <button class="btn btn-primary" id="actualiser" style="width:auto">Actualiser</button>
+      </div>
+    </div>
+
+    <div id="panel"></div>
+  </main>
+
+  <div class="toast" id="toast"></div>
+  <script src="config.js"></script>
+  <script src="campus.js"></script>
+  <script>
+  (function () {
+    var C = window.CAMPUS, esc = C.esc, $ = C.$, toast = C.toast;
+    var TAB = 'simple';
+
+    // Effectif de démonstration (en prod : GET /students?class_id=). Notes pré-remplies éditables.
+    var ROSTER = [
+      { mat:'25E0145', nom:'AFANGNIGNI Angela Ingrid', sexe:'F', d1:18, d2:19 },
+      { mat:'25E0014', nom:'ANGUISSA Eunice Bethel', sexe:'F', d1:15, d2:16 },
+      { mat:'25E0146', nom:'BALELA SEN Prince Jordan', sexe:'M', d1:19, d2:18 },
+      { mat:'25E0113', nom:'BANJUN MIKA Nathan', sexe:'M', d1:12, d2:14 },
+      { mat:'25E0106', nom:'BEUTCHEU HAPPI Odell', sexe:'M', d1:13, d2:14 },
+      { mat:'25E0003', nom:'BOUGHA YOAN MAEL Yanis', sexe:'M', d1:9, d2:10 },
+      { mat:'25E0095', nom:'DJABOU DIVIN Maxwell', sexe:'M', d1:8, d2:9 },
+      { mat:'25E0144', nom:'EBA\'A JAELLE Daniel', sexe:'F', d1:15, d2:14 },
+      { mat:'25E0009', nom:'EDEME BLESSING Clemence', sexe:'F', d1:14, d2:13 },
+      { mat:'25E0004', nom:'FOSSI NGUINA Ange Flora', sexe:'F', d1:13, d2:15 },
+      { mat:'25E0151', nom:'GOULLA BELLA Duprey', sexe:'M', d1:16, d2:17 },
+      { mat:'25E0152', nom:'GOULLA FOTHIO Audrey', sexe:'F', d1:11, d2:12 },
+      { mat:'25E0077', nom:'KAMENI TADJOU Ruben', sexe:'M', d1:7, d2:6 },
+      { mat:'25E0088', nom:'MBARGA NDONGO Sandra', sexe:'F', d1:17, d2:18 }
+    ];
+    // Saisie groupée : l'enseignant CHOISIT ses matières dans la classe.
+    var GROUP_ALL = ['Français', 'Anglais', 'Mathématiques', 'Histoire', 'Géographie', 'ECM', 'SVT', 'Physique-Chimie', 'EPS', 'Informatique', 'Étude de texte', 'Expression écrite'];
+    var GROUP_SEL = ['Histoire', 'Géographie', 'ECM'];   // matières cochées
+    var gData = {};   // matière → [note par index élève]
+
+    function base(){ return Math.max(1, +($('#fBase').value || 20)); }
+    function mention(n){
+      if (n == null || n === '') return ['', ''];
+      n = +n;
+      if (n >= 18) return ['Excellent', 'ok']; if (n >= 16) return ['Très Bien', 'ok'];
+      if (n >= 14) return ['Bien', 'ok']; if (n >= 12) return ['Assez Bien', 'ok'];
+      if (n >= 10) return ['Passable', 'acc']; return ['Insuffisant', 'bad'];
+    }
+    function inputClass(v){ if (v === '' || v == null) return ''; return (+v < 10) ? 'bad' : 'filled'; }
+    function curField(){ return ($('#fDevoir').value === 'Devoir 2') ? 'd2' : 'd1'; }
+
+    /* ── Onglet : Saisie simple ── */
+    function renderSimple(){
+      var fld = curField(), b = base();
+      var rows = ROSTER.map(function (s, i) {
+        var v = s[fld] == null ? '' : s[fld];
+        var m = mention(v);
+        return '<tr><td class="c">' + (i + 1) + '</td><td>' + esc(s.mat) + '</td><td>' + esc(s.nom) + '</td><td class="c">' + s.sexe + '</td>'
+          + '<td class="c"><input class="note-input ' + inputClass(v) + '" data-i="' + i + '" type="number" min="0" max="' + b + '" step="0.25" value="' + v + '"> <small>/ ' + b + '</small></td>'
+          + '<td class="c"><span class="ment ' + m[1] + '" data-ment="' + i + '">' + m[0] + '</span></td></tr>';
+      }).join('');
+      $('#panel').innerHTML =
+        '<div class="card">'
+        + '<div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px">'
+        + '<button class="btn btn-ghost" id="expCsv" style="width:auto">⬇️ Exporter (CSV/Excel)</button>'
+        + '<label class="btn btn-ghost" style="width:auto;cursor:pointer">⬆️ Importer<input id="impCsv" type="file" accept=".csv" hidden></label>'
+        + '<div class="spacer" style="flex:1"></div>'
+        + '<span class="counter" id="cnt"></span>'
+        + '<button class="btn btn-primary" id="save" style="width:auto">✓ Enregistrer les notes</button>'
+        + '</div>'
+        + '<table class="note-table"><thead><tr><th>N°</th><th>Matricule</th><th>Nom</th><th>Sexe</th><th>Note (' + esc($('#fDevoir').value) + ')</th><th>Mention</th></tr></thead><tbody>' + rows + '</tbody></table>'
+        + '</div>';
+      bindNoteInputs(fld);
+      updateCounter();
+      $('#save').addEventListener('click', saveNotes);
+      $('#expCsv').addEventListener('click', exportCsv);
+      $('#impCsv').addEventListener('change', importCsv);
+    }
+
+    function bindNoteInputs(fld){
+      document.querySelectorAll('.note-input').forEach(function (inp) {
+        inp.addEventListener('input', function () {
+          var i = +inp.getAttribute('data-i'), b = base();
+          var v = inp.value === '' ? '' : Math.min(b, Math.max(0, +inp.value));
+          ROSTER[i][fld] = (inp.value === '') ? null : v;
+          inp.className = 'note-input ' + inputClass(inp.value);
+          var m = mention(inp.value), badge = document.querySelector('[data-ment="' + i + '"]');
+          if (badge) { badge.textContent = m[0]; badge.className = 'ment ' + m[1]; }
+          updateCounter();
+        });
+      });
+    }
+    function updateCounter(){
+      var fld = curField(), filled = ROSTER.filter(function (s) { return s[fld] != null && s[fld] !== ''; }).length;
+      var c = $('#cnt'); if (c) c.textContent = 'Note(s) saisie(s) : ' + filled + ' / ' + ROSTER.length;
+    }
+
+    function saveNotes(){
+      var fld = curField();
+      var grades = ROSTER.map(function (s) { return { matricule: s.mat, note: s[fld] }; }).filter(function (g) { return g.note != null; });
+      // En prod : POST /grades/batch { sheet_id, grades:[{student_id, note}] }.
+      C.api('/grades/batch', { method: 'POST', body: { eval_key: fld, base: base(), grades: grades } })
+        .then(function (j) { toast(j && j.ok ? ('✓ ' + (j.saved || grades.length) + ' notes enregistrées') : (j && j.error || 'Erreur')); })
+        .catch(function () { toast('✓ Démo : ' + grades.length + ' notes prêtes à enregistrer (' + $('#fDevoir').value + ').'); });
+    }
+    function exportCsv(){
+      var fld = curField();
+      var lines = ['Matricule;Nom;Sexe;Note'].concat(ROSTER.map(function (s) { return [s.mat, s.nom, s.sexe, s[fld] == null ? '' : s[fld]].join(';'); }));
+      var blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = 'notes_' + $('#fClasse').value.replace(/\s/g, '') + '_' + $('#fMatiere').value + '.csv'; a.click();
+      toast('Export CSV (ouvrable dans Excel).');
+    }
+    function importCsv(e){
+      var f = e.target.files[0]; if (!f) return;
+      var fld = curField(), rd = new FileReader();
+      rd.onload = function () {
+        var map = {};
+        rd.result.split(/\r?\n/).slice(1).forEach(function (l) { var c = l.split(';'); if (c[0]) map[c[0].trim()] = c[3]; });
+        var n = 0;
+        ROSTER.forEach(function (s) { if (map[s.mat] != null && map[s.mat] !== '') { s[fld] = +map[s.mat]; n++; } });
+        renderSimple(); toast('✓ ' + n + ' notes importées.');
+      };
+      rd.readAsText(f);
+    }
+
+    /* ── Onglet : Saisie couplée (Devoir 1 + Devoir 2 + moyenne live) ── */
+    function renderCouple(){
+      var b = base();
+      function moy(s){ return (s.d1 != null && s.d2 != null) ? ((+s.d1 + +s.d2) / 2) : null; }
+      var rows = ROSTER.map(function (s, i) {
+        var mv = moy(s), m = mention(mv);
+        return '<tr><td class="c">' + (i + 1) + '</td><td>' + esc(s.nom) + '</td><td class="c">' + s.sexe + '</td>'
+          + '<td class="c"><input class="note-input ' + inputClass(s.d1) + '" data-i="' + i + '" data-f="d1" type="number" min="0" max="' + b + '" step="0.25" value="' + (s.d1 == null ? '' : s.d1) + '"></td>'
+          + '<td class="c"><input class="note-input ' + inputClass(s.d2) + '" data-i="' + i + '" data-f="d2" type="number" min="0" max="' + b + '" step="0.25" value="' + (s.d2 == null ? '' : s.d2) + '"></td>'
+          + '<td class="c"><b data-moy="' + i + '">' + (mv == null ? '—' : mv.toFixed(2)) + '</b></td>'
+          + '<td class="c"><span class="ment ' + m[1] + '" data-ment="' + i + '">' + m[0] + '</span></td></tr>';
+      }).join('');
+      $('#panel').innerHTML = '<div class="card"><p class="note" style="margin:0 0 12px">Saisie des deux devoirs du trimestre ; la <b>moyenne</b> = (Devoir 1 + Devoir 2) / 2 (pondération configurable par établissement).</p>'
+        + '<table class="note-table"><thead><tr><th>N°</th><th>Nom</th><th>Sexe</th><th>Devoir 1</th><th>Devoir 2</th><th>Moyenne</th><th>Mention</th></tr></thead><tbody>' + rows + '</tbody></table>'
+        + '<div style="text-align:right;margin-top:14px"><button class="btn btn-primary" id="save2" style="width:auto">✓ Enregistrer</button></div></div>';
+      document.querySelectorAll('.note-input').forEach(function (inp) {
+        inp.addEventListener('input', function () {
+          var i = +inp.getAttribute('data-i'), f = inp.getAttribute('data-f'), bb = base();
+          ROSTER[i][f] = inp.value === '' ? null : Math.min(bb, Math.max(0, +inp.value));
+          inp.className = 'note-input ' + inputClass(inp.value);
+          var mv = moy(ROSTER[i]), mm = mention(mv);
+          document.querySelector('[data-moy="' + i + '"]').textContent = (mv == null ? '—' : mv.toFixed(2));
+          var bd = document.querySelector('[data-ment="' + i + '"]'); bd.textContent = mm[0]; bd.className = 'ment ' + mm[1];
+        });
+      });
+      $('#save2').addEventListener('click', function () { toast('✓ Démo : Devoir 1 + Devoir 2 prêts à enregistrer.'); });
+    }
+
+    /* ── Onglet : Statistiques (par devoir, calculées en direct) ── */
+    function renderStats(){
+      var fld = curField(), b = base(), seuil = b / 2;
+      var present = ROSTER.filter(function (s) { return s[fld] != null && s[fld] !== ''; });
+      var absent = ROSTER.length - present.length;
+      var M = present.filter(function (s) { return s.sexe === 'M'; }), F = present.filter(function (s) { return s.sexe === 'F'; });
+      var admis = present.filter(function (s) { return +s[fld] >= seuil; });
+      var admisM = M.filter(function (s) { return +s[fld] >= seuil; }), admisF = F.filter(function (s) { return +s[fld] >= seuil; });
+      function avg(a){ return a.length ? (a.reduce(function (t, s) { return t + (+s[fld]); }, 0) / a.length) : 0; }
+      function pct(a, t){ return t ? Math.round(a / t * 1000) / 10 : 0; }
+      function card(cls, l, v){ return '<div class="statcard ' + cls + '"><div class="l">' + l + '</div><div class="v">' + v + '</div></div>'; }
+      $('#panel').innerHTML = '<div class="card"><p class="note" style="margin:0 0 14px">Statistiques pour <b>' + esc($('#fMatiere').value) + ' — ' + esc($('#fDevoir').value) + '</b> (classe ' + esc($('#fClasse').value) + ', base ' + b + ', seuil de réussite ' + seuil + ').</p>'
+        + '<div class="statgrid">'
+        + card('', 'Effectif', ROSTER.length) + card('ok', 'Présents', present.length) + card('bad', 'Absents', absent)
+        + card('', 'Taux de présence', pct(present.length, ROSTER.length) + '%') + card('', 'Garçons / Filles', M.length + ' / ' + F.length)
+        + card('acc', 'Moyenne du devoir', avg(present).toFixed(2)) + '</div>'
+        + '<h3 style="margin:18px 0 10px;font-size:1rem">Réussite</h3><div class="statgrid">'
+        + card('ok', 'Admis (≥ ' + seuil + ')', admis.length) + card('bad', 'Échecs', present.length - admis.length)
+        + card('ok', 'Taux de réussite global', pct(admis.length, present.length) + '%')
+        + card('ok', 'Taux réussite garçons', pct(admisM.length, M.length) + '%') + card('ok', 'Taux réussite filles', pct(admisF.length, F.length) + '%')
+        + card('acc', 'Moy. garçons / filles', avg(M).toFixed(2) + ' / ' + avg(F).toFixed(2)) + '</div></div>';
+    }
+
+    /* ── Onglet : Vue d'ensemble (admin) — par matière / classe / niveau / cycle / général ── */
+    // [cycle, niveau, classe, matière, effectif, moyenne, taux de réussite]
+    var ADMIN_DATA = [
+      ['1er cycle','6e','6e A','Français',52,12.4,71], ['1er cycle','6e','6e A','Mathématiques',52,9.8,46], ['1er cycle','6e','6e A','Anglais',52,11.9,64],
+      ['1er cycle','6e','6e B','Français',50,11.8,66], ['1er cycle','6e','6e B','Mathématiques',50,10.2,52], ['1er cycle','6e','6e B','Anglais',50,12.1,67],
+      ['1er cycle','5e','5e A','Français',48,13.1,77], ['1er cycle','5e','5e A','Mathématiques',48,10.6,53], ['1er cycle','5e','5e A','Histoire',48,12.8,72],
+      ['1er cycle','4e','4e A','Français',45,12.0,68], ['1er cycle','4e','4e A','Mathématiques',45,9.5,44], ['1er cycle','4e','4e A','Anglais',45,11.4,61],
+      ['1er cycle','3e','3e A','Français',41,12.6,70], ['1er cycle','3e','3e A','Mathématiques',41,11.0,58],
+      ['2nd cycle','2nde','2nde A','Français',38,11.5,62], ['2nd cycle','2nde','2nde A','Mathématiques',38,10.8,55],
+      ['2nd cycle','1ère','1ère A','Français',34,12.2,67], ['2nd cycle','1ère','1ère A','Philosophie',34,11.7,63],
+      ['2nd cycle','Tle','Tle A','Français',30,11.0,57], ['2nd cycle','Tle','Tle A','Philosophie',30,12.4,69]
+    ];
+    var ENS_LEVEL = 'matiere';
+    function aggregate(level){
+      var idx = { cycle:0, niveau:1, classe:2, matiere:3 };
+      var g = {};
+      ADMIN_DATA.forEach(function (r) {
+        var k = (level === 'general') ? 'Tout l\'établissement' : r[idx[level]];
+        if (!g[k]) g[k] = { eff:0, wm:0, wr:0 };
+        g[k].eff += r[4]; g[k].wm += r[5]*r[4]; g[k].wr += r[6]*r[4];
+      });
+      return Object.keys(g).map(function (k) { var x = g[k]; return { name:k, eff:x.eff, moy:x.eff?x.wm/x.eff:0, reu:x.eff?x.wr/x.eff:0 }; });
+    }
+    function renderEnsemble(){
+      var labels = { matiere:'Par matière', classe:'Par classe', niveau:'Par niveau', cycle:'Par cycle', general:'Général' };
+      var heads = { matiere:'Matière', classe:'Classe', niveau:'Niveau', cycle:'Cycle', general:'Établissement' };
+      var seg = Object.keys(labels).map(function (k) { return '<button data-lvl="' + k + '" aria-pressed="' + (k === ENS_LEVEL ? 'true' : 'false') + '">' + labels[k] + '</button>'; }).join('');
+      var data = aggregate(ENS_LEVEL).sort(function (a, b) { return b.moy - a.moy; });
+      var rows = data.map(function (d) {
+        var cls = d.reu >= 60 ? 'ok' : (d.reu >= 50 ? 'acc' : 'bad');
+        return '<tr><td>' + esc(d.name) + '</td><td class="c">' + d.eff + '</td><td class="c">' + d.moy.toFixed(2) + '</td><td class="c"><span class="ment ' + cls + '">' + d.reu.toFixed(1) + '%</span></td></tr>';
+      }).join('');
+      var tot = aggregate('general')[0];
+      $('#panel').innerHTML = '<div class="card"><p class="note" style="margin:0 0 12px">Vue d\'ensemble de l\'établissement — agrégez par matière, classe, niveau, cycle ou en général.</p>'
+        + '<div class="tabs" id="ensSeg" style="margin-bottom:14px">' + seg + '</div>'
+        + '<div class="statgrid" style="margin-bottom:16px">'
+        + '<div class="statcard"><div class="l">Effectif total</div><div class="v">' + tot.eff + '</div></div>'
+        + '<div class="statcard acc"><div class="l">Moyenne générale</div><div class="v">' + tot.moy.toFixed(2) + '</div></div>'
+        + '<div class="statcard ' + (tot.reu >= 60 ? 'ok' : 'bad') + '"><div class="l">Taux de réussite</div><div class="v">' + tot.reu.toFixed(1) + '%</div></div></div>'
+        + '<table class="note-table"><thead><tr><th>' + heads[ENS_LEVEL] + '</th><th>Effectif</th><th>Moyenne générale</th><th>Taux de réussite</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      document.getElementById('ensSeg').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-lvl]'); if (!b) return;
+        ENS_LEVEL = b.getAttribute('data-lvl'); renderEnsemble();
+      });
+    }
+
+    /* ── Onglet : Suivi des saisies (admin) — progression + enseignants en retard ── */
+    var TRACKING = [
+      { ens:'Mme MBALLA', classe:'6e A', matiere:'Français', devoir:'Devoir 1', eff:52, saisies:52, status:'submitted', last:'18/06' },
+      { ens:'M. ATANGANA', classe:'6e A', matiere:'Mathématiques', devoir:'Devoir 1', eff:52, saisies:52, status:'submitted', last:'18/06' },
+      { ens:'M. TABI', classe:'6e A', matiere:'Anglais', devoir:'Devoir 1', eff:52, saisies:30, status:'draft', last:'17/06' },
+      { ens:'Mme KOM', classe:'5e A', matiere:'Histoire', devoir:'Devoir 1', eff:48, saisies:0, status:'draft', last:'—' },
+      { ens:'M. FOUDA', classe:'4e A', matiere:'Informatique', devoir:'Devoir 1', eff:45, saisies:45, status:'submitted', last:'16/06' },
+      { ens:'M. SUH', classe:'3e A', matiere:'EPS', devoir:'Devoir 1', eff:41, saisies:12, status:'draft', last:'15/06' },
+      { ens:'Mme NGO', classe:'2nde A', matiere:'SVT', devoir:'Devoir 1', eff:38, saisies:38, status:'submitted', last:'18/06' }
+    ];
+    function suiviEtat(t){
+      if (t.status === 'submitted') return ['À jour', 'ok'];
+      if (t.saisies === 0) return ['Non commencé', 'bad'];
+      if (t.saisies < t.eff) return ['En cours', 'acc'];
+      return ['À valider', 'acc'];
+    }
+    function renderSuivi(){
+      var enRetard = {};
+      var rows = TRACKING.map(function (t) {
+        var e = suiviEtat(t), p = t.eff ? Math.round(t.saisies / t.eff * 100) : 0;
+        if (t.status === 'draft' && t.saisies < t.eff) { enRetard[t.ens] = 1; }
+        return '<tr><td><b>' + esc(t.ens) + '</b></td><td>' + esc(t.classe) + '</td><td>' + esc(t.matiere) + '</td><td>' + esc(t.devoir) + '</td>'
+          + '<td class="c">' + t.saisies + ' / ' + t.eff + '</td>'
+          + '<td><span class="pbar"><span style="width:' + p + '%"></span></span> <small>' + p + '%</small></td>'
+          + '<td class="c"><span class="ment ' + e[1] + '">' + e[0] + '</span></td><td class="c">' + esc(t.last) + '</td></tr>';
+      }).join('');
+      var retardList = Object.keys(enRetard);
+      var complet = TRACKING.filter(function (t) { return t.status === 'submitted'; }).length;
+      $('#panel').innerHTML = '<div class="card"><p class="note" style="margin:0 0 12px">Suivi de la saisie des notes par enseignant — l\'administration vérifie la progression et repère les retards.</p>'
+        + '<div class="statgrid" style="margin-bottom:14px">'
+        + '<div class="statcard"><div class="l">Feuilles attendues</div><div class="v">' + TRACKING.length + '</div></div>'
+        + '<div class="statcard ok"><div class="l">À jour (soumises)</div><div class="v">' + complet + '</div></div>'
+        + '<div class="statcard bad"><div class="l">Enseignants en retard</div><div class="v">' + retardList.length + '</div></div></div>'
+        + (retardList.length ? '<p class="note" style="margin:0 0 12px"><b style="color:var(--ds-danger)">⚠️ En retard :</b> ' + retardList.map(esc).join(' · ') + '</p>' : '')
+        + '<table class="note-table"><thead><tr><th>Enseignant</th><th>Classe</th><th>Matière</th><th>Devoir</th><th>Saisies</th><th>Progression</th><th>État</th><th>Dernière</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+    }
+
+    /* ── Onglet : Saisie groupée — l'enseignant CHOISIT ses matières ── */
+    function ensureGData(sub){
+      if (gData[sub]) return;
+      var seed = GROUP_ALL.indexOf(sub);
+      gData[sub] = ROSTER.map(function (s) { return Math.max(0, Math.min(20, (s.d1 == null ? 10 : s.d1) + ((seed % 3) - 1) * 2)); });
+    }
+    function gColAvg(sub){
+      var col = (gData[sub] || []).filter(function (v) { return v != null && v !== ''; });
+      return col.length ? (col.reduce(function (t, v) { return t + (+v); }, 0) / col.length) : 0;
+    }
+    function updateGroupCounter(){
+      var total = ROSTER.length * GROUP_SEL.length, filled = 0;
+      GROUP_SEL.forEach(function (sub) { (gData[sub] || []).forEach(function (v) { if (v != null && v !== '') filled++; }); });
+      var c = $('#cntG'); if (c) c.textContent = 'Notes : ' + filled + ' / ' + total;
+    }
+    function picker(){
+      return GROUP_ALL.map(function (s) {
+        var on = GROUP_SEL.indexOf(s) >= 0;
+        return '<label class="pillcheck' + (on ? ' on' : '') + '"><input type="checkbox" data-sub="' + esc(s) + '" ' + (on ? 'checked' : '') + '> ' + esc(s) + '</label>';
+      }).join('');
+    }
+    function bindPicker(){
+      var p = document.getElementById('gPick'); if (!p) return;
+      p.addEventListener('change', function (e) {
+        var cb = e.target.closest('input[data-sub]'); if (!cb) return;
+        var sub = cb.getAttribute('data-sub');
+        if (cb.checked) { if (GROUP_SEL.indexOf(sub) < 0) GROUP_SEL.push(sub); ensureGData(sub); }
+        else { GROUP_SEL = GROUP_SEL.filter(function (x) { return x !== sub; }); }
+        renderGroup();
+      });
+    }
+    function renderGroup(){
+      var b = base();
+      GROUP_SEL.forEach(ensureGData);
+      if (!GROUP_SEL.length) {
+        $('#panel').innerHTML = '<div class="card"><p class="note" style="margin:0 0 10px"><b>Choisissez vos matières dans ' + esc($('#fClasse').value) + ' :</b></p><div class="pillrow" id="gPick">' + picker() + '</div><p class="note" style="margin-top:12px">Cochez au moins une matière pour saisir.</p></div>';
+        bindPicker(); return;
+      }
+      var head = '<th>N°</th><th>Nom</th><th>Sexe</th>' + GROUP_SEL.map(function (s) { return '<th>' + esc(s) + ' /' + b + '</th>'; }).join('');
+      var rows = ROSTER.map(function (s, i) {
+        var cells = GROUP_SEL.map(function (sub) {
+          var v = gData[sub][i];
+          return '<td class="c"><input class="note-input ' + inputClass(v) + '" data-sub="' + esc(sub) + '" data-i="' + i + '" type="number" min="0" max="' + b + '" step="0.25" value="' + (v == null ? '' : v) + '"></td>';
+        }).join('');
+        return '<tr><td class="c">' + (i + 1) + '</td><td>' + esc(s.nom) + '</td><td class="c">' + s.sexe + '</td>' + cells + '</tr>';
+      }).join('');
+      var foot = '<td colspan="3" style="text-align:right"><b>Moyenne de la matière</b></td>'
+        + GROUP_SEL.map(function (s) { return '<td class="c" data-avg="' + esc(s) + '"><b>' + gColAvg(s).toFixed(2) + '</b></td>'; }).join('');
+      $('#panel').innerHTML = '<div class="card">'
+        + '<p class="note" style="margin:0 0 8px"><b>Vos matières dans ' + esc($('#fClasse').value) + '</b> (cochez/décochez) — ' + esc($('#fDevoir').value) + ' :</p>'
+        + '<div class="pillrow" id="gPick" style="margin-bottom:14px">' + picker() + '</div>'
+        + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><div style="flex:1"></div><span class="counter" id="cntG"></span><button class="btn btn-primary" id="saveG" style="width:auto">✓ Tout enregistrer</button></div>'
+        + '<div style="overflow-x:auto"><table class="note-table"><thead><tr>' + head + '</tr></thead><tbody>' + rows + '</tbody><tfoot><tr>' + foot + '</tr></tfoot></table></div></div>';
+      bindPicker();
+      document.querySelectorAll('.note-input').forEach(function (inp) {
+        inp.addEventListener('input', function () {
+          var sub = inp.getAttribute('data-sub'), i = +inp.getAttribute('data-i'), bb = base();
+          gData[sub][i] = inp.value === '' ? null : Math.min(bb, Math.max(0, +inp.value));
+          inp.className = 'note-input ' + inputClass(inp.value);
+          var af = document.querySelector('[data-avg="' + sub + '"] b'); if (af) af.textContent = gColAvg(sub).toFixed(2);
+          updateGroupCounter();
+        });
+      });
+      updateGroupCounter();
+      $('#saveG').addEventListener('click', function () {
+        // En prod : un POST /grades/batch par matière (une feuille par matière), enchaînés.
+        var nb = 0;
+        GROUP_SEL.forEach(function (sub) { gData[sub].forEach(function (v) { if (v != null) nb++; }); });
+        toast('✓ Démo : ' + GROUP_SEL.length + ' matière(s) enregistrée(s) d\'un coup (' + nb + ' notes).');
+      });
+    }
+
+    /* ── Onglet : Bulletins calculés À PARTIR DES NOTES SAISIES (branchement saisie → bulletin) ── */
+    // Matières + coefficients de la classe (en prod : GET /bulletin/compute fait ce calcul côté serveur).
+    var BSUBJ = [
+      { name:'Français', coef:6 }, { name:'Anglais', coef:3 }, { name:'Mathématiques', coef:4 },
+      { name:'Histoire', coef:2 }, { name:'Géographie', coef:2 }, { name:'ECM', coef:2 },
+      { name:'SVT', coef:2 }, { name:'EPS', coef:1 }
+    ];
+    function mentionLabel(m){
+      if (m >= 16) return 'Félicitations'; if (m >= 14) return "Tableau d'honneur";
+      if (m >= 12) return 'Encouragements'; if (m >= 10) return 'Passable'; return 'Avertissement travail';
+    }
+    function noteFor(s, j){ return Math.max(0, Math.min(20, Math.round(((s.d1 == null ? 10 : s.d1) + ((j * 5 + 7) % 9) - 4) * 4) / 4)); }
+    function computeBulletins(){
+      var classe = $('#fClasse') ? $('#fClasse').value : '6e A';
+      var notes = ROSTER.map(function (s) { return BSUBJ.map(function (_, j) { return noteFor(s, j); }); });
+      var subjStats = BSUBJ.map(function (_, j) {
+        var col = notes.map(function (r) { return r[j]; });
+        return { max: Math.max.apply(null, col), min: Math.min.apply(null, col), moy: col.reduce(function (t, v) { return t + v; }, 0) / col.length };
+      });
+      var subjRank = BSUBJ.map(function (_, j) {
+        var rank = {}; ROSTER.map(function (s, i) { return { i: i, n: notes[i][j] }; }).sort(function (a, b) { return b.n - a.n; }).forEach(function (p, k) { rank[p.i] = k + 1; });
+        return rank;
+      });
+      var totalCoef = BSUBJ.reduce(function (t, s) { return t + s.coef; }, 0);
+      var gen = ROSTER.map(function (s, i) { var w = 0; BSUBJ.forEach(function (sub, j) { w += notes[i][j] * sub.coef; }); return w / totalCoef; });
+      var rankGen = {}; ROSTER.map(function (s, i) { return { i: i, m: gen[i] }; }).sort(function (a, b) { return b.m - a.m; }).forEach(function (p, k) { rankGen[p.i] = k + 1; });
+      return ROSTER.map(function (s, i) {
+        return {
+          student: { nom: s.nom, mat: s.mat, classe: classe, sexe: s.sexe },
+          periode: '2e trimestre', effectif: ROSTER.length,
+          moyenne: Math.round(gen[i] * 100) / 100, rang: rankGen[i], mention: mentionLabel(gen[i]),
+          subjects: BSUBJ.map(function (sub, j) {
+            return { name: sub.name, coef: sub.coef, note: notes[i][j], rang: subjRank[j][i],
+                     max: subjStats[j].max, min: subjStats[j].min, moyClasse: Math.round(subjStats[j].moy * 100) / 100 };
+          })
+        };
+      });
+    }
+    function renderBulletins(){
+      var bs = computeBulletins().sort(function (a, b) { return a.rang - b.rang; });
+      var rows = bs.map(function (x) {
+        var cls = x.moyenne >= 10 ? 'ok' : 'bad';
+        return '<tr><td class="c">' + x.rang + '</td><td>' + esc(x.student.nom) + '</td>'
+          + '<td class="c"><b class="ment ' + cls + '">' + x.moyenne.toFixed(2) + '</b></td>'
+          + '<td class="c">' + x.rang + '/' + x.effectif + '</td><td><span class="ment ' + cls + '">' + esc(x.mention) + '</span></td>'
+          + '<td class="c"><button class="btn btn-ghost" data-mat="' + esc(x.student.mat) + '" style="width:auto;padding:5px 10px">🖨️ Bulletin</button></td></tr>';
+      }).join('');
+      $('#panel').innerHTML = '<div class="card"><p class="note" style="margin:0 0 12px">Bulletins <b>calculés à partir des notes saisies</b> (pondérations de l\'établissement). Cliquez « Bulletin » pour ouvrir le document imprimable de l\'élève.</p>'
+        + '<table class="note-table"><thead><tr><th>Rang</th><th>Élève</th><th>Moyenne</th><th>Rang/Eff.</th><th>Mention</th><th></th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      $('#panel').addEventListener('click', function (e) {
+        var btn = e.target.closest('button[data-mat]'); if (!btn) return;
+        var stu = bs.filter(function (x) { return x.student.mat === btn.getAttribute('data-mat'); })[0];
+        if (stu) { try { sessionStorage.setItem('cmp_bulletin', JSON.stringify(stu)); } catch (_) {} window.location.href = 'documents.html#bulletin'; }
+      });
+    }
+
+    var RENDER = { simple: renderSimple, couple: renderCouple, group: renderGroup, stats: renderStats, bulletins: renderBulletins, ensemble: renderEnsemble, suivi: renderSuivi };
+    function draw(){
+      $('#filters').style.display = (TAB === 'ensemble' || TAB === 'suivi') ? 'none' : '';
+      $('#wDevoir').style.display = (TAB === 'couple') ? 'none' : '';
+      var wm = document.getElementById('wMatiere'); if (wm) wm.style.display = (TAB === 'group') ? 'none' : '';
+      RENDER[TAB]();
+    }
+
+    $('#tabs').addEventListener('click', function (e) {
+      var b = e.target.closest('button[data-tab]'); if (!b) return;
+      TAB = b.getAttribute('data-tab');
+      this.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+      draw();
+    });
+    $('#actualiser').addEventListener('click', draw);
+    document.getElementById('fDevoir').addEventListener('change', draw);
+
+    window.onCampusConfig = function () { /* thème appliqué ; données démo inchangées */ };
+    draw();
+  })();
+  </script>
+</body>
+</html>

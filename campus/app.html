@@ -1,0 +1,728 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>VÉRITAS Campus — Application</title>
+  <link rel="stylesheet" href="campus.css">
+  <style>
+    .app-shell { display: grid; grid-template-columns: 244px 1fr; min-height: calc(100vh - 69px); }
+    @media (max-width: 860px) { .app-shell { grid-template-columns: 1fr; } .app-shell .side { display: none; } .app-shell.show-nav .side { display: block; position: fixed; z-index: 40; width: 244px; } }
+    .side .logout { margin: 16px 10px; }
+    .ufer { display: flex; align-items: center; gap: 8px; }
+    .ufer .ava { width: 32px; height: 32px; border-radius: 50%; background: var(--ds-accent); color: var(--ds-on-accent); display: grid; place-items: center; font-weight: 800; }
+    .chart { display: grid; gap: 8px; }
+    .chart .row { display: grid; grid-template-columns: 90px 1fr 44px; gap: 10px; align-items: center; font-size: .85rem; }
+    .alert { border-left: 4px solid var(--ds-accent); background: var(--ds-primary-050); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: .9rem; }
+    .alert.bad { border-color: var(--ds-danger); background: color-mix(in srgb, var(--ds-danger) 7%, #fff); }
+    .alert.ok { border-color: var(--ds-ok); background: color-mix(in srgb, var(--ds-ok) 8%, #fff); }
+    .steps2 { display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap; }
+    .steps2 .s { flex: 1; min-width: 110px; padding: 9px; border-radius: 8px; background: var(--ds-primary-050); font-size: .82rem; font-weight: 600; text-align: center; color: var(--ds-muted); }
+    .steps2 .s.active { background: var(--ds-primary); color: #fff; }
+    .restricted { text-align: center; padding: 60px 20px; }
+    .restricted .ic { font-size: 60px; }
+    .ovl { position: fixed; inset: 0; background: rgba(20,37,84,.5); display: grid; place-items: center; z-index: 60; padding: 20px; }
+    .ovl-card { background: #fff; border-radius: 14px; box-shadow: 0 12px 40px rgba(0,0,0,.3); max-width: 440px; width: 100%; padding: 20px; }
+    .ovl-card h3 { margin: 0 0 12px; }
+    .ovl-ft { display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px; }
+    .ttcell:hover { outline: 2px solid var(--ds-accent); outline-offset: -2px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script>
+  (function () {
+    'use strict';
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+    var CURRENCIES = { FCFA: 'FCFA', XOF: 'F CFA', EUR: '€', USD: '$', GHS: 'GH₵', NGN: '₦', MAD: 'DH' };
+    function devise() { return (typeof DB !== 'undefined' && DB && DB.devise) || 'FCFA'; }
+    function money(n) { return (Math.round(+n || 0)).toLocaleString('fr-FR') + ' ' + (CURRENCIES[devise()] || 'FCFA'); }
+    function gid() { return Math.random().toString(36).slice(2, 9); }
+    function today() { return new Date().toISOString().slice(0, 10); }
+    function toast(m) { var t = $('#toast'); if (!t) return; t.textContent = m; t.classList.add('show'); clearTimeout(toast._t); toast._t = setTimeout(function () { t.classList.remove('show'); }, 2600); }
+    function modal(title, body, onOk, okLabel) {
+      var ov = document.createElement('div'); ov.className = 'ovl';
+      ov.innerHTML = '<div class="ovl-card"><h3>' + esc(title) + '</h3><div>' + body + '</div><div class="ovl-ft"><button class="btn btn-ghost" data-x="1" style="width:auto">Fermer</button><button class="btn btn-primary" data-ok="1" style="width:auto">' + esc(okLabel || 'Valider') + '</button></div></div>';
+      document.body.appendChild(ov);
+      ov.addEventListener('click', function (e) {
+        if (e.target === ov || e.target.getAttribute('data-x')) { ov.remove(); return; }
+        if (e.target.getAttribute('data-ok')) { if (!onOk || onOk(ov) !== false) ov.remove(); }
+      });
+      return ov;
+    }
+
+    /* ── Rôles & accès ── */
+    var VIEWS = {
+      dashboard:  { label: 'Tableau de bord', ic: '📊', cap: null, grp: 'Pilotage' },
+      eleves:     { label: 'Élèves', ic: '👥', cap: 'students.view', grp: 'Scolarité' },
+      inscription:{ label: 'Inscriptions', ic: '📝', cap: 'students.manage', grp: 'Scolarité' },
+      bulletins:  { label: 'Bulletins', ic: '🔢', cap: 'grades', grp: 'Pédagogie' },
+      presences:  { label: 'Présences', ic: '🟢', cap: 'attendance', grp: 'Pédagogie' },
+      edt:        { label: 'Emploi du temps', ic: '🗓️', cap: 'timetable', grp: 'Pédagogie' },
+      conseil:    { label: 'Conseil de classe', ic: '⚖️', cap: 'deliberation', grp: 'Pédagogie' },
+      discipline: { label: 'Discipline', ic: '🛡️', cap: 'discipline', grp: 'Vie scolaire' },
+      infirmerie: { label: 'Infirmerie', ic: '🏥', cap: 'health', grp: 'Vie scolaire' },
+      finances:   { label: 'Finances & Recouvrement', ic: '💳', cap: 'finance', grp: 'Finances' },
+      paie:       { label: 'Paie enseignants', ic: '💼', cap: 'payroll', grp: 'Finances' },
+      facturation:{ label: 'Facturation', ic: '🧾', cap: 'finance', grp: 'Finances' },
+      biblio:     { label: 'Bibliothèque', ic: '📚', cap: 'library', grp: 'Services' },
+      transport:  { label: 'Transport', ic: '🚌', cap: 'transport', grp: 'Services' },
+      internat:   { label: 'Internat', ic: '🛏️', cap: 'boarding', grp: 'Services' },
+      personnel:  { label: 'Personnel', ic: '👔', cap: 'staff', grp: 'Administration' },
+      parametres: { label: 'Paramètres', ic: '⚙️', cap: 'settings', grp: 'Administration' },
+      inventaire: { label: 'Inventaire', ic: '📦', cap: 'inventory', grp: 'Administration' },
+      monespace: { label: 'Mon espace', ic: '🎒', cap: 'self', grp: 'Espace personnel' }
+    };
+    var ROLE_CAPS = {
+      directeur: ['*'], proviseur: ['*'],
+      enseignant: ['students.view', 'grades', 'attendance', 'discipline', 'timetable'],
+      comptable: ['finance', 'payroll'],
+      intendant: ['finance', 'payroll', 'transport', 'boarding', 'inventory'],
+      secretariat: ['students.view', 'students.manage', 'library', 'timetable'],
+      censeur: ['students.view', 'grades', 'attendance', 'discipline', 'timetable', 'settings', 'deliberation'],
+      surveillant: ['students.view', 'attendance', 'discipline', 'health', 'boarding'],
+      bibliothecaire: ['students.view', 'library'],
+      infirmier: ['students.view', 'health'],
+      eleve: ['self'], parent: ['self']
+    };
+    var ROLE_LABELS = { directeur: 'Directeur', proviseur: 'Proviseur', enseignant: 'Enseignant', comptable: 'Comptable', intendant: 'Intendant', secretariat: 'Secrétariat', censeur: 'Censeur', surveillant: 'Surveillant', bibliothecaire: 'Bibliothécaire', infirmier: 'Infirmier(ère)', eleve: 'Élève', parent: 'Parent' };
+    function can(role, cap) { if (cap == null) return true; var c = ROLE_CAPS[role] || []; return c.indexOf('*') >= 0 || c.indexOf(cap) >= 0; }
+
+    /* ── Matières (coefficients) ── */
+    var SUBJECTS = [
+      { n: 'Français', c: 4 }, { n: 'Anglais', c: 4 }, { n: 'Mathématiques', c: 4 },
+      { n: 'SVT', c: 2 }, { n: 'Histoire-Géo', c: 3 }, { n: 'Physique-Chimie', c: 2 },
+      { n: 'EPS', c: 1 }, { n: 'ECM', c: 1 }, { n: 'Informatique', c: 2 }
+    ];
+    var DAYS = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+    var HOURS = ['07-08', '08-09', '09-10', '10-11', '11-12', '13-14', '14-15', '15-16'];
+
+    /* ── Données (persistées localStorage) ── */
+    var DB;
+    function load() { try { DB = JSON.parse(localStorage.getItem('cmp_app_db') || 'null'); } catch (e) { DB = null; } if (!DB) { seed(); return; } DB.medical = DB.medical || {}; DB.infirmary = DB.infirmary || []; DB.journals = DB.journals || []; DB.readingGroups = DB.readingGroups || []; DB.devise = DB.devise || 'FCFA'; DB.invoices = DB.invoices || []; DB.dorms = DB.dorms || []; DB.boarders = DB.boarders || []; DB.inventory = DB.inventory || []; DB.decisions = DB.decisions || {}; }
+    function save() { DB.lastSave = Date.now(); localStorage.setItem('cmp_app_db', JSON.stringify(DB)); }
+    function seed() {
+      DB = { annee: '2025-2026', trimestre: 'Trimestre 2', ecole: 'Collège Bilingue Campus', matSeq: 0,
+        classes: [], students: [], teachers: [], grades: {}, absences: [], sanctions: [], payments: [], edt: {}, books: [], loans: [], routes: [], payrolls: [], medical: {}, infirmary: [], journals: [], readingGroups: [] };
+      [['6e A', '6e', '1er cycle'], ['5e A', '5e', '1er cycle'], ['4e A', '4e', '1er cycle'], ['3e A', '3e', '1er cycle']].forEach(function (c) {
+        DB.classes.push({ id: gid(), nom: c[0], niveau: c[1], cycle: c[2], frais: 90000 });
+      });
+      var noms = ['NGUEMA Sandrine', 'ATANGANA Paul', 'MBALLA Grace', 'FOTSO Kevin', 'NKOLO Linda', 'BIYA Junior', 'KOM Aline', 'TABI Brice', 'SAA Mireille', 'OWONA Yvan', 'NGO Bella', 'ELA Steve', 'FOUDA Carine', 'SUH Derrick'];
+      noms.forEach(function (nm, i) {
+        var cl = DB.classes[i % DB.classes.length];
+        DB.matSeq++;
+        var st = { id: gid(), mat: matricule(cl, DB.matSeq), nom: nm.split(' ')[0], prenom: nm.split(' ').slice(1).join(' '),
+          sexe: (i % 2 ? 'M' : 'F'), classeId: cl.id, tuteur: 'Tuteur ' + (i + 1), tel: '6' + (90000000 + i * 137), frais: cl.frais, statut: 'Inscrit' };
+        DB.students.push(st);
+        DB.grades[st.id] = {};
+        var tgt = [16, 17, 15, 14, 12, 11, 13, 12, 9, 8, 10, 9, 7, 16][i % 14];
+        SUBJECTS.forEach(function (s, j) { DB.grades[st.id][s.n] = { d1: clamp(tgt + ((j % 5) - 2)), d2: clamp(tgt + (((j + 2) % 5) - 2)) }; });
+        // paiement partiel
+        if (i % 4 !== 0) { DB.payments.push({ id: gid(), studentId: st.id, montant: 45000, date: '2025-10-05', tranche: '1re tranche', mode: 'Espèces' }); }
+        if (i % 3 === 0) { DB.absences.push({ id: gid(), studentId: st.id, date: '2026-03-10', heures: (i === 6 ? 8 : 2), justifie: false, motif: 'Non justifiée' }); }
+      });
+      [['MBALLA', 'Rose', 'Français', 1500, 180000], ['ATANGANA', 'Marc', 'Mathématiques', 1800, 0], ['TABI', 'Alice', 'Anglais', 1500, 0], ['NGO', 'Paul', 'SVT', 1200, 150000]].forEach(function (t) {
+        DB.teachers.push({ id: gid(), nom: t[0], prenom: t[1], matiere: t[2], taux: t[3], base: t[4] });
+      });
+      DB.books = [{ id: gid(), titre: 'Le Vieux Nègre et la médaille', auteur: 'F. Oyono', ex: 5, dispo: 3 }, { id: gid(), titre: 'Ville cruelle', auteur: 'Eza Boto', ex: 4, dispo: 4 }];
+      DB.routes = [{ id: gid(), nom: 'Ligne A — Bonabéri', vehicule: 'LT-883', chauffeur: 'M. Eto', chauffeurTel: '699112233', places: 30, frais: 20000, eleves: [], stops: [{ nom: 'Bonabéri carrefour', heure: '06:30' }, { nom: 'Rond-point Deido', heure: '06:50' }, { nom: 'École', heure: '07:10' }] }];
+      DB.students.forEach(function (s, i) { DB.medical[s.id] = { groupe: ['O+', 'A+', 'B+', 'AB+', 'O-'][i % 5], allergies: (i % 4 === 0 ? ['Arachide'] : (i % 5 === 0 ? ['Pénicilline'] : [])), antecedents: (i % 6 === 0 ? 'Asthme léger' : 'RAS'), traitements: '', urgenceNom: s.tuteur, urgenceTel: s.tel }; });
+      DB.infirmary = [{ id: gid(), studentId: DB.students[0].id, date: '2026-03-12', motif: 'Maux de tête', soins: 'Paracétamol, repos 30 min', issue: 'Retour en classe' }];
+      DB.journals = [{ id: gid(), titre: "L'Écho du Campus — N°1", date: '2026-02-01', statut: 'Publié', resume: 'Rentrée scolaire, résultats du 1er trimestre, lancement du club de lecture.', auteur: 'Comité de rédaction' }];
+      DB.readingGroups = [{ id: gid(), nom: 'Cercle des jeunes lecteurs', niveau: '6e–5e', livre: 'Le Vieux Nègre et la médaille', membres: 6, anim: 'Mme MBALLA', prochaine: '2026-03-20' }];
+      DB.devise = 'FCFA';
+      DB.invoices = [];
+      DB.dorms = [{ id: gid(), nom: 'Dortoir Garçons A', genre: 'M', cap: 24 }, { id: gid(), nom: 'Dortoir Filles A', genre: 'F', cap: 24 }];
+      DB.boarders = [];
+      DB.students.slice(0, 4).forEach(function (s) { var d = DB.dorms.filter(function (x) { return x.genre === s.sexe; })[0] || DB.dorms[0]; DB.boarders.push({ studentId: s.id, dormId: d.id, lit: DB.boarders.filter(function (b) { return b.dormId === d.id; }).length + 1, frais: 120000 }); });
+      DB.inventory = [{ id: gid(), nom: 'Table-banc', categorie: 'Mobilier', qte: 120, etat: 'Bon', lieu: 'Salles de classe', valeur: 25000 }, { id: gid(), nom: 'Ordinateur portable', categorie: 'Informatique', qte: 8, etat: 'Bon', lieu: 'Salle informatique', valeur: 180000 }, { id: gid(), nom: 'Microscope', categorie: 'Laboratoire', qte: 5, etat: 'À réviser', lieu: 'Labo SVT', valeur: 75000 }];
+      DB.decisions = {};
+      save();
+    }
+    function clamp(n) { return Math.max(0, Math.min(20, n)); }
+    function matricule(cl, seq) { return 'CMP25-' + cl.nom.replace(/\s/g, '') + '-' + ('00' + seq).slice(-3); }
+
+    /* ── Session ── */
+    function role() { return sessionStorage.getItem('cmp_profile') || ''; }
+    function userName() { return sessionStorage.getItem('cmp_user') || (ROLE_LABELS[role()] || 'Utilisateur'); }
+
+    /* ── Calculs interconnectés ── */
+    function classOf(id) { return DB.classes.filter(function (c) { return c.id === id; })[0] || {}; }
+    function studentsOf(classeId) { return DB.students.filter(function (s) { return s.classeId === classeId; }); }
+    function paid(studentId) { return DB.payments.filter(function (p) { return p.studentId === studentId; }).reduce(function (t, p) { return t + (+p.montant); }, 0); }
+    function absHours(studentId) { return DB.absences.filter(function (a) { return a.studentId === studentId; }).reduce(function (t, a) { return t + (+a.heures); }, 0); }
+    function moyenneOf(studentId) {
+      var g = DB.grades[studentId] || {}, w = 0, c = 0;
+      SUBJECTS.forEach(function (s) { var x = g[s.n]; if (x && x.d1 != null && x.d2 != null) { var m = (+x.d1 + +x.d2) / 2; w += m * s.c; c += s.c; } });
+      return c ? w / c : 0;
+    }
+    function mention(m) { return m >= 16 ? 'Félicitations' : m >= 14 ? "Tableau d'honneur" : m >= 12 ? 'Encouragements' : m >= 10 ? 'Passable' : 'Avertissement'; }
+    // Bulletins d'une classe avec rang.
+    function bulletinsOf(classeId) {
+      var arr = studentsOf(classeId).map(function (s) { return { s: s, moy: moyenneOf(s.id), abs: absHours(s.id) }; });
+      arr.sort(function (a, b) { return b.moy - a.moy; });
+      arr.forEach(function (x, i) { x.rang = i + 1; x.mention = mention(x.moy); });
+      return arr;
+    }
+    // AUTOMATISATIONS : tableaux d'honneur + convocations (notes basses).
+    function honorRoll() { return DB.students.map(function (s) { return { s: s, moy: moyenneOf(s.id) }; }).filter(function (x) { return x.moy >= 14; }).sort(function (a, b) { return b.moy - a.moy; }); }
+    function convocations() {
+      return DB.students.map(function (s) { return { s: s, moy: moyenneOf(s.id), abs: absHours(s.id) }; })
+        .filter(function (x) { return x.moy < 10 || x.abs >= 8; })
+        .map(function (x) { x.motif = (x.moy < 10 ? 'Moyenne faible (' + x.moy.toFixed(2) + '/20)' : '') + (x.abs >= 8 ? (x.moy < 10 ? ' + ' : '') + 'Absences ' + x.abs + 'h' : ''); return x; });
+    }
+    // IA : indice de risque de décrochage (0-100) à partir de la moyenne, des absences, des impayés, des sanctions.
+    function riskScore(s) {
+      var m = moyenneOf(s.id), abs = absHours(s.id), solde = s.frais - paid(s.id), sc = 0;
+      if (m < 10) sc += 40; else if (m < 12) sc += 20;
+      sc += Math.min(30, abs * 3);
+      if (solde > s.frais * 0.6) sc += 20; else if (solde > 0) sc += 10;
+      sc += Math.min(15, DB.sanctions.filter(function (x) { return x.studentId === s.id && x.type !== 'Félicitations'; }).length * 8);
+      return Math.min(100, Math.round(sc));
+    }
+    function riskLevel(sc) { return sc >= 60 ? ['Élevé', 'bad'] : sc >= 35 ? ['Modéré', 'acc'] : ['Faible', 'ok']; }
+
+    /* ── Shell ── */
+    function render() {
+      var r = role();
+      if (!r) return renderLogin();
+      var route = (location.hash || '#dashboard').slice(1);
+      if (!VIEWS[route]) route = 'dashboard';
+      if ((r === 'eleve' || r === 'parent') && route === 'dashboard') route = 'monespace';
+      var allowed = can(r, VIEWS[route].cap);
+      var nav = navHtml(r, route);
+      $('#root').innerHTML =
+        '<header class="cmp-bar"><div class="logo">' + initials(DB.ecole) + '</div>'
+        + '<div class="brand"><b>' + esc(DB.ecole) + '</b><small>' + esc(DB.annee) + ' · ' + esc(DB.trimestre) + '</small></div>'
+        + '<div class="spacer"></div>'
+        + '<div class="ufer"><div class="ava">' + initials(userName()) + '</div><div style="line-height:1.15"><b style="font-size:.85rem">' + esc(userName()) + '</b><br><small style="opacity:.8">' + esc(ROLE_LABELS[r] || r) + '</small></div></div></header>'
+        + '<div class="app-shell"><aside class="side">' + nav + '<button class="btn btn-accent logout" id="logout">⎋ Déconnexion</button></aside>'
+        + '<main class="work" id="view"></main></div>'
+        + '<div class="toast" id="toast"></div>';
+      $('#logout').addEventListener('click', function () { sessionStorage.removeItem('cmp_profile'); sessionStorage.removeItem('cmp_user'); location.hash = ''; render(); });
+      var V = allowed ? VIEWMAP[route] : viewRestricted;
+      (V || viewRestricted)();
+    }
+    function initials(s) { return (s || 'VC').trim().split(/\s+/).slice(0, 2).map(function (w) { return w[0]; }).join('').toUpperCase(); }
+    function navHtml(r, route) {
+      var grp = null, html = '';
+      Object.keys(VIEWS).forEach(function (k) {
+        var v = VIEWS[k]; if (!can(r, v.cap)) return;
+        if (v.cap === null && (r === 'eleve' || r === 'parent')) return;
+        if (v.grp !== grp) { grp = v.grp; html += '<div class="grp">' + grp + '</div>'; }
+        html += '<a href="#' + k + '"' + (k === route ? ' class="active"' : '') + '><span class="ic">' + v.ic + '</span> ' + v.label + '</a>';
+      });
+      return html;
+    }
+    function setView(html) { $('#view').innerHTML = html; }
+    function viewRestricted() { setView('<div class="restricted"><div class="ic">🔒</div><h2>Accès restreint</h2><p class="note">Votre profil (' + esc(ROLE_LABELS[role()] || role()) + ') n\'a pas accès à cette section.</p><a class="btn btn-primary" href="#dashboard" style="width:auto;display:inline-flex">← Tableau de bord</a></div>'); }
+
+    /* ── Connexion (sélecteur de rôle) ── */
+    function renderLogin() {
+      var roles = ['directeur', 'enseignant', 'comptable', 'secretariat', 'censeur', 'intendant', 'surveillant', 'bibliothecaire', 'infirmier', 'eleve', 'parent'];
+      $('#root').innerHTML = '<header class="cmp-bar"><div class="logo">' + initials(DB.ecole) + '</div><div class="brand"><b>' + esc(DB.ecole) + '</b><small>VÉRITAS Campus</small></div></header>'
+        + '<main class="cmp-wrap"><div class="cmp-grid split">'
+        + '<section class="brandpane"><span class="chip">Identification</span><div class="logoBig">' + initials(DB.ecole) + '</div><h1 class="big">' + esc(DB.ecole) + '</h1><p class="lead">Choisissez votre profil : chacun accède uniquement à ses fonctions.</p></section>'
+        + '<section class="card"><h2>Connexion</h2><p class="sub">Sélectionnez un profil pour entrer.</p>'
+        + '<div class="field"><label>Nom (facultatif)</label><input id="lUser" placeholder="Votre nom"></div>'
+        + '<div class="pillrow">' + roles.map(function (r) { return '<button class="pillcheck" data-r="' + r + '">' + esc(ROLE_LABELS[r]) + '</button>'; }).join('') + '</div></section>'
+        + '</div></main><div class="toast" id="toast"></div>';
+      $('.pillrow').addEventListener('click', function (e) {
+        var b = e.target.closest('button[data-r]'); if (!b) return;
+        sessionStorage.setItem('cmp_profile', b.getAttribute('data-r'));
+        if ($('#lUser').value.trim()) sessionStorage.setItem('cmp_user', $('#lUser').value.trim());
+        location.hash = '#dashboard'; render();
+      });
+    }
+
+    /* ── Vues ── */
+    function viewDashboard() {
+      var eff = DB.students.length;
+      var totalFrais = DB.students.reduce(function (t, s) { return t + (+s.frais); }, 0);
+      var encaisse = DB.payments.reduce(function (t, p) { return t + (+p.montant); }, 0);
+      var recouv = totalFrais ? Math.round(encaisse / totalFrais * 100) : 0;
+      var moys = DB.students.map(function (s) { return moyenneOf(s.id); });
+      var moyG = moys.length ? (moys.reduce(function (t, m) { return t + m; }, 0) / moys.length) : 0;
+      var reussite = moys.length ? Math.round(moys.filter(function (m) { return m >= 10; }).length / moys.length * 100) : 0;
+      var absToday = DB.absences.filter(function (a) { return a.date === today(); }).length;
+      var presRate = eff ? Math.round((eff - absToday) / eff * 100) : 100;
+      var maxC = Math.max.apply(null, DB.classes.map(function (c) { return studentsOf(c.id).length; }).concat([1]));
+      var chart = DB.classes.map(function (c) { var n = studentsOf(c.id).length; return '<div class="row"><span>' + esc(c.nom) + '</span><span class="pbar" style="min-width:0"><span style="width:' + (n / maxC * 100) + '%"></span></span><b>' + n + '</b></div>'; }).join('');
+      var hr = honorRoll(), cv = convocations();
+      var risky = DB.students.map(function (s) { return { s: s, sc: riskScore(s), moy: moyenneOf(s.id), abs: absHours(s.id), solde: s.frais - paid(s.id) }; }).filter(function (x) { return x.sc >= 35; }).sort(function (a, b) { return b.sc - a.sc; });
+      var insights = [];
+      if (risky.length) insights.push(['bad', '🚨 ' + risky.length + ' élève(s) à risque de décrochage — suivi rapproché recommandé.']);
+      var debCount = DB.students.filter(function (s) { return s.frais - paid(s.id) > 0; }).length;
+      if (recouv < 80) insights.push(['acc', '💰 Recouvrement à ' + recouv + '% — ' + debCount + ' débiteur(s) : lancer des relances.']);
+      var noNotes = DB.students.filter(function (s) { return moyenneOf(s.id) === 0; }).length;
+      if (noNotes) insights.push(['acc', '📝 ' + noNotes + ' élève(s) sans note saisie — relancer les enseignants.']);
+      insights.push(['ok', '📈 Taux de réussite ' + reussite + '% · présence du jour ' + presRate + '%.']);
+      setView('<h1>Tableau de bord</h1><div class="crumb">Directeur · ' + esc(DB.annee) + ' · ' + esc(DB.trimestre) + ' · statistiques en temps réel</div>'
+        + '<div class="kpis">'
+        + kpi('Effectif total', eff, '+ ce trimestre') + kpi('Taux de réussite', reussite + ' %', '≥ 10/20')
+        + kpi('Recouvrement', recouv + ' %', money(encaisse) + ' encaissés') + kpi('Moyenne générale', moyG.toFixed(2), '/20')
+        + kpi('Présence du jour', presRate + ' %', absToday + ' absent(s)') + '</div>'
+        + '<div class="panel"><h3>Effectifs par classe</h3><div class="chart">' + chart + '</div></div>'
+        + '<div class="cmp-grid" style="grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">'
+        + '<div class="panel"><h3>🏆 Tableau d\'honneur (auto)</h3>' + (hr.length ? hr.slice(0, 8).map(function (x) { return '<div class="alert ok"><b>' + esc(x.s.nom + ' ' + x.s.prenom) + '</b> — ' + x.moy.toFixed(2) + '/20 · ' + esc(classOf(x.s.classeId).nom) + '</div>'; }).join('') : '<p class="note">Aucun élève ≥ 14 pour l\'instant.</p>') + '</div>'
+        + '<div class="panel"><h3>⚠️ Convocations parents (auto)</h3>' + (cv.length ? cv.slice(0, 8).map(function (x) { return '<div class="alert bad"><b>' + esc(x.s.nom + ' ' + x.s.prenom) + '</b> — ' + esc(x.motif) + ' · 📞 ' + esc(x.s.tel) + '</div>'; }).join('') : '<p class="note">Aucune alerte.</p>') + '</div>'
+        + '</div>'
+        + '<div class="cmp-grid" style="grid-template-columns:1.3fr .7fr;gap:16px;margin-top:16px">'
+        + '<div class="panel"><h3>🚨 Élèves à risque de décrochage (IA)</h3>' + (risky.length ? '<table class="note-table"><thead><tr><th>Élève</th><th>Classe</th><th>Indice</th><th>Niveau</th><th>Facteurs</th></tr></thead><tbody>' + risky.slice(0, 8).map(function (x) { var lv = riskLevel(x.sc); var fac = []; if (x.moy < 10) fac.push('moy. ' + x.moy.toFixed(1)); if (x.abs >= 6) fac.push(x.abs + 'h abs.'); if (x.solde > 0) fac.push('impayé'); return '<tr><td><b>' + esc(x.s.nom + ' ' + x.s.prenom) + '</b></td><td>' + esc(classOf(x.s.classeId).nom) + '</td><td class="c"><b>' + x.sc + '/100</b></td><td class="c"><span class="ment ' + lv[1] + '">' + lv[0] + '</span></td><td>' + esc(fac.join(' · ')) + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="note">Aucun élève à risque détecté 🎉</p>') + '</div>'
+        + '<div class="panel"><h3>🤖 Assistant direction</h3>' + insights.map(function (it) { return '<div class="alert ' + it[0] + '">' + it[1] + '</div>'; }).join('') + '</div>'
+        + '</div>');
+    }
+    function kpi(l, v, sub) { return '<div class="kpi"><div class="lab">' + l + '</div><div class="val">' + v + '</div><div class="sub">' + (sub || '') + '</div></div>'; }
+
+    function viewEleves() {
+      var classes = '<option value="">Toutes les classes</option>' + DB.classes.map(function (c) { return '<option value="' + c.id + '">' + esc(c.nom) + '</option>'; }).join('');
+      setView('<h1>Élèves</h1><div class="crumb">' + DB.students.length + ' élèves · recherche, filtre, export</div>'
+        + '<div class="card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px">'
+        + '<div class="field" style="margin:0;flex:1;min-width:160px"><label>Recherche</label><input id="eSearch" placeholder="Nom ou matricule…"></div>'
+        + '<div class="field" style="margin:0"><label>Classe</label><select id="eClass">' + classes + '</select></div>'
+        + '<button class="btn btn-ghost" id="eCsv" style="width:auto">⬇️ Export CSV</button>'
+        + (can(role(), 'students.manage') ? '<a class="btn btn-primary" href="#inscription" style="width:auto">+ Inscrire</a>' : '') + '</div>'
+        + '<div id="eList"></div></div>');
+      function paint() {
+        var q = $('#eSearch').value.toLowerCase(), cl = $('#eClass').value;
+        var rows = DB.students.filter(function (s) { return (!cl || s.classeId === cl) && (s.nom + ' ' + s.prenom + ' ' + s.mat).toLowerCase().indexOf(q) >= 0; });
+        $('#eList').innerHTML = '<table class="note-table"><thead><tr><th></th><th>Matricule</th><th>Nom & prénoms</th><th>Classe</th><th>Sexe</th><th>Moy.</th><th>Solde</th><th>Statut</th></tr></thead><tbody>'
+          + rows.map(function (s) { var m = moyenneOf(s.id), solde = s.frais - paid(s.id);
+            return '<tr><td class="c"><div class="av">' + initials(s.nom + ' ' + s.prenom) + '</div></td><td>' + esc(s.mat) + '</td><td><b>' + esc(s.nom) + '</b> ' + esc(s.prenom) + '</td><td>' + esc(classOf(s.classeId).nom) + '</td><td class="c">' + s.sexe + '</td><td class="c ' + (m < 10 ? 'gred' : '') + '">' + m.toFixed(2) + '</td><td class="c">' + (solde > 0 ? '<span class="gred">' + money(solde) + '</span>' : '✅') + '</td><td class="c"><span class="ment ok">' + esc(s.statut) + '</span></td></tr>'; }).join('')
+          + '</tbody></table><p class="note" style="margin-top:8px">' + rows.length + ' élève(s).</p>';
+      }
+      $('#eSearch').addEventListener('input', paint); $('#eClass').addEventListener('change', paint);
+      $('#eCsv').addEventListener('click', function () {
+        var lines = ['Matricule;Nom;Prenom;Classe;Sexe;Moyenne;Solde'].concat(DB.students.map(function (s) { return [s.mat, s.nom, s.prenom, classOf(s.classeId).nom, s.sexe, moyenneOf(s.id).toFixed(2), s.frais - paid(s.id)].join(';'); }));
+        dl('eleves.csv', lines.join('\n')); toast('Export CSV généré.');
+      });
+      paint();
+    }
+
+    var insStep = 1, insData = {};
+    function viewInscription() {
+      setView('<h1>Inscription d\'un élève</h1><div class="crumb">Multi-étapes · matricule généré automatiquement</div>'
+        + '<div class="card"><div class="steps2"><div class="s" data-s="1">1. Identité</div><div class="s" data-s="2">2. Classe & tuteur</div><div class="s" data-s="3">3. Frais</div><div class="s" data-s="4">4. Validation</div></div><div id="insBody"></div></div>');
+      insStep = 1; insData = { sexe: 'F' }; paintIns();
+    }
+    function paintIns() {
+      document.querySelectorAll('.steps2 .s').forEach(function (e) { e.classList.toggle('active', +e.getAttribute('data-s') === insStep); });
+      var b = $('#insBody'), h = '';
+      if (insStep === 1) h = field('Nom', 'iNom', insData.nom) + field('Prénom(s)', 'iPre', insData.prenom) + '<div class="field"><label>Sexe</label><select id="iSexe"><option' + (insData.sexe === 'F' ? ' selected' : '') + '>F</option><option' + (insData.sexe === 'M' ? ' selected' : '') + '>M</option></select></div>' + field('Date de naissance', 'iDob', insData.dob, 'date');
+      else if (insStep === 2) h = '<div class="field"><label>Classe</label><select id="iClass">' + DB.classes.map(function (c) { return '<option value="' + c.id + '"' + (insData.classeId === c.id ? ' selected' : '') + '>' + esc(c.nom) + '</option>'; }).join('') + '</select></div>' + field('Nom du tuteur', 'iTut', insData.tuteur) + field('Téléphone tuteur', 'iTel', insData.tel);
+      else if (insStep === 3) h = field('Frais de scolarité (FCFA)', 'iFrais', insData.frais || 90000, 'number') + '<p class="note">Le solde et l\'échéancier seront suivis dans le module Finances.</p>';
+      else h = '<div class="alert ok"><b>Récapitulatif :</b> ' + esc((insData.nom || '') + ' ' + (insData.prenom || '')) + ' · ' + insData.sexe + ' · ' + esc(classOf(insData.classeId || (DB.classes[0] || {}).id).nom) + ' · ' + money(insData.frais || 90000) + '<br>Matricule attribué à la validation : <b>' + matricule(classOf(insData.classeId || (DB.classes[0] || {}).id), DB.matSeq + 1) + '</b></div>';
+      b.innerHTML = h + '<div style="display:flex;gap:10px;margin-top:16px">' + (insStep > 1 ? '<button class="btn btn-ghost" id="iPrev" style="width:auto">← Précédent</button>' : '') + '<div style="flex:1"></div>' + (insStep < 4 ? '<button class="btn btn-primary" id="iNext" style="width:auto">Continuer →</button>' : '<button class="btn btn-accent" id="iSave" style="width:auto">✓ Valider l\'inscription</button>') + '</div>';
+      if ($('#iPrev')) $('#iPrev').addEventListener('click', function () { grabIns(); insStep--; paintIns(); });
+      if ($('#iNext')) $('#iNext').addEventListener('click', function () { if (!grabIns()) return; insStep++; paintIns(); });
+      if ($('#iSave')) $('#iSave').addEventListener('click', saveIns);
+    }
+    function grabIns() {
+      if (insStep === 1) { if (!$('#iNom').value.trim()) { toast('Nom requis.'); return false; } insData.nom = $('#iNom').value.trim(); insData.prenom = $('#iPre').value.trim(); insData.sexe = $('#iSexe').value; insData.dob = $('#iDob').value; }
+      if (insStep === 2) { insData.classeId = $('#iClass').value; insData.tuteur = $('#iTut').value.trim(); insData.tel = $('#iTel').value.trim(); }
+      if (insStep === 3) { insData.frais = +$('#iFrais').value || 90000; }
+      return true;
+    }
+    function saveIns() {
+      var cl = classOf(insData.classeId || (DB.classes[0] || {}).id);
+      DB.matSeq++;
+      var st = { id: gid(), mat: matricule(cl, DB.matSeq), nom: insData.nom, prenom: insData.prenom || '', sexe: insData.sexe, classeId: cl.id, tuteur: insData.tuteur || '', tel: insData.tel || '', frais: insData.frais || 90000, statut: 'Inscrit' };
+      DB.students.push(st); DB.grades[st.id] = {}; save();
+      toast('✓ Inscrit — matricule ' + st.mat); location.hash = '#eleves'; render();
+    }
+
+    function viewBulletins() {
+      var cl = $('#bClass') ? $('#bClass').value : (DB.classes[0] || {}).id;
+      setView('<h1>Bulletins</h1><div class="crumb">Saisie des notes · moyennes & rang automatiques · absences intégrées</div>'
+        + '<div class="card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px">'
+        + '<div class="field" style="margin:0"><label>Classe</label><select id="bClass">' + DB.classes.map(function (c) { return '<option value="' + c.id + '"' + (c.id === cl ? ' selected' : '') + '>' + esc(c.nom) + '</option>'; }).join('') + '</select></div>'
+        + '<div class="field" style="margin:0;flex:1;min-width:160px"><label>Élève (saisie des notes)</label><select id="bStud"></select></div>'
+        + '<button class="btn btn-ghost" id="bPrint" style="width:auto">🖨️ Aperçu bulletin</button></div>'
+        + '<div id="bBody"></div></div>');
+      function fillStuds() { var c = $('#bClass').value; $('#bStud').innerHTML = studentsOf(c).map(function (s) { return '<option value="' + s.id + '">' + esc(s.nom + ' ' + s.prenom) + '</option>'; }).join(''); paintGrid(); }
+      function paintGrid() {
+        var sid = $('#bStud').value; if (!sid) { $('#bBody').innerHTML = '<p class="note">Aucun élève.</p>'; return; }
+        var g = DB.grades[sid] || {};
+        $('#bBody').innerHTML = '<table class="note-table"><thead><tr><th>Matière</th><th>Coef</th><th>Devoir 1</th><th>Devoir 2</th><th>Moy.</th><th>Mention</th></tr></thead><tbody>'
+          + SUBJECTS.map(function (s) { var x = g[s.n] || {}; var m = (x.d1 != null && x.d2 != null) ? (+x.d1 + +x.d2) / 2 : null; var mn = m == null ? ['', ''] : [mention(m), m < 10 ? 'bad' : 'ok'];
+            return '<tr><td><b>' + s.n + '</b></td><td class="c">' + s.c + '</td>'
+              + '<td class="c"><input class="note-input" data-s="' + esc(s.n) + '" data-d="d1" type="number" min="0" max="20" step="0.25" value="' + (x.d1 == null ? '' : x.d1) + '"></td>'
+              + '<td class="c"><input class="note-input" data-s="' + esc(s.n) + '" data-d="d2" type="number" min="0" max="20" step="0.25" value="' + (x.d2 == null ? '' : x.d2) + '"></td>'
+              + '<td class="c ' + (m != null && m < 10 ? 'gred' : '') + '"><b data-m="' + esc(s.n) + '">' + (m == null ? '—' : m.toFixed(2)) + '</b></td><td class="c"><span class="ment ' + mn[1] + '" data-mt="' + esc(s.n) + '">' + mn[0] + '</span></td></tr>'; }).join('')
+          + '</tbody></table>'
+          + '<div style="display:flex;gap:10px;margin-top:14px;align-items:center"><span class="counter">Moyenne : ' + moyenneOf(sid).toFixed(2) + ' · Rang ' + rangOf(sid) + '/' + studentsOf($('#bClass').value).length + ' · ' + mention(moyenneOf(sid)) + '</span><span class="ment bad">Absences : ' + absHours(sid) + ' h</span><div style="flex:1"></div><button class="btn btn-primary" id="bSave" style="width:auto">✓ Enregistrer</button></div>';
+        document.querySelectorAll('#bBody .note-input').forEach(function (inp) {
+          inp.addEventListener('input', function () {
+            var sn = inp.getAttribute('data-s'), d = inp.getAttribute('data-d');
+            DB.grades[sid][sn] = DB.grades[sid][sn] || {}; DB.grades[sid][sn][d] = inp.value === '' ? null : clamp(+inp.value);
+            var x = DB.grades[sid][sn], m = (x.d1 != null && x.d2 != null) ? (+x.d1 + +x.d2) / 2 : null;
+            $('[data-m="' + cssAttr(sn) + '"]').textContent = m == null ? '—' : m.toFixed(2);
+          });
+        });
+        $('#bSave').addEventListener('click', function () { save(); toast('✓ Notes enregistrées — moyennes/rang recalculés.'); paintGrid(); });
+      }
+      function rangOf(sid) { var b = bulletinsOf($('#bClass').value).filter(function (x) { return x.s.id === sid; })[0]; return b ? b.rang : '—'; }
+      $('#bClass').addEventListener('change', fillStuds); $('#bStud').addEventListener('change', paintGrid);
+      $('#bPrint').addEventListener('click', function () { printBulletin($('#bStud').value); });
+      fillStuds();
+    }
+    function cssAttr(s) { return s.replace(/"/g, '\\"'); }
+    function rangOfStudent(sid) { var c = (DB.students.filter(function (s) { return s.id === sid; })[0] || {}).classeId; var b = bulletinsOf(c).filter(function (x) { return x.s.id === sid; })[0]; return b ? b.rang : '—'; }
+    function printBulletin(sid) {
+      var s = DB.students.filter(function (x) { return x.id === sid; })[0]; if (!s) return;
+      var g = DB.grades[sid] || {}, moy = moyenneOf(sid), cl = classOf(s.classeId);
+      var rows = SUBJECTS.map(function (su) { var x = g[su.n] || {}; var m = (x.d1 != null && x.d2 != null) ? (+x.d1 + +x.d2) / 2 : 0; return '<tr><td>' + su.n + '</td><td style="text-align:center">' + (m ? m.toFixed(2) : '—') + '</td><td style="text-align:center">' + su.c + '</td><td style="text-align:center">' + (m * su.c).toFixed(2) + '</td></tr>'; }).join('');
+      var w = window.open('', '_blank');
+      w.document.write('<html><head><title>Bulletin ' + esc(s.nom) + '</title><style>body{font-family:system-ui;padding:20px;color:#142554}table{width:100%;border-collapse:collapse;margin:10px 0}td,th{border:1px solid #889;padding:6px;font-size:13px}th{background:#142554;color:#fff}.h{text-align:center;border-bottom:2px solid #142554;padding-bottom:8px}.h b{font-size:13px}</style></head><body>'
+        + '<div class="h"><b>RÉPUBLIQUE DU CAMEROUN — Paix · Travail · Patrie</b><br>MINISTÈRE DES ENSEIGNEMENTS SECONDAIRES<br><b style="font-size:16px">' + esc(DB.ecole) + '</b><br>Bulletin de notes — ' + esc(DB.trimestre) + ' · ' + esc(DB.annee) + '</div>'
+        + '<p><b>Élève :</b> ' + esc(s.nom + ' ' + s.prenom) + ' &nbsp; <b>Matricule :</b> ' + esc(s.mat) + ' &nbsp; <b>Classe :</b> ' + esc(cl.nom) + ' &nbsp; <b>Effectif :</b> ' + studentsOf(s.classeId).length + '</p>'
+        + '<table><thead><tr><th>Matière</th><th>Moy/20</th><th>Coef</th><th>Moy×Coef</th></tr></thead><tbody>' + rows + '</tbody></table>'
+        + '<p><b>Moyenne générale :</b> ' + moy.toFixed(2) + '/20 &nbsp; <b>Rang :</b> ' + rangOfStudent(sid) + '/' + studentsOf(s.classeId).length + ' &nbsp; <b>Mention :</b> ' + mention(moy) + ' &nbsp; <b>Absences :</b> ' + absHours(sid) + ' h</p>'
+        + '<p style="border:1px solid #142554;border-radius:8px;padding:8px 12px;background:#f4f6fb"><b>Décision du conseil de classe :</b> ' + esc(DB.decisions && DB.decisions[sid] ? DB.decisions[sid] : '— (non délibéré)') + '</p>'
+        + '<p style="margin-top:30px;display:flex;justify-content:space-between"><span>Le Professeur principal</span><span>Le Chef d\'établissement</span></p>'
+        + '<script>print()<\/script></body></html>'); w.document.close();
+    }
+
+    function viewPresences() {
+      var d = $('#pDate') ? $('#pDate').value : today();
+      var cl = $('#pClass') ? $('#pClass').value : (DB.classes[0] || {}).id;
+      setView('<h1>Présences</h1><div class="crumb">Appel du jour → alimente les absences et les bulletins</div>'
+        + '<div class="card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px">'
+        + '<div class="field" style="margin:0"><label>Date</label><input id="pDate" type="date" value="' + d + '"></div>'
+        + '<div class="field" style="margin:0"><label>Classe</label><select id="pClass">' + DB.classes.map(function (c) { return '<option value="' + c.id + '"' + (c.id === cl ? ' selected' : '') + '>' + esc(c.nom) + '</option>'; }).join('') + '</select></div>'
+        + '<div style="flex:1"></div><span class="counter" id="pCnt"></span><button class="btn btn-primary" id="pSave" style="width:auto">✓ Enregistrer l\'appel</button></div>'
+        + '<div id="pList"></div></div>');
+      var state = {};
+      function paint() {
+        var c = $('#pClass').value, dt = $('#pDate').value;
+        var studs = studentsOf(c);
+        studs.forEach(function (s) { if (state[s.id] == null) { var ex = DB.absences.filter(function (a) { return a.studentId === s.id && a.date === dt; })[0]; state[s.id] = ex ? 'A' : 'P'; } });
+        $('#pList').innerHTML = '<table class="note-table"><thead><tr><th>N°</th><th>Nom</th><th>Présence</th><th>Heures (si absent)</th></tr></thead><tbody>'
+          + studs.map(function (s, i) { var st = state[s.id];
+            return '<tr><td class="c">' + (i + 1) + '</td><td>' + esc(s.nom + ' ' + s.prenom) + '</td><td class="c"><span class="ptoggle" data-id="' + s.id + '"><button class="' + (st === 'P' ? 'on-p' : '') + '" data-v="P">Présent</button><button class="' + (st === 'A' ? 'on-a' : '') + '" data-v="A">Absent</button></span></td><td class="c"><input class="note-input" data-h="' + s.id + '" type="number" min="0" max="8" value="' + (st === 'A' ? 2 : '') + '" ' + (st === 'A' ? '' : 'disabled') + '></td></tr>'; }).join('')
+          + '</tbody></table>'; updateCnt();
+      }
+      function updateCnt() { var studs = studentsOf($('#pClass').value); var a = studs.filter(function (s) { return state[s.id] === 'A'; }).length; $('#pCnt').textContent = 'Présents : ' + (studs.length - a) + ' · Absents : ' + a; }
+      $('#pList') && null;
+      $('#pList').addEventListener('click', function (e) {
+        var b = e.target.closest('.ptoggle button'); if (!b) return;
+        var id = b.parentNode.getAttribute('data-id'); state[id] = b.getAttribute('data-v'); paint();
+      });
+      $('#pClass').addEventListener('change', function () { state = {}; paint(); });
+      $('#pDate').addEventListener('change', function () { state = {}; paint(); });
+      $('#pSave').addEventListener('click', function () {
+        var dt = $('#pDate').value, studs = studentsOf($('#pClass').value), n = 0;
+        DB.absences = DB.absences.filter(function (a) { return !(a.date === dt && studs.some(function (s) { return s.id === a.studentId; })); });
+        studs.forEach(function (s) { if (state[s.id] === 'A') { var hi = $('[data-h="' + s.id + '"]'); DB.absences.push({ id: gid(), studentId: s.id, date: dt, heures: +(hi && hi.value) || 2, justifie: false, motif: 'Appel' }); n++; } });
+        save(); toast('✓ Appel enregistré — ' + n + ' absence(s). Bulletins & convocations mis à jour.');
+      });
+      paint();
+    }
+
+    function viewDiscipline() {
+      setView('<h1>Discipline</h1><div class="crumb">Sanctions & récompenses</div>'
+        + '<div class="card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px">'
+        + '<div class="field" style="margin:0;flex:1;min-width:160px"><label>Élève</label><select id="dStud">' + DB.students.map(function (s) { return '<option value="' + s.id + '">' + esc(s.nom + ' ' + s.prenom + ' (' + classOf(s.classeId).nom + ')') + '</option>'; }).join('') + '</select></div>'
+        + '<div class="field" style="margin:0"><label>Type</label><select id="dType"><option>Avertissement</option><option>Blâme</option><option>Exclusion temporaire</option><option>Convocation</option><option>Félicitations</option></select></div>'
+        + '<button class="btn btn-primary" id="dAdd" style="width:auto">+ Ajouter</button></div><div id="dList"></div></div>');
+      function paint() {
+        $('#dList').innerHTML = DB.sanctions.length ? '<table class="note-table"><thead><tr><th>Date</th><th>Élève</th><th>Type</th></tr></thead><tbody>' + DB.sanctions.slice().reverse().map(function (x) { var s = DB.students.filter(function (e) { return e.id === x.studentId; })[0] || {}; return '<tr><td>' + esc(x.date) + '</td><td>' + esc((s.nom || '') + ' ' + (s.prenom || '')) + '</td><td><span class="ment ' + (x.type === 'Félicitations' ? 'ok' : 'bad') + '">' + esc(x.type) + '</span></td></tr>'; }).join('') + '</tbody></table>' : '<p class="note">Aucune sanction enregistrée.</p>';
+      }
+      $('#dAdd').addEventListener('click', function () { DB.sanctions.push({ id: gid(), studentId: $('#dStud').value, type: $('#dType').value, date: today() }); save(); toast('✓ Enregistré.'); paint(); });
+      paint();
+    }
+
+    function viewMonEspace() {
+      var sid = sessionStorage.getItem('cmp_student') || (DB.students[0] || {}).id;
+      var s = DB.students.filter(function (x) { return x.id === sid; })[0] || DB.students[0];
+      if (!s) { setView('<p class="note">Aucun élève.</p>'); return; }
+      sid = s.id;
+      var moy = moyenneOf(s.id), bul = bulletinsOf(s.classeId).filter(function (x) { return x.s.id === s.id; })[0] || {}, rang = bul.rang || '—';
+      var solde = s.frais - paid(s.id), med = DB.medical[s.id] || {}, g = DB.grades[s.id] || {};
+      var notesRows = SUBJECTS.map(function (su) { var x = g[su.n] || {}; var m = (x.d1 != null && x.d2 != null) ? (+x.d1 + +x.d2) / 2 : null; return '<tr><td><b>' + su.n + '</b></td><td class="c">' + su.c + '</td><td class="c' + (m != null && m < 10 ? ' gred' : '') + '">' + (m == null ? '—' : m.toFixed(2)) + '</td><td class="c">' + (m == null ? '' : '<span class="ment ' + (m < 10 ? 'bad' : 'ok') + '">' + mention(m) + '</span>') + '</td></tr>'; }).join('');
+      var abs = DB.absences.filter(function (a) { return a.studentId === s.id; }), pays = DB.payments.filter(function (p) { return p.studentId === s.id; });
+      setView('<h1>Mon espace</h1><div class="crumb">' + esc(ROLE_LABELS[role()]) + ' · espace personnel (consultation)</div>'
+        + '<div class="card"><div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap"><div class="b-photo" style="width:56px;height:70px">👤</div>'
+        + '<div style="flex:1;min-width:160px"><h3 style="margin:0">' + esc(s.nom + ' ' + s.prenom) + '</h3><p class="note" style="margin:2px 0">' + esc(classOf(s.classeId).nom) + ' · Matricule ' + esc(s.mat) + '</p></div>'
+        + '<div class="field" style="margin:0"><label>' + (role() === 'parent' ? 'Mon enfant' : 'Compte') + '</label><select id="meStud">' + DB.students.map(function (x) { return '<option value="' + x.id + '"' + (x.id === sid ? ' selected' : '') + '>' + esc(x.nom + ' ' + x.prenom) + '</option>'; }).join('') + '</select></div></div></div>'
+        + '<div class="kpis"><div class="kpi"><div class="lab">Moyenne</div><div class="val">' + moy.toFixed(2) + '</div><div class="sub">' + mention(moy) + '</div></div>'
+        + '<div class="kpi"><div class="lab">Rang</div><div class="val">' + rang + '/' + studentsOf(s.classeId).length + '</div><div class="sub">classe ' + esc(classOf(s.classeId).nom) + '</div></div>'
+        + '<div class="kpi"><div class="lab">Absences</div><div class="val">' + absHours(s.id) + ' h</div><div class="sub">cumul</div></div>'
+        + '<div class="kpi"><div class="lab">Solde scolarité</div><div class="val">' + (solde > 0 ? money(solde) : 'À jour ✅') + '</div><div class="sub">payé ' + money(paid(s.id)) + '</div></div></div>'
+        + '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><h3 style="margin:0">Mes notes</h3><button class="btn btn-ghost" id="mePrint" style="width:auto">🖨️ Mon bulletin</button></div>'
+        + '<table class="note-table" style="margin-top:10px"><thead><tr><th>Matière</th><th>Coef</th><th>Moyenne</th><th>Appréciation</th></tr></thead><tbody>' + notesRows + '</tbody></table></div>'
+        + '<div class="cmp-grid" style="grid-template-columns:1fr 1fr;gap:16px">'
+        + '<div class="panel"><h3>Mes absences</h3>' + (abs.length ? '<table class="note-table"><thead><tr><th>Date</th><th>Heures</th><th>Motif</th></tr></thead><tbody>' + abs.slice().reverse().map(function (a) { return '<tr><td>' + esc(a.date) + '</td><td class="c">' + a.heures + ' h</td><td>' + esc(a.motif || '') + (a.justifie ? ' <span class="ment ok">justifiée</span>' : ' <span class="ment bad">non just.</span>') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="note">Aucune absence 🎉</p>') + '</div>'
+        + '<div class="panel"><h3>Ma scolarité</h3>' + (pays.length ? '<table class="note-table"><thead><tr><th>Date</th><th>Tranche</th><th>Montant</th><th>Mode</th></tr></thead><tbody>' + pays.slice().reverse().map(function (p) { return '<tr><td>' + esc(p.date) + '</td><td>' + esc(p.tranche || '') + '</td><td class="c">' + money(p.montant) + '</td><td>' + esc(p.mode || '') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="note">Aucun paiement.</p>') + '<p class="note" style="margin-top:8px">Frais : ' + money(s.frais) + ' · Payé : ' + money(paid(s.id)) + ' · <b>Solde : ' + money(solde) + '</b></p></div></div>'
+        + '<div class="card"><h3 style="margin:0 0 10px">🏥 Dossier d\'infirmerie</h3><div class="dinfo" style="grid-template-columns:1fr 1fr"><div><span class="l">Groupe sanguin :</span> <b>' + esc(med.groupe || '—') + '</b></div><div><span class="l">Allergies :</span> <b>' + ((med.allergies || []).length ? '<span class="gred">' + esc(med.allergies.join(', ')) + '</span>' : 'Aucune') + '</b></div><div><span class="l">Antécédents :</span> <b>' + esc(med.antecedents || 'RAS') + '</b></div><div><span class="l">Contact urgence :</span> <b>' + esc((med.urgenceNom || '') + ' ' + (med.urgenceTel || '')) + '</b></div></div></div>');
+      $('#meStud').addEventListener('change', function () { sessionStorage.setItem('cmp_student', this.value); viewMonEspace(); });
+      $('#mePrint').addEventListener('click', function () { printBulletin(s.id); });
+    }
+
+    function viewInfirmerie() {
+      var sid = $('#mStud') ? $('#mStud').value : (DB.students[0] || {}).id;
+      var alerg = DB.students.filter(function (s) { return (DB.medical[s.id] || {}).allergies && DB.medical[s.id].allergies.length; });
+      setView('<h1>Infirmerie</h1><div class="crumb">Situation de l\'apprenant · dossier médical · allergies · alerte malaise → parent</div>'
+        + (alerg.length ? '<div class="alert bad" style="margin-bottom:12px">⚠️ <b>' + alerg.length + ' élève(s) avec allergie(s) connue(s)</b> — vigilance cantine & soins.</div>' : '')
+        + '<div class="cmp-grid" style="grid-template-columns:1.1fr .9fr;gap:16px">'
+        + '<div class="card"><h3 style="margin:0 0 10px">Dossier médical</h3>'
+        + '<div class="field"><label>Élève</label><select id="mStud">' + DB.students.map(function (s) { return '<option value="' + s.id + '"' + (s.id === sid ? ' selected' : '') + '>' + esc(s.nom + ' ' + s.prenom + ' (' + classOf(s.classeId).nom + ')') + '</option>'; }).join('') + '</select></div><div id="mBody"></div></div>'
+        + '<div class="card"><h3 style="margin:0 0 10px">🚨 Malaise / Urgence</h3><div id="mUrg"></div><h3 style="margin:18px 0 8px">Derniers passages</h3><div id="mLog"></div></div>'
+        + '</div>');
+      function paint() {
+        var s = DB.students.filter(function (x) { return x.id === $('#mStud').value; })[0]; if (!s) return;
+        var med = DB.medical[s.id] || (DB.medical[s.id] = { groupe: '', allergies: [], antecedents: 'RAS', traitements: '', urgenceNom: s.tuteur, urgenceTel: s.tel });
+        var al = (med.allergies || []).join(', ');
+        $('#mBody').innerHTML = '<div class="dinfo" style="grid-template-columns:1fr 1fr;font-size:.9rem;margin-bottom:8px"><div><span class="l">Classe :</span> <b>' + esc(classOf(s.classeId).nom) + '</b></div><div><span class="l">Matricule :</span> <b>' + esc(s.mat) + '</b></div><div><span class="l">Sexe :</span> <b>' + s.sexe + '</b></div><div><span class="l">Moyenne :</span> <b>' + moyenneOf(s.id).toFixed(2) + '</b></div></div>'
+          + (al ? '<div class="alert bad">⚠️ <b>Allergies :</b> ' + esc(al) + '</div>' : '')
+          + field('Groupe sanguin', 'mGrp', med.groupe)
+          + '<div class="field"><label>Allergies (séparées par des virgules)</label><input id="mAll" value="' + esc(al) + '" placeholder="Arachide, Pénicilline…"></div>'
+          + field('Antécédents médicaux', 'mAnt', med.antecedents) + field('Traitements en cours', 'mTrt', med.traitements)
+          + '<div class="row two">' + field('Contact d\'urgence', 'mUN', med.urgenceNom) + field('Téléphone urgence', 'mUT', med.urgenceTel) + '</div>'
+          + '<button class="btn btn-primary" id="mSave" style="width:auto;margin-top:4px">✓ Enregistrer le dossier</button>';
+        $('#mUrg').innerHTML = '<p class="note" style="margin:0 0 8px">Consigner un passage et alerter immédiatement le parent.</p>'
+          + '<div class="field"><label>Motif / symptômes</label><input id="mMotif" placeholder="Fièvre, malaise, chute…"></div>'
+          + field('Soins prodigués', 'mSoins', '')
+          + '<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-accent" id="mCall" style="width:auto">📞 Appeler le parent</button><button class="btn btn-primary" id="mSms" style="width:auto">📲 Message au parent</button></div>';
+        var log = DB.infirmary.filter(function (v) { return v.studentId === s.id; });
+        $('#mLog').innerHTML = log.length ? '<table class="note-table"><thead><tr><th>Date</th><th>Motif</th><th>Soins</th></tr></thead><tbody>' + log.slice().reverse().map(function (v) { return '<tr><td>' + esc(v.date) + '</td><td>' + esc(v.motif) + '</td><td>' + esc(v.soins || '—') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="note">Aucun passage enregistré.</p>';
+        $('#mSave').addEventListener('click', function () { med.groupe = $('#mGrp').value; med.allergies = $('#mAll').value.split(',').map(function (x) { return x.trim(); }).filter(Boolean); med.antecedents = $('#mAnt').value; med.traitements = $('#mTrt').value; med.urgenceNom = $('#mUN').value; med.urgenceTel = $('#mUT').value; save(); toast('✓ Dossier médical enregistré.'); paint(); });
+        function malaise(canal) { var motif = $('#mMotif').value.trim() || 'Malaise'; DB.infirmary.push({ id: gid(), studentId: s.id, date: today(), motif: motif, soins: ($('#mSoins').value.trim() || 'Pris en charge') + ' · parent alerté (' + canal + ')' }); save(); toast((canal === 'appel' ? '📞 Appel' : '📲 Message') + ' au parent ' + (med.urgenceNom || s.tuteur) + ' (' + (med.urgenceTel || s.tel) + ') — ' + motif); paint(); }
+        $('#mCall').addEventListener('click', function () { malaise('appel'); });
+        $('#mSms').addEventListener('click', function () { malaise('message'); });
+      }
+      $('#mStud').addEventListener('change', paint); paint();
+    }
+
+    function viewFinances() {
+      var totalFrais = DB.students.reduce(function (t, s) { return t + (+s.frais); }, 0);
+      var encaisse = DB.payments.reduce(function (t, p) { return t + (+p.montant); }, 0);
+      var caisseJour = DB.payments.filter(function (p) { return p.date === today(); }).reduce(function (t, p) { return t + (+p.montant); }, 0);
+      var debiteurs = DB.students.map(function (s) { return { s: s, solde: s.frais - paid(s.id) }; }).filter(function (x) { return x.solde > 0; }).sort(function (a, b) { return b.solde - a.solde; });
+      setView('<h1>Finances & Recouvrement</h1><div class="crumb">Encaissement par tranches · caisse du jour · débiteurs</div>'
+        + '<div class="kpis">' + kpi('Attendu', money(totalFrais), 'scolarité totale') + kpi('Encaissé', money(encaisse), Math.round(encaisse / (totalFrais || 1) * 100) + ' %') + kpi('Reste à recouvrer', money(totalFrais - encaisse), debiteurs.length + ' débiteurs') + kpi('Caisse du jour', money(caisseJour), today()) + '</div>'
+        + '<div class="card"><h3 style="margin:0 0 12px">Encaisser une tranche</h3><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">'
+        + '<div class="field" style="margin:0;flex:1;min-width:160px"><label>Élève</label><select id="fStud">' + DB.students.map(function (s) { return '<option value="' + s.id + '">' + esc(s.nom + ' ' + s.prenom) + ' — solde ' + money(s.frais - paid(s.id)) + '</option>'; }).join('') + '</select></div>'
+        + '<div class="field" style="margin:0"><label>Montant</label><input id="fMnt" type="number" value="45000"></div>'
+        + '<div class="field" style="margin:0"><label>Tranche</label><select id="fTr"><option>1re tranche</option><option>2e tranche</option><option>3e tranche</option></select></div>'
+        + '<div class="field" style="margin:0"><label>Mode</label><select id="fMode"><option>Espèces</option><option>Mobile Money</option><option>Virement</option></select></div>'
+        + '<button class="btn btn-primary" id="fEnc" style="width:auto">✓ Encaisser & reçu</button></div></div>'
+        + '<div class="panel"><h3>État des débiteurs</h3>' + (debiteurs.length ? '<div style="display:flex;justify-content:flex-end;margin-bottom:8px"><button class="btn btn-accent" id="fRelanceAll" style="width:auto">📲 Relancer tous les débiteurs</button></div><table class="note-table"><thead><tr><th>Élève</th><th>Classe</th><th>Solde dû</th><th>Tél. tuteur</th><th>Relance</th></tr></thead><tbody>' + debiteurs.map(function (x) { return '<tr><td>' + esc(x.s.nom + ' ' + x.s.prenom) + '</td><td>' + esc(classOf(x.s.classeId).nom) + '</td><td class="c gred">' + money(x.solde) + '</td><td>📞 ' + esc(x.s.tel) + '</td><td class="c"><button class="btn btn-ghost" data-relance="' + x.s.id + '" style="width:auto;padding:3px 8px">📲 Relancer</button></td></tr>'; }).join('') + '</tbody></table>' : '<p class="note">Aucun débiteur 🎉</p>') + '</div>');
+      $('#fEnc').addEventListener('click', function () {
+        var sid = $('#fStud').value, mnt = +$('#fMnt').value || 0; if (mnt <= 0) { toast('Montant invalide.'); return; }
+        DB.payments.push({ id: gid(), studentId: sid, montant: mnt, date: today(), tranche: $('#fTr').value, mode: $('#fMode').value }); save();
+        toast('✓ ' + money(mnt) + ' encaissé — reçu généré.'); viewFinances();
+      });
+      document.querySelectorAll('[data-relance]').forEach(function (b) { b.addEventListener('click', function () { var s = DB.students.filter(function (x) { return x.id === b.getAttribute('data-relance'); })[0]; toast('📲 SMS de relance envoyé à ' + s.tuteur + ' (' + s.tel + ') — solde ' + money(s.frais - paid(s.id))); }); });
+      if ($('#fRelanceAll')) $('#fRelanceAll').addEventListener('click', function () { toast('📲 ' + debiteurs.length + ' relances SMS envoyées aux débiteurs.'); });
+    }
+
+    function viewPaie() {
+      setView('<h1>Paie enseignants</h1><div class="crumb">Heures supplémentaires · CNPS · IRPP · validation</div>'
+        + '<div class="card"><table class="note-table"><thead><tr><th>Enseignant</th><th>Matière</th><th>Salaire base</th><th>H. sup</th><th>Taux/h</th><th>Brut</th><th>CNPS</th><th>IRPP</th><th>Net</th><th></th></tr></thead><tbody id="paieBody"></tbody></table>'
+        + '<p class="note" style="margin-top:8px">CNPS 4,2 % · IRPP barème simplifié. Saisissez les heures supplémentaires puis validez.</p></div>');
+      function paint() {
+        $('#paieBody').innerHTML = DB.teachers.map(function (t) {
+          var hs = t.hs || 0, brut = t.base + hs * t.taux, cnps = Math.round(brut * 0.042), irpp = irppOf(brut - cnps), net = brut - cnps - irpp;
+          var pv = DB.payrolls.filter(function (p) { return p.teacherId === t.id && p.mois === moisCourant(); })[0];
+          return '<tr><td><b>' + esc(t.nom + ' ' + t.prenom) + '</b></td><td>' + esc(t.matiere) + '</td><td class="c">' + money(t.base) + '</td>'
+            + '<td class="c"><input class="note-input" data-t="' + t.id + '" type="number" min="0" value="' + hs + '" style="width:60px"></td>'
+            + '<td class="c">' + money(t.taux) + '</td><td class="c">' + money(brut) + '</td><td class="c gred">-' + money(cnps) + '</td><td class="c gred">-' + money(irpp) + '</td><td class="c"><b>' + money(net) + '</b></td>'
+            + '<td class="c">' + (pv ? '<span class="ment ok">Payé</span>' : '<button class="btn btn-primary" data-pay="' + t.id + '" style="width:auto;padding:4px 10px">Valider</button>') + '</td></tr>';
+        }).join('');
+        document.querySelectorAll('#paieBody input[data-t]').forEach(function (i) { i.addEventListener('input', function () { var t = DB.teachers.filter(function (x) { return x.id === i.getAttribute('data-t'); })[0]; t.hs = +i.value || 0; save(); paint(); }); });
+        document.querySelectorAll('#paieBody button[data-pay]').forEach(function (b) { b.addEventListener('click', function () { var t = DB.teachers.filter(function (x) { return x.id === b.getAttribute('data-pay'); })[0]; var hs = t.hs || 0, brut = t.base + hs * t.taux, cnps = Math.round(brut * 0.042), irpp = irppOf(brut - cnps); DB.payrolls.push({ id: gid(), teacherId: t.id, mois: moisCourant(), net: brut - cnps - irpp, date: today() }); save(); toast('✓ Paie validée pour ' + t.nom); paint(); }); });
+      }
+      paint();
+    }
+    function irppOf(n) { return Math.max(0, Math.round((n - 62000) * 0.12)); }
+    function moisCourant() { return new Date().toISOString().slice(0, 7); }
+
+    function viewEdt() {
+      var cl = $('#tClass') ? $('#tClass').value : (DB.classes[0] || {}).id;
+      DB.edt[cl] = DB.edt[cl] || seedEdt();
+      var grid = '<tr><th>Heure</th>' + DAYS.map(function (d) { return '<th>' + d + '</th>'; }).join('') + '</tr>';
+      HOURS.forEach(function (h, hi) {
+        grid += '<tr><td class="hour">' + h + '</td>' + DAYS.map(function (d, di) { var s = DB.edt[cl][hi] && DB.edt[cl][hi][di]; return '<td class="ttcell" data-hi="' + hi + '" data-di="' + di + '" style="cursor:pointer">' + (s ? '<div class="slot s' + (s.k % 5) + '"><b>' + esc(s.m) + '</b><small>' + esc(s.t) + (s.salle ? ' · ' + esc(s.salle) : '') + '</small></div>' : '<small style="color:#bbb">+</small>') + '</td>'; }).join('') + '</tr>';
+      });
+      setView('<h1>Emploi du temps</h1><div class="crumb">Grille éditable — cliquez une case pour placer / modifier un cours</div>'
+        + '<div class="card"><div class="field" style="max-width:200px"><label>Classe</label><select id="tClass">' + DB.classes.map(function (c) { return '<option value="' + c.id + '"' + (c.id === cl ? ' selected' : '') + '>' + esc(c.nom) + '</option>'; }).join('') + '</select></div>'
+        + '<div style="overflow-x:auto"><table class="tt">' + grid + '</table></div></div>');
+      $('#tClass').addEventListener('change', viewEdt);
+      document.querySelectorAll('.ttcell').forEach(function (td) {
+        td.addEventListener('click', function () {
+          var hi = +td.getAttribute('data-hi'), di = +td.getAttribute('data-di');
+          var cur = (DB.edt[cl][hi] && DB.edt[cl][hi][di]) || {};
+          var body = '<div class="field"><label>Matière</label><select id="eM"><option value="">— (vider la case) —</option>' + SUBJECTS.map(function (s) { return '<option' + (cur.m === s.n ? ' selected' : '') + '>' + esc(s.n) + '</option>'; }).join('') + '</select></div>'
+            + '<div class="field"><label>Enseignant</label><input id="eT" value="' + esc(cur.t || '') + '"></div>'
+            + '<div class="field"><label>Salle</label><input id="eS" value="' + esc(cur.salle || '') + '"></div>';
+          modal(HOURS[hi] + ' · ' + DAYS[di], body, function () {
+            var m = $('#eM').value; DB.edt[cl][hi] = DB.edt[cl][hi] || {};
+            if (!m) { delete DB.edt[cl][hi][di]; } else { DB.edt[cl][hi][di] = { m: m, t: $('#eT').value, salle: $('#eS').value, k: hi + di }; }
+            save(); viewEdt(); toast('✓ Emploi du temps mis à jour.');
+          }, 'Placer');
+        });
+      });
+    }
+    function seedEdt() { var g = {}; HOURS.forEach(function (h, hi) { g[hi] = {}; DAYS.forEach(function (d, di) { if (h === '11-12' || (hi + di) % 3 === 2) return; var su = SUBJECTS[(hi * 2 + di) % SUBJECTS.length]; g[hi][di] = { m: su.n, t: 'M. ' + DB.teachers[(hi + di) % DB.teachers.length].nom, k: (hi + di) }; }); }); return g; }
+
+    var bibTab = 'cat';
+    function viewBiblio() {
+      setView('<h1>Bibliothèque</h1><div class="crumb">Catalogue · journal scolaire · groupes de lecture</div>'
+        + '<div class="tabs" id="bibTabs"><button data-bt="cat">📚 Catalogue & prêts</button><button data-bt="journal">📰 Journal scolaire</button><button data-bt="groupes">👥 Groupes de lecture</button></div><div id="bibPanel"></div>');
+      document.querySelectorAll('#bibTabs button').forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-bt') === bibTab ? 'true' : 'false'); });
+      $('#bibTabs').addEventListener('click', function (e) { var b = e.target.closest('button[data-bt]'); if (!b) return; bibTab = b.getAttribute('data-bt'); viewBiblio(); });
+      (bibTab === 'journal' ? bibJournal : bibTab === 'groupes' ? bibGroupes : bibCatalogue)();
+    }
+    function bibCatalogue() {
+      $('#bibPanel').innerHTML = '<div class="card"><h3 style="margin:0 0 10px">Cataloguer un ouvrage</h3><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">'
+        + '<div class="field" style="margin:0;flex:1;min-width:160px"><label>Titre</label><input id="bkT"></div><div class="field" style="margin:0"><label>Auteur</label><input id="bkA"></div>'
+        + '<div class="field" style="margin:0"><label>Exemplaires</label><input id="bkE" type="number" value="1" style="width:90px"></div><button class="btn btn-primary" id="bkAdd" style="width:auto">+ Ajouter</button></div></div>'
+        + '<div class="card"><h3 style="margin:0 0 10px">Catalogue (' + DB.books.length + ' titres)</h3><table class="note-table"><thead><tr><th>Ouvrage</th><th>Auteur</th><th>Ex.</th><th>Dispo</th><th></th></tr></thead><tbody>'
+        + DB.books.map(function (b) { return '<tr><td><b>' + esc(b.titre) + '</b></td><td>' + esc(b.auteur) + '</td><td class="c">' + b.ex + '</td><td class="c">' + b.dispo + '</td><td class="c">' + (b.dispo > 0 ? '<button class="btn btn-ghost" data-lend="' + b.id + '" style="width:auto;padding:4px 10px">Prêter</button>' : '<span class="gred">Épuisé</span>') + '</td></tr>'; }).join('') + '</tbody></table></div>'
+        + '<div class="panel"><h3>Prêts en cours</h3>' + (DB.loans.filter(function (l) { return !l.rendu; }).length ? '<table class="note-table"><thead><tr><th>Ouvrage</th><th>Emprunteur</th><th>Date</th><th></th></tr></thead><tbody>' + DB.loans.filter(function (l) { return !l.rendu; }).map(function (l) { return '<tr><td>' + esc(l.titre) + '</td><td>' + esc(l.who) + '</td><td>' + esc(l.date) + '</td><td class="c"><button class="btn btn-ghost" data-ret="' + l.id + '" style="width:auto;padding:4px 10px">Rendre</button></td></tr>'; }).join('') + '</tbody></table>' : '<p class="note">Aucun prêt en cours.</p>') + '</div>';
+      $('#bkAdd').addEventListener('click', function () { var t = $('#bkT').value.trim(); if (!t) { toast('Titre requis.'); return; } var e = Math.max(1, +$('#bkE').value || 1); DB.books.push({ id: gid(), titre: t, auteur: $('#bkA').value.trim() || '—', ex: e, dispo: e }); save(); toast('✓ Ouvrage catalogué.'); bibCatalogue(); });
+      document.querySelectorAll('[data-lend]').forEach(function (b) { b.addEventListener('click', function () { var bk = DB.books.filter(function (x) { return x.id === b.getAttribute('data-lend'); })[0]; if (bk.dispo < 1) return; bk.dispo--; DB.loans.push({ id: gid(), bookId: bk.id, titre: bk.titre, who: DB.students[0].nom + ' ' + DB.students[0].prenom, date: today(), rendu: false }); save(); toast('✓ Prêt enregistré.'); bibCatalogue(); }); });
+      document.querySelectorAll('[data-ret]').forEach(function (b) { b.addEventListener('click', function () { var l = DB.loans.filter(function (x) { return x.id === b.getAttribute('data-ret'); })[0]; l.rendu = true; var bk = DB.books.filter(function (x) { return x.id === l.bookId; })[0]; if (bk) bk.dispo++; save(); toast('✓ Retour enregistré.'); bibCatalogue(); }); });
+    }
+    function bibJournal() {
+      $('#bibPanel').innerHTML = '<div class="card"><h3 style="margin:0 0 10px">📰 Publier dans le journal scolaire</h3><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">'
+        + '<div class="field" style="margin:0;flex:1;min-width:180px"><label>Titre de l\'article / numéro</label><input id="jT"></div><div class="field" style="margin:0;flex:2;min-width:200px"><label>Résumé / contenu</label><input id="jR"></div><button class="btn btn-primary" id="jAdd" style="width:auto">+ Publier</button></div></div>'
+        + '<div class="card"><h3 style="margin:0 0 10px">Parutions (' + DB.journals.length + ')</h3>' + (DB.journals.length ? DB.journals.slice().reverse().map(function (j) { return '<div class="alert"><b>' + esc(j.titre) + '</b> <span class="ment ok">' + esc(j.statut) + '</span><br><small>' + esc(j.date) + ' · ' + esc(j.auteur || '') + '</small><br>' + esc(j.resume) + '</div>'; }).join('') : '<p class="note">Aucune parution.</p>') + '</div>';
+      $('#jAdd').addEventListener('click', function () { var t = $('#jT').value.trim(); if (!t) { toast('Titre requis.'); return; } DB.journals.push({ id: gid(), titre: t, resume: $('#jR').value.trim(), date: today(), statut: 'Publié', auteur: userName() }); save(); toast('✓ Article publié.'); bibJournal(); });
+    }
+    function bibGroupes() {
+      $('#bibPanel').innerHTML = '<div class="card"><h3 style="margin:0 0 10px">👥 Créer un groupe de lecture</h3><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end">'
+        + '<div class="field" style="margin:0;flex:1;min-width:150px"><label>Nom du groupe</label><input id="gN"></div><div class="field" style="margin:0"><label>Niveau</label><input id="gNv" placeholder="6e–5e" style="width:110px"></div>'
+        + '<div class="field" style="margin:0;flex:1;min-width:150px"><label>Livre étudié</label><input id="gL"></div><button class="btn btn-primary" id="gAdd" style="width:auto">+ Créer</button></div></div>'
+        + '<div class="card"><h3 style="margin:0 0 10px">Groupes (' + DB.readingGroups.length + ')</h3>' + (DB.readingGroups.length ? '<table class="note-table"><thead><tr><th>Groupe</th><th>Niveau</th><th>Livre</th><th>Membres</th><th>Animateur</th><th>Prochaine</th></tr></thead><tbody>' + DB.readingGroups.map(function (g) { return '<tr><td><b>' + esc(g.nom) + '</b></td><td>' + esc(g.niveau || '') + '</td><td>' + esc(g.livre || '') + '</td><td class="c"><button class="btn btn-ghost" data-join="' + g.id + '" style="width:auto;padding:3px 8px">' + (g.membres || 0) + ' +</button></td><td>' + esc(g.anim || '') + '</td><td>' + esc(g.prochaine || '—') + '</td></tr>'; }).join('') + '</tbody></table>' : '<p class="note">Aucun groupe.</p>') + '</div>';
+      $('#gAdd').addEventListener('click', function () { var n = $('#gN').value.trim(); if (!n) { toast('Nom requis.'); return; } DB.readingGroups.push({ id: gid(), nom: n, niveau: $('#gNv').value.trim(), livre: $('#gL').value.trim(), membres: 0, anim: userName(), prochaine: '' }); save(); toast('✓ Groupe créé.'); bibGroupes(); });
+      document.querySelectorAll('[data-join]').forEach(function (b) { b.addEventListener('click', function () { var g = DB.readingGroups.filter(function (x) { return x.id === b.getAttribute('data-join'); })[0]; g.membres = (g.membres || 0) + 1; save(); bibGroupes(); }); });
+    }
+
+    function viewTransport() {
+      DB.routes.forEach(function (r) { r.stops = r.stops || []; });
+      setView('<h1>Transport scolaire</h1><div class="crumb">Lignes · arrêts & horaires · affectations</div>'
+        + '<div style="margin-bottom:12px"><button class="btn btn-primary" id="trAdd" style="width:auto">+ Nouvelle ligne</button></div>'
+        + DB.routes.map(function (r) {
+          return '<div class="card"><h3 style="margin:0 0 4px">' + esc(r.nom) + '</h3><p class="note">🚐 ' + esc(r.vehicule || '—') + ' · 👤 ' + esc(r.chauffeur || '—') + (r.chauffeurTel ? ' (' + esc(r.chauffeurTel) + ')' : '') + ' · ' + r.eleves.length + '/' + r.places + ' places · ' + money(r.frais) + '/trim.</p>'
+            + '<h4 style="margin:10px 0 6px;font-size:.85rem">Arrêts & horaires</h4>'
+            + '<table class="note-table" style="margin-bottom:8px"><thead><tr><th>Ordre</th><th>Arrêt</th><th>Heure</th></tr></thead><tbody>' + (r.stops.length ? r.stops.map(function (st, i) { return '<tr><td class="c">' + (i + 1) + '</td><td>' + esc(st.nom) + '</td><td class="c">' + esc(st.heure || '—') + '</td></tr>'; }).join('') : '<tr><td colspan="3"><span class="note">Aucun arrêt.</span></td></tr>') + '</tbody></table>'
+            + '<div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap;margin-bottom:12px"><div class="field" style="margin:0;flex:1;min-width:140px"><label>Nouvel arrêt</label><input data-stopname="' + r.id + '" placeholder="Nom de l\'arrêt"></div><div class="field" style="margin:0"><label>Heure</label><input data-stoptime="' + r.id + '" type="time"></div><button class="btn btn-ghost" data-addstop="' + r.id + '" style="width:auto">+ Arrêt</button></div>'
+            + '<div style="display:flex;gap:10px;align-items:end"><div class="field" style="margin:0;flex:1"><label>Affecter un élève</label><select data-route="' + r.id + '">' + DB.students.map(function (s) { return '<option value="' + s.id + '">' + esc(s.nom + ' ' + s.prenom) + '</option>'; }).join('') + '</select></div><button class="btn btn-primary" data-assign="' + r.id + '" style="width:auto">+ Affecter</button></div>'
+            + '<div style="margin-top:10px" class="pillrow">' + r.eleves.map(function (id) { var s = DB.students.filter(function (x) { return x.id === id; })[0] || {}; return '<span class="pillcheck on">' + esc((s.nom || '') + ' ' + (s.prenom || '')) + '</span>'; }).join('') + '</div></div>';
+        }).join(''));
+      $('#trAdd').addEventListener('click', function () {
+        modal('Nouvelle ligne de transport', '<div class="field"><label>Nom de la ligne</label><input id="rN"></div><div class="row two"><div class="field"><label>Véhicule</label><input id="rV"></div><div class="field"><label>Chauffeur</label><input id="rC"></div></div><div class="row two"><div class="field"><label>Places</label><input id="rP" type="number" value="30"></div><div class="field"><label>Frais/trim.</label><input id="rF" type="number" value="20000"></div></div>', function () {
+          if (!$('#rN').value.trim()) { toast('Nom requis.'); return false; }
+          DB.routes.push({ id: gid(), nom: $('#rN').value.trim(), vehicule: $('#rV').value.trim(), chauffeur: $('#rC').value.trim(), chauffeurTel: '', places: +$('#rP').value || 0, frais: +$('#rF').value || 0, eleves: [], stops: [] });
+          save(); viewTransport(); toast('✓ Ligne créée.');
+        }, 'Créer');
+      });
+      document.querySelectorAll('[data-addstop]').forEach(function (b) { b.addEventListener('click', function () { var r = DB.routes.filter(function (x) { return x.id === b.getAttribute('data-addstop'); })[0]; var nm = $('[data-stopname="' + r.id + '"]').value.trim(); if (!nm) { toast('Nom d\'arrêt requis.'); return; } r.stops.push({ nom: nm, heure: $('[data-stoptime="' + r.id + '"]').value }); save(); toast('✓ Arrêt ajouté.'); viewTransport(); }); });
+      document.querySelectorAll('[data-assign]').forEach(function (b) { b.addEventListener('click', function () { var r = DB.routes.filter(function (x) { return x.id === b.getAttribute('data-assign'); })[0]; var sel = $('[data-route="' + r.id + '"]'); if (r.eleves.indexOf(sel.value) < 0) r.eleves.push(sel.value); save(); toast('✓ Élève affecté.'); viewTransport(); }); });
+    }
+
+    function viewPersonnel() {
+      setView('<h1>Personnel</h1><div class="crumb">Enseignants & administration</div>'
+        + '<div class="card"><table class="note-table"><thead><tr><th>Nom</th><th>Fonction / Matière</th><th>Salaire base</th><th>Taux horaire</th></tr></thead><tbody>'
+        + DB.teachers.map(function (t) { return '<tr><td><b>' + esc(t.nom + ' ' + t.prenom) + '</b></td><td>Enseignant — ' + esc(t.matiere) + '</td><td class="c">' + money(t.base) + '</td><td class="c">' + money(t.taux) + '</td></tr>'; }).join('') + '</tbody></table></div>');
+    }
+
+    function viewParametres() {
+      setView('<h1>Paramètres</h1><div class="crumb">Établissement & données</div>'
+        + '<div class="card">' + field('Nom de l\'établissement', 'pEcole', DB.ecole) + field('Année scolaire', 'pAnnee', DB.annee) + field('Trimestre', 'pTrim', DB.trimestre)
+        + '<div class="field"><label>Devise de l\'établissement</label><select id="pDev">' + Object.keys(CURRENCIES).map(function (k) { return '<option value="' + k + '"' + (k === devise() ? ' selected' : '') + '>' + k + ' — ' + CURRENCIES[k] + '</option>'; }).join('') + '</select></div>'
+        + '<div style="display:flex;gap:10px;margin-top:8px"><button class="btn btn-primary" id="pSaveS" style="width:auto">✓ Enregistrer</button><button class="btn btn-ghost" id="pReset" style="width:auto">↺ Réinitialiser les données démo</button></div></div>'
+        + '<p class="note">Dernière sauvegarde : ' + (DB.lastSave ? new Date(DB.lastSave).toLocaleString('fr-FR') : '—') + ' · données stockées localement (localStorage).</p>');
+      $('#pSaveS').addEventListener('click', function () { DB.ecole = $('#pEcole').value; DB.annee = $('#pAnnee').value; DB.trimestre = $('#pTrim').value; DB.devise = $('#pDev').value; save(); toast('✓ Enregistré.'); render(); });
+      $('#pReset').addEventListener('click', function () { if (confirm('Réinitialiser toutes les données de démonstration ?')) { localStorage.removeItem('cmp_app_db'); load(); render(); } });
+    }
+
+    function field(l, id, v, type) { return '<div class="field"><label>' + l + '</label><input id="' + id + '" type="' + (type || 'text') + '" value="' + esc(v == null ? '' : v) + '"></div>'; }
+    function dl(name, content) { var b = new Blob(['﻿' + content], { type: 'text/csv;charset=utf-8' }); var a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = name; a.click(); }
+
+    /* ── Facturation automatique + multi-devises ── */
+    function viewFacturation() {
+      var rows = DB.students.map(function (s) {
+        var cl = classOf(s.classeId), p = paid(s.id), reste = s.frais - p;
+        var st = reste <= 0 ? ['Payée', 'ok'] : (p > 0 ? ['Partielle', 'acc'] : ['Impayée', 'bad']);
+        return { s: s, cl: cl, frais: s.frais, paye: p, reste: reste, st: st };
+      });
+      var totF = rows.reduce(function (t, r) { return t + r.frais; }, 0), totP = rows.reduce(function (t, r) { return t + r.paye; }, 0);
+      setView('<h1>Facturation</h1><div class="crumb">Factures générées automatiquement depuis les frais de scolarité · devise configurable</div>'
+        + '<div class="card"><div style="display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:12px">'
+        + '<div class="field" style="margin:0"><label>Devise de l\'établissement</label><select id="fcDev">' + Object.keys(CURRENCIES).map(function (k) { return '<option value="' + k + '"' + (k === devise() ? ' selected' : '') + '>' + k + ' — ' + CURRENCIES[k] + '</option>'; }).join('') + '</select></div>'
+        + '<div style="flex:1"></div><button class="btn btn-primary" id="fcGen" style="width:auto">🧾 Générer / mettre à jour les factures</button></div>'
+        + '<div class="statgrid" style="margin-bottom:14px"><div class="kpi"><div class="lab">Total facturé</div><div class="val">' + money(totF) + '</div></div><div class="kpi"><div class="lab">Encaissé</div><div class="val">' + money(totP) + '</div><div class="sub">' + (totF ? Math.round(totP / totF * 100) : 0) + ' % recouvré</div></div><div class="kpi"><div class="lab">Reste à recouvrer</div><div class="val gred">' + money(totF - totP) + '</div></div></div>'
+        + '<table class="note-table"><thead><tr><th>N° Facture</th><th>Élève</th><th>Classe</th><th>Montant</th><th>Payé</th><th>Reste</th><th>Statut</th></tr></thead><tbody>'
+        + rows.map(function (r) { return '<tr><td>FAC-' + esc(r.s.mat) + '</td><td><b>' + esc(r.s.nom + ' ' + r.s.prenom) + '</b></td><td>' + esc(r.cl.nom) + '</td><td class="c">' + money(r.frais) + '</td><td class="c">' + money(r.paye) + '</td><td class="c ' + (r.reste > 0 ? 'gred' : 'ggreen') + '">' + money(r.reste) + '</td><td class="c"><span class="ment ' + r.st[1] + '">' + r.st[0] + '</span></td></tr>'; }).join('')
+        + '</tbody></table></div>');
+      $('#fcDev').addEventListener('change', function () { DB.devise = this.value; save(); render(); });
+      $('#fcGen').addEventListener('click', function () { DB.invoices = DB.students.map(function (s) { return { id: 'FAC-' + s.mat, studentId: s.id, montant: s.frais, paye: paid(s.id), date: today(), devise: devise() }; }); save(); toast('🧾 ' + DB.invoices.length + ' factures générées en ' + devise() + '.'); });
+    }
+
+    /* ── Conseil de classe : délibération en lot ── */
+    function viewConseil() {
+      var cid = $('#ccClass') ? $('#ccClass').value : (DB.classes[0] || {}).id;
+      var bs = bulletinsOf(cid);
+      function suggest(m) { return m >= 10 ? 'Admis(e) en classe supérieure' : m >= 8 ? 'Redouble' : 'Exclu(e)'; }
+      var OPTS = ['Admis(e) en classe supérieure', 'Admis(e) avec félicitations', 'Redouble', 'Exclu(e)', 'Réorientation', 'En attente'];
+      setView('<h1>Conseil de classe</h1><div class="crumb">Délibération en lot → la décision s\'imprime sur le bulletin de chaque élève</div>'
+        + '<div class="card"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:12px">'
+        + '<div class="field" style="margin:0"><label>Classe</label><select id="ccClass">' + DB.classes.map(function (c) { return '<option value="' + c.id + '"' + (c.id === cid ? ' selected' : '') + '>' + esc(c.nom) + '</option>'; }).join('') + '</select></div>'
+        + '<div style="flex:1"></div><button class="btn btn-ghost" id="ccAuto" style="width:auto">⚡ Pré-remplir (suggestion auto)</button><button class="btn btn-primary" id="ccSave" style="width:auto">✓ Valider la délibération</button></div>'
+        + '<table class="note-table"><thead><tr><th>Rang</th><th>Élève</th><th>Moyenne</th><th>Mention</th><th>Décision du conseil</th></tr></thead><tbody>'
+        + bs.map(function (x) { var cur = (DB.decisions && DB.decisions[x.s.id]) || ''; return '<tr><td class="c">' + x.rang + '</td><td><b>' + esc(x.s.nom + ' ' + x.s.prenom) + '</b></td><td class="c ' + (x.moy < 10 ? 'gred' : 'ggreen') + '">' + x.moy.toFixed(2) + '</td><td>' + x.mention + '</td><td><select class="note-input" data-dec="' + x.s.id + '" data-sug="' + suggest(x.moy) + '" style="width:auto;min-width:210px"><option value="">— à délibérer —</option>' + OPTS.map(function (o) { return '<option' + (o === cur ? ' selected' : '') + '>' + o + '</option>'; }).join('') + '</select></td></tr>'; }).join('')
+        + '</tbody></table></div>');
+      $('#ccClass').addEventListener('change', render);
+      $('#ccAuto').addEventListener('click', function () { document.querySelectorAll('[data-dec]').forEach(function (sel) { if (!sel.value) sel.value = sel.getAttribute('data-sug'); }); });
+      $('#ccSave').addEventListener('click', function () { DB.decisions = DB.decisions || {}; var n = 0; document.querySelectorAll('[data-dec]').forEach(function (sel) { if (sel.value) { DB.decisions[sel.getAttribute('data-dec')] = sel.value; n++; } }); save(); toast('✓ Délibération enregistrée pour ' + n + ' élève(s) — décisions reportées sur les bulletins.'); });
+    }
+
+    /* ── Internat : dortoirs & internes ── */
+    function viewInternat() {
+      var totCap = DB.dorms.reduce(function (t, d) { return t + d.cap; }, 0);
+      setView('<h1>Internat</h1><div class="crumb">Dortoirs, affectation des lits, internes</div>'
+        + '<div class="statgrid" style="margin-bottom:14px"><div class="kpi"><div class="lab">Dortoirs</div><div class="val">' + DB.dorms.length + '</div></div><div class="kpi"><div class="lab">Internes</div><div class="val">' + DB.boarders.length + '</div></div><div class="kpi"><div class="lab">Occupation</div><div class="val">' + DB.boarders.length + '/' + totCap + '</div><div class="sub">' + (totCap ? Math.round(DB.boarders.length / totCap * 100) : 0) + ' % des lits</div></div></div>'
+        + '<div class="cmp-grid" style="grid-template-columns:1fr 1.2fr;gap:16px">'
+        + '<div class="panel"><div style="display:flex;justify-content:space-between;align-items:center"><h3>Dortoirs</h3><button class="btn btn-ghost" id="inAddDorm" style="width:auto">+ Dortoir</button></div>'
+        + '<table class="note-table"><thead><tr><th>Dortoir</th><th>Genre</th><th>Occupation</th></tr></thead><tbody>' + DB.dorms.map(function (d) { var occ = DB.boarders.filter(function (b) { return b.dormId === d.id; }).length; return '<tr><td><b>' + esc(d.nom) + '</b></td><td class="c">' + (d.genre === 'M' ? 'Garçons' : 'Filles') + '</td><td class="c">' + occ + '/' + d.cap + '</td></tr>'; }).join('') + '</tbody></table></div>'
+        + '<div class="panel"><div style="display:flex;justify-content:space-between;align-items:center"><h3>Internes</h3><button class="btn btn-primary" id="inAdd" style="width:auto">+ Affecter un interne</button></div>'
+        + (DB.boarders.length ? '<table class="note-table"><thead><tr><th>Élève</th><th>Classe</th><th>Dortoir</th><th>Lit</th><th>Frais</th><th></th></tr></thead><tbody>' + DB.boarders.map(function (b) { var s = DB.students.filter(function (x) { return x.id === b.studentId; })[0] || {}; var d = DB.dorms.filter(function (x) { return x.id === b.dormId; })[0] || {}; return '<tr><td><b>' + esc((s.nom || '') + ' ' + (s.prenom || '')) + '</b></td><td>' + esc((classOf(s.classeId) || {}).nom || '—') + '</td><td>' + esc(d.nom || '—') + '</td><td class="c">' + (b.lit || '—') + '</td><td class="c">' + money(b.frais || 0) + '</td><td class="c"><button class="btn btn-ghost" data-rmboard="' + b.studentId + '" style="width:auto;padding:3px 8px">✕</button></td></tr>'; }).join('') + '</tbody></table>' : '<p class="note">Aucun interne affecté.</p>') + '</div>'
+        + '</div>');
+      $('#inAddDorm').addEventListener('click', function () {
+        modal('Nouveau dortoir', field('Nom', 'dNom', '') + '<div class="field"><label>Genre</label><select id="dGen"><option value="M">Garçons</option><option value="F">Filles</option></select></div>' + field('Capacité (lits)', 'dCap', 24, 'number'), function () { var nm = $('#dNom').value.trim(); if (!nm) { toast('Nom requis.'); return false; } DB.dorms.push({ id: gid(), nom: nm, genre: $('#dGen').value, cap: +$('#dCap').value || 24 }); save(); render(); });
+      });
+      $('#inAdd').addEventListener('click', function () {
+        var libres = DB.students.filter(function (s) { return !DB.boarders.some(function (b) { return b.studentId === s.id; }); });
+        if (!libres.length) { toast('Tous les élèves sont déjà internes.'); return; }
+        modal('Affecter un interne', '<div class="field"><label>Élève</label><select id="bStud">' + libres.map(function (s) { return '<option value="' + s.id + '">' + esc(s.nom + ' ' + s.prenom + ' (' + (classOf(s.classeId).nom || '') + ')') + '</option>'; }).join('') + '</select></div><div class="field"><label>Dortoir</label><select id="bDorm">' + DB.dorms.map(function (d) { return '<option value="' + d.id + '">' + esc(d.nom) + '</option>'; }).join('') + '</select></div>' + field('Frais d\'internat', 'bFrais', 120000, 'number'), function () { var sid = $('#bStud').value, did = $('#bDorm').value; DB.boarders.push({ studentId: sid, dormId: did, lit: DB.boarders.filter(function (b) { return b.dormId === did; }).length + 1, frais: +$('#bFrais').value || 0 }); save(); render(); toast('✓ Interne affecté.'); });
+      });
+      document.querySelectorAll('[data-rmboard]').forEach(function (b) { b.addEventListener('click', function () { var id = b.getAttribute('data-rmboard'); DB.boarders = DB.boarders.filter(function (x) { return x.studentId !== id; }); save(); render(); }); });
+    }
+
+    /* ── Inventaire : patrimoine & matériel ── */
+    function viewInventaire() {
+      var tot = DB.inventory.reduce(function (t, it) { return t + it.qte * it.valeur; }, 0);
+      setView('<h1>Inventaire</h1><div class="crumb">Patrimoine & matériel de l\'établissement</div>'
+        + '<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div><b>Valeur totale estimée : </b><span class="ggreen">' + money(tot) + '</span></div><button class="btn btn-primary" id="ivAdd" style="width:auto">+ Article</button></div>'
+        + '<table class="note-table"><thead><tr><th>Article</th><th>Catégorie</th><th>Qté</th><th>État</th><th>Emplacement</th><th>Valeur unit.</th><th>Total</th><th></th></tr></thead><tbody>'
+        + DB.inventory.map(function (it) { return '<tr><td><b>' + esc(it.nom) + '</b></td><td>' + esc(it.categorie) + '</td><td class="c">' + it.qte + '</td><td class="c">' + esc(it.etat) + '</td><td>' + esc(it.lieu) + '</td><td class="c">' + money(it.valeur) + '</td><td class="c">' + money(it.qte * it.valeur) + '</td><td class="c"><button class="btn btn-ghost" data-rminv="' + it.id + '" style="width:auto;padding:3px 8px">✕</button></td></tr>'; }).join('')
+        + '</tbody></table></div>');
+      $('#ivAdd').addEventListener('click', function () {
+        modal('Nouvel article', field('Désignation', 'ivN', '') + '<div class="field"><label>Catégorie</label><select id="ivC"><option>Mobilier</option><option>Informatique</option><option>Laboratoire</option><option>Sport</option><option>Fourniture</option><option>Véhicule</option><option>Autre</option></select></div>' + field('Quantité', 'ivQ', 1, 'number') + '<div class="field"><label>État</label><select id="ivE"><option>Bon</option><option>À réviser</option><option>Hors service</option></select></div>' + field('Emplacement', 'ivL', '') + field('Valeur unitaire', 'ivV', 0, 'number'), function () { var nm = $('#ivN').value.trim(); if (!nm) { toast('Désignation requise.'); return false; } DB.inventory.push({ id: gid(), nom: nm, categorie: $('#ivC').value, qte: +$('#ivQ').value || 0, etat: $('#ivE').value, lieu: $('#ivL').value, valeur: +$('#ivV').value || 0 }); save(); render(); toast('✓ Article ajouté.'); });
+      });
+      document.querySelectorAll('[data-rminv]').forEach(function (b) { b.addEventListener('click', function () { var id = b.getAttribute('data-rminv'); DB.inventory = DB.inventory.filter(function (x) { return x.id !== id; }); save(); render(); }); });
+    }
+
+    var VIEWMAP = { dashboard: viewDashboard, eleves: viewEleves, inscription: viewInscription, bulletins: viewBulletins, presences: viewPresences, edt: viewEdt, conseil: viewConseil, discipline: viewDiscipline, infirmerie: viewInfirmerie, finances: viewFinances, paie: viewPaie, facturation: viewFacturation, biblio: viewBiblio, transport: viewTransport, internat: viewInternat, personnel: viewPersonnel, parametres: viewParametres, inventaire: viewInventaire, monespace: viewMonEspace };
+
+    window.addEventListener('hashchange', render);
+    load(); render();
+  })();
+  </script>
+</body>
+</html>

@@ -80,7 +80,9 @@ graphify-out/
 horodatage/
 
 # Fichiers de travail temporaires
-app.html
+# /app.html = copie RACINE générée par la CI (depuis VERITAS_v1.2.html) — ne pas versionner.
+# Ancré à la racine pour NE PAS attraper campus/app.html (qui, lui, est une vraie source).
+/app.html
 # index.html = copie générée (déploiement / aperçu local) — ne pas versionner
 /index.html
 VERITAS_v1.0.html
