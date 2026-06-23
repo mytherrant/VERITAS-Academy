@@ -5207,3 +5207,189 @@ html{ scroll-behavior:auto; }
 .sread-unlock{display:inline-flex;align-items:center;gap:5px;background:linear-gradient(135deg,#FFC93C,#F5B800);color:#142554;border:none;border-radius:99px;padding:8px 14px;font-weight:800;font-size:12px;cursor:pointer;white-space:nowrap;box-shadow:0 6px 16px rgba(255,201,60,.3);flex-shrink:0}
 .sread-unlock:hover{filter:brightness(1.06)}
 @media (max-width:560px){ .sread-zlbl{display:none} .sread-unlock{padding:8px 11px} .sread-title{font-size:12px} .sread-bar{gap:8px;padding:10px 12px} }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v2.0 — MOTION JEUNE (skills : impeccable · emil-design-eng · review-animations)
+   But : RÉCOMPENSER et engager les élèves du secondaire sans coûter au scroll.
+   100% DÉCLENCHÉ (hover / clic / état correct·wrong / apparition du score) → une
+   seule itération, donc compatible avec le garde-fou perf v1.5
+   (animation-iteration-count:1 global) ; états de repos = look d'origine (aucun
+   saut). Transform/opacity/filter uniquement. Identité navy/or conservée.
+   prefers-reduced-motion neutralise tout (bloc final). Hooks communs aux 3
+   moteurs de quiz : .quiz-opt.correct / .quiz-opt.wrong.
+   ════════════════════════════════════════════════════════════════════════ */
+:root{
+  --ease-out-quint: cubic-bezier(.22,1,.36,1);    /* sorties franches */
+  --ease-spring:    cubic-bezier(.34,1.32,.5,1);   /* ressort DOUX — récompenses seulement */
+  --dur-press:120ms; --dur-state:260ms; --dur-celebrate:520ms;
+}
+
+/* 1. FEEDBACK TACTILE — le clic « répond » (boutons + options) */
+.btn:active:not(:disabled){ transform:translateY(1px) scale(.97); }
+.quiz-opt{ position:relative; }
+.quiz-opt:hover:not(:disabled){ transform:translateY(-1px); box-shadow:0 6px 16px -8px rgba(20,37,84,.35); }
+.quiz-opt:active:not(:disabled){ transform:translateY(0) scale(.99); }
+
+/* 2. BONNE RÉPONSE — pop de récompense + pastille ✓ (le moment qui compte) */
+@keyframes vqCorrectPop{ 0%{transform:scale(1)} 40%{transform:scale(1.035)} 100%{transform:scale(1)} }
+@keyframes vqCheckIn{ 0%{transform:scale(0) rotate(-25deg);opacity:0} 60%{transform:scale(1.25) rotate(6deg);opacity:1} 100%{transform:scale(1) rotate(0);opacity:1} }
+.quiz-opt.correct{
+  animation:vqCorrectPop var(--dur-state) var(--ease-spring) both;
+  box-shadow:0 0 0 3px rgba(5,150,105,.18),0 8px 22px -10px rgba(5,150,105,.5);
+  padding-right:46px !important;
+}
+.quiz-opt.correct::after{
+  content:"✓"; position:absolute; top:50%; right:14px; margin-top:-11px;
+  width:22px; height:22px; border-radius:50%; background:#059669; color:#fff;
+  font-size:13px; font-weight:900; display:flex; align-items:center; justify-content:center;
+  animation:vqCheckIn 420ms var(--ease-spring) 60ms both;
+}
+
+/* 3. MAUVAISE RÉPONSE — secousse douce, non punitive */
+@keyframes vqShake{ 0%,100%{transform:translateX(0)} 20%{transform:translateX(-5px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(2px)} }
+.quiz-opt.wrong{ animation:vqShake 360ms var(--ease-out-quint) both; }
+
+/* 4. CÉLÉBRATION DU SCORE — apparition + chiffre qui pop + étoiles qui éclatent */
+@keyframes vqScoreIn{ 0%{transform:translateY(14px) scale(.96);opacity:0} 100%{transform:translateY(0) scale(1);opacity:1} }
+@keyframes vqNumberPop{ 0%{transform:scale(.4);opacity:0} 55%{transform:scale(1.12);opacity:1} 100%{transform:scale(1)} }
+@keyframes vqStars{ 0%{transform:scale(.5) rotate(-8deg);opacity:0} 60%{transform:scale(1.15) rotate(4deg)} 100%{transform:scale(1) rotate(0);opacity:1} }
+.quiz-score-box{ animation:vqScoreIn var(--dur-celebrate) var(--ease-out-quint) both; }
+.quiz-score-n{ display:inline-block; animation:vqNumberPop 560ms var(--ease-spring) 120ms both; }
+.quiz-score-stars{ display:inline-block; transform-origin:center; animation:vqStars 600ms var(--ease-spring) 260ms both; filter:drop-shadow(0 2px 6px rgba(255,201,60,.5)); }
+
+/* 5. JEUX — la vignette rebondit au survol (joie, coût nul au repos) */
+@keyframes vJeuBounce{ 0%{transform:translateY(0) scale(1)} 35%{transform:translateY(-6px) scale(1.08)} 70%{transform:translateY(0) scale(.98)} 100%{transform:translateY(0) scale(1)} }
+.jeu-card:hover .jeu-thumb{ animation:vJeuBounce 520ms var(--ease-spring); }
+.jeu-card:active{ transform:translateY(-2px) scale(.99); }
+
+/* 6. ACCESSIBILITÉ — tout le motion-jeune se neutralise si l'élève le demande */
+@media (prefers-reduced-motion:reduce){
+  .btn:active:not(:disabled),
+  .quiz-opt:hover:not(:disabled), .quiz-opt:active:not(:disabled),
+  .jeu-card:active{ transform:none; }
+  .quiz-opt.correct, .quiz-opt.wrong, .quiz-score-box,
+  .quiz-score-n, .quiz-score-stars, .jeu-card:hover .jeu-thumb{ animation:none; }
+  .quiz-opt.correct::after{ animation:none; opacity:1; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.x — ERGONOMIE ÉPURÉE « dashboard » (réf. famous.ai), via skill impeccable.
+   Cartes nettes : UNE seule définition (hairline TRÈS clair + micro-ombre, pas de
+   « ghost-card »), coins 14px (fini le sur-arrondi), ZÉRO liseré latéral/haut épais
+   (banni), pastilles d'icônes colorées conservées. Survol jeune (lift + ombre).
+   Scopé #VISITOR (admin intact). Identité navy/or conservée.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR .vcard, #VISITOR .lx-statcard, #VISITOR .gallery-card, #VISITOR .vbook-card,
+#VISITOR .vplan-card, #VISITOR .featured-card, #VISITOR .rc, #VISITOR .vgz-bento-card,
+#VISITOR .vprod-card, #VISITOR .vgz-stat{
+  border:1.5px solid #C5D2E6 !important;       /* bordure ACCENTUÉE (préférence Jacques), pas hairline */
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.65), 0 2px 6px rgba(20,37,84,.07) !important; /* 2e liseré clair interne + ombre douce */
+  border-radius:16px !important;
+  transition:transform .24s cubic-bezier(.34,1.56,.64,1), box-shadow .24s ease, border-color .24s ease !important;
+}
+#VISITOR .vcard:hover, #VISITOR .lx-statcard:hover, #VISITOR .gallery-card:hover,
+#VISITOR .vbook-card:hover, #VISITOR .vplan-card:hover, #VISITOR .featured-card:hover,
+#VISITOR .rc:hover, #VISITOR .vprod-card:hover{
+  border-color:#DCE3EC !important;
+  box-shadow:0 16px 32px -18px rgba(20,37,84,.30) !important;
+  transform:translateY(-3px) !important;
+}
+@media (prefers-reduced-motion:reduce){
+  #VISITOR .vcard, #VISITOR .lx-statcard, #VISITOR .gallery-card, #VISITOR .vbook-card,
+  #VISITOR .vplan-card, #VISITOR .featured-card, #VISITOR .rc, #VISITOR .vprod-card{ transition:none !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.x — ANIMATIONS JEUNES « TU ES… » (cartes de rôle, accueil). Entrée en
+   ressort/cascade (overshoot) + survol vivant : icône qui pop et pivote, carte
+   qui s'élève, flèche « → » qui glisse. transform GPU, reduced-motion respecté.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR .acc-role, #VISITOR .vgz-role{
+  animation:tuEsPop .5s cubic-bezier(.34,1.56,.64,1) both;
+  transition:transform .26s cubic-bezier(.34,1.56,.64,1), box-shadow .26s ease, border-color .26s ease !important;
+}
+#VISITOR .acc-roles .acc-role:nth-child(1),#VISITOR .vgz-roles .vgz-role:nth-child(1){animation-delay:.04s}
+#VISITOR .acc-roles .acc-role:nth-child(2),#VISITOR .vgz-roles .vgz-role:nth-child(2){animation-delay:.11s}
+#VISITOR .acc-roles .acc-role:nth-child(3),#VISITOR .vgz-roles .vgz-role:nth-child(3){animation-delay:.18s}
+#VISITOR .acc-roles .acc-role:nth-child(4),#VISITOR .vgz-roles .vgz-role:nth-child(4){animation-delay:.25s}
+#VISITOR .acc-roles .acc-role:nth-child(5),#VISITOR .vgz-roles .vgz-role:nth-child(5){animation-delay:.32s}
+#VISITOR .acc-roles .acc-role:nth-child(6),#VISITOR .vgz-roles .vgz-role:nth-child(6){animation-delay:.39s}
+#VISITOR .acc-role:hover, #VISITOR .vgz-role:hover{ transform:translateY(-5px) !important; }
+#VISITOR .acc-role-ic, #VISITOR .vgz-role-ic{ transition:transform .3s cubic-bezier(.34,1.56,.64,1) !important; }
+#VISITOR .acc-role:hover .acc-role-ic, #VISITOR .vgz-role:hover .vgz-role-ic{ transform:scale(1.14) rotate(-7deg) !important; }
+#VISITOR .acc-role-go{ transition:transform .22s cubic-bezier(.34,1.56,.64,1); }
+#VISITOR .acc-role:hover .acc-role-go{ transform:translateX(4px); }
+@keyframes tuEsPop{0%{opacity:0;transform:translateY(18px) scale(.93)}100%{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){ #VISITOR .acc-role,#VISITOR .vgz-role{ animation:none !important } }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.x — HEADER & NAV ÉPURÉS (réf. dashboard, skill impeccable).
+   1) Header : suppression du motif de rayures diagonales (.vhero-bg) — texture
+      « encombrante » bannie → navy propre.
+   2) Nav sidebar (desktop) : textes ET icônes UNIFORMES en navy (fini le rainbow
+      par item), exactement comme « Accueil ». L'actif garde son surlignage.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR .vhero-bg{ background:transparent !important; background-image:none !important; opacity:0 !important; }
+/* Nav SOBRE & UNIFORME à TOUTES les largeurs (mobile + desktop) — réf. famous.ai /
+   Allo Docteurs : pictogrammes monochromes navy, fond unique, zéro contour par item.
+   L'actif (.on) garde son surlignage. (Le portail visiteur est en thème clair.) */
+#VISITOR .vnav-btn:not(.on){ color:#142554 !important; }
+#VISITOR .vnav-btn:not(.on) svg, #VISITOR .vnav-btn:not(.on) svg *{ stroke:#142554 !important; color:#142554 !important; }
+#VISITOR .vnav-btn:not(.on) .v-ico{ color:#142554 !important; }
+#VISITOR .vnav-btn{ border:0 !important; box-shadow:none !important; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.x — ANIMATIONS JEUNES · SECTION « TU ES… » (.acc-role).
+   Entrée en cascade ressort + au survol : pastille d'icône qui pop & pivote,
+   flèche « go » qui glisse. transform GPU, reduced-motion respecté.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR .acc-roles .acc-role{ animation:accRolePop .5s cubic-bezier(.34,1.56,.64,1) both; }
+#VISITOR .acc-roles .acc-role:nth-child(1){animation-delay:.03s}
+#VISITOR .acc-roles .acc-role:nth-child(2){animation-delay:.09s}
+#VISITOR .acc-roles .acc-role:nth-child(3){animation-delay:.15s}
+#VISITOR .acc-roles .acc-role:nth-child(4){animation-delay:.21s}
+#VISITOR .acc-roles .acc-role:nth-child(5){animation-delay:.27s}
+#VISITOR .acc-roles .acc-role:nth-child(6){animation-delay:.33s}
+#VISITOR .acc-roles .acc-role:nth-child(7){animation-delay:.39s}
+#VISITOR .acc-roles .acc-role:nth-child(8){animation-delay:.45s}
+#VISITOR .acc-role .acc-role-ic{ transition:transform .3s cubic-bezier(.34,1.56,.64,1), box-shadow .3s ease !important; }
+#VISITOR .acc-role:hover .acc-role-ic{ transform:translateY(-3px) scale(1.09) rotate(-7deg) !important; }
+#VISITOR .acc-role-go{ transition:transform .25s cubic-bezier(.34,1.56,.64,1); }
+#VISITOR .acc-role:hover .acc-role-go{ transform:translateX(3px); }
+@keyframes accRolePop{ 0%{opacity:0;transform:translateY(18px) scale(.93)} 100%{opacity:1;transform:none} }
+@media (prefers-reduced-motion:reduce){ #VISITOR .acc-roles .acc-role{ animation:none } }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.x — « TU ES… » (.vgz-role) : CASCADE RESSORT DÉCLENCHÉE AU SCROLL
+   (préférence Jacques : garder la mise en forme, animer l'apparition).
+   .vgz-roles est .v-reveal (shell) → reçoit .visible/.is-visible à l'entrée à
+   l'écran (observer shell + initRevealSafety). Cartes cachées avant, révélées
+   en cascade. Filet : reduced-motion → visibles d'emblée.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR .vgz-roles .vgz-role{ opacity:0; transform:translateY(20px) scale(.94); animation:none !important; }
+#VISITOR .vgz-roles.visible .vgz-role, #VISITOR .vgz-roles.is-visible .vgz-role{
+  animation:vgzRoleIn .55s cubic-bezier(.34,1.56,.64,1) both !important;
+}
+#VISITOR .vgz-roles.visible .vgz-role:nth-child(1),#VISITOR .vgz-roles.is-visible .vgz-role:nth-child(1){animation-delay:.03s}
+#VISITOR .vgz-roles.visible .vgz-role:nth-child(2),#VISITOR .vgz-roles.is-visible .vgz-role:nth-child(2){animation-delay:.09s}
+#VISITOR .vgz-roles.visible .vgz-role:nth-child(3),#VISITOR .vgz-roles.is-visible .vgz-role:nth-child(3){animation-delay:.15s}
+#VISITOR .vgz-roles.visible .vgz-role:nth-child(4),#VISITOR .vgz-roles.is-visible .vgz-role:nth-child(4){animation-delay:.21s}
+#VISITOR .vgz-roles.visible .vgz-role:nth-child(5),#VISITOR .vgz-roles.is-visible .vgz-role:nth-child(5){animation-delay:.27s}
+#VISITOR .vgz-roles.visible .vgz-role:nth-child(6),#VISITOR .vgz-roles.is-visible .vgz-role:nth-child(6){animation-delay:.33s}
+#VISITOR .vgz-roles.visible .vgz-role:nth-child(7),#VISITOR .vgz-roles.is-visible .vgz-role:nth-child(7){animation-delay:.39s}
+#VISITOR .vgz-roles.visible .vgz-role:nth-child(8),#VISITOR .vgz-roles.is-visible .vgz-role:nth-child(8){animation-delay:.45s}
+@keyframes vgzRoleIn{ 0%{opacity:0;transform:translateY(20px) scale(.94)} 100%{opacity:1;transform:none} }
+@media (prefers-reduced-motion:reduce){ #VISITOR .vgz-roles .vgz-role{ opacity:1 !important; transform:none !important; animation:none !important } }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.9.x — PICTOGRAMMES D'EN-TÊTE SOBRES (sans arrière-fond). Préférence Jacques :
+   retirer la PASTILLE dorée derrière l'icône des bandeaux de section → juste
+   l'icône OR bare sur le navy (lisible, épuré, esprit ligne monochrome).
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR .acc-head .acc-pill .ic{
+  background:none !important; background-image:none !important;
+  border:0 !important; box-shadow:none !important;
+  width:auto !important; height:auto !important; padding:0 !important;
+}
+#VISITOR .acc-head .acc-pill .ic::after, #VISITOR .acc-head .acc-pill .ic::before{ display:none !important; content:none !important; }
+#VISITOR .acc-head .acc-pill-ico{ stroke:#FFC93C !important; width:24px !important; height:24px !important; filter:none !important; }
