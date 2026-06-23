@@ -4778,6 +4778,12 @@ html{ scroll-behavior:auto; }
 #VISITOR .vlogin-btns .btn.sm{ padding:4px 9px !important; font-size:10.5px !important; border-radius:8px !important; }
 #VISITOR .vlogin-btns .btn.sm.icon-only{ width:28px !important; height:28px !important; padding:0 !important; }
 #VISITOR .vlogin-btns .btn.sm svg{ width:14px !important; height:14px !important; }
+/* v1.11.3 — Barre du haut : fond bleu franc + icônes en OR (demande Jacques) */
+#VISITOR .vlogin-bar{ background:var(--bl,#142554) !important; }
+#VISITOR .vlogin-bar .v-ico,
+#VISITOR .vlogin-bar .btn.sm.icon-only svg{ color:var(--gold,#FFC93C) !important; }
+/* exception : garder l'icône lisible dans le bouton plein « Se connecter » (fond or) */
+#VISITOR .vlogin-bar .btn.bi .v-ico, #VISITOR .vlogin-bar .btn.bi svg{ color:#142554 !important; }
 
 /* ════════════════════════════════════════════════════════════════════════
    v1.4.7 — ÉPURE ACCUEIL : typo plus douce, panneaux resserrés,
