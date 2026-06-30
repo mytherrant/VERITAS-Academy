@@ -47,6 +47,11 @@ if (in_array($__origin, $__allowed, true)) {
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('X-Content-Type-Options: nosniff');
+// Durcissement (additif, sans risque pour la lecture légitime) :
+//  • no-referrer  → l'URL du lecteur/page ne fuit jamais via Referer.
+//  • SAMEORIGIN   → l'endpoint ne peut pas être encadré (iframe) sur un autre site.
+header('Referrer-Policy: no-referrer');
+header('X-Frame-Options: SAMEORIGIN');
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
 function spdf_err(int $code, string $msg): void {

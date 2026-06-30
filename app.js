@@ -17856,6 +17856,7 @@ var OEUVRE_COVERS = {
   "3e_petites_gouttes":"3e_petites_gouttes.jpg",
   "2nde_tribus_capitoline":"2nde_tribus_capitoline.jpg",
   "2nde_poemes_sauvages":"2nde_poemes_sauvages.jpg",
+  "2nde_tartuffe":"2nde_tartuffe.jpg",
   "1ere_coeur_tenebres":"1ere_coeur_tenebres.jpg",
   "1ere_balafon":"1ere_balafon.jpg",
   "1ere_lion_perle":"1ere_lion_perle.jpg",
@@ -18118,60 +18119,58 @@ var LITT_OEUVRES = {
   },
 
   "2nde_poemes_sauvages": {
-    titre:"Poèmes Sauvages Éclairés au Feu de Brousse",auteur:"Henri Nkoumo",classe:"2nde",
+    titre:"Poèmes sauvages éclairés au feu de brousse",auteur:"Henri N'Koumo",classe:"2nde",
     carte:{
-      centre:"Poèmes Sauvages\nÉclairés au Feu de Brousse\nHenri Nkoumo",
+      centre:"Poèmes sauvages\néclairés au feu de brousse\nHenri N'Koumo",
       branches:[
-        {label:"Axes & Thèmes",color:"#142554",items:["Réappropriation de 'sauvage' comme fierté","Le feu de brousse : renaissance identitaire","Mémoire ancestrale et résistance culturelle","Nature africaine — espace sacré et politique"]},
-        {label:"Négritude & Style",color:"#059669",items:["Vers libres — rythme oral africain","Anaphore comme figure dominante","Rupture avec le vers classique colonial","Filiation Senghor/Césaire revendiquée"]},
-        {label:"Poétique",color:"#D97706",items:["Images de la brousse, du feu, de la terre","Apostrophe et invocation aux ancêtres","Symbolisme de la nuit et de la lumière","Chant et parole — héritage oral africain"]},
-        {label:"Contexte",color:"#7C3AED",items:["Afrique postcoloniale — affirmation identitaire","Cameroun indépendant — culture en construction","Réponse poétique à l'assimilation coloniale","Langue française habitée par l'âme africaine"]}
+        {label:"Genre & forme",color:"#142554",items:["Poème au long cours (92 p., d'un seul tenant)","Vers libres surréalistes","Ni majuscules ni ponctuation régulière","« et » anaphorique — agent rythmique"]},
+        {label:"Thèmes",color:"#059669",items:["Dénonciation du terrorisme djihadiste","Hommage à Henrike Grohs (Grand-Bassam, 13/03/2016)","Ode à la liberté et à la tolérance","Fraternité universelle malgré les croyances"]},
+        {label:"Structure (3 temps)",color:"#D97706",items:["1. Le constat de l'horreur terroriste","2. Toutes les violences faites à l'Homme au nom de Dieu","3. La transcendance : espérance, paix, « résurrection »"]},
+        {label:"Contexte & influences",color:"#7C3AED",items:["Côte d'Ivoire — attentat de Grand-Bassam (AQMI)","Surréalisme (Césaire, Zadi Zaourou)","Abidjan, Les Classiques Ivoiriens, 2022","Henri N'Koumo, Prix Jean-Marie Adiaffi 2025"]}
       ]
     },
     qcm:[
-      {q:"Que signifie le titre 'Poèmes Sauvages Éclairés au Feu de Brousse' ?",opts:["Des poèmes violents sur la nature hostile","Une réappropriation fière du terme 'sauvage' : ce que le colonisateur appelait barbarie devient lumière — identité africaine affirmée","Des poèmes écrits la nuit en forêt","Une critique de la tradition africaine jugée archaïque"],ans:1,exp:"Le titre est un acte de retournement sémantique : 'sauvage' n'est plus une insulte coloniale mais une affirmation fière. Le 'feu de brousse' n'est pas destruction — c'est illumination identitaire. Nkoumo retourne les armes du colonisateur contre lui."},
-      {q:"Quel mouvement littéraire est la principale influence du recueil ?",opts:["Le symbolisme de Rimbaud et Verlaine","La Négritude (Senghor, Césaire, Damas)","Le Parnasse (Prudhomme, Leconte de Lisle)","Le surréalisme européen"],ans:1,exp:"Le recueil s'inscrit dans la Négritude fondée par Senghor (Sénégal), Césaire (Martinique) et Damas (Guyane) : revendiquer la beauté et la dignité de la civilisation africaine, refuser l'assimilation, célébrer ce que le colonisateur appelait 'primitif'."},
-      {q:"Quelle figure de style est la plus dominante dans ces poèmes ?",opts:["Le sonnet classique (deux quatrains, deux tercets)","L'anaphore (répétition en début de vers) qui crée un rythme incantatoire","La rime embrassée (ABBA)","L'allégorie abstraite"],ans:1,exp:"L'anaphore est la figure dominante, héritée de la poésie orale africaine et du style négritudien de Césaire. La répétition en début de vers crée un effet de proclamation identitaire, un serment poétique proche de la parole rituelle."},
-      {q:"Que symbolise le 'feu de brousse' dans le recueil ?",opts:["La destruction et la violence coloniale","Une force naturelle incontrôlable","La lumière intérieure de la culture africaine, purifiante et révélatrice d'identité","L'incendie des forêts par les colons"],ans:2,exp:"Dans les traditions africaines, le feu de brousse dégage la savane pour que la végétation repousse. Chez Nkoumo, il symbolise la renaissance identitaire après la colonisation : brûler l'oppression pour que la culture africaine renaisse plus forte."},
-      {q:"Pourquoi Nkoumo choisit-il d'écrire en français plutôt qu'en langue africaine uniquement ?",opts:["Par admiration pour la culture française","Pour habiter le français de l'intérieur, l'africaniser et atteindre une audience plus large","Parce qu'il ne parle aucune langue africaine","Par obligation scolaire"],ans:1,exp:"Comme Senghor et Césaire, Nkoumo s'approprie le français pour le transformer : y injecter des rythmes, des images et une cosmovision africaines. Senghor disait que les poètes négritudiens 's'approprient la langue française pour l'exprimer à leur façon'. C'est le projet même de la Négritude."},
-      {q:"Quelle est la posture du poète vis-à-vis de ses ancêtres ?",opts:["Il rompt avec le passé pour embrasser la modernité","Il invoque et convoque les ancêtres comme sources de force et de légitimité poétique","Il critique les traditions ancestrales comme obstacles au progrès","Il observe la tradition sans en faire partie"],ans:1,exp:"La posture négritudienne d'invocation des ancêtres est centrale : la parole poétique s'autorise en remontant aux sources. Les ancêtres ne sont pas le passé mort mais le présent vivant qui fonde l'identité — cosmovision bantu transposée en français."},
-      {q:"En quoi le recueil de Nkoumo est-il politique autant qu'esthétique ?",opts:["Il contient des manifestes politiques explicites","Parce que célébrer la culture africaine dans un contexte postcolonial est en soi un acte de résistance","Il soutient un parti politique précis","Il dénonce les chefs africains corrompus"],ans:1,exp:"Chez les poètes de la Négritude, l'esthétique EST politique : écrire la beauté de la nuit africaine, des rythmes du tam-tam, de la cosmogonie bantu est un refus de l'effacement culturel colonial. Nkoumo hérite de cette conviction profonde."}
+      {q:"À qui et à quel événement le recueil rend-il hommage ?",opts:["Aux héros de l'indépendance ivoirienne","À Henrike Grohs et aux victimes de l'attentat terroriste de Grand-Bassam (13 mars 2016)","Aux ancêtres du poète","Aux soldats tombés au combat"],ans:1,exp:"Le poème est dédié à Henrike Grohs, directrice du Goethe Institut d'Abidjan, tuée lors de l'attentat de Grand-Bassam (revendiqué par AQMI : 19 morts, 33 blessés), « ainsi qu'à toutes les victimes de l'intolérance humaine »."},
+      {q:"Quelle est la forme du texte ?",opts:["Un recueil de sonnets","Un long poème d'un seul tenant (92 pages), comme le « Cahier » de Césaire","Un récit autobiographique en prose","Une pièce de théâtre en vers"],ans:1,exp:"Ce n'est pas un recueil de poèmes courts mais un « poème au long cours » : un seul poème continu qui couvre les 92 pages. Le « s » de « Poèmes » indique que chaque page peut aussi se lire comme un poème autonome — « à l'image d'un collier de perles »."},
+      {q:"Quel mouvement littéraire irrigue l'écriture de N'Koumo ?",opts:["Le classicisme du XVIIe siècle","La Négritude de Senghor","Le surréalisme (rencontré chez Césaire et Zadi Zaourou)","Le Parnasse"],ans:2,exp:"L'auteur revendique le surréalisme : « Le surréalisme né de ma rencontre littéraire avec Césaire ou Zadi Zaourou m'autorise l'exploitation d'images complexes, cocasses, déroutantes. » De là viennent l'absence de ponctuation, de majuscules et les images insolites."},
+      {q:"Quel mot, placé en tête de vers, devient l'agent rythmique du poème ?",opts:["« non »","« ô »","« et »","« je »"],ans:2,exp:"« et », au lieu de coordonner, revient sans cesse en début de vers : c'est une anaphore qui rythme le texte et relie les mouvements de la pensée, tissant le poème en une seule coulée incantatoire."},
+      {q:"Comment le poème se construit-il ?",opts:["En un cri de haine sans issue","En trois temps : constat de l'horreur, extension à toutes les violences au nom de Dieu, puis transcendance en espérance","En un éloge des armes","En une simple chronologie de l'attentat"],ans:1,exp:"Le texte « peut aussi se lire comme un récit en trois temps » : il constate l'horreur, l'élargit à toutes les violences commises au nom de la religion, puis « transcende l'horreur et sublime la douleur pour atteindre l'espérance »."},
+      {q:"Quelle est la thématique centrale du poème ?",opts:["La nostalgie du village","Une ode à la liberté, à la tolérance et à la fraternité universelle","La célébration de la nature africaine","La satire des hommes politiques"],ans:1,exp:"« Poèmes sauvages éclairés au feu de brousse est une ode à la liberté. » Contre le fanatisme, le poète appelle à la paix et à une fraternité par-delà les religions : « et nous serons Coran et bible et torah et Boudha et tous les dieux connus et méconnus »."}
     ],
     fiche:{
-      genre:"Poésie lyrique et engagée",
-      forme:"Vers libres — sans rime fixe ni métrique classique",
-      edition:"Première édition (date exacte non disponible)",
-      epoque:"Afrique postcoloniale — 2e moitié du XXe siècle",
-      mouvement:"Négritude africaine — filiation Senghor/Césaire",
-      lieu:"Cameroun postcolonial — espace culturel africain",
-      themes:["Réappropriation de l'identité africaine","Renaissance culturelle — feu purificateur","Mémoire des ancêtres","Refus de l'assimilation coloniale","Nature africaine comme espace sacré","Langue française africanisée"],
-      axes:["Axe 1 — La négritude comme acte de résistance : Nkoumo retourne l'insulte coloniale ('sauvage') en affirmation fière","Axe 2 — Le feu de brousse : symbole de renaissance identitaire et de purification culturelle après la colonisation","Axe 3 — L'invocation des ancêtres : une poétique de la continuité et du retour aux sources"],
-      resume:"Poèmes Sauvages Éclairés au Feu de Brousse est un recueil de poèmes en vers libres dans lequel Henri Nkoumo, s'inscrivant dans la lignée de la Négritude de Senghor et Aimé Césaire, retourne le terme colonial 'sauvage' en affirmation de fierté culturelle africaine. Le feu de brousse — image africaine de la régénération — symbolise la renaissance identitaire après l'assimilation. Nkoumo y célèbre la mémoire des ancêtres, la nature africaine comme espace spirituel et politique, et l'anaphore comme figure rituelle de la résistance."
+      genre:"Poésie engagée — poème au long cours (« long souffle »)",
+      forme:"Vers libres surréalistes — sans majuscules ni ponctuation régulière",
+      edition:"Abidjan, Les Classiques Ivoiriens, 2022 (92 pages)",
+      epoque:"XXIe siècle — après l'attentat de Grand-Bassam (13 mars 2016)",
+      mouvement:"Surréalisme (héritage de Césaire et de Zadi Zaourou)",
+      lieu:"Côte d'Ivoire — Grand-Bassam ; portée universelle",
+      themes:["Dénonciation du terrorisme et du fanatisme religieux","Hommage aux victimes — Henrike Grohs et Grand-Bassam","Liberté, tolérance, fraternité universelle","Du cri d'indignation au chant d'espérance","La poésie comme « contre-feu » à la violence"],
+      axes:["Axe 1 — Un long cri d'indignation et de révolte devant l'horreur terroriste","Axe 2 — L'élargissement : toutes les violences faites à l'Homme au nom de Dieu","Axe 3 — La transcendance de la douleur en espérance, paix et fraternité universelle"],
+      resume:"« Poèmes sauvages éclairés au feu de brousse » est un poème au long cours (un seul poème de 92 pages) que l'Ivoirien Henri N'Koumo écrit en hommage à son amie Henrike Grohs, directrice du Goethe Institut d'Abidjan, tuée lors de l'attentat terroriste de Grand-Bassam (13 mars 2016, revendiqué par AQMI). Porté par un souffle surréaliste hérité de Césaire, le texte s'organise en trois temps : il constate l'horreur, l'élargit à toutes les violences commises au nom de la religion, puis sublime la douleur en un chant d'espérance, de paix et de fraternité universelle. C'est une ode à la liberté, un « contre-feu » opposé au feu des bombes."
     },
     citations:[
-      {texte:"Sauvages ! Oui, sauvages du feu qui éclaire, / sauvages de la nuit qui enfante l'aurore.",source:"Poème liminaire",figures:["Antithèse (sauvage / lumière)","Apostrophe (affirmation directe)","Métaphore (la nuit enfante l'aurore)"],analyse:"Le poème liminaire opère le geste fondateur de la Négritude : retourner l'injure coloniale. 'Sauvage' devient attribut de lumière et de renaissance. La construction antithétique (feu / nuit / aurore) traduit le passage de l'oppression vers la libération culturelle.",effet:"Le lecteur est saisi par le renversement sémantique : ce qui était honte devient fierté. L'apostrophe directe crée un effet de proclamation solennelle et engage le lecteur dans la revendication identitaire."},
-      {texte:"Ancêtres ! Je vous convoque au carrefour des siècles / pour que votre souffle habite ma parole.",source:"Poème de l'invocation",figures:["Apostrophe (invocation directe)","Métaphore (le souffle = la parole poétique)","Image du carrefour — espace-temps symbolique"],analyse:"L'apostrophe aux ancêtres est le geste fondamental de la poétique négritudienne : la parole poétique ne peut exister que si elle reçoit son autorité des ancêtres. Le 'carrefour des siècles' fusionne passé et présent dans un espace sacré.",effet:"Cette invocation donne au poème une dimension rituelle et cosmique. Le lecteur africain reconnaît la cosmovision bantu ; le lecteur universel est invité à prendre conscience de la profondeur temporelle de cette tradition."},
-      {texte:"Et le feu de brousse avançait, avançait, / lavant de cendres noires les mensonges du monde.",source:"Poème du feu de brousse",figures:["Anaphore ('avançait, avançait')","Métaphore (le feu lave les mensonges)","Personnification (le feu qui avance)"],analyse:"L'anaphore 'avançait, avançait' reproduit le rythme inexorable du feu qui progresse. La métaphore du feu lavant les mensonges transforme une image naturelle en geste de purification morale et culturelle : l'Afrique se lave du mensonge colonial.",effet:"La répétition crée un effet hypnotique, comme une invocation ou un chant. Le lecteur ressent physiquement l'avancée du feu purificateur — la poésie devient cérémonie."},
-      {texte:"Je parle français mais mes mots ont des racines / qui plongent dans la terre rouge de mes pères.",source:"Poème de la langue",figures:["Métaphore filée (racines / terre)","Antithèse implicite (français / terre africaine)","Image végétale (plonger dans la terre)"],analyse:"Ce vers dit le projet même de la Négritude : s'approprier le français pour l'africaniser. La métaphore filée des racines plongeant dans la terre rouge dit que la langue coloniale peut devenir vecteur d'identité si elle est habitée de l'intérieur.",effet:"Cette image réconcilie la langue coloniale et l'identité africaine. Elle résout la tension entre assimilation et résistance par une troisième voie : l'appropriation créatrice."}
+      {texte:"il fait si froid dans le soleil / si froid dans mes mots / car tu es partie un samedi de plage et de rires sous les cocotiers",source:"Ouverture, p. 9",figures:["Antithèse (froid / soleil)","Métaphore (« froid dans mes mots »)","Tonalité élégiaque"],analyse:"Le poème s'ouvre sur le deuil d'Henrike, tuée un samedi sur la plage de Grand-Bassam. L'antithèse « froid dans le soleil » dit l'effondrement intérieur au cœur d'un décor solaire et balnéaire : la mort fait irruption dans l'insouciance.",effet:"Le lecteur entre d'emblée dans la douleur intime du poète ; le contraste rend l'horreur plus saisissante encore."},
+      {texte:"et le temps des fous de dieu a hurlé à mort longtemps [...] et elle saigne ma nuit elle saigne de sa grande colère dans mes étoiles explosées au fusil",source:"p. 23",figures:["Anaphore (« et »)","Personnification (« ma nuit saigne »)","Métaphore (« étoiles explosées au fusil »)"],analyse:"« les fous de dieu » désigne les terroristes qui tuent au nom de la religion. Le « et » anaphorique scande l'indignation ; la nuit et les étoiles qui « saignent » disent une blessure cosmique, démesurée.",effet:"La répétition produit un rythme de litanie funèbre ; le lecteur ressent la colère qui monte et s'étire."},
+      {texte:"et nous serons Coran et bible et torah et Boudha et tous les dieux connus et méconnus [...] pour reconstruire les ponts entre nos jambes",source:"p. 88",figures:["Énumération / accumulation","Anaphore (« et »)","Symbole (« reconstruire les ponts »)"],analyse:"Contre la haine religieuse, le poème convoque toutes les croyances sur un pied d'égalité. L'énumération abolit les frontières confessionnelles : l'espérance d'une fraternité universelle par-delà les religions.",effet:"Le lecteur passe du deuil à l'utopie fraternelle ; la profession de tolérance répond directement au fanatisme dénoncé."},
+      {texte:"et tu ressusciteras comme l'espérance des amandes plantées profondément dans la terre",source:"p. 80",figures:["Comparaison (« comme l'espérance des amandes »)","Métaphore végétale (la graine / la renaissance)","Tonalité d'espérance"],analyse:"La « résurrection » d'Henrike s'écrit par la métaphore de la graine enfouie qui meurt pour renaître. Le troisième temps du poème transforme le deuil en promesse de vie : la mémoire des victimes devient germination.",effet:"L'image apaise sans nier la douleur ; elle clôt le mouvement de transcendance sur une note lumineuse."}
     ],
     techniques:[
-      {nom:"L'anaphore incantatoire",def:"Répétition d'un même mot ou groupe de mots en début de vers ou de strophe, créant un effet de litanie et d'invocation rituelles",exemple:"'Sauvages ! [...] Sauvages !' — 'Ancêtres ! [...] Ancêtres !'",effet:"L'anaphore hérite de la tradition orale africaine : elle transforme le poème en cérémonie verbale, en serment d'appartenance identitaire. Elle crée un rythme incantatoire proche de la parole rituelle."},
-      {nom:"Le retournement sémantique",def:"Procédé qui consiste à reprendre un terme péjoratif pour lui donner un sens opposé et positif — l'antanaclase militante",exemple:"'Sauvage' (insulte coloniale) → fierté culturelle et lumière africaine",effet:"Ce geste rhétorique est le cœur de la Négritude : transformer l'arme de l'oppresseur en outil de libération. Le retournement sémantique est à la fois poétique et politique."},
-      {nom:"Le vers libre africain",def:"Forme poétique sans contrainte métrique fixe ni rime imposée, héritée de la tradition orale africaine",exemple:"Vers de longueur variable, sans rime régulière, rythmés par les répétitions et les images",effet:"Le rejet du vers classique est un acte de résistance formelle : refuser l'alexandrin colonial c'est affirmer le droit à une poésie qui respire selon le rythme africain, oral et vivant."},
-      {nom:"La métaphore cosmogonique",def:"Métaphore qui mobilise des éléments du cosmos africain (feu, terre, nuit, aurore) pour exprimer des vérités identitaires et spirituelles",exemple:"'Le feu de brousse avançait [...] lavant de cendres noires les mensonges du monde'",effet:"Ces images cosmiques donnent au recueil une dimension universelle et sacrée. La nature africaine n'est plus un décor mais un système symbolique complet, aussi riche que n'importe quelle cosmogonie."}
+      {nom:"Le poème au long cours",def:"Un seul poème continu qui couvre tout le livre (92 pages), sans titres ni coupures — par opposition au recueil de poèmes courts.",exemple:"De « il fait si froid dans le soleil » (p. 9) à « car le futur nu est de notre temps ô voyage » (p. 92).",effet:"Le souffle ininterrompu impose un rythme de marche et de litanie ; il inscrit le texte dans la filiation du « Cahier d'un retour au pays natal » de Césaire."},
+      {nom:"L'écriture surréaliste",def:"Suppression des majuscules en tête de vers et de la ponctuation ; images complexes, déroutantes, nées d'associations libres.",exemple:"Aucune majuscule du premier au dernier vers ; « dans le ciel, à la place des oiseaux, il y avait des balles habillées d'ailes sombres ».",effet:"La transgression des règles dit la rupture d'un monde déréglé par la violence ; elle prolonge l'héritage des surréalistes et de Césaire."},
+      {nom:"Le « et » anaphorique",def:"La conjonction « et », placée en tête de vers de façon répétée, non pour coordonner mais pour rythmer et relier les mouvements de la pensée.",exemple:"« et nous Flottons au noir drapeau des peines / et il pleut en nous la libre Fureur des jours d'orage / et nue est notre nuit ».",effet:"« et » devient un agent rythmique et un embrayeur : il tisse le poème en une seule coulée et lui donne sa cadence incantatoire."},
+      {nom:"L'onomastique",def:"Emploi de noms propres réels (personnes, lieux) chargés de sens historique.",exemple:"« Henrike » (plus de 18 occurrences), « Oussama » (plus de 10), « Grand-Bassam » (plus de 15).",effet:"L'ancrage dans le réel — la victime, le terrorisme, le lieu de l'attentat — donne au poème sa force de témoignage et d'engagement."}
     ],
     controle:[
-      {q:"Qu'est-ce que la Négritude et en quoi Nkoumo s'inscrit-il dans ce mouvement ?",r:"La Négritude est un mouvement littéraire fondé par Césaire, Senghor et Damas dans les années 1930-40 : revendiquer la fierté de la civilisation africaine contre l'assimilation coloniale. Nkoumo s'y inscrit en retournant l'insulte 'sauvage', en célébrant la nature africaine et les ancêtres, et en africanisant la langue française."},
-      {q:"Expliquez le titre 'Poèmes Sauvages Éclairés au Feu de Brousse'. Que fait Nkoumo avec le mot 'sauvage' ?",r:"Nkoumo opère un retournement sémantique : 'sauvage', terme colonial péjoratif, devient affirmation de fierté. Le 'feu de brousse' n'est pas destruction mais lumière et renaissance : dans la tradition africaine, il dégage la savane pour que la vie repousse. Le titre annonce le projet du recueil : transformer l'humiliation en ressource poétique."},
-      {q:"Quelle est la fonction de l'anaphore dans la poésie de Nkoumo ?",r:"L'anaphore hérite de la tradition orale africaine. Elle crée un rythme incantatoire, proche de la parole rituelle. Elle transforme le poème en cérémonie verbale, en serment d'appartenance identitaire. Elle exprime aussi une insistance, une proclamation — comme si la vérité identitaire devait être répétée pour être entendue."},
-      {q:"Pourquoi Nkoumo écrit-il en français plutôt qu'en langue africaine uniquement ?",r:"Comme Senghor et Césaire, Nkoumo s'approprie le français pour l'africaniser — y injecter des rythmes, des images et une cosmovision africaines. C'est la stratégie négritudienne : habiter la langue coloniale de l'intérieur pour en faire un vecteur d'identité africaine. 'Mes mots ont des racines qui plongent dans la terre rouge de mes pères.'"},
-      {q:"Que symbolise le feu de brousse dans le recueil et pourquoi cette image est-elle culturellement significative ?",r:"Dans les traditions africaines, le feu de brousse dégage la savane pour que la végétation repousse — image de purification et de renaissance. Chez Nkoumo, il symbolise la renaissance identitaire après la colonisation : brûler l'oppression culturelle pour que l'identité africaine renaisse plus forte. C'est aussi la lumière qui éclaire les 'poèmes sauvages'."},
-      {q:"En quoi la poésie de Nkoumo est-elle à la fois esthétique et politique ?",r:"Chez les poètes de la Négritude, l'esthétique EST politique : célébrer la beauté de la nuit africaine, des ancêtres, de la nature est un refus de l'effacement culturel colonial. Chaque choix formel (vers libre vs alexandrin, anaphore vs rime régulière) est aussi une prise de position. Nkoumo hérite de cette conviction profonde."}
+      {q:"À qui le poème est-il dédié et pourquoi ?",r:"À Henrike Grohs, directrice du Goethe Institut d'Abidjan, amie du poète, tuée lors de l'attentat terroriste de Grand-Bassam (13 mars 2016, revendiqué par AQMI), et à toutes les victimes de l'intolérance. N'Koumo et Henrike partageaient l'homonymie des prénoms « Henri » / « Henrike »."},
+      {q:"Pourquoi parle-t-on d'un « poème au long cours » ?",r:"Parce que c'est un seul poème continu de 92 pages, sans coupures, comme le « Cahier d'un retour au pays natal » de Césaire. Le « s » de « Poèmes » indique cependant que chaque page peut aussi se lire comme un poème autonome : le texte est à la fois unique et pluriel, « à l'image d'un collier de perles »."},
+      {q:"Comment le poème évite-t-il de n'être qu'un cri de colère ?",r:"Il s'organise en trois temps : il constate l'horreur de l'attentat, élargit la révolte à toutes les violences commises au nom de la religion, puis transcende la douleur en un chant d'espérance, de paix et de fraternité universelle. C'est « un immense chant d'amour », un « contre-feu » au feu des bombes."},
+      {q:"Quelles libertés N'Koumo prend-il avec la langue, et pourquoi ?",r:"Absence de majuscules en début de vers, quasi-absence de ponctuation, « et » anaphorique, images surréalistes : ces transgressions traduisent un monde déréglé par la violence et inscrivent le texte dans l'héritage surréaliste de Césaire et de Zadi Zaourou. « La création littéraire n'est ni un cours ni une affaire de grammaire. »"},
+      {q:"En quoi le titre est-il surréaliste plutôt que « négritudien » ?",r:"« Poèmes sauvages éclairés au feu de brousse » associe des images déroutantes. Selon l'auteur, ce titre dit la « force barbare » de poèmes qui « gueulent » en écho au fracas des bombes : reflet d'un monde « prisonnier des idéologies fanatisées et du capitalisme fou ». Il ne s'agit pas de réhabiliter le mot « sauvage » comme fierté identitaire, mais de nommer la sauvagerie du monde contemporain."}
     ],
     analyse:{
-      angle:"Quand un poète te dit fièrement : « Oui, je suis sauvage. Et alors ? »",
-      citation:"Le feu de brousse n'est pas la fin. C'est la renaissance.",
-      contenu:"Petit jeu : ferme les yeux. Quand on te dit « sauvage », tu penses à quoi ? Probablement à un truc négatif. Quelqu'un de mal élevé. De « pas civilisé ». De brutal. Bien. Maintenant, ouvre les Poèmes Sauvages d'Henri Nkoumo. Et accepte de ne plus jamais voir ce mot pareil.\n\nParce que Nkoumo fait une chose puissante avec son titre : il PREND le mot que les colonisateurs utilisaient pour nous humilier, et il le retourne. « Sauvage », pour lui, ça veut dire : libre, vrai, enraciné, vivant. Le contraire de l'homme aseptisé qui a oublié d'où il vient.\n\n📖 SCÈNE — Le feu qui purifie\nImagine un feu de brousse qui avance dans la nuit. La savane crépite. Les bêtes fuient. La fumée monte vers les étoiles. Tout le monde regarde ça avec effroi : « c'est la fin, c'est la mort ». Mais l'oncle assis sous l'arbre sourit doucement. Il a déjà vu ce feu. Il sait. Dans trois mois, la terre sera plus noire, plus grasse, plus fertile. Et la nouvelle pousse jaillira partout. Plus haute qu'avant. Plus forte qu'avant. C'est ça, le feu de brousse selon Nkoumo : pas une fin, mais une promesse.\n\nTu vois la métaphore ? La colonisation a été ce feu. Beaucoup ont cru à la fin. Mais la culture africaine, elle, repousse. Et ses Poèmes Sauvages sont les nouvelles pousses.\n\nC'est de la poésie engagée, mais pas chiante. Les images sont fortes : le feu, la cendre, la nuit, l'aurore. Tu vas tomber sur des vers qui te restent toute la semaine en tête. C'est le but.\n\nConseil pour ton bac blanc 2nde : utilise ce recueil pour parler de « négritude » et « identité africaine » (mots-clés très rentables). Mais lis-le surtout parce qu'il fait du bien. Quand on est jeune Africain en 2026, lire un poète qui te dit « sois fier d'où tu viens », ça change la journée."
+      angle:"Comment transformer l'horreur d'un attentat en chant d'espérance ?",
+      citation:"Contre le feu des bombes [...], ils sont un contre-feu idéal. (Henri N'Koumo)",
+      contenu:"13 mars 2016. Plage de Grand-Bassam, Côte d'Ivoire. Un samedi de soleil, de rires et de cocotiers. Puis des hommes ouvrent le feu sur la foule. Dix-neuf morts. Parmi eux, Henrike Grohs, directrice du Goethe Institut d'Abidjan — une amie d'Henri N'Koumo. De ce deuil naît ce livre.\n\nAttention au piège : à cause du mot « sauvage » et du « feu de brousse », on croit lire un poème de la Négritude qui célébrerait l'Afrique. Faux. Ici, le « sauvage », c'est la sauvagerie du monde : celle des bombes, des « fous de dieu », des « kalach sauvages ». Le titre est surréaliste, pas militant identitaire.\n\n📖 LA SCÈNE — Un seul souffle de 92 pages\nN'Koumo n'écrit pas un recueil de petits poèmes. Il écrit UN poème, qui coule sur 92 pages sans s'arrêter, sans majuscules, presque sans ponctuation, scandé par des « et » qui reviennent comme des vagues. C'est la forme du « Cahier » de Césaire : le long souffle. Lis-le à voix haute, tu sentiras la litanie, le rythme de la marche funèbre qui peu à peu se relève.\n\nLE MOUVEMENT EN 3 TEMPS\n1) Le cri : l'horreur, le sang, « le temps des fous de dieu a hurlé à mort ».\n2) L'élargissement : toutes les violences au nom de Dieu, partout dans le monde — « bring back our girls », les sourates détournées d'Oussama.\n3) La remontée : le poète refuse la haine. Il convoque « Coran et bible et torah et Boudha », il fait « ressusciter » Henrike « comme l'espérance des amandes plantées dans la terre ». La douleur devient fraternité.\n\nPour ta 2nde : ce texte est en or pour une DISSERTATION sur « la poésie engagée » ou « à quoi sert la poésie ? ». Mots-clés rentables : poésie engagée, surréalisme, lyrisme du deuil, fraternité, tolérance, vers libre. Et au fond, retiens la phrase de l'auteur : face au feu des bombes, un poème peut être « un contre-feu »."
     }
   },
 
@@ -19008,47 +19007,57 @@ var LITT_OEUVRES = {
     carte:{
       centre:"L'attachement au sol natal\nErnest Alima\n(Cameroun)",
       branches:[
-        {label:"Personnages",color:"#15803D",items:["Le narrateur (souvent enfant ou jeune)","Les anciens du village","La famille élargie","Le sol natal personnifié","Les ancêtres invisibles"]},
-        {label:"Thèmes",color:"#16A34A",items:["Enracinement et identité","Amour du pays natal","Exode rural vs fidélité","Mémoire des ancêtres","Patriotisme territorial"]},
-        {label:"Style",color:"#D97706",items:["Récits courts et poétiques","Description sensorielle de la nature","Voix lyrique","Symbolisme végétal et tellurique","Style accessible aux jeunes"]},
-        {label:"Contexte",color:"#7C3AED",items:["Ernest Alima — auteur camerounais","Période post-indépendance","Cameroun rural","Défense du patrimoine territorial","Engagement écologique avant l'heure"]}
+        {label:"Genre & composition",color:"#15803D",items:["Recueil de poésie patriotique","26 poèmes répartis en 6 sections","Esthétique du « morcellement » (≠ long souffle)","Éditions Ifrikiya, Yaoundé, 4e éd. 2024"]},
+        {label:"Thèmes",color:"#16A34A",items:["Amour ardent du pays natal — le Cameroun","Patriotisme et engagement citoyen","Dénonciation des comportements antipatriotiques","Le chant du fils, même en exil"]},
+        {label:"Style & figures",color:"#D97706",items:["Vers libre teinté de relents classiques (la rime)","Anaphore « J'aime mon pays »","Exclamation lyrique « Ô mon cher pays ! »","Comparaisons, métaphores, camerounismes"]},
+        {label:"Contexte",color:"#7C3AED",items:["Ernest Alima — poète camerounais de la 1re génération","Retraité, vit à Yaoundé","Filiation : Senghor, Philombe, Ngo Mai, Kayo","Dossier pédagogique : J.-C. Awono & J. Meli"]}
       ]
     },
     qcm:[
-      {q:"Que désigne 'le sol natal' dans l'œuvre ?",opts:["Le sol qu'on cultive","La terre où l'on est né, le pays d'origine","Un terrain à vendre","Le sol forestier"],ans:1,exp:"Le 'sol natal' = la terre des origines, du village, des ancêtres. C'est la terre comme racine identitaire."},
-      {q:"Quel sentiment l'œuvre valorise-t-elle ?",opts:["L'envie de partir","L'attachement profond au pays d'origine","La haine de la campagne","L'indifférence"],ans:1,exp:"L'œuvre célèbre l'enracinement, l'amour de sa terre, contre la fascination pour l'ailleurs ou la ville."},
-      {q:"Quel est le problème social dénoncé en filigrane ?",opts:["La pollution","L'exode rural et l'oubli des origines","La guerre","L'inflation"],ans:1,exp:"L'exode rural vide les villages, coupe les jeunes de leurs racines. Alima invite à ne pas oublier d'où l'on vient."},
-      {q:"Quelle figure traditionnelle est centrale ?",opts:["Le militaire","Les anciens du village, gardiens de la mémoire","Le médecin","L'instituteur"],ans:1,exp:"Les anciens sont les gardiens : ils transmettent l'histoire de la terre, des familles, des traditions. Sans eux, le lien se rompt."},
-      {q:"Quel registre domine ?",opts:["Lyrique et nostalgique","Comique","Tragique","Polémique"],ans:0,exp:"Le ton est lyrique, nostalgique, parfois élégiaque. C'est un chant d'amour à la terre qu'on quitte ou qu'on retrouve."}
+      {q:"Quel est le genre exact de l'œuvre ?",opts:["Un roman d'apprentissage","Un recueil de poésie (26 poèmes en 6 sections)","Un recueil de contes","Une pièce de théâtre"],ans:1,exp:"« L'attachement au sol natal » est un recueil de poèmes : 26 textes répartis en six sections. Ce n'est ni un roman ni des récits, mais bien de la poésie patriotique."},
+      {q:"Quel sentiment est le fil directeur du recueil ?",opts:["La colère contre les anciens","L'amour ardent du poète pour sa terre natale, le Cameroun","La peur de l'avenir","Le regret de l'enfance"],ans:1,exp:"Le fil directeur est « l'amour ardent d'Ernest Alima pour sa terre natale » : il célèbre le Cameroun « comme un amant qui voue un véritable culte à sa belle »."},
+      {q:"Quelle figure de style structure des poèmes comme « Hymne à mon pays » ?",opts:["Le calembour","L'anaphore (« J'aime mon pays… »)","La litote","L'oxymore"],ans:1,exp:"La répétition / anaphore « J'aime mon pays… » revient en tête de vers pour scander la déclaration d'amour, créant cadence et harmonie. La forme exclamative « Ô mon cher pays ! » prolonge cet élan."},
+      {q:"Comment l'écriture d'Alima se situe-t-elle par rapport au vers classique ?",opts:["Elle respecte strictement l'alexandrin","Elle est hybride : vers libre, mais teinté de rime pour la beauté sonore","Elle refuse toute sonorité","Elle imite le sonnet de la Pléiade"],ans:1,exp:"Alima pratique « le vers libre teinté de relents classiques » : il garde la rime non pour respecter les conventions mais pour « cette beauté sonore que les mots qui se rapprochent produisent »."},
+      {q:"Que désigne le poète quand il appelle le pays « le reliquaire qui recèle les restes de mes pères » ?",opts:["Un musée","La terre natale comme lieu sacré des ancêtres","Une église","Un cimetière militaire"],ans:1,exp:"Par cette métaphore (comme « la terre où gît mon cordon ombilical » ou « sol riche en crânes de mes pères »), Alima fait du sol natal un lieu sacré qui garde la mémoire des ancêtres : la patrie est un héritage spirituel."},
+      {q:"Quel procédé enracine le texte dans la culture camerounaise ?",opts:["Les mots latins","Les camerounismes (« matango », « vin de crabe », « écaille du ciel »)","Les anglicismes","Les termes scientifiques"],ans:1,exp:"Quelques camerounismes, « utilisés à très bon escient », marquent l'enracinement culturel du poète et augmentent « son orgueil patriotique »."}
     ],
     fiche:{
-      genre:"Recueil — récits courts à dimension poétique",forme:"Narrations brèves entrelacées",edition:"Éditions camerounaises (CLE ou similaire)",
-      epoque:"Cameroun post-colonial",mouvement:"Littérature de l'enracinement africain",
-      lieu:"Villages camerounais (régions diverses)",
-      themes:["Enracinement","Patriotisme territorial","Mémoire ancestrale","Critique de l'exode rural","Écologie spirituelle"],
-      axes:["Axe 1 — Le sol natal comme identité fondatrice","Axe 2 — La mémoire des anciens face à l'oubli moderne","Axe 3 — Ernest Alima et la défense du patrimoine rural"],
-      resume:"Ernest Alima célèbre dans ce recueil l'attachement profond au pays d'origine, au village natal, à la terre des ancêtres. À travers des récits courts à dimension poétique, il évoque la beauté des paysages camerounais, la sagesse des anciens, et les rites qui lient l'homme à son sol. L'œuvre dénonce en filigrane l'exode rural qui vide les villages et coupe les jeunes générations de leurs racines. C'est un plaidoyer pour l'enracinement et la mémoire."
+      genre:"Recueil de poésie patriotique",
+      forme:"26 poèmes en 6 sections — vers libre teinté de rime",
+      edition:"Yaoundé, Éditions Ifrikiya, 4e édition enrichie d'un dossier pédagogique, 2024",
+      epoque:"Cameroun contemporain",
+      mouvement:"Poésie patriotique camerounaise — filiation Senghor / Philombe / Ngo Mai / Kayo",
+      lieu:"Le Cameroun, célébré sous toutes ses facettes",
+      themes:["Amour de la terre natale et du Cameroun","Patriotisme et engagement citoyen","Dénonciation des comportements antipatriotiques","Le commerce inégal Occident / Afrique","Enracinement culturel (camerounismes)"],
+      axes:["Axe 1 — Le pays natal célébré comme une bien-aimée : un lyrisme amoureux du patriotisme","Axe 2 — Une esthétique du morcellement et du vers libre teinté de rime","Axe 3 — Les figures de l'amour patriotique : anaphore, exclamation, métaphore, personnification du pays"],
+      resume:"Dans « L'attachement au sol natal », le poète camerounais Ernest Alima réunit 26 poèmes en six sections, tous portés par un même fil : l'amour ardent de sa terre natale, le Cameroun. Dans une langue simple et colorée d'images du terroir, il chante son pays « comme un amant voue un culte à sa belle », célèbre ses richesses, dénonce les comportements antipatriotiques et garde, même en exil, le pays au cœur. Sur le plan de l'écriture, il pratique une esthétique du « morcellement » (à l'opposé du long souffle de Césaire), un vers libre teinté de rime, et multiplie anaphores (« J'aime mon pays »), exclamations (« Ô mon cher pays ! »), comparaisons et camerounismes. C'est un appel à l'inspiration patriotique adressé à la jeunesse camerounaise."
     },
     citations:[
-      {texte:"On peut traverser des océans, on peut bâtir des palais — mais le sol qui t'a vu naître saura toujours te reconnaître.",source:"Récit d'ouverture",figures:["Hyperbole (océans, palais)","Personnification (le sol reconnaît)","Concession (mais)"],analyse:"L'œuvre admet la légitimité du voyage, mais affirme la primauté du sol natal. Le sol est personnifié comme un être qui reconnaît : la terre se souvient de nous, comme nous d'elle.",effet:"Image forte d'un lien quasi sacré entre l'humain et sa terre d'origine."},
-      {texte:"Qui oublie son village n'est plus chez lui nulle part.",source:"Proverbe rapporté",figures:["Paradoxe","Maxime","Double négation"],analyse:"Paradoxe brutal : oublier son origine = perdre toute appartenance. L'identité passe par la mémoire des racines.",effet:"Avertissement aux jeunes tentés par l'exode : on ne se construit pas dans le déni de ses origines."},
-      {texte:"La terre des ancêtres ne se mesure pas en hectares, mais en souvenirs et en silences habités.",source:"Description méditative",figures:["Antithèse hectares/souvenirs","Personnification (silences habités)","Spiritualisation"],analyse:"L'œuvre refuse la mesure utilitaire (hectares) au profit de la mesure mémorielle. La terre n'est pas un bien économique, c'est un patrimoine spirituel.",effet:"Critique discrète de la marchandisation moderne de la terre. Invitation à une autre relation à la nature."}
+      {texte:"J'aime mon pays / Et la mer parfois sage / Comme une image, / Parfois en rage / Comme un sauvage / Qui bave sur ses plages [...] Et porte sur son dos ondoyant des cargos / Chargés de bananes et de cacao / En partance pour les pays occidentaux",source:"Poème — l'amour du pays",figures:["Anaphore (« J'aime mon pays »)","Comparaisons (« comme une image », « comme un sauvage »)","Rimes en cascade (sage / image / rage / sauvage / plage)"],analyse:"Sous la déclaration d'amour perce une dénonciation : le « commerce inégal entre l'Occident et l'Afrique ». Les bananes et le cacao qui partent vers l'Occident disent le pillage des richesses. La beauté sonore des rimes accumulées porte le message critique.",effet:"Le lecteur est séduit par la musique des mots avant de percevoir la dénonciation : l'amour du pays se double d'un engagement."},
+      {texte:"J'aime mon pays, / Ses femmes et ses hommes… / J'aime mon pays / Et sa flore dense… / J'aime mon pays / Ses fleuves et ses rivières… / J'aime mon pays / Et ses oiseaux mélodieux…",source:"« Hymne à mon pays »",figures:["Anaphore (« J'aime mon pays »)","Énumération (femmes, flore, fleuves, oiseaux)","Rythme litanique"],analyse:"L'anaphore « affermit un sentiment, ennoblit une idée, arrache le dire à la banalité ». La répétition transforme la déclaration en hymne ; l'énumération embrasse tout le pays, des habitants à la nature.",effet:"Le poème devient chant : le lecteur est entraîné dans une célébration ample et communicative du Cameroun."},
+      {texte:"Ô mon amour immortel ! / Ô Afrique en raccourci ! / Ô mon cher pays ! / Ô mon cher pays ! / Ô mon cher pays !",source:"Poème — l'exclamation patriotique",figures:["Apostrophe / exclamation (« Ô… »)","Anaphore (« Ô mon cher pays »)","Hyperbole (« amour immortel », « Afrique en raccourci »)"],analyse:"La forme exclamative porte l'émotion à son comble. « Afrique en raccourci » fait du Cameroun le condensé du continent. La triple reprise de « Ô mon cher pays ! » mime l'élan du cœur qui ne se lasse pas de nommer l'objet aimé.",effet:"L'intensité lyrique gagne le lecteur : l'amour de la patrie devient presque une prière."},
+      {texte:"Je t'aime d'un amour / Qui règne sur mon cœur / Comme un roi sur sa cour !",source:"Poème — la comparaison amoureuse",figures:["Comparaison (« comme un roi sur sa cour »)","Personnification / tutoiement du pays","Hyperbole de l'amour souverain"],analyse:"Le pays est tutoyé et aimé comme une personne. La comparaison royale dit un amour total, souverain, qui « règne » sans partage. Le sol natal est ailleurs « mon souverain bien », « la terre où gît mon cordon ombilical ».",effet:"Le patriotisme prend la forme d'un amour absolu et personnel ; le lecteur perçoit un attachement viscéral, presque charnel, à la patrie."}
     ],
     techniques:[
-      {nom:"Le récit lyrique",def:"Récit traversé d'émotion et de musicalité, proche du poème en prose.",exemple:"L'évocation émue de la terre natale et des souvenirs d'enfance.",effet:"Le lecteur partage l'attachement profond du narrateur à son sol et à ses racines."},
-      {nom:"La description sensorielle",def:"Solliciter les cinq sens pour faire revivre un lieu.",exemple:"Les couleurs, les odeurs et les bruits du village natal restitués avec précision.",effet:"Le paysage devient présent et vivant : le lecteur le voit et le ressent."},
-      {nom:"Le symbolisme tellurique",def:"Faire de la terre (le sol natal) un symbole d'identité, de mémoire et d'appartenance.",exemple:"La terre natale, racine qui définit l'être et appelle au retour.",effet:"Le thème dépasse l'autobiographie : il dit le lien universel entre l'homme et sa terre."},
-      {nom:"Les proverbes intégrés",def:"Insérer la sagesse orale dans le récit pour l'ancrer dans la culture africaine.",exemple:"Des maximes traditionnelles ponctuent et commentent le récit.",effet:"Le texte gagne en profondeur et relie l'expérience individuelle à la sagesse collective."}
+      {nom:"L'esthétique du morcellement",def:"Organiser le recueil en de nombreux poèmes brefs répartis en sections, au lieu d'un poème-livre continu.",exemple:"26 poèmes en 6 sections — à l'opposé du « long souffle » de Césaire (« Cahier ») ou de J.S.F. Eone (« Le testament du pâtre »).",effet:"Chaque poème éclaire une facette de l'amour du pays ; l'ensemble forme une sorte de puzzle que la lecture recompose."},
+      {nom:"Le vers libre teinté de rime",def:"Une écriture hybride : libérée de la métrique classique, mais qui garde la rime pour sa beauté sonore.",exemple:"« … parfois en rage / Comme un sauvage / Qui bave sur ses plages » (rimes en cascade) ou des passages en vers très courts presque sans rime.",effet:"Alima se situe « à la croisée des mondes » : sensible à la versification française, mais enraciné dans une oralité africaine de rythmes et d'images (Senghor, Philombe, Kayo)."},
+      {nom:"L'anaphore et l'exclamation",def:"La répétition d'un mot en tête de vers et la tournure exclamative pour intensifier le sentiment patriotique.",exemple:"« J'aime mon pays… J'aime mon pays… » ; « Ô mon cher pays ! Ô mon cher pays ! »",effet:"La reprise donne « cadence et harmonie » et transforme la déclaration en hymne ; l'exclamation porte l'émotion à son sommet."},
+      {nom:"La métaphore et la personnification du pays",def:"Représenter la patrie par des images fortes et s'adresser à elle comme à un être vivant (mère, père, bien-aimée).",exemple:"« mon souverain bien », « le reliquaire qui recèle les restes de mes pères », « la terre où gît mon cordon ombilical » ; le pays tutoyé tout au long du livre.",effet:"Le sol natal devient sacré et vivant : héritage des ancêtres et personne aimée à la fois. Les camerounismes (« matango », « vin de crabe ») y ajoutent l'enracinement culturel."}
     ],
     controle:[
-      {q:"Pourquoi l'attachement au sol natal est-il un enjeu actuel pour les jeunes Camerounais ?",r:"1) L'exode rural massif vide les campagnes camerounaises ; 2) La diaspora éloigne géographiquement les jeunes ; 3) L'éducation occidentale peut faire mépriser les origines rurales ; 4) Sans mémoire des origines, il n'y a pas de construction identitaire solide ; 5) L'attachement au sol natal n'empêche pas la modernité, il l'enracine. Ce thème est fondamental pour la jeunesse camerounaise en pleine mutation."}
+      {q:"Quel est le genre de l'œuvre et comment est-elle composée ?",r:"C'est un recueil de poésie : 26 poèmes répartis en six sections (de 1, 9, 8, 4, 2 et 2 textes). Le fil directeur de l'ensemble est l'amour ardent du poète pour sa terre natale, le Cameroun."},
+      {q:"Qu'appelle-t-on « l'esthétique du morcellement » chez Alima ?",r:"Au lieu d'écrire un seul poème continu (le « long souffle » de Césaire dans le « Cahier », ou de J.S.F. Eone), Alima morcelle son inspiration en 26 poèmes brefs assemblés en sections — « un puzzle » de moments d'amour pour le pays que la lecture critique recompose."},
+      {q:"Comment se caractérise le vers d'Alima ?",r:"C'est un vers libre « teinté de relents classiques » : il abandonne la métrique fixe mais conserve la rime, non par respect des conventions, mais pour la beauté sonore. Écriture hybride, à la croisée du classicisme français et de l'oralité africaine (Senghor, Philombe, Ngo Mai, Kayo)."},
+      {q:"Citez trois procédés au service de l'amour patriotique.",r:"1) L'anaphore (« J'aime mon pays… ») qui scande la déclaration ; 2) l'exclamation (« Ô mon cher pays ! ») qui en porte l'émotion ; 3) la métaphore et la personnification du pays (« le reliquaire qui recèle les restes de mes pères », le pays tutoyé comme une bien-aimée), enrichies de comparaisons et de camerounismes."},
+      {q:"En quoi le recueil est-il un engagement citoyen ?",r:"Au-delà de la célébration, Alima dénonce les comportements antipatriotiques et, en filigrane, le commerce inégal entre l'Occident et l'Afrique (les cargos « chargés de bananes et de cacao en partance pour les pays occidentaux »). Il veut transmettre à la jeunesse camerounaise « l'inspiration patriotique » et l'énergie de défendre la nation."}
     ],
     analyse:{
-      angle:"Pourquoi revient-on toujours au village, même quand on a une belle vie en ville ?",
-      citation:"Tu peux quitter le village. Le village, lui, ne te quitte jamais.",
-      contenu:"Question simple : tu connais quelqu'un qui a réussi en ville et qui, malgré tout, retourne au village à chaque vacance ? À chaque deuil ? À chaque fête ? Tu en connais. Tout le monde en connaît. Et Ernest Alima, dans ce livre, te demande : POURQUOI ? D'où vient cette force étrange qui nous ramène toujours au sol natal ?\n\n📖 SCÈNE — Le retour au village\nImagine un homme qui vit à Yaoundé depuis 30 ans. Bon poste, belle maison, enfants scolarisés. Tout va bien. Et pourtant, un matin, il prend le car. Il roule pendant des heures sur des pistes cabossées. Il arrive devant la case en terre où il est né. Il s'assoit sur un tabouret. Il ne dit rien. Il regarde simplement les feuilles bouger. Et il sent quelque chose se réparer en lui qu'il ne savait même pas cassé.\n\nAlima décrit ça avec une simplicité qui frappe. L'odeur du feu de bois. Le bruit des coqs. Les voisins qui passent, qui te reconnaissent. La main de ta tante sur ton épaule. Et toi, qui croyais être devenu un « citadin », qui te rends compte que non — tu es toujours d'ici. Tu seras toujours d'ici.\n\nPour ton année de 4e : ce roman te donne une carte. Une carte de TOI. Tu vis peut-être à Douala. Tu rêves peut-être de Paris ou de Montréal. Très bien. Mais retiens cette idée : tu auras toujours UN SOL. Un endroit où tes premiers pas ont laissé une trace. Et cet attachement-là, ce n'est ni faiblesse ni nostalgie. C'est une force. C'est une racine. Et les arbres sans racines, on sait ce qui leur arrive au premier coup de vent."
+      angle:"Peut-on aimer son pays comme on aime une personne ?",
+      citation:"Je t'aime d'un amour / Qui règne sur mon cœur / Comme un roi sur sa cour !",
+      contenu:"Ernest Alima, c'est un vieux poète camerounais, retraité à Yaoundé, première génération. Et dans ce recueil, il fait une chose simple et bouleversante : il parle à son pays, le Cameroun, comme on parle à quelqu'un qu'on aime à la folie.\n\nAttention : ce n'est PAS un roman, ni des récits. Ce sont 26 poèmes, rangés en 6 sections. De la vraie poésie, avec de la musique dans les mots.\n\n📖 LA SCÈNE — Une déclaration d'amour\nÉcoute le refrain : « J'aime mon pays… J'aime mon pays… ». Ça revient, ça revient, comme quand on n'arrive pas à s'arrêter de dire « je t'aime ». Et quand l'émotion déborde, ça devient un cri : « Ô mon cher pays ! Ô mon cher pays ! Ô mon cher pays ! ». Trois fois. Parce qu'une fois ne suffit jamais.\n\nLE PAYS DEVENU PERSONNE\nPour Alima, le Cameroun n'est pas une carte de géographie. C'est « mon souverain bien », « la terre où gît mon cordon ombilical », « le reliquaire qui recèle les restes de mes pères ». Traduction : ce sol garde les ancêtres, il m'a vu naître, je lui appartiens. Et il glisse au passage des mots de chez nous — « matango », « vin de crabe » — comme une fierté.\n\nMAIS AIMER, C'EST AUSSI DÉFENDRE\nAlima n'est pas naïf. Derrière la beauté, il dénonce : les cargos qui partent « chargés de bananes et de cacao » vers l'Occident — le commerce inégal qui appauvrit l'Afrique. Aimer son pays, chez lui, c'est aussi refuser ce qui l'abîme.\n\nPour ta 4e : ce recueil est parfait pour parler de POÉSIE LYRIQUE et de PATRIOTISME. Mots-clés rentables : lyrisme, anaphore, vers libre, personnification, engagement. Et la grande idée à retenir : on peut aimer un pays d'un amour aussi fort, aussi tendre, aussi jaloux que l'amour pour une personne."
     }
   }
+
 
 };
 
@@ -23645,7 +23654,10 @@ function showLabosVirtuels(){
   h+="</div>";
 
   // Grille de labos
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;margin-bottom:28px'>";
+  // v2.0 FIX débordement mobile : minmax(min(270px,100%),1fr) → la colonne se réduit
+  // à 100% sous 270px au lieu de forcer 270px (qui poussait la carte + son badge
+  // « GRATUIT » hors écran et créait un défilement horizontal). + overflow-x clos.
+  h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr));gap:16px;margin-bottom:28px;max-width:100%'>";
   list.forEach(function(lv){
     var locked=!lv.gratuit&&!SES;
     h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:0;border-top:3px solid "+lv.color+";overflow:hidden;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;box-shadow:0 10px 26px -16px rgba(20,37,84,.16)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px -18px "+lv.color+"55'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 10px 26px -16px rgba(20,37,84,.16)'\">";
@@ -23668,7 +23680,7 @@ function showLabosVirtuels(){
   h+="<div style='background:linear-gradient(135deg,#0F172A,#1E3A8A);border-radius:20px;padding:28px;margin-bottom:20px'>";
   h+="<div style='font-size:11px;font-weight:800;color:#FFC93C;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px'>⭐ Abonnements Labos</div>";
   h+="<div style='font-family:Georgia,serif;font-size:15px;color:rgba(255,255,255,.8);margin-bottom:20px'>Accède à tous les labos, quiz et fiches de révision</div>";
-  h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px'>";
+  h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:14px'>";
   LABO_PACKS.forEach(function(pk){
     h+="<div style='background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,."+(pk.populaire?"3":"15")+");border-radius:16px;padding:18px;position:relative'>";
     if(pk.populaire) h+="<div style='position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#FFC93C;color:#0F172A;font-size:9px;font-weight:800;padding:3px 12px;border-radius:10px;white-space:nowrap'>⭐ PLUS POPULAIRE</div>";
@@ -28347,17 +28359,31 @@ window.openSecureBook=function(bookId){
       +'<span class="sread-zlbl" id="sreadZoomLbl">100%</span>'
       +'<button class="sread-zbtn" onclick="_secureZoom(1)" aria-label="Agrandir le texte" title="Agrandir">+</button>'
     +'</div>'
-    +'<div class="sread-page" id="sreadPageLbl">…</div>'
+    +'<div class="sread-pal-wrap">'
+      +'<button class="sread-pal" onclick="_secureTogglePal(event)" aria-haspopup="true" aria-label="Confort de lecture" title="Confort de lecture (thème)">🎨</button>'
+      +'<div class="sread-pal-pop" id="sreadPalPop" role="menu" aria-label="Thème de lecture">'
+        +'<button role="menuitemradio" data-th="jour"  onclick="_secureTheme(\'jour\')">☀️ Jour</button>'
+        +'<button role="menuitemradio" data-th="sepia" onclick="_secureTheme(\'sepia\')">📜 Sépia</button>'
+        +'<button role="menuitemradio" data-th="nuit"  onclick="_secureTheme(\'nuit\')">🌙 Nuit</button>'
+        +'<button role="menuitemradio" data-th="doux"  onclick="_secureTheme(\'doux\')">🌫️ Doux</button>'
+      +'</div>'
+    +'</div>'
+    +'<div class="sread-page" id="sreadPageLbl" onclick="_secureJump()" title="Aller à une page" style="cursor:pointer">…</div>'
     +'<button class="sread-unlock" id="sreadUnlock" style="display:none" onclick="_secureUnlock()">🔓 Débloquer</button>'
+    +'<button class="sread-fs" onclick="_secureFullscreen()" aria-label="Plein écran" title="Plein écran / présentation">⛶</button>'
     +'<button class="sread-x" onclick="closeSecureBook()" aria-label="Fermer">✕</button>'
     +'</div>'
     +'<div class="sread-stage" id="sreadStage"><div class="sread-load">📖 Chargement…</div></div>'
+    +'<div class="sread-wm" id="sreadWm" aria-hidden="true"></div>'
     +'<div class="sread-shield" id="sreadShield"><div>👁️ Lecture protégée mise en pause</div><small>Revenez sur la fenêtre pour reprendre</small></div>'
     +'<div class="sread-nav"><span class="sread-foot">📖 Lecture continue — faites défiler · Protégé, sans copie ni partage</span></div>';
   document.body.appendChild(ov);
   document.body.style.overflow='hidden';
-  window._secureState={id:bookId,kind:kind,page:1,pages:0,freePages:10,hasAccess:false,prepared:false,base:base,tok:tok,book:book,zoom:1};
+  var _savedTh=(function(){try{return localStorage.getItem('vrt_sread_theme')||'jour';}catch(_){return 'jour';}})();
+  window._secureState={id:bookId,kind:kind,page:1,pages:0,freePages:10,hasAccess:false,prepared:false,base:base,tok:tok,book:book,zoom:1,theme:_savedTh};
+  if(typeof _secureTheme==='function') _secureTheme(_savedTh); else ov.setAttribute('data-theme',_savedTh);
   _secureInstallGuards();
+  if(typeof _secureSetWatermark==='function') _secureSetWatermark();
   // Métadonnées (nombre de pages, droits)
   fetch(base+'/secure_pdf.php?id='+encodeURIComponent(bookId)+'&meta=1'+(tok?('&token='+encodeURIComponent(tok)):''))
     .then(function(r){return r.json();})
@@ -28432,6 +28458,63 @@ window._secureApplyZoom=function(){
   var stage=document.getElementById('sreadStage'); if(!stage) return;
   var w=Math.round(Math.min(900,stage.clientWidth*0.96)*(st.zoom||1))+'px';
   stage.querySelectorAll('.sread-img').forEach(function(img){ img.style.maxWidth='none'; img.style.width=w; });
+};
+// ── CONFORT DE LECTURE : palette de thèmes (Jour/Sépia/Nuit/Doux) ──
+// Filtres CSS sur les images de pages (le filigrane reste incrusté → sécurité intacte).
+window._secureTogglePal=function(e){
+  if(e&&e.stopPropagation) e.stopPropagation();
+  var ov=document.getElementById('secureReader'); if(!ov) return;
+  var open=ov.classList.toggle('pal-open');
+  if(open){ setTimeout(function(){ document.addEventListener('click',window._securePalOutside,{once:true}); },0); }
+};
+window._securePalOutside=function(){ var ov=document.getElementById('secureReader'); if(ov) ov.classList.remove('pal-open'); };
+window._secureTheme=function(name){
+  var ov=document.getElementById('secureReader'); if(!ov) return;
+  if(['jour','sepia','nuit','doux'].indexOf(name)<0) name='jour';
+  ov.setAttribute('data-theme',name);
+  ov.classList.remove('pal-open');
+  try{ localStorage.setItem('vrt_sread_theme',name); }catch(_){}
+  if(window._secureState) window._secureState.theme=name;
+  ov.querySelectorAll('.sread-pal-pop [data-th]').forEach(function(b){
+    var on=b.getAttribute('data-th')===name;
+    b.classList.toggle('on',on); b.setAttribute('aria-checked',on?'true':'false');
+  });
+};
+// ── UX : plein écran / mode présentation ──
+window._secureFullscreen=function(){
+  var ov=document.getElementById('secureReader'); if(!ov) return;
+  try{
+    var fsEl=document.fullscreenElement||document.webkitFullscreenElement;
+    if(!fsEl){ (ov.requestFullscreen||ov.webkitRequestFullscreen||function(){}).call(ov); }
+    else{ (document.exitFullscreen||document.webkitExitFullscreen||function(){}).call(document); }
+  }catch(e){}
+};
+// ── UX : aller à une page (saisie) ──
+window._secureJump=function(){
+  var st=window._secureState; if(!st) return;
+  var max=st.hasAccess?(st.pages||0):Math.min(st.freePages,(st.pages||st.freePages));
+  var v=prompt('Aller à la page (1 – '+(max||st.freePages)+') :',''); if(v===null) return;
+  var n=parseInt(v,10); if(!n||n<1){ return; }
+  _secureScrollToPage(n);
+};
+window._secureScrollToPage=function(n){
+  var stage=document.getElementById('sreadStage'); if(!stage) return;
+  var img=stage.querySelector('.sread-img[data-pg="'+n+'"]');
+  if(img){ stage.scrollTo({top:Math.max(0,img.offsetTop-12),behavior:'smooth'}); }
+  else if(typeof toast==='function'){ toast('Page '+n+' indisponible dans cet aperçu','warn'); }
+};
+// ── Sécurité : filigrane CLIENT vivant (en plus de celui gravé côté serveur) ──
+// Couche supplémentaire liée à la session : toute capture montre AUSSI ce marqueur.
+window._secureSetWatermark=function(){
+  var wm=document.getElementById('sreadWm'); if(!wm) return;
+  var who=(typeof SES!=='undefined'&&SES)
+    ? ((SES.pre||'')+' '+(SES.nom||'')+' · '+(SES.accountId||SES.id||'')).replace(/\s+/g,' ').trim()
+    : 'Aperçu VÉRITAS';
+  var txt=(who+' · '+new Date().toLocaleDateString('fr-FR')).slice(0,60);
+  var svg='<svg xmlns="http://www.w3.org/2000/svg" width="360" height="210">'
+    +'<text x="6" y="120" transform="rotate(-28 6 120)" font-family="Arial" font-size="15" '
+    +'fill="#142554" fill-opacity="0.12">'+txt.replace(/[<>&]/g,' ')+'</text></svg>';
+  wm.style.backgroundImage="url('data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)+"')";
 };
 window._secureUnlock=function(){
   var st=window._secureState; if(!st) return;
@@ -35343,19 +35426,52 @@ window._pdjCleanExtract = function(txt, maxLen){
   }
   return txt;
 };
+// Compte les mots (frontière = espaces) — sert au plancher de 70 mots.
+window._pdjWords = function(txt){ return String(txt||'').trim().split(/\s+/).filter(Boolean).length; };
+
+// ════════════════════════════════════════════════════════════════════
+// 📖 LISTE « À TIRER PAR JOUR » — œuvres au programme (AJOUT SIMPLE)
+// Pour AJOUTER une œuvre : ajoute un objet { titre, auteur, classe, passage }.
+//   • RÈGLE : passage = AU MOINS 70 mots (un vrai extrait, pas une citation courte).
+//   • L'ANALYSE est AUTOMATIQUE (Prof. Ambassa / IA) — inutile de l'écrire ici.
+// Ces œuvres s'ajoutent au tirage quotidien (à côté de LITT_OEUVRES et du corpus rag).
+// ════════════════════════════════════════════════════════════════════
+window.PASSAGES_PROGRAMME = [
+  { titre:"Poèmes sauvages éclairés au feu de brousse", auteur:"Henri N'Koumo", classe:"2nde",
+    passage:"il fait si froid dans le soleil, si froid dans mes mots, car tu es partie un samedi de plage et de rires sous les cocotiers, et tu avais de grands cris dans ton sang déversé dans cette partie de chasse à l'homme, et mes yeux à moi s'éteignent au profond de ma peine comme des allumettes de minuit ouvertes sur les lumières enragées ; tu as ouvert la porte de ma gorge aux eaux écroulées sous la colère des balles, Henrike." },
+  { titre:"L'attachement au sol natal", auteur:"Ernest Alima", classe:"4ème",
+    passage:"J'aime mon pays, ses femmes et ses hommes ; j'aime mon pays et sa flore dense ; j'aime mon pays, ses fleuves et ses rivières ; j'aime mon pays et ses oiseaux mélodieux. Ô mon amour immortel ! Ô Afrique en raccourci ! Ô mon cher pays ! Ô mon cher pays ! Je t'aime d'un amour qui règne sur mon cœur comme un roi sur sa cour ! Toi, mon souverain bien, toi la terre où gît mon cordon ombilical." },
+  // ➕ Ajoute ici tes NOUVELLES œuvres au programme (même format, passage ≥ 70 mots).
+];
+
+// v2.0 — plancher 70 mots : ne tire QUE des passages d'au moins 70 mots.
+// Sources : (1) PASSAGES_PROGRAMME (extraits déjà longs), (2) LITT_OEUVRES (une
+// citation ≥70 mots, sinon montage de citations jusqu'à 70 mots).
 window._getPassageDuJour = function(){
   try{
-    if(typeof LITT_OEUVRES!=='object'||!LITT_OEUVRES) return null;
-    var keys=Object.keys(LITT_OEUVRES).filter(function(k){
-      var o=LITT_OEUVRES[k]; return o&&o.citations&&o.citations.length;
-    });
-    if(!keys.length) return null;
+    var MIN=70, pool=[];
+    if(Array.isArray(window.PASSAGES_PROGRAMME)){
+      window.PASSAGES_PROGRAMME.forEach(function(o){
+        if(o&&o.passage&&_pdjWords(o.passage)>=MIN){
+          pool.push({passage:_pdjCleanExtract(o.passage,1600),titre:o.titre||'',auteur:o.auteur||'',classe:o.classe||''});
+        }
+      });
+    }
+    if(typeof LITT_OEUVRES==='object'&&LITT_OEUVRES){
+      var cit=function(c){ return (typeof c==='string')?c:(c&&(c.texte||c.t||c.citation||c.text||c.extrait)||''); };
+      Object.keys(LITT_OEUVRES).forEach(function(k){
+        var o=LITT_OEUVRES[k]; if(!o||!o.citations||!o.citations.length) return;
+        var single='';
+        for(var i=0;i<o.citations.length;i++){ var t=String(cit(o.citations[i])||'').replace(/\s*\/\s*/g,' ').trim(); if(_pdjWords(t)>=MIN){ single=t; break; } }
+        var passage=single;
+        if(!passage){ var parts=[],w=0; for(var j=0;j<o.citations.length&&w<MIN;j++){ var tt=String(cit(o.citations[j])||'').replace(/\s*\/\s*/g,' ').trim(); if(tt){ parts.push(tt); w+=_pdjWords(tt); } } passage=parts.join(' '); }
+        passage=_pdjCleanExtract(passage,1600);
+        if(_pdjWords(passage)>=MIN) pool.push({passage:passage,titre:o.titre||'',auteur:o.auteur||'',classe:o.classe||o.niveau||''});
+      });
+    }
+    if(!pool.length) return null;
     var day=Math.floor((new Date()-new Date(new Date().getFullYear(),0,1))/86400000);
-    var oe=LITT_OEUVRES[keys[day%keys.length]];
-    var cit=oe.citations[day%oe.citations.length];
-    var txt=(typeof cit==='string')?cit:(cit&&(cit.texte||cit.t||cit.citation||cit.text||cit.extrait)||'');
-    if(!txt) return null;
-    return {passage:_pdjCleanExtract(txt,1600),titre:oe.titre||'',auteur:oe.auteur||'',classe:oe.classe||oe.niveau||''}; // v1.4.8 : extrait long
+    return pool[day%pool.length];
   }catch(e){ return null; }
 };
 
@@ -35469,7 +35585,7 @@ window._pdjLoadExpl = function(){
   try{
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
     fetch(base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      prompt:'Passage de l\'œuvre "'+p.titre+'"'+(p.auteur?' de '+p.auteur:'')+' (programme MINESEC camerounais) :\n« '+p.passage.substring(0,420)+' »\n\nÉcris une MINI-ANALYSE de 2 ou 3 phrases, au ton COMIQUE, IRONIQUE et DIDACTIQUE (un prof drôle et mordant qui adore son texte) : fais comprendre ce qui se joue, situe brièvement le moment ou la partie dans l\'œuvre UNIQUEMENT si tu en es sûr (sinon n\'invente AUCUN numéro de chapitre), et TERMINE par une question taquine qui donne furieusement envie de lire la suite. Aucun spoiler. Réponds en FRANÇAIS.',
+      prompt:'Passage de l\'œuvre "'+p.titre+'"'+(p.auteur?' de '+p.auteur:'')+' (programme MINESEC camerounais) :\n« '+p.passage.substring(0,700)+' »\n\nÉcris une MINI-ANALYSE de 2 ou 3 phrases, au ton IRONIQUE, RÉALISTE, COMIQUE et DIDACTIQUE (un prof drôle, mordant et lucide qui adore son texte et le ramène au réel) : fais comprendre ce qui se joue, situe brièvement le moment ou la partie dans l\'œuvre UNIQUEMENT si tu en es sûr (sinon n\'invente AUCUN numéro de chapitre), et TERMINE par une question taquine qui donne furieusement envie de lire la suite. Aucun spoiler. Réponds en FRANÇAIS.',
       sysPrompt:'Tu es le Professeur Ambassa : prof de français camerounais drôle, ironique, cultivé, jamais ennuyeux. Tu réponds TOUJOURS en français.',
       userId:'pdj',plan:'anon'
     })}).then(function(r){return r.json();}).then(function(d){
@@ -35514,7 +35630,9 @@ window._pdjLoad = function(){
           var t=_pdjCleanTitle((d.passages[i]||{}).titre||'');
           if(t && (!yesterdayTitle || t.toLowerCase()!==yesterdayTitle.toLowerCase())) cands.push(d.passages[i]);
         }
-        if(!cands.length) return; // tous = hier → on garde la pioche LITT_OEUVRES
+        // v2.0 — plancher 70 mots : on écarte les extraits trop courts du corpus.
+        cands=cands.filter(function(pp){ return _pdjWords(_pdjCleanExtract((pp||{}).extrait,1600))>=70; });
+        if(!cands.length) return; // aucun ≥70 mots (ou tous = hier) → on garde la pioche LITT_OEUVRES (≥70 garanti)
         var chosen=cands[Math.floor(Math.random()*cands.length)];
         // v1.4.8 : extrait PLUS LONG (900 → 1600) — un vrai passage qui happe le lecteur
         var pp=chosen, txt=_pdjCleanExtract(pp.extrait,1600);
