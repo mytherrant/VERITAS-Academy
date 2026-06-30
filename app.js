@@ -17857,6 +17857,7 @@ var OEUVRE_COVERS = {
   "2nde_tribus_capitoline":"2nde_tribus_capitoline.jpg",
   "2nde_poemes_sauvages":"2nde_poemes_sauvages.jpg",
   "2nde_tartuffe":"2nde_tartuffe.jpg",
+  "2nde_nkoumwam":"2nde_nkoumwam.jpg",
   "1ere_coeur_tenebres":"1ere_coeur_tenebres.jpg",
   "1ere_balafon":"1ere_balafon.jpg",
   "1ere_lion_perle":"1ere_lion_perle.jpg",
@@ -35580,21 +35581,31 @@ window._pdjLoadExpl = function(){
   var fb=_pdjFallback(p);
   var dk='vrt_pdj_'+new Date().toISOString().slice(0,10)+'_'+(p.titre+'|'+p.passage).substring(0,40).replace(/[^a-z0-9]/gi,'');
   try{ var c=localStorage.getItem(dk); if(c){ box.innerHTML=c; return; } }catch(e){}
-  if(window._pdjExplBusy) return;   // v1.2.x : verrou anti-concurrence — au 1er chargement, l'accueil se re-rend ~4× et déclenchait 4 appels simultanés à ia_proxy (→ HTTP 429). Un seul appel en vol.
+  if(window._pdjExplBusy) return;   // verrou anti-concurrence (l'accueil se re-rend ~4×) — un seul appel IA en vol.
   window._pdjExplBusy=true;
+  // v2.x — CORRECTIF PROFOND du bug « Analyse en cours… » bloqué :
+  //  (1) on RE-CHERCHE #vPdjExpl dans les callbacks : l'accueil se re-rend → le nœud
+  //      capturé (box) devient DÉTACHÉ ; écrire dessus n'affichait plus rien → l'analyse
+  //      n'apparaissait jamais même en cas de succès.
+  //  (2) TIMEOUT client 22 s (AbortController) : la chaîne IA (jusqu'à 6 moteurs × 60 s)
+  //      ne peut plus bloquer indéfiniment ; au-delà, on garde le repli factuel.
+  //  (3) le verrou _pdjExplBusy est TOUJOURS relâché (succès / échec / timeout).
   try{
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
-    fetch(base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    var _ac=('AbortController' in window)?new AbortController():null;
+    var _set=function(html){ var bx=document.getElementById('vPdjExpl'); if(bx&&html) bx.innerHTML=html; window._pdjExplBusy=false; };
+    var _to=setTimeout(function(){ try{ _ac&&_ac.abort(); }catch(e){} window._pdjExplBusy=false; },22000);
+    fetch(base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},signal:_ac?_ac.signal:undefined,body:JSON.stringify({
       prompt:'Passage de l\'œuvre "'+p.titre+'"'+(p.auteur?' de '+p.auteur:'')+' (programme MINESEC camerounais) :\n« '+p.passage.substring(0,700)+' »\n\nÉcris une MINI-ANALYSE de 2 ou 3 phrases, au ton IRONIQUE, RÉALISTE, COMIQUE et DIDACTIQUE (un prof drôle, mordant et lucide qui adore son texte et le ramène au réel) : fais comprendre ce qui se joue, situe brièvement le moment ou la partie dans l\'œuvre UNIQUEMENT si tu en es sûr (sinon n\'invente AUCUN numéro de chapitre), et TERMINE par une question taquine qui donne furieusement envie de lire la suite. Aucun spoiler. Réponds en FRANÇAIS.',
       sysPrompt:'Tu es le Professeur Ambassa : prof de français camerounais drôle, ironique, cultivé, jamais ennuyeux. Tu réponds TOUJOURS en français.',
       userId:'pdj',plan:'anon'
     })}).then(function(r){return r.json();}).then(function(d){
+      clearTimeout(_to);
       var t=(d&&d.text)?String(d.text).trim():'';
-      if(t){ box.innerHTML='💡 '+_esc(t); try{ localStorage.setItem(dk,box.innerHTML); }catch(e){} }
-      else { box.innerHTML=fb; }
-      window._pdjExplBusy=false;
-    }).catch(function(){ box.innerHTML=fb; window._pdjExplBusy=false; });
-  }catch(e){ box.innerHTML=fb; window._pdjExplBusy=false; }
+      if(t){ var html='💡 '+_esc(t); _set(html); try{ localStorage.setItem(dk,html); }catch(e){} }
+      else { _set(fb); }
+    }).catch(function(){ clearTimeout(_to); _set(fb); });
+  }catch(e){ var bx2=document.getElementById('vPdjExpl'); if(bx2) bx2.innerHTML=fb; window._pdjExplBusy=false; }
 };
 
 // Nettoie un titre tiré d'un nom de fichier (suffixes @Epub, "(Z-Library)",
@@ -35659,7 +35670,11 @@ window._passageDuJourHtml = function(){
   window._pdjCurrent=p;
   var ref=_esc(p.titre)+(p.auteur?' · '+_esc(p.auteur):'')+(p.classe?' · '+_esc(p.classe):'');
   // analyse déjà calculée aujourd'hui → l'injecter d'emblée (évite le flash « en cours »)
-  var explInit='<span style="opacity:.7">✨ Analyse en cours…</span>';
+  // v2.x — CORRECTIF « Analyse en cours… » qui restait bloqué : l'état par défaut
+  // n'est plus un spinner mais l'analyse FACTUELLE de repli (LITT_OEUVRES). L'IA,
+  // quand elle arrive, ENRICHIT ce contenu → le bloc affiche TOUJOURS une vraie
+  // analyse, jamais un « en cours » perpétuel (IA lente/indispo, quota, re-render).
+  var explInit=(typeof _pdjFallback==='function'?_pdjFallback(p):'💡 Un extrait à savourer.');
   try{
     var _dk='vrt_pdj_'+new Date().toISOString().slice(0,10)+'_'+(p.titre+'|'+p.passage).substring(0,40).replace(/[^a-z0-9]/gi,'');
     var _c=localStorage.getItem(_dk); if(_c) explInit=_c;
