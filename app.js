@@ -7500,6 +7500,32 @@ function pgAuthorsMgmt(){
     });
     h+='</div>';
   }
+  // v2.x — CHAÎNON MANQUANT : les comptes AUTO-INSCRITS via « Devenir auteur » /
+  // « Créer mon compte partenaire » vivent dans DB.visitorAccounts (role/isAuthor/
+  // isPartner) et n'apparaissaient NULLE PART côté admin. On les liste ici.
+  var _wa=function(t){return (t||'').replace(/[^0-9]/g,'');};
+  var selfAuthors=(DB.visitorAccounts||[]).filter(function(a){return a&&(a.role==='auteur'||a.isAuthor);});
+  var partners=(DB.visitorAccounts||[]).filter(function(a){return a&&(a.isPartner||a.role==='partenaire'||a.role==='mecene');});
+  h+='<div class="card mt16"><div class="ct">✍️ Candidatures auteurs auto-inscrites ('+selfAuthors.length+')</div>';
+  if(!selfAuthors.length){ h+='<div class="ib ibt mb0"><span>📭</span><span>Aucune pour le moment. Les visiteurs qui cliquent « Devenir auteur » apparaissent ici (discipline, niveau, contact).</span></div>'; }
+  else{
+    h+='<div class="tw"><table><thead><tr><th>Nom</th><th>Discipline</th><th>Niveau</th><th>Contact</th><th>Inscrit le</th><th></th></tr></thead><tbody>';
+    selfAuthors.forEach(function(a){ var w=_wa(a.tel);
+      h+='<tr><td class="semi">'+_esc((a.pre||'')+' '+(a.nom||''))+'</td><td>'+_esc(a.discipline||'—')+'</td><td class="mono">'+_esc(a.cls||'—')+'</td><td class="xs2">'+_esc(a.tel||a.email||'—')+'</td><td class="xs2 mut">'+_esc(a.dateInscription||'—')+'</td><td>'+(w?'<a class="btn bi sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/'+w+'">📱</a>':'')+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  h+='</div>';
+  h+='<div class="card mt16"><div class="ct">🤝 Partenaires & mécènes ('+partners.length+')</div>';
+  if(!partners.length){ h+='<div class="ib ibt mb0"><span>📭</span><span>Aucun pour le moment. Ceux qui cliquent « Créer mon compte partenaire » (entreprise / ONG / mécène) apparaissent ici.</span></div>'; }
+  else{
+    h+='<div class="tw"><table><thead><tr><th>Nom</th><th>Organisation</th><th>Type</th><th>Contact</th><th>Inscrit le</th><th></th></tr></thead><tbody>';
+    partners.forEach(function(a){ var w=_wa(a.tel);
+      h+='<tr><td class="semi">'+_esc((a.pre||'')+' '+(a.nom||''))+'</td><td>'+_esc(a.orgNom||'—')+'</td><td>'+_esc(a.orgType||a.role||'—')+'</td><td class="xs2">'+_esc(a.tel||a.email||'—')+'</td><td class="xs2 mut">'+_esc(a.dateInscription||'—')+'</td><td>'+(w?'<a class="btn bi sm" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/'+w+'">📱</a>':'')+'</td></tr>';
+    });
+    h+='</tbody></table></div>';
+  }
+  h+='</div>';
   return h;
 }
 
