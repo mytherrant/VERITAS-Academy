@@ -9494,7 +9494,7 @@ async function doLogin(){
       var v2=DB.visitorAccounts[j];
       if(v2.user.toLowerCase()===u.toLowerCase()&&v2.statut!=='suspendu'){var ok2=await verifyPassword(p,v2.pwd,v2.user,v2);if(ok2){va2=v2;break;}}
     }}
-    if(va2){va2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur',accountId:va2.id,plans:va2.plans||[]});
+    if(va2){va2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur_inscrit',accountId:va2.id,plans:va2.plans||[]});
       // v1.4.9 : compte au profil anglophone → interface intégralement en anglais au login
       try{ if(va2.profil&&va2.profil.sys==='en'&&typeof setLang==='function') setLang('en', true); }catch(e){}
       hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);_studentSyncBg(u,p);return;}
@@ -9509,7 +9509,7 @@ async function doLogin(){
     } else if(_slice&&_slice.account){
       var _ac=_slice.account;
       _recordLoginSuccess(u);_loginAttempts.count=0;
-      _createSession({id:_ac.user,nom:_ac.nom||'',pre:_ac.pre||'',mat:_ac.user,cls:_ac.cls||'',type:'visiteur',accountId:_ac.user,plans:_ac.plans||[]});
+      _createSession({id:_ac.user,nom:_ac.nom||'',pre:_ac.pre||'',mat:_ac.user,cls:_ac.cls||'',type:'visiteur_inscrit',accountId:_ac.user,plans:_ac.plans||[]});
       hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);
       return;
     }
@@ -27555,7 +27555,7 @@ function doRegister(){
     'admin');
   _notifyAdminNewMember(acc);
   SES={id:acc.id,nom:nom,pre:pre,mat:user,cls:acc.cls,tel:tel,
-    type:"visiteur",accountId:acc.id,plans:[]};
+    type:"visiteur_inscrit",accountId:acc.id,plans:[]};
   hideAll();$("VISITOR").style.display="flex";initVisitor();
   setTimeout(_updateVisitorHeader,120);
   if(acc.role==='auteur'){
