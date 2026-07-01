@@ -5203,7 +5203,10 @@ html{ scroll-behavior:auto; }
    sur écran moyen) rendait les panneaux TROP ÉTROITS. Règle retirée → les panneaux
    retrouvent leur largeur normale. Les effets de défilé/reveal sont conservés. */
 /* 3. EN-TÊTES ALLÉGÉES (moins « boîte qui bouffe la place ») */
-#VISITOR .acc-head{ padding:7px 14px !important; margin:12px auto 8px !important; }
+#VISITOR .acc-head{ padding:7px 14px !important; margin:12px auto 8px !important; text-align:center !important; }
+/* v2.x — titres de section centrés + textes descriptifs justifiés (demande Jacques) */
+#VISITOR .acc-head .acc-pill{ justify-content:center; }
+#VISITOR .vcard .acc-about-text, #VISITOR .vsec p.vjustify{ text-align:justify; }
 #VISITOR .acc-head .acc-pill{ font-size:14.5px !important; }
 #VISITOR .acc-head .acc-sub, #VISITOR .acc-sub{ font-size:11px !important; }
 

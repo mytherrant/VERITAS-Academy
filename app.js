@@ -4680,7 +4680,7 @@ function vShowSec(sec,btn){
     </div>
     <div class="g2 v-reveal v-stagger">
       <div class="vcard v-shine">
-        <div style="font-size:13px;line-height:1.9;white-space:pre-line;color:var(--ink2)">${_esc(pi.description||"")}</div>
+        <div style="font-size:13px;line-height:1.9;white-space:pre-line;text-align:justify;color:var(--ink2)">${_esc(pi.description||"")}</div>
       </div>
       <div>
         <div class="vcard">
@@ -16880,7 +16880,7 @@ window.vDevenirAuteur = function(){
     +'<ol style="margin:0;padding-left:20px;font-size:13px;color:#374151;line-height:1.8"><li>Créez votre compte gratuit (30 s)</li><li>Soumettez votre ressource</li><li>Validation puis mise en vente</li><li>Vous êtes payé chaque mois</li></ol>'
     +'</div>',
     '<button class="btn bo" onclick="cm()">Plus tard</button>'
-    +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null)">✨ Créer mon compte auteur</button>', true);
+    +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm(\'auteur\'):typeof showLogin===\'function\'?showLogin(\'eleve\'):null)">✨ Créer mon compte auteur</button>', true);
 };
 
 // Visiteur → devenir partenaire / soutenir VÉRITAS
@@ -16905,7 +16905,9 @@ window.mDevenirPartenaire = function(){
     + opt('🎓','Soutien pédagogique','Mettez à disposition des intervenants, des contenus ou un établissement partenaire.')
     + opt('💝','Don libre','Tout soutien, même modeste, aide un élève à réussir. Reçu disponible sur demande.')
     +'</div>',
-    '<button class="btn bo" onclick="cm()">Fermer</button>'+waBtn, true);
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm(\'partenaire\'):null)">🤝 Créer mon compte partenaire</button>'
+    +waBtn, true);
 };
 function mManagePartenaires(){
   if(!iA())return;
@@ -27386,7 +27388,12 @@ function _hasPlan(planId){
 }
 
 // ── INSCRIPTION VISITEUR ──────────────────────────────────────────
-function showRegisterForm(){
+function showRegisterForm(role){
+  // v2.x : inscription CONTEXTUELLE au rôle ('auteur' | 'partenaire' | 'mecene' |
+  // '' = élève/visiteur). Avant, « Devenir auteur » / « Nous accompagner » menaient
+  // tous au formulaire élève générique → aucune particularité. Le rôle est désormais
+  // capturé sur le compte (acc.role + champs dédiés) et l'admin est notifié en clair.
+  try{ window._regRole = (typeof role==='string') ? role.toLowerCase() : ''; }catch(e){ window._regRole=''; }
   hideAll();
   var ls=$("LS");if(ls)ls.style.display="flex";
   var area=document.getElementById("lFormArea")||document.querySelector(".l-form");
@@ -27394,50 +27401,71 @@ function showRegisterForm(){
     // Fallback: créer un panneau dans le portail visiteur
     hideAll();
     $("VISITOR").style.display="flex";
-    _vc(_buildRegisterHTML());
+    _vc(_buildRegisterHTML(window._regRole));
     return;
   }
-  _si('lFormArea',_buildRegisterHTML());
+  _si('lFormArea',_buildRegisterHTML(window._regRole));
 }
 
-function _buildRegisterHTML(){
-  return "<div style='padding:24px 20px;max-width:460px;margin:0 auto'>"
-    +"<div style='text-align:center;margin-bottom:22px'>"
-    +"<div style='font-size:46px;margin-bottom:10px'>🎓</div>"
-    +"<div style='font-family:Montserrat,sans-serif;font-size:20px;font-weight:900;color:#142554;margin-bottom:4px'>Créer mon compte VÉRITAS</div>"
-    +"<div style='font-size:12px;color:#6B7A99;line-height:1.7'>Accès gratuit immédiat · Premium débloqué par abonnement</div>"
-    +"</div>"
-    +"<div class='fg2'>"
-    +"<div class='fg'><span class='fl'>Prénom *</span><input class='fi' id='rPre' placeholder='Jean-Pierre'></div>"
-    +"<div class='fg'><span class='fl'>Nom *</span><input class='fi' id='rNom' placeholder='MBALLA'></div>"
-    +"<div class='fg'><span class='fl'>WhatsApp *</span><input class='fi' id='rTel' placeholder='+237 6 00 00 00 00'></div>"
-    +"<div class='fg'><span class='fl'>Email</span><input class='fi' type='email' id='rEmail' placeholder='jean@email.cm'></div>"
-    +"<div class='fg'><span class='fl'>🎁 Code parrainage (optionnel)</span><input class='fi' id='rRef' placeholder='VRT...' value='"+(sessionStorage.getItem('_vrtRef')||'')+"' style='text-transform:uppercase;letter-spacing:1px'></div>"
-    // v1.4.8 : PARCOURS dès l'inscription — section, type d'enseignement, niveau.
-    // Le compte naît avec son profil → e-learning, épreuves, labos, plans et
-    // Ambassa sont personnalisés dès la première connexion.
-    +"<div class='fg'><span class='fl'>Sous-système *</span><select class='fi' id='rSys' onchange='_regSysChange()'><option value='fr'>🇨🇲 Francophone</option><option value='en'>🇨🇲 Anglophone (GCE)</option></select></div>"
+function _buildRegisterHTML(role){
+  role = (typeof role==='string' ? role : (window._regRole||'')).toLowerCase();
+  var H = ({
+    auteur:    {ic:'✍️', t:'Créer mon compte auteur',     s:'Proposez vos ressources MINESEC — vous touchez 70% de chaque vente.', btn:'Créer mon compte auteur'},
+    partenaire:{ic:'🤝', t:'Créer mon compte partenaire', s:'Entreprises · ONG · mécènes · établissements — soutenez VÉRITAS, gagnez en visibilité.', btn:'Créer mon compte partenaire'},
+    mecene:    {ic:'💝', t:'Créer mon compte mécène',      s:'Soutenez l\'éducation camerounaise — votre nom mis en avant.', btn:'Créer mon compte mécène'}
+  })[role] || {ic:'🎓', t:'Créer mon compte VÉRITAS', s:'Accès gratuit immédiat · Premium débloqué par abonnement', btn:'Créer mon compte gratuit'};
+  var isPro = (role==='partenaire'||role==='mecene'); // ni élève ni parcours scolaire
+  var banner = (role==='auteur')
+    ? "<div style='background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;border-radius:14px;padding:14px;text-align:center;margin-bottom:16px'><div style='font-size:26px;font-weight:900;line-height:1'>70%</div><div style='font-size:11px;opacity:.92'>de chaque vente vous reviennent · versement MoMo/Orange</div></div>"
+    : isPro
+      ? "<div style='background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;border-radius:14px;padding:14px;text-align:center;margin-bottom:16px'><div style='font-size:14px;font-weight:800'>🤝 Visibilité garantie</div><div style='font-size:11px;opacity:.92'>Votre logo sur la page Partenaires et nos événements</div></div>"
+      : "";
+  var roleField = (role==='auteur')
+    ? "<div class='fg full'><span class='fl'>Votre discipline / matière *</span><input class='fi' id='rDiscipline' placeholder='Français, Maths, PCT, Anglais, SVT…'></div>"
+    : isPro
+      ? "<div class='fg'><span class='fl'>Organisation / structure *</span><input class='fi' id='rOrg' placeholder='Nom de votre entreprise / ONG'></div>"
+        +"<div class='fg'><span class='fl'>Type</span><select class='fi' id='rOrgType'><option value='entreprise'>🏢 Entreprise</option><option value='ong'>🤲 ONG / Association</option><option value='mecene'>💝 Mécène / Particulier</option><option value='ecole'>🏫 Établissement</option></select></div>"
+      : "";
+  // Parcours scolaire : pertinent pour l'élève ET l'auteur (il publie pour un niveau),
+  // masqué pour un partenaire/mécène (structure, pas un élève).
+  var parcours = isPro ? "" : (
+    "<div class='fg'><span class='fl'>Sous-système *</span><select class='fi' id='rSys' onchange='_regSysChange()'><option value='fr'>🇨🇲 Francophone</option><option value='en'>🇨🇲 Anglophone (GCE)</option></select></div>"
     +"<div class='fg'><span class='fl'>Enseignement *</span><select class='fi' id='rEns' onchange='_regSysChange()'><option value='gen'>🎓 Général</option><option value='tech'>🔧 Technique</option></select></div>"
     +(function(){
       var cfg=(typeof _AMBASSA_SYS!=='undefined')?_AMBASSA_SYS.fr_gen:{classes:CLS.slice()};
       var userCls=SES&&SES.cls;
-      return "<div class='fg'><span class='fl'>Classe / Niveau *</span><select class='fi' id='rCls'>"
+      return "<div class='fg'><span class='fl'>"+(role==='auteur'?'Niveau ciblé *':'Classe / Niveau *')+"</span><select class='fi' id='rCls'>"
         +cfg.classes.map(function(cl){
           return "<option"+(cl===userCls?' selected':'')+">"+_esc(cl)+"</option>";
         }).join("")+"</select>"
-        +"<div style='font-size:11px;color:#059669;margin-top:3px'>✓ Vos ressources seront personnalisées pour ce parcours</div>"
+        +"<div style='font-size:11px;color:#059669;margin-top:3px'>✓ "+(role==='auteur'?'Vos ressources seront classées pour ce niveau':'Vos ressources seront personnalisées pour ce parcours')+"</div>"
         +"</div>";
     })()
-    // v1.6 : Filière (Arts/Science en anglophone, Commercial/Industriel en technique).
-    // Masqué pour le francophone général. Détermine le groupe WA + la classe virtuelle.
     +"<div class='fg' id='rSerieWrap' style='display:none'><span class='fl'>Filière *</span><select class='fi' id='rSerie'></select></div>"
+  );
+  return "<div style='padding:24px 20px;max-width:460px;margin:0 auto'>"
+    +"<input type='hidden' id='rRole' value='"+_esc(role)+"'>"
+    +"<div style='text-align:center;margin-bottom:18px'>"
+    +"<div style='font-size:46px;margin-bottom:10px'>"+H.ic+"</div>"
+    +"<div style='font-family:Montserrat,sans-serif;font-size:20px;font-weight:900;color:#142554;margin-bottom:4px'>"+H.t+"</div>"
+    +"<div style='font-size:12px;color:#6B7A99;line-height:1.7'>"+H.s+"</div>"
+    +"</div>"
+    +banner
+    +"<div class='fg2'>"
+    +"<div class='fg'><span class='fl'>Prénom *</span><input class='fi' id='rPre' placeholder='Jean-Pierre'></div>"
+    +"<div class='fg'><span class='fl'>Nom *</span><input class='fi' id='rNom' placeholder='MBALLA'></div>"
+    +"<div class='fg'><span class='fl'>WhatsApp *</span><input class='fi' id='rTel' placeholder='+237 6 00 00 00 00'></div>"
+    +"<div class='fg'><span class='fl'>Email"+(isPro?' *':'')+"</span><input class='fi' type='email' id='rEmail' placeholder='jean@email.cm'></div>"
+    +roleField
+    +"<div class='fg'><span class='fl'>🎁 Code parrainage (optionnel)</span><input class='fi' id='rRef' placeholder='VRT...' value='"+(sessionStorage.getItem('_vrtRef')||'')+"' style='text-transform:uppercase;letter-spacing:1px'></div>"
+    +parcours
     +"<div class='fg full'><span class='fl'>Identifiant (sans espaces) *</span>"
     +"<input class='fi' id='rUser' placeholder='jean.mballa' oninput='_chkUser(this.value)'>"
     +"<div id='uAvail' style='font-size:11px;margin-top:3px;color:#9CA3AF'>Minimum 3 caractères</div></div>"
     +"<div class='fg'><span class='fl'>Mot de passe * (min 6)</span><input class='fi' type='password' id='rPwd'></div>"
     +"<div class='fg'><span class='fl'>Confirmer le mot de passe</span><input class='fi' type='password' id='rPwd2'></div>"
     +"</div>"
-    +"<button class='btn bi' style='width:100%;margin-top:18px;font-size:14px;padding:13px;font-family:Montserrat,sans-serif' onclick='doRegister()'>✨ Créer mon compte gratuit</button>"
+    +"<button class='btn bi' style='width:100%;margin-top:18px;font-size:14px;padding:13px;font-family:Montserrat,sans-serif' onclick='doRegister()'>✨ "+H.btn+"</button>"
     +"<div style='text-align:center;margin-top:14px;font-size:12px;color:#9CA3AF'>Déjà un compte ? "
     +"<button onclick=\"hideAll();$('LS').style.display='flex';swLR('visiteur')\" style='background:none;border:none;color:#3C8DFF;font-weight:700;cursor:pointer;font-size:12px'>Se connecter</button></div>"
     +"</div>";
@@ -27499,6 +27527,11 @@ function doRegister(){
             serie:_rSerie},
     plans:[],statut:"actif",
     dateInscription:new Date().toLocaleDateString("fr-FR"),lastLogin:today()};
+  // v2.x : RÔLE capturé à l'inscription (particularité auteur / partenaire / mécène)
+  var _role=(document.getElementById("rRole")?.value||"").trim().toLowerCase();
+  acc.role = _role || 'eleve';
+  if(_role==='auteur'){ acc.isAuthor=true; acc.discipline=(document.getElementById("rDiscipline")?.value||"").trim(); }
+  else if(_role==='partenaire'||_role==='mecene'){ acc.isPartner=true; acc.orgNom=(document.getElementById("rOrg")?.value||"").trim(); acc.orgType=(document.getElementById("rOrgType")?.value||(_role==='mecene'?'mecene':'')); }
   DB.visitorAccounts.push(acc);
   // v1.6 : auto-inscription dans la classe virtuelle correspondant au segment
   try{
@@ -27512,17 +27545,27 @@ function doRegister(){
   try{ if(typeof _track==='function') _track('signup'); }catch(e){}
   // P2 : appliquer parrainage si code présent dans sessionStorage
   try { if(typeof _processReferralOnSignup==='function') _processReferralOnSignup(acc.id); } catch(e){}
-  // == Notification admin - nouvelle inscription ==
-  autoNotify('🆕 Nouvelle inscription : '+pre+' '+nom,
-    'Classe : '+acc.cls+' | Tél/WA : '+tel+' | Utilisateur : '+user+
-    ' | Inscrit le '+acc.dateInscription+'. Validez son accès au groupe depuis Gestion → Groupes WhatsApp.',
+  // == Notification admin - nouvelle inscription (rôle en clair) ==
+  var _rLbl=acc.role==='auteur'?'✍️ AUTEUR':(acc.role==='partenaire'?'🤝 PARTENAIRE':(acc.role==='mecene'?'💝 MÉCÈNE':'🆕 Élève/Visiteur'));
+  var _rDet=acc.role==='auteur'?('Discipline : '+(acc.discipline||'—')+' | Niveau : '+acc.cls+' | ')
+    :(acc.isPartner?('Organisation : '+(acc.orgNom||'—')+' ('+(acc.orgType||'—')+') | '):('Classe : '+acc.cls+' | '));
+  autoNotify(_rLbl+' — nouvelle inscription : '+pre+' '+nom,
+    _rDet+'Tél/WA : '+tel+' | Utilisateur : '+user+' | Inscrit le '+acc.dateInscription+'.'
+    +(acc.isPartner?' À recontacter pour le partenariat.':acc.role==='auteur'?' À recontacter pour validation des ressources.':' Validez son accès au groupe depuis Gestion → Groupes WhatsApp.'),
     'admin');
   _notifyAdminNewMember(acc);
   SES={id:acc.id,nom:nom,pre:pre,mat:user,cls:acc.cls,tel:tel,
     type:"visiteur",accountId:acc.id,plans:[]};
   hideAll();$("VISITOR").style.display="flex";initVisitor();
   setTimeout(_updateVisitorHeader,120);
-  toast("Bienvenue "+pre+" \uD83C\uDF89 Compte créé avec succès !");
+  if(acc.role==='auteur'){
+    toast("Bienvenue "+pre+" ✍️ Compte auteur créé — soumettez votre 1re ressource !");
+    setTimeout(function(){ if(typeof mMarketplaceSubmit==='function') mMarketplaceSubmit(); },500);
+  } else if(acc.isPartner){
+    toast("Bienvenue "+pre+" 🤝 Compte partenaire créé — notre équipe vous recontacte vite !");
+  } else {
+    toast("Bienvenue "+pre+" \uD83C\uDF89 Compte créé avec succès !");
+  }
 }
 
 // ── HEADER VISITEUR CONNECTÉ ──────────────────────────────────────
