@@ -147,6 +147,8 @@ Sitemap: https://veritas-school.com/sitemap.xml
 Sitemap: https://veritas-school.com/seo/sitemap.xml
 Sitemap: https://veritas-school.com/oeuvres/sitemap-oeuvres.xml
 Sitemap: https://veritas-school.com/ressources/sitemap-ressources.xml
+Sitemap: https://veritas-school.com/decouvrir/sitemap-decouvrir.xml
+Sitemap: https://veritas-school.com/sitemap-index.xml
 
 # ════════════════════════════════════════════════════════════════════
 # AVERTISSEMENT LÉGAL
