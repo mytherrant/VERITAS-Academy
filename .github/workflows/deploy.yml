@@ -21,6 +21,7 @@ on:
       - 'evaluations/**'
       - 'uploads/oeuvres/**'
       - 'oeuvres/**'
+      - 'ressources/**'
       - 'cours/**'
       - 'Logo détouré.png'
       - 'ambassa-avatar.jpg'
@@ -130,6 +131,7 @@ jobs:
 
           # ── Pages SEO des ŒUVRES au programme (analyses/fiches par œuvre) ──
           if [ -d oeuvres ]; then cp -r oeuvres deploy/ && echo "  ✓ oeuvres/ ($(ls oeuvres | wc -l) fichiers)"; fi
+          if [ -d ressources ]; then cp -r ressources deploy/ && echo "  ✓ ressources/ ($(ls ressources | wc -l) fichiers)"; fi
 
           # ── Vidéo promotionnelle ───────────────────────────────
           if [ -f VERITAS_Promo_Video.html ]; then

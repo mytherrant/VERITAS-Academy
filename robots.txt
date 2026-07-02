@@ -146,6 +146,7 @@ Disallow: /api/
 Sitemap: https://veritas-school.com/sitemap.xml
 Sitemap: https://veritas-school.com/seo/sitemap.xml
 Sitemap: https://veritas-school.com/oeuvres/sitemap-oeuvres.xml
+Sitemap: https://veritas-school.com/ressources/sitemap-ressources.xml
 
 # ════════════════════════════════════════════════════════════════════
 # AVERTISSEMENT LÉGAL
