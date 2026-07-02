@@ -20,6 +20,7 @@ on:
       - 'api/**'
       - 'evaluations/**'
       - 'uploads/oeuvres/**'
+      - 'oeuvres/**'
       - 'cours/**'
       - 'Logo détouré.png'
       - 'ambassa-avatar.jpg'
@@ -126,6 +127,9 @@ jobs:
           else
             echo "  ⚠ build_seo ignoré (non bloquant)"
           fi
+
+          # ── Pages SEO des ŒUVRES au programme (analyses/fiches par œuvre) ──
+          if [ -d oeuvres ]; then cp -r oeuvres deploy/ && echo "  ✓ oeuvres/ ($(ls oeuvres | wc -l) fichiers)"; fi
 
           # ── Vidéo promotionnelle ───────────────────────────────
           if [ -f VERITAS_Promo_Video.html ]; then
