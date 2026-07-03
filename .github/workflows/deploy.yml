@@ -23,6 +23,7 @@ on:
       - 'oeuvres/**'
       - 'ressources/**'
       - 'decouvrir/**'
+      - 'niveaux/**'
       - 'cours/**'
       - 'Logo détouré.png'
       - 'ambassa-avatar.jpg'
@@ -135,6 +136,7 @@ jobs:
           if [ -d oeuvres ]; then cp -r oeuvres deploy/ && echo "  ✓ oeuvres/ ($(ls oeuvres | wc -l) fichiers)"; fi
           if [ -d ressources ]; then cp -r ressources deploy/ && echo "  ✓ ressources/ ($(ls ressources | wc -l) fichiers)"; fi
           if [ -d decouvrir ]; then cp -r decouvrir deploy/ && echo "  ✓ decouvrir/ ($(ls decouvrir | wc -l) fichiers)"; fi
+          if [ -d niveaux ]; then cp -r niveaux deploy/ && echo "  ✓ niveaux/ ($(ls niveaux | wc -l) fichiers)"; fi
 
           # ── Vidéo promotionnelle ───────────────────────────────
           if [ -f VERITAS_Promo_Video.html ]; then
