@@ -168,6 +168,7 @@ jobs:
             api/public_data.php \
             api/payment_orange.php \
             api/payment_mtn.php \
+            api/payment_campay.php \
             api/ia_proxy.php \
             api/rag.php \
             api/student_data.php \
@@ -190,6 +191,14 @@ jobs:
           # ── Répertoire data protégé (veritas_db.json) ──────────
           if [ -f api/data/index.php ]; then
             cp api/data/index.php deploy/api/data/
+          fi
+          # ── SÉCURITÉ CamPay : bloquer l'accès HTTP direct à TOUT api/data/ ──
+          #    (jeton CamPay, états de paiement/PII sous payments/, backups).
+          #    Sans ce .htaccess, /api/data/payments/*.json serait téléchargeable
+          #    à des URL prévisibles puisque le dépôt est public.
+          if [ -f api/data/.htaccess ]; then
+            cp api/data/.htaccess deploy/api/data/
+            echo "  ✓ api/data/.htaccess (bloque jeton CamPay + PII paiements)"
           fi
           # ── v1.2.1 : protéger le dossier data/ RACINE où db.php écrit veritas_db.json ──
           #    Sans .htaccess ici, /data/veritas_db.json serait téléchargeable directement (toute la base).

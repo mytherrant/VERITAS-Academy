@@ -43,7 +43,11 @@ veritas-backend/
 # Credentials serveur — ne jamais versionner
 api/config.php
 api/payment_config.php
-api/data/
+# Contenu de api/data/ ignoré (index RAG .db lourds, logs, PII paiements)…
+api/data/*
+# …SAUF les sentinelles de sécurité, qui DOIVENT être déployées par la CI :
+!api/data/.htaccess
+!api/data/index.php
 api/data/_security_log.txt
 api/data/_access_log.txt
 api/data/payments/

@@ -44,6 +44,79 @@ define('MTN_TARGET_ENV',       'sandbox');
 define('MTN_API_BASE',         'https://sandbox.momodeveloper.mtn.com');
 
 // ============================================================
+// 💚 CAMPAY — agrégateur MTN MoMo + Orange Money (Cameroun)
+// ============================================================
+// ⭐ VOIE RECOMMANDÉE POUR DÉMARRER : un seul contrat couvre MTN **et** Orange,
+//    compte ouvert en quelques jours, et les VERSEMENTS partenaires (auteurs,
+//    parrains) sont inclus — ce que ni Orange WebPayment ni MTN Collection seuls
+//    ne permettent. Frais annoncés : 2 % encaissement, 1 % retrait mobile,
+//    5 000 FCFA par virement bancaire.
+//
+// 👉 1. Créez le compte sur https://www.campay.net (au nom du CENTRE VÉRITAS :
+//       RCCM + NIU + CNI du gérant — voir GUIDE_CAMPAY.md)
+// 👉 2. Dashboard → Application → récupérez username / password d'application
+//       (ou un « permanent access token » qui n'expire jamais)
+// 👉 3. Déclarez l'URL de webhook dans le dashboard :
+//       https://veritas-school.com/api/payment_campay.php?action=notify
+// 👉 4. Testez sur le mode démo, puis basculez CAMPAY_API_BASE sur la prod.
+
+define('CAMPAY_USERNAME',        'À_REMPLIR_USERNAME_APPLICATION_CAMPAY');
+define('CAMPAY_PASSWORD',        'À_REMPLIR_PASSWORD_APPLICATION_CAMPAY');
+// Alternative au couple username/password : jeton permanent du dashboard.
+// S'il est renseigné, il est utilisé en priorité (aucun appel /api/token/).
+define('CAMPAY_PERMANENT_TOKEN', '');
+
+// 🔐 Webhook key de l'application (dashboard CamPay → APP KEYS).
+// Le webhook porte un champ `signature` = JWT HS256 signé avec cette clé.
+// Si elle est renseignée, toute notification mal signée est REJETÉE (403).
+// Laisser vide = contrôle désactivé (le statut reste re-vérifié auprès de CamPay).
+define('CAMPAY_WEBHOOK_KEY',     '');
+
+// 🔑 JETON PUBLIC D'INITIATION — self-service client (action=init uniquement).
+//    Permet au navigateur d'un CLIENT de lancer un encaissement /collect/ SANS
+//    détenir PAY_API_SECRET. Faible privilège : ne peut QUE créer une demande
+//    de paiement (jamais list/balance/payouts/withdraw), avec allowlist d'Origin
+//    + rate-limit par IP ci-dessous. Laisser vide '' = self-service DÉSACTIVÉ
+//    (seul l'admin peut alors initier un paiement).
+//    ⚠️ NE JAMAIS mettre la même valeur que PAY_API_SECRET / API_SECRET.
+//    ⚠️ Doit être RECOPIÉ à l'identique dans Admin → Paramètres → Paiements API
+//       → champ « Jeton public CamPay » (c'est cette copie que les clients
+//       envoient). Générez-le p. ex. avec : 'pub_' . bin2hex(random_bytes(16)).
+define('CAMPAY_PUBLIC_INIT',          '');
+// Origines autorisées à utiliser le jeton public (CSV, sans slash final).
+// Inclure les origines de l'app Capacitor (mobile) en plus du site web.
+// '' = contrôle d'origine désactivé (le rate-limit reste actif).
+define('CAMPAY_INIT_ALLOWED_ORIGINS', 'https://veritas-school.com,https://www.veritas-school.com,https://localhost,capacitor://localhost');
+// Nombre max de demandes de paiement par IP et par heure via le jeton public.
+// 0 = rate-limit désactivé (déconseillé).
+define('CAMPAY_INIT_RATE_PER_HOUR',   10);
+
+// Environnement : démo pour tester, prod pour encaisser réellement.
+//   Démo : https://demo.campay.net      ← argent fictif
+//   Prod : https://www.campay.net       ← argent réel
+define('CAMPAY_API_BASE',        'https://demo.campay.net');   // ← CHANGER en prod
+
+// Taux de frais utilisé pour l'estimation comptable tant que la transaction ne
+// renvoie pas `charge_amount` (2 % annoncés par CamPay en juillet 2026).
+// Les frais RÉELS se lisent via ?action=history (champ charge_amount).
+define('CAMPAY_FEE_RATE',        0.02);
+
+// 🔒 Plafond de sécurité par versement partenaire (FCFA). Un seul appel
+//    ?action=withdraw ne peut jamais dépasser ce montant : protège d'une erreur
+//    de saisie ou d'un jeton admin compromis.
+define('CAMPAY_PAYOUT_MAX',      200000);
+
+// 🔒 Plafond du TOTAL d'un lot ?action=masspayout (ex. paie de 50 enseignants
+//    en un appel). Second garde-fou, indépendant du plafond unitaire.
+define('CAMPAY_MASSPAYOUT_MAX',  2000000);
+
+// 🔒 Plafond d'un encaissement initié par le JETON PUBLIC (self-service client).
+//    Borne l'abus si le jeton public fuite : un visiteur ne peut pas déclencher
+//    un /collect/ de montant arbitraire. L'admin (secret) n'est jamais plafonné.
+//    0 = pas de plafond (déconseillé pour le chemin public).
+define('CAMPAY_COLLECT_MAX',     500000);
+
+// ============================================================
 // 🌐 URLs PUBLIQUES du site VÉRITAS
 // ============================================================
 // Doivent être HTTPS et accessibles publiquement par Orange/MTN
@@ -145,8 +218,12 @@ function requirePayAuth() {
             if (strtolower($key) === 'authorization') { $auth = $value; break; }
         }
     }
-    if (!$auth && isset($_SERVER['HTTP_AUTHORIZATION'])) $auth = $_SERVER['HTTP_AUTHORIZATION'];
-    if (!$auth && isset($_GET['secret'])) $auth = 'Bearer ' . $_GET['secret'];
+    if (!$auth && isset($_SERVER['HTTP_AUTHORIZATION']))          $auth = $_SERVER['HTTP_AUTHORIZATION'];
+    if (!$auth && isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) $auth = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+    // 🔐 SÉCURITÉ : PLUS de repli ?secret= en URL. Un secret en query string finit
+    //    dans les logs serveur/proxy, l'historique et l'en-tête Referer. Le client
+    //    n'envoie plus JAMAIS le secret en URL — uniquement via l'en-tête Authorization.
+    //    (Ancien code retiré : if (!$auth && isset($_GET['secret'])) $auth = 'Bearer '.$_GET['secret'];)
 
     $token = trim(str_replace(['Bearer ', 'bearer '], '', $auth));
     // 🔐 BUG FIX #3 : comparaison à temps constant (anti timing-oracle).

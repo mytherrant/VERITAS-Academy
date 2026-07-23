@@ -1,0 +1,21 @@
+# ═══ VÉRITAS — api/data/ : AUCUN accès HTTP direct ═══
+# Ce dossier ne contient QUE du stockage serveur (jamais servi au navigateur) :
+#   • payments/   → jeton CamPay, états de paiement (PII clients), versements
+#   • _backups/   → sauvegardes horodatées de la base
+#   • *.db        → index RAG (biblio/oeuvres) lus par PHP en local
+# Sans ce blocage, des fichiers aux noms prévisibles (dépôt public) seraient
+# téléchargeables : /api/data/payments/_campay_token.json, campay_*.json, etc.
+# PHP y accède par le système de fichiers — ce Deny ne gêne donc rien côté app.
+
+# Apache 2.4+ / LiteSpeed
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+# Repli Apache 2.2
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>
+
+# Pas de listing (au cas où le Deny serait ignoré)
+Options -Indexes

@@ -573,6 +573,69 @@ window._resolveWaGroup=function(acc){
   if(seg){ var bySeg=gs.find(function(g){return g.actif&&g.seg===seg;}); if(bySeg) return bySeg; }
   return gs.find(function(g){return g.actif&&g.niveau===(acc.cls||(acc.profil&&acc.profil.cls));})||null;
 };
+// ═══════════════════════════════════════════════════════════════════
+// v1.2.4 — GROUPES WHATSAPP : droit d'accès et bloc visiteur
+// ═══════════════════════════════════════════════════════════════════
+// Le lien d'invitation EST le produit : il ne doit s'afficher qu'à un ayant
+// droit. Trois portes : administration · groupe acheté (waGroupesValides) ·
+// abonnement actif couvrant le groupe (accessMode 'abonnement').
+window._aDroitGroupe=function(grp){
+  try{
+    if(!grp) return false;
+    if(typeof SES==='undefined'||!SES) return false;
+    if(SES.type==='admin'||SES.type==='superadmin') return true;
+    var accId=SES.accountId||SES.id;
+    var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===accId;})
+         || (DB.studentAccounts||[]).find(function(a){return a.id===accId;});
+    if(!acc) return false;
+    // 1. Groupe acheté à l'unité
+    if(Array.isArray(acc.waGroupesValides) && acc.waGroupesValides.indexOf(grp.id)>=0) return true;
+    // 2. Accès par abonnement. plansRequis vide ⇒ n'importe quel plan actif suffit.
+    var plans=acc.plans||[];
+    if(!plans.length) return false;
+    if(grp.accessMode && grp.accessMode!=='abonnement') return false;
+    var req=grp.plansRequis||[];
+    if(!req.length) return true;
+    return req.some(function(p){ return plans.indexOf(p)>=0; });
+  }catch(e){ return false; }
+};
+
+// Bloc affiché dans l'espace e-learning du visiteur connecté.
+window._vBlocGroupeWA=function(){
+  if(typeof SES==='undefined'||!SES) return '';
+  var accId=SES.accountId||SES.id;
+  var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===accId;})
+       || (DB.studentAccounts||[]).find(function(a){return a.id===accId;});
+  if(!acc) return '';
+  var grp=_resolveWaGroup(acc);
+  if(!grp||!grp.actif) return '';
+  var ok=_aDroitGroupe(grp);
+  var head='<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+    +'<div style="font-size:26px">💬</div>'
+    +'<div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#fff">'+_esc(grp.nom||'Groupe WhatsApp')+'</div>'
+    +'<div style="font-size:11px;color:rgba(255,255,255,.8)">'+_esc(grp.niveau||'')+'</div></div></div>';
+
+  if(ok && grp.lien){
+    return '<div class="v-reveal" style="background:linear-gradient(135deg,#25D366,#128C7E);border-radius:16px;padding:16px;margin-bottom:16px;color:#fff">'
+      +head
+      +'<div style="font-size:12px;color:rgba(255,255,255,.9);margin-bottom:10px">Votre accès est actif. Retrouvez les annonces, devoirs et échanges de votre classe.</div>'
+      +'<a href="'+_esc(grp.lien)+'" target="_blank" rel="noopener" style="display:inline-block;background:#fff;color:#128C7E;padding:10px 18px;border-radius:12px;font-weight:800;font-size:13px;text-decoration:none">🔗 Rejoindre le groupe</a>'
+      +'</div>';
+  }
+  if(ok && !grp.lien){
+    return '<div class="v-reveal" style="background:linear-gradient(135deg,#0f766e,#115e59);border-radius:16px;padding:16px;margin-bottom:16px;color:#fff">'
+      +head
+      +'<div style="font-size:12px;color:rgba(255,255,255,.9)">Votre accès est actif — le lien d\'invitation sera publié très prochainement.</div>'
+      +'</div>';
+  }
+  // Sans droit : on annonce le groupe, JAMAIS le lien.
+  return '<div class="v-reveal" style="background:linear-gradient(135deg,#142554,#1E3A8A);border-radius:16px;padding:16px;margin-bottom:16px;color:#fff">'
+    +head
+    +'<div style="font-size:12px;color:rgba(255,255,255,.85);margin-bottom:10px">🔒 Réservé aux abonnés. Le groupe de votre classe donne accès aux annonces, corrigés et échanges avec les enseignants.</div>'
+    +'<button onclick="vShowSec(\'elearning\',null);window.scrollTo({top:0,behavior:\'smooth\'})" style="background:#FFC93C;color:#142554;border:none;padding:10px 18px;border-radius:12px;font-weight:800;font-size:13px;cursor:pointer">🎓 Voir les abonnements</button>'
+    +'</div>';
+};
+
 window._resolveClassroom=function(acc){
   if(!acc) return null;
   var seg=_segKey(acc.profil);
@@ -1419,8 +1482,8 @@ function _migrateDB(){
   }
   if(!DB.partnerSettings){
     DB.partnerSettings={
-      payoutsEnabled:false,  // ⚠️ Activer après intégration CamPay ou Notch Pay
-      payoutsBlockedReason:'En attente d\'intégration CamPay / Notch Pay (S5)',
+      payoutsEnabled:false,  // ⚠️ Passer à true une fois le compte CamPay validé (KYC entité)
+      payoutsBlockedReason:'En attente de la validation du compte CamPay au nom du Centre VÉRITAS',
       minPayout:5000,        // FCFA minimum pour demander un versement
       payoutCurrency:'XAF'
     };
@@ -1962,7 +2025,7 @@ function adminAddFile(itemId){
     '<div style="display:grid;gap:12px">'
     +'<button class="vcard" style="text-align:left;cursor:pointer;border:2px solid #142554;padding:14px" onclick="cm();_adminPickFile(\''+itemId+'\',\'protege\')">'
       +'<div style="font-weight:800;color:#142554;font-size:14px">🔒 Protégé — lecture seule (recommandé)</div>'
-      +'<div style="font-size:12px;color:var(--ink4);margin-top:4px">Consultation EN LIGNE uniquement, page par page. Impossible à copier, partager, télécharger ou capturer (filigrane traçable). Idéal pour les épreuves et cours payants.</div>'
+      +'<div style="font-size:12px;color:var(--ink4);margin-top:4px">Consultation EN LIGNE uniquement, page par page : aucun fichier téléchargeable, copie et impression désactivées, <strong>filigrane nominatif traçable</strong> sur chaque page. Dans l\'application Android, la capture d\'écran est bloquée par le système. Sur navigateur, la capture reste techniquement possible — c\'est le filigrane qui identifie alors la source de la fuite.</div>'
       +'<div class="fl2 fic g6" style="margin-top:8px" onclick="event.stopPropagation()"><span class="xs2 mut">Pages gratuites d\'aperçu :</span><input class="fi" id="afFreePages" type="number" min="0" max="50" value="'+(contenu.freePages||10)+'" style="width:70px;padding:4px 8px;font-size:12px"></div>'
     +'</button>'
     +'<button class="vcard" style="text-align:left;cursor:pointer;border:2px solid var(--bg3);padding:14px" onclick="cm();_adminPickFile(\''+itemId+'\',\'download\')">'
@@ -4882,6 +4945,11 @@ function vShowSec(sec,btn){
         'cat5':{ic:'pencil',    col:'#D97706', bg:'rgba(217,119,6,0.12)'},  // Fiches
         'cat6':{ic:'check',     col:'#0891B2', bg:'rgba(8,145,178,0.12)'}   // Anciens sujets
       };
+      // v1.2.4 : bloc « mon groupe WhatsApp » — le lien n'est servi qu'aux
+      // ayants droit (abonnement actif ou groupe acheté). Jusqu'ici la
+      // résolution du groupe (_resolveWaGroup) n'était appelée nulle part.
+      try{ if(typeof _vBlocGroupeWA==='function') h+=_vBlocGroupeWA(); }catch(e){}
+
       // v1.4.4 (étude vidéo Sharesub) : cartes à BANDEAU — en-tête navy sobre
       // (icône + nom blancs), corps blanc épuré, CTA pilule bleu vif. Entrée en
       // CASCADE au scroll (classe lx-catcard, délais nth-child en CSS).
@@ -4975,7 +5043,10 @@ function vShowSec(sec,btn){
           var isBlocked=_accId&&(item.blockedFor||[]).indexOf(_accId)>=0;
           var isManuallyUnlocked=_accId&&(item.unlockedFor||[]).indexOf(_accId)>=0;
           var hasPlanAccess=item.plans&&item.plans.length&&item.plans.some(function(p){return _effPlansH.indexOf(p)>=0;});
-          var hasRealAccess=(isFree&&!isBlocked)||isManuallyUnlocked||hasPlanAccess||iA();
+          // v1.2.4 : achat À L'UNITÉ (micro-paiement ou contenu payé seul).
+          // Sans cette ligne, l'élève payait puis restait devant un cadenas.
+          var hasUnitAccess=(typeof _aDroitUnitaire==='function')&&_aDroitUnitaire(item.id);
+          var hasRealAccess=(isFree&&!isBlocked)||isManuallyUnlocked||hasPlanAccess||hasUnitAccess||iA();
           var isUnlocked=hasRealAccess||(isFree)||(free2<2);
           if(!isFree) free2++;
           var isLocked=!isUnlocked;
@@ -13832,8 +13903,25 @@ function pgSettings(){
       <button class="btn bi sm" onclick="DB.tauxHoraire=parseInt(document.getElementById('sc_taux')?.value)||2000;save();toast('✓ Taux horaire mis à jour: '+fmt(DB.tauxHoraire)+'/h')">💾 Enregistrer taux</button>
     </div>
     <div class="card mt16">
-      <div class="ct">⚡ Paiements API automatiques (Orange Money / MTN MoMo)</div>
-      <div class="ib ibg mb14"><span>🎉</span><span><strong>v1.2 — Paiement 100% automatique.</strong> Activez l'API officielle Orange Money pour que les paiements soient confirmés <strong>sans intervention admin</strong>. Le client paie → Orange notifie le serveur → l'accès s'active automatiquement.</span></div>
+      <div class="ct">⚡ Paiements API automatiques (CamPay / Orange Money / MTN MoMo)</div>
+      <div class="ib ibg mb14"><span>🎉</span><span><strong>Paiement 100% automatique.</strong> Le client paie → l'opérateur notifie le serveur → l'accès s'active <strong>et le partenaire est crédité</strong>, sans intervention admin.</span></div>
+      <div class="ib ibi mb14"><span>🏦</span><span><strong>Une seule chose à mettre à jour</strong> quand le compte au nom du Centre VÉRITAS sera ouvert : les numéros affichés aux clients. <button class="btn bi sm" style="margin-left:8px" onclick="mPayCoordonnees()">🏦 Coordonnées d'encaissement</button></span></div>
+      <div class="ib ibt mb14"><span>⚠️</span><span><strong>Une seule voie active par opérateur.</strong> N'activez pas CamPay <em>et</em> l'API directe du même opérateur : deux demandes de paiement partiraient pour une même référence. CamPay = MTN + Orange en un seul contrat (2% de frais, versements partenaires inclus). API directe = zéro intermédiaire, mais un contrat marchand par opérateur.</span></div>
+
+      <div class="fg2">
+        <div class="fg full"><label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--blb);border-radius:10px;cursor:pointer;border:2px solid #059669">
+          <input type="checkbox" id="payCampayEnabled" ${(DB.payApiConfig&&DB.payApiConfig.campayEnabled)?'checked':''} onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.campayEnabled=this.checked;save();toast(this.checked?'⚡ CamPay activé (MTN + Orange)':'⚡ CamPay désactivé');re();">
+          <span><strong>⚡ Activer CamPay — MTN MoMo <em>et</em> Orange Money en un seul bouton</strong> — le client saisit son numéro, l'opérateur est détecté, il valide avec son code secret</span>
+        </label></div>
+      </div>
+
+      <div class="fg2" style="margin-top:8px">
+        <div class="fg full">
+          <span class="fl">🔑 Jeton public CamPay — self-service client</span>
+          <input class="fi" id="payCampayPubToken" placeholder="pub_… (à recopier depuis CAMPAY_PUBLIC_INIT du serveur)" value="${_esc((DB.payApiConfig&&DB.payApiConfig.campayPublicToken)||'')}" onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.campayPublicToken=this.value.trim();save();toast('🔑 Jeton public enregistré');">
+          <div style="font-size:11px;color:var(--ink4);margin-top:4px;line-height:1.5">Permet au navigateur du <strong>client</strong> d'initier un paiement <strong>sans</strong> le secret admin. Doit être <strong>identique</strong> à <code>CAMPAY_PUBLIC_INIT</code> dans <code>api/payment_config.php</code>. Sans lui, seul l'admin peut lancer un encaissement. ⚠️ <strong>Jamais</strong> la même valeur que le secret de synchronisation.</div>
+        </div>
+      </div>
 
       <div class="fg2">
         <div class="fg full"><label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--blb);border-radius:10px;cursor:pointer">
@@ -13847,7 +13935,21 @@ function pgSettings(){
         </label></div>
       </div>
 
-      <details class="mt12" style="background:var(--bg2);padding:14px 18px;border-radius:10px">
+      <details class="mt12" style="background:var(--bg2);padding:14px 18px;border-radius:10px;border-left:4px solid #059669">
+        <summary style="cursor:pointer;font-weight:700;color:var(--ink2)">⭐ Mise en service — CamPay (recommandé : MTN + Orange + versements partenaires)</summary>
+        <ol style="font-size:13px;line-height:1.9;color:var(--ink3);margin:12px 0 0 20px">
+          <li>Créez le compte sur <a href="https://www.campay.net" target="_blank" style="color:var(--bl);font-weight:700">campay.net</a> <strong>au nom du Centre VÉRITAS</strong> (RCCM + NIU + CNI du gérant)</li>
+          <li>Déclarez le <strong>compte de règlement</strong> : compte bancaire de l'entité, ou MoMo business au nom de l'entité — c'est là que vous retirerez l'argent</li>
+          <li>Dashboard → <strong>Application</strong> → copiez <code>username</code> et <code>password</code> (ou générez un <em>permanent access token</em>)</li>
+          <li>Renseignez <code>CAMPAY_USERNAME</code> / <code>CAMPAY_PASSWORD</code> dans <code>api/payment_config.php</code> sur le serveur LWS</li>
+          <li>Déclarez le <strong>webhook</strong> dans le dashboard CamPay : <br><code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:11px">https://veritas-school.com/api/payment_campay.php?action=notify</code></li>
+          <li>Testez en mode démo (<code>CAMPAY_API_BASE = https://demo.campay.net</code>), puis passez à <code>https://www.campay.net</code></li>
+          <li>Cochez la case <strong>⚡ Activer CamPay</strong> ci-dessus, puis testez à <strong>100 FCFA réels</strong></li>
+          <li>Checklist administrative complète (pièces, délais, plan B) → <code>GUIDE_CAMPAY.md</code></li>
+        </ol>
+      </details>
+
+      <details class="mt8" style="background:var(--bg2);padding:14px 18px;border-radius:10px">
         <summary style="cursor:pointer;font-weight:700;color:var(--ink2)">📋 Mise en service — Étapes pour Orange Money Cameroun</summary>
         <ol style="font-size:13px;line-height:1.9;color:var(--ink3);margin:12px 0 0 20px">
           <li>Allez sur <a href="https://developer.orange.com" target="_blank" style="color:var(--bl);font-weight:700">developer.orange.com</a> → <strong>Mes applications</strong></li>
@@ -13877,8 +13979,11 @@ function pgSettings(){
       </details>
 
       <div class="fl2 g8 mt12 fw">
-        <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}window.open(u.replace(/\\/+$/,'')+'/payment_orange.php?action=list&secret='+encodeURIComponent(DB.cloudConfig.secret||''),'_blank')})()">🟠 Paiements Orange (liste)</button>
-        <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}window.open(u.replace(/\\/+$/,'')+'/payment_mtn.php?action=list&secret='+encodeURIComponent(DB.cloudConfig.secret||''),'_blank')})()">📱 Paiements MTN (liste)</button>
+        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','list','⚡ Encaissements CamPay')">⚡ Encaissements CamPay (liste + net)</button>
+        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','balance','💰 Solde wallet CamPay')">💰 Solde wallet CamPay</button>
+        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','payouts','📤 Versements partenaires CamPay')">📤 Versements partenaires (CamPay)</button>
+        <button class="btn bo sm" onclick="_payAdminView('payment_orange.php','list','🟠 Paiements Orange')">🟠 Paiements Orange (liste)</button>
+        <button class="btn bo sm" onclick="_payAdminView('payment_mtn.php','list','📱 Paiements MTN')">📱 Paiements MTN (liste)</button>
         <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}fetch(u.replace(/\\/+$/,'')+'/payment_orange.php?action=status&ref=TEST').then(function(r){return r.text();}).then(function(t){toast('🟠 Orange : '+t.substring(0,80));}).catch(function(e){toast('Erreur : '+e.message,'err');})})()">🔌 Tester Orange</button>
         <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}fetch(u.replace(/\\/+$/,'')+'/payment_mtn.php?action=status&ref=TEST').then(function(r){return r.text();}).then(function(t){toast('📱 MTN : '+t.substring(0,80));}).catch(function(e){toast('Erreur : '+e.message,'err');})})()">🔌 Tester MTN</button>
       </div>
@@ -29256,18 +29361,47 @@ function studentHasPlan(eid,planId){
   return getStudentAboPlan(eid).includes(planId);
 }
 function canAccessCV(cv,eid){
+  if(!cv) return false;
   if(!cv.planRequis||cv.planRequis==='gratuit') return true;
+  // v1.2.4 : l'inscription PAYÉE ouvre la classe. Auparavant seul le plan
+  // comptait — un élève ayant réglé sa classe virtuelle restait à la porte,
+  // alors que le paiement l'avait bien inscrit dans cv.students[].
+  try{
+    var ids=[eid];
+    if(typeof SES!=='undefined'&&SES){ ids.push(SES.accountId); ids.push(SES.id); }
+    if((cv.students||[]).some(function(s){ return s && ids.indexOf(s.accountId)>=0; })) return true;
+  }catch(e){}
   return studentHasPlan(eid, cv.planRequis);
 }
 // ── Abonnements RÉCURRENTS : expiration automatique (v1.2.x) ─────────────────
 // Durée d'un plan → millisecondes (mots-clés FR ; défaut = annuel).
+// ═══════════════════════════════════════════════════════════════════
+// v1.2.4 — DURÉE D'UN ABONNEMENT : vocabulaire unique client ⇄ serveur
+// ═══════════════════════════════════════════════════════════════════
+// Barème officiel VÉRITAS :
+//   hebdomadaire 7 j · mensuel 30 j · trimestriel 90 j · semestriel 182 j · annuel 365 j
+// ⚠️ Ce parseur DOIT rester identique à vrt_abo_duree_ms() (api/_auth_lib.php).
+//    Avant v1.2.4 les deux divergeaient : « 1 mois » valait 30 j côté serveur et
+//    365 j côté client → l'élève voyait son accès ouvert alors que le serveur
+//    refusait déjà ses fichiers.
+// L'ordre des tests compte : « 3 mois » doit donner un trimestre, pas un mois.
 function _aboDureeMs(duree){
-  var d=(duree||'').toString().toLowerCase();
-  if(d.indexOf('hebdo')>=0)   return 7*864e5;
-  if(d.indexOf('mens')>=0)    return 30*864e5;
-  if(d.indexOf('trim')>=0)    return 90*864e5;
-  if(d.indexOf('semestr')>=0) return 182*864e5;
-  return 365*864e5; // annuel + défaut
+  var J=864e5, d=(duree||'').toString().toLowerCase().trim();
+  // 1. Formes chiffrées explicites — « 7 jours », « 3 mois », « 2 semaines »
+  var m;
+  if((m=d.match(/(\d+)\s*(?:jours?|jrs?|j\b)/)))  return parseInt(m[1],10)*J;
+  if((m=d.match(/(\d+)\s*semaines?/)))            return parseInt(m[1],10)*7*J;
+  if((m=d.match(/(\d+)\s*mois/))){
+    var n=parseInt(m[1],10);
+    return (n===1?30:n===3?90:n===6?182:n===12?365:n*30)*J;
+  }
+  // 2. Formes nommées
+  if(d.indexOf('hebdo')>=0   || d.indexOf('semaine')>=0)  return 7*J;
+  if(d.indexOf('trimestr')>=0)                            return 90*J;
+  if(d.indexOf('semestr')>=0)                             return 182*J;
+  if(d.indexOf('mensuel')>=0 || d.indexOf('mois')>=0)     return 30*J;
+  // 3. Annuel, « année scolaire », et défaut prudent
+  return 365*J;
 }
 // Passe à 'expire' les abonnements activés dont la date de fin est dépassée, puis
 // retire des comptes les plans qui ne sont plus accordés par AUCUN abo actif.
@@ -29287,13 +29421,23 @@ function _expireAbonnements(){
       if(_act(a.statut) && end && now>end){ a.statut='Expiré'; changed++; }
     });
     if(!changed) return 0;
-    (DB.visitorAccounts||[]).forEach(function(acc){
+    // v1.2.4 : purger AUSSI les comptes élèves — ils étaient oubliés, donc un
+    // élève dont l'abonnement avait expiré gardait son plan indéfiniment.
+    [].concat(DB.visitorAccounts||[], DB.studentAccounts||[]).forEach(function(acc){
       if(!acc || !Array.isArray(acc.plans) || !acc.plans.length) return;
       var mine=el.abonnements.filter(function(a){return a&&a.accountId===acc.id;});
       var actifs={}, expires={};
       mine.forEach(function(a){ var pk=a.plan||a.planId; if(!pk)return; if(_act(a.statut)) actifs[pk]=1; else if(a.statut==='Expiré'||a.statut==='expire') expires[pk]=1; });
       acc.plans=acc.plans.filter(function(p){ return !expires[p] || actifs[p]; });
     });
+    // La session en cours doit refléter la révocation sans attendre un relogin.
+    try{
+      if(typeof SES!=='undefined' && SES && (SES.accountId||SES.id)){
+        var _me=[].concat(DB.visitorAccounts||[], DB.studentAccounts||[])
+                 .find(function(a){return a && a.id===(SES.accountId||SES.id);});
+        if(_me && Array.isArray(_me.plans)) SES.plans=_me.plans.slice();
+      }
+    }catch(e){}
     return changed;
   }catch(e){ return 0; }
 }
@@ -32111,6 +32255,77 @@ window.VERITAS_PAYMENTS = (function(){
 // (évite un lien Stripe de test cassé ou un IBAN « À configurer » visibles par le client).
 function _payOK(v){ return !!v && !/replace_me|test_replace|À configurer|REMPLACER|Votre[A-Z]|exemple|example|XXXX/i.test(String(v)); }
 
+// ═══════════════════════════════════════════════════════════════════
+// v1.2.4 — COORDONNÉES D'ENCAISSEMENT : le SEUL écran à mettre à jour
+// ═══════════════════════════════════════════════════════════════════
+// Tout le reste (activation des accès, rétribution des partenaires, splits,
+// versements) est automatique. Quand le compte au nom du Centre VÉRITAS sera
+// ouvert, il n'y a QUE cet écran à remplir. Les valeurs sont stockées dans
+// DB.payConfig et surchargent window.VERITAS_PAYMENTS au chargement.
+window.mPayCoordonnees = function(){
+  if(typeof iA==='function' && !iA()){ toast('Accès réservé à l\'administration','warn'); return; }
+  var P = window.VERITAS_PAYMENTS || {};
+  var f = function(id, libelle, valeur, aide){
+    return '<div class="fg"><span class="fl">'+libelle+'</span>'
+      +'<input class="fi" id="'+id+'" value="'+_esc(valeur||'')+'">'
+      +(aide?'<div style="font-size:11px;color:var(--ink4);margin-top:3px">'+aide+'</div>':'')
+      +'</div>';
+  };
+  M('🏦 Coordonnées d\'encaissement', 'Les numéros et noms affichés aux clients',
+    '<div style="padding:4px">'
+    +'<div class="ib ibt mb14"><span>⚠️</span><span>Ces coordonnées doivent être celles du <strong>Centre VÉRITAS</strong> (entité), pas d\'un compte personnel. Elles s\'affichent au client dans la fenêtre de paiement et servent au paiement manuel.</span></div>'
+
+    +'<div class="ct">📱 MTN Mobile Money</div>'
+    + f('pc_momo_num', 'Numéro MoMo', P.momo&&P.momo.numero, 'Format : +237 6XX XX XX XX')
+    + f('pc_momo_nom', 'Nom du compte', P.momo&&P.momo.nomCompte, 'Doit correspondre au titulaire déclaré')
+    + f('pc_momo_code','Code USSD / code marchand', P.momo&&P.momo.code, 'Ex. *126# ou *126*4*CODE#')
+
+    +'<div class="ct mt14">🟠 Orange Money</div>'
+    + f('pc_om_num', 'Numéro Orange Money', P.orange&&P.orange.numero)
+    + f('pc_om_nom', 'Nom du compte', P.orange&&P.orange.nomCompte)
+    + f('pc_om_code','Code USSD', P.orange&&P.orange.code, 'Ex. #150*1#')
+
+    +'<div class="ct mt14">💬 Contact</div>'
+    + f('pc_wa',    'WhatsApp du centre', P.whatsapp, 'Reçoit les confirmations de paiement manuel')
+    + f('pc_email', 'E-mail de contact', P.email)
+
+    +'<div class="ct mt14">🏦 Virement bancaire <span style="font-weight:400;font-size:11px;color:var(--ink4)">(masqué tant que non renseigné)</span></div>'
+    + f('pc_bk_tit', 'Titulaire du compte', P.bank&&P.bank.titulaire)
+    + f('pc_bk_ban', 'Banque', P.bank&&P.bank.banque)
+    + f('pc_bk_iban','IBAN / RIB', P.bank&&P.bank.iban)
+    + f('pc_bk_swi', 'SWIFT / BIC', P.bank&&P.bank.swift)
+
+    +'<div class="ct mt14">🌍 International <span style="font-weight:400;font-size:11px;color:var(--ink4)">(optionnel)</span></div>'
+    + f('pc_pp',  'Lien PayPal', P.paypal&&P.paypal.url, 'Laisser vide pour masquer PayPal')
+    + f('pc_str', 'Lien de paiement carte (Stripe)', P.stripe&&P.stripe.url, 'Laisser vide pour masquer la carte bancaire')
+    +'</div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_savePayCoordonnees()">💾 Enregistrer</button>', true);
+};
+
+window._savePayCoordonnees = function(){
+  var v = function(id){ var e=_ge(id); return e ? e.value.trim() : ''; };
+  DB.payConfig = DB.payConfig || {};
+  DB.payConfig.momo   = Object.assign({}, DB.payConfig.momo,   {numero:v('pc_momo_num'), nomCompte:v('pc_momo_nom'), code:v('pc_momo_code')});
+  DB.payConfig.orange = Object.assign({}, DB.payConfig.orange, {numero:v('pc_om_num'),   nomCompte:v('pc_om_nom'),   code:v('pc_om_code')});
+  DB.payConfig.bank   = Object.assign({}, DB.payConfig.bank,   {titulaire:v('pc_bk_tit'), banque:v('pc_bk_ban'), iban:v('pc_bk_iban'), swift:v('pc_bk_swi')});
+  DB.payConfig.paypal = Object.assign({}, DB.payConfig.paypal, {url:v('pc_pp')});
+  DB.payConfig.stripe = Object.assign({}, DB.payConfig.stripe, {url:v('pc_str')});
+  DB.payConfig.whatsapp = v('pc_wa');
+  DB.payConfig.email    = v('pc_email');
+  // Appliquer immédiatement, sans recharger la page
+  try{
+    Object.keys(DB.payConfig).forEach(function(k){
+      if(typeof window.VERITAS_PAYMENTS[k]==='object' && typeof DB.payConfig[k]==='object'){
+        Object.assign(window.VERITAS_PAYMENTS[k], DB.payConfig[k]);
+      } else if(DB.payConfig[k]){ window.VERITAS_PAYMENTS[k]=DB.payConfig[k]; }
+    });
+  }catch(e){}
+  save(); cm();
+  toast('✓ Coordonnées mises à jour — visibles immédiatement par les clients','ok');
+  if(typeof re==='function') re();
+};
+
 function _payRef(prefix){
   var d = new Date();
   var y = d.getFullYear().toString().slice(2);
@@ -32119,6 +32334,30 @@ function _payRef(prefix){
   var rnd = Math.random().toString(36).toUpperCase().slice(2,6);
   return (prefix||'VT')+y+m+dd+'-'+rnd;
 }
+
+// 🔐 Consultation admin d'un endpoint paiement (liste/solde/versements…).
+// Remplace les anciens window.open(...?secret=...) : le secret ne transite PLUS
+// en URL (logs serveur, historique, Referer) mais dans l'en-tête Authorization,
+// et le JSON s'affiche dans une modale au lieu d'un nouvel onglet.
+function _payAdminView(endpoint, action, title){
+  var cc = DB.cloudConfig || {};
+  if(!cc.url){ toast('URL serveur non configurée','warn'); return; }
+  if(!cc.secret){ toast('Secret cloud manquant — configurez la synchro','warn'); return; }
+  var url = cc.url.replace(/\/+$/,'') + '/' + endpoint + '?action=' + encodeURIComponent(action);
+  toast('⏳ Chargement…','info');
+  fetch(url, { headers:{ 'Authorization':'Bearer ' + cc.secret } })
+    .then(function(r){ return r.text(); })
+    .then(function(txt){
+      var pretty = txt;
+      try { pretty = JSON.stringify(JSON.parse(txt), null, 2); } catch(e){}
+      M(title || 'Paiements', endpoint,
+        '<pre style="max-height:60vh;overflow:auto;background:#0b1220;color:#cfe3ff;padding:12px;border-radius:8px;font-size:11px;line-height:1.5;white-space:pre-wrap;word-break:break-word">'
+        + _esc(pretty) + '</pre>',
+        '<button class="btn bo" onclick="cm()">Fermer</button>');
+    })
+    .catch(function(e){ toast('Erreur : ' + (e && e.message || e),'err'); });
+}
+window._payAdminView = _payAdminView;
 
 // Ouvrir le modal de paiement — point d'entrée principal
 // payInfo: {montant: 5000, label: 'Pack Premium', ref?: 'VT250407-XXXX', onConfirm?: fn}
@@ -32167,6 +32406,22 @@ function openPaymentModal(payInfo){
     + '<div class="bold s mb10" style="color:var(--ink2)">💰 Choisissez votre moyen de paiement :</div>'
 
     + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-bottom:16px">'
+
+      // CamPay — agrégateur MTN + Orange en UN SEUL bouton (v1.2.4)
+      // Affiché en pleine largeur et en tête : c'est le parcours le plus court
+      // pour le client (un numéro, un PIN, activation automatique).
+      + ((DB.payApiConfig&&DB.payApiConfig.campayEnabled)
+          ? '<div class="paymethod" style="background:#fff;border:2px solid #059669;border-radius:12px;padding:14px;grid-column:1/-1">'
+            +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+              +'<div style="font-size:28px">⚡</div>'
+              +'<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">Paiement automatique — MTN MoMo ou Orange Money</div>'
+              +'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>'
+            +'</div>'
+            +'<div style="font-size:11px;color:var(--ink4);line-height:1.5;margin-bottom:8px">Entrez votre numéro : l\'opérateur est détecté automatiquement. Vous recevez une demande de paiement à valider avec votre code secret. <strong>Votre accès s\'active tout seul.</strong></div>'
+            +'<input class="fi" id="campayPhoneInput_'+ref+'" placeholder="Votre n° MTN ou Orange (ex : 6XX XX XX XX)" value="'+(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:8px 10px;width:100%;margin-bottom:8px">'
+            +'<button class="btn" style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitCampay(\''+ref+'\','+montant+',\''+_esc(label).replace(/\x27/g,"")+'\',\''+(payInfo.intent||"generic")+'\',\''+(payInfo.targetId||"")+'\',\''+(payInfo.customerAccountId||"")+'\',\''+(payInfo.customerNom||"").replace(/\x27/g,"")+'\')">⚡ Payer maintenant — '+montantFmt+'</button>'
+          +'</div>'
+          : '')
 
       // MoMo — avec API automatique si activée
       + '<div class="paymethod" style="background:#fff;border:2px solid '+P.momo.couleur+';border-radius:12px;padding:14px;position:relative">'
@@ -32258,8 +32513,11 @@ function openPaymentModal(payInfo){
       date: new Date().toISOString(),
       status: 'pending',
       // Métadonnées pour activation automatique post-validation
-      intent: payInfo.intent || 'generic',         // 'book' | 'product' | 'subscription' | 'whatsapp_group' | 'classroom' | 'generic'
+      intent: payInfo.intent || 'generic',         // clé de VERITAS_MONETISATION, ou 'cart'
       targetId: payInfo.targetId || null,          // ID du livre / plan / groupe / classe
+      // Panier : détail ligne par ligne, pour activer chaque article ET
+      // rétribuer chaque auteur à partir d'un paiement unique.
+      lignes: (payInfo.lignes && payInfo.lignes.length) ? payInfo.lignes : null,
       accountId: payInfo.customerAccountId || (typeof SES!=='undefined'&&SES?SES.accountId:null),
       customerNom: payInfo.customerNom || (typeof SES!=='undefined'&&SES?(SES.pre+' '+SES.nom):''),
       customerTel: payInfo.customerTel || (typeof SES!=='undefined'&&SES?SES.tel:''),
@@ -32407,14 +32665,8 @@ function _payStartPollingMtn(ref){
         _payStopPolling();
         var att = (DB.payAttempts||[]).find(function(x){return x.ref===ref;});
         if(att){
-          att.status='paid';
-          att.datePaid=new Date().toISOString();
-          att.providerAuto='mtn_api';
-          if(typeof _payAutoActivate==='function'){
-            var result=_payAutoActivate(att);
-            att.activationResult=result.msg;
-          }
-          save();
+          // Activation + splits parrains/auteurs + commissions code promo (idempotent)
+          _payFinalizePaid(att, 'mtn_api');
           if(window.VN) VN.toAdmin('✅ Paiement MTN auto-confirmé',
             'Réf '+ref+' validé par MTN MoMo API ('+(att.activationResult||'OK')+')','success');
         }
@@ -32425,6 +32677,127 @@ function _payStartPollingMtn(ref){
         _payStopPolling();
       } else {
         statusEl.innerHTML = '⏳ En attente de votre PIN MoMo... ('+(checks*5)+'s)';
+      }
+    }).catch(function(){});
+  }, 5000);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// ── v1.2.4 : INITIATION PAIEMENT CAMPAY (MTN + Orange, un seul flux) ──
+// ═══════════════════════════════════════════════════════════════════
+// CamPay détecte l'opérateur à partir du numéro : un seul bouton couvre
+// MTN MoMo ET Orange Money. Même contrat serveur que MTN/Orange
+// (init → status → grant), donc aucune autre partie du front à toucher.
+// Base URL des endpoints paiement : l'URL de sync si connue, sinon l'origine
+// courante + /api (un visiteur n'a pas forcément DB.cloudConfig.url).
+function _payApiBase(){
+  var u = (DB.cloudConfig && DB.cloudConfig.url) ? DB.cloudConfig.url.replace(/\/+$/,'') : '';
+  if(u) return u;
+  try { if(location && location.origin && location.protocol.indexOf('http')===0) return location.origin + '/api'; } catch(e){}
+  return '';
+}
+// Jeton d'initiation : le secret admin s'il est présent (accès complet), sinon
+// le JETON PUBLIC dédié (self-service client, faible privilège — voir le garde
+// serveur campayInitGuard()). Un vrai visiteur n'a JAMAIS le secret admin.
+function _payInitToken(){
+  if(DB.cloudConfig && DB.cloudConfig.secret) return DB.cloudConfig.secret;
+  if(DB.payApiConfig && DB.payApiConfig.campayPublicToken) return DB.payApiConfig.campayPublicToken;
+  return '';
+}
+
+function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom){
+  if(!DB.payApiConfig || !DB.payApiConfig.campayEnabled){
+    toast('CamPay non activé — voir Paramètres','warn');
+    return;
+  }
+  var _base = _payApiBase();
+  var _tok  = _payInitToken();
+  if(!_base){
+    toast('Serveur de paiement non configuré','err');
+    return;
+  }
+  if(!_tok){
+    toast('Paiement en libre-service indisponible pour le moment — contactez le centre','warn');
+    return;
+  }
+  var phoneEl = document.getElementById('campayPhoneInput_'+ref);
+  var tel = phoneEl ? phoneEl.value.replace(/[^0-9+]/g,'') : '';
+  if(!tel || tel.replace(/[^0-9]/g,'').length < 9){
+    toast('⚠️ Entrez un numéro MTN ou Orange valide','warn');
+    if(phoneEl) phoneEl.focus();
+    return;
+  }
+  toast('⏳ Envoi de la demande de paiement sur '+tel+'...','info');
+  var endpoint = _base+'/payment_campay.php?action=init';
+  fetch(endpoint, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+_tok},
+    body: JSON.stringify({ref:ref,montant:montant,label:label,intent:intent,targetId:targetId,
+      accountId:accountId,clientNom:nom,clientTel:tel,commissions:_payPendingCommissions(intent,targetId)})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){toast('❌ CamPay : '+data.error,'err');return;}
+    var op = data.operator ? (data.operator==='ORANGE'?'🟠 Orange Money':'📱 MTN MoMo') : 'votre opérateur';
+    cm();
+    M('⏳ Paiement en cours','Référence : '+ref,
+      '<div style="text-align:center;padding:20px">'
+      +'<div style="font-size:64px;margin-bottom:14px">'+(data.operator==='ORANGE'?'🟠':'📱')+'</div>'
+      +'<div style="font-size:14px;color:var(--ink2);margin-bottom:12px"><strong>📲 Vérifiez votre téléphone '+_esc(tel)+'</strong></div>'
+      +'<div style="font-size:13px;color:var(--ink3);margin-bottom:14px;background:var(--blb);padding:12px;border-radius:8px;border:1px solid var(--bld)">Une demande de paiement '+op+' vient de vous être envoyée. Composez votre <strong>code secret</strong> pour valider <strong>'+new Intl.NumberFormat("fr-FR").format(montant)+' FCFA</strong>.'
+      +(data.ussd_code?'<br><span style="font-size:11px;color:var(--ink4)">Si rien ne s\'affiche, composez <strong>'+_esc(data.ussd_code)+'</strong></span>':'')+'</div>'
+      +'<div style="font-size:12px;color:var(--ink4)">⏱ Validation requise sous 2 minutes. L\'activation sera automatique.</div>'
+      +'<div id="payCampayStatus" style="margin-top:14px;font-size:13px;color:var(--bl);font-weight:700;padding:10px;background:var(--bg2);border-radius:8px">⏳ En attente de votre code secret...</div>'
+      +'</div>',
+      '<button class="btn bo" onclick="cm();_payStopPolling()">Fermer</button>');
+    _payStartPollingCampay(ref);
+  })
+  .catch(function(err){
+    console.error('[CamPay init]',err);
+    toast('❌ Connexion serveur impossible','err');
+  });
+}
+
+// Polling CamPay (utilise payment_campay.php — même contrat que MTN/Orange)
+function _payStartPollingCampay(ref){
+  _payStopPolling();
+  var url = _payApiBase()+'/payment_campay.php?action=status&ref='+encodeURIComponent(ref);
+  var checks = 0;
+  _payPollTimer = setInterval(function(){
+    checks++;
+    if(checks > 36){ // arrêt après 3 min
+      _payStopPolling();
+      var sel=document.getElementById('payCampayStatus');
+      if(sel){sel.innerHTML='⏰ Délai dépassé. Réessayez si le paiement n\'a pas abouti.';sel.style.color='var(--or)';}
+      return;
+    }
+    fetch(url).then(function(r){return r.json();}).then(function(data){
+      var statusEl = document.getElementById('payCampayStatus');
+      if(!statusEl) return;
+      if(data.status==='paid'){
+        statusEl.innerHTML = '✅ Paiement confirmé ! Activation en cours...';
+        statusEl.style.color = 'var(--gr)';
+        _payStopPolling();
+        var att = (DB.payAttempts||[]).find(function(x){return x.ref===ref;});
+        if(att){
+          att.operateur = data.operator||'';
+          // Activation + splits parrains/auteurs + commissions code promo (idempotent)
+          _payFinalizePaid(att, 'campay');
+          if(window.VN) VN.toAdmin('✅ Paiement CamPay auto-confirmé',
+            'Réf '+ref+' validé via CamPay '+(data.operator||'')+' ('+(att.activationResult||'OK')+')','success');
+        }
+        setTimeout(function(){cm();toast('✅ Paiement confirmé et accès activé !','ok');},2500);
+      } else if(data.status==='underpaid'){
+        // Montant encaissé < montant attendu : le serveur refuse d'ouvrir l'accès.
+        statusEl.innerHTML = '⚠️ Montant incomplet. Contactez le centre avec la réf '+ref+'.';
+        statusEl.style.color = 'var(--or)';
+        _payStopPolling();
+      } else if(data.status==='failed' || data.status==='cancelled'){
+        statusEl.innerHTML = '❌ Paiement refusé'+(data.reason?' ('+data.reason+')':'')+'. Réessayez.';
+        statusEl.style.color = 'var(--re)';
+        _payStopPolling();
+      } else {
+        statusEl.innerHTML = '⏳ En attente de votre code secret... ('+(checks*5)+'s)';
       }
     }).catch(function(){});
   }, 5000);
@@ -32449,14 +32822,8 @@ function _payStartPolling(ref){
           // Activer côté local
           var att = (DB.payAttempts||[]).find(function(x){return x.ref===ref;});
           if(att){
-            att.status = 'paid';
-            att.datePaid = new Date().toISOString();
-            att.providerAuto = 'orange_api';
-            if(typeof _payAutoActivate==='function'){
-              var result = _payAutoActivate(att);
-              att.activationResult = result.msg;
-            }
-            save();
+            // Activation + splits parrains/auteurs + commissions code promo (idempotent)
+            _payFinalizePaid(att, 'orange_api');
             if(window.VN) VN.toAdmin('✅ Paiement Orange auto-confirmé',
               'Réf '+ref+' validé par l\'API Orange ('+(att.activationResult||'OK')+')','success');
           }
@@ -32588,20 +32955,66 @@ function mPayAttempts(){
 }
 // Helpers appelés depuis les onclick inline de mPayAttempts
 // ── v1.2 : auto-exécution de l'action liée à l'intent ──
+// ═══════════════════════════════════════════════════════════════════
+// v1.2.4 — POINT DE PASSAGE UNIQUE d'un paiement confirmé.
+// ═══════════════════════════════════════════════════════════════════
+// Appelé par les QUATRE chemins de confirmation : validation manuelle admin,
+// CamPay, MTN API, Orange API. Avant, seule la validation manuelle calculait
+// les commissions → un paiement automatique activait l'accès mais ne créditait
+// NI le parrain, NI l'auteur, NI le partenaire au code promo.
+// Idempotent : rejouable sans risque de double crédit.
+window._payFinalizePaid = function(att, source){
+  if(!att) return {msg:'', userMsg:''};
+  if(att._finalized) return {msg: att.activationResult||'', userMsg:''};
+
+  att.status  = 'paid';
+  if(!att.datePaid) att.datePaid = new Date().toISOString();
+  if(source) att.providerAuto = source;
+
+  // 1. Activation de l'accès selon l'intent (livre, abonnement, groupe…)
+  var result = (typeof _payAutoActivate==='function') ? _payAutoActivate(att) : {msg:'', userMsg:''};
+  att.activationResult = result.msg;
+
+  // 2. Splits partenaires : parrain (%+forfait), auteur du livre, enseignant marketplace
+  try { if(typeof _computeSplits === 'function') _computeSplits(att); }
+  catch(e){ console.warn('_computeSplits:', e); }
+
+  // 3. Commissions « code promo partenaire » saisies au checkout :
+  //    pending → validated (elles comptent alors pour le palier et le versement)
+  try { _payConfirmPromoCommissions(att); }
+  catch(e){ console.warn('_payConfirmPromoCommissions:', e); }
+
+  att._finalized = true;
+  try { save(); } catch(e){}
+  return result;
+};
+
+// Confirme les commissions du programme partenariat liées à cette vente.
+// L'intent du paiement est traduit dans le refType utilisé par applyPartnerCode().
+function _payConfirmPromoCommissions(att){
+  if(typeof confirmCommissionsForSale !== 'function' || !att) return 0;
+  var map = {
+    book:'book', digitalbook:'book', boutique:'book',
+    subscription:'elearning', elearning:'elearning',
+    marketplace:'marketplace', product:'other'
+  };
+  var refType = map[att.intent] || 'other';
+  var n = confirmCommissionsForSale(refType, att.targetId);
+  if(n > 0){
+    att.commissionsConfirmees = n;
+    if(window.VN) VN.toAdmin('🤝 Commission partenaire validée',
+      n+' commission(s) confirmée(s) sur la réf. '+att.ref, 'info');
+  }
+  return n;
+}
+window._payConfirmPromoCommissions = _payConfirmPromoCommissions;
+
 function _payMarkPaid(ref){
   var a=(DB.payAttempts||[]).find(function(x){return x.ref===ref;});
   if(!a) return;
-  a.status='paid';
-  a.datePaid=new Date().toISOString();
 
-  // ── ACTIVATION AUTOMATIQUE selon l'intent ──
-  var result = _payAutoActivate(a);
-  a.activationResult = result.msg;
-
-  // ── v2.8 : CALCUL SPLITS PARTENAIRES (parrains + auteurs) ──
-  try { if(typeof _computeSplits === 'function') _computeSplits(a); } catch(e){ console.warn('_computeSplits:', e); }
-
-  save();
+  // Activation + splits + commissions, en un seul passage idempotent
+  var result = _payFinalizePaid(a, a.providerAuto || 'manuel');
 
   // ── NOTIFICATIONS ──
   if(window.VN){
@@ -32626,6 +33039,150 @@ function _payMarkPaid(ref){
 // Phase 2 : versement manuel admin (1 clic → MoMo/Orange + WhatsApp confirmation)
 // Phase 3 : versement auto via Disbursement API (scaffolding)
 
+// ═══════════════════════════════════════════════════════════════════
+// v1.2.4 — TABLE UNIQUE DE MONÉTISATION
+// ═══════════════════════════════════════════════════════════════════
+// Chaque surface payante du site est décrite ICI, et nulle part ailleurs :
+//   • `droit`       : le tiroir du compte où l'accès est inscrit (null = géré
+//                     par un cas dédié de _payAutoActivate, ex. abonnement) ;
+//   • `collection`  : où trouver l'objet vendu, pour identifier son auteur ;
+//   • `champAuteur` : le champ qui porte l'identifiant du bénéficiaire ;
+//   • `part`        : la clé de pourcentage dans SPLIT_CONFIG (éditable admin).
+// Ajouter une surface payante = AJOUTER UNE LIGNE, pas écrire du code.
+window.VERITAS_MONETISATION = {
+  book:           { droit:null,               collection:'books',            champAuteur:'authorId',  part:'auteur_livre',     libelle:'Manuel' },
+  digitalbook:    { droit:'unlockedBooks',    collection:'books',            champAuteur:'authorId',  part:'auteur_livre',     libelle:'Manuel numérique' },
+  contenu:        { droit:'unlockedContenus', collection:'contenus',         champAuteur:'authorId',  part:'auteur_ressource', libelle:'Contenu e-learning' },
+  oeuvre:         { droit:'unlockedOeuvres',  collection:'oeuvres',          champAuteur:'authorId',  part:'auteur_ressource', libelle:'Œuvre littéraire' },
+  labo:           { droit:'unlockedLabos',    collection:'labos',            champAuteur:'authorId',  part:'auteur_ressource', libelle:'Laboratoire virtuel' },
+  marketplace:    { droit:'unlockedItems',    collection:'marketplaceItems', champAuteur:'teacherId', part:'enseignant_cours', libelle:'Cours marketplace' },
+  ia:             { droit:'unlockedIA',       collection:null,               champAuteur:null,        part:null,               libelle:'Crédits Prof. Ambassa' },
+  micro_epreuve:  { droit:'unlockedUnits',    collection:'contenus',         champAuteur:'authorId',  part:'auteur_ressource', libelle:'Épreuve à l\'unité' },
+  micro_chapitre: { droit:'unlockedUnits',    collection:'contenus',         champAuteur:'authorId',  part:'auteur_ressource', libelle:'Chapitre à l\'unité' },
+  micro_fiche:    { droit:'unlockedUnits',    collection:'contenus',         champAuteur:'authorId',  part:'auteur_ressource', libelle:'Fiche à l\'unité' },
+  micro_labo:     { droit:'unlockedUnits',    collection:'labos',            champAuteur:'authorId',  part:'auteur_ressource', libelle:'Labo à l\'unité' },
+  subscription:   { droit:null,               collection:'plans',            champAuteur:null,        part:null,               libelle:'Abonnement' },
+  product:        { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Produit boutique' },
+  // Activation traitée par un cas dédié de _payAutoActivate (double écriture :
+  // groupe + compte, ou classe + compte). Déclarés ici pour que la table reste
+  // l'inventaire COMPLET des surfaces payantes.
+  whatsapp_group: { droit:'waGroupesValides', collection:null,               champAuteur:null,        part:null,               libelle:'Groupe WhatsApp' },
+  classroom:      { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Classe virtuelle' }
+};
+
+window._monetCfg = function(intent){
+  if(intent === 'boutique') intent = 'book';           // alias historique
+  return (window.VERITAS_MONETISATION||{})[intent] || null;
+};
+
+// Traduit le `type` employé par la boutique/le panier en intent de paiement.
+// Un seul endroit : boutique, panier et fiche produit restent cohérents.
+window._intentDeType = function(type){
+  switch(String(type||'').toLowerCase()){
+    case 'contenu':    return 'contenu';
+    case 'abonnement': return 'subscription';
+    case 'oeuvre':     return 'oeuvre';
+    case 'labo':       return 'labo';
+    case 'marketplace':return 'marketplace';
+    case 'article':
+    case 'livre':
+    case 'manuel':     return 'book';
+    default:           return 'product';
+  }
+};
+
+window._monetCollection = function(nom){
+  switch(nom){
+    case 'books':            return DB.books || [];
+    case 'contenus':         return (DB.elearning && DB.elearning.contenus) || [];
+    case 'plans':            return (DB.elearning && DB.elearning.plans) || [];
+    case 'labos':            return DB.labos || DB.laboratoires || [];
+    case 'oeuvres':          return DB.oeuvres || (typeof LITT_OEUVRES!=='undefined' ? LITT_OEUVRES : []) || [];
+    case 'marketplaceItems': return DB.marketplaceItems || [];
+    default:                 return [];
+  }
+};
+
+// Qui doit être rétribué pour cette vente, et de combien ? null = personne.
+window._monetBeneficiaire = function(intent, targetId){
+  var cfg = _monetCfg(intent);
+  if(!cfg || !cfg.part || !cfg.collection || !targetId) return null;
+  var obj = _monetCollection(cfg.collection).find(function(x){ return x && String(x.id) === String(targetId); });
+  if(!obj) return null;
+  // Bénéficiaire : champ déclaré, puis alias tolérés (données hétérogènes).
+  var benef = obj[cfg.champAuteur] || obj.authorId || obj.auteurId || obj.teacherId || obj.enseignantId || '';
+  if(!benef) return null;
+  var scfg = _getSplitConfig();
+  var pct  = (typeof obj.share === 'number') ? obj.share
+           : (cfg.part === 'auteur_livre' && typeof DB.authorShare === 'number') ? DB.authorShare
+           : scfg[cfg.part];
+  return {
+    partenaireId: benef,
+    pct: pct,
+    type: cfg.part,
+    obj: obj,
+    description: (cfg.libelle||'Vente') + ' : ' + (obj.titre || obj.title || obj.nom || obj.name || '?')
+  };
+};
+
+// Inscrit l'accès acheté dans le tiroir du compte. Idempotent.
+window._payAccorderDroit = function(a, cfg){
+  if(!cfg || !cfg.droit || !a.accountId) return false;
+  var acc = (DB.visitorAccounts||[]).find(function(x){return x.id===a.accountId;})
+         || (DB.studentAccounts||[]).find(function(x){return x.id===a.accountId;});
+  if(!acc) return false;
+  if(!acc[cfg.droit]) acc[cfg.droit] = [];
+  // Les micro-achats partagent un tiroir : on préfixe par le type pour éviter
+  // qu'une fiche n° 12 débloque le labo n° 12.
+  var cle = (cfg.droit === 'unlockedUnits') ? (a.intent + ':' + a.targetId) : String(a.targetId);
+  if(acc[cfg.droit].indexOf(cle) < 0) acc[cfg.droit].push(cle);
+  return true;
+};
+
+// Gate client : l'utilisateur a-t-il acheté cet élément à l'unité ?
+// Complète _hasPlan() (abonnement) — un achat unitaire ouvre le même contenu.
+window._aDroit = function(intent, targetId){
+  try{
+    if(typeof SES==='undefined' || !SES) return false;
+    if(SES.type==='admin' || SES.type==='superadmin') return true;
+    var cfg = _monetCfg(intent);
+    if(!cfg || !cfg.droit) return false;
+    var acc = (DB.visitorAccounts||[]).find(function(x){return x.id===(SES.accountId||SES.id);})
+           || (DB.studentAccounts||[]).find(function(x){return x.id===(SES.accountId||SES.id);});
+    if(!acc || !acc[cfg.droit]) return false;
+    var cle = (cfg.droit === 'unlockedUnits') ? (intent + ':' + targetId) : String(targetId);
+    return acc[cfg.droit].indexOf(cle) >= 0;
+  }catch(e){ return false; }
+};
+
+// Cet élément a-t-il été acheté À L'UNITÉ (hors abonnement) par le visiteur
+// connecté ? Miroir exact de vrt_account_a_droit_unitaire() côté serveur.
+// Sert de complément à l'accès par plan dans TOUTES les vitrines.
+window._aDroitUnitaire = function(id){
+  try{
+    if(!id) return false;
+    if(typeof SES==='undefined' || !SES) return false;
+    if(SES.type==='admin' || SES.type==='superadmin') return true;
+    var accId = SES.accountId || SES.id;
+    var acc = (DB.visitorAccounts||[]).find(function(x){return x.id===accId;})
+           || (DB.studentAccounts||[]).find(function(x){return x.id===accId;});
+    if(!acc) return false;
+    var tiroirs = ['unlockedContenus','unlockedItems','unlockedOeuvres','unlockedLabos','unlockedIA'];
+    for(var i=0;i<tiroirs.length;i++){
+      var t = acc[tiroirs[i]];
+      if(Array.isArray(t) && t.indexOf(String(id)) >= 0) return true;
+    }
+    var u = acc.unlockedUnits;
+    if(Array.isArray(u)){
+      for(var j=0;j<u.length;j++){
+        var s = String(u[j]), p = s.indexOf(':');
+        if(p >= 0 && s.substring(p+1) === String(id)) return true;
+      }
+    }
+    return false;
+  }catch(e){ return false; }
+};
+
 // Configuration des pourcentages (modifiable depuis admin)
 window.SPLIT_CONFIG_DEFAULT = {
   parrain_abo: 10,      // 10% au parrain sur chaque abonnement filleul
@@ -32644,6 +33201,13 @@ window._computeSplits = function(payAttempt){
   if(!payAttempt || !payAttempt.montant) return;
   DB.splits = DB.splits || [];
   DB.partenairesSplit = DB.partenairesSplit || {};
+  // 🔒 IDEMPOTENCE (v1.2.4) — un paiement ne crédite JAMAIS deux fois.
+  // Indispensable depuis que les paiements automatiques (CamPay/MTN/Orange)
+  // peuvent confirmer par DEUX chemins : le webhook serveur ET le polling client.
+  // Sans ce garde-fou, le parrain était crédité en double.
+  if(payAttempt.ref && DB.splits.some(function(s){ return s.paymentRef === payAttempt.ref; })){
+    return [];
+  }
   var cfg = _getSplitConfig();
   var splits = [];
 
@@ -32679,57 +33243,77 @@ window._computeSplits = function(payAttempt){
     }
   } catch(e){ console.warn('split parrain:', e); }
 
-  // 2. Auteur de livre : si achat boutique d'un livre avec authorId
+  // 2. Bénéficiaire de l'objet vendu — piloté par VERITAS_MONETISATION.
+  //    Couvre d'un coup : manuel papier, manuel numérique, contenu e-learning,
+  //    œuvre, laboratoire, cours marketplace et TOUS les micro-achats.
+  //    Une nouvelle surface payante est prise en charge dès qu'elle est
+  //    déclarée dans la table — aucun code à ajouter ici.
   try {
-    if(payAttempt.intent === 'book' || payAttempt.intent === 'boutique'){
-      var bid = payAttempt.targetId;
-      var book = (DB.books || []).find(function(b){ return b.id === bid; });
-      if(book && book.authorId){
-        // v1.2.2 : part réelle du livre (book.share) sinon part globale (DB.authorShare), sinon défaut.
-        var pct = (typeof book.share === 'number') ? book.share
-                : (typeof DB.authorShare === 'number') ? DB.authorShare : cfg.auteur_livre;
-        var amount = Math.round((payAttempt.montant * pct) / 100);
+    var b = _monetBeneficiaire(payAttempt.intent, payAttempt.targetId);
+    if(b && b.pct > 0){
+      var amount = Math.round((payAttempt.montant * b.pct) / 100);
+      if(amount > 0){
         splits.push({
           id: gid(),
           paymentRef: payAttempt.ref,
-          type: 'auteur_livre',
-          partenaireId: book.authorId,
-          description: 'Vente livre : '+(book.titre||'?'),
+          type: b.type,
+          partenaireId: b.partenaireId,
+          description: b.description,
           montantBase: payAttempt.montant,
-          pct: pct,
+          pct: b.pct,
           montant: amount,
           etat: 'pending',
           createdAt: Date.now()
         });
+        // Compteur de ventes côté marketplace (inchangé)
+        if(b.type === 'enseignant_cours' && b.obj) b.obj.salesCount = (b.obj.salesCount||0) + 1;
       }
     }
-  } catch(e){ console.warn('split auteur livre:', e); }
+  } catch(e){ console.warn('split bénéficiaire:', e); }
 
-  // 3. Enseignant marketplace : si achat d'un contenu marketplaceItems
+  // 2bis. PANIER : une part par ligne, calculée sur le prix DE LA LIGNE
+  //       (et non sur le total du panier).
   try {
-    if(payAttempt.intent === 'marketplace'){
-      var mid = payAttempt.targetId;
-      var item = (DB.marketplaceItems || []).find(function(m){ return m.id === mid; });
-      if(item && item.teacherId){
-        var pct = cfg.enseignant_cours;
-        var amount = Math.round((payAttempt.montant * pct) / 100);
+    if(payAttempt.intent === 'cart' && payAttempt.lignes && payAttempt.lignes.length){
+      payAttempt.lignes.forEach(function(li){
+        if(!li || !li.intent || li.intent === 'cart') return;
+        var bl = _monetBeneficiaire(li.intent, li.targetId);
+        if(!bl || !(bl.pct > 0)) return;
+        var amt = Math.round(((li.montant||0) * bl.pct) / 100);
+        if(amt <= 0) return;
         splits.push({
           id: gid(),
           paymentRef: payAttempt.ref,
-          type: 'enseignant_cours',
-          partenaireId: item.teacherId,
-          description: 'Vente '+(item.type||'cours')+' : '+(item.title||'?'),
-          montantBase: payAttempt.montant,
-          pct: pct,
-          montant: amount,
+          type: bl.type,
+          partenaireId: bl.partenaireId,
+          description: bl.description,
+          montantBase: li.montant||0,
+          pct: bl.pct,
+          montant: amt,
           etat: 'pending',
           createdAt: Date.now()
         });
-        // Marquer la vente côté marketplace
-        item.salesCount = (item.salesCount||0) + 1;
-      }
+        if(bl.type === 'enseignant_cours' && bl.obj) bl.obj.salesCount = (bl.obj.salesCount||0) + 1;
+      });
     }
-  } catch(e){ console.warn('split marketplace:', e); }
+  } catch(e){ console.warn('split panier:', e); }
+
+  // 🔒 INVARIANT FINANCIER (v1.2.5) — on ne redistribue JAMAIS plus que l'encaissé.
+  // Si le cumul des parts (bénéficiaire + parrainage + …) dépasse le montant reçu
+  // — typiquement une mauvaise config de pourcentages qui excède 100 % — on réduit
+  // TOUTES les parts au prorata pour que leur somme ≤ brut, et on le signale.
+  // Sans ce garde-fou, VÉRITAS verserait aux partenaires plus qu'il n'a encaissé.
+  var _capped = false;
+  try {
+    var _partTotal = splits.reduce(function(s,x){ return s + (x.montant||0); }, 0);
+    if(_partTotal > payAttempt.montant && _partTotal > 0){
+      var _factor = payAttempt.montant / _partTotal;
+      splits.forEach(function(s){ s.montantAvantPlafond = s.montant; s.montant = Math.floor(s.montant * _factor); });
+      _capped = true;
+      console.warn('VÉRITAS splits: cumul ('+_partTotal+') > montant ('+payAttempt.montant+') — parts plafonnées au prorata.');
+      try { if(typeof iA==='function' && iA()) toast('⚠️ Commissions plafonnées : la config dépasse 100 % du paiement '+(payAttempt.ref||''),'warn'); } catch(e){}
+    }
+  } catch(e){ console.warn('split plafond:', e); }
 
   // Enregistrer les splits
   splits.forEach(function(s){
@@ -32746,7 +33330,8 @@ window._computeSplits = function(payAttempt){
       brut: payAttempt.montant,
       parts: splits.map(function(x){ return {type:x.type, beneficiaire:x.partenaireId, forfait:x.forfait||0, pct:x.pct||0, montant:x.montant}; }),
       totalReverse: partTotal,
-      netVeritas: Math.max(0, (payAttempt.montant||0) - partTotal)
+      netVeritas: Math.max(0, (payAttempt.montant||0) - partTotal),
+      capped: _capped   // true si les parts ont été plafonnées (config > 100 %)
     };
   } catch(e){}
   if(splits.length) try { save(); } catch(e){}
@@ -32754,11 +33339,48 @@ window._computeSplits = function(payAttempt){
 };
 
 // Page admin : tableau de bord des partenaires + soldes + versements
+// ── v1.2.4 : RATTRAPAGE des commissions non calculées ──────────────────────
+// Un paiement peut être confirmé côté SERVEUR (webhook opérateur) alors que le
+// navigateur du client est déjà fermé : le calcul des splits, qui vit côté
+// client, n'a alors jamais tourné. Ce passage répare l'écart.
+// ⚠️ Volontairement PAS de _payAutoActivate ici : l'accès a déjà été accordé
+//    (par le serveur ou l'ancien parcours) et le rejouer créerait des commandes
+//    en double. On ne rattrape QUE la partie argent, strictement idempotente.
+// ⚠️ Action MANUELLE (bouton) et non automatique : le premier passage peut
+//    créditer rétroactivement des paiements automatiques anciens.
+window._payReconcileSplits = function(silencieux){
+  var creees = 0, confirmees = 0;
+  (DB.payAttempts||[]).forEach(function(a){
+    if(!a || a.status !== 'paid') return;
+    var avant = (DB.splits||[]).length;
+    try { if(typeof _computeSplits === 'function') _computeSplits(a); } catch(e){}
+    try { confirmees += _payConfirmPromoCommissions(a) || 0; } catch(e){}
+    if((DB.splits||[]).length > avant) creees++;
+  });
+  if(creees || confirmees){ try{ save(); }catch(e){} }
+  if(!silencieux){
+    toast(creees||confirmees
+      ? '✓ Rattrapage : '+creees+' paiement(s) ventilé(s), '+confirmees+' commission(s) confirmée(s)'
+      : '✓ Rien à rattraper — toutes les commissions sont à jour','ok');
+    if(typeof re === 'function') re();
+  }
+  return {splits:creees, commissions:confirmees};
+};
+
 window.pgPartenairesSplits = function(){
   if(!iA()) return na();
   DB.splits = DB.splits || [];
   DB.partenairesSplit = DB.partenairesSplit || {};
   var partenaires = Object.keys(DB.partenairesSplit);
+  // Combien de paiements confirmés n'ont encore aucune ventilation ?
+  var _orphelins = (DB.payAttempts||[]).filter(function(a){
+    return a && a.status==='paid' && a.ref
+        && !(DB.splits||[]).some(function(s){ return s.paymentRef === a.ref; });
+  }).length;
+  // Versements CamPay émis mais non encore confirmés arrivés (argent réservé)
+  var _vsEnCours = (DB.versements||[]).filter(function(v){ return v && v.statut==='en_cours'; });
+  var _enCours = _vsEnCours.length;
+  var _montantEnCours = _vsEnCours.reduce(function(s,v){ return s + (v.montant||0); }, 0);
 
   var totalDu = 0, totalVerse = 0;
   partenaires.forEach(function(pid){
@@ -32786,7 +33408,9 @@ window.pgPartenairesSplits = function(){
       +'<td style="padding:10px"><b>'+_esc(name)+'</b><br><span style="font-size:10px;color:#6B7280">'+_esc(pid.substring(0,12))+'</span></td>'
       +'<td style="padding:10px"><span class="chip-v2 chip-v2--primary">'+type+'</span></td>'
       +'<td style="padding:10px;font-family:JetBrains Mono,monospace">'+_esc(tel||'—')+'</td>'
-      +'<td style="padding:10px;text-align:right"><b style="color:#10B981;font-size:15px">'+fmt(p.solde||0)+'</b><br><span style="font-size:10px;color:#6B7280">'+nbPending+' tx</span></td>'
+      +'<td style="padding:10px;text-align:right"><b style="color:#10B981;font-size:15px">'+fmt(p.solde||0)+'</b><br><span style="font-size:10px;color:#6B7280">'+nbPending+' tx</span>'
+        +(p.soldeEnCours ? '<br><span style="font-size:10px;color:#F59E0B;font-weight:700">⏳ '+fmt(p.soldeEnCours)+' en cours</span>' : '')
+      +'</td>'
       +'<td style="padding:10px;text-align:right;color:#6B7280">'+fmt(p.totalVerse||0)+'</td>'
       +'<td style="padding:10px;text-align:center">'
         +(p.solde>=500 ? '<button class="btn-v2 btn-v2--success btn-v2--sm" onclick="mVerserPartenaire(\''+pid+'\')">💰 Verser</button>' : '<span style="font-size:11px;color:#9CA3AF">Min 500 FCFA</span>')
@@ -32802,9 +33426,24 @@ window.pgPartenairesSplits = function(){
       +'<div class="card-v2" style="text-align:center;border-top:3px solid #10B981"><div class="h-display" style="color:#10B981">'+fmt(totalVerse)+'</div><div class="text-muted">Déjà versé</div></div>'
       +'<div class="card-v2" style="text-align:center;border-top:3px solid #3C8DFF"><div class="h-display" style="color:#3C8DFF">'+partenaires.length+'</div><div class="text-muted">Partenaires</div></div>'
       +'<div class="card-v2" style="text-align:center;border-top:3px solid #7C3AED"><div class="h-display" style="color:#7C3AED">'+((DB.splits||[]).filter(function(s){return s.etat==='pending';}).length)+'</div><div class="text-muted">Splits en attente</div></div>'
-    +'</div></div>'
+    +'</div>'
+    +(_orphelins
+      ? '<div class="ib ibt mt12 mb0"><span>⚠️</span><span><strong>'+_orphelins+' paiement(s) confirmé(s) sans ventilation.</strong> Ils ont probablement été validés par le webhook de l\'opérateur pendant que le navigateur était fermé. '
+        +'<button class="btn-v2 btn-v2--accent btn-v2--sm" style="margin-left:8px" onclick="_payReconcileSplits()">🔄 Rattraper les commissions</button></span></div>'
+      : '<div class="ib ibg mt12 mb0"><span>✅</span><span>Toutes les commissions des paiements confirmés sont ventilées.</span></div>')
+    +(_enCours
+      ? '<div class="ib ibt mt12 mb0"><span>⏳</span><span><strong>'+_enCours+' versement(s) CamPay en attente de confirmation</strong> ('+fmt(_montantEnCours)+' réservés). CamPay accuse réception, pas livraison : vérifiez que l\'argent est bien arrivé. Un échec recrédite automatiquement le partenaire. '
+        +'<button class="btn-v2 btn-v2--accent btn-v2--sm" style="margin-left:8px" onclick="_payVerifyPayouts()">🔍 Vérifier les versements</button></span></div>'
+      : '')
+    +((DB.payApiConfig&&DB.payApiConfig.campayEnabled&&totalDu>0)
+      ? '<div class="fl2 g8 fw mt12">'
+        +'<button class="btn-v2 btn-v2--success" onclick="mVerserTous()">💸 Verser à tous — '+fmt(totalDu)+' en un seul appel</button>'
+        +'<button class="btn-v2 btn-v2--secondary" onclick="_payVerifyPayouts()">🔍 Vérifier les versements</button>'
+        +'</div>'
+      : '')
+    +'</div>'
     +'<div class="card mt12"><div class="ct">⚙️ Configuration des pourcentages</div>'
-    +'<div class="ib ibi mb12 mt0"><span>💡</span><span>Les pourcentages sont appliqués automatiquement à chaque paiement validé. Modifiables ci-dessous.</span></div>'
+    +'<div class="ib ibi mb12 mt0"><span>💡</span><span>Les pourcentages sont appliqués <strong>automatiquement dès la confirmation du paiement</strong> — CamPay, MTN, Orange ou validation manuelle. Le parrain, l\'auteur ou l\'enseignant est crédité sans aucune action de votre part. Modifiables ci-dessous.</span></div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">'
     +(function(){var cfg=_getSplitConfig();
       return [
@@ -32873,9 +33512,15 @@ window.mVerserPartenaire = function(partenaireId){
       +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;opacity:.85">Solde à verser</div>'
       +'<div style="font-size:36px;font-weight:900">'+fmt(p.solde)+'</div>'
     +'</div>'
-    +'<div class="fg"><span class="fl">Téléphone Mobile Money du partenaire</span><input class="input-v2" id="vpTel" value="'+_esc(tel)+'" placeholder="+237 6XX XX XX XX"></div>'
+    +'<div class="fg"><span class="fl">Téléphone Mobile Money du partenaire</span>'
+      +'<div style="display:flex;gap:8px">'
+        +'<input class="input-v2" id="vpTel" value="'+_esc(tel)+'" placeholder="+237 6XX XX XX XX" style="flex:1">'
+        +'<button class="btn-v2 btn-v2--secondary btn-v2--sm" onclick="_payVerifierTitulaire(\'vpTel\',\'vpHolder\')" title="Demander à CamPay le nom associé à ce numéro">🔎 Vérifier</button>'
+      +'</div>'
+      +'<div id="vpHolder" style="font-size:12px;margin-top:6px;min-height:16px"></div>'
+    +'</div>'
     +'<div class="fg"><span class="fl">Opérateur</span><select class="input-v2" id="vpOp"><option value="mtn">📱 MTN MoMo</option><option value="orange">🟠 Orange Money</option></select></div>'
-    +'<div class="fg"><span class="fl">Mode de versement</span><select class="input-v2" id="vpMode"><option value="manuel">✋ Manuel (envoi par téléphone, je marque comme versé)</option><option value="auto">⚡ Automatique (Disbursement API — config requise)</option></select></div>'
+    +'<div class="fg"><span class="fl">Mode de versement</span><select class="input-v2" id="vpMode"><option value="manuel">✋ Manuel (envoi par téléphone, je marque comme versé)</option><option value="auto">⚡ Automatique — CamPay envoie l\'argent depuis le wallet'+((DB.payApiConfig&&DB.payApiConfig.campayEnabled)?'':' (CamPay non activé)')+'</option></select></div>'
     +'<div class="fg"><span class="fl">Note (optionnel)</span><input class="input-v2" id="vpNote" placeholder="Référence interne, période…"></div>'
     +'<div class="ib ibi mb0 mt12"><span>💡</span><span>En mode manuel : l\'admin envoie l\'argent via l\'app MoMo/Orange du téléphone, puis valide ici. Un SMS+WhatsApp de confirmation est envoyé au partenaire.</span></div>'
     +'</div>',
@@ -32906,8 +33551,40 @@ window._executerVersement = function(partenaireId){
   else if(a) name = a.name||'?';
 
   if(mode === 'auto'){
-    // Phase 3 : Disbursement API (à activer plus tard)
-    toast('Mode automatique : configurez d\'abord MTN Disbursement API dans payment_config.php — voir documentation','warn');
+    // ⚡ v1.2.4 — Versement RÉEL via CamPay (?action=withdraw).
+    // L'argent part du wallet CamPay directement vers le MoMo/Orange du
+    // partenaire : plus besoin de le faire transiter par le téléphone de l'admin.
+    if(!DB.payApiConfig || !DB.payApiConfig.campayEnabled){
+      toast('Mode automatique : activez CamPay dans Paramètres → Paiements API','warn');
+      return;
+    }
+    if(!DB.cloudConfig||!DB.cloudConfig.url||!DB.cloudConfig.secret){
+      toast('Configuration cloud manquante (URL serveur + secret API)','err');
+      return;
+    }
+    if(!confirm('Verser RÉELLEMENT '+fmt(montant)+' à '+name+' au '+tel+' via CamPay ?\n\nL\'argent quitte votre wallet CamPay. Le montant sera RÉSERVÉ jusqu\'à confirmation d\'arrivée ; en cas d\'échec de l\'opérateur il est automatiquement recrédité au partenaire.')){
+      return;
+    }
+    // Référence stable = idempotence côté serveur (aucun double versement possible)
+    var wRef = 'PAYOUT-'+partenaireId.substring(0,8)+'-'+Date.now().toString(36).toUpperCase();
+    toast('⏳ Versement CamPay en cours...','info');
+    fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_campay.php?action=withdraw', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+DB.cloudConfig.secret},
+      body: JSON.stringify({montant:montant, to:tel, ref:wRef, partenaireId:partenaireId,
+        nomAttendu:name,   // le serveur refuse si le numéro appartient à quelqu'un d'autre
+        note:(note||('Commissions VERITAS — '+name))})
+    })
+    .then(function(r){return r.json();})
+    .then(function(data){
+      if(data.error){ toast('❌ CamPay : '+data.error,'err'); return; }
+      if(data.already){ toast('⚠️ Versement déjà émis pour cette référence','warn'); }
+      _versementFinalise(partenaireId, montant, tel, op, note, name, 'campay', wRef);
+    })
+    .catch(function(err){
+      console.error('[CamPay withdraw]',err);
+      toast('❌ Connexion serveur impossible — versement NON effectué','err');
+    });
     return;
   }
 
@@ -32915,6 +33592,14 @@ window._executerVersement = function(partenaireId){
   if(!confirm('Confirmer le versement de '+fmt(montant)+' à '+name+' au '+tel+' ?\n\nVous devrez envoyer la somme via votre app '+(op==='mtn'?'MTN MoMo':'Orange Money')+' manuellement.')){
     return;
   }
+  _versementFinalise(partenaireId, montant, tel, op, note, name, mode, '');
+};
+
+// Écritures communes aux deux modes (manuel et CamPay) : enregistrement du
+// versement, marquage des splits, remise à zéro du solde, notifications.
+window._versementFinalise = function(partenaireId, montant, tel, op, note, name, mode, campayRef){
+  var p = (DB.partenairesSplit||{})[partenaireId];
+  if(!p) return;
 
   // 1. Créer un enregistrement de versement
   DB.versements = DB.versements || [];
@@ -32927,44 +33612,273 @@ window._executerVersement = function(partenaireId){
     montant: montant,
     note: note,
     mode: mode,
+    campayRef: campayRef||'',
     splitIds: (p.splits||[]).slice(),
     date: Date.now(),
-    statut: 'effectue'
+    // ⚠️ v1.2.4 — CamPay répond « accepté », PAS « arrivé ». Le transfert peut
+    //    encore échouer (numéro inexistant, plafond du bénéficiaire, panne
+    //    opérateur) et CamPay ne fournit aucune procédure de réconciliation.
+    //    Un versement CamPay reste donc EN COURS jusqu'à vérification.
+    statut: (mode==='campay') ? 'en_cours' : 'effectue'
   };
   DB.versements.push(versement);
 
-  // 2. Marquer tous les splits comme "paid"
+  var enCours = (mode === 'campay');
+
+  // 2. Marquer les splits — 'processing' tant que le transfert n'est pas confirmé
   (DB.splits||[]).forEach(function(s){
     if(s.partenaireId === partenaireId && s.etat === 'pending'){
-      s.etat = 'paid';
+      s.etat = enCours ? 'processing' : 'paid';
       s.versementId = versement.id;
-      s.paidAt = Date.now();
+      if(!enCours) s.paidAt = Date.now();
     }
   });
 
-  // 3. Reset le solde + ajouter au total versé
-  p.totalVerse = (p.totalVerse||0) + montant;
-  p.solde = 0;
-  p.splits = [];
+  // 3. Solde : RÉSERVÉ (et non soldé) tant que CamPay n'a pas confirmé.
+  //    L'argent n'est ni versable une 2e fois, ni perdu si le transfert échoue.
+  if(enCours){
+    p.soldeEnCours = (p.soldeEnCours||0) + montant;
+    p.solde = Math.max(0, (p.solde||0) - montant);
+  } else {
+    p.totalVerse = (p.totalVerse||0) + montant;
+    p.solde = 0;
+    p.splits = [];
+  }
   p.lastVersement = Date.now();
 
   save();
 
   // 4. Notification WhatsApp au partenaire
-  var msg = '✅ VÉRITAS Academy — Versement de '+fmt(montant)+' effectué à votre numéro '+tel+' ('+(op==='mtn'?'MTN MoMo':'Orange Money')+'). Réf: '+versement.id.substring(0,8)+'. Merci pour votre collaboration ! '+(note?'Note: '+note:'');
+  var msg = '✅ VÉRITAS Academy — Versement de '+fmt(montant)+' '+(enCours?'envoyé à':'effectué à')+' votre numéro '+tel+' ('+(op==='mtn'?'MTN MoMo':'Orange Money')+'). Réf: '+(campayRef||versement.id.substring(0,8))+'. '
+    +(enCours?'L\'argent arrive sur votre compte dans quelques instants. ':'')
+    +'Merci pour votre collaboration ! '+(note?'Note: '+note:'');
   var waUrl = 'https://wa.me/'+tel.replace(/[^0-9]/g,'')+'?text='+encodeURIComponent(msg);
   // Notification admin
   if(typeof autoNotify==='function'){
-    autoNotify('💰 Versement effectué',name+' — '+fmt(montant)+' via '+(op==='mtn'?'MTN':'Orange'),'admin');
+    autoNotify(enCours?'⏳ Versement CamPay en cours':'💰 Versement effectué',
+      name+' — '+fmt(montant)+' via '+(enCours?'CamPay (à confirmer)':(op==='mtn'?'MTN':'Orange')),'admin');
   }
 
   cm();
   // Ouvrir WhatsApp avec le message pré-rempli
   setTimeout(function(){ window.open(waUrl, '_blank'); }, 300);
-  toast('✓ Versement enregistré — WhatsApp ouvre pour confirmer au partenaire','ok');
+  toast(enCours
+    ? '⏳ Versement CamPay émis — à confirmer via « Vérifier les versements »'
+    : '✓ Versement enregistré — WhatsApp ouvre pour confirmer au partenaire','ok');
 
   // Refresh
   if(typeof re==='function') re();
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// v1.2.4 — VÉRIFICATION des versements CamPay (réconciliation)
+// ═══════════════════════════════════════════════════════════════════
+// CamPay ne documente aucune procédure de réconciliation (« si le réseau est
+// bon c'est 100 % »). On la fait donc nous-mêmes : on relit le statut réel de
+// chaque versement et on solde OU on restaure le dû du partenaire.
+//   sent   → splits 'paid', solde réservé consommé, totalVerse crédité
+//   failed → l'argent RETOURNE au solde du partenaire, splits re-'pending'
+// Applique le résultat réel d'UN versement (unitaire ou ligne de lot).
+// Retourne 'confirme' | 'echoue' | null (déjà traité / inconnu).
+window._payAppliquerResultatVersement = function(campayRef, status, reason){
+  var vs = (DB.versements||[]).find(function(x){ return x.campayRef === campayRef; });
+  if(!vs || vs.statut !== 'en_cours') return null;        // idempotent
+  var p = (DB.partenairesSplit||{})[vs.partenaireId];
+  if(!p) return null;
+
+  if(status === 'sent'){
+    vs.statut = 'effectue';
+    vs.confirmeLe = Date.now();
+    p.soldeEnCours = Math.max(0, (p.soldeEnCours||0) - vs.montant);
+    p.totalVerse   = (p.totalVerse||0) + vs.montant;
+    p.splits = (p.splits||[]).filter(function(id){ return (vs.splitIds||[]).indexOf(id) < 0; });
+    (DB.splits||[]).forEach(function(s){
+      if(s.versementId === vs.id && s.etat === 'processing'){ s.etat='paid'; s.paidAt=Date.now(); }
+    });
+    return 'confirme';
+  }
+  if(status === 'failed'){
+    vs.statut = 'echoue';
+    vs.raison = reason || 'Refusé par l\'opérateur';
+    // 🔄 L'argent revient au partenaire : il reste dû.
+    p.soldeEnCours = Math.max(0, (p.soldeEnCours||0) - vs.montant);
+    p.solde        = (p.solde||0) + vs.montant;
+    (DB.splits||[]).forEach(function(s){
+      if(s.versementId === vs.id && s.etat === 'processing'){ s.etat='pending'; s.versementId=null; }
+    });
+    if(window.VN) VN.toAdmin('❌ Versement partenaire échoué',
+      vs.nom+' — '+fmt(vs.montant)+' ('+vs.raison+'). Le montant est de nouveau dû.','error');
+    return 'echoue';
+  }
+  return null;
+};
+
+window._payVerifyPayouts = function(){
+  if(!DB.cloudConfig||!DB.cloudConfig.url||!DB.cloudConfig.secret){
+    toast('Configuration cloud manquante','err'); return;
+  }
+  var base = DB.cloudConfig.url.replace(/\/+$/,'');
+  var hdr  = { 'Authorization':'Bearer '+DB.cloudConfig.secret };  // 🔐 secret en en-tête, JAMAIS en URL (logs/Referer/historique)
+  toast('⏳ Vérification des versements auprès de CamPay...','info');
+
+  // 1. Versements unitaires  2. Lots (mass payout), ligne par ligne
+  var lots = (DB.massPayouts||[]).filter(function(l){ return l.statut !== 'complete'; });
+  var appels = [ fetch(base+'/payment_campay.php?action=payouts',{headers:hdr}).then(function(r){return r.json();}) ]
+    .concat(lots.map(function(l){
+      return fetch(base+'/payment_campay.php?action=masspayout_status&ref='+encodeURIComponent(l.ref),{headers:hdr})
+             .then(function(r){return r.json();})
+             .then(function(d){ d._lot = l; return d; })
+             .catch(function(){ return {_lot:l, lignes:[]}; });
+    }));
+
+  Promise.all(appels).then(function(reponses){
+    var confirmes = 0, echoues = 0;
+    var unitaires = reponses[0]||{};
+    if(unitaires.error){ toast('❌ CamPay : '+unitaires.error,'err'); return; }
+
+    (unitaires.payouts||[]).forEach(function(po){
+      var r = _payAppliquerResultatVersement(po.ref, po.status, po.reason);
+      if(r==='confirme') confirmes++; else if(r==='echoue') echoues++;
+    });
+
+    reponses.slice(1).forEach(function(lot){
+      (lot.lignes||[]).forEach(function(li){
+        var r = _payAppliquerResultatVersement(li.ref, li.status, li.reason);
+        if(r==='confirme') confirmes++; else if(r==='echoue') echoues++;
+      });
+      if(lot._lot && lot.status === 'complete') lot._lot.statut = 'complete';
+    });
+
+    if(confirmes||echoues) save();
+    toast(confirmes||echoues
+      ? '✓ '+confirmes+' versement(s) confirmé(s), '+echoues+' échec(s) recrédité(s)'
+      : '✓ Aucun versement en attente de confirmation','ok');
+    if(typeof re==='function') re();
+  })
+  .catch(function(err){
+    console.error('[CamPay payouts]',err);
+    toast('❌ Connexion serveur impossible','err');
+  });
+};
+
+// ═══════════════════════════════════════════════════════════════════
+// v1.2.4 — MASS PAYOUT : tous les partenaires dus en UN SEUL appel API
+// ═══════════════════════════════════════════════════════════════════
+// CamPay accepte N bénéficiaires par requête (/api/mass_payout/). Payer
+// 50 enseignants ne coûte donc qu'un appel, pas 50.
+window.mVerserTous = function(){
+  if(!DB.payApiConfig || !DB.payApiConfig.campayEnabled){
+    toast('Activez CamPay dans Paramètres → Paiements API','warn'); return;
+  }
+  var minP = (DB.partnerSettings && DB.partnerSettings.minPayout) || 500;
+  var elig = [];
+  Object.keys(DB.partenairesSplit||{}).forEach(function(pid){
+    var p = DB.partenairesSplit[pid];
+    if(!p || (p.solde||0) < minP) return;
+    var nom = '?', tel = '';
+    var v = (DB.visitorAccounts||[]).find(function(x){return x.id===pid;});
+    var t = (DB.teachers||[]).find(function(x){return x.id===pid;});
+    var a = (DB.authors||[]).find(function(x){return x.id===pid;});
+    if(v){ nom=(v.pre||'')+' '+(v.nom||''); tel=v.tel||''; }
+    else if(t){ nom=(t.pre||'')+' '+(t.nom||''); tel=t.tel||''; }
+    else if(a){ nom=a.name||'?'; tel=a.tel||''; }
+    elig.push({ pid:pid, nom:nom.trim(), tel:(tel||'').replace(/[^0-9+]/g,''), montant:p.solde });
+  });
+
+  if(!elig.length){ toast('Aucun partenaire au-dessus du seuil de '+fmt(minP),'warn'); return; }
+  var sansTel = elig.filter(function(e){ return e.tel.replace(/[^0-9]/g,'').length < 9; });
+  var payables = elig.filter(function(e){ return e.tel.replace(/[^0-9]/g,'').length >= 9; });
+  var total = payables.reduce(function(s,e){ return s+e.montant; }, 0);
+
+  M('💸 Verser à tous les partenaires', payables.length+' bénéficiaire(s) — un seul appel API',
+    '<div style="padding:8px">'
+    +'<div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:18px;border-radius:14px;text-align:center;margin-bottom:14px">'
+      +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;opacity:.85">Total à verser</div>'
+      +'<div style="font-size:36px;font-weight:900">'+fmt(total)+'</div>'
+      +'<div style="font-size:12px;opacity:.85;margin-top:4px">'+payables.length+' partenaire(s) · seuil '+fmt(minP)+'</div>'
+    +'</div>'
+    +'<div style="max-height:240px;overflow-y:auto;border:1px solid #E5E7EB;border-radius:8px">'
+    +'<table style="width:100%;border-collapse:collapse;font-size:12px">'
+    + payables.map(function(e){
+        return '<tr style="border-bottom:1px solid #F3F4F6"><td style="padding:8px">'+_esc(e.nom)+'</td>'
+             +'<td style="padding:8px;font-family:monospace;color:#6B7280">'+_esc(e.tel)+'</td>'
+             +'<td style="padding:8px;text-align:right;font-weight:700">'+fmt(e.montant)+'</td></tr>';
+      }).join('')
+    +'</table></div>'
+    +(sansTel.length
+      ? '<div class="ib ibt mt12 mb0"><span>⚠️</span><span><strong>'+sansTel.length+' partenaire(s) sans numéro valide</strong> seront ignorés : '
+        +_esc(sansTel.map(function(e){return e.nom;}).join(', '))+'</span></div>'
+      : '')
+    +'<div class="ib ibi mt12 mb0"><span>💡</span><span>Chaque montant est <strong>réservé</strong> jusqu\'à confirmation. Un échec (numéro inexistant, plafond, panne opérateur) recrédite automatiquement le partenaire. Vérifiez ensuite avec <strong>🔍 Vérifier les versements</strong>.</span></div>'
+    +'</div>',
+    '<button class="btn-v2 btn-v2--secondary" onclick="cm()">Annuler</button>'
+    +'<button class="btn-v2 btn-v2--success" onclick="_executerMassPayout('+_esc(JSON.stringify(payables)).replace(/"/g,'&quot;')+')">💸 Verser '+fmt(total)+'</button>', true);
+};
+
+window._executerMassPayout = function(payables){
+  if(typeof payables === 'string'){ try{ payables = JSON.parse(payables); }catch(e){ return; } }
+  if(!payables || !payables.length) return;
+  if(!DB.cloudConfig||!DB.cloudConfig.url||!DB.cloudConfig.secret){
+    toast('Configuration cloud manquante','err'); return;
+  }
+  var total = payables.reduce(function(s,e){ return s+e.montant; }, 0);
+  if(!confirm('Verser RÉELLEMENT '+fmt(total)+' à '+payables.length+' partenaire(s) via CamPay ?\n\nLes montants sont réservés jusqu\'à confirmation ; tout échec est recrédité automatiquement.')){
+    return;
+  }
+
+  var lotRef = 'MP-'+Date.now().toString(36).toUpperCase();
+  var lignes = payables.map(function(e){
+    return { to:e.tel, montant:e.montant, partenaireId:e.pid,
+             ref:'PAYOUT-'+e.pid.substring(0,8)+'-'+lotRef,
+             note:'Commissions VERITAS — '+e.nom };
+  });
+
+  toast('⏳ Envoi du lot de '+lignes.length+' versements...','info');
+  fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_campay.php?action=masspayout', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+DB.cloudConfig.secret},
+    body: JSON.stringify({ ref:lotRef, comment:'Versements partenaires VERITAS', lignes:lignes })
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data.error){ toast('❌ CamPay : '+data.error,'err'); return; }
+    if(data.already){ toast('⚠️ Ce lot a déjà été envoyé','warn'); return; }
+
+    // Réserver le solde de chaque partenaire (même logique que le versement unitaire)
+    DB.massPayouts = DB.massPayouts || [];
+    DB.massPayouts.push({ ref:lotRef, date:Date.now(), nb:lignes.length, total:total, statut:'en_cours' });
+    payables.forEach(function(e, i){
+      _versementFinalise(e.pid, e.montant, e.tel, 'campay', 'Lot '+lotRef, e.nom, 'campay', lignes[i].ref);
+    });
+    save();
+    cm();
+    toast('✓ '+lignes.length+' versement(s) envoyés en un appel — à confirmer','ok');
+    if(typeof re==='function') re();
+  })
+  .catch(function(err){
+    console.error('[CamPay masspayout]',err);
+    toast('❌ Connexion serveur impossible — aucun versement effectué','err');
+  });
+};
+
+// Vérifie à qui appartient réellement un numéro AVANT de verser (/api/holder_info/).
+window._payVerifierTitulaire = function(inputId, cibleId){
+  var el = _ge(inputId); var out = _ge(cibleId);
+  if(!el || !out) return;
+  var tel = (el.value||'').replace(/[^0-9+]/g,'');
+  if(tel.replace(/[^0-9]/g,'').length < 9){ out.innerHTML='<span style="color:#DC2626">Numéro incomplet</span>'; return; }
+  if(!DB.cloudConfig||!DB.cloudConfig.url){ out.innerHTML=''; return; }
+  out.innerHTML = '⏳ Vérification…';
+  fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_campay.php?action=holder&tel='+encodeURIComponent(tel),
+        { headers:{ 'Authorization':'Bearer '+(DB.cloudConfig.secret||'') } })   // 🔐 secret en en-tête, jamais en URL
+  .then(function(r){return r.json();})
+  .then(function(d){
+    var o = _ge(cibleId); if(!o) return;   // le DOM a pu être re-rendu entre-temps
+    o.innerHTML = d && d.found
+      ? '<span style="color:#059669;font-weight:700">✓ Titulaire : '+_esc(d.full_name)+'</span>'
+      : '<span style="color:#D97706;font-weight:700">⚠️ Aucun titulaire trouvé pour ce numéro</span>';
+  })
+  .catch(function(){ var o=_ge(cibleId); if(o) o.innerHTML=''; });
 };
 
 // Détail partenaire (historique de ses splits)
@@ -33142,8 +34056,43 @@ function _payAutoActivate(a){
         };
       }
 
-      default:
+      // ── 5bis. PANIER : un paiement, N articles. Chaque ligne suit son
+      //          propre chemin d'activation (livre, contenu, abonnement…).
+      case 'cart': {
+        var faits = [];
+        (a.lignes||[]).forEach(function(li){
+          if(!li || !li.intent || li.intent === 'cart') return;   // pas de panier imbriqué
+          var r = _payAutoActivate({
+            intent: li.intent, targetId: li.targetId, montant: li.montant,
+            label: li.label, ref: a.ref, accountId: a.accountId,
+            customerNom: a.customerNom, customerTel: a.customerTel,
+            customerEmail: a.customerEmail, datePaid: a.datePaid
+          });
+          if(r && r.msg) faits.push(r.msg);
+        });
+        return {
+          msg: faits.length ? faits.join(' · ') : 'Panier réglé',
+          userMsg: 'Vos ' + ((a.lignes||[]).length) + ' article(s) sont activés.'
+        };
+      }
+
+      // ── 6. Toutes les autres surfaces payantes — pilotées par la table
+      //       VERITAS_MONETISATION : contenu e-learning, œuvre, laboratoire,
+      //       cours marketplace, crédits IA et micro-achats à l'unité.
+      //       Avant v1.2.4, ces paiements n'activaient RIEN : le client payait
+      //       200 FCFA son épreuve et n'y avait toujours pas accès.
+      default: {
+        var cfgM = (typeof _monetCfg==='function') ? _monetCfg(a.intent) : null;
+        if(cfgM && cfgM.droit){
+          var ok = _payAccorderDroit(a, cfgM);
+          var quoi = cfgM.libelle || 'Contenu';
+          return ok
+            ? {msg: quoi+' débloqué', userMsg:'Votre accès à « '+(a.label||quoi)+' » est actif immédiatement.'}
+            : {msg: quoi+' payé — compte à rattacher',
+               userMsg:'Paiement reçu. Connectez-vous avec le compte utilisé lors de l\'achat pour y accéder.'};
+        }
         return {msg:'', userMsg:''};
+      }
     }
   } catch(e){
     console.error('[_payAutoActivate]',e);
@@ -33174,8 +34123,13 @@ window._microPrix = function(type){
 window.acheterUnite = function(type, refId, refLabel){
   var p=_microPrix(type);
   if(!p){ if(typeof toast==='function')toast('Tarif indisponible','warn'); return; }
+  // v1.2.4 : rattacher l'achat au COMPTE, sinon l'unité payée ne se débloque
+  // nulle part (l'activation a besoin d'un accountId pour inscrire le droit).
   openPaymentModal({ montant:p.montant, label:'🎯 '+(refLabel||p.label),
-    intent:'micro_'+type, targetId:refId||'', refPrefix:'U'+type.slice(0,3).toUpperCase() });
+    intent:'micro_'+type, targetId:refId||'', refPrefix:'U'+type.slice(0,3).toUpperCase(),
+    customerAccountId:(typeof SES!=='undefined'&&SES)?(SES.accountId||SES.id):null,
+    customerNom:(typeof SES!=='undefined'&&SES)?((SES.pre||'')+' '+(SES.nom||'')).trim():'',
+    customerTel:(typeof SES!=='undefined'&&SES)?(SES.tel||''):'' });
 };
 window._microBuyBtn = function(type, refId, refLabel){
   var p=_microPrix(type); if(!p) return '';
@@ -38201,6 +39155,16 @@ function openProductPage(itemId, type){
   var ico = item.ico || (type==='contenu'?'📄':type==='abonnement'?'🎓':'📚');
   var chaps = item.chaps || item.chapitres || [];
   var prixAncien = item.prixAncien || item.oldPrix || 0;
+
+  // v1.2.4 — Le paiement DOIT porter l'intent et la cible. Jusqu'ici ces deux
+  // boutons appelaient openPaymentModal sans métadonnées : le client payait,
+  // et rien ne s'activait ni ne rétribuait l'auteur (intent 'generic').
+  var _pIntent = _intentDeType(type);
+  var _pArgs = 'montant:'+prix
+    +',label:\''+_esc(titre).replace(/'/g,"\\'")+'\''
+    +',refPrefix:\''+(type==='article'?'SHOP':'ELRN')+'\''
+    +',intent:\''+_pIntent+'\''
+    +',targetId:\''+_esc(String(itemId))+'\'';
   var prixFmt = new Intl.NumberFormat('fr-FR').format(prix) + ' FCFA';
 
   var badges = '';
@@ -38241,7 +39205,7 @@ function openProductPage(itemId, type){
 
     // CTA principal
     +'<div style="display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap">'
-    +'<button onclick="document.getElementById(\'productPageOverlay\').remove();openPaymentModal({montant:'+prix+',label:\''+_esc(titre).replace(/'/g,"\\'")+'\',refPrefix:\''+( type==='contenu'?'ELRN':type==='abonnement'?'ELRN':'SHOP')+'\'})" style="flex:1;min-width:200px;background:var(--gold);color:var(--ink);border:none;border-radius:14px;padding:16px 24px;font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(255,201,60,.3)">💳 Payer maintenant — '+prixFmt+'</button>'
+    +'<button onclick="document.getElementById(\'productPageOverlay\').remove();openPaymentModal({'+_pArgs+'})" style="flex:1;min-width:200px;background:var(--gold);color:var(--ink);border:none;border-radius:14px;padding:16px 24px;font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(255,201,60,.3)">💳 Payer maintenant — '+prixFmt+'</button>'
     +'<button onclick="addToCart(\''+itemId+'\',\''+type+'\')" style="min-width:140px;background:var(--sur);color:var(--ink);border:2px solid var(--bg3);border-radius:14px;padding:16px 20px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;cursor:pointer">🛒 Ajouter au panier</button>'
     +'</div>'
 
@@ -38263,7 +39227,7 @@ function openProductPage(itemId, type){
 
     // SECTION E — CTA final
     +'<div style="display:flex;flex-direction:column;gap:10px;margin-top:24px">'
-    +'<button onclick="document.getElementById(\'productPageOverlay\').remove();openPaymentModal({montant:'+prix+',label:\''+_esc(titre).replace(/'/g,"\\'")+'\',refPrefix:\''+( type==='contenu'?'ELRN':type==='abonnement'?'ELRN':'SHOP')+'\'})" style="background:var(--gold);color:var(--ink);border:none;border-radius:14px;padding:16px;font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(255,201,60,.3)">💳 Payer — '+prixFmt+'</button>'
+    +'<button onclick="document.getElementById(\'productPageOverlay\').remove();openPaymentModal({'+_pArgs+'})" style="background:var(--gold);color:var(--ink);border:none;border-radius:14px;padding:16px;font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(255,201,60,.3)">💳 Payer — '+prixFmt+'</button>'
     +'<a href="'+waUrl+'" target="_blank" rel="noopener" style="text-align:center;background:#25d366;color:#fff;border:none;border-radius:14px;padding:14px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;cursor:pointer;text-decoration:none">📲 Commander par WhatsApp</a>'
     +'<button onclick="document.getElementById(\'productPageOverlay\').remove()" style="background:var(--bg2);color:var(--ink3);border:none;border-radius:14px;padding:12px;font-size:13px;font-weight:600;cursor:pointer">← Retour à la boutique</button>'
     +'</div>'
@@ -38350,6 +39314,14 @@ function openCart(){
   var labels = cart.map(function(c){return c.titre;}).join(' + ');
   if(labels.length > 60) labels = labels.substring(0,57)+'...';
 
+  // v1.2.4 — Le panier règle N articles en UN paiement : on transmet le détail
+  // ligne par ligne, sinon rien ne s'active et aucun auteur n'est rétribué.
+  var _lignes = cart.map(function(c){
+    return { intent:_intentDeType(c.type), targetId:c.id,
+             montant:(c.prix||0)*(c.qty||1), label:c.titre };
+  });
+  var _lignesJson = _esc(JSON.stringify(_lignes)).replace(/"/g,'&quot;');
+
   M('🛒 Votre panier', cart.length+' article'+(cart.length>1?'s':''),
     rows
     +'<div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;margin-top:8px">'
@@ -38357,7 +39329,7 @@ function openCart(){
     +'<span style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:900;color:var(--gold)">'+totalFmt+'</span>'
     +'</div>',
     '<button class="btn bo" onclick="cm()">Continuer les achats</button>'
-    +'<button class="btn bi" onclick="cm();openPaymentModal({montant:'+total+',label:\'🛒 '+_esc(labels).replace(/'/g,"\\'")+'\',refPrefix:\'CART\'})">💳 Payer tout — '+totalFmt+'</button>',
+    +'<button class="btn bi" onclick="cm();openPaymentModal({montant:'+total+',label:\'🛒 '+_esc(labels).replace(/'/g,"\\'")+'\',refPrefix:\'CART\',intent:\'cart\',lignes:'+_lignesJson+'})">💳 Payer tout — '+totalFmt+'</button>',
     true);
 }
 
@@ -39710,7 +40682,10 @@ function mPartnerSettings(){
   if(!DB.partnerSettings) DB.partnerSettings={payoutsEnabled:false,payoutsBlockedReason:'',minPayout:5000};
   var s = DB.partnerSettings;
   var body = '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:10px;border-radius:6px;font-size:12px;color:#92400E;margin-bottom:14px">'
-    + '⚠️ Activez les versements <strong>uniquement après avoir branché CamPay ou Notch Pay</strong> (cf. CLAUDE.md S5).</div>'
+    + (DB.payApiConfig&&DB.payApiConfig.campayEnabled
+        ? '✅ <strong>CamPay est activé</strong> — les versements partent du wallet CamPay vers le MoMo/Orange du partenaire (mode « ⚡ Automatique » dans la fenêtre de versement). Plafond par versement : voir <code>CAMPAY_PAYOUT_MAX</code> côté serveur.'
+        : '⚠️ Activez les versements <strong>uniquement après avoir activé CamPay</strong> (Paramètres → ⚡ Paiements API automatiques). Sans cela, seul le mode manuel fonctionne.')
+    + '</div>'
     + '<label style="display:flex;align-items:center;gap:8px;margin:10px 0;font-size:13px">'
     +   '<input type="checkbox" id="_ps_enabled"'+(s.payoutsEnabled?' checked':'')+'> Activer les versements automatiques aux partenaires</label>'
     + '<div class="fg"><span class="fl">Montant minimum pour demander un versement (FCFA)</span><input class="fi" id="_ps_min" type="number" min="1000" value="'+(s.minPayout||5000)+'"></div>'
