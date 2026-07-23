@@ -5189,6 +5189,40 @@ html{ scroll-behavior:auto; }
 #VISITOR .vlit-banner{ content-visibility:auto; contain-intrinsic-size:auto 130px; }
 
 /* ════════════════════════════════════════════════════════════════════════
+   v1.5.1 — CORRECTIFS PETITS ÉCRANS : débordement de la barre du haut,
+   bordures résiduelles du hero, densité (« l'écran déborde / trop touffu »).
+   ════════════════════════════════════════════════════════════════════════ */
+@media (max-width:520px){
+  /* Barre du haut : tout doit tenir. On ne garde que Panier + S'inscrire +
+     Se connecter ; langue, contact et Enseignant (accessibles ailleurs) masqués. */
+  #VISITOR .vlogin-bar{ gap:5px !important; padding:5px 9px !important; overflow:hidden !important; flex-wrap:nowrap !important; }
+  #VISITOR .vlogin-bar > span:first-child{ font-size:11px !important; min-width:0 !important; flex:0 1 auto !important; overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; }
+  #VISITOR .vlogin-btns{ gap:5px !important; flex-shrink:0 !important; flex-wrap:nowrap !important; }
+  #VISITOR .vlogin-btns > button:nth-of-type(2),   /* langue */
+  #VISITOR .vlogin-btns > button:nth-of-type(3),   /* contact */
+  #VISITOR .vlogin-btns > button:nth-of-type(6){   /* Enseignant */
+    display:none !important;
+  }
+  #VISITOR .vlogin-btns .btn.sm{ padding:5px 9px !important; font-size:11px !important; white-space:nowrap !important; }
+  #VISITOR .vlogin-btns .btn.sm.icon-only{ width:30px !important; height:30px !important; padding:0 !important; }
+}
+@media (max-width:380px){
+  /* Très étroit : masquer aussi le nom (le hero le répète juste dessous) */
+  #VISITOR .vlogin-bar > span:first-child{ display:none !important; }
+}
+/* Hero vidéo : à PLAT sur mobile (plus de liseré or / coins arrondis / ombre)
+   et nettement MOINS HAUT (le bloc navy pleine hauteur écrasait la page). */
+@media (max-width:899px){
+  #VISITOR .vhero-video-wrap,
+  #VISITOR .acc-hero-video{
+    border:none !important; border-radius:0 !important; box-shadow:none !important;
+  }
+  #VISITOR .acc-hero-video::after{ display:none !important; box-shadow:none !important; }
+  #VISITOR .vhero-video-wrap,
+  #VISITOR #vHeroVideoOuter{ height:230px !important; min-height:230px !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
    v1.9.1 — AFFINAGE LIVE (retour Jacques) : icône d'en-tête lisible, panneaux
    moins larges sur écran moyen, en-têtes allégées (moins d'encadrés/surcharge).
    ════════════════════════════════════════════════════════════════════════ */
