@@ -677,7 +677,7 @@ function defaultDB(){return{
   school:{nom:'VÉRITAS Academy',slogan:'Centre d\u0027Excellence Scolaire',ville:'Douala, Cameroun',tel:'656 720 476 / 650 435 106',bp:'Douala, Cameroun',logo:'',directeur:'La Direction',annee:'2024–2025'},
   publicInfo:{
     slogan2:'Excellence académique depuis 2023',
-    description:'Le Centre VÉRITAS est un établissement d\'enseignement secondaire de renom basé à Douala, Cameroun. Fondé sur des valeurs d\'excellence et de rigueur académique, nous accompagnons les élèves du secondaire vers la réussite avec:\n\n• Des enseignants qualifiés et expérimentés\n• Des cours de répétition personnalisés\n• Un suivi continu des performances\n• Des cours d\'examens (BEPC, BAC)\n• Un environnement favorable à l\'apprentissage',
+    description:'Le Centre VÉRITAS est un établissement d\'enseignement secondaire de renom basé à Douala, Cameroun. Fondé sur des valeurs d\'excellence et de rigueur académique, nous accompagnons les élèves du secondaire vers la réussite avec:\n\n• Des enseignants qualifiés et expérimentés\n• Un accompagnement scolaire personnalisé\n• Un suivi continu des performances\n• Des cours d\'examens (BEPC, BAC)\n• Un environnement favorable à l\'apprentissage',
     histoire:'Fondé en 2023 par TAKOU Jacques Miterand (Directeur), AMBASSA et TCHAPDA, le Centre VÉRITAS est né d\'une vision commune : offrir aux élèves camerounais un espace d\'apprentissage où excellence et bienveillance se conjuguent. Partis d\'une salle modeste, nous accompagnons aujourd\'hui de nombreux apprenants avec un taux de réussite aux examens supérieur à 85%.\n\nL\'équipe fondatrice apporte une expérience complémentaire dans l\'éducation, la gestion et la pédagogie, faisant de VÉRITAS un centre de référence à Douala.',
     equipe:'Une équipe de 15 enseignants certifiés dans diverses disciplines',
     horaires:'Lundi–Vendredi: 7h30–17h30 | Samedi: 8h00–13h00',
@@ -7718,6 +7718,9 @@ function pgElearningMgmt(){
   h+='<button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()">🔬 Laboratoires virtuels</button>';
   h+='<button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()">🎯 Coaching</button>';
   h+='<button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEpreuves()">📝 Épreuves</button>';
+  var _nInact=(typeof _nbInactifs==='function')?_nbInactifs():0;
+  h+='<button class="btn sm" style="background:#DB2777;color:#fff;border-radius:10px" onclick="mRelances()">📣 Relances'+(_nInact>0?(' ('+_nInact+')'):'')+'</button>';
+  h+='<button class="btn sm" style="background:#0D9488;color:#fff;border-radius:10px" onclick="mManageCoachMotiv()">💪 Motivation</button>';
   h+='<button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mManageEvals()">📊 Évaluations en ligne</button>';
   h+='<button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()">📥 Import QCM</button>';
   h+='</div></div>';
@@ -9584,17 +9587,17 @@ async function doLogin(){
       var a2=DB.studentAccounts[i];
       if(a2.user.toLowerCase()===u.toLowerCase()){var ok=await verifyPassword(p,a2.pwd,a2.user,a2);if(ok){sa2=a2;break;}}
     }}
-    if(sa2){var s=S(sa2.eid);if(s){sa2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;go2SES({...s,type:'eleve',sid:s.id,accountId:sa2.id,plans:sa2.plans||[]});_studentSyncBg(u,p);return;}}
+    if(sa2){var s=S(sa2.eid);if(s){window._vrtPrevLogin=sa2.lastLoginISO||sa2.lastLogin||null;sa2.lastLogin=today();sa2.lastLoginISO=new Date().toISOString();save();_recordLoginSuccess(u);_loginAttempts.count=0;go2SES({...s,type:'eleve',sid:s.id,accountId:sa2.id,plans:sa2.plans||[]});_studentSyncBg(u,p);return;}}
     // Visiteurs inscrits en ligne
     var va2=null;
     if(DB.visitorAccounts){for(var j=0;j<DB.visitorAccounts.length;j++){
       var v2=DB.visitorAccounts[j];
       if(v2.user.toLowerCase()===u.toLowerCase()&&v2.statut!=='suspendu'){var ok2=await verifyPassword(p,v2.pwd,v2.user,v2);if(ok2){va2=v2;break;}}
     }}
-    if(va2){va2.lastLogin=today();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur_inscrit',accountId:va2.id,plans:va2.plans||[]});
+    if(va2){window._vrtPrevLogin=va2.lastLoginISO||va2.lastLogin||null;va2.lastLogin=today();va2.lastLoginISO=new Date().toISOString();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur_inscrit',accountId:va2.id,plans:va2.plans||[]});
       // v1.4.9 : compte au profil anglophone → interface intégralement en anglais au login
       try{ if(va2.profil&&va2.profil.sys==='en'&&typeof setLang==='function') setLang('en', true); }catch(e){}
-      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);_studentSyncBg(u,p);return;}
+      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);setTimeout(function(){try{if(typeof _welcomeBack==='function')_welcomeBack();}catch(e){}},1200);_studentSyncBg(u,p);return;}
     // S3 (v1.2.x) : appareil neuf — aucun compte en local → tenter le serveur (lecture).
     var _slice=await _studentSyncFetch(u,p);
     if(_slice&&_slice.student&&_slice.student.id){
@@ -9648,6 +9651,8 @@ function go2SES(acc){
     hideAll();
     $("APP").style.display="flex";
     buildNav();topUI();goTo("dashboard");
+    // 👋 Apprenant de retour après une longue absence (élève ; visiteur inscrit géré au login)
+    setTimeout(function(){try{ if(typeof _welcomeBack==='function') _welcomeBack(); }catch(e){}}, 1200);
     // Afficher l'indicateur de sync cloud pour les admins
     setTimeout(function(){
       if(iA()){
@@ -9659,6 +9664,15 @@ function go2SES(acc){
         }
         // 🔐 v1.2.2 : alerte mot de passe par défaut (admin connecté)
         setTimeout(function(){try{_warnDefaultPasswords();}catch(e){}},2000);
+        // 📣 Relances : scan des inscrits inactifs (1×/jour, client-side) + rappel à l'admin
+        setTimeout(function(){try{
+          if(typeof _scanInactifs!=='function')return;
+          var _tI=new Date().toISOString().slice(0,10);
+          var _al=localStorage.getItem('_vrtRelanceToast')===_tI;
+          var _n=(_scanInactifs()||[]).length;
+          if(_n>0&&!_al){ localStorage.setItem('_vrtRelanceToast',_tI);
+            toast('📣 '+_n+' inscrit'+(_n>1?'s':'')+' inactif'+(_n>1?'s':'')+' à relancer (E-Learning → Relances)','info'); }
+        }catch(e){}}, 2400);
         // Sync intelligente au login : compare lastModified local vs serveur
         // Si serveur plus récent → pull (restaure) ; sinon → push
         var cfg=DB.cloudConfig;
@@ -13934,6 +13948,18 @@ function pgSettings(){
           <span class="fl">🔑 Jeton public CamPay — self-service client</span>
           <input class="fi" id="payCampayPubToken" placeholder="pub_… (à recopier depuis CAMPAY_PUBLIC_INIT du serveur)" value="${_esc((DB.payApiConfig&&DB.payApiConfig.campayPublicToken)||'')}" onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.campayPublicToken=this.value.trim();save();toast('🔑 Jeton public enregistré');">
           <div style="font-size:11px;color:var(--ink4);margin-top:4px;line-height:1.5">Permet au navigateur du <strong>client</strong> d'initier un paiement <strong>sans</strong> le secret admin. Doit être <strong>identique</strong> à <code>CAMPAY_PUBLIC_INIT</code> dans <code>api/payment_config.php</code>. Sans lui, seul l'admin peut lancer un encaissement. ⚠️ <strong>Jamais</strong> la même valeur que le secret de synchronisation.</div>
+        </div>
+      </div>
+
+      <div class="fg2" style="margin-top:8px">
+        <div class="fg full"><label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--blb);border-radius:10px;cursor:pointer;border:2px dashed #C9A227">
+          <input type="checkbox" id="payAutoPayout" ${(DB.payApiConfig&&DB.payApiConfig.autoPayout)?'checked':''} onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.autoPayout=this.checked;save();toast(this.checked?'⚡ Versement AUTOMATIQUE activé — les gains partent tout seuls':'Versement auto désactivé');re();">
+          <span><strong>⚡ Versement AUTOMATIQUE des gains (façon Yango)</strong> — dès qu'un bénéficiaire (parrain, auteur, partenaire de code) est crédité et franchit le seuil, CamPay lui envoie l'argent <strong>sans clic</strong>. ⚠️ Nécessite CamPay activé + wallet approvisionné.</span>
+        </label></div>
+        <div class="fg full">
+          <span class="fl">💸 Seuil de déclenchement du versement auto (FCFA)</span>
+          <input class="fi" type="number" min="500" id="payAutoPayoutMin" value="${(DB.payApiConfig&&typeof DB.payApiConfig.autoPayoutMin==='number')?DB.payApiConfig.autoPayoutMin:1000}" onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.autoPayoutMin=Math.max(500,parseInt(this.value)||1000);save();toast('Seuil auto : '+fmt(DB.payApiConfig.autoPayoutMin));">
+          <div style="font-size:11px;color:var(--ink4);margin-top:4px;line-height:1.5">Sous ce montant les gains <strong>s'accumulent</strong> (évite des micro-versements facturés 1% chacun) ; au-dessus, versement immédiat. Défaut : 1 000 FCFA.</div>
         </div>
       </div>
 
@@ -33364,6 +33390,14 @@ window._computeSplits = function(payAttempt){
     };
   } catch(e){}
   if(splits.length) try { save(); } catch(e){}
+  // ⚡ Répartition automatique : dès que les gains sont crédités, on tente le
+  // versement auto de chaque bénéficiaire (parrain, auteur, enseignant…).
+  // Ne part QUE si DB.payApiConfig.autoPayout est activé (défaut OFF).
+  try {
+    var _benef = {};
+    splits.forEach(function(s){ if(s && s.partenaireId) _benef[s.partenaireId] = 1; });
+    Object.keys(_benef).forEach(function(pid){ try { if(typeof _payMaybeAutoPayout==='function') _payMaybeAutoPayout(pid); } catch(e){} });
+  } catch(e){}
   return splits;
 };
 
@@ -33396,6 +33430,66 @@ window._payReconcileSplits = function(silencieux){
   return {splits:creees, commissions:confirmees};
 };
 
+// Résolveur UNIFIÉ d'un bénéficiaire de versement (parrain, enseignant, auteur,
+// élève OU partenaire de code promo) → {name, tel, type}. Source unique pour
+// l'affichage ET le versement, afin qu'un partenaire de code soit toujours payable.
+window._resolvePartenaire = function(pid){
+  var v=(DB.visitorAccounts||[]).find(function(x){return x.id===pid;});
+  if(v) return {name:((v.pre||'')+' '+(v.nom||'')).trim()||'Parrain', tel:v.tel||'', type:'Parrain'};
+  var t=(DB.teachers||[]).find(function(x){return x.id===pid;});
+  if(t) return {name:((t.pre||'')+' '+(t.nom||'')).trim()||'Enseignant', tel:t.tel||'', type:'Enseignant'};
+  var a=(DB.authors||[]).find(function(x){return x.id===pid;});
+  if(a) return {name:a.name||'Auteur', tel:a.tel||'', type:'Auteur'};
+  var s=(DB.students||[]).find(function(x){return x.id===pid;});
+  if(s) return {name:((s.pre||'')+' '+(s.nom||'')).trim()||'Élève', tel:s.tel||'', type:'Élève'};
+  var pa=(DB.partners||[]).find(function(x){return x.id===pid;});
+  if(pa) return {name:pa.nom||pa.name||'Partenaire', tel:pa.tel||'', type:'Partenaire'};
+  return {name:'?', tel:'', type:'?'};
+};
+
+// ⚡ VERSEMENT AUTOMATIQUE (façon Yango/1xbet) — sans dialogue. Déclenché dès
+// qu'un bénéficiaire est crédité. Gardé par DB.payApiConfig.autoPayout (défaut
+// OFF) : tant qu'il est OFF, rien ne part tout seul (comportement actuel préservé).
+window._payAutoPayout = function(partenaireId){
+  var p = (DB.partenairesSplit||{})[partenaireId];
+  if(!p || !(p.solde>0)) return false;
+  var info = _resolvePartenaire(partenaireId);
+  var tel = (info.tel||'').replace(/[^0-9+]/g,'');
+  if(!/^(\+?237)?6[5-9]\d{7}$/.test(tel)) return false;   // numéro non fiable → reste en versement manuel
+  var montant = p.solde;
+  var op = /^(\+?237)?6(8|[5])/.test(tel) ? 'mtn' : 'orange';
+  var wRef = 'AUTO-'+partenaireId.substring(0,8)+'-'+Date.now().toString(36).toUpperCase();
+  fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_campay.php?action=withdraw', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+DB.cloudConfig.secret},
+    body: JSON.stringify({montant:montant, to:tel, ref:wRef, partenaireId:partenaireId,
+      nomAttendu:info.name, note:'Versement automatique VÉRITAS — '+info.name})
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    if(data && !data.error){
+      _versementFinalise(partenaireId, montant, tel, op, 'Automatique', info.name, 'campay', wRef);
+      if(typeof toast==='function') toast('⚡ Versement auto '+fmt(montant)+' → '+info.name,'ok');
+    } else if(data && data.error){ if(typeof console!=='undefined') console.warn('[auto-payout]', data.error); }
+  })
+  .catch(function(e){ if(typeof console!=='undefined') console.warn('[auto-payout]', e); });
+  return true;
+};
+
+// Décide s'il faut verser automatiquement MAINTENANT (switch + CamPay + contexte
+// admin + seuil + pas de versement déjà en vol). Sous le seuil, on cumule.
+window._payMaybeAutoPayout = function(partenaireId){
+  var cfg = DB.payApiConfig || {};
+  if(!cfg.autoPayout) return false;
+  if(!cfg.campayEnabled) return false;
+  if(!DB.cloudConfig || !DB.cloudConfig.url || !DB.cloudConfig.secret) return false;   // besoin du contexte admin
+  var p = (DB.partenairesSplit||{})[partenaireId];
+  if(!p || p.soldeEnCours) return false;
+  var seuil = (typeof cfg.autoPayoutMin==='number') ? cfg.autoPayoutMin : 1000;
+  if((p.solde||0) < seuil) return false;
+  return _payAutoPayout(partenaireId);
+};
+
 window.pgPartenairesSplits = function(){
   if(!iA()) return na();
   DB.splits = DB.splits || [];
@@ -33422,15 +33516,7 @@ window.pgPartenairesSplits = function(){
   var rows = partenaires.map(function(pid){
     var p = DB.partenairesSplit[pid];
     // Trouver le nom et téléphone du partenaire
-    var name = '?', tel = '', type = '?';
-    var visitor = (DB.visitorAccounts||[]).find(function(v){ return v.id === pid; });
-    var student = (DB.students||[]).find(function(s){ return s.id === pid; });
-    var teacher = (DB.teachers||[]).find(function(t){ return t.id === pid; });
-    var author  = (DB.authors||[]).find(function(a){ return a.id === pid; });
-    if(visitor){ name = (visitor.pre||'')+' '+(visitor.nom||''); tel = visitor.tel||''; type = 'Parrain'; }
-    else if(teacher){ name = (teacher.pre||'')+' '+(teacher.nom||''); tel = teacher.tel||''; type = 'Enseignant'; }
-    else if(author){ name = author.name||'?'; tel = author.tel||''; type = 'Auteur'; }
-    else if(student){ name = (student.pre||'')+' '+(student.nom||''); tel = student.tel||''; type = 'Élève'; }
+    var _rp = _resolvePartenaire(pid); var name = _rp.name, tel = _rp.tel, type = _rp.type;
 
     var nbPending = (DB.splits||[]).filter(function(s){return s.partenaireId === pid && s.etat === 'pending';}).length;
     return '<tr style="border-bottom:1px solid #E5E7EB">'
@@ -33527,13 +33613,7 @@ window._saveSplitConfig = function(){
 window.mVerserPartenaire = function(partenaireId){
   var p = (DB.partenairesSplit||{})[partenaireId];
   if(!p || !p.solde){ toast('Solde nul','warn'); return; }
-  var name = '?', tel = '';
-  var v = (DB.visitorAccounts||[]).find(function(x){return x.id===partenaireId;});
-  var t = (DB.teachers||[]).find(function(x){return x.id===partenaireId;});
-  var a = (DB.authors||[]).find(function(x){return x.id===partenaireId;});
-  if(v){ name=(v.pre||'')+' '+(v.nom||''); tel=v.tel||''; }
-  else if(t){ name=(t.pre||'')+' '+(t.nom||''); tel=t.tel||''; }
-  else if(a){ name=a.name||'?'; tel=a.tel||''; }
+  var _rp = _resolvePartenaire(partenaireId); var name = _rp.name, tel = _rp.tel;
 
   M('💰 Verser à '+_esc(name),'Versement Mobile Money',
     '<div style="padding:8px">'
@@ -33570,14 +33650,8 @@ window._executerVersement = function(partenaireId){
     toast('Téléphone Mobile Money invalide','warn'); return;
   }
 
-  // Trouver le nom du partenaire
-  var name = '?';
-  var v = (DB.visitorAccounts||[]).find(function(x){return x.id===partenaireId;});
-  var t = (DB.teachers||[]).find(function(x){return x.id===partenaireId;});
-  var a = (DB.authors||[]).find(function(x){return x.id===partenaireId;});
-  if(v) name = (v.pre||'')+' '+(v.nom||'');
-  else if(t) name = (t.pre||'')+' '+(t.nom||'');
-  else if(a) name = a.name||'?';
+  // Trouver le nom du partenaire (résolveur unifié : inclut les partenaires de code)
+  var name = _resolvePartenaire(partenaireId).name;
 
   if(mode === 'auto'){
     // ⚡ v1.2.4 — Versement RÉEL via CamPay (?action=withdraw).
@@ -35653,7 +35727,7 @@ window._streakBadgeHtml = function(){
   if(!s) return '';
   var lvl = _currentLevel(s.xp);
   var col = lvl.current.color;
-  return '<div onclick="mMonParcours()" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:linear-gradient(135deg,'+col+'18,'+col+'08);border:1px solid '+col+'40;border-radius:99px;cursor:pointer;font-size:11px;font-weight:700;color:'+col+'" title="Mon parcours · '+lvl.current.title+'">'
+  return '<div onclick="(typeof mCoaching===\'function\'?mCoaching():mMonParcours())" style="display:inline-flex;align-items:center;gap:6px;padding:6px 10px;background:linear-gradient(135deg,'+col+'18,'+col+'08);border:1px solid '+col+'40;border-radius:99px;cursor:pointer;font-size:11px;font-weight:700;color:'+col+'" title="Motivation & coaching · '+lvl.current.title+'">'
     +(s.current>0?'<span>🔥 '+s.current+'j</span>':'')
     +'<span>'+lvl.current.title.split(' ')[0]+' '+s.xp+' XP</span>'
     +'</div>';
@@ -35720,6 +35794,409 @@ try {
 } catch(e){}
 
 // ─── 2. BATTLES HEBDOMADAIRES + LEADERBOARD ─────────────────────────
+// ═══════════════════════════════════════════════════════════════════
+// ENGAGEMENT : COACHING / MOTIVATION + RELANCES DES INACTIFS
+// (coaching & développement perso côté apprenant + relance 1-clic admin)
+// ═══════════════════════════════════════════════════════════════════
+
+window.RELANCE_SEUIL_J = 7; // seuil d'inactivité (jours) pour proposer une relance
+
+// ── Helpers date : parse fr-FR (JJ/MM/AAAA) OU ISO, calcul de jours ──
+window._parseVDate = function(v){
+  if(!v) return null;
+  if(v instanceof Date) return isNaN(v.getTime())?null:v;
+  var s = String(v).trim();
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)){ var d=new Date(s); return isNaN(d.getTime())?null:d; }
+  var m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/);
+  if(m){ var yy=+m[3]; if(yy<100) yy+=2000; var d2=new Date(yy,(+m[2])-1,+m[1]); return isNaN(d2.getTime())?null:d2; }
+  var d3=new Date(s); return isNaN(d3.getTime())?null:d3;
+};
+window._daysSince = function(acc){
+  var val = (acc && typeof acc==='object') ? (acc.lastLoginISO||acc.lastLogin) : acc;
+  var d = _parseVDate(val);
+  if(!d) return null; // jamais connecté / date illisible → pas d'historique fiable
+  return Math.floor((Date.now()-d.getTime())/86400000);
+};
+
+// ── Abonnement actif ? (promotion globale de la logique existante) ──
+window._isAboUid = function(uid){
+  var abos = (DB.elearning && DB.elearning.abonnements) || [];
+  if(abos.some(function(a){ return (a.userId===uid||a.accountId===uid||a.eleveId===uid||a.uid===uid)
+      && a.statut!=='annule' && a.statut!=='expire' && a.statut!=='Expiré' && a.statut!=='En attente'; })) return true;
+  var v=(DB.visitorAccounts||[]).find(function(x){return x.id===uid;});
+  if(v && v.plans && v.plans.length) return true;
+  return false;
+};
+
+// ── Liste unifiée des inscrits (visiteurs inscrits + élèves à compte) ──
+window._allMembers = function(){
+  var out=[];
+  (DB.visitorAccounts||[]).forEach(function(v){
+    if(v.statut==='suspendu') return;
+    out.push({id:v.id,nom:v.nom||'',pre:v.pre||'',tel:v.tel||'',email:v.email||'',cls:v.cls||'',
+      lastLogin:v.lastLogin,lastLoginISO:v.lastLoginISO,type:'visiteur_inscrit',isAbo:_isAboUid(v.id)});
+  });
+  (DB.studentAccounts||[]).forEach(function(a){
+    var s=(DB.students||[]).find(function(x){return x.id===a.eid;});
+    if(!s) return;
+    out.push({id:s.id,nom:s.nom||'',pre:s.pre||'',tel:s.tel||s.ptel||'',email:s.email||'',cls:s.cls||'',
+      lastLogin:a.lastLogin,lastLoginISO:a.lastLoginISO,type:'eleve',isAbo:_isAboUid(s.id)||_isAboUid(a.id)});
+  });
+  return out;
+};
+
+// ── Ce que l'inscrit a « manqué » depuis sa dernière connexion ──
+window._missedSince = function(val){
+  var d=_parseVDate(val);
+  function cnt(arr,keys){
+    if(!arr||!arr.length||!d) return 0;
+    return arr.filter(function(x){
+      var dv=null;
+      for(var i=0;i<keys.length;i++){ if(x[keys[i]]){ dv=_parseVDate(x[keys[i]]); break; } }
+      return dv && dv.getTime()>d.getTime();
+    }).length;
+  }
+  var el=DB.elearning||{};
+  var nContenus=cnt(el.contenus||[],['date','dateAjout','dateCreation','createdAt']);
+  var nDevoirs =cnt(DB.devoirs||[],['date','dateCreation','createdAt']);
+  var nBooks   =cnt(DB.books||[],['date','dateAjout','createdAt']);
+  var nNotifs  =cnt(DB.notifications||[],['date']);
+  var parts=[];
+  if(nContenus) parts.push(nContenus+' nouveau'+(nContenus>1?'x':'')+' contenu'+(nContenus>1?'s':'')+' e-learning');
+  if(nDevoirs)  parts.push(nDevoirs+' nouveau'+(nDevoirs>1?'x':'')+' devoir'+(nDevoirs>1?'s':''));
+  if(nBooks)    parts.push(nBooks+' manuel'+(nBooks>1?'s':'')+' ajouté'+(nBooks>1?'s':''));
+  if(nNotifs)   parts.push(nNotifs+' annonce'+(nNotifs>1?'s':''));
+  // Toujours vrai : le défi hebdo est neuf chaque semaine
+  parts.push('le défi de la semaine et de nouvelles fiches de révision');
+  return {nContenus:nContenus,nDevoirs:nDevoirs,nBooks:nBooks,nNotifs:nNotifs,resume:parts.join(', ')};
+};
+
+// ── Liens 1-clic ──
+window._waLink = function(tel,msg){
+  var num=String(tel||'').replace(/[^0-9]/g,'');
+  if(num && num.length<=9) num='237'+num; // indicatif Cameroun
+  return 'https://wa.me/'+num+'?text='+encodeURIComponent(msg||'');
+};
+window._mailtoLink = function(email,subj,body){
+  return 'mailto:'+encodeURIComponent(email||'')+'?subject='+encodeURIComponent(subj||'')+'&body='+encodeURIComponent(body||'');
+};
+
+// ═══ PARTIE A — COACHING / MOTIVATION / DÉVELOPPEMENT PERSONNEL ═══
+
+window._DEFAULT_COACH_MOTIV = function(){
+  return {
+    citations:[
+      {t:"Le savoir est une arme : aiguise-la un peu chaque jour.",a:"Centre VÉRITAS"},
+      {t:"Ce n'est pas parce que c'est difficile que nous n'osons pas ; c'est parce que nous n'osons pas que c'est difficile.",a:"Sénèque"},
+      {t:"La chance sourit aux esprits préparés.",a:"Louis Pasteur"},
+      {t:"Un peu chaque jour vaut mieux que beaucoup d'un seul coup.",a:"Sagesse africaine"},
+      {t:"Tomber n'est pas échouer ; échouer, c'est rester à terre.",a:"Proverbe"},
+      {t:"L'excellence n'est pas un acte mais une habitude.",a:"Aristote"},
+      {t:"Celui qui déplace la montagne commence par déplacer les petits cailloux.",a:"Confucius"},
+      {t:"La discipline est le pont entre tes rêves et tes résultats.",a:"Jim Rohn"},
+      {t:"Instruis-toi comme si tu devais vivre toujours.",a:"Proverbe"},
+      {t:"Le courage, c'est d'aller à l'école même les jours sans envie.",a:"Centre VÉRITAS"}
+    ],
+    tips:[
+      {ic:"🧠",t:"Mémorise mieux",d:"Révise en 3 temps : lis, ferme le cahier, récite à voix haute. Le rappel actif ancre deux fois mieux que la relecture."},
+      {ic:"⏱️",t:"Méthode Pomodoro",d:"25 min de concentration, 5 min de pause. Après 4 cycles, une grande pause. Ton cerveau tient mieux la distance."},
+      {ic:"😌",t:"Apaise ton stress",d:"Avant une épreuve : inspire 4 s, retiens 4 s, expire 6 s. Répète 5 fois. Le cœur ralentit, l'esprit s'éclaircit."},
+      {ic:"🎯",t:"Un objectif clair",d:"« Réviser » est flou. « Faire 10 QCM de SVT ce soir » est un objectif. Le précis se réalise, le vague s'oublie."},
+      {ic:"🌙",t:"Dors pour apprendre",d:"La mémoire se consolide pendant le sommeil. Une nuit complète vaut mieux qu'une révision de dernière minute."},
+      {ic:"🤝",t:"Explique à un autre",d:"Tu maîtrises vraiment ce que tu peux enseigner. Explique une leçon à un camarade : ses questions révèlent tes trous."}
+    ],
+    defis:[
+      "Aujourd'hui, fais 10 QCM dans ta matière la plus faible.",
+      "Explique une leçon d'hier à quelqu'un, sans regarder ton cahier.",
+      "Termine un devoir avant de toucher ton téléphone.",
+      "Relis tes 3 dernières erreurs et corrige-les proprement.",
+      "Fais une fiche d'une page sur le dernier cours.",
+      "Réponds au Sujet du jour et vise le haut du classement.",
+      "Lis 15 minutes une œuvre au programme."
+    ]
+  };
+};
+
+// Tirage stable pour la journée (même citation/défi toute la journée)
+window._coachDailyPick = function(arr){
+  if(!arr||!arr.length) return null;
+  var d=new Date();
+  var doy=Math.floor((d-new Date(d.getFullYear(),0,0))/86400000);
+  return arr[doy % arr.length];
+};
+
+// Objectifs personnels de l'apprenant courant
+window._userGoals = function(){
+  var ses=(typeof SES!=='undefined'&&SES)?SES:null;
+  if(!ses||!ses.id) return [];
+  DB.userGoals=DB.userGoals||{};
+  DB.userGoals[ses.id]=DB.userGoals[ses.id]||[];
+  return DB.userGoals[ses.id];
+};
+window._addGoal = function(){
+  var el=_ge('cgGoal'); var v=((el&&el.value)||'').trim();
+  if(!v){ toast('Écris ton objectif','warn'); return; }
+  _userGoals().push({id:gid(),texte:v,fait:false,xpGiven:false,date:today()});
+  save(); mCoaching();
+};
+window._toggleGoal = function(id){
+  var g=_userGoals(); var x=g.find(function(y){return y.id===id;});
+  if(!x) return;
+  x.fait=!x.fait;
+  if(x.fait && !x.xpGiven){ x.xpGiven=true; try{ if(typeof _addXP==='function') _addXP('lecture'); }catch(e){} }
+  save(); mCoaching();
+};
+window._delGoal = function(id){
+  var ses=(typeof SES!=='undefined'&&SES)?SES.id:null; if(!ses) return;
+  DB.userGoals=DB.userGoals||{};
+  DB.userGoals[ses]=(DB.userGoals[ses]||[]).filter(function(y){return y.id!==id;});
+  save(); mCoaching();
+};
+
+// Hub apprenant : progression + citation + défi + objectifs + conseils
+window.mCoaching = function(){
+  var ses=(typeof SES!=='undefined'&&SES)?SES:null;
+  if(!ses||!ses.id){
+    M('💪 Motivation & Coaching','Connecte-toi pour ton espace personnel',
+      '<div style="text-align:center;padding:18px"><p>Fixe tes objectifs, garde ta série de connexions et reçois ta dose de motivation chaque jour.</p></div>',
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()">✨ S\'inscrire</button>');
+    return;
+  }
+  DB.coachMotiv=DB.coachMotiv||_DEFAULT_COACH_MOTIV();
+  var cit=_coachDailyPick(DB.coachMotiv.citations)||{t:'',a:''};
+  var defi=_coachDailyPick(DB.coachMotiv.defis)||'';
+  var s=_getUserStreak();
+  var lvl=_currentLevel(s.xp);
+  var pct=Math.round(lvl.progress);
+  var pre=(ses.pre||ses.nom||'').split(' ')[0]||'';
+  var enc;
+  if((s.current||0)<=0) enc="Lance ta série aujourd'hui — le premier jour est le plus important.";
+  else if(s.current<3) enc="Belle reprise ! "+s.current+" jour"+(s.current>1?"s":"")+" d'affilée, continue.";
+  else if(s.current<7) enc="🔥 "+s.current+" jours de suite — tu prends le rythme des champions.";
+  else enc="🏆 "+s.current+" jours ! Tu es une machine à réviser. Ne lâche rien.";
+  var goals=_userGoals();
+  var goalsHtml=goals.length? goals.map(function(g){
+    return '<div style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #F0EDE6">'
+      +'<button onclick="_toggleGoal(\''+g.id+'\')" style="border:none;background:none;cursor:pointer;font-size:18px">'+(g.fait?'✅':'⬜')+'</button>'
+      +'<div style="flex:1;font-size:13px;color:#142554;'+(g.fait?'text-decoration:line-through;opacity:.55':'')+'">'+_esc(g.texte)+'</div>'
+      +'<button onclick="_delGoal(\''+g.id+'\')" style="border:none;background:none;cursor:pointer;color:#DC2626;font-size:14px">✕</button>'
+    +'</div>';
+  }).join(''):'<div style="color:#9A8F80;font-size:12px;padding:6px 0">Aucun objectif pour l\'instant. Fixe-t\'en un tout de suite 👇</div>';
+  var tips=(DB.coachMotiv.tips||[]).map(function(t){
+    return '<div style="background:#fff;border:1px solid #EFEAE0;border-left:3px solid #FFC93C;border-radius:10px;padding:10px 12px">'
+      +'<div style="font-weight:800;color:#142554;font-size:13px">'+(t.ic||'✦')+' '+_esc(t.t)+'</div>'
+      +'<div style="font-size:12px;color:#5B5348;line-height:1.5;margin-top:3px">'+_esc(t.d)+'</div>'
+    +'</div>';
+  }).join('');
+  var body='<div style="padding:4px">'
+    +'<div style="background:linear-gradient(135deg,#142554,'+lvl.current.color+');color:#fff;border-radius:16px;padding:16px;margin-bottom:14px">'
+      +'<div style="font-family:\'Libre Baskerville\',Georgia,serif;font-size:18px;font-weight:700">Salut '+_esc(pre)+' 👋</div>'
+      +'<div style="font-size:12px;opacity:.9;margin:2px 0 10px">'+_esc(enc)+'</div>'
+      +'<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">'
+        +'<div style="font-size:12px"><b style="font-size:18px">🔥 '+(s.current||0)+'</b> j de série</div>'
+        +'<div style="font-size:12px"><b style="font-size:18px">⚡ '+(s.xp||0)+'</b> XP · '+lvl.current.title+'</div>'
+      +'</div>'
+      +'<div style="background:rgba(255,255,255,.25);border-radius:99px;height:7px;margin-top:10px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:#FFC93C;border-radius:99px"></div></div>'
+    +'</div>'
+    +'<div style="background:#FBF7EF;border:1px solid rgba(255,201,60,.45);border-radius:14px;padding:14px;margin-bottom:12px">'
+      +'<div style="font-size:11px;font-weight:800;color:#B45309;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">✦ Pensée du jour</div>'
+      +'<div style="font-family:\'Libre Baskerville\',Georgia,serif;font-size:15px;color:#142554;line-height:1.5;font-style:italic">« '+_esc(cit.t)+' »</div>'
+      +'<div style="text-align:right;font-size:12px;color:#9A8F80;margin-top:4px">— '+_esc(cit.a||'')+'</div>'
+    +'</div>'
+    +'<div style="background:linear-gradient(135deg,#FFF0F0,#FFF7E6);border:1px solid #FBCFE8;border-radius:14px;padding:14px;margin-bottom:14px">'
+      +'<div style="font-size:11px;font-weight:800;color:#BE185D;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">🎯 Défi du jour</div>'
+      +'<div style="font-size:14px;color:#142554;font-weight:600;line-height:1.4">'+_esc(defi)+'</div>'
+    +'</div>'
+    +'<div style="font-weight:800;color:#142554;margin:6px 0 4px;font-size:14px">📌 Mes objectifs</div>'
+    +goalsHtml
+    +'<div style="display:flex;gap:6px;margin:8px 0 16px"><input class="fi" id="cgGoal" placeholder="Ex : finir 10 QCM de SVT ce soir" style="flex:1" onkeydown="if(event.key===\'Enter\')_addGoal()"><button class="btn bi sm" onclick="_addGoal()">+ Ajouter</button></div>'
+    +'<div style="font-weight:800;color:#142554;margin:6px 0 8px;font-size:14px">🧭 Conseils pour progresser</div>'
+    +'<div style="display:grid;grid-template-columns:1fr;gap:8px">'+tips+'</div>'
+    +'</div>';
+  M('💪 Motivation & Coaching','Ta progression · tes objectifs · ta dose du jour',body,
+    '<button class="btn bo" onclick="cm();mMonParcours()">🎯 Mon parcours détaillé</button><button class="btn bi" onclick="cm()">Continuer 💪</button>', true);
+};
+
+// « Bon retour » : à la reconnexion d'un apprenant absent ≥ seuil
+window._welcomeBack = function(){
+  try {
+    var ses=(typeof SES!=='undefined'&&SES)?SES:null;
+    if(!ses||!ses.id) return;
+    if(ses.type!=='eleve' && ses.type!=='visiteur_inscrit') return;
+    var prev=window._vrtPrevLogin;
+    var j=prev? _daysSince(prev): null;
+    if(j==null || j<(window.RELANCE_SEUIL_J||7)) return;
+    var missed=_missedSince(prev);
+    var pre=(ses.pre||ses.nom||'').split(' ')[0]||'';
+    var s=(typeof _getUserStreak==='function')?_getUserStreak():null;
+    var body='<div style="padding:6px">'
+      +'<div style="text-align:center;font-size:44px;margin-bottom:6px">👋</div>'
+      +'<p style="text-align:center;font-size:15px;color:#142554;font-weight:700;margin:0 0 4px">Content de te revoir'+(pre?', '+_esc(pre):'')+' !</p>'
+      +'<p style="text-align:center;color:#6B5E52;font-size:13px;margin:0 0 14px">'+j+" jours sans révision, ça se rattrape 💪</p>"
+      +'<div style="background:linear-gradient(135deg,#FFF7E6,#FFF0F0);border:1px solid rgba(255,201,60,.5);border-radius:14px;padding:14px;margin-bottom:12px">'
+        +'<div style="font-size:12px;font-weight:800;color:#B45309;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📚 Pendant ton absence</div>'
+        +'<div style="font-size:14px;color:#142554;line-height:1.5">'+_esc(missed.resume)+'.</div>'
+      +'</div>'
+      +(s?'<div style="text-align:center;font-size:13px;color:#DC2626;font-weight:700;margin-bottom:4px">🔥 Reprends ta série (record : '+(s.best||0)+' j) — une connexion par jour suffit.</div>':'')
+      +'</div>';
+    M('Bon retour !','',body,
+      '<button class="btn bo" onclick="cm()">Plus tard</button>'
+      +'<button class="btn bi" onclick="cm();(typeof mCoaching===\'function\'?mCoaching():showJeuxEdu())">🚀 Reprendre maintenant</button>', false);
+    window._vrtPrevLogin=null; // ne re-montrer qu'une fois par reconnexion
+  } catch(e){}
+};
+
+// Admin : éditeur léger des contenus de motivation
+window.mManageCoachMotiv = function(){
+  if(!iA()){ toast('Accès réservé','warn'); return; }
+  DB.coachMotiv=DB.coachMotiv||_DEFAULT_COACH_MOTIV();
+  var cmv=DB.coachMotiv;
+  var cits=(cmv.citations||[]).map(function(c,i){
+    return '<div style="display:flex;gap:6px;align-items:flex-start;padding:6px 0;border-bottom:1px solid #F0EDE6"><div style="flex:1;font-size:12px;color:#142554">« '+_esc(c.t)+' » <span style="color:#9A8F80">— '+_esc(c.a||'')+'</span></div><button class="btn br2 xs" onclick="_delCitation('+i+')">🗑</button></div>';
+  }).join('');
+  var defs=(cmv.defis||[]).map(function(d,i){
+    return '<div style="display:flex;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid #F0EDE6"><div style="flex:1;font-size:12px;color:#142554">'+_esc(d)+'</div><button class="btn br2 xs" onclick="_delDefi('+i+')">🗑</button></div>';
+  }).join('');
+  var body='<div style="padding:4px">'
+    +'<div class="ib ibi mb12"><span>💡</span><span>Ces contenus alimentent l\'espace « Motivation & Coaching » des élèves (citation & défi du jour, conseils).</span></div>'
+    +'<div style="font-weight:800;color:#142554;margin:8px 0 4px">📜 Citations ('+(cmv.citations||[]).length+')</div>'
+    +'<div style="max-height:150px;overflow:auto;margin-bottom:8px">'+(cits||'<div style="color:#9A8F80;font-size:12px">Aucune</div>')+'</div>'
+    +'<div style="display:flex;gap:6px;margin-bottom:14px"><input class="fi" id="mcCit" placeholder="Nouvelle citation" style="flex:2"><input class="fi" id="mcAut" placeholder="Auteur" style="flex:1"><button class="btn bi sm" onclick="_addCitation()">+</button></div>'
+    +'<div style="font-weight:800;color:#142554;margin:8px 0 4px">🎯 Défis ('+(cmv.defis||[]).length+')</div>'
+    +'<div style="max-height:130px;overflow:auto;margin-bottom:8px">'+(defs||'<div style="color:#9A8F80;font-size:12px">Aucun</div>')+'</div>'
+    +'<div style="display:flex;gap:6px"><input class="fi" id="mcDefi" placeholder="Nouveau défi du jour" style="flex:1"><button class="btn bi sm" onclick="_addDefi()">+</button></div>'
+    +'</div>';
+  M('💪 Motivation & Coaching','Citations · Défis · Conseils',body,
+    '<button class="btn bo" onclick="_resetCoachMotiv()">↺ Réinitialiser</button><button class="btn bi" onclick="cm()">Fermer</button>',true);
+};
+window._addCitation=function(){var t=((_ge('mcCit')||{}).value||'').trim();var a=((_ge('mcAut')||{}).value||'').trim();if(!t){toast('Texte requis','warn');return;}DB.coachMotiv.citations.push({t:t,a:a||'VÉRITAS'});save();mManageCoachMotiv();};
+window._delCitation=function(i){DB.coachMotiv.citations.splice(i,1);save();mManageCoachMotiv();};
+window._addDefi=function(){var t=((_ge('mcDefi')||{}).value||'').trim();if(!t){toast('Texte requis','warn');return;}DB.coachMotiv.defis.push(t);save();mManageCoachMotiv();};
+window._delDefi=function(i){DB.coachMotiv.defis.splice(i,1);save();mManageCoachMotiv();};
+window._resetCoachMotiv=function(){if(!confirm('Réinitialiser citations, défis et conseils par défaut ?'))return;DB.coachMotiv=_DEFAULT_COACH_MOTIV();save();mManageCoachMotiv();toast('Réinitialisé','ok');};
+
+// ═══ PARTIE B — RELANCES DES INSCRITS INACTIFS (admin, 1-clic) ═══
+
+// Scan client-side (garde 1×/jour). Renseigne window._vrtInactifs.
+window._scanInactifs = function(force){
+  try {
+    var todayISO=new Date().toISOString().slice(0,10);
+    if(force || localStorage.getItem('_vrtRelanceScan')!==todayISO){
+      localStorage.setItem('_vrtRelanceScan',todayISO);
+    }
+    var seuil=window.RELANCE_SEUIL_J||7;
+    var inactifs=_allMembers().filter(function(m){ var j=_daysSince(m); return j!=null && j>=seuil; });
+    window._vrtInactifs=inactifs;
+    return inactifs;
+  } catch(e){ return []; }
+};
+window._nbInactifs = function(){
+  if(!window._vrtInactifs) _scanInactifs();
+  return (window._vrtInactifs||[]).length;
+};
+
+// Message de relance chaleureux et personnalisé
+window._relanceMessage = function(m){
+  var jours=_daysSince(m);
+  var missed=_missedSince(m.lastLoginISO||m.lastLogin);
+  var pre=(m.pre||m.nom||'').split(' ')[0]||'cher élève';
+  var sc=(DB.school&&DB.school.nom)||'VÉRITAS';
+  var url='https://veritas-school.com/';
+  var msg='Bonjour '+pre+' 👋\n\n';
+  msg+='Ici le Centre '+sc+'. ';
+  msg+=(jours!=null)?('Cela fait '+jours+" jours qu'on ne t'a pas vu sur ta plateforme de révision, et tu nous manques ! ")
+                    :("On ne t'a pas vu récemment sur ta plateforme de révision, et tu nous manques ! ");
+  msg+='\n\n📚 Pendant ton absence : '+missed.resume+'.\n';
+  msg+="Ta série de connexions t'attend aussi — reprends-la avant qu'elle ne retombe à zéro 🔥\n\n";
+  msg+='💪 Un petit pas chaque jour fait les grands résultats. On compte sur toi pour la suite.\n';
+  msg+='👉 Reconnecte-toi ici : '+url+'\n\n';
+  msg+='À très vite,\nL\'équipe '+sc;
+  return msg;
+};
+
+window._markRelance=function(uid,canal){
+  DB.relances=DB.relances||[];
+  DB.relances.push({uid:uid,canal:canal||'?',date:today(),by:(typeof SES!=='undefined'&&SES?SES.id:'admin')});
+  save();
+};
+window._lastRelance=function(uid){
+  var list=(DB.relances||[]).filter(function(r){return r.uid===uid;});
+  return list.length? list[list.length-1] : null;
+};
+
+window._relanceWA=function(uid){
+  var m=(window._vrtInactifs||[]).find(function(x){return x.id===uid;});
+  if(!m){ return; }
+  if(!m.tel){ toast('Pas de numéro WhatsApp','warn'); return; }
+  window.open(_waLink(m.tel,_relanceMessage(m)),'_blank');
+  _markRelance(uid,'whatsapp');
+  setTimeout(function(){mRelances();},400);
+};
+window._relanceMail=function(uid){
+  var m=(window._vrtInactifs||[]).find(function(x){return x.id===uid;});
+  if(!m||!m.email){ toast('Pas d\'email','warn'); return; }
+  var sc=(DB.school&&DB.school.nom)||'VÉRITAS';
+  window.open(_mailtoLink(m.email,'Tu nous manques sur '+sc+' 📚',_relanceMessage(m)),'_blank');
+  _markRelance(uid,'email');
+  setTimeout(function(){mRelances();},400);
+};
+window._relanceCopy=function(uid){
+  var m=(window._vrtInactifs||[]).find(function(x){return x.id===uid;});
+  if(!m) return;
+  var msg=_relanceMessage(m);
+  if(navigator.clipboard) navigator.clipboard.writeText(msg).then(function(){toast('Message copié','ok');});
+  else toast('Copie non supportée','warn');
+  _markRelance(uid,'copie');
+  setTimeout(function(){mRelances();},350);
+};
+window._relanceCopyNums=function(){
+  var nums=(window._vrtInactifs||[]).map(function(m){return m.tel;}).filter(Boolean).join(', ');
+  if(!nums){ toast('Aucun numéro','warn'); return; }
+  if(navigator.clipboard) navigator.clipboard.writeText(nums).then(function(){toast('Numéros copiés','ok');});
+};
+
+window._relanceFiltre='tous';
+window.mRelances=function(filtre){
+  if(!iA()){ toast('Accès réservé','warn'); return; }
+  if(filtre) window._relanceFiltre=filtre;
+  var f=window._relanceFiltre||'tous';
+  var all=_scanInactifs(true);
+  var abo=all.filter(function(m){return m.isAbo;}).length;
+  var list=all.filter(function(m){ if(f==='abonnes')return m.isAbo; if(f==='gratuits')return !m.isAbo; return true; })
+              .sort(function(a,b){ return (_daysSince(b)||0)-(_daysSince(a)||0); });
+  function tab(id,lbl,n){ var on=(f===id);
+    return '<button class="btn sm" style="border-radius:99px;'+(on?'background:#142554;color:#FFC93C':'background:#F0EDE6;color:#142554')+'" onclick="mRelances(\''+id+'\')">'+lbl+' ('+n+')</button>'; }
+  var rows=list.map(function(m){
+    var j=_daysSince(m);
+    var missed=_missedSince(m.lastLoginISO||m.lastLogin);
+    var last=_lastRelance(m.id);
+    var nom=((m.pre||'')+' '+(m.nom||'')).trim()||m.id;
+    var waBtn = m.tel
+      ? '<button class="btn xs" style="background:#25D366;color:#fff;border-radius:8px" onclick="_relanceWA(\''+m.id+'\')" title="WhatsApp">📱</button>'
+      : '<span style="font-size:10px;color:#9CA3AF">pas de n°</span>';
+    var emailBtn = m.email
+      ? '<button class="btn xs" style="background:#0EA5E9;color:#fff;border-radius:8px" onclick="_relanceMail(\''+m.id+'\')" title="Email">✉️</button>'
+      : '<button class="btn xs" style="background:#E5E7EB;color:#9CA3AF;border-radius:8px" title="Pas d\'email" disabled>✉️</button>';
+    return '<tr style="border-bottom:1px solid #F0EDE6">'
+      +'<td style="padding:8px 6px"><div style="font-weight:700;color:#142554;font-size:13px">'+_esc(nom)+'</div>'
+        +'<div style="font-size:11px;color:#9A8F80">'+_esc(m.cls||'—')+' · '+(m.isAbo?'<span style="color:#059669;font-weight:700">Abonné</span>':'<span style="color:#9CA3AF">Gratuit</span>')+'</div>'
+        +(last?'<div style="font-size:10px;color:#B45309;margin-top:2px">✓ relancé le '+_esc(last.date)+' ('+_esc(last.canal)+')</div>':'')+'</td>'
+      +'<td style="padding:8px 6px;text-align:center"><div style="font-weight:900;color:#DC2626;font-size:16px">'+(j!=null?j:'?')+'</div><div style="font-size:9px;color:#9A8F80">jours</div></td>'
+      +'<td style="padding:8px 6px;font-size:11px;color:#5B5348;max-width:180px">'+_esc(missed.resume)+'</td>'
+      +'<td style="padding:8px 6px;white-space:nowrap;text-align:right">'+waBtn+' '+emailBtn+' <button class="btn xs" style="background:#F3F4F6;color:#142554;border-radius:8px" onclick="_relanceCopy(\''+m.id+'\')" title="Copier le message">📋</button></td>'
+    +'</tr>';
+  }).join('');
+  var body='<div style="padding:2px">'
+    +'<div class="ib ibi mb12"><span>📣</span><span>Inscrits sans connexion depuis <b>'+(window.RELANCE_SEUIL_J||7)+' jours ou plus</b>. Clique 📱 pour ouvrir WhatsApp avec un message de relance déjà rédigé (ce qu\'il a manqué + une motivation). <b>Rien n\'est envoyé automatiquement</b> — tu gardes la main.</span></div>'
+    +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+tab('tous','Tous',all.length)+tab('abonnes','Abonnés',abo)+tab('gratuits','Gratuits',all.length-abo)+'</div>'
+    +(list.length
+      ? '<div style="overflow-x:auto;max-height:52vh;overflow-y:auto"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#FBF7EF"><th style="text-align:left;padding:6px;font-size:11px;color:#9A8F80">Inscrit</th><th style="padding:6px;font-size:11px;color:#9A8F80">Absence</th><th style="text-align:left;padding:6px;font-size:11px;color:#9A8F80">A manqué</th><th style="padding:6px;font-size:11px;color:#9A8F80">Relancer</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+      : '<div style="text-align:center;padding:30px;color:#9A8F80"><div style="font-size:40px;margin-bottom:8px">🎉</div>Aucun inscrit inactif dans cette catégorie. Tout le monde révise !</div>')
+    +'</div>';
+  M('📣 Relances des inactifs','Rappels WhatsApp / email en 1 clic',body,
+    '<button class="btn bo" onclick="_relanceCopyNums()">📋 Copier les numéros</button><button class="btn bi" onclick="cm()">Fermer</button>', true);
+};
+
 window._currentWeekKey = function(){
   var d = new Date();
   var year = d.getFullYear();
@@ -41006,20 +41483,64 @@ function applyPartnerCode(code, data){
   return c;
 }
 
+// v1.2.5 — RÉPARTITION DIRECTE. Une commission de code promo (ou un bonus de
+// palier) VALIDÉE est créditée dans le solde de versement UNIFIÉ
+// (DB.partenairesSplit) → payée par CamPay AVEC les parrains/auteurs, en un seul
+// flux, un seul tableau de bord. Idempotent : double garde (c._distributed +
+// paymentRef unique par commission) → jamais de double crédit, même si les
+// chemins webhook + polling confirment le même paiement.
+window._payDistributeCommission = function(c){
+  if(!c || c._distributed) return 0;
+  var amt = c.commissionAmount || 0;
+  if(amt <= 0 || !c.partnerId) return 0;
+  DB.partenairesSplit = DB.partenairesSplit || {};
+  DB.splits = DB.splits || [];
+  var payRef = (c.type==='level_bonus' ? 'BONUS:' : 'COM:') + c.id;
+  if(DB.splits.some(function(x){ return x.paymentRef === payRef; })){ c._distributed = true; return 0; }
+  var s = {
+    id: (typeof gid==='function') ? gid() : 's'+Date.now(),
+    paymentRef: payRef,
+    type: (c.type==='level_bonus') ? 'bonus_palier' : 'commission_code',
+    partenaireId: c.partnerId,
+    description: (c.type==='level_bonus')
+      ? ('Bonus ' + (c.refLabel || 'palier'))
+      : ('Commission code — ' + (c.refLabel || c.refType || 'vente')),
+    montantBase: c.saleAmount || 0,
+    pct: c.commissionPct || 0,
+    montant: amt,
+    etat: 'pending',
+    createdAt: Date.now()
+  };
+  var ps = DB.partenairesSplit[c.partnerId] || (DB.partenairesSplit[c.partnerId] = { solde:0, totalVerse:0, splits:[] });
+  DB.splits.push(s);
+  ps.solde += amt;
+  ps.splits.push(s.id);
+  c._distributed = true;
+  c.payoutChannel = 'campay';   // évite tout double-paiement par l'ancien dashboard partenaire
+  return amt;
+};
+
 // v1.2.2 (bug de chaîne #3) : confirme les commissions d'une vente quand le
 // paiement est VALIDÉ par l'admin → elles comptent alors pour le palier/bonus.
 // Appelé à l'activation d'abonnement et à la validation d'un achat.
+// v1.2.5 : chaque commission validée est AUSSITÔT répartie dans le solde CamPay.
 function confirmCommissionsForSale(refType, refId){
   if(!DB.commissions) return 0;
-  var n=0;
+  var n=0, touched={};
   DB.commissions.forEach(function(c){
     if(c.status==='pending' && c.refType===refType && String(c.refId)===String(refId)){
       c.status='validated'; c.validatedAt=(typeof today==='function')?today():''; n++;
+      try { _payDistributeCommission(c); } catch(e){}   // ⚡ répartition directe → solde CamPay
       var p=(DB.partners||[]).find(function(x){return x.id===c.partnerId;});
-      if(p){ calculatePartnerLevel(p.id); }
+      if(p){ calculatePartnerLevel(p.id); touched[c.partnerId]=1; }   // peut créditer un bonus de palier
     }
   });
-  if(n>0){ try{_prtSave&&_prtSave();}catch(e){} try{save&&save();}catch(e){} }
+  if(n>0){
+    try{_prtSave&&_prtSave();}catch(e){} try{save&&save();}catch(e){}
+    // Versement automatique une seule fois par partenaire, après TOUS les crédits
+    // (commission de vente + éventuel bonus de palier cumulés dans le même solde).
+    Object.keys(touched).forEach(function(pid){ try { _payMaybeAutoPayout(pid); } catch(e){} });
+  }
   return n;
 }
 window.confirmCommissionsForSale = confirmCommissionsForSale;
@@ -41043,7 +41564,7 @@ function calculatePartnerLevel(partnerId){
     var bonus = (L[newLevel].bonusFixe||0);
     if(bonus>0){
       if(!DB.commissions) DB.commissions=[];
-      DB.commissions.push({
+      var _bonusCom = {
         id: (typeof gid==='function')?gid():'com_'+Date.now(),
         partnerId: partner.id,
         type: 'level_bonus',
@@ -41051,12 +41572,15 @@ function calculatePartnerLevel(partnerId){
         refLabel: 'Palier '+L[newLevel].label,
         commissionAmount: bonus,
         commissionPct: 0,
-        status: 'pending',
+        status: 'validated',   // le bonus est ACQUIS dès l'atteinte du palier
+        validatedAt: (typeof today==='function')?today():'',
         date: (typeof today==='function')?today():new Date().toISOString().substring(0,10)
-      });
+      };
+      DB.commissions.push(_bonusCom);
+      // ⚡ réparti directement dans le solde de versement (comme une commission)
+      try { if(typeof _payDistributeCommission==='function') _payDistributeCommission(_bonusCom); } catch(e){}
       if(!partner.stats) partner.stats={};
       partner.stats.totalCommission = (partner.stats.totalCommission||0) + bonus;
-      partner.stats.pending = (partner.stats.pending||0) + bonus;
     }
     partner.level = newLevel;
     if(!partner.stats) partner.stats={};
@@ -41333,7 +41857,7 @@ function generatePartnerCertificate(partnerId){
   doc.setTextColor(220,220,240);
   doc.setFont('helvetica','normal');
   doc.setFontSize(8);
-  doc.text('Centre de repetitions - Douala, Cameroun - veritas-school.com', W/2, 30, {align:'center'});
+  doc.text('Centre d\'excellence scolaire - Douala, Cameroun - veritas-school.com', W/2, 30, {align:'center'});
 
   // Titre certificat
   doc.setTextColor(255,255,255);
