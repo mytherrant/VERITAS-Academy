@@ -34456,7 +34456,7 @@ window._certVeritasHTML = function(o){
   var logo = (typeof getLogo==='function') ? getLogo() : '';
   var sc = (typeof DB!=='undefined' && DB.school) ? DB.school : {};
   var ville = sc.ville || 'Douala';
-  var dir = sc.directeur || 'La Direction';
+  var dir = sc.signataire || 'Mythe Errant';
   var nomEc = sc.nom || 'CENTRE VÉRITAS';
   var tier = o.tierColor || '#C9A227';
   var ref = o.certRef || ((typeof gid==='function') ? gid().substring(0,8).toUpperCase() : 'VRT-0000');
@@ -34534,7 +34534,7 @@ window._certVeritasHTML = function(o){
    +'<div class="sp"></div>'
    +'<div class="ft">'
    +'<div class="fc"><div class="v">'+_e(date)+'</div><div class="sl"></div><div class="k">Date de délivrance</div></div>'
-   +'<div class="fc"><div class="vs">'+_e(dir)+'</div><div class="sl"></div><div class="k">'+_e(dir)+' · Directeur</div></div>'
+   +'<div class="fc"><div class="vs">'+_e(dir)+'</div><div class="sl"></div><div class="k">'+_e(dir)+' · Direction</div></div>'
    +'<div class="fc">'+seal+'</div>'
    +'<div class="fc"><div class="qrbox"><div class="qr">'+qr+'</div><div class="qm"><div class="cid">Identifiant</div><div class="cnn">'+_e(ref)+'</div><div class="vf"><span class="sh">'+shield+'</span><div><b>VÉRIFIÉ</b><span>veritas-school.com</span></div></div></div></div></div>'
    +'</div></div>';
@@ -41272,7 +41272,7 @@ function _prtCertEnsure(partner){
       id: 'VRT-CERT-'+year+'-'+seqStr,
       token: token,
       issuedAt: (typeof today==='function')?today():new Date().toISOString().substring(0,10),
-      issuedBy: 'Jacques Miterand TAKOU - Centre VERITAS Douala'
+      issuedBy: 'Mythe Errant - Centre VERITAS Douala'
     };
     _prtSave();
   }
@@ -41410,7 +41410,7 @@ function generatePartnerCertificate(partnerId){
   doc.setTextColor(255,255,255);
   doc.setFont('helvetica','italic');
   doc.setFontSize(9);
-  doc.text('Jacques Miterand TAKOU', 55, H-25, {align:'center'});
+  doc.text('Mythe Errant', 55, H-25, {align:'center'});
   doc.setFontSize(7);
   doc.setTextColor(200,200,220);
   doc.text('Fondateur - VERITAS Academy', 55, H-20, {align:'center'});
@@ -42234,7 +42234,7 @@ function generatePartnerContract(partnerId){
   doc.text('Pour le Partenaire', W-55, y+5, {align:'center'});
   doc.setFont('helvetica','normal');
   doc.setFontSize(8);
-  doc.text('Jacques Miterand TAKOU', 55, y+11, {align:'center'});
+  doc.text('Mythe Errant', 55, y+11, {align:'center'});
   doc.setTextColor(120,120,120);
   doc.text('Fondateur', 55, y+15, {align:'center'});
   doc.setTextColor(40,40,40);
