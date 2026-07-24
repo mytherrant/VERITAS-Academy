@@ -11341,6 +11341,20 @@ function printStudentHonneur(sid,tri){
     return gG.length?gG.reduce(function(a,g){return a+(_subMoy(g))*g.coef;},0)/tC:null;
   }).filter(function(m){return m!==null;}).sort(function(a,b){return b-a;});
   var rang=allMoy.findIndex(function(m){return Math.abs(m-moy)<0.001;})+1;
+  // v1.2.5 : rendu unifié sur le modèle certificat VÉRITAS (logo, calligraphie, sceau, QR).
+  if(typeof _certVeritasHTML==='function'){
+    var _mn=moy>=16?'Félicitations':moy>=14?'Tableau d\'Honneur':'Encouragements';
+    var _tc=moy>=16?'#C9A227':moy>=14?'#25407e':'#1a6e40';
+    var _rf=(typeof gid==='function'?gid().substring(0,8).toUpperCase():'VRT');
+    return printDoc(_certVeritasHTML({
+      titleHTML:'<i>Tableau</i> d\'Honneur', plainTitle:'Tableau d Honneur',
+      kicker:'Excellence académique · '+tri2+' · '+((sc&&sc.annee)||'2025-2026'),
+      cta:'Le Centre VÉRITAS inscrit avec fierté',
+      name:s.pre+' '+s.nom, badgeIcon:'trophy', badgeLabel:_mn, tierColor:_tc, certRef:_rf,
+      descHTML:'élève de <b>'+_esc(s.cls)+'</b> (matricule '+_esc(s.mat)+'), pour ses résultats et son sérieux, avec une moyenne de <b>'+moy.toFixed(2)+' / 20</b> — '+rang+'<sup>e</sup> sur '+allMoy.length+'.',
+      qrData:((sc&&sc.nom)||'VERITAS')+' | Tableau Honneur | '+s.pre+' '+s.nom+' | '+s.cls+' '+s.mat+' | Moy '+moy.toFixed(2)+'/20 Rang '+rang+'/'+allMoy.length+' | '+tri2+' | Ref '+_rf
+    }),'Certificat '+_mn+' — '+s.pre+' '+s.nom,'landscape');
+  }
   var html='<div style="max-width:900px;margin:0 auto;font-family:Outfit,sans-serif;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px '+mentionColor+',inset 0 0 0 6px #142554,inset 0 0 0 8px '+mentionColor+';-webkit-print-color-adjust:exact;print-color-adjust:exact">';
   html+='<div style="background:linear-gradient(135deg,#142554,#1a3a8a);padding:16px 24px;text-align:center">';
   html+='<div style="display:flex;justify-content:space-between;font-size:13px;color:rgba(255,255,255,.5);margin-bottom:8px"><span>RÉPUBLIQUE DU CAMEROUN</span><span>REPUBLIC OF CAMEROON</span></div>';
@@ -16066,7 +16080,7 @@ function mManagePartners(){
   if(!DB.partners) DB.partners = JSON.parse(JSON.stringify(_DEFAULT_PARTNERS));
   var rows = (DB.partners||[]).map(function(p,i){
     return '<tr><td>'+p.emoji+'</td><td class="semi">'+p.nom+'</td><td class="xs2">'+p.categorie+'</td>'+
-    '<td><div class="fl2 g4"><button class="btn bo xs" onclick="mEditPartner('+i+')">✏️</button><button class="btn br2 xs" onclick="delPartner('+i+')">🗑</button></div></td></tr>';
+    '<td><div class="fl2 g4"><button class="btn bo xs" title="Certificat d\'associé" onclick="genCertificatAssocie('+i+')">🎖️</button><button class="btn bo xs" onclick="mEditPartner('+i+')">✏️</button><button class="btn br2 xs" onclick="delPartner('+i+')">🗑</button></div></td></tr>';
   }).join('');
   M('🤝 Partenaires & Sponsors','Gérez la page partenaires',
     '<div class="tw mb12"><table><thead><tr><th>Logo</th><th>Nom</th><th>Type</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
@@ -34352,6 +34366,7 @@ window.pgParrainageEns = function(){
         +'<a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text='+shareMsg+'">📱 Partager (WhatsApp)</a>'
         +'<button class="btn" style="background:rgba(20,37,84,.92);color:#fff;border:none" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(function(){toast(\'Lien copié !\');});">🔗 Copier le lien</button>'
         +'<button class="btn" style="background:#142554;color:#FFC93C;border:none" onclick="genAmbassadorKit(\''+code+'\')">🖨️ Mon kit ambassadeur (A4)</button>'
+        +'<button class="btn" style="background:#C9A227;color:#142554;border:none;font-weight:700" onclick="genCertificatAmbassadeur()">🎖️ Mon certificat d\'ambassadeur</button>'
       +'</div>'
     +'</div>'
     +'<div class="card mt12"><div class="ct">📊 Vue d\'ensemble</div>'
@@ -34432,6 +34447,136 @@ window._posFinish=function(){
 // Coût d'acquisition minimal : un répétiteur convaincu amène 30-60 élèves. Cette
 // fiche (code perso + barème de commission + QR d'inscription) se distribue en
 // salle. Génère un document A4 prêt à imprimer via printDoc.
+// ═══ CERTIFICATS VÉRITAS (Ambassadeur · Associé · Tableau d'Honneur) ═══════
+// Rendu commun paysage A4 : logo réel (getLogo), calligraphie, sceau, laurels,
+// pictogrammes ligne, QR SCANNABLE (_qrSvg). Imprimable via printDoc('landscape').
+window._certVeritasHTML = function(o){
+  o = o || {};
+  var _e = (typeof _esc==='function') ? _esc : function(s){return (s==null?'':String(s));};
+  var logo = (typeof getLogo==='function') ? getLogo() : '';
+  var sc = (typeof DB!=='undefined' && DB.school) ? DB.school : {};
+  var ville = sc.ville || 'Douala';
+  var dir = sc.directeur || 'La Direction';
+  var nomEc = sc.nom || 'CENTRE VÉRITAS';
+  var tier = o.tierColor || '#C9A227';
+  var ref = o.certRef || ((typeof gid==='function') ? gid().substring(0,8).toUpperCase() : 'VRT-0000');
+  var date = o.date || ((typeof today==='function') ? today() : '');
+  var qrData = o.qrData || (nomEc+' | '+(o.plainTitle||'Certificat')+' | '+(o.name||'')+' | Ref '+ref+' | '+date);
+  var qr = (typeof _qrSvg!=='undefined' && _qrSvg && _qrSvg.toSVG) ? _qrSvg.toSVG(qrData,1) : '';
+  function ic(id){
+    var a='<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">';
+    if(id==='medal') return a+'<circle cx="12" cy="15" r="5.6"/><path d="M9.6 14.2l2.4 1.9 2.4-1.9-.9 3 .9 1.1h-4.8l.9-1.1z" fill="currentColor" stroke="none"/><path d="M8.2 3l3 5.5M15.8 3l-3 5.5M8.5 3h7"/></svg>';
+    if(id==='bank') return a+'<path d="M3 9.5l9-5.5 9 5.5M4.5 9.5v9M19.5 9.5v9M8.2 10v7.5M12 10v7.5M15.8 10v7.5M3 20.5h18"/></svg>';
+    if(id==='trophy') return a+'<path d="M8 4h8v4.5a4 4 0 0 1-8 0z"/><path d="M8 5.5H5.2v1a3 3 0 0 0 3 3M16 5.5h2.8v1a3 3 0 0 1-3 3M10 14h4M8.8 20h6.4M12 14v3.2"/></svg>';
+    return a+'</svg>';
+  }
+  var shield='<svg viewBox="0 0 34 44" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3 L31 9 V22 C31 33 17 41 17 41 C17 41 3 33 3 22 V9 Z"/><path d="M11 21 L16 27 L24 15" stroke-width="2.4"/></svg>';
+  var laurel='<svg viewBox="0 0 22 40" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 2 C10 10 6 22 9 38"/><g fill="currentColor" stroke="none"><path d="M9 12 c-5 -1 -8 2 -8 2 c0 0 3 3 8 2z"/><path d="M8 19 c-5 -1 -8 2 -8 2 c0 0 3 3 8 2z"/><path d="M8 26 c-5 -1 -8 2 -8 2 c0 0 3 3 8 2z"/><path d="M10 33 c-5 -1 -8 2 -8 2 c0 0 3 3 8 2z"/></g></svg>';
+  var flr='<svg class="flr" viewBox="0 0 260 16"><g fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"><path d="M24 8 C64 8 78 3 108 8 C114 9.2 118 9.2 124 8"/><path d="M236 8 C196 8 182 3 152 8 C146 9.2 142 9.2 136 8"/><path d="M24 8 C17 8 15 5 17 3 M24 8 C17 8 15 11 17 13"/><path d="M236 8 C243 8 245 5 243 3 M236 8 C243 8 245 11 243 13"/></g><path d="M130 2 C134 5 134 11 130 14 C126 11 126 5 130 2Z" fill="currentColor"/><circle cx="119" cy="8" r="1.5" fill="currentColor"/><circle cx="141" cy="8" r="1.5" fill="currentColor"/></svg>';
+  var corner='<svg viewBox="0 0 58 58" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M3 26V3h23M3 10h15M10 3v15"/><circle cx="26" cy="26" r="1.6" fill="currentColor" stroke="none"/></svg>';
+  var seal='<svg class="seal" viewBox="0 0 100 100" fill="none" stroke="#C9A227"><circle cx="50" cy="50" r="46" stroke-width="1.5"/><circle cx="50" cy="50" r="38" stroke-width="1"/><path id="_vcsp_'+ref+'" d="M50 14 a36 36 0 1 1 -0.1 0" fill="none"/><text font-family="Arial" font-size="8.2" letter-spacing="2.2" fill="#9a7b1c" font-weight="700"><textPath href="#_vcsp_'+ref+'" startOffset="2%">'+_e(nomEc)+' · SCEAU OFFICIEL · '+_e(ville).toUpperCase()+' · </textPath></text><path d="M40 52 L48 62 L64 40" stroke="#142554" stroke-width="2.4"/></svg>';
+  var css='<style>'
+   +'.vcert{position:relative;width:1000px;max-width:100%;margin:0 auto;background:radial-gradient(125% 125% at 82% -12%,#fffefb 0%,#FAF7F1 48%,#f1e9d8 100%);color:#1A1D24;font-family:Georgia,"Times New Roman",serif;overflow:hidden;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+   +'.vcert .fr{position:absolute;inset:15px;border:2.5px solid #142554;z-index:1}'
+   +'.vcert .fr:after{content:"";position:absolute;inset:5px;border:1px solid #C9A227}'
+   +'.vcert .cn{position:absolute;width:54px;height:54px;color:#C9A227;z-index:2}'
+   +'.vcert .cn.tl{top:20px;left:20px}.vcert .cn.tr{top:20px;right:20px;transform:scaleX(-1)}.vcert .cn.bl{bottom:20px;left:20px;transform:scaleY(-1)}.vcert .cn.br{bottom:20px;right:20px;transform:scale(-1,-1)}'
+   +'.vcert .wm{position:absolute;inset:0;background:url('+logo+') center 54%/44% no-repeat;opacity:.05;z-index:1}'
+   +'.vcert .bd{position:relative;z-index:3;padding:42px 82px 34px;display:flex;flex-direction:column;min-height:678px;text-align:center}'
+   +'.vcert .hd{display:flex;align-items:center;gap:16px;justify-content:center}'
+   +'.vcert .crest{width:82px;height:82px;flex:none}'
+   +'.vcert .org{text-align:left}'
+   +'.vcert .org .nm{font-size:23px;letter-spacing:.26em;font-weight:700;color:#142554}'
+   +'.vcert .org .sub{font-family:Arial,sans-serif;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:#a98a2a;margin-top:4px;font-weight:700}'
+   +'.vcert .flr{color:#C9A227;height:15px;width:210px;margin:9px auto 0;display:block}'
+   +'.vcert .ttl{font-size:48px;font-weight:700;color:#142554;line-height:1.02;margin:8px 0 0;font-family:"Libre Baskerville",Georgia,serif}'
+   +'.vcert .ttl i{color:#1c3a86}'
+   +'.vcert .kk{font-family:Arial,sans-serif;font-size:10.5px;letter-spacing:.34em;text-transform:uppercase;color:#5b6472;font-weight:600;margin-top:8px}'
+   +'.vcert .cta{font-family:"Monotype Corsiva","Gabriola","Lucida Handwriting","Segoe Script",cursive;font-size:29px;color:#25407e;margin-top:13px;line-height:1}'
+   +'.vcert .nm2{font-family:"Libre Baskerville",Georgia,serif;font-size:40px;font-weight:700;color:#1A1D24;margin:4px auto 0;padding:0 14px}'
+   +'.vcert .ds{font-size:15px;color:#3a4150;line-height:1.6;max-width:660px;margin:14px auto 0}'
+   +'.vcert .lr{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:14px}'
+   +'.vcert .lr .lf{width:26px;height:40px;color:#C9A227;flex:none;line-height:0}.vcert .lr .lf.r{transform:scaleX(-1)}'
+   +'.vcert .bt{display:inline-flex;align-items:center;gap:10px;padding:8px 20px 8px 14px;border:1.5px solid #C9A227;border-radius:999px;background:rgba(255,255,255,.62)}'
+   +'.vcert .bt .ic{width:25px;height:25px;flex:none;line-height:0}'
+   +'.vcert .bt .lb{font-family:Arial,sans-serif;font-weight:800;letter-spacing:.06em;font-size:12.5px;text-transform:uppercase}'
+   +'.vcert .sp{flex:1 1 auto;min-height:8px}'
+   +'.vcert .ft{display:grid;grid-template-columns:1fr 1.1fr 1fr 1.2fr;gap:16px;align-items:end;margin-top:6px}'
+   +'.vcert .fc{display:flex;flex-direction:column;align-items:center;gap:2px}'
+   +'.vcert .fc .v{font-family:Arial,sans-serif;font-weight:700;font-size:12.5px;color:#142554}'
+   +'.vcert .fc .vs{font-family:"Monotype Corsiva","Gabriola","Lucida Handwriting",cursive;font-size:28px;color:#16203c;line-height:.9;margin-bottom:3px}'
+   +'.vcert .fc .k{font-family:Arial,sans-serif;font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#8a8172}'
+   +'.vcert .sl{width:158px;border-top:1.4px solid #2c3550;margin:0 0 3px}'
+   +'.vcert .seal{width:92px;height:92px}'
+   +'.vcert .qrbox{display:flex;align-items:center;gap:11px}'
+   +'.vcert .qr{width:80px;height:80px;flex:none;border:3px solid #142554;border-radius:7px;padding:4px;background:#fff;line-height:0}'
+   +'.vcert .qr svg{width:100%;height:100%;display:block}'
+   +'.vcert .qm{text-align:left;font-family:Arial,sans-serif}'
+   +'.vcert .qm .cid{font-size:8.5px;letter-spacing:.1em;color:#8a8172;text-transform:uppercase}'
+   +'.vcert .qm .cnn{font-family:"Courier New",monospace;font-weight:700;font-size:13px;color:#142554;letter-spacing:.05em}'
+   +'.vcert .vf{display:flex;align-items:center;gap:6px;margin-top:6px}'
+   +'.vcert .vf .sh{width:24px;height:31px;color:#C9A227;flex:none;line-height:0}'
+   +'.vcert .vf b{color:#2f7d32;font-size:11px;letter-spacing:.1em}'
+   +'.vcert .vf span{display:block;font-size:8px;color:#8a8172;letter-spacing:.06em;text-transform:uppercase;margin-top:1px}'
+   +'</style>';
+  var corners='<div class="cn tl">'+corner+'</div><div class="cn tr">'+corner+'</div><div class="cn bl">'+corner+'</div><div class="cn br">'+corner+'</div>';
+  return css
+   +'<div class="vcert"><div class="fr"></div>'+corners+'<div class="wm"></div>'
+   +'<div class="bd">'
+   +'<div class="hd"><div class="crest" style="background:url('+logo+') center/contain no-repeat"></div><div class="org"><div class="nm">'+_e(nomEc)+'</div><div class="sub">Centre de tutorat · '+_e(ville)+', Cameroun</div></div></div>'
+   +flr
+   +'<div class="ttl">'+(o.titleHTML||'Certificat')+'</div>'
+   +'<div class="kk">'+_e(o.kicker||'')+'</div>'
+   +'<div class="cta">'+_e(o.cta||'')+'</div>'
+   +'<div class="nm2">'+_e(o.name||'')+'</div>'
+   +'<div class="ds">'+(o.descHTML||'')+'</div>'
+   +'<div class="lr"><span class="lf">'+laurel+'</span><div class="bt" style="border-color:'+tier+'"><span class="ic" style="color:'+tier+'">'+ic(o.badgeIcon)+'</span><span class="lb" style="color:'+tier+'">'+_e(o.badgeLabel||'')+'</span></div><span class="lf r">'+laurel+'</span></div>'
+   +'<div class="sp"></div>'
+   +'<div class="ft">'
+   +'<div class="fc"><div class="v">'+_e(date)+'</div><div class="sl"></div><div class="k">Date de délivrance</div></div>'
+   +'<div class="fc"><div class="vs">'+_e(dir)+'</div><div class="sl"></div><div class="k">'+_e(dir)+' · Directeur</div></div>'
+   +'<div class="fc">'+seal+'</div>'
+   +'<div class="fc"><div class="qrbox"><div class="qr">'+qr+'</div><div class="qm"><div class="cid">Identifiant</div><div class="cnn">'+_e(ref)+'</div><div class="vf"><span class="sh">'+shield+'</span><div><b>VÉRIFIÉ</b><span>veritas-school.com</span></div></div></div></div></div>'
+   +'</div></div>';
+};
+
+// Certificat d'Ambassadeur — pour un parrain/ambassadeur (palier selon nb de filleuls).
+window.genCertificatAmbassadeur = function(uid){
+  var ses = (typeof SES!=='undefined'&&SES) ? SES : null;
+  uid = uid || (ses ? ses.id : null);
+  if(!uid){ toast('Session requise','warn'); return; }
+  var filleuls = (DB.parrainages||[]).filter(function(p){ return p.parrainId===uid; }).length;
+  var tier = filleuls>=100 ? {c:'#3FA9C6',l:'Diamant'} : filleuls>=50 ? {c:'#C9A227',l:'Or'} : filleuls>=20 ? {c:'#8C99A8',l:'Argent'} : {c:'#B87333',l:'Bronze'};
+  var nom = ses ? ((ses.pre||'')+' '+(ses.nom||'')).trim() : '';
+  if(!nom){ var u=(DB.visitorAccounts||[]).find(function(v){return v.id===uid;})||(DB.students||[]).find(function(s){return s.id===uid;}); nom=u?((u.pre||u.prenom||'')+' '+(u.nom||'')).trim():'Ambassadeur VÉRITAS'; }
+  var sc = DB.school||{}; var ref = (typeof gid==='function'?gid().substring(0,8).toUpperCase():'VRT');
+  var html = _certVeritasHTML({
+    titleHTML:'Certificat <i>d\'Ambassadeur</i>', plainTitle:'Certificat Ambassadeur',
+    kicker:'Programme de partenariat VÉRITAS', cta:'Le Centre VÉRITAS distingue et remercie',
+    name:nom, badgeIcon:'medal', badgeLabel:'Ambassadeur — Palier '+tier.l, tierColor:tier.c, certRef:ref,
+    descHTML:'pour son engagement à faire rayonner l\'excellence scolaire VÉRITAS auprès des élèves du secondaire, ayant parrainé <b>'+filleuls+' filleul'+(filleuls>1?'s':'')+'</b> vers la réussite.',
+    qrData:(sc.nom||'VERITAS')+' | Certificat Ambassadeur | '+nom+' | Palier '+tier.l+' | '+filleuls+' filleuls | Ref '+ref
+  });
+  printDoc(html,'Certificat Ambassadeur — '+nom,'landscape');
+};
+
+// Certificat d'Associé — pour un partenaire institutionnel (DB.partners).
+window.genCertificatAssocie = function(idx){
+  var p = (DB.partners||[])[idx];
+  if(!p){ toast('Partenaire introuvable','warn'); return; }
+  var tm = {gold:{c:'#C9A227',l:'Partenaire Or'},silver:{c:'#8C99A8',l:'Partenaire Argent'},bronze:{c:'#B87333',l:'Sponsor Officiel'}};
+  var t = tm[p.type]||tm.silver;
+  var sc = DB.school||{}; var ref = (typeof gid==='function'?gid().substring(0,8).toUpperCase():'VRT');
+  var html = _certVeritasHTML({
+    titleHTML:'Certificat <i>d\'Associé</i>', plainTitle:'Certificat Associe',
+    kicker:'Réseau des partenaires VÉRITAS', cta:'Il est attesté que',
+    name:p.nom, badgeIcon:'bank', badgeLabel:'Associé — '+t.l, tierColor:t.c, certRef:ref,
+    descHTML:'est reconnu <b>Partenaire officiel du Centre VÉRITAS</b> en qualité de <b>'+_esc(t.l)+'</b>'+(p.desc?', '+_esc(p.desc):'')+', pour l\'année académique '+_esc(sc.annee||'2025-2026')+'.',
+    qrData:(sc.nom||'VERITAS')+' | Certificat Associe | '+p.nom+' | '+t.l+' | Ref '+ref
+  });
+  printDoc(html,'Certificat Associé — '+p.nom,'landscape');
+};
+
 window.genAmbassadorKit = function(code){
   var ses=(typeof SES!=='undefined'&&SES)?SES:null;
   var nom=ses?((ses.pre||'')+' '+(ses.nom||'')).trim():'';
