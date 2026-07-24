@@ -33196,6 +33196,21 @@ window._getSplitConfig = function(){
   return Object.assign({}, SPLIT_CONFIG_DEFAULT, (DB._splitConfig || {}));
 };
 
+// 🎯 Barème de parrainage RÉELLEMENT versé, en texte honnête pour l'affichage.
+// SOURCE UNIQUE = DB.parrainRate {forfait, pct} — le même objet qu'utilise
+// _computeSplits pour créditer. Évite le piège « on affiche 10 % mais on paie
+// 500 F fixes » : le SPLIT_CONFIG.parrain_abo/boutique n'est PAS ce qui est versé
+// tant que DB.parrainRate.pct est un nombre (0 par défaut).
+window._parrainBaremeTxt = function(){
+  var pr = DB.parrainRate || { forfait:500, pct:0 };
+  var f = (typeof pr.forfait === 'number') ? pr.forfait : 0;
+  var p = (typeof pr.pct === 'number') ? pr.pct : 0;
+  var parts = [];
+  if(f > 0) parts.push((typeof fmt==='function') ? fmt(f) : (f + ' FCFA'));
+  if(p > 0) parts.push(p + ' %');
+  return parts.length ? parts.join(' + ') : '0 FCFA';
+};
+
 // Calculer les splits dus à partir d'un paiement validé
 window._computeSplits = function(payAttempt){
   if(!payAttempt || !payAttempt.montant) return;
@@ -34305,7 +34320,7 @@ window.pgParrainageEns = function(){
   var filleuls = (DB.parrainages||[]).filter(function(p){ return p.parrainId===ses.id; });
   var ps = (DB.partenairesSplit||{})[ses.id] || { solde:0, totalVerse:0 };
   var abos = (DB.elearning && DB.elearning.abonnements) || [];
-  var pctAbo = (typeof _getSplitConfig==='function' ? _getSplitConfig().parrain_abo : 10);
+  var parrTxt = (typeof _parrainBaremeTxt==='function') ? _parrainBaremeTxt() : '500 FCFA';
   function resolveUser(uid){
     return (DB.visitorAccounts||[]).find(function(v){return v.id===uid;})
         || (DB.students||[]).find(function(s){return s.id===uid;}) || null;
@@ -34346,7 +34361,7 @@ window.pgParrainageEns = function(){
     +_statCard('💰', fmt(ps.solde||0), 'Commission à recevoir', '#FFC93C')
     +_statCard('✅', fmt(ps.totalVerse||0), 'Déjà versé', '#7C3AED')
     +'</div>'
-    +'<div class="ib ibi mt12 mb0"><span>💡</span><span>Vous touchez <b>'+pctAbo+'%</b> sur chaque abonnement payé par un filleul inscrit avec votre code. Versement par MoMo/Orange après validation (espace admin → Partage revenus).</span></div></div>'
+    +'<div class="ib ibi mt12 mb0"><span>💡</span><span>Vous touchez <b>'+parrTxt+'</b> sur chaque paiement d\'un filleul inscrit avec votre code. Versement par MoMo/Orange après validation (espace admin → Partage revenus).</span></div></div>'
     +'<div class="card mt12"><div class="ct">📋 Suivi de mes filleuls</div>'
     +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
     +'<thead><tr><th>Filleul</th><th>Inscrit le</th><th style="text-align:center">Statut</th><th style="text-align:right">Progression</th></tr></thead>'
@@ -34420,7 +34435,7 @@ window._posFinish=function(){
 window.genAmbassadorKit = function(code){
   var ses=(typeof SES!=='undefined'&&SES)?SES:null;
   var nom=ses?((ses.pre||'')+' '+(ses.nom||'')).trim():'';
-  var pctAbo=(typeof _getSplitConfig==='function'?_getSplitConfig().parrain_abo:10);
+  var parrTxt=(typeof _parrainBaremeTxt==='function')?_parrainBaremeTxt():'500 FCFA';
   var shareUrl=(location.origin||'https://veritas-school.com')+'/?ref='+code;
   var qr='https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data='+encodeURIComponent(shareUrl);
   var L=(typeof _prtL==='function')?_prtL():null;
@@ -34440,7 +34455,7 @@ window.genAmbassadorKit = function(code){
     +'<div style="background:#f5f3ef;border-radius:10px;padding:14px 18px;margin-bottom:18px">'
       +'<div style="font-weight:800;margin-bottom:8px">💰 Votre commission par palier</div>'
       +'<table style="width:100%;border-collapse:collapse;font-size:13px"><tbody>'+paliers+'</tbody></table>'
-      +'<div style="font-size:12px;color:#6b5e52;margin-top:8px">+ '+pctAbo+'% sur chaque abonnement payé par un filleul. Versement MoMo/Orange après validation.</div>'
+      +'<div style="font-size:12px;color:#6b5e52;margin-top:8px">+ '+parrTxt+' sur chaque paiement d\'un filleul inscrit avec votre code. Versement MoMo/Orange après validation.</div>'
     +'</div>'
     +'<div style="font-weight:800;margin-bottom:6px">🚀 Comment ça marche</div>'
     +'<ol style="margin:0 0 14px 0;padding-left:20px;font-size:13px;line-height:1.9">'
