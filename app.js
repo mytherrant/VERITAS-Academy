@@ -34524,6 +34524,23 @@ window._posFinish=function(){
 // ═══ CERTIFICATS VÉRITAS (Ambassadeur · Associé · Tableau d'Honneur) ═══════
 // Rendu commun paysage A4 : logo réel (getLogo), calligraphie, sceau, laurels,
 // pictogrammes ligne, QR SCANNABLE (_qrSvg). Imprimable via printDoc('landscape').
+// Registre des certificats émis → rend le badge « VÉRIFIÉ » RÉEL : id + token
+// stockés dans DB.certificats, retrouvables par pgCertificateVerify.
+window._certRegister = function(type, name, meta){
+  DB.certificats = DB.certificats || [];
+  var pfx = {ambassadeur:'AMB', associe:'ASC', honneur:'HON'}[type] || 'CERT';
+  var year = new Date().getFullYear();
+  var seq = DB.certificats.filter(function(c){ return c.year===year; }).length + 1;
+  var id = 'VRT-'+pfx+'-'+year+'-'+('0000'+seq).slice(-4);
+  var token = (typeof gid==='function' ? gid() : Math.random().toString(36).slice(2)).substring(0,8).toUpperCase();
+  var rec = { id:id, token:token, type:type, name:name||'', meta:meta||{}, year:year,
+    issuedAt:(typeof today==='function'?today():new Date().toISOString().substring(0,10)),
+    issuedBy:(DB.school&&DB.school.signataire)||'Mythe Errant' };
+  DB.certificats.push(rec);
+  try{ if(typeof save==='function') save(); }catch(e){}
+  return rec;
+};
+
 window._certVeritasHTML = function(o){
   o = o || {};
   var _e = (typeof _esc==='function') ? _esc : function(s){return (s==null?'':String(s));};
@@ -34535,7 +34552,11 @@ window._certVeritasHTML = function(o){
   var tier = o.tierColor || '#C9A227';
   var ref = o.certRef || ((typeof gid==='function') ? gid().substring(0,8).toUpperCase() : 'VRT-0000');
   var date = o.date || ((typeof today==='function') ? today() : '');
-  var qrData = o.qrData || (nomEc+' | '+(o.plainTitle||'Certificat')+' | '+(o.name||'')+' | Ref '+ref+' | '+date);
+  var token = o.certToken || '';
+  // QR = URL de vérification (ouvre la page qui confirme l'authenticité) dès qu'un
+  // token est fourni ; sinon repli texte. Le badge « VÉRIFIÉ » devient ainsi RÉEL.
+  var verifyUrl = 'https://veritas-school.com/#verifier-certificat?cert='+encodeURIComponent(ref)+(token?'&token='+encodeURIComponent(token):'');
+  var qrData = o.qrData || (token ? verifyUrl : (nomEc+' | '+(o.plainTitle||'Certificat')+' | '+(o.name||'')+' | Ref '+ref+' | '+date));
   var qr = (typeof _qrSvg!=='undefined' && _qrSvg && _qrSvg.toSVG) ? _qrSvg.toSVG(qrData,1) : '';
   function ic(id){
     var a='<svg viewBox="0 0 24 24" width="100%" height="100%" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">';
@@ -34610,7 +34631,7 @@ window._certVeritasHTML = function(o){
    +'<div class="fc"><div class="v">'+_e(date)+'</div><div class="sl"></div><div class="k">Date de délivrance</div></div>'
    +'<div class="fc"><div class="vs">'+_e(dir)+'</div><div class="sl"></div><div class="k">'+_e(dir)+' · Direction</div></div>'
    +'<div class="fc">'+seal+'</div>'
-   +'<div class="fc"><div class="qrbox"><div class="qr">'+qr+'</div><div class="qm"><div class="cid">Identifiant</div><div class="cnn">'+_e(ref)+'</div><div class="vf"><span class="sh">'+shield+'</span><div><b>VÉRIFIÉ</b><span>veritas-school.com</span></div></div></div></div></div>'
+   +'<div class="fc"><div class="qrbox"><div class="qr">'+qr+'</div><div class="qm"><div class="cid">Identifiant</div><div class="cnn">'+_e(ref)+'</div>'+(token?'<div class="cid" style="margin-top:3px">Token · <b style="color:#142554;font-family:monospace;letter-spacing:.05em">'+_e(token)+'</b></div>':'')+'<div class="vf"><span class="sh">'+shield+'</span><div><b>VÉRIFIÉ</b><span>veritas-school.com</span></div></div></div></div></div>'
    +'</div></div>';
 };
 
@@ -34623,13 +34644,12 @@ window.genCertificatAmbassadeur = function(uid){
   var tier = filleuls>=100 ? {c:'#3FA9C6',l:'Diamant'} : filleuls>=50 ? {c:'#C9A227',l:'Or'} : filleuls>=20 ? {c:'#8C99A8',l:'Argent'} : {c:'#B87333',l:'Bronze'};
   var nom = ses ? ((ses.pre||'')+' '+(ses.nom||'')).trim() : '';
   if(!nom){ var u=(DB.visitorAccounts||[]).find(function(v){return v.id===uid;})||(DB.students||[]).find(function(s){return s.id===uid;}); nom=u?((u.pre||u.prenom||'')+' '+(u.nom||'')).trim():'Ambassadeur VÉRITAS'; }
-  var sc = DB.school||{}; var ref = (typeof gid==='function'?gid().substring(0,8).toUpperCase():'VRT');
+  var rec = _certRegister('ambassadeur', nom, {tier:tier.l, filleuls:filleuls});
   var html = _certVeritasHTML({
     titleHTML:'Certificat <i>d\'Ambassadeur</i>', plainTitle:'Certificat Ambassadeur',
     kicker:'Programme de partenariat VÉRITAS', cta:'Le Centre VÉRITAS distingue et remercie',
-    name:nom, badgeIcon:'medal', badgeLabel:'Ambassadeur — Palier '+tier.l, tierColor:tier.c, certRef:ref,
-    descHTML:'pour son engagement à faire rayonner l\'excellence scolaire VÉRITAS auprès des élèves du secondaire, ayant parrainé <b>'+filleuls+' filleul'+(filleuls>1?'s':'')+'</b> vers la réussite.',
-    qrData:(sc.nom||'VERITAS')+' | Certificat Ambassadeur | '+nom+' | Palier '+tier.l+' | '+filleuls+' filleuls | Ref '+ref
+    name:nom, badgeIcon:'medal', badgeLabel:'Ambassadeur — Palier '+tier.l, tierColor:tier.c, certRef:rec.id, certToken:rec.token,
+    descHTML:'pour son engagement à faire rayonner l\'excellence scolaire VÉRITAS auprès des élèves du secondaire, ayant parrainé <b>'+filleuls+' filleul'+(filleuls>1?'s':'')+'</b> vers la réussite.'
   });
   printDoc(html,'Certificat Ambassadeur — '+nom,'landscape');
 };
@@ -34640,13 +34660,12 @@ window.genCertificatAssocie = function(idx){
   if(!p){ toast('Partenaire introuvable','warn'); return; }
   var tm = {gold:{c:'#C9A227',l:'Partenaire Or'},silver:{c:'#8C99A8',l:'Partenaire Argent'},bronze:{c:'#B87333',l:'Sponsor Officiel'}};
   var t = tm[p.type]||tm.silver;
-  var sc = DB.school||{}; var ref = (typeof gid==='function'?gid().substring(0,8).toUpperCase():'VRT');
+  var sc = DB.school||{}; var rec = _certRegister('associe', p.nom, {type:t.l, partnerId:p.id});
   var html = _certVeritasHTML({
     titleHTML:'Certificat <i>d\'Associé</i>', plainTitle:'Certificat Associe',
     kicker:'Réseau des partenaires VÉRITAS', cta:'Il est attesté que',
-    name:p.nom, badgeIcon:'bank', badgeLabel:'Associé — '+t.l, tierColor:t.c, certRef:ref,
-    descHTML:'est reconnu <b>Partenaire officiel du Centre VÉRITAS</b> en qualité de <b>'+_esc(t.l)+'</b>'+(p.desc?', '+_esc(p.desc):'')+', pour l\'année académique '+_esc(sc.annee||'2025-2026')+'.',
-    qrData:(sc.nom||'VERITAS')+' | Certificat Associe | '+p.nom+' | '+t.l+' | Ref '+ref
+    name:p.nom, badgeIcon:'bank', badgeLabel:'Associé — '+t.l, tierColor:t.c, certRef:rec.id, certToken:rec.token,
+    descHTML:'est reconnu <b>Partenaire officiel du Centre VÉRITAS</b> en qualité de <b>'+_esc(t.l)+'</b>'+(p.desc?', '+_esc(p.desc):'')+', pour l\'année académique '+_esc(sc.annee||'2025-2026')+'.'
   });
   printDoc(html,'Certificat Associé — '+p.nom,'landscape');
 };
@@ -41962,6 +41981,28 @@ function generatePartnerCertificate(partnerId){
 }
 
 // PAGE PUBLIQUE DE VÉRIFICATION
+// Rendu « certificat authentique » pour un certificat du registre DB.certificats.
+window._certVResultOK = function(c){
+  var _e = (typeof _esc==='function')?_esc:function(s){return s==null?'':String(s);};
+  var typeLabel = {ambassadeur:'Certificat d\'Ambassadeur', associe:'Certificat d\'Associé', honneur:'Tableau d\'Honneur'}[c.type] || 'Certificat VÉRITAS';
+  var m = c.meta||{}, extra = '';
+  if(c.type==='ambassadeur' && m.tier) extra = 'Palier '+_e(m.tier)+(m.filleuls!=null?' · '+m.filleuls+' filleul'+(m.filleuls>1?'s':''):'');
+  else if(c.type==='associe' && m.type) extra = _e(m.type);
+  else if(c.type==='honneur' && (m.mention||m.moy)) extra = _e(m.mention||'')+(m.moy?' · '+_e(m.moy)+'/20':'');
+  return '<div style="max-width:620px;margin:30px auto;padding:20px">'
+    +'<div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">'
+      +'<div style="font-size:44px">✅</div><div style="font-size:20px;font-weight:800;margin-top:6px">Certificat authentique</div>'
+      +'<div style="opacity:.9;font-size:13px;margin-top:4px">Émis par le Centre VÉRITAS · Douala</div></div>'
+    +'<div class="card"><table class="t" style="width:100%;font-size:13.5px">'
+      +'<tr><td class="k">Titulaire</td><td style="text-align:right;font-weight:700">'+_e(c.name)+'</td></tr>'
+      +'<tr><td class="k">Type</td><td style="text-align:right">'+_e(typeLabel)+'</td></tr>'
+      +(extra?'<tr><td class="k">Distinction</td><td style="text-align:right">'+extra+'</td></tr>':'')
+      +'<tr><td class="k">N° de certificat</td><td style="text-align:right;font-family:monospace">'+_e(c.id)+'</td></tr>'
+      +'<tr><td class="k">Délivré le</td><td style="text-align:right">'+_e(c.issuedAt||'')+'</td></tr>'
+      +'<tr><td class="k">Signataire</td><td style="text-align:right">'+_e(c.issuedBy||'Mythe Errant')+'</td></tr>'
+    +'</table></div></div>';
+};
+
 function pgCertificateVerify(){
   var params = {};
   try {
@@ -41985,6 +42026,11 @@ function pgCertificateVerify(){
       + '<div class="fg"><span class="fl">Token de sécurité</span><input class="fi" id="_cvTk" placeholder="8 caractères" maxlength="12"></div>'
       + '<button class="btn bi" style="width:100%;margin-top:10px" onclick="_cvSubmit()">🔍 Vérifier le certificat</button>'
       + '</div>';
+  }
+  var vcert = (DB.certificats||[]).find(function(c){ return c.id === certId; });
+  if(vcert){
+    if(vcert.token !== token) return _prtCertResult('invalid', certId, null, 'Le token de sécurité est invalide.');
+    return _certVResultOK(vcert);
   }
   var partner = (DB.partners||[]).find(function(p){
     return p.certificate && p.certificate.id === certId;
