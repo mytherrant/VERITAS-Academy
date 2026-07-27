@@ -105,5 +105,11 @@ VERITAS_Guide_*.pdf
 !uploads/oeuvres/
 !uploads/oeuvres/*.jpg
 !uploads/oeuvres/*.png
+# Exception : bannière de partage (og:image, 1200×630). Elle est référencée par
+# <meta property="og:image"> et copiée par deploy.yml, mais la règle *.jpg la
+# retirait du dépôt : la CI ne la voyait donc jamais et l'URL renvoyait 404 en
+# production — aucun aperçu lors d'un partage WhatsApp/Facebook, sur un site
+# dont l'acquisition repose précisément sur le partage. Vérifié le 27/07/2026.
+!og-image.jpg
 seo/
 _build/
