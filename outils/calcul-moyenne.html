@@ -1,0 +1,230 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Calcul de moyenne scolaire avec coefficients (Cameroun) — outil gratuit | VÉRITAS</title>
+<meta name="description" content="Calculez gratuitement la moyenne pondérée par coefficients d'un élève du secondaire camerounais (6ème à Terminale) : moyenne sur 20, situation de l'élève et matières qui coûtent le plus de points. Sans inscription.">
+<meta name="keywords" content="calcul moyenne scolaire, moyenne avec coefficients, calculer moyenne trimestre, moyenne de passage Cameroun, moyenne séquence MINESEC">
+<link rel="canonical" href="https://veritas-school.com/outils/calcul-moyenne.html">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="website"><meta property="og:title" content="Calcul de moyenne scolaire avec coefficients (Cameroun) — outil gratuit">
+<meta property="og:description" content="Moyenne pondérée sur 20, situation de l'élève et matières qui coûtent le plus de points. Gratuit, sans inscription."><meta property="og:url" content="https://veritas-school.com/outils/calcul-moyenne.html">
+<meta property="og:site_name" content="Centre VÉRITAS"><meta property="og:locale" content="fr_FR">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Calculateur de moyenne scolaire pondérée","applicationCategory":"EducationalApplication","operatingSystem":"Navigateur web","url":"https://veritas-school.com/outils/calcul-moyenne.html","inLanguage":"fr","offers":{"@type":"Offer","price":"0","priceCurrency":"XAF"},"provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS Academy","url":"https://veritas-school.com"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Comment calcule-t-on une moyenne avec des coefficients ?","acceptedAnswer":{"@type":"Answer","text":"On multiplie chaque note par le coefficient de sa matière, on additionne tous ces produits, puis on divise la somme obtenue par le total des coefficients. Une note de 12 en coefficient 4 pèse quatre fois plus qu'une note de 12 en coefficient 1."}},{"@type":"Question","name":"Quelle moyenne faut-il pour passer en classe supérieure au Cameroun ?","acceptedAnswer":{"@type":"Answer","text":"Il faut 10 sur 20 de moyenne générale. Depuis la session 2024, cette barre est appliquée strictement, sans délibération : les élèves situés entre 8 et 10 ne sont plus repêchés. La décision appartient au conseil de classe de l'établissement, qui tient compte du règlement intérieur, de la conduite et de l'assiduité."}},{"@type":"Question","name":"Pourquoi le taux de réussite au BAC a-t-il chuté en 2024 ?","acceptedAnswer":{"@type":"Answer","text":"Parce que la barre des 10 sur 20 de moyenne générale a été appliquée sans délibération : aucun candidat n'a été déclaré admis avec une moyenne inférieure à 10. Le taux de réussite au BAC général est passé de 75,73 % en 2023 à 37,26 % en 2024, la chute frappant surtout les séries littéraires (6,35 % en A4 Allemand, 6,90 % en A4 Espagnol)."}},{"@type":"Question","name":"Quelles matières faut-il travailler en priorité ?","acceptedAnswer":{"@type":"Answer","text":"Celles où la note est basse ET le coefficient élevé : c'est là qu'un même point gagné rapporte le plus à la moyenne générale. L'outil les classe automatiquement."}}]}</script>
+<style>
+:root{--navy:#142554;--gold:#FFC93C;--ink:#1f2d4d;--mut:#5b6b85;--bg:#f7f9fc}
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.7}
+header{background:linear-gradient(135deg,#0f1b3d,#142554 55%,#1e3a8a);color:#fff;padding:14px 20px}
+header a{color:var(--gold);font-weight:800;text-decoration:none;font-size:18px}
+.wrap{max-width:820px;margin:0 auto;padding:26px 20px}
+.card{background:#fff;border:1px solid #e6eaf2;border-radius:16px;padding:26px;box-shadow:0 10px 30px rgba(20,37,84,.06);margin-bottom:20px}
+.badge{display:inline-block;background:rgba(255,201,60,.18);color:#9a7b1c;font-weight:800;font-size:12px;padding:4px 12px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px}
+h1{font-size:26px;color:var(--navy);margin:12px 0 8px;line-height:1.25;text-wrap:balance}
+h2{color:var(--navy);font-size:19px;margin:22px 0 8px;border-bottom:2px solid #eef1f7;padding-bottom:5px}
+ul{padding-left:22px}li{margin:4px 0}a{color:#2563eb}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px}
+.nav a{background:#fff;border:1px solid #e6eaf2;border-radius:99px;padding:6px 12px;text-decoration:none;color:#142554;font-size:13px;font-weight:700}
+.cta{display:block;text-align:center;background:linear-gradient(135deg,#142554,#1e3a8a);color:#fff;text-decoration:none;font-weight:800;padding:16px;border-radius:14px;margin-top:16px}
+.cta small{display:block;font-weight:500;opacity:.85;font-size:12px;margin-top:3px}
+.wa{display:block;text-align:center;background:#25D366;color:#08281a;text-decoration:none;font-weight:800;padding:14px;border-radius:14px;margin-top:10px}
+.wa small{display:block;font-weight:600;opacity:.8;font-size:12px;margin-top:2px}
+.rel{font-size:14px;color:var(--mut)}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:24px}
+/* ── outil ── */
+table.mx{width:100%;border-collapse:collapse}
+table.mx th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);text-align:left;padding:0 6px 6px}
+table.mx td{padding:3px 6px 3px 0}
+input.f{width:100%;padding:10px 11px;border:1.5px solid #dbe2ee;border-radius:10px;font-size:15px;font-family:inherit;color:var(--ink);background:#fff}
+input.f:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,201,60,.22)}
+.btn{background:linear-gradient(135deg,var(--gold),#e8a413);color:var(--navy);border:none;border-radius:99px;padding:13px 26px;font-weight:800;font-size:15px;font-family:inherit;cursor:pointer;box-shadow:0 8px 20px rgba(232,164,19,.3)}
+.btn:hover{transform:translateY(-2px)}.btn{transition:transform .2s}
+.btn2{background:#fff;border:1.5px solid #dbe2ee;border-radius:99px;padding:11px 18px;font-weight:700;font-size:14px;font-family:inherit;color:var(--navy);cursor:pointer}
+.out{margin-top:18px}
+.res{border-left:4px solid var(--navy);background:#fbfcfe;border-radius:12px;padding:16px 18px}
+.res .big{font-size:36px;font-weight:800;line-height:1.1}
+.res .verd{font-weight:800;margin-top:2px}
+.res .expl{font-size:14px;margin-top:7px}
+.res .meta{font-size:12px;color:var(--mut);margin-top:9px}
+.weak{background:#fff;border:1px solid #e6eaf2;border-radius:12px;padding:14px 16px;margin-top:12px}
+.weak .row{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;border-bottom:1px solid #f0f3f8}
+.weak .row b{color:#b91c1c}
+.warn{background:#fffdf6;border:1px solid #f0e2b8;border-radius:12px;padding:12px 15px;font-size:14px;margin-top:12px}
+.disc{font-size:12.5px;color:var(--mut);margin-top:12px;line-height:1.5}
+/* Règle « 10 par matière » : le message le plus important de la page depuis 2024 */
+.rule{background:#fff8f1;border:1px solid #f3d3b3;border-left:4px solid #c2410c;border-radius:12px;padding:14px 16px;margin-top:12px}
+.rule.ok{background:#f3fbf6;border-color:#c6e7d5;border-left-color:#0f7b4f}
+.rule .rt{font-weight:800;color:#8a3b0c;margin-bottom:6px}
+.rule.ok .rt{color:#0f7b4f}
+.rule p{margin:6px 0;font-size:14px}
+.rule .rn{font-size:12.5px;color:var(--mut)}
+/* Deux publics, deux lectures du même chiffre */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+@media(max-width:640px){.duo{grid-template-columns:1fr}}
+.duo>div{background:#fff;border:1px solid #e6eaf2;border-radius:14px;padding:16px}
+.duo h3{margin:0 0 8px;font-size:15px;color:var(--navy)}
+.duo .who{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:99px;margin-bottom:8px}
+.duo .w1{background:rgba(37,99,235,.10);color:#1d4ed8}
+.duo .w2{background:rgba(15,123,79,.10);color:#0f7b4f}
+.duo ul{padding-left:18px;margin:6px 0 0}
+.duo li{font-size:13.5px;margin:5px 0}
+.form{background:#fbfcfe;border-left:3px solid var(--gold);padding:10px 14px;border-radius:8px;font-size:14px}
+.stats{background:linear-gradient(135deg,#0f1b3d,#142554);color:#fff;border-radius:14px;padding:18px 20px;margin:16px 0}
+.stats h3{color:#fff;margin:0 0 8px;font-size:16px}
+.stats .fig{display:flex;gap:18px;flex-wrap:wrap;margin:10px 0}
+.stats .fig div{flex:1 1 120px}
+.stats .fig b{display:block;font-size:24px;color:var(--gold);line-height:1.1}
+.stats .fig span{font-size:12px;color:#c7d2e8}
+.stats p{font-size:13.5px;color:#dbe4f5;margin:8px 0 0}
+.stats a{color:var(--gold)}
+</style></head><body>
+<header><div class="wrap" style="padding:0"><a href="https://veritas-school.com">🎓 Centre VÉRITAS Academy</a></div></header>
+<div class="wrap">
+<div class="nav"><a href="/outils/">🧰 Tous les outils</a><a style="background:#142554;color:#fff" href="/outils/calcul-moyenne.html">Moyenne</a><a href="/outils/points-manquants.html">Points manquants</a><a href="/outils/planning-revision.html">Planning de révision</a></div>
+
+<article class="card">
+<span class="badge">Outil gratuit · sans inscription</span>
+<h1>Calcul de moyenne scolaire avec coefficients</h1>
+<p>Saisissez les notes sur 20 et les coefficients tels qu'ils figurent sur le bulletin. L'outil donne la <strong>moyenne pondérée</strong>, situe l'élève et désigne les matières qui lui <strong>coûtent le plus de points</strong>. Tout est calculé dans votre navigateur : aucune note n'est envoyée ni conservée.</p>
+
+<table class="mx"><thead><tr><th style="width:46%">Matière</th><th style="width:27%">Note / 20</th><th style="width:27%">Coefficient</th></tr></thead><tbody id="rows"></tbody></table>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+  <button class="btn2" type="button" onclick="addRow()">+ Ajouter une matière</button>
+  <button class="btn" type="button" onclick="calc()">Calculer la moyenne</button>
+</div>
+<div class="out" id="out" aria-live="polite"></div>
+
+<h2>Les trois formules à connaître</h2>
+<p class="form"><strong>1. La moyenne pondérée</strong><br>moyenne = (note₁ × coef₁ + note₂ × coef₂ + …) ÷ (coef₁ + coef₂ + …)<br>
+<span style="font-size:13px;color:var(--mut)">On divise par la somme des coefficients, jamais par le nombre de matières.</span></p>
+<p class="form" style="margin-top:10px"><strong>2. Ce qu'une matière coûte à la moyenne</strong><br>perte = (10 − note) × coef ÷ total des coefficients<br>
+<span style="font-size:13px;color:var(--mut)">Un 8 en coefficient 4 sur un total de 24 retire 0,33 point de moyenne ; le même 8 en coefficient 1 n'en retire que 0,08. C'est la formule qui dit où travailler d'abord.</span></p>
+<p class="form" style="margin-top:10px"><strong>3. La note qu'il faut viser ensuite</strong><br>note nécessaire = [ cible × (C + c) − moyenne × C ] ÷ c<br>
+<span style="font-size:13px;color:var(--mut)">C = coefficients déjà comptés, c = coefficient de la nouvelle note. <a href="/outils/points-manquants.html">Le calculateur dédié</a> la résout pour vous.</span></p>
+
+<h2>Ce que le chiffre veut dire — pour l'élève et pour le parent</h2>
+<div class="duo">
+  <div><span class="who w1">Pour l'élève</span>
+    <h3>Trois points bien choisis valent mieux que dix heures dispersées</h3>
+    <ul>
+      <li><strong>Commence par la matière la plus lourde sous 10</strong>, jamais par celle que tu préfères : la formule n°2 te dit laquelle rapporte le plus.</li>
+      <li><strong>Vise 11, pas 20.</strong> Passer une matière de 7 à 11 rapporte plus à ta moyenne que de faire monter un 15 à 17, pour un effort bien moindre.</li>
+      <li><strong>Agis à la séquence 1.</strong> Plus le trimestre avance, plus ta moyenne devient lourde à déplacer — la formule n°3 le montre noir sur blanc.</li>
+      <li><strong>Aucun point ne se rattrape plus en délibération</strong> (voir plus bas) : ce que tu perds dans une matière, tu ne le récupères qu'en la remontant.</li>
+    </ul>
+  </div>
+  <div><span class="who w2">Pour le parent</span>
+    <h3>Deux chiffres à demander chaque séquence, pas un seul</h3>
+    <ul>
+      <li><strong>La moyenne ET la note la plus basse.</strong> La note la plus basse dit ce qui tire la moyenne vers le bas ; la moyenne seule ne le dit pas.</li>
+      <li><strong>Regardez les coefficients avant les notes.</strong> Un 8 en coefficient 4 est un problème ; un 8 en coefficient 1 est un détail.</li>
+      <li><strong>Fixez une cible chiffrée avec l'enfant</strong> (« 11 en anglais à la prochaine séquence ») : la formule n°3 la transforme en note précise à obtenir, donc en objectif vérifiable.</li>
+      <li><strong>Intervenez à la première séquence sous la moyenne</strong>, pas au troisième trimestre : à ce stade, le rattrapage demande un effort deux à trois fois plus grand.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Depuis 2024&nbsp;: 10/20, sans délibération</h2>
+<p>La règle est la même qu'avant — il faut <strong>10/20 de moyenne générale</strong> — mais elle est désormais appliquée <strong>strictement</strong>. Ce qui a disparu, c'est le <strong>repêchage en délibération</strong> : les candidats situés entre 8 et 10 ne sont plus rattrapés en conseil. Un enseignant à la retraite le formulait sans détour dans la presse : « on avait pris l'habitude de faire passer des candidats qui n'avaient pas eu 10/20 de moyenne ». La conséquence est arithmétique : <strong>chaque point perdu dans une matière compte réellement</strong>, et il n'existe plus de filet en fin d'année.</p>
+<div class="stats">
+  <h3>Ce que cette règle a changé, en chiffres</h3>
+  <div class="fig">
+    <div><b>37,26 %</b><span>de réussite au BAC général 2024 (49 521 admis sur 132 920 candidats)</span></div>
+    <div><b>75,73 %</b><span>l'année précédente, avec délibérations</span></div>
+    <div><b>6,35 %</b><span>en série A4 Allemand (1 496 admis sur 23 564)</span></div>
+  </div>
+  <p>Les séries littéraires ont été les plus touchées — 6,90 % en A4 Espagnol (2 802 admis sur 40 633). La conséquence pratique est simple : <strong>les points perdus dans une matière négligée ne se rattrapent plus en délibération</strong>. C'est pourquoi cet outil chiffre, matière par matière, ce que chacune retire à la moyenne.</p>
+  <p style="font-size:12.5px">Chiffres publiés par l'OBC et repris par la presse nationale (<a href="https://lejour.cm/examens-officiels-2024-comprendre-lechec-record-au-baccalaureat-general/" target="_blank" rel="noopener nofollow">Le Jour</a>, <a href="https://www.cameroon-tribune.cm/article.html/70563/fr.html/baccalaureat-general-plus-de-144-000-candidats-en-lice" target="_blank" rel="noopener nofollow">Cameroon Tribune</a>). Les modalités exactes de chaque session sont fixées par la circulaire de l'année : vérifiez-la auprès de l'établissement.</p>
+</div>
+<p>La décision de passage en classe supérieure appartient par ailleurs au <strong>conseil de classe</strong>, qui regarde aussi la conduite, l'assiduité et le règlement intérieur. Un résultat obtenu ici est un repère de travail, jamais une décision.</p>
+
+<h2>Et ensuite&nbsp;?</h2>
+<p>Une fois les matières faibles identifiées, deux suites utiles : savoir <a href="/outils/points-manquants.html">quelle note viser au prochain devoir</a>, et organiser le travail restant avec le <a href="/outils/planning-revision.html">planning de révision jusqu'à l'examen</a>. Les programmes par classe sont détaillés dans <a href="/niveaux/">l'espace niveaux</a>, et les méthodes d'épreuve dans <a href="/ressources/">méthodes &amp; examens</a>.</p>
+
+<a class="cta" href="https://veritas-school.com">▶ Ouvrir VÉRITAS — cours, annales corrigées &amp; Prof. Ambassa (IA)
+<small>6ème → Terminale · BEPC · Probatoire · BAC · GCE · sous-systèmes francophone &amp; anglophone</small></a>
+<a class="wa" href="https://wa.me/237697637739?text=Bonjour%20V%C3%89RITAS.%20J%27ai%20calcul%C3%A9%20la%20moyenne%20de%20mon%20enfant%20et%20je%20voudrais%20un%20conseil." target="_blank" rel="noopener">💬 Faire lire ce résultat par un enseignant
+<small>Réponse sous 2 h · jours ouvrés</small></a>
+</article>
+
+<p class="rel"><a href="/outils/">← Tous les outils gratuits</a> · <a href="/niveaux/">Niveaux</a> · <a href="/ressources/">Méthodes &amp; examens</a> · <a href="/oeuvres/">Œuvres</a></p>
+</div>
+<footer>© 2026 Centre VÉRITAS Academy · Douala, Cameroun · <a href="https://veritas-school.com">veritas-school.com</a></footer>
+
+<script>
+// Calculateur autonome. Aucune donnée ne quitte le navigateur : c'est un
+// argument de la page, il ne doit donc pas y avoir d'appel réseau ici.
+var SUGGEST=['Français','Mathématiques','Anglais','Histoire-Géo','SVT','Physique-Chimie','EPS','Informatique'];
+function addRow(v){
+  var tb=document.getElementById('rows'), i=tb.rows.length;
+  if(i>=16) return;
+  var tr=tb.insertRow();
+  tr.innerHTML='<td><input class="f" placeholder="'+(SUGGEST[i]||('Matière '+(i+1)))+'" aria-label="Matière '+(i+1)+'"></td>'
+    +'<td><input class="f" type="number" min="0" max="20" step="0.25" inputmode="decimal" placeholder="ex. 12,5" aria-label="Note sur 20 pour la matière '+(i+1)+'"></td>'
+    +'<td><input class="f" type="number" min="1" max="10" step="1" inputmode="numeric" placeholder="ex. 4" aria-label="Coefficient de la matière '+(i+1)+'"></td>';
+}
+for(var k=0;k<5;k++) addRow();
+
+function calc(){
+  var tb=document.getElementById('rows'), out=document.getElementById('out');
+  var tot=0,coefs=0,lignes=[],hors=0;
+  for(var i=0;i<tb.rows.length;i++){
+    var c=tb.rows[i].querySelectorAll('input');
+    var mat=c[0].value.trim()||c[0].placeholder;
+    var n=parseFloat(String(c[1].value).replace(',','.'));
+    var cf=parseFloat(c[2].value);
+    if(isNaN(n)) continue;
+    if(n<0||n>20){ hors++; continue; }
+    if(isNaN(cf)||cf<=0) cf=1;
+    tot+=n*cf; coefs+=cf; lignes.push({m:mat.substring(0,30),n:n,c:cf});
+  }
+  if(!coefs){ out.innerHTML='<div class="warn">⚠️ Saisissez au moins une note sur 20 pour lancer le calcul.</div>'; return; }
+  var moy=tot/coefs, v,col,expl;
+  if(moy>=14){ v='Situation solide'; col='#0f7b4f'; expl='Le niveau est acquis. L\'enjeu devient la régularité et la méthode le jour de l\'épreuve.'; }
+  else if(moy>=12){ v='Bonne moyenne'; col='#0f7b4f'; expl='Deux matières ciblées suffisent le plus souvent à passer au-dessus de 14.'; }
+  else if(moy>=10){ v='Passage probable, marge étroite'; col='#b45309'; expl='Une mauvaise séquence peut faire basculer l\'année. Sécurisez d\'abord les matières à fort coefficient.'; }
+  else if(moy>=8){ v='Situation à risque'; col='#c2410c'; expl='À ce niveau, un accompagnement régulier change réellement l\'issue de l\'année.'; }
+  else { v='Situation critique'; col='#b91c1c'; expl='Il faut reprendre les bases des matières à fort coefficient sans attendre la fin du trimestre.'; }
+
+  var h='<div class="res" style="border-left-color:'+col+'">'
+    +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5b6b85;font-weight:700">Moyenne pondérée</div>'
+    +'<div class="big" style="color:'+col+'">'+moy.toFixed(2)+' / 20</div>'
+    +'<div class="verd" style="color:'+col+'">'+v+'</div>'
+    +'<div class="expl">'+expl+'</div>'
+    +'<div class="meta">Calcul sur '+lignes.length+' matière(s) · total des coefficients : '+coefs
+    +(hors?(' · '+hors+' note(s) hors barème ignorée(s)'):'')+'</div></div>';
+
+  // ── Contexte 2024 : la règle reste 10/20 de MOYENNE GÉNÉRALE ; ce qui a
+  // disparu, c'est le repêchage en délibération entre 8 et 10. On chiffre donc
+  // ce que les matières faibles retirent à la moyenne : c'est l'écart qui se
+  // rattrapait autrefois en conseil et qui ne se rattrape plus.
+  var sous10=lignes.filter(function(l){return l.n<10;}).sort(function(a,b){return a.n-b.n;});
+  if(sous10.length){
+    var perteTot=sous10.reduce(function(a,l){return a+(10-l.n)*l.c;},0)/coefs;
+    h+='<div class="rule"><div class="rt">⚠️ '+sous10.length+' matière(s) sous 10 retirent '+perteTot.toFixed(2)+' point(s) de moyenne</div>'
+      +'<p>Matières concernées : <strong>'+sous10.map(function(l){return esc(l.m)+' ('+l.n+')';}).join(', ')+'</strong>.</p>'
+      +'<p>Depuis la session 2024, la barre des <strong>10/20 de moyenne générale</strong> est appliquée '
+      +'<strong>strictement, sans délibération</strong> : les candidats entre 8 et 10 ne sont plus repêchés. '
+      +'Ces <strong>'+perteTot.toFixed(2)+' point(s)</strong> perdus sont exactement le genre d\'écart qui se rattrapait '
+      +'autrefois en conseil de délibération, et qui aujourd\'hui ne se rattrape plus.</p>'
+      +'<p class="rn">Remonter ces matières à 10 suffirait à récupérer ces points : c\'est le chantier le plus rentable.</p></div>';
+  } else if(moy>=10){
+    h+='<div class="rule ok"><div class="rt">✅ Aucune matière sous 10</div>'
+      +'<p>Aucune matière ne tire la moyenne vers le bas. C\'est la position la plus sûre depuis que la barre des 10/20 '
+      +'est appliquée sans délibération.</p></div>';
+  }
+
+  var faibles=lignes.filter(function(l){return l.n<10;}).sort(function(a,b){return (b.c-a.c)||(a.n-b.n);}).slice(0,4);
+  if(faibles.length){
+    h+='<div class="weak"><div style="font-weight:800;color:#142554;margin-bottom:6px">Ce qui coûte le plus de points</div>';
+    faibles.forEach(function(l){
+      var perte=((10-l.n)*l.c/coefs);
+      h+='<div class="row"><span>'+esc(l.m)+'</span><b>'+l.n+'/20 · coef '+l.c
+        +' <span style="color:#5b6b85;font-weight:400">(−'+perte.toFixed(2)+' pt de moyenne)</span></b></div>';
+    });
+    h+='<div style="font-size:13px;color:#5b6b85;margin-top:8px">La perte indiquée est ce que chaque matière retire à la moyenne générale par rapport à un simple 10/20. C\'est là que le rattrapage rapporte le plus.</div></div>';
+  }
+  h+='<div class="disc"><strong>Résultat indicatif.</strong> La décision de passage ou de redoublement appartient au conseil de classe de l\'établissement, qui tient compte du règlement intérieur, de la conduite et des règles du MINESEC.</div>';
+  out.innerHTML=h;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+</script>
+</body></html>

@@ -3227,6 +3227,24 @@ function getBookRating(bid){var rvs=(DB.bookReviews||[]).filter(function(r){retu
 
 function fmt(n){return new Intl.NumberFormat('fr-FR').format(n)+' FCFA';}
 function fmtN(n){return new Intl.NumberFormat('fr-FR').format(n);}
+
+// Numéro camerounais présentable. La fiche contact publique affichait
+// « 671469236 » (espace parasite en tête, pas d'indicatif) : illisible et
+// non composable depuis l'étranger, sur la page même où l'on demande au
+// parent d'appeler. Rendu : +237 6 71 46 92 36. Toute valeur non reconnue
+// est renvoyée telle quelle (simplement détourée) — jamais de perte.
+function _fmtTel(t){
+  if(!t) return '';
+  var brut = String(t).trim();
+  var d = brut.replace(/[^0-9]/g, '');
+  if(d.length === 9 && d.charAt(0) === '6') d = '237' + d;          // national → international
+  if(d.length === 12 && d.indexOf('237') === 0){
+    var n = d.slice(3);
+    return '+237 ' + n.charAt(0) + ' ' + n.slice(1,3) + ' ' + n.slice(3,5) + ' ' + n.slice(5,7) + ' ' + n.slice(7,9);
+  }
+  return brut;
+}
+window._fmtTel = _fmtTel;
 function S(id){return DB.students.find(s=>s.id===id||s.mat===id);}
 // Moyenne d'une matière, ROBUSTE au type : coerce n1/n2 en nombres (évite la
 // concaténation de chaînes "12"+"8"="128"/2=64 si les notes arrivent en texte —
@@ -3974,6 +3992,78 @@ function _slideGo(){
 function _slideAutoStart(){clearInterval(_slideTimer);_slideTimer=setInterval(function(){_slideNav(1);},5000);}
 
 // ═══════════════════════════════════════════════════════════════════════════
+// PLANCHER DE LISIBILITÉ MOBILE (v1.12)
+// ═══════════════════════════════════════════════════════════════════════════
+// Sur un écran de téléphone, l'accueil comptait ~146 textes sous 11 px, dont
+// 16 à 8 px (« Taux de réussite », « Mentions ») : illisibles pour l'élève ET
+// pour le parent qui décide de l'abonnement. Ces tailles sont posées en style
+// INLINE dans des dizaines de gabarits — une règle CSS ne peut pas les
+// atteindre proprement. On applique donc un plancher au rendu, uniquement sur
+// petit écran, et uniquement dans la zone visiteur.
+var _PLANCHER_MOBILE = 10.5;
+
+function _mobileTypeFloor(){
+  try{
+    var racine = document.getElementById('vContent');
+    if(!racine) return;
+    var estMobile = window.matchMedia && matchMedia('(max-width:480px)').matches;
+
+    if(!estMobile){
+      // Retour en paysage / tablette / bureau : on RETIRE le plancher, sinon
+      // la micro-typographie d'origine resterait figée à 10,5 px après une
+      // simple rotation du téléphone.
+      var poses = racine.querySelectorAll('[data-tfloor="1"]');
+      for(var j=0;j<poses.length;j++){
+        poses[j].style.fontSize = '';
+        delete poses[j].dataset.tfloor;
+      }
+      return;
+    }
+
+    var noeuds = racine.querySelectorAll('*');
+    for(var i=0;i<noeuds.length;i++){
+      var el = noeuds[i];
+      if(el.children.length) continue;                 // feuilles seulement
+      if(el.dataset && el.dataset.tfloor === '1') continue;   // déjà traité
+      var fs = parseFloat(getComputedStyle(el).fontSize);
+      if(fs && fs < _PLANCHER_MOBILE){
+        el.style.fontSize = _PLANCHER_MOBILE + 'px';
+        if(el.dataset) el.dataset.tfloor = '1';
+      }
+    }
+  }catch(e){}
+}
+window._mobileTypeFloor = _mobileTypeFloor;
+
+// Le contenu visiteur est re-rendu par de nombreux chemins (vShowSec sort par
+// une dizaine de `return` différents) : on observe la zone plutôt que de
+// greffer un appel sur chacun, sinon un futur chemin oublierait le plancher.
+function _installTypeFloorObserver(){
+  try{
+    if(window._tfloorObs) return;
+    var cible = document.getElementById('vContent');
+    if(!cible || !window.MutationObserver) return;
+    var minuteur = null;
+    var replanifier = function(){
+      clearTimeout(minuteur);
+      minuteur = setTimeout(_mobileTypeFloor, 120);
+    };
+    // L'observateur est posé quelle que soit la taille : _mobileTypeFloor
+    // décide seul s'il applique ou retire le plancher. Sinon, un visiteur
+    // arrivé en paysage puis passé en portrait n'en bénéficierait jamais.
+    window._tfloorObs = new MutationObserver(replanifier);
+    window._tfloorObs.observe(cible, {childList:true, subtree:true});
+    window.addEventListener('resize', replanifier, {passive:true});
+    if(window.matchMedia){
+      var mq = matchMedia('(max-width:480px)');
+      if(mq.addEventListener) mq.addEventListener('change', replanifier);
+    }
+    _mobileTypeFloor();
+  }catch(e){}
+}
+window._installTypeFloorObserver = _installTypeFloorObserver;
+
+// ═══════════════════════════════════════════════════════════════════════════
 // TOUR INTERACTIF — Onboarding au 1er visiteur (v1.2 OPTIMISATION)
 // ═══════════════════════════════════════════════════════════════════════════
 function maybeShowOnboarding(){
@@ -3981,8 +4071,36 @@ function maybeShowOnboarding(){
   if(SES) return;
   if(localStorage.getItem('_vrtOnboardingSeen')==='1') return;
   if(window._onboardingActive) return;
-  window._onboardingActive=true;
-  _showOnboardingStep(0);
+
+  // v1.12 — DÉCLENCHEMENT SUR ENGAGEMENT, plus sur l'arrivée.
+  // Avant : un calque plein écran s'ouvrait 1,5 s après le chargement. Un
+  // visiteur venu de Google pour « corrigé BEPC » se voyait interrompu avant
+  // d'avoir lu une ligne — le meilleur moyen de le faire repartir. On attend
+  // désormais un vrai signal d'intérêt : il a fait défiler la page, ou il est
+  // resté. Le tour garde tout son sens, il arrive juste au bon moment.
+  if(location.hash && location.hash.length > 1) return;   // arrivé sur une ancre précise (QR, page SEO) → il sait ce qu'il cherche
+
+  var lance = false, minuteur = null;
+  var nettoyer = function(){
+    if(minuteur) clearTimeout(minuteur);
+    window.removeEventListener('scroll', auDefilement);
+  };
+  var lancer = function(){
+    if(lance) return;
+    lance = true;
+    nettoyer();
+    // Re-vérifier : l'état a pu changer pendant l'attente (connexion, tour relancé…).
+    if(SES || window._onboardingActive) return;
+    if(localStorage.getItem('_vrtOnboardingSeen')==='1') return;
+    window._onboardingActive = true;
+    _showOnboardingStep(0);
+  };
+  var auDefilement = function(){
+    var y = window.scrollY || document.documentElement.scrollTop || 0;
+    if(y > Math.max(280, (window.innerHeight||600) * 0.45)) lancer();
+  };
+  window.addEventListener('scroll', auDefilement, {passive:true});
+  minuteur = setTimeout(lancer, 25000);   // sinon : après 25 s de présence réelle
 }
 
 window.startOnboarding=function(){
@@ -4186,6 +4304,8 @@ function initVisitor(){
   if(lbLabel)lbLabel.textContent='🏫 '+(DB.school&&DB.school.nom||'VÉRITAS Academy');
   vShowSec("presentation",document.querySelector(".vnav-btn"));
   initTicker();
+  // ── Plancher de lisibilité mobile (voir _mobileTypeFloor) ──
+  try { if(typeof _installTypeFloorObserver === 'function') _installTypeFloorObserver(); } catch(e){}
   // ── v1.2 OPTIMISATION : Tour interactif au premier visiteur ──
   setTimeout(function(){
     try { if(typeof maybeShowOnboarding === 'function') maybeShowOnboarding(); } catch(e){}
@@ -4635,6 +4755,13 @@ function vShowSec(sec,btn){
   if(sec==='verifier-certificat' && typeof pgCertificateVerify==='function'){
     c.innerHTML = pgCertificateVerify(); return;
   }
+  // v1.13 — ESPACE PARENTS. Le bouton WhatsApp flottant est (ré)affiché ici :
+  // vShowSec est le seul point de passage obligé de toute navigation visiteur,
+  // et l'appel est idempotent (voir _vtSupportFab).
+  try{ if(typeof _vtSupportFab==='function') _vtSupportFab(); }catch(e){}
+  if(sec==='parents' && typeof pgParents==='function'){
+    c.innerHTML = pgParents(); return;
+  }
   if(sec==='leaderboard-junior' && typeof pgLeaderboardJunior==='function'){
     c.innerHTML = pgLeaderboardJunior(); return;
   }
@@ -4650,14 +4777,14 @@ function vShowSec(sec,btn){
     var _heroVideoHtml=buildIntroVideoHtml();
     c.innerHTML=`<div class="vsec acc-wrap">
     <!-- ═══ ACCUEIL PREMIUM v1.2.4 — bandeau + vidéo + widget actualités léger ═══ -->
-    <div class="acc-head">
-      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-graduation"/></svg></span> ${_esc(DB.school?.nom||"Centre VÉRITAS Academy")}</div>
+    <div class="acc-head vfx-orbs">
+      <h1 class="acc-pill vfx-shine"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-graduation"/></svg></span> ${_esc(DB.school?.nom||"Centre VÉRITAS Academy")}</h1>
       <div class="acc-sub">${_esc(pi.slogan||DB.school?.slogan||"L'excellence scolaire de la 6ᵉ à la Terminale — préparation BEPC · Probatoire · BAC · GCE")}</div>
     </div>
     <div class="acc-hero">
       <div class="acc-hero-video" id="vHeroVideoOuter">${_heroVideoHtml}</div>
       <div class="acc-news">
-        <div class="acc-news-hd"><span class="dot"></span><span class="ttl">Actualités éducatives</span></div>
+        <div class="acc-news-hd"><span class="dot vfx-live"></span><span class="ttl">Actualités éducatives</span></div>
         <div class="acc-news-body">
           <a class="acc-news-item" href="#actualites" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'));return false"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-university"/></svg></span><span class="tx"><b>MINESEC</b> — calendrier officiel des examens 2026 : BEPC, Probatoire, BAC &amp; GCE.</span></a>
           <a class="acc-news-item" href="#actualites" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'));return false"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span><span class="tx"><b>Orientation</b> — grandes écoles, concours et bourses post-BAC au Cameroun.</span></a>
@@ -4669,7 +4796,7 @@ function vShowSec(sec,btn){
 
     <!-- ═══ PALMARÈS / ÉMULATION — restauré v1.2.4 : la vidéo ET le panneau d'émulation coexistent désormais ═══ -->
     <div class="acc-head">
-      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Émulation VÉRITAS</div>
+      <h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Émulation VÉRITAS</h2>
       <div class="acc-sub">Le tableau d'honneur de la semaine : manuels stars, champion des battles et plan le plus choisi.</div>
     </div>
     <div style="max-width:680px;margin:0 auto 6px">${_palmaresHtml()}</div>
@@ -4694,7 +4821,7 @@ function vShowSec(sec,btn){
 
     <!-- ═════ PASSAGE DU JOUR (v1.2.3) — harmonisé premium v1.2.4 ═════ -->
     <div class="acc-head">
-      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-bookopen"/></svg></span> Passage du jour</div>
+      <h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-bookopen"/></svg></span> Passage du jour</h2>
       <div class="acc-sub">Un extrait d'une œuvre au programme, décrypté chaque jour par le Professeur Ambassa.</div>
     </div>
     ${(typeof _passageDuJourHtml==='function'?_passageDuJourHtml():(typeof _citationBannerHtml==='function'?_citationBannerHtml():''))}
@@ -4711,7 +4838,7 @@ function vShowSec(sec,btn){
 
     <!-- ═════ 🎓 BANDEAU AMBASSA — Star feature (v2.6) · harmonisé premium v1.2.4 ═════ -->
     <div class="acc-head">
-      <div class="acc-pill gold"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-brain"/></svg></span> Intelligence Artificielle</div>
+      <h2 class="acc-pill gold"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-brain"/></svg></span> Intelligence Artificielle</h2>
       <div class="acc-sub">Le Professeur Ambassa, votre tuteur IA : quiz, corrigés, fiches et évaluations notées — 100% gratuit.</div>
     </div>
     <div class="v-reveal" onclick="mAgentAmbassa()" role="link" tabindex="0" style="background:linear-gradient(180deg,#FFFDF8,#FBF4E2);color:#142554;padding:28px 24px;margin:14px 0;border-radius:18px;border:1px solid #ECE3CB;cursor:pointer;display:flex;flex-direction:column;align-items:center;text-align:center;gap:7px;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(20,37,84,.08);transition:transform .25s,box-shadow .25s" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 18px 40px rgba(20,37,84,.13)'" onmouseout="this.style.transform='';this.style.boxShadow='0 10px 30px rgba(20,37,84,.08)'">
@@ -4738,7 +4865,7 @@ function vShowSec(sec,btn){
     </div>
 
     <div class="acc-head v-reveal">
-      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-building"/></svg></span> Présentation du Centre</div>
+      <h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-building"/></svg></span> Présentation du Centre</h2>
       <div class="acc-sub">Bienvenue au ${_esc(DB.school?.nom||"VÉRITAS Academy")}</div>
     </div>
     <div class="g2 v-reveal v-stagger">
@@ -4748,7 +4875,7 @@ function vShowSec(sec,btn){
       <div>
         <div class="vcard">
           <div class="ct">📍 Informations pratiques</div>
-          ${[['🕐 Horaires',pi.horaires||'—'],['📞 Téléphone',pi.contact||DB.school?.tel||'—'],['✉️ Email',pi.email||DB.school?.email||'—'],['📍 Adresse',pi.adresse||DB.school?.ville||'—'],['📌 Boîte Postale',pi.bp||DB.school?.bp||'—']].map(([l,v])=>`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)"><span class="s mut">${_esc(l)}</span><span class="s semi">${_esc(v)}</span></div>`).join("")}
+          ${[['🕐 Horaires',pi.horaires||'—'],['📞 Téléphone',_fmtTel(pi.contact||DB.school?.tel)||'—'],['✉️ Email',pi.email||DB.school?.email||'—'],['📍 Adresse',pi.adresse||DB.school?.ville||'—'],['📌 Boîte Postale',pi.bp||DB.school?.bp||'—']].map(([l,v])=>`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)"><span class="s mut">${_esc(l)}</span><span class="s semi">${_esc(v)}</span></div>`).join("")}
         </div>
       </div>
     </div><!-- v1.2.2 : panneau « En chiffres » retiré (doublon des stats hero/section dédiée) -->
@@ -4787,7 +4914,7 @@ function vShowSec(sec,btn){
     const pi=DB.publicInfo||{};
     c.innerHTML=`<div class="vsec">
     <div class="acc-head">
-      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span> Notre Histoire</div>
+      <h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span> Notre Histoire</h2>
       <div class="acc-sub">20 ans d'excellence au service des élèves camerounais</div>
     </div>
     <div class="vcard mb20">
@@ -4834,7 +4961,7 @@ function vShowSec(sec,btn){
     var canEdit=iA&&iA();
     c.innerHTML=`<div class="vsec">
     <div class="acc-head">
-      <div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-chart"/></svg></span> Nos résultats aux examens</div>
+      <h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-chart"/></svg></span> Nos résultats aux examens</h2>
       <div class="acc-sub">Taux de réussite de nos élèves aux examens BEPC, Probatoire, BAC et GCE</div>
     </div>
     ${canEdit?'<div style="text-align:center;margin:-8px 0 16px"><button class="btn bi sm" onclick="mEditExamResults()">✏️ Modifier les statistiques</button></div>':''}
@@ -5571,7 +5698,7 @@ function vShowSec(sec,btn){
     <div class="g2">
       <div class="vcard">
         <div class="ct">📬 Coordonnées</div>
-        ${[['📞','Téléphone',pi.contact||DB.school?.tel||'—'],['✉️','Email',pi.email||DB.school?.email||'—'],['📍','Adresse',pi.adresse||DB.school?.ville||'—'],['📌','B.P.',pi.bp||DB.school?.bp||'—'],['🕐','Horaires',pi.horaires||'—']].map(([e,l,v])=>`<div class="fl2 fic g10" style="padding:10px 0;border-bottom:1px solid var(--bg2)"><span style="font-size:18px">${e}</span><div><div style="font-size:13px;color:var(--ink4)">${_esc(l)}</div><div class="semi s">${_esc(v)}</div></div></div>`).join("")}
+        ${[['📞','Téléphone',_fmtTel(pi.contact||DB.school?.tel)||'—'],['✉️','Email',pi.email||DB.school?.email||'—'],['📍','Adresse',pi.adresse||DB.school?.ville||'—'],['📌','B.P.',pi.bp||DB.school?.bp||'—'],['🕐','Horaires',pi.horaires||'—']].map(([e,l,v])=>`<div class="fl2 fic g10" style="padding:10px 0;border-bottom:1px solid var(--bg2)"><span style="font-size:18px">${e}</span><div><div style="font-size:13px;color:var(--ink4)">${_esc(l)}</div><div class="semi s">${_esc(v)}</div></div></div>`).join("")}
         <div style="margin-top:14px">
           <a href="https://wa.me/${(pi.whatsapp||"").replace(/[^0-9]/g,"")}" target="_blank" class="btn bgr2 sm" style="display:inline-flex;width:100%;justify-content:center">📲 Écrire sur WhatsApp</a>
         </div>
@@ -5623,7 +5750,11 @@ function submitOrientation(){
   toast('✓ Demande envoyée ! Nous vous contacterons au '+tel);
   ['orNom','orTel','orNiveau','orType','orMsg','orDispo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
-function hideAll(){[$("LS"),$("APP"),$("VISITOR")].forEach(el=>{if(el)el.style.display="none";});}
+function hideAll(){[$("LS"),$("APP"),$("VISITOR")].forEach(el=>{if(el)el.style.display="none";});
+  // v1.13 : le FAB WhatsApp et le flux d'activité sont attachés à <body>, donc
+  // ils ne disparaissent pas avec le portail visiteur — il faut les masquer ici,
+  // sinon ils flottent au-dessus du tableau de bord admin.
+  try{ if(typeof _vtHideSupportFab==='function') _vtHideSupportFab(); }catch(e){}}
 function goToVisitor(){
   hideAll();
   $("VISITOR").style.display="flex";
@@ -13864,6 +13995,8 @@ async function _guideDownloadPDF(){
 
 function pgSettings(){
   if(!iA())return na();
+  // Diagnostic CamPay peuplé APRÈS injection du HTML (l'élément n'existe pas encore ici).
+  setTimeout(_campayRenderDiag, 60);
   return`<div class="g2">
     <div class="card"><div class="ct">⚙️ Informations de l\'école</div>
       <div class="fg2">
@@ -13941,6 +14074,7 @@ function pgSettings(){
           <input type="checkbox" id="payCampayEnabled" ${(DB.payApiConfig&&DB.payApiConfig.campayEnabled)?'checked':''} onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.campayEnabled=this.checked;save();toast(this.checked?'⚡ CamPay activé (MTN + Orange)':'⚡ CamPay désactivé');re();">
           <span><strong>⚡ Activer CamPay — MTN MoMo <em>et</em> Orange Money en un seul bouton</strong> — le client saisit son numéro, l'opérateur est détecté, il valide avec son code secret</span>
         </label></div>
+        <div class="fg full" id="campayDiag" style="margin-top:8px;font-size:12px;padding:10px;border-radius:8px;background:var(--bg2);color:var(--ink3)">⏳ Vérification de l'état réel du serveur CamPay…</div>
       </div>
 
       <div class="fg2" style="margin-top:8px">
@@ -14525,7 +14659,7 @@ window._statsVitrineHtml = function(){
       +'</div></div>';
   }).join('');
   var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:10px"><button class="btn bo sm" onclick="mEditStatsVitrine()">✏️ Modifier les résultats</button></div>':'';
-  return '<div class="acc-head"><div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</div><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>'
+  return '<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>'
     +'<div class="vgz-stats v-reveal" style="grid-template-columns:repeat(auto-fit,minmax(185px,1fr));max-width:860px;margin:18px auto">'+cards+'</div>'+editBtn;
 };
 
@@ -14769,7 +14903,7 @@ window._reussitesScroller = function(){
       +'</div></div>';
   };
   var cards=list.map(card).join('');
-  var head='<div class="acc-head"><div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</div><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>';
+  var head='<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>';
   var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:8px"><button class="btn bo sm" onclick="mEditStatsVitrine()">✏️ Modifier les résultats</button></div>':'';
   // 2 copies de la liste → boucle continue (translateX -50%)
   return head+'<div class="rsc" tabindex="0" aria-label="Résultats officiels du Centre VÉRITAS"><div class="rsc-track">'+cards+cards+'</div></div>'+editBtn;
@@ -14781,8 +14915,13 @@ window._palmaresHtml = function(){
   var cnt={}; orders.forEach(function(o){ if(o&&o.bid) cnt[o.bid]=(cnt[o.bid]||0)+1; });
   var topBid=null,topN=0; for(var k in cnt){ if(cnt[k]>topN){topN=cnt[k];topBid=k;} }
   var topBook=(topBid&&books.find(function(b){return b.id===topBid;})) || books.find(function(b){return b.featured;}) || books[0] || null;
+  // Seuil de PREUVE SOCIALE. En dessous, un chiffre dessert le produit :
+  // « 1 commande » ou « Note 5,0/5 » issue d'un seul avis signalent un site
+  // désert au visiteur qu'on cherche justement à rassurer. Sous le seuil, on
+  // garde la mise en avant éditoriale mais SANS le compteur.
+  var SEUIL_PREUVE = 3;
   var bestRated=null,bestAvg=0;
-  if(typeof getBookRating==='function'){ books.forEach(function(b){ var r=getBookRating(b.id); if(r.count>0 && r.avg>bestAvg){bestAvg=r.avg;bestRated=b;} }); }
+  if(typeof getBookRating==='function'){ books.forEach(function(b){ var r=getBookRating(b.id); if(r.count>=SEUIL_PREUVE && r.avg>bestAvg){bestAvg=r.avg;bestRated=b;} }); }
   var battleN=0; try{ if(DB.battles){ var bs=Array.isArray(DB.battles)?DB.battles:Object.values(DB.battles); battleN=bs.length; } }catch(e){}
   // Champion de la semaine en cours (1er du leaderboard de la battle courante)
   // Classement = score décroissant, puis CHRONO croissant en cas d'égalité (le + rapide gagne).
@@ -14798,7 +14937,8 @@ window._palmaresHtml = function(){
       +'</div><div class="vemu-arrow" style="color:var(--tile-c,#C3CCDD);font-size:15px;flex-shrink:0">→</div></div>';
   };
   var tiles='';
-  if(topBook){ tiles+=tile({color:'#F59E0B',ico:(topBook.ico||'📘'),label:topN>0?'Manuel le plus commandé':'Manuel à la une',title:_esc(topBook.titre),sub:topN>0?(topN+' commande'+(topN>1?'s':'')+' · '+_esc(topBook.cls)):_esc(topBook.cls),click:"viewBookDetail('"+topBook.id+"')"}); }
+  if(topBook){ var _assez=(topN>=SEUIL_PREUVE);
+    tiles+=tile({color:'#F59E0B',ico:(topBook.ico||'📘'),label:_assez?'Manuel le plus commandé':'Manuel à la une',title:_esc(topBook.titre),sub:_assez?(topN+' commandes · '+_esc(topBook.cls)):_esc(topBook.cls),click:"viewBookDetail('"+topBook.id+"')"}); }
   if(bestRated&&bestRated!==topBook){ tiles+=tile({color:'#10B981',ico:'⭐',lc:'star',label:'Le mieux noté',title:_esc(bestRated.titre),sub:'Note '+bestAvg.toFixed(1)+'/5 par les élèves',click:"viewBookDetail('"+bestRated.id+"')"}); }
   // ── v1.9.1 PODIUM « GAGNANTS DE LA SEMAINE » — émulation : mettre en relief les
   //    MEILLEURS + le PRIX reçu PAR NIVEAU (1er/2e/3e). Classement par score puis
@@ -16632,7 +16772,11 @@ async function callAmbassaIA(prompt, sysPrompt){
       var _rr=await fetch(_base+'/rag.php?limit=4&q='+encodeURIComponent(String(prompt||'').slice(0,180)),{method:'GET'});
       if(_rr.ok){ var _rj=await _rr.json(); if(_rj&&_rj.ok&&_rj.passages&&_rj.passages.length){ _ragCtx=_rj.passages.map(function(p){return '— '+(p.auteur||'?')+', '+(p.titre||'?')+(p.annee?(' ('+p.annee+')'):'')+' : '+p.extrait;}).join('\n'); } }
     }catch(_eRag){}
-    var _r=await fetch(_base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:String(prompt||''),sysPrompt:sys,ragContext:_ragCtx,userId:_ses&&_ses.id?_ses.id:'',plan:_ses&&_ses.type?_ses.type:'anon'})});
+    // `token` = jeton de compte signé par le serveur (émis à la connexion élève).
+    // Sans lui, ia_proxy.php écrête volontairement le palier : un `userId` seul
+    // ne prouve rien et ne doit plus ouvrir le quota enseignant/admin.
+    var _iaTok=''; try{ if(typeof _contentToken==='function') _iaTok=_contentToken(); }catch(e){}
+    var _r=await fetch(_base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt:String(prompt||''),sysPrompt:sys,ragContext:_ragCtx,userId:_ses&&_ses.id?_ses.id:'',plan:_ses&&_ses.type?_ses.type:'anon',token:_iaTok})});
     if(_r.ok){
       var _j=await _r.json();
       // v1.5 : mémoriser la source — permet d'afficher le badge « ✓ Vérifié par
@@ -28849,15 +28993,20 @@ window.closeSecureBook=function(){
 // ══ v1.5 — ANALYTICS MINIMALISTE : tunnel chiffré (api/stats.php) ═══════════
 // 5 événements clés, fire-and-forget (sendBeacon), zéro donnée personnelle,
 // jamais pour l'admin. Sans ces chiffres, le marketing pilote à l'aveugle.
-window._track=function(ev){
+// v1.13 : 2e argument `meta` optionnel (déjà stocké par stats.php, tronqué à
+// 120 car.). Il sert à savoir DEPUIS QUELLE PAGE un parent écrit sur WhatsApp —
+// sans lui, on compte des clics sans savoir ce qui les provoque. La déduplication
+// journalière tient compte de la méta, sinon seule la première page de la journée
+// serait comptée.
+window._track=function(ev,meta){
   try{
     if(typeof SES!=='undefined'&&SES&&(SES.type==='admin'||SES.type==='superadmin'))return;
-    // anti-doublon : 1 même événement / jour / appareil
-    var k='_trk_'+ev+'_'+new Date().toDateString();
+    // anti-doublon : 1 même événement (+ méta) / jour / appareil
+    var k='_trk_'+ev+(meta?('_'+JSON.stringify(meta)):'')+'_'+new Date().toDateString();
     if(localStorage.getItem(k))return;
     localStorage.setItem(k,'1');
     var base=(typeof LWS_API!=='undefined'&&LWS_API.db)?LWS_API.db.replace(/\/db\.php.*$/,''):'/api';
-    var data=JSON.stringify({ev:ev});
+    var data=JSON.stringify(meta?{ev:ev,meta:meta}:{ev:ev});
     if(navigator.sendBeacon){ navigator.sendBeacon(base+'/stats.php', new Blob([data],{type:'application/json'})); }
     else{ fetch(base+'/stats.php',{method:'POST',headers:{'Content-Type':'application/json'},body:data,keepalive:true}).catch(function(){}); }
   }catch(e){}
@@ -28880,18 +29029,21 @@ window.mStatsFunnel=function(){
       if(!d||!d.ok){ box.innerHTML='<div class="ib ibt"><span>⚠️</span><span>Données indisponibles ('+_esc((d&&d.error)||'serveur')+').</span></div>'; return; }
       var days=Object.keys(d.days||{});
       if(!days.length){ box.innerHTML='<div class="empty">Aucun événement encore — les chiffres arrivent dès les premières visites.</div>'; return; }
-      var tot={visit:0,signup:0,ia_try:0,sub_click:0,pay_init:0};
+      // v1.13 : wa_click (clics WhatsApp) et tool_use (outils gratuits) suivent
+      // les deux nouvelles portes d'entrée — sans eux, impossible de savoir si
+      // l'Espace Parents et le calculateur de moyenne amènent des conversations.
+      var tot={visit:0,signup:0,ia_try:0,sub_click:0,pay_init:0,wa_click:0,tool_use:0};
       var rows=days.map(function(t){
         var e=d.days[t]||{};
         Object.keys(tot).forEach(function(k){tot[k]+=(e[k]||0);});
-        return '<tr><td class="xs2">'+t+'</td><td>'+(e.visit||0)+'</td><td>'+(e.signup||0)+'</td><td>'+(e.ia_try||0)+'</td><td>'+(e.sub_click||0)+'</td><td>'+(e.pay_init||0)+'</td></tr>';
+        return '<tr><td class="xs2">'+t+'</td><td>'+(e.visit||0)+'</td><td>'+(e.signup||0)+'</td><td>'+(e.ia_try||0)+'</td><td>'+(e.tool_use||0)+'</td><td>'+(e.wa_click||0)+'</td><td>'+(e.sub_click||0)+'</td><td>'+(e.pay_init||0)+'</td></tr>';
       }).join('');
       var conv=function(a,b){return a?Math.round(b/a*100)+'%':'—';};
       box.innerHTML='<div class="g2 mb12">'
         +'<div class="card" style="padding:12px"><div class="xs2 mut">VISITES → INSCRIPTIONS</div><div class="bold" style="font-size:22px;color:#2563EB">'+conv(tot.visit,tot.signup)+'</div><div class="xs2 mut">'+tot.visit+' → '+tot.signup+'</div></div>'
         +'<div class="card" style="padding:12px"><div class="xs2 mut">INSCRIPTIONS → PAIEMENTS</div><div class="bold" style="font-size:22px;color:#059669">'+conv(tot.signup,tot.pay_init)+'</div><div class="xs2 mut">'+tot.signup+' → '+tot.pay_init+'</div></div>'
         +'</div>'
-        +'<div class="tw"><table><thead><tr><th>Jour</th><th>👁 Visites</th><th>✨ Inscr.</th><th>🤖 IA</th><th>📋 Abo clic</th><th>💳 Paiement</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+        +'<div class="tw"><table><thead><tr><th>Jour</th><th>👁 Visites</th><th>✨ Inscr.</th><th>🤖 IA</th><th>🧰 Outils</th><th>📲 WhatsApp</th><th>📋 Abo clic</th><th>💳 Paiement</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
     })
     .catch(function(){ var box=document.getElementById('funnelBox'); if(box)box.innerHTML='<div class="ib ibt"><span>⚠️</span><span>Serveur stats injoignable.</span></div>'; });
 };
@@ -28907,10 +29059,15 @@ setTimeout(function(){
     if(!V||V.style.display==='none') return;
     var d=document.createElement('div');
     d.className='lx-sticky-cta';
+    // v1.13 : ce bandeau est centré en bas ; la classe sur <body> fait remonter
+    // le FAB WhatsApp (bas-droite) tant qu'il est là — sinon les deux se
+    // superposent sur un écran de 360 px de large.
+    var _lxGone='document.body.classList.remove(\'has-sticky-cta\');';
     d.innerHTML='<span>🎓 Testez le <b>Prof. Ambassa</b> — corrigés et quiz IA <b>gratuits</b></span>'
-      +'<button class="lx-go" onclick="sessionStorage.setItem(\'_lxCtaSeen\',\'1\');this.parentNode.remove();if(typeof mAgentAmbassa===\'function\')mAgentAmbassa();">Essayer →</button>'
-      +'<button class="lx-x" aria-label="Fermer" onclick="sessionStorage.setItem(\'_lxCtaSeen\',\'1\');this.parentNode.remove();">✕</button>';
+      +'<button class="lx-go" onclick="sessionStorage.setItem(\'_lxCtaSeen\',\'1\');'+_lxGone+'this.parentNode.remove();if(typeof mAgentAmbassa===\'function\')mAgentAmbassa();">Essayer →</button>'
+      +'<button class="lx-x" aria-label="Fermer" onclick="sessionStorage.setItem(\'_lxCtaSeen\',\'1\');'+_lxGone+'this.parentNode.remove();">✕</button>';
     document.body.appendChild(d);
+    document.body.classList.add('has-sticky-cta');
   }catch(e){}
 },12000);
 
@@ -32401,6 +32558,14 @@ window._payAdminView = _payAdminView;
 
 // Ouvrir le modal de paiement — point d'entrée principal
 // payInfo: {montant: 5000, label: 'Pack Premium', ref?: 'VT250407-XXXX', onConfirm?: fn}
+// ⚠️⚠️ CETTE DÉFINITION N'EST JAMAIS EXÉCUTÉE ⚠️⚠️
+// Plus bas dans ce même fichier, `openPaymentModal = function(payInfo){…}`
+// (modale en 3 étapes : Coordonnées → Paiement → Confirmer) RÉASSIGNE le nom
+// et écrase celle-ci. Toute modification faite ici est donc invisible en
+// production — piège vérifié dans le navigateur le 25/07/2026.
+// → Pour changer le parcours de paiement, éditez la version « 3 étapes ».
+// Conservée telle quelle : elle documente les variantes de moyens de paiement
+// et sert de référence, mais elle ne doit plus recevoir de correctif.
 function openPaymentModal(payInfo){
   payInfo = payInfo || {};
   try{ if(typeof _track==='function') _track('pay_init'); }catch(e){}
@@ -32438,10 +32603,19 @@ function openPaymentModal(payInfo){
       + '</div>'
     + '</div>'
 
-    + '<div class="ib ibt mb12" style="background:rgba(220,38,38,.08);border-left:4px solid #dc2626">'
-      + '<span>⚠️</span>'
-      + '<span><strong>Important :</strong> Après votre paiement, <strong>cliquez sur le bouton WhatsApp en bas</strong> pour nous envoyer votre confirmation avec la référence '+ref+'. Votre accès sera activé sous 24h.</span>'
-    + '</div>'
+    // Le bandeau « envoyez votre confirmation WhatsApp » ne vaut QUE pour les
+    // moyens manuels. Quand l'encaissement automatique est disponible, l'accès
+    // s'active seul : afficher « activation sous 24h » démoraliserait le client
+    // au moment précis où il s'apprête à payer.
+    + (_payCampayReady()
+        ? '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08);border-left:4px solid #059669">'
+            + '<span>⚡</span>'
+            + '<span><strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24h).</span>'
+          + '</div>'
+        : '<div class="ib ibt mb12" style="background:rgba(220,38,38,.08);border-left:4px solid #dc2626">'
+            + '<span>⚠️</span>'
+            + '<span><strong>Important :</strong> Après votre paiement, <strong>cliquez sur le bouton WhatsApp en bas</strong> pour nous envoyer votre confirmation avec la référence '+ref+'. Votre accès sera activé sous 24h.</span>'
+          + '</div>')
 
     + '<div class="bold s mb10" style="color:var(--ink2)">💰 Choisissez votre moyen de paiement :</div>'
 
@@ -32450,7 +32624,7 @@ function openPaymentModal(payInfo){
       // CamPay — agrégateur MTN + Orange en UN SEUL bouton (v1.2.4)
       // Affiché en pleine largeur et en tête : c'est le parcours le plus court
       // pour le client (un numéro, un PIN, activation automatique).
-      + ((DB.payApiConfig&&DB.payApiConfig.campayEnabled)
+      + (_payCampayReady()
           ? '<div class="paymethod" style="background:#fff;border:2px solid #059669;border-radius:12px;padding:14px;grid-column:1/-1">'
             +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
               +'<div style="font-size:28px">⚡</div>'
@@ -32468,11 +32642,11 @@ function openPaymentModal(payInfo){
         + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
           + '<div style="font-size:28px">'+P.momo.ico+'</div>'
           + '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">'+P.momo.label+'</div>'
-          + (DB.payApiConfig&&DB.payApiConfig.mtnEnabled?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
+          + (_payDirectMtnReady()?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
         + '</div>'
         + '<div style="font-family:monospace;font-size:15px;font-weight:800;color:'+P.momo.couleur+';margin-bottom:4px;cursor:pointer" onclick="_payCopy(\''+P.momo.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro MoMo\')">'+P.momo.numero+'</div>'
         + '<div style="font-size:11px;color:var(--ink4);line-height:1.5">Nom : <strong>'+P.momo.nomCompte+'</strong><br>Code USSD : <strong>'+P.momo.code+'</strong></div>'
-        + (DB.payApiConfig&&DB.payApiConfig.mtnEnabled
+        + (_payDirectMtnReady()
             ? '<div style="margin-top:10px;border-top:1px solid var(--bg3);padding-top:10px">'
               +'<input class="fi" id="mtnPhoneInput_'+ref+'" placeholder="Votre n° MTN (ex: 6XX XX XX XX)" value="'+(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:6px 10px;width:100%;margin-bottom:6px">'
               +'<button class="btn" style="width:100%;background:linear-gradient(135deg,'+P.momo.couleur+',#FFA500);color:#142554;border:none;border-radius:8px;padding:10px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitMtn(\''+ref+'\','+montant+',\''+_esc(label).replace(/\x27/g,"")+'\',\''+(payInfo.intent||"generic")+'\',\''+(payInfo.targetId||"")+'\',\''+(payInfo.customerAccountId||"")+'\',\''+(payInfo.customerNom||"").replace(/\x27/g,"")+'\')">⚡ Payer avec mon MTN MoMo</button>'
@@ -32486,11 +32660,11 @@ function openPaymentModal(payInfo){
         + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
           + '<div style="font-size:28px">'+P.orange.ico+'</div>'
           + '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">'+P.orange.label+'</div>'
-          + (DB.payApiConfig&&DB.payApiConfig.orangeEnabled?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
+          + (_payDirectOrangeReady()?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
         + '</div>'
         + '<div style="font-family:monospace;font-size:15px;font-weight:800;color:'+P.orange.couleur+';margin-bottom:4px;cursor:pointer" onclick="_payCopy(\''+P.orange.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro Orange Money\')">'+P.orange.numero+'</div>'
         + '<div style="font-size:11px;color:var(--ink4);line-height:1.5">Nom : <strong>'+P.orange.nomCompte+'</strong><br>Code USSD : <strong>'+P.orange.code+'</strong></div>'
-        + (DB.payApiConfig&&DB.payApiConfig.orangeEnabled
+        + (_payDirectOrangeReady()
             ? '<button class="btn" style="margin-top:8px;width:100%;background:linear-gradient(135deg,'+P.orange.couleur+',#ff8c00);color:#fff;border:none;border-radius:8px;padding:10px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitOrange(\''+ref+'\','+montant+',\''+_esc(label).replace(/\x27/g,"")+'\',\''+(payInfo.intent||"generic")+'\',\''+(payInfo.targetId||"")+'\',\''+(payInfo.customerAccountId||"")+'\',\''+(payInfo.customerNom||"").replace(/\x27/g,"")+'\',\''+(payInfo.customerTel||"")+'\')">⚡ Payer maintenant (auto)</button>'
             : '<div style="font-size:10px;color:var(--ink4);margin-top:6px;font-style:italic">👆 Cliquez pour copier le numéro</div>'
           )
@@ -32745,9 +32919,97 @@ function _payInitToken(){
   return '';
 }
 
+// ── Sonde de capacité CamPay (le SERVEUR fait foi) ────────────────────────
+// Avant : l'affichage du paiement automatique dépendait d'une case à cocher
+// admin (DB.payApiConfig.campayEnabled) qui pouvait mentir — cochée sans clés
+// serveur ⇒ le client tombait sur une erreur 503 après avoir saisi son numéro.
+// Maintenant on interroge `payment_campay.php?action=config` : le jour où les
+// vraies clés CamPay arrivent, l'encaissement automatique s'allume tout seul.
+window._VRT_CAMPAY = null;
+
+function _payCampayProbe(){
+  // Cache de session (10 min) : évite une requête par ouverture de modale.
+  try{
+    var raw = sessionStorage.getItem('_vrtCampayCap');
+    if(raw){
+      var c = JSON.parse(raw);
+      if(c && (Date.now() - c._t) < 600000){ window._VRT_CAMPAY = c; return Promise.resolve(c); }
+    }
+  }catch(e){}
+
+  var base = _payApiBase();
+  if(!base) return Promise.resolve(null);
+
+  return fetch(base+'/payment_campay.php?action=config', {method:'GET'})
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(d){
+      if(!d || !d.ok) return null;
+      d._t = Date.now();
+      window._VRT_CAMPAY = d;
+      try{ sessionStorage.setItem('_vrtCampayCap', JSON.stringify(d)); }catch(e){}
+      return d;
+    })
+    .catch(function(){ return null; });   // hors ligne / endpoint absent → repli silencieux
+}
+
+// Le paiement automatique est-il réellement proposable à un client final ?
+function _payCampayReady(){
+  var c = window._VRT_CAMPAY;
+  if(c && typeof c.canCollect === 'boolean') return c.canCollect;  // le serveur tranche
+  // Sonde pas encore revenue : on retombe sur le réglage admin (comportement d'avant).
+  return !!(DB.payApiConfig && DB.payApiConfig.campayEnabled);
+}
+window._payCampayReady = _payCampayReady;
+
+// CamPay agrège DÉJÀ MTN + Orange. Quand il est opérationnel, on masque les
+// deux boutons « AUTO » directs : proposer trois chemins pour le même paiement
+// n'ajoute aucune capacité et multiplie les occasions d'échec (les intégrations
+// directes MTN/Orange sont par ailleurs restées en environnement sandbox).
+function _payDirectMtnReady(){
+  return !_payCampayReady() && !!(DB.payApiConfig && DB.payApiConfig.mtnEnabled);
+}
+function _payDirectOrangeReady(){
+  return !_payCampayReady() && !!(DB.payApiConfig && DB.payApiConfig.orangeEnabled);
+}
+window._payDirectMtnReady    = _payDirectMtnReady;
+window._payDirectOrangeReady = _payDirectOrangeReady;
+
+// Diagnostic affiché dans ⚙️ Paramètres : dit la VÉRITÉ du serveur, pour qu'une
+// case cochée ne laisse jamais croire que l'encaissement fonctionne.
+function _campayRenderDiag(){
+  var el = _ge('campayDiag');
+  if(!el) return;
+  _payCampayProbe().then(function(c){
+    el = _ge('campayDiag');                     // le DOM a pu être re-rendu entre-temps
+    if(!el) return;
+    if(!c){
+      el.style.background = 'rgba(217,119,6,.10)';
+      el.innerHTML = '⚠️ <strong>Serveur CamPay injoignable</strong> — <code>api/payment_campay.php</code> ne répond pas (fichier non déployé ?). Les paiements restent manuels.';
+      return;
+    }
+    if(c.canCollect){
+      el.style.background = 'rgba(5,150,105,.10)';
+      el.innerHTML = '✅ <strong>Encaissement automatique opérationnel</strong> (mode <strong>'+_esc(c.mode)+'</strong>) — MTN + Orange. Rien d\'autre à faire.';
+      return;
+    }
+    el.style.background = 'rgba(217,119,6,.10)';
+    el.innerHTML = '⏳ <strong>Automatique pas encore actif</strong> — '+_esc(c.reason||'configuration incomplète')
+      + '<div style="margin-top:6px;color:var(--ink4)">Le paiement manuel (MoMo, Orange, virement) fonctionne normalement en attendant.</div>';
+  });
+}
+window._campayRenderDiag = _campayRenderDiag;
+
+// Sonde au démarrage, sans bloquer le rendu.
+try{
+  var _probeLater = function(){ try{ _payCampayProbe(); }catch(e){} };
+  if(typeof requestIdleCallback === 'function') requestIdleCallback(_probeLater, {timeout:4000});
+  else setTimeout(_probeLater, 3000);
+}catch(e){}
+
 function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom){
-  if(!DB.payApiConfig || !DB.payApiConfig.campayEnabled){
-    toast('CamPay non activé — voir Paramètres','warn');
+  if(!_payCampayReady()){
+    var c = window._VRT_CAMPAY;
+    toast((c && c.reason) ? c.reason : 'Paiement automatique indisponible — utilisez le paiement manuel ci-dessous.','warn');
     return;
   }
   var _base = _payApiBase();
@@ -37338,7 +37600,11 @@ window._pdjLoadExpl = function(){
     fetch(base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},signal:_ac?_ac.signal:undefined,body:JSON.stringify({
       prompt:'Passage de l\'œuvre "'+p.titre+'"'+(p.auteur?' de '+p.auteur:'')+' (programme MINESEC camerounais) :\n« '+p.passage.substring(0,700)+' »\n\nÉcris une MINI-ANALYSE de 2 ou 3 phrases, au ton IRONIQUE, RÉALISTE, COMIQUE et DIDACTIQUE (un prof drôle, mordant et lucide qui adore son texte et le ramène au réel) : fais comprendre ce qui se joue, situe brièvement le moment ou la partie dans l\'œuvre UNIQUEMENT si tu en es sûr (sinon n\'invente AUCUN numéro de chapitre), et TERMINE par une question taquine qui donne furieusement envie de lire la suite. Aucun spoiler. Réponds en FRANÇAIS.',
       sysPrompt:'Tu es le Professeur Ambassa : prof de français camerounais drôle, ironique, cultivé, jamais ennuyeux. Tu réponds TOUJOURS en français.',
-      userId:'pdj',plan:'anon'
+      // `shared` → le serveur génère l'analyse UNE fois par jour et la sert à
+      // tous les visiteurs sans décompter le moindre quota. Avant, cette requête
+      // passait par la clé de quota commune « pdj » plafonnée à 2/jour : à partir
+      // du 3e visiteur quotidien, plus personne ne voyait l'analyse.
+      userId:'pdj',plan:'anon',shared:'pdj'
     })}).then(function(r){return r.json();}).then(function(d){
       clearTimeout(_to);
       var t=(d&&d.text)?String(d.text).trim():'';
@@ -37374,17 +37640,32 @@ window._pdjLoad = function(){
     var yesterdayTitle=''; try{ yesterdayTitle=localStorage.getItem('_pdjYesterday')||''; }catch(e){}
     fetch(base+'/rag.php?src=oeuvres&daily=1&day='+dayN).then(function(r){return r.json();}).then(function(d){
       if(d&&d.ok&&d.passages&&d.passages.length){
-        // v1.4.8 : pioche ALÉATOIRE parmi les passages ≠ hier → le passage VARIE
-        // à chaque visite (avant : toujours le 1er du lot → impression de fixité)
+        // v1.12 — on ne filtre PLUS sur « hier » ici : ce titre vient du
+        // localStorage, donc propre à chaque navigateur. Filtrer dessus faisait
+        // varier la longueur de la liste d'un visiteur à l'autre et cassait la
+        // pioche déterministe ci-dessous. L'évitement d'hier se fait maintenant
+        // par un simple décalage d'indice, après le tri.
         var cands=[];
         for(var i=0;i<d.passages.length;i++){
           var t=_pdjCleanTitle((d.passages[i]||{}).titre||'');
-          if(t && (!yesterdayTitle || t.toLowerCase()!==yesterdayTitle.toLowerCase())) cands.push(d.passages[i]);
+          if(t) cands.push(d.passages[i]);
         }
         // v2.0 — plancher 70 mots : on écarte les extraits trop courts du corpus.
         cands=cands.filter(function(pp){ return _pdjWords(_pdjCleanExtract((pp||{}).extrait,1600))>=70; });
-        if(!cands.length) return; // aucun ≥70 mots (ou tous = hier) → on garde la pioche LITT_OEUVRES (≥70 garanti)
-        var chosen=cands[Math.floor(Math.random()*cands.length)];
+        if(!cands.length) return; // aucun extrait ≥70 mots → on garde la pioche LITT_OEUVRES (≥70 garanti)
+        // v1.12 — pioche DÉTERMINISTE pour la journée (avant : Math.random()).
+        // Trois raisons : (1) c'est le passage DU JOUR, il doit être le même pour
+        // tout le monde ; (2) les boutons Partager désignaient un texte que le
+        // destinataire ne retrouvait pas ; (3) un tirage par visiteur rendait
+        // l'analyse IA incachable — donc regénérée, donc rationnée.
+        cands.sort(function(a,b){ return String((a||{}).titre||'').localeCompare(String((b||{}).titre||'')); });
+        var _idx = dayN % cands.length;
+        // Collision avec le passage d'hier : on décale d'un cran (reste stable).
+        if(cands.length > 1 && yesterdayTitle
+           && _pdjCleanTitle((cands[_idx]||{}).titre||'').toLowerCase() === yesterdayTitle.toLowerCase()){
+          _idx = (_idx + 1) % cands.length;
+        }
+        var chosen=cands[_idx];
         // v1.4.8 : extrait PLUS LONG (900 → 1600) — un vrai passage qui happe le lecteur
         var pp=chosen, txt=_pdjCleanExtract(pp.extrait,1600);
         if(txt.length>40){
@@ -40086,9 +40367,35 @@ openPaymentModal = function(payInfo){
     +'</div>';
 
   // Step 2 : Payment methods
+  // ⚠️ v1.12 — C'EST CETTE MODALE QUI S'AFFICHE. Une seconde définition,
+  // plus ancienne et porteuse de la tuile CamPay, existe plus haut dans le
+  // fichier ; elle est ÉCRASÉE par ce `openPaymentModal = function` et n'est
+  // jamais exécutée. Sans le bloc ci-dessous, l'encaissement automatique
+  // n'apparaîtrait donc JAMAIS aux clients, même une fois les clés CamPay
+  // posées sur le serveur.
+  var _campayTile = (typeof _payCampayReady === 'function' && _payCampayReady())
+    ? ('<div style="background:#fff;border:2px solid #059669;border-radius:12px;padding:14px;grid-column:1/-1">'
+      +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<div style="font-size:26px">⚡</div>'
+        +'<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13.5px;color:#142554">Paiement automatique — MTN MoMo ou Orange Money</div>'
+        +'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--ink4);line-height:1.5;margin-bottom:8px">Entrez votre numéro : l\'opérateur est détecté automatiquement. Vous validez avec votre code secret et <strong>votre accès s\'active tout seul</strong>.</div>'
+      +'<input class="fi" id="campayPhoneInput_'+ref+'" placeholder="Votre n° MTN ou Orange (ex : 6XX XX XX XX)" value="'+String(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:8px 10px;width:100%;margin-bottom:8px">'
+      +'<button class="btn" style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitCampay(\''+ref+'\','+montant+',\''+String(label).replace(/[\\\\\x27"]/g,'')+'\',\''+(payInfo.intent||'generic')+'\',\''+(payInfo.targetId||'')+'\',\''+(payInfo.customerAccountId||'')+'\',\''+String(payInfo.customerNom||'').replace(/[\\\\\x27"]/g,'')+'\')">⚡ Payer maintenant — '+montantFmt+'</button>'
+    +'</div>')
+    : '';
+
   var step2 = '<div id="payStep2" style="display:none">'
     +'<div class="bold s mb10" style="color:var(--ink2)">💰 Choisissez votre moyen de paiement :</div>'
+    // Bandeau d'attente : n'a de sens QUE pour les moyens manuels. Quand
+    // l'encaissement automatique est disponible, promettre « 24 h » au moment
+    // de payer découragerait inutilement le client.
+    + (_campayTile
+        ? '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08);border-left:4px solid #059669"><span>⚡</span><span><strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).</span></div>'
+        : '<div class="ib ibt mb12" style="background:rgba(220,38,38,.08);border-left:4px solid #dc2626"><span>⚠️</span><span><strong>Important :</strong> après votre paiement, passez à l\'étape 3 pour nous envoyer votre confirmation avec la référence <strong>'+ref+'</strong>. Votre accès sera activé sous 24 h.</span></div>')
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:16px">'
+    + _campayTile
     // MoMo
     +'<div style="background:#fff;border:2px solid '+P.momo.couleur+';border-radius:12px;padding:12px;cursor:pointer" onclick="_payCopy(\''+P.momo.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro MoMo\')">'
     +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px"><div style="font-size:24px">'+P.momo.ico+'</div><div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13px;color:#142554">'+P.momo.label+'</div></div>'
@@ -42954,3 +43261,685 @@ function pgInstitutionalShowcase(){
 }
 
 /* ════════════════════════ FIN PROGRAMME PARTENARIAT ═════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v1.13 — RELATION CLIENT & ESPACE PARENTS
+   ══════════════════════════════════════════════════════════════════════════
+   Issu de l'audit du site lefisk.cm (cabinet fiscal camerounais). Trois de
+   leurs mécaniques sont reprises ici, adaptées à une école :
+
+     1. WhatsApp permanent AVEC promesse de délai chiffrée. Le délai annoncé
+        est ce qui rassure ; il n'a de valeur que s'il est tenu. Le clic est
+        tracé avec la page d'origine, pour enfin savoir quelle page fait
+        parler les parents.
+     2. Flux d'activité en bas d'écran. Chez eux les messages sont scriptés ;
+        ici ils sont construits UNIQUEMENT à partir d'événements réellement
+        présents dans DB (inscriptions, abonnements activés, achats de
+        manuels, certificats délivrés). Base vide → aucun message. Une école
+        vend de la confiance à des parents : un faux flux repéré une fois
+        détruirait plus de valeur que le flux n'en crée.
+     3. Segmentation par audience. Chez eux : Diaspora / Étrangers /
+        Résidents. Ici, l'espace s'adresse AUX PARENTS EN GÉNÉRAL — les
+        parents installés au Cameroun sont la majorité et la cible première.
+        L'onglet « à l'étranger » ne fait qu'ajouter les questions propres à
+        la distance ; ce n'est pas le sujet principal de la page.
+
+   Règle de rédaction de cette page : chaque réponse à une inquiétude renvoie
+   à une fonction qui EXISTE dans VÉRITAS. Ce qui est au programme mais pas
+   encore livré est regroupé dans un bloc « en préparation » explicitement
+   annoncé comme tel. Un parent qui découvre qu'une promesse n'existe pas ne
+   revient pas.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────── 1. WHATSAPP CONTEXTUEL ET TRACÉ ─────────── */
+
+// Le numéro vient de VERITAS_PAYMENTS (source unique déjà utilisée par le
+// module de paiement), avec repli sur la fiche de l'école.
+window._vtWaNumber = function(){
+  var n = '';
+  try{
+    n = (window.VERITAS_PAYMENTS && window.VERITAS_PAYMENTS.whatsapp) || '';
+    if(!n && typeof DB!=='undefined' && DB.school) n = DB.school.tel || DB.school.contact || '';
+  }catch(e){}
+  n = String(n||'').replace(/[^0-9]/g,'');
+  if(!n) n = '237697637739';
+  if(n.length===9) n = '237'+n;           // 6XXXXXXXX saisi sans indicatif
+  return n;
+};
+
+// Un message différent selon la page d'où part le parent : il n'a pas à
+// réexpliquer ce qu'il regardait.
+window._vtWaMsg = function(ctx){
+  var sec = ctx || (typeof window._vCurrentSec!=='undefined' ? window._vCurrentSec : '') || '';
+  var map = {
+    parents:     "Bonjour VÉRITAS. Je suis parent et je voudrais savoir comment suivre la scolarité de mon enfant.",
+    elearning:   "Bonjour VÉRITAS. Je m'intéresse à un abonnement e-learning. Pouvez-vous m'expliquer les formules ?",
+    boutique:    "Bonjour VÉRITAS. Je voudrais commander un manuel.",
+    orientation: "Bonjour VÉRITAS. J'aimerais un conseil d'orientation pour mon enfant.",
+    partenariat: "Bonjour VÉRITAS. Je m'intéresse au programme de partenariat.",
+    actualites:  "Bonjour VÉRITAS. J'ai une question sur le calendrier scolaire."
+  };
+  return map[sec] || "Bonjour VÉRITAS. J'ai une question sur vos cours et vos formules.";
+};
+
+window._vtWaOpen = function(ctx){
+  var sec = ctx || (typeof window._vCurrentSec!=='undefined' ? window._vCurrentSec : 'inconnu');
+  try{ if(typeof _track==='function') _track('wa_click', {p:String(sec).substring(0,24)}); }catch(e){}
+  var url = 'https://wa.me/'+_vtWaNumber()+'?text='+encodeURIComponent(_vtWaMsg(ctx));
+  try{ window.open(url,'_blank','noopener'); }catch(e){ window.location.href = url; }
+};
+
+// Bouton flottant. Idempotent : appelé à chaque navigation visiteur, il ne
+// crée l'élément qu'une fois et se contente ensuite de le réafficher.
+window._vtSupportFab = function(){
+  try{
+    var b = document.getElementById('vtWaFab');
+    if(!b){
+      b = document.createElement('button');
+      b.id = 'vtWaFab';
+      b.className = 'vfx-fab';
+      b.type = 'button';
+      b.setAttribute('aria-label','Écrire à VÉRITAS sur WhatsApp — réponse sous 2 h les jours ouvrés');
+      b.innerHTML = '<span class="ic" aria-hidden="true">💬</span>'
+                  + '<span class="tx">Une question ?<small>Réponse sous 2 h · jours ouvrés</small></span>';
+      b.onclick = function(){ _vtWaOpen(); };
+      document.body.appendChild(b);
+    }
+    b.style.display = 'inline-flex';
+  }catch(e){}
+};
+
+window._vtHideSupportFab = function(){
+  try{ var b=document.getElementById('vtWaFab'); if(b) b.style.display='none'; }catch(e){}
+  try{ var p=document.getElementById('vtProof'); if(p) p.classList.remove('on'); }catch(e){}
+};
+
+
+/* ─────────── 2. PREUVE SOCIALE — ÉVÉNEMENTS RÉELS UNIQUEMENT ─────────── */
+
+// « Awa T. » plutôt que le nom complet : le parent voit que c'est un vrai
+// élève sans que l'élève soit exposé.
+window._vtProofName = function(pre, nom){
+  var p = String(pre||'').trim();
+  var n = String(nom||'').trim();
+  if(!p && !n) return 'Un apprenant';
+  if(!p){ p = n; n = ''; }
+  return p + (n ? (' '+n.charAt(0).toUpperCase()+'.') : '');
+};
+
+// Les dates de DB sont au format fr-FR ("27/07/2026"). Retourne un nombre de
+// jours, ou null si la date est absente/illisible — dans ce cas on n'affiche
+// aucune mention de temps plutôt qu'une mention fausse.
+window._vtProofDays = function(d){
+  try{
+    var m = String(d||'').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(!m) return null;
+    var t = new Date(+m[3], +m[2]-1, +m[1]).getTime();
+    if(isNaN(t)) return null;
+    var j = Math.floor((Date.now()-t)/86400000);
+    return (j<0 || j>400) ? null : j;
+  }catch(e){ return null; }
+};
+
+window._vtProofWhen = function(d){
+  var j = _vtProofDays(d);
+  if(j===null) return '';
+  if(j<=0) return "aujourd'hui";
+  if(j===1) return 'hier';
+  if(j<7)  return 'il y a '+j+' jours';
+  if(j<14) return 'la semaine dernière';
+  if(j<60) return 'il y a '+Math.round(j/7)+' semaines';
+  return 'ce trimestre';
+};
+
+// Construit la liste des événements réels, les plus récents d'abord.
+// Aucun message n'est inventé : si une collection est vide, elle ne produit
+// rien. Plafonné à 60 jours pour ne pas présenter du vieux comme de l'actuel.
+window._vtProofEvents = function(){
+  var out = [];
+  if(typeof DB==='undefined' || !DB) return out;
+  var recent = function(d){ var j=_vtProofDays(d); return j!==null && j<=60; };
+
+  try{
+    (DB.visitorAccounts||[]).forEach(function(a){
+      if(!a || !recent(a.dateInscription)) return;
+      var cls = (a.profil && a.profil.cls) ? a.profil.cls : '';
+      out.push({ic:'🎓', d:a.dateInscription,
+        tx:'<b>'+_esc(_vtProofName(a.pre,a.nom))+'</b>'+(cls?' ('+_esc(cls)+')':'')+' a rejoint VÉRITAS'});
+    });
+  }catch(e){}
+
+  try{
+    ((DB.elearning&&DB.elearning.abonnements)||[]).forEach(function(ab){
+      if(!ab || !recent(ab.date||ab.dateDebut)) return;
+      if(ab.statut && ab.statut!=='Activé' && ab.statut!=='actif') return;
+      var plan = '';
+      try{
+        var p = ((DB.elearning.plans)||[]).find(function(x){return x.id===ab.plan;});
+        if(p) plan = p.nom;
+      }catch(e2){}
+      out.push({ic:'⭐', d:(ab.date||ab.dateDebut),
+        tx:'<b>'+_esc(_vtProofName(ab.pre,ab.nom))+'</b> a activé son abonnement'+(plan?' '+_esc(plan):'')});
+    });
+  }catch(e){}
+
+  try{
+    (DB.bookPurchases||[]).forEach(function(bp){
+      if(!bp || !recent(bp.date)) return;
+      var t = '';
+      try{
+        var bk = (DB.books||[]).find(function(x){return x.id===bp.bid||x.id===bp.book;});
+        if(bk) t = bk.titre||bk.nom||'';
+      }catch(e2){}
+      out.push({ic:'📘', d:bp.date,
+        tx:'Un manuel'+(t?' <b>'+_esc(String(t).substring(0,38))+'</b>':'')+' vient d\'être remis'});
+    });
+  }catch(e){}
+
+  try{
+    (DB.certificats||[]).forEach(function(c){
+      if(!c || !recent(c.date)) return;
+      out.push({ic:'🏅', d:c.date,
+        tx:'Un certificat <b>'+_esc(String(c.type||'VÉRITAS').substring(0,26))+'</b> a été délivré et rendu vérifiable'});
+    });
+  }catch(e){}
+
+  out.sort(function(a,b){ var x=_vtProofDays(a.d), y=_vtProofDays(b.d);
+    return (x===null?999:x)-(y===null?999:y); });
+  return out.slice(0,12);
+};
+
+// Rotation discrète en bas à gauche. Desktop seulement (le bas de l'écran
+// mobile est déjà occupé par le FAB et le bandeau d'essai IA), fermable, et
+// silencieuse s'il y a moins de 2 événements réels — un flux à un seul
+// message tournant en boucle se lit immédiatement comme un décor.
+window._vtProofFeed = function(){
+  try{
+    if(sessionStorage.getItem('_vtProofOff')) return;
+    if(window.innerWidth < 1000) return;
+    if(window._vtProofTimer) return;
+    var V = document.getElementById('VISITOR');
+    if(!V || V.style.display==='none') return;
+
+    var evs = _vtProofEvents();
+    if(evs.length < 2) return;
+
+    var box = document.getElementById('vtProof');
+    if(!box){
+      box = document.createElement('div');
+      box.id = 'vtProof';
+      box.className = 'vfx-proof';
+      // aria-live volontairement à "off" : ce bandeau change toutes les 8 s. En
+      // "polite", un lecteur d'écran annoncerait chaque rotation et couvrirait la
+      // lecture de la page. Le contenu reste dans le DOM, donc accessible à la
+      // demande, mais il n'interrompt personne — c'est de la preuve sociale, pas
+      // une information dont dépend l'usage du site.
+      box.setAttribute('aria-live','off');
+      document.body.appendChild(box);
+    }
+    var i = 0, cycles = 0;
+    var paint = function(){
+      var e = evs[i % evs.length];
+      var when = _vtProofWhen(e.d);
+      box.innerHTML = '<div class="vfx-proof-card">'
+        + '<span class="vfx-proof-ic" aria-hidden="true">'+e.ic+'</span>'
+        + '<span><span class="vfx-proof-tx">'+e.tx+'</span>'
+        + '<span class="vfx-proof-when"><span class="vfx-live" style="--vfx-live-c:rgba(16,185,129,.7);width:6px;height:6px;border-radius:50%;background:#10B981;display:inline-block"></span>'
+        + 'Activité réelle du centre'+(when?' · '+when:'')+'</span></span>'
+        + '<button class="vfx-proof-x" aria-label="Masquer le flux d\'activité" '
+        + 'onclick="_vtProofStop()">✕</button></div>';
+      box.classList.add('on');
+      box.style.animation = 'none'; void box.offsetWidth;
+      box.style.animation = '';
+      i++;
+      if(i % evs.length === 0){
+        cycles++;
+        // Deux passages suffisent : au-delà, le bandeau devient du mobilier.
+        if(cycles >= 2) _vtProofStop();
+      }
+    };
+    setTimeout(paint, 400);
+    window._vtProofTimer = setInterval(paint, 8000);
+  }catch(e){}
+};
+
+window._vtProofStop = function(){
+  try{
+    if(window._vtProofTimer){ clearInterval(window._vtProofTimer); window._vtProofTimer = null; }
+    sessionStorage.setItem('_vtProofOff','1');
+    var b = document.getElementById('vtProof');
+    if(b){ b.classList.remove('on'); b.innerHTML=''; }
+  }catch(e){}
+};
+
+
+/* ─────────── 3. ESPACE PARENTS ─────────── */
+
+// Les inquiétudes sont écrites AVEC LES MOTS DU PARENT (colonne de gauche),
+// pas avec le vocabulaire de l'école. En face, ce que VÉRITAS fait
+// aujourd'hui — rien d'autre.
+window._VT_PARENT_TABS = {
+  local: {
+    label: '👨‍👩‍👦 Parent au Cameroun',
+    intro: "Vous payez la scolarité : vous devez pouvoir vérifier ce qu'elle produit, sans attendre le bulletin de fin de trimestre.",
+    fears: [
+      ["« Je paie, mais je ne sais pas s'il travaille vraiment. »",
+       "Le compte de votre enfant enregistre ce qu'il fait : exercices terminés, quiz passés, <b>temps réellement passé</b> matière par matière."],
+      ["« Je découvre les notes trop tard, quand tout est joué. »",
+       "Les notes sont saisies séquence par séquence et le <b>bulletin APC</b> est consultable dès qu'elles sont entrées — pas en fin d'année."],
+      ["« Les absences, je ne l'apprends jamais. »",
+       "Chaque séance manquée est <b>enregistrée avec sa date et son motif</b> dans le dossier de l'élève."],
+      ["« Mon enfant est sur le téléphone, pas sur ses cours. »",
+       "Sur VÉRITAS le téléphone devient l'outil de travail : jeux de révision, annales corrigées, <b>erreurs à revoir</b> reprises automatiquement."],
+      ["« Le répétiteur encaisse et ne vient plus. »",
+       "Aucun paiement de la main à la main : MTN MoMo ou Orange Money, <b>reçu et référence</b> à votre nom, et l'accès s'ouvre tout seul."],
+      ["« Est-ce que ça change vraiment ses résultats ? »",
+       "Les <b>résultats aux examens publiés par le centre</b> sont affichés sur l'accueil, examen par examen, et non résumés en un slogan."],
+      ["« Je ne parle jamais à ses professeurs. »",
+       "Un numéro WhatsApp unique, avec un <b>engagement de réponse sous 2 h</b> les jours ouvrés, et un <b>point mensuel programmé</b> avec l'enseignant qui suit votre enfant."],
+      ["« Je ne sais pas si ça sert à quelque chose. »",
+       "La <b>progression est chiffrée trimestre par trimestre</b> : vous comparez, vous ne croyez pas sur parole."]
+    ]
+  },
+  loin: {
+    label: '✈️ Parent à l\'étranger',
+    intro: "À distance, les mêmes questions se posent — plus une : est-ce que l'argent envoyé arrive vraiment à l'école ?",
+    fears: [
+      ["« De si loin, je ne contrôle rien. »",
+       "Vous ouvrez le compte de votre enfant depuis n'importe quel pays : <b>notes, absences, travail fait</b>, sans passer par un intermédiaire."],
+      ["« Comment payer depuis l'Europe ou l'Amérique ? »",
+       "Aujourd'hui : MTN MoMo ou Orange Money, y compris <b>payés par un proche au Cameroun</b>, avec reçu et référence à votre nom. Le lien de paiement partageable et la carte bancaire en euros arrivent (voir plus bas)."],
+      ["« L'argent que j'envoie sert-il vraiment à la scolarité ? »",
+       "Le paiement va <b>directement au centre</b> et déclenche l'accès : ni enveloppe, ni chaîne d'intermédiaires."],
+      ["« Je ne peux pas aller voir sur place. »",
+       "Le compte remplace la visite : chaque séance, chaque note, chaque devoir rendu y est <b>horodaté</b>."],
+      ["« Le décalage horaire rend tout compliqué. »",
+       "Les cours et annales sont accessibles <b>à toute heure</b>, et un message WhatsApp reçoit une réponse sous 2 h ouvrées."],
+      ["« Mon enfant vit chez un tuteur : qui répond de sa scolarité ? »",
+       "Vous gardez l'accès au compte où que vous soyez : <b>le tuteur accompagne, vous restez informé</b>."]
+    ]
+  },
+  eleve: {
+    label: '🎒 Élève',
+    intro: "Ce que tu y gagnes, concrètement — pas ce que ça rassure chez tes parents.",
+    fears: [
+      ["« Je révise, mais je n'arrive pas à retenir. »",
+       "Tes erreurs sont mémorisées et <b>te sont reproposées</b> jusqu'à ce qu'elles soient acquises."],
+      ["« Je ne sais pas si je suis au niveau. »",
+       "Le <b>test de positionnement</b> est gratuit et te situe par matière en quelques minutes."],
+      ["« Je ne sais pas comment on note à l'examen. »",
+       "Les annales BEPC, Probatoire, BAC et GCE sont <b>corrigées selon les grilles officielles</b> du MINESEC."],
+      ["« Personne pour m'expliquer quand je bloque le soir. »",
+       "Le <b>Professeur Ambassa</b> répond à toute heure : explication, quiz, correction de devoir."],
+      ["« Réviser seul, c'est décourageant. »",
+       "Battles hebdomadaires, classement, badges et salles d'étude en groupe : tu <b>révises avec les autres</b>."]
+    ]
+  }
+};
+
+window.pgParents = function(){
+  var k = window._vtParentTab || 'local';
+  if(!window._VT_PARENT_TABS[k]) k = 'local';
+  var tab = window._VT_PARENT_TABS[k];
+  try{ if(typeof _track==='function') _track('parents_view', {t:k}); }catch(e){}
+
+  var h = '<div class="vsec" style="max-width:1000px;margin:0 auto">';
+
+  // ── Bandeau : une promesse, pas un slogan ──
+  h += '<div class="vp-hero vfx-orbs">'
+     + '<div><h1>Vous payez la scolarité.<br>Vous devez pouvoir la suivre.</h1>'
+     + '<p>VÉRITAS ouvre aux parents ce qu\'une école garde d\'habitude pour elle : présence, notes, travail fait, paiements. '
+     + 'Sans rendez-vous et sans attendre la fin du trimestre.</p>'
+     + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">'
+     + '<button class="vfx-cta" onclick="_vtWaOpen(\'parents\')">💬 Poser ma question — réponse sous 2 h</button>'
+     + '<button class="vfx-ghost" onclick="_vtMoyenne()">🧮 Calculer la moyenne de mon enfant</button>'
+     + '</div></div></div>';
+
+  // ── Chiffres : uniquement ceux que la base contient réellement ──
+  h += _vtParentStats();
+
+  // ── Onglets d'audience ──
+  // Pas de role="tab"/"tablist" ici : le motif ARIA des onglets suppose des
+  // role="tabpanel" associés, or le clic re-rend toute la section. Annoncer des
+  // onglets sans panneau désoriente un lecteur d'écran. Ce sont des boutons de
+  // filtre — donc un groupe et aria-pressed, ce qui décrit exactement l'état réel.
+  h += '<div class="vp-tabs" role="group" aria-label="Choisir votre situation">';
+  Object.keys(window._VT_PARENT_TABS).forEach(function(key){
+    h += '<button class="vp-tab'+(key===k?' on':'')+'" aria-pressed="'+(key===k)+'" '
+       + 'onclick="_vtParentsTab(\''+key+'\')">'+window._VT_PARENT_TABS[key].label+'</button>';
+  });
+  h += '</div>';
+
+  h += '<div style="font-family:\'Crimson Pro\',Georgia,serif;font-style:italic;font-size:15px;'
+     + 'color:#4B5563;margin:0 0 14px;max-width:640px">'+_esc(tab.intro)+'</div>';
+
+  // ── Le tableau inquiétude → réponse ──
+  h += '<div class="vp-fear">'
+     + '<div class="vp-fear-h">Ce que vous vous dites</div>'
+     + '<div class="vp-fear-h">Ce que VÉRITAS fait</div>';
+  tab.fears.forEach(function(row){
+    h += '<div class="vp-fear-q">'+_esc(row[0])+'</div><div class="vp-fear-a">'+row[1]+'</div>';
+  });
+  h += '</div>';
+
+  // ── Le contexte 2024 : c'est l'argument le plus fort de la page, et il est
+  //    entièrement factuel. Sans lui, un parent croit encore qu'une moyenne de
+  //    10 suffit — ce qui n'est plus vrai depuis la session 2024. ──
+  h += '<h3 class="acc-pill" style="margin:30px 0 12px">📉 Ce qui a changé en 2024 — et que beaucoup de parents ignorent</h3>'
+     + '<div class="vp-hero" style="padding:22px 24px;margin-bottom:14px"><div>'
+     + '<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:12px">'
+     + '<div style="flex:1 1 130px"><div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;'
+     + 'font-size:27px;font-weight:800;color:#FFC93C;line-height:1.1">37,26 %</div>'
+     + '<div style="font-size:11.5px;color:#C7D2E8">de réussite au BAC général 2024 (49 521 admis sur 132 920)</div></div>'
+     + '<div style="flex:1 1 130px"><div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;'
+     + 'font-size:27px;font-weight:800;color:#FFC93C;line-height:1.1">75,73 %</div>'
+     + '<div style="font-size:11.5px;color:#C7D2E8">l\'année précédente, quand les délibérations existaient</div></div>'
+     + '<div style="flex:1 1 130px"><div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;'
+     + 'font-size:27px;font-weight:800;color:#FFC93C;line-height:1.1">6,35 %</div>'
+     + '<div style="font-size:11.5px;color:#C7D2E8">en série A4 Allemand (1 496 admis sur 23 564)</div></div>'
+     + '</div>'
+     + '<div style="font-size:13.5px;color:#DBE4F5;line-height:1.6">La règle n\'a pas changé — il faut '
+     + '<b style="color:#fff">10/20 de moyenne générale</b> — mais depuis la session 2024 elle est appliquée '
+     + '<b style="color:#fff">strictement, sans délibération</b> : les candidats entre 8 et 10 ne sont plus repêchés. '
+     + 'Un enseignant le résume ainsi : « on avait pris l\'habitude de faire passer des candidats qui n\'avaient pas eu '
+     + '10/20 de moyenne ». Résultat : les points perdus dans une matière négligée ne se récupèrent plus en conseil, '
+     + 'et les séries littéraires ont payé le plus lourd tribut.</div>'
+     + '<div style="font-size:11px;color:#9FB0CE;margin-top:9px">Chiffres publiés par l\'OBC et repris par la presse '
+     + 'nationale. Les modalités exactes de chaque session sont fixées par la circulaire de l\'année.</div>'
+     + '</div></div>';
+
+  // ── Les formules, lues par un élève et par un parent : mêmes maths, deux
+  //    usages. C'est ce qui transforme un chiffre en action. ──
+  h += '<h3 class="acc-pill" style="margin:26px 0 12px">🧮 Les trois formules, et quoi en faire</h3>'
+     + '<div class="vp-card" style="margin-bottom:14px">'
+     + '<div style="font-size:13.5px;line-height:1.9">'
+     + '<div style="background:#FBFCFE;border-left:3px solid #FFC93C;border-radius:8px;padding:9px 13px;margin-bottom:8px">'
+     + '<b>1. La moyenne pondérée</b><br>moyenne = (note₁ × coef₁ + note₂ × coef₂ + …) ÷ (coef₁ + coef₂ + …)'
+     + '<br><span style="font-size:12px;color:#6B7280">On divise par la somme des coefficients, jamais par le nombre de matières.</span></div>'
+     + '<div style="background:#FBFCFE;border-left:3px solid #FFC93C;border-radius:8px;padding:9px 13px;margin-bottom:8px">'
+     + '<b>2. Ce qu\'une matière coûte</b><br>perte = (10 − note) × coef ÷ total des coefficients'
+     + '<br><span style="font-size:12px;color:#6B7280">Un 8 en coefficient 4 sur 24 retire 0,33 point de moyenne ; le même 8 en coefficient 1 n\'en retire que 0,08.</span></div>'
+     + '<div style="background:#FBFCFE;border-left:3px solid #FFC93C;border-radius:8px;padding:9px 13px">'
+     + '<b>3. La note à viser ensuite</b><br>note nécessaire = [ cible × (C + c) − moyenne × C ] ÷ c'
+     + '<br><span style="font-size:12px;color:#6B7280">C = coefficients déjà comptés, c = coefficient de la nouvelle note.</span></div>'
+     + '</div></div>'
+     + '<div class="vp-grid" style="margin-top:0">'
+     + '<div class="vp-card"><span class="vp-badge" style="background:rgba(37,99,235,.10);color:#1D4ED8">Pour l\'élève</span>'
+     + '<h4 style="margin-top:9px">Trois points bien choisis valent dix heures dispersées</h4>'
+     + '<p style="margin:0"><b>Commence par la matière la plus lourde sous 10</b> (formule 2), pas par celle que tu préfères. '
+     + '<b>Vise 11, pas 20</b> : passer un 7 à 11 rapporte plus que faire monter un 15 à 17, pour bien moins d\'effort. '
+     + '<b>Agis dès la séquence 1</b> : la formule 3 montre qu\'en fin d\'année la même cible devient hors de portée. '
+     + 'Et souviens-toi qu\'<b>aucun point perdu ne se rattrape plus en délibération</b> : la barre des 10 se joue '
+     + 'maintenant, matière par matière.</p></div>'
+     + '<div class="vp-card"><span class="vp-badge">Pour le parent</span>'
+     + '<h4 style="margin-top:9px">Deux chiffres à demander chaque séquence, pas un seul</h4>'
+     + '<p style="margin:0"><b>La moyenne ET la note la plus basse</b> : la note la plus basse dit ce qui tire la moyenne '
+     + 'vers le bas, la moyenne seule ne le dit pas. <b>Regardez le coefficient avant la note</b> : un 8 en coefficient 4 est un problème, '
+     + 'un 8 en coefficient 1 est un détail. <b>Fixez une cible chiffrée</b> (« 11 en anglais à la prochaine séquence ») : '
+     + 'la formule 3 la transforme en note précise, donc en objectif vérifiable. Et <b>intervenez à la première séquence '
+     + 'sous la moyenne</b>, pas au troisième trimestre.</p></div>'
+     + '</div>';
+
+  // ── Vérifiable par vous-même : les outils gratuits ──
+  h += '<h3 class="acc-pill" style="margin:30px 0 6px">🧰 À vérifier vous-même, gratuitement</h3>'
+     + '<div style="font-size:13px;color:#6B7280;margin-bottom:12px">Sans compte, sans paiement. '
+     + 'Un centre sérieux se contrôle avant de se payer.</div>'
+     + '<div class="vp-grid">'
+     + '<button class="vp-tool" onclick="_vtMoyenne()"><span class="ic" aria-hidden="true">🧮</span>'
+     + '<span><span class="tt">Moyenne &amp; situation de l\'élève</span>'
+     + '<span class="ss">Notes et coefficients : moyenne pondérée, matières qui coûtent le plus, alerte si une matière est sous 10.</span></span></button>'
+     + '<a class="vp-tool" href="outils/points-manquants.html" target="_blank" rel="noopener" style="text-decoration:none">'
+     + '<span class="ic" aria-hidden="true">🎯</span>'
+     + '<span><span class="tt">Quelle note viser au prochain devoir</span>'
+     + '<span class="ss">Combien de points manquent, et la note exacte à obtenir pour atteindre 10, 12 ou 14.</span></span></a>'
+     + '<a class="vp-tool" href="outils/planning-revision.html" target="_blank" rel="noopener" style="text-decoration:none">'
+     + '<span class="ic" aria-hidden="true">📅</span>'
+     + '<span><span class="tt">Planning de révision jusqu\'à l\'examen</span>'
+     + '<span class="ss">Heures par matière pondérées par le niveau et le coefficient, en phases jusqu\'au jour J.</span></span></a>'
+     + '<button class="vp-tool" onclick="vShowSec(\'verifier-certificat\',null)"><span class="ic" aria-hidden="true">🔍</span>'
+     + '<span><span class="tt">Vérifier un certificat VÉRITAS</span>'
+     + '<span class="ss">Numéro + token : tout certificat que nous délivrons est contrôlable ici.</span></span></button>'
+     + (typeof mAgentAmbassa==='function'
+        ? '<button class="vp-tool" onclick="mAgentAmbassa()"><span class="ic" aria-hidden="true">🎓</span>'
+        + '<span><span class="tt">Essayer le Professeur Ambassa</span>'
+        + '<span class="ss">Posez-lui une question du programme et jugez la réponse vous-même.</span></span></button>' : '')
+     + (typeof showEpreuves==='function'
+        ? '<button class="vp-tool" onclick="showEpreuves()"><span class="ic" aria-hidden="true">📝</span>'
+        + '<span><span class="tt">Annales corrigées</span>'
+        + '<span class="ss">BEPC, Probatoire, BAC, GCE — corrigés selon les grilles MINESEC.</span></span></button>' : '')
+     + '</div>';
+
+  // ── Confiance : ce qui est vrai, formulé sans exagération ──
+  h += '<h3 class="acc-pill" style="margin:30px 0 12px">🔐 Ce qui protège votre paiement et vos données</h3>'
+     + '<div class="vp-grid">'
+     + '<div class="vp-card"><span class="vp-badge">✓ En place</span>'
+     + '<h4 style="margin-top:9px">Paiement mobile traçable</h4>'
+     + '<p>MTN MoMo et Orange Money via un agrégateur agréé. Chaque paiement porte une '
+     + '<b>référence unique</b> et l\'accès s\'ouvre automatiquement — sans validation manuelle à quémander.</p></div>'
+     + '<div class="vp-card"><span class="vp-badge">✓ En place</span>'
+     + '<h4 style="margin-top:9px">Documents vérifiables</h4>'
+     + '<p>Certificats et attestations portent un numéro, un token et un QR code. '
+     + 'N\'importe qui peut <b>contrôler l\'authenticité</b> sans passer par nous.</p></div>'
+     + '<div class="vp-card"><span class="vp-badge">✓ En place</span>'
+     + '<h4 style="margin-top:9px">Connexion sécurisée</h4>'
+     + '<p>Le site est servi en HTTPS et le dossier d\'un élève n\'est accessible que depuis '
+     + '<b>son compte</b>. Nous ne demandons jamais un mot de passe par WhatsApp ou par téléphone.</p></div>'
+     + '</div>';
+
+  // ── Ce qui n'existe PAS encore : annoncé comme tel ──
+  h += '<div class="vp-card" style="border-left:3px solid #FFC93C;margin-top:6px">'
+     + '<h4>🚧 En préparation — annoncé, pas encore livré</h4>'
+     + '<p style="margin:0">Nous préférons le dire : le <b>lien de paiement partageable</b> (pour qu\'un proche règle '
+     + 'la scolarité sans créer de compte), le <b>paiement en tranches</b>, la <b>carte bancaire en euros</b>, '
+     + 'l\'<b>alerte automatique dès la première note sous la moyenne</b> et le <b>rapport mensuel envoyé au parent</b> '
+     + 'sont en cours de développement. Aujourd\'hui, ces informations existent et sont consultables — mais c\'est vous '
+     + 'qui allez les chercher, ou nous qui vous les transmettons au point mensuel. Tout ce qui figure au-dessus de ce '
+     + 'bloc fonctionne déjà.</p></div>';
+
+  // ── Sortie : une seule action ──
+  h += '<div class="vp-hero vfx-orbs" style="margin:26px 0 10px;text-align:center">'
+     + '<div><h2 style="font-size:21px">Une question sur votre situation ?</h2>'
+     + '<p style="margin:0 auto 16px">Écrivez-nous : un enseignant du centre — pas un robot — vous répond '
+     + 'sous 2 h les jours ouvrés.</p>'
+     + '<button class="vfx-cta" onclick="_vtWaOpen(\'parents\')">💬 Écrire sur WhatsApp</button>'
+     + '</div></div>';
+
+  h += '</div>';
+  return h;
+};
+
+// Chiffres de la page : lus dans DB, et chaque tuile disparaît si la donnée
+// n'existe pas. Mieux vaut trois chiffres vrais que six dont deux inventés.
+window._vtParentStats = function(){
+  var tiles = [];
+  try{
+    var nb = (DB.students||[]).length + (DB.visitorAccounts||[]).length;
+    if(nb > 0) tiles.push(['👥', nb, 'apprenants suivis']);
+  }catch(e){}
+  try{
+    var sv = (DB.statsVitrine||[]).filter(function(s){ return s && s.taux!=null; });
+    if(sv.length){
+      var best = sv.slice().sort(function(a,b){ return b.taux-a.taux; })[0];
+      tiles.push(['🏆', best.taux+' %', 'de réussite au '+String(best.ex||'').substring(0,18)]);
+    }
+  }catch(e){}
+  try{
+    var rv = (DB.bookReviews||[]).filter(function(r){ return r && +r.stars>0; });
+    if(rv.length >= 3){
+      var avg = rv.reduce(function(a,r){ return a + (+r.stars||0); }, 0) / rv.length;
+      tiles.push(['⭐', avg.toFixed(1)+'/5', rv.length+' avis d\'élèves et de parents']);
+    }
+  }catch(e){}
+  try{
+    var nbEns = (DB.teachers||[]).length;
+    if(nbEns > 0) tiles.push(['🎓', nbEns, 'enseignants du centre']);
+  }catch(e){}
+  if(!tiles.length) return '';
+
+  var h = '<div class="vp-grid" style="margin:0 0 6px">';
+  tiles.forEach(function(t){
+    h += '<div class="vp-card" style="text-align:center">'
+       + '<div style="font-size:22px" aria-hidden="true">'+t[0]+'</div>'
+       + '<div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;font-size:25px;'
+       + 'font-weight:800;color:#142554;line-height:1.1">'+_esc(String(t[1]))+'</div>'
+       + '<div style="font-size:12px;color:#6B7280;margin-top:3px">'+_esc(String(t[2]))+'</div></div>';
+  });
+  h += '</div>';
+  h += '<div style="font-size:11px;color:#9CA3AF;margin:0 0 4px">'
+     + 'Chiffres issus des données du centre — aucun n\'est affiché si la donnée est absente.</div>';
+  return h;
+};
+
+window._vtParentsTab = function(k){
+  window._vtParentTab = k;
+  var c = (typeof _ge==='function' ? _ge('vContent') : document.getElementById('vContent'));
+  if(c){ c.innerHTML = pgParents(); try{ window.scrollTo({top:0,behavior:'smooth'}); }catch(e){} }
+};
+
+
+/* ─────────── 4. OUTIL GRATUIT : MOYENNE & SITUATION DE L'ÉLÈVE ─────────── */
+// Premier « aimant » du modèle lefisk : un outil utile, gratuit, sans compte,
+// qui se termine par une proposition. Le calcul est volontairement simple et
+// annoncé comme INDICATIF : la décision de passage appartient au conseil de
+// classe, jamais à une page web.
+
+window._vtMoyenne = function(){
+  try{ if(typeof _track==='function') _track('tool_use', {t:'moyenne'}); }catch(e){}
+  var rows = '';
+  for(var i=0;i<5;i++) rows += _vtMoyenneRow(i);
+  M('🧮 Moyenne &amp; situation de l\'élève',
+    'Saisissez les notes sur 20 et les coefficients — le calcul se fait chez vous, rien n\'est envoyé.',
+    '<div id="vtMoyRows">'+rows+'</div>'
+    + '<button class="btn bo sm" style="margin:4px 0 12px" onclick="_vtMoyenneAdd()">+ Ajouter une matière</button>'
+    + '<div id="vtMoyOut"></div>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    + '<button class="btn bi" onclick="_vtMoyenneCalc()">Calculer la moyenne</button>', true);
+};
+
+window._vtMoyenneRow = function(i){
+  return '<div class="fl2 g4" style="gap:8px;margin-bottom:7px" data-vtmoy="1">'
+    + '<input class="fi" style="flex:2" placeholder="Matière '+(i+1)+'" data-vtm="mat">'
+    + '<input class="fi" style="flex:1" type="number" min="0" max="20" step="0.25" placeholder="Note /20" data-vtm="note">'
+    + '<input class="fi" style="flex:1" type="number" min="1" max="10" step="1" placeholder="Coef" data-vtm="coef">'
+    + '</div>';
+};
+
+window._vtMoyenneAdd = function(){
+  var box = document.getElementById('vtMoyRows'); if(!box) return;
+  var n = box.querySelectorAll('[data-vtmoy]').length;
+  if(n >= 14){ if(typeof toast==='function') toast('14 matières suffisent','warn'); return; }
+  box.insertAdjacentHTML('beforeend', _vtMoyenneRow(n));
+};
+
+window._vtMoyenneCalc = function(){
+  var out = document.getElementById('vtMoyOut'); if(!out) return;
+  var box = document.getElementById('vtMoyRows'); if(!box) return;
+  var tot = 0, coefs = 0, lignes = [], hors = 0;
+  Array.prototype.forEach.call(box.querySelectorAll('[data-vtmoy]'), function(r){
+    var mat  = (r.querySelector('[data-vtm="mat"]')||{}).value || '';
+    var note = parseFloat((r.querySelector('[data-vtm="note"]')||{}).value);
+    var coef = parseFloat((r.querySelector('[data-vtm="coef"]')||{}).value);
+    if(isNaN(note)) return;
+    if(note < 0 || note > 20){ hors++; return; }
+    if(isNaN(coef) || coef <= 0) coef = 1;
+    tot += note*coef; coefs += coef;
+    lignes.push({m:(mat||'Matière').substring(0,28), n:note, c:coef});
+  });
+  if(!coefs){
+    out.innerHTML = '<div class="ib ibt"><span>⚠️</span><span>Saisissez au moins une note sur 20.</span></div>';
+    return;
+  }
+  var moy = tot/coefs;
+  // Seuils usuels du secondaire camerounais. Formulés comme une SITUATION,
+  // pas comme une décision : le conseil de classe seul décide du passage.
+  var verdict, couleur, conseil;
+  if(moy >= 14){ verdict='Situation solide'; couleur='#0F7B4F';
+    conseil='Le niveau est là. L\'enjeu devient la régularité et la méthode d\'examen.'; }
+  else if(moy >= 12){ verdict='Bonne moyenne'; couleur='#0F7B4F';
+    conseil='Deux matières ciblées suffisent souvent à passer au-dessus de 14.'; }
+  else if(moy >= 10){ verdict='Passage probable, marge étroite'; couleur='#B45309';
+    conseil='Une mauvaise séquence peut faire basculer. Les matières à fort coefficient sont à sécuriser en premier.'; }
+  else if(moy >= 8){ verdict='Situation à risque'; couleur='#C2410C';
+    conseil='À ce niveau, un accompagnement régulier change réellement l\'issue de l\'année.'; }
+  else { verdict='Situation critique'; couleur='#B91C1C';
+    conseil='Il faut reprendre les bases des matières à fort coefficient sans attendre la fin du trimestre.'; }
+
+  // ── Contexte 2024 : la règle reste 10/20 de MOYENNE GÉNÉRALE. Ce qui a
+  // changé, c'est son application stricte — plus de repêchage en délibération
+  // des candidats entre 8 et 10. D'où l'intérêt de chiffrer ce que chaque
+  // matière faible retire à la moyenne : c'est exactement l'écart qui séparait
+  // autrefois un repêché d'un admis, et qui ne se rattrape plus.
+  // ⚠️ Ce bloc est construit dans `ruleHtml`, PAS dans `h` : `var h` est déclaré
+  // plus bas, et un `h +=` placé avant sa déclaration est effacé par l'affectation
+  // qui suit (hoisting, sans la moindre erreur à la console).
+  var ruleHtml = '';
+  var sous10 = lignes.filter(function(l){ return l.n < 10; }).sort(function(a,b){ return a.n-b.n; });
+  if(sous10.length){
+    var perteTot = sous10.reduce(function(a,l){ return a + (10-l.n)*l.c; }, 0) / coefs;
+    ruleHtml += '<div class="card" style="margin-top:10px;padding:14px;border-left:4px solid #C2410C;background:#FFF8F1">'
+      + '<div style="font-weight:800;color:#8A3B0C;margin-bottom:6px">⚠️ '+sous10.length
+      + ' matière(s) sous 10 retirent <b>'+perteTot.toFixed(2)+' point(s)</b> de moyenne</div>'
+      + '<div style="font-size:13px;line-height:1.55;color:#374151">'
+      + '<b>'+sous10.map(function(l){ return _esc(l.m)+' ('+l.n+')'; }).join(', ')+'</b>.<br>'
+      + 'Depuis la session 2024, la moyenne de 10/20 est appliquée <b>strictement, sans délibération</b> : '
+      + 'les candidats entre 8 et 10 ne sont plus repêchés. Ces '+perteTot.toFixed(2)+' point(s) perdus sont '
+      + 'précisément le genre d\'écart qui se rattrapait autrefois en conseil et qui, aujourd\'hui, ne se rattrape plus.'
+      + '</div></div>';
+  } else if(moy >= 10){
+    ruleHtml += '<div class="card" style="margin-top:10px;padding:13px;border-left:4px solid #0F7B4F;background:#F3FBF6">'
+      + '<div style="font-weight:800;color:#0F7B4F">✅ Aucune matière sous 10</div>'
+      + '<div style="font-size:12.5px;color:#374151;margin-top:4px">Aucune matière ne tire la moyenne vers le bas : '
+      + 'c\'est la position la plus sûre depuis que la barre des 10/20 est appliquée sans délibération.</div></div>';
+  }
+
+  var faibles = lignes.filter(function(l){ return l.n < 10; })
+                      .sort(function(a,b){ return (b.c-a.c) || (a.n-b.n); }).slice(0,3);
+
+  var h = '<div class="card" style="border-left:4px solid '+couleur+';padding:15px">'
+    + '<div style="font-size:12px;color:#6B7280;font-weight:700;letter-spacing:.06em">MOYENNE PONDÉRÉE</div>'
+    + '<div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;font-size:34px;font-weight:800;'
+    + 'color:'+couleur+';line-height:1.1">'+moy.toFixed(2)+' / 20</div>'
+    + '<div style="font-weight:800;color:'+couleur+';margin-top:4px">'+verdict+'</div>'
+    + '<div style="font-size:13px;color:#374151;margin-top:7px;line-height:1.5">'+conseil+'</div>'
+    + '<div style="font-size:11px;color:#9CA3AF;margin-top:9px">Calcul sur '+lignes.length+' matière(s), '
+    + 'total des coefficients : '+coefs+'.'+(hors?' '+hors+' note(s) hors barème ignorée(s).':'')+'</div>'
+    + '</div>'
+    + ruleHtml;   // contexte 2024 : juste sous la moyenne, avant le détail des matières
+
+  if(faibles.length){
+    h += '<div class="card" style="margin-top:10px;padding:14px">'
+       + '<div style="font-weight:800;color:#142554;margin-bottom:7px">Ce qui coûte le plus de points</div>';
+    faibles.forEach(function(l){
+      h += '<div style="display:flex;justify-content:space-between;font-size:13px;padding:5px 0;'
+         + 'border-bottom:1px solid rgba(20,37,84,.07)"><span>'+_esc(l.m)+'</span>'
+         + '<span style="font-weight:700;color:#B91C1C">'+l.n+'/20 · coef '+l.c+'</span></div>';
+    });
+    h += '<div style="font-size:12px;color:#6B7280;margin-top:8px">Une note faible à fort coefficient '
+       + 'pèse plusieurs fois : c\'est là que le rattrapage rapporte le plus.</div></div>';
+  }
+
+  h += '<div style="background:linear-gradient(135deg,#0D1B3E,#142554);border-radius:14px;padding:16px;'
+    + 'margin-top:12px;text-align:center">'
+    + '<div style="color:#fff;font-weight:800;font-size:14px;margin-bottom:5px">Reprendre ces matières avec VÉRITAS</div>'
+    + '<div style="color:rgba(255,201,60,.9);font-size:12.5px;margin-bottom:12px">Cours, annales corrigées et '
+    + 'exercices repris jusqu\'à ce que la notion soit acquise.</div>'
+    + '<button class="vfx-cta" onclick="cm();vShowSec(\'elearning\',null);'
+    + 'setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)">'
+    + 'Voir les formules d\'abonnement</button>'
+    + '<div style="margin-top:9px"><button class="vfx-ghost" onclick="_vtWaOpen(\'parents\')">'
+    + '💬 En parler à un enseignant</button></div>'
+    + '</div>'
+    + '<div style="font-size:11px;color:#9CA3AF;margin-top:9px;line-height:1.45">Résultat <b>indicatif</b> : '
+    + 'la décision de passage appartient au conseil de classe de l\'établissement, qui tient compte du '
+    + 'règlement intérieur, de la conduite et des règles du MINESEC.</div>';
+
+  out.innerHTML = h;
+};
+
+
+/* ─────────── 5. AMORÇAGE ─────────── */
+// Le flux d'activité attend 6 s : avant, le visiteur lit encore la page
+// d'accueil et un mouvement en bas d'écran ne fait que le distraire.
+setTimeout(function(){ try{ _vtProofFeed(); }catch(e){} }, 6000);
+
+/* ════════════════════ FIN RELATION CLIENT & ESPACE PARENTS ════════════════════ */

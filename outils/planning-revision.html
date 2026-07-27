@@ -1,0 +1,216 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Planning de révision jusqu'à l'examen (BEPC, Probatoire, BAC, GCE) — outil gratuit | VÉRITAS</title>
+<meta name="description" content="Générez gratuitement un planning de révision semaine par semaine jusqu'à la date de votre examen : répartition des heures par matière selon le niveau et le coefficient, phases bases puis annales. Pour élèves et parents au Cameroun.">
+<meta name="keywords" content="planning de révision, programme de révision BEPC, réviser le BAC Cameroun, emploi du temps révision, combien de temps réviser">
+<link rel="canonical" href="https://veritas-school.com/outils/planning-revision.html">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<meta property="og:type" content="website"><meta property="og:title" content="Planning de révision jusqu'à l'examen (BEPC, Probatoire, BAC, GCE)">
+<meta property="og:description" content="Un planning semaine par semaine, pondéré par le niveau et les coefficients. Gratuit, sans inscription."><meta property="og:url" content="https://veritas-school.com/outils/planning-revision.html">
+<meta property="og:site_name" content="Centre VÉRITAS"><meta property="og:locale" content="fr_FR">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Générateur de planning de révision","applicationCategory":"EducationalApplication","operatingSystem":"Navigateur web","url":"https://veritas-school.com/outils/planning-revision.html","inLanguage":"fr","offers":{"@type":"Offer","price":"0","priceCurrency":"XAF"},"provider":{"@type":"EducationalOrganization","name":"Centre VÉRITAS Academy","url":"https://veritas-school.com"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Combien de temps faut-il réviser par semaine avant un examen ?","acceptedAnswer":{"@type":"Answer","text":"Il n'existe pas de durée officielle. Ce qui est mesurable, c'est la régularité : mieux vaut six séances de quarante-cinq minutes réparties dans la semaine qu'une seule matinée de six heures, car la mémoire consolide entre deux séances et non pendant. Indiquez le temps réellement disponible : un planning qu'on ne peut pas tenir ne sert à rien."}},{"@type":"Question","name":"Comment répartir les heures entre les matières ?","acceptedAnswer":{"@type":"Answer","text":"En croisant deux critères : le niveau actuel dans la matière et son coefficient. Une matière faible à fort coefficient doit recevoir le plus d'heures, car c'est là qu'un point gagné rapporte le plus à la moyenne générale. Aucune matière ne doit toutefois tomber à zéro heure : depuis 2024 la barre des 10 sur 20 est appliquée sans délibération, donc les points perdus tardivement ne se rattrapent plus."}},{"@type":"Question","name":"Faut-il réviser les annales ou le cours ?","acceptedAnswer":{"@type":"Answer","text":"Les deux, mais pas en même temps. Le cours et les exercices d'abord, pour installer les notions ; les annales et les sujets complets en conditions de temps dans les dernières semaines, quand il s'agit d'apprendre à gérer une épreuve plutôt qu'à comprendre une notion."}}]}</script>
+<style>
+:root{--navy:#142554;--gold:#FFC93C;--ink:#1f2d4d;--mut:#5b6b85;--bg:#f7f9fc}
+*{box-sizing:border-box}body{margin:0;font-family:'Segoe UI',system-ui,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.7}
+header{background:linear-gradient(135deg,#0f1b3d,#142554 55%,#1e3a8a);color:#fff;padding:14px 20px}
+header a{color:var(--gold);font-weight:800;text-decoration:none;font-size:18px}
+.wrap{max-width:820px;margin:0 auto;padding:26px 20px}
+.card{background:#fff;border:1px solid #e6eaf2;border-radius:16px;padding:26px;box-shadow:0 10px 30px rgba(20,37,84,.06);margin-bottom:20px}
+.badge{display:inline-block;background:rgba(255,201,60,.18);color:#9a7b1c;font-weight:800;font-size:12px;padding:4px 12px;border-radius:99px;text-transform:uppercase;letter-spacing:.5px}
+h1{font-size:26px;color:var(--navy);margin:12px 0 8px;line-height:1.25;text-wrap:balance}
+h2{color:var(--navy);font-size:19px;margin:22px 0 8px;border-bottom:2px solid #eef1f7;padding-bottom:5px}
+ul{padding-left:22px}li{margin:4px 0}a{color:#2563eb}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 2px}
+.nav a{background:#fff;border:1px solid #e6eaf2;border-radius:99px;padding:6px 12px;text-decoration:none;color:#142554;font-size:13px;font-weight:700}
+.cta{display:block;text-align:center;background:linear-gradient(135deg,#142554,#1e3a8a);color:#fff;text-decoration:none;font-weight:800;padding:16px;border-radius:14px;margin-top:16px}
+.cta small{display:block;font-weight:500;opacity:.85;font-size:12px;margin-top:3px}
+.wa{display:block;text-align:center;background:#25D366;color:#08281a;text-decoration:none;font-weight:800;padding:14px;border-radius:14px;margin-top:10px}
+.wa small{display:block;font-weight:600;opacity:.8;font-size:12px;margin-top:2px}
+.rel{font-size:14px;color:var(--mut)}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:24px}
+.fg{margin-bottom:12px}
+.fl{display:block;font-size:13px;font-weight:700;color:var(--navy);margin-bottom:4px}
+.fh{display:block;font-size:12px;color:var(--mut);font-weight:400;margin-bottom:5px}
+input.f,select.f{width:100%;padding:11px;border:1.5px solid #dbe2ee;border-radius:10px;font-size:15px;font-family:inherit;color:var(--ink);background:#fff}
+input.f:focus,select.f:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(255,201,60,.22)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.g2{grid-template-columns:1fr}}
+.btn{background:linear-gradient(135deg,var(--gold),#e8a413);color:var(--navy);border:none;border-radius:99px;padding:13px 26px;font-weight:800;font-size:15px;font-family:inherit;cursor:pointer;box-shadow:0 8px 20px rgba(232,164,19,.3);transition:transform .2s}
+.btn:hover{transform:translateY(-2px)}
+.btn2{background:#fff;border:1.5px solid #dbe2ee;border-radius:99px;padding:11px 18px;font-weight:700;font-size:14px;font-family:inherit;color:var(--navy);cursor:pointer}
+table.mx{width:100%;border-collapse:collapse}
+table.mx th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);text-align:left;padding:0 6px 6px}
+table.mx td{padding:3px 6px 3px 0}
+.res{border-left:4px solid var(--navy);background:#fbfcfe;border-radius:12px;padding:16px 18px;margin-top:18px}
+.res .big{font-size:32px;font-weight:800;line-height:1.1;color:var(--navy)}
+.res .meta{font-size:12.5px;color:var(--mut);margin-top:8px}
+.alloc{width:100%;border-collapse:collapse;margin-top:12px;font-size:14px}
+.alloc th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);padding:6px 8px;border-bottom:1px solid #e6eaf2}
+.alloc td{padding:7px 8px;border-bottom:1px solid #f0f3f8}
+.bar{height:8px;border-radius:99px;background:linear-gradient(90deg,var(--gold),#e8a413)}
+.phase{background:#fff;border:1px solid #e6eaf2;border-left:3px solid var(--gold);border-radius:12px;padding:12px 15px;margin-top:10px;font-size:14px}
+.phase b{color:var(--navy)}
+.warn{background:#fffdf6;border:1px solid #f0e2b8;border-radius:12px;padding:12px 15px;font-size:14px;margin-top:12px}
+.rule{background:#fff8f1;border:1px solid #f3d3b3;border-left:4px solid #c2410c;border-radius:12px;padding:14px 16px;margin-top:12px}
+.rule .rt{font-weight:800;color:#8a3b0c;margin-bottom:6px}
+.rule p{margin:6px 0;font-size:14px}
+.rule .rn{font-size:12.5px;color:var(--mut)}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+@media(max-width:640px){.duo{grid-template-columns:1fr}}
+.duo>div{background:#fff;border:1px solid #e6eaf2;border-radius:14px;padding:16px}
+.duo h3{margin:0 0 8px;font-size:15px;color:var(--navy)}
+.duo .who{display:inline-block;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;padding:3px 10px;border-radius:99px;margin-bottom:8px}
+.duo .w1{background:rgba(37,99,235,.10);color:#1d4ed8}
+.duo .w2{background:rgba(15,123,79,.10);color:#0f7b4f}
+.duo ul{padding-left:18px;margin:6px 0 0}
+.duo li{font-size:13.5px;margin:5px 0}
+.form{background:#fbfcfe;border-left:3px solid var(--gold);padding:10px 14px;border-radius:8px;font-size:14px}
+.disc{font-size:12.5px;color:var(--mut);margin-top:12px;line-height:1.5}
+</style></head><body>
+<header><div class="wrap" style="padding:0"><a href="https://veritas-school.com">🎓 Centre VÉRITAS Academy</a></div></header>
+<div class="wrap">
+<div class="nav"><a href="/outils/">🧰 Tous les outils</a><a href="/outils/calcul-moyenne.html">Moyenne</a><a href="/outils/points-manquants.html">Points manquants</a><a style="background:#142554;color:#fff" href="/outils/planning-revision.html">Planning de révision</a></div>
+
+<article class="card">
+<span class="badge">Outil gratuit · sans inscription</span>
+<h1>Planning de révision jusqu'à l'examen</h1>
+<p>Indiquez la date de l'épreuve, le temps réellement disponible et le niveau par matière. L'outil calcule le <strong>nombre de semaines restantes</strong>, répartit les heures en donnant la priorité aux matières <strong>faibles à fort coefficient</strong>, et découpe la période en phases — bases, puis entraînement, puis annales en conditions réelles.</p>
+
+<div class="g2">
+  <div class="fg"><span class="fl">Date de l'examen ou de la composition</span>
+    <span class="fh">BEPC, Probatoire, BAC, GCE ou simple séquence.</span>
+    <input class="f" id="date" type="date"></div>
+  <div class="fg"><span class="fl">Heures de révision disponibles par semaine</span>
+    <span class="fh">Soyez réaliste : un planning intenable ne se tient pas.</span>
+    <input class="f" id="hrs" type="number" min="1" max="60" step="1" inputmode="numeric" placeholder="ex. 8"></div>
+</div>
+
+<table class="mx"><thead><tr><th style="width:42%">Matière</th><th style="width:31%">Niveau actuel</th><th style="width:27%">Coefficient</th></tr></thead><tbody id="rows"></tbody></table>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+  <button class="btn2" type="button" onclick="addRow()">+ Ajouter une matière</button>
+  <button class="btn" type="button" onclick="plan()">Générer mon planning</button>
+</div>
+<div id="out" aria-live="polite"></div>
+
+<h2>La formule de répartition</h2>
+<p class="form"><strong>Poids d'une matière</strong> = coefficient × facteur de niveau<br>
+<span style="font-size:13px;color:var(--mut)">facteur : <strong>3</strong> si la matière est faible, <strong>2</strong> si elle est moyenne, <strong>1</strong> si elle est solide.</span></p>
+<p class="form" style="margin-top:10px"><strong>Heures attribuées</strong> = heures disponibles × poids de la matière ÷ somme de tous les poids</p>
+<p style="font-size:13.5px;color:var(--mut)">Ce n'est pas une règle officielle mais une répartition proportionnelle assumée : elle envoie le temps là où il rapporte le plus de points, sans jamais descendre une matière à zéro heure.</p>
+
+<div class="rule"><div class="rt">⚠️ Depuis 2024 : plus de repêchage en délibération</div>
+<p>La règle reste <strong>10/20 de moyenne générale</strong>, mais elle est désormais appliquée <strong>strictement, sans délibération</strong> : les candidats situés entre 8 et 10 ne sont plus rattrapés en conseil. Le taux de réussite au BAC général est tombé de <strong>75,73 % (2023) à 37,26 % (2024)</strong>, la chute frappant surtout les séries littéraires — <strong>6,35 %</strong> en A4 Allemand, <strong>6,90 %</strong> en A4 Espagnol.</p>
+<p>Conséquence sur un planning : les points perdus dans une matière négligée <strong>ne se récupèrent plus en fin d'année</strong>. C'est pourquoi cet outil ne descend jamais une matière à zéro heure, même quand elle est solide ou peu coefficientée — un décrochage tardif y coûterait des points impossibles à rattraper.</p>
+<p class="rn">Chiffres publiés par l'OBC, relayés par la presse nationale. Les modalités de chaque session sont fixées par la circulaire de l'année.</p></div>
+
+<h2>Tenir le planning — pour l'élève et pour le parent</h2>
+<div class="duo">
+  <div><span class="who w1">Pour l'élève</span>
+    <h3>La régularité bat l'intensité, et c'est mesurable</h3>
+    <ul>
+      <li><strong>Six séances de 45 minutes valent mieux qu'une matinée de six heures</strong> : la mémoire consolide entre deux séances, pas pendant.</li>
+      <li><strong>Commence chaque séance par un exercice, pas par la relecture.</strong> Relire donne l'illusion de savoir ; se tromper montre ce qui manque.</li>
+      <li><strong>Garde une trace de tes erreurs</strong> et reprends-les la semaine suivante : c'est le geste qui fait le plus progresser, et le plus négligé.</li>
+      <li><strong>Les deux dernières semaines, passe aux sujets complets chronométrés.</strong> Beaucoup d'élèves savent, mais ne finissent pas l'épreuve.</li>
+    </ul>
+  </div>
+  <div><span class="who w2">Pour le parent</span>
+    <h3>Un planning affiché vaut mieux que dix rappels à l'ordre</h3>
+    <ul>
+      <li><strong>Imprimez-le et affichez-le.</strong> Un engagement visible se discute sur des faits, pas sur des impressions.</li>
+      <li><strong>Vérifiez une chose par semaine</strong> : les heures prévues ont-elles été faites ? Pas « as-tu travaillé ? », mais « montre-moi ce que tu as fait ».</li>
+      <li><strong>Protégez le créneau</strong> plutôt que de le contrôler : pas de courses ni de visites sur les heures de révision annoncées.</li>
+      <li><strong>Ne supprimez pas la matière forte du planning.</strong> C'est souvent celle qui redonne confiance — et une matière abandonnée en cours d'année finit par coûter des points qui ne se rattrapent plus.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>Et ensuite&nbsp;?</h2>
+<p>Pour savoir quelles matières sont réellement faibles, commencez par le <a href="/outils/calcul-moyenne.html">calcul de moyenne et des matières qui coûtent le plus de points</a> ; pour fixer une cible chiffrée par matière, utilisez <a href="/outils/points-manquants.html">quelle note viser</a>. Les méthodes d'épreuve (étude de texte, résumé, dissertation, commentaire) sont détaillées dans <a href="/ressources/">méthodes &amp; examens</a>, et le programme par classe dans <a href="/niveaux/">l'espace niveaux</a>.</p>
+
+<a class="cta" href="https://veritas-school.com">▶ Ouvrir VÉRITAS — annales corrigées, quiz &amp; Prof. Ambassa (IA)
+<small>BEPC · Probatoire · BAC · GCE · corrigés selon les grilles MINESEC</small></a>
+<a class="wa" href="https://wa.me/237697637739?text=Bonjour%20V%C3%89RITAS.%20Je%20voudrais%20un%20plan%20de%20r%C3%A9vision%20pour%20l%27examen." target="_blank" rel="noopener">💬 Faire valider ce planning par un enseignant
+<small>Réponse sous 2 h · jours ouvrés</small></a>
+</article>
+
+<p class="rel"><a href="/outils/">← Tous les outils gratuits</a> · <a href="/niveaux/">Niveaux</a> · <a href="/ressources/">Méthodes &amp; examens</a></p>
+</div>
+<footer>© 2026 Centre VÉRITAS Academy · Douala, Cameroun · <a href="https://veritas-school.com">veritas-school.com</a></footer>
+
+<script>
+var SUGGEST=['Français','Mathématiques','Anglais','Histoire-Géo','SVT','Physique-Chimie','Philosophie','Informatique'];
+function addRow(){
+  var tb=document.getElementById('rows'), i=tb.rows.length;
+  if(i>=14) return;
+  var tr=tb.insertRow();
+  tr.innerHTML='<td><input class="f" placeholder="'+(SUGGEST[i]||('Matière '+(i+1)))+'" aria-label="Matière '+(i+1)+'"></td>'
+   +'<td><select class="f" aria-label="Niveau dans la matière '+(i+1)+'">'
+   +'<option value="3">Faible</option><option value="2" selected>Moyen</option><option value="1">Solide</option></select></td>'
+   +'<td><input class="f" type="number" min="1" max="10" step="1" inputmode="numeric" placeholder="ex. 4" aria-label="Coefficient de la matière '+(i+1)+'"></td>';
+}
+for(var k=0;k<5;k++) addRow();
+
+function plan(){
+  var out=document.getElementById('out');
+  var dv=document.getElementById('date').value;
+  var hrs=parseFloat(document.getElementById('hrs').value);
+  if(!dv){ out.innerHTML='<div class="warn">⚠️ Indiquez la date de l\'examen.</div>'; return; }
+  if(isNaN(hrs)||hrs<=0){ out.innerHTML='<div class="warn">⚠️ Indiquez combien d\'heures par semaine sont réellement disponibles.</div>'; return; }
+
+  var today=new Date(); today.setHours(0,0,0,0);
+  var d=new Date(dv+'T00:00:00');
+  var jours=Math.round((d-today)/86400000);
+  if(jours<0){ out.innerHTML='<div class="warn">⚠️ Cette date est déjà passée. Choisissez la prochaine échéance.</div>'; return; }
+  var semaines=Math.max(1,Math.round(jours/7));
+
+  var tb=document.getElementById('rows'), mats=[], poidsTot=0;
+  for(var i=0;i<tb.rows.length;i++){
+    var c=tb.rows[i].querySelectorAll('input,select');
+    var nom=c[0].value.trim()||c[0].placeholder;
+    var niv=parseFloat(c[1].value)||2;
+    var cf=parseFloat(c[2].value); if(isNaN(cf)||cf<=0) cf=1;
+    if(!c[0].value.trim() && !c[2].value) continue;      // ligne laissée vide
+    var p=cf*niv; poidsTot+=p;
+    mats.push({m:nom.substring(0,28),niv:niv,c:cf,p:p});
+  }
+  if(!mats.length){ out.innerHTML='<div class="warn">⚠️ Renseignez au moins une matière avec son coefficient.</div>'; return; }
+
+  var h='<div class="res"><div style="font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#5b6b85;font-weight:700">Temps restant</div>'
+   +'<div class="big">'+jours+' jour'+(jours>1?'s':'')+'</div>'
+   +'<div style="font-weight:700;color:#142554">soit '+semaines+' semaine'+(semaines>1?'s':'')+' · '
+   +(hrs*semaines).toFixed(0)+' h de révision au total</div>'
+   +'<div class="meta">Répartition pondérée par le coefficient et le niveau déclaré. Aucune matière ne descend à zéro heure : depuis 2024, la barre des 10/20 est appliquée sans délibération, donc un décrochage tardif ne se rattrape plus.</div></div>';
+
+  mats.sort(function(a,b){ return b.p-a.p; });
+  var maxH=hrs*mats[0].p/poidsTot;
+  h+='<table class="alloc"><thead><tr><th>Matière</th><th>Par semaine</th><th>Total</th><th style="width:24%">Part</th></tr></thead><tbody>';
+  mats.forEach(function(x){
+    var hSem=hrs*x.p/poidsTot;
+    var lab=x.niv==3?'faible':(x.niv==2?'moyen':'solide');
+    h+='<tr><td><strong>'+esc(x.m)+'</strong><br><span style="font-size:11.5px;color:#5b6b85">coef '+x.c+' · niveau '+lab+'</span></td>'
+     +'<td>'+fmtH(hSem)+'</td><td>'+fmtH(hSem*semaines)+'</td>'
+     +'<td><div class="bar" style="width:'+Math.max(6,Math.round(hSem/maxH*100))+'%"></div></td></tr>';
+  });
+  h+='</tbody></table>';
+
+  // Découpage en phases : le contenu du travail change à mesure que l'échéance
+  // approche — installer les notions, puis s'entraîner, puis gérer l'épreuve.
+  var p1=Math.max(1,Math.round(semaines*0.5)), p3=(semaines>=4?2:(semaines>=2?1:0)), p2=Math.max(0,semaines-p1-p3);
+  h+='<div class="phase"><b>Phase 1 — '+p1+' semaine'+(p1>1?'s':'')+' : installer les notions.</b> Cours + exercices d\'application, matière par matière. On cherche à comprendre, pas encore à aller vite.</div>';
+  if(p2>0) h+='<div class="phase"><b>Phase 2 — '+p2+' semaine'+(p2>1?'s':'')+' : s\'entraîner.</b> Exercices sans le cours sous les yeux, reprise systématique des erreurs de la phase 1.</div>';
+  if(p3>0) h+='<div class="phase"><b>Phase 3 — '+p3+' semaine'+(p3>1?'s':'')+' : conditions d\'examen.</b> Sujets complets chronométrés, dans la durée réelle de l\'épreuve. On travaille la gestion du temps et la présentation de la copie.</div>';
+  else h+='<div class="phase"><b>Échéance très proche.</b> Deux gestes seulement : un sujet complet chronométré par matière faible, et la reprise de vos erreurs. Pas de nouvelle notion à ce stade.</div>';
+
+  h+='<div class="disc"><strong>Répartition indicative.</strong> Elle est proportionnelle au coefficient et au niveau que vous avez déclaré ; elle ne remplace pas le plan de travail donné par les enseignants de l\'établissement.</div>';
+  out.innerHTML=h;
+}
+function fmtH(x){
+  var m=Math.round(x*60), hh=Math.floor(m/60), mm=m%60;
+  if(hh<=0) return mm+' min';
+  return hh+' h'+(mm?(' '+(mm<10?'0':'')+mm):'');
+}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
+</script>
+</body></html>

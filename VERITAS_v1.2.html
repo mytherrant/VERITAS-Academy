@@ -39,7 +39,7 @@
      ════════════════════════════════════════════════════════════ -->
 <title>VÉRITAS Academy — Centre d'Excellence Scolaire à Douala, Cameroun</title>
 <meta name="description" content="Centre VÉRITAS — Établissement d'excellence et de soutien scolaire à Douala (Cameroun). Cours de la 6ème à la Terminale, préparation BEPC & BAC, e-learning, classes virtuelles, boutique de manuels. Programmes MINESEC, enseignants qualifiés, suivi personnalisé.">
-<meta name="keywords" content="centre de répétitions Douala, école Cameroun, soutien scolaire Cameroun, BEPC Cameroun, BAC Cameroun, MINESEC, cours en ligne Cameroun, e-learning lycée, répétition collège, classes virtuelles, manuels scolaires Cameroun">
+<meta name="keywords" content="soutien scolaire Douala, centre d'excellence scolaire Cameroun, cours de soutien Douala, BEPC Cameroun, Probatoire, BAC Cameroun, GCE, MINESEC, cours en ligne Cameroun, e-learning lycée, classes virtuelles, manuels scolaires Cameroun">
 <meta name="author" content="Centre VÉRITAS Academy">
 <meta name="robots" content="index, follow, noai, noimageai, max-image-preview:large, max-snippet:-1">
 <meta name="googlebot" content="index, follow, noai, noimageai">
@@ -793,6 +793,11 @@ setInterval(_refreshCitation,15000);
 
   <!-- 3. Boutique (entrée directe — service phare) -->
   <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#856404;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Boutique"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-shop"/></svg> Boutique</button>
+
+  <!-- 3bis. Espace Parents (v1.13) — entrée de premier niveau assumée : le parent
+       est celui qui paie, et c'est le seul visiteur qui n'a aucune raison de
+       fouiller les menus. Il doit trouver sa page depuis l'accueil. -->
+  <button class="vnav-btn" onclick="vShowSec('parents',this)" style="background:linear-gradient(135deg,rgba(16,185,129,.16),rgba(16,185,129,.05));color:#0F7B4F;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Espace Parents"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-users"/></svg> Parents</button>
 
   <!-- 4. 🤖 IA & Ambassa (groupe) -->
   <div class="vnav-group">
@@ -2545,7 +2550,7 @@ html{scroll-behavior:smooth}
       // === SECTION SOMBRE PREMIUM ===
       // CDN Microsoft Fluent 3D Emoji — pictogrammes haute résolution
       +'<div class="vgz-dark-section">'
-      +'<div class="acc-head"><div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-handshake"/></svg></span> Tu es...</div><div class="acc-sub">Une plateforme. Un accès personnalisé pour chaque rôle.</div></div>'
+      +'<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-handshake"/></svg></span> Tu es...</h2><div class="acc-sub">Une plateforme. Un accès personnalisé pour chaque rôle.</div></div>'
       +'<div class="vgz-roles v-reveal">'
         +'<div class="vgz-role r-eleve" onclick="showLogin(\'eleve\')">'
           +'<div class="vgz-role-glow"></div>'
@@ -2608,7 +2613,7 @@ html{scroll-behavior:smooth}
       // === MARQUEE PARTENAIRES retiré (v1.2.3) : décoratif → allège l'accueil. ===
 
       // === TÉMOIGNAGES — en-tête encadré (.acc-head navy) + 6 témoignages variés ===
-      +'<div class="acc-head" style="margin-top:32px"><div class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-users"/></svg></span> Ils nous font confiance</div><div class="acc-sub">Plus de 500 familles, enseignants et partenaires ont choisi VÉRITAS</div></div>'
+      +'<div class="acc-head" style="margin-top:32px"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-users"/></svg></span> Ils nous font confiance</h2><div class="acc-sub">Plus de 500 familles, enseignants et partenaires ont choisi VÉRITAS</div></div>'
       +'<div class="vgz-testis v-reveal">'
         +'<div class="vgz-testi">'
           +'<div class="vgz-testi-stars">★★★★★</div>'

@@ -1,0 +1,4 @@
+Note de travail (non déployée) — feuille de style commune des pages outils/.
+Les pages sont volontairement AUTONOMES (CSS et JS en ligne) : ce sont des pages
+d'atterrissage Google, elles ne doivent jamais charger app.js (3,4 Mo).
+Toute modification de rendu doit être reportée dans les 4 fichiers .html.

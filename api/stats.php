@@ -14,6 +14,7 @@
  * pour dédupliquer les visites).
  */
 declare(strict_types=1);
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
 
 @include_once __DIR__ . '/payment_config.php';
 if (!defined('API_SECRET')) define('API_SECRET', bin2hex(random_bytes(32))); // fail-closed
@@ -53,7 +54,11 @@ $hits[] = $now;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $in = json_decode((string) file_get_contents('php://input'), true) ?: [];
     $ev = preg_replace('/[^a-z_]/', '', strtolower((string) ($in['ev'] ?? '')));
-    $ALLOWED = ['visit', 'signup', 'ia_try', 'sub_click', 'pay_init'];
+    // v1.13 : wa_click = clic sur le bouton WhatsApp (meta = page d'origine),
+    // tool_use = outil gratuit utilisé, parents_view = consultation de l'Espace
+    // Parents (meta = onglet). Ces trois-là mesurent les portes d'entrée
+    // ajoutées côté marketing ; sans eux le tunnel s'arrête à la visite.
+    $ALLOWED = ['visit', 'signup', 'ia_try', 'sub_click', 'pay_init', 'wa_click', 'tool_use', 'parents_view'];
     if (!in_array($ev, $ALLOWED, true)) { http_response_code(400); echo '{"ok":false}'; exit; }
     $line = json_encode([
         't'  => date('Y-m-d'),

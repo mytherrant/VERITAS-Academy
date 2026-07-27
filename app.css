@@ -3938,6 +3938,12 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 /* v1.2.4 — TITRES DE SECTION style MTN MoMo : titre navy bold (sans fond),
    icône or compacte à gauche, filet doré court sous le titre, sous-titre sobre.
    Le sélecteur reste `.acc-pill` pour compatibilité avec le markup existant. */
+/* v1.12 — les titres de section sont désormais de VRAIS h1/h2 (avant : des div,
+   d'où 0 titre dans tout le document → navigation au lecteur d'écran impossible
+   et page muette pour les moteurs). La classe pilote déjà taille et graisse ;
+   on neutralise seulement les marges par défaut du navigateur pour que le rendu
+   reste identique au pixel près. */
+h1.acc-pill,h2.acc-pill,h3.acc-pill{margin:0}
 .acc-pill{display:inline-flex;align-items:center;gap:11px;
   background:transparent;color:var(--acc-navy);
   font-family:'Plus Jakarta Sans','Montserrat',sans-serif;font-weight:800;
@@ -5450,3 +5456,234 @@ html{ scroll-behavior:auto; }
 }
 #VISITOR .acc-head .acc-pill .ic::after, #VISITOR .acc-head .acc-pill .ic::before{ display:none !important; content:none !important; }
 #VISITOR .acc-head .acc-pill-ico{ stroke:#FFC93C !important; width:24px !important; height:24px !important; filter:none !important; }
+
+/* ════════════════════════════════════════════════════════════════════
+   v1.12 — ÉCRANS INCURVÉS / À ENCOCHE : marge de sécurité latérale
+   ════════════════════════════════════════════════════════════════════
+   Symptôme signalé : sur téléphone, le contenu paraissait « rogné » par un
+   bord arrondi — libellés et badges (GRATUIT, Lancer) coupés à gauche et à
+   droite. Cause : la page déclare `viewport-fit=cover` (elle s'étend donc
+   JUSQUE dans la zone courbe de la dalle), alors qu'aucune `safe-area-inset`
+   n'était respectée et que les gouttières mobiles tombaient à 8 px. Le
+   contenu atterrissait pile dans la courbure de l'écran.
+
+   Deux garde-fous cumulés, car ils couvrent des cas différents :
+     • env(safe-area-inset-*) → iPhone à encoche/Dynamic Island, qui
+       renseigne correctement l'inset ;
+     • un plancher en dur (14-16 px) → la plupart des Android à bords
+       incurvés renvoient un inset de 0 : sans ce plancher, la correction
+       serait sans effet sur la majorité du parc au Cameroun.
+
+   `max()` garantit qu'on ne RÉDUIT jamais une gouttière existante.
+   Seuls padding-left/right sont touchés : les rythmes verticaux et les
+   fonds pleine largeur (bandeaux navy) restent intacts.
+
+   ⚠️ `!important` est nécessaire ici, et uniquement ici : les règles
+   mobiles existantes de `.vsec` sont elles-mêmes en `!important`. Sans lui,
+   ce bloc est chargé mais perd la cascade — vérifié dans le navigateur.
+*/
+@media (max-width:899px){
+  .vsec{
+    padding-left:max(16px, env(safe-area-inset-left)) !important;
+    padding-right:max(16px, env(safe-area-inset-right)) !important;
+  }
+  /* L'accueil (.acc-wrap) est volontairement à 0 : ses bandeaux navy vont
+     d'un bord à l'autre. On lui donne le strict minimum pour sortir de la
+     courbure, sans lui rendre les 16 px des autres sections. */
+  #VISITOR #vContent .vsec.acc-wrap{
+    padding-left:max(12px, env(safe-area-inset-left)) !important;
+    padding-right:max(12px, env(safe-area-inset-right)) !important;
+  }
+  /* Barres du haut : sélecteurs portés à la spécificité d'ID, sinon
+     `#VISITOR .vnav` (10px !important) l'emporte et la marge est ignorée. */
+  .vnav, #VISITOR .vnav{
+    padding-left:max(12px, env(safe-area-inset-left)) !important;
+    padding-right:max(12px, env(safe-area-inset-right)) !important;
+  }
+  .vlogin-bar, #VISITOR .vlogin-bar{
+    padding-left:max(14px, env(safe-area-inset-left)) !important;
+    padding-right:max(14px, env(safe-area-inset-right)) !important;
+  }
+}
+/* Sous 420 px, la règle mobile la plus étroite descendait à 8 px : on la
+   ramène au même plancher, sinon elle reprendrait le dessus. */
+@media (max-width:420px){
+  .vsec{
+    padding-left:max(14px, env(safe-area-inset-left)) !important;
+    padding-right:max(14px, env(safe-area-inset-right)) !important;
+  }
+}
+/* Barre de défilement et pied de page collés au bas : éviter l'indicateur
+   d'accueil (barre horizontale) des téléphones sans bouton physique. */
+@supports (padding: env(safe-area-inset-bottom)){
+  body{ padding-bottom:env(safe-area-inset-bottom); }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   v1.13 — PACK D'EFFETS « vfx » + ESPACE PARENTS + APPUI RELATION CLIENT
+   ════════════════════════════════════════════════════════════════════
+   Inspiration : audit du site lefisk.cm (cabinet fiscal camerounais qui
+   convertit très bien). Effets REPRIS mais RÉ-ÉCRITS : leurs originaux
+   animent `background-position` et `box-shadow`, qui repeignent à chaque
+   frame. Ici tout est en `transform`/`opacity` — composité par le GPU,
+   donc tenable sur les téléphones d'entrée de gamme du parc camerounais.
+
+   Le garde-fou `prefers-reduced-motion` global (≈ ligne 188) neutralise
+   déjà ces animations : chaque keyframe se termine donc sur un état de
+   repos lisible (halo à opacité basse, reflet hors cadre, anneau à 0).
+   ════════════════════════════════════════════════════════════════════ */
+
+@keyframes vfxFloat{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-9px,0)}}
+@keyframes vfxOrb{0%,100%{transform:translate3d(0,0,0) scale(1);opacity:.42}
+  50%{transform:translate3d(0,-16px,0) scale(1.14);opacity:.66}}
+@keyframes vfxShine{0%{transform:translate3d(-140%,0,0)}60%,100%{transform:translate3d(140%,0,0)}}
+@keyframes vfxRing{0%{transform:scale(.7);opacity:.75}100%{transform:scale(2.2);opacity:0}}
+@keyframes vfxProofIn{from{transform:translate3d(0,16px,0);opacity:0}to{transform:translate3d(0,0,0);opacity:1}}
+@keyframes vfxFabIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ── Lévitation douce : cartes autonomes uniquement. Ne PAS l'appliquer à un
+   élément posé dans une grille `align-items:stretch` à côté d'un voisin fixe :
+   le décalage se lit alors comme un défaut d'alignement, pas comme un effet. */
+.vfx-float{animation:vfxFloat 7s ease-in-out infinite;will-change:transform}
+.vfx-float.d1{animation-duration:8.5s;animation-delay:-2s}
+.vfx-float.d2{animation-duration:9.5s;animation-delay:-4s}
+
+/* ── Halos or/navy derrière un bandeau sombre. Le parent doit être
+   `position:relative;overflow:hidden` (c'est le cas de .acc-head). */
+.vfx-orbs::after{content:"";position:absolute;z-index:0;pointer-events:none;
+  width:230px;height:230px;right:-70px;top:-110px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,201,60,.30) 0%,rgba(255,201,60,.07) 45%,transparent 70%);
+  filter:blur(18px);animation:vfxOrb 11s ease-in-out infinite;will-change:transform,opacity}
+.vfx-orbs>*{position:relative;z-index:1}
+
+/* ── Reflet or qui balaie un titre ou un CTA. L'overlay est un pseudo-élément
+   glissé en translateX : aucun repaint du texte, contrairement au dégradé
+   animé de l'original. */
+.vfx-shine{position:relative;overflow:hidden}
+.vfx-shine::before{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(100deg,transparent 38%,rgba(255,201,60,.42) 50%,transparent 62%);
+  animation:vfxShine 5.5s ease-in-out infinite;will-change:transform}
+
+/* ── Pastille « en direct » : anneau qui se dilate, sans ombre animée. */
+.vfx-live{position:relative}
+.vfx-live::after{content:"";position:absolute;inset:-4px;border-radius:50%;
+  border:2px solid var(--vfx-live-c,rgba(255,201,60,.75));animation:vfxRing 2.4s ease-out infinite;
+  pointer-events:none;will-change:transform,opacity}
+/* La pastille des actualités est verte : l'anneau prend sa couleur, sinon on
+   obtient un halo doré autour d'un point vert — lu comme un bug d'affichage. */
+.acc-news-hd .dot.vfx-live{--vfx-live-c:rgba(52,211,153,.80)}
+
+/* ── Verre dépoli : réservé aux cartes posées SUR le navy (sinon le flou n'a
+   rien à flouter et la carte paraît simplement délavée). */
+.vfx-glass{background:rgba(255,255,255,.08);border:1px solid rgba(255,201,60,.22);
+  border-radius:16px;backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2);
+  box-shadow:0 10px 30px rgba(13,27,62,.28),inset 0 1px 0 rgba(255,255,255,.10)}
+
+/* ── CTA or : lueur teintée FIXE (pas d'animation d'ombre) + ressort au survol. */
+.vfx-cta{background:linear-gradient(135deg,#FFC93C,#E8A413);color:#142554;border:none;
+  border-radius:99px;padding:13px 26px;font-weight:800;font-size:14px;cursor:pointer;
+  box-shadow:0 8px 24px rgba(232,164,19,.34);
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+.vfx-cta:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 12px 30px rgba(232,164,19,.46)}
+
+/* ════════ BOUTON FLOTTANT WHATSAPP (promesse de délai chiffrée) ════════
+   La promesse « réponse sous 2 h » est le seul élément de la page qui engage
+   VÉRITAS sur un délai : elle rassure d'autant plus qu'elle est tenue. */
+.vfx-fab{position:fixed;right:16px;bottom:18px;z-index:8700;
+  display:inline-flex;align-items:center;gap:10px;
+  background:#25D366;color:#08281A;border:none;border-radius:99px;
+  padding:11px 18px 11px 13px;font-family:Poppins,Montserrat,sans-serif;
+  font-weight:800;font-size:13px;cursor:pointer;text-decoration:none;
+  box-shadow:0 10px 28px rgba(37,211,102,.40);
+  animation:vfxFabIn .45s cubic-bezier(.16,1,.3,1) both;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+.vfx-fab:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 14px 34px rgba(37,211,102,.52)}
+.vfx-fab .ic{width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.85);
+  display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto}
+.vfx-fab .tx{display:flex;flex-direction:column;line-height:1.15;text-align:left}
+.vfx-fab .tx small{font-weight:600;font-size:10.5px;opacity:.78}
+/* Le bandeau sticky d'essai IA est centré en bas : on lève le FAB quand il est
+   là, sinon les deux se chevauchent sur un écran de 360 px. */
+body.has-sticky-cta .vfx-fab{bottom:82px}
+@media (max-width:640px){
+  .vfx-fab{right:12px;padding:10px 15px 10px 11px;font-size:12px}
+  .vfx-fab .tx small{display:none}
+}
+
+/* ════════ FLUX DE PREUVE SOCIALE (événements RÉELS uniquement) ════════
+   Voir _vtProofFeed() dans app.js : aucune activité inventée. Desktop
+   seulement — sur mobile la place du bas est déjà prise (FAB + sticky CTA). */
+.vfx-proof{position:fixed;left:18px;bottom:18px;z-index:8600;max-width:322px;
+  display:none;animation:vfxProofIn .5s cubic-bezier(.16,1,.3,1) both}
+@media (min-width:1000px){ .vfx-proof.on{display:block} }
+.vfx-proof-card{display:flex;align-items:flex-start;gap:11px;
+  background:#fff;border:1px solid rgba(20,37,84,.10);border-left:3px solid #FFC93C;
+  border-radius:14px;padding:11px 13px;box-shadow:0 12px 32px rgba(13,27,62,.16)}
+.vfx-proof-ic{width:32px;height:32px;border-radius:50%;flex:0 0 auto;
+  background:linear-gradient(135deg,rgba(255,201,60,.30),rgba(255,201,60,.10));
+  display:inline-flex;align-items:center;justify-content:center;font-size:16px}
+.vfx-proof-tx{font-family:Poppins,sans-serif;font-size:12.5px;color:#142554;line-height:1.4}
+.vfx-proof-tx b{font-weight:800}
+.vfx-proof-when{font-size:10.5px;color:#6B7280;margin-top:3px;
+  display:flex;align-items:center;gap:6px}
+.vfx-proof-x{margin-left:auto;background:none;border:none;color:#9CA3AF;
+  font-size:14px;cursor:pointer;padding:0 2px;line-height:1;flex:0 0 auto}
+.vfx-proof-x:hover{color:#142554}
+
+/* ════════════════════ ESPACE PARENTS ════════════════════ */
+.vp-hero{background:linear-gradient(135deg,#0D1B3E,#142554 55%,#1B2F63);
+  border:1px solid rgba(255,201,60,.22);border-radius:20px;
+  padding:30px 26px;position:relative;overflow:hidden;margin-bottom:22px}
+/* h1 ET h2 : le bandeau d'ouverture porte le h1 de la page (une page sans h1
+   est muette pour un lecteur d'écran comme pour Google), les bandeaux suivants
+   restent en h2 avec le même rendu. */
+.vp-hero h1,.vp-hero h2{font-family:'Plus Jakarta Sans','Montserrat',sans-serif;color:#fff;
+  font-size:25px;font-weight:800;line-height:1.2;margin:0 0 10px;letter-spacing:-.01em}
+.vp-hero p{font-family:'Crimson Pro','Libre Baskerville',Georgia,serif;font-style:italic;
+  color:rgba(255,201,60,.90);font-size:15px;line-height:1.5;margin:0;max-width:600px}
+.vp-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 20px}
+.vp-tab{background:#fff;border:1.5px solid rgba(20,37,84,.14);border-radius:99px;
+  padding:10px 18px;font-family:Poppins,sans-serif;font-size:13px;font-weight:700;
+  color:#142554;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s,border-color .2s}
+.vp-tab:hover{transform:translateY(-2px)}
+.vp-tab.on{background:linear-gradient(135deg,#142554,#1B2F63);color:#FFC93C;border-color:transparent}
+/* Bouton secondaire « fantôme ». Classe distincte de .vp-tab, bien que le
+   rendu soit proche : réutiliser .vp-tab pour un bouton qui n'est pas un onglet
+   piège quiconque recherchera ensuite les onglets dans le DOM. */
+.vfx-ghost{background:rgba(255,255,255,.10);color:#FFC93C;
+  border:1.5px solid rgba(255,201,60,.34);border-radius:99px;padding:10px 18px;
+  font-family:Poppins,sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s}
+.vfx-ghost:hover{transform:translateY(-2px);background:rgba(255,255,255,.18)}
+.vp-fear{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid rgba(20,37,84,.10);
+  border-radius:14px;overflow:hidden;background:#fff}
+.vp-fear-h{background:#F4F6FB;font-family:Poppins,sans-serif;font-size:11px;font-weight:800;
+  letter-spacing:.08em;text-transform:uppercase;color:#5A6784;padding:10px 14px}
+.vp-fear-q,.vp-fear-a{padding:13px 14px;border-top:1px solid rgba(20,37,84,.07);font-size:13.5px;line-height:1.5}
+.vp-fear-q{font-family:'Crimson Pro',Georgia,serif;font-style:italic;color:#1F2937;background:#FCFBF8}
+.vp-fear-a{font-family:Poppins,sans-serif;color:#142554}
+.vp-fear-a b{color:#0F7B4F}
+@media (max-width:720px){
+  .vp-fear{grid-template-columns:1fr}
+  .vp-fear-h:nth-child(2){display:none}
+  .vp-fear-q{border-top:2px solid rgba(255,201,60,.55)}
+  .vp-fear-a{border-top:none;padding-top:0}
+}
+.vp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:14px;margin:16px 0}
+.vp-card{background:#fff;border:1px solid rgba(20,37,84,.10);border-radius:16px;padding:17px;
+  box-shadow:0 4px 16px rgba(13,27,62,.07)}
+.vp-card h4{font-family:'Plus Jakarta Sans',Montserrat,sans-serif;font-size:14.5px;font-weight:800;
+  color:#142554;margin:0 0 7px}
+.vp-card p{font-size:12.5px;color:#4B5563;line-height:1.5;margin:0 0 11px}
+.vp-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(15,123,79,.10);
+  color:#0F7B4F;border-radius:99px;padding:4px 10px;font-size:11px;font-weight:800;
+  font-family:Poppins,sans-serif}
+.vp-tool{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
+  background:#fff;border:1.5px solid rgba(20,37,84,.12);border-radius:14px;padding:13px;
+  cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),border-color .2s}
+.vp-tool:hover{transform:translateY(-2px);border-color:rgba(255,201,60,.75)}
+.vp-tool .ic{width:38px;height:38px;border-radius:11px;flex:0 0 auto;font-size:19px;
+  background:linear-gradient(135deg,rgba(255,201,60,.26),rgba(255,201,60,.08));
+  display:inline-flex;align-items:center;justify-content:center}
+.vp-tool .tt{font-family:Poppins,sans-serif;font-weight:800;font-size:13px;color:#142554}
+.vp-tool .ss{font-size:11.5px;color:#6B7280;margin-top:2px}
