@@ -164,7 +164,11 @@ Options -Indexes
 # 7. SEO — pages d'erreur et MIME types
 # ─────────────────────────────────────────────────────────
 ErrorDocument 404 /index.html
-ErrorDocument 403 /index.html
+# 403 → page dédiée LÉGÈRE (≈1,5 Ko) et non indexée.
+# Avant : /index.html, soit l'application entière (~444 Ko) renvoyée à CHAQUE
+# accès refusé — donc à chaque sonde de robot sur /api/config.php, /data/…
+# Gaspillage de bande passante sur mutualisé, et l'app servie à un scanner.
+ErrorDocument 403 /403.html
 
 AddType application/manifest+json .webmanifest
 AddType image/webp .webp

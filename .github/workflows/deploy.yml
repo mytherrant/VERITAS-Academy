@@ -13,6 +13,8 @@ on:
       - 'VERITAS_Promo_Video.html'
       - 'reset.html'
       - 'admin-validation.html'
+      - 'manuels.html'
+      - '403.html'
       - 'index.php'
       - 'app.css'
       - 'app.js'
@@ -24,8 +26,10 @@ on:
       - 'ressources/**'
       - 'decouvrir/**'
       - 'niveaux/**'
+      - 'outils/**'
       - 'cours/**'
       - 'Logo détouré.png'
+      - 'og-image.jpg'
       - 'ambassa-avatar.jpg'
       - 'ambassa-avatar.png'
       - 'sitemap.xml'
@@ -112,6 +116,13 @@ jobs:
           # Logo
           if [ -f "Logo détouré.png" ]; then cp "Logo détouré.png" deploy/; fi
 
+          # ── Bannière de partage (og:image) ──────────────────────
+          # <meta property="og:image"> pointait vers og-image.jpg… qui n'était
+          # PAS déployé (404). Résultat : aucun aperçu lors d'un partage
+          # WhatsApp/Facebook — sur un site dont l'acquisition passe par le
+          # partage. Ne pas retirer.
+          if [ -f og-image.jpg ]; then cp og-image.jpg deploy/; echo "  ✓ og-image.jpg (aperçu de partage)"; fi
+
           # Avatar IA Ambassa (portrait — .png ou .jpg selon disponibilité)
           if [ -f "ambassa-avatar.png" ]; then cp "ambassa-avatar.png" deploy/; echo "  ✓ ambassa-avatar.png"; fi
           if [ -f "ambassa-avatar.jpg" ]; then cp "ambassa-avatar.jpg" deploy/; echo "  ✓ ambassa-avatar.jpg"; fi
@@ -137,11 +148,31 @@ jobs:
           if [ -d ressources ]; then cp -r ressources deploy/ && echo "  ✓ ressources/ ($(ls ressources | wc -l) fichiers)"; fi
           if [ -d decouvrir ]; then cp -r decouvrir deploy/ && echo "  ✓ decouvrir/ ($(ls decouvrir | wc -l) fichiers)"; fi
           if [ -d niveaux ]; then cp -r niveaux deploy/ && echo "  ✓ niveaux/ ($(ls niveaux | wc -l) fichiers)"; fi
+          # ── Outils gratuits (calculateurs autonomes = aimants SEO) ──
+          # _style.txt est une note de travail : elle reste hors du déploiement.
+          if [ -d outils ]; then
+            cp -r outils deploy/ && rm -f deploy/outils/_style.txt
+            echo "  ✓ outils/ ($(ls outils/*.html outils/*.xml 2>/dev/null | wc -l) fichiers publics)"
+          fi
 
           # ── Vidéo promotionnelle ───────────────────────────────
           if [ -f VERITAS_Promo_Video.html ]; then
             cp VERITAS_Promo_Video.html deploy/
             echo "  ✓ VERITAS_Promo_Video.html"
+          fi
+
+          # ── Page d'erreur 403 dédiée (cible de ErrorDocument) ───
+          # Sans elle, .htaccess pointerait vers un fichier absent et Apache
+          # retomberait sur sa page par défaut.
+          if [ -f 403.html ]; then cp 403.html deploy/; echo "  ✓ 403.html"; fi
+
+          # ── Page des corrigés des manuels (manuels.html) ────────
+          # ⚠️ Les QR codes IMPRIMÉS dans les manuels 1er cycle pointent ici.
+          # Le fichier n'était pas déployé → chaque élève scannant son manuel
+          # tombait sur une 404. Ne pas retirer de cette liste.
+          if [ -f manuels.html ]; then
+            cp manuels.html deploy/
+            echo "  ✓ manuels.html (cible des QR imprimés)"
           fi
 
           # ── Page de réparation d'urgence (reset.html) ──────────
@@ -172,6 +203,7 @@ jobs:
             api/ia_proxy.php \
             api/rag.php \
             api/student_data.php \
+            api/_json_boot.php \
             api/_auth_lib.php \
             api/content.php \
             api/migrate_protected.php \

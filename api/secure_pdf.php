@@ -32,6 +32,7 @@
  *   POST {id, page|meta, login, password}            → repli auth sans token
  */
 declare(strict_types=1);
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
 ob_start();
 require_once __DIR__ . '/_auth_lib.php';
 

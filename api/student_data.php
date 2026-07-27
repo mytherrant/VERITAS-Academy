@@ -31,6 +31,7 @@
  *   whitelist d'actions, jamais de mot de passe renvoyé.
  */
 declare(strict_types=1);
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
 
 require_once __DIR__ . '/config_sync.php'; // CORS allowlist + préflight OPTIONS
 require_once __DIR__ . '/_auth_lib.php';    // S3 v1.2.x : auth (bcrypt+S256), token, droits contenu

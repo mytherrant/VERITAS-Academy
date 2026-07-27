@@ -17,6 +17,7 @@
  *        simuler sans rien déplacer ni écrire.
  */
 declare(strict_types=1);
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
 
 require_once __DIR__ . '/config_sync.php'; // CORS + requireAuth + Content-Type JSON
 require_once __DIR__ . '/_auth_lib.php';   // vrt_db_file()

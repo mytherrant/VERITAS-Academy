@@ -26,6 +26,7 @@
  *      (hôte/base/user sont publics et fixés ci-dessous ; seul le mot de passe est secret.)
  */
 declare(strict_types=1);
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
 
 require_once __DIR__ . '/config_sync.php'; // CORS allowlist + OPTIONS + requireAuth() + jsonResponse()
 

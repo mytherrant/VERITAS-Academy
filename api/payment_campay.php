@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
 // ============================================================
 // VÉRITAS — Intégration CamPay (agrégateur MTN MoMo + Orange Money, Cameroun)
 // © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
@@ -173,6 +174,49 @@ function campayInitRateLimit($stateDir) {
     }
     $hits[] = $now;
     @file_put_contents($f, json_encode($hits), LOCK_EX);
+}
+
+// ════════════════════════════════════════════════════════════
+// 0. CONFIG — sonde de capacité PUBLIQUE (aucun secret exposé)
+// ════════════════════════════════════════════════════════════
+// Permet au frontend de savoir SEUL si l'encaissement automatique est
+// réellement opérationnel, au lieu de dépendre d'une case à cocher admin qui
+// se désynchronise du serveur. Conséquence voulue : le jour où les vraies
+// clés CamPay sont posées dans payment_config.php, le paiement automatique
+// s'active de lui-même — sans redéploiement ni intervention dans l'app.
+//
+// On ne renvoie QUE des booléens et un mode : jamais un identifiant, jamais
+// une clé, jamais un jeton.
+if ($action === 'config' && ($method === 'GET' || $method === 'POST')) {
+    $hasPerm = defined('CAMPAY_PERMANENT_TOKEN') && CAMPAY_PERMANENT_TOKEN !== ''
+               && strpos(CAMPAY_PERMANENT_TOKEN, 'À_REMPLIR') === false;
+    $hasCred = defined('CAMPAY_USERNAME') && defined('CAMPAY_PASSWORD')
+               && CAMPAY_USERNAME !== '' && strpos(CAMPAY_USERNAME, 'À_REMPLIR') === false
+               && CAMPAY_PASSWORD !== '' && strpos(CAMPAY_PASSWORD, 'À_REMPLIR') === false;
+    $configured = ($hasPerm || $hasCred);
+    $base       = campayBase();
+    $isDemo     = (stripos($base, 'demo.') !== false);
+    $hasPublic  = defined('CAMPAY_PUBLIC_INIT') && CAMPAY_PUBLIC_INIT !== '';
+
+    jsonResp([
+        'ok'         => true,
+        'configured' => $configured,
+        // 'demo' = bac à sable CamPay (aucun débit réel) ; 'live' = production.
+        'mode'       => $isDemo ? 'demo' : 'live',
+        // Un paiement en libre-service exige AUSSI un jeton public côté serveur.
+        'selfService' => ($configured && $hasPublic),
+        // Encaissement automatique réellement utilisable par un client final.
+        'canCollect' => ($configured && !$isDemo && $hasPublic),
+        'operators'  => ['MTN', 'ORANGE'],
+        // Message prêt à afficher quand l'automatique n'est pas disponible.
+        'reason'     => $configured
+            ? ($isDemo
+                ? 'CamPay est en mode démonstration (aucun débit réel) — basculez CAMPAY_API_BASE sur la production.'
+                : (!$hasPublic
+                    ? 'CamPay est configuré mais le jeton public d\'initiation (CAMPAY_PUBLIC_INIT) est absent.'
+                    : ''))
+            : 'En attente des identifiants CamPay — le paiement manuel reste disponible.',
+    ]);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -715,7 +759,17 @@ function campayRequireConfig() {
     $hasCred = defined('CAMPAY_USERNAME') && defined('CAMPAY_PASSWORD')
                && CAMPAY_USERNAME !== '' && strpos(CAMPAY_USERNAME, 'À_REMPLIR') === false;
     if (!$hasPerm && !$hasCred) {
-        jsonResp(['error' => 'CamPay non configuré — renseignez CAMPAY_USERNAME/CAMPAY_PASSWORD (ou CAMPAY_PERMANENT_TOKEN) dans api/payment_config.php'], 503);
+        // Message DESTINÉ AU CLIENT FINAL : il ne doit ni l'inquiéter ni le
+        // laisser sans issue. Le détail technique part dans le journal, pas à
+        // l'écran (et surtout pas le nom des constantes, dépôt public).
+        @file_put_contents(__DIR__ . '/data/_security_log.txt',
+            date('c') . " [CAMPAY_NOT_CONFIGURED] identifiants absents — renseignez CAMPAY_USERNAME/CAMPAY_PASSWORD"
+            . " (ou CAMPAY_PERMANENT_TOKEN) dans api/payment_config.php\n", FILE_APPEND);
+        jsonResp([
+            'error'      => 'Le paiement automatique n\'est pas encore activé. Utilisez MTN MoMo, Orange Money ou le virement ci-dessous : votre accès sera validé par le centre.',
+            'code'       => 'CAMPAY_NOT_CONFIGURED',
+            'fallback'   => 'manual',
+        ], 503);
     }
 }
 

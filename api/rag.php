@@ -34,6 +34,7 @@
  */
 
 declare(strict_types=1);
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: public, max-age=600');  // cache navigateur 10 min
 // v1.2.2 : allowlist réelle (le code reflétait toute origine malgré le commentaire).

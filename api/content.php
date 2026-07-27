@@ -29,6 +29,7 @@
  *   ne sont PAS diffusables ici : migrer le média vers un fichier serveur.
  */
 declare(strict_types=1);
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
 
 // Tampon défensif : _auth_lib inclut payment_config.php, qui émet des en-têtes
 // (et pourrait émettre un caractère parasite, ex. un saut de ligne après la balise PHP fermante).

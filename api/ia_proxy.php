@@ -21,6 +21,7 @@
  */
 
 declare(strict_types=1);
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 // 🔐 v1.2.2 : CORS en allowlist (ne plus refléter aveuglément l'origine →
@@ -54,6 +55,17 @@ $sysPrompt = $body['sysPrompt'] ?? '';
 $ragContext = $body['ragContext'] ?? '';
 $userId    = $body['userId'] ?? '';
 $userPlan  = strtolower($body['plan'] ?? 'anon');
+
+// ── Contenu ÉDITORIAL partagé (v1.12) ──────────────────────────────────
+// Certains textes ne sont pas une réponse à un utilisateur : ils sont les MÊMES
+// pour tout le site sur une journée (analyse du « Passage du jour »). Avant, ce
+// texte était demandé avec userId='pdj' — une clé de quota COMMUNE plafonnée au
+// palier « anon » (2/jour) : seuls les 2 premiers visiteurs de la journée
+// voyaient l'analyse, tous les autres tombaient sur le repli factuel.
+// On les traite désormais comme une PUBLICATION : générée une fois, mise en
+// cache pour la journée, servie à tout le monde sans décompte de quota.
+$sharedKey = preg_replace('/[^a-z0-9_]/i', '', (string) ($body['shared'] ?? ''));
+$isShared  = ($sharedKey !== '');
 $tier      = $body['tier'] ?? 'free';  // pour stats
 
 // ── v1.2.2 : SOCLE DE SPÉCIALISATION MINESEC ────────────────────────────
@@ -160,6 +172,42 @@ if ($cachedAnswer !== null) {
     exit;
 }
 
+// ── 4ante. 📰 CACHE ÉDITORIAL PARTAGÉ (v1.12) ───────────────────────────
+// Une seule génération par (clé éditoriale + contenu + jour) ; tous les visiteurs
+// suivants lisent le même texte, instantanément et sans consommer de quota.
+$sharedFile = '';
+if ($isShared) {
+    $sharedDir = $rateDir . '_shared/';
+    if (!is_dir($sharedDir)) @mkdir($sharedDir, 0750, true);
+    $sharedFile = $sharedDir . $sharedKey . '_' . date('Ymd') . '_' . substr($questionHash, 0, 16) . '.txt';
+
+    if (is_file($sharedFile)) {
+        $hit = (string) @file_get_contents($sharedFile);
+        if ($hit !== '') {
+            log_request($userId, $userPlan, 'shared_hit', strlen($hit));
+            echo json_encode(['text' => $hit, 'source' => 'cache_shared', 'cached' => true]);
+            exit;
+        }
+    }
+
+    // Purge best-effort des éditions périmées (garde le disque propre).
+    foreach ((array) @glob($sharedDir . $sharedKey . '_*.txt') as $old) {
+        if (is_file($old) && (time() - (int) @filemtime($old)) > 172800) @unlink($old);
+    }
+
+    // Garde-fou de coût : même partagé, on borne le nombre de générations par
+    // jour et par clé (sinon un contenu qui varie à chaque appel relancerait
+    // l'IA indéfiniment en contournant les quotas individuels).
+    $sGenFile  = $sharedDir . '_gen_' . $sharedKey . '_' . date('Ymd') . '.txt';
+    $sGenCount = is_file($sGenFile) ? (int) @file_get_contents($sGenFile) : 0;
+    if ($sGenCount >= 40) {
+        http_response_code(429);
+        echo json_encode(['error' => 'Contenu éditorial du jour déjà généré — réessayez demain.', 'shared' => $sharedKey]);
+        exit;
+    }
+    @file_put_contents($sGenFile, ($sGenCount + 1) . '');
+}
+
 // ── 4bis. 🔐 v1.2.3 PLAFOND GLOBAL QUOTIDIEN (borne les coûts, tous appelants confondus) ──
 // L'endpoint IA n'exige pas d'auth (entonnoir visiteur) ; seul un rate-limit par IP existait.
 // Un plafond global protège contre l'abus distribué ou un pic viral. On ne compte QUE les
@@ -200,10 +248,52 @@ if ($IA_GLOBAL_DAILY_MAX > 0 && $gCount >= $IA_GLOBAL_DAILY_MAX) {
 // ex. : define('IA_TIER_DAILY_JSON','{"anon":2,"free":5,"pro":60}');
 // L'anonyme est compté PAR IP (avant : userId vide ⇒ il échappait totalement
 // au quota par formule et disposait de 300/jour).
-$userTier  = server_user_tier((string) $userId);
+// ── 🔐 v1.12 — L'IDENTITÉ DOIT ÊTRE PROUVÉE POUR OUVRIR UN GROS QUOTA ──
+// `userId` arrive du client, en clair, sans aucune preuve. server_user_tier()
+// le comparait directement aux comptes de la base : il suffisait donc d'envoyer
+// l'identifiant d'un enseignant (120/jour) ou d'un admin (ILLIMITÉ) pour vider
+// le budget IA — un identifiant qui circule dès qu'on partage un écran.
+//
+// Correctif : si un jeton de compte est fourni (émis par student_data.php et
+// signé HMAC), le palier découle du compte VÉRIFIÉ. Sinon on calcule comme
+// avant, mais on ÉCRÊTE les paliers à privilège. Les abonnés légitimes gardent
+// un quota confortable ; l'usurpation ne rapporte plus rien.
+$utilisateurVerifie = '';
+$jetonIA = (string) ($body['token'] ?? '');
+if ($jetonIA !== '') {
+    @include_once __DIR__ . '/_auth_lib.php';
+    if (function_exists('vrt_verify_token')) {
+        try {
+            $verif = vrt_verify_token($jetonIA);
+            if ($verif !== null) {
+                $utilisateurVerifie = (string) ($verif['acc']['user'] ?? $verif['acc']['id'] ?? '');
+            }
+        } catch (Throwable $e) { /* jeton illisible → on retombe sur l'écrêtage */ }
+    }
+}
+
+$userTier = server_user_tier($utilisateurVerifie !== '' ? $utilisateurVerifie : (string) $userId);
+
+if ($utilisateurVerifie === '') {
+    if ($userTier === 'admin' || $userTier === 'teach') {
+        @file_put_contents(__DIR__ . '/data/_security_log.txt',
+            date('c') . ' [IA_TIER_UNPROVEN] palier ' . $userTier . ' réclamé sans jeton — ramené à free. ip=' . $ip
+            . ' userId=' . substr((string) $userId, 0, 40) . "\n", FILE_APPEND);
+        $userTier = 'free';
+    } elseif ($userTier === 'elite') {
+        $userTier = 'pro';   // abonné non prouvé : quota confortable, jamais le maximum
+    }
+} else {
+    // Le compteur suit l'identité PROUVÉE (un jeton = un compte).
+    $userId = $utilisateurVerifie;
+}
 $tierDaily = ['anon' => 2, 'free' => 5, 'starter' => 15, 'pro' => 50, 'teach' => 120, 'elite' => 100, 'admin' => -1];
 if (defined('IA_TIER_DAILY_JSON')) { $cfg = json_decode(IA_TIER_DAILY_JSON, true); if (is_array($cfg)) $tierDaily = array_merge($tierDaily, $cfg); }
 $uDailyMax = $tierDaily[$userTier] ?? 5;
+// Une publication éditoriale n'est facturée à personne : elle a son propre
+// garde-fou (section 4ante) et ne doit pas amputer le quota d'un visiteur qui
+// n'a encore rien demandé.
+if ($isShared) { $uDailyMax = -1; }
 if ($uDailyMax > 0) {
     // Clé de comptage : le COMPTE si connu, sinon l'IP (visiteur anonyme).
     $qKey   = $userId !== ''
@@ -315,6 +405,11 @@ if (!$ok) {
 // ── 6. STORE EN ATTENTE DE VALIDATION ──────────────────────────────────
 store_pending_answer($questionHash, $prompt, $text, $userId, $userPlan);
 log_request($userId, $userPlan, 'success_' . $source, strlen($text));
+
+// Publier le contenu éditorial du jour : les visiteurs suivants le liront ici.
+if ($isShared && $sharedFile !== '' && $text !== '') {
+    @file_put_contents($sharedFile, $text, LOCK_EX);
+}
 
 echo json_encode([
     'text'   => $text,

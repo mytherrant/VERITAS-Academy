@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasites avant le JSON (voir _json_boot.php)
 /**
  * VÉRITAS Academy — api/db.php
  * © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
