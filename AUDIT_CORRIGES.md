@@ -19,7 +19,7 @@ Exercices sans corrigé **ni** consigne d'évaluation pour l'enseignant : **0**.
 | Niveau | Blocs | Questions + exercices | Corrigés | Couverture |
 |---|---:|---:|---:|---:|
 | 2nde | 138 | 736 | 725 | **98.5 %** |
-| 1ere | 165 | 1007 | 814 | **80.8 %** |
+| 1ere | 165 | 1007 | 850 | **84.4 %** |
 | tle | 176 | 1055 | 873 | **82.7 %** |
 
 ### Répartition des manques par nature de bloc
@@ -30,14 +30,14 @@ Exercices sans corrigé **ni** consigne d'évaluation pour l'enseignant : **0**.
 | 2nde | méthodologie / intégration | 30 | 136 | 133 | **3** |
 | 2nde | épreuve / évaluation | 14 | 60 | 58 | **2** |
 | 2nde | étude de l'œuvre intégrale | 27 | 184 | 183 | **1** |
-| 1ere | méthodologie / intégration | 32 | 140 | 96 | **44** |
 | 1ere | étude de l'œuvre intégrale | 30 | 267 | 226 | **41** |
-| 1ere | banque de sujets | 8 | 62 | 23 | **39** |
+| 1ere | méthodologie / intégration | 32 | 140 | 102 | **38** |
 | 1ere | sujet d'entraînement (vierge par conception) | 10 | 43 | 8 | **35** |
+| 1ere | banque de sujets | 8 | 62 | 47 | **15** |
 | 1ere | groupement de textes | 10 | 63 | 52 | **11** |
 | 1ere | épreuve / évaluation | 31 | 145 | 135 | **10** |
-| 1ere | leçon | 38 | 255 | 248 | **7** |
 | 1ere | évaluation diagnostique | 6 | 32 | 26 | **6** |
+| 1ere | leçon | 38 | 255 | 254 | **1** |
 | tle | sujet d'entraînement (vierge par conception) | 12 | 57 | 7 | **50** |
 | tle | étude de l'œuvre intégrale | 27 | 229 | 187 | **42** |
 | tle | méthodologie / intégration | 32 | 176 | 137 | **39** |
