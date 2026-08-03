@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VÉRITAS Flash — scanne le QR de ta séquence, les ressources s'ouvrent</title>
+<meta name="description" content="VÉRITAS Flash : le QR code imprimé dans ton cahier de français ouvre directement les corrigés, les quiz et les ressources de la séquence en cours. Sans application, sans compte.">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Centre VÉRITAS">
+<meta property="og:title" content="VÉRITAS Flash — du cahier papier aux ressources en un scan">
+<meta property="og:description" content="Le QR de ta séquence ouvre les corrigés et les ressources correspondantes. Sans application.">
+<meta property="og:url" content="https://veritas-school.com/flash/">
+<meta property="og:image" content="https://veritas-school.com/uploads/logo-veritas.png">
+<link rel="canonical" href="https://veritas-school.com/flash/">
+<link rel="stylesheet" href="/assets/veritas-pages.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[
+{"@type":"WebPage","name":"VÉRITAS Flash","url":"https://veritas-school.com/flash/","inLanguage":"fr","description":"Résolveur des QR codes imprimés dans les cahiers de français VÉRITAS."},
+{"@type":"BreadcrumbList","itemListElement":[
+{"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com"},
+{"@type":"ListItem","position":2,"name":"La Constellation VÉRITAS","item":"https://veritas-school.com/constellation.html"},
+{"@type":"ListItem","position":3,"name":"VÉRITAS Flash","item":"https://veritas-school.com/flash/"}]}]}</script>
+</head>
+<body>
+<header class="top">
+  <span class="badge">Centre VÉRITAS · Flash</span>
+  <h1 id="h1">VÉRITAS Flash</h1>
+  <p id="sub">Le QR code imprimé au début de chaque séquence ouvre les ressources de cette séquence. Pas d'application à installer, pas de compte à créer.</p>
+</header>
+
+<div class="wrap">
+  <p class="crumb"><a href="https://veritas-school.com">Accueil</a> › <a href="/constellation.html">La Constellation</a> › Flash</p>
+
+  <!-- Cible résolue depuis ?c=<classe>&s=<séquence> -->
+  <section id="cible" hidden>
+    <div class="intro" id="cibleTitre"></div>
+    <div class="grid" id="cibleLiens"></div>
+    <p class="note" style="margin-top:1rem"><a href="/flash/">← Choisir une autre séquence</a></p>
+  </section>
+
+  <!-- Choix manuel (fonctionne sans JavaScript) -->
+  <section id="choix">
+    <div class="intro"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-scan"/></svg><strong>Comment ça marche ?</strong> Ouvre l'appareil photo de ton téléphone, vise le QR code au début de ta séquence, touche le lien qui apparaît. Si le QR est abîmé, choisis simplement ta classe ci-dessous.</div>
+
+    <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book"/></svg>Ma classe</h2>
+    <nav class="seqnav" aria-label="Choisir sa classe">
+      <a href="/corriges/6e/">6ᵉ</a>
+      <a href="/corriges/5e/">5ᵉ</a>
+      <a href="/corriges/4e/">4ᵉ</a>
+      <a href="/corriges/3e/">3ᵉ · BEPC</a>
+      <a href="/corriges/2nde/">2ⁿᵈᵉ A</a>
+      <a href="/corriges/1ere/">1ʳᵉ A · Probatoire</a>
+      <a href="/corriges/tle/">Tˡᵉ A · BAC</a>
+      <a href="/corriges/est-2nde.html">2ⁿᵈᵉ S&amp;T</a>
+      <a href="/corriges/est-1ere.html">1ʳᵉ S&amp;T</a>
+      <a href="/corriges/est-tle.html">Tˡᵉ S&amp;T</a>
+    </nav>
+
+    <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-search"/></svg>Ce que le QR ouvre</h2>
+    <div class="grid">
+      <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-check"/></svg></span><h3>Les corrigés de la séquence</h3>
+        <p class="note">Le corrigé de chaque exercice de la séquence, masqué jusqu'au clic. Les énoncés sont dans ton cahier.</p></div>
+      <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book-open"/></svg></span><h3>L'œuvre étudiée</h3>
+        <p class="note">Résumé, thèmes et citations vérifiées de l'œuvre au programme du niveau.</p></div>
+      <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-feather"/></svg></span><h3>La méthode travaillée</h3>
+        <p class="note">Résumé, commentaire, dissertation, étude de texte : la fiche correspondante.</p></div>
+      <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-target"/></svg></span><h3>De quoi se tester</h3>
+        <p class="note">Quiz et jeux sur la plateforme, pour vérifier ce qui est acquis.</p></div>
+    </div>
+
+    <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-teacher"/></svg>Pour l'enseignant</h2>
+    <p class="note">Les QR codes à imprimer dans les cahiers sont générés par le Centre VÉRITAS (un par séquence et par niveau). Le Guide pédagogique, les grilles et les progressions sont dans l'<a href="/enseignant/">espace enseignant</a>.</p>
+  </section>
+</div>
+
+<footer class="bot">© <span id="y"></span> Centre VÉRITAS · Mythe Errant — Douala, Cameroun ·
+<a href="https://veritas-school.com">veritas-school.com</a> · <a href="/constellation.html">La Constellation</a></footer>
+
+<script src="/assets/veritas-ui.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  var NIV = {
+    '6e':   { lab: '6ᵉ',            seq: 6, oeuvre: null,           niveau: 'francais-6eme' },
+    '5e':   { lab: '5ᵉ',            seq: 6, oeuvre: null,           niveau: 'francais-5eme' },
+    '4e':   { lab: '4ᵉ',            seq: 6, oeuvre: null,           niveau: 'francais-4eme' },
+    '3e':   { lab: '3ᵉ (BEPC)',     seq: 6, oeuvre: null,           niveau: 'francais-3eme' },
+    '2nde': { lab: '2ⁿᵈᵉ A',        seq: 6, oeuvre: null,           niveau: 'francais-seconde' },
+    '1ere': { lab: '1ʳᵉ A',         seq: 6, oeuvre: null,           niveau: 'francais-premiere' },
+    'tle':  { lab: 'Terminale A',   seq: 6, oeuvre: null,           niveau: 'francais-terminale' }
+  };
+  var p = new URLSearchParams(location.search);
+  var c = (p.get('c') || '').toLowerCase().trim();
+  var s = parseInt(p.get('s') || '', 10);
+  if (!NIV[c]) return;                                  // pas de cible : on garde le choix manuel
+
+  var n = NIV[c];
+  var seqOk = s >= 1 && s <= n.seq;
+  var url = seqOk ? '/corriges/' + c + '/sequence-' + s + '.html' : '/corriges/' + c + '/';
+
+  document.getElementById('h1').textContent = seqOk
+    ? n.lab + ' — Séquence ' + s
+    : n.lab + ' — mes ressources';
+  document.getElementById('sub').textContent = 'Les ressources de ton cahier, ouvertes depuis le QR code.';
+
+  var liens = [
+    ['<svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-check"/></svg>', 'Les corrigés' + (seqOk ? ' de la séquence ' + s : ''), 'Le corrigé de chaque exercice, masqué jusqu’au clic.', url, 'Ouvrir'],
+    ['<svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book-open"/></svg>', 'Les œuvres au programme', 'Résumés, thèmes et citations vérifiées.', '/oeuvres/', '21 fiches'],
+    ['<svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-feather"/></svg>', 'Les méthodes', 'Résumé, commentaire, dissertation, étude de texte.', '/ressources/', 'Fiches'],
+    ['<svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-compass"/></svg>', 'Le programme de ' + n.lab, 'Ce qu’il faut savoir pour l’année.', '/niveaux/' + n.niveau + '.html', 'MINESEC'],
+    ['<svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-target"/></svg>', 'Me tester', 'Quiz et jeux sur la plateforme.', 'https://veritas-school.com', 'Plateforme'],
+    ['<svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-calculator"/></svg>', 'Mes outils', 'Moyenne, points manquants, planning.', '/outils/', 'Gratuit']
+  ];
+  document.getElementById('cibleTitre').innerHTML =
+    '<svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-scan"/></svg><strong>QR reconnu.</strong> Voici les ressources de ' +
+    (seqOk ? 'la séquence ' + s + ' de ' + n.lab : n.lab) + '.';
+  document.getElementById('cibleLiens').innerHTML = liens.map(function (l) {
+    return '<div class="card"><span class="ico">' + l[0] + '</span><h3>' + l[1] + '</h3>'
+         + '<p class="note">' + l[2] + '</p>'
+         + '<a class="dl" href="' + l[3] + '"><span>' + l[4] + '</span><span class="pill">→</span></a></div>';
+  }).join('');
+  document.getElementById('cible').hidden = false;
+  document.getElementById('choix').hidden = true;
+})();
+</script>
+</body>
+</html>

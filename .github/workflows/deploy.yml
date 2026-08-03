@@ -27,6 +27,14 @@ on:
       - 'decouvrir/**'
       - 'niveaux/**'
       - 'outils/**'
+      - 'corriges/**'
+      - 'assets/**'
+      - 'constellation.html'
+      - 'eleve/**'
+      - 'enseignant/**'
+      - 'flash/**'
+      - 'parcours/**'
+      - 'adopter/**'
       - 'cours/**'
       - 'Logo détouré.png'
       - 'og-image.jpg'
@@ -71,8 +79,8 @@ jobs:
             echo "::warning::php introuvable sur le runner — lint PHP ignoré"
           fi
           js_fail=0
-          echo "→ Lint JS (node --check) sur app.js et sw.js"
-          for j in app.js sw.js; do
+          echo "→ Lint JS (node --check) sur app.js, sw.js et assets/*.js"
+          for j in app.js sw.js $(ls assets/*.js 2>/dev/null); do
             [ -f "$j" ] || continue
             if ! node --check "$j"; then js_fail=1; fi
           done
@@ -154,6 +162,28 @@ jobs:
             cp -r outils deploy/ && rm -f deploy/outils/_style.txt
             echo "  ✓ outils/ ($(ls outils/*.html outils/*.xml 2>/dev/null | wc -l) fichiers publics)"
           fi
+
+          # ── Corrigés des manuels (cible des astuces 🌐 imprimées) ──
+          # corriges/ = hub + 1 dossier par niveau (6e…tle) + pages EST.
+          # Généré par tools/build_corriges.py depuis les Guides pédagogiques
+          # et les sources des packs ; les .html sont commités tels quels.
+          if [ -d corriges ]; then
+            cp -r corriges deploy/
+            echo "  ✓ corriges/ ($(find corriges -name '*.html' | wc -l) pages)"
+          fi
+
+          # ── Constellation VÉRITAS : écosystème autour du cahier papier ──
+          # assets/ = feuille de style + JS COMMUNS à toutes les pages statiques
+          # (corriges/, eleve/, enseignant/, flash/, constellation.html).
+          # ⚠️ Sans assets/, toutes ces pages s'affichent sans style.
+          if [ -d assets ]; then
+            cp -r assets deploy/
+            echo "  ✓ assets/ ($(ls assets | wc -l) fichiers communs)"
+          fi
+          if [ -f constellation.html ]; then cp constellation.html deploy/; echo "  ✓ constellation.html"; fi
+          for d in eleve enseignant flash parcours adopter; do
+            if [ -d "$d" ]; then cp -r "$d" deploy/; echo "  ✓ $d/"; fi
+          done
 
           # ── Vidéo promotionnelle ───────────────────────────────
           if [ -f VERITAS_Promo_Video.html ]; then

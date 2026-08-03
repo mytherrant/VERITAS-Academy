@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espace enseignant VÉRITAS — Guide pédagogique, grilles et progressions</title>
+<meta name="description" content="Espace réservé aux enseignants adoptant les cahiers de français VÉRITAS : Guide pédagogique (corrigés complets et conduite de classe), grilles d'évaluation MINESEC, progressions annuelles et épreuves prêtes à photocopier. Accès par code enseignant.">
+<meta name="robots" content="index,follow">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Centre VÉRITAS">
+<meta property="og:title" content="Espace enseignant VÉRITAS — les ressources du professeur">
+<meta property="og:description" content="Guide pédagogique, grilles MINESEC, progressions et épreuves. Réservé aux enseignants adoptants.">
+<meta property="og:url" content="https://veritas-school.com/enseignant/">
+<meta property="og:image" content="https://veritas-school.com/uploads/logo-veritas.png">
+<link rel="canonical" href="https://veritas-school.com/enseignant/">
+<link rel="stylesheet" href="/assets/veritas-pages.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[
+{"@type":"WebPage","name":"Espace enseignant VÉRITAS","url":"https://veritas-school.com/enseignant/","inLanguage":"fr","description":"Ressources réservées aux enseignants adoptant les cahiers de français du Centre VÉRITAS.","isAccessibleForFree":false},
+{"@type":"BreadcrumbList","itemListElement":[
+{"@type":"ListItem","position":1,"name":"Accueil","item":"https://veritas-school.com"},
+{"@type":"ListItem","position":2,"name":"La Constellation VÉRITAS","item":"https://veritas-school.com/constellation.html"},
+{"@type":"ListItem","position":3,"name":"Espace enseignant","item":"https://veritas-school.com/enseignant/"}]}]}</script>
+</head>
+<body>
+<header class="top">
+  <span class="badge">Centre VÉRITAS · Espace enseignant</span>
+  <h1>Les ressources du professeur</h1>
+  <p>Guide pédagogique, grilles d'évaluation officielles, progressions annuelles et épreuves prêtes à photocopier. <strong>Réservé aux enseignants</strong> qui utilisent les cahiers VÉRITAS.</p>
+</header>
+
+<div class="wrap">
+  <p class="crumb"><a href="https://veritas-school.com">Accueil</a> › <a href="/constellation.html">La Constellation</a> › Espace enseignant</p>
+
+  <div class="intro">
+    <svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-lock"/></svg><strong>Pourquoi un code ?</strong> Le Guide pédagogique contient les corrigés complets, les barèmes et la conduite de classe.
+    Son exclusivité fait sa valeur : un élève ne doit pas y entrer. Chaque ouverture de ressource est journalisée et un code se révoque en une minute.
+    Les élèves, eux, ont leur propre espace — <a href="/eleve/">libre et gratuit</a>.
+  </div>
+
+  <section class="gate" id="gate">
+    <h2><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-key"/></svg>Entrer avec mon code enseignant</h2>
+    <p class="note">Le code vous est remis à l'adoption des cahiers, par le Centre VÉRITAS. Il est valable pour l'année scolaire.</p>
+    <form id="fgate" autocomplete="off">
+      <label for="code">Code enseignant</label>
+      <input id="code" name="code" type="password" inputmode="text" placeholder="Ex. VRT-XXXX-2026" required>
+      <button type="submit" id="btn">Ouvrir mon espace</button>
+    </form>
+    <div class="msg" id="msg" role="status" aria-live="polite"></div>
+    <p class="note" style="margin-top:1rem">Pas encore de code ?
+      <a href="https://wa.me/237697637739?text=Bonjour%20VÉRITAS%2C%20je%20suis%20enseignant%20et%20je%20souhaite%20un%20code%20d%27acc%C3%A8s%20%C3%A0%20l%27espace%20enseignant.">Le demander par WhatsApp</a>
+      (réponse sous 2 h, jours ouvrés) ou écrire à <a href="mailto:contact@veritas-school.com">contact@veritas-school.com</a>.</p>
+  </section>
+
+  <section id="space" hidden>
+    <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book"/></svg>Mes ressources <span class="pill or" id="who"></span></h2>
+    <p class="note" id="hint">Les documents s'ouvrent en téléchargement direct. Session ouverte pour 8 heures.</p>
+    <div id="groupes"></div>
+    <p class="note" id="empty" hidden></p>
+    <div class="tools" style="margin-top:1.2rem">
+      <button type="button" id="logout">Fermer ma session</button>
+    </div>
+  </section>
+
+  <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-compass"/></svg>Ce que contient l'espace</h2>
+  <div class="grid">
+    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book"/></svg></span><h3>Le Guide pédagogique</h3>
+      <p class="note">Un guide par niveau : corrigés complets de tous les exercices, conduite de la classe, barèmes, remédiation.</p></div>
+    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-chart"/></svg></span><h3>Grilles d'évaluation MINESEC</h3>
+      <p class="note">Les grilles officielles harmonisées, par type d'épreuve, avec les critères et leur pondération.</p></div>
+    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-calendar"/></svg></span><h3>Progressions annuelles</h3>
+      <p class="note">La répartition séquence par séquence, semaine par semaine, alignée sur le programme.</p></div>
+    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-pen"/></svg></span><h3>Épreuves à photocopier</h3>
+      <p class="note">Devoirs et évaluations séquentielles, avec leurs corrigés et leurs barèmes.</p></div>
+  </div>
+
+  <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-users"/></svg>Ce que voient vos élèves</h2>
+  <p>Les élèves accèdent librement aux <a href="/corriges/">corrigés des exercices du cahier</a> — c'est ce que promet l'encadré <svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-globe"/></svg>imprimé dans leur cahier, et c'est volontaire : le corrigé est masqué tant qu'ils n'ont pas cliqué, l'effort vient d'abord. Ce qui reste <strong>exclusivement</strong> dans votre Guide : la conduite de classe, les barèmes détaillés, les productions modèles commentées et les notes de remédiation.</p>
+
+  <div class="cta">
+    <a href="/corriges/"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-check"/></svg>Voir les corrigés élèves<small>Ce que vos élèves consultent</small></a>
+    <a href="/adopter/"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-clipboard-check"/></svg>Adopter les cahiers<small>Spécimen, code, commande d'établissement</small></a>
+    <a href="https://wa.me/237697637739?text=Bonjour%20VÉRITAS%2C%20je%20suis%20enseignant."><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-message"/></svg>Parler à un conseiller<small>Réponse sous 2 h · jours ouvrés</small></a>
+  </div>
+</div>
+
+<footer class="bot">© <span id="y"></span> Centre VÉRITAS · Mythe Errant — Douala, Cameroun ·
+<a href="https://veritas-school.com">veritas-school.com</a> · <a href="/constellation.html">La Constellation</a></footer>
+
+<script src="/assets/veritas-ui.js" defer></script>
+<script>
+(function () {
+  'use strict';
+  var API = '/api/teacher_access.php';
+  var KEY = 'vrt_teacher_tok';           // sessionStorage : la session meurt avec l'onglet
+  var gate = document.getElementById('gate'),
+      space = document.getElementById('space'),
+      msg = document.getElementById('msg'),
+      btn = document.getElementById('btn');
+
+  function show(kind, text) { msg.className = 'msg ' + kind; msg.textContent = text; }
+  function tok() { try { return sessionStorage.getItem(KEY) || ''; } catch (e) { return ''; } }
+  function setTok(t) { try { t ? sessionStorage.setItem(KEY, t) : sessionStorage.removeItem(KEY); } catch (e) {} }
+
+  function post(body) {
+    return fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    }).then(function (r) { return r.json().catch(function () { return { ok: false, error: 'Réponse illisible du serveur.' }; }); });
+  }
+
+  function ko(n) { return n > 0 ? (n > 1048576 ? (n / 1048576).toFixed(1) + ' Mo' : Math.round(n / 1024) + ' Ko') : ''; }
+
+  function render(data) {
+    document.getElementById('who').textContent = data.label || 'Enseignant';
+    var groupes = {}, ordre = [];
+    (data.resources || []).forEach(function (r) {
+      if (!groupes[r.groupe]) { groupes[r.groupe] = []; ordre.push(r.groupe); }
+      groupes[r.groupe].push(r);
+    });
+    var out = '', nDispo = 0;
+    ordre.forEach(function (g) {
+      var cards = groupes[g].map(function (r) {
+        if (r.dispo) nDispo++;
+        var href = r.dispo ? (API + '?res=' + encodeURIComponent(r.slug) + '&token=' + encodeURIComponent(tok())) : null;
+        return '<a class="dl"' + (href ? ' href="' + href + '"' : ' aria-disabled="true" style="opacity:.55"') + '>'
+             + '<span>' + r.label + '</span>'
+             + '<span class="pill' + (r.dispo ? '' : ' gris') + '">' + (r.dispo ? ('PDF ' + ko(r.taille)) : 'bientôt') + '</span></a>';
+      }).join('');
+      out += '<div class="card" style="margin-top:1rem"><h3>' + g + '</h3>' + cards + '</div>';
+    });
+    document.getElementById('groupes').innerHTML = out;
+    var empty = document.getElementById('empty');
+    if (!nDispo) {
+      empty.hidden = false;
+      empty.textContent = 'Aucun document n’a encore été déposé sur le serveur. Les fichiers apparaîtront ici dès leur mise en ligne par le Centre VÉRITAS.';
+    } else { empty.hidden = true; }
+    gate.hidden = true; space.hidden = false;
+  }
+
+  function load() {
+    if (!tok()) return;
+    post({ action: 'list', token: tok() }).then(function (d) {
+      if (d && d.ok) { render(d); } else { setTok(''); }
+    }).catch(function () { /* hors ligne : on laisse la porte */ });
+  }
+
+  document.getElementById('fgate').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var code = document.getElementById('code').value.trim();
+    if (!code) { show('err', 'Saisissez votre code.'); return; }
+    btn.disabled = true; show('ok', 'Vérification…');
+    post({ action: 'login', code: code }).then(function (d) {
+      btn.disabled = false;
+      if (d && d.ok && d.token) {
+        setTok(d.token);
+        document.getElementById('code').value = '';
+        load();
+      } else if (d && d.code === 'not_configured') {
+        show('err', "L'espace enseignant n'est pas encore activé. Écrivez au Centre VÉRITAS pour obtenir votre accès.");
+      } else {
+        show('err', (d && d.error) || 'Code non reconnu.');
+      }
+    }).catch(function () {
+      btn.disabled = false;
+      show('err', 'Serveur injoignable. Vérifiez votre connexion et réessayez.');
+    });
+  });
+
+  document.getElementById('logout').addEventListener('click', function () {
+    setTok(''); space.hidden = true; gate.hidden = false;
+    show('ok', 'Session fermée.');
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

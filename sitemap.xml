@@ -29,8 +29,56 @@
   <!-- Corrigés des manuels : cible des QR codes imprimés dans les cahiers -->
   <url>
     <loc>https://veritas-school.com/manuels.html</loc>
-    <lastmod>2026-07-25</lastmod>
+    <lastmod>2026-07-29</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- La Constellation VÉRITAS : carte de l'écosystème autour du cahier papier -->
+  <url>
+    <loc>https://veritas-school.com/constellation.html</loc>
+    <lastmod>2026-07-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Espace élève : portail des ressources libres -->
+  <url>
+    <loc>https://veritas-school.com/eleve/</loc>
+    <lastmod>2026-07-29</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Espace enseignant : vitrine publique, ressources derrière code -->
+  <url>
+    <loc>https://veritas-school.com/enseignant/</loc>
+    <lastmod>2026-07-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Guide de l'élève : calcul des notes, année scolaire, orientation -->
+  <url>
+    <loc>https://veritas-school.com/parcours/</loc>
+    <lastmod>2026-07-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- VÉRITAS Flash : résolveur des QR imprimés dans les cahiers -->
+  <url>
+    <loc>https://veritas-school.com/flash/</loc>
+    <lastmod>2026-07-29</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Adoption des cahiers : page enseignants et établissements -->
+  <url>
+    <loc>https://veritas-school.com/adopter/</loc>
+    <lastmod>2026-07-30</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 

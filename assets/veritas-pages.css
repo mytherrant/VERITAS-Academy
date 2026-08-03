@@ -1,0 +1,364 @@
+/* ============================================================
+   VÉRITAS — feuille de style commune des pages statiques
+   (corrigés, Constellation, espace élève, espace enseignant, Flash)
+   © 2026 Mythe Errant · Centre VÉRITAS
+   Palette : bleu nuit #142554 / or #FFC93C — thème clair « éditorial ».
+   ============================================================ */
+*{box-sizing:border-box}
+:root{
+  --navy:#142554;--navy2:#1d3168;--navy3:#0d1a3d;--gold:#FFC93C;--gold2:#e0a800;
+  --ink:#14213d;--gris:#5b6478;--bg:#f6f8fc;--card:#fff;--line:#e3e9f5;
+  --green:#128a6f;--vert-bg:#f2fbf8;--rouge:#c23b52;--violet:#6e46c0;
+  --rad:12px;--maxw:960px;
+}
+body{margin:0;font-family:'Segoe UI',Calibri,system-ui,sans-serif;color:var(--ink);
+  background:var(--bg);line-height:1.6}
+a{color:var(--navy)}
+img{max-width:100%;height:auto}
+
+/* ── icônes vectorielles (sprite /assets/veritas-icons.svg) ─ */
+.i{width:1.15em;height:1.15em;flex:none;vertical-align:-.19em;color:inherit}
+.i.lg{width:1.5em;height:1.5em;vertical-align:-.3em}
+h1 .i,h2 .i,h3 .i{vertical-align:-.13em}
+/* pastille ronde teintée : l'équivalent des pictogrammes en médaillon */
+.ico{display:inline-flex;align-items:center;justify-content:center;width:42px;height:42px;
+  border-radius:50%;background:#eef2fb;color:var(--navy);margin-bottom:.5rem}
+.ico .i{width:22px;height:22px;vertical-align:0}
+.ico.or{background:#fff5da;color:#8a6200}
+.ico.vert{background:var(--vert-bg);color:var(--green)}
+.ico.violet{background:#f1ecfc;color:var(--violet)}
+.ico.rouge{background:#fdeef1;color:var(--rouge)}
+h2.sec,h3.sub{display:flex;align-items:center;gap:.5rem}
+.rub{display:flex;align-items:center;gap:.45rem}
+.rub .i{color:var(--gold2)}
+section.lec>h3{display:flex;align-items:flex-start;gap:.5rem}
+section.lec>h3 .i{margin-top:.15em;color:var(--gold2)}
+.obj{display:flex;align-items:flex-start;gap:.4rem}
+.obj .i{margin-top:.2em;color:var(--green)}
+.ex .q .i{color:var(--navy);margin-right:.15em}
+.tools button .i,.cta a .i,.card a.dl .i,.gate button .i{margin-right:.35em}
+.cta a .i{color:var(--gold)}
+
+/* ── en-tête ───────────────────────────────────────────── */
+header.top{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;
+  padding:2.3rem 1rem 2rem;text-align:center;position:relative;overflow:hidden}
+header.top .badge{display:inline-block;border:1.5px solid var(--gold);color:var(--gold);
+  border-radius:999px;padding:.2rem .9rem;font-size:.78rem;letter-spacing:.08em;
+  text-transform:uppercase;margin-bottom:.8rem}
+header.top h1{margin:.2rem auto;max-width:900px;font-size:1.65rem}
+header.top p{margin:.6rem auto 0;max-width:760px;color:#d9e2f5;font-size:.97rem}
+header.top a{color:var(--gold)}
+
+.wrap{max-width:var(--maxw);margin:0 auto;padding:1.5rem 1rem 3rem}
+.crumb{font-size:.84rem;color:var(--gris);margin:.2rem 0 1rem}
+.crumb a{text-decoration:none}
+.intro{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--gold);
+  border-radius:var(--rad);padding:1rem 1.15rem;margin:-2.1rem auto 1.5rem;max-width:880px;
+  box-shadow:0 10px 30px rgba(20,37,84,.08)}
+h2.sec{color:var(--navy);border-bottom:2px solid var(--gold);padding-bottom:.35rem;margin-top:2.2rem}
+h3.sub{color:var(--navy);margin:1.6rem 0 .4rem}
+.note{font-size:.86rem;color:var(--gris)}
+.lead{font-size:1.02rem}
+
+/* ── navigation par séquence ───────────────────────────── */
+nav.seqnav{display:flex;flex-wrap:wrap;gap:.45rem;margin:1rem 0 1.4rem}
+nav.seqnav a{background:#fff;border:1px solid var(--line);border-radius:9px;padding:.4rem .75rem;
+  font-size:.87rem;font-weight:600;text-decoration:none}
+nav.seqnav a:hover{border-color:var(--gold);background:#fffdf5}
+nav.seqnav a[aria-current]{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ── leçons & corrigés ─────────────────────────────────── */
+section.lec{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);
+  padding:1rem 1.15rem 1.2rem;margin:1rem 0;box-shadow:0 4px 14px rgba(20,37,84,.05)}
+section.lec>h3{margin:.1rem 0 .35rem;color:var(--navy);font-size:1.1rem}
+.sem{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gris);font-weight:700}
+.obj{font-size:.9rem;color:var(--gris);margin:.2rem 0 .9rem;border-left:3px solid var(--line);padding-left:.6rem}
+.rub{font-weight:700;color:var(--navy);margin:1.1rem 0 .3rem;font-size:.97rem}
+.ex{border:1px solid var(--line);border-radius:10px;padding:.7rem .85rem;margin:.55rem 0;background:#fcfdff}
+.ex .q{margin:0 0 .1rem}
+.ex ul{margin:.3rem 0 .2rem 1.1rem;padding:0;color:var(--gris);font-size:.93rem}
+details.sol{margin-top:.5rem}
+details.sol>summary{cursor:pointer;list-style:none;display:inline-block;font-weight:700;
+  font-size:.85rem;color:var(--green);background:var(--vert-bg);border:1px solid #cfeae2;
+  border-radius:8px;padding:.25rem .7rem}
+details.sol>summary::-webkit-details-marker{display:none}
+details.sol[open]>summary{border-radius:8px 8px 0 0}
+details.sol .body{border:1px solid #cfeae2;border-top:0;border-radius:0 8px 8px 8px;
+  background:var(--vert-bg);padding:.6rem .8rem;font-size:.95rem}
+details.sol .body p{margin:.25rem 0}
+b.k{color:var(--navy)}
+.hw{color:var(--gris);font-style:italic}
+
+/* ── barre d'outils (tout ouvrir / audio / accessibilité) ─ */
+.tools{display:flex;flex-wrap:wrap;gap:.5rem;margin:.6rem 0 0;align-items:center}
+.tools button{font:inherit;font-size:.83rem;font-weight:600;cursor:pointer;background:#fff;
+  border:1px solid var(--line);border-radius:9px;padding:.35rem .8rem;color:var(--navy)}
+.tools button:hover{border-color:var(--gold)}
+.tools button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tools .sep{width:1px;height:22px;background:var(--line)}
+
+/* ── cartes & grilles ──────────────────────────────────── */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem;margin-top:1rem}
+.grid.two{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);
+  padding:1rem 1.1rem;box-shadow:0 4px 14px rgba(20,37,84,.05)}
+.card h3{margin:.1rem 0 .5rem;color:var(--navy);font-size:1.1rem}
+.card a.dl{display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  padding:.45rem .7rem;border:1px solid var(--line);border-radius:9px;margin:.35rem 0;
+  font-weight:600;text-decoration:none;font-size:.92rem}
+.card a.dl:hover{border-color:var(--gold);background:#fffdf5}
+.pill{background:var(--navy);color:#fff;border-radius:8px;font-size:.68rem;padding:.15rem .5rem;white-space:nowrap}
+.pill.or{background:var(--gold);color:var(--navy3)}
+.pill.gris{background:#eef2fa;color:var(--gris)}
+.cta{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:.9rem;margin-top:1rem}
+.cta a{background:var(--navy);color:#fff;border-radius:var(--rad);padding:1rem;font-weight:700;
+  display:block;text-decoration:none}
+.cta a:hover{background:var(--navy2)}
+.cta a small{display:block;font-weight:400;color:var(--gold);margin-top:.25rem}
+
+/* ── la Constellation (carte de l'écosystème) ──────────── */
+.constel{position:relative;background:linear-gradient(160deg,var(--navy3),var(--navy2) 60%,#24407f);
+  border-radius:18px;padding:2rem 1rem;margin-top:1.2rem;overflow:hidden}
+.constel::before,.constel::after{content:"";position:absolute;border:1px solid rgba(255,201,60,.16);
+  border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}
+.constel::before{width:min(78%,640px);aspect-ratio:1}
+.constel::after{width:min(52%,420px);aspect-ratio:1}
+.constel .hub{position:relative;z-index:2;text-align:center;color:#fff;margin:0 auto 1.4rem;max-width:320px}
+.constel .hub .disc{width:96px;height:96px;margin:0 auto .5rem;border-radius:50%;
+  background:var(--gold);color:var(--navy3);display:flex;align-items:center;justify-content:center;
+  font-size:2.4rem;box-shadow:0 8px 26px rgba(0,0,0,.28)}
+.constel .hub b{font-size:1.15rem}
+.constel .hub span{display:block;color:#c9d6f2;font-size:.86rem}
+.orbit{position:relative;z-index:2;display:grid;gap:.85rem;
+  grid-template-columns:repeat(auto-fill,minmax(215px,1fr))}
+.orbit a{display:block;text-decoration:none;background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:.85rem .9rem;color:#fff;
+  transition:.15s;backdrop-filter:blur(2px)}
+.orbit a:hover{background:rgba(255,255,255,.14);border-color:var(--gold);transform:translateY(-2px)}
+.orbit .ic{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;margin-bottom:.45rem;color:#fff}
+.orbit .ic .i{width:20px;height:20px;vertical-align:0}
+.orbit b{display:block;font-size:.98rem;line-height:1.25}
+.orbit small{display:block;color:#c3d0ee;font-size:.8rem;margin-top:.2rem}
+.orbit .tag{display:inline-block;margin-top:.5rem;font-size:.68rem;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;border-radius:6px;padding:.1rem .45rem}
+.tag.libre{background:rgba(18,138,111,.28);color:#7ff0d0}
+.tag.reserve{background:rgba(255,201,60,.2);color:var(--gold)}
+.tag.bientot{background:rgba(255,255,255,.12);color:#c9d6f2}
+
+/* ── « à la loupe » : bloc détaillé ────────────────────── */
+.loupe{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);
+  padding:1rem 1.15rem;margin:.9rem 0;box-shadow:0 4px 14px rgba(20,37,84,.05)}
+.loupe h3{margin:0 0 .5rem;color:var(--navy);font-size:1.06rem;display:flex;
+  align-items:center;gap:.5rem;flex-wrap:wrap}
+.loupe ul{margin:.3rem 0 .6rem 1.1rem;padding:0}
+.loupe li{margin:.22rem 0}
+.loupe .go{display:inline-block;font-weight:700;font-size:.9rem;text-decoration:none;
+  border-bottom:2px solid var(--gold)}
+
+/* ── parcours : étapes du calcul de la moyenne ─────────── */
+.flow{display:grid;gap:.9rem;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));margin-top:1rem}
+.step{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:.95rem 1rem;
+  position:relative;box-shadow:0 4px 14px rgba(20,37,84,.05)}
+.step .n{position:absolute;top:-12px;left:1rem;width:26px;height:26px;border-radius:50%;
+  background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:.82rem;font-weight:700}
+.step h3{margin:.5rem 0 .35rem;color:var(--navy);font-size:1.02rem}
+.step p{margin:.2rem 0;font-size:.9rem;color:var(--gris)}
+.formule{background:#f4f7fd;border:1px dashed #c8d5ee;border-radius:10px;padding:.55rem .75rem;
+  margin:.5rem 0 .2rem;font-size:.92rem;color:var(--navy);overflow-x:auto}
+.formule b{color:var(--gold2)}
+
+/* frise de l'année scolaire */
+.frise{display:grid;gap:.6rem;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:1rem}
+.trim{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--gold);
+  border-radius:var(--rad);padding:.85rem .9rem}
+.trim h4{margin:0 0 .35rem;color:var(--navy);font-size:.98rem}
+.trim ul{margin:.2rem 0 0 1rem;padding:0;font-size:.88rem;color:var(--gris)}
+.trim li{margin:.15rem 0}
+@media(max-width:720px){.frise{grid-template-columns:1fr}}
+
+/* simulateur */
+.simu{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);
+  padding:1rem 1.1rem;box-shadow:0 4px 14px rgba(20,37,84,.05);margin-top:1rem}
+.simu .tbl{overflow-x:auto}
+.simu table{border-collapse:collapse;width:100%;min-width:520px;font-size:.92rem}
+.simu th,.simu td{border:1px solid var(--line);padding:.3rem .4rem;text-align:center}
+.simu th{background:#f4f7fd;color:var(--navy);font-size:.82rem}
+.simu td:first-child{text-align:left}
+.simu input{width:100%;font:inherit;font-size:.9rem;border:1px solid var(--line);border-radius:6px;
+  padding:.25rem .35rem;background:#fbfcff;text-align:center}
+.simu input.mat{text-align:left}
+.simu input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.simu .del{cursor:pointer;border:0;background:none;color:var(--rouge);font-size:1rem;line-height:1}
+.verdict{margin-top:1rem;border-radius:var(--rad);padding:.9rem 1rem;border:1px solid var(--line);
+  background:#f4f7fd}
+.verdict .big{font-size:1.5rem;font-weight:800;color:var(--navy)}
+.verdict.ok{background:var(--vert-bg);border-color:#cfeae2}
+.verdict.ko{background:#fdf0f3;border-color:#f4d3da}
+.verdict .lig{display:flex;flex-wrap:wrap;gap:.4rem 1.2rem;margin-top:.5rem;font-size:.9rem;color:var(--gris)}
+
+/* ── graphiques du parcours ────────────────────────────── */
+/* cercle des disciplines (anneau proportionnel aux coefficients) */
+.disciplines{display:grid;gap:1.2rem;grid-template-columns:minmax(240px,320px) 1fr;align-items:center;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--rad);padding:1.1rem;
+  box-shadow:0 4px 14px rgba(20,37,84,.05);margin-top:1rem}
+@media(max-width:720px){.disciplines{grid-template-columns:1fr}}
+.donut{position:relative;width:100%;max-width:320px;margin:0 auto}
+.donut svg{display:block;width:100%;height:auto;transform:rotate(-90deg)}
+.donut .mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;pointer-events:none}
+.donut .mid b{font-size:1.7rem;color:var(--navy);line-height:1}
+.donut .mid span{font-size:.76rem;color:var(--gris);max-width:60%}
+.leg{display:grid;gap:.3rem}
+.leg .l{display:flex;align-items:center;gap:.5rem;font-size:.9rem;padding:.15rem 0;
+  border-bottom:1px dotted var(--line)}
+.leg .l:last-child{border-bottom:0}
+.leg .pt{width:12px;height:12px;border-radius:3px;flex:none}
+.leg .l .nom{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.leg .l .cf{color:var(--gris);font-size:.82rem}
+.leg .l .nt{font-weight:700;color:var(--navy);width:44px;text-align:right}
+
+/* barres d'impact : ce que chaque matière fait gagner ou perdre */
+.impact{margin-top:1rem;background:var(--card);border:1px solid var(--line);border-radius:var(--rad);
+  padding:1rem 1.1rem;box-shadow:0 4px 14px rgba(20,37,84,.05)}
+.imp-row{display:grid;grid-template-columns:minmax(90px,150px) 1fr 62px;align-items:center;
+  gap:.6rem;margin:.32rem 0;font-size:.9rem}
+.imp-bar{position:relative;height:20px;background:#f4f7fd;border-radius:6px;overflow:hidden}
+.imp-bar .zero{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#c8d5ee}
+.imp-bar i{position:absolute;top:3px;bottom:3px;border-radius:4px;display:block}
+.imp-bar i.pos{background:var(--green);left:50%}
+.imp-bar i.neg{background:var(--rouge);right:50%}
+.imp-val{text-align:right;font-weight:700}
+.imp-val.pos{color:var(--green)}
+.imp-val.neg{color:var(--rouge)}
+
+/* escalier des études après le Bac */
+.escalier{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);
+  padding:1rem 1.1rem 1.2rem;box-shadow:0 4px 14px rgba(20,37,84,.05);margin-top:1rem;overflow-x:auto}
+.esc-grid{min-width:560px}
+.esc-head{display:grid;grid-template-columns:170px repeat(8,1fr);gap:2px;margin-bottom:.35rem}
+.esc-head span{font-size:.72rem;color:var(--gris);text-align:center}
+.esc-head span:first-child{text-align:left;font-weight:700;color:var(--navy)}
+.esc-row{display:grid;grid-template-columns:170px repeat(8,1fr);gap:2px;align-items:center;margin:.22rem 0}
+.esc-row .lab{font-size:.86rem;font-weight:600;color:var(--navy);padding-right:.4rem}
+.esc-row .bar{grid-column:2 / span 8;height:26px;position:relative;background:
+  repeating-linear-gradient(to right,#f4f7fd 0,#f4f7fd calc(12.5% - 2px),transparent calc(12.5% - 2px),transparent 12.5%);
+  border-radius:6px}
+.esc-row .bar b{position:absolute;top:0;bottom:0;left:0;border-radius:6px;display:flex;align-items:center;
+  padding:0 .55rem;color:#fff;font-size:.78rem;font-weight:700;white-space:nowrap;overflow:hidden}
+.esc-row .bar b.court{background:linear-gradient(90deg,#128a6f,#16a887)}
+.esc-row .bar b.licence{background:linear-gradient(90deg,#1d3168,#2c4a99)}
+.esc-row .bar b.long{background:linear-gradient(90deg,#6e46c0,#8a63d6)}
+.esc-row .bar b.sante{background:linear-gradient(90deg,#c23b52,#e0576f)}
+.esc-note{font-size:.84rem;color:var(--gris);margin-top:.7rem}
+
+/* poids du diplôme (contrôle continu vs examen) */
+.poids{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+.poids .p{flex:1 1 220px;border-radius:var(--rad);padding:.9rem 1rem;color:#fff}
+.poids .p.cc{background:linear-gradient(135deg,#128a6f,#16a887)}
+.poids .p.ex{background:linear-gradient(135deg,var(--navy),var(--navy2))}
+.poids .p b{display:block;font-size:1.9rem;line-height:1}
+.poids .p span{font-size:.88rem;opacity:.92;display:block;margin-top:.2rem}
+
+/* choix de série */
+.series-pick{display:flex;flex-wrap:wrap;gap:.4rem;margin:.8rem 0}
+.series-pick button{font:inherit;font-size:.85rem;font-weight:700;cursor:pointer;background:#fff;
+  border:1px solid var(--line);border-radius:9px;padding:.35rem .8rem;color:var(--navy)}
+.series-pick button:hover{border-color:var(--gold);background:#fffdf5}
+.series-pick button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+/* ── condition de validité + promesse d'excellence ─────── */
+.condition{background:#fffdf3;border:1px solid #f0e0b0;border-left:5px solid var(--gold);
+  border-radius:var(--rad);padding:1rem 1.15rem;margin-top:1.2rem}
+.condition h3{margin:.1rem 0 .5rem;color:var(--navy);font-size:1.06rem;display:flex;
+  align-items:center;gap:.5rem}
+.condition ul{margin:.4rem 0 .2rem 1.1rem;padding:0}
+.condition li{margin:.25rem 0}
+.mention{display:inline-flex;align-items:center;gap:.4rem;border-radius:999px;padding:.2rem .8rem;
+  font-weight:700;font-size:.86rem;background:#eef2fb;color:var(--navy)}
+.mention.tb{background:#eaf7f2;color:var(--green)}
+.mention.b{background:#e9f0ff;color:#1d3168}
+.mention.ab{background:#fff5da;color:#8a6200}
+.mention.p{background:#f2f4f9;color:var(--gris)}
+.mention.ko{background:#fdeef1;color:var(--rouge)}
+.echelle{display:grid;gap:.4rem;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:.8rem 0}
+.echelle div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.5rem .7rem;
+  font-size:.88rem}
+.echelle b{display:block;color:var(--navy)}
+
+/* bandeau d'abonnement (le moment où l'on bloque) */
+.upsell{background:linear-gradient(135deg,var(--navy3),var(--navy2));color:#fff;border-radius:16px;
+  padding:1.4rem 1.3rem;margin-top:1.4rem;position:relative;overflow:hidden}
+.upsell::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;
+  border-radius:50%;background:rgba(255,201,60,.14)}
+.upsell h3{margin:.1rem 0 .5rem;font-size:1.25rem;color:#fff;position:relative;z-index:2}
+.upsell p{color:#d9e2f5;margin:.35rem 0;position:relative;z-index:2}
+.upsell .promesses{display:grid;gap:.6rem;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  margin:.9rem 0 1rem;position:relative;z-index:2}
+.upsell .promesses div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);
+  border-radius:12px;padding:.7rem .8rem;font-size:.9rem}
+.upsell .promesses b{display:flex;align-items:center;gap:.4rem;color:var(--gold);margin-bottom:.2rem}
+.upsell .btns{display:flex;flex-wrap:wrap;gap:.6rem;position:relative;z-index:2}
+.upsell .btns a{display:inline-flex;align-items:center;gap:.4rem;background:var(--gold);
+  color:var(--navy3);font-weight:800;text-decoration:none;border-radius:10px;padding:.6rem 1rem}
+.upsell .btns a.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.4)}
+.upsell .btns a:hover{filter:brightness(1.05)}
+.upsell small{display:block;color:#b9c7e8;margin-top:.7rem;font-size:.82rem;position:relative;z-index:2}
+
+/* messages parent / élève */
+.duo{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:1rem}
+.duo .bloc{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);
+  padding:1rem 1.1rem;box-shadow:0 4px 14px rgba(20,37,84,.05)}
+.duo .bloc h3{margin:.1rem 0 .5rem;color:var(--navy);font-size:1.06rem;display:flex;
+  align-items:center;gap:.5rem}
+.duo .bloc p{margin:.35rem 0;font-size:.93rem}
+.duo .bloc .cite{border-left:3px solid var(--gold);padding-left:.7rem;color:var(--gris);
+  font-style:italic;margin:.6rem 0}
+
+/* orientation : cartes de série / filière */
+.serie{display:flex;gap:.7rem;align-items:flex-start;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--rad);padding:.85rem .95rem;margin:.55rem 0}
+.serie .code{flex:none;width:52px;height:52px;border-radius:12px;background:var(--navy);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.05rem}
+.serie .code.or{background:var(--gold);color:var(--navy3)}
+.serie b{display:block;color:var(--navy)}
+.serie p{margin:.2rem 0 0;font-size:.9rem;color:var(--gris)}
+
+/* ── porte de l'espace enseignant ──────────────────────── */
+.gate{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--gold);
+  border-radius:var(--rad);padding:1.2rem 1.2rem 1.3rem;max-width:520px;margin:1.2rem auto;
+  box-shadow:0 10px 30px rgba(20,37,84,.09)}
+.gate h2{margin:.1rem 0 .3rem;color:var(--navy);font-size:1.2rem}
+.gate label{display:block;font-weight:600;font-size:.88rem;margin:.8rem 0 .25rem}
+.gate input{width:100%;font:inherit;padding:.6rem .75rem;border:1px solid var(--line);
+  border-radius:9px;background:#fbfcff}
+.gate input:focus{outline:2px solid var(--gold);outline-offset:1px}
+.gate button{width:100%;margin-top:1rem;font:inherit;font-weight:700;cursor:pointer;
+  background:var(--navy);color:#fff;border:0;border-radius:10px;padding:.7rem}
+.gate button:hover{background:var(--navy2)}
+.gate .msg{margin-top:.8rem;font-size:.9rem;border-radius:9px;padding:.55rem .7rem;display:none}
+.gate .msg.err{display:block;background:#fdf0f3;color:var(--rouge);border:1px solid #f4d3da}
+.gate .msg.ok{display:block;background:var(--vert-bg);color:var(--green);border:1px solid #cfeae2}
+.locked{opacity:.55;pointer-events:none;filter:grayscale(.4)}
+
+/* ── mode lecture accessible (dyslexie / confort) ──────── */
+body.a11y{--rad:10px}
+body.a11y .wrap{max-width:760px}
+body.a11y .ex,body.a11y .loupe,body.a11y section.lec{font-size:1.08rem;line-height:2}
+body.a11y .ex .q,body.a11y details.sol .body p{letter-spacing:.03em;word-spacing:.14em}
+body.a11y .ex:nth-of-type(odd){background:#fffdf3}
+body.a11y details.sol .body{font-size:1.05rem}
+body.a11y b.k{background:#fff3d6}
+body.speaking .ex.reading{outline:2px solid var(--gold);outline-offset:3px;border-radius:10px}
+
+footer.bot{text-align:center;color:var(--gris);font-size:.84rem;padding:2rem 1rem;
+  border-top:1px solid var(--line)}
+
+@media(max-width:600px){
+  header.top h1{font-size:1.35rem}
+  .wrap{padding-top:1.2rem}
+  .constel{padding:1.4rem .8rem}
+  .constel .hub .disc{width:76px;height:76px;font-size:1.9rem}
+}
+@media(prefers-reduced-motion:reduce){.orbit a{transition:none}}
