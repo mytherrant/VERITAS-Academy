@@ -302,6 +302,9 @@ if ($action === 'init' && $method === 'POST') {
         'accountId'          => $accountId,
         'clientNom'          => $clientNom,
         'clientTel'          => $payerNumber,
+        // Cagnotte : mot laissé par le contributeur, affiché publiquement à
+        // côté de sa contribution une fois le paiement vérifié.
+        'fundMessage'        => mb_substr(trim((string)($input['fundMessage'] ?? '')), 0, 140),
         'operator'           => strtoupper($data['operator'] ?? ''),
         'ussd_code'          => $data['ussd_code'] ?? '',
         'status'             => 'pending',
@@ -731,7 +734,12 @@ if ($action === 'history' && $method === 'GET') {
 // 11. HOLDER — nom du titulaire d'un numéro (avant de payer)
 // ════════════════════════════════════════════════════════════
 if ($action === 'holder' && $method === 'GET') {
-    requirePayAuth();
+    // v1.14 : ouvert AUSSI au chemin public (jeton public + contrôle d'origine
+    // + rate-limit 10/h/IP, exactement comme `init`). Motif : confirmer au
+    // contributeur d'une cagnotte le NOM du titulaire avant de débiter — un
+    // chiffre saisi de travers envoie l'argent chez un inconnu. Le rate-limit
+    // est ce qui empêche d'en faire un annuaire inversé.
+    campayInitGuard($stateDir);
     campayRequireConfig();
     $tel = campayNormalizePhone(trim($_GET['tel'] ?? ''));
     if (strlen($tel) !== 12) jsonResp(['error' => 'Numéro invalide (ER101)'], 400);
@@ -741,9 +749,95 @@ if ($action === 'holder' && $method === 'GET') {
     jsonResp(['tel' => $tel, 'full_name' => $nom, 'found' => ($nom !== null)]);
 }
 
+// ════════════════════════════════════════════════════════════
+// 12. CAGNOTTES DE SCOLARITÉ — le lien partageable
+// ════════════════════════════════════════════════════════════
+// Au Cameroun, une scolarité n'est presque jamais payée par une seule
+// personne : l'oncle met 10 000, la marraine 5 000, la tante à Bruxelles
+// complète. Jusqu'ici VÉRITAS ne savait encaisser QUE le titulaire du
+// compte, connecté. La cagnotte renverse ça : l'élève obtient un LIEN,
+// l'envoie sur WhatsApp, et n'importe qui paie SANS créer de compte.
+//
+// Le paiement lui-même ne change pas d'un iota : le contributeur passe par
+// `action=init` (chemin public déjà durci — jeton public, contrôle
+// d'origine, rate-limit, plafond) avec intent='cagnotte' et targetId=<token>.
+// C'est `campayGrant()` qui, à la confirmation, inscrit la contribution.
+// Aucune écriture n'est déclenchée par le client : seul un paiement
+// réellement vérifié auprès de CamPay fait bouger le compteur.
+//
+//   POST ?action=fund_create   (admin)  → crée la cagnotte, renvoie le lien
+//   GET  ?action=fund_get&token=…       → vue PUBLIQUE (aucune donnée perso)
+//   GET  ?action=fund_list     (admin)  → toutes les cagnottes
+//   POST ?action=fund_close    (admin)  → clôture (plus de contribution)
+
+if ($action === 'fund_create' && $method === 'POST') {
+    requirePayAuth();
+    $in = json_decode(file_get_contents('php://input'), true) ?: [];
+
+    $prenom   = trim((string)($in['prenom']   ?? ''));
+    $objectif = (int)($in['objectif'] ?? 0);
+    if ($prenom === '')   jsonResp(['error' => 'prenom requis'], 400);
+    if ($objectif <= 0)   jsonResp(['error' => 'objectif (montant total à réunir) requis'], 400);
+
+    $token = bin2hex(random_bytes(12));   // 24 hex — non devinable
+    $fund = [
+        'token'      => $token,
+        'eleveId'    => trim((string)($in['eleveId'] ?? '')),
+        'prenom'     => mb_substr($prenom, 0, 40),
+        'classe'     => mb_substr(trim((string)($in['classe'] ?? '')), 0, 30),
+        'titre'      => mb_substr(trim((string)($in['titre'] ?? '')) ?: ('Scolarité de ' . $prenom), 0, 120),
+        'message'    => mb_substr(trim((string)($in['message'] ?? '')), 0, 600),
+        'objectif'   => $objectif,
+        'echeance'   => trim((string)($in['echeance'] ?? '')),   // AAAA-MM-JJ, facultatif
+        'statut'     => 'ouverte',
+        'created_at' => date('c'),
+        'contributions' => []
+    ];
+    if (!cagSave($fund)) jsonResp(['error' => 'Écriture impossible côté serveur'], 500);
+
+    jsonResp([
+        'success' => true,
+        'token'   => $token,
+        'url'     => 'https://veritas-school.com/#cagnotte?t=' . $token,
+        'fund'    => cagPublicView($fund)
+    ]);
+}
+
+if ($action === 'fund_get' && $method === 'GET') {
+    $fund = cagLoad(trim((string)($_GET['token'] ?? '')));
+    if (!$fund) jsonResp(['error' => 'Cagnotte introuvable ou lien expiré'], 404);
+    jsonResp(['success' => true, 'fund' => cagPublicView($fund)]);
+}
+
+if ($action === 'fund_list' && $method === 'GET') {
+    requirePayAuth();
+    $out = [];
+    foreach (glob(cagDir() . '*.json') ?: [] as $f) {
+        if (basename($f)[0] === '_') continue;
+        $p = json_decode((string)file_get_contents($f), true);
+        if (!is_array($p)) continue;
+        $v = cagPublicView($p);
+        $v['eleveId'] = $p['eleveId'] ?? '';
+        $out[] = $v;
+    }
+    usort($out, function ($a, $b) { return strcmp($b['created_at'] ?? '', $a['created_at'] ?? ''); });
+    jsonResp(['success' => true, 'count' => count($out), 'data' => $out]);
+}
+
+if ($action === 'fund_close' && $method === 'POST') {
+    requirePayAuth();
+    $in = json_decode(file_get_contents('php://input'), true) ?: [];
+    $fund = cagLoad(trim((string)($in['token'] ?? '')));
+    if (!$fund) jsonResp(['error' => 'Cagnotte introuvable'], 404);
+    $fund['statut'] = ($in['statut'] ?? 'close') === 'ouverte' ? 'ouverte' : 'close';
+    cagSave($fund);
+    jsonResp(['success' => true, 'fund' => cagPublicView($fund)]);
+}
+
 jsonResp(['error' => 'Action inconnue',
           'allowed' => ['init','notify','status','list','withdraw','masspayout',
-                        'masspayout_status','payouts','balance','history','holder']], 400);
+                        'masspayout_status','payouts','balance','history','holder',
+                        'fund_create','fund_get','fund_list','fund_close']], 400);
 
 // ════════════════════════════════════════════════════════════
 // HELPERS
@@ -951,12 +1045,133 @@ function campayApplyVerified($state, $verified, $logFile, $ref) {
 
 function campayGrant($state, $logFile, $ref) {
     if (($state['status'] ?? '') !== 'paid') return;
+
+    // Cagnotte : il n'y a AUCUN droit d'accès à ouvrir — on inscrit la
+    // contribution et on s'arrête là (ne pas laisser l'octroi d'entitlement
+    // interpréter un intent qu'il ne connaît pas).
+    if (($state['intent'] ?? '') === 'cagnotte') {
+        try {
+            $r = cagRecordContribution($state);
+            campayLog($logFile, date('c') . ' [CAGNOTTE] ref=' . $ref . ' ' . json_encode($r) . "\n");
+        } catch (\Throwable $e) {
+            campayLog($logFile, date('c') . ' [CAGNOTTE_ERR] ref=' . $ref . ' ' . $e->getMessage() . "\n");
+        }
+        return;
+    }
+
     try {
         $g = vrt_grant_entitlement_to_file($state);
         campayLog($logFile,date('c') . ' [GRANT] ref=' . $ref . ' ' . json_encode($g) . "\n");
     } catch (\Throwable $e) {
         campayLog($logFile,date('c') . ' [GRANT_ERR] ref=' . $ref . ' ' . $e->getMessage() . "\n");
     }
+}
+
+// ── Cagnottes : stockage, vue publique, inscription d'une contribution ──
+// Même doctrine que les paiements : dossier interdit en HTTP (deux sentinelles
+// créées au runtime), un fichier JSON par cagnotte, jamais de base à migrer.
+function cagDir() {
+    static $dir = null;
+    if ($dir !== null) return $dir;
+    $dir = __DIR__ . '/data/funds/';
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    if (!is_file($dir . '.htaccess')) {
+        @file_put_contents($dir . '.htaccess',
+            "Require all denied\n<IfModule !mod_authz_core.c>\nOrder allow,deny\nDeny from all\n</IfModule>\n");
+    }
+    if (!is_file($dir . 'index.php')) {
+        @file_put_contents($dir . 'index.php', "<?php http_response_code(403); exit;\n");
+    }
+    return $dir;
+}
+
+function cagFile($token) {
+    $t = preg_replace('/[^a-f0-9]/', '', strtolower((string)$token));
+    if (strlen($t) < 16) return null;              // jeton trop court = tentative
+    return cagDir() . 'fund_' . $t . '.json';
+}
+
+function cagLoad($token) {
+    $f = cagFile($token);
+    if (!$f || !is_file($f)) return null;
+    $d = json_decode((string)file_get_contents($f), true);
+    return is_array($d) ? $d : null;
+}
+
+function cagSave(array $fund) {
+    $f = cagFile($fund['token'] ?? '');
+    if (!$f) return false;
+    return (bool)@file_put_contents($f, json_encode($fund, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
+}
+
+// Vue PUBLIQUE — ce que voit l'oncle à Bruxelles. Jamais de numéro de
+// téléphone, jamais de nom de famille complet : « Awa T. ».
+function cagPublicView(array $fund) {
+    $contribs = [];
+    $total = 0;
+    foreach (($fund['contributions'] ?? []) as $c) {
+        $m = (int)($c['montant'] ?? 0);
+        $total += $m;
+        $contribs[] = [
+            'nom'     => cagShortName((string)($c['nom'] ?? '')),
+            'montant' => $m,
+            'date'    => substr((string)($c['date'] ?? ''), 0, 10),
+            'mot'     => mb_substr((string)($c['mot'] ?? ''), 0, 140)
+        ];
+    }
+    $objectif = (int)($fund['objectif'] ?? 0);
+    $reste    = max(0, $objectif - $total);
+    return [
+        'token'      => $fund['token'] ?? '',
+        'prenom'     => $fund['prenom'] ?? '',
+        'classe'     => $fund['classe'] ?? '',
+        'titre'      => $fund['titre'] ?? '',
+        'message'    => $fund['message'] ?? '',
+        'objectif'   => $objectif,
+        'collecte'   => $total,
+        'reste'      => $reste,
+        'pourcent'   => $objectif > 0 ? min(100, (int)round($total * 100 / $objectif)) : 0,
+        'echeance'   => $fund['echeance'] ?? '',
+        'statut'     => $fund['statut'] ?? 'ouverte',
+        'created_at' => $fund['created_at'] ?? '',
+        'nb'         => count($contribs),
+        'contributions' => array_reverse($contribs)   // la plus récente d'abord
+    ];
+}
+
+// « Marie-Claire NGOUEWOUE » → « Marie-Claire N. »
+function cagShortName($nom) {
+    $nom = trim(preg_replace('/\s+/', ' ', (string)$nom));
+    if ($nom === '') return 'Anonyme';
+    $mots = explode(' ', $nom);
+    if (count($mots) === 1) return mb_substr($mots[0], 0, 24);
+    $last = array_pop($mots);
+    return mb_substr(implode(' ', $mots), 0, 24) . ' ' . mb_strtoupper(mb_substr($last, 0, 1)) . '.';
+}
+
+// Inscription IDEMPOTENTE : une référence de paiement = une contribution.
+// Rejouer le webhook (CamPay le fait) ne double jamais le compteur.
+function cagRecordContribution(array $state) {
+    $fund = cagLoad((string)($state['targetId'] ?? ''));
+    if (!$fund) return ['ok' => false, 'reason' => 'cagnotte introuvable'];
+
+    $ref = (string)($state['ref'] ?? '');
+    foreach (($fund['contributions'] ?? []) as $c) {
+        if ((string)($c['ref'] ?? '') === $ref) return ['ok' => true, 'already' => true];
+    }
+
+    $fund['contributions'][] = [
+        'ref'     => $ref,
+        'nom'     => (string)($state['clientNom'] ?? ''),
+        'montant' => (int)($state['montant_paye'] ?? $state['montant'] ?? 0),
+        'mot'     => (string)($state['fundMessage'] ?? ''),
+        'date'    => date('c'),
+        'operator'=> (string)($state['operator'] ?? '')
+    ];
+    cagSave($fund);
+
+    $v = cagPublicView($fund);
+    return ['ok' => true, 'collecte' => $v['collecte'], 'objectif' => $v['objectif'], 'nb' => $v['nb']];
 }
 
 // Nom du titulaire d'un numéro (/api/holder_info/). null si introuvable.

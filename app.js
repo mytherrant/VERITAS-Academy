@@ -4762,6 +4762,14 @@ function vShowSec(sec,btn){
   if(sec==='parents' && typeof pgParents==='function'){
     c.innerHTML = pgParents(); return;
   }
+  // v1.14 — CAGNOTTE DE SCOLARITÉ. Section publique atteinte par un lien
+  // partagé (#cagnotte?t=…) : le contributeur n'a aucun compte à créer.
+  if(sec==='cagnotte' && typeof pgCagnotte==='function'){
+    c.innerHTML = pgCagnotte(); return;
+  }
+  if(sec==='trophees' && typeof pgTrophees==='function'){
+    c.innerHTML = pgTrophees(); return;
+  }
   if(sec==='leaderboard-junior' && typeof pgLeaderboardJunior==='function'){
     c.innerHTML = pgLeaderboardJunior(); return;
   }
@@ -10145,6 +10153,9 @@ function render(p){
     'verifier-certificat':pgCertificateVerify,
     'leaderboard-junior':pgLeaderboardJunior,
     'nos-partenaires':pgInstitutionalShowcase,
+    // v1.14 — Trophées VÉRITAS (côté centre) et cagnottes de scolarité.
+    trophees_admin: (typeof pgTropheesAdmin==='function' ? pgTropheesAdmin : null),
+    cagnottes: (typeof pgCagnottesAdmin==='function' ? pgCagnottesAdmin : null),
     // Super Admin
     superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,sacontrol:pgSAControl,
     // Guide d'utilisation (tous rôles)
@@ -40355,6 +40366,14 @@ openPaymentModal = function(payInfo){
     +'<div style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;margin-top:4px">'+_esc(label)+'</div>'
     +'<div style="font-size:28px;font-weight:900;color:#FFC93C;margin-top:8px" id="payStepTotal">'+montantFmt+'</div>'
     +'<div style="font-size:11px;opacity:.7;margin-top:2px">≈ '+montantEUR+' € / USD</div>'
+    // v1.14 — TRANSPARENCE DES FRAIS. Un parent qui découvre un écart entre le
+    // prix annoncé et la somme débitée ne revient pas payer une seconde fois.
+    // On annonce donc les frais opérateur AVANT le paiement, et on dit qu'ils
+    // sont absorbés : le client paie le montant affiché, pas un franc de plus.
+    +'<div style="margin-top:10px;padding:7px 11px;background:rgba(255,255,255,.08);border-radius:8px;font-size:11.5px;line-height:1.5">'
+      +'Frais opérateur estimés (2 %) : <strong>'+new Intl.NumberFormat('fr-FR').format(Math.round(montant*0.02))+' FCFA</strong>'
+      +' — <span style="opacity:.85">pris en charge par le centre. Vous êtes débité de <strong style="color:#FFC93C">'+montantFmt+'</strong>.</span>'
+    +'</div>'
     +'</div>'
     +'<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;margin-bottom:10px;color:var(--ink)">👤 Vos coordonnées</div>'
     +'<div class="fg2">'
@@ -43943,3 +43962,889 @@ window._vtMoyenneCalc = function(){
 setTimeout(function(){ try{ _vtProofFeed(); }catch(e){} }, 6000);
 
 /* ════════════════════ FIN RELATION CLIENT & ESPACE PARENTS ════════════════════ */
+
+
+/* ═══════════════════ CAGNOTTE DE SCOLARITÉ — LIEN PARTAGEABLE (v1.14) ═══════════════════
+   Une scolarité camerounaise n'est presque jamais payée par une seule personne.
+   Jusqu'ici VÉRITAS ne savait encaisser que le titulaire du compte, connecté :
+   la tante à Bruxelles ne pouvait rien payer sans créer un compte, et l'élève
+   ne pouvait pas demander 10 000 F à son oncle sans passer par l'admin.
+
+   La cagnotte renverse ça. L'élève obtient UN LIEN, l'envoie sur WhatsApp, et
+   n'importe qui contribue sans compte. La barre de progression est publique,
+   chaque contributeur reçoit un reçu, et le compteur ne bouge QUE sur un
+   paiement vérifié auprès de CamPay (c'est campayGrant() qui écrit, jamais le
+   client). Aucune donnée personnelle n'est exposée : « Awa T. », pas de numéro.
+
+   Ce module absorbe deux chantiers qui étaient séparés : le lien de facture
+   (payer sans compte) et le paiement en tranches (plusieurs versements) — ici
+   les tranches sont simplement des contributeurs différents.                    */
+
+window._CAG = { fund:null, montant:10000, token:'' };
+
+// Paliers : le défaut est le palier INTERMÉDIAIRE, pas le minimum.
+var _CAG_PALIERS = [2000, 5000, 10000, 25000, 50000];
+
+function _cagToken(){
+  var h = (window.location.hash||'');
+  var q = h.indexOf('?');
+  if(q < 0) return '';
+  var out = '';
+  h.substring(q+1).split('&').forEach(function(kv){
+    var p = kv.split('=');
+    if(decodeURIComponent(p[0]||'') === 't') out = decodeURIComponent(p[1]||'');
+  });
+  return out.replace(/[^a-f0-9]/gi,'').toLowerCase();
+}
+
+window.pgCagnotte = function(){
+  var tk = _cagToken();
+  window._CAG.token = tk;
+
+  if(!tk){
+    // Sans jeton : page d'explication (elle sert aussi de vitrine).
+    return '<div style="max-width:640px;margin:26px auto;padding:20px">'
+      + '<h1 class="pgt" style="text-align:center">🎓 Cagnotte de scolarité</h1>'
+      + '<div style="text-align:center;color:var(--ink3);font-size:14px;line-height:1.6;margin-bottom:20px">'
+      +   'Une scolarité se paie rarement seul. Avec la cagnotte VÉRITAS, l\'élève reçoit un lien '
+      +   'à envoyer à sa famille : chacun contribue de ce qu\'il peut, depuis le Cameroun ou depuis '
+      +   'l\'étranger, <strong>sans créer de compte</strong>. La progression est visible par tous, '
+      +   'et chaque versement est confirmé par l\'opérateur.'
+      + '</div>'
+      + '<div class="card" style="padding:16px">'
+      +   '<div style="font-weight:800;margin-bottom:8px">Comment ça marche</div>'
+      +   '<ol style="margin:0 0 0 18px;padding:0;font-size:13.5px;line-height:1.9;color:var(--ink2)">'
+      +     '<li>Le centre ouvre la cagnotte et vous remet le lien.</li>'
+      +     '<li>Vous l\'envoyez sur WhatsApp à qui vous voulez.</li>'
+      +     '<li>Chacun paie par MTN MoMo ou Orange Money, en une minute.</li>'
+      +     '<li>La barre monte, tout le monde voit où on en est.</li>'
+      +   '</ol>'
+      + '</div>'
+      + '<div style="text-align:center;margin-top:18px">'
+      +   '<button class="btn bi" onclick="_vtWaOpen(\'cagnotte\')">💬 Demander l\'ouverture d\'une cagnotte</button>'
+      + '</div></div>';
+  }
+
+  // Avec jeton : coquille + chargement asynchrone.
+  // ⚠️ L'accueil se re-rend plusieurs fois : on re-cherche le conteneur DANS
+  //    le callback, jamais une référence capturée avant le fetch.
+  setTimeout(_cagCharger, 30);
+  return '<div id="cagWrap" style="max-width:660px;margin:26px auto;padding:20px">'
+    + '<div style="text-align:center;color:var(--ink3);padding:40px 0">⏳ Chargement de la cagnotte…</div>'
+    + '</div>';
+};
+
+function _cagCharger(){
+  var base = (typeof _payApiBase==='function') ? _payApiBase() : '';
+  var tk = window._CAG.token;
+  if(!base || !tk){ _cagErreur('Serveur indisponible.'); return; }
+
+  var ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
+  var minuteur = setTimeout(function(){ try{ ctrl && ctrl.abort(); }catch(e){} }, 12000);
+
+  fetch(base+'/payment_campay.php?action=fund_get&token='+encodeURIComponent(tk),
+        ctrl ? {signal:ctrl.signal} : {})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      clearTimeout(minuteur);
+      if(!d || !d.success || !d.fund){ _cagErreur(d && d.error ? d.error : 'Cagnotte introuvable.'); return; }
+      window._CAG.fund = d.fund;
+      _cagRendre(d.fund);
+    })
+    .catch(function(){ clearTimeout(minuteur); _cagErreur('Connexion au serveur impossible.'); });
+}
+
+function _cagErreur(msg){
+  var w = document.getElementById('cagWrap');
+  if(!w) return;
+  w.innerHTML = '<div class="card" style="padding:24px;text-align:center">'
+    + '<div style="font-size:40px">🔎</div>'
+    + '<div style="font-weight:800;margin:8px 0 4px">Cagnotte indisponible</div>'
+    + '<div style="color:var(--ink3);font-size:13.5px">'+_esc(msg)+'</div>'
+    + '<div style="margin-top:14px"><button class="btn bo sm" onclick="_vtWaOpen(\'cagnotte\')">💬 Nous écrire</button></div>'
+    + '</div>';
+}
+
+function _cagJoursRestants(iso){
+  if(!iso) return null;
+  var d = new Date(iso+'T23:59:59');
+  if(isNaN(d.getTime())) return null;
+  return Math.ceil((d.getTime() - Date.now())/86400000);
+}
+
+function _cagRendre(f){
+  var w = document.getElementById('cagWrap');
+  if(!w) return;
+
+  var pct = Math.max(0, Math.min(100, f.pourcent||0));
+  var jours = _cagJoursRestants(f.echeance);
+  var close = (f.statut !== 'ouverte') || (f.reste <= 0);
+
+  var h = '';
+
+  // ── En-tête ──
+  h += '<div style="text-align:center;margin-bottom:18px">'
+    + '<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);font-weight:800">Cagnotte de scolarité · Centre VÉRITAS</div>'
+    + '<h1 class="pgt" style="margin:6px 0 2px">'+_esc(f.titre||('Scolarité de '+f.prenom))+'</h1>'
+    + (f.classe ? '<div style="color:var(--ink3);font-size:13.5px">'+_esc(f.prenom)+' · classe de '+_esc(f.classe)+'</div>' : '')
+    + '</div>';
+
+  // ── Progression ──
+  h += '<div class="card" style="padding:18px;margin-bottom:14px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">'
+    +   '<div style="font-size:24px;font-weight:900;color:var(--gr,#059669)">'+fmt(f.collecte||0)+'</div>'
+    +   '<div style="font-size:13px;color:var(--ink3)">sur '+fmt(f.objectif||0)+'</div>'
+    + '</div>'
+    + '<div style="height:14px;background:var(--bg2,#eef2f7);border-radius:99px;overflow:hidden">'
+    +   '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#059669,#10B981);border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1)"></div>'
+    + '</div>'
+    + '<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12.5px;color:var(--ink3)">'
+    +   '<span><strong>'+pct+' %</strong> réunis</span>'
+    +   '<span>'+(f.reste>0 ? 'Il manque <strong>'+fmt(f.reste)+'</strong>' : '🎉 Objectif atteint')+'</span>'
+    + '</div>'
+    + (jours !== null && jours >= 0 && !close
+        ? '<div style="margin-top:10px;text-align:center;font-size:12.5px;color:#B45309;background:rgba(217,119,6,.10);padding:7px;border-radius:8px">'
+          + '⏳ Il reste <strong>'+jours+' jour'+(jours>1?'s':'')+'</strong> avant l\'échéance</div>'
+        : '')
+    + (f.nb ? '<div style="margin-top:10px;text-align:center;font-size:12.5px;color:var(--ink3)"><strong>'+f.nb+'</strong> personne'+(f.nb>1?'s ont':' a')+' déjà participé</div>' : '')
+    + '</div>';
+
+  // ── Mot de l'élève / du centre ──
+  if(f.message){
+    h += '<div class="card" style="padding:16px;margin-bottom:14px;border-left:4px solid var(--gold,#FFC93C)">'
+      + '<div style="font-size:13.5px;line-height:1.7;color:var(--ink2);font-style:italic">« '+_esc(f.message)+' »</div>'
+      + '</div>';
+  }
+
+  // ── Formulaire de contribution ──
+  if(close){
+    h += '<div class="card" style="padding:20px;text-align:center;margin-bottom:14px">'
+      + '<div style="font-size:34px">✅</div>'
+      + '<div style="font-weight:800;margin-top:6px">Cette cagnotte est clôturée</div>'
+      + '<div style="color:var(--ink3);font-size:13px;margin-top:4px">Merci à toutes les personnes qui ont participé.</div>'
+      + '</div>';
+  } else {
+    h += '<div class="card" style="padding:18px;margin-bottom:14px">'
+      + '<div style="font-weight:800;margin-bottom:4px">Participer</div>'
+      + '<div style="font-size:12.5px;color:var(--ink3);margin-bottom:12px">Aucun compte à créer. Paiement MTN MoMo ou Orange Money.</div>'
+      + '<div style="font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:6px">Montant</div>'
+      + '<div id="cagPaliers" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px">'
+      + _CAG_PALIERS.map(function(m){
+          var on = (m === window._CAG.montant);
+          return '<button type="button" class="btn '+(on?'bi':'bo')+' sm" data-m="'+m+'" onclick="_cagPalier('+m+')" '
+            + 'style="flex:1 1 96px;min-width:96px'+(on?';font-weight:800':'')+'">'+fmtN(m)+' F</button>';
+        }).join('')
+      + '</div>'
+      + '<div class="fg"><span class="fl">Autre montant (FCFA)</span>'
+      +   '<input class="fi" id="cagAutre" type="number" min="500" step="500" placeholder="ex. 15000" oninput="_cagPalierLibre(this.value)"></div>'
+      + '<div class="fg"><span class="fl">Votre nom (affiché publiquement en « '+_esc('Awa T.')+' »)</span>'
+      +   '<input class="fi" id="cagNom" placeholder="ex. Awa Tchoumi" maxlength="40"></div>'
+      + '<div class="fg"><span class="fl">Votre numéro MTN ou Orange</span>'
+      +   '<input class="fi" id="cagTel" inputmode="tel" placeholder="ex. 6 77 00 11 22" maxlength="17" onblur="_cagVerifierTitulaire()"></div>'
+      + '<div id="cagTitulaire" style="font-size:12.5px;margin:-4px 0 10px;min-height:16px"></div>'
+      + '<div class="fg"><span class="fl">Un mot pour '+_esc(f.prenom)+' (facultatif)</span>'
+      +   '<input class="fi" id="cagMot" placeholder="Courage, on est avec toi !" maxlength="140"></div>'
+      + '<div id="cagRecap" style="background:var(--bg2,#f6f8fb);border-radius:10px;padding:12px;font-size:13px;margin-bottom:12px"></div>'
+      + '<button class="btn bi" style="width:100%;padding:14px;font-size:15px;font-weight:800" onclick="_cagPayer()">📲 Contribuer maintenant</button>'
+      + '<div style="font-size:11.5px;color:var(--ink4);text-align:center;margin-top:8px;line-height:1.5">'
+      +   'Vous recevrez une demande de confirmation sur votre téléphone. '
+      +   'L\'argent va directement au Centre VÉRITAS, pour la scolarité de '+_esc(f.prenom)+'.'
+      + '</div>'
+      + '</div>';
+  }
+
+  // ── Contributeurs ──
+  if(f.contributions && f.contributions.length){
+    h += '<div class="card" style="padding:16px;margin-bottom:14px">'
+      + '<div style="font-weight:800;margin-bottom:10px">Ils ont participé</div>'
+      + f.contributions.map(function(c){
+          return '<div style="display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg3,#eef2f7)">'
+            + '<div><div style="font-weight:700;font-size:13.5px">'+_esc(c.nom)+'</div>'
+            + (c.mot ? '<div style="font-size:12px;color:var(--ink3);font-style:italic">« '+_esc(c.mot)+' »</div>' : '')
+            + '</div>'
+            + '<div style="text-align:right;white-space:nowrap"><div style="font-weight:800;color:var(--gr,#059669);font-size:13.5px">'+fmt(c.montant)+'</div>'
+            + '<div style="font-size:11px;color:var(--ink4)">'+_esc(c.date||'')+'</div></div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+  }
+
+  // ── Partage ──
+  h += '<div style="text-align:center;padding:6px 0 20px">'
+    + '<button class="btn bo" onclick="_cagPartager()">📤 Partager cette cagnotte</button>'
+    + '</div>';
+
+  w.innerHTML = h;
+  _cagRecap();
+}
+
+function _cagPalier(m){
+  window._CAG.montant = m;
+  var libre = document.getElementById('cagAutre');
+  if(libre) libre.value = '';
+  var box = document.getElementById('cagPaliers');
+  if(box){
+    box.querySelectorAll('button').forEach(function(b){
+      var on = (parseInt(b.getAttribute('data-m'),10) === m);
+      b.className = 'btn '+(on?'bi':'bo')+' sm';
+      b.style.fontWeight = on ? '800' : '';
+    });
+  }
+  _cagRecap();
+}
+
+function _cagPalierLibre(v){
+  var m = parseInt(String(v).replace(/[^0-9]/g,''),10);
+  if(!isNaN(m) && m > 0){
+    window._CAG.montant = m;
+    var box = document.getElementById('cagPaliers');
+    if(box) box.querySelectorAll('button').forEach(function(b){ b.className='btn bo sm'; b.style.fontWeight=''; });
+  }
+  _cagRecap();
+}
+
+// Récapitulatif AVANT paiement, frais compris. Le contributeur ne doit
+// jamais découvrir un écart après coup : les frais opérateur (~2 %) sont
+// pris en charge par le centre, on l'écrit noir sur blanc.
+function _cagRecap(){
+  var el = document.getElementById('cagRecap');
+  if(!el) return;
+  var m = window._CAG.montant || 0;
+  var taux = 0.02;
+  var frais = Math.round(m * taux);
+  el.innerHTML = '<div style="display:flex;justify-content:space-between"><span>Votre contribution</span><strong>'+fmt(m)+'</strong></div>'
+    + '<div style="display:flex;justify-content:space-between;color:var(--ink3);margin-top:4px">'
+    +   '<span>Frais opérateur estimés (2 %)</span><span>'+fmt(frais)+'</span></div>'
+    + '<div style="display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid var(--bg3,#e5e9f0)">'
+    +   '<span><strong>Vous serez débité de</strong></span><strong style="color:var(--gr,#059669)">'+fmt(m)+'</strong></div>'
+    + '<div style="font-size:11.5px;color:var(--ink4);margin-top:6px">Les frais opérateur sont pris en charge par le Centre VÉRITAS : vous payez exactement le montant choisi.</div>';
+}
+
+// Confirmation du NOM du titulaire avant de débiter : un chiffre saisi de
+// travers envoie l'argent chez un inconnu, et personne ne le voit passer.
+function _cagVerifierTitulaire(){
+  var el = document.getElementById('cagTitulaire');
+  var tel = (document.getElementById('cagTel')||{}).value || '';
+  if(!el) return;
+  var digits = tel.replace(/[^0-9]/g,'');
+  if(digits.length < 9){ el.innerHTML=''; return; }
+
+  var base = (typeof _payApiBase==='function') ? _payApiBase() : '';
+  var tok  = (typeof _payInitToken==='function') ? _payInitToken() : '';
+  if(!base || !tok){ el.innerHTML=''; return; }
+
+  el.innerHTML = '<span style="color:var(--ink4)">⏳ Vérification du numéro…</span>';
+  fetch(base+'/payment_campay.php?action=holder&tel='+encodeURIComponent(digits),
+        {headers:{'Authorization':'Bearer '+tok}})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var e2 = document.getElementById('cagTitulaire');   // re-cherché : le DOM a pu changer
+      if(!e2) return;
+      if(d && d.found && d.full_name){
+        e2.innerHTML = '<span style="color:var(--gr,#059669);font-weight:700">✓ Compte au nom de '+_esc(d.full_name)+'</span>';
+      } else {
+        e2.innerHTML = '<span style="color:var(--ink4)">Numéro non reconnu — vérifiez-le avant de valider.</span>';
+      }
+    })
+    .catch(function(){
+      var e2 = document.getElementById('cagTitulaire');
+      if(e2) e2.innerHTML = '';
+    });
+}
+
+function _cagPayer(){
+  var f = window._CAG.fund;
+  if(!f){ toast('Cagnotte non chargée','warn'); return; }
+
+  var m   = parseInt(window._CAG.montant,10) || 0;
+  var nom = ((document.getElementById('cagNom')||{}).value||'').trim();
+  var tel = ((document.getElementById('cagTel')||{}).value||'').replace(/[^0-9+]/g,'');
+  var mot = ((document.getElementById('cagMot')||{}).value||'').trim();
+
+  if(m < 500){ toast('Montant minimum : 500 FCFA','warn'); return; }
+  if(!nom){ toast('Indiquez votre nom — il apparaîtra sur la cagnotte','warn'); var n=document.getElementById('cagNom'); if(n)n.focus(); return; }
+  if(tel.replace(/[^0-9]/g,'').length < 9){ toast('Entrez un numéro MTN ou Orange valide','warn'); var t=document.getElementById('cagTel'); if(t)t.focus(); return; }
+
+  var base = (typeof _payApiBase==='function') ? _payApiBase() : '';
+  var tok  = (typeof _payInitToken==='function') ? _payInitToken() : '';
+  if(!base || !tok){
+    toast('Le paiement en ligne n\'est pas encore actif — contactez le centre par WhatsApp','warn');
+    return;
+  }
+
+  var ref = 'CAG' + (f.token||'').substring(0,6).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+
+  toast('⏳ Envoi de la demande sur '+tel+'…','info');
+  fetch(base+'/payment_campay.php?action=init', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
+    body: JSON.stringify({
+      ref:ref, montant:m, label:'Cagnotte '+(f.prenom||''), intent:'cagnotte',
+      targetId:f.token, clientNom:nom, clientTel:tel, fundMessage:mot
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(!d || d.error){ toast('❌ '+((d&&d.error)||'Paiement impossible'),'err'); return; }
+    var orange = (d.operator === 'ORANGE');
+    M('⏳ Confirmez sur votre téléphone', 'Référence : '+ref,
+      '<div style="text-align:center;padding:18px">'
+      + '<div style="font-size:56px">'+(orange?'🟠':'📱')+'</div>'
+      + '<div style="font-size:14px;margin:10px 0"><strong>Une demande de '+fmt(m)+' a été envoyée au '+_esc(tel)+'.</strong></div>'
+      + '<div style="font-size:13px;color:var(--ink3);background:var(--bg2,#f6f8fb);padding:12px;border-radius:8px;line-height:1.6">'
+      +   'Validez-la avec votre <strong>code secret</strong> '+(orange?'Orange Money':'MTN MoMo')+'.'
+      +   (d.ussd_code ? '<br><span style="font-size:12px">Si rien ne s\'affiche à l\'écran, composez <strong>'+_esc(d.ussd_code)+'</strong> puis suivez les instructions.</span>'
+                       : '<br><span style="font-size:12px">Si rien ne s\'affiche, ouvrez le menu de votre opérateur pour valider la demande en attente.</span>')
+      + '</div>'
+      + '<div id="cagStatut" style="margin-top:14px;font-size:13px;font-weight:700;padding:10px;background:var(--bg2,#f6f8fb);border-radius:8px">⏳ En attente de votre validation…</div>'
+      + '</div>',
+      '<button class="btn bo" onclick="cm();_cagStopPoll()">Fermer</button>');
+    _cagPoll(ref);
+  })
+  .catch(function(){ toast('❌ Connexion au serveur impossible','err'); });
+}
+
+var _cagPollTimer = null;
+function _cagStopPoll(){ if(_cagPollTimer){ clearInterval(_cagPollTimer); _cagPollTimer = null; } }
+
+function _cagPoll(ref){
+  _cagStopPoll();
+  var base = (typeof _payApiBase==='function') ? _payApiBase() : '';
+  if(!base) return;
+  var n = 0;
+  _cagPollTimer = setInterval(function(){
+    n++;
+    if(n > 36){   // ~3 min
+      _cagStopPoll();
+      var e = document.getElementById('cagStatut');
+      if(e){ e.innerHTML = '⏰ Délai dépassé. Si vous avez validé, la cagnotte se mettra à jour d\'elle-même.'; e.style.color = '#B45309'; }
+      return;
+    }
+    fetch(base+'/payment_campay.php?action=status&ref='+encodeURIComponent(ref))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var e = document.getElementById('cagStatut');
+        if(!e) return;
+        if(d && d.status === 'paid'){
+          _cagStopPoll();
+          e.innerHTML = '✅ Merci ! Votre contribution est enregistrée.';
+          e.style.color = 'var(--gr,#059669)';
+          try{ if(typeof _track==='function') _track('pay_init', {t:'cagnotte'}); }catch(_e){}
+          setTimeout(function(){ cm(); _cagCharger(); toast('✅ Merci pour votre contribution !','ok'); }, 2200);
+        } else if(d && (d.status === 'failed' || d.status === 'underpaid')){
+          _cagStopPoll();
+          e.innerHTML = (d.status === 'underpaid')
+            ? '⚠️ Montant incomplet — contactez le centre avec la référence '+_esc(ref)+'.'
+            : '❌ Paiement non abouti. Vous pouvez réessayer.';
+          e.style.color = '#DC2626';
+        }
+      })
+      .catch(function(){});
+  }, 5000);
+}
+
+function _cagPartager(){
+  var f = window._CAG.fund;
+  if(!f) return;
+  var url = 'https://veritas-school.com/#cagnotte?t=' + (f.token||'');
+  var txt = 'Bonjour, j\'ouvre la cagnotte pour la scolarité de ' + (f.prenom||'') + '. '
+          + 'Il manque ' + fmt(f.reste||0) + ' sur ' + fmt(f.objectif||0) + '. '
+          + 'Chacun met ce qu\'il peut, c\'est en une minute : ' + url;
+  try{
+    if(navigator.share){ navigator.share({title:'Cagnotte VÉRITAS', text:txt, url:url}); return; }
+  }catch(e){}
+  window.open('https://wa.me/?text='+encodeURIComponent(txt), '_blank', 'noopener');
+}
+
+/* ── Côté centre : ouvrir une cagnotte et récupérer le lien ── */
+window.mCagnotteCreer = function(eleve){
+  if(typeof iA==='function' && !iA()){ toast('Réservé à l\'administration','warn'); return; }
+  var e = eleve || {};
+  M('🎓 Ouvrir une cagnotte de scolarité',
+    'Le lien s\'envoie sur WhatsApp — le contributeur n\'a aucun compte à créer.',
+    '<div class="fg"><span class="fl">Prénom de l\'élève *</span><input class="fi" id="cgPre" value="'+_esc(e.pre||'')+'"></div>'
+    + '<div class="fg"><span class="fl">Classe</span><input class="fi" id="cgCls" value="'+_esc(e.cls||'')+'"></div>'
+    + '<div class="fg"><span class="fl">Montant à réunir (FCFA) *</span><input class="fi" id="cgObj" type="number" min="1000" step="500" placeholder="ex. 90000"></div>'
+    + '<div class="fg"><span class="fl">Échéance (facultatif)</span><input class="fi" id="cgEch" type="date"></div>'
+    + '<div class="fg"><span class="fl">Mot affiché sur la page (facultatif)</span>'
+    +   '<textarea class="fi" id="cgMsg" rows="3" maxlength="600" placeholder="Ex. : Rita est en Terminale A4. Il lui manque la scolarité du 2e trimestre pour continuer."></textarea></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_cagCreer(\''+_esc(e.id||'')+'\')">✓ Créer la cagnotte</button>');
+};
+
+function _cagCreer(eleveId){
+  var pre = ((_ge('cgPre')||{}).value||'').trim();
+  var obj = parseInt(((_ge('cgObj')||{}).value||'0').replace(/[^0-9]/g,''),10);
+  if(!pre){ toast('Prénom requis','warn'); return; }
+  if(!obj || obj < 1000){ toast('Indiquez le montant à réunir','warn'); return; }
+
+  var cc = DB.cloudConfig || {};
+  if(!cc.url || !cc.secret){ toast('Configurez la synchronisation serveur d\'abord','warn'); return; }
+
+  toast('⏳ Création…','info');
+  fetch(cc.url.replace(/\/+$/,'')+'/payment_campay.php?action=fund_create', {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+cc.secret},
+    body: JSON.stringify({
+      eleveId: eleveId||'', prenom: pre,
+      classe: ((_ge('cgCls')||{}).value||'').trim(),
+      objectif: obj,
+      echeance: ((_ge('cgEch')||{}).value||''),
+      message: ((_ge('cgMsg')||{}).value||'').trim()
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(!d || !d.success){ toast('❌ '+((d&&d.error)||'Création impossible'),'err'); return; }
+    DB.cagnottes = DB.cagnottes || [];
+    DB.cagnottes.push({token:d.token, eleveId:eleveId||'', prenom:pre, objectif:obj, url:d.url, date:today()});
+    save();
+    var msg = 'Bonjour, j\'ouvre la cagnotte pour la scolarité de '+pre+' ('+fmt(obj)+'). '
+            + 'Chacun met ce qu\'il peut, sans créer de compte : '+d.url;
+    cm();
+    M('✅ Cagnotte ouverte', pre+' · objectif '+fmt(obj),
+      '<div style="text-align:center;padding:10px">'
+      + '<div style="font-size:44px">🔗</div>'
+      + '<div style="font-size:13px;color:var(--ink3);margin:8px 0 12px">Voici le lien à envoyer. Il fonctionne pour tout le monde, y compris depuis l\'étranger.</div>'
+      + '<div style="background:var(--bg2,#f6f8fb);padding:12px;border-radius:8px;font-family:monospace;font-size:12px;word-break:break-all">'+_esc(d.url)+'</div>'
+      + '</div>',
+      '<button class="btn bo" onclick="_payCopy(\''+_esc(d.url)+'\')">📋 Copier</button>'
+      + '<button class="btn bi" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msg)+'\',\'_blank\',\'noopener\')">💬 Envoyer sur WhatsApp</button>');
+  })
+  .catch(function(){ toast('❌ Connexion serveur impossible','err'); });
+}
+
+/* ══════════════════════════ ROUTAGE PAR ANCRE (v1.13.1) ══════════════════════════
+   vShowSec sait afficher « verifier-certificat », « parents », les programmes de
+   partenariat… mais RIEN ne lisait location.hash au chargement. Conséquence
+   vérifiée en production : le QR imprimé sur chaque certificat VÉRITAS
+   (/#verifier-certificat?cert=…&token=…) et les appels à l'action des pages
+   outils/ (/#parents) tombaient tous sur la page d'accueil.
+
+   Ce routeur est volontairement placé en toute fin de fichier : vShowSec est
+   redéfini plus haut (patch ~l.22707), et on veut appeler la version finale.
+   Liste blanche explicite — un hash inconnu (#top, ancre CSS) ne déclenche rien. */
+(function _vtHashRouter(){
+  var SECTIONS = ['presentation','actualites','elearning','boutique','orientation',
+                  'contact','photos','resultats','parents','partenariat',
+                  'mes-partenariats','verifier-certificat','leaderboard-junior',
+                  'nos-partenaires','cagnotte','trophees'];
+
+  function sectionDuHash(){
+    var h = (window.location.hash || '').replace(/^#/, '');
+    if(!h) return '';
+    var sec = h.split('?')[0].trim();
+    if(!sec) return '';
+    // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
+    if(sec.indexOf('partenariat-') === 0) return sec;
+    return SECTIONS.indexOf(sec) >= 0 ? sec : '';
+  }
+
+  function router(){
+    var sec = sectionDuHash();
+    if(!sec) return;
+    if(typeof window.vShowSec !== 'function') return;
+    // #vContent n'existe que dans l'espace visiteur : un utilisateur connecté
+    // qui reçoit un lien à ancre n'a pas à voir sa session interrompue.
+    if(!document.getElementById('vContent')) return;
+    if(window._vCurrentSec === sec) return;   // déjà affiché (ex. _cvSubmit)
+    try{ window.vShowSec(sec, null); }catch(e){}
+  }
+
+  // Au chargement : après l'amorçage de l'espace visiteur, qui rend l'accueil.
+  if(document.readyState === 'complete') setTimeout(router, 60);
+  else window.addEventListener('load', function(){ setTimeout(router, 60); });
+
+  // Et à chaque changement d'ancre (retour arrière, lien interne, _cvSubmit).
+  window.addEventListener('hashchange', router);
+})();
+
+
+/* ═══════════════════ TROPHÉES VÉRITAS — TABLEAU D'HONNEUR (v1.14) ═══════════════════
+   Réponse directe aux « awards » à vote payant qui fleurissent au Cameroun
+   (100 F la voix, packs de 100). Deux différences de fond, et elles sont
+   structurelles :
+
+   1. LE VOTE EST GRATUIT ET UNIQUE. Une personne inscrite = une voix par
+      catégorie. Aucun « super-vote » : un palmarès qui s'achète ne distingue
+      personne, il classe des carnets d'adresses.
+   2. LA DISTINCTION EST VÉRIFIABLE. Chaque trophée décerné passe par
+      _certRegister() : identifiant + jeton dans DB.certificats, contrôlables
+      par n'importe qui sur /#verifier-certificat. Les awards concurrents
+      remettent des diplômes que personne ne peut authentifier.
+
+   Règle d'affichage héritée du reste du produit : une catégorie sans voix
+   affiche « vote ouvert », JAMAIS « 0 voix », et aucun rang n'est publié tant
+   que personne n'a voté — un classement alphabétique déguisé en palmarès
+   décourage les nommés et trompe le public.                                    */
+
+function _trEd(){
+  DB.trophees = DB.trophees || {editions:[]};
+  return DB.trophees;
+}
+function _trCourante(){
+  var t = _trEd();
+  for(var i=t.editions.length-1;i>=0;i--){ if(t.editions[i].statut==='ouverte') return t.editions[i]; }
+  return null;
+}
+function _trVotantId(){
+  if(typeof SES==='undefined' || !SES) return '';
+  return String(SES.id || SES.accountId || '');
+}
+function _trAVote(cat){
+  var v = _trVotantId();
+  if(!v) return false;
+  return (cat.nominations||[]).some(function(n){ return (n.votes||[]).indexOf(v) >= 0; });
+}
+function _trTotalVoix(cat){
+  return (cat.nominations||[]).reduce(function(s,n){ return s + ((n.votes||[]).length); }, 0);
+}
+
+window.pgTrophees = function(){
+  var ed = _trCourante();
+  var closes = _trEd().editions.filter(function(e){ return e.statut==='close'; });
+
+  var h = '<div style="max-width:720px;margin:26px auto;padding:20px">';
+  h += '<div style="text-align:center;margin-bottom:22px">'
+    + '<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4);font-weight:800">Centre VÉRITAS</div>'
+    + '<h1 class="pgt" style="margin:6px 0 4px">🏆 Trophées VÉRITAS</h1>'
+    + '<div style="color:var(--ink3);font-size:14px;line-height:1.6;max-width:520px;margin:0 auto">'
+    +   'Le tableau d\'honneur du centre. <strong>Le vote est gratuit</strong> — une voix par personne '
+    +   'et par catégorie, et chaque distinction remise porte un certificat que n\'importe qui peut vérifier.'
+    + '</div></div>';
+
+  if(!ed && !closes.length){
+    h += '<div class="card" style="padding:24px;text-align:center">'
+      + '<div style="font-size:40px">🌱</div>'
+      + '<div style="font-weight:800;margin:8px 0 4px">Aucune édition en cours</div>'
+      + '<div style="color:var(--ink3);font-size:13.5px;line-height:1.6">'
+      +   'La première édition sera annoncée en fin de trimestre. Les nominations viendront '
+      +   'des résultats réels : progression, assiduité, entraide, et le regard des élèves sur leurs enseignants.'
+      + '</div></div>';
+    return h + '</div>';
+  }
+
+  if(ed){
+    var fin = ed.dateFin ? _cagJoursRestants(ed.dateFin) : null;
+    h += '<div class="card" style="padding:16px;margin-bottom:16px;text-align:center">'
+      + '<div style="font-weight:900;font-size:17px">'+_esc(ed.titre||'Édition en cours')+'</div>'
+      + (ed.periode ? '<div style="color:var(--ink3);font-size:13px">'+_esc(ed.periode)+'</div>' : '')
+      + (fin !== null && fin >= 0
+          ? '<div style="margin-top:8px;display:inline-block;font-size:12.5px;color:#B45309;background:rgba(217,119,6,.10);padding:6px 12px;border-radius:99px">'
+            + '⏳ Vote ouvert encore <strong>'+fin+' jour'+(fin>1?'s':'')+'</strong></div>'
+          : '')
+      + '</div>';
+
+    (ed.categories||[]).forEach(function(cat){
+      var total = _trTotalVoix(cat);
+      var dejaVote = _trAVote(cat);
+      var noms = (cat.nominations||[]).slice();
+      // Tant que personne n'a voté, on garde l'ordre de nomination : publier un
+      // « rang » alphabétique ferait croire à un classement qui n'existe pas.
+      if(total > 0) noms.sort(function(a,b){ return (b.votes||[]).length - (a.votes||[]).length; });
+
+      h += '<div class="card" style="padding:16px;margin-bottom:14px">'
+        + '<div style="font-weight:800;font-size:15px">'+_esc(cat.label||'')+'</div>'
+        + (cat.desc ? '<div style="color:var(--ink3);font-size:12.5px;margin-bottom:10px">'+_esc(cat.desc)+'</div>' : '<div style="height:8px"></div>');
+
+      if(!noms.length){
+        h += '<div style="color:var(--ink4);font-size:13px">Nominations en cours.</div>';
+      } else {
+        noms.forEach(function(n, i){
+          var voix = (n.votes||[]).length;
+          h += '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bg3,#eef2f7)">'
+            + (total > 0
+                ? '<div style="width:26px;text-align:center;font-weight:900;color:'+(i===0?'#C9A227':'var(--ink4)')+'">'+(i+1)+'</div>'
+                : '<div style="width:26px;text-align:center;color:var(--ink4)">•</div>')
+            + '<div style="flex:1;min-width:0">'
+            +   '<div style="font-weight:700;font-size:13.5px">'+_esc(n.nom||'')+'</div>'
+            +   (n.motif ? '<div style="font-size:12px;color:var(--ink3)">'+_esc(n.motif)+'</div>' : '')
+            + '</div>'
+            + '<div style="text-align:right;white-space:nowrap">'
+            +   (total > 0 ? '<div style="font-weight:800;font-size:13px">'+voix+' voix</div>' : '')
+            +   (cat.vote !== false
+                  ? '<button class="btn '+(dejaVote?'bo':'bi')+' sm" style="margin-top:2px"'+(dejaVote?' disabled':'')
+                    + ' onclick="_trVoter(\''+_esc(cat.id)+'\',\''+_esc(n.id)+'\')">'+(dejaVote?'✓ Voté':'Voter')+'</button>'
+                  : '')
+            + '</div></div>';
+        });
+        if(total === 0 && cat.vote !== false){
+          h += '<div style="margin-top:10px;font-size:12.5px;color:var(--ink4);text-align:center">Le vote est ouvert — soyez le premier à soutenir un nommé.</div>';
+        }
+      }
+      h += '</div>';
+    });
+
+    if(!_trVotantId()){
+      h += '<div class="card" style="padding:14px;text-align:center;font-size:13px;color:var(--ink3)">'
+        + 'Connectez-vous avec votre compte VÉRITAS pour voter. <strong>C\'est gratuit</strong> — '
+        + 'une seule voix par personne et par catégorie, jamais de vote payant.'
+        + '</div>';
+    }
+  }
+
+  // ── Palmarès des éditions closes : la preuve, avec certificats vérifiables ──
+  closes.slice().reverse().forEach(function(e){
+    h += '<div class="card" style="padding:16px;margin-top:16px">'
+      + '<div style="font-weight:800;margin-bottom:8px">🏅 '+_esc(e.titre||'Édition')+(e.periode?' · '+_esc(e.periode):'')+'</div>';
+    (e.categories||[]).forEach(function(cat){
+      var g = (cat.nominations||[]).find(function(n){ return n.laureat; });
+      if(!g) return;
+      h += '<div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg3,#eef2f7)">'
+        + '<div><div style="font-size:12px;color:var(--ink4)">'+_esc(cat.label||'')+'</div>'
+        +   '<div style="font-weight:700;font-size:13.5px">'+_esc(g.nom||'')+'</div></div>'
+        + (g.certId
+            ? '<a class="btn bo sm" style="align-self:center;text-decoration:none" href="#verifier-certificat?cert='
+              + encodeURIComponent(g.certId)+'&token='+encodeURIComponent(g.certToken||'')+'">🔍 Vérifier</a>'
+            : '')
+        + '</div>';
+    });
+    h += '</div>';
+  });
+
+  return h + '</div>';
+};
+
+window._trVoter = function(catId, nomId){
+  var v = _trVotantId();
+  if(!v){ toast('Connectez-vous pour voter — c\'est gratuit','warn'); return; }
+  var ed = _trCourante();
+  if(!ed){ toast('Aucune édition ouverte','warn'); return; }
+  var cat = (ed.categories||[]).find(function(c){ return c.id===catId; });
+  if(!cat){ return; }
+  if(_trAVote(cat)){ toast('Vous avez déjà voté dans cette catégorie','warn'); return; }
+  var nom = (cat.nominations||[]).find(function(n){ return n.id===nomId; });
+  if(!nom){ return; }
+  nom.votes = nom.votes || [];
+  nom.votes.push(v);
+  save();
+  try{ if(typeof _track==='function') _track('tool_use', {t:'trophee_vote'}); }catch(e){}
+  toast('✓ Voix enregistrée — merci','ok');
+  if(typeof vShowSec==='function') vShowSec('trophees', null);
+};
+
+/* ── Administration des Trophées ── */
+window.pgTropheesAdmin = function(){
+  if(typeof iA==='function' && !iA()) return (typeof na==='function'?na():'');
+  var t = _trEd();
+  var h = '<div class="pgt">🏆 Trophées VÉRITAS</div>'
+    + '<div class="card" style="padding:14px;margin-bottom:12px">'
+    +   '<button class="btn bi" onclick="mTropheeEdition()">+ Nouvelle édition</button> '
+    +   '<button class="btn bo" onclick="vShowSec(\'trophees\',null)">👁 Voir la page publique</button>'
+    + '</div>';
+  if(!t.editions.length){
+    return h + '<div class="card" style="padding:20px;color:var(--ink3)">Aucune édition. Créez-en une : elle produit à la fois de la fierté, du contenu à partager et des certificats vérifiables.</div>';
+  }
+  t.editions.slice().reverse().forEach(function(e){
+    h += '<div class="card" style="padding:14px;margin-bottom:10px">'
+      + '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px">'
+      +   '<div><b>'+_esc(e.titre||'')+'</b> <span class="xs2">'+_esc(e.periode||'')+'</span>'
+      +     '<div class="xs2" style="color:var(--ink4)">'+(e.categories||[]).length+' catégorie(s) · '
+      +       (e.statut==='ouverte'?'<span style="color:var(--gr,#059669);font-weight:700">ouverte</span>':'close')+'</div></div>'
+      +   '<div style="white-space:nowrap">'
+      +     '<button class="btn bo sm" onclick="mTropheeCategorie(\''+_esc(e.id)+'\')">+ Catégorie</button> '
+      +     (e.statut==='ouverte' ? '<button class="btn bi sm" onclick="_trCloturer(\''+_esc(e.id)+'\')">🏁 Clôturer</button>' : '')
+      +   '</div></div>';
+    (e.categories||[]).forEach(function(c){
+      h += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bg3,#eef2f7)">'
+        + '<b style="font-size:13px">'+_esc(c.label||'')+'</b> '
+        + '<button class="btn bo sm" onclick="mTropheeNomination(\''+_esc(e.id)+'\',\''+_esc(c.id)+'\')">+ Nommé</button>'
+        + '<div class="xs2" style="color:var(--ink4);margin-top:4px">'
+        +   ((c.nominations||[]).map(function(n){
+              return _esc(n.nom)+' ('+((n.votes||[]).length)+' voix)'+(n.laureat?' 🏅':'');
+            }).join(' · ') || 'aucun nommé')
+        + '</div></div>';
+    });
+    h += '</div>';
+  });
+  return h;
+};
+
+window.mTropheeEdition = function(){
+  M('🏆 Nouvelle édition', 'Un trimestre, une édition.',
+    '<div class="fg"><span class="fl">Titre *</span><input class="fi" id="trTit" placeholder="Trophées VÉRITAS — 2e trimestre"></div>'
+    + '<div class="fg"><span class="fl">Période</span><input class="fi" id="trPer" placeholder="Janvier – Mars 2026"></div>'
+    + '<div class="fg"><span class="fl">Fin du vote</span><input class="fi" id="trFin" type="date"></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_trCreerEdition()">✓ Créer</button>');
+};
+window._trCreerEdition = function(){
+  var tit = ((_ge('trTit')||{}).value||'').trim();
+  if(!tit){ toast('Titre requis','warn'); return; }
+  var t = _trEd();
+  t.editions.push({
+    id: gid(), titre: tit,
+    periode: ((_ge('trPer')||{}).value||'').trim(),
+    dateFin: ((_ge('trFin')||{}).value||''),
+    statut: 'ouverte', cree: today(),
+    categories: [
+      {id:gid(), label:'Meilleure progression', desc:'L\'élève qui a le plus progressé sur le trimestre.', vote:false, nominations:[]},
+      {id:gid(), label:'Coup de cœur des élèves', desc:'L\'enseignant désigné par les élèves eux-mêmes.', vote:true, nominations:[]},
+      {id:gid(), label:'Prix de l\'entraide', desc:'Celui ou celle qui aide les autres sans qu\'on le lui demande.', vote:true, nominations:[]}
+    ]
+  });
+  save(); cm();
+  if(typeof re==='function') re();
+  toast('✓ Édition créée','ok');
+};
+
+window.mTropheeCategorie = function(edId){
+  M('Nouvelle catégorie','',
+    '<div class="fg"><span class="fl">Intitulé *</span><input class="fi" id="tcLab" placeholder="Meilleure copie du trimestre"></div>'
+    + '<div class="fg"><span class="fl">Description</span><input class="fi" id="tcDsc" placeholder="Ce qu\'elle récompense, en une phrase"></div>'
+    + '<div class="fg"><span class="fl">Ouverte au vote des élèves ?</span>'
+    +   '<select class="fi" id="tcVot"><option value="1">Oui — vote gratuit</option><option value="0">Non — désignée par le centre</option></select></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_trAddCat(\''+_esc(edId)+'\')">✓ Ajouter</button>');
+};
+window._trAddCat = function(edId){
+  var lab = ((_ge('tcLab')||{}).value||'').trim();
+  if(!lab){ toast('Intitulé requis','warn'); return; }
+  var e = _trEd().editions.find(function(x){ return x.id===edId; });
+  if(!e) return;
+  e.categories = e.categories || [];
+  e.categories.push({id:gid(), label:lab,
+    desc:((_ge('tcDsc')||{}).value||'').trim(),
+    vote: ((_ge('tcVot')||{}).value||'1')==='1',
+    nominations:[]});
+  save(); cm(); if(typeof re==='function') re();
+  toast('✓ Catégorie ajoutée','ok');
+};
+
+window.mTropheeNomination = function(edId, catId){
+  M('Nommer','Le motif est public : il doit dire ce que la personne a réellement fait.',
+    '<div class="fg"><span class="fl">Nom *</span><input class="fi" id="tnNom" placeholder="Prénom NOM"></div>'
+    + '<div class="fg"><span class="fl">Motif *</span><input class="fi" id="tnMot" placeholder="Ex. : de 8,5 à 13,2 de moyenne en un trimestre" maxlength="120"></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_trAddNom(\''+_esc(edId)+'\',\''+_esc(catId)+'\')">✓ Ajouter</button>');
+};
+window._trAddNom = function(edId, catId){
+  var nom = ((_ge('tnNom')||{}).value||'').trim();
+  var mot = ((_ge('tnMot')||{}).value||'').trim();
+  if(!nom || !mot){ toast('Nom et motif requis','warn'); return; }
+  var e = _trEd().editions.find(function(x){ return x.id===edId; });
+  if(!e) return;
+  var c = (e.categories||[]).find(function(x){ return x.id===catId; });
+  if(!c) return;
+  c.nominations = c.nominations || [];
+  c.nominations.push({id:gid(), nom:nom, motif:mot, votes:[]});
+  save(); cm(); if(typeof re==='function') re();
+  toast('✓ Nommé ajouté','ok');
+};
+
+// Clôture : désigne les lauréats et ÉMET les certificats vérifiables.
+window._trCloturer = function(edId){
+  var e = _trEd().editions.find(function(x){ return x.id===edId; });
+  if(!e) return;
+  var recap = (e.categories||[]).map(function(c){
+    var noms = (c.nominations||[]).slice().sort(function(a,b){ return (b.votes||[]).length - (a.votes||[]).length; });
+    var g = noms[0];
+    return '<div style="padding:6px 0;border-bottom:1px solid var(--bg3,#eef2f7)"><b>'+_esc(c.label)+'</b><br>'
+      + (g ? _esc(g.nom)+' — '+((g.votes||[]).length)+' voix' : '<span style="color:var(--ink4)">aucun nommé</span>')+'</div>';
+  }).join('');
+  M('🏁 Clôturer l\'édition',
+    'Chaque lauréat reçoit un certificat inscrit au registre, vérifiable publiquement.',
+    '<div style="font-size:13px">'+recap+'</div>'
+    + '<div style="margin-top:10px;font-size:12.5px;color:var(--ink4)">Cette action ferme le vote. Elle ne peut pas être annulée depuis l\'interface.</div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_trCloturerOK(\''+_esc(edId)+'\')">🏅 Décerner et clôturer</button>');
+};
+window._trCloturerOK = function(edId){
+  var e = _trEd().editions.find(function(x){ return x.id===edId; });
+  if(!e) return;
+  var emis = 0;
+  (e.categories||[]).forEach(function(c){
+    var noms = (c.nominations||[]).slice().sort(function(a,b){ return (b.votes||[]).length - (a.votes||[]).length; });
+    var g = noms[0];
+    if(!g) return;
+    g.laureat = true;
+    if(typeof _certRegister==='function'){
+      var rec = _certRegister('honneur', g.nom, {
+        trophee: c.label, edition: e.titre, periode: e.periode||'',
+        motif: g.motif||'', voix: (g.votes||[]).length
+      });
+      g.certId = rec.id; g.certToken = rec.token;
+      emis++;
+    }
+  });
+  e.statut = 'close'; e.dateCloture = today();
+  save(); cm(); if(typeof re==='function') re();
+  toast('🏅 '+emis+' certificat(s) émis et vérifiables','ok');
+};
+
+// Diplôme imprimable d'un lauréat (réutilise le moteur de certificats existant).
+window._trImprimer = function(edId, catId, nomId){
+  var e = _trEd().editions.find(function(x){ return x.id===edId; });
+  if(!e) return;
+  var c = (e.categories||[]).find(function(x){ return x.id===catId; });
+  if(!c) return;
+  var g = (c.nominations||[]).find(function(x){ return x.id===nomId; });
+  if(!g || typeof _certVeritasHTML!=='function' || typeof printDoc!=='function'){ toast('Certificat indisponible','warn'); return; }
+  var url = 'https://veritas-school.com/#verifier-certificat?cert='+encodeURIComponent(g.certId||'')+'&token='+encodeURIComponent(g.certToken||'');
+  printDoc(_certVeritasHTML({
+    titleHTML:'<i>Trophée</i> VÉRITAS', plainTitle:'Trophee VERITAS',
+    kicker:_esc(c.label)+' · '+_esc(e.periode||e.titre||''),
+    cta:'Le Centre VÉRITAS distingue',
+    name:g.nom, badgeIcon:'trophy', badgeLabel:'Lauréat', tierColor:'#C9A227',
+    certRef:(g.certId||''),
+    descHTML:_esc(g.motif||''),
+    qrData:url
+  }), 'Trophée VÉRITAS — '+g.nom, 'landscape');
+};
+
+
+/* ── Cagnottes : écran de suivi côté centre (v1.14) ────────────────────────
+   La liste vit sur le SERVEUR (fund_list) : c'est lui qui détient la vérité
+   du montant collecté, jamais le localStorage. DB.cagnottes ne garde qu'un
+   raccourci local vers les liens créés depuis ce poste.                      */
+window.pgCagnottesAdmin = function(){
+  if(typeof iA==='function' && !iA()) return (typeof na==='function'?na():'');
+  setTimeout(_cagAdminCharger, 30);
+  return '<div class="pgt">🎓 Cagnottes de scolarité</div>'
+    + '<div class="card" style="padding:14px;margin-bottom:12px">'
+    +   '<button class="btn bi" onclick="mCagnotteCreer()">+ Ouvrir une cagnotte</button> '
+    +   '<span class="xs2" style="color:var(--ink4)">Le lien se partage sur WhatsApp — le contributeur n\'a aucun compte à créer.</span>'
+    + '</div>'
+    + '<div id="cagAdminList"><div class="card" style="padding:18px;color:var(--ink3)">⏳ Chargement…</div></div>';
+};
+
+function _cagAdminCharger(){
+  var cc = DB.cloudConfig || {};
+  var box = document.getElementById('cagAdminList');
+  if(!box) return;
+  if(!cc.url || !cc.secret){
+    box.innerHTML = '<div class="card" style="padding:18px;color:var(--ink3)">Configurez la synchronisation serveur pour voir les cagnottes.</div>';
+    return;
+  }
+  fetch(cc.url.replace(/\/+$/,'')+'/payment_campay.php?action=fund_list',
+        {headers:{'Authorization':'Bearer '+cc.secret}})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var b = document.getElementById('cagAdminList');   // re-cherché après l'await
+      if(!b) return;
+      if(!d || !d.success || !d.data || !d.data.length){
+        b.innerHTML = '<div class="card" style="padding:18px;color:var(--ink3)">Aucune cagnotte ouverte pour l\'instant.</div>';
+        return;
+      }
+      b.innerHTML = d.data.map(function(f){
+        var url = 'https://veritas-school.com/#cagnotte?t='+f.token;
+        return '<div class="card" style="padding:14px;margin-bottom:10px">'
+          + '<div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">'
+          +   '<div><b>'+_esc(f.titre||f.prenom)+'</b>'
+          +     '<div class="xs2" style="color:var(--ink4)">'+_esc(f.prenom)+(f.classe?' · '+_esc(f.classe):'')
+          +       ' · '+f.nb+' contributeur(s) · '+(f.statut==='ouverte'?'ouverte':'close')+'</div></div>'
+          +   '<div style="text-align:right"><b style="color:var(--gr,#059669)">'+fmt(f.collecte)+'</b>'
+          +     '<div class="xs2" style="color:var(--ink4)">sur '+fmt(f.objectif)+' — '+f.pourcent+' %</div></div>'
+          + '</div>'
+          + '<div style="height:8px;background:var(--bg2,#eef2f7);border-radius:99px;overflow:hidden;margin:10px 0">'
+          +   '<div style="height:100%;width:'+Math.max(0,Math.min(100,f.pourcent))+'%;background:linear-gradient(90deg,#059669,#10B981)"></div></div>'
+          + '<button class="btn bo sm" onclick="_payCopy(\''+_esc(url)+'\')">📋 Copier le lien</button> '
+          + '<button class="btn bo sm" onclick="window.open(\'#cagnotte?t='+_esc(f.token)+'\',\'_self\')">👁 Voir</button>'
+          + '</div>';
+      }).join('');
+    })
+    .catch(function(){
+      var b = document.getElementById('cagAdminList');
+      if(b) b.innerHTML = '<div class="card" style="padding:18px;color:var(--ink3)">Serveur injoignable.</div>';
+    });
+}
