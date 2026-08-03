@@ -240,6 +240,7 @@ jobs:
             api/db_sql.php \
             api/admin_validate.php \
             api/stats.php \
+            api/teacher_access.php \
             api/secure_pdf.php; do
             [ -f "$f" ] && cp "$f" deploy/api/ && echo "  ✓ $f"
           done
