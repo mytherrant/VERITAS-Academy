@@ -1,4 +1,4 @@
-# Audit des corrigés des manuels VÉRITAS — 03/08/2026
+# Audit des corrigés des manuels VÉRITAS — 04/08/2026
 
 > Généré par `tools/audit_corriges.py`. Tous les chiffres sont recomptés depuis les fichiers
 > sources (Guides `.docx` du 1er cycle, sources balisées des packs du 2nd cycle, cahiers EST).
@@ -19,7 +19,7 @@ Exercices sans corrigé **ni** consigne d'évaluation pour l'enseignant : **0**.
 | Niveau | Blocs | Questions + exercices | Corrigés | Couverture |
 |---|---:|---:|---:|---:|
 | 2nde | 138 | 736 | 725 | **98.5 %** |
-| 1ere | 165 | 1007 | 850 | **84.4 %** |
+| 1ere | 165 | 1007 | 871 | **86.5 %** |
 | tle | 176 | 1055 | 873 | **82.7 %** |
 
 ### Répartition des manques par nature de bloc
@@ -30,9 +30,9 @@ Exercices sans corrigé **ni** consigne d'évaluation pour l'enseignant : **0**.
 | 2nde | méthodologie / intégration | 30 | 136 | 133 | **3** |
 | 2nde | épreuve / évaluation | 14 | 60 | 58 | **2** |
 | 2nde | étude de l'œuvre intégrale | 27 | 184 | 183 | **1** |
-| 1ere | étude de l'œuvre intégrale | 30 | 267 | 226 | **41** |
-| 1ere | méthodologie / intégration | 32 | 140 | 102 | **38** |
 | 1ere | sujet d'entraînement (vierge par conception) | 10 | 43 | 8 | **35** |
+| 1ere | étude de l'œuvre intégrale | 30 | 267 | 237 | **30** |
+| 1ere | méthodologie / intégration | 32 | 140 | 112 | **28** |
 | 1ere | banque de sujets | 8 | 62 | 47 | **15** |
 | 1ere | groupement de textes | 10 | 63 | 52 | **11** |
 | 1ere | épreuve / évaluation | 31 | 145 | 135 | **10** |
