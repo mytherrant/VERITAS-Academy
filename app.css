@@ -5631,6 +5631,20 @@ body.has-sticky-cta .vfx-fab{bottom:82px}
 .vfx-proof-x:hover{color:#142554}
 
 /* ════════════════════ ESPACE PARENTS ════════════════════ */
+/* ── Icônes vectorielles (sprite embarqué par app.js) ──────────────────────
+   Un <svg> sans dimensions retomberait sur 300×150 px : ces règles sont
+   indispensables, pas décoratives. */
+.i{width:1.15em;height:1.15em;flex:none;vertical-align:-.19em;color:inherit;
+   fill:none;stroke:currentColor}
+.i.lg{width:1.5em;height:1.5em;vertical-align:-.28em}
+h1 .i,h2 .i,h3 .i,h4 .i{vertical-align:-.12em}
+.acc-pill .i{margin-right:.45em;color:#FFC93C}
+.vp-tab .i{margin-right:.4em}
+button .i,a .i{margin-right:.4em}
+.i-disc{display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;
+   border-radius:50%;background:rgba(20,37,84,.07);color:#142554}
+.i-disc .i{width:21px;height:21px;vertical-align:0;margin:0}
+
 .vp-hero{background:linear-gradient(135deg,#0D1B3E,#142554 55%,#1B2F63);
   border:1px solid rgba(255,201,60,.22);border-radius:20px;
   padding:30px 26px;position:relative;overflow:hidden;margin-bottom:22px}
@@ -5687,3 +5701,18 @@ body.has-sticky-cta .vfx-fab{bottom:82px}
   display:inline-flex;align-items:center;justify-content:center}
 .vp-tool .tt{font-family:Poppins,sans-serif;font-weight:800;font-size:13px;color:#142554}
 .vp-tool .ss{font-size:11.5px;color:#6B7280;margin-top:2px}
+
+/* -- Lisibilite de la partie visiteur (demande Jacques) -------------------
+   Beaucoup de titres de l'app portent un font-weight:800/900 EN LIGNE : seul
+   !important peut les temperer sans reecrire des centaines de balises. Limite
+   au visiteur (.vsec) pour ne pas toucher aux tableaux de l'admin. */
+.vsec h1,.vsec h2,.vsec h3,.vsec h4,.vsec .acc-pill,.vsec .acc-sub{text-align:center}
+.vsec .acc-pill{justify-content:center}
+.vsec p,.vsec .vp-fear-a,.vsec .vp-card p{text-align:justify;hyphens:auto;-webkit-hyphens:auto;
+  text-wrap:pretty}
+@media(max-width:600px){
+  .vsec [style*="font-weight:900"],.vsec [style*="font-weight: 900"]{font-weight:700 !important}
+  .vsec [style*="font-weight:800"],.vsec [style*="font-weight: 800"]{font-weight:700 !important}
+  .vsec b,.vsec strong{font-weight:600}
+  .vsec [style*="letter-spacing:3px"]{letter-spacing:1.5px !important}
+}

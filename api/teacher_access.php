@@ -52,6 +52,11 @@ header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
+// Rien de ce que sert cet endpoint ne doit entrer dans un index : ni la réponse
+// JSON, ni le PDF du Guide. robots.txt bloque déjà /api/, mais un lien partagé
+// suffirait à contourner le fichier — l'en-tête, lui, voyage avec la réponse.
+header('X-Robots-Tag: noindex, nofollow, noarchive, nosnippet');
+header('X-Frame-Options: DENY');
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') { http_response_code(204); exit; }
 
@@ -103,12 +108,57 @@ function ta_dir(): string {
     return dirname(__DIR__) . '/uploads/protected/enseignant';
 }
 
+// ── Verrouillage après échecs répétés (anti force brute) ──────────────────────
+// Le rate-limit général plafonne le DÉBIT ; il n'empêche pas un attaquant patient
+// d'essayer 40 codes par minute pendant des heures. On compte donc les échecs par
+// IP sur une fenêtre glissante, et au-delà du seuil la porte reste fermée même
+// avec le bon code.
+const TA_MAX_ECHECS = 5;          // échecs tolérés…
+const TA_FENETRE    = 900;        // …sur 15 minutes glissantes
+
+function ta_fichier_echecs(): string {
+    $dir = __DIR__ . '/data/_rate';
+    if (!is_dir($dir)) { @mkdir($dir, 0750, true); }
+    return $dir . '/teachfail_' . substr(hash('sha256', vrt_client_ip()), 0, 16) . '.txt';
+}
+
+function ta_echecs_recents(): int {
+    $f = ta_fichier_echecs();
+    if (!is_file($f)) return 0;
+    $now = time();
+    return count(array_filter(explode("\n", (string) @file_get_contents($f)),
+        function ($t) use ($now) { return $t !== '' && ($now - (int) $t) < TA_FENETRE; }));
+}
+
+function ta_note_echec(): void {
+    $f = ta_fichier_echecs();
+    $now = time();
+    $lignes = [];
+    if (is_file($f)) {
+        $lignes = array_filter(explode("\n", (string) @file_get_contents($f)),
+            function ($t) use ($now) { return $t !== '' && ($now - (int) $t) < TA_FENETRE; });
+    }
+    $lignes[] = (string) $now;
+    @file_put_contents($f, implode("\n", $lignes), LOCK_EX);
+}
+
+function ta_efface_echecs(): void { @unlink(ta_fichier_echecs()); }
+
 // ── Jetons (HMAC, 8 h) ────────────────────────────────────────────────────────
 const TA_TTL = 8 * 3600;
 
+/** Empreinte du demandeur : le jeton ne vaut que depuis le poste qui l'a obtenu.
+ *  IP + agent hachés avec la clé HMAC — aucune donnée identifiante n'est stockée.
+ *  Sans cela, l'URL de téléchargement, copiée dans un groupe WhatsApp, ouvrirait
+ *  le Guide à toute une classe. */
+function ta_empreinte(): string {
+    $ua = substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 120);
+    return substr(hash_hmac('sha256', vrt_client_ip() . '|' . $ua, VRT_HMAC_KEY), 0, 16);
+}
+
 function ta_issue(string $label): array {
     $exp = time() + TA_TTL;
-    $payload = ['s' => 'teacher', 'l' => $label, 'exp' => $exp];
+    $payload = ['s' => 'teacher', 'l' => $label, 'exp' => $exp, 'fp' => ta_empreinte()];
     $body = vrt_b64url_encode(json_encode($payload, JSON_UNESCAPED_UNICODE));
     $sig  = vrt_b64url_encode(hash_hmac('sha256', 'TEACHER|' . $body, VRT_HMAC_KEY, true));
     return ['token' => $body . '.' . $sig, 'exp' => $exp];
@@ -123,6 +173,8 @@ function ta_verify(string $token): ?array {
     if (!is_array($payload)) return null;
     if (($payload['s'] ?? '') !== 'teacher') return null;
     if ((int) ($payload['exp'] ?? 0) < time()) return null;
+    // Jeton lié au poste : un lien de téléchargement transmis à un tiers ne vaut rien.
+    if (!hash_equals((string) ($payload['fp'] ?? ''), ta_empreinte())) return null;
     return $payload;
 }
 
@@ -202,6 +254,13 @@ if ($action === 'login') {
     if (!$codes) {
         ta_err(503, "L'espace enseignant n'est pas encore activé sur ce serveur.", 'not_configured');
     }
+    // Porte fermée après trop d'échecs, même si le code présenté est le bon :
+    // sinon un attaquant apprendrait, en tombant juste, qu'il a trouvé.
+    if (ta_echecs_recents() >= TA_MAX_ECHECS) {
+        ta_log('[BLOQUE] ip=' . vrt_client_ip() . ' echecs>=' . TA_MAX_ECHECS);
+        ta_err(429, 'Trop de tentatives. Réessayez dans un quart d\'heure.', 'locked');
+    }
+
     $code = trim((string) ($in['code'] ?? ''));
     if ($code === '') ta_err(400, 'Code requis.', 'empty');
 
@@ -210,11 +269,13 @@ if ($action === 'login') {
         if (password_verify($code, $c['hash'])) { $label = $c['label']; break; }
     }
     if ($label === null) {
-        ta_log('[REFUS] ip=' . vrt_client_ip() . ' motif=code');
+        ta_note_echec();
+        ta_log('[REFUS] ip=' . vrt_client_ip() . ' motif=code echecs=' . ta_echecs_recents());
         // Petite latence : décourage l'essai en masse sans pénaliser l'usage normal.
         usleep(400000);
         ta_err(401, 'Code enseignant non reconnu.', 'bad_code');
     }
+    ta_efface_echecs();
     $t = ta_issue($label);
     ta_log('[LOGIN] ip=' . vrt_client_ip() . ' code=' . $label);
     ta_out(200, ['ok' => true, 'token' => $t['token'], 'label' => $label, 'exp' => $t['exp']]);

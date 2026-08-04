@@ -52,7 +52,7 @@ header.top a{color:var(--gold)}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:1.5rem 1rem 3rem}
 .crumb{font-size:.84rem;color:var(--gris);margin:.2rem 0 1rem}
 .crumb a{text-decoration:none}
-.intro{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--gold);
+.intro{background:var(--card);border:1px solid var(--line);
   border-radius:var(--rad);padding:1rem 1.15rem;margin:-2.1rem auto 1.5rem;max-width:880px;
   box-shadow:0 10px 30px rgba(20,37,84,.08)}
 h2.sec{color:var(--navy);border-bottom:2px solid var(--gold);padding-bottom:.35rem;margin-top:2.2rem}
@@ -72,7 +72,7 @@ section.lec{background:var(--card);border:1px solid var(--line);border-radius:va
   padding:1rem 1.15rem 1.2rem;margin:1rem 0;box-shadow:0 4px 14px rgba(20,37,84,.05)}
 section.lec>h3{margin:.1rem 0 .35rem;color:var(--navy);font-size:1.1rem}
 .sem{font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gris);font-weight:700}
-.obj{font-size:.9rem;color:var(--gris);margin:.2rem 0 .9rem;border-left:3px solid var(--line);padding-left:.6rem}
+.obj{font-size:.9rem;color:var(--gris);margin:.2rem 0 .9rem}
 .rub{font-weight:700;color:var(--navy);margin:1.1rem 0 .3rem;font-size:.97rem}
 .ex{border:1px solid var(--line);border-radius:10px;padding:.7rem .85rem;margin:.55rem 0;background:#fcfdff}
 .ex .q{margin:0 0 .1rem}
@@ -171,7 +171,7 @@ b.k{color:var(--navy)}
 
 /* frise de l'année scolaire */
 .frise{display:grid;gap:.6rem;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:1rem}
-.trim{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--gold);
+.trim{background:var(--card);border:1px solid var(--line);
   border-radius:var(--rad);padding:.85rem .9rem}
 .trim h4{margin:0 0 .35rem;color:var(--navy);font-size:.98rem}
 .trim ul{margin:.2rem 0 0 1rem;padding:0;font-size:.88rem;color:var(--gris)}
@@ -269,7 +269,7 @@ b.k{color:var(--navy)}
 .series-pick button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
 
 /* ── condition de validité + promesse d'excellence ─────── */
-.condition{background:#fffdf3;border:1px solid #f0e0b0;border-left:5px solid var(--gold);
+.condition{background:#fffdf3;border:1px solid #f0e0b0;
   border-radius:var(--rad);padding:1rem 1.15rem;margin-top:1.2rem}
 .condition h3{margin:.1rem 0 .5rem;color:var(--navy);font-size:1.06rem;display:flex;
   align-items:center;gap:.5rem}
@@ -313,7 +313,7 @@ b.k{color:var(--navy)}
 .duo .bloc h3{margin:.1rem 0 .5rem;color:var(--navy);font-size:1.06rem;display:flex;
   align-items:center;gap:.5rem}
 .duo .bloc p{margin:.35rem 0;font-size:.93rem}
-.duo .bloc .cite{border-left:3px solid var(--gold);padding-left:.7rem;color:var(--gris);
+.duo .bloc .cite{color:var(--gris);
   font-style:italic;margin:.6rem 0}
 
 /* orientation : cartes de série / filière */
@@ -326,7 +326,7 @@ b.k{color:var(--navy)}
 .serie p{margin:.2rem 0 0;font-size:.9rem;color:var(--gris)}
 
 /* ── porte de l'espace enseignant ──────────────────────── */
-.gate{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--gold);
+.gate{background:var(--card);border:1px solid var(--line);
   border-radius:var(--rad);padding:1.2rem 1.2rem 1.3rem;max-width:520px;margin:1.2rem auto;
   box-shadow:0 10px 30px rgba(20,37,84,.09)}
 .gate h2{margin:.1rem 0 .3rem;color:var(--navy);font-size:1.2rem}
@@ -362,3 +362,20 @@ footer.bot{text-align:center;color:var(--gris);font-size:.84rem;padding:2rem 1re
   .constel .hub .disc{width:76px;height:76px;font-size:1.9rem}
 }
 @media(prefers-reduced-motion:reduce){.orbit a{transition:none}}
+
+/* ── Lisibilité : titres centrés, textes justifiés, gras tempéré ──────────
+   Un gras massif empâte le texte sous 600 px et le rend plus lent à lire ;
+   la justification demande obligatoirement la césure, sinon elle ouvre des
+   « rivières » blanches au milieu du paragraphe sur écran étroit. */
+h2.sec,h3.sub{justify-content:center;text-align:center}
+h2.sec{border-bottom:0;position:relative;padding-bottom:.6rem}
+h2.sec::after{content:"";position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  width:72px;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.card h3,.step h3,.loupe h3,.duo .bloc h3,.trim h4{text-align:center;justify-content:center}
+.wrap>p,.card .note,.loupe li,.duo .bloc p,details.sol .body p,.ex .q,.step p,.condition li{
+  text-align:justify;hyphens:auto;-webkit-hyphens:auto;text-wrap:pretty}
+@media(max-width:600px){
+  strong,b{font-weight:600}
+  header.top h1{font-size:1.3rem}
+  .wrap>p,.card .note,details.sol .body p{font-size:.95rem}
+}

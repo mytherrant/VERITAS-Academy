@@ -28,6 +28,7 @@ on:
       - 'niveaux/**'
       - 'outils/**'
       - 'corriges/**'
+      - 'chunks/**'
       - 'assets/**'
       - 'constellation.html'
       - 'eleve/**'
@@ -79,8 +80,8 @@ jobs:
             echo "::warning::php introuvable sur le runner — lint PHP ignoré"
           fi
           js_fail=0
-          echo "→ Lint JS (node --check) sur app.js, sw.js et assets/*.js"
-          for j in app.js sw.js $(ls assets/*.js 2>/dev/null); do
+          echo "→ Lint JS (node --check) sur app.js, sw.js, assets/*.js et chunks/*.js"
+          for j in app.js sw.js $(ls assets/*.js 2>/dev/null) $(ls chunks/*.js 2>/dev/null); do
             [ -f "$j" ] || continue
             if ! node --check "$j"; then js_fail=1; fi
           done
@@ -89,6 +90,21 @@ jobs:
             exit 1
           fi
           echo "✅ Syntaxe PHP + JS valide — déploiement autorisé."
+
+          # ── Cohérence de version des assets (coquille ⇄ service worker) ──
+          # La coquille demande /app.js?v=X ; sw.js précharge /app.js?v=ASSET_VER
+          # dérivé de CACHE_VERSION. Constaté en production le 04/08/2026 : les
+          # deux avaient divergé (1.11.3 vs 1.13.0). Conséquences silencieuses —
+          # ~3,7 Mo préchargés pour une URL que personne ne demande, et surtout
+          # le mode hors ligne inopérant, la page réclamant une URL absente du
+          # cache. Rien ne plante : c'est précisément pour ça qu'on l'automatise.
+          SHELL_VER=$(grep -o 'app\.js?v=[0-9.]*' VERITAS_v1.2.html | head -1 | sed 's/.*v=//')
+          SW_VER=$(grep -o "CACHE_VERSION = 'veritas-v[0-9.]*'" sw.js | head -1 | sed "s/.*veritas-v//;s/'//")
+          if [ -n "$SHELL_VER" ] && [ -n "$SW_VER" ] && [ "$SHELL_VER" != "$SW_VER" ]; then
+            echo "::error title=Versions d'assets divergentes::VERITAS_v1.2.html demande app.js?v=$SHELL_VER mais sw.js précharge la version $SW_VER. Alignez les deux (et bumpez-les à chaque modification d'app.js)."
+            exit 1
+          fi
+          echo "✅ Version d'assets cohérente ($SHELL_VER) — coquille et service worker alignés."
 
       - name: 📋 Préparer les fichiers
         run: |
@@ -101,7 +117,22 @@ jobs:
                    deploy/uploads/epreuve \
                    deploy/uploads/cours \
                    deploy/uploads/ressource \
-                   deploy/uploads/image
+                   deploy/uploads/image \
+                   deploy/uploads/protected/enseignant
+
+          # ── Verrous des dossiers protégés ───────────────────────
+          # Les .htaccess « Require all denied » DOIVENT accompagner les dossiers
+          # protégés : sans eux, un Guide déposé par FTP serait téléchargeable par
+          # son URL, et la porte api/teacher_access.php ne servirait à rien.
+          for d in uploads/protected uploads/protected/enseignant; do
+            if [ -f "$d/.htaccess" ]; then
+              cp "$d/.htaccess" "deploy/$d/.htaccess"
+              echo "  ✓ $d/.htaccess (accès HTTP direct interdit)"
+            else
+              echo "::warning title=Dossier protégé sans verrou::$d/.htaccess manquant"
+            fi
+          done
+          [ -f uploads/protected/enseignant/LISEZMOI.txt ] && cp uploads/protected/enseignant/LISEZMOI.txt deploy/uploads/protected/enseignant/
 
           # ── Application principale ──────────────────────────────
           # app.html → servi par index.php (wrapper no-cache LiteSpeed)
@@ -179,6 +210,15 @@ jobs:
           if [ -d assets ]; then
             cp -r assets deploy/
             echo "  ✓ assets/ ($(ls assets | wc -l) fichiers communs)"
+          fi
+
+          # ── Modules chargés à la demande (v1.14) ────────────────────────
+          # chunks/ = catalogues sortis d'app.js pour alléger le démarrage.
+          # ⚠️ Sans ce dossier sur le serveur, les ressources pédagogiques et
+          # les analyses littéraires ne s'ouvrent plus : _lazyChunk() échoue.
+          if [ -d chunks ]; then
+            cp -r chunks deploy/
+            echo "  ✓ chunks/ ($(ls chunks/*.js 2>/dev/null | wc -l) modules différés)"
           fi
           if [ -f constellation.html ]; then cp constellation.html deploy/; echo "  ✓ constellation.html"; fi
           for d in eleve enseignant flash parcours adopter; do

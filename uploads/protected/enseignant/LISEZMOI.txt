@@ -1,0 +1,35 @@
+ESPACE ENSEIGNANT — dépôt des ressources réservées
+==================================================
+
+Ce dossier n'est JAMAIS accessible en HTTP direct (.htaccess : Require all denied).
+Les fichiers ne sortent que par api/teacher_access.php, après vérification du code
+enseignant, et chaque ouverture est journalisée dans api/data/_teacher_log.txt.
+
+Comment déposer un document
+---------------------------
+1. Déposer le PDF par FTP dans ce dossier, avec EXACTEMENT le nom attendu :
+     guide-6e.pdf · guide-5e.pdf · guide-4e.pdf · guide-3e.pdf
+     guide-2nde.pdf · guide-1ere.pdf · guide-tle.pdf
+     progression-<niveau>.pdf     (mêmes suffixes de niveau)
+     epreuves-<niveau>.pdf
+     grilles-minesec.pdf
+     integration-modeles.pdf
+2. Rien d'autre à faire : la ressource apparaît aussitôt dans l'espace enseignant.
+   Un fichier absent s'affiche « bientôt » — jamais en erreur.
+
+Activer l'accès
+---------------
+Dans api/payment_config.php (gitignoré), poser au moins l'une des deux formes :
+
+    define('TEACHER_CODE_HASH', '$2y$12$....');
+    define('TEACHER_CODES', '[{"hash":"$2y$12$...","label":"Lycée de Bonabéri"}]');
+
+Générer un hash :
+    php -r "echo password_hash('MON-CODE', PASSWORD_BCRYPT, ['cost'=>12]);"
+
+Tant qu'aucun code n'est configuré, l'espace répond 503 : il ne s'ouvre jamais
+par défaut. Utiliser TEACHER_CODES (un code par établissement) permet de savoir,
+dans le journal, d'où vient chaque téléchargement — et de révoquer un seul
+établissement sans couper les autres.
+
+NE JAMAIS committer ces PDF : le dépôt GitHub est public.
