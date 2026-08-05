@@ -268,6 +268,38 @@ b.k{color:var(--navy)}
 .series-pick button:hover{border-color:var(--gold);background:#fffdf5}
 .series-pick button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
 
+/* ── frise chronologique des mouvements littéraires ────── */
+.frise-v{position:relative;margin:1.4rem 0 0;padding-left:2.2rem}
+.frise-v::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:2px;
+  background:linear-gradient(180deg,var(--gold),var(--navy) 55%,var(--green))}
+.mv{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--rad);
+  padding:.9rem 1.05rem;margin:0 0 .9rem;box-shadow:0 4px 14px rgba(20,37,84,.05)}
+/* Le contenu est visible PAR DÉFAUT. L'apparition progressive n'est activée que si
+   le JS pose .anim — sinon un script bloqué ou une animation gelée rendrait la
+   frise invisible, ce qui est inacceptable pour une page de contenu. */
+.frise-v.anim .mv{opacity:0;transform:translateY(14px);
+  transition:opacity .5s ease,transform .5s ease}
+.frise-v.anim .mv.vu{opacity:1;transform:none}
+.mv .pt{position:absolute;left:-2.2rem;top:1.15rem;width:12px;height:12px;border-radius:50%;
+  background:var(--navy);border:2px solid #fff;box-shadow:0 0 0 2px var(--line)}
+.mv.afr .pt{background:var(--green);box-shadow:0 0 0 2px #cfeae2}
+.mv::after{content:attr(data-siecle);position:absolute;right:1rem;top:.7rem;font-size:.72rem;
+  font-weight:800;letter-spacing:.06em;color:var(--gris);background:#f4f7fd;border-radius:6px;
+  padding:.1rem .45rem}
+.mv h2{margin:.1rem 0 .45rem;color:var(--navy);font-size:1.08rem;padding-right:3.2rem}
+.mv h2 em{font-style:normal;font-weight:600;color:var(--gold2);font-size:.9rem}
+.mv p{margin:.3rem 0;font-size:.94rem}
+.mv .idee{color:var(--ink)}
+.mv .aut{color:var(--gris);font-size:.9rem}
+.mv .note{color:var(--gris);font-size:.86rem;font-style:italic}
+.mv .cahier{background:#fffdf3;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;
+  padding:.4rem .6rem;font-size:.9rem;margin-top:.5rem}
+.mv.afr{border-left:3px solid var(--green)}
+@media(prefers-reduced-motion:reduce){.mv{opacity:1;transform:none;transition:none}}
+@media(max-width:600px){.frise-v{padding-left:1.7rem}.mv .pt{left:-1.7rem}
+  .mv::after{position:static;display:inline-block;margin-bottom:.3rem}
+  .mv h2{padding-right:0}}
+
 /* ── condition de validité + promesse d'excellence ─────── */
 .condition{background:#fffdf3;border:1px solid #f0e0b0;
   border-radius:var(--rad);padding:1rem 1.15rem;margin-top:1.2rem}
