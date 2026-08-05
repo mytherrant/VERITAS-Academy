@@ -6,6 +6,7 @@
 <title>Espace élève VÉRITAS — corrigés, quiz et méthodes de français (6ᵉ → Terminale)</title>
 <meta name="description" content="Le portail unique de l'élève VÉRITAS : corrigés du cahier séquence par séquence, quiz, fiches de méthode, œuvres au programme, lecture facilitée et écoute audio. Programme MINESEC, Cameroun. Accès libre.">
 <meta name="robots" content="index,follow">
+<meta name="theme-color" content="#142554">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Centre VÉRITAS">
 <meta property="og:title" content="Espace élève VÉRITAS — toutes tes ressources de français">
@@ -14,6 +15,7 @@
 <meta property="og:image" content="https://veritas-school.com/uploads/logo-veritas.png">
 <link rel="canonical" href="https://veritas-school.com/eleve/">
 <link rel="stylesheet" href="/assets/veritas-pages.css">
+<link rel="stylesheet" href="/assets/veritas-eleve.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@graph":[
 {"@type":"CollectionPage","name":"Espace élève VÉRITAS","url":"https://veritas-school.com/eleve/","inLanguage":"fr","description":"Portail des ressources élèves accompagnant les cahiers de français du Centre VÉRITAS.","isAccessibleForFree":true},
 {"@type":"BreadcrumbList","itemListElement":[
@@ -22,104 +24,141 @@
 {"@type":"ListItem","position":3,"name":"Espace élève","item":"https://veritas-school.com/eleve/"}]}]}</script>
 </head>
 <body>
-<header class="top">
-  <span class="badge">Centre VÉRITAS · Espace élève</span>
-  <h1>Tout ce qui accompagne ton cahier</h1>
-  <p>Les corrigés de tes exercices, des quiz pour te tester, les méthodes d'examen et les œuvres au programme. <strong>Accès libre</strong> — rien à payer, rien à installer.</p>
+
+<header class="eh">
+  <span class="orbe o1" aria-hidden="true"></span>
+  <span class="orbe o2" aria-hidden="true"></span>
+  <span class="orbe o3" aria-hidden="true"></span>
+  <div class="inner">
+    <span class="kicker"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-backpack"/></svg>Espace élève · Centre VÉRITAS</span>
+    <h1>Ton cahier continue <span class="or">ici</span>.</h1>
+    <p class="sub">Le corrigé de chaque exercice, des quiz pour te tester, les méthodes d'examen et les œuvres au programme. Tu cherches d'abord — tu compares ensuite.</p>
+    <div class="chips">
+      <span class="chip"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-check"/></svg><b data-compte="4191">0</b>&nbsp;corrigés</span>
+      <span class="chip"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-book"/></svg><b data-compte="10">0</b>&nbsp;classes</span>
+      <span class="chip"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-sparkle"/></svg><b>Gratuit</b></span>
+    </div>
+  </div>
 </header>
 
+<nav class="tabs" aria-label="Sections de l'espace élève">
+  <div class="in">
+    <a href="#corriges"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-check"/></svg>Mes corrigés</a>
+    <a href="#accessible"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-type"/></svg>Lire &amp; écouter</a>
+    <a href="#quiz"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-target"/></svg>Me tester</a>
+    <a href="#programme"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-book-open"/></svg>Mon programme</a>
+    <a href="#aide"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-message"/></svg>Besoin d'aide</a>
+  </div>
+</nav>
+
 <div class="wrap">
-  <div class="intro">
-    <svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-globe"/></svg><strong>Tu viens de l'encadré « Espace VÉRITAS » de ton cahier ?</strong> Tu es au bon endroit.
-    Choisis ta classe ci-dessous, puis ta séquence. Et souviens-toi de la règle : <strong>on cherche d'abord, on compare ensuite</strong>.
+  <div class="intro rv">
+    <svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-globe"/></svg><strong>Tu viens de l'encadré « Espace VÉRITAS » de ton cahier ?</strong> Tu es au bon endroit.
+    Choisis ta classe, puis ta séquence. Les énoncés restent dans ton cahier — ici, tu trouves les corrections, et elles sont gratuites.
   </div>
   <p class="crumb"><a href="https://veritas-school.com">Accueil</a> › <a href="/constellation.html">La Constellation</a> › Espace élève</p>
 
-  <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-check"/></svg>Les corrigés de mon cahier</h2>
-  <nav class="seqnav" aria-label="Choisir sa classe">
-    <a href="/corriges/6e/">6ᵉ</a>
-    <a href="/corriges/5e/">5ᵉ</a>
-    <a href="/corriges/4e/">4ᵉ</a>
-    <a href="/corriges/3e/">3ᵉ · BEPC</a>
-    <a href="/corriges/2nde/">2ⁿᵈᵉ A</a>
-    <a href="/corriges/1ere/">1ʳᵉ A · Probatoire</a>
-    <a href="/corriges/tle/">Tˡᵉ A · BAC</a>
-    <a href="/corriges/est-2nde.html">2ⁿᵈᵉ S&amp;T</a>
-    <a href="/corriges/est-1ere.html">1ʳᵉ S&amp;T</a>
-    <a href="/corriges/est-tle.html">Tˡᵉ S&amp;T</a>
-  </nav>
-  <p class="note">4 212 exercices corrigés au total, rangés exactement comme dans le cahier (classe → séquence → leçon), avec les mêmes numéros d'exercice. Les énoncés restent dans ton cahier — ici, tu trouves les corrections, gratuitement.</p>
-
-  <h2 class="sec" id="accessible"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-type"/></svg>Lire autrement : confort et audio</h2>
-  <div class="grid two">
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-type"/></svg></span><h3>Lecture facilitée</h3>
-      <p class="note">Sur chaque page de corrigés, le bouton <strong>« <svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-type"/></svg>Lecture facilitée »</strong> agrandit le texte, aère les lignes, espace les lettres et colore une ligne sur deux. Pensé pour les élèves dyslexiques et pour la lecture sur téléphone. Ton réglage est retenu pour les visites suivantes.</p></div>
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-volume"/></svg></span><h3>Écouter les corrigés</h3>
-      <p class="note">Le bouton <strong>« <svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-volume"/></svg>Écouter les corrigés »</strong> fait lire les corrections à voix haute par ton navigateur, en français, en ouvrant chaque corrigé au fur et à mesure. Utile pour réviser en marchant — ou quand la lecture fatigue.</p></div>
+  <!-- ── 1. CORRIGÉS ────────────────────────────────────── -->
+  <div class="sh" id="corriges"><span class="num">1</span><h2>Les corrigés de mon cahier</h2></div>
+  <p class="note">Rangés exactement comme dans ton cahier : classe → séquence → leçon, avec les mêmes numéros d'exercice.</p>
+  <div class="classes rv">
+    <a class="cl" href="/corriges/6e/" style="--ton:#2c7fb8"><span class="niv">6ᵉ</span><span class="ex">463 corrigés</span><span class="go">Ouvrir<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></span></a>
+    <a class="cl" href="/corriges/5e/" style="--ton:#0f9b8e"><span class="niv">5ᵉ</span><span class="ex">443 corrigés</span><span class="go">Ouvrir<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></span></a>
+    <a class="cl" href="/corriges/4e/" style="--ton:#6e46c0"><span class="niv">4ᵉ</span><span class="ex">364 corrigés</span><span class="go">Ouvrir<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></span></a>
+    <a class="cl" href="/corriges/3e/" style="--ton:#e0576f"><span class="niv">3ᵉ</span><span class="ex">476 corrigés · BEPC</span><span class="go">Ouvrir<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></span></a>
+    <a class="cl" href="/corriges/2nde/" style="--ton:#2c7fb8"><span class="niv">2ⁿᵈᵉ</span><span class="ex">725 corrigés · série A</span><span class="go">Ouvrir<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></span></a>
+    <a class="cl" href="/corriges/1ere/" style="--ton:#0f9b8e"><span class="niv">1ʳᵉ</span><span class="ex">850 corrigés · Probatoire</span><span class="go">Ouvrir<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></span></a>
+    <a class="cl" href="/corriges/tle/" style="--ton:#e0a800"><span class="niv">Tˡᵉ</span><span class="ex">870 corrigés · BAC</span><span class="go">Ouvrir<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></span></a>
+    <a class="cl" href="/corriges/est-2nde.html" style="--ton:#6e46c0"><span class="niv">2ⁿᵈᵉ</span><span class="ex">scientifique &amp; technique</span><span class="go">Ouvrir<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></span></a>
+    <a class="cl" href="/corriges/est-1ere.html" style="--ton:#6e46c0"><span class="niv">1ʳᵉ</span><span class="ex">scientifique &amp; technique</span><span class="go">Ouvrir<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></span></a>
+    <a class="cl" href="/corriges/est-tle.html" style="--ton:#6e46c0"><span class="niv">Tˡᵉ</span><span class="ex">scientifique &amp; technique</span><span class="go">Ouvrir<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></span></a>
   </div>
 
-  <h2 class="sec" id="gagne"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-award"/></svg>Ce que tu y gagnes, concrètement</h2>
-  <p class="note">Pas ce qui rassure tes parents — ce qui change quelque chose pour toi.</p>
-  <div class="duo">
-    <div class="bloc">
-      <h3><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-brain"/></svg>Retenir, pour de bon</h3>
-      <p class="cite">« Je révise, mais je n'arrive pas à retenir. »</p>
-      <p>Tes erreurs sont mémorisées et <strong>te sont reproposées</strong> jusqu'à ce qu'elles soient acquises. On ne progresse pas en relisant : on progresse en refaisant ce qu'on a raté.</p>
-      <p class="cite">« Je ne sais pas si je suis au niveau. »</p>
-      <p>Le <strong>test de positionnement</strong> est gratuit et te situe matière par matière en quelques minutes.</p>
+  <!-- ── 2. LIRE & ÉCOUTER ──────────────────────────────── -->
+  <div class="sh" id="accessible"><span class="num">2</span><h2>Lire autrement : confort et audio</h2></div>
+  <div class="feats rv">
+    <article class="ft" style="--ton:#2c7fb8">
+      <span class="med"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-type"/></svg></span>
+      <h3>Lecture facilitée</h3>
+      <p>Sur chaque page de corrigés, un bouton agrandit le texte, aère les lignes, espace les lettres et colore une ligne sur deux. Pensé pour les élèves dyslexiques — et pour lire sur un petit écran. Ton réglage est retenu.</p>
+    </article>
+    <article class="ft" style="--ton:#0f9b8e">
+      <span class="med"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-volume"/></svg></span>
+      <h3>Écouter les corrigés</h3>
+      <p>Ton navigateur lit les corrections à voix haute, en français, et ouvre chaque bloc au fur et à mesure. Utile pour réviser en marchant — ou quand la lecture fatigue.</p>
+    </article>
+  </div>
+
+  <!-- ── 3. ME TESTER ───────────────────────────────────── -->
+  <div class="sh" id="quiz"><span class="num">3</span><h2>Me tester</h2></div>
+  <div class="feats rv">
+    <article class="ft" style="--ton:#e0576f">
+      <span class="med"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-gamepad"/></svg></span>
+      <h3>Quiz &amp; jeux éducatifs</h3>
+      <p>QCM, vrai/faux, textes à trous, appariements. On apprend mieux quand on se trompe tout seul.</p>
+      <a class="lien" href="https://veritas-school.com">Jouer et se tester<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></a>
+    </article>
+    <article class="ft" style="--ton:#6e46c0">
+      <span class="med"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-pen"/></svg></span>
+      <h3>Épreuves corrigées</h3>
+      <p>Annales et sujets commentés : BEPC, Probatoire, BAC, GCE.</p>
+      <a class="lien" href="/ressources/">Voir les épreuves<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></a>
+    </article>
+    <article class="ft" style="--ton:#e0a800">
+      <span class="med"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-gauge"/></svg></span>
+      <h3>Mes notes &amp; mon orientation</h3>
+      <p>Comment ta moyenne se calcule, ce qui décide de ton passage, quelle série choisir. Avec un simulateur d'année.</p>
+      <a class="lien" href="/parcours/">Comprendre et simuler<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></a>
+    </article>
+    <article class="ft" style="--ton:#0f9b8e">
+      <span class="med"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-calculator"/></svg></span>
+      <h3>Mes outils</h3>
+      <p>Moyenne pondérée, points qu'il me manque, planning de révision.</p>
+      <a class="lien" href="/outils/">Ouvrir les outils<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></a>
+    </article>
+  </div>
+
+  <!-- ── 4. MON PROGRAMME ───────────────────────────────── -->
+  <div class="sh" id="programme"><span class="num">4</span><h2>Comprendre mon programme</h2></div>
+  <div class="feats rv">
+    <article class="ft" style="--ton:#2c7fb8">
+      <span class="med"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-book-open"/></svg></span>
+      <h3>Les œuvres au programme</h3>
+      <p>Résumé, thèmes, personnages et citations vérifiées mot pour mot dans le texte réel.</p>
+      <a class="lien" href="/oeuvres/">Voir les 21 œuvres<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></a>
+    </article>
+    <article class="ft" style="--ton:#6e46c0">
+      <span class="med"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-compass"/></svg></span>
+      <h3>Le programme de ma classe</h3>
+      <p>Les notions MINESEC de la 6ᵉ à la Terminale, classe par classe.</p>
+      <a class="lien" href="/niveaux/">Voir les programmes<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></a>
+    </article>
+    <article class="ft" style="--ton:#e0576f">
+      <span class="med"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-feather"/></svg></span>
+      <h3>Les méthodes</h3>
+      <p>Résumé, commentaire composé, dissertation, étude de texte, dictée.</p>
+      <a class="lien" href="/ressources/">Voir les méthodes<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></a>
+    </article>
+    <article class="ft" style="--ton:#e0a800">
+      <span class="med"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-scan"/></svg></span>
+      <h3>VÉRITAS Flash</h3>
+      <p>Scanne le QR de ta séquence : la ressource s'ouvre directement, sans application.</p>
+      <a class="lien" href="/flash/">Comment ça marche<svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg></a>
+    </article>
+  </div>
+
+  <!-- ── 5. AIDE ────────────────────────────────────────── -->
+  <div class="sh" id="aide"><span class="num">5</span><h2>Bloqué sur un corrigé ?</h2></div>
+  <section class="appel rv">
+    <span class="orbe" aria-hidden="true"></span>
+    <h2>Personne ne progresse en restant coincé</h2>
+    <p>Un corrigé qu'on ne comprend pas ne sert à rien. Fais-le t'expliquer autrement — c'est comme ça qu'on décroche une mention.</p>
+    <div class="btns">
+      <a href="https://veritas-school.com"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-bot"/></svg>Demander à Prof. Ambassa</a>
+      <a class="ghost" href="https://wa.me/237697637739?text=Bonjour%20V%C3%89RITAS%2C%20j%27ai%20une%20question%20sur%20un%20corrig%C3%A9%20du%20cahier."><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-message"/></svg>Écrire au centre</a>
+      <a class="ghost" href="/constellation.html"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-compass"/></svg>Toute la Constellation</a>
     </div>
-    <div class="bloc">
-      <h3><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-target"/></svg>Arriver prêt à l'examen</h3>
-      <p class="cite">« Je ne sais pas comment on note à l'examen. »</p>
-      <p>Les annales BEPC, Probatoire, BAC et GCE sont <strong>corrigées selon les grilles officielles</strong> du MINESEC — tu vois où partent les points.</p>
-      <p class="cite">« Personne pour m'expliquer quand je bloque le soir. »</p>
-      <p><strong>Prof. Ambassa</strong> répond à toute heure : explication, quiz, correction de devoir.</p>
-      <p class="cite">« Réviser seul, c'est décourageant. »</p>
-      <p>Battles hebdomadaires, classement et salles d'étude : tu <strong>révises avec les autres</strong>.</p>
-    </div>
-  </div>
-
-  <h2 class="sec" id="quiz"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-target"/></svg>Me tester</h2>
-  <div class="grid">
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-gamepad"/></svg></span><h3>Quiz &amp; jeux éducatifs</h3>
-      <p class="note">QCM, vrai/faux, textes à trous, appariements — sur la plateforme.</p>
-      <a class="dl" href="https://veritas-school.com"><span>Jouer et se tester</span><span class="pill">Plateforme</span></a></div>
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-pen"/></svg></span><h3>Épreuves corrigées</h3>
-      <p class="note">Annales et sujets d'examen commentés (BEPC, Probatoire, BAC, GCE).</p>
-      <a class="dl" href="/ressources/"><span>Voir les épreuves</span><span class="pill">11 fiches</span></a></div>
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-gauge"/></svg></span><h3>Mes notes &amp; mon orientation</h3>
-      <p class="note">Comment ma moyenne se calcule, ce qui décide de mon passage, quelle série choisir.</p>
-      <a class="dl" href="/parcours/"><span>Comprendre et simuler</span><span class="pill">Guide</span></a></div>
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-calculator"/></svg></span><h3>Mes outils</h3>
-      <p class="note">Moyenne pondérée, points qu'il me manque, planning de révision.</p>
-      <a class="dl" href="/outils/"><span>Ouvrir les outils</span><span class="pill">Gratuit</span></a></div>
-  </div>
-
-  <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book-open"/></svg>Comprendre mon programme</h2>
-  <div class="grid">
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book-open"/></svg></span><h3>Les œuvres au programme</h3>
-      <p class="note">Résumé, thèmes, personnages et citations vérifiées mot pour mot.</p>
-      <a class="dl" href="/oeuvres/"><span>Voir les œuvres</span><span class="pill">21 fiches</span></a></div>
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-compass"/></svg></span><h3>Le programme de ma classe</h3>
-      <p class="note">Les notions MINESEC de la 6ᵉ à la Terminale, classe par classe.</p>
-      <a class="dl" href="/niveaux/"><span>Voir les programmes</span><span class="pill">7 pages</span></a></div>
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-feather"/></svg></span><h3>Les méthodes</h3>
-      <p class="note">Résumé, commentaire composé, dissertation, étude de texte, dictée.</p>
-      <a class="dl" href="/ressources/"><span>Voir les méthodes</span><span class="pill">Fiches</span></a></div>
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-calendar"/></svg></span><h3>La frise des mouvements</h3>
-      <p class="note">De l'humanisme aux lettres africaines : dates, principes, auteurs — et l'œuvre de ton cahier qui s'y rattache.</p>
-      <a class="dl" href="/eleve/frise-litteraire.html"><span>Voir la frise</span><span class="pill">Animée</span></a></div>
-    <div class="card"><span class="ico"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-scan"/></svg></span><h3>VÉRITAS Flash</h3>
-      <p class="note">Scanne le QR de ta séquence : la ressource s'ouvre directement.</p>
-      <a class="dl" href="/flash/"><span>Comment ça marche</span><span class="pill">QR</span></a></div>
-  </div>
-
-  <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-message"/></svg>Bloqué sur un corrigé ?</h2>
-  <div class="cta">
-    <a href="https://veritas-school.com"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-bot"/></svg>Demander à Prof. Ambassa<small>L'assistant reprend le corrigé autrement</small></a>
-    <a href="https://wa.me/237697637739?text=Bonjour%20VÉRITAS%2C%20j%27ai%20une%20question%20sur%20un%20corrigé%20du%20cahier."><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-message"/></svg>Écrire au centre<small>Réponse sous 2 h · jours ouvrés</small></a>
-    <a href="/constellation.html"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-compass"/></svg>Voir toute la Constellation<small>Tout ce qui accompagne le cahier</small></a>
-  </div>
+  </section>
 
   <p class="note" style="margin-top:1.6rem">Vous êtes enseignant ? Le Guide pédagogique, les grilles et les progressions sont dans l'<a href="/enseignant/">espace enseignant</a> (accès par code).</p>
 </div>

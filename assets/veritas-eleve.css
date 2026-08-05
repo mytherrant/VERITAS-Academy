@@ -1,0 +1,157 @@
+/* ============================================================
+   VÉRITAS — habillage de l'ESPACE ÉLÈVE
+   © 2026 Mythe Errant · Centre VÉRITAS
+   Chargé uniquement par /eleve/ : le reste du site garde son
+   habillage éditorial sobre (veritas-pages.css).
+
+   Règles tenues :
+   • identité navy/or conservée — on éclaircit, on ne blanchit pas ;
+   • toutes les animations portent sur transform/opacity (GPU),
+     jamais sur background-position ni box-shadow ;
+   • prefers-reduced-motion coupe le mouvement, pas le contenu ;
+   • aucun contenu n'est masqué sans filet : voir .rv + .rv-on.
+   ============================================================ */
+
+:root{
+  --e-violet:#6e46c0; --e-teal:#0f9b8e; --e-rose:#e0576f; --e-bleu:#2c7fb8;
+  --e-r:18px;
+  --e-ombre:0 10px 30px rgba(20,37,84,.10);
+  --e-ombre-h:0 18px 44px rgba(20,37,84,.18);
+}
+
+/* ── HÉROS ───────────────────────────────────────────────── */
+.eh{position:relative;overflow:hidden;color:#fff;padding:3.2rem 1rem 3.6rem;
+  background:linear-gradient(135deg,#0d1a3d 0%,#1d3168 45%,#3a2a7a 100%)}
+.eh .inner{position:relative;z-index:3;max-width:920px;margin:0 auto;text-align:center}
+.eh .kicker{display:inline-flex;align-items:center;gap:.45rem;border:1.5px solid rgba(255,201,60,.55);
+  color:var(--gold);border-radius:999px;padding:.25rem .9rem;font-size:.76rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase}
+.eh h1{margin:.9rem 0 .5rem;font-size:clamp(1.8rem,5.2vw,3rem);line-height:1.08;
+  letter-spacing:-.02em;font-weight:800}
+.eh h1 .or{color:var(--gold);position:relative;white-space:nowrap}
+.eh h1 .or::after{content:"";position:absolute;left:0;right:0;bottom:.06em;height:.28em;
+  background:rgba(255,201,60,.22);border-radius:3px;z-index:-1}
+.eh p.sub{margin:.2rem auto 1.4rem;max-width:640px;color:#cdd8f2;font-size:clamp(.96rem,2.4vw,1.1rem)}
+
+/* pastilles de preuve */
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem}
+.chip{display:inline-flex;align-items:center;gap:.45rem;background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.16);border-radius:999px;padding:.42rem .95rem;
+  font-size:.88rem;font-weight:600;backdrop-filter:blur(3px)}
+.chip b{color:var(--gold);font-size:1.02rem}
+.chip .i{width:1.05em;height:1.05em;color:var(--gold)}
+
+/* orbes : transform/opacity uniquement */
+.eh .orbe{position:absolute;border-radius:50%;filter:blur(46px);opacity:.5;z-index:1;
+  will-change:transform}
+.eh .o1{width:340px;height:340px;background:#ffc93c;top:-120px;left:-90px;
+  animation:derive 26s ease-in-out infinite}
+.eh .o2{width:300px;height:300px;background:#6e46c0;bottom:-140px;right:-70px;
+  animation:derive 32s ease-in-out infinite reverse}
+.eh .o3{width:200px;height:200px;background:#0f9b8e;top:40%;right:22%;opacity:.32;
+  animation:derive 38s ease-in-out infinite}
+@keyframes derive{
+  0%,100%{transform:translate3d(0,0,0) scale(1)}
+  33%{transform:translate3d(26px,-18px,0) scale(1.06)}
+  66%{transform:translate3d(-20px,22px,0) scale(.95)}
+}
+/* liseré or en bas du héros */
+.eh::after{content:"";position:absolute;left:0;right:0;bottom:0;height:4px;z-index:4;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+
+/* ── ONGLETS FLOTTANTS ───────────────────────────────────── */
+.tabs{position:sticky;top:0;z-index:40;background:rgba(255,255,255,.86);
+  backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--line)}
+.tabs .in{max-width:var(--maxw);margin:0 auto;display:flex;gap:.3rem;padding:.5rem 1rem;
+  overflow-x:auto;scrollbar-width:none}
+.tabs .in::-webkit-scrollbar{display:none}
+.tabs a{flex:none;display:inline-flex;align-items:center;gap:.4rem;text-decoration:none;
+  color:var(--gris);font-weight:700;font-size:.88rem;padding:.5rem .85rem;border-radius:999px;
+  transition:transform .16s ease,color .16s ease,background-color .16s ease}
+.tabs a .i{width:1.05em;height:1.05em}
+.tabs a:hover{color:var(--navy);background:#f1f5fd;transform:translateY(-1px)}
+.tabs a[aria-current="true"]{color:#fff;background:var(--navy)}
+.tabs a[aria-current="true"] .i{color:var(--gold)}
+
+/* ── TUILES DE CLASSE ────────────────────────────────────── */
+.classes{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));margin-top:1rem}
+.cl{position:relative;display:block;text-decoration:none;border-radius:var(--e-r);padding:1rem .9rem;
+  background:var(--card);border:1px solid var(--line);box-shadow:var(--e-ombre);overflow:hidden;
+  transition:transform .18s cubic-bezier(.2,.9,.3,1.2),box-shadow .18s ease,border-color .18s ease}
+.cl::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--ton,var(--navy));
+  transition:width .18s ease}
+.cl:hover,.cl:focus-visible{transform:translateY(-4px);box-shadow:var(--e-ombre-h);border-color:var(--ton,var(--gold))}
+.cl:hover::before{width:100%;opacity:.07}
+.cl .niv{display:block;font-size:1.55rem;font-weight:800;color:var(--ton,var(--navy));line-height:1;
+  letter-spacing:-.02em}
+.cl .ex{display:block;margin-top:.35rem;font-size:.82rem;color:var(--gris);font-weight:600}
+.cl .go{display:inline-flex;align-items:center;gap:.25rem;margin-top:.5rem;font-size:.8rem;
+  font-weight:700;color:var(--navy);opacity:0;transform:translateX(-4px);
+  transition:opacity .18s ease,transform .18s ease}
+.cl:hover .go{opacity:1;transform:none}
+.cl .go .i{width:1em;height:1em}
+
+/* ── CARTES ENRICHIES ────────────────────────────────────── */
+.feats{display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));margin-top:1rem}
+.ft{position:relative;background:var(--card);border:1px solid var(--line);border-radius:var(--e-r);
+  padding:1.15rem 1.15rem 1.2rem;box-shadow:var(--e-ombre);overflow:hidden;
+  transition:transform .2s cubic-bezier(.2,.9,.3,1.2),box-shadow .2s ease}
+.ft::after{content:"";position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(90deg,var(--ton,var(--navy)),transparent);
+  transform:scaleX(0);transform-origin:left;transition:transform .28s ease}
+.ft:hover{transform:translateY(-5px);box-shadow:var(--e-ombre-h)}
+.ft:hover::after{transform:scaleX(1)}
+.ft .med{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--ton,#142554) 12%,#fff);color:var(--ton,var(--navy));margin-bottom:.6rem;
+  transition:transform .25s cubic-bezier(.2,.9,.3,1.4)}
+.ft:hover .med{transform:rotate(-6deg) scale(1.08)}
+.ft .med .i{width:24px;height:24px}
+.ft h3{margin:.1rem 0 .35rem;color:var(--navy);font-size:1.06rem;letter-spacing:-.01em}
+.ft p{margin:0;font-size:.92rem;color:var(--gris);line-height:1.55}
+.ft .lien{display:inline-flex;align-items:center;gap:.3rem;margin-top:.7rem;font-weight:700;
+  font-size:.88rem;text-decoration:none;color:var(--navy)}
+.ft .lien .i{width:1em;height:1em;transition:transform .18s ease}
+.ft:hover .lien .i{transform:translateX(3px)}
+
+/* ── TITRES DE SECTION ───────────────────────────────────── */
+.sh{display:flex;align-items:center;gap:.6rem;margin:2.6rem 0 .2rem}
+.sh .num{flex:none;width:30px;height:30px;border-radius:10px;background:var(--navy);color:var(--gold);
+  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.86rem}
+.sh h2{margin:0;color:var(--navy);font-size:clamp(1.15rem,3vw,1.5rem);letter-spacing:-.02em}
+.sh + p.note{margin-top:.3rem}
+
+/* ── RÉVÉLATION AU SCROLL (avec filet) ───────────────────── */
+/* Le masquage n'existe QUE si le JS a posé .has-js sur le body : sans lui — JS
+   coupé, script en échec, vieux navigateur — le contenu reste visible. Un bloc
+   invisible faute de JavaScript, c'est un bloc perdu ; on ne prend pas ce risque. */
+body.has-js .rv{opacity:0;transform:translateY(14px)}
+body.has-js .rv-on{opacity:1;transform:none;
+  transition:opacity .5s ease,transform .5s cubic-bezier(.2,.9,.3,1)}
+
+/* ── BANDE D'APPEL ───────────────────────────────────────── */
+.appel{position:relative;overflow:hidden;border-radius:22px;margin-top:2.4rem;padding:1.6rem 1.3rem;
+  background:linear-gradient(135deg,#0d1a3d,#24407f);color:#fff}
+.appel h2{margin:.1rem 0 .4rem;font-size:1.3rem;color:#fff;letter-spacing:-.01em}
+.appel p{color:#cdd8f2;margin:.3rem 0 1rem}
+.appel .btns{display:flex;flex-wrap:wrap;gap:.6rem}
+.appel .btns a{display:inline-flex;align-items:center;gap:.45rem;text-decoration:none;font-weight:800;
+  border-radius:12px;padding:.65rem 1.1rem;background:var(--gold);color:var(--navy3);
+  transition:transform .16s ease,filter .16s ease}
+.appel .btns a.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.45)}
+.appel .btns a:hover{transform:translateY(-2px);filter:brightness(1.05)}
+.appel .orbe{position:absolute;width:260px;height:260px;border-radius:50%;filter:blur(50px);
+  background:#ffc93c;opacity:.22;right:-70px;top:-90px;animation:derive 30s ease-in-out infinite}
+
+@media(max-width:600px){
+  .eh{padding:2.4rem 1rem 2.8rem}
+  .classes{grid-template-columns:repeat(auto-fill,minmax(128px,1fr))}
+  .cl .niv{font-size:1.3rem}
+}
+
+/* Le mouvement est un confort, pas une information : on le coupe si demandé. */
+@media(prefers-reduced-motion:reduce){
+  .eh .orbe,.appel .orbe{animation:none}
+  .rv,.rv-on{opacity:1;transform:none;transition:none}
+  .cl,.ft,.tabs a,.appel .btns a{transition:none}
+  .cl:hover,.ft:hover{transform:none}
+}

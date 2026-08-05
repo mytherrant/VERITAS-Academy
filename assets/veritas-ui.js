@@ -152,13 +152,98 @@
     }
   }
 
+  /* ── Espace élève : révélation au scroll ────────────────
+     Le masquage n'est activé qu'ici (classe .has-js) et un filet de sécurité
+     découvre tout au bout d'1,2 s, quoi qu'il arrive. Aucune information ne
+     doit dépendre du bon vouloir d'un observateur. */
+  function reveals() {
+    var blocs = document.querySelectorAll('.rv');
+    if (!blocs.length) return;
+    var doux = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (doux || !('IntersectionObserver' in window)) {
+      blocs.forEach(function (b) { b.classList.add('rv-on'); });
+      return;
+    }
+    document.body.classList.add('has-js');
+    var io = new IntersectionObserver(function (entrees) {
+      entrees.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add('rv-on'); io.unobserve(e.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px', threshold: 0.06 });
+    blocs.forEach(function (b, i) {
+      b.style.transitionDelay = Math.min(i * 60, 240) + 'ms';
+      io.observe(b);
+    });
+    setTimeout(function () {                       // filet : rien ne reste caché
+      document.querySelectorAll('.rv:not(.rv-on)').forEach(function (b) { b.classList.add('rv-on'); });
+    }, 1200);
+  }
+
+  /* ── Espace élève : onglets qui suivent la lecture ──────── */
+  function onglets() {
+    var barre = document.querySelector('.tabs');
+    if (!barre) return;
+    var liens = [].slice.call(barre.querySelectorAll('a[href^="#"]'));
+    var cibles = liens.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+    function actif(id) {
+      liens.forEach(function (a) {
+        a.setAttribute('aria-current', a.getAttribute('href') === '#' + id ? 'true' : 'false');
+      });
+    }
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entrees) {
+        entrees.forEach(function (e) { if (e.isIntersecting) actif(e.target.id); });
+      }, { rootMargin: '-18% 0px -70% 0px' });
+      cibles.forEach(function (c) { if (c) io.observe(c); });
+    }
+    // Décalage du scroll : la barre collante ne doit pas manger le titre visé.
+    liens.forEach(function (a) {
+      a.addEventListener('click', function (ev) {
+        var c = document.querySelector(a.getAttribute('href'));
+        if (!c) return;
+        ev.preventDefault();
+        var y = c.getBoundingClientRect().top + window.pageYOffset - barre.offsetHeight - 12;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        actif(c.id);
+        if (history.replaceState) history.replaceState(null, '', a.getAttribute('href'));
+      });
+    });
+  }
+
+  /* ── Compteurs qui montent (chiffres réels, jamais inventés) ── */
+  function compteurs() {
+    var els = document.querySelectorAll('[data-compte]');
+    if (!els.length) return;
+    var doux = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    els.forEach(function (el) {
+      var cible = parseInt(el.getAttribute('data-compte'), 10) || 0;
+      var fmt = function (n) { return n.toLocaleString('fr-FR').replace(/ /g, ' '); };
+      // On écrit d'ABORD la valeur finale : dans un onglet d'arrière-plan,
+      // requestAnimationFrame ne s'exécute pas et le compteur resterait bloqué
+      // sur 0 — un chiffre faux coûte plus cher qu'une animation perdue.
+      el.textContent = fmt(cible);
+      if (doux || document.visibilityState === 'hidden') return;
+      var t0 = null, duree = 900;
+      function pas(ts) {
+        if (t0 === null) t0 = ts;
+        var p = Math.min((ts - t0) / duree, 1);
+        el.textContent = fmt(Math.round(cible * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) requestAnimationFrame(pas);
+      }
+      requestAnimationFrame(pas);
+    });
+  }
+
   /* ── Année du pied de page ─────────────────────────────── */
   function year() {
     var y = document.getElementById('y');
     if (y) y.textContent = new Date().getFullYear();
   }
 
-  function init() { bindToggleAll(); bindA11y(); bindSpeak(); bindShare(); year(); }
+  function init() {
+    bindToggleAll(); bindA11y(); bindSpeak(); bindShare(); year();
+    reveals(); onglets(); compteurs();          // habillage de l'espace élève
+  }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else { init(); }
