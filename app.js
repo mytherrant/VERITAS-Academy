@@ -17281,17 +17281,18 @@ function _buildOrientationSection(){
   h+="<div class='vsec-sub'>Trouvez la filiere et l'ecole adaptees a votre profil selon le systeme educatif camerounais.</div>";
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:22px'>";
   var cards=[
-    {ico:"🎯",titre:"Orientation personnalisee",desc:"Remplissez un formulaire pour une analyse complete de votre profil",action:"showOrientationForm()"},
-    {ico:"🏫",titre:"Grandes ecoles",desc:"ENAM, Polytechnique, FASA, IRIC, ESSEC, EMIA — conditions d'admission",action:"_showGrandesEcoles()"},
-    {ico:"🔬",titre:"Filieres scientifiques",desc:"BAC C/D, Medecine, Ingenierie, Agriculture, Sciences Naturelles",action:"showOrientationForm()"},
-    {ico:"⚖️",titre:"Filieres litteraires",desc:"BAC A, Droit, Lettres, Journalisme, Sciences Humaines",action:"showOrientationForm()"},
-    {ico:"💼",titre:"Filieres techniques",desc:"BAC TI/TC, BTS/HND, Commerce, Industrie, Informatique",action:"showOrientationForm()"},
-    {ico:"🎓",titre:"Bourses & Concours",desc:"Calendrier des concours nationaux et opportunites de bourses",action:"_showBourses()"},
-    {ico:"🎯",titre:"Coaching & Accompagnement",desc:"Soutien scolaire, gestion du stress, developpement personnel et bien-etre",action:"showPacksCoaching()"},
+    // Pictogrammes du sprite embarqué VRT_SPRITE (#i-*) — voir ICO() ; aucun émoji.
+    {ico:"i-target",tint:"or",titre:"Orientation personnalisee",desc:"Remplissez un formulaire pour une analyse complete de votre profil",action:"showOrientationForm()"},
+    {ico:"i-school",tint:"bleu",titre:"Grandes ecoles",desc:"ENAM, Polytechnique, FASA, IRIC, ESSEC, EMIA — conditions d'admission",action:"_showGrandesEcoles()"},
+    {ico:"i-flask",tint:"vert",titre:"Filieres scientifiques",desc:"BAC C/D, Medecine, Ingenierie, Agriculture, Sciences Naturelles",action:"showOrientationForm()"},
+    {ico:"i-book-open",tint:"violet",titre:"Filieres litteraires",desc:"BAC A, Droit, Lettres, Journalisme, Sciences Humaines",action:"showOrientationForm()"},
+    {ico:"i-tool",tint:"cyan",titre:"Filieres techniques",desc:"BAC TI/TC, BTS/HND, Commerce, Industrie, Informatique",action:"showOrientationForm()"},
+    {ico:"i-graduation",tint:"or",titre:"Bourses & Concours",desc:"Calendrier des concours nationaux et opportunites de bourses",action:"_showBourses()"},
+    {ico:"i-users",tint:"rose",titre:"Coaching & Accompagnement",desc:"Soutien scolaire, gestion du stress, developpement personnel et bien-etre",action:"showPacksCoaching()"},
   ];
   cards.forEach(function(c){
-    h+="<div class='vcard' style='cursor:pointer;transition:.25s' onmouseover=\"this.style.transform='translateY(-4px)'\" onmouseout=\"this.style.transform=''\" onclick='"+c.action+"'>"
-      +"<div style='font-size:36px;margin-bottom:10px'>"+c.ico+"</div>"
+    h+="<div class='vcard vori-card' style='cursor:pointer' onclick='"+c.action+"'>"
+      +"<div class='vori-ico t-"+c.tint+"'>"+ICO(c.ico)+"</div>"
       +"<div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#142554;margin-bottom:6px'>"+c.titre+"</div>"
       +"<div style='font-size:11px;color:#6B7A99;line-height:1.55'>"+c.desc+"</div>"
       +"</div>";
@@ -38996,6 +38997,10 @@ function pgPartnerProgram(type){
     + _prtRoleBlockHtml(type, false)  // v1.8 : rôle dans la chaîne + attributions (sans boutons en public)
     + '<div class="ct" style="margin:18px 0 8px">✨ Vos avantages</div>'
     + '<ul style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 18px 18px 36px;list-style:disc">'+av+'</ul>'
+    // v1.14 — le programme répondait « qu'est-ce que j'y gagne » et rien
+    // d'autre. On ajoute le déroulé, ce qui est attendu, et ce dont on
+    // profite immédiatement sans candidater : on donne avant de demander.
+    + ((typeof _prtContenuHtml==='function') ? _prtContenuHtml(type) : '')
     + '<div class="ct" style="margin:24px 0 10px">🎯 Système de paliers (mix ouvrages + abonnements + autres)</div>'
     + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px">'+lvCount+'</div>'
     + '<div style="background:linear-gradient(135deg,#142554,#1e3a8a);color:#fff;padding:24px;border-radius:14px;text-align:center;margin:24px 0">'
@@ -42987,4 +42992,147 @@ window.pgPourVous = function(role){
 window._portailConnexion = function(role){
   if(role === 'parent'){ if(typeof showRegisterForm==='function') showRegisterForm(''); return; }
   if(typeof showLogin==='function') showLogin(role);
+};
+
+
+/* ════════ CONTENU DES PORTAILS PARTENAIRES (v1.14) ════════
+   Les neuf pages de programme se réduisaient à un titre, une liste
+   d'avantages et un bouton « devenir partenaire » — 900 à 1 600 caractères.
+   Elles répondaient à « qu'est-ce que j'y gagne », jamais à « comment ça
+   marche », « qu'attend-on de moi » et « qu'est-ce qui est gratuit tout de
+   suite ». Un visiteur ne candidate pas à ce qu'il ne comprend pas.
+
+   Trois blocs ajoutés par programme, tous factuels : le déroulé en trois
+   étapes, ce qui est attendu, et — dans l'esprit des hubs par public — ce
+   dont on peut profiter IMMÉDIATEMENT, sans compte ni candidature. On donne
+   avant de demander, ici aussi.
+
+   Aucun chiffre n'est inventé : les taux et paliers restent ceux déjà
+   déclarés dans les avantages et le système de paliers existants. */
+
+var _PRT_DEROULE = {
+  enseignant: [
+    'Vous candidatez en deux minutes — nom, établissement, matière, téléphone.',
+    'Le centre valide sous 48 h ouvrables et vous transmet votre code personnel.',
+    'Chaque commande passée avec votre code vous est créditée automatiquement.'
+  ],
+  createur: [
+    'Vous candidatez en indiquant votre audience et vos plateformes.',
+    'Le centre valide et génère votre code promo personnel.',
+    'Vos abonnés bénéficient d\'une réduction, vos ventes vous sont créditées.'
+  ],
+  chef_etab: [
+    'Vous nous écrivez avec le nom et la localisation de l\'établissement.',
+    'Nous convenons d\'un rendez-vous pour cadrer les besoins réels.',
+    'L\'établissement est équipé, le personnel formé, le label remis.'
+  ],
+  inspecteur: [
+    'Vous nous indiquez votre corps d\'inspection et vos disciplines.',
+    'Nous vous associons aux comités de validation en cours.',
+    'Les formations et rédactions auxquelles vous participez sont rémunérées.'
+  ],
+  parent: [
+    'Vous créez un compte parent — gratuit, en une minute.',
+    'Vous suivez la scolarité et réglez en Mobile Money depuis chez vous.',
+    'Vous recommandez VÉRITAS autour de vous et bénéficiez du programme.'
+  ],
+  eleve_leader: [
+    'Vous activez votre statut d\'ambassadeur en un clic.',
+    'Vous recevez votre code et vos visuels à partager.',
+    'Vos points vous placent au classement, les prix sont remis par niveau.'
+  ],
+  librairie: [
+    'Vous nous transmettez les coordonnées du point de vente.',
+    'Nous convenons des volumes, des marges et du dépôt.',
+    'Vous recevez les supports publicitaires et le réassort suit vos ventes.'
+  ],
+  universite: [
+    'Vous nous présentez la structure et le champ de collaboration visé.',
+    'Nous définissons ensemble le cadre (stages, recherche, contenus).',
+    'La convention est signée et le partenariat annoncé publiquement.'
+  ],
+  sponsor: [
+    'Vous nous dites ce que vous souhaitez soutenir et à quelle hauteur.',
+    'Nous vous proposons les contreparties de visibilité correspondantes.',
+    'Le soutien est engagé et rendu visible auprès des familles.'
+  ]
+};
+
+var _PRT_ATTENDU = {
+  enseignant:   'Exercer effectivement dans un établissement, et recommander ce que vous avez vous-même jugé utile à vos élèves. Aucun volume minimum n\'est exigé.',
+  createur:     'Une audience réelle et engagée, quelle que soit sa taille, et des publications honnêtes : vous parlez de ce que vous avez essayé.',
+  chef_etab:    'Un établissement en activité et un interlocuteur identifié pour le suivi. L\'engagement porte sur l\'accompagnement, pas sur un volume d\'achat.',
+  inspecteur:   'Une fonction d\'inspection en cours et la disponibilité pour relire ou animer. Votre nom n\'est associé qu\'aux travaux que vous validez.',
+  parent:       'Rien de plus qu\'un compte et l\'envie de faire connaître ce qui vous a servi.',
+  eleve_leader: 'Être élève inscrit, et partager honnêtement. Aucune obligation de résultat : le classement récompense, il ne sanctionne pas.',
+  librairie:    'Un point de vente ouvert et un stock tenu. Les invendus se traitent au réassort suivant.',
+  universite:   'Une structure identifiée et un référent pour la convention.',
+  sponsor:      'Rien d\'autre que l\'accord sur les contreparties. Le montant et sa durée sont libres.'
+};
+
+// Ce dont on profite TOUT DE SUITE, sans compte ni candidature. Toutes les
+// destinations sont vérifiées existantes (mêmes cibles que les hubs publics).
+var _PRT_DEJA = {
+  enseignant:   [{t:'Les corrigés des cahiers',   a:"window.open('corriges/','_blank','noopener')"},
+                 {t:'Les manuels et leurs ressources', a:"window.open('manuels.html','_blank','noopener')"}],
+  createur:     [{t:'Les outils gratuits à partager', a:"window.open('outils/','_blank','noopener')"},
+                 {t:'Les corrigés en ligne',      a:"window.open('corriges/','_blank','noopener')"}],
+  chef_etab:    [{t:'Les corrigés des cahiers',   a:"window.open('corriges/','_blank','noopener')"},
+                 {t:'L\'espace parents',          a:"vShowSec('parents',null)"}],
+  inspecteur:   [{t:'Les manuels VÉRITAS',        a:"window.open('manuels.html','_blank','noopener')"},
+                 {t:'Les corrigés en ligne',      a:"window.open('corriges/','_blank','noopener')"}],
+  parent:       [{t:'Calculer une moyenne',       a:"window.open('outils/calcul-moyenne.html','_blank','noopener')"},
+                 {t:'L\'espace parents',          a:"vShowSec('parents',null)"}],
+  eleve_leader: [{t:'Les jeux et les œuvres',     a:"showJeuxEdu()"},
+                 {t:'Le coaching',                a:"mCoaching()"}],
+  librairie:    [{t:'Le catalogue des manuels',   a:"vShowSec('boutique',null)"}],
+  universite:   [{t:'Les manuels VÉRITAS',        a:"window.open('manuels.html','_blank','noopener')"}],
+  sponsor:      [{t:'Les trophées VÉRITAS',       a:"vShowSec('trophees',null)"}]
+};
+
+function _prtIco(id, taille){
+  return '<svg width="'+(taille||18)+'" height="'+(taille||18)+'" viewBox="0 0 24 24" fill="none" '
+       + 'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '
+       + 'aria-hidden="true"><use href="#'+id+'"/></svg>';
+}
+
+// Blocs insérés dans pgPartnerProgram, entre les avantages et l'appel à agir.
+window._prtContenuHtml = function(type){
+  var etapes  = _PRT_DEROULE[type];
+  var attendu = _PRT_ATTENDU[type];
+  var deja    = _PRT_DEJA[type];
+  var h = '';
+
+  if(deja && deja.length){
+    h += '<div class="ct" style="margin:26px 0 10px">Ce dont vous profitez déjà, sans rien signer</div>'
+      +  '<div style="display:flex;gap:10px;flex-wrap:wrap">';
+    deja.forEach(function(d){
+      h += '<button class="btn bo sm" style="flex:1 1 200px;text-align:left;padding:12px 14px" onclick="'+d.a+'">'
+        +  '<span style="display:inline-flex;align-items:center;gap:8px">'+_prtIco('lc-check',16)+_prtSafe(d.t)+'</span>'
+        +  '</button>';
+    });
+    h += '</div>';
+  }
+
+  if(etapes && etapes.length){
+    h += '<div class="ct" style="margin:26px 0 10px">Comment ça se passe</div>'
+      +  '<div style="background:var(--bg1,#fff);border:1px solid var(--bg3,#E5E7EB);border-radius:12px;padding:6px 16px">';
+    etapes.forEach(function(e,i){
+      h += '<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0'
+        +  (i<etapes.length-1?';border-bottom:1px solid var(--bg3,#eef2f7)':'')+'">'
+        +  '<span style="flex:none;width:26px;height:26px;border-radius:50%;background:#142554;color:#FFC93C;'
+        +    'display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px">'+(i+1)+'</span>'
+        +  '<span style="font-size:13.5px;line-height:1.6;color:var(--ink2)">'+_prtSafe(e)+'</span>'
+        +  '</div>';
+    });
+    h += '</div>';
+  }
+
+  if(attendu){
+    h += '<div class="ct" style="margin:26px 0 10px">Ce qui est attendu de vous</div>'
+      +  '<div style="background:rgba(20,37,84,.04);border-left:4px solid #142554;border-radius:0 12px 12px 0;'
+      +    'padding:14px 16px;font-size:13.5px;line-height:1.7;color:var(--ink2)">'+_prtSafe(attendu)+'</div>';
+  }
+
+  return h;
 };
