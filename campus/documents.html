@@ -7,6 +7,57 @@
   <link rel="stylesheet" href="campus.css">
 </head>
 <body data-page="documents">
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true" id="cmpSprite"><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-badge" viewBox="0 0 24 24">
+  <rect x="3.5" y="5" width="17" height="14" rx="2"/><circle cx="9" cy="11" r="2.2"/><path d="M5.8 16.2c.5-1.5 1.8-2.2 3.2-2.2s2.7.7 3.2 2.2"/><path d="M15 10h3.5M15 13.5h3.5"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-book" viewBox="0 0 24 24">
+  <path d="M6.5 3H19v18H6.5A2.5 2.5 0 0 1 4 18.5v-13A2.5 2.5 0 0 1 6.5 3z"/>
+  <path d="M4 17.5h15"/><path d="M9 3v11l2.5-1.6L14 14V3"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-bot" viewBox="0 0 24 24">
+  <rect x="4" y="8" width="16" height="11" rx="3"/><path d="M12 4.5V8"/><circle cx="12" cy="3.6" r="1.3"/>
+  <circle cx="9" cy="13" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1.1" fill="currentColor" stroke="none"/><path d="M9.5 16.3h5"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-box" viewBox="0 0 24 24">
+  <path d="M3.5 7.5L12 3.5l8.5 4v9L12 20.5l-8.5-4z"/><path d="M3.5 7.5L12 11.5l8.5-4"/><path d="M12 11.5v9"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-briefcase" viewBox="0 0 24 24">
+  <rect x="3" y="7.5" width="18" height="12" rx="2"/><path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5"/><path d="M3 12.5h18"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-bus" viewBox="0 0 24 24">
+  <rect x="3.5" y="4" width="17" height="12" rx="2"/><path d="M3.5 10h17"/><circle cx="7.5" cy="18.5" r="1.6"/><circle cx="16.5" cy="18.5" r="1.6"/><path d="M6.5 7h4M13.5 7h4"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-calendar" viewBox="0 0 24 24">
+  <rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 10h17"/><path d="M8 3v4M16 3v4"/>
+  <path d="M7.5 14h3M13.5 14h3M7.5 17.5h3"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-chart" viewBox="0 0 24 24">
+  <path d="M4 20V4"/><path d="M4 20h16"/><path d="M7.5 16v-4M12 16V8M16.5 16v-6"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-check" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="9"/><path d="M8 12.3l2.6 2.6L16 9.5"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-credit-card" viewBox="0 0 24 24">
+  <rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18"/><path d="M6.5 14.5h3"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-eye" viewBox="0 0 24 24">
+  <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-file-text" viewBox="0 0 24 24">
+  <path d="M13.5 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8.5z"/>
+  <path d="M13.5 3v5.5H19"/><path d="M8.5 13h7M8.5 16.5h5"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-gamepad" viewBox="0 0 24 24">
+  <rect x="2.5" y="7.5" width="19" height="10" rx="4"/><path d="M7 11v3M5.5 12.5h3"/>
+  <circle cx="16" cy="11.8" r="1" fill="currentColor" stroke="none"/><circle cx="18.2" cy="14" r="1" fill="currentColor" stroke="none"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-graduation" viewBox="0 0 24 24">
+  <path d="M12 4L2.5 8.5 12 13l9.5-4.5z"/><path d="M6.5 10.7V16c0 1.7 2.5 3 5.5 3s5.5-1.3 5.5-3v-5.3"/>
+  <path d="M21.5 8.5V14"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-message" viewBox="0 0 24 24">
+  <path d="M20.5 11.5a7.5 7.5 0 0 1-10.9 6.7L4 20l1.8-5.4A7.5 7.5 0 1 1 20.5 11.5z"/>
+  <path d="M9 11h6M9 14h4"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-printer" viewBox="0 0 24 24">
+  <path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/>
+  <rect x="7" y="14" width="10" height="6.5"/><circle cx="17.5" cy="12" r="1" fill="currentColor" stroke="none"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-receipt" viewBox="0 0 24 24">
+  <path d="M6 3h12v18l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4L6 21z"/><path d="M9 8h6M9 12h6M9 16h3"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-shield" viewBox="0 0 24 24">
+  <path d="M12 3l7.5 3v6c0 4.4-3.1 7.9-7.5 9.2C7.6 19.9 4.5 16.4 4.5 12V6z"/>
+  <path d="M9 12.2l2.2 2.2 4-4.2"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-users" viewBox="0 0 24 24">
+  <circle cx="9.5" cy="8" r="3.5"/><path d="M3.5 20a6 6 0 0 1 12 0"/>
+  <path d="M16 5.2a3.5 3.5 0 0 1 0 6.6"/><path d="M17.5 14.6A6 6 0 0 1 21 20"/>
+</symbol><symbol fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" id="i-utensils" viewBox="0 0 24 24">
+  <path d="M6 3v7a2 2 0 0 0 4 0V3"/><path d="M8 10v11"/><path d="M17 3c-1.7 1.2-2.5 3-2.5 5.2 0 1.6.8 2.6 2.5 2.8V21"/>
+</symbol></svg>
 
   <header class="cmp-bar">
     <div class="logo" data-brand-logo>VC</div>
@@ -20,17 +71,17 @@
 
     <div class="doc-toolbar">
       <div class="seg" id="docSeg">
-        <button data-doc="bulletin" aria-pressed="true">📄 Bulletin</button>
-        <button data-doc="recu">🧾 Reçu</button>
-        <button data-doc="certificat">🎓 Certificat de scolarité</button>
-        <button data-doc="attestation">💼 Attestation de travail</button>
-        <button data-doc="carte">🪪 Carte scolaire</button>
-        <button data-doc="biblio">📚 Reçu bibliothèque</button>
-        <button data-doc="cantine">🍽️ Reçu cantine</button>
-        <button data-doc="bus">🚌 Reçu transport</button>
+        <button data-doc="bulletin" aria-pressed="true"><svg class="cico" aria-hidden="true"><use href="#i-file-text"/></svg> Bulletin</button>
+        <button data-doc="recu"><svg class="cico" aria-hidden="true"><use href="#i-receipt"/></svg> Reçu</button>
+        <button data-doc="certificat"><svg class="cico" aria-hidden="true"><use href="#i-graduation"/></svg> Certificat de scolarité</button>
+        <button data-doc="attestation"><svg class="cico" aria-hidden="true"><use href="#i-briefcase"/></svg> Attestation de travail</button>
+        <button data-doc="carte"><svg class="cico" aria-hidden="true"><use href="#i-badge"/></svg> Carte scolaire</button>
+        <button data-doc="biblio"><svg class="cico" aria-hidden="true"><use href="#i-book"/></svg> Reçu bibliothèque</button>
+        <button data-doc="cantine"><svg class="cico" aria-hidden="true"><use href="#i-utensils"/></svg> Reçu cantine</button>
+        <button data-doc="bus"><svg class="cico" aria-hidden="true"><use href="#i-bus"/></svg> Reçu transport</button>
       </div>
       <div style="flex:1"></div>
-      <button class="btn btn-accent" onclick="window.print()" style="width:auto">🖨️ Imprimer / PDF</button>
+      <button class="btn btn-accent" onclick="window.print()" style="width:auto"><svg class="cico" aria-hidden="true"><use href="#i-printer"/></svg> Imprimer / PDF</button>
     </div>
 
     <div id="docHost"></div>
@@ -175,9 +226,9 @@
       var moyG = +d.moyenne, mg = moyG < 10 ? 'gred' : 'ggreen', ctG = cote(moyG);
       return '<div class="sheet bulletin">'
         + wm(b) + dheadOfficial(b, 'BUL-' + esc(d.student.mat))
-        + '<div style="background:color-mix(in srgb,var(--ds-ok) 12%,#fff);border:1px solid var(--ds-ok);border-radius:6px;padding:4px 10px;font-size:9px;margin:4px 0">✅ Bulletin généré automatiquement à partir des notes saisies.</div>'
+        + '<div style="background:color-mix(in srgb,var(--ds-ok) 12%,#fff);border:1px solid var(--ds-ok);border-radius:6px;padding:4px 10px;font-size:9px;margin:4px 0"><svg class="cico" aria-hidden="true"><use href="#i-check"/></svg> Bulletin généré automatiquement à partir des notes saisies.</div>'
         + '<div class="dtitle"><h2>Bulletin de notes / Report Card</h2><div class="per">' + esc(d.periode) + ' · Classe ' + esc(d.student.classe) + ' · Effectif ' + d.effectif + ' · 2025–2026</div></div>'
-        + '<div class="b-student"><div class="b-photo">👤</div>'
+        + '<div class="b-student"><div class="b-photo"><svg class="cico" aria-hidden="true"><use href="#i-users"/></svg></div>'
         + '<div class="dinfo"><div><span class="l">Nom / Name :</span> <b>' + esc(d.student.nom) + '</b></div><div><span class="l">Matricule / ID :</span> <b>' + esc(d.student.mat) + '</b></div>'
         + '<div><span class="l">Classe / Class :</span> <b>' + esc(d.student.classe) + '</b></div><div><span class="l">Sexe / Sex :</span> <b>' + esc(d.student.sexe || '') + '</b></div></div></div>'
         + '<table class="grades"><thead><tr><th>Matière / Subject</th><th>Moy/20</th><th>Coef</th><th>Rang</th><th>Max/Min cl.</th><th>Moy. cl.</th><th>Cote</th><th>Appréciation</th></tr></thead>'
@@ -232,7 +283,7 @@
               + '<td class="n'+(gm<10?' gred':'')+'">'+gm.toFixed(2)+'</td><td class="n">'+sC+'</td>'
               + '<td class="n">—</td><td class="n">—</td><td class="n">'+cote(gm)[0]+'</td><td>Moyenne du domaine</td></tr>';
       });
-      var moyG=gW/gC, ctG=cote(moyG), mgClass = moyG<10?'gred':'ggreen', photo='👤';
+      var moyG=gW/gC, ctG=cote(moyG), mgClass = moyG<10?'gred':'ggreen', photo='<svg class="cico" aria-hidden="true"><use href="#i-users"/></svg>';
       var dist = DIST[DIST.length-1].label;
       for(var d=0; d<DIST.length; d++){ if(moyG>=DIST[d].min){ dist=DIST[d].label; break; } }
       var remark = moyG>=16?'Excellent travail, félicitations !':moyG>=14?'Très bon trimestre, continuez ainsi.':moyG>=12?'Assez bien, élève méritante.':moyG>=10?'Passable, peut mieux faire.':'Travail insuffisant, ressaisissez-vous.';
@@ -258,7 +309,7 @@
         + '<p style="font-size:8px;margin:3px 0 2px"><b>Cotes :</b> CTBA · CBA · CA · CMA · CNA. <b style="color:#c0392b">Rouge / Red = sous-moyenne (&lt;10).</b></p>'
         + '<table class="grades b-recap"><thead><tr><th>Profil de la classe / Class profile</th><th>Moy. élève / Pupil</th><th>Rang / Rank</th><th>Moy. 1er / Top</th><th>Moy. dern. / Last</th><th>Moy. classe / Class</th></tr></thead>'
         + '<tbody><tr><td>2<sup>e</sup> trimestre / 2nd term</td><td class="n '+mgClass+'">'+moyG.toFixed(2)+'</td><td class="n">7<sup>e</sup>/52</td><td class="n">15,80</td><td class="n gred">4,20</td><td class="n">11,90</td></tr></tbody></table>'
-        + '<div class="b-prog">📈 <b>Progression / Progress :</b> Trim. 1 : '+t1.toFixed(2)+' (9<sup>e</sup>) &nbsp;→&nbsp; Trim. 2 : <b>'+t2.toFixed(2)+'</b> (7<sup>e</sup>) &nbsp;→&nbsp; Trim. 3 : — &nbsp;→&nbsp; <b>Moy. annuelle / Annual :</b> — <span style="color:#888">(= (T1+T2+T3)/3 au 3<sup>e</sup> trim. ; le bulletin annuel synthétise les 3 trimestres)</span></div>'
+        + '<div class="b-prog"><svg class="cico" aria-hidden="true"><use href="#i-chart"/></svg> <b>Progression / Progress :</b> Trim. 1 : '+t1.toFixed(2)+' (9<sup>e</sup>) &nbsp;→&nbsp; Trim. 2 : <b>'+t2.toFixed(2)+'</b> (7<sup>e</sup>) &nbsp;→&nbsp; Trim. 3 : — &nbsp;→&nbsp; <b>Moy. annuelle / Annual :</b> — <span style="color:#888">(= (T1+T2+T3)/3 au 3<sup>e</sup> trim. ; le bulletin annuel synthétise les 3 trimestres)</span></div>'
         + '<div class="b-bottom">'
         + '<div class="b-box"><div class="h">Discipline</div>'
           + ln('Absences just. / Justified','6 h') + ln('Absences non just. / Unjust.','<span class="gred">2 h</span>')
@@ -345,7 +396,7 @@
         + '<div class="idcard">'
           + '<div class="idc-head"><div class="idc-logo">'+(b.logo_url?'<img src="'+esc(b.logo_url)+'" alt="">':esc(C.initials(b.product_name||'ET')))+'</div>'
             + '<div><b>'+esc(b.product_name||'Établissement')+'</b><div>Carte scolaire / Student ID · 2025–2026</div></div></div>'
-          + '<div class="idc-body"><div class="idc-photo">'+(b.student_photo?'<img src="'+esc(b.student_photo)+'" alt="">':'👤')+'</div>'
+          + '<div class="idc-body"><div class="idc-photo">'+(b.student_photo?'<img src="'+esc(b.student_photo)+'" alt="">':'<svg class="cico" aria-hidden="true"><use href="#i-users"/></svg>')+'</div>'
             + '<div class="idc-fields"><div><span>Nom / Name :</span> <b>NGUEMA Sandrine</b></div>'
             + '<div><span>Matricule / ID :</span> <b>CMP-2026-0481</b></div>'
             + '<div><span>Classe / Class :</span> <b>5<sup>e</sup></b></div>'

@@ -8,7 +8,10 @@
  */
 declare(strict_types=1);
 
-require_once __DIR__ . '/_config.php';
+// Surcharges propres au serveur (gitignore, absent du depot), PUIS les valeurs
+// par defaut. L'ordre compte : _defaults.php ne pose que ce qui manque.
+@include_once __DIR__ . '/_config.php';
+require_once __DIR__ . '/_defaults.php';
 
 // ── Durcissement : pas de fuite d'erreurs PHP dans la réponse (sécurité). ──
 // (Mémoire projet : display_errors ON en prod était un défaut à corriger.)
@@ -101,6 +104,38 @@ function cmp_param(string $key, $default = null) {
 }
 function cmp_client_ip(): string {
     return substr((string) ($_SERVER['REMOTE_ADDR'] ?? ''), 0, 45);
+}
+
+/**
+ * Limitation de débit par IP, sur fichier plat.
+ *
+ * Renvoie true si la limite est DÉPASSÉE (l'appelant répond alors 429). Le
+ * compteur vit dans le répertoire temporaire du système : toujours accessible
+ * en écriture, y compris sur une install mono-établissement posée par FTP, et
+ * sans rien ajouter à l'arborescence déployée.
+ *
+ * Best-effort assumé : si l'écriture échoue, on laisse passer. Une limite de
+ * débit protège d'un abus, elle ne doit pas devenir un point de panne.
+ */
+function cmp_rate_exceeded(string $prefix, int $maxParMinute): bool {
+    try {
+        $dir = rtrim(sys_get_temp_dir(), '/\\') . DIRECTORY_SEPARATOR . 'veritas_campus_rl';
+        if (!is_dir($dir)) { @mkdir($dir, 0700, true); }
+        $f = $dir . DIRECTORY_SEPARATOR . $prefix . '_' . substr(md5(cmp_client_ip()), 0, 16) . '.txt';
+        $now = time();
+        $hits = [];
+        if (is_file($f)) {
+            foreach (explode("\n", (string) @file_get_contents($f)) as $t) {
+                if ($t !== '' && ($now - (int) $t) < 60) { $hits[] = $t; }
+            }
+        }
+        if (count($hits) >= $maxParMinute) { return true; }
+        $hits[] = (string) $now;
+        @file_put_contents($f, implode("\n", $hits), LOCK_EX);
+    } catch (Throwable $e) {
+        error_log('[campus][rate] ' . $e->getMessage());
+    }
+    return false;
 }
 
 // ── PDO (singleton paresseux) ──

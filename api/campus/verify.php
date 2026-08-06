@@ -11,6 +11,16 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/_bootstrap.php';
 
+// Endpoint public : sans limite, il devient un robinet à essayer des codes et
+// à moissonner des noms d'élèves. 20 vérifications par minute suffisent
+// largement à un parent ou à un employeur qui scanne un QR.
+if (cmp_rate_exceeded('verify', 20)) {
+    http_response_code(429);
+    header('Retry-After: 60');
+    exit(json_encode(['valid' => false, 'error' => 'Trop de vérifications successives. Réessayez dans une minute.'],
+                     JSON_UNESCAPED_UNICODE));
+}
+
 $code = strtoupper(trim((string) ($_GET['code'] ?? '')));
 $wantsJson = (($_GET['format'] ?? '') === 'json')
     || str_contains(strtolower($_SERVER['HTTP_ACCEPT'] ?? ''), 'application/json');

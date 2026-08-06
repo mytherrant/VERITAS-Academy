@@ -462,3 +462,8 @@ table.grades tr.sub td { background: color-mix(in srgb, var(--ds-primary) 10%, #
   .sheet.bulletin { padding: 6mm 9mm; }
   @page { size: A4; margin: 8mm; }
 }
+
+/* Pictogrammes VÉRITAS (remplacent les émojis système) */
+.cico{width:1.05em;height:1.05em;flex:0 0 auto;vertical-align:-.14em;
+  fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+.ic .cico,.ti .cico{width:1.15em;height:1.15em}

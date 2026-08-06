@@ -44,6 +44,13 @@ function cmp_bearer(): string {
  * lui, exigé dans tous les cas.
  */
 function cmp_login_guard(string $email): void {
+    // Les seuils sont définis ICI et pas seulement dans _config.php : ce
+    // dernier est gitignoré (il porte les identifiants MySQL) et n'est donc
+    // jamais déployé. Sans ce repli, la constante manquerait sur le serveur,
+    // la garde tomberait dans son propre catch et ne protégerait rien.
+    if (!defined('CAMPUS_LOGIN_WINDOW_MIN')) { define('CAMPUS_LOGIN_WINDOW_MIN', 15); }
+    if (!defined('CAMPUS_LOGIN_MAX_IP'))     { define('CAMPUS_LOGIN_MAX_IP', 10); }
+    if (!defined('CAMPUS_LOGIN_MAX_EMAIL'))  { define('CAMPUS_LOGIN_MAX_EMAIL', 5); }
     try {
         $fenetre = (int) CAMPUS_LOGIN_WINDOW_MIN;
         $st = cmp_pdo()->prepare(

@@ -66,9 +66,9 @@
   };
 
   var MODULE_LABELS = {
-    frais: '💳 Frais & reçus', bulletins: '📄 Bulletins', sms: '📲 SMS parents',
-    elearning: '🎓 E-learning', ia: '🤖 IA Ambassa', jeux: '🎮 Jeux',
-    discipline: '🛡️ Discipline', emploi_temps: '🗓️ Emploi du temps', rh: '👔 RH & paie', boutique: '🛍️ Boutique'
+    frais: '<svg class="cico" aria-hidden="true"><use href="#i-credit-card"/></svg> Frais & reçus', bulletins: '<svg class="cico" aria-hidden="true"><use href="#i-file-text"/></svg> Bulletins', sms: '<svg class="cico" aria-hidden="true"><use href="#i-message"/></svg> SMS parents',
+    elearning: '<svg class="cico" aria-hidden="true"><use href="#i-graduation"/></svg> E-learning', ia: '<svg class="cico" aria-hidden="true"><use href="#i-bot"/></svg> IA Ambassa', jeux: '<svg class="cico" aria-hidden="true"><use href="#i-gamepad"/></svg> Jeux',
+    discipline: '<svg class="cico" aria-hidden="true"><use href="#i-shield"/></svg> Discipline', emploi_temps: '<svg class="cico" aria-hidden="true"><use href="#i-calendar"/></svg> Emploi du temps', rh: '<svg class="cico" aria-hidden="true"><use href="#i-briefcase"/></svg> RH & paie', boutique: '<svg class="cico" aria-hidden="true"><use href="#i-box"/></svg> Boutique'
   };
 
   /* ── Résolution du slug (sous-domaine ou ?tenant=) ── */
@@ -173,7 +173,7 @@
   function mountDemoSwitch() {
     var host = $('#demoSwitch'); if (!host) return;
     var keys = Object.keys(MOCK);
-    host.innerHTML = '<b>👁️ Aperçu white-label —</b> <span class="note">chaque établissement a SA marque :</span> ' +
+    host.innerHTML = '<b><svg class="cico" aria-hidden="true"><use href="#i-eye"/></svg> Aperçu white-label —</b> <span class="note">chaque établissement a SA marque :</span> ' +
       keys.map(function (k) {
         return '<button data-slug="' + k + '" aria-pressed="' + (k === (window.CAMPUS_DEMO_SLUG || 'demo') ? 'true' : 'false') + '">' + esc(MOCK[k].branding.product_name) + '</button>';
       }).join('');
