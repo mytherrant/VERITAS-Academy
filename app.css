@@ -1330,6 +1330,33 @@ input,select,textarea,button{font-family:'Poppins','Inter',sans-serif!important}
   .vsec-title-hero > span:first-child, .vsec-title-hero > svg:first-child{ width:48px; height:48px; font-size:22px; }
 }
 
+/* ── « L'essentiel pour réviser » — grille de l'accueil (v1.14.2) ──────────
+   Huit portes vers les outils de l'apprenant. Grille auto-ajustée : 4 colonnes
+   sur large, 2 sur tablette, 2 sur téléphone (à 150 px la carte reste lisible
+   et l'apprenant voit huit choix sans faire défiler trois écrans). */
+/* 150 px et non 170 : sur un écran de 375 px, .vsec retire 28 px de marge, il
+   reste 347 px. À 170 px la seconde colonne ne rentrait pas (2×170+12 = 352) et
+   les huit cartes tombaient en pile. À 150 px (312) elles tiennent par deux. */
+.acc-ess{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(150px,100%),1fr));
+  gap:12px;max-width:920px;margin:0 auto 14px;padding:0 2px}
+.acc-ess-c{background:var(--bg1,#fff);border:1px solid var(--bg3,#e8edf5);border-radius:14px;
+  padding:14px 14px 15px;cursor:pointer;position:relative;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.acc-ess-c:hover,.acc-ess-c:focus-visible{transform:translateY(-3px);border-color:rgba(60,141,255,.30);
+  box-shadow:0 12px 26px -14px rgba(20,37,84,.28);outline:none}
+.acc-ess-ic{color:#1E3A8A;margin-bottom:9px;line-height:0}
+.acc-ess-t{font-weight:800;font-size:13.5px;color:var(--ink1,#142554);margin-bottom:4px;
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.acc-ess-d{font-size:12px;color:var(--ink3,#6B7A99);line-height:1.5}
+/* « Gratuit » informe, il ne crie pas : c'est ce qui décide du clic, pas une
+   promotion. D'où le vert sobre plutôt que l'or de la marque. */
+.acc-ess-free{font-size:9.5px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;
+  color:#0F766E;background:rgba(15,118,110,.10);border-radius:99px;padding:2px 7px;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){
+  .acc-ess-c{transition:none}
+  .acc-ess-c:hover,.acc-ess-c:focus-visible{transform:none}
+}
+
 /* ── Pictogrammes du sprite Lucide (#lc-*) ────────────────────────────────
    La conversion émoji → pictogramme avait écrit 659 fois le même bloc de neuf
    attributs de présentation dans app.js — 136 Ko de balisage identique, sur le
