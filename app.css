@@ -5745,3 +5745,51 @@ button .i,a .i{margin-right:.4em}
 .review-vf{color:#047857}
 /* Étoiles de notation : objet graphique, seuil 3:1 — teinte or conservée */
 .vbook-stars,.vbook-star{color:#D97706}
+
+/* ── Cartes d'orientation : pastille en dégradé, texte navy (v1.2.6) ──
+   Le pictogramme remplace l'émoji : il prend la couleur de la pastille,
+   reste net à toute taille et s'imprime. La teinte varie par famille de
+   filière ; le texte reste bleu nuit pour ne jamais se confondre au fond. */
+.vori-card{transition:transform .25s cubic-bezier(.2,.9,.3,1.2),box-shadow .25s}
+.vori-card:hover{transform:translateY(-4px);box-shadow:0 16px 34px rgba(20,37,84,.13)}
+.vori-ico{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  border-radius:14px;margin-bottom:12px;color:#fff;
+  background:linear-gradient(135deg,var(--o1,#FFC93C),var(--o2,#B45309));
+  box-shadow:0 6px 16px rgba(20,37,84,.16),inset 0 1px 0 rgba(255,255,255,.35)}
+.vori-ico .i{width:22px;height:22px;vertical-align:0}
+.vori-card:hover .vori-ico{transform:translateY(-1px) rotate(-4deg) scale(1.05);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+.vori-ico.t-or    {--o1:#FFD86E;--o2:#B45309}
+.vori-ico.t-bleu  {--o1:#60A5FA;--o2:#1D4ED8}
+.vori-ico.t-vert  {--o1:#34D399;--o2:#047857}
+.vori-ico.t-violet{--o1:#C084FC;--o2:#6B21A8}
+.vori-ico.t-cyan  {--o1:#22D3EE;--o2:#0369A1}
+.vori-ico.t-rose  {--o1:#FB7185;--o2:#9F1239}
+
+/* ── Portails partenaires : listes à puces vectorielles et cartes de rôle ──
+   Le « • » typographique doublait la coche des avantages. Une seule puce,
+   en dégradé, et la carte de rôle reçoit un fond nuancé plutôt qu'un aplat. */
+.vlist.vlist-sm{font-size:13px;color:var(--ink2,#1E2D5A);gap:7px}
+.vlist.vlist-sm li{padding-left:24px;line-height:1.7;text-align:left}
+.vlist.vlist-sm li::before{width:15px;height:15px;border-radius:6px;top:.24em}
+.vlist.vlist-sm li::after{left:3.5px;top:calc(.24em + 3.5px);width:8px;height:8px}
+.vlist.vlist-card{background:linear-gradient(160deg,#fff,#F7F9FF);
+  border:1px solid #E5EAF4;border-radius:14px;padding:18px 18px 18px 20px;
+  box-shadow:0 4px 14px rgba(20,37,84,.05)}
+.vlist.vlist-card li{color:var(--ink2,#1E2D5A);text-align:left}
+.prt-role-card{position:relative;overflow:hidden;padding:16px 18px;margin-bottom:14px;border-radius:14px;
+  background:linear-gradient(150deg,#FBFCFF,#EEF3FF);
+  border:1px solid #DCE5F7;border-left:4px solid #1E3A8A;
+  box-shadow:0 4px 14px rgba(20,37,84,.06)}
+.prt-role-card::before{content:"";position:absolute;top:-52px;right:-42px;width:130px;height:130px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,201,60,.30),transparent 68%);pointer-events:none}
+.prt-role-t{position:relative;display:flex;align-items:center;gap:10px;
+  font-weight:800;font-size:14px;color:#142554;margin-bottom:8px}
+.prt-role-ico{width:30px;height:30px;flex:none;display:inline-flex;align-items:center;justify-content:center;
+  border-radius:10px;color:#fff;background:linear-gradient(135deg,#3C8DFF,#1E3A8A);
+  box-shadow:0 4px 12px rgba(30,58,138,.26),inset 0 1px 0 rgba(255,255,255,.28)}
+.prt-role-ico .i{width:17px;height:17px;vertical-align:0}
+.prt-role-card > div:not(.prt-role-t){position:relative}
+.prt-role-card ul{position:relative}
+.prt-role-lbl{position:relative;font-weight:800;font-size:11px;color:#1E3A8A;text-transform:uppercase;
+  letter-spacing:.8px;margin:12px 0 8px;display:flex;align-items:center;gap:8px}
+.prt-role-lbl::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(30,58,138,.22),transparent)}
