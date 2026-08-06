@@ -635,15 +635,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.14.0">
+<link rel="preload" as="script" href="/app.js?v=1.14.1">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.14.0" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.14.0"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.14.1" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.14.1"></noscript>
 </head>
 <body>
 <!-- ════════ A11Y v2 : Skip link pour lecteurs d'écran ════════ -->
@@ -847,6 +847,13 @@ setInterval(_refreshCitation,15000);
        fouiller les menus. Il doit trouver sa page depuis l'accueil. -->
   <button class="vnav-btn" onclick="vShowSec('parents',this)" style="background:linear-gradient(135deg,rgba(16,185,129,.16),rgba(16,185,129,.05));color:#0F7B4F;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Espace Parents"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-users"/></svg> Parents</button>
 
+  <!-- 3quater. Orientation scolaire (v1.14) — remontée au premier niveau.
+       Elle était au TROISIÈME niveau (menu « Vie scolaire » → dépliant →
+       item) : personne ne la trouvait, alors que « quelle filière choisir »
+       est l'une des premières questions d'un élève comme d'un parent.
+       L'entrée du menu déroulant est conservée, elle ne gêne pas. -->
+  <button class="vnav-btn" onclick="vShowSec('orientation',this)" style="background:linear-gradient(135deg,rgba(124,58,237,.14),rgba(124,58,237,.05));color:#6D28D9;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Orientation scolaire"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-compass"/></svg> Orientation</button>
+
   <!-- 3ter. Recherche globale (v1.14) — un champ pour atteindre n'importe
        quelle ressource sans traverser les menus. Cherche dans un index de
        35 Ko ; seul le module du résultat choisi est ensuite téléchargé.
@@ -994,7 +1001,7 @@ setInterval(_refreshCitation,15000);
 <!-- Version des assets, partagée avec les modules chargés à la demande
      (chunks/*.js) pour qu'ils suivent le même cache que app.js. -->
 <script>window._VRT_ASSET_VER='1.14.0';</script>
-<script defer src="/app.js?v=1.14.0"></script>
+<script defer src="/app.js?v=1.14.1"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>
@@ -2738,21 +2745,21 @@ html{scroll-behavior:smooth}
       +'<div class="vgz-dark-section">'
       +'<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-handshake"/></svg></span> Tu es...</h2><div class="acc-sub">Une plateforme. Un accès personnalisé pour chaque rôle.</div></div>'
       +'<div class="vgz-roles v-reveal">'
-        +'<div class="vgz-role r-eleve" onclick="showLogin(\'eleve\')">'
+        +'<div class="vgz-role r-eleve" onclick="_portailAller(\'eleve\')">'
           +'<div class="vgz-role-glow"></div>'
           +'<div class="vgz-role-ico"><svg class="vgz-role-svg" viewBox="0 0 24 24" role="img" aria-label="Élève"><use href="#lc-graduation"/></svg></div>'
           +'<div class="vgz-role-title">ÉLÈVE</div>'
           +'<div class="vgz-role-desc">Notes, bulletins, devoirs et cours en ligne. Tout ce qu\'il te faut pour réussir.</div>'
           +'<div class="vgz-role-cta">Se connecter →</div>'
         +'</div>'
-        +'<div class="vgz-role r-parent" onclick="showRegisterForm()">'
+        +'<div class="vgz-role r-parent" onclick="_portailAller(\'parent\')">'
           +'<div class="vgz-role-glow"></div>'
           +'<div class="vgz-role-ico"><svg class="vgz-role-svg" viewBox="0 0 24 24" role="img" aria-label="Parent"><use href="#lc-users"/></svg></div>'
           +'<div class="vgz-role-title">PARENT</div>'
           +'<div class="vgz-role-desc">Suis la progression de ton enfant, paie en MoMo et reçois les notifs en direct.</div>'
           +'<div class="vgz-role-cta">S\'inscrire →</div>'
         +'</div>'
-        +'<div class="vgz-role r-enseignant" onclick="showLogin(\'enseignant\')">'
+        +'<div class="vgz-role r-enseignant" onclick="_portailAller(\'enseignant\')">'
           +'<div class="vgz-role-glow"></div>'
           +'<div class="vgz-role-ico"><svg class="vgz-role-svg" viewBox="0 0 24 24" role="img" aria-label="Enseignant"><use href="#lc-presentation"/></svg></div>'
           +'<div class="vgz-role-title">ENSEIGNANT</div>'

@@ -4479,6 +4479,14 @@ function vShowSec(sec,btn){
   if(sec==='cagnotte' && typeof pgCagnotte==='function'){
     c.innerHTML = pgCagnotte(); return;
   }
+  // v1.14 — hubs par public. Un visiteur voit d'abord ce qu'il peut faire,
+  // la connexion ne vient qu'après. C'est aussi la seule porte visible vers
+  // l'orientation scolaire et le coaching, jusqu'ici enterrés dans les menus.
+  if(typeof sec==='string' && sec.indexOf('pour-')===0 && typeof pgPourVous==='function'){
+    var _pvRole = sec.substring(5);
+    var _pvHtml = pgPourVous(_pvRole);
+    if(_pvHtml){ c.innerHTML = _pvHtml; return; }
+  }
   if(sec==='trophees' && typeof pgTrophees==='function'){
     c.innerHTML = pgTrophees(); return;
   }
@@ -42029,6 +42037,7 @@ function _cagCreer(eleveId){
     if(!sec) return '';
     // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
     if(sec.indexOf('partenariat-') === 0) return sec;
+    if(sec.indexOf('pour-') === 0) return sec;          // hubs par public (v1.14)
     return SECTIONS.indexOf(sec) >= 0 ? sec : '';
   }
 
@@ -42766,3 +42775,216 @@ document.addEventListener('keydown', function(ev){
   ev.preventDefault();
   if(typeof mRecherche === 'function') mRecherche();
 });
+
+
+/* ════════════════ ORIENTATION DES PORTAILS (v1.14) ════════════════
+   Les huit cartes « Tu es… » envoyaient tout le monde au même endroit, quel
+   que soit son état : un élève déjà connecté retombait sur l'écran de
+   connexion, un parent déjà inscrit sur le formulaire d'inscription, et un
+   enseignant connecté en tant qu'élève n'avait aucune explication.
+
+   Une seule porte, _portailAller(role), qui regarde QUI est là avant de
+   décider où l'envoyer. Trois cas seulement :
+     • déjà connecté avec le bon rôle  → droit à son espace, sans réauthentifier
+     • connecté avec un AUTRE rôle     → on le dit clairement, on propose le
+                                          changement de compte plutôt que de le
+                                          renvoyer sur une page qui échouera
+     • pas de session                  → connexion ou inscription selon le rôle  */
+
+function _portailRoleActuel(){
+  try{
+    if(typeof SES==='undefined' || !SES) return '';
+    var t = String(SES.type||'');
+    if(t==='admin' || t==='superadmin') return 'admin';
+    if(t==='enseignant') return 'enseignant';
+    if(t==='eleve') return 'eleve';
+    if(t==='visiteur_inscrit' || t==='visiteur') return 'parent';
+    return t;
+  }catch(e){ return ''; }
+}
+
+var _PORTAIL_LABELS = {
+  eleve:'Élève', parent:'Parent', enseignant:'Enseignant', admin:'Administration'
+};
+
+window._portailAller = function(role){
+  var actuel = _portailRoleActuel();
+
+  // 1) Déjà au bon endroit → on ouvre son espace directement.
+  if(actuel === role){
+    try{
+      if(typeof hideAll==='function') hideAll();
+      var app = (typeof $==='function') ? $('app') : document.getElementById('app');
+      if(app) app.style.display='';
+      if(typeof goTo==='function'){ goTo('dash'); return; }
+      if(typeof re==='function'){ re(); return; }
+    }catch(e){}
+    return;
+  }
+
+  // 2) Connecté, mais sous un autre rôle → l'envoyer sur l'écran de connexion
+  //    sans explication donnerait l'impression d'un bug. On explique et on
+  //    laisse le choix : rester, ou changer de compte.
+  if(actuel){
+    var moi   = _PORTAIL_LABELS[actuel] || actuel;
+    var vise  = _PORTAIL_LABELS[role]   || role;
+    M('Changer d\'espace ?',
+      'Vous êtes connecté en tant que ' + _esc(moi) + '.',
+      '<div style="font-size:13.5px;line-height:1.7;color:var(--ink2)">'
+      + 'L\'espace <b>' + _esc(vise) + '</b> demande un compte de ce type. '
+      + 'Vous pouvez rester dans votre espace actuel, ou vous déconnecter pour '
+      + 'ouvrir une session ' + _esc(vise) + '.'
+      + '</div>',
+      '<button class="btn bo" onclick="cm()">Rester ici</button>'
+      + '<button class="btn bi" onclick="cm();_portailChanger(\'' + _esc(role) + '\')">Changer de compte</button>');
+    return;
+  }
+
+  // 3) Aucune session → on montre D'ABORD le contenu qui le concerne, pas un
+  //    mur de connexion. Le hub liste ce qui est accessible sans compte
+  //    (corrigés, jeux, orientation, coaching, outils) et propose la connexion
+  //    en bas de page, une fois la valeur démontrée. Un visiteur venu de
+  //    Google pour un corrigé n'a aucune raison de s'authentifier d'abord.
+  if(typeof pgPourVous==='function' && typeof vShowSec==='function' && _PV_PUBLICS[role]){
+    vShowSec('pour-' + role, null);
+    return;
+  }
+  if(role === 'parent'){
+    if(typeof showRegisterForm==='function') showRegisterForm('');
+    return;
+  }
+  if(typeof showLogin==='function') showLogin(role);
+};
+
+window._portailChanger = function(role){
+  try{
+    if(typeof logout==='function'){ logout(); }
+    else { try{ sessionStorage.removeItem('VERITAS_SES'); }catch(e){} }
+  }catch(e){}
+  setTimeout(function(){
+    if(role==='parent'){ if(typeof showRegisterForm==='function') showRegisterForm(''); }
+    else if(typeof showLogin==='function'){ showLogin(role); }
+  }, 120);
+};
+
+
+/* ════════════════ HUBS PAR PUBLIC — « Pour vous » (v1.14) ════════════════
+   Constat à l'origine : l'orientation scolaire était enterrée au TROISIÈME
+   niveau (menu « Vie scolaire » → dépliant → item), et le coaching n'avait
+   aucun point d'entrée visiteur — il n'existait qu'une fois connecté. Deux
+   fonctions bien réelles, invisibles pour qui ne les cherchait pas.
+
+   Trois pages, une par public, qui rassemblent ce qui le concerne avec un
+   accès direct. Un visiteur qui clique « ÉLÈVE » sur l'accueil ne tombe plus
+   sur un mur de connexion : il voit d'abord ce qu'il peut faire, gratuitement
+   et sans compte, et la connexion reste offerte en bas. On donne avant de
+   demander.
+
+   Les destinations sont TOUTES vérifiées existantes : aucune carte ne mène
+   à une page vide. */
+
+var _PV_PUBLICS = {
+  eleve: {
+    titre:'Élève',
+    ico:'lc-graduation',
+    accroche:'Réviser, comprendre, s\'entraîner — et savoir où l\'on va.',
+    cartes:[
+      {ic:'lc-check',      t:'Corrigés des cahiers', d:'6ᵉ à Terminale, exercice par exercice. Gratuit, sans compte.', a:"window.open('corriges/','_blank','noopener')"},
+      {ic:'lc-game',       t:'Jeux & œuvres',        d:'Quiz, cartes mentales et œuvres au programme.',               a:"showJeuxEdu()"},
+      {ic:'lc-flask',      t:'Laboratoires',         d:'Expériences de sciences à manipuler.',                         a:"showLabosVirtuels()"},
+      {ic:'lc-compass',    t:'Orientation scolaire', d:'Filières, séries, débouchés : choisir sans se tromper.',        a:"vShowSec('orientation',null)"},
+      {ic:'lc-flame',      t:'Coaching & motivation',d:'Objectifs, défis du jour, série de connexions.',                a:"mCoaching()"},
+      {ic:'lc-tool',       t:'Outils gratuits',      d:'Moyenne, note à viser, planning de révision.',                  a:"window.open('outils/','_blank','noopener')"},
+      {ic:'lc-brain',      t:'Professeur Ambassa',   d:'Poser une question du programme, obtenir une explication.',     a:"mAgentAmbassa()"},
+      {ic:'lc-bookopen',   t:'E-learning',           d:'Cours, épreuves et corrigés par niveau.',                       a:"vShowSec('elearning',null)"}
+    ]
+  },
+  parent: {
+    titre:'Parent',
+    ico:'lc-users',
+    accroche:'Suivre la scolarité, payer simplement, comprendre les résultats.',
+    cartes:[
+      {ic:'lc-users',      t:'Espace Parents',       d:'Ce que VÉRITAS ouvre aux familles.',                            a:"vShowSec('parents',null)"},
+      {ic:'lc-chart',      t:'Calculer une moyenne', d:'Moyenne pondérée, matières qui coûtent le plus.',               a:"window.open('outils/calcul-moyenne.html','_blank','noopener')"},
+      {ic:'lc-target',     t:'Note à viser',         d:'Combien il faut au prochain devoir pour remonter.',             a:"window.open('outils/points-manquants.html','_blank','noopener')"},
+      {ic:'lc-wallet',     t:'Cagnotte de scolarité',d:'Faire participer la famille, même depuis l\'étranger.',         a:"vShowSec('cagnotte',null)"},
+      {ic:'lc-compass',    t:'Orientation scolaire', d:'Aider son enfant à choisir sa filière.',                        a:"vShowSec('orientation',null)"},
+      {ic:'lc-book',       t:'Manuels & corrigés',   d:'Les cahiers du centre et leurs corrigés en ligne.',             a:"vShowSec('boutique',null)"},
+      {ic:'lc-message',    t:'Poser une question',   d:'Un enseignant répond sous 2 h, jours ouvrés.',                  a:"_vtWaOpen('parents')"}
+    ]
+  },
+  enseignant: {
+    titre:'Enseignant',
+    ico:'lc-presentation',
+    accroche:'Des ressources prêtes à l\'emploi, et une place dans le réseau.',
+    cartes:[
+      {ic:'lc-check',      t:'Corrigés des cahiers', d:'Tous les corrigés, par niveau et séquence.',                    a:"window.open('corriges/','_blank','noopener')"},
+      {ic:'lc-book',       t:'Manuels VÉRITAS',      d:'Les cahiers 6ᵉ→Tle et leurs ressources.',                       a:"window.open('manuels.html','_blank','noopener')"},
+      {ic:'lc-handshake',  t:'Devenir partenaire',   d:'Commissions, formations, co-rédaction.',                        a:"vShowSec('partenariat-enseignant',null)"},
+      {ic:'lc-award',      t:'Trophées VÉRITAS',     d:'Le tableau d\'honneur du centre, vote gratuit.',                a:"vShowSec('trophees',null)"},
+      {ic:'lc-bookopen',   t:'E-learning',           d:'Épreuves, cours et contenus à réutiliser.',                     a:"vShowSec('elearning',null)"},
+      {ic:'lc-message',    t:'Nous écrire',          d:'Une question, une proposition de contenu.',                     a:"_vtWaOpen('partenariat')"}
+    ]
+  }
+};
+
+function _pvIco(id, taille){
+  return '<svg width="'+(taille||22)+'" height="'+(taille||22)+'" viewBox="0 0 24 24" fill="none" '
+       + 'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" '
+       + 'aria-hidden="true"><use href="#'+id+'"/></svg>';
+}
+
+window.pgPourVous = function(role){
+  var p = _PV_PUBLICS[role];
+  if(!p) return '';
+  var connecte = (typeof _portailRoleActuel==='function') ? _portailRoleActuel() : '';
+
+  var h = '<div style="max-width:900px;margin:24px auto;padding:0 16px">';
+
+  h += '<div style="text-align:center;margin-bottom:24px">'
+    +   '<div style="display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;'
+    +     'border-radius:16px;background:linear-gradient(135deg,#1E3A8A,#142554);color:#FFC93C;margin-bottom:10px">'
+    +     _pvIco(p.ico, 26) + '</div>'
+    +   '<h1 class="pgt" style="margin:2px 0 4px">Pour vous, ' + _esc(p.titre.toLowerCase()) + '</h1>'
+    +   '<div style="color:var(--ink3);font-size:14.5px">' + _esc(p.accroche) + '</div>'
+    + '</div>';
+
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">';
+  p.cartes.forEach(function(c){
+    h += '<div onclick="' + c.a + '" role="link" tabindex="0" '
+      +  'style="background:var(--bg1,#fff);border:1px solid var(--bg3,#e8edf5);border-radius:14px;padding:16px;'
+      +  'cursor:pointer;transition:transform .18s ease,box-shadow .18s ease" '
+      +  'onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 10px 24px rgba(20,37,84,.10)\'" '
+      +  'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">'
+      +  '<div style="color:#1E3A8A;margin-bottom:9px">' + _pvIco(c.ic, 24) + '</div>'
+      +  '<div style="font-weight:800;font-size:14.5px;color:var(--ink1,#142554);margin-bottom:4px">' + _esc(c.t) + '</div>'
+      +  '<div style="font-size:12.5px;color:var(--ink3);line-height:1.55">' + _esc(c.d) + '</div>'
+      +  '</div>';
+  });
+  h += '</div>';
+
+  // La connexion vient APRÈS le contenu, et seulement si elle a du sens.
+  if(connecte !== role){
+    var libelle = (role==='parent') ? 'Créer mon compte parent' : 'Me connecter';
+    h += '<div style="margin-top:26px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;'
+      +  'border-radius:16px;padding:22px;text-align:center">'
+      +  '<div style="font-weight:800;font-size:16px;margin-bottom:6px">Aller plus loin</div>'
+      +  '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px;line-height:1.6">'
+      +    (role==='eleve'      ? 'Notes, bulletins, devoirs et suivi personnalisé demandent un compte élève, créé par le centre.'
+      :     role==='parent'     ? 'Le suivi de votre enfant, les paiements et les notifications demandent un compte.'
+      :                           'La saisie des notes et la marketplace demandent un compte enseignant, créé par le centre.')
+      +  '</div>'
+      +  '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 26px" '
+      +    'onclick="_portailConnexion(\'' + role + '\')">' + libelle + '</button>'
+      + '</div>';
+  }
+
+  return h + '</div>';
+};
+
+// Connexion depuis un hub : on court-circuite l'orientation (on SAIT déjà que
+// l'utilisateur veut ce rôle-là), sans repasser par le hub.
+window._portailConnexion = function(role){
+  if(role === 'parent'){ if(typeof showRegisterForm==='function') showRegisterForm(''); return; }
+  if(typeof showLogin==='function') showLogin(role);
+};
