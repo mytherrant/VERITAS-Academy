@@ -347,3 +347,33 @@ scopés (notes/bulletins QR, emploi du temps, RH) ; (d) confirmer le **nom de ma
   2 colonnes à 375 px sans débordement, 3 à 654 px ; formulaire d'orientation rempli → recommandations
   générées citant Médecine/FMSB/Polytechnique (donc `indexOf` et la variable `ecoles` intacts) ;
   0 mot sans accent dans la sortie ; 0 erreur console.
+
+## Campus audité + demandes entrantes (06/08) — déployé 1.15.1, commits fa75dd9 / afc832c / aeadcb4
+- **AUDIT_CAMPUS.md** : socle sain (jetons opaques hachés, bcrypt 12, zéro injection SQL, isolation
+  tenant fail-closed, portail élève borné). Corrigés : anti-force-brute des deux connexions
+  (`cmp_login_guard`, 10/IP + 5/e-mail sur 15 min, comptés dans `cmp_audit_log`, fail-open assumé),
+  journalisation des échecs sur le compte ÉDITEUR (absente), jeton retiré de l'URL, débit limité sur
+  `verify.php`, `str_shuffle` → Fisher-Yates.
+- **PIÈGE n°1 — le module n'était pas déployé** (`campus/**` et `api/campus/**` hors deploy.yml).
+  Ajoutés + lint `php -l` étendu à `api/campus/*.php` + échec du déploiement si `.htaccess` manque.
+- **PIÈGE n°2 — `_config.php` mis au gitignore** alors qu'il définissait SEUL `CAMPUS_DB_HOST` & co :
+  au premier déploiement, `cmp_pdo()` aurait levé une Error sur constante inconnue → 500 partout.
+  Défauts déplacés dans `_defaults.php` (suivi) ; `_config.php` = surcharges serveur. Même repli
+  pour les seuils anti-force-brute, dans `_auth.php`.
+- **PIÈGE n°3 (nouveau, 4e variante) — `api/demandes.php` jamais committé.** Le chemin figurait
+  bien dans deploy.yml, mais `[ -f ]` saute en silence sur un fichier absent du dépôt. Détecté en
+  SONDANT la prod (404), pas en relisant le workflow. Vérifier `git ls-files <chemin>` avant de
+  déclarer un endpoint déployé.
+- **`save()` ne pousse au serveur que pour admin/enseignant** : toute demande déposée par un
+  visiteur restait dans SON navigateur (« demande reçue » mensonger). D'où `api/demandes.php` :
+  écriture serveur, débit limité, empreinte d'IP au lieu de l'IP (ces fiches portent une adresse
+  de domicile), repli WhatsApp si le réseau lâche.
+- Entrées : hub Établissement (`_PV_PUBLICS.etablissement` + carte d'accueil rebranchée), bloc
+  Campus sur le programme partenaire `chef_etab`, 3 boutons « accompagnement à domicile » (hub
+  parent + bandeau et pied de la page Parents), raccourci `?demande=campus|domicile`.
+- Suivi centre : `pgDemandes()` (menu Communication) + devis (calculette séances×heures×tarif,
+  envoi WhatsApp, impression). Aucun tarif public : le devis se construit côté centre.
+- 121 émojis de `campus/` → pictogrammes, **sprite embarqué page par page** (une install d'école
+  hors ligne ne peut pas dépendre de `/assets/`). Jeu commun porté à 75 icônes.
+- Vérifié en prod : 422 « Type de demande inconnu », 422 « Le nom est requis », 401 sans jeton,
+  `campus/index.html` 200, `api/campus` 400 fail-closed (donc bootstrap OK), app.js 1.15.1.
