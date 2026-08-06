@@ -42485,7 +42485,7 @@ function _lazyChunk(nom){
     var s = document.createElement('script');
     // Chemin RELATIF : le mode file:// et les sous-dossiers doivent continuer
     // de fonctionner. La version suit celle des assets pour le cache.
-    s.src   = 'chunks/' + nom + '.js?v=' + (window._VRT_ASSET_VER || '1.14.0');
+    s.src   = 'chunks/' + nom + '.js?v=' + (window._VRT_ASSET_VER || '1.14.2');
     s.async = true;
 
     // Filet : un script qui ne répond jamais laisserait l'appelant sur un
