@@ -2280,7 +2280,7 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 /* Chaque carte porte la teinte de SA catégorie (--t1 clair → --t2 profond).
    Une grille où tout est doré ne se lit plus : l'œil ne distingue pas un férié
    national d'une date religieuse. La couleur devient donc une information. */
-.vferie-card{--t1:#FFC93C;--t2:#B45309;--tf:#7C3E06;--tb:rgba(180,83,9,.16);
+.vferie-card{--t1:#FFC93C;--t2:#B45309;--tf:#142554;--tb:rgba(180,83,9,.16);
   position:relative;padding:15px;border-radius:16px;overflow:hidden;
   background:linear-gradient(150deg,#fff, color-mix(in srgb, var(--t1) 14%, #fff));
   border:1px solid color-mix(in srgb, var(--t2) 26%, transparent);
@@ -2296,16 +2296,16 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .vferie-nom{position:relative;font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:13.5px;
   font-weight:800;color:var(--tf);line-height:1.35}
 .vferie-date{position:relative;font-size:12px;font-weight:700;
-  color:color-mix(in srgb, var(--tf) 78%, #fff);margin-top:5px}
+  color:color-mix(in srgb, var(--tf) 82%, #fff);margin-top:5px}
 /* la mention devient une étiquette : elle se lit d'un coup d'œil */
 .vferie-note{position:relative;display:inline-block;font-size:10px;font-weight:800;
   text-transform:uppercase;letter-spacing:.6px;margin-top:9px;padding:3px 8px;border-radius:999px;
   color:var(--t2);background:color-mix(in srgb, var(--t1) 24%, #fff)}
 /* ── Les quatre familles ── */
-.vferie-card.t-int{--t1:#FFC93C;--t2:#B45309;--tf:#7C3E06;--tb:rgba(180,83,9,.18)}   /* vacances  */
-.vferie-card.t-nat{--t1:#34D399;--t2:#047857;--tf:#065F46;--tb:rgba(4,120,87,.18)}   /* national  */
-.vferie-card.t-rel{--t1:#A78BFA;--t2:#5B21B6;--tf:#4C1D95;--tb:rgba(91,33,182,.18)}  /* religieux */
-.vferie-card.t-fer{--t1:#60A5FA;--t2:#1D4ED8;--tf:#1E3A8A;--tb:rgba(29,78,216,.18)}  /* férié     */
+.vferie-card.t-int{--t1:#FFC93C;--t2:#B45309;--tf:#142554;--tb:rgba(180,83,9,.18)}   /* vacances  */
+.vferie-card.t-nat{--t1:#34D399;--t2:#047857;--tf:#142554;--tb:rgba(4,120,87,.18)}   /* national  */
+.vferie-card.t-rel{--t1:#A78BFA;--t2:#5B21B6;--tf:#142554;--tb:rgba(91,33,182,.18)}  /* religieux */
+.vferie-card.t-fer{--t1:#60A5FA;--t2:#1D4ED8;--tf:#142554;--tb:rgba(29,78,216,.18)}  /* férié     */
 @supports not (color: color-mix(in srgb,#000 10%,#fff)){
   .vferie-card{background:#FFFDF6;border-color:rgba(180,83,9,.26)}
   .vferie-note{background:rgba(255,201,60,.22)}
