@@ -1970,15 +1970,15 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 /* Body : titre, auteur, description */
 .vbook-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column}
 .vbook-title{font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#142554;line-height:1.3;margin-bottom:6px;min-height:38px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.vbook-author{font-size:11.5px;color:#6B7A99;margin-bottom:8px;display:flex;align-items:center;gap:5px;font-style:italic}
+.vbook-author{font-size:11.5px;color:#5A6A8C;margin-bottom:8px;display:flex;align-items:center;gap:5px;font-style:italic}
 .vbook-author::before{content:"✍️";font-style:normal}
 .vbook-desc{font-size:11.5px;color:var(--ink3,#475569);line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
 /* v1.2.1 — Étoiles d'avis (style Babelio/FNAC) + badge MINESEC */
 .vbook-minesec-badge{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.95);color:#0d5c3a;padding:4px 9px;border-radius:10px;font-size:9.5px;font-weight:900;letter-spacing:.4px;z-index:2;box-shadow:0 3px 10px rgba(0,0,0,.18);backdrop-filter:blur(6px)}
 .vbook-rating{display:flex;align-items:center;gap:6px;margin:-2px 0 9px;font-size:12px}
-.vbook-stars{color:#F59E0B;letter-spacing:1.5px;font-size:13px;line-height:1}
+.vbook-stars{color:#D97706;letter-spacing:1.5px;font-size:13px;line-height:1}
 .vbook-rating-num{font-weight:800;color:#142554;font-size:12px}
-.vbook-rating-count{color:#8A94A6;font-size:10.5px}
+.vbook-rating-count{color:#64748B;font-size:10.5px}
 .vbook-rating-none .vbook-stars{color:#D9DEE8}
 .vbook-rating-none .vbook-rating-count{color:#10B981;font-weight:700}
 
@@ -2027,11 +2027,11 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 .vprod-discount{position:absolute;top:10px;left:10px;background:linear-gradient(135deg,#DC2626,#F97316);color:#fff;padding:4px 10px;border-radius:10px;font-size:11px;font-weight:900;z-index:3;box-shadow:0 4px 12px rgba(220,38,38,.4);display:flex;align-items:center;gap:3px}
 
 .vprod-body{padding:14px;flex:1;display:flex;flex-direction:column}
-.vprod-cat{font-size:9px;color:#3C8DFF;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px}
+.vprod-cat{font-size:9px;color:#1D4ED8;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px}
 .vprod-title{font-family:Montserrat,sans-serif;font-size:13.5px;font-weight:800;color:#142554;margin-bottom:6px;line-height:1.25}
 .vprod-desc{font-size:11px;color:#64748B;line-height:1.5;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
 .vprod-pricing{margin-top:auto;padding-top:8px;border-top:1px dashed rgba(20,37,84,.1)}
-.vprod-old{font-size:10px;color:#94A3B8;text-decoration:line-through;text-decoration-color:#DC2626;text-decoration-thickness:1.5px}
+.vprod-old{font-size:10px;color:#64748B;text-decoration:line-through;text-decoration-color:#DC2626;text-decoration-thickness:1.5px}
 .vprod-price{font-family:'Fira Code',monospace;font-size:17px;font-weight:900;background:linear-gradient(135deg,#D97706,#F59E0B);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:2px}
 .vprod-cta{margin-top:10px;padding:10px 14px;background:linear-gradient(135deg,#3C8DFF,#1E40AF);color:#fff;border-radius:12px;font-family:Montserrat,sans-serif;font-size:12px;font-weight:800;text-align:center;cursor:pointer;transition:all .3s;display:flex;align-items:center;justify-content:center;gap:6px;box-shadow:0 6px 16px rgba(60,141,255,.35)}
 .vprod-card:hover .vprod-cta{transform:translateY(-2px);box-shadow:0 12px 28px rgba(60,141,255,.5);background:linear-gradient(135deg,#1E40AF,#142554)}
@@ -2270,14 +2270,39 @@ input[type="text"],input[type="email"],input[type="password"],input[type="search
 
 /* Fêtes légales & rentrée suivante */
 .vferie-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
-.vferie-card{padding:15px;border-radius:16px;background:linear-gradient(150deg,#FFFDF6,#FFF7E4);
-  border:1px solid rgba(255,201,60,.42);transition:transform .25s,box-shadow .25s}
-.vferie-card:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(180,83,9,.16)}
-.vferie-ico{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:11px;margin-bottom:10px;color:#fff;
-  background:linear-gradient(135deg,#FFC93C,#B45309);box-shadow:0 4px 12px rgba(180,83,9,.28),inset 0 1px 0 rgba(255,255,255,.35)}
-.vferie-nom{font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:13.5px;font-weight:800;color:#7C3E06;line-height:1.35}
-.vferie-date{font-size:12px;font-weight:700;color:#92400E;margin-top:5px}
-.vferie-note{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#A97428;margin-top:7px}
+/* Chaque carte porte la teinte de SA catégorie (--t1 clair → --t2 profond).
+   Une grille où tout est doré ne se lit plus : l'œil ne distingue pas un férié
+   national d'une date religieuse. La couleur devient donc une information. */
+.vferie-card{--t1:#FFC93C;--t2:#B45309;--tf:#7C3E06;--tb:rgba(180,83,9,.16);
+  position:relative;padding:15px;border-radius:16px;overflow:hidden;
+  background:linear-gradient(150deg,#fff, color-mix(in srgb, var(--t1) 14%, #fff));
+  border:1px solid color-mix(in srgb, var(--t2) 26%, transparent);
+  transition:transform .25s cubic-bezier(.2,.9,.3,1.2),box-shadow .25s}
+/* halo d'angle : de la profondeur sans une ligne de plus */
+.vferie-card::before{content:"";position:absolute;width:110px;height:110px;border-radius:50%;
+  top:-46px;right:-40px;background:var(--t1);opacity:.20;filter:blur(22px);pointer-events:none}
+.vferie-card:hover{transform:translateY(-5px);box-shadow:0 16px 34px var(--tb)}
+.vferie-ico{position:relative;width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  border-radius:12px;margin-bottom:10px;color:#fff;
+  background:linear-gradient(135deg,var(--t1),var(--t2));
+  box-shadow:0 5px 14px var(--tb),inset 0 1px 0 rgba(255,255,255,.4)}
+.vferie-nom{position:relative;font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:13.5px;
+  font-weight:800;color:var(--tf);line-height:1.35}
+.vferie-date{position:relative;font-size:12px;font-weight:700;
+  color:color-mix(in srgb, var(--tf) 78%, #fff);margin-top:5px}
+/* la mention devient une étiquette : elle se lit d'un coup d'œil */
+.vferie-note{position:relative;display:inline-block;font-size:10px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.6px;margin-top:9px;padding:3px 8px;border-radius:999px;
+  color:var(--t2);background:color-mix(in srgb, var(--t1) 24%, #fff)}
+/* ── Les quatre familles ── */
+.vferie-card.t-int{--t1:#FFC93C;--t2:#B45309;--tf:#7C3E06;--tb:rgba(180,83,9,.18)}   /* vacances  */
+.vferie-card.t-nat{--t1:#34D399;--t2:#047857;--tf:#065F46;--tb:rgba(4,120,87,.18)}   /* national  */
+.vferie-card.t-rel{--t1:#A78BFA;--t2:#5B21B6;--tf:#4C1D95;--tb:rgba(91,33,182,.18)}  /* religieux */
+.vferie-card.t-fer{--t1:#60A5FA;--t2:#1D4ED8;--tf:#1E3A8A;--tb:rgba(29,78,216,.18)}  /* férié     */
+@supports not (color: color-mix(in srgb,#000 10%,#fff)){
+  .vferie-card{background:#FFFDF6;border-color:rgba(180,83,9,.26)}
+  .vferie-note{background:rgba(255,201,60,.22)}
+}
 .vcal-source{display:flex;align-items:center;gap:7px;margin-top:16px;font-size:11.5px;font-style:italic;color:#7A88A6}
 .vcal-source .vico{flex:none;opacity:.7}
 
