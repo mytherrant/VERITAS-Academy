@@ -4517,7 +4517,7 @@ function vShowSec(sec,btn){
         <div class="acc-news-hd"><span class="dot vfx-live"></span><span class="ttl">Actualités éducatives</span></div>
         <div class="acc-news-body">
           <a class="acc-news-item" href="#actualites" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'));return false"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-university"/></svg></span><span class="tx"><b>MINESEC</b> — calendrier officiel des examens 2026 : BEPC, Probatoire, BAC &amp; GCE.</span></a>
-          <a class="acc-news-item" href="#actualites" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'));return false"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span><span class="tx"><b>Orientation</b> — grandes écoles, concours et bourses post-BAC au Cameroun.</span></a>
+          <a class="acc-news-item" href="#actualites" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'));return false"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg></span><span class="tx"><b>Orientation</b> — grandes ecoles, concours et bourses post-BAC au Cameroun.</span></a>
           <a class="acc-news-item" href="#actualites" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'));return false"><span class="acc-news-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-bookopen"/></svg></span><span class="tx"><b>Révisions</b> — nouvelles fiches et méthodes publiées chaque semaine.</span></a>
         </div>
         <button class="acc-news-cta" onclick="vShowSec('actualites',document.querySelector('.vnav-btn[onclick*=actualites]'))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="margin-right:6px;vertical-align:-3px"><use href="#lc-news"/></svg>Voir toutes les actualités →</button>
@@ -13668,7 +13668,7 @@ function _guideContent(section,role){
     return _block('🌐','Page d\'accueil publique',
       'Accessible à tout le monde sans connexion. Affiche : vidéo de présentation, slogan, statistiques, partenaires, actualités, calendrier.'
     )+_block('📰','Actualités éducatives',
-      'Section <strong>Actualités</strong> — Flux automatique depuis Google News (éducation Cameroun, MINESEC, grandes écoles, bourses). Auto-refresh toutes les 15 min. Bouton 🔄 pour forcer.'
+      'Section <strong>Actualités</strong> — Flux automatique depuis Google News (éducation Cameroun, MINESEC, grandes ecoles, bourses). Auto-refresh toutes les 15 min. Bouton 🔄 pour forcer.'
     )+_block('🛒','Boutique en ligne',
       'Manuels, fournitures, services. Le visiteur commande via WhatsApp en 1 clic. Codes promo possibles. Paiement en ligne (MoMo, OM, PayPal, Stripe).'
     )+_block('🎓','E-Learning visiteur',
@@ -15406,11 +15406,11 @@ async function _runAIOrient(){
   if(!forces){toast('Indiquez vos matières fortes','warn');return;}
   var btn=document.getElementById('aiBtnO'),res=document.getElementById('aiResO');
   if(btn){btn.disabled=true;btn.innerHTML='⏳ Analyse en cours…';}
-  var prompt='Tu es un conseiller d\'orientation expert du système éducatif camerounais (MINESEC, universités, grandes écoles). '+
+  var prompt='Tu es un conseiller d\'orientation expert du système éducatif camerounais (MINESEC, universités, grandes ecoles). '+
     'Profil élève : Niveau/Série : '+serie+'. Matières fortes : '+forces+'. Matières faibles : '+(faiblesses||'non précisées')+'. Centres d\'intérêt : '+(interets||'non précisés')+'. '+
     'Fournis une analyse structurée (utilise ** pour les titres) : '+
     '**Profil détecté** : résumé du profil en 2 phrases. '+
-    '**Filières recommandées au Cameroun** : liste 3 filières (université, IUT, grandes écoles) avec leurs conditions d\'accès. '+
+    '**Filières recommandées au Cameroun** : liste 3 filières (université, IUT, grandes ecoles) avec leurs conditions d\'accès. '+
     '**Métiers accessibles** : liste 4 débouchés concrets au Cameroun avec les salaires approximatifs. '+
     '**Plan d\'action** : 3 conseils pratiques pour renforcer le dossier. '+
     '**Conseil BEPC/BAC** : stratégie pour les examens en vue de cette orientation. '+
@@ -17219,25 +17219,25 @@ function _genOrientation(){
 function _buildOrientationHtml(niveau,serie,maths,fr,sci,interests){
   var h="<div style='background:linear-gradient(135deg,#F0F4FF,#EDE9FE);border-radius:16px;padding:20px;border:1px solid #C7D2FE'>";
   h+="<div style='font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#142554;margin-bottom:14px'>🎯 Recommandations personnalisées</div>";
-  var recs=[],écoles=[],conseils=[];
+  var recs=[],ecoles=[],conseils=[];
   if(niveau==="terminale"||niveau==="post_bac"){
     if(serie==="C"||serie==="D"){
-      if(maths>=14){recs.push("🔬 Sciences — Prepas scientifiques");écoles.push("École Nationale Superieure Polytechnique de Yaoundé");}
-      if(interests.indexOf("Médecine")>=0||sci>=14){recs.push("🏥 Médecine / Pharmacie");écoles.push("FMSB — Faculté de Médecine et des Sciences Biomédicales, Yaoundé I");conseils.push("Concours médecine très sélectif (avg >= 14 en sciences)");}
-      if(interests.indexOf("Ingénierie")>=0){écoles.push("ISTDI — Institut Superieur de Technologie et du Design Industriel");}
-      écoles.push("Faculté des Sciences — Universite de Yaoundé I");
+      if(maths>=14){recs.push("🔬 Sciences — Prépas scientifiques");ecoles.push("École Nationale Supérieure Polytechnique de Yaoundé");}
+      if(interests.indexOf("Médecine")>=0||sci>=14){recs.push("🏥 Médecine / Pharmacie");ecoles.push("FMSB — Faculté de Médecine et des Sciences Biomédicales, Yaoundé I");conseils.push("Concours médecine très sélectif (avg >= 14 en sciences)");}
+      if(interests.indexOf("Ingénierie")>=0){ecoles.push("ISTDI — Institut Supérieur de Technologie et du Design Industriel");}
+      ecoles.push("Faculté des Sciences — Université de Yaoundé I");
     }
     if(serie==="A"){
       recs.push("⚖️ Droit / Sciences Politiques");recs.push("📰 Journalisme / Communication");
-      écoles.push("Faculté des Sciences Juridiques et Politiques, Yaoundé II");
-      écoles.push("ESSTIC — École Superieure des Sciences et Techniques de l'Information");
-      écoles.push("IRIC — Institut des Relations Internationales du Cameroun");
-      if(interests.indexOf("Enseignement")>=0){écoles.push("ENS — École Normale Superieure de Yaoundé");conseils.push("Concours ENS très competitif");}
+      ecoles.push("Faculté des Sciences Juridiques et Politiques, Yaoundé II");
+      ecoles.push("ESSTIC — École Supérieure des Sciences et Techniques de l'Information");
+      ecoles.push("IRIC — Institut des Relations Internationales du Cameroun");
+      if(interests.indexOf("Enseignement")>=0){ecoles.push("ENS — École Normale Supérieure de Yaoundé");conseils.push("Concours ENS très compétitif");}
     }
-    if(serie==="TC"){recs.push("💼 Commerce / Gestion / Finance");écoles.push("ESSEC — École Superieure des Sciences Economiques et Commerciales, Douala");}
-    if(interests.indexOf("Agriculture")>=0){recs.push("🌱 Agronomie");écoles.push("FASA Dschang — Faculté d'Agronomie");}
+    if(serie==="TC"){recs.push("💼 Commerce / Gestion / Finance");ecoles.push("ESSEC — École Supérieure des Sciences Économiques et Commerciales, Douala");}
+    if(interests.indexOf("Agriculture")>=0){recs.push("🌱 Agronomie");ecoles.push("FASA Dschang — Faculté d'Agronomie");}
     if(maths>=15&&(interests.indexOf("Droit")>=0||interests.indexOf("Commerce")>=0)){
-      écoles.push("ENAM — École Nationale d'Administration et de Magistrature (concours très sélectif)");
+      ecoles.push("ENAM — École Nationale d'Administration et de Magistrature (concours très sélectif)");
       conseils.push("L'ENAM forme les hauts fonctionnaires camerounais");
     }
   }else if(niveau==="3eme"||niveau==="2nde"){
@@ -17247,11 +17247,11 @@ function _buildOrientationHtml(niveau,serie,maths,fr,sci,interests){
     else{recs.push("Renforcer toutes les matieres");}
   }
   if(!recs.length)recs.push("Remplissez tous les champs pour une orientation precise");
-  if(!écoles.length)écoles.push("Précisez vos notes et intérêts pour des recommandations d'écoles");
-  h+="<div style='margin-bottom:14px'><div style='font-size:12px;font-weight:800;color:#6C56A6;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>🎓 Filières recommandees</div>";
+  if(!ecoles.length)ecoles.push("Précisez vos notes et intérêts pour des recommandations d'écoles");
+  h+="<div style='margin-bottom:14px'><div style='font-size:12px;font-weight:800;color:#6C56A6;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>🎓 Filières recommandées</div>";
   recs.forEach(function(r){h+="<div style='padding:6px 0;border-bottom:1px solid rgba(0,0,0,.05);font-family:Georgia,serif;font-size:13px;color:#1F2937'>"+r+"</div>";});
-  h+="</div><div style='margin-bottom:14px'><div style='font-size:12px;font-weight:800;color:#059669;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>🏫 Écoles & Universites</div>";
-  écoles.forEach(function(e){h+="<div style='padding:6px 10px;background:rgba(5,150,105,.06);border-radius:8px;margin-bottom:5px;font-size:12px;color:#1F2937'>📍 "+e+"</div>";});
+  h+="</div><div style='margin-bottom:14px'><div style='font-size:12px;font-weight:800;color:#059669;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>🏫 Écoles & Universités</div>";
+  ecoles.forEach(function(e){h+="<div style='padding:6px 10px;background:rgba(5,150,105,.06);border-radius:8px;margin-bottom:5px;font-size:12px;color:#1F2937'>📍 "+e+"</div>";});
   h+="</div>";
   if(conseils.length){h+="<div><div style='font-size:12px;font-weight:800;color:#D97706;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>💡 Conseils</div>";conseils.forEach(function(c){h+="<div style='padding:6px 10px;background:rgba(217,119,6,.06);border-radius:8px;margin-bottom:5px;font-size:12px;color:#92400E'>• "+c+"</div>";});h+="</div>";}
   h+="<div style='margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.07);font-size:11px;color:#9CA3AF'>Recommandations basees sur le système MINESEC/MINESUP. Consultez votre conseiller officiel pour une orientation definitives.</div>";
@@ -17261,20 +17261,20 @@ function _buildOrientationHtml(niveau,serie,maths,fr,sci,interests){
 
 // ── GRANDES ÉCOLES ─────────────────────────────────────────────────
 function _showGrandesEcoles(){
-  var écoles=[
+  var ecoles=[
     {nom:"ENAM",titre:"École Nationale d'Administration et de Magistrature",lieu:"Yaoundé",acces:"Concours national (Bac +2)",domaines:"Administration, Magistrature, Diplomatie",ico:"⚖️"},
-    {nom:"ENSP",titre:"École Nationale Superieure Polytechnique",lieu:"Yaoundé",acces:"Concours national (BAC C/D/E, Maths >= 14)",domaines:"Genie Civil, Electricite, Mecanique, Informatique",ico:"⚙️"},
+    {nom:"ENSP",titre:"École Nationale Supérieure Polytechnique",lieu:"Yaoundé",acces:"Concours national (BAC C/D/E, Maths >= 14)",domaines:"Genie Civil, Electricite, Mecanique, Informatique",ico:"⚙️"},
     {nom:"FASA",titre:"Faculté d'Agronomie et des Sciences Agricoles",lieu:"Dschang",acces:"Concours (BAC C/D/E)",domaines:"Agronomie, Zootechnie, Agroeconomie",ico:"🌱"},
     {nom:"IRIC",titre:"Institut des Relations Internationales du Cameroun",lieu:"Yaoundé",acces:"Concours (Bac + 2)",domaines:"Diplomatie, Commerce International, Communication",ico:"🌐"},
-    {nom:"ESSEC",titre:"École Superieure des Sciences Economiques et Commerciales",lieu:"Douala",acces:"Concours (BAC toutes series)",domaines:"Commerce, Gestion, Finance, Marketing",ico:"💼"},
+    {nom:"ESSEC",titre:"École Supérieure des Sciences Économiques et Commerciales",lieu:"Douala",acces:"Concours (BAC toutes series)",domaines:"Commerce, Gestion, Finance, Marketing",ico:"💼"},
     {nom:"FMSB",titre:"Faculté de Médecine et des Sciences Biomédicales",lieu:"Yaoundé",acces:"Concours (BAC C/D, Sciences >= 14)",domaines:"Médecine, Pharmacie, Odontologie",ico:"🏥"},
-    {nom:"ESSTIC",titre:"École Superieure des Sciences et Techniques de l'Information",lieu:"Yaoundé",acces:"Concours (Bac+2)",domaines:"Journalisme, Communication, NTIC",ico:"📺"},
+    {nom:"ESSTIC",titre:"École Supérieure des Sciences et Techniques de l'Information",lieu:"Yaoundé",acces:"Concours (Bac+2)",domaines:"Journalisme, Communication, NTIC",ico:"📺"},
     {nom:"EMIA",titre:"École Militaire Inter-Armes",lieu:"Yaoundé",acces:"Concours national (BAC, tests physiques)",domaines:"Armee, Securite nationale",ico:"🎖️"},
   ];
   var h="<div class='vsec'><button class='back-btn' onclick='vShowSec(\"orientation\",null)'>← Orientation</button>";
   h+="<div class='vsec-title'><span class='vsec-ico'><svg class='vico vico-21' aria-hidden='true'><use href='#lc-university'/></svg></span>Grandes Écoles du Cameroun</div>";
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px'>";
-  écoles.forEach(function(e){
+  ecoles.forEach(function(e){
     h+="<div class='vcard' style='border-top:4px solid #142554'>"
       +"<div style='font-size:32px;margin-bottom:8px'>"+e.ico+"</div>"
       +"<div style='font-family:Montserrat,sans-serif;font-size:16px;font-weight:900;color:#142554;margin-bottom:2px'>"+e.nom+"</div>"

@@ -311,3 +311,39 @@ scopés (notes/bulletins QR, emploi du temps, RH) ; (d) confirmer le **nom de ma
   pictogramme dans le parent. Même précaution pour tout libellé piloté par la base.
 - Les émojis **restants sont volontaires** : le bandeau déroulant (`.t-item`) est de la DONNÉE
   éditable par l'admin, et les `★` sont de la typographie. Ne pas les convertir.
+
+## « L'essentiel pour réviser » à l'accueil + accents de l'Orientation (06/08)
+- **Constat** : l'accueil présentait le CENTRE (vidéo, palmarès, IA, photos, résultats) et **aucun**
+  des outils qu'un apprenant vient chercher. Calendrier, corrigés, laboratoires, outils de calcul
+  dormaient à deux ou trois niveaux dans les menus déroulants — le défaut déjà corrigé pour
+  l'orientation, resté entier pour tout le reste.
+- **8 portes** (`_ACC_ESSENTIEL` / `_accEssentiel()`), placées **juste sous la vidéo**, 2ᵉ section de
+  la page : calendrier, corrigés, épreuves & annales, laboratoires, jeux & œuvres, orientation,
+  outils de calcul, Prof. Ambassa. Pastille « Gratuit » là où c'est vrai — c'est l'information qui
+  décide du clic, pas un argument de vente. Lien final vers le hub élève.
+- **Aucun chiffre affiché** : les catalogues sont chargés à la demande ; un compteur ici serait soit
+  faux, soit payé par le téléchargement qu'on cherche à éviter.
+- **DEUX DESTINATIONS ÉTAIENT FAUSSES, trouvées en cliquant vraiment** :
+  1. `vShowSec('calendrier')` **n'existe pas** — l'appel retombait EN SILENCE sur l'accueil, en
+     laissant `_vCurrentSec='calendrier'` (d'où l'illusion que ça marchait). Le vrai point d'entrée
+     est `showCalendrier()`. **Les clés valides de vShowSec** : actualites, boutique, cagnotte,
+     contact, elearning, epreuves, histoire, labos, leaderboard-junior, mes-partenariats,
+     nos-partenaires, orientation, parents, partenariat, photos, presentation, resultats, trophees,
+     verifier-certificat. Tout le reste retombe sur l'accueil sans rien dire.
+  2. `elearning` (3 200 car.) au lieu d'`epreuves` (8 400 car., filtres section/matière/niveau).
+  **Méthode** : ne jamais valider une carte sur « la fonction existe » — cliquer et comparer
+  l'empreinte du contenu à celle de l'accueil.
+- **Accents rétablis dans toute la section Orientation** (83 mots) : « filiere », « ecole »,
+  « Medecine », « Superieure », « RECOMMANDEES »… sur la page d'orientation d'un centre de français.
+- **DEUX PIÈGES du script d'accentuation**, à connaître avant d'en rejouer un :
+  1. Les libellés des centres d'intérêt servent aussi de **valeur comparée**
+     (`interests.indexOf("Medecine")`). Ici tableau et comparaison étaient dans la même plage de
+     lignes, donc renommés ensemble — le hasard, pas la méthode. Protéger `value=/id=/name=`.
+  2. Le script a renommé la **variable** `ecoles` en `écoles` (identifiant JS accepté par
+     `node --check`). Remis en ASCII ; ne remplacer que hors identifiants.
+  3. La sentinelle de protection doit être impossible dans le source : un ` 14 ` entouré d'espaces
+     existe (attributs `min`/`max`), un octet nul non.
+- Vérifié au navigateur : les 8 cartes atteignent leur destination (2 onglets, 1 modale, 5 sections),
+  2 colonnes à 375 px sans débordement, 3 à 654 px ; formulaire d'orientation rempli → recommandations
+  générées citant Médecine/FMSB/Polytechnique (donc `indexOf` et la variable `ecoles` intacts) ;
+  0 mot sans accent dans la sortie ; 0 erreur console.
