@@ -635,15 +635,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.14.2">
+<link rel="preload" as="script" href="/app.js?v=1.15.0">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.14.2" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.14.2"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.15.0" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.15.0"></noscript>
 </head>
 <body>
 <!-- ════════ A11Y v2 : Skip link pour lecteurs d'écran ════════ -->
@@ -785,16 +785,19 @@ if('MutationObserver' in window){
 <!-- PORTAIL VISITEUR -->
 <div id="VISITOR" style="display:none" role="region" aria-label="Portail visiteur">
 <div class="vlogin-bar">
-  <span>🏫 VÉRITAS Academy</span>
+  <!-- Le nom de l'école est réécrit au démarrage depuis DB.school.nom. Il vit
+       dans son PROPRE span : sans cela un textContent sur le parent effacerait
+       le pictogramme à chaque rendu. -->
+  <span><svg class="vico" width="14" height="14" aria-hidden="true"><use href="#lc-university"/></svg> <span id="vBrandName">VÉRITAS Academy</span></span>
   <div class="vlogin-btns" id="vLoginBtns">
     <!-- Boutons utilitaires v2.2 (panier, langue, contact) -->
     <button class="btn sm icon-only" title="Panier" aria-label="Panier" onclick="openCart()" style="background:rgba(255,201,60,.15);color:#FFC93C;border:1px solid rgba(255,201,60,.3);padding:6px 10px;position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg><span id="cartBadge" style="position:absolute;top:-3px;right:-3px;background:#AE5353;color:#fff;border-radius:50%;font-size:9px;width:16px;height:16px;display:none;align-items:center;justify-content:center;font-weight:700" aria-live="polite"></span></button>
     <button class="btn sm icon-only" title="Changer la langue / Switch language" aria-label="Changer la langue" onclick="mLanguageMenu()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"/></svg></button>
     <button class="btn sm icon-only" title="Nous contacter" aria-label="Contact" onclick="vShowSec('contact',null)" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg></button>
     <span style="width:1px;height:20px;background:rgba(255,255,255,.15);margin:0 4px"></span>
-    <button class="btn sm" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-weight:600" onclick="showRegisterForm()">✨ S'inscrire</button>
-    <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin('eleve')">🎓 Se connecter</button>
-    <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin('enseignant')">👨‍🏫 Enseignant</button>
+    <button class="btn sm" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-weight:600" onclick="showRegisterForm()"><svg class="vico" width="16" height="16" aria-hidden="true"><use href="#lc-sparkles"/></svg>S'inscrire</button>
+    <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin('eleve')"><svg class="vico" width="16" height="16" aria-hidden="true"><use href="#lc-graduation"/></svg>Se connecter</button>
+    <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin('enseignant')"><svg class="vico" width="16" height="16" aria-hidden="true"><use href="#lc-presentation"/></svg>Enseignant</button>
     <span id="vSyncDot" onclick="iA()&&mSyncMenu()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>
     <span id="adminAccessPoint" aria-hidden="true" style="display:inline-block;width:44px;height:44px;cursor:default;opacity:0;vertical-align:middle" onclick="_adminTriple()" title=""></span>
   </div>
@@ -834,7 +837,7 @@ setInterval(_refreshCitation,15000);
 <!-- ═══ TICKER DÉFILANT ═══ -->
 <div id="tickerBar" style="display:none">
   <div class="ticker-in">
-    <div class="ticker-lbl">📢 INFO</div>
+    <div class="ticker-lbl"><svg class="vico" width="13" height="13" aria-hidden="true"><use href="#lc-megaphone"/></svg>INFO</div>
     <div class="ticker-track"><div class="ticker-scroll" id="tkScroll"></div></div>
   </div>
 </div>
@@ -873,9 +876,9 @@ setInterval(_refreshCitation,15000);
   <div class="vnav-group">
     <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(99,102,241,.05));color:#4F46E5;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Outils IA"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-brain"/></svg> IA <span style="opacity:.6;font-size:10px">▾</span></button>
     <div class="vnav-dropdown" role="menu">
-      <button role="menuitem" onclick="_navGo();mAgentAmbassa()"><span style="font-size:18px;margin-right:6px">🎓</span><b>Prof. Ambassa</b><span class="vnav-dd-sub">Quiz · Évaluations · Fiches</span></button>
-      <button role="menuitem" onclick="_navGo();mHubIA()"><span style="font-size:18px;margin-right:6px">🧠</span><b>Hub IA</b><span class="vnav-dd-sub">Devoir IA · Parcours adaptatif</span></button>
-      <button role="menuitem" onclick="_navGo();mVeritasGenome()"><span style="font-size:18px;margin-right:6px">🧬</span><b>Mon Genome</b><span class="vnav-dd-sub">ADN académique personnel</span></button>
+      <button role="menuitem" onclick="_navGo();mAgentAmbassa()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-graduation"/></svg><b>Prof. Ambassa</b><span class="vnav-dd-sub">Quiz · Évaluations · Fiches</span></button>
+      <button role="menuitem" onclick="_navGo();mHubIA()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-brain"/></svg><b>Hub IA</b><span class="vnav-dd-sub">Devoir IA · Parcours adaptatif</span></button>
+      <button role="menuitem" onclick="_navGo();mVeritasGenome()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-activity"/></svg><b>Mon Genome</b><span class="vnav-dd-sub">ADN académique personnel</span></button>
     </div>
   </div>
 
@@ -883,12 +886,12 @@ setInterval(_refreshCitation,15000);
   <div class="vnav-group">
     <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(245,158,11,.05));color:#92400E;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Pratiquer"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-game"/></svg> Pratiquer <span style="opacity:.6;font-size:10px">▾</span></button>
     <div class="vnav-dropdown" role="menu">
-      <button role="menuitem" onclick="_navGo();showJeuxEdu()"><span style="font-size:18px;margin-right:6px">🎮</span><b>Jeux éducatifs</b><span class="vnav-dd-sub">QCM, pendu, cartes mentales</span></button>
-      <button role="menuitem" onclick="_navGo();showLabosVirtuels()"><span style="font-size:18px;margin-right:6px">🔬</span><b>Labos virtuels</b><span class="vnav-dd-sub">Physique, chimie, SVT</span></button>
-      <button role="menuitem" onclick="_navGo();showEpreuves()"><span style="font-size:18px;margin-right:6px">📝</span><b>Épreuves &amp; Annales</b><span class="vnav-dd-sub">BEPC, Probatoire, BAC corrigés</span></button>
-      <button role="menuitem" onclick="_navGo();showEvaluations()"><span style="font-size:18px;margin-right:6px">📊</span><b>Évaluations</b><span class="vnav-dd-sub">Tests en ligne chronométrés</span></button>
-      <button role="menuitem" onclick="_navGo();mStudyRoom()"><span style="font-size:18px;margin-right:6px">👥</span><b>Étude en groupe</b><span class="vnav-dd-sub">Room temps réel code 6 chiffres</span></button>
-      <button role="menuitem" onclick="_navGo();mAchievements()"><span style="font-size:18px;margin-right:6px">🏆</span><b>Mes badges</b><span class="vnav-dd-sub">30+ achievements</span></button>
+      <button role="menuitem" onclick="_navGo();showJeuxEdu()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-game"/></svg><b>Jeux éducatifs</b><span class="vnav-dd-sub">QCM, pendu, cartes mentales</span></button>
+      <button role="menuitem" onclick="_navGo();showLabosVirtuels()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-flask"/></svg><b>Labos virtuels</b><span class="vnav-dd-sub">Physique, chimie, SVT</span></button>
+      <button role="menuitem" onclick="_navGo();showEpreuves()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-doc"/></svg><b>Épreuves &amp; Annales</b><span class="vnav-dd-sub">BEPC, Probatoire, BAC corrigés</span></button>
+      <button role="menuitem" onclick="_navGo();showEvaluations()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-chart"/></svg><b>Évaluations</b><span class="vnav-dd-sub">Tests en ligne chronométrés</span></button>
+      <button role="menuitem" onclick="_navGo();mStudyRoom()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-users"/></svg><b>Étude en groupe</b><span class="vnav-dd-sub">Room temps réel code 6 chiffres</span></button>
+      <button role="menuitem" onclick="_navGo();mAchievements()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-award"/></svg><b>Mes badges</b><span class="vnav-dd-sub">30+ achievements</span></button>
     </div>
   </div>
 
@@ -896,12 +899,12 @@ setInterval(_refreshCitation,15000);
   <div class="vnav-group">
     <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));color:#6C56A6;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Communauté"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-users"/></svg> Communauté <span style="opacity:.6;font-size:10px">▾</span></button>
     <div class="vnav-dropdown" role="menu">
-      <button role="menuitem" onclick="_navGo();showClasseVirtuelle()"><span style="font-size:18px;margin-right:6px">🏫</span><b>Classes &amp; Forum</b><span class="vnav-dd-sub">Échanges avec enseignants &amp; pairs</span></button>
-      <button role="menuitem" onclick="_navGo();mParrainage()"><span style="font-size:18px;margin-right:6px">🎁</span><b>Parrainage</b><span class="vnav-dd-sub">+500 FCFA crédit par filleul</span></button>
-      <button role="menuitem" onclick="_navGo();vShowSec('partenariat',null)" data-new="1"><span style="font-size:18px;margin-right:6px">🤝</span><b>Partenariat VÉRITAS</b><span class="vnav-dd-sub">9 programmes · Bronze/Argent/Or/Diamant</span></button>
-      <button role="menuitem" onclick="_navGo();vShowSec('leaderboard-junior',null)"><span style="font-size:18px;margin-right:6px">🏆</span><b>Classement Junior</b><span class="vnav-dd-sub">Top 100 ambassadeurs élèves</span></button>
-      <button role="menuitem" onclick="_navGo();vShowSec('nos-partenaires',null)"><span style="font-size:18px;margin-right:6px">🏛️</span><b>Nos partenaires</b><span class="vnav-dd-sub">Sponsors · Universités · Libraires</span></button>
-      <button role="menuitem" onclick="_navGo();mMonParcours()"><span style="font-size:18px;margin-right:6px">🔥</span><b>Mon parcours</b><span class="vnav-dd-sub">XP, streak, niveau</span></button>
+      <button role="menuitem" onclick="_navGo();showClasseVirtuelle()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-university"/></svg><b>Classes &amp; Forum</b><span class="vnav-dd-sub">Échanges avec enseignants &amp; pairs</span></button>
+      <button role="menuitem" onclick="_navGo();mParrainage()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-gift"/></svg><b>Parrainage</b><span class="vnav-dd-sub">+500 FCFA crédit par filleul</span></button>
+      <button role="menuitem" onclick="_navGo();vShowSec('partenariat',null)" data-new="1"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-handshake"/></svg><b>Partenariat VÉRITAS</b><span class="vnav-dd-sub">9 programmes · Bronze/Argent/Or/Diamant</span></button>
+      <button role="menuitem" onclick="_navGo();vShowSec('leaderboard-junior',null)"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-trending"/></svg><b>Classement Junior</b><span class="vnav-dd-sub">Top 100 ambassadeurs élèves</span></button>
+      <button role="menuitem" onclick="_navGo();vShowSec('nos-partenaires',null)"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-building"/></svg><b>Nos partenaires</b><span class="vnav-dd-sub">Sponsors · Universités · Libraires</span></button>
+      <button role="menuitem" onclick="_navGo();mMonParcours()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-flame"/></svg><b>Mon parcours</b><span class="vnav-dd-sub">XP, streak, niveau</span></button>
     </div>
   </div>
 
@@ -909,9 +912,9 @@ setInterval(_refreshCitation,15000);
   <div class="vnav-group">
     <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#AE5353;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Vie scolaire"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-calendar"/></svg> Infos <span style="opacity:.6;font-size:10px">▾</span></button>
     <div class="vnav-dropdown" role="menu">
-      <button role="menuitem" onclick="_navGo();showCalendrier()"><span style="font-size:18px;margin-right:6px">📅</span><b>Calendrier scolaire</b><span class="vnav-dd-sub">Trimestres, séquences, vacances</span></button>
-      <button role="menuitem" onclick="_navGo();vShowSec('orientation',null)"><span style="font-size:18px;margin-right:6px">🧭</span><b>Orientation</b><span class="vnav-dd-sub">Filières, grandes écoles</span></button>
-      <button role="menuitem" onclick="_navGo();vShowSec('actualites',null)"><span style="font-size:18px;margin-right:6px">📰</span><b>Actualités</b><span class="vnav-dd-sub">News éducatives Cameroun</span></button>
+      <button role="menuitem" onclick="_navGo();showCalendrier()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-calendar"/></svg><b>Calendrier scolaire</b><span class="vnav-dd-sub">Trimestres, séquences, vacances</span></button>
+      <button role="menuitem" onclick="_navGo();vShowSec('orientation',null)"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-compass"/></svg><b>Orientation</b><span class="vnav-dd-sub">Filières, grandes écoles</span></button>
+      <button role="menuitem" onclick="_navGo();vShowSec('actualites',null)"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-news"/></svg><b>Actualités</b><span class="vnav-dd-sub">News éducatives Cameroun</span></button>
     </div>
   </div>
 </nav>
@@ -946,11 +949,11 @@ setInterval(_refreshCitation,15000);
       <div class="lrt" id="lTitre" onclick="_loginTitleTap()" style="cursor:default;user-select:none">Connexion</div>
       <div class="lrs" id="lSubtitle">Choisissez votre profil</div>
       <div class="ltbs" id="lTabs">
-        <button class="ltb on" id="ltbV" onclick="swLR('visiteur')">🌐 Visiteur</button>
-        <button class="ltb" id="ltbE" onclick="swLR('eleve')">🎓 Élève</button>
-        <button class="ltb" id="ltbT" onclick="swLR('enseignant')">👨‍🏫 Enseignant</button>
-        <button class="ltb" id="ltbA" onclick="swLR('admin')" style="display:none">🔐 Admin</button>
-        <button class="ltb" id="ltbSA" onclick="swLR('superadmin')" style="display:none">👑 Super</button>
+        <button class="ltb on" id="ltbV" onclick="swLR('visiteur')"><svg class="vico" width="14" height="14" aria-hidden="true"><use href="#lc-globe"/></svg> Visiteur</button>
+        <button class="ltb" id="ltbE" onclick="swLR('eleve')"><svg class="vico" width="14" height="14" aria-hidden="true"><use href="#lc-graduation"/></svg> Élève</button>
+        <button class="ltb" id="ltbT" onclick="swLR('enseignant')"><svg class="vico" width="14" height="14" aria-hidden="true"><use href="#lc-presentation"/></svg> Enseignant</button>
+        <button class="ltb" id="ltbA" onclick="swLR('admin')" style="display:none"><svg class="vico" width="14" height="14" aria-hidden="true"><use href="#lc-lock"/></svg> Admin</button>
+        <button class="ltb" id="ltbSA" onclick="swLR('superadmin')" style="display:none"><svg class="vico" width="14" height="14" aria-hidden="true"><use href="#lc-award"/></svg> Super</button>
       </div>
 
       <div id="lerr">Identifiant ou mot de passe incorrect</div>
@@ -1009,8 +1012,8 @@ setInterval(_refreshCitation,15000);
      Le rescue boot (anti-écran-blanc) reste le filet ultime. -->
 <!-- Version des assets, partagée avec les modules chargés à la demande
      (chunks/*.js) pour qu'ils suivent le même cache que app.js. -->
-<script>window._VRT_ASSET_VER='1.14.2';</script>
-<script defer src="/app.js?v=1.14.2"></script>
+<script>window._VRT_ASSET_VER='1.15.0';</script>
+<script defer src="/app.js?v=1.15.0"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>

@@ -676,3 +676,1522 @@ window.LABO_DB=[
    ],
    ressource:"https://officedubac.cm",pack:null},
 ];
+
+/* ── Moteur de simulation (déplacé depuis app.js) ────────────────────────
+   Le catalogue et le simulateur voyagent ensemble : qui ouvre un labo a
+   besoin des deux, qui ne l'ouvre pas ne paie ni l'un ni l'autre. */
+function _initLaboSim(lv){
+  cancelAnimationFrame(window._sim.raf);
+  window._sim={running:true,raf:0,t:0,params:{},defaults:{}};
+  var cnv=document.getElementById('laboCnv');
+  if(!cnv) return;
+  var ctx=cnv.getContext('2d');
+  if(!ctx){console.warn('[VÉRITAS labo] Canvas 2D unavailable for '+lv.id);window._sim.running=false;return;}
+  var W=cnv.width, H=cnv.height;
+  var vals=document.getElementById('simValues');
+  var cw=document.getElementById('simControls');
+
+  function setVal(html){if(vals)vals.innerHTML=html;}
+  function setCtrl(html){if(cw)cw.innerHTML=html;}
+
+  // ── PHYSIQUE : Circuit Électrique (lv1) ──
+  if(lv.id==="lv1"){
+    var P=window._sim.params={U:6,R1:100,R2:100,mode:'serie'};
+    window._sim.defaults={U:6,R1:100,R2:100,mode:'serie'};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>⚡ Tension (V): <input type='range' min='1' max='24' value='"+p.U+"' oninput='window._sim.params.U=+this.value' style='width:90px'><span id='slU'>"+p.U+"V</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>R1 (Ω): <input type='range' min='10' max='500' step='10' value='"+p.R1+"' oninput='window._sim.params.R1=+this.value' style='width:90px'><span>"+p.R1+"Ω</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>R2 (Ω): <input type='range' min='10' max='500' step='10' value='"+p.R2+"' oninput='window._sim.params.R2=+this.value' style='width:90px'><span>"+p.R2+"Ω</span></label>"
+        +"<button onclick=\"window._sim.params.mode=window._sim.params.mode==='serie'?'parallele':'serie'\" style='background:#142554;color:#FFC93C;border:none;border-radius:10px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer'>Mode: "+(window._sim.params.mode==='serie'?'Série':'Parallèle')+"</button>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params;var t=window._sim.t;
+      ctx.clearRect(0,0,W,H);
+      // Background grid
+      ctx.strokeStyle='rgba(255,255,255,.04)';ctx.lineWidth=1;
+      for(var gx=0;gx<W;gx+=20){ctx.beginPath();ctx.moveTo(gx,0);ctx.lineTo(gx,H);ctx.stroke();}
+      for(var gy=0;gy<H;gy+=20){ctx.beginPath();ctx.moveTo(0,gy);ctx.lineTo(W,gy);ctx.stroke();}
+
+      var isSerie=p.mode==='serie';
+      var Req=isSerie?(p.R1+p.R2):(p.R1*p.R2)/(p.R1+p.R2);
+      var I=p.U/Req;
+      var I1=isSerie?I:p.U/p.R1;
+      var I2=isSerie?I:p.U/p.R2;
+
+      // Batterie
+      ctx.fillStyle='#FFC93C';ctx.strokeStyle='#FFC93C';ctx.lineWidth=3;
+      ctx.fillRect(40,130,50,80);ctx.fillStyle='#0F172A';ctx.font='bold 14px Montserrat';ctx.textAlign='center';
+      ctx.fillText(p.U+'V',65,175);
+      // + / -
+      ctx.fillStyle='#fff';ctx.font='bold 18px monospace';ctx.fillText('+',65,148);ctx.fillText('−',65,200);
+
+      // Wires
+      ctx.strokeStyle='#87A9D3';ctx.lineWidth=2.5;ctx.setLineDash([]);
+      if(isSerie){
+        // Série: bat → R1 → R2 → bat
+        ctx.beginPath();ctx.moveTo(90,145);ctx.lineTo(200,145);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(280,145);ctx.lineTo(400,145);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(480,145);ctx.lineTo(580,145);ctx.lineTo(580,195);ctx.lineTo(480,195);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(400,195);ctx.lineTo(200,195);ctx.lineTo(200,195);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(200,195);ctx.lineTo(90,195);ctx.stroke();
+        // R1 box
+        ctx.fillStyle=lv.color;ctx.fillRect(200,125,80,40);
+        ctx.fillStyle='#fff';ctx.font='bold 13px Fira Code';ctx.textAlign='center';
+        ctx.fillText('R1='+p.R1+'Ω',240,150);
+        // R2 box
+        ctx.fillStyle='#6C56A6';ctx.fillRect(400,125,80,40);
+        ctx.fillStyle='#fff';ctx.fillText('R2='+p.R2+'Ω',440,150);
+        // Ammeter
+        ctx.beginPath();ctx.arc(340,195,16,0,Math.PI*2);ctx.fillStyle='#D1FAE5';ctx.fill();ctx.strokeStyle='#059669';ctx.lineWidth=2;ctx.stroke();
+        ctx.fillStyle='#059669';ctx.font='bold 10px Fira Code';ctx.fillText('A',340,199);
+        ctx.beginPath();ctx.moveTo(280,195);ctx.lineTo(324,195);ctx.strokeStyle='#87A9D3';ctx.lineWidth=2.5;ctx.stroke();
+        ctx.beginPath();ctx.moveTo(356,195);ctx.lineTo(400,195);ctx.stroke();
+      } else {
+        // Parallèle
+        ctx.beginPath();ctx.moveTo(90,145);ctx.lineTo(180,145);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(180,145);ctx.lineTo(180,110);ctx.lineTo(350,110);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(180,145);ctx.lineTo(180,220);ctx.lineTo(350,220);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(430,110);ctx.lineTo(520,110);ctx.lineTo(520,170);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(430,220);ctx.lineTo(520,220);ctx.lineTo(520,170);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(520,170);ctx.lineTo(580,170);ctx.lineTo(580,195);ctx.lineTo(90,195);ctx.stroke();
+        // R1 top
+        ctx.fillStyle=lv.color;ctx.fillRect(350,90,80,40);
+        ctx.fillStyle='#fff';ctx.font='bold 12px Fira Code';ctx.fillText('R1='+p.R1+'Ω',390,115);
+        // R2 bottom
+        ctx.fillStyle='#6C56A6';ctx.fillRect(350,200,80,40);
+        ctx.fillStyle='#fff';ctx.fillText('R2='+p.R2+'Ω',390,225);
+      }
+
+      // Electrons animés
+      var speed=I*800;
+      ctx.fillStyle='#FFC93C';
+      for(var ei=0;ei<12;ei++){
+        var phase=(t*speed*0.01+ei*57)%680;
+        var ex,ey;
+        if(isSerie){
+          if(phase<200){ex=90+phase;ey=145;}
+          else if(phase<400){ex=480-(phase-200);ey=195;}
+          else{ex=280;ey=145+((phase-400)/280)*50;}
+        } else {
+          ex=90+(phase%490);ey=ei%2===0?110:220;
+        }
+        ctx.beginPath();ctx.arc(ex,ey,3+Math.sin(t*4+ei)*1,0,Math.PI*2);ctx.fill();
+      }
+
+      // Values display
+      setVal(
+        "<span>⚡ U="+p.U+"V</span>"
+        +"<span>📏 R<sub>eq</sub>="+Req.toFixed(1)+"Ω</span>"
+        +"<span>🔋 I<sub>total</sub>="+(I*1000).toFixed(1)+"mA</span>"
+        +(isSerie?"":"<span>I₁="+(I1*1000).toFixed(1)+"mA</span><span>I₂="+(I2*1000).toFixed(1)+"mA</span>")
+        +"<span>💡 P="+(p.U*I).toFixed(2)+"W</span>"
+      );
+      _simUpdateControls();
+    };
+
+  // ── PHYSIQUE : Forces et Mouvement (lv2) ──
+  } else if(lv.id==="lv2"){
+    var P=window._sim.params={mass:2,force:10,friction:0.3,vx:0,x:60};
+    window._sim.defaults={mass:2,force:10,friction:0.3,vx:0,x:60};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Masse (kg): <input type='range' min='0.5' max='10' step='0.5' value='"+p.mass+"' oninput='window._sim.params.mass=+this.value' style='width:80px'><span>"+p.mass+"kg</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Force (N): <input type='range' min='0' max='50' step='1' value='"+p.force+"' oninput='window._sim.params.force=+this.value' style='width:80px'><span>"+p.force+"N</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Frottement: <input type='range' min='0' max='1' step='0.05' value='"+p.friction+"' oninput='window._sim.params.friction=+this.value' style='width:80px'><span>"+p.friction+"</span></label>"
+        +"<button onclick='window._sim.params.vx=0;window._sim.params.x=60' style='background:#142554;color:#FFC93C;border:none;border-radius:10px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer'>⏹ Stop</button>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params;
+      ctx.clearRect(0,0,W,H);
+      // Ground
+      ctx.fillStyle='#1E3A5F';ctx.fillRect(0,240,W,100);
+      ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=1;
+      for(var gx=0;gx<W;gx+=30){ctx.beginPath();ctx.moveTo(gx,240);ctx.lineTo(gx-15,280);ctx.stroke();}
+      // Physics
+      var a=(p.force-p.friction*p.mass*9.81)/p.mass;
+      if(a<0&&p.vx<=0){a=0;p.vx=0;}
+      p.vx+=a*0.016;if(p.vx<0)p.vx=0;
+      p.x+=p.vx*2;
+      if(p.x>W-60)p.x=60;
+      // Object (box)
+      var bx=p.x,by=190;
+      ctx.fillStyle=lv.color;ctx.beginPath();
+      ctx.roundRect(bx,by,50,50,8);ctx.fill();
+      ctx.fillStyle='#fff';ctx.font='bold 12px Fira Code';ctx.textAlign='center';
+      ctx.fillText(p.mass+'kg',bx+25,by+30);
+      // Force arrow
+      if(p.force>0){
+        var arrowLen=p.force*2;
+        ctx.strokeStyle='#FFC93C';ctx.lineWidth=3;
+        ctx.beginPath();ctx.moveTo(bx+50,by+25);ctx.lineTo(bx+50+arrowLen,by+25);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(bx+50+arrowLen,by+25);ctx.lineTo(bx+40+arrowLen,by+18);ctx.lineTo(bx+40+arrowLen,by+32);ctx.closePath();ctx.fillStyle='#FFC93C';ctx.fill();
+        ctx.fillStyle='#FFC93C';ctx.font='bold 11px Montserrat';ctx.fillText('F='+p.force+'N',bx+50+arrowLen/2,by+12);
+      }
+      // Friction arrow
+      if(p.vx>0.1){
+        var fLen=p.friction*p.mass*9.81*2;
+        ctx.strokeStyle='#D58E8E';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(bx,by+25);ctx.lineTo(bx-fLen,by+25);ctx.stroke();
+        ctx.fillStyle='#D58E8E';ctx.font='10px Montserrat';ctx.fillText('f',bx-fLen/2,by+40);
+      }
+      // Weight arrow
+      ctx.strokeStyle='#87A9D3';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(bx+25,by+50);ctx.lineTo(bx+25,by+50+p.mass*5);ctx.stroke();
+      ctx.fillStyle='#87A9D3';ctx.font='10px Montserrat';ctx.fillText('P='+(p.mass*9.81).toFixed(1)+'N',bx+35,by+60+p.mass*3);
+      // Velocity indicator
+      ctx.fillStyle='#fff';ctx.font='12px Fira Code';ctx.textAlign='left';
+      ctx.fillText('v = '+p.vx.toFixed(2)+' m/s',20,30);
+      ctx.fillText('a = '+a.toFixed(2)+' m/s²',20,50);
+      setVal("<span>🚀 v="+p.vx.toFixed(2)+" m/s</span><span>📐 a="+a.toFixed(2)+" m/s²</span><span>⚖ P="+(p.mass*9.81).toFixed(1)+"N</span><span>💥 F="+p.force+"N</span><span>🔄 f="+(p.friction*p.mass*9.81).toFixed(1)+"N</span>");
+      _simUpdateControls();
+    };
+
+  // ── CHIMIE : Réactions Acido-Basiques (lv3) ──
+  } else if(lv.id==="lv3"){
+    var P=window._sim.params={acidVol:50,baseVol:0,acidConc:0.1,baseConc:0.1};
+    window._sim.defaults={acidVol:50,baseVol:0,acidConc:0.1,baseConc:0.1};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Base ajoutée (mL): <input type='range' min='0' max='100' step='1' value='"+p.baseVol+"' oninput='window._sim.params.baseVol=+this.value' style='width:100px'><span>"+p.baseVol+"mL</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>[Acide]: <input type='range' min='0.01' max='1' step='0.01' value='"+p.acidConc+"' oninput='window._sim.params.acidConc=+this.value' style='width:80px'><span>"+p.acidConc+"M</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>[Base]: <input type='range' min='0.01' max='1' step='0.01' value='"+p.baseConc+"' oninput='window._sim.params.baseConc=+this.value' style='width:80px'><span>"+p.baseConc+"M</span></label>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params;var t=window._sim.t;
+      ctx.clearRect(0,0,W,H);
+      // pH calculation
+      var nAcid=p.acidVol*p.acidConc/1000;
+      var nBase=p.baseVol*p.baseConc/1000;
+      var vTotal=(p.acidVol+p.baseVol)/1000;
+      var pH;
+      if(nBase<nAcid){var excess=(nAcid-nBase)/vTotal;pH=-Math.log10(Math.max(excess,1e-14));}
+      else if(nBase>nAcid){var excess=(nBase-nAcid)/vTotal;pH=14+Math.log10(Math.max(excess,1e-14));}
+      else{pH=7;}
+      pH=Math.max(0,Math.min(14,pH));
+      // Solution color
+      var r,g,b2;
+      if(pH<4){r=220;g=38+pH*15;b2=38;}
+      else if(pH<7){r=220-((pH-4)/3)*180;g=130;b2=38+((pH-4)/3)*80;}
+      else if(pH<10){r=40;g=130+((pH-7)/3)*50;b2=118+((pH-7)/3)*120;}
+      else{r=40+((pH-10)/4)*80;g=80;b2=238;}
+      // Beaker
+      var bx=220,by=60,bw=240,bh=220;
+      ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=3;
+      ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx,by+bh);ctx.lineTo(bx+bw,by+bh);ctx.lineTo(bx+bw,by);ctx.stroke();
+      // Liquid
+      var fillH=bh*(p.acidVol+p.baseVol)/150;
+      var grad=ctx.createLinearGradient(bx,by+bh-fillH,bx,by+bh);
+      grad.addColorStop(0,'rgba('+r+','+g+','+b2+',0.6)');
+      grad.addColorStop(1,'rgba('+r+','+g+','+b2+',0.9)');
+      ctx.fillStyle=grad;
+      ctx.fillRect(bx+3,by+bh-fillH,bw-6,fillH-3);
+      // Bubbles
+      if(Math.abs(nBase-nAcid)<nAcid*0.3 && p.baseVol>5){
+        for(var bi=0;bi<8;bi++){
+          var bub_x=bx+30+Math.sin(t*2+bi*1.3)*(bw-60)*0.4+bw*0.3;
+          var bub_y=by+bh-20-((t*40+bi*30)%fillH);
+          ctx.beginPath();ctx.arc(bub_x,bub_y,2+Math.sin(t*3+bi)*1.5,0,Math.PI*2);
+          ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fill();
+        }
+      }
+      // Burette
+      ctx.fillStyle='rgba(255,255,255,.15)';ctx.fillRect(bx+bw/2-8,10,16,by-10);
+      ctx.fillStyle='rgba(100,180,255,.5)';
+      var buretteLevel=(100-p.baseVol)/100*(by-20);
+      ctx.fillRect(bx+bw/2-5,10+(by-20)-buretteLevel,10,buretteLevel);
+      // Drops
+      if(p.baseVol>0){
+        var dropY=(t*120)%(by-10);
+        ctx.beginPath();ctx.arc(bx+bw/2,by-10+dropY*0.3,3,0,Math.PI*2);
+        ctx.fillStyle='rgba(100,180,255,.7)';ctx.fill();
+      }
+      // pH scale
+      for(var si=0;si<=14;si++){
+        var sx=30+si*12;
+        var sc;
+        if(si<4)sc='rgb(220,'+(38+si*15)+',38)';
+        else if(si<7)sc='rgb('+(220-((si-4)/3)*180)+',130,'+(38+((si-4)/3)*80)+')';
+        else if(si<10)sc='rgb(40,'+(130+((si-7)/3)*50)+','+(118+((si-7)/3)*120)+')';
+        else sc='rgb('+(40+((si-10)/4)*80)+',80,238)';
+        ctx.fillStyle=sc;ctx.fillRect(sx,300,12,20);
+        ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='8px Fira Code';ctx.textAlign='center';ctx.fillText(si,sx+6,315);
+      }
+      // pH indicator arrow
+      var phX=30+pH*12+6;
+      ctx.fillStyle='#FFC93C';ctx.beginPath();ctx.moveTo(phX,296);ctx.lineTo(phX-5,288);ctx.lineTo(phX+5,288);ctx.closePath();ctx.fill();
+      // pH big display
+      ctx.fillStyle='#fff';ctx.font='bold 28px Montserrat';ctx.textAlign='right';
+      ctx.fillText('pH = '+pH.toFixed(1),W-40,100);
+      ctx.font='14px Georgia';ctx.fillStyle='rgba(255,255,255,.6)';
+      ctx.fillText(pH<6.5?'ACIDE':pH>7.5?'BASIQUE':'≈ NEUTRE',W-40,125);
+      setVal("<span>🧪 pH="+pH.toFixed(2)+"</span><span>🔴 n(H⁺)="+(nAcid*1000).toFixed(2)+"mmol</span><span>🔵 n(OH⁻)="+(nBase*1000).toFixed(2)+"mmol</span><span>💧 V<sub>total</sub>="+(p.acidVol+p.baseVol)+"mL</span>");
+      _simUpdateControls();
+    };
+
+  // ── SVT : Cellule Végétale (lv4) ──
+  } else if(lv.id==="lv4"){
+    window._sim.params={zoom:1,showLabels:true};
+    window._sim.defaults={zoom:1,showLabels:true};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>🔍 Zoom: <input type='range' min='0.6' max='2' step='0.1' value='"+p.zoom+"' oninput='window._sim.params.zoom=+this.value' style='width:90px'><span>×"+p.zoom.toFixed(1)+"</span></label>"
+        +"<button onclick=\"window._sim.params.showLabels=!window._sim.params.showLabels\" style='background:#142554;color:#FFC93C;border:none;border-radius:10px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer'>"+(p.showLabels?'Masquer':'Afficher')+" légendes</button>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params;var t=window._sim.t;var z=p.zoom;
+      ctx.clearRect(0,0,W,H);
+      ctx.save();ctx.translate(W/2,H/2);ctx.scale(z,z);ctx.translate(-W/2,-H/2);
+      var cx=W/2,cy=H/2;
+      // Cell wall
+      ctx.strokeStyle='#059669';ctx.lineWidth=6;ctx.setLineDash([]);
+      ctx.beginPath();ctx.roundRect(cx-180,cy-120,360,240,20);ctx.stroke();
+      // Cell membrane
+      ctx.strokeStyle='#5CAB8E';ctx.lineWidth=2;ctx.setLineDash([6,4]);
+      ctx.beginPath();ctx.roundRect(cx-170,cy-110,340,220,16);ctx.stroke();ctx.setLineDash([]);
+      // Cytoplasm
+      ctx.fillStyle='rgba(209,250,229,0.25)';ctx.beginPath();ctx.roundRect(cx-170,cy-110,340,220,16);ctx.fill();
+      // Vacuole (big, pulsing)
+      var vr=60+Math.sin(t*0.8)*4;
+      ctx.beginPath();ctx.ellipse(cx+20,cy,vr,vr*0.8,0,0,Math.PI*2);
+      ctx.fillStyle='rgba(147,197,253,0.35)';ctx.fill();ctx.strokeStyle='#93C5FD';ctx.lineWidth=2;ctx.stroke();
+      // Nucleus
+      var nx=cx-60,ny=cy-10;
+      ctx.beginPath();ctx.ellipse(nx,ny,38,30,0,0,Math.PI*2);
+      ctx.fillStyle='rgba(124,58,237,0.25)';ctx.fill();ctx.strokeStyle='#6C56A6';ctx.lineWidth=2;ctx.stroke();
+      // Nucleolus
+      ctx.beginPath();ctx.arc(nx+5,ny-3,10,0,Math.PI*2);ctx.fillStyle='rgba(124,58,237,0.5)';ctx.fill();
+      // Chloroplasts (orbiting)
+      for(var ci=0;ci<7;ci++){
+        var ca=t*0.3+ci*Math.PI*2/7;
+        var crx=cx+Math.cos(ca)*130,cry=cy+Math.sin(ca)*80;
+        ctx.beginPath();ctx.ellipse(crx,cry,14,8,ca,0,Math.PI*2);
+        ctx.fillStyle='#059669';ctx.fill();
+        // Thylakoids
+        ctx.strokeStyle='#047857';ctx.lineWidth=1;
+        for(var ti=0;ti<3;ti++){
+          ctx.beginPath();ctx.ellipse(crx,cry,10-ti*3,5-ti*1.5,ca,0,Math.PI*2);ctx.stroke();
+        }
+      }
+      // Mitochondria
+      for(var mi=0;mi<3;mi++){
+        var ma=t*0.5+mi*2.1+1;
+        var mx=cx+Math.cos(ma)*90,my=cy+Math.sin(ma)*55;
+        ctx.beginPath();ctx.ellipse(mx,my,16,8,ma*0.5,0,Math.PI*2);
+        ctx.fillStyle='rgba(239,68,68,0.4)';ctx.fill();ctx.strokeStyle='#C46F6F';ctx.lineWidth=1.5;ctx.stroke();
+        // Cristae
+        ctx.strokeStyle='rgba(239,68,68,0.5)';ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(mx-8,my);ctx.quadraticCurveTo(mx,my-6,mx+8,my);ctx.stroke();
+      }
+      // ER (endoplasmic reticulum)
+      ctx.strokeStyle='rgba(251,191,36,0.4)';ctx.lineWidth=1.5;
+      ctx.beginPath();
+      for(var ei=0;ei<30;ei++){
+        var ex=cx-120+ei*8,ey=cy+60+Math.sin(t*0.6+ei*0.4)*12;
+        if(ei===0)ctx.moveTo(ex,ey);else ctx.lineTo(ex,ey);
+      }
+      ctx.stroke();
+      // Labels
+      if(p.showLabels){
+        ctx.font='bold 11px Montserrat';ctx.textAlign='left';
+        var labels=[
+          [cx+190,cy-100,'Paroi cellulaire','#059669'],
+          [cx+190,cy-75,'Membrane plasmique','#5CAB8E'],
+          [cx+80,cy,'Vacuole','#6A8DC7'],
+          [nx+45,ny-20,'Noyau','#6C56A6'],
+          [nx+45,ny+5,'Nucléole','#6C56A6'],
+          [cx+150,cy+60,'Chloroplaste','#059669'],
+          [cx-160,cy+70,'Mitochondrie','#C46F6F'],
+          [cx-140,cy+95,'Réticulum endoplasmique','#F59E0B'],
+        ];
+        labels.forEach(function(lb){
+          ctx.fillStyle=lb[3];ctx.fillText(lb[2],lb[0],lb[1]);
+          ctx.beginPath();ctx.arc(lb[0]-5,lb[1]-4,2,0,Math.PI*2);ctx.fill();
+        });
+      }
+      ctx.restore();
+      setVal("<span>🔬 Cellule végétale</span><span>🟢 Paroi + Chloroplastes + Vacuole</span><span>🔄 Zoom ×"+z.toFixed(1)+"</span>");
+    };
+
+  // ── MATHS : Volumes & Solides (lv5/lv6) ──
+  } else if(lv.id==="lv5"){
+    // ── SVT : Photosynthèse / Nutrition des plantes (lv5) ──
+    window._sim.params={lumiere:80,co2:50,eau:60};
+    window._sim.defaults={lumiere:80,co2:50,eau:60};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>☀️ Lumière (%): <input type='range' min='0' max='100' value='"+p.lumiere+"' oninput='window._sim.params.lumiere=+this.value' style='width:90px'><span>"+p.lumiere+"%</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>🌫️ CO₂ (%): <input type='range' min='0' max='100' value='"+p.co2+"' oninput='window._sim.params.co2=+this.value' style='width:90px'><span>"+p.co2+"%</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>💧 Eau (%): <input type='range' min='0' max='100' value='"+p.eau+"' oninput='window._sim.params.eau=+this.value' style='width:90px'><span>"+p.eau+"%</span></label>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params;var t=window._sim.t;
+      ctx.clearRect(0,0,W,H);
+      // Ciel dégradé selon lumière
+      var skyTop='rgba('+(15+p.lumiere*0.5)+','+(30+p.lumiere*1.2)+','+(60+p.lumiere*1.5)+',1)';
+      var skyBot='rgba('+(40+p.lumiere)+','+(80+p.lumiere*1.3)+','+(120+p.lumiere*1)+',1)';
+      var grad=ctx.createLinearGradient(0,0,0,H*0.7);
+      grad.addColorStop(0,skyTop);grad.addColorStop(1,skyBot);
+      ctx.fillStyle=grad;ctx.fillRect(0,0,W,H*0.7);
+      // Sol
+      ctx.fillStyle='#5C3A1E';ctx.fillRect(0,H*0.7,W,H*0.3);
+      ctx.fillStyle='#3E2614';ctx.fillRect(0,H*0.7,W,8);
+      // Soleil (taille selon lumière)
+      var sunR=8+p.lumiere*0.3;
+      var sgrad=ctx.createRadialGradient(W-80,60,sunR*0.3,W-80,60,sunR*1.8);
+      sgrad.addColorStop(0,'rgba(255,243,107,1)');sgrad.addColorStop(0.6,'rgba(255,201,60,'+(p.lumiere/120)+')');sgrad.addColorStop(1,'rgba(255,201,60,0)');
+      ctx.fillStyle=sgrad;ctx.beginPath();ctx.arc(W-80,60,sunR*1.8,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='rgba(255,243,107,'+(0.4+p.lumiere/200)+')';ctx.beginPath();ctx.arc(W-80,60,sunR,0,Math.PI*2);ctx.fill();
+      // Rayons solaires animés
+      if(p.lumiere>20){
+        ctx.strokeStyle='rgba(255,243,107,'+(p.lumiere/300)+')';ctx.lineWidth=2;
+        for(var ri=0;ri<8;ri++){
+          var ra=(t*0.3+ri*Math.PI/4)%(Math.PI*2);
+          var rl=sunR+15+Math.sin(t*2+ri)*5;
+          ctx.beginPath();ctx.moveTo(W-80+Math.cos(ra)*sunR*1.2,60+Math.sin(ra)*sunR*1.2);
+          ctx.lineTo(W-80+Math.cos(ra)*(sunR+rl),60+Math.sin(ra)*(sunR+rl));ctx.stroke();
+        }
+      }
+      // Plante (tige + feuilles, vigueur selon facteurs)
+      var vigueur=Math.min(p.lumiere,p.co2,p.eau)/100;
+      var plantH=80+vigueur*120;
+      var px=W/2;var py=H*0.7;
+      // Tige
+      ctx.strokeStyle='#16A34A';ctx.lineWidth=4+vigueur*3;
+      ctx.beginPath();ctx.moveTo(px,py);ctx.bezierCurveTo(px-5,py-plantH/3,px+5,py-plantH*2/3,px,py-plantH);ctx.stroke();
+      // Feuilles
+      var nbFeuilles=Math.floor(2+vigueur*5);
+      for(var fi=0;fi<nbFeuilles;fi++){
+        var fy=py-(fi+1)*(plantH/(nbFeuilles+1));
+        var fSide=fi%2===0?-1:1;
+        var fSize=20+vigueur*15;
+        var sway=Math.sin(t+fi)*3;
+        ctx.fillStyle='rgba(34,'+(150+vigueur*60)+',60,'+(0.7+vigueur*0.3)+')';
+        ctx.beginPath();
+        ctx.ellipse(px+fSide*fSize*0.6+sway,fy,fSize,fSize*0.5,fSide*0.4,0,Math.PI*2);
+        ctx.fill();
+        ctx.strokeStyle='#15803D';ctx.lineWidth=1.5;ctx.stroke();
+      }
+      // Racines
+      ctx.strokeStyle='#7C2D12';ctx.lineWidth=2;
+      for(var rk=0;rk<5;rk++){
+        var ra2=Math.PI+rk*0.3-0.6;
+        ctx.beginPath();ctx.moveTo(px,py);
+        ctx.lineTo(px+Math.cos(ra2)*30,py+Math.abs(Math.sin(ra2))*30);ctx.stroke();
+      }
+      // Molécules CO2 entrantes (animées vers les feuilles)
+      if(p.co2>10){
+        ctx.fillStyle='rgba(150,150,150,'+(p.co2/120)+')';ctx.font='bold 11px Fira Code';
+        for(var ci=0;ci<Math.floor(p.co2/20);ci++){
+          var phase=(t*30+ci*80)%200;
+          ctx.fillText('CO₂',60+phase,80+ci*30);
+        }
+      }
+      // Molécules H2O remontant les racines
+      if(p.eau>10){
+        ctx.fillStyle='rgba(96,165,250,'+(p.eau/120)+')';
+        for(var wi=0;wi<Math.floor(p.eau/15);wi++){
+          var wph=(t*20+wi*30)%50;
+          ctx.beginPath();ctx.arc(px-25+wi*8,py+30-wph,3,0,Math.PI*2);ctx.fill();
+        }
+      }
+      // Molécules O2 sortantes (produit de la photosynthèse)
+      if(vigueur>0.3){
+        ctx.fillStyle='rgba(34,197,94,'+vigueur+')';ctx.font='bold 11px Fira Code';
+        for(var oi=0;oi<Math.floor(vigueur*5);oi++){
+          var oph=(t*25+oi*60)%150;
+          ctx.fillText('O₂',px+30+oph,py-plantH/2-oph*0.5);
+        }
+      }
+      // Équation
+      ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 13px Fira Code';ctx.textAlign='left';
+      ctx.fillText('6 CO₂ + 6 H₂O ──[lumière]──▶ C₆H₁₂O₆ + 6 O₂',16,H-20);
+      var croissance=Math.round(vigueur*100);
+      setVal("<span>☀️ "+p.lumiere+"%</span><span>🌫️ CO₂ "+p.co2+"%</span><span>💧 "+p.eau+"%</span><span>🌱 Croissance: "+croissance+"%</span><span>"+(croissance>70?'✅ Photosynthèse optimale':croissance>30?'🟡 Photosynthèse partielle':'❌ Photosynthèse insuffisante')+"</span>");
+      _simUpdateControls();
+    };
+
+  } else if(lv.id==="lv6"){
+    window._sim.params={shape:'cube',size:4};
+    window._sim.defaults={shape:'cube',size:4};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<button onclick=\"window._sim.params.shape='cube'\" style='background:"+(p.shape==='cube'?'#142554':'#F0F4FF')+";color:"+(p.shape==='cube'?'#FFC93C':'#142554')+";border:none;border-radius:10px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer'>Cube</button>"
+        +"<button onclick=\"window._sim.params.shape='sphere'\" style='background:"+(p.shape==='sphere'?'#142554':'#F0F4FF')+";color:"+(p.shape==='sphere'?'#FFC93C':'#142554')+";border:none;border-radius:10px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer'>Sphère</button>"
+        +"<button onclick=\"window._sim.params.shape='cylinder'\" style='background:"+(p.shape==='cylinder'?'#142554':'#F0F4FF')+";color:"+(p.shape==='cylinder'?'#FFC93C':'#142554')+";border:none;border-radius:10px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer'>Cylindre</button>"
+        +"<button onclick=\"window._sim.params.shape='cone'\" style='background:"+(p.shape==='cone'?'#142554':'#F0F4FF')+";color:"+(p.shape==='cone'?'#FFC93C':'#142554')+";border:none;border-radius:10px;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer'>Cône</button>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Taille: <input type='range' min='1' max='8' step='0.5' value='"+p.size+"' oninput='window._sim.params.size=+this.value' style='width:90px'><span>"+p.size+"</span></label>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params;var t=window._sim.t;
+      ctx.clearRect(0,0,W,H);
+      var cx=W/2,cy=H/2-20,s=p.size*25;
+      var rot=t*0.5;
+      ctx.save();ctx.translate(cx,cy);
+      if(p.shape==='cube'){
+        var c=Math.cos(rot),sn=Math.sin(rot);
+        var pts=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]];
+        pts=pts.map(function(v){
+          var x2=v[0]*c-v[2]*sn,z2=v[0]*sn+v[2]*c;
+          return[(x2)*s,(v[1]*Math.cos(0.4)-z2*Math.sin(0.4))*s];
+        });
+        var faces=[[0,1,2,3,'rgba(8,145,178,0.6)'],[4,5,6,7,'rgba(8,145,178,0.3)'],[0,1,5,4,'rgba(59,130,246,0.5)'],[2,3,7,6,'rgba(59,130,246,0.3)'],[0,3,7,4,'rgba(124,58,237,0.4)'],[1,2,6,5,'rgba(124,58,237,0.25)']];
+        faces.forEach(function(f){
+          ctx.beginPath();ctx.moveTo(pts[f[0]][0],pts[f[0]][1]);
+          for(var fi=1;fi<4;fi++)ctx.lineTo(pts[f[fi]][0],pts[f[fi]][1]);
+          ctx.closePath();ctx.fillStyle=f[4];ctx.fill();ctx.strokeStyle='rgba(255,255,255,.4)';ctx.lineWidth=1.5;ctx.stroke();
+        });
+        var vol=Math.pow(p.size*2,3);var surf=6*Math.pow(p.size*2,2);
+        ctx.restore();
+        ctx.fillStyle='#fff';ctx.font='bold 14px Montserrat';ctx.textAlign='center';
+        ctx.fillText('a = '+(p.size*2)+' cm',cx,cy+s+40);
+        setVal("<span>📐 a="+(p.size*2)+"cm</span><span>📦 V=a³="+vol.toFixed(1)+"cm³</span><span>🔲 S=6a²="+surf.toFixed(1)+"cm²</span>");
+      } else if(p.shape==='sphere'){
+        var r=s;
+        // Sphere with gradient
+        var grad=ctx.createRadialGradient(-r*0.3,-r*0.3,r*0.1,0,0,r);
+        grad.addColorStop(0,'rgba(59,130,246,0.8)');grad.addColorStop(0.7,'rgba(124,58,237,0.5)');grad.addColorStop(1,'rgba(20,37,84,0.6)');
+        ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.fillStyle=grad;ctx.fill();ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1.5;ctx.stroke();
+        // Equator line rotating
+        ctx.beginPath();ctx.ellipse(0,0,r,r*0.15,rot,0,Math.PI*2);ctx.strokeStyle='rgba(255,201,60,.4)';ctx.lineWidth=1;ctx.stroke();
+        // Meridian
+        ctx.beginPath();ctx.ellipse(0,0,r*0.15,r,0,0,Math.PI*2);ctx.stroke();
+        ctx.restore();
+        var vol2=(4/3)*Math.PI*Math.pow(p.size,3);var surf2=4*Math.PI*Math.pow(p.size,2);
+        ctx.fillStyle='#fff';ctx.font='bold 14px Montserrat';ctx.textAlign='center';
+        ctx.fillText('r = '+p.size+' cm',cx,cy+r+35);
+        setVal("<span>📐 r="+p.size+"cm</span><span>📦 V=4/3πr³="+vol2.toFixed(1)+"cm³</span><span>🔲 S=4πr²="+surf2.toFixed(1)+"cm²</span>");
+      } else if(p.shape==='cylinder'){
+        var r=s*0.6,h=s*1.4;
+        // Body
+        ctx.beginPath();ctx.moveTo(-r,-h/2);ctx.lineTo(-r,h/2);ctx.lineTo(r,h/2);ctx.lineTo(r,-h/2);ctx.closePath();
+        ctx.fillStyle='rgba(8,145,178,0.45)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1.5;ctx.stroke();
+        // Top ellipse
+        ctx.beginPath();ctx.ellipse(0,-h/2,r,r*0.25,0,0,Math.PI*2);ctx.fillStyle='rgba(59,130,246,0.6)';ctx.fill();ctx.stroke();
+        // Bottom ellipse
+        ctx.beginPath();ctx.ellipse(0,h/2,r,r*0.25,0,0,Math.PI);ctx.strokeStyle='rgba(255,255,255,.2)';ctx.stroke();
+        ctx.restore();
+        var rr=p.size*0.6,hh=p.size*1.4;
+        var vol3=Math.PI*rr*rr*hh;var surf3=2*Math.PI*rr*(rr+hh);
+        ctx.fillStyle='#fff';ctx.font='bold 14px Montserrat';ctx.textAlign='center';
+        ctx.fillText('r='+rr.toFixed(1)+' h='+hh.toFixed(1)+' cm',cx,cy+h/2+40);
+        setVal("<span>📐 r="+rr.toFixed(1)+"cm h="+hh.toFixed(1)+"cm</span><span>📦 V=πr²h="+vol3.toFixed(1)+"cm³</span><span>🔲 S="+surf3.toFixed(1)+"cm²</span>");
+      } else {
+        // Cone
+        var r=s*0.7,h=s*1.5;
+        ctx.beginPath();ctx.moveTo(0,-h/2);ctx.lineTo(-r,h/2);ctx.lineTo(r,h/2);ctx.closePath();
+        ctx.fillStyle='rgba(217,119,6,0.45)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.3)';ctx.lineWidth=1.5;ctx.stroke();
+        ctx.beginPath();ctx.ellipse(0,h/2,r,r*0.2,0,0,Math.PI*2);ctx.fillStyle='rgba(217,119,6,0.3)';ctx.fill();ctx.stroke();
+        ctx.restore();
+        var rr=p.size*0.7,hh=p.size*1.5;
+        var vol4=(1/3)*Math.PI*rr*rr*hh;
+        ctx.fillStyle='#fff';ctx.font='bold 14px Montserrat';ctx.textAlign='center';
+        ctx.fillText('r='+rr.toFixed(1)+' h='+hh.toFixed(1)+' cm',cx,cy+h/2+40);
+        setVal("<span>📐 r="+rr.toFixed(1)+"cm h="+hh.toFixed(1)+"cm</span><span>📦 V=⅓πr²h="+vol4.toFixed(1)+"cm³</span>");
+      }
+      _simUpdateControls();
+    };
+
+  // ── GÉO : Carte du Cameroun (lv7) ──
+  } else if(lv.id==="lv7"){
+    window._sim.params={highlight:-1};
+    window._sim.defaults={highlight:-1};
+    var regions=[
+      {nom:"Adamaoua",cx:380,cy:130,chef:"Ngaoundéré",col:"#D97706"},
+      {nom:"Centre",cx:330,cy:200,chef:"Yaoundé",col:"#059669"},
+      {nom:"Est",cx:440,cy:210,chef:"Bertoua",col:"#6C56A6"},
+      {nom:"Extrême-Nord",cx:370,cy:40,chef:"Maroua",col:"#AE5353"},
+      {nom:"Littoral",cx:260,cy:220,chef:"Douala",col:"#0891B2"},
+      {nom:"Nord",cx:370,cy:85,chef:"Garoua",col:"#1E3A8A"},
+      {nom:"Nord-Ouest",cx:270,cy:160,chef:"Bamenda",col:"#BE185D"},
+      {nom:"Ouest",cx:290,cy:185,chef:"Bafoussam",col:"#D97706"},
+      {nom:"Sud",cx:330,cy:260,chef:"Ebolowa",col:"#059669"},
+      {nom:"Sud-Ouest",cx:230,cy:190,chef:"Buea",col:"#6C56A6"},
+    ];
+    window._sim.controlsDef=function(){
+      return "<span style='font-size:11px;font-weight:700;color:#142554'>Clique sur une région pour l'explorer</span>"
+        +"<button onclick='window._sim.params.highlight=-1' style='background:#F0F4FF;color:#142554;border:none;border-radius:10px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>Tout afficher</button>";
+    };
+    _simUpdateControls();
+    // Click on canvas to select region
+    var cnvEl=document.getElementById('laboCnv');
+    if(cnvEl)cnvEl.onclick=function(ev){
+      var rect=cnvEl.getBoundingClientRect();
+      var mx=(ev.clientX-rect.left)*(W/rect.width);
+      var my=(ev.clientY-rect.top)*(H/rect.height);
+      var closest=-1,minD=999;
+      regions.forEach(function(rg,i){
+        var d=Math.hypot(mx-rg.cx,my-rg.cy);
+        if(d<minD){minD=d;closest=i;}
+      });
+      if(minD<50)window._sim.params.highlight=closest;
+    };
+    window._sim._draw=function(){
+      var p=window._sim.params;var t=window._sim.t;
+      ctx.clearRect(0,0,W,H);
+      // Title
+      ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='bold 13px Montserrat';ctx.textAlign='left';
+      ctx.fillText('🗺️ CAMEROUN — 10 Régions',20,25);
+      // Country outline (simplified polygon)
+      ctx.beginPath();ctx.moveTo(350,15);ctx.lineTo(400,30);ctx.lineTo(420,70);ctx.lineTo(410,100);
+      ctx.lineTo(460,160);ctx.lineTo(490,230);ctx.lineTo(420,290);ctx.lineTo(340,310);
+      ctx.lineTo(280,290);ctx.lineTo(240,260);ctx.lineTo(210,230);ctx.lineTo(220,180);
+      ctx.lineTo(240,140);ctx.lineTo(280,120);ctx.lineTo(320,80);ctx.lineTo(340,40);ctx.closePath();
+      ctx.fillStyle='rgba(255,255,255,.05)';ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.2)';ctx.lineWidth=2;ctx.stroke();
+      // Regions
+      regions.forEach(function(rg,i){
+        var active=p.highlight===i||p.highlight===-1;
+        var pulse=active?Math.sin(t*2+i)*3:0;
+        var r=18+pulse;
+        ctx.beginPath();ctx.arc(rg.cx,rg.cy,r,0,Math.PI*2);
+        ctx.fillStyle=active?rg.col+'cc':'rgba(100,100,100,.3)';ctx.fill();
+        ctx.strokeStyle=active?'#fff':'rgba(255,255,255,.1)';ctx.lineWidth=active?2:1;ctx.stroke();
+        ctx.fillStyle=active?'#fff':'rgba(255,255,255,.3)';ctx.font=(p.highlight===i?'bold ':'')+' 9px Montserrat';ctx.textAlign='center';
+        ctx.fillText(rg.nom,rg.cx,rg.cy+r+14);
+        if(p.highlight===i){
+          ctx.fillStyle='#FFC93C';ctx.font='bold 10px Fira Code';
+          ctx.fillText('Chef-lieu: '+rg.chef,rg.cx,rg.cy+r+28);
+        }
+      });
+      // Mt Cameroun
+      ctx.fillStyle='#FFC93C';ctx.font='8px Montserrat';ctx.textAlign='left';
+      ctx.fillText('▲ Mt Cameroun 4095m',200,205);
+      // Info panel
+      if(p.highlight>=0){
+        var sel=regions[p.highlight];
+        setVal("<span style='color:"+sel.col+"'>📍 "+sel.nom+"</span><span>🏛 Chef-lieu: "+sel.chef+"</span>");
+      } else {
+        setVal("<span>🗺️ 10 régions</span><span>🏔 Point culminant: Mt Cameroun 4095m</span><span>👆 Clique pour explorer</span>");
+      }
+    };
+
+  // ── SIMULATION GÉNÉRIQUE (autres labos) ──
+  
+  // â”€â”€ lv8 : Décolonisation en Afrique â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv8"){
+    var events=[
+      {y:1956,pays:"Maroc / Tunisie",col:"France",c:"#EAB308"},
+      {y:1957,pays:"Ghana",col:"Grande-Bretagne",c:"#4B9C69"},
+      {y:1958,pays:"Guinée",col:"France",c:"#EAB308"},
+      {y:1960,pays:"Cameroun, Sénégal, Mali, Côte d'Ivoire…",col:"France",c:"#EAB308"},
+      {y:1960,pays:"Nigeria, Kenya, Somalie",col:"Grande-Bretagne",c:"#4B9C69"},
+      {y:1962,pays:"Algérie, Rwanda, Burundi",col:"France / Belgique",c:"#EAB308"},
+      {y:1964,pays:"Malawi, Zambie",col:"Grande-Bretagne",c:"#4B9C69"},
+      {y:1965,pays:"Gambie, Rhodésie (UDI)",col:"Grande-Bretagne",c:"#4B9C69"},
+      {y:1968,pays:"Guinée équatoriale, Swaziland",col:"Espagne / GB",c:"#C07D4F"},
+      {y:1975,pays:"Mozambique, Angola, Comores",col:"Portugal",c:"#C46F6F"},
+      {y:1980,pays:"Zimbabwe",col:"Grande-Bretagne",c:"#4B9C69"},
+      {y:1990,pays:"Namibie",col:"Afrique du Sud / ONU",c:"#7C68B8"},
+      {y:1993,pays:"Érythrée",col:"Éthiopie",c:"#C37199"},
+    ];
+    var selected=0;
+    window._sim.params={sel:0};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:8px'>Événement: <input type='range' min='0' max='"+(events.length-1)+"' value='"+p.sel+"' oninput='window._sim.params.sel=+this.value' style='width:130px'></label>"
+        +"<span style='font-size:11px;color:#142554'>"+events[p.sel].y+" — "+events[p.sel].pays+"</span>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var t=window._sim.t; var sel=window._sim.params.sel;
+      ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#0F172A'; ctx.fillRect(0,0,W,H);
+      // Timeline axis
+      var x0=40, x1=W-40, y0=H-60, barH=28;
+      var yrs=[1956,1960,1965,1970,1975,1980,1985,1990,1993];
+      ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y0); ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px Montserrat'; ctx.textAlign='center';
+      yrs.forEach(function(yr){
+        var x=x0+(yr-1956)/(1993-1956)*(x1-x0);
+        ctx.beginPath(); ctx.moveTo(x,y0); ctx.lineTo(x,y0+6); ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.stroke();
+        ctx.fillText(yr,x,y0+18);
+      });
+      // Bars
+      var maxCount=0; var yrCount={};
+      events.forEach(function(e){ yrCount[e.y]=(yrCount[e.y]||0)+1; if(yrCount[e.y]>maxCount) maxCount=yrCount[e.y]; });
+      var yrSeen={};
+      events.forEach(function(ev,i){
+        var x=x0+(ev.y-1956)/(1993-1956)*(x1-x0);
+        var slot=yrSeen[ev.y]||0; yrSeen[ev.y]=slot+1;
+        var barY=y0-20-slot*14;
+        var progress=Math.min(1,(t-i*0.18)*3);
+        if(progress<=0) return;
+        var bw=Math.max(4,14*progress);
+        ctx.fillStyle=ev.c+(i===sel?'FF':'88');
+        ctx.beginPath();
+        if(typeof ctx.roundRect==='function') ctx.roundRect(x-bw/2,barY-12,bw,12,3);
+        else { ctx.rect(x-bw/2,barY-12,bw,12); }
+        ctx.fill();
+        if(i===sel){
+          ctx.beginPath(); ctx.moveTo(x,barY); ctx.lineTo(x,y0-2); ctx.strokeStyle=ev.c; ctx.lineWidth=1.5; ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
+        }
+      });
+      // Info box for selected
+      var ev=events[sel];
+      ctx.fillStyle='rgba(255,255,255,.07)'; if(typeof ctx.roundRect==='function') ctx.roundRect(12,10,W-24,72,12); else ctx.rect(12,10,W-24,72); ctx.fill();
+      ctx.fillStyle=ev.c; ctx.font='bold 16px Montserrat'; ctx.textAlign='left';
+      ctx.fillText(ev.y+' — Indépendance',24,36);
+      ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='13px Georgia';
+      ctx.fillText(ev.pays,24,56);
+      ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='11px Georgia';
+      ctx.fillText('Ancienne puissance : '+ev.col,24,74);
+      setVal('<span>📅 '+ev.y+'</span><span>🌍 '+ev.pays+'</span><span>ðŸ´ '+ev.col+'</span>');
+      _simUpdateControls();
+    };
+
+  // â”€â”€ lv9 : Optique & Propagation de la Lumière â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv9"){
+    var P=window._sim.params={angle:45,n1:1.0,n2:1.5};
+    window._sim.defaults={angle:45,n1:1.0,n2:1.5};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      var sinT2=p.n1/p.n2*Math.sin(p.angle*Math.PI/180);
+      var refr=sinT2<=1?'θr = '+(Math.asin(sinT2)*180/Math.PI).toFixed(1)+'°':'Réflexion totale';
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>θ incident: <input type='range' min='5' max='89' value='"+p.angle+"' oninput='window._sim.params.angle=+this.value' style='width:100px'><span>"+p.angle+"°</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>n2 (milieu): <input type='range' min='1.0' max='2.5' step='0.05' value='"+p.n2+"' oninput='window._sim.params.n2=+this.value' style='width:100px'><span>"+p.n2+"</span></label>"
+        +"<span style='font-size:11px;color:#6C56A6;font-weight:700'>"+refr+"</span>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params; ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      var cx=W/2, iy=H/2;
+      // Interface
+      ctx.fillStyle='rgba(96,165,250,.12)'; ctx.fillRect(0,iy,W,H-iy);
+      ctx.strokeStyle='rgba(255,255,255,.25)'; ctx.lineWidth=1.5; ctx.setLineDash([8,4]);
+      ctx.beginPath(); ctx.moveTo(0,iy); ctx.lineTo(W,iy); ctx.stroke(); ctx.setLineDash([]);
+      // Normal (dashed vertical)
+      ctx.strokeStyle='rgba(255,255,255,.2)'; ctx.setLineDash([5,5]);
+      ctx.beginPath(); ctx.moveTo(cx,iy-120); ctx.lineTo(cx,iy+120); ctx.stroke(); ctx.setLineDash([]);
+      // Labels
+      ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='11px Fira Code'; ctx.textAlign='left';
+      ctx.fillText('n₁ = '+p.n1+' (air)',10,iy-12);
+      ctx.fillText('n₁‚ = '+p.n2+' (verre)',10,iy+24);
+      // Incident ray
+      var ang=p.angle*Math.PI/180;
+      var ix=cx-Math.sin(ang)*150, iy1=iy-Math.cos(ang)*150;
+      ctx.strokeStyle='#FFC93C'; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(ix,iy1); ctx.lineTo(cx,iy); ctx.stroke();
+      // Arrow head
+      var dx=cx-ix, dy=iy-iy1, len=Math.sqrt(dx*dx+dy*dy);
+      var ux=dx/len, uy=dy/len;
+      ctx.fillStyle='#FFC93C';
+      ctx.beginPath(); ctx.moveTo(cx,iy); ctx.lineTo(cx-ux*12-uy*6,iy-uy*12+ux*6); ctx.lineTo(cx-ux*12+uy*6,iy-uy*12-ux*6); ctx.closePath(); ctx.fill();
+      // Reflected ray
+      ctx.strokeStyle='#87A9D3'; ctx.lineWidth=1.5;
+      var rx=cx+Math.sin(ang)*120, ry=iy-Math.cos(ang)*120;
+      ctx.beginPath(); ctx.moveTo(cx,iy); ctx.lineTo(rx,ry); ctx.stroke();
+      // Refracted ray
+      var sinT2=p.n1/p.n2*Math.sin(ang);
+      if(sinT2<=1){
+        var t2=Math.asin(sinT2);
+        var rfx=cx+Math.sin(t2)*130, rfy=iy+Math.cos(t2)*130;
+        ctx.strokeStyle='#5CAB8E'; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.moveTo(cx,iy); ctx.lineTo(rfx,rfy); ctx.stroke();
+        // Angle arcs
+        ctx.strokeStyle='rgba(252,211,77,.4)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.arc(cx,iy,50,-(Math.PI/2+ang),-Math.PI/2); ctx.stroke();
+        ctx.fillStyle='#FFC93C'; ctx.font='11px Fira Code'; ctx.textAlign='center';
+        ctx.fillText(p.angle+'°',cx-30,iy-38);
+        ctx.strokeStyle='rgba(52,211,153,.4)';
+        ctx.beginPath(); ctx.arc(cx,iy,50,Math.PI/2,Math.PI/2+t2); ctx.stroke();
+        ctx.fillStyle='#5CAB8E';
+        ctx.fillText((t2*180/Math.PI).toFixed(1)+'°',cx+32,iy+44);
+        setVal('<span>⚡ θi='+p.angle+'°</span><span>🔵 θr='+p.angle+'°</span><span>🟢 θt='+(t2*180/Math.PI).toFixed(1)+'°</span><span>n₁sinθi=n₁‚sinθt</span>');
+      } else {
+        ctx.fillStyle='#C46F6F'; ctx.font='bold 13px Montserrat'; ctx.textAlign='center';
+        ctx.fillText('⚠️ Réflexion totale interne',W/2,iy+50);
+        setVal('<span>⚠️ Angle limite dépassé — réflexion totale</span>');
+      }
+      _simUpdateControls();
+    };
+
+  // â”€â”€ lv10 : Thermodynamique & Calorimétrie â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv10"){
+    var molecules=[];
+    for(var mi=0;mi<30;mi++) molecules.push({x:200+Math.random()*280,y:60+Math.random()*220,vx:(Math.random()-.5)*2,vy:(Math.random()-.5)*2,r:4+Math.random()*3});
+    window._sim.params={T:300,Q:0,mc:100}; window._sim.defaults={T:300,Q:0,mc:100};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>🌡️ Température (K): <input type='range' min='100' max='800' value='"+p.T+"' oninput='window._sim.params.T=+this.value' style='width:100px'><span>"+p.T+"K</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Chaleur Q (J): <input type='range' min='0' max='5000' step='100' value='"+p.Q+"' oninput='window._sim.params.Q=+this.value' style='width:100px'><span>"+p.Q+"J</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Masse×c (J/K): <input type='range' min='10' max='500' step='10' value='"+p.mc+"' oninput='window._sim.params.mc=+this.value' style='width:80px'><span>"+p.mc+"</span></label>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params; ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      var speed=Math.sqrt(p.T/300)*1.5;
+      var hue=Math.max(0,Math.min(240,240-(p.T-100)*240/700));
+      // Container
+      ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=2;
+      ctx.strokeRect(190,50,300,230);
+      ctx.fillStyle='rgba('+Math.round(255*(1-hue/240))+','+Math.round(100+hue/2)+','+Math.round(hue)+',0.05)';
+      ctx.fillRect(190,50,300,230);
+      // Molecules
+      molecules.forEach(function(m){
+        m.vx+=(Math.random()-.5)*0.05; m.vy+=(Math.random()-.5)*0.05;
+        var spd=Math.sqrt(m.vx*m.vx+m.vy*m.vy);
+        if(spd>0){m.vx=m.vx/spd*speed;m.vy=m.vy/spd*speed;}
+        m.x+=m.vx; m.y+=m.vy;
+        if(m.x<194+m.r||m.x>486-m.r) m.vx*=-1;
+        if(m.y<54+m.r||m.y>276-m.r) m.vy*=-1;
+        m.x=Math.max(194+m.r,Math.min(486-m.r,m.x));
+        m.y=Math.max(54+m.r,Math.min(276-m.r,m.y));
+        var g=ctx.createRadialGradient(m.x,m.y,0,m.x,m.y,m.r*1.5);
+        g.addColorStop(0,'hsl('+hue+',80%,70%)'); g.addColorStop(1,'hsl('+hue+',80%,20%)');
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(m.x,m.y,m.r,0,Math.PI*2); ctx.fill();
+      });
+      // Thermometer
+      var tPct=(p.T-100)/700; ctx.fillStyle='#1E293B'; ctx.fillRect(70,60,20,200);
+      ctx.fillStyle='hsl('+hue+',80%,55%)'; ctx.fillRect(72,60+(1-tPct)*196,16,tPct*196+8);
+      ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1;
+      for(var ti=0;ti<=7;ti++){var ty=60+ti*28;ctx.beginPath();ctx.moveTo(68,ty);ctx.lineTo(90,ty);ctx.stroke();ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='9px Fira Code';ctx.textAlign='right';ctx.fillText(800-ti*100,66,ty+4);}
+      ctx.fillStyle='#FFC93C'; ctx.font='bold 12px Fira Code'; ctx.textAlign='center'; ctx.fillText('T='+p.T+'K',80,275);
+      // Formula box
+      var dT=(p.Q/p.mc).toFixed(1);
+      ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(505,50,160,130);
+      ctx.fillStyle='#FFC93C'; ctx.font='bold 12px Fira Code'; ctx.textAlign='left';
+      ctx.fillText('Q = mÂ·cÂ·ΔT',515,80); ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='11px Fira Code';
+      ctx.fillText('T = '+p.T+' K',515,100);
+      ctx.fillText('Q = '+p.Q+' J',515,118);
+      ctx.fillText('ΔT = '+dT+' K',515,136);
+      ctx.fillText('T finale = '+(+p.T + +dT).toFixed(0)+' K',515,158);
+      setVal('<span>🌡️ T='+p.T+'K</span><span>Q='+p.Q+'J</span><span>ΔT='+dT+'K</span><span>Ec̄∝T</span>');
+    };
+
+  // â”€â”€ lv11 : Oxydoréduction & Combustion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv11"){
+    window._sim.params={reaction:0,step:0};
+    var reactions=[
+      {nom:'Zn + Cu²âº → Zn²âº + Cu',oxyd:'Zn → Zn²âº + 2eâ»',red:'Cu²âº + 2eâ» → Cu',ne:2,col1:'#78716C',col2:'#0EA5E9',prod:'#C07D4F'},
+      {nom:'Fe + 2HCl → FeCl₁‚ + H₁‚',oxyd:'Fe → Fe²âº + 2eâ»',red:'2Hâº + 2eâ» → H₁‚',ne:2,col1:'#6B7280',col2:'#C46F6F',prod:'#A3E635'},
+      {nom:'CH₁„ + 2O₁‚ → CO₁‚ + 2H₁‚O',oxyd:'Combustion',red:'C: -4 → +4',ne:8,col1:'#87A9D3',col2:'#C07D4F',prod:'#94A3B8'},
+    ];
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<button onclick='window._sim.params.reaction=(window._sim.params.reaction+1)%3;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>⇄ Changer réaction</button>"
+        +"<span style='font-size:11px;color:#142554;font-weight:700;margin-left:8px'>"+reactions[p.reaction].nom+"</span>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params; var t=window._sim.t;
+      var rx=reactions[p.reaction];
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      // Two half-cells
+      [
+        {x:120,label:'Oxydation',eq:rx.oxyd,col:rx.col1},
+        {x:460,label:'Réduction',eq:rx.red,col:rx.col2}
+      ].forEach(function(cell){
+        ctx.strokeStyle=cell.col; ctx.lineWidth=2.5;
+        ctx.strokeRect(cell.x-80,60,160,180);
+        ctx.fillStyle=cell.col+'22'; ctx.fillRect(cell.x-80,60,160,180);
+        ctx.fillStyle=cell.col; ctx.font='bold 13px Montserrat'; ctx.textAlign='center';
+        ctx.fillText(cell.label,cell.x,54);
+        ctx.fillStyle='rgba(255,255,255,.75)'; ctx.font='11px Georgia';
+        var words=cell.eq.split(' ');
+        ctx.fillText(cell.eq,cell.x,H/2-10);
+        // Electrode
+        ctx.fillStyle=cell.col; ctx.fillRect(cell.x-8,90,16,80);
+        // Bubbles (product forming)
+        for(var bi=0;bi<5;bi++){
+          var phase=(t*0.6+bi*1.2)%1;
+          var bx=cell.x-20+bi*10;
+          var by=150-phase*60;
+          ctx.fillStyle=rx.prod+'88'; ctx.beginPath(); ctx.arc(bx,by,3+Math.sin(t+bi)*1.5,0,Math.PI*2); ctx.fill();
+        }
+      });
+      // Bridge
+      ctx.fillStyle='#FFC93C'; ctx.fillRect(200,125,180,20); ctx.fillStyle='#0F172A'; ctx.font='10px Fira Code'; ctx.textAlign='center'; ctx.fillText('Pont salin',290,139);
+      // Electrons flowing
+      var ne=Math.min(rx.ne,8);
+      for(var ei=0;ei<ne;ei++){
+        var ePhase=(t*0.5+ei/ne)%1;
+        var ex=120+80+ePhase*(460-120-80*2);
+        var ey=60;
+        ctx.fillStyle='#87A9D3'; ctx.beginPath(); ctx.arc(ex,ey,4,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#87A9D3'; ctx.font='bold 9px Fira Code'; ctx.textAlign='center'; ctx.fillText('eâ»',ex,ey-6);
+      }
+      // Wire top
+      ctx.strokeStyle='#87A9D3'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(120,60); ctx.lineTo(460,60); ctx.stroke();
+      // Formula
+      ctx.fillStyle='rgba(255,255,255,.07)'; ctx.fillRect(10,H-70,W-20,55);
+      ctx.fillStyle='#FFC93C'; ctx.font='bold 13px Fira Code'; ctx.textAlign='center';
+      ctx.fillText(rx.nom,W/2,H-48);
+      ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='11px Georgia';
+      ctx.fillText(rx.oxyd+'   |   '+rx.red,W/2,H-28);
+      setVal('<span>⚡ n(eâ»)='+rx.ne+'</span><span>Ox: '+rx.oxyd+'</span><span>Réd: '+rx.red+'</span>');
+    };
+
+  // â”€â”€ lv12 : Digestion Humaine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv12"){
+    var organs=[
+      {n:'Bouche',x:340,y:40,r:22,c:'#C07D4F',info:'Mastication + amylase salivaire. Amidon → Maltose.'},
+      {n:'Œsophage',x:340,y:90,r:10,c:'#87A9D3',info:'Transit par péristaltisme. ~10 secondes.'},
+      {n:'Estomac',x:320,y:155,r:40,c:'#C46F6F',info:'HCl + pepsine. pH=1,5–3. Protéines → peptides. ~2-4h.'},
+      {n:'Intestin grêle',x:290,y:260,r:25,c:'#A3E635',info:'Bile + sucs pancréatiques. Absorption : 90% nutriments. ~6h.'},
+      {n:'Gros intestin',x:400,y:280,r:20,c:'#F59E0B',info:'Absorption eau. Formation des fèces. Microbiote. ~24-48h.'},
+      {n:'Anus',x:450,y:330,r:12,c:'#94A3B8',info:'Évacuation des déchets.'},
+    ];
+    window._sim.params={step:0}; window._sim.defaults={step:0};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params; var o=organs[p.step%organs.length];
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Étape: <input type='range' min='0' max='"+(organs.length-1)+"' value='"+p.step+"' oninput='window._sim.params.step=+this.value' style='width:120px'></label>"
+        +"<span style='font-size:10px;color:#475882'>"+o.n+": "+o.info+"</span>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params; var t=window._sim.t; var sel=p.step%organs.length;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      // Draw connections
+      ctx.strokeStyle='rgba(255,255,255,.15)'; ctx.lineWidth=3;
+      for(var oi=0;oi<organs.length-1;oi++){
+        ctx.beginPath(); ctx.moveTo(organs[oi].x,organs[oi].y); ctx.lineTo(organs[oi+1].x,organs[oi+1].y); ctx.stroke();
+      }
+      // Draw organs
+      organs.forEach(function(o,i){
+        var pulse=i===sel?(1+Math.sin(t*4)*0.12):1;
+        ctx.fillStyle=o.c+(i===sel?'FF':'55');
+        ctx.beginPath(); ctx.arc(o.x,o.y,o.r*pulse,0,Math.PI*2); ctx.fill();
+        if(i===sel){ ctx.strokeStyle=o.c; ctx.lineWidth=2.5; ctx.beginPath(); ctx.arc(o.x,o.y,(o.r+6)*pulse,0,Math.PI*2); ctx.stroke(); }
+        ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='bold 10px Montserrat'; ctx.textAlign='center';
+        ctx.fillText(o.n,o.x+(o.x<400?-60:60),o.y+4);
+      });
+      // Food bolus animation
+      var prog=(t*0.15)%1;
+      var segIdx=Math.floor(prog*(organs.length-1));
+      var segFrac=prog*(organs.length-1)-segIdx;
+      if(segIdx<organs.length-1){
+        var sx=organs[segIdx].x+(organs[segIdx+1].x-organs[segIdx].x)*segFrac;
+        var sy=organs[segIdx].y+(organs[segIdx+1].y-organs[segIdx].y)*segFrac;
+        ctx.fillStyle='#FFC93C'; ctx.beginPath(); ctx.arc(sx,sy,7+Math.sin(t*5)*2,0,Math.PI*2); ctx.fill();
+      }
+      // Info panel right
+      var sel2=p.step%organs.length;
+      ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(520,20,150,H-40);
+      ctx.fillStyle=organs[sel2].c; ctx.font='bold 11px Montserrat'; ctx.textAlign='center';
+      ctx.fillText(organs[sel2].n,595,45);
+      ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='9.5px Georgia'; ctx.textAlign='left';
+      var words=organs[sel2].info.split(' '); var line=''; var lineY=65;
+      words.forEach(function(w){if((line+' '+w).length>20){ctx.fillText(line,527,lineY);line=w;lineY+=14;}else line+=(line?'  ':'')+w;});
+      ctx.fillText(line,527,lineY);
+      setVal('<span>'+organs[sel2].n+'</span>');
+      _simUpdateControls();
+    };
+
+  // â”€â”€ lv13 : Circulation Sanguine & Respiration â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv13"){
+    window._sim.params={fc:60,spo2:98}; window._sim.defaults={fc:60,spo2:98};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>💓 FC (bpm): <input type='range' min='40' max='180' value='"+p.fc+"' oninput='window._sim.params.fc=+this.value' style='width:90px'><span>"+p.fc+"</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>🫁 SpO₁‚ (%): <input type='range' min='80' max='100' value='"+p.spo2+"' oninput='window._sim.params.spo2=+this.value' style='width:90px'><span>"+p.spo2+"%</span></label>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params; var t=window._sim.t;
+      var beat=t*(p.fc/60);
+      var pulse=(Math.sin(beat*Math.PI*2)*0.5+0.5);
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      var cx=280,cy=170;
+      // Heart shape
+      var hs=1+pulse*0.08;
+      ctx.save(); ctx.translate(cx,cy); ctx.scale(hs,hs);
+      ctx.beginPath();
+      ctx.moveTo(0,20);
+      ctx.bezierCurveTo(-60,-20,-80,-80,-10,-80);
+      ctx.bezierCurveTo(30,-80,40,-50,0,20);
+      ctx.bezierCurveTo(-40,-50,-30,-80,10,-80);
+      ctx.bezierCurveTo(80,-80,60,-20,0,20);
+      ctx.fillStyle='rgba(239,68,68,'+(0.6+pulse*0.4)+')'; ctx.fill();
+      // Chambers
+      ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(0,-40); ctx.lineTo(0,0); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-25,-60); ctx.lineTo(25,-60); ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='8px Fira Code'; ctx.textAlign='center';
+      ctx.fillText('VD',15,-20); ctx.fillText('VG',-15,-20);
+      ctx.fillText('OD',15,-70); ctx.fillText('OG',-15,-70);
+      ctx.restore();
+      // Blood vessels - arteries (red) and veins (blue)
+      var vessels=[
+        {x1:cx,y1:cy-80,x2:cx,y2:40,col:'#C46F6F',label:'Aorte',oxy:true},
+        {x1:cx,y1:cy+10,x2:cx,y2:310,col:'#6A8DC7',label:'Veine cave',oxy:false},
+        {x1:cx-30,y1:cy-40,x2:90,y2:cy-40,col:'#6A8DC7',label:'Art. pulm.',oxy:false},
+        {x1:cx+30,y1:cy-40,x2:470,y2:cy-40,col:'#C46F6F',label:'V. pulm.',oxy:true},
+      ];
+      vessels.forEach(function(v){
+        ctx.strokeStyle=v.col; ctx.lineWidth=4;
+        ctx.beginPath(); ctx.moveTo(v.x1,v.y1); ctx.lineTo(v.x2,v.y2); ctx.stroke();
+        ctx.fillStyle=v.col; ctx.font='9px Fira Code'; ctx.textAlign='center';
+        ctx.fillText(v.label,(v.x1+v.x2)/2,(v.y1+v.y2)/2-6);
+      });
+      // Lungs
+      [[90,cy-40,50,'#6C56A6'],[470,cy-40,40,'#6C56A6']].forEach(function(l){
+        ctx.fillStyle=l[3]+'44'; ctx.strokeStyle=l[3]; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.ellipse(l[0],l[1],l[2],l[2]*1.4,0,0,Math.PI*2);
+        ctx.fill(); ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='10px Fira Code'; ctx.textAlign='center';
+        ctx.fillText('🫁',l[0],l[1]+4);
+      });
+      // Animated blood cells
+      var bPhase=(beat*0.15)%1;
+      [[cx,cy-80,cx,40,true],[cx,cy+10,cx,290,false],[cx-30,cy-40,90,cy-40,false],[cx+30,cy-40,470,cy-40,true]].forEach(function(v,vi){
+        var frac=(bPhase+vi*0.25)%1;
+        var bx=v[0]+(v[2]-v[0])*frac, by=v[1]+(v[3]-v[1])*frac;
+        ctx.fillStyle=v[4]?'#C46F6F':'#6A8DC7';
+        ctx.beginPath(); ctx.arc(bx,by,5,0,Math.PI*2); ctx.fill();
+      });
+      // ECG
+      ctx.strokeStyle='#A3E635'; ctx.lineWidth=1.5;
+      ctx.beginPath();
+      for(var xi=0;xi<W-10;xi++){
+        var xt=xi/60-t*(p.fc/60);
+        var ecg=Math.sin(xt*Math.PI*2)*0.1+
+          (Math.abs(xt%1-0.5)<0.05?Math.exp(-Math.pow((xt%1-0.5)*40,2))*2:0);
+        var ey2=H-30-ecg*30;
+        if(xi===0)ctx.moveTo(10+xi,ey2); else ctx.lineTo(10+xi,ey2);
+      }
+      ctx.stroke();
+      setVal('<span>💓 '+p.fc+' bpm</span><span>SpO₁‚: '+p.spo2+'%</span><span>Q=VES×FC</span>');
+    };
+
+  // â”€â”€ lv14 : Génétique & Hérédité â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv14"){
+    window._sim.params={phase:0,ploidy:2}; window._sim.defaults={phase:0,ploidy:2};
+    var phases=['Prophase I','Métaphase I','Anaphase I','Télophase I','Méiose II — Cellules haploïdes'];
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:8px'>Phase: <input type='range' min='0' max='4' value='"+p.phase+"' oninput='window._sim.params.phase=+this.value' style='width:140px'><span>"+phases[p.phase]+"</span></label>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params; var t=window._sim.t; var ph=p.phase;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      function drawCell(cx,cy,r,label,chromosomes){
+        ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='10px Montserrat'; ctx.textAlign='center';
+        ctx.fillText(label,cx,cy+r+16);
+        chromosomes.forEach(function(c){
+          ctx.fillStyle=c.col; ctx.fillRect(cx+c.dx-4,cy+c.dy-15,8,30);
+          if(c.pair){ ctx.fillStyle=c.col+'88'; ctx.fillRect(cx+c.dx+4,cy+c.dy-14,8,28); }
+        });
+      }
+      var chroms=[
+        {dx:-30,dy:-10,col:'#C46F6F',pair:ph<2},{dx:-10,dy:-10,col:'#C46F6F',pair:ph<2},
+        {dx:10,dy:-10,col:'#6A8DC7',pair:ph<2},{dx:30,dy:-10,col:'#6A8DC7',pair:ph<2},
+      ];
+      if(ph<4){
+        drawCell(W/2,H/2-20,100,'2n=4 (diploïde)',chroms);
+        if(ph===1){
+          ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1; ctx.setLineDash([4,4]);
+          ctx.beginPath(); ctx.moveTo(W/2,H/2-120); ctx.lineTo(W/2,H/2+80); ctx.stroke(); ctx.setLineDash([]);
+        }
+        if(ph===2){
+          var sep=(t%3)/3*60;
+          ctx.fillStyle='#C46F6F'; ctx.fillRect(W/2-40-sep,H/2-25,8,50);
+          ctx.fillStyle='#6A8DC7'; ctx.fillRect(W/2+32+sep,H/2-25,8,50);
+        }
+        if(ph===3){
+          drawCell(W/2-150,H/2,60,'n=2',[ {dx:-10,dy:0,col:'#C46F6F',pair:false},{dx:10,dy:0,col:'#6A8DC7',pair:false}]);
+          drawCell(W/2+150,H/2,60,'n=2',[ {dx:-10,dy:0,col:'#C46F6F',pair:false},{dx:10,dy:0,col:'#6A8DC7',pair:false}]);
+        }
+      } else {
+        for(var ci=0;ci<4;ci++){
+          var ccx=110+ci*(W-160)/3; var ccy=H/2;
+          ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5;
+          ctx.beginPath(); ctx.arc(ccx,ccy,55,0,Math.PI*2); ctx.stroke();
+          var col=ci%2===0?'#C46F6F':'#6A8DC7';
+          ctx.fillStyle=col; ctx.fillRect(ccx-4,ccy-20,8,40);
+          ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='10px Fira Code'; ctx.textAlign='center';
+          ctx.fillText('n=2',ccx,ccy+72);
+        }
+        ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='12px Georgia'; ctx.textAlign='center';
+        ctx.fillText('4 cellules haploïdes — gamètes',W/2,H-20);
+      }
+      ctx.fillStyle='#FFC93C'; ctx.font='bold 13px Montserrat'; ctx.textAlign='center';
+      ctx.fillText(phases[ph],W/2,25);
+      setVal('<span>Phase: '+phases[ph]+'</span>');
+      _simUpdateControls();
+    };
+
+  // â”€â”€ lv15 : Probabilités & Statistiques â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv15"){
+    var freq=new Array(13).fill(0); var total=0;
+    window._sim.params={ndice:2,running:true}; window._sim.defaults={ndice:2,running:true};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Dés: <input type='range' min='1' max='4' value='"+p.ndice+"' oninput='window._sim.params.ndice=+this.value;freq=new Array(13).fill(0);total=0' style='width:80px'><span>"+p.ndice+"</span></label>"
+        +"<button onclick='freq=new Array(13).fill(0);total=0;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer'>🔄 Reset</button>"
+        +"<span style='font-size:11px;color:#475882'>"+total+" lancers</span>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params; var t=window._sim.t;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      // Roll dice periodically
+      if(t%0.1<0.016 && total<2000){
+        var sum=0; for(var di=0;di<p.ndice;di++) sum+=Math.ceil(Math.random()*6);
+        freq[sum]=(freq[sum]||0)+1; total++;
+      }
+      // Histogram
+      var maxF=Math.max.apply(null,freq.slice(p.ndice,p.ndice*6+1))||1;
+      var barW=Math.floor((W-80)/(p.ndice*5+1));
+      for(var s=p.ndice;s<=p.ndice*6;s++){
+        var bh=Math.round((freq[s]||0)/maxF*(H-100));
+        var bx=60+(s-p.ndice)*barW;
+        var theoretical=(p.ndice===2?(s-1):1)/(p.ndice===2?36:6);
+        var theH=Math.round(theoretical*(H-100)*1.2);
+        // Theoretical outline
+        ctx.strokeStyle='rgba(252,211,77,.35)'; ctx.lineWidth=1;
+        ctx.strokeRect(bx,H-60-theH,barW-3,theH);
+        // Actual bar
+        var hue=Math.round((s-p.ndice)/(p.ndice*5)*240);
+        ctx.fillStyle='hsl('+hue+',70%,55%)';
+        ctx.fillRect(bx,H-60-bh,barW-3,bh);
+        ctx.fillStyle='rgba(255,255,255,.55)'; ctx.font='10px Fira Code'; ctx.textAlign='center';
+        ctx.fillText(s,bx+barW/2-1,H-44);
+        if(freq[s]) ctx.fillText(freq[s],bx+barW/2-1,H-63-bh);
+      }
+      // Axes
+      ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(55,20); ctx.lineTo(55,H-55); ctx.lineTo(W-10,H-55); ctx.stroke();
+      ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px Fira Code'; ctx.textAlign='center';
+      ctx.fillText('Somme des '+p.ndice+' dé(s)',W/2,H-10);
+      ctx.fillText(total+' lancers — loi normale émerge',W/2,18);
+      setVal('<span>🎲 '+p.ndice+' dé(s)</span><span>'+total+' lancers</span><span>Courbe en cloche</span>');
+      _simUpdateControls();
+    };
+
+  // â”€â”€ lv16 : Fonctions & Dérivées â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv16"){
+    window._sim.params={a:1,b:0,c:-2,xtan:0}; window._sim.defaults={a:1,b:0,c:-2,xtan:0};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px'>a: <input type='range' min='-3' max='3' step='0.5' value='"+p.a+"' oninput='window._sim.params.a=+this.value' style='width:70px'><span>"+p.a+"</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px'>b: <input type='range' min='-5' max='5' step='0.5' value='"+p.b+"' oninput='window._sim.params.b=+this.value' style='width:70px'><span>"+p.b+"</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px'>c: <input type='range' min='-5' max='5' step='0.5' value='"+p.c+"' oninput='window._sim.params.c=+this.value' style='width:70px'><span>"+p.c+"</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px'>x₁€: <input type='range' min='-4' max='4' step='0.1' value='"+p.xtan+"' oninput='window._sim.params.xtan=+this.value' style='width:70px'><span>"+p.xtan+"</span></label>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params; ctx.clearRect(0,0,W,H);
+      ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      var ox=W/2, oy=H/2, sc=45;
+      // Grid
+      ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
+      for(var gx=-8;gx<=8;gx++){ctx.beginPath();ctx.moveTo(ox+gx*sc,0);ctx.lineTo(ox+gx*sc,H);ctx.stroke();}
+      for(var gy=-4;gy<=4;gy++){ctx.beginPath();ctx.moveTo(0,oy+gy*sc);ctx.lineTo(W,oy+gy*sc);ctx.stroke();}
+      // Axes
+      ctx.strokeStyle='rgba(255,255,255,.35)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(0,oy); ctx.lineTo(W,oy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ox,0); ctx.lineTo(ox,H); ctx.stroke();
+      // Axis labels
+      ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='9px Fira Code'; ctx.textAlign='center';
+      for(var gx2=-7;gx2<=7;gx2+=1){if(gx2!==0)ctx.fillText(gx2,ox+gx2*sc,oy+14);}
+      ctx.textAlign='right';
+      for(var gy2=-3;gy2<=3;gy2+=1){if(gy2!==0)ctx.fillText(-gy2,ox-5,oy+gy2*sc+4);}
+      // f(x)
+      ctx.strokeStyle='#87A9D3'; ctx.lineWidth=2.5;
+      ctx.beginPath(); var first=true;
+      for(var xi=-8;xi<=8;xi+=0.05){
+        var y=p.a*xi*xi+p.b*xi+p.c;
+        var cx2=ox+xi*sc, cy2=oy-y*sc;
+        if(cy2<0||cy2>H){first=true;continue;}
+        if(first){ctx.moveTo(cx2,cy2);first=false;}else ctx.lineTo(cx2,cy2);
+      }
+      ctx.stroke();
+      // Tangent at x0
+      var x0=p.xtan, y0=p.a*x0*x0+p.b*x0+p.c;
+      var deriv=2*p.a*x0+p.b;
+      var tx1=x0-2, ty1=y0-deriv*2, tx2=x0+2, ty2=y0+deriv*2;
+      ctx.strokeStyle='#FFC93C'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(ox+tx1*sc,oy-ty1*sc); ctx.lineTo(ox+tx2*sc,oy-ty2*sc); ctx.stroke();
+      // Point
+      ctx.fillStyle='#C46F6F'; ctx.beginPath(); ctx.arc(ox+x0*sc,oy-y0*sc,5,0,Math.PI*2); ctx.fill();
+      // Formula
+      ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(10,10,220,65);
+      ctx.fillStyle='#87A9D3'; ctx.font='bold 12px Fira Code'; ctx.textAlign='left';
+      ctx.fillText('f(x) = '+p.a+'x² + '+p.b+'x + '+p.c,18,32);
+      ctx.fillStyle='#FFC93C'; ctx.font='11px Fira Code';
+      ctx.fillText("f'(x) = "+(2*p.a)+'x + '+p.b,18,52);
+      ctx.fillStyle='rgba(255,255,255,.7)'; ctx.font='10px Fira Code';
+      ctx.fillText("f'("+x0+") = "+deriv.toFixed(2),18,68);
+      setVal("<span>f(x)="+p.a+"x²+"+p.b+"x+"+p.c+"</span><span>f'("+x0+")="+deriv.toFixed(2)+"</span><span>f("+x0+")="+y0.toFixed(2)+"</span>");
+      _simUpdateControls();
+    };
+
+  // â”€â”€ lv17 : Trigonométrie & Cercle Unitaire â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv17"){
+    window._sim.params={angleDeg:45,speed:1}; window._sim.defaults={angleDeg:45,speed:1};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      var rad=(p.angleDeg*Math.PI/180);
+      return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>θ (degrés): <input type='range' min='0' max='360' value='"+p.angleDeg+"' oninput='window._sim.params.angleDeg=+this.value' style='width:120px'><span>"+p.angleDeg+"°</span></label>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Vitesse: <input type='range' min='0' max='3' step='0.1' value='"+p.speed+"' oninput='window._sim.params.speed=+this.value' style='width:80px'><span>"+p.speed+"</span></label>"
+        +"<span style='font-size:11px;color:#6C56A6;font-weight:700'>sin="+Math.sin(rad).toFixed(3)+" cos="+Math.cos(rad).toFixed(3)+" tan="+(Math.abs(Math.cos(rad))<0.01?'∝ž':Math.tan(rad).toFixed(3))+"</span>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params; var t=window._sim.t;
+      p.angleDeg=(p.angleDeg+p.speed)%360;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      var cx=200, cy=H/2, R=130;
+      // Grid
+      ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
+      for(var gi=-3;gi<=3;gi++){ctx.beginPath();ctx.moveTo(cx-R-20,cy+gi*R/2);ctx.lineTo(cx+R+20,cy+gi*R/2);ctx.stroke();}
+      // Circle
+      ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2); ctx.stroke();
+      // Axes
+      ctx.strokeStyle='rgba(255,255,255,.4)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.moveTo(cx-R-15,cy); ctx.lineTo(cx+R+15,cy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cx,cy-R-15); ctx.lineTo(cx,cy+R+15); ctx.stroke();
+      // Point on circle
+      var ang=p.angleDeg*Math.PI/180;
+      var px=cx+R*Math.cos(ang), py=cy-R*Math.sin(ang);
+      // cos projection (horizontal)
+      ctx.strokeStyle='#87A9D3'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(px,cy); ctx.stroke();
+      ctx.fillStyle='#87A9D3'; ctx.font='11px Fira Code'; ctx.textAlign='center';
+      ctx.fillText('cos θ',cx+(px-cx)/2,cy+16);
+      // sin projection (vertical)
+      ctx.strokeStyle='#A3E635'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(px,cy); ctx.lineTo(px,py); ctx.stroke();
+      ctx.fillStyle='#A3E635'; ctx.textAlign='left';
+      ctx.fillText('sin θ',px+5,cy-(py-cy)/2);
+      // Radius
+      ctx.strokeStyle='#FFC93C'; ctx.lineWidth=2.5;
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(px,py); ctx.stroke();
+      // Angle arc
+      ctx.strokeStyle='rgba(252,211,77,.5)'; ctx.lineWidth=1.5;
+      ctx.beginPath(); ctx.arc(cx,cy,40,0,-ang,ang>Math.PI); ctx.stroke();
+      ctx.fillStyle='#FFC93C'; ctx.font='bold 11px Fira Code'; ctx.textAlign='center';
+      ctx.fillText(p.angleDeg+'°',cx+55*Math.cos(-ang/2),cy+55*Math.sin(-ang/2));
+      // Point
+      ctx.fillStyle='#C46F6F'; ctx.beginPath(); ctx.arc(px,py,7,0,Math.PI*2); ctx.fill();
+      // Sin wave on right side
+      var wox=430, woy=H/2, wsc=60;
+      ctx.strokeStyle='rgba(163,230,53,.3)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(wox,woy-wsc); ctx.lineTo(wox,woy+wsc); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(wox,woy); ctx.lineTo(W-10,woy); ctx.stroke();
+      ctx.strokeStyle='#A3E635'; ctx.lineWidth=2;
+      ctx.beginPath();
+      for(var xi=0;xi<(W-wox-10);xi++){
+        var ang2=(xi/(W-wox-10))*Math.PI*2+ang;
+        var ys=woy-Math.sin(ang2)*wsc;
+        if(xi===0) ctx.moveTo(wox+xi,ys); else ctx.lineTo(wox+xi,ys);
+      }
+      ctx.stroke();
+      // Current position marker on wave
+      ctx.fillStyle='#C46F6F'; ctx.beginPath(); ctx.arc(wox,woy-Math.sin(ang)*wsc,5,0,Math.PI*2); ctx.fill();
+      // Labels
+      ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='9px Fira Code'; ctx.textAlign='center';
+      ctx.fillText('1',cx+R+8,cy+4); ctx.fillText('-1',cx-R-14,cy+4);
+      ctx.fillText('1',cx+4,cy-R-5); ctx.fillText('-1',cx+4,cy+R+12);
+      setVal('<span>θ='+p.angleDeg+'°</span><span>sin='+Math.sin(ang).toFixed(3)+'</span><span>cos='+Math.cos(ang).toFixed(3)+'</span>');
+      _simUpdateControls();
+    };
+
+  // â”€â”€ lv18 : La Mondialisation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv18"){
+    var POLES=[
+      {n:'Amérique N.',x:140,y:130,col:'#6A8DC7'},{n:'Europe',x:320,y:110,col:'#FFC93C'},
+      {n:'Asie-Pacifique',x:520,y:120,col:'#C46F6F'},{n:'Afrique',x:320,y:230,col:'#4B9C69'},
+      {n:'Amérique S.',x:180,y:270,col:'#9784D1'},{n:'Moyen-Orient',x:400,y:190,col:'#C07D4F'},
+    ];
+    var FLOWS=[
+      {f:0,t:1,val:7200,label:'commerce'},{f:1,t:2,val:9400,label:'tech'},{f:2,t:0,val:8100,label:'manufact.'},
+      {f:3,t:1,val:3200,label:'matières'},{f:0,t:3,val:1800,label:'aide'},{f:1,t:3,val:2600,label:'invest.'},
+      {f:5,t:1,val:4200,label:'énergie'},{f:2,t:3,val:5100,label:'export'},{f:4,t:2,val:2300,label:'comm.'},
+    ];
+    window._sim.params={flow:0};
+    window._sim.controlsDef=function(){
+      return "<span style='font-size:11px;color:#142554;font-weight:700'>Arcs animés = flux commerciaux et financiers mondiaux</span>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var t=window._sim.t;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      // Draw flows
+      FLOWS.forEach(function(fl,fi){
+        var src=POLES[fl.f], dst=POLES[fl.t];
+        var phase=(t*0.25+fi*0.11)%1;
+        var mx=(src.x+dst.x)/2, my=(src.y+dst.y)/2-60;
+        // Bezier arc
+        ctx.strokeStyle=src.col+'44'; ctx.lineWidth=1+fl.val/3000;
+        ctx.beginPath(); ctx.moveTo(src.x,src.y);
+        ctx.quadraticCurveTo(mx,my,dst.x,dst.y); ctx.stroke();
+        // Moving dot
+        var bx,by;
+        bx=Math.pow(1-phase,2)*src.x+2*(1-phase)*phase*mx+Math.pow(phase,2)*dst.x;
+        by=Math.pow(1-phase,2)*src.y+2*(1-phase)*phase*my+Math.pow(phase,2)*dst.y;
+        ctx.fillStyle=src.col; ctx.beginPath(); ctx.arc(bx,by,4,0,Math.PI*2); ctx.fill();
+        // Value label at midpoint
+        var lx=Math.pow(0.5,2)*src.x+2*0.5*0.5*mx+Math.pow(0.5,2)*dst.x;
+        var ly=Math.pow(0.5,2)*src.y+2*0.5*0.5*my+Math.pow(0.5,2)*dst.y;
+        ctx.fillStyle='rgba(255,255,255,.3)'; ctx.font='8px Fira Code'; ctx.textAlign='center';
+        ctx.fillText(fl.label,lx,ly);
+      });
+      // Draw poles
+      POLES.forEach(function(p,pi){
+        ctx.fillStyle=p.col+'BB';
+        ctx.beginPath(); ctx.arc(p.x,p.y,18+Math.sin(t*1.5+pi)*2,0,Math.PI*2); ctx.fill();
+        ctx.strokeStyle=p.col; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(p.x,p.y,22,0,Math.PI*2); ctx.stroke();
+        ctx.fillStyle='rgba(255,255,255,.85)'; ctx.font='bold 9.5px Montserrat'; ctx.textAlign='center';
+        ctx.fillText(p.n,p.x,p.y+36);
+      });
+      // Title
+      ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(10,H-55,W-20,45);
+      ctx.fillStyle='#FFC93C'; ctx.font='bold 11px Montserrat'; ctx.textAlign='center';
+      ctx.fillText('Triade (Am.N. / Europe / Asie) = 75% du PIB mondial',W/2,H-35);
+      ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='10px Georgia';
+      ctx.fillText('FMI • OMC • ONU • multinationales • délocalisation • dette',W/2,H-18);
+      setVal('<span>🌍 3 pôles de la Triade</span><span>Flux commerce, capital, migr.</span>');
+    };
+
+  // â”€â”€ lv19 : Algorithmes & Programmation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv19"){
+    var arr=[]; for(var ai=0;ai<18;ai++) arr.push(Math.round(20+Math.random()*200));
+    var sortStep=0; var sorted=false; var comparing=[-1,-1]; var swapping=-1;
+    window._sim.params={algo:'bubble',speed:1}; window._sim.defaults={algo:'bubble',speed:1};
+    function resetArr(){ arr=[]; for(var ai2=0;ai2<18;ai2++) arr.push(Math.round(20+Math.random()*200)); sortStep=0;sorted=false;comparing=[-1,-1];swapping=-1; }
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      return "<button onclick=\"window._sim.params.algo='bubble';resetArr()\" style='background:"+(p.algo==='bubble'?'#142554':'#E8EEFF')+";color:"+(p.algo==='bubble'?'#FFC93C':'#142554')+";border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer'>Tri Bulles</button>"
+        +"<button onclick=\"window._sim.params.algo='select';resetArr()\" style='background:"+(p.algo==='select'?'#6C56A6':'#E8EEFF')+";color:"+(p.algo==='select'?'#fff':'#142554')+";border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px'>Tri Sélection</button>"
+        +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px;margin-left:8px'>Vitesse: <input type='range' min='0.5' max='5' step='0.5' value='"+p.speed+"' oninput='window._sim.params.speed=+this.value' style='width:70px'><span>×"+p.speed+"</span></label>"
+        +"<button onclick='resetArr()' style='background:#C46F6F;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px'>🔀 Mélanger</button>";
+    };
+    _simUpdateControls();
+    var lastStep=0;
+    window._sim._draw=function(){
+      var p=window._sim.params; var t=window._sim.t;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      // Step algorithm
+      if(!sorted && t-lastStep > 0.5/p.speed){
+        lastStep=t;
+        if(p.algo==='bubble'){
+          var n=arr.length-sortStep; var swapped=false;
+          for(var bi=0;bi<n-1;bi++){
+            if(arr[bi]>arr[bi+1]){var tmp=arr[bi];arr[bi]=arr[bi+1];arr[bi+1]=tmp;swapped=true;comparing=[bi,bi+1];}
+          }
+          sortStep++; if(!swapped||sortStep>arr.length) sorted=true;
+        } else {
+          var minIdx=sortStep;
+          for(var si=sortStep+1;si<arr.length;si++) if(arr[si]<arr[minIdx]) minIdx=si;
+          var tmp2=arr[sortStep];arr[sortStep]=arr[minIdx];arr[minIdx]=tmp2;
+          comparing=[sortStep,minIdx]; sortStep++; if(sortStep>=arr.length) sorted=true;
+        }
+      }
+      // Draw bars
+      var bw=Math.floor((W-40)/arr.length)-2;
+      arr.forEach(function(v,i){
+        var bh=Math.round(v/220*(H-80));
+        var bx=20+i*(bw+2);
+        var isSorted=sorted||(p.algo==='bubble'?i>=arr.length-sortStep:i<sortStep);
+        ctx.fillStyle=comparing.indexOf(i)>=0?'#C46F6F':(isSorted?'#4B9C69':'#87A9D3');
+        ctx.fillRect(bx,H-50-bh,bw,bh);
+        if(bw>14){ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='9px Fira Code';ctx.textAlign='center';ctx.fillText(v,bx+bw/2,H-52-bh);}
+      });
+      // Status
+      ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(10,10,W-20,35);
+      ctx.fillStyle='#FFC93C'; ctx.font='bold 12px Montserrat'; ctx.textAlign='center';
+      ctx.fillText(sorted?'âœ… Tableau trié!':(p.algo==='bubble'?'Tri à bulles':'Tri par sélection')+' — Étape '+sortStep,W/2,32);
+      setVal('<span>'+(sorted?'Terminé':'En cours')+'</span><span>Étape: '+sortStep+'</span><span>O(n²)</span>');
+      _simUpdateControls();
+    };
+
+  // â”€â”€ lv20 : Conjugaison & Grammaire Française â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  } else if(lv.id==="lv20"){
+    var verbs=[
+      {inf:'aimer',gr:1,temps:{
+        present:['aime','aimes','aime','aimons','aimez','aiment'],
+        imparfait:['aimais','aimais','aimait','aimions','aimiez','aimaient'],
+        futur:['aimerai','aimeras','aimera','aimerons','aimerez','aimeront'],
+        passe_c:['ai aimé','as aimé','a aimé','avons aimé','avez aimé','ont aimé'],
+      }},
+      {inf:'finir',gr:2,temps:{
+        present:['finis','finis','finit','finissons','finissez','finissent'],
+        imparfait:['finissais','finissais','finissait','finissions','finissiez','finissaient'],
+        futur:['finirai','finiras','finira','finirons','finirez','finiront'],
+        passe_c:['ai fini','as fini','a fini','avons fini','avez fini','ont fini'],
+      }},
+      {inf:'être',gr:3,temps:{
+        present:['suis','es','est','sommes','êtes','sont'],
+        imparfait:['étais','étais','était','étions','étiez','étaient'],
+        futur:['serai','seras','sera','serons','serez','seront'],
+        passe_c:['ai été','as été','a été','avons été','avez été','ont été'],
+      }},
+      {inf:'avoir',gr:3,temps:{
+        present:['ai','as','a','avons','avez','ont'],
+        imparfait:['avais','avais','avait','avions','aviez','avaient'],
+        futur:['aurai','auras','aura','aurons','aurez','auront'],
+        passe_c:['ai eu','as eu','a eu','avons eu','avez eu','ont eu'],
+      }},
+      {inf:'aller',gr:3,temps:{
+        present:['vais','vas','va','allons','allez','vont'],
+        imparfait:['allais','allais','allait','allions','alliez','allaient'],
+        futur:['irai','iras','ira','irons','irez','iront'],
+        passe_c:['suis allé','es allé','est allé','sommes allés','êtes allés','sont allés'],
+      }},
+    ];
+    var TEMPS_KEYS=['present','imparfait','futur','passe_c'];
+    var TEMPS_LABELS={'present':'Présent','imparfait':'Imparfait','futur':'Futur simple','passe_c':'Passé composé'};
+    var PRONOMS=['je','tu','il/elle','nous','vous','ils/elles'];
+    window._sim.params={verb:0,temps:'present'}; window._sim.defaults={verb:0,temps:'present'};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      var btnV=verbs.map(function(v,i){
+        return "<button onclick='window._sim.params.verb="+i+"' style='background:"+(i===p.verb?'#142554':'#E8EEFF')+";color:"+(i===p.verb?'#FFC93C':'#142554')+";border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer'>"+v.inf+"</button>";
+      }).join(' ');
+      var btnT=TEMPS_KEYS.map(function(k){
+        return "<button onclick=\"window._sim.params.temps='"+k+"'\" style='background:"+(k===p.temps?'#6C56A6':'#EDE9FE')+";color:"+(k===p.temps?'#fff':'#6C56A6')+";border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer'>"+TEMPS_LABELS[k]+"</button>";
+      }).join(' ');
+      return "<div style='margin-bottom:6px'>"+btnV+"</div>"+btnT;
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var p=window._sim.params; var t=window._sim.t;
+      ctx.clearRect(0,0,W,H); ctx.fillStyle='#0A1628'; ctx.fillRect(0,0,W,H);
+      var vb=verbs[Math.max(0,Math.min(p.verb||0,verbs.length-1))]||verbs[0]; if(!vb)return;
+      var forms=(vb.temps[p.temps]||vb.temps.present)||[]; if(!forms.length)return;
+      // Background card
+      ctx.fillStyle='rgba(255,255,255,.04)'; ctx.fillRect(20,20,W-40,H-40);
+      // Verb title
+      ctx.fillStyle='#FFC93C'; ctx.font='bold 24px Libre Baskerville,Georgia,serif'; ctx.textAlign='center';
+      ctx.fillText(vb.inf.toUpperCase(),W/2,72);
+      ctx.fillStyle='rgba(255,255,255,.4)'; ctx.font='12px Montserrat';
+      ctx.fillText('Groupe '+vb.gr+' — '+TEMPS_LABELS[p.temps],W/2,96);
+      // Table
+      var cols=[[60,'Pronom'],[W/2+20,'Forme conjuguée']];
+      var rowH=36, startY=120;
+      // Header
+      ctx.fillStyle='rgba(255,255,255,.08)'; ctx.fillRect(30,startY,W-60,rowH);
+      cols.forEach(function(c){
+        ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='bold 11px Montserrat'; ctx.textAlign='left';
+        ctx.fillText(c[0],c[1],startY+22);
+      });
+      // Divider
+      ctx.strokeStyle='rgba(255,255,255,.12)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(W/2+10,startY); ctx.lineTo(W/2+10,startY+rowH*7); ctx.stroke();
+      // Rows
+      forms.forEach(function(form,ri){
+        var ry=startY+rowH*(ri+1);
+        var highlight=Math.floor(t*1.5)%6===ri;
+        if(highlight){ ctx.fillStyle='rgba(252,211,77,.08)'; ctx.fillRect(30,ry,W-60,rowH); }
+        ctx.fillStyle=highlight?'#FFC93C':'rgba(255,255,255,.85)';
+        ctx.font=(highlight?'bold ':'')+'13px Libre Baskerville,Georgia,serif'; ctx.textAlign='left';
+        ctx.fillText(PRONOMS[ri],60,ry+23);
+        ctx.fillStyle=highlight?'#87A9D3':'rgba(163,230,53,.9)';
+        ctx.font=(highlight?'bold ':'')+'13px Libre Baskerville,Georgia,serif';
+        ctx.fillText(form,W/2+20,ry+23);
+        // Small line between rows
+        ctx.strokeStyle='rgba(255,255,255,.06)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(30,ry+rowH); ctx.lineTo(W-30,ry+rowH); ctx.stroke();
+      });
+      // Group color indicator
+      var grpCol={1:'#4B9C69',2:'#6A8DC7',3:'#C46F6F'};
+      ctx.fillStyle=grpCol[vb.gr]; ctx.fillRect(30,30,6,H-60);
+      setVal('<span>'+vb.inf+'</span><span>'+TEMPS_LABELS[p.temps]+'</span><span>Groupe '+vb.gr+'</span>');
+      _simUpdateControls();
+    };
+
+  // ── FALLBACK GÉNÉRIQUE AMÉLIORÉ (slideshow des étapes d'expérience) ────
+  } else {
+    window._sim.params={stepIdx:0,autoPlay:true};
+    window._sim.controlsDef=function(){
+      var p=window._sim.params;
+      var totalSteps=(lv.experience||[]).length;
+      return "<button onclick='window._sim.params.stepIdx=Math.max(0,window._sim.params.stepIdx-1);window._sim.params.autoPlay=false;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>← Étape précédente</button>"
+        +"<button onclick='window._sim.params.autoPlay=!window._sim.params.autoPlay' style='background:#6C56A6;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>"+(p.autoPlay?'⏸ Pause':'▶ Auto')+"</button>"
+        +"<button onclick='window._sim.params.stepIdx=Math.min("+(totalSteps-1)+",window._sim.params.stepIdx+1);window._sim.params.autoPlay=false;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>Étape suivante →</button>"
+        +"<span style='font-size:11px;color:#142554;font-weight:700;margin-left:8px'>Étape "+(p.stepIdx+1)+"/"+totalSteps+"</span>";
+    };
+    _simUpdateControls();
+    window._sim._draw=function(){
+      var t=window._sim.t; ctx.clearRect(0,0,W,H);
+      var p=window._sim.params;
+      var steps=lv.experience||[];
+      var totalSteps=steps.length;
+      // Auto-play : changer d'étape toutes les 6 secondes
+      if(p.autoPlay && t>0 && t%6 < 0.05 && totalSteps>1){
+        p.stepIdx=(p.stepIdx+1) % totalSteps;
+        _simUpdateControls();
+      }
+      // Fond animé : particules colorées
+      var col1={r:20,g:37,b:84},col2={r:124,g:58,b:237};
+      var bg=ctx.createLinearGradient(0,0,W,H);
+      bg.addColorStop(0,'rgba(20,37,84,.95)');bg.addColorStop(1,'rgba(15,23,42,.95)');
+      ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+      // Particules dorées en arrière-plan
+      for(var i=0;i<25;i++){
+        var px=(Math.sin(t*0.4+i*7.3)*0.5+0.5)*W;
+        var py=(Math.cos(t*0.3+i*5.1)*0.5+0.5)*H;
+        var sz=1.5+Math.sin(t*1.5+i)*1.2;
+        ctx.fillStyle='rgba(255,201,60,'+(0.15+Math.sin(t+i*0.7)*0.1)+')';
+        ctx.beginPath();ctx.arc(px,py,sz,0,Math.PI*2);ctx.fill();
+      }
+      // Titre du lab en haut
+      ctx.textAlign='center';
+      ctx.fillStyle='rgba(255,201,60,.95)';
+      ctx.font='bold 17px Montserrat,sans-serif';
+      ctx.fillText(lv.ico+' '+lv.titre,W/2,28);
+      ctx.fillStyle='rgba(255,255,255,.6)';
+      ctx.font='11px Georgia,serif';
+      ctx.fillText(lv.matiere+' • '+lv.classe,W/2,44);
+      // Étape courante affichée comme un encadré
+      var step=steps[p.stepIdx]||'';
+      // Boîte centrale
+      var boxX=40,boxY=64,boxW=W-80,boxH=H-90;
+      var grad=ctx.createLinearGradient(boxX,boxY,boxX+boxW,boxY+boxH);
+      grad.addColorStop(0,'rgba(255,255,255,.06)');grad.addColorStop(1,'rgba(255,201,60,.08)');
+      ctx.fillStyle=grad;
+      // Roundrect manuel
+      var r=14;
+      ctx.beginPath();
+      ctx.moveTo(boxX+r,boxY);ctx.lineTo(boxX+boxW-r,boxY);ctx.quadraticCurveTo(boxX+boxW,boxY,boxX+boxW,boxY+r);
+      ctx.lineTo(boxX+boxW,boxY+boxH-r);ctx.quadraticCurveTo(boxX+boxW,boxY+boxH,boxX+boxW-r,boxY+boxH);
+      ctx.lineTo(boxX+r,boxY+boxH);ctx.quadraticCurveTo(boxX,boxY+boxH,boxX,boxY+boxH-r);
+      ctx.lineTo(boxX,boxY+r);ctx.quadraticCurveTo(boxX,boxY,boxX+r,boxY);
+      ctx.closePath();ctx.fill();
+      ctx.strokeStyle='rgba(255,201,60,.4)';ctx.lineWidth=1.5;ctx.stroke();
+      // Texte de l'étape avec wrap
+      ctx.fillStyle='#FFC93C';ctx.font='bold 13px Montserrat,sans-serif';ctx.textAlign='left';
+      ctx.fillText('ÉTAPE '+(p.stepIdx+1)+'/'+totalSteps,boxX+18,boxY+24);
+      // Wrap du contenu
+      ctx.fillStyle='rgba(255,255,255,.92)';ctx.font='12.5px Georgia,serif';
+      var words=String(step).split(' '),line='',lines=[],maxW=boxW-36;
+      words.forEach(function(w){
+        var test=(line?line+' ':'')+w;
+        if(ctx.measureText(test).width>maxW && line){lines.push(line);line=w;}
+        else line=test;
+      });
+      if(line)lines.push(line);
+      lines.slice(0,12).forEach(function(l,li){
+        ctx.fillText(l,boxX+18,boxY+50+li*18);
+      });
+      // Progression
+      var pct=totalSteps>1?(p.stepIdx/(totalSteps-1)):1;
+      ctx.fillStyle='rgba(255,255,255,.15)';
+      ctx.fillRect(boxX,boxY+boxH-6,boxW,3);
+      ctx.fillStyle='rgba(255,201,60,.9)';
+      ctx.fillRect(boxX,boxY+boxH-6,boxW*pct,3);
+      setVal('<span>📍 Étape '+(p.stepIdx+1)+'/'+totalSteps+'</span><span>'+lv.matiere+'</span><span>'+(p.autoPlay?'▶ Auto-play':'⏸ Manuel')+'</span>');
+    };
+  }
+
+  // Démarrer la boucle d'animation
+  window._sim.running=true;
+  _simLoop();
+}
+window._initLaboSim = _initLaboSim;

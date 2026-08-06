@@ -289,3 +289,25 @@ scopés (notes/bulletins QR, emploi du temps, RH) ; (d) confirmer le **nom de ma
 - **Coordination multi-agents** : un autre agent travaillait dans le même dossier. Sa version de
   app.js a écrasé une édition en cours ; l'arbre est reparti de HEAD (son travail, déjà committé).
   Avant d'éditer un gros fichier partagé : `git status` + `git diff HEAD` d'abord.
+
+## Démarrage allégé + chrome sans émoji (06/08, suite) — sessions parallèles
+- **app.js 3 030 → 2 930 Ko** en trois coups, sans rien retirer au produit :
+  1. **105 littéraux SVG en apostrophes** (−14 Ko) que la première passe, calée sur les guillemets
+     doubles, avait laissés. Même bascule vers `svg.vico` en CSS. Reste 1 occurrence légitime :
+     le gabarit dynamique de `_calIco`.
+  2. **`_initLaboSim` déplacé dans `chunks/labo.js`** (−90 Ko). 1 514 lignes, **un seul appelant**,
+     **zéro dépendance** vers app.js (vérifié par extraction des symboles) ; il ne pose que
+     `window._sim`, que personne ne lit ailleurs. On ne l'atteint que par `lancerLabo()`, qui charge
+     déjà le module → aucune attente nouvelle. Le simulateur et sa donnée voyagent ensemble.
+  3. Repli défensif au point d'appel (charge le module si un appel direct court-circuitait la porte).
+- Vérifié au navigateur : au démarrage `_initLaboSim` = `undefined` et 0 chunk ; après ouverture d'un
+  labo, canvas rendu, 3 curseurs, `_sim.params` {U:6,R1:100,R2:100,mode:'serie'}, boutons
+  Pause/Reset/Mode, 0 erreur. Démarrage : 9 requêtes, 3 305 Ko.
+- **Chrome 100 % pictogrammes** : 24 émojis restants convertis dans la coquille — barre de connexion
+  (marque, S'inscrire, Se connecter, Enseignant), label INFO du bandeau, 5 onglets de connexion,
+  18 entrées des menus déroulants. 41 `<use>` résolus, 0 symbole cassé.
+  **PIÈGE** : le nom de l'école est réécrit par `textContent` sur le span parent (2 endroits) —
+  ça effaçait le pictogramme à chaque rendu. Le nom vit maintenant dans `#vBrandName`, le
+  pictogramme dans le parent. Même précaution pour tout libellé piloté par la base.
+- Les émojis **restants sont volontaires** : le bandeau déroulant (`.t-item`) est de la DONNÉE
+  éditable par l'admin, et les `★` sont de la typographie. Ne pas les convertir.
