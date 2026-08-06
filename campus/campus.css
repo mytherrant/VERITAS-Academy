@@ -186,8 +186,8 @@ body {
 .sec .tag { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--ds-accent-600); }
 .sec b { font-size: .98rem; }
 .sec small { color: var(--ds-muted); }
-.sec.fr { border-left: 3px solid var(--ds-primary); }
-.sec.en { border-left: 3px solid var(--ds-accent-600); }
+.sec.fr {  }
+.sec.en {  }
 
 /* ── Wizard (onboarding) ── */
 .steps { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
@@ -257,7 +257,7 @@ body {
   background: var(--ds-surface); border: 1px solid var(--ds-line); border-radius: var(--ds-radius);
   padding: 16px 18px; box-shadow: var(--ds-shadow-sm); position: relative; overflow: hidden;
 }
-.kpi::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--ds-accent); }
+.kpi::before { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--ds-accent); opacity:.5; }
 .kpi .lab { font-size: .78rem; color: var(--ds-muted); font-weight: 600; }
 .kpi .val { font-size: 1.7rem; font-weight: 800; color: var(--ds-primary); line-height: 1.1; margin-top: 4px; }
 .kpi .sub { font-size: .74rem; color: var(--ds-muted); margin-top: 2px; }
@@ -425,7 +425,7 @@ table.grades tr.sub td { background: color-mix(in srgb, var(--ds-primary) 10%, #
 .statcard { background: var(--ds-surface); border: 1px solid var(--ds-line); border-radius: var(--ds-radius); padding: 14px 16px; box-shadow: var(--ds-shadow-sm); }
 .statcard .l { font-size: .76rem; color: var(--ds-muted); font-weight: 600; }
 .statcard .v { font-size: 1.55rem; font-weight: 800; color: var(--ds-primary); line-height: 1.1; }
-.statcard.ok { border-left: 4px solid var(--ds-ok); } .statcard.bad { border-left: 4px solid var(--ds-danger); } .statcard.acc { border-left: 4px solid var(--ds-accent); }
+.statcard.ok {  } .statcard.bad {  } .statcard.acc {  }
 .pillrow { display: flex; flex-wrap: wrap; gap: 8px; }
 .pillcheck { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid var(--ds-line); border-radius: 999px; font-size: .82rem; cursor: pointer; background: #fff; user-select: none; }
 .pillcheck.on { background: var(--ds-primary); color: #fff; border-color: var(--ds-primary); }
@@ -444,7 +444,7 @@ table.grades tr.sub td { background: color-mix(in srgb, var(--ds-primary) 10%, #
 .tt .s0 { background: color-mix(in srgb, var(--ds-primary) 12%, #fff); }
 .tt .s1 { background: color-mix(in srgb, var(--ds-accent) 22%, #fff); }
 .tt .s2 { background: color-mix(in srgb, var(--ds-ok) 14%, #fff); }
-.tt .s3 { background: color-mix(in srgb, #7c3aed 14%, #fff); }
+.tt .s3 { background: color-mix(in srgb, #6C56A6 14%, #fff); }
 .tt .s4 { background: color-mix(in srgb, var(--ds-warn) 16%, #fff); }
 /* présence toggle */
 .ptoggle { display: inline-flex; border: 1px solid var(--ds-line); border-radius: 999px; overflow: hidden; }

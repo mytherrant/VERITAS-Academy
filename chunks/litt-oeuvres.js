@@ -18,7 +18,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Axes de lecture",color:"#142554",items:["Mépris colonial ('hommes de la brousse')","Injustice du Contrôle du cacao","Dignité bafouée du paysan africain","Résistance muette de Banda"]},
         {label:"Personnages",color:"#059669",items:["Banda (paysan — héros)","L'agent du Contrôle (colon arrogant)","Les 200 kg de cacao (symbole du labeur)","Tanga — ville coloniale fictive"]},
         {label:"Style & Langue",color:"#D97706",items:["Point de vue interne (Banda)","Imparfait de description","Métaphore 'silence de plomb'","Antithèse brousse / civilisation"]},
-        {label:"Contexte",color:"#7C3AED",items:["Cameroun colonial — années 1950","Publié sous pseudonyme Eza Boto","Mongo Beti = Alexandre Biyidi-Awala","Premier roman — Présence Africaine"]}
+        {label:"Contexte",color:"#6C56A6",items:["Cameroun colonial — années 1950","Publié sous pseudonyme Eza Boto","Mongo Beti = Alexandre Biyidi-Awala","Premier roman — Présence Africaine"]}
       ]
     },
     qcm:[
@@ -77,7 +77,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Genre & cadre",color:"#142554",items:["Drame en deux actes","Grand prix du Concours théâtral interafricain 1967","Royaume de Koka-Mbala (ancien Kongo)","Guy Menga (Bikouta-Menga), Congolais"]},
         {label:"Thèmes",color:"#059669",items:["La domination des vieux sur les jeunes","La superstition et la peur","La tyrannie et la justice inique","La condition de la femme"]},
         {label:"Personnages",color:"#D97706",items:["Bintsamou — le roi troublé par un rêve","Lemba — la reine qui l'éclaire","Bobolo — le féticheur tyrannique","Bitala — le jeune délinquant"]},
-        {label:"Symbole & style",color:"#7C3AED",items:["La marmite « à esprits » = terreur","Le rêve prémonitoire (le sang)","Tradition contre progrès / justice","Théâtre africain engagé"]}
+        {label:"Symbole & style",color:"#6C56A6",items:["La marmite « à esprits » = terreur","Le rêve prémonitoire (le sang)","Tradition contre progrès / justice","Théâtre africain engagé"]}
       ]
     },
     qcm:[
@@ -132,7 +132,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Genre & auteur",color:"#142554",items:["Recueil de poésie (Éd. CLE / Semences africaines)","René Philombe (1930-2001), Camerounais","Suivi de « Les Blancs partis, les Nègres dansent »","Traduit en allemand et en russe"]},
         {label:"Thèmes",color:"#059669",items:["« L'homme séparé de l'homme »","La fraternité universelle","Le refus du racisme et de la haine","« Créer l'homme » — l'humanisme"]},
         {label:"Message",color:"#D97706",items:["S'armer d'amour pour désarmer la haine","Une humanité toujours plus humaine","Une société sans race","La poésie accessible et engagée"]},
-        {label:"Style & symboles",color:"#7C3AED",items:["Le hibou : le poète qui veille","Le « fier soldat » aux côtés des opprimés","Vers libres, images, allitérations","Poésie du témoignage"]}
+        {label:"Style & symboles",color:"#6C56A6",items:["Le hibou : le poète qui veille","Le « fier soldat » aux côtés des opprimés","Vers libres, images, allitérations","Poésie du témoignage"]}
       ]
     },
     qcm:[
@@ -187,7 +187,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Genre & auteur",color:"#142554",items:["Roman (Éditions CLÉ, Yaoundé, 2017)","P.-C. Ombété-Bella, écrivain camerounais","Cadre : Yaoundé (Elig-Belibi) et Douala","Récit d'apprentissage et de quête"]},
         {label:"Thèmes",color:"#059669",items:["La quête des origines et du père","L'appartenance tribale (éwondo / ossananga)","La condition de la femme (mères seules)","Le secret familial et le non-dit"]},
         {label:"Personnages",color:"#D97706",items:["Mathieu « Manos » Belibi — en quête de lui-même","Sophie Mbezele — la mère au lourd secret","Jacqueline « Song' Lina » — la tante de Douala","Médard — le père caché (ossananga)"]},
-        {label:"Style & portée",color:"#7C3AED",items:["Réalisme social (quartiers pauvres, rails)","Analyse psychologique fine","L'art du non-dit et du secret","Yaoundé / Douala : l'exode urbain"]}
+        {label:"Style & portée",color:"#6C56A6",items:["Réalisme social (quartiers pauvres, rails)","Analyse psychologique fine","L'art du non-dit et du secret","Yaoundé / Douala : l'exode urbain"]}
       ]
     },
     qcm:[
@@ -242,7 +242,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Genre & forme",color:"#142554",items:["Poème au long cours (92 p., d'un seul tenant)","Vers libres surréalistes","Ni majuscules ni ponctuation régulière","« et » anaphorique — agent rythmique"]},
         {label:"Thèmes",color:"#059669",items:["Dénonciation du terrorisme djihadiste","Hommage à Henrike Grohs (Grand-Bassam, 13/03/2016)","Ode à la liberté et à la tolérance","Fraternité universelle malgré les croyances"]},
         {label:"Structure (3 temps)",color:"#D97706",items:["1. Le constat de l'horreur terroriste","2. Toutes les violences faites à l'Homme au nom de Dieu","3. La transcendance : espérance, paix, « résurrection »"]},
-        {label:"Contexte & influences",color:"#7C3AED",items:["Côte d'Ivoire — attentat de Grand-Bassam (AQMI)","Surréalisme (Césaire, Zadi Zaourou)","Abidjan, Les Classiques Ivoiriens, 2022","Henri N'Koumo, Prix Jean-Marie Adiaffi 2025"]}
+        {label:"Contexte & influences",color:"#6C56A6",items:["Côte d'Ivoire — attentat de Grand-Bassam (AQMI)","Surréalisme (Césaire, Zadi Zaourou)","Abidjan, Les Classiques Ivoiriens, 2022","Henri N'Koumo, Prix Jean-Marie Adiaffi 2025"]}
       ]
     },
     qcm:[
@@ -298,7 +298,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Genre & auteur",color:"#142554",items:["Théâtre — comédie en cinq actes (Afrédit, 2024)","David Massoma Pandong, Camerounais (poète, ingénieur)","Chefferie de Kekem, peuple mbo","« Une œuvre rituelle »"]},
         {label:"Intrigue",color:"#059669",items:["Succéder au 8e notable défunt, N'koum Epié","Sept candidats parrainés par les notables","Le N'koum-wam épouse une fille de sang royal","Kwangué, le jeune « désœuvré », l'emporte"]},
         {label:"Thèmes",color:"#D97706",items:["La sagesse traditionnelle (> l'école occidentale)","La parole partagée et les proverbes","L'unité dans la diversité (le vivre-ensemble)","La fierté et l'espoir de la jeunesse africaine"]},
-        {label:"Style",color:"#7C3AED",items:["Théâtre rituel : chants et danses (l'Ahon, le Ngono)","Dialogue en français + langue mbo","Proverbes et onomastique parlante","Comique et sagesse mêlés"]}
+        {label:"Style",color:"#6C56A6",items:["Théâtre rituel : chants et danses (l'Ahon, le Ngono)","Dialogue en français + langue mbo","Proverbes et onomastique parlante","Comique et sagesse mêlés"]}
       ]
     },
     qcm:[
@@ -353,7 +353,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Axes & Thèmes",color:"#142554",items:["L'hypocrisie religieuse (Tartuffe)","L'aveuglement amoureux d'Orgon","La raison face à la passion (Cléante)","La censure royale et son histoire"]},
         {label:"Personnages",color:"#059669",items:["Tartuffe (faux dévot — imposteur)","Orgon (père aveuglé — victime)","Elmire (épouse clairvoyante)","Dorine (servante — bon sens)","Cléante (le raisonneur)"]},
         {label:"Genre & Style",color:"#D97706",items:["Comédie en 5 actes — vers alexandrins","Satire des mœurs religieuses","Scène-piège (Acte IV) — mise en scène","Deus ex machina royal — dénouement"]},
-        {label:"Contexte historique",color:"#7C3AED",items:["XVIIe s. — règne de Louis XIV","Censurée en 1664 par les dévots","Représentée en 1669 après 5 ans","Molière = Jean-Baptiste Poquelin"]}
+        {label:"Contexte historique",color:"#6C56A6",items:["XVIIe s. — règne de Louis XIV","Censurée en 1664 par les dévots","Représentée en 1669 après 5 ans","Molière = Jean-Baptiste Poquelin"]}
       ]
     },
     qcm:[
@@ -412,7 +412,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Axes de lecture",color:"#142554",items:["Dénonciation du colonialisme belge au Congo","La barbarie de l''homme civilisé' (Kurtz)","Ambiguïté morale de la 'mission civilisatrice'","Débat Achebe vs Conrad (1975)"]},
         {label:"Structure narrative",color:"#059669",items:["Récit encadré (yacht Nellie — Tamise)","Marlow narrateur homodiégétique","3 parties — voyage vers les ténèbres","Mensonge final à 'The Intended'"]},
         {label:"Personnages",color:"#D97706",items:["Marlow (narrateur-témoin)","Kurtz (pouvoir absolu → folie)","The Intended (fiancée — mensonge)","Les Africains : enjeu du débat littéraire"]},
-        {label:"Réception critique",color:"#7C3AED",items:["Chinua Achebe — 'An Image of Africa' (1975)","Déshumanisation des Africains critiquée","Anti-impérialiste mais eurocentré","Œuvre ambiguë — débat mondial"]}
+        {label:"Réception critique",color:"#6C56A6",items:["Chinua Achebe — 'An Image of Africa' (1975)","Déshumanisation des Africains critiquée","Anti-impérialiste mais eurocentré","Œuvre ambiguë — débat mondial"]}
       ]
     },
     qcm:[
@@ -469,7 +469,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Genre & auteur",color:"#142554",items:["Recueil de seize poèmes (1972)","R.P. Engelbert Mveng (1930-1995), Camerounais","Jésuite, historien, archéologue, artiste","Le « balafon » : instrument de la parole"]},
         {label:"Thèmes",color:"#059669",items:["L'universalisme (« l'homme de toute race »)","La fraternité entre les peuples et les cultures","La synthèse Afrique-christianisme","L'espérance : la vie après la mort"]},
         {label:"Sources & portée",color:"#D97706",items:["Sources africaine ET chrétienne","Ouverture aux autres continents (l'Orient)","« Le chant maternel de l'Afrique »","« L'immense plantation de notre humanité »"]},
-        {label:"Style",color:"#7C3AED",items:["Lyrisme et souffle ample","Images cosmiques et exotiques","Anaphore (« Je suis… »)","Symbolisme (le balafon, la croix, l'aube)"]}
+        {label:"Style",color:"#6C56A6",items:["Lyrisme et souffle ample","Images cosmiques et exotiques","Anaphore (« Je suis… »)","Symbolisme (le balafon, la croix, l'aube)"]}
       ]
     },
     qcm:[
@@ -524,7 +524,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Axes de lecture",color:"#142554",items:["Tradition vs Modernité (Baroka/Lakunlé)","La femme — beauté convoitée (Sidi)","Comique et satire de l'idéalisme naïf","Ruse traditionnelle vs discours moderne"]},
         {label:"Personnages",color:"#059669",items:["Sidi (la perle — objet de tous les désirs)","Lakunlé (instituteur — modernité naïve)","Baroka le Bale (le lion — ruse traditionnelle)","Sadiku (1ère épouse — médiatrice)"]},
         {label:"Structure & Genre",color:"#D97706",items:["3 tableaux : Matin · Midi · Soir","Théâtre yoruba : chant, danse, mime","Comédie satirique — Nigeria 1963","Intégration du rituel africain au théâtre"]},
-        {label:"Contexte",color:"#7C3AED",items:["Nigeria post-indépendance","Culture yoruba — Abeokuta","Journaliste étranger — célébrité de Sidi","Soyinka emprisonné ~2 ans (années 60)"]}
+        {label:"Contexte",color:"#6C56A6",items:["Nigeria post-indépendance","Culture yoruba — Abeokuta","Journaliste étranger — célébrité de Sidi","Soyinka emprisonné ~2 ans (années 60)"]}
       ]
     },
     qcm:[
@@ -582,7 +582,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Poèmes clés",color:"#142554",items:["'Jeune fille' — 5 quatrains octosyllabes","'La Mémoire I' — le présent comme angoisse","'INTUS' — doute intérieur (foi/raison/athéisme)","'Le vase brisé' — métaphore du cœur fissuré"]},
         {label:"Style & Forme",color:"#059669",items:["Parnasse : rigueur formelle avant tout","Octosyllabes et quatrains — musicalité retenue","Lexique de la discrétion et du silence","Métaphore et hyperbole maîtrisées"]},
         {label:"Thèmes profonds",color:"#D97706",items:["L'amour dans sa phase secrète et discrète","La mémoire comme chaîne des temps révolus","Doute entre panthéisme, athéisme et foi","La souffrance intérieure — 'deux murmures'"]},
-        {label:"Auteur & Repères",color:"#7C3AED",items:["Né le 16 mars 1839, Paris — mort 1907","Lycée Louis-le-Grand — ingénieur de formation","Parnasse : contre le romantisme larmoyant","1er Prix Nobel de littérature (1901)"]}
+        {label:"Auteur & Repères",color:"#6C56A6",items:["Né le 16 mars 1839, Paris — mort 1907","Lycée Louis-le-Grand — ingénieur de formation","Parnasse : contre le romantisme larmoyant","1er Prix Nobel de littérature (1901)"]}
       ]
     },
     qcm:[
@@ -639,7 +639,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Axes de lecture",color:"#142554",items:["La désillusion du 'bon colonisé'","La ségrégation dans l'espace sacré (église)","Mensonge colonial : 'parler comme au tribunal'","Le sacrifice de Meka : terres données aux prêtres"]},
         {label:"Citations clés",color:"#059669",items:["'Ces Blancs ne savaient même pas mentir'","'Parler comme au tribunal'","'Ciment poussiéreux et nu, zébré de mouches'","Meka agenouillé à côté d'un lépreux"]},
         {label:"Personnages",color:"#D97706",items:["Meka (vieux catholique — sacrifice/désillusion)","Kelara (épouse fidèle et lucide)","Mami Titi (distillatrice d'arki — peuple)","Le Haut-Commissaire (amitié protocolaire vide)"]},
-        {label:"Contexte & Style",color:"#7C3AED",items:["Cameroun colonial — années 1950","Satire et ironie — réalisme critique","Oyono né 1929 Ngoulémakong — mort 2010","Une vie de boy (1956) — même univers"]}
+        {label:"Contexte & Style",color:"#6C56A6",items:["Cameroun colonial — années 1950","Satire et ironie — réalisme critique","Oyono né 1929 Ngoulémakong — mort 2010","Une vie de boy (1956) — même univers"]}
       ]
     },
     qcm:[
@@ -696,7 +696,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Axes de lecture",color:"#142554",items:["Valorisation des traditions Sawa","Ségrégation raciale et spoliation","Héroïsme, patriotisme, sacrifice","Dénonciation de la colonisation"]},
         {label:"Personnages",color:"#059669",items:["Dualla Manga Bell (roi / héros tragique)","Von Roehm (administrateur colonial)","Niedermeyer (colon hypocrite)","Kum'a Mbape · Mukud'a Mikano (cérémonie)"]},
         {label:"Contexte & Structure",color:"#D97706",items:["5 actes — pièce de théâtre","Kamerun allemand avant 1914","Écrite en duala · 1976 par Eyombwan","Traduite par Prof. Njoh Mouelle"]},
-        {label:"Thèmes & Style",color:"#7C3AED",items:["Foi comme acte de résistance","Emprunts duala (esthétique sawa)","Héros modèle + héros tragique","Prose engagée — pas le vers classique"]}
+        {label:"Thèmes & Style",color:"#6C56A6",items:["Foi comme acte de résistance","Emprunts duala (esthétique sawa)","Héros modèle + héros tragique","Prose engagée — pas le vers classique"]}
       ]
     },
     qcm:[
@@ -765,7 +765,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Bestiaire beti",color:"#16A34A",items:["Kulu — la Tortue (sagesse, intelligence, réfléchit avant d'agir)","Zee — le Léopard (force brute mais réfléchit peu)","Ndoe — l'Aigle (réfléchit, mais pas assez)","Berne — le Cochon sauvage (stupidité)","Nkaa — le Varan (étourdi)","Dzungo'o — le Caméléon","Mvomo — le Python"]},
         {label:"Thèmes",color:"#15803D",items:["Sagesse ancestrale beti","Forêt équatoriale du Sud Cameroun","Personnification éducative des animaux","Patience et intelligence vs force brute","Héritage transmis 'de père en fils'","'École' traditionnelle africaine"]},
         {label:"Style oral",color:"#D97706",items:["Contes + Chantefables (chant+récit)","Personnages animaux à caractère fixe","Trait de caractère = leçon morale","Personnification anthropomorphique","Refrains mélodiques rythmés","Pédagogie par mise en situation"]},
-        {label:"Auteur & édition",color:"#7C3AED",items:["Lucien Anya Noa — passeur de la tradition","Préface de Séverin Cécil Abéga","Afredit, Yaoundé, 2011 (ISBN 9956-428-01-9)","Autres œuvres : La poésie beti (1997), Mimbenge (1998), Nnem (2000)","Bible en ewondo (inédit)","Patrimoine oral beti"]}
+        {label:"Auteur & édition",color:"#6C56A6",items:["Lucien Anya Noa — passeur de la tradition","Préface de Séverin Cécil Abéga","Afredit, Yaoundé, 2011 (ISBN 9956-428-01-9)","Autres œuvres : La poésie beti (1997), Mimbenge (1998), Nnem (2000)","Bible en ewondo (inédit)","Patrimoine oral beti"]}
       ]
     },
     qcm:[
@@ -815,9 +815,9 @@ Object.assign(window.LITT_OEUVRES, {
       centre:"Les Bimanes\nSéverin Cécil Abega\n(Recueil de 7 nouvelles)",
       branches:[
         {label:"Personnages clés",color:"#0EA5E9",items:["Le vieux Tchakarias (héros de 'Le fardeau')","Sa femme rusée et patiente","Ana — sa fille jolie convoitée","Le 'ngomna' (haut fonctionnaire corrompu)","La petite vendeuse de beignets","Les enfants observateurs","Les bureaucrates absurdes"]},
-        {label:"Thèmes satiriques",color:"#DC2626",items:["Corruption administrative (carte d'identité)","Harcèlement sexuel des fonctionnaires","Misère et faim du peuple","Détresse des vieux et des enfants","Femmes-victimes et femmes-rusées","Absurdité bureaucratique post-coloniale"]},
+        {label:"Thèmes satiriques",color:"#AE5353",items:["Corruption administrative (carte d'identité)","Harcèlement sexuel des fonctionnaires","Misère et faim du peuple","Détresse des vieux et des enfants","Femmes-victimes et femmes-rusées","Absurdité bureaucratique post-coloniale"]},
         {label:"Structure",color:"#D97706",items:["7 nouvelles brèves indépendantes","Le fardeau · Dans la forêt","Une petite vendeuse de beignets","Le savon · Un étranger de passage","Mots d'enfants · Au ministère du soya","Galerie sociale du Cameroun"]},
-        {label:"Style",color:"#7C3AED",items:["Satire mordante et ironie","Personnification ('jambes braves', 'souliers ricanant')","Humour noir et tendre","Phrases courtes et incisives","Mots locaux (ngomna, Kola)","Critique sociale frontale"]}
+        {label:"Style",color:"#6C56A6",items:["Satire mordante et ironie","Personnification ('jambes braves', 'souliers ricanant')","Humour noir et tendre","Phrases courtes et incisives","Mots locaux (ngomna, Kola)","Critique sociale frontale"]}
       ]
     },
     qcm:[
@@ -869,7 +869,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Personnages",color:"#0891B2",items:["Korotoumou (grande sœur — conteuse de 60 ans)","Le narrateur (frère cadet)","Maï (la nièce de Korotoumou)","Lièvre et Hyène (compères des contes)","Chat, Chien, Singe, Oiseau Malan","Gnitorni, La proscrite, Ntégnan, Soumaoro"]},
         {label:"Thèmes",color:"#16A34A",items:["Sagesse africaine en langue Cerma","Modernité (TV, radio) vs oralité","Bien vs mal — justice traditionnelle","Lieu mythique : la plantation de café-cacao","Transmission menacée par l'oubli"]},
         {label:"Style et structure",color:"#D97706",items:["3 sections : animaux entre eux, hommes entre eux, hommes/animaux/objets","Formule d'ouverture : 'Kouncoun'","Récit-cadre (sœur raconte au frère)","Personnages-types et refrains","Morale finale explicite"]},
-        {label:"Contexte",color:"#7C3AED",items:["Amadou Koné — écrivain ivoirien","Aire culturelle Cerma (Burkina/Côte d'Ivoire)","Kongodjan = plantation natale (lieu réel transposé)","Critique sociale douce de la modernité","Patrimoine oral ouest-africain"]}
+        {label:"Contexte",color:"#6C56A6",items:["Amadou Koné — écrivain ivoirien","Aire culturelle Cerma (Burkina/Côte d'Ivoire)","Kongodjan = plantation natale (lieu réel transposé)","Critique sociale douce de la modernité","Patrimoine oral ouest-africain"]}
       ]
     },
     qcm:[
@@ -922,7 +922,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Personnages",color:"#15803D",items:["Paul Lanta (jeune commis d'administration, urbaniste)","Originaire de Cotonou — 'moderne jusqu'au bout des ongles'","Les anciens d'Abomey, gardiens du vodun","Les prêtres et prêtresses des couvents","L'arbre fétiche (esprit incarné)","Les descendants des rois d'Abomey"]},
         {label:"Thèmes",color:"#16A34A",items:["Modernité urbanistique vs traditions vodun","Le dilemme du jeune cadre africain","Mémoire des rois (Ghézo) et des coutumes","Rupture spatiale : route goudronnée vs venelles","Cimetières chrétiens vs morts enterrés dans les maisons","Foi vodun dans le secret des couvents"]},
         {label:"Lieux symboliques",color:"#D97706",items:["Abomey, capitale historique du Dahomey","Route goudronnée Bohicon-Abomey (modernité)","Place du monument aux morts (colonial)","Marché Houndjro (entre deux mondes)","Palais royal de Ghézo (musée + danses)","Couvents vodun cachés dans la verdure"]},
-        {label:"Contexte",color:"#7C3AED",items:["Jean Pliya (1931-2015) — écrivain béninois","Prix de la Nouvelle Africaine 1963","Édition CLE Yaoundé, 1971","Dahomey nouvellement indépendant","Civilisation royale d'Abomey (Roi Ghézo)","Vodun = patrimoine vivant menacé"]}
+        {label:"Contexte",color:"#6C56A6",items:["Jean Pliya (1931-2015) — écrivain béninois","Prix de la Nouvelle Africaine 1963","Édition CLE Yaoundé, 1971","Dahomey nouvellement indépendant","Civilisation royale d'Abomey (Roi Ghézo)","Vodun = patrimoine vivant menacé"]}
       ]
     },
     qcm:[
@@ -970,7 +970,7 @@ Object.assign(window.LITT_OEUVRES, {
     carte:{
       centre:"N'koum-wam,\nle huitième notable\nDavid Massoma Pandong\n(Comédie en 5 actes, 2024)",
       branches:[
-        {label:"Personnages",color:"#7C3AED",items:["N'koum-wam (le futur 8ème notable — héros)","N'koum Epié (le 8ème notable défunt — un an plus tôt)","Le chef de la chefferie de Kekem","Les 7 notables siégeant au conseil","Les candidats à la succession","Les sages venus de Santchou (Sanzo)"]},
+        {label:"Personnages",color:"#6C56A6",items:["N'koum-wam (le futur 8ème notable — héros)","N'koum Epié (le 8ème notable défunt — un an plus tôt)","Le chef de la chefferie de Kekem","Les 7 notables siégeant au conseil","Les candidats à la succession","Les sages venus de Santchou (Sanzo)"]},
         {label:"Thèmes",color:"#16A34A",items:["Succession à la notabilité","Renouvellement des élites traditionnelles","Mérite face à l'hérédité","Justice et sagesse politique","Cohésion communautaire","Vie quotidienne à la chefferie"]},
         {label:"Style — Théâtre",color:"#D97706",items:["Comédie en 5 actes","Dialogues vifs entre personnages","Mimesis (Aristote) — fête des yeux et oreilles","Onomastique signifiante (noms parlants)","Scènes rituelles","Comique de situation"]},
         {label:"Contexte",color:"#0891B2",items:["David Massoma Pandong — poète devenu dramaturge","Première œuvre théâtrale (auparavant poète)","Recueil poétique antérieur : Merveilles au crépuscule (1997)","Éditions Afrédit, Yaoundé, 2024","Chefferies entre Littoral/Sud-Ouest/Ouest","Patrimoine politique camerounais"]}
@@ -1021,10 +1021,10 @@ Object.assign(window.LITT_OEUVRES, {
     carte:{
       centre:"Père inconnu\nPabé Mongo\n(Récit autobiographique)",
       branches:[
-        {label:"Personnages",color:"#DC2626",items:["La narratrice (petite fille de 4 ans au début — 'poupée')","Frérot (le petit frère de 2 ans, dodu, teint foncé)","La mère (corpulente, taille d'homme, voix grave, barbe au menton)","Le monsieur résident (oncle paresseux, ressemblant à la mère)","Le père inconnu (jamais nommé ni présent)"]},
+        {label:"Personnages",color:"#AE5353",items:["La narratrice (petite fille de 4 ans au début — 'poupée')","Frérot (le petit frère de 2 ans, dodu, teint foncé)","La mère (corpulente, taille d'homme, voix grave, barbe au menton)","Le monsieur résident (oncle paresseux, ressemblant à la mère)","Le père inconnu (jamais nommé ni présent)"]},
         {label:"Thèmes",color:"#16A34A",items:["Quête identitaire d'une fillette","Douleur de l'absence paternelle","Mère célibataire courageuse","Stigmatisation des 'enfants naturels'","Cuisine-foyer comme refuge","Tâches précoces (cueillette, vaisselle, eau)"]},
         {label:"Lieux et objets",color:"#D97706",items:["Cuisine en terre battue ouverte","Foyer aux 3 pierres 'sacrées'","Lits de bambous (enfants)","Chambre cachée par un pagne (mystérieuse)","Étagère vaisselle aluminium/bois","Fontaine du village (corvée d'eau)"]},
-        {label:"Contexte",color:"#7C3AED",items:["Pabé Mongo — pseudonyme camerounais","Dédicace : 'Aux enfants délaissés, aux futurs papas, aux futures mamans'","Cameroun contemporain","Société traditionnelle rurale","Cri du cœur — fonction éducative"]}
+        {label:"Contexte",color:"#6C56A6",items:["Pabé Mongo — pseudonyme camerounais","Dédicace : 'Aux enfants délaissés, aux futurs papas, aux futures mamans'","Cameroun contemporain","Société traditionnelle rurale","Cri du cœur — fonction éducative"]}
       ]
     },
     qcm:[
@@ -1080,7 +1080,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Genre & cadre",color:"#142554",items:["Comédie en 5 actes (Éd. CLE, 1964)","Village bulu de Mvoutessi","Théâtre populaire : chants, danses, plein air","But affiché : divertir, non moraliser"]},
         {label:"Thèmes",color:"#059669",items:["La dot et le mariage arrangé","Tradition contre modernité (3 générations)","La condition de la femme","La vénalité et l'appât du gain"]},
         {label:"Personnages",color:"#D97706",items:["Juliette — collégienne « à marier »","Abessôlô — l'aïeul traditionaliste","Atangana — le père cupide","Ndi, Mbia, Tchetgen — les 3 prétendants"]},
-        {label:"Comique & style",color:"#7C3AED",items:["Comique de caractère et de situation","Satire sociale souriante","Couleur locale (vin de palme, songho, bulu)","Aparté au public, ironie de l'auteur"]}
+        {label:"Comique & style",color:"#6C56A6",items:["Comique de caractère et de situation","Satire sociale souriante","Couleur locale (vin de palme, songho, bulu)","Aparté au public, ironie de l'auteur"]}
       ]
     },
     qcm:[
@@ -1135,7 +1135,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Genre & cadre",color:"#142554",items:["Roman (Éd. Emmanuelle Collas, 2022)","Extrême-Nord du Cameroun (Maroua, savane)","« Fiction inspirée de faits réels »","Autrice des Impatientes (Goncourt des lycéens 2020)"]},
         {label:"Thèmes",color:"#059669",items:["Le travail domestique des jeunes filles","La condition de la femme au Sahel","La pauvreté et la sécheresse","L'espoir et le rêve d'émancipation"]},
         {label:"Personnages",color:"#D97706",items:["Faydé — l'adolescente qui veut partir","Kondem — la mère qui s'y oppose","Les « petites bonnes » de la ville","Le village pauvre / Maroua la métropole"]},
-        {label:"Style & portée",color:"#7C3AED",items:["Roman social engagé","Descriptions du paysage sahélien","Dédicace « Aux femmes victimes du Sahel »","Dénoncer par la fiction (témoignage)"]}
+        {label:"Style & portée",color:"#6C56A6",items:["Roman social engagé","Descriptions du paysage sahélien","Dédicace « Aux femmes victimes du Sahel »","Dénoncer par la fiction (témoignage)"]}
       ]
     },
     qcm:[
@@ -1190,7 +1190,7 @@ Object.assign(window.LITT_OEUVRES, {
         {label:"Genre & composition",color:"#15803D",items:["Recueil de poésie patriotique","26 poèmes répartis en 6 sections","Esthétique du « morcellement » (≠ long souffle)","Éditions Ifrikiya, Yaoundé, 4e éd. 2024"]},
         {label:"Thèmes",color:"#16A34A",items:["Amour ardent du pays natal — le Cameroun","Patriotisme et engagement citoyen","Dénonciation des comportements antipatriotiques","Le chant du fils, même en exil"]},
         {label:"Style & figures",color:"#D97706",items:["Vers libre teinté de relents classiques (la rime)","Anaphore « J'aime mon pays »","Exclamation lyrique « Ô mon cher pays ! »","Comparaisons, métaphores, camerounismes"]},
-        {label:"Contexte",color:"#7C3AED",items:["Ernest Alima — poète camerounais de la 1re génération","Retraité, vit à Yaoundé","Filiation : Senghor, Philombe, Ngo Mai, Kayo","Dossier pédagogique : J.-C. Awono & J. Meli"]}
+        {label:"Contexte",color:"#6C56A6",items:["Ernest Alima — poète camerounais de la 1re génération","Retraité, vit à Yaoundé","Filiation : Senghor, Philombe, Ngo Mai, Kayo","Dossier pédagogique : J.-C. Awono & J. Meli"]}
       ]
     },
     qcm:[

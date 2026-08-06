@@ -528,7 +528,7 @@ window._SECTION_GROUPS=[
   {id:'fr_gen', l:'🎓 Général',    c:'#142554'},
   {id:'fr_tech',l:'🔧 Technique',  c:'#B45309'},
   {id:'cap',    l:'🛠️ CAP',        c:'#0E7490'},
-  {id:'en',     l:'🇬🇧 Anglophone', c:'#7C3AED'}
+  {id:'en',     l:'🇬🇧 Anglophone', c:'#6C56A6'}
 ];
 window._classifySection=function(cls){
   var c=String(cls||'').trim();
@@ -2089,7 +2089,7 @@ function _showSecurityBanner(msg){
     if(document.getElementById('_secBanner'))return;
     var b=document.createElement('div');
     b.id='_secBanner'; b.setAttribute('role','alert');
-    b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:999998;background:#DC2626;color:#fff;padding:10px 44px 10px 16px;font:600 14px/1.4 Inter,system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.3);text-align:center';
+    b.style.cssText='position:fixed;top:0;left:0;right:0;z-index:999998;background:#AE5353;color:#fff;padding:10px 44px 10px 16px;font:600 14px/1.4 Inter,system-ui,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.3);text-align:center';
     b.innerHTML='🚨 Sécurité : '+(typeof _esc==='function'?_esc(msg):msg)+' utilise encore le mot de passe par défaut. Changez-le dans Admin → Comptes &amp; Accès.'
       +'<button type="button" aria-label="Fermer l\'alerte" onclick="this.parentNode.remove()" style="position:absolute;right:8px;top:6px;background:transparent;border:none;color:#fff;font-size:20px;line-height:1;cursor:pointer">×</button>';
     document.body.appendChild(b);
@@ -2514,9 +2514,9 @@ function _startBgPoll(){
     function logResult(label,status,detail){
       if(!results) return;
       var iconMap={ok:'✅',warn:'⚠️',err:'❌',pending:'⏳'};
-      var colorMap={ok:'#10B981',warn:'#F59E0B',err:'#DC2626',pending:'#64748B'};
+      var colorMap={ok:'#3A8F73',warn:'#F59E0B',err:'#AE5353',pending:'#64748B'};
       var div=document.createElement('div');
-      div.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:#F8FAFC;border-left:4px solid '+colorMap[status]+';font-size:13px';
+      div.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:#F8FAFC;font-size:13px';
       div.innerHTML='<span style="font-size:20px">'+iconMap[status]+'</span>'+
         '<div style="flex:1"><div style="font-weight:700;color:#142554">'+label+'</div>'+
         '<div style="font-size:11px;color:#64748B;margin-top:2px">'+(detail||'')+'</div></div>';
@@ -2813,9 +2813,9 @@ function _setSyncDot(state,label){
   if(!dot)return;
   var cfg={
     pending: {bg:'#FFC93C',title:'Modifications non synchronisées',ico:'⏳'},
-    syncing: {bg:'#60A5FA',title:'Synchronisation en cours…',ico:'🔄'},
-    ok:      {bg:'#34D399',title:'Synchronisé'+(label?' — '+label:''),ico:'✓'},
-    err:     {bg:'#F87171',title:'Échec de la synchronisation'+(label?' — '+label:''),ico:'⚠'}
+    syncing: {bg:'#87A9D3',title:'Synchronisation en cours…',ico:'🔄'},
+    ok:      {bg:'#5CAB8E',title:'Synchronisé'+(label?' — '+label:''),ico:'✓'},
+    err:     {bg:'#D58E8E',title:'Échec de la synchronisation'+(label?' — '+label:''),ico:'⚠'}
   }[state]||{bg:'#9CA3AF',title:'',ico:'?'};
   dot.style.background=cfg.bg;
   dot.title=cfg.title;
@@ -2836,9 +2836,9 @@ function mSyncMenu(){
     "<div style='background:var(--bg);border-radius:12px;padding:14px;margin-bottom:14px'>"
     +"<div style='font-size:11px;color:var(--ink4);margin-bottom:4px'>État actuel</div>"
     +"<div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:var(--bl)'>"+stLbl+"</div>"
-    +(window._lastSyncLabel?"<div style='font-size:11px;color:#DC2626;margin-top:4px'>"+_esc(window._lastSyncLabel)+"</div>":"")
+    +(window._lastSyncLabel?"<div style='font-size:11px;color:#AE5353;margin-top:4px'>"+_esc(window._lastSyncLabel)+"</div>":"")
     +"<div style='font-size:11px;color:var(--ink4);margin-top:8px'>Dernière sync : "+_esc(lastSync)+"</div>"
-    +"<div style='font-size:11px;color:var(--ink4)'>Cloud : "+(cfg.url?_esc(cfg.url):"<span style='color:#DC2626'>non configuré</span>")+"</div>"
+    +"<div style='font-size:11px;color:var(--ink4)'>Cloud : "+(cfg.url?_esc(cfg.url):"<span style='color:#AE5353'>non configuré</span>")+"</div>"
     +"</div>"
     +"<div class='ib ibt mb12'><span>💡</span><span>Astuce : la sync automatique se déclenche 8s après chaque modification. Utilisez ces boutons en cas de problème.</span></div>"
     +"<div style='display:grid;grid-template-columns:1fr 1fr;gap:8px'>"
@@ -2878,12 +2878,12 @@ function mStorageDiag(){
     }
   }catch(e){rows=[{label:'Erreur lecture',ko:0}];}
   rows.sort(function(a,b){return b.ko-a.ko;});
-  var bar=function(ko){var pct=Math.min(100,Math.round(ko/51.2));return '<div style="height:6px;background:#E5E7EB;border-radius:3px;margin-top:2px"><div style="height:6px;background:'+(pct>60?'#DC2626':pct>30?'#D97706':'#059669')+';border-radius:3px;width:'+pct+'%"></div></div>';};
+  var bar=function(ko){var pct=Math.min(100,Math.round(ko/51.2));return '<div style="height:6px;background:#E5E7EB;border-radius:3px;margin-top:2px"><div style="height:6px;background:'+(pct>60?'#AE5353':pct>30?'#D97706':'#059669')+';border-radius:3px;width:'+pct+'%"></div></div>';};
   var html='<div style="font-size:11px;color:var(--ink4);margin-bottom:10px">Quota localStorage ≈ 5 Mo (5 120 Ko) · Utilisé : <b>'+fmtN(total)+' Ko</b></div>';
   html+='<div style="max-height:260px;overflow-y:auto">';
   rows.forEach(function(r){html+='<div style="margin-bottom:6px"><div style="display:flex;justify-content:space-between"><span style="font-size:12px">'+_esc(r.label)+'</span><b style="font-size:12px">'+fmtN(r.ko)+' Ko</b></div>'+bar(r.ko)+'</div>';});
   html+='</div>';
-  if(total>4000)html+='<div class="ib ibt" style="margin-top:10px;background:#FEF2F2;border-color:#DC2626"><span>⚠️</span><span>Stockage presque plein. Cliquez "Libérer espace local" pour supprimer les images binaires du cache local (elles restent sur le serveur).</span></div>';
+  if(total>4000)html+='<div class="ib ibt" style="margin-top:10px;background:#FEF2F2;border-color:#AE5353"><span>⚠️</span><span>Stockage presque plein. Cliquez "Libérer espace local" pour supprimer les images binaires du cache local (elles restent sur le serveur).</span></div>';
   cm();
   M('📊 Diagnostic Stockage','Utilisation du cache local navigateur',html,'<button class="btn bi" onclick="cm()">OK</button>');
 }
@@ -3220,7 +3220,7 @@ function viewBookDetail(bid){
   h+='<p style="font-size:13px;color:var(--ink2);line-height:1.8;margin:8px 0">'+(b.desc||'')+'</p>';
   // Price
   h+='<div class="book-price-box">';
-  if(b.ancienPrix)h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:14px;color:var(--ink4);text-decoration:line-through;text-decoration-color:#DC2626">'+fmt(b.ancienPrix)+'</span><span style="font-size:13px;font-weight:700;color:#fff;background:#DC2626;padding:2px 10px;border-radius:8px;box-shadow:0 2px 6px rgba(220,38,38,.25)">🔥 -'+Math.round((1-b.prix/b.ancienPrix)*100)+'%</span></div>';
+  if(b.ancienPrix)h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:14px;color:var(--ink4);text-decoration:line-through;text-decoration-color:#AE5353">'+fmt(b.ancienPrix)+'</span><span style="font-size:13px;font-weight:700;color:#fff;background:#AE5353;padding:2px 10px;border-radius:8px;box-shadow:0 2px 6px rgba(220,38,38,.25)">🔥 -'+Math.round((1-b.prix/b.ancienPrix)*100)+'%</span></div>';
   h+='<div class="book-price">'+fmt(b.prix)+'</div>';
   h+='<div style="margin-top:8px;padding:8px;background:var(--grb);border:1px solid var(--grd);border-radius:var(--r);font-size:13px;color:var(--gr)">🎓 Code <span class="mono bold" style="background:var(--gp);padding:1px 6px;border-radius:3px;color:var(--gold)">ELEVE10</span> = -10%</div>';
   h+='<div style="margin-top:8px"><div class="fl2 g6" style="align-items:stretch"><input class="fi" id="promoInput_'+bid+'" placeholder="Code promo" style="font-size:13px;padding:8px;text-transform:uppercase;flex:1"><button class="btn bgr2 sm" onclick="applyPromo(\''+bid+'\')">Appliquer</button></div><div id="promoResult_'+bid+'"></div></div>';
@@ -3471,7 +3471,7 @@ function showBookTab(btn,tabId){
       idbGetFile(pdfKey,function(rec){
         if(!cont)return;
         if(!rec){
-          cont.innerHTML='<div class="ib" style="background:#FEE2E2;color:#DC2626;padding:10px;border-radius:8px;font-size:12px">'
+          cont.innerHTML='<div class="ib" style="background:#FEE2E2;color:#AE5353;padding:10px;border-radius:8px;font-size:12px">'
             +'❌ Aperçu PDF introuvable (peut être chargé sur un autre appareil).</div>';
           return;
         }
@@ -4194,7 +4194,7 @@ function _vheroUnmute(){
 // ═══ Scroll reveal observer ═══
 var _vRevealObs=null;
 // ── ACTUALITÉS HERO PANEL ────────────────────────────────────────────────────
-var _heroCatColors={education:'#3B82F6',minesec:'#10B981',grandes_ecoles:'#8B5CF6',bourses:'#F59E0B'};
+var _heroCatColors={education:'#6A8DC7',minesec:'#3A8F73',grandes_ecoles:'#7C68B8',bourses:'#F59E0B'};
 var _heroCatBg={education:'#EFF6FF',minesec:'#ECFDF5',grandes_ecoles:'#F5F3FF',bourses:'#FFFBEB'};
 var _heroCatText={education:'#1D4ED8',minesec:'#065F46',grandes_ecoles:'#5B21B6',bourses:'#92400E'};
 var _heroCurCat='education';
@@ -4206,7 +4206,7 @@ function _heroActuTab(cat,btn){
     if(!b)return;
     var active=id===cat;
     if(active){
-      b.style.border='1.5px solid '+(_heroCatColors[id]||'#3B82F6');
+      b.style.border='1.5px solid '+(_heroCatColors[id]||'#6A8DC7');
       b.style.background=(_heroCatBg[id]||'#EFF6FF');
       b.style.color=(_heroCatText[id]||'#1D4ED8');
       b.style.boxShadow='none';
@@ -4247,14 +4247,14 @@ function _heroActuLoad(cat){
       }
     })
     .catch(function(){
-      list.innerHTML='<div style="color:#EF4444;font-size:12px;padding:16px;text-align:center">⚠️ Actualités indisponibles</div>';
+      list.innerHTML='<div style="color:#C46F6F;font-size:12px;padding:16px;text-align:center">⚠️ Actualités indisponibles</div>';
     });
 }
 
 function _heroActuRender(items,cat){
   var list=document.getElementById('vHeroNewsList');
   if(!list)return;
-  var col=_heroCatColors[cat]||'#3B82F6';
+  var col=_heroCatColors[cat]||'#6A8DC7';
   var bg=_heroCatBg[cat]||'#EFF6FF';
   var textCol=_heroCatText[cat]||'#1D4ED8';
   // Injection animation une seule fois
@@ -4310,7 +4310,7 @@ function showActualites(container){
   var cats=[
     {id:'education',     label:'📰 Éducation',     color:'#3C8DFF'},
     {id:'minesec',       label:'🏛️ MINESEC',        color:'#059669'},
-    {id:'grandes_ecoles',label:'🎓 Grandes Écoles', color:'#7C3AED'},
+    {id:'grandes_ecoles',label:'🎓 Grandes Écoles', color:'#6C56A6'},
     {id:'bourses',       label:'💼 Bourses',         color:'#f59e0b'},
   ];
   var tabsHtml=cats.map(function(ct){
@@ -4339,7 +4339,7 @@ function showActualites(container){
 function _actuTab(cat){
   _actuCat=cat;
   var cats=['education','minesec','grandes_ecoles','bourses'];
-  var colors={education:'#3C8DFF',minesec:'#059669',grandes_ecoles:'#7C3AED',bourses:'#f59e0b'};
+  var colors={education:'#3C8DFF',minesec:'#059669',grandes_ecoles:'#6C56A6',bourses:'#f59e0b'};
   cats.forEach(function(id){
     var btn=document.getElementById('actutab_'+id);
     if(!btn)return;
@@ -4406,7 +4406,7 @@ function _actuStartAutoRefresh(){
 function _actuRender(items,cat,fetchedAt){
   var feed=document.getElementById('actu-feed');
   if(!feed)return;
-  var colors={education:'#3C8DFF',minesec:'#059669',grandes_ecoles:'#7C3AED',bourses:'#f59e0b'};
+  var colors={education:'#3C8DFF',minesec:'#059669',grandes_ecoles:'#6C56A6',bourses:'#f59e0b'};
   var col=colors[cat]||'#3C8DFF';
   // Indicateur de fraîcheur en haut
   var freshHtml='';
@@ -4421,7 +4421,7 @@ function _actuRender(items,cat,fetchedAt){
   var html=freshHtml+'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">';
   items.forEach(function(it){
     html+='<a href="'+it.link+'" target="_blank" rel="noopener" style="text-decoration:none">'
-      +'<div style="background:var(--sur);border:1px solid var(--bg3);border-left:3px solid '+col+';border-radius:var(--r2);padding:14px;transition:all .2s;cursor:pointer" '
+      +'<div style="background:var(--sur);border:1px solid var(--bg3);border-radius:var(--r2);padding:14px;transition:all .2s;cursor:pointer" '
         +'onmouseover="this.style.boxShadow=\'0 4px 16px rgba(0,0,0,.08)\';this.style.transform=\'translateY(-2px)\'" '
         +'onmouseout="this.style.boxShadow=\'\';this.style.transform=\'\'">'
         +'<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;color:var(--ink1);line-height:1.4;margin-bottom:8px">'+it.title+'</div>'
@@ -4649,7 +4649,7 @@ function vShowSec(sec,btn){
       <div style="font-size:14px;line-height:2;white-space:pre-line;color:var(--ink2)">${_esc(pi.histoire||"")}</div>
     </div>
     <div class="g3">
-      ${[["2023","Fondation du centre","Ouverture avec 15 élèves et 3 enseignants dans une salle de classe louée"],["2023","Fondation","Construction de nouveaux locaux et recrutement de 8 enseignants supplémentaires"],["2024","Première année","Obtention du statut d\'établissement d\'enseignement agréé par le MINESEC"],["2024","Croissance","Introduction des outils numériques dans les pratiques pédagogiques"],["2024","Innovation","Adaptation aux cours à distance pendant la période COVID-19"],["2025","Aujourd\'hui",`${DB.students.length} élèves, ${DB.teachers.length} enseignants, taux de réussite > 85%`]].map(([an,t,d])=>`<div class="vcard" style="border-left:4px solid #3C8DFF;background:linear-gradient(135deg,#fff 0%,#E0EAFF 100%);border-radius:14px"><div style="font-family:Georgia,serif;font-size:18px;color:var(--gold);font-weight:700">${an}</div><div class="semi s mt8 mb4">${t}</div><div style="font-size:13px;color:var(--ink4)">${d}</div></div>`).join("")}
+      ${[["2023","Fondation du centre","Ouverture avec 15 élèves et 3 enseignants dans une salle de classe louée"],["2023","Fondation","Construction de nouveaux locaux et recrutement de 8 enseignants supplémentaires"],["2024","Première année","Obtention du statut d\'établissement d\'enseignement agréé par le MINESEC"],["2024","Croissance","Introduction des outils numériques dans les pratiques pédagogiques"],["2024","Innovation","Adaptation aux cours à distance pendant la période COVID-19"],["2025","Aujourd\'hui",`${DB.students.length} élèves, ${DB.teachers.length} enseignants, taux de réussite > 85%`]].map(([an,t,d])=>`<div class="vcard" style="background:linear-gradient(135deg,#fff 0%,#E0EAFF 100%);border-radius:14px"><div style="font-family:Georgia,serif;font-size:18px;color:var(--gold);font-weight:700">${an}</div><div class="semi s mt8 mb4">${t}</div><div style="font-size:13px;color:var(--ink4)">${d}</div></div>`).join("")}
     </div>
     </div>`;
   } else if(sec==="photos"){
@@ -4693,12 +4693,12 @@ function vShowSec(sec,btn){
       <div class="acc-sub">Taux de réussite de nos élèves aux examens BEPC, Probatoire, BAC et GCE</div>
     </div>
     ${canEdit?'<div style="text-align:center;margin:-8px 0 16px"><button class="btn bi sm" onclick="mEditExamResults()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les statistiques</button></div>':''}
-    ${DB.examResults.map((er,ei)=>{var _xa=['#3B82F6','#7C3AED','#059669','#D97706','#0891B2','#DC2626'][ei%6];return`<div class="vcard exam-card mb16" style="--exam-acc:${_xa}">
+    ${DB.examResults.map((er,ei)=>{var _xa=['#6A8DC7','#6C56A6','#059669','#D97706','#0891B2','#AE5353'][ei%6];return`<div class="vcard exam-card mb16" style="--exam-acc:${_xa}">
       <div class="fl2 fic fsb mb12">
         <div class="exam-year-chip">📅 Année scolaire ${er.annee}</div>
         ${canEdit?`<button class="btn bo xs" onclick="mEditExamYear(${ei})"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier</button>`:''}
       </div>
-      ${er.niveaux.map(n=>{var _fc=n.taux>=80?'#10B981':n.taux>=60?'#F59E0B':'#EF4444';return`<div class="exam-row">
+      ${er.niveaux.map(n=>{var _fc=n.taux>=80?'#3A8F73':n.taux>=60?'#F59E0B':'#C46F6F';return`<div class="exam-row">
         <div style="min-width:80px;font-weight:700;font-size:13px">${n.cls}</div>
         <div class="exam-bar"><div class="exam-fill" style="width:${n.taux}%;--exam-fill-c:${_fc}"></div></div>
         <div style="min-width:90px;text-align:right">
@@ -4752,12 +4752,12 @@ function vShowSec(sec,btn){
     var selCat=window._elCat||'';
     var h='<div class="vsec">';
     var catGrads=[
-      'linear-gradient(135deg,#1E3A8A,#3B82F6)',
-      'linear-gradient(135deg,#7C3AED,#A78BFA)',
-      'linear-gradient(135deg,#DC2626,#F87171)',
-      'linear-gradient(135deg,#059669,#34D399)',
+      'linear-gradient(135deg,#1E3A8A,#6A8DC7)',
+      'linear-gradient(135deg,#6C56A6,#9784D1)',
+      'linear-gradient(135deg,#AE5353,#D58E8E)',
+      'linear-gradient(135deg,#059669,#5CAB8E)',
       'linear-gradient(135deg,#D97706,#FBBF24)',
-      'linear-gradient(135deg,#0891B2,#22D3EE)',
+      'linear-gradient(135deg,#0891B2,#55ADBB)',
     ];
     var catAccents=['#93C5FD','#DDD6FE','#FCA5A5','#A7F3D0','#FDE68A','#A5F3FC'];
 
@@ -4803,9 +4803,9 @@ function vShowSec(sec,btn){
       });
       // v2.2 : Mapping catégorie → couleur Lucide + icône SVG (style analyse littéraire)
       var _catLcMap={
-        'cat1':{ic:'doc',       col:'#3B82F6', bg:'rgba(59,130,246,0.12)'}, // Épreuves
-        'cat2':{ic:'book',      col:'#7C3AED', bg:'rgba(124,58,237,0.12)'}, // Cours PDF
-        'cat3':{ic:'sparkles',  col:'#DC2626', bg:'rgba(220,38,38,0.12)'},  // Cours vidéo
+        'cat1':{ic:'doc',       col:'#6A8DC7', bg:'rgba(59,130,246,0.12)'}, // Épreuves
+        'cat2':{ic:'book',      col:'#6C56A6', bg:'rgba(124,58,237,0.12)'}, // Cours PDF
+        'cat3':{ic:'sparkles',  col:'#AE5353', bg:'rgba(220,38,38,0.12)'},  // Cours vidéo
         'cat4':{ic:'clipboard', col:'#059669', bg:'rgba(5,150,105,0.12)'},  // Corpus
         'cat5':{ic:'pencil',    col:'#D97706', bg:'rgba(217,119,6,0.12)'},  // Fiches
         'cat6':{ic:'check',     col:'#0891B2', bg:'rgba(8,145,178,0.12)'}   // Anciens sujets
@@ -4820,7 +4820,7 @@ function vShowSec(sec,btn){
       // CASCADE au scroll (classe lx-catcard, délais nth-child en CSS).
       h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px" class="v-reveal lx-catgrid">';
       el.categories.forEach(function(cat,i){
-        var theme=_catLcMap[cat.id]||{ic:'book',col:'#3B82F6',bg:'rgba(59,130,246,0.12)'};
+        var theme=_catLcMap[cat.id]||{ic:'book',col:'#6A8DC7',bg:'rgba(59,130,246,0.12)'};
         var cnt=_catCounts[cat.id]||0;
         var free=_catFree[cat.id]||0;
         var isPopular=(i===0)||cat.populaire;
@@ -4844,7 +4844,7 @@ function vShowSec(sec,btn){
       // ── CONTENT VIEW ──
       var selCatObj=(el.categories||[]).find(function(x){return x.id===selCat;})||{nom:'?',ico:'📄',desc:''};
       var ci=(el.categories||[]).indexOf(selCatObj);
-      var catColor=['#3B82F6','#7C3AED','#DC2626','#059669','#D97706','#0891B2'][ci>=0?ci%6:0];
+      var catColor=['#6A8DC7','#6C56A6','#AE5353','#059669','#D97706','#0891B2'][ci>=0?ci%6:0];
       var catGrad=catGrads[ci>=0?ci%6:0];
 
       h+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap">';
@@ -4983,7 +4983,7 @@ function vShowSec(sec,btn){
             h+='</div>';
           }
           h+='</div></div>';
-          if(iA()) h+='<button onclick="event.stopPropagation();_delContenueVisiteur(\''+item.id+'\');" style="position:absolute;top:6px;right:6px;background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;width:26px;height:26px;font-size:13px;cursor:pointer;z-index:3;display:flex;align-items:center;justify-content:center;font-family:sans-serif" title="Supprimer ce contenu">&#128465;</button>';
+          if(iA()) h+='<button onclick="event.stopPropagation();_delContenueVisiteur(\''+item.id+'\');" style="position:absolute;top:6px;right:6px;background:#FEE2E2;color:#AE5353;border:none;border-radius:6px;width:26px;height:26px;font-size:13px;cursor:pointer;z-index:3;display:flex;align-items:center;justify-content:center;font-family:sans-serif" title="Supprimer ce contenu">&#128465;</button>';
           
           // Lock overlay
           if(isLocked){
@@ -5008,8 +5008,8 @@ function vShowSec(sec,btn){
       var quizList=[
         {key:'maths_bepc',titre:'Quiz Maths BEPC',cls:'3ème',ico:'🔢',color:'#1E3A8A',n:QUIZ_DB.maths_bepc.length},
         {key:'physchim_bepc',titre:'Quiz Physique-Chimie BEPC',cls:'3ème',ico:'⚗️',color:'#059669',n:QUIZ_DB.physchim_bepc.length},
-        {key:'francais_bepc',titre:'Quiz Français BEPC',cls:'3ème',ico:'📝',color:'#7C3AED',n:QUIZ_DB.francais_bepc.length},
-        {key:'svt_bepc',titre:'Quiz SVT BEPC',cls:'3ème',ico:'🧬',color:'#DC2626',n:QUIZ_DB.svt_bepc.length},
+        {key:'francais_bepc',titre:'Quiz Français BEPC',cls:'3ème',ico:'📝',color:'#6C56A6',n:QUIZ_DB.francais_bepc.length},
+        {key:'svt_bepc',titre:'Quiz SVT BEPC',cls:'3ème',ico:'🧬',color:'#AE5353',n:QUIZ_DB.svt_bepc.length},
         {key:'histgeo_bepc',titre:'Quiz Histoire-Géo',cls:'3ème',ico:'🌍',color:'#D97706',n:QUIZ_DB.histgeo_bepc.length},
       ];
       h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px">';
@@ -5065,7 +5065,7 @@ function vShowSec(sec,btn){
 
       h+='<div class="vplan-card '+cssClass+(isPopular?' is-popular':'')+'">';
       h+='  <div class="vplan-top"></div>';
-      h+=  (isReco?'<div class="vplan-badge-pop" style="background:linear-gradient(135deg,#059669,#10B981)">🎯 Recommandé pour vous</div>':(isPopular?'<div class="vplan-badge-pop">Populaire</div>':''));
+      h+=  (isReco?'<div class="vplan-badge-pop" style="background:linear-gradient(135deg,#059669,#3A8F73)">🎯 Recommandé pour vous</div>':(isPopular?'<div class="vplan-badge-pop">Populaire</div>':''));
       h+='  <div class="vplan-body">';
       h+='    <div class="vplan-ico"><img src="'+_esc(picto)+'" alt="" loading="lazy" data-ef="🎓"></div>';
       h+=    (pct?'<div class="vplan-promo">🔥 -'+pct+'% ÉCONOMIE</div>':'');
@@ -5183,7 +5183,7 @@ function vShowSec(sec,btn){
             ${b.coverImg?`<img src="${b.coverImg}" alt="${_esc(b.titre)}" onerror="this.style.display='none'">`:`<span class="vbook-cover-emoji">${b.ico||'📘'}</span>`}
             <div class="vbook-class-badge">${_esc(b.cls)}</div>
             <div class="vbook-minesec-badge">📚 MINESEC</div>
-            ${b.id===_bestId&&(b.vendu||0)>0?'<div style="position:absolute;bottom:8px;left:8px;background:linear-gradient(135deg,#DC2626,#F87171);color:#fff;font-size:9.5px;font-weight:900;padding:3px 10px;border-radius:10px;letter-spacing:.5px;box-shadow:0 3px 10px rgba(220,38,38,.4);z-index:2">🔥 BEST-SELLER</div>':''}
+            ${b.id===_bestId&&(b.vendu||0)>0?'<div style="position:absolute;bottom:8px;left:8px;background:linear-gradient(135deg,#AE5353,#D58E8E);color:#fff;font-size:9.5px;font-weight:900;padding:3px 10px;border-radius:10px;letter-spacing:.5px;box-shadow:0 3px 10px rgba(220,38,38,.4);z-index:2">🔥 BEST-SELLER</div>':''}
             ${b.stock<=0?'<div class="vbook-stock-out">Rupture</div>':''}
             ${hasPreview?'<div class="vbook-preview-badge">Aperçu gratuit</div>':''}
             <div class="vbook-pages">${b.pages||0}p · ${(b.chaps||[]).length} chap.</div>
@@ -5386,7 +5386,7 @@ function vShowSec(sec,btn){
         var st='';for(var i=1;i<=5;i++)st+=i<=Math.round(r.stars)?'<span style="color:#FFC93C">★</span>':'<span style="color:var(--bg3)">★</span>';
         h+='<div style="padding:10px 0;border-bottom:1px solid var(--bg2)">'+
            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'+
-           '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#142554,#7C3AED);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;flex-shrink:0">'+r.nom[0]+'</div>'+
+           '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#142554,#6C56A6);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;flex-shrink:0">'+r.nom[0]+'</div>'+
            '<div style="font-size:12px;font-weight:700">'+r.nom+'</div>'+
            '<div style="font-size:11px;color:var(--ink4)">· '+r.role+'</div>'+
            '<div style="margin-left:auto;font-size:12px">'+st+'</div></div>'+
@@ -5541,7 +5541,7 @@ function _renderNotifModal(){
         +'onclick="_notifMarkAndRefresh(\''+n.id+'\')">'
         +'<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">'
         +'<div style="display:flex;align-items:center;gap:6px;flex:1;min-width:0">'
-        +(isRead?'':'<span style="width:7px;height:7px;border-radius:50%;background:#3B82F6;flex-shrink:0;margin-top:3px;display:inline-block"></span>')
+        +(isRead?'':'<span style="width:7px;height:7px;border-radius:50%;background:#6A8DC7;flex-shrink:0;margin-top:3px;display:inline-block"></span>')
         +'<span style="font-size:16px">'+ico+'</span>'
         +'<span style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:'+(isRead?'600':'800')+';color:var(--ink1)">'+_esc(n.titre)+'</span>'
         +'</div>'
@@ -5560,7 +5560,7 @@ function _renderNotifModal(){
   var footer='<button class="btn bo" onclick="cm()">Fermer</button>';
   if(unread>0) footer+='<button class="btn bgr2" onclick="_markAllNotifsRead()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Tout marquer lu</button>';
   if(iA()) footer='<button class="btn bi sm" onclick="cm();mNewNotification()">＋ Nouvelle</button>'+footer;
-  var titre=unread>0?'🔔 Notifications <span style="background:#EF4444;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px">'+unread+' non lu'+(unread>1?'es':'')+'</span>':'🔔 Notifications';
+  var titre=unread>0?'🔔 Notifications <span style="background:#C46F6F;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px">'+unread+' non lu'+(unread>1?'es':'')+'</span>':'🔔 Notifications';
   M(titre,notifs.length+' notification'+(notifs.length>1?'s':''),html,footer);
 }
 function _notifMarkAndRefresh(nid){
@@ -6238,7 +6238,7 @@ function cloudTestConnection(){
     toast('✅ Connexion au cloud réussie !');
   })
   .catch(function(e){
-    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span><strong>Échec de connexion :</strong> '+_esc(e.message)+'. Vérifiez l\'URL et la clé API.</span></div>');
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>❌</span><span><strong>Échec de connexion :</strong> '+_esc(e.message)+'. Vérifiez l\'URL et la clé API.</span></div>');
     toast('❌ Connexion échouée : '+e.message,'err');
   });
 }
@@ -6356,7 +6356,7 @@ function cloudSaveDB(){
     });
   })
   .catch(function(e){
-    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span><strong>Échec :</strong> '+_esc(e.message)+'</span></div>');
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>❌</span><span><strong>Échec :</strong> '+_esc(e.message)+'</span></div>');
     toast('❌ Sauvegarde échouée : '+e.message,'err');
   });
 }
@@ -6390,7 +6390,7 @@ function cloudRestoreDB(){
     setTimeout(function(){re();},1000);
   })
   .catch(function(e){
-    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span><strong>Erreur :</strong> '+_esc(e.message)+'</span></div>');
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>❌</span><span><strong>Erreur :</strong> '+_esc(e.message)+'</span></div>');
     toast('❌ Échec restauration : '+e.message,'err');
   });
 }
@@ -6451,7 +6451,7 @@ function cloudDoUpload(){
     toast('✅ Fichier uploadé avec succès !');
   })
   .catch(function(e){
-    _si('uplProgress','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span>'+_esc(e.message)+'</span></div>');
+    _si('uplProgress','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>❌</span><span>'+_esc(e.message)+'</span></div>');
     toast('❌ Échec upload : '+e.message,'err');
   });
 }
@@ -6488,7 +6488,7 @@ function mCloudFilesList(){
     _si('cloudFilesContent',h);
   })
   .catch(function(e){
-    _si('cloudFilesContent','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span>'+_esc(e.message)+'</span></div>');
+    _si('cloudFilesContent','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>❌</span><span>'+_esc(e.message)+'</span></div>');
   });
 }
 
@@ -6898,13 +6898,13 @@ async function forceFullSync(){
   var nBin=_countLocalBinaries();
   M('🚀 Synchronisation complète','Cette opération va :',
     '<div style="font-size:13px;line-height:1.9">'
-      +'<div style="background:#EFF6FF;border-left:3px solid #2563EB;padding:10px 14px;border-radius:8px;margin-bottom:10px">'
+      +'<div style="background:#EFF6FF;padding:10px 14px;border-radius:8px;margin-bottom:10px">'
       +'<strong>1. Upload des fichiers locaux</strong><br>'
       +'<span style="color:var(--ink3);font-size:12px">'+(nBin>0?nBin+' fichier(s) à envoyer sur LWS':'Aucun fichier en attente')+'</span></div>'
-      +'<div style="background:#F0FDF4;border-left:3px solid #16A34A;padding:10px 14px;border-radius:8px;margin-bottom:10px">'
+      +'<div style="background:#F0FDF4;padding:10px 14px;border-radius:8px;margin-bottom:10px">'
       +'<strong>2. Sauvegarde DB → Firebase</strong><br>'
       +'<span style="color:var(--ink3);font-size:12px">Texte (élèves, notes, paramètres) — sync instantanée multi-appareils</span></div>'
-      +'<div style="background:#FEF3C7;border-left:3px solid #D97706;padding:10px 14px;border-radius:8px;margin-bottom:10px">'
+      +'<div style="background:#FEF3C7;padding:10px 14px;border-radius:8px;margin-bottom:10px">'
       +'<strong>3. Sauvegarde DB → LWS (200 Go)</strong><br>'
       +'<span style="color:var(--ink3);font-size:12px">Copie indépendante de secours sur ton serveur</span></div>'
       +'<div id="forceSyncStatus" class="mt12"></div>'
@@ -6948,7 +6948,7 @@ async function _runForceFullSync(){
     if(!res.ok)throw new Error('HTTP '+res.status);
     _step('<div style="font-size:12px;color:#059669;padding:4px 0">✓ Firebase synchronisé ('+Math.round(JSON.stringify(dbLight).length/1024)+' Ko)</div>');
   }catch(e){
-    _step('<div style="font-size:12px;color:#DC2626;padding:4px 0">✗ Firebase : '+_esc(e.message)+'</div>');
+    _step('<div style="font-size:12px;color:#AE5353;padding:4px 0">✗ Firebase : '+_esc(e.message)+'</div>');
   }
   // Étape 3 : POST LWS
   _step('<div style="font-size:12px;color:var(--ink3);padding:4px 0">⏳ Étape 3/3 : Sauvegarde sur LWS (200 Go)…</div>');
@@ -6960,7 +6960,7 @@ async function _runForceFullSync(){
       _step('<div style="font-size:12px;color:#D97706;padding:4px 0">⚠️ LWS : statut inconnu (voir console)</div>');
     }
   }catch(e){
-    _step('<div style="font-size:12px;color:#DC2626;padding:4px 0">✗ LWS : '+_esc(e.message)+'</div>');
+    _step('<div style="font-size:12px;color:#AE5353;padding:4px 0">✗ LWS : '+_esc(e.message)+'</div>');
   }
   _step('<div style="margin-top:12px;padding:10px;background:#F0FDF4;border-radius:8px;font-size:13px;font-weight:600;color:#16A34A">✅ Synchronisation terminée — tes données sont sauvegardées à 2 endroits indépendants.</div>');
   if(btn){btn.disabled=false;btn.innerHTML='✓ Terminé · Fermer';btn.setAttribute('onclick','cm()');}
@@ -7084,7 +7084,7 @@ function mCleanBrokenRefs(){
 
   M('🧹 Nettoyer les références cassées','Outil de réparation post-corruption',body,
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +(total>0?'<button class="btn" style="background:#DC2626;color:#fff" onclick="_runCleanBrokenRefs()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Nettoyer maintenant ('+total+')</button>':''),
+    +(total>0?'<button class="btn" style="background:#AE5353;color:#fff" onclick="_runCleanBrokenRefs()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Nettoyer maintenant ('+total+')</button>':''),
     false
   );
 }
@@ -7278,7 +7278,7 @@ function cloudForcePull(){
     setTimeout(function(){re();},800);
   })
   .catch(function(e){
-    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626"><span>❌</span><span>'+_esc(e.message)+'</span></div>');
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>❌</span><span>'+_esc(e.message)+'</span></div>');
     toast('❌ '+e.message,'err');
   });
 }
@@ -7595,7 +7595,7 @@ function pgElearningMgmt(){
   h+='<div class="fl2 g8 fw">';
   h+='<button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-package"/></svg>Packs personnalisés</button>';
   h+='<button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-game"/></svg>Jeux éducatifs</button>';
-  h+='<button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageLabos()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"/></svg>Laboratoires virtuels</button>';
+  h+='<button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="mManageLabos()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"/></svg>Laboratoires virtuels</button>';
   h+='<button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-target"/></svg>Coaching</button>';
   h+='<button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEpreuves()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Épreuves</button>';
   var _nInact=(typeof _nbInactifs==='function')?_nbInactifs():0;
@@ -7610,7 +7610,7 @@ function pgElearningMgmt(){
     ['&#128218;',el.contenus.length,'Contenus publiés','#3C8DFF','#E0EAFF'],
     ['&#128203;',abos.length,'Abonnés','#059669','#D1FAE5'],
     ['&#128722;',cmds.length,'Commandes','#F59E0B','#FFF7ED'],
-    ['&#9203;',pendingSubs.length,'En attente de validation','#DC2626','#FEE2E2']
+    ['&#9203;',pendingSubs.length,'En attente de validation','#AE5353','#FEE2E2']
   ];
   h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px">';
   kpis.forEach(function(k){
@@ -7624,7 +7624,7 @@ function pgElearningMgmt(){
 
   // Soumissions en attente
   if(pendingSubs.length>0){
-    h+='<div class="card mb16" style="border-left:4px solid #FFC93C;background:linear-gradient(135deg,#fff,#FFF8E1)">';
+    h+='<div class="card mb16" style="background:linear-gradient(135deg,#fff,#FFF8E1)">';
     h+='<div class="fl2 fic fsb mb12"><div class="ct mb0" style="color:var(--gold)">&#128228; Soumissions en attente ('+pendingSubs.length+')</div></div>';
     h+='<div class="ib ibi mb13"><span>&#128161;</span><span>Cliquer sur <strong>&#9989; Publier</strong> pour ajouter la ressource au catalogue visible par les abonnés.</span></div>';
     h+='<div class="tw"><table><thead><tr><th>Date</th><th>Enseignant</th><th>Titre</th><th>Classe</th><th>Prix</th><th>Fichier</th><th>Actions</th></tr></thead><tbody>';
@@ -7644,16 +7644,16 @@ function pgElearningMgmt(){
     });
     h+='</tbody></table></div></div>';
   }else{
-    h+='<div class="card mb16" style="border-left:4px solid var(--gr);background:var(--grb)">';
+    h+='<div class="card mb16" style="background:var(--grb)">';
     h+='<div class="fl2 fic g10"><span style="font-size:22px">&#9989;</span><span style="font-size:13px;color:var(--gr);font-weight:600">Aucune soumission en attente &#8212; le catalogue est à jour.</span></div></div>';
   }
 
   // Abonnements — alerte si en attente
   var pendingAbos=abos.filter(function(a){return a.statut==='En attente';});
   if(pendingAbos.length>0){
-    h+='<div class="card mb16" style="border-left:4px solid #DC2626;background:linear-gradient(135deg,#fff,#FEE2E2)">';
+    h+='<div class="card mb16" style="background:linear-gradient(135deg,#fff,#FEE2E2)">';
     h+='<div class="fl2 fic g10 mb14"><span style="font-size:28px">🔔</span><div>';
-    h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#DC2626">'+pendingAbos.length+' souscription(s) en attente de validation !</div>';
+    h+='<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:800;color:#AE5353">'+pendingAbos.length+' souscription(s) en attente de validation !</div>';
     h+='<div style="font-size:13px;color:var(--ink3);margin-top:3px">Ces abonnés ont effectué un paiement et attendent leur activation.</div>';
     h+='</div></div>';
     h+='<div class="tw"><table><thead><tr><th>Date</th><th>Abonné</th><th>Pack souscrit</th><th>Classe</th><th>WhatsApp</th><th>Actions rapides</th></tr></thead><tbody>';
@@ -7679,7 +7679,7 @@ function pgElearningMgmt(){
   if(abos.length>0){
     h+='<div class="fl2 g8">';
     h+='<span class="bg bgg">✅ Activés: '+abos.filter(function(a){return a.statut==='Activé';}).length+'</span>';
-    h+='<span style="background:#DC2626;color:#fff;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:700">⏳ En attente: '+pendingAbos.length+'</span>';
+    h+='<span style="background:#AE5353;color:#fff;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:700">⏳ En attente: '+pendingAbos.length+'</span>';
     h+='<span class="bg bgd">Expirés: '+abos.filter(function(a){return a.statut==='Expiré';}).length+'</span>';
     h+='</div>';
   }
@@ -7734,7 +7734,7 @@ function pgElearningMgmt(){
   // Résumé par pack
   if(el.contenus.length>0){
     h+='<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:14px">';
-    var packStats={plan1:{label:'EXAMEN',color:'#059669',bg:'#D1FAE5'},plan2:{label:'INTERMÉDIAIRE',color:'#3C8DFF',bg:'#E0EAFF'},plan3:{label:'ENSEIGNANT',color:'#7C3AED',bg:'#DDD6FE'},plan4:{label:'FAMILLE',color:'#DC2626',bg:'#FEE2E2'}};
+    var packStats={plan1:{label:'EXAMEN',color:'#059669',bg:'#D1FAE5'},plan2:{label:'INTERMÉDIAIRE',color:'#3C8DFF',bg:'#E0EAFF'},plan3:{label:'ENSEIGNANT',color:'#6C56A6',bg:'#DDD6FE'},plan4:{label:'FAMILLE',color:'#AE5353',bg:'#FEE2E2'}};
     Object.entries(packStats).forEach(function(entry){
       var pid=entry[0];var ps=entry[1];
       var cnt=(el.contenus||[]).filter(function(c){return c.plans&&c.plans.indexOf(pid)>-1;}).length;
@@ -7751,7 +7751,7 @@ function pgElearningMgmt(){
       var cat=(el.categories||[]).find(function(c){return c.id===item.cat;})||{nom:'?',ico:'📄'};
       var packBadges='';
       if(item.plans&&item.plans.length){
-        var packCols={plan1:'#059669',plan2:'#3C8DFF',plan3:'#7C3AED',plan4:'#DC2626'};
+        var packCols={plan1:'#059669',plan2:'#3C8DFF',plan3:'#6C56A6',plan4:'#AE5353'};
         var packSh={plan1:'EXAM.',plan2:'INTER.',plan3:'PROF.',plan4:'FAM.'};
         item.plans.forEach(function(pid){packBadges+='<span style="background:'+packCols[pid]+'22;color:'+packCols[pid]+';font-size:9px;font-weight:700;padding:1px 6px;border-radius:6px;margin-right:2px">'+packSh[pid]+'</span>';});
       } else {packBadges='<span class="xs2 mut">Aucun</span>';}
@@ -8121,7 +8121,7 @@ function mGererAccesContenu(itemId){
     var isBlocked=item.blockedFor.indexOf(acc.id)>=0;
     var _ap=acc.plans||[],_ed=DB&&DB.elearning&&DB.elearning.plans||[];var _ep=_ap.reduce(function(ef,pid){if(ef.indexOf(pid)<0)ef.push(pid);var pd=_ed.find(function(p){return p.id===pid;});if(pd&&pd.planTags)pd.planTags.forEach(function(t){if(ef.indexOf(t)<0)ef.push(t);});return ef;},[]);
     var hasPlan=_ep.length&&item.plans&&item.plans.some(function(p){return _ep.indexOf(p)>=0;});
-    var status=isBlocked?'<span style="background:#FEE2E2;color:#DC2626;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">🔒 Bloqué</span>':isUnlocked?'<span style="background:#D1FAE5;color:#059669;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">🔓 Débloqué</span>':hasPlan?'<span style="background:#E0EAFF;color:#3C8DFF;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">✅ Via plan</span>':'<span style="background:#F3F4F6;color:#6B7280;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">— Aucun accès</span>';
+    var status=isBlocked?'<span style="background:#FEE2E2;color:#AE5353;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">🔒 Bloqué</span>':isUnlocked?'<span style="background:#D1FAE5;color:#059669;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">🔓 Débloqué</span>':hasPlan?'<span style="background:#E0EAFF;color:#3C8DFF;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">✅ Via plan</span>':'<span style="background:#F3F4F6;color:#6B7280;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">— Aucun accès</span>';
     rows+='<tr>'
       +'<td class="semi s">'+_esc(acc.pre)+' '+_esc(acc.nom)+'</td>'
       +'<td class="xs2 mut">'+_esc(acc.email||acc.tel||'')+'</td>'
@@ -8271,7 +8271,7 @@ function pgBoutiqueMgmt(){
   prods.forEach(function(p){
     var pct=p.ancien?Math.round((1-p.prix/p.ancien)*100):0;
     h+='<tr><td>'+(p.photo?'<img src="'+p.photo+'" style="width:40px;height:40px;border-radius:8px;object-fit:cover">':'<span style="font-size:24px">'+p.ico+'</span>')+'</td>';
-    h+='<td><div class="semi">'+p.titre+(p.featured?' <span style="background:#FFC93C;color:#142554;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-left:4px">⭐ EN AVANT</span>':'')+(p.nouveau?' <span style="background:#DC2626;color:#fff;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-left:4px">🆕 NEW</span>':'')+'</div><div class="xs2 mut">'+p.desc.substring(0,50)+'...</div></td>';
+    h+='<td><div class="semi">'+p.titre+(p.featured?' <span style="background:#FFC93C;color:#142554;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-left:4px">⭐ EN AVANT</span>':'')+(p.nouveau?' <span style="background:#AE5353;color:#fff;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-left:4px">🆕 NEW</span>':'')+'</div><div class="xs2 mut">'+p.desc.substring(0,50)+'...</div></td>';
     h+='<td><span class="bg bgb">'+(p.cat||'—')+'</span></td>';
     h+='<td class="mono" style="color:var(--re);text-decoration:line-through">'+(p.ancien?fmt(p.ancien):'—')+'</td>';
     h+='<td class="mono bold" style="color:var(--gold)">'+fmt(p.prix)+'</td>';
@@ -8585,7 +8585,7 @@ function previewElContenu(itemId){
   if(!item)return;
   var cat=(el.categories||[]).find(function(c2){return c2.id===item.cat;})||{ico:'📄',nom:'Autre'};
   var planLabels={plan1:'Pack EXAMEN',plan2:'Pack INTERMÉDIAIRE',plan3:'Pack ENSEIGNANT',plan4:'Pack FAMILLE / ÉCOLE'};
-  var planColors={plan1:'#059669',plan2:'#3C8DFF',plan3:'#7C3AED',plan4:'#DC2626'};
+  var planColors={plan1:'#059669',plan2:'#3C8DFF',plan3:'#6C56A6',plan4:'#AE5353'};
   var plansHtml='';
   if(item.plans&&item.plans.length){
     plansHtml='<div style="margin-bottom:12px"><div style="font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Inclus dans :</div><div style="display:flex;gap:6px;flex-wrap:wrap">';
@@ -8681,7 +8681,7 @@ function _loadElPdfPreview(itemId,pdfKey){
   cont.innerHTML='<div class="ib ibt" style="margin-top:8px"><span>⏳</span><span>Chargement de l\'aperçu PDF…</span></div>';
   idbGetFile(pdfKey,function(rec){
     if(!rec){
-      cont.innerHTML='<div class="ib" style="background:#FEE2E2;color:#DC2626;padding:10px;border-radius:8px;font-size:12px;margin-top:8px">'
+      cont.innerHTML='<div class="ib" style="background:#FEE2E2;color:#AE5353;padding:10px;border-radius:8px;font-size:12px;margin-top:8px">'
         +'❌ Aperçu PDF introuvable (chargé sur un autre appareil).</div>';
       return;
     }
@@ -8827,7 +8827,7 @@ function viewResource(item, accessMode, dlUsedToday, dlLimitToday){
 
     var apercuHtml=item.apercu?
       '<div style="background:linear-gradient(135deg,#E0EAFF,#EDE9FE);border-radius:10px;padding:12px 14px;margin-bottom:12px;font-family:Georgia,serif;font-size:13px;color:#142554;line-height:1.7">'+
-      '<div style="font-size:10px;font-weight:800;color:#7C3AED;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">📋 Aperçu du contenu</div>'+item.apercu+'</div>':'';
+      '<div style="font-size:10px;font-weight:800;color:#6C56A6;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">📋 Aperçu du contenu</div>'+item.apercu+'</div>':'';
 
     var counterHtml='';
   var _cnt=dlUsedToday||todayCount;
@@ -9519,7 +9519,7 @@ async function doLogin(){
   if($("lp"))$("lp").value="";
   var lockAfter=_checkLoginLock(u);
   if(lockAfter.locked){
-    $("lerr").innerHTML='<div>Identifiants incorrects</div><div style="font-size:11px;margin-top:4px;color:#dc2626">Compte verrouill\u00e9 pour '+lockAfter.remaining+'s apr\u00e8s trop de tentatives</div>';
+    $("lerr").innerHTML='<div>Identifiants incorrects</div><div style="font-size:11px;margin-top:4px;color:#AE5353">Compte verrouill\u00e9 pour '+lockAfter.remaining+'s apr\u00e8s trop de tentatives</div>';
   } else {
     $("lerr").innerHTML='<div>Identifiants incorrects</div>';
   }
@@ -9611,7 +9611,7 @@ function go2SES(acc){
     $("APP").style.display="none";
     $("LS").style.display="flex";
     $("lerr").style.display="block";
-    $("lerr").innerHTML="❌ Erreur chargement: "+err.message+"<br><small style='font-size:10px'>Essayez de <button onclick=\"localStorage.removeItem(\'vrt10\');location.reload()\" style=\"background:#dc2626;color:#fff;border:none;padding:2px 8px;border-radius:4px;cursor:pointer\">réinitialiser</button></small>";
+    $("lerr").innerHTML="❌ Erreur chargement: "+err.message+"<br><small style='font-size:10px'>Essayez de <button onclick=\"localStorage.removeItem(\'vrt10\');location.reload()\" style=\"background:#AE5353;color:#fff;border:none;padding:2px 8px;border-radius:4px;cursor:pointer\">réinitialiser</button></small>";
     console.error("go2SES error:",err);
   }
 }
@@ -9825,7 +9825,7 @@ function buildNav(){
   const pendingAbos=(DB.elearning?.abonnements||[]).filter(function(a){return a.statut==='En attente';}).length;
   $("snav").innerHTML=nav.map(s=>`<div class="sbsec"><div class="sbsl">${s.s}</div>${s.i.map(it=>{
     const b=it.k==='payments'&&un>0&&iA()?`<span class="sbbg">${un}</span>`:'';
-    const elBadge=it.k==='elearningmgmt'&&pendingAbos>0&&iA()?`<span class="sbbg" style="background:#DC2626">${pendingAbos}</span>`:'';
+    const elBadge=it.k==='elearningmgmt'&&pendingAbos>0&&iA()?`<span class="sbbg" style="background:#AE5353">${pendingAbos}</span>`:'';
     return`<div class="sbit${it.k===pg?' on':''}" onclick="goTo('${it.k}')"><span class="sbic">${it.i}</span>${it.l}${b}${elBadge}</div>`;
   }).join("")}</div>`).join("");
   const roleMap={admin:"aa",enseignant:"at",eleve:"ae",superadmin:"asa"};
@@ -9932,7 +9932,7 @@ function cm(){
   // v2 a11y : restituer le focus à l'élément qui a ouvert la modale (si possible)
   try { if(window._lastFocusedBeforeModal && document.contains(window._lastFocusedBeforeModal)) window._lastFocusedBeforeModal.focus(); } catch(e){}
 }
-function toast(msg,t='ok'){const d=document.createElement('div');const c={ok:['var(--gr)','✓'],warn:['var(--or)','⚠'],err:['var(--re)','✕'],info:['#3C8DFF','ℹ']}[t]||['var(--gr)','✓'];d.style.cssText=`position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6EAF2;border-left:4px solid ${c[0]};color:#142554;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(20,37,84,.16);max-width:360px;animation:su .24s cubic-bezier(.16,1,.3,1);`;d.innerHTML=`<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${c[0]};color:#fff;font-size:13px;font-weight:800">${c[1]}</span><span>${(''+msg).replace(/</g,'&lt;')}</span>`;document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s,transform .3s';d.style.opacity='0';d.style.transform='translateY(8px)';setTimeout(()=>d.remove(),300);},3500);}
+function toast(msg,t='ok'){const d=document.createElement('div');const c={ok:['var(--gr)','✓'],warn:['var(--or)','⚠'],err:['var(--re)','✕'],info:['#3C8DFF','ℹ']}[t]||['var(--gr)','✓'];d.style.cssText=`position:fixed;bottom:20px;right:20px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6EAF2;color:#142554;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 10px 30px rgba(20,37,84,.16);max-width:360px;animation:su .24s cubic-bezier(.16,1,.3,1);`;d.innerHTML=`<span style="flex-shrink:0;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:${c[0]};color:#fff;font-size:13px;font-weight:800">${c[1]}</span><span>${(''+msg).replace(/</g,'&lt;')}</span>`;document.body.appendChild(d);setTimeout(()=>{d.style.transition='opacity .3s,transform .3s';d.style.opacity='0';d.style.transform='translateY(8px)';setTimeout(()=>d.remove(),300);},3500);}
 // Toast enrichi avec bouton d'action — utilisé quand cloud KO et fichiers locaux en attente
 function _toastRetrySync(){
   var d=document.createElement('div');
@@ -10108,7 +10108,7 @@ function pgDash(){
   const totAbs=DB.absences?.length||0;
   return`
   ${isSA()?'<div class="ib ibg mb16"><span>👑</span><span>Vous êtes connecté en tant que <strong>Super Administrateur</strong>. Vous avez accès à toutes les données sensibles du système.</span></div>':''}
-  ${(()=>{var pendingAbos=(DB.elearning?.abonnements||[]).filter(function(a){return a.statut==='En attente';});if(!pendingAbos.length)return'';return'<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#DC2626;cursor:pointer;margin-bottom:16px" onclick="goTo(\'elearningmgmt\')"><span style="font-size:20px">🔔</span><span><strong>'+pendingAbos.length+' abonnement(s) E-Learning en attente de validation !</strong> Cliquez pour gérer → E-Learning Admin</span></div>'})()}
+  ${(()=>{var pendingAbos=(DB.elearning?.abonnements||[]).filter(function(a){return a.statut==='En attente';});if(!pendingAbos.length)return'';return'<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353;cursor:pointer;margin-bottom:16px" onclick="goTo(\'elearningmgmt\')"><span style="font-size:20px">🔔</span><span><strong>'+pendingAbos.length+' abonnement(s) E-Learning en attente de validation !</strong> Cliquez pour gérer → E-Learning Admin</span></div>'})()}
   <div class="sg">
     <div class="sc scg"><div class="sci">🎓</div><div class="scl">Élèves inscrits</div><div class="scv vg">${DB.students.length}</div><div class="scs">${CLS.filter(c=>DB.students.some(s=>s.cls===c)).length} niveaux actifs</div></div>
     <div class="sc scgr"><div class="sci">💰</div><div class="scl">Recettes totales</div><div class="scv vgr" style="font-size:18px">${fmt(paid+bkr)}</div><div class="scs">frais + manuels</div></div>
@@ -10596,11 +10596,11 @@ function pgCMS(){
   <div class="card mb16" style="background:linear-gradient(135deg,#F8F9FF,#EDE9FE);border:1px solid #C7D2FE">
     <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg></span>Outils rapides du portail</div>
     <div class="fl2 g8 fw">
-      <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg>Bandeau défilant</button>
-      <button class="btn sm" style="background:#DC2626;color:#fff;border-radius:10px" onclick="mSetIntroVideo()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-camera"/></svg>Vidéo d'accueil</button>
+      <button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg>Bandeau défilant</button>
+      <button class="btn sm" style="background:#AE5353;color:#fff;border-radius:10px" onclick="mSetIntroVideo()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-camera"/></svg>Vidéo d'accueil</button>
       <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-calendar"/></svg>Calendrier événements</button>
       <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"/></svg>Partenaires</button>
-      <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="mManageExtraits()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Extraits de manuels</button>
+      <button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="mManageExtraits()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Extraits de manuels</button>
       <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageCitations()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>Citations héro</button>
     </div>
   </div>
@@ -11760,7 +11760,7 @@ function pgGrades(){
     </div>
     <div class="fl2 fic g6 fw" id="gClsChips" style="margin-top:10px">
       ${cls.map(c=>`<button data-cls="${c}" data-grp="${_clsGroup(c)}" style="display:${_clsGroup(c)===selG?'inline-block':'none'};padding:4px 11px;border-radius:6px;border:none;background:${c===selC?'var(--bl)':'var(--sur,#f3f5fa)'};color:${c===selC?'#fff':'var(--ink2)'};font-size:13px;font-weight:600;cursor:pointer" onclick="window._gC='${c}';window._gGrp='${_clsGroup(c)}';re()">${c}</button>`).join('')}
-      ${!isEnseignant()?`<button onclick="mManageClasses()" style="padding:4px 11px;border-radius:6px;border:1px dashed var(--bl);background:transparent;color:var(--bl);font-size:12px;font-weight:700;cursor:pointer">🏫 Gérer les classes</button><button onclick="mManageSubjects()" style="padding:4px 11px;border-radius:6px;border:1px dashed #7C3AED;background:transparent;color:#7C3AED;font-size:12px;font-weight:700;cursor:pointer">📚 Matières &amp; coef.</button>`:''}
+      ${!isEnseignant()?`<button onclick="mManageClasses()" style="padding:4px 11px;border-radius:6px;border:1px dashed var(--bl);background:transparent;color:var(--bl);font-size:12px;font-weight:700;cursor:pointer">🏫 Gérer les classes</button><button onclick="mManageSubjects()" style="padding:4px 11px;border-radius:6px;border:1px dashed #6C56A6;background:transparent;color:#6C56A6;font-size:12px;font-weight:700;cursor:pointer">📚 Matières &amp; coef.</button>`:''}
     </div>
   </div>
   <div class="fl2 fic fsb mb16 fw g8">
@@ -12331,7 +12331,7 @@ function printSched(){
     <table style="width:100%;border-collapse:collapse;font-size:12px">
       <thead><tr><th style="padding:6px;background:#1a3a8a;color:rgba(255,255,255,.7);font-size:13px;min-width:60px">Horaire</th>${sc.days.map(d=>`<th style="padding:6px;background:#1a3a8a;color:#FFC93C;font-size:13px;font-weight:700">${d}</th>`).join('')}</tr></thead>
       <tbody>${sc.slots.map(sl=>`<tr>${['<td style="padding:5px;font-size:13px;color:#888;background:#f5f3ef;text-align:center;line-height:1.4">'+sl.replace('–','<br>')+'</td>',
-        ...sc.days.map(d=>{const items=sc.items.filter(i=>i.day===d&&i.slot===sl);return`<td style="padding:3px;border:1px solid #e8e4dc;vertical-align:top">${items.map(i=>`<div style="padding:4px;margin:2px;border-radius:4px;background:#fffbee;border-left:3px solid #c49a3c"><div style="font-weight:700;font-size:12px">${i.sub}</div><div style="color:#666;font-size:12px">${i.cls}</div></div>`).join('')}</td>`;})].join('')}</tr>`).join('')}</tbody>
+        ...sc.days.map(d=>{const items=sc.items.filter(i=>i.day===d&&i.slot===sl);return`<td style="padding:3px;border:1px solid #e8e4dc;vertical-align:top">${items.map(i=>`<div style="padding:4px;margin:2px;border-radius:4px;background:#fffbee;"><div style="font-weight:700;font-size:12px">${i.sub}</div><div style="color:#666;font-size:12px">${i.cls}</div></div>`).join('')}</td>`;})].join('')}</tr>`).join('')}</tbody>
     </table>
   </div></div>`,'Emploi du temps');
 }
@@ -13316,7 +13316,7 @@ function genCertScol(){
     <div style="background:#f5f3ef;border-radius:10px;padding:20px;margin-bottom:20px;text-align:left">
       <div style="font-size:14px;line-height:2">
         <p>Nous soussignés, <strong>${DB.school?.directeur||'Le Directeur'}</strong>, Directeur du <strong>${DB.school?.nom||'Centre VÉRITAS'}</strong>, certifions que :</p>
-        <div style="margin:16px 0;padding:14px;border-left:4px solid #9a7228;background:#fff">
+        <div style="margin:16px 0;padding:14px;background:#fff">
           <div style="font-size:18px;font-weight:700;color:#142554">${s.pre.toUpperCase()} ${s.nom.toUpperCase()}</div>
           <div style="font-size:13px;color:#6b5e52;margin-top:4px">Né(e) le ${s.dob||'—'}</div>
         </div>
@@ -13384,7 +13384,7 @@ function genAttestTravail(){
   const t=T(document.getElementById('atEns')?.value);if(!t)return;
   printDoc(`<div style="max-width:900px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px #9a7228,inset 0 0 0 6px #142554,inset 0 0 0 8px #9a7228;-webkit-print-color-adjust:exact;print-color-adjust:exact">${docHeader("Attestation de Travail")}<div style="padding:30px 40px"><div style="font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:20px">ATTESTATION DE TRAVAIL</div>
   <div style="font-size:13px;line-height:2;text-align:left"><p>Je soussigné(e), <strong>${DB.school?.directeur||'Le Directeur'}</strong>, Directeur du <strong>${DB.school?.nom||'Centre VÉRITAS'}</strong>, atteste que :</p>
-  <div style="margin:16px 0;padding:14px;border-left:4px solid #9a7228;background:#f5f3ef"><div style="font-size:18px;font-weight:700;color:#142554">${t.pre.toUpperCase()} ${t.nom.toUpperCase()}</div><div style="font-size:13px;color:#6b5e52;margin-top:4px">Grade: ${t.grade} · Matière: ${t.mat2}</div></div>
+  <div style="margin:16px 0;padding:14px;background:#f5f3ef"><div style="font-size:18px;font-weight:700;color:#142554">${t.pre.toUpperCase()} ${t.nom.toUpperCase()}</div><div style="font-size:13px;color:#6b5e52;margin-top:4px">Grade: ${t.grade} · Matière: ${t.mat2}</div></div>
   <p>est employé(e) en qualité de <strong>Professeur de ${t.mat2}</strong> au sein de notre établissement depuis la rentrée scolaire <strong>${DB.school?.annee||'2024–2025'}</strong>.</p>
   <p style="margin-top:12px">Cette attestation est délivrée pour servir et valoir ce que de droit.</p></div>
   <div style="display:flex;justify-content:space-between;margin-top:24px"><div><div style="font-size:13px;color:#6b5e52">Fait le: ${today()}</div></div><div style="text-align:right"><div style="font-weight:700">${DB.school?.directeur||'Le Directeur'}</div><div style="margin-top:18px;border-top:1px solid #ccc;width:140px;margin-left:auto;font-size:13px;color:#aaa;padding-top:4px">Signature & Cachet</div></div></div></div></div>`,`Attestation travail — ${t.pre} ${t.nom}`,'landscape');
@@ -13493,12 +13493,12 @@ function pgGuide(){
   var section=window._guideSec||'demarrage';
   var sections=[
     {k:'demarrage',ico:'🚀',l:"Démarrage rapide",col:'#3C8DFF'},
-    {k:'comptes',ico:'👥',l:"Comptes & connexion",col:'#7C3AED'},
+    {k:'comptes',ico:'👥',l:"Comptes & connexion",col:'#6C56A6'},
     {k:'admin',ico:'⚙️',l:"Administration",col:'#142554'},
     {k:'pedagogie',ico:'📚',l:"Pédagogie & notes",col:'#16A34A'},
     {k:'paiements',ico:'💳',l:"Paiements & finance",col:'#F59E0B'},
     {k:'elearning',ico:'🎓',l:"E-Learning & jeux",col:'#0EA5E9'},
-    {k:'sync',ico:'☁️',l:"Sync cloud & sauvegarde",col:'#DC2626'},
+    {k:'sync',ico:'☁️',l:"Sync cloud & sauvegarde",col:'#AE5353'},
     {k:'visiteurs',ico:'🌐',l:"Portail visiteurs",col:'#BE185D'},
     {k:'depannage',ico:'🛠️',l:"Dépannage / FAQ",col:'#92400E'},
     {k:'about',ico:'ℹ️',l:"À propos / Version",col:'#6B7A99'}
@@ -13533,7 +13533,7 @@ function pgGuide(){
 function _guideContent(section,role){
   var sNom=(DB.school&&DB.school.nom)||'VÉRITAS Academy';
   function _block(ico,titre,html){
-    return '<div style="margin-bottom:20px;padding:16px 18px;background:#F8FAFF;border-left:4px solid #142554;border-radius:0 12px 12px 0">'
+    return '<div style="margin-bottom:20px;padding:16px 18px;background:#F8FAFF;border-radius:0 12px 12px 0">'
       +'<div style="font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="font-size:20px">'+ico+'</span>'+_esc(titre)+'</div>'
       +'<div style="font-size:13.5px;color:#374151;line-height:1.8">'+html+'</div></div>';
   }
@@ -13543,10 +13543,10 @@ function _guideContent(section,role){
       +'<div><div style="font-weight:700;color:#142554;font-size:13.5px;margin-bottom:3px">'+_esc(t)+'</div><div style="font-size:13px;color:#475569;line-height:1.6">'+d+'</div></div></div>';
   }
   function _tip(t){
-    return '<div style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);border-left:4px solid #D97706;padding:10px 14px;border-radius:0 10px 10px 0;margin:10px 0;font-size:13px;color:#78350F"><strong>💡 Astuce :</strong> '+t+'</div>';
+    return '<div style="background:linear-gradient(135deg,#FEF3C7,#FDE68A);padding:10px 14px;border-radius:0 10px 10px 0;margin:10px 0;font-size:13px;color:#78350F"><strong>💡 Astuce :</strong> '+t+'</div>';
   }
   function _warn(t){
-    return '<div style="background:linear-gradient(135deg,#FEE2E2,#FECACA);border-left:4px solid #DC2626;padding:10px 14px;border-radius:0 10px 10px 0;margin:10px 0;font-size:13px;color:#991B1B"><strong>⚠️ Attention :</strong> '+t+'</div>';
+    return '<div style="background:linear-gradient(135deg,#FEE2E2,#FECACA);padding:10px 14px;border-radius:0 10px 10px 0;margin:10px 0;font-size:13px;color:#991B1B"><strong>⚠️ Attention :</strong> '+t+'</div>';
   }
 
   if(section==='demarrage'){
@@ -13796,13 +13796,13 @@ function pgSettings(){
       </div>
       <button class="btn bi sm mt10" onclick="saveCloudConfig()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer config cloud</button>
       <div class="fl2 g8 fw mt14 pt14" style="border-top:var(--br)">
-        <button class="btn sm" style="background:linear-gradient(135deg,#DC2626,#F97316);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="forceFullSync()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>Forcer la sync complète</button>
+        <button class="btn sm" style="background:linear-gradient(135deg,#AE5353,#C07D4F);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="forceFullSync()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>Forcer la sync complète</button>
         <button class="btn sm" style="background:linear-gradient(135deg,#142554,#1e3a7a);color:#FFC93C;border-radius:10px;font-weight:700" onclick="mStorageDashboard()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Stockage LWS (200 Go)</button>
         <button class="btn sm" style="background:linear-gradient(135deg,#92400E,#D97706);color:#fff;border-radius:10px;font-weight:700" onclick="mCleanBrokenRefs()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Nettoyer références cassées</button>
         <button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="cloudSaveDB()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cloud"/></svg>Sauvegarder vers le cloud</button>
-        <button class="btn sm" style="background:#7C3AED;color:#fff;border-radius:10px" onclick="cloudRestoreDB()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Restaurer depuis le cloud</button>
+        <button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="cloudRestoreDB()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Restaurer depuis le cloud</button>
         <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="cloudTestConnection()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Tester la connexion</button>
-        <button class="btn sm" style="background:linear-gradient(135deg,#DC2626,#F59E0B);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="mSyncDiag()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Diagnostic Sync complet (5 tests)</button>
+        <button class="btn sm" style="background:linear-gradient(135deg,#AE5353,#F59E0B);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="mSyncDiag()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Diagnostic Sync complet (5 tests)</button>
         <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mCloudUploadFile()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Uploader un fichier</button>
         <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mCloudFilesList()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-package"/></svg>Fichiers en ligne</button><button class="btn sm" style="background:#065F46;color:#fff;border-radius:10px" onclick="cloudSyncBinaries()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Sync fichiers locaux</button><button class="btn sm" style="background:#6D28D9;color:#fff;border-radius:10px" onclick="cloudForcePull()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Forcer depuis le cloud</button>
       </div>
@@ -13861,7 +13861,7 @@ function pgSettings(){
         </label></div>
       </div>
 
-      <details class="mt12" style="background:var(--bg2);padding:14px 18px;border-radius:10px;border-left:4px solid #059669">
+      <details class="mt12" style="background:var(--bg2);padding:14px 18px;border-radius:10px;">
         <summary style="cursor:pointer;font-weight:700;color:var(--ink2)">⭐ Mise en service — CamPay (recommandé : MTN + Orange + versements partenaires)</summary>
         <ol style="font-size:13px;line-height:1.9;color:var(--ink3);margin:12px 0 0 20px">
           <li>Créez le compte sur <a href="https://www.campay.net" target="_blank" style="color:var(--bl);font-weight:700">campay.net</a> <strong>au nom du Centre VÉRITAS</strong> (RCCM + NIU + CNI du gérant)</li>
@@ -14387,7 +14387,7 @@ function mManageTicker(){
 window._statsVitrineHtml = function(){
   var list=(typeof DB!=='undefined'&&DB.statsVitrine&&DB.statsVitrine.length)?DB.statsVitrine:[];
   if(!list.length) return '';
-  var accents=['#3C8DFF','#FFC93C','#7C3AED','#059669','#F59E0B','#0D9488'];
+  var accents=['#3C8DFF','#FFC93C','#6C56A6','#059669','#F59E0B','#0D9488'];
   var mLabels={ab:'Assez Bien',b:'Bien',tb:'Très Bien',exc:'Excellent'};
   // v1.4.8 (demande Jacques) : MÊME style que les cartes catégories e-learning —
   // bandeau navy sobre (examen + % or) et corps BLANC (séries en chips claires,
@@ -14495,7 +14495,7 @@ window._examCountdownHtml = function(){
   if(!n) return '';
   var urgent = n.days<=60;
   var dd = n.days===0 ? "aujourd'hui" : (n.days===1 ? "demain" : ("dans "+n.days+" jours"));
-  var bg = urgent ? 'linear-gradient(135deg,#DC2626,#F59E0B)' : 'linear-gradient(135deg,#142554,#1E3A8A)';
+  var bg = urgent ? 'linear-gradient(135deg,#AE5353,#F59E0B)' : 'linear-gradient(135deg,#142554,#1E3A8A)';
   return '<div class="v-reveal" style="background:'+bg+';color:#fff;border-radius:16px;padding:16px 20px;margin:16px 0;display:flex;align-items:center;gap:16px;flex-wrap:wrap;box-shadow:0 12px 30px rgba(20,37,84,.22);position:relative;overflow:hidden">'
     +'<div style="font-size:13px" aria-hidden="true">⏳</div>'
     +'<div style="flex:1;min-width:200px">'
@@ -14580,7 +14580,7 @@ window._questionJourHtml = function(){
   var site='https://veritas-school.com';
   var msg='🎓 QUESTION DU JOUR — Centre VÉRITAS\n\n'+q+'\n\n💡 La réponse avec le Prof. Ambassa (IA gratuite) : '+site;
   var waShare='https://wa.me/?text='+encodeURIComponent(msg); // partage générique (statut/contact)
-  return '<div class="v-reveal" style="background:linear-gradient(135deg,#0D9488,#10B981);color:#fff;border-radius:16px;padding:16px 20px;margin:16px 0;box-shadow:0 12px 30px rgba(13,148,136,.22)">'
+  return '<div class="v-reveal" style="background:linear-gradient(135deg,#0D9488,#3A8F73);color:#fff;border-radius:16px;padding:16px 20px;margin:16px 0;box-shadow:0 12px 30px rgba(13,148,136,.22)">'
     +'<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
       +'<div style="flex:1;min-width:220px">'
         +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#A7F3D0;font-weight:800">❓ Question du jour</div>'
@@ -14600,7 +14600,7 @@ window._questionJourHtml = function(){
 // transform GPU + pause au survol + reduced-motion statique (voir .rmq dans app.css).
 window._reussitesMarquee = function(){
   var chips=[];
-  (DB.statsVitrine||[]).forEach(function(s){ if(s && s.ex && s.taux!=null) chips.push({lc:'award',c:'#10B981',t:_esc(s.ex),v:(s.taux||0)+'% de réussite'}); });
+  (DB.statsVitrine||[]).forEach(function(s){ if(s && s.ex && s.taux!=null) chips.push({lc:'award',c:'#3A8F73',t:_esc(s.ex),v:(s.taux||0)+'% de réussite'}); });
   try{
     if(DB.battles && typeof _currentWeekKey==='function'){
       var wk=DB.battles[_currentWeekKey()];
@@ -14616,7 +14616,7 @@ window._reussitesMarquee = function(){
   var nApp=((DB.students||[]).length)+((DB.visitorAccounts||[]).length);
   if(nApp>0) chips.push({lc:'users',c:'#3C8DFF',t:nApp+' apprenant'+(nApp>1?'s':''),v:'nous font confiance'});
   chips.push({lc:'award',c:'#FFC93C',t:'BEPC · Probatoire · BAC · GCE',v:'préparation complète'});
-  chips.push({lc:'graduation',c:'#7C3AED',t:'Général · Technique · Anglophone',v:'tous les sous-systèmes'});
+  chips.push({lc:'graduation',c:'#6C56A6',t:'Général · Technique · Anglophone',v:'tous les sous-systèmes'});
   if(chips.length<4) return '';
   var html=chips.map(function(o){
     return '<span class="rmq-chip">'
@@ -14680,7 +14680,11 @@ window._palmaresHtml = function(){
   var champ=null, _battleTop=[]; try{ if(DB.battles && typeof _currentWeekKey==='function'){ var _wkb=DB.battles[_currentWeekKey()]; if(_wkb && _wkb.participants){ var _pa=Object.values(_wkb.participants).sort(function(a,b){ return (b.score-a.score) || (a.timeMs-b.timeMs); }); _battleTop=_pa.slice(0,3); if(_pa.length) champ=_pa[0]; } } }catch(e){}
   var nApp=(DB.students||[]).length+(DB.visitorAccounts||[]).length;
   var tile=function(o){
-    return '<div onclick="'+o.click+'" class="vemu-tile" style="--tile-c:'+o.color+';display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:13px;background:#fff;border:1px solid #E6EAF2;border-left:4px solid '+o.color+';cursor:pointer">'
+    // Plus de barre verticale à gauche : la couleur passe par un fond lavé, la
+    // pastille du picto et la flèche. Même repère, sans le trait qui tranche.
+    return '<div onclick="'+o.click+'" class="vemu-tile" style="--tile-c:'+o.color+';display:flex;align-items:center;gap:11px;padding:12px 13px;border-radius:14px;'
+      +'background:linear-gradient(135deg,color-mix(in srgb,'+o.color+' 10%,#fff),#fff 60%);'
+      +'border:1px solid color-mix(in srgb,'+o.color+' 24%,#E6EAF2);cursor:pointer">'
       +'<div class="vemu-ic" style="flex-shrink:0;width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:21px;background:color-mix(in srgb,'+o.color+' 14%,#fff)">'+(o.lc?'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+o.color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+o.lc+'"/></svg>':o.ico)+'</div>'
       +'<div style="min-width:0;flex:1">'
         +'<div style="font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:color-mix(in srgb,'+o.color+' 60%,#0D1B3E)">'+o.label+'</div>'
@@ -14690,8 +14694,8 @@ window._palmaresHtml = function(){
   };
   var tiles='';
   if(topBook){ var _assez=(topN>=SEUIL_PREUVE);
-    tiles+=tile({color:'#F59E0B',ico:(topBook.ico||'📘'),label:_assez?'Manuel le plus commandé':'Manuel à la une',title:_esc(topBook.titre),sub:_assez?(topN+' commandes · '+_esc(topBook.cls)):_esc(topBook.cls),click:"viewBookDetail('"+topBook.id+"')"}); }
-  if(bestRated&&bestRated!==topBook){ tiles+=tile({color:'#10B981',ico:'⭐',lc:'star',label:'Le mieux noté',title:_esc(bestRated.titre),sub:'Note '+bestAvg.toFixed(1)+'/5 par les élèves',click:"viewBookDetail('"+bestRated.id+"')"}); }
+    tiles+=tile({color:'#F59E0B',lc:'book',label:_assez?'Manuel le plus commandé':'Manuel à la une',title:_esc(topBook.titre),sub:_assez?(topN+' commandes · '+_esc(topBook.cls)):_esc(topBook.cls),click:"viewBookDetail('"+topBook.id+"')"}); }
+  if(bestRated&&bestRated!==topBook){ tiles+=tile({color:'#3A8F73',lc:'star',label:'Le mieux noté',title:_esc(bestRated.titre),sub:'Note '+bestAvg.toFixed(1)+'/5 par les élèves',click:"viewBookDetail('"+bestRated.id+"')"}); }
   // ── v1.9.1 PODIUM « GAGNANTS DE LA SEMAINE » — émulation : mettre en relief les
   //    MEILLEURS + le PRIX reçu PAR NIVEAU (1er/2e/3e). Classement par score puis
   //    chrono (cf. tri ci-dessus). « Mes erreurs » et « Test de positionnement » ont
@@ -14737,7 +14741,7 @@ window._palmaresHtml = function(){
       +'<button onclick="event.stopPropagation();(typeof mBattles===\'function\'?mBattles():showJeuxEdu())" style="margin-top:9px;width:100%;border:none;cursor:pointer;padding:10px;border-radius:11px;background:#142554;color:#FFC93C;font-weight:800;font-size:12px;letter-spacing:.3px">Participe et gagne ton prix →</button>'
     +'</div>';
   } else {
-    tiles+=tile({color:'#C8961A',ico:'⚔️',lc:'swords',label:'Battle de la semaine',title:'10 QCM · Gagne ton prix !',sub:battleN>0?(battleN+' duel'+(battleN>1?'s':'')+' en cours'):'Général, technique & anglophone — abonnement & manuel à gagner',click:"(typeof mBattles===\'function\'?mBattles():showJeuxEdu())"});
+    tiles+=tile({color:'#C8961A',lc:'swords',label:'Battle de la semaine',title:'10 QCM · Gagne ton prix !',sub:battleN>0?(battleN+' duel'+(battleN>1?'s':'')+' en cours'):'Général, technique & anglophone — abonnement & manuel à gagner',click:"(typeof mBattles===\'function\'?mBattles():showJeuxEdu())"});
   }
   // ── Plan d'abonnement le PLUS souscrit (émulation : « rejoignez les autres ») ──
   var _plans=(DB.elearning&&DB.elearning.plans)||[];
@@ -14752,9 +14756,9 @@ window._palmaresHtml = function(){
     var _psub=_topPlanN>0
       ? ('🔥 '+_topPlanN+' élève'+(_topPlanN>1?'s ont':' a')+' déjà choisi ce plan — rejoignez-les !')
       : (_pp?('Dès '+_pp+' — débloquez tout le contenu'):'Débloquez tout le contenu premium');
-    tiles+=tile({color:'#7C3AED',ico:'🚀',lc:'rocket',label:'Abonnement le plus choisi',title:_esc(_topPlan.nom||'Plan Premium')+(_pp?(' · '+_pp):''),sub:_psub,click:"(typeof vShowSec===\'function\'?vShowSec(\'elearning\'):(typeof showRegisterForm===\'function\'?showRegisterForm():null))"});
+    tiles+=tile({color:'#6C56A6',lc:'rocket',label:'Abonnement le plus choisi',title:_esc(_topPlan.nom||'Plan Premium')+(_pp?(' · '+_pp):''),sub:_psub,click:"(typeof vShowSec===\'function\'?vShowSec(\'elearning\'):(typeof showRegisterForm===\'function\'?showRegisterForm():null))"});
   } else {
-    tiles+=tile({color:'#7C3AED',ico:'🔥',lc:'flame',label:'Rejoignez le palmarès',title:'XP · Badges · Niveaux',sub:nApp>0?('Déjà '+nApp+' apprenants inscrits — rejoignez-les !'):'Soyez le premier !',click:"(typeof showRegisterForm===\'function\'?showRegisterForm():null)"});
+    tiles+=tile({color:'#6C56A6',lc:'flame',label:'Rejoignez le palmarès',title:'XP · Badges · Niveaux',sub:nApp>0?('Déjà '+nApp+' apprenants inscrits — rejoignez-les !'):'Soyez le premier !',click:"(typeof showRegisterForm===\'function\'?showRegisterForm():null)"});
   }
   return '<div style="min-height:300px;height:100%;background:linear-gradient(180deg,#fff,#F7F9FF);border:1px solid #E6EAF2;border-radius:var(--r3,20px);box-shadow:0 4px 24px rgba(20,37,84,.08);display:flex;flex-direction:column;overflow:hidden">'
     +'<div style="padding:14px 16px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;flex-shrink:0;text-align:center">'
@@ -14856,7 +14860,7 @@ function _buildHeroMediaHtml(){
       }
     });
     return '<div class="vhero-video-wrap" data-vtype="idb-loading">'
-      +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#7C3AED);background-size:400% 400%;animation:vhAnim 8s ease infinite">'
+      +'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#6C56A6);background-size:400% 400%;animation:vhAnim 8s ease infinite">'
         +'<div style="color:#fff;font-size:14px;opacity:.7;font-family:sans-serif">⏳ Chargement vidéo...</div>'
       +'</div>'
       +'</div>';
@@ -14945,7 +14949,7 @@ function _vheroShowGradient(wrap){
   if(wrap.getAttribute('data-vtype')==='gradient-shown')return; // déjà affiché
   wrap.setAttribute('data-vtype','gradient-shown');
   wrap.style.cssText=(wrap.style.cssText||'')
-    +';background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#7C3AED);background-size:400% 400%;animation:vhAnim 8s ease infinite;display:block;position:relative';
+    +';background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#6C56A6);background-size:400% 400%;animation:vhAnim 8s ease infinite;display:block;position:relative';
   var nom=(DB&&DB.school&&DB.school.nom)||'VÉRITAS';
   var sl=(DB&&DB.publicInfo&&DB.publicInfo.slogan)||'Centre d\'Excellence Scolaire';
   wrap.innerHTML='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:30px 20px;z-index:1">'
@@ -15051,7 +15055,7 @@ function buildIntroVideoHtml_legacy(){
   if(DB&&DB.students&&DB.students.length)stats+='<span style="font-size:12px;color:rgba(255,255,255,.8)">👨‍🎓 '+DB.students.length+' élèves</span>&nbsp;&nbsp;';
   if(DB&&DB.teachers&&DB.teachers.length)stats+='<span style="font-size:12px;color:rgba(255,255,255,.8)">👩‍🏫 '+DB.teachers.length+' enseignants</span>';
 
-  return '<div style="background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#7C3AED);background-size:400% 400%;animation:vhAnim 8s ease infinite;border-radius:18px;overflow:hidden;margin-bottom:20px;box-shadow:0 8px 32px rgba(13,27,62,.35)">'
+  return '<div style="background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#6C56A6);background-size:400% 400%;animation:vhAnim 8s ease infinite;border-radius:18px;overflow:hidden;margin-bottom:20px;box-shadow:0 8px 32px rgba(13,27,62,.35)">'
     +'<div style="padding:36px 28px 28px;position:relative">'
     // Badge
     +'<div style="position:absolute;top:16px;right:16px;background:rgba(255,201,60,.15);border:1px solid rgba(255,201,60,.4);border-radius:20px;padding:4px 14px;font-size:10px;font-weight:800;color:#FFC93C;letter-spacing:1px">🏫 VÉRITAS</div>'
@@ -15327,7 +15331,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
       +'</div>'
       // v1.2.2 (#6) : UPGRADE CONTEXTUEL — si un examen approche, créer l'urgence ici (le bon moment)
       +((function(){ try{ var n=(typeof _examPromoActive==='function')?_examPromoActive():null;
-          return n ? ('<div style="background:linear-gradient(135deg,#DC2626,#F59E0B);color:#fff;padding:12px;border-radius:12px;margin-bottom:12px;font-size:13px;font-weight:700">⏳ '+_esc(n.ex)+' dans '+n.days+' jour'+(n.days>1?'s':'')+' — ne casse pas ta révision maintenant. Débloque Ambassa sans limite pour la dernière ligne droite.</div>') : ''; }catch(e){return '';} })())
+          return n ? ('<div style="background:linear-gradient(135deg,#AE5353,#F59E0B);color:#fff;padding:12px;border-radius:12px;margin-bottom:12px;font-size:13px;font-weight:700">⏳ '+_esc(n.ex)+' dans '+n.days+' jour'+(n.days>1?'s':'')+' — ne casse pas ta révision maintenant. Débloque Ambassa sans limite pour la dernière ligne droite.</div>') : ''; }catch(e){return '';} })())
       +'<button class="btn bi" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:14px 28px;font-size:14px;font-weight:800;width:100%" onclick="cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-star"/></svg>Choisir un plan d\'abonnement</button>'
       // v1.2.2 (#3) : alternative micro-paiement immédiate (lève le frein du forfait)
       +((typeof _microBuyBtn==='function')?('<div style="margin-top:8px">'+_microBuyBtn('epreuve','ambassa','Continuer avec Ambassa (à l\'unité)')+'</div>'):'')
@@ -15354,7 +15358,7 @@ window._aiQuotaBadgeHtml = function(action){
   action = action || 'ambassa';
   var st = _aiQuotaStatus(action);
   if(st.unlimited) return '<span style="font-size:11px;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:3px 10px;border-radius:99px;font-weight:800">∞ Illimité</span>';
-  var color = st.remaining===0 ? '#DC2626' : st.remaining<=2 ? '#F59E0B' : '#10B981';
+  var color = st.remaining===0 ? '#AE5353' : st.remaining<=2 ? '#F59E0B' : '#3A8F73';
   var periodLabel = st.period==='lifetime'?'au total':st.period==='week'?'cette semaine':'aujourd\'hui';
   return '<span style="font-size:11px;background:'+color+'18;color:'+color+';padding:3px 10px;border-radius:99px;font-weight:700;border:1px solid '+color+'40">⚡ '+st.remaining+'/'+st.limit+' essai'+(st.remaining>1?'s':'')+' restant'+(st.remaining>1?'s':'')+' '+periodLabel+'</span>';
 };
@@ -15457,7 +15461,7 @@ async function _runAICorrect(){
       '**Résolution étape par étape** : méthode attendue au BEPC/BAC. '+
       '**Méthode à retenir** : technique clé pour ce type de sujet. '+
       '**Piège classique** : erreur fréquente des élèves camerounais sur ce sujet.'
-    )+' Maximum 450 mots. En français.';;
+    )+' Maximum 450 mots. En français.';
   try{
     var txt=await callAmbassaIA(prompt);
     // FIX v1.2 : _aiGate() a déjà incrémenté — pas de second _aiInc
@@ -15746,7 +15750,7 @@ function renderQuizQuestion(){
   html+='</div>';
   html+='<div class="quiz-nav">';
   html+='<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;color:#059669">✅ Score: '+s.score+'/'+s.current+'</div>';
-  html+='<button class="btn" id="quizNextBtn" style="display:none;background:linear-gradient(135deg,#1E3A8A,#3B82F6);color:#fff;border-radius:12px;padding:9px 20px;font-size:12px;font-weight:700" onclick="_quizNext()">Question suivante →</button>';
+  html+='<button class="btn" id="quizNextBtn" style="display:none;background:linear-gradient(135deg,#1E3A8A,#6A8DC7);color:#fff;border-radius:12px;padding:9px 20px;font-size:12px;font-weight:700" onclick="_quizNext()">Question suivante →</button>';
   html+='</div>';
   html+='</div>';
   
@@ -15803,7 +15807,7 @@ function renderQuizScore(){
   var scoreKey='quiz_'+s.titre.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_'+new Date().toDateString();
   try{localStorage.setItem(scoreKey,JSON.stringify({score:s.score,total:s.qbank.length,pct:pct,date:new Date().toISOString()}));}catch(e){}
   html+='<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">';
-  html+='<button class="btn" style="background:linear-gradient(135deg,#1E3A8A,#3B82F6);color:#fff;border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700" onclick="startQuiz(\''+s.topicKey+'\',\''+s.classe+'\',\''+s.titre+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Recommencer</button>';
+  html+='<button class="btn" style="background:linear-gradient(135deg,#1E3A8A,#6A8DC7);color:#fff;border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700" onclick="startQuiz(\''+s.topicKey+'\',\''+s.classe+'\',\''+s.titre+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Recommencer</button>';
   html+='<button class="btn" style="background:#E8EEFF;color:#1E3A8A;border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700" onclick="vShowSec(\'elearning\',null)">← E-Learning</button>';
   html+='</div></div>';
   _vc(html);
@@ -15941,10 +15945,10 @@ function showCalendrier(){
   h+='<div class="ct mb12"><span class="ct-ico">'+_calIco('sun',17)+'</span>Vacances scolaires</div>';
   h+='<div class="vvac-grid">';
   var _vacThemes=[
-    {c1:'#EAF2FF',c2:'#CFE1FF',br:'#3C8DFF',ink:'#1E3A8A',ink2:'#3C5A96',g1:'#60A5FA',g2:'#1D4ED8',ico:'snowflake'}, // 1re interruption (Noël)
-    {c1:'#E7FAF0',c2:'#C6F0D8',br:'#10B981',ink:'#065F46',ink2:'#0F7A5A',g1:'#34D399',g2:'#047857',ico:'sprout'},    // 2e interruption (Pâques)
+    {c1:'#EAF2FF',c2:'#CFE1FF',br:'#3C8DFF',ink:'#1E3A8A',ink2:'#3C5A96',g1:'#87A9D3',g2:'#1D4ED8',ico:'snowflake'}, // 1re interruption (Noël)
+    {c1:'#E7FAF0',c2:'#C6F0D8',br:'#3A8F73',ink:'#065F46',ink2:'#0F7A5A',g1:'#5CAB8E',g2:'#047857',ico:'sprout'},    // 2e interruption (Pâques)
     {c1:'#FFF3DF',c2:'#FFE2B0',br:'#F59E0B',ink:'#92400E',ink2:'#A45B12',g1:'#FBBF24',g2:'#D97706',ico:'sun'},       // grandes vacances
-    {c1:'#F7EEFF',c2:'#E9D8FF',br:'#A855F7',ink:'#6B21A8',ink2:'#7C3AED',g1:'#C084FC',g2:'#7E22CE',ico:'calendar'}   // secours
+    {c1:'#F7EEFF',c2:'#E9D8FF',br:'#A855F7',ink:'#6B21A8',ink2:'#6C56A6',g1:'#C084FC',g2:'#7E22CE',ico:'calendar'}   // secours
   ];
   cal.vacances.forEach(function(v,i){
     var t=_vacThemes[i % _vacThemes.length];
@@ -16191,7 +16195,7 @@ function mEditCalendrier(){
   var evts=(DB.calendrierCustom.evenements||[]);
   var rows=evts.map(function(ev,i){
     return "<tr><td style='padding:5px 8px;font-size:12px'><strong>"+ev.titre+"</strong></td>"
-      +"<td style='padding:5px 8px;font-size:11px;color:#DC2626;font-weight:600'>"+ev.date+"</td>"
+      +"<td style='padding:5px 8px;font-size:11px;color:#AE5353;font-weight:600'>"+ev.date+"</td>"
       +"<td style='padding:5px 8px;font-size:11px;color:var(--ink4)'>"+ev.niveaux+"</td>"
       +"<td><button class='btn br2 xs' data-ci='"+i+"' onclick='_calEvtDel(this)'>🗑</button></td></tr>";
   }).join("");
@@ -16610,7 +16614,7 @@ window._runCorrectionIA = async function(){
       res.style.display='block';
       // Formatter le markdown léger ** ** → <strong>
       var html = (typeof _aiMarkdown==='function') ? _aiMarkdown(txt) : _esc(txt).replace(/\n/g,'<br>');
-      res.innerHTML = '<div class="ai-md" style="background:linear-gradient(135deg,#FAF5FF,#EDE9FE);border-left:4px solid #7C3AED;border-radius:12px;padding:16px 20px">'+html+'</div>'+
+      res.innerHTML = '<div class="ai-md" style="background:linear-gradient(135deg,#FAF5FF,#EDE9FE);border-radius:12px;padding:16px 20px">'+html+'</div>'+
         '<div style="margin-top:12px;font-size:11px;color:#64748B;text-align:right;font-style:italic">Correction générée par IA pédagogique — Centre VÉRITAS</div>';
       res.scrollIntoView({behavior:'smooth',block:'nearest'});
     }
@@ -17071,7 +17075,7 @@ window.vDevenirAuteur = function(){
   }
   M('✍️ Devenir auteur VÉRITAS','Partagez votre savoir, soyez rémunéré',
     '<div style="padding:6px">'
-    +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;border-radius:14px;padding:18px;text-align:center;margin-bottom:14px">'
+    +'<div style="background:linear-gradient(135deg,#142554,#6C56A6);color:#fff;border-radius:14px;padding:18px;text-align:center;margin-bottom:14px">'
       +'<div style="font-size:34px;font-weight:900;line-height:1">70%</div>'
       +'<div style="font-size:12px;opacity:.9;margin-top:2px">de chaque vente vous reviennent</div>'
     +'</div>'
@@ -17234,7 +17238,7 @@ function _buildOrientationHtml(niveau,serie,maths,fr,sci,interests){
   }
   if(!recs.length)recs.push("Remplissez tous les champs pour une orientation precise");
   if(!ecoles.length)ecoles.push("Precisez vos notes et interets pour des recommandations d'ecoles");
-  h+="<div style='margin-bottom:14px'><div style='font-size:12px;font-weight:800;color:#7C3AED;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>🎓 Filieres recommandees</div>";
+  h+="<div style='margin-bottom:14px'><div style='font-size:12px;font-weight:800;color:#6C56A6;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>🎓 Filieres recommandees</div>";
   recs.forEach(function(r){h+="<div style='padding:6px 0;border-bottom:1px solid rgba(0,0,0,.05);font-family:Georgia,serif;font-size:13px;color:#1F2937'>"+r+"</div>";});
   h+="</div><div style='margin-bottom:14px'><div style='font-size:12px;font-weight:800;color:#059669;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px'>🏫 Ecoles & Universites</div>";
   ecoles.forEach(function(e){h+="<div style='padding:6px 10px;background:rgba(5,150,105,.06);border-radius:8px;margin-bottom:5px;font-size:12px;color:#1F2937'>📍 "+e+"</div>";});
@@ -17359,7 +17363,7 @@ function _getFullQuizList(){
   var base=[
     {key:"maths_bepc",titre:"Maths BEPC",cls:"3eme",ico:"🔢",color:"#1E3A8A",free:true},
     {key:"physchim_bepc",titre:"Physique-Chimie",cls:"3eme",ico:"⚗️",color:"#059669",free:true},
-    {key:"francais_bepc",titre:"Francais BEPC",cls:"3eme",ico:"📝",color:"#7C3AED",free:true},
+    {key:"francais_bepc",titre:"Francais BEPC",cls:"3eme",ico:"📝",color:"#6C56A6",free:true},
     {key:"svt_bepc",titre:"SVT BEPC",cls:"3eme",ico:"🧬",color:"#065F46",free:true},
     {key:"anglais_bepc",titre:"Anglais BEPC",cls:"3eme",ico:"🇬🇧",color:"#1E40AF",free:true},
     {key:"philo_term",titre:"Philosophie Tle",cls:"Terminale",ico:"🧠",color:"#4C1D95",free:false,plan:"Premium"},
@@ -17409,23 +17413,23 @@ JEUX_CATALOGUE.forEach(function(j){
     )
     +"</td></tr>";
   if(isHidden) deletedRows.push(row); else activeRows.push(row);
-});;
+});
   var MATS=["Mathematiques","Francais","Litterature","Histoire-Geographie","Physique-Chimie","SVT","Anglais","Philosophie","Toutes matieres"];
   var NIVEAUX=["6eme-3eme","4eme-3eme","3eme","2nde-1ere","1ere","Terminale","3eme-Tle","Toutes classes"];
   M("🎮 Gestion des Jeux & Quiz","",
-    "<div class='ib ibt mb12'><span>🎮</span><span>"+(JEUX_CATALOGUE.length-_deleted.length)+" jeux actifs"+(  _deleted.length?" · <span style='color:#DC2626;font-weight:700'>"+_deleted.length+" supprimés</span>":"")+" — Gérez l'accès, importez ou créez de nouveaux contenus.</span></div>"
+    "<div class='ib ibt mb12'><span>🎮</span><span>"+(JEUX_CATALOGUE.length-_deleted.length)+" jeux actifs"+(  _deleted.length?" · <span style='color:#AE5353;font-weight:700'>"+_deleted.length+" supprimés</span>":"")+" — Gérez l'accès, importez ou créez de nouveaux contenus.</span></div>"
     +"<div class='tw' style='max-height:220px;overflow-y:auto'><table style='width:100%'>"
     +"<thead><tr style='background:var(--bg2)'><th style='padding:6px 8px;text-align:left'>Jeu / Quiz</th><th>Matière</th><th>Niveau</th><th>Accès</th><th>Actions</th></tr></thead>"
     +"<tbody>"+(activeRows.length?activeRows.join(""):"<tr><td colspan='5' style='text-align:center;padding:20px;color:#999'>Aucun jeu actif</td></tr>")+"</tbody></table></div>"
-    +(deletedRows.length?"<details style='margin-top:8px'><summary style='cursor:pointer;font-size:11px;color:#DC2626;font-weight:700;user-select:none'>&#128465; Jeux supprim&eacute;s ("+deletedRows.length+") — cliquer pour voir / restaurer</summary><div class='tw' style='max-height:160px;overflow-y:auto;margin-top:6px'><table style='width:100%;font-size:11px'><thead><tr style='background:#FEF2F2'><th style='padding:4px 8px;text-align:left'>Jeu</th><th>Mati&egrave;re</th><th>Niveau</th><th>Acc&egrave;s</th><th>Action</th></tr></thead><tbody>"+deletedRows.join("")+"</tbody></table></div></details>":"")
+    +(deletedRows.length?"<details style='margin-top:8px'><summary style='cursor:pointer;font-size:11px;color:#AE5353;font-weight:700;user-select:none'>&#128465; Jeux supprim&eacute;s ("+deletedRows.length+") — cliquer pour voir / restaurer</summary><div class='tw' style='max-height:160px;overflow-y:auto;margin-top:6px'><table style='width:100%;font-size:11px'><thead><tr style='background:#FEF2F2'><th style='padding:4px 8px;text-align:left'>Jeu</th><th>Mati&egrave;re</th><th>Niveau</th><th>Acc&egrave;s</th><th>Action</th></tr></thead><tbody>"+deletedRows.join("")+"</tbody></table></div></details>":"")
     +"<div style='border-top:var(--br);padding-top:12px;margin-top:12px'>"
     +"<div class='bold s mb10'>⚡ Actions rapides</div>"
     +"<div class='fl2 g8 fw mb14'>"
     +"<button class='btn bgr2 sm' onclick='_setAllJeuxGratuit()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-checkcircle'/></svg>Tout gratuit</button>"
     +"<button class='btn br2 sm' onclick='_setAllJeuxPremium()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-lock'/></svg>Tout premium</button>"
-    +"<button class='btn sm' style='background:#DC2626;color:#fff' onclick='_deleteAllBuiltinJeux()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-trash'/></svg>Supprimer tous les jeux par défaut</button>"
+    +"<button class='btn sm' style='background:#AE5353;color:#fff' onclick='_deleteAllBuiltinJeux()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-trash'/></svg>Supprimer tous les jeux par défaut</button>"
     +"<button class='btn sm' style='background:#6B7280;color:#fff' onclick='_restoreAllJeux()'>↩ Restaurer tous</button>"
-    +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='cm();mImportQCM()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-download'/></svg>Importer JSON</button>"
+    +"<button class='btn sm' style='background:#6C56A6;color:#fff' onclick='cm();mImportQCM()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-download'/></svg>Importer JSON</button>"
     +"<button class='btn sm' style='background:#059669;color:#fff' onclick='cm();mImportJeuFichier()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-upload'/></svg>Importer Jeu/Quiz</button>"
     +"<button class='btn sm' style='background:#BE185D;color:#fff' onclick='cm();mImportJeuHTML()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-globe'/></svg>Importer HTML</button>"
     +"</div>"
@@ -17702,7 +17706,7 @@ function _lancerQCMCustom(j){
     opts.forEach(function(o,oi){
       h+="<button class='quiz-opt' onclick='_cqCheck("+oi+","+q.ans+",this,\""+encodeURIComponent(q.exp||"")+"\")'>"+String.fromCharCode(65+oi)+". "+o+"</button>";
     });
-    h+="</div><div id='cqExp' style='display:none;margin-top:12px;padding:10px;background:#FEF3C7;border-left:4px solid #F59E0B;border-radius:0 8px 8px 0;font-size:12px'></div>"
+    h+="</div><div id='cqExp' style='display:none;margin-top:12px;padding:10px;background:#FEF3C7;border-radius:0 8px 8px 0;font-size:12px'></div>"
     +"</div><div class='quiz-nav'><span style='font-size:13px;color:var(--ink4)'>Score : "+score+"/"+qs.length+"</span>"
     +"<button id='cqNext' class='btn bi xs' style='display:none' onclick='window._cqNext()'>Suivant →</button></div></div></div>";
     _vc(h);
@@ -17735,19 +17739,19 @@ function _lancerPenduCustom(j){
     h+="<div class='vcard' style='max-width:560px;margin:0 auto;text-align:center'>";
     if(item.ind)h+="<div style='font-size:12px;color:var(--ink4);margin-bottom:10px;font-style:italic'>💡 "+item.ind+"</div>";
     // Bonhomme pendu SVG simplifié
-    var parts=["<circle cx='100' cy='30' r='18' fill='none' stroke='#DC2626' stroke-width='3'/>",
-      "<line x1='100' y1='48' x2='100' y2='110' stroke='#DC2626' stroke-width='3'/>",
-      "<line x1='100' y1='65' x2='70' y2='95' stroke='#DC2626' stroke-width='3'/>",
-      "<line x1='100' y1='65' x2='130' y2='95' stroke='#DC2626' stroke-width='3'/>",
-      "<line x1='100' y1='110' x2='75' y2='145' stroke='#DC2626' stroke-width='3'/>",
-      "<line x1='100' y1='110' x2='125' y2='145' stroke='#DC2626' stroke-width='3'/>",
+    var parts=["<circle cx='100' cy='30' r='18' fill='none' stroke='#AE5353' stroke-width='3'/>",
+      "<line x1='100' y1='48' x2='100' y2='110' stroke='#AE5353' stroke-width='3'/>",
+      "<line x1='100' y1='65' x2='70' y2='95' stroke='#AE5353' stroke-width='3'/>",
+      "<line x1='100' y1='65' x2='130' y2='95' stroke='#AE5353' stroke-width='3'/>",
+      "<line x1='100' y1='110' x2='75' y2='145' stroke='#AE5353' stroke-width='3'/>",
+      "<line x1='100' y1='110' x2='125' y2='145' stroke='#AE5353' stroke-width='3'/>",
       "<line x1='40' y1='0' x2='40' y2='160' stroke='#142554' stroke-width='3'/><line x1='40' y1='0' x2='100' y2='0' stroke='#142554' stroke-width='3'/><line x1='100' y1='0' x2='100' y2='12' stroke='#142554' stroke-width='3'/>"];
     h+="<svg viewBox='0 0 200 170' style='width:160px;height:130px;margin:0 auto;display:block'>"
       +parts.slice(Math.max(0,7-tries)).join("")
       +"</svg>";
     h+="<div style='font-size:26px;font-family:\"Fira Code\",monospace;letter-spacing:8px;color:#142554;margin:14px 0'>"+display+"</div>";
     if(won){h+="<div style='color:#059669;font-weight:800;font-size:16px;margin-bottom:12px'>🎉 Bravo ! Mot trouvé !</div><button class='btn bi' onclick='_lancerPenduCustom("+JSON.stringify(j).replace(/'/g,"&#39;")+")'>Rejouer</button>";}
-    else if(lost){h+="<div style='color:#DC2626;font-weight:800;font-size:14px;margin-bottom:8px'>❌ Perdu ! Le mot était : <strong>"+item.mot+"</strong></div><button class='btn bi' onclick='_lancerPenduCustom("+JSON.stringify(j).replace(/'/g,"&#39;")+")'>Rejouer</button>";}
+    else if(lost){h+="<div style='color:#AE5353;font-weight:800;font-size:14px;margin-bottom:8px'>❌ Perdu ! Le mot était : <strong>"+item.mot+"</strong></div><button class='btn bi' onclick='_lancerPenduCustom("+JSON.stringify(j).replace(/'/g,"&#39;")+")'>Rejouer</button>";}
     else{
       h+="<div style='display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:8px'>";
       ALPHA.split("").forEach(function(c){
@@ -17797,7 +17801,7 @@ function _lancerTrousCustom(j){
       if(val===ans||ans.split("|").some(function(a){return val===a.trim();})){
         score++;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:800'>✅ Correct !</span>";
       }else{
-        if(fb)fb.innerHTML="<span style='color:#DC2626;font-weight:800'>❌ Réponse : "+decodeURIComponent(ansEnc)+"</span>";
+        if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:800'>❌ Réponse : "+decodeURIComponent(ansEnc)+"</span>";
       }
       if(inp)inp.disabled=true;
       setTimeout(function(){idx++;render();},1400);
@@ -17919,7 +17923,7 @@ function _showLittCarte(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe||!oe.carte){toast('Carte non disponible','warn');return;}
   var c=oe.carte;
-  var _MMCOLORS=['#0EA5E9','#F97316','#8B5CF6','#10B981','#EF4444','#F59E0B'];
+  var _MMCOLORS=['#0EA5E9','#C07D4F','#7C68B8','#3A8F73','#C46F6F','#F59E0B'];
   function _mmIco(lb){
     lb=(lb||'').toLowerCase();
     if(/thème|theme/.test(lb)) return'💡 ';
@@ -18022,7 +18026,7 @@ function _mmDrawCv(cv,c,oe,sc,mob){
   var cx=W/2, cy=H/2;
   var branches=c.branches||[];
   var nBr=branches.length;
-  var COLORS=['#0EA5E9','#F97316','#8B5CF6','#10B981','#EF4444','#F59E0B'];
+  var COLORS=['#0EA5E9','#C07D4F','#7C68B8','#3A8F73','#C46F6F','#F59E0B'];
 
   // ── Fond dégradé radial ──
   var bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.65);
@@ -18418,7 +18422,7 @@ function _showLittCorriges(oeuvreKey){
     // v1.3.2 : accès direct à la demande IA précise depuis les corrigés statiques
     +'<div class="vcard mt12" style="text-align:center;background:linear-gradient(135deg,#FAF5FF,#EFF6FF);border:1px dashed rgba(124,58,237,.35)">'
       +'<div style="font-size:13px;color:var(--ink3);margin-bottom:10px">Un autre sujet en tête ? Ambassa rédige une dissertation, un commentaire ou une fiche sur VOTRE sujet.</div>'
-      +'<button class="btn" style="background:#7C3AED;color:#fff;border:none;border-radius:24px;padding:10px 22px;font-weight:800;cursor:pointer" onclick="_littCorrigeIA(\''+oeuvreKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>Demander à l\'IA (sujet précis)</button>'
+      +'<button class="btn" style="background:#6C56A6;color:#fff;border:none;border-radius:24px;padding:10px 22px;font-weight:800;cursor:pointer" onclick="_littCorrigeIA(\''+oeuvreKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>Demander à l\'IA (sujet précis)</button>'
     +'</div></div>');
   var base=(typeof location!=='undefined'&&location.origin&&location.origin.indexOf('http')===0)?'':'';
   fetch(base+'evaluations/'+file+'?t='+Date.now())
@@ -18466,7 +18470,7 @@ function _littCorrigeIA(oeuvreKey, mode){
       +'<div class="fg" style="margin-top:12px"><span class="fl">🎯 Votre sujet précis (optionnel — sinon Ambassa propose un sujet type examen)</span>'
       +'<textarea class="fi" id="littIaSujet" rows="2" placeholder="Ex : un sujet de dissertation exact, ou collez l\'extrait à commenter…"></textarea></div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:12px;margin-top:14px">'
-      +_iaCard('🖋️','#7C3AED','Dissertation','Analyse du sujet, problématique, plan détaillé, rédaction + barème','dissertation')
+      +_iaCard('🖋️','#6C56A6','Dissertation','Analyse du sujet, problématique, plan détaillé, rédaction + barème','dissertation')
       +_iaCard('📖','#1E3A8A','Commentaire composé','Centres d\'intérêt, procédés analysés et interprétés, conclusion','commentaire')
       +_iaCard('📋','#059669','Fiche de révision','Résumé, personnages, thèmes, citations clés, sujets probables','fiche')
       +_iaCard('⚡','#D97706','Pack complet','Commentaire + dissertation modèles en une fois','complet')
@@ -18534,7 +18538,7 @@ function _showLittMenu(jid,oeuvreKey){
         // ic = nom Lucide, c = couleur, bg = fond halo, t = titre, st = sous-titre, click = onclick
         function _lcard(ic, c, bg, t, st, click, isNew){
           return '<div class="vcard" style="cursor:pointer;text-align:center;position:relative;transition:all .25s var(--ease-out, ease-out);padding:16px 12px" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 24px rgba(20,37,84,.12)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'" onclick="'+click+'">'
-            +(isNew?'<div style="position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;font-size:8px;font-weight:900;padding:2px 7px;border-radius:8px;letter-spacing:.5px;z-index:2">✨ NEW</div>':'')
+            +(isNew?'<div style="position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#6C56A6,#A855F7);color:#fff;font-size:8px;font-weight:900;padding:2px 7px;border-radius:8px;letter-spacing:.5px;z-index:2">✨ NEW</div>':'')
             // Halo circulaire coloré avec icône Lucide au centre
             +'<div style="width:56px;height:56px;border-radius:50%;background:'+bg+';display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 12px '+bg.replace('0.12','0.25')+'">'
               +'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="'+c+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+ic+'"/></svg>'
@@ -18549,13 +18553,13 @@ function _showLittMenu(jid,oeuvreKey){
         //   3. CONTRÔLE DE LECTURE → citations + figures + techniques + QCM + questions ouvertes
         var nbControle = ((oe.citations||[]).length) + ((oe.techniques||[]).length) + ((oe.qcm||[]).length) + ((oe.controle||[]).length);
         var _hasCorrige = (typeof _oeuvreCorrige==='function') && _oeuvreCorrige(oeuvreKey);
-        return (oe.analyse ? _lcard('bookopen','#7C3AED', 'rgba(124,58,237,0.12)','Analyse littéraire',   'Style accessible &amp; extraits phares', '_showLittAnalyse(\''+oeuvreKey+'\')', true) : '')
+        return (oe.analyse ? _lcard('bookopen','#6C56A6', 'rgba(124,58,237,0.12)','Analyse littéraire',   'Style accessible &amp; extraits phares', '_showLittAnalyse(\''+oeuvreKey+'\')', true) : '')
              + _lcard('clipboard', '#142554', 'rgba(16,185,129,0.12)',  'Fiche d\'identité',      _esc(ficheDesc)+' · Carte mentale',          '_showLittFiche(\''+oeuvreKey+'\')', false)
-             + _lcard('pencil',    '#DC2626', 'rgba(220,38,38,0.12)',   'Contrôle de lecture',    nbControle+' éléments à maîtriser',          '_showLittControleComplet(\''+oeuvreKey+'\')', false)
+             + _lcard('pencil',    '#AE5353', 'rgba(220,38,38,0.12)',   'Contrôle de lecture',    nbControle+' éléments à maîtriser',          '_showLittControleComplet(\''+oeuvreKey+'\')', false)
              // v1.3.2 : la carte IA est TOUJOURS proposée (avant, une œuvre avec
              // corrigé statique n'offrait AUCUN bouton de demande précise à l'IA).
              + (_hasCorrige ? _lcard('award','#F59E0B', 'rgba(245,158,11,0.14)', 'Corrigés modèles', 'Commentaire composé &amp; dissertation rédigés', '_showLittCorriges(\''+oeuvreKey+'\')', true) : '')
-             + _lcard('sparkles','#7C3AED', 'rgba(124,58,237,0.12)', 'Demander à l\'IA Ambassa', 'Dissertation, commentaire ou fiche — sujet au choix', '_littCorrigeIA(\''+oeuvreKey+'\')', true);
+             + _lcard('sparkles','#6C56A6', 'rgba(124,58,237,0.12)', 'Demander à l\'IA Ambassa', 'Dissertation, commentaire ou fiche — sujet au choix', '_littCorrigeIA(\''+oeuvreKey+'\')', true);
       })()
     +'</div>'
     // Bandeau auteur/classe
@@ -18618,7 +18622,7 @@ function _showLittFiche(oeuvreKey){
   }
   // Résumé / argument
   if(fi.resume){
-    h+='<div style="margin-top:16px;padding:12px 16px;background:#FFF8E7;border-left:4px solid #FFC93C;border-radius:0 8px 8px 0">'
+    h+='<div style="margin-top:16px;padding:12px 16px;background:#FFF8E7;border-radius:0 8px 8px 0">'
       +'<div style="font-weight:800;color:#92400E;font-size:12px;margin-bottom:6px;text-transform:uppercase">📝 Argument / Résumé</div>'
       +'<div style="font-size:13px;line-height:1.7;color:var(--ink)">'+_esc(fi.resume)+'</div></div>';
   }
@@ -18643,7 +18647,7 @@ function _showLittFiche(oeuvreKey){
 function _showLittControleComplet(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe){toast("Œuvre introuvable","warn");return;}
-  var COL='#DC2626';
+  var COL='#AE5353';
   var nbCit = (oe.citations||[]).length;
   var nbTech = (oe.techniques||[]).length;
   var nbQcm = (oe.qcm||[]).length;
@@ -18664,9 +18668,9 @@ function _showLittControleComplet(oeuvreKey){
   // Carte 2 — Techniques d'écriture
   if(nbTech > 0){
     h+='<div class="vcard" style="cursor:pointer;text-align:center;padding:18px 14px;border:1px solid rgba(124,58,237,.25);background:linear-gradient(135deg,#FAF5FF,#F3E8FF)" onclick="_showLittTechniques(\''+oeuvreKey+'\')">'
-      +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(124,58,237,.18);display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-tool"/></svg></div>'
+      +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(124,58,237,.18);display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C56A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-tool"/></svg></div>'
       +'<div style="font-weight:800;color:#6D28D9;font-size:13px">Techniques d\'écriture</div>'
-      +'<div style="font-size:11px;color:#7C3AED;margin-top:4px">'+nbTech+' procédés identifiés</div>'
+      +'<div style="font-size:11px;color:#6C56A6;margin-top:4px">'+nbTech+' procédés identifiés</div>'
     +'</div>';
   }
   // Carte 3 — QCM (évaluation interactive)
@@ -18680,9 +18684,9 @@ function _showLittControleComplet(oeuvreKey){
   // Carte 4 — Questions ouvertes (contrôle écrit traditionnel)
   if(nbCtrl > 0){
     h+='<div class="vcard" style="cursor:pointer;text-align:center;padding:18px 14px;border:1px solid rgba(220,38,38,.25);background:linear-gradient(135deg,#FEF2F2,#FEE2E2)" onclick="_showLittControle(\''+oeuvreKey+'\')">'
-      +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(220,38,38,.18);display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-book"/></svg></div>'
+      +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(220,38,38,.18);display:flex;align-items:center;justify-content:center;margin:0 auto 10px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#AE5353" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-book"/></svg></div>'
       +'<div style="font-weight:800;color:#991B1B;font-size:13px">Questions ouvertes</div>'
-      +'<div style="font-size:11px;color:#DC2626;margin-top:4px">'+nbCtrl+' questions de rédaction</div>'
+      +'<div style="font-size:11px;color:#AE5353;margin-top:4px">'+nbCtrl+' questions de rédaction</div>'
     +'</div>';
   }
   h+='</div>';
@@ -18690,7 +18694,7 @@ function _showLittControleComplet(oeuvreKey){
   if(nbCit + nbTech + nbQcm + nbCtrl === 0){
     h+='<div class="vcard mt16" style="max-width:480px;margin:24px auto 0;text-align:center;color:var(--ink3);font-style:italic">Aucun exercice de contrôle disponible pour cette œuvre pour le moment.</div>';
   } else {
-    h+='<div class="vcard mt16" style="max-width:640px;margin:24px auto 0;background:#FEF2F2;border-left:4px solid #DC2626;padding:14px 18px">'
+    h+='<div class="vcard mt16" style="max-width:640px;margin:24px auto 0;background:#FEF2F2;padding:14px 18px">'
       +'<div style="font-weight:700;color:#991B1B;font-size:12px;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">💡 Conseil méthode</div>'
       +'<div style="font-size:13px;color:#7F1D1D;line-height:1.6">Pour valider ta lecture : 1) Commence par les <strong>Citations &amp; Figures</strong> (repérage). 2) Étudie les <strong>Techniques d\'écriture</strong>. 3) Teste-toi avec le <strong>QCM</strong> (auto-correction). 4) Termine par les <strong>Questions ouvertes</strong> (rédaction type examen).</div>'
     +'</div>';
@@ -18717,8 +18721,8 @@ function _showLittAnalyse(oeuvreKey){
       var firstNl = t.indexOf('\n');
       var label = (firstNl>0) ? t.substring(0,firstNl).trim() : '📖 Extrait';
       var corps = (firstNl>0) ? t.substring(firstNl+1).trim() : t;
-      return '<aside style="background:linear-gradient(135deg,#FAF5FF,#FDF4FF);border-left:4px solid #7C3AED;border-radius:0 14px 14px 0;padding:18px 22px;margin:22px 0;box-shadow:0 4px 14px rgba(124,58,237,.08);position:relative">'
-        +'<div style="position:absolute;top:-10px;left:18px;background:#fff;padding:2px 10px;border:1px solid #E9D5FF;border-radius:20px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:800;color:#7C3AED;letter-spacing:1.2px;text-transform:uppercase">'+_esc(label.replace(/^📖\s*/,''))+'</div>'
+      return '<aside style="background:linear-gradient(135deg,#FAF5FF,#FDF4FF);border-radius:0 14px 14px 0;padding:18px 22px;margin:22px 0;box-shadow:0 4px 14px rgba(124,58,237,.08);position:relative">'
+        +'<div style="position:absolute;top:-10px;left:18px;background:#fff;padding:2px 10px;border:1px solid #E9D5FF;border-radius:20px;font-family:Montserrat,sans-serif;font-size:10px;font-weight:800;color:#6C56A6;letter-spacing:1.2px;text-transform:uppercase">'+_esc(label.replace(/^📖\s*/,''))+'</div>'
         +'<div style="font-family:Georgia,serif;font-size:14.5px;line-height:1.75;color:#4A5568;font-style:italic;white-space:pre-line">'+_esc(corps)+'</div>'
       +'</aside>';
     }
@@ -18730,7 +18734,7 @@ function _showLittAnalyse(oeuvreKey){
     +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
     +'<article style="max-width:740px;margin:0 auto;background:#fff;border-radius:24px;overflow:hidden;box-shadow:0 12px 40px rgba(20,37,84,.08)">'
     // En-tête avec image et titre
-    +'<header style="background:linear-gradient(135deg,#7C3AED 0%,#A855F7 50%,#EC4899 100%);padding:32px 28px 28px;color:#fff;position:relative;overflow:hidden">'
+    +'<header style="background:linear-gradient(135deg,#6C56A6 0%,#A855F7 50%,#C37199 100%);padding:32px 28px 28px;color:#fff;position:relative;overflow:hidden">'
       +'<div style="position:absolute;top:-30px;right:-30px;width:160px;height:160px;background:radial-gradient(circle,rgba(255,255,255,.18) 0%,transparent 70%);border-radius:50%"></div>'
       +'<div style="position:absolute;bottom:-40px;left:-40px;width:140px;height:140px;background:radial-gradient(circle,rgba(255,201,60,.2) 0%,transparent 70%);border-radius:50%"></div>'
       +'<div style="position:relative;z-index:1">'
@@ -18740,7 +18744,7 @@ function _showLittAnalyse(oeuvreKey){
         +'<h1 style="font-family:\'Libre Baskerville\',Georgia,serif;font-size:30px;font-weight:700;margin:0 0 8px;line-height:1.2;letter-spacing:.3px;text-shadow:0 2px 6px rgba(0,0,0,.15)">'+_esc(oe.titre)+'</h1>'
         +'<div style="font-style:italic;opacity:.95;font-size:14px;margin-bottom:14px">'+_esc(oe.auteur||'')+(oe.classe?' · <span style="background:rgba(255,255,255,.18);padding:2px 10px;border-radius:10px;font-size:11px;font-style:normal;font-weight:700;margin-left:6px">'+_esc(oe.classe)+'</span>':'')+'</div>'
         // Angle de lecture
-        +'<div style="background:rgba(0,0,0,.12);backdrop-filter:blur(6px);border-left:4px solid #FFC93C;padding:14px 18px;border-radius:6px;margin-top:18px">'
+        +'<div style="background:rgba(0,0,0,.12);backdrop-filter:blur(6px);padding:14px 18px;border-radius:6px;margin-top:18px">'
           +'<div style="font-size:10px;font-weight:900;letter-spacing:1.5px;color:#FFC93C;text-transform:uppercase;margin-bottom:4px">🎯 Angle de lecture</div>'
           +'<div style="font-family:Georgia,serif;font-size:17px;font-style:italic;color:#fff;line-height:1.4">'+_esc(a.angle||'')+'</div>'
         +'</div>'
@@ -18749,7 +18753,7 @@ function _showLittAnalyse(oeuvreKey){
     // Citation phare
     +(a.citation?
       '<div style="padding:24px 32px;background:linear-gradient(180deg,#FAFBFF,#fff);border-bottom:1px solid rgba(124,58,237,.1)">'
-      +'<blockquote style="font-family:\'Libre Baskerville\',Georgia,serif;font-size:18px;font-style:italic;color:#1E293B;line-height:1.6;padding:0 16px;margin:0;border-left:4px solid #7C3AED;position:relative">'
+      +'<blockquote style="font-family:\'Libre Baskerville\',Georgia,serif;font-size:18px;font-style:italic;color:#1E293B;line-height:1.6;padding:0 16px;margin:0;position:relative">'
         +'<span style="position:absolute;top:-12px;left:-8px;font-size:48px;color:rgba(124,58,237,.2);font-family:Georgia,serif;line-height:1">"</span>'
         +'<span style="position:relative;z-index:1">'+_esc(a.citation)+'</span>'
       +'</blockquote>'
@@ -18768,7 +18772,7 @@ function _showLittAnalyse(oeuvreKey){
       var out='';
       // 1) Thèmes en chips
       if(themes.length){
-        out+='<div style="padding:0 36px 18px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#7C3AED;text-transform:uppercase;margin-bottom:10px;display:inline-flex;align-items:center;gap:6px">'
+        out+='<div style="padding:0 36px 18px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#6C56A6;text-transform:uppercase;margin-bottom:10px;display:inline-flex;align-items:center;gap:6px">'
           +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg> Thèmes clés</div>'
           +'<div style="display:flex;flex-wrap:wrap;gap:8px">'
           +themes.map(function(t){return '<span style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);color:#6B21A8;border:1px solid rgba(124,58,237,.22);border-radius:20px;padding:6px 14px;font-size:12.5px;font-weight:600">'+_esc(t)+'</span>';}).join('')
@@ -18776,20 +18780,20 @@ function _showLittAnalyse(oeuvreKey){
       }
       // 2) Axes de lecture (numérotés)
       if(axes.length){
-        out+='<div style="padding:0 36px 18px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#7C3AED;text-transform:uppercase;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px">'
+        out+='<div style="padding:0 36px 18px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#6C56A6;text-transform:uppercase;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px">'
           +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-compass"/></svg> Axes de lecture</div>'
           +'<div style="display:grid;gap:10px">'
-          +axes.map(function(a,i){return '<div style="display:flex;gap:12px;background:#FAFBFF;border:1px solid #E9E2FF;border-radius:12px;padding:12px 16px"><div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">'+(i+1)+'</div><div style="font-family:Georgia,serif;font-size:14px;line-height:1.55;color:#1E293B">'+_esc(a)+'</div></div>';}).join('')
+          +axes.map(function(a,i){return '<div style="display:flex;gap:12px;background:#FAFBFF;border:1px solid #E9E2FF;border-radius:12px;padding:12px 16px"><div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#6C56A6,#A855F7);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px">'+(i+1)+'</div><div style="font-family:Georgia,serif;font-size:14px;line-height:1.55;color:#1E293B">'+_esc(a)+'</div></div>';}).join('')
           +'</div></div>';
       }
       // 3) Procédés d'écriture en avant-goût (3 max, lien vers techniques complet)
       if(techs.length){
-        out+='<div style="padding:0 36px 22px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#7C3AED;text-transform:uppercase;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px">'
+        out+='<div style="padding:0 36px 22px"><div style="font-family:Montserrat,sans-serif;font-size:11px;font-weight:900;letter-spacing:1.5px;color:#6C56A6;text-transform:uppercase;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px">'
           +'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-tool"/></svg> Procédés d\'écriture · aperçu</div>'
           +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px">'
-          +techs.map(function(t){return '<div style="background:#fff;border:1px solid #E9E2FF;border-left:3px solid #7C3AED;border-radius:8px;padding:10px 14px"><div style="font-weight:800;color:#6B21A8;font-size:13px;line-height:1.2;margin-bottom:4px">'+_esc(t.nom)+'</div>'+(t.def?'<div style="font-size:11.5px;color:#475569;font-style:italic;line-height:1.4">'+_esc(t.def.length>110?t.def.substring(0,110)+'…':t.def)+'</div>':'')+'</div>';}).join('')
+          +techs.map(function(t){return '<div style="background:#fff;border:1px solid #E9E2FF;border-radius:8px;padding:10px 14px"><div style="font-weight:800;color:#6B21A8;font-size:13px;line-height:1.2;margin-bottom:4px">'+_esc(t.nom)+'</div>'+(t.def?'<div style="font-size:11.5px;color:#475569;font-style:italic;line-height:1.4">'+_esc(t.def.length>110?t.def.substring(0,110)+'…':t.def)+'</div>':'')+'</div>';}).join('')
           +'</div>'
-          +'<div style="text-align:center;margin-top:10px"><a onclick="_showLittTechniques(\''+oeuvreKey+'\')" style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;color:#7C3AED;font-size:12.5px;font-weight:700;text-decoration:none">→ Tous les procédés &amp; effets</a></div>'
+          +'<div style="text-align:center;margin-top:10px"><a onclick="_showLittTechniques(\''+oeuvreKey+'\')" style="cursor:pointer;display:inline-flex;align-items:center;gap:5px;color:#6C56A6;font-size:12.5px;font-weight:700;text-decoration:none">→ Tous les procédés &amp; effets</a></div>'
           +'</div>';
       }
       // 4) Bandeau « Aller plus loin »
@@ -18847,7 +18851,7 @@ function _showLittCitations(oeuvreKey){
       +'</div>'
       // Effet
       +(c.effet?
-        '<div style="margin-top:12px;padding:10px 14px;background:#F0FDF4;border-left:3px solid #059669;border-radius:0 8px 8px 0">'
+        '<div style="margin-top:12px;padding:10px 14px;background:#F0FDF4;border-radius:0 8px 8px 0">'
           +'<div style="font-weight:700;color:#065F46;font-size:12px;text-transform:uppercase;margin-bottom:4px">💡 Effet produit</div>'
           +'<div style="font-size:13px;line-height:1.7;color:var(--ink)">'+_esc(c.effet)+'</div>'
         +'</div>'
@@ -18876,12 +18880,12 @@ function _showLittTechniques(oeuvreKey){
     +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-tool"/></svg></span>Techniques d\'écriture — '+_esc(oe.titre)+'</div>'
     +'<div style="max-width:660px;margin:0 auto;display:flex;flex-direction:column;gap:14px">';
   oe.techniques.forEach(function(t,i){
-    var cols=['#142554','#059669','#D97706','#7C3AED','#DC2626','#0891B2'];
+    var cols=['#142554','#059669','#D97706','#6C56A6','#AE5353','#0891B2'];
     var col=cols[i%cols.length];
     // Normaliser : si t est une simple chaîne, la convertir en objet {nom}
     if(typeof t === 'string'){ t = {nom: t}; }
     if(!t || (!t.nom && !t.def && !t.exemple && !t.effet)) return;
-    h+='<div class="vcard" style="border-left:5px solid '+col+'">'
+    h+='<div class="vcard" style="">'
       +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(t.def||t.exemple||t.effet?'10px':'0')+'">'
         +'<span style="background:'+col+';color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">'+(i+1)+'</span>'
         +'<div style="font-weight:800;color:'+col+';font-size:15px">'+_esc(t.nom||'Procédé '+(i+1))+'</div>'
@@ -18940,7 +18944,7 @@ function _showLittControle(oeuvreKey){
         +'<div style="font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:10px;text-align:center">Avez-vous bien répondu ?</div>'
         +'<div style="display:flex;gap:12px">'
           +'<button class="btn" style="flex:1;background:#D1FAE5;color:#065F46;border:2px solid #059669;font-weight:700" id="ctrlOui"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Oui</button>'
-          +'<button class="btn" style="flex:1;background:#FEE2E2;color:#991B1B;border:2px solid #DC2626;font-weight:700" id="ctrlNon"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Non</button>'
+          +'<button class="btn" style="flex:1;background:#FEE2E2;color:#991B1B;border:2px solid #AE5353;font-weight:700" id="ctrlNon"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Non</button>'
         +'</div>'
       +'</div>'
       +'</div></div>';
@@ -19009,7 +19013,7 @@ function _lancerLittQCM(oeuvreKey){
         var cb=document.getElementById('qo'+correct);
         if(wb)wb.classList.add('wrong');
         if(cb)cb.classList.add('correct');
-        if(fb)fb.innerHTML='<div style="color:#DC2626;font-weight:700;padding:10px 14px;background:#FEE2E2;border-radius:10px">❌ Incorrect. '+exp+'</div>';
+        if(fb)fb.innerHTML='<div style="color:#AE5353;font-weight:700;padding:10px 14px;background:#FEE2E2;border-radius:10px">❌ Incorrect. '+exp+'</div>';
       }
       idx++;
       setTimeout(renderQ,1800);
@@ -19039,10 +19043,10 @@ function _lancerLittVF(oeuvreKey){
       +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg></span>Vrai/Faux — '+oe.titre+'</div>'
       +'<div class="vcard" style="max-width:560px;margin:0 auto">'
       +'<div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;margin-bottom:8px">Proposition '+(idx+1)+'/'+qs.length+'</div>'
-      +'<div style="font-family:Georgia,serif;font-size:17px;line-height:1.65;color:var(--ink);margin-bottom:24px;font-weight:600;border-left:4px solid #FFC93C;padding-left:14px">'+q.q+'</div>'
+      +'<div style="font-family:Georgia,serif;font-size:17px;line-height:1.65;color:var(--ink);margin-bottom:24px;font-weight:600;padding-left:14px">'+q.q+'</div>'
       +'<div style="display:flex;gap:14px;justify-content:center">'
       +'<button id="vfV" style="flex:1;padding:16px;border-radius:14px;border:2.5px solid #059669;background:#D1FAE5;color:#065F46;font-size:16px;font-weight:800;cursor:pointer" onclick="_vfLittAns(true,'+q.rep+',\''+safeExpVF+'\')">✅ VRAI</button>'
-      +'<button id="vfF" style="flex:1;padding:16px;border-radius:14px;border:2.5px solid #DC2626;background:#FEE2E2;color:#991B1B;font-size:16px;font-weight:800;cursor:pointer" onclick="_vfLittAns(false,'+q.rep+',\''+safeExpVF+'\')">❌ FAUX</button>'
+      +'<button id="vfF" style="flex:1;padding:16px;border-radius:14px;border:2.5px solid #AE5353;background:#FEE2E2;color:#991B1B;font-size:16px;font-weight:800;cursor:pointer" onclick="_vfLittAns(false,'+q.rep+',\''+safeExpVF+'\')">❌ FAUX</button>'
       +'</div>'
       +'<div id="vffb" style="margin-top:14px;min-height:20px"></div>'
       +'</div></div>');
@@ -19052,7 +19056,7 @@ function _lancerLittVF(oeuvreKey){
       var fb=document.getElementById('vffb');
       var ok=(chosen===correct);
       if(ok)score++;
-      var col=ok?'#059669':'#DC2626';var bg=ok?'#D1FAE5':'#FEE2E2';
+      var col=ok?'#059669':'#AE5353';var bg=ok?'#D1FAE5':'#FEE2E2';
       if(fb)fb.innerHTML='<div style="color:'+col+';font-weight:700;padding:10px 14px;background:'+bg+';border-radius:10px">'+(ok?'✅ Exact !':'❌ Incorrect.')+' '+exp+'</div>';
       idx++;
       setTimeout(renderVF,1800);
@@ -19100,14 +19104,14 @@ function _lancerLittPendu(oeuvreKey){
       +'<div style="font-family:\'Fira Code\',monospace;font-size:26px;font-weight:700;color:#142554;letter-spacing:6px;margin:14px 0">'+affiche+'</div>';
     if(found||lost){
       if(found){score++;html+='<div style="color:#059669;font-weight:700;font-size:14px;margin:8px 0">✅ Bravo ! '+mots[midx]+'</div>';}
-      else{html+='<div style="color:#DC2626;font-weight:700;font-size:14px;margin:8px 0">❌ Perdu ! Le mot : '+mots[midx]+'</div>';}
+      else{html+='<div style="color:#AE5353;font-weight:700;font-size:14px;margin:8px 0">❌ Perdu ! Le mot : '+mots[midx]+'</div>';}
       html+='<button class="btn bi mt10" id="nextMot">Suivant →</button>';
     }else{
       html+='<div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:12px">';
       alpha.forEach(function(l){
         var used=essayes.indexOf(l)>=0;
         var hit=used&&motCourant.indexOf(l)>=0;
-        html+='<button onclick="_penduLett(\''+l+'\')" '+(used?'disabled':'')+' style="width:34px;height:34px;border-radius:8px;border:2px solid '+(hit?'#059669':used?'#DC2626':'#C7D2FE')+';background:'+(hit?'#D1FAE5':used?'#FEE2E2':'#F0F4FF')+';color:'+(hit?'#065F46':used?'#991B1B':'#142554')+';font-weight:800;font-size:13px;cursor:'+(used?'default':'pointer')+'">'+l+'</button>';
+        html+='<button onclick="_penduLett(\''+l+'\')" '+(used?'disabled':'')+' style="width:34px;height:34px;border-radius:8px;border:2px solid '+(hit?'#059669':used?'#AE5353':'#C7D2FE')+';background:'+(hit?'#D1FAE5':used?'#FEE2E2':'#F0F4FF')+';color:'+(hit?'#065F46':used?'#991B1B':'#142554')+';font-weight:800;font-size:13px;cursor:'+(used?'default':'pointer')+'">'+l+'</button>';
       });
       html+='</div>';
     }
@@ -19173,7 +19177,7 @@ function _lancerLittTrous(oeuvreKey){
       var fb=document.getElementById('trFb');
       var ok=(val===cor||cor.includes(val)&&val.length>2||val.includes(cor)&&cor.length>2);
       if(ok)score++;
-      var col=ok?'#059669':'#DC2626';var bg=ok?'#D1FAE5':'#FEE2E2';
+      var col=ok?'#059669':'#AE5353';var bg=ok?'#D1FAE5':'#FEE2E2';
       if(fb)fb.innerHTML='<div style="color:'+col+';font-weight:700;padding:10px 14px;background:'+bg+';border-radius:10px">'+(ok?'✅ Correct !':'❌ Incorrect. Réponse : <strong>'+rep+'</strong>')+'</div>';
       idx++;
       setTimeout(renderTrous,1800);
@@ -19254,7 +19258,7 @@ function pgReleve(){
       h+="<th style='text-align:center;padding:6px 8px;font-size:11px;color:#6B7A99;font-weight:700'>Moy.</th>";
       h+="</tr></thead><tbody>";
       gT.sort(function(a,b){return b.coef-a.coef;}).forEach(function(g){
-        var mg=_subMoy(g);var col=mg>=10?"#059669":mg>=7?"#D97706":"#DC2626";
+        var mg=_subMoy(g);var col=mg>=10?"#059669":mg>=7?"#D97706":"#AE5353";
         h+="<tr style='border-bottom:1px solid #F0F4FF'>";
         h+="<td style='padding:7px 8px;font-size:12px;font-weight:600'>"+g.sub+"</td>";
         h+="<td style='text-align:center;padding:7px 8px;font-size:11px;color:#6B7A99'>"+g.coef+"</td>";
@@ -19373,7 +19377,7 @@ function pgSoumissions(){
     if(pending.length){
       h+="<div class='semi mb8' style='color:var(--wa)'>En attente de validation</div>";
       h+=pending.map(function(s){
-        return "<div class='vcard mb8' style='border-left:4px solid var(--wa)'>"
+        return "<div class='vcard mb8' style=''>"
           +"<div class='fl2 fsb fic'>"
           +"<div><div class='bold s'>"+s.titre+"</div>"
           +"<div class='xs2 mut'>"+s.type+" · "+s.matiere+" · "+s.date+"</div></div>"
@@ -19625,7 +19629,7 @@ function pgResPedagoAdmin(){
     h+='<tr>';
     h+='<td style="font-weight:700;max-width:220px">'+(rp.ico||'📄')+' '+_esc(item.titre)+'</td>';
     h+='<td>'+_esc(item.matiere||'')+'</td>';
-    h+='<td style="text-align:center">'+(item.gratuit?'<span style="color:#059669;font-weight:700">✅ Oui</span>':'<span style="color:#dc2626">❌ Non</span>')+'</td>';
+    h+='<td style="text-align:center">'+(item.gratuit?'<span style="color:#059669;font-weight:700">✅ Oui</span>':'<span style="color:#AE5353">❌ Non</span>')+'</td>';
     h+='<td>'+(item.gratuit?'—':fmtN(item.prix)+' F')+'</td>';
     h+='<td>'+plansHtml+'</td>';
     h+='<td style="white-space:nowrap">'+
@@ -19882,7 +19886,7 @@ function showJeuxEdu(){
 
   // ══════════ SECTION CARTES MENTALES LITTÉRAIRES ══════════
   h+="<div id='cartesMentalesSection' data-mat='Littérature' style='margin-bottom:28px'>";
-  h+="<div style='background:linear-gradient(135deg,#1E3A8A,#7C3AED);border-radius:20px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden'>";
+  h+="<div style='background:linear-gradient(135deg,#1E3A8A,#6C56A6);border-radius:20px;padding:24px;margin-bottom:16px;position:relative;overflow:hidden'>";
   h+="<div style='position:absolute;top:-20px;right:-10px;font-size:100px;opacity:.06'>🗺️</div>";
   h+="<div style='position:relative;z-index:1'>";
   h+="<div style='font-family:Montserrat,sans-serif;font-size:11px;font-weight:800;color:#FFC93C;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px'>Cartes Mentales Littéraires</div>";
@@ -19903,11 +19907,11 @@ function showJeuxEdu(){
     {key:"6e_contes_korotoumou",pic:'open-book_1f4d6.png',                      col:"#0891B2"},
     // 5ème — récits initiatiques et critique sociale
     {key:"5e_arbre_fetiche",    pic:'palm-tree_1f334.png',                      col:"#15803D"},
-    {key:"5e_nkum_wam",         pic:'crown_1f451.png',                          col:"#7C3AED"},
-    {key:"5e_pere_inconnu",     pic:'dna_1f9ec.png',                            col:"#DC2626"},
+    {key:"5e_nkum_wam",         pic:'crown_1f451.png',                          col:"#6C56A6"},
+    {key:"5e_pere_inconnu",     pic:'dna_1f9ec.png',                            col:"#AE5353"},
     // 4ème — comédie, condition féminine, enracinement
     {key:"4e_trois_pretendants",pic:'performing-arts_1f3ad.png',                col:"#16A34A"},
-    {key:"4e_coeur_sahel",      pic:'droplet_1f4a7.png',                        col:"#DC2626"},
+    {key:"4e_coeur_sahel",      pic:'droplet_1f4a7.png',                        col:"#AE5353"},
     {key:"4e_attachement_sol",  pic:'globe-showing-europe-africa_1f30d.png',    col:"#D97706"},
     // 3ème — roman colonial, théâtre africain, poésie
     {key:"3e_ville_cruelle",    pic:'cityscape_1f3d9-fe0f.png',                 col:"#0891B2"},
@@ -19915,8 +19919,8 @@ function showJeuxEdu(){
     {key:"3e_petites_gouttes",  pic:'musical-note_1f3b5.png',                   col:"#D97706"},
     // 2nde — poésie, théâtre classique
     {key:"2nde_tribus_capitoline",pic:'classical-building_1f3db-fe0f.png',      col:"#1E3A8A"},
-    {key:"2nde_poemes_sauvages",pic:'fire_1f525.png',                           col:"#DC2626"},
-    {key:"2nde_tartuffe",       pic:'performing-arts_1f3ad.png',                col:"#7C3AED"},
+    {key:"2nde_poemes_sauvages",pic:'fire_1f525.png',                           col:"#AE5353"},
+    {key:"2nde_tartuffe",       pic:'performing-arts_1f3ad.png',                col:"#6C56A6"},
     // 1ère — roman, poésie, théâtre africain
     {key:"1ere_coeur_tenebres", pic:'new-moon_1f311.png',                       col:"#0F172A"},
     {key:"1ere_balafon",        pic:'musical-keyboard_1f3b9.png',               col:"#BE185D"},
@@ -19924,7 +19928,7 @@ function showJeuxEdu(){
     // Terminale — poésie XIXe, roman et théâtre africain
     {key:"tle_stances_poemes",  pic:'scroll_1f4dc.png',                         col:"#059669"},
     {key:"tle_vieux_negro",     pic:'sports-medal_1f3c5.png',                   col:"#1E3A8A"},
-    {key:"tle_ngum_jemea",      pic:'latin-cross_271d-fe0f.png',                col:"#7C3AED"}
+    {key:"tle_ngum_jemea",      pic:'latin-cross_271d-fe0f.png',                col:"#6C56A6"}
   ];
   // Helper : URL complète du picto
   littDefs.forEach(function(d){d.picUrl=_picOe+d.pic;});
@@ -20021,7 +20025,7 @@ function showJeuxEdu(){
   h+="</div><div style='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px'>";
   h+="<div style='font-size:11px;font-weight:700;color:var(--ink4);align-self:center;text-transform:uppercase;letter-spacing:1px'>Niveau :</div>";
   NIVEAUX.forEach(function(n){
-    h+="<button style='padding:4px 10px;border-radius:16px;border:1.5px solid "+(filtreNiv===n?"#7C3AED":"var(--bg3)")+";background:"+(filtreNiv===n?"#7C3AED":"#fff")+";color:"+(filtreNiv===n?"#fff":"var(--ink3)")+";font-size:11px;font-weight:700;cursor:pointer' onclick='window._jeuFNiv=\""+n+"\";showJeuxEdu()'>"+n+"</button>";
+    h+="<button style='padding:4px 10px;border-radius:16px;border:1.5px solid "+(filtreNiv===n?"#6C56A6":"var(--bg3)")+";background:"+(filtreNiv===n?"#6C56A6":"#fff")+";color:"+(filtreNiv===n?"#fff":"var(--ink3)")+";font-size:11px;font-weight:700;cursor:pointer' onclick='window._jeuFNiv=\""+n+"\";showJeuxEdu()'>"+n+"</button>";
   });
   h+="</div>";
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px'>";
@@ -20044,10 +20048,10 @@ function showJeuxEdu(){
   function _jeuColor(j){
     var m=(j.matiere||'').toLowerCase();
     if(m.indexOf('math')>=0) return '#3C8DFF';
-    if(m.indexOf('phys')>=0||m.indexOf('chim')>=0) return '#7C3AED';
-    if(m.indexOf('svt')>=0) return '#10B981';
+    if(m.indexOf('phys')>=0||m.indexOf('chim')>=0) return '#6C56A6';
+    if(m.indexOf('svt')>=0) return '#3A8F73';
     if(m.indexOf('hist')>=0||m.indexOf('geo')>=0) return '#D97706';
-    if(m.indexOf('fran')>=0||m.indexOf('litt')>=0) return '#EC4899';
+    if(m.indexOf('fran')>=0||m.indexOf('litt')>=0) return '#C37199';
     if(m.indexOf('angl')>=0) return '#0EA5E9';
     return '#6366F1';
   }
@@ -20073,7 +20077,7 @@ function showJeuxEdu(){
     h+="<div class='jeu-meta'>";
     h+="<span class='jeu-tag' style='background:#E0EAFF;color:#142554'>"+j.matiere+"</span>";
     h+="<span class='jeu-tag' style='background:#FEF3C7;color:#D97706'>"+j.niveau+"</span>";
-    if(iA()) h+="<button onclick='event.stopPropagation();_delJeuFromPage(\""+j.id+"\")' style='margin-left:auto;background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:2px 6px;font-size:8px;font-weight:700;cursor:pointer'>🗑</button>";
+    if(iA()) h+="<button onclick='event.stopPropagation();_delJeuFromPage(\""+j.id+"\")' style='margin-left:auto;background:#FEE2E2;color:#AE5353;border:none;border-radius:6px;padding:2px 6px;font-size:8px;font-weight:700;cursor:pointer'>🗑</button>";
     h+="</div></div></div>";
   });
   if(!list.length)h+="<div class='empty' style='grid-column:1/-1'><div class='empty-ico'>🎮</div>Aucun jeu pour cette sélection</div>";
@@ -20115,7 +20119,7 @@ function lancerCalculMental(){
     if(ans===current.rep){
       scores.bon++;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:700'>✅ Correct !</span>";
     }else{
-      if(fb)fb.innerHTML="<span style='color:#DC2626;font-weight:700'>❌ Incorrect. Reponse: "+current.rep+"</span>";
+      if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:700'>❌ Incorrect. Reponse: "+current.rep+"</span>";
     }
     current=newQ();setTimeout(render,1200);
   };
@@ -20154,7 +20158,7 @@ function lancerDevinette(){
     if(ans.includes(p.nom.split(" ")[0].toLowerCase())||ans.includes(p.nom.split(" ").pop().toLowerCase())){
       found=true;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:700'>✅ Exact ! C'etait "+p.nom+"</span>";
       setTimeout(function(){idx=Math.floor(Math.random()*persos.length);p=persos[idx];revealed=1;found=false;render();},2000);
-    }else{if(fb)fb.innerHTML="<span style='color:#DC2626'>❌ Essayez encore...</span>";}
+    }else{if(fb)fb.innerHTML="<span style='color:#AE5353'>❌ Essayez encore...</span>";}
   };
   window._devIndice=function(){if(revealed<p.indices.length){revealed++;render();}};
   render();
@@ -20193,7 +20197,7 @@ function lancerOrthographe(){
     var fb=document.getElementById("orthFb");
     total++;
     if(ans===mots[idx].mot){score++;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:700'>✅ Parfait !</span>";}
-    else{if(fb)fb.innerHTML="<span style='color:#DC2626;font-weight:700'>❌ Reponse: "+mots[idx].mot+"</span>";}
+    else{if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:700'>❌ Reponse: "+mots[idx].mot+"</span>";}
     idx=Math.floor(Math.random()*mots.length);setTimeout(render,1500);
   };
   render();
@@ -20228,7 +20232,7 @@ function lancerCarteGeo(){
   window._carteCheck=function(i){
     var l=lieux[idx];var fb=document.getElementById("carteFb");
     if(i===l.ans){score++;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:700'>✅ Correct !</span>";}
-    else{if(fb)fb.innerHTML="<span style='color:#DC2626;font-weight:700'>❌ Reponse: "+l.opts[l.ans]+"</span>";}
+    else{if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:700'>❌ Reponse: "+l.opts[l.ans]+"</span>";}
     idx++;setTimeout(render,1200);
   };
   render();
@@ -20264,7 +20268,7 @@ function lancerConjugaison(){
     var ans=(document.getElementById("conjAns")?.value||"").trim().toLowerCase();
     var fb=document.getElementById("conjFb");total++;
     if(ans===verbes[idx].rep){score++;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:700'>✅ Correct !</span>";}
-    else{if(fb)fb.innerHTML="<span style='color:#DC2626;font-weight:700'>❌ Reponse: "+verbes[idx].rep+"</span>";}
+    else{if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:700'>❌ Reponse: "+verbes[idx].rep+"</span>";}
     idx=Math.floor(Math.random()*verbes.length);setTimeout(render,1500);
   };
   render();
@@ -20300,7 +20304,7 @@ function lancerFigures(){
   window._figureCheck=function(i){
     var f=figures[idx];var fb=document.getElementById("figFb");
     if(i===f.ans){score++;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:700'>✅ Exact ! "+f.fig+"</span>";}
-    else{if(fb)fb.innerHTML="<span style='color:#DC2626;font-weight:700'>❌ C'etait: "+f.fig+"</span>";}
+    else{if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:700'>❌ C'etait: "+f.fig+"</span>";}
     idx++;setTimeout(render,1500);
   };
   render();
@@ -20339,7 +20343,7 @@ function lancerTableauPeriodique(){
   window._tpCheck=function(i){
     var el=elements[idx];var fb=document.getElementById("tpFb");
     if(i===el.ans){score++;if(fb)fb.innerHTML="<span style='color:#059669;font-weight:700'>✅ "+el.nom+" !</span>";}
-    else{if(fb)fb.innerHTML="<span style='color:#DC2626;font-weight:700'>❌ C'etait: "+el.nom+"</span>";}
+    else{if(fb)fb.innerHTML="<span style='color:#AE5353;font-weight:700'>❌ C'etait: "+el.nom+"</span>";}
     idx++;setTimeout(render,1500);
   };
   render();
@@ -20382,7 +20386,7 @@ function lancerMotsCaches(){
       trouves.push(ans);if(fb)fb.innerHTML="<span style='color:#059669;font-weight:700'>✅ "+ans+" trouve !</span>";
       if(trouves.length===mots.length&&fb)fb.innerHTML="<span style='color:#059669;font-weight:800'>🎉 Tous les mots trouves !</span>";
     }else if(trouves.includes(ans)){if(fb)fb.innerHTML="<span style='color:#D97706'>Deja trouve !</span>";}
-    else{if(fb)fb.innerHTML="<span style='color:#DC2626'>Ce mot n'est pas dans la liste.</span>";}
+    else{if(fb)fb.innerHTML="<span style='color:#AE5353'>Ce mot n'est pas dans la liste.</span>";}
     document.getElementById("motsAns").value="";
     render();
   };
@@ -20470,7 +20474,7 @@ function showEpreuves(){
 
   // Bouton réinitialiser les filtres si au moins un filtre actif
   if(mat||classe||seq){
-    h+="<div style='margin-bottom:12px'><button onclick=\"window._epGrp='';window._epMat='';window._epClasse='';window._epSeq='';showEpreuves()\" style='padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #DC2626;background:#FEE2E2;color:#DC2626'>✕ Réinitialiser les filtres</button></div>";
+    h+="<div style='margin-bottom:12px'><button onclick=\"window._epGrp='';window._epMat='';window._epClasse='';window._epSeq='';showEpreuves()\" style='padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid #AE5353;background:#FEE2E2;color:#AE5353'>✕ Réinitialiser les filtres</button></div>";
   }
 
   // v1.4.2 : filtre SECTION en premier (Général / Technique / CAP / Anglophone)
@@ -20505,8 +20509,8 @@ function showEpreuves(){
       var apercu=ep.apercu||ep.extrait||ep.desc||"";
       var badge=ep.gratuit?"GRATUIT":"PREMIUM";
       var badgeBg=ep.gratuit?"#D1FAE5":"#EDE9FE";
-      var badgeColor=ep.gratuit?"#059669":"#7C3AED";
-      h+="<div class='vcard' style='cursor:pointer;border-left:4px solid #142554' onclick='showEpreuveDetail(\""+ep.id+"\")'>";
+      var badgeColor=ep.gratuit?"#059669":"#6C56A6";
+      h+="<div class='vcard' style='cursor:pointer;' onclick='showEpreuveDetail(\""+ep.id+"\")'>";
       h+="<div class='fl2 fic fsb mb8'>";
       h+="<div><div style='font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#142554'>"+ep.titre+"</div>";
       h+="<div style='font-size:11px;color:#6B7A99;margin-top:2px'>"+(ep.classe?"🎓 "+ep.classe:"")+""+(ep.seq?" · <span style='color:#D97706;font-weight:700'>"+ep.seq+"</span>":"")+"</div></div>";
@@ -20515,7 +20519,7 @@ function showEpreuves(){
       if(apercu){
         h+="<div style='font-size:12px;color:#6B7A99;line-height:1.6;font-style:italic;margin-bottom:10px'>"+apercu.substring(0,100)+(apercu.length>100?"...":"")+"</div>";
       }
-      h+="<button class='btn "+(ep.gratuit?"bi":"")+" sm' style='"+(ep.gratuit?"":"background:#EDE9FE;color:#7C3AED;")+";border-radius:10px;font-size:12px;font-weight:700' onclick='event.stopPropagation();showEpreuveDetail(\""+ep.id+"\")'>"+(locked?"🔒 Voir l'extrait":"📄 Lire l'épreuve")+"</button>";
+      h+="<button class='btn "+(ep.gratuit?"bi":"")+" sm' style='"+(ep.gratuit?"":"background:#EDE9FE;color:#6C56A6;")+";border-radius:10px;font-size:12px;font-weight:700' onclick='event.stopPropagation();showEpreuveDetail(\""+ep.id+"\")'>"+(locked?"🔒 Voir l'extrait":"📄 Lire l'épreuve")+"</button>";
       h+="</div>";
     });
     h+="</div>";
@@ -20543,7 +20547,7 @@ function _showEpreuveHTML(id){
     (DB.customEpHtml&&(DB.customEpHtml[id]||DB.customEpHtml[ep.idbKey||'']));
   var format=ep.format||'html';
   var fmtLabels={html:'HTML',pdf:'PDF',word:'Word',url:'Lien'};
-  var fmtColors={html:'#059669',pdf:'#DC2626',word:'#2563EB',url:'#7C3AED'};
+  var fmtColors={html:'#059669',pdf:'#AE5353',word:'#2563EB',url:'#6C56A6'};
   // Mémoriser l'épreuve courante pour le bouton PDF
   window._currentEpreuve=ep;
   var apercu=ep.apercu||ep.extrait||ep.desc||"";
@@ -20624,7 +20628,7 @@ function _formatEpreuveContent(text){
       html+=line;
       inSection=true;
     } else {
-      html+='<div style="font-family:Georgia,serif;font-size:13.5px;line-height:1.85;color:#1F2937;padding:6px 14px'+(inSection?';background:#FAFBFF;border-left:3px solid #142554':'')+'">'+line+'</div>';
+      html+='<div style="font-family:Georgia,serif;font-size:13.5px;line-height:1.85;color:#1F2937;padding:6px 14px'+(inSection?';background:#FAFBFF;':'')+'">'+line+'</div>';
     }
   });
   return '<div style="margin:14px 0">'+html+'</div>';
@@ -20790,7 +20794,7 @@ function _simulerExamen(epId){
     var mn=Math.floor(remaining/60);
     var sc=remaining%60;
     var pct=Math.round((elapsed/totalSec)*100);
-    var col=remaining<600?"#DC2626":remaining<1800?"#D97706":"#059669";
+    var col=remaining<600?"#AE5353":remaining<1800?"#D97706":"#059669";
     
     _vc(
       "<div class='vsec'>"
@@ -20820,7 +20824,7 @@ function _simulerExamen(epId){
       _vc(
         "<div class='vsec'><div class='vcard' style='text-align:center;padding:40px'>"
         +"<div style='font-size:56px;margin-bottom:16px'>⏰</div>"
-        +"<div style='font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#DC2626;margin-bottom:8px'>Temps écoulé !</div>"
+        +"<div style='font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#AE5353;margin-bottom:8px'>Temps écoulé !</div>"
         +"<div style='font-size:14px;color:#6B7A99;margin-bottom:20px'>La session de "+ep.duree+" minutes est terminée.</div>"
         +"<button class='btn bi' onclick='showEpreuves()'>← Retour aux épreuves</button>"
         +"</div></div>");
@@ -20844,11 +20848,11 @@ var LABO_EXPERIENCES=[
    composants:["scalpel","loupe","étiquettes","schéma anatomique"]},
   {id:"lv3",titre:"Réactions Chimiques",matiere:"Physique-Chimie",classe:"2nde-Tle C",
    desc:"Simulez des réactions acide-base et d'oxydoréduction en toute sécurité.",
-   ico:"⚗️",color:"#7C3AED",gratuit:false,
+   ico:"⚗️",color:"#6C56A6",gratuit:false,
    composants:["acides","bases","indicateurs","pH-mètre","béchers"]},
   {id:"lv4",titre:"Génétique & ADN",matiere:"SVT",classe:"1ère D-Tle D",
    desc:"Visualisez la mitose, la méiose et l'expression des gènes en 3D interactif.",
-   ico:"🧬",color:"#DC2626",gratuit:false,
+   ico:"🧬",color:"#AE5353",gratuit:false,
    composants:["chromosomes","ADN","enzymes","microscope électronique"]},
   {id:"lv5",titre:"Géométrie 3D",matiere:"Maths",classe:"2nde-Tle",
    desc:"Construisez et faites pivoter des solides géométriques. Calculez volumes et surfaces.",
@@ -20930,7 +20934,7 @@ var LABO_PACKS=[
    labos:["lv1","lv2","lv3","lv4","lv5","lv6","lv7","lv8","lv9","lv10","lv11","lv12","lv13","lv14","lv15","lv16","lv17","lv18","lv19","lv20"],
    avantages:["20 labos complets","Quiz illimités","Fiches de synthèse","Corrigés détaillés","Physique + Chimie + SVT + Maths"],
    badge:"8 000 FCFA/mois"},
-  {id:"lp_premium",nom:"Pack Premium Complet",prix:15000,duree:"Mensuel",couleur:"#7C3AED",
+  {id:"lp_premium",nom:"Pack Premium Complet",prix:15000,duree:"Mensuel",couleur:"#6C56A6",
    labos:"*",
    avantages:["Tous les labos (20+)","Épreuves officielles BEPC/BAC","Simulateur d'examen","Coaching personnalisé","Accès prioritaire nouveaux contenus","Support WhatsApp"],
    badge:"15 000 FCFA/mois",populaire:true},
@@ -20945,7 +20949,7 @@ var _CV={classroomId:null,channelId:null,refreshTimer:null,replyTo:null};
 function _cvDefaultClassrooms(){
   var classes=[].concat([].slice.call(new Set((DB.students||[]).map(function(s){return s.cls;}).filter(Boolean))));
   if(!classes.length)classes=['6ème','5ème','4ème','3ème','2nde','1ère A','Tle A'];
-  var palette=['#3C8DFF','#7C3AED','#059669','#DC2626','#F59E0B','#0891B2','#4F46E5','#BE185D'];
+  var palette=['#3C8DFF','#6C56A6','#059669','#AE5353','#F59E0B','#0891B2','#4F46E5','#BE185D'];
   var icos={};
   var base=classes.map(function(cls,i){
     var key=cls.replace(/[^a-z0-9]/gi,'').toLowerCase();
@@ -20966,7 +20970,7 @@ function _cvDefaultClassrooms(){
   // ── v1.6 : classes virtuelles ANGLOPHONE (GCE) & TECHNIQUE — examen × filière ──
   // Salons adaptés (Subjects EN / matières techniques). membres remplis à l'inscription.
   var seg=[
-    {seg:'en_olevel_arts',nom:'GCE O Level · Arts (Form 5)',col:'#7C3AED',chans:['General','Announcements','English','Literature','History/Geo','French']},
+    {seg:'en_olevel_arts',nom:'GCE O Level · Arts (Form 5)',col:'#6C56A6',chans:['General','Announcements','English','Literature','History/Geo','French']},
     {seg:'en_olevel_sci', nom:'GCE O Level · Science (Form 5)',col:'#0891B2',chans:['General','Announcements','Mathematics','Physics','Chemistry','Biology']},
     {seg:'en_alevel_arts',nom:'GCE A Level · Arts (Upper Sixth)',col:'#BE185D',chans:['General','Announcements','Literature','History','Geography','Philosophy']},
     {seg:'en_alevel_sci', nom:'GCE A Level · Science (Upper Sixth)',col:'#4F46E5',chans:['General','Announcements','Pure Maths','Physics','Chemistry','Biology']},
@@ -21011,7 +21015,7 @@ function _cvRenderHome(){
   h+="</div>";
   // Stats
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:24px'>";
-  [{n:accessible.length,l:'Classes actives',i:'🏫',c:'#3C8DFF'},{n:totalPosts,l:'Messages',i:'💬',c:'#7C3AED'},{n:todayPosts,l:"Aujourd'hui",i:'🔔',c:'#059669'},{n:(DB.students||[]).length,l:'Élèves',i:'👤',c:'#F59E0B'}].forEach(function(s){
+  [{n:accessible.length,l:'Classes actives',i:'🏫',c:'#3C8DFF'},{n:totalPosts,l:'Messages',i:'💬',c:'#6C56A6'},{n:todayPosts,l:"Aujourd'hui",i:'🔔',c:'#059669'},{n:(DB.students||[]).length,l:'Élèves',i:'👤',c:'#F59E0B'}].forEach(function(s){
     h+="<div style='background:linear-gradient(135deg,"+s.c+"18,"+s.c+"06);border:1px solid "+s.c+"25;border-radius:14px;padding:14px;text-align:center'><div style='font-size:22px;margin-bottom:4px'>"+s.i+"</div><div style='font-size:20px;font-weight:900;color:"+s.c+";font-family:Montserrat,sans-serif'>"+s.n+"</div><div style='font-size:11px;color:var(--ink4)'>"+s.l+"</div></div>";
   });
   h+="</div>";
@@ -21161,11 +21165,11 @@ function _cvPostCard(p,cls,ch){
   var isMe=uid&&(p.auteurId===uid);
   var isTeacher=p.auteurType==='enseignant'||p.auteurType==='admin';
   var iLiked=uid&&(p.likes||[]).indexOf(uid)>-1;
-  var typeColors={discussion:'#3C8DFF',question:'#F59E0B',ressource:'#059669',devoir:'#7C3AED',annonce:'#DC2626'};
+  var typeColors={discussion:'#3C8DFF',question:'#F59E0B',ressource:'#059669',devoir:'#6C56A6',annonce:'#AE5353'};
   var typeIcos={discussion:'💬',question:'❓',ressource:'📎',devoir:'📝',annonce:'📢'};
   var tc=typeColors[p.type||'discussion']||'#6B7A99';
   var ti=typeIcos[p.type||'discussion']||'💬';
-  var border=p.pinned?'border-left:3px solid #FFC93C':isMe?'border-left:3px solid '+cls.couleur:'';
+  var border=p.pinned?'':isMe?''+cls.couleur:'';
 
   var html="<div id='cvp_"+p.id+"' style='background:var(--sur);border-radius:14px;padding:14px;border:1px solid var(--bg3);"+border+";transition:.2s'>";
 
@@ -21196,7 +21200,7 @@ function _cvPostCard(p,cls,ch){
 
   // Barre d'actions
   html+="<div style='display:flex;align-items:center;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid var(--bg3);flex-wrap:wrap'>";
-  html+="<button onclick=\"_cvLike('"+p.id+"')\" style='background:none;border:none;cursor:pointer;font-size:12px;color:"+(iLiked?"#EF4444":"var(--ink4)")+";font-weight:"+(iLiked?"700":"400")+";display:flex;align-items:center;gap:4px;transition:.2s;padding:0'>"+(iLiked?"❤️":"🤍")+" "+(p.likes||[]).length+"</button>";
+  html+="<button onclick=\"_cvLike('"+p.id+"')\" style='background:none;border:none;cursor:pointer;font-size:12px;color:"+(iLiked?"#C46F6F":"var(--ink4)")+";font-weight:"+(iLiked?"700":"400")+";display:flex;align-items:center;gap:4px;transition:.2s;padding:0'>"+(iLiked?"❤️":"🤍")+" "+(p.likes||[]).length+"</button>";
   if(me){html+="<button onclick=\"_cvStartReply('"+p.id+"','"+_esc(p.auteurNom)+"')\" style='background:none;border:none;cursor:pointer;font-size:12px;color:var(--ink4);display:flex;align-items:center;gap:4px;padding:0;transition:.2s' onmouseover=\"this.style.color='var(--bl)'\" onmouseout=\"this.style.color='var(--ink4)'\">💬 Répondre ("+(p.replies||[]).length+")</button>";}
   html+="</div>";
 
@@ -21215,7 +21219,7 @@ function _cvPostCard(p,cls,ch){
       if(iA()||rMe){html+="<button onclick=\"_cvDeleteReply('"+p.id+"','"+r.id+"')\" style='background:none;border:none;cursor:pointer;font-size:12px;color:var(--ink4);margin-left:auto;opacity:.5'>🗑️</button>";}
       html+="</div>";
       html+="<div style='font-size:12px;color:var(--ink2);line-height:1.65;white-space:pre-wrap;word-break:break-word'>"+_esc(r.contenu||'')+"</div>";
-      html+="<button onclick=\"_cvLikeReply('"+p.id+"','"+r.id+"')\" style='background:none;border:none;cursor:pointer;font-size:11px;color:"+(rLiked?"#EF4444":"var(--ink4)")+";margin-top:6px;padding:0'>"+(rLiked?"❤️":"🤍")+" "+(r.likes||[]).length+"</button>";
+      html+="<button onclick=\"_cvLikeReply('"+p.id+"','"+r.id+"')\" style='background:none;border:none;cursor:pointer;font-size:11px;color:"+(rLiked?"#C46F6F":"var(--ink4)")+";margin-top:6px;padding:0'>"+(rLiked?"❤️":"🤍")+" "+(r.likes||[]).length+"</button>";
       html+="</div>";
     });
     html+="</div>";
@@ -21515,7 +21519,7 @@ function showLabosVirtuels(){
 
   // Bandeau stats
   h+="<div style='display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px'>";
-  [{n:_visibleLabo.length,l:"Expériences",c:"#142554",i:"🔬"},{n:gratuits,l:"Gratuites",c:"#059669",i:"✅"},{n:_visibleLabo.filter(function(l){return !l.gratuit;}).length,l:"Premium",c:"#7C3AED",i:"⭐"}].forEach(function(s){
+  [{n:_visibleLabo.length,l:"Expériences",c:"#142554",i:"🔬"},{n:gratuits,l:"Gratuites",c:"#059669",i:"✅"},{n:_visibleLabo.filter(function(l){return !l.gratuit;}).length,l:"Premium",c:"#6C56A6",i:"⭐"}].forEach(function(s){
     h+="<div style='background:"+s.c+"0f;border:0;border-radius:16px;padding:16px 12px;text-align:center;box-shadow:0 8px 22px -15px rgba(20,37,84,.22)'>";
     h+="<div style='font-size:22px;margin-bottom:4px'>"+s.i+"</div>";
     h+="<div style='font-family:Montserrat,sans-serif;font-size:24px;font-weight:900;color:"+s.c+";line-height:1'>"+s.n+"</div>";
@@ -21540,7 +21544,7 @@ function showLabosVirtuels(){
     var locked=!lv.gratuit&&!SES;
     h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:0;border-top:3px solid "+lv.color+";overflow:hidden;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;box-shadow:0 10px 26px -16px rgba(20,37,84,.16)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px -18px "+lv.color+"55'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 10px 26px -16px rgba(20,37,84,.16)'\">";
     h+="<div style='background:linear-gradient(135deg,"+lv.color+"1f,"+lv.color+"08);padding:18px 18px 16px;position:relative'>";
-    h+="<div style='position:absolute;top:10px;right:10px;background:"+(lv.gratuit?"#059669":"#7C3AED")+";color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:10px'>"+(lv.gratuit?"GRATUIT":lv.plan||"PREMIUM")+"</div>";
+    h+="<div style='position:absolute;top:10px;right:10px;background:"+(lv.gratuit?"#059669":"#6C56A6")+";color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:10px'>"+(lv.gratuit?"GRATUIT":lv.plan||"PREMIUM")+"</div>";
     h+="<div style='width:52px;height:52px;border-radius:14px;background:"+lv.color+"26;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:10px'>"+lv.ico+"</div>";
     h+="<div style='font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:14px;font-weight:800;color:#142554'>"+lv.titre+"</div>";
     h+="<div style='font-size:11px;color:#6B7A99;margin-top:3px;font-weight:600'>"+lv.matiere+" · "+lv.classe+"</div>";
@@ -21644,7 +21648,7 @@ function _lancerLaboComplet(lv){
     if(activeTab==="theorie"){
       h+="<div class='card'>";
       h+="<div class='ct mb12'><span class='ct-ico'><svg class='vico' width='17' height='17' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-bookopen'/></svg></span>Cours théorique</div>";
-      h+="<div style='font-family:Georgia,serif;font-size:14px;color:#374151;line-height:1.9;padding:16px;background:linear-gradient(135deg,#F8FAFF,#EDE9FE1A);border-radius:12px;border-left:4px solid "+lv.color+"'>";
+      h+="<div style='font-family:Georgia,serif;font-size:14px;color:#374151;line-height:1.9;padding:16px;background:linear-gradient(135deg,#F8FAFF,#EDE9FE1A);border-radius:12px;'>";
       h+=lv.theorie;
       h+="</div>";
       h+="<button class='btn bi mt14' onclick=\"window._laboTab='experience';_lancerLaboComplet(window._laboDBItem)\">Passer à l'expérience →</button>";
@@ -21670,7 +21674,7 @@ function _lancerLaboComplet(lv){
       h+="<div id='simControls' style='display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:12px;background:#F0F4FF;border-radius:12px'></div>";
 
       lv.experience.forEach(function(e,i){
-        h+="<div style='display:flex;align-items:flex-start;gap:12px;padding:12px;background:"+(i%2===0?"#F8FAFF":"#fff")+";border-radius:10px;margin-bottom:8px;border-left:3px solid "+lv.color+"'>";
+        h+="<div style='display:flex;align-items:flex-start;gap:12px;padding:12px;background:"+(i%2===0?"#F8FAFF":"#fff")+";border-radius:10px;margin-bottom:8px;'>";
         h+="<div style='font-size:18px;flex-shrink:0'>"+e.charAt(0)+e.charAt(1)+"</div>";
         h+="<div style='font-family:Georgia,serif;font-size:13px;color:#374151;line-height:1.7'>"+e.substring(3)+"</div>";
         h+="</div>";
@@ -21687,7 +21691,7 @@ function _lancerLaboComplet(lv){
         h+="<div class='card' style='text-align:center;padding:32px'>";
         h+="<div style='font-size:52px;margin-bottom:16px'>"+(pct>=80?"🏆":pct>=60?"✅":"📚")+"</div>";
         h+="<div style='font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#142554;margin-bottom:8px'>Quiz terminé !</div>";
-        h+="<div style='font-family:Georgia,serif;font-size:16px;color:"+(pct>=80?"#059669":pct>=60?"#D97706":"#DC2626")+"';>Score : "+window._laboScore+"/"+qs.length+" ("+pct+"%)</div>";
+        h+="<div style='font-family:Georgia,serif;font-size:16px;color:"+(pct>=80?"#059669":pct>=60?"#D97706":"#AE5353")+"';>Score : "+window._laboScore+"/"+qs.length+" ("+pct+"%)</div>";
         h+="<div style='font-size:13px;color:#6B7A99;margin:10px 0 20px'>"+(pct>=80?"Excellent ! Tu maîtrises ce chapitre.":pct>=60?"Bien ! Revois quelques points.":"Continue à étudier la théorie.")+"</div>";
         h+="<div class='fl2 g8' style='justify-content:center'>";
         h+="<button class='btn' style='background:#F0F4FF;color:#142554;border-radius:12px;padding:9px 18px;font-weight:700' onclick=\"window._laboQIdx=0;window._laboScore=0;_lancerLaboComplet(window._laboDBItem)\"><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-refresh'/></svg>Recommencer</button>";
@@ -21732,12 +21736,12 @@ function _lancerLaboComplet(lv){
     var btns=document.querySelectorAll("[onclick^='_laboAnswer']");
     btns.forEach(function(b,idx){
       b.style.background=idx===q.ans?"#D1FAE5":idx===i&&i!==q.ans?"#FEE2E2":"#F0F4FF";
-      b.style.borderColor=idx===q.ans?"#059669":idx===i&&i!==q.ans?"#DC2626":"#E8EEFF";
+      b.style.borderColor=idx===q.ans?"#059669":idx===i&&i!==q.ans?"#AE5353":"#E8EEFF";
       b.style.cursor="default";
       b.onclick=null;
     });
     if(i===q.ans) window._laboScore=(window._laboScore||0)+1;
-    if(fb) fb.innerHTML="<div style='padding:10px;background:"+(i===q.ans?"#D1FAE5":"#FEE2E2")+";border-radius:10px;font-size:13px;color:"+(i===q.ans?"#059669":"#DC2626")+";line-height:1.6'>"+(i===q.ans?"✅ ":"❌ ")+q.exp+"</div>";
+    if(fb) fb.innerHTML="<div style='padding:10px;background:"+(i===q.ans?"#D1FAE5":"#FEE2E2")+";border-radius:10px;font-size:13px;color:"+(i===q.ans?"#059669":"#AE5353")+";line-height:1.6'>"+(i===q.ans?"✅ ":"❌ ")+q.exp+"</div>";
     setTimeout(function(){window._laboQIdx=(window._laboQIdx||0)+1;render();},2000);
   };
 
@@ -21835,7 +21839,7 @@ function _initLaboSim(lv){
       ctx.fillStyle='#fff';ctx.font='bold 18px monospace';ctx.fillText('+',65,148);ctx.fillText('−',65,200);
 
       // Wires
-      ctx.strokeStyle='#60A5FA';ctx.lineWidth=2.5;ctx.setLineDash([]);
+      ctx.strokeStyle='#87A9D3';ctx.lineWidth=2.5;ctx.setLineDash([]);
       if(isSerie){
         // Série: bat → R1 → R2 → bat
         ctx.beginPath();ctx.moveTo(90,145);ctx.lineTo(200,145);ctx.stroke();
@@ -21848,12 +21852,12 @@ function _initLaboSim(lv){
         ctx.fillStyle='#fff';ctx.font='bold 13px Fira Code';ctx.textAlign='center';
         ctx.fillText('R1='+p.R1+'Ω',240,150);
         // R2 box
-        ctx.fillStyle='#7C3AED';ctx.fillRect(400,125,80,40);
+        ctx.fillStyle='#6C56A6';ctx.fillRect(400,125,80,40);
         ctx.fillStyle='#fff';ctx.fillText('R2='+p.R2+'Ω',440,150);
         // Ammeter
         ctx.beginPath();ctx.arc(340,195,16,0,Math.PI*2);ctx.fillStyle='#D1FAE5';ctx.fill();ctx.strokeStyle='#059669';ctx.lineWidth=2;ctx.stroke();
         ctx.fillStyle='#059669';ctx.font='bold 10px Fira Code';ctx.fillText('A',340,199);
-        ctx.beginPath();ctx.moveTo(280,195);ctx.lineTo(324,195);ctx.strokeStyle='#60A5FA';ctx.lineWidth=2.5;ctx.stroke();
+        ctx.beginPath();ctx.moveTo(280,195);ctx.lineTo(324,195);ctx.strokeStyle='#87A9D3';ctx.lineWidth=2.5;ctx.stroke();
         ctx.beginPath();ctx.moveTo(356,195);ctx.lineTo(400,195);ctx.stroke();
       } else {
         // Parallèle
@@ -21867,7 +21871,7 @@ function _initLaboSim(lv){
         ctx.fillStyle=lv.color;ctx.fillRect(350,90,80,40);
         ctx.fillStyle='#fff';ctx.font='bold 12px Fira Code';ctx.fillText('R1='+p.R1+'Ω',390,115);
         // R2 bottom
-        ctx.fillStyle='#7C3AED';ctx.fillRect(350,200,80,40);
+        ctx.fillStyle='#6C56A6';ctx.fillRect(350,200,80,40);
         ctx.fillStyle='#fff';ctx.fillText('R2='+p.R2+'Ω',390,225);
       }
 
@@ -21940,14 +21944,14 @@ function _initLaboSim(lv){
       // Friction arrow
       if(p.vx>0.1){
         var fLen=p.friction*p.mass*9.81*2;
-        ctx.strokeStyle='#F87171';ctx.lineWidth=2;
+        ctx.strokeStyle='#D58E8E';ctx.lineWidth=2;
         ctx.beginPath();ctx.moveTo(bx,by+25);ctx.lineTo(bx-fLen,by+25);ctx.stroke();
-        ctx.fillStyle='#F87171';ctx.font='10px Montserrat';ctx.fillText('f',bx-fLen/2,by+40);
+        ctx.fillStyle='#D58E8E';ctx.font='10px Montserrat';ctx.fillText('f',bx-fLen/2,by+40);
       }
       // Weight arrow
-      ctx.strokeStyle='#60A5FA';ctx.lineWidth=2;
+      ctx.strokeStyle='#87A9D3';ctx.lineWidth=2;
       ctx.beginPath();ctx.moveTo(bx+25,by+50);ctx.lineTo(bx+25,by+50+p.mass*5);ctx.stroke();
-      ctx.fillStyle='#60A5FA';ctx.font='10px Montserrat';ctx.fillText('P='+(p.mass*9.81).toFixed(1)+'N',bx+35,by+60+p.mass*3);
+      ctx.fillStyle='#87A9D3';ctx.font='10px Montserrat';ctx.fillText('P='+(p.mass*9.81).toFixed(1)+'N',bx+35,by+60+p.mass*3);
       // Velocity indicator
       ctx.fillStyle='#fff';ctx.font='12px Fira Code';ctx.textAlign='left';
       ctx.fillText('v = '+p.vx.toFixed(2)+' m/s',20,30);
@@ -22058,7 +22062,7 @@ function _initLaboSim(lv){
       ctx.strokeStyle='#059669';ctx.lineWidth=6;ctx.setLineDash([]);
       ctx.beginPath();ctx.roundRect(cx-180,cy-120,360,240,20);ctx.stroke();
       // Cell membrane
-      ctx.strokeStyle='#34D399';ctx.lineWidth=2;ctx.setLineDash([6,4]);
+      ctx.strokeStyle='#5CAB8E';ctx.lineWidth=2;ctx.setLineDash([6,4]);
       ctx.beginPath();ctx.roundRect(cx-170,cy-110,340,220,16);ctx.stroke();ctx.setLineDash([]);
       // Cytoplasm
       ctx.fillStyle='rgba(209,250,229,0.25)';ctx.beginPath();ctx.roundRect(cx-170,cy-110,340,220,16);ctx.fill();
@@ -22069,7 +22073,7 @@ function _initLaboSim(lv){
       // Nucleus
       var nx=cx-60,ny=cy-10;
       ctx.beginPath();ctx.ellipse(nx,ny,38,30,0,0,Math.PI*2);
-      ctx.fillStyle='rgba(124,58,237,0.25)';ctx.fill();ctx.strokeStyle='#7C3AED';ctx.lineWidth=2;ctx.stroke();
+      ctx.fillStyle='rgba(124,58,237,0.25)';ctx.fill();ctx.strokeStyle='#6C56A6';ctx.lineWidth=2;ctx.stroke();
       // Nucleolus
       ctx.beginPath();ctx.arc(nx+5,ny-3,10,0,Math.PI*2);ctx.fillStyle='rgba(124,58,237,0.5)';ctx.fill();
       // Chloroplasts (orbiting)
@@ -22089,7 +22093,7 @@ function _initLaboSim(lv){
         var ma=t*0.5+mi*2.1+1;
         var mx=cx+Math.cos(ma)*90,my=cy+Math.sin(ma)*55;
         ctx.beginPath();ctx.ellipse(mx,my,16,8,ma*0.5,0,Math.PI*2);
-        ctx.fillStyle='rgba(239,68,68,0.4)';ctx.fill();ctx.strokeStyle='#EF4444';ctx.lineWidth=1.5;ctx.stroke();
+        ctx.fillStyle='rgba(239,68,68,0.4)';ctx.fill();ctx.strokeStyle='#C46F6F';ctx.lineWidth=1.5;ctx.stroke();
         // Cristae
         ctx.strokeStyle='rgba(239,68,68,0.5)';ctx.lineWidth=1;
         ctx.beginPath();ctx.moveTo(mx-8,my);ctx.quadraticCurveTo(mx,my-6,mx+8,my);ctx.stroke();
@@ -22107,12 +22111,12 @@ function _initLaboSim(lv){
         ctx.font='bold 11px Montserrat';ctx.textAlign='left';
         var labels=[
           [cx+190,cy-100,'Paroi cellulaire','#059669'],
-          [cx+190,cy-75,'Membrane plasmique','#34D399'],
-          [cx+80,cy,'Vacuole','#3B82F6'],
-          [nx+45,ny-20,'Noyau','#7C3AED'],
-          [nx+45,ny+5,'Nucléole','#7C3AED'],
+          [cx+190,cy-75,'Membrane plasmique','#5CAB8E'],
+          [cx+80,cy,'Vacuole','#6A8DC7'],
+          [nx+45,ny-20,'Noyau','#6C56A6'],
+          [nx+45,ny+5,'Nucléole','#6C56A6'],
           [cx+150,cy+60,'Chloroplaste','#059669'],
-          [cx-160,cy+70,'Mitochondrie','#EF4444'],
+          [cx-160,cy+70,'Mitochondrie','#C46F6F'],
           [cx-140,cy+95,'Réticulum endoplasmique','#F59E0B'],
         ];
         labels.forEach(function(lb){
@@ -22312,14 +22316,14 @@ function _initLaboSim(lv){
     var regions=[
       {nom:"Adamaoua",cx:380,cy:130,chef:"Ngaoundéré",col:"#D97706"},
       {nom:"Centre",cx:330,cy:200,chef:"Yaoundé",col:"#059669"},
-      {nom:"Est",cx:440,cy:210,chef:"Bertoua",col:"#7C3AED"},
-      {nom:"Extrême-Nord",cx:370,cy:40,chef:"Maroua",col:"#DC2626"},
+      {nom:"Est",cx:440,cy:210,chef:"Bertoua",col:"#6C56A6"},
+      {nom:"Extrême-Nord",cx:370,cy:40,chef:"Maroua",col:"#AE5353"},
       {nom:"Littoral",cx:260,cy:220,chef:"Douala",col:"#0891B2"},
       {nom:"Nord",cx:370,cy:85,chef:"Garoua",col:"#1E3A8A"},
       {nom:"Nord-Ouest",cx:270,cy:160,chef:"Bamenda",col:"#BE185D"},
       {nom:"Ouest",cx:290,cy:185,chef:"Bafoussam",col:"#D97706"},
       {nom:"Sud",cx:330,cy:260,chef:"Ebolowa",col:"#059669"},
-      {nom:"Sud-Ouest",cx:230,cy:190,chef:"Buea",col:"#7C3AED"},
+      {nom:"Sud-Ouest",cx:230,cy:190,chef:"Buea",col:"#6C56A6"},
     ];
     window._sim.controlsDef=function(){
       return "<span style='font-size:11px;font-weight:700;color:#142554'>Clique sur une région pour l'explorer</span>"
@@ -22385,18 +22389,18 @@ function _initLaboSim(lv){
   } else if(lv.id==="lv8"){
     var events=[
       {y:1956,pays:"Maroc / Tunisie",col:"France",c:"#EAB308"},
-      {y:1957,pays:"Ghana",col:"Grande-Bretagne",c:"#22C55E"},
+      {y:1957,pays:"Ghana",col:"Grande-Bretagne",c:"#4B9C69"},
       {y:1958,pays:"Guinée",col:"France",c:"#EAB308"},
       {y:1960,pays:"Cameroun, Sénégal, Mali, Côte d'Ivoire…",col:"France",c:"#EAB308"},
-      {y:1960,pays:"Nigeria, Kenya, Somalie",col:"Grande-Bretagne",c:"#22C55E"},
+      {y:1960,pays:"Nigeria, Kenya, Somalie",col:"Grande-Bretagne",c:"#4B9C69"},
       {y:1962,pays:"Algérie, Rwanda, Burundi",col:"France / Belgique",c:"#EAB308"},
-      {y:1964,pays:"Malawi, Zambie",col:"Grande-Bretagne",c:"#22C55E"},
-      {y:1965,pays:"Gambie, Rhodésie (UDI)",col:"Grande-Bretagne",c:"#22C55E"},
-      {y:1968,pays:"Guinée équatoriale, Swaziland",col:"Espagne / GB",c:"#F97316"},
-      {y:1975,pays:"Mozambique, Angola, Comores",col:"Portugal",c:"#EF4444"},
-      {y:1980,pays:"Zimbabwe",col:"Grande-Bretagne",c:"#22C55E"},
-      {y:1990,pays:"Namibie",col:"Afrique du Sud / ONU",c:"#8B5CF6"},
-      {y:1993,pays:"Érythrée",col:"Éthiopie",c:"#EC4899"},
+      {y:1964,pays:"Malawi, Zambie",col:"Grande-Bretagne",c:"#4B9C69"},
+      {y:1965,pays:"Gambie, Rhodésie (UDI)",col:"Grande-Bretagne",c:"#4B9C69"},
+      {y:1968,pays:"Guinée équatoriale, Swaziland",col:"Espagne / GB",c:"#C07D4F"},
+      {y:1975,pays:"Mozambique, Angola, Comores",col:"Portugal",c:"#C46F6F"},
+      {y:1980,pays:"Zimbabwe",col:"Grande-Bretagne",c:"#4B9C69"},
+      {y:1990,pays:"Namibie",col:"Afrique du Sud / ONU",c:"#7C68B8"},
+      {y:1993,pays:"Érythrée",col:"Éthiopie",c:"#C37199"},
     ];
     var selected=0;
     window._sim.params={sel:0};
@@ -22464,7 +22468,7 @@ function _initLaboSim(lv){
       var refr=sinT2<=1?'θr = '+(Math.asin(sinT2)*180/Math.PI).toFixed(1)+'°':'Réflexion totale';
       return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>θ incident: <input type='range' min='5' max='89' value='"+p.angle+"' oninput='window._sim.params.angle=+this.value' style='width:100px'><span>"+p.angle+"°</span></label>"
         +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>n2 (milieu): <input type='range' min='1.0' max='2.5' step='0.05' value='"+p.n2+"' oninput='window._sim.params.n2=+this.value' style='width:100px'><span>"+p.n2+"</span></label>"
-        +"<span style='font-size:11px;color:#7C3AED;font-weight:700'>"+refr+"</span>";
+        +"<span style='font-size:11px;color:#6C56A6;font-weight:700'>"+refr+"</span>";
     };
     _simUpdateControls();
     window._sim._draw=function(){
@@ -22493,7 +22497,7 @@ function _initLaboSim(lv){
       ctx.fillStyle='#FFC93C';
       ctx.beginPath(); ctx.moveTo(cx,iy); ctx.lineTo(cx-ux*12-uy*6,iy-uy*12+ux*6); ctx.lineTo(cx-ux*12+uy*6,iy-uy*12-ux*6); ctx.closePath(); ctx.fill();
       // Reflected ray
-      ctx.strokeStyle='#60A5FA'; ctx.lineWidth=1.5;
+      ctx.strokeStyle='#87A9D3'; ctx.lineWidth=1.5;
       var rx=cx+Math.sin(ang)*120, ry=iy-Math.cos(ang)*120;
       ctx.beginPath(); ctx.moveTo(cx,iy); ctx.lineTo(rx,ry); ctx.stroke();
       // Refracted ray
@@ -22501,7 +22505,7 @@ function _initLaboSim(lv){
       if(sinT2<=1){
         var t2=Math.asin(sinT2);
         var rfx=cx+Math.sin(t2)*130, rfy=iy+Math.cos(t2)*130;
-        ctx.strokeStyle='#34D399'; ctx.lineWidth=2;
+        ctx.strokeStyle='#5CAB8E'; ctx.lineWidth=2;
         ctx.beginPath(); ctx.moveTo(cx,iy); ctx.lineTo(rfx,rfy); ctx.stroke();
         // Angle arcs
         ctx.strokeStyle='rgba(252,211,77,.4)'; ctx.lineWidth=1;
@@ -22510,11 +22514,11 @@ function _initLaboSim(lv){
         ctx.fillText(p.angle+'°',cx-30,iy-38);
         ctx.strokeStyle='rgba(52,211,153,.4)';
         ctx.beginPath(); ctx.arc(cx,iy,50,Math.PI/2,Math.PI/2+t2); ctx.stroke();
-        ctx.fillStyle='#34D399';
+        ctx.fillStyle='#5CAB8E';
         ctx.fillText((t2*180/Math.PI).toFixed(1)+'°',cx+32,iy+44);
         setVal('<span>⚡ θi='+p.angle+'°</span><span>🔵 θr='+p.angle+'°</span><span>🟢 θt='+(t2*180/Math.PI).toFixed(1)+'°</span><span>n₁sinθi=n₁‚sinθt</span>');
       } else {
-        ctx.fillStyle='#EF4444'; ctx.font='bold 13px Montserrat'; ctx.textAlign='center';
+        ctx.fillStyle='#C46F6F'; ctx.font='bold 13px Montserrat'; ctx.textAlign='center';
         ctx.fillText('⚠️ Réflexion totale interne',W/2,iy+50);
         setVal('<span>⚠️ Angle limite dépassé — réflexion totale</span>');
       }
@@ -22579,9 +22583,9 @@ function _initLaboSim(lv){
   } else if(lv.id==="lv11"){
     window._sim.params={reaction:0,step:0};
     var reactions=[
-      {nom:'Zn + Cu²âº → Zn²âº + Cu',oxyd:'Zn → Zn²âº + 2eâ»',red:'Cu²âº + 2eâ» → Cu',ne:2,col1:'#78716C',col2:'#0EA5E9',prod:'#F97316'},
-      {nom:'Fe + 2HCl → FeCl₁‚ + H₁‚',oxyd:'Fe → Fe²âº + 2eâ»',red:'2Hâº + 2eâ» → H₁‚',ne:2,col1:'#6B7280',col2:'#EF4444',prod:'#A3E635'},
-      {nom:'CH₁„ + 2O₁‚ → CO₁‚ + 2H₁‚O',oxyd:'Combustion',red:'C: -4 → +4',ne:8,col1:'#60A5FA',col2:'#F97316',prod:'#94A3B8'},
+      {nom:'Zn + Cu²âº → Zn²âº + Cu',oxyd:'Zn → Zn²âº + 2eâ»',red:'Cu²âº + 2eâ» → Cu',ne:2,col1:'#78716C',col2:'#0EA5E9',prod:'#C07D4F'},
+      {nom:'Fe + 2HCl → FeCl₁‚ + H₁‚',oxyd:'Fe → Fe²âº + 2eâ»',red:'2Hâº + 2eâ» → H₁‚',ne:2,col1:'#6B7280',col2:'#C46F6F',prod:'#A3E635'},
+      {nom:'CH₁„ + 2O₁‚ → CO₁‚ + 2H₁‚O',oxyd:'Combustion',red:'C: -4 → +4',ne:8,col1:'#87A9D3',col2:'#C07D4F',prod:'#94A3B8'},
     ];
     window._sim.controlsDef=function(){
       var p=window._sim.params;
@@ -22624,11 +22628,11 @@ function _initLaboSim(lv){
         var ePhase=(t*0.5+ei/ne)%1;
         var ex=120+80+ePhase*(460-120-80*2);
         var ey=60;
-        ctx.fillStyle='#60A5FA'; ctx.beginPath(); ctx.arc(ex,ey,4,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle='#60A5FA'; ctx.font='bold 9px Fira Code'; ctx.textAlign='center'; ctx.fillText('eâ»',ex,ey-6);
+        ctx.fillStyle='#87A9D3'; ctx.beginPath(); ctx.arc(ex,ey,4,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#87A9D3'; ctx.font='bold 9px Fira Code'; ctx.textAlign='center'; ctx.fillText('eâ»',ex,ey-6);
       }
       // Wire top
-      ctx.strokeStyle='#60A5FA'; ctx.lineWidth=2;
+      ctx.strokeStyle='#87A9D3'; ctx.lineWidth=2;
       ctx.beginPath(); ctx.moveTo(120,60); ctx.lineTo(460,60); ctx.stroke();
       // Formula
       ctx.fillStyle='rgba(255,255,255,.07)'; ctx.fillRect(10,H-70,W-20,55);
@@ -22642,9 +22646,9 @@ function _initLaboSim(lv){
   // â”€â”€ lv12 : Digestion Humaine â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv12"){
     var organs=[
-      {n:'Bouche',x:340,y:40,r:22,c:'#F97316',info:'Mastication + amylase salivaire. Amidon → Maltose.'},
-      {n:'Œsophage',x:340,y:90,r:10,c:'#60A5FA',info:'Transit par péristaltisme. ~10 secondes.'},
-      {n:'Estomac',x:320,y:155,r:40,c:'#EF4444',info:'HCl + pepsine. pH=1,5–3. Protéines → peptides. ~2-4h.'},
+      {n:'Bouche',x:340,y:40,r:22,c:'#C07D4F',info:'Mastication + amylase salivaire. Amidon → Maltose.'},
+      {n:'Œsophage',x:340,y:90,r:10,c:'#87A9D3',info:'Transit par péristaltisme. ~10 secondes.'},
+      {n:'Estomac',x:320,y:155,r:40,c:'#C46F6F',info:'HCl + pepsine. pH=1,5–3. Protéines → peptides. ~2-4h.'},
       {n:'Intestin grêle',x:290,y:260,r:25,c:'#A3E635',info:'Bile + sucs pancréatiques. Absorption : 90% nutriments. ~6h.'},
       {n:'Gros intestin',x:400,y:280,r:20,c:'#F59E0B',info:'Absorption eau. Formation des fèces. Microbiote. ~24-48h.'},
       {n:'Anus',x:450,y:330,r:12,c:'#94A3B8',info:'Évacuation des déchets.'},
@@ -22730,10 +22734,10 @@ function _initLaboSim(lv){
       ctx.restore();
       // Blood vessels - arteries (red) and veins (blue)
       var vessels=[
-        {x1:cx,y1:cy-80,x2:cx,y2:40,col:'#EF4444',label:'Aorte',oxy:true},
-        {x1:cx,y1:cy+10,x2:cx,y2:310,col:'#3B82F6',label:'Veine cave',oxy:false},
-        {x1:cx-30,y1:cy-40,x2:90,y2:cy-40,col:'#3B82F6',label:'Art. pulm.',oxy:false},
-        {x1:cx+30,y1:cy-40,x2:470,y2:cy-40,col:'#EF4444',label:'V. pulm.',oxy:true},
+        {x1:cx,y1:cy-80,x2:cx,y2:40,col:'#C46F6F',label:'Aorte',oxy:true},
+        {x1:cx,y1:cy+10,x2:cx,y2:310,col:'#6A8DC7',label:'Veine cave',oxy:false},
+        {x1:cx-30,y1:cy-40,x2:90,y2:cy-40,col:'#6A8DC7',label:'Art. pulm.',oxy:false},
+        {x1:cx+30,y1:cy-40,x2:470,y2:cy-40,col:'#C46F6F',label:'V. pulm.',oxy:true},
       ];
       vessels.forEach(function(v){
         ctx.strokeStyle=v.col; ctx.lineWidth=4;
@@ -22742,7 +22746,7 @@ function _initLaboSim(lv){
         ctx.fillText(v.label,(v.x1+v.x2)/2,(v.y1+v.y2)/2-6);
       });
       // Lungs
-      [[90,cy-40,50,'#7C3AED'],[470,cy-40,40,'#7C3AED']].forEach(function(l){
+      [[90,cy-40,50,'#6C56A6'],[470,cy-40,40,'#6C56A6']].forEach(function(l){
         ctx.fillStyle=l[3]+'44'; ctx.strokeStyle=l[3]; ctx.lineWidth=2;
         ctx.beginPath(); ctx.ellipse(l[0],l[1],l[2],l[2]*1.4,0,0,Math.PI*2);
         ctx.fill(); ctx.stroke();
@@ -22754,7 +22758,7 @@ function _initLaboSim(lv){
       [[cx,cy-80,cx,40,true],[cx,cy+10,cx,290,false],[cx-30,cy-40,90,cy-40,false],[cx+30,cy-40,470,cy-40,true]].forEach(function(v,vi){
         var frac=(bPhase+vi*0.25)%1;
         var bx=v[0]+(v[2]-v[0])*frac, by=v[1]+(v[3]-v[1])*frac;
-        ctx.fillStyle=v[4]?'#EF4444':'#3B82F6';
+        ctx.fillStyle=v[4]?'#C46F6F':'#6A8DC7';
         ctx.beginPath(); ctx.arc(bx,by,5,0,Math.PI*2); ctx.fill();
       });
       // ECG
@@ -22794,8 +22798,8 @@ function _initLaboSim(lv){
         });
       }
       var chroms=[
-        {dx:-30,dy:-10,col:'#EF4444',pair:ph<2},{dx:-10,dy:-10,col:'#EF4444',pair:ph<2},
-        {dx:10,dy:-10,col:'#3B82F6',pair:ph<2},{dx:30,dy:-10,col:'#3B82F6',pair:ph<2},
+        {dx:-30,dy:-10,col:'#C46F6F',pair:ph<2},{dx:-10,dy:-10,col:'#C46F6F',pair:ph<2},
+        {dx:10,dy:-10,col:'#6A8DC7',pair:ph<2},{dx:30,dy:-10,col:'#6A8DC7',pair:ph<2},
       ];
       if(ph<4){
         drawCell(W/2,H/2-20,100,'2n=4 (diploïde)',chroms);
@@ -22805,19 +22809,19 @@ function _initLaboSim(lv){
         }
         if(ph===2){
           var sep=(t%3)/3*60;
-          ctx.fillStyle='#EF4444'; ctx.fillRect(W/2-40-sep,H/2-25,8,50);
-          ctx.fillStyle='#3B82F6'; ctx.fillRect(W/2+32+sep,H/2-25,8,50);
+          ctx.fillStyle='#C46F6F'; ctx.fillRect(W/2-40-sep,H/2-25,8,50);
+          ctx.fillStyle='#6A8DC7'; ctx.fillRect(W/2+32+sep,H/2-25,8,50);
         }
         if(ph===3){
-          drawCell(W/2-150,H/2,60,'n=2',[ {dx:-10,dy:0,col:'#EF4444',pair:false},{dx:10,dy:0,col:'#3B82F6',pair:false}]);
-          drawCell(W/2+150,H/2,60,'n=2',[ {dx:-10,dy:0,col:'#EF4444',pair:false},{dx:10,dy:0,col:'#3B82F6',pair:false}]);
+          drawCell(W/2-150,H/2,60,'n=2',[ {dx:-10,dy:0,col:'#C46F6F',pair:false},{dx:10,dy:0,col:'#6A8DC7',pair:false}]);
+          drawCell(W/2+150,H/2,60,'n=2',[ {dx:-10,dy:0,col:'#C46F6F',pair:false},{dx:10,dy:0,col:'#6A8DC7',pair:false}]);
         }
       } else {
         for(var ci=0;ci<4;ci++){
           var ccx=110+ci*(W-160)/3; var ccy=H/2;
           ctx.strokeStyle='rgba(255,255,255,.3)'; ctx.lineWidth=1.5;
           ctx.beginPath(); ctx.arc(ccx,ccy,55,0,Math.PI*2); ctx.stroke();
-          var col=ci%2===0?'#EF4444':'#3B82F6';
+          var col=ci%2===0?'#C46F6F':'#6A8DC7';
           ctx.fillStyle=col; ctx.fillRect(ccx-4,ccy-20,8,40);
           ctx.fillStyle='rgba(255,255,255,.6)'; ctx.font='10px Fira Code'; ctx.textAlign='center';
           ctx.fillText('n=2',ccx,ccy+72);
@@ -22908,7 +22912,7 @@ function _initLaboSim(lv){
       ctx.textAlign='right';
       for(var gy2=-3;gy2<=3;gy2+=1){if(gy2!==0)ctx.fillText(-gy2,ox-5,oy+gy2*sc+4);}
       // f(x)
-      ctx.strokeStyle='#60A5FA'; ctx.lineWidth=2.5;
+      ctx.strokeStyle='#87A9D3'; ctx.lineWidth=2.5;
       ctx.beginPath(); var first=true;
       for(var xi=-8;xi<=8;xi+=0.05){
         var y=p.a*xi*xi+p.b*xi+p.c;
@@ -22924,10 +22928,10 @@ function _initLaboSim(lv){
       ctx.strokeStyle='#FFC93C'; ctx.lineWidth=1.5;
       ctx.beginPath(); ctx.moveTo(ox+tx1*sc,oy-ty1*sc); ctx.lineTo(ox+tx2*sc,oy-ty2*sc); ctx.stroke();
       // Point
-      ctx.fillStyle='#EF4444'; ctx.beginPath(); ctx.arc(ox+x0*sc,oy-y0*sc,5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#C46F6F'; ctx.beginPath(); ctx.arc(ox+x0*sc,oy-y0*sc,5,0,Math.PI*2); ctx.fill();
       // Formula
       ctx.fillStyle='rgba(255,255,255,.06)'; ctx.fillRect(10,10,220,65);
-      ctx.fillStyle='#60A5FA'; ctx.font='bold 12px Fira Code'; ctx.textAlign='left';
+      ctx.fillStyle='#87A9D3'; ctx.font='bold 12px Fira Code'; ctx.textAlign='left';
       ctx.fillText('f(x) = '+p.a+'x² + '+p.b+'x + '+p.c,18,32);
       ctx.fillStyle='#FFC93C'; ctx.font='11px Fira Code';
       ctx.fillText("f'(x) = "+(2*p.a)+'x + '+p.b,18,52);
@@ -22945,7 +22949,7 @@ function _initLaboSim(lv){
       var rad=(p.angleDeg*Math.PI/180);
       return "<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>θ (degrés): <input type='range' min='0' max='360' value='"+p.angleDeg+"' oninput='window._sim.params.angleDeg=+this.value' style='width:120px'><span>"+p.angleDeg+"°</span></label>"
         +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:6px'>Vitesse: <input type='range' min='0' max='3' step='0.1' value='"+p.speed+"' oninput='window._sim.params.speed=+this.value' style='width:80px'><span>"+p.speed+"</span></label>"
-        +"<span style='font-size:11px;color:#7C3AED;font-weight:700'>sin="+Math.sin(rad).toFixed(3)+" cos="+Math.cos(rad).toFixed(3)+" tan="+(Math.abs(Math.cos(rad))<0.01?'∝ž':Math.tan(rad).toFixed(3))+"</span>";
+        +"<span style='font-size:11px;color:#6C56A6;font-weight:700'>sin="+Math.sin(rad).toFixed(3)+" cos="+Math.cos(rad).toFixed(3)+" tan="+(Math.abs(Math.cos(rad))<0.01?'∝ž':Math.tan(rad).toFixed(3))+"</span>";
     };
     _simUpdateControls();
     window._sim._draw=function(){
@@ -22967,9 +22971,9 @@ function _initLaboSim(lv){
       var ang=p.angleDeg*Math.PI/180;
       var px=cx+R*Math.cos(ang), py=cy-R*Math.sin(ang);
       // cos projection (horizontal)
-      ctx.strokeStyle='#60A5FA'; ctx.lineWidth=2;
+      ctx.strokeStyle='#87A9D3'; ctx.lineWidth=2;
       ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(px,cy); ctx.stroke();
-      ctx.fillStyle='#60A5FA'; ctx.font='11px Fira Code'; ctx.textAlign='center';
+      ctx.fillStyle='#87A9D3'; ctx.font='11px Fira Code'; ctx.textAlign='center';
       ctx.fillText('cos θ',cx+(px-cx)/2,cy+16);
       // sin projection (vertical)
       ctx.strokeStyle='#A3E635'; ctx.lineWidth=2;
@@ -22985,7 +22989,7 @@ function _initLaboSim(lv){
       ctx.fillStyle='#FFC93C'; ctx.font='bold 11px Fira Code'; ctx.textAlign='center';
       ctx.fillText(p.angleDeg+'°',cx+55*Math.cos(-ang/2),cy+55*Math.sin(-ang/2));
       // Point
-      ctx.fillStyle='#EF4444'; ctx.beginPath(); ctx.arc(px,py,7,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#C46F6F'; ctx.beginPath(); ctx.arc(px,py,7,0,Math.PI*2); ctx.fill();
       // Sin wave on right side
       var wox=430, woy=H/2, wsc=60;
       ctx.strokeStyle='rgba(163,230,53,.3)'; ctx.lineWidth=1;
@@ -23000,7 +23004,7 @@ function _initLaboSim(lv){
       }
       ctx.stroke();
       // Current position marker on wave
-      ctx.fillStyle='#EF4444'; ctx.beginPath(); ctx.arc(wox,woy-Math.sin(ang)*wsc,5,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle='#C46F6F'; ctx.beginPath(); ctx.arc(wox,woy-Math.sin(ang)*wsc,5,0,Math.PI*2); ctx.fill();
       // Labels
       ctx.fillStyle='rgba(255,255,255,.5)'; ctx.font='9px Fira Code'; ctx.textAlign='center';
       ctx.fillText('1',cx+R+8,cy+4); ctx.fillText('-1',cx-R-14,cy+4);
@@ -23012,9 +23016,9 @@ function _initLaboSim(lv){
   // â”€â”€ lv18 : La Mondialisation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   } else if(lv.id==="lv18"){
     var POLES=[
-      {n:'Amérique N.',x:140,y:130,col:'#3B82F6'},{n:'Europe',x:320,y:110,col:'#FFC93C'},
-      {n:'Asie-Pacifique',x:520,y:120,col:'#EF4444'},{n:'Afrique',x:320,y:230,col:'#22C55E'},
-      {n:'Amérique S.',x:180,y:270,col:'#A78BFA'},{n:'Moyen-Orient',x:400,y:190,col:'#F97316'},
+      {n:'Amérique N.',x:140,y:130,col:'#6A8DC7'},{n:'Europe',x:320,y:110,col:'#FFC93C'},
+      {n:'Asie-Pacifique',x:520,y:120,col:'#C46F6F'},{n:'Afrique',x:320,y:230,col:'#4B9C69'},
+      {n:'Amérique S.',x:180,y:270,col:'#9784D1'},{n:'Moyen-Orient',x:400,y:190,col:'#C07D4F'},
     ];
     var FLOWS=[
       {f:0,t:1,val:7200,label:'commerce'},{f:1,t:2,val:9400,label:'tech'},{f:2,t:0,val:8100,label:'manufact.'},
@@ -23075,9 +23079,9 @@ function _initLaboSim(lv){
     window._sim.controlsDef=function(){
       var p=window._sim.params;
       return "<button onclick=\"window._sim.params.algo='bubble';resetArr()\" style='background:"+(p.algo==='bubble'?'#142554':'#E8EEFF')+";color:"+(p.algo==='bubble'?'#FFC93C':'#142554')+";border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer'>Tri Bulles</button>"
-        +"<button onclick=\"window._sim.params.algo='select';resetArr()\" style='background:"+(p.algo==='select'?'#7C3AED':'#E8EEFF')+";color:"+(p.algo==='select'?'#fff':'#142554')+";border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px'>Tri Sélection</button>"
+        +"<button onclick=\"window._sim.params.algo='select';resetArr()\" style='background:"+(p.algo==='select'?'#6C56A6':'#E8EEFF')+";color:"+(p.algo==='select'?'#fff':'#142554')+";border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px'>Tri Sélection</button>"
         +"<label style='font-size:11px;font-weight:700;color:#142554;display:flex;align-items:center;gap:4px;margin-left:8px'>Vitesse: <input type='range' min='0.5' max='5' step='0.5' value='"+p.speed+"' oninput='window._sim.params.speed=+this.value' style='width:70px'><span>×"+p.speed+"</span></label>"
-        +"<button onclick='resetArr()' style='background:#EF4444;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px'>🔀 Mélanger</button>";
+        +"<button onclick='resetArr()' style='background:#C46F6F;color:#fff;border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px'>🔀 Mélanger</button>";
     };
     _simUpdateControls();
     var lastStep=0;
@@ -23106,7 +23110,7 @@ function _initLaboSim(lv){
         var bh=Math.round(v/220*(H-80));
         var bx=20+i*(bw+2);
         var isSorted=sorted||(p.algo==='bubble'?i>=arr.length-sortStep:i<sortStep);
-        ctx.fillStyle=comparing.indexOf(i)>=0?'#EF4444':(isSorted?'#22C55E':'#60A5FA');
+        ctx.fillStyle=comparing.indexOf(i)>=0?'#C46F6F':(isSorted?'#4B9C69':'#87A9D3');
         ctx.fillRect(bx,H-50-bh,bw,bh);
         if(bw>14){ctx.fillStyle='rgba(255,255,255,.4)';ctx.font='9px Fira Code';ctx.textAlign='center';ctx.fillText(v,bx+bw/2,H-52-bh);}
       });
@@ -23162,7 +23166,7 @@ function _initLaboSim(lv){
         return "<button onclick='window._sim.params.verb="+i+"' style='background:"+(i===p.verb?'#142554':'#E8EEFF')+";color:"+(i===p.verb?'#FFC93C':'#142554')+";border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer'>"+v.inf+"</button>";
       }).join(' ');
       var btnT=TEMPS_KEYS.map(function(k){
-        return "<button onclick=\"window._sim.params.temps='"+k+"'\" style='background:"+(k===p.temps?'#7C3AED':'#EDE9FE')+";color:"+(k===p.temps?'#fff':'#7C3AED')+";border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer'>"+TEMPS_LABELS[k]+"</button>";
+        return "<button onclick=\"window._sim.params.temps='"+k+"'\" style='background:"+(k===p.temps?'#6C56A6':'#EDE9FE')+";color:"+(k===p.temps?'#fff':'#6C56A6')+";border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer'>"+TEMPS_LABELS[k]+"</button>";
       }).join(' ');
       return "<div style='margin-bottom:6px'>"+btnV+"</div>"+btnT;
     };
@@ -23199,7 +23203,7 @@ function _initLaboSim(lv){
         ctx.fillStyle=highlight?'#FFC93C':'rgba(255,255,255,.85)';
         ctx.font=(highlight?'bold ':'')+'13px Libre Baskerville,Georgia,serif'; ctx.textAlign='left';
         ctx.fillText(PRONOMS[ri],60,ry+23);
-        ctx.fillStyle=highlight?'#60A5FA':'rgba(163,230,53,.9)';
+        ctx.fillStyle=highlight?'#87A9D3':'rgba(163,230,53,.9)';
         ctx.font=(highlight?'bold ':'')+'13px Libre Baskerville,Georgia,serif';
         ctx.fillText(form,W/2+20,ry+23);
         // Small line between rows
@@ -23207,7 +23211,7 @@ function _initLaboSim(lv){
         ctx.beginPath(); ctx.moveTo(30,ry+rowH); ctx.lineTo(W-30,ry+rowH); ctx.stroke();
       });
       // Group color indicator
-      var grpCol={1:'#22C55E',2:'#3B82F6',3:'#EF4444'};
+      var grpCol={1:'#4B9C69',2:'#6A8DC7',3:'#C46F6F'};
       ctx.fillStyle=grpCol[vb.gr]; ctx.fillRect(30,30,6,H-60);
       setVal('<span>'+vb.inf+'</span><span>'+TEMPS_LABELS[p.temps]+'</span><span>Groupe '+vb.gr+'</span>');
       _simUpdateControls();
@@ -23220,7 +23224,7 @@ function _initLaboSim(lv){
       var p=window._sim.params;
       var totalSteps=(lv.experience||[]).length;
       return "<button onclick='window._sim.params.stepIdx=Math.max(0,window._sim.params.stepIdx-1);window._sim.params.autoPlay=false;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>← Étape précédente</button>"
-        +"<button onclick='window._sim.params.autoPlay=!window._sim.params.autoPlay' style='background:#7C3AED;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>"+(p.autoPlay?'⏸ Pause':'▶ Auto')+"</button>"
+        +"<button onclick='window._sim.params.autoPlay=!window._sim.params.autoPlay' style='background:#6C56A6;color:#fff;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>"+(p.autoPlay?'⏸ Pause':'▶ Auto')+"</button>"
         +"<button onclick='window._sim.params.stepIdx=Math.min("+(totalSteps-1)+",window._sim.params.stepIdx+1);window._sim.params.autoPlay=false;window._sim.t=0' style='background:#142554;color:#FFC93C;border:none;border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;cursor:pointer'>Étape suivante →</button>"
         +"<span style='font-size:11px;color:#142554;font-weight:700;margin-left:8px'>Étape "+(p.stepIdx+1)+"/"+totalSteps+"</span>";
     };
@@ -23343,9 +23347,9 @@ function mManageCoaching(){
 function _DEFAULT_COACHING_PACKS(){
   return[
     {ico:"🎯",nom:"Coaching Scolaire",desc:"Suivi personnalisé hebdomadaire, bilan de compétences, plan de progression adapté",prix:"25 000",duree:"Mensuel",color:"#1E3A8A"},
-    {ico:"🧠",nom:"Développement Personnel",desc:"Confiance en soi, gestion du stress, techniques de mémorisation efficaces",prix:"20 000",duree:"Mensuel",color:"#7C3AED"},
+    {ico:"🧠",nom:"Développement Personnel",desc:"Confiance en soi, gestion du stress, techniques de mémorisation efficaces",prix:"20 000",duree:"Mensuel",color:"#6C56A6"},
     {ico:"📅",nom:"Emploi du Temps",desc:"Élaboration d'un planning optimisé et gestion des priorités scolaires",prix:"10 000",duree:"Session",color:"#059669"},
-    {ico:"😰",nom:"Gestion du Stress",desc:"Accompagnement psychologique, relaxation et préparation mentale aux examens",prix:"15 000",duree:"Mensuel",color:"#DC2626"},
+    {ico:"😰",nom:"Gestion du Stress",desc:"Accompagnement psychologique, relaxation et préparation mentale aux examens",prix:"15 000",duree:"Mensuel",color:"#AE5353"},
     {ico:"📚",nom:"Remédiation Scolaire",desc:"Soutien intensif dans les matières en difficulté, exercices corrigés",prix:"30 000",duree:"Mensuel",color:"#D97706"},
     {ico:"🏆",nom:"Préparation Examens",desc:"Pack intensif BEPC/BAC: épreuves blanches, corrections, stratégies de réussite",prix:"35 000",duree:"Trimestriel",color:"#0891B2"},
     {ico:"👨‍👩‍👧",nom:"Accompagnement Parents",desc:"Guide pratique pour suivre la scolarité et motiver votre enfant",prix:"12 000",duree:"Mensuel",color:"#BE185D"},
@@ -23403,7 +23407,7 @@ function mManageEpreuves(){
   var _customFiltered=(DB.customEpreuves||[]).filter(function(e){return _purgedE.indexOf(e.id)<0;});
   var all=_builtinFiltered.concat(_customFiltered);
   var _builtinFilteredLen=_builtinFiltered.length;
-  var fmtColors={html:'#059669',pdf:'#DC2626',word:'#2563EB',url:'#7C3AED'};
+  var fmtColors={html:'#059669',pdf:'#AE5353',word:'#2563EB',url:'#6C56A6'};
   var rows=all.map(function(ep,i){
     var isCustom=i>=_builtinFilteredLen;
     var fmt=ep.format||((ep.externalUrl||ep.htmlLocal||ep.idbKey)?'html':'');
@@ -23415,7 +23419,7 @@ function mManageEpreuves(){
         +"<div style='font-size:10px;color:var(--ink4)'>"+_esc(ep.exam||'')+(ep.serie?" "+_esc(ep.serie):"")+(ep.annee?" · "+ep.annee:"")+"</div>"
       +"</td>"
       +"<td style='padding:6px 8px;font-size:11px'>"+_esc(ep.matiere||'')+"</td>"
-      +"<td style='padding:6px 8px;font-size:11px'>"+(ep.gratuit?"<span style='color:#059669;font-weight:700'>Gratuit</span>":"<span style='color:#7C3AED'>Premium</span>")+"</td>"
+      +"<td style='padding:6px 8px;font-size:11px'>"+(ep.gratuit?"<span style='color:#059669;font-weight:700'>Gratuit</span>":"<span style='color:#6C56A6'>Premium</span>")+"</td>"
       +(hasFile?"<td style='padding:6px 8px'><button class='btn bi xs' onclick='_openRessource(\""+ep.id+"\")' style='padding:3px 7px;font-size:10px'>👁</button></td>":"<td></td>")
       +"<td style='padding:6px 8px;white-space:nowrap'>"
         +(isCustom
@@ -23437,8 +23441,8 @@ function mManageEpreuves(){
     +"<div class='tw mb12' style='max-height:240px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th style='text-align:left;padding:6px 8px'>Titre</th><th>Matière</th><th>Accès</th><th></th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
     +"<div class='fl2 g8 fw mt10'>"
     +"<button class='btn bi sm' onclick='_newEp()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-plus'/></svg>Saisir une épreuve</button>"
-    +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='_importRessourceMulti()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-download'/></svg>Importer (HTML · PDF · Word)</button>"
-    +"<button class='btn sm' style='background:#DC2626;color:#fff' onclick='_deleteAllBuiltinEp()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-trash'/></svg>Supprimer toutes les épreuves par défaut</button>"
+    +"<button class='btn sm' style='background:#6C56A6;color:#fff' onclick='_importRessourceMulti()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-download'/></svg>Importer (HTML · PDF · Word)</button>"
+    +"<button class='btn sm' style='background:#AE5353;color:#fff' onclick='_deleteAllBuiltinEp()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-trash'/></svg>Supprimer toutes les épreuves par défaut</button>"
     +"<button class='btn sm' style='background:#059669;color:#fff' onclick='_restoreAllEpreuves()'>↩ Tout restaurer</button>"
     +(_purgedE.length?"<button class='btn sm' style='background:#7F1D1D;color:#fff' onclick='_unpurgeAllEpreuves()'>↩ Annuler les purges ("+_purgedE.length+")</button>":"")
     +"</div>",
@@ -23556,7 +23560,7 @@ function _saveEp(){
 function _importRessourceMulti(){
   cm();
   M('📥 Importer une ressource pédagogique',
-    '<span style="display:flex;gap:6px;align-items:center"><span style="background:#DC2626;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px">PDF</span><span style="background:#2563EB;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px">Word</span><span style="background:#059669;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px">HTML</span><span style="font-size:12px;color:var(--ink4)">Filigrane VÉRITAS appliqué automatiquement</span></span>',
+    '<span style="display:flex;gap:6px;align-items:center"><span style="background:#AE5353;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px">PDF</span><span style="background:#2563EB;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px">Word</span><span style="background:#059669;color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:6px">HTML</span><span style="font-size:12px;color:var(--ink4)">Filigrane VÉRITAS appliqué automatiquement</span></span>',
     '<div class="ib ibt mb12"><span>💡</span><span>Importez n\'importe quel format. Le filigrane <strong>VÉRITAS Academy</strong> est ajouté à l\'affichage et au téléchargement.</span></div>'
     +'<div class="fg2">'
     +'<div class="fg full"><span class="fl">Titre *</span><input class="fi" id="riTitre" placeholder="BAC C 2025 — Mathématiques"></div>'
@@ -23792,8 +23796,8 @@ function _showPDFViewer(src,titre,canDownload){
     +'</div>';
   var footer='<button class="btn bo" onclick="cm()">Fermer</button>';
   if(canDownload){
-    footer+='<button class="btn" style="background:#7C3AED;color:#fff" onclick="window.open(window._pdfVwSrc,\'_blank\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Ouvrir PDF</button>';
-    footer+='<button class="btn" style="background:#DC2626;color:#fff" onclick="(function(){var a=document.createElement(\'a\');a.href=window._pdfVwSrc;a.download=(window._pdfVwTitre||\'document\').replace(/[^a-z0-9]/gi,\'_\')+\'.pdf\';a.click();})()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger PDF</button>';
+    footer+='<button class="btn" style="background:#6C56A6;color:#fff" onclick="window.open(window._pdfVwSrc,\'_blank\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Ouvrir PDF</button>';
+    footer+='<button class="btn" style="background:#AE5353;color:#fff" onclick="(function(){var a=document.createElement(\'a\');a.href=window._pdfVwSrc;a.download=(window._pdfVwTitre||\'document\').replace(/[^a-z0-9]/gi,\'_\')+\'.pdf\';a.click();})()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger PDF</button>';
   }
   M('','',body,footer,true);
 
@@ -23940,7 +23944,7 @@ function _downloadWordWithWatermark(dataUrlOrText,ep){
     +'font-size:76pt;color:rgba(200,200,200,0.11);font-weight:900;'
     +'transform:rotate(-40deg);z-index:-1;font-family:Arial,sans-serif;letter-spacing:12px}'
     +'.sep{border:none;border-top:2px solid #FFC93C;margin:16px 0}'
-    +'.notice{background:#FFF8E1;border-left:4px solid #FFC93C;padding:12px 16px;margin:20px 0;font-size:9pt}'
+    +'.notice{background:#FFF8E1;padding:12px 16px;margin:20px 0;font-size:9pt}'
     +'.footer{border-top:1px solid #ddd;margin-top:40px;padding-top:10px;text-align:center;font-size:8pt;color:#999}'
     +'</style></head><body>'
     +'<div class="watermark">VÉRITAS</div>'
@@ -24085,14 +24089,14 @@ function showExtraits(){
       h+="<div style='background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.08);border:1px solid var(--bg3);cursor:pointer' onclick='_viewExtraitModal(\""+e.id+"\")'>";
       h+="<div style='height:100px;"+cov+"display:flex;align-items:center;justify-content:center;position:relative'>";
       if(!e.couverture)h+="<span style='font-size:38px'>📖</span>";
-      h+="<span style='position:absolute;top:8px;right:8px;background:"+(e.gratuit?"#059669":"#7C3AED")+";color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+(e.gratuit?"GRATUIT":"PREMIUM")+"</span>";
+      h+="<span style='position:absolute;top:8px;right:8px;background:"+(e.gratuit?"#059669":"#6C56A6")+";color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+(e.gratuit?"GRATUIT":"PREMIUM")+"</span>";
       h+="</div>";
       h+="<div style='padding:12px 14px'>";
       h+="<div style='font-weight:800;color:#142554;font-size:14px;margin-bottom:3px'>"+_esc(e.titre)+"</div>";
       h+="<div style='font-size:12px;color:var(--ink4);margin-bottom:6px'>"+_esc(e.auteur||'')+(e.pages?" · "+e.pages+" p.":"")+"</div>";
       if(e.resume)h+="<div style='font-size:11px;color:var(--ink3);line-height:1.5;margin-bottom:8px'>"+_esc(e.resume.slice(0,90))+(e.resume.length>90?"…":"")+"</div>";
       h+="<div style='display:flex;gap:6px;flex-wrap:wrap'>";
-      if(e.niveau)h+="<span style='background:#EDE9FE;color:#7C3AED;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+_esc(e.niveau)+"</span>";
+      if(e.niveau)h+="<span style='background:#EDE9FE;color:#6C56A6;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+_esc(e.niveau)+"</span>";
       if(e.matiere)h+="<span style='background:#E0F2FE;color:#0369A1;font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+_esc(e.matiere)+"</span>";
       h+="</div></div></div>";
     });
@@ -24125,7 +24129,7 @@ function _viewExtraitModal(id){
   body+="</div>";
   var footer="<button class='btn bo' onclick='cm()'>Fermer</button>";
   if(!locked){
-    footer+="<button class='btn' style='background:#DC2626;color:#fff' onclick='cm();_downloadExtraitPDF(\""+id+"\")'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-doc'/></svg>PDF</button>";
+    footer+="<button class='btn' style='background:#AE5353;color:#fff' onclick='cm();_downloadExtraitPDF(\""+id+"\")'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-doc'/></svg>PDF</button>";
     footer+="<button class='btn' style='background:#2563EB;color:#fff' onclick='cm();_downloadExtraitWord(\""+id+"\")'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-pencil'/></svg>Word</button>";
   } else {
     footer+="<button class='btn bi' onclick='cm();vShowSec(\"elearning\",null)'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-star'/></svg>S'abonner</button>";
@@ -24239,7 +24243,7 @@ function _downloadExtraitWord(id){
     +".header p{color:rgba(255,255,255,0.8);font-size:10pt;margin:0}"
     +".titre-oeuvre{text-align:center;color:#142554;font-size:18pt;font-weight:bold;margin:16px 0 4px}"
     +".meta{text-align:center;color:#666;font-size:10pt;font-style:italic;margin-bottom:16px}"
-    +".resume{background:#F8FAFF;border-left:4px solid #FFC93C;padding:10px 14px;font-style:italic;font-size:10pt;color:#444;margin-bottom:18px}"
+    +".resume{background:#F8FAFF;padding:10px 14px;font-style:italic;font-size:10pt;color:#444;margin-bottom:18px}"
     +".content{line-height:1.9;font-size:12pt;text-align:justify;white-space:pre-wrap}"
     +".filigrane{position:fixed;top:45%;left:10%;width:80%;text-align:center;font-size:80pt;"
     +"color:rgba(200,200,200,0.18);font-weight:bold;transform:rotate(-40deg);z-index:-1;pointer-events:none}"
@@ -24275,11 +24279,11 @@ function mManageExtraits(){
       +"<td style='padding:8px 6px;font-size:11px'>"+_esc(e.auteur||'—')+"</td>"
       +"<td style='padding:8px 6px;font-size:11px'>"+_esc(e.niveau||'—')+"</td>"
       +"<td style='padding:8px 6px;font-size:11px'>"+_esc(e.matiere||'—')+"</td>"
-      +"<td style='padding:8px 6px'><span style='background:"+(e.gratuit?"#D1FAE5":"#EDE9FE")+";color:"+(e.gratuit?"#059669":"#7C3AED")+";font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+(e.gratuit?"GRATUIT":"PREMIUM")+"</span></td>"
+      +"<td style='padding:8px 6px'><span style='background:"+(e.gratuit?"#D1FAE5":"#EDE9FE")+";color:"+(e.gratuit?"#059669":"#6C56A6")+";font-size:9px;font-weight:800;padding:2px 7px;border-radius:8px'>"+(e.gratuit?"GRATUIT":"PREMIUM")+"</span></td>"
       +"<td style='padding:8px 6px;font-size:10px;color:var(--ink4)'>"+((e.texte||'').length)+" car.</td>"
       +"<td style='padding:8px 6px;white-space:nowrap'>"
       +"<button onclick='cm();_editExtrait(\""+e.id+"\")' style='background:#E0EAFF;color:#142554;border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-right:3px'>✏️</button>"
-      +"<button onclick='_delExtrait(\""+e.id+"\")' style='background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer'>🗑</button>"
+      +"<button onclick='_delExtrait(\""+e.id+"\")' style='background:#FEE2E2;color:#AE5353;border:none;border-radius:6px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer'>🗑</button>"
       +"</td></tr>";
   }).join(""):"<tr><td colspan='7' style='text-align:center;padding:24px;color:var(--ink4)'>Aucun extrait ajouté</td></tr>";
   M("📖 Extraits de Livres","Gérer les extraits disponibles pour les élèves",
@@ -24394,7 +24398,7 @@ function mManageLabos(){
     return "<tr style='border-bottom:1px solid var(--bg3)'>"
       +"<td style='padding:6px 8px;font-size:20px'>"+lv.ico+"</td>"
       +"<td style='padding:6px 8px'><strong style='font-size:12px'>"+lv.titre+"</strong><br><span style='font-size:10px;color:var(--ink4)'>"+lv.matiere+" · "+lv.classe+"</span></td>"
-      +"<td style='padding:6px 8px;font-size:11px'>"+(lv.gratuit?"<span style='color:#059669'>Gratuit</span>":"<span style='color:#7C3AED'>Premium</span>")+"</td>"
+      +"<td style='padding:6px 8px;font-size:11px'>"+(lv.gratuit?"<span style='color:#059669'>Gratuit</span>":"<span style='color:#6C56A6'>Premium</span>")+"</td>"
       +"<td style='padding:6px 8px;white-space:nowrap'>"
         +(isCustom
           ?"<button class='btn bo xs' onclick='_editLabo("+(i)+")'  style='margin-right:4px'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-pencil'/></svg>️</button><button class='btn br2 xs' onclick='_delLabo("+(i-base)+")' style='margin-right:3px'>🗑</button><button class='btn xs' style='background:#7F1D1D;color:#fff;font-size:10px' onclick='_purgeLabo(\""+lv.id+"\",true)'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-x'/></svg>Purger</button>"
@@ -24411,7 +24415,7 @@ function mManageLabos(){
     +"<div class='tw mb12' style='max-height:220px;overflow-y:auto'><table style='width:100%'><thead><tr style='background:var(--bg2)'><th></th><th style='text-align:left;padding:6px 8px'>Labo</th><th>Accès</th><th></th></tr></thead><tbody>"+rows+"</tbody></table></div>"
     +"<div class='fl2 g8 fw'>"
     +"<button class='btn bi sm' onclick='_newLabo()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-plus'/></svg>Nouveau laboratoire</button>"
-    +"<button class='btn sm' style='background:#DC2626;color:#fff' onclick='_deleteAllBuiltinLabos()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-trash'/></svg>Supprimer tous les labos par défaut</button>"
+    +"<button class='btn sm' style='background:#AE5353;color:#fff' onclick='_deleteAllBuiltinLabos()'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-trash'/></svg>Supprimer tous les labos par défaut</button>"
     +"<button class='btn sm' style='background:#059669;color:#fff' onclick='_restoreAllLabos()'>↩ Tout restaurer</button>"
     +(_purgedL.length?"<button class='btn sm' style='background:#7F1D1D;color:#fff' onclick='_unpurgeAllLabos()'>↩ Annuler les purges ("+_purgedL.length+")</button>":"")
     +"</div>",
@@ -24541,7 +24545,7 @@ function mManageEvaluations(){
       +"<td style='padding:6px 8px;font-size:11px'>"+(ev.actif?"<span style='color:#059669;font-weight:700'>Actif</span>":"<span style='color:#9CA3AF'>Inactif</span>")+"</td>"
       +"<td style='padding:6px 8px;white-space:nowrap'>"
         +"<button class='btn bo xs' onclick='_editEval("+i+")' style='margin-right:2px'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-pencil'/></svg>️</button>"
-        +"<button class='btn' style='background:"+(ev.actif?"#FEE2E2":"#D1FAE5")+";color:"+(ev.actif?"#DC2626":"#059669")+";border-radius:6px;font-size:9px;font-weight:700;padding:2px 7px;border:none;cursor:pointer;margin-right:2px' onclick='_toggleEval("+i+")'>"+(ev.actif?"Désactiver":"Activer")+"</button>"
+        +"<button class='btn' style='background:"+(ev.actif?"#FEE2E2":"#D1FAE5")+";color:"+(ev.actif?"#AE5353":"#059669")+";border-radius:6px;font-size:9px;font-weight:700;padding:2px 7px;border:none;cursor:pointer;margin-right:2px' onclick='_toggleEval("+i+")'>"+(ev.actif?"Désactiver":"Activer")+"</button>"
         +"<button class='btn xs' style='background:#059669;color:#fff;border-radius:6px;font-size:9px;padding:2px 7px;margin-right:2px' onclick='_exportEvalJSON("+i+")'>&#8659; JSON</button>"
         +"<button class='btn xs' style='background:#2563EB;color:#fff;border-radius:6px;font-size:9px;padding:2px 7px;margin-right:2px' onclick='_exportEvalCSV("+i+")'>&#8659; CSV</button>"
         +"<button class='btn br2 xs' onclick='_delEval("+i+")'>&#128465;</button>"
@@ -24553,7 +24557,7 @@ function mManageEvaluations(){
           :"<div class='empty mb12'><div class='empty-ico'>📊</div>Aucune évaluation créée</div>")
     +"<div style='display:flex;gap:8px;flex-wrap:wrap'>"
     +"<button class='btn bi sm' onclick='_newEval()'>&#10133; Nouvelle &eacute;valuation</button>"
-    +"<button class='btn sm' style='background:#7C3AED;color:#fff' onclick='_importEvalModal()'>&#128229; Importer</button>"
+    +"<button class='btn sm' style='background:#6C56A6;color:#fff' onclick='_importEvalModal()'>&#128229; Importer</button>"
     +"</div>",
     "<button class='btn bo' onclick='cm()'>Fermer</button>",true);
 }
@@ -24893,7 +24897,7 @@ function _editEval(i){window._editEvalIdx=i;_evalFormUI(DB.evaluations[i]);}
 function _evalFormUI(ev){
   var mats=["Mathématiques","Français","Anglais","Physique-Chimie","SVT","Histoire-Géo","Philosophie","Informatique"];
   var existing_q=ev?(ev.questions||[]).map(function(q,qi){
-    return "<div style='background:#F8FAFF;border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #142554'>"
+    return "<div style='background:#F8FAFF;border-radius:8px;padding:10px;margin-bottom:8px;'>"
       +"<div style='font-size:12px;font-weight:700;margin-bottom:4px'>Q"+(qi+1)+": "+q.q+"</div>"
       +"<div style='font-size:11px;color:#6B7A99'>"+(_evalIsOpen(q)?("✍️ Réponse libre · barème "+(q.bareme||q.points||"?")+" pts"):("Options: "+(q.opts||[]).join(" / ")+" | Bonne: "+((q.opts||[])[q.ans]||"?")))+"</div>"
       +"<button class='btn br2 xs' onclick='_delEvalQ("+qi+")' style='margin-top:4px'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-trash'/></svg>Supprimer</button>"
@@ -24947,7 +24951,7 @@ function _addEvalQ(){
     if(_qlo){
       var _qio=window._evalFormQuestions.length-1;
       var _dvo=document.createElement("div");
-      _dvo.style.cssText="background:#F8FAFF;border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #7C3AED";
+      _dvo.style.cssText="background:#F8FAFF;border-radius:8px;padding:10px;margin-bottom:8px;";
       _dvo.innerHTML="<div style='font-size:12px;font-weight:700;margin-bottom:4px'>Q"+(_qio+1)+": "+q+"</div><div style='font-size:11px;color:#6B7A99'>✍️ Réponse libre · barème "+_bar+" pts</div>";
       _qlo.appendChild(_dvo); _qlo.scrollTop=_qlo.scrollHeight;
     }
@@ -24969,7 +24973,7 @@ function _addEvalQ(){
   if(qList){
     var qi=window._evalFormQuestions.length-1;
     var div=document.createElement("div");
-    div.style.cssText="background:#F8FAFF;border-radius:8px;padding:10px;margin-bottom:8px;border-left:3px solid #059669";
+    div.style.cssText="background:#F8FAFF;border-radius:8px;padding:10px;margin-bottom:8px;";
     div.innerHTML="<div style='font-size:12px;font-weight:700;margin-bottom:4px'>Q"+(qi+1)+": "+q+"</div>"
       +"<div style='font-size:11px;color:#6B7A99'>"+opts.join(" / ")+" | ✓ "+opts[Math.min(ans,opts.length-1)]+"</div>";
     qList.appendChild(div);
@@ -25025,7 +25029,7 @@ function showMesEvaluations(){
       h+="<div style='font-size:12px;color:#6B7A99;margin-bottom:12px'>"+ev.matiere+(ev.classe?" · "+ev.classe:"")+" · "+(ev.questions||[]).length+" questions · "+ev.duree+" min</div>";
       if(maDeja){
         var pct=Math.round((maDeja.score/(ev.questions||[]).length)*100);
-        h+="<div style='background:"+(pct>=60?"#D1FAE5":"#FEE2E2")+";border-radius:10px;padding:10px;font-size:13px;font-weight:700;color:"+(pct>=60?"#059669":"#DC2626")+";text-align:center;margin-bottom:10px'>Score: "+maDeja.score+"/"+(ev.questions||[]).length+" ("+pct+"%)</div>";
+        h+="<div style='background:"+(pct>=60?"#D1FAE5":"#FEE2E2")+";border-radius:10px;padding:10px;font-size:13px;font-weight:700;color:"+(pct>=60?"#059669":"#AE5353")+";text-align:center;margin-bottom:10px'>Score: "+maDeja.score+"/"+(ev.questions||[]).length+" ("+pct+"%)</div>";
         h+="<button class='btn sm' style='background:#F0F4FF;color:#142554;border-radius:10px;font-weight:700;border:none;cursor:pointer' onclick='_passerEval(\""+ev.id+"\",true)'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-refresh'/></svg>Recommencer</button>";
       }else{
         h+="<button class='btn bi' onclick='_passerEval(\""+ev.id+"\",false)'>▶ Commencer l'évaluation</button>";
@@ -25098,10 +25102,10 @@ function _passerEval(evalId,force){
       _vc("<div class='vsec'><div class='vcard' style='text-align:center;padding:40px'>"
         +"<div style='font-size:56px;margin-bottom:14px'>"+(pct>=80?"🏆":pct>=60?"✅":"📚")+"</div>"
         +"<div style='font-family:Montserrat,sans-serif;font-size:24px;font-weight:800;color:#142554;margin-bottom:8px'>Évaluation terminée !</div>"
-        +"<div style='font-family:Georgia,serif;font-size:18px;color:"+(pct>=60?"#059669":"#DC2626")+";font-weight:700;margin-bottom:10px'>"+score+"/"+ev.questions.length+" ("+pct+"%)</div>"
+        +"<div style='font-family:Georgia,serif;font-size:18px;color:"+(pct>=60?"#059669":"#AE5353")+";font-weight:700;margin-bottom:10px'>"+score+"/"+ev.questions.length+" ("+pct+"%)</div>"
         +"<div style='display:flex;gap:10px;justify-content:center;margin-bottom:18px;flex-wrap:wrap'>"
           +"<div style='background:#F0F4FF;border-radius:10px;padding:8px 14px'><div style='font-size:10px;color:#6B7A99;text-transform:uppercase;letter-spacing:.5px'>⏱️ Temps</div><div style='font-family:monospace;font-weight:800;color:#142554'>"+_tmps+"</div></div>"
-          +"<div style='background:#F0F4FF;border-radius:10px;padding:8px 14px'><div style='font-size:10px;color:#6B7A99;text-transform:uppercase;letter-spacing:.5px'>✅ Réussite</div><div style='font-weight:800;color:"+(pct>=60?"#059669":"#DC2626")+"'>"+pct+"%</div></div>"
+          +"<div style='background:#F0F4FF;border-radius:10px;padding:8px 14px'><div style='font-size:10px;color:#6B7A99;text-transform:uppercase;letter-spacing:.5px'>✅ Réussite</div><div style='font-weight:800;color:"+(pct>=60?"#059669":"#AE5353")+"'>"+pct+"%</div></div>"
         +"</div>"
         +"<div style='font-size:13px;color:#6B7A99;margin-bottom:24px'>"+(pct>=80?"Excellent travail ! Tu maîtrises ce chapitre.":pct>=60?"Bon résultat, continue sur ta lancée !":"Révise ce chapitre puis retente l'évaluation.")+"</div>"
         +"<button class='btn bi' onclick='showMesEvaluations()'>← Retour aux évaluations</button>"
@@ -25113,7 +25117,7 @@ function _passerEval(evalId,force){
     var remaining=totalSec-elapsed;
     var mn=Math.floor(remaining/60);var sc=remaining%60;
     var pctT=Math.round((elapsed/totalSec)*100);
-    var col=remaining<120?"#DC2626":remaining<600?"#D97706":"#059669";
+    var col=remaining<120?"#AE5353":remaining<600?"#D97706":"#059669";
     _vc("<div class='vsec'>"
       +"<div style='background:linear-gradient(135deg,#142554,#1E3A8A);border-radius:16px;padding:16px 20px;color:#fff;margin-bottom:16px'>"
         +"<div class='fl2 fic fsb'>"
@@ -25123,7 +25127,7 @@ function _passerEval(evalId,force){
         +"<div style='background:rgba(255,255,255,.1);border-radius:20px;height:6px;margin-top:10px'><div style='background:"+col+";height:100%;width:"+pctT+"%;border-radius:20px;transition:width .5s'></div></div>"
         +"<div class='fl2 fic fsb' style='margin-top:6px'>"
           +"<div style='font-size:11px;opacity:.6'>Question "+(qi+1)+"/"+ev.questions.length+"</div>"
-          +"<div style='font-size:11px;font-weight:700;color:#86EFAC;display:flex;align-items:center;gap:5px'><span style='width:7px;height:7px;border-radius:50%;background:#10B981;display:inline-block;box-shadow:0 0 0 0 rgba(16,185,129,.7);animation:vgzPing 1.6s infinite'></span><span id='evalLiveCount'>"+_evalLiveCount()+"</span> élèves composent</div>"
+          +"<div style='font-size:11px;font-weight:700;color:#86EFAC;display:flex;align-items:center;gap:5px'><span style='width:7px;height:7px;border-radius:50%;background:#3A8F73;display:inline-block;box-shadow:0 0 0 0 rgba(16,185,129,.7);animation:vgzPing 1.6s infinite'></span><span id='evalLiveCount'>"+_evalLiveCount()+"</span> élèves composent</div>"
         +"</div>"
       +"</div>"
       +"<div class='vcard'>"
@@ -25144,20 +25148,20 @@ function _passerEval(evalId,force){
     var btns=document.querySelectorAll("[onclick^='_answerEval']");
     btns.forEach(function(b,idx){
       b.style.background=idx===q.ans?"#D1FAE5":idx===i&&i!==q.ans?"#FEE2E2":"#F0F4FF";
-      b.style.borderColor=idx===q.ans?"#059669":idx===i&&i!==q.ans?"#DC2626":"#E8EEFF";
+      b.style.borderColor=idx===q.ans?"#059669":idx===i&&i!==q.ans?"#AE5353":"#E8EEFF";
       b.onclick=null;b.onmouseover=null;b.onmouseout=null;
     });
     if(i===q.ans)score++;
     userAnswers.push({qi:qi,ans:i,correct:i===q.ans});
     // v1.2.2 : question ratée → file de révision espacée (J+1/J+3/J+7)
     if(i!==q.ans && typeof _srsAdd==='function'){ try{ _srsAdd(q, ev.matiere||ev.titre||''); }catch(e){} }
-    if(fb)fb.innerHTML="<div style='padding:10px;background:"+(i===q.ans?"#D1FAE5":"#FEE2E2")+";border-radius:10px;font-size:13px;color:"+(i===q.ans?"#059669":"#DC2626")+"'>"+(i===q.ans?"✅ ":"❌ ")+(q.exp||"")+"</div>";
+    if(fb)fb.innerHTML="<div style='padding:10px;background:"+(i===q.ans?"#D1FAE5":"#FEE2E2")+";border-radius:10px;font-size:13px;color:"+(i===q.ans?"#059669":"#AE5353")+"'>"+(i===q.ans?"✅ ":"❌ ")+(q.exp||"")+"</div>";
     setTimeout(function(){qi++;renderQ();},2000);
   };
 
   function _passerEvalOpen(q){
     var rem=totalSec-elapsed, mnO=Math.floor(rem/60), scO=rem%60;
-    var colO=rem<120?"#DC2626":rem<600?"#D97706":"#059669";
+    var colO=rem<120?"#AE5353":rem<600?"#D97706":"#059669";
     _vc("<div class='vsec'>"
       +"<div style='background:linear-gradient(135deg,#142554,#1E3A8A);border-radius:16px;padding:16px 20px;color:#fff;margin-bottom:16px'>"
         +"<div class='fl2 fic fsb'><div style='font-size:13px;opacity:.7'>"+ev.titre+"</div>"
@@ -25181,7 +25185,7 @@ function _passerEval(evalId,force){
     if(elapsed>=totalSec){clearInterval(timer);qi=ev.questions.length;renderQ();}
     else {
       var remaining2=totalSec-elapsed;var mn2=Math.floor(remaining2/60);var sc2=remaining2%60;
-      var col2=remaining2<120?"#DC2626":remaining2<600?"#D97706":"#059669";
+      var col2=remaining2<120?"#AE5353":remaining2<600?"#D97706":"#059669";
       var el=document.querySelector("[style*='monospace']");
       if(el){el.style.color=col2;el.textContent=String(mn2).padStart(2,'0')+":"+String(sc2).padStart(2,'0');}
       var bar=document.querySelector("[style*='transition:width']");
@@ -25202,7 +25206,7 @@ function mVoirResultatsEval(evalId){
   var rows=reps.map(function(r){
     var pct=Math.round((r.score/ev.questions.length)*100);
     return "<tr><td style='padding:6px 8px;font-size:13px'>"+r.nom+"</td>"
-      +"<td style='padding:6px 8px;text-align:center;font-weight:700;color:"+(pct>=60?"#059669":"#DC2626")+"'>"+r.score+"/"+ev.questions.length+"</td>"
+      +"<td style='padding:6px 8px;text-align:center;font-weight:700;color:"+(pct>=60?"#059669":"#AE5353")+"'>"+r.score+"/"+ev.questions.length+"</td>"
       +"<td style='padding:6px 8px;text-align:center'>"+pct+"%</td>"
       +"<td style='padding:6px 8px;font-size:11px;color:var(--ink4)'>"+r.date+"</td></tr>";
   }).join("");
@@ -25299,7 +25303,7 @@ function _buildRegisterHTML(role){
   })[role] || {ic:'🎓', t:'Créer mon compte VÉRITAS', s:'Accès gratuit immédiat · Premium débloqué par abonnement', btn:'Créer mon compte gratuit'};
   var isPro = (role==='partenaire'||role==='mecene'); // ni élève ni parcours scolaire
   var banner = (role==='auteur')
-    ? "<div style='background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;border-radius:14px;padding:14px;text-align:center;margin-bottom:16px'><div style='font-size:26px;font-weight:900;line-height:1'>70%</div><div style='font-size:11px;opacity:.92'>de chaque vente vous reviennent · versement MoMo/Orange</div></div>"
+    ? "<div style='background:linear-gradient(135deg,#142554,#6C56A6);color:#fff;border-radius:14px;padding:14px;text-align:center;margin-bottom:16px'><div style='font-size:26px;font-weight:900;line-height:1'>70%</div><div style='font-size:11px;opacity:.92'>de chaque vente vous reviennent · versement MoMo/Orange</div></div>"
     : isPro
       ? "<div style='background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;border-radius:14px;padding:14px;text-align:center;margin-bottom:16px'><div style='font-size:14px;font-weight:800'>🤝 Visibilité garantie</div><div style='font-size:11px;opacity:.92'>Votre logo sur la page Partenaires et nos événements</div></div>"
       : "";
@@ -25378,7 +25382,7 @@ function _chkUser(u){
   var ex=(DB.visitorAccounts||[]).find(function(a){return a.user.toLowerCase()===u.toLowerCase();})
     ||(DB.studentAccounts||[]).find(function(a){return a.user.toLowerCase()===u.toLowerCase();});
   _si("uAvail",ex
-    ?"<span style='color:#DC2626'>Identifiant deja pris</span>"
+    ?"<span style='color:#AE5353'>Identifiant deja pris</span>"
     :"<span style='color:#059669'>Disponible</span>");
 }
 
@@ -25473,7 +25477,7 @@ function _monCompte(){
   var plans=acc?acc.plans||[]:SES.plans||[];
   var planHTML=plans.length
     ?"<div style='display:flex;flex-wrap:wrap;gap:8px'>"+plans.map(function(p){
-        return "<span style='background:linear-gradient(135deg,#EDE9FE,#E0E7FF);color:#7C3AED;font-size:12px;font-weight:700;padding:7px 16px;border-radius:12px;border:1px solid #C4B5FD'>⭐ "+p.charAt(0).toUpperCase()+p.slice(1)+"</span>";
+        return "<span style='background:linear-gradient(135deg,#EDE9FE,#E0E7FF);color:#6C56A6;font-size:12px;font-weight:700;padding:7px 16px;border-radius:12px;border:1px solid #C4B5FD'>⭐ "+p.charAt(0).toUpperCase()+p.slice(1)+"</span>";
       }).join("")+"</div>"
     :"<div style='background:#F8FAFF;border-radius:12px;padding:16px;border:2px dashed #E0EAFF'>"
       +"<div style='font-size:13px;font-weight:700;color:#142554;margin-bottom:6px'>🔓 Accès gratuit</div>"
@@ -25596,13 +25600,13 @@ function pgVisitorAccounts(){
 
   var rows=accs.map(function(a,i){
     var pb=(a.plans||[]).length
-      ?"<div style='display:flex;gap:3px;flex-wrap:wrap'>"+(a.plans||[]).map(function(p){return "<span style='background:#EDE9FE;color:#7C3AED;font-size:9px;font-weight:800;padding:2px 7px;border-radius:7px'>"+p+"</span>";}).join("")+"</div>"
+      ?"<div style='display:flex;gap:3px;flex-wrap:wrap'>"+(a.plans||[]).map(function(p){return "<span style='background:#EDE9FE;color:#6C56A6;font-size:9px;font-weight:800;padding:2px 7px;border-radius:7px'>"+p+"</span>";}).join("")+"</div>"
       :"<span style='background:#F0F4FF;color:#9CA3AF;font-size:9px;font-weight:700;padding:2px 7px;border-radius:7px'>GRATUIT</span>";
     return "<tr>"
       +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'><div style='font-size:12px;font-weight:700;color:#142554'>"+a.pre+" "+a.nom+"</div><div style='font-size:10px;color:#9CA3AF;font-family:monospace'>"+a.user+" · "+a.cls+"</div></td>"
       +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF;font-size:11px;color:#6B7A99'>"+a.tel+"</td>"
       +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'>"+pb+"</td>"
-      +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'><span style='background:"+(a.statut==="actif"?"#D1FAE5":"#FEE2E2")+";color:"+(a.statut==="actif"?"#059669":"#DC2626")+";font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap'>"+a.statut.toUpperCase()+"</span></td>"
+      +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF'><span style='background:"+(a.statut==="actif"?"#D1FAE5":"#FEE2E2")+";color:"+(a.statut==="actif"?"#059669":"#AE5353")+";font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap'>"+a.statut.toUpperCase()+"</span></td>"
       +"<td style='padding:8px 6px;border-bottom:1px solid #F0F4FF;white-space:nowrap'>"
       +"<button class='btn bi xs' onclick='_mgrPlans(\""+a.id+"\")' title='Gérer les abonnements'>⭐</button> "
       +"<button class='btn bo xs' onclick='_mgrToggle(\""+a.id+"\")' title='Activer/Suspendre'>⇄</button> "
@@ -25649,7 +25653,7 @@ function _mgrPlans(id){
     +allPlans.map(function(p){
       var ck=(acc.plans||[]).indexOf(p.id)>=0;
       return "<label style='display:flex;align-items:center;gap:10px;background:"+(ck?"linear-gradient(135deg,#EDE9FE,#E0E7FF)":"#F8FAFF")+";border:2px solid "+(ck?"#C4B5FD":"#E8EEFF")+";border-radius:12px;padding:12px 16px;cursor:pointer;transition:.15s'>"
-        +"<input type='checkbox' name='planCk' value='"+p.id+"'"+(ck?" checked":"")+" style='width:16px;height:16px;accent-color:#7C3AED'>"
+        +"<input type='checkbox' name='planCk' value='"+p.id+"'"+(ck?" checked":"")+" style='width:16px;height:16px;accent-color:#6C56A6'>"
         +"<span style='font-size:13px;font-weight:"+(ck?"700":"600")+";color:"+(ck?"#5B21B6":"#374151")+"'>"+p.l+"</span>"
         +"</label>";
     }).join("")+"</div>",
@@ -25730,7 +25734,7 @@ function showEvaluations(){
   evals.forEach(function(ev){
     var uid=SES&&(SES.accountId||SES.id);
     var myR=uid&&(ev.resultats||[]).find(function(r){return r.uid===uid;});
-    var col=myR?(myR.score>=80?"#059669":myR.score>=60?"#D97706":"#DC2626"):"#142554";
+    var col=myR?(myR.score>=80?"#059669":myR.score>=60?"#D97706":"#AE5353"):"#142554";
     h+="<div class='vcard' style='border-top:4px solid #142554'>"
       +"<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:6px'>"+ev.titre+"</div>"
       +"<div style='font-size:11px;color:#6B7A99;margin-bottom:3px'>"+ev.matiere+(ev.classe?" · "+ev.classe:"")+"</div>"
@@ -25780,7 +25784,7 @@ function lancerEvaluation(evId){
         correct:correct,total:ev.questions.length,
         date:new Date().toLocaleDateString("fr-FR"),temps:Math.round(elapsed/60)+"min"});
       save();
-      var col=pct>=80?"#059669":pct>=60?"#D97706":"#DC2626";
+      var col=pct>=80?"#059669":pct>=60?"#D97706":"#AE5353";
       _vc(
         "<div class='vsec'><div class='vcard' style='text-align:center;padding:40px'>"
         +"<div style='font-size:60px;margin-bottom:16px'>"+(pct>=80?"🏆":pct>=60?"✅":"📚")+"</div>"
@@ -25792,7 +25796,7 @@ function lancerEvaluation(evId){
           var ok=answers[i]===q.ans;
           return "<div style='margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid #F0F4FF'>"
             +"<div style='font-size:13px;font-weight:700;color:#142554;margin-bottom:4px'>"+(i+1)+". "+q.q+"</div>"
-            +"<div style='font-size:12px;color:"+(ok?"#059669":"#DC2626")+";margin-bottom:3px'>"+(ok?"✅":"❌")+" "+(ok?"Correct : ":"Bonne réponse : ")+(q.opts[q.ans]||"")+"</div>"
+            +"<div style='font-size:12px;color:"+(ok?"#059669":"#AE5353")+";margin-bottom:3px'>"+(ok?"✅":"❌")+" "+(ok?"Correct : ":"Bonne réponse : ")+(q.opts[q.ans]||"")+"</div>"
             +(q.exp?"<div style='font-size:11px;color:#6B7A99;font-style:italic'>"+q.exp+"</div>":"")
             +"</div>";
         }).join("")+"</div>"
@@ -25844,11 +25848,11 @@ function lancerEvaluation(evId){
       answers[qIdx]=i;
       document.querySelectorAll("[data-oi]").forEach(function(b,idx){
         b.style.background=idx===q.ans?"#D1FAE5":idx===i&&i!==q.ans?"#FEE2E2":"#F8FAFF";
-        b.style.borderColor=idx===q.ans?"#059669":idx===i&&i!==q.ans?"#DC2626":"#E8EEFF";
+        b.style.borderColor=idx===q.ans?"#059669":idx===i&&i!==q.ans?"#AE5353":"#E8EEFF";
         b.onclick=null;
       });
       var fb=document.getElementById("evFb");
-      if(fb)fb.innerHTML="<div style='padding:10px 14px;background:"+(i===q.ans?"#D1FAE5":"#FEE2E2")+";border-radius:10px;font-size:12px;color:"+(i===q.ans?"#059669":"#DC2626")+"'>"+(i===q.ans?"✅ ":"❌ ")+(q.exp||"")+"</div>";
+      if(fb)fb.innerHTML="<div style='padding:10px 14px;background:"+(i===q.ans?"#D1FAE5":"#FEE2E2")+";border-radius:10px;font-size:12px;color:"+(i===q.ans?"#059669":"#AE5353")+"'>"+(i===q.ans?"✅ ":"❌ ")+(q.exp||"")+"</div>";
       setTimeout(function(){qIdx++;renderQ();},1600);
     };
   }
@@ -25958,11 +25962,11 @@ async function _evalAutoCorrect(ev, qa){
 
 // Rendu HTML du bilan (injecté dans #vContent)
 function _evalBilanHtml(ev, result){
-  var col=result.noteSur20>=14?"#059669":result.noteSur20>=10?"#D97706":"#DC2626";
+  var col=result.noteSur20>=14?"#059669":result.noteSur20>=10?"#D97706":"#AE5353";
   var ico=result.noteSur20>=14?"🏆":result.noteSur20>=10?"✅":"📚";
   function ul(arr,c){ return (arr&&arr.length)?"<ul style='margin:6px 0 0;padding-left:18px'>"+arr.map(function(x){return "<li style='font-size:13px;color:"+(c||"#334155")+";margin-bottom:4px'>"+_esc(typeof x==='string'?x:JSON.stringify(x))+"</li>";}).join("")+"</ul>":"<div class='xs2 mut'>—</div>"; }
   var corrH=(result.corrections&&result.corrections.length)?result.corrections.map(function(c){
-    return "<div style='background:#F8FAFF;border-left:3px solid #142554;border-radius:8px;padding:10px;margin-bottom:8px'>"
+    return "<div style='background:#F8FAFF;border-radius:8px;padding:10px;margin-bottom:8px'>"
       +"<div style='font-size:12px;font-weight:700;color:#142554'>Question "+_esc(String(c.q!=null?c.q:"?"))+" — "+_esc(String(c.note!=null?c.note:"?"))+"/"+_esc(String(c.sur!=null?c.sur:"?"))+"</div>"
       +"<div style='font-size:12px;color:#475569;margin-top:4px'>"+_esc(c.commentaire||"")+"</div></div>";
   }).join(""):"";
@@ -25991,10 +25995,10 @@ function _evalBilanHtml(ev, result){
     +(result.message?"<div class='ib ibt mb12' style='white-space:pre-wrap'><span>💬</span><span>"+_esc(result.message)+"</span></div>":"")
     +"<div class='fl2' style='gap:14px;flex-wrap:wrap'>"
       +"<div style='flex:1;min-width:200px'><div style='font-weight:700;color:#059669;font-size:13px'>✅ Points forts</div>"+ul(result.pointsForts,"#065F46")+"</div>"
-      +"<div style='flex:1;min-width:200px'><div style='font-weight:700;color:#DC2626;font-size:13px'>⚠️ À améliorer</div>"+ul(result.pointsFaibles,"#7F1D1D")+"</div>"
+      +"<div style='flex:1;min-width:200px'><div style='font-weight:700;color:#AE5353;font-size:13px'>⚠️ À améliorer</div>"+ul(result.pointsFaibles,"#7F1D1D")+"</div>"
     +"</div>"
     +(corrH?"<div style='margin-top:16px'><div style='font-weight:700;color:#142554;font-size:13px;margin-bottom:8px'>📝 Correction détaillée</div>"+corrH+"</div>":"")
-    +"<div style='margin-top:16px'><div style='font-weight:700;color:#7C3AED;font-size:13px'>🎯 Plan de remédiation</div>"+ul(result.remediation,"#5B21B6")+"</div>"
+    +"<div style='margin-top:16px'><div style='font-weight:700;color:#6C56A6;font-size:13px'>🎯 Plan de remédiation</div>"+ul(result.remediation,"#5B21B6")+"</div>"
     +"<div style='margin-top:18px;padding-top:14px;border-top:1px solid #EEF2F7'>"
       +"<div style='font-size:12px;font-weight:700;color:#142554;margin-bottom:8px'>Besoin d'un humain&nbsp;? Suivi de proximité</div>"
       +"<div class='fl2' style='gap:8px;flex-wrap:wrap'>"
@@ -26048,7 +26052,7 @@ function _evalRunCorrection(ev, qa, who, doneCb){
     +"<div style='font-size:48px;margin-bottom:14px'>🤖</div>"
     +"<div style='font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;color:#142554;margin-bottom:8px'>Le Professeur Ambassa corrige ta copie…</div>"
     +"<div class='xs2 mut'>Analyse de tes réponses et préparation de ton bilan personnalisé.</div>"
-    +"<div style='margin-top:18px'><span style='width:9px;height:9px;border-radius:50%;background:#10B981;display:inline-block;animation:vgzPing 1.2s infinite'></span></div>"
+    +"<div style='margin-top:18px'><span style='width:9px;height:9px;border-radius:50%;background:#3A8F73;display:inline-block;animation:vgzPing 1.2s infinite'></span></div>"
   +"</div></div>");
   return _evalAutoCorrect(ev, qa).then(function(result){
     window._evalLast={ev:ev, result:result, who:who};
@@ -26168,7 +26172,7 @@ function mManageEvals(){
       +(nb?"<div style='font-size:11px;color:#059669;margin-top:2px'>"+nb+" passage"+(nb>1?"s":""+(moy!==null?" · Moy: "+moy+"%":""))+"</div>":"")
       +"</div>"
       +"<div class='fl2 g4'>"
-      +"<span style='background:"+(actif?"#D1FAE5":"#FEE2E2")+";color:"+(actif?"#059669":"#DC2626")+";font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px'>"+(actif?"ACTIF":"INACTIF")+"</span>"
+      +"<span style='background:"+(actif?"#D1FAE5":"#FEE2E2")+";color:"+(actif?"#059669":"#AE5353")+";font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px'>"+(actif?"ACTIF":"INACTIF")+"</span>"
       +"<button class='btn bo xs' onclick='_evalToggle("+i+")' title='Activer/Désactiver'>⇄</button>"
       +"<button class='btn bo xs' onclick='_evalEdit("+i+")' title='Modifier'><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-pencil'/></svg>️</button>"
       +"<button class='btn br2 xs' onclick='_evalDel("+i+")' title='Supprimer'>🗑</button>"
@@ -27146,8 +27150,8 @@ function _expireAbonnements(){
   }catch(e){ return 0; }
 }
 function cvColor(matiere){
-  var m={'Mathématiques':'#3C8DFF','Français':'#DC2626','Anglais':'#059669',
-         'SVT':'#16a34a','Physique-Chimie':'#7C3AED','Histoire-Géographie':'#d97706',
+  var m={'Mathématiques':'#3C8DFF','Français':'#AE5353','Anglais':'#059669',
+         'SVT':'#16a34a','Physique-Chimie':'#6C56A6','Histoire-Géographie':'#d97706',
          'Philosophie':'#0891b2','Économie':'#db2777','Informatique':'#6366f1'};
   return m[matiere]||'#142554';
 }
@@ -27186,7 +27190,7 @@ function autoCreateWAGroups(){
 // ── PAGE: CLASSES VIRTUELLES ADMIN ──────────────────────────────────────────
 // ── HELPER COULEUR PAR MATIÈRE ──────────────────────────────────────────────
 function cvMatColor(mat){
-  var m={'Mathématiques':'#3C8DFF','Français':'#DC2626','Anglais':'#059669','SVT':'#16a34a','Physique-Chimie':'#7C3AED','Histoire-Géographie':'#d97706','Philosophie':'#0891b2','Économie':'#db2777','Informatique':'#6366f1'};
+  var m={'Mathématiques':'#3C8DFF','Français':'#AE5353','Anglais':'#059669','SVT':'#16a34a','Physique-Chimie':'#6C56A6','Histoire-Géographie':'#d97706','Philosophie':'#0891b2','Économie':'#db2777','Informatique':'#6366f1'};
   return m[mat]||'#142554';
 }
 var DAYS_FR=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
@@ -27201,7 +27205,7 @@ function pgClassesVirtuellesAdmin(){
   var soums=(DB.cvSoumissions||[]).length;
 
   var statsH='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">';
-  [['📚',total,'Groupes',  '#3C8DFF'],['✅',actives,'Actifs','#059669'],['📖',totalMats,'Matières','#7C3AED'],['📤',soums,'Soumissions','#DC2626']].forEach(function(x){
+  [['📚',total,'Groupes',  '#3C8DFF'],['✅',actives,'Actifs','#059669'],['📖',totalMats,'Matières','#6C56A6'],['📤',soums,'Soumissions','#AE5353']].forEach(function(x){
     statsH+='<div style="background:var(--sur);border-radius:14px;padding:14px;border:1px solid var(--bg3);text-align:center"><div style="font-size:22px">'+x[0]+'</div><div style="font-family:Fira Code,monospace;font-size:22px;font-weight:700;color:'+x[3]+'">'+x[1]+'</div><div style="font-size:11px;color:var(--ink4);text-transform:uppercase;letter-spacing:.8px">'+x[2]+'</div></div>';
   });
   statsH+='</div>';
@@ -28153,7 +28157,7 @@ function pgMesClassesVirtuelles(){
     h+='<div style="background:var(--sur);border-radius:16px;border:1px solid var(--bg3);overflow:hidden;box-shadow:var(--sh);cursor:pointer;transition:.2s" onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'var(--sh2)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'var(--sh)\'">';
     // Gradient header
     h+='<div style="background:linear-gradient(135deg,#0f172a,#1e3a8a);padding:16px;position:relative">';
-    if(nouveauxSujets>0)h+='<div style="position:absolute;top:10px;right:10px;background:#DC2626;color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700">'+nouveauxSujets+' nouveau(x)</div>';
+    if(nouveauxSujets>0)h+='<div style="position:absolute;top:10px;right:10px;background:#AE5353;color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700">'+nouveauxSujets+' nouveau(x)</div>';
     if(nouveauxMsgs>0&&nouveauxSujets===0)h+='<div style="position:absolute;top:10px;right:10px;background:#3C8DFF;color:#fff;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700">'+nouveauxMsgs+' msg</div>';
     h+='<div style="font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#fff;margin-bottom:4px">'+cv.nom+'</div>';
     h+='<div style="font-size:11px;color:rgba(255,255,255,.5)">'+cv.classe+' · '+matieres.length+' matière(s)</div>';
@@ -28625,8 +28629,8 @@ document.addEventListener('keydown',function(e){
       '<kbd style="background:#142554;color:#FFC93C;padding:6px 12px;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700">Ctrl + Shift + L</kbd>'+
       '<span style="font-size:14px;color:#142554;font-weight:600">🔐 Accès Administration</span></div>'+
       '<div style="background:#EDE9FE;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
-      '<kbd style="background:#7C3AED;color:#fff;padding:6px 12px;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700">Ctrl + Shift + U</kbd>'+
-      '<span style="font-size:14px;color:#7C3AED;font-weight:600">👑 Accès Super Administration</span></div>'+
+      '<kbd style="background:#6C56A6;color:#fff;padding:6px 12px;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700">Ctrl + Shift + U</kbd>'+
+      '<span style="font-size:14px;color:#6C56A6;font-weight:600">👑 Accès Super Administration</span></div>'+
       '<div style="background:#D1FAE5;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
       '<kbd style="background:#059669;color:#fff;padding:6px 12px;border-radius:8px;font-family:monospace;font-size:14px;font-weight:700">Ctrl + Shift + H</kbd>'+
       '<span style="font-size:14px;color:#059669;font-weight:600">⌨️ Afficher cette aide</span></div>'+
@@ -28834,7 +28838,7 @@ var _chatPoll=null;
 var _chatLastCount=0;
 
 function _cvColor2(matiere){
-  var m={'Mathématiques':'#3C8DFF','Français':'#DC2626','Anglais':'#059669','SVT':'#16a34a','Physique-Chimie':'#7C3AED','Histoire-Géographie':'#d97706','Philosophie':'#0891b2','Économie':'#db2777','Informatique':'#6366f1','Éducation Physique':'#f59e0b'};
+  var m={'Mathématiques':'#3C8DFF','Français':'#AE5353','Anglais':'#059669','SVT':'#16a34a','Physique-Chimie':'#6C56A6','Histoire-Géographie':'#d97706','Philosophie':'#0891b2','Économie':'#db2777','Informatique':'#6366f1','Éducation Physique':'#f59e0b'};
   return m[matiere]||'#142554';
 }
 function _cvLight(hex){return hex+'1A';}
@@ -28858,7 +28862,7 @@ function _cvSenderName2(sid,role){
   return 'Utilisateur';
 }
 function _cvSenderCol(sid){
-  var cols=['#3C8DFF','#059669','#DC2626','#7C3AED','#D97706','#0891B2','#DB2777','#f59e0b'];
+  var cols=['#3C8DFF','#059669','#AE5353','#6C56A6','#D97706','#0891B2','#DB2777','#f59e0b'];
   var h=0;for(var i=0;i<sid.length;i++)h=(h<<5)-h+sid.charCodeAt(i);
   return cols[Math.abs(h)%cols.length];
 }
@@ -28988,7 +28992,7 @@ function _renderEdtAdmin(cv){
         var col=_cvColor2(item.matiere);
         var t=(DB.teachers||[]).find(function(x){return x.id===item.tid;})||{};
         g+='<div class="cv-edt-cell" onclick="_cvEdtEdit2(\''+cv.id+'\',\''+day+'\',\''+slot+'\')">'+
-          '<div class="cv-edt-item" style="background:'+_cvLight(col)+';border-left:3px solid '+col+';color:'+col+'">'+
+          '<div class="cv-edt-item" style="background:'+_cvLight(col)+';color:'+col+'">'+
           '<div style="font-weight:800;font-size:11px">'+item.matiere+'</div>'+
           (t.nom?'<div style="font-size:10px;opacity:.75">'+t.pre[0]+'. '+t.nom+'</div>':'')+
           (item.salle?'<div style="font-size:9px;opacity:.6">'+item.salle+'</div>':'')+
@@ -29080,7 +29084,7 @@ function _renderCvSpace(cvId_,cv,uid,role){
           var col=_cvColor2(item.matiere);
           var t=(DB.teachers||[]).find(function(x){return x.id===item.tid;})||{};
           var lien=item.salle&&item.salle.startsWith('http')?'<a href="'+item.salle+'" target="_blank" style="font-size:9px;color:'+col+';display:block">🔗 Rejoindre</a>':'';
-          edtHtml+='<div class="cv-edt-cell"><div class="cv-edt-item" style="background:'+_cvLight(col)+';border-left:3px solid '+col+';color:'+col+'">'+
+          edtHtml+='<div class="cv-edt-cell"><div class="cv-edt-item" style="background:'+_cvLight(col)+';color:'+col+'">'+
             '<div style="font-weight:800;font-size:10px">'+item.matiere.substring(0,8)+'</div>'+
             (t.nom?'<div style="font-size:9px;opacity:.7">'+t.nom+'</div>':'')+lien+'</div></div>';
         } else {
@@ -29130,7 +29134,7 @@ function _renderCvSpace(cvId_,cv,uid,role){
 
   // Annonces html
   var annHtml=annonces.slice().reverse().slice(0,5).map(function(a){
-    return '<div style="background:linear-gradient(135deg,#FFF8E1,#FFF3C4);border-left:4px solid var(--gold);border-radius:0 12px 12px 0;padding:10px 12px;margin-bottom:8px">'+
+    return '<div style="background:linear-gradient(135deg,#FFF8E1,#FFF3C4);border-radius:0 12px 12px 0;padding:10px 12px;margin-bottom:8px">'+
       '<div style="font-size:10px;font-weight:700;color:var(--gold2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">📢 '+a.date+'</div>'+
       '<div style="font-size:13px;color:var(--ink2);line-height:1.6">'+a.text+'</div>'+
       ((isAdmin||isTeach)?'<button class="btn br2 xs mt4" onclick="_cvDelAnn(\''+a.id+'\',\''+cvId_+'\')">🗑</button>':'')+
@@ -29453,7 +29457,7 @@ function mWAGroupes(){
   if(!iA()) return;
   if(!DB.whatsappGroupes) DB.whatsappGroupes = [];
   var grps = DB.whatsappGroupes;
-  var _modeCol={libre:"#059669",abonnement:"#3C8DFF",paiement:"#D97706",manuel:"#7C3AED"};
+  var _modeCol={libre:"#059669",abonnement:"#3C8DFF",paiement:"#D97706",manuel:"#6C56A6"};
   var _modeLbl={libre:"Libre",abonnement:"Abo.",paiement:"Paiem.",manuel:"Manuel"};
   var rows = grps.length ? grps.map(function(g){
     var _mode=g.accessMode||"libre"; var _mc=_modeCol[_mode]||"#142554";
@@ -29466,7 +29470,7 @@ function mWAGroupes(){
         +'<span style="background:'+(g.actif?'#1a5c2e':'#8b1a1a')+';color:#fff;padding:2px 8px;border-radius:20px;font-size:.75rem">'
         +(g.actif?'Actif':'Inactif')+'</span></td>'
       +'<td style="padding:8px 6px;text-align:center">'
-        '<button class="btn sm" style="background:#7C3AED;color:#fff;margin:1px" title="Configurer acces" onclick="_waConfigAccess(\''+g.id+'\')">CFG</button>'
+        '<button class="btn sm" style="background:#6C56A6;color:#fff;margin:1px" title="Configurer acces" onclick="_waConfigAccess(\''+g.id+'\')">CFG</button>'
         +'<button class="btn sm" style="background:#142554;color:#fff;margin:1px" onclick="mEditWAGroupe(\''+g.id+'\')">âœ️</button>'
         +'<button class="btn sm" style="background:#8b1a1a;color:#fff;margin:1px" onclick="_delWAGroupe(\''+g.id+'\')">🗑</button>'
       +'</td>'
@@ -29700,7 +29704,7 @@ function pgWAAccess(){
     allAccs.filter(function(a){return a.cls===grp.niveau&&a.groupeStatut!=='invite'&&_waGroupAccess(grp,a,null).eligible;}).forEach(function(){nEligible++;});
   });
 
-  var modeCol={libre:'#059669',abonnement:'#3C8DFF',paiement:'#D97706',manuel:'#7C3AED'};
+  var modeCol={libre:'#059669',abonnement:'#3C8DFF',paiement:'#D97706',manuel:'#6C56A6'};
   var modeTxt={libre:'🟢 Libre',abonnement:'🔵 Abonnement',paiement:'💛 Paiement',manuel:'⚙️ Manuel'};
 
   var h='<div class="fl2 fic fsb mb16 fw g8">';
@@ -29752,7 +29756,7 @@ function pgWAAccess(){
       h+='<thead><tr style="background:#F8FAFF"><th style="padding:6px 10px;text-align:left">Élève</th><th style="padding:6px 8px">Scolarité</th><th style="padding:6px 8px">Éligibilité</th><th style="padding:6px 8px">Invitation</th></tr></thead><tbody>';
       students.forEach(function(s){
         var a2=_waGroupAccess(grp,null,s);
-        var ec=a2.eligible?'#059669':'#DC2626';
+        var ec=a2.eligible?'#059669':'#AE5353';
         var vAcc=(DB.visitorAccounts||[]).find(function(a){return a.cls===s.cls&&(a.nom.toLowerCase()===s.nom.toLowerCase()||a.pre.toLowerCase()===s.pre.toLowerCase());});
         var wasInvited=vAcc&&vAcc.groupeStatut==='invite';
         h+='<tr style="border-bottom:1px solid var(--bg2)">';
@@ -29778,7 +29782,7 @@ function pgWAAccess(){
       h+='<thead><tr style="background:#F8FAFF"><th style="padding:6px 10px;text-align:left">Visiteur</th><th style="padding:6px 8px">Statut</th><th style="padding:6px 8px">Abonnements</th><th style="padding:6px 8px">Éligibilité</th><th style="padding:6px 8px">Invitation</th></tr></thead><tbody>';
       visitors.forEach(function(a){
         var a2=_waGroupAccess(grp,a,null);
-        var ec=a2.eligible?'#059669':'#DC2626';
+        var ec=a2.eligible?'#059669':'#AE5353';
         h+='<tr style="border-bottom:1px solid var(--bg2)">';
         h+='<td style="padding:6px 10px"><div style="font-weight:600">'+_esc(a.pre)+' '+_esc(a.nom)+'</div><div style="font-size:10px;color:var(--ink4)">'+_esc(a.tel||a.email||'—')+'</div></td>';
         h+='<td style="padding:6px 8px;text-align:center"><span class="bg '+(a.statut==='actif'?'bgg':'bgr')+' xs">'+_esc(a.statut||'—')+'</span></td>';
@@ -30115,11 +30119,11 @@ function openPaymentModal(payInfo){
     // s'active seul : afficher « activation sous 24h » démoraliserait le client
     // au moment précis où il s'apprête à payer.
     + (_payCampayReady()
-        ? '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08);border-left:4px solid #059669">'
+        ? '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08);">'
             + '<span>⚡</span>'
             + '<span><strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24h).</span>'
           + '</div>'
-        : '<div class="ib ibt mb12" style="background:rgba(220,38,38,.08);border-left:4px solid #dc2626">'
+        : '<div class="ib ibt mb12" style="background:rgba(220,38,38,.08);">'
             + '<span>⚠️</span>'
             + '<span><strong>Important :</strong> Après votre paiement, <strong>cliquez sur le bouton WhatsApp en bas</strong> pour nous envoyer votre confirmation avec la référence '+ref+'. Votre accès sera activé sous 24h.</span>'
           + '</div>')
@@ -30136,11 +30140,11 @@ function openPaymentModal(payInfo){
             +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
               +'<div style="font-size:28px">⚡</div>'
               +'<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">Paiement automatique — MTN MoMo ou Orange Money</div>'
-              +'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>'
+              +'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>'
             +'</div>'
             +'<div style="font-size:11px;color:var(--ink4);line-height:1.5;margin-bottom:8px">Entrez votre numéro : l\'opérateur est détecté automatiquement. Vous recevez une demande de paiement à valider avec votre code secret. <strong>Votre accès s\'active tout seul.</strong></div>'
             +'<input class="fi" id="campayPhoneInput_'+ref+'" placeholder="Votre n° MTN ou Orange (ex : 6XX XX XX XX)" value="'+(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:8px 10px;width:100%;margin-bottom:8px">'
-            +'<button class="btn" style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitCampay(\''+ref+'\','+montant+',\''+_esc(label).replace(/\x27/g,"")+'\',\''+(payInfo.intent||"generic")+'\',\''+(payInfo.targetId||"")+'\',\''+(payInfo.customerAccountId||"")+'\',\''+(payInfo.customerNom||"").replace(/\x27/g,"")+'\')">⚡ Payer maintenant — '+montantFmt+'</button>'
+            +'<button class="btn" style="width:100%;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitCampay(\''+ref+'\','+montant+',\''+_esc(label).replace(/\x27/g,"")+'\',\''+(payInfo.intent||"generic")+'\',\''+(payInfo.targetId||"")+'\',\''+(payInfo.customerAccountId||"")+'\',\''+(payInfo.customerNom||"").replace(/\x27/g,"")+'\')">⚡ Payer maintenant — '+montantFmt+'</button>'
           +'</div>'
           : '')
 
@@ -30149,7 +30153,7 @@ function openPaymentModal(payInfo){
         + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
           + '<div style="font-size:28px">'+P.momo.ico+'</div>'
           + '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">'+P.momo.label+'</div>'
-          + (_payDirectMtnReady()?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
+          + (_payDirectMtnReady()?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
         + '</div>'
         + '<div style="font-family:monospace;font-size:15px;font-weight:800;color:'+P.momo.couleur+';margin-bottom:4px;cursor:pointer" onclick="_payCopy(\''+P.momo.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro MoMo\')">'+P.momo.numero+'</div>'
         + '<div style="font-size:11px;color:var(--ink4);line-height:1.5">Nom : <strong>'+P.momo.nomCompte+'</strong><br>Code USSD : <strong>'+P.momo.code+'</strong></div>'
@@ -30167,7 +30171,7 @@ function openPaymentModal(payInfo){
         + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
           + '<div style="font-size:28px">'+P.orange.ico+'</div>'
           + '<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">'+P.orange.label+'</div>'
-          + (_payDirectOrangeReady()?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
+          + (_payDirectOrangeReady()?'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>':'')
         + '</div>'
         + '<div style="font-family:monospace;font-size:15px;font-weight:800;color:'+P.orange.couleur+';margin-bottom:4px;cursor:pointer" onclick="_payCopy(\''+P.orange.numero.replace(/[^0-9+]/g,'')+'\',\'Numéro Orange Money\')">'+P.orange.numero+'</div>'
         + '<div style="font-size:11px;color:var(--ink4);line-height:1.5">Nom : <strong>'+P.orange.nomCompte+'</strong><br>Code USSD : <strong>'+P.orange.code+'</strong></div>'
@@ -30705,7 +30709,7 @@ function mPayAttempts(){
     var map = {
       book:        {ico:'📚',lbl:'Livre',         col:'#0EA5E9'},
       product:     {ico:'🛒',lbl:'Produit',       col:'#D97706'},
-      subscription:{ico:'🎓',lbl:'Abonnement',    col:'#7C3AED'},
+      subscription:{ico:'🎓',lbl:'Abonnement',    col:'#6C56A6'},
       whatsapp_group:{ico:'📲',lbl:'Groupe WA',   col:'#25D366'},
       classroom:   {ico:'🎥',lbl:'Classe virt.',col:'#BE185D'},
       generic:     {ico:'💳',lbl:'Paiement',      col:'#64748B'}
@@ -30722,7 +30726,7 @@ function mPayAttempts(){
         // ── v1.2 : bouton consolidé "Valider et activer" ──
         var btnPaye = a.status==='paid'
           ? '<span style="font-size:11px;color:var(--gr)">✓ Validé</span>'
-          : '<button class="btn xs" style="background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-weight:700;border:none" onclick="_payMarkPaid(\''+a.ref+'\')" title="Valider le paiement ET activer automatiquement l\'accès"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Valider &amp; activer</button>';
+          : '<button class="btn xs" style="background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-weight:700;border:none" onclick="_payMarkPaid(\''+a.ref+'\')" title="Valider le paiement ET activer automatiquement l\'accès"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Valider &amp; activer</button>';
         var btnAbo = (aboLie && aboLie.statut!=='Activé' && a.status!=='paid')
           ? ' <button class="btn xs" style="background:#6D28D9;color:#fff" onclick="cm();activerAbonnement(\''+aboLie.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg>Abo (manuel)</button>'
           : (aboLie&&aboLie.statut==='Activé' ? '<span style="font-size:10px;color:var(--gr)"> ✓ Abo actif</span>' : '');
@@ -31292,7 +31296,7 @@ window.pgPartenairesSplits = function(){
       +'<td style="padding:10px"><b>'+_esc(name)+'</b><br><span style="font-size:10px;color:#6B7280">'+_esc(pid.substring(0,12))+'</span></td>'
       +'<td style="padding:10px"><span class="chip-v2 chip-v2--primary">'+type+'</span></td>'
       +'<td style="padding:10px;font-family:JetBrains Mono,monospace">'+_esc(tel||'—')+'</td>'
-      +'<td style="padding:10px;text-align:right"><b style="color:#10B981;font-size:15px">'+fmt(p.solde||0)+'</b><br><span style="font-size:10px;color:#6B7280">'+nbPending+' tx</span>'
+      +'<td style="padding:10px;text-align:right"><b style="color:#3A8F73;font-size:15px">'+fmt(p.solde||0)+'</b><br><span style="font-size:10px;color:#6B7280">'+nbPending+' tx</span>'
         +(p.soldeEnCours ? '<br><span style="font-size:10px;color:#F59E0B;font-weight:700">⏳ '+fmt(p.soldeEnCours)+' en cours</span>' : '')
       +'</td>'
       +'<td style="padding:10px;text-align:right;color:#6B7280">'+fmt(p.totalVerse||0)+'</td>'
@@ -31307,9 +31311,9 @@ window.pgPartenairesSplits = function(){
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">'
       +'<div class="card-v2" style="text-align:center;border-top:3px solid #F59E0B"><div class="h-display" style="color:#F59E0B">'+fmt(totalDu)+'</div><div class="text-muted">À verser</div></div>'
-      +'<div class="card-v2" style="text-align:center;border-top:3px solid #10B981"><div class="h-display" style="color:#10B981">'+fmt(totalVerse)+'</div><div class="text-muted">Déjà versé</div></div>'
+      +'<div class="card-v2" style="text-align:center;border-top:3px solid #3A8F73"><div class="h-display" style="color:#3A8F73">'+fmt(totalVerse)+'</div><div class="text-muted">Déjà versé</div></div>'
       +'<div class="card-v2" style="text-align:center;border-top:3px solid #3C8DFF"><div class="h-display" style="color:#3C8DFF">'+partenaires.length+'</div><div class="text-muted">Partenaires</div></div>'
-      +'<div class="card-v2" style="text-align:center;border-top:3px solid #7C3AED"><div class="h-display" style="color:#7C3AED">'+((DB.splits||[]).filter(function(s){return s.etat==='pending';}).length)+'</div><div class="text-muted">Splits en attente</div></div>'
+      +'<div class="card-v2" style="text-align:center;border-top:3px solid #6C56A6"><div class="h-display" style="color:#6C56A6">'+((DB.splits||[]).filter(function(s){return s.etat==='pending';}).length)+'</div><div class="text-muted">Splits en attente</div></div>'
     +'</div>'
     +(_orphelins
       ? '<div class="ib ibt mt12 mb0"><span>⚠️</span><span><strong>'+_orphelins+' paiement(s) confirmé(s) sans ventilation.</strong> Ils ont probablement été validés par le webhook de l\'opérateur pendant que le navigateur était fermé. '
@@ -31359,7 +31363,7 @@ window.pgPartenairesSplits = function(){
             +'<td>'+_esc(s.description||'?')+'</td>'
             +'<td style="text-align:right">'+fmt(s.montantBase)+'</td>'
             +'<td style="text-align:center">'+s.pct+'%</td>'
-            +'<td style="text-align:right;font-weight:700;color:#10B981">'+fmt(s.montant)+'</td>'
+            +'<td style="text-align:right;font-weight:700;color:#3A8F73">'+fmt(s.montant)+'</td>'
             +'<td>'+(s.etat==='paid'?'<span class="chip-v2 chip-v2--success">✓ Versé</span>':'<span class="chip-v2 chip-v2--warning">⏳ En attente</span>')+'</td></tr>';
         }).join('')+'</tbody></table></div>';
     })()
@@ -31386,7 +31390,7 @@ window.mVerserPartenaire = function(partenaireId){
 
   M('💰 Verser à '+_esc(name),'Versement Mobile Money',
     '<div style="padding:8px">'
-    +'<div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:18px;border-radius:14px;text-align:center;margin-bottom:14px">'
+    +'<div style="background:linear-gradient(135deg,#3A8F73,#059669);color:#fff;padding:18px;border-radius:14px;text-align:center;margin-bottom:14px">'
       +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;opacity:.85">Solde à verser</div>'
       +'<div style="font-size:36px;font-weight:900">'+fmt(p.solde)+'</div>'
     +'</div>'
@@ -31664,7 +31668,7 @@ window.mVerserTous = function(){
 
   M('💸 Verser à tous les partenaires', payables.length+' bénéficiaire(s) — un seul appel API',
     '<div style="padding:8px">'
-    +'<div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;padding:18px;border-radius:14px;text-align:center;margin-bottom:14px">'
+    +'<div style="background:linear-gradient(135deg,#3A8F73,#059669);color:#fff;padding:18px;border-radius:14px;text-align:center;margin-bottom:14px">'
       +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;opacity:.85">Total à verser</div>'
       +'<div style="font-size:36px;font-weight:900">'+fmt(total)+'</div>'
       +'<div style="font-size:12px;opacity:.85;margin-top:4px">'+payables.length+' partenaire(s) · seuil '+fmt(minP)+'</div>'
@@ -31738,7 +31742,7 @@ window._payVerifierTitulaire = function(inputId, cibleId){
   var el = _ge(inputId); var out = _ge(cibleId);
   if(!el || !out) return;
   var tel = (el.value||'').replace(/[^0-9+]/g,'');
-  if(tel.replace(/[^0-9]/g,'').length < 9){ out.innerHTML='<span style="color:#DC2626">Numéro incomplet</span>'; return; }
+  if(tel.replace(/[^0-9]/g,'').length < 9){ out.innerHTML='<span style="color:#AE5353">Numéro incomplet</span>'; return; }
   if(!DB.cloudConfig||!DB.cloudConfig.url){ out.innerHTML=''; return; }
   out.innerHTML = '⏳ Vérification…';
   fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_campay.php?action=holder&tel='+encodeURIComponent(tel),
@@ -31771,7 +31775,7 @@ window.mDetailPartenaire = function(partenaireId){
   var body = '<div style="padding:8px">'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
       +'<div class="card-v2" style="text-align:center;border-top:3px solid #F59E0B"><div style="font-size:22px;font-weight:900;color:#F59E0B">'+fmt(p.solde||0)+'</div><div class="text-muted" style="font-size:11px">À verser</div></div>'
-      +'<div class="card-v2" style="text-align:center;border-top:3px solid #10B981"><div style="font-size:22px;font-weight:900;color:#10B981">'+fmt(p.totalVerse||0)+'</div><div class="text-muted" style="font-size:11px">Déjà versé</div></div>'
+      +'<div class="card-v2" style="text-align:center;border-top:3px solid #3A8F73"><div style="font-size:22px;font-weight:900;color:#3A8F73">'+fmt(p.totalVerse||0)+'</div><div class="text-muted" style="font-size:11px">Déjà versé</div></div>'
     +'</div>'
     +'<h3 class="h-3">📜 Splits ('+splits.length+')</h3>'
     +(splits.length?
@@ -31779,7 +31783,7 @@ window.mDetailPartenaire = function(partenaireId){
       +splits.map(function(s){
         return '<div style="display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #F3F4F6;font-size:12px">'
           +'<div><b>'+_esc(s.description||'?')+'</b><br><span style="color:#6B7280">'+new Date(s.createdAt).toLocaleDateString('fr-FR')+' · '+s.type+'</span></div>'
-          +'<div style="text-align:right"><b style="color:#10B981">'+fmt(s.montant)+'</b><br>'+(s.etat==='paid'?'<span style="color:#10B981;font-size:10px">✓ Versé</span>':'<span style="color:#F59E0B;font-size:10px">⏳ Attente</span>')+'</div>'
+          +'<div style="text-align:right"><b style="color:#3A8F73">'+fmt(s.montant)+'</b><br>'+(s.etat==='paid'?'<span style="color:#3A8F73;font-size:10px">✓ Versé</span>':'<span style="color:#F59E0B;font-size:10px">⏳ Attente</span>')+'</div>'
         +'</div>';
       }).join('')
       +'</div>' : '<div style="text-align:center;padding:14px;color:#9CA3AF;font-size:13px">Aucun split.</div>')
@@ -32039,14 +32043,14 @@ window.mBusinessStats = function(){
     var topProd = Object.entries(prodCount).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
 
     var body = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px">'
-      +_statCard('💰', fmt(totalCA), 'CA total', '#10B981')
+      +_statCard('💰', fmt(totalCA), 'CA total', '#3A8F73')
       +_statCard('📅', fmt(caMois), 'CA ce mois', '#3C8DFF')
       +_statCard('👥', nbStud, 'Élèves', '#FFC93C')
-      +_statCard('🌐', nbVisit, 'Visiteurs inscrits', '#7C3AED')
-      +_statCard('🎓', nbAbo, 'Abonnements actifs', '#EC4899')
+      +_statCard('🌐', nbVisit, 'Visiteurs inscrits', '#6C56A6')
+      +_statCard('🎓', nbAbo, 'Abonnements actifs', '#C37199')
       +_statCard('📚', nbBook, 'Achats livres', '#F59E0B')
-      +_statCard('⏳', pendingPays, 'Paiements en attente', '#EF4444')
-      +_statCard('📊', convRate+'%', 'Taux conversion', '#06B6D4')
+      +_statCard('⏳', pendingPays, 'Paiements en attente', '#C46F6F')
+      +_statCard('📊', convRate+'%', 'Taux conversion', '#3A91A0')
       +'</div>';
 
     if(topProd.length){
@@ -32057,7 +32061,7 @@ window.mBusinessStats = function(){
         var medal = ['🥇','🥈','🥉'][i]||'•';
         body += '<div style="display:flex;justify-content:space-between;padding:8px;background:#fff;border-radius:8px;margin-bottom:6px">'
           +'<span>'+medal+' '+_esc(t[0])+'</span>'
-          +'<b style="color:#10B981">'+t[1]+' vente'+(t[1]>1?'s':'')+'</b></div>';
+          +'<b style="color:#3A8F73">'+t[1]+' vente'+(t[1]>1?'s':'')+'</b></div>';
       });
       body += '</div>';
     }
@@ -32141,11 +32145,11 @@ window.mParrainage = function(){
       +'<button class="btn" style="margin-top:10px;background:rgba(20,37,84,.9);color:#FFC93C;border:none;padding:6px 14px;border-radius:8px;font-size:12px" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié !\');});"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
       +'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
-      +'<div style="background:#fff;border:2px solid #10B981;border-radius:12px;padding:14px;text-align:center">'
+      +'<div style="background:#fff;border:2px solid #3A8F73;border-radius:12px;padding:14px;text-align:center">'
         +'<div style="font-size:28px">'+filleuls.length+'</div>'
         +'<div style="font-size:11px;color:#6B7280">Filleul'+(filleuls.length>1?'s':'')+'</div></div>'
       +'<div style="background:#fff;border:2px solid #FFC93C;border-radius:12px;padding:14px;text-align:center">'
-        +'<div style="font-size:20px;color:#10B981;font-weight:800">'+fmt(credit)+'</div>'
+        +'<div style="font-size:20px;color:#3A8F73;font-weight:800">'+fmt(credit)+'</div>'
         +'<div style="font-size:11px;color:#6B7280">Crédit gagné</div></div>'
       +'</div>'
       +'<div style="background:#F3F4F6;padding:14px;border-radius:12px;margin-bottom:12px">'
@@ -32195,7 +32199,7 @@ window.pgParrainageEns = function(){
     var xp = xpOf(p.filleulId);
     return '<tr><td>'+_esc(nom)+'</td>'
       +'<td>'+(p.date?new Date(p.date).toLocaleDateString('fr-FR'):'—')+'</td>'
-      +'<td style="text-align:center">'+(ab?'<span style="color:#10B981;font-weight:700">✓ Abonné</span>':'<span style="color:#9CA3AF">Gratuit</span>')+'</td>'
+      +'<td style="text-align:center">'+(ab?'<span style="color:#3A8F73;font-weight:700">✓ Abonné</span>':'<span style="color:#9CA3AF">Gratuit</span>')+'</td>'
       +'<td style="text-align:right;font-weight:700;color:#142554">'+xp+' XP</td></tr>';
   }).join('') : '<tr><td colspan="4" style="text-align:center;color:#9CA3AF;padding:20px">Aucun filleul pour l\'instant. Partagez votre code !</td></tr>';
   var shareUrl = (location.origin||'https://veritas-school.com')+'/?ref='+code;
@@ -32215,9 +32219,9 @@ window.pgParrainageEns = function(){
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
     +_statCard('👥', filleuls.length, 'Filleuls inscrits', '#3C8DFF')
-    +_statCard('🎓', nbAb, 'Filleuls abonnés', '#10B981')
+    +_statCard('🎓', nbAb, 'Filleuls abonnés', '#3A8F73')
     +_statCard('💰', fmt(ps.solde||0), 'Commission à recevoir', '#FFC93C')
-    +_statCard('✅', fmt(ps.totalVerse||0), 'Déjà versé', '#7C3AED')
+    +_statCard('✅', fmt(ps.totalVerse||0), 'Déjà versé', '#6C56A6')
     +'</div>'
     +'<div class="ib ibi mt12 mb0"><span>💡</span><span>Vous touchez <b>'+parrTxt+'</b> sur chaque paiement d\'un filleul inscrit avec votre code. Versement par MoMo/Orange après validation (espace admin → Partage revenus).</span></div></div>'
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Suivi de mes filleuls</div>'
@@ -32276,12 +32280,12 @@ window._posFinish=function(){
     localStorage.setItem('_posDone','1');
   }catch(e){}
   var box=document.getElementById('posBox'); if(!box) return;
-  var bar=function(x){var c=x.pct>=70?'#10B981':x.pct>=50?'#F59E0B':'#EF4444';return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>'+_esc(x.t)+'</span><span style="font-weight:700;color:'+c+'">'+x.pct+'%</span></div><div style="height:7px;background:#EEF1F7;border-radius:99px;overflow:hidden"><div style="height:100%;width:'+x.pct+'%;background:'+c+'"></div></div></div>';};
+  var bar=function(x){var c=x.pct>=70?'#3A8F73':x.pct>=50?'#F59E0B':'#C46F6F';return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px"><span>'+_esc(x.t)+'</span><span style="font-weight:700;color:'+c+'">'+x.pct+'%</span></div><div style="height:7px;background:#EEF1F7;border-radius:99px;overflow:hidden"><div style="height:100%;width:'+x.pct+'%;background:'+c+'"></div></div></div>';};
   box.innerHTML='<div style="text-align:center;margin-bottom:14px"><div style="font-size:40px">'+(pct>=70?'🌟':pct>=50?'💪':'📚')+'</div>'
     +'<div style="font-family:Libre Baskerville,Georgia,serif;font-size:30px;font-weight:700;color:#142554">'+pct+'%</div>'
     +'<div style="font-size:12px;color:var(--ink4)">'+s.ok+' / '+s.qs.length+' bonnes réponses</div></div>'
     +(strong.length?'<div style="font-weight:800;font-size:13px;color:#059669;margin:10px 0 6px">✅ Tes points forts</div>'+strong.slice(0,4).map(bar).join(''):'')
-    +(weak.length?'<div style="font-weight:800;font-size:13px;color:#DC2626;margin:12px 0 6px">🎯 À travailler en priorité</div>'+weak.slice(0,4).map(bar).join(''):'')
+    +(weak.length?'<div style="font-weight:800;font-size:13px;color:#AE5353;margin:12px 0 6px">🎯 À travailler en priorité</div>'+weak.slice(0,4).map(bar).join(''):'')
     +'<div class="ib ibi mt12"><span>💡</span><span>Tes erreurs ont été ajoutées à <b>« Mes erreurs à revoir »</b>. Révise-les puis refais le test pour mesurer tes progrès.</span></div>'
     +'<button class="btn bi" style="width:100%;margin-top:10px" onclick="cm();(typeof mErreursARevoir===\'function\'?mErreursARevoir():(typeof vShowSec===\'function\'?vShowSec(\'elearning\',null):0))"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg>Réviser mes points faibles</button>';
 };
@@ -32901,29 +32905,29 @@ window.pgStatsBusiness = function(){
       var medal = ['🥇','🥈','🥉','4️⃣','5️⃣'][i];
       return '<div style="display:flex;justify-content:space-between;padding:10px 14px;background:#fff;border-radius:10px;margin-bottom:6px;border:1px solid #E5E7EB">'
         +'<span>'+medal+' '+_esc(t[0])+'</span>'
-        +'<b style="color:#10B981">'+fmt(t[1])+'</b></div>';
+        +'<b style="color:#3A8F73">'+fmt(t[1])+'</b></div>';
     }).join('') || '<div style="text-align:center;padding:20px;color:#9CA3AF">Aucune vente confirmée</div>';
 
     return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Statistiques Business</div>'
       +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg></span>Chiffre d\'affaires</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">'
-      +_statCard('💰', fmt(totalCA), 'CA total', '#10B981')
+      +_statCard('💰', fmt(totalCA), 'CA total', '#3A8F73')
       +_statCard('📅', fmt(caMois), 'CA ce mois', '#3C8DFF')
-      +_statCard('📆', fmt(caSem), 'CA cette semaine', '#7C3AED')
-      +_statCard('⏳', pendingPays, 'En attente', '#EF4444')
+      +_statCard('📆', fmt(caSem), 'CA cette semaine', '#6C56A6')
+      +_statCard('⏳', pendingPays, 'En attente', '#C46F6F')
       +'</div></div>'
       +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trending"/></svg></span>Évolution 6 derniers mois</div>'
       +'<div style="display:flex;align-items:flex-end;justify-content:space-around;height:200px;gap:10px;padding:14px">'+bars+'</div></div>'
       +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"/></svg></span>Utilisateurs</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px">'
       +_statCard('🎓', nbStud, 'Élèves inscrits', '#FFC93C')
-      +_statCard('🌐', nbVisit, 'Visiteurs', '#06B6D4')
-      +_statCard('📊', convRate+'%', 'Taux conversion', '#EC4899')
+      +_statCard('🌐', nbVisit, 'Visiteurs', '#3A91A0')
+      +_statCard('📊', convRate+'%', 'Taux conversion', '#C37199')
       +_statCard('🎁', nbPar, 'Parrainages', '#F59E0B')
       +'</div></div>'
       +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg></span>Activité</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px">'
-      +_statCard('🎓', nbAbo, 'Abonnements actifs', '#10B981')
+      +_statCard('🎓', nbAbo, 'Abonnements actifs', '#3A8F73')
       +_statCard('📚', nbBook, 'Achats livres', '#F59E0B')
       +'</div></div>'
       +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></span>Top 5 produits (CA)</div>'+topHTML+'</div>';
@@ -32948,16 +32952,16 @@ window.pgParrainageAdmin = function(){
     var topHTML = topParrains.map(function(t,i){
       var v = visitors.find(function(x){return x.id===t[0];});
       var nom = v ? (v.pre||'')+' '+(v.nom||'') : 'Anonyme';
-      return '<tr><td>'+(i+1)+'</td><td>'+_esc(nom)+'</td><td><code style="background:#F3F4F6;padding:2px 6px;border-radius:4px">'+_genReferralCode(t[0])+'</code></td><td><b style="color:#10B981">'+t[1]+'</b></td><td>'+fmt(t[1]*(PARRAINAGE_BONUS||500))+'</td></tr>';
+      return '<tr><td>'+(i+1)+'</td><td>'+_esc(nom)+'</td><td><code style="background:#F3F4F6;padding:2px 6px;border-radius:4px">'+_genReferralCode(t[0])+'</code></td><td><b style="color:#3A8F73">'+t[1]+'</b></td><td>'+fmt(t[1]*(PARRAINAGE_BONUS||500))+'</td></tr>';
     }).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:#9CA3AF">Aucun parrainage actif</td></tr>';
 
     return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-gift"/></svg></span>Programme de parrainage</div>'
       +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">'
-      +_statCard('🎁', pars.length, 'Parrainages totaux', '#EC4899')
-      +_statCard('✅', pars.filter(function(p){return p.confirmed;}).length, 'Confirmés', '#10B981')
+      +_statCard('🎁', pars.length, 'Parrainages totaux', '#C37199')
+      +_statCard('✅', pars.filter(function(p){return p.confirmed;}).length, 'Confirmés', '#3A8F73')
       +_statCard('💰', fmt(totalBonus), 'Crédits distribués', '#FFC93C')
-      +_statCard('👥', Object.keys(byParrain).length, 'Parrains actifs', '#7C3AED')
+      +_statCard('👥', Object.keys(byParrain).length, 'Parrains actifs', '#6C56A6')
       +'</div></div>'
       +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></span>Top 10 parrains</div>'
       +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
@@ -33051,7 +33055,7 @@ window.mIAAdaptative = function(){
           +'<div><div style="font-weight:800;color:#3730A3">📝 Devoir corrigé par IA</div><div style="font-size:12px;color:#4338CA;margin-top:3px">Collez votre rédaction, recevez une note + corrections</div></div>'
         +'</div>'
         +'<div style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);padding:14px;border-radius:14px;border:1px solid #D8B4FE;display:flex;gap:12px;align-items:flex-start">'
-          +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(168,85,247,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-brain"/></svg></div>'
+          +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(168,85,247,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C56A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-brain"/></svg></div>'
           +'<div><div style="font-weight:800;color:#6B21A8">🎯 Parcours personnalisé (connexion requise)</div><div style="font-size:12px;color:#7E22CE;margin-top:3px">L\'IA analyse vos perfs et propose les bons exercices</div></div>'
         +'</div>'
         +'<div style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);padding:14px;border-radius:14px;border:1px solid #6EE7B7;display:flex;gap:12px;align-items:flex-start;cursor:pointer" onclick="cm();(typeof mAIOrientation===\'function\'?mAIOrientation():toast(\'Cette fonctionnalité arrive bientôt !\'))">'
@@ -33073,23 +33077,23 @@ window.mIAAdaptative = function(){
     }).length;
 
     var dueHTML = due.length ? due.slice(0,5).map(function(c){
-      return '<div style="background:#FEF3C7;padding:12px;border-radius:10px;margin-bottom:8px;border-left:4px solid #F59E0B">'
+      return '<div style="background:#FEF3C7;padding:12px;border-radius:10px;margin-bottom:8px;">'
         +'<b style="color:#92400E">⏰ '+_esc(c.topic)+'</b>'
         +'<div style="font-size:12px;color:#6B7280;margin-top:4px">Dernière qualité : '+(c.lastQuality||0)+'/5</div></div>';
-    }).join('') : '<div style="padding:20px;text-align:center;color:#10B981">✅ Aucune révision urgente</div>';
+    }).join('') : '<div style="padding:20px;text-align:center;color:#3A8F73">✅ Aucune révision urgente</div>';
 
     var weakHTML = weak.length ? weak.slice(0,5).map(function(c){
       var avg = (c.history.reduce(function(s,h){return s+h.quality;},0)/c.history.length).toFixed(1);
-      return '<div style="background:#FEE2E2;padding:12px;border-radius:10px;margin-bottom:8px;border-left:4px solid #EF4444">'
+      return '<div style="background:#FEE2E2;padding:12px;border-radius:10px;margin-bottom:8px;">'
         +'<b style="color:#991B1B">📉 '+_esc(c.topic)+'</b>'
         +'<div style="font-size:12px;color:#6B7280;margin-top:4px">Moyenne : '+avg+'/5 — à renforcer</div></div>';
-    }).join('') : '<div style="padding:20px;text-align:center;color:#10B981">💪 Aucun point faible identifié</div>';
+    }).join('') : '<div style="padding:20px;text-align:center;color:#3A8F73">💪 Aucun point faible identifié</div>';
 
     var body = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px">'
       +_statCard('📚', allCards.length, 'Notions suivies', '#3C8DFF')
-      +_statCard('✅', mastered, 'Maîtrisées', '#10B981')
+      +_statCard('✅', mastered, 'Maîtrisées', '#3A8F73')
       +_statCard('⏰', due.length, 'À réviser', '#F59E0B')
-      +_statCard('📉', weak.length, 'À renforcer', '#EF4444')
+      +_statCard('📉', weak.length, 'À renforcer', '#C46F6F')
       +'</div>'
       +'<div style="margin-top:14px"><h4 style="color:#142554;margin-bottom:8px">⏰ Révisions du jour (top 5)</h4>'+dueHTML+'</div>'
       +'<div style="margin-top:14px"><h4 style="color:#142554;margin-bottom:8px">📉 Points faibles (top 5)</h4>'+weakHTML+'</div>'
@@ -33115,9 +33119,9 @@ window.mHubIA = function(){
       +'<div style="color:#6366F1;font-size:20px;align-self:center">→</div>'
     +'</div>'
     +'<div style="background:linear-gradient(135deg,#FAF5FF,#F3E8FF);padding:14px;border-radius:14px;border:1px solid #D8B4FE;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;'+(connected?'cursor:pointer;':'')+'transition:transform .2s" '+(connected?'onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();window._showAIAdaptiveDashboard&&window._showAIAdaptiveDashboard()"':'')+'>'
-      +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(168,85,247,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"/></svg></div>'
+      +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(168,85,247,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C56A6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"/></svg></div>'
       +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#6B21A8;font-size:15px">🎯 Parcours personnalisé '+(connected?'':'<span style="font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 6px;border-radius:6px;font-weight:600;margin-left:4px">connexion requise</span>')+'</div><div style="font-size:12px;color:#7E22CE;margin-top:3px;line-height:1.4">L\'IA analyse vos performances et propose les bons exercices au bon moment (algorithme SuperMemo)</div></div>'
-      +'<div style="color:#7C3AED;font-size:20px;align-self:center">→</div>'
+      +'<div style="color:#6C56A6;font-size:20px;align-self:center">→</div>'
     +'</div>'
     +'<div style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5);padding:14px;border-radius:14px;border:1px solid #6EE7B7;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();(typeof mAIOrientation===\'function\'?mAIOrientation():vShowSec(\'orientation\',document.querySelector(\'.vnav-btn[onclick*=orientation]\')))">'
       +'<div style="width:48px;height:48px;border-radius:50%;background:rgba(16,185,129,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-compass"/></svg></div>'
@@ -33125,7 +33129,7 @@ window.mHubIA = function(){
       +'<div style="color:#059669;font-size:20px;align-self:center">→</div>'
     +'</div>'
     // v2.5 : Agent Ambassa (concurrent de Didactia/Leopold)
-    +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);padding:14px;border-radius:14px;border:1px solid #A855F7;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:transform .2s;color:#fff" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();mAgentAmbassa()">'
+    +'<div style="background:linear-gradient(135deg,#142554,#6C56A6);padding:14px;border-radius:14px;border:1px solid #A855F7;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;transition:transform .2s;color:#fff" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="cm();mAgentAmbassa()">'
       +'<div style="width:48px;height:48px;border-radius:50%;background:#FFC93C;color:#142554;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:900;font-size:22px;font-family:Plus Jakarta Sans">M</div>'
       +'<div style="flex:1"><div style="font-family:\'Plus Jakarta Sans\',sans-serif;font-weight:800;color:#FFC93C;font-size:15px">🎓 Professeur Ambassa</div><div style="font-size:12px;color:rgba(255,255,255,.85);margin-top:3px;line-height:1.4">Agent IA pédagogique : quiz, corrigés, fiches révision, évaluations notées… <em style="color:#FFC93C">7 capacités pour enseignants &amp; élèves</em></div></div>'
       +'<div style="color:#FFC93C;font-size:20px;align-self:center">→</div>'
@@ -33444,10 +33448,10 @@ window.VERITAS_XP = {
   levels: [
     {min:0,    title:'🌱 Apprenti',    color:'#94A3B8'},
     {min:100,  title:'📘 Étudiant',     color:'#3C8DFF'},
-    {min:300,  title:'⭐ Bachelier',    color:'#10B981'},
-    {min:600,  title:'🎓 Diplômé',     color:'#7C3AED'},
+    {min:300,  title:'⭐ Bachelier',    color:'#3A8F73'},
+    {min:600,  title:'🎓 Diplômé',     color:'#6C56A6'},
     {min:1000, title:'🏆 Champion',    color:'#FFC93C'},
-    {min:2000, title:'👑 Légende',     color:'#DC2626'}
+    {min:2000, title:'👑 Légende',     color:'#AE5353'}
   ]
 };
 
@@ -33546,9 +33550,9 @@ window.mMonParcours = function(){
     +'</div>'
     // 3 stats
     +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">'
-      +'<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">🔥</div><div style="font-size:22px;font-weight:900;color:#DC2626">'+s.current+'</div><div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">Jours d\'affilée</div></div>'
+      +'<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">🔥</div><div style="font-size:22px;font-weight:900;color:#AE5353">'+s.current+'</div><div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">Jours d\'affilée</div></div>'
       +'<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">⚡</div><div style="font-size:22px;font-weight:900;color:#F59E0B">'+s.xp+'</div><div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">XP total</div></div>'
-      +'<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">🏆</div><div style="font-size:22px;font-weight:900;color:#10B981">'+(s.best||0)+'</div><div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">Record streak</div></div>'
+      +'<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:14px;text-align:center"><div style="font-size:28px">🏆</div><div style="font-size:22px;font-weight:900;color:#3A8F73">'+(s.best||0)+'</div><div style="font-size:10px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">Record streak</div></div>'
     +'</div>'
     // 4 actions
     +'<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:8px">🎯 Que faire pour gagner +XP ?</div>'
@@ -33562,8 +33566,8 @@ window.mMonParcours = function(){
     +'<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:8px;margin-top:6px">🌟 Découvrez aussi</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
       +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mAchievements()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg>Badges</button>'
-      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mVeritasGenome()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"/></svg>Genome</button>'
-      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#7C3AED,#EC4899);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mWrapped()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-gift"/></svg>Wrapped</button>'
+      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#142554,#6C56A6);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mVeritasGenome()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"/></svg>Genome</button>'
+      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#6C56A6,#C37199);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mWrapped()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-gift"/></svg>Wrapped</button>'
     +'</div>';
   M('🎯 Mon Parcours','XP · Niveau · Streak',body,
     '<button class="btn bi" onclick="cm()">Continuer</button>', true);
@@ -33767,11 +33771,11 @@ window.mCoaching = function(){
     return '<div style="display:flex;gap:8px;align-items:center;padding:7px 0;border-bottom:1px solid #F0EDE6">'
       +'<button onclick="_toggleGoal(\''+g.id+'\')" style="border:none;background:none;cursor:pointer;font-size:18px">'+(g.fait?'✅':'⬜')+'</button>'
       +'<div style="flex:1;font-size:13px;color:#142554;'+(g.fait?'text-decoration:line-through;opacity:.55':'')+'">'+_esc(g.texte)+'</div>'
-      +'<button onclick="_delGoal(\''+g.id+'\')" style="border:none;background:none;cursor:pointer;color:#DC2626;font-size:14px">✕</button>'
+      +'<button onclick="_delGoal(\''+g.id+'\')" style="border:none;background:none;cursor:pointer;color:#AE5353;font-size:14px">✕</button>'
     +'</div>';
   }).join(''):'<div style="color:#9A8F80;font-size:12px;padding:6px 0">Aucun objectif pour l\'instant. Fixe-t\'en un tout de suite 👇</div>';
   var tips=(DB.coachMotiv.tips||[]).map(function(t){
-    return '<div style="background:#fff;border:1px solid #EFEAE0;border-left:3px solid #FFC93C;border-radius:10px;padding:10px 12px">'
+    return '<div style="background:#fff;border:1px solid #EFEAE0;border-radius:10px;padding:10px 12px">'
       +'<div style="font-weight:800;color:#142554;font-size:13px">'+(t.ic||'✦')+' '+_esc(t.t)+'</div>'
       +'<div style="font-size:12px;color:#5B5348;line-height:1.5;margin-top:3px">'+_esc(t.d)+'</div>'
     +'</div>';
@@ -33825,7 +33829,7 @@ window._welcomeBack = function(){
         +'<div style="font-size:12px;font-weight:800;color:#B45309;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📚 Pendant ton absence</div>'
         +'<div style="font-size:14px;color:#142554;line-height:1.5">'+_esc(missed.resume)+'.</div>'
       +'</div>'
-      +(s?'<div style="text-align:center;font-size:13px;color:#DC2626;font-weight:700;margin-bottom:4px">🔥 Reprends ta série (record : '+(s.best||0)+' j) — une connexion par jour suffit.</div>':'')
+      +(s?'<div style="text-align:center;font-size:13px;color:#AE5353;font-weight:700;margin-bottom:4px">🔥 Reprends ta série (record : '+(s.best||0)+' j) — une connexion par jour suffit.</div>':'')
       +'</div>';
     M('Bon retour !','',body,
       '<button class="btn bo" onclick="cm()">Plus tard</button>'
@@ -33969,7 +33973,7 @@ window.mRelances=function(filtre){
       +'<td style="padding:8px 6px"><div style="font-weight:700;color:#142554;font-size:13px">'+_esc(nom)+'</div>'
         +'<div style="font-size:11px;color:#9A8F80">'+_esc(m.cls||'—')+' · '+(m.isAbo?'<span style="color:#059669;font-weight:700">Abonné</span>':'<span style="color:#9CA3AF">Gratuit</span>')+'</div>'
         +(last?'<div style="font-size:10px;color:#B45309;margin-top:2px">✓ relancé le '+_esc(last.date)+' ('+_esc(last.canal)+')</div>':'')+'</td>'
-      +'<td style="padding:8px 6px;text-align:center"><div style="font-weight:900;color:#DC2626;font-size:16px">'+(j!=null?j:'?')+'</div><div style="font-size:9px;color:#9A8F80">jours</div></td>'
+      +'<td style="padding:8px 6px;text-align:center"><div style="font-weight:900;color:#AE5353;font-size:16px">'+(j!=null?j:'?')+'</div><div style="font-size:9px;color:#9A8F80">jours</div></td>'
       +'<td style="padding:8px 6px;font-size:11px;color:#5B5348;max-width:180px">'+_esc(missed.resume)+'</td>'
       +'<td style="padding:8px 6px;white-space:nowrap;text-align:right">'+waBtn+' '+emailBtn+' <button class="btn xs" style="background:#F3F4F6;color:#142554;border-radius:8px" onclick="_relanceCopy(\''+m.id+'\')" title="Copier le message">📋</button></td>'
     +'</tr>';
@@ -34131,7 +34135,7 @@ window.mBattles = function(){
     +'</div>'
     +(hasPlayed
       ? '<div style="background:#D1FAE5;border:1px solid #6EE7B7;padding:12px;border-radius:10px;margin-bottom:14px;text-align:center"><div style="font-weight:700;color:#065F46">✓ Vous avez déjà joué cette semaine</div><div style="font-size:13px;color:#047857;margin-top:4px">Votre score : '+battle.participants[ses.id].score+'/10 · Position : #'+myRank+'</div></div>'
-      : '<div style="text-align:center;margin-bottom:14px"><button class="btn bi" style="background:linear-gradient(135deg,#DC2626,#F59E0B);color:#fff;padding:14px 28px;font-size:15px;font-weight:800" onclick="cm();_lancerBattle()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Lancer le défi (10 QCM)</button><div style="font-size:11px;color:#6B7280;margin-top:8px">Un seul essai par semaine</div></div>'
+      : '<div style="text-align:center;margin-bottom:14px"><button class="btn bi" style="background:linear-gradient(135deg,#AE5353,#F59E0B);color:#fff;padding:14px 28px;font-size:15px;font-weight:800" onclick="cm();_lancerBattle()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Lancer le défi (10 QCM)</button><div style="font-size:11px;color:#6B7280;margin-top:8px">Un seul essai par semaine</div></div>'
     )
     +'<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:8px">🏆 Classement de la semaine</div>';
   if(!leaderboard.length){
@@ -34144,7 +34148,7 @@ window.mBattles = function(){
       body += '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;background:'+(isMe?'#FEF3C7':'#fff')+';border:1px solid '+(isMe?'#FCD34D':'#E5E7EB')+';border-radius:8px;margin-bottom:4px">'
         +'<div style="font-size:18px;min-width:30px;font-weight:800">'+medal+'</div>'
         +'<div style="flex:1;font-weight:600;color:#142554">'+_esc(p.nom||'Anonyme')+(isMe?' <span style="font-size:10px;background:#FFC93C;padding:1px 5px;border-radius:4px;color:#142554">vous</span>':'')+'</div>'
-        +'<div style="font-weight:800;color:#10B981">'+p.score+'/10</div>'
+        +'<div style="font-weight:800;color:#3A8F73">'+p.score+'/10</div>'
       +'</div>';
     });
   }
@@ -34182,7 +34186,7 @@ window._lancerBattle = function(){
       M('🎉 Battle terminé !','Bravo pour votre participation',
         '<div style="text-align:center;padding:20px">'
         +'<div style="font-size:60px;margin-bottom:10px">'+(score>=8?'🏆':score>=5?'⭐':'💪')+'</div>'
-        +'<div style="font-size:32px;font-weight:900;color:#10B981">'+score+'/10</div>'
+        +'<div style="font-size:32px;font-weight:900;color:#3A8F73">'+score+'/10</div>'
         +'<div style="font-size:13px;color:#6B7280;margin-top:8px">Temps : '+Math.round(timeMs/1000)+'s</div>'
         +'<div style="margin-top:14px;padding:12px;background:#FEF3C7;border-radius:10px;font-size:13px;color:#92400E"><b>+'+(50+score*5)+' XP gagnés !</b><br>Battle bonus + '+score+' bonnes réponses × 5 XP</div>'
         +'</div>',
@@ -34267,7 +34271,7 @@ window.mSujetDuJour = function(){
   var now = new Date();
   var canReveal = now.getHours() >= 18 || sj.revealed;
   var body = '<div style="padding:8px">'
-    +'<div style="background:linear-gradient(135deg,#7C3AED,#A855F7);color:#fff;padding:14px;border-radius:12px;margin-bottom:14px;text-align:center">'
+    +'<div style="background:linear-gradient(135deg,#6C56A6,#A855F7);color:#fff;padding:14px;border-radius:12px;margin-bottom:14px;text-align:center">'
       +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;font-weight:800;opacity:.9">☀️ Sujet du '+new Date(sj.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+'</div>'
       +'<div style="font-size:11px;margin-top:6px;background:rgba(0,0,0,.2);padding:2px 10px;border-radius:99px;display:inline-block">'+(sj.mat?'📚 '+_esc(sj.mat)+' · ':'')+'Niveau : '+_esc(sj.lvl)+'</div>'
     +'</div>'
@@ -34339,7 +34343,7 @@ window.mBacCountdown = function(){
   var days = _getDaysToBAC();
   var dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(),0,1)) / 86400000);
   var mission = MISSIONS_BAC[dayOfYear % MISSIONS_BAC.length];
-  var color = days<=30 ? '#DC2626' : days<=60 ? '#F59E0B' : days<=100 ? '#3C8DFF' : '#10B981';
+  var color = days<=30 ? '#AE5353' : days<=60 ? '#F59E0B' : days<=100 ? '#3C8DFF' : '#3A8F73';
   var label = days<=30 ? 'CRITIQUE' : days<=60 ? 'INTENSIF' : days<=100 ? 'ACCÉLÉRATION' : 'PRÉPARATION';
   var body = '<div style="padding:8px">'
     +'<div style="background:linear-gradient(135deg,'+color+',#0F1E47);color:#fff;padding:24px;border-radius:14px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden">'
@@ -34386,7 +34390,7 @@ window._bacMissionDone = function(){
     +'</div>'
     +'<div style="font-size:13px;color:#374151;line-height:1.6;margin-bottom:12px">'+intro+'</div>'
     +steps
-    +'<div style="margin-top:16px;background:linear-gradient(135deg,#142554,#7C3AED);border-radius:14px;padding:16px;color:#fff;position:relative;overflow:hidden">'
+    +'<div style="margin-top:16px;background:linear-gradient(135deg,#142554,#6C56A6);border-radius:14px;padding:16px;color:#fff;position:relative;overflow:hidden">'
       +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#FFC93C">'+(urgent?'⚡ Sprint final':'🎯 Aller plus loin')+'</div>'
       +'<div style="font-size:16px;font-weight:900;margin-top:4px;line-height:1.25">Révision Intensive '+(new Date().getFullYear()+(days>365?1:0))+'</div>'
       +'<div style="font-size:12.5px;opacity:.9;margin-top:6px;line-height:1.5">Épreuves corrigées, fiches IA illimitées, suivi de progression et accès prioritaire à tous les cours MINESEC.</div>'
@@ -34435,10 +34439,10 @@ window._engagementBannerHtml = function(){
   };
 
   // Couleurs d'accent (en hex pour permettre l'ajout de 33/55 d'opacité)
-  var accentSujet = '#A78BFA';   // violet doux
-  var accentBAC = days<=30 ? '#F87171' : days<=100 ? '#FBBF24' : '#60A5FA'; // rouge/jaune/bleu adoucis
-  var accentBattle = '#FB923C';  // orange doux
-  var accentParcoursOK = '#34D399'; // vert doux
+  var accentSujet = '#9784D1';   // violet doux
+  var accentBAC = days<=30 ? '#D58E8E' : days<=100 ? '#FBBF24' : '#87A9D3'; // rouge/jaune/bleu adoucis
+  var accentBattle = '#CB976C';  // orange doux
+  var accentParcoursOK = '#5CAB8E'; // vert doux
   var accentParcoursKO = '#FCD34D'; // jaune doux
 
   return '<div class="v-reveal" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:12px 0 20px">'
@@ -34523,7 +34527,7 @@ window.mVeritasGenome = function(){
   var hash = (ses.id+'').split('').reduce(function(a,c){return a+c.charCodeAt(0);},0);
   var geneCode = ['VRT','GNM','BAC','DXA','RSL'][hash%5] + '-' + String(hash%9999).padStart(4,'0');
 
-  var body = '<div id="genomeCard" style="background:linear-gradient(135deg,#0F1E47,#1E3A8A 50%,#7C3AED);padding:24px;border-radius:18px;color:#fff;position:relative;overflow:hidden">'
+  var body = '<div id="genomeCard" style="background:linear-gradient(135deg,#0F1E47,#1E3A8A 50%,#6C56A6);padding:24px;border-radius:18px;color:#fff;position:relative;overflow:hidden">'
     +'<div style="position:absolute;top:-20px;right:-20px;width:140px;height:140px;border-radius:50%;background:radial-gradient(circle,#FFC93C 0%,transparent 70%);opacity:.3"></div>'
     +'<div style="position:relative;z-index:1">'
     // Header
@@ -34543,8 +34547,8 @@ window.mVeritasGenome = function(){
     +'<div style="background:rgba(0,0,0,.25);border-radius:12px;padding:14px;margin-bottom:14px">'
       +'<div style="font-size:10px;color:#FFC93C;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📊 Profil génétique</div>'
       +[
-        {l:'Maîtrise notions',v:Math.round(pctMastered),c:'#10B981'},
-        {l:'Régularité (streak)',v:Math.round(pctStreak),c:'#DC2626'},
+        {l:'Maîtrise notions',v:Math.round(pctMastered),c:'#3A8F73'},
+        {l:'Régularité (streak)',v:Math.round(pctStreak),c:'#AE5353'},
         {l:'Engagement (XP)',v:Math.round(pctXP),c:'#FFC93C'}
       ].map(function(r){
         return '<div style="margin-bottom:8px">'
@@ -34556,9 +34560,9 @@ window.mVeritasGenome = function(){
     // Stats
     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center;font-size:11px">'
       +'<div><div style="font-size:22px;font-weight:900;color:#FFC93C">'+topics+'</div><div style="opacity:.7">Notions</div></div>'
-      +'<div><div style="font-size:22px;font-weight:900;color:#10B981">'+mastered+'</div><div style="opacity:.7">Maîtrisées</div></div>'
+      +'<div><div style="font-size:22px;font-weight:900;color:#3A8F73">'+mastered+'</div><div style="opacity:.7">Maîtrisées</div></div>'
       +'<div><div style="font-size:22px;font-weight:900;color:#3C8DFF">'+battlesPlayed+'</div><div style="opacity:.7">Battles</div></div>'
-      +'<div><div style="font-size:22px;font-weight:900;color:#EC4899">'+(s.best||0)+'</div><div style="opacity:.7">Record streak</div></div>'
+      +'<div><div style="font-size:22px;font-weight:900;color:#C37199">'+(s.best||0)+'</div><div style="opacity:.7">Record streak</div></div>'
     +'</div>'
     +'<div style="text-align:center;font-size:9px;color:rgba(255,255,255,.4);margin-top:14px;letter-spacing:1px">VÉRITAS ACADEMY · DOUALA · '+new Date().getFullYear()+'</div>'
     +'</div></div>';
@@ -34617,12 +34621,12 @@ window.mStudyRoom = function(){
       +'<div style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE);border:2px solid #93C5FD;border-radius:14px;padding:18px;text-align:center;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'" onclick="_createStudyRoom()">'
         +'<div style="font-size:36px;margin-bottom:8px">🚀</div>'
         +'<div style="font-weight:800;color:#1E3A8A;font-size:14px">Créer une room</div>'
-        +'<div style="font-size:11px;color:#3B82F6;margin-top:4px">Code unique 6 chiffres</div>'
+        +'<div style="font-size:11px;color:#6A8DC7;margin-top:4px">Code unique 6 chiffres</div>'
       +'</div>'
       +'<div style="background:linear-gradient(135deg,#F0FDF4,#D1FAE5);border:2px solid #6EE7B7;border-radius:14px;padding:18px;text-align:center;cursor:pointer;transition:transform .2s" onmouseover="this.style.transform=\'translateY(-3px)\'" onmouseout="this.style.transform=\'\'" onclick="_joinStudyRoom()">'
         +'<div style="font-size:36px;margin-bottom:8px">🔑</div>'
         +'<div style="font-weight:800;color:#065F46;font-size:14px">Rejoindre une room</div>'
-        +'<div style="font-size:11px;color:#10B981;margin-top:4px">Saisir le code reçu</div>'
+        +'<div style="font-size:11px;color:#3A8F73;margin-top:4px">Saisir le code reçu</div>'
       +'</div>'
     +'</div>'
     +'<div style="background:#FEF3C7;border:1px solid #FCD34D;padding:12px;border-radius:10px;font-size:11px;color:#92400E;margin-top:14px;line-height:1.5">'
@@ -34690,9 +34694,9 @@ window._renderStudyRoom = function(code){
     +'<div style="background:#F9FAFB;border-radius:10px;padding:10px;max-height:200px;overflow-y:auto">'
     +room.members.map(function(m,i){
       return '<div style="display:flex;align-items:center;gap:10px;padding:6px;border-bottom:1px solid #F3F4F6">'
-        +'<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3C8DFF,#7C3AED);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px">'+((m.name||'?')[0]||'?').toUpperCase()+'</div>'
+        +'<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#3C8DFF,#6C56A6);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px">'+((m.name||'?')[0]||'?').toUpperCase()+'</div>'
         +'<div style="flex:1"><div style="font-weight:600;color:#142554;font-size:13px">'+_esc(m.name)+(m.id===room.hostId?' <span style="background:#FFC93C;color:#142554;font-size:9px;padding:1px 5px;border-radius:4px;font-weight:800">HÔTE</span>':'')+'</div></div>'
-        +(m.score>0?'<div style="font-weight:800;color:#10B981">+'+m.score+' XP</div>':'')
+        +(m.score>0?'<div style="font-weight:800;color:#3A8F73">+'+m.score+' XP</div>':'')
       +'</div>';
     }).join('')
     +'</div>'
@@ -34848,7 +34852,7 @@ window.mAchievements = function(){
 window._confetti = function(){
   var c = document.createElement('div');
   c.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9999;overflow:hidden';
-  var colors = ['#FFC93C','#3C8DFF','#10B981','#EC4899','#F59E0B','#7C3AED'];
+  var colors = ['#FFC93C','#3C8DFF','#3A8F73','#C37199','#F59E0B','#6C56A6'];
   for(var i=0;i<40;i++){
     var p = document.createElement('div');
     var col = colors[Math.floor(Math.random()*colors.length)];
@@ -34904,7 +34908,7 @@ window._getCitationDuJour = function(){
 
 window._citationBannerHtml = function(){
   var c = _getCitationDuJour();
-  return '<div style="background:linear-gradient(135deg,#0F1E47 0%,#1E3A8A 100%);color:#fff;padding:18px 22px;border-radius:14px;margin:16px 0;position:relative;overflow:hidden;border-left:4px solid #FFC93C">'
+  return '<div style="background:linear-gradient(135deg,#0F1E47 0%,#1E3A8A 100%);color:#fff;padding:18px 22px;border-radius:14px;margin:16px 0;position:relative;overflow:hidden;">'
     +'<div style="position:absolute;top:-10px;right:0;font-family:Georgia,serif;font-size:80px;line-height:1;color:rgba(255,201,60,.15);font-weight:900">"</div>'
     +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#FFC93C;font-weight:800;margin-bottom:6px">📜 Citation du jour</div>'
     +'<div style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:16px;line-height:1.5;font-style:italic;margin-bottom:8px">'+_esc(c.t)+'</div>'
@@ -35278,7 +35282,7 @@ window.mWrapped = function(){
   var year = new Date().getFullYear();
   DB._wrappedViewed = true;
   try { save(); } catch(e){}
-  var body = '<div style="background:linear-gradient(135deg,#7C3AED 0%,#EC4899 50%,#F59E0B 100%);color:#fff;padding:24px;border-radius:18px;text-align:center">'
+  var body = '<div style="background:linear-gradient(135deg,#6C56A6 0%,#C37199 50%,#F59E0B 100%);color:#fff;padding:24px;border-radius:18px;text-align:center">'
     +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:3px;font-weight:800;opacity:.85">VÉRITAS Wrapped</div>'
     +'<div style="font-size:48px;font-weight:900;line-height:1;margin:8px 0;font-family:Plus Jakarta Sans">'+year+'</div>'
     +'<div style="font-size:14px;opacity:.85;margin-bottom:20px">'+_esc((ses.pre||'')+' '+(ses.nom||''))+'</div>'
@@ -35335,14 +35339,14 @@ window._hookQuizSM2 = function(topic, scorePct){
 // ════════════════════════════════════════════════════════════════════
 window.FORUM_CATEGORIES = [
   {k:'general', l:'💬 Général', c:'#6B7280'},
-  {k:'francais', l:'📖 Français', c:'#EC4899'},
+  {k:'francais', l:'📖 Français', c:'#C37199'},
   {k:'maths', l:'🔢 Maths', c:'#3C8DFF'},
-  {k:'physique', l:'⚗️ Physique', c:'#7C3AED'},
-  {k:'svt', l:'🌱 SVT', c:'#10B981'},
+  {k:'physique', l:'⚗️ Physique', c:'#6C56A6'},
+  {k:'svt', l:'🌱 SVT', c:'#3A8F73'},
   {k:'anglais', l:'🌍 Anglais', c:'#F59E0B'},
   {k:'histoire', l:'🏛️ Histoire-Géo', c:'#92400E'},
   {k:'orientation', l:'🧭 Orientation', c:'#0EA5E9'},
-  {k:'examens', l:'📝 BEPC/BAC', c:'#DC2626'}
+  {k:'examens', l:'📝 BEPC/BAC', c:'#AE5353'}
 ];
 
 window.showForum = function(){
@@ -35452,7 +35456,7 @@ window.showForumPost = function(postId){
   var cat = FORUM_CATEGORIES.find(function(c){return c.k===post.cat;}) || FORUM_CATEGORIES[0];
 
   var repliesHTML = replies.length ? replies.map(function(r){
-    return '<div style="background:#F9FAFB;padding:12px;border-radius:10px;margin-top:10px;border-left:3px solid #3C8DFF">'
+    return '<div style="background:#F9FAFB;padding:12px;border-radius:10px;margin-top:10px;">'
       +'<div style="font-size:13px;color:#374151;white-space:pre-wrap">'+_esc(r.body)+'</div>'
       +'<div style="font-size:11px;color:#9CA3AF;margin-top:8px">👤 '+_esc(r.authorName||'Anonyme')+' · '+new Date(r.date).toLocaleString('fr-FR')+'</div></div>';
   }).join('') : '<div style="text-align:center;padding:20px;color:#9CA3AF">Aucune réponse pour le moment</div>';
@@ -35525,14 +35529,14 @@ window.pgForumAdmin = function(){
       +'<td>'+_esc(preview)+'</td>'
       +'<td>'+_esc(p.authorName||'?')+'</td>'
       +'<td>'+(p.parentId?'réponse':'question')+'</td>'
-      +'<td><button class="btn sm" style="background:#DC2626;color:#fff" onclick="adminBanForumPost(\''+p.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Suppr.</button></td></tr>';
+      +'<td><button class="btn sm" style="background:#AE5353;color:#fff" onclick="adminBanForumPost(\''+p.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Suppr.</button></td></tr>';
   }).join('');
   return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg></span>Modération Forum</div>'
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Stats</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
     +_statCard('💬', posts.length, 'Posts actifs', '#3C8DFF')
-    +_statCard('🚫', bannedCount, 'Supprimés', '#EF4444')
-    +_statCard('📂', FORUM_CATEGORIES.length, 'Catégories', '#10B981')
+    +_statCard('🚫', bannedCount, 'Supprimés', '#C46F6F')
+    +_statCard('📂', FORUM_CATEGORIES.length, 'Catégories', '#3A8F73')
     +'</div></div>'
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>50 derniers posts</div>'
     +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
@@ -35558,7 +35562,7 @@ window.pgMarketplaceEnseignant = function(){
   var approved = mine.filter(function(m){return m.status==='approved';}).length;
 
   var itemsHTML = mine.length ? mine.map(function(m){
-    var statusColor = {pending:'#F59E0B', approved:'#10B981', rejected:'#EF4444'}[m.status]||'#6B7280';
+    var statusColor = {pending:'#F59E0B', approved:'#3A8F73', rejected:'#C46F6F'}[m.status]||'#6B7280';
     var statusLbl = {pending:'⏳ En attente', approved:'✅ Approuvé', rejected:'❌ Refusé'}[m.status]||'?';
     return '<div class="card" style="margin:8px 0">'
       +'<div style="display:flex;justify-content:space-between;align-items:start;gap:10px">'
@@ -35566,7 +35570,7 @@ window.pgMarketplaceEnseignant = function(){
       +'<div style="font-size:12px;color:#6B7280;margin-top:4px">'+_esc((m.description||'').slice(0,100))+'</div></div>'
       +'<div style="text-align:right">'
       +'<span style="background:'+statusColor+';color:#fff;padding:4px 10px;border-radius:8px;font-size:11px;font-weight:700">'+statusLbl+'</span>'
-      +'<div style="font-weight:800;color:#10B981;margin-top:6px">'+fmt(m.price||0)+'</div>'
+      +'<div style="font-weight:800;color:#3A8F73;margin-top:6px">'+fmt(m.price||0)+'</div>'
       +'<div style="font-size:11px;color:#9CA3AF">'+(m.salesCount||0)+' ventes</div></div></div>'
       +(m.rejectReason ? '<div style="background:#FEE2E2;padding:8px;border-radius:6px;margin-top:8px;font-size:12px;color:#991B1B"><b>Refus :</b> '+_esc(m.rejectReason)+'</div>':'')
       +'</div>';
@@ -35576,9 +35580,9 @@ window.pgMarketplaceEnseignant = function(){
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
     +_statCard('📚', mine.length, 'Soumissions', '#3C8DFF')
-    +_statCard('✅', approved, 'Approuvés', '#10B981')
+    +_statCard('✅', approved, 'Approuvés', '#3A8F73')
     +_statCard('⏳', pending, 'En attente', '#F59E0B')
-    +_statCard('🛒', totalSales, 'Ventes', '#EC4899')
+    +_statCard('🛒', totalSales, 'Ventes', '#C37199')
     +_statCard('💰', fmt(totalRev), 'Revenus (70%)', '#FFC93C')
     +'</div></div>'
     +'<div class="card mt12">'
@@ -35649,25 +35653,25 @@ window.pgMarketplaceAdmin = function(){
   var totalRev = approved.reduce(function(s,m){return s+((m.salesCount||0)*(m.price||0)*MARKETPLACE_COMMISSION);},0);
 
   var pendingHTML = pending.length ? pending.map(function(m){
-    return '<div class="card" style="border-left:4px solid #F59E0B;margin:8px 0">'
+    return '<div class="card" style="margin:8px 0">'
       +'<div style="display:flex;justify-content:space-between;align-items:start;gap:10px">'
       +'<div style="flex:1"><b>'+_esc(m.title)+'</b> <span style="background:#E5E7EB;padding:2px 6px;border-radius:4px;font-size:11px">'+_esc(m.type)+' / '+_esc(m.level)+'</span>'
       +'<div style="font-size:12px;color:#6B7280;margin-top:4px">Par <b>'+_esc(m.teacherName)+'</b> · '+_esc(m.subject||'?')+'</div>'
       +'<div style="font-size:13px;color:#374151;margin-top:8px">'+_esc(m.description)+'</div>'
       +(m.url ? '<a href="'+_esc(m.url)+'" target="_blank" style="color:#3C8DFF;font-size:12px">🔗 '+_esc(m.url)+'</a>':'')
       +'</div>'
-      +'<div style="text-align:right"><b style="color:#10B981">'+fmt(m.price)+'</b></div></div>'
+      +'<div style="text-align:right"><b style="color:#3A8F73">'+fmt(m.price)+'</b></div></div>'
       +'<div style="display:flex;gap:8px;margin-top:12px">'
-      +'<button class="btn sm" style="background:#10B981;color:#fff" onclick="adminApproveMK(\''+m.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Approuver</button>'
-      +'<button class="btn sm" style="background:#EF4444;color:#fff" onclick="adminRejectMK(\''+m.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>'
+      +'<button class="btn sm" style="background:#3A8F73;color:#fff" onclick="adminApproveMK(\''+m.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Approuver</button>'
+      +'<button class="btn sm" style="background:#C46F6F;color:#fff" onclick="adminRejectMK(\''+m.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>'
       +'</div></div>';
-  }).join('') : '<div style="text-align:center;padding:20px;color:#10B981">✅ Aucune soumission en attente</div>';
+  }).join('') : '<div style="text-align:center;padding:20px;color:#3A8F73">✅ Aucune soumission en attente</div>';
 
   return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg></span>Marketplace — Modération</div>'
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Stats globales</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
     +_statCard('⏳', pending.length, 'En attente', '#F59E0B')
-    +_statCard('✅', approved.length, 'Approuvés', '#10B981')
+    +_statCard('✅', approved.length, 'Approuvés', '#3A8F73')
     +_statCard('💰', fmt(totalRev), 'Commission VÉRITAS (30%)', '#FFC93C')
     +'</div></div>'
     +'<div class="card mt12"><div class="ct">⏳ Soumissions à valider</div>'+pendingHTML+'</div>';
@@ -36464,11 +36468,11 @@ window.AMBASSA_PERSONA = [
 
 window.AMBASSA_TACHES = [
   { id:'quiz',       ic:'pencil',    col:'#3C8DFF', t:'Générer un quiz',           d:'QCM / Vrai-Faux / Questions ouvertes — sur n\'importe quel sujet' },
-  { id:'corrige',    ic:'check',     col:'#10B981', t:'Générer un corrigé',         d:'Pour un sujet d\'épreuve, exercice ou QCM existant' },
-  { id:'fiche',      ic:'doc',       col:'#7C3AED', t:'Fiche de révision',          d:'Synthèse des points clés d\'un chapitre / cours' },
+  { id:'corrige',    ic:'check',     col:'#3A8F73', t:'Générer un corrigé',         d:'Pour un sujet d\'épreuve, exercice ou QCM existant' },
+  { id:'fiche',      ic:'doc',       col:'#6C56A6', t:'Fiche de révision',          d:'Synthèse des points clés d\'un chapitre / cours' },
   { id:'diff',       ic:'chart',     col:'#F59E0B', t:'Exercices différenciés',     d:'3 niveaux : facile, moyen, difficile sur le même thème' },
-  { id:'remed',      ic:'compass',   col:'#EC4899', t:'Activité de remédiation',   d:'Pour élèves en difficulté sur une notion précise' },
-  { id:'eval',       ic:'edit',      col:'#DC2626', t:'Évaluation notée',           d:'Sujet complet barème + corrigé prêt à imprimer' },
+  { id:'remed',      ic:'compass',   col:'#C37199', t:'Activité de remédiation',   d:'Pour élèves en difficulté sur une notion précise' },
+  { id:'eval',       ic:'edit',      col:'#AE5353', t:'Évaluation notée',           d:'Sujet complet barème + corrigé prêt à imprimer' },
   { id:'doc',        ic:'bookopen',  col:'#6366F1', t:'Analyser un document',       d:'Coller un texte → l\'IA génère questions/résumé/quiz dessus' },
   { id:'translate',  ic:'globe',     col:'#0EA5E9', t:'Traduction intelligente',    d:'FR ↔ EN ↔ ES — traduction pédagogique avec vocabulaire expliqué' }
 ];
@@ -36540,7 +36544,7 @@ window.mAgentAmbassa = function(taskId){
   var tier = (typeof _aiTier === 'function') ? _aiTier() : 'anon';
 
   var body = '<div style="padding:8px">'
-    +'<div style="background:linear-gradient(135deg,#142554,#7C3AED);color:#fff;padding:18px;border-radius:14px;margin-bottom:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">'
+    +'<div style="background:linear-gradient(135deg,#142554,#6C56A6);color:#fff;padding:18px;border-radius:14px;margin-bottom:14px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">'
       +'<div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#FFE082,#FFC93C);display:flex;align-items:center;justify-content:center;overflow:hidden;border:3px solid #FFC93C;box-shadow:0 4px 14px rgba(255,201,60,.4);flex-shrink:0;position:relative">'
         +'<span style="position:absolute;color:#142554;font-size:28px;font-weight:900;font-family:Plus Jakarta Sans,sans-serif;line-height:1">A</span>'
         +'<img src="ambassa-avatar.png" alt="Professeur Ambassa" style="position:relative;z-index:2;width:100%;height:100%;object-fit:cover;display:block">'
@@ -36898,7 +36902,7 @@ window._ambassaGenerate = async function(taskId){
       +'<div style="display:flex;gap:6px">'
       +'<button class="btn sm" style="background:#fff;border:1px solid #6EE7B7;color:#059669;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaCopy()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
       +'<button class="btn sm" style="background:#fff;border:1px solid #C7D2FE;color:#3730A3;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSpeak(this)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg>Écouter</button>'
-      +(taskId==='eval'?'<button class="btn sm" style="background:#10B981;color:#fff;border:none;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSaveEval(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/'/g,"\\'")+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer dans Évaluations</button>':'')
+      +(taskId==='eval'?'<button class="btn sm" style="background:#3A8F73;color:#fff;border:none;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSaveEval(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/'/g,"\\'")+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer dans Évaluations</button>':'')
       +'</div></div>'
       + displayHtml
       // v1.2.2 : zone de SOUMISSION élève (sauf QCM interactif qui a déjà sa correction)
@@ -37129,7 +37133,7 @@ window._renderQCMInteractive = function(items) {
   });
 
   html += '<div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap">';
-  html += '<button class="btn bi" style="background:#10B981;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:800;font-size:14px;cursor:pointer" onclick="_revealQCMResults()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg>Voir mes résultats</button>';
+  html += '<button class="btn bi" style="background:#3A8F73;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:800;font-size:14px;cursor:pointer" onclick="_revealQCMResults()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg>Voir mes résultats</button>';
   html += '<button class="btn bo" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;padding:12px 18px;border-radius:8px;font-size:13px;cursor:pointer" onclick="_skipQCMAnswers()">⏭ Voir directement le corrigé</button>';
   html += '</div>';
   // Conteneur résultats (vide au départ)
@@ -37158,7 +37162,7 @@ window._revealQCMResults = function() {
   });
 
   var score = items.length > 0 ? Math.round((correct / items.length) * 100) : 0;
-  var scoreColor = score >= 80 ? '#10B981' : score >= 50 ? '#F59E0B' : '#DC2626';
+  var scoreColor = score >= 80 ? '#3A8F73' : score >= 50 ? '#F59E0B' : '#AE5353';
   var msg = score >= 80 ? 'Excellent travail ! 🌟'
           : score >= 60 ? 'Bon niveau, continue ! 💪'
           : score >= 40 ? 'À retravailler — relis les explications. 📖'
@@ -37174,12 +37178,12 @@ window._revealQCMResults = function() {
       radios[i].disabled = true;
       if (item.correct && val === item.correct) {
         lbl.style.background = '#D1FAE5';
-        lbl.style.borderColor = '#10B981';
+        lbl.style.borderColor = '#3A8F73';
         lbl.style.color = '#065F46';
         lbl.style.fontWeight = '700';
       } else if (radios[i].checked && val !== item.correct) {
         lbl.style.background = '#FEE2E2';
-        lbl.style.borderColor = '#DC2626';
+        lbl.style.borderColor = '#AE5353';
         lbl.style.color = '#991B1B';
       }
     }
@@ -37187,7 +37191,7 @@ window._revealQCMResults = function() {
     var qDiv = document.querySelector('.qcm-item[data-idx="' + idx + '"]');
     if (qDiv && item.explanation) {
       var explDiv = document.createElement('div');
-      explDiv.style.cssText = 'margin-top:10px;padding:10px 12px;background:#EFF6FF;border-left:3px solid #3C8DFF;border-radius:0 6px 6px 0;font-size:12px;line-height:1.55;color:#1E40AF';
+      explDiv.style.cssText = 'margin-top:10px;padding:10px 12px;background:#EFF6FF;border-radius:0 6px 6px 0;font-size:12px;line-height:1.55;color:#1E40AF';
       var explHtml = '<b>💡 Explication :</b> ' + _esc(item.explanation);
       if (item.source) explHtml += '<br><span style="color:#64748B;font-style:italic">📚 ' + _esc(item.source) + '</span>';
       explDiv.innerHTML = explHtml;
@@ -37296,9 +37300,9 @@ window.pgAmbassa = function(){
   return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg></span>Professeur Ambassa — Agent IA pédagogique</div>'
     +'<div class="card mt12">'
     +'<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">'
-    +'<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#142554,#7C3AED);color:#FFC93C;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;font-family:Plus Jakarta Sans;flex-shrink:0">M</div>'
+    +'<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#142554,#6C56A6);color:#FFC93C;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;font-family:Plus Jakarta Sans;flex-shrink:0">M</div>'
     +'<div style="flex:1;min-width:240px">'
-    +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#7C3AED;font-weight:800">Agent IA pédagogique camerounais</div>'
+    +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#6C56A6;font-weight:800">Agent IA pédagogique camerounais</div>'
     +'<h2 style="margin:4px 0;color:#142554;font-family:Plus Jakarta Sans">Professeur Ambassa</h2>'
     +'<p style="font-style:italic;color:#475569;font-family:Crimson Pro,serif;font-size:14px;margin:6px 0">Expert MINESEC · BEPC · Probatoire · BAC séries A/C/D · Connaît les programmes camerounais.</p>'
     +'<button class="btn bi" onclick="mAgentAmbassa()" style="font-size:14px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Lancer Ambassa</button>'
@@ -37358,7 +37362,7 @@ window.pgCalendrierAdmin = function(){
     var triLabel = tri.num===1 ? '1er Trimestre' : tri.num+'ème Trimestre';
     h += '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:14px;margin-bottom:12px">';
     h += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><strong style="color:#1E3A8A;font-size:15px">'+triLabel+'</strong>';
-    h += '<button class="btn sm" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:8px;padding:4px 10px" onclick="_calDelTri('+ti+')">'+_calIco('trash',14,'margin-right:5px')+'Supprimer trimestre</button>';
+    h += '<button class="btn sm" style="background:#FEE2E2;color:#AE5353;border:none;border-radius:8px;padding:4px 10px" onclick="_calDelTri('+ti+')">'+_calIco('trash',14,'margin-right:5px')+'Supprimer trimestre</button>';
     h += '</div>';
     h += '<div class="fg2">';
     h += '<div class="fg"><span class="fl">Date début</span><input class="fi" id="calT'+ti+'Debut" value="'+_esc(tri.debut||'')+'"></div>';
@@ -37371,7 +37375,7 @@ window.pgCalendrierAdmin = function(){
       h += '<input class="fi" id="calT'+ti+'S'+si+'Debut" value="'+_esc(s.debut||'')+'" placeholder="Début">';
       h += '<input class="fi" id="calT'+ti+'S'+si+'Fin" value="'+_esc(s.fin||'')+'" placeholder="Fin">';
       h += '<input class="fi" id="calT'+ti+'S'+si+'Exa" value="'+_esc(s.examens||'')+'" placeholder="Épreuves">';
-      h += '<button class="btn sm" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:4px 8px;font-size:11px" onclick="_calDelSeq('+ti+','+si+')" title="Supprimer">×</button>';
+      h += '<button class="btn sm" style="background:#FEE2E2;color:#AE5353;border:none;border-radius:6px;padding:4px 8px;font-size:11px" onclick="_calDelSeq('+ti+','+si+')" title="Supprimer">×</button>';
       h += '</div>';
     });
     h += '<button class="btn sm bvi mt8" onclick="_calAddSeq('+ti+')">'+_calIco('plus',14,'margin-right:5px')+'Ajouter une séquence</button>';
@@ -37391,7 +37395,7 @@ window.pgCalendrierAdmin = function(){
     h += '<td style="padding:6px"><input class="fi" id="calEx'+i+'Date" value="'+_esc(ex.date||'')+'"></td>';
     h += '<td style="padding:6px"><input class="fi" id="calEx'+i+'Niv" value="'+_esc(ex.niveaux||'')+'"></td>';
     h += '<td style="padding:6px"><input class="fi" id="calEx'+i+'Mat" value="'+_esc(ex.matières||'')+'"></td>';
-    h += '<td style="padding:6px"><button class="btn sm" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:4px 10px" onclick="_calDelExam('+i+')" title="Supprimer">'+_calIco('trash',14)+'</button></td>';
+    h += '<td style="padding:6px"><button class="btn sm" style="background:#FEE2E2;color:#AE5353;border:none;border-radius:6px;padding:4px 10px" onclick="_calDelExam('+i+')" title="Supprimer">'+_calIco('trash',14)+'</button></td>';
     h += '</tr>';
   });
   h += '</tbody></table></div>';
@@ -37406,7 +37410,7 @@ window.pgCalendrierAdmin = function(){
     h += '<input class="fi" id="calVac'+i+'Lab" value="'+_esc(v.label||'')+'" placeholder="Label (ex: Toussaint)">';
     h += '<input class="fi" id="calVac'+i+'Deb" value="'+_esc(v.debut||'')+'" placeholder="Début">';
     h += '<input class="fi" id="calVac'+i+'Fin" value="'+_esc(v.fin||'')+'" placeholder="Fin">';
-    h += '<button class="btn sm" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:4px 8px;font-size:11px" onclick="_calDelVac('+i+')">×</button>';
+    h += '<button class="btn sm" style="background:#FEE2E2;color:#AE5353;border:none;border-radius:6px;padding:4px 8px;font-size:11px" onclick="_calDelVac('+i+')">×</button>';
     h += '</div>';
   });
   h += '<div class="mt12"><button class="btn bvi sm" onclick="_calAddVac()">'+_calIco('plus',14,'margin-right:5px')+'Ajouter des vacances</button>';
@@ -37419,7 +37423,7 @@ window.pgCalendrierAdmin = function(){
     h += '<div style="display:grid;grid-template-columns:1fr 2fr 40px;gap:10px;align-items:center;margin-bottom:8px">';
     h += '<input class="fi" id="calJour'+i+'Date" value="'+_esc(j.date||'')+'" placeholder="Date (ex: Lun. 05 Oct. 2026)">';
     h += '<input class="fi" id="calJour'+i+'Nom" value="'+_esc(j.nom||'')+'" placeholder="Intitulé de la journée">';
-    h += '<button class="btn sm" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:4px 8px" onclick="_calDelJour('+i+')" title="Supprimer">'+_calIco('trash',13)+'</button>';
+    h += '<button class="btn sm" style="background:#FEE2E2;color:#AE5353;border:none;border-radius:6px;padding:4px 8px" onclick="_calDelJour('+i+')" title="Supprimer">'+_calIco('trash',13)+'</button>';
     h += '</div>';
   });
   h += '<div class="mt12"><button class="btn bvi sm" onclick="_calAddJour()">'+_calIco('plus',14,'margin-right:5px')+'Ajouter une journée</button>';
@@ -37433,7 +37437,7 @@ window.pgCalendrierAdmin = function(){
     h += '<input class="fi" id="calFer'+i+'Date" value="'+_esc(f.date||'')+'" placeholder="Date">';
     h += '<input class="fi" id="calFer'+i+'Nom" value="'+_esc(f.nom||'')+'" placeholder="Intitulé">';
     h += '<input class="fi" id="calFer'+i+'Note" value="'+_esc(f.note||'')+'" placeholder="Mention (ex: férié national)">';
-    h += '<button class="btn sm" style="background:#FEE2E2;color:#DC2626;border:none;border-radius:6px;padding:4px 8px" onclick="_calDelFerie('+i+')" title="Supprimer">'+_calIco('trash',13)+'</button>';
+    h += '<button class="btn sm" style="background:#FEE2E2;color:#AE5353;border:none;border-radius:6px;padding:4px 8px" onclick="_calDelFerie('+i+')" title="Supprimer">'+_calIco('trash',13)+'</button>';
     h += '</div>';
   });
   h += '<div class="mt12"><button class="btn bvi sm" onclick="_calAddFerie()">'+_calIco('plus',14,'margin-right:5px')+'Ajouter une fête</button>';
@@ -37444,7 +37448,7 @@ window.pgCalendrierAdmin = function(){
   h += '<div class="card mt12" style="background:linear-gradient(135deg,#FEF6DF,#FEF3C7);border:1px solid #FCD34D"><div class="ct"><span class="ct-ico">'+_calIco('sliders',17)+'</span>Actions globales</div>';
   h += '<button class="btn" style="background:linear-gradient(135deg,#1E3A8A,#142554);color:#fff" onclick="_calSaveAll()">'+_calIco('save',15,'margin-right:6px')+'Enregistrer TOUT le calendrier</button> ';
   h += '<button class="btn bo sm" style="margin-left:8px" onclick="_calReset()">'+_calIco('rotate',14,'margin-right:5px')+'Réinitialiser au calendrier officiel</button> ';
-  h += '<button class="btn sm" style="background:linear-gradient(135deg,#10B981,#047857);color:#fff;margin-left:8px" onclick="window.open(\'/?cal=preview\',\'_blank\')">'+_calIco('eye',14,'margin-right:5px')+'Aperçu portail visiteur</button>';
+  h += '<button class="btn sm" style="background:linear-gradient(135deg,#3A8F73,#047857);color:#fff;margin-left:8px" onclick="window.open(\'/?cal=preview\',\'_blank\')">'+_calIco('eye',14,'margin-right:5px')+'Aperçu portail visiteur</button>';
   h += '<div class="ib ibg mt12 mb0"><span>'+_calIco('checkcircle',16)+'</span><span>Pensez à cliquer <strong>Enregistrer TOUT</strong> après vos modifications pour les rendre visibles sur le portail.</span></div>';
   h += '</div>';
   return h;
@@ -37606,7 +37610,7 @@ window.pgCentresAdmin = function(){
       +'<td><b>'+_esc(c.nom||'?')+'</b><br><span style="font-size:11px;color:#6B7280">'+_esc(c.slug||'?')+'.veritas-school.com</span></td>'
       +'<td>'+_esc(c.ville||'?')+'</td>'
       +'<td><span style="background:#3C8DFF;color:#fff;padding:2px 8px;border-radius:6px;font-size:11px">'+_esc(c.plan)+'</span></td>'
-      +'<td><b style="color:#10B981">'+fmt(c.mrrFcfa||0)+'</b>/mois</td>'
+      +'<td><b style="color:#3A8F73">'+fmt(c.mrrFcfa||0)+'</b>/mois</td>'
       +'<td>'+new Date(c.createdAt).toLocaleDateString('fr-FR')+'</td>'
       +'<td>'+(c.active?'✅':'⏸️')+'</td></tr>';
   }).join('') || '<tr><td colspan="6" style="text-align:center;padding:20px;color:#9CA3AF">Aucun centre client (mode mono-tenant)</td></tr>';
@@ -37614,9 +37618,9 @@ window.pgCentresAdmin = function(){
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>SaaS Overview</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">'
     +_statCard('🏢', DB.centres.length, 'Centres clients', '#3C8DFF')
-    +_statCard('✅', DB.centres.filter(function(c){return c.active;}).length, 'Actifs', '#10B981')
+    +_statCard('✅', DB.centres.filter(function(c){return c.active;}).length, 'Actifs', '#3A8F73')
     +_statCard('💰', fmt(totalMRR), 'MRR mensuel récurrent', '#FFC93C')
-    +_statCard('📅', fmt(totalMRR*12), 'ARR annualisé', '#7C3AED')
+    +_statCard('📅', fmt(totalMRR*12), 'ARR annualisé', '#6C56A6')
     +'</div></div>'
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-building"/></svg></span>Liste des centres</div>'
     +'<button class="btn bi sm" onclick="mAddCentre()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter un centre client</button>'
@@ -37742,7 +37746,7 @@ function openProductPage(itemId, type){
     +'</div>'
 
     // SECTION B — Aperçu
-    +(apercu?'<div style="margin-bottom:24px"><div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px">📖 Aperçu du contenu</div><div style="background:var(--bg2);border-left:4px solid var(--gold);padding:16px;border-radius:0 12px 12px 0;font-size:13px;color:var(--ink2);line-height:1.7">'+_esc(apercu)+'</div></div>':'')
+    +(apercu?'<div style="margin-bottom:24px"><div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px">📖 Aperçu du contenu</div><div style="background:var(--bg2);padding:16px;border-radius:0 12px 12px 0;font-size:13px;color:var(--ink2);line-height:1.7">'+_esc(apercu)+'</div></div>':'')
 
     // SECTION C — Description + chapitres
     +(desc?'<div style="margin-bottom:24px"><div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px">📝 Description</div><div style="font-size:13px;color:var(--ink2);line-height:1.7">'+_esc(desc)+'</div></div>':'')
@@ -37981,11 +37985,11 @@ openPaymentModal = function(payInfo){
       +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
         +'<div style="font-size:26px">⚡</div>'
         +'<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13.5px;color:#142554">Paiement automatique — MTN MoMo ou Orange Money</div>'
-        +'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#10B981);color:#fff;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>'
+        +'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>'
       +'</div>'
       +'<div style="font-size:11px;color:var(--ink4);line-height:1.5;margin-bottom:8px">Entrez votre numéro : l\'opérateur est détecté automatiquement. Vous validez avec votre code secret et <strong>votre accès s\'active tout seul</strong>.</div>'
       +'<input class="fi" id="campayPhoneInput_'+ref+'" placeholder="Votre n° MTN ou Orange (ex : 6XX XX XX XX)" value="'+String(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:8px 10px;width:100%;margin-bottom:8px">'
-      +'<button class="btn" style="width:100%;background:linear-gradient(135deg,#059669,#10B981);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitCampay(\''+ref+'\','+montant+',\''+String(label).replace(/[\\\\\x27"]/g,'')+'\',\''+(payInfo.intent||'generic')+'\',\''+(payInfo.targetId||'')+'\',\''+(payInfo.customerAccountId||'')+'\',\''+String(payInfo.customerNom||'').replace(/[\\\\\x27"]/g,'')+'\')">⚡ Payer maintenant — '+montantFmt+'</button>'
+      +'<button class="btn" style="width:100%;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitCampay(\''+ref+'\','+montant+',\''+String(label).replace(/[\\\\\x27"]/g,'')+'\',\''+(payInfo.intent||'generic')+'\',\''+(payInfo.targetId||'')+'\',\''+(payInfo.customerAccountId||'')+'\',\''+String(payInfo.customerNom||'').replace(/[\\\\\x27"]/g,'')+'\')">⚡ Payer maintenant — '+montantFmt+'</button>'
     +'</div>')
     : '';
 
@@ -37995,8 +37999,8 @@ openPaymentModal = function(payInfo){
     // l'encaissement automatique est disponible, promettre « 24 h » au moment
     // de payer découragerait inutilement le client.
     + (_campayTile
-        ? '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08);border-left:4px solid #059669"><span>⚡</span><span><strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).</span></div>'
-        : '<div class="ib ibt mb12" style="background:rgba(220,38,38,.08);border-left:4px solid #dc2626"><span>⚠️</span><span><strong>Important :</strong> après votre paiement, passez à l\'étape 3 pour nous envoyer votre confirmation avec la référence <strong>'+ref+'</strong>. Votre accès sera activé sous 24 h.</span></div>')
+        ? '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08);"><span>⚡</span><span><strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).</span></div>'
+        : '<div class="ib ibt mb12" style="background:rgba(220,38,38,.08);"><span>⚠️</span><span><strong>Important :</strong> après votre paiement, passez à l\'étape 3 pour nous envoyer votre confirmation avec la référence <strong>'+ref+'</strong>. Votre accès sera activé sous 24 h.</span></div>')
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:16px">'
     + _campayTile
     // MoMo
@@ -39032,7 +39036,7 @@ function mPartnerSignup(type){
     + (type==='librairie' ? '<div class="fg"><span class="fl">Nom de la librairie</span><input class="fi" id="_psEtab" placeholder="ex. Librairie du Centre"></div><div class="fg"><span class="fl">Adresse</span><input class="fi" id="_psAdr" placeholder="Adresse complète"></div>' : '')
     + (type==='sponsor' ? '<div class="fg"><span class="fl">Nom de l\'entreprise</span><input class="fi" id="_psEtab" placeholder="ex. MTN Cameroun"></div><div class="fg"><span class="fl">Secteur d\'activité</span><input class="fi" id="_psSecteur" placeholder="Télécoms, banque..."></div>' : '')
     + '<div class="fg"><span class="fl">Pourquoi rejoindre VÉRITAS ? (motivation)</span><textarea class="fi" id="_psMot" rows="3" placeholder="Quelques lignes sur votre motivation et ce que vous apportez"></textarea></div>'
-    + (needsKYC ? '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:10px 12px;border-radius:6px;font-size:12px;color:#92400E;margin:10px 0">📎 <strong>Documents KYC requis</strong> après validation initiale : RCCM/agrément, pièce d\'identité du dirigeant, RIB ou numéro MoMo. Ils vous seront demandés par WhatsApp.</div>' : '')
+    + (needsKYC ? '<div style="background:#FEF3C7;padding:10px 12px;border-radius:6px;font-size:12px;color:#92400E;margin:10px 0">📎 <strong>Documents KYC requis</strong> après validation initiale : RCCM/agrément, pièce d\'identité du dirigeant, RIB ou numéro MoMo. Ils vous seront demandés par WhatsApp.</div>' : '')
     + '<label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--ink3);margin:12px 0"><input type="checkbox" id="_psCgu" style="margin-top:2px"><span>J\'accepte les <a href="#" onclick="event.preventDefault();alert(\'CGU disponibles sur veritas-school.com\')">CGU du Programme Partenaire</a> et autorise VÉRITAS à me recontacter par WhatsApp et email.</span></label>';
   M(t.emoji+' Devenir partenaire — '+t.label, 'Candidature gratuite · Réponse sous 48h ouvrables', body,
     '<button class="btn bo" onclick="cm()">Annuler</button>'
@@ -39108,14 +39112,14 @@ function pgPartnersAdmin(){
   var blockedReason = (DB.partnerSettings && DB.partnerSettings.payoutsBlockedReason) || '';
   var h = '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"/></svg></span>Programme Partenariat — Administration</div>';
   if(payoutsBlocked){
-    h += '<div style="background:#FEF3C7;border-left:4px solid #F59E0B;padding:12px 14px;border-radius:8px;margin-bottom:16px;font-size:13px">'
+    h += '<div style="background:#FEF3C7;padding:12px 14px;border-radius:8px;margin-bottom:16px;font-size:13px">'
       + '<strong>⏸ Versements automatiques désactivés</strong> — '+_prtSafe(blockedReason)
       + ' · <a href="#" onclick="event.preventDefault();mPartnerSettings()" style="color:#142554;font-weight:700">Configurer</a></div>';
   }
   // KPI cards
   h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px">'
-    + _prtKpiCard('📥', 'Candidatures', pending.length, '#3B82F6')
-    + _prtKpiCard('✅', 'Partenaires actifs', active.length, '#10B981')
+    + _prtKpiCard('📥', 'Candidatures', pending.length, '#6A8DC7')
+    + _prtKpiCard('✅', 'Partenaires actifs', active.length, '#3A8F73')
     + _prtKpiCard('💰', 'À verser', _prtFmt(totalPending), '#F59E0B')
     + _prtKpiCard('🏦', 'Total versé', _prtFmt(totalPaid), '#6B7280')
     + '</div>';
@@ -39146,7 +39150,7 @@ function pgPartnersAdmin(){
         + '<div style="display:flex;gap:6px;flex-direction:column">'
         +   '<button class="btn bi xs" onclick="mApprovePartner(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Valider</button>'
         +   '<a class="btn bo xs" href="https://wa.me/'+a.tel.replace(/[^0-9]/g,'')+'" target="_blank" style="text-decoration:none"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>WhatsApp</a>'
-        +   '<button class="btn bo xs" style="color:#DC2626" onclick="mRejectPartner(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>'
+        +   '<button class="btn bo xs" style="color:#AE5353" onclick="mRejectPartner(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>'
         + '</div>'
         + '</div>';
     });
@@ -39251,7 +39255,7 @@ function mRejectPartner(appId){
 function mPartnerSettings(){
   if(!DB.partnerSettings) DB.partnerSettings={payoutsEnabled:false,payoutsBlockedReason:'',minPayout:5000};
   var s = DB.partnerSettings;
-  var body = '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:10px;border-radius:6px;font-size:12px;color:#92400E;margin-bottom:14px">'
+  var body = '<div style="background:#FEF3C7;padding:10px;border-radius:6px;font-size:12px;color:#92400E;margin-bottom:14px">'
     + (DB.payApiConfig&&DB.payApiConfig.campayEnabled
         ? '✅ <strong>CamPay est activé</strong> — les versements partent du wallet CamPay vers le MoMo/Orange du partenaire (mode « ⚡ Automatique » dans la fenêtre de versement). Plafond par versement : voir <code>CAMPAY_PAYOUT_MAX</code> côté serveur.'
         : '⚠️ Activez les versements <strong>uniquement après avoir activé CamPay</strong> (Paramètres → ⚡ Paiements API automatiques). Sans cela, seul le mode manuel fonctionne.')
@@ -39657,7 +39661,7 @@ function pgPartnerPortal(){
       + '</div>'
       + '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0">'
       +   '<div><div style="font-size:13px;font-weight:700">📄 Contrat de partenariat</div>'
-      +     '<div style="font-size:11px;color:'+(ctr && ctr.signedAt?'#10B981':kycSt.status==='approved'?'#F59E0B':'#9CA3AF')+'">'
+      +     '<div style="font-size:11px;color:'+(ctr && ctr.signedAt?'#3A8F73':kycSt.status==='approved'?'#F59E0B':'#9CA3AF')+'">'
       +       (ctr && ctr.signedAt ? '✅ Signé le '+_prtSafe(ctr.signedAt) : (kycSt.status==='approved' ? '⏳ À signer' : '⚪ KYC requis d\'abord'))
       +     '</div></div>'
       +   (kycSt.status==='approved' && !(ctr && ctr.signedAt) ? '<button class="btn bi xs" onclick="mPartnerSignContract(\''+partner.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Signer</button>'
@@ -39666,14 +39670,14 @@ function pgPartnerPortal(){
       + '</div></div>';
   }
   h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px">'
-    + _prtKpiCard('📊', 'Ventes générées', salesCount, '#3B82F6')
-    + _prtKpiCard('💰', 'Total commission', _prtFmt((partner.stats||{}).totalCommission||0), '#10B981')
+    + _prtKpiCard('📊', 'Ventes générées', salesCount, '#6A8DC7')
+    + _prtKpiCard('💰', 'Total commission', _prtFmt((partner.stats||{}).totalCommission||0), '#3A8F73')
     + _prtKpiCard('⏳', 'En attente', _prtFmt((partner.stats||{}).pending||0), '#F59E0B')
     + _prtKpiCard('🏦', 'Déjà versé', _prtFmt((partner.stats||{}).paidOut||0), '#6B7280')
     + '</div>';
   var payoutsBlocked = !(DB.partnerSettings && DB.partnerSettings.payoutsEnabled);
   if(payoutsBlocked){
-    h += '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:12px;border-radius:8px;font-size:13px;margin-bottom:14px">'
+    h += '<div style="background:#FEF3C7;padding:12px;border-radius:8px;font-size:13px;margin-bottom:14px">'
       + '⏸ <strong>Versements en préparation</strong> — '+_prtSafe((DB.partnerSettings||{}).payoutsBlockedReason||'')+'. Vos commissions sont enregistrées et seront versées dès l\'activation.</div>';
   }
   h += '<div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg></span>Historique de vos commissions</div>';
@@ -39707,13 +39711,13 @@ function _prtCertConfig(type){
   var configs = {
     chef_etab:    { titre:'Label Centre d\'Excellence', subtitle:'CENTRE D\'EXCELLENCE VERITAS', emoji:'🏆', accent:'#FFD700', mention:'reconnue à' },
     enseignant:   { titre:'Certificat d\'Ambassadeur',  subtitle:'AMBASSADEUR PEDAGOGIQUE VERITAS', emoji:'🎓', accent:'#3C8DFF', mention:'décerné à' },
-    createur:     { titre:'Certificat d\'Ambassadeur',  subtitle:'AMBASSADEUR OFFICIEL VERITAS', emoji:'💎', accent:'#7C3AED', mention:'décerné à' },
+    createur:     { titre:'Certificat d\'Ambassadeur',  subtitle:'AMBASSADEUR OFFICIEL VERITAS', emoji:'💎', accent:'#6C56A6', mention:'décerné à' },
     eleve_leader: { titre:'Certificat Ambassadeur Junior', subtitle:'AMBASSADEUR VERITAS JUNIOR', emoji:'⭐', accent:'#F59E0B', mention:'décerné à' },
     inspecteur:   { titre:'Certificat d\'Expert Associé', subtitle:'EXPERT PEDAGOGIQUE VERITAS', emoji:'📚', accent:'#0EA5E9', mention:'décerné à' },
-    librairie:    { titre:'Certificat de Partenariat',  subtitle:'POINT DE VENTE PARTENAIRE VERITAS', emoji:'🏪', accent:'#10B981', mention:'reconnu à' },
+    librairie:    { titre:'Certificat de Partenariat',  subtitle:'POINT DE VENTE PARTENAIRE VERITAS', emoji:'🏪', accent:'#3A8F73', mention:'reconnu à' },
     universite:   { titre:'Convention de Partenariat',  subtitle:'INSTITUTION PARTENAIRE VERITAS', emoji:'🏛️', accent:'#6366F1', mention:'établie avec' },
     sponsor:      { titre:'Certificat de Partenariat',  subtitle:'PARTENAIRE INSTITUTIONNEL VERITAS', emoji:'🌍', accent:'#0F766E', mention:'décerné à' },
-    parent:       { titre:'Adhésion Club Parents',      subtitle:'MEMBRE DU CLUB PARENTS VERITAS', emoji:'👨‍👩‍👧', accent:'#EC4899', mention:'décernée à' }
+    parent:       { titre:'Adhésion Club Parents',      subtitle:'MEMBRE DU CLUB PARENTS VERITAS', emoji:'👨‍👩‍👧', accent:'#C37199', mention:'décernée à' }
   };
   return configs[type] || { titre:'Certificat de Partenariat', subtitle:'PARTENAIRE VERITAS', emoji:'🤝', accent:'#142554', mention:'décerné à' };
 }
@@ -39904,7 +39908,7 @@ window._certVResultOK = function(c){
   else if(c.type==='associe' && m.type) extra = _e(m.type);
   else if(c.type==='honneur' && (m.mention||m.moy)) extra = _e(m.mention||'')+(m.moy?' · '+_e(m.moy)+'/20':'');
   return '<div style="max-width:620px;margin:30px auto;padding:20px">'
-    +'<div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">'
+    +'<div style="background:linear-gradient(135deg,#3A8F73,#059669);color:#fff;border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">'
       +'<div style="font-size:44px">✅</div><div style="font-size:20px;font-weight:800;margin-top:6px">Certificat authentique</div>'
       +'<div style="opacity:.9;font-size:13px;margin-top:4px">Émis par le Centre VÉRITAS · Douala</div></div>'
     +'<div class="card"><table class="t" style="width:100%;font-size:13.5px">'
@@ -39976,7 +39980,7 @@ function _prtCertResult(status, certId, partner, errorMsg){
     var lv = L[partner.level||'bronze']||L.bronze;
     var typeLabel = (DB.partnerTypes && DB.partnerTypes[partner.type]) ? DB.partnerTypes[partner.type].label : partner.type;
     return '<div style="max-width:620px;margin:30px auto;padding:20px">'
-      + '<div style="background:linear-gradient(135deg,#10B981,#059669);color:#fff;border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">'
+      + '<div style="background:linear-gradient(135deg,#3A8F73,#059669);color:#fff;border-radius:14px;padding:24px;text-align:center;margin-bottom:16px">'
       +   '<div style="font-size:56px;margin-bottom:6px">✅</div>'
       +   '<div style="font-size:22px;font-weight:800;margin-bottom:4px">Certificat AUTHENTIQUE</div>'
       +   '<div style="font-size:13px;opacity:.9">Délivré par Centre VÉRITAS et inscrit dans notre base officielle</div>'
@@ -40001,7 +40005,7 @@ function _prtCertResult(status, certId, partner, errorMsg){
       +   '<a href="https://wa.me/237697637739" target="_blank" style="color:#25D366;font-weight:700;text-decoration:none">📞 Contacter VÉRITAS pour confirmation</a>'
       + '</div></div>';
   }
-  var color = status==='suspended' ? '#F59E0B' : '#DC2626';
+  var color = status==='suspended' ? '#F59E0B' : '#AE5353';
   var emoji = status==='suspended' ? '⏸' : '❌';
   var title = status==='suspended' ? 'Partenariat SUSPENDU' : 'Certificat INVALIDE';
   return '<div style="max-width:560px;margin:30px auto;padding:20px">'
@@ -40099,8 +40103,8 @@ function pgLeaderboardJunior(){
   var nApprenants = (DB.visitorAccounts||[]).length;
   h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px">'
     + _prtKpiCard('🎯', 'Ambassadeurs actifs', nAmbassadeurs, '#F59E0B')
-    + _prtKpiCard('👥', 'Apprenants inscrits', nApprenants, '#3B82F6')
-    + _prtKpiCard('🏆', 'Au classement', rows.length, '#10B981')
+    + _prtKpiCard('👥', 'Apprenants inscrits', nApprenants, '#6A8DC7')
+    + _prtKpiCard('🏆', 'Au classement', rows.length, '#3A8F73')
     + '</div>';
 
   if(!rows.length){
@@ -40121,7 +40125,7 @@ function pgLeaderboardJunior(){
         +     '<div style="font-size:11px;color:var(--ink3)">'+_prtSafe(r.lv)+(r.ville?' · '+_prtSafe(r.ville):'')+(r.cls?' · '+_prtSafe(r.cls):'')+'</div></div>'
         +   '<div style="text-align:right;font-weight:700;color:#3C8DFF">'+r.xp+'</div>'
         +   '<div style="text-align:right;font-weight:700;color:#F59E0B">'+r.badges+'</div>'
-        +   '<div style="text-align:right;font-weight:700;color:#10B981">'+r.sales+'</div>'
+        +   '<div style="text-align:right;font-weight:700;color:#3A8F73">'+r.sales+'</div>'
         + '</div>';
     });
     h += '</div>';
@@ -40196,7 +40200,7 @@ function mCandidaterAmbassadeurJunior(){
     + '<div style="font-size:11px;color:var(--ink3);margin-top:4px">Recommande VÉRITAS à tes camarades · Gagne badges, paliers, bourses</div>'
     + '</div>';
   // Bloc statut actuel
-  body += '<div style="background:'+(seuilOK?'#D1FAE5':'#FEF3C7')+';border-left:3px solid '+(seuilOK?'#10B981':'#F59E0B')+';padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px">'
+  body += '<div style="background:'+(seuilOK?'#D1FAE5':'#FEF3C7')+';padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px">'
     + '<div style="font-weight:700;margin-bottom:4px">'+(seuilOK?'✅ Tu remplis les critères !':'⚠️ Seuil minimum non atteint')+'</div>'
     + '<div>XP actuel : <strong>'+(streak.xp||0)+'</strong>'+(lv?' · Niveau : '+lv.current.title:'')+' · Badges : <strong>'+nBadges+'</strong></div>'
     + (seuilOK ? '<div style="margin-top:4px">Ta candidature sera <strong>auto-validée</strong> sous quelques secondes.</div>'
@@ -40387,12 +40391,12 @@ function _kycStatus(partnerId){
   });
   if(uploadedReq.length < required.length) return { status:'incomplete', label:'Documents manquants ('+uploadedReq.length+'/'+required.length+')', color:'#F59E0B', icon:'⚠️' };
   var hasPending = kyc.documents.some(function(d){return d.status==='pending';});
-  if(hasPending) return { status:'pending_review', label:'En cours de validation', color:'#3B82F6', icon:'⏳' };
+  if(hasPending) return { status:'pending_review', label:'En cours de validation', color:'#6A8DC7', icon:'⏳' };
   var allApproved = kyc.documents.every(function(d){return d.status==='approved';});
-  if(allApproved) return { status:'approved', label:'KYC validé', color:'#10B981', icon:'✅' };
+  if(allApproved) return { status:'approved', label:'KYC validé', color:'#3A8F73', icon:'✅' };
   var hasRejected = kyc.documents.some(function(d){return d.status==='rejected';});
-  if(hasRejected) return { status:'rejected', label:'Documents refusés', color:'#DC2626', icon:'❌' };
-  return { status:'pending_review', label:'En cours de validation', color:'#3B82F6', icon:'⏳' };
+  if(hasRejected) return { status:'rejected', label:'Documents refusés', color:'#AE5353', icon:'❌' };
+  return { status:'pending_review', label:'En cours de validation', color:'#6A8DC7', icon:'⏳' };
 }
 
 // MODALE upload KYC côté partenaire
@@ -40407,7 +40411,7 @@ function mPartnerKYCUpload(partnerId){
   if(!DB.partnerKYC[partnerId]) DB.partnerKYC[partnerId] = { documents:[], status:'incomplete', startedAt:(typeof today==='function')?today():new Date().toISOString().substring(0,10) };
   var kyc = DB.partnerKYC[partnerId];
   var st = _kycStatus(partnerId);
-  var body = '<div style="background:'+st.color+'15;border-left:3px solid '+st.color+';padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px">'
+  var body = '<div style="background:'+st.color+'15;padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px">'
     + '<strong>'+st.icon+' Statut KYC : '+st.label+'</strong>'
     + (st.status==='rejected' && kyc.rejectionReason ? '<div style="margin-top:6px">Motif : '+_prtSafe(kyc.rejectionReason)+'</div>' : '')
     + '</div>';
@@ -40416,12 +40420,12 @@ function mPartnerKYCUpload(partnerId){
     var existing = kyc.documents.find(function(d){return d.docType===r.id;});
     var statusBadge = '';
     if(existing){
-      var col = existing.status==='approved'?'#10B981':existing.status==='rejected'?'#DC2626':'#3B82F6';
+      var col = existing.status==='approved'?'#3A8F73':existing.status==='rejected'?'#AE5353':'#6A8DC7';
       var lab = existing.status==='approved'?'✓ Validé':existing.status==='rejected'?'✗ Refusé':'⏳ En cours';
       statusBadge = '<span style="background:'+col+';color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;margin-left:6px">'+lab+'</span>';
     }
     body += '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:8px;padding:10px 12px;margin-bottom:8px">'
-      + '<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:6px">'+_prtSafe(r.label)+(r.required?'<span style="color:#DC2626">*</span>':'')+statusBadge+'</div>'
+      + '<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:6px">'+_prtSafe(r.label)+(r.required?'<span style="color:#AE5353">*</span>':'')+statusBadge+'</div>'
       + (existing ? '<div style="font-size:11px;color:var(--ink3);margin-bottom:6px">📎 '+_prtSafe(existing.fileName)+' · '+(existing.size?Math.round(existing.size/1024)+' Ko':'')+' · '+_prtSafe(existing.uploadedAt)+'</div>' : '')
       + '<input type="file" id="_kycF_'+r.id+'" accept=".pdf,.jpg,.jpeg,.png" style="font-size:11px;width:100%" onchange="_kycSaveDoc(\''+partnerId+'\',\''+r.id+'\',this)">'
       + '</div>';
@@ -40480,7 +40484,7 @@ function mAdminReviewKYC(partnerId){
   }
   var required = _kycRequiredDocs(partner.type);
   var st = _kycStatus(partnerId);
-  var body = '<div style="background:'+st.color+'15;border-left:3px solid '+st.color+';padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px">'
+  var body = '<div style="background:'+st.color+'15;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:14px">'
     + '<strong>'+st.icon+' '+st.label+'</strong></div>';
   kyc.documents.forEach(function(doc){
     var reqInfo = required.find(function(r){return r.id===doc.docType;}) || {label:doc.docType};
@@ -40492,8 +40496,8 @@ function mAdminReviewKYC(partnerId){
       +   '</div>'
       +   '<div style="display:flex;gap:5px;flex-wrap:wrap">'
       +     '<button class="btn bo xs" onclick="_kycPreview(\''+doc.id+'\',\''+partnerId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>'
-      +     (doc.status!=='approved' ? '<button class="btn bi xs" onclick="_kycApprove(\''+partnerId+'\',\''+doc.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Valider</button>' : '<span style="background:#10B981;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px">✓ Validé</span>')
-      +     (doc.status!=='rejected' ? '<button class="btn bo xs" style="color:#DC2626" onclick="_kycReject(\''+partnerId+'\',\''+doc.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>' : '<span style="background:#DC2626;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px">✗ Refusé</span>')
+      +     (doc.status!=='approved' ? '<button class="btn bi xs" onclick="_kycApprove(\''+partnerId+'\',\''+doc.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Valider</button>' : '<span style="background:#3A8F73;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px">✓ Validé</span>')
+      +     (doc.status!=='rejected' ? '<button class="btn bo xs" style="color:#AE5353" onclick="_kycReject(\''+partnerId+'\',\''+doc.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>' : '<span style="background:#AE5353;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px">✗ Refusé</span>')
       +   '</div>'
       + '</div></div>';
   });
@@ -40772,7 +40776,7 @@ function mPartnerSignContract(partnerId){
     return;
   }
   var tpl = _contractTemplate(partner.type);
-  var body = '<div style="background:#FEF3C7;border-left:3px solid #F59E0B;padding:10px 14px;border-radius:8px;font-size:12px;color:#92400E;margin-bottom:14px">'
+  var body = '<div style="background:#FEF3C7;padding:10px 14px;border-radius:8px;font-size:12px;color:#92400E;margin-bottom:14px">'
     + '⚠️ Lisez attentivement le contrat avant de signer. La signature est juridiquement opposable selon la loi camerounaise sur les transactions électroniques (Loi n° 2010/021).</div>';
   body += '<div style="background:#F9FAFB;padding:14px;border-radius:8px;max-height:200px;overflow-y:auto;font-size:11px;line-height:1.6;margin-bottom:14px">';
   body += '<div style="font-weight:800;font-size:13px;margin-bottom:8px">'+tpl.titre+'</div>';
@@ -40846,7 +40850,7 @@ function pgInstitutionalShowcase(){
         +   '</div>'
         + '</div>'
         + (p.ville?'<div style="font-size:11px;color:var(--ink3)">📍 '+_prtSafe(p.ville)+'</div>':'')
-        + (p.certificate?'<div style="font-size:10px;color:#10B981;font-weight:700">✅ Certifié</div>':'')
+        + (p.certificate?'<div style="font-size:10px;color:#3A8F73;font-weight:700">✅ Certifié</div>':'')
         + '</div>';
     });
     h += '</div>';
@@ -41091,7 +41095,7 @@ window._vtProofFeed = function(){
       box.innerHTML = '<div class="vfx-proof-card">'
         + '<span class="vfx-proof-ic" aria-hidden="true">'+e.ic+'</span>'
         + '<span><span class="vfx-proof-tx">'+e.tx+'</span>'
-        + '<span class="vfx-proof-when"><span class="vfx-live" style="--vfx-live-c:rgba(16,185,129,.7);width:6px;height:6px;border-radius:50%;background:#10B981;display:inline-block"></span>'
+        + '<span class="vfx-proof-when"><span class="vfx-live" style="--vfx-live-c:rgba(16,185,129,.7);width:6px;height:6px;border-radius:50%;background:#3A8F73;display:inline-block"></span>'
         + 'Activité réelle du centre'+(when?' · '+when:'')+'</span></span>'
         + '<button class="vfx-proof-x" aria-label="Masquer le flux d\'activité" '
         + 'onclick="_vtProofStop()">✕</button></div>';
@@ -41277,13 +41281,13 @@ window.pgParents = function(){
   h += '<h3 class="acc-pill" style="margin:26px 0 12px">' + ICO('i-calculator') + 'Les trois formules, et quoi en faire</h3>'
      + '<div class="vp-card" style="margin-bottom:14px">'
      + '<div style="font-size:13.5px;line-height:1.9">'
-     + '<div style="background:#FBFCFE;border-left:3px solid #FFC93C;border-radius:8px;padding:9px 13px;margin-bottom:8px">'
+     + '<div style="background:#FBFCFE;border-radius:8px;padding:9px 13px;margin-bottom:8px">'
      + '<b>1. La moyenne pondérée</b><br>moyenne = (note₁ × coef₁ + note₂ × coef₂ + …) ÷ (coef₁ + coef₂ + …)'
      + '<br><span style="font-size:12px;color:#6B7280">On divise par la somme des coefficients, jamais par le nombre de matières.</span></div>'
-     + '<div style="background:#FBFCFE;border-left:3px solid #FFC93C;border-radius:8px;padding:9px 13px;margin-bottom:8px">'
+     + '<div style="background:#FBFCFE;border-radius:8px;padding:9px 13px;margin-bottom:8px">'
      + '<b>2. Ce qu\'une matière coûte</b><br>perte = (10 − note) × coef ÷ total des coefficients'
      + '<br><span style="font-size:12px;color:#6B7280">Un 8 en coefficient 4 sur 24 retire 0,33 point de moyenne ; le même 8 en coefficient 1 n\'en retire que 0,08.</span></div>'
-     + '<div style="background:#FBFCFE;border-left:3px solid #FFC93C;border-radius:8px;padding:9px 13px">'
+     + '<div style="background:#FBFCFE;border-radius:8px;padding:9px 13px">'
      + '<b>3. La note à viser ensuite</b><br>note nécessaire = [ cible × (C + c) − moyenne × C ] ÷ c'
      + '<br><span style="font-size:12px;color:#6B7280">C = coefficients déjà comptés, c = coefficient de la nouvelle note.</span></div>'
      + '</div></div>'
@@ -41351,7 +41355,7 @@ window.pgParents = function(){
      + '</div>';
 
   // ── Ce qui n'existe PAS encore : annoncé comme tel ──
-  h += '<div class="vp-card" style="border-left:3px solid #FFC93C;margin-top:6px">'
+  h += '<div class="vp-card" style="margin-top:6px">'
      + '<h4>' + ICO('i-warning') + 'En préparation — annoncé, pas encore livré</h4>'
      + '<p style="margin:0">Nous préférons le dire : le <b>lien de paiement partageable</b> (pour qu\'un proche règle '
      + 'la scolarité sans créer de compte), le <b>paiement en tranches</b>, la <b>carte bancaire en euros</b>, '
@@ -41500,7 +41504,7 @@ window._vtMoyenneCalc = function(){
   var sous10 = lignes.filter(function(l){ return l.n < 10; }).sort(function(a,b){ return a.n-b.n; });
   if(sous10.length){
     var perteTot = sous10.reduce(function(a,l){ return a + (10-l.n)*l.c; }, 0) / coefs;
-    ruleHtml += '<div class="card" style="margin-top:10px;padding:14px;border-left:4px solid #C2410C;background:#FFF8F1">'
+    ruleHtml += '<div class="card" style="margin-top:10px;padding:14px;background:#FFF8F1">'
       + '<div style="font-weight:800;color:#8A3B0C;margin-bottom:6px">⚠️ '+sous10.length
       + ' matière(s) sous 10 retirent <b>'+perteTot.toFixed(2)+' point(s)</b> de moyenne</div>'
       + '<div style="font-size:13px;line-height:1.55;color:#374151">'
@@ -41510,7 +41514,7 @@ window._vtMoyenneCalc = function(){
       + 'précisément le genre d\'écart qui se rattrapait autrefois en conseil et qui, aujourd\'hui, ne se rattrape plus.'
       + '</div></div>';
   } else if(moy >= 10){
-    ruleHtml += '<div class="card" style="margin-top:10px;padding:13px;border-left:4px solid #0F7B4F;background:#F3FBF6">'
+    ruleHtml += '<div class="card" style="margin-top:10px;padding:13px;background:#F3FBF6">'
       + '<div style="font-weight:800;color:#0F7B4F">✅ Aucune matière sous 10</div>'
       + '<div style="font-size:12.5px;color:#374151;margin-top:4px">Aucune matière ne tire la moyenne vers le bas : '
       + 'c\'est la position la plus sûre depuis que la barre des 10/20 est appliquée sans délibération.</div></div>';
@@ -41519,7 +41523,7 @@ window._vtMoyenneCalc = function(){
   var faibles = lignes.filter(function(l){ return l.n < 10; })
                       .sort(function(a,b){ return (b.c-a.c) || (a.n-b.n); }).slice(0,3);
 
-  var h = '<div class="card" style="border-left:4px solid '+couleur+';padding:15px">'
+  var h = '<div class="card" style="padding:15px">'
     + '<div style="font-size:12px;color:#6B7280;font-weight:700;letter-spacing:.06em">MOYENNE PONDÉRÉE</div>'
     + '<div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;font-size:34px;font-weight:800;'
     + 'color:'+couleur+';line-height:1.1">'+moy.toFixed(2)+' / 20</div>'
@@ -41701,7 +41705,7 @@ function _cagRendre(f){
     +   '<div style="font-size:13px;color:var(--ink3)">sur '+fmt(f.objectif||0)+'</div>'
     + '</div>'
     + '<div style="height:14px;background:var(--bg2,#eef2f7);border-radius:99px;overflow:hidden">'
-    +   '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#059669,#10B981);border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1)"></div>'
+    +   '<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#059669,#3A8F73);border-radius:99px;transition:width .8s cubic-bezier(.2,.8,.2,1)"></div>'
     + '</div>'
     + '<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12.5px;color:var(--ink3)">'
     +   '<span><strong>'+pct+' %</strong> réunis</span>'
@@ -41716,7 +41720,7 @@ function _cagRendre(f){
 
   // ── Mot de l'élève / du centre ──
   if(f.message){
-    h += '<div class="card" style="padding:16px;margin-bottom:14px;border-left:4px solid var(--gold,#FFC93C)">'
+    h += '<div class="card" style="padding:16px;margin-bottom:14px;">'
       + '<div style="font-size:13.5px;line-height:1.7;color:var(--ink2);font-style:italic">« '+_esc(f.message)+' »</div>'
       + '</div>';
   }
@@ -41941,7 +41945,7 @@ function _cagPoll(ref){
           e.innerHTML = (d.status === 'underpaid')
             ? '⚠️ Montant incomplet — contactez le centre avec la référence '+_esc(ref)+'.'
             : '❌ Paiement non abouti. Vous pouvez réessayer.';
-          e.style.color = '#DC2626';
+          e.style.color = '#AE5353';
         }
       })
       .catch(function(){});
@@ -42443,7 +42447,7 @@ function _cagAdminCharger(){
           +     '<div class="xs2" style="color:var(--ink4)">sur '+fmt(f.objectif)+' — '+f.pourcent+' %</div></div>'
           + '</div>'
           + '<div style="height:8px;background:var(--bg2,#eef2f7);border-radius:99px;overflow:hidden;margin:10px 0">'
-          +   '<div style="height:100%;width:'+Math.max(0,Math.min(100,f.pourcent))+'%;background:linear-gradient(90deg,#059669,#10B981)"></div></div>'
+          +   '<div style="height:100%;width:'+Math.max(0,Math.min(100,f.pourcent))+'%;background:linear-gradient(90deg,#059669,#3A8F73)"></div></div>'
           + '<button class="btn bo sm" onclick="_payCopy(\''+_esc(url)+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier le lien</button> '
           + '<button class="btn bo sm" onclick="window.open(\'#cagnotte?t='+_esc(f.token)+'\',\'_self\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Voir</button>'
           + '</div>';
@@ -42648,12 +42652,12 @@ window._chargerCatalogueElearning = _chargerCatalogueElearning;
    au lieu de 1,1 Mo ; ouvrir coûte ce que pèse la ressource ouverte. */
 
 var _RECH_TYPES = {
-  oeuvre:    { l:'Œuvre',      ic:'lc-book',      c:'#7C3AED' },
+  oeuvre:    { l:'Œuvre',      ic:'lc-book',      c:'#6C56A6' },
   jeu:       { l:'Jeu',        ic:'lc-game',      c:'#0EA5E9' },
   labo:      { l:'Laboratoire',ic:'lc-flask',     c:'#059669' },
   ressource: { l:'Ressource',  ic:'lc-doc',       c:'#B45309' },
   contenu:   { l:'E-learning', ic:'lc-graduation',c:'#1D4ED8' },
-  corrige:   { l:'Corrigé',    ic:'lc-check',     c:'#DC2626' }
+  corrige:   { l:'Corrigé',    ic:'lc-check',     c:'#AE5353' }
 };
 
 // Normalisation : « Élève » et « eleve » doivent se trouver mutuellement.
@@ -43130,7 +43134,7 @@ window._prtContenuHtml = function(type){
 
   if(attendu){
     h += '<div class="ct" style="margin:26px 0 10px">Ce qui est attendu de vous</div>'
-      +  '<div style="background:rgba(20,37,84,.04);border-left:4px solid #142554;border-radius:0 12px 12px 0;'
+      +  '<div style="background:rgba(20,37,84,.04);border-radius:0 12px 12px 0;'
       +    'padding:14px 16px;font-size:13.5px;line-height:1.7;color:var(--ink2)">'+_prtSafe(attendu)+'</div>';
   }
 

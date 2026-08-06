@@ -78,10 +78,9 @@
 .cl{position:relative;display:block;text-decoration:none;border-radius:var(--e-r);padding:1rem .9rem;
   background:var(--card);border:1px solid var(--line);box-shadow:var(--e-ombre);overflow:hidden;
   transition:transform .18s cubic-bezier(.2,.9,.3,1.2),box-shadow .18s ease,border-color .18s ease}
-.cl::before{content:"";position:absolute;inset:0 auto 0 0;width:5px;background:var(--ton,var(--navy));
-  transition:width .18s ease}
+.cl::before{content:"";position:absolute;inset:auto 0 0 0;height:3px;background:var(--ton,var(--navy));opacity:.55;transition:opacity .3s}
 .cl:hover,.cl:focus-visible{transform:translateY(-4px);box-shadow:var(--e-ombre-h);border-color:var(--ton,var(--gold))}
-.cl:hover::before{width:100%;opacity:.07}
+.cl:hover::before{height:100%;opacity:.06}
 .cl .niv{display:block;font-size:1.55rem;font-weight:800;color:var(--ton,var(--navy));line-height:1;
   letter-spacing:-.02em}
 .cl .ex{display:block;margin-top:.35rem;font-size:.82rem;color:var(--gris);font-weight:600}

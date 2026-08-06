@@ -74,7 +74,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv10",titre:"Thermodynamique & Calorimétrie",matiere:"Physique",cat:"physique",
-   classe:"1ère-Tle",ico:"🌡️",color:"#DC2626",gratuit:false,plan:"Sciences",
+   classe:"1ère-Tle",ico:"🌡️",color:"#AE5353",gratuit:false,plan:"Sciences",
    desc:"Transferts de chaleur, capacité calorifique, changements d'état et lois des gaz parfaits.",
    theorie:"🌡️ Q = m×c×ΔT (Q en J, m en kg, c = capacité thermique massique).\nc_eau = 4180 J/kg·K ; c_fer = 450 J/kg·K.\n\n🧊 Changement d'état : Q = m×L (L = chaleur latente). L_fusion_glace = 334 kJ/kg.\n\n⚖️ Mélange : Q_cédée + Q_reçue = 0 (système isolé).\n\n⚗️ Gaz parfaits : PV = nRT (R = 8,314 J/mol·K ; T en Kelvin = °C + 273).\nBoyle : PV = cste (T fixe). Gay-Lussac : P/T = cste (V fixe).",
    experience:[
@@ -97,7 +97,7 @@ window.LABO_DB=[
 
   // ─ CHIMIE ─
   {id:"lv3",titre:"Réactions Acide-Base",matiere:"Physique-Chimie",cat:"chimie",
-   classe:"2nde-1ère-Tle C",ico:"⚗️",color:"#7C3AED",gratuit:true,
+   classe:"2nde-1ère-Tle C",ico:"⚗️",color:"#6C56A6",gratuit:true,
    desc:"pH, indicateurs colorés, neutralisations, dosage acido-basique et calculs de concentration.",
    theorie:"⚗️ Acide : libère H⁺ (H₃O⁺). Base : libère OH⁻.\npH < 7 = acide ; pH = 7 = neutre ; pH > 7 = basique.\n\n⚖️ Neutralisation : Acide + Base → Sel + Eau. Ex: HCl + NaOH → NaCl + H₂O.\n\nIndicateurs : phénolphtaléine (incolore/acide → rose/basique) ; BBT (jaune/acide, vert/neutre, bleu/basique).\n\n📈 Titrage : à l'équivalence Ca×Va = Cb×Vb (monoprotique).",
    experience:[
@@ -188,7 +188,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv12",titre:"La Digestion Humaine",matiere:"SVT",cat:"svt",
-   classe:"5ème-4ème",ico:"🍽️",color:"#E11D48",gratuit:true,
+   classe:"5ème-4ème",ico:"🍽️",color:"#B04E64",gratuit:true,
    desc:"Trajet des aliments, enzymes digestives, absorption des nutriments et rôle du foie.",
    theorie:"🍽️ Tube digestif : bouche → œsophage → estomac → intestin grêle → gros intestin → anus.\n\n⚗️ Enzymes :\n• Bouche : amylase salivaire (amidon → maltose)\n• Estomac : pepsine + HCl (pH≈2) (protéines → peptides)\n• Intestin grêle : lipase, protéases, amylase pancréatique ; bile du foie (émulsification graisses)\n\n🩸 Absorption : villosités intestinales (≈200 m² de surface). Glucose, acides aminés → sang. Lipides → lymphe.\nFoie : stockage glycogène, filtration, production bile.",
    experience:[
@@ -211,7 +211,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv13",titre:"Circulation Sanguine & Respiration",matiere:"SVT",cat:"svt",
-   classe:"4ème-3ème",ico:"❤️",color:"#DC2626",gratuit:true,
+   classe:"4ème-3ème",ico:"❤️",color:"#AE5353",gratuit:true,
    desc:"Le cœur, la grande et petite circulation, échanges gazeux dans les poumons et rôle de l'hémoglobine.",
    theorie:"❤️ Cœur = pompe double à 4 cavités : 2 oreillettes + 2 ventricules.\n\n🔴 Grande circulation : cœur gauche → aorte → organes → veines caves → oreillette droite.\n🔵 Petite circulation : cœur droit → artères pulmonaires → poumons → veines pulmonaires → oreillette gauche.\n\n🫁 Hématose (alvéoles) : O₂ passe dans le sang par diffusion ; CO₂ en sort. Surface ≈ 70 m².\n\nHémoglobine (globules rouges) : fixe 4 O₂ → oxyhémoglobine (rouge vif) ; libère O₂ aux tissus.",
    experience:[
@@ -233,7 +233,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv14",titre:"Génétique & Hérédité",matiere:"SVT",cat:"svt",
-   classe:"Tle D",ico:"🔬",color:"#7C3AED",gratuit:false,plan:"Sciences",
+   classe:"Tle D",ico:"🔬",color:"#6C56A6",gratuit:false,plan:"Sciences",
    desc:"Lois de Mendel, croisements, dominance, codominance et génétique des groupes sanguins.",
    theorie:"🧬 Gène : portion d'ADN. Allèles : différentes formes d'un gène.\nGénotype (AA, Aa, aa) → Phénotype (caractère observable).\n\n📌 1ère loi Mendel : uniformité F1 (AA × aa → 100% Aa).\n📌 2ème loi : F1×F1 → ratio 3:1 phénotypique, 1:2:1 génotypique.\n📌 3ème loi : assortiment indépendant des gènes de chromosomes différents.\n\nGroupes ABO : IA et IB codominants ; i récessif.\nDaltonisme : lié à X (garçons surtout touchés).\nDrépanocytose : HbS/HbS = malade ; HbA/HbS = porteur sain.",
    experience:[
@@ -256,7 +256,7 @@ window.LABO_DB=[
 
   // ─ MATHS ─
   {id:"lv6",titre:"Géométrie dans l'Espace",matiere:"Maths",cat:"maths",
-   classe:"2nde-1ère-Tle",ico:"📐",color:"#DC2626",gratuit:true,
+   classe:"2nde-1ère-Tle",ico:"📐",color:"#AE5353",gratuit:true,
    desc:"Volumes, aires et diagonales des solides : cube, sphère, cylindre, pyramide, cône.",
    theorie:"📦 Cube : V=a³ ; Aire=6a² ; Diagonale=a√3.\n🔵 Sphère : V=(4/3)πr³ ; Aire=4πr².\n🥫 Cylindre : V=πr²h ; Aire totale=2πr(h+r).\n🔺 Pyramide : V=(B×h)/3 (B=aire base).\n🍦 Cône : V=(πr²h)/3 ; Apothème l=√(r²+h²).\n\nDistance 3D : AB=√[(x₂-x₁)²+(y₂-y₁)²+(z₂-z₁)²].\nSection d'un cube par plan diagonal → rectangle.",
    experience:[
@@ -418,7 +418,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:null},
 
   {id:"lv28",titre:"ADN, Gènes & Hérédité",matiere:"SVT",cat:"svt",
-   classe:"1ère D-Tle D",ico:"🧬",color:"#7C3AED",gratuit:true,
+   classe:"1ère D-Tle D",ico:"🧬",color:"#6C56A6",gratuit:true,
    desc:"Structure de l'ADN, code génétique, transmission des caractères et lois de Mendel. Programme 1ère-Tle.",
    theorie:"🧬 ADN = double hélice (Watson & Crick 1953) faite de 4 bases : A-T et G-C (complémentaires).\n\n📐 STRUCTURE : 2 brins anti-parallèles enroulés. Sucre (désoxyribose) + phosphate = squelette. Bases à l'intérieur.\n\n⛓️ ARN messager : copie d'un gène (transcription dans noyau). Sort vers ribosome.\n\n🔬 CODE GÉNÉTIQUE : par triplets (codons) de 3 bases → 1 acide aminé. 64 codons → 20 acides aminés (redondance).\n\n👶 LOIS DE MENDEL :\n• 1ère loi : uniformité des hybrides F1.\n• 2ème loi : ségrégation 3:1 dans F2 (dominant : récessif).\n• Sexe humain : XX (♀), XY (♂).",
    experience:[
@@ -464,7 +464,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:"Premium"},
 
   {id:"lv30",titre:"Énergie Nucléaire : Fission & Fusion",matiere:"Physique",cat:"physique",
-   classe:"Tle C-Tle D",ico:"☢️",color:"#DC2626",gratuit:false,plan:"Sciences",
+   classe:"Tle C-Tle D",ico:"☢️",color:"#AE5353",gratuit:false,plan:"Sciences",
    desc:"Radioactivité, désintégration, fission (centrales), fusion (étoiles, bombe H). Programme Tle.",
    theorie:"⚛️ NOYAU : Z protons + N neutrons. A=Z+N (nombre de masse). Notation : ^A_Z X.\n\n☢️ RADIOACTIVITÉ :\n• α : émission ^4_2 He (noyau hélium). Z↓2, A↓4.\n• β⁻ : neutron→proton + électron. Z↑1, A=cst.\n• γ : photon haute énergie. Z et A inchangés.\n\n⏱️ DEMI-VIE T : temps après lequel 50% des noyaux ont désintégré. N(t) = N₀ × (1/2)^(t/T).\n\n💥 FISSION : noyau lourd (U-235) absorbe neutron → se brise en 2 + 3 neutrons + énergie. Réaction en chaîne. Centrales nucléaires.\n\n☀️ FUSION : 2 noyaux légers (H) → noyau plus lourd (He) + énergie. Source du Soleil. Bombe H.",
    experience:[
@@ -487,7 +487,7 @@ window.LABO_DB=[
    ressource:"https://minesec-distancelearning.cm",pack:"Sciences"},
 
   {id:"lv31",titre:"Chimie Organique : Synthèse d'Ester",matiere:"Chimie",cat:"chimie",
-   classe:"1ère D-Tle D",ico:"⚗️",color:"#F97316",gratuit:true,
+   classe:"1ère D-Tle D",ico:"⚗️",color:"#C07D4F",gratuit:true,
    desc:"Estérification, hydrolyse, parfums et arômes. Mécanismes et déplacement d'équilibre. Programme 1ère-Tle.",
    theorie:"⚗️ ESTÉRIFICATION : Acide carboxylique + Alcool ⇌ Ester + Eau.\nR-COOH + R'-OH ⇌ R-CO-O-R' + H₂O\n\n⚖️ Équilibre LIMITÉ (~67% acide-alcool primaires, 50% secondaires). Lente.\n\n🚀 CATALYSEUR : H₂SO₄ concentré accélère SANS modifier l'équilibre.\n\n⬆️ DÉPLACER vers la droite (Le Chatelier) :\n• Excès d'un réactif (généralement alcool)\n• Élimination de l'eau formée (distillation Dean-Stark)\n\n🌸 ESTERS = PARFUMS : éthanoate d'éthyle = colle nail, éthanoate de pentyle = banane, butanoate d'éthyle = ananas.",
    experience:[
@@ -577,7 +577,7 @@ window.LABO_DB=[
    ressource:"https://camgceb.org",pack:null},
 
   {id:"lv41",titre:"Titration Lab — Acids & Bases (GCE Chemistry)",matiere:"Chemistry",cat:"english",
-   classe:"Form 4-5 · Lower Sixth",ico:"🧪",color:"#7C3AED",gratuit:true,
+   classe:"Form 4-5 · Lower Sixth",ico:"🧪",color:"#6C56A6",gratuit:true,
    desc:"Neutralise an acid with a base using an indicator. Calculate concentration from titre values. GCE Chemistry (0515/0715).",
    theorie:"🧪 Neutralisation: acid + base → salt + water (e.g. HCl + NaOH → NaCl + H₂O).\n\npH scale: 0-6 acidic, 7 neutral, 8-14 alkaline. Indicators: methyl orange (red→yellow), phenolphthalein (colourless→pink).\n\n📐 Titration formula: (C₁V₁)/n₁ = (C₂V₂)/n₂ where C = concentration (mol/dm³), V = volume, n = mole ratio from the balanced equation.\n\nGCE tip: always read the burette at eye level, record titres to 2 decimal places, and average only CONCORDANT results (within 0.10 cm³).",
    experience:[

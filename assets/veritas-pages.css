@@ -292,9 +292,9 @@ b.k{color:var(--navy)}
 .mv .idee{color:var(--ink)}
 .mv .aut{color:var(--gris);font-size:.9rem}
 .mv .note{color:var(--gris);font-size:.86rem;font-style:italic}
-.mv .cahier{background:#fffdf3;border-left:3px solid var(--gold);border-radius:0 8px 8px 0;
+.mv .cahier{background:#fffdf3;border-radius:0 8px 8px 0;
   padding:.4rem .6rem;font-size:.9rem;margin-top:.5rem}
-.mv.afr{border-left:3px solid var(--green)}
+.mv.afr{}
 @media(prefers-reduced-motion:reduce){.mv{opacity:1;transform:none;transition:none}}
 @media(max-width:600px){.frise-v{padding-left:1.7rem}.mv .pt{left:-1.7rem}
   .mv::after{position:static;display:inline-block;margin-bottom:.3rem}

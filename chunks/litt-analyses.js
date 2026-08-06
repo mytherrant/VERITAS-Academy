@@ -11,7 +11,7 @@ window.LITT_ANALYSES = [
     annee:"",
     genre:"Roman",
     pays:"Cameroun",
-    couleur:"#7C3AED", // violet
+    couleur:"#6C56A6", // violet
     ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/family_1f46a.png",
     angle:"La faute d'une mère est-elle l'héritage de sa fille ?",
     citation:"Et si les mères payaient leurs fautes à travers l'échec de leur fille ?",
@@ -27,7 +27,7 @@ window.LITT_ANALYSES = [
     annee:"2025",
     genre:"Poésie",
     pays:"Cameroun",
-    couleur:"#EC4899", // rose
+    couleur:"#C37199", // rose
     ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/red-heart_2764-fe0f.png",
     angle:"Quand l'amante prend sa revanche sur le discours qui la criminalise",
     citation:"Chaque vers est un cri de liberté ; liberté de la féminité et du désir.",
@@ -75,7 +75,7 @@ window.LITT_ANALYSES = [
     annee:"1979",
     genre:"Roman épistolaire",
     pays:"Sénégal",
-    couleur:"#DC2626", // rouge
+    couleur:"#AE5353", // rouge
     ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/envelope-with-arrow_1f4e9.png",
     angle:"Lire autrement un livre connu",
     citation:"Et pourtant que n'a-t-il fait pour que je devienne sa femme !",
@@ -203,7 +203,7 @@ window.LITT_ANALYSES = [
     annee:"2017",
     genre:"Jeunesse / Conte",
     pays:"Cameroun",
-    couleur:"#F97316", // orange
+    couleur:"#C07D4F", // orange
     ico:"https://em-content.zobj.net/source/microsoft-3D-fluent/406/crown_1f451.png",
     angle:"Lire pour un enfant et replonger en enfance",
     citation:"Comment conter les conflits du monde, résumer la condition humaine aux enfants, en si peu de mots ?",
