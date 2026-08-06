@@ -38986,7 +38986,7 @@ function pgPartnerProgram(type){
       + '<div style="font-size:12px;font-weight:700">'+lv.label+'</div>'
       + '<div style="font-size:10px;color:var(--ink3)">'+lv.min+'+ ventes</div></div>';
   }).join('');
-  var av = (avantages[type]||[]).map(function(a){return '<li style="margin:6px 0;line-height:1.6">'+_prtSafe(a)+'</li>';}).join('');
+  var av = (avantages[type]||[]).map(function(a){return '<li>'+_prtSafe(a)+'</li>';}).join('');
   return '<div style="max-width:780px;margin:0 auto;padding:0 14px">'
     + '<button class="btn bo sm" style="margin-bottom:14px" onclick="_prtGo(\'partenariat\')">← Tous les programmes</button>'
     + '<div style="text-align:center;margin-bottom:20px">'
@@ -38995,8 +38995,8 @@ function pgPartnerProgram(type){
     +   '<div style="font-size:14px;color:var(--ink3);font-style:italic">'+_prtSafe(t.desc)+'</div>'
     + '</div>'
     + _prtRoleBlockHtml(type, false)  // v1.8 : rôle dans la chaîne + attributions (sans boutons en public)
-    + '<div class="ct" style="margin:18px 0 8px">✨ Vos avantages</div>'
-    + '<ul style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px 18px 18px 36px;list-style:disc">'+av+'</ul>'
+    + '<div class="ct" style="margin:18px 0 8px"><span class="ct-ico">'+ICO('i-sparkle')+'</span>Vos avantages</div>'
+    + '<ul class="vlist vlist-card">'+av+'</ul>'
     // v1.14 — le programme répondait « qu'est-ce que j'y gagne » et rien
     // d'autre. On ajoute le déroulé, ce qui est attendu, et ce dont on
     // profite immédiatement sans candidater : on donne avant de demander.
@@ -39591,11 +39591,11 @@ window._prtContact=function(sujet){
 // Bloc HTML « attributions & outils » pour un type donné (réutilisable)
 window._prtRoleBlockHtml=function(type, withActions){
   var s=_PARTNER_ROLE_SPEC[type]; if(!s) return '';
-  var h='<div style="background:#fff;border:1px solid #E5E7EB;border-left:4px solid #142554;border-radius:12px;padding:16px;margin-bottom:14px">'
-    +'<div style="font-weight:800;font-size:14px;color:#142554;margin-bottom:6px">🎯 Votre rôle dans la chaîne</div>'
+  var h='<div class="prt-role-card">'
+    +'<div class="prt-role-t"><span class="prt-role-ico">'+ICO('i-target')+'</span>Votre rôle dans la chaîne</div>'
     +'<div style="font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:10px">'+_prtSafe(s.chain)+'</div>'
-    +'<div style="font-weight:700;font-size:12px;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Vos attributions</div>'
-    +'<ul style="margin:0 0 '+(withActions?'12px':'0')+' 0;padding-left:18px;font-size:13px;color:var(--ink2);line-height:1.8">'
+    +'<div class="prt-role-lbl">Vos attributions</div>'
+    +'<ul class="vlist vlist-sm" style="margin:0 0 '+(withActions?'12px':'0')+' 0">'
     + s.missions.map(function(m){return '<li>'+_prtSafe(m)+'</li>';}).join('')
     +'</ul>';
   if(withActions && s.actions && s.actions.length){
@@ -43136,3 +43136,184 @@ window._prtContenuHtml = function(type){
 
   return h;
 };
+
+
+/* ══════════════════ ÉMOJIS → PICTOGRAMMES (v1.14) ══════════════════
+   Première tentative : réécrire les 3 327 émojis dans le source. Abandonnée
+   après vérification — le balisage SVG contient des guillemets doubles, et
+   l'insérer dans une chaîne JavaScript à guillemets doubles la casse net.
+   Un fichier de 44 000 lignes mêlant les deux styles de guillemets rend la
+   réécriture automatique dangereuse pour un gain purement cosmétique.
+
+   Approche retenue : la substitution se fait sur le DOM, après rendu. Un
+   parcours des nœuds de texte remplace chaque émoji connu par le
+   pictogramme correspondant. Trois avantages décisifs :
+
+   • aucune chaîne source n'est modifiée — zéro risque de casse ;
+   • les messages WhatsApp et e-mail sortants gardent leurs émojis, puisqu'ils
+     ne passent jamais par le DOM : ils partent en paramètre d'URL. C'est
+     exactement ce qu'on veut — un <svg> y serait affiché tel quel ;
+   • la conversion couvre TOUT ce qui s'affiche, y compris le HTML construit
+     par des fonctions qu'on n'aurait pas pensé à traiter.
+
+   Les pictogrammes héritent de la couleur du texte (currentColor), restent
+   nets à toute taille et s'impriment — trois choses qu'un émoji ne fait pas. */
+
+var _PICTO_MAP = {
+  '🗑':'lc-trash','👁':'lc-eye','📊':'lc-chart','🛒':'lc-cart','👥':'lc-users',
+  '✅':'lc-check','⚡':'lc-zap','🏫':'lc-building','❌':'lc-x','📚':'lc-book',
+  '🔒':'lc-lock','💬':'lc-message','⚙':'lc-settings','💰':'lc-wallet',
+  '🎓':'lc-graduation','🔄':'lc-refresh','🎯':'lc-target','📝':'lc-edit',
+  '💾':'lc-save','📤':'lc-upload','📥':'lc-download','🎉':'lc-sparkles',
+  '🖨':'lc-printer','🔍':'lc-search','🏆':'lc-award','🤝':'lc-handshake',
+  '🛡':'lc-shield','▶':'lc-play','⏸':'lc-pause','📖':'lc-bookopen',
+  '📅':'lc-calendar','📋':'lc-clipboard','💡':'lc-bulb','⏳':'lc-clock',
+  '⚠':'lc-alert','📄':'lc-doc','➕':'lc-plus','📱':'lc-phone','🔧':'lc-tool',
+  '🎮':'lc-game','🧭':'lc-compass','🔬':'lc-flask','🏢':'lc-building',
+  '✏':'lc-pencil','🚀':'lc-rocket','🎁':'lc-gift','🌍':'lc-globe','🌐':'lc-globe',
+  '📰':'lc-news','📢':'lc-megaphone','⭐':'lc-star','🔥':'lc-flame','🧠':'lc-brain',
+  '🏠':'lc-home','📩':'lc-mail','📧':'lc-mail','🗺':'lc-map','🎒':'lc-backpack',
+  '🌱':'lc-sprout','🔗':'lc-link','💳':'lc-wallet','📌':'lc-map','📍':'lc-map',
+  // Complément après relevé de ce qui restait à l'écran, section par section.
+  '🏅':'lc-award','📗':'lc-book','📘':'lc-book','📙':'lc-book','📕':'lc-book',
+  '📐':'lc-ruler','📏':'lc-ruler','🧑':'lc-users','👨':'lc-users','👩':'lc-users',
+  '👔':'lc-users','💎':'lc-sparkles','🖼':'lc-presentation','🖊':'lc-pencil',
+  '✍':'lc-pencil','🎧':'lc-headphones','💻':'lc-laptop','🖥':'lc-laptop',
+  '📈':'lc-chart','📉':'lc-chart','💵':'lc-wallet','💴':'lc-wallet','💶':'lc-wallet',
+  '📲':'lc-phone','📞':'lc-phone','☎':'lc-phone','📂':'lc-doc','📁':'lc-doc',
+  '🔢':'lc-chart','⚗':'lc-flask','🧬':'lc-flask','🔭':'lc-search','🔎':'lc-search',
+  '☀':'lc-zap','🌟':'lc-star','✨':'lc-sparkles','🥇':'lc-award','🥈':'lc-award',
+  '🥉':'lc-award','🎬':'lc-play','📹':'lc-play','🎥':'lc-play','🔔':'lc-alert',
+  '🗓':'lc-calendar','🕐':'lc-clock','⏰':'lc-clock','🔑':'lc-lock','🔐':'lc-lock',
+  '📷':'lc-presentation','🌿':'lc-sprout','🧾':'lc-doc','📃':'lc-doc','📜':'lc-doc',
+  '👧':'lc-users','👦':'lc-users','🧒':'lc-users','👪':'lc-users','👣':'lc-users',
+  '🎖':'lc-award','🏵':'lc-award','🎗':'lc-award',
+  '🏛':'lc-university','💼':'lc-clipboard','👤':'lc-users','🧑‍🏫':'lc-presentation',
+  '🏗':'lc-tool','🛠':'lc-tool','⚖':'lc-clipboard','🗳':'lc-clipboard'
+};
+
+/* Les modificateurs de teinte de peau (U+1F3FB…U+1F3FF) suivent un émoji de
+   personne. Une fois celui-ci remplacé par un pictogramme, le modificateur
+   resterait seul à l'écran sous forme de carré coloré. On les efface. */
+var _PICTO_TEINTES = /[\u{1F3FB}-\u{1F3FF}]/gu;
+
+// Les zones où l'émoji doit rester tel quel : champs de saisie (on n'injecte
+// pas de balisage dans une valeur), et blocs de code.
+var _PICTO_IGNORE = {SCRIPT:1, STYLE:1, TEXTAREA:1, INPUT:1, CODE:1, PRE:1, OPTION:1, SVG:1};
+
+function _pictoSvg(id, taille){
+  var s = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  s.setAttribute('class','vico picto');
+  s.setAttribute('width', taille); s.setAttribute('height', taille);
+  s.setAttribute('viewBox','0 0 24 24');
+  s.setAttribute('fill','none'); s.setAttribute('stroke','currentColor');
+  s.setAttribute('stroke-width','2'); s.setAttribute('stroke-linecap','round');
+  s.setAttribute('stroke-linejoin','round');
+  s.setAttribute('aria-hidden','true');
+  var u = document.createElementNS('http://www.w3.org/2000/svg','use');
+  u.setAttribute('href','#'+id);
+  s.appendChild(u);
+  return s;
+}
+
+// Taille déduite du contexte : un titre porte un pictogramme plus grand.
+function _pictoTaille(el){
+  try{
+    var t = (el.tagName||'').toUpperCase();
+    if(t==='H1' || (el.className||'').toString().indexOf('pgt')>=0) return 20;
+    var fs = parseFloat(getComputedStyle(el).fontSize) || 14;
+    return Math.max(13, Math.min(22, Math.round(fs * 1.05)));
+  }catch(e){ return 15; }
+}
+
+window._vtPictos = function(racine){
+  var zone = racine || document.getElementById('vContent') || document.body;
+  if(!zone) return 0;
+
+  var re = /[⌚-➿⬀-⯿️\u{1F000}-\u{1FAFF}]/u;
+  var marcheur, aTraiter = [], n = 0;
+  try{
+    marcheur = document.createTreeWalker(zone, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(nd){
+        var p = nd.parentNode;
+        if(!p || _PICTO_IGNORE[(p.tagName||'').toUpperCase()]) return NodeFilter.FILTER_REJECT;
+        return re.test(nd.nodeValue||'') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+  }catch(e){ return 0; }
+
+  while(marcheur.nextNode()) aTraiter.push(marcheur.currentNode);
+
+  aTraiter.forEach(function(nd){
+    var txt = (nd.nodeValue||'').replace(_PICTO_TEINTES, '');
+    var parent = nd.parentNode;
+    if(!parent) return;
+    var taille = _pictoTaille(parent.nodeType===1 ? parent : zone);
+    var frag = document.createDocumentFragment();
+    var tampon = '', converti = false;
+
+    for(var i=0;i<txt.length;i++){
+      // Un émoji peut occuper deux unités (paire de substitution).
+      var c = txt[i], paire = txt.charCodeAt(i)>=0xD800 && txt.charCodeAt(i)<=0xDBFF;
+      if(paire && i+1<txt.length){ c = txt.substr(i,2); }
+      var cle = c.replace('️','');
+      var id = _PICTO_MAP[cle];
+      if(id){
+        if(tampon){ frag.appendChild(document.createTextNode(tampon)); tampon=''; }
+        frag.appendChild(_pictoSvg(id, taille));
+        converti = true; n++;
+        if(paire) i++;
+        // avaler le sélecteur de variante et l'espace qui suit
+        if(txt[i+1]==='️') i++;
+        if(txt[i+1]===' ') { tampon += ' '; i++; }
+      } else {
+        tampon += c;
+        if(paire) i++;
+      }
+    }
+    if(converti){
+      if(tampon) frag.appendChild(document.createTextNode(tampon));
+      parent.replaceChild(frag, nd);
+    }
+  });
+
+  return n;
+};
+
+/* Branchement : après chaque rendu de section visiteur. vShowSec est le point
+   de passage obligé de toute navigation, et l'appel est idempotent — les
+   pictogrammes déjà posés ne sont plus des nœuds de texte. */
+(function _pictoBrancher(){
+  function passe(){ try{ _vtPictos(); }catch(e){} }
+  if(typeof window.vShowSec === 'function'){
+    var _orig = window.vShowSec;
+    window.vShowSec = function(sec, btn){
+      var r = _orig.apply(this, arguments);
+      setTimeout(passe, 0);
+      return r;
+    };
+  }
+  if(document.readyState === 'complete') setTimeout(passe, 300);
+  else window.addEventListener('load', function(){ setTimeout(passe, 300); });
+
+  /* L'accueil se re-rend plusieurs fois, et plusieurs blocs arrivent APRÈS le
+     premier rendu (actualités, flux d'activité, passage du jour). Un seul
+     passage laisserait leurs émojis en place. Un observateur repasse sur ce
+     qui vient d'être injecté, avec un délai de regroupement : on ne veut pas
+     rejouer la conversion à chaque nœud d'une longue liste. */
+  try{
+    if(typeof MutationObserver === 'function'){
+      var minuteur = null;
+      var obs = new MutationObserver(function(){
+        if(minuteur) return;                 // un passage déjà programmé
+        minuteur = setTimeout(function(){ minuteur = null; passe(); }, 220);
+      });
+      var demarrer = function(){
+        var cible = document.getElementById('vContent') || document.body;
+        if(cible) obs.observe(cible, {childList:true, subtree:true});
+      };
+      if(document.readyState === 'complete') setTimeout(demarrer, 600);
+      else window.addEventListener('load', function(){ setTimeout(demarrer, 600); });
+    }
+  }catch(e){}
+})();
