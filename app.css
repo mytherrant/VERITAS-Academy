@@ -3725,6 +3725,14 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 .pgt{
   font-family:var(--ds-font-display,'Plus Jakarta Sans'),sans-serif;
   font-weight:800; letter-spacing:-.02em; color:var(--ds-primary,#142554);
+  display:flex; align-items:center; gap:11px;
+}
+/* v1.2.6 — pastille du pictogramme de titre de page (remplace l'émoji) */
+.pgt-ico{
+  width:36px; height:36px; flex:none; display:inline-flex; align-items:center; justify-content:center;
+  border-radius:12px; color:#FFC93C;
+  background:linear-gradient(135deg,#1E3A8A,#142554);
+  box-shadow:0 5px 14px rgba(20,37,84,.24), inset 0 1px 0 rgba(255,255,255,.16);
 }
 /* Icône KPI : pastille avec léger relief + pop au survol de la carte */
 .sci{
