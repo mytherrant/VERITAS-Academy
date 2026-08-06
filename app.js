@@ -39016,6 +39016,7 @@ function pgPartnerProgram(type){
     // d'autre. On ajoute le déroulé, ce qui est attendu, et ce dont on
     // profite immédiatement sans candidater : on donne avant de demander.
     + ((typeof _prtContenuHtml==='function') ? _prtContenuHtml(type) : '')
+    + (typeof _prtBlocsContenu==='function' ? _prtBlocsContenu(type) : '')
     + '<div class="ct" style="margin:24px 0 10px">🎯 Système de paliers (mix ouvrages + abonnements + autres)</div>'
     + '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px">'+lvCount+'</div>'
     + '<div style="background:linear-gradient(135deg,#142554,#1e3a8a);color:#fff;padding:24px;border-radius:14px;text-align:center;margin:24px 0">'
@@ -43176,6 +43177,14 @@ function _pvOffre(role){
         ? '<span style="font-size:13px;color:#94A3B8;text-decoration:line-through">' + fmt(plan.ancien) + '</span>' : '')
     +    '<span style="font-size:12px;color:#C7D2FE">/ ' + _esc(plan.duree || 'an') + '</span>'
     +  '</div>';
+  // Le prix ramené au mois. Un abonnement annuel se compare mal ; 300 F par
+  // mois se compare tout seul à une séance de répétition. Le chiffre est
+  // CALCULÉ depuis le plan réel (année scolaire ≈ 10 mois de cours) : si le
+  // tarif change, la phrase suit et ne peut pas se mettre à mentir.
+  h += '<div style="font-size:12px;color:#C7D2FE;margin-top:7px;line-height:1.5">'
+    +    'soit <b style="color:#fff">' + fmt(Math.round(plan.prix / 10)) + ' par mois</b> '
+    +    'sur l\'année scolaire — moins qu\'une seule séance de répétition.'
+    +  '</div>';
   h += '</div>';
 
   h += av.map(function(a){
@@ -43184,6 +43193,27 @@ function _pvOffre(role){
       +    '<span style="font-size:12.5px;color:#E2E8F0;line-height:1.55">' + _esc(a) + '</span>'
       +  '</div>';
   }).join('');
+
+  // ── Pourquoi maintenant : deux chiffres officiels, pas un adjectif ──
+  // Source : Office du Baccalauréat, session 2024 (49 521 admis sur 132 920),
+  // déjà cités et sourcés sur les pages outils/. Aucun taux de réussite maison
+  // n'est avancé : nous n'en avons pas de vérifiable, donc nous n'en affichons
+  // pas. C'est le fait brut qui persuade, pas la promesse.
+  if(role === 'eleve' || role === 'parent'){
+    h += '<div style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.14)">'
+      +    '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:9px">'
+      +      '<div><div style="font-family:Georgia,serif;font-size:21px;font-weight:700;color:#FCA5A5;line-height:1.1">37,26 %</div>'
+      +        '<div style="font-size:11px;color:#94A3B8;line-height:1.4">de réussite<br>au BAC général 2024</div></div>'
+      +      '<div><div style="font-family:Georgia,serif;font-size:21px;font-weight:700;color:#94A3B8;line-height:1.1">75,73 %</div>'
+      +        '<div style="font-size:11px;color:#94A3B8;line-height:1.4">l\'année précédente,<br>avec délibérations</div></div>'
+      +    '</div>'
+      +    '<div style="font-size:12px;color:#C7D2FE;line-height:1.6">'
+      +      'La règle n\'a pas changé — <b style="color:#fff">10/20 de moyenne générale</b>. '
+      +      'Ce qui a changé, c\'est qu\'elle s\'applique <b style="color:#fff">sans délibération</b> : '
+      +      'entre 8 et 10, on ne repêche plus. Les points perdus en cours d\'année ne se rattrapent plus en juin.'
+      +    '</div>'
+      +  '</div>';
+  }
 
   h += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">';
   h += '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 24px;flex:1 1 auto;min-width:170px" '
@@ -44268,3 +44298,116 @@ window._demImprimerDevis = function(id){
   w.document.write(html); w.document.close(); w.focus();
   setTimeout(function(){ try{ w.print(); }catch(e){} }, 250);
 };
+
+
+/* ═══════════ CONTENU DES PORTAILS PARTENAIRES (v1.14) ═══════════
+   Les neuf programmes affichaient une liste d'avantages et un bouton. Il
+   manquait ce qui décide vraiment quelqu'un : comment ça se passe
+   concrètement, ce qu'on attend de lui, et sous quel délai il a une réponse.
+   Un partenaire potentiel ne s'engage pas sur une promesse, il s'engage quand
+   il sait à quoi il s'engage.
+
+   Trois blocs communs, alimentés par type. Aucun chiffre inventé : les taux
+   cités viennent des barèmes déjà inscrits dans les avantages du programme,
+   les délais de la procédure réelle de validation.                            */
+
+var _PRT_MARCHE = {
+  enseignant: [
+    'Vous candidatez en 2 minutes — nom, établissement, classes enseignées.',
+    'Le centre valide sous 48 h ouvrables et vous ouvre votre espace.',
+    'Vous recevez votre code personnel et vos ressources ; les commissions se cumulent à chaque commande passée avec votre code.'
+  ],
+  createur: [
+    'Vous candidatez avec le lien de votre chaîne ou de votre page.',
+    'Validation sous 48 h, puis remise de votre code promo personnel.',
+    'Vous recevez le kit (visuels, scripts) ; chaque vente faite avec votre code vous est créditée.'
+  ],
+  chef_etab: [
+    'Vous nous écrivez avec le nom et la ville de l\'établissement.',
+    'Un échange de cadrage : effectifs, besoins, niveau d\'équipement.',
+    'Mise en place accompagnée, formation des enseignants, puis suivi.'
+  ],
+  inspecteur: [
+    'Vous candidatez en précisant votre circonscription et vos disciplines.',
+    'Le centre vous propose un premier dossier de validation ou une formation.',
+    'Les missions (comités, formations, co-rédaction) sont rémunérées au cas par cas, sur convention écrite.'
+  ],
+  parent: [
+    'Vous créez votre compte parent — gratuit, en 2 minutes.',
+    'Vous rattachez votre enfant et accédez à son suivi.',
+    'Vous recommandez VÉRITAS autour de vous : chaque famille inscrite avec votre code vous ouvre des avantages.'
+  ],
+  eleve_leader: [
+    'Vous activez votre statut d\'ambassadeur depuis votre espace élève.',
+    'Vous recevez votre code et vos supports à partager.',
+    'Vos points montent à chaque camarade inscrit ; le classement est public et remis à zéro chaque trimestre.'
+  ],
+  librairie: [
+    'Vous nous contactez avec le nom et l\'adresse du point de vente.',
+    'Nous convenons du volume de dépôt et des marges.',
+    'Vous recevez les ouvrages, les supports de vitrine et le réassort à la demande.'
+  ],
+  universite: [
+    'Vous nous écrivez au nom de l\'établissement ou du département.',
+    'Nous cadrons ensemble le périmètre : stages, interventions, recherche.',
+    'Une convention écrite fixe les engagements de chaque partie.'
+  ],
+  sponsor: [
+    'Vous nous indiquez la cause que vous souhaitez soutenir.',
+    'Nous vous proposons un affectation précise : élèves, matériel, ou bourses.',
+    'Vous recevez un rapport d\'emploi des fonds, nominatif et vérifiable.'
+  ]
+};
+
+var _PRT_ATTENDU = {
+  enseignant:   'Être en poste et recommander les ouvrages que vous jugez utiles — rien d\'imposé, rien à avancer financièrement.',
+  createur:     'Une audience réelle et une communication honnête : nous ne demandons jamais de promettre des résultats.',
+  chef_etab:    'Un interlocuteur unique dans l\'établissement et l\'accord de la direction.',
+  inspecteur:   'Votre expertise disciplinaire et le respect du cadre déontologique de votre fonction.',
+  parent:       'Rien d\'autre que votre honnêteté : vous ne recommandez que ce que vous utilisez.',
+  eleve_leader: 'Être inscrit au centre et rester correct : un ambassadeur qui force la main perd son statut.',
+  librairie:    'Un point de vente identifié et un stock tenu à jour.',
+  universite:   'Un cadre institutionnel : la convention passe par la direction.',
+  sponsor:      'Rien en retour, sinon la transparence sur l\'emploi des fonds — c\'est nous qui vous la devons.'
+};
+
+window._prtBlocsContenu = function(type){
+  var etapes = _PRT_MARCHE[type];
+  var attendu = _PRT_ATTENDU[type];
+  if(!etapes && !attendu) return '';
+
+  var h = '';
+
+  if(etapes){
+    h += '<div class="ct" style="margin:26px 0 12px">Comment ça se passe</div>'
+      +  '<div style="display:grid;gap:10px">';
+    etapes.forEach(function(e, i){
+      h += '<div style="display:flex;gap:12px;align-items:flex-start;background:var(--bg1,#fff);'
+        +  'border:1px solid var(--bg3,#e8edf5);border-radius:12px;padding:14px">'
+        +    '<div style="flex:0 0 26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#1E3A8A,#142554);'
+        +      'color:#FFC93C;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center">'
+        +      (i+1) + '</div>'
+        +    '<div style="font-size:13.5px;line-height:1.6;color:var(--ink2)">' + _prtSafe(e) + '</div>'
+        +  '</div>';
+    });
+    h += '</div>';
+  }
+
+  if(attendu){
+    h += '<div class="ct" style="margin:24px 0 10px">Ce que nous attendons de vous</div>'
+      +  '<div style="background:rgba(255,201,60,.10);border-left:4px solid #FFC93C;border-radius:0 12px 12px 0;'
+      +  'padding:14px 16px;font-size:13.5px;line-height:1.65;color:var(--ink2)">' + _prtSafe(attendu) + '</div>';
+  }
+
+  // Engagement de traitement : un candidat qui ne sait pas quand on lui
+  // répondra suppose qu'on ne lui répondra pas.
+  h += '<div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--ink3)">'
+    +  '<span style="background:var(--bg2,#f6f8fb);border-radius:99px;padding:6px 13px">Candidature gratuite</span>'
+    +  '<span style="background:var(--bg2,#f6f8fb);border-radius:99px;padding:6px 13px">Réponse sous 48 h ouvrables</span>'
+    +  '<span style="background:var(--bg2,#f6f8fb);border-radius:99px;padding:6px 13px">Sans engagement de durée</span>'
+    +  '</div>';
+
+  return h;
+};
+
+
