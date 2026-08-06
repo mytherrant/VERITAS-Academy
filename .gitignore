@@ -43,6 +43,9 @@ veritas-backend/
 # Credentials serveur — ne jamais versionner
 api/config.php
 api/payment_config.php
+# Identifiants MySQL + jeton d'installation de VÉRITAS Campus. Même règle que
+# ci-dessus : le fichier vit sur le serveur, jamais dans un dépôt public.
+api/campus/_config.php
 # Contenu de api/data/ ignoré (index RAG .db lourds, logs, PII paiements)…
 api/data/*
 # …SAUF les sentinelles de sécurité, qui DOIVENT être déployées par la CI :

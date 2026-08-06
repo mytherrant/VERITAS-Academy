@@ -1485,13 +1485,13 @@ function renderExtrait(item){
     return'<div class="extrait-lws" style="text-align:center;padding:12px">'
       +'<span style="font-size:2.5em">📕</span>'
       +'<div style="margin-top:6px;font-size:13px;color:var(--ink2)">'+titre+'</div>'
-      +'<a class="btn bi" href="'+url+'" target="_blank" rel="noopener" style="margin-top:8px;font-size:12px;display:inline-block"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Ouvrir le PDF</a>'
+      +'<a class="btn bi" href="'+url+'" target="_blank" rel="noopener" style="margin-top:8px;font-size:12px;display:inline-block"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Ouvrir le PDF</a>'
       +'</div>';
   }else{
     return'<div class="extrait-lws" style="text-align:center;padding:12px">'
       +'<span style="font-size:2em">📎</span>'
       +'<div style="margin-top:6px;font-size:13px;color:var(--ink2)">'+titre+'</div>'
-      +'<a class="btn bi" href="'+url+'" target="_blank" rel="noopener" style="margin-top:8px;font-size:12px;display:inline-block"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a>'
+      +'<a class="btn bi" href="'+url+'" target="_blank" rel="noopener" style="margin-top:8px;font-size:12px;display:inline-block"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a>'
       +'</div>';
   }
 }
@@ -1514,7 +1514,7 @@ function previewFichier(item){
         inner='<div style="text-align:center;padding:24px 16px">'
           +'<div style="font-size:56px;margin-bottom:10px">📕</div>'
           +'<div style="font-size:13px;color:#555;margin-bottom:18px;word-break:break-all">'+_esc(fname)+'</div>'
-          +'<button class="btn bi" style="font-size:14px;padding:12px 28px" onclick="window._pdfOpenBlob(window._previewItem)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
+          +'<button class="btn bi" style="font-size:14px;padding:12px 28px" onclick="window._pdfOpenBlob(window._previewItem)"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
           +'</div>';
       } else {
         inner='<embed src="'+dataUrl+'" type="application/pdf" style="width:100%;height:480px;border-radius:8px">';
@@ -1522,7 +1522,7 @@ function previewFichier(item){
     }
     else{inner='<div class="ib ibt"><span>📄</span><span>Aperçu non disponible. Téléchargez le fichier.</span></div>';}
     window._previewItem=item;
-    M('▶ '+item.titre,fname,inner+'<div style="margin-top:12px;text-align:center"><button class="btn bi" onclick="openFichier(window._previewItem)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</button></div>','<button class="btn bo" onclick="cm()">Fermer</button>');
+    M('▶ '+item.titre,fname,inner+'<div style="margin-top:12px;text-align:center"><button class="btn bi" onclick="openFichier(window._previewItem)"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</button></div>','<button class="btn bo" onclick="cm()">Fermer</button>');
   };
   // MOD-3.7 : priorité fichierUrl (serveur LWS) > fichierData (localStorage) > idbKey (IndexedDB)
   if(item.fichierUrl){tryShow(item.fichierUrl,item.fichier||item.fichierUrl.split('/').pop(),item.fileType||'');}
@@ -2055,7 +2055,7 @@ function _ensureCloudSecret(){
     +'Elle reste sur cet appareil et n\'est pas écrite dans le code de la page. '
     +'Sans elle, l\'application fonctionne en local (sans synchronisation cloud).</p>',
     '<button class="btn bo" onclick="cm()">Plus tard</button>'
-    +'<button class="btn bi" onclick="_saveCloudSecret()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer la clé</button>'
+    +'<button class="btn bi" onclick="_saveCloudSecret()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer la clé</button>'
   );
 }
 function _saveCloudSecret(){
@@ -2966,7 +2966,7 @@ function isEnseignant(){return SES?.type==='enseignant';}
 // ─── PORTAIL VISITEUR ────────────────────────────
 function visitorOrderProduct(title,price){
   const overlay=document.createElement('div');overlay.className='mov';
-  if(overlay)overlay.innerHTML='<div class="modal"><div class="mhd"><div><div class="mtt">🛒 Commander: '+title+'</div><div class="mst">'+fmt(price)+' FCFA</div></div><button class="mc" onclick="this.closest(\'.mov\').remove()">✕</button></div><div class="mb"><div class="fg2"><div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="vpNom" placeholder="Nom et prénom"></div><div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="vpTel" type="tel" placeholder="+237 6 XX XX XX XX"></div></div><div class="fg mt8"><span class="fl">Code promo (optionnel)</span><input class="fi" id="vpPromo" placeholder="ELEVE10" style="text-transform:uppercase"></div></div><div class="mf"><button class="btn bo" onclick="this.closest(\'.mov\').remove()">Annuler</button><button class="btn bi" onclick="confirmProductOrder(\'' + title.replace(/'/g,"") + '\','+price+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Commander</button></div></div>';
+  if(overlay)overlay.innerHTML='<div class="modal"><div class="mhd"><div><div class="mtt">🛒 Commander: '+title+'</div><div class="mst">'+fmt(price)+' FCFA</div></div><button class="mc" onclick="this.closest(\'.mov\').remove()">✕</button></div><div class="mb"><div class="fg2"><div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="vpNom" placeholder="Nom et prénom"></div><div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="vpTel" type="tel" placeholder="+237 6 XX XX XX XX"></div></div><div class="fg mt8"><span class="fl">Code promo (optionnel)</span><input class="fi" id="vpPromo" placeholder="ELEVE10" style="text-transform:uppercase"></div></div><div class="mf"><button class="btn bo" onclick="this.closest(\'.mov\').remove()">Annuler</button><button class="btn bi" onclick="confirmProductOrder(\'' + title.replace(/'/g,"") + '\','+price+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Commander</button></div></div>';
   document.body.appendChild(overlay);
 }
 function confirmProductOrder(title,price){
@@ -3021,7 +3021,7 @@ function visitorOrderBook(bid){
     ${autoPromo?'<div style="font-size:13px;color:var(--gr);margin:-8px 0 8px">✅ Code ELEVE10 appliqué (-10%)</div>':''}
     <div class="fg"><span class="fl">Message (optionnel)</span><textarea class="fi" id="voMsg" rows="2" placeholder="Précisions, quantité..."></textarea></div>
   </div>
-  <div class="mf"><button class="btn bo" onclick="this.closest('.mov').remove()">Annuler</button><button class="btn bi" onclick="confirmVisitorOrder('${b.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Confirmer la commande</button></div></div>`;
+  <div class="mf"><button class="btn bo" onclick="this.closest('.mov').remove()">Annuler</button><button class="btn bi" onclick="confirmVisitorOrder('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Confirmer la commande</button></div></div>`;
   document.body.appendChild(overlay);
 }
 
@@ -3087,7 +3087,7 @@ function addBookContent(bid){
   var _pdfStat=(b.previewPdfUrl||b.previewPdfKey)
     ?'<span class="bg bgg">✅ '+_esc(b.previewPdfName||'apercu.pdf')+'</span> '
       +(b.previewPdfUrl?'<span class="xs2" style="color:var(--gr)">☁️ Disponible sur tous les appareils</span> ':'<span class="xs2 mut">📱 Local uniquement</span> ')
-      +'<button class="btn bo xs" onclick="removeBookPdfPreview(\''+bid+'\')" style="font-size:10px;padding:2px 8px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Supprimer</button>'
+      +'<button class="btn bo xs" onclick="removeBookPdfPreview(\''+bid+'\')" style="font-size:10px;padding:2px 8px"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Supprimer</button>'
     :'<span class="xs2 mut">Aucun aperçu PDF chargé</span>';
   M('📖 Gérer le contenu — '+b.titre,'Extraits et chapitres consultables par les visiteurs',
   '<div class="ib ibt mb14"><span>📝</span><span>Ajoutez des extraits que les visiteurs pourront lire avant d\'acheter.</span></div>'+
@@ -3101,8 +3101,8 @@ function addBookContent(bid){
   '<div class="fl2 g8 fw mt8" id="bkPreviews">'+previewHtml+'</div>'+
   '<button class="btn bo sm mt8" onclick="uploadBookPreview('+String.fromCharCode(39)+bid+String.fromCharCode(39)+')">＋ Ajouter des captures</button></div>'+
   '<div class="fg"><span class="fl">📸 Image de couverture</span>'+
-  '<div class="fl2 fic g8 mt8">'+coverHtml+'<button class="btn bo sm" onclick="uploadBookCover('+String.fromCharCode(39)+bid+String.fromCharCode(39)+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-camera"/></svg>Changer couverture</button></div></div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveBookContent('+String.fromCharCode(39)+bid+String.fromCharCode(39)+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>',true);
+  '<div class="fl2 fic g8 mt8">'+coverHtml+'<button class="btn bo sm" onclick="uploadBookCover('+String.fromCharCode(39)+bid+String.fromCharCode(39)+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-camera"/></svg>Changer couverture</button></div></div>',
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveBookContent('+String.fromCharCode(39)+bid+String.fromCharCode(39)+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>',true);
 }
 
 function saveBookContent(bid){
@@ -3209,7 +3209,7 @@ function viewBookDetail(bid){
   h+='<div class="bk-fallback" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center"><div style="font-size:60px;margin-bottom:8px">'+b.ico+'</div><div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;line-height:1.3;color:#fff">'+_esc(b.titre)+'</div></div>';
   if(b.coverImg)h+='<img src="'+_esc(b.coverImg)+'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:1" onerror="this.style.display=\'none\'" onload="var p=this.parentNode.querySelector(\'.bk-fallback\');if(p)p.style.display=\'none\'">';
   h+='</div>';
-  h+='<button class="btn bo sm" onclick="downloadBookCover(\''+bid+'\')" style="width:100%"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Couverture</button></div>';
+  h+='<button class="btn bo sm" onclick="downloadBookCover(\''+bid+'\')" style="width:100%"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Couverture</button></div>';
   // Info
   h+='<div class="book-info"><h2>'+_esc(b.titre)+'</h2>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="bg bgb">'+_esc(b.cls)+'</span><span class="bg bgd">'+_esc(String(b.pages))+' pages</span><span class="bg '+(b.stock>0?'bgg':'bgr')+'">'+(b.stock>0?b.stock+' en stock':'Rupture')+'</span></div>';
@@ -3230,7 +3230,7 @@ function viewBookDetail(bid){
   // Visible quand le livre a été préparé (b.secureId/securePages) ou marqué digital.
   if(b.secureId||b.securePages||b.digital){
     var _fp=b.freePages||10, _pd=b.prixDigital||b.priceDigital||b.prix;
-    h+='<button class="btn bi mt8" style="width:100%;background:linear-gradient(135deg,#142554,#1E3A7A)" onclick="openSecureBook(\''+bid+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Lire en ligne · '+_fp+' pages gratuites</button>';
+    h+='<button class="btn bi mt8" style="width:100%;background:linear-gradient(135deg,#142554,#1E3A7A)" onclick="openSecureBook(\''+bid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Lire en ligne · '+_fp+' pages gratuites</button>';
     h+='<div style="font-size:11px;color:var(--ink4);text-align:center;margin-top:6px">🔒 Version numérique '+fmtN(_pd)+' FCFA — consultation protégée, sans téléchargement ni partage</div>';
   }
   h+='</div></div>';
@@ -3261,8 +3261,8 @@ function viewBookDetail(bid){
       h+='<div style="border:2px dashed var(--bld);border-radius:var(--r);padding:24px;text-align:center;background:var(--blb)">'
         +'<div style="font-size:48px;margin-bottom:10px">📄</div>'
         +'<div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;color:var(--bl);margin-bottom:14px">'+_esc(b.previewPdfName||'Aperçu')+'</div>'
-        +'<button class="btn bi" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:4px" onclick="var w=window.open(window[\'_bookPdfUrl_'+bid+'\'],\'_blank\');if(!w)alert(\'Autorisez les pop-ups pour ouvrir le PDF\');"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
-        +'<button class="btn bo" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:4px" onclick="var w=window.open(window[\'_bookGvUrl_'+bid+'\'],\'_blank\');if(!w)alert(\'Autorisez les pop-ups\');"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Voir aperçu</button>'
+        +'<button class="btn bi" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:4px" onclick="var w=window.open(window[\'_bookPdfUrl_'+bid+'\'],\'_blank\');if(!w)alert(\'Autorisez les pop-ups pour ouvrir le PDF\');"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
+        +'<button class="btn bo" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:4px" onclick="var w=window.open(window[\'_bookGvUrl_'+bid+'\'],\'_blank\');if(!w)alert(\'Autorisez les pop-ups\');"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Voir aperçu</button>'
         +'</div>';
     } else {
       // Desktop : viewer PDF robuste (fetch+blob → PDF.js fallback)
@@ -3300,7 +3300,7 @@ function viewBookDetail(bid){
   h+='<div class="fl2 g6 mb8">'; for(var s=1;s<=5;s++)h+='<span style="font-size:24px;cursor:pointer" onclick="setReviewStars('+s+')" id="rs_'+s+'">★</span>'; h+='<span class="xs2 mut" id="rsLabel">Sélectionnez</span></div>';
   h+='<input class="fi mb8" id="rvNom" placeholder="Votre nom"><input class="fi mb8" id="rvRole" placeholder="Rôle (Parent, Élève...)">';
   h+='<textarea class="fi mb8" id="rvText" rows="2" placeholder="Votre avis sur ce manuel..."></textarea>';
-  h+='<button class="btn bi sm" onclick="submitReview(\''+bid+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Publier l&#39;avis</button></div>';
+  h+='<button class="btn bi sm" onclick="submitReview(\''+bid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Publier l&#39;avis</button></div>';
   h+='</div></div></div></div>';
   if(cv)cv.innerHTML=h;
   window._rvStars=0;
@@ -3323,8 +3323,8 @@ function _showExtrait(bid){
       h+='<div style="border:2px dashed var(--bld);border-radius:var(--r);padding:28px;text-align:center;background:var(--blb)">'
         +'<div style="font-size:56px;margin-bottom:12px">📄</div>'
         +'<div style="font-family:Libre Baskerville,serif;font-size:15px;font-weight:700;color:var(--bl);margin-bottom:16px">'+_esc(pdfName||'Aperçu PDF')+'</div>'
-        +'<button class="btn bi" style="border:none;cursor:pointer;font-size:14px;padding:12px 22px;margin:5px" onclick="var w=window.open(window._extraitPdfUrl,\'_blank\');if(!w)alert(\'Autorisez les pop-ups pour ouvrir le PDF\');"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button><br>'
-        +'<button class="btn bo" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:5px" onclick="var w=window.open(window._extraitGvUrl,\'_blank\');if(!w)alert(\'Autorisez les pop-ups\');"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Voir aperçu intégré</button>'
+        +'<button class="btn bi" style="border:none;cursor:pointer;font-size:14px;padding:12px 22px;margin:5px" onclick="var w=window.open(window._extraitPdfUrl,\'_blank\');if(!w)alert(\'Autorisez les pop-ups pour ouvrir le PDF\');"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button><br>'
+        +'<button class="btn bo" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:5px" onclick="var w=window.open(window._extraitGvUrl,\'_blank\');if(!w)alert(\'Autorisez les pop-ups\');"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Voir aperçu intégré</button>'
         +'</div>';
     } else if(_isMob&&!_isHttpUrl&&pdfSrc&&pdfSrc.indexOf('data:')===0){
       // Mobile + data: URL → convertir en Blob URL pour ouverture/téléchargement natif
@@ -3342,8 +3342,8 @@ function _showExtrait(bid){
         h+='<div style="border:2px dashed var(--bld);border-radius:var(--r);padding:28px;text-align:center;background:var(--blb)">'
           +'<div style="font-size:56px;margin-bottom:12px">📄</div>'
           +'<div style="font-family:Libre Baskerville,serif;font-size:15px;font-weight:700;color:var(--bl);margin-bottom:16px">'+_fname+'</div>'
-          +'<button class="btn bi" style="font-size:14px;padding:12px 22px;margin:5px;cursor:pointer" onclick="window.open(\''+_blobUrl+'\',\'_blank\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button><br>'
-          +'<a href="'+_blobUrl+'" download="'+_fname+'" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:5px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a>'
+          +'<button class="btn bi" style="font-size:14px;padding:12px 22px;margin:5px;cursor:pointer" onclick="window.open(\''+_blobUrl+'\',\'_blank\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button><br>'
+          +'<a href="'+_blobUrl+'" download="'+_fname+'" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:5px"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a>'
           +'</div>';
       } else {
         // Fallback data URL mobile sans blob → Google Docs viewer impossible → iframe data:
@@ -3364,8 +3364,8 @@ function _showExtrait(bid){
     }
     M('📄 Aperçu — '+b.titre,'Extrait gratuit avant achat',h,
       '<button class="btn bo" onclick="cm()">Fermer</button>'
-      +'<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Détails</button>'
-      +(b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')" ><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg>Commander — '+fmt(b.prix)+'</button>':''),true);
+      +'<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Détails</button>'
+      +(b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')" ><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Commander — '+fmt(b.prix)+'</button>':''),true);
   }
   // 1. URL serveur (cross-device) — priorité maximale
   if(b.previewPdfUrl){_showPdfExtrait(b.previewPdfUrl,b.previewPdfName||'apercu.pdf');return;}
@@ -3430,8 +3430,8 @@ function _showExtrait_text(bid){
   // CTA
   M('📖 Aperçu gratuit', b.titre, h,
     '<button class="btn bo" onclick="cm()">Fermer</button>'+
-    '<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Détails & Avis</button>'+
-    (b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg>Commander — '+fmt(b.prix)+'</button>':'<span style="font-size:12px;color:var(--re);font-weight:700;padding:8px">Rupture de stock</span>'),
+    '<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Détails & Avis</button>'+
+    (b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Commander — '+fmt(b.prix)+'</button>':'<span style="font-size:12px;color:var(--re);font-weight:700;padding:8px">Rupture de stock</span>'),
     true // large modal
   );
 }
@@ -3494,8 +3494,8 @@ function showBookTab(btn,tabId){
           cont.innerHTML='<div style="border:2px dashed var(--bld);border-radius:var(--r);padding:24px;text-align:center;background:var(--blb)">'
             +'<div style="font-size:48px;margin-bottom:10px">📄</div>'
             +'<div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;color:var(--bl);margin-bottom:14px">'+_esc(_fn2)+'</div>'
-            +'<button class="btn bi" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:4px" onclick="var w=window.open(window._idbPdfSrc,\'_blank\');if(!w)alert(\'Autorisez les pop-ups pour ouvrir le PDF\');"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
-            +'<a href="'+_pdfSrc+'" download="'+_esc(_fn2)+'" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:4px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a>'
+            +'<button class="btn bi" style="border:none;cursor:pointer;font-size:13px;padding:10px 18px;margin:4px" onclick="var w=window.open(window._idbPdfSrc,\'_blank\');if(!w)alert(\'Autorisez les pop-ups pour ouvrir le PDF\');"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
+            +'<a href="'+_pdfSrc+'" download="'+_esc(_fn2)+'" class="btn bo" style="display:inline-block;text-decoration:none;font-size:13px;padding:10px 18px;margin:4px"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a>'
             +'</div>';
         } else {
           cont.innerHTML='<iframe src="'+_pdfSrc+'" style="width:100%;height:58vh;border:1px solid var(--bg3);border-radius:8px;display:block" title="Aperçu PDF"></iframe>'
@@ -3539,8 +3539,8 @@ function _pdfViewerIframe(pdfUrl, containerId, opts){
     +'<div id="'+fallbackId+'" style="display:none;text-align:center;padding:24px;background:var(--blb);border-radius:8px;margin-top:6px">'
       +'<div style="font-size:48px;margin-bottom:10px">📄</div>'
       +'<div style="font-size:13px;color:var(--ink3);margin-bottom:14px">L\'aperçu n\'a pas pu être chargé directement.<br>Choisissez une option :</div>'
-      +'<a href="'+pdfUrl+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;margin:4px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir dans un onglet</a>'
-      +'<a href="'+pdfUrl+'" download class="btn bo" style="display:inline-block;text-decoration:none;margin:4px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a>'
+      +'<a href="'+pdfUrl+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;margin:4px"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir dans un onglet</a>'
+      +'<a href="'+pdfUrl+'" download class="btn bo" style="display:inline-block;text-decoration:none;margin:4px"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a>'
     +'</div>'
     +'<div style="margin-top:6px;text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;font-size:11px">'
       +'<a href="'+pdfUrl+'" target="_blank" rel="noopener" style="color:var(--bl);text-decoration:none">↗ Ouvrir le PDF directement</a>'
@@ -4322,7 +4322,7 @@ function showActualites(container){
   }).join('');
 
   c.innerHTML='<div class="vsec">'
-    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-news"/></svg></span>Actualités Éducatives</div>'
+    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-news"/></svg></span>Actualités Éducatives</div>'
     +'<div class="vsec-sub">Restez informé — éducation Cameroun, MINESEC, grandes écoles et bourses</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;padding-bottom:12px;border-bottom:var(--br)">'
       +tabsHtml
@@ -4608,7 +4608,7 @@ function vShowSec(sec,btn){
       </div>
     </div><!-- v1.2.2 : panneau « En chiffres » retiré (doublon des stats hero/section dédiée) -->
     ${(DB.galleryImages||[]).length>0?`<div class="vcard mt20">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-camera"/></svg></span>Notre centre en images</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-camera"/></svg></span>Notre centre en images</div>
       <div class="gallery-grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px">
         ${(DB.galleryImages||[]).slice(0,6).map(p=>`<div class="gallery-card" style="aspect-ratio:16/10">
           <img src="${p.src}" alt="${p.titre}" loading="lazy" style="width:100%;height:100%;object-fit:cover">
@@ -4619,7 +4619,7 @@ function vShowSec(sec,btn){
       </div>`:''}
     </div>`:''}
     ${DB.photos?.length>0&&(DB.galleryImages||[]).length===0?`<div class="vcard mt20">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-camera"/></svg></span>Nos installations</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-camera"/></svg></span>Nos installations</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px">
         ${DB.photos.slice(0,6).map(p=>`<div style="text-align:center;padding:16px 8px;background:var(--bg2);border-radius:var(--r2)">
           <div style="font-size:36px">${p.emoji}</div>
@@ -4660,7 +4660,7 @@ function vShowSec(sec,btn){
       ${DB.photos.map(p=>`<div class="gallery-card" style="background:var(--bg2)">
         <div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:56px">${p.emoji}</div>
         <div class="gallery-overlay">
-          ${iA()?`<button class="btn br2 xs" style="background:rgba(220,38,38,.85);border:none" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Supprimer</button>`:''}
+          ${iA()?`<button class="btn br2 xs" style="background:rgba(220,38,38,.85);border:none" onclick="event.stopPropagation();deleteGalleryPhoto('${p.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Supprimer</button>`:''}
         </div>
       </div>`).join("")}
       ${(DB.galleryImages||[]).filter(p=>p.src&&p.src.length>20).map(p=>`<div class="gallery-card" onclick="_galleryLightbox('${encodeURIComponent(p.src)}','${_esc(p.titre||'')}')">
@@ -4676,13 +4676,13 @@ function vShowSec(sec,btn){
       </div>`).join("")}
     </div>
     <div class="vcard mt16" style="text-align:center">
-      ${iA()?'<button class="btn bi" onclick="uploadGalleryPhoto()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-camera"/></svg>Ajouter des photos à la galerie</button>':'<div class="ib ibi mb0"><span>📷</span><span>Les administrateurs connectés peuvent ajouter des photos à la galerie.</span></div>'}
+      ${iA()?'<button class="btn bi" onclick="uploadGalleryPhoto()"><svg class="vico bico" aria-hidden="true"><use href="#lc-camera"/></svg>Ajouter des photos à la galerie</button>':'<div class="ib ibi mb0"><span>📷</span><span>Les administrateurs connectés peuvent ajouter des photos à la galerie.</span></div>'}
     </div>
     <div class="vcard mt16" style="text-align:center;border:2px dashed var(--bg3)">
       <div style="font-size:32px;margin-bottom:8px">📷</div>
       <div class="semi">Découvrez nos installations</div>
       <div style="font-size:13px;color:var(--ink4);margin-top:4px">Visitez-nous en personne ou contactez-nous</div>
-      <a href="https://wa.me/${(DB.publicInfo?.whatsapp||"").replace(/[^0-9]/g,"")}" target="_blank" class="btn bgr2 sm mt14" style="display:inline-flex"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Nous contacter sur WhatsApp</a>
+      <a href="https://wa.me/${(DB.publicInfo?.whatsapp||"").replace(/[^0-9]/g,"")}" target="_blank" class="btn bgr2 sm mt14" style="display:inline-flex"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Nous contacter sur WhatsApp</a>
     </div>
     </div>`;
   } else if(sec==="resultats"){
@@ -4692,11 +4692,11 @@ function vShowSec(sec,btn){
       <h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-chart"/></svg></span> Nos résultats aux examens</h2>
       <div class="acc-sub">Taux de réussite de nos élèves aux examens BEPC, Probatoire, BAC et GCE</div>
     </div>
-    ${canEdit?'<div style="text-align:center;margin:-8px 0 16px"><button class="btn bi sm" onclick="mEditExamResults()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les statistiques</button></div>':''}
+    ${canEdit?'<div style="text-align:center;margin:-8px 0 16px"><button class="btn bi sm" onclick="mEditExamResults()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les statistiques</button></div>':''}
     ${DB.examResults.map((er,ei)=>{var _xa=['#6A8DC7','#6C56A6','#059669','#D97706','#0891B2','#AE5353'][ei%6];return`<div class="vcard exam-card mb16" style="--exam-acc:${_xa}">
       <div class="fl2 fic fsb mb12">
         <div class="exam-year-chip">📅 Année scolaire ${er.annee}</div>
-        ${canEdit?`<button class="btn bo xs" onclick="mEditExamYear(${ei})"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier</button>`:''}
+        ${canEdit?`<button class="btn bo xs" onclick="mEditExamYear(${ei})"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier</button>`:''}
       </div>
       ${er.niveaux.map(n=>{var _fc=n.taux>=80?'#3A8F73':n.taux>=60?'#F59E0B':'#C46F6F';return`<div class="exam-row">
         <div style="min-width:80px;font-weight:700;font-size:13px">${n.cls}</div>
@@ -4711,10 +4711,10 @@ function vShowSec(sec,btn){
       <div class="fl2 fic g10"><span style="font-size:22px">➕</span>
       <div><div class="semi" style="color:var(--bl)">Ajouter une année scolaire</div>
       <div style="font-size:12px;color:var(--ink4)">Enrichissez les statistiques avec de nouvelles données</div></div>
-      <button class="btn bi sm" style="margin-left:auto" onclick="mAddExamYear()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button></div>
+      <button class="btn bi sm" style="margin-left:auto" onclick="mAddExamYear()"><svg class="vico bico" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button></div>
     </div>`:''}
     <div class="vcard mt4">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg></span>Nos Manuels les Mieux Notés</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-book"/></svg></span>Nos Manuels les Mieux Notés</div>
       <div class="featured-scroll">
         ${DB.books.map(b=>{const rt=getBookRating(b.id);const cc=b.coverColor||'#1a3a8a';const hasExt=b.extrait||((b.previewImages||[]).length>0);return`<div class="featured-card" onclick="${hasExt?'_showExtrait':'viewBookDetail'}('${b.id}')">
           <div style="height:90px;background:linear-gradient(160deg,${cc},${cc}cc);display:flex;align-items:center;justify-content:center;position:relative">
@@ -4729,7 +4729,7 @@ function vShowSec(sec,btn){
           </div>
         </div>`}).join("")}
       </div>
-      <div style="text-align:center;margin-top:10px"><button class="btn bi sm" onclick="vShowSec('boutique',document.querySelector('.vnav-btn[onclick*="boutique"]'))"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg>Voir toute la boutique →</button></div>
+      <div style="text-align:center;margin-top:10px"><button class="btn bi sm" onclick="vShowSec('boutique',document.querySelector('.vnav-btn[onclick*="boutique"]'))"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Voir toute la boutique →</button></div>
     </div>
     <div class="ib ibg mt16"><span>✅</span><span><strong>Nos résultats parlent d'eux-mêmes !</strong> Une moyenne de <strong>${Math.round(DB.examResults.flatMap(er=>er.niveaux).reduce((a,n)=>a+n.taux,0)/Math.max(1,DB.examResults.flatMap(er=>er.niveaux).length))}%</strong> de réussite aux examens officiels. Inscrivez votre enfant dès maintenant.</span></div>
     </div>`;
@@ -4954,18 +4954,18 @@ function vShowSec(sec,btn){
               var isHtmlItem=(item.fileType==='html')||(item.fichier&&item.fichier.toLowerCase().endsWith('.html'));
               if(dlUsed>0&&!isHtmlItem) h+='<span class="dl-counter">📊 '+dlUsed+'/3</span>';
               if(isHtmlItem){
-                h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px;font-weight:700" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"/></svg>Lancer</button>';
+                h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px;font-weight:700" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-globe"/></svg>Lancer</button>';
               } else {
-                h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Consulter</button>';
-                h+='<button class="btn" style="background:'+catColor+'22;color:'+catColor+';font-size:11px;padding:6px 10px;border-radius:12px;border:1px solid '+catColor+'44" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</button>';
+                h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Consulter</button>';
+                h+='<button class="btn" style="background:'+catColor+'22;color:'+catColor+';font-size:11px;padding:6px 10px;border-radius:12px;border:1px solid '+catColor+'44" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</button>';
               }
             }
             h+='</div>';
           } else if(isLocked){
             h+='<span class="rc-price" style="color:#FFC93C">'+fmtN(item.prix)+' FCFA</span>';
             h+='<div style="display:flex;align-items:center;gap:6px">';
-            if(item.apercu||item.desc) h+='<button class="btn" style="background:'+catColor+'18;color:'+catColor+';font-size:10px;padding:5px 10px;border-radius:10px;border:1px solid '+catColor+'33" onclick="event.stopPropagation();previewElContent(\''+item.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>';
-            h+='<button class="btn" style="background:#E8EEFF;color:#4B5BDB;font-size:11px;padding:6px 12px;border-radius:12px" onclick="document.getElementById(\'elPlans\')?.scrollIntoView({behavior:\'smooth\'})"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Abonnement</button>';
+            if(item.apercu||item.desc) h+='<button class="btn" style="background:'+catColor+'18;color:'+catColor+';font-size:10px;padding:5px 10px;border-radius:10px;border:1px solid '+catColor+'33" onclick="event.stopPropagation();previewElContent(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>';
+            h+='<button class="btn" style="background:#E8EEFF;color:#4B5BDB;font-size:11px;padding:6px 12px;border-radius:12px" onclick="document.getElementById(\'elPlans\')?.scrollIntoView({behavior:\'smooth\'})"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Abonnement</button>';
             h+='</div>';
           } else {
             if(hasPlanAccess&&!iA()){
@@ -4974,11 +4974,11 @@ function vShowSec(sec,btn){
               h+='<span class="rc-price" style="color:'+catColor+'">'+fmtN(item.prix)+' FCFA</span>';
             }
             h+='<div style="display:flex;align-items:center;gap:6px">';
-            if(item.apercu||item.desc) h+='<button class="btn" style="background:'+catColor+'18;color:'+catColor+';font-size:10px;padding:5px 10px;border-radius:10px;border:1px solid '+catColor+'33" onclick="event.stopPropagation();previewElContent(\''+item.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>';
+            if(item.apercu||item.desc) h+='<button class="btn" style="background:'+catColor+'18;color:'+catColor+';font-size:10px;padding:5px 10px;border-radius:10px;border:1px solid '+catColor+'33" onclick="event.stopPropagation();previewElContent(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>';
             if(hasPlanAccess||iA()){
-              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Consulter</button>';
+              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Consulter</button>';
             } else {
-              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="commanderContenu(\''+item.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg>Commander</button>';
+              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="commanderContenu(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Commander</button>';
             }
             h+='</div>';
           }
@@ -5003,7 +5003,7 @@ function vShowSec(sec,btn){
     // ── QUIZ INTERACTIFS ──
     if(!selCat){
       h+='<div class="vcard mb20">';
-      h+='<div class="ct mb14"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"/></svg></span>Quiz Interactifs — Entraînez-vous par matière</div>';
+      h+='<div class="ct mb14"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-brain"/></svg></span>Quiz Interactifs — Entraînez-vous par matière</div>';
       h+='<div class="ib ibt mb14"><span>💡</span><span>Testez vos connaissances avec nos quiz corrigés. Chaque question est expliquée.</span></div>';
       var quizList=[
         {key:'maths_bepc',titre:'Quiz Maths BEPC',cls:'3ème',ico:'🔢',color:'#1E3A8A',n:QUIZ_DB.maths_bepc.length},
@@ -5142,7 +5142,7 @@ function vShowSec(sec,btn){
       var featured=(DB.products||[]).filter(function(p){return p.actif&&p.featured;});
       if(!featured.length)return '';
       return '<div class="vcard mb20">'
-        +'<div class="ct mb14"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg></span>Articles &amp; Ressources</div>'
+        +'<div class="ct mb14"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-cart"/></svg></span>Articles &amp; Ressources</div>'
         +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px">'
         +featured.map(function(s){
             var bg=s.bgColor||'#EDE9FE';
@@ -5156,7 +5156,7 @@ function vShowSec(sec,btn){
               +'<p class="sc-desc">'+_esc(s.desc||'')+'</p>'
               +'<div class="shoprow"><span class="sc-price">'+fmt(s.prix)+'</span>'
               +(oldP?'<span class="sc-old">'+oldP+'</span>':'')+'</div>'
-              +'<button class="btn bi" style="width:100%;justify-content:center;font-size:11px;padding:5px 8px;margin-top:6px;border-radius:8px" onclick="visitorOrderProduct(\''+s.titre.replace(/'/g,'')+'\','+s.prix+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg>Commander</button>'
+              +'<button class="btn bi" style="width:100%;justify-content:center;font-size:11px;padding:5px 8px;margin-top:6px;border-radius:8px" onclick="visitorOrderProduct(\''+s.titre.replace(/'/g,'')+'\','+s.prix+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Commander</button>'
               +'</div></div>';
           }).join('')
         +'</div></div>';
@@ -5211,7 +5211,7 @@ function vShowSec(sec,btn){
 
     <!-- ═════ AUTRES PRODUITS PREMIUM v2 ═════ -->
     <div class="vcard mb20">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-gift"/></svg></span>Autres Produits & Services</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-gift"/></svg></span>Autres Produits & Services</div>
       <div class="vprod-grid">
         ${(DB.products||[]).filter(function(p){return p.actif&&!p.featured;}).map(function(p){
           var pct=p.ancien?Math.round((1-p.prix/p.ancien)*100):0;
@@ -5249,13 +5249,13 @@ function vShowSec(sec,btn){
           <div style="font-size:13px;font-weight:700;color:#7a5cd6">Vous êtes auteur ou enseignant ?</div>
           <div style="font-size:13px;color:var(--ink3);margin-top:2px">Publiez vos manuels sur VÉRITAS et gagnez <strong>${DB.authorShare||60}% des ventes</strong>. Connectez-vous comme enseignant et accédez à "Mes publications".</div>
         </div>
-        <button class="btn sm" style="background:#7a5cd6;color:#fff;font-weight:700" onclick="showLogin('enseignant')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Espace Auteur</button>
+        <button class="btn sm" style="background:#7a5cd6;color:#fff;font-weight:700" onclick="showLogin('enseignant')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Espace Auteur</button>
       </div>
     </div>
 
     <!-- COMMENT ACHETER -->
     <div class="vcard mb20">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-shop"/></svg></span>Comment Acheter ?</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-shop"/></svg></span>Comment Acheter ?</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;text-align:center">
         ${[['1️⃣','Choisissez','Parcourez les manuels et consultez les extraits gratuits'],['2️⃣','Code Promo','Appliquez votre code (ELEVE10, FIDELE5...)'],['3️⃣','WhatsApp','Commandez au 656 720 476'],['4️⃣','Payez','OM: 650 435 106 / MoMo: 656 720 476'],['5️⃣','Récupérez','Au centre ou livraison à domicile']].map(([n,t,d])=>'<div style="padding:12px"><div style="font-size:24px;margin-bottom:4px">'+n+'</div><div class="semi" style="font-size:12px">'+t+'</div><div style="font-size:13px;color:var(--ink4);margin-top:4px;line-height:1.5">'+d+'</div></div>').join("")}
       </div>
@@ -5263,7 +5263,7 @@ function vShowSec(sec,btn){
 
     <!-- AVIS CLIENTS -->
     <div class="vcard mb20">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-star"/></svg></span>Avis de nos Clients</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-star"/></svg></span>Avis de nos Clients</div>
       ${(function(){
         var allRvs=(DB.bookReviews||[]).slice(0,6);
         if(!allRvs.length)return'<div class="empty xs2">Aucun avis pour le moment</div>';
@@ -5308,8 +5308,8 @@ function vShowSec(sec,btn){
         <div style="font-family:Montserrat,sans-serif;font-size:24px;font-weight:800;color:#fff;margin-bottom:8px">Rejoignez VÉRITAS aujourd&#39;hui !</div>
         <div style="font-size:14px;color:rgba(255,255,255,.7);max-width:500px;margin:0 auto 20px;line-height:1.7">Inscrivez votre enfant dans un centre d\'excellence. Enseignement de qualité, suivi personnalisé et outils modernes.</div>
         <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-          <button class="btn" style="background:#FFC93C;color:#142554;font-family:Montserrat,sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px" onclick="showLogin('eleve')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg>S\'inscrire maintenant</button>
-          <a class="btn" href="https://wa.me/237697637739" target="_blank" style="background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3);font-family:Montserrat,sans-serif;font-size:14px;padding:12px 24px;border-radius:12px;text-decoration:none"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>Nous contacter</a>
+          <button class="btn" style="background:#FFC93C;color:#142554;font-family:Montserrat,sans-serif;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px" onclick="showLogin('eleve')"><svg class="vico bico" aria-hidden="true"><use href="#lc-graduation"/></svg>S\'inscrire maintenant</button>
+          <a class="btn" href="https://wa.me/237697637739" target="_blank" style="background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.3);font-family:Montserrat,sans-serif;font-size:14px;padding:12px 24px;border-radius:12px;text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Nous contacter</a>
         </div>
       </div>
     </div>
@@ -5348,7 +5348,7 @@ function vShowSec(sec,btn){
       ['Peut-on consulter un psychologue ?','Oui, nos spécialistes accompagnent les élèves souffrant d\'anxiété ou de troubles.']
     ];
     var h='<div class="vsec">';
-    h+='<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-compass"/></svg></span>Orientation & Conseil</div>';
+    h+='<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-compass"/></svg></span>Orientation & Conseil</div>';
     var _rO=Math.max(0,_aiLimit('orient')-_aiUsed('orient'));
     var _rC=Math.max(0,_aiLimit('correct')-_aiUsed('correct'));
     var _lO=_aiLimit('orient');var _lC=_aiLimit('correct');
@@ -5381,7 +5381,7 @@ function vShowSec(sec,btn){
     var rvs=DB.bookReviews||[];
     if(rvs.length){
       h+='<div class="vcard mb16">';
-      h+='<div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-star"/></svg></span>Témoignages de nos élèves</div>';
+      h+='<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-star"/></svg></span>Témoignages de nos élèves</div>';
       rvs.slice(0,3).forEach(function(r){
         var st='';for(var i=1;i<=5;i++)st+=i<=Math.round(r.stars)?'<span style="color:#FFC93C">★</span>':'<span style="color:var(--bg3)">★</span>';
         h+='<div style="padding:10px 0;border-bottom:1px solid var(--bg2)">'+
@@ -5393,12 +5393,12 @@ function vShowSec(sec,btn){
            '<div style="font-size:12px;color:var(--ink3);font-style:italic">« '+r.text.substring(0,110)+' »</div></div>';
       });
       h+='<div style="text-align:center;margin-top:10px">'+
-         '<button class="btn bpu sm" onclick="vShowSec(\'avis\',null)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-star"/></svg>Tous les avis par niveau →</button></div>';
+         '<button class="btn bpu sm" onclick="vShowSec(\'avis\',null)"><svg class="vico bico" aria-hidden="true"><use href="#lc-star"/></svg>Tous les avis par niveau →</button></div>';
       h+='</div>';
     }
     // Formulaire
     h+='<div class="vcard mb16">';
-    h+='<div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg></span>Soumettre une demande de conseil</div>';
+    h+='<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-mail"/></svg></span>Soumettre une demande de conseil</div>';
     h+='<div style="font-size:13px;color:var(--ink4);margin-bottom:16px">Notre équipe vous contactera dans les plus brefs délais.</div>';
     h+='<div class="fg2">';
     h+='<div class="fg"><span class="fl">Nom & Prénom *</span><input class="fi" id="orNom" placeholder="Ex: MBALLA Jean-Pierre"></div>';
@@ -5413,11 +5413,11 @@ function vShowSec(sec,btn){
     h+='<div class="fg" style="grid-column:1/-1"><span class="fl">Message</span><textarea class="fi" id="orMsg" rows="3" placeholder="Décrivez brièvement votre situation..."></textarea></div>';
     h+='<div class="fg" style="grid-column:1/-1"><span class="fl">Disponibilité</span><input class="fi" id="orDispo" placeholder="Ex: Lundi matin, Mercredi après-midi..."></div>';
     h+='</div>';
-    h+='<button class="btn bgr2 mt14" style="width:100%;justify-content:center" onclick="submitOrientation()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg>Envoyer ma demande</button>';
+    h+='<button class="btn bgr2 mt14" style="width:100%;justify-content:center" onclick="submitOrientation()"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Envoyer ma demande</button>';
     h+='</div>';
     // FAQ
     h+='<div class="vcard">';
-    h+='<div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-help"/></svg></span>Questions fréquentes</div>';
+    h+='<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-help"/></svg></span>Questions fréquentes</div>';
     faqs.forEach(function(f){
       h+='<div style="padding:11px 0;border-bottom:1px solid var(--bg2)">'+
          '<div style="font-weight:700;font-size:13px;color:var(--ink);margin-bottom:4px">→ '+f[0]+'</div>'+
@@ -5431,14 +5431,14 @@ function vShowSec(sec,btn){
   } else if(sec==="contact"){
     const pi=DB.publicInfo||{};
     c.innerHTML=`<div class="vsec">
-    <div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-phone"/></svg></span>Nous Contacter</div>
+    <div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-phone"/></svg></span>Nous Contacter</div>
     <div class="vsec-sub">L\'équipe VÉRITAS est disponible pour répondre à toutes vos questions</div>
     <div class="g2">
       <div class="vcard">
         <div class="ct"><span class="ct-ico">${_ico('mail',17)}</span>Coordonnées</div>
         ${[['phone','Téléphone',_fmtTel(pi.contact||DB.school?.tel)||'—'],['mail','Email',pi.email||DB.school?.email||'—'],['mappin','Adresse',pi.adresse||DB.school?.ville||'—'],['package','B.P.',pi.bp||DB.school?.bp||'—'],['clock','Horaires',pi.horaires||'—']].map(([ic,l,v])=>`<div class="vinfo-row stack"><span class="vinfo-ic lg">${_ico(ic,17)}</span><div><div class="vinfo-l">${_esc(l)}</div><div class="vinfo-v">${_esc(v)}</div></div></div>`).join("")}
         <div style="margin-top:14px">
-          <a href="https://wa.me/${(pi.whatsapp||"").replace(/[^0-9]/g,"")}" target="_blank" class="btn bgr2 sm" style="display:inline-flex;width:100%;justify-content:center"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Écrire sur WhatsApp</a>
+          <a href="https://wa.me/${(pi.whatsapp||"").replace(/[^0-9]/g,"")}" target="_blank" class="btn bgr2 sm" style="display:inline-flex;width:100%;justify-content:center"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Écrire sur WhatsApp</a>
         </div>
       </div>
       <div>
@@ -5454,14 +5454,14 @@ function vShowSec(sec,btn){
               <li>Frais d\'inscription</li>
             </ul>
           </div>
-          <button class="btn sm mt16" style="background:#FFC93C;color:#142554;font-weight:700;width:100%;justify-content:center" onclick="showLogin('eleve')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg>Accès Espace Élève</button>
+          <button class="btn sm mt16" style="background:#FFC93C;color:#142554;font-weight:700;width:100%;justify-content:center" onclick="showLogin('eleve')"><svg class="vico bico" aria-hidden="true"><use href="#lc-graduation"/></svg>Accès Espace Élève</button>
         </div>
         <div class="vcard" style="background:var(--blb);border-color:var(--bld)">
           <div class="semi mb8" style="color:var(--bl)">👤 Espaces connectés</div>
           <div style="font-size:13px;color:var(--ink4);margin-bottom:12px">Les élèves et enseignants inscrits peuvent accéder à leur espace personnel</div>
           <div style="display:flex;flex-direction:column;gap:8px">
-            <button class="btn bgr2 sm" onclick="showLogin('eleve')" style="justify-content:center"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg>Connexion Élève</button>
-            <button class="btn bvi sm" onclick="showLogin('enseignant')" style="justify-content:center"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"/></svg>‍🏫 Connexion Enseignant</button>
+            <button class="btn bgr2 sm" onclick="showLogin('eleve')" style="justify-content:center"><svg class="vico bico" aria-hidden="true"><use href="#lc-graduation"/></svg>Connexion Élève</button>
+            <button class="btn bvi sm" onclick="showLogin('enseignant')" style="justify-content:center"><svg class="vico bico" aria-hidden="true"><use href="#lc-users"/></svg>‍🏫 Connexion Enseignant</button>
             
           </div>
         </div>
@@ -5558,7 +5558,7 @@ function _renderNotifModal(){
     html='<div class="empty"><div class="empty-ico">🔔</div><div>Aucune notification pour le moment</div></div>';
   }
   var footer='<button class="btn bo" onclick="cm()">Fermer</button>';
-  if(unread>0) footer+='<button class="btn bgr2" onclick="_markAllNotifsRead()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Tout marquer lu</button>';
+  if(unread>0) footer+='<button class="btn bgr2" onclick="_markAllNotifsRead()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Tout marquer lu</button>';
   if(iA()) footer='<button class="btn bi sm" onclick="cm();mNewNotification()">＋ Nouvelle</button>'+footer;
   var titre=unread>0?'🔔 Notifications <span style="background:#C46F6F;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;margin-left:6px">'+unread+' non lu'+(unread>1?'es':'')+'</span>':'🔔 Notifications';
   M(titre,notifs.length+' notification'+(notifs.length>1?'s':''),html,footer);
@@ -5591,7 +5591,7 @@ function mNewNotification(){
   +'<div class="fg"><span class="fl">Destinataires</span><select class="fi" id="nfTo"><option value="all">👥 Tout le monde</option><option value="eleve">🎓 Élèves uniquement</option><option value="enseignant">👨‍🏫 Enseignants uniquement</option></select></div>'
   +'<div class="fg full"><span class="fl">Message *</span><textarea class="fi" id="nfMsg" rows="4" placeholder="Rédigez votre message ici…"></textarea></div>'
   +'</div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="sendNotification()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Envoyer</button>');
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="sendNotification()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Envoyer</button>');
 }
 function autoNotify(titre,msg,to){
   if(!DB.notifications)DB.notifications=[];
@@ -6128,7 +6128,7 @@ function _galleryLightbox(encodedSrc, titre){
     +'style="max-width:100%;max-height:75vh;border-radius:10px;display:block;margin:0 auto;box-shadow:0 8px 32px rgba(0,0,0,.25)">'
     +(titre?'<div style="margin-top:12px;font-family:Libre Baskerville,serif;font-size:16px;font-weight:700;color:var(--bl)">'+_esc(titre)+'</div>':'')
     +'</div>',
-    '<button class="btn bo" onclick="cm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Fermer</button>',
+    '<button class="btn bo" onclick="cm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Fermer</button>',
     true
   );
 }
@@ -6413,7 +6413,7 @@ function mCloudUploadFile(){
     '<div class="fg mb12"><span class="fl">Fichier (max 50 Mo)</span><input type="file" class="fi" id="upl_file" accept=".pdf,.mp4,.webm,.ogg,.png,.jpg,.jpeg,.webp,.html,.xlsx"></div>'+
     '<div id="uplProgress" class="mt8"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'+
-    '<button class="btn bi" onclick="cloudDoUpload()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Envoyer</button>'
+    '<button class="btn bi" onclick="cloudDoUpload()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Envoyer</button>'
   );
 }
 
@@ -6910,7 +6910,7 @@ async function forceFullSync(){
       +'<div id="forceSyncStatus" class="mt12"></div>'
       +'</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" id="forceSyncBtn" onclick="_runForceFullSync()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>Lancer la synchronisation</button>',
+    +'<button class="btn bi" id="forceSyncBtn" onclick="_runForceFullSync()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Lancer la synchronisation</button>',
     false
   );
 }
@@ -7084,7 +7084,7 @@ function mCleanBrokenRefs(){
 
   M('🧹 Nettoyer les références cassées','Outil de réparation post-corruption',body,
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +(total>0?'<button class="btn" style="background:#AE5353;color:#fff" onclick="_runCleanBrokenRefs()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Nettoyer maintenant ('+total+')</button>':''),
+    +(total>0?'<button class="btn" style="background:#AE5353;color:#fff" onclick="_runCleanBrokenRefs()"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Nettoyer maintenant ('+total+')</button>':''),
     false
   );
 }
@@ -7226,7 +7226,7 @@ function mStorageDashboard(){
 
   M('💾 Stockage LWS (200 Go disponibles)','Vue d\'ensemble de tes données','<div></div>'+body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +'<button class="btn bi" onclick="cm();forceFullSync()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>Forcer la sync complète</button>',
+    +'<button class="btn bi" onclick="cm();forceFullSync()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Forcer la sync complète</button>',
     true
   );
 }
@@ -7323,7 +7323,7 @@ function mAddPromo(){
   '<div class="fg"><span class="fl">Type</span><select class="fi" id="npType"><option value="percent">Pourcentage (%)</option><option value="fixed">Montant fixe (FCFA)</option></select></div>'+
   '<div class="fg"><span class="fl">Valeur réduction *</span><input class="fi" id="npVal" type="number" min="1" placeholder="10"></div>'+
   '<div class="fg"><span class="fl">Description</span><input class="fi" id="npDesc" placeholder="Promo Noël"></div></div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveNewPromo()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Créer</button>');
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveNewPromo()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Créer</button>');
 }
 function saveNewPromo(){
   var code=(document.getElementById('npCode')?.value||'').trim().toUpperCase();
@@ -7341,7 +7341,7 @@ function pgMyBooks(){
   var author=(DB.authors||[]).find(function(a){return a.user===SES?.user;});
   if(!author){
     return'<div class="ib ibt mb16"><span>✍️</span><span>Vous n\'avez pas encore de compte auteur. Soumettez votre premier manuel pour en créer un.</span></div>'+
-    '<button class="btn bi" onclick="mSubmitBook()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg>Soumettre un manuel</button>';
+    '<button class="btn bi" onclick="mSubmitBook()"><svg class="vico bico" aria-hidden="true"><use href="#lc-book"/></svg>Soumettre un manuel</button>';
   }
   var myBooks=DB.books.filter(function(b){return(author.books||[]).indexOf(b.id)>-1;});
   var totalVentes=myBooks.reduce(function(s,b){return s+b.vendu*b.prix;},0);
@@ -7370,7 +7370,7 @@ function mSubmitBook(){
   '<div class="fg"><span class="fl">Prix souhaité (FCFA) *</span><input class="fi" id="sbPrix" type="number" placeholder="5000"></div>'+
   '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="sbDesc" rows="3" placeholder="Décrivez le contenu du manuel..."></textarea></div>'+
   '<div class="fg full"><span class="fl">Chapitres (un par ligne)</span><textarea class="fi" id="sbChaps" rows="3" placeholder="Chapitre 1 — ..."></textarea></div></div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveSubmittedBook()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Soumettre</button>',true);
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveSubmittedBook()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Soumettre</button>',true);
 }
 
 function saveSubmittedBook(){
@@ -7418,12 +7418,12 @@ function pgAuthorsMgmt(){
   h+='<div class="fg"><span class="fl">Téléphone</span><input class="fi" id="auTel" placeholder="6XX XX XX XX"></div>';
   h+='<div class="fg"><span class="fl">Identifiant *</span><input class="fi" id="auUser" placeholder="nom_auteur"></div></div>';
   h+='<div class="fg mt8"><span class="fl">Bio / Présentation</span><textarea class="fi" id="auBio" rows="2" placeholder="Courte présentation..."></textarea></div>';
-  h+='<button class="btn bi sm mt12" onclick="createAuthorAccount()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Créer le compte auteur</button></div>';
+  h+='<button class="btn bi sm mt12" onclick="createAuthorAccount()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Créer le compte auteur</button></div>';
   h+='<div class="card"><div class="fl2 fic fsb mb12"><div class="ct mb0">Taux de partage</div>';
   h+='<div class="fl2 fic g8"><input class="fi" id="shareRate" type="number" min="1" max="99" value="'+shareRate+'" style="width:60px;padding:6px;text-align:center"><span class="semi">% auteur / '+(100-shareRate)+'% VÉRITAS</span>';
   h+='<button class="btn bi sm" onclick="DB.authorShare=parseInt(document.getElementById(\'shareRate\')?.value)||60;save();re();toast(\'✓ Taux mis à jour\')">💾</button></div></div>';
   h+='<div class="ib ibt mb0"><span>💡</span><span>L\'auteur reçoit <strong>'+shareRate+'%</strong> des ventes, VÉRITAS garde <strong>'+(100-shareRate)+'%</strong> pour la distribution, impression et gestion.</span></div></div>';
-  h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg></span>Liste des Auteurs</div>';
+  h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-pencil"/></svg></span>Liste des Auteurs</div>';
   h+='<div class="tw"><table><thead><tr><th>Auteur</th><th>Livres</th><th>Ventes</th><th>Part</th><th>Status</th></tr></thead><tbody>';
   authors.forEach(function(a){
     var bookCount=(a.books||[]).length;var ventes=0;
@@ -7435,10 +7435,10 @@ function pgAuthorsMgmt(){
   // Submitted books awaiting stock
   var submitted=DB.books.filter(function(b){return b.submitted&&b.stock===0;});
   if(submitted.length){
-    h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg></span>Manuels en attente de stock</div>';
+    h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-mail"/></svg></span>Manuels en attente de stock</div>';
     submitted.forEach(function(b){
       h+='<div class="fl2 fic fsb" style="padding:10px;border-bottom:1px solid var(--bg3)"><div><div class="semi">'+b.ico+' '+b.titre+' ('+b.cls+')</div><div class="xs2 mut">Par '+b.auteur+' · '+fmt(b.prix)+'</div></div>';
-      h+='<div class="fl2 g6"><input class="fi" id="stk_'+b.id+'" type="number" value="10" style="width:50px;padding:4px"><button class="btn bi sm" onclick="DB.books.find(function(x){return x.id===\''+b.id+'\';}).stock=parseInt(document.getElementById(\'stk_'+b.id+'\')?.value)||0;DB.books.find(function(x){return x.id===\''+b.id+'\';}).submitted=false;save();re();toast(\'✓ Stock ajouté\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Valider</button></div></div>';
+      h+='<div class="fl2 g6"><input class="fi" id="stk_'+b.id+'" type="number" value="10" style="width:50px;padding:4px"><button class="btn bi sm" onclick="DB.books.find(function(x){return x.id===\''+b.id+'\';}).stock=parseInt(document.getElementById(\'stk_'+b.id+'\')?.value)||0;DB.books.find(function(x){return x.id===\''+b.id+'\';}).submitted=false;save();re();toast(\'✓ Stock ajouté\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Valider</button></div></div>';
     });
     h+='</div>';
   }
@@ -7448,7 +7448,7 @@ function pgAuthorsMgmt(){
   var _wa=function(t){return (t||'').replace(/[^0-9]/g,'');};
   var selfAuthors=(DB.visitorAccounts||[]).filter(function(a){return a&&(a.role==='auteur'||a.isAuthor);});
   var partners=(DB.visitorAccounts||[]).filter(function(a){return a&&(a.isPartner||a.role==='partenaire'||a.role==='mecene');});
-  h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg></span>Candidatures auteurs auto-inscrites ('+selfAuthors.length+')</div>';
+  h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-pencil"/></svg></span>Candidatures auteurs auto-inscrites ('+selfAuthors.length+')</div>';
   if(!selfAuthors.length){ h+='<div class="ib ibt mb0"><span>📭</span><span>Aucune pour le moment. Les visiteurs qui cliquent « Devenir auteur » apparaissent ici (discipline, niveau, contact).</span></div>'; }
   else{
     h+='<div class="tw"><table><thead><tr><th>Nom</th><th>Discipline</th><th>Niveau</th><th>Contact</th><th>Inscrit le</th><th></th></tr></thead><tbody>';
@@ -7458,7 +7458,7 @@ function pgAuthorsMgmt(){
     h+='</tbody></table></div>';
   }
   h+='</div>';
-  h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"/></svg></span>Partenaires & mécènes ('+partners.length+')</div>';
+  h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-handshake"/></svg></span>Partenaires & mécènes ('+partners.length+')</div>';
   if(!partners.length){ h+='<div class="ib ibt mb0"><span>📭</span><span>Aucun pour le moment. Ceux qui cliquent « Créer mon compte partenaire » (entreprise / ONG / mécène) apparaissent ici.</span></div>'; }
   else{
     h+='<div class="tw"><table><thead><tr><th>Nom</th><th>Organisation</th><th>Type</th><th>Contact</th><th>Inscrit le</th><th></th></tr></thead><tbody>';
@@ -7494,7 +7494,7 @@ function createAuthorAccount(){
       '<div class="fg"><span class="fl">Identifiant</span><input class="fi" value="'+_esc(user)+'" readonly onclick="this.select()"></div>'
       +'<div class="fg"><span class="fl">Mot de passe provisoire</span><input class="fi" value="'+_esc(_tmpPwd)+'" readonly onclick="this.select()"></div>'
       +'<p style="font-size:13px;color:var(--ds-text-3,#7A88A6);line-height:1.5">Notez-le maintenant : il ne sera plus affiché et sera stocké sous forme hachée. L\'auteur pourra le modifier ensuite.</p>',
-      '<button class="btn bi" onclick="cm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>J\'ai noté</button>');
+      '<button class="btn bi" onclick="cm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>J\'ai noté</button>');
   } else {
     toast('✓ Compte auteur créé. Mot de passe provisoire : '+_tmpPwd,'ok');
   }
@@ -7517,7 +7517,7 @@ function pgReleveTemplate(){
   h+='</div>';
   h+='<div class="fl2 fic fsb fw g8">';
   h+='<div class="tabs">'+CLS.filter(function(cl){return _classifySection(cl)===selG;}).map(function(cl){return '<button class="tab'+(cl===selC?' on':'')+'" onclick="window._rvCls=\''+cl+'\';re()">'+cl+'</button>';}).join('')+'</div>';
-  h+='<button class="btn bi" onclick="printReleveTemplate(\''+selC+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button></div></div>';
+  h+='<button class="btn bi" onclick="printReleveTemplate(\''+selC+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button></div></div>';
   h+='<div class="ib ibt mb14"><span>📋</span><span>Relevé de notes vierge pour <strong>'+sub+'</strong> — Classe de <strong>'+selC+'</strong>. À remplir en classe puis saisir dans l\'application.</span></div>';
   h+='<div class="card"><div class="tw"><table><thead><tr><th style="width:30px">#</th><th>Nom et Prénom</th>';
   TRS.forEach(function(tri){h+='<th colspan="3" style="text-align:center;background:var(--blb);color:var(--bl)">'+tri+'</th>';});
@@ -7591,18 +7591,18 @@ function pgElearningMgmt(){
 
   // ─── BARRE D'OUTILS RAPIDES — gestion des modules pédagogiques liés ───
   h+='<div class="card mb16" style="background:linear-gradient(135deg,#F0FDF4,#D1FAE5);border:1px solid #A7F3D0">';
-  h+='<div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg></span>Modules e-learning éditables</div>';
+  h+='<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-zap"/></svg></span>Modules e-learning éditables</div>';
   h+='<div class="fl2 g8 fw">';
-  h+='<button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-package"/></svg>Packs personnalisés</button>';
-  h+='<button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-game"/></svg>Jeux éducatifs</button>';
-  h+='<button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="mManageLabos()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"/></svg>Laboratoires virtuels</button>';
-  h+='<button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-target"/></svg>Coaching</button>';
-  h+='<button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEpreuves()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Épreuves</button>';
+  h+='<button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="mManagePacksAdmin()"><svg class="vico bico" aria-hidden="true"><use href="#lc-package"/></svg>Packs personnalisés</button>';
+  h+='<button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageJeux()"><svg class="vico bico" aria-hidden="true"><use href="#lc-game"/></svg>Jeux éducatifs</button>';
+  h+='<button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="mManageLabos()"><svg class="vico bico" aria-hidden="true"><use href="#lc-flask"/></svg>Laboratoires virtuels</button>';
+  h+='<button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mManageCoaching()"><svg class="vico bico" aria-hidden="true"><use href="#lc-target"/></svg>Coaching</button>';
+  h+='<button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mManageEpreuves()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Épreuves</button>';
   var _nInact=(typeof _nbInactifs==='function')?_nbInactifs():0;
-  h+='<button class="btn sm" style="background:#DB2777;color:#fff;border-radius:10px" onclick="mRelances()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg>Relances'+(_nInact>0?(' ('+_nInact+')'):'')+'</button>';
-  h+='<button class="btn sm" style="background:#0D9488;color:#fff;border-radius:10px" onclick="mManageCoachMotiv()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flame"/></svg>Motivation</button>';
-  h+='<button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mManageEvals()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg>Évaluations en ligne</button>';
-  h+='<button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Import QCM</button>';
+  h+='<button class="btn sm" style="background:#DB2777;color:#fff;border-radius:10px" onclick="mRelances()"><svg class="vico bico" aria-hidden="true"><use href="#lc-megaphone"/></svg>Relances'+(_nInact>0?(' ('+_nInact+')'):'')+'</button>';
+  h+='<button class="btn sm" style="background:#0D9488;color:#fff;border-radius:10px" onclick="mManageCoachMotiv()"><svg class="vico bico" aria-hidden="true"><use href="#lc-flame"/></svg>Motivation</button>';
+  h+='<button class="btn sm" style="background:#16A34A;color:#fff;border-radius:10px" onclick="mManageEvals()"><svg class="vico bico" aria-hidden="true"><use href="#lc-chart"/></svg>Évaluations en ligne</button>';
+  h+='<button class="btn sm" style="background:#BE185D;color:#fff;border-radius:10px" onclick="mImportQCM()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Import QCM</button>';
   h+='</div></div>';
 
   // KPIs
@@ -7666,8 +7666,8 @@ function pgElearningMgmt(){
       h+='<td class="xs2">'+a.classe+'</td>';
       h+='<td class="mono xs2"><a href="https://wa.me/237'+a.tel.replace(/[^0-9]/g,'')+'" target="_blank" style="color:var(--gr)">📲 '+a.tel+'</a></td>';
       h+='<td><div class="fl2 g4">';
-      h+='<button class="btn bgr2 sm" onclick="activerAbonnement(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Activer</button>';
-      h+='<button class="btn br2 sm" onclick="deleteAbo(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>';
+      h+='<button class="btn bgr2 sm" onclick="activerAbonnement(\''+a.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Activer</button>';
+      h+='<button class="btn br2 sm" onclick="deleteAbo(\''+a.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>';
       h+='</div></td></tr>';
     });
     h+='</tbody></table></div></div>';
@@ -7675,7 +7675,7 @@ function pgElearningMgmt(){
 
   // Tous les abonnements
   h+='<div class="card mb16"><div class="fl2 fic fsb mb13">';
-  h+='<div class="ct mb0"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Tous les abonnés ('+abos.length+')</div>';
+  h+='<div class="ct mb0"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Tous les abonnés ('+abos.length+')</div>';
   if(abos.length>0){
     h+='<div class="fl2 g8">';
     h+='<span class="bg bgg">✅ Activés: '+abos.filter(function(a){return a.statut==='Activé';}).length+'</span>';
@@ -7698,8 +7698,8 @@ function pgElearningMgmt(){
       h+='<td class="mono xs2"><a href="https://wa.me/237'+a.tel.replace(/[^0-9]/g,'')+'" target="_blank" style="color:var(--gr)">📲 '+a.tel+'</a></td>';
       h+='<td><span class="bg '+(a.statut==='Activé'?'bgg':a.statut==='Expiré'?'bgr':'bgo')+'">'+a.statut+'</span></td>';
       h+='<td><div class="fl2 g4">';
-      if(a.statut!=='Activé'){h+='<button class="btn bgr2 xs" onclick="activerAbonnement(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Activer</button>';}
-      h+='<button class="btn bvi xs" onclick="changeAboPlan(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>';
+      if(a.statut!=='Activé'){h+='<button class="btn bgr2 xs" onclick="activerAbonnement(\''+a.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Activer</button>';}
+      h+='<button class="btn bvi xs" onclick="changeAboPlan(\''+a.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>';
       h+='<button class="btn br2 xs" onclick="deleteAbo(\''+a.id+'\')">🗑</button>';
       h+='</div></td></tr>';
     });
@@ -7727,7 +7727,7 @@ function pgElearningMgmt(){
 
   // Catalogue contenus
   h+='<div class="card"><div class="fl2 fic fsb mb13">';
-  h+='<div class="ct mb0"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg></span>Catalogue ('+el.contenus.length+' ressources)</div>';
+  h+='<div class="ct mb0"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-bookopen"/></svg></span>Catalogue ('+el.contenus.length+' ressources)</div>';
   h+='<button class="btn bi sm" onclick="mAddElearningContent()">+ Ajouter</button>';
   h+='<button class="btn bo sm" onclick="restoreAllDefaultContents()" style="font-size:11px">Restaurer defauts</button></div>';
 
@@ -7764,7 +7764,7 @@ function pgElearningMgmt(){
       h+='<td class="mono bold" style="color:var(--gold)">'+fmtN(item.prix||0)+'</td>';
       h+='<td>'+(item.fichierUrl?'<a href="'+item.fichierUrl+'" target="_blank" class="bg bgg" style="font-size:10px;text-decoration:none">☁️ Serveur</a>':item.externalUrl?'<a href="'+item.externalUrl+'" target="_blank" class="bg bgb" style="font-size:10px;text-decoration:none">🔗 URL</a>':item.fichierData?'<span class="bg" style="font-size:10px;background:#FEF3C7;color:#92400E">📄 Local</span>':'<span class="xs2 mut">—</span>')+'</td>';
       h+='<td>'+(item.gratuit?'<span class="bg bgg">✓</span>':'<span class="xs2 mut">—</span>')+'</td>';
-      h+='<td><div class="fl2 g4"><button class="btn bvi xs" onclick="mEditElearningContent(\''+item.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>';
+      h+='<td><div class="fl2 g4"><button class="btn bvi xs" onclick="mEditElearningContent(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>';
       h+='<button class="btn xs" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A" title="Uploader un fichier" onclick="_uploadElFichier(\''+item.id+'\')">📤</button>';
       if(item.externalUrl) h+='<button class="btn xs" style="background:#FFF8E1;color:#F59E0B;border:1px solid #FDE68A" onclick="mGererAccesContenu(\''+item.id+'\')">👥</button>';
       h+='<button class="btn br2 xs" onclick="deleteElearningContent(\''+item.id+'\')">🗑</button></div></td>';
@@ -7817,7 +7817,7 @@ function mAddElearningContent(){
   '<div class="fg full" id="ecUrlWrap" style="display:none"><span class="fl">URL du fichier HTML <small style="color:var(--ink3)">(hébergé sur veritas-school.com ou ailleurs)</small></span>'+
   '<input class="fi" id="ecExternalUrl" placeholder="https://veritas-school.com/evaluations/mon_epreuve.html" type="url"></div>'+
   '</div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveElearningContent()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter au catalogue</button>',true);
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveElearningContent()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter au catalogue</button>',true);
 }
 
 function mEditElearningContent(itemId){
@@ -8128,12 +8128,12 @@ function mGererAccesContenu(itemId){
       +'<td>'+status+'</td>'
       +'<td><div class="fl2 g4">'
       +(isBlocked
-        ?'<button class="btn bgg xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'unblock\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Rétablir</button>'
+        ?'<button class="btn bgg xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'unblock\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Rétablir</button>'
         :isUnlocked
-          ?'<button class="btn br2 xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'block\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Bloquer</button>'
-            +'<button class="btn bo xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'remove_unlock\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Retirer</button>'
-          :'<button class="btn bgg xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'unlock\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Débloquer</button>'
-            +'<button class="btn br2 xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'block\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Bloquer</button>'
+          ?'<button class="btn br2 xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'block\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Bloquer</button>'
+            +'<button class="btn bo xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'remove_unlock\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Retirer</button>'
+          :'<button class="btn bgg xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'unlock\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Débloquer</button>'
+            +'<button class="btn br2 xs" onclick="toggleAccesContenu(\''+itemId+'\',\''+acc.id+'\',\'block\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Bloquer</button>'
       )
       +'</div></td>'
       +'</tr>';
@@ -8183,7 +8183,7 @@ function changeAboPlan(id){
   '<div class="fg"><span class="fl">Plan actuel: <strong>'+abo.plan+'</strong></span></div>'+
   '<div class="fg"><span class="fl">Nouveau plan *</span><select class="fi" id="newPlan">'+plans.map(function(p){return '<option value="'+p.id+'"'+(p.id===abo.plan?' selected':'')+'>'+p.nom+' — '+fmtN(p.prix)+' XAF</option>';}).join('')+'</select></div>'+
   '<div class="fg"><span class="fl">Statut</span><select class="fi" id="newStatut"><option'+(abo.statut==='Activé'?' selected':'')+'>Activé</option><option'+(abo.statut==='En attente'?' selected':'')+'>En attente</option><option>Expiré</option></select></div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveAboPlan(\''+id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveAboPlan(\''+id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
 }
 function saveAboPlan(id){
   var abo=(DB.elearning.abonnements||[]).find(function(a){return a.id===id;});
@@ -8248,7 +8248,7 @@ function activerAbonnement(id){
         : '<div class="ib" style="background:#FEF9C3;border-color:#CA8A04"><span>⚠️</span><span>Aucun groupe WhatsApp actif pour la classe <b>'+_esc(acc.cls)+'</b>. Configurez un groupe dans Gestion → Groupes WhatsApp.</span></div>'),
       '<button class="btn bo" onclick="cm()">Plus tard</button>'
       +(grp&&acc.tel
-        ? '<button class="btn bi" onclick="cm();_sendWAGroupInvite(\''+acc.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Envoyer invitation WhatsApp</button>'
+        ? '<button class="btn bi" onclick="cm();_sendWAGroupInvite(\''+acc.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Envoyer invitation WhatsApp</button>'
         : ''));
   }
 }
@@ -8266,7 +8266,7 @@ function pgBoutiqueMgmt(){
   h+='<div class="sc scgr"><div class="sci">🛒</div><div class="scl">Commandes</div><div class="scv vgr">'+(DB.visitorOrders||[]).length+'</div></div>';
   h+='</div>';
   // Products table
-  h+='<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-package"/></svg></span>Tous les produits et services</div>';
+  h+='<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-package"/></svg></span>Tous les produits et services</div>';
   h+='<div class="tw"><table><thead><tr><th>Photo</th><th>Produit</th><th>Catégorie</th><th>Ancien prix</th><th>Nouveau prix</th><th>Réduction</th><th>Statut</th><th>Actions</th></tr></thead><tbody>';
   prods.forEach(function(p){
     var pct=p.ancien?Math.round((1-p.prix/p.ancien)*100):0;
@@ -8277,7 +8277,7 @@ function pgBoutiqueMgmt(){
     h+='<td class="mono bold" style="color:var(--gold)">'+fmt(p.prix)+'</td>';
     h+='<td>'+(pct?'<span class="bg bgr">-'+pct+'%</span>':'—')+'</td>';
     h+='<td><span class="bg '+(p.actif?'bgg':'bgr')+'">'+(p.actif?'Actif':'Inactif')+'</span></td>';
-    h+='<td><div class="fl2 g4"><button class="btn bo xs" onclick="mEditProduct(\''+p.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button><button class="btn '+(p.actif?'br2':'bgr2')+' xs" onclick="toggleProduct(\''+p.id+'\')">'+(p.actif?'⏸':'▶')+'</button><button class="btn br2 xs" onclick="deleteProduct(\''+p.id+'\')">🗑</button></div></td></tr>';
+    h+='<td><div class="fl2 g4"><button class="btn bo xs" onclick="mEditProduct(\''+p.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button><button class="btn '+(p.actif?'br2':'bgr2')+' xs" onclick="toggleProduct(\''+p.id+'\')">'+(p.actif?'⏸':'▶')+'</button><button class="btn br2 xs" onclick="deleteProduct(\''+p.id+'\')">🗑</button></div></td></tr>';
   });
   h+='</tbody></table></div></div>';
   return h;
@@ -8295,7 +8295,7 @@ function mAddProduct(){
   '<div class="fg full"><span class="fl">🎨 Picto 3D HD</span>'+
     '<div style="display:flex;gap:8px;align-items:center">'+
       '<input class="fi" id="pdPictoUrl" placeholder="(vide = emoji) ou URL...">'+
-      '<button type="button" class="btn bi sm" onclick="openPictoPicker(\'pdPictoUrl\')" style="white-space:nowrap;padding:8px 14px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-star"/></svg>Choisir</button>'+
+      '<button type="button" class="btn bi sm" onclick="openPictoPicker(\'pdPictoUrl\')" style="white-space:nowrap;padding:8px 14px"><svg class="vico bico" aria-hidden="true"><use href="#lc-star"/></svg>Choisir</button>'+
     '</div>'+
     '<div id="pdPictoPreview" style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink4)"></div>'+
   '</div>'+
@@ -8303,7 +8303,7 @@ function mAddProduct(){
   '<div class="fg"><span class="fl">⭐ Mettre en avant (Articles & Ressources)</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdFeatured"><span style="font-size:13px">Afficher dans le carrousel principal</span></label></div>'+
   '<div class="fg"><span class="fl">🆕 Badge "NEW"</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdNouveau"><span style="font-size:13px">Marquer comme nouveauté</span></label></div>'+
   '<div id="pdPreview" style="margin-top:8px"></div></div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveProduct()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>',true);
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveProduct()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>',true);
 }
 function loadProductPhoto(input){
   if(!input.files||!input.files[0])return;
@@ -8486,7 +8486,7 @@ function mEditProduct(pid){
   '<div class="fg full"><span class="fl">🎨 Picto 3D HD</span>'+
     '<div style="display:flex;gap:8px;align-items:center">'+
       '<input class="fi" id="pdPictoUrl" value="'+_esc(p.pictoUrl||'')+'" placeholder="(vide = emoji) ou URL...">'+
-      '<button type="button" class="btn bi sm" onclick="openPictoPicker(\'pdPictoUrl\')" style="white-space:nowrap;padding:8px 14px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-star"/></svg>Choisir</button>'+
+      '<button type="button" class="btn bi sm" onclick="openPictoPicker(\'pdPictoUrl\')" style="white-space:nowrap;padding:8px 14px"><svg class="vico bico" aria-hidden="true"><use href="#lc-star"/></svg>Choisir</button>'+
     '</div>'+
     '<div id="pdPictoPreview" style="margin-top:6px;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--ink4)">'+(p.pictoUrl?'<img src="'+_esc(p.pictoUrl)+'" style="width:36px;height:36px;object-fit:contain"> Picto actuel':'')+'</div>'+
   '</div>'+
@@ -8497,7 +8497,7 @@ function mEditProduct(pid){
   '<div class="fg"><span class="fl">⭐ Mettre en avant (Articles & Ressources)</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdFeatured"'+(p.featured?' checked':'')+'><span style="font-size:13px">Afficher dans le carrousel principal</span></label></div>'+
   '<div class="fg"><span class="fl">🆕 Badge "NEW"</span><label style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--blb);border-radius:8px;cursor:pointer"><input type="checkbox" id="pdNouveau"'+(p.nouveau?' checked':'')+'><span style="font-size:13px">Marquer comme nouveauté</span></label></div>'+
   '<div id="pdPreview">'+(p.photo?'<img src="'+p.photo+'" style="width:80px;height:80px;border-radius:10px;object-fit:cover">':'')+'</div></div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="updateProduct(\''+pid+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>',true);
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="updateProduct(\''+pid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>',true);
 }
 function updateProduct(pid){
   var p=(DB.products||[]).find(function(x){return x.id===pid;});if(!p)return;
@@ -8609,7 +8609,7 @@ function previewElContenu(itemId){
   '<div style="font-family:Georgia,serif;font-size:13px;color:var(--ink2);line-height:1.8">'+apercuContent+'</div>'+
   '</div>'+
   '<div class="ib ibt mb0"><span>🔒</span><span>Pour télécharger ce document complet, souscrivez à un abonnement ou commandez individuellement.</span></div>',
-  '<button class="btn bo" onclick="cm()">Fermer</button>'+(item.gratuit?'<button class="btn bgr2" onclick="cm();consulterGratuit(\''+item.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Consulter gratuitement</button>':'<button class="btn bi" onclick="cm();commanderContenu(\''+item.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg>Commander — '+fmtN(item.prix)+' FCFA</button><button class="btn" style="background:#FFC93C;color:#142554;font-weight:700" onclick="cm();document.getElementById(\'elPlans\')?.scrollIntoView({behavior:\'smooth\'})"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Voir les abonnements</button>'),true);
+  '<button class="btn bo" onclick="cm()">Fermer</button>'+(item.gratuit?'<button class="btn bgr2" onclick="cm();consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Consulter gratuitement</button>':'<button class="btn bi" onclick="cm();commanderContenu(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Commander — '+fmtN(item.prix)+' FCFA</button><button class="btn" style="background:#FFC93C;color:#142554;font-weight:700" onclick="cm();document.getElementById(\'elPlans\')?.scrollIntoView({behavior:\'smooth\'})"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Voir les abonnements</button>'),true);
 }
 
 function consulterGratuit(itemId){
@@ -8714,8 +8714,8 @@ function previewElContent(itemId){
       (item.gratuit?'Cette ressource est gratuite et accessible à tous.':'Pour accéder au contenu intégral, souscrivez à un abonnement ou commandez à l\u2019unité. Un aperçu limité (30%) est disponible.')+
       '</span></div>',
       '<button class="btn bo" onclick="cm()">Fermer</button>'+
-      (item.gratuit?'<button class="btn bi" onclick="cm();lancerRessourcePedago(\''+item.resPedago+'\',false)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>Lancer</button>':
-       '<button class="btn" style="background:#E8F0FE;color:#1a56db;font-weight:700" onclick="cm();lancerRessourcePedago(\''+item.resPedago+'\',true)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu (30%)</button>'+
+      (item.gratuit?'<button class="btn bi" onclick="cm();lancerRessourcePedago(\''+item.resPedago+'\',false)"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Lancer</button>':
+       '<button class="btn" style="background:#E8F0FE;color:#1a56db;font-weight:700" onclick="cm();lancerRessourcePedago(\''+item.resPedago+'\',true)"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu (30%)</button>'+
        '<button class="btn bi" onclick="cm();commanderContenu(\''+item.id+'\')">Commander</button>'));
     return;
   }
@@ -8788,7 +8788,7 @@ function viewResource(item, accessMode, dlUsedToday, dlLimitToday){
         viewer='<div style="text-align:center;padding:28px 16px;background:var(--bg2);border-radius:12px;margin-bottom:10px">'
           +'<div style="font-size:56px;margin-bottom:12px">📄</div>'
           +'<div style="font-size:14px;font-weight:700;color:var(--bl);margin-bottom:18px">'+_esc(fname)+'</div>'
-          +'<button class="btn bi" style="font-size:15px;padding:14px 28px;width:100%;max-width:280px;cursor:pointer" onclick="window.open(\''+_bvBlobUrl+'\',\'_blank\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
+          +'<button class="btn bi" style="font-size:15px;padding:14px 28px;width:100%;max-width:280px;cursor:pointer" onclick="window.open(\''+_bvBlobUrl+'\',\'_blank\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
           +'</div>';
       } else {
         viewer='<div style="border-radius:12px;overflow:hidden;border:1px solid var(--bg3);margin-bottom:10px">'+
@@ -8965,7 +8965,7 @@ function commanderAbonnement(planId){
   '<div class="fg full"><span class="fl">🤝 Code parrainage (facultatif)</span><input class="fi" id="elPromo" placeholder="Ex. JACQUES10 — code d\'un partenaire VÉRITAS" style="text-transform:uppercase"></div>'+
   '</div>'+
   '<div class="ib ibt mb13"><span>💳</span><span>Après validation, vous serez redirigé(e) vers notre formulaire de paiement sécurisé.</span></div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerAbonnement(\''+planId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Valider et payer</button>',true);
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerAbonnement(\''+planId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Valider et payer</button>',true);
 }
 
 function validerAbonnement(planId){
@@ -9050,7 +9050,7 @@ function commanderContenu(itemId){
   '<div class="fg"><span class="fl">WhatsApp *</span><input class="fi" id="cmdTel" placeholder="697 637 739"></div>'+
   '</div>'+
   '<div class="ib ibt mb13"><span>💳</span><span>Après validation, vous serez redirigé(e) vers notre formulaire de paiement sécurisé.</span></div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerCommandeContenu(\''+itemId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Commander et payer</button>',true);
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerCommandeContenu(\''+itemId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Commander et payer</button>',true);
 }
 
 function validerCommandeContenu(itemId){
@@ -9092,7 +9092,7 @@ function commanderPersonnalise(){
   '<div class="fg"><span class="fl">Séquence / Période</span><input class="fi" id="cpSeq" placeholder="Ex: Séquence 3, Trimestre 2..."></div>'+
   '<div class="fg full"><span class="fl">Description détaillée *</span><textarea class="fi" id="cpDesc" rows="3" placeholder="Décrivez ce que vous souhaitez: chapitres, thèmes, exercices..."></textarea></div>'+
   '</div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerCommandePerso()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Envoyer la demande</button>',true);
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerCommandePerso()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Envoyer la demande</button>',true);
 }
 
 function validerCommandePerso(){
@@ -9125,7 +9125,7 @@ function pgDataReset(){
   var total=logs+notifs+orders+elCmds+elSoum;
 
   var h='<div class="fl2 fic fsb mb16 fw g8"><div class="bold" style="font-size:18px">🗑 Nettoyage & Réinitialisation</div>';
-  h+='<button class="btn bi" onclick="autoCleanOldData()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Nettoyage automatique</button></div>';
+  h+='<button class="btn bi" onclick="autoCleanOldData()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Nettoyage automatique</button></div>';
 
   h+='<div class="ib ibr mb14"><span>⚠️</span><span><strong>Espace utilisé:</strong> ~'+Math.round(JSON.stringify(DB).length/1024)+' Ko — <strong>'+total+'</strong> entrées nettoyables. Imprimez avant de supprimer.</span></div>';
 
@@ -9139,16 +9139,16 @@ function pgDataReset(){
   items.forEach(function(it){
     h+='<div class="card"><div class="ct">'+it[1]+'</div>';
     h+='<div style="font-size:14px;margin-bottom:10px"><strong style="font-size:20px;color:var(--bl2)">'+it[2]+'</strong> entrées</div>';
-    h+='<div class="fl2 g8"><button class="btn bo sm" onclick="printResetData(\''+it[0]+'\',\''+it[3]+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>';
-    h+='<button class="btn br2 sm" onclick="resetData(\''+it[0]+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Vider</button></div></div>';
+    h+='<div class="fl2 g8"><button class="btn bo sm" onclick="printResetData(\''+it[0]+'\',\''+it[3]+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>';
+    h+='<button class="btn br2 sm" onclick="resetData(\''+it[0]+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Vider</button></div></div>';
   });
 
   // E-learning items
   [['commandes','📚 Commandes e-learning',elCmds],['soumissions','📤 Soumissions',elSoum]].forEach(function(it){
     h+='<div class="card"><div class="ct">'+it[1]+'</div>';
     h+='<div style="font-size:14px;margin-bottom:10px"><strong style="font-size:20px;color:var(--bl2)">'+it[2]+'</strong> entrées</div>';
-    h+='<div class="fl2 g8"><button class="btn bo sm" onclick="printResetData(\'elearning.'+it[0]+'\',\''+it[1]+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>';
-    h+='<button class="btn br2 sm" onclick="resetElData(\''+it[0]+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Vider</button></div></div>';
+    h+='<div class="fl2 g8"><button class="btn bo sm" onclick="printResetData(\'elearning.'+it[0]+'\',\''+it[1]+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>';
+    h+='<button class="btn br2 sm" onclick="resetElData(\''+it[0]+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Vider</button></div></div>';
   });
 
   h+='</div>';
@@ -9271,7 +9271,7 @@ function mAddTeacherHours(tid){
     '<div class="fg"><span class="fl">Description</span><input class="fi" id="thDesc" placeholder="Cours, TP, examen..."></div>'+
     '</div>'+
     '<div class="ib ibi mt8 mb0"><span>💰</span><span>Taux horaire: <strong>'+fmt(DB.tauxHoraire||2000)+' /h</strong></span></div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveTeacherHours(\''+tid+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveTeacherHours(\''+tid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
 }
 
 function saveTeacherHours(tid){
@@ -9666,6 +9666,7 @@ const ANAV=[
     {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
     {k:"parrainage_admin",i:"🎁",l:"Programme parrainage"},
     {k:"partenaires_admin",i:"🤝",l:"Programme Partenariat"},
+    {k:"demandes",i:"✉",l:"Demandes & devis"},
     {k:"forum_admin",i:"💬",l:"Modération Forum"},
     {k:"marketplace_admin",i:"🛒",l:"Marketplace auteurs"},
     {k:"cms",i:"🌐",l:"Portail visiteur"},
@@ -9729,6 +9730,7 @@ const SANAV=[
     {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
     {k:"parrainage_admin",i:"🎁",l:"Programme parrainage"},
     {k:"partenaires_admin",i:"🤝",l:"Programme Partenariat"},
+    {k:"demandes",i:"✉",l:"Demandes & devis"},
     {k:"forum_admin",i:"💬",l:"Modération Forum"},
     {k:"marketplace_admin",i:"🛒",l:"Marketplace auteurs"},
     {k:"cms",i:"🌐",l:"Portail visiteur"},
@@ -9793,6 +9795,7 @@ const PT={
   send:"Centre WhatsApp",
   orientation_admin:"Orientation & Conseil",
   cms:"Portail visiteur (CMS)",
+  demandes:"Demandes & devis",
   // Super Admin
   superoverview:"Vue d'ensemble système",
   sacontrol:"Centre de contrôle Super Admin",
@@ -9890,6 +9893,7 @@ function render(p){
     'partenariat-universite':function(){return pgPartnerProgram('universite');},
     'partenariat-sponsor':function(){return pgPartnerProgram('sponsor');},
     partenaires_admin:pgPartnersAdmin,
+    demandes:(typeof pgDemandes==='function'?pgDemandes:null),
     mes_partenariats:pgPartnerPortal,
     'verifier-certificat':pgCertificateVerify,
     'leaderboard-junior':pgLeaderboardJunior,
@@ -10036,19 +10040,19 @@ function pgDash(){
       return '<div style="background:'+_bg+';border-radius:14px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px"><div style="display:flex;align-items:center;gap:12px"><span style="font-size:26px">&#128241;</span><div><div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:800;color:#fff">Groupe WA &#8212; '+_esc(_wg.nom)+'</div><div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:2px">'+_sub+'</div></div></div>'+_btn+'</div>';
     })()}
     <div class="g2">
-      <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg></span>Mes dernières notes — ${TRS[0]}</div>
+      <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-pencil"/></svg></span>Mes dernières notes — ${TRS[0]}</div>
         ${gr.length===0?'<div class="empty"><div class="empty-ico">📋</div>Aucune note disponible</div>':gr.map(g=>{const m=_subMoy(g);const ap2=getAppr(m);return`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)">
           <div><div class="semi s">${g.sub}</div><div class="xs2 mut">Coef. ${g.coef} · ${g.ens}</div></div>
           <div class="fl2 fic g8"><span class="mono xs2">${g.n1}/20 + ${g.n2}/20</span><span class="bg" style="background:${ap2.col}20;color:${ap2.col};border:1px solid ${ap2.col}44">${m.toFixed(1)}</span></div>
         </div>`;}).join("")}
-        <button class="btn bgr2 sm mt14" onclick="goTo('mon_bulletin')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Voir bulletin complet →</button>
+        <button class="btn bgr2 sm mt14" onclick="goTo('mon_bulletin')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Voir bulletin complet →</button>
       </div>
       <div>
-        <div class="card mb16"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Prochains devoirs</div>
+        <div class="card mb16"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Prochains devoirs</div>
           ${dvsPending.length===0?'<div class="empty"><div class="empty-ico">✅</div>Tous les devoirs remis !</div>':dvsPending.slice(0,3).map(d=>{const dl=new Date(d.dateLimit);const j=Math.ceil((dl-new Date())/864e5);const cls2=j<0?'dv-late':j<=3?'dv-warn':'dv-ok';return`<div class="dv-card"><div class="fl2 fic fsb mb8"><span class="bg bgb">${d.sub}</span><span class="dv-deadline ${cls2}">${j<0?'En retard':j===0?'Auj.':`dans ${j}j`}</span></div><div class="semi s mb4">${d.titre}</div><div style="font-size:13px;color:var(--ink4)">Limite: ${dl.toLocaleDateString('fr-FR')}</div></div>`;}).join("")}
-          <button class="btn bvi sm mt8" onclick="goTo('mes_devoirs')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Tous mes devoirs →</button>
+          <button class="btn bvi sm mt8" onclick="goTo('mes_devoirs')"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Tous mes devoirs →</button>
         </div>
-        <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg></span>Annonces récentes</div>
+        <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-megaphone"/></svg></span>Annonces récentes</div>
           ${DB.announce.slice(-3).reverse().map(a=>`<div class="fl2 fic g10" style="padding:8px 0;border-bottom:1px solid var(--bg2)"><span class="bg ${EVT[a.type]?.c||'bgt'} xs">${_esc(EVT[a.type]?.l||a.type)}</span><div class="s semi">${_esc(a.titre)}</div></div>`).join("") || '<div class="empty xs2">Aucune annonce</div>'}
           <button class="btn bo sm mt8" onclick="goTo('announce')">Toutes les annonces →</button>
         </div>
@@ -10078,16 +10082,16 @@ function pgDash(){
         ${mg.length===0?'<div class="empty"><div class="empty-ico">📋</div>Aucune note saisie</div>':`<div class="tw"><table><thead><tr><th>Élève</th><th>Classe</th><th>Dev.1</th><th>Dev.2</th><th>Moy.</th></tr></thead><tbody>
         ${mg.slice(-8).reverse().map(g=>{const m=_subMoy(g);const ap2=getAppr(m);return`<tr><td class="bold s">${g.enom}</td><td><span class="bg bgt">${g.cls}</span></td><td class="mono s">${g.n1}/20</td><td class="mono s">${g.n2}/20</td><td class="mono bold s" style="color:${ap2.col}">${m.toFixed(2)}</td></tr>`;}).join("")}
         </tbody></table></div>`}
-        <button class="btn bgr2 sm mt14" onclick="goTo('grades')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Saisir des notes →</button>
+        <button class="btn bgr2 sm mt14" onclick="goTo('grades')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Saisir des notes →</button>
       </div>
       <div>
-        <div class="card mb16"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Mes devoirs récents</div>
+        <div class="card mb16"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Mes devoirs récents</div>
           ${myDvs.length===0?'<div class="empty"><div class="empty-ico">📋</div>Aucun devoir proposé</div>':myDvs.slice(-3).reverse().map(d=>{const nbSub=DB.submissions.filter(sb=>sb.dvid===d.id).length;return`<div class="dv-card"><div class="fl2 fic fsb mb4"><span class="bg bgb">${d.sub} · ${d.cls}</span><span class="bg bgt">${nbSub} soum.</span></div><div class="semi s mb4">${d.titre}</div><div style="font-size:13px;color:var(--ink4)">Limite: ${new Date(d.dateLimit).toLocaleDateString('fr-FR')}</div></div>`;}).join("")}
-          <button class="btn bvi sm mt8" onclick="goTo('devoirs_teacher')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Gérer mes devoirs →</button>
+          <button class="btn bvi sm mt8" onclick="goTo('devoirs_teacher')"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Gérer mes devoirs →</button>
         </div>
-        <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Performance par classe</div>
+        <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Performance par classe</div>
           ${clsSet.map(cls=>{const clsGr=mg.filter(g=>g.cls===cls);const moysAll=clsGr.reduce((acc,g)=>{if(!acc[g.eid])acc[g.eid]={total:0,coef:0};acc[g.eid].total+=_subMoy(g)*g.coef;acc[g.eid].coef+=g.coef;return acc;},{});const moyClasses=Object.values(moysAll).map(x=>x.total/x.coef);const avg=moyClasses.length?moyClasses.reduce((a,b)=>a+b,0)/moyClasses.length:0;return`<div class="fl2 fic fsb mb10"><div><div class="semi s">${cls}</div><div class="xs2 mut">${[...new Set(clsGr.map(g=>g.eid))].length} élèves</div></div><div class="fl2 fic g8"><div class="pb" style="width:100px"><div class="pf pfg" style="width:${Math.round(avg/20*100)}%"></div></div><span class="mono xs2" style="color:var(--gold)">${avg.toFixed(1)}/20</span></div></div>`;}).join("") || '<div class="xs2 mut">Aucune donnée</div>'}
-          <button class="btn bo sm mt8" onclick="goTo('perf_teacher')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg>Analyse complète →</button>
+          <button class="btn bo sm mt8" onclick="goTo('perf_teacher')"><svg class="vico bico" aria-hidden="true"><use href="#lc-chart"/></svg>Analyse complète →</button>
         </div>
       </div>
     </div>`;
@@ -10123,18 +10127,18 @@ function pgDash(){
   <div class="g2">
     <div class="card"><div class="ct">Répartition par classe</div>
       ${cd.map(({c,n})=>`<div class="mb12"><div class="fl2 fic fsb mb6"><span class="semi s">${c}</span><span class="mono xs2 mut">${n} élève${n>1?'s':''}</span></div><div class="pb"><div class="pf pfg" style="width:${Math.round(n/mx*100)}%"></div></div></div>`).join("")}
-      <button class="btn bo sm mt14" onclick="goTo('students')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg>Voir inscriptions →</button>
+      <button class="btn bo sm mt14" onclick="goTo('students')"><svg class="vico bico" aria-hidden="true"><use href="#lc-graduation"/></svg>Voir inscriptions →</button>
     </div>
     <div class="card"><div class="ct">Derniers paiements</div>
       ${rp.map(p=>`<div class="fl2 fic fsb" style="padding:9px 0;border-bottom:1px solid var(--bg2)">
         <div class="fl2 fic g10"><div class="av" style="width:28px;height:28px;background:var(--gp);color:var(--gold);border:1.5px solid var(--gb);font-size:12px">${p.enom[0]}</div>
         <div><div class="semi s">${p.enom}</div><div class="xs2 mut">${p.mo}</div></div></div>
         <div class="fl2 fic g6"><span class="mono s" style="color:var(--gold)">${fmt(p.mnt)}</span><span class="bg ${p.stat==='Payé'?'bgg':p.stat==='Impayé'?'bgr':'bgo'}">${p.stat}</span></div></div>`).join("")}
-      <button class="btn bo sm mt14" onclick="goTo('payments')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-card"/></svg>Tous les paiements →</button>
+      <button class="btn bo sm mt14" onclick="goTo('payments')"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Tous les paiements →</button>
     </div>
   </div>
   <div class="g2">
-    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></span>Meilleurs élèves — ${TRS[0]}</div>
+    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-award"/></svg></span>Meilleurs élèves — ${TRS[0]}</div>
       ${tops.slice(0,5).map((s,i)=>{const ap2=getAppr(s.moy);return`<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)">
         <div class="fl2 fic g10"><div style="width:24px;height:24px;border-radius:50%;background:${i===0?'var(--gp)':'var(--bg3)'};color:${i===0?'var(--gold)':'var(--ink4)'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700">${i+1}</div>
         <div><div class="semi s">${s.pre} ${s.nom}</div><div class="xs2 mut">${s.cls}</div></div></div>
@@ -10147,10 +10151,10 @@ function pgDash(){
         <div class="xs2 mut">Résultat net</div>
         <div class="mono bold mt8" style="font-size:22px;color:${bnet>=0?'var(--gr)':'var(--re)'}">${bnet>=0?'+':''} ${fmt(bnet)}</div>
       </div>
-      <button class="btn bi sm mt14" onclick="goTo('finance')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trending"/></svg>Bilan détaillé →</button>
+      <button class="btn bi sm mt14" onclick="goTo('finance')"><svg class="vico bico" aria-hidden="true"><use href="#lc-trending"/></svg>Bilan détaillé →</button>
     </div>
   </div>
-  ${ua.length>0?`<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg></span>Événements à venir</div><div class="fl2 g12 fw">${ua.map(a=>{const dL=Math.ceil((new Date(a.date)-new Date())/864e5);return`<div style="flex:1;min-width:180px;padding:14px;border-radius:var(--r2);border:var(--br);background:var(--sur2)"><div class="fl2 fic fsb mb8"><span class="bg ${EVT[a.type]?.c||'bgt'}">${EVT[a.type]?.l||a.type}</span><span class="xs2 mut">${dL>0?`dans ${dL}j`:dL===0?'Auj.':`${Math.abs(dL)}j passé`}</span></div><div class="semi s mb4">${a.titre}</div></div>`;}).join("")}</div></div>`:''}`
+  ${ua.length>0?`<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-megaphone"/></svg></span>Événements à venir</div><div class="fl2 g12 fw">${ua.map(a=>{const dL=Math.ceil((new Date(a.date)-new Date())/864e5);return`<div style="flex:1;min-width:180px;padding:14px;border-radius:var(--r2);border:var(--br);background:var(--sur2)"><div class="fl2 fic fsb mb8"><span class="bg ${EVT[a.type]?.c||'bgt'}">${EVT[a.type]?.l||a.type}</span><span class="xs2 mut">${dL>0?`dans ${dL}j`:dL===0?'Auj.':`${Math.abs(dL)}j passé`}</span></div><div class="semi s mb4">${a.titre}</div></div>`;}).join("")}</div></div>`:''}`
 }
 
 // ═══════════════════════════════════════════════
@@ -10170,7 +10174,7 @@ function pgMonBulletin(){
   }
   return`<div class="fl2 fic g8 mb20 fw">
     ${TRS.map(t=>`<button class="tab${t===selT?' on':''}" onclick="window._bT='${t}';re()">${t}</button>`).join("")}
-    <button class="btn bi sm" onclick="printBulletin('${s.id}','${selT}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer bulletin</button>
+    <button class="btn bi sm" onclick="printBulletin('${s.id}','${selT}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer bulletin</button>
   </div>
   <div class="card mb16" style="background:linear-gradient(135deg,#142554,#1a3a8a);color:#fff;border:none;padding:22px">
     <div class="fl2 fic fsb fw g12">
@@ -10250,7 +10254,7 @@ function pgMesDevoirs(){
       </div>
       ${!sub?`<div style="margin-top:12px;padding-top:12px;border-top:var(--br)">
         <div class="fg mb8"><span class="fl">Ma réponse / commentaire</span><textarea class="fi" id="subText_${d.id}" rows="3" placeholder="Entrez votre réponse ou commentaire..."></textarea></div>
-        <button class="btn bgr2 sm" onclick="submitDevoir('${d.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg>Soumettre</button>
+        <button class="btn bgr2 sm" onclick="submitDevoir('${d.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Soumettre</button>
       </div>`:(sub.commentaire?`<div class="ib ibg mt12 mb0"><span>💬</span><span>${sub.commentaire}</span></div>`:'')
       }
     </div>`;}).join("")}`;
@@ -10299,7 +10303,7 @@ function pgMonPaiement(){
       <td class="xs2">${p.mode}</td>
       <td class="xs2 mut">${p.dt||'—'}</td>
       <td><span class="bg ${p.stat==='Payé'?'bgg':p.stat==='Impayé'?'bgr':'bgo'}">${p.stat}</span></td>
-      <td>${p.stat==='Payé'?`<button class="btn bo xs" onclick="printRec('${p.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu</button>`:''}</td>
+      <td>${p.stat==='Payé'?`<button class="btn bo xs" onclick="printRec('${p.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu</button>`:''}</td>
     </tr>`).join("")}</tbody></table></div>`}
   </div>
   ${purchases.length>0?`<div class="card"><div class="ct">Achats de manuels</div>
@@ -10328,7 +10332,7 @@ function pgBoutique(){
           <span class="mono bold s" style="color:var(--gold)">${fmt(b.prix)}</span>
           <span class="bg ${b.stock>0?'bgg':'bgr'}" style="font-size:12px">${b.stock>0?b.stock+' dispo':'Rupture'}</span>
         </div>
-        ${owned?'<div class="ib ibg mt8 mb0" style="font-size:12px"><span>✅</span><span>Déjà acheté</span></div>':(b.stock>0?`<button class="btn bi sm mt8" style="width:100%;justify-content:center" onclick="acheterManuel('${b.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg>Acheter</button>`:`<button class="btn" style="width:100%;justify-content:center;background:var(--bg3);color:var(--ink4);cursor:not-allowed;padding:5px" disabled>Rupture de stock</button>`)}
+        ${owned?'<div class="ib ibg mt8 mb0" style="font-size:12px"><span>✅</span><span>Déjà acheté</span></div>':(b.stock>0?`<button class="btn bi sm mt8" style="width:100%;justify-content:center" onclick="acheterManuel('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Acheter</button>`:`<button class="btn" style="width:100%;justify-content:center;background:var(--bg3);color:var(--ink4);cursor:not-allowed;padding:5px" disabled>Rupture de stock</button>`)}
       </div>
     </div>`;}).join("")}
   </div>`;
@@ -10340,7 +10344,7 @@ function acheterManuel(bid){
   M('Acheter ce manuel',b.titre,`<div class="vcard" style="text-align:center;margin-bottom:14px"><div style="font-size:48px;margin-bottom:8px">${b.ico}</div><div class="bold s">${b.titre}</div><div class="xs2 mut">${b.cls} · ${b.auteur} · ${b.pages} pages</div></div>
     <div style="padding:14px;background:var(--gp);border-radius:var(--r2);border:1px solid var(--gb);text-align:center"><div class="mono bold" style="font-size:24px;color:var(--gold)">${fmt(b.prix)}</div><div class="xs2 mut mt4">Prix d\'achat</div></div>
     <div class="ib ibt mt14 mb0"><span>ℹ️</span><span>Votre commande sera enregistrée. Rendez-vous à l\'administration pour récupérer votre manuel et effectuer le paiement.</span></div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="confirmerAchat('${bid}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Confirmer la commande</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="confirmerAchat('${bid}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Confirmer la commande</button>`);
 }
 
 function confirmerAchat(bid){
@@ -10382,7 +10386,7 @@ function pgDevoirsTeacher(){
     return`<div class="card mb14">
       <div class="fl2 fic fsb mb8 fw g8">
         <div class="fl2 fic g8 fw"><span class="bg bgb">${d.sub}</span><span class="bg bgt">${d.cls}</span><span class="bg bgd">${d.tri}</span></div>
-        <div class="fl2 g6"><button class="btn bo xs" onclick="viewSubs('${d.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg>${subs.length} soum.</button><button class="btn br2 xs" onclick="delDevoir('${d.id}')">🗑</button></div>
+        <div class="fl2 g6"><button class="btn bo xs" onclick="viewSubs('${d.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>${subs.length} soum.</button><button class="btn br2 xs" onclick="delDevoir('${d.id}')">🗑</button></div>
       </div>
       <div class="semi s mb4">${d.titre}</div>
       <div style="font-size:13px;color:var(--ink2);margin-bottom:10px">${d.desc}</div>
@@ -10399,7 +10403,7 @@ function mAddDevoir(){
     <div class="fg full"><span class="fl">Description / Instructions *</span><textarea class="fi" id="dvDesc" rows="4" placeholder="Décrivez le travail à effectuer..."></textarea></div>
     <div class="fg"><span class="fl">Date limite *</span><input class="fi" id="dvDl" type="date"></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveDevoir()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Publier le devoir</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveDevoir()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Publier le devoir</button>`);
 }
 
 function saveDevoir(){
@@ -10424,7 +10428,7 @@ function viewSubs(dvid){
       <div class="fl2 fic g8">
         <div class="fg" style="flex:1"><input type="number" min="0" max="20" step="0.5" placeholder="Note /20" value="${sb.note||''}" id="note_${sb.id}" style="width:90px;padding:7px;border:1.5px solid var(--bg3);border-radius:6px;outline:none;font-size:13px"></div>
         <div class="fg" style="flex:2"><input type="text" placeholder="Commentaire optionnel" value="${_esc(sb.commentaire||'')}" id="comm_${sb.id}" class="fi"></div>
-        <button class="btn bgr2 sm" onclick="saveNote_sb('${sb.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Noter</button>
+        <button class="btn bgr2 sm" onclick="saveNote_sb('${sb.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Noter</button>
       </div>
     </div>`;}).join(""),
   `<button class="btn bo" onclick="cm()">Fermer</button>`);
@@ -10482,7 +10486,7 @@ function pgAbsencesAdmin(){
       <div class="fg"><span class="fl">Élève</span><select class="fi" style="min-width:200px" onchange="window._abE=this.value;re()"><option value="Tous">Tous les élèves</option>${stFilt.map(s=>`<option value="${s.id}"${s.id===selE?' selected':''}>${s.pre} ${s.nom}</option>`).join("")}</select></div>
     </div>
     <button class="btn bi" onclick="mAddAbsence()">＋ Saisie individuelle</button>
-    <button class="btn bg2" onclick="mBulkAbsence()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Saisie par liste</button>
+    <button class="btn bg2" onclick="mBulkAbsence()"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Saisie par liste</button>
   </div>
   <div class="sg" style="grid-template-columns:repeat(3,1fr)">
     <div class="sc scr"><div class="sci">⏱️</div><div class="scl">Total heures</div><div class="scv vr">${filtAbs.reduce((a,b)=>a+b.heures,0)}h</div></div>
@@ -10517,7 +10521,7 @@ function mAddAbsence(){
     <div class="fg"><span class="fl">Motif</span><input class="fi" id="abMotif" placeholder="Ex: Maladie, Voyage..."></div>
     <div class="fg full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="abJust"> <span class="fl">Absence justifiée</span></label></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveAbsence()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveAbsence()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
   setTimeout(()=>updateStudentList(),100);
 }
 
@@ -10540,7 +10544,7 @@ function mBulkAbsence(){
   '<div class="fl2 fic g8 mb13"><div class="fg"><span class="fl">Classe</span><select class="fi" onchange="window._abCls=this.value;cm();mBulkAbsence()">'+CLS.map(function(cl){return '<option'+(cl===cls?' selected':'')+'>'+cl+'</option>';}).join('')+'</select></div><div class="fg"><span class="fl">Matière</span><select class="fi" id="bAbMat">'+SUBS.map(function(s){return '<option>'+s+'</option>';}).join('')+'</select></div><div class="fg"><span class="fl">Date</span><input class="fi" id="bAbDate" type="date" value="'+new Date().toISOString().split('T')[0]+'"></div></div>'+
   '<div class="ib ibt mb13"><span>✅</span><span>Cochez les élèves absents et indiquez le nombre d\'heures.</span></div>'+
   '<div class="tw"><table><thead><tr><th>#</th><th>Élève</th><th>Absent</th><th>Heures</th><th>Motif</th></tr></thead><tbody>'+rows+'</tbody></table></div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveBulkAbsence()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer les absences</button>',true);
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveBulkAbsence()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer les absences</button>',true);
 }
 function saveBulkAbsence(){
   var checks=document.querySelectorAll('.abCheck:checked');
@@ -10579,7 +10583,7 @@ function pgDevoirsAdmin(){
         <td><div class="semi s">${d.titre}</div><div class="xs2 mut">${d.desc.substring(0,60)}${d.desc.length>60?'...':''}...</div></td>
         <td class="xs2 mut">${dl.toLocaleDateString('fr-FR')} ${j<0?'<span style="color:var(--re);font-weight:700"> · Passé</span>':''}  </td>
         <td><span class="bg ${subs.length>0?'bgg':'bgt'}">${subs.length} soum.</span></td>
-        <td><button class="btn bo xs" onclick="viewSubs('${d.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg>Voir</button></td>
+        <td><button class="btn bo xs" onclick="viewSubs('${d.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Voir</button></td>
       </tr>`;}).join("")}</tbody>
     </table></div>
   </div>`;
@@ -10594,18 +10598,18 @@ function pgCMS(){
   return`<div class="ib ibg mb16"><span>🌐</span><span>Modifiez ici <strong>tout le contenu</strong> affiché sur le portail visiteur public.</span></div>
   <!-- BARRE D'OUTILS RAPIDES — accès aux gestionnaires CMS depuis un seul endroit -->
   <div class="card mb16" style="background:linear-gradient(135deg,#F8F9FF,#EDE9FE);border:1px solid #C7D2FE">
-    <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg></span>Outils rapides du portail</div>
+    <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-zap"/></svg></span>Outils rapides du portail</div>
     <div class="fl2 g8 fw">
-      <button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg>Bandeau défilant</button>
-      <button class="btn sm" style="background:#AE5353;color:#fff;border-radius:10px" onclick="mSetIntroVideo()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-camera"/></svg>Vidéo d'accueil</button>
-      <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-calendar"/></svg>Calendrier événements</button>
-      <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"/></svg>Partenaires</button>
-      <button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="mManageExtraits()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Extraits de manuels</button>
-      <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageCitations()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>Citations héro</button>
+      <button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="mManageTickerAdmin()"><svg class="vico bico" aria-hidden="true"><use href="#lc-megaphone"/></svg>Bandeau défilant</button>
+      <button class="btn sm" style="background:#AE5353;color:#fff;border-radius:10px" onclick="mSetIntroVideo()"><svg class="vico bico" aria-hidden="true"><use href="#lc-camera"/></svg>Vidéo d'accueil</button>
+      <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mEditCalendrier()"><svg class="vico bico" aria-hidden="true"><use href="#lc-calendar"/></svg>Calendrier événements</button>
+      <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mManagePartenaires()"><svg class="vico bico" aria-hidden="true"><use href="#lc-handshake"/></svg>Partenaires</button>
+      <button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="mManageExtraits()"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Extraits de manuels</button>
+      <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="mManageCitations()"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Citations héro</button>
     </div>
   </div>
   <div class="g2">
-    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-university"/></svg></span>Présentation</div>
+    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-university"/></svg></span>Présentation</div>
       <div class="fg mb10"><span class="fl">Slogan accrocheur</span><input class="fi" id="cms_slogan2" value="${pi.slogan2||''}"></div>
       <div class="fg mb10"><span class="fl">Description du centre</span><textarea class="fi" id="cms_description" rows="5">${pi.description||''}</textarea></div>
       <div class="fg mb10"><span class="fl">Horaires d\'ouverture</span><input class="fi" id="cms_horaires" value="${pi.horaires||''}"></div>
@@ -10614,27 +10618,27 @@ function pgCMS(){
       <div class="fg mb10"><span class="fl">WhatsApp</span><input class="fi" id="cms_whatsapp" value="${pi.whatsapp||''}" placeholder="+237 656 720 476"></div>
       <div class="fg mb10"><span class="fl">📍 Adresse complète</span><input class="fi" id="cms_adresse" value="${pi.adresse||''}" placeholder="Quartier, Ville"></div>
       <div class="fg mb10"><span class="fl">📌 Boîte Postale</span><input class="fi" id="cms_bp" value="${pi.bp||''}" placeholder="BP 1234, Douala"></div>
-      <button class="btn bi sm mt8" onclick="saveCMS('presentation')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>
+      <button class="btn bi sm mt8" onclick="saveCMS('presentation')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>
     </div>
-    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg></span>Histoire</div>
+    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-bookopen"/></svg></span>Histoire</div>
       <div class="fg mb10"><span class="fl">Texte de l\'histoire</span><textarea class="fi" id="cms_histoire" rows="6">${pi.histoire||''}</textarea></div>
       <div class="fg mb10"><span class="fl">Équipe pédagogique</span><input class="fi" id="cms_equipe" value="${pi.equipe||''}"></div>
-      <button class="btn bi sm mt8" onclick="saveCMS('histoire')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>
+      <button class="btn bi sm mt8" onclick="saveCMS('histoire')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>
     </div>
   </div>
   <div class="g2 mt16">
-    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-camera"/></svg></span>Galerie Photos</div>
+    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-camera"/></svg></span>Galerie Photos</div>
       <div class="mb12">${(DB.galleryImages||[]).length} photo(s) en galerie</div>
-      <button class="btn bi sm" onclick="uploadGalleryPhoto()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-camera"/></svg>Ajouter des photos</button>
+      <button class="btn bi sm" onclick="uploadGalleryPhoto()"><svg class="vico bico" aria-hidden="true"><use href="#lc-camera"/></svg>Ajouter des photos</button>
       <div class="fl2 g8 fw mt12">${(DB.galleryImages||[]).map(p=>'<div style="position:relative;width:80px;height:60px;border-radius:4px;overflow:hidden;border:1px solid var(--bg3);background:#F1F5F9"><img src="'+(p.src||'')+'" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display=\'none\';var pl=this.parentNode.querySelector(\'.imgpl\');if(pl)pl.style.display=\'flex\';"><div class="imgpl" style="display:'+(p.src?'none':'flex')+';position:absolute;inset:0;background:linear-gradient(135deg,#FEE2E2,#FECACA);align-items:center;justify-content:center;font-size:20px;color:#991B1B">🖼️</div><button title="Supprimer" style="position:absolute;top:1px;right:1px;background:var(--re);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;line-height:1;z-index:2" onclick="deleteGalleryPhoto(&quot;'+p.id+'&quot;)">×</button></div>').join('')}</div>
     </div>
-    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></span>Résultats aux examens</div>
+    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-award"/></svg></span>Résultats aux examens</div>
       <div class="ib ibi mb12"><span>💡</span><span>Modifiez les taux de réussite et les années affichés aux visiteurs. L'admin peut ajouter/supprimer des années.</span></div>
       <div id="cms_resultats_zone">
       ${(DB.examResults||[]).map((er,ei)=>`<div class="mb14" style="background:var(--bg2);border-radius:12px;padding:12px 14px;border:var(--br)">
         <div class="fl2 fic fsb mb8">
           <input class="fi" style="font-weight:700;font-size:13px;max-width:160px;padding:4px 8px" id="cms_er_annee_${ei}" value="${er.annee}" placeholder="Ex: 2024–2025">
-          <button class="btn xs" style="background:var(--reb);color:var(--re);border:1px solid var(--red)" onclick="_cmsDelAnnee(${ei})"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Supprimer</button>
+          <button class="btn xs" style="background:var(--reb);color:var(--re);border:1px solid var(--red)" onclick="_cmsDelAnnee(${ei})"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Supprimer</button>
         </div>
         ${er.niveaux.map((n,ni)=>`<div class="fl2 fic g8 mb4">
           <input class="fi" style="width:80px;padding:3px 6px;font-size:12px" id="cms_er_cls_${ei}_${ni}" value="${n.cls}" placeholder="Classe">
@@ -10651,14 +10655,14 @@ function pgCMS(){
       </div>
       <div class="fl2 g8 mt10">
         <button class="btn bi sm" onclick="_cmsAddAnnee()">＋ Nouvelle année</button>
-        <button class="btn bi sm" onclick="saveCMS('resultats')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer tout</button>
+        <button class="btn bi sm" onclick="saveCMS('resultats')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer tout</button>
       </div>
     </div>
   </div>
-  <div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg></span>Citations Motivantes</div>
+  <div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-message"/></svg></span>Citations Motivantes</div>
     <div class="ib ibi mb12"><span>✨</span><span>Gérez les citations affichées dans la barre héro du portail visiteur. Elles changent automatiquement toutes les 15 secondes.</span></div>
     <div class="mb10">${(DB.citations||[]).length} citation(s) enregistrée(s)</div>
-    <button class="btn bi sm" onclick="mManageCitations()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>Gérer les citations</button>
+    <button class="btn bi sm" onclick="mManageCitations()"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Gérer les citations</button>
   </div>`;
 }
 function saveCMS(section){
@@ -10729,16 +10733,16 @@ function pgSAControl(){
   h+='<div class="card mb16"><div class="pgt" style="font-size:18px">⚙️ Configuration & sauvegarde</div>'
     +'<div class="ib ibi mb12"><span>💾</span><span>Dernière sauvegarde : <strong>'+_esc(String(lastBak))+'</strong></span></div>'
     +'<div class="fl2 fw g8">'
-    +'<button class="btn bi" onclick="_saBackupJSON()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Sauvegarder (JSON complet)</button>'
-    +'<button class="btn bo" onclick="if(typeof exportSQL===\'function\')exportSQL()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-package"/></svg>Export SQL</button>'
-    +'<button class="btn bo" onclick="_saRestoreModal()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Restaurer une sauvegarde</button>'
-    +'<button class="btn bo" onclick="if(typeof mSyncDiag===\'function\')mSyncDiag()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Tester serveur / IA / RAG</button>'
-    +'<button class="btn bo" onclick="_saCloudSecretModal()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Clé de synchronisation Cloud</button>'
+    +'<button class="btn bi" onclick="_saBackupJSON()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Sauvegarder (JSON complet)</button>'
+    +'<button class="btn bo" onclick="if(typeof exportSQL===\'function\')exportSQL()"><svg class="vico bico" aria-hidden="true"><use href="#lc-package"/></svg>Export SQL</button>'
+    +'<button class="btn bo" onclick="_saRestoreModal()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Restaurer une sauvegarde</button>'
+    +'<button class="btn bo" onclick="if(typeof mSyncDiag===\'function\')mSyncDiag()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Tester serveur / IA / RAG</button>'
+    +'<button class="btn bo" onclick="_saCloudSecretModal()"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Clé de synchronisation Cloud</button>'
     +'</div></div>';
   // ── Bundle 2 : Comptes & sécurité ──
   h+='<div class="card mb16"><div class="pgt" style="font-size:18px">🛡️ Comptes & sécurité</div>'
     +'<div class="fl2 fw g8 mb12">'
-    +'<button class="btn bi" onclick="_saResetPwdModal()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Réinitialiser un mot de passe</button>'
+    +'<button class="btn bi" onclick="_saResetPwdModal()"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Réinitialiser un mot de passe</button>'
     +'<button class="btn bo" onclick="goTo(\'loginlog\')">◌ Journal des connexions</button>'
     +'<button class="btn bo" onclick="goTo(\'allaccounts\')">⊡ Tous les comptes</button>'
     +'</div>'
@@ -10746,7 +10750,7 @@ function pgSAControl(){
   if(lockedKeys.length>0){
     h+='<div class="tw mt8"><table><thead><tr><th>Identifiant</th><th>Tentatives</th><th></th></tr></thead><tbody>';
     lockedKeys.forEach(function(k){
-      h+='<tr><td>'+_esc(k)+'</td><td>'+(locks[k].attempts||0)+'</td><td><button class="btn bo xs" onclick="_saUnlock(\''+_esc(k).replace(/'/g,"")+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Déverrouiller</button></td></tr>';
+      h+='<tr><td>'+_esc(k)+'</td><td>'+(locks[k].attempts||0)+'</td><td><button class="btn bo xs" onclick="_saUnlock(\''+_esc(k).replace(/'/g,"")+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Déverrouiller</button></td></tr>';
     });
     h+='</tbody></table></div>';
   }
@@ -10755,10 +10759,10 @@ function pgSAControl(){
   h+='<div class="card mb16"><div class="pgt" style="font-size:18px">💰 Finances & intégrité</div>'
     +'<div class="ib ibi mb12"><span>📊</span><span>Part auteur : <strong>'+(DB.authorShare||60)+'%</strong> · Parrainage : <strong>'+(DB.parrainRate.forfait||0)+' FCFA</strong> + <strong>'+(DB.parrainRate.pct||0)+'%</strong></span></div>'
     +'<div class="fl2 fw g8">'
-    +'<button class="btn bi" onclick="_saRatesModal()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Taux globaux (auteur / parrain / promos)</button>'
-    +'<button class="btn bo" onclick="if(typeof mPayAttempts===\'function\')mPayAttempts()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-card"/></svg>Override des paiements</button>'
-    +'<button class="btn bo" onclick="_saIntegrity()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"/></svg>Vérifier l\'intégrité des données</button>'
-    +'<button class="btn bo" onclick="if(typeof mStatsFunnel===\'function\')mStatsFunnel()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trending"/></svg>Tunnel d\'acquisition (30 j)</button>'
+    +'<button class="btn bi" onclick="_saRatesModal()"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Taux globaux (auteur / parrain / promos)</button>'
+    +'<button class="btn bo" onclick="if(typeof mPayAttempts===\'function\')mPayAttempts()"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Override des paiements</button>'
+    +'<button class="btn bo" onclick="_saIntegrity()"><svg class="vico bico" aria-hidden="true"><use href="#lc-flask"/></svg>Vérifier l\'intégrité des données</button>'
+    +'<button class="btn bo" onclick="if(typeof mStatsFunnel===\'function\')mStatsFunnel()"><svg class="vico bico" aria-hidden="true"><use href="#lc-trending"/></svg>Tunnel d\'acquisition (30 j)</button>'
     +'</div></div>';
   return h;
 }
@@ -10780,7 +10784,7 @@ function _saRestoreModal(){
     '<div class="ib ibi mb12"><span>⚠️</span><span>La base actuelle sera <strong>écrasée</strong> par le fichier importé. Faites une sauvegarde avant, au besoin.</span></div>'
     +'<input type="file" id="_saRestoreFile" accept="application/json,.json" class="fi">',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn br2" onclick="_saRestoreDo()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-alert"/></svg>Restaurer (écraser)</button>');
+    +'<button class="btn br2" onclick="_saRestoreDo()"><svg class="vico bico" aria-hidden="true"><use href="#lc-alert"/></svg>Restaurer (écraser)</button>');
 }
 function _saRestoreDo(){
   var f=_ge('_saRestoreFile');
@@ -10802,7 +10806,7 @@ function _saCloudSecretModal(){
     '<div class="fg"><span class="fl">Nouvelle clé (laisser vide = ne pas changer)</span><input class="fi" id="_saSec" type="password" autocomplete="off"></div>'
     +'<p style="font-size:13px;color:var(--ds-text-3,#7A88A6);line-height:1.5">Doit correspondre à <code>API_SECRET</code> côté serveur (api/payment_config.php). Conservée localement, jamais écrite dans le code.</p>',
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +'<button class="btn bi" onclick="_saCloudSecretSave()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
+    +'<button class="btn bi" onclick="_saCloudSecretSave()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
 }
 function _saCloudSecretSave(){
   var v=(_ge('_saSec')&&_ge('_saSec').value||'').trim();
@@ -10821,7 +10825,7 @@ function _saResetPwdModal(){
   M('🔁 Réinitialiser un mot de passe','Génère un mot de passe provisoire (haché au stockage)',
     '<div class="fg"><span class="fl">Compte</span><select class="fi" id="_saAcct">'+opts+'</select></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="_saResetPwdDo()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Générer un nouveau mot de passe</button>');
+    +'<button class="btn bi" onclick="_saResetPwdDo()"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Générer un nouveau mot de passe</button>');
 }
 async function _saResetPwdDo(){
   var sel=_ge('_saAcct'); if(!sel){return;}
@@ -10841,7 +10845,7 @@ async function _saResetPwdDo(){
     '<div class="fg"><span class="fl">Identifiant</span><input class="fi" value="'+_esc(rec.user||'')+'" readonly onclick="this.select()"></div>'
     +'<div class="fg"><span class="fl">Mot de passe provisoire</span><input class="fi" value="'+_esc(tmp)+'" readonly onclick="this.select()"></div>'
     +'<p style="font-size:13px;color:var(--ds-text-3,#7A88A6)">Affiché une seule fois. Stocké sous forme hachée.</p>',
-    '<button class="btn bi" onclick="cm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>J\'ai noté</button>');
+    '<button class="btn bi" onclick="cm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>J\'ai noté</button>');
 }
 function _saUnlock(k){
   if(typeof _loginLock!=='undefined'&&_loginLock&&_loginLock[k])_loginLock[k]={attempts:0,locked:false,until:0};
@@ -10856,7 +10860,7 @@ function _saRatesModal(){
     +'<div class="fg"><span class="fl">Parrainage — % des paiements du filleul</span><input class="fi" id="_saParP" type="number" min="0" max="100" value="'+(DB.parrainRate.pct||0)+'"></div>'
     +'<p style="font-size:13px;color:var(--ds-text-3,#7A88A6)">Les codes promo (%) se gèrent dans la page « Programme parrainage / Boutique ».</p>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="_saRatesSave()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
+    +'<button class="btn bi" onclick="_saRatesSave()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
 }
 function _saRatesSave(){
   var a=parseInt((_ge('_saAuthor')&&_ge('_saAuthor').value)||'',10);
@@ -10882,7 +10886,7 @@ function _saIntegrity(){
     +'<li>Notes orphelines (élève supprimé) : <strong>'+orphG+'</strong></li>'
     +'<li>Paiements orphelins : <strong>'+orphP+'</strong></li></ul>';
   var foot='<button class="btn bo" onclick="cm()">Fermer</button>';
-  if(orphG+orphP>0) foot+='<button class="btn br2" onclick="_saIntegrityFix()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Supprimer les orphelins ('+(orphG+orphP)+')</button>';
+  if(orphG+orphP>0) foot+='<button class="btn br2" onclick="_saIntegrityFix()"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Supprimer les orphelins ('+(orphG+orphP)+')</button>';
   M('🧪 Intégrité des données', anomalies>0?'Anomalies détectées':'Aucune anomalie ✅', body, foot);
 }
 function _saIntegrityFix(){
@@ -10905,15 +10909,15 @@ function pgSuperOverview(){
     <div class="sc scgr"><div class="sci">🎓</div><div class="scl">Comptes élèves</div><div class="scv vgr">${DB.studentAccounts?.length||0}</div></div>
   </div>
   <div class="g2">
-    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg></span>Données financières sensibles</div>
+    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-coins"/></svg></span>Données financières sensibles</div>
       ${[['Recettes frais scolarité',totalPaid,true],['Masse salariale',totalSal,false],['Résultat',totalPaid-totalSal,totalPaid>totalSal]].map(([l,v,pos])=>`<div class="fl2 fic fsb" style="padding:9px 0;border-bottom:1px solid var(--bg2)"><span>${l}</span><span class="mono bold" style="color:${pos?'var(--gr)':'var(--re)'}">${v>=0?'+':''} ${fmt(Math.abs(v))}</span></div>`).join("")}
-      <button class="btn bi sm mt14" onclick="goTo('finance')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trending"/></svg>Bilan complet →</button>
+      <button class="btn bi sm mt14" onclick="goTo('finance')"><svg class="vico bico" aria-hidden="true"><use href="#lc-trending"/></svg>Bilan complet →</button>
     </div>
-    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg></span>Comptes du système</div>
+    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-lock"/></svg></span>Comptes du système</div>
       <div class="ib ibi mb12"><span>⚠️</span><span>Données sensibles — visible uniquement par le Super Admin</span></div>
       <div class="xs2 mut mb8" style="text-transform:uppercase;letter-spacing:.6px">Comptes administrateurs</div>
       ${DB.admins.map(a=>`<div style="padding:8px;background:var(--bg2);border-radius:var(--r);margin-bottom:6px"><div class="fl2 fic fsb"><div class="semi s">${_esc(a.nom)}</div><span class="bg bgg">${_esc(a.role)}</span></div><div class="mono xs2 mt4" style="color:var(--bl)">${_esc(a.user)} / <span style="color:var(--gr)">••••••••</span></div></div>`).join("")}
-      <button class="btn bpu sm mt10" onclick="goTo('allaccounts')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Gérer tous les comptes →</button>
+      <button class="btn bpu sm mt10" onclick="goTo('allaccounts')"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Gérer tous les comptes →</button>
     </div>
   </div>`;
 }
@@ -10942,7 +10946,7 @@ function mAddAdmin(){
   '<div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="naNom" placeholder="M./Mme ..."></div>'+
   '<div class="fg"><span class="fl">Rôle / Fonction</span><select class="fi" id="naRole"><option>Administrateur</option><option>Secrétaire</option><option>Comptable</option><option>Surveillant</option><option>Censeur</option></select></div>'+
   '</div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveNewAdmin()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Créer le compte</button>');
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveNewAdmin()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Créer le compte</button>');
 }
 async function saveNewAdmin(){
   var user=(document.getElementById('naUser')?.value||'').trim();
@@ -10989,7 +10993,7 @@ function pgAllAccounts(){
     <div class="bold">Gestion des comptes</div>
     <div class="fl2 g8">
       <button class="btn bi" onclick="mAddAdmin()">＋ Nommer un administrateur</button>
-      <button class="btn bvi" onclick="mManagePromos()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-ticket"/></svg>Codes promo</button>
+      <button class="btn bvi" onclick="mManagePromos()"><svg class="vico bico" aria-hidden="true"><use href="#lc-ticket"/></svg>Codes promo</button>
     </div>
   </div>
   <div class="g2">
@@ -11001,14 +11005,14 @@ function pgAllAccounts(){
           <td class="mono xs2" style="color:var(--bl)">${_esc(a.user)}</td>
           <td><span class="bg bgg">${isHashed(a.pwd)?'\ud83d\udd12 Hash\u00e9':'\u26a0\ufe0f Clair'}</span></td>
           <td><span class="bg bgg">${_esc(a.role)}</span></td>
-          <td><div class="fl2 g4"><button class="btn bo xs" onclick="editAdminPwd('${a.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Changer MDP</button>${isSA()?`<button class="btn br2 xs" onclick="deleteAdmin('${a.id}')">🗑</button>`:''}</div></td>
+          <td><div class="fl2 g4"><button class="btn bo xs" onclick="editAdminPwd('${a.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Changer MDP</button>${isSA()?`<button class="btn br2 xs" onclick="deleteAdmin('${a.id}')">🗑</button>`:''}</div></td>
         </tr>`).join("")}
         <tr style="background:var(--pub)">
           <td class="semi s">${_esc(DB.superAdmin?.nom||'')}</td>
           <td class="mono xs2" style="color:var(--pu)">${_esc(DB.superAdmin?.user||'')}</td>
           <td><span class="bg bgpu">${isHashed(DB.superAdmin?.pwd)?'\ud83d\udd12 Hash\u00e9':'\u26a0\ufe0f Clair'}</span></td>
           <td><span class="bg bgpu">Super Admin</span></td>
-          <td><button class="btn bpu xs" onclick="editSAPwd()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Changer MDP</button></td>
+          <td><button class="btn bpu xs" onclick="editSAPwd()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Changer MDP</button></td>
         </tr>
         </tbody>
       </table></div>
@@ -11019,7 +11023,7 @@ function pgAllAccounts(){
           <td class="semi s">${_esc(t.pre)} ${_esc(t.nom)}</td>
           <td class="mono xs2" style="color:var(--bl)">${_esc(t.user)}</td>
           <td><span class="bg bgg">${isHashed(DB.tpwd[t.user])?'\ud83d\udd12 Hash\u00e9':'\u26a0\ufe0f Clair'}</span></td>
-          <td><button class="btn bo xs" onclick="editTeacherPwd('${t.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Changer MDP</button></td>
+          <td><button class="btn bo xs" onclick="editTeacherPwd('${t.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Changer MDP</button></td>
         </tr>`).join("")}</tbody>
       </table></div>
     </div>
@@ -11032,19 +11036,19 @@ function pgAllAccounts(){
         <td class="mono xs2" style="color:var(--bl)">${_esc(sa.user)}</td>
         <td><span class="bg bgg">${isHashed(sa.pwd)?'\ud83d\udd12 Hash\u00e9':'\u26a0\ufe0f Clair'}</span></td>
         <td class="xs2 mut">${sa.lastLogin||'Jamais'}</td>
-        <td><button class="btn bo xs" onclick="editStudentPwd('${sa.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Changer MDP</button></td>
+        <td><button class="btn bo xs" onclick="editStudentPwd('${sa.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Changer MDP</button></td>
       </tr>`;}).join("")}</tbody>
     </table></div>
   </div>`;
 }
 
-function editAdminPwd(aid){var a=DB.admins.find(function(x){return x.id===aid;});if(!a)return;M('Modifier mot de passe Admin',_esc(a.nom),'<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="naPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="naPwd2" type="password" placeholder="Confirmer le mot de passe"></div><div class="ib ibi mt8"><span>\ud83d\udd12</span><span>Le mot de passe sera hash\u00e9 automatiquement (SHA-256)</span></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveAdminPwd(\''+aid+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Modifier</button>');}
+function editAdminPwd(aid){var a=DB.admins.find(function(x){return x.id===aid;});if(!a)return;M('Modifier mot de passe Admin',_esc(a.nom),'<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="naPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="naPwd2" type="password" placeholder="Confirmer le mot de passe"></div><div class="ib ibi mt8"><span>\ud83d\udd12</span><span>Le mot de passe sera hash\u00e9 automatiquement (SHA-256)</span></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveAdminPwd(\''+aid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Modifier</button>');}
 async function _saveAdminPwd(aid){var p1=$('naPwd')?.value||'';var p2=$('naPwd2')?.value||'';if(p1.length<6){toast('Minimum 6 caract\u00e8res','warn');return;}if(p1!==p2){toast('Les mots de passe ne correspondent pas','warn');return;}var a=DB.admins.find(function(x){return x.id===aid;});if(!a)return;a.pwd=await hashPassword(p1,a.user);save();cm();re();toast('\u2713 Mot de passe modifi\u00e9 et hash\u00e9');}
-function editSAPwd(){M('Modifier mot de passe Super Admin',_esc(DB.superAdmin?.nom||''),'<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="saPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="saPwd2" type="password" placeholder="Confirmer le mot de passe"></div><div class="ib ibi mt8"><span>\ud83d\udd12</span><span>Le mot de passe sera hash\u00e9 automatiquement (SHA-256)</span></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bpu" onclick="_saveSAPwd()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Modifier</button>');}
+function editSAPwd(){M('Modifier mot de passe Super Admin',_esc(DB.superAdmin?.nom||''),'<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="saPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="saPwd2" type="password" placeholder="Confirmer le mot de passe"></div><div class="ib ibi mt8"><span>\ud83d\udd12</span><span>Le mot de passe sera hash\u00e9 automatiquement (SHA-256)</span></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bpu" onclick="_saveSAPwd()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Modifier</button>');}
 async function _saveSAPwd(){var p1=$('saPwd')?.value||'';var p2=$('saPwd2')?.value||'';if(p1.length<8){toast('Minimum 8 caract\u00e8res pour le Super Admin','warn');return;}if(p1!==p2){toast('Les mots de passe ne correspondent pas','warn');return;}DB.superAdmin.pwd=await hashPassword(p1,DB.superAdmin.user);save();cm();re();toast('\u2713 Mot de passe Super Admin modifi\u00e9 et hash\u00e9');}
-function editTeacherPwd(tid){var t=T(tid);if(!t)return;M('Modifier mot de passe Enseignant',_esc(t.pre)+' '+_esc(t.nom),'<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="tPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="tPwd2" type="password" placeholder="Confirmer le mot de passe"></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveTeacherPwd(\''+_esc(t.user)+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Modifier</button>');}
+function editTeacherPwd(tid){var t=T(tid);if(!t)return;M('Modifier mot de passe Enseignant',_esc(t.pre)+' '+_esc(t.nom),'<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="tPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="tPwd2" type="password" placeholder="Confirmer le mot de passe"></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveTeacherPwd(\''+_esc(t.user)+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Modifier</button>');}
 async function _saveTeacherPwd(user){var p1=$('tPwd')?.value||'';var p2=$('tPwd2')?.value||'';if(p1.length<6){toast('Minimum 6 caract\u00e8res','warn');return;}if(p1!==p2){toast('Les mots de passe ne correspondent pas','warn');return;}DB.tpwd[user]=await hashPassword(p1,user);save();cm();re();toast('\u2713 Mot de passe modifi\u00e9 et hash\u00e9');}
-function editStudentPwd(said){var sa=DB.studentAccounts?.find(function(x){return x.id===said;});if(!sa)return;var st=S(sa.eid);M('Modifier mot de passe \u00c9l\u00e8ve',_esc(st?.pre||'')+' '+_esc(st?.nom||'')+' ('+_esc(sa.user)+')','<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="stPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="stPwd2" type="password" placeholder="Confirmer le mot de passe"></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bgr2" onclick="_saveStudentPwd(\''+said+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Modifier</button>');}
+function editStudentPwd(said){var sa=DB.studentAccounts?.find(function(x){return x.id===said;});if(!sa)return;var st=S(sa.eid);M('Modifier mot de passe \u00c9l\u00e8ve',_esc(st?.pre||'')+' '+_esc(st?.nom||'')+' ('+_esc(sa.user)+')','<div class="fg"><span class="fl">Nouveau mot de passe</span><input class="fi" id="stPwd" type="password" placeholder="Nouveau mot de passe"></div><div class="fg mt8"><span class="fl">Confirmer</span><input class="fi" id="stPwd2" type="password" placeholder="Confirmer le mot de passe"></div>','<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bgr2" onclick="_saveStudentPwd(\''+said+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Modifier</button>');}
 async function _saveStudentPwd(said){var p1=$('stPwd')?.value||'';var p2=$('stPwd2')?.value||'';if(p1.length<6){toast('Minimum 6 caract\u00e8res','warn');return;}if(p1!==p2){toast('Les mots de passe ne correspondent pas','warn');return;}var sa=DB.studentAccounts.find(function(x){return x.id===said;});if(!sa)return;sa.pwd=await hashPassword(p1,sa.user);save();cm();re();toast('\u2713 Mot de passe modifi\u00e9 et hash\u00e9');}
 
 
@@ -11110,7 +11114,7 @@ function pgHonneur(){
   var tri=window._hTri||TRS[0];
   var h='<div class="fl2 fic fsb mb16 fw g8">';
   h+='<div class="tabs">'+TRS.map(function(t){return '<button class="tab'+(t===tri?' on':'')+'" onclick="window._hTri=\''+t+'\';re()">'+t+'</button>';}).join('')+'</div>';
-  h+='<button class="btn bi sm" onclick="printHonneur()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button></div>';
+  h+='<button class="btn bi sm" onclick="printHonneur()"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button></div>';
   // Compute all students with averages
   var allData=[];
   CLS.forEach(function(cls){
@@ -11151,7 +11155,7 @@ function pgHonneur(){
       h+='<tr><td class="semi">'+rank+'</td><td class="semi">'+d.s.pre+' '+d.s.nom+'</td><td><span class="bg bgd">'+d.cls+'</span></td>';
       h+='<td class="mono bold" style="color:var(--gr)">'+d.moy.toFixed(2)+'/20</td>';
       h+='<td class="xs2">'+(d.subMoy.length?'<span style="color:var(--re)">'+d.subMoy.join(', ')+'</span>':'<span style="color:var(--gr)">Aucune</span>')+'</td>';
-      h+='<td><button class="btn bgr2 xs" onclick="printStudentHonneur(\''+d.s.id+'\',\''+tri+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>️</button></td></tr>';
+      h+='<td><button class="btn bgr2 xs" onclick="printStudentHonneur(\''+d.s.id+'\',\''+tri+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>️</button></td></tr>';
     });
     h+='</tbody></table></div></div>';
   }
@@ -11165,13 +11169,13 @@ function pgHonneur(){
       h+='<tr><td class="semi">'+rank+'</td><td class="semi">'+d.s.pre+' '+d.s.nom+'</td><td><span class="bg bgd">'+d.cls+'</span></td>';
       h+='<td class="mono bold" style="color:var(--bl)">'+d.moy.toFixed(2)+'/20</td>';
       h+='<td class="xs2">'+(d.subMoy.length?'<span style="color:var(--re)">'+d.subMoy.join(', ')+'</span>':'<span style="color:var(--gr)">Aucune</span>')+'</td>';
-      h+='<td><button class="btn bgr2 xs" onclick="printStudentHonneur(\''+d.s.id+'\',\''+tri+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>️</button></td></tr>';
+      h+='<td><button class="btn bgr2 xs" onclick="printStudentHonneur(\''+d.s.id+'\',\''+tri+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>️</button></td></tr>';
     });
     h+='</tbody></table></div></div>';
   }
   // Encouragements
   if(encouragements>0){
-    h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mappin"/></svg></span>Encouragements (12-13.99/20)</div>';
+    h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-mappin"/></svg></span>Encouragements (12-13.99/20)</div>';
     h+='<div class="tw"><table><thead><tr><th>#</th><th>Élève</th><th>Classe</th><th>Moyenne</th><th>Matières sous la moyenne</th><th></th></tr></thead><tbody>';
     rank=0;
     allData.filter(function(d){return d.mention==='Encouragements';}).forEach(function(d){
@@ -11179,7 +11183,7 @@ function pgHonneur(){
       h+='<tr><td class="semi">'+rank+'</td><td class="semi">'+d.s.pre+' '+d.s.nom+'</td><td><span class="bg bgd">'+d.cls+'</span></td>';
       h+='<td class="mono bold">'+d.moy.toFixed(2)+'/20</td>';
       h+='<td class="xs2">'+(d.subMoy.length?'<span style="color:var(--re)">'+d.subMoy.join(', ')+'</span>':'<span style="color:var(--gr)">Aucune</span>')+'</td>';
-      h+='<td><button class="btn bgr2 xs" onclick="printStudentHonneur(\''+d.s.id+'\',\''+tri+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>️</button></td></tr>';
+      h+='<td><button class="btn bgr2 xs" onclick="printStudentHonneur(\''+d.s.id+'\',\''+tri+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>️</button></td></tr>';
     });
     h+='</tbody></table></div></div>';
   }
@@ -11325,7 +11329,7 @@ function pgStudents(){
         <button class="btn bi" onclick="mAddStu()">＋ Nouvelle inscription</button>
         <button class="excel-btn" onclick="exportStudentsList(window._scls||'Toutes')">📊 Exporter Excel</button>
         <button class="excel-btn import" onclick="importStudents()">📥 Importer Excel</button>
-        ${isSA()?`<button class="btn bpu sm" onclick="mAddStudentAccount()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Créer compte élève</button>`:''}
+        ${isSA()?`<button class="btn bpu sm" onclick="mAddStudentAccount()"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Créer compte élève</button>`:''}
       </div>
     </div>
     <div class="tw"><table>
@@ -11340,7 +11344,7 @@ function pgStudents(){
       <td><span class="bg ${s.stat==='Payé'?'bgg':s.stat==='Impayé'?'bgr':'bgo'}">${s.stat}</span></td>
       <td><div class="fl2 g4">
         <button class="btn bo xs" onclick="viewStu('${s.id}')">👁</button>
-        <button class="btn bg2 xs" onclick="editStu('${s.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>
+        <button class="btn bg2 xs" onclick="editStu('${s.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>
         ${isSA()?`<button class="btn br2 xs" onclick="delStu('${s.id}')">🗑</button>`:''}
       </div></td>
     </tr>`).join('')}
@@ -11358,7 +11362,7 @@ function mAddStudentAccount(){
     <div class="fg"><span class="fl">Identifiant *</span><input class="fi" id="saUser" placeholder="Ex: VRT-006" oninput="autoFillSaPwd()"></div>
     <div class="fg"><span class="fl">Mot de passe *</span><input class="fi" id="saPwd2" placeholder="Ex: Nom2024!"></div>
   </div><div class="ib ibt mb0 mt8"><span>ℹ️</span><span>L\'identifiant par défaut est le matricule de l\'élève.</span></div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="createStudentAccount()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Créer le compte</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="createStudentAccount()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Créer le compte</button>`);
   setTimeout(()=>{
     const sel=document.getElementById('saEtu');
     if(sel){sel.addEventListener('change',()=>autoFillSaPwd());}
@@ -11401,7 +11405,7 @@ function mAddStu(){
     <input type="file" id="newStuPhotoInput" accept="image/*" style="display:none" onchange="previewNewStuPhoto(this)"></div>
   </div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveStu()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveStu()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
 }
 function pickNewStuPhoto(){document.getElementById('newStuPhotoInput')?.click();}
 function previewNewStuPhoto(input){
@@ -11439,7 +11443,7 @@ function editStu(id){
   <div class="fg"><span class="fl">Frais mensuels (FCFA)</span><input class="fi" id="eF" type="number" value="${s.frais}" min="0"></div>
   <div class="fg"><span class="fl">Statut paiement</span><select class="fi" id="eSt"><option${s.stat==='En attente'?' selected':''}>En attente</option><option${s.stat==='Payé'?' selected':''}>Payé</option><option${s.stat==='Impayé'?' selected':''}>Impayé</option></select></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEditStu('${id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`,true);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEditStu('${id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`,true);
 }
 function saveEditStu(id){
   const s=S(id);if(!s)return;
@@ -11472,7 +11476,7 @@ function viewStu(id){
     ${moy!==null?`<div style="flex:1;min-width:90px;padding:11px;background:${ap.col}18;border-radius:var(--r);text-align:center"><div class="xs2 mut mb3">Moy. T1</div><div class="mono bold" style="color:${ap.col}">${moy.toFixed(2)}/20</div><div class="xs2" style="color:${ap.col}">${ap.lbl}</div></div>`:''}
     <div style="flex:1;min-width:90px;padding:11px;background:var(--reb);border-radius:var(--r);text-align:center"><div class="xs2 mut mb3">Absences</div><div class="mono bold" style="color:var(--re)">${absE.reduce((a,b)=>a+b.heures,0)}h</div></div>
   </div>`,
-  `<button class="btn bo sm" onclick="cm()">Fermer</button><button class="btn bg2 sm" onclick="cm();editStu('${id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier</button>${pays.some(p=>p.stat==='Payé')?`<button class="btn bg2 sm" onclick="printLastRec('${id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu</button>`:''}`);
+  `<button class="btn bo sm" onclick="cm()">Fermer</button><button class="btn bg2 sm" onclick="cm();editStu('${id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier</button>${pays.some(p=>p.stat==='Payé')?`<button class="btn bg2 sm" onclick="printLastRec('${id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu</button>`:''}`);
 }
 function printLastRec(sid){const pays=DB.payments.filter(p=>p.eid===sid&&p.stat==='Payé');if(!pays.length){toast('Aucun paiement','warn');return;}cm();printRec(pays[pays.length-1].id);}
 
@@ -11511,7 +11515,7 @@ function pgPayments(){
       <td class="xs2 mut">${p.dt||'—'}</td>
       <td><span class="bg ${p.stat==='Payé'?'bgg':p.stat==='Impayé'?'bgr':'bgo'}">${p.stat}</span></td>
       <td><div class="fl2 g4">
-        ${p.stat==='Payé'?`<button class="btn bo xs" onclick="printRec('${p.id}')">🧾</button>`:`<button class="btn bgr2 xs" onclick="markP('${p.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Payé</button>`}
+        ${p.stat==='Payé'?`<button class="btn bo xs" onclick="printRec('${p.id}')">🧾</button>`:`<button class="btn bgr2 xs" onclick="markP('${p.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Payé</button>`}
         ${isSA()?`<button class="btn br2 xs" onclick="delPay('${p.id}')">🗑</button>`:''}
       </div></td>
     </tr>`;}).join('')}
@@ -11528,7 +11532,7 @@ function mAddPay(){
   <div class="fg"><span class="fl">Date</span><input class="fi" id="pDt" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
   <div class="fg"><span class="fl">Statut</span><select class="fi" id="pSt"><option>Payé</option><option>En attente</option><option>Impayé</option></select></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="savePay()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="savePay()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
   setTimeout(()=>autoFillPay(),100);
 }
 function autoFillPay(){const s=S(document.getElementById('pEtu')?.value);const m=document.getElementById('pMnt');if(s&&m&&!m.value)m.value=s.frais;}
@@ -11632,7 +11636,7 @@ function mManageClasses(){
     +'<div class="fg2 mb12" style="align-items:end">'
     +'<div class="fg"><span class="fl">Nom de la classe *</span><input class="fi" id="ncNom" placeholder="Ex: Form 4 · 1ère F4 · Tle ACC · Upper Sixth Science"></div>'
     +'<div class="fg"><span class="fl">Sous-système</span><select class="fi" id="ncSec">'+secs.map(function(g){return '<option value="'+g.id+'">'+g.l+'</option>';}).join('')+'</select></div>'
-    +'<div class="fg"><button class="btn bi" onclick="_addClasse()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button></div>'
+    +'<div class="fg"><button class="btn bi" onclick="_addClasse()"><svg class="vico bico" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button></div>'
     +'</div>'
     +'<div style="max-height:330px;overflow:auto">'+(body||'<div class="empty">Aucune classe</div>')+'</div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>',true);
@@ -11691,7 +11695,7 @@ function mManageSubjects(){
     +'<div class="fg2 mb12" style="align-items:end">'
     +'<div class="fg"><span class="fl">Nouvelle matière *</span><input class="fi" id="nsNom" placeholder="Ex: Littérature · Latin · Computer Science"></div>'
     +'<div class="fg"><span class="fl">Coefficient</span><input class="fi" id="nsCoef" type="number" min="1" max="10" value="2"></div>'
-    +'<div class="fg"><button class="btn bi" onclick="_addSubject()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button></div>'
+    +'<div class="fg"><button class="btn bi" onclick="_addSubject()"><svg class="vico bico" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button></div>'
     +'</div>'
     +'<div class="tw" style="max-height:320px;overflow:auto"><table style="width:100%"><thead><tr style="background:var(--bg2)"><th style="text-align:left;padding:5px 8px">Matière</th><th style="padding:5px 8px">Coef.</th><th style="padding:5px 8px">Action</th></tr></thead><tbody>'+rows+'</tbody></table></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>',true);
@@ -11767,10 +11771,10 @@ function pgGrades(){
     <div class="xs2 mut">Classe : <b style="color:var(--bl)">${selC}</b> · ${sts.length} élève${sts.length>1?'s':''}</div>
     <div class="fl2 g8 fw">
       <button class="btn bi" onclick="mAddGr()">＋ Note</button>
-      <button class="btn bg2" onclick="mBulkGrades()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Saisie classe</button>
+      <button class="btn bg2" onclick="mBulkGrades()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Saisie classe</button>
       <button class="excel-btn" onclick="exportTeacherGrades()">📊 Excel</button>
       ${isEnseignant()?'<button class="excel-btn import" onclick="importTeacherGrades()">📥 Importer</button>':''}
-      <button class="btn bg2" onclick="printBulletins('${selC}','${selT}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Bulletins ${selC}</button>
+      <button class="btn bg2" onclick="printBulletins('${selC}','${selT}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Bulletins ${selC}</button>
     </div>
   </div>
   <div class="card">
@@ -11802,7 +11806,7 @@ function mAddGr(){
   <div class="fg"><span class="fl">Devoir 1 (/20) *</span><input class="fi" id="grN1" type="number" step=".5" min="0" max="20" placeholder="0–20"></div>
   <div class="fg"><span class="fl">Devoir 2 (/20) *</span><input class="fi" id="grN2" type="number" step=".5" min="0" max="20" placeholder="0–20"></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveGr()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveGr()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
   setTimeout(()=>refreshGrStu(),100);
 }
 function mBulkGrades(){
@@ -11823,7 +11827,7 @@ function mBulkGrades(){
     '<div class="ib ibt mb12"><span>📝</span><span>Saisissez les notes de <strong>'+sub+'</strong> pour tous les élèves de <strong>'+selC+'</strong>. Ordre alphabétique. <span style="color:var(--re)">Notes &lt;10 en rouge</span>.</span></div>'+
     (!t?'<div class="fg mb12"><span class="fl">Matière</span><select class="fi" id="bulkSub" onchange="window._bulkSub=this.value">'+SUBS.map(s=>'<option'+(s===sub?' selected':'')+'>'+s+'</option>').join('')+'</select></div>':'')+
     '<div class="tw"><table><thead><tr><th>#</th><th>Élève</th><th>Dev. 1</th><th>Dev. 2</th><th>Moy.</th></tr></thead><tbody>'+rows+'</tbody></table></div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveBulkGrades(\''+selC+'\',\''+selT+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer tout</button>',true);
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveBulkGrades(\''+selC+'\',\''+selT+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer tout</button>',true);
 }
 function saveBulkGrades(cls,tri){
   const t=isEnseignant()?T(SES.tid):null;
@@ -12293,7 +12297,7 @@ function pgSched(){
   const items=isT?sc.items.filter(i=>i.tid===SES.tid):filtItems;
   return`<div class="fl2 fic fsb mb14 fw g8">
     ${!isT?`<div class="tabs">${['Tout',...allCls].map(c=>`<button class="tab${(c==='Tout'?'':c)===selC?' on':''}" onclick="window._schC='${c==='Tout'?'':c}';re()">${c}</button>`).join('')}</div>`:'<div class="bold">Mon emploi du temps — '+((myT?.mat2)||'')+'</div>'}
-    ${iA()?`<div class="fl2 g8"><button class="btn bi" onclick="mAddSch()">＋ Créneau</button><button class="btn bg2" onclick="printSched()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button></div>`:''}
+    ${iA()?`<div class="fl2 g8"><button class="btn bi" onclick="mAddSch()">＋ Créneau</button><button class="btn bg2" onclick="printSched()"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button></div>`:''}
   </div>
   <div class="sw">
     <div class="sgrid" style="grid-template-columns:80px repeat(${sc.days.length},1fr)">
@@ -12316,7 +12320,7 @@ function mAddSch(){
     <div class="fg"><span class="fl">Salle</span><input class="fi" id="schSl2" placeholder="Ex: Salle A"></div>
     <div class="fg"><span class="fl">Couleur</span><select class="fi" id="schCol"><option value="cm2">🟡 Jaune</option><option value="cff">🔵 Bleu</option><option value="ce">🟢 Vert</option><option value="cs">🔴 Rouge</option><option value="co">🟣 Violet</option></select></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveSch()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveSch()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>`);
 }
 function saveSch(){
   DB.sched.items.push({id:gid(),day:document.getElementById('schD').value,slot:document.getElementById('schSl').value,sub:document.getElementById('schS').value,cls:document.getElementById('schC').value,tid:document.getElementById('schT').value||null,salle:document.getElementById('schSl2')?.value||'',col:document.getElementById('schCol').value||'cm2'});
@@ -12362,7 +12366,7 @@ function mAddAnn(){
     <div class="fg full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="anU"> <span class="fl">Marquer comme urgent 🚨</span></label></div>
     <div class="fg full"><span class="fl">Description *</span><textarea class="fi" id="anDe" rows="4" placeholder="Contenu de l\'annonce..."></textarea></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveAnn()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Publier</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveAnn()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Publier</button>`);
 }
 function saveAnn(){
   const titre=document.getElementById('anT')?.value.trim(),desc=document.getElementById('anDe')?.value.trim();
@@ -12463,14 +12467,14 @@ function pgBooks2(){
         <div class="pb mb8"><div class="pf pfg" style="width:${b.vendu+b.stock>0?Math.round(b.vendu/(b.vendu+b.stock)*100):0}%"></div></div>
         <div class="xs2 mut mb8">${b.vendu} vendus · ${b.pages} pages</div>
         <div class="fl2 g6 fw">
-          <button class="btn bgr2 xs" onclick="viewBook('${b.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Voir</button>
-          ${(b.fichierUrl||b.fichierKey)?`<button class="btn xs" style="background:#E0F2FE;color:#0369A1;border:1px solid #BAE6FD" onclick="_previewManuel('${b.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Visualiser</button>`:''}
-          ${(b.fichierUrl||b.fichierKey)?`<button class="btn xs" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7" onclick="_dlManuel('${b.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</button>`:''}
+          <button class="btn bgr2 xs" onclick="viewBook('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Voir</button>
+          ${(b.fichierUrl||b.fichierKey)?`<button class="btn xs" style="background:#E0F2FE;color:#0369A1;border:1px solid #BAE6FD" onclick="_previewManuel('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Visualiser</button>`:''}
+          ${(b.fichierUrl||b.fichierKey)?`<button class="btn xs" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7" onclick="_dlManuel('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</button>`:''}
           ${b.fichierUrl?`<span style="background:#D1FAE5;color:#059669;font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;border:1px solid #A7F3D0">☁️ Serveur${b.lireGratuit?' · 📖 Libre':''}
 </span>`:''}
-          ${iA()?`<button class="btn bg2 xs" onclick="editBook('${b.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>
-          <button class="btn xs" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A" onclick="_uploadManuelFichier('${b.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Upload</button>
-          <button class="btn xs" style="background:#EDE9FE;color:#6D28D9;border:1px solid #DDD6FE" onclick="addBookContent('${b.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Contenu</button>
+          ${iA()?`<button class="btn bg2 xs" onclick="editBook('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>
+          <button class="btn xs" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A" onclick="_uploadManuelFichier('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Upload</button>
+          <button class="btn xs" style="background:#EDE9FE;color:#6D28D9;border:1px solid #DDD6FE" onclick="addBookContent('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Contenu</button>
           <button class="btn br2 xs" onclick="delBook('${b.id}')">🗑</button>`:''}
         </div>
       </div>
@@ -12489,7 +12493,7 @@ function mAddBk(){
     <div class="fg"><span class="fl">Nb pages</span><input class="fi" id="bkPg" type="number" min="0"></div>
     <div class="fg full"><span class="fl">Description</span><textarea class="fi" id="bkD" rows="2" placeholder="Description du manuel..."></textarea></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveBk()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveBk()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>`);
 }
 function saveBk(){
   const titre=document.getElementById('bkT')?.value.trim();
@@ -12509,7 +12513,7 @@ function viewBook(id){
     ${[['Prix',fmt(b.prix)],['Stock',b.stock+' exemplaires'],['Vendus',b.vendu],['Pages',b.pages],['Chapitres',(b.chaps?.length||0)+' chap.']].map(([l,v])=>`<div style="padding:10px;background:var(--bg2);border-radius:var(--r)"><div class="xs2 mut">${l}</div><div class="semi s">${v}</div></div>`).join('')}
   </div>
   <p class="s" style="line-height:1.7">${b.desc||'Aucune description.'}</p>`,
-  `<button class="btn bo" onclick="cm()">Fermer</button>${iA()?`<button class="btn bg2" onclick="cm();editBook('${id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier</button>`:''}`);
+  `<button class="btn bo" onclick="cm()">Fermer</button>${iA()?`<button class="btn bg2" onclick="cm();editBook('${id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier</button>`:''}`);
 }
 function editBook(id){
   const b=DB.books.find(x=>x.id===id);if(!b)return;
@@ -12528,7 +12532,7 @@ function editBook(id){
       </label>
     </div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEditBk('${id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEditBk('${id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
 }
 function saveEditBk(id){const b=DB.books.find(x=>x.id===id);if(!b)return;b.titre=document.getElementById('eBkT')?.value||b.titre;b.cls=document.getElementById('eBkCl')?.value||b.cls;b.auteur=document.getElementById('eBkA')?.value||b.auteur;b.prix=+document.getElementById('eBkP')?.value||b.prix;b.stock=+document.getElementById('eBkSt')?.value||0;b.ico=document.getElementById('eBkI')?.value||b.ico;b.desc=document.getElementById('eBkD')?.value||b.desc;b.lireGratuit=!!(document.getElementById('eBkLG')?.checked);save();cm();re();toast('✓ Manuel modifié');}
 function delBook(id){if(!confirm('Supprimer ce manuel ?'))return;DB.books=DB.books.filter(b=>b.id!==id);save();re();}
@@ -12616,7 +12620,7 @@ function _previewManuel(bid){
         inner='<div style="text-align:center;padding:28px 16px">'
           +'<div style="font-size:56px;margin-bottom:12px">📄</div>'
           +'<div style="font-size:14px;font-weight:700;color:var(--bl);margin-bottom:18px">'+_esc(nom)+'</div>'
-          +'<button class="btn bi" style="font-size:14px;padding:12px 24px;margin:6px;width:100%;max-width:260px;cursor:pointer" onclick="window.open(\''+_blobPdf+'\',\'_blank\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
+          +'<button class="btn bi" style="font-size:14px;padding:12px 24px;margin:6px;width:100%;max-width:260px;cursor:pointer" onclick="window.open(\''+_blobPdf+'\',\'_blank\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
           +'</div>';
       } else {
         inner='<div style="border-radius:10px;overflow:hidden;border:1px solid var(--bg3)"><embed src="'+data+'" type="application/pdf" style="width:100%;height:60vh;border:none"></div>';
@@ -12624,7 +12628,7 @@ function _previewManuel(bid){
     }
     else if(isImg){inner='<div style="text-align:center"><img src="'+data+'" style="max-width:100%;max-height:60vh;border-radius:10px;display:inline-block"></div>';}
     else if(isVid){inner='<video src="'+data+'" controls style="width:100%;max-height:55vh;border-radius:10px;display:block;background:#000"></video>';}
-    else{inner='<div style="text-align:center;padding:30px"><div style="font-size:42px;margin-bottom:12px">📄</div><div style="font-size:14px;color:var(--ink3);margin-bottom:16px">'+nom+'</div><a href="'+data+'" download="'+nom+'" class="btn bi"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a></div>';}
+    else{inner='<div style="text-align:center;padding:30px"><div style="font-size:42px;margin-bottom:12px">📄</div><div style="font-size:14px;color:var(--ink3);margin-bottom:16px">'+nom+'</div><a href="'+data+'" download="'+nom+'" class="btn bi"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a></div>';}
     M('📖 '+nom,'',inner,'<button class="btn bo" onclick="cm()">Fermer</button>',true);
   }
   var w=window.open('','_blank','width=900,height=700,resizable=yes,scrollbars=yes');
@@ -12712,33 +12716,33 @@ function pgSend(){
   const stu=selT==='group'?DB.students.filter(s=>s.cls===selC&&s.ptel):DB.students.filter(s=>s.ptel);
   return`<!-- BARRE D'OUTILS — gestion des groupes WhatsApp -->
   <div class="card mb16" style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:1px solid #86EFAC">
-    <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg></span>Groupes WhatsApp & inscriptions</div>
+    <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-zap"/></svg></span>Groupes WhatsApp & inscriptions</div>
     <div class="fl2 g8 fw">
-      <button class="btn sm" style="background:#25D366;color:#fff;border-radius:10px" onclick="mWAPendingMembers()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Membres en attente d'accès</button>
-      <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="(function(){var p=document.querySelector('a[href*=\\'whatsapp\\']');toast('Vous gérez les liens d\\'invitation directement sur WhatsApp')})()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"/></svg>Gérer les invitations</button>
+      <button class="btn sm" style="background:#25D366;color:#fff;border-radius:10px" onclick="mWAPendingMembers()"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Membres en attente d'accès</button>
+      <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="(function(){var p=document.querySelector('a[href*=\\'whatsapp\\']');toast('Vous gérez les liens d\\'invitation directement sur WhatsApp')})()"><svg class="vico bico" aria-hidden="true"><use href="#lc-globe"/></svg>Gérer les invitations</button>
     </div>
   </div>
   <div class="tabs mb16">${[['individual','Message individuel'],['group','Message de groupe'],['bulletin','Envoi bulletins'],['announce','Annonces parents'],['email','📧 E-mail (diffusion)']].map(([k,l])=>`<button class="tab${selT===k?' on':''}" onclick="window._waT='${k}';re()">${l}</button>`).join('')}</div>
   ${selT==='individual'?`<div class="card">
-    <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>Message WhatsApp individuel</div>
+    <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>Message WhatsApp individuel</div>
     <div class="fg2"><div class="fg"><span class="fl">Destinataire</span><select class="fi" id="waEtu" onchange="prevWA()">${stu.map(s=>`<option value="${s.id}">${s.pre} ${s.nom} (${s.cls})</option>`).join('')}</select></div>
     <div class="fg"><span class="fl">Modèle</span><select class="fi" id="waTpl" onchange="fillWATpl()"><option value="paiement">Rappel paiement</option><option value="bulletin">Résultats disponibles</option><option value="absence">Notification absence</option><option value="convocation">Convocation</option><option value="custom">Message personnalisé</option></select></div></div>
     <div class="fg mb14"><span class="fl">Message</span><textarea class="fi" id="waMsg" rows="5" onkeyup="prevWA()"></textarea></div>
     ${wb('<span id="waPrev">Aperçu apparaîtra ici…</span>')}
-    <div class="mt16"><button class="btn bi" onclick="sendWA()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Ouvrir WhatsApp</button></div>
+    <div class="mt16"><button class="btn bi" onclick="sendWA()"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Ouvrir WhatsApp</button></div>
   </div>`:''}
   ${selT==='group'?`<div class="card">
-    <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>Message de groupe par classe</div>
+    <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>Message de groupe par classe</div>
     <div class="fl2 fic g8 mb14 fw">${allCls.map(c=>`<button class="tab${c===selC?' on':''}" onclick="window._waC='${c}';re()">${c}</button>`).join('')}</div>
     <div class="fg mb14"><span class="fl">Message pour les parents de ${selC}</span><textarea class="fi" id="grpMsg" rows="5" placeholder="Chers parents de la classe de ${selC},\n\n..."></textarea></div>
     ${stu.length===0?'<div class="ib ibr"><span>⚠️</span><span>Aucun parent avec numéro WhatsApp dans cette classe</span></div>':
     `<div class="ib ibg mb14"><span>✅</span><span><strong>${stu.length} parents</strong> avec numéro WhatsApp dans la classe ${selC}</span></div>
     <div style="display:flex;flex-direction:column;gap:8px">${stu.map(s=>`<div class="fl2 fic fsb"><div class="fl2 fic g8"><div class="av" style="width:26px;height:26px;background:var(--gp);color:var(--gold);border:1.5px solid var(--gb);font-size:12px">${s.pre[0]}</div><span class="s semi">${s.pre} ${s.nom}</span></div>
-      <a href="${wu(s.ptel,'Chers parents...')}" target="_blank" class="btn bgr2 xs"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Envoyer</a>
+      <a href="${wu(s.ptel,'Chers parents...')}" target="_blank" class="btn bgr2 xs"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Envoyer</a>
     </div>`).join('')}</div>`}
   </div>`:''}
   ${selT==='bulletin'?`<div class="card">
-    <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Envoi des résultats par WhatsApp</div>
+    <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Envoi des résultats par WhatsApp</div>
     <div class="fl2 fic g8 mb14 fw"><span class="fl">Trimestre:</span>${TRS.map(t=>`<button class="tab${(window._waTriB||TRS[0])===t?' on':''}" onclick="window._waTriB='${t}';re()">${t}</button>`).join('')}</div>
     <div style="display:flex;flex-direction:column;gap:8px">
     ${DB.students.filter(s=>s.ptel).map(s=>{
@@ -12750,17 +12754,17 @@ function pgSend(){
       const msg=`Bonjour ${s.parent||'cher parent'},\n\nVoici les résultats de ${s.pre} ${s.nom} (${s.cls}) pour le ${tri}:\n\nMoyenne générale: *${moy!==null?moy.toFixed(2):'-'}/20* — ${ap?.lbl||'-'}\n\nPour plus de détails, contactez l\'établissement.\n\n_${DB.school?.nom||'VÉRITAS Academy'}_`;
       return`<div class="fl2 fic fsb"><div class="fl2 fic g8"><div class="av" style="width:26px;height:26px;background:var(--gp);color:var(--gold);border:1.5px solid var(--gb);font-size:12px">${s.pre[0]}</div>
         <div><div class="s semi">${s.pre} ${s.nom}</div><div class="xs2 mut">${s.cls} · Moy: ${moy!==null?moy.toFixed(2):'-'}</div></div></div>
-        <a href="${wu(s.ptel,msg)}" target="_blank" class="btn bgr2 xs"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Envoyer</a>
+        <a href="${wu(s.ptel,msg)}" target="_blank" class="btn bgr2 xs"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Envoyer</a>
       </div>`;}).join('')}
     </div>
   </div>`:''}
   ${selT==='announce'?`<div class="card">
-    <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg></span>Annonces aux parents</div>
+    <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-megaphone"/></svg></span>Annonces aux parents</div>
     ${DB.announce.slice(-5).reverse().map(a=>`<div style="padding:12px;border:var(--br);border-radius:var(--r2);margin-bottom:10px">
       <div class="fl2 fic fsb mb8"><div class="bold s">${a.titre}</div><span class="bg ${EVT[a.type]?.c||'bgt'}">${EVT[a.type]?.l||a.type}</span></div>
       <div class="xs2 mut mb8">${a.desc.substring(0,100)}${a.desc.length>100?'...':''}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
-        ${DB.students.filter(s=>s.ptel).slice(0,3).map(s=>`<a href="${wu(s.ptel,'📣 '+a.titre+'\n\n'+a.desc+'\n\n_'+DB.school?.nom||'VÉRITAS_')}" target="_blank" class="btn bgr2 xs"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>${s.pre}</a>`).join('')}
+        ${DB.students.filter(s=>s.ptel).slice(0,3).map(s=>`<a href="${wu(s.ptel,'📣 '+a.titre+'\n\n'+a.desc+'\n\n_'+DB.school?.nom||'VÉRITAS_')}" target="_blank" class="btn bgr2 xs"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>${s.pre}</a>`).join('')}
         ${DB.students.filter(s=>s.ptel).length>3?`<span class="xs2 mut">+ ${DB.students.filter(s=>s.ptel).length-3} autres</span>`:''}
       </div>
     </div>`).join('') || '<div class="empty">Aucune annonce</div>'}
@@ -12769,15 +12773,15 @@ function pgSend(){
     var emails=[...new Set((DB.visitorAccounts||[]).map(function(v){return (v.email||'').trim();}).filter(function(e){return e.indexOf('@')>1;}))];
     var phones=[]; DB.students.forEach(function(s){if(s.ptel)phones.push(s.ptel);}); (DB.visitorAccounts||[]).forEach(function(v){if(v.tel)phones.push(v.tel);}); phones=[...new Set(phones)];
     return '<div class="card">'
-      +'<div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg></span>Diffusion par e-mail (liens pré-remplis)</div>'
+      +'<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-mail"/></svg></span>Diffusion par e-mail (liens pré-remplis)</div>'
       +'<div class="ib ibi mb12"><span>💡</span><span>Génère un lien <strong>mailto:</strong> avec tous les e-mails en copie cachée (BCC) — un clic ouvre votre messagerie, prête à envoyer. Gratuit, sans configuration. (Pour un envoi 100% automatique, sans clic, il faut un service e-mail/SMS — voir roadmap.)</span></div>'
       +'<div class="fg mb10"><span class="fl">Objet</span><input class="fi" id="emObj" placeholder="Ex : Réunion de parents — samedi 14h"></div>'
       +'<div class="fg mb12"><span class="fl">Message</span><textarea class="fi" id="emBody" rows="6" placeholder="Chers parents,&#10;&#10;..."></textarea></div>'
       +'<div class="ib ibg mb12"><span>✅</span><span><strong>'+emails.length+'</strong> e-mail(s) collecté(s) · <strong>'+phones.length+'</strong> numéro(s) WhatsApp/SMS</span></div>'
       +'<div class="fl2 g8 fw">'
-        +'<button class="btn bi" onclick="_bulkMailto()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg>Ouvrir l\'e-mail groupé (BCC)</button>'
-        +'<button class="btn bo" onclick="_bulkCopy(\'email\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier les e-mails</button>'
-        +'<button class="btn bgr2" onclick="_bulkCopy(\'wa\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier les numéros</button>'
+        +'<button class="btn bi" onclick="_bulkMailto()"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Ouvrir l\'e-mail groupé (BCC)</button>'
+        +'<button class="btn bo" onclick="_bulkCopy(\'email\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier les e-mails</button>'
+        +'<button class="btn bgr2" onclick="_bulkCopy(\'wa\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier les numéros</button>'
       +'</div>'
       +(emails.length===0?'<div class="ib ibr mt12"><span>⚠️</span><span>Aucune adresse e-mail collectée pour l\'instant (elles proviennent des inscriptions visiteurs en ligne).</span></div>':'')
     +'</div>';
@@ -12852,8 +12856,8 @@ function pgTeachers(){
         <td class="mono bold" style="color:var(--gold)">${fmt(t.sal)}</td>
         <td><span class="bg ${t.stat==='Actif'?'bgg':'bgr'}">${t.stat}</span></td>
         <td><div class="fl2 g4">
-          <button class="btn bo xs" onclick="printPaySlip('${t.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg>Fiche paie</button>
-          ${isSA()?`<button class="btn bpu xs" onclick="promoteToAdmin('${t.id}')" title="Promouvoir admin">👑</button><button class="btn bg2 xs" onclick="editTch('${t.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>`:''}
+          <button class="btn bo xs" onclick="printPaySlip('${t.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Fiche paie</button>
+          ${isSA()?`<button class="btn bpu xs" onclick="promoteToAdmin('${t.id}')" title="Promouvoir admin">👑</button><button class="btn bg2 xs" onclick="editTch('${t.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>`:''}
         </div></td>
       </tr>`).join('')}</tbody>
     </table></div>
@@ -12873,7 +12877,7 @@ function mAddTch(){
     <div class="fg"><span class="fl">Téléphone</span><input class="fi" id="tTl"></div>
     <div class="fg"><span class="fl">Salaire (FCFA)</span><input class="fi" id="tSal" type="number" value="100000"></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveTch()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveTch()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
 }
 function saveTch(){
   const nom=document.getElementById('tN')?.value.trim(),pre=document.getElementById('tP')?.value.trim();
@@ -12896,7 +12900,7 @@ function editTch(id){
     <div class="fg"><span class="fl">Salaire (FCFA)</span><input class="fi" id="etSal" type="number" value="${t.sal}"></div>
     <div class="fg full"><span class="fl">Statut</span><select class="fi" id="etSt"><option${t.stat==='Actif'?' selected':''}>Actif</option><option${t.stat==='Inactif'?' selected':''}>Inactif</option></select></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEditTch('${id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Modifier</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEditTch('${id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Modifier</button>`);
 }
 function saveEditTch(id){const t=T(id);if(!t)return;t.nom=document.getElementById('etN')?.value||t.nom;t.pre=document.getElementById('etP')?.value||t.pre;t.mat2=document.getElementById('etMat')?.value||t.mat2;t.grade=document.getElementById('etGr')?.value||t.grade;t.tel=document.getElementById('etTl')?.value||t.tel;t.sal=+document.getElementById('etSal')?.value||t.sal;t.stat=document.getElementById('etSt')?.value||t.stat;save();cm();re();toast('✓ Enseignant modifié');}
 function printPaySlip(tid){
@@ -12943,13 +12947,13 @@ function pgAccounts(){
   if(!iA())return na();
   if(!isSA()){
     var h='<div class="ib ibt mb16"><span>🔐</span><span>Certaines fonctions sont réservées au Super Administrateur. Vous pouvez gérer les comptes élèves.</span></div>';
-    h+='<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"/></svg></span>‍🎓 Comptes Élèves</div>';
+    h+='<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-users"/></svg></span>‍🎓 Comptes Élèves</div>';
     h+='<div class="tw"><table><thead><tr><th>Nom</th><th>Utilisateur</th><th>Classe</th></tr></thead><tbody>';
     DB.students.forEach(function(s){
       h+='<tr><td class="semi">'+s.pre+' '+s.nom+'</td><td class="mono xs2">'+(s.user||'<span style="color:var(--ink4)">Non créé</span>')+'</td><td><span class="bg bgd">'+s.cls+'</span></td></tr>';
     });
     h+='</tbody></table></div></div>';
-    h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"/></svg></span>‍🏫 Comptes Enseignants</div>';
+    h+='<div class="card mt16"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-users"/></svg></span>‍🏫 Comptes Enseignants</div>';
     h+='<div class="tw"><table><thead><tr><th>Nom</th><th>Utilisateur</th><th>Matière</th></tr></thead><tbody>';
     DB.teachers.forEach(function(t){
       h+='<tr><td class="semi">'+t.pre+' '+t.nom+'</td><td class="mono xs2">'+(t.user||'—')+'</td><td>'+(t.mat2||'—')+'</td></tr>';
@@ -12985,8 +12989,8 @@ function pgVisitorOrders(){
       '<td><span class="bg '+(o.statut==='Confirmé'?'bgg':o.statut==='Annulé'?'bgr':'bgo')+'">'+o.statut+'</span></td>'+
       '<td><div class="fl2 g4">'+
       (o.statut==='En attente'?'<button class="btn bgr2 xs" onclick="confirmVOrder(\''+o.id+'\')">✓</button><button class="btn br2 xs" onclick="cancelVOrder(\''+o.id+'\')">✕</button>':'')+
-      (o.statut==='Confirmé'?'<button class="btn bgr2 xs" onclick="sendVisitorReceipt(&apos;'+o.id+'&apos;)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu WA</button><button class="btn bo xs" onclick="printVisitorReceipt(&apos;'+o.id+'&apos;)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>️</button>':'')+
-      '<button class="btn bgr2 xs" onclick="sendVisitorReceipt(\''+o.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu</button>'+
+      (o.statut==='Confirmé'?'<button class="btn bgr2 xs" onclick="sendVisitorReceipt(&apos;'+o.id+'&apos;)"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu WA</button><button class="btn bo xs" onclick="printVisitorReceipt(&apos;'+o.id+'&apos;)"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>️</button>':'')+
+      '<button class="btn bgr2 xs" onclick="sendVisitorReceipt(\''+o.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Reçu</button>'+
       '<a href="https://wa.me/'+o.tel.replace(/[^0-9]/g,'')+'" target="_blank" class="btn bo xs">📲</a>'+
       '</div></td></tr>'
     ).join('')+
@@ -13025,7 +13029,7 @@ function pgBooksale(){
         <td class="mono bold" style="color:var(--gold)">${fmt(bp.mnt)}</td>
         <td><span class="bg ${bp.statut==='Payé'?'bgg':'bgo'}">${bp.statut}</span></td>
         <td><div class="fl2 g4">
-          ${bp.statut!=='Payé'?`<button class="btn bgr2 xs" onclick="markBPPaid('${bp.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Payé</button>`:''}
+          ${bp.statut!=='Payé'?`<button class="btn bgr2 xs" onclick="markBPPaid('${bp.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Payé</button>`:''}
           <button class="btn bo xs" onclick="printBookRec('${bp.id}')">🧾</button>
         </div></td>
       </tr>`;}).join('')}
@@ -13039,7 +13043,7 @@ function mSaleBook(){
     <div class="fg full"><span class="fl">Manuel *</span><select class="fi" id="slBk" onchange="autoFillSaleP()">${DB.books.filter(b=>b.stock>0).map(b=>`<option value="${b.id}">${b.ico} ${b.titre} (${b.cls}) — ${fmt(b.prix)}</option>`).join('')}</select></div>
     <div class="fg"><span class="fl">Montant</span><input class="fi" id="slMnt" type="number" min="0"></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveSale()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveSale()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
   setTimeout(()=>autoFillSaleP(),100);
 }
 function autoFillSaleP(){const bid=document.getElementById('slBk')?.value;const b=DB.books.find(x=>x.id===bid);const m=document.getElementById('slMnt');if(b&&m)m.value=b.prix;}
@@ -13109,7 +13113,7 @@ function mAddDep(){
     <div class="fg full"><span class="fl">Description *</span><input class="fi" id="depD" placeholder="Détail de la dépense"></div>
     <div class="fg"><span class="fl">Date</span><input class="fi" id="depDt" type="date" value="${new Date().toISOString().split('T')[0]}"></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveDep()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveDep()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
 }
 function saveDep(){
   const mnt=+document.getElementById('depM')?.value;const desc=document.getElementById('depD')?.value.trim();
@@ -13162,7 +13166,7 @@ function pgClassStats(){
   h+='<div class="sc scg"><div class="sci">🏆</div><div class="scl">Meilleure classe</div><div class="scv vg" style="font-size:16px">'+best.cls+'</div><div class="scs">'+best.avg.toFixed(2)+'/20</div></div>';
   h+='</div>';
   // Class comparison
-  h+='<div class="g2"><div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Moyennes par classe — '+tri+'</div>';
+  h+='<div class="g2"><div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Moyennes par classe — '+tri+'</div>';
   clsData.forEach(function(d){
     var col=d.avg>=14?'var(--gr)':d.avg>=10?'var(--gold)':'var(--re)';
     var pct=Math.round(d.avg/20*100);
@@ -13172,7 +13176,7 @@ function pgClassStats(){
   });
   h+='</div>';
   // Class ranking
-  h+='<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></span>Classement des classes</div><div class="tw"><table><thead><tr><th>#</th><th>Classe</th><th>Moy.</th><th>Taux</th><th>Eff.</th></tr></thead><tbody>';
+  h+='<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-award"/></svg></span>Classement des classes</div><div class="tw"><table><thead><tr><th>#</th><th>Classe</th><th>Moy.</th><th>Taux</th><th>Eff.</th></tr></thead><tbody>';
   clsData.sort(function(a,b){return b.avg-a.avg;}).forEach(function(d,i){
     var col=d.avg>=14?'var(--gr)':d.avg>=10?'var(--gold)':'var(--re)';
     h+='<tr><td class="semi">'+(i+1)+'</td><td class="semi">'+d.cls+'</td>';
@@ -13182,7 +13186,7 @@ function pgClassStats(){
   });
   h+='</tbody></table></div></div></div>';
   // Subject comparison
-  h+='<div class="card mt20"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg></span>Performances par Matière — '+tri+'</div><div class="tw"><table>';
+  h+='<div class="card mt20"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-book"/></svg></span>Performances par Matière — '+tri+'</div><div class="tw"><table>';
   h+='<thead><tr><th>#</th><th>Matière</th><th>Moy.</th><th>Taux ≥10</th><th>Notes</th><th>[Min-Max]</th></tr></thead><tbody>';
   subData.forEach(function(d,i){
     var col=d.avg>=14?'var(--gr)':d.avg>=10?'var(--gold)':'var(--re)';
@@ -13193,13 +13197,13 @@ function pgClassStats(){
   });
   h+='</tbody></table></div></div>';
   // Subject bars + top 3
-  h+='<div class="g2 mt16"><div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Matières (barres)</div>';
+  h+='<div class="g2 mt16"><div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Matières (barres)</div>';
   subData.slice(0,12).forEach(function(d){
     var col=d.avg>=14?'var(--gr)':d.avg>=10?'var(--gold)':'var(--re)';
     h+='<div class="mb10"><div class="fl2 fic fsb mb4"><span class="s">'+d.sub.substring(0,20)+'</span><span class="mono bold xs2" style="color:'+col+'">'+d.avg.toFixed(1)+'</span></div>';
     h+='<div class="pb"><div class="pf" style="width:'+Math.round(d.avg/20*100)+'%;background:'+col+'"></div></div></div>';
   });
-  h+='</div><div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></span>Top 3 & alerte</div>';
+  h+='</div><div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-award"/></svg></span>Top 3 & alerte</div>';
   var medals=['🥇','🥈','🥉'];
   subData.slice(0,3).forEach(function(d,i){
     var bg=i===0?'var(--gp)':i===1?'var(--blb)':'var(--pub)';
@@ -13250,7 +13254,7 @@ function pgFinance(){
       <div class="xs2 mut mb4">RÉSULTAT NET</div>
       <div class="mono bold" style="font-size:32px;color:${bNet>=0?'var(--gr)':'var(--re)'}">${bNet>=0?'+':''} ${fmt(bNet)}</div>
       <div class="xs2 mut mt8">Recettes: ${fmt(tF+tB)} — Charges: ${fmt(tS+tD)}</div>
-      <button class="btn bi sm mt14" onclick="printBilan()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer bilan</button>
+      <button class="btn bi sm mt14" onclick="printBilan()"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer bilan</button>
     </div>
     <div class="card">
       <div class="ct">Répartition des dépenses</div>
@@ -13294,13 +13298,13 @@ function pgCertScol(){
   var selC=window._csCls||'Toutes';
   var sts=selC==='Toutes'?DB.students:DB.students.filter(function(s){return s.cls===selC;});
   sts.sort(function(a,b){return(a.nom+a.pre).localeCompare(b.nom+b.pre);});
-  return`<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg></span>Certificats de scolarité</div>
+  return`<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-doc"/></svg></span>Certificats de scolarité</div>
     <div class="fl2 fic g8 mb14 fw">
       <div class="fg"><span class="fl">Classe</span><select class="fi" onchange="window._csCls=this.value;re()">${['Toutes',...CLS].map(cl=>'<option'+(cl===selC?' selected':'')+'>'+cl+'</option>').join('')}</select></div>
       <div class="fg" style="flex:2"><span class="fl">🔍 Rechercher</span><input class="fi" id="csSearch" placeholder="Nom ou prénom..." oninput="filterCsStudents()"></div>
     </div>
     <div id="csStudentList"><div class="tw"><table><thead><tr><th>#</th><th>Élève</th><th>Classe</th><th>Actions</th></tr></thead><tbody>
-    ${sts.map(function(s,i){return '<tr class="csRow" data-nom="'+(s.pre+' '+s.nom).toLowerCase()+'"><td class="xs2">'+(i+1)+'</td><td class="semi">'+s.pre+' '+s.nom+'</td><td><span class="bg bgd">'+s.cls+'</span></td><td><button class="btn bi sm" onclick="genCertScolFor(&apos;'+s.id+'&apos;)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Certificat</button></td></tr>';}).join('')}
+    ${sts.map(function(s,i){return '<tr class="csRow" data-nom="'+(s.pre+' '+s.nom).toLowerCase()+'"><td class="xs2">'+(i+1)+'</td><td class="semi">'+s.pre+' '+s.nom+'</td><td><span class="bg bgd">'+s.cls+'</span></td><td><button class="btn bi sm" onclick="genCertScolFor(&apos;'+s.id+'&apos;)"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Certificat</button></td></tr>';}).join('')}
     </tbody></table></div></div>
   </div>`;
 }
@@ -13336,7 +13340,7 @@ function pgListeClasse(){
   const list=DB.students.filter(s=>s.cls===selC);
   return`<div class="fl2 fic fsb mb14 fw g8">
     <div class="tabs">${CLS.map(c=>`<button class="tab${c===selC?' on':''}" onclick="window._lcC='${c}';re()">${c}</button>`).join('')}</div>
-    <button class="btn bg2" onclick="printListeClasse()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer liste ${selC}</button>
+    <button class="btn bg2" onclick="printListeClasse()"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer liste ${selC}</button>
   </div>
   <div class="card"><div class="ct">${selC} — ${list.length} élève${list.length>1?'s':''}</div>
     <div class="tw"><table>
@@ -13373,13 +13377,13 @@ function printListeClasse(){
   </div></div>`,`Liste classe ${selC}`);
 }
 
-function pgPresence(){if(!iA())return na();return`<div class="card"><div class="ct">Fiches de présence</div><div class="fl2 fic fsb mb14 fw g8"><div class="fg"><span class="fl">Classe</span><select class="fi" style="min-width:150px" onchange="window._prCl=this.value;renderPresence()">${CLS.map(c=>`<option${c===(window._prCl||CLS[0])?' selected':''}>${c}</option>`).join('')}</select></div><button class="btn bg2" onclick="printPresence()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer fiche</button></div><div id="prContent"></div></div>`;
+function pgPresence(){if(!iA())return na();return`<div class="card"><div class="ct">Fiches de présence</div><div class="fl2 fic fsb mb14 fw g8"><div class="fg"><span class="fl">Classe</span><select class="fi" style="min-width:150px" onchange="window._prCl=this.value;renderPresence()">${CLS.map(c=>`<option${c===(window._prCl||CLS[0])?' selected':''}>${c}</option>`).join('')}</select></div><button class="btn bg2" onclick="printPresence()"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer fiche</button></div><div id="prContent"></div></div>`;
   setTimeout(renderPresence,100);
 }
 function renderPresence(){const cls=window._prCl||CLS[0];const sts=DB.students.filter(s=>s.cls===cls);const pc=document.getElementById('prContent');if(!pc)return;pc.innerHTML=`<div class="tw"><table><thead><tr><th>#</th><th>Élève</th>${Array.from({length:20},(_,i)=>i+1).map(n=>`<th style="text-align:center;min-width:28px">${n}</th>`).join('')}</tr></thead><tbody>${sts.map((s,i)=>`<tr><td class="xs2 mut">${i+1}</td><td class="semi s">${s.pre} ${s.nom}</td>${Array.from({length:20},()=>'<td style="border:1px solid var(--bg3);height:22px"></td>').join('')}</tr>`).join('')}</tbody></table></div>`;}
 function printPresence(){const cls=window._prCl||CLS[0];const sts=DB.students.filter(s=>s.cls===cls);printDoc(`<div style="max-width:720px;margin:0 auto;font-family:'Inter',sans-serif">${docHeader('Fiche de Présence')}<div style="padding:10px 16px;background:#f5f3ef;border-bottom:1px solid #ddd8d0"><strong>Classe:</strong> ${cls} — Mois: __________________</div><div style="padding:10px 16px"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th style="padding:5px;text-align:left;border:1px solid #ddd">#</th><th style="padding:5px;text-align:left;border:1px solid #ddd;min-width:120px">Élève</th>${Array.from({length:25},(_,i)=>`<th style="padding:4px 2px;text-align:center;border:1px solid #ddd;width:18px">${i+1}</th>`).join('')}</tr></thead><tbody>${sts.map((s,i)=>`<tr><td style="padding:5px;border:1px solid #ddd;font-size:12px">${i+1}</td><td style="padding:5px;border:1px solid #ddd;font-size:13px;font-weight:600">${s.pre} ${s.nom}</td>${Array.from({length:25},()=>'<td style="border:1px solid #ddd;height:18px"></td>').join('')}</tr>`).join('')}</tbody></table></div></div>`,`Présence ${cls}`);}
 
-function pgAttestTravail(){if(!iA())return na();return`<div class="card"><div class="ct">Attestations de travail</div><div class="fg mb14"><span class="fl">Enseignant</span><select class="fi" id="atEns">${DB.teachers.map(t=>`<option value="${t.id}">${t.pre} ${t.nom} — ${t.mat2}</option>`).join('')}</select></div><button class="btn bi" onclick="genAttestTravail()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Générer attestation</button></div>`;}
+function pgAttestTravail(){if(!iA())return na();return`<div class="card"><div class="ct">Attestations de travail</div><div class="fg mb14"><span class="fl">Enseignant</span><select class="fi" id="atEns">${DB.teachers.map(t=>`<option value="${t.id}">${t.pre} ${t.nom} — ${t.mat2}</option>`).join('')}</select></div><button class="btn bi" onclick="genAttestTravail()"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Générer attestation</button></div>`;}
 function genAttestTravail(){
   const t=T(document.getElementById('atEns')?.value);if(!t)return;
   printDoc(`<div style="max-width:900px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px #9a7228,inset 0 0 0 6px #142554,inset 0 0 0 8px #9a7228;-webkit-print-color-adjust:exact;print-color-adjust:exact">${docHeader("Attestation de Travail")}<div style="padding:30px 40px"><div style="font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:20px">ATTESTATION DE TRAVAIL</div>
@@ -13407,10 +13411,10 @@ function pgOrientationAdmin(){
   </div>
   <div class="card">
     <div class="fl2 fic fsb mb14 fw g8">
-      <div class="ct mb0"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-compass"/></svg></span>Demandes d\'Orientation & Conseil</div>
+      <div class="ct mb0"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-compass"/></svg></span>Demandes d\'Orientation & Conseil</div>
       <div class="fl2 g8">
         <button class="btn bi sm" onclick="mAddOrientationDemande()">＋ Nouvelle demande</button>
-        <button class="btn bg2 sm" onclick="exportOrientationExcel()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Excel</button>
+        <button class="btn bg2 sm" onclick="exportOrientationExcel()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Excel</button>
       </div>
     </div>
     ${!nb?'<div class="empty"><div class="empty-ico">🧭</div>Aucune demande pour l\'instant</div>':
@@ -13429,7 +13433,7 @@ function pgOrientationAdmin(){
           <option${d.statut==='Clôturé'?' selected':''}>Clôturé</option>
         </select></td>
         <td><div class="fl2 g4">
-          ${d.msg?`<button class="btn bo xs" onclick="viewOrientMsg('${d.id}')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Msg</button>`:''}
+          ${d.msg?`<button class="btn bo xs" onclick="viewOrientMsg('${d.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Msg</button>`:''}
           <button class="btn br2 xs" onclick="delOrientDemande('${d.id}')">🗑</button>
         </div></td>
       </tr>`).join('')}</tbody>
@@ -13452,7 +13456,7 @@ function viewOrientMsg(id){
   `<div style="padding:12px;background:var(--bg2);border-radius:var(--r2);font-size:13px;line-height:1.8;white-space:pre-wrap">${_esc(d.msg||'(Aucun message)')}</div>
    ${d.dispo?`<div class="ib ibt mt12 mb0"><span>📅</span><span>Disponibilité : ${_esc(d.dispo)}</span></div>`:''}`,
   `<button class="btn bo" onclick="cm()">Fermer</button>
-   <a href="https://wa.me/237${(d.tel||'').replace(/[^0-9]/g,'')}" target="_blank" class="btn bgr2"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>WhatsApp</a>`);
+   <a href="https://wa.me/237${(d.tel||'').replace(/[^0-9]/g,'')}" target="_blank" class="btn bgr2"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>WhatsApp</a>`);
 }
 function mAddOrientationDemande(){
   M('Nouvelle demande','Saisie manuelle',
@@ -13464,7 +13468,7 @@ function mAddOrientationDemande(){
     <div class="fg full"><span class="fl">Message</span><textarea class="fi" id="aoMsg" rows="2"></textarea></div>
     <div class="fg full"><span class="fl">Disponibilité</span><input class="fi" id="aoDispo"></div>
   </div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveOrientDemande()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveOrientDemande()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
 }
 function saveOrientDemande(){
   const nom=(document.getElementById('aoNom')?.value||'').trim();
@@ -13507,8 +13511,8 @@ function pgGuide(){
   var h='<div class="fl2 fic fsb fw g8 mb16">'
     +'<div><div class="bold" style="font-size:22px;color:var(--bl);font-family:Montserrat,sans-serif">📖 Guide d\'utilisation VÉRITAS</div>'
     +'<div class="xs2 mut">Votre tableau de bord — Connecté en tant que <strong>'+_esc(currentRoleLabel)+'</strong></div></div>'
-    +'<div class="fl2 g6"><button class="btn bo sm" onclick="window.print()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>'
-    +'<button class="btn bi sm" onclick="_guideDownloadPDF()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger PDF</button></div>'
+    +'<div class="fl2 g6"><button class="btn bo sm" onclick="window.print()"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>'
+    +'<button class="btn bi sm" onclick="_guideDownloadPDF()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger PDF</button></div>'
     +'</div>';
 
   // Bandeau onglets de navigation
@@ -13750,75 +13754,75 @@ function pgSettings(){
   // Diagnostic CamPay peuplé APRÈS injection du HTML (l'élément n'existe pas encore ici).
   setTimeout(_campayRenderDiag, 60);
   return`<div class="g2">
-    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sliders"/></svg></span>Informations de l\'école</div>
+    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-sliders"/></svg></span>Informations de l\'école</div>
       <div class="fg2">
         ${[['nom','Nom établissement'],['slogan','Slogan'],['ville','Ville / Adresse'],['tel','Téléphone'],['bp','Boîte postale'],['directeur','Directeur'],['annee','Année scolaire']].map(([k,l])=>`<div class="fg${k==='nom'||k==='ville'?' full':''}"><span class="fl">${l}</span><input class="fi" id="sc_${k}" value="${DB.school[k]||''}"></div>`).join('')}
       </div>
-      <button class="btn bi mt14" onclick="saveSettings()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>
+      <button class="btn bi mt14" onclick="saveSettings()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>
     </div>
-    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"/></svg></span>Portail public</div>
+    <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-globe"/></svg></span>Portail public</div>
       <div class="fg mb10"><span class="fl">Slogan accrocheur</span><input class="fi" id="pi_slogan2" value="${DB.publicInfo?.slogan2||''}"></div>
       <div class="fg mb10"><span class="fl">Description (portail visiteur)</span><textarea class="fi" id="pi_description" rows="4">${DB.publicInfo?.description||''}</textarea></div>
       <div class="fg mb10"><span class="fl">Histoire du centre</span><textarea class="fi" id="pi_histoire" rows="3">${DB.publicInfo?.histoire||''}</textarea></div>
       <div class="fg mb10"><span class="fl">Horaires d\'ouverture</span><input class="fi" id="pi_horaires" value="${DB.publicInfo?.horaires||''}"></div>
       <div class="fg mb10"><span class="fl">Email de contact</span><input class="fi" id="pi_email" value="${DB.publicInfo?.email||''}"></div>
       <div class="fg mb10"><span class="fl">WhatsApp contact</span><input class="fi" id="pi_whatsapp" value="${DB.publicInfo?.whatsapp||''}"></div>
-      <button class="btn bi mt14" onclick="savePublicInfo()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer portail</button>
+      <button class="btn bi mt14" onclick="savePublicInfo()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer portail</button>
     </div>
   </div>
   <div class="card mt16">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg></span>Synchronisation & Sauvegarde</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-refresh"/></svg></span>Synchronisation & Sauvegarde</div>
       <div class="ib ibt mb14"><span>📱</span><span>Exportez/importez les données pour synchroniser entre appareils ou via réseau intranet.</span></div>
       <div class="fl2 g8 fw">
-        <button class="btn bgr2" onclick="exportAllData()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Exporter JSON</button>
-        <button class="btn bvi" onclick="importAllData()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Importer JSON</button>
-        <button class="btn" style="background:#059669;color:#fff" onclick="exportSQL()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-package"/></svg>Exporter SQL</button>
+        <button class="btn bgr2" onclick="exportAllData()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Exporter JSON</button>
+        <button class="btn bvi" onclick="importAllData()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Importer JSON</button>
+        <button class="btn" style="background:#059669;color:#fff" onclick="exportSQL()"><svg class="vico bico" aria-hidden="true"><use href="#lc-package"/></svg>Exporter SQL</button>
       </div>
       <div class="ib ibi mt14 mb0"><span>💡</span><span>Pour synchroniser via <strong>intranet</strong>: exportez les données, partagez via WiFi, importez sur l\'autre appareil.</span></div>
       <div class="ib ibg mt12 mb0" style="background:#F0FDF4;border:1px solid #A7F3D0"><span>✨</span><span><strong>Nouveau (v1.2)</strong> : les anciens raccourcis « Gestion avancée » ont été éclatés dans les bonnes sections du menu. Retrouvez-les dans : 🌐 <strong>Portail visiteur</strong> (ticker, vidéo, calendrier, partenaires, extraits), 🎓 <strong>E-Learning</strong> (packs, jeux, labos, coaching, import QCM), 📚 <strong>Pédagogie › Devoirs</strong> (épreuves, évals), 💰 <strong>Finances</strong> (tentatives paiement) et 📢 <strong>Communication</strong> (groupes WhatsApp).</span></div>
     </div>
     <div class="card mt16">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg></span>Contenu premium protégé (Étape 2)</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-lock"/></svg></span>Contenu premium protégé (Étape 2)</div>
       <div class="ib ibt mb14"><span>🛡️</span><span>Les médias <strong>payants</strong> uploadés sont désormais stockés dans un dossier <strong>privé</strong> et servis uniquement après vérification d'abonnement (content.php). Migrez les anciens fichiers premium (aujourd'hui publics, téléchargeables par URL) vers ce dossier privé.</span></div>
       <div class="fl2 g8 fw">
-        <button class="btn bgr2" onclick="runProtectMigration(true)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"/></svg>Simuler (dry-run)</button>
-        <button class="btn" style="background:#92400E;color:#fff;border-radius:10px;font-weight:700" onclick="runProtectMigration(false)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-package"/></svg>Migrer maintenant</button>
+        <button class="btn bgr2" onclick="runProtectMigration(true)"><svg class="vico bico" aria-hidden="true"><use href="#lc-flask"/></svg>Simuler (dry-run)</button>
+        <button class="btn" style="background:#92400E;color:#fff;border-radius:10px;font-weight:700" onclick="runProtectMigration(false)"><svg class="vico bico" aria-hidden="true"><use href="#lc-package"/></svg>Migrer maintenant</button>
       </div>
       <div class="ib ibi mt12 mb0"><span>💡</span><span>Lance d'abord la <strong>simulation</strong>, puis <strong>Migrer</strong>. Une sauvegarde horodatée est créée avant toute modification. Le contenu <strong>gratuit</strong> reste public (funnel d'abonnement).</span></div>
       <div id="protectMigrStatus" class="mt12"></div>
     </div>
     <div class="card mt16">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cloud"/></svg></span>VÉRITAS Cloud — Synchronisation en ligne</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-cloud"/></svg></span>VÉRITAS Cloud — Synchronisation en ligne</div>
       <div class="ib ibg mb14"><span>🌐</span><span>Synchronisez vos données avec le serveur <strong>veritas-school.com</strong>. Sauvegardez automatiquement dans MySQL et uploadez vos fichiers (vidéos, épreuves, cours).</span></div>
       <div class="fg2">
         <div class="fg full"><span class="fl">URL du serveur API</span><input class="fi" id="cloud_url" value="${DB.cloudConfig?.url||'https://veritas-school.com/api'}" placeholder="https://veritas-school.com/api"></div>
         <div class="fg full"><span class="fl">Clé API (token secret)</span><input class="fi" id="cloud_secret" type="password" value="${DB.cloudConfig?.secret||''}" placeholder="Votre clé secrète API"></div>
       </div>
-      <button class="btn bi sm mt10" onclick="saveCloudConfig()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer config cloud</button>
+      <button class="btn bi sm mt10" onclick="saveCloudConfig()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer config cloud</button>
       <div class="fl2 g8 fw mt14 pt14" style="border-top:var(--br)">
-        <button class="btn sm" style="background:linear-gradient(135deg,#AE5353,#C07D4F);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="forceFullSync()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>Forcer la sync complète</button>
-        <button class="btn sm" style="background:linear-gradient(135deg,#142554,#1e3a7a);color:#FFC93C;border-radius:10px;font-weight:700" onclick="mStorageDashboard()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Stockage LWS (200 Go)</button>
-        <button class="btn sm" style="background:linear-gradient(135deg,#92400E,#D97706);color:#fff;border-radius:10px;font-weight:700" onclick="mCleanBrokenRefs()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Nettoyer références cassées</button>
-        <button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="cloudSaveDB()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cloud"/></svg>Sauvegarder vers le cloud</button>
-        <button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="cloudRestoreDB()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Restaurer depuis le cloud</button>
-        <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="cloudTestConnection()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Tester la connexion</button>
-        <button class="btn sm" style="background:linear-gradient(135deg,#AE5353,#F59E0B);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="mSyncDiag()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Diagnostic Sync complet (5 tests)</button>
-        <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mCloudUploadFile()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Uploader un fichier</button>
-        <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mCloudFilesList()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-package"/></svg>Fichiers en ligne</button><button class="btn sm" style="background:#065F46;color:#fff;border-radius:10px" onclick="cloudSyncBinaries()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Sync fichiers locaux</button><button class="btn sm" style="background:#6D28D9;color:#fff;border-radius:10px" onclick="cloudForcePull()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Forcer depuis le cloud</button>
+        <button class="btn sm" style="background:linear-gradient(135deg,#AE5353,#C07D4F);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="forceFullSync()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Forcer la sync complète</button>
+        <button class="btn sm" style="background:linear-gradient(135deg,#142554,#1e3a7a);color:#FFC93C;border-radius:10px;font-weight:700" onclick="mStorageDashboard()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Stockage LWS (200 Go)</button>
+        <button class="btn sm" style="background:linear-gradient(135deg,#92400E,#D97706);color:#fff;border-radius:10px;font-weight:700" onclick="mCleanBrokenRefs()"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Nettoyer références cassées</button>
+        <button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="cloudSaveDB()"><svg class="vico bico" aria-hidden="true"><use href="#lc-cloud"/></svg>Sauvegarder vers le cloud</button>
+        <button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="cloudRestoreDB()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Restaurer depuis le cloud</button>
+        <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="cloudTestConnection()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Tester la connexion</button>
+        <button class="btn sm" style="background:linear-gradient(135deg,#AE5353,#F59E0B);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="mSyncDiag()"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Diagnostic Sync complet (5 tests)</button>
+        <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mCloudUploadFile()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Uploader un fichier</button>
+        <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mCloudFilesList()"><svg class="vico bico" aria-hidden="true"><use href="#lc-package"/></svg>Fichiers en ligne</button><button class="btn sm" style="background:#065F46;color:#fff;border-radius:10px" onclick="cloudSyncBinaries()"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Sync fichiers locaux</button><button class="btn sm" style="background:#6D28D9;color:#fff;border-radius:10px" onclick="cloudForcePull()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Forcer depuis le cloud</button>
       </div>
       <div id="cloudSyncStatus" class="mt12"></div>
       <div class="ib ibi mt14 mb0"><span>💡</span><span><strong>Dernière sync :</strong> ${DB.cloudConfig?.lastSync||'Jamais'} — Les données sont sauvegardées dans la base MySQL de veritas-school.com. Les fichiers uploadés sont accessibles depuis n\'importe quel appareil.</span></div>
     </div>
     <div class="card mt16">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg></span>Sécurité</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-lock"/></svg></span>Sécurité</div>
       <div class="ib ibg mb14"><span>🛡️</span><span>L\'application utilise le chiffrement SHA-256 pour les mots de passe et la validation des entrées.</span></div>
       <div class="fg mb10"><span class="fl">Taux horaire enseignants (FCFA/h)</span><input class="fi" id="sc_taux" type="number" value="${DB.tauxHoraire||2000}" min="500"></div>
-      <button class="btn bi sm" onclick="DB.tauxHoraire=parseInt(document.getElementById('sc_taux')?.value)||2000;save();toast('✓ Taux horaire mis à jour: '+fmt(DB.tauxHoraire)+'/h')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer taux</button>
+      <button class="btn bi sm" onclick="DB.tauxHoraire=parseInt(document.getElementById('sc_taux')?.value)||2000;save();toast('✓ Taux horaire mis à jour: '+fmt(DB.tauxHoraire)+'/h')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer taux</button>
     </div>
     <div class="card mt16">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg></span>Paiements API automatiques (CamPay / Orange Money / MTN MoMo)</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-zap"/></svg></span>Paiements API automatiques (CamPay / Orange Money / MTN MoMo)</div>
       <div class="ib ibg mb14"><span>🎉</span><span><strong>Paiement 100% automatique.</strong> Le client paie → l'opérateur notifie le serveur → l'accès s'active <strong>et le partenaire est crédité</strong>, sans intervention admin.</span></div>
-      <div class="ib ibi mb14"><span>🏦</span><span><strong>Une seule chose à mettre à jour</strong> quand le compte au nom du Centre VÉRITAS sera ouvert : les numéros affichés aux clients. <button class="btn bi sm" style="margin-left:8px" onclick="mPayCoordonnees()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-building"/></svg>Coordonnées d'encaissement</button></span></div>
+      <div class="ib ibi mb14"><span>🏦</span><span><strong>Une seule chose à mettre à jour</strong> quand le compte au nom du Centre VÉRITAS sera ouvert : les numéros affichés aux clients. <button class="btn bi sm" style="margin-left:8px" onclick="mPayCoordonnees()"><svg class="vico bico" aria-hidden="true"><use href="#lc-building"/></svg>Coordonnées d'encaissement</button></span></div>
       <div class="ib ibt mb14"><span>⚠️</span><span><strong>Une seule voie active par opérateur.</strong> N'activez pas CamPay <em>et</em> l'API directe du même opérateur : deux demandes de paiement partiraient pour une même référence. CamPay = MTN + Orange en un seul contrat (2% de frais, versements partenaires inclus). API directe = zéro intermédiaire, mais un contrat marchand par opérateur.</span></div>
 
       <div class="fg2">
@@ -13905,17 +13909,17 @@ function pgSettings(){
       </details>
 
       <div class="fl2 g8 mt12 fw">
-        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','list','⚡ Encaissements CamPay')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Encaissements CamPay (liste + net)</button>
-        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','balance','💰 Solde wallet CamPay')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg>Solde wallet CamPay</button>
-        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','payouts','📤 Versements partenaires CamPay')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Versements partenaires (CamPay)</button>
-        <button class="btn bo sm" onclick="_payAdminView('payment_orange.php','list','🟠 Paiements Orange')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Paiements Orange (liste)</button>
-        <button class="btn bo sm" onclick="_payAdminView('payment_mtn.php','list','📱 Paiements MTN')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Paiements MTN (liste)</button>
-        <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}fetch(u.replace(/\\/+$/,'')+'/payment_orange.php?action=status&ref=TEST').then(function(r){return r.text();}).then(function(t){toast('🟠 Orange : '+t.substring(0,80));}).catch(function(e){toast('Erreur : '+e.message,'err');})})()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Tester Orange</button>
-        <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}fetch(u.replace(/\\/+$/,'')+'/payment_mtn.php?action=status&ref=TEST').then(function(r){return r.text();}).then(function(t){toast('📱 MTN : '+t.substring(0,80));}).catch(function(e){toast('Erreur : '+e.message,'err');})})()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Tester MTN</button>
+        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','list','⚡ Encaissements CamPay')"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Encaissements CamPay (liste + net)</button>
+        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','balance','💰 Solde wallet CamPay')"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Solde wallet CamPay</button>
+        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','payouts','📤 Versements partenaires CamPay')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Versements partenaires (CamPay)</button>
+        <button class="btn bo sm" onclick="_payAdminView('payment_orange.php','list','🟠 Paiements Orange')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Paiements Orange (liste)</button>
+        <button class="btn bo sm" onclick="_payAdminView('payment_mtn.php','list','📱 Paiements MTN')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Paiements MTN (liste)</button>
+        <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}fetch(u.replace(/\\/+$/,'')+'/payment_orange.php?action=status&ref=TEST').then(function(r){return r.text();}).then(function(t){toast('🟠 Orange : '+t.substring(0,80));}).catch(function(e){toast('Erreur : '+e.message,'err');})})()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Tester Orange</button>
+        <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}fetch(u.replace(/\\/+$/,'')+'/payment_mtn.php?action=status&ref=TEST').then(function(r){return r.text();}).then(function(t){toast('📱 MTN : '+t.substring(0,80));}).catch(function(e){toast('Erreur : '+e.message,'err');})})()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Tester MTN</button>
       </div>
     </div>
     <div class="card mt16">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"/></svg></span>Automatisation & Notifications</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-brain"/></svg></span>Automatisation & Notifications</div>
       <div class="ib ibg mb14"><span>✨</span><span><strong>v1.2 — Tout est automatique.</strong> Chaque action (inscription, paiement, note, devoir, annonce...) déclenche automatiquement les notifications et les synchronisations entre sections.</span></div>
       <div class="fg2">
         <div class="fg full"><label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--blb);border-radius:10px;cursor:pointer">
@@ -13942,11 +13946,11 @@ function pgSettings(){
           <br><strong>Rafraîchissement temps réel :</strong> le tableau de bord se met à jour seul toutes les 30 secondes.
         </div>
       </details>
-      <button class="btn bo sm mt10" onclick="if(window.VA){VA.debug();toast('Console : 20 derniers événements');}else{toast('Module non initialisé','warn');}"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-tool"/></svg>Debug événements (F12)</button>
-      <button class="btn bo sm mt10" onclick="if(window.VN){VN.toAdmin('🧪 Test notification','Le système de notifications fonctionne correctement','success');toast('✓ Test envoyé');}else{toast('Module non initialisé','warn');}"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg>Tester une notification</button>
+      <button class="btn bo sm mt10" onclick="if(window.VA){VA.debug();toast('Console : 20 derniers événements');}else{toast('Module non initialisé','warn');}"><svg class="vico bico" aria-hidden="true"><use href="#lc-tool"/></svg>Debug événements (F12)</button>
+      <button class="btn bo sm mt10" onclick="if(window.VN){VN.toAdmin('🧪 Test notification','Le système de notifications fonctionne correctement','success');toast('✓ Test envoyé');}else{toast('Module non initialisé','warn');}"><svg class="vico bico" aria-hidden="true"><use href="#lc-megaphone"/></svg>Tester une notification</button>
     </div>
     <div class="card mt16">
-      <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-ticket"/></svg></span>Codes Promo (Boutique)</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-ticket"/></svg></span>Codes Promo (Boutique)</div>
       <div class="ib ibt mb12"><span>💡</span><span>Ces codes sont utilisables dans la boutique intégrée et la commande visiteur. Ils se synchronisent automatiquement.</span></div>
       <div class="tw"><table><thead><tr><th>Code</th><th>Réduction</th><th>Description</th><th>Utilisations</th><th>Actif</th><th></th></tr></thead>
       <tbody>${(DB.promoCodes||[]).map(p=>`<tr>
@@ -13960,10 +13964,10 @@ function pgSettings(){
       <button class="btn bi sm mt12" onclick="mAddPromo()">＋ Nouveau code promo</button>
     </div>
   ${isSA()?`<div class="card mt16">
-    <div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-alert"/></svg></span>Zone Danger (Super Admin)</div>
+    <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-alert"/></svg></span>Zone Danger (Super Admin)</div>
     <div class="ib ibr mb14"><span>🚨</span><span>Ces actions sont irréversibles. Utilisez avec précaution.</span></div>
     <div class="fl2 g8">
-      <button class="btn br2" onclick="if(confirm('ATTENTION: Supprimer TOUTES les données ?')){localStorage.removeItem('vrt10');location.reload();}"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Réinitialiser tout</button>
+      <button class="btn br2" onclick="if(confirm('ATTENTION: Supprimer TOUTES les données ?')){localStorage.removeItem('vrt10');location.reload();}"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Réinitialiser tout</button>
     </div>
   </div>`:''}`;
 }
@@ -14372,7 +14376,7 @@ function mManageTicker(){
     '<div class="tw" style="max-height:200px;overflow-y:auto;margin-bottom:12px"><table><thead><tr><th>Message</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
     '<div style="border-top:var(--br);padding-top:12px"><div class="fl mb8"><span class="bold s">➕ Ajouter</span></div>'+
     '<textarea class="fi mb8" id="ntText" rows="2" placeholder="💡 Saviez-vous ? ... ou 📅 Date examen... ou 📢 Annonce..."></textarea>'+
-    '<button class="btn bi sm" onclick="(function(){var t=(document.getElementById(\'ntText\').value||\'\'). trim();if(!t){toast(\'Message requis\',\'warn\');return;}if(!DB.tickerItems)DB.tickerItems=[];DB.tickerItems.push({t:t});save();initTicker();cm();toast(\'✅ Ajouté\');})()" ><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button></div>',
+    '<button class="btn bi sm" onclick="(function(){var t=(document.getElementById(\'ntText\').value||\'\'). trim();if(!t){toast(\'Message requis\',\'warn\');return;}if(!DB.tickerItems)DB.tickerItems=[];DB.tickerItems.push({t:t});save();initTicker();cm();toast(\'✅ Ajouté\');})()" ><svg class="vico bico" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>');
 }
 
@@ -14410,7 +14414,7 @@ window._statsVitrineHtml = function(){
       +(mentions?'<div class="lx-stat-mentions"><span class="lx-stat-mlabel">🏅 Mentions</span><div class="lx-stat-mrow">'+mentions+'</div></div>':'')
       +'</div></div>';
   }).join('');
-  var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:10px"><button class="btn bo sm" onclick="mEditStatsVitrine()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les résultats</button></div>':'';
+  var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:10px"><button class="btn bo sm" onclick="mEditStatsVitrine()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les résultats</button></div>':'';
   return '<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>'
     +'<div class="vgz-stats v-reveal" style="grid-template-columns:repeat(auto-fit,minmax(185px,1fr));max-width:860px;margin:18px auto">'+cards+'</div>'+editBtn;
 };
@@ -14430,7 +14434,7 @@ window.mEditStatsVitrine = function(){
       +'<div class="fl2 g6 fic"><input class="fi" style="font-weight:800;flex:1" value="'+_esc(s.ex||'')+'" onchange="_svSet('+i+',\'ex\',null,this.value)" placeholder="Nom de l\'examen">'
         +'<input class="fi" type="number" min="0" max="100" style="width:90px" value="'+(s.taux||0)+'" onchange="_svSet('+i+',\'taux\',null,this.value)" placeholder="Taux %">'
         +'<span class="semi">%</span>'
-        +'<button class="btn bo xs" onclick="_svDelExam('+i+')" title="Supprimer"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>️</button></div>'
+        +'<button class="btn bo xs" onclick="_svDelExam('+i+')" title="Supprimer"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>️</button></div>'
       +'<div style="font-size:11px;color:var(--ink4);margin:8px 0 2px">Séries (optionnel)</div>'+ser
       +'<button class="btn bo xs" onclick="_svAddSerie('+i+')" style="margin-top:4px">+ Série</button>'
       +'<div style="font-size:11px;color:var(--ink4);margin:10px 0 4px">🏅 Mentions (nombre d\'élèves)</div>'
@@ -14441,7 +14445,7 @@ window.mEditStatsVitrine = function(){
   M('📊 Résultats aux examens','Édition du panneau d\'accueil',
     '<div class="ib ibi mb12"><span>💡</span><span>Ces chiffres alimentent le panneau « Nos résultats » sur la page d\'accueil. Laissez les séries vides pour le BEPC.</span></div>'
     +body+'<button class="btn bo sm" onclick="_svAddExam()">+ Ajouter un examen</button>',
-    '<button class="btn bi" onclick="cm();re&&re()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Terminé</button>', true);
+    '<button class="btn bi" onclick="cm();re&&re()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Terminé</button>', true);
 };
 window._svSet=function(i,field,key,val){
   var s=DB.statsVitrine[i]; if(!s)return;
@@ -14507,7 +14511,7 @@ window._examCountdownHtml = function(){
       +'<div style="font-family:Montserrat,sans-serif;font-size:30px;font-weight:900;color:#FFC93C;line-height:1">'+n.days+'</div>'
       +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;opacity:.85">jour'+(n.days>1?'s':'')+'</div>'
     +'</div>'
-    +(urgent?'<button class="btn" style="background:#FFC93C;color:#142554;border:none;border-radius:99px;font-weight:800;padding:11px 20px;cursor:pointer;white-space:nowrap" onclick="(typeof vShowSec===\'function\'?vShowSec(\'elearning\'):0);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-target"/></svg>Pack révision</button>':'')
+    +(urgent?'<button class="btn" style="background:#FFC93C;color:#142554;border:none;border-radius:99px;font-weight:800;padding:11px 20px;cursor:pointer;white-space:nowrap" onclick="(typeof vShowSec===\'function\'?vShowSec(\'elearning\'):0);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)"><svg class="vico bico" aria-hidden="true"><use href="#lc-target"/></svg>Pack révision</button>':'')
   +'</div>';
 };
 
@@ -14588,8 +14592,8 @@ window._questionJourHtml = function(){
       +'</div>'
     +'</div>'
     +'<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">'
-      +'<button class="btn" style="background:#fff;color:#0D9488;border:none;border-radius:99px;font-weight:800;padding:9px 18px;cursor:pointer" onclick="(typeof mAgentAmbassa===\'function\'?mAgentAmbassa():(typeof vShowSec===\'function\'?vShowSec(\'elearning\'):0))"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg>Répondre avec Ambassa</button>'
-      +'<a href="'+waShare+'" target="_blank" rel="noopener" class="btn" style="background:#25D366;color:#fff;border:none;border-radius:99px;font-weight:800;padding:9px 18px;text-decoration:none"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Partager sur WhatsApp</a>'
+      +'<button class="btn" style="background:#fff;color:#0D9488;border:none;border-radius:99px;font-weight:800;padding:9px 18px;cursor:pointer" onclick="(typeof mAgentAmbassa===\'function\'?mAgentAmbassa():(typeof vShowSec===\'function\'?vShowSec(\'elearning\'):0))"><svg class="vico bico" aria-hidden="true"><use href="#lc-graduation"/></svg>Répondre avec Ambassa</button>'
+      +'<a href="'+waShare+'" target="_blank" rel="noopener" class="btn" style="background:#25D366;color:#fff;border:none;border-radius:99px;font-weight:800;padding:9px 18px;text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Partager sur WhatsApp</a>'
     +'</div>'
   +'</div>';
 };
@@ -14656,7 +14660,7 @@ window._reussitesScroller = function(){
   };
   var cards=list.map(card).join('');
   var head='<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>';
-  var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:8px"><button class="btn bo sm" onclick="mEditStatsVitrine()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les résultats</button></div>':'';
+  var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:8px"><button class="btn bo sm" onclick="mEditStatsVitrine()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les résultats</button></div>':'';
   // 2 copies de la liste → boucle continue (translateX -50%)
   return head+'<div class="rsc" tabindex="0" aria-label="Résultats officiels du Centre VÉRITAS"><div class="rsc-track">'+cards+cards+'</div></div>'+editBtn;
 };
@@ -15314,7 +15318,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
         +'<li>500 FCFA de crédit par ami parrainé</li>'
         +'<li>Badges + Genome + Wrapped annuel</li>'
         +'</ul></div>'
-      +'<button class="btn bi" style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:14px 28px;font-size:14px;font-weight:800;width:100%;margin-bottom:6px" onclick="cm();showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>S\'inscrire gratuitement (30 sec)</button>'
+      +'<button class="btn bi" style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:14px 28px;font-size:14px;font-weight:800;width:100%;margin-bottom:6px" onclick="cm();showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>S\'inscrire gratuitement (30 sec)</button>'
       +'<div style="font-size:11px;color:#94A3B8;margin-top:6px">Pas de carte bancaire · 100% gratuit</div>'
       +'</div>';
   } else if(tier === 'free'){
@@ -15332,10 +15336,10 @@ window._showQuotaExceeded = function(action, tier, used, limit){
       // v1.2.2 (#6) : UPGRADE CONTEXTUEL — si un examen approche, créer l'urgence ici (le bon moment)
       +((function(){ try{ var n=(typeof _examPromoActive==='function')?_examPromoActive():null;
           return n ? ('<div style="background:linear-gradient(135deg,#AE5353,#F59E0B);color:#fff;padding:12px;border-radius:12px;margin-bottom:12px;font-size:13px;font-weight:700">⏳ '+_esc(n.ex)+' dans '+n.days+' jour'+(n.days>1?'s':'')+' — ne casse pas ta révision maintenant. Débloque Ambassa sans limite pour la dernière ligne droite.</div>') : ''; }catch(e){return '';} })())
-      +'<button class="btn bi" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:14px 28px;font-size:14px;font-weight:800;width:100%" onclick="cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-star"/></svg>Choisir un plan d\'abonnement</button>'
+      +'<button class="btn bi" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:14px 28px;font-size:14px;font-weight:800;width:100%" onclick="cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)"><svg class="vico bico" aria-hidden="true"><use href="#lc-star"/></svg>Choisir un plan d\'abonnement</button>'
       // v1.2.2 (#3) : alternative micro-paiement immédiate (lève le frein du forfait)
       +((typeof _microBuyBtn==='function')?('<div style="margin-top:8px">'+_microBuyBtn('epreuve','ambassa','Continuer avec Ambassa (à l\'unité)')+'</div>'):'')
-      +'<button class="btn bo" style="margin-top:8px;width:100%" onclick="cm();mParrainage()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-gift"/></svg>Ou parrainer un ami (+500 FCFA crédit)</button>'
+      +'<button class="btn bo" style="margin-top:8px;width:100%" onclick="cm();mParrainage()"><svg class="vico bico" aria-hidden="true"><use href="#lc-gift"/></svg>Ou parrainer un ami (+500 FCFA crédit)</button>'
       +'</div>';
   } else {
     // Plans payants : message simple + upgrade vers plan supérieur
@@ -15346,7 +15350,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
       +'<div style="font-family:Plus Jakarta Sans,sans-serif;font-size:20px;font-weight:800;color:#142554;margin-bottom:6px">Quota journalier atteint</div>'
       +'<div style="font-size:13px;color:#475569;line-height:1.6;margin-bottom:14px">Vous avez utilisé <b>'+used+'/'+limit+' essais</b> de '+label+' aujourd\'hui.<br>Le quota se réinitialise à minuit.</div>'
       +'<div style="background:#EEF2FF;padding:12px;border-radius:10px;font-size:12px;color:#3730A3;margin-bottom:12px">💡 Pour plus d\'essais, passez au plan <b>'+upgrade+'</b>.</div>'
-      +'<button class="btn bi" onclick="cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-star"/></svg>Upgrader vers '+upgrade+'</button>'
+      +'<button class="btn bi" onclick="cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)"><svg class="vico bico" aria-hidden="true"><use href="#lc-star"/></svg>Upgrader vers '+upgrade+'</button>'
       +'</div>';
   }
   M('🔒 Quota IA atteint','Plan actuel : '+tier.toUpperCase(),body,
@@ -15385,7 +15389,7 @@ function mAIOrientation(){
     '<textarea class="fi" id="oriInterets" rows="2" placeholder="Ex: médecine, informatique, enseignement, business…"></textarea></div>'+
     '<div id="aiResO" class="ai-res" style="display:none"></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>'+
-    '<button class="btn bgr2" id="aiBtnO" onclick="_runAIOrient()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"/></svg>Analyser mon profil ('+rem+' restant'+(rem>1?'s':'')+')</button>',true);
+    '<button class="btn bgr2" id="aiBtnO" onclick="_runAIOrient()"><svg class="vico bico" aria-hidden="true"><use href="#lc-brain"/></svg>Analyser mon profil ('+rem+' restant'+(rem>1?'s':'')+')</button>',true);
 }
 async function _runAIOrient(){
   if(!_aiGate('orient'))return;
@@ -15432,7 +15436,7 @@ function mAICorrection(){
     '<textarea class="fi" id="corRep" rows="3" placeholder="Collez votre tentative de réponse pour obtenir une correction personnalisée…"></textarea></div>'+
     '<div id="aiResC" class="ai-res" style="display:none"></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>'+
-    '<button class="btn bgr2" id="aiBtnC" onclick="_runAICorrect()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"/></svg>Corriger ('+rem+' restant'+(rem>1?'s':'')+')</button>',true);
+    '<button class="btn bgr2" id="aiBtnC" onclick="_runAICorrect()"><svg class="vico bico" aria-hidden="true"><use href="#lc-brain"/></svg>Corriger ('+rem+' restant'+(rem>1?'s':'')+')</button>',true);
 }
 
 async function _runAICorrect(){
@@ -15483,7 +15487,7 @@ function mManagePacks(){
     return'<div class="card" style="border-top:4px solid #3C8DFF">'+
       '<div class="fl2 fic fsb mb8"><span class="bold">'+p.nom+'</span>'+
       '<div class="fl2 g4">'+
-      '<button class="btn bo xs" data-pid="'+encodeURIComponent(p.id)+'" onclick="_editPk(decodeURIComponent(this.dataset.pid))"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>'+
+      '<button class="btn bo xs" data-pid="'+encodeURIComponent(p.id)+'" onclick="_editPk(decodeURIComponent(this.dataset.pid))"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>'+
       '<button class="btn br2 xs" data-pid="'+encodeURIComponent(p.id)+'" onclick="(function(b){if(!confirm(\'Supprimer ?\'))return;DB.elearning.plans=(DB.elearning.plans||[]).filter(function(x){return x.id!==decodeURIComponent(b.dataset.pid);});save();cm();toast(\'Supprimé\');})(this)">🗑</button>'+
       '</div></div>'+
       '<div style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:var(--gold2)">'+fmtN(p.prix)+' XAF/an</div>'+
@@ -15491,7 +15495,7 @@ function mManagePacks(){
   }).join('');
   M('📦 Packs d\'abonnement','',
     '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:16px">'+(cards||'<div class="empty"><div class="empty-ico">📦</div>Aucun pack</div>')+'</div>'+
-    '<button class="btn bi sm" onclick="_newPk()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Nouveau pack</button>',
+    '<button class="btn bi sm" onclick="_newPk()"><svg class="vico bico" aria-hidden="true"><use href="#lc-plus"/></svg>Nouveau pack</button>',
     '<button class="btn bo" onclick="cm()">Fermer</button>',true);
 }
 function _newPk(){window._editPkId=null;_pkForm(null);}
@@ -15514,7 +15518,7 @@ function _pkForm(p){
     '<div class="fg"><label class="fl2" style="cursor:pointer;gap:8px"><input type="checkbox" id="pkPop"'+(p&&p.populaire?' checked':'')+'>  ⭐ Populaire (meilleure vente)</label></div>'+
     '</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'+
-    '<button class="btn bi" onclick="_savePk()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>'+(p?'Modifier':'Créer')+'</button>',true);
+    '<button class="btn bi" onclick="_savePk()"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>'+(p?'Modifier':'Créer')+'</button>',true);
 }
 function _savePk(){
   var nom=(document.getElementById('pkNom')?.value||'').trim();
@@ -15564,7 +15568,7 @@ function viewSecure(item){
         inner='<div style="text-align:center;padding:28px 16px;background:var(--bg2);border-radius:12px">'
           +'<div style="font-size:56px;margin-bottom:12px">🔒</div>'
           +'<div style="font-size:13px;font-weight:700;color:var(--bl);margin-bottom:16px">'+_esc(fname||'Document PDF')+'</div>'
-          +'<button class="btn bi" style="font-size:14px;padding:12px 24px;width:100%;max-width:260px;cursor:pointer" onclick="window.open(\''+_subBlob+'\',\'_blank\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
+          +'<button class="btn bi" style="font-size:14px;padding:12px 24px;width:100%;max-width:260px;cursor:pointer" onclick="window.open(\''+_subBlob+'\',\'_blank\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button>'
           +'<div class="xs2 mut mt8">🔒 PDF protégé VÉRITAS</div>'
           +'</div>';
       }else{
@@ -15807,7 +15811,7 @@ function renderQuizScore(){
   var scoreKey='quiz_'+s.titre.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_'+new Date().toDateString();
   try{localStorage.setItem(scoreKey,JSON.stringify({score:s.score,total:s.qbank.length,pct:pct,date:new Date().toISOString()}));}catch(e){}
   html+='<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">';
-  html+='<button class="btn" style="background:linear-gradient(135deg,#1E3A8A,#6A8DC7);color:#fff;border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700" onclick="startQuiz(\''+s.topicKey+'\',\''+s.classe+'\',\''+s.titre+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Recommencer</button>';
+  html+='<button class="btn" style="background:linear-gradient(135deg,#1E3A8A,#6A8DC7);color:#fff;border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700" onclick="startQuiz(\''+s.topicKey+'\',\''+s.classe+'\',\''+s.titre+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Recommencer</button>';
   html+='<button class="btn" style="background:#E8EEFF;color:#1E3A8A;border-radius:12px;padding:10px 20px;font-size:13px;font-weight:700" onclick="vShowSec(\'elearning\',null)">← E-Learning</button>';
   html+='</div></div>';
   _vc(html);
@@ -16039,7 +16043,7 @@ function _showAdminLogin(){
     '<div class="fg mb10"><span class="fl">Mot de passe *</span><input class="fi" id="otpPwd" type="password" placeholder="••••••••"></div>'+
     '<div style="background:var(--grb);border:1px solid var(--grd);border-radius:var(--r);padding:10px;font-size:12px;color:var(--gr);margin-bottom:10px">ℹ️ <strong>Note OTP :</strong> En production, un SMS/WhatsApp serait envoyé au numéro enregistré. Pour cette démo, saisir directement les identifiants.</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'+
-    '<button class="btn bi" onclick="_doAdminLogin()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Connexion sécurisée</button>');
+    '<button class="btn bi" onclick="_doAdminLogin()"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Connexion sécurisée</button>');
 }
 
 function _doAdminLogin(){
@@ -16083,7 +16087,7 @@ initTicker = initTickerFixed;
 function vShowPartners(){
   var partners = DB.partners || _DEFAULT_PARTNERS;
   var h = '<div class="vsec">';
-  h += '<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"/></svg></span>Partenaires & Sponsors</div>';
+  h += '<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-handshake"/></svg></span>Partenaires & Sponsors</div>';
   h += '<div class="vsec-sub">Ils nous font confiance et soutiennent l\'excellence scolaire au Cameroun</div>';
   
   // Partner categories
@@ -16113,8 +16117,8 @@ function vShowPartners(){
   h += '<div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;margin-bottom:8px">Devenez Partenaire VÉRITAS</div>';
   h += '<div style="font-size:13px;color:rgba(255,255,255,.8);max-width:500px;margin:0 auto 20px;line-height:1.7">Rejoignez notre réseau de partenaires et touchez des milliers d\'élèves et de familles au Cameroun. Visibilité, impact social et retour sur investissement.</div>';
   h += '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">';
-  h += '<a href="https://wa.me/237697637739?text=Je+suis+intéressé+par+un+partenariat+VÉRITAS" target="_blank" class="btn" style="background:#25D366;color:#fff;font-weight:700;border-radius:12px;padding:10px 20px;text-decoration:none"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>WhatsApp</a>';
-  h += '<a href="mailto:contact@veritas-cm.cm?subject=Partenariat VÉRITAS" class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 20px;text-decoration:none"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg>Email</a>';
+  h += '<a href="https://wa.me/237697637739?text=Je+suis+intéressé+par+un+partenariat+VÉRITAS" target="_blank" class="btn" style="background:#25D366;color:#fff;font-weight:700;border-radius:12px;padding:10px 20px;text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>WhatsApp</a>';
+  h += '<a href="mailto:contact@veritas-cm.cm?subject=Partenariat VÉRITAS" class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 20px;text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Email</a>';
   h += '</div></div>';
   h += '</div>';
   _vc(h);
@@ -16134,11 +16138,11 @@ function mManagePartners(){
   if(!DB.partners) DB.partners = JSON.parse(JSON.stringify(_DEFAULT_PARTNERS));
   var rows = (DB.partners||[]).map(function(p,i){
     return '<tr><td>'+p.emoji+'</td><td class="semi">'+p.nom+'</td><td class="xs2">'+p.categorie+'</td>'+
-    '<td><div class="fl2 g4"><button class="btn bo xs" title="Certificat d\'associé" onclick="genCertificatAssocie('+i+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg>️</button><button class="btn bo xs" onclick="mEditPartner('+i+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button><button class="btn br2 xs" onclick="delPartner('+i+')">🗑</button></div></td></tr>';
+    '<td><div class="fl2 g4"><button class="btn bo xs" title="Certificat d\'associé" onclick="genCertificatAssocie('+i+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-award"/></svg>️</button><button class="btn bo xs" onclick="mEditPartner('+i+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button><button class="btn br2 xs" onclick="delPartner('+i+')">🗑</button></div></td></tr>';
   }).join('');
   M('🤝 Partenaires & Sponsors','Gérez la page partenaires',
     '<div class="tw mb12"><table><thead><tr><th>Logo</th><th>Nom</th><th>Type</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-    '<button class="btn bi sm" onclick="mAddPartner()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter partenaire</button>',
+    '<button class="btn bi sm" onclick="mAddPartner()"><svg class="vico bico" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter partenaire</button>',
     '<button class="btn bo" onclick="cm()">Fermer</button>');
 }
 
@@ -16151,7 +16155,7 @@ function mAddPartner(){
     '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="pDesc" rows="2" placeholder="Description courte du partenariat"></textarea></div>'+
     '<div class="fg full"><span class="fl">Site web</span><input class="fi" id="pSite" placeholder="https://..."></div>'+
     '</div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_savePartner(-1)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Ajouter</button>');
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_savePartner(-1)"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Ajouter</button>');
 }
 
 function mEditPartner(idx){
@@ -16167,7 +16171,7 @@ function mEditPartner(idx){
     '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="pDesc" rows="2">'+(p.desc||'')+'</textarea></div>'+
     '<div class="fg full"><span class="fl">Site web</span><input class="fi" id="pSite" value="'+(p.site||'')+'"></div>'+
     '</div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_savePartner('+idx+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Modifier</button>');
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_savePartner('+idx+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Modifier</button>');
 }
 
 function _savePartner(idx){
@@ -16344,7 +16348,7 @@ function mAddElContent2(){
     '<div id="ec2FileInfo" class="xs2 mut mt4"></div></div>'+
     '</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'+
-    '<button class="btn bi" onclick="_saveElContent2()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Ajouter au catalogue</button>',true);
+    '<button class="btn bi" onclick="_saveElContent2()"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Ajouter au catalogue</button>',true);
   
   // Attach file listener
   setTimeout(function(){
@@ -16578,7 +16582,7 @@ window.mDevoirCorrectionIA = function(){
       '<textarea class="fi" id="dvTravail" rows="8" placeholder="Colle ici ta rédaction, ta dissertation ou la résolution de ton exercice..." style="font-family:Georgia,serif;font-size:13.5px;line-height:1.6"></textarea></div>'+
     '<div id="dvRes" class="ai-res" style="display:none"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'+
-    '<button class="btn bgr2" id="dvBtn" onclick="_runCorrectionIA()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"/></svg>Corriger ('+rem+' restant'+(rem>1?'s':'')+')</button>',true);
+    '<button class="btn bgr2" id="dvBtn" onclick="_runCorrectionIA()"><svg class="vico bico" aria-hidden="true"><use href="#lc-brain"/></svg>Corriger ('+rem+' restant'+(rem>1?'s':'')+')</button>',true);
 };
 
 window._runCorrectionIA = async function(){
@@ -17083,7 +17087,7 @@ window.vDevenirAuteur = function(){
     +'<ol style="margin:0;padding-left:20px;font-size:13px;color:#374151;line-height:1.8"><li>Créez votre compte gratuit (30 s)</li><li>Soumettez votre ressource</li><li>Validation puis mise en vente</li><li>Vous êtes payé chaque mois</li></ol>'
     +'</div>',
     '<button class="btn bo" onclick="cm()">Plus tard</button>'
-    +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm(\'auteur\'):typeof showLogin===\'function\'?showLogin(\'eleve\'):null)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>Créer mon compte auteur</button>', true);
+    +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm(\'auteur\'):typeof showLogin===\'function\'?showLogin(\'eleve\'):null)"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>Créer mon compte auteur</button>', true);
 };
 
 // Visiteur → devenir partenaire / soutenir VÉRITAS
@@ -17092,8 +17096,8 @@ window.mDevenirPartenaire = function(){
   var waDigits=(wa||'').replace(/[^0-9]/g,'');
   var msg=encodeURIComponent('Bonjour VÉRITAS, je souhaite devenir partenaire / soutenir le projet. Mon organisation : ');
   var waBtn = waDigits
-    ? '<a class="btn bi" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/'+waDigits+'?text='+msg+'"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Discuter sur WhatsApp</a>'
-    : '<button class="btn bi" onclick="cm();vShowSec(\'contact\',null)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg>Nous contacter</button>';
+    ? '<a class="btn bi" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/'+waDigits+'?text='+msg+'"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Discuter sur WhatsApp</a>'
+    : '<button class="btn bi" onclick="cm();vShowSec(\'contact\',null)"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Nous contacter</button>';
   function opt(ic,t,d){
     return '<div style="display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid #E6EAF2;border-radius:12px;padding:12px 14px;margin-bottom:8px">'
       +'<span style="font-size:22px;flex-shrink:0">'+ic+'</span>'
@@ -17109,7 +17113,7 @@ window.mDevenirPartenaire = function(){
     + opt('💝','Don libre','Tout soutien, même modeste, aide un élève à réussir. Reçu disponible sur demande.')
     +'</div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm(\'partenaire\'):null)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"/></svg>Créer mon compte partenaire</button>'
+    +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm(\'partenaire\'):null)"><svg class="vico bico" aria-hidden="true"><use href="#lc-handshake"/></svg>Créer mon compte partenaire</button>'
     +waBtn, true);
 };
 function mManagePartenaires(){
@@ -17996,7 +18000,7 @@ function _showLittCarte(oeuvreKey){
   });
   legHtml+='</div>';
   _vc('<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-map"/></svg></span>Carte Mentale — '+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-map"/></svg></span>Carte Mentale — '+_esc(oe.titre)+'</div>'
     +'<div class="vsec-sub" style="font-style:italic">'+_esc(oe.auteur)+' — '+_esc(oe.classe)+'</div>'
     +'<div style="background:#07142E;border-radius:18px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,.45);margin:12px 0">'
     +'<canvas id="mmCanvas" style="width:100%;height:auto;display:block"></canvas>'
@@ -18005,8 +18009,8 @@ function _showLittCarte(oeuvreKey){
     +'<div class="vcard mt14"><div class="bold s mb8">📌 Comment utiliser cette carte ?</div>'
     +'<div style="font-size:13px;color:var(--ink3);line-height:1.8">Visualisez les <strong>'+(c.branches||[]).length+' axes</strong> autour du centre (titre + auteur). Chaque branche regroupe un aspect essentiel de l\'œuvre. Téléchargez en HD pour révision ou impression A4.</div>'
     +'<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'
-    +'<button class="btn sm bi" onclick="_mmDownload(\''+oeuvreKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger HD (PNG)</button>'
-    +'<button class="btn sm bo" onclick="window.print()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>'
+    +'<button class="btn sm bi" onclick="_mmDownload(\''+oeuvreKey+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger HD (PNG)</button>'
+    +'<button class="btn sm bo" onclick="window.print()"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>'
     +'</div></div></div>');
   setTimeout(function(){
     var cv=document.getElementById('mmCanvas');
@@ -18359,7 +18363,7 @@ function _showLittCarte_svg_unused(oeuvreKey){
   legende += '</div>';
 
   _vc('<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-map"/></svg></span>Carte Mentale — '+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-map"/></svg></span>Carte Mentale — '+_esc(oe.titre)+'</div>'
     +'<div class="vsec-sub" style="font-style:italic">'+_esc(oe.auteur)+' — '+_esc(oe.classe)+'</div>'
     +'<div class="vcard" style="padding:14px;background:var(--bg2)">'+svg+'</div>'
     +legende
@@ -18371,8 +18375,8 @@ function _showLittCarte_svg_unused(oeuvreKey){
     +'Reproduisez cette carte sur papier pour mieux mémoriser, ou téléchargez-la en image.'
     +'</div>'
     +'<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">'
-      +'<button class="btn sm bi" onclick="_mmDownload(\''+oeuvreKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger (PNG)</button>'
-      +'<button class="btn sm bo" onclick="document.body.setAttribute(\'data-print-date\',new Date().toLocaleDateString(\'fr-FR\')+\' \'+new Date().toLocaleTimeString(\'fr-FR\',{hour:\'2-digit\',minute:\'2-digit\'}));window.print()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>'
+      +'<button class="btn sm bi" onclick="_mmDownload(\''+oeuvreKey+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger (PNG)</button>'
+      +'<button class="btn sm bo" onclick="document.body.setAttribute(\'data-print-date\',new Date().toLocaleDateString(\'fr-FR\')+\' \'+new Date().toLocaleTimeString(\'fr-FR\',{hour:\'2-digit\',minute:\'2-digit\'}));window.print()"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer</button>'
     +'</div>'
     +'</div></div>');
 }
@@ -18414,7 +18418,7 @@ function _showLittCorriges(oeuvreKey){
   if(!file){toast("Aucun corrigé disponible pour cette œuvre","warn");return;}
   _vc('<div class="vsec">'
     +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></span>Corrigés modèles — '+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-award"/></svg></span>Corrigés modèles — '+_esc(oe.titre)+'</div>'
     +'<div class="vsec-sub" style="font-style:italic;color:var(--ink3)">Commentaire composé &amp; dissertation entièrement rédigés · '+_esc(oe.classe)+'</div>'
     +'<div id="littCorrigeBox" class="vcard ai-md" style="margin-top:16px;line-height:1.7">'
       +'<div style="text-align:center;color:var(--ink4);padding:24px"><span style="animation:pulse 1.2s infinite;font-size:28px">📖</span><br>Chargement du corrigé…</div>'
@@ -18422,7 +18426,7 @@ function _showLittCorriges(oeuvreKey){
     // v1.3.2 : accès direct à la demande IA précise depuis les corrigés statiques
     +'<div class="vcard mt12" style="text-align:center;background:linear-gradient(135deg,#FAF5FF,#EFF6FF);border:1px dashed rgba(124,58,237,.35)">'
       +'<div style="font-size:13px;color:var(--ink3);margin-bottom:10px">Un autre sujet en tête ? Ambassa rédige une dissertation, un commentaire ou une fiche sur VOTRE sujet.</div>'
-      +'<button class="btn" style="background:#6C56A6;color:#fff;border:none;border-radius:24px;padding:10px 22px;font-weight:800;cursor:pointer" onclick="_littCorrigeIA(\''+oeuvreKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>Demander à l\'IA (sujet précis)</button>'
+      +'<button class="btn" style="background:#6C56A6;color:#fff;border:none;border-radius:24px;padding:10px 22px;font-weight:800;cursor:pointer" onclick="_littCorrigeIA(\''+oeuvreKey+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>Demander à l\'IA (sujet précis)</button>'
     +'</div></div>');
   var base=(typeof location!=='undefined'&&location.origin&&location.origin.indexOf('http')===0)?'':'';
   fetch(base+'evaluations/'+file+'?t='+Date.now())
@@ -18465,7 +18469,7 @@ function _littCorrigeIA(oeuvreKey, mode){
     };
     _vc('<div class="vsec">'
       +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"/></svg></span>Prof. Ambassa — '+_esc(oe.titre)+'</div>'
+      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-brain"/></svg></span>Prof. Ambassa — '+_esc(oe.titre)+'</div>'
       +'<div class="vsec-sub" style="font-style:italic;color:var(--ink3)">Choisissez votre production · '+_esc(oe.classe)+' · grilles harmonisées MINESEC</div>'
       +'<div class="fg" style="margin-top:12px"><span class="fl">🎯 Votre sujet précis (optionnel — sinon Ambassa propose un sujet type examen)</span>'
       +'<textarea class="fi" id="littIaSujet" rows="2" placeholder="Ex : un sujet de dissertation exact, ou collez l\'extrait à commenter…"></textarea></div>'
@@ -18530,7 +18534,7 @@ function _showLittMenu(jid,oeuvreKey){
   } catch(e){}
   _vc('<div class="vsec">'
     +'<button class="back-btn" onclick="showJeuxEdu()">← Jeux</button>'
-    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg></span>'+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-bookopen"/></svg></span>'+_esc(oe.titre)+'</div>'
     +'<div class="vsec-sub" style="font-style:italic;color:var(--ink3)">'+_esc(oe.auteur)+' — '+_esc(oe.classe)+'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:14px;margin-top:18px">'
     // v2.1 : helper inline pour générer une carte avec icône Lucide + halo coloré
@@ -18582,7 +18586,7 @@ function _showLittFiche(oeuvreKey){
   var COL='#142554';
   var h='<div class="vsec">'
     +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Fiche d\'identité — '+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Fiche d\'identité — '+_esc(oe.titre)+'</div>'
     +'<div class="vcard" style="max-width:640px;margin:0 auto">'
     +'<table style="width:100%;border-collapse:collapse;font-size:14px">';
   var rows=[
@@ -18632,7 +18636,7 @@ function _showLittFiche(oeuvreKey){
     h+='<div class="vcard mt16" style="max-width:640px;margin:16px auto 0;text-align:center;background:linear-gradient(135deg,#EFF6FF,#FAF5FF);border:1px dashed rgba(60,141,255,.3)">'
       +'<div style="font-size:13px;font-weight:800;color:#142554;margin-bottom:8px">🧠 Carte mentale interactive</div>'
       +'<div style="font-size:12px;color:#475569;margin-bottom:12px">Visualise les axes de lecture, thèmes, personnages et figures en un coup d\'œil.</div>'
-      +'<button class="btn bi" onclick="_showLittCarte(\''+oeuvreKey+'\')" style="background:#3C8DFF;color:#fff;padding:10px 22px;border-radius:24px;font-weight:700;border:none;cursor:pointer"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-map"/></svg>Voir la carte mentale</button>'
+      +'<button class="btn bi" onclick="_showLittCarte(\''+oeuvreKey+'\')" style="background:#3C8DFF;color:#fff;padding:10px 22px;border-radius:24px;font-weight:700;border:none;cursor:pointer"><svg class="vico bico" aria-hidden="true"><use href="#lc-map"/></svg>Voir la carte mentale</button>'
     +'</div>';
   }
   h+='</div>';
@@ -18654,7 +18658,7 @@ function _showLittControleComplet(oeuvreKey){
   var nbCtrl = (oe.controle||[]).length;
   var h='<div class="vsec">'
     +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg></span>Contrôle de lecture — '+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-pencil"/></svg></span>Contrôle de lecture — '+_esc(oe.titre)+'</div>'
     +'<div class="vsec-sub" style="font-style:italic;color:var(--ink3)">Vérifie ta compréhension de l\'œuvre · '+_esc(oe.auteur)+'</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:18px;max-width:780px;margin-left:auto;margin-right:auto">';
   // Carte 1 — Citations & Figures de style
@@ -18810,7 +18814,7 @@ function _showLittAnalyse(oeuvreKey){
     // Actions
     +'<div style="padding:18px 32px 26px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center">'
       +'<button class="btn bi" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')" style="padding:10px 22px;border-radius:14px;font-weight:700">← Menu de l\'œuvre</button>'
-      +(oe.citations&&oe.citations.length?'<button class="btn bo" onclick="_showLittCitations(\''+oeuvreKey+'\')" style="padding:10px 22px;border-radius:14px;font-weight:700"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>Citations détaillées →</button>':'')
+      +(oe.citations&&oe.citations.length?'<button class="btn bo" onclick="_showLittCitations(\''+oeuvreKey+'\')" style="padding:10px 22px;border-radius:14px;font-weight:700"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Citations détaillées →</button>':'')
     +'</div>'
     +'</article>'
     +'</div>');
@@ -18825,7 +18829,7 @@ function _showLittCitations(oeuvreKey){
     var c=oe.citations[idx];
     var h='<div class="vsec">'
       +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg></span>Citations & Figures — '+_esc(oe.titre)+'</div>'
+      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-message"/></svg></span>Citations & Figures — '+_esc(oe.titre)+'</div>'
       +'<div style="font-size:12px;color:var(--ink4);text-align:center;margin-bottom:12px">Extrait '+(idx+1)+' / '+oe.citations.length+'</div>'
       // Citation principale
       +'<div class="vcard" style="max-width:660px;margin:0 auto">'
@@ -18877,7 +18881,7 @@ function _showLittTechniques(oeuvreKey){
   if(!oe||!oe.techniques||!oe.techniques.length){toast("Aucune technique disponible","warn");return;}
   var h='<div class="vsec">'
     +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-tool"/></svg></span>Techniques d\'écriture — '+_esc(oe.titre)+'</div>'
+    +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-tool"/></svg></span>Techniques d\'écriture — '+_esc(oe.titre)+'</div>'
     +'<div style="max-width:660px;margin:0 auto;display:flex;flex-direction:column;gap:14px">';
   oe.techniques.forEach(function(t,i){
     var cols=['#142554','#059669','#D97706','#6C56A6','#AE5353','#0891B2'];
@@ -18922,7 +18926,7 @@ function _showLittControle(oeuvreKey){
         +'<div class="vsec-title">Contrôle terminé !</div>'
         +'<div style="font-size:28px;font-weight:700;color:#142554">'+score+' / '+oe.controle.length+'</div>'
         +'<div style="font-size:13px;color:var(--ink4);margin:10px 0">Questions maîtrisées</div>'
-        +'<button class="btn bi mt12" onclick="_showLittControle(\''+oeuvreKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Recommencer</button>'
+        +'<button class="btn bi mt12" onclick="_showLittControle(\''+oeuvreKey+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Recommencer</button>'
         +'<button class="btn bo mt8" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Menu</button>'
         +'</div></div>');
       return;
@@ -18930,12 +18934,12 @@ function _showLittControle(oeuvreKey){
     var q=oe.controle[idx];
     revealed=false;
     var h='<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg></span>Contrôle de lecture — '+_esc(oe.titre)+'</div>'
+      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-book"/></svg></span>Contrôle de lecture — '+_esc(oe.titre)+'</div>'
       +'<div class="vcard" style="max-width:620px;margin:0 auto">'
       +'<div class="quiz-progress"><div class="quiz-progress-fill" style="width:'+Math.round(idx/oe.controle.length*100)+'%"></div></div>'
       +'<div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;margin:8px 0">Question '+(idx+1)+' / '+oe.controle.length+' — Points : '+score+'</div>'
       +'<div style="font-family:Georgia,serif;font-size:16px;color:var(--ink);line-height:1.65;margin-bottom:18px;font-weight:600;padding:14px;background:#F0F4FF;border-radius:10px">'+_esc(q.q)+'</div>'
-      +'<button class="btn bo" id="ctrlReveal" style="width:100%;margin-bottom:12px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Voir la réponse attendue</button>'
+      +'<button class="btn bo" id="ctrlReveal" style="width:100%;margin-bottom:12px"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Voir la réponse attendue</button>'
       +'<div id="ctrlAns" style="display:none;background:#1a1a2e;border-radius:10px;padding:16px 18px;margin-bottom:16px">'
         +'<div style="font-size:11px;color:#aaa;text-transform:uppercase;margin-bottom:8px;font-weight:600">Réponse attendue</div>'
         +'<div style="font-family:Georgia,serif;font-size:14px;color:#FFC93C;line-height:1.8;font-style:italic">'+_esc(q.r)+'</div>'
@@ -18943,8 +18947,8 @@ function _showLittControle(oeuvreKey){
       +'<div id="ctrlRate" style="display:none">'
         +'<div style="font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:10px;text-align:center">Avez-vous bien répondu ?</div>'
         +'<div style="display:flex;gap:12px">'
-          +'<button class="btn" style="flex:1;background:#D1FAE5;color:#065F46;border:2px solid #059669;font-weight:700" id="ctrlOui"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Oui</button>'
-          +'<button class="btn" style="flex:1;background:#FEE2E2;color:#991B1B;border:2px solid #AE5353;font-weight:700" id="ctrlNon"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Non</button>'
+          +'<button class="btn" style="flex:1;background:#D1FAE5;color:#065F46;border:2px solid #059669;font-weight:700" id="ctrlOui"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Oui</button>'
+          +'<button class="btn" style="flex:1;background:#FEE2E2;color:#991B1B;border:2px solid #AE5353;font-weight:700" id="ctrlNon"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Non</button>'
         +'</div>'
       +'</div>'
       +'</div></div>';
@@ -18980,14 +18984,14 @@ function _lancerLittQCM(oeuvreKey){
         +'<div class="vsec-title">Quiz terminé !</div>'
         +'<div style="font-size:28px;font-weight:700;color:'+(pct>=70?"#059669":"#D97706")+'">'+score+' / '+qs.length+'</div>'
         +'<div style="font-size:13px;color:var(--ink4);margin:10px 0">'+msg+'</div>'
-        +'<button class="btn bi mt12" onclick="_lancerLittQCM(\''+oeuvreKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Rejouer</button>'
+        +'<button class="btn bi mt12" onclick="_lancerLittQCM(\''+oeuvreKey+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Rejouer</button>'
         +'<button class="btn bo mt8" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Menu</button>'
         +'</div></div>');
       return;
     }
     var q=qs[idx];
     var html='<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg></span>'+oe.titre+'</div>'
+      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-pencil"/></svg></span>'+oe.titre+'</div>'
       +'<div class="vcard">'
       +'<div class="quiz-progress"><div class="quiz-progress-fill" style="width:'+Math.round(idx/qs.length*100)+'%"></div></div>'
       +'<div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;margin:8px 0">Question '+(idx+1)+'/'+qs.length+' — Score : '+score+'</div>'
@@ -19034,13 +19038,13 @@ function _lancerLittVF(oeuvreKey){
         +'<div class="vcard" style="text-align:center"><div style="font-size:52px;margin-bottom:12px">🎉</div>'
         +'<div class="vsec-title">Vrai/Faux terminé !</div>'
         +'<div style="font-size:28px;font-weight:700;color:#059669">'+score+' / '+qs.length+'</div>'
-        +'<button class="btn bi mt12" onclick="_lancerLittVF(\''+oeuvreKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Rejouer</button></div></div>');
+        +'<button class="btn bi mt12" onclick="_lancerLittVF(\''+oeuvreKey+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Rejouer</button></div></div>');
       return;
     }
     var q=qs[idx];
     var safeExpVF=(q.exp||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
     _vc('<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg></span>Vrai/Faux — '+oe.titre+'</div>'
+      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-checkcircle"/></svg></span>Vrai/Faux — '+oe.titre+'</div>'
       +'<div class="vcard" style="max-width:560px;margin:0 auto">'
       +'<div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;margin-bottom:8px">Proposition '+(idx+1)+'/'+qs.length+'</div>'
       +'<div style="font-family:Georgia,serif;font-size:17px;line-height:1.65;color:var(--ink);margin-bottom:24px;font-weight:600;padding-left:14px">'+q.q+'</div>'
@@ -19080,7 +19084,7 @@ function _lancerLittPendu(oeuvreKey){
         +'<div class="vcard" style="text-align:center"><div style="font-size:52px;margin-bottom:12px">🎯</div>'
         +'<div class="vsec-title">Pendu terminé !</div>'
         +'<div style="font-size:28px;font-weight:700;color:#142554">'+score+' / '+mots.length+' mots</div>'
-        +'<button class="btn bi mt12" onclick="_lancerLittPendu(\''+oeuvreKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Rejouer</button></div></div>');
+        +'<button class="btn bi mt12" onclick="_lancerLittPendu(\''+oeuvreKey+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Rejouer</button></div></div>');
       return;
     }
     motCourant=mots[midx].toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
@@ -19097,7 +19101,7 @@ function _lancerLittPendu(oeuvreKey){
     var found=(trouves.length===letMot.length);
     var lost=(vies<=0);
     var html='<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-target"/></svg></span>Pendu — '+oe.titre+'</div>'
+      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-target"/></svg></span>Pendu — '+oe.titre+'</div>'
       +'<div class="vcard" style="text-align:center;max-width:520px;margin:0 auto">'
       +'<div style="font-size:36px;margin-bottom:4px">'+PHEAD[Math.min(vies,6)]+'</div>'
       +'<div style="font-size:11px;color:var(--ink4);margin-bottom:10px">Mot '+(midx+1)+'/'+mots.length+' — Vies : '+vies+' — Score : '+score+'</div>'
@@ -19145,20 +19149,20 @@ function _lancerLittTrous(oeuvreKey){
         +'<div class="vcard" style="text-align:center"><div style="font-size:52px;margin-bottom:12px">✍️</div>'
         +'<div class="vsec-title">Texte à trous terminé !</div>'
         +'<div style="font-size:28px;font-weight:700;color:#059669">'+score+' / '+qs.length+'</div>'
-        +'<button class="btn bi mt12" onclick="_lancerLittTrous(\''+oeuvreKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Rejouer</button></div></div>');
+        +'<button class="btn bi mt12" onclick="_lancerLittTrous(\''+oeuvreKey+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Rejouer</button></div></div>');
       return;
     }
     var q=qs[idx];
     var affPhrase=q.phrase.replace('___','<span style="display:inline-block;border-bottom:2px solid #FFC93C;min-width:80px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>');
     _vc('<div class="vsec"><button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
-      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg></span>Texte à trous — '+oe.titre+'</div>'
+      +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-pencil"/></svg></span>Texte à trous — '+oe.titre+'</div>'
       +'<div class="vcard" style="max-width:560px;margin:0 auto">'
       +'<div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;margin-bottom:10px">Phrase '+(idx+1)+'/'+qs.length+' — Score : '+score+'</div>'
       +'<div style="font-family:Georgia,serif;font-size:17px;line-height:2;color:var(--ink);margin-bottom:12px;font-weight:600">'+affPhrase+'</div>'
       +'<div class="ib ibt mb12"><span>💡</span><span>Indice : <span style="font-family:monospace;font-size:13px;letter-spacing:3px">'+q.indice+'</span></span></div>'
       +'<input class="fi" id="trInp" placeholder="Votre réponse..." style="font-size:15px;text-align:center">'
       +'<div style="display:flex;gap:10px;margin-top:12px">'
-      +'<button class="btn bi" onclick="_trLittCheck()" style="flex:1"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Valider</button>'
+      +'<button class="btn bi" onclick="_trLittCheck()" style="flex:1"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Valider</button>'
       +'</div>'
       +'<div id="trFb" style="margin-top:12px;min-height:20px"></div>'
       +'</div></div>');
@@ -19619,7 +19623,7 @@ function pgResPedagoAdmin(){
   }
   var el=DB.elearning||defaultDB().elearning;
   var items=(el.contenus||[]).filter(function(c){return c.resPedago;});
-  var h='<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg></span>Ressources Pédagogiques Interactives</div>';
+  var h='<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-book"/></svg></span>Ressources Pédagogiques Interactives</div>';
   h+='<div class="ib ibt mb12"><span>💡</span><span>Gérez l\u2019accès aux évaluations BAC et cours interactifs. Basculez entre gratuit/payant et choisissez les abonnements autorisés.</span></div>';
   h+='<table class="tbl"><thead><tr><th>Ressource</th><th>Matière</th><th>Gratuit</th><th>Prix</th><th>Plans</th><th>Actions</th></tr></thead><tbody>';
   items.forEach(function(item){
@@ -19636,7 +19640,7 @@ function pgResPedagoAdmin(){
       '<button class="btn btn-xs" style="font-size:11px;padding:4px 10px;margin:2px" onclick="toggleResGratuit(\''+item.id+'\')">'+
       (item.gratuit?'🔒 Rendre payant':'🔓 Rendre gratuit')+'</button>'+
       '<button class="btn btn-xs bi" style="font-size:11px;padding:4px 10px;margin:2px" onclick="editResPlans(\''+item.id+'\')">Plans</button>'+
-      '<button class="btn btn-xs bgr2" style="font-size:11px;padding:4px 10px;margin:2px" onclick="lancerRessourcePedago(\''+item.resPedago+'\',false)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Tester</button>'+
+      '<button class="btn btn-xs bgr2" style="font-size:11px;padding:4px 10px;margin:2px" onclick="lancerRessourcePedago(\''+item.resPedago+'\',false)"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Tester</button>'+
       '</td>';
     h+='</tr>';
   });
@@ -19668,7 +19672,7 @@ function editResPlans(itemId){
   });
   body+='<div style="margin-top:12px"><label style="font-size:13px">Prix unitaire (FCFA) : <input type="number" id="rp_prix" value="'+(item.prix||0)+'" style="width:100px;padding:4px 8px;border:1px solid #ccc;border-radius:6px;margin-left:6px"></label></div>';
   M('⚙️ Plans d\u2019accès — '+_esc(item.titre),'',body,
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveResPlans(\''+itemId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveResPlans(\''+itemId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>');
 }
 
 function saveResPlans(itemId){
@@ -19699,7 +19703,7 @@ function mManageCitations(){
     +'<div class="semi xs2 mb8">➕ Ajouter une citation</div>'
     +'<div class="fg mb8"><span class="fl">Citation</span><textarea class="fi" id="citTexte" rows="2" placeholder="Le texte de la citation..."></textarea></div>'
     +'<div class="fg mb8"><span class="fl">Auteur</span><input class="fi" id="citAuteur" placeholder="Nom de l\'auteur"></div>'
-    +'<button class="btn bi sm" onclick="_citAdd()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button>'
+    +'<button class="btn bi sm" onclick="_citAdd()"><svg class="vico bico" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button>'
     +'</div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>');
 }
@@ -19793,7 +19797,7 @@ function mAddCarteMentale(){
     +'<div class="fg"><span class="fl">Classe</span><select class="fi" id="cmClasse"><option>3ème</option><option>2nde</option><option>1ère</option><option>Terminale</option></select></div>'
     +'<div class="fg"><span class="fl">Thèmes (virgule séparée)</span><input class="fi" id="cmThemes" placeholder="colonialisme, révolte, identité"></div>'
     +'<div class="fg"><span class="fl">QCM (JSON array, optionnel)</span><textarea class="fi" id="cmQCM" rows="3" placeholder=\'[{"q":"Question?","a":"Réponse A","b":"B","c":"C","ok":"a"}]\'></textarea></div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveNewCarte()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>',true
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveNewCarte()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>',true
   );
 }
 function _saveNewCarte(){
@@ -19819,7 +19823,7 @@ function mEditCarteMentale(key){
     +'<div class="fg"><span class="fl">Auteur</span><input class="fi" id="cmAuteur" value="'+_esc(oe.auteur)+'"></div>'
     +'<div class="fg"><span class="fl">Classe</span><select class="fi" id="cmClasse"><option'+(oe.classe==='3ème'?' selected':'')+'>3ème</option><option'+(oe.classe==='2nde'?' selected':'')+'>2nde</option><option'+(oe.classe==='1ère'?' selected':'')+'>1ère</option><option'+(oe.classe==='Terminale'?' selected':'')+'>Terminale</option></select></div>'
     +'<div class="fg"><span class="fl">QCM (JSON)</span><textarea class="fi" id="cmQCM" rows="4">'+(oe.qcm?JSON.stringify(oe.qcm,null,1):'')+'</textarea></div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveEditCarte(\''+key+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>',true
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveEditCarte(\''+key+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>',true
   );
 }
 function _saveEditCarte(key){
@@ -20585,7 +20589,7 @@ function _showEpreuveHTML(id){
         +'<div style="font-size:56px;margin-bottom:12px">🔒</div>'
         +'<div style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;color:#92400E;margin-bottom:8px">Contenu Premium</div>'
         +'<div style="font-size:13px;color:#78350F;line-height:1.7;max-width:500px;margin:0 auto">Cette épreuve est réservée aux abonnés. Inscrivez-vous pour y accéder.</div>'
-        +'<button class="btn bi mt12" onclick="vShowSec(\'elearning\',null)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-star"/></svg>S\'abonner</button>'
+        +'<button class="btn bi mt12" onclick="vShowSec(\'elearning\',null)"><svg class="vico bico" aria-hidden="true"><use href="#lc-star"/></svg>S\'abonner</button>'
         +'</div>'
         :htmlContent)
       // Pied de page institutionnel
@@ -20600,7 +20604,7 @@ function _showEpreuveHTML(id){
       '<button class="btn bi" onclick="_downloadEpreuvePDF()" style="padding:12px 22px;font-weight:700"><span style="font-size:18px;margin-right:6px">📥</span> Télécharger en PDF</button>'
     )
     +'<button class="btn" style="background:#FFC93C;color:#142554;padding:12px 22px;font-weight:700" onclick="window.print()"><span style="font-size:16px;margin-right:6px">🖨️</span> Imprimer</button>'
-    +(hasFile&&!locked?'<button class="btn" style="background:'+(fmtColors[format]||'#6B7A99')+';color:#fff;padding:12px 22px;font-weight:700" onclick="_openRessource(\''+id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Ouvrir '+(fmtLabels[format]||format.toUpperCase())+'</button>':'')
+    +(hasFile&&!locked?'<button class="btn" style="background:'+(fmtColors[format]||'#6B7A99')+';color:#fff;padding:12px 22px;font-weight:700" onclick="_openRessource(\''+id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Ouvrir '+(fmtLabels[format]||format.toUpperCase())+'</button>':'')
     +'<button class="btn bo" onclick="showEpreuves()" style="padding:12px 22px">← Retour à la liste</button>'
     +'</div>'
     +'</div>';
@@ -21597,22 +21601,29 @@ function lancerLabo(id){
   var lv=window.LABO_DB.find(function(x){return x.id===id;});
   if(!lv)return;
   // v1.2.2 : labo premium → accès selon le PLAN (pas seulement "connecté")
+  // v1.14.1 : la relance NOMME le labo qu'on vient de toucher et le plan qui
+  // l'ouvre, au lieu du message générique « réservé aux abonnés » qui laissait
+  // le visiteur faire lui-même le lien avec le catalogue.
   if(!lv.gratuit && typeof _planAccess==='function' && !_planAccess('labos')
      && !(typeof iA==='function' && iA())){
+    if(typeof _relancePremium==='function'){
+      var _autres = (window.LABO_DB||[]).filter(function(x){ return !x.gratuit && x.id!==lv.id; }).length;
+      _relancePremium({
+        titre:   lv.titre,
+        sous:    lv.matiere + ' · ' + lv.classe,
+        ico:     lv.ico,
+        role:    'eleve',
+        feature: 'labos',
+        aussi:   _autres ? ('les ' + _autres + ' autres laboratoires premium') : ''
+      });
+      return;
+    }
     if(typeof _requirePlan==='function'){ _requirePlan('labos','Les laboratoires virtuels premium'); return; }
   }
-  if(!lv.gratuit&&!SES){
-    M("🔒 Contenu Premium","",
-      "<div style='text-align:center;padding:20px'>"
-      +"<div style='font-size:52px;margin-bottom:14px'>"+lv.ico+"</div>"
-      +"<div style='font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;color:#142554;margin-bottom:8px'>"+lv.titre+"</div>"
-      +"<div style='font-size:13px;color:#6B7A99;margin-bottom:20px'>"+lv.matiere+" · "+lv.classe+"</div>"
-      +"<div style='background:#F0F4FF;border-radius:12px;padding:14px;font-size:13px;color:#475882;margin-bottom:16px'>"+lv.theorie+"</div>"
-      +"<div style='font-size:12px;color:#9CA3AF'>Abonnez-vous pour accéder au lab complet, aux quiz et aux fiches.</div>"
-      +"</div>",
-      "<button class='btn bo' onclick='cm()'>Fermer</button>"
-      +"<button class='btn bi' onclick=\"cm();showLabosVirtuels()\"><svg class='vico bico' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-star'/></svg>Voir les abonnements</button>",true);
-    return;
+  // Filet : si le contrôle par plan venait à manquer, un labo premium ne doit
+  // pas s'ouvrir pour autant à un visiteur non identifié.
+  if(!lv.gratuit && typeof _planAccess!=='function' && !SES){
+    toast('Ce laboratoire est réservé aux abonnés','warn'); return;
   }
   _lancerLaboComplet(lv);
 }
@@ -23595,7 +23606,7 @@ function _importRessourceMulti(){
     +'<div class="fg full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px;background:var(--grb);border-radius:8px"><input type="checkbox" id="riGratuit"> <span class="fl" style="color:var(--gr)">&#9989; Accès gratuit (sans abonnement)</span></label></div>'
     +'</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="_saveRessourceMulti()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Importer</button>',true);
+    +'<button class="btn bi" onclick="_saveRessourceMulti()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Importer</button>',true);
 }
 
 function _saveRessourceMulti(){
@@ -23758,8 +23769,8 @@ function _showPDFViewer(src,titre,canDownload){
       +'<div style="padding:32px 20px;text-align:center;background:var(--bg)">'
       +'<div style="font-size:64px;margin-bottom:16px">📄</div>'
       +'<div style="font-size:16px;font-weight:700;color:var(--bl);margin-bottom:20px">'+_esc(titre)+'</div>'
-      +'<button class="btn bi" style="font-size:15px;padding:14px 28px;margin:6px;width:100%;max-width:280px;cursor:pointer;border:none" onclick="window.open(window._pdfVwSrc,\'_blank\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button><br>'
-      +(canDownload?'<button class="btn bo" style="font-size:14px;padding:12px 24px;margin:6px;width:100%;max-width:280px;cursor:pointer;border:none" onclick="window.open(window._pdfVwSrc,\'_blank\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</button><br>':'')
+      +'<button class="btn bi" style="font-size:15px;padding:14px 28px;margin:6px;width:100%;max-width:280px;cursor:pointer;border:none" onclick="window.open(window._pdfVwSrc,\'_blank\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Ouvrir le PDF</button><br>'
+      +(canDownload?'<button class="btn bo" style="font-size:14px;padding:12px 24px;margin:6px;width:100%;max-width:280px;cursor:pointer;border:none" onclick="window.open(window._pdfVwSrc,\'_blank\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</button><br>':'')
       +'<div style="font-size:11px;color:var(--ink4);margin-top:12px;font-style:italic">© VÉRITAS · Usage pédagogique uniquement</div>'
       +'</div>';
     M('','',_mBody,'<button class="btn bo" onclick="cm()">Fermer</button>',false);
@@ -23796,8 +23807,8 @@ function _showPDFViewer(src,titre,canDownload){
     +'</div>';
   var footer='<button class="btn bo" onclick="cm()">Fermer</button>';
   if(canDownload){
-    footer+='<button class="btn" style="background:#6C56A6;color:#fff" onclick="window.open(window._pdfVwSrc,\'_blank\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Ouvrir PDF</button>';
-    footer+='<button class="btn" style="background:#AE5353;color:#fff" onclick="(function(){var a=document.createElement(\'a\');a.href=window._pdfVwSrc;a.download=(window._pdfVwTitre||\'document\').replace(/[^a-z0-9]/gi,\'_\')+\'.pdf\';a.click();})()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger PDF</button>';
+    footer+='<button class="btn" style="background:#6C56A6;color:#fff" onclick="window.open(window._pdfVwSrc,\'_blank\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Ouvrir PDF</button>';
+    footer+='<button class="btn" style="background:#AE5353;color:#fff" onclick="(function(){var a=document.createElement(\'a\');a.href=window._pdfVwSrc;a.download=(window._pdfVwTitre||\'document\').replace(/[^a-z0-9]/gi,\'_\')+\'.pdf\';a.click();})()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger PDF</button>';
   }
   M('','',body,footer,true);
 
@@ -23996,7 +24007,7 @@ function mImportJeuHTML(){
     +'<div class="fg full"><label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="jhGratuit" checked><span>Accès gratuit</span></label></div>'
     +'</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="_saveJeuHTML()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Importer</button>',true);
+    +'<button class="btn bi" onclick="_saveJeuHTML()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Importer</button>',true);
 }
 function _saveJeuHTML(){
   var titre=(document.getElementById('jhTitre')?.value||'').trim();
@@ -25549,7 +25560,7 @@ window.mRapportParent=function(){
   M('📲 Rapport au parent','Votre parent reçoit votre activité de la semaine sur WhatsApp',
     '<div class="fg"><span class="fl">Numéro WhatsApp du parent *</span><input class="fi" id="rpTel" placeholder="+237 6XX XX XX XX" value="'+_esc(saved)+'"></div>'
     +'<div class="ib ibi mt8"><span>💡</span><span>Le message est prérempli — vous pourrez le relire avant l\'envoi.</span></div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_sendRapportParent()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Composer le message</button>');
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_sendRapportParent()"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Composer le message</button>');
 };
 window._sendRapportParent=function(){
   var tel=((_ge('rpTel')||{}).value||'').replace(/[^0-9+]/g,'');
@@ -25579,9 +25590,9 @@ function deconnecter(){
   _autoSyncDirty=false;
   hideAll();$("VISITOR").style.display="flex";
   var bar=document.getElementById("vLoginBtns");
-  if(bar) bar.innerHTML='<button class="btn sm" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-weight:600" onclick="showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>'
-    +' <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin(\'eleve\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg>Se connecter</button>'
-    +' <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin(\'enseignant\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"/></svg>\u200d🏫 Enseignant</button>'
+  if(bar) bar.innerHTML='<button class="btn sm" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-weight:600" onclick="showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>'
+    +' <button class="btn sm" style="background:#FFC93C;color:#142554;font-weight:800" onclick="showLogin(\'eleve\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-graduation"/></svg>Se connecter</button>'
+    +' <button class="btn sm" style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2)" onclick="showLogin(\'enseignant\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-users"/></svg>\u200d🏫 Enseignant</button>'
     +'<span id="vSyncDot" onclick="iA()&&mSyncMenu()" title="Synchronisation cloud" style="display:none;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:700;cursor:pointer;color:#142554;flex-shrink:0;transition:background .4s"></span>'
     +'<span id="adminAccessPoint" aria-hidden="true" style="display:inline-block;width:44px;height:44px;cursor:default;opacity:0;vertical-align:middle" onclick="_adminTriple()" title=""></span>';
   initVisitor();toast("Déconnecté");
@@ -27239,10 +27250,10 @@ function pgClassesVirtuellesAdmin(){
       cardsH+='</div>';
       // EDT aperçu + actions
       cardsH+='<div style="padding:12px 14px;display:flex;gap:8px;flex-wrap:wrap">';
-      cardsH+='<button class="btn bi xs" onclick="cvAdminOpenRoom(\''+cv.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"/></svg>Salle</button>';
-      cardsH+='<button class="btn bvi xs" onclick="cvAdminEDT(\''+cv.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-calendar"/></svg>Emploi du temps</button>';
-      cardsH+='<button class="btn bo xs" onclick="cvAdminManageEleves(\''+cv.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"/></svg>Élèves</button>';
-      cardsH+='<button class="btn bo xs" onclick="cvAdminEditCV('+i+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>';
+      cardsH+='<button class="btn bi xs" onclick="cvAdminOpenRoom(\''+cv.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-presentation"/></svg>Salle</button>';
+      cardsH+='<button class="btn bvi xs" onclick="cvAdminEDT(\''+cv.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-calendar"/></svg>Emploi du temps</button>';
+      cardsH+='<button class="btn bo xs" onclick="cvAdminManageEleves(\''+cv.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-users"/></svg>Élèves</button>';
+      cardsH+='<button class="btn bo xs" onclick="cvAdminEditCV('+i+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>';
       cardsH+='<button class="btn br2 xs" onclick="cvAdminDelete(\''+cv.id+'\')">🗑</button>';
       cardsH+='</div>';
       cardsH+='</div>';
@@ -27253,7 +27264,7 @@ function pgClassesVirtuellesAdmin(){
   return '<div class="fl2 fic fsb mb16 fw g8"><div class="bold" style="font-size:18px">📚 Classes Virtuelles</div>'+
     '<button class="btn bi" onclick="cvAdminCreate()">＋ Nouveau groupe</button></div>'+
     statsH+cardsH+
-    '<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>Groupes WhatsApp par classe</div>'+pgWAGroupes()+'</div>';
+    '<div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>Groupes WhatsApp par classe</div>'+pgWAGroupes()+'</div>';
 }
 
 function cvAdminCreate(){
@@ -27270,7 +27281,7 @@ function cvAdminCreate(){
     '<div class="fg"><span class="fl">Capacité max élèves</span><input class="fi" id="cvCap" type="number" value="30" min="1" max="200"></div>'+
     '<div class="ib ibt mb0"><span>💡</span><span>Vous pourrez ajouter d\'autres matières et professeurs après la création.</span></div>'+
     '</div>',
-    '<button class="btn bi" onclick="cvAdminSave()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Créer le groupe</button><button class="btn bo" onclick="cm()">Annuler</button>'
+    '<button class="btn bi" onclick="cvAdminSave()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Créer le groupe</button><button class="btn bo" onclick="cm()">Annuler</button>'
   );
 }
 
@@ -27283,7 +27294,7 @@ function cvAdminAddMatiere(cvId){
     '<div class="fg"><span class="fl">Matière *</span><select class="fi" id="amMat">'+SUBS.map(function(s){return '<option>'+s+'</option>';}).join('')+'</select></div>'+
     '<div class="fg full"><span class="fl">Enseignant *</span><select class="fi" id="amEns">'+ensOpts+'</select></div>'+
     '</div>',
-    '<button class="btn bi" onclick="cvAdminSaveMatiere(\''+cvId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Ajouter</button><button class="btn bo" onclick="cm()">Annuler</button>'
+    '<button class="btn bi" onclick="cvAdminSaveMatiere(\''+cvId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Ajouter</button><button class="btn bo" onclick="cm()">Annuler</button>'
   );
 }
 function cvAdminSaveMatiere(cvId){
@@ -27330,7 +27341,7 @@ function cvAdminEDT(cvId){
     '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'
     +matieres.map(function(m){return '<button onclick="window._edtMat=\''+m.mat+'\';window._edtEns=\''+m.ensId+'\';window._edtCol=\''+m.col+'\';[].forEach.call(document.querySelectorAll(\'.edt-mat-btn\'),function(b){b.style.opacity=\'.4\'});this.style.opacity=\'1\'" class="edt-mat-btn" style="background:'+m.col+';color:#fff;border:none;border-radius:10px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;opacity:.5">'+m.mat+'</button>';}).join('')
     +'</div>'+grid,
-    '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cvEdtSave(\''+cvId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Sauvegarder</button>',true
+    '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cvEdtSave(\''+cvId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Sauvegarder</button>',true
   );
   // Pre-select first subject
   setTimeout(function(){var b=document.querySelector('.edt-mat-btn');if(b)b.click();},80);
@@ -27449,7 +27460,7 @@ function renderCVRoom(cvId){
       html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px">';
       html+='<div><div style="font-weight:700;font-size:14px">'+sj.titre+'</div><div style="font-size:11px;color:var(--ink4)">'+sj.type+' · Limite: '+sj.dateLimite+' · '+nbSoum+' soumission(s)</div></div>';
       html+='<div style="display:flex;gap:6px">';
-      if(canPost)html+='<button class="btn bi xs" onclick="cvTeacherCorrections(\''+cvId+'\',\''+sj.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Corriger</button>';
+      if(canPost)html+='<button class="btn bi xs" onclick="cvTeacherCorrections(\''+cvId+'\',\''+sj.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Corriger</button>';
       if(canPost||isAdmin)html+='<button class="btn bo xs" onclick="cvAdminAddSujet(\''+cvId+'\',\''+curMat.mat+'\')">＋ Sujet</button>';
       html+='</div></div>';
       if(sj.desc)html+='<div style="font-size:12px;color:var(--ink3);line-height:1.5">'+sj.desc+'</div>';
@@ -27618,7 +27629,7 @@ function cvAdminAddSujet(cvId,mat){
     '<div id="sjFilePreview" style="font-size:12px;color:var(--gr);margin-top:4px"></div></div>'+
     '<div class="fg"><span class="fl">Note sur</span><input class="fi" id="assNoteSur" type="number" value="20" min="5" max="100"></div>'+
     '</div>',
-    '<button class="btn bi" onclick="cvAdminSaveSujet(\''+cvId+'\',\''+mat+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Publier</button><button class="btn bo" onclick="cm()">Annuler</button>'
+    '<button class="btn bi" onclick="cvAdminSaveSujet(\''+cvId+'\',\''+mat+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Publier</button><button class="btn bo" onclick="cm()">Annuler</button>'
   );
 }
 function cvAdminSaveSujet(cvId,mat){
@@ -27682,7 +27693,7 @@ function cvAdminEditCV(idx){
     '<div class="fg"><span class="fl">Plan requis</span><select class="fi" id="cvEPlan">'+planOpts+'</select></div>'+
     '<div class="fg full"><span class="fl">Description</span><textarea class="fi" id="cvEDesc" rows="3">'+cv.desc+'</textarea></div>'+
     '</div>',
-    '<button class="btn bi" onclick="cvAdminUpdate('+idx+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Mettre à jour</button><button class="btn bo" onclick="cm()">Annuler</button>'
+    '<button class="btn bi" onclick="cvAdminUpdate('+idx+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Mettre à jour</button><button class="btn bo" onclick="cm()">Annuler</button>'
   );
 }
 function cvAdminUpdate(idx){
@@ -27724,7 +27735,7 @@ function cvAdminManageEleves(cvId){
     '<div style="font-weight:700;font-size:13px;margin-bottom:10px">Élèves éligibles ('+eligibles.length+')</div>'+
     (eligH||'<div class="empty"><div class="empty-ico">👥</div>Aucun élève éligible dans cette classe</div>')+
     autresH,
-    '<button class="btn bi" onclick="cvAdminAddAll(\''+cvId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Tout ajouter</button><button class="btn bo" onclick="cm()">Fermer</button>'
+    '<button class="btn bi" onclick="cvAdminAddAll(\''+cvId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Tout ajouter</button><button class="btn bo" onclick="cm()">Fermer</button>'
   );
 }
 function cvToggleEleve(cvId,sid){
@@ -27758,7 +27769,7 @@ function cvAdminViewSujets(cvId){
       '<td><span class="bg bgd" style="font-size:11px">'+s.dateLimite+'</span></td>'+
       '<td style="text-align:center">'+nbSoum+'</td>'+
       '<td style="text-align:center;color:var(--gr);font-weight:700">'+nbCorr+'</td>'+
-      '<td><button class="btn bo xs" onclick="cvViewSoumissions(\''+s.id+'\',\''+cv.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Voir soumissions</button></td></tr>';
+      '<td><button class="btn bo xs" onclick="cvViewSoumissions(\''+s.id+'\',\''+cv.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Voir soumissions</button></td></tr>';
   }).join('');
   M('Sujets — '+cv.nom,'',
     '<div class="tw"><table><thead><tr><th>Titre</th><th>Matière</th><th>Date limite</th><th>Soumissions</th><th>Corrigés</th><th></th></tr></thead><tbody>'+
@@ -27806,7 +27817,7 @@ function waSetLink(grpId){
   M('Lien du groupe WhatsApp',grp.nom,
     '<div class="ib ibt mb12"><span>💡</span><span>Créez d\'abord votre groupe WhatsApp manuellement, puis collez ici le lien d\'invitation généré (Paramètres → Lien d\'invitation du groupe).</span></div>'+
     '<div class="fg"><span class="fl">Lien d\'invitation WhatsApp</span><input class="fi" id="waLienInput" value="'+(grp.lien||'')+'" placeholder="https://chat.whatsapp.com/..."></div>',
-    '<button class="btn bi" onclick="waSaveLink(\''+grpId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button><button class="btn bo" onclick="cm()">Annuler</button>'
+    '<button class="btn bi" onclick="waSaveLink(\''+grpId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button><button class="btn bo" onclick="cm()">Annuler</button>'
   );
 }
 function waSaveLink(grpId){
@@ -27821,13 +27832,13 @@ function waViewMembres(grpId){
     var tel=s.ptel||s.tel||'—';
     var waLink='https://wa.me/'+(tel.replace(/[^0-9]/g,''));
     return '<tr><td class="semi">'+s.nom+' '+s.pre+'</td><td>'+s.mat+'</td><td>'+tel+'</td>'+
-      '<td><a href="'+waLink+'" target="_blank" class="btn bvi xs"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>Message</a></td></tr>';
+      '<td><a href="'+waLink+'" target="_blank" class="btn bvi xs"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Message</a></td></tr>';
   }).join('');
   M('Membres — '+grp.nom,grp.classe+' · '+membres.length+' élèves',
     '<div class="tw"><table><thead><tr><th>Élève</th><th>Matricule</th><th>Téléphone</th><th>Action</th></tr></thead><tbody>'+
     (rows||'<tr><td colspan="4"><div class="empty">Aucun membre</div></td></tr>')+
     '</tbody></table></div>',
-    '<button class="btn bi" onclick="waInviteAll(\''+grpId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Inviter tous</button><button class="btn bo" onclick="cm()">Fermer</button>','',true
+    '<button class="btn bi" onclick="waInviteAll(\''+grpId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Inviter tous</button><button class="btn bo" onclick="cm()">Fermer</button>','',true
   );
 }
 function waInviteAll(grpId){
@@ -27894,9 +27905,9 @@ function pgClassesVirtuellesTeacher(){
     h+='</div>';
     // Actions
     h+='<div style="padding:12px 14px;display:flex;gap:8px;flex-wrap:wrap">';
-    h+='<button class="btn bi sm" onclick="window._cvRoomId=\''+cv.id+'\';window._cvMatIdx=0;window._cvTab=\'chat\';renderCVRoom(\''+cv.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"/></svg>Ouvrir la salle</button>';
-    h+='<button class="btn bvi sm" onclick="cvAdminAddSujet(\''+cv.id+'\',\''+mesMatieres[0].mat+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Publier sujet</button>';
-    if(nonCorr>0)h+='<button class="btn" style="background:var(--reb);color:var(--re);border:1px solid var(--red);border-radius:var(--r);padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer" onclick="cvShowAllCorrections(\''+cv.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-alert"/></svg>'+nonCorr+' à corriger</button>';
+    h+='<button class="btn bi sm" onclick="window._cvRoomId=\''+cv.id+'\';window._cvMatIdx=0;window._cvTab=\'chat\';renderCVRoom(\''+cv.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-presentation"/></svg>Ouvrir la salle</button>';
+    h+='<button class="btn bvi sm" onclick="cvAdminAddSujet(\''+cv.id+'\',\''+mesMatieres[0].mat+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Publier sujet</button>';
+    if(nonCorr>0)h+='<button class="btn" style="background:var(--reb);color:var(--re);border:1px solid var(--red);border-radius:var(--r);padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer" onclick="cvShowAllCorrections(\''+cv.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-alert"/></svg>'+nonCorr+' à corriger</button>';
     h+='</div>';
     h+='</div>';
   });
@@ -27921,7 +27932,7 @@ function cvShowAllCorrections(cvId){
       var sj=mesSujets.find(function(x){return x.id===s.sujetId;})||{};
       return '<div style="background:var(--bg);border-radius:10px;padding:10px;margin-bottom:8px;border:1px solid var(--bg3)">'+
         '<div class="fl2 fic fsb"><div><div class="semi s">'+el.pre+' '+el.nom+'</div><div style="font-size:11px;color:var(--ink4)">'+sj.titre+' · '+(s.mat||sj.mat||'—')+'</div></div>'+
-        '<button class="btn bi xs" onclick="cvCorrectSoumission(\''+s.id+'\',\''+s.sujetId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Corriger</button></div>'+
+        '<button class="btn bi xs" onclick="cvCorrectSoumission(\''+s.id+'\',\''+s.sujetId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Corriger</button></div>'+
         '</div>';
     }).join(''),
     '<button class="btn bo" onclick="cm()">Fermer</button>',true
@@ -27945,7 +27956,7 @@ function cvTeacherAddSujet(cvId){
     '<div class="fg"><span class="fl">Coefficient</span><input class="fi" id="sjCoef" type="number" value="1" min="1" max="10"></div>'+
     '<div class="fg"><span class="fl">Note sur</span><input class="fi" id="sjNoteSur" type="number" value="20" min="5" max="100"></div>'+
     '</div>',
-    '<button class="btn bi" onclick="cvTeacherSaveSujet(\''+cvId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Publier</button><button class="btn bo" onclick="cm()">Annuler</button>'
+    '<button class="btn bi" onclick="cvTeacherSaveSujet(\''+cvId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Publier</button><button class="btn bo" onclick="cm()">Annuler</button>'
   );
 }
 
@@ -28028,16 +28039,16 @@ function cvCorrectSoumission(soumId,sjId){
   M('Corriger — '+_esc(el.nom||'')+' '+_esc(el.pre||''),'',
     '<div class="ib ibt mb12"><span>📄</span><span style="white-space:pre-wrap">'+_esc(soum.contenu||'Aucun texte fourni')+'</span></div>'+
     (soum.fichierUrl?
-      '<div style="margin-bottom:12px"><a class="btn bvi sm" href="'+_esc(soum.fichierUrl)+'" target="_blank" rel="noopener"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>☁️ Voir le fichier soumis</a> <a class="btn bo sm" href="'+_esc(soum.fichierUrl)+'" download target="_blank"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a></div>':
+      '<div style="margin-bottom:12px"><a class="btn bvi sm" href="'+_esc(soum.fichierUrl)+'" target="_blank" rel="noopener"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>☁️ Voir le fichier soumis</a> <a class="btn bo sm" href="'+_esc(soum.fichierUrl)+'" download target="_blank"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</a></div>':
      soum.fichierData?
-      '<div style="margin-bottom:12px"><button class="btn bvi sm" onclick="_applyWatermarkAndDownload(window._getSoumData(\''+soum.id+'\'),\''+(soum.fichier||'soumission.pdf')+'\',\''+(soum.fichierType||'')+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>💾 Voir le fichier soumis</button></div>':
-      (soum.fichier?'<a href="'+soum.fichier+'" target="_blank" class="btn bvi sm mb12"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Voir le fichier soumis</a><br>':''))+
+      '<div style="margin-bottom:12px"><button class="btn bvi sm" onclick="_applyWatermarkAndDownload(window._getSoumData(\''+soum.id+'\'),\''+(soum.fichier||'soumission.pdf')+'\',\''+(soum.fichierType||'')+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>💾 Voir le fichier soumis</button></div>':
+      (soum.fichier?'<a href="'+soum.fichier+'" target="_blank" class="btn bvi sm mb12"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Voir le fichier soumis</a><br>':''))+
     '<div class="fg2">'+
     '<div class="fg"><span class="fl">Note /'+noteSur+'</span><input class="fi" id="corrNote" type="number" min="0" max="'+noteSur+'" value="'+(soum.note||0)+'" placeholder="0-'+noteSur+'"></div>'+
     '<div class="fg"><span class="fl">Appréciation</span><select class="fi" id="corrAppr"><option>Excellent travail</option><option>Très bien</option><option>Bien</option><option>Assez bien</option><option>Passable</option><option>Insuffisant</option><option>Travail non fait sérieusement</option></select></div>'+
     '<div class="fg full"><span class="fl">Commentaire personnalisé</span><textarea class="fi" id="corrComment" rows="3" placeholder="Feedback pour l\'élève...">'+( soum.commentaire||'')+'</textarea></div>'+
     '</div>',
-    '<button class="btn bi" onclick="cvSaveCorrection(\''+soumId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer la note</button><button class="btn bo" onclick="cm()">Annuler</button>'
+    '<button class="btn bi" onclick="cvSaveCorrection(\''+soumId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer la note</button><button class="btn bo" onclick="cm()">Annuler</button>'
   );
 }
 
@@ -28086,7 +28097,7 @@ function _cvChatOpen(cvId,cv,userId,userType){
     '<div class="fg" style="grid-column:1/-1"><textarea class="fi" id="cvChatTxt" rows="2" placeholder="Votre message..."></textarea></div>'+
     '<div class="fg"><span class="fl">Fichier (optionnel)</span><input class="fi" id="cvChatFile" type="url" placeholder="Lien Drive..."></div>'+
     '</div>',
-    '<button class="btn bi" onclick="cvChatSend(\''+cvId+'\',\''+userId+'\',\''+userType+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Envoyer</button>'+
+    '<button class="btn bi" onclick="cvChatSend(\''+cvId+'\',\''+userId+'\',\''+userType+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Envoyer</button>'+
     '<button class="btn bo" onclick="cm()">Fermer</button>','',true
   );
   // Scroll to bottom
@@ -28177,7 +28188,7 @@ function pgMesClassesVirtuelles(){
     h+='</div>';
     // Bouton entrer
     h+='<div style="padding:12px 14px">';
-    h+='<button class="btn bi" style="width:100%;justify-content:center" onclick="window._cvRoomId=\''+cv.id+'\';window._cvMatIdx=0;window._cvTab=\'chat\';renderCVRoom(\''+cv.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>Entrer dans la salle</button>';
+    h+='<button class="btn bi" style="width:100%;justify-content:center" onclick="window._cvRoomId=\''+cv.id+'\';window._cvMatIdx=0;window._cvTab=\'chat\';renderCVRoom(\''+cv.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Entrer dans la salle</button>';
     h+='</div>';
     h+='</div>';
   });
@@ -28185,7 +28196,7 @@ function pgMesClassesVirtuelles(){
 
   if(autresCvs.length){
     h+='<div class="card" style="border:1px dashed var(--bg3)">';
-    h+='<div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg></span>Autres classes (abonnement requis)</div>';
+    h+='<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-lock"/></svg></span>Autres classes (abonnement requis)</div>';
     autresCvs.forEach(function(cv){
       var plan=(DB.elearning&&DB.elearning.plans||[]).find(function(p){return p.id===cv.planRequis;})||{nom:'Abonnement'};
       h+='<div class="fl2 fic fsb" style="padding:8px 0;border-bottom:1px solid var(--bg2)">'+
@@ -28206,7 +28217,7 @@ function cvEleveSoumettre(cvId,sjId,sjTitre,noteSur){
     '<div class="fg"><span class="fl">Fichier joint — PDF ou Word (max 20 Mo)</span>'+
     '<input type="file" class="fi" id="soumFileUpload" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style="padding:7px" onchange="_soumLoadFile(this)">'+
     '<div id="soumFilePreview" style="font-size:12px;color:var(--ink3);margin-top:4px"></div></div>',
-    '<button class="btn bi" onclick="cvEleveSave(\''+cvId+'\',\''+sjId+'\',\''+eid+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Soumettre</button><button class="btn bo" onclick="cm()">Annuler</button>'
+    '<button class="btn bi" onclick="cvEleveSave(\''+cvId+'\',\''+sjId+'\',\''+eid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Soumettre</button><button class="btn bo" onclick="cm()">Annuler</button>'
   );
 }
 
@@ -28674,7 +28685,7 @@ function mEditExamResults(){
     h+='</div>';
   });
   M('✏️ Modifier les Statistiques','Résultats aux examens nationaux',h,
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveExamResults()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer tout</button>',true);
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveExamResults()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer tout</button>',true);
 }
 
 function _saveExamResults(){
@@ -28715,9 +28726,9 @@ function mEditExamYear(ei){
   });
   h+='</div>';
   window._eyNi=er.niveaux.length;
-  h+='<button class="btn bo sm mt6" onclick="_addNiveauRow()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter un niveau</button><div id="ey_extra"></div>';
+  h+='<button class="btn bo sm mt6" onclick="_addNiveauRow()"><svg class="vico bico" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter un niveau</button><div id="ey_extra"></div>';
   M('✏️ '+er.annee,'Modifier cette année',h,
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveExamYear('+ei+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>',true);
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveExamYear('+ei+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>',true);
 }
 
 function _addNiveauRow(){
@@ -28766,7 +28777,7 @@ function mAddExamYear(){
   window._neyCount=4;
   h+='<button class="btn bo sm mt6" onclick="(function(){var i=window._neyCount++;document.getElementById(\'neyRows\').innerHTML+=\'<div class=\\\"fl2 fic g6 mb6\\\"><input class=\\\"fi\\\" id=\\\"ney_cls_\'+i+\'\\\" placeholder=\\\"Classe\\\" style=\\\"width:80px;padding:5px 8px\\\"><div style=\\\"flex:1\\\"><label style=\\\"font-size:11px\\\">%</label><input class=\\\"fi\\\" type=\\\"number\\\" id=\\\"ney_t_\'+i+\'\\\" value=\\\"80\\\" style=\\\"padding:5px 8px\\\"></div><div style=\\\"flex:1\\\"><label style=\\\"font-size:11px\\\">Cand.</label><input class=\\\"fi\\\" type=\\\"number\\\" id=\\\"ney_c_\'+i+\'\\\" value=\\\"20\\\" style=\\\"padding:5px 8px\\\"></div><div style=\\\"flex:1\\\"><label style=\\\"font-size:11px\\\">Admis</label><input class=\\\"fi\\\" type=\\\"number\\\" id=\\\"ney_a_\'+i+\'\\\" value=\\\"16\\\" style=\\\"padding:5px 8px\\\"></div></div>\';})()">➕ Ajouter niveau</button>';
   M('➕ Nouvelle Année Scolaire','Ajouter des statistiques',h,
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveNewExamYear()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Ajouter</button>',true);
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveNewExamYear()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Ajouter</button>',true);
 }
 
 function _saveNewExamYear(){
@@ -28892,7 +28903,7 @@ window.cvAdminCreate=function(){
     '<div style="background:var(--blb);border-radius:12px;padding:12px;margin-top:8px;border:1px solid var(--bld)">'+
     '<div class="semi s mb8" style="color:var(--bl)">📚 Matières (Ctrl/Cmd + clic pour plusieurs)</div>'+
     '<select class="fi" id="cvMatieres" multiple style="height:110px">'+SUBS.map(function(s){return '<option>'+s+'</option>';}).join('')+'</select></div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_cvSaveV2()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Créer</button>'
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_cvSaveV2()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Créer</button>'
   );
 };
 
@@ -28944,8 +28955,8 @@ window.cvAdminManageMatieres=function(cvId_){
     (rows||'<div class="empty">Aucune matière</div>')+
     '<div class="fl2 fic g8 mt12" style="flex-wrap:wrap">'+
     '<select class="fi" id="addMatSel" style="flex:1;min-width:130px">'+addOpts+'</select>'+
-    '<button class="btn bi sm" onclick="_cvAddMat(\''+cvId_+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button></div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_cvSaveMats(\''+cvId_+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>',true
+    '<button class="btn bi sm" onclick="_cvAddMat(\''+cvId_+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter</button></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_cvSaveMats(\''+cvId_+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>',true
   );
 };
 
@@ -29021,9 +29032,9 @@ function _cvEdtEdit2(cvId_,day,slot){
     '<div class="fg full"><span class="fl">Enseignant</span><select class="fi" id="edtEns2">'+ensOpts+'</select></div>'+
     '<div class="fg full"><span class="fl">Salle / Lien visio</span><input class="fi" id="edtSalle2" value="'+(ex&&ex.salle||'')+'" placeholder="Salle A ou https://meet.google.com/..."></div>'+
     '</div>'+
-    (ex?'<button class="btn br2 sm mt6" onclick="_cvEdtDel2(\''+cvId_+'\',\''+day+'\',\''+slot+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Supprimer ce créneau</button>':''),
+    (ex?'<button class="btn br2 sm mt6" onclick="_cvEdtDel2(\''+cvId_+'\',\''+day+'\',\''+slot+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Supprimer ce créneau</button>':''),
     '<button class="btn bo" onclick="cm();setTimeout(function(){window.cvAdminEmploiDuTemps(\''+cvId_+'\')},80)">← Retour</button>'+
-    '<button class="btn bi" onclick="_cvEdtSave2(\''+cvId_+'\',\''+day+'\',\''+slot+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>'
+    '<button class="btn bi" onclick="_cvEdtSave2(\''+cvId_+'\',\''+day+'\',\''+slot+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>'
   );
 }
 
@@ -29174,7 +29185,7 @@ function _renderCvSpace(cvId_,cv,uid,role){
       '<div style="margin-top:12px;background:var(--bg2);border-radius:12px;padding:14px">'+
       '<div class="semi s mb8">📢 Nouvelle annonce</div>'+
       '<textarea class="fi" id="cvAnnInp" rows="2" placeholder="Message pour tous les apprenants…"></textarea>'+
-      '<button class="btn bi sm mt8" onclick="_cvPostAnn2(\''+cvId_+'\',\''+uid+'\',\''+role+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg>Publier</button></div>':'')
+      '<button class="btn bi sm mt8" onclick="_cvPostAnn2(\''+cvId_+'\',\''+uid+'\',\''+role+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-megaphone"/></svg>Publier</button></div>':'')
     +'</div>'+
     // Sondages panel
     '<div id="cvPP" style="display:none">'+
@@ -29184,7 +29195,7 @@ function _renderCvSpace(cvId_,cv,uid,role){
       '<div class="semi s mb8">📊 Créer un sondage</div>'+
       '<input class="fi mb6" id="cvPollQ2" placeholder="Votre question…">'+
       ['Option 1 *','Option 2 *','Option 3','Option 4'].map(function(p,i){return '<input class="fi mb5" id="cvPollO'+(i+1)+'" placeholder="'+p+'">';}).join('')+
-      '<button class="btn bi sm mt8" onclick="_cvCreatePoll2(\''+cvId_+'\',\''+uid+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg>Lancer le sondage</button></div>':'')
+      '<button class="btn bi sm mt8" onclick="_cvCreatePoll2(\''+cvId_+'\',\''+uid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-chart"/></svg>Lancer le sondage</button></div>':'')
     +'</div>'+
     // Emploi du temps
     '<div id="cvPE" style="display:none">'+edtHtml+'</div>'+
@@ -29194,7 +29205,7 @@ function _renderCvSpace(cvId_,cv,uid,role){
   window._cvSpaceCvId=cvId_;
   window._cvSpaceUid=uid;
   window._cvSpaceRole=role;
-  M('📚 '+cv.nom,'Classe virtuelle — '+cv.classe,body,'<button class="btn bo" onclick="clearInterval(_chatPoll);cm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Fermer</button>',true);
+  M('📚 '+cv.nom,'Classe virtuelle — '+cv.classe,body,'<button class="btn bo" onclick="clearInterval(_chatPoll);cm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Fermer</button>',true);
   setTimeout(function(){_refreshMsgs(cvId_,uid,role);},100);
 }
 
@@ -29325,8 +29336,8 @@ if(_origPgCVAdmin){
     // Injecter boutons EDT et Matières dans les actions du tableau
     h=h.replace(/(<button class="btn bo xs" onclick="cvAdminViewSujets\('([^']+)'\)">📝 Sujets<\/button>)/g,
       function(match,btn,id){
-        return '<button class="btn bo xs" onclick="window.cvAdminManageMatieres(\''+id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg>Matières</button>'+
-               '<button class="btn bo xs" onclick="window.cvAdminEmploiDuTemps(\''+id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-calendar"/></svg>EDT</button>'+btn;
+        return '<button class="btn bo xs" onclick="window.cvAdminManageMatieres(\''+id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-book"/></svg>Matières</button>'+
+               '<button class="btn bo xs" onclick="window.cvAdminEmploiDuTemps(\''+id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-calendar"/></svg>EDT</button>'+btn;
       });
     return h;
   };
@@ -29552,7 +29563,7 @@ function mEditWAGroupe(id){
     +'<option value="0"'+(!g.actif?' selected':'')+'>Non</option>'
     +'</select></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="_updateWAGroupe(\''+id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Mettre à jour</button>'
+    +'<button class="btn bi" onclick="_updateWAGroupe(\''+id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Mettre à jour</button>'
   );
 }
 
@@ -29649,7 +29660,7 @@ function _waConfigAccess(grpId){
       :'<div class="ib ibt xs2"><span>⚠️</span><span>Aucun plan e-learning configuré. Créez d\'abord des plans dans E-Learning → Plans.</span></div>')
     +'</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="_saveWAConfig(\''+grpId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>'
+    +'<button class="btn bi" onclick="_saveWAConfig(\''+grpId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>'
   );
 }
 
@@ -29709,7 +29720,7 @@ function pgWAAccess(){
 
   var h='<div class="fl2 fic fsb mb16 fw g8">';
   h+='<div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;color:#142554">📱 Accès Groupes WhatsApp</div>';
-  h+='<div class="fl2 g8"><button class="btn bi" onclick="mWAGroupes()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sliders"/></svg>Configurer les groupes</button>';
+  h+='<div class="fl2 g8"><button class="btn bi" onclick="mWAGroupes()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sliders"/></svg>Configurer les groupes</button>';
   h+='<button class="btn" style="background:#25D366;color:#fff" onclick="mWAPendingMembers()">⏳ Inscriptions en attente</button></div></div>';
 
   h+='<div class="sg" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">';
@@ -29744,8 +29755,8 @@ function pgWAAccess(){
     h+='<div class="fl2 fic g8 fw">';
     h+='<span style="background:'+mc+'22;color:'+mc+';border:1px solid '+mc+'44;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700">'+mt+'</span>';
     if(mode==='abonnement'&&plansReq.length) h+='<span style="font-size:11px;color:var(--ink3)">Plans : '+plansReq.map(planLabel).join(', ')+'</span>';
-    h+='<button class="btn bo xs" onclick="_waConfigAccess(\''+grp.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-tool"/></svg>Modifier accès</button>';
-    if(eligibleNotInvited>0) h+='<button class="btn xs" style="background:#25D366;color:#fff" onclick="_waInviteEligibles(\''+grp.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Inviter '+eligibleNotInvited+' éligible(s)</button>';
+    h+='<button class="btn bo xs" onclick="_waConfigAccess(\''+grp.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-tool"/></svg>Modifier accès</button>';
+    if(eligibleNotInvited>0) h+='<button class="btn xs" style="background:#25D366;color:#fff" onclick="_waInviteEligibles(\''+grp.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Inviter '+eligibleNotInvited+' éligible(s)</button>';
     h+='</div></div>';
 
     // Table élèves
@@ -29765,9 +29776,9 @@ function pgWAAccess(){
         h+='<td style="padding:6px 8px;text-align:center"><span style="color:'+ec+';font-size:11px;font-weight:600">'+(a2.eligible?'✅':'❌')+' '+_esc(a2.reason)+'</span></td>';
         h+='<td style="padding:6px 8px;text-align:center">';
         if(wasInvited){h+='<span style="color:#059669;font-size:11px;font-weight:600">✅ Invité</span>';}
-        else if(a2.eligible&&vAcc){h+='<button class="btn xs" style="background:#25D366;color:#fff" onclick="_sendWAGroupInvite(\''+vAcc.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Inviter</button>';}
+        else if(a2.eligible&&vAcc){h+='<button class="btn xs" style="background:#25D366;color:#fff" onclick="_sendWAGroupInvite(\''+vAcc.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Inviter</button>';}
         else if(a2.eligible){h+='<span style="color:#059669;font-size:11px">✅ Éligible</span>';}
-        else if(a2.canManuel&&vAcc){h+='<button class="btn xs bo" onclick="_waManuelInvite(\''+vAcc.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sliders"/></svg>Accorder</button>';}
+        else if(a2.canManuel&&vAcc){h+='<button class="btn xs bo" onclick="_waManuelInvite(\''+vAcc.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-sliders"/></svg>Accorder</button>';}
         else{h+='<span style="color:#9CA3AF;font-size:10px">—</span>';}
         h+='</td></tr>';
       });
@@ -29791,11 +29802,11 @@ function pgWAAccess(){
         h+='<td style="padding:6px 8px;text-align:center">';
         if(a.groupeStatut==='invite'){
           h+='<div style="font-size:10px;color:#059669;font-weight:700">✅ Invité '+_esc(a.dateInvitGroupe||'')+'</div>';
-          h+='<button class="btn xs bo mt2" onclick="_sendWAGroupInvite(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Renvoyer</button>';
+          h+='<button class="btn xs bo mt2" onclick="_sendWAGroupInvite(\''+a.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Renvoyer</button>';
         } else if(a2.eligible){
-          h+='<button class="btn xs" style="background:#25D366;color:#fff" onclick="_validerEtInviter(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Inviter</button>';
+          h+='<button class="btn xs" style="background:#25D366;color:#fff" onclick="_validerEtInviter(\''+a.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Inviter</button>';
         } else if(a2.canManuel){
-          h+='<button class="btn xs bo" onclick="_waManuelInvite(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sliders"/></svg>Accorder</button>';
+          h+='<button class="btn xs bo" onclick="_waManuelInvite(\''+a.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-sliders"/></svg>Accorder</button>';
         } else {
           h+='<span style="color:#9CA3AF;font-size:10px">Non éligible</span>';
         }
@@ -29983,32 +29994,32 @@ window.mPayCoordonnees = function(){
     '<div style="padding:4px">'
     +'<div class="ib ibt mb14"><span>⚠️</span><span>Ces coordonnées doivent être celles du <strong>Centre VÉRITAS</strong> (entité), pas d\'un compte personnel. Elles s\'affichent au client dans la fenêtre de paiement et servent au paiement manuel.</span></div>'
 
-    +'<div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>MTN Mobile Money</div>'
+    +'<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>MTN Mobile Money</div>'
     + f('pc_momo_num', 'Numéro MoMo', P.momo&&P.momo.numero, 'Format : +237 6XX XX XX XX')
     + f('pc_momo_nom', 'Nom du compte', P.momo&&P.momo.nomCompte, 'Doit correspondre au titulaire déclaré')
     + f('pc_momo_code','Code USSD / code marchand', P.momo&&P.momo.code, 'Ex. *126# ou *126*4*CODE#')
 
-    +'<div class="ct mt14"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>Orange Money</div>'
+    +'<div class="ct mt14"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-smartphone"/></svg></span>Orange Money</div>'
     + f('pc_om_num', 'Numéro Orange Money', P.orange&&P.orange.numero)
     + f('pc_om_nom', 'Nom du compte', P.orange&&P.orange.nomCompte)
     + f('pc_om_code','Code USSD', P.orange&&P.orange.code, 'Ex. #150*1#')
 
-    +'<div class="ct mt14"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg></span>Contact</div>'
+    +'<div class="ct mt14"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-message"/></svg></span>Contact</div>'
     + f('pc_wa',    'WhatsApp du centre', P.whatsapp, 'Reçoit les confirmations de paiement manuel')
     + f('pc_email', 'E-mail de contact', P.email)
 
-    +'<div class="ct mt14"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-building"/></svg></span>Virement bancaire <span style="font-weight:400;font-size:11px;color:var(--ink4)">(masqué tant que non renseigné)</span></div>'
+    +'<div class="ct mt14"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-building"/></svg></span>Virement bancaire <span style="font-weight:400;font-size:11px;color:var(--ink4)">(masqué tant que non renseigné)</span></div>'
     + f('pc_bk_tit', 'Titulaire du compte', P.bank&&P.bank.titulaire)
     + f('pc_bk_ban', 'Banque', P.bank&&P.bank.banque)
     + f('pc_bk_iban','IBAN / RIB', P.bank&&P.bank.iban)
     + f('pc_bk_swi', 'SWIFT / BIC', P.bank&&P.bank.swift)
 
-    +'<div class="ct mt14"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"/></svg></span>International <span style="font-weight:400;font-size:11px;color:var(--ink4)">(optionnel)</span></div>'
+    +'<div class="ct mt14"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-globe"/></svg></span>International <span style="font-weight:400;font-size:11px;color:var(--ink4)">(optionnel)</span></div>'
     + f('pc_pp',  'Lien PayPal', P.paypal&&P.paypal.url, 'Laisser vide pour masquer PayPal')
     + f('pc_str', 'Lien de paiement carte (Stripe)', P.stripe&&P.stripe.url, 'Laisser vide pour masquer la carte bancaire')
     +'</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="_savePayCoordonnees()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>', true);
+    +'<button class="btn bi" onclick="_savePayCoordonnees()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>', true);
 };
 
 window._savePayCoordonnees = function(){
@@ -30301,7 +30312,7 @@ function _payInitOrange(ref, montant, label, intent, targetId, accountId, nom, t
       '<div style="text-align:center;padding:20px">'
       +'<div style="font-size:64px;margin-bottom:14px">🟠</div>'
       +'<div style="font-size:14px;color:var(--ink2);margin-bottom:14px">Une nouvelle fenêtre va s\'ouvrir pour finaliser votre paiement sur Orange Money.</div>'
-      +'<a href="'+data.payment_url+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:14px;padding:12px 24px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Ouvrir la page de paiement</a>'
+      +'<a href="'+data.payment_url+'" target="_blank" rel="noopener" class="btn bi" style="display:inline-block;text-decoration:none;font-size:14px;padding:12px 24px"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Ouvrir la page de paiement</a>'
       +'<div style="margin-top:14px;font-size:12px;color:var(--ink4)">Validez avec votre PIN Orange Money sur votre téléphone.<br>L\'activation sera automatique après confirmation.</div>'
       +'<div id="payOrangeStatus" style="margin-top:14px;font-size:12px;color:var(--bl);font-weight:700"></div>'
       +'</div>',
@@ -30726,9 +30737,9 @@ function mPayAttempts(){
         // ── v1.2 : bouton consolidé "Valider et activer" ──
         var btnPaye = a.status==='paid'
           ? '<span style="font-size:11px;color:var(--gr)">✓ Validé</span>'
-          : '<button class="btn xs" style="background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-weight:700;border:none" onclick="_payMarkPaid(\''+a.ref+'\')" title="Valider le paiement ET activer automatiquement l\'accès"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Valider &amp; activer</button>';
+          : '<button class="btn xs" style="background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-weight:700;border:none" onclick="_payMarkPaid(\''+a.ref+'\')" title="Valider le paiement ET activer automatiquement l\'accès"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Valider &amp; activer</button>';
         var btnAbo = (aboLie && aboLie.statut!=='Activé' && a.status!=='paid')
-          ? ' <button class="btn xs" style="background:#6D28D9;color:#fff" onclick="cm();activerAbonnement(\''+aboLie.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg>Abo (manuel)</button>'
+          ? ' <button class="btn xs" style="background:#6D28D9;color:#fff" onclick="cm();activerAbonnement(\''+aboLie.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-graduation"/></svg>Abo (manuel)</button>'
           : (aboLie&&aboLie.statut==='Activé' ? '<span style="font-size:10px;color:var(--gr)"> ✓ Abo actif</span>' : '');
         // Infos client + résultat d'activation
         var clientInfo = (a.customerNom||a.customerTel)
@@ -31301,14 +31312,14 @@ window.pgPartenairesSplits = function(){
       +'</td>'
       +'<td style="padding:10px;text-align:right;color:#6B7280">'+fmt(p.totalVerse||0)+'</td>'
       +'<td style="padding:10px;text-align:center">'
-        +(p.solde>=500 ? '<button class="btn-v2 btn-v2--success btn-v2--sm" onclick="mVerserPartenaire(\''+pid+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg>Verser</button>' : '<span style="font-size:11px;color:#9CA3AF">Min 500 FCFA</span>')
+        +(p.solde>=500 ? '<button class="btn-v2 btn-v2--success btn-v2--sm" onclick="mVerserPartenaire(\''+pid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Verser</button>' : '<span style="font-size:11px;color:#9CA3AF">Min 500 FCFA</span>')
         +' <button class="btn-v2 btn-v2--secondary btn-v2--sm" onclick="mDetailPartenaire(\''+pid+'\')">Détails</button>'
       +'</td>'
       +'</tr>';
   }).join('');
 
-  return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg></span>Partage Revenus Partenaires</div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
+  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-coins"/></svg></span>Partage Revenus Partenaires</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">'
       +'<div class="card-v2" style="text-align:center;border-top:3px solid #F59E0B"><div class="h-display" style="color:#F59E0B">'+fmt(totalDu)+'</div><div class="text-muted">À verser</div></div>'
       +'<div class="card-v2" style="text-align:center;border-top:3px solid #3A8F73"><div class="h-display" style="color:#3A8F73">'+fmt(totalVerse)+'</div><div class="text-muted">Déjà versé</div></div>'
@@ -31317,20 +31328,20 @@ window.pgPartenairesSplits = function(){
     +'</div>'
     +(_orphelins
       ? '<div class="ib ibt mt12 mb0"><span>⚠️</span><span><strong>'+_orphelins+' paiement(s) confirmé(s) sans ventilation.</strong> Ils ont probablement été validés par le webhook de l\'opérateur pendant que le navigateur était fermé. '
-        +'<button class="btn-v2 btn-v2--accent btn-v2--sm" style="margin-left:8px" onclick="_payReconcileSplits()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Rattraper les commissions</button></span></div>'
+        +'<button class="btn-v2 btn-v2--accent btn-v2--sm" style="margin-left:8px" onclick="_payReconcileSplits()"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Rattraper les commissions</button></span></div>'
       : '<div class="ib ibg mt12 mb0"><span>✅</span><span>Toutes les commissions des paiements confirmés sont ventilées.</span></div>')
     +(_enCours
       ? '<div class="ib ibt mt12 mb0"><span>⏳</span><span><strong>'+_enCours+' versement(s) CamPay en attente de confirmation</strong> ('+fmt(_montantEnCours)+' réservés). CamPay accuse réception, pas livraison : vérifiez que l\'argent est bien arrivé. Un échec recrédite automatiquement le partenaire. '
-        +'<button class="btn-v2 btn-v2--accent btn-v2--sm" style="margin-left:8px" onclick="_payVerifyPayouts()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier les versements</button></span></div>'
+        +'<button class="btn-v2 btn-v2--accent btn-v2--sm" style="margin-left:8px" onclick="_payVerifyPayouts()"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier les versements</button></span></div>'
       : '')
     +((DB.payApiConfig&&DB.payApiConfig.campayEnabled&&totalDu>0)
       ? '<div class="fl2 g8 fw mt12">'
-        +'<button class="btn-v2 btn-v2--success" onclick="mVerserTous()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg>Verser à tous — '+fmt(totalDu)+' en un seul appel</button>'
-        +'<button class="btn-v2 btn-v2--secondary" onclick="_payVerifyPayouts()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier les versements</button>'
+        +'<button class="btn-v2 btn-v2--success" onclick="mVerserTous()"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Verser à tous — '+fmt(totalDu)+' en un seul appel</button>'
+        +'<button class="btn-v2 btn-v2--secondary" onclick="_payVerifyPayouts()"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier les versements</button>'
         +'</div>'
       : '')
     +'</div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sliders"/></svg></span>Configuration des pourcentages</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-sliders"/></svg></span>Configuration des pourcentages</div>'
     +'<div class="ib ibi mb12 mt0"><span>💡</span><span>Les pourcentages sont appliqués <strong>automatiquement dès la confirmation du paiement</strong> — CamPay, MTN, Orange ou validation manuelle. Le parrain, l\'auteur ou l\'enseignant est crédité sans aucune action de votre part. Modifiables ci-dessous.</span></div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">'
     +(function(){var cfg=_getSplitConfig();
@@ -31344,14 +31355,14 @@ window.pgPartenairesSplits = function(){
         return '<div class="fg"><span class="fl">'+c.l+' (%)</span><input class="input-v2" type="number" id="sc_'+c.k+'" value="'+c.v+'" min="0" max="100"></div>';
       }).join('');
     })()
-    +'</div><button class="btn-v2 btn-v2--accent mt12" onclick="_saveSplitConfig()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer les pourcentages</button></div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"/></svg></span>Liste des partenaires</div>'
+    +'</div><button class="btn-v2 btn-v2--accent mt12" onclick="_saveSplitConfig()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer les pourcentages</button></div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-users"/></svg></span>Liste des partenaires</div>'
     +(partenaires.length ?
       '<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse;font-size:13px"><thead style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff"><tr>'
       +'<th style="padding:10px;text-align:left">Partenaire</th><th>Type</th><th>Téléphone</th><th style="text-align:right">Solde à verser</th><th style="text-align:right">Total versé</th><th>Action</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
       : '<div style="text-align:center;padding:30px;color:#9CA3AF">Aucun partenaire pour le moment. Les splits seront créés automatiquement à chaque vente avec parrain/auteur/enseignant.</div>')
     +'</div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg></span>Historique des 20 derniers splits</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-doc"/></svg></span>Historique des 20 derniers splits</div>'
     +(function(){
       var recent = (DB.splits||[]).slice(-20).reverse();
       if(!recent.length) return '<div style="text-align:center;padding:20px;color:#9CA3AF">Aucun split encore.</div>';
@@ -31397,7 +31408,7 @@ window.mVerserPartenaire = function(partenaireId){
     +'<div class="fg"><span class="fl">Téléphone Mobile Money du partenaire</span>'
       +'<div style="display:flex;gap:8px">'
         +'<input class="input-v2" id="vpTel" value="'+_esc(tel)+'" placeholder="+237 6XX XX XX XX" style="flex:1">'
-        +'<button class="btn-v2 btn-v2--secondary btn-v2--sm" onclick="_payVerifierTitulaire(\'vpTel\',\'vpHolder\')" title="Demander à CamPay le nom associé à ce numéro"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier</button>'
+        +'<button class="btn-v2 btn-v2--secondary btn-v2--sm" onclick="_payVerifierTitulaire(\'vpTel\',\'vpHolder\')" title="Demander à CamPay le nom associé à ce numéro"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier</button>'
       +'</div>'
       +'<div id="vpHolder" style="font-size:12px;margin-top:6px;min-height:16px"></div>'
     +'</div>'
@@ -31407,7 +31418,7 @@ window.mVerserPartenaire = function(partenaireId){
     +'<div class="ib ibi mb0 mt12"><span>💡</span><span>En mode manuel : l\'admin envoie l\'argent via l\'app MoMo/Orange du téléphone, puis valide ici. Un SMS+WhatsApp de confirmation est envoyé au partenaire.</span></div>'
     +'</div>',
     '<button class="btn-v2 btn-v2--secondary" onclick="cm()">Annuler</button>'
-    +'<button class="btn-v2 btn-v2--success" onclick="_executerVersement(\''+partenaireId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg>Confirmer le versement</button>', true);
+    +'<button class="btn-v2 btn-v2--success" onclick="_executerVersement(\''+partenaireId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Confirmer le versement</button>', true);
 };
 
 // Exécuter le versement (manuel ou auto)
@@ -31688,7 +31699,7 @@ window.mVerserTous = function(){
     +'<div class="ib ibi mt12 mb0"><span>💡</span><span>Chaque montant est <strong>réservé</strong> jusqu\'à confirmation. Un échec (numéro inexistant, plafond, panne opérateur) recrédite automatiquement le partenaire. Vérifiez ensuite avec <strong>🔍 Vérifier les versements</strong>.</span></div>'
     +'</div>',
     '<button class="btn-v2 btn-v2--secondary" onclick="cm()">Annuler</button>'
-    +'<button class="btn-v2 btn-v2--success" onclick="_executerMassPayout('+_esc(JSON.stringify(payables)).replace(/"/g,'&quot;')+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg>Verser '+fmt(total)+'</button>', true);
+    +'<button class="btn-v2 btn-v2--success" onclick="_executerMassPayout('+_esc(JSON.stringify(payables)).replace(/"/g,'&quot;')+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Verser '+fmt(total)+'</button>', true);
 };
 
 window._executerMassPayout = function(payables){
@@ -31800,7 +31811,7 @@ window.mDetailPartenaire = function(partenaireId){
     +'</div>';
   M('👤 '+name,'Détail partenaire',body,
     '<button class="btn-v2 btn-v2--secondary" onclick="cm()">Fermer</button>'
-    +(p.solde>=500?'<button class="btn-v2 btn-v2--success" onclick="cm();mVerserPartenaire(\''+partenaireId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg>Verser '+fmt(p.solde)+'</button>':''), true);
+    +(p.solde>=500?'<button class="btn-v2 btn-v2--success" onclick="cm();mVerserPartenaire(\''+partenaireId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Verser '+fmt(p.solde)+'</button>':''), true);
 };
 
 // ── Cœur de l'automatisation post-paiement ──
@@ -32010,7 +32021,7 @@ window.acheterUnite = function(type, refId, refLabel){
 window._microBuyBtn = function(type, refId, refLabel){
   var p=_microPrix(type); if(!p) return '';
   return '<button class="btn bo sm" onclick="acheterUnite(\''+type+'\',\''+_esc(String(refId||''))+'\',\''+_esc(String(refLabel||'')).replace(/\x27/g,"")+'\')" '
-    +'style="border-color:var(--gold,#FFC93C);color:#142554"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lightbulb"/></svg>À l\'unité — '+(typeof fmt==='function'?fmt(p.montant):p.montant+' FCFA')+'</button>';
+    +'style="border-color:var(--gold,#FFC93C);color:#142554"><svg class="vico bico" aria-hidden="true"><use href="#lc-lightbulb"/></svg>À l\'unité — '+(typeof fmt==='function'?fmt(p.montant):p.montant+' FCFA')+'</button>';
 };
 
 // ════════════════════════════════════════════════════════════════════
@@ -32075,7 +32086,7 @@ window.mBusinessStats = function(){
 
     M('📊 Statistiques Business', 'Vue d\'ensemble VÉRITAS', body,
       '<button class="btn bo" onclick="cm()">Fermer</button>'
-      +'<button class="btn bi" onclick="mBusinessStats()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Actualiser</button>', true);
+      +'<button class="btn bi" onclick="mBusinessStats()"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Actualiser</button>', true);
   } catch(e){
     console.error('mBusinessStats error:', e);
     toast('Erreur stats : '+e.message,'err');
@@ -32130,7 +32141,7 @@ window.mParrainage = function(){
         +'<p style="text-align:center;font-size:13px;color:#6B7280">Inscription en 30 secondes, 100% gratuit.</p>'
         +'</div>',
         '<button class="btn bo" onclick="cm()">Fermer</button>'
-        +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>', true);
+        +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>', true);
       return;
     }
     var code = _genReferralCode(ses.id);
@@ -32142,7 +32153,7 @@ window.mParrainage = function(){
     var body = '<div style="background:linear-gradient(135deg,#FFC93C,#F59E0B);padding:20px;border-radius:14px;text-align:center;color:#142554;margin-bottom:14px">'
       +'<div style="font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Votre code parrainage</div>'
       +'<div style="font-size:32px;font-weight:900;letter-spacing:3px;font-family:monospace">'+code+'</div>'
-      +'<button class="btn" style="margin-top:10px;background:rgba(20,37,84,.9);color:#FFC93C;border:none;padding:6px 14px;border-radius:8px;font-size:12px" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié !\');});"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
+      +'<button class="btn" style="margin-top:10px;background:rgba(20,37,84,.9);color:#FFC93C;border:none;padding:6px 14px;border-radius:8px;font-size:12px" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié !\');});"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
       +'</div>'
       +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
       +'<div style="background:#fff;border:2px solid #3A8F73;border-radius:12px;padding:14px;text-align:center">'
@@ -32160,9 +32171,9 @@ window.mParrainage = function(){
       +'<li>Vous recevez <b>'+fmt(PARRAINAGE_BONUS)+'</b> de crédit chacun</li>'
       +'<li>Crédit utilisable sur la boutique et les abonnements e-learning</li></ol></div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">'
-      +'<a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text='+shareMsg+'"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>WhatsApp</a>'
-      +'<a class="btn" style="background:#1877F2;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(shareUrl)+'"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg>Facebook</a>'
-      +'<button class="btn bo" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(function(){toast(\'Lien copié !\');});"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"/></svg>Lien</button>'
+      +'<a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text='+shareMsg+'"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>WhatsApp</a>'
+      +'<a class="btn" style="background:#1877F2;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(shareUrl)+'"><svg class="vico bico" aria-hidden="true"><use href="#lc-book"/></svg>Facebook</a>'
+      +'<button class="btn bo" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(function(){toast(\'Lien copié !\');});"><svg class="vico bico" aria-hidden="true"><use href="#lc-globe"/></svg>Lien</button>'
       +'</div>';
 
     M('🎁 Programme de parrainage','Invitez vos amis, gagnez du crédit',body,
@@ -32204,19 +32215,19 @@ window.pgParrainageEns = function(){
   }).join('') : '<tr><td colspan="4" style="text-align:center;color:#9CA3AF;padding:20px">Aucun filleul pour l\'instant. Partagez votre code !</td></tr>';
   var shareUrl = (location.origin||'https://veritas-school.com')+'/?ref='+code;
   var shareMsg = encodeURIComponent('🎓 Rejoins ma classe sur VÉRITAS avec mon code '+code+' et accède aux révisions MINESEC : '+shareUrl);
-  return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-gift"/></svg></span>Mes filleuls & commissions</div>'
+  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-gift"/></svg></span>Mes filleuls & commissions</div>'
     +'<div class="card mt12" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554">'
       +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1px;font-weight:800;opacity:.85">Votre code parrainage</div>'
       +'<div style="font-size:30px;font-weight:900;letter-spacing:3px;font-family:monospace;margin:4px 0">'+code+'</div>'
       +'<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">'
-        +'<button class="btn" style="background:rgba(20,37,84,.92);color:#FFC93C;border:none" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié !\');});"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier le code</button>'
-        +'<a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text='+shareMsg+'"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Partager (WhatsApp)</a>'
-        +'<button class="btn" style="background:rgba(20,37,84,.92);color:#fff;border:none" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(function(){toast(\'Lien copié !\');});"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"/></svg>Copier le lien</button>'
-        +'<button class="btn" style="background:#142554;color:#FFC93C;border:none" onclick="genAmbassadorKit(\''+code+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-printer"/></svg>Mon kit ambassadeur (A4)</button>'
-        +'<button class="btn" style="background:#C9A227;color:#142554;border:none;font-weight:700" onclick="genCertificatAmbassadeur()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg>Mon certificat d\'ambassadeur</button>'
+        +'<button class="btn" style="background:rgba(20,37,84,.92);color:#FFC93C;border:none" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié !\');});"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier le code</button>'
+        +'<a class="btn" style="background:#25D366;color:#fff;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text='+shareMsg+'"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Partager (WhatsApp)</a>'
+        +'<button class="btn" style="background:rgba(20,37,84,.92);color:#fff;border:none" onclick="navigator.clipboard.writeText(\''+shareUrl+'\').then(function(){toast(\'Lien copié !\');});"><svg class="vico bico" aria-hidden="true"><use href="#lc-globe"/></svg>Copier le lien</button>'
+        +'<button class="btn" style="background:#142554;color:#FFC93C;border:none" onclick="genAmbassadorKit(\''+code+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Mon kit ambassadeur (A4)</button>'
+        +'<button class="btn" style="background:#C9A227;color:#142554;border:none;font-weight:700" onclick="genCertificatAmbassadeur()"><svg class="vico bico" aria-hidden="true"><use href="#lc-award"/></svg>Mon certificat d\'ambassadeur</button>'
       +'</div>'
     +'</div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
     +_statCard('👥', filleuls.length, 'Filleuls inscrits', '#3C8DFF')
     +_statCard('🎓', nbAb, 'Filleuls abonnés', '#3A8F73')
@@ -32224,7 +32235,7 @@ window.pgParrainageEns = function(){
     +_statCard('✅', fmt(ps.totalVerse||0), 'Déjà versé', '#6C56A6')
     +'</div>'
     +'<div class="ib ibi mt12 mb0"><span>💡</span><span>Vous touchez <b>'+parrTxt+'</b> sur chaque paiement d\'un filleul inscrit avec votre code. Versement par MoMo/Orange après validation (espace admin → Partage revenus).</span></div></div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Suivi de mes filleuls</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Suivi de mes filleuls</div>'
     +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
     +'<thead><tr><th>Filleul</th><th>Inscrit le</th><th style="text-align:center">Statut</th><th style="text-align:right">Progression</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div></div>';
@@ -32287,7 +32298,7 @@ window._posFinish=function(){
     +(strong.length?'<div style="font-weight:800;font-size:13px;color:#059669;margin:10px 0 6px">✅ Tes points forts</div>'+strong.slice(0,4).map(bar).join(''):'')
     +(weak.length?'<div style="font-weight:800;font-size:13px;color:#AE5353;margin:12px 0 6px">🎯 À travailler en priorité</div>'+weak.slice(0,4).map(bar).join(''):'')
     +'<div class="ib ibi mt12"><span>💡</span><span>Tes erreurs ont été ajoutées à <b>« Mes erreurs à revoir »</b>. Révise-les puis refais le test pour mesurer tes progrès.</span></div>'
-    +'<button class="btn bi" style="width:100%;margin-top:10px" onclick="cm();(typeof mErreursARevoir===\'function\'?mErreursARevoir():(typeof vShowSec===\'function\'?vShowSec(\'elearning\',null):0))"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg>Réviser mes points faibles</button>';
+    +'<button class="btn bi" style="width:100%;margin-top:10px" onclick="cm();(typeof mErreursARevoir===\'function\'?mErreursARevoir():(typeof vShowSec===\'function\'?vShowSec(\'elearning\',null):0))"><svg class="vico bico" aria-hidden="true"><use href="#lc-book"/></svg>Réviser mes points faibles</button>';
 };
 
 // ══ v1.9 (#9) — KIT AMBASSADEUR ENSEIGNANT (fiche A4 imprimable) ════════════
@@ -32908,32 +32919,32 @@ window.pgStatsBusiness = function(){
         +'<b style="color:#3A8F73">'+fmt(t[1])+'</b></div>';
     }).join('') || '<div style="text-align:center;padding:20px;color:#9CA3AF">Aucune vente confirmée</div>';
 
-    return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Statistiques Business</div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg></span>Chiffre d\'affaires</div>'
+    return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-chart"/></svg></span>Statistiques Business</div>'
+      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-coins"/></svg></span>Chiffre d\'affaires</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">'
       +_statCard('💰', fmt(totalCA), 'CA total', '#3A8F73')
       +_statCard('📅', fmt(caMois), 'CA ce mois', '#3C8DFF')
       +_statCard('📆', fmt(caSem), 'CA cette semaine', '#6C56A6')
       +_statCard('⏳', pendingPays, 'En attente', '#C46F6F')
       +'</div></div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trending"/></svg></span>Évolution 6 derniers mois</div>'
+      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-trending"/></svg></span>Évolution 6 derniers mois</div>'
       +'<div style="display:flex;align-items:flex-end;justify-content:space-around;height:200px;gap:10px;padding:14px">'+bars+'</div></div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"/></svg></span>Utilisateurs</div>'
+      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-users"/></svg></span>Utilisateurs</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px">'
       +_statCard('🎓', nbStud, 'Élèves inscrits', '#FFC93C')
       +_statCard('🌐', nbVisit, 'Visiteurs', '#3A91A0')
       +_statCard('📊', convRate+'%', 'Taux conversion', '#C37199')
       +_statCard('🎁', nbPar, 'Parrainages', '#F59E0B')
       +'</div></div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg></span>Activité</div>'
+      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-cart"/></svg></span>Activité</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px">'
       +_statCard('🎓', nbAbo, 'Abonnements actifs', '#3A8F73')
       +_statCard('📚', nbBook, 'Achats livres', '#F59E0B')
       +'</div></div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></span>Top 5 produits (CA)</div>'+topHTML+'</div>';
+      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-award"/></svg></span>Top 5 produits (CA)</div>'+topHTML+'</div>';
   } catch(e){
     console.error('pgStatsBusiness:',e);
-    return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Statistiques Business</div><div class="card">Erreur : '+_esc(e.message)+'</div>';
+    return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-chart"/></svg></span>Statistiques Business</div><div class="card">Erreur : '+_esc(e.message)+'</div>';
   }
 };
 
@@ -32955,26 +32966,26 @@ window.pgParrainageAdmin = function(){
       return '<tr><td>'+(i+1)+'</td><td>'+_esc(nom)+'</td><td><code style="background:#F3F4F6;padding:2px 6px;border-radius:4px">'+_genReferralCode(t[0])+'</code></td><td><b style="color:#3A8F73">'+t[1]+'</b></td><td>'+fmt(t[1]*(PARRAINAGE_BONUS||500))+'</td></tr>';
     }).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:#9CA3AF">Aucun parrainage actif</td></tr>';
 
-    return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-gift"/></svg></span>Programme de parrainage</div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
+    return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-gift"/></svg></span>Programme de parrainage</div>'
+      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">'
       +_statCard('🎁', pars.length, 'Parrainages totaux', '#C37199')
       +_statCard('✅', pars.filter(function(p){return p.confirmed;}).length, 'Confirmés', '#3A8F73')
       +_statCard('💰', fmt(totalBonus), 'Crédits distribués', '#FFC93C')
       +_statCard('👥', Object.keys(byParrain).length, 'Parrains actifs', '#6C56A6')
       +'</div></div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></span>Top 10 parrains</div>'
+      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-award"/></svg></span>Top 10 parrains</div>'
       +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
       +'<thead><tr><th>#</th><th>Nom</th><th>Code</th><th>Filleuls</th><th>Bonus généré</th></tr></thead>'
       +'<tbody>'+topHTML+'</tbody></table></div></div>'
-      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sliders"/></svg></span>Configuration</div>'
+      +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-sliders"/></svg></span>Configuration</div>'
       +'<div class="fg"><span class="fl">Bonus par parrainage (FCFA)</span>'
       +'<input class="fi" id="parr_bonus" type="number" value="'+(PARRAINAGE_BONUS||500)+'" min="0" step="100"></div>'
-      +'<button class="btn bi mt10" onclick="window.PARRAINAGE_BONUS=parseInt(_ge(\'parr_bonus\')?.value)||500;DB._parrainageBonus=window.PARRAINAGE_BONUS;save();toast(\'✓ Bonus mis à jour\');"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>'
+      +'<button class="btn bi mt10" onclick="window.PARRAINAGE_BONUS=parseInt(_ge(\'parr_bonus\')?.value)||500;DB._parrainageBonus=window.PARRAINAGE_BONUS;save();toast(\'✓ Bonus mis à jour\');"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>'
       +'</div>';
   } catch(e){
     console.error('pgParrainageAdmin:',e);
-    return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-gift"/></svg></span>Parrainage</div><div class="card">Erreur : '+_esc(e.message)+'</div>';
+    return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-gift"/></svg></span>Parrainage</div><div class="card">Erreur : '+_esc(e.message)+'</div>';
   }
 };
 
@@ -33065,7 +33076,7 @@ window.mIAAdaptative = function(){
         +'<p style="margin-top:14px;font-size:12px;color:#6B7280;text-align:center">💡 Inscrivez-vous pour débloquer toutes les fonctions IA personnalisées</p>'
         +'</div>',
         '<button class="btn bo" onclick="cm()">Fermer</button>'
-        +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>', true);
+        +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>', true);
       return;
     }
     var due = SM2.getDueTopics(ses.id);
@@ -33141,7 +33152,7 @@ window.mHubIA = function(){
     +'</div>';
   M('🧠 Hub IA','Vos 3 assistants intelligents pour réussir',body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +(connected ? '' : '<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>'), true);
+    +(connected ? '' : '<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>'), true);
 };
 
 // Helper pour afficher le dashboard adaptatif IA (était le contenu connecté de mIAAdaptative)
@@ -33531,7 +33542,7 @@ window.mMonParcours = function(){
   if(!ses){
     M('🎯 Mon Parcours','Connectez-vous pour suivre votre progression',
       '<div style="text-align:center;padding:18px"><p>Inscrivez-vous pour gagner des XP, débloquer des niveaux et maintenir votre streak quotidien comme Duolingo.</p></div>',
-      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
     return;
   }
   var s = _getUserStreak();
@@ -33557,17 +33568,17 @@ window.mMonParcours = function(){
     // 4 actions
     +'<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:8px">🎯 Que faire pour gagner +XP ?</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">'
-      +'<button class="btn" style="padding:10px;background:#EFF6FF;color:#1E3A8A;border:1px solid #BFDBFE;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();showJeuxEdu()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>QCM +10 XP</button>'
-      +'<button class="btn" style="padding:10px;background:#F0FDF4;color:#065F46;border:1px solid #6EE7B7;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mDevoirCorrectionIA()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"/></svg>Devoir IA +30 XP</button>'
-      +'<button class="btn" style="padding:10px;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mBattles()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-swords"/></svg>Battle +50 XP</button>'
-      +'<button class="btn" style="padding:10px;background:#FAF5FF;color:#6B21A8;border:1px solid #D8B4FE;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mSujetDuJour()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sun"/></svg>Sujet du jour +15 XP</button>'
+      +'<button class="btn" style="padding:10px;background:#EFF6FF;color:#1E3A8A;border:1px solid #BFDBFE;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();showJeuxEdu()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>QCM +10 XP</button>'
+      +'<button class="btn" style="padding:10px;background:#F0FDF4;color:#065F46;border:1px solid #6EE7B7;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mDevoirCorrectionIA()"><svg class="vico bico" aria-hidden="true"><use href="#lc-brain"/></svg>Devoir IA +30 XP</button>'
+      +'<button class="btn" style="padding:10px;background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mBattles()"><svg class="vico bico" aria-hidden="true"><use href="#lc-swords"/></svg>Battle +50 XP</button>'
+      +'<button class="btn" style="padding:10px;background:#FAF5FF;color:#6B21A8;border:1px solid #D8B4FE;border-radius:10px;font-weight:700;font-size:12px" onclick="cm();mSujetDuJour()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sun"/></svg>Sujet du jour +15 XP</button>'
     +'</div>'
     // v2.4 FIX : accès Wrapped + Achievements + Genome depuis Mon Parcours
     +'<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:8px;margin-top:6px">🌟 Découvrez aussi</div>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
-      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mAchievements()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg>Badges</button>'
-      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#142554,#6C56A6);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mVeritasGenome()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"/></svg>Genome</button>'
-      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#6C56A6,#C37199);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mWrapped()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-gift"/></svg>Wrapped</button>'
+      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mAchievements()"><svg class="vico bico" aria-hidden="true"><use href="#lc-award"/></svg>Badges</button>'
+      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#142554,#6C56A6);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mVeritasGenome()"><svg class="vico bico" aria-hidden="true"><use href="#lc-flask"/></svg>Genome</button>'
+      +'<button class="btn" style="padding:10px;background:linear-gradient(135deg,#6C56A6,#C37199);color:#fff;border:none;border-radius:10px;font-weight:800;font-size:12px" onclick="cm();mWrapped()"><svg class="vico bico" aria-hidden="true"><use href="#lc-gift"/></svg>Wrapped</button>'
     +'</div>';
   M('🎯 Mon Parcours','XP · Niveau · Streak',body,
     '<button class="btn bi" onclick="cm()">Continuer</button>', true);
@@ -33751,7 +33762,7 @@ window.mCoaching = function(){
   if(!ses||!ses.id){
     M('💪 Motivation & Coaching','Connecte-toi pour ton espace personnel',
       '<div style="text-align:center;padding:18px"><p>Fixe tes objectifs, garde ta série de connexions et reçois ta dose de motivation chaque jour.</p></div>',
-      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
     return;
   }
   DB.coachMotiv=DB.coachMotiv||_DEFAULT_COACH_MOTIV();
@@ -33806,7 +33817,7 @@ window.mCoaching = function(){
     +'<div style="display:grid;grid-template-columns:1fr;gap:8px">'+tips+'</div>'
     +'</div>';
   M('💪 Motivation & Coaching','Ta progression · tes objectifs · ta dose du jour',body,
-    '<button class="btn bo" onclick="cm();mMonParcours()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-target"/></svg>Mon parcours détaillé</button><button class="btn bi" onclick="cm()">Continuer 💪</button>', true);
+    '<button class="btn bo" onclick="cm();mMonParcours()"><svg class="vico bico" aria-hidden="true"><use href="#lc-target"/></svg>Mon parcours détaillé</button><button class="btn bi" onclick="cm()">Continuer 💪</button>', true);
 };
 
 // « Bon retour » : à la reconnexion d'un apprenant absent ≥ seuil
@@ -33833,7 +33844,7 @@ window._welcomeBack = function(){
       +'</div>';
     M('Bon retour !','',body,
       '<button class="btn bo" onclick="cm()">Plus tard</button>'
-      +'<button class="btn bi" onclick="cm();(typeof mCoaching===\'function\'?mCoaching():showJeuxEdu())"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>Reprendre maintenant</button>', false);
+      +'<button class="btn bi" onclick="cm();(typeof mCoaching===\'function\'?mCoaching():showJeuxEdu())"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Reprendre maintenant</button>', false);
     window._vrtPrevLogin=null; // ne re-montrer qu'une fois par reconnexion
   } catch(e){}
 };
@@ -33967,8 +33978,8 @@ window.mRelances=function(filtre){
       ? '<button class="btn xs" style="background:#25D366;color:#fff;border-radius:8px" onclick="_relanceWA(\''+m.id+'\')" title="WhatsApp">📱</button>'
       : '<span style="font-size:10px;color:#9CA3AF">pas de n°</span>';
     var emailBtn = m.email
-      ? '<button class="btn xs" style="background:#0EA5E9;color:#fff;border-radius:8px" onclick="_relanceMail(\''+m.id+'\')" title="Email"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg>️</button>'
-      : '<button class="btn xs" style="background:#E5E7EB;color:#9CA3AF;border-radius:8px" title="Pas d\'email" disabled><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg>️</button>';
+      ? '<button class="btn xs" style="background:#0EA5E9;color:#fff;border-radius:8px" onclick="_relanceMail(\''+m.id+'\')" title="Email"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>️</button>'
+      : '<button class="btn xs" style="background:#E5E7EB;color:#9CA3AF;border-radius:8px" title="Pas d\'email" disabled><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>️</button>';
     return '<tr style="border-bottom:1px solid #F0EDE6">'
       +'<td style="padding:8px 6px"><div style="font-weight:700;color:#142554;font-size:13px">'+_esc(nom)+'</div>'
         +'<div style="font-size:11px;color:#9A8F80">'+_esc(m.cls||'—')+' · '+(m.isAbo?'<span style="color:#059669;font-weight:700">Abonné</span>':'<span style="color:#9CA3AF">Gratuit</span>')+'</div>'
@@ -33986,7 +33997,7 @@ window.mRelances=function(filtre){
       : '<div style="text-align:center;padding:30px;color:#9A8F80"><div style="font-size:40px;margin-bottom:8px">🎉</div>Aucun inscrit inactif dans cette catégorie. Tout le monde révise !</div>')
     +'</div>';
   M('📣 Relances des inactifs','Rappels WhatsApp / email en 1 clic',body,
-    '<button class="btn bo" onclick="_relanceCopyNums()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier les numéros</button><button class="btn bi" onclick="cm()">Fermer</button>', true);
+    '<button class="btn bo" onclick="_relanceCopyNums()"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier les numéros</button><button class="btn bi" onclick="cm()">Fermer</button>', true);
 };
 
 window._currentWeekKey = function(){
@@ -34106,7 +34117,7 @@ window.mBattles = function(){
   if(!ses){
     M('⚔️ Battles hebdo','Connectez-vous pour participer aux défis',
       '<div style="text-align:center;padding:18px"><p>Affrontez les autres élèves dans 10 QCM hebdomadaires. Top 3 = prix mensuel (manuel offert) !</p></div>',
-      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
     return;
   }
   DB.battles = DB.battles || {};
@@ -34135,7 +34146,7 @@ window.mBattles = function(){
     +'</div>'
     +(hasPlayed
       ? '<div style="background:#D1FAE5;border:1px solid #6EE7B7;padding:12px;border-radius:10px;margin-bottom:14px;text-align:center"><div style="font-weight:700;color:#065F46">✓ Vous avez déjà joué cette semaine</div><div style="font-size:13px;color:#047857;margin-top:4px">Votre score : '+battle.participants[ses.id].score+'/10 · Position : #'+myRank+'</div></div>'
-      : '<div style="text-align:center;margin-bottom:14px"><button class="btn bi" style="background:linear-gradient(135deg,#AE5353,#F59E0B);color:#fff;padding:14px 28px;font-size:15px;font-weight:800" onclick="cm();_lancerBattle()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Lancer le défi (10 QCM)</button><div style="font-size:11px;color:#6B7280;margin-top:8px">Un seul essai par semaine</div></div>'
+      : '<div style="text-align:center;margin-bottom:14px"><button class="btn bi" style="background:linear-gradient(135deg,#AE5353,#F59E0B);color:#fff;padding:14px 28px;font-size:15px;font-weight:800" onclick="cm();_lancerBattle()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Lancer le défi (10 QCM)</button><div style="font-size:11px;color:#6B7280;margin-top:8px">Un seul essai par semaine</div></div>'
     )
     +'<div style="font-size:13px;font-weight:700;color:#142554;margin-bottom:8px">🏆 Classement de la semaine</div>';
   if(!leaderboard.length){
@@ -34191,7 +34202,7 @@ window._lancerBattle = function(){
         +'<div style="margin-top:14px;padding:12px;background:#FEF3C7;border-radius:10px;font-size:13px;color:#92400E"><b>+'+(50+score*5)+' XP gagnés !</b><br>Battle bonus + '+score+' bonnes réponses × 5 XP</div>'
         +'</div>',
         '<button class="btn bo" onclick="cm()">Fermer</button>'
-        +'<button class="btn bi" onclick="cm();mBattles()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg>Voir le classement</button>', true);
+        +'<button class="btn bi" onclick="cm();mBattles()"><svg class="vico bico" aria-hidden="true"><use href="#lc-award"/></svg>Voir le classement</button>', true);
       return;
     }
     var q = qs[idx];
@@ -34292,7 +34303,7 @@ window.mSujetDuJour = function(){
     +'</div>';
   M('☀️ Sujet du jour','Une question par jour pour rester affûté',body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +(canReveal ? '<button class="btn bi" onclick="cm();_markSujetLu()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg>J\'ai lu (+15 XP)</button>' : ''), true);
+    +(canReveal ? '<button class="btn bi" onclick="cm();_markSujetLu()"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>J\'ai lu (+15 XP)</button>' : ''), true);
   // Marquer comme révélé après 18h
   if(canReveal && !sj.revealed){ sj.revealed = true; try{save();}catch(e){} }
 };
@@ -34362,7 +34373,7 @@ window.mBacCountdown = function(){
     +'</div>';
   M('⏳ BAC en '+days+' jours','Votre compte à rebours quotidien',body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +'<button class="btn bi" onclick="_bacMissionDone()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Mission acceptée (+5 XP)</button>', true);
+    +'<button class="btn bi" onclick="_bacMissionDone()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Mission acceptée (+5 XP)</button>', true);
 };
 
 // Orientation après acceptation de la mission : guide l'apprenant + entonnoir abonnement
@@ -34394,12 +34405,12 @@ window._bacMissionDone = function(){
       +'<div style="font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:#FFC93C">'+(urgent?'⚡ Sprint final':'🎯 Aller plus loin')+'</div>'
       +'<div style="font-size:16px;font-weight:900;margin-top:4px;line-height:1.25">Révision Intensive '+(new Date().getFullYear()+(days>365?1:0))+'</div>'
       +'<div style="font-size:12.5px;opacity:.9;margin-top:6px;line-height:1.5">Épreuves corrigées, fiches IA illimitées, suivi de progression et accès prioritaire à tous les cours MINESEC.</div>'
-      +'<button class="btn" style="margin-top:12px;background:#FFC93C;color:#142554;font-weight:800;border:none;padding:10px 16px;border-radius:10px;cursor:pointer" onclick="_bacGoElearning()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>Découvrir les abonnements</button>'
+      +'<button class="btn" style="margin-top:12px;background:#FFC93C;color:#142554;font-weight:800;border:none;padding:10px 16px;border-radius:10px;cursor:pointer" onclick="_bacGoElearning()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Découvrir les abonnements</button>'
     +'</div>'
     +'</div>';
   M('🎓 Et maintenant ?', soon?'Ton plan pour le BAC dans '+days+' jours':'Continue sur ta lancée',body,
     '<button class="btn bo" onclick="cm()">Plus tard</button>'
-    +'<button class="btn bi" onclick="_bacGoElearning()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-rocket"/></svg>Révisions intensives</button>', true);
+    +'<button class="btn bi" onclick="_bacGoElearning()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Révisions intensives</button>', true);
 };
 
 // Redirige vers la section abonnements e-learning (entonnoir)
@@ -34488,7 +34499,7 @@ window.mVeritasGenome = function(){
   if(!ses){
     M('🧬 VÉRITAS Genome','Découvrez votre ADN académique',
       '<div style="text-align:center;padding:20px"><p style="margin-bottom:14px">Le VÉRITAS Genome analyse vos performances et révèle :</p><ul style="text-align:left;color:#374151;line-height:2;max-width:400px;margin:0 auto"><li>✓ Vos <b>forces</b> et <b>faiblesses</b> par matière</li><li>✓ Votre <b>courbe d\'évolution</b> sur 30 jours</li><li>✓ Une <b>prédiction de note BAC</b> basée IA</li><li>✓ Une <b>infographie partageable</b> sur WhatsApp</li></ul></div>',
-      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire pour mon Genome</button>');
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire pour mon Genome</button>');
     return;
   }
   // v2.4 FIX : tracker la consultation pour débloquer le badge genome_unlock
@@ -34569,8 +34580,8 @@ window.mVeritasGenome = function(){
 
   M('🧬 Votre VÉRITAS Genome','ADN académique unique partageable',body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +'<button class="btn" style="background:#25D366;color:#fff" onclick="_genomeShareWA()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Partager WhatsApp</button>'
-    +'<button class="btn bi" onclick="_genomeDownload()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</button>', true);
+    +'<button class="btn" style="background:#25D366;color:#fff" onclick="_genomeShareWA()"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Partager WhatsApp</button>'
+    +'<button class="btn bi" onclick="_genomeDownload()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Télécharger</button>', true);
 };
 
 window._genomeShareWA = function(){
@@ -34612,7 +34623,7 @@ window.mStudyRoom = function(){
   if(!ses){
     M('👥 Étude en groupe','Étudiez à plusieurs en temps réel',
       '<div style="text-align:center;padding:20px"><p>Créez une room avec un code à 6 chiffres et invitez vos amis à étudier ensemble : QCM, chat, leaderboard live.</p></div>',
-      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
     return;
   }
   M('👥 Mode Étude en Groupe','Créez ou rejoignez une room',
@@ -34688,7 +34699,7 @@ window._renderStudyRoom = function(code){
     +'<div style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:18px;border-radius:14px;margin-bottom:14px;text-align:center">'
       +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#FFC93C;font-weight:800">Code de la room</div>'
       +'<div style="font-size:42px;font-weight:900;letter-spacing:6px;font-family:JetBrains Mono,monospace;color:#FFC93C;margin:6px 0">'+code+'</div>'
-      +'<button class="btn" style="background:rgba(255,201,60,.2);color:#FFC93C;border:1px solid rgba(255,201,60,.4);padding:6px 12px;font-size:11px;border-radius:8px" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié\');})"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier code</button>'
+      +'<button class="btn" style="background:rgba(255,201,60,.2);color:#FFC93C;border:1px solid rgba(255,201,60,.4);padding:6px 12px;font-size:11px;border-radius:8px" onclick="navigator.clipboard.writeText(\''+code+'\').then(function(){toast(\'Code copié\');})"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier code</button>'
     +'</div>'
     +'<div style="font-weight:700;color:#142554;margin-bottom:8px">👥 Membres ('+room.members.length+')</div>'
     +'<div style="background:#F9FAFB;border-radius:10px;padding:10px;max-height:200px;overflow-y:auto">'
@@ -34701,13 +34712,13 @@ window._renderStudyRoom = function(code){
     }).join('')
     +'</div>'
     +(isHost
-      ? '<div style="margin-top:14px;padding:12px;background:#FEF3C7;border-radius:10px"><div style="font-weight:700;color:#92400E;margin-bottom:8px">⚙️ Actions hôte</div><button class="btn bi" style="width:100%" onclick="_startGroupQuiz(\''+code+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Lancer le quiz commun (10 QCM)</button></div>'
+      ? '<div style="margin-top:14px;padding:12px;background:#FEF3C7;border-radius:10px"><div style="font-weight:700;color:#92400E;margin-bottom:8px">⚙️ Actions hôte</div><button class="btn bi" style="width:100%" onclick="_startGroupQuiz(\''+code+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Lancer le quiz commun (10 QCM)</button></div>'
       : '<div style="margin-top:14px;padding:12px;background:#EFF6FF;border-radius:10px;text-align:center;font-size:13px;color:#1E3A8A">⏳ En attente que l\'hôte lance le quiz…</div>'
     )
     +'</div>';
   M('👥 Room '+code,room.members.length+' membre(s) connecté(s)',body,
     '<button class="btn bo" onclick="cm()">Quitter</button>'
-    +'<button class="btn bi" onclick="_renderStudyRoom(\''+code+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Rafraîchir</button>', true);
+    +'<button class="btn bi" onclick="_renderStudyRoom(\''+code+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Rafraîchir</button>', true);
 };
 
 window._startGroupQuiz = function(code){
@@ -34819,7 +34830,7 @@ window.mAchievements = function(){
   if(!ses){
     M('🏆 Achievements','Connectez-vous pour débloquer les badges',
       '<div style="text-align:center;padding:18px"><p>30+ badges progressifs : Champion, Marathonien, Sans-faute, Légende…</p></div>',
-      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
     return;
   }
   // FIX v1.2 : re-vérifier les conditions avant affichage
@@ -35273,7 +35284,7 @@ window.mWrapped = function(){
   if(!ses){
     M('🎁 Wrapped 2026','Inscrivez-vous pour découvrir votre Wrapped annuel',
       '<div style="text-align:center;padding:20px"><p>Découvrez votre récap visuel personnalisé en fin d\'année comme sur Spotify : œuvres préférées, niveau atteint, achievements, partageable sur réseaux sociaux.</p></div>',
-      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
+      '<button class="btn bo" onclick="cm()">Fermer</button><button class="btn bi" onclick="cm();showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>');
     return;
   }
   var s = _getUserStreak() || {xp:0,current:0,best:0,totalActivities:0};
@@ -35300,7 +35311,7 @@ window.mWrapped = function(){
     +'</div>';
   M('🎁 Votre Wrapped '+year,'Récap annuel — Partageable',body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +'<button class="btn" style="background:#25D366;color:#fff" onclick="_wrappedShareWA('+year+')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Partager WhatsApp</button>', true);
+    +'<button class="btn" style="background:#25D366;color:#fff" onclick="_wrappedShareWA('+year+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Partager WhatsApp</button>', true);
   // Confettis !
   _confetti();
 };
@@ -35375,8 +35386,8 @@ window.showForum = function(){
     var html = '<div class="vsec">'
       +'<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">'
       +'<h2 style="margin:0;color:#142554">💬 Forum Communauté VÉRITAS</h2>'
-      +(isLogged ? '<button class="btn bi" onclick="mNewForumPost()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Poser une question</button>' :
-        '<button class="btn bi" onclick="showRegisterForm&&showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"/></svg>Se connecter pour poster</button>')
+      +(isLogged ? '<button class="btn bi" onclick="mNewForumPost()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Poser une question</button>' :
+        '<button class="btn bi" onclick="showRegisterForm&&showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Se connecter pour poster</button>')
       +'</div>'
       +'<div style="background:linear-gradient(135deg,rgba(60,141,255,.08),rgba(124,58,237,.05));padding:14px;border-radius:14px;margin-bottom:14px">'
       +'<div style="font-size:12px;color:#374151;margin-bottom:8px;font-weight:700">📂 Catégories</div>'
@@ -35407,7 +35418,7 @@ window.showForumCat = function(catKey){
   var html = '<div class="vsec">'
     +'<button class="btn bo sm" onclick="showForum()">← Toutes les catégories</button>'
     +'<h2 style="color:'+cat.c+';margin-top:10px">'+cat.l+'</h2>'
-    +(isLogged ? '<button class="btn bi" onclick="mNewForumPost(\''+catKey+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Poser une question</button>' : '')
+    +(isLogged ? '<button class="btn bi" onclick="mNewForumPost(\''+catKey+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Poser une question</button>' : '')
     +'<div style="margin-top:14px">'+listHTML+'</div></div>';
   if(typeof _vc==='function') _vc(html); else _si('vContent', html);
 };
@@ -35421,7 +35432,7 @@ window.mNewForumPost = function(presetCat){
     +'<div class="fg"><span class="fl">Titre *</span><input class="fi" id="fpTitle" placeholder="Ex: Comment résoudre une équation du 2nd degré ?"></div>'
     +'<div class="fg"><span class="fl">Détails *</span><textarea class="fi" id="fpBody" rows="6" placeholder="Décrivez votre question en détail..."></textarea></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="saveForumPost()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Publier</button>');
+    +'<button class="btn bi" onclick="saveForumPost()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Publier</button>');
 };
 
 window.saveForumPost = function(){
@@ -35469,12 +35480,12 @@ window.showForumPost = function(postId){
     +'<button class="btn '+(hasVoted?'bi':'bo')+'" onclick="voteForumPost(\''+post.id+'\')"'+(!isLogged?' disabled':'')+'>👍 '+(post.votes||[]).length+'</button></div>'
     +'<div style="margin-top:12px;color:#374151;white-space:pre-wrap;font-size:14px;line-height:1.6">'+_esc(post.body)+'</div>'
     +'<div style="font-size:11px;color:#9CA3AF;margin-top:10px">👤 '+_esc(post.authorName||'Anonyme')+' · '+new Date(post.date).toLocaleString('fr-FR')
-    +(iA() ? ' · <button class="btn bo sm" onclick="adminBanForumPost(\''+post.id+'\')" style="margin-left:8px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Supprimer</button>':'')+'</div>'
+    +(iA() ? ' · <button class="btn bo sm" onclick="adminBanForumPost(\''+post.id+'\')" style="margin-left:8px"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Supprimer</button>':'')+'</div>'
     +'</div>'
     +'<h3 style="color:#142554;margin-top:18px">💬 Réponses ('+replies.length+')</h3>'
     +repliesHTML
     +(isLogged ? '<div class="card mt12"><textarea class="fi" id="fpReply" rows="3" placeholder="Votre réponse..."></textarea>'
-      +'<button class="btn bi mt10" onclick="saveForumReply(\''+post.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Répondre</button></div>' : '')
+      +'<button class="btn bi mt10" onclick="saveForumReply(\''+post.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Répondre</button></div>' : '')
     +'</div>';
   if(typeof _vc==='function') _vc(html); else _si('vContent', html);
 };
@@ -35529,16 +35540,16 @@ window.pgForumAdmin = function(){
       +'<td>'+_esc(preview)+'</td>'
       +'<td>'+_esc(p.authorName||'?')+'</td>'
       +'<td>'+(p.parentId?'réponse':'question')+'</td>'
-      +'<td><button class="btn sm" style="background:#AE5353;color:#fff" onclick="adminBanForumPost(\''+p.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Suppr.</button></td></tr>';
+      +'<td><button class="btn sm" style="background:#AE5353;color:#fff" onclick="adminBanForumPost(\''+p.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Suppr.</button></td></tr>';
   }).join('');
-  return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg></span>Modération Forum</div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Stats</div>'
+  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-message"/></svg></span>Modération Forum</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Stats</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
     +_statCard('💬', posts.length, 'Posts actifs', '#3C8DFF')
     +_statCard('🚫', bannedCount, 'Supprimés', '#C46F6F')
     +_statCard('📂', FORUM_CATEGORIES.length, 'Catégories', '#3A8F73')
     +'</div></div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>50 derniers posts</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>50 derniers posts</div>'
     +'<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
     +'<thead><tr><th>Date</th><th>Cat.</th><th>Aperçu</th><th>Auteur</th><th>Type</th><th>Action</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div></div>';
@@ -35576,8 +35587,8 @@ window.pgMarketplaceEnseignant = function(){
       +'</div>';
   }).join('') : '<div style="text-align:center;padding:30px;color:#9CA3AF">Aucun contenu soumis. Cliquez sur "Soumettre" pour commencer !</div>';
 
-  return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg></span>Espace Auteur — Mes contenus</div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
+  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-cart"/></svg></span>Espace Auteur — Mes contenus</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
     +_statCard('📚', mine.length, 'Soumissions', '#3C8DFF')
     +_statCard('✅', approved, 'Approuvés', '#3A8F73')
@@ -35586,9 +35597,9 @@ window.pgMarketplaceEnseignant = function(){
     +_statCard('💰', fmt(totalRev), 'Revenus (70%)', '#FFC93C')
     +'</div></div>'
     +'<div class="card mt12">'
-    +'<button class="btn bi" onclick="mMarketplaceSubmit()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Soumettre un nouveau contenu</button>'
+    +'<button class="btn bi" onclick="mMarketplaceSubmit()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Soumettre un nouveau contenu</button>'
     +'<div class="ib ibi mt12 mb0"><span>💡</span><span>Modèle <b>70/30</b> : vous touchez 70% des ventes, VÉRITAS 30%. Versement mensuel via MoMo/Orange.</span></div></div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Mes contenus</div>'+itemsHTML+'</div>';
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-clipboard"/></svg></span>Mes contenus</div>'+itemsHTML+'</div>';
 };
 
 window.mMarketplaceSubmit = function(){
@@ -35609,7 +35620,7 @@ window.mMarketplaceSubmit = function(){
     +'<div class="fg"><span class="fl">Lien contenu (URL ou WeTransfer)</span><input class="fi" id="mkUrl" placeholder="https://..."></div>'
     +'<div style="background:#FEF3C7;padding:10px;border-radius:8px;font-size:12px;color:#92400E"><b>ℹ️</b> Votre soumission sera validée par un admin VÉRITAS sous 48h.</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="saveMarketplaceItem()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Soumettre</button>', true);
+    +'<button class="btn bi" onclick="saveMarketplaceItem()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Soumettre</button>', true);
 };
 
 window.saveMarketplaceItem = function(){
@@ -35662,13 +35673,13 @@ window.pgMarketplaceAdmin = function(){
       +'</div>'
       +'<div style="text-align:right"><b style="color:#3A8F73">'+fmt(m.price)+'</b></div></div>'
       +'<div style="display:flex;gap:8px;margin-top:12px">'
-      +'<button class="btn sm" style="background:#3A8F73;color:#fff" onclick="adminApproveMK(\''+m.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Approuver</button>'
-      +'<button class="btn sm" style="background:#C46F6F;color:#fff" onclick="adminRejectMK(\''+m.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>'
+      +'<button class="btn sm" style="background:#3A8F73;color:#fff" onclick="adminApproveMK(\''+m.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Approuver</button>'
+      +'<button class="btn sm" style="background:#C46F6F;color:#fff" onclick="adminRejectMK(\''+m.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>'
       +'</div></div>';
   }).join('') : '<div style="text-align:center;padding:20px;color:#3A8F73">✅ Aucune soumission en attente</div>';
 
-  return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg></span>Marketplace — Modération</div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>Stats globales</div>'
+  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-cart"/></svg></span>Marketplace — Modération</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Stats globales</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">'
     +_statCard('⏳', pending.length, 'En attente', '#F59E0B')
     +_statCard('✅', approved.length, 'Approuvés', '#3A8F73')
@@ -36566,7 +36577,7 @@ window.mAgentAmbassa = function(taskId){
 
   M('🎓 Professeur Ambassa','Votre IA pédagogique camerounaise',body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    +'<button class="btn bi" onclick="cm();mAmbassaHistorique()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg>Historique complet</button>', true);
+    +'<button class="btn bi" onclick="cm();mAmbassaHistorique()"><svg class="vico bico" aria-hidden="true"><use href="#lc-book"/></svg>Historique complet</button>', true);
 };
 
 // ── v1.3.2 : COUVERTURE COMPLÈTE MINESEC — sous-système (francophone/anglophone)
@@ -36635,7 +36646,7 @@ window.mLearnerProfile=function(){
     +'</div>'
     +'<div class="fg"><span class="fl">Classe</span><select class="fi" id="lpCls">'+cfg.classes.map(function(c){return '<option'+(c===p.cls?' selected':'')+'>'+c+'</option>';}).join('')+'</select></div>'
     +'<div class="ib ibi mt8"><span>💡</span><span>L\'e-learning, les plans d\'abonnement et le Professeur Ambassa se règlent automatiquement sur votre parcours.</span></div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_lpSave()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer mon parcours</button>');
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_lpSave()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer mon parcours</button>');
 };
 window._lpRefresh=function(){
   var cfg=_AMBASSA_SYS[(((_ge('lpSys')||{}).value)||'fr')+'_'+(((_ge('lpEns')||{}).value)||'gen')]||_AMBASSA_SYS.fr_gen;
@@ -36722,7 +36733,7 @@ window._ambassaTaskForm = function(taskId){
     +'<div class="fg"><span class="fl">Instructions supplémentaires (optionnel)</span><textarea class="fi" id="mvExtra" rows="2" placeholder="Ex: Contextualiser pour élèves de Douala / Inclure exemples concrets / Difficulté progressive…"></textarea></div>'
     +'<div id="mvResult" style="margin-top:14px"></div>',
     '<button class="btn bo" onclick="cm();mAgentAmbassa()">← Retour</button>'
-    +'<button class="btn bi" id="mvGenBtn" onclick="_ambassaGenerate(\''+taskId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Générer</button>', true);
+    +'<button class="btn bi" id="mvGenBtn" onclick="_ambassaGenerate(\''+taskId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Générer</button>', true);
   // v1.4.2 : pré-régler le formulaire sur le PROFIL APPRENANT (section/enseignement/classe)
   setTimeout(function(){
     try{
@@ -36900,9 +36911,9 @@ window._ambassaGenerate = async function(taskId){
       +((typeof _iaBadgeHtml==='function')?_iaBadgeHtml():'')
       +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:1px">'+(hasQuiz?'📝 Quiz prêt — '+parsedQuiz.length+' questions':'✓ Ambassa a généré')+'</div>'
       +'<div style="display:flex;gap:6px">'
-      +'<button class="btn sm" style="background:#fff;border:1px solid #6EE7B7;color:#059669;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaCopy()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
-      +'<button class="btn sm" style="background:#fff;border:1px solid #C7D2FE;color:#3730A3;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSpeak(this)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-megaphone"/></svg>Écouter</button>'
-      +(taskId==='eval'?'<button class="btn sm" style="background:#3A8F73;color:#fff;border:none;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSaveEval(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/'/g,"\\'")+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer dans Évaluations</button>':'')
+      +'<button class="btn sm" style="background:#fff;border:1px solid #6EE7B7;color:#059669;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaCopy()"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
+      +'<button class="btn sm" style="background:#fff;border:1px solid #C7D2FE;color:#3730A3;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSpeak(this)"><svg class="vico bico" aria-hidden="true"><use href="#lc-megaphone"/></svg>Écouter</button>'
+      +(taskId==='eval'?'<button class="btn sm" style="background:#3A8F73;color:#fff;border:none;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaSaveEval(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/'/g,"\\'")+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer dans Évaluations</button>':'')
       +'</div></div>'
       + displayHtml
       // v1.2.2 : zone de SOUMISSION élève (sauf QCM interactif qui a déjà sa correction)
@@ -36911,7 +36922,7 @@ window._ambassaGenerate = async function(taskId){
             +'<div style="font-size:12px;font-weight:800;color:#059669;margin-bottom:6px">✍️ À toi de jouer — soumets ta proposition</div>'
             +'<textarea id="mvSubmitTxt" class="fi" style="min-height:120px;font-size:13px" placeholder="Rédige ici ta réponse / ta production, puis demande la correction d\'Ambassa…"></textarea>'
             +'<div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">'
-            +'<button class="btn bi sm" id="mvSubmitBtn" onclick="_ambassaCorrigerProposition(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/\x27/g,"\\\x27")+'\',\''+taskId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Corrige ma proposition</button>'
+            +'<button class="btn bi sm" id="mvSubmitBtn" onclick="_ambassaCorrigerProposition(\''+_esc(cls)+'\',\''+_esc(mat)+'\',\''+_esc(sujet).replace(/\x27/g,"\\\x27")+'\',\''+taskId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Corrige ma proposition</button>'
             +'<span style="font-size:11px;color:#6B7280;align-self:center">Ambassa note selon les critères MINESEC et te conseille.</span>'
             +'</div>'
             +'<div id="mvSubmitResult" style="margin-top:10px"></div>'
@@ -37133,7 +37144,7 @@ window._renderQCMInteractive = function(items) {
   });
 
   html += '<div style="display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap">';
-  html += '<button class="btn bi" style="background:#3A8F73;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:800;font-size:14px;cursor:pointer" onclick="_revealQCMResults()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg>Voir mes résultats</button>';
+  html += '<button class="btn bi" style="background:#3A8F73;color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:800;font-size:14px;cursor:pointer" onclick="_revealQCMResults()"><svg class="vico bico" aria-hidden="true"><use href="#lc-chart"/></svg>Voir mes résultats</button>';
   html += '<button class="btn bo" style="background:#F1F5F9;color:#475569;border:1px solid #E2E8F0;padding:12px 18px;border-radius:8px;font-size:13px;cursor:pointer" onclick="_skipQCMAnswers()">⏭ Voir directement le corrigé</button>';
   html += '</div>';
   // Conteneur résultats (vide au départ)
@@ -37208,8 +37219,8 @@ window._revealQCMResults = function() {
     resHtml += '<div style="font-size:11px;margin-top:6px;background:rgba(255,255,255,.15);padding:4px 10px;border-radius:6px;display:inline-block">⚠️ ' + (items.length - answered) + ' question(s) sans réponse</div>';
   }
   resHtml += '<div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">';
-  resHtml += '<button class="btn sm" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);padding:8px 14px;border-radius:6px;font-size:12px;cursor:pointer" onclick="_restartQCM()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-refresh"/></svg>Recommencer</button>';
-  resHtml += '<button class="btn sm" style="background:#fff;color:' + scoreColor + ';border:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:800;cursor:pointer" onclick="_ambassaCopy()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier le corrigé complet</button>';
+  resHtml += '<button class="btn sm" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.3);padding:8px 14px;border-radius:6px;font-size:12px;cursor:pointer" onclick="_restartQCM()"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Recommencer</button>';
+  resHtml += '<button class="btn sm" style="background:#fff;color:' + scoreColor + ';border:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:800;cursor:pointer" onclick="_ambassaCopy()"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier le corrigé complet</button>';
   resHtml += '</div></div>';
 
   var resCt = document.getElementById('qcmResults');
@@ -37236,7 +37247,7 @@ window._restartQCM = function() {
   document.getElementById('mvResult').innerHTML =
     '<div style="background:#F0FDF4;border:2px solid #6EE7B7;border-radius:14px;padding:18px;margin-top:12px">'
     + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div style="font-size:11px;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:1px">📝 Quiz prêt — ' + data.items.length + ' questions</div>'
-    + '<button class="btn sm" style="background:#fff;border:1px solid #6EE7B7;color:#059669;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaCopy()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
+    + '<button class="btn sm" style="background:#fff;border:1px solid #6EE7B7;color:#059669;padding:4px 10px;font-size:11px;border-radius:6px" onclick="_ambassaCopy()"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
     + '</div>'
     + _renderQCMInteractive(data.items)
     + '</div>';
@@ -37280,7 +37291,7 @@ window.mAmbassaHistorique = function(){
   }).join('');
   M('📚 Historique Ambassa',hist.length+' génération'+(hist.length>1?'s':''),'<div style="padding:6px">'+rows+'</div>',
     '<button class="btn bi" onclick="cm();mAgentAmbassa()">← Retour</button>'
-    +'<button class="btn bo" onclick="_ambassaClearHist()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trash"/></svg>Effacer historique</button>', true);
+    +'<button class="btn bo" onclick="_ambassaClearHist()"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Effacer historique</button>', true);
 };
 
 window._ambassaClearHist = function(){
@@ -37297,7 +37308,7 @@ window._ambassaClearHist = function(){
 window.pgAmbassa = function(){
   // Lancer directement la modale principale
   setTimeout(function(){ mAgentAmbassa(); }, 100);
-  return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg></span>Professeur Ambassa — Agent IA pédagogique</div>'
+  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-graduation"/></svg></span>Professeur Ambassa — Agent IA pédagogique</div>'
     +'<div class="card mt12">'
     +'<div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap">'
     +'<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#142554,#6C56A6);color:#FFC93C;display:flex;align-items:center;justify-content:center;font-size:42px;font-weight:900;font-family:Plus Jakarta Sans;flex-shrink:0">M</div>'
@@ -37305,9 +37316,9 @@ window.pgAmbassa = function(){
     +'<div style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#6C56A6;font-weight:800">Agent IA pédagogique camerounais</div>'
     +'<h2 style="margin:4px 0;color:#142554;font-family:Plus Jakarta Sans">Professeur Ambassa</h2>'
     +'<p style="font-style:italic;color:#475569;font-family:Crimson Pro,serif;font-size:14px;margin:6px 0">Expert MINESEC · BEPC · Probatoire · BAC séries A/C/D · Connaît les programmes camerounais.</p>'
-    +'<button class="btn bi" onclick="mAgentAmbassa()" style="font-size:14px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Lancer Ambassa</button>'
+    +'<button class="btn bi" onclick="mAgentAmbassa()" style="font-size:14px"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Lancer Ambassa</button>'
     +'</div></div></div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"/></svg></span>Ce que Ambassa peut faire pour vous</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-book"/></svg></span>Ce que Ambassa peut faire pour vous</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">'
     +(AMBASSA_TACHES||[]).map(function(t){
       return '<div onclick="mAgentAmbassa(\''+t.id+'\')" style="background:#fff;border:1px solid '+t.col+'30;border-radius:12px;padding:14px;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor=\''+t.col+'\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\''+t.col+'30\';this.style.transform=\'\'">'
@@ -37321,7 +37332,7 @@ window.pgAmbassa = function(){
         +'</div>';
     }).join('')
     +'</div></div>'
-    +'<div class="card mt12" style="background:linear-gradient(135deg,#FEF3C7,#FCD34D)"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lightbulb"/></svg></span>Astuce : intégration aux évaluations</div>'
+    +'<div class="card mt12" style="background:linear-gradient(135deg,#FEF3C7,#FCD34D)"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-lightbulb"/></svg></span>Astuce : intégration aux évaluations</div>'
     +'<div style="font-size:13px;color:#78350F;line-height:1.6">Quand vous générez une <b>Évaluation notée</b>, un bouton "💾 Enregistrer dans Évaluations" apparaît. L\'évaluation est alors disponible dans la section pédagogique pour la donner à vos élèves.</div>'
     +'</div>';
 };
@@ -37333,7 +37344,7 @@ window._ambassaShowHistItem = function(id){
   M('📄 '+h.task,h.cls+' · '+h.mat+' · '+h.sujet,
     '<div style="font-size:13px;color:#374151;line-height:1.7;max-height:400px;overflow-y:auto;white-space:pre-wrap">'+_esc(h.response||'')+'</div>',
     '<button class="btn bo" onclick="cm();mAmbassaHistorique()">← Historique</button>'
-    +'<button class="btn bi" onclick="navigator.clipboard.writeText(\'\'+'+JSON.stringify(h.response).replace(/'/g,"\\'")+').then(function(){toast(\'✓ Copié\');});"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>', true);
+    +'<button class="btn bi" onclick="navigator.clipboard.writeText(\'\'+'+JSON.stringify(h.response).replace(/'/g,"\\'")+').then(function(){toast(\'✓ Copié\');});"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>', true);
 };
 
 // ════════════════════════════════════════════════════════════════════
@@ -37614,20 +37625,20 @@ window.pgCentresAdmin = function(){
       +'<td>'+new Date(c.createdAt).toLocaleDateString('fr-FR')+'</td>'
       +'<td>'+(c.active?'✅':'⏸️')+'</td></tr>';
   }).join('') || '<tr><td colspan="6" style="text-align:center;padding:20px;color:#9CA3AF">Aucun centre client (mode mono-tenant)</td></tr>';
-  return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-building"/></svg></span>Centres clients (multi-tenant)</div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"/></svg></span>SaaS Overview</div>'
+  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-building"/></svg></span>Centres clients (multi-tenant)</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>SaaS Overview</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">'
     +_statCard('🏢', DB.centres.length, 'Centres clients', '#3C8DFF')
     +_statCard('✅', DB.centres.filter(function(c){return c.active;}).length, 'Actifs', '#3A8F73')
     +_statCard('💰', fmt(totalMRR), 'MRR mensuel récurrent', '#FFC93C')
     +_statCard('📅', fmt(totalMRR*12), 'ARR annualisé', '#6C56A6')
     +'</div></div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-building"/></svg></span>Liste des centres</div>'
-    +'<button class="btn bi sm" onclick="mAddCentre()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter un centre client</button>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-building"/></svg></span>Liste des centres</div>'
+    +'<button class="btn bi sm" onclick="mAddCentre()"><svg class="vico bico" aria-hidden="true"><use href="#lc-plus"/></svg>Ajouter un centre client</button>'
     +'<div style="overflow-x:auto;margin-top:12px"><table class="t" style="width:100%;border-collapse:collapse">'
     +'<thead><tr><th>Centre</th><th>Ville</th><th>Plan</th><th>MRR</th><th>Inscrit</th><th>Statut</th></tr></thead>'
     +'<tbody>'+rows+'</tbody></table></div></div>'
-    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lightbulb"/></svg></span>Notice multi-tenant</div>'
+    +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-lightbulb"/></svg></span>Notice multi-tenant</div>'
     +'<div class="ib ibi mb0"><span>ℹ️</span><span>L\'isolation complète des données par centre nécessite un backend dédié (cf. ROADMAP_LONG_TERME.md #15). Le frontend est prêt — il manque les Row-Level Security côté SQL et la résolution serveur des sous-domaines.</span></div></div>';
 };
 
@@ -37644,7 +37655,7 @@ window.mAddCentre = function(){
     +'<option value="enterprise">Enterprise — 50 000 FCFA/mois (illimité)</option>'
     +'</select></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="saveCentre()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Créer le centre</button>');
+    +'<button class="btn bi" onclick="saveCentre()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Créer le centre</button>');
 };
 
 window.saveCentre = function(){
@@ -37865,7 +37876,7 @@ function openCart(){
     +'<span style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:900;color:var(--gold)">'+totalFmt+'</span>'
     +'</div>',
     '<button class="btn bo" onclick="cm()">Continuer les achats</button>'
-    +'<button class="btn bi" onclick="cm();openPaymentModal({montant:'+total+',label:\'🛒 '+_esc(labels).replace(/'/g,"\\'")+'\',refPrefix:\'CART\',intent:\'cart\',lignes:'+_lignesJson+'})"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-card"/></svg>Payer tout — '+totalFmt+'</button>',
+    +'<button class="btn bi" onclick="cm();openPaymentModal({montant:'+total+',label:\'🛒 '+_esc(labels).replace(/'/g,"\\'")+'\',refPrefix:\'CART\',intent:\'cart\',lignes:'+_lignesJson+'})"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Payer tout — '+totalFmt+'</button>',
     true);
 }
 
@@ -38044,7 +38055,7 @@ openPaymentModal = function(payInfo){
     +'<div style="font-size:12px;color:var(--ink4);margin-top:8px">Montant : <strong>'+montantFmt+'</strong></div>'
     +'</div>'
     +'<div style="font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:16px">Notre équipe activera votre accès sous <strong>24h</strong> après vérification.<br>Conservez cette référence.</div>'
-    +'<button class="btn bo sm" onclick="_payCopy(\''+ref+'\',\'Référence\')" style="margin-bottom:12px"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier la référence</button>'
+    +'<button class="btn bo sm" onclick="_payCopy(\''+ref+'\',\'Référence\')" style="margin-bottom:12px"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier la référence</button>'
     +'</div>'
     +'<div id="payStep3WA"></div>'
     +'<div style="display:flex;justify-content:space-between;margin-top:12px"><button class="btn bo" onclick="_payGoStep(2)">← Précédent</button><button class="btn bi" onclick="cm()">Fermer</button></div>'
@@ -38219,7 +38230,7 @@ function _mAddPromo(){
     +'<div class="fg"><span class="fl">Label</span><input class="fi" id="npLabel" placeholder="Description courte"></div>'
     +'<div class="fg"><span class="fl">Utilisations max *</span><input class="fi" id="npMax" type="number" min="1" placeholder="100"></div>'
     +'</div>',
-    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveNewPromo()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Créer</button>');
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveNewPromo()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Créer</button>');
 }
 
 function _saveNewPromo(){
@@ -38898,7 +38909,7 @@ function pgPartnerships(){
     + '« VÉRITAS : Ensemble, transformons l\'éducation, révélons les talents et construisons l\'excellence. »</div>'
     + '<div style="text-align:center;margin:20px auto 40px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
     + '<a href="https://wa.me/237697637739" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:#25D366;color:#fff;padding:12px 22px;border-radius:24px;text-decoration:none;font-weight:700;font-size:14px">📞 WhatsApp · 697 63 77 39</a>'
-    + '<button class="btn bo" style="padding:12px 22px;border-radius:24px;font-size:14px" onclick="_prtGo(\'verifier-certificat\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier un certificat</button>'
+    + '<button class="btn bo" style="padding:12px 22px;border-radius:24px;font-size:14px" onclick="_prtGo(\'verifier-certificat\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier un certificat</button>'
     + '</div>';
   return h;
 }
@@ -39012,10 +39023,10 @@ function pgPartnerProgram(type){
     +   '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">Candidature gratuite. Validation sous 48h ouvrables.</div>'
     +   (type==='eleve_leader'
         ? '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">'
-          + '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 28px;font-size:14px" onclick="mCandidaterAmbassadeurJunior()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-zap"/></svg>Activer en 1 clic</button>'
-          + '<button class="btn" style="background:rgba(255,255,255,.15);color:#fff;font-weight:700;padding:12px 22px;font-size:13px;border:1px solid rgba(255,255,255,.3)" onclick="_prtGo(\'leaderboard-junior\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg>Voir le classement</button>'
+          + '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 28px;font-size:14px" onclick="mCandidaterAmbassadeurJunior()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Activer en 1 clic</button>'
+          + '<button class="btn" style="background:rgba(255,255,255,.15);color:#fff;font-weight:700;padding:12px 22px;font-size:13px;border:1px solid rgba(255,255,255,.3)" onclick="_prtGo(\'leaderboard-junior\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-award"/></svg>Voir le classement</button>'
           + '</div>'
-        : '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 28px;font-size:14px" onclick="mPartnerSignup(\''+type+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Devenir partenaire '+_prtSafe(t.label)+'</button>')
+        : '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 28px;font-size:14px" onclick="mPartnerSignup(\''+type+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Devenir partenaire '+_prtSafe(t.label)+'</button>')
     + '</div>'
     + '<div style="text-align:center;color:var(--ink3);font-size:12px;margin:18px auto">Une question ? <a href="https://wa.me/237697637739" target="_blank" style="color:#25D366;font-weight:700">WhatsApp : +237 697 63 77 39</a></div>'
     + '</div>';
@@ -39040,7 +39051,7 @@ function mPartnerSignup(type){
     + '<label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--ink3);margin:12px 0"><input type="checkbox" id="_psCgu" style="margin-top:2px"><span>J\'accepte les <a href="#" onclick="event.preventDefault();alert(\'CGU disponibles sur veritas-school.com\')">CGU du Programme Partenaire</a> et autorise VÉRITAS à me recontacter par WhatsApp et email.</span></label>';
   M(t.emoji+' Devenir partenaire — '+t.label, 'Candidature gratuite · Réponse sous 48h ouvrables', body,
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    + '<button class="btn bi" onclick="submitPartnerApplication(\''+type+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg>Envoyer ma candidature</button>',
+    + '<button class="btn bi" onclick="submitPartnerApplication(\''+type+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Envoyer ma candidature</button>',
     true);
 }
 
@@ -39092,7 +39103,7 @@ function submitPartnerApplication(type){
     +     '<li>Rejoignez notre canal WhatsApp Partenaires</li>'
     +   '</ul></div>'
     + '<button class="btn bi" onclick="_prtGo(\'partenariat\')">← Voir tous les programmes</button>'
-    + ' <a class="btn bo" href="https://wa.me/237697637739" target="_blank" style="text-decoration:none"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-phone"/></svg>WhatsApp VÉRITAS</a>'
+    + ' <a class="btn bo" href="https://wa.me/237697637739" target="_blank" style="text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-phone"/></svg>WhatsApp VÉRITAS</a>'
     + '</div>';
   if(typeof _vc==='function') _vc(html);
   else if(typeof _si==='function') _si('vContent', html);
@@ -39110,7 +39121,7 @@ function pgPartnersAdmin(){
   var totalPaid = commissions.filter(function(c){return c.status==='paid';}).reduce(function(s,c){return s+(c.commissionAmount||0);},0);
   var payoutsBlocked = !(DB.partnerSettings && DB.partnerSettings.payoutsEnabled);
   var blockedReason = (DB.partnerSettings && DB.partnerSettings.payoutsBlockedReason) || '';
-  var h = '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"/></svg></span>Programme Partenariat — Administration</div>';
+  var h = '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-handshake"/></svg></span>Programme Partenariat — Administration</div>';
   if(payoutsBlocked){
     h += '<div style="background:#FEF3C7;padding:12px 14px;border-radius:8px;margin-bottom:16px;font-size:13px">'
       + '<strong>⏸ Versements automatiques désactivés</strong> — '+_prtSafe(blockedReason)
@@ -39125,16 +39136,16 @@ function pgPartnersAdmin(){
     + '</div>';
   // Onglets
   h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">'
-    + '<button class="btn bi sm"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg>Candidatures ('+pending.length+')</button>'
-    + '<button class="btn bo sm" onclick="mPartnersList()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Partenaires actifs ('+active.length+')</button>'
-    + '<button class="btn bo sm" onclick="mPartnersCommissions()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-coins"/></svg>Commissions</button>'
-    + '<button class="btn bo sm" onclick="mPartnerSettings()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sliders"/></svg>Paramètres</button>'
+    + '<button class="btn bi sm"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Candidatures ('+pending.length+')</button>'
+    + '<button class="btn bo sm" onclick="mPartnersList()"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Partenaires actifs ('+active.length+')</button>'
+    + '<button class="btn bo sm" onclick="mPartnersCommissions()"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Commissions</button>'
+    + '<button class="btn bo sm" onclick="mPartnerSettings()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sliders"/></svg>Paramètres</button>'
     + '</div>';
   // Liste candidatures (ce qu'on voit par défaut)
   if(pending.length===0){
     h += '<div style="text-align:center;padding:40px;color:var(--ink3);background:#F9FAFB;border-radius:10px">Aucune candidature en attente. 🎉</div>';
   } else {
-    h += '<div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-download"/></svg></span>Candidatures à valider</div>';
+    h += '<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-download"/></svg></span>Candidatures à valider</div>';
     h += '<div style="display:grid;gap:10px">';
     pending.slice().reverse().forEach(function(a){
       var t = (DB.partnerTypes[a.type]||{label:a.type,emoji:'❓'});
@@ -39148,9 +39159,9 @@ function pgPartnersAdmin(){
         +   '<div style="font-size:10px;color:var(--ink4);margin-top:4px">Reçue le '+_prtSafe(a.submittedAt)+'</div>'
         + '</div>'
         + '<div style="display:flex;gap:6px;flex-direction:column">'
-        +   '<button class="btn bi xs" onclick="mApprovePartner(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Valider</button>'
-        +   '<a class="btn bo xs" href="https://wa.me/'+a.tel.replace(/[^0-9]/g,'')+'" target="_blank" style="text-decoration:none"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>WhatsApp</a>'
-        +   '<button class="btn bo xs" style="color:#AE5353" onclick="mRejectPartner(\''+a.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>'
+        +   '<button class="btn bi xs" onclick="mApprovePartner(\''+a.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-checkcircle"/></svg>Valider</button>'
+        +   '<a class="btn bo xs" href="https://wa.me/'+a.tel.replace(/[^0-9]/g,'')+'" target="_blank" style="text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>WhatsApp</a>'
+        +   '<button class="btn bo xs" style="color:#AE5353" onclick="mRejectPartner(\''+a.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>'
         + '</div>'
         + '</div>';
     });
@@ -39180,7 +39191,7 @@ function mApprovePartner(appId){
   M('✅ Valider la candidature', _prtSafe(a.nom),
     body,
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    + '<button class="btn bi" onclick="confirmApprovePartner(\''+appId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Valider et créer le partenaire</button>',
+    + '<button class="btn bi" onclick="confirmApprovePartner(\''+appId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Valider et créer le partenaire</button>',
     false);
 }
 
@@ -39235,7 +39246,7 @@ function confirmApprovePartner(appId){
     + '<div style="font-size:14px;margin:10px 0">Le partenaire est actif et peut commencer à utiliser son code.</div>'
     + '<div style="background:#F0FDF4;border:1px solid #86EFAC;padding:12px;border-radius:8px;margin:10px 0;font-size:13px"><strong>Prochaine étape :</strong> envoyer le code par WhatsApp.</div></div>',
     '<button class="btn bo" onclick="cm();re()">Fermer</button>'
-    + ' <a class="btn bi" href="'+wa+'" target="_blank" onclick="cm();re()" style="text-decoration:none"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>Envoyer le code WhatsApp</a>',
+    + ' <a class="btn bi" href="'+wa+'" target="_blank" onclick="cm();re()" style="text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Envoyer le code WhatsApp</a>',
     false);
 }
 
@@ -39266,7 +39277,7 @@ function mPartnerSettings(){
     + '<div class="fg"><span class="fl">Message affiché quand les versements sont désactivés</span><input class="fi" id="_ps_reason" value="'+_prtSafe(s.payoutsBlockedReason||'')+'"></div>';
   M('⚙️ Paramètres Programme Partenariat', '', body,
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="savePartnerSettings()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>', false);
+    +'<button class="btn bi" onclick="savePartnerSettings()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>', false);
 }
 
 // ── LISTE des partenaires actifs (admin) ────────────────────────────────────
@@ -39292,8 +39303,8 @@ function mPartnersList(){
         +     '🛒 '+(stats.salesCount||0)+' ventes · 💰 '+_prtFmt(stats.totalCommission||0)+' cumulés · ⏳ '+_prtFmt(stats.pending||0)+' à verser</div>'
         + '</div>'
         + '<div style="display:flex;flex-direction:column;gap:5px">'
-        +   '<button class="btn bi xs" onclick="generatePartnerCertificate(\''+p.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Certificat PDF</button>'
-        +   '<button class="btn bo xs" onclick="cm();mPartnerDetail(\''+p.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Détails</button>'
+        +   '<button class="btn bi xs" onclick="generatePartnerCertificate(\''+p.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Certificat PDF</button>'
+        +   '<button class="btn bo xs" onclick="cm();mPartnerDetail(\''+p.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Détails</button>'
         + '</div></div>';
     });
     body += '</div>';
@@ -39342,7 +39353,7 @@ function mPartnerDetail(partnerId){
   M(t.emoji+' '+_prtSafe(p.name), lv.badge+' '+lv.label, body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
     + kycBtn
-    + '<button class="btn bi" onclick="generatePartnerCertificate(\''+p.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Certificat</button>',
+    + '<button class="btn bi" onclick="generatePartnerCertificate(\''+p.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Certificat</button>',
     true);
 }
 
@@ -39642,8 +39653,8 @@ function pgPartnerPortal(){
     + '<div style="font-size:12px;color:#cbd5e1">Votre code parrainage</div>'
     + '<div style="font-family:monospace;font-size:28px;font-weight:800;color:#FFC93C;letter-spacing:2px;margin:6px 0">'+_prtSafe(partner.code)+'</div>'
     + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">'
-    +   '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:700;font-size:12px" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+partner.code+'\').then(function(){toast(\'Code copié !\')});"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier le code</button>'
-    +   '<button class="btn" style="background:#fff;color:#142554;font-weight:700;font-size:12px" onclick="generatePartnerCertificate(\''+partner.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Télécharger mon certificat</button>'
+    +   '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:700;font-size:12px" onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+partner.code+'\').then(function(){toast(\'Code copié !\')});"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier le code</button>'
+    +   '<button class="btn" style="background:#fff;color:#142554;font-weight:700;font-size:12px" onclick="generatePartnerCertificate(\''+partner.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Télécharger mon certificat</button>'
     + '</div>'
     + '</div>';
   // v1.8 — ATTRIBUTIONS & OUTILS propres au rôle (interconnectés aux fonctionnalités)
@@ -39664,8 +39675,8 @@ function pgPartnerPortal(){
       +     '<div style="font-size:11px;color:'+(ctr && ctr.signedAt?'#3A8F73':kycSt.status==='approved'?'#F59E0B':'#9CA3AF')+'">'
       +       (ctr && ctr.signedAt ? '✅ Signé le '+_prtSafe(ctr.signedAt) : (kycSt.status==='approved' ? '⏳ À signer' : '⚪ KYC requis d\'abord'))
       +     '</div></div>'
-      +   (kycSt.status==='approved' && !(ctr && ctr.signedAt) ? '<button class="btn bi xs" onclick="mPartnerSignContract(\''+partner.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Signer</button>'
-        : ctr && ctr.signedAt ? '<button class="btn bo xs" onclick="generatePartnerContract(\''+partner.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Télécharger</button>'
+      +   (kycSt.status==='approved' && !(ctr && ctr.signedAt) ? '<button class="btn bi xs" onclick="mPartnerSignContract(\''+partner.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Signer</button>'
+        : ctr && ctr.signedAt ? '<button class="btn bo xs" onclick="generatePartnerContract(\''+partner.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Télécharger</button>'
         : '<button class="btn bo xs" disabled style="opacity:.5">— en attente —</button>')
       + '</div></div>';
   }
@@ -39680,7 +39691,7 @@ function pgPartnerPortal(){
     h += '<div style="background:#FEF3C7;padding:12px;border-radius:8px;font-size:13px;margin-bottom:14px">'
       + '⏸ <strong>Versements en préparation</strong> — '+_prtSafe((DB.partnerSettings||{}).payoutsBlockedReason||'')+'. Vos commissions sont enregistrées et seront versées dès l\'activation.</div>';
   }
-  h += '<div class="ct"><span class="ct-ico"><svg class="vico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg></span>Historique de vos commissions</div>';
+  h += '<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-doc"/></svg></span>Historique de vos commissions</div>';
   if(!myComm.length){
     h += '<div style="text-align:center;padding:30px;color:var(--ink3);background:#F9FAFB;border-radius:10px;font-size:13px">Aucune commission pour l\'instant. Partagez votre code <strong>'+partner.code+'</strong> à vos contacts !</div>';
   } else {
@@ -39942,7 +39953,7 @@ function pgCertificateVerify(){
       + '<div style="text-align:center;color:var(--ink3);font-size:13px;margin-bottom:18px">Entrez le numéro et le token figurant sur le certificat pour vérifier son authenticité.</div>'
       + '<div class="fg"><span class="fl">Numéro de certificat (N°)</span><input class="fi" id="_cvId" placeholder="VRT-CERT-2026-0001"></div>'
       + '<div class="fg"><span class="fl">Token de sécurité</span><input class="fi" id="_cvTk" placeholder="8 caractères" maxlength="12"></div>'
-      + '<button class="btn bi" style="width:100%;margin-top:10px" onclick="_cvSubmit()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier le certificat</button>'
+      + '<button class="btn bi" style="width:100%;margin-top:10px" onclick="_cvSubmit()"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier le certificat</button>'
       + '</div>';
   }
   var vcert = (DB.certificats||[]).find(function(c){ return c.id === certId; });
@@ -40136,7 +40147,7 @@ function pgLeaderboardJunior(){
     +   '<div style="font-size:48px;margin-bottom:6px">⭐</div>'
     +   '<div style="font-size:17px;font-weight:800;margin-bottom:8px">Pas encore Ambassadeur Junior ?</div>'
     +   '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">Active ton profil en 1 clic. Reçois ton certificat officiel, partage ton code à tes camarades, gravis les paliers.</div>'
-    +   '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 26px;font-size:14px" onclick="mCandidaterAmbassadeurJunior()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-target"/></svg>Devenir Ambassadeur Junior</button>'
+    +   '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 26px;font-size:14px" onclick="mCandidaterAmbassadeurJunior()"><svg class="vico bico" aria-hidden="true"><use href="#lc-target"/></svg>Devenir Ambassadeur Junior</button>'
     + '</div>';
 
   h += '<div style="text-align:center;color:var(--ink3);font-size:11px;margin:14px auto 24px">Classement mis à jour en temps réel · Pseudonymisation pour la confidentialité · Mise à jour : '+(typeof today==='function'?today():'aujourd\'hui')+'</div>';
@@ -40152,7 +40163,7 @@ function mCandidaterAmbassadeurJunior(){
     M('🔒 Connexion requise', 'Pour devenir Ambassadeur Junior, créez d\'abord un compte élève.',
       '<div style="text-align:center;padding:18px">Tu peux t\'inscrire gratuitement en 30 secondes — c\'est la première étape pour devenir Ambassadeur VÉRITAS Junior.</div>',
       '<button class="btn bo" onclick="cm()">Annuler</button>'
-      +'<button class="btn bi" onclick="cm();if(typeof showRegisterForm===\'function\')showRegisterForm()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>Créer mon compte</button>');
+      +'<button class="btn bi" onclick="cm();if(typeof showRegisterForm===\'function\')showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>Créer mon compte</button>');
     return;
   }
   // Déjà ambassadeur ?
@@ -40217,7 +40228,7 @@ function mCandidaterAmbassadeurJunior(){
   M('🎯 Devenir Ambassadeur Junior', '',
     body,
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    +'<button class="btn bi" onclick="_ajSubmit()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"/></svg>Activer mon profil</button>',
+    +'<button class="btn bi" onclick="_ajSubmit()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>Activer mon profil</button>',
     true);
 }
 
@@ -40327,7 +40338,7 @@ function _ajAutoApprove(appId){
     +   '4. À chaque palier : récompense + certificat'
     + '</div></div>',
     '<button class="btn bo" onclick="cm();_prtGo(\'mes-partenariats\')">Mon espace</button>'
-    + ' <button class="btn bi" onclick="cm();if(typeof generatePartnerCertificate===\'function\')generatePartnerCertificate(\''+partner.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Certificat PDF</button>', true);
+    + ' <button class="btn bi" onclick="cm();if(typeof generatePartnerCertificate===\'function\')generatePartnerCertificate(\''+partner.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Certificat PDF</button>', true);
 }
 
 /* ═══════════════════ KYC + CONTRATS INSTITUTIONNELS (S4) ═════════════════════
@@ -40495,9 +40506,9 @@ function mAdminReviewKYC(partnerId){
       +     '<div style="font-size:11px;color:var(--ink3);margin-top:2px">📎 '+_prtSafe(doc.fileName)+' · '+Math.round((doc.size||0)/1024)+' Ko · '+_prtSafe(doc.uploadedAt)+'</div>'
       +   '</div>'
       +   '<div style="display:flex;gap:5px;flex-wrap:wrap">'
-      +     '<button class="btn bo xs" onclick="_kycPreview(\''+doc.id+'\',\''+partnerId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>'
-      +     (doc.status!=='approved' ? '<button class="btn bi xs" onclick="_kycApprove(\''+partnerId+'\',\''+doc.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Valider</button>' : '<span style="background:#3A8F73;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px">✓ Validé</span>')
-      +     (doc.status!=='rejected' ? '<button class="btn bo xs" style="color:#AE5353" onclick="_kycReject(\''+partnerId+'\',\''+doc.id+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>' : '<span style="background:#AE5353;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px">✗ Refusé</span>')
+      +     '<button class="btn bo xs" onclick="_kycPreview(\''+doc.id+'\',\''+partnerId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu</button>'
+      +     (doc.status!=='approved' ? '<button class="btn bi xs" onclick="_kycApprove(\''+partnerId+'\',\''+doc.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Valider</button>' : '<span style="background:#3A8F73;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px">✓ Validé</span>')
+      +     (doc.status!=='rejected' ? '<button class="btn bo xs" style="color:#AE5353" onclick="_kycReject(\''+partnerId+'\',\''+doc.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Refuser</button>' : '<span style="background:#AE5353;color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:6px">✗ Refusé</span>')
       +   '</div>'
       + '</div></div>';
   });
@@ -40507,7 +40518,7 @@ function mAdminReviewKYC(partnerId){
   }
   M('📋 Review KYC — '+_prtSafe(partner.name), partner.type+' · '+st.label, body,
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    + (st.status==='approved' ? '<button class="btn bi" onclick="cm();generatePartnerContract(\''+partnerId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Émettre contrat</button>' : ''),
+    + (st.status==='approved' ? '<button class="btn bi" onclick="cm();generatePartnerContract(\''+partnerId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Émettre contrat</button>' : ''),
     true);
 }
 
@@ -40767,7 +40778,7 @@ function mPartnerSignContract(partnerId){
     M('✅ Contrat déjà signé', 'Le ' + _prtSafe(ctr.signedAt),
       '<div style="text-align:center;padding:18px"><div style="font-size:48px">📄</div>'
       + '<div style="margin:10px 0">Votre contrat <strong>'+_prtSafe(ctr.id)+'</strong> est signé et archivé.</div></div>',
-      '<button class="btn bi" onclick="cm();generatePartnerContract(\''+partnerId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Télécharger PDF</button>'); return;
+      '<button class="btn bi" onclick="cm();generatePartnerContract(\''+partnerId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Télécharger PDF</button>'); return;
   }
   // Si pas de contrat envoyé, on l'émet d'abord
   if(!ctr){
@@ -40788,7 +40799,7 @@ function mPartnerSignContract(partnerId){
   M('✍️ Signature électronique du contrat', _prtSafe(ctr.id),
     body,
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    + '<button class="btn bi" onclick="_signContract(\''+partnerId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-pencil"/></svg>Signer électroniquement</button>',
+    + '<button class="btn bi" onclick="_signContract(\''+partnerId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Signer électroniquement</button>',
     true);
 }
 
@@ -40816,7 +40827,7 @@ function _signContract(partnerId){
     + '<div style="font-size:12px;color:var(--ink3);margin-bottom:8px">Hash de vérification : <strong style="font-family:monospace">'+_prtSafe(ctr.hash.substring(0,16))+'…</strong></div>'
     + '<div style="font-size:12px;color:var(--ink3)">Vous pouvez télécharger le PDF horodaté ci-dessous.</div></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>'
-    + '<button class="btn bi" onclick="cm();generatePartnerContract(\''+partnerId+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"/></svg>Télécharger le contrat signé</button>');
+    + '<button class="btn bi" onclick="cm();generatePartnerContract(\''+partnerId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Télécharger le contrat signé</button>');
 }
 
 // ─── VITRINE PUBLIQUE — nos partenaires institutionnels ────────────────────
@@ -40865,7 +40876,7 @@ function pgInstitutionalShowcase(){
   h += '<div style="background:linear-gradient(135deg,#142554,#1e3a8a);color:#fff;padding:24px;border-radius:14px;text-align:center;margin:30px 0">'
     + '<div style="font-size:17px;font-weight:800;margin-bottom:8px">Votre institution n\'est pas listée ?</div>'
     + '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">Découvrez les programmes de partenariat institutionnel et rejoignez le réseau.</div>'
-    + '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 26px;font-size:14px" onclick="_prtGo(\'partenariat\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"/></svg>Devenir partenaire</button>'
+    + '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 26px;font-size:14px" onclick="_prtGo(\'partenariat\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-handshake"/></svg>Devenir partenaire</button>'
     + '</div>';
   h += '</div>';
   return h;
@@ -41630,7 +41641,7 @@ window.pgCagnotte = function(){
       +   '</ol>'
       + '</div>'
       + '<div style="text-align:center;margin-top:18px">'
-      +   '<button class="btn bi" onclick="_vtWaOpen(\'cagnotte\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>Demander l\'ouverture d\'une cagnotte</button>'
+      +   '<button class="btn bi" onclick="_vtWaOpen(\'cagnotte\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Demander l\'ouverture d\'une cagnotte</button>'
       + '</div></div>';
   }
 
@@ -41670,7 +41681,7 @@ function _cagErreur(msg){
     + '<div style="font-size:40px">🔎</div>'
     + '<div style="font-weight:800;margin:8px 0 4px">Cagnotte indisponible</div>'
     + '<div style="color:var(--ink3);font-size:13.5px">'+_esc(msg)+'</div>'
-    + '<div style="margin-top:14px"><button class="btn bo sm" onclick="_vtWaOpen(\'cagnotte\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>Nous écrire</button></div>'
+    + '<div style="margin-top:14px"><button class="btn bo sm" onclick="_vtWaOpen(\'cagnotte\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Nous écrire</button></div>'
     + '</div>';
 }
 
@@ -41754,7 +41765,7 @@ function _cagRendre(f){
       + '<div class="fg"><span class="fl">Un mot pour '+_esc(f.prenom)+' (facultatif)</span>'
       +   '<input class="fi" id="cagMot" placeholder="Courage, on est avec toi !" maxlength="140"></div>'
       + '<div id="cagRecap" style="background:var(--bg2,#f6f8fb);border-radius:10px;padding:12px;font-size:13px;margin-bottom:12px"></div>'
-      + '<button class="btn bi" style="width:100%;padding:14px;font-size:15px;font-weight:800" onclick="_cagPayer()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"/></svg>Contribuer maintenant</button>'
+      + '<button class="btn bi" style="width:100%;padding:14px;font-size:15px;font-weight:800" onclick="_cagPayer()"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Contribuer maintenant</button>'
       + '<div style="font-size:11.5px;color:var(--ink4);text-align:center;margin-top:8px;line-height:1.5">'
       +   'Vous recevrez une demande de confirmation sur votre téléphone. '
       +   'L\'argent va directement au Centre VÉRITAS, pour la scolarité de '+_esc(f.prenom)+'.'
@@ -41780,7 +41791,7 @@ function _cagRendre(f){
 
   // ── Partage ──
   h += '<div style="text-align:center;padding:6px 0 20px">'
-    + '<button class="btn bo" onclick="_cagPartager()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-upload"/></svg>Partager cette cagnotte</button>'
+    + '<button class="btn bo" onclick="_cagPartager()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Partager cette cagnotte</button>'
     + '</div>';
 
   w.innerHTML = h;
@@ -41978,7 +41989,7 @@ window.mCagnotteCreer = function(eleve){
     + '<div class="fg"><span class="fl">Mot affiché sur la page (facultatif)</span>'
     +   '<textarea class="fi" id="cgMsg" rows="3" maxlength="600" placeholder="Ex. : Rita est en Terminale A4. Il lui manque la scolarité du 2e trimestre pour continuer."></textarea></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    + '<button class="btn bi" onclick="_cagCreer(\''+_esc(e.id||'')+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Créer la cagnotte</button>');
+    + '<button class="btn bi" onclick="_cagCreer(\''+_esc(e.id||'')+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Créer la cagnotte</button>');
 };
 
 function _cagCreer(eleveId){
@@ -42017,8 +42028,8 @@ function _cagCreer(eleveId){
       + '<div style="font-size:13px;color:var(--ink3);margin:8px 0 12px">Voici le lien à envoyer. Il fonctionne pour tout le monde, y compris depuis l\'étranger.</div>'
       + '<div style="background:var(--bg2,#f6f8fb);padding:12px;border-radius:8px;font-family:monospace;font-size:12px;word-break:break-all">'+_esc(d.url)+'</div>'
       + '</div>',
-      '<button class="btn bo" onclick="_payCopy(\''+_esc(d.url)+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
-      + '<button class="btn bi" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msg)+'\',\'_blank\',\'noopener\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"/></svg>Envoyer sur WhatsApp</button>');
+      '<button class="btn bo" onclick="_payCopy(\''+_esc(d.url)+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier</button>'
+      + '<button class="btn bi" onclick="window.open(\'https://wa.me/?text='+encodeURIComponent(msg)+'\',\'_blank\',\'noopener\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-message"/></svg>Envoyer sur WhatsApp</button>');
   })
   .catch(function(){ toast('❌ Connexion serveur impossible','err'); });
 }
@@ -42205,7 +42216,7 @@ window.pgTrophees = function(){
         +   '<div style="font-weight:700;font-size:13.5px">'+_esc(g.nom||'')+'</div></div>'
         + (g.certId
             ? '<a class="btn bo sm" style="align-self:center;text-decoration:none" href="#verifier-certificat?cert='
-              + encodeURIComponent(g.certId)+'&token='+encodeURIComponent(g.certToken||'')+'"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier</a>'
+              + encodeURIComponent(g.certId)+'&token='+encodeURIComponent(g.certToken||'')+'"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier</a>'
             : '')
         + '</div>';
     });
@@ -42237,10 +42248,10 @@ window._trVoter = function(catId, nomId){
 window.pgTropheesAdmin = function(){
   if(typeof iA==='function' && !iA()) return (typeof na==='function'?na():'');
   var t = _trEd();
-  var h = '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg></span>Trophées VÉRITAS</div>'
+  var h = '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-award"/></svg></span>Trophées VÉRITAS</div>'
     + '<div class="card" style="padding:14px;margin-bottom:12px">'
     +   '<button class="btn bi" onclick="mTropheeEdition()">+ Nouvelle édition</button> '
-    +   '<button class="btn bo" onclick="vShowSec(\'trophees\',null)"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Voir la page publique</button>'
+    +   '<button class="btn bo" onclick="vShowSec(\'trophees\',null)"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Voir la page publique</button>'
     + '</div>';
   if(!t.editions.length){
     return h + '<div class="card" style="padding:20px;color:var(--ink3)">Aucune édition. Créez-en une : elle produit à la fois de la fierté, du contenu à partager et des certificats vérifiables.</div>';
@@ -42253,7 +42264,7 @@ window.pgTropheesAdmin = function(){
       +       (e.statut==='ouverte'?'<span style="color:var(--gr,#059669);font-weight:700">ouverte</span>':'close')+'</div></div>'
       +   '<div style="white-space:nowrap">'
       +     '<button class="btn bo sm" onclick="mTropheeCategorie(\''+_esc(e.id)+'\')">+ Catégorie</button> '
-      +     (e.statut==='ouverte' ? '<button class="btn bi sm" onclick="_trCloturer(\''+_esc(e.id)+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flag"/></svg>Clôturer</button>' : '')
+      +     (e.statut==='ouverte' ? '<button class="btn bi sm" onclick="_trCloturer(\''+_esc(e.id)+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-flag"/></svg>Clôturer</button>' : '')
       +   '</div></div>';
     (e.categories||[]).forEach(function(c){
       h += '<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--bg3,#eef2f7)">'
@@ -42276,7 +42287,7 @@ window.mTropheeEdition = function(){
     + '<div class="fg"><span class="fl">Période</span><input class="fi" id="trPer" placeholder="Janvier – Mars 2026"></div>'
     + '<div class="fg"><span class="fl">Fin du vote</span><input class="fi" id="trFin" type="date"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    + '<button class="btn bi" onclick="_trCreerEdition()"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Créer</button>');
+    + '<button class="btn bi" onclick="_trCreerEdition()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Créer</button>');
 };
 window._trCreerEdition = function(){
   var tit = ((_ge('trTit')||{}).value||'').trim();
@@ -42305,7 +42316,7 @@ window.mTropheeCategorie = function(edId){
     + '<div class="fg"><span class="fl">Ouverte au vote des élèves ?</span>'
     +   '<select class="fi" id="tcVot"><option value="1">Oui — vote gratuit</option><option value="0">Non — désignée par le centre</option></select></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    + '<button class="btn bi" onclick="_trAddCat(\''+_esc(edId)+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>');
+    + '<button class="btn bi" onclick="_trAddCat(\''+_esc(edId)+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>');
 };
 window._trAddCat = function(edId){
   var lab = ((_ge('tcLab')||{}).value||'').trim();
@@ -42326,7 +42337,7 @@ window.mTropheeNomination = function(edId, catId){
     '<div class="fg"><span class="fl">Nom *</span><input class="fi" id="tnNom" placeholder="Prénom NOM"></div>'
     + '<div class="fg"><span class="fl">Motif *</span><input class="fi" id="tnMot" placeholder="Ex. : de 8,5 à 13,2 de moyenne en un trimestre" maxlength="120"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    + '<button class="btn bi" onclick="_trAddNom(\''+_esc(edId)+'\',\''+_esc(catId)+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>');
+    + '<button class="btn bi" onclick="_trAddNom(\''+_esc(edId)+'\',\''+_esc(catId)+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Ajouter</button>');
 };
 window._trAddNom = function(edId, catId){
   var nom = ((_ge('tnNom')||{}).value||'').trim();
@@ -42357,7 +42368,7 @@ window._trCloturer = function(edId){
     '<div style="font-size:13px">'+recap+'</div>'
     + '<div style="margin-top:10px;font-size:12.5px;color:var(--ink4)">Cette action ferme le vote. Elle ne peut pas être annulée depuis l\'interface.</div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
-    + '<button class="btn bi" onclick="_trCloturerOK(\''+_esc(edId)+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-award"/></svg>Décerner et clôturer</button>');
+    + '<button class="btn bi" onclick="_trCloturerOK(\''+_esc(edId)+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-award"/></svg>Décerner et clôturer</button>');
 };
 window._trCloturerOK = function(edId){
   var e = _trEd().editions.find(function(x){ return x.id===edId; });
@@ -42410,7 +42421,7 @@ window._trImprimer = function(edId, catId, nomId){
 window.pgCagnottesAdmin = function(){
   if(typeof iA==='function' && !iA()) return (typeof na==='function'?na():'');
   setTimeout(_cagAdminCharger, 30);
-  return '<div class="pgt"><span class="pgt-ico"><svg class="vico" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"/></svg></span>Cagnottes de scolarité</div>'
+  return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-graduation"/></svg></span>Cagnottes de scolarité</div>'
     + '<div class="card" style="padding:14px;margin-bottom:12px">'
     +   '<button class="btn bi" onclick="mCagnotteCreer()">+ Ouvrir une cagnotte</button> '
     +   '<span class="xs2" style="color:var(--ink4)">Le lien se partage sur WhatsApp — le contributeur n\'a aucun compte à créer.</span>'
@@ -42448,8 +42459,8 @@ function _cagAdminCharger(){
           + '</div>'
           + '<div style="height:8px;background:var(--bg2,#eef2f7);border-radius:99px;overflow:hidden;margin:10px 0">'
           +   '<div style="height:100%;width:'+Math.max(0,Math.min(100,f.pourcent))+'%;background:linear-gradient(90deg,#059669,#3A8F73)"></div></div>'
-          + '<button class="btn bo sm" onclick="_payCopy(\''+_esc(url)+'\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier le lien</button> '
-          + '<button class="btn bo sm" onclick="window.open(\'#cagnotte?t='+_esc(f.token)+'\',\'_self\')"><svg class="vico bico" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-eye"/></svg>Voir</button>'
+          + '<button class="btn bo sm" onclick="_payCopy(\''+_esc(url)+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Copier le lien</button> '
+          + '<button class="btn bo sm" onclick="window.open(\'#cagnotte?t='+_esc(f.token)+'\',\'_self\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Voir</button>'
           + '</div>';
       }).join('');
     })
@@ -42813,11 +42824,20 @@ function _portailRoleActuel(){
 }
 
 var _PORTAIL_LABELS = {
-  eleve:'Élève', parent:'Parent', enseignant:'Enseignant', admin:'Administration'
+  eleve:'Élève', parent:'Parent', enseignant:'Enseignant',
+  etablissement:'Établissement', admin:'Administration'
 };
 
 window._portailAller = function(role){
   var actuel = _portailRoleActuel();
+
+  // 0) « Établissement » n'est pas un type de compte : c'est une présentation
+  //    publique (Campus, label Centre d'Excellence, corrigés pour les
+  //    enseignants). Un proviseur connecté par ailleurs en tant que parent n'a
+  //    aucune raison de tomber sur « Changer d'espace ? ».
+  if(role === 'etablissement'){
+    if(typeof vShowSec === 'function'){ vShowSec('pour-etablissement', null); return; }
+  }
 
   // 1) Déjà au bon endroit → on ouvre son espace directement.
   if(actuel === role){
@@ -42919,8 +42939,29 @@ var _PV_PUBLICS = {
       {ic:'lc-wallet',     t:'Cagnotte de scolarité',d:'Faire participer la famille, même depuis l\'étranger.',         a:"vShowSec('cagnotte',null)"},
       {ic:'lc-compass',    t:'Orientation scolaire', d:'Aider son enfant à choisir sa filière.',                        a:"vShowSec('orientation',null)"},
       {ic:'lc-book',       t:'Manuels & corrigés',   d:'Les cahiers du centre et leurs corrigés en ligne.',             a:"vShowSec('boutique',null)"},
+      {ic:'lc-home',       t:'Accompagnement à domicile', d:'Un enseignant du centre chez vous : vous décrivez le besoin, le centre chiffre.', a:"mDemandeDomicile()"},
       {ic:'lc-message',    t:'Poser une question',   d:'Un enseignant répond sous 2 h, jours ouvrés.',                  a:"_vtWaOpen('parents')"}
     ]
+  },
+  etablissement: {
+    titre:'Établissement',
+    ico:'lc-building',
+    accroche:'Gérer l\'école sans y passer les nuits — et donner aux enseignants de quoi travailler.',
+    cartes:[
+      {ic:'lc-settings',   t:'Confier la gestion de mon établissement', d:'Inscriptions, notes, bulletins, frais, personnel : VÉRITAS Campus, à vos couleurs.', a:"mDemandeCampus()"},
+      {ic:'lc-laptop',     t:'Voir VÉRITAS Campus',  d:'Ce que couvre l\'outil, et les trois façons de l\'héberger.',        a:"window.open('campus/','_blank','noopener')"},
+      {ic:'lc-award',      t:'Centre d\'Excellence VÉRITAS', d:'Le label partenaire : ressources gratuites, formations, visibilité.', a:"vShowSec('partenariat-chef_etab',null)"},
+      {ic:'lc-check',      t:'Corrigés pour vos enseignants', d:'6ᵉ à Terminale, exercice par exercice. Gratuit, sans compte.', a:"window.open('corriges/','_blank','noopener')"},
+      {ic:'lc-book',       t:'Manuels & commandes groupées', d:'Les cahiers VÉRITAS pour vos classes, tarifs par volume.',      a:"vShowSec('boutique',null)"},
+      {ic:'lc-compass',    t:'Orientation de vos élèves', d:'Filières, séries, débouchés : de quoi outiller vos conseils de classe.', a:"vShowSec('orientation',null)"},
+      {ic:'lc-message',    t:'Parler à un conseiller', d:'Une question sur la mise en route, les tarifs, la reprise de vos données.', a:"_vtWaOpen('partenariat')"}
+    ],
+    pied:{
+      titre:'VÉRITAS Campus — votre établissement, votre marque',
+      texte:'Un seul outil pour les inscriptions, les notes, les bulletins conformes MINESEC, les absences, la discipline, les frais de scolarité et le personnel. Francophone ou anglophone, général ou technique : la structure académique se configure, elle ne s\'impose pas. Vos données restent chez VÉRITAS, sur votre serveur, ou sur un poste de la direction qui fonctionne sans Internet — c\'est vous qui choisissez.',
+      cta:'Demander une démonstration',
+      action:'mDemandeCampus()'
+    }
   },
   enseignant: {
     titre:'Enseignant',
@@ -42972,8 +43013,26 @@ window.pgPourVous = function(role){
   });
   h += '</div>';
 
-  // La connexion vient APRÈS le contenu, et seulement si elle a du sens.
-  if(connecte !== role){
+  // Le bas de page vend l'offre qui concerne ce public — prix réels lus dans
+  // DB.elearning.plans — au lieu de se terminer sur un mur de connexion. La
+  // connexion reste offerte à l'intérieur du bloc, en second plan.
+  // (Un abonné actif y voit son accès, pas une vente : cf. _pvOffre.)
+  var offre = (typeof _pvOffre==='function') ? _pvOffre(role) : '';
+  // Un public peut porter son PROPRE pied de page : l'établissement n'a pas de
+  // plan d'abonnement à vendre et le repli « créez un compte enseignant » ne
+  // voudrait rien dire pour un proviseur.
+  if(p.pied){
+    h += '<div style="margin-top:26px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;'
+      +  'border-radius:16px;padding:24px;text-align:center">'
+      +  '<div style="font-weight:800;font-size:17px;margin-bottom:8px;font-family:Montserrat,sans-serif">' + _esc(p.pied.titre) + '</div>'
+      +  '<div style="font-size:13px;color:#cbd5e1;margin:0 auto 16px;line-height:1.65;max-width:620px">' + _esc(p.pied.texte) + '</div>'
+      +  '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 26px" '
+      +    'onclick="' + p.pied.action + '">' + _esc(p.pied.cta) + '</button>'
+      + '</div>';
+  } else if(offre){
+    h += offre;
+  } else if(connecte !== role){
+    // Repli : aucun plan en base (première installation).
     var libelle = (role==='parent') ? 'Créer mon compte parent' : 'Me connecter';
     h += '<div style="margin-top:26px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;'
       +  'border-radius:16px;padding:22px;text-align:center">'
@@ -42996,6 +43055,269 @@ window.pgPourVous = function(role){
 window._portailConnexion = function(role){
   if(role === 'parent'){ if(typeof showRegisterForm==='function') showRegisterForm(''); return; }
   if(typeof showLogin==='function') showLogin(role);
+};
+
+
+/* ══════════ L'OFFRE QUI CONCERNE CHAQUE PUBLIC (v1.14.1) ══════════
+   Les trois hubs listaient très bien ce qui est gratuit, puis s'arrêtaient sur
+   « Me connecter ». Pour l'élève venu de Google, c'était un mur vers un compte
+   que seul le centre peut créer : la page se terminait sur une impasse. Et sur
+   les trois hubs réunis, aucun prix, aucun plan, aucune raison de payer.
+
+   Chaque hub se termine désormais sur l'offre qui LE concerne. Les prix sont
+   LUS dans DB.elearning.plans — jamais écrits en dur ici : si Jacques change un
+   tarif dans l'admin, les hubs suivent. Un abonné actif ne voit pas de vente,
+   il voit ce qu'il a déjà. */
+
+var _PV_TIERS_PAYANTS = ['starter','pro','elite','teach','admin'];
+
+function _pvEstAbonne(){
+  try{
+    if(typeof iA==='function' && iA()) return true;
+    if(typeof _aiTier!=='function') return false;
+    return _PV_TIERS_PAYANTS.indexOf(_aiTier()) >= 0;
+  }catch(e){ return false; }
+}
+
+/* Le plan qui concerne ce public. Pour l'élève, on suit le parcours qu'il a
+   déclaré (anglophone → GCE, technique → TECHNIQUE) puis sa classe : proposer
+   le plan EXAMEN à un élève de 6e serait aussi faux que l'inverse. */
+function _pvPlanPourRole(role){
+  var plans = (DB.elearning && DB.elearning.plans) || [];
+  if(!plans.length) return null;
+  function get(id){ return plans.find(function(p){ return p.id===id; }) || null; }
+
+  if(role === 'enseignant') return get('plan3') || get('plan1');
+  if(role === 'parent')     return get('plan4') || get('plan2');
+
+  var pr = (typeof _getLearnerProfile==='function') ? _getLearnerProfile() : null;
+  if(pr && pr.sys === 'en')   return get('plan6') || get('plan1');
+  if(pr && pr.ens === 'tech') return get('plan5') || get('plan1');
+
+  var cls = String((pr && pr.cls) || (typeof SES!=='undefined' && SES && SES.cls) || '');
+  if(/3\s*[eè]|1\s*[eè]re|1re|\bT(?:le|erminale)\b/i.test(cls)) return get('plan1');
+  if(cls) return get('plan2');
+  return get('plan1') || get('plan2');
+}
+
+/* Les avantages sont saisis avec un préfixe ✅ ou 🔒 dans l'admin. Le ✅ est
+   décoratif — la puce du gabarit le remplace. Le 🔒 marque une EXCLUSION
+   (« réservé au plan supérieur ») : elle n'a rien à faire dans un argumentaire,
+   on l'écarte plutôt que de la vendre à l'envers. */
+function _pvAvantages(plan, max){
+  return (plan.avantages || [])
+    .filter(function(a){ return String(a).indexOf('🔒') < 0; })
+    .map(function(a){ return String(a).replace(/^[\s✅✓•·-]+/, '').trim(); })
+    .filter(function(a){ return a.length > 0; })
+    .slice(0, max || 4);
+}
+
+var _PV_PITCH = {
+  eleve: {
+    titre:'Tu as fait le tour de ce qui est gratuit',
+    sous:'La suite, c\'est ce qui fait la différence en salle d\'examen.'
+  },
+  parent: {
+    titre:'Ce que l\'abonnement change pour votre enfant',
+    sous:'Un seul accès, toute la famille, toute l\'année scolaire.'
+  },
+  enseignant: {
+    titre:'Vos préparations, déjà faites',
+    sous:'Épreuves, corrigés et progressions conformes au programme MINESEC.'
+  }
+};
+
+function _pvOffre(role){
+  var plan = _pvPlanPourRole(role);
+  if(!plan) return '';   // base neuve sans plans : on ne fabrique pas une offre
+
+  // Abonné actif : on ne lui vend pas ce qu'il paie déjà.
+  if(_pvEstAbonne()){
+    return '<div style="margin-top:26px;background:linear-gradient(135deg,#065F46,#047857);color:#fff;'
+      +  'border-radius:16px;padding:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
+      +  '<div style="color:#6EE7B7;flex:0 0 auto">' + _pvIco('lc-check', 26) + '</div>'
+      +  '<div style="flex:1 1 200px;min-width:0">'
+      +    '<div style="font-weight:800;font-size:15px;margin-bottom:3px">Votre abonnement est actif</div>'
+      +    '<div style="font-size:12.5px;color:#D1FAE5;line-height:1.55">Tout le contenu de cet espace vous est ouvert.</div>'
+      +  '</div>'
+      +  '<button class="btn" style="background:#fff;color:#065F46;font-weight:800;padding:10px 20px;flex:0 0 auto" '
+      +    'onclick="vShowSec(\'elearning\',null)">Ouvrir mes contenus</button>'
+      + '</div>';
+  }
+
+  var pitch = _PV_PITCH[role] || _PV_PITCH.eleve;
+  var av    = _pvAvantages(plan, 4);
+  var eco   = (plan.ancien && plan.ancien > plan.prix)
+            ? Math.round((1 - plan.prix / plan.ancien) * 100) : 0;
+
+  var h = '<div style="margin-top:28px;background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;'
+        + 'border-radius:18px;padding:26px 22px;position:relative;overflow:hidden">';
+
+  // Halo d'or discret, purement décoratif.
+  h += '<div aria-hidden="true" style="position:absolute;top:-70px;right:-70px;width:220px;height:220px;'
+    +  'border-radius:50%;background:radial-gradient(circle,rgba(255,201,60,.16),transparent 70%);pointer-events:none"></div>';
+
+  h += '<div style="position:relative">';
+  h += '<div style="font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:18px;font-weight:800;'
+    +  'line-height:1.3;margin-bottom:6px">' + _esc(pitch.titre) + '</div>';
+  h += '<div style="font-size:13px;color:#C7D2FE;margin-bottom:18px;line-height:1.6">' + _esc(pitch.sous) + '</div>';
+
+  // Le plan, son prix réel, son ancrage.
+  h += '<div style="background:rgba(255,255,255,.07);border:1px solid rgba(255,201,60,.28);border-radius:14px;padding:16px;margin-bottom:16px">';
+  h += '<div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px">'
+    +    '<span style="font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:15px;font-weight:800;color:#FFC93C">'
+    +      _esc(plan.nom) + '</span>'
+    +    (eco ? '<span style="background:#FFC93C;color:#142554;font-size:10px;font-weight:800;padding:2px 8px;border-radius:9px">−' + eco + ' %</span>' : '')
+    +  '</div>';
+  h += '<div style="font-size:11.5px;color:#94A3B8;margin-bottom:10px">' + _esc(plan.cible || '') + '</div>';
+  h += '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">'
+    +    '<span style="font-family:Georgia,serif;font-size:26px;font-weight:700;color:#fff;line-height:1">' + fmt(plan.prix) + '</span>'
+    +    (plan.ancien && plan.ancien > plan.prix
+        ? '<span style="font-size:13px;color:#94A3B8;text-decoration:line-through">' + fmt(plan.ancien) + '</span>' : '')
+    +    '<span style="font-size:12px;color:#C7D2FE">/ ' + _esc(plan.duree || 'an') + '</span>'
+    +  '</div>';
+  h += '</div>';
+
+  h += av.map(function(a){
+    return '<div style="display:flex;gap:9px;align-items:flex-start;margin-bottom:7px">'
+      +    '<span style="color:#FFC93C;flex:0 0 auto;line-height:1.5">' + _pvIco('lc-check', 15) + '</span>'
+      +    '<span style="font-size:12.5px;color:#E2E8F0;line-height:1.55">' + _esc(a) + '</span>'
+      +  '</div>';
+  }).join('');
+
+  h += '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:18px">';
+  h += '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 24px;flex:1 1 auto;min-width:170px" '
+    +    'onclick="commanderAbonnement(\'' + _esc(plan.id) + '\')">S\'abonner — ' + fmt(plan.prix) + '</button>';
+  h += '<button class="btn" style="background:rgba(255,255,255,.12);color:#fff;font-weight:700;padding:12px 20px;flex:0 1 auto" '
+    +    'onclick="vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)">Comparer les plans</button>';
+  h += '</div>';
+
+  // La connexion reste offerte, mais elle n'est plus la seule issue de la page.
+  var lienCo = (role === 'parent')
+    ? '<a href="javascript:void(0)" onclick="_portailConnexion(\'parent\')" style="color:#C7D2FE;text-decoration:underline">Créer mon compte parent</a> (gratuit, pour suivre la scolarité)'
+    : (role === 'eleve')
+    ? 'Déjà inscrit au centre ? <a href="javascript:void(0)" onclick="_portailConnexion(\'eleve\')" style="color:#C7D2FE;text-decoration:underline">Me connecter</a> — les comptes élèves sont créés par le centre.'
+    : 'Déjà partenaire ? <a href="javascript:void(0)" onclick="_portailConnexion(\'enseignant\')" style="color:#C7D2FE;text-decoration:underline">Me connecter</a>';
+  h += '<div style="margin-top:14px;font-size:11.5px;color:#94A3B8;line-height:1.6">' + lienCo + '</div>';
+
+  h += '</div></div>';
+  return h;
+}
+window._pvOffre = _pvOffre;
+
+
+/* ══════════ BORDS DE LA NAVIGATION (v1.14.1) ══════════
+   La barre de navigation visiteur mesure ~1 096 px pour 375 px d'écran : le
+   dernier onglet visible était coupé net au bord droit, ce qui se lit comme un
+   défaut d'affichage plutôt que comme un défilement. Le fondu vit dans app.css ;
+   ici on ne fait que dire OÙ on en est du défilement, pour ne pas estomper une
+   extrémité déjà atteinte. Écouteurs passifs, une classe posée par image. */
+(function(){
+  /* Volontairement SANS requestAnimationFrame. Un onglet en arrière-plan ne
+     reçoit plus d'images : un verrou « une passe par frame » n'y serait jamais
+     relâché, et la barre resterait figée au retour de l'utilisateur. On mesure
+     donc directement — mais en gardant `reste` en cache, car lui seul coûte un
+     recalcul de mise en page ; au défilement on ne lit que scrollLeft. */
+  function etat(nav){
+    if(!nav) return;
+    var reste = nav._reste;
+    if(reste === undefined) reste = nav._reste = nav.scrollWidth - nav.clientWidth;
+    var x = nav.scrollLeft;
+    // 2 px de tolérance : les navigateurs arrondissent scrollLeft.
+    nav.classList.toggle('at-start', reste <= 2 || x <= 2);
+    nav.classList.toggle('at-end',   reste <= 2 || x >= reste - 2);
+  }
+  function mesurer(nav){
+    if(!nav) return;
+    nav._reste = nav.scrollWidth - nav.clientWidth;
+    etat(nav);
+  }
+  function brancher(){
+    var nav = document.querySelector('.vnav');
+    if(!nav) return;
+    // Déjà branchée : on REMESURE quand même. La barre est peuplée après coup
+    // (session, langue) et sa largeur extérieure ne bouge pas quand des onglets
+    // s'y ajoutent — sans ce recalcul, l'état resterait figé sur « tout tient ».
+    if(nav._bordsOk){ mesurer(nav); return; }
+    nav._bordsOk = true;
+
+    nav.addEventListener('scroll', function(){ etat(nav); }, {passive:true});
+    window.addEventListener('resize', function(){ mesurer(nav); }, {passive:true});
+    if(typeof ResizeObserver === 'function'){
+      try{ new ResizeObserver(function(){ mesurer(nav); }).observe(nav); }catch(e){}
+    }
+    // Ce sont les ONGLETS qui changent, pas la barre : c'est le contenu qu'il
+    // faut surveiller pour savoir si ça déborde encore.
+    if(typeof MutationObserver === 'function'){
+      try{ new MutationObserver(function(){ mesurer(nav); }).observe(nav, {childList:true, subtree:true}); }catch(e){}
+    }
+    mesurer(nav);
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', brancher, {once:true});
+  } else { brancher(); }
+  // Filet : la barre peut être reconstruite après coup (connexion, langue).
+  setTimeout(brancher, 1500);
+  window._navBordsRefresh = brancher;
+})();
+
+
+/* ══════════ RELANCE CONTEXTUELLE SUR CONTENU PREMIUM (v1.14.1) ══════════
+   _requirePlan() dit « cette fonctionnalité est réservée aux abonnés » et
+   renvoie sur la liste des plans : le visiteur doit lui-même faire le lien
+   entre ce qu'il voulait ouvrir et ce qu'il devrait payer. On perd l'élan.
+
+   Ici on nomme ce qu'il vient de toucher, on annonce le plan qui l'ouvre et
+   son prix, et le bouton mène à la souscription — pas à un catalogue. */
+window._relancePremium = function(o){
+  o = o || {};
+  var plan = o.plan || _pvPlanPourRole(o.role || 'eleve');
+
+  // Sans plan exploitable, mieux vaut l'ancien message générique que rien.
+  if(!plan){
+    if(typeof _requirePlan==='function'){ _requirePlan(o.feature || 'labos', o.titre); }
+    return;
+  }
+  try{ if(typeof _track==='function') _track('paywall_view'); }catch(e){}
+
+  var av = _pvAvantages(plan, 3);
+
+  var body = '<div style="padding:4px 2px">';
+
+  // Ce qu'il voulait ouvrir, nommé.
+  body += '<div style="background:linear-gradient(135deg,#EFF6FF,#EDE9FE);border-radius:14px;padding:16px;margin-bottom:16px;text-align:center">'
+       +    (o.ico ? '<div style="font-size:34px;line-height:1;margin-bottom:8px">' + o.ico + '</div>' : '')
+       +    '<div style="font-family:var(--ds-font-display,Montserrat),sans-serif;font-size:15px;font-weight:800;color:#142554">'
+       +      _esc(o.titre || 'Ce contenu') + '</div>'
+       +    (o.sous ? '<div style="font-size:12px;color:#6B7A99;margin-top:3px">' + _esc(o.sous) + '</div>' : '')
+       +  '</div>';
+
+  body += '<div style="font-size:13.5px;color:var(--ink2);line-height:1.65;margin-bottom:14px">'
+       +    'C\'est inclus dans le plan <b>' + _esc(plan.nom) + '</b>'
+       +    (o.aussi ? ', avec ' + _esc(o.aussi) : '') + '.'
+       +  '</div>';
+
+  body += '<div style="background:#142554;color:#fff;border-radius:14px;padding:16px;margin-bottom:14px">'
+       +    '<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:10px">'
+       +      '<span style="font-family:Georgia,serif;font-size:23px;font-weight:700;line-height:1">' + fmt(plan.prix) + '</span>'
+       +      (plan.ancien && plan.ancien > plan.prix
+            ? '<span style="font-size:12.5px;color:#94A3B8;text-decoration:line-through">' + fmt(plan.ancien) + '</span>' : '')
+       +      '<span style="font-size:12px;color:#C7D2FE">/ ' + _esc(plan.duree || 'an') + '</span>'
+       +    '</div>'
+       +    av.map(function(a){
+              return '<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:6px">'
+                +    '<span style="color:#FFC93C;flex:0 0 auto">' + _pvIco('lc-check', 14) + '</span>'
+                +    '<span style="font-size:12px;color:#E2E8F0;line-height:1.5">' + _esc(a) + '</span>'
+                +  '</div>';
+            }).join('')
+       +  '</div>';
+
+  body += '</div>';
+
+  M('Débloquer ce contenu', _esc(plan.cible || 'Abonnement VÉRITAS'), body,
+    '<button class="btn bo" onclick="cm()">Plus tard</button>'
+    + '<button class="btn bi" onclick="cm();commanderAbonnement(\'' + _esc(plan.id) + '\')">'
+    + 'Débloquer — ' + fmt(plan.prix) + '</button>');
 };
 
 
@@ -43321,3 +43643,628 @@ window._vtPictos = function(racine){
     }
   }catch(e){}
 })();
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DEMANDES ENTRANTES — établissement (VÉRITAS Campus) & accompagnement à
+   domicile.                                                        (v1.15)
+
+   Ce que ce module corrige au passage : les candidatures partenaires étaient
+   rangées dans DB.partnerApplications, or save() ne pousse vers le serveur que
+   pour une session admin/enseignant. Une demande déposée par un visiteur
+   restait donc dans SON navigateur — l'écran affichait « demande reçue »
+   pendant que personne ne la recevait.
+
+   Ici, la demande est POSTÉE à api/demandes.php, qui l'écrit côté serveur. Si
+   le réseau lâche, on ne prétend pas avoir transmis : on garde une copie locale
+   ET on ouvre WhatsApp avec le récapitulatif, pour que la demande parte par un
+   canal qui, lui, a fonctionné.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+window._DEM_URL = (typeof _VRT_ORIGIN !== 'undefined' ? _VRT_ORIGIN : '') + '/api/demandes.php';
+
+/** Lecteur de champ null-safe (la modale est détruite à la fermeture). */
+function _demV(id){ var e = _ge ? _ge(id) : document.getElementById(id); return e ? String(e.value || '').trim() : ''; }
+
+/** Récapitulatif lisible — sert au message WhatsApp et à l'accusé de réception. */
+function _demRecap(type, d){
+  var L = [];
+  if(type === 'campus'){
+    L.push('Établissement : ' + d.etablissement);
+    if(d.fonction) L.push('Fonction : ' + d.fonction);
+    if(d.effectif) L.push('Effectif : ' + d.effectif + ' élèves');
+    if(d.mode)     L.push('Hébergement souhaité : ' + ({managed:"géré par VÉRITAS", self:"serveur de l'établissement", local:"poste de la direction"}[d.mode] || d.mode));
+    if(d.besoins && d.besoins.length) L.push('Besoins : ' + d.besoins.join(', '));
+  } else {
+    if(d.niveau)   L.push('Classe : ' + d.niveau);
+    if(d.matieres && d.matieres.length) L.push('Matières : ' + d.matieres.join(', '));
+    if(d.eleves)   L.push("Nombre d'apprenants : " + d.eleves);
+    if(d.quartier) L.push('Quartier : ' + d.quartier);
+    if(d.adresse)  L.push('Adresse : ' + d.adresse);
+    if(d.frequence)L.push('Rythme : ' + d.frequence);
+    if(d.creneaux) L.push('Disponibilités : ' + d.creneaux);
+    if(d.objectif) L.push('Objectif : ' + d.objectif);
+  }
+  L.push('Contact : ' + d.nom + ' · ' + d.tel + (d.email ? ' · ' + d.email : ''));
+  return L.join('\n');
+}
+
+/** Envoi réel. Renvoie une promesse ; l'appelant affiche l'accusé de réception. */
+function _demEnvoyer(type, d){
+  d.type = type;
+  return fetch(window._DEM_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(d)
+    })
+    .then(function(r){
+      return r.json()
+        .catch(function(){ return { ok:false, error:'Réponse illisible du serveur.' }; })
+        .then(function(j){ j._status = r.status; return j; });
+    })
+    .then(function(j){
+      if(!j.ok) throw new Error(j.error || 'Envoi refusé (' + (j._status || '?') + ').');
+      try{
+        DB.demandes = DB.demandes || [];
+        DB.demandes.push({ id:j.id, ref:j.ref, type:type, statut:'nouveau',
+                           date:(typeof today === 'function' ? today() : ''), nom:d.nom, tel:d.tel });
+        if(typeof save === 'function') save();
+      }catch(e){}
+      return j;
+    });
+}
+
+/** Repli hors-ligne : rien n'est perdu, la demande part par WhatsApp. */
+function _demReplWhatsApp(type, d, raison){
+  var titre = (type === 'campus')
+    ? "Demande VÉRITAS Campus (gestion d'établissement)"
+    : "Demande d'accompagnement à domicile";
+  var msg = 'Bonjour VÉRITAS.\n' + titre + '\n\n' + _demRecap(type, d);
+  var num = (typeof _vtWaNumber === 'function') ? _vtWaNumber() : '237697637739';
+  try{
+    DB.demandesEnAttente = DB.demandesEnAttente || [];
+    DB.demandesEnAttente.push({ type:type, data:d, date:new Date().toISOString(), raison:String(raison || '') });
+    if(typeof save === 'function') save();
+  }catch(e){}
+  try{ window.open('https://wa.me/' + num + '?text=' + encodeURIComponent(msg), '_blank', 'noopener'); }catch(e){}
+}
+
+/** Accusé de réception affiché dans la zone visiteur. */
+function _demMerci(type, ref, d){
+  var titre = (type === 'campus') ? 'Demande transmise à VÉRITAS Campus' : "Demande d'accompagnement transmise";
+  var suite = (type === 'campus')
+    ? "Un conseiller vous rappelle sous <strong>48 h ouvrables</strong> pour cadrer le besoin, choisir le mode d'hébergement et vous montrer l'outil sur vos propres classes."
+    : "Le centre étudie la demande et vous envoie <strong>un devis détaillé</strong> — matières, nombre de séances, déplacement — sous 48 h ouvrables. Rien n'est facturé avant votre accord.";
+  var h = '<div style="max-width:560px;margin:32px auto;padding:0 16px;text-align:center">'
+    + '<div class="i-disc" style="width:64px;height:64px;margin:0 auto 16px;background:rgba(58,143,115,.14);color:#3A8F73">' + ICO('i-check', 'i i-lg') + '</div>'
+    + '<div style="font-size:22px;font-weight:800;color:#142554;margin-bottom:8px;font-family:Montserrat,sans-serif">' + titre + '</div>'
+    + '<div style="font-size:13.5px;color:#5B6B85;line-height:1.65;margin-bottom:16px">' + suite + '</div>'
+    + '<div style="background:#F7F9FF;border:1px solid #E6EAF2;border-radius:14px;padding:14px 16px;margin-bottom:18px;text-align:left">'
+    +   '<div style="font-size:10.5px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#7B8AA6;margin-bottom:6px">Votre référence</div>'
+    +   '<div style="font-family:Fira Code,monospace;font-size:17px;font-weight:700;color:#142554">' + _esc(ref) + '</div>'
+    +   '<div style="font-size:11.5px;color:#7B8AA6;margin-top:6px">Citez-la si vous appelez : elle retrouve votre dossier en une seconde.</div>'
+    + '</div>'
+    + '<button class="btn bi" onclick="_demWaSuivi(\'' + _esc(ref) + '\')">' + ICO('i-message', 'i bico') + 'Prévenir sur WhatsApp</button> '
+    + '<button class="btn bo" onclick="vShowSec(\'presentation\',null)">Retour à l\'accueil</button>'
+    + '</div>';
+  if(typeof _vc === 'function') _vc(h);
+  else if(typeof _si === 'function') _si('vContent', h);
+}
+
+window._demWaSuivi = function(ref){
+  var num = (typeof _vtWaNumber === 'function') ? _vtWaNumber() : '237697637739';
+  var msg = 'Bonjour VÉRITAS. Je viens de déposer la demande ' + ref + ' sur le site.';
+  try{ window.open('https://wa.me/' + num + '?text=' + encodeURIComponent(msg), '_blank', 'noopener'); }catch(e){}
+};
+
+/** Empêche le double envoi pendant l'aller-retour réseau. */
+function _demBoutonEnCours(){
+  try{
+    var btns = document.querySelectorAll('.mfoot .btn.bi, .modal .btn.bi, #modal .btn.bi');
+    for(var i = 0; i < btns.length; i++){
+      btns[i].disabled = true;
+      btns[i].style.opacity = '.6';
+      btns[i].textContent = 'Envoi…';
+    }
+  }catch(e){}
+}
+
+/* ── 1. ÉTABLISSEMENT : confier la gestion à VÉRITAS Campus ─────────────── */
+window.mDemandeCampus = function(){
+  var besoins = ['Notes & bulletins','Frais de scolarité','Absences & discipline','Emploi du temps',
+                 'Personnel & paie','Communication familles','E-learning','Bibliothèque'];
+  var body =
+      '<div style="background:#F7F9FF;border:1px solid #E6EAF2;border-radius:12px;padding:12px 14px;font-size:12.5px;color:#41506B;line-height:1.6;margin-bottom:14px">'
+    +   "VÉRITAS Campus gère un établissement de bout en bout : inscriptions, notes et bulletins conformes MINESEC, absences, discipline, frais de scolarité, personnel. "
+    +   "Aux couleurs de votre établissement, en français comme en anglais, enseignement général ou technique."
+    + '</div>'
+    + '<div class="fg"><span class="fl">Nom de l\'établissement *</span><input class="fi" id="_dcEtab" placeholder="ex. Collège Bilingue La Semence"></div>'
+    + '<div class="fg"><span class="fl">Votre nom *</span><input class="fi" id="_dcNom" placeholder="ex. Jacques TAKOU"></div>'
+    + '<div class="fg"><span class="fl">Votre fonction</span><select class="fi" id="_dcFonction">'
+    +   '<option value="">— choisir —</option><option>Proviseur</option><option>Directeur</option><option>Censeur</option>'
+    +   '<option>Préfet des études</option><option>Intendant / Économe</option><option>Secrétaire</option>'
+    +   '<option>Fondateur / Promoteur</option><option>Autre</option>'
+    + '</select></div>'
+    + '<div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="_dcTel" placeholder="+237 6XX XX XX XX"></div>'
+    + '<div class="fg"><span class="fl">E-mail</span><input class="fi" id="_dcEmail" type="email" placeholder="direction@etablissement.cm"></div>'
+    + '<div class="fg"><span class="fl">Ville</span><input class="fi" id="_dcVille" placeholder="Douala, Yaoundé, Bafoussam…"></div>'
+    + '<div class="fg"><span class="fl">Effectif approximatif</span><input class="fi" id="_dcEffectif" type="number" min="0" placeholder="ex. 450"></div>'
+    + '<div class="fg"><span class="fl">Où loger les données ?</span><select class="fi" id="_dcMode">'
+    +   '<option value="managed">Hébergé par VÉRITAS — rien à installer, mises à jour et sauvegardes comprises</option>'
+    +   '<option value="self">Sur le serveur de l\'établissement — vos données chez vous</option>'
+    +   '<option value="local">Sur un poste de la direction — fonctionne sans Internet</option>'
+    + '</select></div>'
+    + '<div class="fg"><span class="fl">Ce qui vous intéresse en priorité</span>'
+    +   '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">'
+    +   besoins.map(function(b, i){
+          return '<label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;background:#F7F9FF;border:1px solid #E6EAF2;border-radius:20px;padding:6px 12px;cursor:pointer">'
+               + '<input type="checkbox" class="_dcBesoin" value="' + b + '" id="_dcB' + i + '">' + b + '</label>';
+        }).join('')
+    +   '</div></div>'
+    + '<div class="fg"><span class="fl">Précisions</span><textarea class="fi" id="_dcMsg" rows="3" placeholder="Votre organisation actuelle, ce qui vous fait perdre le plus de temps…"></textarea></div>';
+
+  M('Confier la gestion de mon établissement', 'VÉRITAS Campus · démonstration gratuite, sans engagement', body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_demSoumettreCampus()">' + ICO('i-mail', 'i bico') + 'Envoyer ma demande</button>',
+    true);
+};
+
+window._demSoumettreCampus = function(){
+  var d = {
+    etablissement: _demV('_dcEtab'),
+    nom:      _demV('_dcNom'),
+    fonction: _demV('_dcFonction'),
+    tel:      _demV('_dcTel'),
+    email:    _demV('_dcEmail'),
+    ville:    _demV('_dcVille'),
+    effectif: parseInt(_demV('_dcEffectif'), 10) || 0,
+    mode:     _demV('_dcMode') || 'managed',
+    message:  _demV('_dcMsg'),
+    besoins:  []
+  };
+  try{
+    var cases = document.querySelectorAll('._dcBesoin');
+    for(var i = 0; i < cases.length; i++){ if(cases[i].checked) d.besoins.push(cases[i].value); }
+  }catch(e){}
+  if(!d.etablissement){ toast("Le nom de l'établissement est requis", 'warn'); return; }
+  if(!d.nom){ toast('Votre nom est requis', 'warn'); return; }
+  if(d.tel.replace(/\D/g, '').length < 8){ toast('Numéro de téléphone invalide', 'warn'); return; }
+  _demBoutonEnCours();
+  _demEnvoyer('campus', d)
+    .then(function(j){ if(typeof cm === 'function') cm(); _demMerci('campus', j.ref, d); })
+    .catch(function(err){
+      if(typeof cm === 'function') cm();
+      toast('Envoi impossible — la demande part par WhatsApp', 'warn');
+      _demReplWhatsApp('campus', d, err && err.message);
+    });
+};
+
+/* ── 2. PARENT : accompagnement à domicile ─────────────────────────────── */
+window.mDemandeDomicile = function(){
+  var matieres = ['Français','Mathématiques','Anglais','Physique-Chimie','SVT','Histoire-Géographie',
+                  'Philosophie','Informatique','ECM','Allemand','Espagnol','Comptabilité'];
+  var niveaux  = ['Primaire','6ᵉ','5ᵉ','4ᵉ','3ᵉ','2nde','1ère','Terminale','Form 1-5 (GCE)','Lower/Upper Sixth'];
+  var body =
+      '<div style="background:#F7F9FF;border:1px solid #E6EAF2;border-radius:12px;padding:12px 14px;font-size:12.5px;color:#41506B;line-height:1.6;margin-bottom:14px">'
+    +   "Un enseignant du centre se déplace chez vous. Vous décrivez le besoin ci-dessous ; "
+    +   "<strong>le centre vous répond avec un devis détaillé</strong> — matières, nombre de séances, déplacement. Rien n'est facturé avant votre accord."
+    + '</div>'
+    + '<div class="fg"><span class="fl">Votre nom *</span><input class="fi" id="_ddNom" placeholder="ex. Mme NGONO"></div>'
+    + '<div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="_ddTel" placeholder="+237 6XX XX XX XX"></div>'
+    + '<div class="fg"><span class="fl">E-mail</span><input class="fi" id="_ddEmail" type="email" placeholder="vous@example.cm"></div>'
+    + '<div class="fg"><span class="fl">Ville *</span><input class="fi" id="_ddVille" placeholder="Douala"></div>'
+    + '<div class="fg"><span class="fl">Quartier *</span><input class="fi" id="_ddQuartier" placeholder="ex. Bonamoussadi, Makepe, Logpom…"></div>'
+    + '<div class="fg"><span class="fl">Adresse / repère</span><input class="fi" id="_ddAdresse" placeholder="ex. carrefour Kotto, immeuble bleu, 2ᵉ étage"></div>'
+    + '<div class="fg"><span class="fl">Classe de l\'apprenant *</span><select class="fi" id="_ddNiveau"><option value="">— choisir —</option>'
+    +   niveaux.map(function(n){ return '<option>' + n + '</option>'; }).join('')
+    + '</select></div>'
+    + '<div class="fg"><span class="fl">Matières souhaitées *</span>'
+    +   '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">'
+    +   matieres.map(function(m, i){
+          return '<label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;background:#F7F9FF;border:1px solid #E6EAF2;border-radius:20px;padding:6px 12px;cursor:pointer">'
+               + '<input type="checkbox" class="_ddMat" value="' + m + '" id="_ddM' + i + '">' + m + '</label>';
+        }).join('')
+    +   '</div></div>'
+    + '<div class="fg"><span class="fl">Nombre d\'apprenants</span><input class="fi" id="_ddEleves" type="number" min="1" max="20" value="1"></div>'
+    + '<div class="fg"><span class="fl">Rythme souhaité</span><select class="fi" id="_ddFrequence">'
+    +   '<option>1 séance par semaine</option><option>2 séances par semaine</option><option>3 séances par semaine</option>'
+    +   '<option>Tous les jours (période d\'examen)</option><option>Vacances uniquement</option><option>À définir avec le centre</option>'
+    + '</select></div>'
+    + '<div class="fg"><span class="fl">Jours et heures qui vous arrangent</span><input class="fi" id="_ddCreneaux" placeholder="ex. mardi et jeudi après 17 h, samedi matin"></div>'
+    + '<div class="fg"><span class="fl">Objectif</span><textarea class="fi" id="_ddObjectif" rows="3" placeholder="ex. remonter la moyenne de maths avant le 2ᵉ trimestre, préparer le BEPC…"></textarea></div>';
+
+  M('Accompagnement à domicile', 'Un enseignant du centre chez vous · devis sous 48 h', body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_demSoumettreDomicile()">' + ICO('i-mail', 'i bico') + 'Demander un devis</button>',
+    true);
+};
+
+window._demSoumettreDomicile = function(){
+  var d = {
+    nom:       _demV('_ddNom'),
+    tel:       _demV('_ddTel'),
+    email:     _demV('_ddEmail'),
+    ville:     _demV('_ddVille'),
+    quartier:  _demV('_ddQuartier'),
+    adresse:   _demV('_ddAdresse'),
+    niveau:    _demV('_ddNiveau'),
+    eleves:    parseInt(_demV('_ddEleves'), 10) || 1,
+    frequence: _demV('_ddFrequence'),
+    creneaux:  _demV('_ddCreneaux'),
+    objectif:  _demV('_ddObjectif'),
+    matieres:  []
+  };
+  try{
+    var cases = document.querySelectorAll('._ddMat');
+    for(var i = 0; i < cases.length; i++){ if(cases[i].checked) d.matieres.push(cases[i].value); }
+  }catch(e){}
+  if(!d.nom){ toast('Votre nom est requis', 'warn'); return; }
+  if(d.tel.replace(/\D/g, '').length < 8){ toast('Numéro de téléphone invalide', 'warn'); return; }
+  if(!d.quartier && !d.adresse){ toast('Précisez au moins le quartier', 'warn'); return; }
+  if(!d.niveau){ toast('Précisez la classe', 'warn'); return; }
+  if(!d.matieres.length){ toast('Choisissez au moins une matière', 'warn'); return; }
+  _demBoutonEnCours();
+  _demEnvoyer('domicile', d)
+    .then(function(j){ if(typeof cm === 'function') cm(); _demMerci('domicile', j.ref, d); })
+    .catch(function(err){
+      if(typeof cm === 'function') cm();
+      toast('Envoi impossible — la demande part par WhatsApp', 'warn');
+      _demReplWhatsApp('domicile', d, err && err.message);
+    });
+};
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CÔTÉ CENTRE — suivi des demandes et émission des devis.          (v1.15)
+
+   Les demandes vivent SUR LE SERVEUR (api/demandes.php), pas dans le
+   localStorage : c'est la seule façon pour le centre de voir ce qu'un visiteur
+   a déposé depuis son propre téléphone. Cette page les lit avec le secret de
+   synchronisation (le même que db.php), les classe, et permet de répondre.
+
+   Le devis n'invente aucun tarif : le centre saisit ses lignes et son montant.
+   Un tarif horaire mémorisé (DB.tarifDomicile) sert uniquement de calculette,
+   jamais de prix affiché au public.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+window._DEM_CACHE = { liste: [], charge: false, erreur: '' };
+
+function _demSecret(){
+  try{
+    if(DB && DB.cloudConfig && DB.cloudConfig.secret) return DB.cloudConfig.secret;
+    var cc = localStorage.getItem('vrt10_cc');
+    if(cc){ var o = JSON.parse(cc); if(o && o.secret) return o.secret; }
+  }catch(e){}
+  return '';
+}
+
+function _demCharger(){
+  var sec = _demSecret();
+  if(!sec){
+    _DEM_CACHE.erreur = 'Clé de synchronisation absente sur ce poste — ouvrez Réglages ▸ Cloud pour la saisir.';
+    _DEM_CACHE.charge = true;
+    if(typeof re === 'function') re();
+    return;
+  }
+  fetch(window._DEM_URL + '?action=list&t=' + Date.now(), { headers: { 'Authorization': 'Bearer ' + sec } })
+    .then(function(r){ return r.json().catch(function(){ return { ok:false, error:'Réponse illisible (' + r.status + ')' }; }); })
+    .then(function(j){
+      _DEM_CACHE.liste  = (j && j.ok && j.demandes) ? j.demandes : [];
+      _DEM_CACHE.erreur = (j && j.ok) ? '' : ((j && j.error) || 'Lecture impossible.');
+      _DEM_CACHE.charge = true;
+      if(typeof re === 'function') re();
+    })
+    .catch(function(err){
+      _DEM_CACHE.erreur = 'Serveur injoignable : ' + (err && err.message ? err.message : 'réseau');
+      _DEM_CACHE.charge = true;
+      if(typeof re === 'function') re();
+    });
+}
+
+function _demMajServeur(payload){
+  var sec = _demSecret();
+  if(!sec){ toast('Clé de synchronisation absente', 'warn'); return Promise.reject(new Error('no-secret')); }
+  return fetch(window._DEM_URL + '?action=update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sec },
+      body: JSON.stringify(payload)
+    })
+    .then(function(r){ return r.json().catch(function(){ return { ok:false, error:'Réponse illisible (' + r.status + ')' }; }); })
+    .then(function(j){ if(!j.ok) throw new Error(j.error || 'Refus du serveur'); return j; });
+}
+
+var _DEM_STATUTS = {
+  nouveau:      { l:'Nouvelle',      c:'#B45309', f:'rgba(180,83,9,.12)' },
+  en_cours:     { l:'En cours',      c:'#3A6EA8', f:'rgba(58,110,168,.12)' },
+  devis_envoye: { l:'Devis envoyé',  c:'#6C56A6', f:'rgba(108,86,166,.12)' },
+  accepte:      { l:'Acceptée',      c:'#3A8F73', f:'rgba(58,143,115,.14)' },
+  clos:         { l:'Close',         c:'#6B7A94', f:'rgba(107,122,148,.12)' }
+};
+
+function _demBadge(st){
+  var s = _DEM_STATUTS[st] || _DEM_STATUTS.nouveau;
+  return '<span style="display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:800;'
+       + 'background:' + s.f + ';color:' + s.c + '">' + s.l + '</span>';
+}
+
+function _demDate(iso){
+  try{ return new Date(iso).toLocaleDateString('fr-FR', { day:'2-digit', month:'2-digit', year:'numeric' })
+            + ' à ' + new Date(iso).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }); }
+  catch(e){ return String(iso || ''); }
+}
+
+window.pgDemandes = function(){
+  if(typeof iA === 'function' && !iA()) return (typeof na === 'function') ? na() : '';
+  if(!_DEM_CACHE.charge){ setTimeout(_demCharger, 30); }
+
+  var liste = _DEM_CACHE.liste || [];
+  var f = window._demFiltre || 'tout';
+  var vues = liste.filter(function(d){
+    if(f === 'tout')     return true;
+    if(f === 'campus')   return d.type === 'campus';
+    if(f === 'domicile') return d.type === 'domicile';
+    return d.statut === f;
+  });
+  var nb = function(test){ return liste.filter(test).length; };
+
+  var h = '<div class="pgt"><span class="pgt-ico">' + ICO('i-mail') + '</span>Demandes entrantes</div>';
+
+  h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px">'
+    +  _demTuile('À traiter',  nb(function(d){ return d.statut === 'nouveau'; }), '#B45309')
+    +  _demTuile('Établissements', nb(function(d){ return d.type === 'campus'; }), '#6C56A6')
+    +  _demTuile('À domicile', nb(function(d){ return d.type === 'domicile'; }), '#3A6EA8')
+    +  _demTuile('Devis envoyés', nb(function(d){ return d.statut === 'devis_envoye'; }), '#3A8F73')
+    + '</div>';
+
+  if(_DEM_CACHE.erreur){
+    h += '<div class="ib ibw mb14"><span>' + ICO('i-warning') + '</span><span>' + _esc(_DEM_CACHE.erreur) + '</span></div>';
+  }
+
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">';
+  [['tout','Toutes'],['nouveau','À traiter'],['campus','Établissements'],['domicile','À domicile'],
+   ['devis_envoye','Devis envoyés'],['clos','Closes']].forEach(function(o){
+    var actif = (f === o[0]);
+    h += '<button class="btn ' + (actif ? 'bi' : 'bo') + ' sm" onclick="window._demFiltre=\'' + o[0] + '\';re()">' + o[1] + '</button>';
+  });
+  h += '<button class="btn bo sm" onclick="_DEM_CACHE.charge=false;re()">' + ICO('i-refresh', 'i bico') + 'Actualiser</button>';
+  h += '</div>';
+
+  if(!_DEM_CACHE.charge){
+    h += '<div class="card" style="text-align:center;padding:30px;color:var(--ink3)">Lecture des demandes sur le serveur…</div>';
+    return h;
+  }
+  if(!vues.length){
+    h += '<div class="card" style="text-align:center;padding:34px">'
+      +  '<div style="color:var(--ink3);font-size:13.5px">Aucune demande dans cette vue.</div>'
+      +  '<div style="color:var(--ink4);font-size:12px;margin-top:6px">Les demandes déposées depuis le site (établissement ou accompagnement à domicile) arrivent ici automatiquement.</div>'
+      +  '</div>';
+    return h;
+  }
+
+  vues.forEach(function(d){
+    var estCampus = (d.type === 'campus');
+    var titre = estCampus ? (d.etablissement || '(établissement non précisé)')
+                          : ((d.niveau ? d.niveau + ' · ' : '') + (d.matieres || []).join(', '));
+    var lignes = [];
+    if(estCampus){
+      if(d.fonction) lignes.push(['Fonction', d.fonction]);
+      if(d.effectif) lignes.push(['Effectif', d.effectif + ' élèves']);
+      lignes.push(['Hébergement', ({managed:'Géré par VÉRITAS', self:'Serveur de l\'établissement', local:'Poste de la direction'})[d.mode] || d.mode || '—']);
+      if((d.besoins || []).length) lignes.push(['Priorités', d.besoins.join(', ')]);
+    } else {
+      if(d.quartier) lignes.push(['Quartier', d.quartier]);
+      if(d.adresse)  lignes.push(['Adresse', d.adresse]);
+      if(d.eleves)   lignes.push(['Apprenants', String(d.eleves)]);
+      if(d.frequence)lignes.push(['Rythme', d.frequence]);
+      if(d.creneaux) lignes.push(['Disponibilités', d.creneaux]);
+      if(d.objectif) lignes.push(['Objectif', d.objectif]);
+    }
+    if(d.ville)   lignes.push(['Ville', d.ville]);
+    if(d.message) lignes.push(['Message', d.message]);
+
+    var tel = String(d.tel || '').replace(/\D/g, '');
+    h += '<div class="card mb12" style="border-left:none">'
+      +  '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">'
+      +    '<div style="min-width:220px">'
+      +      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+      +        '<span style="font-weight:800;font-size:15px;color:#142554">' + _esc(titre) + '</span>'
+      +        _demBadge(d.statut)
+      +        '<span style="font-family:Fira Code,monospace;font-size:11.5px;color:var(--ink4)">' + _esc(d.ref || '') + '</span>'
+      +      '</div>'
+      +      '<div style="font-size:12.5px;color:var(--ink3);margin-top:4px">'
+      +        _esc(d.nom || '') + ' · ' + _esc(d.tel || '') + (d.email ? ' · ' + _esc(d.email) : '')
+      +      '</div>'
+      +      '<div style="font-size:11.5px;color:var(--ink4);margin-top:2px">Reçue le ' + _esc(_demDate(d.created_at)) + '</div>'
+      +    '</div>'
+      +    '<div style="display:flex;gap:6px;flex-wrap:wrap">'
+      +      (tel ? '<a class="btn bo sm" href="https://wa.me/' + tel + '" target="_blank" rel="noopener">' + ICO('i-message', 'i bico') + 'WhatsApp</a>' : '')
+      +      '<button class="btn bi sm" onclick="mDemDevis(\'' + _esc(d.id) + '\')">' + ICO('i-file-text', 'i bico') + (d.devis ? 'Revoir le devis' : 'Faire un devis') + '</button>'
+      +      '<button class="btn bo sm" onclick="_demStatut(\'' + _esc(d.id) + '\',\'en_cours\')">En cours</button>'
+      +      '<button class="btn bo sm" onclick="_demStatut(\'' + _esc(d.id) + '\',\'clos\')">Clore</button>'
+      +    '</div>'
+      +  '</div>';
+
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-top:12px">';
+    lignes.forEach(function(l){
+      h += '<div style="background:#F7F9FF;border-radius:10px;padding:8px 10px">'
+        +  '<div style="font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#7B8AA6">' + _esc(l[0]) + '</div>'
+        +  '<div style="font-size:12.5px;color:#41506B;margin-top:2px">' + _esc(l[1]) + '</div>'
+        +  '</div>';
+    });
+    h += '</div>';
+
+    if(d.devis){
+      h += '<div style="margin-top:12px;background:rgba(108,86,166,.07);border:1px solid rgba(108,86,166,.20);border-radius:12px;padding:12px 14px">'
+        +  '<div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:#6C56A6;margin-bottom:6px">Devis émis</div>'
+        +  '<div style="font-size:15px;font-weight:800;color:#142554">' + (typeof fmt === 'function' ? fmt(d.devis.montant) : d.devis.montant + ' FCFA')
+        +    (d.devis.periode ? ' <span style="font-size:12px;font-weight:600;color:var(--ink3)">/ ' + _esc(d.devis.periode) + '</span>' : '') + '</div>'
+        +  ((d.devis.detail || []).length ? '<ul style="margin:8px 0 0 18px;font-size:12.5px;color:#41506B;line-height:1.6">'
+              + d.devis.detail.map(function(x){ return '<li>' + _esc(x) + '</li>'; }).join('') + '</ul>' : '')
+        +  '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">'
+        +    (tel ? '<button class="btn bi sm" onclick="_demEnvoyerDevis(\'' + _esc(d.id) + '\')">' + ICO('i-message', 'i bico') + 'Envoyer le devis</button>' : '')
+        +    '<button class="btn bo sm" onclick="_demImprimerDevis(\'' + _esc(d.id) + '\')">' + ICO('i-printer', 'i bico') + 'Imprimer</button>'
+        +    '<button class="btn bo sm" onclick="_demStatut(\'' + _esc(d.id) + '\',\'accepte\')">Marquer acceptée</button>'
+        +  '</div>'
+        +  '</div>';
+    }
+    if(d.note){
+      h += '<div style="margin-top:10px;font-size:12px;color:var(--ink3)"><b>Note interne :</b> ' + _esc(d.note) + '</div>';
+    }
+    h += '</div>';
+  });
+
+  return h;
+};
+
+function _demTuile(label, valeur, couleur){
+  return '<div style="background:#fff;border:1px solid #E6EAF2;border-radius:14px;padding:14px 16px">'
+       + '<div style="font-size:26px;font-weight:800;color:' + couleur + ';line-height:1">' + valeur + '</div>'
+       + '<div style="font-size:11.5px;color:var(--ink3);margin-top:4px">' + label + '</div>'
+       + '</div>';
+}
+
+function _demTrouve(id){
+  return (_DEM_CACHE.liste || []).filter(function(d){ return d.id === id; })[0] || null;
+}
+
+window._demStatut = function(id, statut){
+  _demMajServeur({ id:id, statut:statut })
+    .then(function(){
+      var d = _demTrouve(id); if(d) d.statut = statut;
+      toast('Statut mis à jour');
+      if(typeof re === 'function') re();
+    })
+    .catch(function(e){ toast('Échec : ' + e.message, 'err'); });
+};
+
+/* ── Devis ───────────────────────────────────────────────────────────────
+   Le centre saisit ses lignes. La calculette (séances × tarif) n'est qu'une
+   aide de saisie : aucun tarif n'est publié ni imposé. */
+window.mDemDevis = function(id){
+  var d = _demTrouve(id);
+  if(!d){ toast('Demande introuvable', 'warn'); return; }
+  var dv = d.devis || {};
+  var tarif = (DB && DB.tarifDomicile) ? DB.tarifDomicile : '';
+  var estCampus = (d.type === 'campus');
+  var detail = (dv.detail || []).join('\n');
+  if(!detail){
+    detail = estCampus
+      ? ['Mise en route de VÉRITAS Campus (paramétrage, import des élèves)',
+         'Formation du personnel (2 séances)',
+         'Abonnement annuel — ' + (d.effectif ? d.effectif + ' élèves' : 'effectif à préciser')].join('\n')
+      : (d.matieres || []).map(function(m){ return m + ' — séances à domicile'; }).join('\n');
+  }
+
+  var body =
+      '<div style="background:#F7F9FF;border:1px solid #E6EAF2;border-radius:12px;padding:10px 12px;font-size:12px;color:#41506B;margin-bottom:12px">'
+    +   'Demande <b>' + _esc(d.ref || '') + '</b> · ' + _esc(d.nom || '') + ' · ' + _esc(d.tel || '')
+    +   (estCampus ? '' : ('<br>' + _esc((d.niveau || '') + ' · ' + (d.matieres || []).join(', ') + ' · ' + (d.quartier || ''))))
+    + '</div>'
+    + (estCampus ? '' :
+        '<div class="fg"><span class="fl">Calculette (facultative)</span>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">'
+      +   '<input class="fi" id="_dvSeances" type="number" min="0" placeholder="séances / mois" oninput="_demCalc()">'
+      +   '<input class="fi" id="_dvHeures" type="number" min="0" step="0.5" placeholder="heures / séance" oninput="_demCalc()">'
+      +   '<input class="fi" id="_dvTarif" type="number" min="0" placeholder="tarif horaire" value="' + _esc(String(tarif)) + '" oninput="_demCalc()">'
+      + '</div>'
+      + '<div id="_dvCalcOut" style="font-size:12px;color:var(--ink3);margin-top:6px"></div></div>')
+    + '<div class="fg"><span class="fl">Montant proposé (FCFA) *</span><input class="fi" id="_dvMontant" type="number" min="0" value="' + _esc(String(dv.montant || '')) + '"></div>'
+    + '<div class="fg"><span class="fl">Période</span><input class="fi" id="_dvPeriode" placeholder="ex. par mois, par trimestre, forfait annuel" value="' + _esc(dv.periode || '') + '"></div>'
+    + '<div class="fg"><span class="fl">Détail (une ligne par prestation)</span><textarea class="fi" id="_dvDetail" rows="5">' + _esc(detail) + '</textarea></div>'
+    + '<div class="fg"><span class="fl">Valable jusqu\'au</span><input class="fi" id="_dvValide" type="date" value="' + _esc(dv.valide_le || '') + '"></div>'
+    + '<div class="fg"><span class="fl">Note interne (non envoyée)</span><textarea class="fi" id="_dvNote" rows="2">' + _esc(d.note || '') + '</textarea></div>';
+
+  M('Devis — ' + (estCampus ? _esc(d.etablissement || 'établissement') : 'accompagnement à domicile'),
+    'Le montant part au demandeur uniquement quand vous l\'envoyez', body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_demSauverDevis(\'' + _esc(id) + '\')">' + ICO('i-check', 'i bico') + 'Enregistrer le devis</button>',
+    true);
+};
+
+window._demCalc = function(){
+  var v = function(id){ var e = document.getElementById(id); return e ? parseFloat(e.value) || 0 : 0; };
+  var total = v('_dvSeances') * v('_dvHeures') * v('_dvTarif');
+  var out = document.getElementById('_dvCalcOut');
+  if(out) out.innerHTML = total > 0
+    ? 'Soit <b>' + (typeof fmt === 'function' ? fmt(Math.round(total)) : Math.round(total) + ' FCFA') + '</b> par mois · '
+      + '<a href="#" onclick="event.preventDefault();document.getElementById(\'_dvMontant\').value=' + Math.round(total) + '">reporter dans le montant</a>'
+    : '';
+};
+
+window._demSauverDevis = function(id){
+  var v = function(x){ var e = document.getElementById(x); return e ? String(e.value || '').trim() : ''; };
+  var montant = parseInt(v('_dvMontant'), 10) || 0;
+  if(montant <= 0){ toast('Indiquez le montant du devis', 'warn'); return; }
+  var payload = {
+    id: id,
+    note: v('_dvNote'),
+    devis: {
+      montant: montant,
+      periode: v('_dvPeriode'),
+      detail: v('_dvDetail').split('\n').map(function(x){ return x.trim(); }).filter(Boolean),
+      valide_le: v('_dvValide')
+    }
+  };
+  var tarif = parseInt(v('_dvTarif'), 10) || 0;
+  if(tarif > 0){ try{ DB.tarifDomicile = tarif; if(typeof save === 'function') save(); }catch(e){} }
+  _demMajServeur(payload)
+    .then(function(){
+      var d = _demTrouve(id);
+      if(d){ d.devis = payload.devis; d.note = payload.note; if(d.statut === 'nouveau' || d.statut === 'en_cours') d.statut = 'devis_envoye'; }
+      if(typeof cm === 'function') cm();
+      toast('Devis enregistré — reste à l\'envoyer');
+      if(typeof re === 'function') re();
+    })
+    .catch(function(e){ toast('Échec : ' + e.message, 'err'); });
+};
+
+window._demEnvoyerDevis = function(id){
+  var d = _demTrouve(id);
+  if(!d || !d.devis){ toast('Aucun devis à envoyer', 'warn'); return; }
+  var centre = (DB && DB.school && DB.school.nom) ? DB.school.nom : 'Centre VÉRITAS';
+  var L = ['Bonjour ' + (d.nom || '') + ',', '', centre + ' — devis ' + (d.ref || '') + ''];
+  if((d.devis.detail || []).length){ L.push(''); d.devis.detail.forEach(function(x){ L.push('• ' + x); }); }
+  L.push('');
+  L.push('Montant : ' + (typeof fmt === 'function' ? fmt(d.devis.montant) : d.devis.montant + ' FCFA')
+         + (d.devis.periode ? ' ' + d.devis.periode : ''));
+  if(d.devis.valide_le) L.push('Valable jusqu\'au ' + d.devis.valide_le);
+  L.push('');
+  L.push('Répondez à ce message pour confirmer ou ajuster.');
+  var tel = String(d.tel || '').replace(/\D/g, '');
+  try{ window.open('https://wa.me/' + tel + '?text=' + encodeURIComponent(L.join('\n')), '_blank', 'noopener'); }catch(e){}
+};
+
+window._demImprimerDevis = function(id){
+  var d = _demTrouve(id);
+  if(!d || !d.devis){ toast('Aucun devis à imprimer', 'warn'); return; }
+  var centre = (DB && DB.school) ? DB.school : {};
+  var lignes = (d.devis.detail || []).map(function(x){
+    return '<tr><td style="padding:8px 10px;border-bottom:1px solid #E6EAF2">' + _esc(x) + '</td></tr>';
+  }).join('');
+  var html = '<html><head><meta charset="utf-8"><title>Devis ' + _esc(d.ref || '') + '</title></head>'
+    + '<body style="font-family:Georgia,serif;color:#142554;max-width:720px;margin:32px auto;padding:0 20px">'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #FFC93C;padding-bottom:12px">'
+    +   '<div><div style="font-size:20px;font-weight:700">' + _esc(centre.nom || 'Centre VÉRITAS') + '</div>'
+    +   '<div style="font-size:12px;color:#5B6B85">' + _esc(centre.ville || '') + (centre.tel ? ' · ' + _esc(centre.tel) : '') + '</div></div>'
+    +   '<div style="text-align:right"><div style="font-size:15px;font-weight:700">DEVIS</div>'
+    +   '<div style="font-size:12px;color:#5B6B85">' + _esc(d.ref || '') + '</div></div>'
+    + '</div>'
+    + '<p style="font-size:13px;line-height:1.6">À l\'attention de <b>' + _esc(d.nom || '') + '</b>'
+    +   (d.type === 'campus' ? ' — ' + _esc(d.etablissement || '') : '')
+    +   '<br>' + _esc(d.tel || '') + (d.email ? ' · ' + _esc(d.email) : '') + '</p>'
+    + '<table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:10px">'
+    +   '<thead><tr><th style="text-align:left;padding:8px 10px;background:#F7F9FF;border-bottom:2px solid #142554">Prestation</th></tr></thead>'
+    +   '<tbody>' + lignes + '</tbody></table>'
+    + '<div style="text-align:right;margin-top:16px;font-size:17px;font-weight:700">'
+    +   'Total : ' + (typeof fmt === 'function' ? fmt(d.devis.montant) : d.devis.montant + ' FCFA')
+    +   (d.devis.periode ? ' <span style="font-size:13px;font-weight:400">' + _esc(d.devis.periode) + '</span>' : '')
+    + '</div>'
+    + (d.devis.valide_le ? '<div style="text-align:right;font-size:12px;color:#5B6B85">Offre valable jusqu\'au ' + _esc(d.devis.valide_le) + '</div>' : '')
+    + '<p style="font-size:11.5px;color:#5B6B85;margin-top:26px;border-top:1px solid #E6EAF2;padding-top:10px">'
+    +   'Devis établi le ' + _esc(_demDate(new Date().toISOString())) + '. Aucune prestation n\'est engagée avant acceptation écrite du demandeur.'
+    + '</p></body></html>';
+  var w = window.open('', '_blank');
+  if(!w){ toast('Autorisez les fenêtres surgissantes pour imprimer', 'warn'); return; }
+  w.document.write(html); w.document.close(); w.focus();
+  setTimeout(function(){ try{ w.print(); }catch(e){} }, 250);
+};

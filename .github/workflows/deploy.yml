@@ -37,6 +37,7 @@ on:
       - 'parcours/**'
       - 'adopter/**'
       - 'cours/**'
+      - 'campus/**'
       - 'Logo détouré.png'
       - 'og-image.jpg'
       - 'ambassa-avatar.jpg'
@@ -70,9 +71,9 @@ jobs:
       - name: 🧪 Vérifier la syntaxe (PHP + JS) avant déploiement
         run: |
           php_fail=0
-          echo "→ Lint PHP (php -l) sur api/*.php"
+          echo "→ Lint PHP (php -l) sur api/*.php et api/campus/*.php"
           if command -v php >/dev/null 2>&1; then
-            for f in api/*.php; do
+            for f in api/*.php api/campus/*.php; do
               [ -f "$f" ] || continue
               if ! php -l "$f"; then php_fail=1; fi
             done
@@ -225,6 +226,19 @@ jobs:
             if [ -d "$d" ]; then cp -r "$d" deploy/; echo "  ✓ $d/"; fi
           done
 
+          # ── VÉRITAS Campus (SaaS multi-établissement) ───────────
+          # Front : campus/*.html + campus.js + config.js.
+          # ⚠️ config.js porte le MODE d'hébergement ; il part tel quel, c'est
+          #    le fichier que l'on édite pour une install mono-établissement.
+          #    Les .md (offre, déploiement) restent internes : pas en ligne.
+          if [ -d campus ]; then
+            mkdir -p deploy/campus
+            for f in campus/*.html campus/*.js campus/*.css; do
+              [ -f "$f" ] && cp "$f" deploy/campus/
+            done
+            echo "  ✓ campus/ ($(ls deploy/campus | wc -l) fichiers publics, docs internes exclues)"
+          fi
+
           # ── Vidéo promotionnelle ───────────────────────────────
           if [ -f VERITAS_Promo_Video.html ]; then
             cp VERITAS_Promo_Video.html deploy/
@@ -281,9 +295,37 @@ jobs:
             api/admin_validate.php \
             api/stats.php \
             api/teacher_access.php \
-            api/secure_pdf.php; do
+            api/secure_pdf.php \
+            api/demandes.php; do
             [ -f "$f" ] && cp "$f" deploy/api/ && echo "  ✓ $f"
           done
+
+          # ── Backend VÉRITAS Campus (api/campus/) ────────────────
+          # TOUT le dossier part : index.php est le front controller, mais il
+          # require les _*.php — en oublier un donne un 500 muet en production.
+          # Le .htaccess est OBLIGATOIRE : c'est lui qui interdit l'accès direct
+          # aux _*.php et à schema.sql. Sans lui, le déploiement échoue ici
+          # plutôt que d'exposer le schéma de la base.
+          if [ -d api/campus ]; then
+            if [ ! -f api/campus/.htaccess ]; then
+              echo "::error title=Campus sans verrou::api/campus/.htaccess manquant — les _*.php et schema.sql seraient lisibles en ligne. Déploiement ANNULÉ."
+              exit 1
+            fi
+            mkdir -p deploy/api/campus
+            # _config.php porte les identifiants MySQL et le jeton
+            # d'installation : il est gitignoré (dépôt public) et vit
+            # uniquement sur le serveur. La CI ne l'a donc pas — et ne doit
+            # surtout pas l'écraser avec un fichier vide.
+            for f in api/campus/*.php; do
+              case "$(basename "$f")" in
+                _config.php) echo "  ↷ _config.php ignoré (secrets, reste sur le serveur)" ;;
+                *) cp "$f" deploy/api/campus/ ;;
+              esac
+            done
+            cp api/campus/schema.sql deploy/api/campus/
+            cp api/campus/.htaccess deploy/api/campus/
+            echo "  ✓ api/campus/ ($(ls deploy/api/campus/*.php | wc -l) fichiers PHP + schema.sql + verrou)"
+          fi
 
           # ── Page admin de validation des réponses IA (Plan Élite) ─
           if [ -f admin-validation.html ]; then

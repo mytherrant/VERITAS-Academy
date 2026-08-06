@@ -1,0 +1,17 @@
+# VÉRITAS Campus — routage & protection (api/campus/)
+# Le front controller est index.php ; les routes passent par PATH_INFO
+# (…/api/campus/index.php/auth/login) ou ?route=auth/login.
+
+# Empêche l'accès direct aux fichiers internes (_*.php) et au schéma SQL.
+<FilesMatch "^(_.*\.php|schema\.sql)$">
+    Require all denied
+</FilesMatch>
+
+# Jolies URLs optionnelles : /api/campus/<route> → index.php/<route>
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /api/campus/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+</IfModule>

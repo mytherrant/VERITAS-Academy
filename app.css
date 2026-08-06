@@ -1330,6 +1330,27 @@ input,select,textarea,button{font-family:'Poppins','Inter',sans-serif!important}
   .vsec-title-hero > span:first-child, .vsec-title-hero > svg:first-child{ width:48px; height:48px; font-size:22px; }
 }
 
+/* ── Pictogrammes du sprite Lucide (#lc-*) ────────────────────────────────
+   La conversion émoji → pictogramme avait écrit 659 fois le même bloc de neuf
+   attributs de présentation dans app.js — 136 Ko de balisage identique, sur le
+   chemin de démarrage. Ces attributs ont tous un équivalent CSS ; le viewBox
+   est porté par les <symbol> du sprite (88/88 le déclarent), donc inutile sur
+   le <svg> qui les référence. Reste dans le JS ce qui varie : la classe et
+   l'identifiant de l'icône.
+
+   `:not([width])` est le garde-fou : _calIco()/window._ico calcule une taille
+   à la volée et la pose en attribut. Une règle CSS l'emporterait sur cet
+   attribut et figerait toutes ses icônes à 17 px — ici elle s'efface devant lui.
+
+   stroke:currentColor est conservé tel quel : c'est ce qui fait fonctionner les
+   surcharges de couleur existantes (.vexam-date .vico, .vcal-note .vico, …). */
+svg.vico{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+svg.vico:not([width]){width:17px;height:17px}
+svg.vico.bico{stroke-width:2}
+svg.vico.bico:not([width]){width:15px;height:15px}
+svg.vico.vico-19:not([width]){width:19px;height:19px}
+svg.vico.vico-21:not([width]){width:21px;height:21px}
+
 /* ── Nav redesign ── */
 .vnav{background:#fff;border-bottom:3px solid #E8EEFF;padding:10px 12px;display:flex;
   flex-wrap:nowrap;gap:6px;position:sticky;top:0;z-index:100;
@@ -1340,6 +1361,38 @@ input,select,textarea,button{font-family:'Poppins','Inter',sans-serif!important}
 .vnav::-webkit-scrollbar-track{background:transparent}
 .vnav::-webkit-scrollbar-thumb{background:#C7D2FE;border-radius:10px}
 .vnav::-webkit-scrollbar-thumb:hover{background:#93A5CF}
+
+/* ── Bords de la nav : dire qu'il y a une suite ────────────────────────────
+   Sur un écran de 375 px la barre mesure 1 096 px : 721 px sont hors champ.
+   Le dernier bouton visible était tranché net au bord droit — ça ne se lit pas
+   comme « ça défile », ça se lit comme « c'est cassé ». Un fondu aux deux
+   extrémités, piloté par les classes posées au défilement, montre la coupure
+   pour ce qu'elle est. Le masque est retiré à l'extrémité atteinte, sinon le
+   premier et le dernier bouton resteraient éternellement à demi effacés. */
+.vnav{
+  --vnav-fade:26px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--vnav-fade),
+                     #000 calc(100% - var(--vnav-fade)),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 var(--vnav-fade),
+                     #000 calc(100% - var(--vnav-fade)),transparent 100%);
+  scroll-behavior:smooth;
+}
+.vnav.at-start{
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - var(--vnav-fade)),transparent 100%);
+          mask-image:linear-gradient(90deg,#000 calc(100% - var(--vnav-fade)),transparent 100%);
+}
+.vnav.at-end{
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--vnav-fade));
+          mask-image:linear-gradient(90deg,transparent 0,#000 var(--vnav-fade));
+}
+/* Tient dans la largeur : ni fondu, ni masque. */
+.vnav.at-start.at-end{-webkit-mask-image:none;mask-image:none}
+/* Le rail de défilement de 5 px sous les onglets fait sale sur mobile, où le
+   geste suffit. On le garde à la souris, où il sert de poignée. */
+@media (hover:none){
+  .vnav{scrollbar-width:none}
+  .vnav::-webkit-scrollbar{height:0}
+}
 .vnav-btn{border:none;background:transparent;color:#6B7A99;font:600 12px/1 'Montserrat',sans-serif;
   padding:8px 14px;border-radius:6px;cursor:pointer;transition:all .2s;letter-spacing:.3px}
 .vnav-btn:hover{background:#E8EEFF;color:#142554}

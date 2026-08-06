@@ -5,7 +5,11 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const PORT = parseInt(process.argv[2] || '3000', 10);
+// Priorité : argument explicite > variable PORT > 3000. Sans la lecture de
+// process.env.PORT, l'attribution automatique de port du harnais ne servait à
+// rien : le script écoutait toujours 3000 et refusait de démarrer si un
+// serveur y traînait déjà (EADDRINUSE).
+const PORT = parseInt(process.argv[2] || process.env.PORT || '3000', 10);
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'application/javascript; charset=utf-8',
