@@ -644,6 +644,10 @@ if('MutationObserver' in window){
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
 <link rel="preload" as="style" href="/app.css?v=1.15.3" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="/app.css?v=1.15.3"></noscript>
+<!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
+     app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
+<link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.15.3" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/veritas-motion.css?v=1.15.3"></noscript>
 </head>
 <body>
 <!-- ════════ A11Y v2 : Skip link pour lecteurs d'écran ════════ -->
@@ -1163,6 +1167,10 @@ else _vCitFloat();
      (chunks/*.js) pour qu'ils suivent le même cache que app.js. -->
 <script>window._VRT_ASSET_VER='1.15.3';</script>
 <script defer src="/app.js?v=1.15.3"></script>
+<!-- Promotion des barres de filtres en onglets flottants. `defer` la place
+     après app.js : elle habille un DOM qui existe déjà. Amélioration
+     progressive — son absence ne retire aucune fonctionnalité. -->
+<script defer src="/assets/veritas-motion.js?v=1.15.3"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>

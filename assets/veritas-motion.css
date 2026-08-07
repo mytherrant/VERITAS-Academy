@@ -1,0 +1,236 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   VÉRITAS — Panneaux, onglets flottants et mouvement          v1.15.2 · 08/2026
+   ───────────────────────────────────────────────────────────────────────────
+   Couche AUTONOME, volontairement hors d'app.css : elle se relit, se révise et
+   se retire d'un bloc. Elle habille ce qui existe — aucune page n'en dépend
+   pour fonctionner.
+
+   Trois règles tenues d'un bout à l'autre :
+
+   1. ON N'ANIME QUE `transform` ET `opacity`. Pas de `box-shadow`, pas de
+      `background-position`, pas de `filter`, pas de `width/top/left`. Une ombre
+      qui change au survol est peinte par le processeur ; sur un téléphone
+      d'entrée de gamme camerounais c'est la première chose qui saccade. Quand
+      il faut faire varier une ombre, elle est PRÉ-PEINTE dans un pseudo-élément
+      dont on ne touche que l'opacité.
+
+   2. NAVY ↔ COBALT ↔ OR. Pas de dégradé bleu→violet : c'est la signature des
+      interfaces générées, et ce n'est pas la marque. L'or #FFC93C ne sert que
+      d'accent — jamais de fond de panneau.
+
+   3. PAS DE BLANC PUR. Le fond des panneaux est l'ivoire --lx-paper : le blanc
+      #fff délave l'or et durcit le navy.
+
+   L'ensemble se coupe net sous `prefers-reduced-motion` (fin de fichier).
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* Ressort : dépassement franc puis retour. C'est lui qui donne le côté
+     « jeune » — un easing linéaire aurait l'air administratif. */
+  --vm-spring: cubic-bezier(.34, 1.56, .64, 1);
+  --vm-ease:   cubic-bezier(.22, .61, .36, 1);
+  --vm-navy:   #142554;
+  --vm-gold:   #FFC93C;
+  --vm-paper:  var(--lx-paper, #FAF7F1);
+  /* Ombres TEINTÉES navy — jamais du gris neutre, qui salit l'ivoire. */
+  --vm-lift:   0 18px 38px -20px rgba(20,37,84,.42);
+  --vm-rest:   0 8px 20px -14px rgba(20,37,84,.24);
+}
+
+/* ═══ 1. PANNEAUX ═══════════════════════════════════════════════════════════
+   Le liseré or est décalé à GAUCHE et ne fait pas toute la largeur : une barre
+   centrée parfaitement symétrique est exactement ce qu'on cherche à éviter. */
+
+.vpanel{
+  position:relative;
+  background:var(--vm-paper);
+  border:1px solid rgba(20,37,84,.09);
+  border-radius:22px;
+  padding:22px 22px 24px;
+  box-shadow:var(--vm-rest);
+  transition:transform .28s var(--vm-ease);
+  will-change:transform;
+}
+/* L'ombre haute est peinte une fois et attend à opacité 0 ; au survol on ne
+   fait varier QUE son opacité — donc rien à repeindre. */
+.vpanel::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:var(--vm-lift);
+  opacity:0;transition:opacity .28s var(--vm-ease);
+}
+.vpanel:hover{transform:translateY(-4px)}
+.vpanel:hover::after{opacity:1}
+
+/* Filet or asymétrique sous le titre du panneau. */
+.vpanel-t{
+  font-family:'Libre Baskerville',Georgia,serif;
+  font-size:17px;font-weight:700;color:var(--vm-navy);
+  margin:0 0 14px;padding-bottom:10px;position:relative;letter-spacing:-.01em;
+}
+.vpanel-t::after{
+  content:'';position:absolute;left:0;bottom:0;width:44px;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--vm-gold),rgba(255,201,60,0));
+  transform-origin:left center;transform:scaleX(1);
+  transition:transform .34s var(--vm-spring);
+}
+.vpanel:hover .vpanel-t::after{transform:scaleX(1.7)}
+
+/* Variante « marque » : fond navy, réservée aux encarts d'appel. Le navy est
+   nuancé (deux navys), pas remplacé par du blanc — règle de Jacques. */
+.vpanel.is-brand{
+  background:linear-gradient(148deg,#142554 0%,#1E3A8A 100%);
+  border-color:rgba(255,201,60,.22);
+}
+.vpanel.is-brand .vpanel-t{color:#fff}
+.vpanel.is-brand{color:rgba(255,255,255,.82)}
+
+
+/* ── Les surfaces qui existent déjà héritent du même traitement ────────────
+   Plutôt que d'exiger une nouvelle classe partout (donc de toucher app.js, que
+   d'autres éditent), on reprend les deux surfaces réellement utilisées. Même
+   technique : l'ombre haute est pré-peinte dans ::after et seule son opacité
+   varie, donc rien n'est repeint au survol. */
+#vContent .vcard,
+#vContent .acc-ess-c{
+  position:relative;
+  transition:transform .26s var(--vm-ease), border-color .26s var(--vm-ease);
+  will-change:transform;
+}
+#vContent .vcard::after,
+#vContent .acc-ess-c::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  box-shadow:var(--vm-lift);
+  opacity:0;transition:opacity .26s var(--vm-ease);
+}
+#vContent .vcard:hover,
+#vContent .acc-ess-c:hover{transform:translateY(-4px);border-color:rgba(255,201,60,.42)}
+#vContent .vcard:hover::after,
+#vContent .acc-ess-c:hover::after{opacity:1}
+
+/* Le pictogramme accompagne le mouvement de la carte au lieu de rester figé —
+   c'est ce décalage d'un cheveu qui fait « vivant » plutôt que « survolé ». */
+#vContent .acc-ess-c .acc-ess-ic{
+  transition:transform .3s var(--vm-spring);
+  transform-origin:left center;
+}
+#vContent .acc-ess-c:hover .acc-ess-ic{transform:scale(1.14) rotate(-5deg)}
+
+
+/* ═══ 2. ONGLETS FLOTTANTS ══════════════════════════════════════════════════
+   Les barres de filtres (labos, épreuves, jeux) étaient des rangées de pilules
+   qui défilaient hors de l'écran avec le contenu : dès qu'on descendait dans la
+   liste, on ne savait plus quel filtre était actif ni comment en changer.
+   Elles deviennent collantes, posées sur un bandeau ivoire translucide.
+
+   Le curseur n'est PAS un élément qui se déplace : chaque onglet porte son
+   propre trait, révélé par un scaleX. Rien à mesurer en JS, rien à recalculer
+   au redimensionnement, et le ressort part du bon côté. */
+
+.vftabs{
+  position:sticky;top:52px;z-index:40;
+  display:flex;gap:8px;align-items:center;
+  padding:9px 12px;margin:0 -2px 16px;
+  background:rgba(250,247,241,.86);
+  -webkit-backdrop-filter:saturate(1.5) blur(10px);
+          backdrop-filter:saturate(1.5) blur(10px);
+  border:1px solid rgba(20,37,84,.08);
+  border-radius:999px;
+  box-shadow:0 10px 26px -18px rgba(20,37,84,.40);
+  overflow-x:auto;overflow-y:hidden;
+  scrollbar-width:none;
+  /* Fondu aux extrémités : dire qu'il y a une suite, sans barre de défilement. */
+  --vm-fade:22px;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--vm-fade),#000 calc(100% - var(--vm-fade)),transparent 100%);
+          mask-image:linear-gradient(90deg,transparent 0,#000 var(--vm-fade),#000 calc(100% - var(--vm-fade)),transparent 100%);
+  scroll-behavior:smooth;
+}
+.vftabs::-webkit-scrollbar{height:0}
+.vftabs.at-start{
+  -webkit-mask-image:linear-gradient(90deg,#000 calc(100% - var(--vm-fade)),transparent 100%);
+          mask-image:linear-gradient(90deg,#000 calc(100% - var(--vm-fade)),transparent 100%);
+}
+.vftabs.at-end{
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 var(--vm-fade));
+          mask-image:linear-gradient(90deg,transparent 0,#000 var(--vm-fade));
+}
+.vftabs.at-start.at-end{-webkit-mask-image:none;mask-image:none}
+
+.vftab{
+  position:relative;flex:0 0 auto;
+  padding:8px 16px 9px;border:0;border-radius:999px;
+  background:rgba(20,37,84,.05);
+  color:var(--vm-navy);
+  font:700 12.5px/1 'Montserrat',system-ui,sans-serif;
+  white-space:nowrap;cursor:pointer;
+  transition:transform .2s var(--vm-spring), background-color .2s var(--vm-ease), color .2s var(--vm-ease);
+  will-change:transform;
+}
+.vftab:hover{transform:translateY(-2px)}
+.vftab:active{transform:translateY(0) scale(.96)}
+.vftab:focus-visible{outline:2px solid var(--vm-gold);outline-offset:2px}
+
+/* Onglet actif : pilule navy, texte or. Le trait or dessous part de zéro. */
+.vftab.is-on{background:var(--vm-navy);color:var(--vm-gold)}
+.vftab::after{
+  content:'';position:absolute;left:16px;right:16px;bottom:4px;height:2px;border-radius:2px;
+  background:var(--vm-gold);
+  transform:scaleX(0);transform-origin:center;
+  transition:transform .34s var(--vm-spring);
+}
+.vftab.is-on::after{transform:scaleX(1)}
+
+@media (max-width:560px){
+  .vftabs{top:48px;padding:7px 10px;gap:6px}
+  .vftab{padding:7px 13px 8px;font-size:11.5px}
+}
+
+
+/* ═══ 3. ENTRÉE DES SECTIONS ════════════════════════════════════════════════
+   Passer d'une section à l'autre remplaçait le contenu d'un coup sec. Une
+   montée de 10 px suffit à faire comprendre que la page a changé. */
+
+.vm-enter{animation:vmEnter .38s var(--vm-ease) both}
+@keyframes vmEnter{
+  from{opacity:0;transform:translate3d(0,10px,0)}
+  to  {opacity:1;transform:none}
+}
+
+/* Entrée en cascade des cartes : l'index est posé par le JS (--vm-i). Le délai
+   est plafonné à 8 rangs — au-delà, l'attente se voit plus que l'effet. */
+.vm-stagger{animation:vmEnter .42s var(--vm-ease) both;animation-delay:calc(var(--vm-i,0) * 45ms)}
+
+
+/* ═══ 4. ACCROCHES ══════════════════════════════════════════════════════════
+   Le reflet or balaie le bouton par TRANSLATION d'un pseudo-élément — la
+   version habituelle anime `background-position`, qui repeint à chaque image. */
+
+.vm-shine{position:relative;overflow:hidden;isolation:isolate}
+.vm-shine::before{
+  content:'';position:absolute;top:0;bottom:0;left:-60%;width:45%;z-index:1;
+  background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.42) 50%,rgba(255,255,255,0) 100%);
+  transform:translate3d(-140%,0,0) skewX(-18deg);
+  transition:transform .62s var(--vm-ease);
+  pointer-events:none;
+}
+.vm-shine:hover::before{transform:translate3d(360%,0,0) skewX(-18deg)}
+
+/* Pastille de comptage qui « respire » une fois à l'apparition, sans boucle. */
+.vm-pop{animation:vmPop .5s var(--vm-spring) both}
+@keyframes vmPop{
+  from{opacity:0;transform:scale(.72)}
+  to  {opacity:1;transform:scale(1)}
+}
+
+
+/* ═══ 5. RESPECT DU RÉGLAGE SYSTÈME ═════════════════════════════════════════
+   Un utilisateur qui a demandé moins d'animation a souvent une bonne raison
+   (mal des transports, trouble vestibulaire). On ne garde que l'essentiel. */
+
+@media (prefers-reduced-motion:reduce){
+  .vpanel,.vpanel::after,.vpanel-t::after,.vftab,.vftab::after,.vm-shine::before{
+    transition:none !important;
+  }
+  .vpanel:hover{transform:none}
+  .vm-enter,.vm-stagger,.vm-pop{animation:none !important}
+  .vftabs{scroll-behavior:auto}
+}
