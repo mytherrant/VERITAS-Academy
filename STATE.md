@@ -451,3 +451,37 @@ scopés (notes/bulletins QR, emploi du temps, RH) ; (d) confirmer le **nom de ma
 - **À retenir** : `:last-of-type` / `:last-child` sur un conteneur au balisage mixte est un piège ;
   et un `position:static` imposé de loin transforme silencieusement tout enfant `absolute` en calque
   plein écran.
+
+## Chrome visiteur : trois bandeaux → un seul (07/08)
+- **79px d'en-tête récupérés** : `.vlogin-bar` (36) + `.vhero` (7, écrasé sur mobile — sa citation
+  débordait PAR-DESSUS le ticker, d'où le chevauchement visible sur les captures) + `#tickerBar` (36).
+  Le contenu commence désormais à y=0. Aplatissement en CSS, pas de restructuration HTML : la
+  coquille était éditée en parallèle par une autre session.
+- **PIÈGE — `#vLoginBtns` est réécrit EN ENTIER** par `_updateVisitorHeader()` (connexion) et
+  `deconnecter()`. Y laisser panier / langue / contact / `#adminAccessPoint`, c'est les perdre à la
+  première connexion — l'accès admin compris (bug préexistant). D'où `#vNavUtils`, conteneur à nous
+  créé par `_vChromeCompact()`, qu'aucune de ces réécritures ne touche. `#vLoginBtns` est déplacé
+  dans la nav malgré tout : connecté, c'est lui qui porte « Mon compte » et « Déco ».
+- **PIÈGE — `min-height` CLAMPE `height`, même en `!important`.** `.btn{min-height:44px}` rendait les
+  icônes ovales (40 de large, 44 de haut) : `height:40px!important` ne pouvait pas gagner, ce n'est
+  pas une déclaration concurrente mais une contrainte. Il faut neutraliser `min-height`.
+  La cible tactile de 44px reste garantie par `@media(pointer:coarse)` — règle d'accessibilité
+  volontaire (l.199), à respecter, pas à contourner.
+- **PIÈGE — un calque décoratif n'est pas une modale.** `.v-scroll-progress` (4px,
+  `pointer-events:none`, z-index:10001) faisait passer ma détection « modale ouverte » pour vraie et
+  la citation ne paraissait jamais. Une vraie modale CAPTE le pointeur ET couvre l'écran : tester les
+  trois conditions, pas seulement le z-index.
+- **PIÈGE — `#vtWaFab` CHANGE de place en cours de route** : `bottom:18px` à 9s, `bottom:82px` à 10,5s
+  (repositionné, pas seulement animé). Toute mesure ponctuelle est fausse quel que soit l'instant.
+  La carte de citation maintient donc sa position tant qu'elle est affichée (700ms).
+- Citations : 20 entrées (motivation + développement personnel, voix africaines), carte flottante
+  13s toutes les 4 min, refermable pour la session, jamais par-dessus une modale, 12px au-dessus du
+  bouton WhatsApp. Elles ne reprennent aucune hauteur.
+- Sélecteur de langue enrichi : nom natif, sous-système, état courant, périmètre exact de la
+  traduction, passerelle GCE. **Deux langues seulement** — celles réellement traduites ; en annoncer
+  une troisième serait une promesse creuse.
+- **Coordination multi-agents (2e fois)** : `app.js` et la coquille étaient édités en parallèle.
+  Méthode qui a marché : construire le blob à committer = `git show HEAD:fichier` + MON seul
+  changement, puis `git hash-object -w` + `git update-index --cacheinfo`. La copie de travail de
+  l'autre session n'est jamais touchée. Ne JAMAIS faire `git commit <chemin>` ensuite : les chemins
+  explicites recommittent la copie de travail et écrasent l'index.
