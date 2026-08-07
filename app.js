@@ -31335,14 +31335,55 @@ window.setLang = function(lang, silent){
 
 window.mLanguageMenu = function(){
   var curr = (DB && DB._lang) || localStorage.getItem('_vrtLang') || 'fr';
-  var body = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:8px">'
-    +'<button class="btn" style="background:'+(curr==='fr'?'#FFC93C':'#F3F4F6')+';color:'+(curr==='fr'?'#142554':'#374151')+';padding:18px;font-size:16px;font-weight:700;border-radius:14px" onclick="setLang(\'fr\');cm()">🇫🇷 Français</button>'
-    +'<button class="btn" style="background:'+(curr==='en'?'#FFC93C':'#F3F4F6')+';color:'+(curr==='en'?'#142554':'#374151')+';padding:18px;font-size:16px;font-weight:700;border-radius:14px" onclick="setLang(\'en\');cm()">🇬🇧 English</button>'
-    +'</div>'
-    +'<div style="margin-top:14px;padding:10px;background:#FEF3C7;border-radius:8px;font-size:12px;color:#92400E">'
-    +'<b>ℹ️ Note :</b> '+(curr==='fr'?'Les contenus pédagogiques (cours, œuvres, épreuves) restent en français — seule l\'interface est traduite.':'Educational content (courses, works, exams) stays in French — only the UI is translated.')
+  var EN = (curr==='en');
+
+  // v1.15.3 — Enrichi. On n'affiche QUE les deux langues réellement traduites :
+  // annoncer une troisième langue qui ne traduit rien serait une promesse creuse.
+  // Ce qu'on ajoute à la place : le nom natif, l'état courant lisible, le
+  // périmètre exact de la traduction, et la passerelle vers le sous-système
+  // anglophone (GCE) — la vraie attente derrière « passer en anglais » au Cameroun.
+  var LANGS = [
+    { code:'fr', drapeau:'🇫🇷', nom:'Français', natif:'Langue d\'enseignement', sous:EN?'Francophone subsystem':'Sous-système francophone' },
+    { code:'en', drapeau:'🇬🇧', nom:'English',  natif:'Interface language',     sous:EN?'Anglophone subsystem (GCE)':'Sous-système anglophone (GCE)' }
+  ];
+
+  var body = '<div style="display:grid;gap:10px;padding:2px">';
+  LANGS.forEach(function(L){
+    var actif = (curr===L.code);
+    body += '<button class="btn" onclick="setLang(\''+L.code+'\');cm()" aria-pressed="'+actif+'" '
+      +'style="display:flex;align-items:center;gap:13px;text-align:left;padding:14px 15px;border-radius:14px;'
+      +'background:'+(actif?'linear-gradient(150deg,#16295C,#101F45)':'#F4F6FA')+';'
+      +'color:'+(actif?'#fff':'#142554')+';'
+      +'border:1px solid '+(actif?'rgba(255,201,60,.45)':'rgba(20,37,84,.12)')+';font-weight:600">'
+      +'<span style="font-size:26px;line-height:1;flex-shrink:0">'+L.drapeau+'</span>'
+      +'<span style="flex:1;min-width:0">'
+        +'<span style="display:block;font-size:15.5px;font-weight:800">'+L.nom+'</span>'
+        +'<span style="display:block;font-size:11px;opacity:.72;margin-top:2px">'+L.sous+'</span>'
+      +'</span>'
+      +(actif
+        ? '<span style="flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:.6px;color:#FFC93C;text-transform:uppercase">'+(EN?'Active':'Actuelle')+'</span>'
+        : '<span style="flex-shrink:0;font-size:17px;opacity:.35">→</span>')
+      +'</button>';
+  });
+  body += '</div>';
+
+  // Périmètre : dire précisément ce qui bascule et ce qui ne bascule pas.
+  body += '<div style="margin-top:14px;padding:12px 13px;background:#F4F6FA;border-radius:12px;font-size:12.5px;color:#374151;line-height:1.5">'
+    +'<b style="color:#142554">'+(EN?'What changes':'Ce qui change')+'</b><br>'
+    +(EN
+      ? 'Menus, buttons and labels switch to English. Teaching content (courses, set works, past papers) stays in the language it was written in — French for the francophone subsystem, English for GCE material.'
+      : 'Les menus, boutons et libellés passent en anglais. Les contenus pédagogiques (cours, œuvres, épreuves) restent dans leur langue d\'origine — français pour le sous-système francophone, anglais pour les ressources GCE.')
     +'</div>';
-  M(t('menu.lang','Langue'),'',body,'<button class="btn bi" onclick="cm()">'+t('btn.close','Fermer')+'</button>');
+
+  // Passerelle vers les ressources anglophones : l'intention réelle, souvent.
+  body += '<button class="btn" onclick="cm();vShowSec(\'epreuves\',null)" '
+    +'style="margin-top:10px;width:100%;padding:12px;border-radius:12px;background:rgba(255,201,60,.16);'
+    +'border:1px solid rgba(199,146,10,.38);color:#7A5A05;font-weight:700;font-size:13px">'
+    +(EN?'📘 Browse GCE papers & resources':'📘 Voir les épreuves et ressources GCE')
+    +'</button>';
+
+  M(t('menu.lang','Langue'), EN?'Interface language':'Langue de l\'interface', body,
+    '<button class="btn bi" onclick="cm()">'+t('btn.close','Fermer')+'</button>');
 };
 
 // Auto-load langue au démarrage — v1.2.4 : applique RÉELLEMENT la traduction de l'UI

@@ -635,15 +635,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.15.2">
+<link rel="preload" as="script" href="/app.js?v=1.15.3">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.15.2" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.15.2"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.15.3" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.15.3"></noscript>
 </head>
 <body>
 <!-- ════════ A11Y v2 : Skip link pour lecteurs d'écran ════════ -->
@@ -825,13 +825,142 @@ function _refreshCitation(){
     {texte:'L\u2019avenir appartient \u00e0 ceux qui croient en la beaut\u00e9 de leurs r\u00eaves.',auteur:'Eleanor Roosevelt'},
     {texte:'Vis comme si tu devais mourir demain. Apprends comme si tu devais vivre toujours.',auteur:'Gandhi'}
   ];
-  var cits=(typeof DB!=='undefined'&&DB&&DB.citations&&DB.citations.length)?DB.citations:_defCit;
+  var cits=(typeof DB!=='undefined'&&DB&&DB.citations&&DB.citations.length)?DB.citations:(window._VRT_CITATIONS||_defCit);
   var q=cits[Math.floor(Math.random()*cits.length)];
   var el=document.getElementById('vHeroQuote');
   if(el&&q) el.innerHTML='\u00ab '+q.texte+' \u00bb<span style="display:block;font-size:9px;color:#FFC93C;font-style:normal;margin-top:2px;letter-spacing:.5px">\u2014 '+q.auteur+'</span>';
 }
 setTimeout(_refreshCitation,300);
 setInterval(_refreshCitation,15000);
+
+/* ════════ v1.15.3 — CHROME COMPACT + CITATION FLOTTANTE ════════
+   Les bandeaux .vlogin-bar et #tickerBar sont aplatis en CSS (voir app.css,
+   section « TROIS BANDEAUX → UN SEUL »). Deux conséquences à traiter ici :
+   1. le groupe utilitaire (panier, langue, contact, pastille de sync et
+      #adminAccessPoint — le triple-clic qui ouvre l'admin) doit SURVIVRE :
+      on le déplace dans la nav, où il reste collé à droite ;
+   2. les citations, qui vivaient dans un hero écrasé à 7px sur mobile,
+      reprennent vie en carte flottante — sans reprendre un pixel de hauteur. */
+
+/* Répertoire élargi : motivation + développement personnel, avec des voix
+   africaines et camerounaises pour ne pas sonner comme un mur de maximes
+   importées. `DB.citations` reste prioritaire si l'admin en a saisi. */
+window._VRT_CITATIONS=[
+  {texte:'L’éducation est l’arme la plus puissante pour changer le monde.',auteur:'Nelson Mandela'},
+  {texte:'Le savoir est la seule richesse qu’on peut donner sans s’appauvrir.',auteur:'Proverbe africain'},
+  {texte:'Celui qui ouvre une porte d’école ferme une prison.',auteur:'Victor Hugo'},
+  {texte:'L’excellence n’est pas un acte, c’est une habitude.',auteur:'Aristote'},
+  {texte:'Apprendre sans réfléchir est vain, réfléchir sans apprendre est dangereux.',auteur:'Confucius'},
+  {texte:'L’avenir appartient à ceux qui croient en la beauté de leurs rêves.',auteur:'Eleanor Roosevelt'},
+  {texte:'Vis comme si tu devais mourir demain. Apprends comme si tu devais vivre toujours.',auteur:'Gandhi'},
+  {texte:'Seul on va plus vite, ensemble on va plus loin.',auteur:'Proverbe africain'},
+  {texte:'La patience est un arbre dont la racine est amère et les fruits très doux.',auteur:'Proverbe africain'},
+  {texte:'Un peuple qui n’enseigne pas son histoire est un peuple qui perd son âme.',auteur:'Proverbe bamiléké'},
+  {texte:'Ce n’est pas parce que les choses sont difficiles que nous n’osons pas ; c’est parce que nous n’osons pas qu’elles sont difficiles.',auteur:'Sénèque'},
+  {texte:'Le courage n’est pas l’absence de peur, mais la capacité de la vaincre.',auteur:'Nelson Mandela'},
+  {texte:'Tu ne peux pas changer le vent, mais tu peux ajuster tes voiles.',auteur:'Proverbe marin'},
+  {texte:'Ce que tu fais aujourd’hui peut améliorer tous tes lendemains.',auteur:'Ralph Marston'},
+  {texte:'La discipline est le pont entre les objectifs et les résultats.',auteur:'Jim Rohn'},
+  {texte:'Une erreur n’est pas un échec : c’est une information.',auteur:'Développement personnel'},
+  {texte:'Chaque expert a d’abord été un débutant.',auteur:'Développement personnel'},
+  {texte:'La rivière creuse la roche non par sa force, mais par sa constance.',auteur:'Proverbe'},
+  {texte:'Fais de ton mieux jusqu’à ce que tu saches faire mieux. Ensuite, fais mieux.',auteur:'Maya Angelou'},
+  {texte:'Il n’y a pas de honte à ne pas savoir ; la honte est de ne pas vouloir apprendre.',auteur:'Proverbe africain'}
+];
+
+/* Le groupe utilitaire migre dans la nav. #vNav est déclaré PLUS BAS dans le
+   document que ce script : on attend donc que le DOM soit prêt. Un second
+   passage à 3s rattrape le cas où app.js retoucherait la nav à son init. */
+/* PIÈGE : app.js réécrit `#vLoginBtns.innerHTML` EN ENTIER dans
+   `_updateVisitorHeader()` (à la connexion) et `deconnecter()`. Y laisser le
+   panier, la langue, le contact et #adminAccessPoint, c'est les perdre à la
+   première connexion — l'accès admin avec. On les sort donc dans un conteneur
+   à nous, `#vNavUtils`, qu'aucune de ces réécritures ne touche.
+   `#vLoginBtns` suit dans la nav malgré tout : quand l'élève est connecté,
+   c'est lui qui porte « Mon compte » et « Déco ». */
+function _vChromeCompact(){
+  try{
+    var nav=document.getElementById('vNav'); if(!nav) return;
+    var utils=document.getElementById('vNavUtils');
+    if(!utils){
+      utils=document.createElement('div');
+      utils.id='vNavUtils';
+      nav.appendChild(utils);
+    }
+    // Déplacement par identité, pas par position : les :nth-of-type d'app.css
+    // ont déjà prouvé qu'un index se décale dès qu'un bouton bouge.
+    ['button[onclick*="openCart"]','button[onclick*="mLanguageMenu"]',
+     'button[onclick*="vShowSec(\'contact\'"]','#vSyncDot','#adminAccessPoint']
+    .forEach(function(sel){
+      var el=document.querySelector('#vLoginBtns '+sel)||document.querySelector('.vlogin-bar '+sel);
+      if(el&&el.parentNode!==utils) utils.appendChild(el);
+    });
+    var lb=document.getElementById('vLoginBtns');
+    if(lb&&lb.parentNode!==nav) nav.appendChild(lb);
+  }catch(e){}
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_vChromeCompact);
+else _vChromeCompact();
+setTimeout(_vChromeCompact,3000);
+
+/* Carte flottante. Règles : jamais par-dessus une modale, jamais pendant que
+   l'utilisateur lit une modale, refermable définitivement pour la session, et
+   silencieuse hors du portail visiteur (l'espace admin n'en veut pas). */
+function _vCitFloat(){
+  var PREMIERE=9000, DUREE=13000, INTERVALLE=240000;
+  var box=null, tmo=null;
+
+  function conges(){ try{ return sessionStorage.getItem('_vrtCitOff')==='1'; }catch(e){ return false; } }
+  function portailVisible(){
+    var v=document.getElementById('VISITOR');
+    return !!v && getComputedStyle(v).display!=='none';
+  }
+  /* Une modale ouverte se reconnaît à un calque fixe au-dessus du portail
+     (#VISITOR est à 9000). Deux conditions de plus, apprises à la vérification :
+     elle CAPTE le pointeur et elle COUVRE l'écran. Sans elles, `.v-scroll-progress`
+     — la barre de progression de 4px en z-index:10001, `pointer-events:none` —
+     passait pour une modale et la citation ne paraissait jamais. */
+  function modaleOuverte(){
+    var n=document.body?document.body.children:[];
+    for(var i=0;i<n.length;i++){
+      var cs=getComputedStyle(n[i]);
+      if(cs.position!=='fixed'||cs.display==='none'||cs.visibility==='hidden') continue;
+      if((+cs.zIndex||0)<=9000||cs.pointerEvents==='none') continue;
+      if(n[i].getBoundingClientRect().height>window.innerHeight*0.4) return true;
+    }
+    return false;
+  }
+  function creer(){
+    var v=document.getElementById('VISITOR'); if(!v) return null;
+    var d=document.createElement('div');
+    d.id='vCitFloat';
+    d.innerHTML='<div class="cit-card" role="status" aria-live="polite">'
+      +'<button class="cit-x" type="button" aria-label="Masquer les citations">×</button>'
+      +'<span class="cit-txt"></span><span class="cit-aut"></span></div>';
+    d.querySelector('.cit-x').addEventListener('click',function(){
+      cacher(); try{ sessionStorage.setItem('_vrtCitOff','1'); }catch(e){}
+    });
+    v.appendChild(d);
+    return d;
+  }
+  function cacher(){ if(box) box.classList.remove('on'); clearTimeout(tmo); }
+  function montrer(){
+    if(conges()||!portailVisible()||modaleOuverte()) return;
+    var src=(typeof DB!=='undefined'&&DB&&DB.citations&&DB.citations.length)?DB.citations:window._VRT_CITATIONS;
+    if(!src||!src.length) return;
+    if(!box) box=creer();
+    if(!box) return;
+    var q=src[Math.floor(Math.random()*src.length)];
+    box.querySelector('.cit-txt').textContent='« '+q.texte+' »';
+    box.querySelector('.cit-aut').textContent=q.auteur||'';
+    box.classList.add('on');
+    clearTimeout(tmo); tmo=setTimeout(cacher,DUREE);
+  }
+  setTimeout(montrer,PREMIERE);
+  setInterval(montrer,INTERVALLE);
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_vCitFloat);
+else _vCitFloat();
 </script>
 
 <!-- ═══ TICKER DÉFILANT ═══ -->
@@ -1012,8 +1141,8 @@ setInterval(_refreshCitation,15000);
      Le rescue boot (anti-écran-blanc) reste le filet ultime. -->
 <!-- Version des assets, partagée avec les modules chargés à la demande
      (chunks/*.js) pour qu'ils suivent le même cache que app.js. -->
-<script>window._VRT_ASSET_VER='1.15.2';</script>
-<script defer src="/app.js?v=1.15.2"></script>
+<script>window._VRT_ASSET_VER='1.15.3';</script>
+<script defer src="/app.js?v=1.15.3"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>

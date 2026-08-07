@@ -5890,3 +5890,169 @@ button .i,a .i{margin-right:.4em}
 .prt-role-lbl{position:relative;font-weight:800;font-size:11px;color:#1E3A8A;text-transform:uppercase;
   letter-spacing:.8px;margin:12px 0 8px;display:flex;align-items:center;gap:8px}
 .prt-role-lbl::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,rgba(30,58,138,.22),transparent)}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.15.3 — CHROME VISITEUR : TROIS BANDEAUX → UN SEUL
+   ════════════════════════════════════════════════════════════════════════
+   Avant la nav s'empilaient .vlogin-bar (36px) + .vhero (7px, écrasé sur
+   mobile — sa citation débordait PAR-DESSUS le ticker) + #tickerBar (36px)
+   = 79px mangés avant le premier contenu.
+   Décision : ne garder que la nav. Les portails de rôle mènent déjà à la
+   connexion, et la section Actualités couvre ce que disait le ticker.
+   RIEN N'EST PERDU : le groupe utilitaire (panier, langue, contact, pastille
+   de sync et #adminAccessPoint — le triple-clic qui ouvre l'admin) est
+   déplacé DANS la nav par `_vChromeCompact()` (coquille) et reste collé à
+   droite en `sticky` pendant que les onglets défilent dessous. */
+
+/* 1. La barre de connexion s'aplatit. On ne peut pas la `display:none` : elle
+      porte le groupe utilitaire qu'on garde (un parent masqué masque l'enfant,
+      même `fixed`/`sticky`). Repli si le JS n'a pas encore déplacé le groupe. */
+#VISITOR .vlogin-bar{
+  height:0!important; min-height:0!important;
+  padding:0!important; margin:0!important;
+  border:0!important; background:transparent!important;
+  overflow:visible!important;
+}
+#VISITOR .vlogin-bar>span:first-child{ display:none!important; }  /* nom d'école — déjà dans .vhero */
+
+/* 2. Les trois boutons d'authentification : les cartes de rôle y mènent déjà. */
+#VISITOR #vLoginBtns>button[onclick*="showLogin"],
+#VISITOR #vLoginBtns>button[onclick*="showRegisterForm"]{ display:none!important; }
+#VISITOR #vLoginBtns>span[style*="width:1px"]{ display:none!important; }  /* le séparateur devenu orphelin */
+
+/* 3. Le bandeau défilant. `display:none` doit être !important : initTickerFixed()
+      repose un `style.display='block'` en ligne à chaque rendu. */
+#VISITOR #tickerBar{ display:none!important; }
+
+/* 4. Le sliver .vhero sur mobile : 7px de vide dont la citation débordait sur le
+      ticker. La citation a désormais son propre affichage (voir 6). Sur grand
+      écran le hero garde tout son sens : on n'y touche pas. */
+@media (max-width:899px){
+  #VISITOR .vhero{ display:none!important; }
+}
+
+/* 5. Le groupe utilitaire, épinglé à droite de la nav.
+      `sticky` + `right:0` dans le conteneur qui défile horizontalement : les
+      onglets glissent dessous, les icônes restent atteignables. Le masque de
+      fondu de la nav est retiré, sinon il estomperait le groupe. */
+#VISITOR .vnav{ mask:none!important; -webkit-mask:none!important; }
+#VISITOR #vNavUtils{
+  position:sticky; right:0; z-index:6;
+  display:flex; align-items:center; gap:5px;
+  margin-left:auto; padding:0 2px 0 44px; flex-shrink:0;
+  /* Dégradé vers le fond de la nav : les onglets s'effacent proprement dessous.
+     Il doit devenir OPAQUE VITE — à 24% et .94 on lisait encore « Boutique »
+     derrière le panier. Le fondu ne sert qu'à éviter une arête franche. */
+  background:linear-gradient(90deg,rgba(250,247,241,0) 0%,rgba(250,247,241,.93) 16%,#FAF7F1 34%);
+}
+/* Les icônes venaient d'un fond navy (texte blanc en style INLINE) : sur la nav
+   claire il faut repasser en navy, et seul !important bat un style en ligne.
+   Le `display:inline-flex` rétablit AUSSI langue et contact, que la passe
+   `@media(max-width:520px)` masquait faute de place dans l'ancienne barre —
+   contrainte disparue avec elle. */
+#VISITOR #vNavUtils>button{
+  display:inline-flex!important; align-items:center; justify-content:center;
+  flex:0 0 auto;
+  /* Carré, donc rond. L'ovale venait de `.btn{min-height:44px}` : un `min-height`
+     CLAMPE la hauteur utilisée et gagne donc sur `height`, même en !important —
+     36 de large pour 44 de haut. On neutralise la contrainte au lieu de la
+     surenchérir. La cible tactile de 44px reste garantie sur écran tactile,
+     via le `@media(pointer:coarse)` juste dessous. */
+  width:40px!important; height:40px!important;
+  min-width:0!important; min-height:40px!important;
+  padding:0!important;
+  /* Fonds OPAQUES : en rgba, le libellé de l'onglet passait sous l'icône. */
+  background:#EDF0F6!important;
+  color:#142554!important;
+  border:1px solid rgba(20,37,84,.14)!important;
+  border-radius:50%!important;
+  transition:background .18s ease, transform .18s ease;
+}
+@media (pointer:coarse){
+  #VISITOR #vNavUtils>button{ width:44px!important; height:44px!important; min-height:44px!important; }
+}
+/* Contact retiré du groupe : le bouton flottant WhatsApp, le pied de page et la
+   section Contact de la nav couvrent déjà ce besoin, et 3 cibles de 44px
+   mangeaient la moitié de la barre. */
+#VISITOR #vNavUtils>button[onclick*="vShowSec('contact'"]{ display:none!important; }
+/* Le déclencheur admin reste cliquable mais cesse de coûter 44px de largeur. */
+#VISITOR #vNavUtils #adminAccessPoint{
+  width:22px!important; min-width:0!important; height:32px!important; flex:0 0 auto;
+}
+#VISITOR #vNavUtils>button:hover{ background:rgba(20,37,84,.12)!important; transform:translateY(-1px); }
+#VISITOR #vNavUtils>button:focus-visible{ outline:2px solid #142554; outline-offset:2px; }
+/* Le panier garde son accent or : c'est le seul bouton marchand. */
+#VISITOR #vNavUtils>button[onclick*="openCart"]{
+  background:#FBEEC6!important;
+  border-color:rgba(199,146,10,.42)!important;
+  color:#7A5A05!important;
+}
+#VISITOR #vNavUtils #cartBadge{ top:-4px!important; right:-4px!important; }
+
+/* Connecté, app.js remplit #vLoginBtns avec « 👤 Prénom · Mon compte · Déco »
+   en BLANC (styles en ligne, pensés pour l'ancien fond navy). Sur la nav claire
+   ce serait illisible : on repasse en navy, en gardant le rouge de Déco qui
+   signale l'action destructive. */
+#VISITOR .vnav #vLoginBtns{
+  position:sticky; right:0; z-index:5;
+  display:flex; align-items:center; flex-shrink:0;
+  padding-left:6px; background:rgba(250,247,241,.97);
+}
+#VISITOR .vnav #vLoginBtns div{ color:#142554!important; }
+#VISITOR .vnav #vLoginBtns .btn{
+  color:#142554!important;
+  background:rgba(20,37,84,.07)!important;
+  border:1px solid rgba(20,37,84,.16)!important;
+}
+#VISITOR .vnav #vLoginBtns .btn[onclick*="deconnecter"]{
+  color:#8E2C2C!important; background:rgba(174,83,83,.12)!important;
+  border-color:rgba(174,83,83,.30)!important;
+}
+/* La nav doit pouvoir défiler SOUS le groupe : sans cette réserve, le dernier
+   onglet reste inatteignable derrière les icônes. */
+#VISITOR .vnav{ padding-right:6px; }
+
+/* 6. LA CITATION — elle ne reprend pas de hauteur : carte flottante, discrète,
+      qui paraît quelques secondes puis s'efface. Voir `_vCitFloat()` (coquille).
+      `pointer-events` : le conteneur laisse tout passer, seule la carte capte. */
+#vCitFloat{
+  /* `bottom:74px` et non 12 : le bouton flottant WhatsApp (#vtWaFab, 152×46)
+     occupe déjà le bas droit. La carte se pose AU-DESSUS de lui, jamais dessous.
+     Elle vit DANS #VISITOR (z-index:9000) — un z-index de 55 posé sur <body>
+     serait passé derrière le portail tout entier. */
+  position:fixed; left:10px; right:10px; bottom:74px; z-index:55;
+  display:flex; justify-content:center; pointer-events:none;
+}
+#vCitFloat .cit-card{
+  pointer-events:auto; position:relative;
+  max-width:460px; width:100%;
+  padding:12px 38px 12px 15px;
+  border-radius:15px;
+  background:linear-gradient(158deg,#16295C,#101F45);
+  box-shadow:0 18px 42px -20px rgba(9,18,44,.62);
+  color:#F3F1EC;
+  font-family:Georgia,'Times New Roman',serif; font-style:italic;
+  font-size:13.5px; line-height:1.46;
+  opacity:0; transform:translateY(12px) scale(.985);
+  transition:opacity .55s ease, transform .55s cubic-bezier(.22,1,.36,1);
+}
+#vCitFloat.on .cit-card{ opacity:1; transform:none; }
+#vCitFloat .cit-aut{
+  display:block; margin-top:5px;
+  font-family:Montserrat,system-ui,sans-serif; font-style:normal;
+  font-size:10px; font-weight:700; letter-spacing:.7px; text-transform:uppercase;
+  color:#FFC93C;
+}
+#vCitFloat .cit-x{
+  position:absolute; top:7px; right:7px;
+  width:26px; height:26px; border-radius:50%;
+  border:0; cursor:pointer; line-height:1;
+  background:rgba(255,255,255,.10); color:rgba(255,255,255,.72);
+  font-size:15px; font-family:system-ui,sans-serif; font-style:normal;
+}
+#vCitFloat .cit-x:hover{ background:rgba(255,255,255,.20); color:#fff; }
+#vCitFloat .cit-x:focus-visible{ outline:2px solid #FFC93C; outline-offset:2px; }
+@media (prefers-reduced-motion:reduce){
+  #vCitFloat .cit-card{ transition:opacity .2s linear; transform:none; }
+  #vCitFloat.on .cit-card{ transform:none; }
+}
