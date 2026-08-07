@@ -953,13 +953,17 @@ function _vCitFloat(){
     var q=src[Math.floor(Math.random()*src.length)];
     box.querySelector('.cit-txt').textContent='« '+q.texte+' »';
     box.querySelector('.cit-aut').textContent=q.auteur||'';
-    /* On se cale sur la position MESURÉE du bouton flottant WhatsApp plutôt que
-       sur une marge en dur : sa hauteur change selon le libellé et la largeur
-       d'écran (un `bottom:74px` calculé en local le chevauchait de 54px en prod). */
+    /* On se cale sur le bouton flottant WhatsApp plutôt que sur une marge en dur
+       (un `bottom:74px` figé le chevauchait de 54px en prod).
+       On lit ses valeurs de MISE EN PAGE — `bottom` calculé + offsetHeight — et
+       non son getBoundingClientRect : le bouton s'anime après son apparition
+       (mesuré top:748 à 9s, puis 684 une fois posé), donc son rectangle ment au
+       moment précis où l'on affiche la citation. La mise en page, elle, ne bouge pas. */
     var bas=14, fab=document.getElementById('vtWaFab');
-    if(fab){
-      var fr=fab.getBoundingClientRect();
-      if(fr.height>0) bas=Math.round(window.innerHeight-fr.top)+12;
+    if(fab&&getComputedStyle(fab).display!=='none'){
+      var cb=parseFloat(getComputedStyle(fab).bottom)||0;
+      var ch=fab.offsetHeight||0;
+      if(ch>0) bas=Math.round(cb+ch+12);
     }
     box.style.bottom=bas+'px';
     box.classList.add('on');
