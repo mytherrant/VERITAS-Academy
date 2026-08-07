@@ -908,7 +908,21 @@ setTimeout(_vChromeCompact,3000);
    silencieuse hors du portail visiteur (l'espace admin n'en veut pas). */
 function _vCitFloat(){
   var PREMIERE=9000, DUREE=13000, INTERVALLE=240000;
-  var box=null, tmo=null;
+  var box=null, tmo=null, suivi=null;
+
+  /* Pose la carte juste au-dessus du bouton flottant WhatsApp. On lit ses
+     valeurs de MISE EN PAGE (`bottom` calculé + offsetHeight) plutôt que son
+     rectangle : le rectangle bouge aussi avec les animations de transformation. */
+  function placer(){
+    if(!box) return;
+    var bas=14, fab=document.getElementById('vtWaFab');
+    if(fab&&getComputedStyle(fab).display!=='none'){
+      var cb=parseFloat(getComputedStyle(fab).bottom)||0;
+      var ch=fab.offsetHeight||0;
+      if(ch>0) bas=Math.round(cb+ch+12);
+    }
+    box.style.bottom=bas+'px';
+  }
 
   function conges(){ try{ return sessionStorage.getItem('_vrtCitOff')==='1'; }catch(e){ return false; } }
   function portailVisible(){
@@ -943,7 +957,7 @@ function _vCitFloat(){
     v.appendChild(d);
     return d;
   }
-  function cacher(){ if(box) box.classList.remove('on'); clearTimeout(tmo); }
+  function cacher(){ if(box) box.classList.remove('on'); clearTimeout(tmo); clearInterval(suivi); suivi=null; }
   function montrer(){
     if(conges()||!portailVisible()||modaleOuverte()) return;
     var src=(typeof DB!=='undefined'&&DB&&DB.citations&&DB.citations.length)?DB.citations:window._VRT_CITATIONS;
@@ -953,20 +967,13 @@ function _vCitFloat(){
     var q=src[Math.floor(Math.random()*src.length)];
     box.querySelector('.cit-txt').textContent='« '+q.texte+' »';
     box.querySelector('.cit-aut').textContent=q.auteur||'';
-    /* On se cale sur le bouton flottant WhatsApp plutôt que sur une marge en dur
-       (un `bottom:74px` figé le chevauchait de 54px en prod).
-       On lit ses valeurs de MISE EN PAGE — `bottom` calculé + offsetHeight — et
-       non son getBoundingClientRect : le bouton s'anime après son apparition
-       (mesuré top:748 à 9s, puis 684 une fois posé), donc son rectangle ment au
-       moment précis où l'on affiche la citation. La mise en page, elle, ne bouge pas. */
-    var bas=14, fab=document.getElementById('vtWaFab');
-    if(fab&&getComputedStyle(fab).display!=='none'){
-      var cb=parseFloat(getComputedStyle(fab).bottom)||0;
-      var ch=fab.offsetHeight||0;
-      if(ch>0) bas=Math.round(cb+ch+12);
-    }
-    box.style.bottom=bas+'px';
+    placer();
     box.classList.add('on');
+    /* Le bouton WhatsApp CHANGE de place en cours de route : mesuré `bottom:18px`
+       à 9s, puis `bottom:82px` à 10,5s. Une mesure ponctuelle — rectangle ou
+       mise en page — est donc fausse quel que soit l'instant choisi. On maintient
+       la position tant que la carte est affichée. ~18 passages pour 13s : négligeable. */
+    clearInterval(suivi); suivi=setInterval(placer,700);
     clearTimeout(tmo); tmo=setTimeout(cacher,DUREE);
   }
   setTimeout(montrer,PREMIERE);
