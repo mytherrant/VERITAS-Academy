@@ -953,6 +953,15 @@ function _vCitFloat(){
     var q=src[Math.floor(Math.random()*src.length)];
     box.querySelector('.cit-txt').textContent='« '+q.texte+' »';
     box.querySelector('.cit-aut').textContent=q.auteur||'';
+    /* On se cale sur la position MESURÉE du bouton flottant WhatsApp plutôt que
+       sur une marge en dur : sa hauteur change selon le libellé et la largeur
+       d'écran (un `bottom:74px` calculé en local le chevauchait de 54px en prod). */
+    var bas=14, fab=document.getElementById('vtWaFab');
+    if(fab){
+      var fr=fab.getBoundingClientRect();
+      if(fr.height>0) bas=Math.round(window.innerHeight-fr.top)+12;
+    }
+    box.style.bottom=bas+'px';
     box.classList.add('on');
     clearTimeout(tmo); tmo=setTimeout(cacher,DUREE);
   }
