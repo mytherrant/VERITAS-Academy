@@ -377,3 +377,77 @@ scopés (notes/bulletins QR, emploi du temps, RH) ; (d) confirmer le **nom de ma
   hors ligne ne peut pas dépendre de `/assets/`). Jeu commun porté à 75 icônes.
 - Vérifié en prod : 422 « Type de demande inconnu », 422 « Le nom est requis », 401 sans jeton,
   `campus/index.html` 200, `api/campus` 400 fail-closed (donc bootstrap OK), app.js 1.15.1.
+
+## Audit cohérence / doublons / pages muettes / abonnements (07/08)
+- **PAGES MUETTES : aucune.** Balayage réel des **40 portes** du portail visiteur (nav, menus
+  déroulants, tuiles d'accueil, cartes de rôle) — chacune déclenchée puis comparée à l'empreinte de
+  l'accueil : 28 sections rendues (249 → 8 825 car.), 9 modales, 2 onglets, **0 erreur JS, 0 dialogue
+  natif**. Le seul « muet » est `vShowSec('presentation')` depuis le bouton Accueil = comportement
+  correct. Harnais : neutraliser `alert/confirm/prompt` AVANT le balayage — un `confirm()` gèle le
+  rendu entier et fait passer l'audit pour bloqué.
+- **PIÈGE CORRIGÉ AU PASSAGE** : `vShowSec('calendrier')` **n'existe pas** — le calendrier a sa propre
+  fonction `showCalendrier()`. Un `vShowSec()` sur une clé inconnue **retombe en silence sur
+  l'accueil** : aucune erreur, aucune trace. Sections valides : presentation, elearning, boutique,
+  parents, orientation, actualites, epreuves, labos, jeux, photos, resultats, contact, cagnotte,
+  trophees, partenariat, leaderboard-junior, nos-partenaires, mes-partenariats, verifier-certificat,
+  histoire. Vérifier une clé avant de l'écrire dans une carte.
+- **DOUBLONS = motif d'override V2, pas des accidents.** 13 captures `var _origX = …` ; **9 ne sont
+  jamais rappelées** (`_origRe`, `_origInitTicker`, `_origVShowSecEl`, `_origShowCoaching`,
+  `_orig_dlFile`, `_origCvEleveViewSujet`, `_origCvAdminCreate`, `_origCvChatOpen`,
+  `_origOpenPaymentModal`). Trois V1 sont masquées par une V2 homonyme et **pèsent 4,3 Ko de code
+  mort** : `_dlFile` (8934, V2 27091), `cvAdminCreate` (25774, V2 27393), `_cvChatOpen` (26576,
+  V2 27566). **Conséquence à retenir : éditer une V1 n'a aucun effet** (déjà constaté sur
+  `openPaymentModal`). Suppression préparée, NON appliquée — un autre agent éditait `app.js`.
+- **Code mort** : 75 définitions racine sans aucune référence ailleurs. Beaucoup sont des crochets
+  volontaires (`startOnboarding` = relance manuelle jamais câblée, `clearVeritasErrors` = outil de
+  console documenté). À trier, pas à supprimer en bloc. **`_st` (l.665) n'est utilisé nulle part**
+  alors que le CLAUDE.md le présente comme un helper « à utiliser systématiquement » — doc à corriger.
+- **PIÈGE D'AUDIT** : un scan « jamais référencé » qui exclut le point dans sa lookbehind ne compte
+  pas les définitions `window.X = function` et déclare mortes des fonctions bien vivantes (238 faux
+  positifs au premier jet). Retirer les LIGNES de définition du corpus, puis compter.
+- **ABONNEMENTS — la chaîne est saine.** `validerAbonnement` crée en `statut:'En attente'` ; seul
+  `_payFinalizePaid` active, et ses 4 appelants sont MTN / CamPay / Orange (statut relu côté serveur)
+  + validation manuelle admin. `_statutActif` n'accepte pas « en attente ». Prix cohérents :
+  `_pvOffre` et `_relancePremium` lisent `DB.elearning.plans`, et le « dès 3 000 FCFA » de
+  `_requirePlan` correspond bien au plan2.
+- **ABONNEMENTS — la faille est ailleurs : `chunks/labo.js` est public et contient les 30 labos,
+  dont les 9 premium** avec leurs étapes et leurs quiz complets (183 Ko). Le « Pack Sciences » se lit
+  intégralement en ouvrant l'URL du module. Le verrou `_planAccess` est purement client. **Ce n'est
+  pas une régression du découpage** — tout était déjà dans app.js, public lui aussi ; le module rend
+  seulement la lecture plus commode. Vrai correctif = servir les labos premium par `content.php`
+  (jeton), comme les PDF. Les fichiers vendus, eux, restent protégés côté serveur.
+- Corrigé : la visite guidée annonçait « en 8 étapes » pour 9 étapes réelles (le compteur affichait
+  « Étape 1 / 9 »). Le nombre est désormais dérivé de `_ONBOARDING_STEPS.length`.
+
+## L'« effet bordure incurvée » gauche/droite — cause racine, enfin (07/08)
+- **Symptôme** : deux bandes sombres verticales collées aux bords gauche et droit, sur **toutes** les
+  pages visiteur, **uniquement sous 900px**. Signalé au moins 3 fois ; les correctifs (k), (k-bis),
+  (k-ter) de `app.css` traitaient des symptômes **sur l'accueil seulement** (`.acc-head`,
+  `.acc-hero-video`, `.acc-news`) et la passe « 237 bordures gauches retirées » cherchait des
+  `border-left` : la cause n'était ni l'un ni l'autre, d'où l'impression de bug immortel.
+- **Cause** : `@media(max-width:899px){ #VISITOR>div:last-of-type{ …position:static!important } }`
+  (app.css ~2974), écrite « pour le footer ». Mais `:last-of-type` = dernier enfant **de type DIV** ;
+  or le footer est un `<footer>`. Enfants de #VISITOR : `.vlogin-bar`, `.vhero`, `script`,
+  **`#tickerBar`**, `main#vBody`, `footer` → la règle visait le **bandeau défilant**.
+  Son `position:static!important` lui retirait son rôle de bloc conteneur, donc ses fondus de bord
+  `#tickerBar::before/::after` (absolute, `top:0;bottom:0`, 60px, `#0F172A`) se rattachaient à
+  **`#VISITOR` (position:fixed)** → 60px × toute la hauteur de l'écran, fixes au défilement.
+  `overflow:hidden` sur le bandeau n'y pouvait rien : il ne coupe pas un absolu dont le bloc
+  conteneur est un ancêtre.
+- **Correctif** : règle supprimée (le `<footer>` se met en forme en inline, coquille ~l.924 → aucun
+  changement pour lui, vérifié : padding/gap/justify identiques avant-après) + `top:auto` ajouté sur
+  `#tickerBar`. **Piège du correctif** : `top:48px` traînait des règles `sticky` (l.1146/1655) ; en
+  `static` il était ignoré, en `relative` il décalait le bandeau de 48px **sous la nav**. Le
+  `top:0!important` du `@media(min-width:900px)` garde le collant du bureau intact.
+- **MÉTHODE qui a marché, là où lire le CSS a échoué 3 fois** : ne pas chercher la déclaration
+  fautive, **mesurer les pixels**. Playwright + Chrome local (`node_modules/playwright-core`,
+  `executablePath` Chrome, `NODE_PATH` vers le dossier projet sinon `MODULE_NOT_FOUND`), capture →
+  `<canvas>` dans la page → luminance par colonne. Bords à 50, centre à 238 = preuve. Puis
+  **dichotomie sur les 1 639 éléments** (`.__np::before,.__np::after{display:none}`) → coupable en
+  11 essais. Les scans DOM par style ne le voyaient pas : le pseudo est `fixed`/`absolute`, il
+  **s'échappe de la boîte de son parent**, donc filtrer sur le rect de l'élément le rate.
+  `CSS.getMatchedStylesForNode` (CDP) donne la règle gagnante et sa ligne — à utiliser d'emblée
+  quand un `getComputedStyle` contredit le CSS lu.
+- **À retenir** : `:last-of-type` / `:last-child` sur un conteneur au balisage mixte est un piège ;
+  et un `position:static` imposé de loin transforme silencieusement tout enfant `absolute` en calque
+  plein écran.
