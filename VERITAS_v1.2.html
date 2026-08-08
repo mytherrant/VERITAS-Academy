@@ -919,12 +919,16 @@ function _vCitFloat(){
      rectangle : le rectangle bouge aussi avec les animations de transformation. */
   function placer(){
     if(!box) return;
-    var bas=14, fab=document.getElementById('vtWaFab');
-    if(fab&&getComputedStyle(fab).display!=='none'){
-      var cb=parseFloat(getComputedStyle(fab).bottom)||0;
-      var ch=fab.offsetHeight||0;
-      if(ch>0) bas=Math.round(cb+ch+12);
-    }
+    var bas=14;
+    // Deux boutons flottants à esquiver : WhatsApp à droite, Ambassa à gauche.
+    // La carte occupe toute la largeur, elle doit passer au-dessus du PLUS HAUT.
+    ['vtWaFab','vAmbassaFab'].forEach(function(id){
+      var f=document.getElementById(id);
+      if(!f||getComputedStyle(f).display==='none') return;
+      var cb=parseFloat(getComputedStyle(f).bottom)||0;
+      var ch=f.offsetHeight||0;
+      if(ch>0) bas=Math.max(bas,Math.round(cb+ch+12));
+    });
     box.style.bottom=bas+'px';
   }
 
@@ -985,6 +989,33 @@ function _vCitFloat(){
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_vCitFloat);
 else _vCitFloat();
+
+/* Avatar Ambassa flottant. Solliciter l'IA imposait jusqu'ici de revenir à
+   l'accueil ou de déplier le menu « IA ▾ » : depuis n'importe quelle section,
+   une question part maintenant en un clic. Posé DANS #VISITOR (donc dans son
+   contexte d'empilement) et à GAUCHE — le bouton WhatsApp tient déjà la droite
+   et change de hauteur en cours de route. */
+function _vAmbassaFab(){
+  try{
+    var v=document.getElementById('VISITOR');
+    if(!v||document.getElementById('vAmbassaFab')) return;
+    var b=document.createElement('button');
+    b.id='vAmbassaFab';
+    b.type='button';
+    b.setAttribute('aria-label','Poser une question au Professeur Ambassa, l\'assistant IA');
+    b.title='Professeur Ambassa — votre assistant IA';
+    b.innerHTML='<img src="ambassa-avatar.png" alt="" aria-hidden="true" loading="lazy">';
+    b.addEventListener('click',function(){
+      // Repli en cascade : la modale si elle existe, sinon la section e-learning.
+      if(typeof mAgentAmbassa==='function') mAgentAmbassa();
+      else if(typeof vShowSec==='function') vShowSec('elearning',null);
+    });
+    v.appendChild(b);
+  }catch(e){}
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_vAmbassaFab);
+else _vAmbassaFab();
+setTimeout(_vAmbassaFab,3000);
 </script>
 
 <!-- ═══ TICKER DÉFILANT ═══ -->

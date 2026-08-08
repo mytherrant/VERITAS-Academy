@@ -5644,6 +5644,7 @@ html{ scroll-behavior:auto; }
 @keyframes vfxShine{0%{transform:translate3d(-140%,0,0)}60%,100%{transform:translate3d(140%,0,0)}}
 @keyframes vfxRing{0%{transform:scale(.7);opacity:.75}100%{transform:scale(2.2);opacity:0}}
 @keyframes vfxProofIn{from{transform:translate3d(0,16px,0);opacity:0}to{transform:translate3d(0,0,0);opacity:1}}
+@keyframes vfxProofOut{from{transform:translate3d(0,0,0);opacity:1}to{transform:translate3d(-26px,0,0);opacity:0}}
 @keyframes vfxFabIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
 
 /* ── Lévitation douce : cartes autonomes uniquement. Ne PAS l'appliquer à un
@@ -5719,11 +5720,16 @@ body.has-sticky-cta .vfx-fab{bottom:82px}
    Voir _vtProofFeed() dans app.js : aucune activité inventée. Desktop
    seulement — sur mobile la place du bas est déjà prise (FAB + sticky CTA). */
 .vfx-proof{position:fixed;left:18px;bottom:18px;z-index:8600;max-width:322px;
-  display:none;animation:vfxProofIn .5s cubic-bezier(.16,1,.3,1) both}
-@media (min-width:1000px){ .vfx-proof.on{display:block} }
-.vfx-proof-card{display:flex;align-items:flex-start;gap:11px;
+  display:none;flex-direction:column;gap:10px;pointer-events:none}
+.vfx-proof.on{display:flex}
+/* Mobile : on remonte le flux au-dessus du bouton WhatsApp (bas-droite, bottom:18px)
+   et du bandeau sticky de conversion (.lx-sticky-cta, centré bas, ~60px de haut). */
+@media (max-width:999px){ .vfx-proof{left:10px;bottom:84px;max-width:calc(100vw - 20px)} }
+.vfx-proof-card{display:flex;align-items:flex-start;gap:11px;pointer-events:auto;
   background:#fff;border:1px solid rgba(20,37,84,.10);
-  border-radius:14px;padding:11px 13px;box-shadow:0 12px 32px rgba(13,27,62,.16)}
+  border-radius:14px;padding:11px 13px;box-shadow:0 12px 32px rgba(13,27,62,.16);
+  animation:vfxProofIn .5s cubic-bezier(.16,1,.3,1) both}
+.vfx-proof-card.vfx-out{animation:vfxProofOut .42s ease forwards}
 .vfx-proof-ic{width:32px;height:32px;border-radius:50%;flex:0 0 auto;
   background:linear-gradient(135deg,rgba(255,201,60,.30),rgba(255,201,60,.10));
   display:inline-flex;align-items:center;justify-content:center;font-size:16px}
@@ -5734,6 +5740,13 @@ body.has-sticky-cta .vfx-fab{bottom:82px}
 .vfx-proof-x{margin-left:auto;background:none;border:none;color:#9CA3AF;
   font-size:14px;cursor:pointer;padding:0 2px;line-height:1;flex:0 0 auto}
 .vfx-proof-x:hover{color:#142554}
+
+/* Ruban oblique « GRATUIT » — coin haut-droit, autonome : la carte n'a besoin
+   que de position:relative (le wrapper clippe le ruban, sans toucher à l'overflow
+   de la carte). Statique = GPU-safe. Réutilisable partout :
+   <div class="vt-rib-wrap"><span class="vt-rib">Gratuit</span></div> */
+.vt-rib-wrap{position:absolute;top:0;right:0;width:80px;height:80px;overflow:hidden;pointer-events:none;z-index:4;border-radius:0 18px 0 0}
+.vt-rib{position:absolute;top:13px;right:-22px;width:112px;transform:rotate(42deg);background:linear-gradient(180deg,#FFD75E,#FFC93C);color:#3B2B05;text-align:center;font-family:Montserrat,Poppins,sans-serif;font-weight:800;font-size:10px;letter-spacing:.12em;line-height:21px;text-transform:uppercase;box-shadow:0 3px 7px rgba(20,37,84,.28)}
 
 /* ════════════════════ ESPACE PARENTS ════════════════════ */
 /* ── Icônes vectorielles (sprite embarqué par app.js) ──────────────────────
@@ -6055,4 +6068,53 @@ button .i,a .i{margin-right:.4em}
 @media (prefers-reduced-motion:reduce){
   #vCitFloat .cit-card{ transition:opacity .2s linear; transform:none; }
   #vCitFloat.on .cit-card{ transform:none; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.15.4 — AVATAR AMBASSA FLOTTANT, PRÉSENT SUR TOUTES LES PAGES
+   ════════════════════════════════════════════════════════════════════════
+   Jusqu'ici, solliciter l'IA obligeait à revenir à l'accueil ou à déplier le
+   menu « IA ▾ ». L'avatar est désormais posé en permanence dans le portail
+   visiteur : depuis n'importe quelle section, une question part en un clic.
+   Il vit à GAUCHE — le bouton WhatsApp (#vtWaFab) occupe déjà la droite et
+   change de hauteur en cours de route. */
+#vAmbassaFab{
+  position:fixed; left:14px; bottom:18px; z-index:8600;
+  width:58px; height:58px; padding:0; border-radius:50%;
+  border:2.5px solid #FFC93C; background:#142554;
+  cursor:pointer; overflow:visible;
+  box-shadow:0 10px 26px -8px rgba(13,27,62,.55);
+  transition:transform .22s cubic-bezier(.34,1.56,.64,1), box-shadow .22s;
+}
+#vAmbassaFab img{
+  width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;
+}
+#vAmbassaFab:hover{ transform:translateY(-3px) scale(1.04); box-shadow:0 16px 34px -10px rgba(13,27,62,.6); }
+#vAmbassaFab:focus-visible{ outline:3px solid #FFC93C; outline-offset:3px; }
+/* Pastille « IA » : dit ce que c'est sans ajouter de libellé encombrant. */
+#vAmbassaFab::after{
+  content:"IA";
+  position:absolute; bottom:-3px; right:-5px;
+  background:linear-gradient(135deg,#FFD86E,#FFC93C); color:#142554;
+  font-family:Montserrat,system-ui,sans-serif; font-size:9px; font-weight:900;
+  letter-spacing:.4px; padding:2px 6px; border-radius:99px;
+  border:1.5px solid #142554; line-height:1.25;
+}
+/* Halo d'attention discret : une seule couche, en transform/opacity (composée
+   par le GPU). Il s'arrête tout seul au bout de 3 pulsations pour ne pas
+   clignoter en permanence sous les yeux de l'élève. */
+#vAmbassaFab::before{
+  content:""; position:absolute; inset:-4px; border-radius:50%;
+  border:2px solid rgba(255,201,60,.55); pointer-events:none;
+  animation:vAmbPulse 2.4s ease-out 3;
+}
+@keyframes vAmbPulse{
+  0%{ transform:scale(1); opacity:.75; }
+  70%{ transform:scale(1.35); opacity:0; }
+  100%{ transform:scale(1.35); opacity:0; }
+}
+@media (prefers-reduced-motion:reduce){
+  #vAmbassaFab::before{ animation:none; }
+  #vAmbassaFab{ transition:none; }
+  #vAmbassaFab:hover{ transform:none; }
 }

@@ -683,27 +683,24 @@ function defaultDB(){return{
     horaires:'Lundi–Vendredi: 7h30–17h30 | Samedi: 8h00–13h00',
     contact:'+237 6 00 00 00 00',email:'contact@veritas-cm.cm',whatsapp:'+237 6 00 00 00 00'
   },
+  // v1.2.6 FIX : DB.photos était l'ancienne galerie (icônes + légendes) affichée
+  // en repli quand DB.galleryImages est vide — et ses 6 légendes inventaient des
+  // détails précis ("30 places", "500 ouvrages", "Remise des prix 2023") sur
+  // des installations qui ne sont pas décrites nulle part ailleurs. Vidé pour
+  // la même raison que galleryImages ; supprimable/regénérable depuis le même
+  // panneau admin (Galerie photos → 🗑, qui efface aussi DB.photos).
   photos:[
-    {id:'ph1',titre:'Salle de classe',emoji:'🏫',desc:'Salle principale équipée de 30 places'},
-    {id:'ph2',titre:'Bibliothèque',emoji:'📚',desc:'Plus de 500 ouvrages disponibles'},
-    {id:'ph3',titre:'Remise des prix 2023',emoji:'🏆',desc:'Cérémonie annuelle de récompense'},
-    {id:'ph4',titre:'Cours en groupe',emoji:'👥',desc:'Apprentissage collaboratif'},
-    {id:'ph5',titre:'Laboratoire',emoji:'🔬',desc:'Équipement pour les sciences'},
-    {id:'ph6',titre:'Salle informatique',emoji:'💻',desc:'Accès aux ressources numériques'},
   ],
   // v1.2.2 : statistiques VITRINE groupées par examen (panneau d'accueil, éditable admin)
+  // v1.2.6 FIX : les taux ci-dessous étaient des données de démo (94/92/91…)
+  // jamais remplacées par l'admin — affichées comme "résultats officiels" à de
+  // vrais visiteurs. Remplacées par les vrais chiffres 2025-2026 communiqués par
+  // Jacques (BEPC 100%, Probatoire 69%, BAC 61%). Pas de séries/mentions inventées :
+  // on n'affiche que ce qui est confirmé (cf. règle "base vide = rien affiché").
   statsVitrine:[
-    // ── Enseignement Général ─────────────────────────────────────────
-    {ex:'BEPC',            taux:94, series:[], mentions:{ab:40,b:22,tb:9,exc:2}},
-    {ex:'Probatoire',      taux:92, series:[{nom:'A',taux:90},{nom:'C',taux:94},{nom:'D',taux:91}], mentions:{ab:34,b:18,tb:7,exc:1}},
-    {ex:'BAC',             taux:91, series:[{nom:'A',taux:89},{nom:'C',taux:93},{nom:'D',taux:90}], mentions:{ab:48,b:27,tb:11,exc:3}},
-    // ── Enseignement Technique ───────────────────────────────────────
-    {ex:'CAP',             taux:88, series:[{nom:'STT',taux:87},{nom:'Génie Méca',taux:90},{nom:'Génie Élec',taux:89},{nom:'Génie Civil',taux:88},{nom:'Arts & Modes',taux:85}], mentions:{ab:30,b:15,tb:5,exc:1}},
-    {ex:'Probatoire Tech', taux:85, series:[{nom:'STT',taux:87},{nom:'Génie Méca',taux:84},{nom:'Génie Élec',taux:83},{nom:'Génie Civil',taux:85},{nom:'Arts & Modes',taux:82}], mentions:{ab:28,b:14,tb:5,exc:1}},
-    {ex:'BAC Tech',        taux:83, series:[{nom:'STT',taux:85},{nom:'Génie Méca',taux:82},{nom:'Génie Élec',taux:81},{nom:'Génie Civil',taux:83},{nom:'Arts & Modes',taux:80}], mentions:{ab:25,b:13,tb:4,exc:1}},
-    // ── Section Anglophone ───────────────────────────────────────────
-    {ex:'GCE O Level',     taux:91, series:[{nom:'Sciences',taux:92},{nom:'Arts',taux:90},{nom:'Commercial',taux:91}], mentions:{ab:32,b:19,tb:8,exc:2}},
-    {ex:'GCE A Level',     taux:87, series:[{nom:'Sciences',taux:88},{nom:'Arts',taux:85},{nom:'Commercial',taux:89}], mentions:{ab:20,b:12,tb:5,exc:1}},
+    {ex:'BEPC',       taux:100, series:[], mentions:{}},
+    {ex:'Probatoire', taux:69,  series:[], mentions:{}},
+    {ex:'BAC',        taux:61,  series:[], mentions:{}},
   ],
   examResults:[
     {annee:'2022–2023',niveaux:[
@@ -863,13 +860,11 @@ function defaultDB(){return{
     {id:'th6',tid:'t4',date:'18/10/2024',heures:4,cls:'4ème',matiere:'SVT',desc:'Biologie cellulaire'},
   ],
   tauxHoraire:2000,
+  // v1.2.6 FIX : les 6 photos de démo pointaient vers images.unsplash.com — des
+  // salles de classe génériques présentées comme "Notre centre en images". Tableau
+  // vide par défaut : la section reste masquée (voir §4609 app.js) tant qu'aucune
+  // vraie photo n'est chargée via l'admin (Gestion → Galerie photos).
   galleryImages:[
-    {id:'gi1',src:'https://images.unsplash.com/photo-1580582932707-520aed937b7b?w=900&q=80',titre:'Salle de classe',desc:'Nos salles équipées',date:'15/01/2025'},
-    {id:'gi2',src:'https://images.unsplash.com/photo-1509062522246-3755977927d7?w=900&q=80',titre:'Travail en groupe',desc:'Collaboration entre élèves',date:'20/01/2025'},
-    {id:'gi3',src:'https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=900&q=80',titre:'Cours magistral',desc:'Nos enseignants expérimentés',date:'22/01/2025'},
-    {id:'gi4',src:'https://images.unsplash.com/photo-1497486751825-1233686d5d80?w=900&q=80',titre:'Bibliothèque',desc:'Espace de révision',date:'25/01/2025'},
-    {id:'gi5',src:'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=900&q=80',titre:'Révisions intensives',desc:'Préparation BEPC et BAC',date:'01/02/2025'},
-    {id:'gi6',src:'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=900&q=80',titre:'Excellence scolaire',desc:'Nos élèves réussissent',date:'10/02/2025'},
   ],
   products:[
     {id:'p1',ico:'📝',titre:'Annales BEPC 2020-2025',prix:3500,ancien:5000,desc:'5 années de sujets et corrigés complets — Toutes matières',cat:'Épreuves',photo:'',actif:true},
@@ -1119,6 +1114,26 @@ function _migrateDB(){
       DB.publicInfo.email='';
     }
   }
+  // v1.2.6 — Téléphone (DB.school.tel), email et galerie photos (DB.galleryImages)
+  // restent volontairement intouchés ici : Jacques les corrige lui-même dans le
+  // panneau admin (Informations pratiques / Gestion → Galerie photos). Pas de
+  // réécriture automatique de données qu'il gère à la main.
+  // v1.2.6 FIX : "Nos résultats officiels" affichait les taux de démo (94/92/91…
+  // + CAP/Tech/GCE fabriqués) comme si c'étaient de vrais résultats d'examens.
+  // Empreinte de l'ancien jeu de démo (BEPC 94% + CAP 88% présents) → remplacé
+  // par les vrais chiffres 2025-2026 communiqués par Jacques, sans séries ni
+  // mentions inventées.
+  if(DB.statsVitrine && DB.statsVitrine.length){
+    var _svBepc=DB.statsVitrine.find(function(s){return s&&s.ex==='BEPC';});
+    var _svCap=DB.statsVitrine.find(function(s){return s&&s.ex==='CAP';});
+    if(_svBepc && _svBepc.taux===94 && _svCap && _svCap.taux===88){
+      DB.statsVitrine=[
+        {ex:'BEPC',       taux:100, series:[], mentions:{}},
+        {ex:'Probatoire', taux:69,  series:[], mentions:{}},
+        {ex:'BAC',        taux:61,  series:[], mentions:{}},
+      ];
+    }
+  }
   // Identité école (toujours forcer depuis source embarquée)
   var _ldEl=document.getElementById('_logoData');
   var _ldSrc=(_ldEl&&_ldEl.src&&_ldEl.src.startsWith('data:'))?_ldEl.src:'';
@@ -1247,16 +1262,12 @@ function _migrateDB(){
   if(!DB.photos)DB.photos=defaultDB().photos||[];
   if(!DB.examResults)DB.examResults=defaultDB().examResults||[];
   if(!DB.statsVitrine)DB.statsVitrine=defaultDB().statsVitrine||[];
-  // v1.2.x — backfill mentions : toute entrée vitrine sans mentions reçoit des
-  // valeurs d'exemple (Excellent/Très Bien/Bien/Assez Bien) → cartes pleines.
-  // Indicatif, éditable via « ✏️ Modifier les résultats ».
-  (DB.statsVitrine||[]).forEach(function(_sv){
-    var _m=_sv.mentions||{};
-    if(!['ab','b','tb','exc'].some(function(k){return _m[k]!=null&&_m[k]!=='';})){
-      var _t=Math.max(0,Math.min(100,+_sv.taux||0));
-      _sv.mentions={ ab:Math.round(_t*0.42), b:Math.round(_t*0.24), tb:Math.round(_t*0.11), exc:Math.max(1,Math.round(_t*0.03)) };
-    }
-  });
+  // v1.2.6 FIX : l'ancien "backfill mentions" générait des effectifs Excellent/
+  // Très Bien/Bien/Assez Bien par pure formule (taux*0.42, etc.) dès qu'une
+  // entrée n'avait pas de vraies mentions — "pour que les cartes soient
+  // pleines". Résultat : des nombres inventés affichés comme de vrais résultats
+  // d'examens. Supprimé : une entrée sans mentions réelles n'en affiche aucune
+  // (le rendu de _reussitesScroller gère déjà ce cas proprement).
   // GCE O Level et A Level sont désormais des panneaux séparés dans defaultDB().statsVitrine.
   if(!DB.studentAccounts)DB.studentAccounts=defaultDB().studentAccounts||[];
   if(!DB.citations||!DB.citations.length){DB.citations=defaultDB().citations||[];}
@@ -3863,6 +3874,15 @@ var _ONBOARDING_STEPS=[
   }
 ];
 
+/* Le nombre d'étapes était écrit en dur dans le texte d'accueil : « en 8 étapes »
+   pour 9 étapes réellement affichées — le compteur de la modale annonçait donc
+   « Étape 1 / 9 » deux lignes plus bas. On le dérive du tableau : ajouter ou
+   retirer une étape ne peut plus faire mentir la phrase. */
+try{
+  _ONBOARDING_STEPS[0].text = _ONBOARDING_STEPS[0].text
+    .replace(/en \d+ étapes/, 'en ' + _ONBOARDING_STEPS.length + ' étapes');
+}catch(e){}
+
 function _showOnboardingStep(idx){
   if(idx>=_ONBOARDING_STEPS.length){_endOnboarding();return;}
   var step=_ONBOARDING_STEPS[idx];
@@ -4125,8 +4145,8 @@ function _fetchPublicData(){
     if(!isAdmin&&changed){
       // Ticker : re-lancer toujours (les nouveaux items du serveur doivent s'afficher)
       if(typeof initTicker==='function')initTicker();
-      // Bouton Partenaires dans le nav (n'apparaît que si des partenaires existent)
-      if(DB.partenaires&&DB.partenaires.length>0)_addPartnersNav();
+      // v1.2.6 : bouton "🤝 Partenaires" dupliqué dans le nav retiré — fusionné
+      // dans "Nos partenaires" (Communauté ▾ → pgInstitutionalShowcase).
       // Label école dans la barre de connexion
       var lbl=document.getElementById('vBrandName');
       if(lbl&&DB.school&&DB.school.nom)lbl.textContent=DB.school.nom;
@@ -4135,8 +4155,6 @@ function _fetchPublicData(){
       if(curSec==='partenaires'||curSec==='presentation'||curSec==='elearning'||curSec==='contact'||curSec==='boutique'){
         try{vShowSec(curSec,document.querySelector('.vnav-btn.on'));}catch(e){}
       }
-    } else if(isAdmin&&DB.partenaires&&DB.partenaires.length>0){
-      _addPartnersNav();
     }
 
     // NB: on ne call pas save() ici — ces données viennent du serveur et ne
@@ -4527,6 +4545,11 @@ function vShowSec(sec,btn){
     <!-- ═══ L'ESSENTIEL POUR RÉVISER (v1.14.2) — les outils de l'apprenant, juste
          sous la vidéo. Ils n'étaient joignables que par les menus déroulants. ═══ -->
     ${typeof _accEssentiel==='function'?_accEssentiel():''}
+
+    <!-- ═══ MA PROGRESSION & LA COMMUNAUTÉ (v1.2.6) — même logique : XP, badges,
+         étude en groupe, forum, parrainage, classement, cagnotte, partenariat
+         n'étaient visibles que dans les menus Pratiquer/Communauté. ═══ -->
+    ${typeof _accCommunaute==='function'?_accCommunaute():''}
 
     <!-- ═══ PALMARÈS / ÉMULATION — restauré v1.2.4 : la vidéo ET le panneau d'émulation coexistent désormais ═══ -->
     <div class="acc-head">
@@ -4926,12 +4949,13 @@ function vShowSec(sec,btn){
           var dlUsed=parseInt(localStorage.getItem(dlKey)||'0');
           
           h+='<div class="rc elItem" data-titre="'+item.titre.toLowerCase()+'" style="border-color:'+(isLocked?'#E8EEFF':catColor+'44')+';position:relative">';
+          if(isFree) h+='<div class="vt-rib-wrap"><span class="vt-rib">Gratuit</span></div>';
           h+='<div class="rc-accent" style="background:'+catColor+'"></div>';
           h+='<div class="rc-body">';
           
           // Tags
           h+='<div class="rc-tags">';
-          if(isFree) h+='<span class="rc-tag" style="background:#D1FAE5;color:#059669">✅ GRATUIT</span>';
+          if(isFree){ /* le ruban oblique « GRATUIT » du coin remplace ce tag */ }
           else if(item.plans&&item.plans.length){
             (item.plans||[]).slice(0,2).forEach(function(pk){
               h+='<span class="rc-tag" style="background:'+catColor+'18;color:'+catColor+'">'+( pLabels[pk]||pk)+'</span>';
@@ -14393,37 +14417,10 @@ function mManageTicker(){
 // v1.2.1 — Widget « Palmarès de la semaine » : remplit le panneau hero si pas de vidéo.
 // Émulation : manuel star, mieux noté, battle hebdo, rejoindre le classement.
 // v1.2.2 : panneau stats VITRINE groupé PAR EXAMEN (éditable via DB.statsVitrine).
-// Chaque examen = une carte navy : taux principal (compteur or) + séries + mentions.
-window._statsVitrineHtml = function(){
-  var list=(typeof DB!=='undefined'&&DB.statsVitrine&&DB.statsVitrine.length)?DB.statsVitrine:[];
-  if(!list.length) return '';
-  var accents=['#3C8DFF','#FFC93C','#6C56A6','#059669','#F59E0B','#0D9488'];
-  var mLabels={ab:'Assez Bien',b:'Bien',tb:'Très Bien',exc:'Excellent'};
-  // v1.4.8 (demande Jacques) : MÊME style que les cartes catégories e-learning —
-  // bandeau navy sobre (examen + % or) et corps BLANC (séries en chips claires,
-  // mentions en ligne discrète). Compteur animé (.vgz-stat-num) conservé.
-  var cards=list.map(function(s,i){
-    var series=(s.series||[]).map(function(se){
-      return '<div class="lx-serie"><b>'+(se.taux||0)+'%</b><span>'+_esc(se.nom||'')+'</span></div>';
-    }).join('');
-    var m=s.mentions||{};
-    var mentions=['exc','tb','b','ab'].filter(function(k){return m[k]!=null;}).map(function(k){
-      return '<div class="lx-ment"><b>'+(m[k]||0)+'</b><span>'+mLabels[k]+'</span></div>';
-    }).join('');
-    return '<div class="lx-statcard">'
-      +'<div class="lx-statcard-head">'
-        +'<span class="lx-statcard-ex">'+_esc(s.ex||'')+'<small>Taux de réussite</small></span>'
-        +'<em class="vgz-stat-num lx-stat-pct" data-count="'+(s.taux||0)+'" data-suffix="%">0</em>'
-      +'</div>'
-      +'<div class="lx-statcard-body">'
-      +(series?'<div class="lx-stat-series">'+series+'</div>':'')
-      +(mentions?'<div class="lx-stat-mentions"><span class="lx-stat-mlabel">🏅 Mentions</span><div class="lx-stat-mrow">'+mentions+'</div></div>':'')
-      +'</div></div>';
-  }).join('');
-  var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:10px"><button class="btn bo sm" onclick="mEditStatsVitrine()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les résultats</button></div>':'';
-  return '<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>'
-    +'<div class="vgz-stats v-reveal" style="grid-template-columns:repeat(auto-fit,minmax(185px,1fr));max-width:860px;margin:18px auto">'+cards+'</div>'+editBtn;
-};
+// v1.2.6 : rendu remplacé par le carrousel window._reussitesScroller() (défilement
+// horizontal, mêmes cartes .lx-statcard) — cette version en grille statique était
+// devenue du code mort (aucun appelant), supprimée pour ne garder qu'une seule
+// implémentation du panneau "Nos résultats officiels".
 
 // v1.2.2 : éditeur admin des stats vitrine (taux, séries, mentions par examen)
 window.mEditStatsVitrine = function(){
@@ -14665,7 +14662,7 @@ window._reussitesScroller = function(){
       +'</div></div>';
   };
   var cards=list.map(card).join('');
-  var head='<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE</div></div>';
+  var head='<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Session 2025-2026 · BEPC · Probatoire · BAC</div></div>';
   var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:8px"><button class="btn bo sm" onclick="mEditStatsVitrine()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les résultats</button></div>':'';
   // 2 copies de la liste → boucle continue (translateX -50%)
   return head+'<div class="rsc" tabindex="0" aria-label="Résultats officiels du Centre VÉRITAS"><div class="rsc-track">'+cards+cards+'</div></div>'+editBtn;
@@ -14786,6 +14783,19 @@ window._palmaresHtml = function(){
 function buildIntroVideoHtml(){
   var v=DB&&DB.introVideo;
   var nom=(DB&&DB.school&&DB.school.nom)||"VÉRITAS";
+  // v1.2.6 FIX : sans vidéo configurée par l'admin, la façade affichait quand même
+  // un bouton ▶ "Regarder la presentation" cliquable — qui menait à un écran vide
+  // (repli sur un dégradé) puisqu'aucun média n'existe. On ne montre l'invitation
+  // à jouer une vidéo que si une vidéo a réellement été configurée (src ou fichier
+  // local en attente dans IndexedDB).
+  if(!(v&&(v.src||v.idbKey))){
+    return '<div class="vhero-video-wrap" data-vtype="none" style="background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A)">'
+      + '<div class="vhero-video-overlay" style="background:linear-gradient(to bottom,rgba(13,27,62,.22),rgba(13,27,62,.55))">'
+        + '<div></div><div></div>'
+        + '<div style="text-align:center;color:#fff;font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;text-shadow:0 2px 10px rgba(0,0,0,.7)">'+_esc(nom)+'</div>'
+      + '</div>'
+    + '</div>';
+  }
   var poster='';
   if(v&&v.src&&(v.src.indexOf('youtube')>=0||v.src.indexOf('youtu.be')>=0)){
     var _pm=v.src.match(/(?:embed\/|[?&]v=|youtu\.be\/)([^?&/]+)/);
@@ -15020,74 +15030,9 @@ function _vheroToggleSound(ev){
   }
 }
 
-// Ancien nom conservé (au cas où il serait appelé ailleurs)
-function buildIntroVideoHtml_legacy(){
-  var v=DB&&DB.introVideo;
-  var nom=(DB&&DB.school&&DB.school.nom)||"VÉRITAS";
-  var sl=(DB&&DB.publicInfo&&DB.publicInfo.slogan)||"La Réussite Assurée";
-  var desc=(DB&&DB.publicInfo&&DB.publicInfo.description)||"Excellence scolaire au Cameroun";
-
-  // Si une vidéo YouTube a été configurée par l'admin
-  if(v&&v.src&&(v.src.indexOf('youtube')>=0||v.src.indexOf('youtu.be')>=0)){
-    var vid=v.src;
-    vid=vid.replace('watch?v=','embed/');
-    vid=vid.replace('youtu.be/','youtube.com/embed/');
-    if(vid.indexOf('/embed/')<0){
-      var mv=vid.match(/[?&]v=([^&]+)/);
-      if(mv)vid='https://www.youtube.com/embed/'+mv[1];
-    }
-    if(vid.indexOf('?')<0)vid+='?'; else vid+='&';
-    vid+='autoplay=1&mute=1&loop=1&rel=0&modestbranding=1&controls=1';
-    return '<div style="border-radius:18px;overflow:hidden;margin-bottom:20px;box-shadow:0 8px 32px rgba(20,37,84,.18);position:relative">'
-      +'<div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden">'
-      +'<iframe src="'+vid+'" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none" allow="autoplay;encrypted-media;fullscreen" allowfullscreen loading="lazy"></iframe>'
-      +'</div>'
-      +'<div style="background:linear-gradient(90deg,#142554,#1E3A8A);padding:14px 20px;display:flex;align-items:center;justify-content:space-between">'
-      +'<div><div style="font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#fff">'+nom+'</div>'
-      +'<div style="font-size:12px;color:rgba(255,255,255,.7);font-style:italic">'+sl+'</div></div>'
-      +'<div style="background:#FFC93C;color:#142554;font-size:10px;font-weight:800;padding:4px 10px;border-radius:8px">EN LIGNE</div>'
-      +'</div></div>';
-  }
-
-  // Si une vidéo locale a été uploadée
-  if(v&&v.src&&v.src.indexOf('data:video')===0){
-    return '<div class="vhero-video-wrap">'
-      +'<video src="'+v.src+'" autoplay muted loop playsinline controls style="width:100%;max-height:300px;object-fit:cover;display:block"></video>'
-      +'<div style="background:linear-gradient(90deg,#142554,#1E3A8A);padding:10px 18px;display:flex;align-items:center;justify-content:space-between">'
-      +'<div><div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#fff">'+nom+'</div>'
-      +'<div style="font-size:11px;color:rgba(255,255,255,.7)">'+sl+'</div></div>'
-      +'<div style="background:#FFC93C;color:#142554;font-size:10px;font-weight:800;padding:3px 10px;border-radius:8px">EN LIGNE</div>'
-      +'</div></div>';
-  }
-
-  // HERO ANIMÉ par défaut (toujours affiché)
-  var stats='';
-  if(DB&&DB.students&&DB.students.length)stats+='<span style="font-size:12px;color:rgba(255,255,255,.8)">👨‍🎓 '+DB.students.length+' élèves</span>&nbsp;&nbsp;';
-  if(DB&&DB.teachers&&DB.teachers.length)stats+='<span style="font-size:12px;color:rgba(255,255,255,.8)">👩‍🏫 '+DB.teachers.length+' enseignants</span>';
-
-  return '<div style="background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A,#6C56A6);background-size:400% 400%;animation:vhAnim 8s ease infinite;border-radius:18px;overflow:hidden;margin-bottom:20px;box-shadow:0 8px 32px rgba(13,27,62,.35)">'
-    +'<div style="padding:36px 28px 28px;position:relative">'
-    // Badge
-    +'<div style="position:absolute;top:16px;right:16px;background:rgba(255,201,60,.15);border:1px solid rgba(255,201,60,.4);border-radius:20px;padding:4px 14px;font-size:10px;font-weight:800;color:#FFC93C;letter-spacing:1px">🏫 VÉRITAS</div>'
-    // Logo/Icône
-    +'<div style="font-size:52px;margin-bottom:14px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.3))">🎓</div>'
-    // Nom
-    +'<div style="font-family:Montserrat,sans-serif;font-size:clamp(22px,4vw,30px);font-weight:900;color:#fff;margin-bottom:6px;text-shadow:0 2px 12px rgba(0,0,0,.3);line-height:1.2">'+nom+'</div>'
-    // Slogan
-    +'<div style="font-family:Georgia,serif;font-size:clamp(13px,2.5vw,16px);color:rgba(255,255,255,.85);font-style:italic;margin-bottom:8px;line-height:1.6">'+sl+'</div>'
-    // Stats
-    +(stats?'<div style="margin-bottom:20px">'+stats+'</div>':'<div style="margin-bottom:20px"></div>')
-    // Boutons CTA
-    +'<div style="display:flex;gap:10px;flex-wrap:wrap">'
-    +'<button onclick="vShowSec(\'elearning\',null)" style="background:#FFC93C;color:#142554;border:none;border-radius:24px;padding:11px 24px;font-size:13px;font-weight:800;cursor:pointer;font-family:Montserrat,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.25);transition:.2s" onmouseover="this.style.transform=\'scale(1.04)\'" onmouseout="this.style.transform=\'\'">📚 Explorer les cours</button>'
-    +'<button onclick="vShowSec(\'orientation\',null)" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:24px;padding:11px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif;backdrop-filter:blur(6px);transition:.2s" onmouseover="this.style.background=\'rgba(255,255,255,.2)\'" onmouseout="this.style.background=\'rgba(255,255,255,.12)\'">🧭 Mon orientation</button>'
-    +'</div></div>'
-    // Bandeau bas
-    +'<div style="background:rgba(0,0,0,.25);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">'
-    +'<div style="font-size:11px;color:rgba(255,255,255,.6)">🎬 Ajoutez votre vidéo de présentation depuis Paramètres → Vidéo d\'accueil</div>'
-    +'<div style="font-size:10px;color:rgba(255,201,60,.8);font-weight:700">Douala, Cameroun</div>'
-    +'</div></div>';
-}
+// v1.2.6 : buildIntroVideoHtml_legacy() supprimée — ancienne implémentation du
+// hero vidéo, superseded par buildIntroVideoHtml()/_buildHeroMediaHtml() plus
+// haut, sans aucun appelant restant (code mort).
 
 // ════════════════════════════════════════════════════════════════════
 // v2.7 — SYSTÈME DE QUOTAS IA PAR PLAN D'ABONNEMENT
@@ -16517,21 +16462,11 @@ function exportAllDataSQL(){
   toast('✅ Export SQL téléchargé');
 }
 
-// ── Add partners to visitor nav ──────────────────────────────
-function _addPartnersNav(){
-  var vNav = document.getElementById('vNav');
-  if(!vNav) return;
-  var existing = vNav.querySelector('[data-nav="partners"]');
-  if(existing) return; // already added
-  // N'afficher le bouton que si des partenaires existent (ou si admin pour prévisualisation)
-  if((!DB.partenaires||DB.partenaires.length===0)&&!iA()) return;
-  var btn = document.createElement('button');
-  btn.className = 'vnav-btn';
-  btn.setAttribute('data-nav','partners');
-  btn.textContent = '🤝 Partenaires';
-  btn.onclick = function(){vNav.querySelectorAll('.vnav-btn').forEach(function(b){b.classList.remove('on');});btn.classList.add('on');showPartenaires();};
-  vNav.appendChild(btn);
-}
+// v1.2.6 : _addPartnersNav() supprimée — injectait un second bouton "🤝
+// Partenaires" dans le nav, en plus de "Nos partenaires" (Communauté ▾),
+// avec sa propre source de données (DB.partenaires) distincte de celle de
+// pgInstitutionalShowcase (DB.partners). Deux entrées, deux jeux de données :
+// fusionnées dans pgInstitutionalShowcase, qui affiche maintenant les deux.
 
 // ── Add admin menus for partners, calendar, video, packs ──────
 function _patchAdminNavs(){
@@ -16543,7 +16478,6 @@ function _patchAdminNavs(){
 
 // Init patches on page load
 function _applyPatches(){
-  _addPartnersNav();
   initTickerFixed();
   // Note: pgSettings override removed — tous les boutons sont déjà dans Gestion avancée
 }
@@ -17029,53 +16963,10 @@ function _ivSave(){
 }
 function _ivClear(){DB.introVideo=null;window._pVidSrc="";save();window._vidHtml=buildIntroVideoHtml();cm();toast("Video supprimee");}
 
-// ── PARTENAIRES ────────────────────────────────────────────────────
-function showPartenaires(){
-  var pars=DB.partenaires||[];
-  var h="<div class='vsec'>";
-  h+="<div class='vsec-title'><span class='vsec-ico'><svg class='vico vico-21' aria-hidden='true'><use href='#lc-handshake'/></svg></span>Partenaires & Sponsors</div>";
-  h+="<div class='vsec-sub'>Etablissements et organisations qui soutiennent VERITAS</div>";
-  var labs={premium:"🥇 Premium",or:"🥈 Or",argent:"🥉 Argent",autre:"🤝 Partenaires"};
-  if(pars.length){
-    ["premium","or","argent","autre"].forEach(function(cat){
-      var grp=pars.filter(function(p){return(p.cat||"autre")===cat;});
-      if(!grp.length)return;
-      h+="<div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#142554;margin:18px 0 12px'>"+labs[cat]+"</div>";
-      h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:8px'>";
-      grp.forEach(function(p){
-        h+="<div class='vcard' style='text-align:center;border-top:4px solid "+(p.couleur||"#3C8DFF")+"'>"
-          +(p.logo?"<img src='"+p.logo+"' style='max-height:72px;max-width:160px;object-fit:contain;margin:0 auto 10px;display:block;border-radius:8px'>"
-                 :"<div style='font-size:44px;margin-bottom:10px'>"+(p.ico||"🏢")+"</div>")
-          +"<div style='font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#142554;margin-bottom:4px'>"+p.nom+"</div>"
-          +(p.desc?"<div style='font-size:11px;color:var(--ink4);line-height:1.55;margin-bottom:8px'>"+p.desc+"</div>":"")
-          +(p.site?"<a href='"+p.site+"' target='_blank' rel='noopener' style='font-size:11px;color:#3C8DFF;font-weight:700'>🌐 Visiter</a>":"")
-          +"</div>";
-      });
-      h+="</div>";
-    });
-  }else{
-    h+="<div class='ib ibt mb20'><span>💼</span><span>Aucun partenaire configure. Contactez-nous pour rejoindre le reseau VERITAS.</span></div>";
-  }
-  h+="<div class='vcard mt16' style='background:linear-gradient(135deg,#F0F4FF,#EDE9FE);border:1px solid #C7D2FE;text-align:center;padding:28px'>"
-    +"<div style='font-size:38px;margin-bottom:12px'>🤝</div>"
-    +"<div style='font-family:Montserrat,sans-serif;font-size:17px;font-weight:800;color:#142554;margin-bottom:8px'>Rejoignez l'aventure VÉRITAS</div>"
-    +"<div style='font-family:Georgia,serif;font-size:13px;color:var(--ink3);line-height:1.7;font-style:italic;margin-bottom:18px'>Auteurs, enseignants, entreprises et mécènes : contribuez à l'éducation camerounaise — et soyez rémunérés ou mis en avant.</div>"
-    +"<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;text-align:center'>"
-      +"<div style='background:#fff;border:1px solid #E6EAF2;border-radius:14px;padding:16px;display:flex;flex-direction:column'>"
-        +"<div style='font-size:26px'>✍️</div>"
-        +"<div style='font-family:Montserrat,sans-serif;font-weight:800;color:#142554;margin:6px 0 4px'>Devenir auteur</div>"
-        +"<div style='font-size:12px;color:#5B6B85;line-height:1.55;margin-bottom:12px;flex:1'>Vendez vos cours, épreuves et manuels au programme MINESEC. Vous touchez <b>70%</b> de chaque vente.</div>"
-        +"<button class='btn bi' style='width:100%' onclick='vDevenirAuteur()'><svg class='vico bico' aria-hidden='true'><use href='#lc-pencil'/></svg>Soumettre une ressource</button>"
-      +"</div>"
-      +"<div style='background:#fff;border:1px solid #E6EAF2;border-radius:14px;padding:16px;display:flex;flex-direction:column'>"
-        +"<div style='font-size:26px'>🤝</div>"
-        +"<div style='font-family:Montserrat,sans-serif;font-weight:800;color:#142554;margin:6px 0 4px'>Partenaire & soutien</div>"
-        +"<div style='font-size:12px;color:#5B6B85;line-height:1.55;margin-bottom:12px;flex:1'>Entreprises, ONG, mécènes : sponsorisez VÉRITAS ou soutenez nos élèves. Visibilité garantie.</div>"
-        +"<button class='btn bo' style='width:100%' onclick='mDevenirPartenaire()'><svg class='vico bico' aria-hidden='true'><use href='#lc-handshake'/></svg>Nous accompagner</button>"
-      +"</div>"
-    +"</div></div></div>";
-  _vc(h);
-}
+// v1.2.6 : showPartenaires() supprimée — c'était le rendu du bouton nav
+// "🤝 Partenaires" dupliqué (voir _addPartnersNav ci-dessus). Son contenu
+// propre (sponsors par palier + CTA "Devenir auteur / Devenir partenaire")
+// a été repris dans pgInstitutionalShowcase (section "Nos partenaires").
 
 // Visiteur → devenir auteur (soumettre une ressource). Si non connecté, invite à créer un compte.
 window.vDevenirAuteur = function(){
@@ -31139,8 +31030,8 @@ window.I18N_SUBS_EN = {
   "Cliquez pour explorer": "Click to explore",
   "Nos résultats aux examens officiels": "Our results at the official exams",
   "Nos résultats officiels": "Our official exam results",
-  "Excellence aux examens nationaux : BEPC · Probatoire · BAC · GCE":
-    "Excellence at national exams: BEPC · Probatoire · BAC · GCE",
+  "Session 2025-2026 · BEPC · Probatoire · BAC":
+    "2025-2026 session · BEPC · Probatoire · BAC",
   "Nos résultats aux examens": "Our exam results",
   "Présentation du Centre": "About the Centre",
   "Notre Histoire": "Our History",
@@ -39393,6 +39284,28 @@ function pgInstitutionalShowcase(){
   var h = '<div style="max-width:920px;margin:0 auto;padding:0 14px">';
   h += '<div class="pgt" style="text-align:center;margin-top:20px">🤝 Nos Partenaires Institutionnels</div>';
   h += '<div style="text-align:center;color:var(--ink3);font-size:13px;margin-bottom:24px;font-style:italic">Ensemble pour l\'excellence éducative au Cameroun</div>';
+  // v1.2.6 : sponsors par palier (ex-page "showPartenaires", accessible avant
+  // via un second bouton de nav dupliqué). Même page, même donnée DB.partenaires.
+  var _sponsorLabs={premium:'🥇 Sponsors Premium',or:'🥈 Sponsors Or',argent:'🥉 Sponsors Argent',autre:'🤝 Autres sponsors'};
+  var _sponsors=DB.partenaires||[];
+  if(_sponsors.length){
+    ['premium','or','argent','autre'].forEach(function(cat){
+      var grp=_sponsors.filter(function(p){return(p.cat||'autre')===cat;});
+      if(!grp.length)return;
+      h+='<div class="ct" style="margin:24px 0 10px">'+_sponsorLabs[cat]+' <span style="font-size:13px;font-weight:400;color:var(--ink3)">— '+grp.length+'</span></div>';
+      h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:8px">';
+      grp.forEach(function(p){
+        h+='<div class="vcard" style="text-align:center;border-top:4px solid '+(p.couleur||'#3C8DFF')+'">'
+          +(p.logo?'<img src="'+p.logo+'" style="max-height:72px;max-width:160px;object-fit:contain;margin:0 auto 10px;display:block;border-radius:8px">'
+                 :'<div style="font-size:44px;margin-bottom:10px">'+(p.ico||'🏢')+'</div>')
+          +'<div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#142554;margin-bottom:4px">'+_prtSafe(p.nom)+'</div>'
+          +(p.desc?'<div style="font-size:11px;color:var(--ink4);line-height:1.55;margin-bottom:8px">'+_prtSafe(p.desc)+'</div>':'')
+          +(p.site?'<a href="'+p.site+'" target="_blank" rel="noopener" style="font-size:11px;color:#3C8DFF;font-weight:700">🌐 Visiter</a>':'')
+          +'</div>';
+      });
+      h+='</div>';
+    });
+  }
   var total = 0;
   sections.forEach(function(s){
     var list = partners.filter(function(p){return p.type===s.type;});
@@ -39423,11 +39336,24 @@ function pgInstitutionalShowcase(){
       + '<a href="#" onclick="event.preventDefault();_prtGo(\'partenariat\');return false;" style="color:#142554;font-weight:700">Rejoignez-nous</a>'
       + ' pour figurer ici.</div>';
   }
-  h += '<div style="background:linear-gradient(135deg,#142554,#1e3a8a);color:#fff;padding:24px;border-radius:14px;text-align:center;margin:30px 0">'
-    + '<div style="font-size:17px;font-weight:800;margin-bottom:8px">Votre institution n\'est pas listée ?</div>'
-    + '<div style="font-size:13px;color:#cbd5e1;margin-bottom:14px">Découvrez les programmes de partenariat institutionnel et rejoignez le réseau.</div>'
-    + '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 26px;font-size:14px" onclick="_prtGo(\'partenariat\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-handshake"/></svg>Devenir partenaire</button>'
-    + '</div>';
+  h += '<div class="vcard mt16" style="background:linear-gradient(135deg,#F0F4FF,#EDE9FE);border:1px solid #C7D2FE;text-align:center;padding:28px">'
+    + '<div style="font-size:38px;margin-bottom:12px">🤝</div>'
+    + '<div style="font-family:Montserrat,sans-serif;font-size:17px;font-weight:800;color:#142554;margin-bottom:8px">Rejoignez l\'aventure VÉRITAS</div>'
+    + '<div style="font-family:Georgia,serif;font-size:13px;color:var(--ink3);line-height:1.7;font-style:italic;margin-bottom:18px">Auteurs, enseignants, entreprises et mécènes : contribuez à l\'éducation camerounaise — et soyez rémunérés ou mis en avant.</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;text-align:center">'
+      + '<div style="background:#fff;border:1px solid #E6EAF2;border-radius:14px;padding:16px;display:flex;flex-direction:column">'
+        + '<div style="font-size:26px">✍️</div>'
+        + '<div style="font-family:Montserrat,sans-serif;font-weight:800;color:#142554;margin:6px 0 4px">Devenir auteur</div>'
+        + '<div style="font-size:12px;color:#5B6B85;line-height:1.55;margin-bottom:12px;flex:1">Vendez vos cours, épreuves et manuels au programme MINESEC. Vous touchez <b>70%</b> de chaque vente.</div>'
+        + '<button class="btn bi" style="width:100%" onclick="vDevenirAuteur()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Soumettre une ressource</button>'
+      + '</div>'
+      + '<div style="background:#fff;border:1px solid #E6EAF2;border-radius:14px;padding:16px;display:flex;flex-direction:column">'
+        + '<div style="font-size:26px">🤝</div>'
+        + '<div style="font-family:Montserrat,sans-serif;font-weight:800;color:#142554;margin:6px 0 4px">Partenaire &amp; soutien</div>'
+        + '<div style="font-size:12px;color:#5B6B85;line-height:1.55;margin-bottom:12px;flex:1">Entreprises, ONG, mécènes : sponsorisez VÉRITAS ou soutenez nos élèves. Visibilité garantie.</div>'
+        + '<button class="btn bo" style="width:100%" onclick="mDevenirPartenaire()"><svg class="vico bico" aria-hidden="true"><use href="#lc-handshake"/></svg>Nous accompagner</button>'
+      + '</div>'
+    + '</div></div>';
   h += '</div>';
   return h;
 }
@@ -39616,25 +39542,59 @@ window._vtProofEvents = function(){
     });
   }catch(e){}
 
+  // Quiz / évaluations réussis — on ne surface QUE les réussites franches
+  // (≥ 12/20, le seuil « ✅ Réussite » de l'app), anonymisées comme le reste.
+  // La note valorise l'élève sans l'exposer ; rien n'est inventé.
+  try{
+    (DB.evaluations||[]).forEach(function(ev){
+      if(!ev || !ev.reponses) return;
+      ev.reponses.forEach(function(r){
+        if(!r || !recent(r.date)) return;
+        var sur20 = (typeof r.noteSur20==='number') ? r.noteSur20
+                  : (r.total ? Math.round((r.score/r.total)*20) : null);
+        if(sur20===null || sur20 < 12) return;
+        var parts = String(r.nom||'').trim().split(/\s+/);
+        var nm = _vtProofName(parts[0]||'', parts.slice(1).join(' '));
+        out.push({ic:'🎯', d:r.date,
+          tx:'<b>'+_esc(nm)+'</b> a réussi un quiz ('+sur20+'/20)'});
+      });
+    });
+  }catch(e){}
+
+  // Paiements de scolarité confirmés — volontairement génériques : ni nom, ni
+  // montant (donnée sensible). Seuls les paiements réellement « Payé » comptent ;
+  // le plafond 60 j écarte d'office les données de démonstration de 2024.
+  try{
+    (DB.payments||[]).forEach(function(p){
+      if(!p) return;
+      var dd = p.dt || p.date;
+      if(!recent(dd)) return;
+      if(!/pay|paid|régl|confirm|succ/i.test(String(p.stat||''))) return; // Payé / paid / réglé / confirmé / success
+      out.push({ic:'💳', d:dd,
+        tx:'Un paiement de scolarité vient d\'être confirmé'});
+    });
+  }catch(e){}
+
   out.sort(function(a,b){ var x=_vtProofDays(a.d), y=_vtProofDays(b.d);
     return (x===null?999:x)-(y===null?999:y); });
   return out.slice(0,12);
 };
 
-// Rotation discrète en bas à gauche. Desktop seulement (le bas de l'écran
-// mobile est déjà occupé par le FAB et le bandeau d'essai IA), fermable, et
-// silencieuse s'il y a moins de 2 événements réels — un flux à un seul
-// message tournant en boucle se lit immédiatement comme un décor.
+// Flux « live » en bas à gauche : chaque événement RÉEL surgit, reste quelques
+// secondes puis s'efface, et les messages s'empilent — comme un fil d'activité
+// en direct. Sur mobile, remonté au-dessus du bouton WhatsApp et du bandeau
+// sticky (cf. CSS .vfx-proof @media), fermable, et muet si aucun événement réel de
+// moins de 60 jours (jamais de message inventé).
 window._vtProofFeed = function(){
   try{
     if(sessionStorage.getItem('_vtProofOff')) return;
-    if(window.innerWidth < 1000) return;
+    if(window.innerWidth < 360) return; // masqué seulement sur les très petits écrans
     if(window._vtProofTimer) return;
     var V = document.getElementById('VISITOR');
     if(!V || V.style.display==='none') return;
 
     var evs = _vtProofEvents();
-    if(evs.length < 2) return;
+    if(evs.length < 1) return; // dès 1 événement réel, on l'affiche
 
     var box = document.getElementById('vtProof');
     if(!box){
@@ -39649,29 +39609,33 @@ window._vtProofFeed = function(){
       box.setAttribute('aria-live','off');
       document.body.appendChild(box);
     }
-    var i = 0, cycles = 0;
-    var paint = function(){
-      var e = evs[i % evs.length];
+    box.classList.add('on');
+    var i = 0;
+    // « Live » : un message surgit, vit quelques secondes, puis s'efface ; ils
+    // s'empilent (max MAX). GAP < LIFE => on en voit souvent 2 à l'écran.
+    var LIFE = 5200; // durée d'affichage d'un message (ms)
+    var GAP  = 3400; // délai entre deux apparitions (ms)
+    var MAX  = (window.innerWidth < 1000) ? 2 : 3; // moins de cartes empilées sur mobile
+    var pop = function(){
+      var e = evs[i % evs.length]; i++;
       var when = _vtProofWhen(e.d);
-      box.innerHTML = '<div class="vfx-proof-card">'
-        + '<span class="vfx-proof-ic" aria-hidden="true">'+e.ic+'</span>'
+      var card = document.createElement('div');
+      card.className = 'vfx-proof-card';
+      card.innerHTML = '<span class="vfx-proof-ic" aria-hidden="true">'+e.ic+'</span>'
         + '<span><span class="vfx-proof-tx">'+e.tx+'</span>'
         + '<span class="vfx-proof-when"><span class="vfx-live" style="--vfx-live-c:rgba(16,185,129,.7);width:6px;height:6px;border-radius:50%;background:#3A8F73;display:inline-block"></span>'
         + 'Activité réelle du centre'+(when?' · '+when:'')+'</span></span>'
         + '<button class="vfx-proof-x" aria-label="Masquer le flux d\'activité" '
-        + 'onclick="_vtProofStop()">✕</button></div>';
-      box.classList.add('on');
-      box.style.animation = 'none'; void box.offsetWidth;
-      box.style.animation = '';
-      i++;
-      if(i % evs.length === 0){
-        cycles++;
-        // Deux passages suffisent : au-delà, le bandeau devient du mobilier.
-        if(cycles >= 2) _vtProofStop();
-      }
+        + 'onclick="_vtProofStop()">✕</button>';
+      box.appendChild(card);
+      while(box.children.length > MAX){ box.removeChild(box.firstChild); }
+      setTimeout(function(){
+        card.classList.add('vfx-out');
+        setTimeout(function(){ if(card.parentNode) card.parentNode.removeChild(card); }, 460);
+      }, LIFE);
     };
-    setTimeout(paint, 400);
-    window._vtProofTimer = setInterval(paint, 8000);
+    setTimeout(pop, 300);
+    window._vtProofTimer = setInterval(pop, GAP);
   }catch(e){}
 };
 
@@ -40134,7 +40098,7 @@ window._vtMoyenneCalc = function(){
 /* ─────────── 5. AMORÇAGE ─────────── */
 // Le flux d'activité attend 6 s : avant, le visiteur lit encore la page
 // d'accueil et un mouvement en bas d'écran ne fait que le distraire.
-setTimeout(function(){ try{ _vtProofFeed(); }catch(e){} }, 6000);
+setTimeout(function(){ try{ _vtProofFeed(); }catch(e){} }, 1500);
 
 /* ════════════════════ FIN RELATION CLIENT & ESPACE PARENTS ════════════════════ */
 
@@ -41797,7 +41761,7 @@ window._pvOffre = _pvOffre;
    dormaient à deux ou trois niveaux dans les menus déroulants — exactement le
    défaut déjà corrigé pour l'orientation, resté entier pour tout le reste.
 
-   Huit portes, le plus haut possible dans la page, juste sous la vidéo. Chacune
+   Sept portes, le plus haut possible dans la page, juste sous la vidéo. Chacune
    dit ce qu'on y trouve et ce qu'elle coûte : « Gratuit » n'est pas un argument
    de vente ici, c'est l'information qui décide du clic. Les destinations sont
    les mêmes que celles du hub élève — déjà vérifiées une par une — plus le
@@ -41818,8 +41782,11 @@ var _ACC_ESSENTIEL = [
   {ic:'lc-flask',    t:'Laboratoires virtuels', d:'Les expériences de sciences, à manipuler.',        libre:1, a:"showLabosVirtuels()"},
   {ic:'lc-game',     t:'Jeux & œuvres',         d:'Quiz, cartes mentales, œuvres au programme.',      libre:1, a:"showJeuxEdu()"},
   {ic:'lc-compass',  t:'Orientation scolaire',  d:'Filières, séries, débouchés : choisir sans se tromper.',    a:"vShowSec('orientation',null)"},
-  {ic:'lc-tool',     t:'Outils de calcul',      d:'Moyenne, note à viser, planning de révision.',     libre:1, a:"window.open('outils/','_blank','noopener')"},
-  {ic:'lc-brain',    t:'Professeur Ambassa',    d:'Poser une question du programme, obtenir une explication.', a:"mAgentAmbassa()"}
+  {ic:'lc-tool',     t:'Outils de calcul',      d:'Moyenne, note à viser, planning de révision.',     libre:1, a:"window.open('outils/','_blank','noopener')"}
+  // La tuile « Professeur Ambassa » a été RETIRÉE : l'accueil offrait trois
+  // portes vers la même chose (cette tuile, le bandeau « Intelligence
+  // Artificielle » plus bas, et désormais l'avatar flottant présent sur toutes
+  // les pages). Le bandeau reste — c'est l'entrée de l'entonnoir d'abonnement.
 ];
 
 function _accEssentiel(){
@@ -41849,6 +41816,49 @@ function _accEssentiel(){
     + '</div>';
 }
 window._accEssentiel = _accEssentiel;
+
+
+/* ══════════ MA PROGRESSION & LA COMMUNAUTÉ — accueil (v1.2.6) ══════════
+   Même constat que pour "L'essentiel pour réviser", appliqué au reste : XP,
+   badges, étude en groupe, forum, parrainage, classement junior, cagnotte et
+   partenariat existent et sont fonctionnels, mais restaient enterrés dans les
+   menus déroulants Pratiquer/Communauté — un visiteur qui ne déplie pas ces
+   menus ne découvre jamais qu'ils existent. Même règle qu'ailleurs : aucun
+   chiffre inventé ici, seulement ce que la fonctionnalité fait réellement. */
+var _ACC_COMMUNAUTE = [
+  {ic:'lc-flame',     t:'Mon parcours',         d:'XP, streak et niveau : suivre sa progression au fil des révisions.', libre:1, a:"mMonParcours()"},
+  {ic:'lc-award',     t:'Mes badges',           d:'30+ succès à débloquer en pratiquant.',                              libre:1, a:"mAchievements()"},
+  {ic:'lc-users',     t:'Étude en groupe',      d:'Une room en temps réel avec un code à 6 chiffres.',                  libre:1, a:"mStudyRoom()"},
+  {ic:'lc-university',t:'Classes & Forum',      d:'Échanger avec ses enseignants et ses pairs.',                       libre:1, a:"showClasseVirtuelle()"},
+  {ic:'lc-gift',      t:'Parrainage',           d:'+500 FCFA de crédit pour chaque filleul inscrit.',                   libre:1, a:"mParrainage()"},
+  {ic:'lc-trending',  t:'Classement Junior',    d:'Le top 100 des ambassadeurs élèves.',                                libre:1, a:"vShowSec('leaderboard-junior',null)"},
+  {ic:'lc-wallet',    t:'Cagnotte de scolarité',d:'Faire participer la famille au paiement, même depuis l\'étranger.', a:"vShowSec('cagnotte',null)"},
+  {ic:'lc-handshake', t:'Partenariat VÉRITAS',  d:'9 programmes, du Bronze au Diamant.',                                a:"vShowSec('partenariat',null)"}
+];
+
+function _accCommunaute(){
+  var cartes = _ACC_COMMUNAUTE.map(function(c){
+    return '<div class="acc-ess-c" onclick="' + c.a + '" role="link" tabindex="0"'
+      +  ' onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}">'
+      +    '<div class="acc-ess-ic">'
+      +      '<svg class="vico vico-21" aria-hidden="true"><use href="#' + c.ic + '"/></svg>'
+      +    '</div>'
+      +    '<div class="acc-ess-t">' + _esc(c.t)
+      +      (c.libre ? '<span class="acc-ess-free">Gratuit</span>' : '')
+      +    '</div>'
+      +    '<div class="acc-ess-d">' + _esc(c.d) + '</div>'
+      +  '</div>';
+  }).join('');
+
+  return '<div class="acc-head">'
+    +   '<h2 class="acc-pill"><span class="ic">'
+    +     '<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-users"/></svg>'
+    +   '</span> Ma progression &amp; la communauté</h2>'
+    +   '<div class="acc-sub">XP, badges, entraide et parrainage — tout ce que VÉRITAS propose au-delà des cours.</div>'
+    + '</div>'
+    + '<div class="acc-ess">' + cartes + '</div>';
+}
+window._accCommunaute = _accCommunaute;
 
 
 /* ══════════ BORDS DE LA NAVIGATION (v1.14.1) ══════════
@@ -42486,8 +42496,20 @@ window._demSoumettreCampus = function(){
 
 /* ── 2. PARENT : accompagnement à domicile ─────────────────────────────── */
 window.mDemandeDomicile = function(){
-  var matieres = ['Français','Mathématiques','Anglais','Physique-Chimie','SVT','Histoire-Géographie',
-                  'Philosophie','Informatique','ECM','Allemand','Espagnol','Comptabilité'];
+  // La liste de cases ne couvrait que l'enseignement général : un parent du
+  // technique ou du sous-système anglophone n'y trouvait pas sa matière et
+  // n'avait aucun moyen de la demander. C'est LE PARENT qui saisit désormais,
+  // les puces ci-dessous n'étant qu'un raccourci de saisie, réparties sur les
+  // trois sous-systèmes. Toute matière absente se tape directement.
+  var suggestions = [
+    { groupe:'Général', items:['Français','Mathématiques','Anglais','Physique-Chimie','SVT',
+                               'Histoire-Géographie','Philosophie','Informatique','ECM','Allemand','Espagnol'] },
+    { groupe:'Technique & professionnel', items:['Comptabilité','Économie','Droit','Secrétariat-Bureautique',
+                               'Électrotechnique','Électronique','Mécanique','Génie civil','Dessin technique','Fabrication'] },
+    { groupe:'Anglophone (GCE)', items:['English Language','Literature in English','Mathematics','Further Maths',
+                               'Biology','Chemistry','Physics','Geography','History','Economics',
+                               'Computer Science','Citizenship'] }
+  ];
   var niveaux  = ['Primaire','6ᵉ','5ᵉ','4ᵉ','3ᵉ','2nde','1ère','Terminale','Form 1-5 (GCE)','Lower/Upper Sixth'];
   var body =
       '<div style="background:#F7F9FF;border:1px solid #E6EAF2;border-radius:12px;padding:12px 14px;font-size:12.5px;color:#41506B;line-height:1.6;margin-bottom:14px">'
@@ -42504,12 +42526,25 @@ window.mDemandeDomicile = function(){
     +   niveaux.map(function(n){ return '<option>' + n + '</option>'; }).join('')
     + '</select></div>'
     + '<div class="fg"><span class="fl">Matières souhaitées *</span>'
-    +   '<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px">'
-    +   matieres.map(function(m, i){
-          return '<label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;background:#F7F9FF;border:1px solid #E6EAF2;border-radius:20px;padding:6px 12px;cursor:pointer">'
-               + '<input type="checkbox" class="_ddMat" value="' + m + '" id="_ddM' + i + '">' + m + '</label>';
+    +   '<input class="fi" id="_ddMatieres" placeholder="Tapez les matières, séparées par une virgule"'
+    +     ' aria-describedby="_ddMatAide">'
+    +   '<div id="_ddMatAide" style="font-size:11.5px;color:#6B7A99;margin-top:5px;line-height:1.5">'
+    +     'Tous sous-systèmes : général, technique et anglophone (GCE). '
+    +     'Touchez une suggestion pour l\'ajouter, ou saisissez librement.'
+    +   '</div>'
+    +   suggestions.map(function(g){
+          return '<div style="margin-top:9px">'
+            + '<div style="font-size:10px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;color:#8B96AC;margin-bottom:5px">'
+            +   _esc(g.groupe) + '</div>'
+            + '<div style="display:flex;flex-wrap:wrap;gap:6px">'
+            + g.items.map(function(m){
+                return '<button type="button" onclick="_ddAjoutMatiere(\'' + m.replace(/'/g, "\\'") + '\')"'
+                  + ' style="font-size:11.5px;background:#F7F9FF;border:1px solid #E6EAF2;border-radius:20px;'
+                  + 'padding:5px 11px;cursor:pointer;color:#142554;font-weight:600">+ ' + _esc(m) + '</button>';
+              }).join('')
+            + '</div></div>';
         }).join('')
-    +   '</div></div>'
+    + '</div>'
     + '<div class="fg"><span class="fl">Nombre d\'apprenants</span><input class="fi" id="_ddEleves" type="number" min="1" max="20" value="1"></div>'
     + '<div class="fg"><span class="fl">Rythme souhaité</span><select class="fi" id="_ddFrequence">'
     +   '<option>1 séance par semaine</option><option>2 séances par semaine</option><option>3 séances par semaine</option>'
@@ -42522,6 +42557,20 @@ window.mDemandeDomicile = function(){
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     + '<button class="btn bi" onclick="_demSoumettreDomicile()">' + ICO('i-mail', 'i bico') + 'Demander un devis</button>',
     true);
+};
+
+/* Ajoute une matière suggérée au champ de saisie, sans doublon et sans écraser
+   ce que le parent a déjà tapé. Le champ reste la seule source de vérité. */
+window._ddAjoutMatiere = function(m){
+  var el = document.getElementById('_ddMatieres');
+  if(!el) return;
+  var liste = el.value.split(',').map(function(x){ return x.trim(); }).filter(Boolean);
+  if(liste.some(function(x){ return x.toLowerCase() === m.toLowerCase(); })){
+    el.focus(); return;                      // déjà demandée
+  }
+  liste.push(m);
+  el.value = liste.join(', ');
+  el.focus();
 };
 
 window._demSoumettreDomicile = function(){
@@ -42540,8 +42589,12 @@ window._demSoumettreDomicile = function(){
     matieres:  []
   };
   try{
-    var cases = document.querySelectorAll('._ddMat');
-    for(var i = 0; i < cases.length; i++){ if(cases[i].checked) d.matieres.push(cases[i].value); }
+    // Saisie libre : le parent écrit ses matières, quel que soit le sous-système.
+    // Les puces de suggestion ne font qu'alimenter ce même champ.
+    _demV('_ddMatieres').split(',').forEach(function(m){
+      m = m.trim();
+      if(m && d.matieres.indexOf(m) < 0) d.matieres.push(m);
+    });
   }catch(e){}
   if(!d.nom){ toast('Votre nom est requis', 'warn'); return; }
   if(d.tel.replace(/\D/g, '').length < 8){ toast('Numéro de téléphone invalide', 'warn'); return; }
