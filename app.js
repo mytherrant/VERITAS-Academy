@@ -2975,10 +2975,34 @@ function isEleve(){return SES?.type==='eleve';}
 function isEnseignant(){return SES?.type==='enseignant';}
 
 // ─── PORTAIL VISITEUR ────────────────────────────
+/* ÉCRAN INTERMÉDIAIRE SUPPRIMÉ (v1.15.8). Le parcours faisait : fiche →
+   formulaire (nom / téléphone / code promo) → modal de paiement. Or l'étape ①
+   du modal, « Vos coordonnées », demande EXACTEMENT la même chose : payNom,
+   payTel, payEmail et promoInput + appliquerPromo(). Le visiteur saisissait
+   donc deux fois, et chaque écran supplémentaire avant l'encaissement est un
+   endroit où il abandonne.
+   Le produit numérique n'a pas d'adresse de livraison : rien ne justifiait cet
+   écran. On enregistre la commande et on ouvre le paiement directement.
+   ⚠️ Le parcours MANUEL PAPIER garde son formulaire — lui collecte une adresse
+   de livraison, que le modal de paiement ne demande pas. */
 function visitorOrderProduct(title,price){
-  const overlay=document.createElement('div');overlay.className='mov';
-  if(overlay)overlay.innerHTML='<div class="modal"><div class="mhd"><div><div class="mtt">'+ICO("lc-cart")+'Commander : '+title+'</div><div class="mst">'+fmt(price)+' FCFA</div></div><button class="mc" onclick="this.closest(\'.mov\').remove()">✕</button></div><div class="mb"><div class="fg2"><div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="vpNom" placeholder="Nom et prénom"></div><div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="vpTel" type="tel" placeholder="+237 6 XX XX XX XX"></div></div><div class="fg mt8"><span class="fl">Code promo (optionnel)</span><input class="fi" id="vpPromo" placeholder="ELEVE10" style="text-transform:uppercase"></div></div><div class="mf"><button class="btn bo" onclick="this.closest(\'.mov\').remove()">Annuler</button><button class="btn bi" onclick="confirmProductOrder(\'' + title.replace(/'/g,"") + '\','+price+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Payer maintenant</button></div></div>';
-  document.body.appendChild(overlay);
+  var ses=(typeof SES!=='undefined'&&SES)?SES:null;
+  var nom=ses?((ses.pre||'')+' '+(ses.nom||'')).trim():'';
+  var tel=ses?(ses.tel||''):'';
+  if(!DB.visitorOrders)DB.visitorOrders=[];
+  // Le prix stocké est le prix CATALOGUE : la remise éventuelle est appliquée
+  // dans le modal (appliquerPromo) et c'est DB.payAttempts qui porte le montant
+  // réellement encaissé — la source de vérité pour la comptabilité.
+  var cmd={id:gid(),bookTitle:title,nom:nom,tel:tel,date:today(),statut:'En attente',prix:price,promo:''};
+  DB.visitorOrders.push(cmd);
+  save();
+  if(typeof openPaymentModal!=='function'||!(price>0)){toast('✓ Commande enregistrée');return;}
+  openPaymentModal({
+    montant:price, label:'🛒 '+title, refPrefix:'SHOP',
+    intent:'product', targetId:cmd.id,
+    customerAccountId:ses?(ses.accountId||ses.id):null,
+    customerNom:nom, customerTel:tel
+  });
 }
 function confirmProductOrder(title,price){
   var nom=(document.getElementById('vpNom')?.value||'').trim();
@@ -3015,17 +3039,22 @@ function visitorOrderBook(bid){
 
   const b=DB.books.find(x=>x.id===bid);if(!b)return;
   if(b.stock<=0){toast('Ce manuel est en rupture de stock','warn');return;}
+  // Un visiteur connecté ne doit pas retaper ce que le compte sait déjà : seule
+  // l'adresse de livraison reste réellement à saisir.
+  var _ses=(typeof SES!=='undefined'&&SES)?SES:null;
+  var _voPre={ nom:_ses?((_ses.pre||'')+' '+(_ses.nom||'')).trim():'',
+               tel:_ses?(_ses.tel||''):'', email:_ses?(_ses.email||''):'' };
   const overlay=document.createElement('div');
   if(overlay)overlay.className='mov';
   overlay.innerHTML=`<div class="modal"><div class="mhd"><div><div class="mtt">${ICO('lc-cart')}Commander : ${_esc(b.titre)}</div><div class="mst">${_esc(b.cls)} · ${_esc(b.auteur)} · ${fmt(b.prix)}</div></div><button class="mc" onclick="this.closest('.mov').remove()">✕</button></div>
   <div class="mb">
     <div style="text-align:center;margin-bottom:16px"><div style="font-size:48px">${b.ico}</div><div class="mono bold" style="font-size:24px;color:var(--gold);margin-top:8px">${fmt(b.prix)}</div></div>
-    <div class="ib ibt mb14"><span>📋</span><span>Remplissez ce formulaire pour réserver votre manuel. Nous vous contacterons pour confirmer.</span></div>
+    <div class="ib ibt mb14"><span>📦</span><span>Manuel <strong>papier</strong> : il nous faut une adresse de livraison. Le paiement s'ouvre juste après.</span></div>
     <div class="fg2">
-      <div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="voNom" placeholder="Nom et prénom"></div>
-      <div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="voTel" type="tel" placeholder="+237 6 XX XX XX XX"></div>
+      <div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="voNom" value="${_esc(_voPre.nom)}" placeholder="Nom et prénom"></div>
+      <div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="voTel" type="tel" value="${_esc(_voPre.tel)}" placeholder="+237 6 XX XX XX XX"></div>
       <div class="fg"><span class="fl">Classe de l&#39;élève</span><select class="fi" id="voCls">${CLS.map(c=>'<option'+(c===b.cls?' selected':'')+'>'+c+'</option>').join('')}</select></div>
-      <div class="fg"><span class="fl">Email (optionnel)</span><input class="fi" id="voEmail" type="email" placeholder="email@exemple.com"></div>
+      <div class="fg"><span class="fl">Email (optionnel)</span><input class="fi" id="voEmail" type="email" value="${_esc(_voPre.email)}" placeholder="email@exemple.com"></div>
     </div>
     <div class="fg"><span class="fl">📍 Adresse de livraison *</span><input class="fi" id="voAdresse" placeholder="Quartier + ville (ex : Akwa, Douala)"></div>
     <div class="fg"><span class="fl">Code promo</span><input class="fi" id="voPromo" value="${autoPromo}" placeholder="ELEVE10" style="text-transform:uppercase"></div>
@@ -9074,6 +9103,26 @@ function commanderContenu(itemId){
   var item=el.contenus.find(function(c){return c.id===itemId;});
   if(!item) return;
   var cat=(el.categories||[]).find(function(c){return c.id===item.cat;})||{nom:'Autre'};
+  /* Écran intermédiaire court-circuité (v1.15.8) : il ne demandait que nom et
+     WhatsApp, soit exactement l'étape ① du modal de paiement. Un contenu
+     e-learning n'a pas d'adresse de livraison — il ne restait donc aucune
+     raison de faire saisir deux fois avant d'encaisser. */
+  if(typeof openPaymentModal==='function' && (item.prix||0)>0){
+    var ses=(typeof SES!=='undefined'&&SES)?SES:null;
+    var nom=ses?((ses.pre||'')+' '+(ses.nom||'')).trim():'';
+    var tel=ses?(ses.tel||''):'';
+    if(!el.commandes) el.commandes=[];
+    el.commandes.push({id:gid(),contenu:itemId,nom:nom,tel:tel,date:today(),
+                       statut:'En attente',prix:item.prix});
+    save();
+    openPaymentModal({
+      montant:item.prix, label:'📄 '+item.titre, refPrefix:'ELRN',
+      intent:'contenu', targetId:itemId,
+      customerAccountId:ses?(ses.accountId||ses.id):null,
+      customerNom:nom, customerTel:tel
+    });
+    return;
+  }
   M('🛒 Commander: '+item.titre,cat.nom,
   '<div style="text-align:center;margin-bottom:12px">'+
   '<div style="font-family:Montserrat,sans-serif;font-size:16px;font-weight:700;color:#142554">'+item.titre+'</div>'+
