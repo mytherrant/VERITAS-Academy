@@ -472,7 +472,211 @@ if (!defined('VRT_AUTH_LIB')) {
             return ['changed' => false, 'msg' => 'classe introuvable'];
         }
 
+        /* ── Tranche de scolarité (échéancier) ────────────────────────────────
+           targetId = "<idDuPlan>:<rangDuVersement>". C'est le seul moyen de
+           désigner LE versement réglé parmi les N du plan : la référence de
+           paiement, elle, est propre à la tentative.
+           Sans ce cas, un parent payait sa tranche en ligne et la voyait
+           toujours due — l'octroi répondait « intent non géré ». */
+        if ($intent === 'echeance') {
+            $bout   = explode(':', $targetId);
+            $planId = (string) ($bout[0] ?? '');
+            $rang   = (int) ($bout[1] ?? 0);
+            if ($planId === '' || $rang <= 0) return ['changed' => false, 'msg' => 'échéance : cible illisible'];
+            if (!isset($db['echeanciers']) || !is_array($db['echeanciers'])) return ['changed' => false, 'msg' => 'aucun échéancier'];
+
+            // Indices plutôt que références : une boucle `as &$x` imbriquée avec
+            // des `return` au milieu est le meilleur moyen d'écrire dans la
+            // mauvaise ligne au tour suivant.
+            foreach ($db['echeanciers'] as $pi => $plan) {
+                if (!is_array($plan) || (string) ($plan['id'] ?? '') !== $planId) continue;
+                $vers = (isset($plan['versements']) && is_array($plan['versements'])) ? $plan['versements'] : [];
+                foreach ($vers as $vi => $v) {
+                    if (!is_array($v) || (int) ($v['n'] ?? 0) !== $rang) continue;
+                    if ((string) ($v['stat'] ?? '') === 'Payé') return ['changed' => false, 'msg' => 'versement déjà réglé'];
+
+                    $mnt = (int) ($v['mnt'] ?? $montant);
+                    $db['echeanciers'][$pi]['versements'][$vi]['stat'] = 'Payé';
+                    $db['echeanciers'][$pi]['versements'][$vi]['paye'] = date('d/m/Y');
+                    if (empty($v['ref'])) $db['echeanciers'][$pi]['versements'][$vi]['ref'] = $ref;
+
+                    // Recette, idempotente par référence (le navigateur du payeur
+                    // a pu la créer de son côté avant que la synchro n'arrive).
+                    if (!isset($db['payments']) || !is_array($db['payments'])) $db['payments'] = [];
+                    $dejaRecette = false;
+                    foreach ($db['payments'] as $pay) {
+                        if (is_array($pay) && (string) ($pay['ref'] ?? '') === $ref) { $dejaRecette = true; break; }
+                    }
+                    if (!$dejaRecette) {
+                        $db['payments'][] = [
+                            'id'   => 'pay_' . bin2hex(random_bytes(4)),
+                            'eid'  => (string) ($plan['eid'] ?? ''),
+                            'enom' => (string) ($plan['enom'] ?? $nom),
+                            'cls'  => (string) ($plan['cls'] ?? ''),
+                            'mo'   => (string) ($plan['motif'] ?? 'Scolarité') . ' — versement ' . $rang . '/' . (int) ($plan['nb'] ?? 0),
+                            'mnt'  => $mnt, 'mode' => 'CamerPay', 'dt' => date('d/m/Y'),
+                            'stat' => 'Payé', 'ref' => $ref, 'via' => 'webhook_serveur',
+                        ];
+                    }
+
+                    // Plan soldé ⇒ l'élève est à jour.
+                    $reste = 0;
+                    foreach ($db['echeanciers'][$pi]['versements'] as $w) {
+                        if (is_array($w) && (string) ($w['stat'] ?? '') !== 'Payé') $reste += (int) ($w['mnt'] ?? 0);
+                    }
+                    if ($reste === 0 && isset($db['students']) && is_array($db['students'])) {
+                        foreach ($db['students'] as $si => $st) {
+                            if (is_array($st) && (string) ($st['id'] ?? '') === (string) ($plan['eid'] ?? '')) {
+                                $db['students'][$si]['stat'] = 'Payé';
+                            }
+                        }
+                    }
+                    return ['changed' => true, 'msg' => 'Versement ' . $rang . ' encaissé'
+                        . ($reste === 0 ? ' — scolarité soldée' : '')];
+                }
+                return ['changed' => false, 'msg' => 'versement ' . $rang . ' introuvable'];
+            }
+            return ['changed' => false, 'msg' => 'échéancier introuvable'];
+        }
+
+        /* ── Panier : N articles réglés en UN paiement ─────────────────────────
+           On ne duplique aucune règle : chaque ligne repasse par ce même octroi
+           avec son propre intent. La référence est suffixée « #rang » pour que
+           l'idempotence de chaque branche joue ligne par ligne — sinon la 2e
+           ligne se croirait déjà accordée à cause de la 1re. */
+        if ($intent === 'cart') {
+            $lignes = (isset($state['lignes']) && is_array($state['lignes'])) ? $state['lignes'] : [];
+            if (!$lignes) return ['changed' => false, 'msg' => 'panier sans détail (ligne non transmise)'];
+            // Le détail vient du navigateur : il dit QUOI débloquer, il ne décide
+            // pas COMBIEN a été encaissé. Le total des lignes est donc ramené au
+            // montant réellement payé, sinon une ligne gonflée gonflerait la
+            // commande enregistrée (et l'assiette des commissions avec elle).
+            $paye = (int) ($state['montant_paye'] ?? $state['montant'] ?? 0);
+            $changed = false; $msgs = []; $reste = $paye;
+            foreach ($lignes as $i => $l) {
+                if (!is_array($l)) continue;
+                $sousIntent = (string) ($l['intent'] ?? '');
+                if ($sousIntent === '' || $sousIntent === 'cart') continue;
+                $mLigne = max(0, (int) ($l['montant'] ?? 0));
+                if ($mLigne > $reste) $mLigne = $reste;
+                $reste -= $mLigne;
+                $sous = $state;
+                $sous['intent']   = $sousIntent;
+                $sous['targetId'] = (string) ($l['targetId'] ?? '');
+                $sous['montant']  = $mLigne;
+                $sous['label']    = (string) ($l['label'] ?? $label);
+                $sous['ref']      = $ref . '#' . ($i + 1);
+                unset($sous['lignes']);
+                $r = vrt_grant_entitlement($db, $sous);
+                if (!empty($r['changed'])) $changed = true;
+                if (!empty($r['msg']))     $msgs[] = $r['msg'];
+            }
+            return ['changed' => $changed,
+                    'msg' => 'Panier (' . count($lignes) . ') : ' . ($msgs ? implode(' · ', $msgs) : 'rien à activer')];
+        }
+
         return ['changed' => false, 'msg' => 'intent non géré: ' . $intent];
+    }
+
+    /** Table des paliers de partenariat, telle qu'elle vit dans la base (l'admin
+     *  peut la modifier), avec le repli sur les valeurs par défaut du client. */
+    function vrt_paliers_partenaires(array $db): array {
+        $l = (isset($db['partnerLevels']) && is_array($db['partnerLevels'])) ? $db['partnerLevels'] : [];
+        $defaut = [
+            'bronze'  => ['commission' => 0.05], 'argent'  => ['commission' => 0.08],
+            'or'      => ['commission' => 0.10], 'diamant' => ['commission' => 0.12],
+        ];
+        foreach ($defaut as $k => $v) {
+            if (!isset($l[$k]) || !is_array($l[$k]) || !isset($l[$k]['commission'])) $l[$k] = $v;
+        }
+        return $l;
+    }
+
+    /**
+     * Commissions de code promo : ce que le serveur accepte VRAIMENT d'inscrire.
+     *
+     * Le navigateur propose, le serveur dispose. Pour chaque ligne reçue :
+     *   1. le partenaire doit exister ET être actif dans la base ;
+     *   2. le taux vient du PALIER enregistré, jamais du champ envoyé ;
+     *   3. l'assiette est bornée au montant RÉELLEMENT encaissé ;
+     *   4. la valeur envoyée par le client ne sert que de plafond (on prend le
+     *      minimum des deux — un client honnête tombe juste, un client malveillant
+     *      est ramené au taux réel) ;
+     *   5. le cumul de la vente ne peut pas dépasser la moitié de l'encaissement ;
+     *   6. dix lignes au maximum, et seuls les champs connus sont recopiés.
+     * Toute ligne rejetée est journalisée : une tentative doit laisser une trace.
+     */
+    function vrt_commissions_verifiees(array $db, array $state): array {
+        $brut = (isset($state['commissions']) && is_array($state['commissions'])) ? $state['commissions'] : [];
+        if (!$brut) return [];
+
+        $ref   = (string) ($state['ref'] ?? '');
+        $paye  = (int) ($state['montant_paye'] ?? $state['montant'] ?? 0);
+        if ($paye <= 0) return [];
+        $plafondVente = (int) floor($paye * 0.5);   // garde-fou global de la vente
+        $paliers  = vrt_paliers_partenaires($db);
+        $partners = (isset($db['partners']) && is_array($db['partners'])) ? $db['partners'] : [];
+
+        $out = []; $cumul = 0; $n = 0;
+        foreach ($brut as $c) {
+            if (!is_array($c) || empty($c['id'])) continue;
+            if (++$n > 10) { vrt_pay_log("[COMMISSION_REFUSEE] ref=$ref motif=plus de 10 lignes"); break; }
+
+            $pid = (string) ($c['partnerId'] ?? '');
+            $partenaire = null;
+            foreach ($partners as $p) {
+                if (is_array($p) && (string) ($p['id'] ?? '') === $pid) { $partenaire = $p; break; }
+            }
+            if (!$partenaire) { vrt_pay_log("[COMMISSION_REFUSEE] ref=$ref partenaire=$pid motif=inconnu"); continue; }
+            if ((string) ($partenaire['status'] ?? '') !== 'active') {
+                vrt_pay_log("[COMMISSION_REFUSEE] ref=$ref partenaire=$pid motif=non actif"); continue;
+            }
+
+            $niveau = (string) ($partenaire['level'] ?? 'bronze');
+            $taux   = (float) ($paliers[$niveau]['commission'] ?? ($paliers['bronze']['commission'] ?? 0.05));
+            if ($taux <= 0 || $taux > 0.5) $taux = 0.05;              // palier aberrant en base
+
+            $assiette = (int) ($c['saleAmount'] ?? 0);
+            if ($assiette <= 0 || $assiette > $paye) $assiette = $paye;   // jamais plus que l'encaissé
+            $attendu  = (int) round($assiette * $taux);
+            $demande  = (int) ($c['commissionAmount'] ?? 0);
+            $montant  = ($demande > 0) ? min($demande, $attendu) : $attendu;
+            if ($montant <= 0) continue;
+            if ($demande > $attendu) {
+                vrt_pay_log("[COMMISSION_PLAFONNEE] ref=$ref partenaire=$pid demande=$demande retenu=$montant taux=$taux");
+            }
+            if ($cumul + $montant > $plafondVente) {
+                vrt_pay_log("[COMMISSION_REFUSEE] ref=$ref partenaire=$pid motif=cumul>50% de $paye");
+                continue;
+            }
+            $cumul += $montant;
+
+            // Recopie par liste blanche : aucun champ inconnu ne rentre en base.
+            $out[] = [
+                'id'               => mb_substr((string) $c['id'], 0, 40),
+                'partnerId'        => $pid,
+                'type'             => 'sale',
+                'refType'          => mb_substr((string) ($c['refType']  ?? 'other'), 0, 30),
+                'refId'            => mb_substr((string) ($c['refId']    ?? ''), 0, 64),
+                'refLabel'         => mb_substr((string) ($c['refLabel'] ?? ''), 0, 120),
+                'saleAmount'       => $assiette,
+                'commissionPct'    => $taux,
+                'commissionAmount' => $montant,
+                'qty'              => max(1, min(999, (int) ($c['qty'] ?? 1))),
+                'status'           => 'validated',
+                'date'             => date('d/m/Y'),
+                'validatedAt'      => date('Y-m-d'),
+                'paymentRef'       => $ref,
+                'via'              => 'webhook_serveur',
+            ];
+        }
+        return $out;
+    }
+
+    /** Journal des décisions d'argent prises côté serveur (hors webhook log). */
+    function vrt_pay_log(string $ligne): void {
+        @file_put_contents(__DIR__ . '/data/_commissions_log.txt',
+            date('c') . ' ' . $ligne . "\n", FILE_APPEND | LOCK_EX);
     }
 
     /**
@@ -497,20 +701,23 @@ if (!defined('VRT_AUTH_LIB')) {
         $res = vrt_grant_entitlement($db, $state);
 
         // ── Partage de revenus (auteurs / parrains) ──────────────────────────
-        // Le client envoie les commissions DÉJÀ CALCULÉES par applyPartnerCode
-        // (palier × montant) au moment du paiement. Ici on se contente de les
-        // PERSISTER en 'validated' (idempotent par id) → ZÉRO logique d'argent en
-        // PHP. L'admin recalcule paliers/bonus à l'ouverture (calculatePartnerLevel).
+        // ⚠️ CE BLOC MANIPULE DE L'ARGENT QUI SORT. Il recopiait telle quelle la
+        //    liste `commissions` envoyée par le NAVIGATEUR et la marquait
+        //    « validated ». Or `?action=init` est ouvert aux clients (jeton
+        //    public) : n'importe qui pouvait payer 100 FCFA en joignant
+        //    { partnerId: <le sien>, commissionAmount: 2000000 } et voir la somme
+        //    créditée au solde de versement — puis partir toute seule si le
+        //    versement automatique est actif. Le montant est désormais RECALCULÉ
+        //    ici, à partir du palier du partenaire tel qu'il est enregistré dans
+        //    la base : la valeur du client n'est plus qu'un plafond.
         $commChanged = false;
-        if (!empty($state['commissions']) && is_array($state['commissions'])) {
+        $commissionsOk = vrt_commissions_verifiees($db, $state);
+        if ($commissionsOk) {
             if (!isset($db['commissions']) || !is_array($db['commissions'])) $db['commissions'] = [];
             $seen = [];
             foreach ($db['commissions'] as $c) { if (is_array($c) && isset($c['id'])) $seen[(string) $c['id']] = true; }
-            foreach ($state['commissions'] as $c) {
-                if (!is_array($c) || empty($c['id']) || isset($seen[(string) $c['id']])) continue;
-                $c['status']      = 'validated';
-                $c['validatedAt'] = date('Y-m-d');
-                $c['via']         = 'webhook_serveur';
+            foreach ($commissionsOk as $c) {
+                if (isset($seen[(string) $c['id']])) continue;
                 $db['commissions'][] = $c;
                 $seen[(string) $c['id']] = true;
                 $commChanged = true;

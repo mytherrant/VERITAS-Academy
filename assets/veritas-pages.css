@@ -411,3 +411,741 @@ h2.sec::after{content:"";position:absolute;left:50%;bottom:0;transform:translate
   header.top h1{font-size:1.3rem}
   .wrap>p,.card .note,details.sol .body p{font-size:.95rem}
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   VÉRITAS — COUCHE 2 : NUANCIER, DÉGRADÉS ET RELIEF          (août 2026)
+   ─────────────────────────────────────────────────────────────────────
+   Pourquoi cette couche existe : avant elle, les pages statiques posaient
+   les couleurs à la main, au fil de l'écriture — rgba(18,138,111,.25),
+   rgba(110,70,192,.3), #fffdf5, #f4f7fd… Résultat : six teintes sans
+   parenté, six opacités différentes, et aucun moyen de retoucher la charte
+   sans repasser dans chaque fichier.
+   Ici : des RAMPES (50 → 900). Une teinte ne s'invente plus, elle se
+   prélève. Tout dégradé est nommé et dérive des rampes.
+   Règle d'animation du projet : transform / opacity UNIQUEMENT.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  /* ── Rampe primaire — bleu nuit VÉRITAS ─────────────────────────── */
+  --n50:#F2F5FC; --n100:#E4EAF7; --n200:#C7D3ED; --n300:#9CAFDD;
+  --n400:#6B83BE; --n500:#42599A; --n600:#2A4079; --n700:#1D3168;
+  --n800:#142554; --n900:#0D1A3D; --n950:#080F26;
+
+  /* ── Rampe d'accent — or VÉRITAS ────────────────────────────────── */
+  --o50:#FFFBF0; --o100:#FFF4D6; --o200:#FFE8A8; --o300:#FFD96B;
+  --o400:#FFC93C; --o500:#F0B31E; --o600:#D19708; --o700:#A67608;
+  --o800:#7A5709; --o900:#4D3706;
+
+  /* ── Accents de rubrique — un triplet par famille, jamais d'à-peu-près :
+        surface (fond très clair) / trait (bordure) / signe (icône, texte) */
+  --vert-s:#EDF9F5; --vert-t:#BFE5D9; --vert-f:#0E7A62;
+  --viol-s:#F3EFFC; --viol-t:#D7C9F2; --viol-f:#5B37A7;
+  --roug-s:#FDF0F3; --roug-t:#F2CFD7; --roug-f:#A82E45;
+  --cyan-s:#EAF6FB; --cyan-t:#BFDFEE; --cyan-f:#0B6A88;
+  --ambr-s:#FFF8E8; --ambr-t:#F3DFAE; --ambr-f:#8A6200;
+
+  /* ── Dégradés nommés — toujours dérivés des rampes ──────────────── */
+  --g-navy:linear-gradient(135deg,var(--n900) 0%,var(--n800) 52%,var(--n700) 100%);
+  --g-navy-deep:linear-gradient(160deg,var(--n950) 0%,var(--n900) 45%,var(--n700) 100%);
+  --g-gold:linear-gradient(135deg,var(--o300) 0%,var(--o400) 45%,var(--o500) 100%);
+  --g-gold-line:linear-gradient(90deg,transparent,var(--o400) 22%,var(--o300) 50%,var(--o400) 78%,transparent);
+  --g-card:linear-gradient(168deg,#FFFFFF 0%,var(--n50) 100%);
+  /* Voile « maillé » de l'en-tête : trois halos superposés, statiques,
+     donc composés une fois puis oubliés par le GPU. */
+  --g-mesh:
+    radial-gradient(60% 120% at 12% -10%, rgba(255,201,60,.20) 0%, transparent 60%),
+    radial-gradient(48% 100% at 92% 0%, rgba(107,131,190,.34) 0%, transparent 62%),
+    radial-gradient(70% 140% at 50% 130%, rgba(255,201,60,.10) 0%, transparent 60%);
+
+  /* ── Relief : trois ombres, pas trente ──────────────────────────── */
+  --sh-1:0 1px 2px rgba(13,26,61,.06), 0 2px 8px rgba(13,26,61,.05);
+  --sh-2:0 2px 6px rgba(13,26,61,.06), 0 12px 28px rgba(13,26,61,.09);
+  --sh-3:0 4px 12px rgba(13,26,61,.08), 0 28px 64px rgba(13,26,61,.16);
+  --sh-gold:0 10px 30px rgba(209,151,8,.28);
+
+  /* ── Rayons : trois valeurs ─────────────────────────────────────── */
+  --r-sm:10px; --r-md:16px; --r-lg:22px; --r-full:999px;
+
+  /* ── Mouvement ──────────────────────────────────────────────────── */
+  --e-out:cubic-bezier(.22,1,.36,1);
+  --e-spring:cubic-bezier(.34,1.4,.64,1);
+
+  /* Alias : les anciens noms continuent de fonctionner, mais pointent
+     désormais vers la rampe — plus aucune couleur orpheline. */
+  --navy:var(--n800); --navy2:var(--n700); --navy3:var(--n900);
+  --gold:var(--o400); --gold2:var(--o600);
+  --ink:var(--n800); --gris:#5B6478; --bg:var(--n50);
+  --line:var(--n100); --green:var(--vert-f); --vert-bg:var(--vert-s);
+  --rouge:var(--roug-f); --violet:var(--viol-f);
+  --rad:var(--r-md);
+
+  /* Échelle typographique — rapport 1,25. Six tailles suffisent à tout. */
+  --t-xs:.78rem; --t-sm:.88rem; --t-md:1rem;
+  --t-lg:1.16rem; --t-xl:1.5rem; --t-2xl:2rem;
+}
+
+/* ── Typographie : la même famille que l'application ─────────────────
+   Les pages statiques rendaient en « Segoe UI » pendant que l'application
+   rendait en Plus Jakarta Sans / Inter : deux moitiés de site qui ne se
+   ressemblaient pas. On aligne la pile. Aucune requête réseau n'est
+   ajoutée : la police n'est utilisée que si le visiteur l'a déjà en
+   cache — il arrive presque toujours de l'application, qui la charge. */
+body{
+  font-family:'Inter','Segoe UI Variable Text','Segoe UI',system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+  background:
+    radial-gradient(80% 46% at 50% 0%, #FFFFFF 0%, transparent 72%),
+    var(--n50);
+}
+h1,h2,h3,h4,.pill,.badge,.tag,nav.seqnav a,.tools button,.series-pick button{
+  font-family:'Plus Jakarta Sans','Segoe UI Variable Display','Segoe UI',system-ui,sans-serif;
+  letter-spacing:-.012em;
+}
+
+/* ══ EN-TÊTE ══════════════════════════════════════════════════════════
+   Le bandeau était un aplat navy. Il devient un dégradé maillé, fermé en
+   pied par un filet d'or qui rattrape le titre et amorce la page. */
+header.top{
+  background:var(--g-navy-deep);
+  padding:3rem 1.15rem 3.2rem;
+  isolation:isolate;
+}
+header.top::before{
+  content:"";position:absolute;inset:0;background:var(--g-mesh);z-index:0;
+}
+header.top::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:var(--g-gold-line);z-index:2;
+}
+header.top>*{position:relative;z-index:1}
+header.top .badge{
+  background:rgba(255,201,60,.10);
+  border-color:rgba(255,201,60,.55);
+  font-size:.72rem;
+}
+header.top h1{
+  font-size:clamp(1.5rem,1.05rem + 2vw,2.35rem);
+  line-height:1.16;font-weight:800;letter-spacing:-.022em;
+  text-wrap:balance;
+}
+header.top p{
+  font-size:1rem;color:var(--n200);max-width:64ch;text-wrap:pretty;
+}
+
+/* ══ COLONNE DE TEXTE ═════════════════════════════════════════════════
+   Le contenu était centré dans 960 px, mais chaque bloc y flottait à sa
+   propre largeur — 880 px pour l'intro, 900 px pour le titre, 760 px pour
+   le chapeau : trois bords gauches différents sur la même page. On aligne
+   tout sur une seule gouttière. */
+:root{--maxw:1020px}
+.wrap{max-width:var(--maxw);padding-inline:clamp(1rem,4vw,1.6rem)}
+.intro{
+  max-width:none;margin:-2.6rem 0 1.8rem;
+  background:var(--g-card);
+  border:1px solid var(--n100);
+  border-radius:var(--r-lg);
+  padding:1.15rem 1.35rem 1.15rem 1.6rem;
+  box-shadow:var(--sh-2);
+  position:relative;overflow:hidden;
+}
+/* liseré d'or à gauche : repère de lecture, coût de rendu nul */
+.intro::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:var(--g-gold);
+}
+
+/* ══ TITRES DE SECTION ════════════════════════════════════════════════ */
+h2.sec{
+  font-size:var(--t-xl);font-weight:800;color:var(--n800);
+  margin-top:3rem;padding-bottom:.75rem;
+}
+h2.sec .i{color:var(--o500)}
+h2.sec::after{
+  width:56px;height:3px;
+  background:var(--g-gold);border-radius:var(--r-full);
+}
+
+/* ══ CARTES ═══════════════════════════════════════════════════════════
+   Une carte n'est plus un rectangle blanc à filet gris : fond très
+   légèrement dégradé, ombre à deux étages, et elle se soulève au survol.
+   Le halo d'or apparaît en opacity — jamais en box-shadow animée. */
+.grid{gap:1.15rem}
+.card{
+  background:var(--g-card);
+  border:1px solid var(--n100);
+  border-radius:var(--r-lg);
+  padding:1.35rem 1.3rem;
+  box-shadow:var(--sh-1);
+  position:relative;isolation:isolate;
+  transition:transform .42s var(--e-out), box-shadow .42s var(--e-out), border-color .3s;
+}
+.card::after{
+  content:"";position:absolute;inset:-1px;border-radius:inherit;z-index:-1;
+  background:var(--g-gold);opacity:0;transition:opacity .38s var(--e-out);
+}
+.card:hover{
+  transform:translateY(-6px);
+  box-shadow:var(--sh-2);
+  border-color:transparent;
+}
+.card:hover::after{opacity:.55}
+.card h3{font-size:var(--t-lg);font-weight:800;letter-spacing:-.015em}
+.card .note{font-size:var(--t-sm)}
+
+.card a.dl{
+  border-radius:var(--r-sm);
+  border-color:var(--n100);
+  background:#fff;
+  padding:.6rem .85rem;
+  transition:border-color .25s, background .25s, transform .25s var(--e-out);
+}
+.card a.dl:hover{
+  border-color:var(--o300);
+  background:var(--o50);
+  transform:translateX(3px);
+}
+
+/* pastilles de comptage */
+.pill{
+  background:var(--n800);border-radius:var(--r-full);
+  padding:.2rem .6rem;font-weight:700;letter-spacing:.01em;
+}
+.pill.or{background:var(--g-gold);color:var(--n900);box-shadow:var(--sh-gold)}
+.pill.gris{background:var(--n100);color:var(--n600)}
+
+/* ══ BOUTONS D'APPEL ══════════════════════════════════════════════════ */
+.cta a{
+  background:var(--g-navy);
+  border-radius:var(--r-lg);
+  padding:1.15rem 1.2rem;
+  box-shadow:var(--sh-1);
+  position:relative;overflow:hidden;isolation:isolate;
+  transition:transform .4s var(--e-out), box-shadow .4s var(--e-out);
+}
+/* reflet d'or qui traverse la tuile au survol — transform seul */
+.cta a::before{
+  content:"";position:absolute;top:0;bottom:0;left:-60%;width:45%;z-index:-1;
+  background:linear-gradient(100deg,transparent,rgba(255,201,60,.22),transparent);
+  transform:translateX(0);transition:transform .75s var(--e-out);
+}
+.cta a:hover{transform:translateY(-5px);box-shadow:var(--sh-3);background:var(--g-navy)}
+.cta a:hover::before{transform:translateX(340%)}
+.cta a small{color:var(--o300);font-size:var(--t-xs);line-height:1.45}
+.cta a .i{color:var(--o400)}
+
+/* ══ MÉDAILLONS D'ICÔNE — le nuancier remplace les rgba() à la main ══ */
+.ico{width:46px;height:46px;border-radius:14px;box-shadow:var(--sh-1)}
+.ico.or   {background:var(--ambr-s);color:var(--ambr-f)}
+.ico.vert {background:var(--vert-s);color:var(--vert-f)}
+.ico.violet{background:var(--viol-s);color:var(--viol-f)}
+.ico.rouge{background:var(--roug-s);color:var(--roug-f)}
+.ico.cyan {background:var(--cyan-s);color:var(--cyan-f)}
+
+/* ══ CORRIGÉS : le bloc « voir la solution » ═════════════════════════ */
+details.sol>summary{
+  border-radius:var(--r-sm);
+  background:var(--vert-s);border-color:var(--vert-t);color:var(--vert-f);
+  padding:.35rem .85rem;
+  transition:background .25s, transform .25s var(--e-out);
+}
+details.sol>summary:hover{background:#E1F4EC;transform:translateY(-1px)}
+details.sol[open]>summary{border-radius:var(--r-sm) var(--r-sm) 0 0}
+details.sol .body{
+  border-color:var(--vert-t);
+  border-radius:0 var(--r-sm) var(--r-sm) var(--r-sm);
+  background:var(--vert-s);
+}
+.ex{
+  border-radius:var(--r-sm);
+  border-color:var(--n100);
+  background:linear-gradient(170deg,#FFFFFF,var(--n50));
+}
+section.lec{
+  border-radius:var(--r-lg);
+  border-color:var(--n100);
+  box-shadow:var(--sh-1);
+  padding:1.25rem 1.35rem 1.4rem;
+}
+
+/* ══ NAVIGATION PAR SÉQUENCE ══════════════════════════════════════════ */
+nav.seqnav a{
+  border-radius:var(--r-full);border-color:var(--n100);
+  padding:.45rem .95rem;
+  transition:transform .25s var(--e-out), border-color .25s, background .25s;
+}
+nav.seqnav a:hover{transform:translateY(-2px);border-color:var(--o300);background:var(--o50)}
+nav.seqnav a[aria-current]{background:var(--g-navy);border-color:transparent;box-shadow:var(--sh-1)}
+
+/* ══ RÉVÉLATION À L'ENTRÉE ════════════════════════════════════════════
+   On réutilise la convention déjà en place dans veritas-ui.js (.rv →
+   .rv-on, armée par body.has-js, avec un filet qui découvre tout au bout
+   d'1,2 s). Ces règles vivaient dans veritas-eleve.css, chargée seulement
+   par l'espace élève : elles sont remontées ici pour que corrigés,
+   Constellation et Espace Manuels en bénéficient aussi.
+   Le contenu reste visible PAR DÉFAUT : le masquage n'existe que si le JS
+   a effectivement posé .has-js. */
+body.has-js .rv{opacity:0;transform:translateY(18px)}
+body.has-js .rv-on{
+  opacity:1;transform:none;
+  transition:opacity .6s var(--e-out), transform .6s var(--e-out);
+}
+@media(prefers-reduced-motion:reduce){
+  .rv,.rv-on{opacity:1 !important;transform:none !important;transition:none}
+  .card,.cta a,nav.seqnav a,.card a.dl,details.sol>summary{transition:none}
+  .card:hover,.cta a:hover,nav.seqnav a:hover{transform:none}
+}
+
+/* ══ ACCESSIBILITÉ : le focus doit se voir ════════════════════════════ */
+a:focus-visible,button:focus-visible,summary:focus-visible,input:focus-visible{
+  outline:3px solid var(--o400);outline-offset:3px;border-radius:4px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LA CONSTELLATION — de la grille de vignettes à une vraie carte du ciel
+   ─────────────────────────────────────────────────────────────────────
+   État précédent : un dégradé de fond, deux cercles en ::before/::after,
+   et onze tuiles dont la teinte était écrite à la main dans l'attribut
+   style (six rgba() sans parenté). Rien n'orbitait, rien ne respirait.
+   Ici : un champ d'étoiles statique, trois anneaux dont un seul tourne
+   (rotation = transform, composée sur le GPU, aucun repaint), un moyeu
+   qui pulse, et des tuiles dont la teinte vient du nuancier — chaque
+   couleur dit quelque chose : or = réservé aux enseignants, vert = le
+   cahier et ses corrigés, cyan = confort de l'élève, violet = les outils
+   intelligents, rouge = se tester.
+   ══════════════════════════════════════════════════════════════════════ */
+.constel{
+  background:var(--g-navy-deep);
+  border-radius:var(--r-lg);
+  padding:3rem 1.4rem 2.6rem;
+  margin-top:1.6rem;
+  isolation:isolate;
+  box-shadow:var(--sh-3);
+}
+/* champ d'étoiles : deux trames de points, peintes une seule fois */
+.constel::before{
+  content:"";position:absolute;inset:0;z-index:0;
+  border:0;border-radius:inherit;left:0;top:0;transform:none;width:auto;height:auto;
+  background-image:
+    radial-gradient(1.4px 1.4px at 18% 22%, rgba(255,255,255,.55) 50%, transparent 51%),
+    radial-gradient(1.1px 1.1px at 74% 14%, rgba(255,255,255,.42) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 41% 68%, rgba(255,201,60,.55) 50%, transparent 51%),
+    radial-gradient(1.1px 1.1px at 88% 61%, rgba(255,255,255,.38) 50%, transparent 51%),
+    radial-gradient(1.3px 1.3px at 9% 79%, rgba(255,201,60,.40) 50%, transparent 51%),
+    radial-gradient(1.1px 1.1px at 62% 88%, rgba(255,255,255,.34) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 31% 8%, rgba(255,255,255,.30) 50%, transparent 51%),
+    var(--g-mesh);
+  opacity:.9;
+}
+/* anneau extérieur : le seul élément animé de la page, une rotation lente */
+.constel::after{
+  content:"";position:absolute;z-index:0;
+  left:50%;top:46%;width:min(92%,760px);aspect-ratio:1;
+  margin:0;border-radius:50%;
+  border:1px dashed rgba(255,201,60,.20);
+  transform:translate(-50%,-50%);
+  animation:vtOrbit 90s linear infinite;
+}
+@keyframes vtOrbit{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+/* anneaux intermédiaires : statiques, posés par un élément dédié */
+.constel .rings{position:absolute;inset:0;z-index:0;pointer-events:none}
+.constel .rings i{
+  position:absolute;left:50%;top:46%;border-radius:50%;
+  border:1px solid rgba(255,201,60,.14);
+  transform:translate(-50%,-50%);display:block;
+}
+.constel .rings i:nth-child(1){width:min(70%,560px);aspect-ratio:1}
+.constel .rings i:nth-child(2){width:min(48%,380px);aspect-ratio:1;border-color:rgba(255,255,255,.10)}
+
+/* ── le moyeu : le cahier papier, au centre de tout ─────────────────── */
+.constel .hub{max-width:360px;margin-bottom:2rem}
+.constel .hub .disc{
+  width:104px;height:104px;
+  background:var(--g-gold);
+  box-shadow:0 10px 34px rgba(0,0,0,.34), 0 0 0 10px rgba(255,201,60,.09);
+  position:relative;isolation:isolate;
+}
+.constel .hub .disc .i{width:44px;height:44px}
+/* halo qui respire — scale + opacity, rien d'autre */
+.constel .hub .disc::after{
+  content:"";position:absolute;inset:-14px;border-radius:50%;z-index:-1;
+  border:1px solid rgba(255,201,60,.45);
+  animation:vtPulse 4.5s var(--e-out) infinite;
+}
+@keyframes vtPulse{
+  0%,100%{transform:scale(1);opacity:.75}
+  50%    {transform:scale(1.16);opacity:0}
+}
+.constel .hub b{font-size:var(--t-lg);letter-spacing:-.015em}
+.constel .hub span{color:var(--n200);margin-top:.25rem}
+
+/* ── les tuiles en orbite ───────────────────────────────────────────── */
+.orbit{gap:1rem}
+.orbit a{
+  background:rgba(255,255,255,.055);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:var(--r-md);
+  padding:1.05rem 1.05rem 1.1rem;
+  transition:transform .4s var(--e-out), background .3s, border-color .3s;
+  position:relative;overflow:hidden;
+}
+.orbit a::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;
+  background:var(--g-gold-line);opacity:0;transition:opacity .35s;
+}
+.orbit a:hover{
+  transform:translateY(-5px);
+  background:rgba(255,255,255,.11);
+  border-color:rgba(255,201,60,.55);
+}
+.orbit a:hover::before{opacity:1}
+.orbit b{font-size:var(--t-md);font-weight:800;letter-spacing:-.012em}
+.orbit small{color:var(--n200);font-size:var(--t-xs);line-height:1.5}
+
+/* médaillons : la teinte vient du nuancier et porte un sens */
+.orbit .ic{
+  width:42px;height:42px;border-radius:13px;margin-bottom:.6rem;
+  border:1px solid rgba(255,255,255,.14);
+}
+.orbit .ic .i{width:21px;height:21px}
+.orbit .ic.t-vert{background:rgba(14,122,98,.30);color:#8FE9D0}
+.orbit .ic.t-cyan{background:rgba(11,106,136,.34);color:#8ED8F0}
+.orbit .ic.t-viol{background:rgba(91,55,167,.34);color:#C9B4F5}
+.orbit .ic.t-roug{background:rgba(168,46,69,.32);color:#F5AEBC}
+.orbit .ic.t-ambr{background:rgba(255,201,60,.20);color:var(--o300)}
+.orbit .ic.t-navy{background:rgba(107,131,190,.30);color:var(--n200)}
+
+/* étiquettes de statut */
+.orbit .tag{border-radius:var(--r-full);padding:.14rem .55rem}
+.tag.libre  {background:rgba(14,122,98,.30);color:#8FE9D0}
+.tag.reserve{background:rgba(255,201,60,.18);color:var(--o300)}
+.tag.bientot{background:rgba(255,255,255,.10);color:var(--n200)}
+
+@media(max-width:600px){
+  .constel{padding:2rem .9rem 1.8rem}
+  .constel .hub .disc{width:84px;height:84px}
+  .constel .hub .disc .i{width:36px;height:36px}
+}
+@media(prefers-reduced-motion:reduce){
+  .constel::after,.constel .hub .disc::after{animation:none}
+  .orbit a{transition:none}
+  .orbit a:hover{transform:none}
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   NORMALISATION TYPOGRAPHIQUE
+   ─────────────────────────────────────────────────────────────────────
+   Mesure faite au navigateur sur corriges/index.html avant cette section :
+   onze tailles de police rendues sur une seule page (.68, .72, .78, .83,
+   .84, .86, .87, .88, .92, .93, 1 rem…). Aucune n'était fausse ; c'est
+   leur nombre qui l'était — l'œil ne peut pas hiérarchiser onze niveaux,
+   il ne perçoit que du bruit.
+   On ramène le bas de l'échelle à trois marches : xs (.78) pour les
+   étiquettes, sm (.88) pour le texte secondaire, md (1) pour le texte
+   courant. Rien d'autre en dessous de 1 rem.
+   ══════════════════════════════════════════════════════════════════════ */
+.pill,.sem,.crumb,.tag,.esc-head span,.orbit .tag,
+.leg .l .cf,.imp-val,.esc-note,.upsell small{font-size:var(--t-xs)}
+
+.note,.lead,.tools button,nav.seqnav a,.card a.dl,.ex ul,.obj,
+.trim ul,.leg .l,.serie p,.echelle div,.step p,.mv p,.mv .aut,
+.duo .bloc p,.simu table,.formule,.series-pick button,
+.gate label,.gate .msg,footer.bot,.condition li{font-size:var(--t-sm)}
+
+.intro,.ex .q,details.sol .body,.loupe li,.mv .idee{font-size:var(--t-md)}
+
+/* Interlignage : un texte à .88 rem a besoin de plus d'air, pas moins. */
+.note,.card .note,.orbit small,.cta a small{line-height:1.55}
+
+/* Titres — quatre niveaux, chacun distinct du précédent d'un cran net. */
+h2.sec{font-size:var(--t-xl)}
+h3.sub,.loupe h3,.duo .bloc h3,.condition h3,.gate h2,.upsell h3{
+  font-size:var(--t-lg);font-weight:800;letter-spacing:-.015em;color:var(--n800)}
+.card h3,.step h3,.mv h2,.serie b{font-size:var(--t-lg);font-weight:800}
+.trim h4{font-size:var(--t-md);font-weight:800}
+
+/* ══ LARGEUR DE LIGNE ═════════════════════════════════════════════════
+   Sur 1020 px, un paragraphe pleine largeur fait ~135 caractères — le
+   double du confort de lecture. On plafonne, et on centre le bloc pour
+   que la page reste équilibrée au lieu de pendre à gauche. */
+.wrap>p,.wrap>.note{max-width:72ch;margin-inline:auto}
+
+/* La justification sans césure ouvre des rivières blanches ; la césure
+   est déjà demandée plus haut, on la sécurise ici pour les écrans
+   étroits où le mot ne tient pas dans la colonne. */
+@media(max-width:620px){
+  .wrap>p,.card .note,.loupe li,.duo .bloc p,details.sol .body p,.ex .q,
+  .step p,.condition li{text-align:left}
+}
+
+/* ══ PIED DE PAGE ═════════════════════════════════════════════════════ */
+footer.bot{
+  border-top:1px solid var(--n100);
+  background:linear-gradient(180deg,transparent,var(--n50));
+  padding:2.6rem 1rem 3rem;
+}
+footer.bot a{color:var(--n700);font-weight:600}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LA CONSTELLATION EN FIGURE CIRCULAIRE
+   ─────────────────────────────────────────────────────────────────────
+   Modèle : le schéma « Vos disciplines de Première » — un anneau segmenté
+   au centre qui porte le compte, les éléments disposés tout autour, reliés
+   par des rayons. La figure dit d'un coup d'œil ce qu'une grille ne dit
+   pas : que tout gravite autour d'UNE chose, le cahier.
+
+   Positionnement sans trigonométrie CSS : rotate(--a) → translateY(-R) →
+   rotate(-(--a)). La troisième rotation remet le texte droit. sin()/cos()
+   auraient été plus lisibles mais ne sont pas acquis sur les Android
+   d'entrée de gamme, majoritaires dans le public visé.
+
+   Sous 900 px la figure redevient une liste : un cercle de onze éléments
+   sur un téléphone serait illisible, et un schéma qu'on ne peut pas lire
+   ne vaut pas mieux que pas de schéma.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── Anneau central ────────────────────────────────────────────────── */
+.constel-ring{
+  position:absolute;left:50%;top:50%;z-index:1;
+  width:min(74%,620px);aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  pointer-events:none;
+  display:none;                       /* n'apparaît qu'en mode figure */
+}
+.constel-ring .ring-seg{
+  fill:none;stroke-width:9;stroke-linecap:butt;
+}
+.constel-ring .ring-seg.lib{stroke:#1D3168}
+.constel-ring .ring-seg.res{stroke:var(--o400)}
+.constel-ring .ring-seg.pla{stroke:#C8D64B}
+.constel-ring .ray{
+  stroke:rgba(255,201,60,.30);stroke-width:.35;stroke-dasharray:1.4 1.4;
+}
+
+/* ── Légende des segments ──────────────────────────────────────────── */
+.constel-leg{
+  position:relative;z-index:2;
+  list-style:none;margin:1.6rem 0 0;padding:0;
+  display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem 1.6rem;
+}
+.constel-leg li{
+  display:inline-flex;align-items:center;gap:.45rem;
+  color:var(--n200);font-size:var(--t-xs);font-weight:600;
+}
+.constel-leg i{width:11px;height:11px;border-radius:3px;flex:none}
+.constel-leg i.lib{background:#4C6BB5}
+.constel-leg i.res{background:var(--o400)}
+.constel-leg i.pla{background:#C8D64B}
+
+/* ══ MODE FIGURE — à partir de 900 px ═════════════════════════════════ */
+@media (min-width:900px){
+  .constel{padding:2.4rem 1.4rem 2.2rem}
+  .constel-ring{display:block}
+
+  .constel-fig{
+    position:relative;z-index:2;
+    width:min(100%,940px);aspect-ratio:1;
+    margin:0 auto;
+    --tw:clamp(112px,10vw,132px);     /* largeur : voir la contrainte de corde */
+    --R:clamp(250px,30vw,390px);      /* rayon : toujours >= 2,51 x max(l,h) */
+  }
+
+  /* le moyeu occupe le centre exact de la figure */
+  .constel-fig .hub{
+    position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%);
+    margin:0;max-width:220px;
+  }
+  .constel-fig .hub .disc{width:96px;height:96px;margin-bottom:.6rem}
+  .constel-fig .hub b{font-size:var(--t-md)}
+  .constel-fig .hub span{font-size:var(--t-xs);line-height:1.4}
+
+  /* les onze tuiles, posées sur le cercle */
+  .constel-fig .orbit{display:block;position:absolute;inset:0}
+  .constel-fig .orbit a{
+    position:absolute;left:50%;top:50%;
+    width:var(--tw);margin:0;
+    padding:.6rem .55rem .65rem;
+    transform:
+      rotate(var(--a))
+      translateY(calc(-1 * var(--R)))
+      rotate(calc(-1 * var(--a)))
+      translate(-50%,-50%);
+    transform-origin:0 0;
+    text-align:center;
+    transition:box-shadow .35s var(--e-out),background .3s,border-color .3s;
+  }
+  /* Le survol ne peut pas être un translateY : il écraserait la chaîne de
+     transformations qui place la tuile. On joue sur l'ombre et le fond. */
+  .constel-fig .orbit a:hover{
+    transform:
+      rotate(var(--a))
+      translateY(calc(-1 * var(--R)))
+      rotate(calc(-1 * var(--a)))
+      translate(-50%,-50%)
+      scale(1.06);
+    box-shadow:0 14px 32px rgba(0,0,0,.34);
+    z-index:3;
+  }
+  .constel-fig .orbit .ic{margin:0 auto .35rem;width:30px;height:30px}
+  .constel-fig .orbit b{font-size:12px;line-height:1.25;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  /* Une seule ligne de description : chaque ligne supplementaire rapproche
+     les tuiles de la limite de croisement calculee ci-dessus. */
+  .constel-fig .orbit small{
+    font-size:10px;line-height:1.35;margin-top:.15rem;
+    display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .constel-fig .orbit .tag{margin-top:.3rem;font-size:9.5px}
+
+  /* Les anneaux décoratifs de la couche précédente feraient doublon avec
+     l'anneau segmenté : on les retire en mode figure. */
+  .constel .rings,.constel::after{display:none}
+}
+
+/* Au-delà de 1200 px on peut respirer davantage. */
+@media (min-width:1200px){
+  .constel-fig{--tw:132px;--R:390px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .constel-fig .orbit a{transition:none}
+  .constel-fig .orbit a:hover{
+    transform:rotate(var(--a)) translateY(calc(-1 * var(--R)))
+              rotate(calc(-1 * var(--a))) translate(-50%,-50%);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   CONSTELLATION — COULEUR, ANNEAU DÉGAGÉ, TÉLÉPHONE
+   ─────────────────────────────────────────────────────────────────────
+   Trois corrections après première mise à l'écran :
+   1. les onze tuiles avaient toutes le même fond ardoise — seul le
+      médaillon portait une couleur, trop petite pour se voir ;
+   2. le texte du moyeu débordait de l'anneau et le chevauchait ;
+   3. sous 900 px la figure retombait en grille, mais une grille qui
+      n'avait reçu aucun soin.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Chaque tuile prend la couleur de sa famille ─────────────────── */
+.orbit a.orb{
+  border-width:1px;
+  background:
+    linear-gradient(160deg, var(--tint-a) 0%, var(--tint-b) 100%),
+    rgba(255,255,255,.04);
+  border-color:var(--tint-l);
+}
+.orbit a.orb::after{                     /* halo coloré au survol */
+  content:"";position:absolute;inset:0;border-radius:inherit;
+  background:radial-gradient(120% 90% at 50% 0%, var(--tint-g) 0%, transparent 70%);
+  opacity:0;transition:opacity .35s var(--e-out);pointer-events:none;
+}
+.orbit a.orb:hover{border-color:var(--tint-s)}
+.orbit a.orb:hover::after{opacity:1}
+.orbit a.orb b{color:#fff}
+
+.orbit a.t-vert{--tint-a:rgba(14,122,98,.30); --tint-b:rgba(14,122,98,.10);
+                --tint-l:rgba(63,196,161,.30); --tint-s:#3FC4A1; --tint-g:rgba(63,196,161,.26)}
+.orbit a.t-cyan{--tint-a:rgba(11,106,136,.34); --tint-b:rgba(11,106,136,.10);
+                --tint-l:rgba(90,196,232,.30); --tint-s:#5AC4E8; --tint-g:rgba(90,196,232,.26)}
+.orbit a.t-viol{--tint-a:rgba(91,55,167,.36); --tint-b:rgba(91,55,167,.10);
+                --tint-l:rgba(168,138,240,.32); --tint-s:#A88AF0; --tint-g:rgba(168,138,240,.26)}
+.orbit a.t-roug{--tint-a:rgba(168,46,69,.34); --tint-b:rgba(168,46,69,.10);
+                --tint-l:rgba(240,124,148,.30); --tint-s:#F07C94; --tint-g:rgba(240,124,148,.26)}
+.orbit a.t-ambr{--tint-a:rgba(209,151,8,.32); --tint-b:rgba(209,151,8,.09);
+                --tint-l:rgba(255,201,60,.34); --tint-s:var(--o400); --tint-g:rgba(255,201,60,.26)}
+
+/* les médaillons gagnent en présence : fond plein de leur famille */
+.orbit .ic.t-vert{background:linear-gradient(140deg,#12A180,#0B6B55);color:#EAFFF8;border-color:transparent}
+.orbit .ic.t-cyan{background:linear-gradient(140deg,#1892BC,#0A5B76);color:#EAF9FF;border-color:transparent}
+.orbit .ic.t-viol{background:linear-gradient(140deg,#7B54D4,#4B2C90);color:#F3ECFF;border-color:transparent}
+.orbit .ic.t-roug{background:linear-gradient(140deg,#D04E6B,#8C2038);color:#FFEDF1;border-color:transparent}
+.orbit .ic.t-ambr{background:linear-gradient(140deg,#FFD96B,#D19708);color:#3A2A00;border-color:transparent}
+
+/* ── 2. L'anneau doit encercler le moyeu, pas passer dessous ───────── */
+@media (min-width:900px){
+  .constel-ring{width:min(52%,470px)}
+  .constel-ring .ring-seg{stroke-width:7}
+  /* Le moyeu tient à l'intérieur de l'anneau : on borne sa largeur au
+     diamètre intérieur, sinon la légende déborde sur les segments. */
+  .constel-fig .hub{max-width:212px}
+  .constel-fig .hub .disc{width:84px;height:84px;margin-bottom:.5rem}
+  .constel-fig .hub .disc .i{width:38px;height:38px}
+  .constel-fig .hub b{font-size:15px;line-height:1.2;display:block}
+  .constel-fig .hub span{
+    font-size:10.5px;line-height:1.35;margin-top:.3rem;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  /* rayons plus lisibles, partant du bord extérieur de l'anneau */
+  .constel-ring .ray{stroke:rgba(255,201,60,.34);stroke-width:.4;stroke-dasharray:1.2 1.6}
+}
+
+/* ── 3. Téléphone : la figure redevient une liste, mais soignée ─────── */
+@media (max-width:899px){
+  .constel{padding:1.8rem 1rem 1.6rem}
+  .constel .hub{margin-bottom:1.5rem}
+  .orbit{grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.8rem}
+  .orbit a.orb{
+    display:grid;
+    grid-template-columns:42px 1fr;
+    grid-template-areas:"ic titre" "ic desc" "ic tag";
+    align-items:center;
+    gap:.1rem .75rem;
+    padding:.8rem .9rem;
+    text-align:left;
+  }
+  .orbit a.orb .ic{grid-area:ic;align-self:center;margin:0;width:42px;height:42px}
+  .orbit a.orb b{grid-area:titre;font-size:13.5px}
+  .orbit a.orb small{grid-area:desc;font-size:11px;line-height:1.4}
+  .orbit a.orb .tag{grid-area:tag;justify-self:start;margin-top:.35rem}
+  .constel-leg{gap:.4rem .9rem;margin-top:1.2rem}
+  .constel-leg li{font-size:10.5px}
+}
+/* Un seul élément par ligne sous 520 px : à deux colonnes, le titre
+   « Lecture facilitée & audio » se coupait en trois lignes. */
+@media (max-width:520px){
+  .orbit{grid-template-columns:1fr}
+  .constel .hub .disc{width:72px;height:72px}
+  .constel .hub b{font-size:15px}
+  .constel .hub span{font-size:11.5px}
+  .constel{border-radius:var(--r-md);padding:1.5rem .8rem 1.4rem}
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   ANNEAU SEGMENTÉ ET CONNECTEURS COURBES (modèle « Vos disciplines »)
+   ─────────────────────────────────────────────────────────────────────
+   Un segment par ressource, séparés par un jour, chacun de la couleur de
+   sa famille : l'anneau devient une légende en soi. Au centre, le compte
+   en gros — c'est ce que le schéma de référence donne à lire en premier.
+   ══════════════════════════════════════════════════════════════════════ */
+.constel-ring .seg{fill:none;stroke-width:8;stroke-linecap:butt}
+.constel-ring .seg.t-vert{stroke:#12A180}
+.constel-ring .seg.t-cyan{stroke:#1892BC}
+.constel-ring .seg.t-viol{stroke:#7B54D4}
+.constel-ring .seg.t-roug{stroke:#D04E6B}
+.constel-ring .seg.t-ambr{stroke:var(--o400)}
+.constel-ring .lien{
+  fill:none;stroke:rgba(255,255,255,.30);stroke-width:.45;stroke-linecap:round;
+}
+
+/* Le compte, au centre de l'anneau */
+.constel .hub .hub-n{
+  display:block;
+  font-family:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;
+  font-size:clamp(2rem,1.2rem + 2.4vw,3.1rem);
+  font-weight:800;line-height:.95;letter-spacing:-.04em;
+  color:#fff;
+}
+.constel .hub b{
+  display:block;text-transform:uppercase;letter-spacing:.14em;
+  font-size:.74rem;font-weight:800;color:var(--o300);margin-top:.25rem;
+}
+.constel .hub span{display:block;color:var(--n200);margin-top:.4rem}
+@media (min-width:900px){
+  /* Le pictogramme du cahier passe au-dessus du compte, plus discret :
+     c'est le nombre qui doit se lire de loin, pas l'icône. */
+  .constel-fig .hub .disc{width:54px;height:54px;margin-bottom:.45rem}
+  .constel-fig .hub .disc .i{width:26px;height:26px}
+  .constel-fig .hub b{font-size:.7rem;margin-top:.2rem}
+  .constel-fig .hub span{font-size:10.5px;margin-top:.35rem}
+}

@@ -1120,7 +1120,7 @@ textarea.fi{resize:vertical;min-height:72px}
 
 /* ═══ MONTSERRAT/POPPINS FOR ALL HEADINGS ═══ */
 h1,h2,h3,h4,h5,h6,.ct,.mtt,.pgt,.vsec-title,.vhero-title,.sbsl,.scl,.tab,.ltb,.book-tab{font-family:'Montserrat','Montserrat',sans-serif !important}
-.btn,.vnav-btn,.fl{font-family:'Poppins','Montserrat',sans-serif !important}
+.btn,.vnav-btn,.fl{font-family:'Plus Jakarta Sans','Montserrat',sans-serif !important}
 .mono{font-family:'Fira Code',monospace !important;font-variant-numeric:tabular-nums}
 /* ═══ GRAIN TEXTURE ═══ */
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.018;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")}
@@ -1262,11 +1262,11 @@ body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;
    VERITAS v22 — DESIGN CAPTIVANT POUR APPRENANTS
    ═══════════════════════════════════════════════ */
 
-/* ── Typography upgrade — Poppins + Montserrat ── */
+/* ── Typographie — Plus Jakarta Sans + Montserrat ── */
 body{font-family:var(--ds-font-text)!important}
 h1,h2,h3,.vsec-title,.ct,.mtt,.pgt,.vhero-title{font-family:'Montserrat','Montserrat',sans-serif!important}
 .serif, .pack-feat, .rc-preview, .ai-res, .ai-result-box{font-family:Georgia,'Libre Baskerville',serif!important}
-input,select,textarea,button{font-family:'Poppins','Inter',sans-serif!important}
+input,select,textarea,button{font-family:'Plus Jakarta Sans','Inter',sans-serif!important}
 
 /* ── Visitor Portal enhanced ── */
 #VISITOR{background:var(--ds-bg,#F5F7FB)}
@@ -1540,11 +1540,11 @@ svg.vico.vico-21:not([width]){width:21px;height:21px}
   color:#142554;line-height:1.35;margin-bottom:5px}
 .rc-meta{font-size:10px;color:#8895AA;margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap}
 .rc-meta span{background:#F0F4FF;padding:2px 8px;border-radius:6px}
-.rc-preview{font-family:'Lora',Georgia,serif;font-size:12px;color:#4A5568;
+.rc-preview{font-family:'Libre Baskerville',Georgia,serif;font-size:12px;color:#4A5568;
   line-height:1.65;margin-bottom:12px;padding:10px;border-radius:10px;}
 .rc-footer{display:flex;justify-content:space-between;align-items:center;
   padding-top:10px;border-top:1px solid #F0F4FF}
-.rc-price{font-family:'Lora',Georgia,serif;font-size:17px;font-weight:700}
+.rc-price{font-family:'Libre Baskerville',Georgia,serif;font-size:17px;font-weight:700}
 .rc-lock{position:absolute;inset:0;border-radius:16px;display:flex;align-items:center;
   justify-content:center;flex-direction:column;gap:10px;backdrop-filter:blur(6px)}
 .rc-lock-btn{font-size:12px;font-weight:800;padding:8px 20px;border-radius:20px;
@@ -1562,7 +1562,7 @@ svg.vico.vico-21:not([width]){width:21px;height:21px}
 .sc-body h4{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;
   color:#142554;margin-bottom:4px;line-height:1.3}
 .sc-desc{font-size:11px;color:#5A6A8C;margin-bottom:10px;line-height:1.5}
-.sc-price{font-family:'Lora',Georgia,serif;font-size:16px;font-weight:700;color:#1D4ED8}
+.sc-price{font-family:'Libre Baskerville',Georgia,serif;font-size:16px;font-weight:700;color:#1D4ED8}
 .sc-old{font-size:10px;color:#9CA3AF;text-decoration:line-through;margin-left:6px}
 .sc-btn{width:100%;background:linear-gradient(135deg,#142554,#3C8DFF);color:#fff;border:none;
   border-radius:12px;padding:9px;font-size:11px;font-weight:700;cursor:pointer;
@@ -1587,11 +1587,11 @@ svg.vico.vico-21:not([width]){width:21px;height:21px}
   color:rgba(255,255,255,.95);margin-bottom:4px}
 .pk-cible{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:8px}
 .pk-oldp{font-size:11px;color:rgba(255,255,255,.3);text-decoration:line-through}
-.pk-price{font-family:'Lora',Georgia,serif;font-size:32px;font-weight:700;
+.pk-price{font-family:'Libre Baskerville',Georgia,serif;font-size:32px;font-weight:700;
   color:#FFC93C;line-height:1}
 .pk-per{font-size:10px;color:rgba(255,255,255,.4);margin-bottom:14px}
 .pk-list{list-style:none;padding:0;margin-bottom:14px}
-.pk-feat{font-family:'Lora',Georgia,serif;font-size:11px;
+.pk-feat{font-family:'Libre Baskerville',Georgia,serif;font-size:11px;
   color:rgba(255,255,255,.78);padding:4px 0;
   border-bottom:1px solid rgba(255,255,255,.06);
   display:flex;align-items:flex-start;gap:7px;line-height:1.45}
@@ -1620,7 +1620,7 @@ svg.vico.vico-21:not([width]){width:21px;height:21px}
 .ai-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;
   padding:3px 10px;border-radius:10px}
 .ai-res{background:#FAFBFF;border:1px solid #E0EAFF;border-radius:14px;padding:16px;
-  font-family:'Lora',Georgia,serif;font-size:13px;color:#2D3748;
+  font-family:'Libre Baskerville',Georgia,serif;font-size:13px;color:#2D3748;
   line-height:1.9;margin-top:14px;max-height:340px;overflow-y:auto;
   white-space:pre-wrap}
 
@@ -1632,7 +1632,7 @@ svg.vico.vico-21:not([width]){width:21px;height:21px}
 .vstats-item{padding:16px 8px;text-align:center;
   border-right:1px solid rgba(255,255,255,.07)}
 .vstats-item:last-child{border:none}
-.vstats-n{font-family:'Lora',Georgia,serif;font-size:28px;font-weight:700;
+.vstats-n{font-family:'Libre Baskerville',Georgia,serif;font-size:28px;font-weight:700;
   color:#FFC93C;line-height:1;margin-bottom:4px}
 .vstats-l{color:rgba(255,255,255,.6);font-size:10px;font-weight:500}
 
@@ -1701,7 +1701,7 @@ svg.vico.vico-21:not([width]){width:21px;height:21px}
 .quiz-header p{font-size:11px;color:rgba(255,255,255,.75)}
 .quiz-q{padding:20px}
 .quiz-num{font-size:10px;font-weight:800;color:#6B7A99;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
-.quiz-q-text{font-family:'Lora',Georgia,serif;font-size:15px;color:#1E2D5A;line-height:1.6;margin-bottom:16px;font-weight:600}
+.quiz-q-text{font-family:'Libre Baskerville',Georgia,serif;font-size:15px;color:#1E2D5A;line-height:1.6;margin-bottom:16px;font-weight:600}
 .quiz-opts{display:flex;flex-direction:column;gap:8px}
 .quiz-opt{background:#F8FAFF;border:2px solid #E8EEFF;border-radius:12px;padding:12px 16px;
   font-size:13px;color:#2D3748;cursor:pointer;transition:all .2s;text-align:left;
@@ -1710,12 +1710,12 @@ svg.vico.vico-21:not([width]){width:21px;height:21px}
 .quiz-opt.correct{background:#D1FAE5;border-color:#059669;color:#065F46}
 .quiz-opt.wrong{background:#FEE2E2;border-color:#AE5353;color:#991B1B}
 .quiz-explication{background:#FEF3C7;border-radius:12px;
-  padding:12px 14px;margin-top:12px;font-family:'Lora',Georgia,serif;font-size:13px;
+  padding:12px 14px;margin-top:12px;font-family:'Libre Baskerville',Georgia,serif;font-size:13px;
   color:#92400E;line-height:1.65}
 .quiz-progress{height:5px;background:#E8EEFF;border-radius:3px;overflow:hidden;margin:0 20px 16px}
 .quiz-progress-fill{height:100%;background:linear-gradient(90deg,#6A8DC7,#6C56A6);border-radius:3px;transition:width .4s}
 .quiz-score-box{text-align:center;padding:30px 20px;background:linear-gradient(135deg,#EEF2FF,#F0FDF4)}
-.quiz-score-n{font-family:'Lora',Georgia,serif;font-size:52px;font-weight:700;color:#059669;line-height:1}
+.quiz-score-n{font-family:'Libre Baskerville',Georgia,serif;font-size:52px;font-weight:700;color:#059669;line-height:1}
 .quiz-score-stars{font-size:28px;margin:8px 0}
 .quiz-nav{display:flex;justify-content:space-between;align-items:center;padding:0 20px 16px}
 
@@ -5686,9 +5686,10 @@ html{ scroll-behavior:auto; }
   box-shadow:0 10px 30px rgba(13,27,62,.28),inset 0 1px 0 rgba(255,255,255,.10)}
 
 /* ── CTA or : lueur teintée FIXE (pas d'animation d'ombre) + ressort au survol. */
-.vfx-cta{background:linear-gradient(135deg,#FFC93C,#E8A413);color:#142554;border:none;
-  border-radius:99px;padding:13px 26px;font-weight:800;font-size:14px;cursor:pointer;
-  box-shadow:0 8px 24px rgba(232,164,19,.34);
+.vfx-cta{background:var(--g-gold);color:var(--n800);border:none;
+  border-radius:var(--r-full);padding:13px 26px;font-weight:800;font-size:14px;cursor:pointer;
+  font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif;
+  box-shadow:0 8px 24px rgba(209,151,8,.32);
   transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
 .vfx-cta:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 12px 30px rgba(232,164,19,.46)}
 
@@ -5698,7 +5699,7 @@ html{ scroll-behavior:auto; }
 .vfx-fab{position:fixed;right:16px;bottom:18px;z-index:8700;
   display:inline-flex;align-items:center;gap:10px;
   background:#25D366;color:#08281A;border:none;border-radius:99px;
-  padding:11px 18px 11px 13px;font-family:Poppins,Montserrat,sans-serif;
+  padding:11px 18px 11px 13px;font-family:'Plus Jakarta Sans',Montserrat,sans-serif;
   font-weight:800;font-size:13px;cursor:pointer;text-decoration:none;
   box-shadow:0 10px 28px rgba(37,211,102,.40);
   animation:vfxFabIn .45s cubic-bezier(.16,1,.3,1) both;
@@ -5733,7 +5734,7 @@ body.has-sticky-cta .vfx-fab{bottom:82px}
 .vfx-proof-ic{width:32px;height:32px;border-radius:50%;flex:0 0 auto;
   background:linear-gradient(135deg,rgba(255,201,60,.30),rgba(255,201,60,.10));
   display:inline-flex;align-items:center;justify-content:center;font-size:16px}
-.vfx-proof-tx{font-family:Poppins,sans-serif;font-size:12.5px;color:#142554;line-height:1.4}
+.vfx-proof-tx{font-family:'Plus Jakarta Sans',sans-serif;font-size:12.5px;color:#142554;line-height:1.4}
 .vfx-proof-tx b{font-weight:800}
 .vfx-proof-when{font-size:10.5px;color:#6B7280;margin-top:3px;
   display:flex;align-items:center;gap:6px}
@@ -5746,7 +5747,7 @@ body.has-sticky-cta .vfx-fab{bottom:82px}
    de la carte). Statique = GPU-safe. Réutilisable partout :
    <div class="vt-rib-wrap"><span class="vt-rib">Gratuit</span></div> */
 .vt-rib-wrap{position:absolute;top:0;right:0;width:80px;height:80px;overflow:hidden;pointer-events:none;z-index:4;border-radius:0 18px 0 0}
-.vt-rib{position:absolute;top:13px;right:-22px;width:112px;transform:rotate(42deg);background:linear-gradient(180deg,#FFD75E,#FFC93C);color:#3B2B05;text-align:center;font-family:Montserrat,Poppins,sans-serif;font-weight:800;font-size:10px;letter-spacing:.12em;line-height:21px;text-transform:uppercase;box-shadow:0 3px 7px rgba(20,37,84,.28)}
+.vt-rib{position:absolute;top:13px;right:-22px;width:112px;transform:rotate(42deg);background:linear-gradient(180deg,#FFD75E,#FFC93C);color:#3B2B05;text-align:center;font-family:Montserrat,'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:10px;letter-spacing:.12em;line-height:21px;text-transform:uppercase;box-shadow:0 3px 7px rgba(20,37,84,.28)}
 
 /* ════════════════════ ESPACE PARENTS ════════════════════ */
 /* ── Icônes vectorielles (sprite embarqué par app.js) ──────────────────────
@@ -5775,7 +5776,7 @@ button .i,a .i{margin-right:.4em}
   color:rgba(255,201,60,.90);font-size:15px;line-height:1.5;margin:0;max-width:600px}
 .vp-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 20px}
 .vp-tab{background:#fff;border:1.5px solid rgba(20,37,84,.14);border-radius:99px;
-  padding:10px 18px;font-family:Poppins,sans-serif;font-size:13px;font-weight:700;
+  padding:10px 18px;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;
   color:#142554;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s,border-color .2s}
 .vp-tab:hover{transform:translateY(-2px)}
 .vp-tab.on{background:linear-gradient(135deg,#142554,#1B2F63);color:#FFC93C;border-color:transparent}
@@ -5784,16 +5785,16 @@ button .i,a .i{margin-right:.4em}
    piège quiconque recherchera ensuite les onglets dans le DOM. */
 .vfx-ghost{background:rgba(255,255,255,.10);color:#FFC93C;
   border:1.5px solid rgba(255,201,60,.34);border-radius:99px;padding:10px 18px;
-  font-family:Poppins,sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
   transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .2s}
 .vfx-ghost:hover{transform:translateY(-2px);background:rgba(255,255,255,.18)}
 .vp-fear{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid rgba(20,37,84,.10);
   border-radius:14px;overflow:hidden;background:#fff}
-.vp-fear-h{background:#F4F6FB;font-family:Poppins,sans-serif;font-size:11px;font-weight:800;
+.vp-fear-h{background:#F4F6FB;font-family:'Plus Jakarta Sans',sans-serif;font-size:11px;font-weight:800;
   letter-spacing:.08em;text-transform:uppercase;color:#5A6784;padding:10px 14px}
 .vp-fear-q,.vp-fear-a{padding:13px 14px;border-top:1px solid rgba(20,37,84,.07);font-size:13.5px;line-height:1.5}
 .vp-fear-q{font-family:'Crimson Pro',Georgia,serif;font-style:italic;color:#1F2937;background:#FCFBF8}
-.vp-fear-a{font-family:Poppins,sans-serif;color:#142554}
+.vp-fear-a{font-family:'Plus Jakarta Sans',sans-serif;color:#142554}
 .vp-fear-a b{color:#0F7B4F}
 @media (max-width:720px){
   .vp-fear{grid-template-columns:1fr}
@@ -5809,7 +5810,7 @@ button .i,a .i{margin-right:.4em}
 .vp-card p{font-size:12.5px;color:#4B5563;line-height:1.5;margin:0 0 11px}
 .vp-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(15,123,79,.10);
   color:#0F7B4F;border-radius:99px;padding:4px 10px;font-size:11px;font-weight:800;
-  font-family:Poppins,sans-serif}
+  font-family:'Plus Jakarta Sans',sans-serif}
 .vp-tool{display:flex;align-items:center;gap:11px;width:100%;text-align:left;
   background:#fff;border:1.5px solid rgba(20,37,84,.12);border-radius:14px;padding:13px;
   cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1),border-color .2s}
@@ -5817,7 +5818,7 @@ button .i,a .i{margin-right:.4em}
 .vp-tool .ic{width:38px;height:38px;border-radius:11px;flex:0 0 auto;font-size:19px;
   background:linear-gradient(135deg,rgba(255,201,60,.26),rgba(255,201,60,.08));
   display:inline-flex;align-items:center;justify-content:center}
-.vp-tool .tt{font-family:Poppins,sans-serif;font-weight:800;font-size:13px;color:#142554}
+.vp-tool .tt{font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;font-size:13px;color:#142554}
 .vp-tool .ss{font-size:11.5px;color:#6B7280;margin-top:2px}
 
 /* -- Lisibilite de la partie visiteur (demande Jacques) -------------------
@@ -5949,7 +5950,7 @@ button .i,a .i{margin-right:.4em}
       onglets glissent dessous, les icônes restent atteignables. Le masque de
       fondu de la nav est retiré, sinon il estomperait le groupe. */
 #VISITOR .vnav{ mask:none!important; -webkit-mask:none!important; }
-#VISITOR #vNavUtils{
+#VISITOR #VISITOR #vNavUtils, #vNavUtils{
   position:sticky; right:0; z-index:6;
   display:flex; align-items:center; gap:5px;
   margin-left:auto; padding:0 2px 0 44px; flex-shrink:0;
@@ -6118,3 +6119,1003 @@ button .i,a .i{margin-right:.4em}
   #vAmbassaFab{ transition:none; }
   #vAmbassaFab:hover{ transform:none; }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   THÈME CLAIR / SOMBRE — v1.15.5
+   ────────────────────────────────────────────────────────────────────────
+   Le thème se pilote par [data-theme] sur <html>, posé AVANT peinture par le
+   script inline du <head> (sinon flash blanc). Deux valeurs peintes :
+     absent / "light"  → thème clair (défaut historique, inchangé)
+     "dark"            → thème sombre
+   Le choix « auto » (préférence système) est résolu en light/dark par le JS :
+   aucune media-query ici, pour que le bouton puisse toujours forcer l'inverse.
+
+   ⚠️ POURQUOI CE FICHIER FINIT PAR DES SÉLECTEURS [style*=…] :
+   app.js pose ~400 couleurs EN LIGNE (background:#fff, color:#142554…).
+   Une règle de classe ne peut pas les battre : seule une règle attributaire
+   + !important y arrive. C'est laid, mais c'est la seule voie sans réécrire
+   3,4 Mo de JS. Toute NOUVELLE couleur doit passer par var(--ink)/var(--sur)
+   — jamais par du hex en ligne — sinon elle restera claire en mode sombre.
+   ════════════════════════════════════════════════════════════════════════ */
+:root{ color-scheme:light; }
+
+:root[data-theme="dark"]{
+  color-scheme:dark;
+
+  /* ─── Tokens v3 : le navy de marque poussé plus profond, l'or conservé ─── */
+  --ds-bg:#0A1024; --ds-surface:#131C36; --ds-surface-2:#18223F;
+  --ds-border:#263355; --ds-border-strong:#35446B;
+  --ds-text:#E9EDF7; --ds-text-2:#AEBAD4; --ds-text-3:#8492B0;
+  --ds-primary:#9DBAFF; --ds-accent:#FFC93C;
+  --ds-ok:#34D399; --ds-warn:#FBBF24; --ds-err:#F79999;
+  --ds-sh-sm:0 1px 3px rgba(0,0,0,.45);
+  --ds-sh:0 6px 20px rgba(0,0,0,.42),0 1px 3px rgba(0,0,0,.35);
+  --ds-sh-lg:0 24px 56px rgba(0,0,0,.6);
+
+  /* ─── Anciennes variables : mêmes rôles, valeurs sombres ─── */
+  --ink1:#F2F5FB;
+  --bg:#0A1024; --bg2:#131C36; --bg3:#1F2A4A; --sur:#131C36; --sur2:#18223F;
+  --ink:#E9EDF7; --ink2:#DCE4F3; --ink3:#AEBAD4; --ink4:#8492B0;
+  --gold:#FFC93C; --gold2:#FFD86E; --gp:#3A2E10; --gb:#5E4A16;
+  --gr:#34D399; --grb:#0E3227; --grd:#17604A;
+  --re:#F79999; --reb:#3B1D1D; --red:#6E2F2F;
+  --bl:#9DBAFF; --blb:#16244A; --bld:#2A3F72;
+  --bl2:#6FA8FF;
+  --or:#FBBF24; --orb:#3A2A12; --ord:#5E4520;
+  --pu:#B49DE8; --pub:#2A2350; --pud:#453A78;
+  --vi:#2DD4BF; --vib:#0C3634; --vid:#12564F;
+  --pink:#3A1F2C; --pink2:#55293D;
+  --yellow:#FFC93C; --yellow2:#3A2E10;
+  --br:1px solid #263355; --br2:1px solid #35446B;
+  --sh:0 1px 3px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.32);
+  --sh2:0 8px 32px rgba(0,0,0,.5); --sh3:0 24px 64px rgba(0,0,0,.66);
+  --wa:#FBBF24;
+}
+
+/* ═══ 1. Fonds racines ═══════════════════════════════════════════════ */
+/* ⚠️ Les identifiants sont SENSIBLES À LA CASSE : l'espace admin est `#APP`
+   (majuscules), l'écran de connexion `#LS`, le conteneur de modales `#MC`.
+   Écrire `#app` ne matche rien du tout. */
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] #VISITOR,
+:root[data-theme="dark"] #APP,
+:root[data-theme="dark"] #LS,
+:root[data-theme="dark"] .vbody{ background:var(--ds-bg); color:var(--ink); }
+:root[data-theme="dark"] #APP, :root[data-theme="dark"] #MC{ color:var(--ink); }
+
+/* ═══ 2. Surfaces blanches déclarées en dur dans ce fichier ═══════════ */
+:root[data-theme="dark"] .vnav,
+:root[data-theme="dark"] .vnav-dropdown,
+:root[data-theme="dark"] .rc,
+:root[data-theme="dark"] .sc,
+:root[data-theme="dark"] .nc,
+:root[data-theme="dark"] .quiz-container,
+:root[data-theme="dark"] .jeu-card,
+:root[data-theme="dark"] .mgr-card,
+:root[data-theme="dark"] .partner-card,
+:root[data-theme="dark"] .docwin,
+:root[data-theme="dark"] #docContent,
+:root[data-theme="dark"] .rmq-chip,
+:root[data-theme="dark"] .vfx-proof-card,
+:root[data-theme="dark"] .vp-fear,
+:root[data-theme="dark"] .vp-card,
+:root[data-theme="dark"] .vp-tab,
+:root[data-theme="dark"] .lx-catcard,
+:root[data-theme="dark"] .lx-statcard,
+:root[data-theme="dark"] #VISITOR .vcard,
+:root[data-theme="dark"] #VISITOR .rc,
+:root[data-theme="dark"] #VISITOR .vbook-card,
+:root[data-theme="dark"] #VISITOR .featured-card,
+:root[data-theme="dark"] #VISITOR .back-btn{
+  background:var(--sur); border-color:var(--ds-border); color:var(--ink);
+}
+:root[data-theme="dark"] .vnav{ border-bottom-color:var(--ds-border); }
+:root[data-theme="dark"] .vp-fear-h{ background:var(--sur2); color:var(--ink3); }
+:root[data-theme="dark"] .u-bg-white{ background:var(--sur); }
+
+/* Champs de formulaire : lisibles, curseur et placeholder compris */
+:root[data-theme="dark"] .fi,
+:root[data-theme="dark"] #VISITOR .fi,
+:root[data-theme="dark"] input, :root[data-theme="dark"] textarea,
+:root[data-theme="dark"] select{
+  background:var(--sur2); color:var(--ink); border-color:var(--ds-border-strong);
+}
+:root[data-theme="dark"] ::placeholder{ color:var(--ink4); opacity:1; }
+
+/* Cartes de couleur pédagogiques : on garde la teinte, on baisse la lumière */
+:root[data-theme="dark"] .cm2{background:#332A12;border-color:#5C4A17;color:var(--ink)}
+:root[data-theme="dark"] .cff{background:#16244A;border-color:#2A3F72;color:var(--ink)}
+:root[data-theme="dark"] .ce {background:#0E3227;border-color:#17604A;color:var(--ink)}
+:root[data-theme="dark"] .cs {background:#3B1D1D;border-color:#6E2F2F;color:var(--ink)}
+:root[data-theme="dark"] .co {background:#2A2350;border-color:#453A78;color:var(--ink)}
+
+/* Les logos posés sur pastille blanche RESTENT sur blanc : un logo détouré
+   sur navy disparaît. Volontaire — ne pas « corriger ». */
+
+/* ═══ 3. Couleurs posées EN LIGNE par app.js ═════════════════════════
+   Chaque motif est décliné en « …; » (au milieu de l'attribut) et « $= »
+   (en fin) : un sélecteur attributaire ne voit pas la fin d'une déclaration. */
+
+/* 3a. Fonds blancs → surface sombre */
+:root[data-theme="dark"] [style*="background:#fff;"],
+:root[data-theme="dark"] [style$="background:#fff"],
+:root[data-theme="dark"] [style*="background:#fff "],
+:root[data-theme="dark"] [style*="background:#FFF;"],
+:root[data-theme="dark"] [style$="background:#FFF"],
+:root[data-theme="dark"] [style*="background:#ffffff"],
+:root[data-theme="dark"] [style*="background:#FFFFFF"],
+:root[data-theme="dark"] [style*="background:white"],
+:root[data-theme="dark"] [style*="background-color:#fff;"],
+:root[data-theme="dark"] [style$="background-color:#fff"]{
+  background:var(--sur) !important;
+}
+
+/* 3b. Fonds bleutés très pâles → surface secondaire */
+:root[data-theme="dark"] [style*="background:#f8faff"],
+:root[data-theme="dark"] [style*="background:#F8FAFF"],
+:root[data-theme="dark"] [style*="background:#f0f4ff"],
+:root[data-theme="dark"] [style*="background:#F0F4FF"],
+:root[data-theme="dark"] [style*="background:#f5f7fb"],
+:root[data-theme="dark"] [style*="background:#F5F7FB"],
+:root[data-theme="dark"] [style*="background:#f8f9fc"],
+:root[data-theme="dark"] [style*="background:#F8F9FC"],
+:root[data-theme="dark"] [style*="background:#f4f6fb"],
+:root[data-theme="dark"] [style*="background:#F4F6FB"],
+:root[data-theme="dark"] [style*="background:#f9fafb"],
+:root[data-theme="dark"] [style*="background:#F9FAFB"]{
+  background:var(--sur2) !important;
+}
+
+/* 3c. Pastilles de statut : la teinte porte le sens, on la garde en sombre */
+:root[data-theme="dark"] [style*="background:#fef3c7"],
+:root[data-theme="dark"] [style*="background:#FEF3C7"],
+:root[data-theme="dark"] [style*="background:#fff8e1"],
+:root[data-theme="dark"] [style*="background:#FFF8E1"]{ background:#3A2E10 !important; }
+:root[data-theme="dark"] [style*="background:#fee2e2"],
+:root[data-theme="dark"] [style*="background:#FEE2E2"]{ background:#3B1D1D !important; }
+:root[data-theme="dark"] [style*="background:#d1fae5"],
+:root[data-theme="dark"] [style*="background:#D1FAE5"],
+:root[data-theme="dark"] [style*="background:#f0fdf4"],
+:root[data-theme="dark"] [style*="background:#F0FDF4"]{ background:#0E3227 !important; }
+:root[data-theme="dark"] [style*="background:#e0eaff"],
+:root[data-theme="dark"] [style*="background:#E0EAFF"]{ background:#16244A !important; }
+
+/* 3d. Textes navy → texte clair.
+   EXCEPTION : quand le même style pose un fond OR (ou un jaune pâle qu'on
+   conserve), le navy doit RESTER navy — sinon or sur or, illisible. */
+:root[data-theme="dark"] [style*="color:#142554"]:not([style*="background:#FFC93C"]):not([style*="background:#ffc93c"]):not([style*="background:#FFD86E"]):not([style*="background:#FFE082"]):not([style*="background:#fff9"]):not([style*="background:linear-gradient"][style*="#FFC93C"]):not([style*="background:linear-gradient"][style*="#FFD86E"]):not([style*="background:linear-gradient"][style*="#F5B800"]):not([style*="background:linear-gradient"][style*="#FFE082"]),
+:root[data-theme="dark"] [style*="color:#0F1E47"],
+:root[data-theme="dark"] [style*="color:#1E2D5A"]{
+  color:var(--ink) !important;
+}
+
+/* 3e. Gris de texte → gris clair (le contraste s'inverse, pas la hiérarchie) */
+:root[data-theme="dark"] [style*="color:#6b7a99"],
+:root[data-theme="dark"] [style*="color:#6B7A99"],
+:root[data-theme="dark"] [style*="color:#6b7280"],
+:root[data-theme="dark"] [style*="color:#6B7280"],
+:root[data-theme="dark"] [style*="color:#374151"],
+:root[data-theme="dark"] [style*="color:#475569"],
+:root[data-theme="dark"] [style*="color:#475882"],
+:root[data-theme="dark"] [style*="color:#5b6b85"],
+:root[data-theme="dark"] [style*="color:#5B6B85"],
+:root[data-theme="dark"] [style*="color:#64748b"],
+:root[data-theme="dark"] [style*="color:#64748B"]{ color:var(--ink3) !important; }
+:root[data-theme="dark"] [style*="color:#9ca3af"],
+:root[data-theme="dark"] [style*="color:#9CA3AF"],
+:root[data-theme="dark"] [style*="color:#94a3b8"],
+:root[data-theme="dark"] [style*="color:#94A3B8"],
+:root[data-theme="dark"] [style*="color:#888"],
+:root[data-theme="dark"] [style*="color:#999"],
+:root[data-theme="dark"] [style*="color:#6B7DA0"],
+:root[data-theme="dark"] [style*="color:#6b7da0"]{ color:var(--ink4) !important; }
+
+/* 3f. Bordures pâles en ligne */
+:root[data-theme="dark"] [style*="border:1px solid #E6EAF2"],
+:root[data-theme="dark"] [style*="border:1px solid #e6eaf2"],
+:root[data-theme="dark"] [style*="border:1px solid #E8EEFF"],
+:root[data-theme="dark"] [style*="border:2px solid #E8EEFF"],
+:root[data-theme="dark"] [style*="border:1px solid #E4E8F0"],
+:root[data-theme="dark"] [style*="border:1px solid #eee"],
+:root[data-theme="dark"] [style*="border:1px solid #ddd"]{
+  border-color:var(--ds-border) !important;
+}
+
+/* ═══ 4. Le bouton de bascule ════════════════════════════════════════ */
+[data-theme-toggle]{ position:relative; }
+[data-theme-toggle] .vth-ico{ display:block; transition:transform .35s cubic-bezier(.34,1.56,.64,1); }
+:root[data-theme="dark"] [data-theme-toggle] .vth-sun{ display:none; }
+:root:not([data-theme="dark"]) [data-theme-toggle] .vth-moon{ display:none; }
+[data-theme-toggle]:hover .vth-ico{ transform:rotate(-18deg) scale(1.08); }
+@media (prefers-reduced-motion:reduce){ [data-theme-toggle] .vth-ico{ transition:none } }
+/* Variante barre latérale admin : même bouton, aligné sur .sblo */
+#sbTheme{ display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  width:32px; height:32px; flex-shrink:0; border-radius:9px; cursor:pointer;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.16);
+  color:inherit; }
+#sbTheme:hover{ background:rgba(255,255,255,.16); }
+
+/* ═══ 5. Média ═══════════════════════════════════════════════════════
+   Captures et scans de manuels sont des documents blancs : en sombre on les
+   pose sur un cadre, on ne les INVERSE PAS (un scan inversé est illisible).
+   Seule la luminosité est calmée. */
+:root[data-theme="dark"] #VISITOR img:not([src*=".svg"]):not(.vhero-logo):not(.logo-login){
+  filter:brightness(.94) contrast(1.02);
+}
+:root[data-theme="dark"] hr{ border-color:var(--ds-border); }
+
+/* Impression : toujours en clair, quel que soit le thème écran. */
+@media print{ :root[data-theme="dark"]{ color-scheme:light; } }
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   v1.16 — NUANCIER PARTAGÉ, POLICES RÉELLES, PANNEAU PARENTS
+   ─────────────────────────────────────────────────────────────────────
+   Bloc additif, placé en dernier : il corrige sans réécrire l'existant.
+   Trois constats d'audit, mesurés au navigateur, motivent ce bloc.
+
+   1. POLICES FANTÔMES. app.css déclare « Poppins » 11 fois et « Lora »
+      10 fois. Or le <head> ne charge que Inter, Montserrat, Libre
+      Baskerville, Plus Jakarta Sans, Crimson Pro et JetBrains Mono
+      (vérifié : document.fonts n'énumère que ces familles). Poppins et
+      Lora ne s'affichent donc QUE chez le visiteur qui les a installées
+      sur sa machine — sur un téléphone Android ou un PC standard, elles
+      retombent sur le sans-serif générique. Autrement dit, le rendu
+      n'était pas le même d'un poste à l'autre, sans que rien ne le
+      signale. On les redirige vers les familles réellement chargées.
+
+   2. NUANCIER. Le panneau Parents écrivait ses couleurs à la main
+      (#0D1B3E, #1B2F63, #4B5563, #6B7280, #1F2937, #0F7B4F, #F4F6FB…),
+      sans lien avec les jetons --ds-*. On importe ici les mêmes rampes
+      que les pages statiques : les deux moitiés du site puisent enfin
+      dans le même nuancier.
+
+   3. ÉCHELLE. Mesure sur le panneau Parents avant correction : quinze
+      tailles de police et six rayons différents sur une seule page. On
+      ramène à six tailles et trois rayons.
+   ══════════════════════════════════════════════════════════════════════ */
+:root{
+  /* Rampes — identiques à assets/veritas-pages.css, aux mêmes noms. */
+  --n50:#F2F5FC; --n100:#E4EAF7; --n200:#C7D3ED; --n300:#9CAFDD;
+  --n400:#6B83BE; --n500:#42599A; --n600:#2A4079; --n700:#1D3168;
+  --n800:#142554; --n900:#0D1A3D; --n950:#080F26;
+  --o50:#FFFBF0; --o100:#FFF4D6; --o200:#FFE8A8; --o300:#FFD96B;
+  --o400:#FFC93C; --o500:#F0B31E; --o600:#D19708; --o700:#A67608;
+  --vert-s:#EDF9F5; --vert-t:#BFE5D9; --vert-f:#0E7A62;
+  --viol-s:#F3EFFC; --viol-t:#D7C9F2; --viol-f:#5B37A7;
+  --roug-s:#FDF0F3; --roug-t:#F2CFD7; --roug-f:#A82E45;
+  --cyan-s:#EAF6FB; --cyan-t:#BFDFEE; --cyan-f:#0B6A88;
+  --ambr-s:#FFF8E8; --ambr-t:#F3DFAE; --ambr-f:#8A6200;
+
+  --g-navy:linear-gradient(135deg,var(--n900) 0%,var(--n800) 52%,var(--n700) 100%);
+  --g-navy-deep:linear-gradient(160deg,var(--n950) 0%,var(--n900) 45%,var(--n700) 100%);
+  --g-gold:linear-gradient(135deg,var(--o300) 0%,var(--o400) 45%,var(--o500) 100%);
+  --g-gold-line:linear-gradient(90deg,transparent,var(--o400) 22%,var(--o300) 50%,var(--o400) 78%,transparent);
+  --g-card:linear-gradient(168deg,#FFFFFF 0%,var(--n50) 100%);
+  --g-mesh:
+    radial-gradient(60% 120% at 12% -10%, rgba(255,201,60,.20) 0%, transparent 60%),
+    radial-gradient(48% 100% at 92% 0%, rgba(107,131,190,.34) 0%, transparent 62%),
+    radial-gradient(70% 140% at 50% 130%, rgba(255,201,60,.10) 0%, transparent 60%);
+
+  --sh-1:0 1px 2px rgba(13,26,61,.06), 0 2px 8px rgba(13,26,61,.05);
+  --sh-2:0 2px 6px rgba(13,26,61,.06), 0 12px 28px rgba(13,26,61,.09);
+  --sh-3:0 4px 12px rgba(13,26,61,.08), 0 28px 64px rgba(13,26,61,.16);
+
+  --r-sm:10px; --r-md:16px; --r-lg:22px; --r-full:999px;
+  --e-out:cubic-bezier(.22,1,.36,1);
+
+  /* Six tailles pour la partie visiteur — plus une seule valeur isolée.
+     Relevé avant correction sur le seul panneau Parents : 11, 11.5, 12,
+     12.5, 13, 13.5, 14, 14.5, 15, 19, 21, 22, 24, 25 et 27 px. Quinze
+     marches là où l'œil n'en distingue que cinq ou six. */
+  --v-xs:11.5px; --v-sm:13px; --v-md:15px; --v-lg:18px; --v-xl:22px; --v-2xl:28px;
+}
+
+/* ── 1. Les polices fantômes retombent sur les familles chargées ────── */
+.vp-tab,.vp-fear-h,.vp-fear-a,.vp-badge,.vp-tool .tt{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+}
+.vp-hero h1,.vp-hero h2,.vp-card h4{
+  font-family:'Plus Jakarta Sans','Montserrat',system-ui,sans-serif;
+}
+
+/* ══ 2. LE BANDEAU D'OUVERTURE ════════════════════════════════════════
+   Défaut mesuré : le titre était centré (règle .vsec h1) pendant que le
+   chapeau, plafonné à 600 px, restait collé à gauche dans un bloc de
+   866 px, et que la rangée de boutons partait elle aussi de la gauche.
+   Trois axes différents dans le même bandeau : c'est ce déséquilibre
+   qu'on voyait sans pouvoir le nommer. On les met tous sur le même axe,
+   et le chapeau reçoit une mesure de lecture (60 caractères). */
+.vp-hero{
+  background:var(--g-navy-deep);
+  border:1px solid rgba(255,201,60,.20);
+  border-radius:var(--r-lg);
+  padding:38px 30px 34px;
+  isolation:isolate;
+  box-shadow:var(--sh-2);
+}
+.vp-hero::before{
+  content:"";position:absolute;inset:0;background:var(--g-mesh);z-index:0;
+}
+.vp-hero::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:2px;
+  background:var(--g-gold-line);z-index:2;
+}
+.vp-hero>*{position:relative;z-index:1}
+.vp-hero h1,.vp-hero h2{
+  font-size:clamp(21px,17px + 1.4vw,31px);
+  line-height:1.15;letter-spacing:-.022em;margin:0 0 12px;
+  text-wrap:balance;
+}
+.vp-hero p{
+  font-family:'Crimson Pro','Libre Baskerville',Georgia,serif;
+  font-size:var(--v-md);line-height:1.6;
+  color:var(--o200);
+  max-width:60ch;margin:0 auto;
+  text-align:center;                 /* même axe que le titre */
+  text-wrap:pretty;
+}
+/* la rangée de boutons du bandeau se centre elle aussi */
+.vp-hero>div:last-child{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+
+/* ══ 3. ONGLETS ═══════════════════════════════════════════════════════ */
+.vp-tabs{justify-content:center;margin:22px 0 18px}
+.vp-tab{
+  border-radius:var(--r-full);
+  border:1.5px solid var(--n100);
+  font-size:var(--v-sm);
+  padding:10px 20px;
+  box-shadow:var(--sh-1);
+  transition:transform .3s var(--e-out),background .25s,border-color .25s,box-shadow .3s;
+}
+.vp-tab:hover{transform:translateY(-2px);border-color:var(--o300);box-shadow:var(--sh-2)}
+.vp-tab.on{background:var(--g-navy);color:var(--o400);border-color:transparent;box-shadow:var(--sh-2)}
+.vfx-ghost{border-radius:var(--r-full);font-size:var(--v-sm);font-family:'Inter',system-ui,sans-serif}
+
+/* ══ 4. LE TABLEAU INQUIÉTUDE → RÉPONSE ══════════════════════════════
+   C'est la pièce maîtresse de la page : c'est là que le parent se
+   reconnaît. Elle était grise et plate. On alterne les lignes, on
+   marque la colonne de gauche d'un filet d'or, et la réponse gagne le
+   vert du nuancier là où elle affirme quelque chose de vérifiable. */
+.vp-fear{
+  border:1px solid var(--n100);
+  border-radius:var(--r-lg);
+  box-shadow:var(--sh-1);
+  background:#fff;
+}
+.vp-fear-h{
+  background:var(--g-navy);color:var(--o300);
+  font-size:var(--v-xs);letter-spacing:.1em;
+  padding:12px 16px;
+}
+.vp-fear-q,.vp-fear-a{
+  padding:16px 18px;border-top:1px solid var(--n100);
+  font-size:var(--v-sm);line-height:1.6;
+}
+.vp-fear-q{
+  font-family:'Crimson Pro',Georgia,serif;font-style:italic;
+  color:var(--n700);background:var(--o50);
+  border-left:3px solid var(--o300);
+  font-size:var(--v-md);
+}
+.vp-fear-a{color:var(--n800)}
+.vp-fear-a b{color:var(--vert-f);font-weight:700}
+
+/* ══ 5. CARTES ════════════════════════════════════════════════════════ */
+.vp-grid{gap:16px}
+.vp-card{
+  background:var(--g-card);
+  border:1px solid var(--n100);
+  border-radius:var(--r-lg);
+  padding:20px 19px;
+  box-shadow:var(--sh-1);
+  position:relative;isolation:isolate;
+  transition:transform .4s var(--e-out),box-shadow .4s var(--e-out),border-color .3s;
+}
+.vp-card::after{
+  content:"";position:absolute;inset:-1px;border-radius:inherit;z-index:-1;
+  background:var(--g-gold);opacity:0;transition:opacity .38s var(--e-out);
+}
+.vp-card:hover{transform:translateY(-5px);box-shadow:var(--sh-2);border-color:transparent}
+.vp-card:hover::after{opacity:.5}
+.vp-card h4{font-size:var(--v-md);margin:0 0 8px;letter-spacing:-.015em}
+.vp-card p{font-size:var(--v-sm);color:var(--n600);line-height:1.6;margin:0 0 12px}
+.vp-badge{
+  background:var(--vert-s);color:var(--vert-f);
+  border:1px solid var(--vert-t);
+  border-radius:var(--r-full);font-size:var(--v-xs);padding:4px 11px;
+}
+
+/* ══ 6. TUILES D'OUTILS ═══════════════════════════════════════════════
+   Le médaillon était dimensionné en font-size:19px — vestige de l'époque
+   où il contenait un emoji. Il contient maintenant un pictogramme du
+   sprite : on le dimensionne en pixels et on lui donne une teinte du
+   nuancier au lieu du même or pour les six. */
+.vp-tool{
+  border:1.5px solid var(--n100);
+  border-radius:var(--r-md);
+  padding:15px;
+  box-shadow:var(--sh-1);
+  transition:transform .35s var(--e-out),border-color .25s,box-shadow .35s;
+}
+.vp-tool:hover{transform:translateY(-3px);border-color:var(--o300);box-shadow:var(--sh-2)}
+.vp-tool .ic{
+  width:42px;height:42px;border-radius:13px;
+  background:var(--ambr-s);color:var(--ambr-f);
+  border:1px solid var(--ambr-t);
+  font-size:0;                      /* plus aucun emoji à dimensionner */
+}
+.vp-tool .ic .i{width:21px;height:21px;margin:0;vertical-align:0}
+/* teintes tournantes : six outils, six familles du nuancier */
+.vp-tool:nth-of-type(2) .ic{background:var(--cyan-s);color:var(--cyan-f);border-color:var(--cyan-t)}
+.vp-tool:nth-of-type(3) .ic{background:var(--viol-s);color:var(--viol-f);border-color:var(--viol-t)}
+.vp-tool:nth-of-type(4) .ic{background:var(--vert-s);color:var(--vert-f);border-color:var(--vert-t)}
+.vp-tool:nth-of-type(5) .ic{background:var(--roug-s);color:var(--roug-f);border-color:var(--roug-t)}
+.vp-tool .tt{font-size:var(--v-sm);font-weight:800;color:var(--n800)}
+.vp-tool .ss{font-size:var(--v-xs);color:var(--n500);margin-top:3px;line-height:1.5}
+
+/* ══ 7. ÉQUILIBRE DE LA COLONNE VISITEUR ══════════════════════════════
+   Un paragraphe pleine largeur dans .vsec fait ~135 caractères sur un
+   écran de bureau : le double du confort de lecture. On plafonne et on
+   centre — le panneau cesse de « pendre » à gauche. */
+.vsec>p,.vsec>.acc-sub{max-width:70ch;margin-inline:auto}
+.vsec .vp-fear-a,.vsec .vp-card p{text-align:left}
+@media(max-width:620px){
+  .vsec p{text-align:left}
+  .vp-hero{padding:28px 20px 26px}
+}
+@media(prefers-reduced-motion:reduce){
+  .vp-card,.vp-tool,.vp-tab{transition:none}
+  .vp-card:hover,.vp-tool:hover,.vp-tab:hover{transform:none}
+}
+
+/* ═══ 6. La couche « Éditorial Lumineux » (--lx-*) en version sombre ═══
+   Elle est posée plus haut (≈ l.4541) et repeint TOUT le portail visiteur en
+   ivoire, avec des !important. Sans ce bloc, basculer les tokens de base ne
+   change rien au visiteur : c'est l'ivoire qui gagnait.
+   ⚠️ Ce bloc doit rester APRÈS le :root des --lx-* dans le fichier. */
+:root[data-theme="dark"]{
+  --lx-paper:#0A1024; --lx-paper-2:#131C36;
+  /* --lx-ink reste un FOND (bouton plein, pilule de nav active). On le
+     REMONTE au lieu de l'éclaircir en texte : sur un fond quasi noir, le
+     navy d'origine devenait un bouton invisible. */
+  --lx-ink:#24345F;
+  --lx-ink-2:#AEBAD4; --lx-ink-3:#8492B0;
+  --lx-cobalt:#6FA8FF; --lx-cobalt-soft:#16244A;
+  --lx-gold:#FFC93C;
+  --lx-line:1px solid rgba(233,237,247,.12);
+  --lx-shadow:0 1px 2px rgba(0,0,0,.5), 0 16px 40px rgba(0,0,0,.45);
+  --lx-shadow-lg:0 2px 4px rgba(0,0,0,.5), 0 28px 64px rgba(0,0,0,.6);
+  /* .acc-ess-c s'écrit var(--bg1,#fff) et --bg1 n'existe nulle part : les
+     cartes de l'accueil retombaient sur le blanc du repli. */
+  --bg1:#131C36;
+}
+
+/* --lx-ink sert AUSSI de couleur de TEXTE à trois endroits. Là il faut
+   l'encre claire, pas le fond remonté. */
+:root[data-theme="dark"] #VISITOR .vsec-title,
+:root[data-theme="dark"] #VISITOR .vsec-title-hero,
+:root[data-theme="dark"] #VISITOR .btn.bo,
+:root[data-theme="dark"] #VISITOR .vplan-price{ color:var(--ink) !important; }
+
+:root[data-theme="dark"] #VISITOR .vnav{ background:rgba(10,16,36,.86) !important; }
+:root[data-theme="dark"] .vftabs{ background:rgba(10,16,36,.86); border-color:rgba(233,237,247,.10); }
+:root[data-theme="dark"] #VISITOR .vnav-btn:hover{ background:rgba(233,237,247,.07); }
+:root[data-theme="dark"] #VISITOR .vnav-btn.on{ color:#FFF !important; }
+:root[data-theme="dark"] #VISITOR .btn.bo{ border-color:rgba(233,237,247,.22) !important; }
+:root[data-theme="dark"] #VISITOR .btn.bo:hover{ background:rgba(233,237,247,.06) !important; }
+:root[data-theme="dark"] #VISITOR .fi{ background:var(--sur2) !important; }
+:root[data-theme="dark"] .vpanel{ border-color:rgba(233,237,247,.10); }
+
+/* ═══ 7. Le chrome visiteur (nav + barre utilitaire) ═══════════════════
+   Ces règles-là repeignent la navigation en navy AVEC !important (l.5504 et
+   l.6014) parce qu'en clair les pilules vivent sur ivoire. En sombre il faut
+   exactement l'inverse, donc mêmes armes : spécificité supérieure + !important. */
+:root[data-theme="dark"] #VISITOR .vnav-btn:not(.on){ color:var(--ink) !important; }
+:root[data-theme="dark"] #VISITOR .vnav-btn:not(.on) svg,
+:root[data-theme="dark"] #VISITOR .vnav-btn:not(.on) svg *{ stroke:var(--ink) !important; color:var(--ink) !important; }
+:root[data-theme="dark"] #VISITOR .vnav-btn:not(.on) .v-ico{ color:var(--ink) !important; }
+:root[data-theme="dark"] #VISITOR .vnav-btn.on{ color:#FFF !important; }
+
+:root[data-theme="dark"] #VISITOR .vnav #vLoginBtns{ background:rgba(10,16,36,.97); }
+:root[data-theme="dark"] #VISITOR .vnav #vLoginBtns div{ color:var(--ink) !important; }
+:root[data-theme="dark"] #VISITOR .vnav #vLoginBtns .btn{
+  color:var(--ink) !important;
+  background:rgba(233,237,247,.09) !important;
+  border:1px solid rgba(233,237,247,.18) !important;
+}
+/* Les onglets ronds compacts (mobile) : fond opaque obligatoire, sinon le
+   libellé passe sous l'icône — on garde l'opacité, on inverse la teinte. */
+:root[data-theme="dark"] #VISITOR .vnav #vNavUtils > .btn,
+:root[data-theme="dark"] .vftab.is-ico{
+  background:#1B2440 !important; color:var(--ink) !important;
+  border-color:rgba(233,237,247,.16) !important;
+}
+
+/* Menus déroulants de la nav */
+:root[data-theme="dark"] .vnav-dropdown button{ color:var(--ink); }
+:root[data-theme="dark"] .vnav-dropdown button:hover{ background:rgba(233,237,247,.07); }
+:root[data-theme="dark"] .vnav-dd-sub{ color:var(--ink4); }
+
+/* Le lien d'évitement (skip link) devient visible au focus sur fond sombre */
+:root[data-theme="dark"] .skip-link{ background:var(--sur); color:var(--ink); }
+
+/* ═══ 8. Derniers textes sombres repérés à la mesure ═══════════════════
+   Trouvés en calculant le rapport de contraste réel dans le navigateur, pas
+   en relisant le CSS : ces trois-là tiennent leur couleur d'une classe, les
+   suivants d'un style en ligne. Méthode de contrôle : voir STATE.md. */
+:root[data-theme="dark"] .acc-news-item .tx{ color:var(--ink3); }
+:root[data-theme="dark"] .acc-news-cta{ color:var(--ink) !important; }
+:root[data-theme="dark"] .vlit-banner__title{ color:var(--ink); }
+
+/* Bruns et ocres de texte (encadrés « extrait », citations éditoriales) */
+:root[data-theme="dark"] [style*="color:#473F2A"],
+:root[data-theme="dark"] [style*="color:#473f2a"],
+:root[data-theme="dark"] [style*="color:#5B5337"],
+:root[data-theme="dark"] [style*="color:#5b5337"],
+:root[data-theme="dark"] [style*="color:#6b5e52"],
+:root[data-theme="dark"] [style*="color:#6B5E52"],
+:root[data-theme="dark"] [style*="color:#856404"],
+:root[data-theme="dark"] [style*="color:#92400E"],
+:root[data-theme="dark"] [style*="color:#92400e"]{ color:#E8C27A !important; }
+
+/* Sur-titres calculés en color-mix() : le mélange avec du blanc les rend
+   pâles en clair, illisibles en sombre. On repasse à la teinte pure, éclaircie.
+   La règle générique attrape les variantes non recensées ; les trois règles
+   suivantes rendent leur couleur d'origine aux cas connus. */
+:root[data-theme="dark"] [style*="color:color-mix"]{ color:var(--ink3) !important; }
+:root[data-theme="dark"] [style*="color:color-mix(in srgb,#F59E0B"]{ color:#FBBF24 !important; }
+:root[data-theme="dark"] [style*="color:color-mix(in srgb,#C8961A"]{ color:#E8C27A !important; }
+:root[data-theme="dark"] [style*="color:color-mix(in srgb,#6C56A6"]{ color:#B49DE8 !important; }
+
+/* ═══ 9. Les deux rampes de gris ══════════════════════════════════════
+   Le projet en compte DEUX en plus des tokens --ds-x : --neutral-x (l.89)
+   et la rampe --n / --o / --vert / --viol (l.6372, dupliquée dans
+   assets/veritas-pages.css). Elles sont utilisées comme une échelle de sens
+   (50 = fond pâle … 900 = texte foncé), donc on ne les « assombrit » pas :
+   on les RETOURNE bout à bout. 50 devient la surface la plus profonde,
+   900 l'encre la plus claire — tout code qui écrit var(--n50) en fond et
+   var(--n800) en texte continue de marcher sans être touché.
+   `:root[data-theme="dark"]` (0,2,0) bat `:root` (0,1,0) : l'ordre des
+   fichiers n'a pas d'importance, y compris face à veritas-pages.css. */
+:root[data-theme="dark"]{
+  --neutral-0:#0A1024;  --neutral-50:#131C36; --neutral-100:#18223F;
+  --neutral-200:#263355; --neutral-300:#35446B; --neutral-400:#6F7E9E;
+  --neutral-500:#8492B0; --neutral-600:#AEBAD4; --neutral-700:#D2DAEA;
+  --neutral-800:#E9EDF7; --neutral-900:#F4F7FD;
+
+  --n50:#131C36; --n100:#18223F; --n200:#263355; --n300:#35446B;
+  --n400:#6F7E9E; --n500:#8492B0; --n600:#AEBAD4; --n700:#D2DAEA;
+  --n800:#E9EDF7; --n900:#F2F5FC; --n950:#FFFFFF;
+
+  /* La rampe or ne se retourne PAS : l'or est la couleur de marque, il doit
+     rester or dans les deux thèmes. Seuls ses fonds pâles descendent. */
+  --o50:#241C0A; --o100:#3A2E10; --o200:#5E4A16; --o300:#8A6E1E;
+
+  --vert-s:#0E3227; --vert-t:#17604A; --vert-f:#34D399;
+  --viol-s:#2A2350; --viol-t:#453A78; --viol-f:#B49DE8;
+}
+
+/* ═══ 10. Boutique et Espace parents ══════════════════════════════════
+   Ces deux pages ont leur propre famille de composants, écrite en couleurs
+   fixes. Les pastilles (badges MINESEC, aperçu, vert « parents ») sont
+   VOLONTAIREMENT laissées telles quelles : fond coloré + encre navy forment
+   déjà une paire cohérente, les toucher les casserait. */
+:root[data-theme="dark"] .vbook-title,
+:root[data-theme="dark"] .vbook-rating-num,
+:root[data-theme="dark"] .vprod-title,
+:root[data-theme="dark"] .acc-pill,
+:root[data-theme="dark"] .tt,
+:root[data-theme="dark"] .vfx-cta{ color:var(--ink); }
+
+:root[data-theme="dark"] .vbook-btn{
+  background:var(--sur2); color:var(--ink); border-color:var(--ds-border);
+}
+:root[data-theme="dark"] .vprod-card{ background:var(--sur); }
+:root[data-theme="dark"] .vp-fear-q{ background:var(--sur2); color:var(--ink); }
+:root[data-theme="dark"] .vp-fear-a{ color:var(--ink3); }
+:root[data-theme="dark"] .vp-tool{
+  background:var(--sur); color:var(--ink); border-color:var(--ds-border);
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   BOUTIQUE — PICTOGRAMMES ET CARTES
+   ─────────────────────────────────────────────────────────────────────
+   Les notes en étoiles étaient écrites avec les caractères ★ et ☆. Leur
+   dessin dépend de la police installée : Android, Windows et iOS n'en
+   donnent pas la même forme, et plusieurs les rendent en émoji couleur —
+   auquel cas l'étoile s'affiche jaune vif quoi qu'on demande en CSS,
+   hors charte. Le pictogramme du sprite a le même tracé partout et prend
+   la couleur qu'on lui donne.
+   ══════════════════════════════════════════════════════════════════════ */
+.vt-star{width:15px;height:15px;flex:none;vertical-align:-.15em;margin:0 .5px;
+  fill:none;stroke:var(--n200);stroke-width:1.8;stroke-linejoin:round}
+.vt-star.on{fill:var(--o400);stroke:var(--o500)}
+.vbook-stars,.book-stars{display:inline-flex;align-items:center;gap:1px;line-height:1}
+.star .vt-star{fill:var(--o400);stroke:var(--o500)}
+.star-off .vt-star{fill:none;stroke:var(--n200)}
+
+/* saisie d'une note : cinq étoiles cliquables, cible tactile suffisante */
+.vt-star-pick{display:inline-flex;align-items:center;justify-content:center;
+  width:34px;height:34px;cursor:pointer;border-radius:var(--r-sm);
+  transition:transform .2s var(--e-out),background .2s}
+.vt-star-pick .vt-star{width:24px;height:24px}
+.vt-star-pick:hover{transform:scale(1.14);background:var(--o50)}
+
+/* ── Pastilles « promotion » et « meilleure vente » ───────────────────
+   Elles portaient un 🔥 : la flamme émoji est rouge-orange sur toutes les
+   plateformes et jurait avec le rouge de la pastille. Le pictogramme
+   hérite maintenant de la couleur du texte. */
+.vprod-discount .i,.vplan-promo .i,.vprod-cta .i,
+.vbook-btn .i,.book-order-btn .i{width:14px;height:14px;vertical-align:-.16em;margin-right:.3em}
+.vprod-discount,.vplan-promo{display:inline-flex;align-items:center;gap:2px}
+
+/* ── Cartes livre : relief et survol cohérents avec le reste du site ── */
+.vbook-card{
+  border-radius:var(--r-lg);
+  box-shadow:var(--sh-1);
+  transition:transform .42s var(--e-out),box-shadow .42s var(--e-out);
+}
+.vbook-card:hover{transform:translateY(-6px);box-shadow:var(--sh-2)}
+.vbook-btn{border-radius:var(--r-sm);font-family:'Plus Jakarta Sans','Inter',system-ui,sans-serif}
+.vbook-btn.btn-buy{background:var(--g-navy);color:#fff;border:none}
+.vbook-btn.btn-buy:hover{background:var(--g-navy);filter:brightness(1.12)}
+.book-order-btn{border-radius:var(--r-sm);background:var(--g-gold);color:var(--n800);
+  border:none;font-weight:800}
+
+@media(prefers-reduced-motion:reduce){
+  .vbook-card,.vt-star-pick{transition:none}
+  .vbook-card:hover,.vt-star-pick:hover{transform:none}
+}
+
+/* ═══ 11. Deux derniers écarts propres au thème sombre ═══════════════
+   Repérés en comparant les mesures clair/sombre : tout le reste des textes
+   pâles de la boutique et du e-learning est déjà pâle EN CLAIR (défauts
+   préexistants, hors sujet ici). Ces deux-là ne le sont qu'en sombre. */
+:root[data-theme="dark"] .vprod-cat{ color:#8FB0FF; }
+:root[data-theme="dark"] .lx-catcard-count{ color:var(--ink3); }
+
+/* ═══ 12. Titres de cartes et gris foncés résiduels ═══════════════════
+   `.sc-body h4` est déclaré DEUX fois dans ce fichier : une fois en
+   var(--ink), une fois en dur. C'est la version en dur qui gagnait, donc les
+   titres des cartes de la boutique restaient navy sur navy. */
+:root[data-theme="dark"] .sc-body h3,
+:root[data-theme="dark"] .sc-body h4,
+:root[data-theme="dark"] .sc-body h5,
+:root[data-theme="dark"] .rc h3, :root[data-theme="dark"] .rc h4,
+:root[data-theme="dark"] .nc h3, :root[data-theme="dark"] .nc h4{ color:var(--ink); }
+
+/* Gris très foncés utilisés comme couleur de texte (Tailwind-like) */
+:root[data-theme="dark"] [style*="color:#1F2937"],
+:root[data-theme="dark"] [style*="color:#1f2937"],
+:root[data-theme="dark"] [style*="color:#111827"],
+:root[data-theme="dark"] [style*="color:#0F172A"],
+:root[data-theme="dark"] [style*="color:#0f172a"],
+:root[data-theme="dark"] [style*="color:#334155"],
+:root[data-theme="dark"] [style*="color:#1E293B"],
+:root[data-theme="dark"] [style*="color:#1e293b"],
+:root[data-theme="dark"] [style*="color:#222"],
+:root[data-theme="dark"] [style*="color:#333"],
+:root[data-theme="dark"] [style*="color:#003"]:not([style*="background:#FFC93C"]):not([style*="background:var(--gold)"]):not([style*="background:#ffcc00"]):not([style*="background:#FFCC00"]){ color:var(--ink) !important; }
+
+/* Un dernier fond pâle en ligne, rencontré côté e-learning */
+:root[data-theme="dark"] [style*="background:#F6F8FC"],
+:root[data-theme="dark"] [style*="background:#f6f8fc"],
+:root[data-theme="dark"] [style*="background:#FCFBF8"],
+:root[data-theme="dark"] [style*="background:#fcfbf8"]{ background:var(--sur2) !important; }
+
+/* Un fond OR posé en ligne garde SON encre navy : la règle 3d, qui éclaircit
+   les textes navy, ne sait pas distinguer #FFCC00 de #FFC93C. On répare ici
+   plutôt que d'allonger encore sa chaîne de :not(). */
+:root[data-theme="dark"] [style*="background:#FFCC00"]:not([style*="color:#fff"]),
+:root[data-theme="dark"] [style*="background:#ffcc00"]:not([style*="color:#fff"]),
+:root[data-theme="dark"] [style*="background:#FFC93C"]:not([style*="color:#fff"]),
+:root[data-theme="dark"] [style*="background:var(--gold)"]:not([style*="color:#fff"]){
+  color:#142554 !important;
+}
+
+/* Titres des cartes « Espace parents » (déclarés en dur, comme .sc-body h4) */
+:root[data-theme="dark"] .vp-card h3,
+:root[data-theme="dark"] .vp-card h4,
+:root[data-theme="dark"] .vp-card h5{ color:var(--ink); }
+
+/* Icône posée en préfixe d'un titre par vtIconize() */
+.vt-ico-pre{display:inline-flex;align-items:center;margin-right:.4em;vertical-align:-.14em}
+.vt-ico-pre .i{width:1.05em;height:1.05em;margin:0}
+.sbic .i,.sci .i{width:1.15em;height:1.15em;margin:0}
+.sci{display:inline-flex;align-items:center;justify-content:center}
+/* …et leurs enfants : le fond or est souvent porté par le conteneur, pas par
+   le texte lui-même (cas du badge « MoMo » de la boutique). */
+:root[data-theme="dark"] [style*="background:#FFCC00"] *:not([style*="color:#fff"]),
+:root[data-theme="dark"] [style*="background:#ffcc00"] *:not([style*="color:#fff"]),
+:root[data-theme="dark"] [style*="background:#FFC93C"] *:not([style*="color:#fff"]),
+:root[data-theme="dark"] [style*="background:var(--gold)"] *:not([style*="color:#fff"]){
+  color:#142554 !important;
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════
+   v1.16b — CORRECTIFS D'INTERFACE SIGNALÉS À L'USAGE
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Panier / langue / thème recouvraient les entrées de menu ───────
+   Mesuré à 654 px de large : la barre de navigation passe à l'horizontale
+   (@media max-width:899px), ses liens occupent 1 289 px pour 654 px
+   disponibles — elle défile donc. Or #vNavUtils est en position:sticky À
+   L'INTÉRIEUR de cette barre défilante, sans fond ni z-index : les liens
+   glissent DESSOUS et s'y superposent. Relevé exact des collisions :
+     Panier   ↔ « Orientation »
+     Langue   ↔ « Orientation » et « Rechercher »
+     Thème    ↔ « Rechercher »
+   Le correctif ne déplace rien : il donne à la zone d'outils un fond
+   opaque, un plan supérieur et un dégradé de fuite à sa gauche. Les liens
+   passent alors visiblement DERRIÈRE, comme sous une barre d'outils — ce
+   qui est le comportement attendu d'un élément collant. */
+#VISITOR #vNavUtils, #vNavUtils{
+  position:sticky;
+  right:0;
+  z-index:6;
+  flex:0 0 auto;
+  align-items:center;
+  gap:6px;
+  padding:0 2px 0 14px;
+  margin-left:auto;
+  background:linear-gradient(90deg,rgba(13,27,62,0) 0%,var(--n900) 16%,var(--n900) 100%);
+}
+/* En rail vertical (≥ 900 px), la zone reprend un fond plein et se centre. */
+@media (min-width:900px){
+  #VISITOR #vNavUtils, #vNavUtils{
+    position:static;
+    justify-content:center;
+    margin:10px auto 4px;
+    padding:8px 6px;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.10);
+    border-radius:var(--r-full);
+    width:max-content;
+  }
+}
+
+/* ── 2. Le bouton clair/sombre était illisible ─────────────────────────
+   Il était posé en #1B2440 sur le rail #142554 : deux navys à 1,2:1 de
+   contraste — invisible en pratique. Les trois boutons d'outils prennent
+   un fond translucide clair, un liseré, et l'or au survol. */
+#VISITOR #vNavUtils>button, #VISITOR #vNavUtils>.btn, #vNavUtils .btn.icon-only{
+  width:38px;height:38px;min-width:38px;min-height:38px;
+  padding:0;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.20);
+  border-radius:var(--r-full);
+  color:#fff;
+  transition:transform .25s var(--e-out),background .2s,border-color .2s;
+}
+#VISITOR #vNavUtils>button:hover, #VISITOR #vNavUtils>.btn:hover{
+  background:rgba(255,201,60,.22);
+  border-color:var(--o400);
+  color:var(--o300);
+  transform:translateY(-2px);
+}
+#VISITOR #vNavUtils>button svg, #VISITOR #vNavUtils>.btn svg, #VISITOR #vNavUtils .i{width:18px;height:18px;margin:0}
+/* le compteur du panier ne doit pas être avalé par le bouton rond */
+#vNavUtils .btn .badge,#vNavUtils .btn sup{
+  position:absolute;top:-4px;right:-4px;z-index:2;
+  background:var(--o400);color:var(--n900);
+  border-radius:var(--r-full);font-size:10px;font-weight:800;
+  min-width:17px;height:17px;display:inline-flex;align-items:center;justify-content:center;
+}
+
+/* ── 3. Le bouton WhatsApp flottant n'apparaissait pas ─────────────────
+   Sa visibilité reposait entièrement sur `animation:vfxFabIn … both`, dont
+   l'image de départ est `opacity:0`. Si l'animation ne démarre pas — onglet
+   ouvert en arrière-plan, rendu différé, moteur qui gèle les animations —
+   le bouton reste à zéro et ne revient jamais. Un élément ne doit jamais
+   devoir une animation pour exister : l'état de repos est VISIBLE, et
+   l'animation ne porte plus que l'entrée en scène. */
+.vfx-fab{
+  opacity:1;
+  animation:none;
+  padding:12px 20px 12px 14px;
+  gap:11px;
+  min-height:52px;
+}
+.vfx-fab.vfx-fab-in{animation:vfxFabPop .45s cubic-bezier(.16,1,.3,1)}
+@keyframes vfxFabPop{from{transform:scale(.72)}to{transform:scale(1)}}
+.vfx-fab .ic{width:28px;height:28px;background:#fff;color:#128C4A}
+.vfx-fab .ic .i{width:17px;height:17px;margin:0}
+.vfx-fab .tx{font-size:13px}
+.vfx-fab .tx small{font-size:10.5px}
+@media(prefers-reduced-motion:reduce){ .vfx-fab.vfx-fab-in{animation:none} }
+
+
+/* ── 1bis. Le fond de la zone d'outils doit ÊTRE celui de la barre ─────
+   Premier correctif incomplet : j'avais posé un dégradé navy, alors que la
+   barre visiteur est blanche (.vnav{background:#fff} l.1382 l'emporte sur
+   le dégradé navy de la l.778). Un bloc sombre apparaissait donc au bout
+   d'une barre claire. On passe par un jeton qui suit le thème : la zone
+   d'outils devient invisible en tant que bloc, et ne fait qu'occulter ce
+   qui défile dessous. */
+:root{ --vnav-bg:#FAF7F1; }
+:root[data-theme="dark"]{ --vnav-bg:#0D1A3D; }
+
+#VISITOR #vNavUtils, #vNavUtils{
+  background:linear-gradient(90deg,
+    rgba(250,247,241,0) 0%,
+    var(--vnav-bg) 18%,
+    var(--vnav-bg) 100%) !important;
+}
+@media (min-width:900px){
+  #VISITOR #vNavUtils, #vNavUtils{
+    background:rgba(20,37,84,.05) !important;
+    border:1px solid rgba(20,37,84,.12);
+  }
+  :root[data-theme="dark"] #VISITOR #vNavUtils{
+    background:rgba(255,255,255,.06) !important;
+    border-color:rgba(255,255,255,.12);
+  }
+}
+
+/* Le dernier lien de la barre restait prisonnier sous la zone d'outils :
+   on réserve sa largeur en fin de piste défilante. */
+@media (max-width:899px){
+  #VISITOR .vnav::after, .vnav::after{
+    content:"";flex:0 0 4px;
+  }
+  #VISITOR .vnav, .vnav{ scroll-padding-right:200px; }
+}
+
+/* ── 2bis. Contraste du bouton clair/sombre en thème CLAIR ─────────────
+   Relevé : fond #EDF0F6 sur une barre #FFFFFF — 1,1:1. On passe à un fond
+   teinté navy et une icône navy pleine : 8,6:1 sur blanc. */
+#VISITOR #vNavUtils>button, #VISITOR #vNavUtils>.btn{
+  background:rgba(20,37,84,.07) !important;
+  border:1px solid rgba(20,37,84,.16) !important;
+  color:var(--n800) !important;
+}
+#VISITOR #vNavUtils>button:hover, #VISITOR #vNavUtils>.btn:hover{
+  background:rgba(255,201,60,.30) !important;
+  border-color:var(--o500) !important;
+  color:var(--n900) !important;
+}
+:root[data-theme="dark"] #VISITOR #vNavUtils>button,
+:root[data-theme="dark"] #VISITOR #vNavUtils>.btn{
+  background:rgba(255,255,255,.13) !important;
+  border-color:rgba(255,255,255,.22) !important;
+  color:#fff !important;
+}
+/* Le bouton de thème porte deux icônes superposées (soleil / lune) : sans
+   taille explicite, l'une des deux débordait de son bouton rond. */
+#VISITOR #vNavUtils .vth-ico{width:17px;height:17px}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.15.6 — CHECKLIST D'ACTIVATION · TENDANCES · ÉCHÉANCIERS
+   Tout est écrit en tokens (--sur, --ink, --gold…) : ces trois blocs suivent
+   donc le thème clair et le thème sombre sans une seule règle en double.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Checklist ─────────────────────────────────────────────────────── */
+.vchk{ border-left:4px solid var(--gold); }
+.vchk-h{ font-family:'Plus Jakarta Sans',Montserrat,sans-serif; font-size:16px;
+  font-weight:800; color:var(--ink); }
+.vchk-sub{ font-size:12px; color:var(--ink3); margin-top:2px; }
+.vchk-bar{ height:7px; border-radius:99px; background:var(--bg2); overflow:hidden; margin-bottom:14px; }
+.vchk-fill{ height:100%; border-radius:99px;
+  background:linear-gradient(90deg,var(--gold),#F5B800); transition:width .5s cubic-bezier(.22,.61,.36,1); }
+.vchk-list{ display:flex; flex-direction:column; gap:2px; }
+.vchk-row{ display:flex; align-items:center; gap:11px; padding:9px 4px;
+  border-bottom:1px solid var(--bg2); }
+.vchk-row:last-child{ border-bottom:none; }
+.vchk-n{ flex-shrink:0; width:24px; height:24px; border-radius:50%;
+  display:inline-flex; align-items:center; justify-content:center;
+  font-family:Montserrat,sans-serif; font-size:11px; font-weight:800;
+  background:var(--gp); color:var(--gold2); border:1.5px solid var(--gb); }
+.vchk-ok{ background:var(--grb); color:var(--gr); border-color:var(--grd); }
+.vchk-t{ font-size:13.5px; font-weight:700; color:var(--ink); }
+.vchk-s{ font-size:11.5px; color:var(--ink3); margin-top:1px; }
+/* Les étapes franchies restent visibles mais s'effacent : elles rassurent
+   sans reprendre l'attention due à ce qui reste à faire. */
+.vchk-done{ opacity:.45; }
+.vchk-done .vchk-t{ text-decoration:line-through; text-decoration-thickness:1px; }
+.vchk-cta{ flex-shrink:0; white-space:nowrap; }
+@media (max-width:640px){
+  .vchk-row{ flex-wrap:wrap; }
+  .vchk-cta{ margin-left:35px; }
+}
+@media (prefers-reduced-motion:reduce){ .vchk-fill{ transition:none } }
+
+/* ─── Tendances sur les cartes chiffrées ────────────────────────────── */
+.vkpi-trend{ display:flex; align-items:center; gap:7px; flex-wrap:wrap;
+  margin-top:8px; padding-top:7px; border-top:1px solid var(--bg2); }
+.vspark{ flex-shrink:0; display:block; }
+.vtrend{ font-family:Montserrat,sans-serif; font-size:10.5px; font-weight:800;
+  letter-spacing:.2px; white-space:nowrap; }
+.vtrend-up{ color:var(--gr); }
+.vtrend-down{ color:var(--re); }
+.vtrend-flat, .vtrend-new{ color:var(--ink4); font-weight:700; }
+/* La note explique CE QUE couvre la courbe quand elle ne couvre pas tout le
+   chiffre affiché. Sans elle, la micro-courbe ment par omission. */
+.vkpi-note{ flex-basis:100%; font-size:10px; line-height:1.35; color:var(--ink4); font-style:italic; }
+
+/* ─── Échéanciers ───────────────────────────────────────────────────── */
+.ech-prev{ background:var(--sur2); border:1px solid var(--ds-border,#E6EAF2);
+  border-radius:12px; padding:13px 15px; margin-top:6px; }
+.ech-prev-h{ font-family:'Plus Jakarta Sans',Montserrat,sans-serif;
+  font-size:14px; font-weight:800; color:var(--ink); }
+.ech-prev-s{ font-size:11.5px; color:var(--ink3); margin-top:3px; }
+.ech-prev-n{ font-size:11px; color:var(--ink4); font-style:italic; margin-top:8px; line-height:1.4; }
+.ech-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.ech-chip{ font-family:'JetBrains Mono',ui-monospace,monospace; font-size:11px;
+  font-weight:700; padding:4px 9px; border-radius:99px;
+  background:var(--gp); color:var(--gold2); border:1px solid var(--gb); }
+.ech-chip-more{ background:transparent; color:var(--ink4); border-color:var(--ds-border,#E6EAF2); }
+.ech-card{ border-left:4px solid var(--gold); }
+
+/* ── Boutique : pictogrammes issus du remplacement des emojis ──────────
+   Ces classes remplacent des `font-size:28px` qui dimensionnaient un
+   emoji. Un <svg> sans dimensions retomberait sur 300×150 px : ces règles
+   sont indispensables, pas décoratives. */
+.bq-pic{display:flex;align-items:center;justify-content:center;
+  width:46px;height:46px;margin:0 auto 8px;border-radius:14px;
+  background:var(--o50);color:var(--o600);border:1px solid var(--o200)}
+.bq-pic .i{width:24px;height:24px;margin:0}
+.vb-stk{width:13px;height:13px;vertical-align:-.15em;margin:0}
+.vbook-adopt{display:flex;align-items:center;gap:5px;
+  font-size:11px;color:#B45309;font-weight:700;margin:2px 0 4px}
+.vbook-adopt .i{width:13px;height:13px;margin:0}
+.vbook-cover-emoji .i{width:44px;height:44px;margin:0;opacity:.9}
+.vbook-minesec-badge{display:inline-flex;align-items:center;gap:4px}
+.vbook-minesec-badge .i{width:12px;height:12px;margin:0}
+.vprod-thumb-emoji .i{width:26px;height:26px;margin:0}
+.review-vf{display:inline-flex;align-items:center;gap:4px}
+.review-vf .i{width:13px;height:13px;margin:0}
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.15.6 — Checklist d'activation, tendances, échéanciers
+   Tout est écrit en tokens (var(--sur), var(--ink)…) : ces composants
+   basculent donc en sombre sans une seule règle [data-theme] dédiée. C'est
+   la règle à suivre pour tout nouveau composant.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Checklist ── */
+.vchk{ border-left:4px solid var(--gold); }
+.vchk-h{ font-family:var(--font-display,'Montserrat',sans-serif); font-size:16px; font-weight:800; color:var(--ink); }
+.vchk-sub{ font-size:12px; color:var(--ink3); margin-top:2px; }
+.vchk-bar{ height:6px; border-radius:99px; background:var(--bg2); overflow:hidden; margin-bottom:12px; }
+.vchk-fill{ height:100%; border-radius:99px; background:linear-gradient(90deg,var(--gold),var(--gold2)); transition:width .5s cubic-bezier(.22,.61,.36,1); }
+.vchk-list{ display:flex; flex-direction:column; gap:2px; }
+.vchk-row{ display:flex; align-items:center; gap:11px; padding:9px 2px; border-bottom:1px solid var(--bg2); }
+.vchk-row:last-child{ border-bottom:none; }
+.vchk-n{ flex-shrink:0; width:23px; height:23px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-mono,monospace); font-size:11px; font-weight:800;
+  background:var(--gp); color:var(--gold2); border:1.5px solid var(--gb); }
+.vchk-ok{ background:var(--grb); color:var(--gr); border-color:var(--grd); }
+.vchk-t{ font-size:13px; font-weight:700; color:var(--ink); }
+.vchk-s{ font-size:11.5px; color:var(--ink3); margin-top:1px; line-height:1.4; }
+.vchk-done .vchk-t{ color:var(--ink4); text-decoration:line-through; text-decoration-thickness:1px; }
+.vchk-cta{ flex-shrink:0; white-space:nowrap; }
+@media (max-width:560px){
+  .vchk-row{ flex-wrap:wrap; }
+  .vchk-cta{ margin-left:34px; }
+}
+
+/* ── Tendances sur les cartes chiffrées ── */
+.vkpi-trend{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; margin-top:7px;
+  padding-top:7px; border-top:1px solid var(--bg2); }
+.vspark{ flex-shrink:0; display:block; overflow:visible; }
+.vtrend{ font-size:10.5px; font-weight:700; letter-spacing:.1px; white-space:nowrap; }
+.vtrend-up{ color:var(--gr); }
+.vtrend-down{ color:var(--re); }
+.vtrend-flat, .vtrend-new{ color:var(--ink4); }
+.vkpi-note{ font-size:10px; color:var(--ink4); line-height:1.35; flex-basis:100%; }
+
+/* ── Échéanciers ── */
+.ech-prev{ background:var(--sur2); border:1px solid var(--ds-border,#E6EAF2); border-radius:12px; padding:13px; margin-top:6px; }
+.ech-prev-h{ font-family:var(--font-display,'Montserrat',sans-serif); font-size:14px; font-weight:800; color:var(--ink); }
+.ech-prev-s{ font-size:11.5px; color:var(--ink3); margin-top:3px; }
+.ech-prev-n{ font-size:11px; color:var(--ink4); margin-top:8px; line-height:1.45; }
+.ech-chips{ display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; }
+.ech-chip{ font-family:var(--font-mono,monospace); font-size:11px; font-weight:700;
+  background:var(--gp); color:var(--gold2); border:1px solid var(--gb); border-radius:99px; padding:3px 10px; }
+.ech-chip-more{ background:var(--bg2); color:var(--ink4); border-color:var(--bg3); }
+.ech-card{ border-left:4px solid var(--gold); }

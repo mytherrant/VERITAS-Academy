@@ -44,8 +44,111 @@ if (!defined('MTN_TARGET_ENV')) define('MTN_TARGET_ENV',       'sandbox');
 if (!defined('MTN_API_BASE')) define('MTN_API_BASE',         'https://sandbox.momodeveloper.mtn.com');
 
 // ============================================================
+// 🔀 QUEL FOURNISSEUR ENCAISSE ? (CamerPay ou CamPay)
+// ============================================================
+// VÉRITAS sait parler aux deux. Cette constante tranche :
+//   'auto'     → CamerPay s'il est configuré, sinon CamPay  (défaut)
+//   'camerpay' → forcer CamerPay
+//   'campay'   → forcer CamPay (le jour où le compte bancaire entreprise existe)
+// Le frontend interroge api/payment_camerpay.php?action=config et suit la
+// réponse : aucune case à cocher à retoucher dans l'application.
+if (!defined('PAY_PROVIDER')) define('PAY_PROVIDER', 'auto');
+
+// ============================================================
+// 🇨🇲 CAMERPAY — passerelle camerounaise (Orange Money, MTN MoMo, carte, PayPal)
+// ============================================================
+// ⭐ VOIE DE LANCEMENT : contrairement à CamPay, CamerPay N'EXIGE PAS de compte
+//    bancaire d'entreprise ni d'historique d'activité. On teste en sandbox sans
+//    aucun document, et le premier niveau de KYC demande simplement la CNI du
+//    gérant OU un extrait RCCM. Les retraits partent vers un Mobile Money au
+//    nom de l'entreprise OU DU GÉRANT.
+//
+//    Plafonds de volume mensuel selon les documents fournis (doc /docs/kyc-tiers) :
+//      KYC-1  CNI du gérant OU RCCM ................  200 000 FCFA / mois
+//      KYC-2  identité + attestation NIU ........... 1 000 000 FCFA / mois
+//      KYC-3  RCCM + NIU + justificatif de siège ... illimité
+//    Un dépassement renvoie HTTP 402 avec le document exact à fournir.
+//
+//    Tarifs (relevés sur le tableau de bord CamerPay, août 2026) :
+//      Démarreur     0 XAF/mois + 3 %   — plafonné à 100 transactions/mois
+//      Entreprise  500 XAF/mois + 1,5 % — transactions ILLIMITÉES  ← plan de VÉRITAS
+//      Pro       2 500 XAF/mois + 1 %   — transactions illimitées
+//    Retrait vers Mobile Money : ~2 % (Orange) / ~3,75 % (MTN), minimum
+//    1 000 FCFA, versé sous 24 à 72 h ouvrées.
+//
+// 👉 1. Créez le compte sur https://camerpay.biz/register (gratuit, sans KYC)
+// 👉 2. Dashboard → /client/api → « Générer un nouveau token »
+//       ⚠️ Le jeton ne s'affiche QU'UNE FOIS : copiez-le tout de suite.
+// 👉 3. Dans le même écran, relevez le « callback secret » (clé des webhooks)
+// 👉 4. Déclarez l'URL de webhook :
+//       https://veritas-school.com/api/payment_camerpay.php?action=notify
+// 👉 5. Testez en sandbox, puis passez CAMERPAY_MODE sur 'live' après le KYC.
+
+if (!defined('CAMERPAY_TOKEN')) define('CAMERPAY_TOKEN', 'À_REMPLIR_TOKEN_BEARER_CAMERPAY');
+
+// 🔐 Secret de signature des webhooks (dashboard → API & webhooks). OBLIGATOIRE.
+// CamerPay signe en HMAC-SHA256 la chaîne "uuid|invoice_id|status|amount".
+// ⚠️ FAIL-CLOSED : laissé vide, TOUTES les notifications sont rejetées (401) —
+//    on ne sait pas d'où elles viennent, donc on ne les croit pas. Aucun
+//    paiement n'est perdu pour autant (le suivi du payeur et la réconciliation
+//    du tableau de bord relisent le statut chez CamerPay), mais l'activation
+//    cesse d'être instantanée. L'écran ⚙️ Paramètres → Paiements API l'affiche
+//    en clair tant que ce secret manque.
+if (!defined('CAMERPAY_CALLBACK_SECRET')) define('CAMERPAY_CALLBACK_SECRET', '');
+
+// Mode du COMPTE CamerPay. Attention : l'URL de l'API est la même dans les deux
+// cas (contrairement à CamPay) — c'est le compte qui décide. Cette constante
+// sert donc à AFFICHER la vérité à l'administrateur, pas à la provoquer.
+//   'sandbox' → paiements simulés, aucun argent réel (avant KYC)
+//   'live'    → encaissement réel (après validation du KYC)
+if (!defined('CAMERPAY_MODE')) define('CAMERPAY_MODE', 'sandbox');   // ← 'live' après le KYC
+
+if (!defined('CAMERPAY_API_BASE')) define('CAMERPAY_API_BASE', 'https://camerpay.biz');
+
+// Taux de commission de VOTRE plan, utilisé pour ESTIMER le net encaissé
+// (CamerPay ne renvoie pas la commission transaction par transaction).
+//   0.03 = Démarreur · 0.015 = Entreprise · 0.01 = Pro
+// VÉRITAS est au plan ENTREPRISE (500 XAF/mois) → 1,5 %.
+if (!defined('CAMERPAY_FEE_RATE')) define('CAMERPAY_FEE_RATE', 0.015);
+
+// 🔑 JETON PUBLIC D'INITIATION — self-service client (action=init uniquement).
+//    Même doctrine que CAMPAY_PUBLIC_INIT : faible privilège, ne peut QUE créer
+//    une demande de paiement. Vide = seul l'admin peut encaisser.
+//    ⚠️ JAMAIS la même valeur que PAY_API_SECRET / API_SECRET / CAMERPAY_TOKEN.
+//    Générez-le p. ex. avec : 'pub_' . bin2hex(random_bytes(16))
+//
+//    ℹ️ RIEN À RECOPIER dans l'application : la sonde ?action=config transmet
+//    ce jeton au navigateur du client. C'est indispensable — un visiteur n'a ni
+//    le secret de synchronisation ni la base complète, il ne pouvait donc PAS
+//    payer tant que le jeton ne vivait que dans l'écran d'administration.
+//    Ce jeton est public par construction (tout navigateur qui paie le détient) :
+//    ses vraies barrières sont les trois lignes qui suivent — origine autorisée,
+//    débit par IP, plafond de montant. Il ne donne accès à AUCUNE lecture.
+if (!defined('CAMERPAY_PUBLIC_INIT')) define('CAMERPAY_PUBLIC_INIT', '');
+if (!defined('CAMERPAY_INIT_ALLOWED_ORIGINS')) define('CAMERPAY_INIT_ALLOWED_ORIGINS', 'https://veritas-school.com,https://www.veritas-school.com,https://localhost,capacitor://localhost');
+if (!defined('CAMERPAY_INIT_RATE_PER_HOUR')) define('CAMERPAY_INIT_RATE_PER_HOUR', 10);
+// Coupe-circuit GLOBAL : initiations en libre-service par jour, toutes adresses
+// confondues. Le plan Entreprise étant illimité en transactions, ce plafond ne
+// protège pas le quota du fournisseur mais le SERVEUR : chaque initiation crée
+// un fichier d'état que le tableau de bord relit ensuite en entier. 0 = désactivé.
+if (!defined('CAMERPAY_INIT_MAX_PER_DAY')) define('CAMERPAY_INIT_MAX_PER_DAY', 500);
+
+// 🔒 Plafonds de sécurité VÉRITAS (indépendants de ceux de CamerPay).
+//    Encaissement en libre-service, versement unitaire, total d'un lot.
+if (!defined('CAMERPAY_COLLECT_MAX')) define('CAMERPAY_COLLECT_MAX', 500000);
+if (!defined('CAMERPAY_PAYOUT_MAX')) define('CAMERPAY_PAYOUT_MAX', 200000);
+// CamerPay plafonne lui-même un lot à 2 000 000 FCFA (limite BEAC) et
+// 100 bénéficiaires : on ne peut être que plus prudent, jamais plus permissif.
+if (!defined('CAMERPAY_MASSPAYOUT_MAX')) define('CAMERPAY_MASSPAYOUT_MAX', 2000000);
+
+// ============================================================
 // 💚 CAMPAY — agrégateur MTN MoMo + Orange Money (Cameroun)
 // ============================================================
+// ⏸️ MIS DE CÔTÉ (août 2026) — CamPay exige un compte bancaire d'entreprise et
+//    un historique d'activité, impossibles en phase de lancement. Le code de
+//    api/payment_campay.php reste ENTIER et fonctionnel : posez les identifiants
+//    ci-dessous et passez PAY_PROVIDER sur 'campay' pour rebasculer.
+//
 // ⭐ VOIE RECOMMANDÉE POUR DÉMARRER : un seul contrat couvre MTN **et** Orange,
 //    compte ouvert en quelques jours, et les VERSEMENTS partenaires (auteurs,
 //    parrains) sont inclus — ce que ni Orange WebPayment ni MTN Collection seuls

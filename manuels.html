@@ -11,41 +11,10 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://veritas-school.com/manuels.html">
 <link rel="canonical" href="https://veritas-school.com/manuels.html">
-<style>
-:root{--navy:#142554;--navy2:#1d3168;--gold:#FFC93C;--ink:#14213d;--gris:#5b6478;--bg:#f6f8fc;--card:#fff;--line:#e3e9f5}
-*{box-sizing:border-box}
-body{margin:0;font-family:'Segoe UI',Calibri,system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.55}
-a{color:var(--navy);text-decoration:none}
-header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:2.4rem 1rem 2rem;text-align:center}
-header .badge{display:inline-block;border:1.5px solid var(--gold);color:var(--gold);border-radius:999px;padding:.2rem .9rem;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.9rem}
-header h1{margin:.2rem auto;max-width:900px;font-size:1.9rem}
-header p{margin:.6rem auto 0;max-width:720px;color:#d9e2f5}
-.wrap{max-width:1000px;margin:0 auto;padding:1.6rem 1rem 3rem}
-.intro{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem;margin:-2.2rem auto 1.8rem;max-width:900px;box-shadow:0 10px 30px rgba(20,37,84,.08)}
-h2{color:var(--navy);border-bottom:2px solid var(--gold);padding-bottom:.35rem;margin-top:2.2rem}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;margin-top:1rem}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1rem 1.1rem;box-shadow:0 4px 14px rgba(20,37,84,.05)}
-.card h3{margin:.1rem 0 .7rem;color:var(--navy);font-size:1.15rem}
-.card a.dl{display:flex;align-items:center;gap:.5rem;padding:.5rem .7rem;border:1px solid var(--line);border-radius:9px;margin:.4rem 0;font-weight:600;transition:.15s}
-.card a.dl:hover{border-color:var(--gold);background:#fffdf5}
-.card a.dl .t{font-size:.78rem;color:var(--gris);font-weight:500}
-.pill{background:var(--navy);color:#fff;border-radius:8px;font-size:.7rem;padding:.15rem .5rem}
-.cta{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-top:1rem}
-.cta a{background:var(--navy);color:#fff;border-radius:12px;padding:1.1rem;font-weight:700;display:block;transition:.15s}
-.cta a:hover{background:var(--navy2)}
-.cta a small{display:block;font-weight:400;color:var(--gold);margin-top:.3rem}
-footer{text-align:center;color:var(--gris);font-size:.85rem;padding:2rem 1rem;border-top:1px solid var(--line)}
-.note{font-size:.85rem;color:var(--gris);margin-top:.5rem}
-/* Icônes vectorielles (sprite /assets/veritas-icons.svg) — sans elles, un <svg>
-   sans dimensions retomberait sur la taille par défaut de 300×150 px. */
-.i{width:1.15em;height:1.15em;flex:none;vertical-align:-.19em;margin-right:.4em}
-h2 .i{color:var(--gold)}
-.card a.dl>span:first-child{display:inline-flex;align-items:center}
-.cta a .i{color:var(--gold)}
-</style>
+<link rel="stylesheet" href="/assets/veritas-pages.css">
 </head>
 <body>
-<header>
+<header class="top">
   <span class="badge">Centre VÉRITAS · Espace collaboratif</span>
   <h1>Espace Manuels — Corrigés, ressources & exercices</h1>
   <p>Les corrigés des <strong>livrets d'activités</strong> et des <strong>bords (cahiers)</strong>, des <strong>exercices supplémentaires</strong> et des <strong>pistes de recherche</strong> pour accompagner chaque manuel, de la 6ᵉ à la Terminale.</p>
@@ -55,7 +24,7 @@ h2 .i{color:var(--gold)}
     <strong><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book-open"/></svg>Comment utiliser cet espace ?</strong> Chaque niveau propose le corrigé de son <em>livret</em> (activités de l'élève) et de son <em>bord</em> (cahier complet). Consulte-les <strong>après avoir cherché par toi-même</strong>. Pour aller plus loin, utilise les <strong>exercices interactifs</strong> et l'assistant <strong>Prof. Ambassa</strong> sur la plateforme e-learning.
   </div>
 
-  <h2><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book"/></svg>Corrigés par niveau</h2>
+  <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book"/></svg>Corrigés par niveau</h2>
   <p class="note">Corrigés <strong>en ligne</strong>, séquence par séquence : le corrigé de chaque exercice, masqué tant que tu ne cliques pas. Les énoncés, eux, restent dans le cahier : le cahier se vend, les corrigés sont offerts.</p>
   <div class="grid" id="niveaux">
     <div class="card"><h3>Classe de 6ᵉ</h3>
@@ -75,7 +44,7 @@ h2 .i{color:var(--gold)}
   </div>
   <p class="note">Astuce enseignants : ces corrigés servent aussi de barème indicatif. Les corrigés des tâches d'intégration comportent une production modèle, un commentaire et un barème. Les leçons, les textes d'auteur et la conduite de classe restent dans le cahier imprimé et dans le <strong>Guide pédagogique</strong>.</p>
 
-  <h2><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-flask"/></svg>Séries scientifiques &amp; techniques (Cahiers EST)</h2>
+  <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-flask"/></svg>Séries scientifiques &amp; techniques (Cahiers EST)</h2>
   <p class="note">Cahiers de français dédiés aux séries scientifiques et techniques (C-D-E-TI, STT, industriel). Corrigés en ligne des <strong>évaluations</strong> (langue R.A.I., résumés-modèles, plans de dissertation et de discussion) et des <strong>tâches d'intégration</strong>.</p>
   <div class="grid">
     <div class="card"><h3>2ⁿᵈᵉ S&amp;T <small class="t">Capitoline · Tartuffe</small></h3>
@@ -87,7 +56,7 @@ h2 .i{color:var(--gold)}
   </div>
   <p class="note">Toutes classes confondues : <a href="corriges/"><strong>l'index complet des corrigés</strong></a> (4 212 exercices corrigés, 6ᵉ → Terminale).</p>
 
-  <h2><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-compass"/></svg>La Constellation VÉRITAS</h2>
+  <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-compass"/></svg>La Constellation VÉRITAS</h2>
   <p class="note">Le cahier papier est au centre ; autour, tout ce qui le prolonge — corrigés en ligne, quiz, écoute audio et lecture facilitée, Guide pédagogique réservé aux enseignants, et le QR <strong>VÉRITAS Flash</strong> qui mène du cahier aux ressources de la séquence.</p>
   <div class="cta">
     <a href="constellation.html"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-compass"/></svg>Voir la Constellation<small>La carte de tout l'écosystème</small></a>
@@ -97,17 +66,18 @@ h2 .i{color:var(--gold)}
     <a href="adopter/"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-clipboard-check"/></svg>Enseignant : adopter le cahier<small>Spécimen, code, Guide pédagogique</small></a>
   </div>
 
-  <h2><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg>Pour aller plus loin</h2>
+  <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-arrow-right"/></svg>Pour aller plus loin</h2>
   <div class="cta">
     <a href="https://veritas-school.com"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-graduation"/></svg>Plateforme e-learning<small>Cours, épreuves, jeux éducatifs</small></a>
     <a href="flash/"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-scan"/></svg>VÉRITAS Flash<small>Scanner le QR de sa séquence</small></a>
     <a href="https://veritas-school.com"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-message"/></svg>Prof. Ambassa (IA)<small>Poser une question, approfondir une recherche</small></a>
   </div>
 
-  <h2>ℹ️ À propos</h2>
+  <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-lightbulb"/></svg>À propos</h2>
   <p>Cet espace accompagne les manuels de français du <strong>Centre VÉRITAS</strong> (programme MINESEC, Cameroun). Il est mis à jour régulièrement. Pour toute question : <a href="https://veritas-school.com">veritas-school.com</a>.</p>
 </div>
-<footer>© <span id="y"></span> Centre VÉRITAS · Mythe Errant — Douala, Cameroun · <a href="https://veritas-school.com">veritas-school.com</a></footer>
+<footer class="bot">© <span id="y"></span> Centre VÉRITAS · Mythe Errant — Douala, Cameroun · <a href="https://veritas-school.com">veritas-school.com</a></footer>
 <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+<script src="/assets/veritas-ui.js" defer></script>
 </body>
 </html>

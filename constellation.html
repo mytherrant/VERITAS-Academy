@@ -34,79 +34,89 @@
   </div>
 
   <div class="constel">
+    <div class="rings" aria-hidden="true"><i></i><i></i></div>
+    <svg class="constel-ring" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><g transform="rotate(-90 50 50)"><circle class="seg t-vert" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-0.80"/><circle class="seg t-cyan" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-9.89"/><circle class="seg t-viol" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-18.98"/><circle class="seg t-roug" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-28.07"/><circle class="seg t-cyan" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-37.16"/><circle class="seg t-ambr" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-46.25"/><circle class="seg t-ambr" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-55.35"/><circle class="seg t-ambr" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-64.44"/><circle class="seg t-vert" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-73.53"/><circle class="seg t-viol" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-82.62"/><circle class="seg t-viol" cx="50" cy="50" r="15.915" pathLength="100" stroke-dasharray="7.49 92.51" stroke-dashoffset="-91.71"/></g><path class="lien" d="M50.00 29.50 Q51.51 24.54 50.00 19.50"/><path class="lien" d="M61.08 32.75 Q65.03 29.40 66.49 24.34"/><path class="lien" d="M68.65 41.48 Q73.78 40.80 77.74 37.33"/><path class="lien" d="M70.29 52.92 Q74.98 55.12 80.19 54.34"/><path class="lien" d="M65.49 63.42 Q68.25 67.81 73.05 69.97"/><path class="lien" d="M55.78 69.67 Q55.72 74.85 58.59 79.26"/><path class="lien" d="M44.22 69.67 Q41.38 74.00 41.41 79.26"/><path class="lien" d="M34.51 63.42 Q29.77 65.53 26.95 69.97"/><path class="lien" d="M29.71 52.92 Q24.59 52.13 19.81 54.34"/><path class="lien" d="M31.35 41.48 Q27.47 38.05 22.26 37.33"/><path class="lien" d="M38.92 32.75 Q37.51 27.77 33.51 24.34"/></svg>
+    <div class="constel-fig">
     <div class="hub">
       <span class="disc"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-notebook"/></svg></span>
-      <b>Le cahier VÉRITAS</b>
-      <span>Papier · 6ᵉ → Terminale · séries A, scientifiques &amp; techniques</span>
+      <strong class="hub-n">11</strong>
+      <b>ressources</b>
+      <span>autour du cahier VÉRITAS</span>
     </div>
     <div class="orbit">
-      <a href="/corriges/">
-        <span class="ic" style="background:rgba(18,138,111,.25)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-check"/></svg></span>
+      <a class="orb t-vert" href="/corriges/" style="--a:0deg">
+        <span class="ic t-vert"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-check"/></svg></span>
         <b>Les corrigés en ligne</b>
         <small>4 212 exercices corrigés, séquence par séquence</small>
         <span class="tag libre">Libre</span>
       </a>
-      <a href="/eleve/">
-        <span class="ic" style="background:rgba(110,70,192,.3)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-backpack"/></svg></span>
+      <a class="orb t-cyan" href="/eleve/" style="--a:32.7deg">
+        <span class="ic t-cyan"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-backpack"/></svg></span>
         <b>L'espace élève</b>
         <small>Le portail unique de toutes tes ressources</small>
         <span class="tag libre">Libre</span>
       </a>
-      <a href="/flash/">
-        <span class="ic" style="background:rgba(255,201,60,.25)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-scan"/></svg></span>
+      <a class="orb t-viol" href="/flash/" style="--a:65.5deg">
+        <span class="ic t-viol"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-scan"/></svg></span>
         <b>VÉRITAS Flash</b>
         <small>Scanne le QR de ta séquence, la ressource s'ouvre</small>
         <span class="tag libre">Libre</span>
       </a>
-      <a href="/eleve/#quiz">
-        <span class="ic" style="background:rgba(194,59,82,.28)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-target"/></svg></span>
+      <a class="orb t-roug" href="/eleve/#quiz" style="--a:98.2deg">
+        <span class="ic t-roug"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-target"/></svg></span>
         <b>Quiz &amp; jeux</b>
         <small>Se tester à la fin de chaque leçon</small>
         <span class="tag libre">Libre</span>
       </a>
-      <a href="/eleve/#accessible">
-        <span class="ic" style="background:rgba(29,49,104,.55)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-type"/></svg></span>
+      <a class="orb t-cyan" href="/eleve/#accessible" style="--a:130.9deg">
+        <span class="ic t-cyan"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-type"/></svg></span>
         <b>Lecture facilitée &amp; audio</b>
         <small>Confort de lecture (dys) et écoute des corrigés</small>
         <span class="tag libre">Libre</span>
       </a>
-      <a href="/enseignant/">
-        <span class="ic" style="background:rgba(255,201,60,.25)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-teacher"/></svg></span>
+      <a class="orb t-ambr" href="/enseignant/" style="--a:163.6deg">
+        <span class="ic t-ambr"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-teacher"/></svg></span>
         <b>L'espace enseignant</b>
         <small>Guide pédagogique, grilles, progressions, épreuves</small>
         <span class="tag reserve">Réservé</span>
       </a>
-      <a href="/adopter/">
-        <span class="ic" style="background:rgba(18,138,111,.25)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-clipboard-check"/></svg></span>
+      <a class="orb t-ambr" href="/adopter/" style="--a:196.4deg">
+        <span class="ic t-ambr"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-clipboard-check"/></svg></span>
         <b>Adopter les cahiers</b>
         <small>Spécimen, code enseignant, commande d'établissement</small>
         <span class="tag reserve">Enseignants</span>
       </a>
-      <a href="/enseignant/#guide">
-        <span class="ic" style="background:rgba(224,168,0,.3)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book"/></svg></span>
+      <a class="orb t-ambr" href="/enseignant/#guide" style="--a:229.1deg">
+        <span class="ic t-ambr"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-book"/></svg></span>
         <b>Le Guide pédagogique</b>
         <small>Le livre du professeur : conduite de classe + corrigés complets</small>
         <span class="tag reserve">Réservé</span>
       </a>
-      <a href="https://veritas-school.com">
-        <span class="ic" style="background:rgba(18,138,111,.25)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-graduation"/></svg></span>
+      <a class="orb t-vert" href="https://veritas-school.com" style="--a:261.8deg">
+        <span class="ic t-vert"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-graduation"/></svg></span>
         <b>Le cahier numérique</b>
         <small>Lecture en ligne sécurisée, page à page</small>
         <span class="tag bientot">Sur la plateforme</span>
       </a>
-      <a href="/parcours/">
-        <span class="ic" style="background:rgba(224,168,0,.3)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-gauge"/></svg></span>
+      <a class="orb t-viol" href="/parcours/" style="--a:294.5deg">
+        <span class="ic t-viol"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-gauge"/></svg></span>
         <b>Mes notes &amp; mon orientation</b>
         <small>Comment se calcule ma moyenne, quelle série choisir</small>
         <span class="tag libre">Libre</span>
       </a>
-      <a href="https://veritas-school.com">
-        <span class="ic" style="background:rgba(110,70,192,.3)"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-bot"/></svg></span>
+      <a class="orb t-viol" href="https://veritas-school.com" style="--a:327.3deg">
+        <span class="ic t-viol"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-bot"/></svg></span>
         <b>Prof. Ambassa</b>
         <small>L'assistant qui explique un corrigé qu'on n'a pas compris</small>
         <span class="tag libre">Libre</span>
       </a>
     </div>
+    </div>
+    <ul class="constel-leg">
+      <li><i class="lib"></i>7 ressources libres</li>
+      <li><i class="res"></i>3 réservées aux enseignants</li>
+      <li><i class="pla"></i>1 sur la plateforme</li>
+    </ul>
   </div>
 
   <h2 class="sec"><svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#i-search"/></svg>La Constellation à la loupe</h2>

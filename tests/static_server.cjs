@@ -43,8 +43,19 @@ http.createServer((req, res) => {
 
   let urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
   if (urlPath === '/') urlPath = '/VERITAS_v1.2.html';
-  const file = path.normalize(path.join(ROOT, urlPath));
+  let file = path.normalize(path.join(ROOT, urlPath));
   if (!file.startsWith(ROOT)) { res.writeHead(403); res.end(); return; }
+  // DirectoryIndex, comme Apache/LiteSpeed en production. Sans cela, /niveaux/,
+  // /corriges/ et /outils/ renvoyaient 404 EN LOCAL SEULEMENT — un faux bug très
+  // coûteux : on cherche la panne dans le lien alors qu'elle est dans le serveur
+  // de dev. Le site en ligne, lui, sert index.html tout seul.
+  try {
+    if (fs.statSync(file).isDirectory()) {
+      const idx = path.join(file, 'index.html');
+      if (fs.existsSync(idx)) file = idx;
+      else { res.writeHead(404); res.end('404 — dossier sans index.html'); return; }
+    }
+  } catch (e) { /* inexistant : le readFile ci-dessous répondra 404 */ }
   fs.readFile(file, (err, data) => {
     if (err) { res.writeHead(404); res.end('404'); return; }
     res.writeHead(200, {

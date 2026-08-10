@@ -284,6 +284,8 @@ jobs:
             api/payment_orange.php \
             api/payment_mtn.php \
             api/payment_campay.php \
+            api/payment_camerpay.php \
+            api/_pay_funds_lib.php \
             api/ia_proxy.php \
             api/rag.php \
             api/student_data.php \
@@ -297,7 +299,18 @@ jobs:
             api/teacher_access.php \
             api/secure_pdf.php \
             api/demandes.php; do
-            [ -f "$f" ] && cp "$f" deploy/api/ && echo "  ✓ $f"
+            # ⚠️ ÉCHEC BRUYANT, et pas un « [ -f ] && cp » silencieux.
+            #    Quatre incidents ont la même cause : un endpoint écrit, ajouté
+            #    à cette liste, mais jamais « git add » — la CI ne le voit donc
+            #    pas, la garde saute sans un mot, et la fonctionnalité est
+            #    déclarée livrée alors que le fichier n'existe pas en ligne
+            #    (404 masqués par le cache LiteSpeed). Un chemin listé ici est
+            #    une PROMESSE : s'il manque, le déploiement s'arrête.
+            if [ ! -f "$f" ]; then
+              echo "::error title=Endpoint manquant::$f est listé pour le déploiement mais absent du dépôt (oubli de 'git add' ?). Déploiement ANNULÉ — sinon l'API partirait incomplète et les 404 seraient invisibles."
+              exit 1
+            fi
+            cp "$f" deploy/api/ && echo "  ✓ $f"
           done
 
           # ── Backend VÉRITAS Campus (api/campus/) ────────────────

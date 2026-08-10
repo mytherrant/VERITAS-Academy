@@ -635,19 +635,77 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.15.4">
+<link rel="preload" as="script" href="/app.js?v=1.15.6">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.15.4" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.15.4"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.15.6" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.15.6"></noscript>
 <!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
      app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
-<link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.15.4" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/veritas-motion.css?v=1.15.4"></noscript>
+<link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.15.6" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/veritas-motion.css?v=1.15.6"></noscript>
+
+<!-- ════════ v1.15.6 — THÈME CLAIR / SOMBRE ════════
+     Ce script est INLINE et SYNCHRONE, tout en haut : il doit poser
+     data-theme AVANT la première peinture. Le mettre dans app.js (3,4 Mo,
+     defer) ferait clignoter un écran clair pendant ~2 s avant de virer au
+     sombre — pire que pas de mode sombre du tout.
+     Trois états stockés dans localStorage.vrt_theme :
+       'auto' (défaut) → suit le réglage du téléphone / de l'OS
+       'light' | 'dark' → choix explicite, il gagne sur l'OS.
+     Le CSS, lui, ne connaît que light/dark : « auto » est résolu ici. -->
+<script>
+(function(){
+  var KEY='vrt_theme', mq=null;
+  try{ mq=window.matchMedia('(prefers-color-scheme:dark)'); }catch(e){}
+  function pref(){ try{ return localStorage.getItem(KEY)||'auto'; }catch(e){ return 'auto'; } }
+  function resolve(p){ return p==='auto' ? ((mq&&mq.matches)?'dark':'light') : p; }
+  function paint(){
+    var eff=resolve(pref());
+    document.documentElement.setAttribute('data-theme',eff);
+    // La barre d'adresse mobile suit le thème (sinon liseré blanc en sombre).
+    var m=document.querySelector('meta[name="theme-color"]');
+    if(!m){ m=document.createElement('meta'); m.name='theme-color'; document.head.appendChild(m); }
+    m.setAttribute('content', eff==='dark' ? '#0A1024' : '#142554');
+    // Les boutons de bascule peuvent exister avant ou après ce script.
+    var btns=document.querySelectorAll('#vThemeBtn,[data-theme-toggle]');
+    for(var i=0;i<btns.length;i++){
+      btns[i].setAttribute('aria-pressed', eff==='dark'?'true':'false');
+      btns[i].title = (eff==='dark'?'Thème sombre':'Thème clair')
+        + (pref()==='auto'?' (réglage du système)':'') + ' — cliquer pour changer';
+    }
+    return eff;
+  }
+  // Bascule explicite : on épingle l'inverse de ce qui est affiché. Repasser
+  // en 'auto' se fait par un clic long / clic droit (voir plus bas).
+  window.vrtToggleTheme=function(){
+    var next = resolve(pref())==='dark' ? 'light' : 'dark';
+    try{ localStorage.setItem(KEY,next); }catch(e){}
+    paint();
+    try{ if(typeof toast==='function') toast(next==='dark'?'Thème sombre activé':'Thème clair activé','ok'); }catch(e){}
+    return next;
+  };
+  window.vrtThemeAuto=function(){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    var eff=paint();
+    try{ if(typeof toast==='function') toast('Thème réglé sur le système ('+(eff==='dark'?'sombre':'clair')+')','ok'); }catch(e){}
+  };
+  window.vrtThemeCurrent=function(){ return resolve(pref()); };
+  // À appeler après tout rendu qui (re)crée un bouton de bascule — la barre
+  // latérale admin est réécrite à chaque navigation, ses attributs ARIA
+  // repartiraient sinon d'un état figé au chargement de la page.
+  window.vrtThemeSync=paint;
+  // Tant que l'utilisateur n'a rien épinglé, on suit l'OS en direct.
+  if(mq&&mq.addEventListener) mq.addEventListener('change',function(){ if(pref()==='auto') paint(); });
+  else if(mq&&mq.addListener) mq.addListener(function(){ if(pref()==='auto') paint(); });
+  paint();
+  document.addEventListener('DOMContentLoaded',paint);
+})();
+</script>
 </head>
 <body>
 <!-- ════════ A11Y v2 : Skip link pour lecteurs d'écran ════════ -->
@@ -797,6 +855,9 @@ if('MutationObserver' in window){
     <!-- Boutons utilitaires v2.2 (panier, langue, contact) -->
     <button class="btn sm icon-only" title="Panier" aria-label="Panier" onclick="openCart()" style="background:rgba(255,201,60,.15);color:#FFC93C;border:1px solid rgba(255,201,60,.3);padding:6px 10px;position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg><span id="cartBadge" style="position:absolute;top:-3px;right:-3px;background:#AE5353;color:#fff;border-radius:50%;font-size:9px;width:16px;height:16px;display:none;align-items:center;justify-content:center;font-weight:700" aria-live="polite"></span></button>
     <button class="btn sm icon-only" title="Changer la langue / Switch language" aria-label="Changer la langue" onclick="mLanguageMenu()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"/></svg></button>
+    <!-- Bascule clair/sombre. Le clic droit (ou l'appui long) rend la main au
+         réglage du système — sans occuper un 3ᵉ état dans le cycle du clic. -->
+    <button class="btn sm icon-only" id="vThemeBtn" data-theme-toggle aria-pressed="false" aria-label="Basculer entre thème clair et sombre" onclick="vrtToggleTheme()" oncontextmenu="vrtThemeAuto();return false" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg class="vth-ico vth-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sun"/></svg><svg class="vth-ico vth-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-moon"/></svg></button>
     <button class="btn sm icon-only" title="Nous contacter" aria-label="Contact" onclick="vShowSec('contact',null)" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-mail"/></svg></button>
     <span style="width:1px;height:20px;background:rgba(255,255,255,.15);margin:0 4px"></span>
     <button class="btn sm" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,255,255,.3);font-weight:600" onclick="showRegisterForm()"><svg class="vico" width="16" height="16" aria-hidden="true"><use href="#lc-sparkles"/></svg>S'inscrire</button>
@@ -893,7 +954,7 @@ function _vChromeCompact(){
     }
     // Déplacement par identité, pas par position : les :nth-of-type d'app.css
     // ont déjà prouvé qu'un index se décale dès qu'un bouton bouge.
-    ['button[onclick*="openCart"]','button[onclick*="mLanguageMenu"]',
+    ['button[onclick*="openCart"]','button[onclick*="mLanguageMenu"]','#vThemeBtn',
      'button[onclick*="vShowSec(\'contact\'"]','#vSyncDot','#adminAccessPoint']
     .forEach(function(sel){
       var el=document.querySelector('#vLoginBtns '+sel)||document.querySelector('.vlogin-bar '+sel);
@@ -1032,11 +1093,26 @@ setTimeout(_vAmbassaFab,3000);
   <!-- 1. Accueil -->
   <button class="vnav-btn on" onclick="vShowSec('presentation',this)" style="color:#142554;background:linear-gradient(135deg,rgba(20,37,84,.10),rgba(20,37,84,.03));border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Accueil"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-home"/></svg> Accueil</button>
 
+  <!-- 2. Boutique — DEUXIÈME position (v1.16, demande Jacques) : c est le
+       point le plus rentable du site. Une entrée de vente ne se met pas
+       derrière quatre entrées de contenu gratuit. -->
+  <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#856404;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Boutique"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-shop"/></svg> Boutique</button>
+
   <!-- 2. E-Learning (entrée directe — service phare) -->
   <button class="vnav-btn" onclick="vShowSec('elearning',this)" style="background:linear-gradient(135deg,rgba(60,141,255,.15),rgba(60,141,255,.05));color:#1D5FBF;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="E-Learning"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-book"/></svg> E-Learning</button>
 
-  <!-- 3. Boutique (entrée directe — service phare) -->
-  <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#856404;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Boutique"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-shop"/></svg> Boutique</button>
+  <!-- 2bis. Mes matières (v1.16) — l'apprenant n'avait AUCUNE entrée vers le
+       programme de sa classe : les pages « Programmes par classe » (notions et
+       œuvres, 6ᵉ → Tˡᵉ) existaient mais n'étaient liées que depuis les pages
+       statiques, jamais depuis l'application. Un élève qui ouvre le site pour
+       savoir ce qu'il doit réviser ne trouvait rien. -->
+  <button class="vnav-btn" onclick="location.href='/niveaux/'" style="background:linear-gradient(135deg,rgba(11,106,136,.16),rgba(11,106,136,.05));color:#0B6A88;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Mes matières — programme de ma classe"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-clipboard"/></svg> Mes matières</button>
+
+  <!-- 2ter. Mon parcours (v1.16) — il était SIXIÈME et dernier item du menu
+       déroulant « Communauté ». Autant dire invisible : aucun élève ne va
+       chercher sa propre progression sous « Communauté ». Remonté ici. -->
+  <button class="vnav-btn" onclick="mMonParcours()" style="background:linear-gradient(135deg,rgba(91,55,167,.16),rgba(91,55,167,.05));color:#5B37A7;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Mon parcours — progression, XP, niveau"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-trending"/></svg> Mon parcours</button>
+
 
   <!-- 3bis. Espace Parents (v1.13) — entrée de premier niveau assumée : le parent
        est celui qui paie, et c'est le seul visiteur qui n'a aucune raison de
@@ -1197,11 +1273,11 @@ setTimeout(_vAmbassaFab,3000);
 <!-- Version des assets, partagée avec les modules chargés à la demande
      (chunks/*.js) pour qu'ils suivent le même cache que app.js. -->
 <script>window._VRT_ASSET_VER='1.15.3';</script>
-<script defer src="/app.js?v=1.15.4"></script>
+<script defer src="/app.js?v=1.15.6"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->
-<script defer src="/assets/veritas-motion.js?v=1.15.4"></script>
+<script defer src="/assets/veritas-motion.js?v=1.15.6"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>

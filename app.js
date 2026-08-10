@@ -2924,7 +2924,7 @@ function _purgeLocalBinaries(silent){
 }
 function gid(){return Math.random().toString(36).slice(2,10);}
 function today(){return new Date().toLocaleDateString('fr-FR');}
-function starsHtml(n){var h='';for(var i=1;i<=5;i++)h+=i<=Math.round(n)?'<span class="star">★</span>':'<span class="star-off">★</span>';return h;}
+function starsHtml(n){var h='';for(var i=1;i<=5;i++)h+=i<=Math.round(n)?'<span class="star">'+ICO('lc-star','i vt-star on')+'</span>':'<span class="star-off">'+ICO('lc-star','i vt-star')+'</span>';return h;}
 function getBookRating(bid){var rvs=(DB.bookReviews||[]).filter(function(r){return r.bid===bid;});if(!rvs.length)return{avg:0,count:0};var avg=rvs.reduce(function(s,r){return s+r.stars;},0)/rvs.length;return{avg:avg,count:rvs.length};}
 
 function fmt(n){return new Intl.NumberFormat('fr-FR').format(n)+' FCFA';}
@@ -2977,7 +2977,7 @@ function isEnseignant(){return SES?.type==='enseignant';}
 // ─── PORTAIL VISITEUR ────────────────────────────
 function visitorOrderProduct(title,price){
   const overlay=document.createElement('div');overlay.className='mov';
-  if(overlay)overlay.innerHTML='<div class="modal"><div class="mhd"><div><div class="mtt">🛒 Commander: '+title+'</div><div class="mst">'+fmt(price)+' FCFA</div></div><button class="mc" onclick="this.closest(\'.mov\').remove()">✕</button></div><div class="mb"><div class="fg2"><div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="vpNom" placeholder="Nom et prénom"></div><div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="vpTel" type="tel" placeholder="+237 6 XX XX XX XX"></div></div><div class="fg mt8"><span class="fl">Code promo (optionnel)</span><input class="fi" id="vpPromo" placeholder="ELEVE10" style="text-transform:uppercase"></div></div><div class="mf"><button class="btn bo" onclick="this.closest(\'.mov\').remove()">Annuler</button><button class="btn bi" onclick="confirmProductOrder(\'' + title.replace(/'/g,"") + '\','+price+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Commander</button></div></div>';
+  if(overlay)overlay.innerHTML='<div class="modal"><div class="mhd"><div><div class="mtt">'+ICO("lc-cart")+'Commander : '+title+'</div><div class="mst">'+fmt(price)+' FCFA</div></div><button class="mc" onclick="this.closest(\'.mov\').remove()">✕</button></div><div class="mb"><div class="fg2"><div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="vpNom" placeholder="Nom et prénom"></div><div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="vpTel" type="tel" placeholder="+237 6 XX XX XX XX"></div></div><div class="fg mt8"><span class="fl">Code promo (optionnel)</span><input class="fi" id="vpPromo" placeholder="ELEVE10" style="text-transform:uppercase"></div></div><div class="mf"><button class="btn bo" onclick="this.closest(\'.mov\').remove()">Annuler</button><button class="btn bi" onclick="confirmProductOrder(\'' + title.replace(/'/g,"") + '\','+price+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Commander</button></div></div>';
   document.body.appendChild(overlay);
 }
 function confirmProductOrder(title,price){
@@ -3017,7 +3017,7 @@ function visitorOrderBook(bid){
   if(b.stock<=0){toast('Ce manuel est en rupture de stock','warn');return;}
   const overlay=document.createElement('div');
   if(overlay)overlay.className='mov';
-  overlay.innerHTML=`<div class="modal"><div class="mhd"><div><div class="mtt">🛒 Commander: ${_esc(b.titre)}</div><div class="mst">${_esc(b.cls)} · ${_esc(b.auteur)} · ${fmt(b.prix)}</div></div><button class="mc" onclick="this.closest('.mov').remove()">✕</button></div>
+  overlay.innerHTML=`<div class="modal"><div class="mhd"><div><div class="mtt">${ICO('lc-cart')}Commander : ${_esc(b.titre)}</div><div class="mst">${_esc(b.cls)} · ${_esc(b.auteur)} · ${fmt(b.prix)}</div></div><button class="mc" onclick="this.closest('.mov').remove()">✕</button></div>
   <div class="mb">
     <div style="text-align:center;margin-bottom:16px"><div style="font-size:48px">${b.ico}</div><div class="mono bold" style="font-size:24px;color:var(--gold);margin-top:8px">${fmt(b.prix)}</div></div>
     <div class="ib ibt mb14"><span>📋</span><span>Remplissez ce formulaire pour réserver votre manuel. Nous vous contacterons pour confirmer.</span></div>
@@ -3212,6 +3212,12 @@ function viewBookDetail(bid){
   var author=(DB.authors||[]).find(function(a){return(a.books||[]).indexOf(bid)>-1;});
   var h='<div class="vsec">';
   h+='<button class="btn bo sm mb16" onclick="vShowSec(\'boutique\',document.querySelector(\'.vnav-btn[onclick*=&quot;boutique&quot;]\'))">← Retour à la boutique</button>';
+  // v1.16 — la fiche passe en deux colonnes : le contenu à gauche, le panneau
+  // d'achat COLLANT à droite. Il reste visible pendant toute la lecture, au
+  // lieu d'obliger à remonter pour retrouver le prix et le bouton.
+  h+='<div class="bkpage">';
+  h+=(typeof _bookBuyPanel==='function'?_bookBuyPanel(b,rt,rvs):'');
+  h+='<div class="bkpage-main">';
   h+='<div class="book-viewer"><div class="book-hero">';
   // Cover
   h+='<div style="display:flex;flex-direction:column;gap:10px;align-items:center">';
@@ -3231,12 +3237,12 @@ function viewBookDetail(bid){
   h+='<p style="font-size:13px;color:var(--ink2);line-height:1.8;margin:8px 0">'+(b.desc||'')+'</p>';
   // Price
   h+='<div class="book-price-box">';
-  if(b.ancienPrix)h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:14px;color:var(--ink4);text-decoration:line-through;text-decoration-color:#AE5353">'+fmt(b.ancienPrix)+'</span><span style="font-size:13px;font-weight:700;color:#fff;background:#AE5353;padding:2px 10px;border-radius:8px;box-shadow:0 2px 6px rgba(220,38,38,.25)">🔥 -'+Math.round((1-b.prix/b.ancienPrix)*100)+'%</span></div>';
+  if(b.ancienPrix)h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:14px;color:var(--ink4);text-decoration:line-through;text-decoration-color:#AE5353">'+fmt(b.ancienPrix)+'</span><span style="font-size:13px;font-weight:700;color:#fff;background:#AE5353;padding:2px 10px;border-radius:8px;box-shadow:0 2px 6px rgba(220,38,38,.25)">'+ICO("lc-flame")+'-'+Math.round((1-b.prix/b.ancienPrix)*100)+'%</span></div>';
   h+='<div class="book-price">'+fmt(b.prix)+'</div>';
   h+='<div style="margin-top:8px;padding:8px;background:var(--grb);border:1px solid var(--grd);border-radius:var(--r);font-size:13px;color:var(--gr)">🎓 Code <span class="mono bold" style="background:var(--gp);padding:1px 6px;border-radius:3px;color:var(--gold)">ELEVE10</span> = -10%</div>';
   h+='<div style="margin-top:8px"><div class="fl2 g6" style="align-items:stretch"><input class="fi" id="promoInput_'+bid+'" placeholder="Code promo" style="font-size:13px;padding:8px;text-transform:uppercase;flex:1"><button class="btn bgr2 sm" onclick="applyPromo(\''+bid+'\')">Appliquer</button></div><div id="promoResult_'+bid+'"></div></div>';
   h+='</div>';
-  if(b.stock>0)h+='<button class="book-order-btn mt12" onclick="visitorOrderBook(\''+bid+'\')">🛒 Commander (papier) — '+fmt(b.prix)+'</button>';
+  if(b.stock>0)h+='<button class="book-order-btn mt12" onclick="visitorOrderBook(\''+bid+'\')">'+ICO("lc-cart")+'Commander (papier) — '+fmt(b.prix)+'</button>';
   // v1.7 : LECTURE NUMÉRIQUE SÉCURISÉE — aperçu gratuit + achat débloque tout.
   // Visible quand le livre a été préparé (b.secureId/securePages) ou marqué digital.
   if(b.secureId||b.securePages||b.digital){
@@ -3248,7 +3254,7 @@ function viewBookDetail(bid){
   // Tabs
   h+='<div style="padding:16px 24px 24px"><div class="book-tabs">';
   h+='<div class="book-tab active" onclick="showBookTab(this,\'chap_'+bid+'\')">📋 Chapitres</div>';
-  h+='<div class="book-tab" onclick="showBookTab(this,\'prev_'+bid+'\')">👁 Extrait</div>';
+  h+='<div class="book-tab" onclick="showBookTab(this,\'prev_'+bid+'\')">'+ICO('i-eye')+'Extrait</div>';
   h+='<div class="book-tab" onclick="showBookTab(this,\'revs_'+bid+'\')">⭐ Avis ('+rvs.length+')</div>';
   h+='</div>';
   // Chapters tab
@@ -3302,13 +3308,13 @@ function viewBookDetail(bid){
       h+='<div class="review-card"><div class="review-hd"><div class="review-av">'+r.nom[0]+'</div><div><div class="review-nm">'+r.nom+'</div><div class="review-rl">'+r.role+'</div></div></div>';
       h+='<div>'+starsHtml(r.stars)+'</div>';
       h+='<div class="review-txt">&laquo; '+r.text+' &raquo;</div>';
-      h+='<div class="fl2 fic fsb"><span class="review-dt">'+r.date+'</span>'+(r.verified?'<span class="review-vf">✅ Achat vérifié</span>':'')+'</div></div>';
+      h+='<div class="fl2 fic fsb"><span class="review-dt">'+r.date+'</span>'+(r.verified?'<span class="review-vf">'+ICO('i-check')+'Achat vérifié</span>':'')+'</div></div>';
     });
   }else h+='<div class="empty"><div class="empty-ico">⭐</div>Aucun avis pour le moment</div>';
   // Add review form
   h+='<div style="margin-top:14px;padding:14px;border:1px solid var(--bg3);border-radius:var(--r2);background:var(--bg)">';
   h+='<div class="semi s mb8">✍️ Laisser un avis</div>';
-  h+='<div class="fl2 g6 mb8">'; for(var s=1;s<=5;s++)h+='<span style="font-size:24px;cursor:pointer" onclick="setReviewStars('+s+')" id="rs_'+s+'">★</span>'; h+='<span class="xs2 mut" id="rsLabel">Sélectionnez</span></div>';
+  h+='<div class="fl2 g6 mb8">'; for(var s=1;s<=5;s++)h+='<span class="vt-star-pick" onclick="setReviewStars('+s+')" id="rs_'+s+'">'+ICO('lc-star','i vt-star')+'</span>'; h+='<span class="xs2 mut" id="rsLabel">Sélectionnez</span></div>';
   h+='<input class="fi mb8" id="rvNom" placeholder="Votre nom"><input class="fi mb8" id="rvRole" placeholder="Rôle (Parent, Élève...)">';
   h+='<textarea class="fi mb8" id="rvText" rows="2" placeholder="Votre avis sur ce manuel..."></textarea>';
   h+='<button class="btn bi sm" onclick="submitReview(\''+bid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Publier l&#39;avis</button></div>';
@@ -3424,7 +3430,7 @@ function _showExtrait_text(bid){
   if(b.extrait){
     h+='<div style="background:var(--bg);border:var(--br);border-radius:var(--r2);padding:16px 18px;font-family:Libre Baskerville,serif;font-size:13px;line-height:2;color:var(--ink2);white-space:pre-line;max-height:42vh;overflow-y:auto;position:relative;scrollbar-width:thin">';
     h+=_esc(b.extrait);
-    h+='<div style="margin-top:16px;padding-top:12px;border-top:2px dashed var(--bg3);text-align:center;font-size:12px;color:var(--ink4);font-family:Poppins,sans-serif">📚 <strong>Fin de l\'extrait</strong> — Le manuel complet contient '+b.pages+' pages</div>';
+    h+='<div style="margin-top:16px;padding-top:12px;border-top:2px dashed var(--bg3);text-align:center;font-size:12px;color:var(--ink4);font-family:Plus Jakarta Sans,sans-serif">📚 <strong>Fin de l\'extrait</strong> — Le manuel complet contient '+b.pages+' pages</div>';
     h+='</div>';
   }
 
@@ -4749,7 +4755,7 @@ function vShowSec(sec,btn){
           <div style="height:90px;background:linear-gradient(160deg,${cc},${cc}cc);display:flex;align-items:center;justify-content:center;position:relative">
             <div style="font-size:36px;position:absolute;z-index:0">${b.ico}</div>${b.coverImg?'<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover;position:relative;z-index:1" onerror="this.style.display=\'none\'">':''}
             <div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#FFC93C;padding:1px 6px;border-radius:8px;font-size:11px;font-weight:700">${b.cls}</div>
-            ${hasExt?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(5,150,105,.9);color:#fff;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:700">👁 Extrait</div>':''}
+            ${hasExt?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(5,150,105,.9);color:#fff;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:700">'+ICO('i-eye')+'Extrait</div>':''}
           </div>
           <div style="padding:10px">
             <div style="font-size:13px;font-weight:700;line-height:1.2;margin-bottom:3px">${_esc(b.titre)}</div>
@@ -4797,11 +4803,11 @@ function vShowSec(sec,btn){
       h+='<div style="position:relative;z-index:1">';
       h+='<div style="font-size:11px;font-weight:800;color:#FFC93C;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;font-family:Montserrat,sans-serif">📚 Plateforme E-Learning</div>';
       h+='<div style="font-family:Montserrat,sans-serif;font-size:24px;font-weight:900;line-height:1.2;margin-bottom:8px">Apprenez à votre rythme</div>';
-      h+='<div style="font-family:Lora,Georgia,serif;font-size:13px;color:rgba(255,255,255,.78);line-height:1.7;font-style:italic;max-width:500px">Épreuves officielles, cours vidéos, fiches de révision — tout ce qu\'il faut pour réussir le BEPC et le BAC.</div>';
+      h+='<div style="font-family:Libre Baskerville,Georgia,serif;font-size:13px;color:rgba(255,255,255,.78);line-height:1.7;font-style:italic;max-width:500px">Épreuves officielles, cours vidéos, fiches de révision — tout ce qu\'il faut pour réussir le BEPC et le BAC.</div>';
       h+='<div style="display:flex;gap:20px;margin-top:16px;flex-wrap:wrap">';
-      h+='<div style="text-align:center"><div style="font-family:Lora,Georgia,serif;font-size:28px;font-weight:700;color:#FFC93C;line-height:1">'+el.contenus.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Ressources</div></div>';
-      h+='<div style="text-align:center"><div style="font-family:Lora,Georgia,serif;font-size:28px;font-weight:700;color:#A5F3FC;line-height:1">'+el.categories.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Catégories</div></div>';
-      h+='<div style="text-align:center"><div style="font-family:Lora,Georgia,serif;font-size:28px;font-weight:700;color:#FDE68A;line-height:1">'+(el.plans||[]).length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Packs</div></div>';
+      h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#FFC93C;line-height:1">'+el.contenus.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Ressources</div></div>';
+      h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#A5F3FC;line-height:1">'+el.categories.length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Catégories</div></div>';
+      h+='<div style="text-align:center"><div style="font-family:Libre Baskerville,Georgia,serif;font-size:28px;font-weight:700;color:#FDE68A;line-height:1">'+(el.plans||[]).length+'</div><div style="font-size:10px;color:rgba(255,255,255,.55)">Packs</div></div>';
       h+='</div>';
       // v1.4.2 : bouton PROFIL — l'apprenant déclare section/enseignement/classe
       h+='<div style="margin-top:14px"><button onclick="mLearnerProfile()" style="background:rgba(255,255,255,.12);color:#fff;border:1.5px solid rgba(255,201,60,.45);border-radius:24px;padding:9px 20px;font-size:12px;font-weight:700;cursor:pointer;font-family:Montserrat,sans-serif">🎯 '+(_lpEl&&_lpEl.cls?('Mon parcours : '+_esc(_lpEl.cls)+(_lpEl.sys==='en'?' · Anglophone':'')+(_lpEl.ens==='tech'?' · Technique':'')):'Personnaliser mon parcours')+'</button></div>';
@@ -4858,7 +4864,7 @@ function vShowSec(sec,btn){
         h+='<div class="lx-catcard-head">';
         h+='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-'+theme.ic+'"/></svg>';
         h+='<span>'+_esc(cat.nom)+'</span>';
-        h+=(isPopular?'<em class="lx-chip lx-chip-gold">★</em>':(free?'<em class="lx-chip lx-chip-green">'+free+' gratuit'+(free>1?'s':'')+'</em>':''));
+        h+=(isPopular?'<em class="lx-chip lx-chip-gold">'+ICO('lc-star','i vt-star on')+'</em>':(free?'<em class="lx-chip lx-chip-green">'+free+' gratuit'+(free>1?'s':'')+'</em>':''));
         h+='</div>';
         // Corps blanc sobre
         h+='<div class="lx-catcard-body">';
@@ -4976,7 +4982,7 @@ function vShowSec(sec,btn){
           // Footer with price and action
           h+='<div class="rc-footer">';
           if(isFree){
-            h+='<span style="font-family:Lora,Georgia,serif;font-size:13px;font-weight:700;color:#059669">Gratuit</span>';
+            h+='<span style="font-family:Libre Baskerville,Georgia,serif;font-size:13px;font-weight:700;color:#059669">Gratuit</span>';
             h+='<div style="display:flex;align-items:center;gap:6px">';
             if(item.externalUrl){
               h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 14px;border-radius:12px;font-weight:700" onclick="window.open(\''+item.externalUrl+'\',\'_blank\')">&#9654;&#65039; Passer l\'épreuve</button>';
@@ -5098,7 +5104,7 @@ function vShowSec(sec,btn){
       h+=  (isReco?'<div class="vplan-badge-pop" style="background:linear-gradient(135deg,#059669,#3A8F73)">🎯 Recommandé pour vous</div>':(isPopular?'<div class="vplan-badge-pop">Populaire</div>':''));
       h+='  <div class="vplan-body">';
       h+='    <div class="vplan-ico"><img src="'+_esc(picto)+'" alt="" loading="lazy" data-ef="🎓"></div>';
-      h+=    (pct?'<div class="vplan-promo">🔥 -'+pct+'% ÉCONOMIE</div>':'');
+      h+=    (pct?'<div class="vplan-promo">'+ICO("lc-flame")+'-'+pct+'% ÉCONOMIE</div>':'');
       h+='    <div class="vplan-name">'+_esc(plan.nom)+'</div>';
       h+='    <div class="vplan-cible">'+_esc(plan.cible)+'</div>';
       h+='    <div class="vplan-divider"></div>';
@@ -5125,10 +5131,10 @@ function vShowSec(sec,btn){
     h+='<div style="position:relative;z-index:1">';
     h+='<div style="width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#FFF7E0,#FFEDB8);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;border:1px solid rgba(218,165,32,.35)"><span class="material-symbols-rounded" style="font-size:28px;color:#B8860B">design_services</span></div>';
     h+='<div style="font-family:Montserrat,sans-serif;font-size:22px;font-weight:800;color:#142554;margin-bottom:8px;letter-spacing:.5px">Besoin d&#39;un contenu <span style="color:#B8860B;text-decoration:underline;text-decoration-color:rgba(218,165,32,.4);text-underline-offset:4px">sur mesure</span> ?</div>';
-    h+='<div style="font-family:Poppins,sans-serif;font-size:14px;color:#6B7A99;max-width:500px;margin:0 auto 24px;line-height:1.75">Commandez des épreuves, cours ou corpus adaptés à vos séquences et progressions. Nos enseignants préparent du contenu personnalisé.</div>';
+    h+='<div style="font-family:Plus Jakarta Sans,sans-serif;font-size:14px;color:#6B7A99;max-width:500px;margin:0 auto 24px;line-height:1.75">Commandez des épreuves, cours ou corpus adaptés à vos séquences et progressions. Nos enseignants préparent du contenu personnalisé.</div>';
     h+='<div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">';
     h+='<button class="btn" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#1E293B;font-family:Montserrat,sans-serif;font-weight:800;border-radius:16px;padding:14px 28px;font-size:14px;border:none;box-shadow:0 4px 16px rgba(255,201,60,.3);transition:transform .18s ease" onmouseover="this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.transform=\'\'" onclick="commanderPersonnalise()"><span class="material-symbols-rounded" style="font-size:18px;vertical-align:-3px;margin-right:6px">edit_note</span>Commande personnalisée</button>';
-    h+='<a href="https://wa.me/237697637739?text=Bonjour%20VÉRITAS%20!%20Je%20souhaite%20des%20ressources%20e-learning." target="_blank" class="btn" style="background:#fff;color:#142554;border:1.5px solid rgba(20,37,84,.16);border-radius:16px;padding:14px 28px;font-size:14px;text-decoration:none;font-family:Poppins,sans-serif;font-weight:600"><span class="material-symbols-rounded" style="font-size:18px;vertical-align:-3px;margin-right:6px">chat</span>WhatsApp</a>';
+    h+='<a href="https://wa.me/237697637739?text=Bonjour%20VÉRITAS%20!%20Je%20souhaite%20des%20ressources%20e-learning." target="_blank" class="btn" style="background:#fff;color:#142554;border:1.5px solid rgba(20,37,84,.16);border-radius:16px;padding:14px 28px;font-size:14px;text-decoration:none;font-family:Plus Jakarta Sans,sans-serif;font-weight:600"><span class="material-symbols-rounded" style="font-size:18px;vertical-align:-3px;margin-right:6px">chat</span>WhatsApp</a>';
     h+='</div></div></div>';
 
     h+='</div>';
@@ -5147,21 +5153,21 @@ function vShowSec(sec,btn){
     <!-- HERO BOUTIQUE — proposition de valeur + preuve sociale -->
     <div class="v-hero-gradient" style="border-radius:22px;padding:30px 28px;margin-bottom:20px;color:#fff;position:relative;overflow:hidden">
       <div style="position:relative;z-index:1">
-        <div style="font-size:11px;font-weight:800;color:#FFC93C;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">📚 Librairie VÉRITAS</div>
-        <div style="font-family:'Libre Baskerville',Georgia,serif;font-size:clamp(22px,3.4vw,32px);font-weight:700;line-height:1.18;margin-bottom:8px">Le manuel qui fera<br>la <span style="color:#FFC93C">différence</span> à l'examen.</div>
-        <div style="font-family:'Crimson Pro',Georgia,serif;font-size:14.5px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.7;max-width:520px">Rédigés par nos enseignants, conformes aux programmes MINESEC. Feuilletez un extrait gratuit avant d'acheter — livraison à Douala et en province.</div>
+        <div style="font-size:11px;font-weight:800;color:#FFC93C;letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">${ICO('i-book')}Librairie VÉRITAS</div>
+        <div style="font-family:Libre Baskerville,Georgia,serif;font-size:clamp(22px,3.4vw,32px);font-weight:700;line-height:1.18;margin-bottom:8px">Le manuel qui fera<br>la <span style="color:#FFC93C">différence</span> à l'examen.</div>
+        <div style="font-family:Crimson Pro,Georgia,serif;font-size:14.5px;font-style:italic;color:rgba(255,255,255,.78);line-height:1.7;max-width:520px">Rédigés par nos enseignants, conformes aux programmes MINESEC. Feuilletez un extrait gratuit avant d'acheter — livraison à Douala et en province.</div>
         <div style="display:flex;gap:22px;margin-top:16px;flex-wrap:wrap;align-items:center">
-          <div><span style="font-family:'Libre Baskerville',serif;font-size:24px;font-weight:700;color:#FFC93C">${_bks.length}</span> <span style="font-size:11px;color:rgba(255,255,255,.6)">manuels</span></div>
-          ${_totVendu>0?`<div><span style="font-family:'Libre Baskerville',serif;font-size:24px;font-weight:700;color:#A5F3FC">${fmtN(_totVendu)}</span> <span style="font-size:11px;color:rgba(255,255,255,.6)">exemplaires adoptés</span></div>`:''}
-          ${_avgNote>0?`<div><span style="font-family:'Libre Baskerville',serif;font-size:24px;font-weight:700;color:#FDE68A">${_avgNote.toFixed(1)}<span style="font-size:13px">/5</span></span> <span style="font-size:11px;color:rgba(255,255,255,.6)">note moyenne</span></div>`:''}
-          ${_firstExtrait?`<button onclick="_showExtrait('${_firstExtrait}')" style="background:#FFC93C;color:#142554;border:none;border-radius:24px;padding:10px 22px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:Montserrat,sans-serif;box-shadow:0 4px 14px rgba(255,201,60,.35)">👁 Feuilleter un extrait gratuit</button>`:''}
+          <div><span style="font-family:Libre Baskerville,serif;font-size:24px;font-weight:700;color:#FFC93C">${_bks.length}</span> <span style="font-size:11px;color:rgba(255,255,255,.6)">manuels</span></div>
+          ${_totVendu>0?`<div><span style="font-family:Libre Baskerville,serif;font-size:24px;font-weight:700;color:#A5F3FC">${fmtN(_totVendu)}</span> <span style="font-size:11px;color:rgba(255,255,255,.6)">exemplaires adoptés</span></div>`:''}
+          ${_avgNote>0?`<div><span style="font-family:Libre Baskerville,serif;font-size:24px;font-weight:700;color:#FDE68A">${_avgNote.toFixed(1)}<span style="font-size:13px">/5</span></span> <span style="font-size:11px;color:rgba(255,255,255,.6)">note moyenne</span></div>`:''}
+          ${_firstExtrait?`<button onclick="_showExtrait('${_firstExtrait}')" style="background:#FFC93C;color:#142554;border:none;border-radius:24px;padding:10px 22px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:Montserrat,sans-serif;box-shadow:0 4px 14px rgba(255,201,60,.35)">${ICO('i-eye')}Feuilleter un extrait gratuit</button>`:''}
         </div>
       </div>
     </div>
 
     <!-- PROMO BANNER (uniquement s'il y a des codes actifs) -->
     ${promos.length?`<div style="background:linear-gradient(135deg,#5E1B23,#8C2F39);border:1px solid rgba(255,201,60,.28);border-radius:16px;padding:14px 20px;margin-bottom:20px;color:#fff;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-      <span class="i-disc" style="width:34px;height:34px;background:rgba(255,201,60,.16);color:#FFC93C">${ICO('i-ticket')}</span>
+      <span class="i-disc" style="width:34px;height:34px;background:rgba(255,201,60,.16);color:#FFC93C">${ICO('lc-ticket')}</span>
       <span style="font-weight:800;font-family:Montserrat,sans-serif;font-size:13px">Codes promo actifs :</span>
       ${promos.map(p=>'<span style="padding:4px 12px;border-radius:20px;background:rgba(255,255,255,.15);border:1px dashed rgba(255,255,255,.5);color:#fff;font-size:13px;font-weight:700;font-family:Fira Code">'+p.code+' → <span style="color:#FFE0A0">'+(p.type==='percent'?'-'+p.reduction+'%':'-'+fmt(p.reduction))+'</span></span>').join('')}
     </div>`:''}
@@ -5178,7 +5184,7 @@ function vShowSec(sec,btn){
             var bg=s.bgColor||'#EDE9FE';
             var thumb=s.photo
               ? '<img src="'+s.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">'
-              : (s.ico||'📦');
+              : (s.ico?PIC(s.ico):ICO('i-box'));
             var oldP=s.ancien?fmt(s.ancien):'';
             return '<div class="sc"><div class="sc-thumb" style="background:'+bg+'">'+thumb
               +(s.nouveau?'<span class="sc-new">NEW</span>':'')
@@ -5200,20 +5206,20 @@ function vShowSec(sec,btn){
         const hasPreview=b.extrait||(b.previewImages&&b.previewImages.length);
         const stockCls=b.stock>5?'ok':b.stock>0?'warn':'out';
         const stockLbl=b.stock>5?'En stock':b.stock>0?b.stock+' restants':'Rupture';
-        const stockIco=b.stock>5?'✓':b.stock>0?'⚠':'✕';
+        const stockIco=b.stock>5?ICO('i-check','i vb-stk'):b.stock>0?ICO('i-warning','i vb-stk'):ICO('i-x-circle','i vb-stk');
         const discount=b.ancienPrix?Math.round((1-b.prix/b.ancienPrix)*100):0;
         const _rt=(typeof getBookRating==='function')?getBookRating(b.id):{avg:0,count:0};
         const _full=Math.max(0,Math.min(5,Math.round(_rt.avg||0)));
-        const _stars='★★★★★'.slice(0,_full)+'☆☆☆☆☆'.slice(0,5-_full);
+        const _stars=Array.from({length:5},(_,i)=>ICO('lc-star', i<_full?'i vt-star on':'i vt-star')).join('');
         const _ratingHtml=_rt.count>0
           ? `<div class="vbook-rating"><span class="vbook-stars">${_stars}</span><span class="vbook-rating-num">${_rt.avg.toFixed(1)}</span><span class="vbook-rating-count">(${_rt.count} avis)</span></div>`
-          : `<div class="vbook-rating vbook-rating-none"><span class="vbook-stars">☆☆☆☆☆</span><span class="vbook-rating-count">Nouveau</span></div>`;
+          : `<div class="vbook-rating vbook-rating-none"><span class="vbook-stars">${Array.from({length:5},()=>ICO('lc-star','i vt-star')).join('')}</span><span class="vbook-rating-count">Nouveau</span></div>`;
         return `<div class="vbook-card${b.featured?' is-featured':''}" style="--vbk-color:${cc}" onclick="viewBookDetail('${b.id}')">
           <div class="vbook-cover">
             ${b.coverImg?`<img src="${b.coverImg}" alt="${_esc(b.titre)}" onerror="this.style.display='none'">`:`<span class="vbook-cover-emoji">${b.ico||'📘'}</span>`}
             <div class="vbook-class-badge">${_esc(b.cls)}</div>
-            <div class="vbook-minesec-badge">📚 MINESEC</div>
-            ${b.id===_bestId&&(b.vendu||0)>0?'<div style="position:absolute;bottom:8px;left:8px;background:linear-gradient(135deg,#AE5353,#D58E8E);color:#fff;font-size:9.5px;font-weight:900;padding:3px 10px;border-radius:10px;letter-spacing:.5px;box-shadow:0 3px 10px rgba(220,38,38,.4);z-index:2">🔥 BEST-SELLER</div>':''}
+            <div class="vbook-minesec-badge">${ICO('i-award')}MINESEC</div>
+            ${b.id===_bestId&&(b.vendu||0)>0?'<div style="position:absolute;bottom:8px;left:8px;background:linear-gradient(135deg,#AE5353,#D58E8E);color:#fff;font-size:9.5px;font-weight:900;padding:3px 10px;border-radius:10px;letter-spacing:.5px;box-shadow:0 3px 10px rgba(220,38,38,.4);z-index:2">'+ICO("lc-flame")+'BEST-SELLER</div>':''}
             ${b.stock<=0?'<div class="vbook-stock-out">Rupture</div>':''}
             ${hasPreview?'<div class="vbook-preview-badge">Aperçu gratuit</div>':''}
             <div class="vbook-pages">${b.pages||0}p · ${(b.chaps||[]).length} chap.</div>
@@ -5222,7 +5228,7 @@ function vShowSec(sec,btn){
             <div class="vbook-title">${_esc(b.titre)}</div>
             <div class="vbook-author">${_esc(b.auteur||'')}</div>
             ${_ratingHtml}
-            ${(b.vendu||0)>=3?'<div style="font-size:11px;color:#B45309;font-weight:700;margin:2px 0 4px">👥 Déjà adopté par '+b.vendu+' élèves</div>':''}
+            ${(b.vendu||0)>=3?'<div class="vbook-adopt">'+ICO('i-users')+'Déjà adopté par '+b.vendu+' élèves</div>':''}
             <div class="vbook-desc">${_esc((b.desc||'').substring(0,90))}</div>
             ${discount?`<div class="vbook-old-price"><s>${fmt(b.ancienPrix)}</s><span class="vbook-discount">-${discount}%</span></div>`:''}
             <div class="vbook-price-row">
@@ -5230,9 +5236,9 @@ function vShowSec(sec,btn){
               <span class="vbook-stock ${stockCls}">${stockIco} ${stockLbl}</span>
             </div>
             <div class="vbook-actions">
-              ${hasPreview?`<button class="vbook-btn btn-extrait" onclick="event.stopPropagation();_showExtrait('${b.id}')">👁 Extrait</button>`:''}
-              <button class="vbook-btn btn-detail" onclick="event.stopPropagation();viewBookDetail('${b.id}')">📋 Détails</button>
-              ${b.stock>0?`<button class="vbook-btn btn-buy" onclick="event.stopPropagation();visitorOrderBook('${b.id}')">🛒 Commander maintenant</button>`:'<button class="vbook-btn btn-buy" disabled>Rupture de stock</button>'}
+              ${hasPreview?`<button class="vbook-btn btn-extrait" onclick="event.stopPropagation();_showExtrait('${b.id}')">${ICO('i-eye')}Extrait</button>`:''}
+              <button class="vbook-btn btn-detail" onclick="event.stopPropagation();viewBookDetail('${b.id}')">${ICO('lc-clipboard')}Détails</button>
+              ${b.stock>0?`<button class="vbook-btn btn-buy" onclick="event.stopPropagation();visitorOrderBook('${b.id}')">${ICO('lc-cart')}Commander maintenant</button>`:'<button class="vbook-btn btn-buy" disabled>Rupture de stock</button>'}
             </div>
           </div>
         </div>`;
@@ -5252,10 +5258,10 @@ function vShowSec(sec,btn){
             ? '<img src="'+_esc(p.photo)+'" alt="'+_esc(p.titre)+'">'
             : (pictoUrl
                 ? '<div class="vprod-thumb-ico"><img src="'+_esc(pictoUrl)+'" alt="" data-ef="'+_esc(p.ico||'🎁')+'"></div>'
-                : '<div class="vprod-thumb-emoji">'+(p.ico||'🎁')+'</div>');
+                : '<div class="vprod-thumb-emoji">'+(p.ico?PIC(p.ico):ICO('i-box'))+'</div>');
           return '<div class="vprod-card'+(p.nouveau?' has-new':'')+'" onclick="visitorOrderProduct(&apos;'+p.titre.replace(/'/g,'')+'&apos;,'+p.prix+')">'+
             '<div class="vprod-thumb" style="background:'+bg+'">'+icoHtml+'</div>'+
-            (pct?'<div class="vprod-discount">🔥 -'+pct+'%</div>':'')+
+            (pct?'<div class="vprod-discount">'+ICO("lc-flame")+'-'+pct+'%</div>':'')+
             '<div class="vprod-body">'+
               (p.cat?'<div class="vprod-cat">'+_esc(p.cat)+'</div>':'')+
               '<div class="vprod-title">'+_esc(p.titre)+'</div>'+
@@ -5263,7 +5269,7 @@ function vShowSec(sec,btn){
               '<div class="vprod-pricing">'+
                 (p.ancien?'<div class="vprod-old">'+fmt(p.ancien)+'</div>':'')+
                 '<div class="vprod-price">'+fmt(p.prix)+'</div>'+
-                '<div class="vprod-cta">🛒 Commander</div>'+
+                '<div class="vprod-cta">'+ICO("lc-cart")+'Commander</div>'+
               '</div>'+
             '</div>'+
           '</div>';
@@ -5274,7 +5280,7 @@ function vShowSec(sec,btn){
     <!-- AUTEURS : SOUMETTRE UN MANUEL -->
     <div style="border:1px solid rgba(122,92,214,.3);border-radius:var(--r3);padding:16px;margin-bottom:20px;background:rgba(122,92,214,.04)">
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
-        <div style="font-size:28px">✍️</div>
+        <div class="bq-pic">${ICO('i-feather')}</div>
         <div style="flex:1;min-width:200px">
           <div style="font-size:13px;font-weight:700;color:#7a5cd6">Vous êtes auteur ou enseignant ?</div>
           <div style="font-size:13px;color:var(--ink3);margin-top:2px">Publiez vos manuels sur VÉRITAS et gagnez <strong>${DB.authorShare||60}% des ventes</strong>. Connectez-vous comme enseignant et accédez à "Mes publications".</div>
@@ -5303,7 +5309,7 @@ function vShowSec(sec,btn){
           var bk=DB.books.find(function(x){return x.id===r.bid;});
           h2+='<div class="review-card"><div class="review-hd"><div class="review-av">'+r.nom[0]+'</div><div><div class="review-nm">'+r.nom+'</div><div class="review-rl">'+r.role+(bk?' · '+bk.titre:'')+'</div></div></div>';
           h2+='<div>'+starsHtml(r.stars)+'</div><div class="review-txt">&laquo; '+r.text+' &raquo;</div>';
-          h2+='<div class="fl2 fic fsb"><span class="review-dt">'+r.date+'</span>'+(r.verified?'<span class="review-vf">✅ Achat vérifié</span>':'')+'</div></div>';
+          h2+='<div class="fl2 fic fsb"><span class="review-dt">'+r.date+'</span>'+(r.verified?'<span class="review-vf">'+ICO('i-check')+'Achat vérifié</span>':'')+'</div></div>';
         });
         return h2;
       })()}
@@ -5311,20 +5317,20 @@ function vShowSec(sec,btn){
 
     <!-- SECTION RESSOURCES (inspiré grandprof) -->
     <div class="vcard mb20" style="background:linear-gradient(135deg,#DDD6FE 0%,#E0EAFF 100%);border:none">
-      <div style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:700;color:#142554;margin-bottom:14px">🎯 Te faire RÉUSSIR, notre devoir !</div>
+      <div style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:700;color:#142554;margin-bottom:14px">${ICO('i-target')}Te faire RÉUSSIR, notre devoir !</div>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
         <div style="background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)">
-          <div style="font-size:28px;margin-bottom:8px">🧑‍🏫</div>
+          <div class="bq-pic">${ICO('i-teacher')}</div>
           <div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:#142554;margin-bottom:4px">Suivi Personnalisé</div>
           <div style="font-family:Georgia,serif;font-size:12px;color:var(--ink3);line-height:1.6">Nos enseignants vous suivent individuellement pour répondre à vos besoins.</div>
         </div>
         <div style="background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)">
-          <div style="font-size:28px;margin-bottom:8px">📈</div>
+          <div class="bq-pic">${ICO('i-chart')}</div>
           <div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:#142554;margin-bottom:4px">Explosion du Potentiel</div>
           <div style="font-family:Georgia,serif;font-size:12px;color:var(--ink3);line-height:1.6">Être entouré des meilleurs enseignants vous pousse à vous améliorer.</div>
         </div>
         <div style="background:#fff;border-radius:14px;padding:16px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04)">
-          <div style="font-size:28px;margin-bottom:8px">📅</div>
+          <div class="bq-pic">${ICO('i-calendar')}</div>
           <div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;color:#142554;margin-bottom:4px">Planning & Motivation</div>
           <div style="font-family:Georgia,serif;font-size:12px;color:var(--ink3);line-height:1.6">Planning d&#39;étude personnalisé + capsules de motivation pour ne pas décourager.</div>
         </div>
@@ -5346,16 +5352,16 @@ function vShowSec(sec,btn){
 
     <!-- PAIEMENT -->
     <div style="background:linear-gradient(135deg,var(--bl),#162d6a);border-radius:var(--r3);padding:20px;text-align:center">
-      <div style="color:#FFC93C;font-family:'Libre Baskerville',serif;font-size:16px;margin-bottom:12px">💳 Moyens de Paiement</div>
+      <div style="color:#FFC93C;font-family:Libre Baskerville,serif;font-size:16px;margin-bottom:12px">${ICO('i-credit-card')}Moyens de Paiement</div>
       <div style="display:flex;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:14px">
         ${[
         ['<div style="width:40px;height:40px;border-radius:50%;background:#ff6600;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;letter-spacing:-1px">OM</div>','Orange Money','697 637 739','#ff6600'],
         ['<div style="width:40px;height:40px;border-radius:50%;background:#ffcc00;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#003;letter-spacing:-0.5px">MoMo</div>','MTN MoMo','650 435 106','#ffcc00'],
         ['<div style="width:40px;height:40px;border-radius:50%;background:#25d366;display:flex;align-items:center;justify-content:center"><svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.615-1.456A11.93 11.93 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.813c-2.188 0-4.22-.59-5.978-1.618l-.428-.254-3.182 1.004 1.023-3.094-.278-.442A9.77 9.77 0 012.188 12c0-5.414 4.398-9.813 9.812-9.813S21.813 6.586 21.813 12s-4.399 9.813-9.813 9.813z"/></svg></div>','WhatsApp','697 637 739','#25d366'],
-        ['<div style="width:40px;height:40px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff">💵</div>','Espèces','Au centre','var(--gold)']
+        ['<div style="width:40px;height:40px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:#fff">'+ICO('i-coins')+'</div>','Espèces','Au centre','var(--gold)']
       ].map(([icon,n,v,col])=>'<div style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:var(--r2);padding:14px 16px;min-width:140px;text-align:center"><div style="display:flex;justify-content:center">'+icon+'</div><div style="color:#fff;font-size:13px;font-weight:700;margin-top:8px">'+n+'</div><div style="font-family:Fira Code;color:#FFC93C;font-size:14px;font-weight:700;margin-top:4px;letter-spacing:1px">'+v+'</div></div>').join("")}
       </div>
-      <a href="https://wa.me/237697637739?text=${encodeURIComponent('Bonjour VÉRITAS ! Je souhaite commander.')}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#FFC93C;color:#142554;padding:10px 24px;border-radius:var(--r);font-size:13px;font-weight:700;text-decoration:none;transition:all .2s">📲 Commander maintenant</a>
+      <a href="https://wa.me/237697637739?text=${encodeURIComponent('Bonjour VÉRITAS ! Je souhaite commander.')}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;background:#FFC93C;color:#142554;padding:10px 24px;border-radius:var(--r);font-size:13px;font-weight:700;text-decoration:none;transition:all .2s">${ICO('i-phone')}Commander maintenant</a>
     </div>
     </div>`;
   
@@ -5413,7 +5419,7 @@ function vShowSec(sec,btn){
       h+='<div class="vcard mb16">';
       h+='<div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-star"/></svg></span>Témoignages de nos élèves</div>';
       rvs.slice(0,3).forEach(function(r){
-        var st='';for(var i=1;i<=5;i++)st+=i<=Math.round(r.stars)?'<span style="color:#FFC93C">★</span>':'<span style="color:var(--bg3)">★</span>';
+        var st='';for(var i=1;i<=5;i++)st+=i<=Math.round(r.stars)?ICO('lc-star','i vt-star on'):ICO('lc-star','i vt-star');
         h+='<div style="padding:10px 0;border-bottom:1px solid var(--bg2)">'+
            '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'+
            '<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#142554,#6C56A6);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;font-weight:700;flex-shrink:0">'+r.nom[0]+'</div>'+
@@ -5473,7 +5479,7 @@ function vShowSec(sec,btn){
       </div>
       <div>
         <div class="vcard mb16" style="background:linear-gradient(135deg,#142554,#1a3a8a);color:#fff;border:none">
-          <div style="font-family:'Libre Baskerville',serif;font-size:18px;color:#FFC93C;margin-bottom:12px">Inscription au Centre VÉRITAS</div>
+          <div style="font-family:Libre Baskerville,serif;font-size:18px;color:#FFC93C;margin-bottom:12px">Inscription au Centre VÉRITAS</div>
           <div style="font-size:13px;color:rgba(255,255,255,.7);line-height:1.8">
             Les inscriptions pour l\'année scolaire <strong style="color:#FFC93C">${DB.school?.annee||'2024–2025'}</strong> sont ouvertes.
             <div style="margin-top:12px;font-weight:600;color:rgba(255,255,255,.9)">Apportez les documents suivants :</div>
@@ -9859,12 +9865,13 @@ function buildNav(){
   $("snav").innerHTML=nav.map(s=>`<div class="sbsec"><div class="sbsl">${s.s}</div>${s.i.map(it=>{
     const b=it.k==='payments'&&un>0&&iA()?`<span class="sbbg">${un}</span>`:'';
     const elBadge=it.k==='elearningmgmt'&&pendingAbos>0&&iA()?`<span class="sbbg" style="background:#AE5353">${pendingAbos}</span>`:'';
-    return`<div class="sbit${it.k===pg?' on':''}" onclick="goTo('${it.k}')"><span class="sbic">${it.i}</span>${it.l}${b}${elBadge}</div>`;
+    return`<div class="sbit${it.k===pg?' on':''}" onclick="goTo('${it.k}')"><span class="sbic">${PIC(it.i)}</span>${it.l}${b}${elBadge}</div>`;
   }).join("")}</div>`).join("");
   const roleMap={admin:"aa",enseignant:"at",eleve:"ae",superadmin:"asa"};
   const ac=roleMap[SES?.type]||"ae";
   const roleLabel={admin:"Admin",enseignant:"Enseignant",eleve:"Élève",superadmin:"Super Admin"};
-  $("sbu").innerHTML=`<div class="sba ${ac}">${SES?.nom?.[0]||'?'}</div><div style="flex:1;min-width:0"><div class="sbun">${SES?.pre?SES.pre+' '+SES.nom:SES?.nom||''}</div><div class="sbur">${roleLabel[SES?.type]||''}</div></div><button class="sblo" onclick="logout()" title="Déconnexion">⏻ Déconnexion</button>`;
+  $("sbu").innerHTML=`<div class="sba ${ac}">${SES?.nom?.[0]||'?'}</div><div style="flex:1;min-width:0"><div class="sbun">${SES?.pre?SES.pre+' '+SES.nom:SES?.nom||''}</div><div class="sbur">${roleLabel[SES?.type]||''}</div></div><button id="sbTheme" data-theme-toggle aria-label="Basculer entre thème clair et sombre" onclick="vrtToggleTheme()" oncontextmenu="vrtThemeAuto();return false"><svg class="vth-ico vth-sun" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sun"/></svg><svg class="vth-ico vth-moon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-moon"/></svg></button><button class="sblo" onclick="logout()" title="Déconnexion">⏻ Déconnexion</button>`;
+  if(typeof vrtThemeSync==='function') vrtThemeSync();
   $("sbfi").textContent=`${DB.students.length} élèves · ${DB.teachers.length} enseignants`;
   const lg=getLogo();
   const sl=$("sbLogo");if(sl)sl.src=lg;
@@ -10023,7 +10030,7 @@ applyWatermark(canvas,canvas.getContext('2d'));const{jsPDF}=window.jspdf;const p
 async function doExportImg(enc){const c=$("docContent");if(!c)return;const title=decodeURIComponent(enc);toast('⏳ Génération image…');try{await _ensureLib('html2canvas');await document.fonts.ready;await new Promise(r=>setTimeout(r,500));const canvas=await html2canvas(c,{scale:2,useCORS:true,allowTaint:true,backgroundColor:'#fff',logging:false});// [WATERMARK v1.2] Filigrane avant export image
 applyWatermark(canvas,canvas.getContext('2d'));const link=document.createElement('a');link.download=title.replace(/[^\w\sÀ-ÿ\-]/g,'_')+'.png';link.href=canvas.toDataURL('image/png');link.click();toast('✓ Image téléchargée');}catch(e){console.error(e);toast('Erreur image','err');}}
 
-function docHeader(titre){const sc=DB.school;return`<div style="background:#142554;padding:16px 26px;display:flex;align-items:center;gap:14px"><img src="${getLogo()}" style="width:42px;height:42px;border-radius:50%;background:#fff;padding:2px;object-fit:contain;flex-shrink:0"><div style="flex:1"><div style="font-family:'Libre Baskerville',serif;font-size:16px;color:#FFC93C;letter-spacing:2px">${sc?.nom||'VÉRITAS'}</div><div style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">${sc?.slogan||'La Réussite Assurée'} · ${sc?.ville||'Yaoundé'}</div></div><div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${titre}</div><div style="font-size:8px;font-family:'Fira Code',monospace;color:rgba(255,255,255,.3)">Tél: ${sc?.tel||'—'} · ${sc?.bp||'—'}</div><div style="font-size:8px;color:rgba(255,255,255,.3);margin-top:2px">Année ${sc?.annee||'2024–2025'}</div></div></div>`;}
+function docHeader(titre){const sc=DB.school;return`<div style="background:#142554;padding:16px 26px;display:flex;align-items:center;gap:14px"><img src="${getLogo()}" style="width:42px;height:42px;border-radius:50%;background:#fff;padding:2px;object-fit:contain;flex-shrink:0"><div style="flex:1"><div style="font-family:Libre Baskerville,serif;font-size:16px;color:#FFC93C;letter-spacing:2px">${sc?.nom||'VÉRITAS'}</div><div style="font-size:10px;color:rgba(255,255,255,.5);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px">${sc?.slogan||'La Réussite Assurée'} · ${sc?.ville||'Yaoundé'}</div></div><div style="text-align:right"><div style="font-size:9px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">${titre}</div><div style="font-size:8px;font-family:'Fira Code',monospace;color:rgba(255,255,255,.3)">Tél: ${sc?.tel||'—'} · ${sc?.bp||'—'}</div><div style="font-size:8px;color:rgba(255,255,255,.3);margin-top:2px">Année ${sc?.annee||'2024–2025'}</div></div></div>`;}
 
 // ═══════════════════════════════════════════════
 // TABLEAU DE BORD (unifié multi-rôles)
@@ -10044,7 +10051,7 @@ function pgDash(){
     const dvsPending=dvsE.filter(d=>!subs.find(sb=>sb.dvid===d.id));
     return`<div class="card mb16" style="background:linear-gradient(135deg,#1a6e40,#228844);color:#fff;border:none;padding:22px">
       <div class="fl2 fic g12"><img src="${getLogo()}" alt="" style="width:50px;height:50px;border-radius:50%;background:#fff;padding:3px"><div>
-        <div style="font-family:'Libre Baskerville',serif;font-size:20px;color:#edfaf3">${s.pre} ${s.nom}</div>
+        <div style="font-family:Libre Baskerville,serif;font-size:20px;color:#edfaf3">${s.pre} ${s.nom}</div>
         <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px">Matricule: <strong style="color:#fff">${s.mat}</strong> · Classe: <strong style="color:#fff">${s.cls}</strong></div>
         <div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:2px">Inscrit le ${s.ins} · ${s.stat}</div>
       </div></div>
@@ -10098,7 +10105,7 @@ function pgDash(){
     const clsSet=[...new Set(mg.map(g=>g.cls))];
     return`<div class="card mb16" style="background:linear-gradient(135deg,#1a3a8a,#1a50c0);color:#fff;border:none;padding:22px">
       <div class="fl2 fic g12"><img src="${getLogo()}" alt="" style="width:50px;height:50px;border-radius:50%;background:#fff;padding:3px">
-      <div><div style="font-family:'Libre Baskerville',serif;font-size:18px;color:#FFC93C">${t?.pre} ${t?.nom}</div>
+      <div><div style="font-family:Libre Baskerville,serif;font-size:18px;color:#FFC93C">${t?.pre} ${t?.nom}</div>
       <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:2px">${t?.mat2||t?.mat} · ${t?.grade} · ${t?.mat}</div></div></div>
     </div>
     <div class="sg" style="grid-template-columns:repeat(4,1fr)">
@@ -10140,13 +10147,20 @@ function pgDash(){
   const rp=DB.payments.slice(-5).reverse();
   const ua=DB.announce.filter(a=>new Date(a.date)>=new Date()).sort((a,b)=>new Date(a.date)-new Date(b.date)).slice(0,3);
   const totAbs=DB.absences?.length||0;
+  // v1.15.6 — séries 12 mois pour les tendances. Les entrées sans date
+  // exploitable sont ignorées par _serieMensuelle : mieux vaut pas de courbe
+  // qu'une courbe qui range tout l'historique dans le mois courant.
+  const serEleves=_serieMensuelle(DB.students,s=>s.ins,()=>1);
+  const serRec=_serieMensuelle(DB.payments.filter(p=>p.stat==='Payé'),p=>p.dt,p=>p.mnt);
+  const serImp=_serieMensuelle(DB.payments.filter(p=>p.stat==='Impayé'),p=>p.dt,p=>p.mnt);
   return`
+  ${_checklistHTML()}
   ${isSA()?'<div class="ib ibg mb16"><span>👑</span><span>Vous êtes connecté en tant que <strong>Super Administrateur</strong>. Vous avez accès à toutes les données sensibles du système.</span></div>':''}
   ${(()=>{var pendingAbos=(DB.elearning?.abonnements||[]).filter(function(a){return a.statut==='En attente';});if(!pendingAbos.length)return'';return'<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353;cursor:pointer;margin-bottom:16px" onclick="goTo(\'elearningmgmt\')"><span style="font-size:20px">🔔</span><span><strong>'+pendingAbos.length+' abonnement(s) E-Learning en attente de validation !</strong> Cliquez pour gérer → E-Learning Admin</span></div>'})()}
   <div class="sg">
-    <div class="sc scg"><div class="sci">🎓</div><div class="scl">Élèves inscrits</div><div class="scv vg">${DB.students.length}</div><div class="scs">${CLS.filter(c=>DB.students.some(s=>s.cls===c)).length} niveaux actifs</div></div>
-    <div class="sc scgr"><div class="sci">💰</div><div class="scl">Recettes totales</div><div class="scv vgr" style="font-size:18px">${fmt(paid+bkr)}</div><div class="scs">frais + manuels</div></div>
-    <div class="sc scr"><div class="sci">⚠️</div><div class="scl">Impayés</div><div class="scv vr" style="font-size:18px">${fmt(imp)}</div><div class="scs">${DB.payments.filter(p=>p.stat==='Impayé').length} élèves</div></div>
+    <div class="sc scg"><div class="sci">🎓</div><div class="scl">Élèves inscrits</div><div class="scv vg">${DB.students.length}</div><div class="scs">${CLS.filter(c=>DB.students.some(s=>s.cls===c)).length} niveaux actifs</div>${_kpiTrend(serEleves,'#059669')}</div>
+    <div class="sc scgr"><div class="sci">💰</div><div class="scl">Recettes totales</div><div class="scv vgr" style="font-size:18px">${fmt(paid+bkr)}</div><div class="scs">frais + manuels</div>${_kpiTrend(serRec,'#059669','courbe : frais de scolarité seuls — les ventes de manuels ne sont pas datées en base')}</div>
+    <div class="sc scr"><div class="sci">⚠️</div><div class="scl">Impayés</div><div class="scv vr" style="font-size:18px">${fmt(imp)}</div><div class="scs">${DB.payments.filter(p=>p.stat==='Impayé').length} élèves</div>${_kpiTrend(serImp,'#AE5353')}</div>
     <div class="sc scb"><div class="sci">👨‍🏫</div><div class="scl">Masse salariale</div><div class="scv vb" style="font-size:18px">${fmt(sal)}</div><div class="scs">${DB.teachers.length} enseignants</div></div>
   </div>
   <div class="sg" style="grid-template-columns:repeat(3,1fr)">
@@ -10209,7 +10223,7 @@ function pgMonBulletin(){
   <div class="card mb16" style="background:linear-gradient(135deg,#142554,#1a3a8a);color:#fff;border:none;padding:22px">
     <div class="fl2 fic fsb fw g12">
       <div class="fl2 fic g12"><img src="${getLogo()}" alt="" style="width:46px;height:46px;border-radius:50%;background:#fff;padding:3px">
-        <div><div style="font-family:'Libre Baskerville',serif;font-size:18px;color:#FFC93C">${s.pre} ${s.nom}</div>
+        <div><div style="font-family:Libre Baskerville,serif;font-size:18px;color:#FFC93C">${s.pre} ${s.nom}</div>
         <div style="font-size:13px;color:rgba(255,255,255,.5);margin-top:2px">Matricule: ${s.mat} · Classe: ${s.cls}</div></div>
       </div>
       <div class="fl2 g16 fw">
@@ -10323,6 +10337,8 @@ function pgMonPaiement(){
     <div class="sc scgr"><div class="sci">✅</div><div class="scl">Total versé</div><div class="scv vgr" style="font-size:18px">${fmt(tpays)}</div></div>
     <div class="sc scb"><div class="sci">📚</div><div class="scl">Achats manuels</div><div class="scv vb">${purchases.length}</div><div class="scs">${fmt(purchases.reduce((a,b)=>a+b.mnt,0))}</div></div>
   </div>
+  ${_echStudentHTML(s.id)}
+  ${_echStudentHTML(s.id)}
   ${s.stat!=='Payé'?`<div class="ib ibr mb14"><span>⚠️</span><span>Votre paiement du mois est en attente. Veuillez vous rendre à l\'administration pour régulariser votre situation.</span></div>`:''}
   <div class="card mb16"><div class="ct">Historique des paiements de scolarité</div>
     ${pays.length===0?'<div class="empty">Aucun paiement enregistré</div>':
@@ -11531,7 +11547,13 @@ function pgPayments(){
         <div class="srch" style="width:210px"><span class="si">🔍</span><input class="fi" style="padding-left:33px" placeholder="Rechercher..." value="${window._pq||''}" oninput="window._pq=this.value;re()"></div>
         <div class="tabs">${['Tous','Payé','Impayé','En attente'].map(s=>`<button class="tab${f===s?' on':''}" onclick="window._pf='${s}';re()">${s}</button>`).join('')}</div>
       </div>
-      <button class="btn bi" onclick="mAddPay()">＋ Paiement</button>
+      <div class="fl2 fic g8">
+        <button class="btn bo" onclick="mEcheanciers()" title="Paiement fractionné : petites tranches plutôt qu'une somme d'un coup">🗓️ Échéanciers</button>
+        <div class="fl2 fic g8">
+        <button class="btn bo" onclick="mEcheanciers()" title="Paiement fractionné : 1 000 F par semaine plutôt que 45 000 F d’un coup">🗓️ Échéanciers</button>
+        <button class="btn bi" onclick="mAddPay()">＋ Paiement</button>
+      </div>
+      </div>
     </div>
     <div class="tw"><table>
     <thead><tr><th>Élève</th><th>Classe</th><th>Période</th><th>Montant</th><th>Mode</th><th>Date</th><th>Statut</th><th>Actions</th></tr></thead>
@@ -11983,7 +12005,7 @@ function _campusBulletinHtml(sid,tri){
   .vbul .dhead-bi .ctr .qrx{border:1px solid #142554;border-radius:3px;padding:1px;background:#fff;line-height:0}
   .vbul .dhead-bi .ctr .qrx svg{width:54px;height:54px;display:block}
   .vbul .dtitle{text-align:center;margin:6px 0 4px}
-  .vbul .dtitle h2{margin:0;font-size:16px;color:#142554;letter-spacing:1px;text-transform:uppercase;font-family:'Libre Baskerville',Georgia,serif}
+  .vbul .dtitle h2{margin:0;font-size:16px;color:#142554;letter-spacing:1px;text-transform:uppercase;font-family:Libre Baskerville,Georgia,serif}
   .vbul .dtitle .per{font-size:9px;color:#555}
   .vbul .b-student{display:flex;gap:12px;align-items:flex-start;margin:6px 0}
   .vbul .b-photo{width:60px;height:74px;flex:0 0 auto;border:2px solid #142554;border-radius:6px;background:#eef1f8;display:grid;place-items:center;color:#142554;font-size:24px;overflow:hidden}
@@ -12151,7 +12173,7 @@ function _printBulletinHtmlLegacy(sid,tri){
   </div>
   <!-- TITRE -->
   <div style="text-align:center;margin:6px 0 4px">
-    <div style="font-family:'Libre Baskerville',serif;font-size:14px;font-weight:700;color:#142554;letter-spacing:1px;text-transform:uppercase">Bulletin de notes / Report Card</div>
+    <div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;color:#142554;letter-spacing:1px;text-transform:uppercase">Bulletin de notes / Report Card</div>
     <div style="font-size:9px;color:#555">${tri} · Classe ${s.cls} · Effectif ${DB.students.filter(st=>st.cls===s.cls).length} · ${sc?.annee||'2024–2025'}</div>
   </div>
   <!-- INFOS ÉLÈVE -->
@@ -13345,7 +13367,7 @@ function genCertScol(){
   printDoc(`<div style="max-width:900px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px #9a7228,inset 0 0 0 6px #142554,inset 0 0 0 8px #9a7228;-webkit-print-color-adjust:exact;print-color-adjust:exact">
   ${docHeader('Certificat de Scolarité')}
   <div style="padding:30px 40px">
-    <div style="font-family:'Libre Baskerville',serif;font-size:17px;font-weight:700;color:#142554;margin-bottom:20px">CERTIFICAT DE SCOLARITÉ</div>
+    <div style="font-family:Libre Baskerville,serif;font-size:17px;font-weight:700;color:#142554;margin-bottom:20px">CERTIFICAT DE SCOLARITÉ</div>
     <div style="font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#a89888;margin-bottom:24px">Année académique ${DB.school?.annee||'2024–2025'}</div>
     <div style="background:#f5f3ef;border-radius:10px;padding:20px;margin-bottom:20px;text-align:left">
       <div style="font-size:14px;line-height:2">
@@ -13416,7 +13438,7 @@ function printPresence(){const cls=window._prCl||CLS[0];const sts=DB.students.fi
 function pgAttestTravail(){if(!iA())return na();return`<div class="card"><div class="ct">Attestations de travail</div><div class="fg mb14"><span class="fl">Enseignant</span><select class="fi" id="atEns">${DB.teachers.map(t=>`<option value="${t.id}">${t.pre} ${t.nom} — ${t.mat2}</option>`).join('')}</select></div><button class="btn bi" onclick="genAttestTravail()"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Générer attestation</button></div>`;}
 function genAttestTravail(){
   const t=T(document.getElementById('atEns')?.value);if(!t)return;
-  printDoc(`<div style="max-width:900px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px #9a7228,inset 0 0 0 6px #142554,inset 0 0 0 8px #9a7228;-webkit-print-color-adjust:exact;print-color-adjust:exact">${docHeader("Attestation de Travail")}<div style="padding:30px 40px"><div style="font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:20px">ATTESTATION DE TRAVAIL</div>
+  printDoc(`<div style="max-width:900px;margin:0 auto;font-family:'Inter',sans-serif;text-align:center;background:#fff;padding:8px;border-radius:7px;overflow:hidden;box-shadow:inset 0 0 0 2px #9a7228,inset 0 0 0 6px #142554,inset 0 0 0 8px #9a7228;-webkit-print-color-adjust:exact;print-color-adjust:exact">${docHeader("Attestation de Travail")}<div style="padding:30px 40px"><div style="font-family:Libre Baskerville,serif;font-size:20px;font-weight:700;color:#142554;margin-bottom:20px">ATTESTATION DE TRAVAIL</div>
   <div style="font-size:13px;line-height:2;text-align:left"><p>Je soussigné(e), <strong>${DB.school?.directeur||'Le Directeur'}</strong>, Directeur du <strong>${DB.school?.nom||'Centre VÉRITAS'}</strong>, atteste que :</p>
   <div style="margin:16px 0;padding:14px;background:#f5f3ef"><div style="font-size:18px;font-weight:700;color:#142554">${t.pre.toUpperCase()} ${t.nom.toUpperCase()}</div><div style="font-size:13px;color:#6b5e52;margin-top:4px">Grade: ${t.grade} · Matière: ${t.mat2}</div></div>
   <p>est employé(e) en qualité de <strong>Professeur de ${t.mat2}</strong> au sein de notre établissement depuis la rentrée scolaire <strong>${DB.school?.annee||'2024–2025'}</strong>.</p>
@@ -13789,6 +13811,7 @@ function pgSettings(){
         ${[['nom','Nom établissement'],['slogan','Slogan'],['ville','Ville / Adresse'],['tel','Téléphone'],['bp','Boîte postale'],['directeur','Directeur'],['annee','Année scolaire']].map(([k,l])=>`<div class="fg${k==='nom'||k==='ville'?' full':''}"><span class="fl">${l}</span><input class="fi" id="sc_${k}" value="${DB.school[k]||''}"></div>`).join('')}
       </div>
       <button class="btn bi mt14" onclick="saveSettings()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer</button>
+      ${DB.school&&DB.school._chkHide?`<button class="btn bo sm mt14" style="margin-left:8px" onclick="_checklistShow()">🚀 Réafficher la checklist d\'activation</button>`:''}
     </div>
     <div class="card"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-globe"/></svg></span>Portail public</div>
       <div class="fg mb10"><span class="fl">Slogan accrocheur</span><input class="fi" id="pi_slogan2" value="${DB.publicInfo?.slogan2||''}"></div>
@@ -13850,7 +13873,7 @@ function pgSettings(){
       <button class="btn bi sm" onclick="DB.tauxHoraire=parseInt(document.getElementById('sc_taux')?.value)||2000;save();toast('✓ Taux horaire mis à jour: '+fmt(DB.tauxHoraire)+'/h')"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer taux</button>
     </div>
     <div class="card mt16">
-      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-zap"/></svg></span>Paiements API automatiques (CamPay / Orange Money / MTN MoMo)</div>
+      <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-zap"/></svg></span>Paiements API automatiques (CamerPay / CamPay / Orange Money / MTN MoMo)</div>
       <div class="ib ibg mb14"><span>🎉</span><span><strong>Paiement 100% automatique.</strong> Le client paie → l'opérateur notifie le serveur → l'accès s'active <strong>et le partenaire est crédité</strong>, sans intervention admin.</span></div>
       <div class="ib ibi mb14"><span>🏦</span><span><strong>Une seule chose à mettre à jour</strong> quand le compte au nom du Centre VÉRITAS sera ouvert : les numéros affichés aux clients. <button class="btn bi sm" style="margin-left:8px" onclick="mPayCoordonnees()"><svg class="vico bico" aria-hidden="true"><use href="#lc-building"/></svg>Coordonnées d'encaissement</button></span></div>
       <div class="ib ibt mb14"><span>⚠️</span><span><strong>Une seule voie active par opérateur.</strong> N'activez pas CamPay <em>et</em> l'API directe du même opérateur : deux demandes de paiement partiraient pour une même référence. CamPay = MTN + Orange en un seul contrat (2% de frais, versements partenaires inclus). API directe = zéro intermédiaire, mais un contrat marchand par opérateur.</span></div>
@@ -13860,21 +13883,26 @@ function pgSettings(){
           <input type="checkbox" id="payCampayEnabled" ${(DB.payApiConfig&&DB.payApiConfig.campayEnabled)?'checked':''} onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.campayEnabled=this.checked;save();toast(this.checked?'⚡ CamPay activé (MTN + Orange)':'⚡ CamPay désactivé');re();">
           <span><strong>⚡ Activer CamPay — MTN MoMo <em>et</em> Orange Money en un seul bouton</strong> — le client saisit son numéro, l'opérateur est détecté, il valide avec son code secret</span>
         </label></div>
-        <div class="fg full" id="campayDiag" style="margin-top:8px;font-size:12px;padding:10px;border-radius:8px;background:var(--bg2);color:var(--ink3)">⏳ Vérification de l'état réel du serveur CamPay…</div>
+        <div class="fg full" id="campayDiag" style="margin-top:8px;font-size:12px;padding:10px;border-radius:8px;background:var(--bg2);color:var(--ink3)">⏳ Vérification de l'état réel du serveur de paiement…</div>
       </div>
 
       <div class="fg2" style="margin-top:8px">
         <div class="fg full">
-          <span class="fl">🔑 Jeton public CamPay — self-service client</span>
+          <span class="fl">🔑 Jeton public CamerPay — self-service client</span>
+          <input class="fi" id="payCamerpayPubToken" placeholder="pub_… (à recopier depuis CAMERPAY_PUBLIC_INIT du serveur)" value="${_esc((DB.payApiConfig&&DB.payApiConfig.camerpayPublicToken)||'')}" onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.camerpayPublicToken=this.value.trim();save();toast('🔑 Jeton public CamerPay enregistré');">
+          <div style="font-size:11px;color:var(--ink4);margin-top:4px;line-height:1.5"><strong>Facultatif depuis v1.15.6</strong> — le serveur transmet lui-même ce jeton au navigateur du client (sonde <code>?action=config</code>), donc il suffit de le poser dans <code>CAMERPAY_PUBLIC_INIT</code> côté serveur. Ce champ ne sert plus que de repli. ⚠️ <strong>Jamais</strong> la même valeur que le secret de synchronisation ni que <code>CAMERPAY_TOKEN</code>.</div>
+        </div>
+        <div class="fg full">
+          <span class="fl">🔑 Jeton public CamPay — self-service client (fournisseur de repli)</span>
           <input class="fi" id="payCampayPubToken" placeholder="pub_… (à recopier depuis CAMPAY_PUBLIC_INIT du serveur)" value="${_esc((DB.payApiConfig&&DB.payApiConfig.campayPublicToken)||'')}" onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.campayPublicToken=this.value.trim();save();toast('🔑 Jeton public enregistré');">
-          <div style="font-size:11px;color:var(--ink4);margin-top:4px;line-height:1.5">Permet au navigateur du <strong>client</strong> d'initier un paiement <strong>sans</strong> le secret admin. Doit être <strong>identique</strong> à <code>CAMPAY_PUBLIC_INIT</code> dans <code>api/payment_config.php</code>. Sans lui, seul l'admin peut lancer un encaissement. ⚠️ <strong>Jamais</strong> la même valeur que le secret de synchronisation.</div>
+          <div style="font-size:11px;color:var(--ink4);margin-top:4px;line-height:1.5">Ne sert que le jour où vous rebasculez sur CamPay (<code>PAY_PROVIDER = 'campay'</code>). Doit être identique à <code>CAMPAY_PUBLIC_INIT</code>.</div>
         </div>
       </div>
 
       <div class="fg2" style="margin-top:8px">
         <div class="fg full"><label style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--blb);border-radius:10px;cursor:pointer;border:2px dashed #C9A227">
           <input type="checkbox" id="payAutoPayout" ${(DB.payApiConfig&&DB.payApiConfig.autoPayout)?'checked':''} onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.autoPayout=this.checked;save();toast(this.checked?'⚡ Versement AUTOMATIQUE activé — les gains partent tout seuls':'Versement auto désactivé');re();">
-          <span><strong>⚡ Versement AUTOMATIQUE des gains (façon Yango)</strong> — dès qu'un bénéficiaire (parrain, auteur, partenaire de code) est crédité et franchit le seuil, CamPay lui envoie l'argent <strong>sans clic</strong>. ⚠️ Nécessite CamPay activé + wallet approvisionné.</span>
+          <span><strong>⚡ Versement AUTOMATIQUE des gains (façon Yango)</strong> — dès qu'un bénéficiaire (parrain, auteur, partenaire de code promo) est crédité et franchit le seuil, la passerelle lui envoie l'argent <strong>sans clic</strong>. ⚠️ Nécessite un fournisseur configuré + un solde approvisionné. Avec CamerPay, le lot part immédiatement mais attend une <strong>approbation CamerPay</strong> (&lt; 4 h ouvrées) avant d'être exécuté.</span>
         </label></div>
         <div class="fg full">
           <span class="fl">💸 Seuil de déclenchement du versement auto (FCFA)</span>
@@ -13895,8 +13923,25 @@ function pgSettings(){
         </label></div>
       </div>
 
-      <details class="mt12" style="background:var(--bg2);padding:14px 18px;border-radius:10px;">
-        <summary style="cursor:pointer;font-weight:700;color:var(--ink2)">⭐ Mise en service — CamPay (recommandé : MTN + Orange + versements partenaires)</summary>
+      <details class="mt12" open style="background:var(--bg2);padding:14px 18px;border-radius:10px;border:2px solid #059669">
+        <summary style="cursor:pointer;font-weight:700;color:var(--ink2)">⭐ Mise en service — CamerPay (voie de lancement : aucun compte bancaire d'entreprise exigé)</summary>
+        <div class="ib ibg mt12 mb0" style="background:rgba(5,150,105,.08)"><span>🇨🇲</span><span>CamerPay ouvre <strong>sans compte bancaire d'entreprise ni historique d'activité</strong> : la CNI du gérant <em>ou</em> un extrait RCCM suffit au premier palier, et les retraits partent vers un Mobile Money au nom du gérant. Vous pouvez même <strong>tout tester avant tout document</strong>, en sandbox.</span></div>
+        <ol style="font-size:13px;line-height:1.9;color:var(--ink3);margin:12px 0 0 20px">
+          <li>Créez le compte sur <a href="https://camerpay.biz/register" target="_blank" rel="noopener" style="color:var(--bl);font-weight:700">camerpay.biz/register</a> (gratuit, sans KYC)</li>
+          <li>Tableau de bord → <a href="https://camerpay.biz/client" target="_blank" rel="noopener" style="color:var(--bl);font-weight:700">camerpay.biz/client</a> → <strong>API &amp; webhooks</strong> → « Générer un nouveau token ». ⚠️ <strong>Il ne s'affiche qu'une fois</strong> : copiez-le tout de suite.</li>
+          <li>Sur le même écran, relevez le <strong>callback secret</strong> (il signe les webhooks)</li>
+          <li>Renseignez <code>CAMERPAY_TOKEN</code> et <code>CAMERPAY_CALLBACK_SECRET</code> dans <code>api/payment_config.php</code> sur le serveur LWS</li>
+          <li>Déclarez le <strong>webhook</strong> chez CamerPay : <br><code style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:11px">https://veritas-school.com/api/payment_camerpay.php?action=notify</code></li>
+          <li>Générez un <strong>jeton public</strong> (<code>CAMERPAY_PUBLIC_INIT</code>, p. ex. <code>pub_</code> + 32 caractères au hasard) et recopiez-le dans le champ ci-dessus — sans lui, seul l'admin peut encaisser</li>
+          <li>Testez en <strong>sandbox</strong> (aucun argent réel), puis validez votre KYC et passez <code>CAMERPAY_MODE</code> sur <code>'live'</code></li>
+          <li>Paliers KYC : <strong>CNI du gérant ou RCCM</strong> → 200 000 FCFA/mois · <strong>+ NIU</strong> → 1 000 000 FCFA/mois · <strong>RCCM + NIU + siège</strong> → illimité. Un dépassement renvoie une erreur qui nomme la pièce à fournir.</li>
+          <li>Guide pas à pas → <code>GUIDE_CAMERPAY_ACTIVATION.md</code></li>
+        </ol>
+      </details>
+
+      <details class="mt8" style="background:var(--bg2);padding:14px 18px;border-radius:10px;opacity:.85">
+        <summary style="cursor:pointer;font-weight:700;color:var(--ink2)">⏸️ Mis de côté — CamPay (à reprendre quand le compte entreprise existera)</summary>
+        <div class="ib ibt mt12 mb0"><span>⏸️</span><span>CamPay exige un <strong>compte bancaire d'entreprise</strong> et un <strong>historique d'activité</strong> — impossible en phase de lancement. Le code reste entier : posez les identifiants ci-dessous et passez <code>PAY_PROVIDER</code> sur <code>'campay'</code> pour rebasculer, sans toucher à l'application.</span></div>
         <ol style="font-size:13px;line-height:1.9;color:var(--ink3);margin:12px 0 0 20px">
           <li>Créez le compte sur <a href="https://www.campay.net" target="_blank" style="color:var(--bl);font-weight:700">campay.net</a> <strong>au nom du Centre VÉRITAS</strong> (RCCM + NIU + CNI du gérant)</li>
           <li>Déclarez le <strong>compte de règlement</strong> : compte bancaire de l'entité, ou MoMo business au nom de l'entité — c'est là que vous retirerez l'argent</li>
@@ -13939,9 +13984,9 @@ function pgSettings(){
       </details>
 
       <div class="fl2 g8 mt12 fw">
-        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','list','⚡ Encaissements CamPay')"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Encaissements CamPay (liste + net)</button>
-        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','balance','💰 Solde wallet CamPay')"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Solde wallet CamPay</button>
-        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView('payment_campay.php','payouts','📤 Versements partenaires CamPay')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Versements partenaires (CamPay)</button>
+        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView(_payProviderFile(),'list','⚡ Encaissements '+_payProviderName())"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Encaissements (liste + net)</button>
+        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView(_payProviderFile(),'balance','💰 Solde '+_payProviderName())"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Solde du compte</button>
+        <button class="btn bo sm" style="border-color:#059669;color:#059669" onclick="_payAdminView(_payProviderFile(),'payouts','📤 Versements partenaires '+_payProviderName())"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Versements partenaires</button>
         <button class="btn bo sm" onclick="_payAdminView('payment_orange.php','list','🟠 Paiements Orange')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Paiements Orange (liste)</button>
         <button class="btn bo sm" onclick="_payAdminView('payment_mtn.php','list','📱 Paiements MTN')"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Paiements MTN (liste)</button>
         <button class="btn bo sm" onclick="(function(){var u=DB.cloudConfig?.url;if(!u){toast('URL serveur non configurée','warn');return;}fetch(u.replace(/\\/+$/,'')+'/payment_orange.php?action=status&ref=TEST').then(function(r){return r.text();}).then(function(t){toast('🟠 Orange : '+t.substring(0,80));}).catch(function(e){toast('Erreur : '+e.message,'err');})})()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Tester Orange</button>
@@ -15756,7 +15801,7 @@ function renderQuizScore(){
   html+='<div style="font-size:48px;margin-bottom:12px">🏆</div>';
   html+='<div class="quiz-score-n">'+s.score+'/'+s.qbank.length+'</div>';
   html+='<div class="quiz-score-stars">'+stars+'</div>';
-  html+='<div style="font-family:Lora,Georgia,serif;font-size:16px;color:#1E2D5A;font-weight:600;margin:8px 0">'+pct+'% de réussite</div>';
+  html+='<div style="font-family:Libre Baskerville,Georgia,serif;font-size:16px;color:#1E2D5A;font-weight:600;margin:8px 0">'+pct+'% de réussite</div>';
   html+='<div style="font-size:13px;color:#6B7A99;margin-bottom:20px">'+msg+'</div>';
   // Save score
   var scoreKey='quiz_'+s.titre.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_'+new Date().toDateString();
@@ -28527,7 +28572,7 @@ function openPaymentModal(payInfo){
     + (_payCampayReady()
         ? '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08);">'
             + '<span>⚡</span>'
-            + '<span><strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24h).</span>'
+            + '<span>'+_payTileBandeau()+'</span>'
           + '</div>'
         : '<div class="ib ibt mb12" style="background:rgba(220,38,38,.08);">'
             + '<span>⚠️</span>'
@@ -28545,11 +28590,11 @@ function openPaymentModal(payInfo){
           ? '<div class="paymethod" style="background:#fff;border:2px solid #059669;border-radius:12px;padding:14px;grid-column:1/-1">'
             +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
               +'<div style="font-size:28px">⚡</div>'
-              +'<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">Paiement automatique — MTN MoMo ou Orange Money</div>'
+              +'<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:14px;color:#142554">'+_payTileTitre()+'</div>'
               +'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>'
             +'</div>'
-            +'<div style="font-size:11px;color:var(--ink4);line-height:1.5;margin-bottom:8px">Entrez votre numéro : l\'opérateur est détecté automatiquement. Vous recevez une demande de paiement à valider avec votre code secret. <strong>Votre accès s\'active tout seul.</strong></div>'
-            +'<input class="fi" id="campayPhoneInput_'+ref+'" placeholder="Votre n° MTN ou Orange (ex : 6XX XX XX XX)" value="'+(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:8px 10px;width:100%;margin-bottom:8px">'
+            +'<div style="font-size:11px;color:var(--ink4);line-height:1.5;margin-bottom:8px">'+_payTileTexte()+'</div>'
+            +'<input class="fi" id="campayPhoneInput_'+ref+'" placeholder="'+_payTilePlaceholder()+'" value="'+(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:8px 10px;width:100%;margin-bottom:8px">'
             +'<button class="btn" style="width:100%;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitCampay(\''+ref+'\','+montant+',\''+_esc(label).replace(/\x27/g,"")+'\',\''+(payInfo.intent||"generic")+'\',\''+(payInfo.targetId||"")+'\',\''+(payInfo.customerAccountId||"")+'\',\''+(payInfo.customerNom||"").replace(/\x27/g,"")+'\')">⚡ Payer maintenant — '+montantFmt+'</button>'
           +'</div>'
           : '')
@@ -28832,9 +28877,81 @@ function _payApiBase(){
 // serveur campayInitGuard()). Un vrai visiteur n'a JAMAIS le secret admin.
 function _payInitToken(){
   if(DB.cloudConfig && DB.cloudConfig.secret) return DB.cloudConfig.secret;
-  if(DB.payApiConfig && DB.payApiConfig.campayPublicToken) return DB.payApiConfig.campayPublicToken;
-  return '';
+  // 🔑 Le jeton public servi par la SONDE d'abord. C'est le seul chemin qui
+  // fonctionne pour un vrai visiteur : il n'a pas le secret de synchronisation
+  // (réservé à l'admin) et il ne télécharge JAMAIS `DB.payApiConfig`
+  // (public_data.php ne l'expose pas, et la base complète demande le secret).
+  // Le champ ⚙️ Paramètres ne servait donc que sur le poste de l'admin —
+  // c'est-à-dire nulle part où un client paie. Sans ceci, le client voyait
+  // « Payer maintenant » puis « libre-service indisponible » : un cul-de-sac.
+  var s = window._VRT_CAMPAY;
+  if(s && s.publicInitToken) return s.publicInitToken;
+  // Repli : la valeur recopiée à la main par l'admin (postes déjà configurés,
+  // ou serveur trop ancien pour renvoyer le jeton dans la sonde).
+  var c = DB.payApiConfig || {};
+  // Le jeton public dépend du fournisseur actif : celui de CamerPay ne vaut
+  // rien pour CamPay et réciproquement. On prend celui du fournisseur en
+  // service, avec repli sur l'autre (une seule clé renseignée = cas courant).
+  if(_payProviderFile() === 'payment_camerpay.php'){
+    return c.camerpayPublicToken || c.campayPublicToken || '';
+  }
+  return c.campayPublicToken || c.camerpayPublicToken || '';
 }
+
+// ── Quel fichier serveur encaisse ? ───────────────────────────────────────
+// VÉRITAS parle à DEUX passerelles. CamPay exige un compte bancaire
+// d'entreprise (bloquant au lancement) ; CamerPay ouvre avec la CNI du gérant.
+// Le SERVEUR tranche (constante PAY_PROVIDER + clés réellement posées) et le
+// renvoie dans la sonde `?action=config` : le front n'a rien à deviner, et
+// rebasculer sur CamPay ne demandera pas une seule ligne de JavaScript.
+function _payProviderFile(){
+  var c = window._VRT_CAMPAY;
+  if(c && c.file) return c.file;
+  // Sonde pas encore revenue : on tente CamerPay, qui est le fournisseur de
+  // lancement. Si le fichier n'existe pas côté serveur, la sonde corrigera.
+  return 'payment_camerpay.php';
+}
+window._payProviderFile = _payProviderFile;
+
+// CamerPay envoie le payeur sur une page de paiement hébergée (redirection) ;
+// CamPay poussait un prompt USSD sur le téléphone. Les deux parcours n'ont ni
+// le même texte ni les mêmes écrans — d'où ce test, utilisé partout.
+function _payFlowIsRedirect(){
+  var c = window._VRT_CAMPAY;
+  return !!(c && c.flow === 'redirect');
+}
+window._payFlowIsRedirect = _payFlowIsRedirect;
+
+// ── Formulations du bouton de paiement automatique ────────────────────────
+// Les deux parcours ne promettent PAS la même chose : en USSD on annonce un
+// prompt sur le téléphone, en redirection une page où l'on choisit son moyen
+// (carte et PayPal compris). Ces quatre helpers évitent de dupliquer la
+// condition dans les deux écrans de paiement — et qu'un seul des deux soit
+// corrigé le jour où le texte change.
+function _payTileTitre(){
+  return _payFlowIsRedirect()
+    ? 'Paiement automatique — MoMo, Orange, carte ou PayPal'
+    : 'Paiement automatique — MTN MoMo ou Orange Money';
+}
+function _payTileTexte(){
+  return _payFlowIsRedirect()
+    ? 'Vous êtes redirigé vers la page de paiement sécurisée, où vous choisissez votre moyen. <strong>Votre accès s\'active tout seul</strong> dès le paiement confirmé.'
+    : 'Entrez votre numéro : l\'opérateur est détecté automatiquement. Vous validez avec votre code secret et <strong>votre accès s\'active tout seul</strong>.';
+}
+function _payTilePlaceholder(){
+  return _payFlowIsRedirect()
+    ? 'Votre n° de téléphone (facultatif)'
+    : 'Votre n° MTN ou Orange (ex : 6XX XX XX XX)';
+}
+function _payTileBandeau(){
+  return _payFlowIsRedirect()
+    ? '<strong>Paiement automatique disponible :</strong> réglez par MoMo, Orange Money, carte bancaire ou PayPal, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).'
+    : '<strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).';
+}
+window._payTileTitre = _payTileTitre;
+window._payTileTexte = _payTileTexte;
+window._payTilePlaceholder = _payTilePlaceholder;
+window._payTileBandeau = _payTileBandeau;
 
 // ── Sonde de capacité CamPay (le SERVEUR fait foi) ────────────────────────
 // Avant : l'affichage du paiement automatique dépendait d'une case à cocher
@@ -28846,8 +28963,11 @@ window._VRT_CAMPAY = null;
 
 function _payCampayProbe(){
   // Cache de session (10 min) : évite une requête par ouverture de modale.
+  // Clé versionnée (…Cap2) : une réponse mise en cache par la version
+  // précédente ne porte pas `publicInitToken`, et le client serait resté
+  // 10 minutes sans pouvoir payer après la mise à jour.
   try{
-    var raw = sessionStorage.getItem('_vrtCampayCap');
+    var raw = sessionStorage.getItem('_vrtCampayCap2');
     if(raw){
       var c = JSON.parse(raw);
       if(c && (Date.now() - c._t) < 600000){ window._VRT_CAMPAY = c; return Promise.resolve(c); }
@@ -28857,16 +28977,32 @@ function _payCampayProbe(){
   var base = _payApiBase();
   if(!base) return Promise.resolve(null);
 
-  return fetch(base+'/payment_campay.php?action=config', {method:'GET'})
+  var _keep = function(d, file, flow){
+    if(!d || !d.ok) return null;
+    d.file = d.file || file;
+    d.flow = d.flow || flow;
+    d._t   = Date.now();
+    window._VRT_CAMPAY = d;
+    try{ sessionStorage.setItem('_vrtCampayCap2', JSON.stringify(d)); }catch(e){}
+    return d;
+  };
+
+  // CamerPay répond POUR LES DEUX : sa sonde dit quel fournisseur est actif
+  // (`file`, `flow`) et si CamPay est configuré. Une seule requête suffit donc
+  // dans le cas normal. Le repli sur payment_campay.php ne sert qu'aux serveurs
+  // où payment_camerpay.php n'est pas encore déployé.
+  return fetch(base+'/payment_camerpay.php?action=config', {method:'GET'})
     .then(function(r){ return r.ok ? r.json() : null; })
     .then(function(d){
-      if(!d || !d.ok) return null;
-      d._t = Date.now();
-      window._VRT_CAMPAY = d;
-      try{ sessionStorage.setItem('_vrtCampayCap', JSON.stringify(d)); }catch(e){}
-      return d;
+      if(d && d.ok && d.file) return _keep(d, d.file, d.flow);
+      throw new Error('camerpay-indisponible');
     })
-    .catch(function(){ return null; });   // hors ligne / endpoint absent → repli silencieux
+    .catch(function(){
+      return fetch(base+'/payment_campay.php?action=config', {method:'GET'})
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){ return _keep(d, 'payment_campay.php', 'ussd'); })
+        .catch(function(){ return null; });   // hors ligne / endpoints absents → repli silencieux
+    });
 }
 
 // Le paiement automatique est-il réellement proposable à un client final ?
@@ -28901,12 +29037,31 @@ function _campayRenderDiag(){
     if(!el) return;
     if(!c){
       el.style.background = 'rgba(217,119,6,.10)';
-      el.innerHTML = '⚠️ <strong>Serveur CamPay injoignable</strong> — <code>api/payment_campay.php</code> ne répond pas (fichier non déployé ?). Les paiements restent manuels.';
+      el.innerHTML = '⚠️ <strong>Serveur de paiement injoignable</strong> — ni <code>api/payment_camerpay.php</code> ni <code>api/payment_campay.php</code> ne répondent (fichiers non déployés ?). Les paiements restent manuels.';
       return;
     }
+    var nom = (c.provider === 'camerpay') ? 'CamerPay' : (c.provider === 'campay' ? 'CamPay' : 'Aucun fournisseur');
+    // Webhook non signé = notifications REFUSÉES par le serveur (fail-closed).
+    // Les paiements aboutissent quand même (le suivi du payeur et la
+    // réconciliation du tableau de bord confirment), mais l'activation cesse
+    // d'être instantanée : ça doit se voir, pas se deviner dans un journal.
+    var _hook = (c.provider === 'camerpay' && c.webhookSecret === false)
+      ? '<div style="margin-top:8px;padding:8px 10px;border-radius:8px;background:rgba(217,119,6,.14);color:#92400e;font-weight:700">⚠️ <code>CAMERPAY_CALLBACK_SECRET</code> absent — les notifications CamerPay sont <strong>rejetées</strong> et l\'activation se fait au bout de quelques secondes de suivi (ou à l\'ouverture de « Encaissements »), pas instantanément. Posez le « callback secret » du tableau de bord CamerPay dans <code>api/payment_config.php</code>.</div>'
+      : '';
     if(c.canCollect){
+      // Le mode TEST doit crier : un encaissement sandbox ressemble trait pour
+      // trait à un vrai, et personne ne doit croire que l'argent est arrivé.
+      if(c.sandbox || c.mode === 'sandbox' || c.mode === 'demo'){
+        el.style.background = 'rgba(217,119,6,.14)';
+        el.innerHTML = '🧪 <strong>'+nom+' en mode TEST</strong> — la chaîne complète fonctionne, mais <strong>aucun argent réel ne circule</strong>.'
+          + '<div style="margin-top:6px;color:var(--ink4)">Validez votre KYC sur <code>camerpay.biz/client</code>, puis passez <code>CAMERPAY_MODE</code> sur <code>live</code> dans <code>api/payment_config.php</code>.</div>'
+          + _hook;
+        return;
+      }
       el.style.background = 'rgba(5,150,105,.10)';
-      el.innerHTML = '✅ <strong>Encaissement automatique opérationnel</strong> (mode <strong>'+_esc(c.mode)+'</strong>) — MTN + Orange. Rien d\'autre à faire.';
+      el.innerHTML = '✅ <strong>Encaissement automatique opérationnel</strong> via <strong>'+nom+'</strong> — MTN, Orange'
+        + (c.provider === 'camerpay' ? ', carte bancaire et PayPal' : '') + '. Rien d\'autre à faire.'
+        + _hook;
       return;
     }
     el.style.background = 'rgba(217,119,6,.10)';
@@ -28941,22 +29096,101 @@ function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom){
   }
   var phoneEl = document.getElementById('campayPhoneInput_'+ref);
   var tel = phoneEl ? phoneEl.value.replace(/[^0-9+]/g,'') : '';
-  if(!tel || tel.replace(/[^0-9]/g,'').length < 9){
+  var redirect = _payFlowIsRedirect();
+  // En parcours REDIRECTION (CamerPay) le payeur choisit son moyen sur la page
+  // hébergée : il peut payer par carte ou PayPal, donc exiger un numéro
+  // MTN/Orange bloquerait un client qui n'en a pas. Le numéro reste utile
+  // (pré-remplissage + détection d'opérateur) mais devient facultatif. En
+  // parcours USSD (CamPay) il est indispensable : c'est là que part le prompt.
+  if(tel && tel.replace(/[^0-9]/g,'').length < 9){
+    toast('⚠️ Ce numéro est incomplet — laissez le champ vide ou corrigez-le','warn');
+    if(phoneEl) phoneEl.focus();
+    return;
+  }
+  if(!tel && !redirect){
     toast('⚠️ Entrez un numéro MTN ou Orange valide','warn');
     if(phoneEl) phoneEl.focus();
     return;
   }
-  toast('⏳ Envoi de la demande de paiement sur '+tel+'...','info');
-  var endpoint = _base+'/payment_campay.php?action=init';
+
+  // ⚠️ Le popup DOIT être ouvert pendant le geste utilisateur (le clic), pas
+  // dans le .then() : un window.open() différé est bloqué par tous les
+  // navigateurs. On ouvre donc une fenêtre vide tout de suite et on y pose
+  // l'URL quand le serveur répond. Si le blocage survient quand même, la
+  // modale affiche un bouton — le parcours n'est jamais dans une impasse.
+  var _win = null;
+  if(redirect){ try{ _win = window.open('', '_blank'); }catch(e){ _win = null; } }
+
+  toast(redirect ? '⏳ Ouverture de la page de paiement sécurisée...'
+                 : '⏳ Envoi de la demande de paiement sur '+tel+'...','info');
+  var endpoint = _base+'/'+_payProviderFile()+'?action=init';
+  // Détail du panier mis de côté par openPaymentModal (voir _VRT_PAYX) : sans
+  // lui, un paiement « cart » confirmé alors que le payeur a fermé son
+  // navigateur n'activait aucun des articles côté serveur.
+  var _extra = (window._VRT_PAYX && window._VRT_PAYX[ref]) || {};
+  var _body = {ref:ref,montant:montant,label:label,intent:intent,targetId:targetId,
+      accountId:accountId,clientNom:nom,clientTel:tel,commissions:_payPendingCommissions(intent,targetId)};
+  if(_extra.lignes) _body.lignes = _extra.lignes;
   fetch(endpoint, {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+_tok},
-    body: JSON.stringify({ref:ref,montant:montant,label:label,intent:intent,targetId:targetId,
-      accountId:accountId,clientNom:nom,clientTel:tel,commissions:_payPendingCommissions(intent,targetId)})
+    body: JSON.stringify(_body)
   })
   .then(function(r){return r.json();})
   .then(function(data){
-    if(data.error){toast('❌ CamPay : '+data.error,'err');return;}
+    if(data.error){
+      if(_win){ try{ _win.close(); }catch(e){} }
+      toast('❌ '+_payProviderName()+' : '+data.error,'err');
+      return;
+    }
+
+    // ── Parcours REDIRECTION (CamerPay) ────────────────────────────────────
+    // Pas de code secret à composer ici : le payeur atterrit sur la page
+    // CamerPay, y choisit Orange / MTN / carte / PayPal, et revient. Le suivi
+    // se fait par polling, exactement comme en USSD.
+    if(redirect || data.pay_url){
+      var url = data.pay_url || '';
+      if(!url){
+        if(_win){ try{ _win.close(); }catch(e){} }
+        toast('❌ Page de paiement introuvable — réessayez','err');
+        return;
+      }
+      var ouverte = false;
+      if(_win){ try{ _win.location.href = url; ouverte = (_win.closed === false); }catch(e){ ouverte = false; } }
+      if(!ouverte){ try{ var _w2 = window.open(url, '_blank'); ouverte = !!(_w2 && _w2.closed === false); }catch(e){ ouverte = false; } }
+      // Aucun onglet ouvrable — cas de la webview de l'app Android (Capacitor),
+      // où `_blank` ne donne rien. On bascule alors sur une navigation DANS la
+      // fenêtre courante : c'est le parcours normal d'une passerelle par
+      // redirection, et `merchant_return_url` ramène le payeur sur VÉRITAS où
+      // _payResumeFromHash() rouvre l'écran de suivi. Le lien reste un clic de
+      // l'utilisateur : on ne l'éjecte pas de l'application sans qu'il le veuille.
+      var lienAttrs = ouverte ? ' target="_blank" rel="noopener"' : ' rel="noopener"';
+      cm();
+      M('💳 Paiement sécurisé','Référence : '+ref,
+        '<div style="text-align:center;padding:18px">'
+        +'<div style="font-size:56px;margin-bottom:12px">'+(data.sandbox?'🧪':'🔒')+'</div>'
+        +(data.sandbox
+          ? '<div style="font-size:12px;font-weight:800;color:#b45309;background:rgba(217,119,6,.12);padding:8px 10px;border-radius:8px;margin-bottom:12px">MODE TEST — aucun argent réel ne circule</div>'
+          : '')
+        +'<div style="font-size:14px;color:var(--ink2);margin-bottom:12px"><strong>'
+          +(ouverte ? 'La page de paiement s\'est ouverte dans un nouvel onglet.' : 'Ouvrez la page de paiement pour continuer.')
+        +'</strong></div>'
+        +'<div style="font-size:13px;color:var(--ink3);margin-bottom:14px;background:var(--blb);padding:12px;border-radius:8px;border:1px solid var(--bld)">Choisissez-y <strong>Orange Money, MTN MoMo, carte bancaire ou PayPal</strong> pour régler <strong>'+new Intl.NumberFormat("fr-FR").format(montant)+' FCFA</strong>, puis revenez sur cette page.</div>'
+        +'<a href="'+_esc(url)+'"'+lienAttrs+' class="btn" style="display:block;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;text-decoration:none">'
+          +(ouverte ? '🔁 Rouvrir la page de paiement' : '💳 Ouvrir la page de paiement')+'</a>'
+        +'<div style="font-size:12px;color:var(--ink4);margin-top:12px">'
+          +(ouverte
+            ? '⏱ Ne fermez pas cette fenêtre : l\'activation se fait toute seule dès le paiement confirmé.'
+            : '⏱ Vous serez ramené ici automatiquement après le paiement, et l\'activation se fera toute seule.')
+        +'</div>'
+        +'<div id="payCampayStatus" style="margin-top:14px;font-size:13px;color:var(--bl);font-weight:700;padding:10px;background:var(--bg2);border-radius:8px">⏳ En attente de votre paiement...</div>'
+        +'</div>',
+        '<button class="btn bo" onclick="cm();_payStopPolling()">Fermer</button>');
+      _payStartPollingCampay(ref);
+      return;
+    }
+
+    // ── Parcours USSD (CamPay) ─────────────────────────────────────────────
     var op = data.operator ? (data.operator==='ORANGE'?'🟠 Orange Money':'📱 MTN MoMo') : 'votre opérateur';
     cm();
     M('⏳ Paiement en cours','Référence : '+ref,
@@ -28972,19 +29206,36 @@ function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom){
     _payStartPollingCampay(ref);
   })
   .catch(function(err){
-    console.error('[CamPay init]',err);
+    if(_win){ try{ _win.close(); }catch(e){} }
+    console.error('['+_payProviderName()+' init]',err);
     toast('❌ Connexion serveur impossible','err');
   });
 }
 
-// Polling CamPay (utilise payment_campay.php — même contrat que MTN/Orange)
+// Nom lisible du fournisseur actif — pour ne pas écrire « CamPay » dans un
+// message alors que c'est CamerPay qui a répondu (et inversement).
+function _payProviderName(){
+  var c = window._VRT_CAMPAY;
+  if(c && c.provider === 'campay') return 'CamPay';
+  if(c && c.provider === 'camerpay') return 'CamerPay';
+  return (_payProviderFile() === 'payment_campay.php') ? 'CamPay' : 'CamerPay';
+}
+window._payProviderName = _payProviderName;
+
+// Polling du fournisseur actif (même contrat de réponse que MTN/Orange)
 function _payStartPollingCampay(ref){
   _payStopPolling();
-  var url = _payApiBase()+'/payment_campay.php?action=status&ref='+encodeURIComponent(ref);
+  var url = _payApiBase()+'/'+_payProviderFile()+'?action=status&ref='+encodeURIComponent(ref);
   var checks = 0;
+  // En redirection, le payeur quitte l'application : il lui faut le temps de
+  // choisir son moyen, saisir son numéro et valider. 3 minutes suffisaient pour
+  // un prompt USSD déjà affiché sur le téléphone ; ici on tient 12 minutes.
+  var redirect = _payFlowIsRedirect();
+  var maxChecks = redirect ? 144 : 36;
+  var attente = redirect ? '⏳ En attente de votre paiement...' : '⏳ En attente de votre code secret...';
   _payPollTimer = setInterval(function(){
     checks++;
-    if(checks > 36){ // arrêt après 3 min
+    if(checks > maxChecks){
       _payStopPolling();
       var sel=document.getElementById('payCampayStatus');
       if(sel){sel.innerHTML='⏰ Délai dépassé. Réessayez si le paiement n\'a pas abouti.';sel.style.color='var(--or)';}
@@ -29001,9 +29252,18 @@ function _payStartPollingCampay(ref){
         if(att){
           att.operateur = data.operator||'';
           // Activation + splits parrains/auteurs + commissions code promo (idempotent)
-          _payFinalizePaid(att, 'campay');
-          if(window.VN) VN.toAdmin('✅ Paiement CamPay auto-confirmé',
-            'Réf '+ref+' validé via CamPay '+(data.operator||'')+' ('+(att.activationResult||'OK')+')','success');
+          _payFinalizePaid(att, (window._VRT_CAMPAY && window._VRT_CAMPAY.provider === 'campay') ? 'campay' : 'camerpay');
+          if(window.VN) VN.toAdmin('✅ Paiement '+_payProviderName()+' auto-confirmé',
+            'Réf '+ref+' validé via '+_payProviderName()+' '+(data.operator||'')+' ('+(att.activationResult||'OK')+')','success');
+          // Le reçu est déjà émis par _payFinalizePaid : on le met sous la main
+          // du payeur pendant qu'il regarde l'écran, pas dans un menu qu'il
+          // faudra retrouver. Et on ne referme plus la modale toute seule tant
+          // qu'il ne l'a pas vue.
+          statusEl.innerHTML = '✅ Paiement confirmé — accès activé.'
+            + '<div style="margin-top:10px"><button class="btn bi" style="width:100%" onclick="_recuOuvrir(\''+String(ref).replace(/[^\w\-]/g,'')+'\')">🧾 Télécharger mon reçu</button></div>';
+          statusEl.style.color = 'var(--gr)';
+          if(typeof toast==='function') toast('✅ Paiement confirmé et accès activé !','ok');
+          return;
         }
         setTimeout(function(){cm();toast('✅ Paiement confirmé et accès activé !','ok');},2500);
       } else if(data.status==='underpaid'){
@@ -29016,7 +29276,7 @@ function _payStartPollingCampay(ref){
         statusEl.style.color = 'var(--re)';
         _payStopPolling();
       } else {
-        statusEl.innerHTML = '⏳ En attente de votre code secret... ('+(checks*5)+'s)';
+        statusEl.innerHTML = attente+' ('+(checks*5)+'s)';
       }
     }).catch(function(){});
   }, 5000);
@@ -29148,6 +29408,12 @@ function mPayAttempts(){
           +'<td style="font-size:11px;color:var(--ink4);white-space:nowrap;vertical-align:top">'+dt+'</td>'
           +'<td style="vertical-align:top"><span style="padding:3px 8px;border-radius:10px;font-size:10px;font-weight:800;background:'+statColor+';color:#fff">'+_esc(a.status||'pending').toUpperCase()+'</span></td>'
           +'<td style="white-space:nowrap;vertical-align:top">'+btnPaye+btnAbo
+            // Réédition du reçu : un parent le perd, le redemande six mois plus
+            // tard. Le numéro ne change pas (idempotence par référence), donc
+            // rééditer ne crée jamais un second reçu pour le même paiement.
+            +((a.status==='paid')
+              ? ' <button class="btn xs bo" onclick="_recuOuvrir(\''+String(a.ref).replace(/[^\w\-]/g,'')+'\')" title="Éditer ou rééditer le reçu numéroté">🧾</button>'
+              : '')
             +' <button class="btn xs bo" onclick="_payDelete(\''+a.ref+'\')">🗑</button>'
           +'</td>'
         +'</tr>';
@@ -29203,9 +29469,194 @@ window._payFinalizePaid = function(att, source){
   try { _payConfirmPromoCommissions(att); }
   catch(e){ console.warn('_payConfirmPromoCommissions:', e); }
 
+  // 4. Reçu : émis AUTOMATIQUEMENT, quel que soit le chemin de confirmation.
+  //    Au Cameroun un paiement sans reçu numéroté ne vaut rien devant un parent
+  //    qui conteste, ni devant un contrôle. On ne le fabrique donc pas « quand
+  //    on y pense » : il naît avec la confirmation, dans la même transaction.
+  try { _recuEmettre(att); } catch(e){ console.warn('[reçu]', e); }
+
   att._finalized = true;
   try { save(); } catch(e){}
   return result;
+};
+
+/* ═══════════════════════════════════════════════════════════════════════
+   REÇUS AUTOMATIQUES — un document numéroté par paiement confirmé
+   ─────────────────────────────────────────────────────────────────────
+   Émis par _payFinalizePaid, donc par les CINQ chemins de confirmation :
+   validation manuelle de l'admin, CamerPay, CamPay, MTN API, Orange API.
+   IDEMPOTENT par référence de paiement : un webhook rejoué, un polling qui
+   double, une validation manuelle après coup — un seul reçu, un seul numéro.
+   La numérotation est ANNUELLE et continue (VR-2026-0001) : un trou dans la
+   série est ce qu'un contrôleur cherche en premier.
+   ═════════════════════════════════════════════════════════════════════ */
+function _recuNumeroSuivant(){
+  var an = new Date().getFullYear();
+  var n = 0;
+  (DB.recus||[]).forEach(function(r){
+    if(!r || String(r.annee) !== String(an)) return;
+    var s = parseInt(r.seq, 10) || 0;
+    if(s > n) n = s;
+  });
+  return { annee: an, seq: n + 1, numero: 'VR-' + an + '-' + ('000' + (n + 1)).slice(-4) };
+}
+
+// Montant en toutes lettres (français) — obligatoire sur un reçu manuscrit,
+// attendu sur un reçu imprimé. Gère les règles qui se ratent : quatre-vingts,
+// cent/cents, mille invariable, « et un ».
+function _recuLettres(n){
+  n = Math.max(0, Math.round(Number(n) || 0));
+  if(n === 0) return 'zéro';
+  var U = ['','un','deux','trois','quatre','cinq','six','sept','huit','neuf','dix','onze','douze',
+           'treize','quatorze','quinze','seize','dix-sept','dix-huit','dix-neuf'];
+  var D = ['','','vingt','trente','quarante','cinquante','soixante','soixante','quatre-vingt','quatre-vingt'];
+  // `avantMille` : « cent » et « quatre-vingt » perdent leur -s devant MILLE,
+  // qui est un numéral invariable — « cinq cent mille », « quatre-vingt mille ».
+  // Devant MILLION (un nom, lui) l'accord revient : « deux cents millions ».
+  function sous100(x, avantMille){
+    if(x < 20) return U[x];
+    var d = Math.floor(x/10), u = x%10;
+    if(d === 7 || d === 9){ d -= 1; u += 10; }
+    var mot = D[d];
+    if(d === 8 && u === 0 && !avantMille) mot += 's';   // quatre-vingts
+    if(u === 0) return mot;
+    // ⚠️ d a DÉJÀ été ramené (70→60, 90→80) juste au-dessus : le test doit
+    // porter sur la dizaine transformée. « soixante et onze », mais
+    // « quatre-vingt-onze » sans « et ».
+    if(u === 1 && d !== 8) return mot + ' et un';
+    if(u === 11 && d === 6) return mot + ' et onze';
+    return mot + '-' + U[u];
+  }
+  function sous1000(x, avantMille){
+    var c = Math.floor(x/100), r = x%100;
+    if(c === 0) return sous100(r, avantMille);
+    var mot = (c === 1 ? 'cent' : U[c] + ' cent');
+    if(c > 1 && r === 0 && !avantMille) mot += 's';     // deux cents / deux cent trois
+    return r === 0 ? mot : mot + ' ' + sous100(r, avantMille);
+  }
+  var out = [];
+  var mil = Math.floor(n/1000000), reste = n%1000000;
+  var mille = Math.floor(reste/1000), unites = reste%1000;
+  if(mil > 0)   out.push(mil === 1 ? 'un million' : sous1000(mil, false) + ' millions');
+  if(mille > 0) out.push(mille === 1 ? 'mille' : sous1000(mille, true) + ' mille');
+  if(unites > 0) out.push(sous1000(unites, false));
+  return out.join(' ').replace(/\s+/g,' ').trim();
+}
+
+// Émission. Renvoie le reçu (existant ou neuf) — jamais null, jamais deux fois
+// le même numéro pour une même référence de paiement.
+window._recuEmettre = function(att){
+  if(!att || !att.ref) return null;
+  DB.recus = DB.recus || [];
+  var deja = DB.recus.filter(function(r){ return r && r.payRef === att.ref; })[0];
+  if(deja) return deja;
+
+  var num = _recuNumeroSuivant();
+  var d = new Date();
+  var recu = {
+    id: (typeof gid==='function') ? gid() : ('r'+Date.now()),
+    numero: num.numero, annee: num.annee, seq: num.seq,
+    payRef: att.ref,
+    montant: att.montant || 0,
+    label: att.label || 'Paiement VÉRITAS',
+    intent: att.intent || 'generic',
+    // Le payeur : ce que la tentative a retenu, sinon la session en cours.
+    nom: att.customerNom || att.clientNom || att.nom
+         || ((typeof SES!=='undefined' && SES) ? ((SES.pre||'')+' '+(SES.nom||'')).trim() : '') || 'Client',
+    tel: att.customerTel || att.clientTel || '',
+    accountId: att.customerAccountId || att.accountId || '',
+    mode: _recuLibelleMode(att),
+    operateur: att.operateur || '',
+    // Un encaissement de TEST doit le dire sur le papier, sinon il circule
+    // comme une preuve de paiement réelle.
+    test: !!att.sandbox,
+    date: d.toLocaleDateString('fr-FR'),
+    heure: d.toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'}),
+    emisLe: d.toISOString()
+  };
+  DB.recus.push(recu);
+  try { save(); } catch(e){}
+  return recu;
+};
+
+function _recuLibelleMode(att){
+  var m = String(att.providerAuto || att.mode || '').toLowerCase();
+  if(m.indexOf('camerpay') === 0) return 'CamerPay' + (att.operateur ? ' — ' + att.operateur : '');
+  if(m.indexOf('campay')   === 0) return 'CamPay'   + (att.operateur ? ' — ' + att.operateur : '');
+  if(m.indexOf('mtn')      === 0) return 'MTN MoMo';
+  if(m.indexOf('orange')   === 0) return 'Orange Money';
+  if(m === 'manuel' || m === '')  return 'Validation par le centre';
+  return att.providerAuto || att.mode || 'Paiement';
+}
+
+// Le document. Charte VÉRITAS (navy/or), lisible en noir et blanc — un reçu
+// finit toujours photocopié.
+function _recuHTML(r){
+  var E = (typeof _esc==='function') ? _esc : function(s){ return String(s==null?'':s); };
+  var ec = (DB.school||{});
+  var mnt = new Intl.NumberFormat('fr-FR').format(r.montant||0);
+  var bandeauTest = r.test
+    ? '<div style="background:#fef3c7;border:2px dashed #d97706;color:#92400e;text-align:center;font-weight:900;padding:8px;border-radius:8px;margin-bottom:14px;letter-spacing:1px">SPÉCIMEN — PAIEMENT DE TEST, AUCUNE SOMME ENCAISSÉE</div>'
+    : '';
+  var ligne = function(k, v){
+    return '<tr><td style="padding:7px 0;color:#5b6478;font-size:12.5px;width:38%">'+E(k)+'</td>'
+         + '<td style="padding:7px 0;font-size:13.5px;font-weight:700;color:#142554">'+E(v)+'</td></tr>';
+  };
+  return '<div style="font-family:Inter,Arial,sans-serif;max-width:760px;margin:0 auto;padding:34px 38px;color:#142554;background:#fff">'
+    + bandeauTest
+    // `flex-wrap` + `gap` : le reçu est très souvent consulté sur un téléphone
+    // avant d'être imprimé. Sans cela, le bloc « N° … » se coupait en deux.
+    + '<div style="display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #FFC93C;padding-bottom:14px;margin-bottom:6px">'
+      + '<div>'
+        + '<div style="font-family:Montserrat,Arial,sans-serif;font-size:22px;font-weight:900;letter-spacing:.5px">'+E(ec.nom||'VÉRITAS Academy')+'</div>'
+        + '<div style="font-size:12px;color:#5b6478;margin-top:2px">'+E(ec.slogan||"Centre d'Excellence Scolaire")+'</div>'
+        + '<div style="font-size:11.5px;color:#5b6478;margin-top:6px;line-height:1.6">'+E(ec.ville||'Douala, Cameroun')
+          + (ec.tel ? '<br>Tél. '+E(ec.tel) : '') + (ec.bp ? '<br>'+E(ec.bp) : '') + '</div>'
+      + '</div>'
+      + '<div style="text-align:right">'
+        + '<div style="display:inline-block;background:#142554;color:#FFC93C;border-radius:8px;padding:8px 16px;font-family:Montserrat,Arial,sans-serif;font-weight:900;font-size:15px;letter-spacing:1px">REÇU DE PAIEMENT</div>'
+        + '<div style="font-family:Fira Code,monospace;font-size:17px;font-weight:900;margin-top:10px;white-space:nowrap">N° '+E(r.numero)+'</div>'
+        + '<div style="font-size:11.5px;color:#5b6478;margin-top:3px">'+E(r.date)+' à '+E(r.heure)+'</div>'
+      + '</div>'
+    + '</div>'
+    + '<div style="text-align:center;margin:22px 0 18px">'
+      + '<div style="font-size:12px;color:#5b6478;text-transform:uppercase;letter-spacing:2px;font-weight:700">Montant reçu</div>'
+      + '<div style="font-family:Montserrat,Arial,sans-serif;font-size:40px;font-weight:900;color:#142554;line-height:1.15">'+mnt+' <span style="font-size:20px">FCFA</span></div>'
+      + '<div style="font-size:12.5px;font-style:italic;color:#5b6478;margin-top:4px">soit '+E(_recuLettres(r.montant))+' francs CFA</div>'
+    + '</div>'
+    + '<table style="width:100%;border-collapse:collapse;border-top:1px solid #e6e8ef;border-bottom:1px solid #e6e8ef">'
+      + ligne('Reçu de', r.nom)
+      + (r.tel ? ligne('Téléphone', r.tel) : '')
+      + ligne('Objet du paiement', String(r.label||'').replace(/^[^\w\dÀ-ÿ]+/,'').trim() || 'Paiement VÉRITAS')
+      + ligne('Moyen de paiement', r.mode)
+      + ligne('Référence de la transaction', r.payRef)
+    + '</table>'
+    + '<div style="display:flex;justify-content:space-between;align-items:flex-end;margin-top:34px">'
+      + '<div style="font-size:11.5px;color:#5b6478;max-width:58%;line-height:1.65">'
+        + 'Ce reçu atteste du paiement ci-dessus. Conservez-le : il est demandé en cas de réclamation.'
+        + '<br>Vérification : indiquez la référence <strong>'+E(r.payRef)+'</strong> au centre.'
+      + '</div>'
+      + '<div style="text-align:center">'
+        + '<div style="font-size:11.5px;color:#5b6478;margin-bottom:34px">Pour le centre</div>'
+        + '<div style="border-top:1px solid #142554;padding-top:5px;font-weight:800;font-size:12.5px;min-width:190px">'+E(ec.directeur||'La Direction')+'</div>'
+      + '</div>'
+    + '</div>'
+  + '</div>';
+}
+
+// Ouvre le reçu dans la visionneuse (Imprimer / PDF / Image + QR d'authenticité).
+window._recuOuvrir = function(payRef){
+  var r = (DB.recus||[]).filter(function(x){ return x && (x.payRef === payRef || x.numero === payRef); })[0];
+  if(!r){
+    // Reçu jamais émis (paiement d'avant cette version) : on le crée maintenant
+    // plutôt que d'afficher une erreur — la numérotation reste continue.
+    var att = (DB.payAttempts||[]).filter(function(a){ return a && a.ref === payRef; })[0];
+    if(att) r = _recuEmettre(att);
+  }
+  if(!r){ if(typeof toast==='function') toast('Reçu introuvable pour cette référence','warn'); return; }
+  var html = _recuHTML(r);
+  if(typeof printDoc === 'function') printDoc(html, 'Reçu ' + r.numero);
+  else { var w = window.open('','_blank'); if(w){ w.document.write(html); w.document.close(); w.print(); } }
 };
 
 // Confirme les commissions du programme partenariat liées à cette vente.
@@ -29636,31 +30087,73 @@ window._payAutoPayout = function(partenaireId){
   var tel = (info.tel||'').replace(/[^0-9+]/g,'');
   if(!/^(\+?237)?6[5-9]\d{7}$/.test(tel)) return false;   // numéro non fiable → reste en versement manuel
   var montant = p.solde;
-  var op = /^(\+?237)?6(8|[5])/.test(tel) ? 'mtn' : 'orange';
+  var op = _payGuessOperator(tel);
+  if(!op) return false;   // préfixe hors table MTN/Orange : l'argent n'irait nulle part
   var wRef = 'AUTO-'+partenaireId.substring(0,8)+'-'+Date.now().toString(36).toUpperCase();
-  fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_campay.php?action=withdraw', {
+  var prov = _payProviderFile();
+  fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/'+prov+'?action=withdraw', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+DB.cloudConfig.secret},
     body: JSON.stringify({montant:montant, to:tel, ref:wRef, partenaireId:partenaireId,
-      nomAttendu:info.name, note:'Versement automatique VÉRITAS — '+info.name})
+      nomAttendu:info.name, methode:(op==='mtn'?'mtn_momo':'orange_money'),
+      note:'Versement automatique VÉRITAS — '+info.name})
   })
   .then(function(r){return r.json();})
   .then(function(data){
     if(data && !data.error){
-      _versementFinalise(partenaireId, montant, tel, op, 'Automatique', info.name, 'campay', wRef);
-      if(typeof toast==='function') toast('⚡ Versement auto '+fmt(montant)+' → '+info.name,'ok');
+      _versementFinalise(partenaireId, montant, tel, op, 'Automatique', info.name,
+        (prov === 'payment_campay.php') ? 'campay' : 'camerpay', wRef);
+      // CamerPay soumet le lot à une approbation manuelle de son côté (< 4 h
+      // ouvrées) : dire « versé » serait faux tant que le webhook n'est pas
+      // passé. Le versement reste « en cours » jusque-là — c'est déjà ce que
+      // fait _versementFinalise, le message doit dire la même chose.
+      if(typeof toast==='function') toast('⚡ Versement auto '+fmt(montant)+' → '+info.name
+        + (data.status === 'pending_approval' ? ' (soumis, en attente de validation)' : ''),'ok');
     } else if(data && data.error){ if(typeof console!=='undefined') console.warn('[auto-payout]', data.error); }
   })
   .catch(function(e){ if(typeof console!=='undefined') console.warn('[auto-payout]', e); });
   return true;
 };
 
-// Décide s'il faut verser automatiquement MAINTENANT (switch + CamPay + contexte
-// admin + seuil + pas de versement déjà en vol). Sous le seuil, on cumule.
+// Opérateur d'après le préfixe (plan de numérotation ARPT à 9 chiffres).
+// MÊME table que camerpayGuessMethod() côté serveur — un écart entre les deux
+// enverrait l'argent chez le mauvais opérateur ou afficherait un mauvais label.
+//   MTN : 67x, 68x, 650-654 · Orange : 69x, 655-659, 640
+function _payGuessOperator(tel){
+  var n = String(tel||'').replace(/[^0-9]/g,'');
+  if(n.length === 9) n = '237'+n;
+  if(n.length !== 12) return '';
+  var loc = n.slice(3), p2 = loc.slice(0,2), p3 = loc.slice(0,3);
+  if(p2 === '67' || p2 === '68') return 'mtn';
+  if(p2 === '69') return 'orange';
+  if(p3 >= '650' && p3 <= '654') return 'mtn';
+  if(p3 >= '655' && p3 <= '659') return 'orange';
+  if(p3 === '640') return 'orange';
+  return '';
+}
+window._payGuessOperator = _payGuessOperator;
+
+// Le fournisseur actif peut-il VERSER (et pas seulement encaisser) ?
+// ⚠️ Le garde-fou historique testait `cfg.campayEnabled`, une case à cocher qui
+// ne parle que de CamPay : avec CamerPay en service elle reste à false et plus
+// AUCUN bonus ne partait automatiquement. On interroge donc la sonde serveur,
+// qui sait quel fournisseur est réellement branché, et on ne retombe sur les
+// cases d'administration que si la sonde n'a pas (encore) répondu.
+function _payPayoutReady(){
+  var cfg = DB.payApiConfig || {};
+  var c   = window._VRT_CAMPAY;
+  if(c && c.provider === 'camerpay') return !!c.configured;
+  if(c && c.provider === 'campay')   return !!cfg.campayEnabled;
+  return !!(cfg.camerpayEnabled || cfg.campayEnabled);
+}
+window._payPayoutReady = _payPayoutReady;
+
+// Décide s'il faut verser automatiquement MAINTENANT (switch + fournisseur +
+// contexte admin + seuil + pas de versement déjà en vol). Sous le seuil, on cumule.
 window._payMaybeAutoPayout = function(partenaireId){
   var cfg = DB.payApiConfig || {};
   if(!cfg.autoPayout) return false;
-  if(!cfg.campayEnabled) return false;
+  if(!_payPayoutReady()) return false;
   if(!DB.cloudConfig || !DB.cloudConfig.url || !DB.cloudConfig.secret) return false;   // besoin du contexte admin
   var p = (DB.partenairesSplit||{})[partenaireId];
   if(!p || p.soldeEnCours) return false;
@@ -29726,10 +30219,10 @@ window.pgPartenairesSplits = function(){
         +'<button class="btn-v2 btn-v2--accent btn-v2--sm" style="margin-left:8px" onclick="_payReconcileSplits()"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Rattraper les commissions</button></span></div>'
       : '<div class="ib ibg mt12 mb0"><span>✅</span><span>Toutes les commissions des paiements confirmés sont ventilées.</span></div>')
     +(_enCours
-      ? '<div class="ib ibt mt12 mb0"><span>⏳</span><span><strong>'+_enCours+' versement(s) CamPay en attente de confirmation</strong> ('+fmt(_montantEnCours)+' réservés). CamPay accuse réception, pas livraison : vérifiez que l\'argent est bien arrivé. Un échec recrédite automatiquement le partenaire. '
+      ? '<div class="ib ibt mt12 mb0"><span>⏳</span><span><strong>'+_enCours+' versement(s) '+_payProviderName()+' en attente de confirmation</strong> ('+fmt(_montantEnCours)+' réservés). '+_payProviderName()+' accuse réception, pas livraison : vérifiez que l\'argent est bien arrivé. Un échec recrédite automatiquement le partenaire. '
         +'<button class="btn-v2 btn-v2--accent btn-v2--sm" style="margin-left:8px" onclick="_payVerifyPayouts()"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier les versements</button></span></div>'
       : '')
-    +((DB.payApiConfig&&DB.payApiConfig.campayEnabled&&totalDu>0)
+    +((_payPayoutReady()&&totalDu>0)
       ? '<div class="fl2 g8 fw mt12">'
         +'<button class="btn-v2 btn-v2--success" onclick="mVerserTous()"><svg class="vico bico" aria-hidden="true"><use href="#lc-coins"/></svg>Verser à tous — '+fmt(totalDu)+' en un seul appel</button>'
         +'<button class="btn-v2 btn-v2--secondary" onclick="_payVerifyPayouts()"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Vérifier les versements</button>'
@@ -29808,7 +30301,7 @@ window.mVerserPartenaire = function(partenaireId){
       +'<div id="vpHolder" style="font-size:12px;margin-top:6px;min-height:16px"></div>'
     +'</div>'
     +'<div class="fg"><span class="fl">Opérateur</span><select class="input-v2" id="vpOp"><option value="mtn">📱 MTN MoMo</option><option value="orange">🟠 Orange Money</option></select></div>'
-    +'<div class="fg"><span class="fl">Mode de versement</span><select class="input-v2" id="vpMode"><option value="manuel">✋ Manuel (envoi par téléphone, je marque comme versé)</option><option value="auto">⚡ Automatique — CamPay envoie l\'argent depuis le wallet'+((DB.payApiConfig&&DB.payApiConfig.campayEnabled)?'':' (CamPay non activé)')+'</option></select></div>'
+    +'<div class="fg"><span class="fl">Mode de versement</span><select class="input-v2" id="vpMode"><option value="manuel">✋ Manuel (envoi par téléphone, je marque comme versé)</option><option value="auto">⚡ Automatique — '+_payProviderName()+' envoie l\'argent depuis le compte marchand'+(_payPayoutReady()?'':' ('+_payProviderName()+' non configuré)')+'</option></select></div>'
     +'<div class="fg"><span class="fl">Note (optionnel)</span><input class="input-v2" id="vpNote" placeholder="Référence interne, période…"></div>'
     +'<div class="ib ibi mb0 mt12"><span>💡</span><span>En mode manuel : l\'admin envoie l\'argent via l\'app MoMo/Orange du téléphone, puis valide ici. Un SMS+WhatsApp de confirmation est envoyé au partenaire.</span></div>'
     +'</div>',
@@ -29833,38 +30326,49 @@ window._executerVersement = function(partenaireId){
   var name = _resolvePartenaire(partenaireId).name;
 
   if(mode === 'auto'){
-    // ⚡ v1.2.4 — Versement RÉEL via CamPay (?action=withdraw).
-    // L'argent part du wallet CamPay directement vers le MoMo/Orange du
-    // partenaire : plus besoin de le faire transiter par le téléphone de l'admin.
-    if(!DB.payApiConfig || !DB.payApiConfig.campayEnabled){
-      toast('Mode automatique : activez CamPay dans Paramètres → Paiements API','warn');
+    // ⚡ v1.2.4 — Versement RÉEL via le fournisseur actif (?action=withdraw).
+    // L'argent part du solde de la passerelle directement vers le MoMo/Orange
+    // du partenaire : plus besoin de le faire transiter par le téléphone de
+    // l'admin. v1.2.6 : CamerPay soumet le lot à une approbation manuelle de
+    // son côté (< 4 h ouvrées) — le dialogue doit le dire, sinon l'admin croit
+    // à un échec en ne voyant rien arriver dans la minute.
+    var _prov = _payProviderFile();
+    var _nomP = _payProviderName();
+    var _cyPay = (_prov === 'payment_camerpay.php');
+    if(!_payPayoutReady()){
+      toast('Mode automatique : configurez '+_nomP+' dans Paramètres → Paiements API','warn');
       return;
     }
     if(!DB.cloudConfig||!DB.cloudConfig.url||!DB.cloudConfig.secret){
       toast('Configuration cloud manquante (URL serveur + secret API)','err');
       return;
     }
-    if(!confirm('Verser RÉELLEMENT '+fmt(montant)+' à '+name+' au '+tel+' via CamPay ?\n\nL\'argent quitte votre wallet CamPay. Le montant sera RÉSERVÉ jusqu\'à confirmation d\'arrivée ; en cas d\'échec de l\'opérateur il est automatiquement recrédité au partenaire.')){
+    if(!confirm('Verser RÉELLEMENT '+fmt(montant)+' à '+name+' au '+tel+' via '+_nomP+' ?\n\n'
+      + (_cyPay
+          ? 'L\'argent quitte votre solde CamerPay. Le versement est d\'abord SOUMIS : CamerPay demande une approbation manuelle (généralement moins de 4 h ouvrées) avant de l\'exécuter. Le montant reste réservé jusqu\'à confirmation d\'arrivée ; en cas d\'échec de l\'opérateur il est automatiquement recrédité au partenaire.'
+          : 'L\'argent quitte votre wallet CamPay. Le montant sera RÉSERVÉ jusqu\'à confirmation d\'arrivée ; en cas d\'échec de l\'opérateur il est automatiquement recrédité au partenaire.'))){
       return;
     }
     // Référence stable = idempotence côté serveur (aucun double versement possible)
     var wRef = 'PAYOUT-'+partenaireId.substring(0,8)+'-'+Date.now().toString(36).toUpperCase();
-    toast('⏳ Versement CamPay en cours...','info');
-    fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_campay.php?action=withdraw', {
+    toast('⏳ Versement '+_nomP+' en cours...','info');
+    fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/'+_prov+'?action=withdraw', {
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+DB.cloudConfig.secret},
       body: JSON.stringify({montant:montant, to:tel, ref:wRef, partenaireId:partenaireId,
         nomAttendu:name,   // le serveur refuse si le numéro appartient à quelqu'un d'autre
+        methode:(op==='mtn'?'mtn_momo':(op==='orange'?'orange_money':'')),
         note:(note||('Commissions VERITAS — '+name))})
     })
     .then(function(r){return r.json();})
     .then(function(data){
-      if(data.error){ toast('❌ CamPay : '+data.error,'err'); return; }
+      if(data.error){ toast('❌ '+_nomP+' : '+data.error,'err'); return; }
       if(data.already){ toast('⚠️ Versement déjà émis pour cette référence','warn'); }
-      _versementFinalise(partenaireId, montant, tel, op, note, name, 'campay', wRef);
+      else if(data.status === 'pending_approval'){ toast('📤 Versement soumis — en attente de validation '+_nomP,'ok'); }
+      _versementFinalise(partenaireId, montant, tel, op, note, name, _cyPay?'camerpay':'campay', wRef);
     })
     .catch(function(err){
-      console.error('[CamPay withdraw]',err);
+      console.error('['+_nomP+' withdraw]',err);
       toast('❌ Connexion serveur impossible — versement NON effectué','err');
     });
     return;
@@ -29879,6 +30383,12 @@ window._executerVersement = function(partenaireId){
 
 // Écritures communes aux deux modes (manuel et CamPay) : enregistrement du
 // versement, marquage des splits, remise à zéro du solde, notifications.
+
+// Ce mode de versement passe-t-il par une passerelle (argent en vol, à
+// confirmer) plutôt que par la main de l'admin (argent déjà remis) ?
+function _payModeEstPasserelle(mode){ return mode === 'campay' || mode === 'camerpay'; }
+window._payModeEstPasserelle = _payModeEstPasserelle;
+
 window._versementFinalise = function(partenaireId, montant, tel, op, note, name, mode, campayRef){
   var p = (DB.partenairesSplit||{})[partenaireId];
   if(!p) return;
@@ -29897,15 +30407,19 @@ window._versementFinalise = function(partenaireId, montant, tel, op, note, name,
     campayRef: campayRef||'',
     splitIds: (p.splits||[]).slice(),
     date: Date.now(),
-    // ⚠️ v1.2.4 — CamPay répond « accepté », PAS « arrivé ». Le transfert peut
-    //    encore échouer (numéro inexistant, plafond du bénéficiaire, panne
-    //    opérateur) et CamPay ne fournit aucune procédure de réconciliation.
-    //    Un versement CamPay reste donc EN COURS jusqu'à vérification.
-    statut: (mode==='campay') ? 'en_cours' : 'effectue'
+    // ⚠️ v1.2.4 — la passerelle répond « accepté », PAS « arrivé ». Le transfert
+    //    peut encore échouer (numéro inexistant, plafond du bénéficiaire, panne
+    //    opérateur). Chez CamerPay c'est encore plus net : le lot attend une
+    //    approbation manuelle avant même de partir. Un versement passerelle
+    //    reste donc EN COURS jusqu'à vérification.
+    // ⚠️ Le test portait sur la seule valeur 'campay' : avec 'camerpay' le
+    //    versement était compté « effectué » et le solde du partenaire remis à
+    //    zéro AVANT que l'argent ne bouge — donc perdu si le lot était refusé.
+    statut: _payModeEstPasserelle(mode) ? 'en_cours' : 'effectue'
   };
   DB.versements.push(versement);
 
-  var enCours = (mode === 'campay');
+  var enCours = _payModeEstPasserelle(mode);
 
   // 2. Marquer les splits — 'processing' tant que le transfert n'est pas confirmé
   (DB.splits||[]).forEach(function(s){
@@ -30001,13 +30515,14 @@ window._payVerifyPayouts = function(){
   }
   var base = DB.cloudConfig.url.replace(/\/+$/,'');
   var hdr  = { 'Authorization':'Bearer '+DB.cloudConfig.secret };  // 🔐 secret en en-tête, JAMAIS en URL (logs/Referer/historique)
-  toast('⏳ Vérification des versements auprès de CamPay...','info');
+  var _prov = _payProviderFile(), _nomP = _payProviderName();
+  toast('⏳ Vérification des versements auprès de '+_nomP+'...','info');
 
   // 1. Versements unitaires  2. Lots (mass payout), ligne par ligne
   var lots = (DB.massPayouts||[]).filter(function(l){ return l.statut !== 'complete'; });
-  var appels = [ fetch(base+'/payment_campay.php?action=payouts',{headers:hdr}).then(function(r){return r.json();}) ]
+  var appels = [ fetch(base+'/'+_prov+'?action=payouts',{headers:hdr}).then(function(r){return r.json();}) ]
     .concat(lots.map(function(l){
-      return fetch(base+'/payment_campay.php?action=masspayout_status&ref='+encodeURIComponent(l.ref),{headers:hdr})
+      return fetch(base+'/'+_prov+'?action=masspayout_status&ref='+encodeURIComponent(l.ref),{headers:hdr})
              .then(function(r){return r.json();})
              .then(function(d){ d._lot = l; return d; })
              .catch(function(){ return {_lot:l, lignes:[]}; });
@@ -30016,7 +30531,7 @@ window._payVerifyPayouts = function(){
   Promise.all(appels).then(function(reponses){
     var confirmes = 0, echoues = 0;
     var unitaires = reponses[0]||{};
-    if(unitaires.error){ toast('❌ CamPay : '+unitaires.error,'err'); return; }
+    if(unitaires.error){ toast('❌ '+_nomP+' : '+unitaires.error,'err'); return; }
 
     (unitaires.payouts||[]).forEach(function(po){
       var r = _payAppliquerResultatVersement(po.ref, po.status, po.reason);
@@ -30038,7 +30553,7 @@ window._payVerifyPayouts = function(){
     if(typeof re==='function') re();
   })
   .catch(function(err){
-    console.error('[CamPay payouts]',err);
+    console.error('['+_nomP+' payouts]',err);
     toast('❌ Connexion serveur impossible','err');
   });
 };
@@ -30046,11 +30561,12 @@ window._payVerifyPayouts = function(){
 // ═══════════════════════════════════════════════════════════════════
 // v1.2.4 — MASS PAYOUT : tous les partenaires dus en UN SEUL appel API
 // ═══════════════════════════════════════════════════════════════════
-// CamPay accepte N bénéficiaires par requête (/api/mass_payout/). Payer
+// Les deux passerelles acceptent N bénéficiaires par requête (CamPay
+// /api/mass_payout/, CamerPay /api/payouts/batch — 100 maximum). Payer
 // 50 enseignants ne coûte donc qu'un appel, pas 50.
 window.mVerserTous = function(){
-  if(!DB.payApiConfig || !DB.payApiConfig.campayEnabled){
-    toast('Activez CamPay dans Paramètres → Paiements API','warn'); return;
+  if(!_payPayoutReady()){
+    toast('Configurez '+_payProviderName()+' dans Paramètres → Paiements API','warn'); return;
   }
   var minP = (DB.partnerSettings && DB.partnerSettings.minPayout) || 500;
   var elig = [];
@@ -30104,33 +30620,47 @@ window._executerMassPayout = function(payables){
     toast('Configuration cloud manquante','err'); return;
   }
   var total = payables.reduce(function(s,e){ return s+e.montant; }, 0);
-  if(!confirm('Verser RÉELLEMENT '+fmt(total)+' à '+payables.length+' partenaire(s) via CamPay ?\n\nLes montants sont réservés jusqu\'à confirmation ; tout échec est recrédité automatiquement.')){
+  var _prov = _payProviderFile(), _nomP = _payProviderName();
+  var _mode = (_prov === 'payment_campay.php') ? 'campay' : 'camerpay';
+  if(!confirm('Verser RÉELLEMENT '+fmt(total)+' à '+payables.length+' partenaire(s) via '+_nomP+' ?\n\n'
+    + (_mode === 'camerpay'
+        ? 'Le lot est SOUMIS à CamerPay, qui demande une approbation manuelle (< 4 h ouvrées) avant exécution. '
+        : '')
+    + 'Les montants sont réservés jusqu\'à confirmation ; tout échec est recrédité automatiquement.')){
     return;
   }
 
   var lotRef = 'MP-'+Date.now().toString(36).toUpperCase();
   var lignes = payables.map(function(e){
-    return { to:e.tel, montant:e.montant, partenaireId:e.pid,
+    var _op = _payGuessOperator(e.tel);
+    return { to:e.tel, montant:e.montant, partenaireId:e.pid, nom:e.nom,
              ref:'PAYOUT-'+e.pid.substring(0,8)+'-'+lotRef,
+             // CamerPay REFUSE une ligne sans opérateur résolu : on l'envoie
+             // explicitement plutôt que de laisser le serveur redeviner.
+             methode:(_op==='mtn'?'mtn_momo':(_op==='orange'?'orange_money':'')),
              note:'Commissions VERITAS — '+e.nom };
   });
 
   toast('⏳ Envoi du lot de '+lignes.length+' versements...','info');
-  fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_campay.php?action=masspayout', {
+  fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/'+_prov+'?action=masspayout', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+DB.cloudConfig.secret},
     body: JSON.stringify({ ref:lotRef, comment:'Versements partenaires VERITAS', lignes:lignes })
   })
   .then(function(r){return r.json();})
   .then(function(data){
-    if(data.error){ toast('❌ CamPay : '+data.error,'err'); return; }
+    if(data.error){ toast('❌ '+_nomP+' : '+data.error,'err'); return; }
     if(data.already){ toast('⚠️ Ce lot a déjà été envoyé','warn'); return; }
 
     // Réserver le solde de chaque partenaire (même logique que le versement unitaire)
     DB.massPayouts = DB.massPayouts || [];
     DB.massPayouts.push({ ref:lotRef, date:Date.now(), nb:lignes.length, total:total, statut:'en_cours' });
     payables.forEach(function(e, i){
-      _versementFinalise(e.pid, e.montant, e.tel, 'campay', 'Lot '+lotRef, e.nom, 'campay', lignes[i].ref);
+      // 4e argument = OPÉRATEUR du bénéficiaire (mtn/orange), pas le nom de la
+      // passerelle : c'est lui qui écrit « MTN MoMo » ou « Orange Money » dans
+      // le message envoyé au partenaire.
+      _versementFinalise(e.pid, e.montant, e.tel, _payGuessOperator(e.tel),
+                         'Lot '+lotRef, e.nom, _mode, lignes[i].ref);
     });
     save();
     cm();
@@ -30138,7 +30668,7 @@ window._executerMassPayout = function(payables){
     if(typeof re==='function') re();
   })
   .catch(function(err){
-    console.error('[CamPay masspayout]',err);
+    console.error('['+_nomP+' masspayout]',err);
     toast('❌ Connexion serveur impossible — aucun versement effectué','err');
   });
 };
@@ -30151,14 +30681,26 @@ window._payVerifierTitulaire = function(inputId, cibleId){
   if(tel.replace(/[^0-9]/g,'').length < 9){ out.innerHTML='<span style="color:#AE5353">Numéro incomplet</span>'; return; }
   if(!DB.cloudConfig||!DB.cloudConfig.url){ out.innerHTML=''; return; }
   out.innerHTML = '⏳ Vérification…';
-  fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/payment_campay.php?action=holder&tel='+encodeURIComponent(tel),
+  fetch(DB.cloudConfig.url.replace(/\/+$/,'')+'/'+_payProviderFile()+'?action=holder&tel='+encodeURIComponent(tel),
         { headers:{ 'Authorization':'Bearer '+(DB.cloudConfig.secret||'') } })   // 🔐 secret en en-tête, jamais en URL
   .then(function(r){return r.json();})
   .then(function(d){
     var o = _ge(cibleId); if(!o) return;   // le DOM a pu être re-rendu entre-temps
-    o.innerHTML = d && d.found
-      ? '<span style="color:#059669;font-weight:700">✓ Titulaire : '+_esc(d.full_name)+'</span>'
-      : '<span style="color:#D97706;font-weight:700">⚠️ Aucun titulaire trouvé pour ce numéro</span>';
+    if(d && d.found){
+      o.innerHTML = '<span style="color:#059669;font-weight:700">✓ Titulaire : '+_esc(d.full_name)+'</span>';
+      return;
+    }
+    // CamerPay n'expose pas le nom du titulaire. Répondre « aucun titulaire
+    // trouvé » ferait croire que le numéro est faux : on dit la vérité et on
+    // affiche au moins l'opérateur détecté, qui est vérifiable à l'œil.
+    if(d && d.unsupported){
+      var op = _payGuessOperator(tel);
+      o.innerHTML = '<span style="color:#6B7280">ℹ️ Nom du titulaire non vérifiable avec '+_esc(_payProviderName())
+        + (op ? ' — opérateur détecté : <strong>'+(op==='mtn'?'MTN MoMo':'Orange Money')+'</strong>' : '')
+        + '. Vérifiez le numéro avant de verser.</span>';
+      return;
+    }
+    o.innerHTML = '<span style="color:#D97706;font-weight:700">⚠️ Aucun titulaire trouvé pour ce numéro</span>';
   })
   .catch(function(){ var o=_ge(cibleId); if(o) o.innerHTML=''; });
 };
@@ -30356,6 +30898,21 @@ function _payAutoActivate(a){
           msg: faits.length ? faits.join(' · ') : 'Panier réglé',
           userMsg: 'Vos ' + ((a.lignes||[]).length) + ' article(s) sont activés.'
         };
+      }
+
+      // ── Échéancier de scolarité : une tranche réglée en ligne ────────────
+      // On ne réimplémente RIEN : _echMarkPaid porte déjà toute la règle
+      // (versement marqué, recette créée, élève soldé quand il ne doit plus
+      // rien) et refuse de rejouer un versement déjà « Payé ».
+      case 'echeance': {
+        var _ep = String(a.targetId||'').split(':');
+        var _epId = _ep[0]||'', _epN = parseInt(_ep[1],10)||0;
+        if(!_epId || !_epN || typeof _echMarkPaid!=='function'){
+          return {msg:'Versement payé — à pointer à la main', userMsg:'Paiement reçu. Le centre confirmera votre versement.'};
+        }
+        _echMarkPaid(_epId, _epN, 'CamerPay');
+        return {msg:'Versement '+_epN+' encaissé',
+                userMsg:'Votre versement est enregistré. Le solde de la scolarité est mis à jour.'};
       }
 
       // ── 6. Toutes les autres surfaces payantes — pilotées par la table
@@ -36375,6 +36932,16 @@ openPaymentModal = function(payInfo){
   var P = window.VERITAS_PAYMENTS;
   if(!P) return;
 
+  // Le bouton « ⚡ Payer maintenant » est un onclick construit en chaîne : il ne
+  // peut transporter que des scalaires. Le détail d'un PANIER (N articles en un
+  // seul paiement) n'y entrait donc pas, et le serveur recevait un paiement
+  // « cart » sans savoir quoi débloquer. On le met de côté par référence ;
+  // _payInitCampay le rattache au corps de la requête.
+  try{
+    window._VRT_PAYX = window._VRT_PAYX || {};
+    window._VRT_PAYX[ref] = { lignes: (payInfo.lignes && payInfo.lignes.length) ? payInfo.lignes : null };
+  }catch(e){}
+
   _promoApplied = null;
   _promoDiscount = 0;
 
@@ -36431,11 +36998,11 @@ openPaymentModal = function(payInfo){
     ? ('<div style="background:#fff;border:2px solid #059669;border-radius:12px;padding:14px;grid-column:1/-1">'
       +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
         +'<div style="font-size:26px">⚡</div>'
-        +'<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13.5px;color:#142554">Paiement automatique — MTN MoMo ou Orange Money</div>'
+        +'<div style="font-family:Montserrat,sans-serif;font-weight:800;font-size:13.5px;color:#142554">'+_payTileTitre()+'</div>'
         +'<span style="margin-left:auto;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:8px">⚡ AUTO</span>'
       +'</div>'
-      +'<div style="font-size:11px;color:var(--ink4);line-height:1.5;margin-bottom:8px">Entrez votre numéro : l\'opérateur est détecté automatiquement. Vous validez avec votre code secret et <strong>votre accès s\'active tout seul</strong>.</div>'
-      +'<input class="fi" id="campayPhoneInput_'+ref+'" placeholder="Votre n° MTN ou Orange (ex : 6XX XX XX XX)" value="'+String(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:8px 10px;width:100%;margin-bottom:8px">'
+      +'<div style="font-size:11px;color:var(--ink4);line-height:1.5;margin-bottom:8px">'+_payTileTexte()+'</div>'
+      +'<input class="fi" id="campayPhoneInput_'+ref+'" placeholder="'+_payTilePlaceholder()+'" value="'+String(payInfo.customerTel||'').replace(/[^0-9+]/g,'')+'" style="font-size:12px;padding:8px 10px;width:100%;margin-bottom:8px">'
       +'<button class="btn" style="width:100%;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;cursor:pointer" onclick="_payInitCampay(\''+ref+'\','+montant+',\''+String(label).replace(/[\\\\\x27"]/g,'')+'\',\''+(payInfo.intent||'generic')+'\',\''+(payInfo.targetId||'')+'\',\''+(payInfo.customerAccountId||'')+'\',\''+String(payInfo.customerNom||'').replace(/[\\\\\x27"]/g,'')+'\')">⚡ Payer maintenant — '+montantFmt+'</button>'
     +'</div>')
     : '';
@@ -36446,7 +37013,7 @@ openPaymentModal = function(payInfo){
     // l'encaissement automatique est disponible, promettre « 24 h » au moment
     // de payer découragerait inutilement le client.
     + (_campayTile
-        ? '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08);"><span>⚡</span><span><strong>Paiement automatique disponible :</strong> payez avec votre numéro MTN ou Orange, votre accès s\'active <strong>immédiatement</strong>. Les autres moyens ci-dessous restent manuels (validation sous 24 h).</span></div>'
+        ? '<div class="ib ibt mb12" style="background:rgba(5,150,105,.08);"><span>⚡</span><span>'+_payTileBandeau()+'</span></div>'
         : '<div class="ib ibt mb12" style="background:rgba(220,38,38,.08);"><span>⚠️</span><span><strong>Important :</strong> après votre paiement, passez à l\'étape 3 pour nous envoyer votre confirmation avec la référence <strong>'+ref+'</strong>. Votre accès sera activé sous 24 h.</span></div>')
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-bottom:16px">'
     + _campayTile
@@ -37708,9 +38275,15 @@ function mPartnerSettings(){
   if(!DB.partnerSettings) DB.partnerSettings={payoutsEnabled:false,payoutsBlockedReason:'',minPayout:5000};
   var s = DB.partnerSettings;
   var body = '<div style="background:#FEF3C7;padding:10px;border-radius:6px;font-size:12px;color:#92400E;margin-bottom:14px">'
-    + (DB.payApiConfig&&DB.payApiConfig.campayEnabled
-        ? '✅ <strong>CamPay est activé</strong> — les versements partent du wallet CamPay vers le MoMo/Orange du partenaire (mode « ⚡ Automatique » dans la fenêtre de versement). Plafond par versement : voir <code>CAMPAY_PAYOUT_MAX</code> côté serveur.'
-        : '⚠️ Activez les versements <strong>uniquement après avoir activé CamPay</strong> (Paramètres → ⚡ Paiements API automatiques). Sans cela, seul le mode manuel fonctionne.')
+    + (function(){
+        var _n = (typeof _payProviderName==='function') ? _payProviderName() : 'la passerelle';
+        var _cy = (typeof _payProviderFile==='function') && _payProviderFile()==='payment_camerpay.php';
+        if(typeof _payPayoutReady==='function' && _payPayoutReady()){
+          return '✅ <strong>'+_n+' est configuré</strong> — les versements partent du compte marchand vers le MoMo/Orange du partenaire (mode « ⚡ Automatique » dans la fenêtre de versement). Plafond par versement : voir <code>'+(_cy?'CAMERPAY_PAYOUT_MAX':'CAMPAY_PAYOUT_MAX')+'</code> côté serveur.'
+            + (_cy ? ' ⏳ CamerPay soumet chaque lot à une <strong>approbation manuelle de son côté</strong> (généralement moins de 4 h ouvrées) : le versement n\'est pas instantané.' : '');
+        }
+        return '⚠️ Activez les versements <strong>uniquement après avoir configuré '+_n+'</strong> (Paramètres → ⚡ Paiements API automatiques). Sans cela, seul le mode manuel fonctionne.';
+      })()
     + '</div>'
     + '<label style="display:flex;align-items:center;gap:8px;margin:10px 0;font-size:13px">'
     +   '<input type="checkbox" id="_ps_enabled"'+(s.payoutsEnabled?' checked':'')+'> Activer les versements automatiques aux partenaires</label>'
@@ -37874,10 +38447,12 @@ function applyPartnerCode(code, data){
 
 // v1.2.5 — RÉPARTITION DIRECTE. Une commission de code promo (ou un bonus de
 // palier) VALIDÉE est créditée dans le solde de versement UNIFIÉ
-// (DB.partenairesSplit) → payée par CamPay AVEC les parrains/auteurs, en un seul
-// flux, un seul tableau de bord. Idempotent : double garde (c._distributed +
-// paymentRef unique par commission) → jamais de double crédit, même si les
-// chemins webhook + polling confirment le même paiement.
+// (DB.partenairesSplit) → payée par la passerelle active AVEC les parrains, les
+// auteurs et les enseignants, en un seul flux et un seul tableau de bord.
+// Idempotent : double garde (c._distributed + paymentRef unique par commission)
+// → jamais de double crédit, même si les chemins webhook + polling confirment le
+// même paiement.
+// v1.2.6 : le canal est celui du fournisseur en service (CamerPay au lancement).
 window._payDistributeCommission = function(c){
   if(!c || c._distributed) return 0;
   var amt = c.commissionAmount || 0;
@@ -37905,7 +38480,10 @@ window._payDistributeCommission = function(c){
   ps.solde += amt;
   ps.splits.push(s.id);
   c._distributed = true;
-  c.payoutChannel = 'campay';   // évite tout double-paiement par l'ancien dashboard partenaire
+  // Marque le canal réel : évite tout double-paiement par l'ancien tableau de
+  // bord partenaire, et dit lequel des deux fournisseurs a la charge du solde.
+  c.payoutChannel = (typeof _payProviderFile==='function' && _payProviderFile()==='payment_campay.php')
+                    ? 'campay' : 'camerpay';
   return amt;
 };
 
@@ -38006,7 +38584,7 @@ window._PARTNER_ROLE_SPEC = {
   inspecteur: {
     chain:'Garant de la qualité — il valide la conformité pédagogique des contenus et de l\'IA.',
     missions:['Valider les réponses de l\'IA (file de validation)','Co-rédiger les manuels officiels','Animer des formations rémunérées'],
-    actions:[{l:'✓ File de validation IA',fn:"window.open('admin-validation.html','_blank')"},{l:'✍️ Co-rédaction manuels',fn:"_prtContact('Co-rédaction manuel')"}]
+    actions:[{l:'✓ File de validation IA',fn:"window.open('/admin-validation.html','_blank')"},{l:'✍️ Co-rédaction manuels',fn:"_prtContact('Co-rédaction manuel')"}]
   },
   parent: {
     chain:'Relais familial — il suit l\'élève et fidélise le foyer.',
@@ -39438,14 +40016,35 @@ window._vtSupportFab = function(){
       b.className = 'vfx-fab';
       b.type = 'button';
       b.setAttribute('aria-label','Écrire à VÉRITAS sur WhatsApp — réponse sous 2 h les jours ouvrés');
-      b.innerHTML = '<span class="ic" aria-hidden="true">💬</span>'
+      b.innerHTML = '<span class="ic" aria-hidden="true">' + ICO('i-message') + '</span>'
                   + '<span class="tx">Une question ?<small>Réponse sous 2 h · jours ouvrés</small></span>';
       b.onclick = function(){ _vtWaOpen(); };
       document.body.appendChild(b);
+      // L'entrée en scène est une classe, pas une condition d'existence :
+      // sans elle le bouton reste visible (voir le correctif .vfx-fab).
+      b.classList.add('vfx-fab-in');
     }
     b.style.display = 'inline-flex';
   }catch(e){}
 };
+
+/* Le FAB n'était créé que depuis vShowSec(), donc uniquement APRÈS une
+   navigation : un visiteur qui arrivait sur l'accueil et n'en bougeait pas
+   ne le voyait jamais. On le pose aussi au chargement, dès que le portail
+   visiteur est à l'écran. L'appel est idempotent. */
+(function(){
+  function poser(){
+    try{
+      var v = document.getElementById('VISITOR');
+      if(v && getComputedStyle(v).display !== 'none' && typeof _vtSupportFab === 'function'){
+        _vtSupportFab();
+      }
+    }catch(e){}
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', poser);
+  else poser();
+  setTimeout(poser, 1200);   // filet : le portail peut s'afficher après coup
+})();
 
 window._vtHideSupportFab = function(){
   try{ var b=document.getElementById('vtWaFab'); if(b) b.style.display='none'; }catch(e){}
@@ -39663,6 +40262,110 @@ window.ICO = function(nom, cls){
   return '<svg class="' + (cls || 'i') + '" aria-hidden="true" focusable="false">'
        + '<use href="#' + nom + '"/></svg>';
 };
+
+/* ══════════════════════════════════════════════════════════════════════
+   PIC() — table de correspondance émoji → pictogramme
+   ─────────────────────────────────────────────────────────────────────
+   Pourquoi : un émoji n'est pas un pictogramme. Son dessin appartient au
+   système d'exploitation — le 📚 d'un téléphone Android, celui d'un iPhone
+   et celui de Windows sont trois images différentes, en couleur, qu'aucune
+   règle CSS ne peut mettre à la charte. Sur un vieil Android il peut même
+   ne pas exister et s'afficher en tofu (□). Le pictogramme du sprite a le
+   même tracé partout et prend la couleur qu'on lui donne.
+
+   PIC(x) renvoie le pictogramme correspondant si x est un émoji connu,
+   et x inchangé sinon : aucun site d'appel ne peut régresser. Les émojis
+   non répertoriés (drapeaux, visages d'humeur des questionnaires) restent
+   volontairement tels quels — ils ne sont pas des icônes d'interface.
+   ══════════════════════════════════════════════════════════════════════ */
+window.EMO2ICO = {
+  /* documents & pédagogie */
+  '📚':'i-book',        '📖':'i-book-open',   '📘':'i-book',       '📗':'i-book',
+  '📕':'i-book',        '📙':'i-book',        '📓':'i-notebook',   '📄':'i-file-text',
+  '📃':'i-file-text',   '📝':'i-pen',         '✍':'i-feather',     '✏':'i-pen',
+  '🖊':'i-pen',         '🖋':'i-feather',     '📋':'i-clipboard-check', '📜':'i-file-text',
+  '📎':'i-link',        '🔗':'i-link',        '📁':'i-box',        '📂':'i-box',
+  '🗂':'i-box',         '📐':'i-scale',       '📏':'i-scale',      '🎓':'i-graduation',
+  '🏫':'i-school',      '🏛':'i-school',      '🧠':'i-brain',      '💡':'i-lightbulb',
+
+  /* évaluation & progression */
+  '✅':'i-check',       '☑':'i-check',        '✔':'i-check',       '✓':'i-check',
+  '❌':'i-x-circle',    '✗':'i-x-circle',     '✕':'i-x-circle',    '🚫':'i-x-circle',
+  '🎯':'i-target',      '📊':'i-chart',       '📈':'i-chart',      '📉':'i-chart',
+  '🏆':'i-award',       '🥇':'i-award',       '🥈':'i-award',      '🥉':'i-award',
+  '🏅':'i-award',       '🎖':'i-award',       '🏵':'i-award',      '👑':'i-award',
+  '⭐':'i-star',        '🌟':'i-star',        '✨':'i-sparkle',    '💫':'i-sparkle',
+
+  /* personnes */
+  '👤':'i-users',       '👥':'i-users',       '👨':'i-users',      '👩':'i-users',
+  '🧑':'i-users',       '👧':'i-users',       '👦':'i-users',      '🧒':'i-users',
+  '👪':'i-users',       '🤝':'i-users',       '🧑‍🏫':'i-teacher',
+
+  /* argent & commerce */
+  '💰':'i-coins',       '💵':'i-coins',       '💴':'i-coins',      '💶':'i-coins',
+  '💸':'i-coins',       '🏦':'i-briefcase',   '💳':'i-credit-card','🧾':'i-receipt',
+  '🛒':'i-box',         '🛍':'i-box',         '🏪':'i-briefcase',  '📦':'i-box',
+  '💼':'i-briefcase',   '🎁':'i-box',         '🏢':'i-briefcase',  '🎟':'i-badge',
+
+  /* communication */
+  '💬':'i-message',     '💭':'i-message',     '📢':'i-megaphone',  '📣':'i-megaphone',
+  '🔔':'i-megaphone',   '📧':'i-mail',        '✉':'i-mail',        '📩':'i-mail',
+  '📨':'i-mail',        '📬':'i-mail',        '📭':'i-mail',       '📞':'i-phone',
+  '☎':'i-phone',        '📱':'i-phone',       '📲':'i-phone',      '🌐':'i-globe',
+  '🌍':'i-globe',       '📡':'i-globe',
+
+  /* sécurité */
+  '🔒':'i-lock',        '🔐':'i-lock',        '🔓':'i-lock',       '🔑':'i-key',
+  '🛡':'i-shield',      '⚠':'i-warning',      '🚨':'i-warning',    '❓':'i-lightbulb',
+
+  /* actions */
+  '🗑':'i-trash',       '🔄':'i-refresh',     '🔁':'i-refresh',    '➕':'i-plus',
+  '🔍':'i-search',      '🔎':'i-search',      '👁':'i-eye',        '💾':'i-cloud',
+  '☁':'i-cloud',        '📤':'i-download',    '📥':'i-download',   '🖨':'i-printer',
+  '⚙':'i-tool',         '🔧':'i-tool',        '🛠':'i-tool',       '🧰':'i-tool',
+  '🧹':'i-tool',        '📌':'i-map',         '📍':'i-map',        '🗺':'i-map',
+  '🧭':'i-compass',
+
+  /* sciences & activités */
+  '🔬':'i-flask',       '🧪':'i-flask',       '⚗':'i-flask',       '🧬':'i-flask',
+  '🎮':'i-gamepad',     '🧩':'i-puzzle',      '🎨':'i-image',      '🖼':'i-image',
+  '📸':'i-image',       '📷':'i-image',       '🎬':'i-play',       '🎥':'i-play',
+  '📹':'i-play',        '🎵':'i-music',       '🎶':'i-music',      '🔊':'i-volume',
+  '🎧':'i-volume',      '🔇':'i-volume',      '🎤':'i-mic',        '🤖':'i-bot',
+  '🧮':'i-calculator',  '💻':'i-grid',        '🖥':'i-grid',       '⚖':'i-scale',
+
+  /* temps */
+  '📅':'i-calendar',    '📆':'i-calendar',    '🗓':'i-calendar',   '🕐':'i-clock',
+  '⏰':'i-clock',
+
+  /* divers d'interface */
+  '⚡':'i-sparkle',     '🚀':'i-sparkle',     '🔥':'i-sparkle',    '💪':'i-award',
+  '🌱':'i-feather',     '💎':'i-sparkle',     '🏗':'i-tool',       '🎉':'i-sparkle',
+  '🎊':'i-sparkle',     '🏠':'i-home',        '🏥':'i-first-aid',  '📰':'i-file-text',
+  '👔':'i-briefcase',   '🎒':'i-backpack',    '🏷':'i-badge',      '🔢':'i-calculator',
+  '⚔':'i-target',       '🎭':'i-quote',       '🌿':'i-feather',    '🔌':'i-tool',
+  '📺':'i-play',        '👋':'i-users',       '👍':'i-check',      '🏙':'i-school',
+  '🌆':'i-school',      '🚌':'i-bus',         '🛏':'i-bed',        '🍽':'i-utensils',
+  '🫕':'i-utensils',    '📶':'i-chart',       '🗳':'i-box',        '🎗':'i-award'
+
+  /* Volontairement NON mappés — ce ne sont pas des icônes d'interface :
+     — 🟠 🔵 🟢 ⚪ 🔴 🟡 🟣 : pastilles d'état, leur couleur EST l'information ;
+     — 💛 💚 💙 💜 🧡 🤍 🩵 : échantillons de couleur dans les sélecteurs ;
+     — 😰 😊 🙂 😐 😟 😨 😵 : humeurs des questionnaires de ressenti ;
+     — 🦁 🌈 ✝ ♀ ♂ … : contenu éditorial ou pédagogique, pas du chrome.
+     PIC() les laisse passer tels quels. */
+};
+
+/* PIC(x) : x peut être un émoji seul, ou une chaîne quelconque.
+   — émoji connu  → pictogramme SVG
+   — autre chose  → renvoyé tel quel (aucune régression possible) */
+window.PIC = function(x, cls){
+  if(!x) return '';
+  var k = String(x).trim().replace(/️/g,'');   // ôte le sélecteur de variante
+  var id = window.EMO2ICO[k];
+  return id ? ICO(id, cls || 'i') : x;
+};
+
 (function(){
   function pose(){
     if(document.getElementById('vrtSprite')) return;
@@ -39759,16 +40462,16 @@ window.pgParents = function(){
   });
   h += '</div>';
 
-  h += '<div style="font-family:\'Crimson Pro\',Georgia,serif;font-style:italic;font-size:15px;'
-     + 'color:#4B5563;margin:0 0 14px;max-width:640px">'+_esc(tab.intro)+'</div>';
+  h += '<div style="font-family:\'Crimson Pro\',Georgia,serif;font-style:italic;font-size:var(--v-md);'
+     + 'color:var(--ds-text-2);margin:0 0 14px;max-width:640px">'+_esc(tab.intro)+'</div>';
 
   // Aiguillage d'audience : cette page parle AUX PARENTS. L'élève a son propre
   // espace — on le lui indique au lieu de mêler les deux discours sur une même page.
   h += '<div class="vp-card" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;'
-     + 'margin:0 0 16px;font-size:13.5px">'
+     + 'margin:0 0 16px;font-size:var(--v-sm)">'
      + ICO('i-backpack') + '<span>Vous êtes l\'élève, pas le parent ?</span>'
      + '<a href="/eleve/" style="font-weight:700;text-decoration:underline">Votre espace est ici</a>'
-     + '<span style="color:#6B7280">— corrigés, méthodes et quiz.</span></div>';
+     + '<span style="color:var(--ds-text-2)">— corrigés, méthodes et quiz.</span></div>';
 
   // ── Le tableau inquiétude → réponse ──
   h += '<div class="vp-fear">'
@@ -39786,22 +40489,22 @@ window.pgParents = function(){
      + '<div class="vp-hero" style="padding:22px 24px;margin-bottom:14px"><div>'
      + '<div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:12px">'
      + '<div style="flex:1 1 130px"><div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;'
-     + 'font-size:27px;font-weight:800;color:#FFC93C;line-height:1.1">37,26 %</div>'
-     + '<div style="font-size:11.5px;color:#C7D2E8">de réussite au BAC général 2024 (49 521 admis sur 132 920)</div></div>'
+     + 'font-size:var(--v-2xl);font-weight:800;color:var(--o400);line-height:1.1">37,26 %</div>'
+     + '<div style="font-size:var(--v-xs);color:var(--n200)">de réussite au BAC général 2024 (49 521 admis sur 132 920)</div></div>'
      + '<div style="flex:1 1 130px"><div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;'
-     + 'font-size:27px;font-weight:800;color:#FFC93C;line-height:1.1">75,73 %</div>'
-     + '<div style="font-size:11.5px;color:#C7D2E8">l\'année précédente, quand les délibérations existaient</div></div>'
+     + 'font-size:var(--v-2xl);font-weight:800;color:var(--o400);line-height:1.1">75,73 %</div>'
+     + '<div style="font-size:var(--v-xs);color:var(--n200)">l\'année précédente, quand les délibérations existaient</div></div>'
      + '<div style="flex:1 1 130px"><div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;'
-     + 'font-size:27px;font-weight:800;color:#FFC93C;line-height:1.1">6,35 %</div>'
-     + '<div style="font-size:11.5px;color:#C7D2E8">en série A4 Allemand (1 496 admis sur 23 564)</div></div>'
+     + 'font-size:var(--v-2xl);font-weight:800;color:var(--o400);line-height:1.1">6,35 %</div>'
+     + '<div style="font-size:var(--v-xs);color:var(--n200)">en série A4 Allemand (1 496 admis sur 23 564)</div></div>'
      + '</div>'
-     + '<div style="font-size:13.5px;color:#DBE4F5;line-height:1.6">La règle n\'a pas changé — il faut '
+     + '<div style="font-size:var(--v-sm);color:var(--n100);line-height:1.6">La règle n\'a pas changé — il faut '
      + '<b style="color:#fff">10/20 de moyenne générale</b> — mais depuis la session 2024 elle est appliquée '
      + '<b style="color:#fff">strictement, sans délibération</b> : les candidats entre 8 et 10 ne sont plus repêchés. '
      + 'Un enseignant le résume ainsi : « on avait pris l\'habitude de faire passer des candidats qui n\'avaient pas eu '
      + '10/20 de moyenne ». Résultat : les points perdus dans une matière négligée ne se récupèrent plus en conseil, '
      + 'et les séries littéraires ont payé le plus lourd tribut.</div>'
-     + '<div style="font-size:11px;color:#9FB0CE;margin-top:9px">Chiffres publiés par l\'OBC et repris par la presse '
+     + '<div style="font-size:var(--v-xs);color:var(--n300);margin-top:9px">Chiffres publiés par l\'OBC et repris par la presse '
      + 'nationale. Les modalités exactes de chaque session sont fixées par la circulaire de l\'année.</div>'
      + '</div></div>';
 
@@ -39809,19 +40512,19 @@ window.pgParents = function(){
   //    usages. C'est ce qui transforme un chiffre en action. ──
   h += '<h3 class="acc-pill" style="margin:26px 0 12px">' + ICO('i-calculator') + 'Les trois formules, et quoi en faire</h3>'
      + '<div class="vp-card" style="margin-bottom:14px">'
-     + '<div style="font-size:13.5px;line-height:1.9">'
-     + '<div style="background:#FBFCFE;border-radius:8px;padding:9px 13px;margin-bottom:8px">'
+     + '<div style="font-size:var(--v-sm);line-height:1.9">'
+     + '<div style="background:var(--n50);border-radius:var(--r-sm);padding:9px 13px;margin-bottom:8px">'
      + '<b>1. La moyenne pondérée</b><br>moyenne = (note₁ × coef₁ + note₂ × coef₂ + …) ÷ (coef₁ + coef₂ + …)'
-     + '<br><span style="font-size:12px;color:#6B7280">On divise par la somme des coefficients, jamais par le nombre de matières.</span></div>'
-     + '<div style="background:#FBFCFE;border-radius:8px;padding:9px 13px;margin-bottom:8px">'
+     + '<br><span style="font-size:var(--v-sm);color:var(--ds-text-2)">On divise par la somme des coefficients, jamais par le nombre de matières.</span></div>'
+     + '<div style="background:var(--n50);border-radius:var(--r-sm);padding:9px 13px;margin-bottom:8px">'
      + '<b>2. Ce qu\'une matière coûte</b><br>perte = (10 − note) × coef ÷ total des coefficients'
-     + '<br><span style="font-size:12px;color:#6B7280">Un 8 en coefficient 4 sur 24 retire 0,33 point de moyenne ; le même 8 en coefficient 1 n\'en retire que 0,08.</span></div>'
-     + '<div style="background:#FBFCFE;border-radius:8px;padding:9px 13px">'
+     + '<br><span style="font-size:var(--v-sm);color:var(--ds-text-2)">Un 8 en coefficient 4 sur 24 retire 0,33 point de moyenne ; le même 8 en coefficient 1 n\'en retire que 0,08.</span></div>'
+     + '<div style="background:var(--n50);border-radius:var(--r-sm);padding:9px 13px">'
      + '<b>3. La note à viser ensuite</b><br>note nécessaire = [ cible × (C + c) − moyenne × C ] ÷ c'
-     + '<br><span style="font-size:12px;color:#6B7280">C = coefficients déjà comptés, c = coefficient de la nouvelle note.</span></div>'
+     + '<br><span style="font-size:var(--v-sm);color:var(--ds-text-2)">C = coefficients déjà comptés, c = coefficient de la nouvelle note.</span></div>'
      + '</div></div>'
      + '<div class="vp-grid" style="margin-top:0">'
-     + '<div class="vp-card"><span class="vp-badge" style="background:rgba(37,99,235,.10);color:#1D4ED8">Pour l\'élève</span>'
+     + '<div class="vp-card"><span class="vp-badge" style="background:rgba(37,99,235,.10);color:var(--n600)">Pour l\'élève</span>'
      + '<h4 style="margin-top:9px">Trois points bien choisis valent dix heures dispersées</h4>'
      + '<p style="margin:0"><b>Commence par la matière la plus lourde sous 10</b> (formule 2), pas par celle que tu préfères. '
      + '<b>Vise 11, pas 20</b> : passer un 7 à 11 rapporte plus que faire monter un 15 à 17, pour bien moins d\'effort. '
@@ -39839,7 +40542,7 @@ window.pgParents = function(){
 
   // ── Vérifiable par vous-même : les outils gratuits ──
   h += '<h3 class="acc-pill" style="margin:30px 0 6px">' + ICO('i-tool') + 'À vérifier vous-même, gratuitement</h3>'
-     + '<div style="font-size:13px;color:#6B7280;margin-bottom:12px">Sans compte, sans paiement. '
+     + '<div style="font-size:var(--v-sm);color:var(--ds-text-2);margin-bottom:12px">Sans compte, sans paiement. '
      + 'Un centre sérieux se contrôle avant de se payer.</div>'
      + '<div class="vp-grid">'
      + '<button class="vp-tool" onclick="_vtMoyenne()"><span class="ic" aria-hidden="true">' + ICO('i-calculator') + '</span>'
@@ -39895,7 +40598,7 @@ window.pgParents = function(){
 
   // ── Sortie : une seule action ──
   h += '<div class="vp-hero vfx-orbs" style="margin:26px 0 10px;text-align:center">'
-     + '<div><h2 style="font-size:21px">Une question sur votre situation ?</h2>'
+     + '<div><h2 style="font-size:var(--v-xl)">Une question sur votre situation ?</h2>'
      + '<p style="margin:0 auto 16px">Écrivez-nous : un enseignant du centre — pas un robot — vous répond '
      + 'sous 2 h les jours ouvrés.</p>'
      + '<button class="vfx-cta" onclick="_vtWaOpen(\'parents\')">' + ICO('i-message') + 'Écrire sur WhatsApp</button> '
@@ -39937,13 +40640,13 @@ window._vtParentStats = function(){
   var h = '<div class="vp-grid" style="margin:0 0 6px">';
   tiles.forEach(function(t){
     h += '<div class="vp-card" style="text-align:center">'
-       + '<div style="font-size:22px" aria-hidden="true">'+t[0]+'</div>'
-       + '<div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;font-size:25px;'
-       + 'font-weight:800;color:#142554;line-height:1.1">'+_esc(String(t[1]))+'</div>'
-       + '<div style="font-size:12px;color:#6B7280;margin-top:3px">'+_esc(String(t[2]))+'</div></div>';
+       + '<div style="font-size:var(--v-xl)" aria-hidden="true">'+t[0]+'</div>'
+       + '<div style="font-family:\'Plus Jakarta Sans\',Montserrat,sans-serif;font-size:var(--v-2xl);'
+       + 'font-weight:800;color:var(--n800);line-height:1.1">'+_esc(String(t[1]))+'</div>'
+       + '<div style="font-size:var(--v-sm);color:var(--ds-text-2);margin-top:3px">'+_esc(String(t[2]))+'</div></div>';
   });
   h += '</div>';
-  h += '<div style="font-size:11px;color:#9CA3AF;margin:0 0 4px">'
+  h += '<div style="font-size:var(--v-xs);color:var(--ds-text-3);margin:0 0 4px">'
      + 'Chiffres issus des données du centre — aucun n\'est affiché si la donnée est absente.</div>';
   return h;
 };
@@ -40181,7 +40884,7 @@ function _cagCharger(){
   var ctrl = (typeof AbortController!=='undefined') ? new AbortController() : null;
   var minuteur = setTimeout(function(){ try{ ctrl && ctrl.abort(); }catch(e){} }, 12000);
 
-  fetch(base+'/payment_campay.php?action=fund_get&token='+encodeURIComponent(tk),
+  fetch(base+'/'+_payProviderFile()+'?action=fund_get&token='+encodeURIComponent(tk),
         ctrl ? {signal:ctrl.signal} : {})
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -40373,7 +41076,7 @@ function _cagVerifierTitulaire(){
   if(!base || !tok){ el.innerHTML=''; return; }
 
   el.innerHTML = '<span style="color:var(--ink4)">⏳ Vérification du numéro…</span>';
-  fetch(base+'/payment_campay.php?action=holder&tel='+encodeURIComponent(digits),
+  fetch(base+'/'+_payProviderFile()+'?action=holder&tel='+encodeURIComponent(digits),
         {headers:{'Authorization':'Bearer '+tok}})
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -40381,6 +41084,10 @@ function _cagVerifierTitulaire(){
       if(!e2) return;
       if(d && d.found && d.full_name){
         e2.innerHTML = '<span style="color:var(--gr,#059669);font-weight:700">✓ Compte au nom de '+_esc(d.full_name)+'</span>';
+      } else if(d && d.unsupported){
+        // Pas de service de titulaire chez CamerPay : ne rien affirmer sur le
+        // numéro plutôt que d'inquiéter un donateur dont le numéro est bon.
+        e2.innerHTML = '';
       } else {
         e2.innerHTML = '<span style="color:var(--ink4)">Numéro non reconnu — vérifiez-le avant de valider.</span>';
       }
@@ -40402,7 +41109,11 @@ function _cagPayer(){
 
   if(m < 500){ toast('Montant minimum : 500 FCFA','warn'); return; }
   if(!nom){ toast('Indiquez votre nom — il apparaîtra sur la cagnotte','warn'); var n=document.getElementById('cagNom'); if(n)n.focus(); return; }
-  if(tel.replace(/[^0-9]/g,'').length < 9){ toast('Entrez un numéro MTN ou Orange valide','warn'); var t=document.getElementById('cagTel'); if(t)t.focus(); return; }
+  var _redir = (typeof _payFlowIsRedirect==='function') && _payFlowIsRedirect();
+  // Page de paiement hébergée : le donateur peut régler par carte ou PayPal
+  // (utile pour la diaspora, qui n'a pas toujours un numéro camerounais).
+  if(tel && tel.replace(/[^0-9]/g,'').length < 9){ toast('Ce numéro est incomplet — corrigez-le ou laissez-le vide','warn'); var t=document.getElementById('cagTel'); if(t)t.focus(); return; }
+  if(!tel && !_redir){ toast('Entrez un numéro MTN ou Orange valide','warn'); var t2=document.getElementById('cagTel'); if(t2)t2.focus(); return; }
 
   var base = (typeof _payApiBase==='function') ? _payApiBase() : '';
   var tok  = (typeof _payInitToken==='function') ? _payInitToken() : '';
@@ -40413,8 +41124,12 @@ function _cagPayer(){
 
   var ref = 'CAG' + (f.token||'').substring(0,6).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
 
-  toast('⏳ Envoi de la demande sur '+tel+'…','info');
-  fetch(base+'/payment_campay.php?action=init', {
+  // Popup ouvert PENDANT le clic (voir _payInitCampay) : différé, il est bloqué.
+  var _cw = null;
+  if(_redir){ try{ _cw = window.open('', '_blank'); }catch(e){ _cw = null; } }
+
+  toast(_redir ? '⏳ Ouverture de la page de paiement…' : '⏳ Envoi de la demande sur '+tel+'…','info');
+  fetch(base+'/'+_payProviderFile()+'?action=init', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+tok},
     body: JSON.stringify({
@@ -40424,7 +41139,46 @@ function _cagPayer(){
   })
   .then(function(r){ return r.json(); })
   .then(function(d){
-    if(!d || d.error){ toast('❌ '+((d&&d.error)||'Paiement impossible'),'err'); return; }
+    if(!d || d.error){
+      if(_cw){ try{ _cw.close(); }catch(e){} }
+      toast('❌ '+((d&&d.error)||'Paiement impossible'),'err');
+      return;
+    }
+
+    // ── Parcours REDIRECTION (CamerPay) ──────────────────────────────────
+    if(_redir || d.pay_url){
+      var url = d.pay_url || '';
+      if(!url){
+        if(_cw){ try{ _cw.close(); }catch(e){} }
+        toast('❌ Page de paiement introuvable — réessayez','err');
+        return;
+      }
+      var ok = false;
+      if(_cw){ try{ _cw.location.href = url; ok = (_cw.closed === false); }catch(e){ ok = false; } }
+      if(!ok){ try{ var _w3 = window.open(url, '_blank'); ok = !!(_w3 && _w3.closed === false); }catch(e){ ok = false; } }
+      // Aucun onglet ouvrable (webview Android, blocage de popup) → navigation
+      // dans la fenêtre courante. La page de cagnotte est publique et sans
+      // compte : le contributeur y revient par `merchant_return_url` sans rien
+      // perdre. Cf. le même repli dans _payInitCampay.
+      var _cagAttrs = ok ? ' target="_blank" rel="noopener"' : ' rel="noopener"';
+      M('💳 Finalisez votre contribution', 'Référence : '+ref,
+        '<div style="text-align:center;padding:18px">'
+        + '<div style="font-size:56px">'+(d.sandbox?'🧪':'💚')+'</div>'
+        + (d.sandbox ? '<div style="font-size:12px;font-weight:800;color:#b45309;background:rgba(217,119,6,.12);padding:8px 10px;border-radius:8px;margin:10px 0">MODE TEST — aucun argent réel ne circule</div>' : '')
+        + '<div style="font-size:14px;margin:10px 0"><strong>'+(ok?'La page de paiement s\'est ouverte dans un nouvel onglet.':'Ouvrez la page de paiement pour continuer.')+'</strong></div>'
+        + '<div style="font-size:13px;color:var(--ink3);background:var(--bg2,#f6f8fb);padding:12px;border-radius:8px;line-height:1.6">'
+        +   'Réglez vos <strong>'+fmt(m)+'</strong> par Orange Money, MTN MoMo, carte bancaire ou PayPal, puis revenez ici.'
+        + '</div>'
+        + '<a href="'+_esc(url)+'"'+_cagAttrs+' class="btn" style="display:block;margin-top:12px;background:linear-gradient(135deg,#059669,#3A8F73);color:#fff;border:none;border-radius:8px;padding:12px;font-weight:800;font-size:13px;text-decoration:none">'
+        +   (ok?'🔁 Rouvrir la page de paiement':'💳 Ouvrir la page de paiement')+'</a>'
+        + '<div id="cagStatut" style="margin-top:14px;font-size:13px;font-weight:700;padding:10px;background:var(--bg2,#f6f8fb);border-radius:8px">⏳ En attente de votre paiement…</div>'
+        + '</div>',
+        '<button class="btn bo" onclick="cm();_cagStopPoll()">Fermer</button>');
+      _cagPoll(ref);
+      return;
+    }
+
+    // ── Parcours USSD (CamPay) ───────────────────────────────────────────
     var orange = (d.operator === 'ORANGE');
     M('⏳ Confirmez sur votre téléphone', 'Référence : '+ref,
       '<div style="text-align:center;padding:18px">'
@@ -40451,15 +41205,18 @@ function _cagPoll(ref){
   var base = (typeof _payApiBase==='function') ? _payApiBase() : '';
   if(!base) return;
   var n = 0;
+  // En redirection, le donateur quitte la page et prend son temps (choix du
+  // moyen, saisie de la carte) : 3 minutes couperaient trop tôt.
+  var _max = ((typeof _payFlowIsRedirect==='function') && _payFlowIsRedirect()) ? 144 : 36;
   _cagPollTimer = setInterval(function(){
     n++;
-    if(n > 36){   // ~3 min
+    if(n > _max){
       _cagStopPoll();
       var e = document.getElementById('cagStatut');
       if(e){ e.innerHTML = '⏰ Délai dépassé. Si vous avez validé, la cagnotte se mettra à jour d\'elle-même.'; e.style.color = '#B45309'; }
       return;
     }
-    fetch(base+'/payment_campay.php?action=status&ref='+encodeURIComponent(ref))
+    fetch(base+'/'+_payProviderFile()+'?action=status&ref='+encodeURIComponent(ref))
       .then(function(r){ return r.json(); })
       .then(function(d){
         var e = document.getElementById('cagStatut');
@@ -40521,7 +41278,7 @@ function _cagCreer(eleveId){
   if(!cc.url || !cc.secret){ toast('Configurez la synchronisation serveur d\'abord','warn'); return; }
 
   toast('⏳ Création…','info');
-  fetch(cc.url.replace(/\/+$/,'')+'/payment_campay.php?action=fund_create', {
+  fetch(cc.url.replace(/\/+$/,'')+'/'+_payProviderFile()+'?action=fund_create', {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+cc.secret},
     body: JSON.stringify({
@@ -40956,7 +41713,7 @@ function _cagAdminCharger(){
     box.innerHTML = '<div class="card" style="padding:18px;color:var(--ink3)">Configurez la synchronisation serveur pour voir les cagnottes.</div>';
     return;
   }
-  fetch(cc.url.replace(/\/+$/,'')+'/payment_campay.php?action=fund_list',
+  fetch(cc.url.replace(/\/+$/,'')+'/'+_payProviderFile()+'?action=fund_list',
         {headers:{'Authorization':'Bearer '+cc.secret}})
     .then(function(r){ return r.json(); })
     .then(function(d){
@@ -41437,12 +42194,12 @@ var _PV_PUBLICS = {
     ico:'lc-graduation',
     accroche:'Réviser, comprendre, s\'entraîner — et savoir où l\'on va.',
     cartes:[
-      {ic:'lc-check',      t:'Corrigés des cahiers', d:'6ᵉ à Terminale, exercice par exercice. Gratuit, sans compte.', a:"window.open('corriges/','_blank','noopener')"},
+      {ic:'lc-check',      t:'Corrigés des cahiers', d:'6ᵉ à Terminale, exercice par exercice. Gratuit, sans compte.', a:"window.open('/corriges/','_blank','noopener')"},
       {ic:'lc-game',       t:'Jeux & œuvres',        d:'Quiz, cartes mentales et œuvres au programme.',               a:"showJeuxEdu()"},
       {ic:'lc-flask',      t:'Laboratoires',         d:'Expériences de sciences à manipuler.',                         a:"showLabosVirtuels()"},
       {ic:'lc-compass',    t:'Orientation scolaire', d:'Filières, séries, débouchés : choisir sans se tromper.',        a:"vShowSec('orientation',null)"},
       {ic:'lc-flame',      t:'Coaching & motivation',d:'Objectifs, défis du jour, série de connexions.',                a:"mCoaching()"},
-      {ic:'lc-tool',       t:'Outils gratuits',      d:'Moyenne, note à viser, planning de révision.',                  a:"window.open('outils/','_blank','noopener')"},
+      {ic:'lc-tool',       t:'Outils gratuits',      d:'Moyenne, note à viser, planning de révision.',                  a:"window.open('/outils/','_blank','noopener')"},
       {ic:'lc-brain',      t:'Professeur Ambassa',   d:'Poser une question du programme, obtenir une explication.',     a:"mAgentAmbassa()"},
       {ic:'lc-bookopen',   t:'E-learning',           d:'Cours, épreuves et corrigés par niveau.',                       a:"vShowSec('elearning',null)"}
     ]
@@ -41453,8 +42210,8 @@ var _PV_PUBLICS = {
     accroche:'Suivre la scolarité, payer simplement, comprendre les résultats.',
     cartes:[
       {ic:'lc-users',      t:'Espace Parents',       d:'Ce que VÉRITAS ouvre aux familles.',                            a:"vShowSec('parents',null)"},
-      {ic:'lc-chart',      t:'Calculer une moyenne', d:'Moyenne pondérée, matières qui coûtent le plus.',               a:"window.open('outils/calcul-moyenne.html','_blank','noopener')"},
-      {ic:'lc-target',     t:'Note à viser',         d:'Combien il faut au prochain devoir pour remonter.',             a:"window.open('outils/points-manquants.html','_blank','noopener')"},
+      {ic:'lc-chart',      t:'Calculer une moyenne', d:'Moyenne pondérée, matières qui coûtent le plus.',               a:"window.open('/outils/calcul-moyenne.html','_blank','noopener')"},
+      {ic:'lc-target',     t:'Note à viser',         d:'Combien il faut au prochain devoir pour remonter.',             a:"window.open('/outils/points-manquants.html','_blank','noopener')"},
       {ic:'lc-wallet',     t:'Cagnotte de scolarité',d:'Faire participer la famille, même depuis l\'étranger.',         a:"vShowSec('cagnotte',null)"},
       {ic:'lc-compass',    t:'Orientation scolaire', d:'Aider son enfant à choisir sa filière.',                        a:"vShowSec('orientation',null)"},
       {ic:'lc-book',       t:'Manuels & corrigés',   d:'Les cahiers du centre et leurs corrigés en ligne.',             a:"vShowSec('boutique',null)"},
@@ -41468,9 +42225,9 @@ var _PV_PUBLICS = {
     accroche:'Gérer l\'école sans y passer les nuits — et donner aux enseignants de quoi travailler.',
     cartes:[
       {ic:'lc-settings',   t:'Confier la gestion de mon établissement', d:'Inscriptions, notes, bulletins, frais, personnel : VÉRITAS Campus, à vos couleurs.', a:"mDemandeCampus()"},
-      {ic:'lc-laptop',     t:'Voir VÉRITAS Campus',  d:'Ce que couvre l\'outil, et les trois façons de l\'héberger.',        a:"window.open('campus/','_blank','noopener')"},
+      {ic:'lc-laptop',     t:'Voir VÉRITAS Campus',  d:'Ce que couvre l\'outil, et les trois façons de l\'héberger.',        a:"window.open('/campus/','_blank','noopener')"},
       {ic:'lc-award',      t:'Centre d\'Excellence VÉRITAS', d:'Le label partenaire : ressources gratuites, formations, visibilité.', a:"vShowSec('partenariat-chef_etab',null)"},
-      {ic:'lc-check',      t:'Corrigés pour vos enseignants', d:'6ᵉ à Terminale, exercice par exercice. Gratuit, sans compte.', a:"window.open('corriges/','_blank','noopener')"},
+      {ic:'lc-check',      t:'Corrigés pour vos enseignants', d:'6ᵉ à Terminale, exercice par exercice. Gratuit, sans compte.', a:"window.open('/corriges/','_blank','noopener')"},
       {ic:'lc-book',       t:'Manuels & commandes groupées', d:'Les cahiers VÉRITAS pour vos classes, tarifs par volume.',      a:"vShowSec('boutique',null)"},
       {ic:'lc-compass',    t:'Orientation de vos élèves', d:'Filières, séries, débouchés : de quoi outiller vos conseils de classe.', a:"vShowSec('orientation',null)"},
       {ic:'lc-message',    t:'Parler à un conseiller', d:'Une question sur la mise en route, les tarifs, la reprise de vos données.', a:"_vtWaOpen('partenariat')"}
@@ -41487,8 +42244,8 @@ var _PV_PUBLICS = {
     ico:'lc-presentation',
     accroche:'Des ressources prêtes à l\'emploi, et une place dans le réseau.',
     cartes:[
-      {ic:'lc-check',      t:'Corrigés des cahiers', d:'Tous les corrigés, par niveau et séquence.',                    a:"window.open('corriges/','_blank','noopener')"},
-      {ic:'lc-book',       t:'Manuels VÉRITAS',      d:'Les cahiers 6ᵉ→Tle et leurs ressources.',                       a:"window.open('manuels.html','_blank','noopener')"},
+      {ic:'lc-check',      t:'Corrigés des cahiers', d:'Tous les corrigés, par niveau et séquence.',                    a:"window.open('/corriges/','_blank','noopener')"},
+      {ic:'lc-book',       t:'Manuels VÉRITAS',      d:'Les cahiers 6ᵉ→Tle et leurs ressources.',                       a:"window.open('/manuels.html','_blank','noopener')"},
       {ic:'lc-handshake',  t:'Devenir partenaire',   d:'Commissions, formations, co-rédaction.',                        a:"vShowSec('partenariat-enseignant',null)"},
       {ic:'lc-award',      t:'Trophées VÉRITAS',     d:'Le tableau d\'honneur du centre, vote gratuit.',                a:"vShowSec('trophees',null)"},
       {ic:'lc-bookopen',   t:'E-learning',           d:'Épreuves, cours et contenus à réutiliser.',                     a:"vShowSec('elearning',null)"},
@@ -41772,17 +42529,35 @@ window._pvOffre = _pvOffre;
    cherche justement à éviter. */
 
 var _ACC_ESSENTIEL = [
+  // v1.16.1 — la tuile « Mes matières » a été RETIRÉE d'ici et repliée dans
+  // « Corrigés des cahiers ». Elle pointait vers /niveaux/, qui ne contient
+  // que des pages `francais-*.html` : sous un titre qui promettait TOUTES les
+  // matières, l'élève de 3ᵉ venu pour ses maths ne trouvait que du français.
+  // Le programme de français a désormais sa porte là où il est cohérent —
+  // à côté des corrigés du cahier — et le libellé qui couvre réellement
+  // toutes les disciplines est celui de /parcours/, juste en dessous.
+  // « Mon parcours » n'est PAS repris ici : il vit déjà dans _ACC_COMMUNAUTE,
+  // plus bas sur la même page. Deux tuiles identiques à trois écrans d'écart
+  // ne rendent pas la fonction plus visible, elles font douter que ce soit
+  // la même chose.
+  // /parcours/ était en ligne depuis août — chaîne note → moyenne → passage →
+  // examen, simulateur d'année, filières après le BEPC et après le BAC — et
+  // liée depuis constellation.html, eleve/, manuels.html et outils/, mais
+  // depuis AUCUNE porte sur l'accueil de l'application. Le libellé évite
+  // « Mon parcours », déjà pris par la progression gamifiée (_ACC_COMMUNAUTE).
+  {ic:'lc-chart',    t:'Mes matières, coefficients et orientation', d:'Toutes les disciplines et leur poids réel, puis la filière après le BEPC ou le BAC.', libre:1, a:"window.open('/parcours/','_blank','noopener')"},
+  {ic:'lc-compass',  t:'La Constellation VÉRITAS', d:'La carte de tout ce qui accompagne le cahier : corrigés, quiz, audio, Guide.', libre:1, a:"window.open('/constellation.html','_blank','noopener')"},
   // Le calendrier n'est PAS une section de vShowSec : il a sa propre fonction.
   // Écrit en vShowSec('calendrier'), l'appel retombait en silence sur l'accueil.
   {ic:'lc-calendar', t:'Calendrier scolaire',   d:'Dates des examens, vacances, conseils de classe.', libre:1, a:"showCalendrier()"},
-  {ic:'lc-check',    t:'Corrigés des cahiers',  d:'6ᵉ à Terminale, exercice par exercice.',           libre:1, a:"window.open('corriges/','_blank','noopener')"},
+  {ic:'lc-check',    t:'Corrigés des cahiers',  d:'6ᵉ à Terminale, exercice par exercice — et le programme de français de ta classe.', libre:1, a:"window.open('/corriges/','_blank','noopener')"},
   // 'epreuves' et non 'elearning' : c'est la section qui porte le filtre par
   // section, matière et niveau (8 400 caractères contre 3 200).
   {ic:'lc-doc',      t:'Épreuves & annales',    d:'BEPC, Probatoire, BAC et GCE avec corrigés.',               a:"vShowSec('epreuves',null)"},
   {ic:'lc-flask',    t:'Laboratoires virtuels', d:'Les expériences de sciences, à manipuler.',        libre:1, a:"showLabosVirtuels()"},
   {ic:'lc-game',     t:'Jeux & œuvres',         d:'Quiz, cartes mentales, œuvres au programme.',      libre:1, a:"showJeuxEdu()"},
   {ic:'lc-compass',  t:'Orientation scolaire',  d:'Filières, séries, débouchés : choisir sans se tromper.',    a:"vShowSec('orientation',null)"},
-  {ic:'lc-tool',     t:'Outils de calcul',      d:'Moyenne, note à viser, planning de révision.',     libre:1, a:"window.open('outils/','_blank','noopener')"}
+  {ic:'lc-tool',     t:'Outils de calcul',      d:'Moyenne, note à viser, planning de révision.',     libre:1, a:"window.open('/outils/','_blank','noopener')"}
   // La tuile « Professeur Ambassa » a été RETIRÉE : l'accueil offrait trois
   // portes vers la même chose (cette tuile, le bandeau « Intelligence
   // Artificielle » plus bas, et désormais l'avatar flottant présent sur toutes
@@ -42054,20 +42829,20 @@ var _PRT_ATTENDU = {
 // Ce dont on profite TOUT DE SUITE, sans compte ni candidature. Toutes les
 // destinations sont vérifiées existantes (mêmes cibles que les hubs publics).
 var _PRT_DEJA = {
-  enseignant:   [{t:'Les corrigés des cahiers',   a:"window.open('corriges/','_blank','noopener')"},
-                 {t:'Les manuels et leurs ressources', a:"window.open('manuels.html','_blank','noopener')"}],
-  createur:     [{t:'Les outils gratuits à partager', a:"window.open('outils/','_blank','noopener')"},
-                 {t:'Les corrigés en ligne',      a:"window.open('corriges/','_blank','noopener')"}],
-  chef_etab:    [{t:'Les corrigés des cahiers',   a:"window.open('corriges/','_blank','noopener')"},
+  enseignant:   [{t:'Les corrigés des cahiers',   a:"window.open('/corriges/','_blank','noopener')"},
+                 {t:'Les manuels et leurs ressources', a:"window.open('/manuels.html','_blank','noopener')"}],
+  createur:     [{t:'Les outils gratuits à partager', a:"window.open('/outils/','_blank','noopener')"},
+                 {t:'Les corrigés en ligne',      a:"window.open('/corriges/','_blank','noopener')"}],
+  chef_etab:    [{t:'Les corrigés des cahiers',   a:"window.open('/corriges/','_blank','noopener')"},
                  {t:'L\'espace parents',          a:"vShowSec('parents',null)"}],
-  inspecteur:   [{t:'Les manuels VÉRITAS',        a:"window.open('manuels.html','_blank','noopener')"},
-                 {t:'Les corrigés en ligne',      a:"window.open('corriges/','_blank','noopener')"}],
-  parent:       [{t:'Calculer une moyenne',       a:"window.open('outils/calcul-moyenne.html','_blank','noopener')"},
+  inspecteur:   [{t:'Les manuels VÉRITAS',        a:"window.open('/manuels.html','_blank','noopener')"},
+                 {t:'Les corrigés en ligne',      a:"window.open('/corriges/','_blank','noopener')"}],
+  parent:       [{t:'Calculer une moyenne',       a:"window.open('/outils/calcul-moyenne.html','_blank','noopener')"},
                  {t:'L\'espace parents',          a:"vShowSec('parents',null)"}],
   eleve_leader: [{t:'Les jeux et les œuvres',     a:"showJeuxEdu()"},
                  {t:'Le coaching',                a:"mCoaching()"}],
   librairie:    [{t:'Le catalogue des manuels',   a:"vShowSec('boutique',null)"}],
-  universite:   [{t:'Les manuels VÉRITAS',        a:"window.open('manuels.html','_blank','noopener')"}],
+  universite:   [{t:'Les manuels VÉRITAS',        a:"window.open('/manuels.html','_blank','noopener')"}],
   sponsor:      [{t:'Les trophées VÉRITAS',       a:"vShowSec('trophees',null)"}]
 };
 
@@ -43152,3 +43927,811 @@ function _prtBlocCampus(){
     else window.addEventListener('load', function(){ setTimeout(tenter, 400); });
   }catch(e){}
 })();
+
+/* ═══════════ RETOUR DU PAYEUR APRÈS REDIRECTION (CamerPay, v1.2.6) ═══════════
+   CamerPay est une passerelle par REDIRECTION : le payeur quitte VÉRITAS, règle
+   sur la page hébergée, puis revient sur `merchant_return_url`, que le serveur
+   fixe à `…/#paiement?ref=VT260809-XXXX` (camerpayReturnUrl(), payment_camerpay.php).
+
+   Ce hash n'était lu NULLE PART : le client revenait sur une application muette,
+   sans confirmation ni suivi — alors même que le paiement était passé. Le
+   routeur d'ancres v1.13.1 ci-dessus ne le couvre pas (liste blanche de sections
+   visiteur, et « paiement » n'en est pas une).
+
+   Cas où c'est le SEUL chemin visible pour le client :
+     • webview de l'app Android (Capacitor) : pas de second onglet à retrouver ;
+     • navigateurs mobiles qui remplacent l'onglet au lieu d'en ouvrir un ;
+     • onglet d'origine fermé pendant le paiement.
+
+   ⚠️ Ceci ne fait que MONTRER l'issue : l'autorité sur l'argent reste le webhook
+   serveur, re-vérifié auprès de CamerPay. On rouvre l'écran et on relance le
+   polling, rien de plus — aucun accès n'est accordé ici. */
+window._payResumeFromHash = function(){
+  var h = String(window.location.hash || '');
+  // Ancrage STRICT sur la forme produite par camerpayReturnUrl().
+  // Un indexOf('paiement') attraperait aussi `#mes-paiements?ref=…`.
+  var q = h.match(/^#?paiement\?(.+)$/);
+  if(!q) return false;
+  var m = ('&' + q[1]).match(/[?&]ref=([^&]+)/);
+  if(!m) return false;
+  var ref = '';
+  try{ ref = decodeURIComponent(m[1]); }catch(e){ ref = m[1]; }
+  if(!ref) return false;
+  if(typeof M !== 'function' || typeof _payStartPollingCampay !== 'function') return false;
+
+  // Le hash ne doit pas rouvrir l'écran à chaque re-rendu ni survivre à un F5.
+  try{ history.replaceState(null, '', location.pathname + location.search); }
+  catch(e){ try{ window.location.hash = ''; }catch(e2){} }
+
+  var att = (window.DB && DB.payAttempts || []).filter(function(x){ return x && x.ref === ref; })[0];
+  var montant = att ? (att.montant || 0) : 0;
+  M('🔎 Vérification de votre paiement', 'Référence : ' + _esc(ref),
+    '<div style="text-align:center;padding:20px">'
+    + '<div style="font-size:56px;margin-bottom:12px">⏳</div>'
+    + '<div style="font-size:14px;color:var(--ink2);margin-bottom:12px"><strong>Merci — nous vérifions votre paiement'
+      + (montant ? ' de ' + new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA' : '') + '.</strong></div>'
+    + '<div style="font-size:13px;color:var(--ink3);background:var(--blb);padding:12px;border-radius:8px;border:1px solid var(--bld)">La confirmation vient de l\'opérateur, pas de votre navigateur : elle peut demander quelques secondes. <strong>Ne payez pas une seconde fois</strong> — si quelque chose a échoué, ce message vous le dira.</div>'
+    + '<div id="payCampayStatus" style="margin-top:14px;font-size:13px;color:var(--bl);font-weight:700;padding:10px;background:var(--bg2);border-radius:8px">⏳ Vérification en cours...</div>'
+    + '</div>',
+    '<button class="btn bo" onclick="cm();_payStopPolling()">Fermer</button>');
+  _payStartPollingCampay(ref);
+  return true;
+};
+
+(function _payReturnBoot(){
+  var go = function(){ try{ window._payResumeFromHash(); }catch(e){} };
+  // Au chargement, après l'amorçage de l'espace visiteur (même délai que le
+  // routeur d'ancres, pour ne pas ouvrir une modale que le rendu écraserait).
+  if(document.readyState === 'complete') setTimeout(go, 500);
+  else window.addEventListener('load', function(){ setTimeout(go, 500); });
+  // Et si le retour se fait sans rechargement (webview qui réécrit le hash).
+  window.addEventListener('hashchange', go);
+})();
+
+/* ══════════════════════════════════════════════════════════════════════
+   vtIconize() — balayage des émojis restants, au niveau du DOM
+   ─────────────────────────────────────────────────────────────────────
+   Les émojis de l'application connectée sont écrits en dur dans des
+   milliers de chaînes JS, tantôt à apostrophes ('…'+x+'…'), tantôt en
+   gabarits (`…${x}…`), parfois imbriquées l'une dans l'autre. Les
+   remplacer dans le source demanderait de deviner le contexte de chaque
+   occurrence : une erreur de forme et le code affiche « '+ICO(...)+' »
+   en toutes lettres, ou ne s'analyse plus du tout.
+
+   On agit donc APRÈS le rendu, sur le DOM, où il n'y a plus de contexte
+   de chaîne du tout — seulement du texte. Le balayage est limité à une
+   liste de conteneurs qui sont, par construction, des porte-icônes :
+   jamais du contenu rédactionnel, jamais une réponse d'élève.
+
+   Deux cas seulement :
+   — le conteneur ne contient QUE l'émoji  → il est remplacé en entier ;
+   — le texte COMMENCE par un émoji         → seul ce préfixe est remplacé.
+   Tout le reste est laissé intact.
+   ══════════════════════════════════════════════════════════════════════ */
+(function(){
+  // Conteneurs dont le rôle est de porter une icône, et rien d'autre.
+  var PORTE_ICONE = '.sci,.sbic,.i-disc,.rc-ico,.stat-ico,.kpi-ico,.card-ico';
+  // Conteneurs qui commencent par une icône, suivie d'un libellé.
+  var PREFIXE = '.mtt,.pgt,.sbsl,.scl';
+
+  var EMO = /^\s*([\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F900}-\u{1F9FF}][\u{FE0F}\u{200D}\u{1F3FB}-\u{1F3FF}]*(?:[\u{1F300}-\u{1FAFF}][\u{FE0F}]*)*)\s*/u;
+
+  function svgPour(emoji){
+    if(typeof PIC !== 'function') return null;
+    var out = PIC(emoji);
+    return (out && out !== emoji) ? out : null;   // inconnu → on ne touche pas
+  }
+
+  function balayer(racine){
+    if(!racine || !racine.querySelectorAll) return;
+    var n = 0;
+
+    racine.querySelectorAll(PORTE_ICONE).forEach(function(el){
+      if(el.querySelector('svg')) return;              // déjà converti
+      var t = (el.textContent || '').trim();
+      if(!t) return;
+      var m = t.match(EMO);
+      if(!m || m[0].trim() !== t) return;              // pas SEULEMENT un émoji
+      var svg = svgPour(m[1]);
+      if(svg){ el.innerHTML = svg; n++; }
+    });
+
+    racine.querySelectorAll(PREFIXE).forEach(function(el){
+      if(el.querySelector('svg')) return;
+      var noeud = el.firstChild;
+      if(!noeud || noeud.nodeType !== 3) return;       // 3 = nœud texte
+      var m = noeud.nodeValue.match(EMO);
+      if(!m) return;
+      var svg = svgPour(m[1]);
+      if(!svg) return;
+      noeud.nodeValue = noeud.nodeValue.slice(m[0].length);
+      var boite = document.createElement('span');
+      boite.className = 'vt-ico-pre';
+      boite.innerHTML = svg;
+      el.insertBefore(boite, el.firstChild);
+      n++;
+    });
+    return n;
+  }
+  window.vtIconize = balayer;
+
+  /* Le rendu de l'application est refait à chaque navigation (re(), goTo(),
+     render()). Plutôt que d'appeler le balayage à chacun de ces endroits —
+     et d'en oublier —, on observe le conteneur applicatif. L'observation est
+     coupée pendant le balayage pour ne pas se déclencher elle-même. */
+  var enCours = false, minuteur = null, obs = null;
+  function planifier(){
+    if(enCours) return;
+    clearTimeout(minuteur);
+    minuteur = setTimeout(function(){
+      enCours = true;
+      try{ balayer(document.body); } catch(e){}
+      enCours = false;
+    }, 60);
+  }
+  function armer(){
+    balayer(document.body);
+    if(!window.MutationObserver) return;
+    obs = new MutationObserver(planifier);
+    obs.observe(document.body, {childList:true, subtree:true});
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', armer);
+  else armer();
+})();
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.15.6 — TROIS REPRISES DU TABLEAU DE BORD CAMERPAY
+   ────────────────────────────────────────────────────────────────────────
+   1. Checklist d'activation du centre  — état DÉRIVÉ de DB, jamais stocké.
+   2. Tendances sur les cartes chiffrées — delta mois/mois + micro-courbe.
+   3. Échéancier de scolarité            — le « carnet quotidien » appliqué à
+      NOTRE propre facture : aucun argent de tiers ne transite.
+
+   Règle tenue partout ici : pas de données, pas d'indicateur. Un « +100 % »
+   calculé sur un seul mois est un mensonge présenté comme une mesure.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─── Dates ─────────────────────────────────────────────────────────────
+   La base mélange « JJ/MM/AAAA » (fr-FR, format d'écriture de `today()`) et
+   quelques ISO venus des imports. `new Date('02/10/2024')` lirait le 10
+   FÉVRIER : il faut découper à la main, sinon toutes les séries sont fausses. */
+function _dFR(v){
+  if(!v) return null;
+  if(v instanceof Date) return isNaN(v)?null:v;
+  var s=String(v).trim(); if(!s) return null;
+  var m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(m) return new Date(+m[3], +m[2]-1, +m[1]);
+  m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if(m) return new Date(+m[1], +m[2]-1, +m[3]);
+  var d=new Date(s); return isNaN(d)?null:d;
+}
+function _dOut(d){ return d.toLocaleDateString('fr-FR'); }
+function _mKey(d){ return d.getFullYear()*12 + d.getMonth(); }
+
+/* ════════ 1. CHECKLIST D'ACTIVATION ════════════════════════════════════
+   Le parcours guidé existant (`maybeShowOnboarding`) est autre chose : huit
+   écrans joués UNE fois au visiteur. Ici c'est un état d'avancement du
+   centre, recalculé à chaque rendu, qui disparaît tout seul une fois plein. */
+function _vrtChecklistSteps(){
+  // Appelable depuis n'importe où, y compris le portail visiteur où `DB`
+  // n'est pas encore monté : on travaille sur une base vide plutôt que de jeter.
+  var DBx = (typeof DB!=='undefined' && DB) ? DB : {};
+  if(!DBx.students) DBx={ students:[], teachers:[], payments:[], subjects:[], school:{} };
+  var sc = DBx.school || {};
+  var P  = window.VERITAS_PAYMENTS || {};
+  // Un numéro reste « à remplir » tant qu'il porte encore une marque d'usine.
+  function pose(v){
+    v = String(v||'');
+    if(!v.trim()) return false;
+    return !/XX|test_replace_me|À REMPLACER|Votre\.\.\./i.test(v);
+  }
+  var classesActives = (typeof CLS!=='undefined'?CLS:[]).filter(function(c){
+    return DBx.students.some(function(s){ return s.cls===c; });
+  }).length;
+
+  return [
+    { id:'logo',  ok:pose(sc.logo),
+      t:'Poser le logo du centre',
+      s:'Il apparaît sur les bulletins, les reçus et les certificats.',
+      cta:'Ouvrir les réglages', go:"goTo('settings')" },
+    { id:'ident', ok:pose(sc.tel) && pose(sc.ville) && pose(sc.directeur),
+      t:'Compléter l’identité du centre',
+      s:'Téléphone, ville et responsable — imprimés sur tous les documents officiels.',
+      cta:'Compléter', go:"goTo('settings')" },
+    { id:'cls',   ok:classesActives>0,
+      t:'Activer au moins une classe',
+      s:'Une classe devient active dès qu’un élève y est inscrit.',
+      cta:'Gérer les classes', go:"(typeof mManageClasses==='function'?mManageClasses():goTo('settings'))" },
+    { id:'subs',  ok:!!(DBx.subjects && DBx.subjects.length),
+      t:'Vérifier matières et coefficients',
+      s:'Les coefficients pilotent les moyennes : une erreur ici fausse tous les bulletins.',
+      cta:'Gérer les matières', go:"(typeof mManageSubjects==='function'?mManageSubjects():goTo('settings'))" },
+    { id:'eleves',ok:DBx.students.length>=5,
+      t:'Inscrire les premiers élèves',
+      s:DBx.students.length+' inscrit'+(DBx.students.length>1?'s':'')+' — au moins 5 pour que les statistiques aient un sens.',
+      cta:'Ajouter un élève', go:"goTo('students')" },
+    { id:'ens',   ok:DBx.teachers.length>=1,
+      t:'Enregistrer un enseignant',
+      s:'Sans enseignant, personne ne peut saisir de notes.',
+      cta:'Ajouter un enseignant', go:"goTo('teachers')" },
+    { id:'pay',   ok:pose(P.momo && P.momo.numero) && pose(P.orange && P.orange.numero),
+      t:'Renseigner les coordonnées d’encaissement',
+      s:'MTN MoMo et Orange Money — ce sont les numéros affichés aux parents.',
+      cta:'Voir le module paiements', go:"(typeof mPayAttempts==='function'?mPayAttempts():goTo('payments'))" },
+    { id:'wa',    ok:pose(P.whatsapp),
+      t:'Indiquer le WhatsApp du centre',
+      s:'C’est là qu’arrivent les confirmations de paiement des parents.',
+      cta:'Voir le module paiements', go:"(typeof mPayAttempts==='function'?mPayAttempts():goTo('payments'))" },
+    { id:'enc',   ok:DBx.payments.some(function(p){ return p.stat==='Payé'; }),
+      t:'Enregistrer le premier encaissement',
+      s:'La dernière étape : elle prouve que la chaîne complète fonctionne.',
+      cta:'Enregistrer un paiement', go:"(typeof mAddPay==='function'?mAddPay():goTo('payments'))" }
+  ];
+}
+
+function _checklistHTML(){
+  try{
+    if(typeof iA!=='function' || !iA()) return '';
+    if(DB.school && DB.school._chkHide) return '';
+    var st=_vrtChecklistSteps();
+    var done=st.filter(function(x){ return x.ok; }).length;
+    if(done===st.length) return '';           // plein = disparaît, sans félicitations creuses
+    var pct=Math.round(done/st.length*100);
+    var reste=st.filter(function(x){ return !x.ok; });
+
+    var lignes=reste.map(function(x,i){
+      return '<div class="vchk-row">'
+        +'<span class="vchk-n">'+(done+i+1)+'</span>'
+        +'<div style="flex:1;min-width:0">'
+          +'<div class="vchk-t">'+_esc(x.t)+'</div>'
+          +'<div class="vchk-s">'+_esc(x.s)+'</div>'
+        +'</div>'
+        +'<button class="btn bo xs vchk-cta" onclick="'+x.go+'">'+_esc(x.cta)+' →</button>'
+      +'</div>';
+    }).join('');
+
+    var faits=st.filter(function(x){ return x.ok; }).map(function(x){
+      return '<div class="vchk-row vchk-done"><span class="vchk-n vchk-ok">✓</span>'
+        +'<div style="flex:1;min-width:0"><div class="vchk-t">'+_esc(x.t)+'</div></div></div>';
+    }).join('');
+
+    return '<div class="card vchk mb16">'
+      +'<div class="fl2 fic fsb fw g8 mb12">'
+        +'<div><div class="vchk-h">🚀 Votre centre est prêt à '+pct+' %</div>'
+        +'<div class="vchk-sub">'+done+' étape'+(done>1?'s':'')+' sur '+st.length+' — les suivantes prennent quelques minutes.</div></div>'
+        +'<button class="btn bo xs" onclick="_checklistHide()" title="Masquer définitivement cette carte">Masquer</button>'
+      +'</div>'
+      +'<div class="vchk-bar"><div class="vchk-fill" style="width:'+pct+'%"></div></div>'
+      +'<div class="vchk-list">'+faits+lignes+'</div>'
+    +'</div>';
+  }catch(e){ return ''; }   // le tableau de bord ne tombe jamais pour une checklist
+}
+
+function _checklistHide(){
+  if(!DB.school) DB.school={};
+  DB.school._chkHide=true;
+  save(); re();
+  toast('Checklist masquée — « Réafficher la checklist » dans les réglages','ok');
+}
+function _checklistShow(){
+  if(DB.school) delete DB.school._chkHide;
+  save(); re();
+  toast('Checklist réaffichée','ok');
+}
+
+/* ════════ 2. TENDANCES (delta + micro-courbe) ══════════════════════════
+   `_serieMensuelle` ramène N mois glissants à un tableau de sommes. Les
+   entrées sans date exploitable sont IGNORÉES, jamais rangées dans le mois
+   courant : ça gonflerait artificiellement le dernier point, donc le delta. */
+function _serieMensuelle(items, getDate, getVal, nMois){
+  nMois = nMois || 12;
+  var now=new Date(), fin=_mKey(now), out=[], i;
+  for(i=0;i<nMois;i++) out.push(0);
+  var vus=0;
+  (items||[]).forEach(function(it){
+    var d=_dFR(getDate(it)); if(!d) return;
+    var idx = nMois-1 - (fin - _mKey(d));
+    if(idx<0 || idx>=nMois) return;
+    out[idx] += (+getVal(it) || 0); vus++;
+  });
+  out._n = vus;
+  return out;
+}
+
+/* Micro-courbe : polyligne SVG, sans axe ni légende. Elle donne la FORME,
+   pas la valeur — le chiffre est juste au-dessus. `preserveAspectRatio` est
+   désactivé pour qu'elle s'étire sans déformer l'épaisseur du trait. */
+function _sparkline(vals, couleur){
+  if(!vals || vals.length<2) return '';
+  var max=Math.max.apply(null, vals), min=Math.min.apply(null, vals);
+  if(max===min){ max=min+1; }
+  var W=68, H=20, pas=W/(vals.length-1);
+  var pts=vals.map(function(v,i){
+    var y = H-2 - ((v-min)/(max-min))*(H-4);
+    return (i*pas).toFixed(1)+','+y.toFixed(1);
+  }).join(' ');
+  var dernier=vals[vals.length-1], yD = H-2 - ((dernier-min)/(max-min))*(H-4);
+  return '<svg class="vspark" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" '
+    +'preserveAspectRatio="none" aria-hidden="true" focusable="false">'
+    +'<polyline points="'+pts+'" fill="none" stroke="'+couleur+'" stroke-width="1.6" '
+    +'stroke-linecap="round" stroke-linejoin="round" opacity=".85"/>'
+    +'<circle cx="'+W+'" cy="'+yD.toFixed(1)+'" r="2.1" fill="'+couleur+'"/>'
+  +'</svg>';
+}
+
+/* Delta mois/mois. Les cas dégénérés sont nommés, pas maquillés :
+   - moins de 2 mois de données réelles → RIEN (pas de « +100 % » sur un mois) ;
+   - mois précédent à zéro → « nouveau », parce qu'une division par zéro n'a
+     pas de pourcentage honnête. */
+function _deltaHTML(vals){
+  if(!vals || vals.length<2 || !vals._n) return '';
+  var nonVides=vals.filter(function(v){ return v>0; }).length;
+  if(nonVides<2) return '';
+  var cur=vals[vals.length-1], prev=vals[vals.length-2];
+  if(prev===0 && cur===0) return '';
+  if(prev===0) return '<span class="vtrend vtrend-new">nouveau ce mois-ci</span>';
+  var pc=Math.round((cur-prev)/prev*100);
+  if(pc===0) return '<span class="vtrend vtrend-flat">stable</span>';
+  var cls = pc>0 ? 'vtrend-up' : 'vtrend-down';
+  return '<span class="vtrend '+cls+'">'+(pc>0?'↑':'↓')+' '+Math.abs(pc)+' % vs mois dernier</span>';
+}
+
+/* Bloc complet à coller sous un chiffre de carte. `libelle` explique CE QUI
+   est mesuré quand la courbe ne couvre pas tout le chiffre affiché — cas des
+   recettes, dont la part « manuels » n'est pas datée en base. */
+function _kpiTrend(vals, couleur, libelle){
+  var d=_deltaHTML(vals);
+  if(!d && !vals._n) return '';
+  var sp=_sparkline(vals, couleur||'#059669');
+  if(!d && !sp) return '';
+  return '<div class="vkpi-trend">'+sp+(d||'')
+    +(libelle?'<span class="vkpi-note">'+_esc(libelle)+'</span>':'')+'</div>';
+}
+
+/* ════════ 3. ÉCHÉANCIER DE SCOLARITÉ ═══════════════════════════════════
+   Le « carnet d'épargne quotidien » de CamerPay, mais appliqué à NOTRE
+   propre facture. Différence essentielle : on ne détient l'argent de
+   personne — chaque versement est un paiement de scolarité normal, qui
+   atterrit dans DB.payments et ressort dans les recettes et les reçus.
+   Sans cette jonction, l'échéancier serait un silo qui ment à la compta. */
+function _echAll(){
+  if(!DB.echeanciers) DB.echeanciers=[];
+  return DB.echeanciers;
+}
+function _echPlan(id){ return _echAll().find(function(p){ return p.id===id; })||null; }
+function _echForStudent(eid){ return _echAll().filter(function(p){ return p.eid===eid; }); }
+
+var _ECH_RYTHMES = {
+  jour:    { l:'chaque jour',        pas:1,  unite:'jour'    },
+  semaine: { l:'chaque semaine',     pas:7,  unite:'semaine' },
+  quinz:   { l:'toutes les 2 semaines', pas:14, unite:'quinzaine' },
+  mois:    { l:'chaque mois',        pas:0,  unite:'mois'    }   // pas=0 → saut de mois calendaire
+};
+
+function _echDateVersement(debut, rythme, n){
+  var d=new Date(debut.getTime());
+  var r=_ECH_RYTHMES[rythme]||_ECH_RYTHMES.mois;
+  if(r.pas){ d.setDate(d.getDate() + r.pas*n); return d; }
+  /* Saut de mois calendaire, avec BUTÉE en fin de mois. `setMonth` seul fait
+     déborder : le 31/01 + 1 mois donne le 31 février, que JS reporte au 3 mars.
+     Un échéancier ouvert le 31 sauterait ainsi un mois sur deux. */
+  var jour=d.getDate();
+  d.setDate(1);
+  d.setMonth(d.getMonth() + n);
+  var dernierJour=new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+  d.setDate(Math.min(jour, dernierJour));
+  return d;
+}
+
+/* Découpage. Deux modes, parce que les deux façons de poser le problème
+   existent chez un parent :
+     'unit' — « je peux mettre 500 F par jour » → on en déduit le nombre ;
+     'nb'   — « en 10 fois » → on en déduit le montant.
+   Le reste de division ne tombe pas au même endroit selon le mode, et ce
+   n'est pas un détail :
+     - en 'unit', le parent a FIXÉ sa mensualité (« 300 F par jour ») : on la
+       respecte à l'unité près et c'est le DERNIER versement qui absorbe, donc
+       qui est plus petit — un solde qui rétrécit, jamais une surprise ;
+     - en 'nb', il a fixé le nombre de fois : c'est le PREMIER qui absorbe, et
+       il voit dès la création le montant exact de tous les suivants. */
+function _echDecoupe(total, mode, valeur){
+  total=Math.max(0, Math.round(+total||0));
+  valeur=Math.max(1, Math.round(+valeur||0));
+  var nb, unit;
+  if(mode==='unit'){ unit=Math.min(valeur,total); nb=Math.max(1, Math.ceil(total/unit)); }
+  else { nb=Math.min(valeur, total); unit=Math.floor(total/nb); }
+  if(nb<1) nb=1;
+  if(unit<1) unit=1;
+  var mnts=[], i, cumul=0;
+  for(i=0;i<nb;i++){ mnts.push(unit); cumul+=unit; }
+  var reste=total-cumul;                           // ≤ 0 en mode 'unit', ≥ 0 en mode 'nb'
+  var cible = (mode==='unit') ? nb-1 : 0;
+  mnts[cible]+=reste;
+  if(mnts[cible]<=0){                              // garde-fou : jamais de versement nul
+    mnts.splice(cible,1); nb=mnts.length;
+    if(!nb){ mnts=[total]; nb=1; }
+    else { var s2=mnts.reduce(function(a,b){return a+b;},0); mnts[nb-1]+= (total-s2); }
+  }
+  return { nb:nb, unit:unit, mnts:mnts };
+}
+
+function mEcheancierNew(eid){
+  if(!iA()) return;
+  var eleves=DB.students.slice().sort(function(a,b){ return (a.nom||'').localeCompare(b.nom||''); });
+  if(!eleves.length){ toast('Aucun élève inscrit','warn'); return; }
+  var sel=eid||eleves[0].id;
+  var s=S(sel)||eleves[0];
+  var body=''
+    +'<div class="fg"><span class="fl">Élève</span>'
+      +'<select class="fi" id="echE" onchange="_echPreview()">'
+      + eleves.map(function(e){
+          return '<option value="'+e.id+'"'+(e.id===sel?' selected':'')+'>'+_esc((e.pre||'')+' '+(e.nom||''))+' — '+_esc(e.cls||'')+'</option>';
+        }).join('')
+      +'</select></div>'
+    +'<div class="fg"><span class="fl">Motif</span>'
+      +'<input class="fi" id="echMotif" value="Scolarité '+_esc((DB.school&&DB.school.annee)||'')+'" oninput="_echPreview()"></div>'
+    +'<div class="g2">'
+      +'<div class="fg"><span class="fl">Montant total à couvrir (FCFA)</span>'
+        +'<input class="fi" id="echTotal" type="number" min="1" step="500" value="'+(s.frais||45000)+'" oninput="_echPreview()"></div>'
+      +'<div class="fg"><span class="fl">Premier versement le</span>'
+        +'<input class="fi" id="echDebut" type="date" value="'+new Date().toISOString().slice(0,10)+'" onchange="_echPreview()"></div>'
+    +'</div>'
+    +'<div class="fg"><span class="fl">Rythme</span>'
+      +'<select class="fi" id="echRythme" onchange="_echPreview()">'
+        +'<option value="jour">Chaque jour — le carnet quotidien</option>'
+        +'<option value="semaine" selected>Chaque semaine</option>'
+        +'<option value="quinz">Toutes les deux semaines</option>'
+        +'<option value="mois">Chaque mois</option>'
+      +'</select></div>'
+    +'<div class="fg"><span class="fl">Je fixe…</span>'
+      +'<div class="tabs" id="echModeTabs">'
+        +'<button type="button" class="tab on" id="echModeUnit" onclick="_echMode(\'unit\')">le montant par versement</button>'
+        +'<button type="button" class="tab" id="echModeNb" onclick="_echMode(\'nb\')">le nombre de versements</button>'
+      +'</div></div>'
+    +'<div class="fg"><span class="fl" id="echValLbl">Montant de chaque versement (FCFA)</span>'
+      +'<input class="fi" id="echVal" type="number" min="1" step="100" value="1000" oninput="_echPreview()"></div>'
+    +'<div id="echPrev"></div>';
+  M('Échelonner une scolarité',
+    'Le parent paie par petites tranches. Chaque versement reste un paiement de scolarité normal : il entre dans les recettes et donne droit à un reçu.',
+    body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="_echSave()">✓ Créer l’échéancier</button>',
+    true);
+  window._echMode_ = 'unit';
+  _echPreview();
+}
+
+function _echMode(m){
+  window._echMode_=m;
+  var u=_ge('echModeUnit'), n=_ge('echModeNb'), lbl=_ge('echValLbl'), v=_ge('echVal');
+  if(u) u.className='tab'+(m==='unit'?' on':'');
+  if(n) n.className='tab'+(m==='nb'?' on':'');
+  if(lbl) lbl.textContent = (m==='unit') ? 'Montant de chaque versement (FCFA)' : 'Nombre de versements';
+  if(v){ v.step = (m==='unit')?'100':'1'; v.value = (m==='unit')?'1000':'10'; }
+  _echPreview();
+}
+
+function _echPreview(){
+  var tot=+(_ge('echTotal')||{}).value||0;
+  var val=+(_ge('echVal')||{}).value||0;
+  var ry=(_ge('echRythme')||{}).value||'semaine';
+  var deb=_dFR((_ge('echDebut')||{}).value)||new Date();
+  var box=_ge('echPrev'); if(!box) return;
+  if(tot<=0||val<=0){ _si('echPrev','<div class="ib ibo"><span>ℹ️</span><span>Renseignez un montant total et une valeur de découpage.</span></div>'); return; }
+  var d=_echDecoupe(tot, window._echMode_||'unit', val);
+  var fin=_echDateVersement(deb, ry, d.nb-1);
+  var egaux = d.mnts[0]===d.mnts[d.mnts.length-1];
+  var apercu = d.mnts.slice(0,3).map(function(m,i){
+    return '<span class="ech-chip">'+(i+1)+'ᵉ : '+fmt(m)+'</span>';
+  }).join('') + (d.nb>3?'<span class="ech-chip ech-chip-more">… '+(d.nb-3)+' de plus</span>':'');
+  _si('echPrev',
+    '<div class="ech-prev">'
+    +'<div class="ech-prev-h">'+d.nb+' versement'+(d.nb>1?'s':'')+' de '+fmt(d.unit)+' — '+(_ECH_RYTHMES[ry]||{}).l+'</div>'
+    +'<div class="ech-prev-s">Du '+_dOut(deb)+' au '+_dOut(fin)+' · total couvert '+fmt(tot)+'</div>'
+    +'<div class="ech-chips">'+apercu+'</div>'
+    +(egaux?'':'<div class="ech-prev-n">Le premier versement absorbe le reste de division : les suivants sont tous à '+fmt(d.unit)+'.</div>')
+    +'</div>');
+}
+
+function _echSave(){
+  var eid=(_ge('echE')||{}).value;
+  var s=S(eid); if(!s){ toast('Élève introuvable','warn'); return; }
+  var tot=Math.round(+(_ge('echTotal')||{}).value||0);
+  var val=Math.round(+(_ge('echVal')||{}).value||0);
+  var ry=(_ge('echRythme')||{}).value||'semaine';
+  var motif=((_ge('echMotif')||{}).value||'Scolarité').trim();
+  var deb=_dFR((_ge('echDebut')||{}).value);
+  if(tot<=0){ toast('Montant total invalide','warn'); return; }
+  if(val<=0){ toast('Découpage invalide','warn'); return; }
+  if(!deb){ toast('Date de début invalide','warn'); return; }
+  var d=_echDecoupe(tot, window._echMode_||'unit', val);
+  if(d.nb>200){ toast('Plus de 200 versements : réduisez le découpage','warn'); return; }
+  var plan={
+    id:gid(), eid:eid, enom:((s.pre||'')+' '+(s.nom||'')).trim(), cls:s.cls||'',
+    motif:motif, total:tot, rythme:ry, nb:d.nb, unit:d.unit,
+    debut:_dOut(deb), cree:today(),
+    versements:d.mnts.map(function(m,i){
+      return { n:i+1, mnt:m, date:_dOut(_echDateVersement(deb,ry,i)), stat:'À payer', ref:'', paye:'' };
+    })
+  };
+  _echAll().push(plan);
+  save(); cm(); re();
+  toast('Échéancier créé : '+d.nb+' versements de '+fmt(d.unit),'ok');
+}
+
+/* État d'un versement : « en retard » se DÉDUIT de la date, il ne se stocke
+   pas. Un statut figé serait faux dès le lendemain. */
+function _echEtat(v){
+  if(v.stat==='Payé') return 'paye';
+  var d=_dFR(v.date); if(!d) return 'attente';
+  var auj=new Date(); auj.setHours(0,0,0,0);
+  return d<auj ? 'retard' : 'attente';
+}
+function _echStats(plan){
+  var paye=0, du=0, retard=0, prochain=null;
+  plan.versements.forEach(function(v){
+    if(v.stat==='Payé'){ paye+=v.mnt; return; }
+    du+=v.mnt;
+    var e=_echEtat(v);
+    if(e==='retard') retard+=v.mnt;
+    if(!prochain) prochain=v;
+  });
+  return { paye:paye, du:du, retard:retard, prochain:prochain,
+           pct: plan.total? Math.round(paye/plan.total*100) : 0 };
+}
+
+/* Marquer payé = créer un VRAI paiement dans DB.payments. C'est ce qui
+   raccroche l'échéancier à la comptabilité, aux reçus et aux impayés
+   existants, sans dupliquer la moindre règle métier. */
+function _echMarkPaid(planId, n, mode){
+  var p=_echPlan(planId); if(!p) return;
+  var v=p.versements.find(function(x){ return x.n===n; }); if(!v||v.stat==='Payé') return;
+  v.stat='Payé'; v.paye=today();
+  if(!v.ref) v.ref = (typeof _payRef==='function') ? _payRef('ECH') : ('ECH-'+gid());
+  DB.payments.push({
+    id:gid(), eid:p.eid, enom:p.enom, cls:p.cls,
+    mo:p.motif+' — versement '+n+'/'+p.nb,
+    mnt:v.mnt, mode:mode||'Mobile Money', dt:today(), stat:'Payé', ref:v.ref
+  });
+  var st=_echStats(p);
+  if(st.du===0){
+    var s=S(p.eid);
+    if(s) s.stat='Payé';                       // échéancier soldé = élève à jour
+  }
+  save(); re();
+  toast('Versement '+n+'/'+p.nb+' encaissé — '+fmt(v.mnt),'ok');
+}
+
+function _echPay(planId, n){
+  var p=_echPlan(planId); if(!p) return;
+  var v=p.versements.find(function(x){ return x.n===n; }); if(!v) return;
+  if(v.stat==='Payé'){ toast('Ce versement est déjà réglé','ok'); return; }
+  if(!v.ref) v.ref = (typeof _payRef==='function') ? _payRef('ECH') : ('ECH-'+gid());
+  save();
+  if(typeof openPaymentModal==='function'){
+    // ⚠️ Ce paiement partait SANS `intent` : le versement était bel et bien
+    // encaissé, mais rien ne le marquait « Payé » — ni le navigateur du payeur
+    // (aucun cas d'activation ne correspondait) ni le serveur (« intent non
+    // géré »). Le parent payait sa tranche de scolarité et la voyait toujours
+    // due. `targetId` porte le couple plan:rang, seule façon de désigner LE
+    // versement réglé parmi les N du plan.
+    var _eleve = (typeof S==='function') ? S(p.eid) : null;
+    openPaymentModal({
+      montant:v.mnt, ref:v.ref,
+      label:'💳 '+p.motif+' — versement '+n+'/'+p.nb+' ('+p.enom+')',
+      intent:'echeance', targetId:p.id+':'+n,
+      customerAccountId:(_eleve && (_eleve.accountId||_eleve.id))||'',
+      customerNom:p.enom||'',
+      customerTel:(_eleve && (_eleve.tel||_eleve.ptel))||''
+    });
+  } else { toast('Module de paiement indisponible','warn'); }
+}
+
+function _echDelete(planId){
+  var p=_echPlan(planId); if(!p) return;
+  var st=_echStats(p);
+  if(st.paye>0 && !confirm('Cet échéancier a déjà reçu '+fmt(st.paye)+'. Les paiements encaissés seront CONSERVÉS dans les recettes ; seul le plan disparaît.\n\nSupprimer le plan ?')) return;
+  if(st.paye===0 && !confirm('Supprimer cet échéancier ?')) return;
+  DB.echeanciers=_echAll().filter(function(x){ return x.id!==planId; });
+  save(); re(); cm();
+  toast('Échéancier supprimé','ok');
+}
+
+/* Vue admin — un tableau de bord des plans, sur le modèle de mPayAttempts. */
+function mEcheanciers(){
+  if(!iA()) return;
+  var plans=_echAll();
+  var body;
+  if(!plans.length){
+    body='<div class="empty"><div class="empty-ico">🗓️</div>Aucun échéancier.<br><span class="xs2 mut">'
+      +'Utile pour les familles qui ne peuvent pas payer la scolarité en une fois : 1 000 F par semaine plutôt que 45 000 F d’un coup.</span></div>';
+  } else {
+    body=plans.slice().reverse().map(function(p){
+      var st=_echStats(p);
+      var couleur = st.retard>0 ? 'var(--re)' : (st.du===0 ? 'var(--gr)' : 'var(--gold)');
+      var lignes=p.versements.map(function(v){
+        var e=_echEtat(v);
+        var bg = e==='paye'?'bgg':(e==='retard'?'bgr':'bgo');
+        var lbl= e==='paye'?'Payé':(e==='retard'?'En retard':'À payer');
+        return '<tr>'
+          +'<td class="mono xs2">'+v.n+'/'+p.nb+'</td>'
+          +'<td class="xs2 mut">'+_esc(v.date)+'</td>'
+          +'<td class="mono bold" style="color:var(--gold)">'+fmt(v.mnt)+'</td>'
+          +'<td><span class="bg '+bg+'">'+lbl+'</span></td>'
+          +'<td>'+(e==='paye'
+              ? '<span class="xs2 mut">'+_esc(v.paye||'')+'</span>'
+              : '<button class="btn bgr2 xs" onclick="_echMarkPaid(\''+p.id+'\','+v.n+')">✓ Encaisser</button>')
+          +'</td></tr>';
+      }).join('');
+      return '<div class="card mb12" style="border-left:4px solid '+couleur+'">'
+        +'<div class="fl2 fic fsb fw g8 mb10">'
+          +'<div><div class="bold">'+_esc(p.enom)+' <span class="bg bgd">'+_esc(p.cls||'—')+'</span></div>'
+          +'<div class="xs2 mut">'+_esc(p.motif)+' · '+p.nb+' versements '+((_ECH_RYTHMES[p.rythme]||{}).l||'')+' · depuis le '+_esc(p.debut)+'</div></div>'
+          +'<button class="btn bo xs" onclick="_echDelete(\''+p.id+'\')">Supprimer</button>'
+        +'</div>'
+        +'<div class="fl2 fic g8 mb8 fw">'
+          +'<div class="pb" style="flex:1;min-width:140px"><div class="pf pfg" style="width:'+st.pct+'%"></div></div>'
+          +'<span class="mono xs2">'+fmt(st.paye)+' / '+fmt(p.total)+' ('+st.pct+' %)</span>'
+          +(st.retard>0?'<span class="bg bgr">'+fmt(st.retard)+' en retard</span>':'')
+        +'</div>'
+        +'<div class="tw"><table><thead><tr><th>N°</th><th>Échéance</th><th>Montant</th><th>Statut</th><th></th></tr></thead><tbody>'
+        + lignes +'</tbody></table></div>'
+      +'</div>';
+    }).join('');
+  }
+  M('Échéanciers de scolarité',
+    'Le paiement fractionné appliqué à votre propre facture : chaque versement encaissé devient un paiement normal, avec son reçu.',
+    body,
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +'<button class="btn bi" onclick="cm();mEcheancierNew()">＋ Nouvel échéancier</button>',
+    true);
+}
+
+/* Vue élève — insérée dans « Mon paiement ». */
+function _echStudentHTML(eid){
+  try{
+    var plans=_echForStudent(eid).filter(function(p){ return _echStats(p).du>0 || _echStats(p).paye>0; });
+    if(!plans.length) return '';
+    return plans.map(function(p){
+      var st=_echStats(p);
+      var pr=st.prochain;
+      var enRetard = pr && _echEtat(pr)==='retard';
+      return '<div class="card mb16 ech-card">'
+        +'<div class="ct"><span class="ct-ico">🗓️</span>'+_esc(p.motif)+' — paiement échelonné</div>'
+        +'<div class="fl2 fic g10 fw mb10">'
+          +'<div class="pb" style="flex:1;min-width:150px"><div class="pf pfg" style="width:'+st.pct+'%"></div></div>'
+          +'<span class="mono s bold">'+fmt(st.paye)+' / '+fmt(p.total)+'</span>'
+        +'</div>'
+        +(st.du===0
+          ? '<div class="ib ibg"><span>✅</span><span>Échéancier soldé. Merci !</span></div>'
+          : '<div class="ib '+(enRetard?'ibr':'ibo')+'"><span>'+(enRetard?'⚠️':'📅')+'</span><span>'
+            +(enRetard?'Versement en retard depuis le ':'Prochain versement le ')
+            +'<strong>'+_esc(pr.date)+'</strong> — <strong>'+fmt(pr.mnt)+'</strong>'
+            +' (n° '+pr.n+' sur '+p.nb+')</span></div>'
+            +'<button class="btn bi mt8" onclick="_echPay(\''+p.id+'\','+pr.n+')">💳 Payer ce versement — '+fmt(pr.mnt)+'</button>')
+        +'<div class="tw mt12"><table><thead><tr><th>N°</th><th>Échéance</th><th>Montant</th><th>Statut</th></tr></thead><tbody>'
+        + p.versements.map(function(v){
+            var e=_echEtat(v);
+            return '<tr><td class="mono xs2">'+v.n+'</td><td class="xs2 mut">'+_esc(v.date)+'</td>'
+              +'<td class="mono bold" style="color:var(--gold)">'+fmt(v.mnt)+'</td>'
+              +'<td><span class="bg '+(e==='paye'?'bgg':e==='retard'?'bgr':'bgo')+'">'
+              +(e==='paye'?'Payé':e==='retard'?'En retard':'À payer')+'</span></td></tr>';
+          }).join('')
+        +'</tbody></table></div>'
+      +'</div>';
+    }).join('');
+  }catch(e){ return ''; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   PANNEAU D'ACHAT DE LA FICHE LIVRE (v1.16)
+   ─────────────────────────────────────────────────────────────────────
+   Structure reprise des pages produit qui convertissent : une colonne
+   d'achat COLLANTE à droite, qui reste sous les yeux pendant toute la
+   lecture de l'argumentaire, et qui répond dans l'ordre aux quatre
+   questions de l'acheteur — combien, qu'est-ce que j'obtiens, comment je
+   paie, et à qui je parle si ça coince.
+
+   ⚠ RÈGLE DU PROJET, appliquée ici sans exception : aucun chiffre inventé.
+   Les pages dont on s'inspire affichent « Restant : 93 » et « offre
+   limitée à aujourd'hui » sur des compteurs décoratifs. Ici :
+     — la barre « vendu / restant » n'apparaît QUE si b.vendu > 0 ;
+     — le prix barré n'apparaît QUE si b.ancienPrix existe réellement ;
+     — la note et les avis ne s'affichent QUE s'il y a de vrais avis ;
+     — aucune mention d'urgence n'est produite si rien ne l'établit.
+   Une base vide ⇒ un panneau sobre, et c'est très bien ainsi.
+   ══════════════════════════════════════════════════════════════════════ */
+window._bookBuyPanel = function(b, rt, rvs){
+  var vendu = b.vendu || 0;
+  var stock = (typeof b.stock === 'number') ? b.stock : null;
+  var h = '<aside class="bkbuy">';
+
+  /* — Progression des ventes : uniquement sur des ventes réelles — */
+  if(vendu > 0 && stock !== null){
+    var total = vendu + stock;
+    var pct   = total > 0 ? Math.round(vendu / total * 100) : 0;
+    h += '<div class="bkbuy-stock">'
+       +   '<div class="bkbuy-stock-l"><span>Vendu : <b>' + fmtN(vendu) + '</b></span>'
+       +   '<span>Restant : <b>' + fmtN(stock) + '</b></span></div>'
+       +   '<div class="bkbuy-bar"><i style="width:' + pct + '%"></i></div>'
+       + '</div>';
+  } else if(stock !== null && stock <= 0){
+    h += '<div class="bkbuy-rupture">' + ICO('i-warning') + 'Rupture de stock — réassort en cours</div>';
+  }
+
+  /* — Le prix, et l'économie si elle est réelle — */
+  h += '<div class="bkbuy-prix">';
+  if(b.ancienPrix && b.ancienPrix > b.prix){
+    var eco = b.ancienPrix - b.prix;
+    h += '<div class="bkbuy-avant">' + fmt(b.ancienPrix) + '</div>'
+       + '<div class="bkbuy-eco">' + ICO('i-sparkle') + 'Vous économisez ' + fmt(eco) + '</div>';
+  }
+  h += '<div class="bkbuy-net">' + fmt(b.prix) + '</div>';
+  h += '</div>';
+
+  /* — L'action principale — */
+  if(stock === null || stock > 0){
+    h += '<button class="bkbuy-cta" onclick="visitorOrderBook(\'' + b.id + '\')">'
+       +   ICO('i-box') + 'Commander maintenant</button>';
+  }
+  if(b.secureId || b.securePages || b.digital){
+    var fp = b.freePages || 10;
+    h += '<button class="bkbuy-cta2" onclick="openSecureBook(\'' + b.id + '\')">'
+       +   ICO('i-book-open') + 'Lire en ligne · ' + fp + ' pages gratuites</button>';
+  }
+  if(b.extrait || (b.previewImages && b.previewImages.length)){
+    h += '<button class="bkbuy-lien" onclick="_showExtrait(\'' + b.id + '\')">'
+       +   ICO('i-eye') + 'Feuilleter un extrait gratuit</button>';
+  }
+
+  /* — Ce qui est compris : des faits vérifiables, pas des promesses — */
+  h += '<ul class="bkbuy-inclus">'
+     +   '<li>' + ICO('i-check') + '<span><b>' + _esc(String(b.pages || '—')) + ' pages</b>'
+     +     ((b.chaps && b.chaps.length) ? ' · ' + b.chaps.length + ' chapitres' : '') + '</span></li>'
+     +   '<li>' + ICO('i-check') + '<span>Conforme au <b>programme MINESEC</b></span></li>'
+     +   '<li>' + ICO('i-check') + '<span>Les <b>corrigés en ligne sont gratuits</b>, à vie</span></li>'
+     +   '<li>' + ICO('i-check') + '<span>Extrait consultable <b>avant l\'achat</b></span></li>'
+     + '</ul>';
+
+  /* — Moyens de paiement réellement acceptés par le centre — */
+  h += '<div class="bkbuy-pay"><div class="bkbuy-pay-t">Moyens de paiement</div>'
+     +   '<div class="bkbuy-pay-l">'
+     +     '<span class="bkbuy-pay-i om">OM</span>'
+     +     '<span class="bkbuy-pay-i momo">MoMo</span>'
+     +     '<span class="bkbuy-pay-i wa">' + ICO('i-message') + '</span>'
+     +     '<span class="bkbuy-pay-i esp">' + ICO('i-coins') + '</span>'
+     +   '</div></div>';
+
+  /* — À qui parler — */
+  h += '<div class="bkbuy-aide">'
+     +   '<a href="https://wa.me/237697637739?text=' + encodeURIComponent('Bonjour VÉRITAS ! Une question sur le manuel « ' + (b.titre || '') + ' » avant de commander.') + '" target="_blank" rel="noopener">'
+     +     ICO('i-message') + 'Une question avant d\'acheter ?</a>'
+     +   '<span class="bkbuy-delai">Réponse sous 2 h · jours ouvrés</span>'
+     + '</div>';
+
+  h += '</aside>';
+  return h;
+};
+
+/* ── « Comment recevoir mon exemplaire ? » — les quatre étapes réelles ──
+   Le parcours est décrit tel qu'il se passe vraiment au centre. Aucune
+   étape n'est promise si elle n'existe pas : pas de « livraison en 24 h »
+   tant que ce délai n'est pas tenu. */
+window._bookCommentRecevoir = function(b){
+  var etapes = [
+    ['Vous commandez',      'Cliquez sur « Commander maintenant » et laissez votre nom et votre numéro WhatsApp.'],
+    ['Vous payez',          'MTN MoMo, Orange Money, ou en espèces au centre. Vous recevez une référence à votre nom.'],
+    ['Nous confirmons',     'Un enseignant du centre vous répond sur WhatsApp et confirme la disponibilité.'],
+    ['Vous recevez',        'Retrait au centre à Douala, ou expédition en province. La version numérique, elle, s\'ouvre dès la confirmation.']
+  ];
+  var h = '<section class="bkrec"><h3 class="bkrec-t">' + ICO('i-steps') + 'Comment recevoir mon exemplaire ?</h3><ol class="bkrec-l">';
+  etapes.forEach(function(e, i){
+    h += '<li><span class="bkrec-n">' + (i + 1) + '</span><div><b>' + e[0] + '</b><span>' + e[1] + '</span></div></li>';
+  });
+  h += '</ol>'
+     + '<p class="bkrec-note">' + ICO('i-shield')
+     + 'Le manuel se paie ; <b>les corrigés en ligne restent gratuits pour tout le monde</b>, acheteur ou non. '
+     + 'C\'est le cahier qu\'on vend, jamais l\'accès aux corrections.</p>'
+     + '</section>';
+  return h;
+};

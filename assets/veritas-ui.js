@@ -157,6 +157,12 @@
      découvre tout au bout d'1,2 s, quoi qu'il arrive. Aucune information ne
      doit dépendre du bon vouloir d'un observateur. */
   function reveals() {
+    /* Les pages de contenu (corrigés, Constellation, Espace Manuels) n'ont
+       pas de .rv dans leur balisage : on marque ici les blocs qui gagnent à
+       entrer en scène. Le filet de sécurité plus bas s'applique à eux comme
+       aux autres — rien ne peut rester caché. */
+    document.querySelectorAll('.card, .cta a, .orbit a, .loupe, .step')
+      .forEach(function (b) { b.classList.add('rv'); });
     var blocs = document.querySelectorAll('.rv');
     if (!blocs.length) return;
     var doux = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
