@@ -191,13 +191,15 @@
     Source : <a href="https://officedubac.cm/wp-content/uploads/2025/03/Arrete-n-92-22.pdf" rel="noopener">arrêté n° 92/22/MINESEC du 17 mars 2022</a>,
     publié par l'<a href="https://officedubac.cm/textes/" rel="noopener">Office du Baccalauréat du Cameroun</a>.
     Le total des coefficients est vérifié contre celui du texte (A4 : 31 en 2ⁿᵈᵉ et 1ʳᵉ, 33 en Tˡᵉ — C : 30 / 29 / 33 — D : 30 / 31 — TI : 32 / 33).
-    <strong>Séries D et TI</strong> : elles commencent en Première. <strong>Collège et GCE</strong> : aucun coefficient n'est pré-rempli (voir plus bas).
+    <strong>Séries D et TI</strong> : elles commencent en Première. <strong>Collège et GCE</strong> : l'arrêté ne les couvre pas —
+    les matières sont chargées avec un <strong>coefficient 1</strong> (poids égal), à corriger d'après ton bulletin.
     Si ton établissement applique une pondération différente, corrige-la — le calcul suit tes valeurs.</p>
 
   <p class="note" id="avisSerie" hidden style="padding-left:.7rem"></p>
   <p class="note" id="avisGce" hidden style="padding-left:.7rem">
     <svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-globe"/></svg>
-    <strong>GCE :</strong> ce tableau suit tes <em>marks</em> de contrôle continu et te montre le poids relatif de tes <em>subjects</em>.
+    <strong>GCE :</strong> ce tableau suit tes <em>marks</em> de contrôle continu et te montre le poids relatif de tes <em>subjects</em>,
+    chargés à <strong>coefficient 1</strong> puisque le GCE n'en attribue pas.
     Le diplôme, lui, ne se calcule pas en moyenne : il se compte en <strong>matières validées</strong> (voir plus bas).</p>
 
   <div class="disciplines">
@@ -221,6 +223,24 @@
     <div class="p ex"><b>100 %</b><span>du <strong>diplôme</strong> (BEPC, Probatoire, BAC, CAP, GCE) vient des épreuves de l'examen officiel.</span></div>
   </div>
   <p class="note" style="margin-top:.7rem">Conséquence pratique : une bonne moyenne annuelle ne « met pas des points d'avance » à l'examen. Ce qu'elle donne, c'est le passage, la confiance — et l'entraînement. En 1ʳᵉ, le <strong>Probatoire</strong> est déjà un examen national : il conditionne l'entrée en Terminale.</p>
+
+  <!-- Si 100 % du diplôme vient de l'épreuve, la suite logique de cette page est
+       de s'entraîner dans les conditions de l'épreuve. Ces deux écrans existaient
+       déjà dans l'application, mais au fond du menu « Pratiquer » : un élève qui
+       ne déplie pas ce menu ignorait leur existence. Les ancres #evaluations et
+       #epreuves sont désormais routées (voir _vtHashRouter dans app.js). -->
+  <h3 class="sub"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-target"/></svg>S'entraîner dans les conditions de l'épreuve</h3>
+  <p class="note">Puisque le diplôme se joue entièrement le jour de l'examen, la seule préparation qui compte est celle qui se fait <strong>en temps limité</strong>, puis se corrige. Deux outils sont ouverts sur VÉRITAS :</p>
+  <div class="grid two">
+    <div class="card"><span class="ico"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-chart"/></svg></span>
+      <h3>Évaluation chronométrée, en direct</h3>
+      <p class="note">Un test <strong>en temps limité</strong>, corrigé <strong>dès la remise</strong> : la note tombe tout de suite, avec le détail des erreurs à revoir. C'est la seule façon de savoir si ce que tu sais tient encore quand le chronomètre tourne.</p>
+      <p style="margin-top:.5rem"><a class="btn" href="https://veritas-school.com/#evaluations">Lancer une évaluation →</a></p></div>
+    <div class="card"><span class="ico"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-pen"/></svg></span>
+      <h3>Épreuves &amp; annales corrigées</h3>
+      <p class="note">Les sujets des sessions passées — <strong>BEPC, Probatoire, BAC, CAP, GCE</strong> — avec leur corrigé rédigé selon les grilles du MINESEC. Traite le sujet d'abord, compare ensuite : c'est là qu'on voit ce que le correcteur attend vraiment.</p>
+      <p style="margin-top:.5rem"><a class="btn" href="https://veritas-school.com/#epreuves">Voir les épreuves →</a></p></div>
+  </div>
 
   <h3 class="sub"><svg class="i" aria-hidden="true"><use href="/assets/veritas-icons.svg#i-globe"/></svg>Sous-système anglophone : le GCE se compte autrement</h3>
   <div class="grid two">
@@ -702,11 +722,25 @@
       avert.hidden = false;
       avert.innerHTML = '<strong>Cette série n\'existe pas dans cette classe.</strong> '
         + 'Les séries D et TI commencent en Première : choisis Première ou Terminale.';
+      // Sans ce vidage, le tableau de la série précédente restait affiché sous le
+      // message : l'élève lisait « série inexistante » au-dessus de matières bien
+      // remplies, et le cercle continuait de tourner sur les mauvais coefficients.
+      rows.innerHTML = '';
+      calcul();
+      document.getElementById('avisGce').hidden = true;
       return;
     }
     avert.hidden = true;
     rows.innerHTML = '';
-    liste.forEach(function (m) { addRow(m[0], m.length > 1 ? m[1] : ''); });
+    // Collège et GCE ne figurent pas dans l'arrêté 92/22 : leurs listes n'ont donc
+    // pas de coefficient. On charge 1 partout — poids égal, annoncé comme tel dans
+    // la note au-dessus. Laisser la case vide était plus prudent sur le papier,
+    // mais la somme des coefficients tombait à 0 : le cercle des disciplines et le
+    // diagramme d'impact restaient muets (« saisis tes coefficients »), et l'élève
+    // du collège ou du GCE n'avait aucun rendu. Un poids neutre affiche le
+    // graphique tout de suite, et chaque saisie le corrige.
+    var neutre = !!(SERIES[serie] && SERIES[serie].any);
+    liste.forEach(function (m) { addRow(m[0], m.length > 1 ? m[1] : (neutre ? 1 : '')); });
     calcul();
     // Rappel honnête : au GCE, ce tableau suit le contrôle continu de l'année,
     // il ne calcule pas le diplôme (qui se compte en matières validées).

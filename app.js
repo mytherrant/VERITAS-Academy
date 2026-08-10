@@ -40724,6 +40724,10 @@ window.pgParents = function(){
         ? '<button class="vp-tool" onclick="showEpreuves()"><span class="ic" aria-hidden="true">' + ICO('i-pen') + '</span>'
         + '<span><span class="tt">Annales corrigées</span>'
         + '<span class="ss">BEPC, Probatoire, BAC, GCE — corrigés selon les grilles MINESEC.</span></span></button>' : '')
+     + (typeof showEvaluations==='function'
+        ? '<button class="vp-tool" onclick="showEvaluations()"><span class="ic" aria-hidden="true">' + ICO('i-chart') + '</span>'
+        + '<span><span class="tt">Évaluation chronométrée en direct</span>'
+        + '<span class="ss">Un test en temps limité, corrigé dès la remise : la note tombe tout de suite, avec les erreurs à revoir.</span></span></button>' : '')
      + '</div>';
 
   // ── Confiance : ce qui est vrai, formulé sans exagération ──
@@ -41483,11 +41487,20 @@ function _cagCreer(eleveId){
                   'mes-partenariats','verifier-certificat','leaderboard-junior',
                   'nos-partenaires','cagnotte','trophees'];
 
+  // Deux écrans ne sont PAS des sections de vShowSec : ils ont leur propre
+  // fonction de rendu, qui écrit elle aussi dans #vContent. Sans cette table,
+  // « #evaluations » et « #epreuves » n'étaient adressables par aucun lien —
+  // ils n'existaient qu'au fond du menu déroulant « Pratiquer », donc un élève
+  // qui ne déplie pas ce menu ignorait que l'entraînement chronométré et les
+  // annales corrigées existent.
+  var FONCTIONS = { evaluations:'showEvaluations', epreuves:'showEpreuves', annales:'showEpreuves' };
+
   function sectionDuHash(){
     var h = (window.location.hash || '').replace(/^#/, '');
     if(!h) return '';
     var sec = h.split('?')[0].trim();
     if(!sec) return '';
+    if(FONCTIONS[sec]) return sec;
     // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
     if(sec.indexOf('partenariat-') === 0) return sec;
     if(sec.indexOf('pour-') === 0) return sec;          // hubs par public (v1.14)
@@ -41502,6 +41515,16 @@ function _cagCreer(eleveId){
     // qui reçoit un lien à ancre n'a pas à voir sa session interrompue.
     if(!document.getElementById('vContent')) return;
     if(window._vCurrentSec === sec) return;   // déjà affiché (ex. _cvSubmit)
+    var fn = FONCTIONS[sec];
+    if(fn){
+      if(typeof window[fn] !== 'function') return;
+      // Ces écrans ne passent pas par vShowSec : on note la section courante à sa
+      // place, sinon le routeur les rejouerait à chaque hashchange.
+      window._vCurrentSec = sec;
+      document.querySelectorAll('.vnav-btn').forEach(function(b){ b.classList.remove('on'); });
+      try{ window[fn](); }catch(e){}
+      return;
+    }
     try{ window.vShowSec(sec, null); }catch(e){}
   }
 

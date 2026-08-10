@@ -338,6 +338,16 @@ b.k{color:var(--navy)}
 .upsell .btns a:hover{filter:brightness(1.05)}
 .upsell small{display:block;color:#b9c7e8;margin-top:.7rem;font-size:.82rem;position:relative;z-index:2}
 
+/* Bouton d'action réutilisable HORS bandeau .upsell — notamment dans une .card
+   sur fond clair, où le CTA doré du bandeau navy ne s'appliquait pas : un
+   `class="btn"` posé là rendait un lien bleu souligné, indistinguable du texte. */
+a.btn{display:inline-flex;align-items:center;gap:.4rem;background:var(--navy);
+  color:#fff;font-weight:800;text-decoration:none;border-radius:10px;
+  padding:.55rem .95rem;font-size:.92rem;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),filter .2s}
+a.btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+a.btn.or{background:var(--gold);color:var(--navy3)}
+
 /* messages parent / élève */
 .duo{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));margin-top:1rem}
 .duo .bloc{background:var(--card);border:1px solid var(--line);border-radius:var(--rad);
