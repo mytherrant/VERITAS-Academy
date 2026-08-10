@@ -2977,7 +2977,7 @@ function isEnseignant(){return SES?.type==='enseignant';}
 // ─── PORTAIL VISITEUR ────────────────────────────
 function visitorOrderProduct(title,price){
   const overlay=document.createElement('div');overlay.className='mov';
-  if(overlay)overlay.innerHTML='<div class="modal"><div class="mhd"><div><div class="mtt">'+ICO("lc-cart")+'Commander : '+title+'</div><div class="mst">'+fmt(price)+' FCFA</div></div><button class="mc" onclick="this.closest(\'.mov\').remove()">✕</button></div><div class="mb"><div class="fg2"><div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="vpNom" placeholder="Nom et prénom"></div><div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="vpTel" type="tel" placeholder="+237 6 XX XX XX XX"></div></div><div class="fg mt8"><span class="fl">Code promo (optionnel)</span><input class="fi" id="vpPromo" placeholder="ELEVE10" style="text-transform:uppercase"></div></div><div class="mf"><button class="btn bo" onclick="this.closest(\'.mov\').remove()">Annuler</button><button class="btn bi" onclick="confirmProductOrder(\'' + title.replace(/'/g,"") + '\','+price+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Commander</button></div></div>';
+  if(overlay)overlay.innerHTML='<div class="modal"><div class="mhd"><div><div class="mtt">'+ICO("lc-cart")+'Commander : '+title+'</div><div class="mst">'+fmt(price)+' FCFA</div></div><button class="mc" onclick="this.closest(\'.mov\').remove()">✕</button></div><div class="mb"><div class="fg2"><div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="vpNom" placeholder="Nom et prénom"></div><div class="fg"><span class="fl">Téléphone WhatsApp *</span><input class="fi" id="vpTel" type="tel" placeholder="+237 6 XX XX XX XX"></div></div><div class="fg mt8"><span class="fl">Code promo (optionnel)</span><input class="fi" id="vpPromo" placeholder="ELEVE10" style="text-transform:uppercase"></div></div><div class="mf"><button class="btn bo" onclick="this.closest(\'.mov\').remove()">Annuler</button><button class="btn bi" onclick="confirmProductOrder(\'' + title.replace(/'/g,"") + '\','+price+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Payer maintenant</button></div></div>';
   document.body.appendChild(overlay);
 }
 function confirmProductOrder(title,price){
@@ -3242,7 +3242,7 @@ function viewBookDetail(bid){
   h+='<div style="margin-top:8px;padding:8px;background:var(--grb);border:1px solid var(--grd);border-radius:var(--r);font-size:13px;color:var(--gr)">🎓 Code <span class="mono bold" style="background:var(--gp);padding:1px 6px;border-radius:3px;color:var(--gold)">ELEVE10</span> = -10%</div>';
   h+='<div style="margin-top:8px"><div class="fl2 g6" style="align-items:stretch"><input class="fi" id="promoInput_'+bid+'" placeholder="Code promo" style="font-size:13px;padding:8px;text-transform:uppercase;flex:1"><button class="btn bgr2 sm" onclick="applyPromo(\''+bid+'\')">Appliquer</button></div><div id="promoResult_'+bid+'"></div></div>';
   h+='</div>';
-  if(b.stock>0)h+='<button class="book-order-btn mt12" onclick="visitorOrderBook(\''+bid+'\')">'+ICO("lc-cart")+'Commander (papier) — '+fmt(b.prix)+'</button>';
+  if(b.stock>0)h+='<button class="book-order-btn mt12" onclick="visitorOrderBook(\''+bid+'\')">'+ICO("lc-cart")+'Payer (papier) — '+fmt(b.prix)+'</button>';
   // v1.7 : LECTURE NUMÉRIQUE SÉCURISÉE — aperçu gratuit + achat débloque tout.
   // Visible quand le livre a été préparé (b.secureId/securePages) ou marqué digital.
   if(b.secureId||b.securePages||b.digital){
@@ -3382,7 +3382,7 @@ function _showExtrait(bid){
     M('📄 Aperçu — '+b.titre,'Extrait gratuit avant achat',h,
       '<button class="btn bo" onclick="cm()">Fermer</button>'
       +'<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Détails</button>'
-      +(b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')" ><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Commander — '+fmt(b.prix)+'</button>':''),true);
+      +(b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')" ><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Payer — '+fmt(b.prix)+'</button>':''),true);
   }
   // 1. URL serveur (cross-device) — priorité maximale
   if(b.previewPdfUrl){_showPdfExtrait(b.previewPdfUrl,b.previewPdfName||'apercu.pdf');return;}
@@ -3448,7 +3448,7 @@ function _showExtrait_text(bid){
   M('📖 Aperçu gratuit', b.titre, h,
     '<button class="btn bo" onclick="cm()">Fermer</button>'+
     '<button class="btn bg2 sm" onclick="cm();viewBookDetail(\''+bid+'\')" style="font-size:12px"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Détails & Avis</button>'+
-    (b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Commander — '+fmt(b.prix)+'</button>':'<span style="font-size:12px;color:var(--re);font-weight:700;padding:8px">Rupture de stock</span>'),
+    (b.stock>0?'<button class="btn bi" onclick="cm();visitorOrderBook(\''+bid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Payer — '+fmt(b.prix)+'</button>':'<span style="font-size:12px;color:var(--re);font-weight:700;padding:8px">Rupture de stock</span>'),
     true // large modal
   );
 }
@@ -5014,7 +5014,7 @@ function vShowSec(sec,btn){
             if(hasPlanAccess||iA()){
               h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Consulter</button>';
             } else {
-              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="commanderContenu(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Commander</button>';
+              h+='<button class="btn" style="background:'+catColor+';color:#fff;font-size:11px;padding:6px 12px;border-radius:12px" onclick="commanderContenu(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Payer</button>';
             }
             h+='</div>';
           }
@@ -5192,7 +5192,7 @@ function vShowSec(sec,btn){
               +'<p class="sc-desc">'+_esc(s.desc||'')+'</p>'
               +'<div class="shoprow"><span class="sc-price">'+fmt(s.prix)+'</span>'
               +(oldP?'<span class="sc-old">'+oldP+'</span>':'')+'</div>'
-              +'<button class="btn bi" style="width:100%;justify-content:center;font-size:11px;padding:5px 8px;margin-top:6px;border-radius:8px" onclick="visitorOrderProduct(\''+s.titre.replace(/'/g,'')+'\','+s.prix+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Commander</button>'
+              +'<button class="btn bi" style="width:100%;justify-content:center;font-size:11px;padding:5px 8px;margin-top:6px;border-radius:8px" onclick="visitorOrderProduct(\''+s.titre.replace(/'/g,'')+'\','+s.prix+')"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Payer</button>'
               +'</div></div>';
           }).join('')
         +'</div></div>';
@@ -5238,7 +5238,7 @@ function vShowSec(sec,btn){
             <div class="vbook-actions">
               ${hasPreview?`<button class="vbook-btn btn-extrait" onclick="event.stopPropagation();_showExtrait('${b.id}')">${ICO('i-eye')}Extrait</button>`:''}
               <button class="vbook-btn btn-detail" onclick="event.stopPropagation();viewBookDetail('${b.id}')">${ICO('lc-clipboard')}Détails</button>
-              ${b.stock>0?`<button class="vbook-btn btn-buy" onclick="event.stopPropagation();visitorOrderBook('${b.id}')">${ICO('lc-cart')}Commander maintenant</button>`:'<button class="vbook-btn btn-buy" disabled>Rupture de stock</button>'}
+              ${b.stock>0?`<button class="vbook-btn btn-buy" onclick="event.stopPropagation();visitorOrderBook('${b.id}')">${ICO('lc-cart')}Payer maintenant</button>`:'<button class="vbook-btn btn-buy" disabled>Rupture de stock</button>'}
             </div>
           </div>
         </div>`;
@@ -5269,7 +5269,7 @@ function vShowSec(sec,btn){
               '<div class="vprod-pricing">'+
                 (p.ancien?'<div class="vprod-old">'+fmt(p.ancien)+'</div>':'')+
                 '<div class="vprod-price">'+fmt(p.prix)+'</div>'+
-                '<div class="vprod-cta">'+ICO("lc-cart")+'Commander</div>'+
+                '<div class="vprod-cta">'+ICO("lc-card")+'Payer</div>'+
               '</div>'+
             '</div>'+
           '</div>';
@@ -8645,7 +8645,7 @@ function previewElContenu(itemId){
   '<div style="font-family:Georgia,serif;font-size:13px;color:var(--ink2);line-height:1.8">'+apercuContent+'</div>'+
   '</div>'+
   '<div class="ib ibt mb0"><span>🔒</span><span>Pour télécharger ce document complet, souscrivez à un abonnement ou commandez individuellement.</span></div>',
-  '<button class="btn bo" onclick="cm()">Fermer</button>'+(item.gratuit?'<button class="btn bgr2" onclick="cm();consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Consulter gratuitement</button>':'<button class="btn bi" onclick="cm();commanderContenu(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Commander — '+fmtN(item.prix)+' FCFA</button><button class="btn" style="background:#FFC93C;color:#142554;font-weight:700" onclick="cm();document.getElementById(\'elPlans\')?.scrollIntoView({behavior:\'smooth\'})"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Voir les abonnements</button>'),true);
+  '<button class="btn bo" onclick="cm()">Fermer</button>'+(item.gratuit?'<button class="btn bgr2" onclick="cm();consulterGratuit(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-doc"/></svg>Consulter gratuitement</button>':'<button class="btn bi" onclick="cm();commanderContenu(\''+item.id+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-cart"/></svg>Payer — '+fmtN(item.prix)+' FCFA</button><button class="btn" style="background:#FFC93C;color:#142554;font-weight:700" onclick="cm();document.getElementById(\'elPlans\')?.scrollIntoView({behavior:\'smooth\'})"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Voir les abonnements</button>'),true);
 }
 
 function consulterGratuit(itemId){
@@ -8752,7 +8752,7 @@ function previewElContent(itemId){
       '<button class="btn bo" onclick="cm()">Fermer</button>'+
       (item.gratuit?'<button class="btn bi" onclick="cm();lancerRessourcePedago(\''+item.resPedago+'\',false)"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Lancer</button>':
        '<button class="btn" style="background:#E8F0FE;color:#1a56db;font-weight:700" onclick="cm();lancerRessourcePedago(\''+item.resPedago+'\',true)"><svg class="vico bico" aria-hidden="true"><use href="#lc-eye"/></svg>Aperçu (30%)</button>'+
-       '<button class="btn bi" onclick="cm();commanderContenu(\''+item.id+'\')">Commander</button>'));
+       '<button class="btn bi" onclick="cm();commanderContenu(\''+item.id+'\')">Payer</button>'));
     return;
   }
   var cat=(el.categories||[]).find(function(c){return c.id===item.cat;})||{ico:'📄',nom:'Autre'};
@@ -8777,7 +8777,7 @@ function previewElContent(itemId){
     '<div class="ib ibt mb0"><span>Info :</span><span>Pour acceder au document complet, souscrivez a un abonnement ou commandez a l\'unite.</span></div>',
     '<button class="btn bo" onclick="cm()">Fermer</button>'+
     (item.gratuit?'<button class="btn bi" onclick="cm();consulterGratuit(\''+itemId+'\')">Consulter gratuitement</button>':
-    '<button class="btn bi" onclick="cm();commanderContenu(\''+itemId+'\')">Commander</button>'));
+    '<button class="btn bi" onclick="cm();commanderContenu(\''+itemId+'\')">Payer</button>'));
   return;
 }
 
@@ -9086,7 +9086,7 @@ function commanderContenu(itemId){
   '<div class="fg"><span class="fl">WhatsApp *</span><input class="fi" id="cmdTel" placeholder="697 637 739"></div>'+
   '</div>'+
   '<div class="ib ibt mb13"><span>💳</span><span>Après validation, vous serez redirigé(e) vers notre formulaire de paiement sécurisé.</span></div>',
-  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerCommandeContenu(\''+itemId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Commander et payer</button>',true);
+  '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="validerCommandeContenu(\''+itemId+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Payer maintenant</button>',true);
 }
 
 function validerCommandeContenu(itemId){
@@ -15334,7 +15334,10 @@ window._showQuotaExceeded = function(action, tier, used, limit){
           return n ? ('<div style="background:linear-gradient(135deg,#AE5353,#F59E0B);color:#fff;padding:12px;border-radius:12px;margin-bottom:12px;font-size:13px;font-weight:700">⏳ '+_esc(n.ex)+' dans '+n.days+' jour'+(n.days>1?'s':'')+' — ne casse pas ta révision maintenant. Débloque Ambassa sans limite pour la dernière ligne droite.</div>') : ''; }catch(e){return '';} })())
       +'<button class="btn bi" style="background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:14px 28px;font-size:14px;font-weight:800;width:100%" onclick="cm();vShowSec(\'elearning\',null);setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)"><svg class="vico bico" aria-hidden="true"><use href="#lc-star"/></svg>Choisir un plan d\'abonnement</button>'
       // v1.2.2 (#3) : alternative micro-paiement immédiate (lève le frein du forfait)
-      +((typeof _microBuyBtn==='function')?('<div style="margin-top:8px">'+_microBuyBtn('epreuve','ambassa','Continuer avec Ambassa (à l\'unité)')+'</div>'):'')
+      // Était câblé sur _microBuyBtn('epreuve',…) : l'élève payait 200 FCFA et
+      // recevait un droit `micro_epreuve:ambassa` — une épreuve fantôme, aucun
+      // crédit IA. Le bon intent est `ia` (droit unlockedIA).
+      +((typeof _creditsIABtn==='function')?('<div style="margin-top:8px">'+_creditsIABtn()+'</div>'):'')
       +'<button class="btn bo" style="margin-top:8px;width:100%" onclick="cm();mParrainage()"><svg class="vico bico" aria-hidden="true"><use href="#lc-gift"/></svg>Ou parrainer un ami (+500 FCFA crédit)</button>'
       +'</div>';
   } else {
@@ -20468,6 +20471,15 @@ function showEpreuves(){
         h+="<div style='font-size:12px;color:#6B7A99;line-height:1.6;font-style:italic;margin-bottom:10px'>"+apercu.substring(0,100)+(apercu.length>100?"...":"")+"</div>";
       }
       h+="<button class='btn "+(ep.gratuit?"bi":"")+" sm' style='"+(ep.gratuit?"":"background:#EDE9FE;color:#6C56A6;")+";border-radius:10px;font-size:12px;font-weight:700' onclick='event.stopPropagation();showEpreuveDetail(\""+ep.id+"\")'>"+(locked?"🔒 Voir l'extrait":"📄 Lire l'épreuve")+"</button>";
+      // ACHAT À L'UNITÉ — on ne peut pas exiger un abonnement annuel de qui veut
+      // UNE épreuve. Le mécanisme existait entièrement (MICRO_PRIX_DEFAULT,
+      // acheterUnite, intent micro_epreuve, droit unlockedUnits) mais n'était
+      // posé sur aucune vitrine : personne ne pouvait l'acheter. Masqué dès que
+      // l'épreuve est gratuite ou déjà débloquée par un achat précédent.
+      if(!ep.gratuit && typeof _microBuyBtn==='function'
+         && !((typeof _aDroitUnitaire==='function') && _aDroitUnitaire(ep.id))){
+        h+="<div style='margin-top:6px'>"+_microBuyBtn('epreuve', ep.id, ep.titre)+"</div>";
+      }
       h+="</div>";
     });
     h+="</div>";
@@ -30969,6 +30981,28 @@ window.acheterUnite = function(type, refId, refLabel){
     customerAccountId:(typeof SES!=='undefined'&&SES)?(SES.accountId||SES.id):null,
     customerNom:(typeof SES!=='undefined'&&SES)?((SES.pre||'')+' '+(SES.nom||'')).trim():'',
     customerTel:(typeof SES!=='undefined'&&SES)?(SES.tel||''):'' });
+};
+// CRÉDITS IA — l'intent `ia` (droit `unlockedIA`) existait dans
+// VERITAS_MONETISATION mais rien ne le déclenchait : aucun moyen d'acheter des
+// jetons Ambassa sans abonnement. Il ne passe PAS par acheterUnite(), qui
+// préfixe en `micro_` — `micro_ia` n'est pas une surface déclarée.
+window.MICRO_PRIX_IA_DEFAULT = { montant:500, jetons:20, label:'20 questions au Professeur Ambassa' };
+window._prixCreditsIA = function(){
+  return (typeof DB!=='undefined' && DB.microPrix && DB.microPrix.ia) ? DB.microPrix.ia : MICRO_PRIX_IA_DEFAULT;
+};
+window.acheterCreditsIA = function(){
+  var p=_prixCreditsIA();
+  openPaymentModal({ montant:p.montant, label:'🤖 '+p.label, intent:'ia',
+    targetId:'ia_credits', refPrefix:'UIA',
+    customerAccountId:(typeof SES!=='undefined'&&SES)?(SES.accountId||SES.id):null,
+    customerNom:(typeof SES!=='undefined'&&SES)?((SES.pre||'')+' '+(SES.nom||'')).trim():'',
+    customerTel:(typeof SES!=='undefined'&&SES)?(SES.tel||''):'' });
+};
+window._creditsIABtn = function(){
+  var p=_prixCreditsIA();
+  return '<button class="btn bo sm" onclick="acheterCreditsIA()" style="border-color:var(--gold,#FFC93C);color:#142554">'
+    +'<svg class="vico bico" aria-hidden="true"><use href="#lc-lightbulb"/></svg>'
+    +'Crédits IA — '+(typeof fmt==='function'?fmt(p.montant):p.montant+' FCFA')+'</button>';
 };
 window._microBuyBtn = function(type, refId, refLabel){
   var p=_microPrix(type); if(!p) return '';
@@ -44672,7 +44706,7 @@ window._bookBuyPanel = function(b, rt, rvs){
   /* — L'action principale — */
   if(stock === null || stock > 0){
     h += '<button class="bkbuy-cta" onclick="visitorOrderBook(\'' + b.id + '\')">'
-       +   ICO('i-box') + 'Commander maintenant</button>';
+       +   ICO('i-card') + 'Payer maintenant — ' + fmt(b.prix) + '</button>';
   }
   if(b.secureId || b.securePages || b.digital){
     var fp = b.freePages || 10;
@@ -44719,7 +44753,7 @@ window._bookBuyPanel = function(b, rt, rvs){
    tant que ce délai n'est pas tenu. */
 window._bookCommentRecevoir = function(b){
   var etapes = [
-    ['Vous commandez',      'Cliquez sur « Commander maintenant » et laissez votre nom et votre numéro WhatsApp.'],
+    ['Vous payez',          'Cliquez sur « Payer maintenant » et laissez votre nom et votre numéro WhatsApp.'],
     ['Vous payez',          'MTN MoMo, Orange Money, ou en espèces au centre. Vous recevez une référence à votre nom.'],
     ['Nous confirmons',     'Un enseignant du centre vous répond sur WhatsApp et confirme la disponibilité.'],
     ['Vous recevez',        'Retrait au centre à Douala, ou expédition en province. La version numérique, elle, s\'ouvre dès la confirmation.']

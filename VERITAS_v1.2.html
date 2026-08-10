@@ -635,21 +635,21 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.15.6">
+<link rel="preload" as="script" href="/app.js?v=1.15.7">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.15.6" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.15.6"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.15.7" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.15.7"></noscript>
 <!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
      app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
-<link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.15.6" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/veritas-motion.css?v=1.15.6"></noscript>
+<link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.15.7" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/veritas-motion.css?v=1.15.7"></noscript>
 
-<!-- ════════ v1.15.6 — THÈME CLAIR / SOMBRE ════════
+<!-- ════════ v1.15.7 — THÈME CLAIR / SOMBRE ════════
      Ce script est INLINE et SYNCHRONE, tout en haut : il doit poser
      data-theme AVANT la première peinture. Le mettre dans app.js (3,4 Mo,
      defer) ferait clignoter un écran clair pendant ~2 s avant de virer au
@@ -1273,11 +1273,11 @@ setTimeout(_vAmbassaFab,3000);
 <!-- Version des assets, partagée avec les modules chargés à la demande
      (chunks/*.js) pour qu'ils suivent le même cache que app.js. -->
 <script>window._VRT_ASSET_VER='1.15.3';</script>
-<script defer src="/app.js?v=1.15.6"></script>
+<script defer src="/app.js?v=1.15.7"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->
-<script defer src="/assets/veritas-motion.js?v=1.15.6"></script>
+<script defer src="/assets/veritas-motion.js?v=1.15.7"></script>
 
 <!-- ══ VÉRITAS Design Enhancement v1.1 — Micro-interactions ══ -->
 <script>
