@@ -569,3 +569,68 @@ scopés (notes/bulletins QR, emploi du temps, RH) ; (d) confirmer le **nom de ma
   or sur blanc) — hors sujet, non touchés.
 - Impression forcée en clair. Les images ne sont PAS inversées (un scan de manuel inversé est
   illisible) : seule la luminosité est calmée. Les logos restent sur pastille blanche.
+
+## Chemins d'argent : payer sans rien recevoir (10/08) — commits e65ebd1 → a889d53
+- **Le motif, constant sur 4 bugs** : `VERITAS_MONETISATION` est JUSTE, ce sont les **appelants
+  qui se trompent d'`intent`**. Le paiement aboutit, l'argent rentre, et rien ne se débloque —
+  aucune erreur, aucune trace. C'est indétectable sans dérouler la chaîne complète
+  `bouton → openPaymentModal → _payFinalizePaid → droit écrit sur le compte`.
+  1. `commanderContenu` ouvrait le paiement en `intent:'product'` — dont le `droit` est **null**.
+     L'élève payait son contenu e-learning, rien ne s'ouvrait. → `intent:'contenu'` (unlockedContenus).
+  2. Le modal « quota dépassé » proposait `_microBuyBtn('epreuve','ambassa')` : 200 FCFA contre un
+     droit `micro_epreuve:ambassa`, une épreuve fantôme, zéro crédit IA. → `acheterCreditsIA()`,
+     intent `ia` (unlockedIA), 500 FCFA / 20 questions.
+  3. `MICRO_PRIX_DEFAULT` (épreuve 200, chapitre 500, fiche 300), `acheterUnite()`, l'intent
+     `micro_epreuve`, le droit `unlockedUnits` et jusqu'au miroir serveur `_aDroitUnitaire()`
+     existaient **entièrement** — mais n'étaient posés sur **aucune vitrine**. Fonctionnalité
+     complète, invendable. Bouton « À l'unité » ajouté aux cartes d'épreuves premium.
+  4. Une session parallèle a trouvé les six équivalents **côté serveur** (commit a889d53).
+- **À faire** : un test qui parcourt chaque surface payante et vérifie qu'un droit est écrit après
+  confirmation. Un audit de plus ne suffira pas — le symptôme est l'absence de symptôme.
+- **Étiquettes** : « Commander » sur des boutons qui ouvrent le paiement. Le câblage était bon
+  depuis toujours, seule l'étiquette mentait. Renommés « Payer ». Épargnés : les 6 « Commander »
+  qui n'encaissent rien (titres de modale, lien WhatsApp, missions partenaires).
+- **Un écran de moins avant de payer** : le parcours faisait fiche → formulaire → paiement, or
+  l'étape ① du modal (« Vos coordonnées ») collecte DÉJÀ `payNom`, `payTel`, `payEmail` et le code
+  promo (`promoInput` + `appliquerPromo`). L'écran intermédiaire ne faisait que dupliquer la
+  saisie, juste avant l'encaissement. Retiré pour le produit numérique et le contenu e-learning.
+  **CONSERVÉ pour le manuel papier** : lui seul collecte une **adresse de livraison**, que le modal
+  ne demande nulle part — mais prérempli depuis le compte.
+
+## Le cache-buster qui ne bustait rien (10/08)
+- **Symptôme** : la prod renvoyait `_VRT_ASSET_VER = 1.15.3` alors que `app.js?v=` était à 1.15.8.
+- **Ce n'était PAS le cache** : coquille fraîche, `no-cache` correct sur index.php, ETag à jour.
+  C'était un **littéral saisi à la main** dans la coquille, resté figé pendant que le reste montait
+  (les `sed` de bump cherchaient `1.15.6` puis `1.15.7` — jamais `1.15.3`).
+- **Ce n'était pas cosmétique** : cette variable versionne les **chunks chargés à la demande**
+  (`app.js` ~l.41938, `chunks/<nom>.js?v=`). Bloquée, chaque module paresseux était réclamé sous
+  une vieille URL → servi depuis le cache après CHAQUE déploiement.
+- **Correctif** : littéral **supprimé**, valeur DÉRIVÉE du `?v=` d'app.js (seule version que la CI
+  vérifie déjà contre `sw.js`). Un seul endroit à bumper, dérive impossible. Preuve immédiate :
+  une session parallèle a bumpé en 1.15.9 pendant le travail, `_VRT_ASSET_VER` a suivi seul.
+- **Règle** : une version d'asset recopiée à la main dérive toujours. La dériver, ou la garder.
+
+## Produit de test à 100 FCFA (10/08) — À RETIRER
+- `btest100` en tête de `DB.books`, 100 FCFA, stock 999, pour éprouver MTN / Orange / CamerPay en
+  réel sans engager 5 000 F par essai. **Visible de tous les visiteurs.**
+- Inséré dans **`_migrateDB()`** et pas seulement dans `defaultDB()` : une base déjà créée ne
+  rejoue jamais le seed — le produit n'apparaîtrait pas chez celui qui en a besoin. Idempotent
+  (vérifié en rejouant la migration 2×).
+- Retrait : `DB.books = DB.books.filter(b=>b.id!=='btest100'); DB._testProduitRetire = 1; save();`
+  Le drapeau empêche la réinsertion au rechargement.
+
+## Coordination multi-agents — ce qui s'est réellement passé (10/08)
+- Une session parallèle travaillait dans le MÊME dossier et committait avec `-a` : **mes
+  modifications ont été absorbées dans ses commits** (a889d53, d8b39c9…), une fois après avoir été
+  **écrasées** (la tuile Ambassa en double est revenue).
+- L'arbre bougeait entre deux commandes : `sw.js` est passé de 1.15.4 à 1.15.6 pendant la
+  construction d'un commit, `_ACC_ESSENTIEL` a doublé de taille entre deux exécutions du même
+  script. Un commit construit sur une lecture de HEAD vieille de 3 minutes est déjà faux.
+- **Technique qui a marché** : rejouer SES SEULS changements sur `git show HEAD:fichier`, region par
+  region délimitée par des marqueurs uniques, puis stager le blob via `git hash-object -w` +
+  `git update-index --cacheinfo` — la copie de travail de l'autre agent reste intacte.
+  ⚠️ `git commit <chemin>` commiterait la copie de TRAVAIL et écraserait ce blob : committer **sans
+  argument de chemin**.
+- **Garde-fou scopé** : un contrôle « la tuile doublon est-elle partie ? » en regex globale a donné
+  un faux positif — une autre tuile Ambassa légitime vit dans le hub élève. Scoper le contrôle à la
+  région éditée, jamais au fichier entier.
