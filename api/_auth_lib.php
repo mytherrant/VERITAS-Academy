@@ -575,6 +575,76 @@ if (!defined('VRT_AUTH_LIB')) {
                     'msg' => 'Panier (' . count($lignes) . ') : ' . ($msgs ? implode(' · ', $msgs) : 'rien à activer')];
         }
 
+        /* ── CRÉDITS IA (intent `ia`) ─────────────────────────────────────────
+           Le bouton « Crédits Prof. Ambassa » vendait 20 questions vers un
+           tiroir `unlockedIA` que RIEN ne lisait : ni compteur, ni garde. Le
+           client payait 500 FCFA et ne recevait rien du tout, même sur son
+           propre appareil, et un second achat était encore plus muet (le tiroir
+           dédoublonnait la même valeur). Les jetons deviennent donc un SOLDE.
+           Le nombre vient de la base (jamais du client), et `iaCreditRefs`
+           rend l'octroi idempotent : un webhook rejoué ne crédite pas deux fois. */
+        if ($intent === 'ia') {
+            if ($accountId === '') return ['changed' => false, 'msg' => 'accountId manquant'];
+            $jetons = (int) ($db['microPrix']['ia']['jetons'] ?? 20);
+            if ($jetons <= 0) $jetons = 20;
+            foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+                if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
+                foreach ($db[$coll] as &$acc) {
+                    if (!is_array($acc) || (string) ($acc['id'] ?? '') !== $accountId) continue;
+                    if (!isset($acc['iaCreditRefs']) || !is_array($acc['iaCreditRefs'])) $acc['iaCreditRefs'] = [];
+                    if (in_array($ref, $acc['iaCreditRefs'], true)) { unset($acc); return ['changed' => false, 'msg' => 'crédits IA déjà accordés']; }
+                    $acc['iaCredits']      = (int) ($acc['iaCredits'] ?? 0) + $jetons;
+                    $acc['iaCreditRefs'][] = $ref;
+                    $solde = (int) $acc['iaCredits'];
+                    unset($acc);
+                    return ['changed' => true, 'msg' => $jetons . ' crédits IA ajoutés (solde ' . $solde . ')'];
+                }
+                unset($acc);
+            }
+            return ['changed' => false, 'msg' => 'compte introuvable pour les crédits IA'];
+        }
+
+        /* ── ACHATS À L'UNITÉ ──────────────────────────────────────────────────
+           Contenu e-learning, œuvre, laboratoire, cours marketplace et
+           micro-achats. Le navigateur savait les activer (branche `default` de
+           _payAutoActivate), le serveur non : il répondait « intent non géré ».
+           Conséquence, avec CamerPay qui fait SORTIR le payeur de l'application :
+           un client qui fermait l'onglet avant la confirmation payait et
+           n'obtenait rien nulle part, et le droit gagné par ceux qui restaient
+           ne vivait que dans leur localStorage — perdu au changement d'appareil.
+           Miroir EXACT de _payAccorderDroit() : mêmes tiroirs, même clé. */
+        $tiroirs = [
+            'contenu'        => 'unlockedContenus',
+            'oeuvre'         => 'unlockedOeuvres',
+            'labo'           => 'unlockedLabos',
+            'marketplace'    => 'unlockedItems',
+            'micro_epreuve'  => 'unlockedUnits',
+            'micro_chapitre' => 'unlockedUnits',
+            'micro_fiche'    => 'unlockedUnits',
+            'micro_labo'     => 'unlockedUnits',
+        ];
+        if (isset($tiroirs[$intent])) {
+            if ($accountId === '') return ['changed' => false, 'msg' => 'accountId manquant'];
+            if ($targetId === '')  return ['changed' => false, 'msg' => 'targetId manquant'];
+            $tiroir = $tiroirs[$intent];
+            // Les micro-achats partagent UN tiroir : sans le préfixe d'intent,
+            // la fiche n° 12 débloquerait le labo n° 12.
+            $cle = ($tiroir === 'unlockedUnits') ? ($intent . ':' . $targetId) : $targetId;
+            foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+                if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
+                foreach ($db[$coll] as &$acc) {
+                    if (!is_array($acc) || (string) ($acc['id'] ?? '') !== $accountId) continue;
+                    if (!isset($acc[$tiroir]) || !is_array($acc[$tiroir])) $acc[$tiroir] = [];
+                    if (in_array($cle, $acc[$tiroir], true)) { unset($acc); return ['changed' => false, 'msg' => 'accès déjà ouvert']; }
+                    $acc[$tiroir][] = $cle;
+                    unset($acc);
+                    return ['changed' => true, 'msg' => 'Accès ouvert (' . $intent . ')'];
+                }
+                unset($acc);
+            }
+            return ['changed' => false, 'msg' => 'compte introuvable'];
+        }
+
         return ['changed' => false, 'msg' => 'intent non géré: ' . $intent];
     }
 

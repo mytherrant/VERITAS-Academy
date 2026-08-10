@@ -1087,6 +1087,27 @@ function _migrateDB(){
   // FIX URLs /htdocs/ : toutes les URLs uploadées avant 12/05/2026 sont cassées
   // Réécriture systématique au chargement (idempotent — ne fait rien si pas de /htdocs/)
   _fixHtdocsUrls();
+  /* PRODUIT DE TEST À 100 FCFA — pour éprouver l'encaissement en conditions
+     réelles (MTN / Orange / CamerPay) sans engager 5 000 F à chaque essai.
+     Inséré ici et pas seulement dans defaultDB() : une base déjà créée ne
+     rejoue jamais le seed, le produit n'apparaîtrait donc pas chez celui qui
+     en a le plus besoin. Idempotent : ré-ajouté seulement s'il a été supprimé
+     à la main, jamais dupliqué.
+     ⚠️ À RETIRER APRÈS LES TESTS — il est visible de tous les visiteurs.
+     Suppression : boutique admin, ou DB.books = DB.books.filter(b=>b.id!=='btest100') */
+  try{
+    if(!DB.books) DB.books=[];
+    if(!DB._testProduitRetire && !DB.books.some(function(b){return b.id==='btest100';})){
+      DB.books.unshift({
+        id:'btest100', titre:'TEST — Paiement 100 FCFA', cls:'Toutes classes',
+        auteur:'Centre VÉRITAS', prix:100, prixDigital:100, stock:999, vendu:0,
+        pages:1, ico:'🧪', digital:true, coverColor:'#0D9488',
+        desc:"Produit de test destiné à vérifier l'encaissement mobile (MTN, Orange, CamerPay) "
+            +"pour 100 FCFA. Il ne contient aucun cours. À retirer une fois les tests terminés.",
+        chaps:[], content:{}
+      });
+    }
+  }catch(e){}
   // v1.11 : classes & matières éditables — seed DB.classes (+ anglophone GCE) / DB.subjects
   // et synchronise CLS / SUBS / COEFS en place (répercuté dans tous les menus).
   try{ _initClasses(); }catch(e){}
@@ -3004,35 +3025,10 @@ function visitorOrderProduct(title,price){
     customerNom:nom, customerTel:tel
   });
 }
-function confirmProductOrder(title,price){
-  var nom=(document.getElementById('vpNom')?.value||'').trim();
-  var tel=(document.getElementById('vpTel')?.value||'').trim();
-  if(!nom||!tel){toast('Nom et téléphone requis','warn');return;}
-  var promo=(document.getElementById('vpPromo')?.value||'').trim().toUpperCase();
-  var finalPrice=price;
-  if(promo){var pc=(DB.promoCodes||[]).find(function(p){return p.code===promo&&p.actif;});if(pc){if(pc.type==='percent')finalPrice=Math.round(price*(100-pc.reduction)/100);else finalPrice=Math.max(0,price-pc.reduction);}}
-  if(!DB.visitorOrders)DB.visitorOrders=[];
-  DB.visitorOrders.push({id:gid(),bookTitle:title,nom:nom,tel:tel,date:today(),statut:'En attente',prix:finalPrice,promo:promo});
-  save();
-  var mov=document.querySelector('.mov');if(mov)mov.remove();
-  // v1.0 : ouvrir le modal de paiement unifié
-  setTimeout(function(){
-    if(typeof openPaymentModal === 'function' && finalPrice > 0){
-      // ── v1.2 : metadata pour activation automatique ──
-      var lastOrder = DB.visitorOrders[DB.visitorOrders.length-1];
-      openPaymentModal({
-        montant: finalPrice,
-        label: '🛒 '+title,
-        refPrefix: 'SHOP',
-        intent: 'product',
-        targetId: lastOrder?lastOrder.id:null,
-        customerNom: nom, customerTel: tel
-      });
-    } else {
-      toast('✓ Commande envoyée !');
-    }
-  }, 100);
-}
+/* confirmProductOrder RETIRÉE (v1.15.9) — code mort. Elle servait l'écran
+   intermédiaire supprimé au commit précédent ; plus aucun appelant depuis que
+   visitorOrderProduct ouvre le paiement directement. Elle lisait vpNom/vpTel/
+   vpPromo, des champs qui n'existent plus dans le DOM. */
 
 function visitorOrderBook(bid){
   var autoPromo=(typeof SES!=='undefined'&&SES&&SES.type==='eleve')?'ELEVE10':'';
@@ -13939,7 +13935,7 @@ function pgSettings(){
         <div class="fg full">
           <span class="fl">🔑 Jeton public CamerPay — self-service client</span>
           <input class="fi" id="payCamerpayPubToken" placeholder="pub_… (à recopier depuis CAMERPAY_PUBLIC_INIT du serveur)" value="${_esc((DB.payApiConfig&&DB.payApiConfig.camerpayPublicToken)||'')}" onchange="DB.payApiConfig=DB.payApiConfig||{};DB.payApiConfig.camerpayPublicToken=this.value.trim();save();toast('🔑 Jeton public CamerPay enregistré');">
-          <div style="font-size:11px;color:var(--ink4);margin-top:4px;line-height:1.5"><strong>Facultatif depuis v1.15.6</strong> — le serveur transmet lui-même ce jeton au navigateur du client (sonde <code>?action=config</code>), donc il suffit de le poser dans <code>CAMERPAY_PUBLIC_INIT</code> côté serveur. Ce champ ne sert plus que de repli. ⚠️ <strong>Jamais</strong> la même valeur que le secret de synchronisation ni que <code>CAMERPAY_TOKEN</code>.</div>
+          <div style="font-size:11px;color:var(--ink4);margin-top:4px;line-height:1.5"><strong>Facultatif</strong> — le serveur transmet lui-même ce jeton au navigateur du client (sonde <code>?action=config</code>), donc il suffit de le poser dans <code>CAMERPAY_PUBLIC_INIT</code> côté serveur. Ce champ ne sert plus que de repli. ⚠️ <strong>Jamais</strong> la même valeur que le secret de synchronisation ni que <code>CAMERPAY_TOKEN</code>.</div>
         </div>
         <div class="fg full">
           <span class="fl">🔑 Jeton public CamPay — self-service client (fournisseur de repli)</span>
@@ -14410,10 +14406,8 @@ function savePublicInfo(){if(!DB.publicInfo)DB.publicInfo={};['slogan2','descrip
       var last = DB.visitorOrders && DB.visitorOrders[DB.visitorOrders.length-1];
       return { order: { client: last?.nom, produit: last?.bookTitle, montant: last?.prix } };
     });
-    _wrap('confirmProductOrder','order.placed',function(args){
-      var last = DB.visitorOrders && DB.visitorOrders[DB.visitorOrders.length-1];
-      return { order: { client: last?.nom, produit: args[0]||last?.bookTitle, montant: args[1]||last?.prix } };
-    });
+    // _wrap('confirmProductOrder') retiré : la fonction n'existe plus.
+    // order.placed part toujours via le _wrap('visitorOrderProduct') ci-dessous.
     _wrap('visitorOrderProduct','order.placed',function(args){
       return { order: { client: 'Visiteur', produit: args[0]||'?', montant: args[1]||0 } };
     });
@@ -15310,11 +15304,63 @@ window._aiGate = function(action){
   // -1 = illimité
   if(limit === -1) return true;
   if(used >= limit){
+    // Quota du jour épuisé : un crédit ACHETÉ prend le relais avant de bloquer.
+    // Sans cette ligne, les « 20 questions » vendues 500 FCFA ne servaient à
+    // rien — le tiroir unlockedIA n'était lu par aucune garde.
+    if(typeof _iaCreditsDepenser==='function' && _iaCreditsDepenser()) return true;
     _showQuotaExceeded(action, tier, used, limit);
     return false;
   }
   // Incrémenter le compteur (consommation)
   _aiInc(action);
+  return true;
+};
+
+// ══════════════════════════════════════════════════════════════════════
+// CRÉDITS IA ACHETÉS — solde, pas tiroir
+// ──────────────────────────────────────────────────────────────────────
+// Le pack « crédits » écrivait son targetId dans un tableau `unlockedIA`.
+// Deux défauts, tous deux payants : (1) aucune garde ne lisait ce tableau,
+// donc l'achat n'ouvrait rien ; (2) un tableau dédoublonne, donc le DEUXIÈME
+// pack acheté était purement et simplement perdu. Un crédit est une quantité :
+// il lui faut un compteur. Le solde vit sur le COMPTE (et non dans
+// localStorage) pour suivre l'élève d'un appareil à l'autre et pour que le
+// webhook serveur puisse le créditer même si le navigateur a été fermé.
+window._iaCreditsAcc = function(){
+  try{
+    if(typeof SES==='undefined' || !SES) return null;
+    var id = SES.accountId || SES.id;
+    if(!id) return null;
+    return (DB.visitorAccounts||[]).find(function(x){return x.id===id;})
+        || (DB.studentAccounts||[]).find(function(x){return x.id===id;})
+        || null;
+  }catch(e){ return null; }
+};
+window._iaCreditsSolde = function(){
+  var a = _iaCreditsAcc();
+  return a ? Math.max(0, parseInt(a.iaCredits,10)||0) : 0;
+};
+// Dépense UN crédit. true = un crédit a réellement été consommé.
+window._iaCreditsDepenser = function(){
+  var a = _iaCreditsAcc();
+  if(!a) return false;
+  var n = Math.max(0, parseInt(a.iaCredits,10)||0);
+  if(n <= 0) return false;
+  a.iaCredits = n - 1;
+  try{ save(); }catch(e){}
+  return true;
+};
+// Crédite un pack. IDEMPOTENT par référence de paiement : le webhook serveur et
+// le navigateur du payeur peuvent tous deux passer ici sans doubler le solde.
+window._iaCreditsAjouter = function(accountId, jetons, ref){
+  if(!accountId) return false;
+  var a = (DB.visitorAccounts||[]).find(function(x){return x.id===accountId;})
+       || (DB.studentAccounts||[]).find(function(x){return x.id===accountId;});
+  if(!a) return false;
+  a.iaCreditRefs = a.iaCreditRefs || [];
+  if(ref && a.iaCreditRefs.indexOf(ref) >= 0) return true;   // déjà crédité
+  a.iaCredits = (parseInt(a.iaCredits,10)||0) + (parseInt(jetons,10)||0);
+  if(ref) a.iaCreditRefs.push(ref);
   return true;
 };
 
@@ -15412,7 +15458,13 @@ window._aiQuotaBadgeHtml = function(action){
   if(st.unlimited) return '<span style="font-size:11px;background:linear-gradient(135deg,#FFC93C,#F59E0B);color:#142554;padding:3px 10px;border-radius:99px;font-weight:800">∞ Illimité</span>';
   var color = st.remaining===0 ? '#AE5353' : st.remaining<=2 ? '#F59E0B' : '#3A8F73';
   var periodLabel = st.period==='lifetime'?'au total':st.period==='week'?'cette semaine':'aujourd\'hui';
-  return '<span style="font-size:11px;background:'+color+'18;color:'+color+';padding:3px 10px;border-radius:99px;font-weight:700;border:1px solid '+color+'40">⚡ '+st.remaining+'/'+st.limit+' essai'+(st.remaining>1?'s':'')+' restant'+(st.remaining>1?'s':'')+' '+periodLabel+'</span>';
+  // Les crédits achetés doivent SE VOIR : quelqu'un qui vient de payer et ne
+  // lit « 0 essai restant » nulle part croit avoir payé pour rien.
+  var _cr = (typeof _iaCreditsSolde==='function') ? _iaCreditsSolde() : 0;
+  var _crHtml = _cr > 0
+    ? '<span style="font-size:11px;background:#FFC93C22;color:#142554;padding:3px 10px;border-radius:99px;font-weight:800;border:1px solid #FFC93C;margin-left:6px">+'+_cr+' crédit'+(_cr>1?'s':'')+' acheté'+(_cr>1?'s':'')+'</span>'
+    : '';
+  return '<span style="font-size:11px;background:'+color+'18;color:'+color+';padding:3px 10px;border-radius:99px;font-weight:700;border:1px solid '+color+'40">⚡ '+st.remaining+'/'+st.limit+' essai'+(st.remaining>1?'s':'')+' restant'+(st.remaining>1?'s':'')+' '+periodLabel+'</span>'+_crHtml;
 };
 
 
@@ -29787,7 +29839,10 @@ window.VERITAS_MONETISATION = {
   oeuvre:         { droit:'unlockedOeuvres',  collection:'oeuvres',          champAuteur:'authorId',  part:'auteur_ressource', libelle:'Œuvre littéraire' },
   labo:           { droit:'unlockedLabos',    collection:'labos',            champAuteur:'authorId',  part:'auteur_ressource', libelle:'Laboratoire virtuel' },
   marketplace:    { droit:'unlockedItems',    collection:'marketplaceItems', champAuteur:'teacherId', part:'enseignant_cours', libelle:'Cours marketplace' },
-  ia:             { droit:'unlockedIA',       collection:null,               champAuteur:null,        part:null,               libelle:'Crédits Prof. Ambassa' },
+  // `droit:null` VOLONTAIRE : les crédits sont un SOLDE (acc.iaCredits), pas un
+  // tiroir d'identifiants. Activation par le cas dédié de _payAutoActivate et,
+  // côté serveur, par la branche `ia` de vrt_grant_entitlement().
+  ia:             { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Crédits IA VÉRITAS' },
   micro_epreuve:  { droit:'unlockedUnits',    collection:'contenus',         champAuteur:'authorId',  part:'auteur_ressource', libelle:'Épreuve à l\'unité' },
   micro_chapitre: { droit:'unlockedUnits',    collection:'contenus',         champAuteur:'authorId',  part:'auteur_ressource', libelle:'Chapitre à l\'unité' },
   micro_fiche:    { droit:'unlockedUnits',    collection:'contenus',         champAuteur:'authorId',  part:'auteur_ressource', libelle:'Fiche à l\'unité' },
@@ -30976,7 +31031,22 @@ function _payAutoActivate(a){
                 userMsg:'Votre versement est enregistré. Le solde de la scolarité est mis à jour.'};
       }
 
-      // ── 6. Toutes les autres surfaces payantes — pilotées par la table
+      // ── 6. Crédits IA : une QUANTITÉ, pas un droit binaire. Passer par la
+      //       table (tiroir `unlockedIA`) ne créditait rien et rendait le
+      //       deuxième pack acheté purement invisible.
+      case 'ia': {
+        var pIA  = (typeof _prixCreditsIA==='function') ? _prixCreditsIA() : {jetons:20};
+        var nJ   = parseInt(pIA.jetons,10) || 20;
+        var okIA = (typeof _iaCreditsAjouter==='function') && _iaCreditsAjouter(a.accountId, nJ, a.ref);
+        if(!okIA){
+          return {msg:'Crédits IA payés — compte à rattacher',
+                  userMsg:'Paiement reçu. Connectez-vous avec le compte utilisé lors de l\'achat pour retrouver vos crédits.'};
+        }
+        return {msg:nJ+' crédits IA ajoutés (solde '+_iaCreditsSolde()+')',
+                userMsg:'Vos '+nJ+' questions sont créditées. Elles prennent le relais dès que votre quota du jour est épuisé.'};
+      }
+
+      // ── 7. Toutes les autres surfaces payantes — pilotées par la table
       //       VERITAS_MONETISATION : contenu e-learning, œuvre, laboratoire,
       //       cours marketplace, crédits IA et micro-achats à l'unité.
       //       Avant v1.2.4, ces paiements n'activaient RIEN : le client payait
@@ -31035,7 +31105,11 @@ window.acheterUnite = function(type, refId, refLabel){
 // VERITAS_MONETISATION mais rien ne le déclenchait : aucun moyen d'acheter des
 // jetons Ambassa sans abonnement. Il ne passe PAS par acheterUnite(), qui
 // préfixe en `micro_` — `micro_ia` n'est pas une surface déclarée.
-window.MICRO_PRIX_IA_DEFAULT = { montant:500, jetons:20, label:'20 questions au Professeur Ambassa' };
+// Le libellé dit « à l'IA » et non « au Professeur Ambassa » : les crédits sont
+// consommés par TOUTE action IA dont le quota du jour est épuisé (Ambassa,
+// orientation, correction) — c'est d'ailleurs sur ces trois écrans que le
+// bouton d'achat apparaît. Promettre une seule surface aurait été inexact.
+window.MICRO_PRIX_IA_DEFAULT = { montant:500, jetons:20, label:'20 questions à l\'IA VÉRITAS' };
 window._prixCreditsIA = function(){
   return (typeof DB!=='undefined' && DB.microPrix && DB.microPrix.ia) ? DB.microPrix.ia : MICRO_PRIX_IA_DEFAULT;
 };
