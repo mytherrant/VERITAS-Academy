@@ -12645,6 +12645,7 @@ function pgBooks2(){
           ${iA()?`<button class="btn bg2 xs" onclick="editBook('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>
           <button class="btn xs" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A" onclick="_uploadManuelFichier('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Upload</button>
           <button class="btn xs" style="background:#EDE9FE;color:#6D28D9;border:1px solid #DDD6FE" onclick="addBookContent('${b.id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Contenu</button>
+          <button class="btn xs" style="background:${b.digital?'#DBEAFE':'#F1F5F9'};color:${b.digital?'#1E3A8A':'#475569'};border:1px solid ${b.digital?'#93C5FD':'#CBD5E1'}" onclick="mBookSecure('${b.id}')" title="Aperçu gratuit + déblocage à l'achat">🔒 ${b.digital?`Protégé · ${b.freePages||0} gratuites`:'Protéger'}</button>
           <button class="btn br2 xs" onclick="delBook('${b.id}')">🗑</button>`:''}
         </div>
       </div>
@@ -12706,6 +12707,101 @@ function editBook(id){
 }
 function saveEditBk(id){const b=DB.books.find(x=>x.id===id);if(!b)return;b.titre=document.getElementById('eBkT')?.value||b.titre;b.cls=document.getElementById('eBkCl')?.value||b.cls;b.auteur=document.getElementById('eBkA')?.value||b.auteur;b.prix=+document.getElementById('eBkP')?.value||b.prix;b.stock=+document.getElementById('eBkSt')?.value||0;b.ico=document.getElementById('eBkI')?.value||b.ico;b.desc=document.getElementById('eBkD')?.value||b.desc;b.lireGratuit=!!(document.getElementById('eBkLG')?.checked);save();cm();re();toast('✓ Manuel modifié');}
 function delBook(id){if(!confirm('Supprimer ce manuel ?'))return;DB.books=DB.books.filter(b=>b.id!==id);save();re();}
+
+// ── MANUELS : LECTURE PROTÉGÉE (lecteur sécurisé api/secure_pdf.php) ────────
+// Le lecteur existe depuis v1.7 et viewBookDetail sait déjà afficher « Lire en
+// ligne » — mais AUCUN écran d'admin ne posait les champs qu'il attend sur un
+// LIVRE. Seuls les contenus e-learning avaient leur configuration (adminAddFile).
+// Un manuel de la boutique restait donc « papier » quoi qu'on uploade : le bouton
+// Upload envoie dans uploads/veritas/ (public, téléchargeable), pas dans le store
+// protégé que secure_pdf.php lit. D'où ce panneau : il écrit les cinq champs
+// réellement consommés (digital / secureId / securePages / freePages / prixDigital).
+function mBookSecure(bid){
+  if(typeof iA==='function'&&!iA())return;
+  var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
+  var sid=b.secureId||b.id;
+  M('🔒 Lecture protégée — '+b.titre,
+    'Aperçu gratuit, puis achat qui débloque la suite — sans jamais livrer le fichier',
+    '<div class="ib ibt mb14"><span>📖</span><span>Les pages sont servies <strong>une par une, en images filigranées</strong> par <code>api/secure_pdf.php</code>. Le PDF d\'origine ne quitte jamais le serveur.</span></div>'
+    +'<label class="fl2 fic g8 mb12" style="cursor:pointer;padding:10px;background:var(--blb);border:1px solid var(--bld);border-radius:var(--r)">'
+      +'<input type="checkbox" id="bsOn"'+(b.digital?' checked':'')+' style="width:18px;height:18px;accent-color:#142554">'
+      +'<span style="font-size:13px;font-weight:800;color:var(--bl)">Activer la lecture en ligne protégée</span></label>'
+    +'<div class="fg2">'
+      +'<div class="fg full"><span class="fl">Dossier des pages sur le serveur</span>'
+        +'<input class="fi mono" id="bsId" value="'+_esc(sid)+'" spellcheck="false">'
+        +'<div class="xs2 mut mt4">Chemin attendu : <code>uploads/protected/books/<span id="bsPath">'+_esc(sid)+'</span>/p001.jpg</code></div></div>'
+      +'<div class="fg"><span class="fl">Pages au total</span><input class="fi" id="bsTot" type="number" min="0" value="'+(b.securePages||b.pages||0)+'"></div>'
+      +'<div class="fg"><span class="fl">Pages gratuites d\'aperçu</span><input class="fi" id="bsFree" type="number" min="0" max="999" value="'+(b.freePages===undefined?10:b.freePages)+'"></div>'
+      +'<div class="fg full"><span class="fl">Prix de la version numérique (FCFA)</span><input class="fi" id="bsPrix" type="number" min="0" value="'+(b.prixDigital||b.prix||0)+'">'
+        +'<div class="xs2 mut mt4">Tarif propre au numérique — le prix papier reste '+fmt(b.prix||0)+'.</div></div>'
+    +'</div>'
+    +'<div class="ib" style="background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;border-radius:var(--r);padding:8px 12px;font-size:12px;margin-top:10px">⚠️ Désactiver la case efface le lien vers le dossier (<code>secureId</code>) pour retirer le bouton « Lire en ligne » de la fiche publique.</div>'
+    +'<div class="fl2 fic g8 mt12"><button class="btn bo sm" onclick="_bookSecureCheck(\''+bid+'\')">🔍 Vérifier la préparation serveur</button>'
+      +'<span class="xs2 mut">lit l\'état <strong>enregistré</strong> — enregistrez d\'abord</span></div>'
+    +'<div id="bsDiag" class="mt8"></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    +'<button class="btn bi" onclick="saveBookSecure(\''+bid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>',
+    true);
+  var idIn=_ge('bsId');
+  if(idIn) idIn.oninput=function(){ _st('bsPath',(this.value||'').replace(/[^a-zA-Z0-9_\-]/g,'')||'…'); };
+}
+function saveBookSecure(bid){
+  var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
+  var on=!!(_ge('bsOn')&&_ge('bsOn').checked);
+  var sid=(((_ge('bsId')||{}).value)||'').replace(/[^a-zA-Z0-9_\-]/g,'');
+  var tot=parseInt((_ge('bsTot')||{}).value,10);
+  var free=parseInt((_ge('bsFree')||{}).value,10);
+  var prix=parseInt((_ge('bsPrix')||{}).value,10);
+  if(on&&!sid){toast('Identifiant de dossier requis','warn');return;}
+  if(on&&!isNaN(free)&&!isNaN(tot)&&tot>0&&free>tot){toast('Pages gratuites supérieures au total','warn');return;}
+  b.digital=on;
+  if(on){
+    b.secureId=sid;
+    if(!isNaN(tot)) b.securePages=Math.max(0,tot);
+    b.freePages=isNaN(free)?10:Math.max(0,free);
+    if(!isNaN(prix)&&prix>0) b.prixDigital=prix;
+  } else {
+    // viewBookDetail affiche « Lire en ligne » dès que secureId OU securePages
+    // existe : les laisser en place laisserait le bouton actif malgré la case
+    // décochée. On les retire pour que la case fasse ce qu'elle annonce.
+    delete b.secureId; delete b.securePages;
+  }
+  save();cm();re();
+  toast(on?'✓ Lecture protégée activée — '+(b.freePages||0)+' pages gratuites':'✓ Lecture protégée désactivée');
+}
+// Interroge secure_pdf.php?meta=1 : dit si les images de pages existent VRAIMENT
+// sur le serveur. Sans ce contrôle, un livre paraît configuré côté admin alors que
+// le lecteur affichera « document non encore préparé » au premier visiteur.
+function _bookSecureCheck(bid){
+  var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
+  var out=_ge('bsDiag');if(!out)return;
+  out.innerHTML='<div class="ib ibt"><span>⏳</span><span>Interrogation du serveur…</span></div>';
+  var base=(typeof _secureApiBase==='function')?_secureApiBase():'/api';
+  var tok=(typeof _secureToken==='function')?_secureToken():'';
+  fetch(base+'/secure_pdf.php?id='+encodeURIComponent(b.id)+'&meta=1'+(tok?('&token='+encodeURIComponent(tok)):''))
+    .then(function(r){return r.json();})
+    .then(function(m){
+      var el=_ge('bsDiag');if(!el)return;
+      if(!m||!m.ok){
+        el.innerHTML='<div class="ib" style="background:#FEE2E2;border:1px solid #FECACA;color:#991B1B;border-radius:var(--r);padding:9px 12px;font-size:12px">✗ '+_esc((m&&m.error)||'Réponse inattendue du serveur')+'</div>';
+        return;
+      }
+      var okStyle='background:#D1FAE5;border:1px solid #A7F3D0;color:#065F46';
+      var koStyle='background:#FEF3C7;border:1px solid #FDE68A;color:#92400E';
+      var h='<div class="ib" style="'+(m.prepared?okStyle:koStyle)+';border-radius:var(--r);padding:9px 12px;font-size:12px;display:block;line-height:1.7">';
+      h+=m.prepared
+        ? '✅ <strong>Pages présentes sur le serveur.</strong>'
+        : '⚠️ <strong>Aucune page trouvée.</strong> Déposez <code>p001.jpg…</code> dans <code>uploads/protected/books/'+_esc(b.secureId||b.id)+'/</code> (pré-rendu : <code>node tools/render_secure_pdf.cjs &lt;fichier.pdf&gt; '+_esc(b.secureId||b.id)+'</code>).';
+      h+='<br>Pages détectées : <strong>'+(m.pages||0)+'</strong> · gratuites : <strong>'+(m.freePages||0)+'</strong>';
+      h+='<br>Droit du compte courant : <strong>'+(m.hasAccess?'accès complet':'aperçu seulement')+'</strong>';
+      h+=' <span class="xs2">(un admin connecté côté élève/visiteur voit « accès complet » ; sinon le serveur ne vous identifie pas)</span>';
+      h+='</div>';
+      el.innerHTML=h;
+    })
+    .catch(function(){
+      var el=_ge('bsDiag');if(el)el.innerHTML='<div class="ib" style="background:#FEE2E2;border:1px solid #FECACA;color:#991B1B;border-radius:var(--r);padding:9px 12px;font-size:12px">✗ Serveur injoignable (hors ligne, ou API non configurée).</div>';
+    });
+}
 
 // ── MANUELS : UPLOAD FICHIER ADMIN ──────────────────────────────────
 function _uploadManuelFichier(bid){
@@ -29478,7 +29574,7 @@ function _payStartPollingCampay(ref){
   var redirect = _payFlowIsRedirect();
   var maxChecks = redirect ? 144 : 36;
   var attente = redirect ? '⏳ En attente de votre paiement...' : '⏳ En attente de votre code secret...';
-  _payPollTimer = setInterval(function(){
+  var _tick = function(){
     checks++;
     if(checks > maxChecks){
       _payStopPolling();
@@ -29493,6 +29589,16 @@ function _payStartPollingCampay(ref){
         statusEl.innerHTML = '✅ Paiement confirmé ! Activation en cours...';
         statusEl.style.color = 'var(--gr)';
         _payStopPolling();
+        /* Le reçu s'appuie sur html2canvas + jsPDF, chargés à la demande depuis
+           un CDN : ~550 Ko qui ne partaient qu'au CLIC sur « Télécharger mon
+           reçu ». Sur une connexion mobile camerounaise, cela fait plusieurs
+           secondes devant un bouton qui semble ne rien faire — juste après avoir
+           payé, c'est le pire moment pour douter. On les charge MAINTENANT,
+           pendant que le client lit sa confirmation : sans bloquer, et sans
+           bruit s'il ne demande jamais son reçu. */
+        if(typeof _ensureLib === 'function'){
+          try{ _ensureLib('html2canvas'); _ensureLib('jspdf'); }catch(e){}
+        }
         var att = (DB.payAttempts||[]).find(function(x){return x.ref===ref;});
         if(att){
           att.operateur = data.operator||'';
@@ -29524,7 +29630,24 @@ function _payStartPollingCampay(ref){
         statusEl.innerHTML = attente+' ('+(checks*5)+'s)';
       }
     }).catch(function(){});
-  }, 5000);
+  };
+  _payPollTimer = setInterval(_tick, 5000);
+
+  /* LA source de latence en parcours par REDIRECTION : le payeur quitte notre
+     onglet pour la page CamerPay, et les navigateurs mobiles SUSPENDENT les
+     timers d'un onglet en arrière-plan (Chrome Android les étale à une fois par
+     minute, parfois les gèle). Le paiement était donc confirmé chez CamerPay
+     depuis longtemps quand notre `setInterval` se réveillait enfin : le client
+     revenait sur un écran qui affichait encore « en attente », et concluait que
+     son argent était parti dans le vide.
+     On interroge donc immédiatement au retour de l'onglet — le moment exact où
+     l'utilisateur regarde l'écran. Un `visibilitychange` n'est pas soumis au
+     throttling, lui. */
+  _payVisibilityHandler = function(){ if(!document.hidden) { try{ _tick(); }catch(e){} } };
+  try{ document.addEventListener('visibilitychange', _payVisibilityHandler); }catch(e){}
+  // Le retour depuis la page de paiement passe aussi par pageshow (bfcache) :
+  // sur iOS, revenir en arrière restaure la page sans déclencher visibilitychange.
+  try{ window.addEventListener('pageshow', _payVisibilityHandler); }catch(e){}
 }
 
 // Polling du statut de paiement (toutes les 5s)
@@ -29563,8 +29686,17 @@ function _payStartPolling(ref){
     }).catch(function(){});
   }, 5000);
 }
+var _payVisibilityHandler = null;
 function _payStopPolling(){
   if(_payPollTimer){clearInterval(_payPollTimer);_payPollTimer=null;}
+  // Sans ce retrait, chaque paiement laisse un écouteur de plus derrière lui :
+  // au troisième achat d'une session, revenir sur l'onglet déclencherait trois
+  // interrogations simultanées sur des références déjà soldées.
+  if(_payVisibilityHandler){
+    try{ document.removeEventListener('visibilitychange', _payVisibilityHandler); }catch(e){}
+    try{ window.removeEventListener('pageshow', _payVisibilityHandler); }catch(e){}
+    _payVisibilityHandler = null;
+  }
 }
 
 // Helper : copier un texte dans le presse-papier
