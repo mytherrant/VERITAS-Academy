@@ -276,6 +276,14 @@ if ($action === 'config' && ($method === 'GET' || $method === 'POST')) {
         $reason = 'CamerPay est configuré mais le jeton public d\'initiation est absent : seul l\'administrateur peut lancer un encaissement.';
     } elseif ($mode === 'sandbox') {
         $reason = 'CamerPay est en mode TEST (sandbox) : aucun argent réel ne circule. Basculez CAMERPAY_MODE sur « live » après validation du KYC.';
+    } elseif (is_file($stateDir . '_mode_mismatch.txt')) {
+        // Le cas le plus trompeur : l'administrateur a mis CAMERPAY_MODE=live et
+        // croit encaisser, mais CamerPay renvoie toujours sa page de simulation.
+        // CAMERPAY_MODE ne pilote RIEN chez le fournisseur — seul le jeton compte.
+        $reason = 'ATTENTION : CAMERPAY_MODE est sur « live », mais CamerPay renvoie encore des pages de TEST — aucun argent réel n\'arrive. '
+                . 'Ce réglage est purement local : il n\'est jamais transmis au fournisseur. Ce qui décide, c\'est le JETON. '
+                . 'Récupérez le jeton LIVE sur camerpay.biz/client/api et remplacez CAMERPAY_TOKEN dans api/payment_config.php sur le serveur '
+                . '(ce fichier n\'est jamais déployé par la CI : il se pose en FTP). Si le jeton live est refusé, c\'est que le KYC n\'est pas encore validé.';
     }
 
     jsonRespCy([
@@ -419,7 +427,24 @@ if ($action === 'init' && $method === 'POST') {
 
     $payUrl  = (string)($data['pay_url'] ?? $data['redirect_url'] ?? '');
     // Signature du sandbox documentée : /sandbox/simulate/ dans l'URL.
-    $sandbox = (stripos($payUrl, '/sandbox/simulate/') !== false) || camerpayMode() === 'sandbox';
+    $urlSandbox = (stripos($payUrl, '/sandbox/simulate/') !== false);
+    $sandbox = $urlSandbox || camerpayMode() === 'sandbox';
+
+    /* ⚠️ CONFIGURATION QUI SE CONTREDIT — et personne ne le disait.
+       CAMERPAY_MODE est DÉCLARATIF de notre côté : il n'est jamais envoyé à
+       CamerPay (camerpayApi n'ajoute que le Bearer, le payload ne porte aucun
+       champ de mode). Ce qui décide là-bas, c'est le JETON employé et l'état du
+       KYC. Un administrateur qui bascule CAMERPAY_MODE sur « live » croit donc
+       encaisser pour de vrai, pendant que CamerPay continue de renvoyer sa page
+       de simulation — le symptôme, une fois de plus, est l'absence de symptôme :
+       tout « fonctionne », mais aucun franc n'arrive jamais.
+       On le journalise et on le remonte, à l'initiation comme dans la sonde. */
+    if ($urlSandbox && camerpayMode() === 'live') {
+        camerpayLog($logFile, date('c') . " [MODE_MISMATCH] ref=$ref — CAMERPAY_MODE=live mais CamerPay renvoie une page sandbox : le jeton employé est un jeton de TEST, ou le KYC n'est pas validé\n");
+        @file_put_contents($stateDir . '_mode_mismatch.txt', date('c') . '|' . $ref . "\n");
+    } elseif (!$urlSandbox && camerpayMode() === 'live') {
+        @unlink($stateDir . '_mode_mismatch.txt');   // rentré dans l'ordre
+    }
 
     $state = [
         'ref'            => $ref,
@@ -999,6 +1024,52 @@ if ($action === 'payouts' && $method === 'GET') {
 // ════════════════════════════════════════════════════════════
 // On répond 200 avec `unsupported: true` plutôt qu'une erreur : le bouton de
 // l'écran d'administration doit afficher une phrase utile, pas un 500 rouge.
+/* ── HOOKLOG — pourquoi une notification a-t-elle été refusée ? ──────────────
+   CamerPay affiche « 1 webhook en échec · votre serveur n'a pas pu être
+   notifié », ce qui laisse croire à un serveur injoignable. Dans la plupart des
+   cas il a très bien répondu — il a REFUSÉ, et il a dit pourquoi :
+     REJECTED_BAD_SIGNATURE → CAMERPAY_CALLBACK_SECRET ≠ celui du tableau de bord
+     REJECTED_NO_SECRET     → secret absent côté serveur (fail-closed)
+     UNKNOWN_REF            → invoice_id inconnu de nos fichiers d'état
+     UNVERIFIED_NO_AUTH...  → statut irrelisible chez CamerPay (jeton ?)
+     MODE_MISMATCH          → CAMERPAY_MODE=live mais pages de test
+   Ce motif ne vivait que dans un fichier accessible en FTP. Il se lit désormais
+   depuis l'écran d'administration. Lecture seule, réservée à l'admin. */
+if ($action === 'hooklog' && $method === 'GET') {
+    requirePayAuth();
+    $n = max(1, min(200, (int)($_GET['lines'] ?? 50)));
+    $lignes = is_file($logFile) ? @file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
+    if (!is_array($lignes)) $lignes = [];
+    $recent = array_slice($lignes, -$n);
+
+    // Compte des refus, pour dire en UNE phrase ce qui cloche.
+    $motifs = [];
+    foreach (['REJECTED_BAD_SIGNATURE', 'REJECTED_NO_SECRET', 'UNKNOWN_REF',
+              'UNVERIFIED_NO_AUTH_STATUS', 'MODE_MISMATCH', 'AMOUNT_MISMATCH', 'GRANT'] as $m) {
+        $c = 0;
+        foreach ($lignes as $l) if (strpos($l, '[' . $m . ']') !== false) $c++;
+        if ($c > 0) $motifs[$m] = $c;
+    }
+    $diag = '';
+    if (!empty($motifs['REJECTED_BAD_SIGNATURE'])) {
+        $diag = 'Les notifications arrivent bien, mais leur signature est refusée : CAMERPAY_CALLBACK_SECRET ne correspond pas à celui affiché sur camerpay.biz/client. Recopiez-le exactement (sandbox et live peuvent en avoir deux différents).';
+    } elseif (!empty($motifs['REJECTED_NO_SECRET'])) {
+        $diag = 'CAMERPAY_CALLBACK_SECRET est absent du serveur : toute notification est refusée (fail-closed). Aucun paiement n\'est perdu — le polling confirme — mais renseignez-le dans api/payment_config.php.';
+    } elseif (!empty($motifs['UNKNOWN_REF'])) {
+        $diag = 'Une notification portait une référence inconnue de ce serveur : transaction créée depuis un AUTRE environnement (local, autre domaine), ou fichiers d\'état effacés.';
+    } elseif (!empty($motifs['UNVERIFIED_NO_AUTH_STATUS'])) {
+        $diag = 'La notification a été acceptée mais le statut n\'a pas pu être relu chez CamerPay (jeton refusé ou API injoignable). Vérifiez CAMERPAY_TOKEN.';
+    }
+    jsonRespCy([
+        'ok'         => true,
+        'count'      => count($lignes),
+        'motifs'     => $motifs,
+        'diagnostic' => $diag ?: 'Aucun refus enregistré dans ce journal.',
+        'callback_url' => camerpayCallbackUrl(),
+        'lignes'     => $recent,
+    ]);
+}
+
 if ($action === 'balance' && $method === 'GET') {
     requirePayAuth();
     jsonRespCy([
@@ -1091,7 +1162,7 @@ if ($action === 'fund_close' && $method === 'POST') {
 
 jsonRespCy(['error' => 'Action inconnue',
             'allowed' => ['config','init','notify','status','list','history','refund','withdraw',
-                          'masspayout','masspayout_status','payouts','balance','holder',
+                          'masspayout','masspayout_status','payouts','balance','holder','hooklog',
                           'fund_create','fund_get','fund_list','fund_close']], 400);
 
 // ════════════════════════════════════════════════════════════
