@@ -63,17 +63,72 @@ function spdf_err(int $code, string $msg): void {
     exit;
 }
 
+/* ── v1.17 — BAIL DE LECTURE SIGNÉ + QUOTA ANTI-ASPIRATION ───────────────────
+   Le lecteur recevait d'un seul coup l'URL de TOUTES les pages auxquelles il
+   avait droit, jeton de session inclus : une ligne en console récoltait un
+   manuel entier, et une URL copiée restait valable aussi longtemps que la
+   session. Deux verrous, ceux des liseuses en ligne :
+     1. au-delà de l'aperçu, chaque page exige une signature HMAC liée au
+        COMPTE, à la PAGE et à une échéance courte — une URL partagée meurt en
+        quelques minutes et ne vaut que pour son destinataire ;
+     2. un quota de pages DISTINCTES par heure et par document : lire ne le
+        touche jamais, aspirer bute dessus (429 + journal de sécurité).
+   Ni l'un ni l'autre n'empêche de photographier un écran — rien ne le peut.
+   Ils suppriment l'extraction en masse, qui est la vraie fuite. */
+define('SPDF_LEASE_TTL', 600);        // validité d'une signature : 10 min
+define('SPDF_WINDOW_MAX', 8);         // pages signables en un appel
+define('SPDF_PAGES_PER_HOUR', 150);   // pages distinctes/heure/document
+
+function spdf_identity(?array $acc): string {
+    $aid = $acc ? (string) ($acc['id'] ?? '') : '';
+    if ($aid !== '') return 'a:' . $aid;
+    return 'ip:' . substr(md5(vrt_client_ip()), 0, 12);
+}
+function spdf_sig(string $docId, int $page, string $who, int $exp): string {
+    return hash_hmac('sha256', $docId . '|' . $page . '|' . $who . '|' . $exp, VRT_HMAC_KEY);
+}
+/** true si le quota est dépassé. Compte les pages DISTINCTES sur 1 h glissante :
+ *  relire dix fois la même page ne coûte rien, en balayer trois cents coûte. */
+function spdf_budget(string $who, string $docId, array $add, int $max): bool {
+    $dir = __DIR__ . '/data/_rate/';
+    if (!is_dir($dir)) @mkdir($dir, 0750, true);
+    $f = $dir . 'spdfq_' . substr(md5($who . '|' . $docId), 0, 20) . '.txt';
+    $now = time(); $keep = [];
+    if (is_file($f)) {
+        foreach (explode("\n", (string) @file_get_contents($f)) as $ln) {
+            $p = explode(':', $ln);
+            if (count($p) === 2 && ($now - (int) $p[0]) < 3600) $keep[(int) $p[1]] = (int) $p[0];
+        }
+    }
+    foreach ($add as $pg) { if (!isset($keep[$pg])) $keep[$pg] = $now; }
+    // Dépassement : on ne PERSISTE pas, sinon un attaquant qui insiste ferait
+    // enfler le fichier sans jamais rien obtenir.
+    if (count($keep) > $max) return true;
+    $out = [];
+    foreach ($keep as $pg => $ts) $out[] = $ts . ':' . $pg;
+    @file_put_contents($f, implode("\n", $out));
+    return false;
+}
+
 // ── Rate-limit (anti aspiration massive de pages) ──
 if (vrt_rate_exceeded('spdf', 120)) spdf_err(429, 'Trop de requêtes — patientez une minute.');
 
 // ── Entrées ──
 $method = $_SERVER['REQUEST_METHOD'];
 $id = ''; $page = 0; $token = ''; $login = ''; $pass = ''; $wantMeta = false;
+$wantSign = false; $signFrom = 0; $signCount = 0; $qExp = 0; $qSig = '';
 if ($method === 'GET') {
     $id    = (string) ($_GET['id'] ?? '');
     $page  = (int) ($_GET['page'] ?? 0);
     $token = (string) ($_GET['token'] ?? '');
     $wantMeta = isset($_GET['meta']);
+    // v1.17 — bail de lecture : le client demande la signature d'une FENÊTRE de
+    // pages (celles qu'il s'apprête à afficher), jamais du document entier.
+    $wantSign  = isset($_GET['sign']);
+    $signFrom  = (int) ($_GET['from'] ?? 0);
+    $signCount = (int) ($_GET['count'] ?? 0);
+    $qExp = (int) ($_GET['exp'] ?? 0);
+    $qSig = preg_replace('/[^a-f0-9]/', '', (string) ($_GET['sig'] ?? ''));
 } elseif ($method === 'POST') {
     $in = json_decode((string) file_get_contents('php://input'), true);
     if (is_array($in)) {
@@ -161,6 +216,33 @@ if ($bookDir && is_dir($bookDir)) {
 if ($totalPg <= 0) $totalPg = $preparedPages;
 $prepared = ($preparedPages > 0) || ($pdfFile && is_file($pdfFile) && class_exists('Imagick'));
 
+// ── SIGNER une fenêtre de pages (bail de lecture) ──
+if ($wantSign) {
+    while (ob_get_level() > 0) { ob_end_clean(); }
+    header('Content-Type: application/json; charset=utf-8');
+    header('Cache-Control: no-store');
+    $who  = spdf_identity($acc);
+    $from = max(1, $signFrom);
+    $cnt  = max(1, min(SPDF_WINDOW_MAX, $signCount ?: 1));
+    $exp  = time() + SPDF_LEASE_TTL;
+    $pages = [];
+    for ($p = $from; $p < $from + $cnt; $p++) {
+        if ($totalPg > 0 && $p > $totalPg) break;
+        if (!$hasFull && $p > $freePg) break;   // le mur d'aperçu reste le mur
+        $pages[] = $p;
+    }
+    if (!$pages) { echo json_encode(['ok' => true, 'exp' => $exp, 'sigs' => new stdClass()]); exit; }
+    if (spdf_budget($who, $id, $pages, SPDF_PAGES_PER_HOUR)) {
+        @file_put_contents(__DIR__ . '/data/_security_log.txt',
+            date('c') . ' [SPDF_QUOTA] id=' . $id . ' who=' . $who . ' ip=' . vrt_client_ip() . "\n", FILE_APPEND);
+        spdf_err(429, 'Beaucoup de pages consultées sur la dernière heure. La lecture redevient possible un peu plus tard.');
+    }
+    $sigs = [];
+    foreach ($pages as $p) $sigs[(string) $p] = spdf_sig($id, $p, $who, $exp);
+    echo json_encode(['ok' => true, 'exp' => $exp, 'ttl' => SPDF_LEASE_TTL, 'sigs' => $sigs]);
+    exit;
+}
+
 // ── META : informations pour le client (pas d'image) ──
 if ($wantMeta) {
     while (ob_get_level() > 0) { ob_end_clean(); }
@@ -189,6 +271,17 @@ if (!$hasFull && $page > $freePg) {
     spdf_err(402, 'Page réservée — achetez la version numérique pour débloquer la suite.');
 }
 if ($totalPg > 0 && $page > $totalPg) spdf_err(404, 'Page hors limites');
+
+/* Signature obligatoire AU-DELÀ de l'aperçu gratuit. L'aperçu reste ouvert :
+   il est public par destination (c'est l'argument de vente), et l'exiger
+   casserait net les clients servis depuis un cache antérieur. Le contenu payé,
+   lui, n'est plus atteignable par une URL nue, même munie du jeton de session. */
+if ($page > $freePg) {
+    $who = spdf_identity($acc);
+    if ($qExp < time() || $qSig === '' || !hash_equals(spdf_sig($id, $page, $who, $qExp), $qSig)) {
+        spdf_err(403, 'Lien de page expiré ou invalide — rechargez le lecteur.');
+    }
+}
 
 // Anti-hotlink léger : si Referer présent, il doit venir d'une origine connue.
 $ref = $_SERVER['HTTP_REFERER'] ?? '';
