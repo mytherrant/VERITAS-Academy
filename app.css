@@ -7709,3 +7709,58 @@ button .i,a .i{margin-right:.4em}
 @media (max-width:720px){
   #VISITOR .vsec .v-hero-gradient{padding:18px 16px!important;margin-bottom:14px!important;border-radius:16px!important}
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   v1.17.3 — BARRE DE RECHERCHE DE LA BOUTIQUE
+   ════════════════════════════════════════════════════════════════════
+   Posée juste au-dessus des rayons. Assez visible pour qu'on la trouve
+   sans la chercher, assez sobre pour ne pas voler la vedette aux
+   couvertures — c'est un outil, pas une accroche. */
+.shop-find{margin:2px 0 16px}
+.shop-find-box{
+  display:flex;align-items:center;gap:10px;
+  background:#fff;border:1.5px solid rgba(20,37,84,.14);
+  border-radius:14px;padding:0 12px;
+  box-shadow:0 2px 10px rgba(13,27,62,.05);
+  transition:border-color .2s,box-shadow .2s;
+}
+.shop-find-box:focus-within{
+  border-color:rgba(255,201,60,.85);
+  box-shadow:0 0 0 3px rgba(255,201,60,.20);
+}
+.shop-find-ic{display:inline-flex;align-items:center;color:var(--ds-text-2,#6B7280);flex:0 0 auto}
+.shop-find-ic svg{width:18px;height:18px}
+.shop-find-in{
+  flex:1;min-width:0;border:none;outline:none;background:none;
+  padding:12px 0;font-family:inherit;font-size:14.5px;color:var(--acc-navy,#142554);
+}
+.shop-find-in::placeholder{color:#9AA3B2}
+/* La croix native de <input type=search> varie d'un navigateur à l'autre :
+   on la retire pour garder un seul bouton d'effacement, le nôtre. */
+.shop-find-in::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
+.shop-find-x{
+  flex:0 0 auto;border:none;background:none;cursor:pointer;
+  color:#9AA3B2;font-size:15px;line-height:1;padding:6px;border-radius:8px;
+}
+.shop-find-x:hover{color:var(--acc-navy,#142554);background:rgba(20,37,84,.06)}
+.shop-find-say{
+  margin-top:6px;font-size:12px;color:var(--ds-text-2,#6B7280);
+  font-family:Poppins,system-ui,sans-serif;
+}
+/* L'absence de résultat : dite clairement, et suivie d'une porte de sortie. */
+.shop-find-none{
+  margin-top:10px;background:#FFFDF6;border:1px solid #F0E2B8;
+  border-radius:14px;padding:14px 16px;
+}
+.shop-find-none-t{font-weight:800;color:#8A6D1A;font-size:14px;margin-bottom:4px}
+.shop-find-none-s{font-size:13px;color:#5B6B85;line-height:1.5}
+.shop-find-wa{
+  display:inline-flex;align-items:center;gap:6px;margin-top:10px;
+  background:#25D366;color:#08281A;text-decoration:none;font-weight:800;font-size:13px;
+  border-radius:99px;padding:9px 16px;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1);
+}
+.shop-find-wa:hover{transform:translateY(-2px)}
+/* Une vignette masquée par le filtre ne doit pas laisser d'espace fantôme
+   dans une rangée en flex : `hidden` seul ne suffit pas face à display:flex. */
+.shelf-item[hidden],.vbook-card[hidden],.shelf-row[hidden]{display:none!important}

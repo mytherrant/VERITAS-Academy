@@ -46111,6 +46111,26 @@ function _shopSearchBar(){
  *  Tous les mots doivent être présents (ET), comme dans la recherche
  *  globale : « maths 3 » trouve « Mathématiques 3ème » sans ramener tous
  *  les livres de 3ème. */
+/* Abréviations réellement employées dans les classes camerounaises. Mesuré au
+   banc d'essai : « maths » ne trouvait RIEN alors que le catalogue contient
+   « Mathématiques » — parce que « maths » n'est pas une sous-chaîne de
+   « mathematiques ». Une recherche qui répond « aucun résultat » sur un livre
+   présent est pire que pas de recherche : le parent conclut qu'on ne l'a pas.
+   Les clés sont déjà normalisées (minuscules, sans accents). */
+var _SHOP_ALIAS = {
+  maths:['mathematiques'], math:['mathematiques'], mathematique:['mathematiques'],
+  svt:['sciences','svteehb','biologie'], sciences:['svt','svteehb'],
+  pc:['physique','chimie'], pct:['physique','chimie'], physique:['physique'],
+  hg:['histoire','geographie'], histgeo:['histoire','geographie'],
+  fr:['francais'], francai:['francais'],
+  ang:['anglais'], angl:['anglais'], english:['anglais'],
+  philo:['philosophie'], info:['informatique'], infos:['informatique'],
+  eps:['sport','education physique'], ecm:['education civique'],
+  tle:['terminale'], term:['terminale'], terminal:['terminale'],
+  '1ere':['premiere'], '1re':['premiere'], '2nde':['seconde'], '2de':['seconde'],
+  bepc:['3eme','troisieme'], bac:['terminale'], proba:['premiere'], probatoire:['premiere']
+};
+
 function _shopFind(q){
   var norm = _shopNorm(q || '');
   var mots = norm ? norm.split(' ').filter(Boolean) : [];
@@ -46118,7 +46138,24 @@ function _shopFind(q){
 
   function teste(txt){
     if (!mots.length) return true;
-    for (var i = 0; i < mots.length; i++) if (txt.indexOf(mots[i]) < 0) return false;
+    for (var i = 0; i < mots.length; i++){
+      var m = mots[i];
+      // Le mot lui-même, ou l'une de ses formes développées, doit être présent.
+      var formes = [m].concat(_SHOP_ALIAS[m] || []);
+      var trouve = false;
+      for (var k = 0; k < formes.length; k++){
+        if (txt.indexOf(formes[k]) >= 0){ trouve = true; break; }
+      }
+      // Repli : une saisie plus LONGUE que le mot indexé (« mathematiqu »).
+      // Au-delà de 4 caractères seulement, sinon « le » attraperait tout.
+      if (!trouve && m.length > 4){
+        var tokens = txt.split(' ');
+        for (var j = 0; j < tokens.length; j++){
+          if (tokens[j].length > 3 && m.indexOf(tokens[j]) === 0){ trouve = true; break; }
+        }
+      }
+      if (!trouve) return false;
+    }
     return true;
   }
 
