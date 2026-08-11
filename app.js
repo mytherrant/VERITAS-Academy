@@ -25391,23 +25391,118 @@ window._secureRenderScroll=function(){
   var total=st.pages||0;
   var readable=st.hasAccess?total:Math.min(st.freePages,(total||st.freePages));
   if(readable<1) readable=st.hasAccess?(total||1):st.freePages;
+  // v1.17 : plus AUCUNE URL de page dans le DOM. On pose des toiles vides ; leur
+  // contenu n'arrive qu'à l'approche de l'écran, via un bail signé, et repart
+  // dès qu'on s'en éloigne. Auparavant les 300 liens d'un manuel tenaient dans
+  // le document, prêts à être récoltés d'une ligne en console.
+  st.readable=readable; st.sigs={}; st.sigExp=0; st.busy={};
   var html='';
   for(var n=1;n<=readable;n++){
-    var url=st.base+'/secure_pdf.php?id='+encodeURIComponent(st.id)+'&page='+n+(st.tok?('&token='+encodeURIComponent(st.tok)):'');
-    html+='<img class="sread-img" data-pg="'+n+'" alt="page '+n+'" draggable="false" loading="lazy" '
-      +'oncontextmenu="return false" src="'+url+'" onerror="this.style.opacity=.25">';
+    html+='<canvas class="sread-img" data-pg="'+n+'" width="1240" height="1754" '
+      +'aria-label="page '+n+'" oncontextmenu="return false"></canvas>';
   }
   if(!st.hasAccess && (total===0 || total>st.freePages)){ html+=_securePaywallHtml(st); }
   stage.innerHTML=html || '<div class="sread-load">📖 Chargement…</div>';
   _secureApplyZoom();
   _secureUpdatePageLbl();
+  _secureInstallLazy();
   if(!stage._vrtScroll){ stage._vrtScroll=1; stage.addEventListener('scroll',_secureUpdatePageLbl,{passive:true}); }
+};
+// Bail de lecture : le serveur ne signe qu'une FENÊTRE de pages à la fois, et
+// tient un quota horaire. Demander tout le document d'un coup est précisément
+// ce qu'on ne veut plus pouvoir faire.
+window._secureEnsureSig=function(n){
+  var st=window._secureState; if(!st) return Promise.reject(new Error('fermé'));
+  var now=Math.floor(Date.now()/1000);
+  if(st.sigs[n]&&st.sigExp>now+30) return Promise.resolve(st.sigs[n]);
+  var u=st.base+'/secure_pdf.php?id='+encodeURIComponent(st.id)+'&sign=1&from='+n+'&count=8'
+       +(st.tok?('&token='+encodeURIComponent(st.tok)):'');
+  return fetch(u,{cache:'no-store'}).then(function(r){
+    if(r.status===429) throw new Error('quota');
+    return r.json();
+  }).then(function(j){
+    if(!j||!j.ok||!j.sigs) throw new Error('bail refusé');
+    st.sigExp=j.exp||0;
+    for(var k in j.sigs){ if(Object.prototype.hasOwnProperty.call(j.sigs,k)) st.sigs[k]=j.sigs[k]; }
+    if(!st.sigs[n]) throw new Error('page non couverte');
+    return st.sigs[n];
+  });
+};
+// Peint une page DANS une toile : l'image transite en blob, n'apparaît jamais
+// comme ressource du document et ne survit pas au dessin.
+window._securePaintPage=function(n){
+  var st=window._secureState; if(!st||st.busy[n]) return;
+  var stage=document.getElementById('sreadStage'); if(!stage) return;
+  var cv=stage.querySelector('.sread-img[data-pg="'+n+'"]'); if(!cv||cv._painted) return;
+  st.busy[n]=1;
+  _secureEnsureSig(n).then(function(sig){
+    var u=st.base+'/secure_pdf.php?id='+encodeURIComponent(st.id)+'&page='+n
+         +'&exp='+encodeURIComponent(st.sigExp)+'&sig='+encodeURIComponent(sig)
+         +(st.tok?('&token='+encodeURIComponent(st.tok)):'');
+    return fetch(u,{cache:'no-store'}).then(function(r){
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      return r.blob();
+    });
+  }).then(function(blob){
+    var draw=function(src,w,h){
+      cv.width=w; cv.height=h;
+      var cx=cv.getContext('2d'); cx.drawImage(src,0,0);
+      cv._painted=1;
+      // Largeur posée sur CETTE toile seule : repasser sur les trois cents
+      // autres à chaque page peinte coûterait cher sans rien apporter.
+      var sg=document.getElementById('sreadStage');
+      if(sg){ cv.style.maxWidth='none'; cv.style.width=Math.round(Math.min(900,sg.clientWidth*0.96)*(st.zoom||1))+'px'; }
+      if(src.close) src.close();
+    };
+    if(window.createImageBitmap){
+      return createImageBitmap(blob).then(function(bmp){ draw(bmp,bmp.width,bmp.height); });
+    }
+    return new Promise(function(res,rej){
+      var im=new Image(), ou=URL.createObjectURL(blob);
+      im.onload=function(){ draw(im,im.naturalWidth,im.naturalHeight); URL.revokeObjectURL(ou); res(); };
+      im.onerror=function(){ URL.revokeObjectURL(ou); rej(new Error('image illisible')); };
+      im.src=ou;
+    });
+  }).then(function(){ delete st.busy[n]; })
+    .catch(function(e){
+      delete st.busy[n];
+      var cx=cv.getContext('2d');
+      cx.fillStyle='#F1F5F9'; cx.fillRect(0,0,cv.width,cv.height);
+      cx.fillStyle='#7A88A6'; cx.font='600 34px Arial, sans-serif'; cx.textAlign='center';
+      cx.fillText(e&&e.message==='quota'?'Lecture en pause — trop de pages sur cette heure'
+                                        :'Page indisponible',cv.width/2,cv.height/2);
+    });
+};
+// Charge à l'approche, libère à l'éloignement : la mémoire reste bornée et le
+// document ne contient jamais plus de quelques pages à la fois.
+window._secureInstallLazy=function(){
+  var st=window._secureState, stage=document.getElementById('sreadStage');
+  if(!st||!stage) return;
+  if(st.obs){ try{st.obs.disconnect();}catch(e){} }
+  if(!window.IntersectionObserver){
+    for(var n=1;n<=Math.min(st.readable,4);n++) _securePaintPage(n);
+    return;
+  }
+  st.obs=new IntersectionObserver(function(ents){
+    ents.forEach(function(en){
+      var pg=parseInt(en.target.getAttribute('data-pg'),10);
+      if(!pg) return;
+      if(en.isIntersecting){ _securePaintPage(pg); return; }
+      // Hors champ ET loin : on rend la mémoire. La toile reprend sa taille
+      // d'attente pour que la mise en page ne saute pas.
+      if(en.target._painted&&Math.abs(pg-(st.page||1))>8){
+        en.target.width=1240; en.target.height=1754; en.target._painted=0;
+      }
+    });
+  },{root:stage,rootMargin:'600px 0px'});
+  stage.querySelectorAll('.sread-img').forEach(function(c){ st.obs.observe(c); });
 };
 window._secureUpdatePageLbl=function(){
   var st=window._secureState, stage=document.getElementById('sreadStage'), lbl=document.getElementById('sreadPageLbl');
   if(!st||!stage||!lbl) return;
   var imgs=stage.querySelectorAll('.sread-img'), cur=imgs.length?1:0, mid=stage.scrollTop+stage.clientHeight*0.35;
   for(var i=0;i<imgs.length;i++){ if(imgs[i].offsetTop<=mid) cur=parseInt(imgs[i].getAttribute('data-pg'),10)||cur; }
+  st.page=cur||1;   // sert de repère à la libération des pages éloignées
   lbl.textContent=cur?('Page '+cur+(st.pages?(' / '+st.pages):'')):'…';
 };
 window._secureZoom=function(d){
@@ -25522,6 +25617,7 @@ window._secureShield=function(on){
   var sh=document.getElementById('sreadShield'); if(sh) sh.style.display=on?'flex':'none';
 };
 window.closeSecureBook=function(){
+  try{ if(window._secureState&&window._secureState.obs) window._secureState.obs.disconnect(); }catch(e){}
   var ov=document.getElementById('secureReader'); if(ov) ov.remove();
   document.body.style.overflow='';
   try{
