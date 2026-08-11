@@ -4852,16 +4852,38 @@ function vShowSec(sec,btn){
     <div class="vcard mt4">
       <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-book"/></svg></span>Nos Manuels les Mieux Notés</div>
       <div class="featured-scroll">
-        ${DB.books.map(b=>{const rt=getBookRating(b.id);const cc=b.coverColor||'#1a3a8a';const hasExt=b.extrait||((b.previewImages||[]).length>0);return`<div class="featured-card" onclick="${hasExt?'_showExtrait':'viewBookDetail'}('${b.id}')">
-          <div style="height:90px;background:linear-gradient(160deg,${cc},${cc}cc);display:flex;align-items:center;justify-content:center;position:relative">
-            <div style="font-size:36px;position:absolute;z-index:0">${b.ico}</div>${b.coverImg?'<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover;position:relative;z-index:1" onerror="this.style.display=\'none\'">':''}
-            <div style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:#FFC93C;padding:1px 6px;border-radius:8px;font-size:11px;font-weight:700">${b.cls}</div>
-            ${hasExt?'<div style="position:absolute;bottom:4px;right:4px;background:rgba(5,150,105,.9);color:#fff;padding:1px 6px;border-radius:6px;font-size:10px;font-weight:700">'+ICO('i-eye')+'Extrait</div>':''}
+        ${DB.books.map(b=>{const rt=getBookRating(b.id);const cc=b.coverColor||'#1a3a8a';const hasExt=b.extrait||((b.previewImages||[]).length>0);
+          /* La couverture est l'argument de vente d'un manuel : à 90 px elle ne
+             montrait rien, et le titre passait avant l'objet. Portée à 168 px,
+             au format d'un livre posé debout.
+             Le format se dit AVANT le clic : « je l'achète pour le lire tout de
+             suite » et « je l'achète pour l'avoir en main » sont deux décisions
+             différentes, et on faisait deviner laquelle était possible.
+             L'accroche s'appuie sur des chiffres RÉELS (stock, ventes, avis) ;
+             quand il n'y en a pas, on parle du contenu, jamais d'un succès
+             inventé. */
+          const _lisible = !!(b.digital || b.secureId || b.securePages);
+          const _papier  = (b.stock === undefined) || b.stock > 0;
+          const _fmts = [_papier?'Papier':'', _lisible?'Lecture en ligne':''].filter(Boolean).join(' · ');
+          let _accroche = '';
+          if(_papier && b.stock !== undefined && b.stock > 0 && b.stock <= 5) _accroche = 'Plus que '+b.stock+' exemplaire'+(b.stock>1?'s':'');
+          else if(b.vendu > 0) _accroche = b.vendu+' élève'+(b.vendu>1?'s l\'ont':' l\'a')+' déjà';
+          else if(rt.count > 0) _accroche = 'Noté '+rt.avg.toFixed(1)+'/5';
+          else if(hasExt) _accroche = 'Feuilletez un extrait gratuit';
+          else if(b.pages) _accroche = b.pages+' pages conformes au programme';
+          return`<div class="featured-card" onclick="${hasExt?'_showExtrait':'viewBookDetail'}('${b.id}')">
+          <div style="height:240px;background:linear-gradient(160deg,${cc},${cc}cc);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden">
+            <div style="font-size:64px;position:absolute;z-index:0;opacity:.9">${b.ico}</div>${b.coverImg?'<img src="'+b.coverImg+'" style="width:100%;height:100%;object-fit:cover;position:relative;z-index:1" onerror="this.style.display=\'none\'">':''}
+            <div style="position:absolute;top:6px;left:6px;background:rgba(0,0,0,.62);color:#FFC93C;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:800;z-index:2">${b.cls}</div>
+            ${_lisible?'<div style="position:absolute;top:6px;right:6px;background:rgba(255,201,60,.95);color:#142554;padding:2px 7px;border-radius:8px;font-size:10px;font-weight:800;z-index:2">Lecture immédiate</div>':''}
+            ${hasExt?'<div style="position:absolute;bottom:6px;right:6px;background:rgba(5,150,105,.92);color:#fff;padding:2px 8px;border-radius:6px;font-size:10px;font-weight:800;z-index:2">'+ICO('i-eye')+'Extrait</div>':''}
           </div>
-          <div style="padding:10px">
-            <div style="font-size:13px;font-weight:700;line-height:1.2;margin-bottom:3px">${_esc(b.titre)}</div>
+          <div style="padding:11px">
+            <div style="font-size:13.5px;font-weight:800;line-height:1.25;margin-bottom:3px">${_esc(b.titre)}</div>
+            ${_fmts?'<div style="font-size:10.5px;color:var(--ink4);font-weight:700;letter-spacing:.3px;margin-bottom:4px">'+_esc(_fmts)+'</div>':''}
             ${rt.count>0?'<div style="font-size:13px;margin-bottom:3px">'+starsHtml(rt.avg)+' <span class="xs2 mut">('+rt.count+')</span></div>':''}
-            <div class="mono bold" style="font-size:13px;color:var(--gold)">${fmt(b.prix)}</div>
+            <div class="mono bold" style="font-size:14px;color:var(--gold)">${fmt(b.prix)}</div>
+            ${_accroche?'<div style="font-size:10.5px;color:var(--gr);font-weight:700;margin-top:4px">'+_esc(_accroche)+'</div>':''}
           </div>
         </div>`}).join("")}
       </div>
@@ -5306,6 +5328,15 @@ function vShowSec(sec,btn){
          à des rayons par cycle, façon librairie — la couverture porte le regard,
          le texte se réduit au nécessaire. La grille détaillée reste dessous
          pour qui veut comparer prix, stock et notes. -->
+
+    <!-- ═════ RECHERCHE DANS LE CATALOGUE (v1.17.3) ═════
+         La recherche globale (mRecherche) indexe les œuvres, jeux, labos et
+         corrigés — mais PAS les manuels de la boutique. Un parent qui voulait
+         savoir si un titre existe devait parcourir les rayons à l'œil.
+         Filtrage dans le DOM, sans re-rendu : la boutique est coûteuse à
+         reconstruire, et la réponse doit tomber à la frappe. -->
+    ${_shopSearchBar()}
+
     ${_shopRows()}
 
     <!-- ═════ GRILLE LIVRES DÉTAILLÉE (repliée par défaut) ═════ -->
@@ -45973,10 +46004,24 @@ function _shopCover(b){
        + '</span>';
 }
 
+/* La normalisation (minuscules, sans accents) existe déjà : `_rechNorm`, qui
+   sert à la recherche globale. On la réutilise plutôt que d'en écrire une
+   seconde — deux normaliseurs finissent toujours par diverger, et une barre
+   qui répond « aucun résultat » sur un livre présent est pire que pas de
+   barre du tout. Repli défensif si l'ordre de chargement changeait un jour. */
+function _shopNorm(s){
+  if (typeof _rechNorm === 'function') return _rechNorm(s);
+  return String(s == null ? '' : s).toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
 function _shopItem(b){
   var rupture = (b.stock <= 0);
   var apercu  = !!(b.extrait || (b.previewImages && b.previewImages.length));
+  // Texte cherchable porté par la vignette : on filtre ensuite dans le DOM,
+  // sans re-rendre la section (le rendu complet de la boutique coûte cher).
+  var cherchable = _shopNorm([b.titre, b.auteur, b.cls, (b.chaps || []).join(' '), b.desc].join(' '));
   return '<button class="shelf-item' + (rupture ? ' is-out' : '') + '" '
+       + 'data-q="' + _esc(cherchable) + '" '
        + 'onclick="viewBookDetail(\'' + b.id + '\')" '
        + 'aria-label="' + _esc(b.titre) + ' — ' + _esc(b.cls || '') + ', ' + fmt(b.prix) + '">'
        + '<span class="shelf-cover">' + _shopCover(b)
@@ -46021,4 +46066,125 @@ function _shopRows(){
     html += _shopRow(r.titre, r.sous, livres.filter(function(b){ return _shopCycle(b.cls) === r.id; }));
   });
   return html ? '<div class="vshop-shelves">' + html + '</div>' : '';
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   v1.17.3 — RECHERCHE DANS LE CATALOGUE DE LA BOUTIQUE
+   ════════════════════════════════════════════════════════════════════
+   Demande de Jacques : « une barre de recherche pour accéder rapidement à
+   un livre ou le vérifier dans le catalogue ».
+
+   Deux usages, et le second compte autant que le premier : trouver un
+   titre qu'on sait présent, et OBTENIR UNE RÉPONSE CLAIRE quand il est
+   absent. Un filtre qui se contente de vider l'écran laisse le parent
+   dans le doute (« ai-je mal écrit ? ») ; ici, l'absence est dite, et
+   elle ouvre un message WhatsApp pré-rempli avec le titre cherché — un
+   titre demandé est une information commerciale, pas un échec.
+
+   Filtrage dans le DOM plutôt que re-rendu : reconstruire la section
+   boutique coûte cher (rayons + grille détaillée), et la réponse doit
+   tomber à la frappe, y compris sur un téléphone d'entrée de gamme.
+   ════════════════════════════════════════════════════════════════════ */
+
+function _shopSearchBar(){
+  var n = (typeof DB !== 'undefined' && DB.books) ? DB.books.length : 0;
+  if (!n) return '';
+  return '<div class="shop-find">'
+    + '<div class="shop-find-box">'
+    +   '<span class="shop-find-ic" aria-hidden="true">' + (typeof ICO === 'function' ? ICO('i-search') : '🔎') + '</span>'
+    +   '<input id="shopQ" class="shop-find-in" type="search" autocomplete="off" '
+    +     'placeholder="Chercher un manuel : titre, matière, classe, auteur…" '
+    +     'aria-label="Rechercher un manuel dans le catalogue" '
+    +     'oninput="_shopFind(this.value)" '
+    +     'onkeydown="if(event.key===\'Escape\'){this.value=\'\';_shopFind(\'\');}else if(event.key===\'Enter\'){_shopFindOpen();}">'
+    +   '<button type="button" class="shop-find-x" id="shopQX" hidden aria-label="Effacer la recherche" '
+    +     'onclick="var i=document.getElementById(\'shopQ\');if(i){i.value=\'\';i.focus();}_shopFind(\'\');">✕</button>'
+    + '</div>'
+    + '<div class="shop-find-say" id="shopQSay" role="status" aria-live="polite">'
+    +   n + ' manuel' + (n > 1 ? 's' : '') + ' au catalogue'
+    + '</div>'
+    + '<div class="shop-find-none" id="shopQNone" hidden></div>'
+    + '</div>';
+}
+
+/** Filtre les vignettes des rayons ET les cartes de la grille détaillée.
+ *  Tous les mots doivent être présents (ET), comme dans la recherche
+ *  globale : « maths 3 » trouve « Mathématiques 3ème » sans ramener tous
+ *  les livres de 3ème. */
+function _shopFind(q){
+  var norm = _shopNorm(q || '');
+  var mots = norm ? norm.split(' ').filter(Boolean) : [];
+  var vus = 0;
+
+  function teste(txt){
+    if (!mots.length) return true;
+    for (var i = 0; i < mots.length; i++) if (txt.indexOf(mots[i]) < 0) return false;
+    return true;
+  }
+
+  // 1) Les vignettes des rayons portent leur texte cherchable en data-q.
+  document.querySelectorAll('.vshop-shelves .shelf-item').forEach(function(el){
+    var ok = teste(el.getAttribute('data-q') || '');
+    el.hidden = !ok;
+    if (ok) vus++;
+  });
+
+  // 2) Un rayon dont toutes les vignettes sont masquées disparaît, sinon on
+  //    laisse des titres de rayon suivis de vide.
+  document.querySelectorAll('.vshop-shelves .shelf-row').forEach(function(row){
+    var reste = row.querySelectorAll('.shelf-item:not([hidden])').length;
+    row.hidden = (reste === 0);
+    var c = row.querySelector('.shelf-count');
+    if (c && mots.length) c.textContent = reste + ' sur ' + row.querySelectorAll('.shelf-item').length;
+    else if (c) {
+      var tot = row.querySelectorAll('.shelf-item').length;
+      c.textContent = tot + ' titre' + (tot > 1 ? 's' : '');
+    }
+  });
+
+  // 3) La grille détaillée suit le même filtre (son texte est dans le DOM).
+  document.querySelectorAll('.vshop-all .vbook-card').forEach(function(card){
+    card.hidden = !teste(_shopNorm(card.textContent || ''));
+  });
+
+  var say  = document.getElementById('shopQSay');
+  var none = document.getElementById('shopQNone');
+  var x    = document.getElementById('shopQX');
+  if (x) x.hidden = !mots.length;
+
+  if (!mots.length){
+    var n = (typeof DB !== 'undefined' && DB.books) ? DB.books.length : 0;
+    if (say)  say.textContent = n + ' manuel' + (n > 1 ? 's' : '') + ' au catalogue';
+    if (none){ none.hidden = true; none.innerHTML = ''; }
+    return;
+  }
+
+  if (say) say.textContent = vus
+    ? (vus + ' manuel' + (vus > 1 ? 's' : '') + ' trouvé' + (vus > 1 ? 's' : ''))
+    : 'Aucun manuel ne correspond';
+
+  if (none){
+    if (vus){ none.hidden = true; none.innerHTML = ''; }
+    else {
+      // Absence assumée et utile : on nomme ce qui a été cherché, et on ouvre
+      // la conversation plutôt que de laisser un écran vide.
+      var brut = String(q || '').trim();
+      var msg  = 'Bonjour VÉRITAS. Je cherche le manuel « ' + brut + ' ». Est-il disponible ?';
+      none.hidden = false;
+      none.innerHTML = '<div class="shop-find-none-t">Rien au catalogue pour « ' + _esc(brut) + ' »</div>'
+        + '<div class="shop-find-none-s">Vérifiez l\'orthographe, ou cherchez par matière (« maths ») '
+        + 'ou par classe (« 3ème »). Si ce titre vous manque, dites-le nous : c\'est ainsi que le '
+        + 'catalogue s\'étoffe.</div>'
+        + '<a class="shop-find-wa" target="_blank" rel="noopener" '
+        + 'href="https://wa.me/237697637739?text=' + encodeURIComponent(msg) + '">'
+        + 'Demander ce manuel sur WhatsApp</a>';
+    }
+  }
+}
+
+/** Entrée : s'il ne reste qu'un seul manuel visible, on l'ouvre — le geste
+ *  attendu quand on a tapé un titre précis. */
+function _shopFindOpen(){
+  var vis = document.querySelectorAll('.vshop-shelves .shelf-item:not([hidden])');
+  if (vis.length === 1) vis[0].click();
 }
