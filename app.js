@@ -13850,8 +13850,42 @@ window._clsSelecteur = function(sel, cb, ns){
           + ' onclick="window._clsSec_'+ns+'=\''+s.nom.replace(/'/g,"\\'")+'\';re()">'
           + _esc(s.nom)+' <span style="opacity:.6;font-weight:600">'+s.classes.length+'</span></button>';
       }).join('')
-    + '</div><div class="tabs">'
-    + trouvee.classes.map(function(c){
+    + '</div>';
+
+  /* Troisième niveau, indispensable pour « Technique » : à elle seule elle
+     compte 134 classes — sectionner sans sous-grouper aurait juste déplacé le
+     mur. On coupe par niveau scolaire (2nde / 1ère / Tle), qui est la question
+     que se pose réellement un secrétariat. Les sections courtes (Collège,
+     Lycée général) sautent cette étape : personne n'a besoin d'un filtre pour
+     choisir entre quatre classes. */
+  var classes = trouvee.classes;
+  if(classes.length > 24){
+    var niveau = function(c){
+      var s = String(c||'');
+      if(/\b2nde\b/i.test(s)) return '2nde';
+      if(/\b1ère\b/i.test(s)) return '1ère';
+      if(/\bTle\b/i.test(s))  return 'Tle';
+      return 'Autres';
+    };
+    var ordreN = ['2nde','1ère','Tle','Autres'], parN = {};
+    classes.forEach(function(c){ (parN[niveau(c)] = parN[niveau(c)] || []).push(c); });
+    var dispo = ordreN.filter(function(n){ return parN[n] && parN[n].length; });
+    if(dispo.length > 1){
+      var nCour = window['_clsNiv_'+ns];
+      if(dispo.indexOf(nCour) < 0) nCour = (dispo.indexOf(niveau(sel)) >= 0) ? niveau(sel) : dispo[0];
+      h += '<div class="tabs" style="margin-bottom:8px">'
+        + dispo.map(function(n){
+            return '<button class="tab'+(n===nCour?' on':'')+'" style="font-size:12px"'
+              + ' onclick="window._clsNiv_'+ns+'=\''+n+'\';re()">'+n
+              + ' <span style="opacity:.6">'+parN[n].length+'</span></button>';
+          }).join('')
+        + '</div>';
+      classes = parN[nCour];
+    }
+  }
+
+  h += '<div class="tabs">'
+    + classes.map(function(c){
         return '<button class="tab'+(c===sel?' on':'')+'" onclick="'+cb.replace(/\{c\}/g, c.replace(/'/g,"\\'"))+'">'+_esc(c)+'</button>';
       }).join('')
     + '</div>';
@@ -38003,11 +38037,20 @@ function pgPaiementsAdmin(){
   // pourtant « ACTIF ».
   var promos = (typeof DB!=='undefined' && DB.promoCodes) ? DB.promoCodes : [];
   if(promos.length){
-    h += '<div class="tw"><table><thead><tr><th>Code</th><th>Réduction</th><th>Description</th><th>Utilisations</th><th>Statut</th></tr></thead><tbody>';
+    h += '<div class="tw"><table><thead><tr><th>Code</th><th>Réduction</th><th>Propriétaire</th><th>Commission</th><th>Description</th><th>Utilisations</th><th>Statut</th></tr></thead><tbody>';
+    var _LV = (typeof _prtL==='function') ? _prtL() : {};
     promos.forEach(function(p){
       var actif = !!p.actif;
       var red = (p.type==='fixed') ? fmt(p.reduction) : (p.reduction+' %');
-      h += '<tr><td style="font-family:monospace;font-weight:700">'+_esc(p.code||'')+'</td><td>'+_esc(red)+'</td><td>'+_esc(p.desc||'')+'</td><td>'+(p.usage||0)+'</td>'
+      // Qui touche quoi : la colonne qui manquait. Sans elle, impossible de
+      // savoir au premier coup d'œil quels codes rémunèrent quelqu'un.
+      var op = p.partnerId ? (DB.partners||[]).find(function(x){return x && x.id===p.partnerId;}) : null;
+      var olv = op ? (_LV[op.level||'bronze'] || _LV.bronze || {}) : null;
+      var oNom = op ? (op.nom||op.name||op.code||'—') : (p.partnerNom||'');
+      h += '<tr><td style="font-family:monospace;font-weight:700">'+_esc(p.code||'')+'</td><td>'+_esc(red)+'</td>'
+        +'<td>'+(oNom ? _esc(oNom) : '<span style="opacity:.5">— personne —</span>')+'</td>'
+        +'<td>'+(olv ? '<b>'+Math.round((olv.commission||0)*100)+' %</b> <span style="opacity:.6;font-size:11px">'+_esc(olv.label||'')+'</span>' : '<span style="opacity:.5">—</span>')+'</td>'
+        +'<td>'+_esc(p.desc||'')+'</td><td>'+(p.usage||0)+'</td>'
         +'<td><span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:'+(actif?'var(--gr)':'var(--re)')+';color:#fff">'+(actif?'ACTIF':'INACTIF')+'</span></td></tr>';
     });
     h += '</tbody></table></div>';
@@ -38019,13 +38062,35 @@ function pgPaiementsAdmin(){
 }
 
 function _mAddPromo(){
+  /* Un code promo sans propriétaire ne rémunère PERSONNE. C'était la source de
+     confusion : on créait « MIT » en croyant faire un code de parrainage, alors
+     que DB.promoCodes ne fait que réduire le prix — les commissions, elles, se
+     lisent sur DB.partners[].code. Deux tables, deux effets, un seul écran de
+     création : le champ ci-dessous les relie enfin, et affiche le taux réel du
+     partenaire (il découle de son PALIER, il ne se saisit pas). */
+  var parts = (typeof DB!=='undefined' && DB.partners) ? DB.partners.filter(function(p){return p && p.status==='active';}) : [];
+  var L = (typeof _prtL==='function') ? _prtL() : {};
+  var optsP = '<option value="">— Aucun (simple réduction, personne n\'est rémunéré) —</option>'
+    + parts.map(function(p){
+        var lv = L[p.level||'bronze'] || L.bronze || {commission:0.05,label:'Bronze'};
+        return '<option value="'+_esc(p.id)+'">'+_esc(p.nom||p.name||p.code||p.id)
+             + ' — '+(lv.label||p.level||'Bronze')+' · '+Math.round((lv.commission||0)*100)+' % de commission</option>';
+      }).join('');
+
   M('🏷️ Nouveau code promo','',
     '<div class="fg2">'
     +'<div class="fg"><span class="fl">Code *</span><input class="fi" id="npCode" placeholder="MONCODE" style="text-transform:uppercase"></div>'
     +'<div class="fg"><span class="fl">Réduction (%) *</span><input class="fi" id="npPct" type="number" min="1" max="100" placeholder="10"></div>'
     +'<div class="fg"><span class="fl">Label</span><input class="fi" id="npLabel" placeholder="Description courte"></div>'
     +'<div class="fg"><span class="fl">Utilisations max *</span><input class="fi" id="npMax" type="number" min="1" placeholder="100"></div>'
-    +'</div>',
+    +'</div>'
+    +'<div class="fg" style="margin-top:12px"><span class="fl">Propriétaire du code (parrain rémunéré)</span>'
+      +'<select class="fi" id="npOwner">'+optsP+'</select></div>'
+    +'<div class="ib ibt" style="margin-top:10px"><span>💡</span><span>'
+      +(parts.length
+        ? 'La <strong>réduction</strong> est ce que le client économise. La <strong>commission</strong> est ce que touche le parrain : elle découle de son palier (Bronze 5 % · Argent 8 % · Or 10 % · Diamant 12 %) et ne se saisit pas ici. Elle est recalculée par le serveur à chaque vente.'
+        : 'Aucun partenaire actif pour l\'instant : ce code réduira le prix sans rémunérer personne. Créez d\'abord un partenaire dans <strong>Partenaires</strong> pour en faire un code de parrainage.')
+    +'</span></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_saveNewPromo()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Créer</button>');
 }
 
@@ -38043,8 +38108,15 @@ function _saveNewPromo(){
   if(DB.promoCodes.some(function(p){return String(p.code||'').toUpperCase()===code;})){
     toast('Ce code existe déjà','warn'); return;
   }
+  var owner = (document.getElementById('npOwner')?.value||'').trim();
+  var oPart = owner ? (DB.partners||[]).find(function(p){return p && p.id===owner;}) : null;
   DB.promoCodes.push({id:(typeof gid==='function'?gid():'pc'+Date.now()),code:code,
-    reduction:pct,type:'percent',desc:label||('Promo '+code),actif:true,usage:0,max:max});
+    reduction:pct,type:'percent',desc:label||('Promo '+code),actif:true,usage:0,max:max,
+    // Propriétaire : c'est LUI qui rend le code rémunérateur. Le taux n'est pas
+    // recopié ici — il découle du palier du partenaire, qui évolue avec ses
+    // ventes, et le serveur le recalcule de toute façon à chaque encaissement.
+    partnerId: owner || null,
+    partnerNom: oPart ? (oPart.nom||oPart.name||oPart.code||'') : ''});
   if(typeof save==='function') save();
   cm();re();
   toast('✓ Code '+code+' créé ('+pct+'%)');
