@@ -6593,11 +6593,76 @@ function mCloudUploadFile(){
     '<div class="fg mb12"><span class="fl">Classe concernée</span><input class="fi" id="upl_classe" placeholder="Ex: Tle C"></div>'+
     '<div class="fg mb12"><span class="fl">Matière</span><input class="fi" id="upl_matiere" placeholder="Ex: Mathématiques"></div>'+
     '<div class="fg mb12"><span class="fl">Description (optionnel)</span><textarea class="fi" id="upl_desc" rows="2" placeholder="Brève description..."></textarea></div>'+
+    // v1.17 : tout partait jusqu'ici dans uploads/veritas/misc/, PUBLIC, et le
+    // modal affichait même l'URL en clair. Rien n'était ni estampillé ni vendable.
+    '<div class="fg mb12"><span class="fl">Diffusion</span><select class="fi" id="upl_diff" onchange="_uplToggleDiff()">'+
+    '<option value="protege">🔒 Protégé et payant — estampillé, débloqué au paiement</option>'+
+    '<option value="public">🌍 Public — accessible à tous par son URL</option></select></div>'+
+    '<div id="uplPay">'+
+      '<div class="ib ibt mb12"><span>💳</span><span>Le document devient une <strong>fiche vendable de la boutique</strong> : pages estampillées, lecture en ligne seule, aperçu gratuit puis paiement.</span></div>'+
+      '<div class="fg2">'+
+        '<div class="fg"><span class="fl">Prix (FCFA)</span><input class="fi" id="upl_prix" type="number" min="0" value="1000"></div>'+
+        '<div class="fg"><span class="fl">Pages gratuites</span><input class="fi" id="upl_free" type="number" min="0" max="999" value="2"></div>'+
+      '</div>'+
+    '</div>'+
     '<div class="fg mb12"><span class="fl">Fichier (max 50 Mo)</span><input type="file" class="fi" id="upl_file" accept=".pdf,.mp4,.webm,.ogg,.png,.jpg,.jpeg,.webp,.html,.xlsx"></div>'+
     '<div id="uplProgress" class="mt8"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'+
     '<button class="btn bi" onclick="cloudDoUpload()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Envoyer</button>'
   );
+}
+
+window._uplToggleDiff=function(){
+  var p=_ge('uplPay'); if(p) p.style.display=((_ge('upl_diff')||{}).value==='public')?'none':'';
+};
+/* Envoi PROTÉGÉ : le document devient une fiche vendable, ses pages sont
+   estampillées et déposées dans le store interdit d'accès direct, et seul le
+   paiement ouvre au-delà de l'aperçu. Réutilise exactement la chaîne de la
+   fiche livre (_protegerDocument) — un seul pipeline à maintenir. */
+async function _cloudUploadProtege(file,title,classe,matiere,desc){
+  var prix=Math.max(0,parseInt((_ge('upl_prix')||{}).value,10)||0);
+  var free=parseInt((_ge('upl_free')||{}).value,10); if(isNaN(free)||free<0) free=2;
+  var estDoc=(file.type==='application/pdf')||/\.pdf$/i.test(file.name)||/^image\//.test(file.type);
+  if(!estDoc){
+    // Une vidéo ne se rasterise pas, et content.php n'autorise que par ABONNEMENT :
+    // promettre ici un déblocage à l'unité serait mentir sur ce que fait le serveur.
+    _si('uplProgress','<div class="ib" style="background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;display:block;line-height:1.7">⚠️ <strong>'+_esc(file.name)+'</strong> n\'est ni un PDF ni une image.<br>'
+      +'L\'estampillage page par page ne s\'y applique pas, et le serveur ne sait ouvrir ce type de fichier que par <strong>abonnement</strong> (jamais à l\'unité).<br>'
+      +'<span class="xs2">Passez par E-learning → contenu → 📤, en choisissant « Protégé », puis rattachez-le à un plan.</span></div>');
+    return;
+  }
+  var id='doc'+gid();
+  var stamp=((DB.school&&DB.school.nom)||'VÉRITAS')+' · '+title+' · reproduction interdite';
+  _si('uplProgress','<div class="ib ibt"><span>⏳</span><span>Chargement du moteur de rendu…</span></div>');
+  var total=0;
+  try{
+    total=await _protegerDocument({file:file,secureId:id,stamp:stamp,onProgress:function(d,t){
+      var pct=t?Math.round(d/t*100):0;
+      _si('uplProgress','<div class="ib ibt" style="display:block;line-height:1.8">'
+        +'<div style="height:8px;background:var(--bg3);border-radius:99px;overflow:hidden;margin-bottom:8px">'
+          +'<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#142554,#FFC93C);transition:width .2s"></div></div>'
+        +'Page <strong>'+d+'</strong> / '+t+' estampillée et déposée</div>');
+    }});
+  }catch(e){
+    _si('uplProgress','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#991B1B;display:block">❌ '+_esc(e.message||'Échec')+'</div>');
+    toast('❌ '+e.message,'err'); return;
+  }
+  if(!DB.books) DB.books=[];
+  DB.books.unshift({
+    id:id, titre:title, cls:classe||'Toutes classes', matiere:matiere,
+    auteur:(DB.school&&DB.school.nom)||'Centre VÉRITAS',
+    prix:prix, prixDigital:prix, stock:0, vendu:0, pages:total,
+    ico:'🔒', coverColor:'#142554', desc:desc, chaps:[], content:{},
+    digital:true, secureId:id, securePages:total, freePages:free, dateAjout:today()
+  });
+  save();
+  try{ if(typeof _triggerAutoSync==='function') _triggerAutoSync(); }catch(e){}
+  _si('uplProgress','<div class="ib" style="background:#D1FAE5;border:1px solid #A7F3D0;color:#065F46;display:block;line-height:1.8">'
+    +'✅ <strong>'+total+' page(s) estampillée(s)</strong> dans <code>uploads/protected/books/'+_esc(id)+'/</code>'
+    +'<br>Aperçu gratuit : <strong>'+free+' page(s)</strong> · au-delà, paiement de '+fmt(prix)
+    +'<br><span class="xs2">Fiche créée dans la boutique. Aucune URL publique n\'existe pour ce document.</span></div>');
+  toast('✓ Document protégé et mis en vente');
+  if(typeof re==='function') re();
 }
 
 function cloudDoUpload(){
@@ -6610,8 +6675,15 @@ function cloudDoUpload(){
   var classe=(_ge('upl_classe')?.value||'').trim();
   var matiere=(_ge('upl_matiere')?.value||'').trim();
   var desc=(_ge('upl_desc')?.value||'').trim();
+  if((_ge('upl_diff')?.value||'protege')!=='public'){
+    _cloudUploadProtege(file,title,classe,matiere,desc);
+    return;
+  }
   var fd=new FormData();
   fd.append('file',file);
+  // upload.php lit « folder », jamais « category » : le champ envoyé jusqu'ici
+  // était ignoré et TOUT atterrissait dans uploads/veritas/misc/.
+  fd.append('folder',cat);
   fd.append('category',cat);
   fd.append('title',title);
   fd.append('classe',classe);
@@ -12956,6 +13028,62 @@ function mBookExport(bid){
     +'<button class="btn bi" id="bxGo" onclick="_bookExportRun(\''+bid+'\')">🚀 Convertir et exporter</button>',
     true);
 }
+/* Cœur de la protection d'un document, partagé par la fiche livre et par
+   l'envoi de fichier : rasterise (pdf.js), estampille, dépose page par page.
+   o = {file, secureId, stamp, width, quality, onProgress(faites,total)}
+   Renvoie le nombre de pages déposées ; lève en cas d'échec. */
+window._protegerDocument=async function(o){
+  var BAND=60, done=0, total=0;
+  var wT=Math.min(2000,Math.max(600,o.width||1240));
+  var q=Math.min(0.95,Math.max(0.5,o.quality||0.82));
+  var sid=String(o.secureId||'').replace(/[^a-zA-Z0-9_\-]/g,'');
+  if(!sid) throw new Error('Identifiant de dossier requis');
+  if(!o.file) throw new Error('Aucun fichier');
+  if(!(DB.cloudConfig&&DB.cloudConfig.secret)) throw new Error('Clé Cloud requise pour l\'envoi');
+  var stamp=String(o.stamp||'VÉRITAS').trim();
+  function avance(){ if(o.onProgress) o.onProgress(done,total); }
+  async function pousser(canvas,n,purge){
+    var blob=await new Promise(function(res){ canvas.toBlob(res,'image/jpeg',q); });
+    if(!blob) throw new Error('Encodage JPEG impossible');
+    await _bookExportUpload(sid,n,blob,purge);
+    done++; avance();
+  }
+  if(o.file.type==='application/pdf'||/\.pdf$/i.test(o.file.name)){
+    var L=await _bookPdfReady();
+    var doc=await L.getDocument({data:new Uint8Array(await o.file.arrayBuffer())}).promise;
+    total=doc.numPages; avance();
+    for(var n=1;n<=total;n++){
+      var page=await doc.getPage(n);
+      var vp1=page.getViewport({scale:1});
+      var vp=page.getViewport({scale:wT/vp1.width});
+      var cv=document.createElement('canvas');
+      cv.width=Math.round(vp.width); cv.height=Math.round(vp.height)+BAND;
+      var ctx=cv.getContext('2d');
+      ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,cv.width,cv.height);
+      await page.render({canvasContext:ctx,viewport:vp}).promise;
+      _bookStampPage(ctx,cv.width,cv.height-BAND,BAND,stamp,n,total);
+      // purge=1 à la première page : un réexport plus court laisserait sinon
+      // traîner les pages du document précédent, comptées comme sa fin.
+      await pousser(cv,n,n===1);
+      page.cleanup&&page.cleanup();
+    }
+  } else {
+    total=1; avance();
+    var img=await new Promise(function(res,rej){
+      var im=new Image(); im.onload=function(){res(im);}; im.onerror=function(){rej(new Error('Image illisible'));};
+      im.src=URL.createObjectURL(o.file);
+    });
+    var sc=wT/img.naturalWidth;
+    var cv2=document.createElement('canvas');
+    cv2.width=wT; cv2.height=Math.round(img.naturalHeight*sc)+BAND;
+    var c2=cv2.getContext('2d');
+    c2.fillStyle='#FFFFFF'; c2.fillRect(0,0,cv2.width,cv2.height);
+    c2.drawImage(img,0,0,wT,Math.round(img.naturalHeight*sc));
+    _bookStampPage(c2,cv2.width,cv2.height-BAND,BAND,stamp,1,1);
+    await pousser(cv2,1,true);
+  }
+  return total;
+};
 window._bookExportRun=async function(bid){
   var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
   var fl=(_ge('bxFile')||{}).files, file=fl&&fl[0];
@@ -12968,58 +13096,19 @@ window._bookExportRun=async function(bid){
   var free=parseInt((_ge('bxFree')||{}).value,10); if(isNaN(free)||free<0) free=2;
   var stamp=((((_ge('bxStamp')||{}).value)||'')+'').trim()||('VÉRITAS · '+(b.titre||''));
   var go=_ge('bxGo'); if(go){go.disabled=true;go.textContent='⏳ En cours…';}
-  var BAND=60, done=0, total=0, ko=0;
-  function bar(){
-    var pct=total?Math.round(done/total*100):0;
+  var done=0, total=0;
+  function bar(d,t){
+    done=d; total=t;
+    var pct=t?Math.round(d/t*100):0;
     _bookExportLog('<div class="ib ibt" style="display:block;line-height:1.8">'
       +'<div style="height:8px;background:var(--bg3);border-radius:99px;overflow:hidden;margin-bottom:8px">'
         +'<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#142554,#FFC93C);transition:width .2s"></div></div>'
-      +'Page <strong>'+done+'</strong> / '+total+' envoyée'+(ko?(' · <span style="color:#991B1B">'+ko+' en échec</span>'):'')+'</div>');
-  }
-  async function pousser(canvas,n,purge){
-    var blob=await new Promise(function(res){ canvas.toBlob(res,'image/jpeg',q); });
-    if(!blob) throw new Error('Encodage JPEG impossible');
-    await _bookExportUpload(sid,n,blob,purge);
-    done++; bar();
+      +'Page <strong>'+d+'</strong> / '+t+' envoyée</div>');
   }
   try{
-    if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
-      _bookExportLog('<div class="ib ibt"><span>⏳</span><span>Chargement du moteur de rendu…</span></div>');
-      var L=await _bookPdfReady();
-      var doc=await L.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
-      total=doc.numPages; bar();
-      for(var n=1;n<=total;n++){
-        var page=await doc.getPage(n);
-        var vp1=page.getViewport({scale:1});
-        var vp=page.getViewport({scale:wT/vp1.width});
-        var cv=document.createElement('canvas');
-        cv.width=Math.round(vp.width); cv.height=Math.round(vp.height)+BAND;
-        var ctx=cv.getContext('2d');
-        ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,cv.width,cv.height);
-        await page.render({canvasContext:ctx,viewport:vp}).promise;
-        _bookStampPage(ctx,cv.width,cv.height-BAND,BAND,stamp,n,total);
-        // purge=1 à la première page : un réexport plus court laisserait sinon
-        // traîner les pages du document précédent, comptées comme sa fin.
-        await pousser(cv,n,n===1);
-        page.cleanup&&page.cleanup();
-      }
-    } else {
-      total=1; bar();
-      var img=await new Promise(function(res,rej){
-        var im=new Image(); im.onload=function(){res(im);}; im.onerror=function(){rej(new Error('Image illisible'));};
-        im.src=URL.createObjectURL(file);
-      });
-      var sc=wT/img.naturalWidth;
-      var cv2=document.createElement('canvas');
-      cv2.width=wT; cv2.height=Math.round(img.naturalHeight*sc)+BAND;
-      var c2=cv2.getContext('2d');
-      c2.fillStyle='#FFFFFF'; c2.fillRect(0,0,cv2.width,cv2.height);
-      c2.drawImage(img,0,0,wT,Math.round(img.naturalHeight*sc));
-      _bookStampPage(c2,cv2.width,cv2.height-BAND,BAND,stamp,1,1);
-      await pousser(cv2,1,true);
-    }
+    _bookExportLog('<div class="ib ibt"><span>⏳</span><span>Chargement du moteur de rendu…</span></div>');
+    total=await _protegerDocument({file:file,secureId:sid,stamp:stamp,width:wT,quality:q,onProgress:bar});
   }catch(e){
-    ko++;
     if(go){go.disabled=false;go.textContent='🚀 Convertir et exporter';}
     _bookExportLog('<div class="ib" style="background:#FEE2E2;border:1px solid #FECACA;color:#991B1B;border-radius:var(--r);padding:9px 12px;font-size:12px;display:block">✗ '+_esc(e.message||'Échec')
       +'<br><span class="xs2">'+done+' page(s) déjà déposée(s) — relancer reprend depuis le début.</span></div>');
