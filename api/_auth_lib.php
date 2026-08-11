@@ -978,6 +978,21 @@ if (!defined('VRT_AUTH_LIB')) {
         if (!is_dir($bkDir)) @mkdir($bkDir, 0750, true);
         @file_put_contents($bkDir . '/veritas_db.' . date('Ymd_His') . '.' . bin2hex(random_bytes(3)) . '.pay.json', $cur);
 
+        /* ROTATION — rien n'effaçait ces sauvegardes.
+           Une copie complète de la base est écrite AVANT chaque octroi. La base
+           pèse plusieurs mégaoctets : à raison d'un fichier par paiement, et sans
+           personne pour faire le ménage, le dossier grossit jusqu'à saturer le
+           quota d'un hébergement mutualisé — et un disque plein met TOUT le site
+           en erreur 500, y compris les pages statiques qui n'ont rien à voir.
+           C'est un filet de sécurité, pas un archivage : les 40 dernières
+           suffisent largement à rattraper une écriture fautive, et l'export
+           manuel reste le vrai outil de conservation. */
+        $anciennes = glob($bkDir . '/veritas_db.*.pay.json') ?: [];
+        if (count($anciennes) > 40) {
+            sort($anciennes);                                   // horodatage en tête = ordre chronologique
+            foreach (array_slice($anciennes, 0, count($anciennes) - 40) as $vieux) @unlink($vieux);
+        }
+
         $res = vrt_grant_entitlement($db, $state);
 
         // ── Partage de revenus (auteurs / parrains) ──────────────────────────
