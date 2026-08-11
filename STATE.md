@@ -805,3 +805,28 @@ association) a été écartée pour cette raison, pas par manque de temps.
 - **PHP exécutable en local depuis le 11/08** : 8.2.33 portable (scratchpad, empreinte SHA-256
   vérifiée) + `php.ini` activant `mbstring` et `curl`. Sans `mbstring`, les libs `api/` plantent sur
   `mb_substr()`. Permet de LANCER le test au lieu d'attendre la CI.
+
+## Bumper une version par remplacement GLOBAL casse des choses (11/08)
+- `sed 's/1.17.0/1.17.1/g'` sur la coquille a modifié un **tracé SVG** : la chaîne de version se
+  retrouve telle quelle dans les paramètres d'un arc du symbole `lc-shield`. Le bouclier s'est
+  déformé, et rien ne le signalait — ni `node --check`, ni la CI, qui ne comparent que les versions
+  d'assets entre elles. Corrigé par la session parallèle (commit 731eeae).
+- **Règle** : cibler le motif qui porte la version, jamais le nombre nu.
+  `sed "s/?v=$V/?v=$NV/g"` pour la coquille, `sed "s/veritas-v$V/veritas-v$NV/"` pour `sw.js`.
+  Et **regarder le diff avant de committer** : un bump ne doit toucher que des lignes `?v=`.
+- Le contrôle CI existant (coquille vs `sw.js`) ne protège de rien ici : les deux versions restent
+  parfaitement alignées pendant que le SVG est cassé. Un garde-fou qui vérifie la cohérence de deux
+  valeurs ne dit rien sur ce que le remplacement a détruit ailleurs.
+
+## Le déploiement coûte ~7 minutes d'indisponibilité (11/08)
+- Constaté **trois fois** : après chaque `workflow_dispatch`, le site renvoie 500 sur TOUT — y
+  compris les pages statiques de 9 Ko, qui ne s'exécutent pas. Puis il revient seul (~400 s).
+- Ce n'est donc ni `app.js`, ni le PHP : c'est le serveur pendant l'écriture FTP (`app.js` fait
+  3,7 Mo, minifié juste avant l'envoi). Page d'erreur générique d'Hebergeur-Discount, sans détail.
+- **À vérifier chez l'hébergeur** : le quota disque d'abord (un disque plein donne exactement ce
+  symptôme). Piste d'accumulation trouvée et corrigée : `api/data/_backups/` recevait une copie
+  COMPLÈTE de la base avant chaque octroi de droit, et **rien ne l'effaçait** — rotation à 40
+  fichiers posée dans `vrt_grant_entitlement_to_file`.
+- Si le quota est sain, le correctif est un déploiement en deux temps (envoi sous nom temporaire
+  puis renommage atomique) dans `deploy.yml`. Tant que ce n'est pas fait : **éviter de déployer aux
+  heures de vente**, et grouper les correctifs non urgents en un seul lot.
