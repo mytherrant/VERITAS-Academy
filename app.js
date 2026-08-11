@@ -30916,6 +30916,23 @@ function _payAutoActivate(a){
         // Décrémenter le stock si livre identifié
         var bk = (DB.books||[]).find(function(b){return b.id===a.targetId;});
         if(bk && bk.stock>0){bk.stock--;bk.vendu=(bk.vendu||0)+1;}
+
+        // Le papier se retire à l'administration — mais la LECTURE s'ouvre tout
+        // de suite. Entre le débit et le retrait il pouvait s'écouler un
+        // week-end entier sans la moindre contrepartie : vu du client qui vient
+        // de sortir 5 000 FCFA, cela ressemble à une arnaque. La lecture
+        // sécurisée existe déjà (secure_pdf.php : images page par page,
+        // filigranées, jamais le PDF), il suffisait d'ouvrir le droit.
+        // Miroir exact de vrt_ouvrir_lecture_immediate() côté serveur.
+        var _lisible = bk && (bk.secureId || bk.securePages || bk.digital);
+        var _accB = a.accountId ? ((DB.visitorAccounts||[]).find(function(x){return x.id===a.accountId;})
+                               || (DB.studentAccounts||[]).find(function(x){return x.id===a.accountId;})) : null;
+        if(_lisible && _accB){
+          if(!_accB.unlockedBooks) _accB.unlockedBooks=[];
+          if(_accB.unlockedBooks.indexOf(a.targetId)<0) _accB.unlockedBooks.push(a.targetId);
+          return {msg:'Commande activée + lecture numérique ouverte',
+                  userMsg:'Paiement confirmé. <strong>Vous pouvez lire votre manuel en ligne dès maintenant</strong> — l\'exemplaire papier est à retirer à l\'administration avec votre référence.'};
+        }
         return {msg:'Commande activée', userMsg:'Votre commande est confirmée. Nous vous contacterons pour la livraison.'};
       }
 

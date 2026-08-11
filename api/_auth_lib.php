@@ -456,6 +456,49 @@ if (!defined('VRT_AUTH_LIB')) {
     }
 
     /**
+     * MANUEL PAPIER PAYÉ ⇒ LECTURE NUMÉRIQUE OUVERTE TOUT DE SUITE.
+     *
+     * Payer un livre puis attendre de passer à l'administration pour le retirer,
+     * c'est un trou de plusieurs heures — parfois un week-end — entre le débit et
+     * la moindre contrepartie. Vu du client qui vient de sortir 5 000 FCFA sur son
+     * téléphone, ça ressemble à une arnaque, et c'est là qu'il demande son
+     * remboursement.
+     *
+     * Le livre acheté existe déjà en lecture sécurisée (api/secure_pdf.php sert
+     * des IMAGES page par page, filigranées, sans jamais livrer le PDF). Il suffit
+     * d'inscrire le livre dans acc.unlockedBooks : la lecture s'ouvre à la seconde
+     * où le paiement est confirmé, l'exemplaire papier se retire ensuite.
+     * Rien n'est téléchargeable pour autant — le droit ouvert est celui de LIRE.
+     *
+     * Silencieux et sans effet si le livre n'a pas de version préparée
+     * (`secureId` / `securePages` / `digital`) ou si l'acheteur n'a pas de compte.
+     */
+    function vrt_ouvrir_lecture_immediate(array &$db, string $bookId, string $accountId): string {
+        if ($bookId === '' || $accountId === '') return '';
+        $livre = null;
+        foreach (($db['books'] ?? []) as $b) {
+            if (is_array($b) && (string) ($b['id'] ?? '') === $bookId) { $livre = $b; break; }
+        }
+        if (!$livre) return '';
+        $lisible = !empty($livre['secureId']) || !empty($livre['securePages']) || !empty($livre['digital']);
+        if (!$lisible) return '';
+
+        foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+            if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
+            foreach ($db[$coll] as &$acc) {
+                if (!is_array($acc) || (string) ($acc['id'] ?? '') !== $accountId) continue;
+                if (!isset($acc['unlockedBooks']) || !is_array($acc['unlockedBooks'])) $acc['unlockedBooks'] = [];
+                if (in_array($bookId, $acc['unlockedBooks'], true)) { unset($acc); return ''; }
+                $acc['unlockedBooks'][] = $bookId;
+                unset($acc);
+                return ' — lecture numérique ouverte immédiatement';
+            }
+            unset($acc);
+        }
+        return '';
+    }
+
+    /**
      * Applique au $db (mutation en place) l'entitlement d'un paiement confirmé.
      * IDEMPOTENT par référence ($state['ref']) → rejouable sans double-octroi.
      * Renvoie ['changed'=>bool, 'msg'=>string]. Ne LÈVE jamais.
@@ -540,7 +583,8 @@ if (!defined('VRT_AUTH_LIB')) {
                     if (($o['statut'] ?? '') === 'Payé') { unset($o); return ['changed' => false, 'msg' => 'commande déjà payée']; }
                     $o['statut'] = 'Payé'; $o['datePaiement'] = date('c'); unset($o);
                     vrt_dec_stock($db, $targetId);
-                    return ['changed' => true, 'msg' => 'Commande livre confirmée'];
+                    $lect = vrt_ouvrir_lecture_immediate($db, $targetId, $accountId);
+                    return ['changed' => true, 'msg' => 'Commande livre confirmée' . $lect];
                 }
             }
             unset($o);
@@ -550,7 +594,8 @@ if (!defined('VRT_AUTH_LIB')) {
                 'date' => date('d/m/Y'), 'statut' => 'Payé', 'prix' => $montant, 'datePaiement' => date('c'), 'via' => 'webhook_serveur',
             ];
             vrt_dec_stock($db, $targetId);
-            return ['changed' => true, 'msg' => 'Commande livre créée et confirmée'];
+            $lect = vrt_ouvrir_lecture_immediate($db, $targetId, $accountId);
+            return ['changed' => true, 'msg' => 'Commande livre créée et confirmée' . $lect];
         }
 
         // v1.7 : LIVRE NUMÉRIQUE — débloque la lecture sécurisée sur le compte

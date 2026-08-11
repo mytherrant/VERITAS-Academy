@@ -72,7 +72,7 @@ function tiroir(array $db, string $tiroir, string $id = 'acc_test'): array {
 function baseDeTest(): array {
     return [
         'books' => [
-            ['id' => 'bk1', 'titre' => 'Manuel 3e', 'prix' => 5000, 'prixDigital' => 2500, 'stock' => 10, 'vendu' => 0],
+            ['id' => 'bk1', 'titre' => 'Manuel 3e', 'secureId' => 'bk1', 'securePages' => 280, 'prix' => 5000, 'prixDigital' => 2500, 'stock' => 10, 'vendu' => 0],
         ],
         'elearning' => [
             'plans'    => [['id' => 'pl1', 'nom' => 'Premium annuel', 'prix' => 25000, 'duree' => 'année scolaire']],
@@ -138,10 +138,15 @@ $surfaces = [
             && in_array('pl1', $acc['plans'] ?? [], true);
     }, 'attendu' => 'abonnement activé + plan sur le compte'],
 
+    // Le manuel PAPIER ouvre aussi la lecture en ligne, à la seconde. Sans elle,
+    // le client paie et n'a rien jusqu'à son passage à l'administration — un
+    // week-end de silence après un débit, c'est ce qui déclenche les demandes de
+    // remboursement.
     'book' => ['cible' => 'bk1', 'prix' => 5000, 'preuve' => function ($db) {
         $o = $db['visitorOrders'][0] ?? null;
-        return $o && ($o['statut'] ?? '') === 'Payé' && ($db['books'][0]['stock'] ?? 0) === 9;
-    }, 'attendu' => 'commande payée + stock décrémenté'],
+        return $o && ($o['statut'] ?? '') === 'Payé' && ($db['books'][0]['stock'] ?? 0) === 9
+            && in_array('bk1', tiroir($db, 'unlockedBooks'), true);
+    }, 'attendu' => 'commande payée + stock décrémenté + lecture ouverte'],
 
     'digitalbook' => ['cible' => 'bk1', 'prix' => 2500, 'preuve' => function ($db) {
         return in_array('bk1', tiroir($db, 'unlockedBooks'), true);
