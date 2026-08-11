@@ -4562,6 +4562,11 @@ function vShowSec(sec,btn){
   if(sec==='nos-partenaires' && typeof pgInstitutionalShowcase==='function'){
     c.innerHTML = pgInstitutionalShowcase(); return;
   }
+  // v1.17 — TARIFS. Il n'existait aucune page de prix : le seul montant visible
+  // de tout le site était « 3 000 FCFA » perdu dans le widget Émulation.
+  if(sec==='tarifs' && typeof pgTarifs==='function'){
+    c.innerHTML = pgTarifs(); return;
+  }
   if(sec==="presentation"){
     const pi=DB.publicInfo||{};
     var _iv=(DB&&DB.introVideo)||{};
@@ -4572,9 +4577,36 @@ function vShowSec(sec,btn){
     c.innerHTML=`<div class="vsec acc-wrap">
     <!-- ═══ ACCUEIL PREMIUM v1.2.4 — bandeau + vidéo + widget actualités léger ═══ -->
     <div class="acc-head vfx-orbs">
-      <h1 class="acc-pill vfx-shine"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-graduation"/></svg></span> ${_esc(DB.school?.nom||"Centre VÉRITAS Academy")}</h1>
+      <h1 class="acc-pill vfx-shine"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-graduation"/></svg></span> ${_esc(_nomMarque(DB.school?.nom)||"Centre VÉRITAS Academy")}</h1>
       <div class="acc-sub">${_esc(pi.slogan||DB.school?.slogan||"L'excellence scolaire de la 6ᵉ à la Terminale — préparation BEPC · Probatoire · BAC · GCE")}</div>
     </div>
+
+    <!-- ═══ PROMESSE + CHOIX DU RÔLE (v1.17) ═══════════════════════════════
+         Avant : le premier écran mobile ne contenait que le nom du centre et
+         un fil d'actualités. Ni promesse, ni bouton, ni porte d'entrée — et
+         « Se connecter » n'apparaissait qu'au 5,6ᵉ écran. Un enseignant ou un
+         parent ne trouvait tout simplement pas sa place.
+         Ici : ce que fait VÉRITAS, pour qui, et les quatre portes en clair. -->
+    <div class="acc-promesse v-reveal">
+      <p class="acc-promesse-tx">Cours, corrigés et épreuves conformes au programme <b>MINESEC</b>, de la 6ᵉ à la Terminale — et un tuteur IA qui explique, corrige et interroge. <b>L'essentiel est gratuit et sans compte.</b></p>
+      <div class="acc-portes" role="group" aria-label="Choisissez votre profil">
+        ${[['eleve','graduation','Je suis élève','Réviser, m\'entraîner, comprendre'],
+           ['parent','users','Je suis parent','Suivre mon enfant, payer en MoMo'],
+           ['enseignant','presentation','Je suis enseignant','Ressources prêtes, réseau, manuels'],
+           ['etablissement','building','Je dirige un établissement','Confier la gestion à Campus']]
+          .map(([r,ic,t,d])=>`<button class="acc-porte" onclick="_portailAller('${r}')" aria-label="${_esc(t)} — ${_esc(d)}">
+            <span class="acc-porte-ic">${_ico(ic,20)}</span>
+            <span class="acc-porte-tx"><b>${_esc(t)}</b><small>${_esc(d)}</small></span>
+            <span class="acc-porte-fl" aria-hidden="true">→</span>
+          </button>`).join('')}
+      </div>
+      <div class="acc-promesse-sec">
+        <button class="acc-lien-sec" onclick="_portailAller('eleve')">J'ai déjà un compte — me connecter</button>
+        <span class="acc-sep" aria-hidden="true">·</span>
+        <button class="acc-lien-sec" onclick="vShowSec('tarifs',null)">Voir les abonnements</button>
+      </div>
+    </div>
+
     <div class="acc-hero">
       <div class="acc-hero-video" id="vHeroVideoOuter">${_heroVideoHtml}</div>
       <div class="acc-news">
@@ -4588,6 +4620,12 @@ function vShowSec(sec,btn){
       </div>
     </div>
 
+    <!-- ═══ RÉSULTATS OFFICIELS (remontés v1.17) ═══════════════════════════
+         Ils étaient injectés en fin de page par injectGenZBlock() — donc au
+         8,7ᵉ écran sur mobile. C'est la preuve n°1 que cherche un parent :
+         elle vient maintenant juste après le héros. ═══ -->
+    ${(typeof _reussitesScroller==='function'?_reussitesScroller():'')}
+
     <!-- ═══ L'ESSENTIEL POUR RÉVISER (v1.14.2) — les outils de l'apprenant, juste
          sous la vidéo. Ils n'étaient joignables que par les menus déroulants. ═══ -->
     ${typeof _accEssentiel==='function'?_accEssentiel():''}
@@ -4596,6 +4634,13 @@ function vShowSec(sec,btn){
          étude en groupe, forum, parrainage, classement, cagnotte, partenariat
          n'étaient visibles que dans les menus Pratiquer/Communauté. ═══ -->
     ${typeof _accCommunaute==='function'?_accCommunaute():''}
+
+    <!-- ═══ CE QUE DÉBLOQUE L'ABONNEMENT (v1.17) ═══════════════════════════
+         L'accueil affichait 13 badges « GRATUIT » et un seul prix, noyé dans
+         le widget Émulation. Le visiteur n'avait aucun moyen de savoir ce
+         qu'il gagnerait à payer — donc aucune raison de le faire.
+         Les plans viennent de DB.elearning.plans (données réelles, admin). -->
+    ${typeof _accOffre==='function'?_accOffre():''}
 
     <!-- ═══ PALMARÈS / ÉMULATION — restauré v1.2.4 : la vidéo ET le panneau d'émulation coexistent désormais ═══ -->
     <div class="acc-head">
@@ -4669,7 +4714,7 @@ function vShowSec(sec,btn){
 
     <div class="acc-head v-reveal">
       <h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-building"/></svg></span> Présentation du Centre</h2>
-      <div class="acc-sub">Bienvenue au ${_esc(DB.school?.nom||"VÉRITAS Academy")}</div>
+      <div class="acc-sub">Bienvenue à ${_esc(_nomMarque(DB.school?.nom)||"VÉRITAS Academy")}</div>
     </div>
     <div class="g2 v-reveal v-stagger">
       <div class="vcard v-shine">
@@ -4678,7 +4723,14 @@ function vShowSec(sec,btn){
       <div>
         <div class="vcard">
           <div class="ct"><span class="ct-ico">${_ico('mappin',17)}</span>Informations pratiques</div>
-          ${[['clock','Horaires',pi.horaires||'—'],['phone','Téléphone',_fmtTel(pi.contact||DB.school?.tel)||'—'],['mail','Email',pi.email||DB.school?.email||'—'],['mappin','Adresse',pi.adresse||DB.school?.ville||'—'],['package','Boîte Postale',pi.bp||DB.school?.bp||'—']].map(([ic,l,v])=>`<div class="vinfo-row"><span class="vinfo-ic">${_ico(ic,15)}</span><span class="vinfo-l">${_esc(l)}</span><span class="vinfo-v">${_esc(v)}</span></div>`).join("")}
+          ${[['clock','Horaires',pi.horaires],
+             ['phone','Téléphone',_telPublic(pi)],
+             ['whatsapp','WhatsApp',_telPropre(pi.whatsapp)],
+             ['mail','Email',_emailPublic(pi)],
+             ['mappin','Adresse',pi.adresse||DB.school?.ville],
+             ['package','Boîte Postale',pi.bp||DB.school?.bp]]
+            .filter(([ic,l,v])=>v&&String(v).trim())
+            .map(([ic,l,v])=>`<div class="vinfo-row"><span class="vinfo-ic">${_ico(ic==='whatsapp'?'message':ic,15)}</span><span class="vinfo-l">${_esc(l)}</span><span class="vinfo-v">${_esc(v)}</span></div>`).join("")}
         </div>
       </div>
     </div><!-- v1.2.2 : panneau « En chiffres » retiré (doublon des stats hero/section dédiée) -->
@@ -14773,6 +14825,13 @@ window._reussitesScroller = function(){
   var cards=list.map(card).join('');
   var head='<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Session 2025-2026 · BEPC · Probatoire · BAC</div></div>';
   var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:8px"><button class="btn bo sm" onclick="mEditStatsVitrine()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les résultats</button></div>':'';
+  // v1.17 — jusqu'à 4 examens : grille STATIQUE. Le défilement emportait le
+  // chiffre que le parent est précisément en train de lire, et sur grand écran
+  // la boucle affichait la même carte deux fois côte à côte. La boucle ne
+  // reprend son intérêt qu'au-delà de 4 cartes.
+  if(list.length <= 4){
+    return head+'<div class="rsc-fixe" role="group" aria-label="Résultats officiels du Centre VÉRITAS">'+cards+'</div>'+editBtn;
+  }
   // 2 copies de la liste → boucle continue (translateX -50%)
   return head+'<div class="rsc" tabindex="0" aria-label="Résultats officiels du Centre VÉRITAS"><div class="rsc-track">'+cards+cards+'</div></div>'+editBtn;
 };
@@ -29309,8 +29368,8 @@ function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom, _
         window._VRT_CAMPAY = null;
         if(_win){ try{ _win.close(); }catch(e){} }
         toast('⏳ Actualisation de la configuration de paiement...','info');
-        // `true` en dernier argument : le second essai ignore le secret admin
-        // et n'emploie que le jeton public — le seul que cet endpoint attend.
+        // `true` en dernier argument = « ceci EST déjà la reprise » : si le 401
+        // persiste, on affiche l'erreur au lieu de boucler indéfiniment.
         var _reprise = function(){
           _payInitCampay(ref, montant, label, intent, targetId, accountId, nom, true);
         };
@@ -34185,9 +34244,25 @@ window._pdjCleanExtract = function(txt, maxLen){
   txt = String(txt||'').replace(/^[﻿«»"'\s]+|[«»"'\s]+$/g,'').replace(/\s+/g,' ').trim();
   if(!txt) return '';
   if(!/^[A-ZÀ-ÖØ-Þ«—0-9]/.test(txt)){
+    // Le passage commence en cours de phrase : on essaie de le recadrer sur la
+    // phrase suivante pour une entrée en lecture plus nette.
+    var origine = txt;
     var m = txt.match(/[.!?…][»"')\s]*\s([A-ZÀ-ÖØ-Þ«—])/);
     if(m){ txt = txt.slice(txt.indexOf(m[0]) + m[0].length - 1).trim(); }
     else { var cm = txt.search(/[A-ZÀ-ÖØ-Þ«—]/); if(cm>0) txt = txt.slice(cm).trim(); }
+    /* GARDE-FOU (v1.17) — ce recadrage détruisait le passage.
+       Cas réel vu en production : « il fait si froid dans le soleil… Henrike. »
+       (Henri N'Koumo, 80 mots) n'a AUCUN point interne ; le repli « première
+       majuscule » tombait donc sur le H de « Henrike », dernier mot du texte,
+       et l'accueil affichait « Henrike. » — un mot — sous le titre « Passage
+       du jour », avec cinq boutons de partage à côté.
+       Le plancher de 70 mots ne protégeait que les extraits venus de rag.php,
+       pas ceux de PASSAGES_PROGRAMME. Désormais : si le recadrage ampute le
+       passage, on garde l'original et on marque l'entrée en cours de phrase
+       par « […] » — le texte de l'auteur reste mot pour mot. */
+    if(_pdjWords(txt) < 70 || txt.length < origine.length * 0.6){
+      txt = '[…] ' + origine;
+    }
   }
   maxLen = maxLen || 340;
   if(txt.length > maxLen){
@@ -34199,6 +34274,29 @@ window._pdjCleanExtract = function(txt, maxLen){
 };
 // Compte les mots (frontière = espaces) — sert au plancher de 70 mots.
 window._pdjWords = function(txt){ return String(txt||'').trim().split(/\s+/).filter(Boolean).length; };
+
+/* ════════ MISE EN PAGE DU PASSAGE — dialogues (v1.17) ════════
+   Un extrait de théâtre ou de roman arrivait en un seul pavé : les répliques
+   s'enchaînaient au fil du texte, illisibles. En typographie française, chaque
+   réplique ouvre une ligne. On distingue deux tirets :
+     • tiret de DIALOGUE — il suit une fin de phrase (. ! ? … :) ou un
+       guillemet fermant, ou ouvre le passage      → saut de ligne
+     • tiret d'INCISE    — encadré par des mots
+       (« mon frère — celui de Douala — est venu ») → on n'y touche pas
+   Entrée : texte DÉJÀ échappé par _esc(). Sortie : HTML avec des <br>. */
+window._pdjFormatDialogue = function(html){
+  var s = String(html||'');
+  s = s.replace(/\r?\n+/g, '<br>');                          // sauts déjà présents
+  s = s.replace(/([.!?…:»])\s+([—–])\s*/g, '$1<br>$2 '); // réplique après fin de phrase
+  s = s.replace(/^\s*([—–])\s*/, '$1 ');                 // réplique en tête de passage
+  s = s.replace(/([.!?…])\s+(«)\s*/g, '$1<br>$2 ');      // réplique ouverte par «
+  return s;
+};
+
+// Passage prêt à l'affichage : échappé, guillemets français, dialogues aérés.
+window._pdjTexteHtml = function(txt){
+  return '« ' + _pdjFormatDialogue(_esc(String(txt||''))) + ' »';
+};
 
 // ════════════════════════════════════════════════════════════════════
 // 📖 LISTE « À TIRER PAR JOUR » — œuvres au programme (AJOUT SIMPLE)
@@ -34441,7 +34539,7 @@ window._pdjLoad = function(){
           var newTitle=_pdjCleanTitle(pp.titre||'');
           window._pdjCurrent={passage:txt,titre:newTitle,auteur:au,classe:''};
           try{ localStorage.setItem('_pdjYesterday', newTitle); }catch(e){}
-          var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML='« '+_esc(txt)+' »';
+          var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML=_pdjTexteHtml(txt);
           var rb=document.getElementById('vPdjRef'); if(rb) rb.innerHTML='— '+_esc(newTitle)+(au?' · '+_esc(au):'');
         }
       }
@@ -34484,7 +34582,7 @@ window._passageDuJourHtml = function(){
     if(window._pdjLoaded){
       var pc=window._pdjCurrent;
       if(pc){
-        var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML='« '+_esc(pc.passage)+' »';
+        var pb=document.getElementById('vPdjPassage'); if(pb) pb.innerHTML=_pdjTexteHtml(pc.passage);
         var rb=document.getElementById('vPdjRef'); if(rb) rb.innerHTML='— '+_esc(pc.titre||'')+(pc.auteur?' · '+_esc(pc.auteur):'');
       }
       if(window._pdjLoadExpl) _pdjLoadExpl();
@@ -34508,7 +34606,7 @@ window._passageDuJourHtml = function(){
     +'<div style="position:absolute;inset:0 0 auto 0;height:4px;background:linear-gradient(90deg,#142554,#1E3A8A 45%,#FFC93C)"></div>'
     +'<div style="position:absolute;top:4px;right:18px;font-family:Georgia,serif;font-size:90px;line-height:1;color:rgba(200,150,26,.16);font-weight:900;pointer-events:none">“</div>'
     +'<div style="font-size:10px;text-transform:uppercase;letter-spacing:1.6px;color:#9A7B1C;font-weight:800;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px;justify-content:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"/></svg> Passage du jour · une œuvre au programme</div>'
-    +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:18px;line-height:1.65;font-style:italic;color:#142554;margin:0 auto 10px;max-width:660px">« '+_esc(p.passage)+' »</div>'
+    +'<div id="vPdjPassage" style="font-family:Crimson Pro,Libre Baskerville,serif;font-size:18px;line-height:1.65;font-style:italic;color:#142554;margin:0 auto 10px;max-width:660px">'+_pdjTexteHtml(p.passage)+'</div>'
     +'<div id="vPdjRef" style="font-size:12px;color:#9A7B1C;font-weight:700;margin-bottom:14px">— '+ref+'</div>'
     +'<div id="vPdjExpl" style="font-size:13px;line-height:1.65;color:#473F2A;background:#fff;border:1px solid #EADFBF;border-radius:12px;padding:13px 16px;margin:0 auto 16px;max-width:660px;text-align:left;box-shadow:0 2px 10px rgba(20,37,84,.05)">'+explInit+'</div>'
     +'<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center">'
@@ -42900,6 +42998,199 @@ var _ACC_ESSENTIEL = [
   // Artificielle » plus bas, et désormais l'avatar flottant présent sur toutes
   // les pages). Le bandeau reste — c'est l'entrée de l'entonnoir d'abonnement.
 ];
+
+/* ════════ IDENTITÉ & COORDONNÉES PUBLIQUES — garde-fous (v1.17) ════════
+   La vitrine lit les coordonnées servies par api/public_data.php, c'est-à-dire
+   la COPIE SERVEUR de la base. Le nettoyage de placeholders fait au chargement
+   (_migrateDB) ne s'applique qu'au navigateur : il ne protégeait donc pas la
+   page publique. Résultat constaté en production : « +237 6 00 00 00 00 » et
+   une adresse Gmail personnelle préfixée « www. » s'affichaient au visiteur —
+   de quoi perdre un parent en une seconde.
+   Ces trois fonctions filtrent à l'affichage. Une valeur douteuse n'est pas
+   remplacée par une invention : la ligne disparaît, et on montre ce qui est
+   vrai (le WhatsApp du centre). */
+
+// Le nom peut arriver sans accents depuis la base (« VERITAS Academy »).
+// La marque s'écrit VÉRITAS : on rétablit l'accent à l'affichage.
+function _nomMarque(n){
+  var s = String(n||'').trim();
+  if(!s) return '';
+  return s.replace(/\bVERITAS\b/g,'VÉRITAS');
+}
+window._nomMarque = _nomMarque;
+
+// Un numéro est « factice » s'il ne contient pas assez de chiffres distincts
+// (00 00 00 00, 6XX XX XX XX, 123456789…).
+// ATTENTION : le test doit porter sur le numéro NATIONAL, pas sur la chaîne
+// complète. Première version de ce garde-fou : « +237 6 00 00 00 00 » donnait
+// les chiffres {2,3,7,6,0} — cinq valeurs distinctes grâce au seul indicatif —
+// et le placeholder passait pour un vrai numéro. On retire donc l'indicatif
+// avant de compter.
+function _telFactice(t){
+  var brut = String(t||'');
+  if(/X/i.test(brut)) return true;                     // « 6XX XX XX XX »
+  var d = brut.replace(/[^0-9]/g,'');
+  if(d.length < 8) return true;
+  var nat = d;
+  if(nat.length > 9 && nat.indexOf('237') === 0) nat = nat.slice(3);
+  nat = nat.slice(-9);                                  // 9 derniers = abonné
+  if(/^(\d)\1+$/.test(nat)) return true;                // 000000000, 111111111
+  if(nat === '123456789') return true;
+  var uniques = {}; for(var i=0;i<nat.length;i++) uniques[nat.charAt(i)]=1;
+  return Object.keys(uniques).length <= 2;              // « 600000000 » → {6,0}
+}
+function _telPropre(t){
+  if(!t || _telFactice(t)) return '';
+  return _fmtTel(t) || '';
+}
+window._telPropre = _telPropre;
+
+// Téléphone affiché : publicInfo.contact s'il est réel, sinon school.tel,
+// sinon le WhatsApp. Aucun repli inventé.
+function _telPublic(pi){
+  pi = pi || {};
+  return _telPropre(pi.contact)
+      || _telPropre((typeof DB!=='undefined'&&DB.school)?DB.school.tel:'')
+      || _telPropre(pi.whatsapp);
+}
+window._telPublic = _telPublic;
+
+// E-mail affiché : doit ressembler à une adresse. On corrige le « www. » collé
+// devant (saisie fréquente), et on refuse ce qui n'est pas une adresse valide.
+/* E-mail affiché. Deux filtres :
+   1. le « www. » collé devant (saisie fréquente) rendait l'adresse inutilisable
+      — on le retire, et on refuse ce qui n'est pas une adresse valide ;
+   2. une adresse en boîte gratuite (gmail, yahoo…) n'est PAS affichée sur la
+      vitrine d'un établissement : la production montrait une adresse Gmail
+      personnelle, sans rapport avec la marque, à l'endroit exact où un parent
+      décide s'il peut faire confiance. Le WhatsApp du centre prend le relais.
+   Pour faire réapparaître la ligne : saisir en admin une adresse au domaine du
+   centre (ex. …@veritas-school.com). Aucune adresse n'est inventée ici. */
+var _MAIL_GRATUIT = /@(gmail|googlemail|yahoo|ymail|hotmail|outlook|live|msn|aol|icloud|gmx|mail\.ru|yandex)\./i;
+function _emailPublic(pi){
+  pi = pi || {};
+  var e = String(pi.email || ((typeof DB!=='undefined'&&DB.school)?DB.school.email:'') || '').trim();
+  e = e.replace(/^(www\.)+/i,'');            // « www.qqn@gmail.com » → « qqn@gmail.com »
+  if(!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(e)) return '';
+  if(_MAIL_GRATUIT.test(e)) return '';
+  return e;
+}
+window._emailPublic = _emailPublic;
+
+/* ════════ TÉMOIGNAGES RÉELS (v1.17) ════════
+   Remplace les 6 témoignages inventés qui étaient codés en dur dans le shell.
+   Source : DB.temoignages — [{texte, nom, role, note}] saisis en admin avec
+   l'accord de la personne. Sous 3 témoignages, on n'affiche RIEN : trois avis
+   valent mieux qu'un mur de faux, et un seul avis signale un site désert.
+   (Même seuil que _palmaresHtml.) */
+function _temoignagesReelsHtml(){
+  var t = (typeof DB!=='undefined' && Array.isArray(DB.temoignages)) ? DB.temoignages : [];
+  t = t.filter(function(x){ return x && String(x.texte||'').trim() && String(x.nom||'').trim(); });
+  if(t.length < 3) return '';
+  var cartes = t.slice(0,6).map(function(x){
+    var note = Math.max(1, Math.min(5, parseInt(x.note,10) || 5));
+    var ini  = String(x.nom).trim().charAt(0).toUpperCase();
+    return '<div class="vgz-testi">'
+      +'<div class="vgz-testi-stars" aria-label="'+note+' sur 5">'+new Array(note+1).join('★')+'</div>'
+      +'<div class="vgz-testi-text">'+_esc(x.texte)+'</div>'
+      +'<div class="vgz-testi-author"><div class="vgz-testi-avatar">'+_esc(ini)+'</div>'
+      +'<div><div class="vgz-testi-info-name">'+_esc(x.nom)+'</div>'
+      +(x.role?'<div class="vgz-testi-info-meta">'+_esc(x.role)+'</div>':'')+'</div></div>'
+    +'</div>';
+  }).join('');
+  return '<div class="acc-head" style="margin-top:32px"><h2 class="acc-pill"><span class="ic">'
+    +'<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-users"/></svg></span>'
+    +' Ils nous font confiance</h2><div class="acc-sub">Ce que disent les familles et les enseignants du centre</div></div>'
+    +'<div class="vgz-testis v-reveal">'+cartes+'</div>';
+}
+window._temoignagesReelsHtml = _temoignagesReelsHtml;
+
+/* ════════ CE QUE DÉBLOQUE L'ABONNEMENT (v1.17) ════════
+   L'accueil affiche 13 badges « GRATUIT ». C'est honnête, mais rien ne disait
+   ce qu'apporte le paiement : aucun visiteur ne pouvait décider de s'abonner.
+   Les plans viennent de DB.elearning.plans (réels, éditables en admin) — dont
+   un plan ENSEIGNANT, qui donne enfin à ce public une raison de rester. */
+function _accOffre(){
+  var plans = ((typeof DB!=='undefined' && DB.elearning && DB.elearning.plans) || [])
+    .filter(function(p){ return p && p.actif !== false && Number(p.prix) > 0; });
+  if(!plans.length) return '';
+  plans = plans.slice().sort(function(a,b){ return Number(a.prix) - Number(b.prix); }).slice(0,4);
+
+  var cartes = plans.map(function(p){
+    var av = p.avantages || p.features || [];
+    if(!Array.isArray(av)) av = String(av).split('\n');
+    av = av.map(function(s){ return String(s).replace(/^[✅✔️•\-\s]+/,'').trim(); })
+           .filter(function(s){ return s && s.indexOf('🔒') !== 0; })
+           .slice(0,4);
+    var pour = /ENSEIGNANT/i.test(p.nom||'') ? 'Enseignants'
+             : /FAMILLE|ÉCOLE|ECOLE/i.test(p.nom||'') ? 'Familles & écoles'
+             : /EXAMEN/i.test(p.nom||'') ? 'Classes d\'examen' : 'Élèves';
+    return '<div class="acc-plan" role="link" tabindex="0" onclick="vShowSec(\'elearning\',null)">'
+      +'<div class="acc-plan-pour">'+_esc(pour)+'</div>'
+      +'<div class="acc-plan-nom">'+_esc(p.nom||'Abonnement')+'</div>'
+      +'<div class="acc-plan-prix">'+fmt(Number(p.prix))+'<small> / '+_esc(p.duree||'an')+'</small></div>'
+      +'<ul class="acc-plan-av">'+av.map(function(s){
+          return '<li>'+_ico('check',14)+'<span>'+_esc(s)+'</span></li>'; }).join('')+'</ul>'
+      +'<div class="acc-plan-cta">Voir ce plan →</div>'
+    +'</div>';
+  }).join('');
+
+  return '<div class="acc-head"><h2 class="acc-pill gold"><span class="ic">'
+    +'<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-sparkles"/></svg></span>'
+    +' Ce que débloque l\'abonnement</h2>'
+    +'<div class="acc-sub">Les corrigés, les jeux, les labos et le Professeur Ambassa restent gratuits. '
+    +'L\'abonnement ouvre les cours en PDF et vidéo, les épreuves corrigées et le suivi WhatsApp.</div></div>'
+    +'<div class="acc-plans v-reveal">'+cartes+'</div>'
+    +'<div class="acc-plans-note">Paiement Mobile Money (MTN / Orange) · Sans engagement · '
+    +'<button class="acc-lien-sec" onclick="vShowSec(\'tarifs\',null)">Comparer tous les plans →</button></div>';
+}
+window._accOffre = _accOffre;
+
+/* ════════ PAGE TARIFS (v1.17) ════════
+   Ce qui reste gratuit, ce que l'abonnement ajoute, et tous les plans réels. */
+function pgTarifs(){
+  var plans = ((typeof DB!=='undefined' && DB.elearning && DB.elearning.plans) || [])
+    .filter(function(p){ return p && p.actif !== false && Number(p.prix) > 0; })
+    .slice().sort(function(a,b){ return Number(a.prix) - Number(b.prix); });
+
+  var gratuit = ['Corrigés des cahiers, 6ᵉ à Terminale','Professeur Ambassa (quiz, explications, fiches)',
+                 'Jeux éducatifs, œuvres et cartes mentales','Laboratoires virtuels',
+                 'Outils de calcul (moyenne, note à viser)','Calendrier scolaire et orientation']
+    .map(function(s){ return '<li>'+_ico('check',14)+'<span>'+_esc(s)+'</span></li>'; }).join('');
+
+  var cartes = plans.map(function(p){
+    var av = p.avantages || p.features || [];
+    if(!Array.isArray(av)) av = String(av).split('\n');
+    av = av.map(function(s){ return String(s).trim(); }).filter(Boolean);
+    return '<div class="acc-plan">'
+      +'<div class="acc-plan-nom">'+_esc(p.nom||'Abonnement')+'</div>'
+      +'<div class="acc-plan-prix">'+fmt(Number(p.prix))+'<small> / '+_esc(p.duree||'an')+'</small></div>'
+      +'<ul class="acc-plan-av">'+av.map(function(s){
+          var bloque = s.indexOf('🔒') === 0;
+          var txt = s.replace(/^[✅✔️🔒•\-\s]+/,'').trim();
+          return '<li'+(bloque?' class="off"':'')+'>'+_ico(bloque?'lock':'check',14)+'<span>'+_esc(txt)+'</span></li>';
+        }).join('')+'</ul>'
+      +'<button class="btn bi" style="width:100%;margin-top:10px" onclick="vShowSec(\'elearning\',null)">Souscrire →</button>'
+    +'</div>';
+  }).join('');
+
+  return '<div class="vsec">'
+    +'<div class="acc-head"><h1 class="acc-pill"><span class="ic">'
+      +'<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-wallet"/></svg></span>'
+      +' Abonnements</h1>'
+      +'<div class="acc-sub">L\'essentiel reste gratuit. L\'abonnement ouvre les cours, les épreuves corrigées et le suivi.</div></div>'
+    +'<div class="vcard" style="max-width:680px;margin:0 auto 18px">'
+      +'<div class="ct"><span class="ct-ico">'+_ico('check',17)+'</span>Gratuit, sans compte</div>'
+      +'<ul class="acc-plan-av">'+gratuit+'</ul></div>'
+    +(cartes
+        ? '<div class="acc-plans">'+cartes+'</div>'
+          +'<div class="acc-plans-note">Paiement Mobile Money (MTN / Orange) · Sans engagement</div>'
+        : '<div class="vcard" style="max-width:680px;margin:0 auto"><div class="vprose">'
+          +'Les abonnements sont en cours de mise à jour. Écrivez-nous sur WhatsApp pour connaître les formules disponibles.'
+          +'</div></div>')
+  +'</div>';
+}
+window.pgTarifs = pgTarifs;
 
 function _accEssentiel(){
   var cartes = _ACC_ESSENTIEL.map(function(c){
