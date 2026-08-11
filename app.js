@@ -3044,7 +3044,16 @@ function visitorOrderBook(bid){
   if(overlay)overlay.className='mov';
   overlay.innerHTML=`<div class="modal"><div class="mhd"><div><div class="mtt">${ICO('lc-cart')}Commander : ${_esc(b.titre)}</div><div class="mst">${_esc(b.cls)} · ${_esc(b.auteur)} · ${fmt(b.prix)}</div></div><button class="mc" onclick="this.closest('.mov').remove()">✕</button></div>
   <div class="mb">
-    <div style="text-align:center;margin-bottom:16px"><div style="font-size:48px">${b.ico}</div><div class="mono bold" style="font-size:24px;color:var(--gold);margin-top:8px">${fmt(b.prix)}</div></div>
+    <!-- Le prix était en or (#FFC93C) sur le fond clair de la modale : 1,45:1,
+         illisible. L'or est une couleur d'accent ou de fond, jamais d'encre sur
+         clair. On réutilise .book-price-box / .book-price (encre bleu nuit) déjà
+         définies pour la boutique, plutôt que d'écrire une seconde correction.
+         Le picto passe de 48px bruts à un cadre calibré : à 48px, un emoji
+         déborde de sa ligne et se lit comme une image cassée. -->
+    <div class="book-price-box" style="text-align:center;margin-bottom:16px">
+      <div class="bk-picto" role="img" aria-label="${_esc(b.titre)}">${b.ico}</div>
+      <div class="book-price" style="margin-top:8px">${fmt(b.prix)}</div>
+    </div>
     <div class="ib ibt mb14"><span>📦</span><span>Manuel <strong>papier</strong> : il nous faut une adresse de livraison. Le paiement s'ouvre juste après.</span></div>
     <div class="fg2">
       <div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="voNom" value="${_esc(_voPre.nom)}" placeholder="Nom et prénom"></div>
@@ -29000,17 +29009,31 @@ function _payApiBase(){
 // Jeton d'initiation : le secret admin s'il est présent (accès complet), sinon
 // le JETON PUBLIC dédié (self-service client, faible privilège — voir le garde
 // serveur campayInitGuard()). Un vrai visiteur n'a JAMAIS le secret admin.
-function _payInitToken(){
-  if(DB.cloudConfig && DB.cloudConfig.secret) return DB.cloudConfig.secret;
-  // 🔑 Le jeton public servi par la SONDE d'abord. C'est le seul chemin qui
+function _payInitToken(_sansSecretAdmin){
+  /* ⚠️ L'ORDRE COMPTE, et il était inversé.
+     Le secret de SYNCHRONISATION passait en premier. Or ce n'est pas le jeton
+     de cet endpoint : le serveur le compare à PAY_API_SECRET, deux constantes
+     distinctes que rien n'oblige à être égales. Quand elles diffèrent, l'appel
+     retombe sur la comparaison avec le jeton public, échoue, et renvoie
+     « Authentification requise pour initier un paiement ».
+     Conséquence absurde : un visiteur anonyme pouvait payer, mais
+     l'ADMINISTRATEUR CONNECTÉ non — c'est-à-dire précisément la personne qui
+     teste l'encaissement avant de l'ouvrir aux clients, qui en conclut que sa
+     passerelle est mal configurée et cherche la panne côté fournisseur.
+     Le jeton public passe donc devant : il vaut pour TOUT LE MONDE, admin
+     compris. Le secret n'est plus qu'un repli (serveur trop ancien pour servir
+     `publicInitToken`), et le drapeau `_sansSecretAdmin` permet au rattrapage
+     401 de le mettre franchement de côté au second essai. */
+  var s0 = window._VRT_CAMPAY;
+  if(s0 && s0.publicInitToken) return s0.publicInitToken;
+  if(!_sansSecretAdmin && DB.cloudConfig && DB.cloudConfig.secret) return DB.cloudConfig.secret;
+  // Le jeton public de la sonde (testé ci-dessus) est le seul chemin qui
   // fonctionne pour un vrai visiteur : il n'a pas le secret de synchronisation
   // (réservé à l'admin) et il ne télécharge JAMAIS `DB.payApiConfig`
   // (public_data.php ne l'expose pas, et la base complète demande le secret).
   // Le champ ⚙️ Paramètres ne servait donc que sur le poste de l'admin —
   // c'est-à-dire nulle part où un client paie. Sans ceci, le client voyait
   // « Payer maintenant » puis « libre-service indisponible » : un cul-de-sac.
-  var s = window._VRT_CAMPAY;
-  if(s && s.publicInitToken) return s.publicInitToken;
   // Repli : la valeur recopiée à la main par l'admin (postes déjà configurés,
   // ou serveur trop ancien pour renvoyer le jeton dans la sonde).
   var c = DB.payApiConfig || {};
@@ -29203,14 +29226,14 @@ try{
   else setTimeout(_probeLater, 3000);
 }catch(e){}
 
-function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom){
+function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom, _retry){
   if(!_payCampayReady()){
     var c = window._VRT_CAMPAY;
     toast((c && c.reason) ? c.reason : 'Paiement automatique indisponible — utilisez le paiement manuel ci-dessous.','warn');
     return;
   }
   var _base = _payApiBase();
-  var _tok  = _payInitToken();
+  var _tok  = _payInitToken(_retry);   // au 2e essai : jeton public uniquement
   if(!_base){
     toast('Serveur de paiement non configuré','err');
     return;
@@ -29265,9 +29288,43 @@ function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom){
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+_tok},
     body: JSON.stringify(_body)
   })
-  .then(function(r){return r.json();})
+  // On garde le code HTTP : un 401 ne se traite pas comme les autres erreurs
+  // (voir juste en dessous), et `.then(r=>r.json())` le jetait.
+  .then(function(r){ return r.json().then(function(j){ j._http = r.status; return j; },
+                                          function(){ return {error:'Réponse illisible du serveur de paiement', _http:r.status}; }); })
   .then(function(data){
     if(data.error){
+      /* 401 « Authentification requise pour initier un paiement » : le jeton
+         public envoyé n'est plus celui du serveur. Le cas normal n'est pas une
+         attaque, c'est une ROTATION — l'administrateur a changé
+         CAMERPAY_PUBLIC_INIT, et nos navigateurs gardent la sonde ?action=config
+         10 minutes en sessionStorage. Sans ce rattrapage, TOUT visiteur ayant
+         ouvert la page avant la rotation se heurte à un cul-de-sac pendant dix
+         minutes, sur l'écran même où il allait payer — et un client ne sait pas
+         vider un sessionStorage : il s'en va.
+         On purge donc le cache, on re-sonde, et on rejoue l'initiation UNE fois
+         (`_retry` interdit la boucle si le jeton est vraiment invalide). */
+      if(data._http === 401 && !_retry){
+        try{ sessionStorage.removeItem('_vrtCampayCap2'); }catch(e){}
+        window._VRT_CAMPAY = null;
+        if(_win){ try{ _win.close(); }catch(e){} }
+        toast('⏳ Actualisation de la configuration de paiement...','info');
+        // `true` en dernier argument : le second essai ignore le secret admin
+        // et n'emploie que le jeton public — le seul que cet endpoint attend.
+        var _reprise = function(){
+          _payInitCampay(ref, montant, label, intent, targetId, accountId, nom, true);
+        };
+        // _payCampayProbe() re-sonde le serveur et repose window._VRT_CAMPAY,
+        // d'où _payInitToken() relit le jeton. Sans elle, la reprise rejouerait
+        // avec le même jeton périmé et échouerait pareil.
+        if(typeof _payCampayProbe === 'function'){
+          try{
+            var _p = _payCampayProbe();
+            return (_p && _p.then) ? _p.then(_reprise, _reprise) : _reprise();
+          }catch(e){ return _reprise(); }
+        }
+        return _reprise();
+      }
       if(_win){ try{ _win.close(); }catch(e){} }
       toast('❌ '+_payProviderName()+' : '+data.error,'err');
       return;
