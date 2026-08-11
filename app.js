@@ -5300,7 +5300,17 @@ function vShowSec(sec,btn){
     })()}
 
 
-    <!-- ═════ GRILLE LIVRES PREMIUM v2 — Cartes 3D avec animations ═════ -->
+    <!-- ═════ RAYONS PAR CATÉGORIE (v1.16.3) ═════
+         La grille plate ci-dessous listait TOUS les manuels d'affilée, sans
+         hiérarchie : un parent cherchant la 3ᵉ devait tout parcourir. On passe
+         à des rayons par cycle, façon librairie — la couverture porte le regard,
+         le texte se réduit au nécessaire. La grille détaillée reste dessous
+         pour qui veut comparer prix, stock et notes. -->
+    ${_shopRows()}
+
+    <!-- ═════ GRILLE LIVRES DÉTAILLÉE (repliée par défaut) ═════ -->
+    <details class="vshop-all">
+      <summary>Voir tous les manuels en détail — prix, stock, avis</summary>
     <div class="vbook-grid">
       ${DB.books.map(b=>{
         const cc=b.coverColor||'#1a3a8a';
@@ -5345,6 +5355,7 @@ function vShowSec(sec,btn){
         </div>`;
       }).join("")}
     </div>
+    </details>
 
     <!-- ═════ AUTRES PRODUITS PREMIUM v2 ═════ -->
     <div class="vcard mb20">
@@ -6028,13 +6039,17 @@ window._libSrc = {
   html2canvas:['https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'],
   jspdf:['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'],
   xlsx:['https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js'],
-  qrcode:['https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js','https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js']
+  qrcode:['https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js','https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'],
+  // v1.17 : rendu d'un PDF en images CÔTÉ NAVIGATEUR (export protégé des manuels).
+  // Le serveur LWS n'a pas Imagick garanti ; rasteriser ici évite d'en dépendre.
+  pdfjs:['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js','https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js']
 };
 window._libReady = {
   html2canvas:function(){return typeof window.html2canvas!=='undefined';},
   jspdf:function(){return !!(window.jspdf&&window.jspdf.jsPDF)||typeof window.jsPDF!=='undefined';},
   xlsx:function(){return typeof window.XLSX!=='undefined';},
-  qrcode:function(){return typeof window.QRCode!=='undefined';}
+  qrcode:function(){return typeof window.QRCode!=='undefined';},
+  pdfjs:function(){return !!(window.pdfjsLib&&window.pdfjsLib.getDocument);}
 };
 window._libCache = {};
 window._ensureLib = function(key){
@@ -12745,8 +12760,10 @@ function mBookSecure(bid){
         +'<div class="xs2 mut mt4">Tarif propre au numérique — le prix papier reste '+fmt(b.prix||0)+'.</div></div>'
     +'</div>'
     +'<div class="ib" style="background:#FEF3C7;border:1px solid #FDE68A;color:#92400E;border-radius:var(--r);padding:8px 12px;font-size:12px;margin-top:10px">⚠️ Désactiver la case efface le lien vers le dossier (<code>secureId</code>) pour retirer le bouton « Lire en ligne » de la fiche publique.</div>'
-    +'<div class="fl2 fic g8 mt12"><button class="btn bo sm" onclick="_bookSecureCheck(\''+bid+'\')">🔍 Vérifier la préparation serveur</button>'
-      +'<span class="xs2 mut">lit l\'état <strong>enregistré</strong> — enregistrez d\'abord</span></div>'
+    +'<div class="fl2 fic g8 mt12" style="flex-wrap:wrap">'
+      +'<button class="btn bi sm" onclick="cm();mBookExport(\''+bid+'\')">🖼️ Convertir un PDF et exporter</button>'
+      +'<button class="btn bo sm" onclick="_bookSecureCheck(\''+bid+'\')">🔍 Vérifier la préparation serveur</button>'
+      +'<span class="xs2 mut">le contrôle lit l\'état <strong>enregistré</strong> — enregistrez d\'abord</span></div>'
     +'<div id="bsDiag" class="mt8"></div>',
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     +'<button class="btn bi" onclick="saveBookSecure(\''+bid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>',
@@ -12811,6 +12828,186 @@ function _bookSecureCheck(bid){
       var el=_ge('bsDiag');if(el)el.innerHTML='<div class="ib" style="background:#FEE2E2;border:1px solid #FECACA;color:#991B1B;border-radius:var(--r);padding:9px 12px;font-size:12px">✗ Serveur injoignable (hors ligne, ou API non configurée).</div>';
     });
 }
+
+// ══ v1.17 — CHAÎNE D'EXPORT PROTÉGÉ : PDF → images estampillées → LWS ════════
+// Le lecteur sécurisé ne sait lire QUE des images pré-rendues dans
+// uploads/protected/books/<secureId>/pNNN.jpg. Les fabriquer exigeait jusqu'ici
+// un accès FTP et une ligne de commande : autant dire que personne ne le faisait,
+// et que les livres restaient « non préparés ». Tout se fait désormais depuis la
+// fiche du livre. Le PDF d'origine ne quitte jamais le poste de l'administrateur —
+// seules les images en partent, déjà estampillées.
+window._bookPdfReady=function(){
+  return _ensureLib('pdfjs').then(function(){
+    var L=window.pdfjsLib;
+    if(!L||!L.getDocument) throw new Error('pdf.js indisponible');
+    if(L.GlobalWorkerOptions.workerSrc) return L;
+    // CSP : worker-src n'autorise que 'self' et blob: — un worker chargé depuis le
+    // CDN serait refusé net par le navigateur. On récupère sa source (connect-src
+    // autorise https:) et on la republie en blob local.
+    return fetch('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js')
+      .then(function(r){ if(!r.ok) throw new Error('worker HTTP '+r.status); return r.text(); })
+      .then(function(src){
+        L.GlobalWorkerOptions.workerSrc=URL.createObjectURL(new Blob([src],{type:'application/javascript'}));
+        return L;
+      });
+  });
+};
+// Estampille PERMANENTE, gravée à l'export. Elle ne remplace pas le filigrane
+// nominatif que secure_pdf.php incruste à chaque lecture : celui-là désigne le
+// lecteur, celle-ci marque l'origine — elle survit même si l'image ressort un
+// jour du circuit. Le bandeau occupe une bande AJOUTÉE sous la page (il ne
+// recouvre jamais le texte) et laisse ses 26 px du bas au serveur, qui y grave
+// sa propre barre.
+window._bookStampPage=function(ctx,w,hPage,band,txt,n,total){
+  ctx.save();
+  ctx.globalAlpha=0.085; ctx.fillStyle='#142554'; ctx.font='600 15px Arial, sans-serif';
+  var step=Math.max(150,Math.round(w/3.2));
+  for(var y=70;y<hPage;y+=140){
+    for(var x=-60;x<w;x+=step){
+      ctx.save(); ctx.translate(x,y); ctx.rotate(-28*Math.PI/180);
+      ctx.fillText(txt,0,0); ctx.restore();
+    }
+  }
+  ctx.restore();
+  ctx.save(); ctx.textBaseline='top';
+  ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,hPage,w,band);
+  ctx.fillStyle='#142554'; ctx.fillRect(0,hPage,w,3);
+  ctx.font='700 15px Arial, sans-serif'; ctx.fillStyle='#142554';
+  ctx.fillText(txt,12,hPage+12);
+  ctx.font='400 13px Arial, sans-serif'; ctx.fillStyle='#7A88A6';
+  var pg='Page '+n+' / '+total;
+  ctx.fillText(pg,Math.max(12,w-12-ctx.measureText(pg).width),hPage+13);
+  ctx.restore();
+};
+window._bookExportLog=function(html){ var el=_ge('bxLog'); if(el) el.innerHTML=html; };
+window._bookExportUpload=function(bookId,page,blob,purge){
+  return new Promise(function(resolve,reject){
+    var fd=new FormData();
+    var nom='p'+('00'+page).slice(-3)+'.jpg';
+    fd.append('file',blob,nom);
+    fd.append('folder','bookpages');
+    fd.append('bookId',bookId);
+    fd.append('page',String(page));
+    if(purge) fd.append('purge','1');
+    var sec=DB.cloudConfig&&DB.cloudConfig.secret;
+    var xhr=new XMLHttpRequest();
+    xhr.open('POST',LWS_API.upload);
+    if(sec) xhr.setRequestHeader('Authorization','Bearer '+sec);
+    xhr.onload=function(){
+      try{ var r=JSON.parse(xhr.responseText); r.ok?resolve(r):reject(new Error(r.error||('HTTP '+xhr.status))); }
+      catch(e){ reject(new Error('Réponse illisible du serveur (HTTP '+xhr.status+')')); }
+    };
+    xhr.onerror=function(){ reject(new Error('Réseau indisponible')); };
+    xhr.send(fd);
+  });
+};
+function mBookExport(bid){
+  if(typeof iA==='function'&&!iA())return;
+  var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
+  var sid=b.secureId||b.id;
+  var stamp=((DB.school&&DB.school.nom)||'VÉRITAS')+' · '+(b.titre||'')+' · reproduction interdite';
+  M('🖼️ Convertir, estampiller et exporter — '+b.titre,
+    'Le PDF reste sur ce poste ; seules les pages en images partent sur le serveur',
+    '<div class="ib ibt mb14"><span>🔒</span><span>Chaque page est <strong>rendue en image</strong>, <strong>estampillée</strong>, puis déposée dans <code>uploads/protected/books/</code> — dossier interdit d\'accès direct. Le fichier d\'origine n\'est jamais envoyé.</span></div>'
+    +'<div class="fg full"><span class="fl">Document source (PDF, ou une image de page)</span>'
+      +'<input class="fi" id="bxFile" type="file" accept="application/pdf,image/jpeg,image/png"></div>'
+    +'<div class="fg2">'
+      +'<div class="fg full"><span class="fl">Dossier de destination</span>'
+        +'<input class="fi mono" id="bxId" value="'+_esc(sid)+'" spellcheck="false"></div>'
+      +'<div class="fg"><span class="fl">Largeur des pages (px)</span><input class="fi" id="bxW" type="number" min="600" max="2000" step="20" value="1240"></div>'
+      +'<div class="fg"><span class="fl">Qualité JPEG (%)</span><input class="fi" id="bxQ" type="number" min="50" max="95" value="82"></div>'
+      +'<div class="fg"><span class="fl">Pages gratuites d\'aperçu</span><input class="fi" id="bxFree" type="number" min="0" max="999" value="'+(b.freePages===undefined?2:b.freePages)+'"></div>'
+      +'<div class="fg full"><span class="fl">Texte de l\'estampille</span><input class="fi" id="bxStamp" value="'+_esc(stamp)+'">'
+        +'<div class="xs2 mut mt4">Gravé en diagonale et en pied de page. Le filigrane <strong>nominatif</strong> du lecteur s\'y ajoute à chaque consultation.</div></div>'
+    +'</div>'
+    +'<div id="bxLog" class="mt12"></div>',
+    '<button class="btn bo" onclick="cm()">Fermer</button>'
+    +'<button class="btn bi" id="bxGo" onclick="_bookExportRun(\''+bid+'\')">🚀 Convertir et exporter</button>',
+    true);
+}
+window._bookExportRun=async function(bid){
+  var b=DB.books.find(function(x){return x.id===bid;});if(!b)return;
+  var fl=(_ge('bxFile')||{}).files, file=fl&&fl[0];
+  if(!file){toast('Choisissez un document','warn');return;}
+  var sid=((((_ge('bxId')||{}).value)||b.secureId||b.id)+'').replace(/[^a-zA-Z0-9_\-]/g,'');
+  if(!sid){toast('Dossier de destination requis','warn');return;}
+  if(!(DB.cloudConfig&&DB.cloudConfig.secret)){toast('Clé Cloud requise pour l\'envoi','err');return;}
+  var wT=Math.min(2000,Math.max(600,parseInt((_ge('bxW')||{}).value,10)||1240));
+  var q=Math.min(95,Math.max(50,parseInt((_ge('bxQ')||{}).value,10)||82))/100;
+  var free=parseInt((_ge('bxFree')||{}).value,10); if(isNaN(free)||free<0) free=2;
+  var stamp=((((_ge('bxStamp')||{}).value)||'')+'').trim()||('VÉRITAS · '+(b.titre||''));
+  var go=_ge('bxGo'); if(go){go.disabled=true;go.textContent='⏳ En cours…';}
+  var BAND=60, done=0, total=0, ko=0;
+  function bar(){
+    var pct=total?Math.round(done/total*100):0;
+    _bookExportLog('<div class="ib ibt" style="display:block;line-height:1.8">'
+      +'<div style="height:8px;background:var(--bg3);border-radius:99px;overflow:hidden;margin-bottom:8px">'
+        +'<div style="height:100%;width:'+pct+'%;background:linear-gradient(90deg,#142554,#FFC93C);transition:width .2s"></div></div>'
+      +'Page <strong>'+done+'</strong> / '+total+' envoyée'+(ko?(' · <span style="color:#991B1B">'+ko+' en échec</span>'):'')+'</div>');
+  }
+  async function pousser(canvas,n,purge){
+    var blob=await new Promise(function(res){ canvas.toBlob(res,'image/jpeg',q); });
+    if(!blob) throw new Error('Encodage JPEG impossible');
+    await _bookExportUpload(sid,n,blob,purge);
+    done++; bar();
+  }
+  try{
+    if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
+      _bookExportLog('<div class="ib ibt"><span>⏳</span><span>Chargement du moteur de rendu…</span></div>');
+      var L=await _bookPdfReady();
+      var doc=await L.getDocument({data:new Uint8Array(await file.arrayBuffer())}).promise;
+      total=doc.numPages; bar();
+      for(var n=1;n<=total;n++){
+        var page=await doc.getPage(n);
+        var vp1=page.getViewport({scale:1});
+        var vp=page.getViewport({scale:wT/vp1.width});
+        var cv=document.createElement('canvas');
+        cv.width=Math.round(vp.width); cv.height=Math.round(vp.height)+BAND;
+        var ctx=cv.getContext('2d');
+        ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,cv.width,cv.height);
+        await page.render({canvasContext:ctx,viewport:vp}).promise;
+        _bookStampPage(ctx,cv.width,cv.height-BAND,BAND,stamp,n,total);
+        // purge=1 à la première page : un réexport plus court laisserait sinon
+        // traîner les pages du document précédent, comptées comme sa fin.
+        await pousser(cv,n,n===1);
+        page.cleanup&&page.cleanup();
+      }
+    } else {
+      total=1; bar();
+      var img=await new Promise(function(res,rej){
+        var im=new Image(); im.onload=function(){res(im);}; im.onerror=function(){rej(new Error('Image illisible'));};
+        im.src=URL.createObjectURL(file);
+      });
+      var sc=wT/img.naturalWidth;
+      var cv2=document.createElement('canvas');
+      cv2.width=wT; cv2.height=Math.round(img.naturalHeight*sc)+BAND;
+      var c2=cv2.getContext('2d');
+      c2.fillStyle='#FFFFFF'; c2.fillRect(0,0,cv2.width,cv2.height);
+      c2.drawImage(img,0,0,wT,Math.round(img.naturalHeight*sc));
+      _bookStampPage(c2,cv2.width,cv2.height-BAND,BAND,stamp,1,1);
+      await pousser(cv2,1,true);
+    }
+  }catch(e){
+    ko++;
+    if(go){go.disabled=false;go.textContent='🚀 Convertir et exporter';}
+    _bookExportLog('<div class="ib" style="background:#FEE2E2;border:1px solid #FECACA;color:#991B1B;border-radius:var(--r);padding:9px 12px;font-size:12px;display:block">✗ '+_esc(e.message||'Échec')
+      +'<br><span class="xs2">'+done+' page(s) déjà déposée(s) — relancer reprend depuis le début.</span></div>');
+    return;
+  }
+  // Le lecteur lit freePages et le prix dans la base SERVEUR : sans synchro, les
+  // pages seraient en place mais l'aperçu garderait l'ancien réglage.
+  b.digital=true; b.secureId=sid; b.securePages=total; b.freePages=free;
+  if(!b.prixDigital) b.prixDigital=b.prix||0;
+  save();
+  try{ if(typeof _triggerAutoSync==='function') _triggerAutoSync(); }catch(e){}
+  if(go){go.disabled=false;go.textContent='✓ Terminé';}
+  _bookExportLog('<div class="ib" style="background:#D1FAE5;border:1px solid #A7F3D0;color:#065F46;border-radius:var(--r);padding:10px 12px;font-size:12px;display:block;line-height:1.8">'
+    +'✅ <strong>'+total+' page(s) exportée(s)</strong> dans <code>uploads/protected/books/'+_esc(sid)+'/</code>'
+    +'<br>Aperçu gratuit : <strong>'+free+' page(s)</strong> · le reste exige le paiement de '+fmt(b.prixDigital||0)
+    +'<br><span class="xs2">Réglages poussés vers le serveur. Vérifiez avec « 🔍 Vérifier la préparation serveur ».</span></div>');
+  toast('✓ '+total+' page(s) protégée(s) sur le serveur');
+  if(typeof re==='function') re();
+};
 
 // ── MANUELS : UPLOAD FICHIER ADMIN ──────────────────────────────────
 function _uploadManuelFichier(bid){
@@ -13609,12 +13806,64 @@ function genCertScol(){
   </div></div>`,`Certificat de scolarité — ${s.pre} ${s.nom}`,'landscape');
 }
 
+/* ── Les 150 classes ne tiennent pas dans une seule rangée d'onglets ─────────
+   L'établissement couvre le collège, le lycée général, tout l'enseignement
+   technique (tertiaire ET industriel), les CAP et le sous-système anglophone.
+   Affichées à plat, elles formaient un mur de ~150 pastilles où l'on ne
+   retrouvait même plus la 6ème. On range donc en DEUX niveaux : la section
+   d'abord, ses classes ensuite.
+
+   La règle de classement se lit sur le libellé, et reste volontairement
+   prudente : tout ce qui n'est ni collège, ni série générale (A/C/D), ni CAP,
+   ni GCE tombe dans « Technique », sous-groupé par niveau. Deviner la famille
+   exacte (tertiaire STT contre industriel F1-F8…) demanderait une table que
+   personne ne tiendra à jour — et une classe mal rangée est pire qu'une classe
+   dans un groupe large. */
+window._clsSection = function(c){
+  var s = String(c||'').trim();
+  if(/^CAP\b/i.test(s)) return 'CAP';
+  if(/\b(Form|Sixth)\b/i.test(s)) return 'GCE (anglophone)';
+  if(/^(6|5|4|3)(ème|e)\b/i.test(s)) return 'Collège';
+  if(/^(2nde|1ère|Tle)\s*[ACD]?$/i.test(s)) return 'Lycée général';
+  return 'Technique';
+};
+window._clsSections = function(){
+  var ordre = ['Collège','Lycée général','Technique','CAP','GCE (anglophone)'];
+  var out = {};
+  (CLS||[]).forEach(function(c){
+    var s = _clsSection(c);
+    (out[s] = out[s] || []).push(c);
+  });
+  return ordre.filter(function(s){ return out[s] && out[s].length; })
+              .map(function(s){ return {nom:s, classes:out[s]}; });
+};
+/* Rendu du sélecteur à deux niveaux. `cb` reçoit la classe choisie ; le nom de
+   la variable globale de section est dérivé de `ns` pour que deux écrans
+   ouverts sur des sections différentes ne se marchent pas dessus. */
+window._clsSelecteur = function(sel, cb, ns){
+  var secs = _clsSections();
+  var courante = window['_clsSec_'+ns] || _clsSection(sel) || secs[0].nom;
+  var trouvee = secs.filter(function(s){ return s.nom===courante; })[0] || secs[0];
+  var h = '<div class="tabs" style="margin-bottom:8px">'
+    + secs.map(function(s){
+        return '<button class="tab'+(s.nom===trouvee.nom?' on':'')+'" style="font-weight:800"'
+          + ' onclick="window._clsSec_'+ns+'=\''+s.nom.replace(/'/g,"\\'")+'\';re()">'
+          + _esc(s.nom)+' <span style="opacity:.6;font-weight:600">'+s.classes.length+'</span></button>';
+      }).join('')
+    + '</div><div class="tabs">'
+    + trouvee.classes.map(function(c){
+        return '<button class="tab'+(c===sel?' on':'')+'" onclick="'+cb.replace(/\{c\}/g, c.replace(/'/g,"\\'"))+'">'+_esc(c)+'</button>';
+      }).join('')
+    + '</div>';
+  return h;
+};
+
 function pgListeClasse(){
   if(!iA())return na();
   const selC=window._lcC||CLS[0];
   const list=DB.students.filter(s=>s.cls===selC);
   return`<div class="fl2 fic fsb mb14 fw g8">
-    <div class="tabs">${CLS.map(c=>`<button class="tab${c===selC?' on':''}" onclick="window._lcC='${c}';re()">${c}</button>`).join('')}</div>
+    <div style="flex:1;min-width:280px">${_clsSelecteur(selC, "window._lcC='{c}';re()", 'lc')}</div>
     <button class="btn bg2" onclick="printListeClasse()"><svg class="vico bico" aria-hidden="true"><use href="#lc-printer"/></svg>Imprimer liste ${selC}</button>
   </div>
   <div class="card"><div class="ct">${selC} — ${list.length} élève${list.length>1?'s':''}</div>
@@ -45504,3 +45753,98 @@ window._bookCommentRecevoir = function(b){
      + '</section>';
   return h;
 };
+
+/* ════════════════════════════════════════════════════════════════════
+   v1.16.3 — LA BOUTIQUE EN RAYONS (demande Jacques, modèle Babelio)
+   ════════════════════════════════════════════════════════════════════
+   Avant : une grille unique déroulant TOUS les manuels, chaque carte
+   portant titre, auteur, étoiles, description, stock, prix et trois
+   boutons. Résultat : la couverture — le seul élément qu'on reconnaît
+   d'un coup d'œil en librairie — occupait moins de place que le texte
+   qui l'entourait, et un parent cherchant la 3ᵉ devait tout parcourir.
+
+   Maintenant : des rayons. Un rayon = une ligne défilante d'un cycle
+   scolaire, la couverture en grand, et sous elle le strict nécessaire
+   (titre, classe, prix). Le détail complet reste accessible d'un clic
+   et la grille détaillée est repliée dessous.
+
+   Déclaration `function` (et non `window.x =`) : elle est appelée depuis
+   le littéral de gabarit de vShowSec, situé PLUS HAUT dans le fichier.
+   Seule une déclaration est hoistée jusque-là.
+   ════════════════════════════════════════════════════════════════════ */
+function _shopCycle(cls){
+  var c = String(cls || '').toLowerCase();
+  if (/6|5|4|3\s*(e|ème|eme)/.test(c) && !/2nde|1ère|1ere|tle|terminale/.test(c)) return 'college';
+  if (/2nde|seconde|1ère|1ere|première|premiere|tle|terminale|lycée|lycee/.test(c)) return 'lycee';
+  return 'autres';
+}
+
+var _SHOP_RAYONS = [
+  { id:'college', titre:'Collège', sous:'6ᵉ · 5ᵉ · 4ᵉ · 3ᵉ — préparation au BEPC' },
+  { id:'lycee',   titre:'Lycée',   sous:'2nde · 1ʳᵉ · Terminale — Probatoire, BAC & GCE' },
+  { id:'autres',  titre:'Toutes classes', sous:'Méthodes, annales et ouvrages transversaux' }
+];
+
+/** Une couverture : l'image si elle existe, sinon une couverture composée
+ *  (aplat de la couleur du livre + emoji + titre) — jamais un cadre vide. */
+function _shopCover(b){
+  var cc = b.coverColor || '#1a3a8a';
+  if (b.coverImg){
+    return '<img class="shelf-img" src="' + _esc(b.coverImg) + '" alt="' + _esc(b.titre) + '" loading="lazy"'
+         + ' onerror="this.remove()">';
+  }
+  return '<span class="shelf-fallback" style="--cc:' + _esc(cc) + '">'
+       + '<span class="shelf-emo">' + (b.ico || '📘') + '</span>'
+       + '<span class="shelf-ttl">' + _esc((b.titre || '').substring(0, 42)) + '</span>'
+       + '</span>';
+}
+
+function _shopItem(b){
+  var rupture = (b.stock <= 0);
+  var apercu  = !!(b.extrait || (b.previewImages && b.previewImages.length));
+  return '<button class="shelf-item' + (rupture ? ' is-out' : '') + '" '
+       + 'onclick="viewBookDetail(\'' + b.id + '\')" '
+       + 'aria-label="' + _esc(b.titre) + ' — ' + _esc(b.cls || '') + ', ' + fmt(b.prix) + '">'
+       + '<span class="shelf-cover">' + _shopCover(b)
+       +   (apercu ? '<span class="shelf-tag">Aperçu gratuit</span>' : '')
+       +   (rupture ? '<span class="shelf-out">Rupture</span>' : '')
+       + '</span>'
+       + '<span class="shelf-meta">'
+       +   '<span class="shelf-name">' + _esc(b.titre) + '</span>'
+       +   '<span class="shelf-sub">' + _esc(b.cls || '') + '</span>'
+       +   '<span class="shelf-price">' + fmt(b.prix) + '</span>'
+       + '</span>'
+       + '</button>';
+}
+
+function _shopRow(titre, sous, livres){
+  if (!livres || !livres.length) return '';
+  return '<section class="shelf-row">'
+       + '<div class="shelf-head">'
+       +   '<h3 class="shelf-h">' + _esc(titre) + '</h3>'
+       +   '<span class="shelf-count">' + livres.length + ' titre' + (livres.length > 1 ? 's' : '') + '</span>'
+       + '</div>'
+       + (sous ? '<p class="shelf-sous">' + _esc(sous) + '</p>' : '')
+       + '<div class="shelf" role="list">' + livres.map(function(b){ return _shopItem(b); }).join('') + '</div>'
+       + '</section>';
+}
+
+function _shopRows(){
+  var livres = (typeof DB !== 'undefined' && DB.books) ? DB.books.slice() : [];
+  if (!livres.length) return '';
+  var html = '';
+
+  /* Rayon « les plus adoptés » : uniquement sur des ventes RÉELLES. Base
+     vide = rayon absent, on n'invente pas un succès. */
+  var adoptes = livres.filter(function(b){ return (b.vendu || 0) > 0; })
+                      .sort(function(a, b){ return (b.vendu || 0) - (a.vendu || 0); })
+                      .slice(0, 8);
+  if (adoptes.length >= 2){
+    html += _shopRow('Les plus adoptés', 'Classés par nombre d\'exemplaires réellement remis aux élèves', adoptes);
+  }
+
+  _SHOP_RAYONS.forEach(function(r){
+    html += _shopRow(r.titre, r.sous, livres.filter(function(b){ return _shopCycle(b.cls) === r.id; }));
+  });
+  return html ? '<div class="vshop-shelves">' + html + '</div>' : '';
+}

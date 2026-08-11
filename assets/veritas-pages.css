@@ -1159,3 +1159,274 @@ footer.bot a{color:var(--n700);font-weight:600}
   .constel-fig .hub b{font-size:.7rem;margin-top:.2rem}
   .constel-fig .hub span{font-size:10.5px;margin-top:.35rem}
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   v1.16.1 — RELANCES D'ABONNEMENT PERSISTANTES (page /parcours/)
+   Un seul bandeau .upsell au tiers de la page laissait onze sections sans
+   la moindre porte vers l'abonnement. Deux formats complémentaires :
+     .vabo-inline  — relance CONTEXTUELLE, posée juste après le passage
+                     qu'elle prolonge. Discrète, dans le flux du texte.
+     .vabo-sticky  — relance PERSISTANTE, en bas d'écran. Elle n'apparaît
+                     qu'une fois la page réellement entamée (voir le script
+                     en fin de /parcours/) et se referme pour la session :
+                     un bandeau qu'on ne peut pas fermer se fait ignorer,
+                     puis détester.
+   ════════════════════════════════════════════════════════════════════════ */
+.vabo-inline{
+  display:flex; align-items:center; gap:.9rem; flex-wrap:wrap;
+  background:linear-gradient(135deg,rgba(20,37,84,.055),rgba(255,201,60,.07));
+  border:1px solid rgba(20,37,84,.10); border-left:3px solid var(--gold);
+  border-radius:12px; padding:.85rem 1rem; margin:1.1rem 0;
+}
+.vabo-inline p{ margin:0; flex:1; min-width:230px; font-size:.93rem; color:var(--navy2); }
+.vabo-inline p b{ color:var(--navy3); }
+.vabo-inline .lien{
+  display:inline-flex; align-items:center; gap:.4rem; flex-shrink:0;
+  background:var(--gold); color:var(--navy3); font-weight:800; font-size:.9rem;
+  text-decoration:none; border-radius:10px; padding:.55rem .95rem;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1), filter .2s;
+}
+.vabo-inline .lien:hover{ transform:translateY(-2px); filter:brightness(1.06); }
+.vabo-inline .lien.ghost{ background:transparent; color:var(--navy3); border:1.5px solid rgba(20,37,84,.22); }
+
+.vabo-sticky{
+  position:fixed; left:0; right:0; bottom:0; z-index:60;
+  display:flex; align-items:center; gap:.9rem; flex-wrap:wrap;
+  padding:.7rem clamp(.8rem,4vw,2rem);
+  background:linear-gradient(135deg,var(--navy3),var(--navy2));
+  border-top:2px solid var(--gold);
+  box-shadow:0 -10px 30px -18px rgba(13,27,62,.7);
+  /* Masquée par défaut : c'est le script qui la révèle, une fois la page
+     entamée. Sans cela elle couvrirait le titre dès la première seconde. */
+  transform:translateY(110%); transition:transform .35s cubic-bezier(.22,.61,.36,1);
+}
+.vabo-sticky.on{ transform:translateY(0); }
+.vabo-sticky p{ margin:0; flex:1; min-width:200px; color:#e6ecf9; font-size:.9rem; line-height:1.35; }
+.vabo-sticky p b{ color:var(--gold); }
+.vabo-sticky .lien{
+  display:inline-flex; align-items:center; gap:.4rem; flex-shrink:0;
+  background:var(--gold); color:var(--navy3); font-weight:800; font-size:.9rem;
+  text-decoration:none; border-radius:10px; padding:.55rem 1rem;
+}
+.vabo-sticky .lien.ghost{ background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.38); }
+.vabo-sticky .fermer{
+  flex-shrink:0; background:transparent; border:none; cursor:pointer;
+  color:rgba(255,255,255,.6); font-size:1.3rem; line-height:1; padding:.2rem .45rem;
+}
+.vabo-sticky .fermer:hover{ color:#fff; }
+/* La barre occupe le bas de l'écran : sans cette réserve, le dernier
+   paragraphe de la page reste inatteignable sur mobile. */
+body.vabo-actif{ padding-bottom:86px; }
+@media (max-width:560px){
+  .vabo-sticky{ padding:.6rem .7rem; gap:.5rem; }
+  .vabo-sticky p{ font-size:.82rem; min-width:100%; order:1; }
+  .vabo-sticky .lien{ font-size:.84rem; padding:.5rem .8rem; order:2; }
+  .vabo-sticky .lien.ghost{ display:none; }   /* un seul appel visible sur petit écran */
+  .vabo-sticky .fermer{ order:3; margin-left:auto; }
+  body.vabo-actif{ padding-bottom:110px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .vabo-sticky{ transition:none; }
+  .vabo-inline .lien{ transition:none; }
+  .vabo-inline .lien:hover{ transform:none; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   LA CONSTELLATION PASSE EN FOND CLAIR (v1.16c)
+   ─────────────────────────────────────────────────────────────────────
+   Le bloc était le seul pavé sombre d'un site clair : il se lisait comme
+   une pièce rapportée, et le champ d'étoiles n'y changeait rien. En fond
+   clair, tout le contraste s'inverse — ce n'est pas une couleur qu'on
+   remplace, c'est chaque encre, chaque bordure et chaque teinte de
+   médaillon qu'il faut reprendre, sinon on obtient du texte blanc sur
+   blanc. C'est fait ici de manière exhaustive.
+   ══════════════════════════════════════════════════════════════════════ */
+.constel{
+  background:
+    radial-gradient(70% 60% at 50% 0%, #FFFFFF 0%, transparent 70%),
+    linear-gradient(168deg, #FBFCFE 0%, var(--n50) 55%, #F0F4FC 100%);
+  border:1px solid var(--n100);
+  box-shadow:var(--sh-2);
+}
+/* Le champ d'étoiles n'a plus de sens sur du clair : il devient une trame
+   de points bleutés très discrète, qui donne de la matière sans bruit. */
+.constel::before{
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 22%, rgba(20,37,84,.12) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 74% 14%, rgba(20,37,84,.10) 50%, transparent 51%),
+    radial-gradient(1.6px 1.6px at 41% 68%, rgba(209,151,8,.22) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 88% 61%, rgba(20,37,84,.09) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 9% 79%, rgba(209,151,8,.18) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 62% 88%, rgba(20,37,84,.08) 50%, transparent 51%),
+    radial-gradient(1.3px 1.3px at 31% 8%, rgba(20,37,84,.07) 50%, transparent 51%);
+  opacity:1;
+}
+.constel::after{border-color:rgba(20,37,84,.10)}
+.constel .rings i{border-color:rgba(20,37,84,.09)}
+
+/* ── Le moyeu ──────────────────────────────────────────────────────── */
+.constel .hub{color:var(--n800)}
+.constel .hub .disc{
+  background:var(--g-navy);color:var(--o400);
+  box-shadow:0 10px 28px rgba(20,37,84,.22), 0 0 0 9px rgba(20,37,84,.06);
+}
+.constel .hub .disc::after{border-color:rgba(20,37,84,.28)}
+.constel .hub .hub-n{color:var(--n800)}
+.constel .hub b{color:var(--o700)}
+.constel .hub span{color:var(--n500)}
+
+/* ── L'anneau et ses liens ─────────────────────────────────────────── */
+.constel-ring .lien{stroke:rgba(20,37,84,.22)}
+
+/* ── Les tuiles : fond blanc, teinte en liseré et en médaillon ─────── */
+.orbit a.orb{
+  background:linear-gradient(168deg,#FFFFFF 0%,var(--tint-pale) 100%);
+  border:1px solid var(--tint-bord);
+  box-shadow:var(--sh-1);
+}
+.orbit a.orb b{color:var(--n800)}
+.orbit a.orb small{color:var(--n500)}
+.orbit a.orb:hover{
+  border-color:var(--tint-fort);
+  box-shadow:var(--sh-2);
+}
+.orbit a.orb::after{
+  background:radial-gradient(120% 90% at 50% 0%, var(--tint-halo) 0%, transparent 72%);
+}
+
+.orbit a.t-vert{--tint-pale:#F1FAF7; --tint-bord:#C8E7DD; --tint-fort:#12A180; --tint-halo:rgba(18,161,128,.14)}
+.orbit a.t-cyan{--tint-pale:#EFF8FC; --tint-bord:#C4E2EF; --tint-fort:#1892BC; --tint-halo:rgba(24,146,188,.14)}
+.orbit a.t-viol{--tint-pale:#F6F2FD; --tint-bord:#DBCFF4; --tint-fort:#7B54D4; --tint-halo:rgba(123,84,212,.14)}
+.orbit a.t-roug{--tint-pale:#FDF3F5; --tint-bord:#F3D2DA; --tint-fort:#D04E6B; --tint-halo:rgba(208,78,107,.14)}
+.orbit a.t-ambr{--tint-pale:#FFFAEE; --tint-bord:#F3E2B4; --tint-fort:#D19708; --tint-halo:rgba(209,151,8,.16)}
+
+/* Les médaillons gardent leur dégradé plein : ce sont eux qui portent la
+   couleur, et ils ressortent mieux encore sur du blanc. */
+.orbit .ic{border:none;box-shadow:0 4px 12px rgba(20,37,84,.14)}
+
+/* ── Étiquettes de statut, sur clair ───────────────────────────────── */
+.orbit .tag,.tag.libre,.tag.reserve,.tag.bientot{font-weight:800}
+.tag.libre  {background:#E4F6F0;color:#0B6B55}
+.tag.reserve{background:#FFF3D4;color:#8A6200}
+.tag.bientot{background:var(--n100);color:var(--n600)}
+
+/* ── Légende ───────────────────────────────────────────────────────── */
+.constel-leg li{color:var(--n600)}
+
+@media (max-width:520px){
+  .constel{box-shadow:var(--sh-1)}
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   v1.16.3 — LA CONSTELLATION PASSE EN CLAIR
+   ══════════════════════════════════════════════════════════════════════
+   Demande de Jacques : « supprime le sombre derrière constellations, enlève
+   les cercles derrière ». Le bloc était un ciel nocturne — navy plein, champ
+   d'étoiles, anneau pointillé en rotation et deux anneaux concentriques. Joli
+   isolé, mais c'est le SEUL pavé sombre d'une page par ailleurs claire : il se
+   lisait comme un encart étranger, et les anneaux traversaient les tuiles.
+
+   Le parti retenu suit la charte visiteur (« Éditorial Lumineux ») : papier
+   crème, filet or, encre bleu nuit. On garde le moyeu doré — c'est lui qui
+   porte le sens (le cahier au centre) — et le halo qui respire.
+
+   Bloc placé en FIN de fichier : une passe de design tourne en parallèle plus
+   haut dans ce fichier, on ne réécrit donc pas ses lignes.
+   ══════════════════════════════════════════════════════════════════════ */
+
+.constel{
+  background:linear-gradient(168deg,#FFFFFF 0%,#FAF7F1 55%,#F6F1E7 100%) !important;
+  border:1px solid rgba(20,37,84,.10);
+  box-shadow:0 8px 30px rgba(20,37,84,.07) !important;
+}
+/* Le champ d'étoiles et l'anneau en rotation n'ont plus de nuit où exister. */
+.constel::before,
+.constel::after{ content:none !important; display:none !important; }
+/* Les deux anneaux concentriques : ce sont « les cercles derrière ». */
+.constel .rings{ display:none !important; }
+
+/* L'encre repasse en bleu nuit — sans quoi le blanc sur crème disparaît. */
+.constel,
+.constel .hub,
+.constel .hub b{ color:var(--navy3,#0F1B3D) !important; }
+.constel .hub span{ color:var(--n600,#4B5772) !important; }
+
+/* Le moyeu doré reste, mais son ombre était calculée pour du navy : sur clair
+   elle faisait une tache grise. Ombre teintée or, plus courte. */
+.constel .hub .disc{
+  box-shadow:0 8px 22px rgba(232,164,19,.28), 0 0 0 8px rgba(255,201,60,.12) !important;
+}
+
+/* Les tuiles étaient du blanc translucide posé sur du navy : sur fond clair,
+   elles devenaient invisibles. Elles reprennent un fond blanc franc et une
+   bordure lisible, en gardant le filet or au survol. */
+.constel .orbit a,
+.orbit a{
+  background:#FFFFFF !important;
+  border:1px solid rgba(20,37,84,.12) !important;
+  box-shadow:0 3px 12px rgba(20,37,84,.05);
+}
+.constel .orbit a:hover,
+.orbit a:hover{
+  background:#FFFFFF !important;
+  border-color:rgba(232,164,19,.55) !important;
+  box-shadow:0 10px 26px rgba(20,37,84,.10);
+}
+.constel .orbit a,
+.constel .orbit a b,
+.constel .orbit a strong{ color:var(--navy3,#0F1B3D) !important; }
+.constel .orbit a span,
+.constel .orbit a p,
+.constel .orbit a small{ color:var(--n600,#4B5772) !important; }
+
+/* ── Puces modernes, sur les 64 pages statiques ───────────────────────
+   Même traitement que dans l'application : un trait or court à la place du
+   gros point noir du navigateur, aligné sur la première ligne du texte. */
+.wrap ul:not([class]),
+.card ul:not([class]),
+article ul:not([class]){ list-style:none;padding-left:0;margin:.7rem 0 }
+.wrap ul:not([class])>li,
+.card ul:not([class])>li,
+article ul:not([class])>li{ position:relative;padding-left:1.25rem;margin:.4rem 0 }
+.wrap ul:not([class])>li::before,
+.card ul:not([class])>li::before,
+article ul:not([class])>li::before{
+  content:"";position:absolute;left:0;top:.62em;
+  width:9px;height:2px;border-radius:2px;
+  background:linear-gradient(90deg,#FFC93C,#E8A413);
+}
+.wrap ol:not([class])>li::marker,
+.card ol:not([class])>li::marker,
+article ol:not([class])>li::marker{
+  color:#B8860B;font-weight:800;font-variant-numeric:tabular-nums;
+}
+
+/* ── Bouton WhatsApp flottant des pages statiques ──────────────────────
+   Injecté par assets/veritas-ui.js (fabWhatsApp). Même vert, même promesse
+   de délai et même géométrie que le .vfx-fab de l'application, pour qu'un
+   visiteur qui passe d'un corrigé à l'app retrouve le même repère.
+   transform/opacity uniquement : composé par le GPU. */
+.vrt-wa-fab{
+  position:fixed;right:16px;bottom:18px;z-index:9000;
+  display:inline-flex;align-items:center;gap:10px;
+  background:#25D366;color:#08281A;text-decoration:none;
+  border-radius:99px;padding:11px 18px 11px 13px;
+  font-family:'Segoe UI',system-ui,sans-serif;font-weight:800;font-size:13px;
+  box-shadow:0 10px 28px rgba(37,211,102,.40);
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;
+}
+.vrt-wa-fab:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 14px 34px rgba(37,211,102,.52)}
+.vrt-wa-fab .ic{
+  width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.85);
+  display:inline-flex;align-items:center;justify-content:center;font-size:15px;flex:0 0 auto;
+  font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;line-height:1;
+}
+.vrt-wa-fab .tx{display:flex;flex-direction:column;line-height:1.15;text-align:left}
+.vrt-wa-fab .tx small{font-weight:600;font-size:10.5px;opacity:.78}
+@media (max-width:640px){
+  /* Sur téléphone, le libellé long mangerait la largeur : la pastille suffit,
+     l'aria-label porte toujours la promesse pour les lecteurs d'écran. */
+  .vrt-wa-fab{right:12px;bottom:14px;padding:11px 15px 11px 12px;font-size:12px}
+  .vrt-wa-fab .tx small{display:none}
+}
+@media print{ .vrt-wa-fab{display:none} }

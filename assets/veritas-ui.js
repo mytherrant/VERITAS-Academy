@@ -246,9 +246,35 @@
     if (y) y.textContent = new Date().getFullYear();
   }
 
+  /* ── Bouton WhatsApp flottant ───────────────────────────
+     L'application le porte déjà (.vfx-fab dans app.css), mais les 64 pages
+     statiques ne chargent pas app.css : un visiteur qui arrive par Google sur
+     un corrigé ou sur la Constellation n'avait donc aucun moyen de poser sa
+     question. On l'injecte ici, avec la même promesse de délai que dans
+     l'application — une promesse chiffrée n'a de valeur que si elle est
+     partout la même.
+     Le message est pré-rempli avec le titre de la page : côté VÉRITAS, on sait
+     d'où vient la question sans avoir à la demander. */
+  var WA_NUM = '237697637739';
+  function fabWhatsApp() {
+    if (document.querySelector('.vrt-wa-fab')) return;
+    var titre = (document.title || '').split('—')[0].trim().substring(0, 70);
+    var msg = 'Bonjour VÉRITAS. Je consulte « ' + titre + ' » et j\'ai une question.';
+    var a = document.createElement('a');
+    a.className = 'vrt-wa-fab';
+    a.href = 'https://wa.me/' + WA_NUM + '?text=' + encodeURIComponent(msg);
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.setAttribute('aria-label', 'Poser une question sur WhatsApp — réponse sous 2 h les jours ouvrés');
+    a.innerHTML = '<span class="ic" aria-hidden="true">💬</span>'
+                + '<span class="tx">Une question ?<small>Réponse sous 2 h · jours ouvrés</small></span>';
+    document.body.appendChild(a);
+  }
+
   function init() {
     bindToggleAll(); bindA11y(); bindSpeak(); bindShare(); year();
     reveals(); onglets(); compteurs();          // habillage de l'espace élève
+    fabWhatsApp();
   }
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
