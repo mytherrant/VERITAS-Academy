@@ -752,3 +752,27 @@ association) a été écartée pour cette raison, pas par manque de temps.
   ni mesure de géométrie réelle. Ce qui reste vérifiable : le CSSOM (valeurs des règles), les
   fonctions pures, et les rapports de contraste calculés. **Le rendu visuel reste à contrôler à
   l'œil sur un vrai écran.**
+
+## Déploiement du 11/08 (v1.16.2) — ce qui est en prod
+- Déployé par **`gh workflow run deploy.yml --ref deploy/campay-securite`** (workflow_dispatch),
+  PAS par un merge master : master reste 60 commits en arrière, c'est le mode opératoire établi.
+- CI verte avant déploiement : job `paiements` (54/54 sur PHP 8.2 Linux) + smoke Playwright.
+- Vérifié en prod avec cache-buster : coquille en `app.js?v=1.16.2`, marqueurs `unlockedBooks`,
+  `_coordConnues`, `montantFinal` présents dans l'app.js servi, et `?action=config` répond
+  `provider:camerpay, mode:LIVE, webhookSecret:true, selfService:true`.
+- ⚠️ **CamerPay est passé en LIVE** (plus de sandbox) : le contrôle de prix arrive juste à temps —
+  sans lui, les 100 FCFA contre un abonnement annuel étaient exploitables en argent réel.
+  Corollaire : le produit de test `btest100` (100 FCFA, visible de tous) encaisse maintenant pour
+  de vrai. Retrait conseillé — voir la commande dans la section « Produit de test ».
+- **Manuel papier = lecture immédiate.** `vrt_ouvrir_lecture_immediate()` + miroir client :
+  un achat `book` inscrit le livre dans `acc.unlockedBooks`, donc `secure_pdf.php` l'ouvre à la
+  seconde (images page par page, filigranées, jamais le PDF). Le papier se retire ensuite.
+  Sans effet si le livre n'a pas de `secureId`/`securePages`/`digital` — on ne promet pas une
+  lecture qui n'existe pas. Exigé par le test, vérifié par mutation.
+- **Tunnel raccourci** : les coordonnées étaient redemandées à vide alors que `confirmerAchat` les
+  transmet déjà. Champs préremplis + étape ① sautée quand nom et téléphone sont connus (retour
+  possible d'un clic). Vérifié au navigateur dans les deux cas (connu → ②, `SES=null` → ①).
+- **Faux positif écarté** : le bandeau rouge « accès activé sous 24 h » vu en test venait d'un
+  appel manuel à `openPaymentModal` sur le serveur local, sans configuration de passerelle. En
+  prod, `_campayTile` existe et c'est le bandeau vert « activation immédiate » qui s'affiche.
+  Le message des 24 h est déjà conditionnel depuis un commit antérieur.
