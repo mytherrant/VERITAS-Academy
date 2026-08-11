@@ -121,6 +121,34 @@ personne ne peut croire que l'argent est arrivé.
 
 Validez le KYC sur <https://camerpay.biz/client>, puis `CAMERPAY_MODE = 'live'`.
 
+> ### ⚠️ `CAMERPAY_MODE` ne fait PAS passer en réel — il ne fait que l'annoncer
+>
+> Ce réglage est **purement local**. Il n'est jamais transmis à CamerPay :
+> l'appel d'initiation ne porte aucun champ de mode, seulement votre jeton.
+> Le mettre à `live` sans avoir validé le KYC donne une sonde `?action=config`
+> qui affiche fièrement `mode:live` pendant que CamerPay continue de renvoyer
+> ses pages `/sandbox/simulate/`. **On croit encaisser, et aucun franc n'arrive.**
+>
+> **Ce qui décide se trouve chez CamerPay, dans cet ordre :**
+> 1. le **KYC validé** (sans lui, le compte reste en test quoi qu'on fasse) ;
+> 2. le **jeton** employé — après validation, prenez le jeton de production sur
+>    `camerpay.biz/client/api` et remplacez `CAMERPAY_TOKEN` **sur le serveur**.
+>
+> **Le seul test qui fasse foi** — lancez un paiement et regardez la page qui
+> s'ouvre : une URL contenant `/sandbox/simulate/`, ou le bandeau
+> « 🧪 MODE TEST » dans le modal, signifie que **CamerPay** vous répond en test.
+> Ce bandeau n'est pas déclaratif : le serveur le calcule à partir de l'URL
+> renvoyée par le fournisseur, pas à partir de `CAMERPAY_MODE`.
+>
+> **Piège de configuration à écarter d'abord** : le bloc `CAMERPAY` protège
+> chaque constante par `if (!defined('X')) define('X', …)`. La **première**
+> définition gagne et les suivantes sont ignorées **en silence** — si
+> `CAMERPAY_TOKEN` apparaît deux fois dans le fichier, votre nouveau jeton n'est
+> jamais pris en compte. Cherchez `CAMERPAY_TOKEN` dans `payment_config.php` :
+> il ne doit y avoir **qu'une seule** ligne `define`. Une fois la mise à jour
+> déployée, `?action=hooklog` (admin) fait ce comptage tout seul et publie une
+> empreinte du jeton actif, pour confirmer que c'est bien le nouveau qui sert.
+
 | Palier | Pièces | Plafond mensuel |
 |---|---|---|
 | KYC-1 | CNI du gérant **ou** extrait RCCM | 200 000 FCFA |
