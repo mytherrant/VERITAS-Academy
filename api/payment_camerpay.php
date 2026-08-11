@@ -1085,6 +1085,27 @@ if ($action === 'hooklog' && $method === 'GET') {
     $secretPose = defined('CAMERPAY_CALLBACK_SECRET') && CAMERPAY_CALLBACK_SECRET !== ''
                   && strpos(CAMERPAY_CALLBACK_SECRET, 'À_REMPLIR') === false;
     $fp = $secretPose ? substr(hash('sha256', 'vrt-fp|' . CAMERPAY_CALLBACK_SECRET), 0, 12) : '';
+    // Le jeton API a droit à la même empreinte : « ai-je bien remplacé le jeton
+    // de test par celui de production ? » se vérifie ainsi sans le recopier.
+    $fpTok = camerpayConfigured() ? substr(hash('sha256', 'vrt-fp|' . CAMERPAY_TOKEN), 0, 12) : '';
+
+    /* ⚠️ DÉFINITIONS EN DOUBLE — le piège de `if (!defined(...)) define(...)`.
+       Ces gardes évitent une erreur fatale si le fichier est inclus deux fois,
+       mais elles ont un effet de bord redoutable : la PREMIÈRE définition gagne,
+       et les suivantes sont ignorées SANS le moindre avertissement. Un
+       administrateur qui remplace son jeton de test par le jeton live dans le
+       second bloc voit… exactement le même comportement qu'avant, et cherche la
+       panne partout ailleurs. PHP ne sait pas dire où une constante a été
+       définie : on lit donc le fichier de configuration et on compte. */
+    $doublons = [];
+    $cfgFile = __DIR__ . '/payment_config.php';
+    if (is_readable($cfgFile)) {
+        $src = (string) @file_get_contents($cfgFile);
+        foreach (['CAMERPAY_TOKEN', 'CAMERPAY_CALLBACK_SECRET', 'CAMERPAY_PUBLIC_INIT', 'CAMERPAY_MODE'] as $c) {
+            $n = preg_match_all("/define\s*\(\s*['\"]" . $c . "['\"]/", $src);
+            if ($n > 1) $doublons[$c] = $n;
+        }
+    }
 
     jsonRespCy([
         'ok'         => true,
@@ -1094,6 +1115,13 @@ if ($action === 'hooklog' && $method === 'GET') {
         'callback_url' => camerpayCallbackUrl(),
         'secret_pose'        => $secretPose,
         'secret_empreinte'   => $fp,
+        'token_empreinte'    => $fpTok,
+        'definitions_en_double' => $doublons ?: null,
+        'alerte_doublons'    => $doublons
+            ? 'ATTENTION : ' . implode(', ', array_keys($doublons)) . ' est défini PLUSIEURS fois dans api/payment_config.php. '
+              . 'Avec « if (!defined(...)) define(...) », c\'est la PREMIÈRE définition qui gagne et les suivantes sont ignorées en silence : '
+              . 'la valeur que vous venez de modifier n\'est peut-être pas celle qui sert. Supprimez les définitions en trop et ne gardez que la bonne.'
+            : null,
         'secret_comparaison' => $secretPose
             ? 'Collez le secret affiché sur camerpay.biz dans cette commande — il ne quitte pas votre machine : '
               . 'php -r "echo substr(hash(\'sha256\',\'vrt-fp|\'.trim(fgets(STDIN))),0,12).PHP_EOL;" '
