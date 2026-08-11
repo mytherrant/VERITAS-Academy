@@ -10446,8 +10446,8 @@ function acheterManuel(bid){
   if(DB.bookPurchases.find(bp=>bp.eid===s.id&&bp.bid===bid)){toast('Vous avez déjà acheté ce manuel','warn');return;}
   M('Acheter ce manuel',b.titre,`<div class="vcard" style="text-align:center;margin-bottom:14px"><div style="font-size:48px;margin-bottom:8px">${b.ico}</div><div class="bold s">${b.titre}</div><div class="xs2 mut">${b.cls} · ${b.auteur} · ${b.pages} pages</div></div>
     <div style="padding:14px;background:var(--gp);border-radius:var(--r2);border:1px solid var(--gb);text-align:center"><div class="mono bold" style="font-size:24px;color:var(--gold)">${fmt(b.prix)}</div><div class="xs2 mut mt4">Prix d\'achat</div></div>
-    <div class="ib ibt mt14 mb0"><span>ℹ️</span><span>Votre commande sera enregistrée. Rendez-vous à l\'administration pour récupérer votre manuel et effectuer le paiement.</span></div>`,
-  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="confirmerAchat('${bid}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Confirmer la commande</button>`);
+    <div class="ib ibt mt14 mb0"><span>ℹ️</span><span>Réglez en ligne par Orange Money, MTN MoMo ou carte. Le manuel est à retirer à l\'administration, votre référence de paiement à l\'appui.</span></div>`,
+  `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="confirmerAchat('${bid}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Payer maintenant</button>`);
 }
 
 function confirmerAchat(bid){
@@ -37169,6 +37169,21 @@ openPaymentModal = function(payInfo){
     +'<span style="width:70px">Coordonnées</span><span style="width:70px">Paiement</span><span style="width:70px">Confirmer</span></div>';
 
   // Step 1 : Client form
+  /* Acheter un manuel demandait TROIS écrans : la fiche du livre, puis « Vos
+     coordonnées », puis le paiement. Or l'appelant transmet déjà `customerNom`
+     et `customerTel` (confirmerAchat les tire de la session), et l'étape ① les
+     redemandait quand même — à vide. Le client connecté retapait son propre nom
+     avant de pouvoir payer, et beaucoup abandonnaient là.
+     Les champs sont donc préremplis, et quand nom + téléphone sont déjà connus
+     l'étape ① est SAUTÉE : on ouvre directement sur les moyens de paiement. Elle
+     reste accessible d'un clic (« ← Précédent ») pour corriger une faute de
+     frappe, et le visiteur non connecté la voit toujours — lui, on ne sait rien
+     de lui. */
+  var _cNom  = (payInfo.customerNom  || ((typeof SES!=='undefined'&&SES) ? ((SES.pre||'')+' '+(SES.nom||'')) : '')).trim();
+  var _cTel  = (payInfo.customerTel  || ((typeof SES!=='undefined'&&SES) ? (SES.tel||'')   : '')).trim();
+  var _cMail = (payInfo.customerEmail || ((typeof SES!=='undefined'&&SES) ? (SES.email||'') : '')).trim();
+  var _coordConnues = !!(_cNom && _cTel);
+
   var step1 = '<div id="payStep1">'
     +'<div style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:16px;border-radius:14px;margin-bottom:16px">'
     +'<div style="font-size:11px;letter-spacing:2px;opacity:.7;text-transform:uppercase">Paiement pour</div>'
@@ -37186,9 +37201,9 @@ openPaymentModal = function(payInfo){
     +'</div>'
     +'<div style="font-family:Montserrat,sans-serif;font-size:13px;font-weight:700;margin-bottom:10px;color:var(--ink)">👤 Vos coordonnées</div>'
     +'<div class="fg2">'
-    +'<div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="payNom" placeholder="Ex: MBALLA Jean-Pierre"></div>'
-    +'<div class="fg"><span class="fl">Numéro WhatsApp *</span><input class="fi" id="payTel" type="tel" placeholder="+237 6XX XX XX XX"></div>'
-    +'<div class="fg"><span class="fl">Email (pour PDF)</span><input class="fi" id="payEmail" type="email" placeholder="votre@email.com"></div>'
+    +'<div class="fg"><span class="fl">Nom complet *</span><input class="fi" id="payNom" value="'+_esc(_cNom)+'" placeholder="Ex: MBALLA Jean-Pierre"></div>'
+    +'<div class="fg"><span class="fl">Numéro WhatsApp *</span><input class="fi" id="payTel" type="tel" value="'+_esc(_cTel)+'" placeholder="+237 6XX XX XX XX"></div>'
+    +'<div class="fg"><span class="fl">Email (pour PDF)</span><input class="fi" id="payEmail" type="email" value="'+_esc(_cMail)+'" placeholder="votre@email.com"></div>'
     +'</div>'
     +'<div style="margin-top:12px"><span class="fl">Code promo</span><div style="display:flex;gap:8px"><input class="fi" id="promoInput" placeholder="Ex: ELEVE10" style="flex:1;text-transform:uppercase"><button class="btn bi sm" onclick="appliquerPromo('+montant+',\''+ref+'\')" style="white-space:nowrap">Appliquer</button></div><div id="promoFeedback" style="margin-top:6px"></div></div>'
     +'<div style="margin-top:16px;text-align:right"><button class="btn bi" onclick="_payGoStep(2)">Suivant →</button></div>'
@@ -37286,6 +37301,11 @@ openPaymentModal = function(payInfo){
 
   M('💰 Paiement Sécurisé', label+' — '+montantFmt, body,
     '<button class="btn bo" onclick="cm()">Fermer</button>', true);
+
+  // Un écran de moins : on n'ouvre pas sur un formulaire déjà rempli. Le
+  // setTimeout laisse M() poser le DOM — _payGoStep lit les champs, qui
+  // n'existent pas encore à cet instant.
+  if(_coordConnues) setTimeout(function(){ try{ _payGoStep(2); }catch(e){} }, 0);
 };
 window.openPaymentModal = openPaymentModal;
 
