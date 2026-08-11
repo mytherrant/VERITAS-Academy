@@ -404,6 +404,38 @@ jobs:
             fi
           fi
 
+      - name: 🔗 Aligner les cache-busters de tous les assets
+        run: |
+          # Les ?v= de /assets/*.css|js étaient maintenus À LA MAIN, page par page,
+          # et ils ont dérivé : app.js en 1.17.2 pendant que veritas-ui.js restait
+          # en 1.16.0 sur 64 pages, veritas-pages.css en 1.16.1, motion en 1.16.2.
+          # Or .htaccess sert ces fichiers en « max-age=31536000, immutable » : un
+          # appareil déjà venu gardait donc l'ancienne version PENDANT UN AN, sans
+          # autre recours que vider son cache — le symptôme rapporté en août 2026.
+          # On réaligne tout sur la version de la coquille, dans deploy/ seulement.
+          VER=$(grep -o 'app\.js?v=[0-9.]*' deploy/app.html | head -1 | sed 's/.*v=//')
+          if [ -z "$VER" ]; then
+            echo "::error title=Version d'asset introuvable::Impossible de lire app.js?v= dans deploy/app.html."
+            exit 1
+          fi
+          # Ancrage STRICT sur « .css?v= » / « .js?v= ». Un remplacement sur le
+          # numéro nu a déjà mangé les paramètres d'un arc SVG (symbole lc-shield,
+          # bump 1.17.0 → 1.17.1) : ne jamais élargir ce motif.
+          n=0
+          while IFS= read -r f; do
+            if grep -qE '\.(css|js)\?v=[0-9.]+' "$f"; then
+              sed -i -E "s/\.(css|js)\?v=[0-9.]+/.\1?v=$VER/g" "$f"
+              n=$((n+1))
+            fi
+          done < <(find deploy -type f \( -name '*.html' -o -name '*.php' \))
+          echo "✅ Cache-busters alignés sur $VER dans $n fichier(s)."
+          reste=$(grep -rhoE '\.(css|js)\?v=[0-9.]+' deploy --include='*.html' --include='*.php' | grep -v "v=$VER" | sort -u | tr '\n' ' ')
+          if [ -n "$reste" ]; then
+            echo "::warning title=Versions résiduelles::$reste"
+          else
+            echo "   Aucune version résiduelle — tous les assets partagent $VER."
+          fi
+
       - name: 🚀 Déployer via FTP vers veritas-school.com
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
