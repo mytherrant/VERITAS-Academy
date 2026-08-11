@@ -404,6 +404,16 @@ if ($action === 'init' && $method === 'POST') {
         'source'                => 'veritas',
     ];
     if ($methode !== '')     $payload['payment_method'] = $methode;
+    /* ⚠️ `customer_phone` : la documentation CamerPay se CONTREDIT.
+         • le courriel « 3 raisons d'échec » (11/08/2026) : « Format API :
+           +237 6XX XXX XXX (avec indicatif) » ;
+         • l'exemple d'appel du tableau de bord : "customer_phone": "699123456"
+           — neuf chiffres, sans indicatif.
+       On garde le format international, et ce n'est pas un pari : une
+       transaction réelle initiée avec « +237697637739 » a été acceptée, et la
+       page de paiement a bien affiché « 697637739 » — CamerPay normalise donc
+       lui-même. Ne PAS « aligner sur l'exemple » sans reproduire ce test : on
+       casserait un chemin qui fonctionne pour suivre une doc ambiguë. */
     if ($payerNumber !== '') $payload['customer_phone'] = '+' . $payerNumber;
     if ($clientNom !== '')   $payload['customer_name']  = mb_substr($clientNom, 0, 255);
     if ($clientMail !== '' && filter_var($clientMail, FILTER_VALIDATE_EMAIL)) {
@@ -1060,12 +1070,35 @@ if ($action === 'hooklog' && $method === 'GET') {
     } elseif (!empty($motifs['UNVERIFIED_NO_AUTH_STATUS'])) {
         $diag = 'La notification a été acceptée mais le statut n\'a pas pu être relu chez CamerPay (jeton refusé ou API injoignable). Vérifiez CAMERPAY_TOKEN.';
     }
+    /* EMPREINTE du secret, jamais le secret.
+       « Le secret est-il le bon ? » ne se vérifie pas à l'œil : les deux valeurs
+       vivent à deux endroits différents (tableau de bord CamerPay / serveur), et
+       les recopier pour comparer est le meilleur moyen de les faire fuiter — un
+       secret HMAC lu par un tiers permet de forger des notifications.
+       On publie donc les 12 premiers caractères d'un SHA-256 SALÉ du secret :
+       assez pour comparer, inutilisable pour remonter à la valeur. La commande
+       qui calcule la même empreinte sur le secret affiché par CamerPay est
+       donnée juste à côté — si les deux chaînes diffèrent, le secret du serveur
+       n'est pas celui du tableau de bord, et c'est toute l'explication des
+       « webhooks en échec ». Rappel : sandbox et live peuvent avoir DEUX
+       secrets distincts — passer en live sans reporter le nouveau les casse tous. */
+    $secretPose = defined('CAMERPAY_CALLBACK_SECRET') && CAMERPAY_CALLBACK_SECRET !== ''
+                  && strpos(CAMERPAY_CALLBACK_SECRET, 'À_REMPLIR') === false;
+    $fp = $secretPose ? substr(hash('sha256', 'vrt-fp|' . CAMERPAY_CALLBACK_SECRET), 0, 12) : '';
+
     jsonRespCy([
         'ok'         => true,
         'count'      => count($lignes),
         'motifs'     => $motifs,
         'diagnostic' => $diag ?: 'Aucun refus enregistré dans ce journal.',
         'callback_url' => camerpayCallbackUrl(),
+        'secret_pose'        => $secretPose,
+        'secret_empreinte'   => $fp,
+        'secret_comparaison' => $secretPose
+            ? 'Collez le secret affiché sur camerpay.biz dans cette commande — il ne quitte pas votre machine : '
+              . 'php -r "echo substr(hash(\'sha256\',\'vrt-fp|\'.trim(fgets(STDIN))),0,12).PHP_EOL;" '
+              . '· une empreinte différente de « ' . $fp . ' » = ce n\'est pas le même secret.'
+            : 'Aucun secret de webhook posé sur ce serveur : toutes les notifications sont refusées (fail-closed).',
         'lignes'     => $recent,
     ]);
 }
