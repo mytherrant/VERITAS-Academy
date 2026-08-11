@@ -101,10 +101,33 @@ if ($file['size'] > $maxBytes) {
    publique renvoyée. Les autres folders restent publics (galerie, logos, etc.). */
 $isProtected = ($folder === 'protected');
 
-if ($isProtected) {
-    $uploadBase = dirname(__DIR__) . '/uploads/protected/';
-    if (!is_dir($uploadBase)) mkdir($uploadBase, 0750, true);
-    $htaccess = $uploadBase . '.htaccess';
+/* 🔐 v1.17 — PAGES D'UN LIVRE PROTÉGÉ : folder='bookpages'
+   → uploads/protected/books/<bookId>/pNNN.jpg
+
+   Le nom de fichier est IMPOSÉ par api/secure_pdf.php, qui cherche p001.jpg,
+   p002.jpg… Le nom aléatoire utilisé pour tous les autres uploads rendrait ces
+   pages invisibles au lecteur : le dossier paraîtrait rempli côté FTP et le
+   livre resterait obstinément « non préparé » côté élève. */
+$isBookPage = ($folder === 'bookpages');
+$bookId = ''; $pageNo = 0;
+if ($isBookPage) {
+    $bookId = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) ($_POST['bookId'] ?? ''));
+    $pageNo = (int) ($_POST['page'] ?? 0);
+    if ($bookId === '') {
+        http_response_code(400); echo json_encode(['ok'=>false,'error'=>'bookId requis']); exit;
+    }
+    if ($pageNo < 1 || $pageNo > 2000) {
+        http_response_code(400); echo json_encode(['ok'=>false,'error'=>'Numéro de page hors bornes (1-2000)']); exit;
+    }
+    if ($mime !== 'image/jpeg') {
+        http_response_code(400); echo json_encode(['ok'=>false,'error'=>'Les pages doivent être des JPEG']); exit;
+    }
+}
+
+if ($isProtected || $isBookPage) {
+    $protRoot = dirname(__DIR__) . '/uploads/protected/';
+    if (!is_dir($protRoot)) mkdir($protRoot, 0750, true);
+    $htaccess = $protRoot . '.htaccess';
     if (!file_exists($htaccess)) {
         file_put_contents($htaccess,
             "# Contenu PREMIUM — aucun accès HTTP direct ; servi via api/content.php après contrôle de droits.\n".
@@ -114,6 +137,18 @@ if ($isProtected) {
             "RemoveHandler .php .phtml .phar .cgi .pl .py\n".
             "<FilesMatch \"\\.(php|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp|exe|bat)$\">\n  Require all denied\n</FilesMatch>\n"
         );
+    }
+    if ($isBookPage) {
+        $uploadBase = $protRoot . 'books/' . $bookId . '/';
+        if (!is_dir($uploadBase)) mkdir($uploadBase, 0750, true);
+        /* Réexport d'un document plus court : sans purge, les pages du précédent
+           survivraient (p007.jpg orpheline comptée par secure_pdf.php, donc lue
+           comme la fin du nouveau document). Le client ne purge qu'à la page 1. */
+        if (!empty($_POST['purge'])) {
+            foreach (glob($uploadBase . 'p*.jpg') ?: [] as $old) @unlink($old);
+        }
+    } else {
+        $uploadBase = $protRoot;
     }
 } else {
     $uploadBase = dirname(__DIR__) . '/uploads/veritas/' . $folder . '/';
@@ -133,16 +168,27 @@ if ($isProtected) {
     }
 }
 
-/* Nom de fichier sécurisé unique */
-$name = 'vt_' . bin2hex(random_bytes(8)) . '.' . $ext;
+/* Nom de fichier : imposé pour une page de livre, aléatoire partout ailleurs */
+$name = $isBookPage
+    ? sprintf('p%03d.jpg', $pageNo)
+    : ('vt_' . bin2hex(random_bytes(8)) . '.' . $ext);
 $dest = $uploadBase . $name;
 
 if (!move_uploaded_file($file['tmp_name'], $dest)) {
     http_response_code(500); echo json_encode(['ok'=>false,'error'=>'Impossible de déplacer le fichier']); exit;
 }
-chmod($dest, $isProtected ? 0640 : 0644);
+chmod($dest, ($isProtected || $isBookPage) ? 0640 : 0644);
 
-if ($isProtected) {
+if ($isBookPage) {
+    // On renvoie le décompte réel du dossier : le client affiche ainsi une
+    // progression fondée sur ce que le serveur a VRAIMENT écrit, pas sur le
+    // nombre de requêtes qu'il croit avoir réussies.
+    $count = count(glob($uploadBase . 'p*.jpg') ?: []);
+    echo json_encode([
+        'ok'=>true, 'bookpage'=>true, 'page'=>$pageNo, 'name'=>$name,
+        'pages'=>$count, 'dir'=>'uploads/protected/books/'.$bookId, 'size'=>$file['size']
+    ]);
+} elseif ($isProtected) {
     // Pas d'URL publique : le client stocke fichierProtege et lit via content.php.
     echo json_encode(['ok'=>true,'protected'=>true,'fichierProtege'=>$name,'name'=>$name,'size'=>$file['size'],'mime'=>$mime]);
 } else {
