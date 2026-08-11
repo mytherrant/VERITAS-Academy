@@ -25395,7 +25395,7 @@ window._secureRenderScroll=function(){
   // contenu n'arrive qu'à l'approche de l'écran, via un bail signé, et repart
   // dès qu'on s'en éloigne. Auparavant les 300 liens d'un manuel tenaient dans
   // le document, prêts à être récoltés d'une ligne en console.
-  st.readable=readable; st.sigs={}; st.sigExp=0; st.busy={};
+  st.readable=readable; st.sigs={}; st.busy={};
   var html='';
   for(var n=1;n<=readable;n++){
     html+='<canvas class="sread-img" data-pg="'+n+'" width="1240" height="1754" '
@@ -25411,10 +25411,14 @@ window._secureRenderScroll=function(){
 // Bail de lecture : le serveur ne signe qu'une FENÊTRE de pages à la fois, et
 // tient un quota horaire. Demander tout le document d'un coup est précisément
 // ce qu'on ne veut plus pouvoir faire.
+// Chaque signature est conservée AVEC son échéance : le serveur signe
+// « id|page|compte|exp », donc réutiliser une signature d'une fenêtre
+// antérieure sous l'échéance de la dernière la rendrait invalide (403).
 window._secureEnsureSig=function(n){
   var st=window._secureState; if(!st) return Promise.reject(new Error('fermé'));
   var now=Math.floor(Date.now()/1000);
-  if(st.sigs[n]&&st.sigExp>now+30) return Promise.resolve(st.sigs[n]);
+  var have=st.sigs[n];
+  if(have&&have.e>now+30) return Promise.resolve(have);
   var u=st.base+'/secure_pdf.php?id='+encodeURIComponent(st.id)+'&sign=1&from='+n+'&count=8'
        +(st.tok?('&token='+encodeURIComponent(st.tok)):'');
   return fetch(u,{cache:'no-store'}).then(function(r){
@@ -25422,8 +25426,10 @@ window._secureEnsureSig=function(n){
     return r.json();
   }).then(function(j){
     if(!j||!j.ok||!j.sigs) throw new Error('bail refusé');
-    st.sigExp=j.exp||0;
-    for(var k in j.sigs){ if(Object.prototype.hasOwnProperty.call(j.sigs,k)) st.sigs[k]=j.sigs[k]; }
+    var exp=j.exp||0;
+    for(var k in j.sigs){
+      if(Object.prototype.hasOwnProperty.call(j.sigs,k)) st.sigs[k]={s:j.sigs[k],e:exp};
+    }
     if(!st.sigs[n]) throw new Error('page non couverte');
     return st.sigs[n];
   });
@@ -25435,9 +25441,9 @@ window._securePaintPage=function(n){
   var stage=document.getElementById('sreadStage'); if(!stage) return;
   var cv=stage.querySelector('.sread-img[data-pg="'+n+'"]'); if(!cv||cv._painted) return;
   st.busy[n]=1;
-  _secureEnsureSig(n).then(function(sig){
+  _secureEnsureSig(n).then(function(bail){
     var u=st.base+'/secure_pdf.php?id='+encodeURIComponent(st.id)+'&page='+n
-         +'&exp='+encodeURIComponent(st.sigExp)+'&sig='+encodeURIComponent(sig)
+         +'&exp='+encodeURIComponent(bail.e)+'&sig='+encodeURIComponent(bail.s)
          +(st.tok?('&token='+encodeURIComponent(st.tok)):'');
     return fetch(u,{cache:'no-store'}).then(function(r){
       if(!r.ok) throw new Error('HTTP '+r.status);
