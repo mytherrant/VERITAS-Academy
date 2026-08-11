@@ -776,3 +776,32 @@ association) a été écartée pour cette raison, pas par manque de temps.
   appel manuel à `openPaymentModal` sur le serveur local, sans configuration de passerelle. En
   prod, `_campayTile` existe et c'est le bandeau vert « activation immédiate » qui s'affiche.
   Le message des 24 h est déjà conditionnel depuis un commit antérieur.
+
+## Passage en LIVE de CamerPay — trois pièges silencieux (11/08)
+- **`CAMERPAY_MODE` ne pilote RIEN chez le fournisseur.** Réglage purement local : `camerpayApi()`
+  n'ajoute que le Bearer, le payload d'initiation ne porte aucun champ de mode. Basculer sur
+  « live » donne une sonde qui annonce `mode:live` pendant que CamerPay sert toujours ses pages
+  `/sandbox/simulate/` — on croit encaisser, aucun franc n'arrive. **Seul le JETON décide** (test
+  vs live) avec l'état du KYC. Le remplacer dans `api/payment_config.php` SUR LE SERVEUR (fichier
+  gitignoré ET exclu de la copie CI : il se pose en FTP). Désormais détecté : log `[MODE_MISMATCH]`
+  à l'initiation + phrase explicite dans `?action=config`.
+- **Deux étages de webhook, à ne jamais confondre.** (a) Orange/MTN/Stripe/PayPal → CamerPay :
+  `camerpay.biz/webhook/{camerpay,stripe,paypal}`, à déclarer chez les OPÉRATEURS ; (b) CamerPay →
+  VÉRITAS : `veritas-school.com/api/payment_camerpay.php?action=notify`. Mettre (a) à la place de
+  (b) couperait toute notification vers VÉRITAS.
+- **Sandbox et live ont souvent DEUX secrets HMAC distincts.** Basculer sans reporter le nouveau
+  casse tous les webhooks, et CamerPay affiche « votre serveur n'a pas pu être notifié » alors
+  qu'il a parfaitement répondu — **401, il a REFUSÉ** (fail-closed). Nouveau `?action=hooklog`
+  (admin) : N dernières lignes, compte par motif, UNE phrase de diagnostic, et une **empreinte
+  SHA-256 salée (12 caractères) du secret posé** + la commande pour calculer la même sur le secret
+  du tableau de bord — comparaison sans jamais exposer la valeur. Rappel : un webhook refusé ne
+  perd AUCUN paiement (polling `?action=status` + réconciliation `?action=list`).
+- **`customer_phone` : la doc se contredit.** Courriel officiel = `+237 6XX XXX XXX` « avec
+  indicatif » ; exemple du tableau de bord = `699123456` nu. On envoie l'international, validé par
+  une transaction réelle (CamerPay normalise et réaffiche 9 chiffres). Figé en commentaire : ne pas
+  « aligner sur l'exemple » sans reproduire ce test.
+- **Notre payload d'initiation est conforme** champ pour champ à l'exemple officiel. L'initiation
+  n'est donc PAS en cause : il ne reste que le jeton et le secret.
+- **PHP exécutable en local depuis le 11/08** : 8.2.33 portable (scratchpad, empreinte SHA-256
+  vérifiée) + `php.ini` activant `mbstring` et `curl`. Sans `mbstring`, les libs `api/` plantent sur
+  `mb_substr()`. Permet de LANCER le test au lieu d'attendre la CI.
