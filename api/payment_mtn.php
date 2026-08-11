@@ -301,9 +301,12 @@ if ($action === 'status' && $method === 'GET') {
         'paid_at'  => $state['paid_at'] ?? null,
         'failed_at'=> $state['failed_at'] ?? null,
         'provider_status' => $state['provider_status'] ?? null,
+        // ⚠️ Action NON authentifiée : le payeur poll sans compte. `targetId` et
+        //    `accountId` en sortaient — or une référence est courte (préfixe +
+        //    date + 4 caractères), donc énumérable, et ces deux champs désignent
+        //    un élève et un compte. Aucun code client ne les lit (vérifié).
+        //    Même retrait que payment_camerpay.php.
         'intent'   => $state['intent'] ?? 'generic',
-        'targetId' => $state['targetId'] ?? null,
-        'accountId'=> $state['accountId'] ?? null,
         'reason'   => $state['reason'] ?? null
     ]);
 }

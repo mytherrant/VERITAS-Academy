@@ -242,9 +242,10 @@ if ($action === 'status' && $method === 'GET') {
         'paid_at'  => $state['paid_at'] ?? null,
         'failed_at'=> $state['failed_at'] ?? null,
         'provider_status' => $state['provider_status'] ?? null,
-        'intent'   => $state['intent'] ?? 'generic',
-        'targetId' => $state['targetId'] ?? null,
-        'accountId'=> $state['accountId'] ?? null
+        // ⚠️ Action NON authentifiée (le payeur poll sans compte) : `targetId` et
+        //    `accountId` désignent un élève et un compte, et une référence est
+        //    énumérable. Retirés — aucun code client ne les lit (vérifié).
+        'intent'   => $state['intent'] ?? 'generic'
     ]);
 }
 

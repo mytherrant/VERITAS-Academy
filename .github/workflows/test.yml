@@ -12,6 +12,7 @@ on:
       - 'VERITAS_v1.2.html'
       - 'app.js'
       - 'app.css'
+      - 'api/**'
       - 'tests/**'
       - 'playwright.config.cjs'
       - 'package.json'
@@ -20,6 +21,35 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # Chaque surface payante débloque-t-elle vraiment quelque chose ?
+  #
+  # Dix bugs d'argent trouvés à la main en une session, tous identiques : le
+  # paiement réussit, l'argent rentre, et rien ne s'ouvre. Aucune exception,
+  # aucune trace — le symptôme est l'absence de symptôme. Ce job parcourt les
+  # surfaces une à une, confirme un paiement et va LIRE le droit en base.
+  # Il tourne avant le smoke test : il est dix fois plus rapide, et un chemin
+  # d'argent cassé est plus grave qu'un écran blanc.
+  # ──────────────────────────────────────────────────────────────────────────
+  paiements:
+    name: 💰 Surfaces payantes (octroi, prix, idempotence)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, curl
+          coverage: none
+      - name: 🔎 Syntaxe des endpoints de paiement
+        run: |
+          for f in api/_auth_lib.php api/payment_camerpay.php api/payment_campay.php \
+                   api/payment_mtn.php api/payment_orange.php api/_pay_funds_lib.php; do
+            [ -f "$f" ] && php -l "$f"
+          done
+      - name: 💰 Un paiement confirmé écrit-il un droit ?
+        run: php tests/paiements_entitlements.php
+
   smoke:
     name: 🌐 Boot du portail (Chromium headless)
     runs-on: ubuntu-latest

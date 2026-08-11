@@ -320,6 +320,141 @@ if (!defined('VRT_AUTH_LIB')) {
         unset($b);
     }
 
+    /* ══════════════════════════════════════════════════════════════════════
+       PRIX DE RÉFÉRENCE — ce que l'objet vendu coûte VRAIMENT, d'après la base.
+
+       ⚠️ Le trou que cela ferme est le plus coûteux de toute la chaîne d'argent.
+       `?action=init` reçoit `montant`, `intent` et `targetId` du NAVIGATEUR, et
+       le jeton public d'initiation est servi à tous par `?action=config` (il le
+       doit : sans lui, personne ne peut payer). Jusqu'ici l'octroi ne confrontait
+       le montant qu'à... lui-même : `camerpayApplyVerified` vérifie que la somme
+       encaissée par l'opérateur égale la somme DÉCLARÉE, jamais le tarif. Une
+       requête forgée à 100 FCFA (le minimum CamerPay) sur l'abonnement annuel
+       passait donc toute la chaîne — paiement réel, signature HMAC valide,
+       montant « vérifié » — et ouvrait l'accès complet. Aucune alerte : le
+       paiement RÉUSSIT.
+
+       Le prix est cherché dans la base partagée, jamais dans la requête.
+       null = tarif indéterminable (produit libre, panier, cagnotte, objet absent
+       du catalogue) : on n'invente pas un prix, on journalise et on laisse
+       passer — refuser sur une ignorance ferait payer le client pour un trou de
+       nos données, exactement le mal qu'on soigne.
+       ══════════════════════════════════════════════════════════════════════ */
+    function vrt_prix_catalogue(array $db, string $intent, string $targetId): ?int {
+        // Micro-achats à l'unité et crédits IA : le tarif vit dans DB.microPrix,
+        // avec le repli sur les valeurs par défaut du client (MICRO_PRIX_DEFAULT).
+        $micro    = ['micro_epreuve' => 'epreuve', 'micro_chapitre' => 'chapitre',
+                     'micro_fiche'   => 'fiche',   'micro_labo'     => 'labo'];
+        $microDef = ['epreuve' => 200, 'chapitre' => 500, 'fiche' => 300, 'labo' => 300, 'ia' => 500];
+        if (isset($micro[$intent]) || $intent === 'ia') {
+            $t = ($intent === 'ia') ? 'ia' : $micro[$intent];
+            $v = (int) ($db['microPrix'][$t]['montant'] ?? 0);
+            return $v > 0 ? $v : $microDef[$t];
+        }
+
+        // Tranche de scolarité : le montant dû est inscrit versement par
+        // versement. C'est le seul intent dont le tarif est EXACT en base.
+        if ($intent === 'echeance') {
+            $bout   = explode(':', $targetId);
+            $planId = (string) ($bout[0] ?? '');
+            $rang   = (int) ($bout[1] ?? 0);
+            foreach (($db['echeanciers'] ?? []) as $p) {
+                if (!is_array($p) || (string) ($p['id'] ?? '') !== $planId) continue;
+                foreach ((isset($p['versements']) && is_array($p['versements']) ? $p['versements'] : []) as $v) {
+                    if (is_array($v) && (int) ($v['n'] ?? 0) === $rang) return max(0, (int) ($v['mnt'] ?? 0));
+                }
+            }
+            return null;
+        }
+
+        // Collections du catalogue — miroir EXACT de VERITAS_MONETISATION
+        // (app.js) : même intent, même collection, même champ de prix.
+        $coll = [
+            'book' => 'books', 'digitalbook' => 'books', 'contenu' => 'contenus',
+            'oeuvre' => 'oeuvres', 'labo' => 'labos', 'marketplace' => 'marketplaceItems',
+            'subscription' => 'plans',
+        ];
+        if (!isset($coll[$intent]) || $targetId === '') return null;
+
+        switch ($coll[$intent]) {
+            case 'books':            $liste = $db['books'] ?? []; break;
+            case 'contenus':         $liste = $db['elearning']['contenus'] ?? []; break;
+            case 'plans':            $liste = $db['elearning']['plans'] ?? []; break;
+            case 'labos':            $liste = $db['labos'] ?? ($db['laboratoires'] ?? []); break;
+            case 'oeuvres':          $liste = $db['oeuvres'] ?? []; break;
+            case 'marketplaceItems': $liste = $db['marketplaceItems'] ?? []; break;
+            default:                 $liste = [];
+        }
+        if (!is_array($liste)) return null;
+
+        foreach ($liste as $o) {
+            if (!is_array($o) || (string) ($o['id'] ?? '') !== $targetId) continue;
+            // Le manuel NUMÉRIQUE a son propre tarif (souvent moitié du papier) :
+            // le confronter au prix papier refuserait un achat parfaitement payé.
+            if ($intent === 'digitalbook') {
+                foreach (['prixDigital', 'priceDigital', 'prix'] as $k) {
+                    if (isset($o[$k]) && (int) $o[$k] > 0) return (int) $o[$k];
+                }
+                return null;
+            }
+            $p = (int) ($o['prix'] ?? 0);
+            return $p > 0 ? $p : null;   // 0 = gratuit ou non tarifé → rien à contrôler
+        }
+        return null;   // objet absent du catalogue : on ne devine pas
+    }
+
+    /**
+     * Prix plancher acceptable pour un tarif donné : le catalogue MOINS la
+     * meilleure remise réellement active en base (DB.promoCodes).
+     *
+     * Le navigateur applique les codes promo sans transmettre lequel : refuser
+     * tout paiement inférieur au catalogue bloquerait des remises légitimes
+     * (la boutique de manuels envoie déjà `finalPrix`). On borne donc par le bas
+     * plutôt que d'exiger l'égalité — et on plafonne cette tolérance, sinon un
+     * code « -95 % » saisi une fois en base rouvrirait le trou en grand.
+     */
+    function vrt_prix_plancher(array $db, int $prix): int {
+        if ($prix <= 0) return 0;
+        $capPct = defined('VRT_REMISE_MAX_PCT') ? (float) VRT_REMISE_MAX_PCT : 50.0;
+        if ($capPct < 0)  $capPct = 0;
+        if ($capPct > 90) $capPct = 90;
+
+        $best = 0;
+        foreach (($db['promoCodes'] ?? []) as $p) {
+            if (!is_array($p) || empty($p['actif'])) continue;
+            $r = (float) ($p['reduction'] ?? 0);
+            if ($r <= 0) continue;
+            $v = ((string) ($p['type'] ?? 'percent') === 'fixed')
+                ? (int) round($r)                       // remise en FCFA
+                : (int) round($prix * $r / 100);        // remise en pourcentage
+            if ($v > $best) $best = $v;
+        }
+        $plafond = (int) floor($prix * $capPct / 100);
+        if ($best > $plafond) $best = $plafond;
+        return max(0, $prix - $best);
+    }
+
+    /**
+     * Le montant encaissé couvre-t-il l'objet vendu ?
+     * ['ok'=>bool, 'attendu'=>?int, 'paye'=>int, 'plancher'=>int, 'motif'=>string]
+     */
+    function vrt_verifier_prix(array $db, array $state): array {
+        $intent   = (string) ($state['intent']   ?? '');
+        $targetId = (string) ($state['targetId'] ?? '');
+        $paye     = (int) ($state['montant_paye'] ?? $state['montant'] ?? 0);
+        $attendu  = vrt_prix_catalogue($db, $intent, $targetId);
+
+        if ($attendu === null) return ['ok' => true, 'attendu' => null, 'paye' => $paye, 'plancher' => 0, 'motif' => 'tarif indéterminable'];
+        if ($attendu <= 0)     return ['ok' => true, 'attendu' => $attendu, 'paye' => $paye, 'plancher' => 0, 'motif' => 'gratuit'];
+
+        $plancher = vrt_prix_plancher($db, $attendu);
+        if ($paye >= $plancher) {
+            return ['ok' => true, 'attendu' => $attendu, 'paye' => $paye, 'plancher' => $plancher,
+                    'motif' => ($paye < $attendu) ? 'remise admise' : ''];
+        }
+        return ['ok' => false, 'attendu' => $attendu, 'paye' => $paye, 'plancher' => $plancher, 'motif' => 'sous-paiement'];
+    }
+
     /**
      * Applique au $db (mutation en place) l'entitlement d'un paiement confirmé.
      * IDEMPOTENT par référence ($state['ref']) → rejouable sans double-octroi.
@@ -335,6 +470,31 @@ if (!defined('VRT_AUTH_LIB')) {
         $tel       = (string) ($state['clientTel'] ?? '');
         $label     = (string) ($state['label'] ?? '');
         if ($intent === '' || $ref === '') return ['changed' => false, 'msg' => 'intent/ref manquant'];
+
+        /* 🔐 LE MONTANT COUVRE-T-IL L'OBJET ? — contrôle unique, ici, parce que
+           les QUATRE passerelles (CamerPay, CamPay, MTN, Orange) passent par
+           cette fonction. Le placer dans les `init` obligerait à l'écrire quatre
+           fois et à le tenir à jour quatre fois.
+           Le panier se vérifie ligne par ligne : chaque ligne repasse par cette
+           même porte avec son propre intent et son propre montant. */
+        $pv = vrt_verifier_prix($db, $state);
+        if (!$pv['ok']) {
+            vrt_pay_log('[PRIX_REFUSE] ref=' . $ref . ' intent=' . $intent . ' cible=' . $targetId
+                . ' paye=' . $pv['paye'] . ' attendu=' . $pv['attendu'] . ' plancher=' . $pv['plancher']);
+            $mode = defined('VRT_PRICE_ENFORCE') ? strtolower((string) VRT_PRICE_ENFORCE) : 'strict';
+            if ($mode !== 'log') {
+                // Échec BRUYANT et non rejouable : la transaction garde son
+                // drapeau `granted`, le tableau de bord montre le motif, et
+                // l'administrateur tranche à la main. C'est l'inverse exact du
+                // symptôme d'origine — le silence.
+                return ['changed' => false, 'underpaid' => true,
+                        'msg' => 'Sous-paiement REFUSÉ : ' . $pv['paye'] . ' FCFA reçus pour un tarif de '
+                               . $pv['attendu'] . ' FCFA (plancher remise incluse : ' . $pv['plancher'] . ')'];
+            }
+        } elseif ($pv['motif'] === 'remise admise') {
+            vrt_pay_log('[PRIX_REMISE] ref=' . $ref . ' intent=' . $intent . ' cible=' . $targetId
+                . ' paye=' . $pv['paye'] . ' catalogue=' . $pv['attendu']);
+        }
 
         if ($intent === 'subscription') {
             if (!isset($db['elearning']) || !is_array($db['elearning'])) $db['elearning'] = [];
@@ -564,6 +724,11 @@ if (!defined('VRT_AUTH_LIB')) {
                 $sous['intent']   = $sousIntent;
                 $sous['targetId'] = (string) ($l['targetId'] ?? '');
                 $sous['montant']  = $mLigne;
+                // `montant_paye` porte le total du PANIER et prime sur `montant`
+                // dans le contrôle de prix : le laisser tel quel ferait passer
+                // chaque ligne pour payée au prix du panier entier — une ligne à
+                // 0 FCFA glissée dans un panier de 20 000 aurait été accordée.
+                $sous['montant_paye'] = $mLigne;
                 $sous['label']    = (string) ($l['label'] ?? $label);
                 $sous['ref']      = $ref . '#' . ($i + 1);
                 unset($sous['lignes']);
@@ -802,6 +967,10 @@ if (!defined('VRT_AUTH_LIB')) {
         }
         flock($fp, LOCK_UN);
         fclose($fp);
-        return ['ok' => true, 'changed' => $changed, 'msg' => $res['msg'] ?? ''];
+        return ['ok' => true, 'changed' => $changed, 'msg' => $res['msg'] ?? '',
+                // Remonté jusqu'au fichier d'état par camerpayGrant() : un refus
+                // de prix doit être LISIBLE dans le tableau de bord, pas seulement
+                // dans un journal que personne n'ouvre.
+                'underpaid' => !empty($res['underpaid'])];
     }
 }

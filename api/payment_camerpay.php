@@ -178,8 +178,17 @@ function camerpayInitQuotaJour($stateDir) {
     if ($max <= 0) return;
     $f = $stateDir . '_ratelimit/_jour_' . date('Ymd') . '.txt';
     if (!is_dir($stateDir . '_ratelimit/')) @mkdir($stateDir . '_ratelimit/', 0750, true);
-    $n = (int) @file_get_contents($f);
+    // Lecture-modification-écriture SOUS VERROU : sans lui, N requêtes
+    // simultanées lisent toutes la même valeur et écrivent toutes n+1. Le
+    // compteur avançait d'un cran pendant que le plafond était franchi N fois —
+    // exactement le scénario qu'un abuseur provoque (rafale parallèle), jamais
+    // celui d'un usage normal (séquentiel).
+    $fp = @fopen($f, 'c+');
+    if (!$fp) return;                       // pas de compteur possible : on ne bloque pas un paiement légitime
+    @flock($fp, LOCK_EX);
+    $n = (int) stream_get_contents($fp);
     if ($n >= $max) {
+        @flock($fp, LOCK_UN); @fclose($fp);
         @file_put_contents($stateDir . '_webhook_camerpay_log.txt',
             date('c') . " [QUOTA_JOUR_ATTEINT] $n initiations publiques aujourd'hui — plafond $max\n",
             FILE_APPEND | LOCK_EX);
@@ -187,7 +196,10 @@ function camerpayInitQuotaJour($stateDir) {
         echo json_encode(['error' => 'Le paiement en ligne est momentanément saturé. Utilisez MoMo, Orange Money ou le virement ci-dessous — le centre valide sous 24 h.']);
         exit;
     }
-    @file_put_contents($f, (string) ($n + 1), LOCK_EX);
+    // L'incrément reste DANS le verrou : ré-ouvrir le fichier pour écrire
+    // rendrait la lecture protégée parfaitement inutile.
+    ftruncate($fp, 0); rewind($fp); fwrite($fp, (string) ($n + 1)); fflush($fp);
+    @flock($fp, LOCK_UN); @fclose($fp);
 }
 
 function camerpayInitCheckOrigin() {
@@ -219,19 +231,24 @@ function camerpayInitRateLimit($stateDir) {
     if (!is_dir($dir)) @mkdir($dir, 0750, true);
     $f    = $dir . 'cyinit_' . preg_replace('/[^0-9A-Fa-f:._]/', '_', $ip) . '.json';
     $now  = time();
-    $hits = [];
-    if (is_file($f)) {
-        $prev = json_decode((string) @file_get_contents($f), true);
-        if (is_array($prev)) $hits = $prev;
-    }
+    // Même raison qu'au quota journalier : lire puis écrire sans verrou laisse
+    // une rafale parallèle franchir le plafond autant de fois qu'elle a de
+    // requêtes en vol.
+    $fp = @fopen($f, 'c+');
+    if (!$fp) return;
+    @flock($fp, LOCK_EX);
+    $hits = json_decode((string) stream_get_contents($fp), true);
+    if (!is_array($hits)) $hits = [];
     $hits = array_values(array_filter($hits, function ($t) use ($now) { return ($now - (int) $t) < 3600; }));
     if (count($hits) >= $max) {
+        @flock($fp, LOCK_UN); @fclose($fp);
         http_response_code(429);
         echo json_encode(['error' => 'Trop de tentatives de paiement. Réessayez dans quelques minutes.']);
         exit;
     }
     $hits[] = $now;
-    @file_put_contents($f, json_encode($hits), LOCK_EX);
+    ftruncate($fp, 0); rewind($fp); fwrite($fp, json_encode($hits)); fflush($fp);
+    @flock($fp, LOCK_UN); @fclose($fp);
 }
 
 // ════════════════════════════════════════════════════════════
@@ -558,13 +575,22 @@ if ($action === 'status' && $method === 'GET') {
 
     $state = json_decode(file_get_contents($stateFile), true) ?: [];
     $age   = time() - strtotime($state['created_at'] ?? 'now');
-    if (($state['status'] ?? '') === 'pending' && $age > 5) {
+    // 🔒 Anti-amplification. Cette action est NON authentifiée (le payeur poll
+    //    sans compte) et chaque passage déclenchait un appel sortant vers
+    //    CamerPay : une boucle sur une seule référence connue suffisait à faire
+    //    marteler notre serveur chez le fournisseur, jusqu'au 429 qui aurait
+    //    alors bloqué les VRAIS paiements. On borne la re-vérification par
+    //    référence, pas par IP — les adresses tournent, la référence non.
+    //    4 secondes laissent le polling légitime (5 s) inchangé.
+    $depuisControle = time() - strtotime($state['last_check_at'] ?? '@0');
+    if (($state['status'] ?? '') === 'pending' && $age > 5 && $depuisControle >= 4) {
+        $state['last_check_at'] = date('c');
         $verified = camerpayVerifyTransaction($state);
         if ($verified !== null) {
             $state = camerpayApplyVerified($state, $verified, $logFile, $ref);
             camerpayGrant($state, $logFile, $ref);   // pose `granted` — écrire APRÈS
-            file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         }
+        file_put_contents($stateFile, json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     // ⚠️ Action NON authentifiée (le payeur poll sans compte). On ne renvoie
@@ -1450,6 +1476,16 @@ function camerpayGrant(&$state, $logFile, $ref) {
     try {
         $g = vrt_grant_entitlement_to_file($state);
         if (!empty($g['ok'])) { $state['granted'] = true; $state['granted_at'] = date('c'); }
+        // Le VERDICT de l'octroi vit désormais dans le fichier d'état : « accès
+        // ouvert », « compte introuvable », « sous-paiement refusé »… Sans lui,
+        // ?action=list affichait « payé » pour une transaction qui n'avait
+        // strictement rien débloqué — le symptôme est justement l'absence de
+        // symptôme, et c'est ici qu'on lui donne une voix.
+        $state['grant_msg'] = mb_substr((string) ($g['msg'] ?? ''), 0, 200);
+        if (!empty($g['underpaid'])) {
+            $state['underpaid']  = true;
+            $state['a_regler']   = true;   // demande une décision humaine
+        }
         camerpayLog($logFile, date('c') . ' [GRANT] ref=' . $ref . ' ' . json_encode($g) . "\n");
     } catch (\Throwable $e) {
         camerpayLog($logFile, date('c') . ' [GRANT_ERR] ref=' . $ref . ' ' . $e->getMessage() . "\n");

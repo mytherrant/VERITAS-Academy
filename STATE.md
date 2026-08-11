@@ -634,3 +634,121 @@ scopés (notes/bulletins QR, emploi du temps, RH) ; (d) confirmer le **nom de ma
 - **Garde-fou scopé** : un contrôle « la tuile doublon est-elle partie ? » en regex globale a donné
   un faux positif — une autre tuile Ambassa légitime vit dans le hub élève. Scoper le contrôle à la
   région éditée, jamais au fichier entier.
+
+## Le test des surfaces payantes + le trou de tarification (10/08, suite)
+- **LA faille, jamais vue par les onze audits précédents** : le serveur n'avait AUCUN prix de
+  référence. `?action=init` reçoit `montant`, `intent` et `targetId` du NAVIGATEUR, et le jeton
+  public d'initiation est servi à tous par `?action=config` (il le doit — sans lui personne ne
+  peut payer). `camerpayApplyVerified` confrontait le montant encaissé au montant **déclaré**,
+  jamais au tarif. Une requête forgée à **100 FCFA** (minimum CamerPay) sur l'abonnement annuel à
+  25 000 traversait toute la chaîne : paiement réel, signature HMAC valide, montant « vérifié »,
+  accès complet ouvert. Les QUATRE passerelles (CamerPay, CamPay, MTN, Orange) partageaient le
+  défaut, puisqu'elles partagent `vrt_grant_entitlement`.
+- **Correctif** : `vrt_prix_catalogue()` + `vrt_prix_plancher()` + `vrt_verifier_prix()` dans
+  `_auth_lib.php`, appelés **une seule fois**, en tête de `vrt_grant_entitlement` — le point de
+  passage unique des quatre passerelles. Le prix vient de la base, jamais de la requête.
+  - Prix inconnu (objet hors catalogue, `product`, panier, cagnotte) → **on accorde et on
+    journalise**. Refuser sur une ignorance ferait payer au client un trou de NOS données.
+  - Remises : le plancher = catalogue − meilleure remise ACTIVE de `DB.promoCodes`, elle-même
+    plafonnée par `VRT_REMISE_MAX_PCT` (50 %). Un code désactivé n'ouvre aucune tolérance.
+  - Panier : chaque ligne repasse par la même porte. `montant_paye` est **réécrit par ligne** —
+    sans cela il portait le total du panier et une ligne à 0 FCFA passait pour payée.
+  - Refus = échec BRUYANT : `underpaid` + `grant_msg` dans le fichier d'état, visible au tableau
+    de bord. L'inverse exact du symptôme d'origine.
+- **`tests/paiements_entitlements.php` — le test qui manquait.** 54 contrôles : octroi réel de
+  chaque surface (on LIT le droit en base, jamais `changed=true`), idempotence du rejeu, refus de
+  sous-paiement, remises légitimes, panier ligne à ligne, commissions recalculées, et **parité
+  client ↔ serveur lue dans app.js** (tout intent vendu a un miroir serveur ; tout intent passé au
+  modal existe dans la table ; toute surface déclarée est couverte par le test).
+  - **Éprouvé par mutation** — trois régressions injectées volontairement, trois rougissements :
+    retirer `contenu` du tableau des tiroirs (= le bug n°1 de la session) → 4 échecs dont
+    « aucun intent vendu n'est ignoré » ; désactiver le contrôle de prix → 10 échecs ; retirer le
+    préfixe de `unlockedUnits` → 4 échecs. Un test vert qui n'a jamais rougi ne prouve rien.
+  - Branché dans `.github/workflows/test.yml` (job `paiements`, avant le smoke) + `api/**` ajouté
+    aux `paths`. PHP absent de la machine : exécuté ici via un PHP 8.2.33 portable (empreinte
+    SHA-256 vérifiée contre le sha256sum officiel), dans le scratchpad, rien d'installé.
+- **Deux bugs d'argent de plus, même motif (l'appelant se trompe, rien ne le signale)** :
+  1. `validerCommandeContenu` ouvrait encore le paiement d'un contenu e-learning en
+     `intent:'product'` (droit null) et **sans `customerAccountId`** — le neuvième du genre.
+  2. **Le code promo n'atteignait jamais le montant encaissé.** Le montant part figé dans
+     l'`onclick` du bouton, au rendu ; `appliquerPromo` ne touchait que du texte. Le client lisait
+     « Nouveau total : 20 000 FCFA » et était débité de 25 000. Le montant remisé transite
+     désormais par `_VRT_PAYX[ref].montantFinal`, relu par `_payInitCampay` avant l'envoi.
+  3. Corollaire : `appliquerPromo` lit `DB.promoCodes` et non plus `window.VERITAS_PROMOS`.
+     Cette dernière n'était **jamais persistée** (`_saveNewPromo` sans `save()`) : un code créé
+     par l'admin disparaissait au rechargement pendant que l'écran affichait « ACTIF ». Et surtout
+     le serveur ne connaît que `DB.promoCodes` — appliquer une remise qu'il ignore ferait refuser
+     l'accès après un paiement accepté, soit pire que le bug corrigé.
+- **Sécurité, corrections annexes** : `targetId`/`accountId` retirés de `?action=status` (non
+  authentifiée, référence énumérable) sur MTN, Orange et CamPay — CamerPay l'avait déjà ;
+  anti-amplification sur `?action=status` (re-vérification bornée à 1 / 4 s **par référence**, pas
+  par IP : les adresses tournent, la référence non) ; compteurs de débit et quota journalier
+  passés sous `flock` (lire puis écrire sans verrou laissait une rafale parallèle franchir le
+  plafond autant de fois qu'elle avait de requêtes en vol).
+- **À décider (pas un bug)** : `whatsapp_group` et `classroom` sont déclarés, implémentés des deux
+  côtés… et n'ont **aucun bouton d'achat**. Même situation que les micro-achats avant leur mise en
+  vitrine : fonctionnalité complète, invendable.
+
+---
+
+## v1.16.1 — Trois reprises de CamerPay + reprise des portes « matières »
+
+### 1. Checklist d'activation (admin)
+`_vrtChecklistSteps()` / `_checklistHTML()` en tête de `pgDash()`. Neuf étapes **dérivées de
+`DB`**, jamais stockées : logo, identité, classe active, matières, 5 élèves, 1 enseignant,
+coordonnées MoMo/OM, WhatsApp, premier encaissement. Disparaît seule à 100 %, masquable
+(`DB.school._chkHide`, `_checklistShow()` pour revenir). **Ne pas confondre avec
+`maybeShowOnboarding()`** : celui-là est une visite guidée visiteur en 8 écrans jouée une fois.
+
+### 2. Tendances sur les cartes chiffrées
+`_serieMensuelle()` → 12 mois glissants ; `_sparkline()` ; `_deltaHTML()` ; `_kpiTrend()`.
+Posées sur Élèves inscrits, Recettes, Impayés.
+- **Les entrées sans date exploitable sont IGNORÉES**, jamais rangées dans le mois courant :
+  les y mettre gonflerait le dernier point, donc le delta.
+- **Moins de 2 mois réels → aucun pourcentage.** Mois précédent à 0 → « nouveau », pas « +100 % ».
+  Base vide → `_kpiTrend` rend une chaîne vide. C'est la règle « pas de données, pas d'indicateur »
+  déjà appliquée à la preuve sociale.
+- La courbe des recettes ne couvre que les frais de scolarité (les ventes de manuels ne sont pas
+  datées en base) — c'est écrit sous la carte, pas masqué.
+- **PIÈGE `_dFR`** : `new Date('02/10/2024')` lit le 10 FÉVRIER. Le format d'écriture du projet est
+  fr-FR (`today()`), il faut découper à la main, sinon toutes les séries sont fausses.
+
+### 3. Échéancier de scolarité (paiement fractionné)
+`DB.echeanciers[]`, `mEcheancierNew()` / `mEcheanciers()` (bouton dans `pgPayments`),
+`_echStudentHTML()` dans `pgMonPaiement`. C'est le « carnet quotidien » de CamerPay appliqué à
+NOTRE facture : **aucun argent de tiers ne transite** — la tontine (djangui, carnet collectif,
+association) a été écartée pour cette raison, pas par manque de temps.
+- **Jonction obligatoire avec la compta** : `_echMarkPaid` crée un vrai `DB.payments` → recettes,
+  impayés et reçus (`printRec`) fonctionnent sans une règle métier dupliquée. Sans cette jonction
+  l'échéancier serait un silo qui ment au tableau de bord.
+- Deux modes de découpe, et le reste ne tombe pas au même endroit : en `'unit'` (« 300 F/jour »)
+  la mensualité est respectée à l'unité près et c'est le DERNIER versement qui rétrécit ; en `'nb'`
+  (« en 10 fois ») c'est le PREMIER qui absorbe, pour que tous les suivants soient annoncés exacts.
+- **PIÈGE corrigé — `setMonth` déborde** : 31/01 + 1 mois donnait le 3 mars. Butée en fin de mois
+  ajoutée (31/01 → 28/02 → 31/03). Un échéancier ouvert le 31 sautait un mois sur deux.
+- « En retard » se DÉDUIT de la date (`_echEtat`), jamais stocké : un statut figé est faux dès
+  le lendemain.
+- Vérifié par 11 cas de découpe : somme exacte, aucun versement ≤ 0, `nb` cohérent.
+
+### 4. Portes « matières » remises d'aplomb
+- La tuile **« Mes matières »** a quitté `_ACC_ESSENTIEL` : elle pointait vers `/niveaux/`, qui ne
+  contient que des `francais-*.html`. Sous un titre promettant toutes les disciplines, l'élève venu
+  pour ses maths ne trouvait que du français. Elle vit désormais **en tête de `/corriges/`**, où la
+  promesse est exacte (et l'ancienne carte « Programmes par classe », enterrée dans « Autres
+  ressources », a été retirée — deux portes identiques font douter que ce soit la même chose).
+- « Coefficients & orientation » → **« Mes matières, coefficients et orientation »** : c'est
+  `/parcours/` qui couvre réellement toutes les disciplines et leur poids.
+- `/parcours/` n'avait **qu'un seul** appel à l'abonnement, au tiers de la page, pour douze
+  sections. Ajout de trois relances **contextuelles** (`.vabo-inline`, posées juste après le
+  passage qu'elles prolongent) + une relance **persistante** (`.vabo-sticky`) qui ne paraît qu'après
+  40 % de défilement et se referme pour la session. Un bandeau qu'on ne peut pas fermer se fait
+  ignorer, puis détester. Le défilement est lu dans un `rAF` (sinon la page saccade sur mobile
+  d'entrée de gamme). 2 → 10 liens d'abonnement sur la page.
+
+### Environnement
+- **`.claude/launch.json` est partagé avec une autre session** qui y a figé le port 3000.
+  Entrée `veritas-static-b` ajoutée à côté (port auto) plutôt que de modifier la sienne.
+- Le volet navigateur de cette session rend un viewport 0×0 : ni capture, ni `requestAnimationFrame`,
+  ni mesure de géométrie réelle. Ce qui reste vérifiable : le CSSOM (valeurs des règles), les
+  fonctions pures, et les rapports de contraste calculés. **Le rendu visuel reste à contrôler à
+  l'œil sur un vrai écran.**

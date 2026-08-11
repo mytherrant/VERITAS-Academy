@@ -3248,15 +3248,15 @@ function viewBookDetail(bid){
   h+='<div style="display:flex;flex-direction:column;gap:10px;align-items:center">';
   h+='<div class="book-cover-lg" style="background:linear-gradient(160deg,'+cc+','+cc+'dd);color:#fff;flex-direction:column;padding:20px;text-align:center">';
   // Fallback emoji+titre toujours rendu en arrière-plan, masqué si l'img charge
-  h+='<div class="bk-fallback" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center"><div style="font-size:60px;margin-bottom:8px">'+b.ico+'</div><div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;line-height:1.3;color:#fff">'+_esc(b.titre)+'</div></div>';
+  h+='<div class="bk-fallback" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center"><div class="bk-cover-pic">'+(b.ico?PIC(b.ico):ICO('i-book'))+'</div><div style="font-family:Libre Baskerville,serif;font-size:14px;font-weight:700;line-height:1.3;color:#fff">'+_esc(b.titre)+'</div></div>';
   if(b.coverImg)h+='<img src="'+_esc(b.coverImg)+'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:1" onerror="this.style.display=\'none\'" onload="var p=this.parentNode.querySelector(\'.bk-fallback\');if(p)p.style.display=\'none\'">';
   h+='</div>';
   h+='<button class="btn bo sm" onclick="downloadBookCover(\''+bid+'\')" style="width:100%"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Couverture</button></div>';
   // Info
   h+='<div class="book-info"><h2>'+_esc(b.titre)+'</h2>';
   h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="bg bgb">'+_esc(b.cls)+'</span><span class="bg bgd">'+_esc(String(b.pages))+' pages</span><span class="bg '+(b.stock>0?'bgg':'bgr')+'">'+(b.stock>0?b.stock+' en stock':'Rupture')+'</span></div>';
-  h+='<div style="font-size:13px;color:var(--ink3)">✍️ <strong>'+_esc(b.auteur)+'</strong> · 📖 '+(b.chaps?.length||0)+' chapitres</div>';
-  if(author)h+='<div class="author-badge mt4">✍️ Auteur vérifié — '+author.nom+'</div>';
+  h+='<div style="font-size:13px;color:var(--ink3)">'+ICO('i-feather')+'<strong>'+_esc(b.auteur)+'</strong> · '+ICO('i-book-open')+' '+(b.chaps?.length||0)+' chapitres</div>';
+  if(author)h+='<div class="author-badge mt4">'+ICO('i-check')+'Auteur vérifié — '+author.nom+'</div>';
   // Stars
   if(rt.count>0)h+='<div style="display:flex;align-items:center;gap:8px;margin:8px 0"><span style="font-size:18px">'+starsHtml(rt.avg)+'</span><span class="mono bold" style="color:var(--gold)">'+rt.avg.toFixed(1)+'</span><span class="xs2 mut">('+rt.count+' avis)</span></div>';
   h+='<p style="font-size:13px;color:var(--ink2);line-height:1.8;margin:8px 0">'+(b.desc||'')+'</p>';
@@ -3264,7 +3264,7 @@ function viewBookDetail(bid){
   h+='<div class="book-price-box">';
   if(b.ancienPrix)h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:14px;color:var(--ink4);text-decoration:line-through;text-decoration-color:#AE5353">'+fmt(b.ancienPrix)+'</span><span style="font-size:13px;font-weight:700;color:#fff;background:#AE5353;padding:2px 10px;border-radius:8px;box-shadow:0 2px 6px rgba(220,38,38,.25)">'+ICO("lc-flame")+'-'+Math.round((1-b.prix/b.ancienPrix)*100)+'%</span></div>';
   h+='<div class="book-price">'+fmt(b.prix)+'</div>';
-  h+='<div style="margin-top:8px;padding:8px;background:var(--grb);border:1px solid var(--grd);border-radius:var(--r);font-size:13px;color:var(--gr)">🎓 Code <span class="mono bold" style="background:var(--gp);padding:1px 6px;border-radius:3px;color:var(--gold)">ELEVE10</span> = -10%</div>';
+  h+='<div style="margin-top:8px;padding:8px;background:var(--grb);border:1px solid var(--grd);border-radius:var(--r);font-size:13px;color:var(--gr)">'+ICO('i-badge')+'Code <span class="mono bold" style="background:var(--gp);padding:1px 6px;border-radius:3px;color:var(--gold)">ELEVE10</span> = -10%</div>';
   h+='<div style="margin-top:8px"><div class="fl2 g6" style="align-items:stretch"><input class="fi" id="promoInput_'+bid+'" placeholder="Code promo" style="font-size:13px;padding:8px;text-transform:uppercase;flex:1"><button class="btn bgr2 sm" onclick="applyPromo(\''+bid+'\')">Appliquer</button></div><div id="promoResult_'+bid+'"></div></div>';
   h+='</div>';
   if(b.stock>0)h+='<button class="book-order-btn mt12" onclick="visitorOrderBook(\''+bid+'\')">'+ICO("lc-cart")+'Payer (papier) — '+fmt(b.prix)+'</button>';
@@ -3273,14 +3273,14 @@ function viewBookDetail(bid){
   if(b.secureId||b.securePages||b.digital){
     var _fp=b.freePages||10, _pd=b.prixDigital||b.priceDigital||b.prix;
     h+='<button class="btn bi mt8" style="width:100%;background:linear-gradient(135deg,#142554,#1E3A7A)" onclick="openSecureBook(\''+bid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-bookopen"/></svg>Lire en ligne · '+_fp+' pages gratuites</button>';
-    h+='<div style="font-size:11px;color:var(--ink4);text-align:center;margin-top:6px">🔒 Version numérique '+fmtN(_pd)+' FCFA — consultation protégée, sans téléchargement ni partage</div>';
+    h+='<div style="font-size:11px;color:var(--ink4);text-align:center;margin-top:6px">'+ICO('i-lock')+'Version numérique '+fmtN(_pd)+' FCFA — consultation protégée, sans téléchargement ni partage</div>';
   }
   h+='</div></div>';
   // Tabs
   h+='<div style="padding:16px 24px 24px"><div class="book-tabs">';
-  h+='<div class="book-tab active" onclick="showBookTab(this,\'chap_'+bid+'\')">📋 Chapitres</div>';
+  h+='<div class="book-tab active" onclick="showBookTab(this,\'chap_'+bid+'\')">'+ICO('i-clipboard-check')+'Chapitres</div>';
   h+='<div class="book-tab" onclick="showBookTab(this,\'prev_'+bid+'\')">'+ICO('i-eye')+'Extrait</div>';
-  h+='<div class="book-tab" onclick="showBookTab(this,\'revs_'+bid+'\')">⭐ Avis ('+rvs.length+')</div>';
+  h+='<div class="book-tab" onclick="showBookTab(this,\'revs_'+bid+'\')">'+ICO('i-star')+'Avis ('+rvs.length+')</div>';
   h+='</div>';
   // Chapters tab
   h+='<div id="chap_'+bid+'">';
@@ -3343,7 +3343,13 @@ function viewBookDetail(bid){
   h+='<input class="fi mb8" id="rvNom" placeholder="Votre nom"><input class="fi mb8" id="rvRole" placeholder="Rôle (Parent, Élève...)">';
   h+='<textarea class="fi mb8" id="rvText" rows="2" placeholder="Votre avis sur ce manuel..."></textarea>';
   h+='<button class="btn bi sm" onclick="submitReview(\''+bid+'\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Publier l&#39;avis</button></div>';
-  h+='</div></div></div></div>';
+  h+='</div></div></div>';
+  // « Comment recevoir mon exemplaire ? » — le parcours d'achat expliqué,
+  // juste après l'argumentaire, là où l'acheteur se demande « et ensuite ? »
+  h+=(typeof _bookCommentRecevoir==='function'?_bookCommentRecevoir(b):'');
+  h+='</div>';   // .bkpage-main
+  h+='</div>';   // .bkpage
+  h+='</div>';   // .vsec
   if(cv)cv.innerHTML=h;
   window._rvStars=0;
 }
@@ -9146,12 +9152,18 @@ function validerCommandeContenu(itemId){
   var montant = item ? (item.prix||0) : 0;
   setTimeout(function(){
     if(typeof openPaymentModal === 'function' && montant > 0){
+      // `intent:'product'` sur un CONTENU e-learning : le droit de `product` est
+      // null, l'élève payait son épreuve et rien ne s'ouvrait — ni ici, ni sur
+      // le serveur. Même défaut que commanderContenu (corrigé au commit
+      // précédent) ; ce chemin de repli l'avait gardé. Sans customerAccountId,
+      // l'octroi n'a par ailleurs aucun compte où inscrire le droit.
       openPaymentModal({
         montant: montant,
         label: '📄 '+(item ? item.titre : 'Contenu E-Learning'),
         refPrefix: 'ELRN',
-        intent: 'product',
+        intent: 'contenu',
         targetId: itemId,
+        customerAccountId: (typeof SES!=='undefined'&&SES)?(SES.accountId||SES.id):null,
         customerNom: nom,
         customerTel: tel
       });
@@ -29241,6 +29253,10 @@ function _payInitCampay(ref, montant, label, intent, targetId, accountId, nom){
   // lui, un paiement « cart » confirmé alors que le payeur a fermé son
   // navigateur n'activait aucun des articles côté serveur.
   var _extra = (window._VRT_PAYX && window._VRT_PAYX[ref]) || {};
+  // Remise appliquée à l'étape ① : le montant du bouton a été figé au rendu,
+  // AVANT que le code promo ne soit saisi. Sans cette relecture, le tunnel
+  // affichait « Nouveau total : 20 000 » et encaissait 25 000.
+  if(_extra.montantFinal > 0 && _extra.montantFinal < montant) montant = _extra.montantFinal;
   var _body = {ref:ref,montant:montant,label:label,intent:intent,targetId:targetId,
       accountId:accountId,clientNom:nom,clientTel:tel,commissions:_payPendingCommissions(intent,targetId)};
   if(_extra.lignes) _body.lignes = _extra.lignes;
@@ -29849,6 +29865,12 @@ window.VERITAS_MONETISATION = {
   micro_labo:     { droit:'unlockedUnits',    collection:'labos',            champAuteur:'authorId',  part:'auteur_ressource', libelle:'Labo à l\'unité' },
   subscription:   { droit:null,               collection:'plans',            champAuteur:null,        part:null,               libelle:'Abonnement' },
   product:        { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Produit boutique' },
+  // Tranche de scolarité réglée en ligne. Elle ENCAISSAIT depuis _echPayerEnLigne
+  // sans figurer ici, alors que cette table se présente comme l'inventaire
+  // complet des surfaces payantes : qui la lisait pour savoir ce qui se vend
+  // ratait l'échéancier. Activation par un cas dédié de _payAutoActivate
+  // (_echMarkPaid porte toute la règle) — d'où `droit:null`.
+  echeance:       { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Tranche de scolarité' },
   // Activation traitée par un cas dédié de _payAutoActivate (double écriture :
   // groupe + compte, ou classe + compte). Déclarés ici pour que la table reste
   // l'inventaire COMPLET des surfaces payantes.
@@ -37050,25 +37072,53 @@ window.VERITAS_PROMOS = window.VERITAS_PROMOS || {
 var _promoApplied = null;
 var _promoDiscount = 0;
 
-function appliquerPromo(originalMontant){
+/* Le code promo affichait « Nouveau total : 20 000 FCFA »… et le bouton de
+   paiement encaissait 25 000. Le montant part figé dans l'onclick au moment du
+   rendu (`_payInitCampay('ref',MONTANT,…)`), et cette fonction ne touchait que
+   du texte : le client lisait une remise qu'il ne recevait jamais. Le montant
+   remis est désormais déposé dans _VRT_PAYX[ref], que _payInitCampay relit
+   juste avant d'appeler le serveur.
+
+   La table lue est DB.promoCodes et non plus VERITAS_PROMOS, pour deux raisons
+   qui vont ensemble : VERITAS_PROMOS n'est jamais persistée (un code créé par
+   l'admin disparaît au rechargement), et surtout le SERVEUR ne connaît qu'elle
+   — il borne désormais tout sous-paiement à la meilleure remise active en base.
+   Appliquer ici une remise que le serveur ignore ferait payer le client pour
+   rien : paiement accepté, accès refusé. */
+function appliquerPromo(originalMontant, ref){
   var code = (document.getElementById('promoInput')?.value||'').trim().toUpperCase();
   var fb = document.getElementById('promoFeedback');
-  if(!code){ if(fb) fb.innerHTML=''; _promoApplied=null; _promoDiscount=0; return; }
+  var _pose = function(m){
+    if(!ref) return;
+    window._VRT_PAYX = window._VRT_PAYX || {};
+    window._VRT_PAYX[ref] = window._VRT_PAYX[ref] || {};
+    window._VRT_PAYX[ref].montantFinal = m;
+  };
+  if(!code){ if(fb) fb.innerHTML=''; _promoApplied=null; _promoDiscount=0; _pose(0); return; }
 
-  var promo = window.VERITAS_PROMOS[code];
-  if(!promo || promo.usage >= promo.max){
+  var promo = ((typeof DB!=='undefined' && DB.promoCodes) || []).find(function(p){
+    return p && p.actif && String(p.code||'').toUpperCase() === code;
+  });
+  if(!promo){
     if(fb) fb.innerHTML='<span style="color:var(--re);font-size:12px;font-weight:600">❌ Code invalide ou expiré</span>';
-    _promoApplied=null; _promoDiscount=0;
+    _promoApplied=null; _promoDiscount=0; _pose(0);
     toast('❌ Code invalide ou expiré','warn');
     return;
   }
 
-  _promoApplied = code;
-  _promoDiscount = promo.pct;
-  var reduction = Math.round(originalMontant * promo.pct / 100);
+  var val = parseFloat(promo.reduction)||0;
+  var reduction = (promo.type === 'fixed') ? Math.round(val)
+                                           : Math.round(originalMontant * val / 100);
+  if(reduction >= originalMontant) reduction = originalMontant - 1;   // jamais 0 FCFA à encaisser
+  if(reduction < 0) reduction = 0;
   var newTotal = originalMontant - reduction;
-  if(fb) fb.innerHTML='<span style="color:var(--gr);font-size:12px;font-weight:600">✅ '+promo.label+' — -'+new Intl.NumberFormat('fr-FR').format(reduction)+' FCFA → Nouveau total : <strong>'+new Intl.NumberFormat('fr-FR').format(newTotal)+' FCFA</strong></span>';
-  toast('✅ Code appliqué — '+promo.pct+'% de réduction !');
+
+  _promoApplied = code;
+  _promoDiscount = Math.round(reduction * 100 / (originalMontant||1));
+  _pose(newTotal);
+
+  if(fb) fb.innerHTML='<span style="color:var(--gr);font-size:12px;font-weight:600">✅ '+_esc(promo.desc||code)+' — -'+new Intl.NumberFormat('fr-FR').format(reduction)+' FCFA → Nouveau total : <strong>'+new Intl.NumberFormat('fr-FR').format(newTotal)+' FCFA</strong></span>';
+  toast('✅ Code appliqué — '+new Intl.NumberFormat('fr-FR').format(reduction)+' FCFA de réduction !');
 
   var totalEl = document.getElementById('payStepTotal');
   if(totalEl) totalEl.textContent = new Intl.NumberFormat('fr-FR').format(newTotal) + ' FCFA';
@@ -37140,7 +37190,7 @@ openPaymentModal = function(payInfo){
     +'<div class="fg"><span class="fl">Numéro WhatsApp *</span><input class="fi" id="payTel" type="tel" placeholder="+237 6XX XX XX XX"></div>'
     +'<div class="fg"><span class="fl">Email (pour PDF)</span><input class="fi" id="payEmail" type="email" placeholder="votre@email.com"></div>'
     +'</div>'
-    +'<div style="margin-top:12px"><span class="fl">Code promo</span><div style="display:flex;gap:8px"><input class="fi" id="promoInput" placeholder="Ex: ELEVE10" style="flex:1;text-transform:uppercase"><button class="btn bi sm" onclick="appliquerPromo('+montant+')" style="white-space:nowrap">Appliquer</button></div><div id="promoFeedback" style="margin-top:6px"></div></div>'
+    +'<div style="margin-top:12px"><span class="fl">Code promo</span><div style="display:flex;gap:8px"><input class="fi" id="promoInput" placeholder="Ex: ELEVE10" style="flex:1;text-transform:uppercase"><button class="btn bi sm" onclick="appliquerPromo('+montant+',\''+ref+'\')" style="white-space:nowrap">Appliquer</button></div><div id="promoFeedback" style="margin-top:6px"></div></div>'
     +'<div style="margin-top:16px;text-align:right"><button class="btn bi" onclick="_payGoStep(2)">Suivant →</button></div>'
     +'</div>';
 
@@ -37364,15 +37414,19 @@ function pgPaiementsAdmin(){
 
   // Promo codes section
   h += '<div style="margin-top:28px"><div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;margin-bottom:12px;color:var(--ink)">🏷️ Codes Promo actifs</div>';
-  var promos = window.VERITAS_PROMOS || {};
-  var promoKeys = Object.keys(promos);
-  if(promoKeys.length){
-    h += '<div class="tw"><table><thead><tr><th>Code</th><th>Réduction</th><th>Utilisations</th><th>Max</th><th>Statut</th></tr></thead><tbody>';
-    promoKeys.forEach(function(k){
-      var p=promos[k];
-      var full = p.usage>=p.max;
-      h += '<tr><td style="font-family:monospace;font-weight:700">'+k+'</td><td>'+p.pct+'%</td><td>'+p.usage+'</td><td>'+p.max+'</td>'
-        +'<td><span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:'+(full?'var(--re)':'var(--gr)')+';color:#fff">'+(full?'ÉPUISÉ':'ACTIF')+'</span></td></tr>';
+  // Source unique : DB.promoCodes. C'est la seule table PERSISTÉE, la seule que
+  // le tunnel de paiement applique, et la seule que le serveur consulte pour
+  // borner un sous-paiement. L'ancienne window.VERITAS_PROMOS vivait en mémoire :
+  // les codes créés ici disparaissaient au rechargement, et l'écran affichait
+  // pourtant « ACTIF ».
+  var promos = (typeof DB!=='undefined' && DB.promoCodes) ? DB.promoCodes : [];
+  if(promos.length){
+    h += '<div class="tw"><table><thead><tr><th>Code</th><th>Réduction</th><th>Description</th><th>Utilisations</th><th>Statut</th></tr></thead><tbody>';
+    promos.forEach(function(p){
+      var actif = !!p.actif;
+      var red = (p.type==='fixed') ? fmt(p.reduction) : (p.reduction+' %');
+      h += '<tr><td style="font-family:monospace;font-weight:700">'+_esc(p.code||'')+'</td><td>'+_esc(red)+'</td><td>'+_esc(p.desc||'')+'</td><td>'+(p.usage||0)+'</td>'
+        +'<td><span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:'+(actif?'var(--gr)':'var(--re)')+';color:#fff">'+(actif?'ACTIF':'INACTIF')+'</span></td></tr>';
     });
     h += '</tbody></table></div>';
   }
@@ -37399,8 +37453,17 @@ function _saveNewPromo(){
   var label=(document.getElementById('npLabel')?.value||'').trim();
   var max=parseInt(document.getElementById('npMax')?.value)||100;
   if(!code||!pct){toast('Code et % requis','warn');return;}
-  if(!window.VERITAS_PROMOS) window.VERITAS_PROMOS={};
-  window.VERITAS_PROMOS[code]={pct:pct,label:label||code,usage:0,max:max};
+  // Écrit dans la base (et sauvegardé) : sans save(), le code n'existait que
+  // le temps de l'onglet, et le tunnel de paiement — qui lit DB.promoCodes —
+  // ne l'aurait de toute façon jamais vu.
+  if(typeof DB==='undefined'){toast('Base indisponible','err');return;}
+  if(!DB.promoCodes) DB.promoCodes=[];
+  if(DB.promoCodes.some(function(p){return String(p.code||'').toUpperCase()===code;})){
+    toast('Ce code existe déjà','warn'); return;
+  }
+  DB.promoCodes.push({id:(typeof gid==='function'?gid():'pc'+Date.now()),code:code,
+    reduction:pct,type:'percent',desc:label||('Promo '+code),actif:true,usage:0,max:max});
+  if(typeof save==='function') save();
   cm();re();
   toast('✓ Code '+code+' créé ('+pct+'%)');
 }
@@ -44260,7 +44323,7 @@ window._payResumeFromHash = function(){
 })();
 
 /* ════════════════════════════════════════════════════════════════════════
-   v1.15.6 — TROIS REPRISES DU TABLEAU DE BORD CAMERPAY
+   v1.16.1 — TROIS REPRISES DU TABLEAU DE BORD CAMERPAY
    ────────────────────────────────────────────────────────────────────────
    1. Checklist d'activation du centre  — état DÉRIVÉ de DB, jamais stocké.
    2. Tendances sur les cartes chiffrées — delta mois/mois + micro-courbe.
