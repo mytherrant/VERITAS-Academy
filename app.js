@@ -1101,10 +1101,19 @@ function _migrateDB(){
       DB.books.unshift({
         id:'btest100', titre:'TEST — Paiement 100 FCFA', cls:'Toutes classes',
         auteur:'Centre VÉRITAS', prix:100, prixDigital:100, stock:999, vendu:0,
-        pages:1, ico:'🧪', digital:true, coverColor:'#0D9488',
+        pages:6, ico:'🧪', digital:true, coverColor:'#0D9488',
         desc:"Produit de test destiné à vérifier l'encaissement mobile (MTN, Orange, CamerPay) "
             +"pour 100 FCFA. Il ne contient aucun cours. À retirer une fois les tests terminés.",
-        chaps:[], content:{}
+        // Lecture protégée : 6 pages dont 2 offertes. Sans ces trois champs, le
+        // livre héritait des valeurs génériques (securePages=pages=1, freePages=10) :
+        // freePages > total, donc _secureRenderScroll n'affichait JAMAIS le mur de
+        // paiement — le produit de test ne pouvait rien tester du tout.
+        secureId:'btest100', securePages:6, freePages:2,
+        extrait:"EXTRAIT GRATUIT — accessible sans paiement\n\n"
+            +"Ce texte est visible de tous, connectés ou non : c'est la partie « vitrine » du produit.\n\n"
+            +"Le document lui-même compte 6 pages : les 2 premières sont offertes dans le lecteur "
+            +"en ligne, les 4 suivantes ne s'affichent qu'après confirmation du paiement de 100 FCFA.",
+        chaps:['Pages 1-2 — aperçu gratuit','Pages 3-6 — réservées après paiement'], content:{}
       });
     }
   }catch(e){}
