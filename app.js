@@ -47176,12 +47176,15 @@ window._pwEtat = function(k, item){
   var s = _pwSurface(k);
   var lim = _pwLimit(k);
   var libre = !_pwActif() || !s || !s.on || lim === -1;
+  // Droit ACHETÉ à l'unité (micro-paiement : une œuvre, un labo, une ressource).
+  // Il prime sur les essais — sinon l'élève paie et reste devant un cadenas.
+  var achete = !!(item && item !== '_' && typeof _aDroitUnitaire==='function' && _aDroitUnitaire(item));
   var ouverts = libre ? [] : _pwStore(k);
-  var dejaOuvert = !!(item && ouverts.indexOf(item) >= 0);
+  var dejaOuvert = achete || !!(item && ouverts.indexOf(item) >= 0);
   return { libre:libre, limite:lim, utilises:ouverts.length,
            reste: Math.max(0, lim - ouverts.length),
            ouvert: libre || dejaOuvert || ouverts.length < lim,
-           dejaOuvert: dejaOuvert };
+           dejaOuvert: dejaOuvert, achete: achete };
 };
 
 /* LE robinet. true = on laisse passer (et on décompte si c'est un item neuf),
@@ -47194,6 +47197,8 @@ window._pwGate = function(k, label, item){
     var lim = _pwLimit(k);
     if(lim === -1) return true;
     item = item || '_';
+    // Payé à l'unité → on n'entame PAS un essai pour un contenu déjà acheté.
+    if(item !== '_' && typeof _aDroitUnitaire==='function' && _aDroitUnitaire(item)) return true;
     var ouverts = _pwStore(k);
     if(ouverts.indexOf(item) >= 0) return true;      // déjà payé d'un essai
     if(ouverts.length >= lim){ _pwModal(k, label); return false; }
