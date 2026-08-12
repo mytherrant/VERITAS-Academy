@@ -2423,3 +2423,111 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 }
 
 
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   25 · LE PRINCIPE LWS, APPLIQUÉ SANS EXCEPTION
+   ─────────────────────────────────────────────────────────────────────────
+   Trois captures de suite ont montré le même défaut sous trois formes :
+   un pavé navy pleine largeur (« Travailler avec VÉRITAS »), un bandeau
+   navy avec bouton doré (« Prêt à rejoindre ? »), des entêtes de tuiles
+   navy. À chaque fois : « trop sombre ».
+
+   La référence n'a AUCUNE section sombre. Pas une. Sa page fait 8 000 px
+   et le seul aplat foncé est le pied de page. Le contraste ne vient pas
+   d'un fond noir : il vient d'un titre navy sur du blanc, et d'un unique
+   bouton coloré par écran.
+
+   Cette section applique la règle sans exception. Les seuls aplats
+   foncés autorisés dans #VISITOR sont, exhaustivement :
+     la bande utilitaire · le bandeau d'annonce · le pied de page ·
+     les boutons d'action · le cadre de la vidéo (qui contient une image).
+   Tout le reste est clair. Ce n'est pas un réglage esthétique, c'est la
+   règle qui rend la page lisible d'un bout à l'autre.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 25.1 · LES SECTIONS SOMBRES PASSENT AU CLAIR ──────────── */
+#VISITOR#VISITOR :is(.vgz-dark-section, .lx-statcard-head, .acc-foot, .vgz-testi){
+  background:var(--lws-grey) !important;
+  background-image:none !important;
+  border:1px solid var(--lws-line) !important;
+  color:var(--lws-text) !important;
+}
+#VISITOR#VISITOR :is(.vgz-dark-section, .lx-statcard-head, .acc-foot, .vgz-testi)
+  :is(h1,h2,h3,h4,b,strong,.acc-pill,.lx-statcard-ex,.acc-foot-tx .hl){
+  color:var(--lws-navy) !important;
+}
+#VISITOR#VISITOR :is(.vgz-dark-section, .lx-statcard-head, .acc-foot, .vgz-testi)
+  :is(p,span,small,div,li,.acc-sub){
+  color:var(--lws-text) !important;
+}
+/* Les tuiles de résultats : entête clair, taux en bleu — le chiffre reste
+   l'élément fort sans avoir besoin d'un fond navy pour le prouver. */
+#VISITOR#VISITOR .lx-statcard-head{ border:0 !important; border-bottom:1px solid var(--lws-line) !important; }
+#VISITOR#VISITOR :is(.lx-stat-pct, .lx-serie b, .lx-ment b){
+  color:var(--lws-blue) !important; font-weight:600 !important;
+}
+#VISITOR#VISITOR .lx-statcard-ico{
+  background:var(--lws-tint-sky) !important; color:var(--lws-blue) !important;
+  width:34px !important; height:34px !important; border-radius:9px !important;
+}
+#VISITOR#VISITOR .lx-statcard-ico svg{
+  stroke:var(--lws-blue) !important; stroke-width:2.1 !important; fill:none !important;
+  width:19px !important; height:19px !important;
+}
+
+/* ─── 25.2 · LES BANDEAUX D'APPEL POSÉS EN LIGNE ──────────────
+   « Prêt à rejoindre VÉRITAS ? » et ses semblables sont peints en navy par
+   un style EN LIGNE dans app.js. Le sélecteur d'attribut les rattrape :
+   fond clair, filet, texte navy. Le bouton, lui, garde toute sa force —
+   c'est le seul élément coloré qui doit rester. */
+#VISITOR#VISITOR [style*="linear-gradient(135deg,#142554"],
+#VISITOR#VISITOR [style*="linear-gradient(135deg, #142554"],
+#VISITOR#VISITOR [style*="background:#142554"],
+#VISITOR#VISITOR [style*="background:#0D1B3E"]{
+  background:var(--lws-grey) !important;
+  background-image:none !important;
+  border:1px solid var(--lws-line) !important;
+  color:var(--lws-text) !important;
+}
+#VISITOR#VISITOR [style*="linear-gradient(135deg,#142554"] :is(div,span,p,b,strong),
+#VISITOR#VISITOR [style*="background:#142554"] :is(div,span,p,b,strong){
+  color:var(--lws-navy) !important;
+}
+
+/* ─── 25.3 · UNE SEULE COULEUR D'ACTION ───────────────────
+   Un bouton doré subsistait sur les pages partenaires pendant que tout le
+   reste du site appelait à l'action en orange. Deux couleurs d'action, ce
+   n'est plus une hiérarchie : c'est une hésitation. */
+#VISITOR#VISITOR [style*="background:#FFC93C"],
+#VISITOR#VISITOR [style*="background:#ffc93c"],
+#VISITOR#VISITOR button[style*="#FFC93C"]{
+  background:var(--lws-action-cta) !important;
+  color:#fff !important;
+  border-radius:999px !important;
+  box-shadow:none !important;
+}
+#VISITOR#VISITOR [style*="background:#FFC93C"] :is(svg,span,b),
+#VISITOR#VISITOR button[style*="#FFC93C"] :is(svg,span,b){
+  color:#fff !important; stroke:#fff !important;
+}
+
+/* ─── 25.4 · AUCUN GLYPHE NE PEUT DISPARAÎTRE ───────────────
+   Sur la capture « Travailler avec VÉRITAS », la pastille de titre était un
+   carré bleu plein : le glyphe, bleu lui aussi, avait disparu dedans.
+   Un pictogramme invisible est pire que pas de pictogramme.
+   Garde-fou : la pastille est TOUJOURS claire, le glyphe TOUJOURS saturé.
+   Cette règle est volontairement la dernière du fichier — elle doit
+   survivre à tout ce qui précède. */
+#VISITOR#VISITOR :is(.acc-pill .ic, .acc-ess-ic, .acc-role-ic, .acc-news-ic,
+                     .lws-chip, .ct-ico, .vinfo-ic, .lx-statcard-ico){
+  background:var(--lws-tint-sky) !important;
+}
+#VISITOR#VISITOR :is(.acc-pill .ic, .acc-ess-ic, .acc-role-ic, .acc-news-ic,
+                     .lws-chip, .ct-ico, .vinfo-ic, .lx-statcard-ico) svg{
+  stroke:var(--lws-blue) !important;
+  fill:none !important;
+  stroke-width:2.1 !important;
+  stroke-linecap:round !important; stroke-linejoin:round !important;
+  opacity:1 !important;
+}

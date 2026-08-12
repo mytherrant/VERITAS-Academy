@@ -150,7 +150,31 @@
     if (deja && !/^(initial|inherit|unset|revert|transparent|rgba\(0,\s*0,\s*0,\s*0\))$/i.test(deja)) return;
 
     var couleur = premiereCouleur(decl);
-    if (couleur) el.style.backgroundColor = couleur;
+    if (!couleur) return;
+
+    /* GARDE-FOU CLARTÉ — la règle du §25 de la feuille : dans la vitrine,
+       aucun GRAND bloc n'est sombre. Les seuls aplats foncés admis sont la
+       bande utilitaire, le bandeau d'annonce, le pied de page, les boutons
+       et le cadre vidéo — tous stylés par des classes, aucun par un dégradé
+       en ligne.
+
+       Sans ce garde-fou, aplatir un dégradé navy repose fidèlement… du navy,
+       et un bandeau de 678×97 px réapparaît en sombre au milieu d'une page
+       claire (constaté sur « Palmarès de la semaine »). On lui substitue le
+       gris de section, et le texte repasse en navy — la correction de
+       contraste qui suit dans `passe()` s'en charge automatiquement.
+
+       Un petit élément garde sa couleur : une pastille ou un bouton foncé
+       de 40 px n'alourdit pas la page, il la ponctue. */
+    var r = el.getBoundingClientRect();
+    var grand = r.width > 200 && r.height > 60;
+    var l = luminance(couleur);
+    if (grand && l !== null && l < 0.45) {
+      el.style.backgroundColor = '#F4F5F8';
+      el.dataset.lwsEclairci = '1';
+    } else {
+      el.style.backgroundColor = couleur;
+    }
   }
 
   function passe(racine) {

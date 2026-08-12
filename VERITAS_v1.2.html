@@ -687,15 +687,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.18.3">
+<link rel="preload" as="script" href="/app.js?v=1.18.4">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.18.3" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.18.3"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.18.4" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.18.4"></noscript>
 <!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
      app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
 <link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.16.2" onload="this.onload=null;this.rel='stylesheet'">
@@ -709,14 +709,14 @@ if('MutationObserver' in window){
      (halos, dégradés de titre, cartes qui décollent).
      ⚠️ ORDRE CRITIQUE : doit rester le DERNIER <link> CSS de la page.
      Chargée en preload+bascule comme les autres → aucun blocage du rendu. -->
-<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.18.3" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.18.3"></noscript>
+<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.18.4" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.18.4"></noscript>
 <!-- Compagnon indispensable de la feuille ci-dessus : elle éteint TOUS les
      dégradés, y compris ceux que le JS de rendu pose en style en ligne —
      lesquels se retrouveraient alors sans aucun fond (texte blanc sur
      blanc). Ce script relit leur première couleur et la repose en aplat.
      `defer` : rien à faire avant que le DOM existe. -->
-<script src="/assets/theme-lws.js?v=1.18.3" defer></script>
+<script src="/assets/theme-lws.js?v=1.18.4" defer></script>
 
 <!-- ════════ v1.15.9 — THÈME CLAIR / SOMBRE ════════
      Ce script est INLINE et SYNCHRONE, tout en haut : il doit poser
@@ -872,7 +872,13 @@ if('MutationObserver' in window){
     <symbol id="lc-pencil" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></symbol>
     <symbol id="lc-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
     <!-- v1.2.4 : icônes des profils « Tu es… » (accueil premium) -->
-    <symbol id="lc-award" viewBox="0 0 24 24"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></symbol>
+    <!-- Redessiné : l'ancien tracé (un cercle r=6 + deux jambes de ruban)
+         donnait une sucette. En dessous de 25px le cercle restait vide et le
+         ruban se refermait en deux traits parallèles illisibles — c'est le
+         glyphe que Jacques a pointé sur « Émulation VÉRITAS » et le palmarès.
+         La coupe se lit dès 16px : masse pleine en haut, anses, socle.
+         L'identifiant NE CHANGE PAS : les 26 emplois dans app.js suivent. -->
+    <symbol id="lc-award" viewBox="0 0 24 24"><path d="M7 3h10v6a5 5 0 0 1-10 0z"/><path d="M7 5H5a2 2 0 0 0 0 4h2"/><path d="M17 5h2a2 2 0 0 1 0 4h-2"/><path d="M12 14v3"/><path d="M8.5 21h7"/><path d="M9.5 21c0-2 1-2.4 1.2-4"/><path d="M14.5 21c0-2-1-2.4-1.2-4"/></symbol>
     <symbol id="lc-presentation" viewBox="0 0 24 24"><path d="M2 3h20"/><path d="M21 3v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V3"/><path d="m7 21 5-4 5 4"/><path d="M12 12v4"/></symbol>
     <symbol id="lc-megaphone" viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></symbol>
     <symbol id="lc-building" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></symbol>
@@ -1538,7 +1544,7 @@ setTimeout(_vAmbassaFab,3000);
    restaient en cache après déploiement. Repli sur la valeur figée si le
    sélecteur ne trouve rien. */
 window._VRT_ASSET_VER=(function(){try{var e=document.querySelector('link[href*="app.js?v="],script[src*="app.js?v="]');var m=e&&String(e.href||e.src||'').match(/app\.js\?v=([0-9.]+)/);return m?m[1]:'1.15.9';}catch(x){return '1.15.9';}})();</script>
-<script defer src="/app.js?v=1.18.3"></script>
+<script defer src="/app.js?v=1.18.4"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->

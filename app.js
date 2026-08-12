@@ -39178,8 +39178,14 @@ function pgPartnerProgram(type){
   };
   var lvCount = ['bronze','argent','or','diamant'].map(function(k){
     var lv = L[k];
+    // Le pictogramme prend la COULEUR de son palier. Les trois médailles
+    // (🥉🥈🥇) sont converties vers le même glyphe du sprite : affichées en
+    // navy uniforme, Bronze, Argent et Or étaient trois vignettes rigoureu-
+    // sement identiques, et le palier ne se lisait plus. La couleur les
+    // sépare d'un regard, sans inventer trois dessins là où le sens est le
+    // même — c'est le palier qui change, pas la récompense.
     return '<div style="flex:1;min-width:120px;padding:10px;background:'+lv.color+'15;border-radius:8px;text-align:center;border:1px solid '+lv.color+'66">'
-      + '<div style="font-size:24px">'+lv.badge+'</div>'
+      + '<div style="font-size:24px;color:'+lv.color+'">'+lv.badge+'</div>'
       + '<div style="font-size:12px;font-weight:700">'+lv.label+'</div>'
       + '<div style="font-size:10px;color:var(--ink3)">'+lv.min+'+ ventes</div></div>';
   }).join('');
@@ -43501,6 +43507,81 @@ function _pvIco(id, taille){
        + 'aria-hidden="true"><use href="#'+id+'"/></svg>';
 }
 
+
+/* ═══════════ « REJOINDRE L'ÉQUIPE VÉRITAS » — hub enseignant (v1.18) ═══════
+   Le hub « Pour vous, enseignant » listait ce qu'un enseignant peut CONSULTER.
+   Rien n'y disait comment entrer dans le réseau — alors qu'un compte enseignant
+   est ouvert par le centre et ne se crée pas en ligne. L'intéressé cherchait un
+   bouton d'inscription qui n'existait nulle part.
+
+   Aucune plomberie nouvelle : la candidature passe par mPartnerSignup(), qui
+   existe déjà et demande précisément établissement + matières, puis écrit dans
+   DB.partnerApplications, notifie l'admin et ouvre l'écran de validation.
+
+   HONNÊTETÉ DES AVANTAGES — deux garde-fous :
+     · les avantages du programme sont LUS dans DB.partnerTypes.enseignant.desc,
+       éditable en admin : la page ne peut pas promettre autre chose que le
+       programme réel ;
+     · DB.partnerSettings.payoutsEnabled vaut false tant que le compte de
+       paiement du centre n'est pas validé. Tant qu'il est à false, on ne
+       présente PAS les commissions comme encaissables : on l'écrit noir sur
+       blanc plutôt que de laisser un enseignant candidater là-dessus.       */
+function _pvRejoindre(role){
+  if(role !== 'enseignant') return '';
+  try{
+    var t  = (DB.partnerTypes && DB.partnerTypes.enseignant) || {};
+    var st = DB.partnerSettings || {};
+    var versementsOuverts = st.payoutsEnabled === true;
+
+    // Avantages concrets, tous adossés à une fonction qui existe aujourd'hui.
+    var av = [
+      ['lc-doc',      'Des séquences prêtes à enseigner',
+       'Progressions, fiches de préparation, corpus et sujets à personnaliser — conformes au programme MINESEC.'],
+      ['lc-chart',    'Vos notes saisies en lot',
+       'Saisie par classe, moyennes et bulletins APC calculés, suivi des performances de vos classes.'],
+      ['lc-book',     'Publier vos propres manuels',
+       'Vos documents rejoignent la boutique du centre, avec filigrane et prix que vous fixez.'],
+      ['lc-users',    'Un réseau, pas une plateforme de plus',
+       'Comités de validation, co-rédaction de manuels et formations entre enseignants du Littoral.']
+    ].map(function(a){
+      return '<li class="pvr-av">'
+        + '<span class="pvr-av-ic">' + _pvIco(a[0], 18) + '</span>'
+        + '<span><b>' + _esc(a[1]) + '</b><small>' + _esc(a[2]) + '</small></span>'
+        + '</li>';
+    }).join('');
+
+    var prog = t.desc ? '<div class="pvr-prog"><b>Programme Enseignant</b> — ' + _esc(t.desc) + '</div>' : '';
+
+    // Le point qu'un candidat doit connaître AVANT de postuler.
+    var note = versementsOuverts
+      ? '<div class="pvr-note">' + _pvIco('lc-check',14)
+        + '<span>Les versements se font en Mobile Money, à partir de '
+        + fmt(Number(st.minPayout || 0)) + ' cumulés.</span></div>'
+      : '<div class="pvr-note pvr-note-att">' + _pvIco('lc-clock',14)
+        + '<span>À savoir : les <b>versements de commissions ne sont pas encore ouverts</b> — '
+        + 'le compte de paiement du centre est en cours de validation. Les ressources, '
+        + 'la publication de manuels et les formations, elles, sont accessibles dès votre '
+        + 'activation.</span></div>';
+
+    return '<div class="pvr">'
+      + '<div class="pvr-hd">'
+      +   '<div class="pvr-t">Rejoindre l\'équipe VÉRITAS</div>'
+      +   '<div class="pvr-s">Votre compte enseignant est ouvert par le centre — il ne se crée pas en ligne. '
+      +     'Voici comment le demander.</div>'
+      + '</div>'
+      + '<ul class="pvr-avs">' + av + '</ul>'
+      + prog
+      + note
+      + '<div class="pvr-act">'
+      +   '<button class="pvr-cta" onclick="mPartnerSignup(\'enseignant\')">Demander mon compte enseignant →</button>'
+      +   '<button class="pvr-sec" onclick="vShowSec(\'partenariat-enseignant\',null)">Lire le programme en détail</button>'
+      + '</div>'
+      + '<div class="pvr-fin">Candidature gratuite · réponse sous 48 h ouvrables · aucun engagement</div>'
+    + '</div>';
+  }catch(e){ return ''; }
+}
+window._pvRejoindre = _pvRejoindre;
+
 window.pgPourVous = function(role){
   var p = _PV_PUBLICS[role];
   if(!p) return '';
@@ -43529,6 +43610,11 @@ window.pgPourVous = function(role){
       +  '</div>';
   });
   h += '</div>';
+
+  // « Rejoindre l'équipe » : l'enseignant voyait ce qu'il pouvait CONSULTER,
+  // jamais comment entrer dans le réseau. Son compte est ouvert par le centre,
+  // rien ne le disait, et aucun formulaire ne permettait de le demander.
+  h += (typeof _pvRejoindre==='function') ? _pvRejoindre(role) : '';
 
   // Le bas de page vend l'offre qui concerne ce public — prix réels lus dans
   // DB.elearning.plans — au lieu de se terminer sur un mur de connexion. La

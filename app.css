@@ -8148,3 +8148,69 @@ body.vmenu-lock{overflow:hidden}
 #LS .l-rj small{
   display:block; font-size:11.5px; color:var(--ink4,#7A8299); margin-top:1px;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   « REJOINDRE L'ÉQUIPE VÉRITAS » — hub enseignant (v1.18)
+   Le bloc doit se distinguer des cartes de consultation qui le
+   précèdent : c'est une porte d'entrée, pas une ressource de plus.
+   D'où le fond navy et le seul bouton or de la page.
+   ═══════════════════════════════════════════════════════════════════ */
+.pvr{
+  margin:26px 0 0; padding:26px 24px; border-radius:16px;
+  background:linear-gradient(135deg,#142554,#1E3A8A); color:#fff;
+}
+.pvr-hd{ margin-bottom:18px; }
+.pvr-t{
+  font-family:Montserrat,sans-serif; font-size:19px; font-weight:800;
+  margin-bottom:6px;
+}
+.pvr-s{ font-size:13px; line-height:1.65; color:#CBD5E1; max-width:640px; }
+.pvr-avs{
+  list-style:none; margin:0 0 16px; padding:0;
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px;
+}
+.pvr-av{ display:flex; gap:11px; align-items:flex-start; }
+.pvr-av-ic{
+  flex:0 0 32px; width:32px; height:32px; border-radius:9px;
+  display:inline-flex; align-items:center; justify-content:center;
+  background:rgba(255,201,60,.14); color:#FFC93C;
+}
+.pvr-av b{ display:block; font-size:13.5px; font-weight:700; line-height:1.35; }
+.pvr-av small{
+  display:block; font-size:12px; line-height:1.55; color:#B6C2D9; margin-top:3px;
+}
+.pvr-prog{
+  font-size:12.5px; line-height:1.6; color:#CBD5E1;
+  padding:11px 13px; border-radius:9px; background:rgba(255,255,255,.06);
+  margin-bottom:11px;
+}
+.pvr-prog b{ color:#FFC93C; }
+.pvr-note{
+  display:flex; gap:8px; align-items:flex-start;
+  font-size:12.5px; line-height:1.6; color:#CBD5E1;
+  padding:11px 13px; border-radius:9px; margin-bottom:17px;
+  background:rgba(255,255,255,.06);
+}
+.pvr-note svg{ flex:0 0 15px; margin-top:2px; color:#FFC93C; }
+.pvr-note b{ color:#fff; }
+.pvr-note-att{ background:rgba(255,201,60,.10); border:1px solid rgba(255,201,60,.22); }
+.pvr-act{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+.pvr-cta{
+  cursor:pointer; border:0; border-radius:9px; padding:13px 24px;
+  font-family:Montserrat,sans-serif; font-size:14px; font-weight:800;
+  background:#FFC93C; color:#142554; transition:background .16s;
+}
+.pvr-cta:hover{ background:#FFD86E; }
+.pvr-sec{
+  cursor:pointer; border:1px solid rgba(255,255,255,.28); border-radius:9px;
+  padding:13px 20px; font-family:inherit; font-size:13.5px; font-weight:600;
+  background:transparent; color:#fff; transition:border-color .16s,background .16s;
+}
+.pvr-sec:hover{ border-color:#FFC93C; background:rgba(255,201,60,.10); }
+.pvr-fin{ margin-top:13px; font-size:11.5px; color:#9AA8C2; }
+@media (max-width:560px){
+  .pvr{ padding:20px 17px; }
+  .pvr-t{ font-size:17px; }
+  .pvr-cta,.pvr-sec{ width:100%; }
+}
