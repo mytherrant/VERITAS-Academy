@@ -4616,6 +4616,25 @@ function vShowSec(sec,btn){
       </div>
     </div>
 
+    <!-- ═══ RECHERCHE GLOBALE (v1.17) ══════════════════════════════════════
+         La recherche n'existait que derrière un bouton de la barre (et un
+         Ctrl+K que personne ne devine). Or le site compte des centaines de
+         ressources : c'est le raccourci le plus utile de l'accueil.
+         Le champ alimente l'index déjà en place (window._VRT_INDEX, 35 Ko,
+         chargé à la demande) via mRecherche(prefill). -->
+    <form class="acc-rech v-reveal" role="search" onsubmit="_vRechLancer(event)">
+      <label class="sr-only" for="accRechQ">Rechercher une ressource sur VÉRITAS</label>
+      <span class="acc-rech-ic" aria-hidden="true">${_ico('compass',18)}</span>
+      <input id="accRechQ" class="acc-rech-in" type="search" autocomplete="off"
+             placeholder="Chercher une œuvre, une matière, un sujet d'examen…">
+      <button class="acc-rech-btn" type="submit">Chercher</button>
+    </form>
+    <div class="acc-rech-sug">
+      <span>Souvent cherché :</span>
+      ${['Ville cruelle','BEPC maths','Le Cid','équations','Probatoire français']
+        .map(s=>`<button type="button" onclick="mRecherche('${_esc(s).replace(/'/g,"\\'")}')">${_esc(s)}</button>`).join('')}
+    </div>
+
     <div class="acc-hero">
       <div class="acc-hero-video" id="vHeroVideoOuter">${_heroVideoHtml}</div>
       <div class="acc-news">
@@ -5615,7 +5634,20 @@ function vShowSec(sec,btn){
     <div class="g2">
       <div class="vcard">
         <div class="ct"><span class="ct-ico">${_ico('mail',17)}</span>Coordonnées</div>
-        ${[['phone','Téléphone',_fmtTel(pi.contact||DB.school?.tel)||'—'],['mail','Email',pi.email||DB.school?.email||'—'],['mappin','Adresse',pi.adresse||DB.school?.ville||'—'],['package','B.P.',pi.bp||DB.school?.bp||'—'],['clock','Horaires',pi.horaires||'—']].map(([ic,l,v])=>`<div class="vinfo-row stack"><span class="vinfo-ic lg">${_ico(ic,17)}</span><div><div class="vinfo-l">${_esc(l)}</div><div class="vinfo-v">${_esc(v)}</div></div></div>`).join("")}
+        <!-- v1.17 : mêmes garde-fous que « Informations pratiques » de l'accueil.
+             Cette page affichait encore pi.contact et pi.email BRUTS — donc le
+             placeholder « +237 6 00 00 00 00 » et une adresse Gmail personnelle,
+             sur la page même où l'on demande au visiteur de nous faire confiance.
+             Une ligne sans valeur valable n'est plus affichée du tout : mieux
+             vaut un bloc court que « — » en face de « Téléphone ». -->
+        ${[['phone','Téléphone',_telPublic(pi)],
+           ['whatsapp','WhatsApp',_telPropre(pi.whatsapp)],
+           ['mail','Email',_emailPublic(pi)],
+           ['mappin','Adresse',pi.adresse||DB.school?.ville],
+           ['package','B.P.',pi.bp||DB.school?.bp],
+           ['clock','Horaires',pi.horaires]]
+          .filter(([ic,l,v])=>v&&String(v).trim())
+          .map(([ic,l,v])=>`<div class="vinfo-row stack"><span class="vinfo-ic lg">${_ico(ic==='whatsapp'?'smartphone':ic,17)}</span><div><div class="vinfo-l">${_esc(l)}</div><div class="vinfo-v">${_esc(v)}</div></div></div>`).join("")}
         <div style="margin-top:14px">
           <a href="https://wa.me/${(pi.whatsapp||"").replace(/[^0-9]/g,"")}" target="_blank" class="btn bgr2 sm" style="display:inline-flex;width:100%;justify-content:center"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>Écrire sur WhatsApp</a>
         </div>
@@ -37743,7 +37775,10 @@ function openProductPage(itemId, type){
     // CTA principal
     +'<div style="display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap">'
     +'<button onclick="document.getElementById(\'productPageOverlay\').remove();openPaymentModal({'+_pArgs+'})" style="flex:1;min-width:200px;background:var(--gold);color:var(--ink);border:none;border-radius:14px;padding:16px 24px;font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;cursor:pointer;box-shadow:0 4px 16px rgba(255,201,60,.3)">💳 Payer maintenant — '+prixFmt+'</button>'
-    +'<button onclick="addToCart(\''+itemId+'\',\''+type+'\')" style="min-width:140px;background:var(--sur);color:var(--ink);border:2px solid var(--bg3);border-radius:14px;padding:16px 20px;font-family:Montserrat,sans-serif;font-size:14px;font-weight:700;cursor:pointer">🛒 Ajouter au panier</button>'
+    // « Ajouter au panier » RETIRÉ avec le panier (v1.18). Il était le SEUL
+    // bouton à remplir DB.cart, et l'icône de la barre était le SEUL moyen de
+    // rouvrir le panier : le garder aurait laissé l'acheteur remplir un panier
+    // qu'il ne pouvait plus ouvrir. « Payer maintenant » prend toute la largeur.
     +'</div>'
 
     // SECTION B — Aperçu
@@ -42421,10 +42456,15 @@ function _cagCreer(eleveId){
    redéfini plus haut (patch ~l.22707), et on veut appeler la version finale.
    Liste blanche explicite — un hash inconnu (#top, ancre CSS) ne déclenche rien. */
 (function _vtHashRouter(){
+  // « tarifs » ajouté en v1.17 : la section existait dans vShowSec et dans la
+  // navigation, mais PAS dans cette liste — donc « veritas-school.com/#tarifs »
+  // ne menait nulle part. C'est précisément l'adresse vers laquelle pointent
+  // les blocs de conversion des pages SEO (/corriges/, /niveaux/, /oeuvres/,
+  // /outils/) : sans elle, tout ce trafic serait retombé sur l'accueil.
   var SECTIONS = ['presentation','actualites','elearning','boutique','orientation',
                   'contact','photos','resultats','parents','partenariat',
                   'mes-partenariats','verifier-certificat','leaderboard-junior',
-                  'nos-partenaires','cagnotte','trophees'];
+                  'nos-partenaires','cagnotte','trophees','tarifs'];
 
   // Deux écrans ne sont PAS des sections de vShowSec : ils ont leur propre
   // fonction de rendu, qui écrit elle aussi dans #vContent. Sans cette table,
@@ -42440,6 +42480,7 @@ function _cagCreer(eleveId){
     var sec = h.split('?')[0].trim();
     if(!sec) return '';
     if(FONCTIONS[sec]) return sec;
+    if(sec === 'livre') return 'livre';   // lien partagé d'un manuel : #livre?id=…
     // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
     if(sec.indexOf('partenariat-') === 0) return sec;
     if(sec.indexOf('pour-') === 0) return sec;          // hubs par public (v1.14)
@@ -42453,6 +42494,25 @@ function _cagCreer(eleveId){
     // #vContent n'existe que dans l'espace visiteur : un utilisateur connecté
     // qui reçoit un lien à ancre n'a pas à voir sa session interrompue.
     if(!document.getElementById('vContent')) return;
+
+    /* Lien partagé d'un manuel : #livre?id=b1 → boutique puis fiche du manuel,
+       panneau d'achat compris. Traité AVANT le garde « déjà affiché » : deux
+       liens de manuels différents partagent la même section, et le second
+       devait pouvoir s'ouvrir après le premier. */
+    if(sec === 'livre'){
+      var qs = (window.location.hash || '').split('?')[1] || '';
+      var id = '';
+      qs.split('&').forEach(function(kv){
+        var p = kv.split('=');
+        if(decodeURIComponent(p[0] || '') === 'id') id = decodeURIComponent(p[1] || '');
+      });
+      if(id && typeof _bookOpenFromHash === 'function'){
+        window._vCurrentSec = 'livre:' + id;
+        _bookOpenFromHash(id);
+      }
+      return;
+    }
+
     if(window._vCurrentSec === sec) return;   // déjà affiché (ex. _cvSubmit)
     var fn = FONCTIONS[sec];
     if(fn){
@@ -43073,9 +43133,23 @@ function _rechNorm(s){
   return s.replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
 }
 
-window.mRecherche = function(){
+// Barre de recherche de l'accueil → réutilise la modale de recherche, qui
+// porte déjà le chargement de l'index et l'ouverture des résultats.
+window._vRechLancer = function(ev){
+  if(ev && ev.preventDefault) ev.preventDefault();
+  var el = document.getElementById('accRechQ');
+  var q  = el ? String(el.value || '').trim() : '';
+  mRecherche(q);
+  return false;
+};
+
+// mRecherche(prefill) — `prefill` vient de la barre de recherche de l'accueil
+// (_vRechLancer). Sans argument, comportement inchangé : modale vide, focus.
+window.mRecherche = function(prefill){
+  var _pf = (typeof prefill === 'string') ? prefill : '';
   M('Rechercher', 'Œuvres, jeux, laboratoires, ressources, corrigés — tout le catalogue.',
     '<div class="fg"><input class="fi" id="_rechQ" placeholder="Ex. : Ville cruelle, équations, Tartuffe, BEPC…" '
+    + 'value="' + _esc(_pf) + '" '
     + 'autocomplete="off" oninput="_rechFiltrer()" onkeydown="if(event.key===\'Enter\')_rechPremier()"></div>'
     + '<div id="_rechOut" style="max-height:52vh;overflow:auto;margin-top:4px">'
     +   '<div style="color:var(--ink3);font-size:13px;padding:14px 2px">Chargement de l\'index…</div>'
@@ -43085,7 +43159,7 @@ window.mRecherche = function(){
   _lazyChunk('index-recherche')
     .then(function(){
       var q = document.getElementById('_rechQ');
-      if(q) q.focus();
+      if(q){ q.focus(); try{ q.setSelectionRange(q.value.length, q.value.length); }catch(e){} }
       _rechFiltrer();
     })
     .catch(function(){
@@ -43858,23 +43932,251 @@ function pgTarifs(){
     +'</div>';
   }).join('');
 
+  // ── Ce que l'abonnement change, par public. On parle du RÉSULTAT pour la
+  //    personne, pas de la liste des fichiers qu'elle télécharge.
+  var gains = [
+    {ic:'graduation', pour:'Pour l\'élève', t:'Ne plus réviser à l\'aveugle',
+     d:'Les épreuves des grands lycées, corrigées et expliquées. Tu sais enfin à quoi ressemble le sujet qui t\'attend — et comment on le traite.'},
+    {ic:'users', pour:'Pour le parent', t:'Voir venir, au lieu de découvrir',
+     d:'La progression, les notes, ce qui coince. On paie en Mobile Money depuis son téléphone, où qu\'on soit dans le monde.'},
+    {ic:'presentation', pour:'Pour l\'enseignant', t:'Récupérer ses soirées',
+     d:'Progressions, fiches de préparation, corpus et sujets à personnaliser : la préparation d\'une séquence passe de deux heures à vingt minutes.'}
+  ].map(function(g){
+    return '<div class="vgain-c">'
+      +'<div class="vgain-ic">'+_ico(g.ic,20)+'</div>'
+      +'<div class="vgain-pour">'+_esc(g.pour)+'</div>'
+      +'<div class="vgain-t">'+_esc(g.t)+'</div>'
+      +'<div class="vgain-d">'+_esc(g.d)+'</div>'
+    +'</div>';
+  }).join('');
+
+  // ── Objections réelles, réponses franches. Une page de prix qui ne répond
+  //    pas aux objections laisse le visiteur les résoudre tout seul — et il
+  //    les résout toujours en défaveur de l'achat.
+  var faq = [
+    ['Et si ça ne me sert pas ?','L\'essentiel est déjà gratuit et sans compte : corrigés, Professeur Ambassa, jeux, labos, outils. Servez-vous d\'abord. On ne s\'abonne que si le gratuit a déjà rendu service.'],
+    ['Je n\'ai pas de carte bancaire.','Aucune n\'est demandée. MTN Mobile Money et Orange Money suffisent, depuis un téléphone camerounais.'],
+    ['Je suis à l\'étranger, je paie pour un enfant au pays.','C\'est prévu : la cagnotte de scolarité permet de payer depuis l\'étranger, et le plan Famille couvre plusieurs enfants.'],
+    ['Suis-je engagé pour longtemps ?','Non. L\'abonnement couvre l\'année scolaire et s\'arrête de lui-même. Rien ne se reconduit dans votre dos.']
+  ].map(function(f){
+    return '<details class="vfaq"><summary>'+_esc(f[0])+'</summary><p>'+_esc(f[1])+'</p></details>';
+  }).join('');
+
   return '<div class="vsec">'
     +'<div class="acc-head"><h1 class="acc-pill"><span class="ic">'
       +'<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-wallet"/></svg></span>'
       +' Abonnements</h1>'
-      +'<div class="acc-sub">L\'essentiel reste gratuit. L\'abonnement ouvre les cours, les épreuves corrigées et le suivi.</div></div>'
-    +'<div class="vcard" style="max-width:680px;margin:0 auto 18px">'
-      +'<div class="ct"><span class="ct-ico">'+_ico('check',17)+'</span>Gratuit, sans compte</div>'
-      +'<ul class="acc-plan-av">'+gratuit+'</ul></div>'
+      +'<div class="acc-sub">L\'essentiel restera toujours gratuit. L\'abonnement ouvre ce qui demande du travail d\'enseignant : les épreuves corrigées, les cours, les progressions.</div></div>'
+
+    // ── Ce que vous y gagnez ──────────────────────────────────────────────
+    +'<div class="vgains v-reveal">'+gains+'</div>'
+
+    // ── Le gratuit, assumé et mis en avant : c'est lui qui donne confiance ─
+    +'<div class="vcard vcard-libre" style="max-width:720px;margin:22px auto 18px">'
+      +'<div class="ct"><span class="ct-ico">'+_ico('check',17)+'</span>Gratuit, sans compte, pour toujours</div>'
+      +'<ul class="acc-plan-av vcols2">'+gratuit+'</ul>'
+      +'<div class="vlibre-note">Commencez par là. Vraiment. Si rien de tout cela ne vous sert, un abonnement ne vous servira pas davantage.</div>'
+    +'</div>'
+
     +(cartes
-        ? '<div class="acc-plans">'+cartes+'</div>'
-          +'<div class="acc-plans-note">Paiement Mobile Money (MTN / Orange) · Sans engagement</div>'
+        ? '<div class="acc-head" style="margin-top:26px"><h2 class="acc-pill"><span class="ic">'
+            +'<svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-sparkles"/></svg></span>'
+            +' Aller plus loin</h2>'
+            +'<div class="acc-sub">Choisissez la formule qui correspond à votre situation. Rien d\'autre à payer.</div></div>'
+          +'<div class="acc-plans">'+cartes+'</div>'
+          +'<div class="acc-plans-note">'+_ico('shield',14)+' Paiement MTN Mobile Money ou Orange Money · Sans engagement · Aucune reconduction automatique</div>'
         : '<div class="vcard" style="max-width:680px;margin:0 auto"><div class="vprose">'
           +'Les abonnements sont en cours de mise à jour. Écrivez-nous sur WhatsApp pour connaître les formules disponibles.'
           +'</div></div>')
+
+    // ── Objections ────────────────────────────────────────────────────────
+    +'<div class="vfaq-wrap"><div class="vfaq-t">Les questions qu\'on nous pose</div>'+faq+'</div>'
+
+    +'<div class="vabo-fin">'
+      +'<div class="vabo-fin-t">Une question avant de vous décider ?</div>'
+      +'<div class="vabo-fin-d">Un enseignant du centre répond sur WhatsApp, jours ouvrés. Poser la question ne vous engage à rien.</div>'
+      +'<button class="btn bi" onclick="(typeof _vtWaOpen===\'function\')?_vtWaOpen(\'tarifs\'):vShowSec(\'contact\',null)">'+_ico('message',15)+' Écrire au centre</button>'
+    +'</div>'
   +'</div>';
 }
 window.pgTarifs = pgTarifs;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BANDEAU D'ABONNEMENT CONTEXTUEL (v1.17)
+
+   Constat de l'audit : sur les 9,3 écrans de l'accueil il n'existait qu'UN
+   appel à l'abonnement, et les pages secondaires (boutique, e-learning, jeux,
+   orientation, parents) n'en portaient aucun. Le visiteur pouvait traverser
+   tout le site, se servir de tout ce qui est gratuit, et repartir sans avoir
+   jamais lu ce que l'abonnement changerait pour lui.
+
+   RÈGLE DE RÉDACTION — tenue ligne à ligne ci-dessous :
+     · aucun chiffre inventé. Les prix viennent de DB.elearning.plans ;
+       le « par mois » est une DIVISION du prix réel, pas une offre nouvelle ;
+     · aucune rareté fabriquée (« plus que 3 places », « offre 24 h ») ;
+     · aucune preuve sociale non vérifiée ;
+     · l'urgence, quand elle est convoquée, est celle du calendrier officiel :
+       les dates d'examen existent, elles ne se reportent pas ;
+     · on nomme d'abord ce que la personne vient de recevoir GRATUITEMENT.
+       On demande après avoir donné, jamais avant.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+
+/* Le bandeau ne doit JAMAIS s'afficher à quelqu'un qui a déjà payé : lui
+   resservir l'argumentaire de vente est le meilleur moyen de lui faire
+   regretter son achat. Statuts acceptés : « Activé » (écrit par
+   activerAbonnement()) et « Actif » (anciens enregistrements). */
+function _aDejaAbonnement(){
+  try{
+    if(typeof SES==='undefined' || !SES) return false;
+    if(SES.type==='admin' || SES.type==='superadmin') return true;
+    var actif=function(a){ return a && (a.statut==='Activé' || a.statut==='Actif'); };
+    var abos=(typeof DB!=='undefined' && DB.elearning && DB.elearning.abonnements) || [];
+    var stu=(typeof DB!=='undefined' && (DB.students||[])).find
+           ? (DB.students||[]).find(function(s){ return s.id===SES.id; }) : null;
+    return abos.some(function(a){
+      if(!actif(a)) return false;
+      if(a.accountId && a.accountId===SES.id) return true;
+      if(stu && a.classe && a.classe===stu.cls) return true;
+      return false;
+    });
+  }catch(e){ return false; }
+}
+window._aDejaAbonnement = _aDejaAbonnement;
+
+// Plan le moins cher réellement actif — sert d'ancrage de prix.
+function _aboPlanAncre(){
+  var plans = ((typeof DB!=='undefined' && DB.elearning && DB.elearning.plans) || [])
+    .filter(function(p){ return p && p.actif !== false && Number(p.prix) > 0; })
+    .slice().sort(function(a,b){ return Number(a.prix) - Number(b.prix); });
+  return plans.length ? plans[0] : null;
+}
+
+/* « 3 000 FCFA l'année » et « 300 FCFA par mois » sont le MÊME prix. Le second
+   se compare à une dépense quotidienne, le premier à un budget. On donne les
+   deux, en disant d'où vient la division — sinon c'est un tour de passe-passe. */
+function _aboPrixPhrase(){
+  var p = _aboPlanAncre();
+  if(!p) return '';
+  var prix = Number(p.prix);
+  var annuel = /an|année|scolaire/i.test(String(p.duree||''));
+  var out = '<b>' + fmt(prix) + '</b>';
+  if(annuel && prix >= 1000){
+    var mois = Math.round(prix / 10 / 50) * 50;   // 10 mois d'année scolaire
+    out += ' pour l\'année — soit <b>' + fmt(mois) + ' par mois</b> sur les '
+        +  '10 mois de l\'année scolaire';
+  } else if(p.duree){
+    out += ' / ' + _esc(p.duree);
+  }
+  return out;
+}
+
+/* Un message par contexte. Chacun part de ce que la personne vient de faire
+   sur la page — pas d'un argumentaire générique recopié six fois. */
+var _ABO_MSG = {
+  boutique: {
+    recu:'Les corrigés de tous les cahiers sont en ligne, gratuits, sans compte.',
+    titre:'Le cahier vous appartient. Ce qui l\'entoure aussi.',
+    corps:'Le manuel donne les exercices. L\'abonnement donne ce qu\'on ne peut pas imprimer : les épreuves des grands lycées avec leur correction, les cours en PDF, les fiches de révision et un enseignant joignable sur WhatsApp.',
+    cta:'Voir ce que ça ouvre'
+  },
+  elearning: {
+    recu:'Vous avez accès librement au Professeur Ambassa, aux jeux et aux labos.',
+    titre:'Vous avez vu le catalogue. Voici ce qui le déverrouille.',
+    corps:'Les épreuves séquentielles corrigées, les anciens sujets d\'examen avec les corrigés nationaux, les cours vidéo et les corpus complets par séquence. C\'est le travail d\'enseignants — c\'est la part qui se paie.',
+    cta:'Choisir ma formule'
+  },
+  jeux: {
+    recu:'Les jeux, les cartes mentales et les œuvres au programme restent gratuits.',
+    titre:'S\'entraîner, c\'est bien. Sur les vrais sujets, c\'est autre chose.',
+    corps:'Un QCM vous dit si vous savez. Une épreuve de lycée corrigée vous dit si vous êtes prêt — ce n\'est pas la même question, et le jour de l\'examen c\'est la seconde qu\'on vous pose.',
+    cta:'Voir les épreuves corrigées'
+  },
+  orientation: {
+    recu:'Les filières, les débouchés et les outils de calcul sont en accès libre.',
+    titre:'Choisir la bonne filière ne suffit pas. Il faut la moyenne pour y entrer.',
+    corps:'Une série se demande, elle ne s\'obtient pas sur simple souhait : elle se joue sur les notes de l\'année. L\'abonnement donne les épreuves corrigées et les cours des matières qui décident de votre orientation.',
+    cta:'Préparer ces notes'
+  },
+  parents: {
+    recu:'Le suivi des notes, la cagnotte et les outils de calcul sont gratuits.',
+    titre:'Vous ne pouvez pas être derrière lui tous les soirs.',
+    corps:'L\'abonnement met à sa disposition ce que vous ne pouvez pas fabriquer vous-même : des épreuves corrigées à son niveau, des cours rédigés, et un enseignant du centre joignable quand il bloque. Le paiement se fait en Mobile Money, depuis le Cameroun ou depuis l\'étranger.',
+    cta:'Voir les formules famille'
+  },
+  epreuves: {
+    recu:'Les annales et les sujets d\'examen sont consultables gratuitement.',
+    titre:'Le BEPC, le Probatoire et le BAC ont une date. Elle ne bouge pas.',
+    corps:'Ce qui se joue d\'ici là, c\'est le nombre de sujets réellement traités, corrigés, compris. L\'abonnement ouvre les épreuves des meilleurs lycées avec leur corrigé détaillé, séquence par séquence.',
+    cta:'Ouvrir les corrigés complets'
+  },
+  _defaut: {
+    recu:'L\'essentiel de VÉRITAS reste gratuit et sans compte.',
+    titre:'Et si on allait au bout ?',
+    corps:'Les épreuves corrigées, les cours rédigés et le suivi par un enseignant du centre sont réunis dans l\'abonnement.',
+    cta:'Voir les abonnements'
+  }
+};
+
+window._vAboBandeau = function(ctx){
+  try{
+    // Un abonné n'a rien à faire ici : lui resservir l'argumentaire de vente
+    // est le meilleur moyen de lui faire regretter d'avoir payé.
+    if(typeof _aDejaAbonnement === 'function' && _aDejaAbonnement()) return '';
+    var m = _ABO_MSG[ctx] || _ABO_MSG._defaut;
+    var prix = _aboPrixPhrase();
+    return '<div class="vabo-band v-reveal" role="complementary" aria-label="À propos de l\'abonnement">'
+      +'<div class="vabo-band-in">'
+        +'<div class="vabo-band-recu">'+_ico('check',14)+'<span>'+_esc(m.recu)+'</span></div>'
+        +'<div class="vabo-band-t">'+_esc(m.titre)+'</div>'
+        +'<p class="vabo-band-d">'+_esc(m.corps)+'</p>'
+        +(prix?'<div class="vabo-band-prix">'+prix+'</div>':'')
+        +'<div class="vabo-band-act">'
+          +'<button class="vabo-band-cta" onclick="vShowSec(\'tarifs\',null)">'+_esc(m.cta)+' →</button>'
+          +'<span class="vabo-band-res">'+_ico('shield',13)+' Mobile Money · sans engagement · aucune reconduction</span>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  }catch(e){ return ''; }
+};
+
+/* Injection. On ne touche à AUCUNE des fonctions de rendu : on enveloppe les
+   points de passage. vShowSec est le routeur de la vitrine ; showJeuxEdu et
+   showEpreuves écrivent dans #vContent sans passer par lui. */
+window._vAboInjecter = function(ctx){
+  try{
+    var c = document.getElementById('vContent'); if(!c) return;
+    if(c.querySelector('.vabo-band')) return;          // jamais deux fois
+    var html = _vAboBandeau(ctx); if(!html) return;
+    var hote = c.querySelector('.vsec') || c;
+    hote.insertAdjacentHTML('beforeend', html);
+  }catch(e){}
+};
+
+(function(){
+  var CTX = {boutique:'boutique', elearning:'elearning', orientation:'orientation',
+             parents:'parents', cagnotte:'parents'};
+  if(typeof window.vShowSec === 'function' && !window.vShowSec.__aboWrap){
+    var _o = window.vShowSec;
+    window.vShowSec = function(sec, btn){
+      var r = _o.apply(this, arguments);
+      var ctx = CTX[sec]; if(ctx) setTimeout(function(){ _vAboInjecter(ctx); }, 0);
+      return r;
+    };
+    window.vShowSec.__aboWrap = true;
+  }
+  ['showJeuxEdu','showEpreuves'].forEach(function(fn){
+    if(typeof window[fn] !== 'function' || window[fn].__aboWrap) return;
+    var _f = window[fn], ctx = (fn === 'showJeuxEdu') ? 'jeux' : 'epreuves';
+    window[fn] = function(){
+      var r = _f.apply(this, arguments);
+      setTimeout(function(){ _vAboInjecter(ctx); }, 0);
+      return r;
+    };
+    window[fn].__aboWrap = true;
+  });
+})();
+
 
 function _accEssentiel(){
   var cartes = _ACC_ESSENTIEL.map(function(c){
@@ -45996,6 +46298,9 @@ window._bookBuyPanel = function(b, rt, rvs){
        +   ICO('i-eye') + 'Feuilleter un extrait gratuit</button>';
   }
 
+  /* — Partage : le lien ouvre CE manuel, prêt à payer (voir _bookShare) — */
+  h += _bookShare(b);
+
   /* — Ce qui est compris : des faits vérifiables, pas des promesses — */
   h += '<ul class="bkbuy-inclus">'
      +   '<li>' + ICO('i-check') + '<span><b>' + _esc(String(b.pages || '—')) + ' pages</b>'
@@ -46313,4 +46618,118 @@ function _shopFind(q){
 function _shopFindOpen(){
   var vis = document.querySelectorAll('.vshop-shelves .shelf-item:not([hidden])');
   if (vis.length === 1) vis[0].click();
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   v1.17.4 — PARTAGER UN MANUEL (lien, WhatsApp, Facebook)
+   ════════════════════════════════════════════════════════════════════
+   Demande de Jacques : « des liens pour copier le livre, partager sur
+   WhatsApp et Facebook, de telle sorte qu'on clique, on y accède, puis
+   on paye ».
+
+   Le point qui décide de tout, c'est l'ATTERRISSAGE. Un lien qui ramène
+   sur l'accueil oblige le destinataire à retrouver le manuel lui-même —
+   et au Cameroun, celui qui paie n'est presque jamais celui qui a
+   choisi le livre. Le lien porte donc l'identifiant du manuel
+   (#livre?id=…) et ouvre directement sa fiche, panneau d'achat compris.
+
+   Facebook ne permet pas de pré-remplir un message : son partageur ne
+   prend que l'URL, et le titre affiché vient des balises Open Graph de
+   la page. On ne promet donc pas ici un texte personnalisé côté
+   Facebook — WhatsApp, lui, le porte.
+   ════════════════════════════════════════════════════════════════════ */
+
+/** URL publique et absolue d'un manuel — celle qu'on colle dans une
+ *  conversation. On part de l'origine réelle : en local comme en prod,
+ *  le lien reste cliquable et testable. */
+function _bookUrl(id){
+  var base;
+  try{
+    base = (location.protocol === 'file:')
+      ? 'https://veritas-school.com/'
+      : (location.origin + location.pathname.replace(/[^/]*$/, ''));
+  }catch(e){ base = 'https://veritas-school.com/'; }
+  return base + '#livre?id=' + encodeURIComponent(id);
+}
+
+function _bookShare(b){
+  if (!b || !b.id) return '';
+  var url = _bookUrl(b.id);
+  var txt = b.titre + (b.cls ? ' (' + b.cls + ')' : '') + ' — ' + fmt(b.prix)
+          + ' chez Centre VÉRITAS. Extrait gratuit et paiement en ligne : ';
+  var wa = 'https://wa.me/?text=' + encodeURIComponent(txt + url);
+  var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+
+  return '<div class="bkshare">'
+    + '<div class="bkshare-t">' + ICO('i-share') + 'Partager ce manuel</div>'
+    + '<div class="bkshare-s">Le lien ouvre cette fiche, prête à payer.</div>'
+    + '<div class="bkshare-b">'
+    +   '<a class="bkshare-btn wa" href="' + _esc(wa) + '" target="_blank" rel="noopener" '
+    +     'aria-label="Partager sur WhatsApp">WhatsApp</a>'
+    +   '<a class="bkshare-btn fb" href="' + _esc(fb) + '" target="_blank" rel="noopener" '
+    +     'aria-label="Partager sur Facebook">Facebook</a>'
+    +   '<button type="button" class="bkshare-btn cp" id="bkCopy-' + _esc(b.id) + '" '
+    +     'onclick="_bookCopyLink(\'' + _esc(b.id) + '\')" aria-label="Copier le lien du manuel">'
+    +     'Copier le lien</button>'
+    + '</div>'
+    + '</div>';
+}
+
+/** Copie du lien. `navigator.clipboard` exige un contexte sécurisé (HTTPS) :
+ *  sur un partage de connexion en HTTP, ou dans un navigateur ancien, il est
+ *  absent. D'où le repli par textarea + execCommand — sans lui, le bouton ne
+ *  ferait rien chez une partie des utilisateurs, sans le moindre message. */
+function _bookCopyLink(id){
+  var url = _bookUrl(id);
+  var btn = document.getElementById('bkCopy-' + id);
+  function ok(){
+    if (btn){
+      var avant = btn.textContent;
+      btn.textContent = 'Lien copié';
+      btn.classList.add('is-ok');
+      setTimeout(function(){ btn.textContent = avant; btn.classList.remove('is-ok'); }, 2200);
+    }
+    if (typeof toast === 'function') toast('Lien copié — collez-le dans WhatsApp');
+  }
+  function repli(){
+    try{
+      var ta = document.createElement('textarea');
+      ta.value = url;
+      ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select(); ta.setSelectionRange(0, 99999);
+      var fait = document.execCommand('copy');
+      ta.remove();
+      if (fait) ok();
+      else if (typeof toast === 'function') toast('Copie impossible — voici le lien : ' + url, 'warn');
+    }catch(e){
+      if (typeof toast === 'function') toast('Copie impossible — voici le lien : ' + url, 'warn');
+    }
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText && window.isSecureContext){
+    navigator.clipboard.writeText(url).then(ok).catch(repli);
+  } else { repli(); }
+}
+
+/* ── Atterrissage : #livre?id=… ─────────────────────────────────────
+   Appelé par le routeur d'ancres (_vtHashRouter). On ouvre la boutique
+   d'abord — la fiche a besoin de #vContent et du contexte visiteur —
+   puis la fiche du manuel. Si l'identifiant n'existe plus (manuel
+   retiré du catalogue), on laisse la boutique ouverte plutôt qu'un
+   écran vide, et on le dit. */
+function _bookOpenFromHash(id){
+  if (!id) return false;
+  var b = (typeof DB !== 'undefined' && DB.books)
+        ? DB.books.find(function(x){ return x.id === id; }) : null;
+  try{ if (typeof vShowSec === 'function') vShowSec('boutique', null); }catch(e){}
+  if (!b){
+    if (typeof toast === 'function') toast('Ce manuel n\'est plus au catalogue', 'warn');
+    return false;
+  }
+  setTimeout(function(){
+    try{ viewBookDetail(id); }catch(e){}
+    try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){}
+  }, 260);
+  return true;
 }

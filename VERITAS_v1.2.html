@@ -262,6 +262,12 @@
 <!-- v1.2.2 : preconnect → polices chargées plus vite (rendu premium net dès le départ) -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Poppins EN PREMIER : c'est désormais la seule famille de la vitrine
+     (cf. assets/theme-lws.css). Les cinq autres restent chargées pour les
+     pages statiques et les écrans de gestion qui les citent encore en dur ;
+     elles ne servent plus rien sur #VISITOR. Graisses 400/500/600 seulement —
+     au-delà, la page redevient criarde. -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Montserrat:wght@400;500;600;700;800;900&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Crimson+Pro:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <!-- v1.2.14 (P1) : « Material Icons Round » retiré (redondant avec Material Symbols ; les 4 glyphs legacy ont été migrés). → une feuille de style bloquante + une police en moins. -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet" media="print" onload="this.media='all'">
@@ -406,18 +412,64 @@ window._navToggle = function(btn, ev){
   }
 };
 
-// Fermer tous les dropdowns
+// ═══ PANNEAU DE NAVIGATION (v1.17) ═══════════════════════════════════════
+// La barre ne porte plus que la marque, « Connexion » et ce bouton. Tout le
+// reste du site est ici. Le panneau se ferme dès qu'on choisit une
+// destination : _navGo() est appelé par chacun de ses boutons.
+window._navMenuFermer = function(){
+  var m = document.getElementById('vMenu'), o = document.getElementById('vMenuOv'),
+      b = document.getElementById('vNavBurger');
+  if(m){ m.classList.remove('open'); }
+  if(o){ o.classList.remove('open'); }
+  if(b){ b.classList.remove('open'); b.setAttribute('aria-expanded','false'); }
+  // hidden est retiré à l'ouverture et remis après l'animation de fermeture,
+  // sinon l'élément resterait focusable au clavier alors qu'il est invisible.
+  setTimeout(function(){
+    if(m && !m.classList.contains('open')){ m.hidden = true; if(o) o.hidden = true; }
+  }, 220);
+  try{ document.body.classList.remove('vmenu-lock'); }catch(e){}
+};
+
+window._navMenuToggle = function(ev){
+  if(ev){ ev.stopPropagation(); }
+  var m = document.getElementById('vMenu'), o = document.getElementById('vMenuOv'),
+      b = document.getElementById('vNavBurger');
+  if(!m) return;
+  if(m.classList.contains('open')){ _navMenuFermer(); return; }
+  m.hidden = false; if(o) o.hidden = false;
+  // Forcer un reflow pour que la transition parte bien de l'état fermé.
+  void m.offsetWidth;
+  m.classList.add('open'); if(o) o.classList.add('open');
+  if(b){ b.classList.add('open'); b.setAttribute('aria-expanded','true'); }
+  try{ document.body.classList.add('vmenu-lock'); }catch(e){}
+};
+
+// Fermer tous les dropdowns ET le panneau
 window._navGo = function(){
   document.querySelectorAll('.vnav-group.open').forEach(function(g){
     g.classList.remove('open');
     var t = g.querySelector('.vnav-trigger');
     if(t) t.setAttribute('aria-expanded','false');
   });
+  if(typeof _navMenuFermer === 'function') _navMenuFermer();
 };
 
 // Fermer si clic ailleurs ou Escape
 document.addEventListener('click', function(e){
-  if(!e.target.closest('.vnav-group')) _navGo();
+  if(!e.target.closest('.vnav-group')) {
+    document.querySelectorAll('.vnav-group.open').forEach(function(g){
+      g.classList.remove('open');
+      var t = g.querySelector('.vnav-trigger');
+      if(t) t.setAttribute('aria-expanded','false');
+    });
+  }
+  // Le panneau ne se ferme QUE par son voile, sa croix ou une destination :
+  // un clic à l'intérieur ne doit pas le refermer sous les doigts.
+  var m = document.getElementById('vMenu');
+  if(m && m.classList.contains('open')
+     && !e.target.closest('#vMenu') && !e.target.closest('#vNavBurger')){
+    _navMenuFermer();
+  }
 });
 document.addEventListener('keydown', function(e){
   if(e.key === 'Escape') _navGo();
@@ -635,19 +687,36 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.17.4">
+<link rel="preload" as="script" href="/app.js?v=1.18.2">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.17.4" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.17.4"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.18.2" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.18.2"></noscript>
 <!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
      app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
 <link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.16.2" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="/assets/veritas-motion.css?v=1.16.2"></noscript>
+
+<!-- ════════ THÈME « CORPORATE » — DERNIÈRE COUCHE, ELLE GAGNE ════════
+     Refonte visuelle de la vitrine sur le modèle des hébergeurs français
+     (référence : lws.fr) : Poppins seule, graisse plafonnée à 600, bleu
+     #1E499B + orange d'action #FF6500, rayon 10px, colonne 1170px, aplats
+     sans ombre. Elle ANNULE l'ancienne charte navy/or et les ornements
+     (halos, dégradés de titre, cartes qui décollent).
+     ⚠️ ORDRE CRITIQUE : doit rester le DERNIER <link> CSS de la page.
+     Chargée en preload+bascule comme les autres → aucun blocage du rendu. -->
+<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.18.2" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.18.2"></noscript>
+<!-- Compagnon indispensable de la feuille ci-dessus : elle éteint TOUS les
+     dégradés, y compris ceux que le JS de rendu pose en style en ligne —
+     lesquels se retrouveraient alors sans aucun fond (texte blanc sur
+     blanc). Ce script relit leur première couleur et la repose en aplat.
+     `defer` : rien à faire avant que le DOM existe. -->
+<script src="/assets/theme-lws.js?v=1.18.2" defer></script>
 
 <!-- ════════ v1.15.9 — THÈME CLAIR / SOMBRE ════════
      Ce script est INLINE et SYNCHRONE, tout en haut : il doit poser
@@ -780,6 +849,11 @@ if('MutationObserver' in window){
     <symbol id="lc-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
     <symbol id="lc-game" viewBox="0 0 24 24"><line x1="6" y1="11" x2="10" y2="11"/><line x1="8" y1="9" x2="8" y2="13"/><line x1="15" y1="12" x2="15.01" y2="12"/><line x1="18" y1="10" x2="18.01" y2="10"/><path d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258A4 4 0 0 0 17.32 5z"/></symbol>
     <symbol id="lc-flask" viewBox="0 0 24 24"><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/></symbol>
+    <!-- lc-user : ABSENT du sprite jusqu'en v1.18. Le bouton « Connexion »
+         appelait #lc-user, ne dessinait rien, et son libellé est masqué sous
+         430 px : il ne restait qu'un carré orange plein, que rien ne
+         permettait d'identifier comme l'accès à son compte. -->
+    <symbol id="lc-user" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
     <symbol id="lc-users" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
     <symbol id="lc-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></symbol>
     <symbol id="lc-calendar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></symbol>
@@ -853,7 +927,10 @@ if('MutationObserver' in window){
   <span><svg class="vico" width="14" height="14" aria-hidden="true"><use href="#lc-university"/></svg> <span id="vBrandName">VÉRITAS Academy</span></span>
   <div class="vlogin-btns" id="vLoginBtns">
     <!-- Boutons utilitaires v2.2 (panier, langue, contact) -->
-    <button class="btn sm icon-only" title="Panier" aria-label="Panier" onclick="openCart()" style="background:rgba(255,201,60,.15);color:#FFC93C;border:1px solid rgba(255,201,60,.3);padding:6px 10px;position:relative;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-cart"/></svg><span id="cartBadge" style="position:absolute;top:-3px;right:-3px;background:#AE5353;color:#fff;border-radius:50%;font-size:9px;width:16px;height:16px;display:none;align-items:center;justify-content:center;font-weight:700" aria-live="polite"></span></button>
+    <!-- Panier RETIRÉ (v1.18, demande Jacques) : la barre portait 5 icônes
+         muettes avant même « Connexion ». Le parcours d'achat passe par
+         « Payer maintenant » (openPaymentModal), qui reste le chemin
+         principal et le plus court. -->
     <button class="btn sm icon-only" title="Changer la langue / Switch language" aria-label="Changer la langue" onclick="mLanguageMenu()" style="background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 10px;display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"/></svg></button>
     <!-- Bascule clair/sombre. Le clic droit (ou l'appui long) rend la main au
          réglage du système — sans occuper un 3ᵉ état dans le cycle du clic. -->
@@ -946,27 +1023,89 @@ window._VRT_CITATIONS=[
 function _vChromeCompact(){
   try{
     var nav=document.getElementById('vNav'); if(!nav) return;
+    // v1.17 (demande Jacques) : le traducteur et la bascule clair/sombre se
+    // placent JUSTE À CÔTÉ de « Connexion », dans la barre principale — pas
+    // dans la bande bleue, où le bloc d'icônes formait un pavé isolé que
+    // personne ne reliait au reste. Le panier les accompagne : c'est le même
+    // geste (agir sur MON contexte), et le laisser seul en haut l'aurait
+    // rendu introuvable au moment d'acheter un manuel.
+    // Repli sur la nav elle-même si .vnav-actions manque — ne JAMAIS perdre
+    // #adminAccessPoint, qui porte le triple-clic d'accès à l'administration.
+    var host=nav.querySelector('.vnav-actions') || nav;
+    var burger=document.getElementById('vNavBurger');
     var utils=document.getElementById('vNavUtils');
     if(!utils){
       utils=document.createElement('div');
       utils.id='vNavUtils';
-      nav.appendChild(utils);
     }
+    // « Contact » RETIRÉ de la barre (v1.17, demande Jacques) : le bouton
+    // WhatsApp flottant (_vtSupportFab) est présent sur toutes les pages et
+    // ouvre une vraie conversation, ce qu'un lien vers une page de formulaire
+    // ne fait pas. Deux points de contact valaient surtout deux hésitations.
+    var contact=document.querySelector('#vLoginBtns button[onclick*="vShowSec(\'contact\'"]')
+             || document.querySelector('.vlogin-bar button[onclick*="vShowSec(\'contact\'"]');
+    if(contact && contact.parentNode) contact.parentNode.removeChild(contact);
+
     // Déplacement par identité, pas par position : les :nth-of-type d'app.css
     // ont déjà prouvé qu'un index se décale dès qu'un bouton bouge.
-    ['button[onclick*="openCart"]','button[onclick*="mLanguageMenu"]','#vThemeBtn',
-     'button[onclick*="vShowSec(\'contact\'"]','#vSyncDot','#adminAccessPoint']
+    // openCart retiré de la liste : son bouton n'existe plus dans la barre.
+    ['button[onclick*="mLanguageMenu"]','#vThemeBtn',
+     '#vSyncDot','#adminAccessPoint']
     .forEach(function(sel){
       var el=document.querySelector('#vLoginBtns '+sel)||document.querySelector('.vlogin-bar '+sel);
       if(el&&el.parentNode!==utils) utils.appendChild(el);
     });
+    // Ordre voulu dans la barre : [panier][langue][thème] [Connexion] [☰].
+    // Les utilitaires viennent donc AVANT le bouton « Connexion », qui reste
+    // l'appel principal, et le bouton du panneau garde le bord droit — la
+    // zone du pouce.
+    // `insertBefore` exige que la référence soit un ENFANT de l'hôte : on ne
+    // la garde que si elle y est réellement, sinon NotFoundError ferait
+    // disparaître tout le bloc utilitaire d'un coup.
+    var cnx=nav.querySelector('.vnav-cnx');
+    var ref=(cnx&&cnx.parentNode===host)?cnx
+           :((burger&&burger.parentNode===host)?burger:null);
+    if(utils.parentNode!==host) host.insertBefore(utils, ref);
+    // #vLoginBtns (« Mon compte » / « Déco » une fois connecté) se place APRÈS
+    // « Connexion » : à l'état déconnecté il est vide (cf. _vAuthDedupe).
+    var lbRef=(burger&&burger.parentNode===host)?burger:null;
     var lb=document.getElementById('vLoginBtns');
-    if(lb&&lb.parentNode!==nav) nav.appendChild(lb);
+    if(lb&&lb.parentNode!==host) host.insertBefore(lb, lbRef);
+    _vAuthDedupe();
+  }catch(e){}
+}
+
+/* La barre ne porte QU'UN appel à se connecter : le bouton « Connexion »
+   (.vnav-cnx). #vLoginBtns en apportait trois de plus — « S'inscrire »,
+   « Se connecter », « Enseignant » — soit quatre boutons d'authentification
+   côte à côte dans une barre qu'on venait justement d'alléger.
+   On masque ceux de l'état DÉCONNECTÉ uniquement : ceux que
+   _updateVisitorHeader() écrit une fois l'élève connecté (« Mon compte »,
+   « Déco ») ne portent pas ces handlers et restent visibles.
+   Style posé EN LIGNE à dessein : app.css et assets/theme-lws.css se
+   disputent déjà ces sélecteurs à coups de !important (l'un force
+   display:none, l'autre display:inline-flex avec deux ID de spécificité).
+   Trancher en ligne évite d'ajouter une surcharge de plus à l'empilement. */
+function _vAuthDedupe(){
+  try{
+    var lb=document.getElementById('vLoginBtns'); if(!lb) return;
+    lb.querySelectorAll('button[onclick*="showLogin"],button[onclick*="showRegisterForm"]')
+      .forEach(function(b){ b.style.setProperty('display','none','important'); });
   }catch(e){}
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',_vChromeCompact);
 else _vChromeCompact();
 setTimeout(_vChromeCompact,3000);
+
+/* _updateVisitorHeader() et deconnecter() réécrivent #vLoginBtns EN ENTIER :
+   sans observateur, les trois boutons reviendraient à la première connexion. */
+(function(){
+  try{
+    var lb=document.getElementById('vLoginBtns'); if(!lb||!window.MutationObserver) return;
+    new MutationObserver(function(){ _vAuthDedupe(); })
+      .observe(lb, {childList:true, subtree:true});
+  }catch(e){}
+})();
 
 /* Carte flottante. Règles : jamais par-dessus une modale, jamais pendant que
    l'utilisateur lit une modale, refermable définitivement pour la session, et
@@ -1086,109 +1225,184 @@ setTimeout(_vAmbassaFab,3000);
     <div class="ticker-track"><div class="ticker-scroll" id="tkScroll"></div></div>
   </div>
 </div>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     EN-TÊTE À DEUX RANGÉES (refonte « corporate », modèle lws.fr)
+     Rangée 1 — bande bleue : qui nous sommes, comment nous joindre, accès
+     au compte. Elle défile avec la page.
+     Rangée 2 — barre blanche collante : marque, sept destinations, bouton
+     d'action orange. C'est elle qu'on voit en permanence.
+     Rangée 3 — bandeau d'annonce.
+     AUCUN CHIFFRE ici : la règle du centre est de n'afficher que des
+     données réelles, et une bande d'en-tête n'est pas l'endroit où les
+     vérifier. On y met des faits vérifiables, pas de la preuve sociale.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div class="lws-utility">
+  <div class="lws-utility-in">
+    <span class="lws-utility-tag">Centre d'Excellence Scolaire — Douala</span>
+    <span class="lws-utility-sep" aria-hidden="true">|</span>
+    <span class="lws-utility-proof">Programme MINESEC · 6<sup>e</sup> à Terminale</span>
+    <!-- « Espace enseignant » n'est PAS répété ici : #vLoginBtns, que
+         _vChromeCompact() dépose juste après, le porte déjà — et porte
+         « Mon compte » / « Déconnexion » une fois l'élève identifié.
+         Deux boutons pour la même porte, c'est une hésitation de plus. -->
+    <!-- « Contact » retiré (demande Jacques) : le bouton WhatsApp flottant est
+         présent sur toutes les pages et ouvre une vraie conversation, ce qu'un
+         lien vers un formulaire ne fait pas. Deux points de contact valaient
+         surtout deux hésitations.
+         Le conteneur reste : #lwsUtilityRight sert de repli à
+         _vChromeCompact() si la barre principale venait à manquer. -->
+    <span class="lws-utility-right" id="lwsUtilityRight"></span>
+  </div>
+</div>
+
 <main class="vbody" id="vBody" role="main" aria-label="Contenu principal">
 <a id="main-content" tabindex="-1" class="sr-only">Contenu principal</a>
-<nav class="vnav" id="vNav" role="navigation" aria-label="Navigation principale">
-  <!-- v2.6 : Nav simplifiée 13 → 7 groupes hiérarchisés -->
-  <!-- 1. Accueil -->
-  <button class="vnav-btn on" onclick="vShowSec('presentation',this)" style="color:#142554;background:linear-gradient(135deg,rgba(20,37,84,.10),rgba(20,37,84,.03));border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Accueil"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-home"/></svg> Accueil</button>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     BARRE PRINCIPALE (v1.17) — REFONTE
+     Avant : 10 boutons de premier niveau + 4 menus déroulants, soit 14 cibles
+     alignées sur une seule ligne. Sur mobile la barre défilait horizontalement
+     sur 790 px de large dans une fenêtre de 375 px : on ne voyait jamais la
+     moitié des entrées, et « Se connecter » n'y figurait même pas.
+     Maintenant : marque à gauche, « Connexion » et un bouton déroulant à
+     droite. TOUT le reste vit dans le panneau — rangé, nommé, atteignable en
+     deux gestes. Rien n'a été supprimé, tout a été rangé.
+     « Contact » ne figure pas ici : le bouton WhatsApp flottant (_vtSupportFab)
+     est présent sur toutes les pages et remplit ce rôle en un seul geste. ═══ -->
+<nav class="vnav vnav-slim" id="vNav" role="navigation" aria-label="Navigation principale">
+  <button class="vnav-brand" onclick="vShowSec('presentation',null);_navMenuFermer()" aria-label="Accueil VÉRITAS">
+    <span class="vnav-brand-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-graduation"/></svg></span>
+    <span class="vnav-brand-tx">VÉRITAS<small>Centre d'Excellence Scolaire</small></span>
+  </button>
 
-  <!-- 2. Boutique — DEUXIÈME position (v1.16, demande Jacques) : c est le
-       point le plus rentable du site. Une entrée de vente ne se met pas
-       derrière quatre entrées de contenu gratuit. -->
-  <button class="vnav-btn" onclick="vShowSec('boutique',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.2),rgba(255,201,60,.08));color:#856404;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Boutique"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-shop"/></svg> Boutique</button>
-
-  <!-- 2. E-Learning (entrée directe — service phare) -->
-  <button class="vnav-btn" onclick="vShowSec('elearning',this)" style="background:linear-gradient(135deg,rgba(60,141,255,.15),rgba(60,141,255,.05));color:#1D5FBF;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="E-Learning"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-book"/></svg> E-Learning</button>
-
-  <!-- 2bis. Mes matières (v1.16) — l'apprenant n'avait AUCUNE entrée vers le
-       programme de sa classe : les pages « Programmes par classe » (notions et
-       œuvres, 6ᵉ → Tˡᵉ) existaient mais n'étaient liées que depuis les pages
-       statiques, jamais depuis l'application. Un élève qui ouvre le site pour
-       savoir ce qu'il doit réviser ne trouvait rien. -->
-  <button class="vnav-btn" onclick="location.href='/niveaux/'" style="background:linear-gradient(135deg,rgba(11,106,136,.16),rgba(11,106,136,.05));color:#0B6A88;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Mes matières — programme de ma classe"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-clipboard"/></svg> Mes matières</button>
-
-  <!-- 2ter. Mon parcours (v1.16) — il était SIXIÈME et dernier item du menu
-       déroulant « Communauté ». Autant dire invisible : aucun élève ne va
-       chercher sa propre progression sous « Communauté ». Remonté ici. -->
-  <button class="vnav-btn" onclick="mMonParcours()" style="background:linear-gradient(135deg,rgba(91,55,167,.16),rgba(91,55,167,.05));color:#5B37A7;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Mon parcours — progression, XP, niveau"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-trending"/></svg> Mon parcours</button>
-
-
-  <!-- 3bis. Espace Parents (v1.13) — entrée de premier niveau assumée : le parent
-       est celui qui paie, et c'est le seul visiteur qui n'a aucune raison de
-       fouiller les menus. Il doit trouver sa page depuis l'accueil. -->
-  <button class="vnav-btn" onclick="vShowSec('parents',this)" style="background:linear-gradient(135deg,rgba(16,185,129,.16),rgba(16,185,129,.05));color:#0F7B4F;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Espace Parents"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-users"/></svg> Parents</button>
-
-  <!-- 3ter. Enseignants (v1.17) — la page pgPourVous('enseignant') existait
-       depuis la v1.14 mais AUCUN lien n'y menait : la navigation ne contenait
-       pas un seul mot adressé à un enseignant, et le premier lui était destiné
-       au 5,6ᵉ écran. C'est pourtant le public qui amène les élèves. -->
-  <button class="vnav-btn" onclick="vShowSec('pour-enseignant',this)" style="background:linear-gradient(135deg,rgba(13,148,136,.16),rgba(13,148,136,.05));color:#0B7268;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Espace Enseignants"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-presentation"/></svg> Enseignants</button>
-
-  <!-- 3quinquies. Tarifs (v1.17) — il n'existait aucune page de prix. Le seul
-       montant visible du site entier était « 3 000 FCFA », perdu dans le
-       widget Émulation, en face de 13 badges « GRATUIT ». -->
-  <button class="vnav-btn" onclick="vShowSec('tarifs',this)" style="background:linear-gradient(135deg,rgba(255,201,60,.22),rgba(255,201,60,.06));color:#8A6A06;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Abonnements et tarifs"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-wallet"/></svg> Tarifs</button>
-
-  <!-- 3quater. Orientation scolaire (v1.14) — remontée au premier niveau.
-       Elle était au TROISIÈME niveau (menu « Vie scolaire » → dépliant →
-       item) : personne ne la trouvait, alors que « quelle filière choisir »
-       est l'une des premières questions d'un élève comme d'un parent.
-       L'entrée du menu déroulant est conservée, elle ne gêne pas. -->
-  <button class="vnav-btn" onclick="vShowSec('orientation',this)" style="background:linear-gradient(135deg,rgba(124,58,237,.14),rgba(124,58,237,.05));color:#6D28D9;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Orientation scolaire"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-compass"/></svg> Orientation</button>
-
-  <!-- 3ter. Recherche globale (v1.14) — un champ pour atteindre n'importe
-       quelle ressource sans traverser les menus. Cherche dans un index de
-       35 Ko ; seul le module du résultat choisi est ensuite téléchargé.
-       Raccourci clavier : Ctrl/⌘ + K. -->
-  <button class="vnav-btn" onclick="mRecherche()" style="background:linear-gradient(135deg,rgba(20,37,84,.10),rgba(20,37,84,.04));color:#142554;border-radius:20px;margin:3px 2px;font-weight:700" aria-label="Rechercher une ressource" title="Rechercher (Ctrl+K)"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-compass"/></svg> Rechercher</button>
-
-  <!-- 4. 🤖 IA & Ambassa (groupe) -->
-  <div class="vnav-group">
-    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(99,102,241,.18),rgba(99,102,241,.05));color:#4F46E5;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Outils IA"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-brain"/></svg> IA <span style="opacity:.6;font-size:10px">▾</span></button>
-    <div class="vnav-dropdown" role="menu">
-      <button role="menuitem" onclick="_navGo();mAgentAmbassa()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-graduation"/></svg><b>Prof. Ambassa</b><span class="vnav-dd-sub">Quiz · Évaluations · Fiches</span></button>
-      <button role="menuitem" onclick="_navGo();mHubIA()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-brain"/></svg><b>Hub IA</b><span class="vnav-dd-sub">Devoir IA · Parcours adaptatif</span></button>
-      <button role="menuitem" onclick="_navGo();mVeritasGenome()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-activity"/></svg><b>Mon Genome</b><span class="vnav-dd-sub">ADN académique personnel</span></button>
-    </div>
+  <!-- Sept destinations en clair. La barre « slim » (marque + burger) rangeait
+       tout dans un panneau : c'était propre, mais un visiteur qui arrive de
+       Google ne déplie pas un menu pour découvrir qu'il existe une boutique.
+       Les entrées secondaires (Établissements, Campus, jeux, orientation…)
+       restent dans le panneau, qui devient le « + » et non le tout.
+       Sous 1100px ce rang disparaît et le burger reprend la main. -->
+  <!-- Un pictogramme par destination. Le modèle n'en met pas — il s'adresse
+       à des acheteurs adultes qui lisent des noms de produits. Ici le
+       visiteur a douze à dix-huit ans : le symbole se repère avant le mot,
+       et la barre devient scannable d'un coup d'œil. Ils viennent du sprite
+       déjà embarqué (#lc-*), donc zéro requête et zéro octet de plus. -->
+  <div class="lws-nav-links">
+    <button type="button" onclick="vShowSec('elearning',null);_navMenuFermer()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-book"/></svg>E-Learning</button>
+    <button type="button" onclick="window.open('/corriges/','_blank','noopener')">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-check"/></svg>Corrigés</button>
+    <button type="button" onclick="location.href='/niveaux/'">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-clipboard"/></svg>Mes matières</button>
+    <button type="button" onclick="vShowSec('boutique',null);_navMenuFermer()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-shop"/></svg>Boutique</button>
+    <button type="button" onclick="vShowSec('tarifs',null);_navMenuFermer()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-wallet"/></svg>Abonnements</button>
+    <button type="button" onclick="vShowSec('parents',null);_navMenuFermer()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-users"/></svg>Parents</button>
+    <button type="button" onclick="vShowSec('pour-enseignant',null);_navMenuFermer()">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-presentation"/></svg>Enseignants</button>
   </div>
 
-  <!-- 5. 🎮 Pratiquer (groupe : Jeux + Labos + Épreuves + Évals + Étude groupe) -->
-  <div class="vnav-group">
-    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(245,158,11,.05));color:#92400E;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Pratiquer"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-game"/></svg> Pratiquer <span style="opacity:.6;font-size:10px">▾</span></button>
-    <div class="vnav-dropdown" role="menu">
-      <button role="menuitem" onclick="_navGo();showJeuxEdu()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-game"/></svg><b>Jeux éducatifs</b><span class="vnav-dd-sub">QCM, pendu, cartes mentales</span></button>
-      <button role="menuitem" onclick="_navGo();showLabosVirtuels()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-flask"/></svg><b>Labos virtuels</b><span class="vnav-dd-sub">Physique, chimie, SVT</span></button>
-      <button role="menuitem" onclick="_navGo();showEpreuves()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-doc"/></svg><b>Épreuves &amp; Annales</b><span class="vnav-dd-sub">BEPC, Probatoire, BAC corrigés</span></button>
-      <button role="menuitem" onclick="_navGo();showEvaluations()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-chart"/></svg><b>Évaluations</b><span class="vnav-dd-sub">Tests en ligne chronométrés</span></button>
-      <button role="menuitem" onclick="_navGo();mStudyRoom()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-users"/></svg><b>Étude en groupe</b><span class="vnav-dd-sub">Room temps réel code 6 chiffres</span></button>
-      <button role="menuitem" onclick="_navGo();mAchievements()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-award"/></svg><b>Mes badges</b><span class="vnav-dd-sub">30+ achievements</span></button>
-    </div>
-  </div>
-
-  <!-- 6. 🌐 Communauté (Classes + Forum + Parrainage) -->
-  <div class="vnav-group">
-    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(124,58,237,.05));color:#6C56A6;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Communauté"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-users"/></svg> Communauté <span style="opacity:.6;font-size:10px">▾</span></button>
-    <div class="vnav-dropdown" role="menu">
-      <button role="menuitem" onclick="_navGo();showClasseVirtuelle()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-university"/></svg><b>Classes &amp; Forum</b><span class="vnav-dd-sub">Échanges avec enseignants &amp; pairs</span></button>
-      <button role="menuitem" onclick="_navGo();mParrainage()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-gift"/></svg><b>Parrainage</b><span class="vnav-dd-sub">+500 FCFA crédit par filleul</span></button>
-      <button role="menuitem" onclick="_navGo();vShowSec('partenariat',null)" data-new="1"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-handshake"/></svg><b>Partenariat VÉRITAS</b><span class="vnav-dd-sub">9 programmes · Bronze/Argent/Or/Diamant</span></button>
-      <button role="menuitem" onclick="_navGo();vShowSec('leaderboard-junior',null)"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-trending"/></svg><b>Classement Junior</b><span class="vnav-dd-sub">Top 100 ambassadeurs élèves</span></button>
-      <button role="menuitem" onclick="_navGo();vShowSec('nos-partenaires',null)"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-building"/></svg><b>Nos partenaires</b><span class="vnav-dd-sub">Sponsors · Universités · Libraires</span></button>
-      <button role="menuitem" onclick="_navGo();mMonParcours()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-flame"/></svg><b>Mon parcours</b><span class="vnav-dd-sub">XP, streak, niveau</span></button>
-    </div>
-  </div>
-
-  <!-- 7. 📰 Vie scolaire (Calendrier + Orientation + Actualités) -->
-  <div class="vnav-group">
-    <button class="vnav-btn vnav-trigger" style="background:linear-gradient(135deg,rgba(239,68,68,.15),rgba(239,68,68,.05));color:#AE5353;border-radius:20px;margin:3px 2px;font-weight:700" aria-haspopup="true" aria-expanded="false" onclick="_navToggle(this,event)" aria-label="Menu Vie scolaire"><svg class="icon-v2" width="18" height="18" aria-hidden="true"><use href="#lc-calendar"/></svg> Infos <span style="opacity:.6;font-size:10px">▾</span></button>
-    <div class="vnav-dropdown" role="menu">
-      <button role="menuitem" onclick="_navGo();showCalendrier()"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-calendar"/></svg><b>Calendrier scolaire</b><span class="vnav-dd-sub">Trimestres, séquences, vacances</span></button>
-      <button role="menuitem" onclick="_navGo();vShowSec('orientation',null)"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-compass"/></svg><b>Orientation</b><span class="vnav-dd-sub">Filières, grandes écoles</span></button>
-      <button role="menuitem" onclick="_navGo();vShowSec('actualites',null)"><svg class="vico" width="18" height="18" style="margin-right:6px" aria-hidden="true"><use href="#lc-news"/></svg><b>Actualités</b><span class="vnav-dd-sub">News éducatives Cameroun</span></button>
-    </div>
+  <div class="vnav-actions">
+    <button class="vnav-cnx" onclick="_portailAller('eleve')" aria-label="Se connecter à mon espace">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-user"/></svg>
+      <span>Connexion</span>
+    </button>
+    <button class="vnav-burger" id="vNavBurger" onclick="_navMenuToggle(event)" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="vMenu">
+      <span class="vnav-burger-b"></span><span class="vnav-burger-b"></span><span class="vnav-burger-b"></span>
+    </button>
   </div>
 </nav>
+
+<!-- Bandeau d'annonce. Une seule promesse, vérifiable, avec sa porte de
+     sortie — pas de compte à rebours ni de « offre limitée » : les corrigés
+     sont réellement en ligne et réellement gratuits, c'est tout l'argument. -->
+<div class="lws-promo">
+  <div class="lws-promo-in">
+    <span><b>Les corrigés des cahiers VÉRITAS sont en ligne</b> — 6<sup>e</sup> à Terminale, en accès libre, sans compte.</span>
+    <button type="button" class="lws-promo-cta" onclick="window.open('/corriges/','_blank','noopener')">Les consulter</button>
+  </div>
+</div>
+
+<!-- ═══ PANNEAU DE NAVIGATION — tout le site, rangé par intention ═══ -->
+<div class="vmenu-ov" id="vMenuOv" onclick="_navMenuFermer()" hidden></div>
+<div class="vmenu" id="vMenu" role="dialog" aria-modal="true" aria-label="Menu de navigation" hidden>
+  <div class="vmenu-hd">
+    <span class="vmenu-hd-t">Naviguer</span>
+    <button class="vmenu-x" onclick="_navMenuFermer()" aria-label="Fermer le menu">&times;</button>
+  </div>
+
+  <button class="vmenu-search" onclick="_navGo();mRecherche()">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg>
+    <span>Rechercher dans tout le site</span><kbd>Ctrl K</kbd>
+  </button>
+
+  <div class="vmenu-hi">
+    <button class="vmenu-hi-c vmenu-hi-or" onclick="_navGo();vShowSec('boutique',null)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-shop"/></svg>
+      <b>Boutique</b><small>Les manuels du centre</small></button>
+    <button class="vmenu-hi-c vmenu-hi-go" onclick="_navGo();vShowSec('tarifs',null)">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-wallet"/></svg>
+      <b>Abonnements</b><small>Ce que vous y gagnez</small></button>
+  </div>
+
+  <div class="vmenu-cols">
+    <div class="vmenu-col">
+      <div class="vmenu-t">Votre espace</div>
+      <button onclick="_navGo();_portailAller('eleve')"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-graduation"/></svg><b>Élève</b><small>Notes, devoirs, cours</small></button>
+      <button onclick="_navGo();vShowSec('parents',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-users"/></svg><b>Parents</b><small>Suivi, paiement MoMo</small></button>
+      <button onclick="_navGo();vShowSec('pour-enseignant',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-presentation"/></svg><b>Enseignants</b><small>Ressources prêtes à l'emploi</small></button>
+      <button onclick="_navGo();vShowSec('pour-etablissement',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-building"/></svg><b>Établissements</b><small>VÉRITAS Campus</small></button>
+    </div>
+
+    <div class="vmenu-col">
+      <div class="vmenu-t">Apprendre</div>
+      <button onclick="_navGo();vShowSec('elearning',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-book"/></svg><b>E-Learning</b><small>Cours, épreuves, corrigés</small></button>
+      <button onclick="_navGo();location.href='/niveaux/'"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-clipboard"/></svg><b>Mes matières</b><small>Le programme de ma classe</small></button>
+      <button onclick="_navGo();window.open('/corriges/','_blank','noopener')"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-check"/></svg><b>Corrigés des cahiers</b><small>6ᵉ à Tˡᵉ · gratuit</small></button>
+      <button onclick="_navGo();showEpreuves()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-doc"/></svg><b>Épreuves &amp; annales</b><small>BEPC, Probatoire, BAC, GCE</small></button>
+      <button onclick="_navGo();vShowSec('orientation',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-compass"/></svg><b>Orientation</b><small>Filières et débouchés</small></button>
+    </div>
+
+    <div class="vmenu-col">
+      <div class="vmenu-t">S'entraîner</div>
+      <button onclick="_navGo();mAgentAmbassa()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-brain"/></svg><b>Professeur Ambassa</b><small>Tuteur IA · gratuit</small></button>
+      <button onclick="_navGo();showJeuxEdu()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-game"/></svg><b>Jeux &amp; œuvres</b><small>Quiz, cartes mentales</small></button>
+      <button onclick="_navGo();showLabosVirtuels()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-flask"/></svg><b>Labos virtuels</b><small>Physique, chimie, SVT</small></button>
+      <button onclick="_navGo();showEvaluations()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-chart"/></svg><b>Évaluations</b><small>Tests chronométrés</small></button>
+      <button onclick="_navGo();mStudyRoom()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-users"/></svg><b>Étude en groupe</b><small>Room à code 6 chiffres</small></button>
+      <button onclick="_navGo();mHubIA()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-activity"/></svg><b>Hub IA</b><small>Devoir IA, parcours adaptatif</small></button>
+    </div>
+
+    <div class="vmenu-col">
+      <div class="vmenu-t">Ma progression</div>
+      <button onclick="_navGo();mMonParcours()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-trending"/></svg><b>Mon parcours</b><small>XP, série, niveau</small></button>
+      <button onclick="_navGo();mAchievements()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg><b>Mes badges</b><small>30+ à débloquer</small></button>
+      <button onclick="_navGo();mVeritasGenome()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-activity"/></svg><b>Mon Genome</b><small>ADN académique</small></button>
+      <button onclick="_navGo();vShowSec('leaderboard-junior',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-flame"/></svg><b>Classement Junior</b><small>Top 100 ambassadeurs</small></button>
+    </div>
+
+    <div class="vmenu-col">
+      <div class="vmenu-t">Communauté</div>
+      <button onclick="_navGo();showClasseVirtuelle()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-university"/></svg><b>Classes &amp; Forum</b><small>Enseignants et pairs</small></button>
+      <button onclick="_navGo();mParrainage()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-gift"/></svg><b>Parrainage</b><small>+500 FCFA par filleul</small></button>
+      <button onclick="_navGo();vShowSec('partenariat',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-handshake"/></svg><b>Partenariat</b><small>9 programmes</small></button>
+      <button onclick="_navGo();vShowSec('nos-partenaires',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-building"/></svg><b>Nos partenaires</b><small>Sponsors, universités</small></button>
+      <button onclick="_navGo();vShowSec('cagnotte',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-wallet"/></svg><b>Cagnotte de scolarité</b><small>Payer depuis l'étranger</small></button>
+    </div>
+
+    <div class="vmenu-col">
+      <div class="vmenu-t">Infos</div>
+      <button onclick="_navGo();showCalendrier()"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-calendar"/></svg><b>Calendrier scolaire</b><small>Séquences, examens, vacances</small></button>
+      <button onclick="_navGo();vShowSec('actualites',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-news"/></svg><b>Actualités</b><small>Éducation au Cameroun</small></button>
+      <button onclick="_navGo();vShowSec('presentation',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-home"/></svg><b>Le centre</b><small>Qui nous sommes</small></button>
+      <button onclick="_navGo();vShowSec('verifier-certificat',null)"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-shield"/></svg><b>Vérifier un certificat</b><small>Authenticité VÉRITAS</small></button>
+    </div>
+  </div>
+</div>
+
+<!-- Ancienne barre (10 boutons + 4 menus) SUPPRIMEE en v1.17 : remplacee par
+     la barre slim + le panneau #vMenu ci-dessus. Toutes ses destinations y ont
+     ete reprises ; aucune n'a ete perdue. -->
 <div id="vContent" role="region" aria-live="polite"></div>
 </main>
 <!-- ═══ FOOTER PORTAIL VISITEUR ═══ -->
@@ -1288,7 +1502,7 @@ setTimeout(_vAmbassaFab,3000);
    restaient en cache après déploiement. Repli sur la valeur figée si le
    sélecteur ne trouve rien. */
 window._VRT_ASSET_VER=(function(){try{var e=document.querySelector('link[href*="app.js?v="],script[src*="app.js?v="]');var m=e&&String(e.href||e.src||'').match(/app\.js\?v=([0-9.]+)/);return m?m[1]:'1.15.9';}catch(x){return '1.15.9';}})();</script>
-<script defer src="/app.js?v=1.17.4"></script>
+<script defer src="/app.js?v=1.18.2"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->
@@ -3039,36 +3253,16 @@ html{scroll-behavior:smooth}
       // === SECTION SOMBRE PREMIUM ===
       // CDN Microsoft Fluent 3D Emoji — pictogrammes haute résolution
       +'<div class="vgz-dark-section">'
-      +'<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-handshake"/></svg></span> Tu es...</h2><div class="acc-sub">Une plateforme. Un accès personnalisé pour chaque rôle.</div></div>'
+      // ═══ DOUBLON SUPPRIMÉ (v1.17) ═══════════════════════════════════════
+      // Les 4 cartes ÉLÈVE / PARENT / ENSEIGNANT / ÉTABLISSEMENT vivaient ici,
+      // au 5,6ᵉ écran sur mobile, ET en haut de l'accueil (.acc-portes, sous la
+      // promesse). Deux fois le même choix, à 5 écrans d'intervalle : le
+      // visiteur qui a déjà choisi son profil retombe dessus et doute d'avoir
+      // avancé. Le choix de rôle se fait UNE fois, tout en haut.
+      // Cette section ne garde donc que les profils PARTENARIAT, qui n'ont pas
+      // d'équivalent ailleurs — et son titre le dit désormais franchement.
+      +'<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-handshake"/></svg></span> Travailler avec VÉRITAS</h2><div class="acc-sub">Neuf programmes de partenariat — pour celles et ceux qui veulent porter VÉRITAS plus loin, et en vivre.</div></div>'
       +'<div class="vgz-roles v-reveal">'
-        +'<div class="vgz-role r-eleve" onclick="_portailAller(\'eleve\')">'
-          +'<div class="vgz-role-glow"></div>'
-          +'<div class="vgz-role-ico"><svg class="vgz-role-svg" viewBox="0 0 24 24" role="img" aria-label="Élève"><use href="#lc-graduation"/></svg></div>'
-          +'<div class="vgz-role-title">ÉLÈVE</div>'
-          +'<div class="vgz-role-desc">Notes, bulletins, devoirs et cours en ligne. Tout ce qu\'il te faut pour réussir.</div>'
-          +'<div class="vgz-role-cta">Se connecter →</div>'
-        +'</div>'
-        +'<div class="vgz-role r-parent" onclick="_portailAller(\'parent\')">'
-          +'<div class="vgz-role-glow"></div>'
-          +'<div class="vgz-role-ico"><svg class="vgz-role-svg" viewBox="0 0 24 24" role="img" aria-label="Parent"><use href="#lc-users"/></svg></div>'
-          +'<div class="vgz-role-title">PARENT</div>'
-          +'<div class="vgz-role-desc">Suis la progression de ton enfant, paie en MoMo et reçois les notifs en direct.</div>'
-          +'<div class="vgz-role-cta">S\'inscrire →</div>'
-        +'</div>'
-        +'<div class="vgz-role r-enseignant" onclick="_portailAller(\'enseignant\')">'
-          +'<div class="vgz-role-glow"></div>'
-          +'<div class="vgz-role-ico"><svg class="vgz-role-svg" viewBox="0 0 24 24" role="img" aria-label="Enseignant"><use href="#lc-presentation"/></svg></div>'
-          +'<div class="vgz-role-title">ENSEIGNANT</div>'
-          +'<div class="vgz-role-desc">Saisis tes notes en lot, publie tes manuels, suis les performances de tes classes.</div>'
-          +'<div class="vgz-role-cta">Accéder →</div>'
-        +'</div>'
-        +'<div class="vgz-role r-etab" onclick="_portailAller(\'etablissement\')">'
-          +'<div class="vgz-role-glow"></div>'
-          +'<div class="vgz-role-ico"><svg class="vgz-role-svg" viewBox="0 0 24 24" role="img" aria-label="Établissement"><use href="#lc-building"/></svg></div>'
-          +'<div class="vgz-role-title">ÉTABLISSEMENT</div>'
-          +'<div class="vgz-role-desc">Confiez-nous la gestion : inscriptions, notes, bulletins MINESEC, frais, personnel — à vos couleurs.</div>'
-          +'<div class="vgz-role-cta">Découvrir Campus →</div>'
-        +'</div>'
         +'<div class="vgz-role" style="--vgz-role-color:#0EA5E9" role="link" tabindex="0" onclick="vShowSec(\'partenariat-inspecteur\',null)">'
           +'<div class="vgz-role-glow"></div>'
           +'<div class="vgz-role-ico"><svg class="vgz-role-svg" viewBox="0 0 24 24" role="img" aria-label="Inspecteur"><use href="#lc-clipboard"/></svg></div>'

@@ -386,9 +386,16 @@ def head(title, desc, canonical, depth=1, jsonld=""):
 """ % dict(title=esc(title), desc=esc(desc), can=canonical, site=SITE, jsonld=jsonld)
 
 def foot(depth=1):
+    # veritas-convert.js ajoute le bloc de conversion AVANT ce pied de page.
+    # Il doit rester ici : les pages de corrigés sont régénérées par ce script,
+    # une balise ajoutée à la main dans le HTML serait effacée au prochain build.
+    # Le pied de page mène désormais aussi aux abonnements : les deux seuls
+    # liens sortants de /corriges/ pointaient tous les deux vers manuels.html.
     return """<footer class="bot">© <span id="y"></span> Centre VÉRITAS · Mythe Errant — Douala, Cameroun ·
-<a href="%(site)s">veritas-school.com</a> · <a href="%(site)s/manuels.html">Espace Manuels</a></footer>
+<a href="%(site)s">veritas-school.com</a> · <a href="%(site)s/manuels.html">Espace Manuels</a> ·
+<a href="%(site)s/#tarifs">Abonnements</a></footer>
 <script src="/assets/veritas-ui.js" defer></script>
+<script src="/assets/veritas-convert.js" defer></script>
 </body>
 </html>
 """ % dict(site=SITE)

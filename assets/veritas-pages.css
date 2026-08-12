@@ -1430,3 +1430,260 @@ article ol:not([class])>li::marker{
   .vrt-wa-fab .tx small{display:none}
 }
 @media print{ .vrt-wa-fab{display:none} }
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   THÈME « CORPORATE » — LES PAGES STATIQUES REJOIGNENT LA VITRINE
+   (référence visuelle : lws.fr · pendant de assets/theme-lws.css)
+   ────────────────────────────────────────────────────────────────────────
+   Cette feuille habille 64 pages : corrigés 6ᵉ→Tˡᵉ, œuvres, niveaux,
+   ressources, Constellation, pages « découvrir ». Elles portaient encore
+   l'ancienne charte — bleu nuit + or, Segoe UI, en-têtes en dégradé,
+   filets dorés sous les titres — pendant que la vitrine passait au bleu
+   #1E499B et à Poppins. Deux sites en un : le visiteur qui clique sur
+   « Corrigés » depuis la barre changeait visiblement de maison.
+
+   Le bloc ci-dessous applique le MÊME système. Il est ajouté en fin de
+   feuille plutôt que réparti dans les 1432 lignes précédentes pour deux
+   raisons : il gagne par l'ordre du cascade sans avoir à surenchérir en
+   `!important`, et il se retire d'un seul geste si le choix est révisé.
+
+   ⚠️ Certaines pages ouvrent un <style> APRÈS ce fichier. Les propriétés
+   qui doivent tenir malgré tout portent `!important` — et seulement
+   celles-là.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 1 · JETONS ─────────────────────────────────────────────────────
+   Les variables déclarées en tête de feuille (--navy, --gold, --rad…)
+   irriguent toutes les règles existantes. Les réécrire ici repeint
+   l'ensemble des 64 pages sans toucher une seule de ces règles. */
+:root{
+  /* La palette du modèle */
+  --lws-blue:#1E499B; --lws-blue-deep:#0C2A6A; --lws-blue-light:#3B6FCB;
+  --lws-navy-txt:#001136; --lws-cyan:#0098FF;
+  --lws-orange:#FF6500; --lws-orange-txt:#C24E00; --lws-orange-dark:#A34100;
+  --lws-orange-sh:0 5px 15px rgba(242,165,32,.5);
+  --lws-grey:#F4F5F8; --lws-line:#E4E7EF;
+  --lws-tint-sky:#DBE8FE; --lws-tint-blue:#E5EFF7;
+  --lws-tint-green:#E5F5E8; --lws-tint-beige:#F5F2E9;
+  --lws-font:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+
+  /* Remappage des anciens jetons. L'OR DISPARAÎT : --gold devient bleu,
+     donc les filets de titre, les survols de carte et les pastilles
+     suivent d'eux-mêmes. */
+  --navy:#1E499B; --navy2:#0C2A6A; --navy3:#001136;
+  --gold:#1E499B;  --gold2:#0C2A6A;
+  --ink:#001136;   --gris:#4D5163;
+  --bg:#FFFFFF;    --card:#FFFFFF;  --line:#E4E7EF;
+  --green:#007E11; --vert-bg:#E5F5E8;
+  --rouge:#C0392B; --violet:#5B4FA8;
+  --rad:10px;      /* rayon unique du modèle */
+  --maxw:1080px;   /* la colonne s'élargit : 960 datait d'avant la refonte */
+}
+
+/* ─── 2 · TYPOGRAPHIE ────────────────────────────────────────────────
+   Poppins, et jamais plus de 600 de graisse. Segoe UI/Calibri donnaient
+   à ces pages un air de document bureautique. */
+body{
+  font-family:var(--lws-font);
+  font-size:16px; line-height:1.6;
+  color:#4D5163; background:#FFFFFF;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4,h5,h6,b,strong,summary,th,legend,dt{
+  font-family:var(--lws-font);
+  font-weight:600;
+  color:var(--lws-navy-txt);
+  letter-spacing:0;
+}
+h1{ font-size:34px; line-height:44px; }
+h2{ font-size:30px; line-height:40px; }
+h3{ font-size:20px; line-height:30px; }
+h4{ font-size:17px; line-height:27px; }
+p{ margin:0 0 16px; }
+a{ color:var(--lws-blue); text-decoration:none; }
+a:hover{ color:var(--lws-blue-light); text-decoration:underline; }
+/* Le confort de lecture prime sur la largeur : une ligne de corrigé à
+   1080px serait illisible. On borne la MESURE, pas le conteneur. */
+section.lec p, .ex p, details.sol .body p, .loupe p{ max-width:74ch; }
+
+/* ─── 3 · EN-TÊTE ────────────────────────────────────────────────────
+   Le dégradé navy devient l'aplat bleu du modèle ; le badge doré
+   contourné devient une pastille pleine et lisible. */
+header.top{
+  background:var(--lws-blue) !important;
+  background-image:none !important;
+  color:#fff;
+  border-bottom:0;
+}
+header.top h1{ color:#fff; font-size:34px; line-height:44px; font-weight:600; }
+header.top p{ color:rgba(255,255,255,.88); font-size:16px; }
+header.top a{ color:#fff; text-decoration:underline; }
+header.top .badge{
+  border:0 !important;
+  background:rgba(255,255,255,.16);
+  color:#fff !important;
+  border-radius:5px; padding:4px 10px;
+  font-size:12px; font-weight:600; letter-spacing:.6px;
+}
+
+/* ─── 4 · TITRES DE SECTION ──────────────────────────────────────────
+   Le filet doré sous chaque h2 disparaît : c'était de la ponctuation
+   visuelle répétée quinze fois par page. L'espace fait mieux le travail. */
+h2.sec{
+  color:var(--lws-navy-txt);
+  border-bottom:0 !important;
+  padding-bottom:0;
+  margin-top:44px; margin-bottom:14px;
+}
+h2.sec::after{ content:none !important; }
+.rub .i, section.lec>h3 .i, .cta a .i{ color:var(--lws-blue) !important; }
+
+/* ─── 5 · CARTES ET BLOCS ────────────────────────────────────────────
+   Filet 1px, rayon 10px, fond blanc, aucune ombre. Le survol répond par
+   la BORDURE et trois pixels de montée — pas par un halo doré. */
+.card, section.lec, .ex, .loupe{
+  background:#FFFFFF;
+  border:1px solid var(--lws-line);
+  border-radius:var(--rad);
+  box-shadow:none !important;
+}
+.card{ padding:22px; transition:transform .18s cubic-bezier(.16,1,.3,1), border-color .18s ease; }
+.card:hover{ transform:translateY(-3px); border-color:var(--lws-blue); }
+.card h3{ color:var(--lws-navy-txt); font-size:18px; }
+.card a.dl{
+  border-radius:var(--rad); border:1px solid var(--lws-line);
+  transition:border-color .18s ease, background-color .18s ease;
+}
+.card a.dl:hover{ border-color:var(--lws-blue) !important; background:var(--lws-tint-blue) !important; }
+.ex{ background:var(--lws-grey); }
+.ex:hover{ border-color:var(--lws-line); }
+
+/* ─── 6 · NAVIGATION DE SÉQUENCE ─────────────────────────────────────
+   Onglets à plat, filet bleu à l'état actif. */
+nav.seqnav a{
+  border-radius:var(--rad); border:1px solid var(--lws-line);
+  color:var(--lws-navy-txt); font-weight:500; padding:8px 14px;
+  transition:border-color .18s ease, background-color .18s ease, color .18s ease;
+}
+nav.seqnav a:hover{ border-color:var(--lws-blue) !important; background:var(--lws-tint-blue) !important; }
+nav.seqnav a[aria-current]{
+  background:var(--lws-blue) !important; color:#fff !important;
+  border-color:var(--lws-blue) !important;
+}
+
+/* ─── 7 · BOUTONS ET APPELS À L'ACTION ───────────────────────────────
+   Bleu plein pour se renseigner, orange pour agir. L'orange porteur de
+   texte est le #C24E00 accessible, pas le #FF6500 vif : sur un téléphone
+   en plein soleil à Douala, ce n'est pas une note de conformité. */
+.cta a{
+  background:var(--lws-blue); border-radius:var(--rad);
+  font-weight:600; padding:18px;
+  transition:background-color .15s ease, transform .12s ease;
+}
+.cta a:hover{ background:var(--lws-blue-deep); transform:translateY(-1px); }
+.cta a small{ color:rgba(255,255,255,.82); font-weight:400; }
+.cta a.primaire, .cta a.achat, .gate button, .tools button.principal{
+  background:var(--lws-orange-txt) !important; color:#fff !important;
+  border:0 !important; border-radius:var(--rad) !important;
+  box-shadow:var(--lws-orange-sh) !important;
+  font-weight:600;
+}
+.cta a.primaire:hover, .cta a.achat:hover, .gate button:hover{
+  background:var(--lws-orange-dark) !important;
+}
+.tools button{
+  border-radius:var(--rad); border:1px solid var(--lws-line);
+  font-weight:500; color:var(--lws-navy-txt);
+  transition:border-color .15s ease, background-color .15s ease, transform .12s ease;
+}
+.tools button:hover{ border-color:var(--lws-blue) !important; }
+.tools button:active{ transform:scale(.985); }
+.tools button[aria-pressed="true"]{
+  background:var(--lws-blue) !important; border-color:var(--lws-blue) !important; color:#fff !important;
+}
+
+/* ─── 8 · PASTILLES ET PICTOGRAMMES ──────────────────────────────────
+   Aplat teinté, coins à 5px, jamais d'ombre : une pastille signale, elle
+   ne décore pas. Les médaillons ronds passent au carré arrondi, cohérents
+   avec ceux de la vitrine. */
+.pill{
+  border-radius:5px; padding:3px 9px;
+  font-size:12px; font-weight:600; letter-spacing:0;
+  background:var(--lws-tint-sky); color:var(--lws-blue);
+}
+.pill.or{ background:var(--lws-tint-beige) !important; color:#8A6A2B !important; }
+.pill.gris{ background:var(--lws-grey) !important; color:#6E7385 !important; }
+.ico{
+  border-radius:12px !important;   /* le rond devient carré arrondi */
+  width:44px; height:44px;
+  background:var(--lws-tint-sky) !important; color:var(--lws-blue) !important;
+  transition:transform .18s cubic-bezier(.16,1,.3,1);
+}
+.card:hover .ico, .cta a:hover .ico{ transform:translateY(-2px) scale(1.06); }
+.ico.or    { background:var(--lws-tint-beige) !important; color:#8A6A2B !important; }
+.ico.vert  { background:var(--lws-tint-green) !important; color:var(--green) !important; }
+.ico.violet{ background:#EDEAF8 !important;               color:var(--violet) !important; }
+.ico.rouge { background:#FBEAE8 !important;               color:var(--rouge) !important; }
+/* Régularité du jeu d'icônes : même épaisseur, mêmes extrémités. */
+.i{ stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+
+/* ─── 9 · SOLUTIONS DÉPLIABLES ───────────────────────────────────────
+   Le cœur des pages de corrigés. Vert de validation, pas d'or. */
+details.sol>summary{
+  border-radius:var(--rad); font-weight:600;
+  background:var(--lws-tint-green); color:#00650D;
+  padding:8px 14px;
+  transition:background-color .15s ease;
+}
+details.sol>summary:hover{ background:#D6EEDC; }
+details.sol[open]>summary{ border-radius:var(--rad) var(--rad) 0 0; }
+details.sol .body{
+  border:1px solid #C6E6CE; border-top:0;
+  border-radius:0 var(--rad) var(--rad) var(--rad);
+  background:#FAFDFB;
+}
+
+/* ─── 10 · PIED DE PAGE ──────────────────────────────────────────────
+   Aplat bleu profond pleine largeur, comme sur la vitrine. */
+footer.bot{
+  background:var(--lws-blue-deep) !important;
+  color:rgba(255,255,255,.78) !important;
+  border-top:0 !important;
+  padding:32px 16px;
+  font-size:14px;
+}
+footer.bot a{ color:#fff !important; }
+footer.bot a:hover{ text-decoration:underline; }
+
+/* ─── 11 · GRILLE ────────────────────────────────────────────────── */
+.wrap{ max-width:var(--maxw); padding:40px 24px 56px; }
+.grid{ gap:16px; }
+
+/* ─── 12 · FOCUS CLAVIER ─────────────────────────────────────────────
+   Une partie des élèves navigue au clavier depuis les salles
+   informatiques : l'anneau doit être visible et bleu, pas doré. */
+a:focus-visible, button:focus-visible, summary:focus-visible,
+input:focus-visible, select:focus-visible, [tabindex]:focus-visible{
+  outline:2px solid var(--lws-blue) !important;
+  outline-offset:2px !important;
+  border-radius:6px;
+}
+
+/* ─── 13 · MOUVEMENT RÉDUIT ──────────────────────────────────────────
+   Le réglage système est un choix, pas une suggestion. */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{
+    animation:none !important; transition:none !important; transform:none !important;
+  }
+}
+
+/* ─── 14 · ADAPTATIF ─────────────────────────────────────────────── */
+@media (max-width:820px){
+  body{ font-size:15px; }
+  h1, header.top h1{ font-size:26px; line-height:35px; }
+  h2, h2.sec{ font-size:22px; line-height:31px; margin-top:32px; }
+  h3{ font-size:18px; line-height:27px; }
+  .wrap{ padding:26px 18px 40px; }
+  .card{ padding:18px; }
+}

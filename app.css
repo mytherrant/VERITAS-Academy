@@ -7764,3 +7764,351 @@ button .i,a .i{margin-right:.4em}
 /* Une vignette masquée par le filtre ne doit pas laisser d'espace fantôme
    dans une rangée en flex : `hidden` seul ne suffit pas face à display:flex. */
 .shelf-item[hidden],.vbook-card[hidden],.shelf-row[hidden]{display:none!important}
+
+/* ── v1.17.4 — Partage d'un manuel (panneau d'achat) ──────────────────
+   Placé sous les boutons d'achat : on partage un livre qu'on a décidé
+   d'acheter ou de faire acheter, pas avant de l'avoir regardé. Discret
+   par rapport au CTA — ce sont des actions secondaires, elles ne doivent
+   pas concurrencer « Payer maintenant ». */
+.bkshare{margin-top:14px;padding-top:12px;border-top:1px solid rgba(20,37,84,.10)}
+.bkshare-t{
+  display:flex;align-items:center;gap:6px;
+  font-family:'Plus Jakarta Sans',Montserrat,sans-serif;
+  font-size:12.5px;font-weight:800;color:var(--acc-navy,#142554);
+}
+.bkshare-t svg{width:15px;height:15px}
+.bkshare-s{font-size:11.5px;color:var(--ds-text-2,#6B7280);margin:2px 0 9px}
+.bkshare-b{display:flex;gap:7px;flex-wrap:wrap}
+.bkshare-btn{
+  flex:1 1 auto;min-width:96px;text-align:center;
+  border:1.5px solid rgba(20,37,84,.16);background:#fff;
+  border-radius:10px;padding:9px 10px;
+  font-family:Poppins,system-ui,sans-serif;font-size:12px;font-weight:700;
+  color:var(--acc-navy,#142554);text-decoration:none;cursor:pointer;
+  transition:transform .2s cubic-bezier(.34,1.56,.64,1),border-color .2s,background .2s;
+}
+.bkshare-btn:hover{transform:translateY(-2px)}
+.bkshare-btn.wa{border-color:rgba(37,211,102,.55);color:#0B6B34}
+.bkshare-btn.wa:hover{background:rgba(37,211,102,.10)}
+.bkshare-btn.fb{border-color:rgba(24,119,242,.45);color:#12579E}
+.bkshare-btn.fb:hover{background:rgba(24,119,242,.08)}
+.bkshare-btn.cp:hover{background:rgba(20,37,84,.05)}
+/* Confirmation visible SUR le bouton : sur mobile, le toast s'affiche en bas
+   de l'écran, loin du pouce qui vient de cliquer — on ne le voit pas. */
+.bkshare-btn.is-ok{
+  border-color:rgba(15,123,79,.6);background:rgba(15,123,79,.10);color:#0F7B4F;
+}
+@media (max-width:420px){
+  .bkshare-btn{flex:1 1 100%;min-width:0}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BARRE PRINCIPALE SLIM + PANNEAU DE NAVIGATION (v1.17)
+   La barre portait 10 boutons et 4 menus sur une ligne : 790 px de contenu
+   dans 375 px de fenêtre. Elle ne porte plus que la marque, « Connexion » et
+   le bouton du panneau. Tout le reste est rangé dans #vMenu.
+   ══════════════════════════════════════════════════════════════════════════ */
+.vnav.vnav-slim{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:8px 14px;overflow:visible;
+  background:var(--ds-surface,#fff);
+  border-bottom:1px solid var(--ds-border,#E6EAF2);
+  box-shadow:0 1px 0 rgba(20,37,84,.03);
+}
+.vnav-brand{
+  display:flex;align-items:center;gap:10px;
+  background:none;border:0;cursor:pointer;padding:4px 6px;border-radius:12px;
+  color:var(--ds-primary,#142554);font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif);
+  transition:background .18s;
+}
+.vnav-brand:hover{background:rgba(20,37,84,.05)}
+.vnav-brand-ic{
+  width:34px;height:34px;flex:0 0 34px;border-radius:10px;
+  display:grid;place-items:center;
+  background:linear-gradient(135deg,#142554,#1E3A8A);
+  box-shadow:0 4px 12px rgba(20,37,84,.22);
+}
+.vnav-brand-ic svg{width:19px;height:19px;fill:none;stroke:#FFC93C;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.vnav-brand-tx{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05;
+  font-size:17px;font-weight:900;letter-spacing:.4px}
+.vnav-brand-tx small{font-size:9.5px;font-weight:600;letter-spacing:.5px;
+  text-transform:uppercase;color:var(--ds-text-2,#5A6B93);margin-top:2px}
+
+.vnav-actions{display:flex;align-items:center;gap:8px}
+.vnav-cnx{
+  display:inline-flex;align-items:center;gap:7px;cursor:pointer;
+  padding:9px 16px;border-radius:99px;
+  background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;
+  border:0;font-weight:800;font-size:13.5px;
+  font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif);
+  box-shadow:0 4px 14px rgba(20,37,84,.24);
+  transition:transform .16s,box-shadow .16s;
+}
+.vnav-cnx:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(20,37,84,.30)}
+.vnav-cnx svg{width:16px;height:16px;fill:none;stroke:#FFC93C;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+
+.vnav-burger{
+  width:44px;height:42px;border-radius:12px;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;
+  background:var(--ds-surface,#fff);border:1px solid var(--ds-border-strong,#D5DBE8);
+  transition:background .18s,border-color .18s;
+}
+.vnav-burger:hover{background:rgba(20,37,84,.05);border-color:var(--ds-primary,#142554)}
+.vnav-burger-b{
+  width:20px;height:2.2px;border-radius:2px;background:var(--ds-primary,#142554);
+  transition:transform .24s cubic-bezier(.4,0,.2,1),opacity .18s;
+}
+.vnav-burger.open .vnav-burger-b:nth-child(1){transform:translateY(7.2px) rotate(45deg)}
+.vnav-burger.open .vnav-burger-b:nth-child(2){opacity:0}
+.vnav-burger.open .vnav-burger-b:nth-child(3){transform:translateY(-7.2px) rotate(-45deg)}
+
+/* ── Panneau ─────────────────────────────────────────────────────────────── */
+.vmenu-ov{
+  position:fixed;inset:0;z-index:900;background:rgba(13,27,62,.45);
+  opacity:0;transition:opacity .22s;backdrop-filter:blur(2px);
+}
+.vmenu-ov.open{opacity:1}
+.vmenu{
+  position:fixed;z-index:901;top:0;right:0;height:100dvh;width:min(430px,100vw);
+  background:var(--ds-surface,#fff);
+  border-left:1px solid var(--ds-border,#E6EAF2);
+  box-shadow:-18px 0 50px rgba(13,27,62,.20);
+  display:flex;flex-direction:column;gap:12px;padding:14px 16px 26px;
+  overflow-y:auto;overscroll-behavior:contain;
+  transform:translateX(100%);transition:transform .26s cubic-bezier(.4,0,.2,1);
+}
+.vmenu.open{transform:none}
+body.vmenu-lock{overflow:hidden}
+
+.vmenu-hd{display:flex;align-items:center;justify-content:space-between;
+  padding-bottom:10px;border-bottom:1px solid var(--ds-border,#E6EAF2)}
+.vmenu-hd-t{font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif);
+  font-size:12px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;
+  color:var(--ds-text-2,#5A6B93)}
+.vmenu-x{width:34px;height:34px;border-radius:10px;border:1px solid var(--ds-border,#E6EAF2);
+  background:none;cursor:pointer;font-size:22px;line-height:1;color:var(--ds-primary,#142554)}
+.vmenu-x:hover{background:rgba(20,37,84,.06)}
+
+.vmenu-search{
+  display:flex;align-items:center;gap:9px;width:100%;cursor:pointer;
+  padding:11px 13px;border-radius:12px;text-align:left;
+  border:1px solid var(--ds-border-strong,#D5DBE8);background:var(--ds-bg,#F7F9FC);
+  font-size:13.5px;font-weight:600;color:var(--ds-text-2,#5A6B93);
+}
+.vmenu-search:hover{border-color:var(--ds-primary,#142554);background:#fff}
+.vmenu-search svg{width:17px;height:17px;flex:0 0 17px;fill:none;
+  stroke:var(--ds-primary,#142554);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vmenu-search span{flex:1}
+.vmenu-search kbd{font-size:10px;font-weight:700;padding:3px 6px;border-radius:5px;
+  background:#fff;border:1px solid var(--ds-border,#E6EAF2);color:var(--ds-text-2,#5A6B93)}
+
+/* Les deux entrées qui font vivre le centre : elles ne se noient pas dans la liste. */
+.vmenu-hi{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.vmenu-hi-c{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;cursor:pointer;
+  padding:13px 12px;border-radius:14px;text-align:left;border:1px solid transparent;
+  font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif);
+  transition:transform .16s,box-shadow .16s;
+}
+.vmenu-hi-c:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(20,37,84,.14)}
+.vmenu-hi-c svg{width:20px;height:20px;fill:none;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round;margin-bottom:4px}
+.vmenu-hi-c b{font-size:14px;font-weight:800}
+.vmenu-hi-c small{font-size:11px;font-weight:600;opacity:.75}
+.vmenu-hi-or{background:linear-gradient(135deg,rgba(255,201,60,.22),rgba(255,201,60,.07));
+  border-color:rgba(255,201,60,.45);color:#7A5B04}
+.vmenu-hi-or svg{stroke:#8A6A06}
+.vmenu-hi-go{background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;
+  border-color:transparent}
+.vmenu-hi-go svg{stroke:#FFC93C}
+.vmenu-hi-go small{opacity:.85}
+
+.vmenu-cols{display:flex;flex-direction:column;gap:16px}
+.vmenu-t{
+  font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif);
+  font-size:10.5px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--ds-accent,#B08300);margin:2px 0 6px;
+  display:flex;align-items:center;gap:8px;
+}
+.vmenu-t::after{content:'';flex:1;height:1px;background:var(--ds-border,#E6EAF2)}
+.vmenu-col button{
+  display:grid;grid-template-columns:24px 1fr;grid-template-rows:auto auto;
+  column-gap:10px;align-items:center;width:100%;cursor:pointer;text-align:left;
+  padding:8px 10px;border-radius:10px;background:none;border:0;
+  transition:background .16s;
+}
+.vmenu-col button:hover{background:rgba(20,37,84,.055)}
+.vmenu-col button svg{grid-row:1/3;width:19px;height:19px;fill:none;
+  stroke:var(--ds-primary,#142554);stroke-width:1.9;
+  stroke-linecap:round;stroke-linejoin:round}
+.vmenu-col button b{font-size:13.5px;font-weight:700;color:var(--ds-text,#142554);
+  font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif)}
+.vmenu-col button small{font-size:11.5px;color:var(--ds-text-2,#5A6B93)}
+
+@media (min-width:900px){
+  .vmenu{width:min(760px,100vw)}
+  .vmenu-cols{display:grid;grid-template-columns:1fr 1fr;gap:14px 26px}
+}
+@media (max-width:430px){
+  .vnav-brand-tx small{display:none}
+  .vnav-cnx span{display:none}
+  .vnav-cnx{padding:10px 12px}
+}
+@media (prefers-reduced-motion:reduce){
+  .vmenu,.vmenu-ov,.vnav-burger-b,.vmenu-hi-c,.vnav-cnx{transition:none}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BARRE DE RECHERCHE DE L'ACCUEIL (v1.17)
+   ══════════════════════════════════════════════════════════════════════════ */
+.acc-rech{
+  display:flex;align-items:center;gap:0;max-width:660px;margin:16px auto 8px;
+  background:var(--ds-surface,#fff);border:2px solid var(--ds-primary,#142554);
+  border-radius:99px;padding:5px 5px 5px 16px;
+  box-shadow:0 8px 26px rgba(20,37,84,.13);
+  transition:box-shadow .2s,border-color .2s;
+}
+.acc-rech:focus-within{box-shadow:0 12px 34px rgba(20,37,84,.20);border-color:var(--ds-accent,#B08300)}
+.acc-rech-ic{display:flex;flex:0 0 auto;margin-right:9px}
+.acc-rech-ic svg{width:18px;height:18px;fill:none;stroke:var(--ds-text-2,#5A6B93);
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.acc-rech-in{
+  flex:1;min-width:0;border:0;outline:0;background:none;
+  font-family:var(--ds-font-text,'Inter',sans-serif);font-size:15px;
+  color:var(--ds-text,#142554);padding:10px 4px;
+}
+.acc-rech-in::placeholder{color:var(--ds-text-2,#8492B4);font-size:14px}
+.acc-rech-in::-webkit-search-cancel-button{cursor:pointer}
+.acc-rech-btn{
+  flex:0 0 auto;cursor:pointer;border:0;border-radius:99px;
+  padding:12px 26px;font-size:14px;font-weight:800;
+  font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif);
+  background:linear-gradient(135deg,#FFD86E,#FFC93C);color:#142554;
+  box-shadow:0 4px 14px rgba(200,150,26,.32);
+  transition:transform .16s,box-shadow .16s;
+}
+.acc-rech-btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(200,150,26,.42)}
+.acc-rech-sug{
+  display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:7px;
+  max-width:660px;margin:0 auto 20px;font-size:12px;color:var(--ds-text-2,#5A6B93);
+}
+.acc-rech-sug > span{font-weight:700}
+.acc-rech-sug button{
+  cursor:pointer;border:1px solid var(--ds-border,#E6EAF2);background:var(--ds-bg,#F7F9FC);
+  border-radius:99px;padding:5px 12px;font-size:12px;color:var(--ds-text-2,#5A6B93);
+  transition:border-color .16s,color .16s,background .16s;
+}
+.acc-rech-sug button:hover{border-color:var(--ds-primary,#142554);
+  color:var(--ds-primary,#142554);background:#fff}
+@media (max-width:520px){
+  .acc-rech{padding-left:13px}
+  .acc-rech-btn{padding:12px 18px;font-size:13px}
+  .acc-rech-in{font-size:14px}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PAGE ABONNEMENTS — gains, objections, relance (v1.17)
+   ══════════════════════════════════════════════════════════════════════════ */
+.vgains{display:grid;gap:14px;max-width:1000px;margin:18px auto 0;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.vgain-c{
+  background:var(--ds-surface,#fff);border:1px solid var(--ds-border,#E6EAF2);
+  border-radius:16px;padding:20px 18px;box-shadow:var(--ds-sh-sm,0 1px 3px rgba(20,37,84,.08));
+  transition:transform .18s,box-shadow .18s;position:relative;overflow:hidden;
+}
+.vgain-c::before{content:'';position:absolute;inset:0 0 auto 0;height:3px;
+  background:linear-gradient(90deg,#142554,#1E3A8A 50%,#FFC93C)}
+.vgain-c:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(20,37,84,.13)}
+.vgain-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,rgba(20,37,84,.09),rgba(255,201,60,.14));margin-bottom:11px}
+.vgain-ic svg{width:20px;height:20px;fill:none;stroke:var(--ds-primary,#142554);
+  stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.vgain-pour{font-size:10.5px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;
+  color:var(--ds-accent,#B08300);margin-bottom:5px}
+.vgain-t{font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif);
+  font-size:18px;font-weight:800;line-height:1.2;color:var(--ds-text,#142554);margin-bottom:7px}
+.vgain-d{font-size:13.5px;line-height:1.6;color:var(--ds-text-2,#5A6B93)}
+
+.vcard-libre{border-color:rgba(15,123,79,.28)!important;
+  background:linear-gradient(180deg,rgba(15,123,79,.045),transparent 60%)}
+.vcols2{columns:2;column-gap:26px}
+@media (max-width:620px){.vcols2{columns:1}}
+.vlibre-note{margin-top:12px;padding-top:11px;border-top:1px dashed var(--ds-border,#E6EAF2);
+  font-family:var(--ds-font-serif,'Crimson Pro',serif);font-style:italic;
+  font-size:14px;color:var(--ds-text-2,#5A6B93)}
+
+.vfaq-wrap{max-width:720px;margin:30px auto 0}
+.vfaq-t{font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif);
+  font-size:15px;font-weight:800;color:var(--ds-text,#142554);margin-bottom:10px}
+.vfaq{border:1px solid var(--ds-border,#E6EAF2);border-radius:12px;
+  background:var(--ds-surface,#fff);margin-bottom:8px;overflow:hidden}
+.vfaq summary{cursor:pointer;padding:13px 15px;font-size:14px;font-weight:700;
+  color:var(--ds-text,#142554);list-style:none;display:flex;align-items:center;
+  justify-content:space-between;gap:10px}
+.vfaq summary::-webkit-details-marker{display:none}
+.vfaq summary::after{content:'+';font-size:19px;font-weight:400;color:var(--ds-accent,#B08300);
+  transition:transform .2s}
+.vfaq[open] summary::after{transform:rotate(45deg)}
+.vfaq summary:hover{background:rgba(20,37,84,.03)}
+.vfaq p{margin:0;padding:0 15px 14px;font-size:13.5px;line-height:1.65;
+  color:var(--ds-text-2,#5A6B93)}
+
+.vabo-fin{max-width:720px;margin:26px auto 0;text-align:center;padding:24px 20px;
+  border-radius:18px;background:linear-gradient(135deg,rgba(20,37,84,.05),rgba(255,201,60,.09));
+  border:1px solid var(--ds-border,#E6EAF2)}
+.vabo-fin-t{font-family:var(--ds-font-display,'Plus Jakarta Sans',sans-serif);
+  font-size:19px;font-weight:800;color:var(--ds-text,#142554)}
+.vabo-fin-d{font-size:13.5px;color:var(--ds-text-2,#5A6B93);margin:6px 0 14px;line-height:1.6}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BARRE SLIM (suite) — absorption des bandeaux redondants (v1.17)
+   Le portail visiteur empilait TROIS bandeaux avant le contenu :
+     1. .vlogin-bar  → marque + utilitaires + 3 boutons d'authentification
+     2. .vhero       → logo + nom + slogan (les mêmes, en plus gros)
+     3. .vnav        → les 14 entrées de navigation
+   Soit ~150 px de hauteur consommés à répéter deux fois le nom du centre.
+   La barre slim porte désormais la marque, les utilitaires et « Connexion ».
+   Les deux bandeaux sont masqués — mais leur balisage RESTE dans le document :
+   #vBrandName, #vLogo, #vName, #vSlogan, #vSyncDot et #adminAccessPoint sont
+   écrits par app.js, les faire disparaître casserait l'accès admin.
+   ══════════════════════════════════════════════════════════════════════════ */
+#VISITOR > .vlogin-bar,
+#VISITOR > .vhero{display:none!important}
+
+/* Utilitaires (panier, langue, thème) ramenés dans la barre slim. */
+#vNavUtils{display:flex;align-items:center;gap:6px}
+#vNavUtils .btn.icon-only{
+  width:36px!important;height:36px!important;padding:0!important;
+  background:var(--ds-bg,#F7F9FC)!important;
+  border:1px solid var(--ds-border,#E6EAF2)!important;
+  color:var(--ds-primary,#142554)!important;
+  border-radius:50%!important;
+}
+#vNavUtils .btn.icon-only:hover{
+  background:#fff!important;border-color:var(--ds-primary,#142554)!important;
+}
+#vNavUtils .btn.icon-only svg{stroke:currentColor}
+
+/* Doublons d'authentification : « Connexion » de la barre slim les couvre.
+   On ne masque QUE les boutons de l'état déconnecté — ceux que
+   _updateVisitorHeader() écrit une fois l'élève connecté (« Mon compte »,
+   « Déco ») ne correspondent pas à ces sélecteurs et restent visibles. */
+.vnav-slim .vlogin-btns .btn[onclick*="showLogin"],
+.vnav-slim .vlogin-btns .btn[onclick*="showRegisterForm"]{display:none!important}
+.vnav-slim .vlogin-btns{display:flex;align-items:center;gap:6px}
+
+/* Sur petit écran, seuls la marque, le panier et le panneau méritent la place. */
+@media (max-width:560px){
+  #vNavUtils button[onclick*="mLanguageMenu"]{display:none!important}
+}
+@media (max-width:430px){
+  #vNavUtils #vThemeBtn{display:none!important}
+}
+
+/* La marque ne doit jamais être écrasée par les actions de droite. */
+.vnav-brand{flex:0 1 auto;min-width:0;overflow:hidden}
+.vnav-brand-tx{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vnav-brand-tx small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.vnav-actions{flex:0 0 auto}
