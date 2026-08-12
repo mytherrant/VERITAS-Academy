@@ -4628,6 +4628,21 @@ function vShowSec(sec,btn){
       </div>
     </div>
 
+    <!-- ═══ ANNONCE « CORRIGÉS EN LIGNE » (déplacée en v1.18.8) ═════════════
+         Elle occupait le tout premier bandeau du site, au-dessus du nom du
+         centre : on annonçait un service avant d'avoir dit qui l'on est.
+         Elle vient maintenant APRÈS la marque, la promesse et les portes de
+         rôle — et seulement sur l'accueil.
+         Une seule promesse, vérifiable, avec sa porte de sortie : pas de
+         compte à rebours, pas d'« offre limitée ». Les corrigés sont
+         réellement en ligne et réellement gratuits, c'est tout l'argument. -->
+    <div class="lws-promo">
+      <div class="lws-promo-in">
+        <span><b>Les corrigés des cahiers VÉRITAS sont en ligne</b> — 6<sup>e</sup> à Terminale, en accès libre, sans compte.</span>
+        <button type="button" class="lws-promo-cta" onclick="window.open('/corriges/','_blank','noopener')">Les consulter</button>
+      </div>
+    </div>
+
     <!-- ═══ RECHERCHE GLOBALE (v1.17) ══════════════════════════════════════
          La recherche n'existait que derrière un bouton de la barre (et un
          Ctrl+K que personne ne devine). Or le site compte des centaines de
@@ -5091,9 +5106,13 @@ function vShowSec(sec,btn){
         h+='<div style="font-size:12px;color:#8895AA;margin-top:6px">Ajoutez des contenus depuis le panneau Admin → E-Learning</div></div>';
       } else {
         var free2=0;
+        // v1.16 — nombre d'aperçus payants offerts avant le mur : réglable dans
+        // l'admin (« 🔓 Essais & abonnements »), plus le « free2<2 » codé en dur
+        // qui ouvrait deux ressources payantes par catégorie à tout le monde.
+        var _essaisCat=(typeof _pwEssaisCatalogue==='function')?_pwEssaisCatalogue():2;
         h+='<div id="elCatalog" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px">';
         filtered.forEach(function(item){
-          var isFree=item.gratuit||false;
+          var isFree=(typeof _pwEstGratuit==='function')?_pwEstGratuit(item):(item.gratuit||false);
           var isBlocked=_accId&&(item.blockedFor||[]).indexOf(_accId)>=0;
           var isManuallyUnlocked=_accId&&(item.unlockedFor||[]).indexOf(_accId)>=0;
           var hasPlanAccess=item.plans&&item.plans.length&&item.plans.some(function(p){return _effPlansH.indexOf(p)>=0;});
@@ -5101,7 +5120,7 @@ function vShowSec(sec,btn){
           // Sans cette ligne, l'élève payait puis restait devant un cadenas.
           var hasUnitAccess=(typeof _aDroitUnitaire==='function')&&_aDroitUnitaire(item.id);
           var hasRealAccess=(isFree&&!isBlocked)||isManuallyUnlocked||hasPlanAccess||hasUnitAccess||iA();
-          var isUnlocked=hasRealAccess||(isFree)||(free2<2);
+          var isUnlocked=hasRealAccess||(isFree)||(free2<_essaisCat);
           if(!isFree) free2++;
           var isLocked=!isUnlocked;
           var pLabels={plan1:'EXAMEN',plan2:'INTERMÉD.',plan3:'ENSEIGNANT',plan4:'FAMILLE',plan5:'TECHNIQUE',plan6:'GCE'};
@@ -8984,7 +9003,9 @@ function consulterGratuit(itemId){
   var visAcc=accId?(DB.visitorAccounts||[]).find(function(a){return a.id===accId;}):null;
   var vPlans=visAcc?visAcc.plans||[]:[];
   var hasPlanAccess=item.plans&&item.plans.length&&item.plans.some(function(p){return vPlans.indexOf(p)>=0;});
-  var isFree=item.gratuit||false;
+  // v1.16 : « gratuit » se lit au travers du réglage admin — le catalogue ne
+  // laisse ouverte que la (ou les) ressource(s) offerte(s), cf. _pwLibreIds.
+  var isFree=(typeof _pwEstGratuit==='function')?_pwEstGratuit(item):(item.gratuit||false);
 
   if(hasPlanAccess){
     // Abonné → accès complet avec filigrane
@@ -8992,7 +9013,12 @@ function consulterGratuit(itemId){
   }
 
   if(!isFree){
-    // Pas d'abonnement et contenu payant
+    // v1.16 — au lieu de claquer la porte : quelques essais offerts (réglables
+    // dans l'admin), puis seulement le mur d'abonnement.
+    if(typeof _pwGate==='function'){
+      if(_pwGate('elearning', item.titre||'Cette ressource', item.id)){ viewResource(item,'subscribed'); }
+      return;
+    }
     toast('&#128274; Abonnement requis pour accéder à ce contenu','warn');
     var elPlans=document.getElementById('elPlans');
     if(elPlans) elPlans.scrollIntoView({behavior:'smooth'});
@@ -10041,6 +10067,7 @@ const ANAV=[
     {k:"booksale",i:"📚",l:"Vente manuels"},
     {k:"books2",i:"▤",l:"Bibliothèque"},
     {k:"elearningmgmt",i:"🎓",l:"E-Learning"},
+    {k:"paywall",i:"🔓",l:"Essais & abonnements"},
     {k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},
     {k:"visitororders",i:"📦",l:"Commandes visiteurs"}
   ]},
@@ -10104,6 +10131,7 @@ const SANAV=[
     {k:"booksale",i:"📚",l:"Vente manuels"},
     {k:"books2",i:"▤",l:"Bibliothèque"},
     {k:"elearningmgmt",i:"🎓",l:"E-Learning"},
+    {k:"paywall",i:"🔓",l:"Essais & abonnements"},
     {k:"resPedago",i:"📄",l:"Ressources BAC"},
     {k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},
     {k:"visitororders",i:"📦",l:"Commandes visiteurs"}
@@ -10174,6 +10202,7 @@ const PT={
   booksale:"Vente de manuels",
   books2:"Bibliothèque scolaire",
   elearningmgmt:"E-Learning & Contenus premium",
+  paywall:"Essais gratuits & mur d'abonnement",
   authorsmgmt:"Auteurs & Partage de droits",
   visitororders:"Commandes visiteurs",
   resPedago:"Ressources pédagogiques (Probatoire/BAC)",
@@ -10268,7 +10297,7 @@ function render(p){
     devoirs_teacher:pgDevoirsTeacher,perf_teacher:pgPerfTeacher,
     // Admin
     statistics:pgClassStats,absences_admin:pgAbsencesAdmin,devoirs_admin:pgDevoirsAdmin,orientation_admin:pgOrientationAdmin,resPedago:pgResPedagoAdmin,paiements_admin:pgPaiementsAdmin,
-    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,
+    stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,paywall:pgPaywall,
     forum_admin:pgForumAdmin,marketplace_admin:pgMarketplaceAdmin,centres_admin:pgCentresAdmin,
     calendrier_admin:pgCalendrierAdmin,
     partenaires_splits:pgPartenairesSplits,
@@ -16001,6 +16030,17 @@ window._aiInc = function(action){
 // Récupérer la limite pour l'action courante
 window._aiLimit = function(action){
   var tier = _aiTier();
+  // v1.16 : l'admin peut surcharger ces quotas depuis « 🔓 Essais &
+  // abonnements » (DB.paywall.quotasIA). Sans surcharge, on garde AI_QUOTAS.
+  var over = null;
+  try{
+    var q = (typeof DB!=='undefined' && DB.paywall && DB.paywall.quotasIA) ? DB.paywall.quotasIA[action] : null;
+    if(q && q[tier]!==undefined && q[tier]!==null && q[tier]!==''){
+      var v = parseInt(q[tier],10);
+      if(!isNaN(v)) over = v;
+    }
+  }catch(e){}
+  if(over !== null) return over;
   var quotas = AI_QUOTAS[action] || AI_QUOTAS.default;
   return quotas[tier] || quotas.free;
 };
@@ -16536,6 +16576,8 @@ var _quizState={qbank:[],current:0,score:0,answered:false};
 function startQuiz(topic,classe,titre){
   var bank=QUIZ_DB[topic]||[];
   if(!bank.length){toast('Quiz non disponible pour cette matière','warn');return;}
+  // v1.16 — essais offerts par quiz (réglables en admin), puis abonnement.
+  if(typeof _pwGate==='function' && !_pwGate('quiz', titre||'Ce quiz', topic)) return;
   // Shuffle and take up to 8 questions
   var shuffled=bank.slice().sort(function(){return Math.random()-0.5;}).slice(0,Math.min(8,bank.length));
   _quizState={qbank:shuffled,current:0,score:0,answered:false,titre:titre||'Quiz',classe:classe||''};
@@ -18426,6 +18468,9 @@ function vLaunchJeu(id){
     if(j&&!JEUX_CATALOGUE.find(function(x){return x.id===id;})){JEUX_CATALOGUE.push(j);}
   }
   if(!j){toast('Jeu introuvable','warn');return;}
+  // v1.16 — jeu premium : essais offerts (réglables en admin) puis abonnement.
+  // Un essai ouvre CE jeu, rejouable ensuite sans en reconsommer.
+  if(!j.gratuit && typeof _pwGate==='function' && !_pwGate('jeux', j.titre||'Ce jeu', j.id)) return;
   // Jeu HTML → ouvrir le contenu dans un nouvel onglet avec filigrane
   if(j.type==='html'||j.type==='html_interactif'){
     if(j.externalUrl){window.open(j.externalUrl,'_blank');return;}
@@ -18684,6 +18729,8 @@ function _showLittCarte(oeuvreKey){
   }
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe||!oe.carte){toast('Carte non disponible','warn');return;}
+  // v1.16 — essais : l'analyse littéraire est libre, le reste de l'œuvre non.
+  if(typeof _pwGate==='function' && !_pwGate('oeuvres','Carte mentale — '+(oe.titre||'œuvre'),oeuvreKey)) return;
   var c=oe.carte;
   var _MMCOLORS=['#0EA5E9','#C07D4F','#7C68B8','#3A8F73','#C46F6F','#F59E0B'];
   function _mmIco(lb){
@@ -19174,6 +19221,7 @@ function _showLittCorriges(oeuvreKey){
   if(!oe){toast("Œuvre introuvable","warn");return;}
   var file=(typeof _oeuvreCorrige==='function')?_oeuvreCorrige(oeuvreKey):'';
   if(!file){toast("Aucun corrigé disponible pour cette œuvre","warn");return;}
+  if(typeof _pwGate==='function' && !_pwGate('oeuvres','Corrigés modèles — '+(oe.titre||'œuvre'),oeuvreKey)) return;
   _vc('<div class="vsec">'
     +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
     +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-award"/></svg></span>Corrigés modèles — '+_esc(oe.titre)+'</div>'
@@ -19207,6 +19255,7 @@ function _showLittCorriges(oeuvreKey){
 function _littCorrigeIA(oeuvreKey, mode){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe){toast("Œuvre introuvable","warn");return;}
+  if(typeof _pwGate==='function' && !_pwGate('oeuvres','Devoir rédigé par l\'IA — '+(oe.titre||'œuvre'),oeuvreKey)) return;
   var fi=oe.fiche||{};
   var th=(fi.themes||[]).join(', ');
   var ax=(fi.axes||[]).join(' ; ');
@@ -19298,8 +19347,9 @@ function _showLittMenu(jid,oeuvreKey){
     // v2.1 : helper inline pour générer une carte avec icône Lucide + halo coloré
     + (function(){
         // ic = nom Lucide, c = couleur, bg = fond halo, t = titre, st = sous-titre, click = onclick
-        function _lcard(ic, c, bg, t, st, click, isNew){
+        function _lcard(ic, c, bg, t, st, click, isNew, badge){
           return '<div class="vcard" style="cursor:pointer;text-align:center;position:relative;transition:all .25s var(--ease-out, ease-out);padding:16px 12px" onmouseover="this.style.transform=\'translateY(-3px)\';this.style.boxShadow=\'0 8px 24px rgba(20,37,84,.12)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'" onclick="'+click+'">'
+            +(badge?'<div style="position:absolute;top:8px;left:8px;z-index:2">'+badge+'</div>':'')
             +(isNew?'<div style="position:absolute;top:8px;right:8px;background:linear-gradient(135deg,#6C56A6,#A855F7);color:#fff;font-size:8px;font-weight:900;padding:2px 7px;border-radius:8px;letter-spacing:.5px;z-index:2">✨ NEW</div>':'')
             // Halo circulaire coloré avec icône Lucide au centre
             +'<div style="width:56px;height:56px;border-radius:50%;background:'+bg+';display:flex;align-items:center;justify-content:center;margin:0 auto 12px;box-shadow:0 4px 12px '+bg.replace('0.12','0.25')+'">'
@@ -19315,13 +19365,18 @@ function _showLittMenu(jid,oeuvreKey){
         //   3. CONTRÔLE DE LECTURE → citations + figures + techniques + QCM + questions ouvertes
         var nbControle = ((oe.citations||[]).length) + ((oe.techniques||[]).length) + ((oe.qcm||[]).length) + ((oe.controle||[]).length);
         var _hasCorrige = (typeof _oeuvreCorrige==='function') && _oeuvreCorrige(oeuvreKey);
-        return (oe.analyse ? _lcard('bookopen','#6C56A6', 'rgba(124,58,237,0.12)','Analyse littéraire',   'Style accessible &amp; extraits phares', '_showLittAnalyse(\''+oeuvreKey+'\')', true) : '')
-             + _lcard('clipboard', '#142554', 'rgba(16,185,129,0.12)',  'Fiche d\'identité',      _esc(ficheDesc)+' · Carte mentale',          '_showLittFiche(\''+oeuvreKey+'\')', false)
-             + _lcard('pencil',    '#AE5353', 'rgba(220,38,38,0.12)',   'Contrôle de lecture',    nbControle+' éléments à maîtriser',          '_showLittControleComplet(\''+oeuvreKey+'\')', false)
+        // v1.16 — l'analyse littéraire est la vitrine : gratuite pour toutes les
+        // œuvres. Les quatre autres cartes consomment UN essai pour l'œuvre
+        // entière (pas un essai par carte), puis renvoient à l'abonnement.
+        var _libre = '<span style="background:#D1FAE5;color:#059669;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap">GRATUIT</span>';
+        var _pwb = (typeof _pwBadge==='function') ? _pwBadge('oeuvres', oeuvreKey) : '';
+        return (oe.analyse ? _lcard('bookopen','#6C56A6', 'rgba(124,58,237,0.12)','Analyse littéraire',   'Style accessible &amp; extraits phares', '_showLittAnalyse(\''+oeuvreKey+'\')', true, _libre) : '')
+             + _lcard('clipboard', '#142554', 'rgba(16,185,129,0.12)',  'Fiche d\'identité',      _esc(ficheDesc)+' · Carte mentale',          '_showLittFiche(\''+oeuvreKey+'\')', false, _pwb)
+             + _lcard('pencil',    '#AE5353', 'rgba(220,38,38,0.12)',   'Contrôle de lecture',    nbControle+' éléments à maîtriser',          '_showLittControleComplet(\''+oeuvreKey+'\')', false, _pwb)
              // v1.3.2 : la carte IA est TOUJOURS proposée (avant, une œuvre avec
              // corrigé statique n'offrait AUCUN bouton de demande précise à l'IA).
-             + (_hasCorrige ? _lcard('award','#F59E0B', 'rgba(245,158,11,0.14)', 'Corrigés modèles', 'Commentaire composé &amp; dissertation rédigés', '_showLittCorriges(\''+oeuvreKey+'\')', true) : '')
-             + _lcard('sparkles','#6C56A6', 'rgba(124,58,237,0.12)', 'Demander à l\'IA Ambassa', 'Dissertation, commentaire ou fiche — sujet au choix', '_littCorrigeIA(\''+oeuvreKey+'\')', true);
+             + (_hasCorrige ? _lcard('award','#F59E0B', 'rgba(245,158,11,0.14)', 'Corrigés modèles', 'Commentaire composé &amp; dissertation rédigés', '_showLittCorriges(\''+oeuvreKey+'\')', true, _pwb) : '')
+             + _lcard('sparkles','#6C56A6', 'rgba(124,58,237,0.12)', 'Demander à l\'IA Ambassa', 'Dissertation, commentaire ou fiche — sujet au choix', '_littCorrigeIA(\''+oeuvreKey+'\')', true, _pwb);
       })()
     +'</div>'
     // Bandeau auteur/classe
@@ -19340,6 +19395,7 @@ function _showLittMenu(jid,oeuvreKey){
 function _showLittFiche(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe){toast("Œuvre introuvable","warn");return;}
+  if(typeof _pwGate==='function' && !_pwGate('oeuvres','Fiche d\'identité — '+(oe.titre||'œuvre'),oeuvreKey)) return;
   var fi=oe.fiche||{};
   var COL='#142554';
   var h='<div class="vsec">'
@@ -19409,6 +19465,7 @@ function _showLittFiche(oeuvreKey){
 function _showLittControleComplet(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe){toast("Œuvre introuvable","warn");return;}
+  if(typeof _pwGate==='function' && !_pwGate('oeuvres','Contrôle de lecture — '+(oe.titre||'œuvre'),oeuvreKey)) return;
   var COL='#AE5353';
   var nbCit = (oe.citations||[]).length;
   var nbTech = (oe.techniques||[]).length;
@@ -19582,6 +19639,7 @@ function _showLittAnalyse(oeuvreKey){
 function _showLittCitations(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe||!oe.citations||!oe.citations.length){toast("Aucune citation disponible","warn");return;}
+  if(typeof _pwGate==='function' && !_pwGate('oeuvres','Citations — '+(oe.titre||'œuvre'),oeuvreKey)) return;
   var idx=0;
   function renderCit(){
     var c=oe.citations[idx];
@@ -19637,6 +19695,7 @@ function _showLittCitations(oeuvreKey){
 function _showLittTechniques(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe||!oe.techniques||!oe.techniques.length){toast("Aucune technique disponible","warn");return;}
+  if(typeof _pwGate==='function' && !_pwGate('oeuvres','Procédés & effets — '+(oe.titre||'œuvre'),oeuvreKey)) return;
   var h='<div class="vsec">'
     +'<button class="back-btn" onclick="_showLittMenu(\''+oeuvreKey+'\',\''+oeuvreKey+'\')">← Retour</button>'
     +'<div class="vsec-title"><span class="vsec-ico"><svg class="vico vico-21" aria-hidden="true"><use href="#lc-tool"/></svg></span>Techniques d\'écriture — '+_esc(oe.titre)+'</div>'
@@ -19675,6 +19734,7 @@ function _showLittTechniques(oeuvreKey){
 function _showLittControle(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe||!oe.controle||!oe.controle.length){toast("Aucun contrôle disponible","warn");return;}
+  if(typeof _pwGate==='function' && !_pwGate('oeuvres','Questions ouvertes — '+(oe.titre||'œuvre'),oeuvreKey)) return;
   var idx=0; var score=0; var revealed=false;
   function renderCtrl(){
     if(idx>=oe.controle.length){
@@ -19731,6 +19791,7 @@ function _showLittControle(oeuvreKey){
 function _lancerLittQCM(oeuvreKey){
   var oe=LITT_OEUVRES[oeuvreKey];
   if(!oe||!oe.qcm||!oe.qcm.length){toast("Aucune question QCM","warn");return;}
+  if(typeof _pwGate==='function' && !_pwGate('oeuvres','QCM — '+(oe.titre||'œuvre'),oeuvreKey)) return;
   var qs=oe.qcm.slice().sort(function(){return Math.random()-.5;});
   var idx=0;var score=0;
   function renderQ(){
@@ -20349,6 +20410,12 @@ function lancerRessourcePedago(key,previewOnly){
   }
   var res=window._RESSOURCES_PEDAGO[key];
   if(!res){toast('\u00c9valuation introuvable','warn');return;}
+  // v1.16 \u2014 TROU BOUCH\u00c9 : ce lanceur ouvrait le document ENTIER sans le moindre
+  // contr\u00f4le. Une \u00ab Ressource BAC \u00bb payante s'ouvrait donc en entier pour tout
+  // le monde (raccourci de consulterGratuit + r\u00e9sultats de recherche). La r\u00e8gle
+  // vit ici, \u00e0 l'entr\u00e9e unique, donc tous les appelants en h\u00e9ritent.
+  // previewOnly (aper\u00e7u 30 %) reste ouvert : c'est l'app\u00e2t, pas le contenu.
+  if(!previewOnly && typeof _pwResPedagoOk==='function' && !_pwResPedagoOk(key)) return;
   try{
     var html=atob(res.b64);
     if(previewOnly){
@@ -20818,9 +20885,13 @@ function showJeuxEdu(){
     return '#6366F1';
   }
   list.forEach(function(j){
-    var locked=!j.gratuit&&!SES;
+    // v1.16 — le cadenas ne dépend plus de « être connecté » (n'importe quel
+    // compte gratuit ouvrait alors TOUS les jeux premium) mais des essais
+    // restants du profil. Le clic sur un jeu épuisé montre l'offre.
+    var _pwE=(typeof _pwEtat==='function')?_pwEtat('jeux',j.id):{ouvert:true,libre:true};
+    var locked=!j.gratuit && !_pwE.ouvert;
     var clickExpr=locked
-      ?"toast(\"Connexion requise pour accéder aux jeux premium\",\"warn\")"
+      ?"_pwModal('jeux','')"
       :"vLaunchJeu(\""+j.id+"\")";
     var ic=_jeuIcon(j), col=_jeuColor(j);
     h+="<div class='jeu-card' onclick='"+clickExpr+"'>";
@@ -20829,7 +20900,11 @@ function showJeuxEdu(){
     h+="<div style='width:56px;height:56px;border-radius:50%;background:"+col+"22;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px "+col+"30'>";
     h+="<svg width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='"+col+"' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><use href='#lc-"+ic+"'/></svg>";
     h+="</div>";
-    if(!j.gratuit) h+="<span class='jeu-premium'>PREMIUM</span>";
+    if(!j.gratuit){
+      h+="<span class='jeu-premium'>PREMIUM</span>";
+      var _pwb=(typeof _pwBadge==='function')?_pwBadge('jeux',j.id):'';
+      if(_pwb) h+="<span style='position:absolute;top:6px;left:6px;z-index:2'>"+_pwb+"</span>";
+    }
     else h+="<span class='jeu-free'>GRATUIT</span>";
     var typeLabel={qcm:"QCM",vf:"Vrai/Faux",pendu:"Pendu",trous:"Texte trous",html:"HTML"}[j.type]||j.type||'';
     if(typeLabel)h+="<span style='position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:rgba(0,0,0,.4)'>"+typeLabel+"</span>";
@@ -22373,6 +22448,12 @@ function lancerLabo(id){
   // le visiteur faire lui-même le lien avec le catalogue.
   if(!lv.gratuit && typeof _planAccess==='function' && !_planAccess('labos')
      && !(typeof iA==='function' && iA())){
+    // v1.16 : on offre d'abord les essais réglés dans l'admin ; la relance
+    // premium (message nominatif ci-dessous) ne sert que s'ils sont épuisés.
+    if(typeof _pwGate==='function' && typeof _pwEtat==='function' && _pwEtat('labo',lv.id).ouvert
+       && _pwGate('labo', lv.titre||'Ce laboratoire', lv.id)){
+      _lancerLaboComplet(lv); return;
+    }
     if(typeof _relancePremium==='function'){
       var _autres = (window.LABO_DB||[]).filter(function(x){ return !x.gratuit && x.id!==lv.id; }).length;
       _relancePremium({
@@ -46942,3 +47023,460 @@ function _bookOpenFromHash(id){
   }, 260);
   return true;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ESSAIS & ABONNEMENTS (v1.16) — un seul robinet pour tout le contenu
+   ─────────────────────────────────────────────────────────────────────────
+   Règle produit (Jacques, 12/08/2026) : le contenu est payant, mais chaque
+   surface offre quelques ESSAIS, pour donner envie de s'abonner plutôt que
+   de claquer la porte au nez du visiteur.
+
+     · Un essai ouvre UN ITEM (une œuvre, un jeu, un quiz), pas un clic.
+       Sinon consulter la fiche d'une œuvre puis sa carte mentale brûlerait
+       deux essais pour un seul livre : revenir sur un item déjà ouvert est
+       toujours gratuit.
+     · Fenêtre : visiteur non inscrit = à vie (par appareil), inscrit gratuit
+       = par semaine, abonné / enseignant / admin = illimité (-1).
+     · L'ANALYSE LITTÉRAIRE des œuvres au programme reste TOUJOURS libre —
+       c'est elle qui vend le reste (fiche, contrôle, corrigés, carte).
+     · Le catalogue e-learning garde UNE ressource gratuite (réglable).
+
+   TOUT est éditable dans l'admin → « 🔓 Essais & abonnements » (pgPaywall).
+   Les valeurs ci-dessous ne sont que le défaut quand DB.paywall est absent.
+
+   ⚠️ Garde-fou de vitrine, pas coffre-fort. Un navigateur peut vider son
+   localStorage. Le vrai verrou d'un contenu PAYÉ vit côté serveur
+   (vrt_grant_entitlement, secure_pdf.php) et n'est pas touché ici.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+window.PAYWALL_DEFAUT = {
+  actif: true,
+  surfaces: {
+    oeuvres: { on:true, label:'📖 Œuvres au programme',
+      aide:"L'analyse littéraire reste gratuite sur TOUTES les œuvres. Un essai ouvre une œuvre en entier : fiche d'identité, carte mentale, contrôle de lecture, corrigés modèles.",
+      essais:{ anon:1, free:2, starter:-1, pro:-1, elite:-1, teach:-1, admin:-1 } },
+    jeux: { on:true, label:'🎮 Jeux éducatifs',
+      aide:"Un essai = un jeu, rejouable ensuite autant de fois qu'on veut.",
+      essais:{ anon:2, free:3, starter:-1, pro:-1, elite:-1, teach:-1, admin:-1 } },
+    quiz: { on:true, label:'🧠 Quiz interactifs',
+      aide:"Un essai = un quiz (Maths BEPC, SVT, Histoire-Géo…).",
+      essais:{ anon:1, free:2, starter:-1, pro:-1, elite:-1, teach:-1, admin:-1 } },
+    labo: { on:true, label:'🔬 Laboratoire virtuel',
+      aide:"Un essai = une expérience.",
+      essais:{ anon:1, free:2, starter:-1, pro:-1, elite:-1, teach:-1, admin:-1 } },
+    elearning: { on:true, label:'🎓 Catalogue e-learning (ressources payantes)',
+      aide:"Nombre de ressources PAYANTES ouvrables avant le mur. 0 = catalogue payant fermé : il ne reste que la ressource offerte ci-dessous.",
+      essais:{ anon:0, free:1, starter:-1, pro:-1, elite:-1, teach:-1, admin:-1 } }
+  },
+  // « Sauf une ressource gratuite pour inciter à l'abonnement »
+  catalogueLibre: { limiter:true, max:1, ids:[] },
+  // Surcharge admin des quotas IA (AI_QUOTAS) : ambassa, devoir, photo_ia, orient, correct
+  quotasIA: {}
+};
+
+window.PW_TIERS = [
+  { k:'anon',    l:'Visiteur non inscrit' },
+  { k:'free',    l:'Inscrit sans abonnement' },
+  { k:'starter', l:'Plan Intermédiaire' },
+  { k:'pro',     l:'Plan Examen / Enseignant' },
+  { k:'elite',   l:'Plan Famille / École' },
+  { k:'teach',   l:'Enseignant VÉRITAS' },
+  { k:'admin',   l:'Administration' }
+];
+
+/* Config effective = défaut + surcharges admin (fusion profonde, pour qu'une
+   surface ajoutée plus tard apparaisse même chez un admin qui a déjà sauvé). */
+window._pwCfg = function(){
+  var d = window.PAYWALL_DEFAUT;
+  var u = (typeof DB!=='undefined' && DB && DB.paywall) ? DB.paywall : null;
+  if(!u) return d;
+  var out = { actif:(u.actif===undefined ? d.actif : !!u.actif), surfaces:{},
+              catalogueLibre:{}, quotasIA:(u.quotasIA||{}) };
+  Object.keys(d.surfaces).forEach(function(k){
+    var ds = d.surfaces[k], us = (u.surfaces && u.surfaces[k]) || {};
+    var e = {};
+    Object.keys(ds.essais).forEach(function(t){
+      var v = (us.essais ? us.essais[t] : undefined);
+      v = (v===undefined || v===null || v==='') ? ds.essais[t] : parseInt(v,10);
+      e[t] = isNaN(v) ? ds.essais[t] : v;
+    });
+    out.surfaces[k] = { on:(us.on===undefined ? ds.on : !!us.on),
+                        label:ds.label, aide:ds.aide, essais:e };
+  });
+  if(u.surfaces) Object.keys(u.surfaces).forEach(function(k){
+    if(!out.surfaces[k]) out.surfaces[k] = u.surfaces[k];
+  });
+  var dc = d.catalogueLibre, uc = u.catalogueLibre || {};
+  out.catalogueLibre = {
+    limiter:(uc.limiter===undefined ? dc.limiter : !!uc.limiter),
+    max:(uc.max===undefined ? dc.max : Math.max(0, parseInt(uc.max,10)||0)),
+    ids:(Array.isArray(uc.ids) ? uc.ids : dc.ids)
+  };
+  return out;
+};
+
+window._pwActif  = function(){ return !!_pwCfg().actif; };
+window._pwTier   = function(){ return (typeof _aiTier==='function') ? _aiTier() : 'anon'; };
+window._pwSurface= function(k){ return _pwCfg().surfaces[k] || null; };
+
+/* Nombre d'essais du profil courant. -1 = illimité, 0 = rien d'offert. */
+window._pwLimit = function(k){
+  var s = _pwSurface(k); if(!s) return -1;
+  var t = _pwTier(), e = s.essais || {};
+  var v = e[t];
+  if(v===undefined || v===null || v==='') v = (e.free===undefined ? 0 : e.free);
+  v = parseInt(v,10);
+  return isNaN(v) ? 0 : v;
+};
+
+/* Fenêtre de comptage : à vie pour l'anonyme, semaine pour l'inscrit gratuit,
+   jour pour le reste (aligné sur la logique de _aiKey). */
+window._pwPeriodKey = function(k){
+  var t = _pwTier(), d = new Date(), p;
+  if(t==='anon') p = 'vie';
+  else if(t==='free'){
+    var fj = new Date(d.getFullYear(),0,1);
+    var doy = Math.floor((d - fj)/86400000);
+    p = 'S'+d.getFullYear()+'-'+Math.ceil((doy + fj.getDay() + 1)/7);
+  } else p = 'J'+d.toDateString();
+  return k+'|'+t+'|'+p;
+};
+
+/* Liste des items déjà ouverts avec un essai sur la période. */
+window._pwStore = function(k){
+  var key = _pwPeriodKey(k);
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(ses && ses.id){
+    DB.userTrials = DB.userTrials || {};
+    DB.userTrials[ses.id] = DB.userTrials[ses.id] || {};
+    if(!Array.isArray(DB.userTrials[ses.id][key])) DB.userTrials[ses.id][key] = [];
+    return DB.userTrials[ses.id][key];
+  }
+  try{
+    var raw = localStorage.getItem('_pwOpen_'+key);
+    var a = raw ? JSON.parse(raw) : [];
+    return Array.isArray(a) ? a : [];
+  }catch(e){ return []; }
+};
+window._pwStoreSave = function(k, list){
+  var key = _pwPeriodKey(k);
+  var ses = (typeof SES!=='undefined' && SES) ? SES : null;
+  if(ses && ses.id){
+    DB.userTrials = DB.userTrials || {};
+    DB.userTrials[ses.id] = DB.userTrials[ses.id] || {};
+    DB.userTrials[ses.id][key] = list;
+    try{ save(); }catch(e){}
+    return;
+  }
+  try{ localStorage.setItem('_pwOpen_'+key, JSON.stringify(list)); }catch(e){}
+};
+
+/* État sans rien consommer — pour afficher un badge ou un cadenas. */
+window._pwEtat = function(k, item){
+  var s = _pwSurface(k);
+  var lim = _pwLimit(k);
+  var libre = !_pwActif() || !s || !s.on || lim === -1;
+  var ouverts = libre ? [] : _pwStore(k);
+  var dejaOuvert = !!(item && ouverts.indexOf(item) >= 0);
+  return { libre:libre, limite:lim, utilises:ouverts.length,
+           reste: Math.max(0, lim - ouverts.length),
+           ouvert: libre || dejaOuvert || ouverts.length < lim,
+           dejaOuvert: dejaOuvert };
+};
+
+/* LE robinet. true = on laisse passer (et on décompte si c'est un item neuf),
+   false = mur affiché, l'appelant doit s'arrêter net. */
+window._pwGate = function(k, label, item){
+  try{
+    if(typeof iA==='function' && iA()) return true;
+    var s = _pwSurface(k);
+    if(!s || !_pwActif() || !s.on) return true;
+    var lim = _pwLimit(k);
+    if(lim === -1) return true;
+    item = item || '_';
+    var ouverts = _pwStore(k);
+    if(ouverts.indexOf(item) >= 0) return true;      // déjà payé d'un essai
+    if(ouverts.length >= lim){ _pwModal(k, label); return false; }
+    ouverts.push(item);
+    _pwStoreSave(k, ouverts);
+    var reste = lim - ouverts.length;
+    if(typeof toast==='function'){
+      toast(reste > 0
+        ? '🎁 Essai offert ' + ouverts.length + '/' + lim + ' — il vous en reste ' + reste
+        : '🎁 Dernier essai offert (' + lim + '/' + lim + ')', 'ok');
+    }
+    return true;
+  }catch(e){ return true; }   // un bug de garde ne doit jamais fermer le site
+};
+
+/* Le mur. Il dit ce qui reste gratuit — sinon on perd le visiteur. */
+window._pwModal = function(k, label){
+  var s = _pwSurface(k) || {};
+  var lim = _pwLimit(k);
+  var quoi = label || s.label || 'Ce contenu';
+  var libreTxt = (k === 'oeuvres')
+    ? "L'<b>analyse littéraire</b> de toutes les œuvres reste gratuite, sans limite."
+    : (k === 'elearning' ? "La ressource offerte du catalogue reste accessible."
+                         : "Les ressources marquées « Gratuit » restent accessibles.");
+  var corps =
+    '<div style="text-align:center;padding:6px 4px 2px">'
+    + '<div style="font-size:44px;line-height:1;margin-bottom:10px">🔓</div>'
+    + '<div style="font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:8px">'
+    + (lim > 1 ? 'Vos ' + lim + ' essais offerts sont utilisés'
+       : lim === 1 ? 'Votre essai offert est utilisé'
+       : 'Contenu réservé aux abonnés') + '</div>'
+    + '<div style="font-size:13px;color:#4A5568;line-height:1.65;max-width:420px;margin:0 auto">'
+    + _esc(quoi) + ' fait partie des contenus de l\'abonnement VÉRITAS. '
+    + 'Un abonnement ouvre <b>tout</b> : épreuves corrigées, cours, œuvres au programme, jeux et laboratoire.'
+    + '</div>'
+    + '<div class="ib ibi" style="margin:14px auto 0;max-width:440px;text-align:left"><span>💡</span><span>'
+    + libreTxt + '</span></div>'
+    + ((typeof SES==='undefined' || !SES)
+        ? '<div style="font-size:12px;color:#6B7A99;margin-top:12px">Astuce : <b>créez un compte gratuit</b>, vous récupérez des essais supplémentaires chaque semaine.</div>'
+        : '')
+    + '</div>';
+  var pied = '<button class="btn bo" onclick="cm()">Plus tard</button>'
+    + '<button class="btn bi" onclick="cm();(typeof vShowSec===\'function\'?vShowSec(\'elearning\',null):0);'
+    + 'setTimeout(function(){var p=document.getElementById(\'elPlans\');if(p)p.scrollIntoView({behavior:\'smooth\'});},400)">'
+    + 'Voir les abonnements →</button>';
+  if(typeof M==='function') M('🔒 ' + quoi, 'Débloquez tout VÉRITAS', corps, pied, true);
+  else if(typeof toast==='function') toast('Contenu réservé aux abonnés', 'warn');
+};
+
+/* Pastille « 2 essais restants » à coller sur une carte. */
+window._pwBadge = function(k, item){
+  var e = _pwEtat(k, item);
+  if(e.libre) return '';
+  if(e.dejaOuvert) return '<span style="background:#D1FAE5;color:#059669;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap">✓ OUVERT</span>';
+  if(e.reste > 0) return '<span style="background:#FEF3C7;color:#D97706;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap">'+e.reste+' ESSAI'+(e.reste>1?'S':'')+'</span>';
+  return '<span style="background:#EDE9FE;color:#6C56A6;font-size:9px;font-weight:800;padding:2px 8px;border-radius:8px;white-space:nowrap">🔒 ABONNÉS</span>';
+};
+
+/* ── Catalogue e-learning : « sauf une ressource gratuite » ────────────────
+   On ne touche PAS au champ item.gratuit des contenus (l'admin l'édite déjà
+   fiche par fiche, et l'écraser serait irréversible). On filtre à l'affichage :
+   parmi les ressources marquées gratuites, seules les N retenues le restent. */
+window._pwLibreIds = function(){
+  var c = _pwCfg().catalogueLibre;
+  if(!c.limiter) return null;                       // null = pas de filtre
+  if(c.ids && c.ids.length) return c.ids.slice();   // choix explicite de l'admin
+  var list = (typeof DB!=='undefined' && DB.elearning && DB.elearning.contenus) || [];
+  var out = [];
+  for(var i=0; i<list.length && out.length < c.max; i++){
+    if(list[i] && list[i].gratuit) out.push(list[i].id);
+  }
+  return out;
+};
+window._pwEstGratuit = function(item){
+  if(!item || !item.gratuit) return false;
+  if(!_pwActif()) return true;
+  var ids = _pwLibreIds();
+  if(ids === null) return true;
+  return ids.indexOf(item.id) >= 0;
+};
+/* Ressources pédagogiques (HTML embarqué, chunk ressources-pedago) : elles
+   n'ont pas de fiche à elles, seulement une entrée de catalogue qui les
+   référence. On remonte à cette entrée pour appliquer la règle habituelle
+   (offerte ? incluse dans l'abonnement ? sinon un essai). */
+window._pwResPedagoOk = function(key){
+  try{
+    if(typeof iA==='function' && iA()) return true;
+    var list = (typeof DB!=='undefined' && DB.elearning && DB.elearning.contenus) || [];
+    var item = list.find(function(c){ return c && c.resPedago === key; });
+    if(!item) return true;                       // hors catalogue : on n'invente pas de mur
+    if(_pwEstGratuit(item)) return true;
+    var accId = (typeof SES!=='undefined' && SES) ? SES.accountId : null;
+    var acc = accId ? ((DB.visitorAccounts||[]).find(function(a){ return a.id===accId; })) : null;
+    var plans = acc ? (acc.plans||[]) : [];
+    if(item.plans && item.plans.length && item.plans.some(function(p){ return plans.indexOf(p)>=0; })) return true;
+    return _pwGate('elearning', item.titre||'Cette ressource', item.id);
+  }catch(e){ return true; }
+};
+
+/* Nombre d'aperçus payants tolérés dans le catalogue (ancien « free2 < 2 »). */
+window._pwEssaisCatalogue = function(){
+  var lim = _pwLimit('elearning');
+  var s = _pwSurface('elearning');
+  if(!_pwActif() || !s || !s.on) return 999;
+  return lim === -1 ? 999 : lim;
+};
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ADMIN — « 🔓 Essais & abonnements »
+   Une seule page pour décider, sans toucher au code : ce qui est payant, ce
+   qui reste offert, et combien d'essais chaque profil reçoit.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+window.PW_QUOTAS_IA = [
+  { k:'ambassa',  l:'🤖 Prof. Ambassa (questions)' },
+  { k:'orient',   l:'🧭 Orientation IA (analyses de profil)' },
+  { k:'correct',  l:'📝 Correction IA d\'une épreuve' },
+  { k:'devoir',   l:'📚 Aide au devoir' },
+  { k:'photo_ia', l:'📷 Photo → correction' }
+];
+
+function _pwNumCell(id, val){
+  return '<td style="text-align:center;padding:4px">'
+    + '<input class="fi" id="'+id+'" type="number" step="1" min="-1" value="'+val+'" '
+    + 'style="width:64px;text-align:center;padding:6px 4px;font-weight:700"></td>';
+}
+
+function pgPaywall(){
+  if(!iA()) return na();
+  var cfg = _pwCfg();
+  var contenus = (DB.elearning && DB.elearning.contenus) || [];
+  var libreIds = _pwLibreIds() || [];
+
+  var h = '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-lock"/></svg></span>Essais &amp; abonnements</div>';
+
+  h += '<div class="ib ibi mt12"><span>💡</span><span>Le principe : <b>tout le contenu est payant</b>, mais chaque espace offre quelques '
+     + '<b>essais</b> pour donner envie de s\'abonner. Un essai ouvre <b>un item entier</b> (une œuvre, un jeu, un quiz) — y revenir ne coûte rien de plus. '
+     + '<b>-1</b> = illimité, <b>0</b> = rien d\'offert.</span></div>';
+
+  // ── Interrupteur général ──
+  h += '<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-settings"/></svg></span>Interrupteur général</div>'
+     + '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:700;color:#142554">'
+     + '<input type="checkbox" id="pw_actif" '+(cfg.actif?'checked':'')+' style="width:20px;height:20px;cursor:pointer">'
+     + 'Activer les essais et le mur d\'abonnement</label>'
+     + '<div class="xs2 mut mt6">Décoché : tout redevient libre d\'accès (utile pour une journée portes ouvertes ou une démonstration).</div></div>';
+
+  // ── Tableau des surfaces ──
+  h += '<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-bookopen"/></svg></span>Essais offerts par espace</div>'
+     + '<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
+     + '<thead><tr><th style="text-align:left;min-width:230px">Espace</th><th style="text-align:center">Payant</th>';
+  PW_TIERS.forEach(function(t){ h += '<th style="text-align:center;font-size:10px;line-height:1.25">'+t.l+'</th>'; });
+  h += '</tr></thead><tbody>';
+  Object.keys(cfg.surfaces).forEach(function(k){
+    var s = cfg.surfaces[k];
+    h += '<tr><td style="padding:8px 6px">'
+       + '<div class="semi s">'+s.label+'</div>'
+       + '<div class="xs2 mut" style="max-width:340px;line-height:1.45">'+(s.aide||'')+'</div></td>'
+       + '<td style="text-align:center"><input type="checkbox" id="pw_on_'+k+'" '+(s.on?'checked':'')+' style="width:18px;height:18px;cursor:pointer"></td>';
+    PW_TIERS.forEach(function(t){ h += _pwNumCell('pw_'+k+'_'+t.k, s.essais[t.k]); });
+    h += '</tr>';
+  });
+  h += '</tbody></table></div>'
+     + '<div class="ib ibt mt12 mb0"><span>ℹ️</span><span>Case « Payant » décochée = cet espace redevient entièrement gratuit, quels que soient les nombres de la ligne.</span></div></div>';
+
+  // ── La ressource offerte du catalogue ──
+  var cl = cfg.catalogueLibre;
+  h += '<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-gift"/></svg></span>La ressource offerte du catalogue</div>'
+     + '<div class="xs2 mut mb8">Les fiches gardent leur case « gratuit » telle quelle : on choisit simplement, ici, <b>combien</b> d\'entre elles restent réellement offertes en vitrine. Rien n\'est effacé, la décision se défait en un clic.</div>'
+     + '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:13px;font-weight:700;color:#142554;margin-bottom:10px">'
+     + '<input type="checkbox" id="pw_lim" '+(cl.limiter?'checked':'')+' style="width:18px;height:18px;cursor:pointer">'
+     + 'Ne garder qu\'un nombre limité de ressources gratuites</label>'
+     + '<div class="fg2">'
+     + '<div class="fg"><span class="fl">Combien de ressources offertes</span>'
+     + '<input class="fi" id="pw_max" type="number" min="0" step="1" value="'+cl.max+'"></div>'
+     + '<div class="fg"><span class="fl">Choix automatique</span><div class="xs2 mut" style="padding-top:8px">'
+     + 'Champ ci-dessous vide → VÉRITAS prend les premières ressources marquées gratuites du catalogue.</div></div>'
+     + '</div>'
+     + '<div class="fg full mt8"><span class="fl">Choisir précisément la ou les ressources offertes (Ctrl+clic pour plusieurs)</span>'
+     + '<select class="fi" id="pw_ids" multiple size="10" style="height:auto;padding:6px">';
+  contenus.slice(0, 500).forEach(function(c){
+    var sel = (cl.ids && cl.ids.indexOf(c.id) >= 0) ? ' selected' : '';
+    h += '<option value="'+_esc(c.id)+'"'+sel+'>'+(c.gratuit?'✅ ':'💰 ')+_esc(c.titre||c.id)+' — '+_esc(c.classe||'')+'</option>';
+  });
+  h += '</select></div>';
+  if(contenus.length > 500) h += '<div class="xs2 mut">(Catalogue tronqué à 500 lignes dans cette liste.)</div>';
+  h += '<div class="ib ibi mt12 mb0"><span>🎁</span><span>Actuellement offert : <b>'
+     + (libreIds.length ? libreIds.map(function(id){
+          var it = contenus.find(function(c){ return c.id===id; });
+          return _esc(it ? (it.titre||id) : id);
+        }).join(' · ') : 'aucune ressource')
+     + '</b></span></div></div>';
+
+  // ── Quotas IA ──
+  h += '<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-sparkles"/></svg></span>Intelligence artificielle — essais offerts</div>'
+     + '<div class="xs2 mut mb8">C\'est ici que se règle l\'orientation : le nombre d\'analyses de profil offertes avant l\'abonnement. Compté par semaine pour un inscrit gratuit, par jour pour un abonné.</div>'
+     + '<div style="overflow-x:auto"><table class="t" style="width:100%;border-collapse:collapse">'
+     + '<thead><tr><th style="text-align:left;min-width:200px">Service IA</th>';
+  PW_TIERS.forEach(function(t){ h += '<th style="text-align:center;font-size:10px;line-height:1.25">'+t.l+'</th>'; });
+  h += '</tr></thead><tbody>';
+  PW_QUOTAS_IA.forEach(function(q){
+    h += '<tr><td style="padding:8px 6px" class="semi s">'+q.l+'</td>';
+    PW_TIERS.forEach(function(t){
+      var v = (cfg.quotasIA[q.k] && cfg.quotasIA[q.k][t.k] !== undefined && cfg.quotasIA[q.k][t.k] !== '')
+        ? cfg.quotasIA[q.k][t.k]
+        : ((AI_QUOTAS[q.k] || AI_QUOTAS.default)[t.k]);
+      h += _pwNumCell('pwia_'+q.k+'_'+t.k, v);
+    });
+    h += '</tr>';
+  });
+  h += '</tbody></table></div></div>';
+
+  // ── Actions ──
+  h += '<div class="card mt12" style="display:flex;gap:10px;flex-wrap:wrap">'
+     + '<button class="btn bi" onclick="_pwAdminSave()"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer les réglages</button>'
+     + '<button class="btn bo" onclick="_pwAdminReset()"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Revenir aux valeurs par défaut</button>'
+     + '<button class="btn bo" onclick="_pwAdminPurgeEssais()"><svg class="vico bico" aria-hidden="true"><use href="#lc-x"/></svg>Remettre à zéro les essais déjà consommés</button>'
+     + '</div>';
+
+  h += '<div class="ib ibt mt12"><span>⚠️</span><span>Ce mur est un garde-fou de vitrine, pas un coffre-fort : il décide de ce que l\'interface montre. '
+     + 'Le verrou d\'un document réellement payé reste côté serveur (lecture protégée, droits accordés au paiement).</span></div>';
+
+  return h;
+}
+window.pgPaywall = pgPaywall;
+
+window._pwAdminSave = function(){
+  var d = window.PAYWALL_DEFAUT;
+  var cfg = { actif:!!(_ge('pw_actif') && _ge('pw_actif').checked), surfaces:{}, catalogueLibre:{}, quotasIA:{} };
+  Object.keys(d.surfaces).forEach(function(k){
+    var e = {};
+    PW_TIERS.forEach(function(t){
+      var el = _ge('pw_'+k+'_'+t.k);
+      var v = el ? parseInt(el.value, 10) : NaN;
+      e[t.k] = isNaN(v) ? d.surfaces[k].essais[t.k] : v;
+    });
+    var on = _ge('pw_on_'+k);
+    cfg.surfaces[k] = { on: on ? !!on.checked : d.surfaces[k].on, essais:e };
+  });
+  var ids = [];
+  var sel = _ge('pw_ids');
+  if(sel && sel.options){
+    for(var i=0; i<sel.options.length; i++){ if(sel.options[i].selected) ids.push(sel.options[i].value); }
+  }
+  cfg.catalogueLibre = {
+    limiter: !!(_ge('pw_lim') && _ge('pw_lim').checked),
+    max: Math.max(0, parseInt((_ge('pw_max') && _ge('pw_max').value) || '0', 10) || 0),
+    ids: ids
+  };
+  PW_QUOTAS_IA.forEach(function(q){
+    var row = {};
+    PW_TIERS.forEach(function(t){
+      var el = _ge('pwia_'+q.k+'_'+t.k);
+      var v = el ? parseInt(el.value, 10) : NaN;
+      if(!isNaN(v)) row[t.k] = v;
+    });
+    cfg.quotasIA[q.k] = row;
+  });
+  DB.paywall = cfg;
+  save();
+  toast('✓ Réglages d\'accès enregistrés');
+  re();
+};
+
+window._pwAdminReset = function(){
+  if(!confirm('Revenir aux réglages d\'origine ? Les essais déjà consommés par les visiteurs ne sont pas touchés.')) return;
+  delete DB.paywall;
+  save();
+  toast('✓ Réglages par défaut rétablis');
+  re();
+};
+
+window._pwAdminPurgeEssais = function(){
+  if(!confirm('Remettre à zéro les essais consommés par TOUS les comptes ? Chacun repart avec ses essais offerts.')) return;
+  DB.userTrials = {};
+  try{
+    var morts = [];
+    for(var i=0; i<localStorage.length; i++){
+      var k = localStorage.key(i);
+      if(k && k.indexOf('_pwOpen_') === 0) morts.push(k);
+    }
+    morts.forEach(function(k){ localStorage.removeItem(k); });
+  }catch(e){}
+  save();
+  toast('✓ Compteurs d\'essais remis à zéro');
+  re();
+};

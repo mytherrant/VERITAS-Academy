@@ -2542,65 +2542,177 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 
 
 /* ═══════════════════════════════════════════════════════════════════
-   CORRECTIF — « background:none !important » du thème LWS (v1.18.5)
+   PANNEAUX BLEUS — rythme de la page (v1.18.7)
 
-   theme-lws.css applique « #VISITOR#VISITOR * { background:none !important } »
-   pour aplatir les dégradés hérités de l'ancienne charte. La règle est
-   volontaire, mais elle frappe AUSSI les blocs conçus après elle :
-   .pvr (panneau « Rejoindre l'équipe ») était dessiné en navy avec un
-   texte blanc — fond supprimé, il s'affichait en BLANC SUR BLANC,
-   contraste mesuré 1,00. Le panneau était invisible en production.
+   Contexte : theme-lws.css aplatit tous les fonds du portail visiteur via
+   « #VISITOR#VISITOR * { background:none !important } ». Utile pour purger
+   les dégradés de l'ancienne charte, mais appliqué sans exception la page
+   devient uniformément blanche — et un panneau dessiné en clair sur clair
+   avait fini invisible (contraste 1,00, corrigé en 1.18.5).
 
-   Plutôt que de rétablir le dégradé contre l'intention du thème, on
-   redessine ces blocs dans son langage : surface claire, texte navy,
-   orange d'action. Sélecteur à deux ID pour passer devant la règle
-   d'aplatissement, qui en compte deux + « * ».
+   Direction retenue : ALTERNER. Les blocs d'action passent en bleu profond,
+   les blocs de lecture restent clairs. L'œil retrouve un rythme, et le bleu
+   redevient la couleur de la marque au lieu d'un souvenir.
+   Sélecteur à deux ID pour passer devant la règle d'aplatissement, qui en
+   compte deux suivis de « * ».
+
+   Sans aucun trait : plus de bordure ni de filet latéral. La séparation se
+   fait par le CONTRASTE DE FOND, pas par une ligne — c'est ce qui distingue
+   une maquette tenue d'une accumulation de cadres.
    ═══════════════════════════════════════════════════════════════════ */
+/* Extrémité claire ramenée de #2B5BC4 à #2450A8 : mesurée, la première
+   faisait tomber les textes secondaires à 3,36–3,70:1 dans le coin le
+   plus clair du dégradé — sous le seuil AA de 4,5. À #2450A8 la teinte
+   la plus pâle du bloc donne encore 4,51:1. Le bleu reste franc. */
 #VISITOR#VISITOR .pvr{
-  background:var(--lws-tint-cloud,#F0F4F7) !important;
-  border:1px solid var(--lws-line,#E4E7EF);
-  border-left:4px solid var(--lws-orange,#FF6500);
-  border-radius:var(--lws-r,10px);
-  color:var(--lws-text,#4D5163);
+  background:linear-gradient(135deg,#142554 0%,#1E3A8A 55%,#2450A8 100%) !important;
+  border:0 !important;
+  border-radius:16px;
+  color:#E8EEF9;
+  box-shadow:0 14px 34px rgba(20,37,84,.18);
 }
-#VISITOR#VISITOR .pvr .pvr-t{ color:var(--lws-navy,#001136); }
-#VISITOR#VISITOR .pvr .pvr-s,
-#VISITOR#VISITOR .pvr .pvr-av small,
-#VISITOR#VISITOR .pvr .pvr-prog,
-#VISITOR#VISITOR .pvr .pvr-note{ color:var(--lws-text,#4D5163); }
-#VISITOR#VISITOR .pvr .pvr-av b{ color:var(--lws-navy,#001136); }
+#VISITOR#VISITOR .pvr .pvr-t{ color:#fff; }
+#VISITOR#VISITOR .pvr .pvr-s{ color:#D3DEF2; }
+
+/* Alternance des puces : or, ciel, blanc, or. Quatre avantages, quatre
+   teintes — la liste se parcourt au lieu de se subir. */
 #VISITOR#VISITOR .pvr .pvr-av-ic{
-  background:#fff !important;
-  border:1px solid var(--lws-line,#E4E7EF);
-  color:var(--lws-orange-txt,#C24E00);
+  background:rgba(255,255,255,.08) !important; border:0 !important;
 }
+#VISITOR#VISITOR .pvr .pvr-av:nth-child(1) .pvr-av-ic{ color:#FFC93C; background:rgba(255,201,60,.16) !important; }
+#VISITOR#VISITOR .pvr .pvr-av:nth-child(2) .pvr-av-ic{ color:#7FB2FF; background:rgba(127,178,255,.16) !important; }
+#VISITOR#VISITOR .pvr .pvr-av:nth-child(3) .pvr-av-ic{ color:#7BE8C2; background:rgba(123,232,194,.15) !important; }
+#VISITOR#VISITOR .pvr .pvr-av:nth-child(4) .pvr-av-ic{ color:#FFA9C4; background:rgba(255,169,196,.15) !important; }
+#VISITOR#VISITOR .pvr .pvr-av b{ color:#fff; }
+#VISITOR#VISITOR .pvr .pvr-av small{ color:#C8D6EE; }
+
 #VISITOR#VISITOR .pvr .pvr-prog,
 #VISITOR#VISITOR .pvr .pvr-note{
-  background:#fff !important;
-  border:1px solid var(--lws-line,#E4E7EF);
+  background:rgba(255,255,255,.07) !important; border:0 !important; color:#D3DEF2;
 }
-#VISITOR#VISITOR .pvr .pvr-prog b{ color:var(--lws-orange-txt,#C24E00); }
-#VISITOR#VISITOR .pvr .pvr-note b{ color:var(--lws-navy,#001136); }
-#VISITOR#VISITOR .pvr .pvr-note svg{ color:var(--lws-orange-txt,#C24E00); }
-#VISITOR#VISITOR .pvr .pvr-note-att{
-  background:#FFF8EE !important; border-color:#F2D9B4;
-}
-#VISITOR#VISITOR .pvr .pvr-cta{
-  background:var(--lws-orange-txt,#C24E00) !important; color:#fff;
-}
-#VISITOR#VISITOR .pvr .pvr-cta:hover{ background:#A34100 !important; }
-#VISITOR#VISITOR .pvr .pvr-sec{
-  background:#fff !important; color:var(--lws-blue,#1E499B);
-  border:1px solid var(--lws-line-strong,#D3D9E6);
-}
-#VISITOR#VISITOR .pvr .pvr-sec:hover{ border-color:var(--lws-blue,#1E499B); }
-/* 4,26:1 avec --lws-text2 sur le fond nuage : sous le seuil AA de 4,5.
-   Ce n'est pas de la coquetterie — c'est la ligne qui dit « gratuit,
-   sans engagement », donc celle qui lève la dernière hésitation. */
-#VISITOR#VISITOR .pvr .pvr-fin{ color:#5B6274; }
+#VISITOR#VISITOR .pvr .pvr-prog b{ color:#FFC93C; }
+#VISITOR#VISITOR .pvr .pvr-note b{ color:#fff; }
+#VISITOR#VISITOR .pvr .pvr-note svg{ color:#FFC93C; }
+#VISITOR#VISITOR .pvr .pvr-note-att{ background:rgba(255,201,60,.13) !important; }
 
-/* Même cause pour le bandeau d'abonnement : son fond teinté sautait aussi.
-   Le texte y était foncé, donc lisible — le bloc perdait seulement sa
-   distinction visuelle. On la rétablit. */
-#VISITOR#VISITOR .vabo-band-in{ background:var(--lws-tint-cloud,#F0F4F7) !important; }
-#VISITOR#VISITOR .vabo-band-prix{ background:#fff !important; }
+/* Un seul bouton plein : l'or sur le bleu. Le second reste en retrait,
+   sans bordure — un simple aplat translucide suffit à le poser. */
+#VISITOR#VISITOR .pvr .pvr-cta{
+  background:#FFC93C !important; color:#142554; border:0 !important;
+}
+#VISITOR#VISITOR .pvr .pvr-cta:hover{ background:#FFD86E !important; }
+#VISITOR#VISITOR .pvr .pvr-sec{
+  background:rgba(255,255,255,.12) !important; color:#fff; border:0 !important;
+}
+#VISITOR#VISITOR .pvr .pvr-sec:hover{ background:rgba(255,255,255,.20) !important; }
+/* Hiérarchie tenue par la TAILLE et la graisse, plus par la pâleur :
+   #9FB2D2 tombait à 3,51:1 sur le bout clair du dégradé. */
+#VISITOR#VISITOR .pvr .pvr-fin{ color:#C8D6EE; }
+
+/* Bandeau d'abonnement — reste clair (c'est l'alternance), mais perd ses
+   traits : le fond teinté le distingue déjà de la page. */
+#VISITOR#VISITOR .vabo-band{ border:0 !important; }
+#VISITOR#VISITOR .vabo-band-in{
+  background:var(--lws-tint-cloud,#F0F4F7) !important;
+  border:0 !important; border-radius:14px;
+}
+#VISITOR#VISITOR .vabo-band-prix{ background:#fff !important; border:0 !important; }
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   26 · REMPLIR LA PAGE · ICONOGRAPHIE COLORÉE · PLUS DE FILETS
+   ─────────────────────────────────────────────────────────────────────────
+   Trois demandes lues sur les captures de référence.
+
+   1. LE TEXTE DOIT REMPLIR LA PAGE. Nos blocs étaient bridés DEUX fois : la
+      colonne à 1170px, puis les en-têtes à 720px et les sous-titres à 640px
+      à l'intérieur. Sur un écran de 1440, cela donnait 130px de marge PUIS
+      encore 300px de vide de chaque côté du texte : une colonne étroite qui
+      flotte au milieu du blanc. La référence va d'un bord à l'autre. On
+      élargit la colonne ET on libère les brides internes — corriger l'une
+      sans l'autre ne change rien de visible.
+      Sur téléphone, même principe : la gouttière tombe de 18 à 14px.
+
+   2. LES ICÔNES SONT COLORÉES, PAS MONOCHROMES. Dans la rangée « Inclus
+      avec votre nom de domaine », les huit pictogrammes portent huit
+      couleurs différentes. C'est ce qui donne à la grille son énergie :
+      huit vignettes du même bleu, c'est une liste ; huit vignettes
+      colorées, c'est un choix. On fait tourner une palette par position.
+
+   3. PLUS DE FILET À DROITE NI EN HAUT. Ces bordures ne séparent rien,
+      elles ferment. La référence n'utilise que des filets BAS (entre deux
+      lignes d'une liste) et des cadres COMPLETS sur les cartes qu'elle veut
+      détacher. On retire les deux côtés demandés, en gardant les cadres.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 26.1 · LA COLONNE S'ÉLARGIT ─────────────────────── */
+:root{ --lws-w:1320px; --lws-gut:26px; }
+
+#VISITOR#VISITOR :is(.vsec, .acc-wrap){
+  max-width:var(--lws-w) !important;
+  padding-left:var(--lws-gut) !important;
+  padding-right:var(--lws-gut) !important;
+}
+/* Les brides internes sautent : ce sont elles qui creusaient le vide. */
+#VISITOR#VISITOR .acc-head{ max-width:1000px !important; }
+#VISITOR#VISITOR .acc-head .acc-sub{ max-width:none !important; }
+#VISITOR#VISITOR .vsec-sub{ max-width:none !important; }
+#VISITOR#VISITOR :is(.acc-promesse, .acc-plans, .rsc-fixe, .acc-ess){
+  max-width:none !important;
+}
+#VISITOR#VISITOR .lws-utility-in,
+#VISITOR#VISITOR .lws-promo-in{ max-width:var(--lws-w) !important; }
+#VISITOR#VISITOR .vnav-brand{
+  padding-left:max(var(--lws-gut), calc((100vw - var(--lws-w)) / 2)) !important;
+}
+#VISITOR#VISITOR .vnav-actions{
+  padding-right:max(var(--lws-gut), calc((100vw - var(--lws-w)) / 2)) !important;
+}
+/* Sur téléphone, le texte va chercher le bord — capture mobile de la
+   référence : la carte tarifaire touche presque le cadre de l'écran. */
+@media (max-width:820px){
+  :root{ --lws-gut:14px; }
+  #VISITOR#VISITOR :is(.vsec, .acc-wrap){ padding-left:14px !important; padding-right:14px !important; }
+  #VISITOR#VISITOR :is(.lws-band, .acc-ess, .rsc-fixe, .acc-plans){ padding:16px !important; }
+  #VISITOR#VISITOR .acc-plan{ padding:22px 16px 18px !important; }
+}
+
+/* ─── 26.2 · UNE COULEUR PAR PICTOGRAMME ──────────────────
+   Huit teintes qui tournent par position. La pastille reste CLAIRE et le
+   glyphe SATURÉ : le garde-fou du §25.4 tient toujours, aucun glyphe ne
+   peut se fondre dans son fond quelle que soit la teinte tirée. */
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+1) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){ background:#DBE8FE !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+1) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico) svg{ stroke:#1E499B !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+2) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){ background:#E1F3E5 !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+2) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico) svg{ stroke:#00701C !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+3) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){ background:#FFEADD !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+3) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico) svg{ stroke:#C24E00 !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+4) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){ background:#ECE9F7 !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+4) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico) svg{ stroke:#4C3F96 !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+5) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){ background:#DCF0F2 !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+5) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico) svg{ stroke:#0E7C86 !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+6) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){ background:#FBE4EC !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+6) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico) svg{ stroke:#A82255 !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+7) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){ background:#F7EFDC !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+7) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico) svg{ stroke:#8A6414 !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+8) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){ background:#E4E9F0 !important; }
+#VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+8) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico) svg{ stroke:#2E3D57 !important; }
+
+/* ─── 26.3 · PLUS AUCUN FILET À DROITE NI EN HAUT ──────────── */
+#VISITOR#VISITOR *{
+  border-top-width:0 !important;
+  border-right-width:0 !important;
+}
+/* Exceptions strictement fonctionnelles : un cadre complet reste un cadre.
+   Les surfaces qui doivent se détacher du fond — cartes, champs de saisie —
+   gardent leurs quatre côtés. Partout ailleurs, la règle ci-dessus tient. */
+#VISITOR#VISITOR :is(.vcard, .acc-plan, .acc-ess-c, .acc-role, .acc-porte,
+                     .vbook-card, .acc-news, .lx-statcard, .acc-rech,
+                     .vemu-tile, .lws-tile, .cit-card, .vmenu-hi-c,
+                     input, select, textarea, .fi){
+  border-top-width:1px !important;
+  border-right-width:1px !important;
+}
+/* Le séparateur des listes d'avantages est un filet BAS posé en haut du
+   bloc : il porte l'information « ici commence la liste », il survit. */
+#VISITOR#VISITOR .acc-plan-av{ border-top-width:1px !important; }
