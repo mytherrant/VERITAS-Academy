@@ -1882,10 +1882,22 @@ function save(){
         localStorage.setItem('vrt10',purged);
         // Déclencher l'upload cloud automatique des binaires encore en mémoire
         setTimeout(function(){
-          if(typeof cloudSyncBinaries==='function'){
-            toast('📤 Stockage local plein — upload automatique vers le cloud…','warn');
-            cloudSyncBinaries(true); // true = silencieux
+          if(typeof cloudSyncBinaries!=='function')return;
+          // Ne pas ANNONCER un upload qui ne partira pas. cloudSyncBinaries()
+          // sort en silence si la clé Cloud manque ou hors session admin : on
+          // affichait « upload automatique vers le cloud… », rien ne partait,
+          // et la purge d'urgence venait de retirer ces images du stockage —
+          // elles disparaissaient donc au rechargement, sans un mot.
+          var _sec=DB.cloudConfig&&DB.cloudConfig.secret;
+          var _adm=(typeof iA==='function')&&iA();
+          if(!_sec||!_adm){
+            toast(_adm
+              ? '⚠️ Stockage plein et clé Cloud absente — ces images ne sont PAS sauvegardées. Paramètres → Cloud.'
+              : '⚠️ Stockage plein — connectez-vous en administrateur pour envoyer ces images au serveur.','err');
+            return;
           }
+          toast('📤 Stockage local plein — upload automatique vers le cloud…','warn');
+          cloudSyncBinaries(true); // true = silencieux
         },200);
       }catch(e2){
         // En dernier recours vider les clés les moins critiques
@@ -6346,14 +6358,44 @@ function uploadGalleryPhoto(){
   };
   setTimeout(function(){input.click();},100);
 }
-function _galleryFallback(file,titre,total,done){
-  var reader=new FileReader();
-  reader.onload=function(evt){
-    if(!DB.galleryImages)DB.galleryImages=[];
-    DB.galleryImages.push({id:gid(),src:evt.target.result,titre:titre,desc:'',date:today()});
-    save();done();
+// Réduit une image avant stockage local. Le repli conservait le cliché BRUT en
+// base64 : une photo de téléphone de 4 Mo en pèse ~5,5 Mo une fois encodée et
+// sature à elle seule le localStorage (~5 Mo au total). 1600 px suffisent
+// largement à une galerie, pour une trentaine de fois moins de place.
+function _downscaleToDataURL(file,maxW,q,cb){
+  var ou;
+  try{ ou=URL.createObjectURL(file); }catch(e){ cb(null); return; }
+  var im=new Image();
+  im.onload=function(){
+    try{
+      var sc=Math.min(1,(maxW||1600)/(im.naturalWidth||1));
+      var cv=document.createElement('canvas');
+      cv.width=Math.max(1,Math.round(im.naturalWidth*sc));
+      cv.height=Math.max(1,Math.round(im.naturalHeight*sc));
+      var cx=cv.getContext('2d');
+      cx.fillStyle='#FFFFFF'; cx.fillRect(0,0,cv.width,cv.height);
+      cx.drawImage(im,0,0,cv.width,cv.height);
+      URL.revokeObjectURL(ou);
+      cb(cv.toDataURL('image/jpeg',q||0.82));
+    }catch(e){ try{URL.revokeObjectURL(ou);}catch(_){} cb(null); }
   };
-  reader.readAsDataURL(file);
+  im.onerror=function(){ try{URL.revokeObjectURL(ou);}catch(_){} cb(null); };
+  im.src=ou;
+}
+function _galleryFallback(file,titre,total,done){
+  function _poser(src){
+    if(!DB.galleryImages)DB.galleryImages=[];
+    DB.galleryImages.push({id:gid(),src:src,titre:titre,desc:'',date:today()});
+    save();done();
+  }
+  _downscaleToDataURL(file,1600,0.82,function(petit){
+    if(petit){ _poser(petit); return; }
+    // Repli du repli : format non décodable par le navigateur (HEIC…) → on
+    // garde l'original plutôt que de perdre la photo.
+    var reader=new FileReader();
+    reader.onload=function(evt){ _poser(evt.target.result); };
+    reader.readAsDataURL(file);
+  });
 }
 
 function _galleryLightbox(encodedSrc, titre){
