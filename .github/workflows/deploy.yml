@@ -413,11 +413,26 @@ jobs:
           # appareil déjà venu gardait donc l'ancienne version PENDANT UN AN, sans
           # autre recours que vider son cache — le symptôme rapporté en août 2026.
           # On réaligne tout sur la version de la coquille, dans deploy/ seulement.
-          VER=$(grep -o 'app\.js?v=[0-9.]*' deploy/app.html | head -1 | sed 's/.*v=//')
-          if [ -z "$VER" ]; then
+          BASE=$(grep -o 'app\.js?v=[0-9.]*' deploy/app.html | head -1 | sed 's/.*v=//')
+          if [ -z "$BASE" ]; then
             echo "::error title=Version d'asset introuvable::Impossible de lire app.js?v= dans deploy/app.html."
             exit 1
           fi
+          # Le numéro écrit à la main ne suffit pas : on peut modifier app.js sans
+          # le bumper (deux sessions qui travaillent le même jour, un correctif
+          # posé après le bump…). L'URL reste alors identique alors que le contenu
+          # a changé — et le service worker, qui met les scripts en cache PAR URL,
+          # continue de servir l'ancien code. Constaté le 12/08/2026 : app.js
+          # remplacé sur le serveur, navigateur toujours sur la version d'avant.
+          # On suffixe donc la version d'une empreinte du contenu RÉELLEMENT servi
+          # (après minification) : un octet qui change ⇒ une URL neuve, toujours.
+          # Suffixe purement NUMÉRIQUE : la coquille lit sa version avec
+          # /app\.js\?v=([0-9.]+)/ (window._VRT_ASSET_VER, qui sert aux chunks),
+          # un caractère hexadécimal casserait cette lecture en silence.
+          EMPREINTE=$(cat deploy/app.js deploy/app.css 2>/dev/null | sha1sum | tr -dc '0-9' | cut -c1-6)
+          [ -z "$EMPREINTE" ] && EMPREINTE=0
+          VER="$BASE.$EMPREINTE"
+          echo "   Version de base $BASE + empreinte du contenu → $VER"
           # Ancrage STRICT sur « .css?v= » / « .js?v= ». Un remplacement sur le
           # numéro nu a déjà mangé les paramètres d'un arc SVG (symbole lc-shield,
           # bump 1.17.0 → 1.17.1) : ne jamais élargir ce motif.
@@ -428,6 +443,20 @@ jobs:
               n=$((n+1))
             fi
           done < <(find deploy -type f \( -name '*.html' -o -name '*.php' \))
+          # Le service worker doit suivre : il DÉRIVE ses URLs de préchargement de
+          # CACHE_VERSION (ASSET_VER), et purge à l'activation tout cache dont la
+          # clé ne commence pas par cette valeur. Le laisser en arrière lui ferait
+          # précharger une URL désormais inexistante — et surtout conserver les
+          # caches de la version précédente.
+          if [ -f deploy/sw.js ]; then
+            sed -i -E "s/(const CACHE_VERSION = 'veritas-v)[0-9.]+(')/\1$VER\2/" deploy/sw.js
+            SWV=$(grep -o "veritas-v[0-9.]*" deploy/sw.js | head -1 | sed 's/veritas-v//')
+            if [ "$SWV" != "$VER" ]; then
+              echo "::error title=Service worker non aligné::CACHE_VERSION vaut '$SWV' au lieu de '$VER' — le cache client ne serait pas purgé."
+              exit 1
+            fi
+            echo "   Service worker aligné : veritas-v$VER"
+          fi
           echo "✅ Cache-busters alignés sur $VER dans $n fichier(s)."
           reste=$(grep -rhoE '\.(css|js)\?v=[0-9.]+' deploy --include='*.html' --include='*.php' | grep -v "v=$VER" | sort -u | tr '\n' ' ')
           if [ -n "$reste" ]; then
