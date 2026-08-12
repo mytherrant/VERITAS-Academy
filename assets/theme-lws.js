@@ -58,14 +58,50 @@
     return (0.299 * +m[0] + 0.587 * +m[1] + 0.114 * +m[2]) / 255;
   }
 
+  /* Le fond RÉELLEMENT PERÇU, alpha compris.
+
+     La version précédente renvoyait la première couleur de fond non
+     strictement transparente, telle quelle. Elle se trompait dès qu'un
+     fond était semi-transparent — ce qui est la règle dans app.js, où les
+     panneaux teintés s'écrivent `background:#0596690f` (un vert à 6 %).
+
+     `luminance('rgba(5,150,105,0.06)')` vaut 0,398 : lu comme un vert
+     SOMBRE, alors qu'à 6 % sur blanc il s'affiche menthe très clair
+     (0,96). `corrigerCouleur` en concluait « fond sombre, donc encre
+     blanche » et écrivait `color:#FFF !important` sur un panneau quasi
+     blanc. Le filet de sécurité FABRIQUAIT le blanc sur blanc qu'il était
+     censé empêcher : mesuré à 1,00 de contraste sur « 21 », « Gratuites »,
+     « Premium », dans les deux thèmes.
+
+     On compose donc la pile de fonds comme le ferait le moteur de rendu :
+     on empile les couches semi-transparentes jusqu'à la première opaque
+     (blanc par défaut si la page n'en pose aucune), puis on les fusionne
+     de l'arrière vers l'avant. Le résultat est toujours une couleur
+     opaque, donc une luminance juste. */
   function fondEffectif(el) {
-    var n = el;
+    var couches = [], n = el;
     while (n && n.nodeType === 1) {
-      var bg = getComputedStyle(n).backgroundColor;
-      if (bg && !/^rgba\(0,\s*0,\s*0,\s*0\)$|^transparent$/i.test(bg)) return bg;
+      var m = String(getComputedStyle(n).backgroundColor).match(/[\d.]+/g);
+      if (m && m.length >= 3) {
+        var a = m.length > 3 ? parseFloat(m[3]) : 1;
+        if (a > 0) {
+          couches.push([+m[0], +m[1], +m[2], a]);
+          if (a >= 1) break;          /* opaque : inutile de remonter plus haut */
+        }
+      }
       n = n.parentElement;
     }
-    return 'rgb(255,255,255)';
+    var base = [255, 255, 255];
+    if (couches.length && couches[couches.length - 1][3] >= 1) {
+      base = couches.pop().slice(0, 3);
+    }
+    for (var i = couches.length - 1; i >= 0; i--) {
+      var c = couches[i], al = c[3];
+      base = [c[0] * al + base[0] * (1 - al),
+              c[1] * al + base[1] * (1 - al),
+              c[2] * al + base[2] * (1 - al)];
+    }
+    return 'rgb(' + Math.round(base[0]) + ',' + Math.round(base[1]) + ',' + Math.round(base[2]) + ')';
   }
 
   /* Couleurs posées en style EN LIGNE sur du texte ou un tracé SVG.
@@ -193,6 +229,43 @@
     var teintes = portail.querySelectorAll(
       '[style*="color"],[style*="fill"],[style*="stroke"]');
     for (var j = 0; j < teintes.length; j++) corrigerCouleur(teintes[j]);
+
+    /* 3. Le filet de sécurité — DANS LES DEUX THÈMES.
+          Les étapes 1 et 2 ne regardent que les éléments qui DÉCLARENT une
+          couleur en ligne. En thème sombre, l'encre claire n'est pas en
+          ligne : elle vient d'une règle d'app.css posée sur #VISITOR, et
+          elle est HÉRITÉE. Aucun de ces éléments n'entrait donc dans le
+          balayage — d'où du blanc sur blanc mesuré à 1,00 de contraste
+          (« Gratuites », « Premium », « VÉRITAS Academy »).
+
+          Le §37 de theme-lws.css rejoue désormais les 59 jetons sombres à
+          leur valeur claire, ce qui traite la cause côté jetons. Restent
+          les règles qui écrivent une couleur EN DUR.
+
+          MESURE, page des labos, éléments RÉELLEMENT VISIBLES :
+              thème clair ..... 125 éléments sous 4,5:1
+              thème sombre ....  70 éléments sous 4,5:1
+          Le clair est le PLUS touché. « 21 », « Gratuites », « Premium »,
+          « Chimie · Tle C/D » sont du blanc pur sur blanc pur (1,00) dans
+          les DEUX thèmes : ces libellés étaient écrits pour un panneau
+          sombre dont le fond a été aplati au blanc par la refonte, sans
+          que l'encre suive. Réserver cette passe au thème sombre, comme je
+          l'avais d'abord fait, laissait donc le pire cas en place.
+
+          Elle ne lit que les éléments porteurs de texte, et `corrigerCouleur`
+          sort immédiatement dès que l'écart de luminance est suffisant :
+          un gris secondaire à 0,37 d'écart n'est pas touché, seul
+          l'illisible l'est. */
+    var noeuds = portail.querySelectorAll('*');
+    for (var k = 0; k < noeuds.length; k++) {
+      var el = noeuds[k];
+      var porteDuTexte = false;
+      for (var c = 0; c < el.childNodes.length; c++) {
+        var n = el.childNodes[c];
+        if (n.nodeType === 3 && n.textContent.trim().length > 1) { porteDuTexte = true; break; }
+      }
+      if (porteDuTexte) corrigerCouleur(el);
+    }
   }
 
   /* La vitrine se re-rend à chaque changement de section (vShowSec) : sans
@@ -213,6 +286,18 @@
         }
       }
     }).observe(portail, { childList: true, subtree: true });
+
+    /* Le bouton de thème (`vrtToggleTheme`) bascule `data-theme` sur
+       <html>. L'observateur ci-dessus n'écoute que les AJOUTS de nœuds :
+       une bascule ne crée aucun nœud, donc rien ne se rejouait, et les
+       aplats calculés sous l'ancien thème restaient en place. On écoute
+       donc l'attribut, sur la racine — pas sur le portail, où il n'est
+       pas posé. */
+    new MutationObserver(function () {
+      requestAnimationFrame(function () { passe(); });
+    }).observe(document.documentElement, {
+      attributes: true, attributeFilter: ['data-theme']
+    });
   }
 
   function demarrer() {

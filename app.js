@@ -4684,8 +4684,15 @@ function vShowSec(sec,btn){
         .map(s=>`<button type="button" onclick="mRecherche('${_esc(s).replace(/'/g,"\\'")}')">${_esc(s)}</button>`).join('')}
     </div>
 
-    <div class="acc-hero">
-      <div class="acc-hero-video" id="vHeroVideoOuter">${_heroVideoHtml}</div>
+    <!-- La vidéo N'EST PLUS ICI (demande Jacques, 12/08/2026).
+         Elle occupait la moitié du premier écran, juste sous la promesse :
+         un visiteur devait la dépasser avant d'atteindre le moindre contenu.
+         Une vidéo de présentation ne convainc pas quelqu'un qui ne sait pas
+         encore ce qu'on lui propose — elle CONFIRME quelqu'un qui vient de
+         le lire. Elle est donc descendue en fin de page, dans la bande de
+         preuve sociale, là où elle travaille vraiment.
+         Les actualités restent ici et prennent toute la largeur. -->
+    <div class="acc-hero acc-hero--news-only">
       <div class="acc-news">
         <div class="acc-news-hd"><span class="dot vfx-live"></span><span class="ttl">Actualités éducatives</span></div>
         <div class="acc-news-body">
@@ -4743,6 +4750,19 @@ function vShowSec(sec,btn){
          élève CONNECTÉ, filtré selon sa classe via _nextExam(true) à l'intérieur
          de _examCountdownHtml(). Chaque élève reçoit donc le rappel de SON examen. -->
     ${((typeof SES!=='undefined' && SES && SES.cls && typeof _examCountdownHtml==='function')?_examCountdownHtml():'')}
+
+    <!-- ═══ PREUVE SOCIALE — LA VIDÉO, À SA PLACE ══════════════════
+         Le visiteur arrive ici après avoir lu la promesse, vu les résultats
+         d'examen réels et les abonnements. C'est le moment où une vidéo
+         sert : il sait ce qu'on lui propose, il veut voir à quoi ça
+         ressemble et qui le dit. ═══ -->
+    <div class="lws-social">
+      <div class="acc-head">
+        <h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-play"/></svg></span> Le centre en images</h2>
+        <div class="acc-sub">Une visite du Centre VÉRITAS et de sa méthode, en quelques minutes.</div>
+      </div>
+      <div class="lws-social-video" id="vHeroVideoOuter">${_heroVideoHtml}</div>
+    </div>
 
     <!-- ═════ PASSAGE DU JOUR (v1.2.3) — harmonisé premium v1.2.4 ═════ -->
     <div class="acc-head">
@@ -5249,7 +5269,7 @@ function vShowSec(sec,btn){
         var scoreKey='quiz_'+qz.titre.replace(/[^a-z0-9]/gi,'_').toLowerCase()+'_'+new Date().toDateString();
         var lastScore=null;
         try{var s=localStorage.getItem(scoreKey);if(s)lastScore=JSON.parse(s);}catch(e){}
-        h+='<div style="background:#fff;border:1px solid #ECE3CB;border-top:3px solid '+qz.color+';border-radius:14px;padding:18px 16px;cursor:pointer;box-shadow:0 8px 20px rgba(20,37,84,.06);transition:transform .22s,box-shadow .22s" '+
+        h+='<div style="background:#fff;border:1px solid #ECE3CB;--vcol:'+qz.color+';border-radius:14px;padding:18px 16px;cursor:pointer;box-shadow:0 8px 20px rgba(20,37,84,.06);transition:transform .22s,box-shadow .22s" '+
           'onclick="(function(){_quizState.topicKey=\''+qz.key+'\';startQuiz(\''+qz.key+'\',\''+qz.cls+'\',\''+qz.titre+'\');})()" '+
           'onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 16px 32px rgba(20,37,84,.12)\'" '+
           'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'0 8px 20px rgba(20,37,84,.06)\'">'+
@@ -16359,7 +16379,7 @@ function mManagePacks(){
   var el=DB.elearning||{};
   if(!el.plans)el.plans=[];
   var cards=(el.plans||[]).map(function(p){
-    return'<div class="card" style="border-top:4px solid #3C8DFF">'+
+    return'<div class="card" style="--vcol:#3C8DFF">'+
       '<div class="fl2 fic fsb mb8"><span class="bold">'+p.nom+'</span>'+
       '<div class="fl2 g4">'+
       '<button class="btn bo xs" data-pid="'+encodeURIComponent(p.id)+'" onclick="_editPk(decodeURIComponent(this.dataset.pid))"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>️</button>'+
@@ -16974,7 +16994,7 @@ function vShowPartners(){
   h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-bottom:28px">';
   (partners).forEach(function(p, i){
     var color = p.type==='gold' ? '#FFC93C' : p.type==='silver' ? '#9CA3AF' : '#3C8DFF';
-    h += '<div class="vcard" style="border-top:4px solid '+color+';text-align:center">';
+    h += '<div class="vcard" style="--vcol:'+color+';text-align:center">';
     if(p.logo){
       h += '<img src="'+p.logo+'" style="max-width:120px;max-height:60px;object-fit:contain;margin:0 auto 12px;display:block" alt="'+p.nom+'">';
     } else {
@@ -18092,7 +18112,7 @@ function _showGrandesEcoles(){
   h+="<div class='vsec-title'><span class='vsec-ico'><svg class='vico vico-21' aria-hidden='true'><use href='#lc-university'/></svg></span>Grandes Écoles du Cameroun</div>";
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px'>";
   ecoles.forEach(function(e){
-    h+="<div class='vcard' style='border-top:4px solid #142554'>"
+    h+="<div class='vcard' style='--vcol:#142554'>"
       +"<div style='font-size:32px;margin-bottom:8px'>"+e.ico+"</div>"
       +"<div style='font-family:Montserrat,sans-serif;font-size:16px;font-weight:900;color:#142554;margin-bottom:2px'>"+e.nom+"</div>"
       +"<div style='font-size:11px;font-weight:600;color:#3C8DFF;margin-bottom:8px'>"+e.titre+"</div>"
@@ -22413,7 +22433,7 @@ function showLabosVirtuels(){
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(min(270px,100%),1fr));gap:16px;margin-bottom:28px;max-width:100%'>";
   list.forEach(function(lv){
     var locked=!lv.gratuit&&!SES;
-    h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:0;border-top:3px solid "+lv.color+";overflow:hidden;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;box-shadow:0 10px 26px -16px rgba(20,37,84,.16)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px -18px "+lv.color+"55'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 10px 26px -16px rgba(20,37,84,.16)'\">";
+    h+="<div onclick='lancerLabo(\""+lv.id+"\")' style='background:#fff;border-radius:18px;border:0;--vcol:"+lv.color+";overflow:hidden;cursor:pointer;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s;box-shadow:0 10px 26px -16px rgba(20,37,84,.16)' onmouseover=\"this.style.transform='translateY(-5px)';this.style.boxShadow='0 20px 40px -18px "+lv.color+"55'\" onmouseout=\"this.style.transform='';this.style.boxShadow='0 10px 26px -16px rgba(20,37,84,.16)'\">";
     h+="<div style='background:linear-gradient(135deg,"+lv.color+"1f,"+lv.color+"08);padding:18px 18px 16px;position:relative'>";
     h+="<div style='position:absolute;top:10px;right:10px;background:"+(lv.gratuit?"#059669":"#6C56A6")+";color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:10px'>"+(lv.gratuit?"GRATUIT":lv.plan||"PREMIUM")+"</div>";
     h+="<div style='width:52px;height:52px;border-radius:14px;background:"+lv.color+"26;display:flex;align-items:center;justify-content:center;font-size:30px;margin-bottom:10px'>"+lv.ico+"</div>";
@@ -24404,7 +24424,7 @@ function showMesEvaluations(){
     h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px'>";
     actives.forEach(function(ev){
       var maDeja=(ev.reponses||[]).find(function(r){return SES&&r.eid===SES.id;});
-      h+="<div class='vcard' style='border-top:4px solid #142554'>";
+      h+="<div class='vcard' style='--vcol:#142554'>";
       h+="<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:6px'>"+ev.titre+"</div>";
       h+="<div style='font-size:12px;color:#6B7A99;margin-bottom:12px'>"+ev.matiere+(ev.classe?" · "+ev.classe:"")+" · "+(ev.questions||[]).length+" questions · "+ev.duree+" min</div>";
       if(maDeja){
@@ -24607,7 +24627,7 @@ function showPacksCoaching(){
   h+="<div class='vsec-sub'>Des offres sur mesure pour soutenir chaque étudiant dans son parcours scolaire</div>";
   h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:24px'>";
   packs.forEach(function(p){
-    h+="<div class='vcard' style='border-top:4px solid "+(p.color||"#142554")+"'>";
+    h+="<div class='vcard' style='--vcol:"+(p.color||"#142554")+"'>";
     h+="<div style='font-size:40px;margin-bottom:12px'>"+(p.ico||"🎯")+"</div>";
     h+="<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:8px'>"+p.nom+"</div>";
     h+="<div style='font-size:12px;color:#6B7A99;line-height:1.65;margin-bottom:14px'>"+p.desc+"</div>";
@@ -25115,7 +25135,7 @@ function showEvaluations(){
     var uid=SES&&(SES.accountId||SES.id);
     var myR=uid&&(ev.resultats||[]).find(function(r){return r.uid===uid;});
     var col=myR?(myR.score>=80?"#059669":myR.score>=60?"#D97706":"#AE5353"):"#142554";
-    h+="<div class='vcard' style='border-top:4px solid #142554'>"
+    h+="<div class='vcard' style='--vcol:#142554'>"
       +"<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:6px'>"+ev.titre+"</div>"
       +"<div style='font-size:11px;color:#6B7A99;margin-bottom:3px'>"+ev.matiere+(ev.classe?" · "+ev.classe:"")+"</div>"
       +"<div style='font-size:11px;color:#9CA3AF;margin-bottom:14px'>"+ev.questions.length+" questions · "+ev.duree+" min</div>";
@@ -31337,10 +31357,10 @@ window.pgPartenairesSplits = function(){
   return '<div class="pgt"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-coins"/></svg></span>Partage Revenus Partenaires</div>'
     +'<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-chart"/></svg></span>Vue d\'ensemble</div>'
     +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">'
-      +'<div class="card-v2" style="text-align:center;border-top:3px solid #F59E0B"><div class="h-display" style="color:#F59E0B">'+fmt(totalDu)+'</div><div class="text-muted">À verser</div></div>'
-      +'<div class="card-v2" style="text-align:center;border-top:3px solid #3A8F73"><div class="h-display" style="color:#3A8F73">'+fmt(totalVerse)+'</div><div class="text-muted">Déjà versé</div></div>'
-      +'<div class="card-v2" style="text-align:center;border-top:3px solid #3C8DFF"><div class="h-display" style="color:#3C8DFF">'+partenaires.length+'</div><div class="text-muted">Partenaires</div></div>'
-      +'<div class="card-v2" style="text-align:center;border-top:3px solid #6C56A6"><div class="h-display" style="color:#6C56A6">'+((DB.splits||[]).filter(function(s){return s.etat==='pending';}).length)+'</div><div class="text-muted">Splits en attente</div></div>'
+      +'<div class="card-v2" style="text-align:center;--vcol:#F59E0B"><div class="h-display" style="color:#F59E0B">'+fmt(totalDu)+'</div><div class="text-muted">À verser</div></div>'
+      +'<div class="card-v2" style="text-align:center;--vcol:#3A8F73"><div class="h-display" style="color:#3A8F73">'+fmt(totalVerse)+'</div><div class="text-muted">Déjà versé</div></div>'
+      +'<div class="card-v2" style="text-align:center;--vcol:#3C8DFF"><div class="h-display" style="color:#3C8DFF">'+partenaires.length+'</div><div class="text-muted">Partenaires</div></div>'
+      +'<div class="card-v2" style="text-align:center;--vcol:#6C56A6"><div class="h-display" style="color:#6C56A6">'+((DB.splits||[]).filter(function(s){return s.etat==='pending';}).length)+'</div><div class="text-muted">Splits en attente</div></div>'
     +'</div>'
     +(_orphelins
       ? '<div class="ib ibt mt12 mb0"><span>⚠️</span><span><strong>'+_orphelins+' paiement(s) confirmé(s) sans ventilation.</strong> Ils ont probablement été validés par le webhook de l\'opérateur pendant que le navigateur était fermé. '
@@ -31850,8 +31870,8 @@ window.mDetailPartenaire = function(partenaireId){
 
   var body = '<div style="padding:8px">'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">'
-      +'<div class="card-v2" style="text-align:center;border-top:3px solid #F59E0B"><div style="font-size:22px;font-weight:900;color:#F59E0B">'+fmt(p.solde||0)+'</div><div class="text-muted" style="font-size:11px">À verser</div></div>'
-      +'<div class="card-v2" style="text-align:center;border-top:3px solid #3A8F73"><div style="font-size:22px;font-weight:900;color:#3A8F73">'+fmt(p.totalVerse||0)+'</div><div class="text-muted" style="font-size:11px">Déjà versé</div></div>'
+      +'<div class="card-v2" style="text-align:center;--vcol:#F59E0B"><div style="font-size:22px;font-weight:900;color:#F59E0B">'+fmt(p.solde||0)+'</div><div class="text-muted" style="font-size:11px">À verser</div></div>'
+      +'<div class="card-v2" style="text-align:center;--vcol:#3A8F73"><div style="font-size:22px;font-weight:900;color:#3A8F73">'+fmt(p.totalVerse||0)+'</div><div class="text-muted" style="font-size:11px">Déjà versé</div></div>'
     +'</div>'
     +'<h3 class="h-3">📜 Splits ('+splits.length+')</h3>'
     +(splits.length?
@@ -32232,7 +32252,7 @@ window.mBusinessStats = function(){
 };
 
 function _statCard(emoji, val, lbl, color){
-  return '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;text-align:center;border-top:3px solid '+color+'">'
+  return '<div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;padding:14px;text-align:center;--vcol:'+color+'">'
     +'<div style="font-size:24px;margin-bottom:6px">'+emoji+'</div>'
     +'<div style="font-size:20px;font-weight:800;color:'+color+';margin-bottom:2px">'+val+'</div>'
     +'<div style="font-size:11px;color:#6B7280;text-transform:uppercase;letter-spacing:.5px">'+lbl+'</div>'
@@ -34614,7 +34634,7 @@ window._engagementBannerHtml = function(){
     return 'background:'
       + 'linear-gradient(160deg, color-mix(in srgb, '+accent+' 14%, #fff) 0%, color-mix(in srgb, '+accent+' 5%, #fff) 55%, #ffffff 100%);'
       + 'color:#142554;padding:16px;border-radius:16px;cursor:pointer;'
-      + 'border:1px solid color-mix(in srgb, '+accent+' 28%, #E6EAF2);border-top:3px solid '+accent+';'
+      + 'border:1px solid color-mix(in srgb, '+accent+' 28%, #E6EAF2);--vcol:'+accent+';'
       + 'box-shadow:0 6px 20px rgba(20,37,84,.08), 0 1px 3px rgba(20,37,84,.06);'
       + 'transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease;'
       + 'position:relative;overflow:hidden';
@@ -39209,7 +39229,7 @@ function pgPartnerships(){
   sortedTypes.forEach(function(k){
     var t = types[k];
     h += '<div onclick="_prtGo(\'partenariat-'+k+'\')" '
-      + 'style="cursor:pointer;background:#fff;border:1px solid var(--ds-border,#E6EAF2);border-top:3px solid var(--gold,#FFC93C);border-radius:var(--ds-r,14px);padding:22px 18px;text-align:center;box-shadow:var(--ds-sh-sm,0 1px 3px rgba(20,37,84,.08));transition:transform .2s,box-shadow .2s" '
+      + 'style="cursor:pointer;background:#fff;border:1px solid var(--ds-border,#E6EAF2);--vcol:var(--gold,#FFC93C);border-radius:var(--ds-r,14px);padding:22px 18px;text-align:center;box-shadow:var(--ds-sh-sm,0 1px 3px rgba(20,37,84,.08));transition:transform .2s,box-shadow .2s" '
       + 'onmouseover="this.style.transform=\'translateY(-4px)\';this.style.boxShadow=\'0 16px 34px rgba(20,37,84,.14)\'" '
       + 'onmouseout="this.style.transform=\'\';this.style.boxShadow=\'var(--ds-sh-sm,0 1px 3px rgba(20,37,84,.08))\'">'
       + '<div style="font-size:34px;margin-bottom:8px">'+t.emoji+'</div>'
@@ -41206,7 +41226,7 @@ function pgInstitutionalShowcase(){
       h+='<div class="ct" style="margin:24px 0 10px">'+_sponsorLabs[cat]+' <span style="font-size:13px;font-weight:400;color:var(--ink3)">— '+grp.length+'</span></div>';
       h+='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;margin-bottom:8px">';
       grp.forEach(function(p){
-        h+='<div class="vcard" style="text-align:center;border-top:4px solid '+(p.couleur||'#3C8DFF')+'">'
+        h+='<div class="vcard" style="text-align:center;--vcol:'+(p.couleur||'#3C8DFF')+'">'
           +(p.logo?'<img src="'+p.logo+'" style="max-height:72px;max-width:160px;object-fit:contain;margin:0 auto 10px;display:block;border-radius:8px">'
                  :'<div style="font-size:44px;margin-bottom:10px">'+(p.ico||'🏢')+'</div>')
           +'<div style="font-family:Montserrat,sans-serif;font-size:14px;font-weight:800;color:#142554;margin-bottom:4px">'+_prtSafe(p.nom)+'</div>'

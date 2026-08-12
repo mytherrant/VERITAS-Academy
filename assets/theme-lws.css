@@ -2698,21 +2698,1258 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 #VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+8) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){ background:#E4E9F0 !important; }
 #VISITOR#VISITOR :is(.acc-ess, .acc-roles, .g2, .g3, .acc-portes) > *:nth-child(8n+8) :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico) svg{ stroke:#2E3D57 !important; }
 
-/* ─── 26.3 · PLUS AUCUN FILET À DROITE NI EN HAUT ──────────── */
-#VISITOR#VISITOR *{
+
+/* ═════════════════════════════════════════════════════════════════════════
+   26.3 → 36 · REFONTE DE LA VITRINE — COUCHE UNIQUE
+   ─────────────────────────────────────────────────────────────────────────
+   CE QUI EST REMPLACÉ ICI. Six sections (26.3, 27, 28, 29, 30, 31, 32) se
+   corrigeaient mutuellement : §27 détendait §18, §29 annulait §27.2, §31
+   réparait l'alternance de §29.2, §30 rattrapait ce que §28.1 avait manqué.
+   863 lignes pour un résultat que personne ne pouvait plus prévoir, parce
+   que la dernière règle écrite gagnait, quelle qu'elle soit.
+
+   Trois de ces règles ne visaient plus rien de précis et cassaient des
+   choses qui marchaient :
+
+     · `#VISITOR#VISITOR#VISITOR :is(div,section,article,li,a,button)::before
+        { display:none }` — écrit pour chasser des filets décoratifs, il
+       éteignait AUSSI les pseudo-éléments porteurs : voiles de vidéo,
+       compteurs d'étapes, chevrons, rubans. On ne coupe plus en masse ce
+       qu'on rallume ensuite au cas par cas ;
+     · `transform:none !important` sur `*` sous `prefers-reduced-motion` —
+       le réglage système doit couper le MOUVEMENT, pas la mise en page :
+       tout ce qui centre par `translate` s'effondrait ;
+     · `:is(.vhero-video-wrap, …) *{ color:#fff }` — repeignait en blanc
+       jusqu'aux textes posés sur fond clair à l'intérieur du bloc.
+
+   CE QUI EST CONSERVÉ, parce que c'est la demande et que c'est juste :
+   aucune bordure en haut ni à droite, bandes pleine largeur alternées,
+   rythme de 40px, titres centrés — le système de lws.fr.
+
+   CE QUI EST AJOUTÉ : des pictogrammes ILLUSTRÉS en couleur (le modèle en
+   a huit sur sa grille « Inclus avec votre nom de domaine » : ce sont des
+   dessins bicolores, pas des traits fins), le gras et la couleur sur les
+   mots qui portent l'information, le texte justifié, et un mouvement qui
+   se sent sans se remarquer.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 26.3 · NI BORDURE HAUTE, NI BORDURE DROITE ─────────────────
+   Demande explicite de Jacques, deux fois. Un cadre complet découpe la
+   page en tranches ; le modèle ne cadre rien, il pose des surfaces.
+   Les champs de saisie sont la seule exception : sans ses quatre côtés,
+   un champ n'est plus un champ — on ne sait plus où cliquer. */
+#VISITOR#VISITOR *,
+#VISITOR#VISITOR *::before,
+#VISITOR#VISITOR *::after{
   border-top-width:0 !important;
   border-right-width:0 !important;
 }
-/* Exceptions strictement fonctionnelles : un cadre complet reste un cadre.
-   Les surfaces qui doivent se détacher du fond — cartes, champs de saisie —
-   gardent leurs quatre côtés. Partout ailleurs, la règle ci-dessus tient. */
-#VISITOR#VISITOR :is(.vcard, .acc-plan, .acc-ess-c, .acc-role, .acc-porte,
-                     .vbook-card, .acc-news, .lx-statcard, .acc-rech,
-                     .vemu-tile, .lws-tile, .cit-card, .vmenu-hi-c,
-                     input, select, textarea, .fi){
+#VISITOR#VISITOR :is(input, select, textarea, .fi){
   border-top-width:1px !important;
   border-right-width:1px !important;
 }
-/* Le séparateur des listes d'avantages est un filet BAS posé en haut du
-   bloc : il porte l'information « ici commence la liste », il survit. */
-#VISITOR#VISITOR .acc-plan-av{ border-top-width:1px !important; }
+
+:root{
+  /* Le vert de la réussite — corrigé validé, taux d'admission. Assez
+     sombre pour porter du texte sur blanc (4,5:1). */
+  --lws-ok:#0B7A33; --lws-ok-clair:#E4F4E9;
+  /* Une ombre, une seule : très diffuse, sans couleur, décalée vers le
+     bas. C'est elle qui fait exister une carte blanche sur fond blanc. */
+  --lws-elev:0 1px 2px rgba(16,24,40,.04), 0 12px 32px -12px rgba(16,24,40,.14);
+  --lws-elev-fort:0 2px 4px rgba(16,24,40,.05), 0 24px 48px -20px rgba(16,24,40,.20);
+  --lws-ease:cubic-bezier(.16,1,.3,1);
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   27 · LE RYTHME ET LES BANDES
+   Le modèle ne remplit pas sa page avec du texte plus large : il la
+   découpe en BANDES pleine largeur qui se succèdent, blanc / gris. Sans
+   cette alternance, une page de 9 000px est une seule surface où rien ne
+   commence ni ne finit. Leur rythme est de 40px — c'est le changement de
+   fond qui fait respirer, pas le vide.
+   ═════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR :is(.vsec, .acc-wrap){
+  padding-top:40px !important; padding-bottom:40px !important;
+}
+#VISITOR#VISITOR .acc-head{ margin:0 auto 28px !important; }
+
+/* La bande sort de la colonne, reprend la largeur de la fenêtre, puis
+   remet à l'intérieur la gouttière de la colonne. #VISITOR est en
+   overflow-x:hidden (§4.0) : aucun défilement horizontal possible. */
+#VISITOR#VISITOR :is(.acc-ess, .rsc-fixe, .acc-plans, .lws-band, .lws-paths,
+                     .acc-roles, .lws-social, .lws-features){
+  box-sizing:border-box !important;
+  width:100vw !important;
+  margin-left:calc(50% - 50vw) !important;
+  margin-right:calc(50% - 50vw) !important;
+  padding-left:max(var(--lws-gut), calc((100vw - var(--lws-w)) / 2)) !important;
+  padding-right:max(var(--lws-gut), calc((100vw - var(--lws-w)) / 2)) !important;
+  padding-top:40px !important;
+  padding-bottom:40px !important;
+  border-radius:0 !important;
+}
+
+/* L'alternance est ASSIGNÉE, jamais devinée. `:nth-of-type` compte les
+   frères de même balise : nos bandes sont des <div> parmi des dizaines
+   d'autres <div>, le rang calculé n'avait aucun rapport avec l'ordre des
+   bandes. Le modèle écrit `bg_white` / `bg_grey` à la main — on fait
+   pareil, une couleur par rôle, dans l'ordre d'apparition. */
+#VISITOR#VISITOR .rsc-fixe  { background:var(--lws-grey) !important; }
+#VISITOR#VISITOR .acc-ess   { background:#fff !important; }
+#VISITOR#VISITOR .lws-paths { background:var(--lws-grey) !important; }
+#VISITOR#VISITOR .acc-roles { background:#fff !important; }
+#VISITOR#VISITOR .acc-plans { background:var(--lws-grey) !important; }
+#VISITOR#VISITOR .lws-social{ background:#fff !important; }
+#VISITOR#VISITOR .lws-band  { background:#fff !important; }
+#VISITOR#VISITOR .lws-features{ background:var(--lws-grey) !important; }
+
+/* Une carte posée sur une bande grise repasse en blanc : c'est ce
+   contraste qui la détache, pas une ombre. */
+#VISITOR#VISITOR :is(.rsc-fixe, .lws-paths, .acc-plans, .lws-features)
+  :is(.acc-ess-c, .lws-path, .acc-role, .vcard, .acc-plan, .lx-statcard, .lx-catcard){
+  background:#fff !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   28 · LES TITRES S'ENTENDENT
+   Mesuré chez le modèle : titres de section 40-48px en 700-800, quand
+   nous étions à 30px en 600. C'est le titre qui découpe la page pour un
+   élève pressé. La graisse 700 est rendue AUX TITRES SEULEMENT — le corps
+   reste en 400, sinon on retombe dans le criard.
+   ═════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR :is(h1, .vhero-title, .vsec-title-hero){
+  font-size:46px !important; line-height:1.12 !important;
+  font-weight:700 !important; letter-spacing:-.015em !important;
+  color:var(--lws-navy) !important;
+}
+#VISITOR#VISITOR :is(h2, .vsec-title, .acc-head .acc-pill){
+  font-size:35px !important; line-height:1.18 !important;
+  font-weight:700 !important; letter-spacing:-.01em !important;
+  color:var(--lws-navy) !important;
+}
+#VISITOR#VISITOR h3{ font-size:22px !important; line-height:1.35 !important; font-weight:700 !important; }
+#VISITOR#VISITOR .acc-head .acc-sub{
+  font-size:18px !important; line-height:1.6 !important; color:var(--lws-text) !important;
+}
+#VISITOR#VISITOR .acc-plan-nom { font-size:23px !important; font-weight:700 !important; }
+#VISITOR#VISITOR .acc-plan-prix{ font-size:40px !important; font-weight:700 !important; }
+
+/* Le corps reprend un cran : 16px sur une colonne de 1170px donne une
+   ligne longue et grise. */
+#VISITOR#VISITOR{ font-size:17px !important; }
+#VISITOR#VISITOR :is(p, li, td){ font-size:17px !important; line-height:1.62 !important; }
+#VISITOR#VISITOR .acc-promesse-tx{ font-size:20px !important; line-height:1.6 !important; }
+#VISITOR#VISITOR :is(.acc-ess-d, .lws-feature-d, .lws-path-d, .acc-plan-av li){ font-size:15.5px !important; }
+#VISITOR#VISITOR :is(.acc-ess-t, .lws-feature-t){ font-size:17.5px !important; }
+
+/* ═════════════════════════════════════════════════════════════════════
+   29 · LES PICTOGRAMMES DEVIENNENT DES ILLUSTRATIONS
+   La grille « Inclus avec votre nom de domaine » du modèle aligne huit
+   DESSINS bicolores de 60px, sans carte, sans cadre, légende en gras
+   dessous. Nous avions des traits monochromes de 1,5px dans un carré
+   pâle : sur une page blanche, ça ne se voit pas.
+
+   Nos glyphes sont des tracés `lucide` monochromes — on ne peut pas les
+   redessiner un par un (91 symboles). Ce qui les rapproche du modèle sans
+   toucher au dessin : une pastille de couleur DOUCE derrière, un glyphe
+   de la même teinte en pleine saturation, et une petite forme d'accent
+   décalée. Deux tons + un accent : l'œil lit une illustration.
+
+   Huit teintes tournent sur la grille. Chacune est assez sombre pour
+   porter un tracé lisible sur sa propre pastille.
+   ═════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR .acc-ess{
+  display:grid !important;
+  grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)) !important;
+  gap:34px 24px !important;
+  align-items:start !important;
+}
+#VISITOR#VISITOR .acc-ess-c{
+  background:none !important;
+  border:0 !important;
+  box-shadow:none !important;
+  padding:10px 12px !important;
+  display:flex !important; flex-direction:column !important;
+  align-items:center !important; text-align:center !important;
+  gap:13px !important;
+  cursor:pointer;
+}
+#VISITOR#VISITOR .acc-ess-c:hover{ box-shadow:none !important; }
+
+#VISITOR#VISITOR :is(.acc-ess-ic, .lws-feature-ic){
+  position:relative;
+  width:84px !important; height:84px !important;
+  flex:0 0 auto;
+  display:grid !important; place-items:center;
+  border-radius:26px !important;
+  background:var(--ico-tint, #E4ECFA) !important;
+  border:0 !important;
+  margin:0 !important;
+  transition:transform .28s var(--lws-ease), border-radius .28s var(--lws-ease);
+}
+#VISITOR#VISITOR :is(.acc-ess-ic, .lws-feature-ic) svg{
+  width:40px !important; height:40px !important;
+  stroke:var(--ico, #1E499B) !important;
+  stroke-width:1.9 !important;
+  fill:none !important;
+  position:relative; z-index:1;
+  transition:transform .28s var(--lws-ease);
+}
+/* La forme d'accent : un disque saturé, décalé, à moitié sorti. C'est ce
+   décalage qui donne l'air « dessiné » plutôt que « posé dans un carré ». */
+#VISITOR#VISITOR :is(.acc-ess-ic, .lws-feature-ic)::after{
+  content:"";
+  position:absolute; right:6px; bottom:6px;
+  width:22px; height:22px; border-radius:50%;
+  background:var(--ico, #1E499B);
+  opacity:.16;
+  transition:transform .28s var(--lws-ease), opacity .28s ease;
+}
+#VISITOR#VISITOR :is(.acc-ess-c, .lws-feature):hover :is(.acc-ess-ic, .lws-feature-ic){
+  transform:translateY(-5px) rotate(-4deg);
+  border-radius:32px !important;
+}
+#VISITOR#VISITOR :is(.acc-ess-c, .lws-feature):hover :is(.acc-ess-ic, .lws-feature-ic) svg{
+  transform:scale(1.1) rotate(4deg);
+}
+#VISITOR#VISITOR :is(.acc-ess-c, .lws-feature):hover :is(.acc-ess-ic, .lws-feature-ic)::after{
+  transform:scale(1.5) translate(2px, 2px); opacity:.26;
+}
+
+/* Les huit teintes. Elles tournent sur toutes les grilles à pictogrammes. */
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(8n+1){ --ico:#1E499B; --ico-tint:#E4ECFA; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(8n+2){ --ico:#0B7A33; --ico-tint:#E2F4E8; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(8n+3){ --ico:#C24E00; --ico-tint:#FCEBDF; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(8n+4){ --ico:#5B3FA8; --ico-tint:#ECE6FA; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(8n+5){ --ico:#0E7C86; --ico-tint:#DFF2F3; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(8n+6){ --ico:#A82255; --ico-tint:#FAE4EC; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(8n+7){ --ico:#8A6414; --ico-tint:#F7EFDA; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(8n+8){ --ico:#2E3D57; --ico-tint:#E8EBF1; }
+
+/* La légende, en gras navy — c'est le mot que l'œil cherche. */
+#VISITOR#VISITOR :is(.acc-ess-t, .lws-feature-t){
+  font-weight:700 !important; color:var(--lws-navy) !important;
+  line-height:1.32 !important;
+  display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap;
+}
+#VISITOR#VISITOR :is(.acc-ess-d, .lws-feature-d){
+  color:var(--lws-text) !important; line-height:1.55 !important;
+}
+/* « Gratuit » redevient visible, et vert : c'est un argument, pas un
+   ornement. Une seule pastille par carte suffit. */
+#VISITOR#VISITOR .acc-ess-free{
+  display:inline-block !important;
+  background:var(--lws-ok-clair) !important; color:var(--lws-ok) !important;
+  font-size:11.5px !important; font-weight:700 !important;
+  letter-spacing:.03em; text-transform:uppercase;
+  padding:3px 9px !important; border-radius:999px !important;
+}
+
+/* Les autres vignettes du site suivent le même dessin, en plus petit. */
+#VISITOR#VISITOR :is(.acc-role-ic, .lws-chip, .ct-ico, .vinfo-ic, .acc-pill .ic){
+  width:56px !important; height:56px !important; border-radius:18px !important;
+  display:inline-grid !important; place-items:center;
+}
+#VISITOR#VISITOR :is(.acc-role-ic, .lws-chip, .ct-ico, .vinfo-ic) svg,
+#VISITOR#VISITOR .acc-pill-ico{
+  width:28px !important; height:28px !important; stroke-width:2.1 !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   30 · LES CARTES QUI RESTENT DES CARTES
+   Toutes les grilles ne sont pas des grilles de pictogrammes. Un manuel,
+   un abonnement, une catégorie de ressources sont des OBJETS : ils
+   gardent une surface, une ombre douce, et un mouvement au survol.
+   ═════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR :is(.vcard, .acc-plan, .acc-role, .acc-porte, .vbook-card,
+                     .acc-news, .lx-statcard, .acc-rech, .vemu-tile,
+                     .lws-tile, .lws-path, .lx-catcard){
+  background:#fff !important;
+  border-radius:14px !important;
+  box-shadow:var(--lws-elev) !important;
+  overflow:hidden;
+  transition:transform .26s var(--lws-ease), box-shadow .26s ease !important;
+}
+#VISITOR#VISITOR :is(.vcard, .acc-plan, .acc-role, .acc-porte, .vbook-card,
+                     .lws-tile, .lws-path, .lx-catcard):hover{
+  transform:translateY(-6px) !important;
+  box-shadow:var(--lws-elev-fort) !important;
+}
+
+/* ── LA CARTE DE CATÉGORIE ÉTAIT ILLISIBLE ─────────────────────
+   `.lx-catcard-head` est un bandeau navy portant un titre BLANC et une
+   icône or. Les passes précédentes ont aplati le fond navy en blanc sans
+   toucher à l'encre : titre blanc sur blanc, il ne restait à l'écran
+   qu'une pastille or flottante au-dessus de « Sujets corrigés ».
+   Le bandeau reprend un fond — teinté, pas navy — et l'encre repasse en
+   navy gras. L'icône prend la couleur du bloc, pas l'or. */
+#VISITOR#VISITOR .lx-catcard-head{
+  display:flex !important; align-items:center !important; gap:11px !important;
+  background:var(--lws-tint-sky, #DBE8FE) !important;
+  padding:15px 17px !important;
+  color:var(--lws-navy) !important;
+  font-size:16.5px !important; font-weight:700 !important;
+  line-height:1.3 !important;
+}
+#VISITOR#VISITOR .lx-catcard-head > span{ color:var(--lws-navy) !important; flex:1; }
+#VISITOR#VISITOR .lx-catcard-head svg{
+  width:22px !important; height:22px !important;
+  stroke:var(--lws-blue) !important; flex:0 0 auto;
+}
+#VISITOR#VISITOR .lx-catcard-body{ padding:15px 17px 17px !important; }
+#VISITOR#VISITOR .lx-catcard-desc{
+  color:var(--lws-text) !important; font-size:15px !important;
+  line-height:1.55 !important; margin-bottom:14px !important;
+}
+#VISITOR#VISITOR .lx-catcard-foot{
+  display:flex !important; align-items:center !important;
+  justify-content:space-between !important; gap:12px !important;
+}
+#VISITOR#VISITOR .lx-catcard-count{
+  color:var(--lws-navy) !important; font-weight:700 !important; font-size:14.5px !important;
+}
+#VISITOR#VISITOR .lx-catcard-cta{
+  background:var(--lws-blue) !important; color:#fff !important;
+  padding:9px 18px !important; border-radius:999px !important;
+  font-weight:600 !important; font-size:14.5px !important;
+  white-space:nowrap;
+  transition:background-color .18s ease, transform .18s var(--lws-ease);
+}
+#VISITOR#VISITOR .lx-catcard:hover .lx-catcard-cta{
+  background:var(--lws-blue-deep) !important; transform:translateX(3px);
+}
+/* Les puces du bandeau : vert pour la gratuité, or pour la mise en avant. */
+#VISITOR#VISITOR .lx-chip-green{
+  background:var(--lws-ok-clair) !important; color:var(--lws-ok) !important;
+  font-weight:700 !important; font-size:12px !important;
+  padding:3px 9px !important; border-radius:999px !important; font-style:normal !important;
+}
+#VISITOR#VISITOR .lx-chip-gold{
+  background:#FDF3D8 !important; padding:4px !important; border-radius:50% !important;
+  display:inline-grid !important; place-items:center;
+}
+#VISITOR#VISITOR .lx-chip-gold svg{ stroke:#8A6414 !important; fill:#F0C33C !important; width:16px !important; height:16px !important; }
+
+/* Les couvertures de manuel : un manuel s'achète d'abord avec les yeux. */
+#VISITOR#VISITOR .vbook-cover{
+  aspect-ratio:3 / 4; height:auto !important; min-height:250px;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(160deg, #EEF2FA, #E2E9F6) !important;
+  border-radius:14px 14px 0 0 !important;
+  overflow:hidden; position:relative;
+}
+#VISITOR#VISITOR .vbook-cover img{ width:100% !important; height:100% !important; object-fit:cover !important; }
+#VISITOR#VISITOR :is(.vbook-cover .bk-fallback, .vbook-cover-title){
+  color:var(--lws-navy) !important; font-weight:700 !important;
+  font-size:16px !important; text-shadow:none !important;
+}
+#VISITOR#VISITOR .vbook-title{
+  font-size:17px !important; font-weight:700 !important;
+  color:var(--lws-navy) !important; line-height:1.3 !important;
+}
+#VISITOR#VISITOR :is(.vshop-all, .vbooks-grid){
+  grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)) !important;
+  gap:22px !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   31 · LE GRAS ET LA COULEUR SUR CE QUI COMPTE
+   Un prix, un taux, une durée, un nom d'examen : ce sont les mots que
+   l'œil cherche. Ils passent en 700 et prennent une couleur. Le reste de
+   la phrase demeure gris — c'est le CONTRASTE qui informe, pas la
+   couleur seule. Tout colorer revient à ne rien colorer.
+   ═════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR :is(.vbook-price, .acc-plan-prix, .vprix, .prix){
+  font-weight:700 !important; color:var(--lws-action-cta) !important;
+}
+#VISITOR#VISITOR :is(.lx-stat-pct, .vstats-n, .lws-figure-n, .lx-serie b){
+  font-weight:700 !important; color:var(--lws-ok) !important;
+}
+#VISITOR#VISITOR :is(.vbook-old-price s, .acc-plan-prix del){
+  color:var(--lws-text2) !important; font-weight:400 !important;
+}
+#VISITOR#VISITOR .vbook-discount{
+  background:var(--lws-ok-clair) !important; color:var(--lws-ok) !important;
+  font-weight:700 !important; border-radius:6px; padding:2px 8px;
+}
+/* Dans le corps de texte, `<b>` reprend du poids et vire au navy : c'est
+   lui qui porte les mots-clés de la promesse. */
+#VISITOR#VISITOR :is(p, .acc-promesse-tx, .acc-sub, .vbook-desc, li) :is(b, strong){
+  font-weight:700 !important; color:var(--lws-navy) !important;
+}
+/* Les coches des listes d'avantages passent au vert. */
+#VISITOR#VISITOR :is(.acc-plan-av, .acc-ess-list, .lws-checks) li > svg{
+  stroke:var(--lws-ok) !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   32 · TEXTE JUSTIFIÉ, PANNEAUX CENTRÉS
+   Demande de Jacques. La justification n'est tenable qu'avec la coupure
+   automatique : sans `hyphens`, elle creuse des rivières blanches dans
+   une colonne étroite. Elle ne s'applique qu'aux PARAGRAPHES — jamais
+   aux titres, aux libellés ni aux boutons, où elle étirerait deux mots
+   sur toute la largeur.
+   ═════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR :is(p, .acc-plan-av li, .vbook-desc, .lx-catcard-desc,
+                     .lws-path-d, .vsec-tx, .acc-foot-tx){
+  text-align:justify !important;
+  text-justify:inter-word;
+  hyphens:auto; -webkit-hyphens:auto;
+}
+/* Ce qui reste centré, parce que c'est court et que c'est un titre. */
+#VISITOR#VISITOR :is(.acc-head, .acc-head .acc-pill, .acc-head .acc-sub,
+                     .acc-ess-c, .lws-feature, .acc-promesse){
+  text-align:center !important;
+}
+#VISITOR#VISITOR :is(.acc-ess-d, .lws-feature-d){ text-align:center !important; }
+
+/* Les panneaux se centrent dans la colonne et s'y tiennent. */
+#VISITOR#VISITOR :is(.acc-head, .acc-promesse, .acc-plans-note){
+  margin-left:auto !important; margin-right:auto !important;
+  max-width:820px !important;
+}
+#VISITOR#VISITOR .acc-promesse{ margin-bottom:32px !important; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features, .acc-plans, .lws-paths, .rsc-fixe, .acc-roles){
+  justify-content:center !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   33 · LES PUCES
+   Une puce grise de 4px ne dit rien. Une coche verte dit « c'est
+   compris ». Les listes sans classe — celles qui sortent du contenu
+   rédigé — prennent une pastille bleue à la place du disque par défaut.
+   ═════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR .vsec ul:not([class]),
+#VISITOR#VISITOR .vsec-tx ul:not([class]){ list-style:none !important; padding-left:0 !important; }
+#VISITOR#VISITOR :is(.vsec, .vsec-tx) ul:not([class]) > li{
+  position:relative; padding-left:32px !important; margin-bottom:10px !important;
+}
+#VISITOR#VISITOR :is(.vsec, .vsec-tx) ul:not([class]) > li::before{
+  content:"" !important; display:block !important;
+  position:absolute; left:0; top:.55em;
+  width:10px; height:10px; border-radius:50%;
+  background:var(--lws-blue) !important;
+  box-shadow:0 0 0 4px rgba(30,73,155,.14);
+}
+/* Les listes d'avantages portent une coche verte, dessinée en CSS —
+   aucun glyphe à charger, et elle suit la taille du texte. */
+#VISITOR#VISITOR .lws-checks{ list-style:none !important; padding-left:0 !important; }
+#VISITOR#VISITOR .lws-checks li{
+  position:relative; padding-left:34px !important; margin-bottom:11px !important;
+}
+#VISITOR#VISITOR .lws-checks li::before{
+  content:"" !important; display:block !important;
+  position:absolute; left:0; top:.28em;
+  width:21px; height:21px; border-radius:50%;
+  background:var(--lws-ok-clair) !important;
+}
+#VISITOR#VISITOR .lws-checks li::after{
+  content:"" !important; display:block !important;
+  position:absolute; left:7px; top:.62em;
+  width:6px; height:10px;
+  border:solid var(--lws-ok);
+  border-width:0 2.4px 2.4px 0 !important;
+  transform:rotate(43deg);
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   34 · LE MOUVEMENT
+   Toujours `transform` et `opacity` — jamais une propriété qui relance la
+   mise en page. Assez pour qu'on le sente, pas assez pour qu'on le
+   remarque.
+   ═════════════════════════════════════════════════════════════════════ */
+@keyframes lwsMontee{
+  from{ opacity:0; transform:translateY(22px) scale(.985); }
+  to  { opacity:1; transform:none; }
+}
+#VISITOR#VISITOR :is(.v-reveal.visible, .v-reveal.is-visible){
+  animation:lwsMontee .55s var(--lws-ease) both !important;
+}
+/* Les cartes d'une même grille entrent en cascade : l'œil suit la
+   rangée au lieu de recevoir tout le bloc d'un coup. */
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(1){ animation-delay:.02s; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(2){ animation-delay:.07s; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(3){ animation-delay:.12s; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(4){ animation-delay:.17s; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(5){ animation-delay:.22s; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(6){ animation-delay:.27s; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(7){ animation-delay:.32s; }
+#VISITOR#VISITOR :is(.acc-ess, .lws-features) > *:nth-child(8){ animation-delay:.37s; }
+
+#VISITOR#VISITOR :is(.btn, .vnav-cnx, .acc-plan-cta, .acc-news-cta, .lws-btn2,
+                     .acc-rech-btn):hover{ transform:translateY(-2px); }
+#VISITOR#VISITOR :is(.btn, .vnav-cnx, .acc-plan-cta, .acc-news-cta, .lws-btn2,
+                     .acc-rech-btn):active{ transform:translateY(0) scale(.97); }
+
+/* Le réglage système coupe le MOUVEMENT, pas la mise en page : on ne
+   touche ni à `transform` ni à quoi que ce soit qui positionne. */
+@media (prefers-reduced-motion: reduce){
+  #VISITOR#VISITOR *, #VISITOR#VISITOR *::before, #VISITOR#VISITOR *::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   35 · LES MODALES ET LA CONNEXION REJOIGNENT LE THÈME
+   `#MC` (fenêtres, fonction `M()` d'app.js) et `#LS` (connexion) sont
+   FRÈRES de #VISITOR, jamais dedans : toute cette feuille les ignorait.
+   D'où un formulaire d'inscription resté en navy/or, dans une autre
+   police, au milieu d'un site refondu.
+   ═════════════════════════════════════════════════════════════════════ */
+#MC, #MC *, #LS, #LS *{ font-family:var(--lws-font) !important; }
+#MC .modal{
+  background:#fff !important; border:0 !important;
+  border-radius:16px !important;
+  box-shadow:0 24px 64px -16px rgba(16,24,40,.34) !important;
+  color:var(--lws-text) !important;
+}
+#MC .mov{ background:rgba(0,17,54,.55) !important; backdrop-filter:blur(2px); }
+#MC .mhd{
+  background:#fff !important; background-image:none !important;
+  border-bottom:1px solid var(--lws-line) !important;
+  padding:22px 26px !important;
+}
+#MC .mtt{
+  color:var(--lws-navy) !important;
+  font-size:22px !important; font-weight:700 !important; letter-spacing:-.01em !important;
+  background:none !important; -webkit-text-fill-color:currentColor !important;
+}
+#MC .mst{ color:var(--lws-text2) !important; font-size:14.5px !important; font-style:normal !important; }
+#MC .mb{ padding:24px 26px !important; font-size:16px !important; color:var(--lws-text) !important; }
+#MC .mf{
+  padding:18px 26px 22px !important;
+  border-top:1px solid var(--lws-line) !important;
+  background:#fff !important;
+  display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end;
+}
+#MC .mc{
+  background:var(--lws-grey) !important; color:var(--lws-navy) !important;
+  border:0 !important; border-radius:50% !important;
+  width:36px !important; height:36px !important;
+}
+#MC .mc:hover{ background:var(--lws-line) !important; }
+#MC :is(input, select, textarea, .fi),
+#LS :is(input, select, textarea, .fi){
+  font-family:var(--lws-font) !important; font-size:15.5px !important;
+  padding:11px 14px !important;
+  border:1px solid var(--lws-line2) !important;
+  border-radius:8px !important;
+  background:#fff !important; color:var(--lws-navy) !important;
+  box-shadow:none !important;
+}
+#MC :is(input, select, textarea, .fi):focus,
+#LS :is(input, select, textarea, .fi):focus{
+  border-color:var(--lws-blue) !important;
+  box-shadow:0 0 0 3px rgba(30,73,155,.14) !important; outline:none !important;
+}
+#MC .fl, #LS .fl{ color:var(--lws-navy) !important; font-weight:600 !important; font-size:13.5px !important; }
+#MC .btn, #LS .btn{
+  font-family:var(--lws-font) !important; font-size:15px !important; font-weight:600 !important;
+  padding:11px 22px !important; border-radius:999px !important;
+  border:2px solid transparent !important; box-shadow:none !important;
+}
+#MC .btn.bi, #LS .btn.bi{ background:var(--lws-blue) !important; border-color:var(--lws-blue) !important; color:#fff !important; }
+#MC .btn.bi:hover, #LS .btn.bi:hover{ background:var(--lws-blue-deep) !important; }
+#MC .btn.bo, #LS .btn.bo{ background:#fff !important; color:var(--lws-blue) !important; border-color:var(--lws-blue) !important; }
+#MC .btn.bo:hover, #LS .btn.bo:hover{ background:var(--lws-blue) !important; color:#fff !important; }
+#MC :is(.btn.bg, .btn.bw, .btn-cta){
+  background:var(--lws-action-cta) !important; border-color:var(--lws-action-cta) !important;
+  color:#fff !important;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   36 · ADAPTATIF
+   Sur téléphone, les BANDES vont chercher le bord (c'est ce qui fait
+   qu'elles se lisent comme des bandes), mais le TEXTE garde sa gouttière :
+   collé au bord, il est illisible.
+   ═════════════════════════════════════════════════════════════════════ */
+@media (max-width:820px){
+  #VISITOR#VISITOR :is(h1, .vhero-title, .vsec-title-hero){ font-size:31px !important; }
+  #VISITOR#VISITOR :is(h2, .vsec-title, .acc-head .acc-pill){ font-size:25px !important; }
+  #VISITOR#VISITOR h3{ font-size:19px !important; }
+  #VISITOR#VISITOR{ font-size:16px !important; }
+  #VISITOR#VISITOR :is(p, li, td){ font-size:16px !important; }
+  #VISITOR#VISITOR .acc-promesse-tx{ font-size:17.5px !important; }
+  #VISITOR#VISITOR .acc-head .acc-sub{ font-size:16px !important; }
+  #VISITOR#VISITOR :is(.vsec, .acc-wrap){ padding-top:28px !important; padding-bottom:28px !important; }
+  #VISITOR#VISITOR .acc-head{ margin-bottom:22px !important; }
+  #VISITOR#VISITOR :is(.acc-ess, .rsc-fixe, .acc-plans, .lws-band, .lws-paths,
+                       .acc-roles, .lws-social, .lws-features){
+    padding-left:14px !important; padding-right:14px !important;
+    padding-top:30px !important; padding-bottom:30px !important;
+  }
+  #VISITOR#VISITOR .acc-ess{ grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)) !important; gap:26px 14px !important; }
+  #VISITOR#VISITOR :is(.acc-ess-ic, .lws-feature-ic){ width:68px !important; height:68px !important; border-radius:21px !important; }
+  #VISITOR#VISITOR :is(.acc-ess-ic, .lws-feature-ic) svg{ width:32px !important; height:32px !important; }
+  #VISITOR#VISITOR :is(.acc-ess-ic, .lws-feature-ic)::after{ width:17px; height:17px; }
+  #VISITOR#VISITOR :is(.acc-ess-t, .lws-feature-t){ font-size:15.5px !important; }
+  #VISITOR#VISITOR :is(.acc-ess-d, .lws-feature-d){ font-size:14px !important; }
+  /* Justifier une colonne de 340px coupe trop souvent : on revient au fer
+     à gauche sous cette largeur. */
+  #VISITOR#VISITOR :is(p, .acc-plan-av li, .vbook-desc, .lx-catcard-desc,
+                       .lws-path-d, .vsec-tx, .acc-foot-tx){
+    text-align:left !important; hyphens:none;
+  }
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   37 · LE VERROU CLAIR, ENFIN ÉTANCHE
+   ─────────────────────────────────────────────────────────────────────────
+   Le §16 déclarait la vitrine « verrouillée en clair » et rejouait les
+   jetons `--lws-*` sous `[data-theme="dark"]`. Il en manquait l'essentiel :
+
+       app.css:6239   :root[data-theme="dark"] #VISITOR{ color:var(--ink); }
+
+   L'encre claire n'arrive pas par un jeton `--lws-*` mais par `--ink`, posé
+   DIRECTEMENT sur #VISITOR — donc hérité par tout ce qui en descend. Les
+   fonds, eux, restent clairs (styles en ligne écrits dans app.js). Mesuré
+   sur la page des labos, thème sombre actif : 80 éléments sous 4,5:1, dont
+   du blanc pur sur blanc pur (rapport 1,00) — « 21 », « Gratuites »,
+   « Premium », « VÉRITAS Academy ».
+
+   Le correctif ne devine rien : les 59 jetons du bloc sombre d'app.css sont
+   rejoués ici à leur valeur CLAIRE, portés par #VISITOR. Une variable CSS
+   se résout sur l'élément qui la consomme : tout descendant qui lit
+   `var(--ink)`, `var(--sur)` ou `var(--ds-text)` reçoit désormais le clair,
+   sans qu'il faille énumérer une seule règle sombre.
+
+   Les valeurs sont EXTRAITES du bloc `:root{}` clair d'app.css, pas
+   retranscrites. Si la charte claire bouge, régénérer plutôt que corriger
+   à la main.
+   ═════════════════════════════════════════════════════════════════════════ */
+:root[data-theme="dark"] #VISITOR{
+  color-scheme:light;
+  background:#FFFFFF !important;
+  color:var(--lws-text) !important;
+  --ds-bg:#F5F7FB;
+  --ds-surface:#FFFFFF;
+  --ds-surface-2:#FAFBFE;
+  --ds-border:#E6EAF2;
+  --ds-border-strong:#D5DBE8;
+  --ds-text:#142554;
+  --ds-text-2:#475882;
+  --ds-text-3:#7A88A6;
+  --ds-primary:#142554;
+  --ds-accent:#FFC93C;
+  --ds-ok:#059669;
+  --ds-warn:#D97706;
+  --ds-err:#AE5353;
+  --ds-sh-sm:0 1px 3px rgba(20,37,84,.08);
+  --ds-sh:0 6px 20px rgba(20,37,84,.08),0 1px 3px rgba(20,37,84,.06);
+  --ds-sh-lg:0 24px 56px rgba(20,37,84,.16);
+  --ink1:#0F1E47;
+  --bg:#F0F2F7;
+  --bg2:#E4E8F0;
+  --bg3:#CDD3DF;
+  --sur:#FFFFFF;
+  --sur2:#F8F9FC;
+  --ink:#142554;
+  --ink2:#1E2D5A;
+  --ink3:#475882;
+  --ink4:#6B7DA0;
+  --gold:#FFC93C;
+  --gold2:#F5B800;
+  --gp:#FFF8E1;
+  --gb:#FFE082;
+  --gr:#059669;
+  --grb:#D1FAE5;
+  --grd:#A7F3D0;
+  --re:#AE5353;
+  --reb:#FEE2E2;
+  --red:#FCA5A5;
+  --bl:#142554;
+  --blb:#E0EAFF;
+  --bld:#93B5FD;
+  --bl2:#3C8DFF;
+  --or:#F59E0B;
+  --orb:#FFF7ED;
+  --ord:#FFDAB9;
+  --pu:#6C56A6;
+  --pub:#DDD6FE;
+  --pud:#C4B5FD;
+  --vi:#0D9488;
+  --vib:#CCFBF1;
+  --vid:#A7F3D0;
+  --pink:#FCE2EE;
+  --pink2:#FBCFE8;
+  --yellow:#FFC93C;
+  --yellow2:#FFF3C4;
+  --br:1px solid #E4E8F0;
+  --br2:1px solid #CDD3DF;
+  --sh:0 1px 3px rgba(20,37,84,.05),0 6px 20px rgba(20,37,84,.04);
+  --sh2:0 8px 32px rgba(20,37,84,.08);
+  --sh3:0 24px 64px rgba(20,37,84,.14);
+  --wa:#F59E0B;
+}
+/* Les surfaces racines de la vitrine ne prennent pas le fond sombre. */
+:root[data-theme="dark"] #VISITOR :is(.vbody, .vsec, .acc-wrap){
+  background:transparent !important;
+}
+/* Un titre reste navy, un texte courant reste gris : on le réaffirme, car
+   certaines règles sombres visent le sélecteur et non le jeton. */
+:root[data-theme="dark"] #VISITOR :is(h1, h2, h3, h4, b, strong, .acc-ess-t,
+  .vbook-title, .lx-catcard-count, .acc-plan-nom, .lws-feature-t){
+  color:var(--lws-navy) !important;
+}
+:root[data-theme="dark"] #VISITOR :is(p, li, td, .acc-ess-d, .lx-catcard-desc,
+  .lws-feature-d, .acc-sub){
+  color:var(--lws-text) !important;
+}
+/* Sauf sur les surfaces délibérément sombres, où l'encre EST blanche. */
+:root[data-theme="dark"] #VISITOR :is(.acc-foot, .lws-band--dark) :is(h1, h2, h3,
+  b, strong, p, li, span, div){
+  color:#fff !important;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   38 · LA COULEUR SANS LE TRAIT (`--vcol`)
+   ─────────────────────────────────────────────────────────────────────────
+   Dix-huit cartes portaient un `border-top:3px solid <couleur>` écrit en
+   style EN LIGNE dans app.js. Les combattre depuis la feuille de style
+   (`* { border-top:0 }`) effaçait le trait ET perdait la couleur : la carte
+   devenait plate, ce qui est exactement le reproche fait au rendu.
+
+   Ces déclarations sont devenues `--vcol:<couleur>` à la source. Le trait a
+   disparu — c'est la demande — et la couleur reste disponible pour servir
+   là où elle informe : la vignette et le titre.
+   ═════════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR [style*="--vcol"] :is(.ct-ico, .vinfo-ic, .acc-role-ic, .lws-chip){
+  background:color-mix(in srgb, var(--vcol) 14%, #fff) !important;
+}
+#VISITOR#VISITOR [style*="--vcol"] :is(.ct-ico, .vinfo-ic, .acc-role-ic, .lws-chip) svg{
+  stroke:var(--vcol) !important;
+}
+/* Un filet BAS sous le titre de la carte : il porte la couleur sans
+   redessiner un cadre par le haut. */
+#VISITOR#VISITOR [style*="--vcol"] > :is(.ct, .vcard-t, .acc-role-t):first-child{
+  color:var(--lws-navy) !important;
+  border-bottom:2px solid var(--vcol) !important;
+  padding-bottom:8px !important;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   39 · LES CONTRASTES QUI ÉCHOUAIENT DÉJÀ EN CLAIR
+   ─────────────────────────────────────────────────────────────────────────
+   Mesuré : « Lancer » en blanc sur ambre #F59E0B donne 2,15:1 ; sur ciel
+   #0EA5E9, 2,77:1 ; « INFO » en blanc sur orange #FF6500, 2,95:1. Le seuil
+   est 4,5:1. Aucun blanc ne passe sur un ambre ni sur un ciel — ce n'est
+   pas un réglage à affiner, c'est une encre à changer. Sur ces fonds vifs,
+   l'encre est navy.
+   ═════════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR [style*="#F59E0B"],
+#VISITOR#VISITOR [style*="#FBBF24"],
+#VISITOR#VISITOR [style*="#FFC93C"],
+#VISITOR#VISITOR [style*="#0EA5E9"]{ color:var(--lws-navy) !important; }
+#VISITOR#VISITOR .ticker-lbl{ background:var(--lws-action-cta) !important; color:#fff !important; }
+
+/* La barre de filtres. Ses libellés portent `color:#142554` en style en
+   ligne (app.js), et son fond basculait au sombre : navy sur navy, 1,28:1.
+   Elle est ramenée au clair sans exception, et l'onglet actif s'inverse —
+   c'est le seul endroit où le bleu plein est justifié. */
+#VISITOR#VISITOR :is(.vftabs, .vftab-wrap){ background:transparent !important; }
+#VISITOR#VISITOR .vftab{
+  background:#fff !important;
+  color:var(--lws-navy) !important;
+  border:1px solid var(--lws-line) !important;
+  border-radius:999px !important;
+  padding:9px 17px !important;
+  font-weight:600 !important; font-size:14.5px !important;
+  transition:background-color .16s ease, color .16s ease, transform .16s var(--lws-ease);
+}
+#VISITOR#VISITOR .vftab:hover{ transform:translateY(-2px); border-color:var(--lws-blue) !important; }
+#VISITOR#VISITOR :is(.vftab.on, .vftab.active, .vftab[aria-selected="true"]){
+  background:var(--lws-blue) !important; color:#fff !important;
+  border-color:var(--lws-blue) !important;
+}
+:root[data-theme="dark"] #VISITOR .vftab{
+  background:#fff !important; color:var(--lws-navy) !important;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   30 · LISIBILITÉ — TROIS MESURES, TROIS CORRECTIONS
+   ─────────────────────────────────────────────────────────────────────────
+   Relevé sur la page d'accueil rendue, pas à l'œil :
+
+     · 59 % des blocs de texte sont sous 15px — dont 27 blocs à 10-12px.
+       Le corps est bien déclaré à 17px, mais presque tout le contenu réel
+       est rendu plus petit par des règles de composant. C'est la demande
+       « agrandis les polices pour les malvoyants », chiffrée.
+     · 19 filets subsistent en haut d'éléments larges.
+     · 18 teintes saturées distinctes cohabitent — dont huit qui ne servent
+       qu'à différencier des pictogrammes. C'est le « trop coloré ».
+
+   Les trois corrections tiennent en trois règles de fond. Elles sont
+   écrites en dernier et avec l'identifiant triplé : elles doivent
+   l'emporter sur les 29 sections précédentes, dont plusieurs fixent des
+   tailles au composant.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 30.1 · PLANCHER TYPOGRAPHIQUE ─────────────────────
+   Aucun texte lu par un élève ne descend sous 16px. Les mentions
+   secondaires tiennent à 15px, les micro-étiquettes à 13px — et rien
+   en dessous, nulle part.
+   Triple identifiant + `!important` : ces tailles sont posées par des
+   dizaines de règles de composant dans app.css, souvent en `!important`
+   elles aussi. Une valeur unique et souveraine vaut mieux que quarante
+   corrections éparses qu'on oubliera de tenir à jour. */
+#VISITOR#VISITOR#VISITOR :is(p, li, td, dd, blockquote, .vtext,
+  .acc-ess-d, .acc-plan-av li, .acc-sub, .vsec-sub, .acc-promesse-tx,
+  .acc-news-item .tx, .lws-path-d, .lws-trust-i, .vmenu-col button b){
+  font-size:16.5px !important;
+  line-height:1.65 !important;
+}
+#VISITOR#VISITOR#VISITOR :is(small, .acc-plan-prix small, .vmenu-col button small,
+  .acc-role-go, .lws-levels-t, .acc-plans-note, figcaption, .lx-serie span,
+  .lx-ment span, .lws-utility, .lws-utility a, .lws-utility button){
+  font-size:15px !important;
+  line-height:1.55 !important;
+}
+/* Le plancher absolu. Les étiquettes de 10 et 11px — « Gratuit », le nom
+   d'une rubrique, le compteur d'une carte — remontent à 13px. En dessous,
+   un œil fatigué devine au lieu de lire. */
+#VISITOR#VISITOR#VISITOR :is(.acc-ess-free, .acc-plan-pour, .vlit-banner__label,
+  .lws-badge, .pill, .lx-statcard-ex small, .acc-news-hd .ttl, kbd,
+  .vmenu-t, .lws-path-n, .badge, .tag){
+  font-size:13px !important;
+  letter-spacing:.4px !important;
+}
+/* Les boutons se lisent et se visent : 16px, 46px de haut — c'est aussi
+   la cible tactile recommandée. */
+#VISITOR#VISITOR#VISITOR :is(.btn, .vnav-cnx, .acc-plan-cta, .acc-news-cta,
+  .lws-btn2, .acc-rech-btn, .lws-level, .vftab, .book-order-btn){
+  font-size:16px !important;
+  min-height:46px !important;
+}
+
+/* ─── 30.2 · PLUS AUCUN FILET EN HAUT ───────────────────
+   Dix-neuf traits horizontaux découpaient encore la page en tranches.
+   Un filet BAS sépare deux lignes d'une même liste : il informe. Un filet
+   HAUT ferme un bloc : il n'informe de rien. Suppression sans exception,
+   pseudo-éléments compris — ce sont les mêmes traits, dessinés autrement. */
+#VISITOR#VISITOR#VISITOR *,
+#VISITOR#VISITOR#VISITOR *::before,
+#VISITOR#VISITOR#VISITOR *::after{
+  border-top:0 !important;
+  border-right:0 !important;
+}
+#VISITOR#VISITOR#VISITOR :is(.acc-plan, .vcard, .acc-card, .acc-ess-c,
+  .acc-role, .lws-path, .lws-tile, .acc-news, .lx-statcard, .acc-rech)::before{
+  display:none !important; content:none !important;
+}
+/* Les séparateurs de liste restent : ils portent une information. */
+#VISITOR#VISITOR#VISITOR .acc-plan-av li{ border-bottom:1px solid #EFF1F6 !important; }
+#VISITOR#VISITOR#VISITOR .acc-plan-av li:last-child{ border-bottom:0 !important; }
+
+/* ─── 30.3 · LA PALETTE SE RESSERRE ────────────────────
+   Huit teintes tournaient sur les pictogrammes pour les différencier. La
+   différence était réelle mais elle ne voulait RIEN DIRE : le violet ne
+   désignait pas une famille, il désignait la quatrième position dans la
+   grille. Une couleur qui ne signifie rien est du bruit, et huit couleurs
+   de bruit rendent la page illisible.
+
+   Trois teintes, et chacune a un sens tenu partout :
+     BLEU   — le contenu, la navigation, l'information ;
+     VERT   — ce qui est acquis, validé, gratuit ;
+     ORANGE — l'action payante, et elle seule.
+   C'est le système des sept plateformes analysées, sans exception. */
+#VISITOR#VISITOR#VISITOR :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico,
+  .vinfo-ic, .acc-pill .ic, .acc-news-ic, .lx-statcard-ico){
+  background:var(--lws-tint-sky) !important;
+  color:var(--lws-blue) !important;
+}
+#VISITOR#VISITOR#VISITOR :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico,
+  .vinfo-ic, .acc-pill .ic, .acc-news-ic, .lx-statcard-ico) svg{
+  stroke:var(--lws-blue) !important;
+  fill:none !important;
+}
+/* Les deux exceptions PORTEUSES DE SENS. */
+#VISITOR#VISITOR#VISITOR :is(.ic-ok, .lws-chip--green) { background:var(--lws-ok-clair,#E4F4E9) !important; }
+#VISITOR#VISITOR#VISITOR :is(.ic-ok, .lws-chip--green) svg{ stroke:var(--lws-ok,#0B7A33) !important; }
+#VISITOR#VISITOR#VISITOR :is(.ic-action, .lws-chip--orange){ background:#FFEADD !important; }
+#VISITOR#VISITOR#VISITOR :is(.ic-action, .lws-chip--orange) svg{ stroke:var(--lws-action-cta) !important; }
+/* La coche d'avantage garde son vert : c'est le sens « acquis ». */
+#VISITOR#VISITOR#VISITOR :is(.acc-plan-av, .acc-ess-list) li > svg{
+  stroke:var(--lws-ok,#0B7A33) !important;
+}
+
+/* ─── 30.4 · MOUVEMENT ───────────────────────────
+   Trois gestes étagés : la carte monte, sa vignette bascule d'un degré, la
+   flèche avance. Rien d'autre que `transform` et `opacity`. */
+#VISITOR#VISITOR :is(.vcard, .acc-ess-c, .acc-role, .acc-porte, .acc-plan,
+  .vbook-card, .lws-tile, .lws-path){
+  transition:transform .26s cubic-bezier(.16,1,.3,1),
+             box-shadow .26s ease, border-color .18s ease !important;
+}
+#VISITOR#VISITOR#VISITOR :is(.vcard, .acc-ess-c, .acc-role, .acc-porte,
+  .acc-plan, .vbook-card, .lws-tile, .lws-path):hover{
+  transform:translateY(-6px) !important;
+}
+#VISITOR#VISITOR :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){
+  transition:transform .24s cubic-bezier(.34,1.56,.64,1) !important;
+}
+#VISITOR#VISITOR :is(.vcard, .acc-ess-c, .acc-role, .acc-porte, .lws-path,
+  .lws-tile):hover :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico){
+  transform:translateY(-3px) rotate(-4deg) scale(1.07) !important;
+}
+@keyframes lwsEntree{
+  from{ opacity:0; transform:translateY(20px) scale(.985); }
+  to  { opacity:1; transform:none; }
+}
+#VISITOR#VISITOR .v-reveal.visible,
+#VISITOR#VISITOR .v-reveal.is-visible{
+  animation:lwsEntree .55s cubic-bezier(.16,1,.3,1) both !important;
+}
+#VISITOR#VISITOR#VISITOR :is(.btn, .vnav-cnx, .acc-plan-cta, .acc-news-cta,
+  .lws-btn2, .acc-rech-btn, .lws-level):hover{ transform:translateY(-2px) !important; }
+#VISITOR#VISITOR#VISITOR :is(.btn, .vnav-cnx, .acc-plan-cta, .acc-news-cta,
+  .lws-btn2, .acc-rech-btn, .lws-level):active{ transform:translateY(0) scale(.97) !important; }
+
+/* Le réglage système reste souverain — y compris sur cette section. */
+@media (prefers-reduced-motion: reduce){
+  #VISITOR#VISITOR#VISITOR *,
+  #VISITOR#VISITOR#VISITOR *::before,
+  #VISITOR#VISITOR#VISITOR *::after{
+    animation:none !important; transition:none !important; transform:none !important;
+  }
+}
+
+/* ─── 30.5 · ADAPTATIF ───────────────────────────
+   Le plancher NE BAISSE PAS sur téléphone : c'est là qu'on lit le plus
+   mal. Seuls les titres se resserrent. */
+@media (max-width:820px){
+  #VISITOR#VISITOR#VISITOR :is(h1, .vhero-title, .vsec-title-hero){ font-size:31px !important; }
+  #VISITOR#VISITOR#VISITOR :is(h2, .vsec-title, .acc-head .acc-pill){ font-size:26px !important; }
+  #VISITOR#VISITOR#VISITOR h3{ font-size:20px !important; }
+}
+
+/* ─── 30.6 · LES DEUX DERNIÈRES SOURCES DE BRUIT ──────────────────────
+   Mesure après la passe 30.1-30.5 : 58 blocs encore sous 13,5px et 18
+   teintes saturées. Le relevé nomme les coupables, et ce ne sont pas ceux
+   qu'on croyait.
+
+   a) LE PANNEAU DE NAVIGATION code ses rubriques en SIX couleurs — teal,
+      violet, or, cyan, rose, ambre — sur les intitulés `.vmenu-t` et les
+      tracés SVG. À elles seules elles font douze des dix-huit teintes de
+      la page. Or ces couleurs ne signifient rien : « Apprendre » n'est pas
+      plus violet que « Communauté ». Elles reviennent au bleu, et le
+      panneau redevient une liste qu'on lit au lieu d'un nuancier.
+
+   b) LES PUCES DE RECHERCHE (« Ville cruelle », « BEPC maths ») sortent à
+      12px. Ce sont des boutons : on les vise du doigt et on les lit d'un
+      œil. 14px est le plancher pour tout ce qui est cliquable. */
+#VISITOR#VISITOR#VISITOR :is(.vmenu-t, .vmenu-col button b, .vmenu-hd-t){
+  color:var(--lws-navy) !important;
+}
+#VISITOR#VISITOR#VISITOR .vmenu-t{ color:var(--lws-text2) !important; }
+#VISITOR#VISITOR#VISITOR :is(.vmenu-col button svg, .vmenu-hi-c svg, .vmenu-search svg){
+  stroke:var(--lws-blue) !important;
+  color:var(--lws-blue) !important;
+  fill:none !important;
+}
+#VISITOR#VISITOR#VISITOR .vmenu-col button small{ color:var(--lws-text) !important; }
+
+/* Plancher pour tout ce qui se clique. */
+#VISITOR#VISITOR#VISITOR :is(button, a, .acc-rech-sugg button, .acc-lien-sec,
+  .lws-promo-cta, .vmenu-col button, .vmenu-t){
+  font-size:14px;
+}
+#VISITOR#VISITOR#VISITOR :is(.acc-rech-sugg button, .acc-rech-sugg span,
+  .acc-lien-sec, .lws-promo-cta){
+  font-size:14.5px !important;
+}
+
+/* ─── 30.7 · LE BANDEAU D'ANNONCE ────────────────────────────────────
+   Mesuré après la passe : son texte ressortait en #1E499B sur son propre
+   fond #1E499B — bleu sur bleu, écart de luminance 0,00. Invisible.
+   La cause : le bandeau porte des <a>/<button>, et la règle générique des
+   liens (§2, `#VISITOR a{color:var(--lws-blue)}`) les avait rattrapés une
+   fois les couleurs de composant retirées par les passes de dépouillement.
+   Sur un fond plein, l'encre est blanche — sans discussion. */
+#VISITOR#VISITOR#VISITOR .lws-promo,
+#VISITOR#VISITOR#VISITOR .lws-promo *{
+  color:#fff !important;
+}
+#VISITOR#VISITOR#VISITOR .lws-promo-cta{
+  color:#fff !important;
+  border:1px solid rgba(255,255,255,.55) !important;
+  background:transparent !important;
+}
+#VISITOR#VISITOR#VISITOR .lws-promo-cta:hover{
+  background:#fff !important;
+  color:var(--lws-blue) !important;
+}
+/* Même garde-fou pour la bande utilitaire, qui a la même structure. */
+#VISITOR#VISITOR#VISITOR .lws-utility,
+#VISITOR#VISITOR#VISITOR .lws-utility *{ color:#fff !important; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   31 · ICÔNES BICOLORES · MOTS EN COULEUR · PLEINE LARGEUR
+   ────────────────────────────────────────────────────────────────────────
+   Les deux captures du modèle montrent trois choses qui nous manquaient.
+
+   1. SES ICÔNES SONT DES ILLUSTRATIONS BICOLORES, posées nues sur le blanc,
+      à ~60px, avec la légende en bleu gras dessous. Aucune pastille, aucun
+      cadre. Nous avions des tracés d'1,5px enfermés dans un carré pâle.
+
+      Nos 91 symboles sont des tracés `lucide` : monochromes, sans
+      remplissage. On ne peut pas les redessiner un par un — mais on peut
+      les REMPLIR. Un tracé fermé rempli de la teinte claire et contourné
+      de la teinte saturée donne exactement le rendu à deux tons du modèle,
+      sans toucher au dessin. C'est la seule voie qui tienne à 91 symboles.
+
+   2. DANS SES PHRASES, LES MOTS QUI COMPTENT SONT ORANGE : « Installation
+      WordPress en 1 clic », « Sauvegardes automatiques », « Migration
+      gratuite ». Le reste est navy. L'œil attrape l'argument sans lire la
+      ligne entière. C'est la demande « alterne les couleurs de police ».
+
+   3. LA LÉGENDE EST EN BLEU, PAS EN GRIS, et en 600.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 31.1 · LES PICTOGRAMMES DEVIENNENT BICOLORES ──────────────────── */
+#VISITOR#VISITOR#VISITOR :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico, .vinfo-ic){
+  background:none !important;      /* plus de pastille : l'illustration est nue */
+  border:0 !important;
+  width:auto !important; height:auto !important;
+  padding:0 !important;
+  margin:0 auto 14px !important;
+  display:flex !important; align-items:center; justify-content:center;
+}
+#VISITOR#VISITOR#VISITOR :is(.acc-ess-ic, .acc-role-ic, .lws-chip, .ct-ico, .vinfo-ic) svg{
+  width:58px !important; height:58px !important;
+  /* Le remplissage clair + le contour saturé : les deux tons du modèle. */
+  fill:var(--lws-tint-sky) !important;
+  stroke:var(--lws-blue) !important;
+  stroke-width:1.6 !important;
+  stroke-linecap:round !important; stroke-linejoin:round !important;
+  overflow:visible;
+  transition:transform .26s cubic-bezier(.34,1.56,.64,1) !important;
+}
+/* Les deux exceptions porteuses de sens gardent leur famille. */
+#VISITOR#VISITOR#VISITOR :is(.ic-ok, .lws-chip--green) svg{
+  fill:#E4F4E9 !important; stroke:var(--lws-ok,#0B7A33) !important;
+}
+#VISITOR#VISITOR#VISITOR :is(.ic-action, .lws-chip--orange) svg{
+  fill:#FFEADD !important; stroke:var(--lws-action-cta) !important;
+}
+/* L'en-tête de section garde sa pastille : là, l'icône accompagne un
+   titre, elle ne le remplace pas. */
+#VISITOR#VISITOR#VISITOR .acc-pill .ic{
+  background:var(--lws-tint-sky) !important;
+  width:52px !important; height:52px !important;
+  border-radius:15px !important; margin:0 !important;
+}
+#VISITOR#VISITOR#VISITOR .acc-pill-ico{
+  width:27px !important; height:27px !important;
+  fill:none !important; stroke:var(--lws-blue) !important; stroke-width:2.2 !important;
+}
+/* Au survol, l'illustration respire. */
+#VISITOR#VISITOR#VISITOR :is(.acc-ess-c, .acc-role, .vcard, .lws-tile):hover
+  :is(.acc-ess-ic, .acc-role-ic, .lws-chip) svg{
+  transform:translateY(-4px) scale(1.09) !important;
+}
+
+/* ─── 31.2 · LA LÉGENDE EN BLEU, CENTRÉE ────────────────────────────── */
+#VISITOR#VISITOR#VISITOR .acc-ess-c{
+  text-align:center !important;
+  background:none !important; border:0 !important; box-shadow:none !important;
+  padding:16px 12px !important;
+}
+#VISITOR#VISITOR#VISITOR .acc-ess-t{
+  color:var(--lws-blue) !important;
+  font-size:17px !important; font-weight:600 !important;
+  line-height:1.35 !important;
+}
+#VISITOR#VISITOR#VISITOR .acc-ess-d{
+  color:var(--lws-text) !important;
+  font-size:15.5px !important; line-height:1.6 !important;
+}
+
+/* ─── 31.3 · LES MOTS QUI COMPTENT SONT ORANGE ──────────────────────
+   Dans une phrase d'avantage, le terme mis en gras par le rédacteur est
+   l'argument. Le modèle le passe en orange ; nous faisions du gras navy,
+   qui se confond avec le reste de la ligne. */
+#VISITOR#VISITOR#VISITOR :is(.acc-plan-av li b, .acc-plan-av li strong,
+  .acc-ess-d b, .acc-ess-d strong, .lws-checks b, .acc-promesse-tx b,
+  .av-qte, .hl){
+  color:var(--lws-action-cta) !important;
+  font-weight:600 !important;
+}
+/* Le qualificatif de fin recule d'un cran : trois niveaux dans la ligne. */
+#VISITOR#VISITOR#VISITOR .av-sec{ color:var(--lws-text2) !important; font-weight:400 !important; }
+
+/* ─── 31.4 · LA GRILLE OCCUPE LA PAGE ───────────────────────────────── */
+#VISITOR#VISITOR#VISITOR .acc-ess{
+  display:grid !important;
+  grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)) !important;
+  gap:34px 20px !important;
+  align-items:start !important;
+}
+@media (max-width:820px){
+  #VISITOR#VISITOR#VISITOR .acc-ess{ grid-template-columns:repeat(2, 1fr) !important; gap:26px 12px !important; }
+  #VISITOR#VISITOR#VISITOR :is(.acc-ess-ic, .acc-role-ic, .lws-chip) svg{ width:48px !important; height:48px !important; }
+  #VISITOR#VISITOR#VISITOR .acc-ess-t{ font-size:15.5px !important; }
+  #VISITOR#VISITOR#VISITOR .acc-ess-d{ font-size:14.5px !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   32 · PANNEAUX D'ABONNEMENT — LE GABARIT DES MAQUETTES
+   ────────────────────────────────────────────────────────────────────────
+   Reprise EXACTE du modèle fourni (BASIC / STANDARD / PREMIUM) :
+     bandeau plein de couleur, nom en capitales blanches ;
+     médaillon de prix rond, à cheval sur la limite bandeau/corps,
+       cerclé de blanc ;
+     « PAR AN » en petites capitales sous le montant ;
+     lignes d'avantages ALTERNÉES (blanc / gris très clair), coche ronde
+       pleine en tête ;
+     bouton pilule pleine largeur, dans la couleur du plan.
+
+   ⚠️ Cette section ANNULE volontairement la version plate du §23. Ce
+   n'est pas une hésitation : le §23 avait été écrit après un « trop
+   sombre et surchargé », et il répondait à ce reproche-là. La demande est
+   maintenant explicite et l'emporte. Ce qui a été retenu de l'épisode
+   précédent : les quatre couleurs restent des versions PROFONDES, assez
+   sombres pour porter du blanc à 4,5:1.
+
+   Le balisage produit par `_accOffre()` reste PLAT (cinq frères) : le
+   bandeau est reconstitué en donnant le même fond aux deux premiers, qui
+   se touchent. Aucun changement de rendu, donc aucun risque sur les
+   données d'abonnement.
+   ════════════════════════════════════════════════════════════════════════ */
+
+#VISITOR#VISITOR#VISITOR .acc-plans{
+  display:grid !important;
+  grid-template-columns:repeat(auto-fit, minmax(262px, 1fr)) !important;
+  gap:24px !important;
+  align-items:stretch !important;
+  background:transparent !important;
+}
+
+#VISITOR#VISITOR#VISITOR .acc-plan{
+  --plan:#1E499B;
+  display:flex !important; flex-direction:column !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  background:#fff !important;
+  border:1px solid var(--lws-line) !important;
+  border-radius:16px !important;
+  text-align:center !important;
+  box-shadow:0 1px 2px rgba(16,24,40,.04), 0 14px 34px -14px rgba(16,24,40,.18) !important;
+}
+
+/* ── Bandeau ── */
+#VISITOR#VISITOR#VISITOR .acc-plan-pour{
+  background:var(--plan) !important; color:#fff !important;
+  margin:0 !important; padding:22px 18px 0 !important;
+  font-size:13px !important; font-weight:600 !important;
+  letter-spacing:1.1px !important; text-transform:uppercase !important;
+  opacity:.9;
+}
+#VISITOR#VISITOR#VISITOR .acc-plan-nom{
+  background:var(--plan) !important; color:#fff !important;
+  margin:0 !important;
+  padding:6px 18px 52px !important;   /* la réserve accueille le médaillon */
+  font-size:27px !important; line-height:1.2 !important;
+  font-weight:700 !important; letter-spacing:.5px !important;
+  text-transform:uppercase !important;
+}
+
+/* ── Médaillon de prix, à cheval ── */
+#VISITOR#VISITOR#VISITOR .acc-plan-prix{
+  position:relative; z-index:2;
+  width:132px !important; height:132px !important;
+  margin:-66px auto 0 !important;
+  display:flex !important; flex-direction:column !important;
+  align-items:center !important; justify-content:center !important;
+  border-radius:50% !important;
+  background:var(--plan) !important;
+  color:#fff !important;
+  border:8px solid #fff !important;
+  font-size:27px !important; line-height:1.1 !important;
+  font-weight:700 !important;
+}
+#VISITOR#VISITOR#VISITOR .acc-plan-prix small{
+  display:block;
+  font-size:11px !important; font-weight:600 !important;
+  letter-spacing:1.2px !important; text-transform:uppercase !important;
+  color:rgba(255,255,255,.9) !important;
+  margin-top:4px !important;
+}
+
+/* ── Avantages : lignes alternées, coche ronde pleine ── */
+#VISITOR#VISITOR#VISITOR .acc-plan-av{
+  margin:18px 0 0 !important; padding:0 !important;
+  flex:1; text-align:left; border:0 !important;
+}
+#VISITOR#VISITOR#VISITOR .acc-plan-av li{
+  display:flex !important; align-items:flex-start !important; gap:11px !important;
+  margin:0 !important;
+  padding:11px 20px !important;
+  border:0 !important;
+  font-size:15.5px !important; line-height:1.5 !important;
+  color:#2E3752 !important;
+}
+#VISITOR#VISITOR#VISITOR .acc-plan-av li:nth-child(odd){ background:#F7F9FC !important; }
+#VISITOR#VISITOR#VISITOR .acc-plan-av li > svg{
+  flex:0 0 auto !important;
+  width:19px !important; height:19px !important;
+  margin-top:2px !important;
+  padding:3.5px !important;
+  border-radius:50% !important;
+  background:#0B7A33 !important;
+  stroke:#fff !important; fill:none !important;
+  stroke-width:3.6 !important;
+  box-sizing:border-box !important;
+}
+/* Avantage NON inclus : disque rouge. La classe vient du rendu — on ne
+   fabrique pas une exclusion absente des données. */
+#VISITOR#VISITOR#VISITOR .acc-plan-av li.off > svg{ background:#C0392B !important; }
+#VISITOR#VISITOR#VISITOR .acc-plan-av li.off{ color:#98A0B0 !important; }
+
+/* ── Bouton pilule ── */
+#VISITOR#VISITOR#VISITOR .acc-plan .acc-plan-cta{
+  display:flex !important; align-items:center !important; justify-content:center !important;
+  gap:9px !important;
+  margin:20px 20px 22px !important;
+  padding:14px 22px !important;
+  border-radius:999px !important;
+  background:var(--plan) !important;
+  border:0 !important; color:#fff !important;
+  font-size:15px !important; font-weight:700 !important;
+  letter-spacing:.9px !important; text-transform:uppercase !important;
+  box-shadow:none !important;
+}
+#VISITOR#VISITOR#VISITOR .acc-plan:hover .acc-plan-cta{ filter:brightness(1.12); }
+#VISITOR#VISITOR#VISITOR .acc-plan-fl{
+  width:17px; height:17px; fill:none; stroke:currentColor; stroke-width:2.4;
+  stroke-linecap:round; stroke-linejoin:round;
+  transition:transform .18s cubic-bezier(.16,1,.3,1);
+}
+#VISITOR#VISITOR#VISITOR .acc-plan:hover .acc-plan-fl{ transform:translateX(4px); }
+
+/* ── Une couleur par plan. Versions PROFONDES : le blanc doit tenir
+      4,5:1 dessus, ce que les teintes vives des maquettes ne donnent pas. ── */
+#VISITOR#VISITOR#VISITOR .acc-plan:nth-child(1){ --plan:#1E499B; }  /* bleu   */
+#VISITOR#VISITOR#VISITOR .acc-plan:nth-child(2){ --plan:#C24E00; }  /* orange */
+#VISITOR#VISITOR#VISITOR .acc-plan:nth-child(3){ --plan:#00701C; }  /* vert   */
+#VISITOR#VISITOR#VISITOR .acc-plan:nth-child(4){ --plan:#4C3F96; }  /* violet */
+
+#VISITOR#VISITOR#VISITOR .acc-plan:hover{
+  transform:translateY(-6px) !important;
+  border-color:var(--plan) !important;
+}
+
+@media (max-width:820px){
+  #VISITOR#VISITOR#VISITOR .acc-plans{ grid-template-columns:1fr !important; gap:18px !important; }
+  #VISITOR#VISITOR#VISITOR .acc-plan-nom{ font-size:24px !important; padding-bottom:46px !important; }
+  #VISITOR#VISITOR#VISITOR .acc-plan-prix{
+    width:118px !important; height:118px !important;
+    margin-top:-59px !important; font-size:24px !important;
+  }
+}
