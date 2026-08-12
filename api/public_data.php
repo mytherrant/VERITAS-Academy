@@ -71,6 +71,107 @@ if (!$db) {
     exit;
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// CATALOGUE E-LEARNING — la VITRINE, jamais la marchandise (v1.19.1)
+// ─────────────────────────────────────────────────────────────────────────
+// Jusqu'ici cet endpoint n'exposait que les PLANS : un visiteur non inscrit
+// voyait donc les prix d'abonnement sans jamais voir ce qu'ils ouvrent. Le
+// mur d'essais n'avait rien à garder sur la page publique — il gardait une
+// étagère vide.
+//
+// On expose donc les fiches, en LISTE BLANCHE stricte. Ce qui ne sort JAMAIS
+// d'ici, quelle que soit la fiche :
+//   htmlContent / fichierData / fichier / idbKey → c'est le contenu lui-même ;
+//   blockedFor / unlockedFor                     → ce sont des identifiants de
+//                                                   comptes, donc des données
+//                                                   personnelles.
+// Une liste blanche (et non une liste noire) parce qu'un champ ajouté demain
+// à une fiche doit être invisible par défaut, pas exposé par oubli.
+//
+// externalUrl et resPedago ouvrent réellement le contenu : ils ne partent que
+// pour la (ou les) ressource(s) OFFERTE(S), calculées ici avec la même règle
+// que le navigateur — l'admin la fixe dans « Essais & abonnements ».
+
+/** Ressources qui restent réellement gratuites. Miroir de _pwLibreIds(). */
+function vrt_pd_offertes(array $contenus, $paywall) {
+    $cl = (is_array($paywall) && isset($paywall['catalogueLibre']) && is_array($paywall['catalogueLibre']))
+        ? $paywall['catalogueLibre'] : [];
+    $actif   = (is_array($paywall) && array_key_exists('actif', $paywall)) ? (bool)$paywall['actif'] : true;
+    $limiter = array_key_exists('limiter', $cl) ? (bool)$cl['limiter'] : true;
+    $max     = array_key_exists('max', $cl) ? max(0, (int)$cl['max']) : 1;
+    $ids     = (isset($cl['ids']) && is_array($cl['ids'])) ? array_values($cl['ids']) : [];
+
+    // Paywall coupé ou limitation levée → toutes les fiches « gratuit » le restent
+    if (!$actif || !$limiter) {
+        $out = [];
+        foreach ($contenus as $c) { if (!empty($c['gratuit']) && isset($c['id'])) $out[] = (string)$c['id']; }
+        return $out;
+    }
+    if (count($ids) > 0) return array_map('strval', $ids);   // choix explicite de l'admin
+    $out = [];
+    foreach ($contenus as $c) {
+        if (count($out) >= $max) break;
+        if (!empty($c['gratuit']) && isset($c['id'])) $out[] = (string)$c['id'];
+    }
+    return $out;
+}
+
+/** Troncature sûre : mbstring n'est pas garanti, et une fatale ici viderait
+ *  TOUTE la réponse publique (école, ticker, partenaires compris). */
+function vrt_pd_coupe($s, $n) {
+    $s = (string)$s;
+    return function_exists('mb_substr') ? mb_substr($s, 0, $n) : substr($s, 0, $n);
+}
+
+/** Extension du fichier, sans jamais divulguer son nom ni son chemin. */
+function vrt_pd_filetype(array $c) {
+    if (!empty($c['fileType'])) return preg_replace('/[^a-z0-9]/i', '', (string)$c['fileType']);
+    if (!empty($c['htmlContent'])) return 'html';
+    $f = isset($c['fichier']) ? (string)$c['fichier'] : '';
+    if ($f === '') return '';
+    $ext = strtolower((string)pathinfo($f, PATHINFO_EXTENSION));
+    return preg_replace('/[^a-z0-9]/', '', $ext);
+}
+
+$__pd_contenus_src = (isset($db['elearning']['contenus']) && is_array($db['elearning']['contenus']))
+    ? $db['elearning']['contenus'] : [];
+$__pd_supprimes = (isset($db['deletedDefaults']) && is_array($db['deletedDefaults'])) ? $db['deletedDefaults'] : [];
+$__pd_paywall   = (isset($db['paywall']) && is_array($db['paywall'])) ? $db['paywall'] : null;
+$__pd_offertes  = vrt_pd_offertes($__pd_contenus_src, $__pd_paywall);
+
+$__pd_contenus = [];
+foreach ($__pd_contenus_src as $c) {
+    if (!is_array($c) || !isset($c['id'])) continue;
+    $id = (string)$c['id'];
+    if (in_array($id, $__pd_supprimes, true)) continue;      // retiré par l'admin
+    if (count($__pd_contenus) >= 400) break;                  // garde-fou de poids
+
+    $offerte = in_array($id, $__pd_offertes, true);
+    $row = [
+        'id'      => $id,
+        'cat'     => isset($c['cat'])     ? (string)$c['cat']     : '',
+        'titre'   => isset($c['titre'])   ? (string)$c['titre']   : '',
+        'classe'  => isset($c['classe'])  ? (string)$c['classe']  : '',
+        'matiere' => isset($c['matiere']) ? (string)$c['matiere'] : '',
+        'seq'     => isset($c['seq'])     ? (string)$c['seq']     : '',
+        'prix'    => isset($c['prix'])    ? (int)$c['prix']       : 0,
+        'gratuit' => !empty($c['gratuit']),
+        'plans'   => (isset($c['plans']) && is_array($c['plans'])) ? array_values($c['plans']) : [],
+        // Accroches : volontairement tronquées, la carte n'en montre pas plus
+        'apercu'  => isset($c['apercu']) ? vrt_pd_coupe($c['apercu'], 240) : '',
+        'desc'    => isset($c['desc'])   ? vrt_pd_coupe($c['desc'], 240) : '',
+    ];
+    if (!empty($c['ico'])) $row['ico'] = vrt_pd_coupe($c['ico'], 8);
+    $ft = vrt_pd_filetype($c);
+    if ($ft !== '') $row['fileType'] = $ft;
+    // Les deux clés qui ouvrent VRAIMENT : réservées à la ressource offerte.
+    if ($offerte) {
+        if (!empty($c['externalUrl'])) $row['externalUrl'] = (string)$c['externalUrl'];
+        if (!empty($c['resPedago']))   $row['resPedago']   = (string)$c['resPedago'];
+    }
+    $__pd_contenus[] = $row;
+}
+
 // Extraire uniquement les données publiques (pas de notes, élèves, paiements, etc.)
 $public = [
     'school'      => $db['school']      ?? null,
@@ -79,6 +180,13 @@ $public = [
     'tickerItems' => $db['tickerItems'] ?? [],
     'calendrier'  => $db['calendrier']  ?? [],
     'elearning_plans' => isset($db['elearning']['plans']) ? $db['elearning']['plans'] : [],
+    'elearning_categories' => (isset($db['elearning']['categories']) && is_array($db['elearning']['categories']))
+        ? $db['elearning']['categories'] : [],
+    'elearning_contenus' => $__pd_contenus,
+    // Politique d'affichage (essais, ressource offerte) : que des nombres, des
+    // booléens et des identifiants de fiches. Elle part telle quelle pour que
+    // la vitrine obéisse au panneau admin, et non à des valeurs codées en dur.
+    'paywall' => $__pd_paywall,
     'generated_at' => date('c'),
 ];
 

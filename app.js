@@ -4208,6 +4208,28 @@ function _fetchPublicData(){
       }
     }
 
+    /* ── Catalogue e-learning public (v1.19.1) ─────────────────────────────
+       Le visiteur non inscrit voyait les prix d'abonnement sans jamais voir ce
+       qu'ils ouvrent : public_data.php n'exposait que les plans, donc la page
+       affichait une étagère vide et le mur d'essais ne gardait rien.
+       Les fiches arrivent maintenant en liste blanche (aucun contenu, aucun
+       identifiant de compte) — de quoi dessiner les cartes et leurs cadenas.
+       On n'écrase JAMAIS la base d'un admin : la sienne fait foi. */
+    if(!isAdmin){
+      if(data.elearning_categories&&data.elearning_categories.length>0){
+        if(!DB.elearning)DB.elearning={plans:[],categories:[],contenus:[],abonnements:[],commandes:[]};
+        DB.elearning.categories=data.elearning_categories;changed=true;
+      }
+      if(data.elearning_contenus&&data.elearning_contenus.length>0){
+        if(!DB.elearning)DB.elearning={plans:[],categories:[],contenus:[],abonnements:[],commandes:[]};
+        DB.elearning.contenus=data.elearning_contenus;changed=true;
+      }
+      // Politique d'essais : c'est le panneau admin qui commande la vitrine,
+      // sinon le visiteur tomberait sur les valeurs par défaut du code et la
+      // ressource offerte ne serait pas celle que Jacques a choisie.
+      if(data.paywall&&typeof data.paywall==='object'){ DB.paywall=data.paywall;changed=true; }
+    }
+
     // ── Ré-initialiser les éléments visuels dynamiques pour les visiteurs ───
     if(!isAdmin&&changed){
       // Ticker : re-lancer toujours (les nouveaux items du serveur doivent s'afficher)
@@ -5286,7 +5308,10 @@ function vShowSec(sec,btn){
       h+='    <div class="vplan-price-unit">/ an scolaire</div>';
       h+=    (nbRessources>0?'<div class="vplan-resources">📚 '+nbRessources+' ressources incluses</div>':'');
       h+='    <div class="vplan-feats">';
-      plan.avantages.forEach(function(av){
+      // Un plan créé sans avantages faisait tomber TOUTE la section e-learning
+      // (plans, catalogue et quiz) sur un TypeError — page blanche pour le
+      // visiteur, alors qu'il ne manquait qu'une liste à puces.
+      (plan.avantages||[]).forEach(function(av){
         h+='      <div class="vplan-feat">'+_esc(av).replace(/^[✅✓☑️\s]+/,'')+'</div>';
       });
       h+='    </div>';
