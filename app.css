@@ -8112,3 +8112,39 @@ body.vmenu-lock{overflow:hidden}
 .vnav-brand-tx{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vnav-brand-tx small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .vnav-actions{flex:0 0 auto}
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   ÉCRAN DE CONNEXION — aide et inscription (v1.18)
+   « Créer un compte » vivait dans #lFormArea, que swLR() réécrit à
+   chaque bascule d'onglet : il disparaissait dès qu'on choisissait
+   « Élève » ou « Enseignant ». Ces blocs-ci sont statiques.
+   ═══════════════════════════════════════════════════════════════════ */
+#LS .l-aide{
+  display:none; margin:12px 0 0; padding:11px 13px;
+  background:var(--blb,#EEF3FC); border:1px solid var(--bld,#D5E0F5);
+  border-radius:var(--r,10px);
+  font-size:12.5px; line-height:1.6; color:var(--ink2,#3D4663);
+}
+#LS .l-aide b{ font-weight:700; color:var(--ink1,#142554); }
+#LS .l-rejoindre{
+  margin-top:16px; padding-top:15px; border-top:1px solid var(--bg2,#E4E7EF);
+}
+#LS .l-rejoindre-t{
+  font-size:12px; font-weight:700; color:var(--ink3,#5A6480);
+  text-align:center; margin-bottom:10px;
+}
+#LS .l-rejoindre-b{ display:grid; gap:7px; }
+#LS .l-rj{
+  display:block; width:100%; text-align:left; cursor:pointer;
+  padding:10px 13px; border-radius:var(--r,10px);
+  background:var(--sur,#fff); border:1px solid var(--bg3,#D9DEEA);
+  font-family:inherit; transition:border-color .15s,background .15s;
+}
+#LS .l-rj:hover{ border-color:var(--bl,#1E499B); background:var(--blb,#EEF3FC); }
+#LS .l-rj b{
+  display:block; font-size:13px; font-weight:700; color:var(--ink1,#142554);
+}
+#LS .l-rj small{
+  display:block; font-size:11.5px; color:var(--ink4,#7A8299); margin-top:1px;
+}

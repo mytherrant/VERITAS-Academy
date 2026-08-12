@@ -687,15 +687,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.18.2">
+<link rel="preload" as="script" href="/app.js?v=1.18.3">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.18.2" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.18.2"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.18.3" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.18.3"></noscript>
 <!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
      app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
 <link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.16.2" onload="this.onload=null;this.rel='stylesheet'">
@@ -709,14 +709,14 @@ if('MutationObserver' in window){
      (halos, dégradés de titre, cartes qui décollent).
      ⚠️ ORDRE CRITIQUE : doit rester le DERNIER <link> CSS de la page.
      Chargée en preload+bascule comme les autres → aucun blocage du rendu. -->
-<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.18.2" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.18.2"></noscript>
+<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.18.3" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.18.3"></noscript>
 <!-- Compagnon indispensable de la feuille ci-dessus : elle éteint TOUS les
      dégradés, y compris ceux que le JS de rendu pose en style en ligne —
      lesquels se retrouveraient alors sans aucun fond (texte blanc sur
      blanc). Ce script relit leur première couleur et la repose en aplat.
      `defer` : rien à faire avant que le DOM existe. -->
-<script src="/assets/theme-lws.js?v=1.18.2" defer></script>
+<script src="/assets/theme-lws.js?v=1.18.3" defer></script>
 
 <!-- ════════ v1.15.9 — THÈME CLAIR / SOMBRE ════════
      Ce script est INLINE et SYNCHRONE, tout en haut : il doit poser
@@ -910,6 +910,14 @@ if('MutationObserver' in window){
     <symbol id="lc-cloud" viewBox="0 0 24 24"><path d="M17.5 19a4.5 4.5 0 1 0 0-9h-1.8A7 7 0 1 0 4 16.7"/><path d="M4 19h13.5"/></symbol>
     <symbol id="lc-ticket" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></symbol>
     <symbol id="lc-trending" viewBox="0 0 24 24"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></symbol>
+    <!-- Flèches. Le sprite n'en comptait AUCUNE : partout où il en fallait une,
+         le rendu écrivait le caractère « → ». Un caractère suit la graisse et
+         la police du texte, ne s'aligne pas sur la ligne de base des libellés
+         de bouton, et se dessine différemment selon la plateforme. Ces deux
+         symboles se comportent comme les 88 autres : taille, épaisseur et
+         couleur pilotées par le CSS. -->
+    <symbol id="lc-arrow-right" viewBox="0 0 24 24"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></symbol>
+    <symbol id="lc-chevron-right" viewBox="0 0 24 24"><polyline points="9 5 16 12 9 19"/></symbol>
     <symbol id="lc-flag" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></symbol>
     <symbol id="lc-droplet" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
     <symbol id="lc-moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></symbol>
@@ -1303,7 +1311,13 @@ setTimeout(_vAmbassaFab,3000);
   </div>
 
   <div class="vnav-actions">
-    <button class="vnav-cnx" onclick="_portailAller('eleve')" aria-label="Se connecter à mon espace">
+    <!-- v1.18 : appelait _portailAller('eleve'). Sans session, cette fonction
+         montre volontairement le HUB DE CONTENU « pour-eleve » plutôt qu'un mur
+         de connexion — c'est le bon geste pour la carte « Je suis élève » de
+         l'accueil, mais pas pour un bouton qui dit « Connexion » : celui qui le
+         clique a déjà un compte et veut le formulaire, pas une page de vente.
+         Il n'atteignait donc JAMAIS l'écran de connexion. -->
+    <button class="vnav-cnx" onclick="_ouvrirConnexion()" aria-label="Se connecter à mon espace">
       <svg viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-user"/></svg>
       <span>Connexion</span>
     </button>
@@ -1451,6 +1465,28 @@ setTimeout(_vAmbassaFab,3000);
         </div>
       </div>
       <button class="lbtn" id="lBtn" onclick="doLogin()">Accéder au portail →</button>
+
+      <!-- ═══ AIDE ET INSCRIPTION — HORS de #lFormArea (v1.18) ═══════════════
+           swLR() réécrit lFormArea.innerHTML à chaque changement d'onglet.
+           « Créer un compte gratuit » vivait DEDANS, dans le bloc Visiteur :
+           il disparaissait donc dès qu'on cliquait « Élève » ou « Enseignant »,
+           et l'écran de connexion n'offrait plus aucun moyen de s'inscrire.
+           Un enseignant ou un partenaire n'avait, lui, aucune piste du tout.
+           Ce bloc est statique : il survit aux bascules d'onglet, et swLR()
+           n'en met à jour que le texte d'aide (#lAide), selon le rôle. -->
+      <div id="lAide" class="l-aide"></div>
+      <div class="l-rejoindre">
+        <div class="l-rejoindre-t">Pas encore de compte ?</div>
+        <div class="l-rejoindre-b">
+          <button class="l-rj" onclick="showRegisterForm('')">
+            <b>Élève ou parent</b><small>Compte gratuit, immédiat</small></button>
+          <button class="l-rj" onclick="goToVisitor();setTimeout(function(){vShowSec('pour-enseignant',null);},80)">
+            <b>Enseignant</b><small>Rejoindre le réseau VÉRITAS</small></button>
+          <button class="l-rj" onclick="goToVisitor();setTimeout(function(){vShowSec('partenariat',null);},80)">
+            <b>Partenaire</b><small>Inspecteur, librairie, sponsor…</small></button>
+        </div>
+      </div>
+
       <button class="lback" onclick="goToVisitor()" id="lBackBtn">← Retour au portail public</button>
       <!-- Accès admin : Ctrl+Shift+L / Ctrl+Shift+U (PC) · 3×/5× taps sur "Connexion" (mobile) -->
     </div>
@@ -1502,7 +1538,7 @@ setTimeout(_vAmbassaFab,3000);
    restaient en cache après déploiement. Repli sur la valeur figée si le
    sélecteur ne trouve rien. */
 window._VRT_ASSET_VER=(function(){try{var e=document.querySelector('link[href*="app.js?v="],script[src*="app.js?v="]');var m=e&&String(e.href||e.src||'').match(/app\.js\?v=([0-9.]+)/);return m?m[1]:'1.15.9';}catch(x){return '1.15.9';}})();</script>
-<script defer src="/app.js?v=1.18.2"></script>
+<script defer src="/app.js?v=1.18.3"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->

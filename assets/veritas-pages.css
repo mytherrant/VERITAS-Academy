@@ -1461,8 +1461,20 @@ article ol:not([class])>li::marker{
   /* La palette du modèle */
   --lws-blue:#1E499B; --lws-blue-deep:#0C2A6A; --lws-blue-light:#3B6FCB;
   --lws-navy-txt:#001136; --lws-cyan:#0098FF;
-  --lws-orange:#FF6500; --lws-orange-txt:#C24E00; --lws-orange-dark:#A34100;
-  --lws-orange-sh:0 5px 15px rgba(242,165,32,.5);
+  /* ── LA COULEUR D'ACTION : L'OR ──────────────────────────────────
+     Le modèle utilise un orange vif. Repris tel quel il virait au
+     rouge-orangé, étranger à VÉRITAS, et écrasait la page sur les grands
+     aplats. On garde la mécanique — UNE couleur d'action, réservée aux
+     boutons d'achat et d'inscription — et on y met l'or de la maison.
+     Bénéfice mesurable : sur or, le texte est navy (11,4:1) là où le blanc
+     sur orange plafonnait à 3,1:1, sous le seuil AA.
+     RÈGLE : toute surface qui prend --lws-action en fond DOIT prendre
+     --lws-action-txt en encre. */
+  --lws-action:#FFC93C; --lws-action-dark:#F0B71E; --lws-action-txt:#001136;
+  --lws-action-sh:0 5px 15px rgba(242,165,32,.45);
+  /* Alias : le bloc ci-dessous a été écrit avec les noms « orange ». */
+  --lws-orange:var(--lws-action); --lws-orange-txt:var(--lws-action);
+  --lws-orange-dark:var(--lws-action-dark); --lws-orange-sh:var(--lws-action-sh);
   --lws-grey:#F4F5F8; --lws-line:#E4E7EF;
   --lws-tint-sky:#DBE8FE; --lws-tint-blue:#E5EFF7;
   --lws-tint-green:#E5F5E8; --lws-tint-beige:#F5F2E9;
@@ -1583,14 +1595,21 @@ nav.seqnav a[aria-current]{
 }
 .cta a:hover{ background:var(--lws-blue-deep); transform:translateY(-1px); }
 .cta a small{ color:rgba(255,255,255,.82); font-weight:400; }
+/* Surfaces d'action : or en fond, navy en encre — jamais blanc. */
 .cta a.primaire, .cta a.achat, .gate button, .tools button.principal{
-  background:var(--lws-orange-txt) !important; color:#fff !important;
+  background:var(--lws-action) !important;
+  color:var(--lws-action-txt) !important;
   border:0 !important; border-radius:var(--rad) !important;
-  box-shadow:var(--lws-orange-sh) !important;
+  box-shadow:var(--lws-action-sh) !important;
   font-weight:600;
 }
-.cta a.primaire:hover, .cta a.achat:hover, .gate button:hover{
-  background:var(--lws-orange-dark) !important;
+.cta a.primaire *, .cta a.achat *, .gate button *, .tools button.principal *{
+  color:var(--lws-action-txt) !important;
+  stroke:var(--lws-action-txt) !important;
+}
+.cta a.primaire:hover, .cta a.achat:hover, .gate button:hover,
+.tools button.principal:hover{
+  background:var(--lws-action-dark) !important;
 }
 .tools button{
   border-radius:var(--rad); border:1px solid var(--lws-line);
@@ -1678,8 +1697,33 @@ input:focus-visible, select:focus-visible, [tabindex]:focus-visible{
   }
 }
 
+/* ─── 13 bis · PLAFOND DE GRAISSE ────────────────────────────────────
+   Mesure sur /corriges/ : 26 éléments encore en 700/800/900, et un
+   `h2.sec` à 800 alors que la règle générique le voulait à 600. La cause
+   n'est pas la spécificité mais l'ORDRE : plusieurs pages ouvrent un
+   <style> APRÈS ce fichier, et leurs règles gagnent à égalité.
+   `!important` tranche — une déclaration importante l'emporte sur une
+   déclaration normale quelle que soit sa spécificité ou sa position.
+   400 par défaut, 500 pour l'appui, 600 pour les titres. Rien au-dessus :
+   c'est ce plafond, plus que la palette, qui distingue une page tenue
+   d'une page criarde. */
+body, body p, body li, body td, body span, body div, body small, body a{
+  font-weight:400 !important;
+}
+h1, h2, h3, h4, h5, h6, b, strong, summary, th, legend, dt,
+h2.sec, h3.sub, .card h3, .pill, .cta a, .tools button,
+header.top h1, header.top .badge, .lx-stat-pct{
+  font-weight:600 !important;
+}
+nav.seqnav a, .card a.dl, .obj b, .rub{ font-weight:500 !important; }
+/* Les tailles de titre subissaient le même écrasement. */
+h2.sec{ font-size:30px !important; line-height:40px !important; }
+h3.sub{ font-size:20px !important; line-height:30px !important; }
+
 /* ─── 14 · ADAPTATIF ─────────────────────────────────────────────── */
 @media (max-width:820px){
+  h2.sec{ font-size:22px !important; line-height:31px !important; }
+  h3.sub{ font-size:18px !important; line-height:27px !important; }
   body{ font-size:15px; }
   h1, header.top h1{ font-size:26px; line-height:35px; }
   h2, h2.sec{ font-size:22px; line-height:31px; margin-top:32px; }

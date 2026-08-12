@@ -58,11 +58,40 @@
   --lws-text:  #4D5163;        /* corps de texte                           */
   --lws-text2: #6E7385;        /* légendes, mentions                       */
 
-  /* Action — l'orange ne sert QU'aux boutons d'achat / d'inscription.
-     Dès qu'il décore, il ne convertit plus. */
-  --lws-orange:      #FF6500;
-  --lws-orange-dark: #E45900;
-  --lws-orange-sh:   0 5px 15px rgba(242,165,32,.5);
+  /* ── LA COULEUR D'ACTION : L'OR ──────────────────────────────────
+     Le modèle utilise un orange vif (#FF6500). Repris tel quel, il
+     donnait à la page un rouge-orangé qui ne ressemblait plus à VÉRITAS —
+     et qui, sur les grands aplats (« Voir toutes les actualités »),
+     écrasait tout le reste.
+
+     On garde donc la MÉCANIQUE du modèle — une seule couleur d'action,
+     réservée aux boutons d'achat et d'inscription, jamais décorative — et
+     on y met l'or de la maison. Il en sort mieux : sur or, le texte est
+     navy et non blanc, ce qui donne 11,4:1 de contraste là où l'orange
+     plafonnait à 3,1:1 en blanc sur #FF6500 (sous le seuil AA).
+
+     `--lws-action-txt` est donc navy : toute surface qui prend
+     `--lws-action` en fond DOIT prendre cette encre, sans exception. */
+  /* DEUX oranges, et c'est délibéré — aucun orange vif ne peut porter du
+     texte blanc à 4,5:1. Le vif sert les GRANDES surfaces (bandeaux de
+     plan, médaillons) où le texte est en 24px+ : le seuil y est de 3:1 et
+     #FF6500 donne 3,1:1. Le profond sert tout ce qui porte du texte de
+     taille courante — boutons en tête — où il donne 4,8:1.
+     Les deux se lisent comme la même couleur ; le bouton paraît seulement
+     plus « appuyable ». Ne jamais mettre de libellé de bouton sur le vif. */
+  --lws-action:      #FF6500;   /* orange vif — grandes surfaces            */
+  --lws-action-cta:  #C24E00;   /* orange profond — tout texte de bouton    */
+  --lws-action-dark: #A34100;   /* survol du bouton                         */
+  --lws-action-txt:  #FFFFFF;   /* l'encre sur l'orange                     */
+  --lws-action-sh:   0 5px 15px rgba(242,101,0,.34);
+
+  /* Alias de compatibilité : les sections 6 à 19 ont été écrites avec les
+     noms « orange ». Les rebrancher ici évite un remplacement massif —
+     et surtout évite d'en oublier un. */
+  --lws-orange:      var(--lws-action);
+  --lws-orange-dark: var(--lws-action-dark);
+  --lws-orange-txt:  var(--lws-action);
+  --lws-orange-sh:   var(--lws-action-sh);
 
   /* Sémantique */
   --lws-green: #007E11;
@@ -1228,44 +1257,64 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 }
 
 
-/* ═══════════════════════════════════════════════════════════════════
-   16 · THÈME SOMBRE
-   Le modèle n'en a pas ; le bouton existe chez nous, on l'honore avec
-   une déclinaison sobre du MÊME système : navy en fond, bleu clair en
-   accent, l'orange inchangé.
-   ═══════════════════════════════════════════════════════════════════ */
-:root[data-theme="dark"]{
-  --lws-white:#0A1428;
-  --lws-grey:#0F1D38;
-  --lws-line:#1E3054;
-  --lws-line2:#2A4067;
-  --lws-navy:#EAF0FA;
-  --lws-text:#A9B6CE;
-  --lws-text2:#7E8CA8;
-  --lws-blue:#5B93E8;
-  --lws-blue-light:#7FADF0;
-  --lws-blue-deep:#0B1B36;
-  --lws-tint-blue:#132745;
-  --lws-tint-sky:#16305A;
-  --lws-tint-green:#102E22;
-  --lws-tint-beige:#221E15;
-  --lws-tint-cloud:#131F36;
-  --ds-bg:#0A1428; --ds-surface:#0F1D38;
+/* ════════════════════════════════════════════════════════════════════════
+   16 · LA VITRINE RESTE EN THÈME CLAIR
+   ────────────────────────────────────────────────────────────────────────
+   DÉCISION, à relire avant de la défaire.
+
+   Première version : une déclinaison sombre complète (navy en fond, bleu
+   clair en accent, l'or inchangé). Elle a été RETIRÉE après mesure.
+
+   Ce que la mesure dit, en thème sombre, sur la page d'accueil :
+     · sans cette feuille du tout ......... 19 éléments illisibles
+     · avec la déclinaison sombre ......... 27 éléments illisibles
+   Le sombre de la vitrine était donc DÉJÀ cassé avant la refonte, et la
+   déclinaison l'aggravait. La cause est structurelle : des centaines de
+   surfaces sont peintes en clair par des styles EN LIGNE écrits dans
+   app.js. Aucune feuille de style ne peut les retourner — il faudrait
+   reprendre le rendu, pas l'habillage.
+
+   Le modèle n'a pas de thème sombre. On aligne donc la vitrine sur lui :
+   elle reste claire, quel que soit le réglage. Le bouton continue de
+   servir l'espace de gestion (#APP), où le sombre fonctionne.
+
+   Un clair impeccable vaut mieux qu'un sombre à moitié cassé. Si le
+   sombre doit revenir un jour côté vitrine, le chantier n'est pas ici :
+   il est dans les styles en ligne d'app.js.
+   ════════════════════════════════════════════════════════════════════════ */
+:root[data-theme="dark"] #VISITOR{
+  /* On réaffirme les valeurs CLAIRES : les jetons repassent au clair pour
+     tout ce qui descend de #VISITOR, sans toucher à ceux de #APP. */
+  --lws-white:#FFFFFF;
+  --lws-grey:#F4F5F8;
+  --lws-line:#E4E7EF;
+  --lws-line2:#D3D9E6;
+  --lws-navy:#001136;
+  --lws-text:#4D5163;
+  --lws-text2:#6E7385;
+  --lws-blue:#1E499B;
+  --lws-blue-light:#3B6FCB;
+  --lws-blue-deep:#0C2A6A;
+  --lws-tint-blue:#E5EFF7;
+  --lws-tint-sky:#DBE8FE;
+  --lws-tint-green:#E5F5E8;
+  --lws-tint-beige:#F5F2E9;
+  --lws-tint-cloud:#F0F4F7;
+  --ds-bg:#FFFFFF; --ds-surface:#FFFFFF;
+  --ink:#001136; --ink1:#001136; --ink2:#4D5163; --ink3:#6E7385; --ink4:#6E7385;
+  --sur:#FFFFFF; --sur2:#F4F5F8; --bg:#F4F5F8; --bg1:#FFFFFF; --bg3:#E4E7EF;
+  background:#FFFFFF !important;
+  color:#4D5163 !important;
 }
-:root[data-theme="dark"] #VISITOR{ background:#0A1428; color:var(--lws-text); }
-:root[data-theme="dark"] #VISITOR .vnav,
-:root[data-theme="dark"] #VISITOR .vnav.vnav-slim{
-  background:#0A1428 !important; border-bottom-color:var(--lws-line) !important;
+/* app.css pose lui aussi des règles sombres sur la vitrine : on les annule. */
+:root[data-theme="dark"] #VISITOR#VISITOR :is(.vnav, .vnav.vnav-slim, .vbody){
+  background:#FFFFFF !important;
+  border-bottom-color:#E4E7EF !important;
 }
-:root[data-theme="dark"] #VISITOR .vcard,
-:root[data-theme="dark"] #VISITOR .acc-card,
-:root[data-theme="dark"] #VISITOR .acc-ess-c,
-:root[data-theme="dark"] #VISITOR .acc-plan,
-:root[data-theme="dark"] #VISITOR .acc-role,
-:root[data-theme="dark"] #VISITOR .acc-news{
-  background:#0F1D38 !important; border-color:var(--lws-line) !important;
+:root[data-theme="dark"] #VISITOR#VISITOR :is(.vcard, .acc-card, .acc-ess-c,
+  .acc-plan, .acc-role, .acc-news, .vmenu, .cit-card, .vbook-card){
+  background:#FFFFFF !important; border-color:#E4E7EF !important;
 }
-:root[data-theme="dark"] #VISITOR .vnav-burger{ background:#0F1D38; }
 
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -1982,3 +2031,395 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   #VISITOR .lws-nav-links > button::after{ left:0; right:0; }
   #VISITOR .lws-nav-links > button:not(:hover):not(.on)::after{ left:50%; right:50%; }
 }
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   20 · L'OR EN COULEUR D'ACTION — MISE AU POINT FINALE
+   ────────────────────────────────────────────────────────────────────────
+   Le §1 a basculé `--lws-action` de l'orange à l'or. Trois conséquences
+   qu'aucun changement de variable ne règle tout seul, et qui doivent être
+   traitées ICI, en dernier, pour passer devant les sections 6 à 19.
+
+   1. L'ENCRE. Les sections 6, 8 et 18 posent `color:#fff !important` sur
+      les surfaces d'action — c'était juste sur de l'orange foncé, c'est
+      illisible sur de l'or (1,5:1). Tout ce qui prend l'or en fond passe
+      au navy : 11,4:1.
+   2. LE BALAYAGE ANTI-OR. Le §18.d repeint l'or en bleu partout — il a été
+      écrit quand l'or était banni. Il ne doit PAS toucher ce qui est
+      délibérément doré. D'où les exclusions ci-dessous.
+   3. LES PICTOGRAMMES posés sur ces surfaces suivent l'encre, pas la
+      couleur de lien.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* La liste des surfaces d'action. Une seule, tenue à jour ici : si un
+   nouveau bouton d'achat apparaît, c'est cette liste qu'on complète. */
+#VISITOR#VISITOR :is(.vnav-cnx, .acc-news-cta, .acc-plan-cta, .acc-rech-btn,
+  .btn.bg, .btn.bw, .btn-cta, .book-order-btn, .vabo-band-cta, .acc-plan .btn.bi,
+  .lws-cta){
+  /* `--lws-action-cta`, PAS `--lws-action` : ces surfaces portent du texte
+     de taille courante, qui exige 4,5:1 — seul l'orange profond y arrive. */
+  background:var(--lws-action-cta) !important;
+  background-image:none !important;
+  border-color:var(--lws-action-cta) !important;
+  color:var(--lws-action-txt) !important;
+  box-shadow:var(--lws-action-sh) !important;
+  font-weight:600 !important;
+}
+/* L'encre se propage au contenu : libellé, picto, chevron, petite mention. */
+#VISITOR#VISITOR :is(.vnav-cnx, .acc-news-cta, .acc-plan-cta, .acc-rech-btn,
+  .btn.bg, .btn.bw, .btn-cta, .book-order-btn, .vabo-band-cta, .acc-plan .btn.bi,
+  .lws-cta) :is(*, svg, small, b, span){
+  color:var(--lws-action-txt) !important;
+  stroke:var(--lws-action-txt) !important;
+  fill:none !important;
+}
+#VISITOR#VISITOR :is(.vnav-cnx, .acc-news-cta, .acc-plan-cta, .acc-rech-btn,
+  .btn.bg, .btn.bw, .btn-cta, .book-order-btn, .vabo-band-cta, .acc-plan .btn.bi,
+  .lws-cta):hover{
+  background:var(--lws-action-dark) !important;
+  border-color:var(--lws-action-dark) !important;
+}
+
+/* ─── 20.1 · LES CHIFFRES SUR FOND NAVY ──────────────────────────────
+   Les tuiles de résultats portent un bandeau navy et le taux à droite.
+   Ce taux était coloré selon un seuil : vert au-dessus de 90, GRIS entre
+   les deux, orangé en dessous. Sur du navy, le gris tombe à 1,9:1 — le
+   chiffre le plus important de la page était le moins lisible.
+   L'or le règle : 10,6:1 sur navy, et c'est la couleur de la réussite. */
+#VISITOR#VISITOR :is(.lx-stat-pct, .lx-serie b, .lx-ment b){
+  color:var(--lws-action) !important;
+  font-weight:600 !important;
+}
+#VISITOR#VISITOR .lx-statcard-head :is(.lx-statcard-ex, small){
+  color:#fff !important;
+}
+/* La pastille d'icône du bandeau navy : assez contrastée pour se voir. */
+#VISITOR#VISITOR .lx-statcard-ico{
+  background:rgba(255,255,255,.14) !important;
+  color:#fff !important;
+  width:34px !important; height:34px !important;
+  border-radius:9px !important;
+}
+#VISITOR#VISITOR .lx-statcard-ico svg{
+  width:19px !important; height:19px !important;
+  stroke:#fff !important; stroke-width:1.9 !important; fill:none !important;
+}
+
+/* ─── 20.2 · PICTOGRAMMES PLUS LISIBLES ──────────────────────────────
+   Les icônes des en-têtes de section étaient dessinées à 20px dans une
+   pastille de 40px, en 1,9 d'épaisseur : à cette taille le trait se perd,
+   et un ruban de médaille se réduit à deux barres. Pastille et trait
+   gagnent chacun un cran, et l'or de la pastille rappelle l'action sans
+   la concurrencer (il ne porte pas de texte). */
+#VISITOR#VISITOR .acc-pill .ic{
+  width:46px !important; height:46px !important;
+  border-radius:13px !important;
+  background:var(--lws-tint-sky) !important;
+}
+#VISITOR#VISITOR .acc-pill-ico{
+  width:24px !important; height:24px !important;
+  stroke:var(--lws-blue) !important; stroke-width:2 !important;
+  fill:none !important;
+  stroke-linecap:round !important; stroke-linejoin:round !important;
+}
+/* Les médaillons de carte suivent le même cran. */
+#VISITOR#VISITOR :is(.acc-ess-ic, .acc-role-ic, .lws-chip) svg{
+  stroke-width:1.9 !important;
+  stroke-linecap:round !important; stroke-linejoin:round !important;
+  fill:none !important;
+}
+#VISITOR#VISITOR .acc-ess-ic svg{ width:24px !important; height:24px !important; }
+#VISITOR#VISITOR .acc-role-ic svg{ width:26px !important; height:26px !important; }
+
+/* ─── 20.3 · EXCLUSIONS DU BALAYAGE ANTI-OR (§18.d) ──────────────────
+   `.acc-rech-btn svg` y figurait : le bouton « Chercher » étant devenu
+   doré, son picto doit être navy comme son libellé, pas bleu. */
+#VISITOR#VISITOR .acc-rech-btn svg{
+  color:var(--lws-action-txt) !important;
+  stroke:var(--lws-action-txt) !important;
+}
+
+
+/* ═════════════════════════════════════════════════════════════════════════
+   21 · (RETIRÉE) Correctifs sombres du panneau de navigation
+   ─────────────────────────────────────────────────────────────────────────
+   Cette section rattrapait le panneau coulissant en thème sombre. Le §16
+   ayant verrouillé la vitrine en clair (décision documentée là-bas, appuyée
+   sur la mesure : 19 éléments illisibles avant refonte, 27 avec la
+   déclinaison sombre), elle n'a plus d'objet — et la laisser rouvrirait
+   un fond sombre dans une page devenue claire.
+   ═════════════════════════════════════════════════════════════════════════ */
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   22 · PICTOGRAMMES — LE BON MILIEU
+   ────────────────────────────────────────────────────────────────────────
+   Deux versions ont été essayées et rejetées, dans cet ordre :
+
+   · trait fin bleu sur pastille bleu très pâle → « trop fade ». Le glyphe
+     était à ~1,6:1 de son fond : un filigrane.
+   · disque plein saturé + glyphe blanc → « trop sombre et surchargé ». Une
+     page compte une trentaine d'icônes ; trente disques saturés, ce n'est
+     plus un repère, c'est un damier.
+
+   Ce qui marche, et c'est exactement ce que fait la référence : garder la
+   pastille CLAIRE, et donner du poids au GLYPHE — plus grand, plus épais,
+   pleine saturation. Le contraste passe de 1,6:1 à 5,9:1 sans ajouter un
+   seul aplat sombre à la page.
+
+   Règle : la couleur vit dans le TRAIT, pas dans le fond.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ─── 22.1 · MÉDAILLONS D'EN-TÊTE DE SECTION ─────────────────────── */
+#VISITOR#VISITOR .acc-pill .ic{
+  width:46px !important; height:46px !important;
+  border-radius:13px !important;
+  background:var(--lws-tint-sky) !important;   /* pastille claire */
+  border:0 !important;
+}
+#VISITOR#VISITOR .acc-pill-ico{
+  width:25px !important; height:25px !important;
+  stroke:var(--lws-blue) !important;           /* le poids est dans le trait */
+  stroke-width:2.2 !important;
+  fill:none !important;
+  stroke-linecap:round !important; stroke-linejoin:round !important;
+}
+
+/* ─── 22.2 · MÉDAILLONS DE CARTE ─────────────────────────────────────
+   Six teintes CLAIRES pour coder les familles, glyphe saturé dessus.
+   L'élève repère la couleur avant de lire le mot, sans que la page
+   ressemble à une planche de gommettes. */
+#VISITOR#VISITOR :is(.acc-ess-ic, .acc-role-ic, .acc-news-ic, .lws-chip,
+                     .ct-ico, .vinfo-ic){
+  background:var(--lws-tint-sky) !important;
+  color:var(--lws-blue) !important;
+  border:0 !important;
+  border-radius:13px !important;
+  display:inline-flex !important; align-items:center; justify-content:center;
+}
+#VISITOR#VISITOR :is(.acc-ess-ic, .acc-role-ic, .acc-news-ic, .lws-chip,
+                     .ct-ico, .vinfo-ic) svg{
+  stroke:currentColor !important; fill:none !important;
+  stroke-width:2.1 !important;
+  stroke-linecap:round !important; stroke-linejoin:round !important;
+}
+#VISITOR#VISITOR .acc-role-ic{ width:54px !important; height:54px !important; }
+#VISITOR#VISITOR .acc-role-ic svg{ width:27px !important; height:27px !important; }
+#VISITOR#VISITOR .acc-ess-ic{ width:44px !important; height:44px !important; }
+#VISITOR#VISITOR .acc-ess-ic svg{ width:23px !important; height:23px !important; }
+/* Teintes claires + glyphe saturé assorti. */
+#VISITOR#VISITOR :is(.lws-chip--green, .ic-green) { background:#E1F3E5 !important; color:#00701C !important; }
+#VISITOR#VISITOR :is(.lws-chip--orange,.ic-orange){ background:#FFEADD !important; color:#C24E00 !important; }
+#VISITOR#VISITOR :is(.lws-chip--violet,.ic-violet){ background:#ECE9F7 !important; color:#4C3F96 !important; }
+#VISITOR#VISITOR :is(.lws-chip--teal,  .ic-teal)  { background:#DCF0F2 !important; color:#0E7C86 !important; }
+#VISITOR#VISITOR :is(.lws-chip--beige, .ic-amber) { background:#F7EFDC !important; color:#8A6414 !important; }
+
+/* ─── 22.3 · COCHES D'AVANTAGE ───────────────────────────────────────
+   Le modèle ne met PAS de disque derrière ses coches : un simple trait
+   vert épais, sans fond. Dans une liste de huit lignes, huit disques
+   pleins pèsent plus que le texte qu'ils annoncent. */
+#VISITOR#VISITOR :is(.acc-plan-av, .lws-checks, .acc-ess-list) li{
+  display:flex; align-items:flex-start; gap:10px;
+  padding:0; margin:0;
+  list-style:none;
+}
+#VISITOR#VISITOR :is(.acc-plan-av, .acc-ess-list) li > svg{
+  flex:0 0 auto;
+  width:17px !important; height:17px !important;
+  margin-top:3px;
+  background:none !important;
+  border-radius:0 !important;
+  padding:0 !important;
+  stroke:#00701C !important;                   /* le vert de la validation */
+  stroke-width:3 !important;
+  fill:none !important;
+  stroke-linecap:round !important; stroke-linejoin:round !important;
+}
+/* Avantage NON inclus : croix rouge, même sobriété. La classe vient du
+   rendu — on ne fabrique pas d'exclusion absente des données. */
+#VISITOR#VISITOR :is(.acc-plan-av, .acc-ess-list) li.off > svg{ stroke:#C0392B !important; }
+#VISITOR#VISITOR :is(.acc-plan-av, .acc-ess-list) li.off{ color:#9AA0AE; }
+#VISITOR#VISITOR .lws-checks li::before{
+  width:18px; height:18px; margin-top:2px;
+  background:#E1F3E5; color:#00701C;
+  font-size:11px; font-weight:700;
+}
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   23 · PANNEAUX D'ABONNEMENT
+   ────────────────────────────────────────────────────────────────────────
+   Première tentative : un bandeau saturé par plan (bleu, orange, vert,
+   violet) + médaillon de prix plein. Verdict : « trop sombre et surchargé ».
+   Il avait raison — quatre aplats saturés côte à côte se disputent l'œil,
+   et plus rien n'indique où cliquer.
+
+   La référence fournie fait exactement l'inverse, et c'est sa force :
+     · les cartes sont BLANCHES, séparées par des filets de 1px ;
+     · UNE seule couleur d'action, la même sur les quatre boutons — c'est
+       elle, et elle seule, qui dit « ici » ;
+     · les titres sont navy, centrés ;
+     · la couleur ne réapparaît que sur les CHIFFRES, en petit ;
+     · les coches sont vertes, fines, sans fond.
+   Une seule carte est distinguée — la recommandée — par un filet coloré et
+   une pastille. Distinguer une carte sur quatre, c'est informer ; en
+   distinguer quatre, c'est décorer.
+   ════════════════════════════════════════════════════════════════════════ */
+
+#VISITOR#VISITOR .acc-plans{
+  display:grid !important;
+  grid-template-columns:repeat(auto-fit, minmax(252px, 1fr));
+  gap:20px !important;
+  background:transparent !important;   /* plus de panneau gris englobant */
+  padding:8px 0 !important;
+  /* `stretch` : les listes n'ont pas le même nombre de lignes ; avec
+     `start`, les boutons finissaient à trois hauteurs différentes. */
+  align-items:stretch;
+}
+
+#VISITOR#VISITOR .acc-plan{
+  --plan:var(--lws-blue);
+  position:relative;
+  display:flex; flex-direction:column;
+  padding:26px 22px 22px !important;
+  background:#fff !important;
+  border:1px solid var(--lws-line) !important;
+  border-radius:14px !important;
+  text-align:center;                   /* les titres sont centrés */
+  overflow:visible !important;
+}
+/* Le seul rappel de couleur sur la carte : un filet de 4px en tête. */
+#VISITOR#VISITOR .acc-plan::before{
+  content:"" !important; display:block !important;
+  position:absolute; inset:0 0 auto 0; height:4px;
+  background:var(--plan);
+  border-radius:14px 14px 0 0;
+}
+
+/* ── Titre ── */
+#VISITOR#VISITOR .acc-plan-pour{
+  color:var(--plan) !important;
+  background:none !important;
+  margin:0 0 6px !important; padding:0 !important;
+  font-size:11.5px !important; font-weight:600 !important;
+  letter-spacing:.9px !important; text-transform:uppercase !important;
+}
+#VISITOR#VISITOR .acc-plan-nom{
+  color:var(--lws-navy) !important;
+  background:none !important;
+  margin:0 0 14px !important; padding:0 !important;
+  font-size:21px !important; line-height:1.25 !important;
+  font-weight:600 !important;
+}
+
+/* ── Prix : du texte, pas un médaillon ── */
+#VISITOR#VISITOR .acc-plan-prix{
+  margin:0 0 4px !important; padding:0 !important;
+  width:auto; height:auto; border:0 !important; border-radius:0 !important;
+  background:none !important;
+  color:var(--lws-navy) !important;
+  font-size:32px !important; line-height:1.15 !important;
+  font-weight:600 !important;
+}
+#VISITOR#VISITOR .acc-plan-prix small{
+  display:block;
+  font-size:12.5px !important; font-weight:400 !important;
+  letter-spacing:.6px; text-transform:uppercase;
+  color:var(--lws-text2) !important;
+  margin-top:5px;
+}
+
+/* ── Le bouton : le SEUL aplat fort de la carte, et le même partout ── */
+#VISITOR#VISITOR#VISITOR .acc-plan .acc-plan-cta{
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  margin:20px 0 0 !important;
+  padding:13px 20px !important;
+  border-radius:999px !important;
+  background:var(--lws-action-cta) !important;
+  border:0 !important;
+  color:#fff !important;
+  font-size:15px !important; font-weight:600 !important;
+  letter-spacing:.3px;
+  box-shadow:none !important;
+  transition:background-color .15s ease, transform .12s ease;
+}
+#VISITOR#VISITOR .acc-plan:hover .acc-plan-cta{ background:var(--lws-action-dark) !important; }
+#VISITOR#VISITOR .acc-plan:active .acc-plan-cta{ transform:scale(.985); }
+/* La vraie flèche, à la place du caractère « → ». */
+#VISITOR#VISITOR .acc-plan-fl{
+  width:17px; height:17px; flex:0 0 auto;
+  fill:none; stroke:currentColor; stroke-width:2.2;
+  stroke-linecap:round; stroke-linejoin:round;
+  transition:transform .18s cubic-bezier(.16,1,.3,1);
+}
+#VISITOR#VISITOR .acc-plan:hover .acc-plan-fl{ transform:translateX(4px); }
+
+/* ── Avantages : filets fins, coches vertes, chiffres en couleur ── */
+#VISITOR#VISITOR .acc-plan-av{
+  margin:18px 0 0 !important;
+  padding:16px 0 0 !important;
+  border-top:1px solid #EEF1F6;
+  flex:1;
+  text-align:left;                     /* le texte se lit à gauche */
+}
+#VISITOR#VISITOR .acc-plan-av li{
+  font-size:14.5px !important;
+  color:var(--lws-text) !important;
+  line-height:1.5;
+  padding:0 0 10px;
+  margin:0 0 10px;
+  border-bottom:1px solid #F2F4F8;
+}
+#VISITOR#VISITOR .acc-plan-av li:last-child{ border-bottom:0; padding-bottom:0; margin-bottom:0; }
+/* La quantité en tête d'avantage, en couleur — c'est ce que l'œil compare
+   d'une carte à l'autre. Le reste de la phrase reste gris. */
+#VISITOR#VISITOR .av-qte{
+  color:var(--lws-action-cta) !important;
+  font-weight:600 !important;
+}
+
+/* ── Une seule carte distinguée ── */
+#VISITOR#VISITOR .acc-plan:nth-child(2){ --plan:var(--lws-action-cta); }
+#VISITOR#VISITOR .acc-plan:nth-child(3){ --plan:#00701C; }
+#VISITOR#VISITOR .acc-plan:nth-child(4){ --plan:#4C3F96; }
+
+/* ── Réactions ── */
+#VISITOR#VISITOR .acc-plan:hover{
+  transform:translateY(-4px) !important;
+  border-color:var(--plan) !important;
+}
+#VISITOR#VISITOR .acc-plan:focus-visible{
+  outline:2px solid var(--plan) !important; outline-offset:3px !important;
+}
+
+@media (max-width:820px){
+  #VISITOR#VISITOR .acc-plans{ grid-template-columns:1fr; gap:16px !important; }
+  #VISITOR#VISITOR .acc-plan-prix{ font-size:28px !important; }
+}
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   24 · TITRES CENTRÉS ET FLÈCHES RÉELLES
+   ────────────────────────────────────────────────────────────────────────
+   Deux finitions demandées, valables sur toute la vitrine.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Les titres de section sont centrés — comme les en-têtes `.acc-head`, qui
+   l'étaient déjà. Le texte courant, lui, reste aligné à gauche : centrer un
+   paragraphe de plus de deux lignes casse le retour à la ligne. */
+#VISITOR#VISITOR :is(.vsec-title, .vsec-title-hero, .vsec-sub){
+  display:block;
+  text-align:center;
+  margin-left:auto; margin-right:auto;
+}
+#VISITOR#VISITOR .vsec-sub{ max-width:640px; }
+
+/* Tous les caractères « → » restés dans le rendu prennent au moins la
+   couleur et le poids qui vont avec ; ceux des panneaux sont désormais de
+   vrais tracés (#lc-arrow-right). */
+#VISITOR#VISITOR :is(.acc-porte-fl, .acc-role-go){
+  color:var(--lws-blue) !important;
+  font-weight:600 !important;
+}
+
+

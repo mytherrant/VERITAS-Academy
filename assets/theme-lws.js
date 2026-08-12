@@ -30,8 +30,11 @@
 
   var GRADIENT = /gradient\s*\(/i;
 
-  /* Or de l'ancienne charte. Reposer une de ces teintes telle quelle
-     réintroduirait par la fenêtre ce que la feuille a chassé par la porte.
+  /* Or de la maison. Il n'est plus banni — il est redevenu la couleur
+     d'ACTION (boutons d'achat et d'inscription). Cette liste ne sert donc
+     plus qu'à un cas : un dégradé DÉCORATIF dont la première couleur est
+     dorée. L'aplatir en or peindrait un pavé jaune là où il n'y a rien à
+     cliquer ; on lui substitue le bleu.
      ⚠️ Les DEUX écritures sont listées : `el.style.backgroundImage` renvoie
      la forme SÉRIALISÉE par le navigateur, où `#FFC93C` est déjà devenu
      `rgb(255, 201, 60)`. Un test uniquement hexadécimal ne voit rien. */
@@ -88,10 +91,14 @@
     var lFond = luminance(fondEffectif(el));
     if (lFond === null) return;
 
+    /* L'or n'est PLUS banni : il est redevenu la couleur d'action de la
+       maison (cf. §1 et §20 de theme-lws.css). On ne le remplace donc plus
+       par principe — seulement s'il échoue au contraste, comme n'importe
+       quelle autre teinte. Un or sur navy passe le test et reste doré ;
+       un or sur crème ne passe pas et bascule. */
     var aCorriger = ['color', 'fill', 'stroke'].filter(function (p) {
       var v = s[p] && String(s[p]).trim();
       if (!v || v === 'none') return false;
-      if (OR.test(v)) return true;
       var l = luminance(v);
       return l !== null && Math.abs(l - lFond) < ECART_MINI;
     });

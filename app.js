@@ -5720,6 +5720,27 @@ function showLogin(role){
   swLR(role);
 }
 
+/* Porte d'entrée du bouton « Connexion » de la barre (v1.18).
+   Distincte de _portailAller() : celle-ci montre d'abord le contenu gratuit du
+   rôle, ce qui est juste quand on clique « Je suis élève » depuis l'accueil,
+   mais absurde quand on clique un bouton marqué « Connexion ». Ici, on ouvre
+   le formulaire.
+   Onglet par défaut : « Élève », le public le plus nombreux. Les onglets
+   Élève / Enseignant restent visibles au-dessus — c'est par eux qu'un
+   enseignant bascule sur son propre formulaire. */
+function _ouvrirConnexion(){
+  try{
+    var actuel = (typeof _portailRoleActuel==='function') ? _portailRoleActuel() : '';
+    // Déjà connecté : « Connexion » doit ramener à SON espace, pas redemander
+    // un mot de passe déjà donné.
+    if(actuel){ _portailAller(actuel); return; }
+    showLogin('eleve');
+  }catch(e){
+    try{ showLogin('eleve'); }catch(_){}
+  }
+}
+window._ouvrirConnexion = _ouvrirConnexion;
+
 
 // ═══════════════════════════════════════════════
 // NOTIFICATIONS
@@ -9617,6 +9638,22 @@ function swLR(t){
     if(ls)ls.textContent=labels[t]||"Connexion";
     if(lfa)lfa.innerHTML=`<div class="lf"><label>Identifiant</label><input id="lu" placeholder="${placeholders[t]||'Identifiant'}" autocomplete="username"></div><div class="lf"><label>Mot de passe</label><div class="pw"><input id="lp" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"><button class="pwe" onclick="tp('lp',this)">👁</button></div></div>`;
     lb.textContent="Connexion →";lb.onclick=doLogin;
+  }
+  /* Texte d'aide propre au rôle, écrit HORS de lFormArea pour survivre aux
+     bascules d'onglet. Il répond à la question que l'écran laissait sans
+     réponse : « je n'ai pas d'identifiant, je fais quoi ? » — un enseignant
+     ne devine pas que son compte est délivré par le centre. */
+  var aide=$("lAide");
+  if(aide){
+    var A={
+      eleve:"Votre identifiant est votre <b>matricule</b>, remis par le centre à l'inscription. Perdu ? Écrivez-nous sur WhatsApp, il vous est renvoyé.",
+      enseignant:"Les comptes enseignants sont <b>ouverts par le centre</b>, ils ne se créent pas en ligne. Pas encore le vôtre ? Passez par « Enseignant » ci-dessous.",
+      admin:"Accès réservé à l'administration du centre.",
+      superadmin:"Accès réservé à la direction.",
+      visiteur:""
+    };
+    aide.innerHTML=A[t]||"";
+    aide.style.display=A[t]?"block":"none";
   }
   $("lerr").style.display="none";
 }
@@ -15342,11 +15379,18 @@ window._reussitesScroller = function(){
   var list=(typeof DB!=='undefined'&&DB.statsVitrine&&DB.statsVitrine.length)?DB.statsVitrine:[];
   if(!list.length) return '';
   var mLabels={ab:'Assez Bien',b:'Bien',tb:'Très Bien',exc:'Excellent'};
+  // Un pictogramme DISTINCT par examen. La version précédente donnait la
+  // même toque à BAC, Probatoire et Terminale : trois cartes côte à côte
+  // avec la même icône, l'œil ne s'en sert plus pour les distinguer.
+  // Ordre des tests significatif — « PROBATOIRE » contient « BAC » nulle
+  // part, mais « TLE » et « BAC » se recoupent dans les libellés saisis.
   var icoFor=function(ex){ ex=(ex||'').toUpperCase();
-    if(ex.indexOf('BAC')>=0||ex.indexOf('PROBA')>=0||ex.indexOf('TLE')>=0) return 'graduation';
-    if(ex.indexOf('GCE')>=0) return 'university';
-    if(ex.indexOf('BEPC')>=0) return 'book';
-    return 'award'; };
+    if(ex.indexOf('GCE')>=0) return 'university';      // examen anglophone
+    if(ex.indexOf('PROBA')>=0) return 'star';          // le palier avant le BAC
+    if(ex.indexOf('BAC')>=0||ex.indexOf('TLE')>=0) return 'graduation';
+    if(ex.indexOf('BEPC')>=0) return 'award';          // le premier diplôme
+    if(ex.indexOf('CAP')>=0) return 'tool';            // filières techniques
+    return 'target'; };
   var card=function(s){
     var series=(s.series||[]).map(function(se){ return '<div class="lx-serie"><b>'+(se.taux||0)+'%</b><span>'+_esc(se.nom||'')+'</span></div>'; }).join('');
     var m=s.mentions||{};
@@ -15363,7 +15407,11 @@ window._reussitesScroller = function(){
       +'</div></div>';
   };
   var cards=list.map(card).join('');
-  var head='<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-award"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Session 2025-2026 · BEPC · Probatoire · BAC</div></div>';
+  // Le médaillon (#lc-award) disait « récompense », pas « résultats », et son
+  // ruban à ce diamètre se réduisait à deux traits illisibles. La courbe
+  // ascendante (#lc-trending) dit exactement ce que la section montre : des
+  // taux, et leur progression.
+  var head='<div class="acc-head"><h2 class="acc-pill"><span class="ic"><svg class="acc-pill-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-trending"/></svg></span> Nos résultats officiels</h2><div class="acc-sub">Session 2025-2026 · BEPC · Probatoire · BAC</div></div>';
   var editBtn=(typeof iA==='function'&&iA())?'<div style="text-align:center;margin-top:8px"><button class="btn bo sm" onclick="mEditStatsVitrine()"><svg class="vico bico" aria-hidden="true"><use href="#lc-pencil"/></svg>Modifier les résultats</button></div>':'';
   // v1.17 — jusqu'à 4 examens : grille STATIQUE. Le défilement emportait le
   // chiffre que le parent est précisément en train de lire, et sur grand écran
@@ -43868,6 +43916,22 @@ window._temoignagesReelsHtml = _temoignagesReelsHtml;
    ce qu'apporte le paiement : aucun visiteur ne pouvait décider de s'abonner.
    Les plans viennent de DB.elearning.plans (réels, éditables en admin) — dont
    un plan ENSEIGNANT, qui donne enfin à ce public une raison de rester. */
+/* Met en couleur la QUANTITÉ en tête d'un avantage — « 200 Go d'espace »,
+   « 25 adresses », « 6 séquences ». C'est le procédé des grilles tarifaires
+   qui se lisent bien : l'œil balaie la colonne de chiffres avant de lire les
+   phrases, et compare les plans en un regard. Sans cela, huit lignes de gris
+   uniforme ne se comparent pas — c'est ce qui rendait nos panneaux fades.
+   Rien n'est inventé : on met en valeur ce que la donnée contient déjà, et
+   si l'avantage ne commence pas par un nombre, la ligne reste telle quelle.
+   `_esc()` est appliqué AVANT le découpage : aucune chaîne d'origine ne
+   traverse le balisage sans être échappée. */
+function _avQte(s){
+  var t = _esc(String(s||''));
+  var m = t.match(/^([\d   .,]*\d(?:\s?(?:Go|Mo|To|Ko|%|h|j|min))?)\s+(.+)$/i);
+  if(!m) return t;
+  return '<b class="av-qte">'+m[1]+'</b> '+m[2];
+}
+
 function _accOffre(){
   var plans = ((typeof DB!=='undefined' && DB.elearning && DB.elearning.plans) || [])
     .filter(function(p){ return p && p.actif !== false && Number(p.prix) > 0; });
@@ -43888,8 +43952,10 @@ function _accOffre(){
       +'<div class="acc-plan-nom">'+_esc(p.nom||'Abonnement')+'</div>'
       +'<div class="acc-plan-prix">'+fmt(Number(p.prix))+'<small> / '+_esc(p.duree||'an')+'</small></div>'
       +'<ul class="acc-plan-av">'+av.map(function(s){
-          return '<li>'+_ico('check',14)+'<span>'+_esc(s)+'</span></li>'; }).join('')+'</ul>'
-      +'<div class="acc-plan-cta">Voir ce plan →</div>'
+          return '<li>'+_ico('check',14)+'<span>'+_avQte(s)+'</span></li>'; }).join('')+'</ul>'
+      +'<div class="acc-plan-cta">Voir ce plan'
+        +'<svg class="acc-plan-fl" viewBox="0 0 24 24" aria-hidden="true"><use href="#lc-arrow-right"/></svg>'
+      +'</div>'
     +'</div>';
   }).join('');
 
