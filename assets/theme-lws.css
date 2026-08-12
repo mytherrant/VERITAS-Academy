@@ -2377,6 +2377,14 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   color:var(--lws-action-cta) !important;
   font-weight:600 !important;
 }
+/* Le qualificatif de fin de ligne — la portée, la précision entre
+   parenthèses — recule d'un cran. Trois niveaux de gris dans une liste,
+   c'est ce qui la rend comparable au lieu de la rendre uniforme. */
+#VISITOR#VISITOR .av-sec{
+  color:var(--lws-text2) !important;
+  font-weight:400 !important;
+}
+#VISITOR#VISITOR .acc-plan-av li{ color:#2E3752 !important; }
 
 /* ── Une seule carte distinguée ── */
 #VISITOR#VISITOR .acc-plan:nth-child(2){ --plan:var(--lws-action-cta); }
@@ -2531,3 +2539,68 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   stroke-linecap:round !important; stroke-linejoin:round !important;
   opacity:1 !important;
 }
+
+
+/* ═══════════════════════════════════════════════════════════════════
+   CORRECTIF — « background:none !important » du thème LWS (v1.18.5)
+
+   theme-lws.css applique « #VISITOR#VISITOR * { background:none !important } »
+   pour aplatir les dégradés hérités de l'ancienne charte. La règle est
+   volontaire, mais elle frappe AUSSI les blocs conçus après elle :
+   .pvr (panneau « Rejoindre l'équipe ») était dessiné en navy avec un
+   texte blanc — fond supprimé, il s'affichait en BLANC SUR BLANC,
+   contraste mesuré 1,00. Le panneau était invisible en production.
+
+   Plutôt que de rétablir le dégradé contre l'intention du thème, on
+   redessine ces blocs dans son langage : surface claire, texte navy,
+   orange d'action. Sélecteur à deux ID pour passer devant la règle
+   d'aplatissement, qui en compte deux + « * ».
+   ═══════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR .pvr{
+  background:var(--lws-tint-cloud,#F0F4F7) !important;
+  border:1px solid var(--lws-line,#E4E7EF);
+  border-left:4px solid var(--lws-orange,#FF6500);
+  border-radius:var(--lws-r,10px);
+  color:var(--lws-text,#4D5163);
+}
+#VISITOR#VISITOR .pvr .pvr-t{ color:var(--lws-navy,#001136); }
+#VISITOR#VISITOR .pvr .pvr-s,
+#VISITOR#VISITOR .pvr .pvr-av small,
+#VISITOR#VISITOR .pvr .pvr-prog,
+#VISITOR#VISITOR .pvr .pvr-note{ color:var(--lws-text,#4D5163); }
+#VISITOR#VISITOR .pvr .pvr-av b{ color:var(--lws-navy,#001136); }
+#VISITOR#VISITOR .pvr .pvr-av-ic{
+  background:#fff !important;
+  border:1px solid var(--lws-line,#E4E7EF);
+  color:var(--lws-orange-txt,#C24E00);
+}
+#VISITOR#VISITOR .pvr .pvr-prog,
+#VISITOR#VISITOR .pvr .pvr-note{
+  background:#fff !important;
+  border:1px solid var(--lws-line,#E4E7EF);
+}
+#VISITOR#VISITOR .pvr .pvr-prog b{ color:var(--lws-orange-txt,#C24E00); }
+#VISITOR#VISITOR .pvr .pvr-note b{ color:var(--lws-navy,#001136); }
+#VISITOR#VISITOR .pvr .pvr-note svg{ color:var(--lws-orange-txt,#C24E00); }
+#VISITOR#VISITOR .pvr .pvr-note-att{
+  background:#FFF8EE !important; border-color:#F2D9B4;
+}
+#VISITOR#VISITOR .pvr .pvr-cta{
+  background:var(--lws-orange-txt,#C24E00) !important; color:#fff;
+}
+#VISITOR#VISITOR .pvr .pvr-cta:hover{ background:#A34100 !important; }
+#VISITOR#VISITOR .pvr .pvr-sec{
+  background:#fff !important; color:var(--lws-blue,#1E499B);
+  border:1px solid var(--lws-line-strong,#D3D9E6);
+}
+#VISITOR#VISITOR .pvr .pvr-sec:hover{ border-color:var(--lws-blue,#1E499B); }
+/* 4,26:1 avec --lws-text2 sur le fond nuage : sous le seuil AA de 4,5.
+   Ce n'est pas de la coquetterie — c'est la ligne qui dit « gratuit,
+   sans engagement », donc celle qui lève la dernière hésitation. */
+#VISITOR#VISITOR .pvr .pvr-fin{ color:#5B6274; }
+
+/* Même cause pour le bandeau d'abonnement : son fond teinté sautait aussi.
+   Le texte y était foncé, donc lisible — le bloc perdait seulement sa
+   distinction visuelle. On la rétablit. */
+#VISITOR#VISITOR .vabo-band-in{ background:var(--lws-tint-cloud,#F0F4F7) !important; }
+#VISITOR#VISITOR .vabo-band-prix{ background:#fff !important; }

@@ -44013,9 +44013,24 @@ window._temoignagesReelsHtml = _temoignagesReelsHtml;
    traverse le balisage sans être échappée. */
 function _avQte(s){
   var t = _esc(String(s||''));
-  var m = t.match(/^([\d   .,]*\d(?:\s?(?:Go|Mo|To|Ko|%|h|j|min))?)\s+(.+)$/i);
-  if(!m) return t;
-  return '<b class="av-qte">'+m[1]+'</b> '+m[2];
+
+  // 1. QUANTITÉ en tête → couleur d'accent. Le procédé des grilles
+  //    tarifaires qui se comparent bien : l'œil balaie la colonne de
+  //    chiffres avant de lire les phrases.
+  t = t.replace(/^([\d   .,]*\d(?:\s?(?:Go|Mo|To|Ko|%|h|j|min))?)\s+/i,
+                '<b class="av-qte">$1</b> ');
+
+  // 2. QUALIFICATIF de fin → atténué. Nos avantages ne commencent presque
+  //    jamais par un nombre : la règle 1 seule ne changeait rien, et les
+  //    huit lignes restaient d'un gris uniforme — c'est ce qui rendait les
+  //    panneaux fades. L'information y est pourtant déjà hiérarchisée :
+  //    « Épreuves séquentielles + corrigés (collèges) » = une promesse,
+  //    puis sa portée. On rend cette hiérarchie VISIBLE au lieu d'en
+  //    inventer une : rien n'est ajouté, seul le poids visuel change.
+  t = t.replace(/\s(\([^()]{2,}\))\s*$/, ' <span class="av-sec">$1</span>');
+  t = t.replace(/\s([—–])\s([^<]{3,})$/, ' <span class="av-sec">$1 $2</span>');
+
+  return t;
 }
 
 function _accOffre(){
