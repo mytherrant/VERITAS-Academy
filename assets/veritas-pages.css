@@ -1783,3 +1783,45 @@ details.sol>summary{ background:var(--lws-ok-clair) !important; color:var(--lws-
   h3, h3.sub{ font-size:19px !important; }
   .wrap{ padding-top:36px !important; padding-bottom:44px !important; }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   COHÉRENCE AVEC LA VITRINE  ·  août 2026
+   ────────────────────────────────────────────────────────────────────────
+   Les 64 pages statiques partagent cette feuille : ce qu'on écrit ici les
+   change toutes d'un coup. On aligne les PRIMITIVES sur la vitrine refondue
+   (vitrine.html) — police, rayons, ombres, durée de transition — pour que
+   passer de l'accueil à un corrigé ne donne pas l'impression de changer de
+   site.
+
+   Trois polices coexistaient : Poppins (barre LWS), Plus Jakarta Sans
+   (titres) et Inter (corps). Le commentaire de la ligne 496 justifiait Inter
+   par « la même famille que l'application » — c'était vrai avant que
+   l'application ne passe à Poppins ; depuis, cette règle produisait
+   exactement l'écart qu'elle prétendait corriger. Poppins est DÉJÀ demandée
+   par ces pages (Google Fonts, graisses 400/500/600) : unifier dessus
+   n'ajoute aucune requête, et supprime deux familles qui n'étaient jamais
+   téléchargées mais forçaient un repli système incohérent.
+
+   Ce qui n'est VOLONTAIREMENT pas repris de la vitrine : sa largeur de
+   conteneur (1170 px). Elle sert une grille marketing ; ces pages-ci portent
+   de la prose — énoncés, corrigés, analyses. Élargir la colonne de 960 à
+   1170 px allongerait la ligne au-delà du confort de lecture. La largeur
+   reste donc celle de chaque page.
+   ═══════════════════════════════════════════════════════════════════════ */
+:root{
+  /* Rayons de la vitrine : 10 / 12 / 14 / 16 / 18, pilule à 100. Rien d'autre. */
+  --v-r-sm:10px; --v-r:12px; --v-r-md:14px; --v-r-lg:16px; --v-r-xl:18px; --v-r-pill:100px;
+  /* Trois niveaux d'ombre, pas un de plus. */
+  --v-sh-repos:0 6px 16px rgba(0,17,54,.06);
+  --v-sh-survol:0 12px 26px rgba(0,17,54,.09);
+  --v-sh-flottant:0 18px 40px rgba(0,17,54,.12);
+  --v-transition:.18s;
+}
+
+body,
+h1, h2, h3, h4,
+.pill, .badge, .tag,
+nav.seqnav a, .tools button, .series-pick button{
+  font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+}
+h1, h2, h3, h4{ letter-spacing:-.012em; }

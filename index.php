@@ -15,7 +15,19 @@
  *  les directives .htaccess — passer par PHP bypass ce cache.
  * ============================================================================
  */
-$appFile = __DIR__ . '/app.html';
+/* ── Ce que sert la racine du site ────────────────────────────────────────
+ * Depuis la refonte d'août 2026, « / » sert la VITRINE PUBLIQUE
+ * (vitrine.html) et non plus la coquille applicative. L'application reste
+ * accessible telle quelle sur /app.html — c'est là que pointent le bouton
+ * « Mon compte », les espaces élève/parent/enseignant, et les 64 pages
+ * statiques qui renvoient vers #tarifs, #boutique, #cagnotte, etc.
+ *
+ * Repli volontaire sur app.html : si vitrine.html venait à manquer sur le
+ * serveur (déploiement partiel), le visiteur retombe sur l'application
+ * plutôt que sur une page de maintenance. Le site reste debout.
+ */
+$vitrine = __DIR__ . '/vitrine.html';
+$appFile = file_exists($vitrine) ? $vitrine : __DIR__ . '/app.html';
 
 // ETag basé sur la date de modification du fichier → invalide le cache à chaque déploiement
 $etag = file_exists($appFile) ? '"' . filemtime($appFile) . '"' : '"0"';

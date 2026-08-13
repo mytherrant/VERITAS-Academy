@@ -856,3 +856,53 @@ association) a été écartée pour cette raison, pas par manque de temps.
 - Si le quota est sain, le correctif est un déploiement en deux temps (envoi sous nom temporaire
   puis renommage atomique) dans `deploy.yml`. Tant que ce n'est pas fait : **éviter de déployer aux
   heures de vente**, et grouper les correctifs non urgents en un seul lot.
+
+## Session « refonte de la vitrine publique » (13/08/2026)
+- **Origine** : refonte livrée dans `Refonte site Véritas/` (index.html 245 Ko + support.js 69 Ko + 10 images).
+  Décision de Jacques : la refonte devient **l'accueil public**, l'application reste sur `app.html`, et son
+  design se propage aux autres pages.
+- **Blocage trouvé à la lecture** : la maquette n'était pas une page HTML mais un export d'outil de design.
+  `support.js` est un runtime `dc-runtime` qui exige **React 18 + ReactDOM + @babel/standalone** depuis
+  unpkg.com — ~3 Mo, compilation JSX **dans le navigateur à chaque visite**, et contenu inexistant tant que
+  Babel n'a pas tourné. Sur un site dont toute l'acquisition passe par le SEO, et pour un public en données
+  mobiles, c'était inacceptable. Le balisage, lui, était du HTML réel (1 425 lignes, styles inline) piloté par
+  quatre directives (`{{ }}`, `<sc-if>`, `<sc-for>`, `style-hover`).
+- **Solution** : transpileur `tools/build_vitrine.js` (Node, sans dépendance). Il évalue la logique du
+  composant pour en extraire les VRAIES données (aucune ressaisie à la main, donc aucune dérive), développe
+  les directives, convertit les 65 `style-hover` en classes CSS, et écrit `vitrine.html` — **les 7 écrans
+  pré-rendus dans le document**, donc indexables et lisibles sans JS. Le seul JS embarqué est
+  `assets/vitrine.js` (~11 Ko) : navigation, onglets, thème, langue, tunnel de paiement.
+  Régénérer : `node tools/build_vitrine.js "Refonte site Véritas/index.html" vitrine.html`.
+- **Défauts de la maquette corrigés, mesurés et non estimés** :
+  · mots tournants du titre — les 4 s'affichaient EN MÊME TEMPS (opacité pleine de 12 % à 88 % d'un cycle
+    partagé) ; un quart de cycle chacun ;
+  · **aucune media query** hors `prefers-reduced-motion` : à 390 px la page faisait 738 px de large.
+    Couche responsive par sélecteur d'attribut (technique déjà employée par son thème sombre) → 390/390 ;
+  · images : 5,99 Mo de PNG photographiques → **598 Ko en WebP** (−90 %), logo laissé en PNG (favicon) ;
+  · domaine : la maquette pointait `www.veritas-school.com`, qui ne répond pas — canonical, og:url et les
+    deux images corrigés ; og:image renvoyait une image de 1,75 Mo, remplacé par `og-image.jpg` ;
+  · JSON-LD : exposait le Gmail personnel de Jacques → `contact@veritas-school.com`.
+- **Données réelles injectées** : taux de réussite depuis `DB.statsVitrine` (app.js:700) — BEPC 100 %,
+  Probatoire 69 %, BAC 61 % — **avec recalcul de l'angle de l'anneau** (la maquette affichait 300° sous un
+  « __ % »). Les 22 ancres provisoires sont branchées sur les hash reconnus par `_vtHashRouter` (app.js) et
+  les pages statiques ; garde-fou : la construction ÉCHOUE si le nombre d'ancres ne correspond plus.
+- **Trous laissés volontairement (données inexistantes dans le dépôt)** : taux **GCE** (anneau vidé, pas
+  laissé aux trois quarts plein), **3 témoignages** (`DB.temoignages` est vide et le code refuse déjà
+  d'afficher sous 3 avis), **vidéo de témoignage** (un MP4 traînait dans le dossier livré, non identifié —
+  Jacques le visionnera), et **#mentions / #cgv / #charte** : aucune page légale n'existe dans le dépôt.
+- **Service** : `index.php` sert `vitrine.html` (repli sur `app.html` s'il manque) ; `deploy.yml` copie la
+  vitrine vers `index.html` ET `vitrine.html`, et **n'écrase plus** `index.html` avec l'application.
+  Retour arrière = une ligne dans `index.php` ; l'ancienne page reste servie telle quelle sur `/app.html`
+  (pas de copie `index-ancien.html` : 440 Ko dupliqués pour un rollback déjà trivial).
+- **Propagation du design** : le levier est `assets/veritas-pages.css`, partagé par les **64 pages
+  statiques**. Trois polices y coexistaient (Poppins, Plus Jakarta Sans, Inter) — le commentaire justifiait
+  Inter par « la même famille que l'application », ce qui n'était plus vrai depuis que l'app est passée à
+  Poppins : la règle produisait l'écart qu'elle prétendait corriger. Unifié sur Poppins (déjà chargée, zéro
+  requête ajoutée) + jetons de rayons/ombres/transition de la vitrine. **Largeur de conteneur volontairement
+  NON reprise** : 1170 px sert une grille marketing, ces pages portent de la prose.
+- **Vérifié dans le navigateur** (serveur statique local) : 7 écrans atteignables et exclusifs, 30 images
+  chargées, 0 débordement à 390/753/1000/1265 px, burger sous 1000 px, thème sombre aller-retour, citations,
+  traducteur FR/EN aller-retour, et tunnel de paiement recalculé (3 articles + Yaoundé = 17 500 F, formulaire
+  carte à 4 champs). `node --check` OK sur `assets/vitrine.js` et `tools/build_vitrine.js`.
+- **Reste à faire** : taux GCE, témoignages, vidéo, pages légales ; `payer()` est encore inerte — le tunnel
+  affiche mais n'encaisse pas, il faudra le brancher sur `openPaymentModal` / CamerPay.

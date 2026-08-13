@@ -10,6 +10,7 @@ on:
     paths:
       - 'VERITAS_v1.2.html'
       - 'VERITAS_v1.1.html'
+      - 'vitrine.html'
       - 'VERITAS_Promo_Video.html'
       - 'reset.html'
       - 'admin-validation.html'
@@ -141,12 +142,27 @@ jobs:
           # Priorité v1.2 si présent, sinon fallback v1.1
           if [ -f "VERITAS_v1.2.html" ]; then
             cp VERITAS_v1.2.html deploy/app.html
-            cp VERITAS_v1.2.html deploy/index.html
-            echo "  ✓ VERITAS_v1.2.html → app.html + index.html"
+            echo "  ✓ VERITAS_v1.2.html → app.html"
           else
             cp VERITAS_v1.1.html deploy/app.html
-            cp VERITAS_v1.1.html deploy/index.html
-            echo "  ✓ VERITAS_v1.1.html → app.html + index.html"
+            echo "  ✓ VERITAS_v1.1.html → app.html"
+          fi
+
+          # ── Vitrine publique (refonte août 2026) ────────────────────────
+          # « / » sert désormais la vitrine (via index.php), et non plus la
+          # coquille applicative. index.html en reçoit une copie pour l'accès
+          # direct sans PHP. L'application reste sur app.html : ne PAS la
+          # remplacer ici, les espaces connectés et les 64 pages statiques y
+          # renvoient.  Échec bruyant : un index.html contenant l'application
+          # alors qu'index.php sert la vitrine donnerait deux accueils
+          # différents selon l'URL tapée, et le bug serait invisible en CI.
+          if [ -f vitrine.html ]; then
+            cp vitrine.html deploy/vitrine.html
+            cp vitrine.html deploy/index.html
+            echo "  ✓ vitrine.html → vitrine.html + index.html (accueil public)"
+          else
+            echo "::error title=Vitrine manquante::vitrine.html est absent du dépôt alors qu'index.php la sert en racine. Le site s'ouvrirait sur l'application. Déploiement ANNULÉ."
+            exit 1
           fi
           cp index.php         deploy/index.php
           # v1.2.2 : CSS + JS principaux extraits (cacheables séparément → 1er chargement allégé)
