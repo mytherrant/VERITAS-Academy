@@ -955,6 +955,23 @@ for (const lg of ['fr', 'en']) {
                         exemple: 'Quartier, rue, point de repère', colonne: 'span 2',
                         auto: 'street-address', type: 'text' }];
 
+  /* Le domaine fantôme se cachait AUSSI dans les données ─────────────────
+     La correction du corps ne suffisait pas : les boutons de partage sont
+     une région dynamique, leurs URLs vivent donc dans VRT_DATA et sont
+     ré-étendues par le client. Vérifié en production après déploiement — le
+     corps était propre, le partage Facebook renvoyait toujours vers
+     veritas-centre.cm/passage-du-jour, un domaine qui n'est pas le nôtre et
+     une page qui n'existe pas. Contrôle : on relit le JSON sérialisé, pas
+     seulement le HTML. */
+  {
+    const avant = JSON.stringify(D.partages);
+    const propre = avant
+      .replace(/https%3A%2F%2Fveritas-centre\.cm%2Fpassage-du-jour/g, encodeURIComponent(SITE + '/'))
+      .replace(/https:\\?\/\\?\/veritas-centre\.cm/g, SITE);
+    D.partages = JSON.parse(propre);
+    if (avant !== propre) console.log('partage     : domaine veritas-centre.cm corrigé dans les données');
+  }
+
   const REDIR = 'Vous serez redirigé vers la page sécurisée de notre prestataire pour régler. '
               + 'Aucune donnée bancaire n’est saisie ni conservée sur ce site.';
   D.scal.moyen2 = { titreFormulaire: 'Vos coordonnées', noteSecurite: REDIR, libellePayer: 'Payer par carte' };
