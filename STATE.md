@@ -1139,3 +1139,28 @@ Inscription à 100 FCFA câblée au paiement · vérification du mur d'abonnemen
 colorer (icônes, puces) · onglet « Répétitions » vide · FAQ vue dans e-learning (localisée dans
 `tarifs` côté code, cause réelle non trouvée) · **refonte de l'habillage du Dashboard et des
 espaces connectés**, qui restent sur l'ancienne charte.
+
+## Mur d'abonnement vérifié + socle « inscription 100 F » (15/08/2026)
+
+### Mur d'abonnement : RIEN À ÉCRIRE, il fonctionne
+Vérifié **en production**, pas relu : `_pwCfg().actif = true`, les 5 surfaces `on`
+(oeuvres, jeux, quiz, labo, elearning), profil `anon` détecté, œuvres = 1 essai, jeux = 2.
+Séquence réelle sur `_pwGate('jeux',…)` : `ouvert → ouvert → BLOQUÉ → BLOQUÉ`, et rejouer un
+item déjà entamé reste gratuit (règle voulue). `pgPaywall` est câblée au routeur admin.
+> Ne pas réécrire ce moteur. Il est en place et il mord.
+
+### Inscription à 100 FCFA — socle serveur posé, client à faire
+`api/_auth_lib.php`, deux ajouts, **inertes tant qu'aucun client n'envoie l'intent** :
+- **prix de référence** (`vrt_prix_catalogue`) : sans lui la fonction rend `null`, et son
+  contrat est que `null` = tarif inconnu = **contrôle de prix sauté**. L'inscription se serait
+  achetée à 1 franc. Réglable en base : `DB.tarifs.inscription`, défaut 100 ;
+- **octroi à part** (`vrt_grant_entitlement`) : ce n'est pas un « tiroir » (liste de droits)
+  mais un changement d'ÉTAT du compte (`statut → actif` + `inscriptionPayee`). Idempotent.
+
+5 contrôles ajoutés (54 → **59**), **éprouvés par mutation** :
+retirer le prix → 2 rouges dont « 1 FCFA → REFUSÉE » qui rapporte `statut=actif` ;
+désactiver l'idempotence → 1 rouge. Restauration : 59/59, et vert en CI sur PHP 8.2 Linux.
+
+**Reste côté client** : créer le compte en `en_attente_paiement`, lancer le paiement de
+100 FCFA avec l'`accountId`, sonder `?action=status`, activer à la confirmation, et une vue
+admin des inscriptions en attente.
