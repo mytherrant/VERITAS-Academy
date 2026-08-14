@@ -4584,29 +4584,31 @@ function _vRevealInit(){
        vient, pas sur la page qu'on vient de quitter automatiquement.
    ═══════════════════════════════════════════════════════════════════════════ */
 var _VITRINE_COUVRE = {
-  /* ⚠️ « presentation » N'EST PAS dans cette table, et ce n'est pas un oubli.
-     L'accueil visiteur se re-rend plusieurs fois après le chargement (comportement
-     connu de cette page), et ces re-rendus ne passent pas le marqueur d'amorçage.
-     Quand il y était, la séquence observée en production était : le routeur
-     redirige correctement vers /#tarifs, puis un re-rendu de « presentation »
-     redirige vers « / » — et c'est lui qui gagne. Le visiteur demandait les
-     abonnements et atterrissait sur l'accueil.
-     Ce cas est de toute façon déjà couvert : le garde en tête de la coquille
-     renvoie /app.html sans ancre vers « / », et la vitrine pointe « Présentation »
-     sur decouvrir/. */
+  /* « presentation » = L'ACCUEIL DE L'APPLICATION. Il est supprimé en tant que
+     page : demandé par Jacques après l'avoir vu réapparaître en cliquant sur la
+     marque. Ce n'est plus une destination, c'est une sortie vers la vitrine.
+     Il n'y figurait pas au commit précédent à cause de la course décrite
+     au-dessus ; la fenêtre d'amorçage la règle, et le bouton de marque est
+     devenu un vrai lien vers « / » plutôt qu'un appel de rendu. */
+  presentation: '',
   tarifs:       '#tarifs',
   boutique:     '#boutique',
   elearning:    '#elearning',
   parents:      '#parents'
 };
+/* Fenêtre d'amorçage. L'accueil visiteur se re-rend plusieurs fois dans les
+   secondes qui suivent le chargement (retour de public_data.php, notamment), et
+   ces re-rendus ne passent PAS le marqueur d'amorçage. Un simple booléen
+   d'argument ne suffit donc pas : il faut une fenêtre de temps.
+   Sans elle, la séquence observée en production était : le routeur redirige
+   correctement vers /#tarifs, puis un re-rendu de « presentation » redirige
+   vers « / » — et c'est le dernier qui gagne. */
+window._vBootJusqua = 0;
+
 function _renvoyerVersVitrine(sec, boot){
   try{
-    /* L'AMORÇAGE NE COMPTE PAS. initVisitor() rend « presentation » par défaut,
-       bouton compris — impossible de le distinguer d'un clic par ses arguments.
-       Sans ce marqueur, un visiteur arrivant sur /app.html#partenariat serait
-       éjecté vers la vitrine par le rendu par défaut, AVANT que le routeur
-       n'ait eu le temps d'afficher la section qu'il venait chercher. */
-    if(boot === true) return false;
+    if(boot === true){ window._vBootJusqua = Date.now() + 3000; return false; }
+    if(Date.now() < (window._vBootJusqua || 0)) return false;   // encore dans l'amorçage
     if(typeof SES !== 'undefined' && SES) return false;               // connecté : chez lui
     if(!Object.prototype.hasOwnProperty.call(_VITRINE_COUVRE, sec)) return false;
     var p = String(location.pathname || '').toLowerCase().replace(/\/+$/, '');
