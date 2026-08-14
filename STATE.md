@@ -1011,3 +1011,18 @@ l'accompagnement à domicile. Trois formulations remplacées par la complémenta
 - `assets/temoignage.mp4` toujours absent : la section témoignage vidéo se retire d'elle-même et
   reviendra le jour où le fichier sera déposé.
 - Taux GCE toujours vide (donnée inexistante), témoignages toujours absents (aucun avis réel).
+
+## Déployé le 14/08 (v1.19.10) — ce qui est en prod
+- Deux exécutions de `deploy.yml` sur `deploy/campay-securite` (workflow_dispatch),
+  vertes toutes les deux : 1m37s et ~1m30s, sans indisponibilité observée cette fois.
+- Cache-busters réalignés par la CI sur **1.19.10.339083** (version + empreinte du contenu)
+  dans **160 fichiers**, et le nouveau garde-fou confirme : « Aucun asset servi sans ?v= ».
+- Vérifié **sur la production**, pas sur le dépôt : accueil 397 Ko, `/app.html`, les trois
+  pages de `legal/`, `/corriges/` et une page de séquence, `assets/veritas-refonte-app.css`,
+  `?action=config`. Menu Plus à 27 entrées, onglet Partenaires, CGV branchées, CSP présente,
+  chiffres inventés et témoignages vides absents, dénigrement des répétiteurs absent.
+- **Un défaut n'a été vu QUE sur la production** : le partage Facebook renvoyait encore vers
+  `veritas-centre.cm`. La correction ne portait que sur le corps de la page ; les boutons de
+  partage sont une région DYNAMIQUE, leurs URLs vivent dans `VRT_DATA`. Règle : après un
+  déploiement, relire ce que le visiteur reçoit — le JSON sérialisé compris, pas seulement
+  le balisage. Corrigé et redéployé.
