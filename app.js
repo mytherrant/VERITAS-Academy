@@ -4082,10 +4082,39 @@ function initVisitor(){
   // pictogramme, qu'un textContent effacerait à chaque rendu.
   var lbLabel=document.getElementById('vBrandName');
   if(lbLabel)lbLabel.textContent=(DB.school&&DB.school.nom)||'VÉRITAS Academy';
-  // 3ᵉ argument : c'est l'AMORÇAGE, pas une demande du visiteur. Il empêche
-  // _renvoyerVersVitrine() d'éjecter vers la vitrine quelqu'un qui arrivait sur
-  // une section propre à l'application (/app.html#partenariat, #cagnotte…).
-  vShowSec("presentation",document.querySelector(".vnav-btn"),true);
+  /* ═══ IL N'Y A PLUS D'ACCUEIL ICI ═══════════════════════════════════════
+     Cette ligne rendait l'accueil de l'application par défaut. C'était la
+     seconde page d'accueil du site, et c'est elle qu'on supprime.
+
+     Première tentative : rediriger depuis vShowSec avec une fenêtre de trois
+     secondes. Mauvaise idée — l'accueil se re-rend à des moments imprévisibles
+     (retour de public_data.php), et passé la fenêtre la redirection partait
+     pour de bon : un visiteur tranquille sur /app.html?ref=… se retrouvait
+     éjecté vers la vitrine au bout de trois secondes. Une minuterie ne règle
+     pas une course, elle la déplace.
+
+     Règle déterministe à la place, sans minuterie de course :
+       · PAS d'ancre → il n'y a rien à voir ici, on part sur la vitrine en
+         conservant la requête (parrainage, retour de paiement) ;
+       · UNE ancre → c'est le routeur qui place la section. On ne rend rien en
+         attendant : afficher l'accueil « en attendant » revient précisément à
+         le garder.
+     Le filet de sécurité plus bas rattrape le cas d'une ancre que personne ne
+     sait traiter — il ne se déclenche que si RIEN n'a été rendu. */
+  (function _plusDAccueilIci(){
+    var connecte = (typeof SES !== 'undefined' && SES);
+    var h = (location.hash || '').replace(/^#/, '').split('?')[0].trim();
+    if(!h && !connecte){ location.replace('/' + (location.search || '')); return; }
+
+    // Filet : si aucune section ne s'est rendue, on ne laisse pas un écran vide.
+    setTimeout(function(){
+      try{
+        if(typeof SES !== 'undefined' && SES) return;
+        var c = document.getElementById('vContent');
+        if(c && c.innerHTML.trim() === '') location.replace('/' + (location.search || ''));
+      }catch(e){}
+    }, 1600);
+  })();
   initTicker();
   // ── Plancher de lisibilité mobile (voir _mobileTypeFloor) ──
   try { if(typeof _installTypeFloorObserver === 'function') _installTypeFloorObserver(); } catch(e){}
@@ -4584,31 +4613,18 @@ function _vRevealInit(){
        vient, pas sur la page qu'on vient de quitter automatiquement.
    ═══════════════════════════════════════════════════════════════════════════ */
 var _VITRINE_COUVRE = {
-  /* « presentation » = L'ACCUEIL DE L'APPLICATION. Il est supprimé en tant que
-     page : demandé par Jacques après l'avoir vu réapparaître en cliquant sur la
-     marque. Ce n'est plus une destination, c'est une sortie vers la vitrine.
-     Il n'y figurait pas au commit précédent à cause de la course décrite
-     au-dessus ; la fenêtre d'amorçage la règle, et le bouton de marque est
-     devenu un vrai lien vers « / » plutôt qu'un appel de rendu. */
-  presentation: '',
+  /* « presentation » N'EST PLUS DANS CETTE TABLE — et cette fois c'est définitif.
+     L'accueil de l'application n'est plus RENDU du tout (voir initVisitor) :
+     il n'y a donc plus rien à intercepter. Rediriger un rendu qui n'existe pas
+     ne servirait qu'à rouvrir la course qui éjectait les visiteurs. */
   tarifs:       '#tarifs',
   boutique:     '#boutique',
   elearning:    '#elearning',
   parents:      '#parents'
 };
-/* Fenêtre d'amorçage. L'accueil visiteur se re-rend plusieurs fois dans les
-   secondes qui suivent le chargement (retour de public_data.php, notamment), et
-   ces re-rendus ne passent PAS le marqueur d'amorçage. Un simple booléen
-   d'argument ne suffit donc pas : il faut une fenêtre de temps.
-   Sans elle, la séquence observée en production était : le routeur redirige
-   correctement vers /#tarifs, puis un re-rendu de « presentation » redirige
-   vers « / » — et c'est le dernier qui gagne. */
-window._vBootJusqua = 0;
-
 function _renvoyerVersVitrine(sec, boot){
   try{
-    if(boot === true){ window._vBootJusqua = Date.now() + 3000; return false; }
-    if(Date.now() < (window._vBootJusqua || 0)) return false;   // encore dans l'amorçage
+    if(boot === true) return false;
     if(typeof SES !== 'undefined' && SES) return false;               // connecté : chez lui
     if(!Object.prototype.hasOwnProperty.call(_VITRINE_COUVRE, sec)) return false;
     var p = String(location.pathname || '').toLowerCase().replace(/\/+$/, '');
