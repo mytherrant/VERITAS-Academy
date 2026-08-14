@@ -1026,3 +1026,75 @@ l'accompagnement à domicile. Trois formulations remplacées par la complémenta
   partage sont une région DYNAMIQUE, leurs URLs vivent dans `VRT_DATA`. Règle : après un
   déploiement, relire ce que le visiteur reçoit — le JSON sérialisé compris, pas seulement
   le balisage. Corrigé et redéployé.
+
+## Session « câblage et charte » (14/08/2026) — v1.19.11, déployée
+
+### La « double interface » ne venait ni du style ni du service de « / »
+Trois portes rouvraient l'ancienne interface, et aucune n'était un problème de CSS :
+- **`app.html#presentation`**, dans le menu Plus. Vérifié dans `vShowSec` puis en production :
+  cette ancre ne rend pas une page « qui nous sommes », elle rend **l'accueil de l'application**
+  (6 223 caractères : pastille de marque, promesse, quatre portes de rôle, vidéo, actualités).
+  → pointe désormais sur `decouvrir/`.
+- **La loupe** n'a jamais cherché : elle ouvrait `app.html`, puis `/corriges/` après un premier
+  correctif — c'était encore de la navigation. `mRecherche()` EXISTE et fait une vraie recherche de
+  site ; elle était enterrée derrière le panneau « Naviguer ». Rendue adressable : `#recherche`.
+- **Le calendrier scolaire** : même cas, `showCalendrier()` n'existait que comme tuile de l'accueil
+  connecté. Rendu adressable : `#calendrier`.
+> Règle : avant de rebrancher un lien, OUVRIR sa destination. Un intitulé juste ne garantit rien.
+
+### Un composant peut exister en DEUX exemplaires — coquille ET maquette
+La bande utilitaire a été retirée de `VERITAS_v1.2.html`… sans que rien ne change à l'écran : la
+vitrine a **sa propre copie**, issue de la maquette. C'est celle-là que voit un visiteur sur « / ».
+> Avant de retirer un élément visible sur la vitrine, chercher le motif dans **les deux** sources.
+
+### Un `<a>` non fermé rendait un tiers de la page orange
+Le bloc calendrier s'affichait sur un aplat #C24E00. L'ancêtre coupable : le bouton « Voir les
+9 formules », dont la conversion `<button>` → `<a>` réécrivait l'ouvrant et laissait le `</button>`.
+Le rattrapage visait un motif ancré en fin de chaîne qui ne correspondait pas — échec **silencieux**.
+Et la garde ne pouvait pas le voir : elle cherchait le texte d'origine, bel et bien disparu — elle
+**vérifiait la moitié faite du travail**.
+- Contrôle d'équilibre `<a>/<button>/<section>/<ul>` ajouté en fin de construction ; il a
+  immédiatement trouvé un second défaut, hérité de l'export de la maquette (7 `<ul>` / 8 `</ul>`).
+- Les fermetures orphelines sont retirées à la construction, pas dans la maquette : ce fichier
+  n'est pas à nous et peut être remplacé.
+> Une balise ouverte ne produit AUCUNE erreur. Il faut une machine pour la voir.
+
+### Régression de plancher typographique (la mienne)
+Le plancher posé au déploiement précédent agrandissait aussi les intitulés de navigation, qui
+vivent dans une piste de largeur fixe en `overflow:hidden` : les sept étaient coupés en production
+(« E-Lear », « Corrig »). `E-Learning` réclamait 132 px, en recevait 88. On ne rétrécit pas le
+texte : la piste devient défilable et les liens ne se compriment plus.
+> Un plancher typographique global doit exempter toute piste à largeur contrainte.
+
+### Vitrine : deux blocs retirés, un bloc utile à la place
+Retirés (captures mobiles) : la bande « corrigés par niveau » (sept cartes empilées pour un nombre,
+déjà atteignables par le menu et le pied de page) et la grille « Ce que chaque plan débloque »
+(cinq colonnes disloquées sous 420 px). Remplacés par les **six dates clés** de l'année, lues à la
+source dans `CALENDRIER_SCOLAIRE` (arrêté conjoint MINEDUB/MINESEC) plutôt que recopiées, prochaine
+échéance mise en avant au chargement, plus un lien vers le calendrier complet ; et les
+**actualités MINESEC / bourses / concours** servies par `api/news_proxy.php`, qui existait déjà.
+Le bloc d'actualités naît masqué et ne s'ouvre que si le flux renvoie un titre.
+
+### Deux pièges d'extraction, tous deux muets
+- Compter les accolades pour lire `CALENDRIER_SCOLAIRE` s'arrêtait au milieu du tableau : les
+  commentaires du calendrier contiennent des **apostrophes françaises** (« fixées par l'arrêté »)
+  que le compteur lisait comme des ouvertures de chaîne. → retirer les commentaires AVANT de compter.
+- Le filtre des jours de semaine mordait sur le « Mar » de « **Mar**s » : « 25 Mars 2027 » perdait
+  sa date pivot. → exiger le point (`Lun.`, `Ven.`), que les mois n'ont jamais.
+
+### `node --check` ne voit pas un renommage incomplet
+`marquerSequence()` renommée, son appel non : ReferenceError au démarrage qui aurait coupé tout ce
+qui suit dans `demarrer()` (anneaux, actualités, thème, écouteurs). Trouvé par un contrôle de
+résolution des 39 fonctions du fichier — commentaires et chaînes retirés d'abord, sinon la prose
+française produit des dizaines de faux positifs.
+
+### PDF sécurisé — la chaîne est bonne, le contenu manque
+`api/secure_pdf.php` répond, la recherche du document fonctionne, la porte tient
+(`?meta=1&id=b2` → `hasAccess:false` hors session, bail signé, budget horaire, mur d'aperçu).
+Mais **`prepared:false` partout** : aucun livre n'a ses images de pages dans
+`uploads/protected/books/<secureId>/`. Un acheteur ouvrirait un lecteur vide. Ce n'est pas un
+correctif de code — il faut déposer les pages. `b1` et `btest100` ne sont plus dans le catalogue
+serveur ; `b2` (« Français Tle A », 320 pages) y est.
+Accessoire : `/uploads/protected/` répond **500** au lieu de 403 — l'accès est bien refusé, mais
+une directive du `.htaccess` n'est pas digérée par l'hébergeur. Non corrigé : `.htaccess` est
+fragile ici et a déjà coûté une panne totale.
