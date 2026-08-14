@@ -5,6 +5,54 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 
+<!-- ══════════════════════════════════════════════════════════════════════
+     UN SEUL ACCUEIL — fusion de « / » et « /app.html »
+     ──────────────────────────────────────────────────────────────────────
+     Le site présentait DEUX pages d'accueil publiques : « / » (vitrine.html)
+     et « /app.html », qui affichait en plus son propre écran visiteur.
+     Deux entrées, deux mises en page, deux discours — et pour Google, deux
+     pages concurrentes sur le même contenu.
+
+     Ici on FUSIONNE PAR ROUTAGE, on ne supprime rien. L'écran visiteur de
+     l'application reste en place et reste atteignable : il ne sert
+     simplement plus de page d'arrivée quand on demande /app.html tout court.
+
+     On ne redirige QUE le visiteur anonyme arrivant les mains vides. Sont
+     donc explicitement épargnés :
+       · les ancres — /app.html#tarifs, #boutique, #cagnotte… : c'est là que
+         pointent les 64 pages statiques, les QR imprimés dans les manuels et
+         les liens de partage. Les casser couperait le site de son public ;
+       · les paramètres — retours de paiement, ?ref= de parrainage ;
+       · toute session ouverte : un élève ou un enseignant connecté est chez
+         lui, on ne le renvoie pas à la vitrine.
+
+     GARDE-FOU ANTI-BOUCLE, et il n'est pas théorique : index.php retombe
+     VOLONTAIREMENT sur app.html si vitrine.html manque au déploiement. Sans
+     le drapeau ci-dessous, ce repli ferait rebondir le visiteur entre « / »
+     et « /app.html » indéfiniment — une panne pire que celle qu'il répare.
+     Le drapeau autorise un seul saut par onglet.
+
+     Placé avant tout chargement : le visiteur redirigé ne télécharge pas les
+     3,4 Mo d'app.js pour rien.
+     ══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function () {
+  try {
+    if (location.hash || location.search) return;          // lien profond, retour de paiement
+    if (sessionStorage.getItem('VERITAS_SES')) return;     // quelqu'un est connecté
+    if (sessionStorage.getItem('_vrtAccueilSaut')) return; // un seul saut par onglet
+    var p = location.pathname.replace(/\/+$/, '');
+    /* Égalité STRICTE avec « /app.html », et non « se termine par ». Un test
+       de terminaison attrapait aussi /campus/app.html — or Campus est le
+       produit white-label vendu à d'autres établissements : l'y renvoyer vers
+       la vitrine VÉRITAS le casserait purement et simplement. */
+    if (p.toLowerCase() !== '/app.html') return;
+    sessionStorage.setItem('_vrtAccueilSaut', '1');
+    location.replace('/');
+  } catch (e) { /* stockage refusé (navigation privée stricte) : on reste, c'est sans danger */ }
+})();
+</script>
+
 <!-- ════════════════════════════════════════════════════════════
      🔐 SÉCURITÉ
      ════════════════════════════════════════════════════════════ -->
@@ -687,15 +735,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.19.4">
+<link rel="preload" as="script" href="/app.js?v=1.19.5">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.19.4" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.19.4"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.19.5" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.19.5"></noscript>
 <!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
      app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
 <link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.16.2" onload="this.onload=null;this.rel='stylesheet'">
@@ -709,14 +757,14 @@ if('MutationObserver' in window){
      (halos, dégradés de titre, cartes qui décollent).
      ⚠️ ORDRE CRITIQUE : doit rester le DERNIER <link> CSS de la page.
      Chargée en preload+bascule comme les autres → aucun blocage du rendu. -->
-<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.19.4" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.19.4"></noscript>
+<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.19.5" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.19.5"></noscript>
 <!-- Compagnon indispensable de la feuille ci-dessus : elle éteint TOUS les
      dégradés, y compris ceux que le JS de rendu pose en style en ligne —
      lesquels se retrouveraient alors sans aucun fond (texte blanc sur
      blanc). Ce script relit leur première couleur et la repose en aplat.
      `defer` : rien à faire avant que le DOM existe. -->
-<script src="/assets/theme-lws.js?v=1.19.4" defer></script>
+<script src="/assets/theme-lws.js?v=1.19.5" defer></script>
 
 <!-- ════════ v1.15.9 — THÈME CLAIR / SOMBRE ════════
      Ce script est INLINE et SYNCHRONE, tout en haut : il doit poser
@@ -1557,7 +1605,7 @@ setTimeout(_vAmbassaFab,3000);
    restaient en cache après déploiement. Repli sur la valeur figée si le
    sélecteur ne trouve rien. */
 window._VRT_ASSET_VER=(function(){try{var e=document.querySelector('link[href*="app.js?v="],script[src*="app.js?v="]');var m=e&&String(e.href||e.src||'').match(/app\.js\?v=([0-9.]+)/);return m?m[1]:'1.15.9';}catch(x){return '1.15.9';}})();</script>
-<script defer src="/app.js?v=1.19.4"></script>
+<script defer src="/app.js?v=1.19.5"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->
