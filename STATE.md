@@ -1164,3 +1164,21 @@ désactiver l'idempotence → 1 rouge. Restauration : 59/59, et vert en CI sur P
 **Reste côté client** : créer le compte en `en_attente_paiement`, lancer le paiement de
 100 FCFA avec l'`accountId`, sonder `?action=status`, activer à la confirmation, et une vue
 admin des inscriptions en attente.
+
+## Accueil de l'application supprimé (15/08/2026) — v1.19.16
+Le chemin de retour vers l'ancienne page d'accueil était **le bouton de marque de la barre**,
+qui appelait `vShowSec('presentation')`. Il est devenu un vrai `<a href="/">` (vérifié dans la
+coquille servie), et `presentation` est réintégré à `_VITRINE_COUVRE`.
+
+La course qui l'en avait fait sortir est réglée par une **fenêtre de temps** et non par un
+booléen : `window._vBootJusqua` = 3 s après l'amorçage, pendant lesquelles aucune redirection ne
+part. Un booléen d'argument ne pouvait pas suffire — les re-rendus déclenchés par le retour de
+`public_data.php` ne le passent pas. Vérifié : `/app.html#epreuves` survit, `/app.html#tarifs`
+part sur `/#tarifs`.
+
+### ⚠️ PISTE OUVERTE, non traitée — `#epreuves` n'affiche pas les épreuves
+Relevé en production juste après ce déploiement : `/app.html#epreuves` rend
+`_vCurrentSec = 'pour-eleve'` et affiche « Laboratoires Virtuels ». La capture de Jacques
+montrait le même symptôme avec « Émulation VÉRITAS ». Le routeur mappe `epreuves` →
+`showEpreuves`, donc le coupable est probablement un rendu POSTÉRIEUR qui écrase (même famille
+que la course ci-dessus). **À reprendre par là.**
