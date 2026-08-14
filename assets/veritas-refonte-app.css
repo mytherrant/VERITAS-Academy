@@ -151,15 +151,35 @@
    justifiée creuse des rivières de blanc et se lit plus mal qu'au fil de
    l'eau. Sous 560 px on abandonne : une ligne de moins de ~40 caractères ne
    se justifie proprement dans aucun cas. */
-#VISITOR#VISITOR :is(p, .vsec-tx, .vcard-d, .acc-promesse-tx) {
+#VISITOR#VISITOR :is(p, .vsec-tx, .acc-promesse-tx) {
   text-align: justify;
   text-justify: inter-word;
   hyphens: auto;
   -webkit-hyphens: auto;
 }
+
+/* ⚠️ ET SURTOUT : PAS DANS LES COLONNES ÉTROITES.
+   Première version : justification sur tout le texte, y compris `.vcard-d`.
+   Déployée, puis vue en production sur les panneaux d'abonnement — quatre
+   colonnes d'environ 250 px : « Épreuves    séquentielles    + » avec des
+   trous de trois espaces entre les mots, et « les le-çons » coupé en deux.
+   Justifier une ligne de moins de ~45 caractères ne peut pas bien se passer :
+   le moteur n'a que quelques espaces pour absorber le débord, il les étire
+   tous. Le texte devient plus pénible à lire que non justifié — l'inverse du
+   but.
+
+   Le point d'arrêt sur la LARGEUR D'ÉCRAN ne suffit pas : ces colonnes sont
+   étroites sur un écran large. On exclut donc les descendants de grilles,
+   qu'app.css déclare en style en ligne (`grid-template-columns`), ainsi que
+   les cartes et les panneaux d'offre — c'est là que vivent les colonnes. */
+#VISITOR#VISITOR :is([style*="grid-template-columns"], .sg, .card, .vcard, .plan, .vplan) :is(p, .vsec-tx, .vcard-d) {
+  text-align: left;
+  hyphens: none;
+  -webkit-hyphens: none;
+}
 @media (max-width: 560px) {
-  #VISITOR#VISITOR :is(p, .vsec-tx, .vcard-d, .acc-promesse-tx) {
-    text-align: left; hyphens: none;
+  #VISITOR#VISITOR :is(p, .vsec-tx, .acc-promesse-tx) {
+    text-align: left; hyphens: none; -webkit-hyphens: none;
   }
 }
 

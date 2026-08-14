@@ -10048,6 +10048,35 @@ async function doLogin(){
   $("lerr").innerHTML='<div>Identifiants incorrects</div>';
 }
 
+/* \u2550\u2550\u2550 \u00ab /app.html#connexion \u00bb doit MONTRER le formulaire, et le GARDER \u2550\u2550\u2550
+   Signal\u00e9 par Jacques, capture \u00e0 l'appui : l'adresse #connexion affichait les
+   panneaux d'abonnement de l'ancienne interface, pas le formulaire.
+
+   Ce n'est pas un mauvais aiguillage \u2014 c'est une COURSE. Le routeur d'ancres
+   se d\u00e9clenche 60 ms apr\u00e8s le chargement et appelle bien l'ouverture du
+   formulaire ; mais l'amor\u00e7age de l'espace visiteur, lui, rend l'accueil
+   ENSUITE (et le re-rend plusieurs fois : c'est un comportement connu de cette
+   page). Le dernier qui \u00e9crit gagne, et ce n'est pas nous.
+
+   On ne se contente donc pas d'ouvrir : on RE-V\u00c9RIFIE pendant une seconde et
+   demie, et on repose le formulaire s'il a \u00e9t\u00e9 recouvert. On s'arr\u00eate net d\u00e8s
+   qu'une session existe \u2014 un utilisateur d\u00e9j\u00e0 connect\u00e9 n'a rien \u00e0 faire l\u00e0 \u2014
+   et on ne touche \u00e0 rien si l'\u00e9cran de connexion est d\u00e9j\u00e0 \u00e0 l'affiche. */
+window._ouvrirConnexionAncre = function(){
+  var essais = 0;
+  var poser = function(){
+    try{
+      if(typeof SES !== 'undefined' && SES) return;        // connect\u00e9 : ne pas insister
+      var ls = document.getElementById('LS');
+      if(ls && getComputedStyle(ls).display === 'none'){
+        if(typeof showLogin === 'function') showLogin('eleve');
+      }
+    }catch(e){}
+    if(++essais < 7) setTimeout(poser, 220);               // ~1,5 s de vigilance
+  };
+  poser();
+};
+
 /* R\u00e9cup\u00e8re les LISTES DE COMPTES depuis la base serveur, avant toute session.
    Demande la cl\u00e9 de synchronisation : c'est elle qui fait autorit\u00e9 ici, et
    elle n'ouvre aucune session \u2014 elle ne fait que rapatrier de quoi en ouvrir
@@ -42818,7 +42847,7 @@ function _cagCreer(eleveId){
   // invisible depuis la vitrine, dont la loupe se contentait de naviguer vers
   // une page. Une loupe doit chercher : elle ouvre désormais cette recherche.
   var FONCTIONS = { evaluations:'showEvaluations', epreuves:'showEpreuves', annales:'showEpreuves',
-                    connexion:'_ouvrirConnexion', compte:'_ouvrirConnexion',
+                    connexion:'_ouvrirConnexionAncre', compte:'_ouvrirConnexionAncre',
                     inscription:'showRegisterForm', recherche:'mRecherche',
                     // Même cas que la recherche : showCalendrier() a sa propre
                     // fonction de rendu, n'est PAS une section de vShowSec, et
