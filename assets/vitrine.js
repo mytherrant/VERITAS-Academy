@@ -279,8 +279,164 @@
       else fini();
     },
     rien: function () {},
-    payer: function () {}
+    payer: payer
   };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     PAIEMENT RÉEL
+     ──────────────────────────────────────────────────────────────────────
+     Le bouton « Payer » était un no-op : le tunnel calculait un total puis
+     ne faisait rien. On rejoue ici, en autonome, le parcours que l'appli
+     suit déjà (voir _payCampayProbe / _payInitCampay dans app.js) — sans
+     charger app.js, qui pèse 3,4 Mo.
+
+     CamerPay est un parcours par REDIRECTION : le payeur choisit son moyen
+     et saisit ses coordonnées sur la page hébergée du prestataire. C'est
+     pour cela qu'aucun numéro de carte n'est demandé ici, et qu'il ne faut
+     jamais en demander : les champs « Numéro de carte / Cryptogramme » de la
+     maquette sont décoratifs, et les collecter nous ferait manipuler des
+     données de carte sans en avoir ni le droit ni le besoin.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /* L'ordre suit celui des moyens affichés dans le tunnel. Ces quatre
+     valeurs sont exactement celles que le serveur accepte ; toute autre
+     chaîne fait répondre « Méthode inconnue ». */
+  var MOYENS = ['mtn_momo', 'orange_money', 'stripe', 'paypal'];
+
+  function apiBase() {
+    try { if (location.protocol.indexOf('http') === 0) return location.origin + '/api'; } catch (e) {}
+    return '';
+  }
+
+  /* Référence : VT + AAMMJJ + 4 caractères. Elle sert de clé d'idempotence
+     côté serveur — deux clics sur « Payer » ne créent donc pas deux
+     transactions, le second récupère l'URL déjà obtenue. */
+  function nouvelleRef() {
+    var d = new Date(), p = function (n) { return ('0' + n).slice(-2); };
+    var al = '', C = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    for (var i = 0; i < 4; i++) al += C.charAt(Math.floor(Math.random() * C.length));
+    return 'VT' + String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()) + '-' + al;
+  }
+
+  /* Sonde de configuration, mise en cache 10 minutes par onglet. La clé est
+     la MÊME que celle de l'application (_vrtCampayCap2) : les deux surfaces
+     partagent donc le même cache et la même rotation de jeton. */
+  function sonder() {
+    try {
+      var brut = sessionStorage.getItem('_vrtCampayCap2');
+      if (brut) {
+        var c = JSON.parse(brut);
+        if (c && (Date.now() - c._t) < 600000) return Promise.resolve(c);
+      }
+    } catch (e) {}
+    var base = apiBase();
+    if (!base) return Promise.resolve(null);
+    return fetch(base + '/payment_camerpay.php?action=config', { method: 'GET' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok) return null;
+        d._t = Date.now();
+        try { sessionStorage.setItem('_vrtCampayCap2', JSON.stringify(d)); } catch (e) {}
+        return d;
+      })
+      .catch(function () { return null; });   // hors ligne : repli silencieux
+  }
+
+  function montantTotal() { return 5000 * S.qte + [0, 1000, 2500][S.livr]; }
+
+  function libelleCommande() {
+    return 'Cahier VÉRITAS × ' + S.qte + ' — livraison ' + ['retrait', 'Douala', 'régions'][S.livr];
+  }
+
+  /* Message d'attente : la vitrine n'a pas le toast() de l'application, on
+     écrit donc dans le libellé du bouton, qui est déjà une région pilotée. */
+  function direAuPayeur(txt) { poser('libellePayer', txt); }
+
+  var paiementEnCours = false;
+
+  function payer() {
+    if (paiementEnCours) return;                 // double-clic : une seule transaction
+    var montant = montantTotal();
+    if (!(montant > 0)) return;
+
+    /* ⚠️ La fenêtre DOIT s'ouvrir pendant le clic, pas dans le .then() :
+       un window.open() différé est bloqué par tous les navigateurs. On ouvre
+       donc vide tout de suite et on y pose l'URL quand le serveur répond. Si
+       le blocage survient malgré tout, on bascule l'onglet courant plutôt
+       que de laisser le payeur dans une impasse. */
+    var fen = null;
+    try { fen = window.open('', '_blank'); } catch (e) { fen = null; }
+
+    paiementEnCours = true;
+    var libelleInitial = (D.scal['moyen' + S.moyen] || {}).libellePayer || 'Payer';
+    direAuPayeur('Ouverture du paiement sécurisé…');
+
+    var echec = function (msg) {
+      paiementEnCours = false;
+      direAuPayeur(libelleInitial);
+      if (fen) { try { fen.close(); } catch (e) {} }
+      alert(msg + '\n\nVous pouvez aussi commander par WhatsApp au +237 697 637 739.');
+    };
+
+    sonder().then(function (cfg) {
+      if (!cfg) return echec('Le paiement en ligne est momentanément indisponible.');
+      if (cfg.canCollect === false) return echec('Le paiement en ligne n\'est pas ouvert pour le moment.');
+
+      var jeton = cfg.publicInitToken || '';
+      if (!jeton) return echec('Le paiement en libre-service n\'est pas activé.');
+
+      var ref = nouvelleRef();
+      var fichier = cfg.file || 'payment_camerpay.php';
+
+      var envoyer = function (tok, second) {
+        return fetch(apiBase() + '/' + fichier + '?action=init', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + tok },
+          body: JSON.stringify({
+            ref: ref,
+            montant: montant,
+            label: libelleCommande(),
+            intent: 'cart',                 // panier : aucun accès numérique à ouvrir
+            methode: MOYENS[S.moyen] || '',
+            lignes: [{ nom: 'Cahier VÉRITAS', qte: S.qte, pu: 5000 },
+                     { nom: 'Livraison', qte: 1, pu: [0, 1000, 2500][S.livr] }]
+          })
+        })
+        /* On conserve le code HTTP : un 401 ne se traite pas comme les
+           autres erreurs, et .then(r => r.json()) le jetterait. */
+        .then(function (r) {
+          return r.json().then(
+            function (j) { j._http = r.status; return j; },
+            function () { return { error: 'Réponse illisible du serveur', _http: r.status }; }
+          );
+        })
+        .then(function (data) {
+          /* 401 : le cas normal n'est pas une attaque, c'est une ROTATION du
+             jeton public pendant que notre sonde dormait en cache. Sans ce
+             rattrapage, tout visiteur ayant ouvert la page avant la rotation
+             se heurte à un mur pendant dix minutes — sur l'écran même où il
+             allait payer. On purge, on re-sonde, on rejoue UNE fois. */
+          if (data._http === 401 && !second) {
+            try { sessionStorage.removeItem('_vrtCampayCap2'); } catch (e) {}
+            return sonder().then(function (c2) {
+              if (!c2 || !c2.publicInitToken) { echec('Session de paiement expirée. Rechargez la page.'); return; }
+              return envoyer(c2.publicInitToken, true);
+            });
+          }
+          if (data.error) return echec(data.error);
+          if (!data.pay_url) return echec('Le serveur n\'a pas renvoyé de page de paiement.');
+
+          if (window.veritasTrack) window.veritasTrack('paiement_init', { ref: ref, montant: montant });
+          if (fen) { fen.location = data.pay_url; }
+          else { location.href = data.pay_url; }   // fenêtre bloquée : on bascule l'onglet
+          paiementEnCours = false;
+          direAuPayeur(libelleInitial);
+        });
+      };
+
+      return envoyer(jeton, false);
+    }).catch(function () { echec('Le paiement n\'a pas pu être lancé.'); });
+  }
 
   function destination(el) {
     var cible = el && el.getAttribute && el.getAttribute('data-go');
