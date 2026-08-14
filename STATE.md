@@ -1098,3 +1098,44 @@ serveur ; `b2` (« Français Tle A », 320 pages) y est.
 Accessoire : `/uploads/protected/` répond **500** au lieu de 403 — l'accès est bien refusé, mais
 une directive du `.htaccess` n'est pas digérée par l'hébergeur. Non corrigé : `.htaccess` est
 fragile ici et a déjà coûté une panne totale.
+
+## Suppression de la double interface (15/08/2026) — v1.19.15, déployée
+
+Cinq écrans publics existaient **en double** depuis que « / » sert la vitrine :
+`presentation`, `tarifs`, `boutique`, `elearning`, `parents`. Ils ne sont plus une
+destination publique — `_renvoyerVersVitrine()` (app.js, en tête de `vShowSec`) envoie le
+visiteur ANONYME sur l'écran correspondant de la vitrine. Quatre garde-fous :
+- **seulement si personne n'est connecté** — un élève ou un enseignant au travail garde sa
+  boutique et son e-learning ;
+- **seulement depuis `/app.html`** — sinon rebond infini le jour où `index.php` retombe sur
+  l'application ;
+- `replace` et non `assign` ;
+- **`presentation` est VOLONTAIREMENT hors de la table.** L'accueil visiteur se re-rend
+  plusieurs fois sans passer le marqueur d'amorçage : sa redirection vers « / » gagnait la
+  course contre celle de `#tarifs`, et le visiteur atterrissait sur l'accueil. Vérifié après
+  correction : `/app.html#tarifs` → `/#tarifs`, écran `tarifs` affiché.
+
+> **Règle** : `initVisitor()` rend « presentation » par défaut **avec un bouton** — on ne peut
+> pas distinguer l'amorçage d'un clic par les arguments. Tout comportement conditionnel dans
+> `vShowSec` a besoin d'un marqueur explicite (3ᵉ argument), et doit encore résister aux
+> re-rendus qui, eux, ne le passent pas.
+
+### Comptes admin : « Identifiants incorrects » mentait
+`DB.admins` / `DB.superAdmin` ne vivent que dans localStorage. Sur un appareil neuf, c'est le
+jeu de démonstration (`directeur`, `secretaire`) — le vrai compte est côté serveur. Le message
+d'erreur envoyait donc chercher l'erreur là où elle n'est pas, et `cloudRestoreDB()` exige
+`isSA()` : il fallait être connecté pour récupérer de quoi se connecter. Une porte de
+récupération est posée AVANT toute session (clé de synchronisation), et ne rapatrie **que les
+listes de comptes**.
+
+### Justification : le point d'arrêt sur la largeur d'écran ne protège rien
+Déployée sur tout le texte, elle a disloqué les panneaux d'abonnement — quatre colonnes de
+250 px sur un écran large. Une ligne de moins de ~45 caractères ne se justifie pas. Exclusion
+par CONTENEUR (grilles, cartes, panneaux), pas par largeur de fenêtre.
+
+### Reste à faire (demandé, non fait)
+Inscription à 100 FCFA câblée au paiement · vérification du mur d'abonnement existant (`_pw*`,
+`pgPaywall`) · extrait du jour à agrandir et relier à l'IA · panneau Actualités à réduire et
+colorer (icônes, puces) · onglet « Répétitions » vide · FAQ vue dans e-learning (localisée dans
+`tarifs` côté code, cause réelle non trouvée) · **refonte de l'habillage du Dashboard et des
+espaces connectés**, qui restent sur l'ancienne charte.
