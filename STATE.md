@@ -1176,9 +1176,23 @@ part. Un booléen d'argument ne pouvait pas suffire — les re-rendus déclench�
 `public_data.php` ne le passent pas. Vérifié : `/app.html#epreuves` survit, `/app.html#tarifs`
 part sur `/#tarifs`.
 
-### ⚠️ PISTE OUVERTE, non traitée — `#epreuves` n'affiche pas les épreuves
-Relevé en production juste après ce déploiement : `/app.html#epreuves` rend
-`_vCurrentSec = 'pour-eleve'` et affiche « Laboratoires Virtuels ». La capture de Jacques
-montrait le même symptôme avec « Émulation VÉRITAS ». Le routeur mappe `epreuves` →
-`showEpreuves`, donc le coupable est probablement un rendu POSTÉRIEUR qui écrase (même famille
-que la course ci-dessus). **À reprendre par là.**
+### `#epreuves` n'affichait pas les épreuves — RÉSOLU (v1.19.17)
+Le coupable était bien un rendu postérieur : l'accueil de l'application. Son bloc « Essentiel »
+porte un bouton vers `pour-eleve`, et le re-rendu de l'accueil (déclenché par le retour de
+`public_data.php`) écrasait la section placée par le routeur.
+
+**La correction n'est pas une redirection mais une SUPPRESSION.** Première tentative :
+rediriger `presentation` avec une fenêtre de 3 s pour épargner l'amorçage — mauvaise, et
+vérifiée comme telle : passé la fenêtre, un visiteur tranquille sur `/app.html?ref=…` était
+éjecté vers la vitrine. *Une minuterie ne règle pas une course, elle la déplace.*
+
+Règle déterministe retenue, dans `initVisitor` :
+- **pas d'ancre** → départ vers la vitrine, requête conservée (parrainage, retour de paiement) ;
+- **une ancre** → le routeur place la section, et **rien** n'est rendu en attendant. Afficher
+  l'accueil « en attendant » revenait exactement à le garder ;
+- filet : si `#vContent` est resté VIDE après 1,6 s, départ vers la vitrine. Il ne peut jamais
+  concurrencer un rendu réussi, puisqu'il ne se déclenche que sur le vide.
+
+Vérifié en production : `#epreuves` → « Épreuves & Annales BEPC, Probatoire, BAC » (8 925 car.),
+et `#partenariat`, `#cagnotte`, `#trophees`, `#evaluations`, `#verifier-certificat` rendent tous
+leur propre section. Le bouton de marque est un `<a href="/">`.
