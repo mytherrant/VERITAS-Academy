@@ -4584,7 +4584,16 @@ function _vRevealInit(){
        vient, pas sur la page qu'on vient de quitter automatiquement.
    ═══════════════════════════════════════════════════════════════════════════ */
 var _VITRINE_COUVRE = {
-  presentation: '',            // l'accueil de la vitrine
+  /* ⚠️ « presentation » N'EST PAS dans cette table, et ce n'est pas un oubli.
+     L'accueil visiteur se re-rend plusieurs fois après le chargement (comportement
+     connu de cette page), et ces re-rendus ne passent pas le marqueur d'amorçage.
+     Quand il y était, la séquence observée en production était : le routeur
+     redirige correctement vers /#tarifs, puis un re-rendu de « presentation »
+     redirige vers « / » — et c'est lui qui gagne. Le visiteur demandait les
+     abonnements et atterrissait sur l'accueil.
+     Ce cas est de toute façon déjà couvert : le garde en tête de la coquille
+     renvoie /app.html sans ancre vers « / », et la vitrine pointe « Présentation »
+     sur decouvrir/. */
   tarifs:       '#tarifs',
   boutique:     '#boutique',
   elearning:    '#elearning',
