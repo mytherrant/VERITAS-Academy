@@ -1,0 +1,683 @@
+/* ============================================================================
+ *  VÉRITAS — assets/veritas-refonte.css
+ *  © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
+ *
+ *  POURQUOI CETTE FEUILLE EXISTE
+ *  Le site s'est construit en deux temps. 64 pages ont suivi la refonte
+ *  « corporate » (Poppins, bleu #1E499B) ; 65 autres — oeuvres/, ressources/,
+ *  niveaux/, decouvrir/, outils/, cours/, campus/ — sont restées sur leur
+ *  feuille d'origine : Segoe UI, bandeau navy/or, cartes à filet fin. Mesuré,
+ *  pas estimé : aucune de ces 65 pages ne contient « Poppins » ni « #1E499B ».
+ *  Un visiteur qui passe de la vitrine à une analyse d'œuvre changeait de site.
+ *
+ *  CE QU'ELLE FAIT — ET CE QU'ELLE NE FAIT PAS
+ *  Elle ne réécrit rien : elle se charge APRÈS les <style> d'origine et ne
+ *  redéfinit que la présentation (police, couleur, rayon, ombre, rythme). Aucun
+ *  sélecteur ne masque, ne déplace ni ne supprime un contenu existant. Les
+ *  pages gardent leur structure, leurs classes et leurs liens.
+ *
+ *  LA LARGEUR DE LECTURE EST VOLONTAIREMENT CONSERVÉE
+ *  La vitrine tient dans 1170 px parce qu'elle aligne des grilles d'accroche.
+ *  Ces pages-ci sont de la prose suivie : au-delà d'environ 75 signes par
+ *  ligne, l'œil perd le début de la ligne suivante. Élargir la colonne aurait
+ *  copié la maquette en dégradant la lecture — le système visuel se transmet
+ *  par la typographie, la couleur, la forme et l'ombre, pas par la largeur.
+ * ==========================================================================*/
+
+/* ── Jetons ────────────────────────────────────────────────────────────────
+   Un rôle par couleur, tenu partout. Les huit teintes de la maquette qui ne
+   désignaient qu'une position dans une grille ne sont pas reprises : une
+   couleur qui ne veut rien dire est du bruit. */
+:root {
+  --r-bleu:      #1E499B;   /* le contenu, et l'élève            */
+  --r-profond:   #0C2A6A;   /* aplats sombres, titres            */
+  --r-parents:   #0E7C86;
+  --r-ensgt:     #B03A6E;
+  --r-action:    #C24E00;   /* l'action payante, le commerce     */
+  --r-acquis:    #007E11;   /* le gratuit, le validé, le juste   */
+  --r-premium:   #5B4FA8;   /* premium et tuteur IA              */
+  --r-or:        #FFC93C;   /* réservé aux fonds sombres         */
+
+  --r-encre:     #16233F;
+  --r-encre2:    #4D5163;
+  --r-fond:      #F6F8FC;
+  --r-ligne:     #E4E9F2;
+
+  --r-10: 10px; --r-12: 12px; --r-14: 14px; --r-16: 16px; --r-18: 18px;
+  --r-pilule: 100px;
+
+  --r-om1: 0 6px 16px rgba(0,17,54,.06);    /* au repos           */
+  --r-om2: 0 12px 26px rgba(0,17,54,.09);   /* au survol          */
+  --r-om3: 0 18px 40px rgba(0,17,54,.12);   /* panneau flottant   */
+
+  --r-t: .18s;
+  --r-rythme: 56px;
+}
+
+/* ── Fondations ────────────────────────────────────────────────────────────
+   `body` porte la police : les pages d'origine la déclarent sur `body` elles
+   aussi, et la source la plus tardive l'emporte à spécificité égale. */
+body {
+  font-family: Poppins, 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+  font-weight: 400;
+  color: var(--r-encre);
+  background: var(--r-fond);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* 15 px de plancher : sous cette taille le texte courant devient pénible sur
+   les téléphones d'entrée de gamme, qui sont la majorité du parc ici. */
+body, p, li, td, th { font-size: clamp(15px, .32vw + 14.2px, 16.5px); }
+
+h1, h2, h3, h4 {
+  font-family: Poppins, 'Segoe UI', system-ui, Arial, sans-serif;
+  color: var(--r-profond);
+  letter-spacing: -.011em;
+  text-wrap: balance;
+}
+h1 { font-weight: 600; font-size: clamp(26px, 3.2vw, 34px); line-height: 1.22; margin: 14px 0 10px; }
+h2 { font-weight: 600; font-size: clamp(20px, 2.1vw, 23px); line-height: 1.3; }
+h3 { font-weight: 500; font-size: clamp(17px, 1.6vw, 19px); line-height: 1.38; }
+
+/* Un filet SOUS un titre sépare deux blocs, il informe. On garde donc celui
+   des h2 — mais aux jetons, et sans l'épaissir. */
+h2 { border-bottom: 1px solid var(--r-ligne); padding-bottom: 7px; margin: var(--r-rythme) 0 14px; }
+h2:first-of-type { margin-top: 26px; }
+
+a { color: var(--r-bleu); text-decoration-thickness: 1px; text-underline-offset: 2px; transition: color var(--r-t); }
+a:hover { color: var(--r-profond); }
+
+strong, b { font-weight: 600; color: var(--r-encre); }
+
+/* ── Bandeau et pied ───────────────────────────────────────────────────────
+   Le bandeau reste sombre — c'est la seule surface où l'or de la marque tient
+   son contraste. Mais on passe du dégradé à trois arrêts à un aplat : le
+   dégradé datait, et il faisait vibrer le texte blanc sur les écrans 6 bits. */
+header {
+  background: var(--r-profond);
+  color: #fff;
+  padding: 15px 20px;
+  box-shadow: var(--r-om1);
+}
+header a {
+  color: var(--r-or);
+  font-weight: 600;
+  font-size: 17px;
+  text-decoration: none;
+  /* Centrage optique du pictogramme avec le texte : l'emoji d'un lien posé
+     dans un flux inline s'assoit sur la ligne de base et paraît trop bas. */
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  line-height: 1;
+}
+header a:hover { color: #FFDA7A; }
+
+footer {
+  text-align: center;
+  color: var(--r-encre2);
+  font-size: 13px;
+  padding: 34px 20px;
+  border-top: 1px solid var(--r-ligne);
+  margin-top: var(--r-rythme);
+}
+
+/* ── Conteneur ─────────────────────────────────────────────────────────────
+   Largeur de lecture préservée (voir l'en-tête de ce fichier). */
+.wrap { padding: 30px 20px; }
+
+/* ── Cartes, tuiles, badges ────────────────────────────────────────────────
+   Le filet fin disparaît au profit de l'ombre de repos : une carte se détache
+   par sa surface, pas par son contour. */
+.card {
+  background: #fff;
+  border: 1px solid var(--r-ligne);
+  border-radius: var(--r-18);
+  padding: 26px;
+  box-shadow: var(--r-om1);
+  margin-bottom: 22px;
+  transition: box-shadow var(--r-t), transform var(--r-t);
+}
+
+.tile {
+  background: #fff;
+  border: 1px solid var(--r-ligne);
+  border-radius: var(--r-14);
+  padding: 16px 17px;
+  color: var(--r-profond);
+  text-decoration: none;
+  box-shadow: var(--r-om1);
+  transition: box-shadow var(--r-t), transform var(--r-t), border-color var(--r-t);
+  display: block;
+}
+.tile:hover {
+  box-shadow: var(--r-om2);
+  transform: translateY(-2px);
+  border-color: #C9D8F2;
+  color: var(--r-profond);
+}
+.tile strong { display: block; font-weight: 600; color: var(--r-profond); }
+/* 15 px est un plancher, pas une cible à contourner pour du « texte
+   secondaire » : sur un téléphone d'entrée de gamme, la description d'une
+   tuile est justement ce qu'on lit pour choisir où aller. */
+.tile span { display: block; color: var(--r-encre2); font-size: 15px; margin-top: 3px; line-height: 1.55; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #EAF0FB;
+  color: var(--r-bleu);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 5px 13px;
+  border-radius: var(--r-pilule);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  line-height: 1.6;
+}
+
+/* ── Appel à l'action ──────────────────────────────────────────────────────
+   Orange : sur ce site il signale l'action, et lui seule. Le bleu du bandeau
+   servait aussi de bouton, ce qui rendait le clic invisible. */
+.cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 3px;
+  background: var(--r-action);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 16px 22px;
+  border-radius: var(--r-pilule);
+  margin-top: 18px;
+  box-shadow: var(--r-om1);
+  transition: background var(--r-t), box-shadow var(--r-t), transform var(--r-t);
+}
+.cta:hover { background: #A84300; color: #fff; box-shadow: var(--r-om2); transform: translateY(-1px); }
+.cta small { display: block; font-weight: 400; opacity: .92; font-size: 12.5px; }
+
+.rel { font-size: 15px; color: var(--r-encre2); }
+
+/* ── Encadrés pédagogiques ─────────────────────────────────────────────────
+   Chaque encadré porte sa couleur de rôle sur un filet GAUCHE : il ouvre le
+   bloc et se lit dans le sens de la lecture. */
+.plan-box, .corpus-box, .obj-box, .retenir-box {
+  border-radius: var(--r-14);
+  box-shadow: var(--r-om1);
+  border: 1px solid var(--r-ligne);
+  border-left: 3px solid var(--r-bleu);
+}
+.obj-box     { border-left-color: var(--r-parents); }
+.retenir-box { border-left-color: var(--r-acquis); }
+.corpus-box  { border-left-color: var(--r-premium); }
+
+.obj-label, .corpus-label, .plan-header, .lesson-tag, .nav-tag {
+  font-weight: 600;
+  letter-spacing: .3px;
+}
+
+/* ── Boutons de navigation et d'exercice ───────────────────────────────────
+   Centrage réel : `text-align` ne centre que l'inline. Une puce, un emoji ou
+   une icône restaient calés à gauche dès que le bouton dépassait une ligne. */
+.nav-btn, .opt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+  border-radius: var(--r-12);
+  font-family: inherit;
+  font-weight: 500;
+  transition: background var(--r-t), border-color var(--r-t), color var(--r-t), box-shadow var(--r-t);
+}
+.opt-btn { width: 100%; justify-content: flex-start; text-align: left; }
+
+/* ── Panneaux de validation ────────────────────────────────────────────────
+   Les pastels d'origine (#d4edda / #f8d7da) viennent d'un cadre tiers et ne
+   sont dans aucune palette d'ici. On les ramène aux deux teintes qui ont un
+   sens tenu : vert = juste, framboise = à revoir. Et on centre le contenu,
+   qui restait collé à gauche dans un panneau pourtant large. */
+.feedback {
+  border-radius: var(--r-12);
+  padding: 13px 16px;
+  font-weight: 500;
+  line-height: 1.55;
+  box-shadow: var(--r-om1);
+  border: 1px solid transparent;
+  /* `display` reste piloté par les classes .ok/.nok des pages : on n'impose
+     rien ici, sinon un panneau fermé s'ouvrirait tout seul. */
+  align-items: center;
+  gap: 10px;
+}
+.feedback.ok {
+  background: #E6F4E9;
+  color: #0A5B14;
+  border-color: #BFE3C7;
+  display: flex;
+}
+.feedback.nok {
+  background: #FBE9F0;
+  color: #8A2B54;
+  border-color: #F0CBDB;
+  display: flex;
+}
+
+.opt-btn.correct {
+  background: #E6F4E9;
+  border-color: var(--r-acquis);
+  color: #0A5B14;
+  font-weight: 600;
+}
+.opt-btn.wrong {
+  background: #FBE9F0;
+  border-color: var(--r-ensgt);
+  color: #8A2B54;
+}
+
+/* ── Utilitaires de couleur hérités ────────────────────────────────────────
+   Ces classes existent dans les pages : on les réaligne au lieu de les
+   laisser pointer vers l'ancienne charte. */
+.marine { color: var(--r-profond); }
+.or     { color: #9A7B1C; }        /* l'or ne passe pas sur fond clair */
+.rouge  { color: var(--r-ensgt); }
+
+.cit, .strophe, .auteur { font-family: Poppins, Georgia, serif; }
+.cit, .strophe { color: var(--r-encre); }
+.auteur { color: var(--r-encre2); font-style: normal; font-weight: 500; }
+
+/* ── Centrage des pictogrammes ─────────────────────────────────────────────
+   Règle générale : tout porteur d'icône passe en boîte flex centrée. Un SVG
+   inline s'assoit sur la ligne de base et paraît systématiquement 1 à 2 px
+   trop bas — visible dès qu'il est posé dans une pastille ronde. */
+svg { display: inline-block; vertical-align: middle; flex: none; }
+
+.sec-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--r-profond);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   COULEUR, PUCES, NUMÉROTATION, EFFETS, ANIMATIONS
+   ──────────────────────────────────────────────────────────────────────────
+   La première passe était juste mais austère : tout tombait en bleu nuit sur
+   blanc, et une page de méthode ressemblait à une page d'examen. Ce qui suit
+   remet de la couleur — mais chaque teinte désigne UNE chose, et le même
+   objet garde la même teinte d'une page à l'autre. Une couleur qui ne
+   signalerait que la position dans une grille serait du bruit ; on la déduit
+   donc de la DESTINATION du lien, pas de son rang.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Titres de section : un jalon coloré ───────────────────────────────────
+   Le filet gris seul ne hiérarchisait pas : deux h2 de nature différente
+   avaient exactement le même poids visuel. */
+.wrap h2 {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.wrap h2::before {
+  content: '';
+  flex: none;
+  width: 5px;
+  height: 1.05em;
+  border-radius: var(--r-pilule);
+  background: var(--r-bleu);
+}
+
+/* ── Puces ─────────────────────────────────────────────────────────────────
+   Le disque noir du navigateur est le dernier élément de la page à ignorer
+   la charte. On ne cible que les listes SANS classe : celles qui en ont une
+   sont déjà mises en forme par leur page, et les écraser casserait des
+   grilles. */
+.wrap ul:not([class]) { list-style: none; padding-left: 2px; }
+.wrap ul:not([class]) > li {
+  position: relative;
+  padding-left: 25px;
+  margin: 8px 0;
+}
+.wrap ul:not([class]) > li::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: .62em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--r-bleu);
+  box-shadow: 0 0 0 3.5px rgba(30, 73, 155, .13);
+}
+
+/* Dans un encadré, la puce prend la couleur de l'encadré : la liste
+   appartient visiblement à son bloc. */
+.retenir-box ul:not([class]) > li::before { background: var(--r-acquis); box-shadow: 0 0 0 3.5px rgba(0,126,17,.13); }
+.obj-box     ul:not([class]) > li::before { background: var(--r-parents); box-shadow: 0 0 0 3.5px rgba(14,124,134,.13); }
+.corpus-box  ul:not([class]) > li::before { background: var(--r-premium); box-shadow: 0 0 0 3.5px rgba(91,79,168,.13); }
+
+/* ── Numérotation ──────────────────────────────────────────────────────────
+   Une méthode est une suite d'étapes : le numéro doit se voir et se compter
+   d'un coup d'œil. Pastille pleine, chiffre centré — centré pour de bon,
+   par `flex`, et non par un `line-height` ajusté à la main qui décale d'un
+   pixel dès que la police change. */
+.wrap ol:not([class]) { list-style: none; counter-reset: vrpas; padding-left: 2px; }
+.wrap ol:not([class]) > li {
+  counter-increment: vrpas;
+  position: relative;
+  padding-left: 42px;
+  margin: 12px 0;
+}
+.wrap ol:not([class]) > li::before {
+  content: counter(vrpas);
+  position: absolute;
+  left: 0;
+  top: .02em;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--r-bleu);
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+  line-height: 1;
+  box-shadow: 0 3px 9px rgba(30, 73, 155, .30);
+}
+.retenir-box ol:not([class]) > li::before { background: var(--r-acquis); box-shadow: 0 3px 9px rgba(0,126,17,.30); }
+.obj-box     ol:not([class]) > li::before { background: var(--r-parents); box-shadow: 0 3px 9px rgba(14,124,134,.30); }
+.corpus-box  ol:not([class]) > li::before { background: var(--r-premium); box-shadow: 0 3px 9px rgba(91,79,168,.30); }
+
+/* ── Couleur des tuiles, déduite de la destination ─────────────────────────
+   Un sélecteur d'attribut lit le `href` : la couleur suit donc le SENS du
+   lien, sans toucher au HTML. Une méthode reste bleue partout où elle
+   apparaît, un examen reste ambré, un corrigé gratuit reste vert. */
+.tile { position: relative; overflow: hidden; }
+.tile::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--r-bleu);
+  transform: scaleX(1);
+  transform-origin: left;
+  transition: width var(--r-t);
+}
+.tile:hover::before { width: 5px; }
+
+.tile[href*="bepc"], .tile[href*="probatoire"],
+.tile[href*="bac-"], .tile[href*="gce"],
+.tile[href*="annales"], .tile[href*="epreuve"]       { --r-accent: var(--r-action); }
+.tile[href*="corrige"], .tile[href*="gratuit"]       { --r-accent: var(--r-acquis); }
+.tile[href*="/oeuvres/"]                             { --r-accent: var(--r-premium); }
+.tile[href*="parent"]                                { --r-accent: var(--r-parents); }
+.tile[href*="enseignant"], .tile[href*="prof"]       { --r-accent: var(--r-ensgt); }
+.tile[href*="programme"], .tile[href*="niveau"]      { --r-accent: var(--r-profond); }
+/* En DERNIER, et ce n'est pas cosmétique : « methode-dissertation-litteraire »
+   contient « litt » et repartait en violet, alors qu'une méthode reste une
+   méthode. À spécificité égale c'est l'ordre qui tranche — la règle la plus
+   spécifique par le SENS doit donc être écrite en dernier. */
+.tile[href*="methode"]                               { --r-accent: var(--r-bleu); }
+.tile::before { background: var(--r-accent, var(--r-bleu)); }
+
+/* Le titre de la tuile reprend l'accent au survol : le lien se désigne
+   lui-même, au lieu de laisser l'ombre faire tout le travail. */
+.tile:hover strong { color: var(--r-accent, var(--r-bleu)); }
+
+/* ── Effets ────────────────────────────────────────────────────────────────
+   Trois niveaux d'ombre, pas un de plus, et un déplacement de 2 px : au-delà
+   la carte « saute » et le curseur perd sa cible. */
+.card:hover { box-shadow: var(--r-om2); }
+
+.badge { transition: background var(--r-t), color var(--r-t); }
+
+/* Voile lumineux qui traverse le bouton d'action au survol. Purement
+   décoratif, donc `pointer-events:none` : il ne doit jamais intercepter le
+   clic qu'il est censé rendre désirable. */
+.cta { position: relative; overflow: hidden; isolation: isolate; }
+.cta::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 -60%;
+  width: 45%;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.30), transparent);
+  transform: skewX(-18deg);
+  transition: left .5s ease;
+}
+.cta:hover::after { left: 115%; }
+
+/* Anneau de focus visible : la navigation au clavier ne doit jamais deviner
+   où elle se trouve. Il ne s'affiche qu'au clavier (`:focus-visible`). */
+a:focus-visible, button:focus-visible, .tile:focus-visible, .cta:focus-visible {
+  outline: 2.5px solid var(--r-bleu);
+  outline-offset: 3px;
+  border-radius: var(--r-10);
+}
+
+/* ── Animations ────────────────────────────────────────────────────────────
+   Sans JavaScript : une montée à l'ouverture, décalée par rang. Le décalage
+   s'arrête au 8ᵉ élément — au-delà l'attente devient perceptible, et une
+   grille de vingt tuiles se remplirait au compte-gouttes. */
+@keyframes vrMontee {
+  from { opacity: 0; transform: translateY(15px); }
+  to   { opacity: 1; transform: none; }
+}
+.card, .tile, .plan-box, .corpus-box, .obj-box, .retenir-box {
+  animation: vrMontee .52s cubic-bezier(.16, 1, .3, 1) both;
+}
+.grid > *:nth-child(1), .card:nth-of-type(1) { animation-delay: .02s; }
+.grid > *:nth-child(2) { animation-delay: .07s; }
+.grid > *:nth-child(3) { animation-delay: .12s; }
+.grid > *:nth-child(4) { animation-delay: .17s; }
+.grid > *:nth-child(5) { animation-delay: .22s; }
+.grid > *:nth-child(6) { animation-delay: .27s; }
+.grid > *:nth-child(7) { animation-delay: .32s; }
+.grid > *:nth-child(n+8) { animation-delay: .36s; }
+
+@keyframes vrEntree {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+header { animation: vrEntree .4s ease both; }
+.wrap > h1 { animation: vrMontee .5s cubic-bezier(.16,1,.3,1) both; animation-delay: .04s; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ICÔNES — les émojis remplacés
+   ──────────────────────────────────────────────────────────────────────────
+   Un émoji n'est pas dessiné par le site mais par le système : le même 🎓
+   sort bleu sur Android, gris sur Windows et bombé sur iPhone. Il ignore donc
+   la charte par construction, et il grossit avec la police sans jamais
+   s'aligner sur elle. Les glyphes lucide du sprite prennent le relais.
+   ═══════════════════════════════════════════════════════════════════════ */
+.vi {
+  width: 1.06em;
+  height: 1.06em;
+  /* Taillée sur la police, l'icône suit les titres comme le texte courant.
+     Le décalage vertical corrige l'assise sur la ligne de base : sans lui
+     l'icône paraît basse d'environ 2 px, ce qui se voit surtout en début de
+     ligne, là où l'œil compare avec la majuscule voisine. */
+  vertical-align: -.155em;
+  display: inline-block;
+  flex: none;
+  color: var(--r-bleu);
+}
+
+/* Dans un conteneur flex (bandeau, titre de section, bouton), l'alignement
+   est pris en charge par le parent : on neutralise le décalage, sinon il
+   s'ajoute au centrage et redescend l'icône. */
+header a .vi, .sec-title .vi, .cta .vi, .badge .vi,
+.nav-btn .vi, .opt-btn .vi, .feedback .vi, h2 .vi { vertical-align: 0; }
+
+/* L'icône hérite de la couleur du texte partout où celui-ci porte déjà un
+   sens (un titre framboise, un lien orange) : une seule décision de couleur
+   par bloc, jamais deux qui se contredisent. */
+h1 .vi, h2 .vi, h3 .vi, .cta .vi, header a .vi, .tile strong .vi { color: currentColor; }
+
+/* Rôles — mêmes teintes que partout ailleurs sur le site. */
+.vi-ok     { color: var(--r-acquis); }
+.vi-faux   { color: var(--r-ensgt); }
+.vi-alerte { color: var(--r-action); }
+.vi-action { color: var(--r-action); }
+.vi-astuce { color: var(--r-action); }
+.vi-ia     { color: var(--r-premium); }
+
+/* Dans un panneau de validation, l'icône suit le verdict, pas la charte
+   générale : un ✓ vert dans un panneau rouge serait un contresens. */
+.feedback.ok .vi  { color: #0A5B14; }
+.feedback.nok .vi { color: #8A2B54; }
+.opt-btn.correct .vi { color: var(--r-acquis); }
+.opt-btn.wrong .vi   { color: var(--r-ensgt); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SANS FILET — la couleur passe du trait au fond
+   ──────────────────────────────────────────────────────────────────────────
+   Tous les traits de bordure sont retirés. Un contour de 1 px sert à séparer
+   deux surfaces de même couleur ; dès que les surfaces diffèrent, il fait
+   double emploi et durcit la page. La séparation est donc portée par le fond
+   et par l'ombre de repos — et la couleur d'accent, qui vivait dans une barre
+   latérale, passe dans la teinte du bloc : elle occupe alors toute la carte
+   au lieu de trois pixels sur le bord.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* Chaque rôle porte sa teinte claire. Valeurs posées à la main plutôt que
+   calculées : on les a vérifiées au contraste, une par une. */
+:root {
+  --t-bleu:    #EDF2FB;
+  --t-profond: #ECEFF7;
+  --t-action:  #FDF1E8;
+  --t-acquis:  #EAF6EC;
+  --t-premium: #F0EDF9;
+  --t-parents: #E9F5F6;
+  --t-ensgt:   #FAEDF3;
+}
+
+/* Retrait général. `border:0` sur les surfaces, pas sur `*` : une bordure
+   peut porter du sens ailleurs (un tableau de données, un séparateur de
+   ligne dans une liste). */
+.card, .tile, .plan-box, .corpus-box, .obj-box, .retenir-box,
+.feedback, .opt-btn, .nav-btn, .badge, header, footer,
+.wrap h2, .wrap h3, .lesson-header, .plan-header {
+  border: 0;
+}
+footer { border-top: 0; }
+.wrap h2 { border-bottom: 0; }
+.tile::before { display: none; }          /* la barre latérale devient le fond */
+
+/* ── Titres de section : bandeau teinté, texte assorti ─────────────────────
+   Le filet gris disparaît au profit d'un aplat clair. Le titre se lit alors
+   comme une entrée de chapitre, et non comme une ligne de tableau. */
+.wrap h2 {
+  background: var(--t-bleu);
+  color: var(--r-bleu);
+  padding: 11px 17px;
+  border-radius: var(--r-12);
+  gap: 0;
+}
+.wrap h2::before { display: none; }
+
+/* Alternance : deux sections voisines ne portent pas la même teinte, ce qui
+   donne le rythme de lecture que le filet assurait auparavant. */
+.wrap h2:nth-of-type(3n+2) { background: var(--t-action);  color: #A84300; }
+.wrap h2:nth-of-type(3n+3) { background: var(--t-premium); color: #4A3F92; }
+
+/* ── Cartes et tuiles : le fond porte l'accent ─────────────────────────────
+   La teinte vient de la DESTINATION du lien (règles plus haut), pas du rang.
+   L'alternance ne fait que doser : une tuile sur deux reste blanche, sinon
+   une grille de douze pavés colorés devient illisible. */
+.tile {
+  background: #fff;
+  --t-accent: var(--t-bleu);
+}
+.tile[href*="bepc"], .tile[href*="probatoire"],
+.tile[href*="bac-"], .tile[href*="gce"],
+.tile[href*="annales"], .tile[href*="epreuve"]  { --t-accent: var(--t-action); }
+.tile[href*="corrige"], .tile[href*="gratuit"]  { --t-accent: var(--t-acquis); }
+.tile[href*="/oeuvres/"]                        { --t-accent: var(--t-premium); }
+.tile[href*="parent"]                           { --t-accent: var(--t-parents); }
+.tile[href*="enseignant"], .tile[href*="prof"]  { --t-accent: var(--t-ensgt); }
+.tile[href*="programme"], .tile[href*="niveau"] { --t-accent: var(--t-profond); }
+.tile[href*="methode"]                          { --t-accent: var(--t-bleu); }
+
+.grid > .tile:nth-child(even) { background: var(--t-accent); }
+.tile:hover  { background: var(--t-accent); }
+
+/* Le titre n'utilise PAS la teinte saturée du rôle mais sa version foncée.
+   Mesuré : #C24E00 sur son propre fond #FDF1E8 tombe à 4,32:1, sous le seuil
+   de 4,5. Une couleur d'accent lisible sur blanc ne l'est plus sur son
+   propre aplat — c'est le piège de l'alternance, et il ne se voit pas à
+   l'œil, seulement à la mesure. */
+.tile strong { color: var(--r-texte, var(--r-bleu)); }
+.tile[href*="bepc"], .tile[href*="probatoire"],
+.tile[href*="bac-"], .tile[href*="gce"],
+.tile[href*="annales"], .tile[href*="epreuve"]  { --r-texte: #A84300; }
+.tile[href*="corrige"], .tile[href*="gratuit"]  { --r-texte: #0A5B14; }
+.tile[href*="/oeuvres/"]                        { --r-texte: #4A3F92; }
+.tile[href*="parent"]                           { --r-texte: #0A5F67; }
+.tile[href*="enseignant"], .tile[href*="prof"]  { --r-texte: #8A2B54; }
+.tile[href*="programme"], .tile[href*="niveau"] { --r-texte: var(--r-profond); }
+.tile[href*="methode"]                          { --r-texte: var(--r-bleu); }
+.tile:hover strong { color: var(--r-texte, var(--r-bleu)); }
+
+/* Les cartes empilées alternent, elles aussi : blanc, puis teinte froide. */
+.wrap > .card:nth-of-type(even) { background: var(--t-bleu); }
+
+/* ── Encadrés pédagogiques : aplat plein, plus de filet gauche ─────────────
+   Chacun garde sa couleur de rôle, désormais sur toute sa surface. */
+.plan-box, .corpus-box, .obj-box, .retenir-box { border-left: 0; }
+.plan-box    { background: var(--t-bleu); }
+.obj-box     { background: var(--t-parents); }
+.retenir-box { background: var(--t-acquis); }
+.corpus-box  { background: var(--t-premium); }
+
+/* Le titre de l'encadré prend la teinte saturée du même rôle : fond clair,
+   texte soutenu — jamais l'inverse, un texte clair sur fond saturé ne tient
+   pas le contraste à cette taille. */
+.plan-header, .plan-box > strong    { color: var(--r-bleu); }
+.obj-label,   .obj-box > strong     { color: #0A5F67; }
+.retenir-box > strong               { color: #0A5B14; }
+.corpus-label, .corpus-box > strong { color: #4A3F92; }
+
+/* ── Panneaux de validation, sans contour ──────────────────────────────── */
+.feedback.ok, .opt-btn.correct { background: var(--t-acquis); }
+.feedback.nok, .opt-btn.wrong  { background: var(--t-ensgt); }
+.opt-btn { background: var(--t-bleu); }
+
+/* ── Pied de page ──────────────────────────────────────────────────────────
+   Le filet supérieur est remplacé par un changement de fond : la zone se
+   distingue sans qu'on ait à tracer une ligne en travers de la page. */
+footer {
+  background: var(--t-profond);
+  color: var(--r-encre2);
+  border-radius: var(--r-18) var(--r-18) 0 0;
+}
+
+/* ── Respect du réglage système ────────────────────────────────────────────
+   Le mouvement est un agrément, jamais une condition d'usage. */
+@media (prefers-reduced-motion: reduce) {
+  * , *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .tile:hover, .cta:hover { transform: none; }
+}
+
+/* ── Petits écrans ─────────────────────────────────────────────────────────
+   Le rythme de 56 px est juste sur un écran de bureau ; il creuse la page sur
+   un téléphone, où l'on fait défiler au pouce. */
+@media (max-width: 700px) {
+  :root { --r-rythme: 38px; }
+  .wrap { padding: 22px 16px; }
+  .card { padding: 20px; border-radius: var(--r-16); }
+  h1 { font-size: clamp(23px, 6vw, 28px); }
+}
