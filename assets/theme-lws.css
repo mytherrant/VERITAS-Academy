@@ -3953,3 +3953,160 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
     margin-top:-59px !important; font-size:24px !important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   HARMONISATION DE L'ACCUEIL VISITEUR SUR LA VITRINE  (14/08/2026)
+   ──────────────────────────────────────────────────────────────────────────
+   Le site a DEUX accueils publics : « / » sert vitrine.html, et « /app.html »
+   garde son propre écran visiteur (#VISITOR), qui est l'accueil d'avant. Les
+   deux partagent déjà Poppins et #1E499B — l'écart n'était donc pas dans les
+   jetons mais dans le traitement : 93 éléments de #VISITOR portaient encore un
+   filet, là où la vitrine n'en a plus un seul et fait porter la séparation par
+   le fond.
+
+   PORTÉE VOLONTAIREMENT LIMITÉE À #VISITOR. Tout ce qui suit est préfixé par
+   l'identifiant de l'écran public. L'application connectée (tableaux de bord,
+   saisie de notes, bulletins) n'est pas touchée : c'est un app-shell dense au
+   contraire de la vitrine, et lui retirer ses filets rendrait ses tableaux
+   illisibles. Harmoniser ne veut pas dire uniformiser.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+#VISITOR {
+  --h-bleu:    #1E499B;
+  --h-profond: #0C2A6A;
+  --h-action:  #C24E00;
+  --h-acquis:  #007E11;
+  --h-premium: #5B4FA8;
+  --h-parents: #0E7C86;
+  --h-ensgt:   #B03A6E;
+
+  --ht-bleu:    #EDF2FB;
+  --ht-profond: #ECEFF7;
+  --ht-action:  #FDF1E8;
+  --ht-acquis:  #EAF6EC;
+  --ht-premium: #F0EDF9;
+  --ht-parents: #E9F5F6;
+
+  --h-om1: 0 6px 16px rgba(0,17,54,.06);
+  --h-om2: 0 12px 26px rgba(0,17,54,.09);
+}
+
+/* ── Retrait des filets ────────────────────────────────────────────────────
+   L'identifiant est DOUBLÉ (#VISITOR#VISITOR). Ce n'est pas une coquetterie :
+   app.css et theme-lws.css posent ces bordures avec des sélecteurs déjà
+   spécifiques, et une simple règle descendante perdait l'arbitrage. Doubler
+   l'identifiant ajoute 100 points de spécificité sans toucher aux feuilles
+   d'origine ni recourir à !important, qu'on ne pourrait plus surcharger. */
+#VISITOR#VISITOR .acc-ess-c,
+#VISITOR#VISITOR .acc-ess-free,
+#VISITOR#VISITOR .acc-porte,
+#VISITOR#VISITOR .acc-porte-ic,
+#VISITOR#VISITOR .acc-plan,
+#VISITOR#VISITOR .acc-plan-prix,
+#VISITOR#VISITOR .acc-pill,
+#VISITOR#VISITOR .vinfo-row,
+#VISITOR#VISITOR .vgz-role,
+#VISITOR#VISITOR .vgz-role-cta,
+#VISITOR#VISITOR .lx-statcard,
+#VISITOR#VISITOR .lx-statcard-head,
+#VISITOR#VISITOR .vemu-tile,
+#VISITOR#VISITOR .vcard,
+#VISITOR#VISITOR .btn {
+  border: 0;
+}
+
+/* ── La séparation passe au fond ───────────────────────────────────────────
+   Une surface se détache par sa teinte et son ombre de repos. C'est ce que
+   fait la vitrine, et c'est ce qui manquait ici. */
+#VISITOR#VISITOR .acc-ess-c,
+#VISITOR#VISITOR .lx-statcard,
+#VISITOR#VISITOR .vemu-tile,
+#VISITOR#VISITOR .vcard {
+  background: #fff;
+  box-shadow: var(--h-om1);
+  border-radius: 14px;
+  transition: box-shadow .18s, transform .18s, background .18s;
+}
+#VISITOR#VISITOR .acc-ess-c:hover,
+#VISITOR#VISITOR .vemu-tile:hover,
+#VISITOR#VISITOR .vcard:hover {
+  box-shadow: var(--h-om2);
+  transform: translateY(-2px);
+}
+
+/* Alternance : une carte sur deux prend la teinte froide. Même dosage que sur
+   les pages statiques — au-delà d'une sur deux, une grille entièrement
+   colorée cesse de hiérarchiser quoi que ce soit. */
+#VISITOR#VISITOR .acc-ess-c:nth-child(even) { background: var(--ht-bleu); }
+
+/* Ce qui est gratuit reste vert, partout et sans exception : c'est la
+   promesse la plus importante du site, elle ne doit pas changer de couleur
+   d'un écran à l'autre. */
+#VISITOR#VISITOR .acc-ess-free {
+  background: var(--ht-acquis);
+  color: #0A5B14;
+  border-radius: 100px;
+}
+
+/* ── Portes d'entrée par rôle ──────────────────────────────────────────────
+   Élève, parents, enseignants, établissements : chacune garde la couleur que
+   la vitrine lui donne déjà. */
+#VISITOR#VISITOR .acc-porte,
+#VISITOR#VISITOR .vgz-role {
+  background: #fff;
+  box-shadow: var(--h-om1);
+  border-radius: 16px;
+  transition: box-shadow .18s, transform .18s;
+}
+#VISITOR#VISITOR .acc-porte:hover,
+#VISITOR#VISITOR .vgz-role:hover { box-shadow: var(--h-om2); transform: translateY(-2px); }
+
+#VISITOR#VISITOR .acc-porte:nth-child(1) { background: var(--ht-bleu); }
+#VISITOR#VISITOR .acc-porte:nth-child(2) { background: var(--ht-parents); }
+#VISITOR#VISITOR .acc-porte:nth-child(3) { background: var(--ht-premium); }
+#VISITOR#VISITOR .acc-porte:nth-child(4) { background: var(--ht-profond); }
+
+#VISITOR#VISITOR .acc-porte-ic { background: transparent; }
+
+/* ── Panneaux d'abonnement ─────────────────────────────────────────────────
+   Le médaillon de prix et le bandeau de couleur, réglés à la session
+   précédente, sont CONSERVÉS : ils fonctionnent. On retire seulement les
+   filets et on pose l'ombre de repos, pour que le panneau se détache comme
+   les cartes de la vitrine. */
+#VISITOR#VISITOR .acc-plan {
+  box-shadow: var(--h-om1);
+  transition: box-shadow .18s, transform .18s;
+}
+#VISITOR#VISITOR .acc-plan:hover { box-shadow: var(--h-om2); transform: translateY(-2px); }
+
+/* ── Boutons ───────────────────────────────────────────────────────────────
+   Pilule et orange d'action, comme sur la vitrine. L'orange de theme-lws
+   (#FF6500) ne tient pas 4,5:1 avec du blanc ; #C24E00 si, et c'est la teinte
+   retenue dans la charte. On ne la change QUE sur l'écran public. */
+#VISITOR#VISITOR .btn {
+  border-radius: 100px;
+  transition: background .18s, box-shadow .18s, transform .18s;
+}
+#VISITOR#VISITOR .vgz-role-cta {
+  border-radius: 100px;
+  background: var(--h-action);
+  color: #fff;
+}
+#VISITOR#VISITOR .vgz-role-cta:hover { background: #A84300; }
+
+/* ── Rythme ────────────────────────────────────────────────────────────────
+   56 px entre sections, comme la vitrine ; 38 px sous 700 px de large, où le
+   même écart creuse la page au lieu de l'aérer. */
+#VISITOR#VISITOR .acc-head { margin-top: 56px; }
+@media (max-width: 700px) {
+  #VISITOR#VISITOR .acc-head { margin-top: 38px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #VISITOR#VISITOR .acc-ess-c:hover,
+  #VISITOR#VISITOR .acc-porte:hover,
+  #VISITOR#VISITOR .vgz-role:hover,
+  #VISITOR#VISITOR .vemu-tile:hover,
+  #VISITOR#VISITOR .vcard:hover,
+  #VISITOR#VISITOR .acc-plan:hover { transform: none; }
+}

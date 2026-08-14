@@ -423,6 +423,35 @@ const cssBascule = `
 }
 [hidden]{display:none!important}
 
+/* ── Le menu « Plus » s'ouvre au survol ────────────────────────────────────
+   Trois choses à savoir avant de toucher à cette règle.
+
+   1. Le mot-clé important est OBLIGATOIRE ici. La ligne [hidden] juste
+      au-dessus ferme le panneau avec la même arme : sans important en face,
+      la règle de survol perd l'arbitrage, en silence.
+
+   2. On s'accroche au PARENT via :has(), faute de conteneur. Le panneau est
+      positionné en absolu, mais l'élément #vrtPlusWrap que vitrine.js
+      interroge dans son gestionnaire de clic extérieur n'existe pas dans la
+      page — :has(> #vrtPlus) désigne donc le vrai parent, quel qu'il soit.
+      Là où :has() n'est pas connu (Chrome antérieur à 105, encore présent
+      sur une partie du parc Android d'ici), la règle est simplement ignorée
+      et le clic continue de fonctionner : l'ouverture au survol est un
+      confort, jamais la seule porte d'entrée.
+
+   3. Réservé aux pointeurs FINS. Sur un écran tactile, un menu qui s'ouvre au
+      survol piège l'utilisateur : la première frappe ouvre au lieu de
+      naviguer, et rien n'indique qu'il faut frapper deux fois. La demande
+      était « au pointeur de la souris » — la media query dit exactement
+      cela. */
+@media (hover:hover) and (pointer:fine){
+  *:has(> #vrtPlus):hover > #vrtPlus[hidden]{display:flex!important}
+  /* Pont de survol : sans lui, les quelques pixels entre le bouton et le
+     panneau referment le menu en cours de trajet. */
+  *:has(> #vrtPlus){position:relative}
+  *:has(> #vrtPlus)::after{content:'';position:absolute;left:0;right:0;top:100%;height:10px}
+}
+
 /* ── Couche responsive ─────────────────────────────────────────────────────
    La maquette ne contient AUCUNE media query en dehors de
    prefers-reduced-motion : toute la mise en page tient dans des styles inline
