@@ -441,6 +441,58 @@ if ($appJs === false || $appJs === '') {
        'surfaces sans contrôle d\'octroi : ' . implode(', ', $nonCouverts));
 }
 
+// ═════════════════════════════════════════════════════════════════
+// 8. FRAIS D'INSCRIPTION — 100 FCFA, et pas 1 franc
+// ═════════════════════════════════════════════════════════════════
+titre('8. Frais d\'inscription');
+
+/* L'inscription n'est pas un tiroir : elle ne débloque rien, elle change
+   l'ÉTAT du compte. Cinq choses à prouver, et la troisième est la seule qui
+   coûte de l'argent quand elle manque. */
+{
+    // (a) Le paiement du bon montant active le compte.
+    $db = baseDeTest();
+    $db['visitorAccounts'][0]['statut'] = 'en_attente_paiement';
+    $r = vrt_grant_entitlement($db, paiement('inscription', '', 100));
+    $a = compte($db);
+    ok('100 FCFA payés → compte actif',
+       !empty($r['changed']) && ($a['statut'] ?? '') === 'actif' && !empty($a['inscriptionPayee']),
+       'statut=' . ($a['statut'] ?? '∅') . ' msg=' . ($r['msg'] ?? ''));
+
+    // (b) Un webhook rejoué ne doit ni réactiver ni réécrire la date.
+    $dateAvant = $a['inscriptionPayee'] ?? '';
+    $r2 = vrt_grant_entitlement($db, paiement('inscription', '', 100));
+    $a2 = compte($db);
+    ok('webhook rejoué → aucun second octroi',
+       empty($r2['changed']) && ($a2['inscriptionPayee'] ?? '') === $dateAvant,
+       'msg=' . ($r2['msg'] ?? ''));
+
+    // (c) LE CONTRÔLE QUI COMPTE : sous-paiement refusé. Sans prix de référence
+    //     pour cet intent, vrt_prix_catalogue rendrait null, le contrôle serait
+    //     SAUTÉ, et l'inscription s'achèterait à 1 franc.
+    $db3 = baseDeTest();
+    $db3['visitorAccounts'][0]['statut'] = 'en_attente_paiement';
+    $r3 = vrt_grant_entitlement($db3, paiement('inscription', '', 1));
+    $a3 = compte($db3);
+    ok('1 FCFA → inscription REFUSÉE',
+       empty($r3['changed']) && ($a3['statut'] ?? '') !== 'actif',
+       'statut=' . ($a3['statut'] ?? '∅') . ' msg=' . ($r3['msg'] ?? ''));
+
+    // (d) Le tarif se règle en base, sans redéploiement.
+    $db4 = baseDeTest();
+    $db4['tarifs'] = ['inscription' => 500];
+    $db4['visitorAccounts'][0]['statut'] = 'en_attente_paiement';
+    $r4 = vrt_grant_entitlement($db4, paiement('inscription', '', 100));
+    ok('tarif relevé à 500 en base → 100 FCFA ne suffisent plus',
+       empty($r4['changed']), 'msg=' . ($r4['msg'] ?? ''));
+
+    // (e) Compte inconnu : on n'active rien au hasard.
+    $db5 = baseDeTest();
+    $r5 = vrt_grant_entitlement($db5, paiement('inscription', '', 100, ['accountId' => 'fantome']));
+    ok('compte inconnu → aucun octroi',
+       empty($r5['changed']), 'msg=' . ($r5['msg'] ?? ''));
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 // BILAN
 // ════════════════════════════════════════════════════════════════════════════

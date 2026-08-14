@@ -352,6 +352,18 @@ if (!defined('VRT_AUTH_LIB')) {
             return $v > 0 ? $v : $microDef[$t];
         }
 
+        /* FRAIS D'INSCRIPTION — 100 FCFA, et un prix de référence OBLIGATOIRE.
+           Sans cette entrée, vrt_prix_catalogue rendrait null pour cet intent,
+           le contrôle de prix serait sauté (c'est son comportement quand il ne
+           connaît pas le tarif), et n'importe qui s'inscrirait en payant 1 franc.
+           Le montant est réglable en base — DB.tarifs.inscription — pour que
+           l'administration puisse le changer sans redéploiement, avec 100 comme
+           valeur par défaut. */
+        if ($intent === 'inscription') {
+            $v = (int) ($db['tarifs']['inscription'] ?? 0);
+            return $v > 0 ? $v : 100;
+        }
+
         // Tranche de scolarité : le montant dû est inscrit versement par
         // versement. C'est le seul intent dont le tarif est EXACT en base.
         if ($intent === 'echeance') {
@@ -823,6 +835,34 @@ if (!defined('VRT_AUTH_LIB')) {
            n'obtenait rien nulle part, et le droit gagné par ceux qui restaient
            ne vivait que dans leur localStorage — perdu au changement d'appareil.
            Miroir EXACT de _payAccorderDroit() : mêmes tiroirs, même clé. */
+        /* FRAIS D'INSCRIPTION — ce n'est PAS un tiroir.
+           Les intents ci-dessous ouvrent un accès en ajoutant un identifiant à
+           une liste. L'inscription, elle, ne débloque rien : elle change l'ÉTAT
+           du compte. D'où une branche à part.
+           Idempotent : un compte déjà actif renvoie « changed:false », sinon une
+           double notification du webhook rejouerait l'activation et écraserait
+           la date de règlement. */
+        if ($intent === 'inscription') {
+            if ($accountId === '') return ['changed' => false, 'msg' => 'accountId manquant'];
+            foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+                if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
+                foreach ($db[$coll] as &$acc) {
+                    if (!is_array($acc) || (string) ($acc['id'] ?? '') !== $accountId) continue;
+                    $st = (string) ($acc['statut'] ?? '');
+                    if ($st === 'actif' || !empty($acc['inscriptionPayee'])) {
+                        unset($acc);
+                        return ['changed' => false, 'msg' => 'inscription déjà réglée'];
+                    }
+                    $acc['statut']           = 'actif';
+                    $acc['inscriptionPayee'] = date('c');
+                    unset($acc);
+                    return ['changed' => true, 'msg' => 'Inscription validée'];
+                }
+                unset($acc);
+            }
+            return ['changed' => false, 'msg' => 'compte introuvable'];
+        }
+
         $tiroirs = [
             'contenu'        => 'unlockedContenus',
             'oeuvre'         => 'unlockedOeuvres',
