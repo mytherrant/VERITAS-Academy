@@ -4558,6 +4558,26 @@ function _vRevealInit(){
 
 function vShowSec(sec,btn){
   window._vCurrentSec=sec;
+  /* ── DEUX INTERFACES EMPILÉES — la vraie « double interface » ─────────────
+     #LS (l'écran de connexion) est en position fixe à z-index 9999, l'espace
+     visiteur #VISITOR à 9000. showLogin() affiche le premier SANS que rien ne
+     le referme ensuite : à partir du moment où un visiteur avait ouvert
+     « Connexion », toute navigation continuait d'écrire dans #vContent… sous
+     un panneau plein écran. Symptôme vécu : « je clique et la page ne change
+     pas », ou « il y a deux sites qui se superposent ». Mesuré : VISITOR
+     1280×840 ET LS 1280×840 affichés en même temps.
+     vShowSec est le passage obligé de TOUTE navigation visiteur : c'est donc
+     ici que la pile se remet d'aplomb. On n'agit que si #LS est réellement
+     visible — un utilisateur connecté, lui, ne doit jamais être renvoyé à
+     l'espace visiteur par un simple changement de section. */
+  try{
+    var _ls = document.getElementById('LS');
+    if(_ls && getComputedStyle(_ls).display !== 'none'){
+      _ls.style.display = 'none';
+      var _ap = document.getElementById('APP');     if(_ap) _ap.style.display = 'none';
+      var _vi = document.getElementById('VISITOR'); if(_vi) _vi.style.display = 'flex';
+    }
+  }catch(e){}
   document.querySelectorAll(".vnav-btn").forEach(b=>b.classList.remove("on"));
   if(btn)btn.classList.add("on");
   const c=$("vContent");
@@ -42694,7 +42714,17 @@ function _cagCreer(eleveId){
   // ils n'existaient qu'au fond du menu déroulant « Pratiquer », donc un élève
   // qui ne déplie pas ce menu ignorait que l'entraînement chronométré et les
   // annales corrigées existent.
-  var FONCTIONS = { evaluations:'showEvaluations', epreuves:'showEpreuves', annales:'showEpreuves' };
+  // « connexion » / « compte » / « inscription » : ajoutés après la refonte
+  // d'août 2026. La vitrine renvoyait ses boutons « Connexion », « Mon compte »
+  // et « Rechercher » vers « app.html » TOUT COURT — or la garde anti-double-
+  // accueil, en tête de la coquille, renvoie à « / » tout visiteur anonyme
+  // arrivant sur /app.html sans ancre ni paramètre. Le premier clic était donc
+  // avalé : le visiteur revenait à la vitrine, cliquait une seconde fois, et
+  // ça marchait. Symptôme fantôme s'il en est. Ces ancres donnent une
+  // destination NOMMÉE, que la garde laisse passer et que le routeur ouvre.
+  var FONCTIONS = { evaluations:'showEvaluations', epreuves:'showEpreuves', annales:'showEpreuves',
+                    connexion:'_ouvrirConnexion', compte:'_ouvrirConnexion',
+                    inscription:'showRegisterForm' };
 
   function sectionDuHash(){
     var h = (window.location.hash || '').replace(/^#/, '');

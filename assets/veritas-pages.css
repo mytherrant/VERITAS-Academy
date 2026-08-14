@@ -1825,3 +1825,152 @@ nav.seqnav a, .tools button, .series-pick button{
   font-family:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
 }
 h1, h2, h3, h4{ letter-spacing:-.012em; }
+
+/* ── PLANCHER TYPOGRAPHIQUE ────────────────────────────────────────────────
+   Le corps de page tient déjà 16 px. Restaient les éléments secondaires —
+   liens de navigation, <small>, boutons d'outils, pastilles — descendus
+   jusqu'à 10,5 px par des règles anciennes. Relevé sur corriges/3e/
+   sequence-1.html : 32 textes sous 15 px, dont un à 10,5 px.
+
+   Deux étages, comme sur la vitrine et dans l'application, pour ne pas
+   aplatir la hiérarchie : 15,5 px pour ce qui se lit, 13,5 px pour ce qui
+   étiquette. Rien en dessous : sous 13 px, un téléphone d'entrée de gamme au
+   soleil ne rend plus le texte lisible, et c'est le parc majoritaire ici. */
+small, .note, span.meta, .crumb{ font-size:15.5px; line-height:1.6; }
+nav.seqnav a, .tools button, .series-pick button, .card a, .intro a{ font-size:15.5px; }
+.badge, .pill, .tag{ font-size:13.5px; letter-spacing:.2px; }
+/* Un bouton se vise au pouce : 44 px, seuil sous lequel les erreurs de frappe
+   augmentent nettement sur mobile. */
+.tools button, .series-pick button{ min-height:44px; }
+
+/* Les huit derniers foyers, relevés un par un dans le DOM plutôt que devinés.
+   Ils résistaient au plancher générique parce qu'ils sont posés par des
+   règles plus spécifiques (héritées de la feuille d'origine) ou en `em`, qui
+   rapetissent silencieusement à chaque niveau d'imbrication. */
+header.top .badge{ font-size:13.5px; }
+section.lec p.sem{ font-size:15.5px; }
+p.obj span{ font-size:15.5px; }
+a.rv small{ font-size:15.5px; }
+footer.bot a{ font-size:15px; }
+span.tx small{ font-size:14px; }
+/* Bloc de conversion (veritas-convert.js) : posé en styles EN LIGNE, donc
+   seul `!important` l'atteint. */
+.vrtc-libre span, .vrtc-res span{ font-size:15.5px !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VIE DE LA PAGE — effets, apparitions, alternance des couleurs de titre
+   ══════════════════════════════════════════════════════════════════════════
+   La vitrine respire : les blocs montent en entrant dans le champ de vision,
+   les cartes se soulèvent au survol, les titres alternent les teintes de la
+   palette. Les pages secondaires, elles, étaient parfaitement immobiles et
+   monochromes — même charte, mais rien ne bougeait, et vingt titres bleu nuit
+   d'affilée finissent par se ressembler.
+
+   ⚠️ SANS UNE LIGNE DE JS, ET CE N'EST PAS UN PARTI PRIS D'ESTHÈTE.
+   Mesuré sur les 128 pages statiques : veritas-convert.js n'est chargé que
+   par 109 d'entre elles, veritas-ui.js par 67, et 18 n'ont aucun script. Une
+   apparition confiée à un observateur JS n'aurait donc animé qu'une partie du
+   site — et, pire, laissé les autres pages à `opacity:0` si le script venait
+   à manquer. On emploie `animation-timeline: view()`, qui fait exactement le
+   travail d'un IntersectionObserver dans le moteur de rendu.
+
+   Repli : `@supports` protège les navigateurs qui l'ignorent — ils affichent
+   la page telle quelle, sans animation et sans le moindre risque de contenu
+   invisible. C'est le bon sens de la dégradation : on ne cache jamais un
+   contenu en pariant qu'un mécanisme le révélera.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes vrtMonte { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }
+@keyframes vrtFondu { from { opacity:0 } to { opacity:1 } }
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .card, .tile, .intro, .seq, .exo, .cta-block, .panel, .box,
+    section > h2, section > h3, .wrap > h2, .wrap > h3, .regle, .enc, table {
+      animation: vrtMonte linear both;
+      animation-timeline: view();
+      /* L'animation se joue pendant que l'élément ENTRE dans l'écran : ce qui
+         est déjà visible au chargement est rendu à 100 %, donc jamais caché. */
+      animation-range: entry 0% entry 46%;
+    }
+    header.top, header { animation: vrtFondu .5s ease both; }
+  }
+
+  /* Survol : le même soulèvement que sur la vitrine, à la même durée. */
+  .card, .tile, .exo, .regle {
+    transition: transform .18s cubic-bezier(.22,1,.36,1), box-shadow .18s, border-color .18s;
+  }
+  .card:hover, .tile:hover, .exo:hover, .regle:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 26px rgba(0,17,54,.09);
+  }
+  /* Les liens de navigation glissent au lieu de sauter. */
+  nav a, .crumb a, footer a { transition: color .18s, background .18s; }
+}
+
+/* ── Alternance des couleurs de titre ──────────────────────────────────────
+   Les quatre teintes sont celles de la vitrine, et chacune garde son rôle :
+   bleu = le contenu, sarcelle = les familles, prune = les enseignants,
+   violet = le premium. On ne colore que les titres de SECTION (h2) : un h1
+   reste seul et ancre la page, un h3 dépend de son h2. Cycle de quatre —
+   au-delà, l'œil ne perçoit plus une alternance mais du désordre. */
+h2:nth-of-type(4n+1) { color:#1E499B }
+h2:nth-of-type(4n+2) { color:#0E7C86 }
+h2:nth-of-type(4n+3) { color:#B03A6E }
+h2:nth-of-type(4n+4) { color:#5B4FA8 }
+
+/* Le filet sous le titre reprend sa teinte : la couleur devient une
+   structure, pas une décoration. */
+h2:nth-of-type(4n+1) { border-bottom-color:rgba(30,73,155,.22) }
+h2:nth-of-type(4n+2) { border-bottom-color:rgba(14,124,134,.22) }
+h2:nth-of-type(4n+3) { border-bottom-color:rgba(176,58,110,.22) }
+h2:nth-of-type(4n+4) { border-bottom-color:rgba(91,79,168,.22) }
+
+/* Première lettre de section un peu plus présente : le repère de lecture des
+   pages longues (corrigés, analyses) sans tomber dans la lettrine. */
+.intro > strong:first-child, .lead > strong:first-child { color:#0C2A6A }
+
+/* Le mouvement est un agrément, jamais une condition d'usage. */
+@media (prefers-reduced-motion: reduce) {
+  .card, .tile, .intro, .seq, .exo, .regle, .enc, table, section > h2 {
+    animation: none !important; opacity:1 !important; transform:none !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BARRE DE RECHERCHE DES CORRIGÉS
+   ══════════════════════════════════════════════════════════════════════════
+   Une page de séquence porte jusqu'à 54 corrigés en sept leçons. L'élève
+   arrive le cahier ouvert sur « exercice 12 » : il n'a pas à faire défiler
+   sept leçons pour le trouver. Posée juste sous la navigation des séquences,
+   avant les outils : c'est le premier geste, il doit être le premier élément.
+   ══════════════════════════════════════════════════════════════════════════ */
+.cfind{ margin:18px 0 6px }
+.cfind-l{ display:block; font-size:14px; font-weight:600; color:#0C2A6A; margin-bottom:7px }
+.cfind-box{ position:relative; display:flex; align-items:center }
+.cfind-i{ position:absolute; left:14px; width:18px; height:18px; color:#8A90A2; pointer-events:none }
+.cfind-in{
+  width:100%; box-sizing:border-box;
+  /* 16 px : en dessous, iOS zoome sur le champ au focus et casse la mise en page. */
+  font:400 16px Poppins,system-ui,sans-serif;
+  padding:13px 44px 13px 42px; min-height:48px;
+  border:1.5px solid #E4E9F2; border-radius:12px; background:#fff; color:#16233F;
+  transition:border-color .18s, box-shadow .18s;
+}
+.cfind-in:focus{ outline:0; border-color:#1E499B; box-shadow:0 0 0 3px rgba(30,73,155,.14) }
+.cfind-in::placeholder{ color:#9BA6BE }
+.cfind-x{
+  position:absolute; right:8px; width:34px; height:34px; min-height:34px;
+  border:0; border-radius:8px; background:#F1F5FC; color:#4D5163; cursor:pointer; font-size:15px;
+}
+.cfind-x:hover{ background:#E4EDFB; color:#1E499B }
+.cfind-say{ margin:8px 2px 0; font-size:14.5px; color:#4D5163; min-height:1.2em }
+
+/* Un bloc masqué par le filtre doit disparaître complètement : `hidden` est
+   ignoré sur les éléments dont le display est forcé par une autre règle. */
+.cfind ~ .wrap [hidden], section.lec[hidden], details.sol[hidden]{ display:none !important }
+
+@media (max-width:700px){
+  .cfind-in{ padding:12px 42px 12px 40px }
+  .cfind-l{ font-size:14.5px }
+}

@@ -20,7 +20,9 @@
   var S = {
     page: 'accueil', tab: 1, filtre: 0, moyen: 0, livr: 1, qte: 1,
     langue: 'fr', theme: 'clair', plus: false, burger: false,
-    ia: false, trad: false, cit: 0, citOn: true, copie: false
+    ia: false, trad: false, cit: 0, citOn: true, copie: false,
+    // Ce que le payeur a tapé. Survit aux re-rendus du tunnel (voir champsDuMoment).
+    saisie: { vpNom: '', vpTel: '', vpTel2: '', vpMail: '', vpAdr: '' }
   };
 
   /* ── Micro-moteur de gabarit ───────────────────────────────────────────
@@ -97,10 +99,29 @@
     if (b) b.hidden = !S.burger;
   }
 
-  /* ── Tunnel de paiement ────────────────────────────────────────────────── */
+  /* ── Tunnel de paiement ──────────────────────────────────────────────────
+     Ce que le payeur saisit vit ICI, pas dans le DOM. `rendre()` remplace les
+     nœuds à chaque changement de moyen ou de livraison : une valeur laissée
+     dans l'<input> serait effacée sous les doigts du payeur au moment même
+     où il choisit sa livraison. On relit donc depuis S.saisie à chaque
+     rendu, et un écouteur DÉLÉGUÉ (posé une seule fois sur le document)
+     enregistre les frappes — un écouteur par champ ne survivrait pas au
+     remplacement des nœuds. */
+  function champsDuMoment() {
+    var liste = (D.champsPaiement[S.moyen] || []).slice();
+    // L'adresse n'a de sens que si l'on livre. On ne demande pas où livrer
+    // à quelqu'un qui vient retirer au centre.
+    if (S.livr > 0 && D.champLivraison) liste = liste.concat(D.champLivraison);
+    return liste.map(function (c) {
+      var o = {}; for (var k in c) if (Object.prototype.hasOwnProperty.call(c, k)) o[k] = c[k];
+      o.valeur = S.saisie[c.champ] || '';
+      return o;
+    });
+  }
+
   function majPaiement() {
     rendre('moyensPaiement', D.moyensPaiement[S.moyen]);
-    rendre('champsPaiement', D.champsPaiement[S.moyen]);
+    rendre('champsPaiement', champsDuMoment());
     rendre('optionsLivraison', D.optionsLivraison[S.livr]);
     var sc = D.scal['moyen' + S.moyen] || {};
     poser('titreFormulaire', sc.titreFormulaire || '');
@@ -359,6 +380,69 @@
     return 'Cahier VÉRITAS × ' + S.qte + ' — livraison ' + ['retrait', 'Douala', 'régions'][S.livr];
   }
 
+  /* ── Contrôle des coordonnées ───────────────────────────────────────────
+     Le tunnel encaissait sans savoir QUI paie ni OÙ livrer. Ces trois règles
+     sont le minimum pour qu'une commande soit exécutable :
+       · un nom, pour rapprocher le versement de la commande ;
+       · un numéro camerounais valide (9 chiffres, ou 12 avec l'indicatif) —
+         c'est aussi celui que le serveur normalise et renvoie au prestataire
+         pour préremplir sa page ;
+       · une adresse dès qu'on livre, puisqu'on la facture.
+     La confirmation du numéro n'est pas un ornement : un chiffre inversé sur
+     un numéro Mobile Money, et le paiement part chez quelqu'un d'autre. */
+  function numeroNormalise(t) {
+    var n = String(t || '').replace(/[^0-9]/g, '');
+    if (n.length === 12 && n.indexOf('237') === 0) n = n.slice(3);
+    return n;
+  }
+
+  function verifierSaisie() {
+    var v = S.saisie;
+    if ((v.vpNom || '').trim().length < 3) return { champ: 'vpNom', msg: 'Indiquez le nom de la personne qui commande.' };
+    var tel = numeroNormalise(v.vpTel);
+    if (!/^6[0-9]{8}$/.test(tel)) return { champ: 'vpTel', msg: 'Numéro camerounais attendu : 9 chiffres commençant par 6.' };
+    // Le second champ n'existe que pour Mobile Money (moyens 0 et 1).
+    if (S.moyen < 2 && numeroNormalise(v.vpTel2) !== tel) {
+      return { champ: 'vpTel2', msg: 'Les deux numéros ne correspondent pas.' };
+    }
+    if (v.vpMail && !/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v.vpMail.trim())) {
+      return { champ: 'vpMail', msg: 'Adresse e-mail invalide.' };
+    }
+    if (S.livr > 0 && (v.vpAdr || '').trim().length < 8) {
+      return { champ: 'vpAdr', msg: 'Indiquez où livrer : quartier, rue, point de repère.' };
+    }
+    return null;
+  }
+
+  /* Le message se pose SOUS le champ fautif, pas dans une alerte : sur
+     téléphone, une alerte masque le formulaire qu'elle commente. */
+  function signalerChamp(id, msg) {
+    var el = document.getElementById(id);
+    if (!el) { alert(msg); return; }
+    var boite = el.closest('label') || el.parentNode;
+    var vieux = boite.querySelector('.vp-err');
+    if (vieux) vieux.parentNode.removeChild(vieux);
+    var p = document.createElement('span');
+    p.className = 'vp-err';
+    p.setAttribute('role', 'alert');
+    p.style.cssText = 'font:400 12.5px Poppins,sans-serif;color:#B3261E;margin-top:2px';
+    p.textContent = msg;
+    boite.appendChild(p);
+    el.style.borderColor = '#B3261E';
+    el.setAttribute('aria-invalid', 'true');
+    try { el.focus({ preventScroll: false }); } catch (e) { el.focus(); }
+  }
+
+  function effacerErreurs() {
+    var es = document.querySelectorAll('.vp-err');
+    for (var i = 0; i < es.length; i++) es[i].parentNode.removeChild(es[i]);
+    var ins = document.querySelectorAll('[aria-invalid="true"]');
+    for (var j = 0; j < ins.length; j++) {
+      ins[j].removeAttribute('aria-invalid');
+      ins[j].style.borderColor = '';
+    }
+  }
+
   /* Message d'attente : la vitrine n'a pas le toast() de l'application, on
      écrit donc dans le libellé du bouton, qui est déjà une région pilotée. */
   function direAuPayeur(txt) { poser('libellePayer', txt); }
@@ -369,6 +453,12 @@
     if (paiementEnCours) return;                 // double-clic : une seule transaction
     var montant = montantTotal();
     if (!(montant > 0)) return;
+
+    /* Coordonnées AVANT tout : rien ne sert d'ouvrir une fenêtre de paiement
+       pour une commande qu'on ne pourra ni rattacher à quelqu'un ni livrer. */
+    effacerErreurs();
+    var faute = verifierSaisie();
+    if (faute) { signalerChamp(faute.champ, faute.msg); return; }
 
     /* ⚠️ La fenêtre DOIT s'ouvrir pendant le clic, pas dans le .then() :
        un window.open() différé est bloqué par tous les navigateurs. On ouvre
@@ -409,8 +499,16 @@
             label: libelleCommande(),
             intent: 'cart',                 // panier : aucun accès numérique à ouvrir
             methode: MOYENS[S.moyen] || '',
+            /* Ces trois-là partaient VIDES : le centre encaissait sans savoir
+               qui avait payé. Le serveur les enregistre dans l'état de la
+               transaction et préremplit la page du prestataire avec. */
+            clientNom: (S.saisie.vpNom || '').trim(),
+            clientTel: numeroNormalise(S.saisie.vpTel),
+            clientEmail: (S.saisie.vpMail || '').trim(),
             lignes: [{ nom: 'Cahier VÉRITAS', qte: S.qte, pu: 5000 },
-                     { nom: 'Livraison', qte: 1, pu: [0, 1000, 2500][S.livr] }]
+                     { nom: 'Livraison ' + ['(retrait au centre)', 'Douala', 'régions'][S.livr]
+                            + (S.livr > 0 ? ' — ' + (S.saisie.vpAdr || '').trim() : ''),
+                       qte: 1, pu: [0, 1000, 2500][S.livr] }]
           })
         })
         /* On conserve le code HTTP : un 401 ne se traite pas comme les
@@ -447,6 +545,118 @@
 
       return envoyer(jeton, false);
     }).catch(function () { echec('Le paiement n\'a pas pu être lancé.'); });
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     RETOUR DU PAYEUR — le point le plus coûteux de toute la refonte
+     ──────────────────────────────────────────────────────────────────────
+     Le serveur fixe l'adresse de retour à « <site>/#paiement?ref=VT… »
+     (camerpayReturnUrl, payment_camerpay.php). Tant que « / » servait
+     l'application, app.js la lisait (_payResumeFromHash). Depuis que « / »
+     sert la vitrine, PLUS PERSONNE ne la lit : le payeur revient de la page
+     du prestataire sur l'accueil, sans un mot. Il a payé et rien ne le dit —
+     alors il repaie, ou il appelle. Cela vaut pour TOUS les paiements du
+     site, pas seulement ceux du panier de la vitrine.
+
+     On rejoue donc ici, en autonome, ce que fait l'application : on interroge
+     `?action=status` jusqu'à ce que le serveur tranche. L'autorité reste le
+     webhook côté serveur, re-vérifié auprès du prestataire ; cet écran ne
+     fait que MONTRER l'issue, il n'ouvre aucun droit.
+     ══════════════════════════════════════════════════════════════════════ */
+  var suiviTimer = null;
+
+  function panneauSuivi(ref, etat, texte, couleur) {
+    var el = document.getElementById('vrtSuivi');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'vrtSuivi';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      el.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:22px;z-index:200;'
+        + 'max-width:min(560px,calc(100vw - 24px));background:#fff;border:1px solid #E4E7EF;'
+        + 'border-radius:14px;box-shadow:0 18px 40px rgba(0,17,54,.16);padding:16px 18px;'
+        + 'font:400 14px Poppins,sans-serif;color:#16233F';
+      document.body.appendChild(el);
+    }
+    el.innerHTML = '';
+    var t = document.createElement('div');
+    t.style.cssText = 'font-weight:600;color:' + couleur + ';margin-bottom:4px';
+    t.textContent = etat;
+    var p = document.createElement('div');
+    p.style.cssText = 'line-height:1.55;color:#4D5163';
+    p.textContent = texte;
+    var r = document.createElement('div');
+    r.style.cssText = 'margin-top:8px;font:400 12px Poppins,sans-serif;color:#8A90A2';
+    r.textContent = 'Référence : ' + ref;
+    var x = document.createElement('button');
+    x.type = 'button';
+    x.textContent = 'Fermer';
+    x.style.cssText = 'margin-top:12px;border:1px solid #E4E7EF;background:#F6F8FC;border-radius:9px;'
+      + 'padding:8px 14px;font:500 13px Poppins,sans-serif;color:#16233F;cursor:pointer';
+    x.onclick = function () {
+      if (suiviTimer) { clearTimeout(suiviTimer); suiviTimer = null; }
+      el.parentNode.removeChild(el);
+    };
+    el.appendChild(t); el.appendChild(p); el.appendChild(r); el.appendChild(x);
+  }
+
+  function suivrePaiement(ref) {
+    var base = apiBase();
+    if (!base) return;
+    var essais = 0;
+    panneauSuivi(ref, 'Vérification de votre paiement…',
+      'La confirmation vient de l’opérateur, pas de votre navigateur : cela peut prendre quelques secondes. Ne payez pas une seconde fois.',
+      '#1E499B');
+    var tour = function () {
+      fetch(base + '/payment_camerpay.php?action=status&ref=' + encodeURIComponent(ref))
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (d) {
+          var st = d && d.status;
+          if (st === 'paid' || st === 'success' || st === 'confirmed') {
+            panneauSuivi(ref, '✓ Paiement confirmé',
+              'Merci. Le centre a bien reçu votre règlement' + (d.sandbox ? ' (mode test)' : '')
+              + '. Vous recevrez votre reçu ; en cas de question, écrivez au +237 697 637 739.', '#007E11');
+            return;
+          }
+          if (st === 'failed' || st === 'cancelled' || st === 'expired') {
+            panneauSuivi(ref, 'Paiement non abouti',
+              (d && d.reason ? d.reason + ' ' : '') + 'Aucun montant n’a été prélevé. Vous pouvez réessayer ou commander par WhatsApp au +237 697 637 739.',
+              '#B3261E');
+            return;
+          }
+          /* Deux minutes de patience, puis on rend la main : au-delà, c'est
+             le webhook qui tranchera, et faire tourner une boucle indéfinie
+             sur un forfait mobile est une impolitesse. */
+          if (++essais > 24) {
+            panneauSuivi(ref, 'Vérification en cours côté opérateur',
+              'Votre paiement est en cours de confirmation. Notez la référence ci-dessous : si rien n’arrive d’ici une heure, envoyez-la nous sur WhatsApp au +237 697 637 739.',
+              '#C24E00');
+            return;
+          }
+          suiviTimer = setTimeout(tour, 5000);
+        })
+        .catch(function () {
+          if (++essais > 24) return;
+          suiviTimer = setTimeout(tour, 5000);
+        });
+    };
+    tour();
+  }
+
+  function lireRetourPaiement() {
+    var h = String(location.hash || '');
+    // Ancrage STRICT sur la forme produite par camerpayReturnUrl().
+    var q = h.match(/^#?paiement\?(.+)$/);
+    if (!q) return false;
+    var m = ('&' + q[1]).match(/[?&]ref=([^&]+)/);
+    if (!m) return false;
+    var ref = '';
+    try { ref = decodeURIComponent(m[1]); } catch (e) { ref = m[1]; }
+    if (!ref) return false;
+    // Le hash ne doit pas rouvrir l'écran à chaque F5.
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    suivrePaiement(ref);
+    return true;
   }
 
   function destination(el) {
@@ -489,8 +699,33 @@
       if (t === 'sombre') { S.theme = 'sombre'; appliquerTheme('sombre'); }
     } catch (e) {}
 
+    /* Le tunnel est pré-rendu dans le document avec les champs de la maquette :
+       sans identifiant, donc illisibles, et pour l'un des moyens seulement.
+       Un payeur les remplissait puis se voyait répondre « indiquez votre
+       nom » sur le champ qu'il venait de remplir. On les remplace dès le
+       démarrage par les champs réels — l'écran est caché à ce moment-là,
+       personne ne voit le remplacement. */
+    try { majPaiement(); } catch (e) {}
+
+    /* Frappes du tunnel : un SEUL écouteur, délégué au document. Les champs
+       sont détruits et recréés à chaque changement de moyen ou de livraison ;
+       un écouteur posé sur l'élément ne leur survivrait pas. */
+    document.addEventListener('input', function (e) {
+      var id = e.target && e.target.id;
+      if (id && Object.prototype.hasOwnProperty.call(S.saisie, id)) {
+        S.saisie[id] = e.target.value;
+        var boite = e.target.closest ? e.target.closest('label') : null;
+        var err = boite && boite.querySelector('.vp-err');
+        if (err) { err.parentNode.removeChild(err); e.target.style.borderColor = ''; e.target.removeAttribute('aria-invalid'); }
+      }
+    });
+
+    // Retour du prestataire de paiement — AVANT le routage d'écran : le hash
+    // « #paiement?ref=… » ne désigne pas un écran, il porte une issue.
+    var retour = lireRetourPaiement();
+
     // Écran d'arrivée depuis l'ancre (#tarifs, #boutique…)
-    var h = (location.hash || '').replace('#', '');
+    var h = retour ? '' : (location.hash || '').replace('#', '');
     if (h && document.querySelector('[data-vp="' + h + '"]')) aller(h);
 
     /* Le hash était lu UNE SEULE FOIS, au démarrage. Conséquence : un lien
@@ -501,6 +736,9 @@
        interne devient un vrai lien : elle fonctionne au clic, au bouton
        Retour du navigateur, et quand on la colle dans la barre d'adresse. */
     window.addEventListener('hashchange', function () {
+      // Certains navigateurs mobiles réécrivent le hash sans recharger : le
+      // retour de paiement peut donc arriver ici plutôt qu'au démarrage.
+      if (lireRetourPaiement()) return;
       var n = (location.hash || '').replace('#', '');
       if (!n) { if (S.page !== 'accueil') aller('accueil'); return; }
       if (n === S.page) return;                                   // déjà là : ne pas re-rendre

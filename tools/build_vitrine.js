@@ -254,11 +254,29 @@ corps = fusionnerHover(corps);
 // l'application (app.js, _vtHashRouter) et les pages statiques du dépôt.
 const APP = 'app.html';
 const TEL = '+237697637739';
+// Domaine réel du site. Déclaré ici parce que les corrections du corps en ont
+// besoin ; `DOMAINE`, plus bas, sert l'assemblage de l'en-tête et vaut pareil.
+const SITE = 'https://veritas-school.com';
+/* ⚠️ AUCUNE de ces destinations ne doit être « app.html » TOUT COURT.
+   La coquille (VERITAS_v1.2.html) ouvre sur une garde anti-double-accueil :
+   tout visiteur ANONYME qui demande /app.html sans ancre ni paramètre est
+   renvoyé à « / ». Un lien nu se faisait donc avaler au premier clic — le
+   visiteur revenait à la vitrine, recliquait, et ça marchait. C'est le pire
+   des bugs : intermittent en apparence, parfaitement déterministe en fait.
+   Les quatre portes d'entrée de l'application (Connexion ×2, Mon compte,
+   Rechercher) étaient précisément dans ce cas. Chaque destination porte
+   désormais une ancre que la garde laisse passer ET que le routeur d'app.js
+   (_vtHashRouter) sait ouvrir. */
 const ANCRES = {
-  '#creer-compte': APP + '#contact',        // l'app place son « S'inscrire » dans contact
-  '#compte': APP,
-  '#connexion': APP,
-  '#recherche': APP,
+  '#creer-compte': APP + '#inscription',    // route ajoutée au routeur en même temps
+  '#compte': APP + '#connexion',            // _ouvrirConnexion() ramène un connecté chez lui
+  '#connexion': APP + '#connexion',
+  /* La loupe ne cherchait rien : elle ouvrait l'accueil de l'application, qui
+     n'a pas de recherche de site. On l'envoie là où une recherche existe
+     VRAIMENT et où mène l'intention n°1 de ce public — retrouver le corrigé
+     d'un exercice. L'intitulé accessible est corrigé plus bas, sinon la loupe
+     promettrait encore autre chose que ce qu'elle fait. */
+  '#recherche': 'corriges/',
   '#contact': APP + '#contact',
   '#aide': APP + '#contact',
   /* ── Ce qui RESTE dans la vitrine ──────────────────────────────────────
@@ -281,10 +299,35 @@ const ANCRES = {
   '#bareme': 'corriges/',
   '#offert': 'corriges/',
   '#whatsapp': 'https://wa.me/237' + TEL.slice(4),
-  '#appel': 'tel:' + TEL
+  '#appel': 'tel:' + TEL,
+  /* Ces trois-là n'avaient AUCUNE destination : le pied de page annonçait
+     « Mentions légales » et « CGV », l'écran enseignants « Lire la charte
+     pédagogique », et les trois liens ne menaient nulle part. Sur un site qui
+     encaisse, des CGV absentes ne sont pas un détail de finition. Les pages
+     existent désormais dans legal/. */
+  '#mentions': 'legal/mentions-legales.html',
+  '#cgv': 'legal/cgv.html',
+  '#charte': 'legal/charte-pedagogique.html'
 };
 // Sans destination dans le dépôt : on NE fabrique rien, on laisse et on signale.
-const SANS_DESTINATION = ['#mentions', '#cgv', '#charte'];
+const SANS_DESTINATION = [];
+
+/* Un lien vers une page absente est pire qu'un lien mort visible : il promet
+   des CGV et rend un 404. On vérifie sur DISQUE, à la construction. */
+for (const cible of Object.values(ANCRES)) {
+  if (/^(https?:|tel:|mailto:|#)/.test(cible)) continue;
+  let chemin = cible.split('#')[0].split('?')[0];
+  if (chemin === '') continue;                                   // ancre pure
+  // app.html n'existe pas dans le dépôt : deploy.yml le fabrique depuis la
+  // coquille. C'est celle-ci qu'il faut vérifier.
+  if (chemin === 'app.html') chemin = 'VERITAS_v1.2.html';
+  if (chemin.endsWith('/')) chemin += 'index.html';
+  const f = path.join(process.cwd(), chemin);
+  if (!fs.existsSync(f)) {
+    throw new Error('Ancre branchée sur « ' + cible + ' », qui n\'existe pas dans le dépôt. '
+      + 'Créer la page ou retirer la destination — pas de lien vers un 404.');
+  }
+}
 
 for (const [ancre, cible] of Object.entries(ANCRES)) {
   corps = corps.split('href="' + ancre + '"').join('href="' + cible + '"');
@@ -368,6 +411,433 @@ function brancherEnOrdre(html, ancre, cibles, quoi) {
 corps = brancherEnOrdre(corps, '#niveau', NIVEAUX, 'des niveaux');
 corps = brancherEnOrdre(corps, '#lien', FOOTER, 'du pied de page');
 
+/* ══════════════════════════════════════════════════════════════════════════
+   CORRECTION 2 bis — LE MENU « PLUS » REPREND TOUS LES ANCIENS ONGLETS
+   ──────────────────────────────────────────────────────────────────────────
+   La maquette proposait quatre entrées : catalogue, corrigés, abonnements,
+   boutique. Or l'ancienne navigation visiteur en comptait dix-sept
+   (_vtHashRouter, app.js) plus une dizaine de hubs statiques. Tout le reste
+   — présentation, actualités, résultats, photos, orientation, cagnotte,
+   trophées, classement, partenaires, certificats, annales, évaluations,
+   œuvres, programmes, outils, Campus… — n'était atteignable par AUCUN menu.
+   Les pages existaient, elles étaient déployées, et plus personne ne pouvait
+   y arriver autrement qu'en connaissant l'URL.
+
+   Deux défauts de câblage au passage, tous deux dans les quatre entrées
+   d'origine : « Corrigés des cahiers » ouvrait l'écran e-learning (donc deux
+   entrées différentes menaient au même endroit, et les corrigés n'étaient
+   nulle part), et le menu ne signalait pas quelles entrées quittent la
+   vitrine.
+
+   Le modèle ci-dessous est la SEULE source : le panneau de bureau et le menu
+   mobile en sont tous deux dérivés, ils ne peuvent donc plus diverger.
+
+   TROIS groupes de NEUF, et ce n'est pas un caprice de symétrie : le panneau
+   tient en trois colonnes de 218 px (590 px au total), la seule largeur qui
+   ne soit jamais coupée à droite quand on l'ancre sous le bouton « Plus ».
+   Un quatrième groupe repartait sur une deuxième rangée, seul et à gauche,
+   et faisait déborder le panneau en hauteur. Si une entrée s'ajoute un jour,
+   la retirer d'ailleurs ou repasser à deux colonnes — mais ne pas laisser
+   une rangée orpheline.
+   ══════════════════════════════════════════════════════════════════════════ */
+const MENU = [
+  { titre: 'Apprendre', entrees: [
+    { t: 'Catalogue e-learning', d: 'Matières, œuvres, séquences', i: 'lc-book',        c: '#1E499B', f: '#DBE8FE', vp: 'elearning' },
+    { t: 'Corrigés des cahiers', d: 'Accès libre, par séquence',   i: 'lc-checkcircle', c: '#007E11', f: '#E0F5E5', h: 'corriges/' },
+    { t: 'Annales corrigées',    d: 'BEPC, Probatoire, BAC, GCE',  i: 'lc-doc',         c: '#5B4FA8', f: '#EAE7F7', h: APP + '#epreuves' },
+    { t: 'Évaluations en ligne', d: 'Entraînement chronométré',    i: 'lc-clock',       c: '#C24E00', f: '#FFF3E4', h: APP + '#evaluations' },
+    { t: 'Œuvres au programme',  d: 'Analyses et fiches',          i: 'lc-bookopen',    c: '#1E499B', f: '#DBE8FE', h: 'oeuvres/' },
+    { t: 'Programmes par classe',d: 'De la 6ᵉ à la Terminale',     i: 'lc-graduation',  c: '#0E7C86', f: '#DDF2F4', h: 'niveaux/' },
+    { t: 'Ressources et cours',  d: 'Leçons interactives',         i: 'lc-presentation',c: '#B03A6E', f: '#FBE4EE', h: 'ressources/' },
+    { t: 'Matières et coefficients', d: 'Poids réels, orientation',i: 'lc-scale',       c: '#5B4FA8', f: '#EAE7F7', h: 'parcours/' },
+    { t: 'Outils gratuits',      d: 'Calculateurs de moyenne',     i: 'lc-calculator',  c: '#007E11', f: '#E0F5E5', h: 'outils/' }
+  ]},
+  { titre: 'Le centre', entrees: [
+    { t: 'Présentation',         d: 'Qui nous sommes',             i: 'lc-building',    c: '#1E499B', f: '#DBE8FE', h: APP + '#presentation' },
+    { t: 'Actualités',           d: 'Ce qui se passe au centre',   i: 'lc-megaphone',   c: '#C24E00', f: '#FFF3E4', h: APP + '#actualites' },
+    { t: 'Résultats aux examens',d: 'Taux de réussite',            i: 'lc-trending',    c: '#007E11', f: '#E0F5E5', h: APP + '#resultats' },
+    { t: 'Photos',               d: 'La vie du centre',            i: 'lc-star',        c: '#B03A6E', f: '#FBE4EE', h: APP + '#photos' },
+    { t: 'Orientation',          d: 'Choisir sa série',            i: 'lc-compass',     c: '#0E7C86', f: '#DDF2F4', h: APP + '#orientation' },
+    { t: 'Nous contacter',       d: 'Douala · réponse sous 2 h',   i: 'lc-message',     c: '#1E499B', f: '#DBE8FE', h: APP + '#contact' },
+    { t: 'S’inscrire',           d: 'Créer un compte gratuit',     i: 'lc-user',        c: '#C24E00', f: '#FFF3E4', h: APP + '#inscription' },
+    { t: 'Nos partenaires',      d: 'Ceux qui nous accompagnent',  i: 'lc-handshake',   c: '#0E7C86', f: '#DDF2F4', h: APP + '#nos-partenaires' },
+    { t: 'Vérifier un certificat',d: 'Authentifier une distinction',i: 'lc-shield',     c: '#1E499B', f: '#DBE8FE', h: APP + '#verifier-certificat' }
+  ]},
+  { titre: 'Boutique et communauté', entrees: [
+    { t: 'Abonnements',          d: 'Dès 1 000 FCFA / mois',       i: 'lc-wallet',      c: '#5B4FA8', f: '#EAE7F7', vp: 'tarifs' },
+    { t: 'Boutique de manuels',  d: 'Cahiers et études d’œuvres',  i: 'lc-shop',        c: '#C24E00', f: '#FFF3E4', vp: 'boutique' },
+    { t: 'Corrigés du cahier papier', d: 'La page des QR codes',   i: 'lc-qr',          c: '#1E499B', f: '#DBE8FE', h: 'manuels.html' },
+    { t: 'Cagnotte de scolarité',d: 'Faire financer son année',    i: 'lc-gift',        c: '#C24E00', f: '#FFF3E4', h: APP + '#cagnotte' },
+    { t: 'Trophées VÉRITAS',     d: 'Vote gratuit et unique',      i: 'lc-trophy',      c: '#B8860B', f: '#FFF6DA', h: APP + '#trophees' },
+    { t: 'Classement junior',    d: 'Le tableau d’honneur',        i: 'lc-award',       c: '#5B4FA8', f: '#EAE7F7', h: APP + '#leaderboard-junior' },
+    { t: 'Devenir partenaire',   d: '9 formules, marges revendeur',i: 'lc-users',       c: '#B03A6E', f: '#FBE4EE', h: APP + '#partenariat' },
+    { t: 'Constellation VÉRITAS',d: 'Tout l’écosystème',           i: 'lc-sparkles',    c: '#B03A6E', f: '#FBE4EE', h: 'constellation.html' },
+    { t: 'VÉRITAS Campus',       d: 'Pour les établissements',     i: 'lc-university',  c: '#0C2A6A', f: '#E4E9F2', h: 'campus/' }
+  ]}
+];
+
+const ICO_MENU = (id, c) => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="' + c
+  + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#' + id + '"/></svg>';
+
+/* Une entrée = un <a> si elle QUITTE la vitrine, un <button> si elle change
+   d'écran ici. La distinction n'est pas cosmétique : un <a> se copie, s'ouvre
+   dans un onglet et se donne à Google ; un bouton non. */
+function entreeHTML(e) {
+  const dedans = '<span class="vmn-p" style="background:' + e.f + '">' + ICO_MENU(e.i, e.c) + '</span>'
+    + '<span class="vmn-x">' + esc(e.t) + '<small>' + esc(e.d) + '</small></span>';
+  return e.vp
+    ? '<button type="button" class="vmn-i" onclick="VRT.act(\'pl__aller\',this,event)" data-go="' + e.vp + '">' + dedans + '</button>'
+    : '<a class="vmn-i" href="' + e.h + '">' + dedans + '</a>';
+}
+
+{
+  const colonnes = MENU.map(g =>
+    '<div class="vmn-col"><p class="vmn-t">' + esc(g.titre) + '</p>'
+    + g.entrees.map(entreeHTML).join('') + '</div>').join('');
+
+  /* On remplace le CONTENU du panneau, pas le panneau : vitrine.js pilote
+     #vrtPlus par son identifiant et le pont de survol CSS le cible par
+     `*:has(> #vrtPlus)`. Changer la balise casserait les deux. */
+  const deb = corps.indexOf('<div id="vrtPlus"');
+  if (deb < 0) throw new Error('Panneau #vrtPlus introuvable — la maquette a changé.');
+  const ouv = corps.indexOf('>', deb);
+  let prof = 0, fin = -1;
+  for (let k = ouv + 1; k < corps.length; k++) {
+    if (corps.startsWith('<div', k)) prof++;
+    else if (corps.startsWith('</div>', k)) { if (prof === 0) { fin = k; break; } prof--; }
+  }
+  if (fin < 0) throw new Error('Panneau #vrtPlus non refermé — maquette inattendue.');
+  corps = corps.slice(0, deb)
+    + '<div id="vrtPlus" class="vmn" hidden role="menu" aria-label="Toutes les rubriques">' + colonnes + '</div>'
+    + corps.slice(fin + '</div>'.length);
+
+  /* Menu mobile : les mêmes entrées, en une colonne, à la suite des raccourcis
+     existants. Sous 1000 px le panneau de bureau n'est jamais montré — sans
+     cet ajout, tout ce qui précède serait invisible sur téléphone, c'est-à-dire
+     pour la majorité du public. */
+  const dbB = corps.indexOf('<div id="vrtBurger"');
+  if (dbB < 0) throw new Error('Menu mobile #vrtBurger introuvable — la maquette a changé.');
+  const ouvB = corps.indexOf('>', dbB);
+  let profB = 0, finB = -1;
+  for (let k = ouvB + 1; k < corps.length; k++) {
+    if (corps.startsWith('<div', k)) profB++;
+    else if (corps.startsWith('</div>', k)) { if (profB === 0) { finB = k; break; } profB--; }
+  }
+  if (finB < 0) throw new Error('Menu mobile #vrtBurger non refermé — maquette inattendue.');
+  const suite = '<div class="vmn vmn-mob">' + MENU.map(g =>
+    '<div class="vmn-col"><p class="vmn-t">' + esc(g.titre) + '</p>'
+    + g.entrees.map(entreeHTML).join('') + '</div>').join('') + '</div>';
+  corps = corps.slice(0, finB) + suite + corps.slice(finB);
+
+  console.log('menu Plus   : ' + MENU.reduce((n, g) => n + g.entrees.length, 0)
+    + ' entrées en ' + MENU.length + ' groupes (bureau + mobile)');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CORRECTION 2 ter — L'ACCUEIL SE RÉPÉTAIT, ET S'OUVRAIT SUR LES CAHIERS
+   ──────────────────────────────────────────────────────────────────────────
+   Compté sur la page livrée, pas estimé : les QUATRE mêmes chiffres
+   (3 854 exercices · 56 pages libres · 134 titres · 7 niveaux) étaient
+   affichés TROIS fois — dans le bandeau d'accroche, dans le second bandeau,
+   puis dans une frise dédiée. La ressource offerte était proposée trois fois
+   elle aussi. Et une section « Ils travaillent avec le centre » montrait au
+   visiteur trois cartouches portant « témoignage à recueillir » : on affichait
+   nos emplacements vides. La règle du produit est pourtant tenue partout
+   ailleurs — pas de données, pas de bloc.
+
+   L'ordre posait un second problème : après l'accroche, la page enchaînait
+   sur les corrigés des cahiers. Le cahier est UN produit ; les publics du
+   centre sont quatre — élèves, parents, enseignants, partenaires. Le bloc des
+   publics remonte donc juste après l'accroche, et il gagne sa quatrième
+   porte : les partenaires n'étaient joignables qu'au bas de la page.
+   ══════════════════════════════════════════════════════════════════════════ */
+function decouperSections(html) {
+  const out = [];
+  let i = 0;
+  while ((i = html.indexOf('<section', i)) >= 0) {
+    const j = html.indexOf('>', i);
+    let prof = 0, fin = -1;
+    for (let k = j + 1; k < html.length; k++) {
+      if (html.startsWith('<section', k)) prof++;
+      else if (html.startsWith('</section>', k)) {
+        if (prof === 0) { fin = k + '</section>'.length; break; }
+        prof--;
+      }
+    }
+    if (fin >= 0) out.push({ deb: i, fin, html: html.slice(i, fin) });
+    i = i + 1;   // ⚠️ +1 et non `fin` : voir la note sur les sections imbriquées
+  }
+  return out;
+}
+
+/* Repérage par CONTENU, jamais par position : une section insérée en amont
+   décalerait tous les indices sans que rien ne le signale. Chaque opération
+   exige UNE correspondance et une seule — zéro ou deux, on arrête tout. */
+function sectionUnique(marqueur, quoi) {
+  const s = decouperSections(corps)
+    .filter(x => x.html.includes(marqueur))
+    .sort((a, b) => a.html.length - b.html.length);
+  if (s.length && s[0].html.length > 60 * 1024) {
+    throw new Error('Accueil - ' + quoi + ' : la plus petite section trouvee fait '
+      + (s[0].html.length / 1024).toFixed(0) + ' Ko : c\'est un ecran, pas un bloc. Preciser le repere.');
+  }
+  if (s.length < 1) {
+    throw new Error('Accueil — ' + quoi + ' : ' + s.length + ' section(s) contiennent « '
+      + marqueur + ' ». La maquette a changé, vérifier AVANT de déployer.');
+  }
+  return s[0];
+}
+function supprimerSection(marqueur, quoi) {
+  const s = sectionUnique(marqueur, quoi);
+  corps = corps.slice(0, s.deb) + corps.slice(s.fin);
+  console.log('accueil     : − ' + quoi + ' (' + (s.html.length / 1024).toFixed(1) + ' Ko)');
+}
+function deplacerSectionApres(marqueur, marqueurCible, quoi) {
+  const s = sectionUnique(marqueur, quoi);
+  const bloc = s.html;
+  corps = corps.slice(0, s.deb) + corps.slice(s.fin);
+  const cible = sectionUnique(marqueurCible, quoi + ' (destination)');
+  corps = corps.slice(0, cible.fin) + bloc + corps.slice(cible.fin);
+  console.log('accueil     : ↑ ' + quoi);
+}
+
+supprimerSection('niveaux couverts',
+  'frise de chiffres (3ᵉ répétition de 3 854 / 56 / 134 / 7)');
+supprimerSection('Prenez une ressource, gratuitement, maintenant',
+  'appel « ressource offerte » (déjà dans l’accroche et à l’étape 2)');
+supprimerSection('Emplacements réservés',
+  'témoignages vides (« témoignage à recueillir » × 3)');
+
+/* ── CHIFFRES INVENTÉS : la règle du produit ne souffre pas d'exception ────
+   « Série de 12 jours », « Niveau 7 · 780/1 000 XP », « Terminale A4 ·
+   Douala — 2 480 pts », « Abonnement le plus choisi : Pro » : rien de tout
+   cela n'est calculé, ni calculable. Ce sont des valeurs de maquette, et
+   elles se présentaient au visiteur comme l'activité réelle du centre.
+   La règle tenue partout ailleurs sur ce produit — les anneaux de réussite
+   vides pour le GCE faute de donnée, les témoignages non affichés faute
+   d'avis — l'interdit. Les jeux et les quiz existent, eux : ils restent
+   annoncés dans « Tout ce dont l'élève a besoin », qui ne prétend rien
+   chiffrer. Le jour où un vrai classement sera calculé, la section pourra
+   revenir avec ses données. */
+supprimerSection('Série de 12 jours',
+  'panneau de gamification (série, XP et classement inventés)');
+supprimerSection('Palmarès de la semaine',
+  'palmarès hebdomadaire (« manuel à la une », « abonnement le plus choisi » : non calculés)');
+
+/* ── DEUX ACCROCHES POUR UNE PAGE ──────────────────────────────────────────
+   La page ouvrait sur « Réussir son année avec les vrais programmes
+   camerounais » (titre, promesse de prix, deux appels à l'action), puis
+   recommençait 30 Ko plus bas avec « Cette année, ton enfant comprend
+   enfin… » — même promesse, mêmes chiffres, deux appels à l'action de plus.
+   Deux fois la même page d'accueil dans la même page d'accueil. */
+supprimerSection('Rentrée 2026 · le centre ouvre ses portes',
+  'seconde accroche (doublon du bandeau d’ouverture)');
+
+/* ── LE CAHIER, TROIS FOIS ─────────────────────────────────────────────────
+   « Les corrigés de ma classe », puis la carte « Cours par séquence » de
+   « Tout ce dont l'élève a besoin », puis une section entière « Séquence par
+   séquence, comme au tableau ». Trois fois la même promesse au même
+   visiteur. On garde les deux premières — l'une est gratuite et sert
+   d'entrée, l'autre situe le cours dans l'ensemble de l'offre. */
+supprimerSection('Séquence par séquence, comme au tableau',
+  'section « le programme, pas un résumé » (3ᵉ énoncé de l’offre cahiers)');
+
+/* ── LES PARTENAIRES, DEUX FOIS ────────────────────────────────────────────
+   Depuis que le bloc des publics porte une carte « Partenaires » — avec ses
+   quatre promesses et son lien vers les neuf formules —, la section
+   « Travailler avec VÉRITAS » du bas de page dit exactement la même chose,
+   aux mêmes personnes, avec les mêmes destinations. La carte est en haut,
+   dans le bloc qui structure la page ; la section est en bas, après tout le
+   reste. C'est la carte qui reste. */
+supprimerSection('Neuf programmes de partenariat',
+  'section « Travailler avec VÉRITAS » (doublon de la carte Partenaires)');
+deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
+  'bloc des publics remonté juste après l’accroche');
+
+/* ── QUATRIÈME PUBLIC : LES PARTENAIRES ────────────────────────────────────
+   Le centre s'adresse à quatre publics — élèves, parents, enseignants,
+   partenaires. Les trois premiers avaient leur onglet dans la barre et leur
+   carte dans le bloc d'entrée ; les partenaires n'avaient ni l'un ni l'autre,
+   alors qu'ils portent neuf programmes et une part du chiffre d'affaires. Ils
+   n'étaient joignables qu'au bas de l'accueil, après quinze sections.
+
+   La carte est CLONÉE sur celle des enseignants plutôt que réécrite : même
+   structure, mêmes classes de survol, même géométrie. Une carte écrite à la
+   main aurait dérivé au premier remaniement de la maquette. On ne substitue
+   que ce qui distingue le public — photo, teinte, textes, destination. */
+{
+  const REPERE = 'grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch';
+  const ig = corps.indexOf(REPERE);
+  if (ig < 0) throw new Error('Bloc des publics : grille à trois colonnes introuvable.');
+  const debG = corps.lastIndexOf('<div', ig);
+  let prof = 0, finG = -1;
+  for (let k = corps.indexOf('>', ig) + 1; k < corps.length; k++) {
+    if (corps.startsWith('<div', k)) prof++;
+    else if (corps.startsWith('</div>', k)) { if (prof === 0) { finG = k + 6; break; } prof--; }
+  }
+  if (finG < 0) throw new Error('Bloc des publics : grille non refermée.');
+  const grille = corps.slice(debG, finG);
+
+  // Cartes de premier niveau, dans l'ordre : Élèves, Parents, Enseignants.
+  const dedans = grille.slice(grille.indexOf('>') + 1, grille.length - 6);
+  const cartes = [];
+  let p = 0, d = -1;
+  for (let k = 0; k < dedans.length; k++) {
+    if (dedans.startsWith('<div', k)) { if (p === 0) d = k; p++; }
+    else if (dedans.startsWith('</div>', k)) { p--; if (p === 0) cartes.push({ d, f: k + 6 }); }
+  }
+  if (cartes.length !== 3) throw new Error('Bloc des publics : ' + cartes.length + ' cartes au lieu de 3.');
+
+  const modele = dedans.slice(cartes[2].d, cartes[2].f);
+  const remplacer = (s, de, vers, quoi) => {
+    if (!s.includes(de)) throw new Error('Carte Partenaires : « ' + quoi + ' » introuvable dans le modèle.');
+    return s.split(de).join(vers);
+  };
+  let carte = modele;
+  /* L'extension dépend de l'ordre des corrections : la conversion en WebP
+     passe APRÈS ce bloc, la maquette porte donc encore des .png ici. On
+     accepte les deux plutôt que de dépendre d'un ordre d'exécution. */
+  if (!/assets\/photo-enseignant\.(png|webp)/.test(carte)) {
+    throw new Error('Carte Partenaires : photo du modèle introuvable.');
+  }
+  carte = carte.replace(/assets\/photo-enseignant\.(png|webp)/g, 'assets/photo-groupe.$1');
+  carte = remplacer(carte, 'Enseignant encadrant des élèves', 'Partenaires et libraires du réseau VÉRITAS', 'aria-label');
+  carte = remplacer(carte, '#lc-presentation', '#lc-handshake', 'picto');
+  carte = remplacer(carte, '#C9508B', '#C24E00', 'teinte claire');
+  carte = remplacer(carte, '#8E2B57', '#8A3700', 'teinte sombre');
+  carte = remplacer(carte, '#B03A6E', '#C24E00', 'teinte d’accent');
+  carte = remplacer(carte, '>Enseignants<', '>Partenaires<', 'titre');
+  carte = remplacer(carte, 'Publiez vos corrigés sous votre nom et encadrez les candidats aux examens.',
+    'Libraires, inspecteurs, influenceurs, établissements : neuf façons de porter VÉRITAS et d’en vivre.', 'accroche');
+  carte = remplacer(carte, 'Votre savoir, signé et payé', 'Votre réseau, votre revenu', 'sur-titre');
+  carte = remplacer(carte, 'Rédiger des corrigés rémunérés', 'Revendre les cahiers avec une marge', 'puce 1');
+  carte = remplacer(carte, 'Animer des classes virtuelles', 'Commission sur chaque abonnement apporté', 'puce 2');
+  carte = remplacer(carte, 'Composer des épreuves blanches', 'Équiper un établissement avec Campus', 'puce 3');
+  carte = remplacer(carte, 'Suivre ses élèves en année d’examen', 'Formations rémunérées et kit de campagne', 'puce 4');
+  carte = remplacer(carte, 'Sur candidature', '9 formules', 'mention');
+  /* La destination sort de la vitrine : un <a>, pas un bouton. Les neuf
+     programmes vivent dans l'application, il n'existe pas d'écran partenaire
+     ici — et un lien se copie, s'ouvre dans un onglet et s'indexe. */
+  carte = carte.replace(
+    /<button type="button" onclick="VRT\.act\('u__aller',this,event\)" data-go="enseignants"([^>]*)>Rejoindre le réseau/,
+    '<a href="' + APP + '#partenariat"$1>Voir les 9 formules');
+  carte = carte.replace(/<\/button>(\s*)<\/div>(\s*)<\/div>(\s*)$/, '</a>$1</div>$2</div>$3');
+  if (carte.includes('Rejoindre le réseau') || carte.includes('data-go="enseignants"')) {
+    throw new Error('Carte Partenaires : le bouton d’appel n’a pas été converti en lien.');
+  }
+
+  const grilleNeuve = grille
+    .replace(REPERE, 'grid-template-columns:repeat(4,1fr);gap:18px;align-items:stretch')
+    .slice(0, grille.indexOf('>') + 1 + cartes[2].f) + carte
+    + grille.slice(grille.indexOf('>') + 1 + cartes[2].f);
+  corps = corps.slice(0, debG) + grilleNeuve + corps.slice(finG);
+
+  // Les intitulés annonçaient trois portes : ils en annoncent quatre.
+  corps = corps.split("Trois portes d'entrée").join('Quatre publics, quatre portes');
+  corps = corps.split("Trois raisons de s'y mettre ce soir plutôt que la veille de l'examen")
+               .join('Élèves, parents, enseignants, partenaires : chacun son espace');
+  console.log('accueil     : + carte « Partenaires » (4ᵉ public) et intitulés accordés');
+}
+
+/* ── Barre de navigation : le quatrième public y entre aussi ───────────────
+   Élèves, Parents, Enseignants… et rien pour les partenaires, alors que la
+   barre est le seul repère permanent de la page. */
+{
+  const btnEns = corps.match(/<button type="button" onclick="VRT\.act\('goEnseignants',this,event\)"[^>]*>Enseignants<\/button>/);
+  if (!btnEns) throw new Error('Barre de navigation : bouton « Enseignants » introuvable.');
+  const lien = btnEns[0]
+    .replace('<button type="button"', '<a')
+    .replace(/ onclick="[^"]*"/, '')
+    .replace(' data-go="enseignants"', ' href="' + APP + '#partenariat"')
+    .replace('>Enseignants</button>', ';text-decoration:none>Partenaires</a>')
+    .replace('white-space:nowrap;transition:color .18s,border-color .18s;text-decoration:none',
+             'white-space:nowrap;text-decoration:none;transition:color .18s,border-color .18s');
+  corps = corps.replace(btnEns[0], btnEns[0] + lien);
+  console.log('barre       : + onglet « Partenaires »');
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CORRECTION 2 quinquies — ON NE DÉNIGRE PAS UN SERVICE QU'ON REND
+   ──────────────────────────────────────────────────────────────────────────
+   La maquette vendait la plateforme CONTRE les répétiteurs : « Un répétiteur
+   coûte 25 000 F par mois et rate des séances », « Moins cher qu'un
+   répétiteur », « 25× moins qu'un répétiteur ». Or le centre PROPOSE les
+   répétitions et l'accompagnement à domicile — c'est même une entrée de son
+   propre menu (« Répétitions »). On dépréciait donc, en page d'accueil, une
+   prestation qu'un parent peut commander dans la page suivante.
+
+   Le comparatif est remplacé par ce qui est vrai et vendeur des deux côtés :
+   la plateforme est ouverte à toute heure pour 1 000 F, et le répétiteur se
+   déplace quand l'élève a besoin de quelqu'un à côté de lui. Deux offres qui
+   se complètent, pas une qui écrase l'autre.
+   ══════════════════════════════════════════════════════════════════════════ */
+{
+  const RETOUCHES = [
+    ['Un répétiteur coûte 25 000 F par mois et rate des séances. VÉRITAS coûte 1 000 F, ouvre à toute heure et couvre la 6',
+     'La plateforme ouvre à toute heure pour 1 000 F par mois et couvre la 6',
+     'accroche du bandeau'],
+    ['Moins cher qu’un répétiteur', 'Le suivi, sans quitter la maison', 'sur-titre de la carte Parents'],
+    ['33 F par jour — 25× moins qu’un répétiteur', '33 F par jour, et un répétiteur à domicile en option',
+     'mention de prix']
+  ];
+  let faites = 0;
+  for (const [de, vers, quoi] of RETOUCHES) {
+    if (!corps.includes(de)) { console.warn('⚠ répétitions : « ' + quoi + ' » introuvable — déjà corrigé ou maquette changée.'); continue; }
+    corps = corps.split(de).join(vers);
+    faites++;
+  }
+  console.log('répétitions : ' + faites + '/' + RETOUCHES.length + ' formulations dénigrantes remplacées');
+}
+
+/* ── CORRECTION 2 quater : la loupe doit annoncer ce qu'elle fait ──────────
+   Elle est désormais branchée sur /corriges/ (voir ANCRES). Son intitulé
+   accessible disait « Rechercher » tout court : un lecteur d'écran annonçait
+   une recherche de site qui n'existe pas. On nomme la destination réelle. */
+{
+  const avant = corps;
+  corps = corps.replace(/href="corriges\/" aria-label="Rechercher"/g,
+                        'href="corriges/" aria-label="Trouver un corrigé" title="Trouver un corrigé">');
+  // Le remplacement ci-dessus ajoute un « > » de trop si la balise en avait un.
+  corps = corps.replace(/title="Trouver un corrigé">([^>]*?)>/, 'title="Trouver un corrigé"$1>');
+  if (corps === avant) console.warn('⚠ loupe : intitulé « Rechercher » introuvable — vérifier la maquette.');
+}
+
+/* ── CORRECTION 2 ter : le partage Facebook pointait un domaine inexistant ──
+   La maquette partageait « veritas-centre.cm/passage-du-jour » : ce domaine
+   n'est pas le nôtre (veritas-school.com) et cette page n'existe nulle part.
+   Chaque partage Facebook produisait donc un lien mort — sur un site dont
+   l'acquisition passe en grande partie par le partage. */
+{
+  const avant = corps;
+  corps = corps.replace(/https%3A%2F%2Fveritas-centre\.cm%2Fpassage-du-jour/g,
+                        encodeURIComponent(SITE + '/'));
+  corps = corps.replace(/https:\/\/veritas-centre\.cm/g, SITE);
+  if (corps === avant) console.warn('⚠ partage : veritas-centre.cm introuvable — déjà corrigé ou maquette changée.');
+}
+
+/* ── CORRECTION 2 quater : pas de lecteur vidéo sans vidéo ─────────────────
+   La maquette place un <video src="assets/temoignage.mp4"> sur l'accueil. Ce
+   fichier n'existe pas dans le dépôt (le MP4 livré n'a jamais été identifié
+   ni validé) : le visiteur voyait un cadre noir avec des commandes inertes,
+   et le serveur répondait 404. Règle déjà tenue ailleurs sur ce produit — pas
+   de données, pas de bloc : la section entière est retirée tant que le
+   fichier est absent, et revient d'elle-même le jour où il est déposé. */
+{
+  const VIDEO = path.join(process.cwd(), 'assets', 'temoignage.mp4');
+  if (!fs.existsSync(VIDEO)) {
+    const marque = '<!-- TÉMOIGNAGE VIDÉO -->';
+    const i = corps.indexOf(marque);
+    if (i < 0) {
+      console.warn('⚠ témoignage vidéo : repère introuvable — le lecteur 404 est peut-être encore là.');
+    } else {
+      const fin = corps.indexOf('</section>', i);
+      if (fin < 0) throw new Error('Section témoignage vidéo non refermée — maquette inattendue.');
+      corps = corps.slice(0, i) + corps.slice(fin + '</section>'.length);
+      console.log('vidéo       : assets/temoignage.mp4 absent → section témoignage retirée');
+    }
+  }
+}
+
 // ── CORRECTION 3 : images en WebP ──────────────────────────────────────────
 // Les neuf photos livrées en PNG pesaient 5,99 Mo à elles seules — dont
 // 1,75 Mo pour la seule image du bandeau. Rien de tout cela n'est du dessin
@@ -375,7 +845,22 @@ corps = brancherEnOrdre(corps, '#lien', FOOTER, 'du pied de page');
 // même rendu, 598 Ko au total. Le logo reste en PNG : il sert aussi de favicon.
 corps = corps.replace(/(assets\/(?!veritas-logo)[a-z0-9-]+)\.png/g, '$1.webp');
 
-const ancresRestantes = [...new Set((corps.match(/href="#(?!lc-)[a-z-]+"/g) || []))];
+/* Ce rapport criait au loup : il comptait comme « sans destination » les
+   références au sprite SVG (<use href="#lc-…">, #pay-…, #du-…, #brand-…) et
+   les ancres qui désignent un ÉCRAN de la vitrine (#tarifs, #boutique…),
+   lesquelles fonctionnent depuis que vitrine.js écoute hashchange. Résultat :
+   vingt-trois « anomalies » à chaque construction, dont zéro vraie — donc un
+   rapport que plus personne ne lit. On ne signale que ce qui est réellement
+   mort. */
+const ancresRestantes = (function () {
+  const idsSprite = new Set([...(sprite.match(/<symbol id="([^"]+)"/g) || [])]
+    .map(s => s.replace(/.*id="/, '').replace(/"$/, '')));
+  return [...new Set((corps.match(/href="#([a-zA-Z0-9-]+)"/g) || []))]
+    .map(h => h.slice(7, -1))
+    .filter(id => !idsSprite.has(id))                       // pictogramme du sprite
+    .filter(id => !PAGES.includes(id))                      // écran de la vitrine
+    .map(id => '#' + id);
+})();
 
 // Le menu mobile n'est rendu que si compact ; on le génère à part.
 const valsCompact = valsFor({ page: 'accueil', compact: true });
@@ -429,6 +914,62 @@ for (const lg of ['fr', 'en']) {
     try { c._appliquerTheme('sombre'); } finally { global.document = g; }
     return capt;
   })();
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LE TUNNEL DEMANDAIT UN NUMÉRO DE CARTE — ET NE L'ENVOYAIT NULLE PART
+   ──────────────────────────────────────────────────────────────────────────
+   Trois défauts, du plus grave au plus sournois :
+
+   1. « Numéro de carte » et « Cryptogramme » étaient de vrais <input> sur une
+      page qui n'est pas certifiée pour cela. Un visiteur y SAISIT son numéro
+      de carte et son cryptogramme. Nous n'avons ni le droit ni le besoin de
+      les recevoir : CamerPay est une passerelle par REDIRECTION, la carte se
+      saisit sur SA page. Ces champs, en plus d'être une faute, obligeaient à
+      tout retaper une fois arrivé chez le prestataire.
+   2. Aucun champ ne portait d'identifiant : rien n'était lisible, donc rien
+      n'était envoyé. Un paiement partait avec un nom et un téléphone VIDES —
+      de l'argent encaissé sans savoir de qui.
+   3. On facturait 1 000 ou 2 500 F de livraison sans jamais demander OÙ
+      livrer. Le champ d'adresse n'apparaît que si une livraison est choisie.
+
+   Les libellés du prestataire sont réécrits en conséquence : promettre « vos
+   données de carte transitent chiffrées » sur un formulaire qui n'en demande
+   plus serait un mensonge de plus, dans l'autre sens.
+   ══════════════════════════════════════════════════════════════════════════ */
+{
+  const NOM = { champ: 'vpNom', label: 'Nom et prénom', exemple: 'NGO BELL Marie',
+                ico: '#lc-user', colonne: 'span 2', auto: 'name', type: 'text' };
+  const TEL = { champ: 'vpTel', label: 'Numéro Mobile Money', exemple: '6 XX XX XX XX',
+                ico: '#lc-smartphone', colonne: 'span 1', auto: 'tel', type: 'tel' };
+  const TEL2 = { champ: 'vpTel2', label: 'Confirmer le numéro', exemple: '6 XX XX XX XX',
+                 ico: '#lc-checkcircle', colonne: 'span 1', auto: 'tel', type: 'tel' };
+  const TELC = { champ: 'vpTel', label: 'Téléphone', exemple: '6 XX XX XX XX',
+                 ico: '#lc-smartphone', colonne: 'span 1', auto: 'tel', type: 'tel' };
+  const MAIL = { champ: 'vpMail', label: 'Adresse e-mail (pour le reçu)', exemple: 'marie@exemple.cm',
+                 ico: '#lc-mail', colonne: 'span 1', auto: 'email', type: 'email' };
+  // Mobile Money (0 = MTN, 1 = Orange) · Carte (2) et PayPal (3) : même trio.
+  D.champsPaiement = [[NOM, TEL, TEL2], [NOM, TEL, TEL2], [NOM, TELC, MAIL], [NOM, TELC, MAIL]];
+  // Ajouté par le client quand la livraison n'est pas un retrait au centre.
+  D.champLivraison = [{ champ: 'vpAdr', label: 'Adresse de livraison', ico: '#lc-mappin',
+                        exemple: 'Quartier, rue, point de repère', colonne: 'span 2',
+                        auto: 'street-address', type: 'text' }];
+
+  const REDIR = 'Vous serez redirigé vers la page sécurisée de notre prestataire pour régler. '
+              + 'Aucune donnée bancaire n’est saisie ni conservée sur ce site.';
+  D.scal.moyen2 = { titreFormulaire: 'Vos coordonnées', noteSecurite: REDIR, libellePayer: 'Payer par carte' };
+  D.scal.moyen3 = { titreFormulaire: 'Vos coordonnées', noteSecurite: REDIR, libellePayer: 'Payer avec PayPal' };
+
+  /* Le gabarit rendait un <input> sans identifiant, sans type et sans valeur :
+     impossible à relire, impossible à repeupler après un re-rendu. On le
+     qualifie ici, une fois, pour les quatre variantes. */
+  const g = gabarits.champsPaiement;
+  if (!g || !/<input type="text"/.test(g.tpl)) {
+    throw new Error('Tunnel : gabarit des champs de paiement introuvable ou déjà modifié.');
+  }
+  g.tpl = g.tpl.replace('<input type="text"',
+    '<input id="{{ cp.champ }}" name="{{ cp.champ }}" type="{{ cp.type }}" autocomplete="{{ cp.auto }}" value="{{ cp.valeur }}"');
+  console.log('tunnel      : champs carte/CVV retirés, nom + téléphone + adresse identifiés');
 }
 
 fs.writeFileSync(path.join(__dirname, '_corps.html'), corps);
@@ -589,6 +1130,44 @@ const cssBascule = `
   *:has(> #vrtPlus)::after{content:'';position:absolute;left:0;right:0;top:100%;height:10px}
 }
 
+/* ── Menu « Plus » : toutes les rubriques ──────────────────────────────────
+   Le panneau d'origine tenait quatre entrées dans 236 px. Il en porte
+   maintenant vingt-sept, groupées : il faut des colonnes, sinon la liste
+   dépasse l'écran et on perd ce qu'on venait de gagner.
+
+   Largeurs choisies pour que le panneau NE SOIT JAMAIS coupé. Il est ancré
+   sur le bouton « Plus », qui se trouve autour du tiers gauche de la barre :
+   trois colonnes de 218 px (≈ 690 px) tiennent à partir de 1200 px de
+   fenêtre, deux colonnes en dessous. Sous 1000 px le panneau n'est plus
+   affiché du tout — c'est le menu mobile qui prend le relais, et il reçoit
+   les mêmes entrées. */
+.vmn{position:absolute;top:100%;left:0;background:#fff;border:1px solid #E4E7EF;
+  border-radius:14px;box-shadow:0 18px 40px rgba(0,17,54,.12);padding:14px;z-index:80;
+  display:grid;grid-template-columns:repeat(3,218px);gap:2px 10px;
+  max-height:min(74vh,600px);overflow-y:auto;overscroll-behavior:contain;
+  animation:vpop .22s cubic-bezier(.22,1,.36,1)}
+@media (max-width:1199.98px){ .vmn{grid-template-columns:repeat(2,214px)} }
+.vmn-col{display:flex;flex-direction:column;gap:1px;min-width:0}
+.vmn-t{margin:10px 0 4px;padding:0 10px;font:600 10.5px Poppins,sans-serif;
+  letter-spacing:.9px;text-transform:uppercase;color:#8A90A2}
+.vmn-i{display:flex;align-items:center;gap:9px;padding:7px 10px;border:0;border-radius:9px;
+  background:none;cursor:pointer;text-align:left;text-decoration:none;width:100%;
+  font:400 13.5px Poppins,sans-serif;color:#001136;transition:background .18s,color .18s}
+.vmn-i:hover,.vmn-i:focus-visible{background:#F1F5FC;color:#1E499B;outline:none}
+.vmn-i:focus-visible{box-shadow:0 0 0 2px #1E499B inset}
+.vmn-p{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;flex:0 0 auto}
+.vmn-x{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.vmn-x small{font:400 11.5px Poppins,sans-serif;color:#6E7385;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Version mobile : dans le tiroir, donc en flux, une seule colonne, sans
+   ombre ni cadre — le tiroir en porte déjà. */
+.vmn-mob{position:static;display:block;border:0;box-shadow:none;padding:4px 0 0;
+  max-height:none;overflow:visible;animation:none;background:none;
+  border-top:1px solid #E4E7EF;margin-top:8px}
+.vmn-mob .vmn-col{margin-bottom:2px}
+
 /* ── Couche responsive ─────────────────────────────────────────────────────
    La maquette ne contient AUCUNE media query en dehors de
    prefers-reduced-motion : toute la mise en page tient dans des styles inline
@@ -618,7 +1197,23 @@ const page = `<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<!-- ── Politique de sécurité du contenu ───────────────────────────────────
+     La coquille applicative doit tout autoriser en https: (CDN jsPDF/xlsx,
+     moteurs d'IA, emojis distants). La vitrine, elle, ne charge QUE ses
+     propres fichiers plus Google Fonts — et c'est la page qui encaisse. Elle
+     mérite donc la politique la plus stricte du site, pas l'absence de
+     politique qu'elle avait. « unsafe-inline » reste indispensable pour les
+     styles (toute la maquette est en styles en ligne) et pour le bloc
+     VRT_DATA ; un nonce est impossible sur un fichier statique servi tel
+     quel. « connect-src 'self' » suffit : le seul appel réseau du script est
+     /api/payment_camerpay.php, sur la même origine. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; frame-src 'none'; img-src 'self' data:; media-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 ${metaBrut}
+<!-- PWA : « / » sert désormais la vitrine. Sans ce lien, le site cessait
+     d'être installable depuis sa propre page d'accueil — le manifeste
+     n'était déclaré que par app.html, où plus personne n'arrive d'abord. -->
+<link rel="manifest" href="/manifest.webmanifest">
 <script type="application/ld+json">${jsonld
   .replace(/https:\/\/www\.veritas-school\.com/g, DOMAINE)
   // L'adresse publique du centre est contact@veritas-school.com (index.php,
@@ -636,6 +1231,19 @@ ${sprite}
 ${corps}
 <script>window.VRT_DATA=${JSON.stringify(D)};window.VRT_TPL=${JSON.stringify(gabarits)};</script>
 <script src="assets/vitrine.js?v=${VERSION_ASSETS}" defer></script>
+<!-- Service worker : enregistré par app.html seulement jusqu'ici. Or depuis
+     que « / » sert la vitrine, un visiteur peut très bien ne jamais ouvrir
+     l'application — il n'avait donc ni mode hors ligne ni proposition
+     d'installation. L'enregistrement est différé après « load » : il ne doit
+     pas disputer la bande passante au premier rendu, sur un public en
+     données mobiles. Portée « / » : le même worker sert les deux surfaces. -->
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () { /* refusé : la page marche sans */ });
+  });
+}
+</script>
 </body>
 </html>
 `;

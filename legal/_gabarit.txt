@@ -1,0 +1,31 @@
+Note de travail — NON DÉPLOYÉE (deploy.yml ne copie que les .html de legal/).
+
+Les trois pages de legal/ partagent la même coquille :
+  · <style> minimal en ligne (elles doivent peindre avant l'arrivée de la
+    feuille externe : ce sont des pages d'entrée, souvent ouvertes depuis un
+    lien de pied de page sur une connexion lente) ;
+  · puis /assets/veritas-refonte.css, qui apporte la charte complète.
+
+Ce que ces pages NE doivent PAS contenir, et pourquoi :
+  · aucun NOM d'associé, aucun numéro de CNI, aucune date de naissance. Ce que
+    la loi exige, c'est l'identification de la PERSONNE MORALE — dénomination,
+    forme, capital, RCCM, NIU, siège, gérance. Les associés figurent au RCCM,
+    qui est public : les recopier sur le site n'ajoute rien et expose des
+    données personnelles. Consigne explicite du propriétaire (14/08/2026).
+  · pas l'adresse Gmail personnelle qui figure sur l'attestation fiscale :
+    l'adresse publique du centre est contact@veritas-school.com.
+
+Source des informations vérifiables employées ici :
+  · RCCM CM-DLA-03-2026-B12-00729, forme B12, capital 999 000 FCFA, siège
+    Ndogpassi 14e, début d'activité 24/07/2026 → déclaration d'immatriculation
+    de personne morale (greffe de Douala-Bonassama-Bonabéri, 27/07/2026) ;
+  · NIU M072618875274L, régime de l'impôt général synthétique, CFLP Douala
+    3 Bis → attestation d'immatriculation DGI (réf. ATTIM 720265324868,
+    07/08/2026) ;
+  · objet social → statuts VÉRITAS EDUCATION SARL et rubrique « activités » de
+    la déclaration d'immatriculation ;
+  · pied de page du site           → « © VERITAS EDUCATION SARL 2026 » ;
+  · contact                        → contact@veritas-school.com, +237 697 637 739 ;
+  · moyens de paiement             → api/payment_camerpay.php (MTN MoMo, Orange
+    Money, carte, PayPal, par redirection chez le prestataire) ;
+  · conservation et suppression    → api/db.php, api/secure_pdf.php.

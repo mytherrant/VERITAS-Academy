@@ -31,6 +31,7 @@ on:
       - 'corriges/**'
       - 'chunks/**'
       - 'assets/**'
+      - 'legal/**'
       - 'constellation.html'
       - 'eleve/**'
       - 'enseignant/**'
@@ -237,6 +238,30 @@ jobs:
             cp -r chunks deploy/
             echo "  ✓ chunks/ ($(ls chunks/*.js 2>/dev/null | wc -l) modules différés)"
           fi
+          # ── Pages légales (mentions, CGV, charte pédagogique) ──────────
+          # ⚠️ ÉCHEC BRUYANT. Le pied de page de la vitrine et l'écran
+          # enseignants pointent vers ces trois pages ; build_vitrine.js refuse
+          # même de construire si elles manquent du dépôt. Les oublier ici
+          # donnerait des CGV en 404 sur un site qui encaisse — la pire des
+          # combinaisons : le lien promet, le serveur nie.
+          # _gabarit.txt est une note de travail : elle reste hors ligne.
+          if [ -d legal ]; then
+            mkdir -p deploy/legal
+            for f in legal/*.html; do
+              [ -f "$f" ] || continue
+              cp "$f" deploy/legal/
+            done
+            n=$(ls deploy/legal/*.html 2>/dev/null | wc -l)
+            if [ "$n" -lt 3 ]; then
+              echo "::error title=Pages légales incomplètes::$n page(s) dans legal/ au lieu de 3 (mentions, CGV, charte). Déploiement ANNULÉ."
+              exit 1
+            fi
+            echo "  ✓ legal/ ($n pages : mentions, CGV, charte)"
+          else
+            echo "::error title=Pages légales absentes::legal/ est introuvable alors que la vitrine y renvoie. Déploiement ANNULÉ."
+            exit 1
+          fi
+
           if [ -f constellation.html ]; then cp constellation.html deploy/; echo "  ✓ constellation.html"; fi
           for d in eleve enseignant flash parcours adopter; do
             if [ -d "$d" ]; then cp -r "$d" deploy/; echo "  ✓ $d/"; fi
@@ -474,6 +499,21 @@ jobs:
             echo "   Service worker aligné : veritas-v$VER"
           fi
           echo "✅ Cache-busters alignés sur $VER dans $n fichier(s)."
+          # ── Le trou de la passoire : un asset SANS ?v= du tout ────────────
+          # Le remplacement ci-dessus n'attrape que les URLs qui portent déjà
+          # « ?v= ». Une feuille appelée « /assets/veritas-pages.css » toute
+          # nue traverse donc l'étape sans être touchée… et .htaccess la sert
+          # en « immutable, max-age=1 an ». Constaté le 14/08/2026 : les 56
+          # pages de corrigés étaient dans ce cas, la charte unifiée ne les
+          # atteignait pas. Aucun symptôme visible : la page s'affiche, avec
+          # l'ancienne feuille. On refuse désormais de déployer ça.
+          nus=$(grep -rhoE '(src|href)="/assets/[A-Za-z0-9_.-]+\.(css|js)"' deploy \
+                  --include='*.html' --include='*.php' | sort -u | tr '\n' ' ')
+          if [ -n "$nus" ]; then
+            echo "::error title=Asset sans cache-buster::$nus — servis « immutable 1 an », donc figés chez tout visiteur déjà venu. Ajoutez ?v= dans le générateur ou la page. Déploiement ANNULÉ."
+            exit 1
+          fi
+          echo "   Aucun asset servi sans ?v= — rien ne restera figé un an."
           reste=$(grep -rhoE '\.(css|js)\?v=[0-9.]+' deploy --include='*.html' --include='*.php' | grep -v "v=$VER" | sort -u | tr '\n' ' ')
           if [ -n "$reste" ]; then
             echo "::warning title=Versions résiduelles::$reste"

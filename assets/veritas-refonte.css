@@ -71,6 +71,16 @@ body {
    les téléphones d'entrée de gamme, qui sont la majorité du parc ici. */
 body, p, li, td, th { font-size: clamp(15px, .32vw + 14.2px, 16.5px); }
 
+/* Le plancher ne valait que pour le corps de page : les éléments secondaires
+   des 58 pages coiffées par cette feuille — <small>, notes, liens de
+   navigation, pastilles — restaient à 12 ou 13 px, hérités de leur feuille
+   d'origine. Deux étages, les mêmes que dans l'application et sur la vitrine :
+   15,5 px pour ce qui se lit, 13,5 px pour ce qui étiquette. */
+small, .note, .meta, .crumb, figcaption { font-size: 15.5px; line-height: 1.6; }
+.badge, .pill, .tag, .kicker { font-size: 13.5px; letter-spacing: .2px; }
+.cta, .btn, button, nav a { font-size: 15.5px; }
+.cta, .btn, button { min-height: 44px; }
+
 h1, h2, h3, h4 {
   font-family: Poppins, 'Segoe UI', system-ui, Arial, sans-serif;
   color: var(--r-profond);
@@ -680,4 +690,84 @@ footer {
   .wrap { padding: 22px 16px; }
   .card { padding: 20px; border-radius: var(--r-16); }
   h1 { font-size: clamp(23px, 6vw, 28px); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   VIE DE LA PAGE — effets, apparitions, alternance des couleurs de titre
+   ══════════════════════════════════════════════════════════════════════════
+   La vitrine respire : les blocs montent en entrant dans le champ de vision,
+   les cartes se soulèvent au survol, les titres alternent les teintes de la
+   palette. Les pages secondaires, elles, étaient parfaitement immobiles et
+   monochromes — même charte, mais rien ne bougeait, et vingt titres bleu nuit
+   d'affilée finissent par se ressembler.
+
+   ⚠️ SANS UNE LIGNE DE JS, ET CE N'EST PAS UN PARTI PRIS D'ESTHÈTE.
+   Mesuré sur les 128 pages statiques : veritas-convert.js n'est chargé que
+   par 109 d'entre elles, veritas-ui.js par 67, et 18 n'ont aucun script. Une
+   apparition confiée à un observateur JS n'aurait donc animé qu'une partie du
+   site — et, pire, laissé les autres pages à `opacity:0` si le script venait
+   à manquer. On emploie `animation-timeline: view()`, qui fait exactement le
+   travail d'un IntersectionObserver dans le moteur de rendu.
+
+   Repli : `@supports` protège les navigateurs qui l'ignorent — ils affichent
+   la page telle quelle, sans animation et sans le moindre risque de contenu
+   invisible. C'est le bon sens de la dégradation : on ne cache jamais un
+   contenu en pariant qu'un mécanisme le révélera.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+@keyframes vrtMonte { from { opacity:0; transform:translateY(20px) } to { opacity:1; transform:none } }
+@keyframes vrtFondu { from { opacity:0 } to { opacity:1 } }
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .card, .tile, .intro, .seq, .exo, .cta-block, .panel, .box,
+    section > h2, section > h3, .wrap > h2, .wrap > h3, .regle, .enc, table {
+      animation: vrtMonte linear both;
+      animation-timeline: view();
+      /* L'animation se joue pendant que l'élément ENTRE dans l'écran : ce qui
+         est déjà visible au chargement est rendu à 100 %, donc jamais caché. */
+      animation-range: entry 0% entry 46%;
+    }
+    header.top, header { animation: vrtFondu .5s ease both; }
+  }
+
+  /* Survol : le même soulèvement que sur la vitrine, à la même durée. */
+  .card, .tile, .exo, .regle {
+    transition: transform .18s cubic-bezier(.22,1,.36,1), box-shadow .18s, border-color .18s;
+  }
+  .card:hover, .tile:hover, .exo:hover, .regle:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 26px rgba(0,17,54,.09);
+  }
+  /* Les liens de navigation glissent au lieu de sauter. */
+  nav a, .crumb a, footer a { transition: color .18s, background .18s; }
+}
+
+/* ── Alternance des couleurs de titre ──────────────────────────────────────
+   Les quatre teintes sont celles de la vitrine, et chacune garde son rôle :
+   bleu = le contenu, sarcelle = les familles, prune = les enseignants,
+   violet = le premium. On ne colore que les titres de SECTION (h2) : un h1
+   reste seul et ancre la page, un h3 dépend de son h2. Cycle de quatre —
+   au-delà, l'œil ne perçoit plus une alternance mais du désordre. */
+h2:nth-of-type(4n+1) { color:#1E499B }
+h2:nth-of-type(4n+2) { color:#0E7C86 }
+h2:nth-of-type(4n+3) { color:#B03A6E }
+h2:nth-of-type(4n+4) { color:#5B4FA8 }
+
+/* Le filet sous le titre reprend sa teinte : la couleur devient une
+   structure, pas une décoration. */
+h2:nth-of-type(4n+1) { border-bottom-color:rgba(30,73,155,.22) }
+h2:nth-of-type(4n+2) { border-bottom-color:rgba(14,124,134,.22) }
+h2:nth-of-type(4n+3) { border-bottom-color:rgba(176,58,110,.22) }
+h2:nth-of-type(4n+4) { border-bottom-color:rgba(91,79,168,.22) }
+
+/* Première lettre de section un peu plus présente : le repère de lecture des
+   pages longues (corrigés, analyses) sans tomber dans la lettrine. */
+.intro > strong:first-child, .lead > strong:first-child { color:#0C2A6A }
+
+/* Le mouvement est un agrément, jamais une condition d'usage. */
+@media (prefers-reduced-motion: reduce) {
+  .card, .tile, .intro, .seq, .exo, .regle, .enc, table, section > h2 {
+    animation: none !important; opacity:1 !important; transform:none !important;
+  }
 }

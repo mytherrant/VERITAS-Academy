@@ -22,6 +22,21 @@ const BASE = (arg('base', 'https://veritas-school.com')).replace(/\/$/, '');
 const OUT = path.join(__dirname, '..', arg('out', 'seo'));
 const APPJS = path.join(__dirname, '..', 'app.js');
 
+/* Cache-buster de la feuille commune. Sans « ?v= », .htaccess sert le CSS en
+   « immutable, max-age=1 an » et l'étape CI qui réaligne les versions ne mord
+   pas — elle ne réécrit que les URLs qui en portent déjà un. Ces 27 pages
+   seraient donc restées figées sur la feuille du jour de leur première visite.
+   On reprend la version de la coquille, comme les autres générateurs. */
+const VER = (function () {
+  try {
+    const shell = fs.readFileSync(path.join(__dirname, '..', 'VERITAS_v1.2.html'), 'utf8').slice(0, 200000);
+    const m = shell.match(/app\.js\?v=([0-9.]+)/);
+    if (m) return m[1];
+  } catch (e) { /* voir ci-dessous */ }
+  // Pas de repli silencieux : mieux vaut échouer ici que figer 27 pages un an.
+  throw new Error('build_seo : version introuvable dans VERITAS_v1.2.html (motif app.js?v=…).');
+})();
+
 function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 // ── Extraire le tableau EPREUVES_DB (données pures) depuis app.js ──
@@ -78,7 +93,7 @@ function pageHtml(e){
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="/assets/veritas-refonte.css">
+<link rel="stylesheet" href="/assets/veritas-refonte.css?v=${VER}">
 <!-- Ces 27 pages étaient les DERNIÈRES hors charte : elles sont fabriquées
      ici, à chaque déploiement, et ne pouvaient donc pas être corrigées une
      fois pour toutes dans le dépôt — toute retouche du fichier produit était
@@ -124,7 +139,7 @@ function main(){
 <link rel="canonical" href="${BASE}/seo/">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="/assets/veritas-refonte.css">
+<link rel="stylesheet" href="/assets/veritas-refonte.css?v=${VER}">
 <style>body{font-family:Poppins,system-ui,'Segoe UI',Arial,sans-serif;max-width:760px;margin:0 auto;padding:24px;background:#F6F8FC;color:#16233F;line-height:1.7}
 header{background:#0C2A6A;color:#fff;padding:24px;border-radius:18px;margin-bottom:22px;box-shadow:0 6px 16px rgba(0,17,54,.06)}
 header h1{color:#fff;font-size:23px;font-weight:600;margin:0 0 6px}

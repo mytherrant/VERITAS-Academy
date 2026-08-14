@@ -1,0 +1,184 @@
+/* ============================================================================
+ *  VÉRITAS — assets/veritas-refonte-app.css
+ *  © 2024-2026 VÉRITAS EDUCATION SARL. Tous droits réservés.
+ *
+ *  POURQUOI CETTE FEUILLE EXISTE
+ *  La refonte d'août 2026 a donné au site une charte claire : Poppins, bleu
+ *  #1E499B, or réservé à l'action, surfaces blanches, texte jamais sous 15 px.
+ *  Elle s'applique à la vitrine (« / ») et, via veritas-refonte.css, aux 64
+ *  pages statiques. Restait l'ESPACE VISITEUR DE L'APPLICATION — c'est-à-dire
+ *  tout ce qu'ouvre le menu « Plus » : partenariat, cagnotte, trophées,
+ *  présentation, actualités, résultats, annales…
+ *
+ *  Mesuré avant correction, sur /app.html#partenariat :
+ *      68 % du texte courant sous 15 px · médiane 13 px · minimum 11 px.
+ *  Le visiteur passait d'une page confortable à un écran deux tailles en
+ *  dessous. C'est ce qu'on décrivait comme « l'ancienne page qui revient ».
+ *
+ *  ── LES TROIS PIÈGES DE LA SURCHARGE D'app.css, ET COMMENT ILS SONT TENUS ──
+ *  1. SPÉCIFICITÉ. app.css et theme-lws.css portent déjà des règles à
+ *     identifiant. On DOUBLE l'identifiant (`#VISITOR#VISITOR`) — technique
+ *     déjà employée par theme-lws.css — et on garde `!important` pour battre
+ *     les styles EN LIGNE, que le rendu JS pose partout.
+ *  2. LES TAILLES SONT EN LIGNE. Une bonne part du texte trop petit vient
+ *     d'attributs `style="font-size:12px"` écrits dans les chaînes JS. Aucune
+ *     règle de classe ne les atteint. On les vise donc par SÉLECTEUR
+ *     D'ATTRIBUT — le même procédé que le thème sombre de la maquette.
+ *  3. ON MESURE, ON NE DEVINE PAS. Les paliers ci-dessous ne sont pas choisis
+ *     au jugé : ils reprennent exactement les tailles relevées dans le DOM
+ *     (9, 10, 11, 12, 13, 13.5, 14, 14.5 px), regroupées en deux étages pour
+ *     ne pas aplatir la hiérarchie — un badge ne doit pas devenir un
+ *     paragraphe.
+ *
+ *  ORDRE DE CHARGEMENT : cette feuille doit rester la DERNIÈRE de la coquille,
+ *  après app.css, veritas-motion.css et theme-lws.css.
+ * ==========================================================================*/
+
+/* ── Jetons, repris tels quels de la vitrine ───────────────────────────── */
+:root {
+  --ra-bleu:    #1E499B;
+  --ra-profond: #0C2A6A;
+  --ra-encre:   #16233F;
+  --ra-encre2:  #4D5163;
+  --ra-fond:    #F6F8FC;
+  --ra-ligne:   #E4E9F2;
+  --ra-action:  #C24E00;
+  --ra-acquis:  #007E11;
+  --ra-om1: 0 6px 16px rgba(0,17,54,.06);
+  --ra-om2: 0 12px 26px rgba(0,17,54,.09);
+  --ra-r: 14px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   1. PLANCHER TYPOGRAPHIQUE
+   ══════════════════════════════════════════════════════════════════════════
+   Deux étages seulement, pour que la hiérarchie survive :
+     · texte courant  → 16 px (la vitrine tient 15 → 16,5 px)
+     · texte secondaire et micro-libellés → 13,5 px, jamais moins.
+   Rien ne descend sous 13,5 px : en dessous, sur un téléphone d'entrée de
+   gamme — la majorité du parc ici — le texte cesse d'être lisible au soleil. */
+
+#VISITOR#VISITOR :is(p, li, td, th, dd, dt, figcaption) {
+  font-size: 16px !important;
+  line-height: 1.62 !important;
+}
+
+/* Tailles posées EN LIGNE par le rendu JS. On relève l'étage bas (badges,
+   mentions, pastilles) sans le confondre avec le texte courant. */
+#VISITOR#VISITOR [style*="font-size:9px"],
+#VISITOR#VISITOR [style*="font-size:10px"],
+#VISITOR#VISITOR [style*="font-size:11px"],
+#VISITOR#VISITOR [style*="font-size:9.5px"],
+#VISITOR#VISITOR [style*="font-size:10.5px"],
+#VISITOR#VISITOR [style*="font-size:11.5px"] {
+  font-size: 13.5px !important;
+  letter-spacing: .2px;
+}
+
+#VISITOR#VISITOR [style*="font-size:12px"],
+#VISITOR#VISITOR [style*="font-size:12.5px"],
+#VISITOR#VISITOR [style*="font-size:13px"],
+#VISITOR#VISITOR [style*="font-size:13.5px"],
+#VISITOR#VISITOR [style*="font-size:14px"],
+#VISITOR#VISITOR [style*="font-size:14.5px"] {
+  font-size: 15.5px !important;
+  line-height: 1.6 !important;
+}
+
+/* Les mêmes tailles quand elles viennent d'une classe d'app.css. La liste est
+   volontairement courte : ce sont les classes réellement relevées sous le
+   plancher dans l'espace visiteur. */
+#VISITOR#VISITOR :is(.vsec-sub, .vcard-d, .vp-d, .acc-ess-d, .lws-feature-d,
+                     .lws-path-d, .vitem-d, .vmeta, .vsmall) {
+  font-size: 15.5px !important;
+  line-height: 1.6 !important;
+}
+
+/* Titres : la vitrine monte plus haut que l'ancienne charte, on suit. */
+#VISITOR#VISITOR h1 { font-size: clamp(27px, 3.4vw, 36px) !important; line-height: 1.2 !important; font-weight: 600 !important; }
+#VISITOR#VISITOR h2 { font-size: clamp(21px, 2.2vw, 26px) !important; line-height: 1.28 !important; font-weight: 600 !important; }
+#VISITOR#VISITOR h3 { font-size: clamp(18px, 1.7vw, 20px) !important; line-height: 1.36 !important; font-weight: 600 !important; }
+#VISITOR#VISITOR :is(h1, h2, h3, h4) { letter-spacing: -.011em !important; text-wrap: balance; }
+
+/* Les boutons doivent rester cliquables au pouce : 44 px de haut minimum,
+   c'est le seuil au-delà duquel les erreurs de frappe s'effondrent. */
+#VISITOR#VISITOR :is(.btn, button, .vbtn) {
+  font-size: 15.5px !important;
+  min-height: 44px;
+  border-radius: 10px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   2. SURFACES : la charte claire de la vitrine
+   ══════════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR { background: var(--ra-fond) !important; color: var(--ra-encre) !important; }
+#VISITOR#VISITOR :is(.card, .vcard, .vsec, .acc-ess, .lws-feature, .lws-card) {
+  background: #fff !important;
+  border: 1px solid var(--ra-ligne) !important;
+  border-radius: var(--ra-r) !important;
+  box-shadow: var(--ra-om1) !important;
+}
+#VISITOR#VISITOR :is(.card, .vcard, .lws-card):hover { box-shadow: var(--ra-om2) !important; }
+#VISITOR#VISITOR a { color: var(--ra-bleu); }
+#VISITOR#VISITOR a:hover { color: var(--ra-profond); }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   3. ÉCRAN DE CONNEXION — le panneau bleu s'en va
+   ══════════════════════════════════════════════════════════════════════════
+   `#LS .lw` est une grille « 420 px | 380 px » : à gauche un aplat navy en
+   dégradé (logo, « SYSTÈME DE GESTION SCOLAIRE », compteurs d'élèves), à
+   droite le formulaire. Ce panneau vient de l'ancienne charte, il occupe plus
+   de place que le formulaire lui-même, il répète une identité déjà portée par
+   la page d'où l'on vient — et il pousse le champ « Identifiant » hors de
+   l'axe du regard. On le retire et la carte se recentre sur son seul objet :
+   entrer. */
+#LS#LS .lw {
+  grid-template-columns: minmax(0, 420px) !important;
+  max-width: 460px !important;
+  margin: 0 auto !important;
+  border-radius: 16px !important;
+  box-shadow: var(--ra-om2) !important;
+  border: 1px solid var(--ra-ligne) !important;
+  overflow: hidden;
+}
+#LS#LS .ll { display: none !important; }
+#LS#LS .lr {
+  width: auto !important;
+  background: #fff !important;
+  padding: 30px 30px 34px !important;
+}
+/* Le formulaire hérite du plancher, lui aussi : un mot de passe se tape mal
+   dans un champ de 13 px, et un libellé de 10 px ne se lit pas. */
+#LS#LS :is(input, select) {
+  font-size: 16px !important;   /* 16 px : en dessous, iOS zoome au focus */
+  min-height: 46px;
+  border-radius: 10px !important;
+  border: 1.5px solid var(--ra-ligne) !important;
+}
+#LS#LS :is(label, .fl, small, p, li) { font-size: 14.5px !important; }
+#LS#LS :is(.btn, button) { font-size: 15.5px !important; min-height: 46px; border-radius: 10px !important; }
+#LS#LS h1 { font-size: 26px !important; font-weight: 600 !important; }
+#LS#LS h2 { font-size: 21px !important; font-weight: 600 !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   4. THÈME SOMBRE — ne pas éclaircir le texte sans assombrir son fond
+   ══════════════════════════════════════════════════════════════════════════
+   Le correctif est le même que celui posé sur la vitrine : on ne touche à la
+   couleur du texte que sur les surfaces dont on maîtrise AUSSI le fond. */
+html[data-theme="dark"] #VISITOR#VISITOR,
+html[data-vrt-theme="sombre"] #VISITOR#VISITOR { background: #0B1220 !important; color: #E8EDF7 !important; }
+html[data-theme="dark"] #VISITOR#VISITOR :is(.card, .vcard, .vsec, .lws-card),
+html[data-vrt-theme="sombre"] #VISITOR#VISITOR :is(.card, .vcard, .vsec, .lws-card) {
+  background: #131C2E !important;
+  border-color: #22304A !important;
+  color: #E8EDF7 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   5. MOBILE
+   ══════════════════════════════════════════════════════════════════════════ */
+@media (max-width: 700px) {
+  #LS#LS .lw { max-width: 100% !important; border-radius: 0 !important; border: 0 !important; }
+  #LS#LS .lr { padding: 22px 18px 28px !important; }
+  #VISITOR#VISITOR :is(p, li, td) { font-size: 15.5px !important; }
+}

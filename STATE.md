@@ -906,3 +906,108 @@ association) a été écartée pour cette raison, pas par manque de temps.
   carte à 4 champs). `node --check` OK sur `assets/vitrine.js` et `tools/build_vitrine.js`.
 - **Reste à faire** : taux GCE, témoignages, vidéo, pages légales ; `payer()` est encore inerte — le tunnel
   affiche mais n'encaisse pas, il faudra le brancher sur `openPaymentModal` / CamerPay.
+
+## Audit « la refonte a cassé le site » (14/08/2026)
+
+### Le vrai bug de la « double interface » — deux écrans plein écran empilés
+`#LS` (connexion, z-index 9999) et `#VISITOR` (espace visiteur, 9000) étaient affichés
+**en même temps**, tous deux en 1280×840 : `showLogin()` montre `#LS`, et **rien ne le
+refermait**. Dès qu'un visiteur avait ouvert « Connexion », toute navigation continuait
+d'écrire dans `#vContent`… sous un panneau opaque. Symptôme rapporté : « je clique et la
+page ne change pas », « il y a deux sites superposés ». Corrigé dans `vShowSec` — le seul
+passage obligé de la navigation visiteur — et **seulement si `#LS` est réellement visible**,
+pour ne pas éjecter un utilisateur connecté. Reproduit avant, vérifié après.
+
+### Les quatre portes d'entrée étaient avalées au premier clic
+« Connexion » ×2, « Mon compte » et la loupe pointaient vers `app.html` **nu**. Or la garde
+anti-double-accueil renvoie à « / » tout visiteur anonyme demandant /app.html sans ancre ni
+paramètre : premier clic → retour à la vitrine, second clic → ça marche (le drapeau de
+session est posé). Intermittent en apparence, déterministe en fait.
+→ `ANCRES` pointe désormais sur `app.html#connexion` / `#inscription`, et `_vtHashRouter`
+gagne les routes `connexion`, `compte`, `inscription`. La loupe va sur `/corriges/`, avec
+son intitulé accessible corrigé.
+
+### Le retour de paiement n'était lu par personne
+`camerpayReturnUrl()` renvoie `<site>/#paiement?ref=…`. Le lecteur (`_payResumeFromHash`)
+vit dans **app.js** ; depuis que « / » sert la vitrine, le payeur revenait sur l'accueil
+sans un mot. **Tous** les paiements du site, pas seulement ceux du panier. Rejoué en
+autonome dans `assets/vitrine.js` (polling `?action=status`, panneau d'issue, hash nettoyé).
+
+### Le tunnel demandait un numéro de carte et n'envoyait rien
+1. « Numéro de carte » et « Cryptogramme » étaient de vrais `<input>` sur une page non
+   certifiée — CamerPay est une passerelle par REDIRECTION, la carte se saisit chez lui.
+2. Aucun champ ne portait d'identifiant : `clientNom`/`clientTel` partaient **vides**.
+3. On facturait 1 000 / 2 500 F de livraison sans jamais demander l'adresse.
+→ Champs carte retirés, nom/téléphone/e-mail/adresse identifiés et envoyés, validation
+(numéro camerounais, confirmation, adresse si livraison) avec message sous le champ fautif.
+**Piège** : le tunnel est PRÉ-RENDU avec les champs de la maquette (sans id) — `majPaiement()`
+est donc appelé au démarrage, sinon le payeur remplit des champs que personne ne lit.
+
+### Ce qui reste figé un an : un asset sans `?v=`
+`build_corriges.py` émettait `/assets/veritas-pages.css` **sans** cache-buster, et supprimait
+le `<link>` Google Fonts. `.htaccess` sert les CSS en `immutable, max-age=1 an` : l'étape CI
+« Aligner les cache-busters » ne réécrit que les URLs qui portent DÉJÀ `?v=`. Les 56 pages de
+corrigés étaient donc figées, et demandaient Poppins sans jamais la télécharger.
+→ Générateur corrigé (version lue dans la coquille) + **garde-fou CI** qui refuse de déployer
+tout `/assets/*.css|js` appelé sans `?v=`.
+
+### Typographie : mesurée, pas estimée
+`/app.html#partenariat` avant : **68 % du texte sous 15 px**, médiane 13, minimum 11.
+Après `assets/veritas-refonte-app.css` (dernière feuille de la coquille, identifiant doublé) :
+**6 %**, médiane 15,5, minimum 13,5. Les tailles posées EN LIGNE par le rendu JS ne sont
+atteignables que par sélecteur d'attribut (`[style*="font-size:12px"]`) — même procédé que le
+thème sombre. Corrigés : 8 % → 1 % après huit règles ciblées, relevées une par une dans le DOM.
+
+### Accueil : les mêmes chiffres trois fois
+3 854 / 56 / 134 / 7 affichés **trois fois**, la ressource offerte proposée trois fois, une
+seconde accroche complète, un palmarès et un panneau de gamification aux données **inventées**
+(« Série de 12 jours », « Terminale A4 · Douala 2 480 pts », « abonnement le plus choisi »), et
+trois témoignages vides affichant « témoignage à recueillir ». 48 Ko retirés, en huit
+suppressions nommées dans le générateur. Bloc des publics remonté juste après l'accroche,
+carte **Partenaires** ajoutée (4ᵉ public) + onglet dans la barre ; la section « Travailler avec
+VÉRITAS » du bas, devenue son doublon, est retirée.
+
+### Répétitions : on ne dénigre pas un service qu'on rend
+« Un répétiteur coûte 25 000 F et rate des séances », « Moins cher qu'un répétiteur »,
+« 25× moins qu'un répétiteur » — alors que le centre PROPOSE les répétitions et
+l'accompagnement à domicile. Trois formulations remplacées par la complémentarité.
+
+### Pièges d'outillage rencontrés
+- **`tools/build_vitrine.js` prend `Refonte VERITAS.dc.html`, PAS `index.html`.** La commande
+  documentée dans la session précédente pointait `index.html` → sortie de 394 Ko au lieu de
+  431, tout le travail des trois derniers commits perdu, sans erreur.
+- **Les sept ÉCRANS sont des `<section>`** : un découpage au premier niveau renvoie l'écran
+  entier. « Supprimer la frise de chiffres » a effacé 164 Ko avant que le garde-fou de taille
+  (> 60 Ko = c'est un écran, pas un bloc) ne soit posé.
+- **`tests/static_server.cjs` ne reproduisait pas la production** : « / » servait la coquille
+  et /app.html répondait 404. On ne pouvait tester en local ni la vitrine à sa vraie adresse,
+  ni la garde anti-double-accueil, ni un seul lien vers l'application.
+- **Le service worker sert les scripts par URL** : sans bump de version, `node --check` passe,
+  le fichier est modifié sur le disque, et le navigateur exécute toujours l'ancien code.
+  Purger SW + caches avant chaque vérification, ou bumper.
+
+### Fait aussi
+- Pages légales créées (`legal/mentions-legales.html`, `cgv.html`, `charte-pedagogique.html`) —
+  `#mentions`, `#cgv`, `#charte` étaient des ancres mortes. Identité de la **personne morale**
+  d'après le RCCM `CM-DLA-03-2026-B12-00729` et le NIU `M072618875274L` fournis le 14/08 ;
+  **aucun nom d'associé, aucune CNI, aucune date de naissance** (consigne explicite).
+  Ajoutées à `deploy.yml` avec échec bruyant si moins de 3 pages.
+- Vitrine : CSP stricte (la page qui encaisse était la seule sans politique), `<link manifest>`,
+  enregistrement du service worker, `referrer` policy.
+- Menu « Plus » : 4 → **27 entrées** en 3 groupes, dérivées d'un modèle unique (bureau + mobile).
+  « Corrigés des cahiers » pointait vers l'écran e-learning.
+- Barre de recherche dans les 56 pages de corrigés (numéro d'exercice ou mot de leçon, sans
+  accents, `?q=` depuis le hub). Script EN LIGNE : 18 des 128 pages statiques ne chargent aucun JS.
+- Effets et animations sur les pages secondaires via `animation-timeline: view()` — zéro JS,
+  `@supports` en garde : on ne cache jamais un contenu en pariant qu'un script le révélera.
+- Panneau bleu de l'écran de connexion retiré, carte recentrée, champs à 16 px (sous 16 px iOS
+  zoome au focus).
+
+### Non fait / à décider
+- **Rien n'est commité ni déployé.** `master` reste en arrière ; le déploiement se fait par
+  `gh workflow run deploy.yml --ref deploy/campay-securite`.
+- Les 64 fichiers de `corriges/` ont été régénérés alors qu'une **autre session** les avait déjà
+  modifiés dans l'arbre de travail. Le générateur est le leur ; seul l'en-tête a été corrigé.
+- `assets/temoignage.mp4` toujours absent : la section témoignage vidéo se retire d'elle-même et
+  reviendra le jour où le fichier sera déposé.
+- Taux GCE toujours vide (donnée inexistante), témoignages toujours absents (aucun avis réel).

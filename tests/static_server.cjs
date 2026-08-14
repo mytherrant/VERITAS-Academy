@@ -42,7 +42,22 @@ http.createServer((req, res) => {
   }
 
   let urlPath = decodeURIComponent((req.url || '/').split('?')[0]);
-  if (urlPath === '/') urlPath = '/VERITAS_v1.2.html';
+  /* ── Ce que sert la racine, à l'identique de la production ───────────────
+     index.php sert vitrine.html sur « / » depuis la refonte d'août 2026, et
+     deploy.yml copie VERITAS_v1.2.html sous le nom app.html. Ce serveur, lui,
+     servait encore la coquille sur « / » et rien du tout sur /app.html.
+     Conséquence : on ne pouvait tester EN LOCAL ni la vitrine à sa vraie
+     adresse, ni la garde anti-double-accueil, ni un seul des liens de la
+     vitrine vers l'application — ils répondaient tous 404. Un banc d'essai
+     qui ne reproduit pas la production fabrique de faux diagnostics dans les
+     deux sens : des pannes qu'on ne voit pas, et des pannes qui n'existent
+     qu'ici. Même repli volontaire qu'index.php : à défaut de vitrine, la
+     coquille. */
+  if (urlPath === '/') {
+    urlPath = fs.existsSync(path.join(ROOT, 'vitrine.html')) ? '/vitrine.html' : '/VERITAS_v1.2.html';
+  } else if (urlPath === '/app.html') {
+    urlPath = '/VERITAS_v1.2.html';
+  }
   let file = path.normalize(path.join(ROOT, urlPath));
   if (!file.startsWith(ROOT)) { res.writeHead(403); res.end(); return; }
   // DirectoryIndex, comme Apache/LiteSpeed en production. Sans cela, /niveaux/,
