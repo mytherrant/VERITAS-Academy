@@ -936,9 +936,37 @@ deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
   carte = carte.replace(
     /<button type="button" onclick="VRT\.act\('u__aller',this,event\)" data-go="enseignants"([^>]*)>Rejoindre le réseau/,
     '<a href="' + APP + '#partenariat"$1>Voir les 9 formules');
-  carte = carte.replace(/<\/button>(\s*)<\/div>(\s*)<\/div>(\s*)$/, '</a>$1</div>$2</div>$3');
+  /* ⚠️ FERMER LE LIEN — et le vérifier, pas l'espérer.
+     La version précédente visait /<\/button>\s*<\/div>\s*<\/div>\s*$/ : un
+     motif ancré en FIN de chaîne qui ne correspondait pas à la structure
+     réelle (il reste un <div> de plus après). Le remplacement échouait donc en
+     silence, et l'ouvrant <a> partait sans fermeture.
+
+     Conséquence observée en production : tout ce qui SUIT ce bouton — le
+     bandeau des matières, le bloc calendrier, les sections suivantes — se
+     retrouvait AVALÉ par le lien, et héritait de son fond orange #C24E00.
+     Une page où un tiers du contenu est un seul lien géant.
+
+     La garde qui suivait ne voyait rien : elle cherchait le texte d'origine
+     (« Rejoindre le réseau »), qui avait bel et bien disparu. Elle vérifiait
+     la moitié faite du travail. On ferme donc le PREMIER </button> qui suit le
+     lien converti, et on vérifie l'ÉQUILIBRE. */
+  const posLien = carte.indexOf('<a href="' + APP + '#partenariat"');
+  if (posLien < 0) throw new Error('Carte Partenaires : lien converti introuvable.');
+  const posFin = carte.indexOf('</button>', posLien);
+  if (posFin < 0) throw new Error('Carte Partenaires : aucun </button> à convertir après le lien.');
+  carte = carte.slice(0, posFin) + '</a>' + carte.slice(posFin + '</button>'.length);
+
   if (carte.includes('Rejoindre le réseau') || carte.includes('data-go="enseignants"')) {
     throw new Error('Carte Partenaires : le bouton d’appel n’a pas été converti en lien.');
+  }
+  {
+    const o = (carte.match(/<a\b/g) || []).length, c = (carte.match(/<\/a>/g) || []).length;
+    const bo = (carte.match(/<button\b/g) || []).length, bc = (carte.match(/<\/button>/g) || []).length;
+    if (o !== c || bo !== bc) {
+      throw new Error('Carte Partenaires : balises déséquilibrées (<a> ' + o + '/' + c
+        + ', <button> ' + bo + '/' + bc + ') — le lien avalerait le reste de la page.');
+    }
   }
 
   const grilleNeuve = grille
@@ -1268,6 +1296,49 @@ for (const lg of ['fr', 'en']) {
   g.tpl = g.tpl.replace('<input type="text"',
     '<input id="{{ cp.champ }}" name="{{ cp.champ }}" type="{{ cp.type }}" autocomplete="{{ cp.auto }}" value="{{ cp.valeur }}"');
   console.log('tunnel      : champs carte/CVV retirés, nom + téléphone + adresse identifiés');
+}
+
+/* ── Fermetures orphelines héritées de la maquette ─────────────────────────
+   L'export de l'outil de design sort avec 7 <ul> pour 8 </ul> : une fermeture
+   sans ouverture, juste après la carte du plan Élite. Le navigateur l'ignore,
+   donc rien ne se voyait — mais elle empêche tout contrôle d'équilibre sérieux,
+   et un contrôle qu'on doit désactiver ne protège plus de rien. On la retire
+   ici plutôt que dans la maquette : le fichier livré n'est pas à nous, et il
+   peut être remplacé par une nouvelle version à tout moment. */
+for (const bal of ['ul', 'ol', 'li']) {
+  const re = new RegExp('<' + bal + '\\b|</' + bal + '>', 'g');
+  let m, prof = 0, orphelines = [];
+  while ((m = re.exec(corps))) {
+    if (m[0][1] === '/') { prof--; if (prof < 0) { orphelines.push(m.index); prof = 0; } }
+    else prof++;
+  }
+  // On retire par la fin, pour que les positions restent valides.
+  for (let k = orphelines.length - 1; k >= 0; k--) {
+    corps = corps.slice(0, orphelines[k]) + corps.slice(orphelines[k] + bal.length + 3);
+  }
+  if (orphelines.length) console.log('maquette    : ' + orphelines.length + ' </' + bal + '> orpheline(s) retirée(s)');
+}
+
+/* ── ÉQUILIBRE DES BALISES — le contrôle qui manquait ──────────────────────
+   Un <a> laissé ouvert ne casse rien de visible : le navigateur referme tout
+   seul, très loin, et le reste de la page devient un lien géant qui prend la
+   couleur du bouton. Aucune erreur, aucun avertissement — on ne le voit qu'en
+   remarquant un aplat orange sous un bloc qui n'en demandait pas.
+   Vécu le 14/08/2026 : le bouton « Voir les 9 formules » avalait le bandeau
+   des matières ET le bloc calendrier. On refuse désormais de produire ça. */
+{
+  const paires = [['a', /<a\b/g, /<\/a>/g], ['button', /<button\b/g, /<\/button>/g],
+                  ['section', /<section\b/g, /<\/section>/g], ['ul', /<ul\b/g, /<\/ul>/g]];
+  const fautes = [];
+  for (const [nom, ro, rc] of paires) {
+    const o = (corps.match(ro) || []).length, c = (corps.match(rc) || []).length;
+    if (o !== c) fautes.push('<' + nom + '> ' + o + ' ouvrant(s) pour ' + c + ' fermant(s)');
+  }
+  if (fautes.length) {
+    throw new Error('Balises déséquilibrées dans le corps : ' + fautes.join(' · ')
+      + '. Une balise ouverte avale tout ce qui suit — construction ANNULÉE.');
+  }
+  console.log('balises     : <a>, <button>, <section> et <ul> équilibrés');
 }
 
 fs.writeFileSync(path.join(__dirname, '_corps.html'), corps);
