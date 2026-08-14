@@ -311,8 +311,126 @@
       else fini();
     },
     rien: function () {},
+    actus: function (el) {
+      var cat = el && el.getAttribute('data-cat');
+      if (!cat) return;
+      var tabs = document.querySelectorAll('.vnews-tab');
+      for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('on', tabs[i] === el);
+      chargerActus(cat);
+    },
     payer: payer
   };
+
+  /* ══════════════════════════════════════════════════════════════════════
+     ACTUALITÉS — MINESEC, bourses, concours
+     ──────────────────────────────────────────────────────────────────────
+     Source : api/news_proxy.php, qui sert déjà quatre flux publics et les
+     met en cache côté serveur. Rien n'est écrit à la main ici : si le flux
+     ne répond pas, le bloc reste MASQUÉ. Une rubrique « Actualités » vide
+     coûte plus cher qu'une rubrique absente — elle donne l'impression d'un
+     site à l'abandon, sur la page qui doit inspirer le contraire.
+     ══════════════════════════════════════════════════════════════════════ */
+  var actusCache = {};
+
+  function chargerActus(cat) {
+    var liste = document.getElementById('vrtNewsListe');
+    var bloc = document.getElementById('vrtNews');
+    if (!liste || !bloc) return;
+
+    if (actusCache[cat]) { poserActus(actusCache[cat]); return; }
+
+    var base = apiBase();
+    if (!base) return;                       // ouvert en file:// : pas d'API
+    liste.innerHTML = '<li class="vnews-vide">Chargement…</li>';
+    bloc.hidden = false;
+
+    fetch(base + '/news_proxy.php?cat=' + encodeURIComponent(cat))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        var items = (d && d.items) || [];
+        actusCache[cat] = items;
+        poserActus(items);
+      })
+      .catch(function () { poserActus([]); });
+  }
+
+  function poserActus(items) {
+    var liste = document.getElementById('vrtNewsListe');
+    var bloc = document.getElementById('vrtNews');
+    if (!liste || !bloc) return;
+
+    if (!items.length) {
+      /* Aucun titre : on referme. Si AUCUNE catégorie n'a jamais répondu, la
+         colonne disparaît et le calendrier reprend toute la largeur — la
+         grille est en `1fr` dès qu'un seul enfant subsiste. */
+      liste.innerHTML = '';
+      bloc.hidden = true;
+      return;
+    }
+
+    var html = '';
+    for (var i = 0; i < items.length && i < 7; i++) {
+      var it = items[i] || {};
+      /* Liens SORTANTS vers la presse : `noopener` (l'onglet ouvert ne doit
+         pas pouvoir réécrire le nôtre) et `nofollow` (nous ne cautionnons pas
+         éditorialement des titres que nous n'avons pas écrits). */
+      html += '<li><a href="' + ech(it.link || '#') + '" target="_blank" rel="noopener nofollow">'
+            + '<span class="vnews-t">' + ech(it.title || '') + '</span>'
+            + '<span class="vnews-m">' + ech(it.source || '') + (it.date ? ' · ' + ech(it.date) : '') + '</span>'
+            + '</a></li>';
+    }
+    liste.innerHTML = html;
+    bloc.hidden = false;
+  }
+
+  function ech(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  /* ── La prochaine date clé ───────────────────────────────────────────────
+     Le bloc est pré-rendu : la page ne peut pas savoir, à la construction,
+     quel jour on est. On met donc en avant ici la PREMIÈRE échéance encore à
+     venir. Si l'année scolaire est terminée — toutes les dates passées — on
+     n'en souligne aucune : mettre en avant une date écoulée serait pire que
+     de n'en mettre aucune. */
+  function marquerProchaineDate() {
+    var lignes = document.querySelectorAll('.vcle[data-jour]');
+    if (!lignes.length) return;
+    var t = new Date(), au = t.getFullYear() + '-'
+          + ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2);
+    for (var i = 0; i < lignes.length; i++) {
+      var j = lignes[i].getAttribute('data-jour');
+      if (j && j >= au) { lignes[i].classList.add('vcle-next'); return; }
+    }
+  }
+
+  /* ── Anneaux de résultats ────────────────────────────────────────────────
+     Ils sont écrits REMPLIS dans le HTML (voir build_vitrine.js) : sans JS,
+     ils affichent le bon taux. On ne les remet à zéro que juste avant de les
+     rejouer, et seulement quand ils entrent dans l'écran — remettre à zéro un
+     anneau déjà visible ferait clignoter le chiffre. */
+  function animerAnneaux() {
+    var anneaux = document.querySelectorAll('.vring');
+    if (!anneaux.length || !('IntersectionObserver' in window)) return;
+    if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+
+    var obs = new IntersectionObserver(function (es) {
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var el = e.target;
+        el.classList.add('vring-anim');            // passe la main à la feuille
+        // Deux images d'écart : le temps que --vr-deg:0 soit appliqué, sinon
+        // la transition n'a pas d'état de départ et l'anneau saute.
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { el.classList.add('vring-on'); });
+        });
+        obs.unobserve(el);
+      });
+    }, { threshold: 0.35 });
+
+    for (var i = 0; i < anneaux.length; i++) obs.observe(anneaux[i]);
+  }
 
   /* ══════════════════════════════════════════════════════════════════════
      PAIEMENT RÉEL
@@ -693,6 +811,13 @@
     window.addEventListener('scroll', parallaxe, { passive: true });
     parallaxe();
     reveler();
+    marquerProchaineDate();
+    animerAnneaux();
+    /* Les actualités partent APRÈS le premier rendu : elles viennent d'un flux
+       externe (via notre proxy), elles ne doivent pas retarder d'une
+       milliseconde l'affichage de la page. L'onglet MINESEC est celui qui
+       ouvre — c'est la source officielle. */
+    setTimeout(function () { chargerActus('minesec'); }, 400);
 
     try {
       var t = localStorage.getItem('vrt_theme');

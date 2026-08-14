@@ -108,6 +108,41 @@
   border-radius: 10px !important;
 }
 
+/* ── LA BARRE DE NAVIGATION EST UNE EXCEPTION, ET ELLE SE MESURE ───────────
+   Le plancher typographique ci-dessus s'applique à du texte qui coule. La
+   barre, elle, aligne sept intitulés dans une piste de largeur FIXE, chaque
+   lien en `overflow:hidden; white-space:nowrap`. Relevé en production après
+   le premier déploiement : les sept étaient coupés — « E-Lear », « Corrig »,
+   « Mes mat », « Abonnem ». « E-Learning » réclamait 132 px et n'en recevait
+   88. La piste fait 626 px pour 927 px de contenu : elle était déjà juste,
+   l'agrandissement l'a fait déborder.
+
+   On ne rétrécit pas le texte pour le faire rentrer — un intitulé de
+   navigation illisible ne sert personne. On rend la piste défilable et on
+   empêche les liens de se comprimer : chaque intitulé s'affiche EN ENTIER, et
+   les derniers se rejoignent d'un glissement du doigt. La barre de défilement
+   est masquée (elle ferait un trait gris sous la barre), le défilement reste
+   possible au doigt, à la molette et au clavier. */
+#VISITOR#VISITOR :is(.lws-nav-links, .vnav-links, .vnav-scroll) {
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+}
+#VISITOR#VISITOR :is(.lws-nav-links, .vnav-links, .vnav-scroll)::-webkit-scrollbar { display: none; }
+#VISITOR#VISITOR :is(.lws-nav-links, .vnav-links, .vnav-scroll) > * {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  scroll-snap-align: start;
+  /* 14,5 px : lisible, et 7 % plus compact que le texte courant — la barre
+     doit rester une barre. */
+  font-size: 14.5px !important;
+}
+
 /* ══════════════════════════════════════════════════════════════════════════
    2. SURFACES : la charte claire de la vitrine
    ══════════════════════════════════════════════════════════════════════════ */

@@ -42722,9 +42722,19 @@ function _cagCreer(eleveId){
   // avalé : le visiteur revenait à la vitrine, cliquait une seconde fois, et
   // ça marchait. Symptôme fantôme s'il en est. Ces ancres donnent une
   // destination NOMMÉE, que la garde laisse passer et que le routeur ouvre.
+  // « recherche » : l'application POSSÈDE une recherche de site — mRecherche(),
+  // ouverte depuis le panneau « Naviguer » (bouton « Rechercher dans tout le
+  // site · Ctrl K »). Elle n'était atteignable que par ce panneau, donc
+  // invisible depuis la vitrine, dont la loupe se contentait de naviguer vers
+  // une page. Une loupe doit chercher : elle ouvre désormais cette recherche.
   var FONCTIONS = { evaluations:'showEvaluations', epreuves:'showEpreuves', annales:'showEpreuves',
                     connexion:'_ouvrirConnexion', compte:'_ouvrirConnexion',
-                    inscription:'showRegisterForm' };
+                    inscription:'showRegisterForm', recherche:'mRecherche',
+                    // Même cas que la recherche : showCalendrier() a sa propre
+                    // fonction de rendu, n'est PAS une section de vShowSec, et
+                    // n'était donc atteignable que par une tuile de l'accueil
+                    // connecté. La vitrine y renvoie maintenant par ancre.
+                    calendrier:'showCalendrier' };
 
   function sectionDuHash(){
     var h = (window.location.hash || '').replace(/^#/, '');

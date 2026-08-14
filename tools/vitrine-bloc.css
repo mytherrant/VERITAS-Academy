@@ -1,0 +1,194 @@
+/* ════════════════════════════════════════════════════════════════════════════
+   VÉRITAS — vitrine : blocs écrits par NOUS (hors maquette)
+   © 2024-2026 VÉRITAS EDUCATION SARL.
+
+   Ce fichier est inliné dans vitrine.html par tools/build_vitrine.js. Il est
+   séparé parce qu'il n'appartient pas à la maquette : la maquette sort en
+   styles EN LIGNE, ce qui impose des !important partout ; ici on écrit en
+   classes, normalement.
+
+   Contient :
+     1. Calendrier scolaire + actualités (remplace deux blocs retirés le 14/08)
+     2. Titres bicolores
+     3. Animations : anneaux de résultats, révélations, confort de lecture
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ══ 1. CALENDRIER SCOLAIRE & ACTUALITÉS ═══════════════════════════════════
+   Remplace la bande « corrigés par niveau » et la grille comparative des
+   plans, retirées le 14/08/2026 : elles se disloquaient sous 420 px et
+   répétaient ce que le menu propose déjà. */
+.vcal-grid{display:grid;grid-template-columns:1.35fr .95fr;gap:26px;align-items:start}
+.vcal-box{background:#fff;border:1px solid #E4E7EF;border-radius:16px;padding:18px 20px;
+  box-shadow:0 6px 16px rgba(0,17,54,.05)}
+
+/* ── Dates clés ────────────────────────────────────────────────────────────
+   Six repères, pas le calendrier entier : l'accueil annonce, le calendrier
+   complet détaille (lien en bas du bloc). Chaque ligne est une paire
+   intitulé / date, séparée par un filet pointillé qui laisse l'œil relier les
+   deux sans qu'on ait à aligner des colonnes. */
+.vcles{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.vcle{display:flex;align-items:baseline;gap:10px;padding:11px 0 11px 15px;position:relative;
+  border-bottom:1px dashed #E7ECF5}
+.vcle:last-of-type{border-bottom:0}
+.vcle::before{content:"";position:absolute;left:0;top:17px;width:7px;height:7px;
+  border-radius:50%;background:#1E499B;transition:transform .2s ease}
+.vcle:hover::before{transform:scale(1.35)}
+.vcle-pause::before{background:#0E7C86}
+.vcle-exam::before{background:#C24E00}
+.vcle-q{font:500 14.5px/1.45 Poppins,sans-serif;color:#16233F;flex:1 1 auto}
+.vcle-d{font:600 13.5px Poppins,sans-serif;color:#0C2A6A;flex:0 0 auto;text-align:right;
+  white-space:nowrap}
+.vcle-exam .vcle-d{color:#C24E00}
+.vcle-pause .vcle-d{color:#0E7C86}
+/* La date la plus proche à venir, mise en avant par vitrine.js. */
+.vcle.vcle-next{background:#F5F9FF;border-radius:10px;padding-left:15px;
+  box-shadow:inset 3px 0 0 #1E499B}
+.vcle.vcle-next .vcle-q{color:#0C2A6A;font-weight:600}
+
+.vcal-note{margin:14px 0 0;font-size:12.5px;line-height:1.6;color:#6B7180;
+  padding:11px 13px;background:#F7FAFF;border-left:3px solid #C7D5EE;border-radius:0 8px 8px 0}
+.vcal-lien{display:inline-flex;align-items:center;gap:7px;margin-top:16px;
+  font:500 14.5px Poppins,sans-serif;color:#1E499B;text-decoration:none}
+.vcal-lien svg{transition:transform .24s cubic-bezier(.16,1,.3,1)}
+.vcal-lien:hover svg{transform:translateX(4px)}
+
+/* ── Le bandeau des matières ne doit pas élargir le document ───────────────
+   Mesuré à 375 px : le lien qui enveloppe la piste défilante s'étalait sur
+   4 083 px (inline-flex, donc dimensionné par son contenu), et sa fenêtre de
+   découpe sur 2 419 px. La page ne défilait pas — les ancêtres la clipsent —
+   mais scrollWidth valait 4 083, ce que certains navigateurs traduisent par
+   une barre horizontale, et la piste ne défilait que dans le vide.
+   On contraint le lien et sa fenêtre ; la piste, elle, garde sa largeur
+   naturelle : c'est ce qui fait le défilement. */
+.vmarq, .vmarq > *{max-width:100%}
+.vmarq{display:block;overflow:hidden}
+
+/* ── Actualités ────────────────────────────────────────────────────────────
+   Le conteneur naît masqué. vitrine.js ne le révèle QUE si le flux renvoie au
+   moins un titre : une rubrique d'actualités vide vaut moins que pas de
+   rubrique du tout. */
+.vnews{background:#fff;border:1px solid #E4E7EF;border-radius:16px;padding:16px 17px;
+  box-shadow:0 6px 16px rgba(0,17,54,.05);position:sticky;top:88px}
+.vnews[hidden]{display:none}
+.vnews-hd h3{font:600 16px Poppins,sans-serif;color:#0C2A6A;margin:0 0 11px}
+.vnews-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:13px}
+.vnews-tab{border:1px solid #E4E7EF;background:#fff;color:#4D5163;cursor:pointer;
+  padding:6px 11px;border-radius:100px;font:500 12.5px Poppins,sans-serif;
+  transition:background .18s ease,color .18s ease,border-color .18s ease}
+.vnews-tab:hover{background:#F2F6FD;border-color:#C7D5EE}
+.vnews-tab.on{background:#1E499B;border-color:#1E499B;color:#fff}
+.vnews-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.vnews-liste li{border-bottom:1px solid #F1F4FA}
+.vnews-liste li:last-child{border-bottom:0}
+.vnews-liste a{display:block;padding:10px 0;text-decoration:none;transition:opacity .18s ease}
+.vnews-liste a:hover{opacity:.72}
+.vnews-liste a:hover .vnews-t{text-decoration:underline}
+.vnews-t{display:block;font:500 13.5px/1.45 Poppins,sans-serif;color:#16233F}
+.vnews-m{display:block;margin-top:3px;font-size:11.5px;color:#8A90A0}
+.vnews-src{margin:12px 0 0;font-size:11px;color:#9AA0AE;text-align:center}
+.vnews-vide{padding:14px 0;font-size:13px;color:#8A90A0;text-align:center}
+
+@media (max-width:1000px){
+  .vcal-grid{grid-template-columns:1fr}
+  .vnews{position:static}
+}
+
+/* ══ 2. TITRES BICOLORES ═══════════════════════════════════════════════════
+   Les grands titres sortaient de la maquette en une seule encre (#001136) :
+   à 27 px sur fond clair, un bandeau de texte uniforme qu'on saute. On
+   alterne l'encre profonde et le bleu de marque MOT À MOT — la seconde
+   moitié du titre passe en #1E499B — ce qui donne un point d'appui à l'œil
+   sans ajouter ni graisse ni majuscule.
+
+   La coupure est posée à la construction (tools/build_vitrine.js), pas au
+   JavaScript : un titre doit être complet dans le HTML servi, sinon Google
+   indexe une moitié de phrase. */
+.vt-a{color:#001136}
+.vt-b{color:#1E499B}
+[data-vrt-theme="sombre"] .vt-a{color:#EAF0FB}
+[data-vrt-theme="sombre"] .vt-b{color:#7FA8F0}
+
+/* ══ 3. ANIMATIONS ═════════════════════════════════════════════════════════
+   Règle unique : tout ce qui bouge s'arrête sous prefers-reduced-motion, et
+   rien ne bouge en boucle dans le champ de lecture — une animation qui se
+   répète pendant qu'on lit gêne au lieu d'aider. */
+
+/* ── 3.1 Anneaux de résultats ─────────────────────────────────────────────
+   Ils s'affichaient d'un bloc, remplis. L'anneau se REMPLIT désormais depuis
+   zéro jusqu'à son angle réel quand il entre dans l'écran, et le pourcentage
+   compte en même temps. L'angle final vient des taux réels (app.js,
+   DB.statsVitrine) : l'animation ne fabrique aucun chiffre, elle le déroule.
+   Technique : --vr-deg est une propriété enregistrée (@property), donc
+   interpolable — un conic-gradient ne s'anime pas autrement. */
+@property --vr-deg{syntax:"<angle>";inherits:false;initial-value:0deg}
+/* ⚠️ L'animation est OPT-IN, posée par vitrine.js (.vring-anim). Sans elle,
+   l'anneau garde le dégradé REMPLI que le générateur écrit en ligne. Si on
+   animait depuis .vring seule, un visiteur sans JavaScript — ou pendant les
+   quelques centaines de millisecondes avant son exécution — verrait un anneau
+   VIDE sous « 100 % ». Un chiffre que son propre graphique contredit est pire
+   que pas de graphique. */
+.vring-anim{--vr-deg:0deg;
+  background:conic-gradient(var(--vr-teinte,#1E499B) 0deg var(--vr-deg),
+                            var(--vr-creux,#E7EDF8) var(--vr-deg) 360deg) !important;
+  transition:--vr-deg 1.15s cubic-bezier(.22,1,.36,1)}
+.vring-anim.vring-on{--vr-deg:var(--vr-cible,0deg)}
+/* Halo discret au survol : la carte de résultat devient une surface vivante
+   sans devenir un bouton. */
+.vres-carte{transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s ease}
+.vres-carte:hover{transform:translateY(-3px)}
+.vres-carte:hover .vring{filter:drop-shadow(0 8px 20px rgba(30,73,155,.22))}
+
+/* ── 3.2 Révélation à l'entrée dans l'écran ───────────────────────────────
+   Déjà en place via [data-reveal] ; on étend le vocabulaire à trois nuances
+   pour que tout n'arrive pas de la même façon. */
+.vrv{opacity:0;transform:translateY(18px);
+  transition:opacity .55s ease,transform .55s cubic-bezier(.16,1,.3,1)}
+.vrv-on{opacity:1;transform:none}
+.vrv-l{transform:translateX(-22px)}
+.vrv-r{transform:translateX(22px)}
+.vrv-z{transform:scale(.965)}
+
+/* ── 3.3 Confort de lecture ───────────────────────────────────────────────
+   Trois réglages qui n'ajoutent aucun mouvement mais changent la fatigue :
+   la longueur de ligne, la césure et le lissage du défilement. */
+html{scroll-behavior:smooth}
+.vcal-note,.vnews-t,.vcle-q{text-wrap:pretty}
+:is(h1,h2,h3){text-wrap:balance}
+
+/* Liens : le soulignement pousse depuis la gauche au lieu d'apparaître. */
+.vlien-anim{background-image:linear-gradient(currentColor,currentColor);
+  background-size:0% 1px;background-repeat:no-repeat;background-position:0 100%;
+  transition:background-size .28s cubic-bezier(.16,1,.3,1)}
+.vlien-anim:hover{background-size:100% 1px}
+
+/* Cartes cliquables : une élévation courte, jamais un rebond. */
+.vlift{transition:transform .26s cubic-bezier(.16,1,.3,1),box-shadow .26s ease}
+.vlift:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(0,17,54,.10)}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  /* L'anneau se pose à sa valeur finale, sans parcourir le chemin. */
+  .vring-anim{transition:none;--vr-deg:var(--vr-cible,0deg)}
+  .vrv{opacity:1;transform:none;transition:none}
+  .vres-carte,.vlift,.vlien-anim{transition:none}
+  .vres-carte:hover,.vlift:hover{transform:none}
+}
+
+/* ══ THÈME SOMBRE ══════════════════════════════════════════════════════════
+   Le thème sombre de la maquette repère les surfaces par leur style EN LIGNE
+   ([style*="background:#fff"]). Nos blocs tirant tout de leurs classes, ils
+   seraient restés blancs pendant que le texte s'éclaircit. */
+[data-vrt-theme="sombre"] :is(.vcal-box,.vnews){
+  background:#101E3C;border-color:#1E3566;box-shadow:none}
+[data-vrt-theme="sombre"] .vcal-box h3,
+[data-vrt-theme="sombre"] .vnews-hd h3{color:#E8EEFA}
+[data-vrt-theme="sombre"] :is(.vnews-t,.vcle-q){color:#E2E9F7}
+[data-vrt-theme="sombre"] .vcal-note{color:#9FB0CE}
+[data-vrt-theme="sombre"] .vcle{border-bottom-color:#1E3566}
+[data-vrt-theme="sombre"] .vcle-d{color:#9FC0F5}
+[data-vrt-theme="sombre"] .vcle.vcle-next{background:#14244A;box-shadow:inset 3px 0 0 #3B6FD4}
+[data-vrt-theme="sombre"] .vcle.vcle-next .vcle-q{color:#DCE7FA}
+[data-vrt-theme="sombre"] .vcal-note{background:#14244A;border-left-color:#2A4176}
+[data-vrt-theme="sombre"] .vnews-tab{background:#14244A;border-color:#1E3566;color:#B9C7E2}
+[data-vrt-theme="sombre"] .vnews-tab.on{background:#3B6FD4;border-color:#3B6FD4;color:#fff}
+[data-vrt-theme="sombre"] .vnews-liste li{border-bottom-color:#1B2C52}

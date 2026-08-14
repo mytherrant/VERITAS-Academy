@@ -443,40 +443,6 @@
    app.css : la vitrine du modèle est blanche, on tranche explicitement. */
 #VISITOR{ background:var(--lws-white) !important; }
 
-/* 4.1 — Bande utilitaire bleue */
-#VISITOR .lws-utility{
-  background:var(--lws-blue);
-  color:rgba(255,255,255,.92);
-  font-size:14px;
-  line-height:1.4;
-  padding:7px 0;
-}
-#VISITOR .lws-utility-in{
-  max-width:var(--lws-w);
-  margin:0 auto;
-  padding:0 var(--lws-gut);
-  display:flex;
-  align-items:center;
-  gap:10px 22px;
-  flex-wrap:wrap;
-}
-#VISITOR .lws-utility-tag{ font-weight:500; color:#fff; }
-#VISITOR .lws-utility-sep{ opacity:.4; }
-#VISITOR .lws-utility-proof{ color:rgba(255,255,255,.85); }
-#VISITOR .lws-utility-right{
-  margin-left:auto; display:flex; align-items:center; gap:20px;
-}
-#VISITOR .lws-utility a,
-#VISITOR .lws-utility button{
-  color:#fff; background:none; border:0; padding:0;
-  font-size:14px; font-family:inherit; cursor:pointer;
-  display:inline-flex; align-items:center; gap:6px;
-  min-height:0;
-}
-#VISITOR .lws-utility a:hover,
-#VISITOR .lws-utility button:hover{ text-decoration:underline; color:#fff; }
-#VISITOR .lws-utility svg{ width:15px; height:15px; }
-
 /* 4.2 — Barre blanche de navigation.
    app.css la rendait grise avec un filet de 3px et un masque de
    dégradé en défilement horizontal : on repart à zéro. */
@@ -588,38 +554,6 @@
   display:block; width:18px; height:2px; border-radius:2px; background:var(--lws-navy);
 }
 #VISITOR .vnav-burger:hover{ border-color:var(--lws-blue); }
-
-/* Groupe utilitaire (panier, langue, thème, pastille de sync, point d'accès
-   admin) et boutons de compte : `_vChromeCompact()` les dépose désormais
-   dans la bande bleue. Ils y sont donc en blanc, à plat, sans cadre — la
-   bande utilitaire est une ligne de texte, pas une rangée de boutons. */
-#VISITOR .lws-utility #vNavUtils,
-#VISITOR .lws-utility #vLoginBtns{
-  display:flex; align-items:center; gap:6px; margin:0; padding:0;
-  background:none; border:0;
-}
-#VISITOR .lws-utility #vNavUtils .btn,
-#VISITOR .lws-utility #vLoginBtns .btn,
-#VISITOR .lws-utility #vLoginBtns button{
-  background:transparent !important;
-  border:0 !important;
-  box-shadow:none !important;
-  color:#fff !important;
-  font-size:14px !important; font-weight:400 !important;
-  padding:2px 6px !important;
-  min-height:0 !important;
-  border-radius:var(--lws-r-sm);
-}
-#VISITOR .lws-utility #vNavUtils .btn:hover,
-#VISITOR .lws-utility #vLoginBtns button:hover{
-  background:rgba(255,255,255,.14) !important; text-decoration:none;
-}
-#VISITOR .lws-utility .btn.sm.icon-only{
-  width:28px !important; height:28px !important; padding:0 !important;
-  justify-content:center;
-}
-#VISITOR .lws-utility #vLoginBtns > span{ color:rgba(255,255,255,.85); font-size:14px; }
-#VISITOR .lws-utility #vSyncDot{ opacity:.85; }
 
 /* Repli : si la bande n'a pas pu accueillir le groupe (JS non exécuté),
    il reste dans la barre blanche — on l'y garde présentable. */
@@ -1197,7 +1131,6 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
      entre 430 et 820 px il reste largement de la place, et une icône seule
      ne dit pas à un parent pressé qu'il peut entrer ici. */
   #VISITOR .vnav-cnx{ padding:10px 15px; }
-  #VISITOR .lws-utility-proof, #VISITOR .lws-utility-sep{ display:none; }
   #VISITOR .acc-foot{ padding:22px !important; }
 }
 
@@ -1250,9 +1183,6 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   #VISITOR#VISITOR .vnav-brand-ic{ width:32px; height:32px; }
 }
 @media (max-width:520px){
-  #VISITOR .lws-utility{ font-size:13px; }
-  #VISITOR .lws-utility-in{ justify-content:center; }
-  #VISITOR .lws-utility-right{ margin-left:0; gap:14px; }
   #VISITOR .lws-promo-in{ font-size:14px; }
 }
 
@@ -1321,8 +1251,6 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
    17 · IMPRESSION
    ═══════════════════════════════════════════════════════════════════ */
 @media print{
-  #VISITOR .lws-utility, #VISITOR .lws-promo, #VISITOR .vnav,
-  #VISITOR #vAmbassaFab, #VISITOR #vCitFloat{ display:none !important; }
   #VISITOR{ background:#fff; color:#000; }
 }
 
@@ -1401,14 +1329,6 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 /* 18.c — Plafond de graisse : 400 par défaut, 500 pour l'appui,
    600 pour les titres et les boutons. Rien au-dessus, jamais. */
 #VISITOR#VISITOR *{ font-weight:400 !important; }
-#VISITOR#VISITOR :is(h1,h2,h3,h4,h5,h6,b,strong,th,legend,summary,dt,kbd,
-  .btn, .vnav-cnx, .vnav-brand-tx, .acc-pill, .acc-num,
-  .acc-plan-nom, .acc-plan-prix, .acc-plan-cta, .acc-ess-t, .acc-role-lbl,
-  .vsec-title, .vsec-title-hero, .vstats-n, .lws-figure-n,
-  .lws-promo-in b, .lws-promo-cta, .lws-footer-col h4, .lws-utility-tag,
-  .vlit-banner__title, .acc-news-cta, .acc-rech-btn, .vmenu-hd-t, .lx-statcard-n){
-  font-weight:600 !important;
-}
 #VISITOR#VISITOR :is(.lws-nav-links > button.on, .acc-plan-pour, .vlit-banner__label,
   .acc-role-go, .vmenu-col button b, .fl, .acc-news-item .tx b, .vmenu-t){
   font-weight:500 !important;
@@ -1458,18 +1378,9 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   text-transform:uppercase !important;
   letter-spacing:.7px !important;
 }
-
-/* 18.f — Bande utilitaire : elle doit tenir sur UNE ligne à 1170px.
-   Mesuré à 87px de haut (deux lignes) tant que la mention de programme
-   restait affichée sous 1300px — on la retire à cette largeur. */
-#VISITOR .lws-utility{ font-size:13.5px; padding:6px 0; }
-#VISITOR .lws-utility-in{ gap:6px 16px; flex-wrap:nowrap; }
-#VISITOR .lws-utility a, #VISITOR .lws-utility button{ font-size:13.5px; }
 @media (max-width:1300px){
-  #VISITOR .lws-utility-proof, #VISITOR .lws-utility-sep{ display:none; }
 }
 @media (max-width:820px){
-  #VISITOR .lws-utility-in{ flex-wrap:wrap; }
 }
 
 /* v1.17 — sous 430 px seulement, l'icone suffit : la barre doit garder la
@@ -2660,8 +2571,6 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 #VISITOR#VISITOR :is(.acc-promesse, .acc-plans, .rsc-fixe, .acc-ess){
   max-width:none !important;
 }
-#VISITOR#VISITOR .lws-utility-in,
-#VISITOR#VISITOR .lws-promo-in{ max-width:var(--lws-w) !important; }
 #VISITOR#VISITOR .vnav-brand{
   padding-left:max(var(--lws-gut), calc((100vw - var(--lws-w)) / 2)) !important;
 }
@@ -3505,12 +3414,6 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   font-size:16.5px !important;
   line-height:1.65 !important;
 }
-#VISITOR#VISITOR#VISITOR :is(small, .acc-plan-prix small, .vmenu-col button small,
-  .acc-role-go, .lws-levels-t, .acc-plans-note, figcaption, .lx-serie span,
-  .lx-ment span, .lws-utility, .lws-utility a, .lws-utility button){
-  font-size:15px !important;
-  line-height:1.55 !important;
-}
 /* Le plancher absolu. Les étiquettes de 10 et 11px — « Gratuit », le nom
    d'une rubrique, le compteur d'une carte — remontent à 13px. En dessous,
    un œil fatigué devine au lieu de lire. */
@@ -3685,9 +3588,6 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   background:#fff !important;
   color:var(--lws-blue) !important;
 }
-/* Même garde-fou pour la bande utilitaire, qui a la même structure. */
-#VISITOR#VISITOR#VISITOR .lws-utility,
-#VISITOR#VISITOR#VISITOR .lws-utility *{ color:#fff !important; }
 
 /* ════════════════════════════════════════════════════════════════════════
    31 · ICÔNES BICOLORES · MOTS EN COULEUR · PLEINE LARGEUR

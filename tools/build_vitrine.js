@@ -239,9 +239,15 @@ vals.reussites = vals.reussites.map(r => {
   }
   const deg = Math.round(t / 100 * 360);
   const creux = r.anneau.match(/,(#[0-9A-Fa-f]{6}) \d+deg/);
+  const fond = (creux ? creux[1] : '#E7EDF8');
   return Object.assign({}, r, {
     taux: t + ' %',
-    anneau: 'conic-gradient(' + r.teinte + ' 0deg ' + deg + 'deg,' + (creux ? creux[1] : '#E7EDF8') + ' ' + deg + 'deg 360deg)'
+    /* L'anneau reste ÉCRIT REMPLI ici — c'est ce que voit un visiteur sans
+       JavaScript, et c'est ce que lit un moteur de recherche. Les trois
+       variables qui suivent permettent à vitrine.js de le rejouer depuis zéro
+       à l'entrée dans l'écran ; sans JS, elles ne servent simplement à rien. */
+    anneau: 'conic-gradient(' + r.teinte + ' 0deg ' + deg + 'deg,' + fond + ' ' + deg + 'deg 360deg);'
+          + '--vr-cible:' + deg + 'deg;--vr-teinte:' + r.teinte + ';--vr-creux:' + fond
   });
 });
 
@@ -271,12 +277,12 @@ const ANCRES = {
   '#creer-compte': APP + '#inscription',    // route ajoutée au routeur en même temps
   '#compte': APP + '#connexion',            // _ouvrirConnexion() ramène un connecté chez lui
   '#connexion': APP + '#connexion',
-  /* La loupe ne cherchait rien : elle ouvrait l'accueil de l'application, qui
-     n'a pas de recherche de site. On l'envoie là où une recherche existe
-     VRAIMENT et où mène l'intention n°1 de ce public — retrouver le corrigé
-     d'un exercice. L'intitulé accessible est corrigé plus bas, sinon la loupe
-     promettrait encore autre chose que ce qu'elle fait. */
-  '#recherche': 'corriges/',
+  /* La loupe ne cherchait rien : elle ouvrait l'accueil de l'application. Un
+     premier correctif l'a envoyée vers /corriges/ — c'était encore de la
+     navigation, pas une recherche. Or l'application POSSÈDE une recherche de
+     site, mRecherche(), jusque-là enterrée derrière le panneau « Naviguer ».
+     Elle est maintenant adressable par ancre, donc atteignable d'ici. */
+  '#recherche': APP + '#recherche',
   '#contact': APP + '#contact',
   '#aide': APP + '#contact',
   /* ── Ce qui RESTE dans la vitrine ──────────────────────────────────────
@@ -395,7 +401,7 @@ const NIVEAUX = ['6eme', '5eme', '4eme', '3eme', 'seconde', 'premiere', 'termina
 const FOOTER = [
   '#elearning', 'corriges/', '#elearning', APP + '#epreuves', 'oeuvres/',
   '#boutique', '#tarifs', '#elearning', '#elearning', APP + '#cagnotte',
-  APP + '#presentation', '#parents', APP + '#partenariat', 'campus/', APP + '#verifier-certificat'
+  'decouvrir/', '#parents', APP + '#partenariat', 'campus/', APP + '#verifier-certificat'
 ];
 
 function brancherEnOrdre(html, ancre, cibles, quoi) {
@@ -408,8 +414,209 @@ function brancherEnOrdre(html, ancre, cibles, quoi) {
   return html.split('href="' + ancre + '"').reduce((acc, part, idx) =>
     idx === 0 ? part : acc + 'href="' + cibles[i++] + '"' + part, '');
 }
-corps = brancherEnOrdre(corps, '#niveau', NIVEAUX, 'des niveaux');
 corps = brancherEnOrdre(corps, '#lien', FOOTER, 'du pied de page');
+
+/* ── Le calendrier scolaire, lu à la SOURCE ────────────────────────────────
+   CALENDRIER_SCOLAIRE (app.js) porte l'arrêté conjoint MINEDUB/MINESEC
+   2026-2027 : trois trimestres, six séquences, les interruptions et les
+   périodes d'examens. On le LIT plutôt que de le recopier — une date recopiée
+   diverge au premier amendement, et personne ne s'en aperçoit.
+   Le bloc est pré-rendu : il s'affiche sans JS et Google l'indexe. */
+function lireCalendrier() {
+  const src = fs.readFileSync(path.join(process.cwd(), 'app.js'), 'utf8');
+  const i = src.indexOf('var CALENDRIER_SCOLAIRE={');
+  if (i < 0) throw new Error('CALENDRIER_SCOLAIRE introuvable dans app.js — bloc calendrier impossible.');
+
+  /* ⚠️ LES COMMENTAIRES D'ABORD, LE COMPTAGE ENSUITE.
+     Premier essai : compter les accolades directement sur la source. Il
+     s'arrêtait au milieu du tableau `journees`, sur une erreur de syntaxe
+     incompréhensible. La cause est en français : les commentaires du
+     calendrier contiennent des apostrophes — « fixées par l'arrêté conjoint ».
+     Le compteur y voyait l'OUVERTURE d'une chaîne, cherchait sa fermeture
+     jusqu'à la prochaine apostrophe venue, et ne comptait plus rien de juste.
+     On travaille donc sur une copie privée de ses commentaires de ligne. */
+  const brut = src.slice(i, i + 40000);
+  const propre = brut.split('\n')
+    .filter(l => !/^\s*\/\//.test(l))
+    .join('\n');
+
+  const d = propre.indexOf('{');
+  let prof = 0, j = d, chaine = null;
+  for (; j < propre.length; j++) {
+    const c = propre[j], p = propre[j - 1];
+    if (chaine) { if (c === chaine && p !== '\\') chaine = null; continue; }
+    if (c === '\'' || c === '"' || c === '`') { chaine = c; continue; }
+    if (c === '{') prof++;
+    else if (c === '}') { prof--; if (!prof) { j++; break; } }
+  }
+  if (prof !== 0) throw new Error('CALENDRIER_SCOLAIRE : accolades déséquilibrées — extraction refusée.');
+
+  // Notre propre fichier, littéral d'objet pur : évaluation directe.
+  const cal = eval('(' + propre.slice(d, j) + ')');
+  if (!cal || !cal.annee || !Array.isArray(cal.trimestres) || !cal.trimestres.length) {
+    throw new Error('CALENDRIER_SCOLAIRE : forme inattendue (année ou trimestres manquants).');
+  }
+  return cal;
+}
+
+/* Les séquences ne portent que jour + mois (« 07 Sept ») ; l'année vient du
+   trimestre qui les contient. Sans cette résolution, « en ce moment » désigne
+   n'importe quoi dès janvier. */
+const MOIS = { jan:0, fév:1, fev:1, mars:2, avr:3, mai:4, juin:5, juil:6, août:7, aout:7, sept:8, oct:9, nov:10, déc:11, dec:11 };
+function isoDe(txt, anneeDebut, anneeFin) {
+  /* Les dates du calendrier ne suivent pas UN format mais plusieurs :
+     « 07 Sept 2026 », « 18 Déc 2026 (15h30) », et surtout
+     « Lun. 03 au Ven. 21 Mai 2027 » — un intervalle avec jours de semaine.
+     Une expression qui exige « nombre puis mois » collés échoue sur le
+     troisième : elle lit « 03 au » et rend une chaîne vide, donc la ligne ne
+     peut jamais être désignée comme prochaine échéance.
+     On prend donc le PREMIER nombre, puis le PREMIER nom de mois qui suit,
+     même séparé par d'autres mots. */
+  /* ⚠️ LE POINT EST OBLIGATOIRE dans ce filtre, il n'est pas décoratif.
+     Sans lui, « \b(mar) » mord sur le début de « MARS » : « 25 Mars 2027 »
+     devenait « 25 s 2027 », plus aucun mois reconnaissable, et la ligne
+     perdait sa date pivot. Les jours de semaine sont TOUJOURS abrégés avec un
+     point dans l'arrêté (« Lun. », « Ven. »), les mois jamais. */
+  const s = String(txt).replace(/\b(?:lun|mar|mer|jeu|ven|sam|dim)\.\s*/gi, '');
+  const mJour = s.match(/(\d{1,2})/);
+  if (!mJour) return '';
+  const apres = s.slice(mJour.index + mJour[1].length);
+  const mMois = apres.match(/([A-Za-zéèûôîàÉÈ]{3,})/);
+  if (!mMois) return '';
+  const m = [null, mJour[1], mMois[1]];
+  const mo = MOIS[m[2].toLowerCase().replace(/\.$/, '')];
+  if (mo === undefined) return '';
+  // Septembre→décembre = année de rentrée ; janvier→août = année suivante.
+  const an = mo >= 8 ? anneeDebut : anneeFin;
+  return an + '-' + String(mo + 1).padStart(2, '0') + '-' + String(+m[1]).padStart(2, '0');
+}
+
+function blocCalendrier() {
+  const C = lireCalendrier();
+  const [a1, a2] = String(C.annee).split('-').map(Number);
+  const ENCRE = '#001136', GRIS = '#4D5163';
+
+  /* ── DATES CLÉS, et rien d'autre ─────────────────────────────────────────
+     Première version : les trois trimestres, leurs six séquences, les
+     interruptions et les cinq périodes d'examens. Exact, sourcé… et beaucoup
+     trop long pour une page d'accueil — sur téléphone, le bloc faisait plus
+     de deux écrans à lui seul. L'accueil annonce, il ne détaille pas.
+
+     On garde donc SIX repères et un lien vers le calendrier complet, qui
+     existe déjà dans l'application (showCalendrier, app.js) et qui est
+     désormais atteignable par ancre. Les six sont DÉRIVÉS de l'objet, jamais
+     retapés : rentrée, les trois interruptions, les compositions de fin
+     d'année et la période des examens officiels du secondaire. */
+  const cles = [];
+  const t1 = C.trimestres[0];
+  if (t1) cles.push({ q: 'Rentrée des classes', d: t1.debut, ton: 'debut' });
+  (C.vacances || []).forEach(v => cles.push({
+    q: v.label.replace(/\s*\([^)]*\)/, ''),
+    d: v.debut.replace(/\s*\([^)]*\)/, '') + ' → ' + v.fin.replace(/\s*\([^)]*\)/, ''),
+    ton: 'pause'
+  }));
+  const compo = (C.examens_nationaux || []).find(e => /Compositions/i.test(e.nom));
+  if (compo) cles.push({ q: 'Compositions de fin d\u2019année', d: compo.date, ton: 'exam' });
+  const offi = (C.examens_nationaux || []).find(e => /Secondaires/i.test(e.nom));
+  if (offi) cles.push({ q: 'Examens officiels · BEPC, Probatoire, BAC, GCE', d: offi.date, ton: 'exam' });
+
+  if (cles.length < 4) throw new Error('Calendrier : moins de 4 dates clés extraites — vérifier CALENDRIER_SCOLAIRE.');
+
+  const lignes = cles.map(c => {
+    const iso = isoDe(String(c.d).split('→')[0], a1, a2);
+    return '<li class="vcle vcle-' + c.ton + '" data-jour="' + iso + '">'
+         + '<span class="vcle-q">' + esc(c.q) + '</span>'
+         + '<span class="vcle-d">' + esc(c.d) + '</span></li>';
+  }).join('');
+
+  /* Les actualités sont un CONTENEUR VIDE : rien n'est écrit ici. Si
+     news_proxy.php ne répond pas, l'aside reste masqué et la colonne
+     disparaît — on n'affiche pas une rubrique d'actualités sans actualité. */
+  const onglets = [['minesec', 'MINESEC'], ['bourses', 'Bourses'],
+                   ['education', 'Éducation'], ['grandes_ecoles', 'Grandes écoles']]
+    .map(([k, l], i) => '<button type="button" class="vnews-tab' + (i ? '' : ' on') + '" data-cat="' + k + '"'
+        + ' onclick="VRT.act(\'actus\',this,event)">' + l + '</button>').join('');
+
+  return '<!-- CALENDRIER & ACTUALITÉS -->\n'
+    + '<section style="padding:48px 0 10px" data-reveal>'
+    +   '<div style="max-width:1170px;margin:0 auto;padding:0 24px">'
+    +     '<div style="margin-bottom:20px">'
+    +       '<h2 style="font:600 27px/36px Poppins,sans-serif;color:' + ENCRE + ';margin:0 0 6px">L\u2019année scolaire ' + esc(C.annee) + '</h2>'
+    +       '<p style="margin:0;font-size:15px;color:' + GRIS + '">Les dates à retenir, d\u2019après l\u2019arrêté conjoint MINEDUB/MINESEC — et ce qui bouge en ce moment côté MINESEC, bourses et concours.</p>'
+    +     '</div>'
+    +     '<div class="vcal-grid">'
+    +       '<div class="vcal-box vcal-box-cles">'
+    +         '<ul class="vcles">' + lignes + '</ul>'
+    +         '<p class="vcal-note">' + esc(C.note || '') + '</p>'
+    +         '<a class="vcal-lien vlien-anim" href="app.html#calendrier">Voir le calendrier complet'
+    +           '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg>'
+    +         '</a>'
+    +       '</div>'
+    +       '<aside class="vnews" id="vrtNews" hidden>'
+    +         '<div class="vnews-hd"><h3>Actualités</h3><div class="vnews-tabs">' + onglets + '</div></div>'
+    +         '<ul class="vnews-liste" id="vrtNewsListe"></ul>'
+    +         '<p class="vnews-src">Fil d\u2019actualité public — VÉRITAS n\u2019en est pas l\u2019auteur.</p>'
+    +       '</aside>'
+    +     '</div>'
+    +   '</div>'
+    + '</section>';
+}
+
+/* ════════════════════════════════════════════════════════════════════════════
+   CORRECTION 2 bis — DEUX BLOCS RETIRÉS, UN BLOC UTILE À LA PLACE
+   ────────────────────────────────────────────────────────────────────────────
+   Demande de Jacques, captures d'écran mobiles à l'appui.
+
+   • « Les corrigés de ma classe » (section NIVEAUX) : sept cartes empilées, une
+     par ligne, chacune haute comme un demi-écran sur téléphone pour n'annoncer
+     qu'un nombre. Le menu « Plus » et le pied de page mènent déjà aux mêmes
+     sept pages ; la bande ne faisait que consommer l'écran le plus précieux.
+
+   • « Ce que chaque plan débloque » : la grille comparative se disloquait sous
+     420 px — pastilles « Oui » flottant au-dessus de leur ligne, « Illimité »
+     coupé net. Une grille de cinq colonnes ne tient pas sur un téléphone, et
+     personne ne compare cinq colonnes au pouce.
+
+   À la place : le CALENDRIER SCOLAIRE officiel et les ACTUALITÉS MINESEC /
+   BOURSES. C'est ce que ce public vient chercher entre deux séquences, et les
+   deux sources existent déjà dans le dépôt — rien n'est inventé :
+     · le calendrier vient de CALENDRIER_SCOLAIRE (app.js), qui cite l'arrêté
+       conjoint MINEDUB/MINESEC 2026-2027 ;
+     · les actualités viennent de api/news_proxy.php, qui sert déjà quatre flux
+       (education, minesec, grandes_ecoles, bourses).
+   Le calendrier est PRÉ-RENDU ici (indexable, lisible sans JS) ; les actualités
+   sont chargées à l'affichage et le bloc DISPARAÎT si le flux ne répond pas —
+   règle maison : pas de données, pas d'affichage.
+   ══════════════════════════════════════════════════════════════════════════ */
+{
+  // ── Retrait 1 : la section NIVEAUX, bornée par les marqueurs de la maquette
+  const dN = corps.indexOf('<!-- NIVEAUX -->');
+  const fN = corps.indexOf('<!-- RÉASSURANCE -->', dN);
+  if (dN < 0 || fN < 0) {
+    throw new Error('Retrait NIVEAUX : marqueurs introuvables — la maquette a changé, vérifier AVANT de déployer.');
+  }
+  const avantN = corps.length;
+  corps = corps.slice(0, dN) + blocCalendrier() + '\n    ' + corps.slice(fN);
+  console.log('niveaux     : section retirée (' + (fN - dN) + ' octets) → calendrier + actualités');
+
+  // ── Retrait 2 : la grille comparative des plans
+  const ancre = corps.indexOf('Ce que chaque plan');
+  if (ancre < 0) {
+    throw new Error('Retrait du tableau : titre introuvable — la maquette a changé, vérifier AVANT de déployer.');
+  }
+  const dT = corps.lastIndexOf('<section', ancre);
+  const fT = corps.indexOf('</section>', ancre);
+  if (dT < 0 || fT < 0) throw new Error('Retrait du tableau : bornes de section introuvables.');
+  // Garde-fou : la section ne doit contenir QUE ce tableau. Si elle en contient
+  // un second (la maquette aurait fusionné deux blocs), on refuse de couper.
+  const tranche = corps.slice(dT, fT);
+  if ((tranche.match(/<section\b/g) || []).length !== 1) {
+    throw new Error('Retrait du tableau : la section englobe autre chose — coupe refusée.');
+  }
+  corps = corps.slice(0, dT) + corps.slice(fT + '</section>'.length);
+  console.log('plans       : grille comparative retirée (' + (fT + 10 - dT) + ' octets)');
+  console.log('total       : ' + (avantN - corps.length) + ' octets nets retirés du corps');
+}
 
 /* ══════════════════════════════════════════════════════════════════════════
    CORRECTION 2 bis — LE MENU « PLUS » REPREND TOUS LES ANCIENS ONGLETS
@@ -453,7 +660,15 @@ const MENU = [
     { t: 'Outils gratuits',      d: 'Calculateurs de moyenne',     i: 'lc-calculator',  c: '#007E11', f: '#E0F5E5', h: 'outils/' }
   ]},
   { titre: 'Le centre', entrees: [
-    { t: 'Présentation',         d: 'Qui nous sommes',             i: 'lc-building',    c: '#1E499B', f: '#DBE8FE', h: APP + '#presentation' },
+    /* ⚠️ PAS `app.html#presentation`. Vérifié dans le code (app.js, vShowSec) et
+     en production : cette ancre ne rend pas une page « qui nous sommes », elle
+     rend L'ACCUEIL DE L'APPLICATION — pastille de marque, promesse, les quatre
+     portes de rôle, vidéo, fil d'actualités. 6 223 caractères de seconde page
+     d'accueil. C'est la « deuxième page » que l'on croyait avoir supprimée :
+     elle ne revenait pas par le service de `/`, mais par cette entrée de menu.
+     La vitrine EST la présentation désormais ; l'entrée pointe donc sur le hub
+     éditorial qui présente réellement le centre. */
+  { t: 'Présentation',         d: 'Qui nous sommes',             i: 'lc-building',    c: '#1E499B', f: '#DBE8FE', h: 'decouvrir/' },
     { t: 'Actualités',           d: 'Ce qui se passe au centre',   i: 'lc-megaphone',   c: '#C24E00', f: '#FFF3E4', h: APP + '#actualites' },
     { t: 'Résultats aux examens',d: 'Taux de réussite',            i: 'lc-trending',    c: '#007E11', f: '#E0F5E5', h: APP + '#resultats' },
     { t: 'Photos',               d: 'La vie du centre',            i: 'lc-star',        c: '#B03A6E', f: '#FBE4EE', h: APP + '#photos' },
@@ -795,10 +1010,8 @@ deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
    une recherche de site qui n'existe pas. On nomme la destination réelle. */
 {
   const avant = corps;
-  corps = corps.replace(/href="corriges\/" aria-label="Rechercher"/g,
-                        'href="corriges/" aria-label="Trouver un corrigé" title="Trouver un corrigé">');
-  // Le remplacement ci-dessus ajoute un « > » de trop si la balise en avait un.
-  corps = corps.replace(/title="Trouver un corrigé">([^>]*?)>/, 'title="Trouver un corrigé"$1>');
+  corps = corps.replace(/aria-label="Rechercher"/g,
+                        'aria-label="Rechercher dans tout le site" title="Rechercher dans tout le site"');
   if (corps === avant) console.warn('⚠ loupe : intitulé « Rechercher » introuvable — vérifier la maquette.');
 }
 
@@ -836,6 +1049,74 @@ deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
       console.log('vidéo       : assets/temoignage.mp4 absent → section témoignage retirée');
     }
   }
+}
+
+/* ── Le bandeau défilant des matières, contraint à l'écran ─────────────────
+   Mesuré à 375 px : le lien qui enveloppe la piste s'étalait sur 4 083 px, sa
+   fenêtre de découpe sur 2 419. Rien ne se voyait — les ancêtres clipsent —
+   mais scrollWidth valait 4 083 pour un écran de 375, et la piste défilait
+   dans le vide. On pose la classe ici ; la feuille fait le reste. */
+{
+  let n = 0;
+  corps = corps.replace(/(<div style="background:#0C2A6A;overflow:hidden;padding:14px 0[^"]*")/g,
+    (m) => { n++; return m.replace('<div ', '<div class="vmarq" '); });
+  if (n !== 1) console.warn('⚠ bandeau défilant : ' + n + ' conteneur(s) contraint(s) au lieu de 1.');
+  else console.log('bandeau     : piste défilante contrainte à la largeur de l\'écran');
+}
+
+/* ── TITRES BICOLORES ──────────────────────────────────────────────────────
+   Les grands titres sortaient de la maquette en une seule encre (#001136).
+   À 27 px sur fond clair, cela donne un bandeau uniforme que l'œil saute. On
+   alterne l'encre profonde et le bleu de marque : la SECONDE moitié du titre
+   passe en #1E499B.
+
+   Trois précautions, parce qu'un titre est ce que Google lit en premier :
+     · la coupure se fait ICI, à la construction — jamais au JavaScript. Un
+       titre découpé côté client serait indexé en morceaux ;
+     · elle tombe sur une FRONTIÈRE DE MOT, au plus près du milieu, jamais au
+       milieu d'un mot ;
+     · un titre de moins de trois mots est laissé tel quel : couper « Nos
+       résultats » en deux couleurs ne crée pas un rythme, seulement du bruit.
+   Le texte du titre est intégralement conservé — on n'ajoute que deux
+   <span>, donc aucun caractère ne disparaît (vérifié par le compteur). */
+{
+  let faits = 0, laisses = 0;
+  corps = corps.replace(/(<h2 style="font:600 2[0-9](?:\.\d)?px[^"]*")>([^<]{6,120})<\/h2>/g,
+    (m, ouvre, texte) => {
+      const mots = texte.trim().split(/\s+/);
+      if (mots.length < 3) { laisses++; return m; }
+      // Coupure au mot dont la position est la plus proche du milieu.
+      let cible = Math.round(texte.length / 2), pos = 0, coupe = 1, ecart = 1e9;
+      for (let i = 0; i < mots.length - 1; i++) {
+        pos += mots[i].length + 1;
+        const e = Math.abs(pos - cible);
+        if (e < ecart) { ecart = e; coupe = i + 1; }
+      }
+      const a = mots.slice(0, coupe).join(' '), b = mots.slice(coupe).join(' ');
+      faits++;
+      return ouvre + '><span class="vt-a">' + a + '</span> <span class="vt-b">' + b + '</span></h2>';
+    });
+  console.log('titres      : ' + faits + ' bicolores, ' + laisses + ' laissés d\'une seule encre (trop courts)');
+}
+
+/* ── Les anneaux de résultats deviennent animables ─────────────────────────
+   Le générateur vient d'écrire les trois variables (--vr-cible, --vr-teinte,
+   --vr-creux) dans l'attribut style. Il reste à poser la prise pour le script
+   et pour la feuille : une classe. On ne la met QUE sur les pastilles qui
+   portent réellement un conic-gradient — le motif est assez précis pour ne
+   désigner qu'elles, et le compteur alerte si la maquette change. */
+{
+  let n = 0;
+  corps = corps.replace(/<span style="(position:relative;width:132px[^"]*conic-gradient[^"]*)"/g,
+    (m, st) => { n++; return '<span class="vring" style="' + st + '"'; });
+  if (n === 0) console.warn('⚠ anneaux : aucune pastille de résultat trouvée — animation inactive.');
+  else console.log('anneaux     : ' + n + ' pastilles rendues animables');
+
+  // La carte qui contient l'anneau reçoit sa propre classe (survol + halo).
+  let c = 0;
+  corps = corps.replace(/<div data-reveal style="(background:#fff;border:1px solid #E4E7EF;border-radius:16px;padding:28px 24px;text-align:center[^"]*)" class="([^"]*)"/g,
+    (m, st, cls) => { c++; return '<div data-reveal style="' + st + '" class="' + cls + ' vres-carte"'; });
+  if (c) console.log('résultats   : ' + c + ' cartes reliées au survol');
 }
 
 // ── CORRECTION 3 : images en WebP ──────────────────────────────────────────
@@ -1025,78 +1306,13 @@ const metaBrut = lines.slice(lines.findIndex(l => l.trim() === '<helmet>') + 1,
   .join('\n');
 
 const cssBascule = `
-/* ── Tableau comparatif, traité comme les panneaux d'abonnement ────────────
-   Même langage : pas de filet, la couleur portée par le fond, une colonne
-   par plan qui garde SA teinte de bout en bout, et les valeurs en pastilles
-   plutôt qu'en texte nu. Le !important est ici obligatoire et non
-   négociable : le tableau sort de la maquette avec ses styles en ligne, qui
-   priment sur toute feuille. */
-.vtab{border:0!important;border-radius:18px!important;overflow:hidden!important;
-  box-shadow:0 6px 16px rgba(0,17,54,.06)!important;background:#fff!important}
-.vtab>div{border-bottom:0!important;gap:10px!important}
-
-/* En-tête : aplat profond, libellés en capitales blanches — l'écho direct du
-   bandeau des panneaux d'abonnement. */
-.vtab>div:first-child{background:#0C2A6A!important;padding:16px 22px!important}
-.vtab>div:first-child span{color:#fff!important;font-weight:600!important;
-  letter-spacing:.6px!important;text-transform:uppercase!important;font-size:11.5px!important}
-
-/* Une ligne sur deux teintée : c'est ce qui remplace le filet pour guider
-   l'œil jusqu'au bout de la ligne, sur un tableau à cinq colonnes. */
-.vtab>div:nth-child(odd):not(:first-child){background:#F8FAFD!important}
-.vtab>div:not(:first-child):hover{background:#EDF2FB!important;transition:background .18s}
-
-/* Colonnes 4 et 5 : les deux plans payants gardent leur teinte sur toute la
-   hauteur, pour qu'on suive une offre du regard sans compter les colonnes. */
-.vtab>div:not(:first-child)>span:nth-child(4){background:rgba(30,73,155,.055)}
-.vtab>div:not(:first-child)>span:nth-child(5){background:rgba(91,79,168,.06)}
-.vtab>div>span:nth-child(4),.vtab>div>span:nth-child(5){
-  margin:-15px 0;padding:15px 4px!important;align-self:stretch;display:flex;
-  align-items:center;justify-content:center}
-.vtab>div:first-child>span:nth-child(4),.vtab>div:first-child>span:nth-child(5){margin:-16px 0;padding:16px 4px!important}
-
-/* Intitulé de ligne à gauche, valeurs centrées : 15 px, jamais moins. */
-.vtab>div>span{font-size:15px!important}
-.vtab>div:not(:first-child)>span:first-child{font-weight:500!important;color:#16233F!important}
-
-/* Le tiret « non inclus » s'efface, le « Oui » s'affirme : on doit lire ce
-   qu'on GAGNE, pas ce qui manque. */
-/* Le tiret « non inclus » doit rester DISCRET sans devenir invisible. Mesuré
-   à #B6BCC9 : 1,82:1 sur blanc — à ce niveau on ne distingue plus un tiret
-   d'une cellule vide, et l'information « ce plan ne l'inclut pas » se perd.
-   #5F6478 tient 4,5:1 y compris sur la ligne teintée (#ECF0F8), où #6E7385 retombait à 4,13 tout en restant nettement en retrait du « Oui ». */
-.vtab .vtab-non{color:#5F6478!important;font-size:17px!important}
-.vtab .vtab-oui{display:inline-flex;align-items:center;justify-content:center;
-  min-width:30px;height:30px;border-radius:100px;background:#E6F4E9;
-  color:#0A5B14!important;font-weight:600!important;font-size:13.5px!important}
-.vtab .vtab-val{display:inline-block;padding:5px 12px;border-radius:100px;
-  background:#EDF2FB;color:#1E499B!important;font-weight:500!important;font-size:13.5px!important}
-
-@media (max-width:760px){
-  .vtab>div{grid-template-columns:1.6fr repeat(4,1fr)!important;padding:12px 13px!important}
-  .vtab>div>span{font-size:13.5px!important}
-  .vtab>div:first-child span{font-size:10.5px!important;letter-spacing:.3px!important}
-}
-
-/* ── Le tableau en thème sombre ────────────────────────────────────────────
-   Indispensable, et pas optionnel : le thème sombre de la maquette repère
-   les surfaces par [style*="background:#fff"], c'est-à-dire dans l'attribut
-   style. Le tableau tirant désormais son fond d'une CLASSE, il serait resté
-   blanc pendant que le texte s'éclaircit — gris pâle sur blanc. On s'accroche
-   à data-vrt-theme, posé sur <html> par appliquerTheme(). */
-[data-vrt-theme="sombre"] .vtab{background:#101E3C!important;box-shadow:none!important}
-[data-vrt-theme="sombre"] .vtab>div:nth-child(odd):not(:first-child){background:#14244A!important}
-[data-vrt-theme="sombre"] .vtab>div:not(:first-child){background:#101E3C!important}
-[data-vrt-theme="sombre"] .vtab>div:not(:first-child):hover{background:#1A2C57!important}
-[data-vrt-theme="sombre"] .vtab>div:not(:first-child)>span{color:#D8E0F0!important}
-[data-vrt-theme="sombre"] .vtab>div:not(:first-child)>span:first-child{color:#F2F5FB!important}
-[data-vrt-theme="sombre"] .vtab>div:not(:first-child)>span:nth-child(4){background:rgba(90,140,235,.14)}
-[data-vrt-theme="sombre"] .vtab>div:not(:first-child)>span:nth-child(5){background:rgba(150,135,235,.16)}
-/* Les pastilles s'inversent : fond soutenu, texte clair — l'inverse du mode
-   clair, sinon un vert pâle sur bleu nuit disparaît. */
-[data-vrt-theme="sombre"] .vtab .vtab-oui{background:#14532D;color:#B7F0C6!important}
-[data-vrt-theme="sombre"] .vtab .vtab-val{background:#1E3566;color:#CBDCFA!important}
-[data-vrt-theme="sombre"] .vtab .vtab-non{color:#5E6B85!important}
+/* ── Blocs écrits par nous, hors maquette ───────────────────────
+   Calendrier scolaire, actualités, titres bicolores et animations. Dans un
+   fichier à part (tools/vitrine-bloc.css) parce qu'ils n'appartiennent pas à
+   la maquette : celle-ci sort en styles EN LIGNE, ce qui impose des
+   !important partout ; nos blocs s'écrivent en classes, normalement.
+   L'ancien CSS du tableau comparatif a disparu avec le tableau. */
+${fs.readFileSync(path.join(__dirname, 'vitrine-bloc.css'), 'utf8')}
 
 /* ── Titre à mots tournants ────────────────────────────────────────────────
    La maquette empilait les quatre mots au lieu de les faire tourner : chaque
