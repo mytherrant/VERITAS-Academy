@@ -143,6 +143,54 @@
   font-size: 14.5px !important;
 }
 
+/* ── JUSTIFICATION DU TEXTE QUI COULE ──────────────────────────────────────
+   Uniquement les paragraphes de prose. Pas les cellules de tableau, pas les
+   libellés, pas les boutons : justifier trois mots dans un bouton les pousse
+   aux deux bords et détruit le libellé.
+   `hyphens:auto` est indispensable — sans césure, une colonne étroite
+   justifiée creuse des rivières de blanc et se lit plus mal qu'au fil de
+   l'eau. Sous 560 px on abandonne : une ligne de moins de ~40 caractères ne
+   se justifie proprement dans aucun cas. */
+#VISITOR#VISITOR :is(p, .vsec-tx, .vcard-d, .acc-promesse-tx) {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+@media (max-width: 560px) {
+  #VISITOR#VISITOR :is(p, .vsec-tx, .vcard-d, .acc-promesse-tx) {
+    text-align: left; hyphens: none;
+  }
+}
+
+/* ── LES TITRES DOIVENT SE VOIR ────────────────────────────────────────────
+   Ils étaient de la même encre que le texte, à peine plus gros. On leur donne
+   trois marqueurs qui ne coûtent aucune requête : l'encre profonde de la
+   marque, un filet court en or sous les h2 (l'or reste réservé à l'accent, il
+   n'est jamais posé sur du texte), et de l'air au-dessus — l'espace blanc est
+   ce qui fait lire un titre comme un titre. */
+#VISITOR#VISITOR :is(h1, h2, h3) { color: var(--ra-profond) !important; }
+#VISITOR#VISITOR h2 {
+  position: relative;
+  padding-bottom: 11px;
+  margin-top: 1.7em;
+}
+#VISITOR#VISITOR h2::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 46px; height: 3px;
+  border-radius: 100px;
+  background: #FFC93C;
+}
+#VISITOR#VISITOR h3 { margin-top: 1.35em; }
+
+/* ── CONTRASTES INSUFFISANTS ───────────────────────────────────────────────
+   Les gris d'app.css descendent jusqu'à 2,9:1 sur fond blanc — sous le seuil
+   AA de 4,5:1, et illisibles au soleil sur un écran d'entrée de gamme, qui
+   est le parc réel ici. On remonte les deux plus clairs. */
+#VISITOR#VISITOR :is(.ink4, .xs2, .vmeta, small) { color: #5F6B80 !important; }
+
 /* ══════════════════════════════════════════════════════════════════════════
    2. SURFACES : la charte claire de la vitrine
    ══════════════════════════════════════════════════════════════════════════ */

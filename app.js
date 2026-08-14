@@ -10003,10 +10003,100 @@ async function doLogin(){
   var lockAfter=_checkLoginLock(u);
   if(lockAfter.locked){
     $("lerr").innerHTML='<div>Identifiants incorrects</div><div style="font-size:11px;margin-top:4px;color:#AE5353">Compte verrouill\u00e9 pour '+lockAfter.remaining+'s apr\u00e8s trop de tentatives</div>';
-  } else {
-    $("lerr").innerHTML='<div>Identifiants incorrects</div>';
+    return;
   }
+
+  /* \u2550\u2550\u2550 \u00ab Identifiants incorrects \u00bb peut \u00eatre un MENSONGE, et il l'\u00e9tait \u2550\u2550\u2550
+     Les comptes administrateurs ne vivent QUE dans le navigateur : DB.admins
+     et DB.superAdmin viennent de localStorage, aliment\u00e9 par defaultDB() au
+     premier chargement. Sur un appareil neuf \u2014 ou apr\u00e8s un vidage de cache,
+     une navigation priv\u00e9e, un changement de t\u00e9l\u00e9phone \u2014 la liste locale est
+     celle du jeu de D\u00c9MONSTRATION (\u00ab directeur \u00bb, \u00ab secretaire \u00bb). Le vrai
+     compte de l'administrateur, lui, est dans la base SERVEUR.
+
+     R\u00e9sultat : le mot de passe est bon, le compte existe, et l'application
+     r\u00e9pond \u00ab Identifiants incorrects \u00bb. C'est le signalement \u00ab les comptes
+     admins ne s'ouvrent pas \u00bb.
+
+     Et la sortie de secours \u00e9tait inatteignable : cloudRestoreDB() exige
+     isSA(), donc il fallait d\u00e9j\u00e0 \u00eatre connect\u00e9 pour r\u00e9cup\u00e9rer de quoi se
+     connecter. On ouvre donc la porte ICI, avant toute session \u2014 la cl\u00e9 de
+     synchronisation joue ce r\u00f4le, c'est d\u00e9j\u00e0 un secret de niveau
+     administrateur.
+
+     \u26a0\ufe0f On ne restaure QUE les listes de comptes, jamais la base enti\u00e8re :
+     \u00e9craser un appareil qui porte du travail non synchronis\u00e9 pour r\u00e9gler un
+     probl\u00e8me de connexion serait un rem\u00e8de pire que le mal. */
+  var estAdmin = (lr === 'admin' || lr === 'superadmin');
+  var connuIci = false;
+  try{
+    if(lr === 'superadmin') connuIci = !!(DB.superAdmin && DB.superAdmin.user === u);
+    else connuIci = (DB.admins || []).some(function(a){ return a && a.user === u; });
+  }catch(e){}
+
+  if(estAdmin && !connuIci){
+    $("lerr").innerHTML =
+      '<div>Ce compte n\'existe pas <b>sur cet appareil</b>.</div>'
+      + '<div style="font-size:11.5px;margin-top:5px;line-height:1.5;color:#AE5353">'
+      + 'Les comptes d\'administration sont stock\u00e9s dans le navigateur. Sur un appareil neuf, '
+      + 'ou apr\u00e8s un vidage de cache, il faut d\'abord les r\u00e9cup\u00e9rer depuis le serveur.</div>'
+      + '<button class="btn bi" style="margin-top:9px;width:100%" onclick="_restaurerComptesAdmin()">'
+      + 'R\u00e9cup\u00e9rer mes comptes depuis le serveur</button>';
+    return;
+  }
+
+  $("lerr").innerHTML='<div>Identifiants incorrects</div>';
 }
+
+/* R\u00e9cup\u00e8re les LISTES DE COMPTES depuis la base serveur, avant toute session.
+   Demande la cl\u00e9 de synchronisation : c'est elle qui fait autorit\u00e9 ici, et
+   elle n'ouvre aucune session \u2014 elle ne fait que rapatrier de quoi en ouvrir
+   une. Le mot de passe reste exig\u00e9 juste apr\u00e8s. */
+window._restaurerComptesAdmin = function(){
+  var cc = null;
+  try{ cc = (DB.cloudConfig && DB.cloudConfig.secret) || (_loadCloudConfigCache() || {}).secret || ''; }catch(e){ cc = ''; }
+  if(typeof M !== 'function') return;
+  M('R\u00e9cup\u00e9rer les comptes d\'administration',
+    'La cl\u00e9 de synchronisation est demand\u00e9e une seule fois sur cet appareil',
+    '<div class="fg"><span class="fl">Cl\u00e9 de synchronisation</span>'
+    + '<input class="fi" id="_racSec" type="password" autocomplete="off" value="' + _esc(cc) + '" placeholder="fournie par l\'administrateur"></div>'
+    + '<p style="font-size:12.5px;color:var(--ink3);margin:9px 0 0;line-height:1.55">'
+    + 'Seules les <b>listes de comptes</b> sont rapatri\u00e9es \u2014 \u00e9l\u00e8ves, notes et paiements de cet appareil '
+    + 'ne sont pas touch\u00e9s. Votre mot de passe vous sera toujours demand\u00e9 ensuite.</p>'
+    + '<div id="_racMsg" style="margin-top:10px;font-size:13px"></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_restaurerComptesAdminGo()">R\u00e9cup\u00e9rer</button>');
+};
+
+window._restaurerComptesAdminGo = function(){
+  var sec = (_ge('_racSec') && _ge('_racSec').value || '').trim();
+  if(!sec){ _si('_racMsg','<span style="color:#AE5353">Cl\u00e9 requise.</span>'); return; }
+  _si('_racMsg','<span style="color:var(--ink3)">Connexion au serveur\u2026</span>');
+  if(!DB.cloudConfig) DB.cloudConfig = { url:_VRT_API, secret:'', lastSync:'Jamais' };
+  var base = (DB.cloudConfig.url || _VRT_API || 'https://veritas-school.com/api').replace(/\/$/,'');
+  fetch(base + '/db.php?t=' + Date.now(), { headers:{ 'Authorization':'Bearer ' + sec } })
+    .then(function(r){
+      if(r.status === 401 || r.status === 403) throw new Error('Cl\u00e9 refus\u00e9e par le serveur.');
+      if(!r.ok) throw new Error('Serveur injoignable (HTTP ' + r.status + ').');
+      return r.json();
+    })
+    .then(function(d){
+      if(!d || d.error) throw new Error((d && d.error) || 'R\u00e9ponse vide.');
+      var nb = 0;
+      if(Array.isArray(d.admins) && d.admins.length){ DB.admins = d.admins; nb += d.admins.length; }
+      if(d.superAdmin && d.superAdmin.user){ DB.superAdmin = d.superAdmin; nb += 1; }
+      if(!nb) throw new Error('Le serveur ne contient aucun compte d\'administration.');
+      // La cl\u00e9 a fait ses preuves : on la garde pour la synchronisation \u00e0 venir.
+      DB.cloudConfig.secret = sec;
+      try{ _saveCloudConfigCache && _saveCloudConfigCache(); }catch(e){}
+      save();
+      _si('_racMsg','<span style="color:#0B7A2A">' + nb + ' compte(s) r\u00e9cup\u00e9r\u00e9(s). Saisissez maintenant votre mot de passe.</span>');
+      setTimeout(function(){ try{ cm(); }catch(e){} var lp = _ge('lp'); if(lp) lp.focus(); }, 1400);
+    })
+    .catch(function(e){
+      _si('_racMsg','<span style="color:#AE5353">' + _esc(e.message) + '</span>');
+    });
+};
 
 function go2SES(acc){
   try{

@@ -93,6 +93,36 @@
   .vnews{position:static}
 }
 
+/* ══ 1 bis. LISIBILITÉ DU CORPS DE TEXTE ═══════════════════════════════════
+   Justification demandée. Elle ne s'applique QU'AU TEXTE QUI COULE — jamais
+   aux libellés, boutons, cellules ni pastilles : justifier trois mots dans un
+   bouton les écarte jusqu'aux bords et rend le libellé illisible.
+
+   Deux précautions qui ne sont pas cosmétiques :
+   · `hyphens:auto` + `lang="fr"` sur <html> — sans césure, une colonne étroite
+     justifiée creuse des « rivières » de blanc et devient PLUS pénible à lire
+     que du texte au fil de l'eau. C'est la raison pour laquelle on ne justifie
+     pas par défaut sur le web ;
+   · en dessous de 560 px la justification est ABANDONNÉE : une ligne de moins
+     de ~40 caractères ne peut pas être justifiée proprement, même avec césure. */
+.vjust, .vjust p, .vcal-note, .vnews-t {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+@media (max-width: 560px) {
+  .vjust, .vjust p, .vcal-note, .vnews-t { text-align: left; hyphens: none; }
+}
+
+/* ── Contrastes : les gris trop clairs de la maquette ─────────────────────
+   Relevés sous le seuil AA (4,5:1) sur fond blanc : #8A90A0 (3,4:1) et
+   #9AA0AE (2,9:1) servaient à des méta-informations réellement lues — source
+   et date d'une actualité, précision sous une date clé. Remontés au premier
+   gris qui passe le seuil sans devenir du texte courant. */
+.vnews-m, .vnews-src { color: #5F6B80; }
+.vcle-d { color: #0C2A6A; }
+
 /* ══ 2. TITRES BICOLORES ═══════════════════════════════════════════════════
    Les grands titres sortaient de la maquette en une seule encre (#001136) :
    à 27 px sur fond clair, un bandeau de texte uniforme qu'on saute. On
