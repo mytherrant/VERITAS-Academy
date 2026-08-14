@@ -4082,7 +4082,10 @@ function initVisitor(){
   // pictogramme, qu'un textContent effacerait à chaque rendu.
   var lbLabel=document.getElementById('vBrandName');
   if(lbLabel)lbLabel.textContent=(DB.school&&DB.school.nom)||'VÉRITAS Academy';
-  vShowSec("presentation",document.querySelector(".vnav-btn"));
+  // 3ᵉ argument : c'est l'AMORÇAGE, pas une demande du visiteur. Il empêche
+  // _renvoyerVersVitrine() d'éjecter vers la vitrine quelqu'un qui arrivait sur
+  // une section propre à l'application (/app.html#partenariat, #cagnotte…).
+  vShowSec("presentation",document.querySelector(".vnav-btn"),true);
   initTicker();
   // ── Plancher de lisibilité mobile (voir _mobileTypeFloor) ──
   try { if(typeof _installTypeFloorObserver === 'function') _installTypeFloorObserver(); } catch(e){}
@@ -4556,7 +4559,56 @@ function _vRevealInit(){
   vis.querySelectorAll('.v-reveal,.v-reveal-left,.v-reveal-right,.v-reveal-scale,.v-stagger').forEach(function(el){_vRevealObs.observe(el);});
 }
 
-function vShowSec(sec,btn){
+/* ═══════════════════════════════════════════════════════════════════════════
+   LA DOUBLE INTERFACE, À LA RACINE — cinq écrans publics existaient EN DOUBLE
+   ───────────────────────────────────────────────────────────────────────────
+   Depuis que « / » sert la vitrine, l'espace visiteur de l'application rend
+   une SECONDE version de cinq écrans que la vitrine possède déjà : l'accueil
+   (« presentation »), les abonnements, la boutique, l'e-learning et l'espace
+   parents. Deux pages pour la même chose, deux chartes, deux textes à tenir à
+   jour — et le visiteur qui passe de l'une à l'autre croit changer de site.
+
+   On ne les restyle donc pas : on les SUPPRIME comme destination publique.
+   Un visiteur anonyme qui demande l'un de ces cinq écrans est envoyé sur
+   l'écran correspondant de la vitrine, qui est désormais la seule façade.
+
+   Trois garde-fous, parce qu'une redirection mal posée casse plus qu'elle ne
+   répare :
+     · UNIQUEMENT si personne n'est connecté. Un élève, un enseignant ou un
+       administrateur travaillant dans l'application a besoin de sa boutique et
+       de son e-learning : on ne le met jamais dehors ;
+     · UNIQUEMENT depuis /app.html. Si la vitrine venait à manquer et
+       qu'index.php retombe sur l'application, rediriger vers « / » ferait
+       rebondir le visiteur indéfiniment ;
+     · `replace` et non `assign` : le bouton Retour doit ramener d'où l'on
+       vient, pas sur la page qu'on vient de quitter automatiquement.
+   ═══════════════════════════════════════════════════════════════════════════ */
+var _VITRINE_COUVRE = {
+  presentation: '',            // l'accueil de la vitrine
+  tarifs:       '#tarifs',
+  boutique:     '#boutique',
+  elearning:    '#elearning',
+  parents:      '#parents'
+};
+function _renvoyerVersVitrine(sec, boot){
+  try{
+    /* L'AMORÇAGE NE COMPTE PAS. initVisitor() rend « presentation » par défaut,
+       bouton compris — impossible de le distinguer d'un clic par ses arguments.
+       Sans ce marqueur, un visiteur arrivant sur /app.html#partenariat serait
+       éjecté vers la vitrine par le rendu par défaut, AVANT que le routeur
+       n'ait eu le temps d'afficher la section qu'il venait chercher. */
+    if(boot === true) return false;
+    if(typeof SES !== 'undefined' && SES) return false;               // connecté : chez lui
+    if(!Object.prototype.hasOwnProperty.call(_VITRINE_COUVRE, sec)) return false;
+    var p = String(location.pathname || '').toLowerCase().replace(/\/+$/, '');
+    if(p !== '/app.html') return false;                               // anti-rebond
+    location.replace('/' + _VITRINE_COUVRE[sec]);
+    return true;
+  }catch(e){ return false; }
+}
+
+function vShowSec(sec,btn,_boot){
+  if(_renvoyerVersVitrine(sec, _boot)) return;
   window._vCurrentSec=sec;
   /* ── DEUX INTERFACES EMPILÉES — la vraie « double interface » ─────────────
      #LS (l'écran de connexion) est en position fixe à z-index 9999, l'espace
