@@ -290,6 +290,58 @@ for (const [ancre, cible] of Object.entries(ANCRES)) {
   corps = corps.split('href="' + ancre + '"').join('href="' + cible + '"');
 }
 
+/* ── Tableau comparatif : une accroche pour pouvoir le styler ──────────────
+   « Ce que chaque plan débloque » sort de la maquette en styles EN LIGNE et
+   sans une seule classe : impossible à reprendre en CSS, et il détonnait à
+   côté des panneaux d'abonnement — filets gris, aplat blanc, colonnes sans
+   identité. On lui pose une classe ici, et la feuille fait le reste. Les
+   règles doivent porter !important : une déclaration en ligne l'emporte
+   toujours sur une feuille, quelle que soit la spécificité. */
+{
+  /* Deux conteneurs portent CE MÊME style en ligne : la grille des plans et
+     le tableau « Votre inquiétude / Notre réponse ». Les coiffer tous les
+     deux appliquerait à un tableau de deux colonnes des règles écrites pour
+     cinq. On ne se repère donc pas sur le style — qui ne distingue rien —
+     mais sur le contenu : seule la grille des plans ouvre sur la colonne
+     « Fonctionnalité ». */
+  const AVANT = '<div style="border:1px solid #E4E7EF;border-radius:14px;overflow:hidden">';
+  let vus = 0, coiffes = 0;
+  corps = corps.split(AVANT).map((part, i, tous) => {
+    if (i === 0) return part;
+    vus++;
+    // `part` est ce qui SUIT le conteneur : on y cherche l'en-tête.
+    const estGrillePlans = part.slice(0, 700).includes('Fonctionnalité');
+    if (estGrillePlans) { coiffes++; return '<div class="vtab">' + part; }
+    return AVANT + part;                      // laissé tel quel
+  }).join('');
+  if (coiffes !== 1) {
+    console.warn('⚠ tableau comparatif : ' + coiffes + ' grille(s) de plans coiffée(s) sur '
+      + vus + ' conteneur(s) — la maquette a changé, vérifier AVANT de déployer.');
+  }
+
+  /* Les cellules de valeur n'ont ni classe ni structure : on les qualifie par
+     leur CONTENU, seul repère disponible. Le motif de style est assez
+     particulier (`font-size:14px` + `text-align:center`) pour ne désigner que
+     ce tableau — vérifié par le compteur ci-dessous, qui alerte si la
+     maquette change et que la transformation ne mord plus. */
+  let cellules = 0;
+  corps = corps.replace(
+    /<span style="font-size:14px;color:(#[0-9A-Fa-f]{6});text-align:center([^"]*)">([^<]*)<\/span>/g,
+    (m, coul, reste, val) => {
+      const t = val.trim();
+      const cls = (t === '—' || t === '-' || t === '') ? 'vtab-non'
+                : (t.toLowerCase() === 'oui') ? 'vtab-oui'
+                : 'vtab-val';
+      cellules++;
+      return '<span class="' + cls + '" style="color:' + coul + ';text-align:center' + reste + '">' + val + '</span>';
+    });
+  if (cellules === 0) {
+    console.warn('⚠ tableau comparatif : aucune cellule qualifiée — les pastilles ne seront pas rendues.');
+  } else {
+    console.log('tableau     : ' + cellules + ' cellules qualifiées');
+  }
+}
+
 // Cartes de niveau : sept cartes, sept pages SEO, dans le même ordre.
 const NIVEAUX = ['6eme', '5eme', '4eme', '3eme', 'seconde', 'premiere', 'terminale']
   .map(n => 'niveaux/francais-' + n + '.html');
@@ -415,6 +467,79 @@ const metaBrut = lines.slice(lines.findIndex(l => l.trim() === '<helmet>') + 1,
   .join('\n');
 
 const cssBascule = `
+/* ── Tableau comparatif, traité comme les panneaux d'abonnement ────────────
+   Même langage : pas de filet, la couleur portée par le fond, une colonne
+   par plan qui garde SA teinte de bout en bout, et les valeurs en pastilles
+   plutôt qu'en texte nu. Le !important est ici obligatoire et non
+   négociable : le tableau sort de la maquette avec ses styles en ligne, qui
+   priment sur toute feuille. */
+.vtab{border:0!important;border-radius:18px!important;overflow:hidden!important;
+  box-shadow:0 6px 16px rgba(0,17,54,.06)!important;background:#fff!important}
+.vtab>div{border-bottom:0!important;gap:10px!important}
+
+/* En-tête : aplat profond, libellés en capitales blanches — l'écho direct du
+   bandeau des panneaux d'abonnement. */
+.vtab>div:first-child{background:#0C2A6A!important;padding:16px 22px!important}
+.vtab>div:first-child span{color:#fff!important;font-weight:600!important;
+  letter-spacing:.6px!important;text-transform:uppercase!important;font-size:11.5px!important}
+
+/* Une ligne sur deux teintée : c'est ce qui remplace le filet pour guider
+   l'œil jusqu'au bout de la ligne, sur un tableau à cinq colonnes. */
+.vtab>div:nth-child(odd):not(:first-child){background:#F8FAFD!important}
+.vtab>div:not(:first-child):hover{background:#EDF2FB!important;transition:background .18s}
+
+/* Colonnes 4 et 5 : les deux plans payants gardent leur teinte sur toute la
+   hauteur, pour qu'on suive une offre du regard sans compter les colonnes. */
+.vtab>div:not(:first-child)>span:nth-child(4){background:rgba(30,73,155,.055)}
+.vtab>div:not(:first-child)>span:nth-child(5){background:rgba(91,79,168,.06)}
+.vtab>div>span:nth-child(4),.vtab>div>span:nth-child(5){
+  margin:-15px 0;padding:15px 4px!important;align-self:stretch;display:flex;
+  align-items:center;justify-content:center}
+.vtab>div:first-child>span:nth-child(4),.vtab>div:first-child>span:nth-child(5){margin:-16px 0;padding:16px 4px!important}
+
+/* Intitulé de ligne à gauche, valeurs centrées : 15 px, jamais moins. */
+.vtab>div>span{font-size:15px!important}
+.vtab>div:not(:first-child)>span:first-child{font-weight:500!important;color:#16233F!important}
+
+/* Le tiret « non inclus » s'efface, le « Oui » s'affirme : on doit lire ce
+   qu'on GAGNE, pas ce qui manque. */
+/* Le tiret « non inclus » doit rester DISCRET sans devenir invisible. Mesuré
+   à #B6BCC9 : 1,82:1 sur blanc — à ce niveau on ne distingue plus un tiret
+   d'une cellule vide, et l'information « ce plan ne l'inclut pas » se perd.
+   #5F6478 tient 4,5:1 y compris sur la ligne teintée (#ECF0F8), où #6E7385 retombait à 4,13 tout en restant nettement en retrait du « Oui ». */
+.vtab .vtab-non{color:#5F6478!important;font-size:17px!important}
+.vtab .vtab-oui{display:inline-flex;align-items:center;justify-content:center;
+  min-width:30px;height:30px;border-radius:100px;background:#E6F4E9;
+  color:#0A5B14!important;font-weight:600!important;font-size:13.5px!important}
+.vtab .vtab-val{display:inline-block;padding:5px 12px;border-radius:100px;
+  background:#EDF2FB;color:#1E499B!important;font-weight:500!important;font-size:13.5px!important}
+
+@media (max-width:760px){
+  .vtab>div{grid-template-columns:1.6fr repeat(4,1fr)!important;padding:12px 13px!important}
+  .vtab>div>span{font-size:13.5px!important}
+  .vtab>div:first-child span{font-size:10.5px!important;letter-spacing:.3px!important}
+}
+
+/* ── Le tableau en thème sombre ────────────────────────────────────────────
+   Indispensable, et pas optionnel : le thème sombre de la maquette repère
+   les surfaces par [style*="background:#fff"], c'est-à-dire dans l'attribut
+   style. Le tableau tirant désormais son fond d'une CLASSE, il serait resté
+   blanc pendant que le texte s'éclaircit — gris pâle sur blanc. On s'accroche
+   à data-vrt-theme, posé sur <html> par appliquerTheme(). */
+[data-vrt-theme="sombre"] .vtab{background:#101E3C!important;box-shadow:none!important}
+[data-vrt-theme="sombre"] .vtab>div:nth-child(odd):not(:first-child){background:#14244A!important}
+[data-vrt-theme="sombre"] .vtab>div:not(:first-child){background:#101E3C!important}
+[data-vrt-theme="sombre"] .vtab>div:not(:first-child):hover{background:#1A2C57!important}
+[data-vrt-theme="sombre"] .vtab>div:not(:first-child)>span{color:#D8E0F0!important}
+[data-vrt-theme="sombre"] .vtab>div:not(:first-child)>span:first-child{color:#F2F5FB!important}
+[data-vrt-theme="sombre"] .vtab>div:not(:first-child)>span:nth-child(4){background:rgba(90,140,235,.14)}
+[data-vrt-theme="sombre"] .vtab>div:not(:first-child)>span:nth-child(5){background:rgba(150,135,235,.16)}
+/* Les pastilles s'inversent : fond soutenu, texte clair — l'inverse du mode
+   clair, sinon un vert pâle sur bleu nuit disparaît. */
+[data-vrt-theme="sombre"] .vtab .vtab-oui{background:#14532D;color:#B7F0C6!important}
+[data-vrt-theme="sombre"] .vtab .vtab-val{background:#1E3566;color:#CBDCFA!important}
+[data-vrt-theme="sombre"] .vtab .vtab-non{color:#5E6B85!important}
+
 /* ── Titre à mots tournants ────────────────────────────────────────────────
    La maquette empilait les quatre mots au lieu de les faire tourner : chaque
    mot reçoit un cycle de 13,6 s décalé d'un quart, mais la règle d'origine le

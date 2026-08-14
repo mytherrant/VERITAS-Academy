@@ -135,6 +135,17 @@
     var el = document.getElementById('vrt-theme');
     if (!el) { el = document.createElement('style'); el.id = 'vrt-theme'; document.head.appendChild(el); }
     el.textContent = mode === 'sombre' ? (D.themeSombre || '') : '';
+    /* Repère de thème sur <html>.
+       Le thème sombre de la maquette reconnaît les surfaces en cherchant une
+       CHAÎNE dans les styles en ligne : [style*="background:#fff"], etc. Le
+       procédé tient tant que rien ne bouge, mais il rate toute surface dont
+       le fond vient d'une feuille et non d'un attribut — et il assombrit
+       alors le texte sans assombrir son fond, ce qui donne du gris clair sur
+       du blanc. Mesuré sur l'écran tarifs : 21 textes sous le seuil en mode
+       sombre contre 10 en clair.
+       Cet attribut donne une prise STABLE, indépendante du style en ligne,
+       pour écrire de vraies règles sombres. */
+    try { document.documentElement.setAttribute('data-vrt-theme', mode); } catch (e) {}
     try { localStorage.setItem('vrt_theme', mode); } catch (e) {}
   }
 
