@@ -1298,6 +1298,33 @@ for (const lg of ['fr', 'en']) {
   console.log('tunnel      : champs carte/CVV retirés, nom + téléphone + adresse identifiés');
 }
 
+/* ── BANDE UTILITAIRE RETIRÉE (demande Jacques, 14/08/2026) ────────────────
+   La même bande existait en DEUX exemplaires : dans la coquille applicative et
+   ici, dans la maquette. Retirer celle de l'application ne changeait donc rien
+   à ce que voit un visiteur qui arrive sur « / ».
+
+   Ses quatre mentions sont toutes reprises ailleurs, à l'écran, en même temps :
+     · « Centre d'Excellence Scolaire — Douala » → sous la marque, dans la barre
+       immédiatement en dessous ;
+     · « Programme MINESEC · 6ᵉ à Terminale » → la pastille de l'accroche, qui
+       dit « Programme MINESEC · général, technique & GCE » trois centimètres
+       plus bas ;
+     · « WhatsApp · réponse sous 2 h » → le bouton flottant, sur toutes les
+       pages, et le bloc contact ;
+     · « Mon compte » → le bouton Connexion de la barre principale.
+   Sur un téléphone, elle se repliait sur trois lignes : une centaine de pixels
+   du premier écran — le plus cher de tout le site — pour ne rien apprendre. */
+{
+  const d = corps.indexOf('<!-- BANDE UTILITAIRE -->');
+  const f = corps.indexOf('<!-- BARRE PRINCIPALE -->', d);
+  if (d < 0 || f < 0) {
+    console.warn('⚠ bande utilitaire : marqueurs introuvables — la maquette a changé.');
+  } else {
+    corps = corps.slice(0, d) + corps.slice(f);
+    console.log('bande util. : retirée de la vitrine (' + (f - d) + ' octets, 4 mentions redondantes)');
+  }
+}
+
 /* ── Fermetures orphelines héritées de la maquette ─────────────────────────
    L'export de l'outil de design sort avec 7 <ul> pour 8 </ul> : une fermeture
    sans ouverture, juste après la carte du plan Élite. Le navigateur l'ignore,
