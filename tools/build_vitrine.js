@@ -261,13 +261,22 @@ const ANCRES = {
   '#recherche': APP,
   '#contact': APP + '#contact',
   '#aide': APP + '#contact',
-  '#souscrire': APP + '#tarifs',
+  /* ── Ce qui RESTE dans la vitrine ──────────────────────────────────────
+     Ces quatre-là partaient vers app.html alors que la vitrine possède ses
+     PROPRES écrans tarifs, elearning, boutique et parents. Le visiteur
+     quittait donc une page claire en Poppins pour l'écran visiteur de
+     l'application, d'une tout autre facture, en passant par un splash plein
+     écran. C'était ça, la « double interface » — pas un problème de style
+     mais de câblage : 25 liens sur 44 n'avaient aucune raison de sortir. */
+  '#souscrire': '#tarifs',
+  '#compte-parent': '#parents',
+  '#matiere': '#elearning',
+  '#detail': '#boutique',
+  /* ── Ce qui sort LÉGITIMEMENT vers l'application ────────────────────────
+     Aucun équivalent dans la vitrine : ces parcours vivent dans l'app. */
   '#partenariat': APP + '#partenariat',
   '#candidature': APP + '#partenariat',
   '#cagnotte': APP + '#cagnotte',
-  '#compte-parent': APP + '#parents',
-  '#matiere': APP + '#elearning',
-  '#detail': APP + '#boutique',
   '#corriges': 'corriges/',
   '#bareme': 'corriges/',
   '#offert': 'corriges/',
@@ -285,10 +294,13 @@ for (const [ancre, cible] of Object.entries(ANCRES)) {
 const NIVEAUX = ['6eme', '5eme', '4eme', '3eme', 'seconde', 'premiere', 'terminale']
   .map(n => 'niveaux/francais-' + n + '.html');
 // Pied de page : trois colonnes de cinq liens, dans l'ordre du gabarit.
+// Même règle qu'au-dessus : ce que la vitrine sait afficher reste dans la
+// vitrine. Le pied de page envoyait sept liens sur quinze vers l'application
+// pour des écrans qui existent ici.
 const FOOTER = [
-  APP + '#elearning', 'corriges/', APP + '#elearning', APP + '#epreuves', 'oeuvres/',
-  APP + '#boutique', APP + '#tarifs', APP + '#elearning', APP + '#elearning', APP + '#cagnotte',
-  APP + '#presentation', APP + '#parents', APP + '#partenariat', 'campus/', APP + '#verifier-certificat'
+  '#elearning', 'corriges/', '#elearning', APP + '#epreuves', 'oeuvres/',
+  '#boutique', '#tarifs', '#elearning', '#elearning', APP + '#cagnotte',
+  APP + '#presentation', '#parents', APP + '#partenariat', 'campus/', APP + '#verifier-certificat'
 ];
 
 function brancherEnOrdre(html, ancre, cibles, quoi) {

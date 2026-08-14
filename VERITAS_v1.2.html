@@ -735,15 +735,15 @@ if('MutationObserver' in window){
 
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.19.7">
+<link rel="preload" as="script" href="/app.js?v=1.19.8">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.19.7" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.19.7"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.19.8" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.19.8"></noscript>
 <!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
      app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
 <link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.16.2" onload="this.onload=null;this.rel='stylesheet'">
@@ -757,14 +757,14 @@ if('MutationObserver' in window){
      (halos, dégradés de titre, cartes qui décollent).
      ⚠️ ORDRE CRITIQUE : doit rester le DERNIER <link> CSS de la page.
      Chargée en preload+bascule comme les autres → aucun blocage du rendu. -->
-<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.19.7" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.19.7"></noscript>
+<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.19.8" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.19.8"></noscript>
 <!-- Compagnon indispensable de la feuille ci-dessus : elle éteint TOUS les
      dégradés, y compris ceux que le JS de rendu pose en style en ligne —
      lesquels se retrouveraient alors sans aucun fond (texte blanc sur
      blanc). Ce script relit leur première couleur et la repose en aplat.
      `defer` : rien à faire avant que le DOM existe. -->
-<script src="/assets/theme-lws.js?v=1.19.7" defer></script>
+<script src="/assets/theme-lws.js?v=1.19.8" defer></script>
 
 <!-- ════════ v1.15.9 — THÈME CLAIR / SOMBRE ════════
      Ce script est INLINE et SYNCHRONE, tout en haut : il doit poser
@@ -833,14 +833,38 @@ if('MutationObserver' in window){
      prêt), l'utilisateur voit un splash de marque au lieu d'un écran blanc pendant tout
      le téléchargement. Il se retire dès que l'app rend du contenu (#vContent/#app/#login)
      ou, au pire, après un délai de sécurité. Aucun couplage avec app.js. -->
-<div id="vBootSplash" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(-45deg,#0D1B3E,#142554,#1E3A8A);transition:opacity .45s ease;font-family:'Montserrat',system-ui,sans-serif">
-  <div style="font-size:58px;filter:drop-shadow(0 4px 18px rgba(0,0,0,.45));animation:vbsFloat 3s ease-in-out infinite">🎓</div>
-  <div style="margin-top:14px;font-size:24px;font-weight:900;color:#FFC93C;letter-spacing:.6px;text-shadow:0 2px 12px rgba(0,0,0,.4)">VÉRITAS Academy</div>
-  <div style="margin-top:6px;font-size:12px;color:rgba(255,255,255,.75);font-style:italic;font-family:Georgia,serif">Centre d'Excellence Scolaire</div>
-  <div style="margin-top:26px;width:42px;height:42px;border:4px solid rgba(255,201,60,.22);border-top-color:#FFC93C;border-radius:50%;animation:vbsSpin .8s linear infinite"></div>
-  <div id="vBootMsg" style="margin-top:16px;font-size:12px;color:rgba(255,255,255,.6);letter-spacing:.4px">Chargement de la plateforme…</div>
+<!-- Transition, et non plus « écran de chargement ».
+     L'ancienne version était un aplat navy en dégradé, titre or en Montserrat
+     900, sous-titre en Georgia italique et anneau qui tourne : l'ancienne
+     charte au complet. Comme on arrive de la vitrine, qui est CLAIRE et en
+     Poppins, le passage produisait un flash bleu en plein écran — la
+     sensation de changer de site, précisément ce qu'on cherche à effacer.
+     Le fond reprend donc EXACTEMENT celui de la vitrine (#F6F8FC) : il n'y a
+     plus de rupture à masquer, seulement un contenu qui arrive. Le repère
+     visuel est un glyphe inline (aucune requête, peint immédiatement) et une
+     barre de progression fine plutôt qu'un anneau, qui tournait dans le vide
+     sans jamais rien indiquer. -->
+<div id="vBootSplash" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#F6F8FC;transition:opacity .5s ease;font-family:Poppins,system-ui,-apple-system,'Segoe UI',sans-serif">
+  <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="animation:vbsRespire 2.4s ease-in-out infinite">
+    <path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/>
+  </svg>
+  <div style="margin-top:15px;font-size:19px;font-weight:600;color:#0C2A6A;letter-spacing:.2px">VÉRITAS</div>
+  <div style="margin-top:3px;font-size:13px;color:#4D5163">Centre d'Excellence Scolaire</div>
+  <div style="margin-top:22px;width:132px;height:3px;border-radius:100px;background:#E4E9F2;overflow:hidden">
+    <div style="width:40%;height:100%;border-radius:100px;background:#1E499B;animation:vbsGlisse 1.5s ease-in-out infinite"></div>
+  </div>
+  <div id="vBootMsg" style="margin-top:14px;font-size:12.5px;color:#8B93A6"></div>
 </div>
-<style>@keyframes vbsSpin{to{transform:rotate(360deg)}}@keyframes vbsFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}</style>
+<style>
+@keyframes vbsGlisse{0%{transform:translateX(-115%)}100%{transform:translateX(365%)}}
+@keyframes vbsRespire{0%,100%{opacity:.55}50%{opacity:1}}
+/* Le mouvement n'est jamais une condition d'usage : sans lui, la barre reste
+   simplement pleine et le glyphe opaque. */
+@media (prefers-reduced-motion:reduce){
+  #vBootSplash [style*="vbsGlisse"]{animation:none;width:100%}
+  #vBootSplash svg{animation:none;opacity:1}
+}
+</style>
 <script>
 (function(){
   var hidden=false;
@@ -1605,7 +1629,7 @@ setTimeout(_vAmbassaFab,3000);
    restaient en cache après déploiement. Repli sur la valeur figée si le
    sélecteur ne trouve rien. */
 window._VRT_ASSET_VER=(function(){try{var e=document.querySelector('link[href*="app.js?v="],script[src*="app.js?v="]');var m=e&&String(e.href||e.src||'').match(/app\.js\?v=([0-9.]+)/);return m?m[1]:'1.15.9';}catch(x){return '1.15.9';}})();</script>
-<script defer src="/app.js?v=1.19.7"></script>
+<script defer src="/app.js?v=1.19.8"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->

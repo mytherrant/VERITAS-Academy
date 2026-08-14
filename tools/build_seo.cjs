@@ -76,12 +76,24 @@ function pageHtml(e){
 <meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${esc(url)}">
 <meta property="og:site_name" content="VÉRITAS Academy">
 <script type="application/ld+json">${JSON.stringify(ld)}</script>
-<style>body{font-family:system-ui,Segoe UI,Arial,sans-serif;max-width:760px;margin:0 auto;padding:24px;color:#142554;line-height:1.7}
-header{background:linear-gradient(135deg,#142554,#1E3A7A);color:#fff;padding:22px;border-radius:14px;margin-bottom:20px}
-h1{font-size:22px;margin:0 0 6px}.tags span{display:inline-block;background:#EEF2FF;color:#1E3A8A;border-radius:99px;padding:3px 12px;font-size:12px;font-weight:700;margin:3px 4px 0 0}
-.excerpt{background:#F8FAFF;border:1px solid #E0EAFF;border-left:4px solid #FFC93C;border-radius:10px;padding:16px;white-space:pre-wrap;font-size:14px}
-.cta{display:block;text-align:center;background:#FFC93C;color:#142554;font-weight:800;text-decoration:none;padding:15px;border-radius:12px;margin:20px 0;font-size:15px}
-footer{font-size:12px;color:#8895AA;text-align:center;border-top:1px solid #eee;padding-top:14px;margin-top:24px}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/veritas-refonte.css">
+<!-- Ces 27 pages étaient les DERNIÈRES hors charte : elles sont fabriquées
+     ici, à chaque déploiement, et ne pouvaient donc pas être corrigées une
+     fois pour toutes dans le dépôt — toute retouche du fichier produit était
+     écrasée au build suivant. On corrige le moule, pas la pièce.
+     Les styles ci-dessous restent en ligne pour que la page soit juste AVANT
+     l'arrivée de la feuille externe : ce sont des pages d'entrée depuis
+     Google, elles doivent peindre correctement du premier coup. -->
+<style>body{font-family:Poppins,system-ui,'Segoe UI',Arial,sans-serif;max-width:760px;margin:0 auto;padding:24px;color:#16233F;line-height:1.7;background:#F6F8FC}
+header{background:#0C2A6A;color:#fff;padding:24px;border-radius:18px;margin-bottom:22px;box-shadow:0 6px 16px rgba(0,17,54,.06)}
+h1{font-size:23px;font-weight:600;margin:0 0 6px;color:#fff}
+.tags span{display:inline-block;background:#EDF2FB;color:#1E499B;border-radius:100px;padding:4px 13px;font-size:12px;font-weight:600;margin:3px 4px 0 0}
+.excerpt{background:#fff;border:0;border-radius:14px;padding:18px;white-space:pre-wrap;font-size:15px;box-shadow:0 6px 16px rgba(0,17,54,.06)}
+.cta{display:block;text-align:center;background:#C24E00;color:#fff;font-weight:600;text-decoration:none;padding:16px;border-radius:100px;margin:22px 0;font-size:15px;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:background .18s,box-shadow .18s}
+.cta:hover{background:#A84300;box-shadow:0 12px 26px rgba(0,17,54,.09)}
+footer{font-size:13px;color:#4D5163;text-align:center;border:0;background:#ECEFF7;border-radius:18px;padding:18px;margin-top:26px}</style>
 </head><body>
 <header><h1>${esc(titre)}</h1><div style="opacity:.85;font-size:14px">${esc(matiere)} · ${esc(classe)} · ${esc(seq)} — Sujet corrigé conforme MINESEC</div></header>
 <div class="tags"><span>${esc(matiere)}</span><span>${esc(classe)}</span>${seq?`<span>${esc(seq)}</span>`:''}<span>✅ Gratuit</span></div>
@@ -106,12 +118,25 @@ function main(){
   // index.html
   const list = free.map(e => `<li><a href="${e.id}.html">${esc(e.titre)} — ${esc(e.matiere)} ${esc(e.classe)}</a></li>`).join('\n');
   fs.writeFileSync(path.join(OUT, 'index.html'),
-    `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><title>Épreuves corrigées gratuites — VÉRITAS</title>
+    `<!DOCTYPE html><html lang="fr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Épreuves corrigées gratuites — VÉRITAS</title>
 <meta name="description" content="Épreuves et sujets corrigés gratuits (BEPC, Probatoire, BAC, GCE) — programme MINESEC Cameroun.">
-<link rel="canonical" href="${BASE}/seo/"></head><body style="font-family:system-ui,Arial;max-width:760px;margin:0 auto;padding:24px">
-<h1>📝 Épreuves corrigées gratuites — VÉRITAS Academy</h1>
-<p>Sujets MINESEC (Cameroun) à consulter gratuitement. <a href="${BASE}">Accéder à la plateforme →</a></p>
-<ul style="line-height:2">${list}</ul></body></html>`);
+<link rel="canonical" href="${BASE}/seo/">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="/assets/veritas-refonte.css">
+<style>body{font-family:Poppins,system-ui,'Segoe UI',Arial,sans-serif;max-width:760px;margin:0 auto;padding:24px;background:#F6F8FC;color:#16233F;line-height:1.7}
+header{background:#0C2A6A;color:#fff;padding:24px;border-radius:18px;margin-bottom:22px;box-shadow:0 6px 16px rgba(0,17,54,.06)}
+header h1{color:#fff;font-size:23px;font-weight:600;margin:0 0 6px}
+ul{list-style:none;padding:0}li{margin:9px 0}
+li a{display:block;background:#fff;border-radius:14px;padding:14px 16px;text-decoration:none;color:#0C2A6A;font-weight:500;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:box-shadow .18s,transform .18s}
+li a:hover{box-shadow:0 12px 26px rgba(0,17,54,.09);transform:translateY(-2px)}
+.cta{display:block;text-align:center;background:#C24E00;color:#fff;font-weight:600;text-decoration:none;padding:16px;border-radius:100px;margin:22px 0;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:background .18s}
+.cta:hover{background:#A84300}</style></head><body>
+<header><h1>Épreuves corrigées gratuites</h1><div style="opacity:.85;font-size:14px">Sujets MINESEC (Cameroun), en accès libre</div></header>
+<p>Les corrigés sont gratuits : c'est le cahier qui se vend, pas la correction.</p>
+<ul>${list}</ul>
+<a class="cta" href="${BASE}">Accéder à la plateforme</a></body></html>`);
   // sitemap.xml
   const now = new Date().toISOString().slice(0, 10);
   const sm = `<?xml version="1.0" encoding="UTF-8"?>

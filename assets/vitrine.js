@@ -482,6 +482,20 @@
     var h = (location.hash || '').replace('#', '');
     if (h && document.querySelector('[data-vp="' + h + '"]')) aller(h);
 
+    /* Le hash était lu UNE SEULE FOIS, au démarrage. Conséquence : un lien
+       <a href="#tarifs"> changeait l'adresse sans changer d'écran — le
+       visiteur cliquait, l'URL bougeait, la page restait. C'est ce qui
+       obligeait à renvoyer ces liens vers app.html, et donc ce qui
+       fabriquait la « double interface ». Avec cette écoute, une ancre
+       interne devient un vrai lien : elle fonctionne au clic, au bouton
+       Retour du navigateur, et quand on la colle dans la barre d'adresse. */
+    window.addEventListener('hashchange', function () {
+      var n = (location.hash || '').replace('#', '');
+      if (!n) { if (S.page !== 'accueil') aller('accueil'); return; }
+      if (n === S.page) return;                                   // déjà là : ne pas re-rendre
+      if (document.querySelector('[data-vp="' + n + '"]')) aller(n);
+    });
+
     // Rotation des citations, comme dans la maquette : toutes les 45 s.
     setInterval(function () {
       if (!S.citOn) return;
