@@ -1194,8 +1194,26 @@ for (const [nom, f] of Object.entries(fragments)) {
 const D = { onglets: [], services: [], filtres: [], moyensPaiement: [], champsPaiement: [], optionsLivraison: [], partages: {}, scal: {} };
 const clean = o => JSON.parse(JSON.stringify(o, (k, v) => typeof v === 'function' ? undefined : v));
 
-for (let t = 1; t <= 4; t++) {
+/* Le NOMBRE d'onglets appartient à la maquette : on le lit, on ne le fige pas.
+   Il était écrit « t <= 4 » en dur. La maquette en propose CINQ — ses variantes
+   de cartes sont indexées 1 à 5 — et la cinquième, « Répétitions », n'a donc
+   jamais été extraite : l'onglet s'affichait, le clic vidait la zone.
+   Ce sont pourtant de vraies prestations du centre (répétitions au centre et à
+   domicile, rattrapage, préparation aux examens), avec leurs tarifs. Un chiffre
+   en dur dans un transpileur est une hypothèse sur des données qu'on ne
+   contrôle pas ; ici elle était fausse et silencieuse. */
+const NB_ONGLETS = (function () {
+  const v = valsFor({ page: 'accueil', tab: 1 });
+  const n = (v.onglets || []).length;
+  if (!n) throw new Error('Onglets introuvables dans la maquette — extraction impossible.');
+  return n;
+})();
+for (let t = 1; t <= NB_ONGLETS; t++) {
   const v = valsFor({ page: 'accueil', tab: t });
+  if (!v.services || !v.services.length) {
+    throw new Error('Onglet ' + t + ' (' + ((v.onglets || [])[t - 1] || {}).nom
+      + ') : aucune carte. Un onglet qui vide la zone au clic ne doit pas partir en production.');
+  }
   D.onglets.push(clean(v.onglets));
   D.services.push(clean(v.services));
 }
@@ -1332,6 +1350,28 @@ for (const lg of ['fr', 'en']) {
    et un contrôle qu'on doit désactiver ne protège plus de rien. On la retire
    ici plutôt que dans la maquette : le fichier livré n'est pas à nous, et il
    peut être remplacé par une nouvelle version à tout moment. */
+/* ── Résidus de gabarit : les directives non développées ───────────────────
+   La maquette pilote ses répétitions par <sc-for> et ses conditions par
+   <sc-if>. Le transpileur les développe… sauf trois fermetures, qui partaient
+   telles quelles dans la page livrée : 1 </sc-for> et 2 </sc-if>, sans balise
+   ouvrante correspondante. Ce sont des éléments inconnus du navigateur, donc
+   des fermetures qu'il ignore — mais elles n'ont rien à faire dans un document
+   servi, elles brouillent toute lecture de la structure, et c'est en les
+   croisant qu'on perd du temps à chercher un défaut de nesting ailleurs. */
+{
+  const avant = corps.length;
+  corps = corps.replace(/<\/?(sc-for|sc-if|sc-else|x-dc)\b[^>]*>/g, '');
+  if (avant !== corps.length) {
+    console.log('maquette    : directives <sc-*> résiduelles retirées (' + (avant - corps.length) + ' octets)');
+  }
+}
+
+/* ⚠️ `div` a été ESSAYÉ dans cette liste, puis retiré. Retirer deux </div>
+   « orphelins » rééquilibrait bien le compte global, mais déplaçait
+   l'imbrication : les écrans suivants changeaient de niveau, et le défaut
+   visé — « Questions fréquentes » affiché sur tous les écrans — restait
+   intact. Un compte équilibré ne dit rien de l'arborescence réelle. Le vrai
+   correctif est plus bas : on rattache la section orpheline à son écran. */
 for (const bal of ['ul', 'ol', 'li']) {
   const re = new RegExp('<' + bal + '\\b|</' + bal + '>', 'g');
   let m, prof = 0, orphelines = [];
@@ -1346,6 +1386,48 @@ for (const bal of ['ul', 'ol', 'li']) {
   if (orphelines.length) console.log('maquette    : ' + orphelines.length + ' </' + bal + '> orpheline(s) retirée(s)');
 }
 
+/* ── Contrôle : autant de jeux de cartes que d'onglets ─────────────────────
+   Le déséquilibre a déjà coûté un onglet muet en production (« Répétitions »,
+   cinq onglets pour quatre jeux extraits). L'extraction est maintenant pilotée
+   par la maquette ; ce contrôle vérifie qu'elle a bien tout pris. */
+{
+  const nOng = (D.onglets && D.onglets[0] ? D.onglets[0].length : 0);
+  const nSrv = (D.services || []).length;
+  if (nOng !== nSrv) {
+    throw new Error('Onglets : ' + nOng + ' intitulé(s) pour ' + nSrv
+      + ' jeu(x) de cartes. Un onglet sans contenu vide la zone au clic — construction ANNULÉE.');
+  }
+  console.log('onglets     : ' + nOng + ' onglets, ' + nSrv + ' jeux de cartes — appariés');
+}
+
+/* ── LA FAQ APPARTENAIT À TOUS LES ÉCRANS, DONC À AUCUN ────────────────────
+   Signalé par Jacques : « Questions fréquentes » s'affichait dans e-learning.
+   Mesuré dans le navigateur — la chaîne d'ancêtres du titre est `h2 < div <
+   section < body` : sa section est un FRÈRE des écrans, pas un enfant. Le
+   dernier enfant réel de l'écran des abonnements est le paragraphe « Le plan
+   Pro… » : l'écran se referme juste après, et tout ce qui suit devient
+   visible en permanence.
+
+   On ne redresse pas l'imbrication de la maquette — essayé, ça déplace les
+   écrans suivants sans rien régler. On DÉCLARE simplement l'appartenance :
+   `aller()` montre et masque TOUTES les balises portant le data-vp demandé,
+   donc une seconde section marquée « tarifs » suit exactement le sort de
+   l'écran des abonnements. Deux lignes, aucun déplacement de balise. */
+{
+  const q = corps.indexOf('Questions fréquentes');
+  if (q < 0) {
+    console.warn('⚠ FAQ : titre introuvable — la maquette a changé.');
+  } else {
+    const d = corps.lastIndexOf('<section', q);
+    if (d < 0 || corps.slice(d, q).includes('data-vp')) {
+      console.warn('⚠ FAQ : section déjà rattachée ou introuvable — rien à faire.');
+    } else {
+      corps = corps.slice(0, d) + '<section data-vp="tarifs" hidden' + corps.slice(d + '<section'.length);
+      console.log('faq         : section rattachee a l ecran des abonnements');
+    }
+  }
+}
+
 /* ── ÉQUILIBRE DES BALISES — le contrôle qui manquait ──────────────────────
    Un <a> laissé ouvert ne casse rien de visible : le navigateur referme tout
    seul, très loin, et le reste de la page devient un lien géant qui prend la
@@ -1356,6 +1438,20 @@ for (const bal of ['ul', 'ol', 'li']) {
 {
   const paires = [['a', /<a\b/g, /<\/a>/g], ['button', /<button\b/g, /<\/button>/g],
                   ['section', /<section\b/g, /<\/section>/g], ['ul', /<ul\b/g, /<\/ul>/g]];
+  /* `div` est SURVEILLÉ mais n'ANNULE PAS la construction. La maquette sort avec
+     deux </div> de trop — un défaut de son export, pas du nôtre. Les retirer
+     rééquilibre le compte mais DÉPLACE l'imbrication : les écrans suivants
+     changent de niveau et le défaut visé reste intact. Essayé, mesuré, abandonné
+     au profit du rattachement de section plus haut.
+     Un avertissement documente l'écart connu ; une erreur bloquerait tout
+     déploiement pour un défaut qu'on a choisi de contourner autrement. */
+  {
+    const o = (corps.match(/<div\b/g) || []).length;
+    const c = (corps.match(/<\/div>/g) || []).length;
+    if (o !== c) {
+      console.warn('⚠ <div> : ' + o + ' ouvrant(s) pour ' + c + ' fermant(s) — écart connu de la maquette, non bloquant.');
+    }
+  }
   const fautes = [];
   for (const [nom, ro, rc] of paires) {
     const o = (corps.match(ro) || []).length, c = (corps.match(rc) || []).length;
