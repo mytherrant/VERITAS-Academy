@@ -1196,3 +1196,32 @@ Règle déterministe retenue, dans `initVisitor` :
 Vérifié en production : `#epreuves` → « Épreuves & Annales BEPC, Probatoire, BAC » (8 925 car.),
 et `#partenariat`, `#cagnotte`, `#trophees`, `#evaluations`, `#verifier-certificat` rendent tous
 leur propre section. Le bouton de marque est un `<a href="/">`.
+
+## v1.19.17 (15/08) — le transpileur décidait à la place de la maquette
+
+- **« Répétitions », l'onglet muet.** `for (let t = 1; t <= 4; t++)` dans
+  `build_vitrine.js` : la maquette propose CINQ onglets (variantes indexées 1→5) et la
+  cinquième n'était jamais extraite. Ce sont de vraies prestations avec leurs tarifs —
+  répétitions au centre (dès 15 000 F/mois) et à domicile (dès 25 000 F/mois), rattrapage,
+  préparation aux examens.
+  > **Erreur de jugement à retenir** : j'ai d'abord RETIRÉ l'onglet en concluant qu'il n'avait
+  > rien à montrer, et en invoquant la règle de marque sur le mot « répétition ». Jacques a
+  > corrigé : les répétitions font partie des activités, un lien existait déjà côté parents.
+  > **Un vide côté sortie ne prouve pas un vide côté source** — vérifier la MAQUETTE avant de
+  > conclure qu'un contenu n'existe pas. Le nombre d'onglets se lit maintenant, et la
+  > construction ÉCHOUE si un onglet n'a pas de cartes.
+
+- **« Questions fréquentes » sur tous les écrans.** Chaîne d'ancêtres mesurée au navigateur :
+  `h2 < div < section < body` — la section est un FRÈRE des écrans. Tentative écartée :
+  retirer les `</div>` orphelins rééquilibre le compte, déplace l'imbrication, et ne règle
+  rien. **Un compte de balises équilibré ne dit rien de l'arborescence réelle.**
+  Retenu : déclarer l'appartenance (`data-vp="tarifs"` sur la section orpheline) — `aller()`
+  bascule TOUTES les balises portant le data-vp demandé. Vérifié dans les deux sens en prod.
+
+- Le déséquilibre `<div>` de la maquette (332/334) est signalé, non bloquant.
+
+### Reste à faire
+Inscription 100 F : **serveur prêt** (prix de référence + octroi idempotent dans
+`_auth_lib.php`, inerte tant que le client n'envoie pas `intent:'inscription'`), **client à
+écrire**. Puis : extrait du jour à agrandir et relier à l'IA · panneau Actualités à réduire et
+colorer · habillage du Dashboard et des espaces connectés · `#epreuves` qui rend `pour-eleve`.
