@@ -187,6 +187,10 @@
 /* ── 3.3 Confort de lecture ───────────────────────────────────────────────
    Trois réglages qui n'ajoutent aucun mouvement mais changent la fatigue :
    la longueur de ligne, la césure et le lissage du défilement. */
+/* Défilement doux pour les ancres INTERNES à un écran (« aller au tarif »,
+   « voir la FAQ »). Le changement d'écran, lui, force `behavior:'instant'`
+   dans aller() : c'est une navigation, elle ne s'anime pas — sinon le
+   visiteur atterrit sur le pied de page le temps de l'animation. */
 html{scroll-behavior:smooth}
 .vcal-note,.vnews-t,.vcle-q{text-wrap:pretty}
 :is(h1,h2,h3){text-wrap:balance}

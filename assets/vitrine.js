@@ -86,7 +86,19 @@
       if (actif) secs[i].removeAttribute('hidden'); else secs[i].setAttribute('hidden', '');
     }
     fermerMenus();
-    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+    /* ⚠️ DÉFILEMENT INSTANTANÉ, et surtout pas animé.
+       Changer d'écran est une NAVIGATION : on doit arriver en haut, tout de
+       suite. Avec un défilement animé, la séquence est la suivante — on est à
+       5 000 px sur la boutique, on clique « Commander », l'écran du tunnel
+       (plus court) s'affiche, le navigateur RABAT d'abord la position sur le
+       nouveau maximum, c'est-à-dire tout en bas, puis commence à remonter.
+       Pendant ces quelques centaines de millisecondes, le visiteur voit le
+       pied de page — c'est exactement ce que montrait la capture de Jacques :
+       un grand vide et les mentions légales, en réponse à « Commander ».
+       `scroll-behavior:smooth` posé sur <html> imposait la même animation à
+       cet appel : on tranche explicitement ici. */
+    try { window.scrollTo({ top: 0, left: 0, behavior: 'instant' }); }
+    catch (e) { window.scrollTo(0, 0); }
     if (history.replaceState) history.replaceState(null, '', page === 'accueil' ? location.pathname : '#' + page);
     reveler();
     if (window.veritasTrack) window.veritasTrack('vitrine_page', { page: page });
