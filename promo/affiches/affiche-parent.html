@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Affiche parent — VÉRITAS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_charte.css">
+<style>
+  .feuille { width: 210mm; height: 297mm; --pas: 8.2mm; }
+  .marge   { left: 20mm; }
+  .contenu { padding: 15mm 15mm 0 26mm; }
+
+  .entete  { font-size: 11.5pt; margin-bottom: 10mm; }
+  .lieu    { font-size: 7.5pt; }
+
+  .surtitre { font-size: 8.5pt; margin-bottom: 4mm; }
+
+  /* Ici le chiffre-héros est un prix : on le compose avec sa devise,
+     sur une seule ligne de base. */
+  .prix { display: flex; align-items: baseline; gap: 3mm; margin-left: -.06em; }
+  .prix .chiffre { font-size: 116pt; margin: 0; }
+  .prix .devise  { font-family: var(--sans); font-weight: 700; font-size: 26pt; color: var(--action); }
+  .prix-sous { display: block; font-family: var(--sans); font-weight: 600; font-size: 15pt;
+               color: var(--action); margin-top: 3mm; }
+
+  .titre  { font-size: 24pt; margin-top: 8mm; }
+  .filet  { margin: 5mm 0; }
+  .chapo  { font-size: 10.5pt; max-width: 142mm; }
+
+  /* Le fait national : encadré, sec, sans point d'exclamation. On informe,
+     on ne fait pas peur. */
+  .fait {
+    margin-top: 7mm; padding: 5mm 7mm; max-width: 142mm;
+    background: var(--papier-2); 
+  }
+  .fait .gros { font-family: var(--serif); font-weight: 700; font-size: 15pt; color: var(--navy); }
+  .fait p { font-size: 9.5pt; line-height: 1.55; margin-top: 1.5mm; }
+
+  .questions { margin: auto 0 11mm; max-width: 148mm; }
+  .questions h2 { font-family: var(--serif); font-size: 12pt; color: var(--navy); margin-bottom: 3mm; }
+  .questions ol { list-style: none; counter-reset: q; display: grid; gap: 2.2mm; }
+  .questions li {
+    position: relative; counter-increment: q; padding-left: 8mm;
+    font-size: 10pt; color: var(--navy); line-height: 1.45;
+  }
+  .questions li::before {
+    content: counter(q); position: absolute; left: 0; top: -.1em;
+    font-family: var(--serif); font-weight: 700; font-size: 12pt; color: var(--action);
+  }
+
+  .pied { padding: 9mm 15mm 9mm 26mm; gap: 8mm; }
+  .pied .adresse { font-size: 14pt; }
+  .pied .mention { font-size: 9pt; margin-top: 2mm; line-height: 1.5; }
+  .pied .qr   { width: 27mm; height: 27mm; padding: 2mm; }
+  .pied .scan { font-size: 7pt; margin-top: 2.5mm; text-align: center; display: block; }
+</style>
+</head>
+<body>
+
+<div class="feuille">
+  <div class="reglure"></div>
+  <div class="marge"></div>
+
+  <div class="contenu">
+
+    <header class="entete">
+      <span class="marque">VÉRI<b>TAS</b></span>
+      <span class="lieu">Centre d'Excellence Scolaire · Douala</span>
+    </header>
+
+    <p class="surtitre">Aux parents d'élèves · 6ᵉ → Terminale</p>
+
+    <p class="prix">
+      <span class="chiffre">250</span>
+      <span class="devise">FCFA</span>
+    </p>
+    <span class="prix-sous">par mois. Soit 3&nbsp;000&nbsp;FCFA pour toute l'année scolaire.</span>
+
+    <h1 class="titre">Vous saurez où il en est.<br>Avant le mois de juin.</h1>
+    <hr class="filet">
+
+    <p class="chapo">
+      Un bulletin donne un rang. Il ne dit pas si votre enfant va passer. Sur VÉRITAS,
+      vous entrez ses notes et vous voyez <strong>comment se fabrique sa moyenne</strong> :
+      ce qui compte, ce qui ne compte pas, et ce qui lui manque, matière par matière.
+      Le simulateur est gratuit — même si vous ne prenez rien d'autre.
+    </p>
+
+    <div class="fait">
+      <span class="gros">BAC général 2024 : 37,26&nbsp;% de réussite.</span>
+      <p>
+        L'année précédente, ils étaient 75,73&nbsp;%. Et depuis 2024, le passage se joue
+        sur la moyenne générale de 10/20 : il n'y a plus de délibération pour rattraper.
+        Un parent qui découvre le problème en juin le découvre trop tard.
+      </p>
+    </div>
+
+    <div class="questions">
+      <h2>Trois questions qui valent mieux qu'un « ça va ».</h2>
+      <ol>
+        <li>Sait-il refaire seul un exercice qu'on a corrigé avec lui&nbsp;?</li>
+        <li>Ses notes tiennent-elles quand l'évaluation est surveillée&nbsp;?</li>
+        <li>Progresse-t-il d'une séquence à l'autre, ou est-ce que ça stagne&nbsp;?</li>
+      </ol>
+    </div>
+
+  </div><!-- /.contenu -->
+
+  <footer class="pied">
+    <div style="flex:1">
+      <p class="adresse">veritas-school.com/parcours</p>
+      <p class="mention">
+        Simulateur de moyenne et corrigés : gratuits, sans compte à créer. Entraînement et suivi :
+        3&nbsp;000&nbsp;FCFA l'année (6ᵉ→2nde), 5&nbsp;000&nbsp;FCFA en classe d'examen,
+        25&nbsp;000&nbsp;FCFA pour toute la famille. Orange Money et MTN MoMo.
+        <br><strong>Je ne vous promets pas qu'il réussira. Je vous promets que vous saurez.</strong>
+      </p>
+    </div>
+    <div>
+      <div class="qr"><img src="qr/parcours.svg" alt="QR vers le simulateur de moyenne VÉRITAS"></div>
+      <span class="scan">Scannez&nbsp;ici</span>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>

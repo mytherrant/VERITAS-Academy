@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Affiche enseignant — VÉRITAS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_charte.css">
+<style>
+  .feuille { width: 210mm; height: 297mm; --pas: 8.2mm; }
+  .marge   { left: 20mm; }
+  .contenu { padding: 15mm 15mm 0 26mm; }
+
+  .entete  { font-size: 11.5pt; margin-bottom: 11mm; }
+  .lieu    { font-size: 7.5pt; }
+
+  .surtitre { font-size: 8.5pt; margin-bottom: 4mm; }
+  .chiffre  { font-size: 124pt; }
+  .chiffre .unite { display: block; font-size: 16.5pt; margin-top: 4mm; letter-spacing: .01em; }
+
+  .titre  { font-size: 26pt; margin-top: 9mm; }
+  .filet  { margin: 5.5mm 0; }
+  .chapo  { font-size: 11pt; max-width: 140mm; }
+
+  .preuves { margin-top: 6.5mm; font-size: 10pt; display: grid; gap: 2.4mm; }
+
+  /* L'encart réservé : c'est lui qui répond à la seule vraie objection de
+     l'enseignant — « si les élèves ont tout, que me reste-t-il ? » */
+  .reserve {
+    margin: auto 0 12mm; padding: 6mm 8mm; max-width: 152mm;
+    background: var(--papier-2);
+    
+    box-shadow: 0 12px 28px -16px rgba(0, 17, 54, .4);
+  }
+  .reserve h2 {
+    font-family: var(--serif); font-size: 12pt; color: var(--navy);
+    margin-bottom: 2.5mm;
+  }
+  .reserve p { font-size: 9.5pt; line-height: 1.55; }
+  .reserve b { color: var(--bleu-profond); font-weight: 600; }
+
+  .pied { padding: 9mm 15mm 9mm 26mm; gap: 8mm; }
+  .pied .adresse { font-size: 14pt; }
+  .pied .mention { font-size: 9pt; margin-top: 2mm; line-height: 1.5; }
+  .pied .qr   { width: 27mm; height: 27mm; padding: 2mm; }
+  .pied .scan { font-size: 7pt; margin-top: 2.5mm; text-align: center; display: block; }
+</style>
+</head>
+<body>
+
+<div class="feuille">
+  <div class="reglure"></div>
+  <div class="marge"></div>
+
+  <div class="contenu">
+
+    <header class="entete">
+      <span class="marque">VÉRI<b>TAS</b></span>
+      <span class="lieu">Centre d'Excellence Scolaire · Douala</span>
+    </header>
+
+    <p class="surtitre">Aux professeurs de français · 6ᵉ → Terminale</p>
+
+    <p class="chiffre">3&nbsp;932
+      <span class="unite">exercices déjà corrigés. Pas par vous.</span>
+    </p>
+
+    <h1 class="titre">Gardez vos soirées.</h1>
+    <hr class="filet">
+
+    <p class="chapo">
+      Les corrigés des exercices de français, de la 6ᵉ à la Terminale, sont en ligne
+      et en accès libre. Vos élèves arrivent en classe avec la correction déjà lue :
+      <strong>la séance passe directement à l'exploitation.</strong> Vous ne corrigez plus,
+      vous enseignez. C'est une séance gagnée, pas seulement une préparation.
+    </p>
+
+    <ul class="preuves">
+      <li>42 séquences <span>· 6 par niveau, 6ᵉ → Tle — plus les trois cahiers de l'enseignement technique</span></li>
+      <li>Conforme au programme MINESEC <span>· démarches officielles, objectifs APC, grilles harmonisées</span></li>
+      <li>Guide enseignant <span>· barèmes détaillés, conduite de classe, remédiation, productions modèles</span></li>
+      <li>Spécimen gratuit <span>· un cahier + un code valable toute l'année, remis en main propre</span></li>
+    </ul>
+
+    <div class="reserve">
+      <h2>Ce que vos élèves n'auront pas.</h2>
+      <p>
+        Les élèves ont les corrigés des exercices — c'est ce qui les fait travailler chez eux.
+        <b>Le Guide reste réservé aux enseignants</b> : barèmes détaillés, conduite de séance,
+        productions modèles et remédiation. Il s'ouvre avec un code que je vous remets
+        personnellement, et que les élèves n'ont pas.
+      </p>
+    </div>
+
+  </div><!-- /.contenu -->
+
+  <footer class="pied">
+    <div style="flex:1">
+      <p class="adresse">veritas-school.com/enseignant</p>
+      <p class="mention">
+        Demandez votre code et votre spécimen : <strong>+237&nbsp;697&nbsp;637&nbsp;739</strong> (WhatsApp).
+        Abonnement enseignant — toutes classes, tous sujets d'examen, progressions officielles :
+        5&nbsp;000&nbsp;FCFA l'année scolaire.
+      </p>
+    </div>
+    <div>
+      <div class="qr"><img src="qr/enseignant.svg" alt="QR vers l'espace enseignant VÉRITAS"></div>
+      <span class="scan">Scannez&nbsp;ici</span>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>

@@ -948,7 +948,7 @@ textarea.fi{resize:vertical;min-height:72px}
 .tab{padding:5px 13px;border-radius:5px;border:none;background:transparent;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink3);transition:all .14s}
 .tab.on{background:var(--sur);color:var(--bl);box-shadow:0 1px 3px rgba(28,24,20,.08)}
 .mov{position:fixed;inset:0;background:rgba(15,30,71,.65);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:var(--z-modal,10000);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;animation:fadeIn .2s var(--ease-out)}
-.modal{background:var(--neutral-0);border-radius:var(--radius-xl);width:100%;max-width:560px;box-shadow:var(--shadow-2xl);border:1px solid var(--neutral-200);border-top:3px solid var(--gold,#FFC93C);animation:su .25s var(--ease-spring);max-height:90vh;display:flex;flex-direction:column}
+.modal{background:var(--neutral-0);border-radius:var(--radius-xl);width:100%;max-width:560px;box-shadow:var(--shadow-2xl);border:1px solid var(--neutral-200);border-top:0;animation:su .25s var(--ease-spring);max-height:90vh;display:flex;flex-direction:column}
 .mxl{max-width:850px}
 .mhd{padding:var(--space-5) var(--space-6) var(--space-4);border-bottom:1px solid var(--neutral-200);background:linear-gradient(180deg,rgba(255,201,60,.07),transparent);display:flex;align-items:flex-start;justify-content:space-between;flex-shrink:0;gap:var(--space-3)}
 .mtt{font-family:var(--font-display);font-size:var(--text-lg);font-weight:700;color:var(--primary-700);line-height:var(--leading-tight)}
@@ -2125,7 +2125,7 @@ body { font-size: 15px !important; }
   backdrop-filter: blur(24px) saturate(1.3) !important;
   -webkit-backdrop-filter: blur(24px) saturate(1.3) !important;
   border: 1px solid var(--glass-border) !important;
-  border-top: 3px solid var(--gold,#FFC93C) !important; /* signature de marque sur toutes les modales */
+  border-top:0!important; /* signature de marque sur toutes les modales */
   box-shadow: 0 24px 80px rgba(20,37,84,.18), inset 0 1px 0 rgba(255,255,255,.4) !important;
 }
 .mov {
@@ -3674,7 +3674,7 @@ body{ -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; tex
 }
 
 /* 2) BORDURES COLORÉES — accent par matière (rotation de teintes de la charte) */
-.vcard,.vgz-bento-card,.gallery-card{ border-top:3px solid var(--bl2,#3C8DFF); }
+.vcard,.vgz-bento-card,.gallery-card{ border-top:0; }
 .vcard:nth-child(6n+2),.vgz-bento-card:nth-child(6n+2),.gallery-card:nth-child(6n+2){ border-top-color:var(--gold,#FFC93C); }
 .vcard:nth-child(6n+3),.vgz-bento-card:nth-child(6n+3),.gallery-card:nth-child(6n+3){ border-top-color:var(--pu,#6C56A6); }
 .vcard:nth-child(6n+4),.vgz-bento-card:nth-child(6n+4),.gallery-card:nth-child(6n+4){ border-top-color:var(--gr,#059669); }
@@ -3864,7 +3864,7 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
 /* Cartes Boutique / E-Learning / Produits : profondeur + lift + accent haut */
 .vbook-card,.vplan-card,.vprod-card{
   border:1px solid var(--ds-border,#E6EAF2);
-  border-top:3px solid var(--bl2,#3C8DFF);
+  border-top:0;
   border-radius:16px;
   box-shadow:0 1px 2px rgba(20,37,84,.05), 0 10px 26px rgba(20,37,84,.06);
   transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
@@ -3961,7 +3961,7 @@ a.vlink:hover, .v-link:hover, a.link-anim:hover{ background-size:100% 2px; }
    ════════════════════════════════════════════════════════════════ */
 .jeu-card{
   border:1px solid var(--ds-border,#E6EAF2);
-  border-top:3px solid var(--bl2,#3C8DFF);
+  border-top:0;
   border-radius:16px;
   box-shadow:0 1px 2px rgba(20,37,84,.05), 0 10px 26px rgba(20,37,84,.06);
   transition:transform .22s ease, box-shadow .22s ease, border-color .22s ease;
@@ -6551,7 +6551,7 @@ button .i,a .i{margin-right:.4em}
 .vp-fear-q{
   font-family:'Crimson Pro',Georgia,serif;font-style:italic;
   color:var(--n700);background:var(--o50);
-  border-left:3px solid var(--o300);
+  
   font-size:var(--v-md);
 }
 .vp-fear-a{color:var(--n800)}
@@ -7051,7 +7051,7 @@ button .i,a .i{margin-right:.4em}
    ════════════════════════════════════════════════════════════════════════ */
 
 /* ─── Checklist ─────────────────────────────────────────────────────── */
-.vchk{ border-left:4px solid var(--gold); }
+.vchk{  }
 .vchk-h{ font-family:'Plus Jakarta Sans',Montserrat,sans-serif; font-size:16px;
   font-weight:800; color:var(--ink); }
 .vchk-sub{ font-size:12px; color:var(--ink3); margin-top:2px; }
@@ -7105,7 +7105,7 @@ button .i,a .i{margin-right:.4em}
   font-weight:700; padding:4px 9px; border-radius:99px;
   background:var(--gp); color:var(--gold2); border:1px solid var(--gb); }
 .ech-chip-more{ background:transparent; color:var(--ink4); border-color:var(--ds-border,#E6EAF2); }
-.ech-card{ border-left:4px solid var(--gold); }
+.ech-card{  }
 
 /* ── Boutique : pictogrammes issus du remplacement des emojis ──────────
    Ces classes remplacent des `font-size:28px` qui dimensionnaient un
@@ -7134,7 +7134,7 @@ button .i,a .i{margin-right:.4em}
    ════════════════════════════════════════════════════════════════════════ */
 
 /* ── Checklist ── */
-.vchk{ border-left:4px solid var(--gold); }
+.vchk{  }
 .vchk-h{ font-family:var(--font-display,'Montserrat',sans-serif); font-size:16px; font-weight:800; color:var(--ink); }
 .vchk-sub{ font-size:12px; color:var(--ink3); margin-top:2px; }
 .vchk-bar{ height:6px; border-radius:99px; background:var(--bg2); overflow:hidden; margin-bottom:12px; }
@@ -7174,7 +7174,7 @@ button .i,a .i{margin-right:.4em}
 .ech-chip{ font-family:var(--font-mono,monospace); font-size:11px; font-weight:700;
   background:var(--gp); color:var(--gold2); border:1px solid var(--gb); border-radius:99px; padding:3px 10px; }
 .ech-chip-more{ background:var(--bg2); color:var(--ink4); border-color:var(--bg3); }
-.ech-card{ border-left:4px solid var(--gold); }
+.ech-card{  }
 
 
 /* ══════════════════════════════════════════════════════════════════════

@@ -29,19 +29,13 @@
    désignaient qu'une position dans une grille ne sont pas reprises : une
    couleur qui ne veut rien dire est du bruit. */
 :root {
-  --r-bleu:      #1E499B;   /* le contenu, et l'élève            */
-  --r-profond:   #0C2A6A;   /* aplats sombres, titres            */
-  --r-parents:   #0E7C86;
-  --r-ensgt:     #B03A6E;
-  --r-action:    #C24E00;   /* l'action payante, le commerce     */
-  --r-acquis:    #007E11;   /* le gratuit, le validé, le juste   */
-  --r-premium:   #5B4FA8;   /* premium et tuteur IA              */
-  --r-or:        #FFC93C;   /* réservé aux fonds sombres         */
-
-  --r-encre:     #16233F;
+  /* ── Couleurs de marque : DÉFINIES DANS assets/veritas-tokens.css ──────
+     Elles étaient redéclarées ici ET dans veritas-pages.css, avec des valeurs
+     divergentes (deux bleus pour une seule marque). Les valeurs sont retirées
+     d'ici pour qu'il n'existe qu'UNE origine. Ne pas les redéclarer : charger
+     veritas-tokens.css avant cette feuille. Seule --r-encre2, propre à cette
+     feuille, reste locale. */
   --r-encre2:    #4D5163;
-  --r-fond:      #F6F8FC;
-  --r-ligne:     #E4E9F2;
 
   --r-10: 10px; --r-12: 12px; --r-14: 14px; --r-16: 16px; --r-18: 18px;
   --r-pilule: 100px;
@@ -221,11 +215,11 @@ footer {
   border-radius: var(--r-14);
   box-shadow: var(--r-om1);
   border: 1px solid var(--r-ligne);
-  border-left: 3px solid var(--r-bleu);
+  
 }
-.obj-box     { border-left-color: var(--r-parents); }
-.retenir-box { border-left-color: var(--r-acquis); }
-.corpus-box  { border-left-color: var(--r-premium); }
+.obj-box     {  }
+.retenir-box {  }
+.corpus-box  {  }
 
 .obj-label, .corpus-label, .plan-header, .lesson-tag, .nav-tag {
   font-weight: 600;

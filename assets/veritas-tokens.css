@@ -1,0 +1,48 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   VÉRITAS — JETONS DE DESIGN · SOURCE DE VÉRITÉ UNIQUE
+   © 2024-2026 Jacques Miterand TAKOU (Mythe Errant).
+
+   Pourquoi ce fichier existe
+   ──────────────────────────
+   Le site portait DEUX palettes sans lien : la refonte (--r-*, bleu #1E499B)
+   sur 88 pages, et l'ancien thème (--navy #142554) sur 69 autres. Même marque,
+   deux bleus. Aucune des deux feuilles ne pouvait servir de référence à
+   l'autre : chacune redéclarait ses couleurs dans son propre :root.
+
+   Ce fichier est désormais la SEULE origine des couleurs. `veritas-refonte.css`
+   et `veritas-pages.css` n'inventent plus de valeur : elles y puisent.
+   Une couleur de marque se change ICI, et nulle part ailleurs.
+
+   Ordre de chargement : veritas-tokens.css AVANT toute autre feuille.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root{
+  /* ── Identité de marque ──────────────────────────────────────────────── */
+  --r-bleu:      #1E499B;   /* primaire — bleu VÉRITAS */
+  --r-profond:   #0C2A6A;   /* fonds sombres, en-têtes */
+  --r-encre:     #16233F;   /* texte courant */
+  --r-or:        #FFC93C;   /* réservé à l'ACTION (jamais décoratif) */
+  --r-fond:      #F6F8FC;
+  --r-ligne:     #E4E9F2;
+
+  /* ── Accents par audience — inchangés, déjà communs aux deux feuilles ── */
+  --r-parents:   #0E7C86;
+  --r-ensgt:     #B03A6E;
+  --r-action:    #C24E00;
+  --r-acquis:    #007E11;
+  --r-premium:   #5B4FA8;
+
+  /* ── Rampe primaire, RECONSTRUITE autour de --r-bleu ──────────────────
+     L'ancienne rampe était ancrée sur #142554. Ses onze degrés sont conservés
+     (les composants s'en servent finement) mais réancrés : n700 = --r-bleu,
+     n900 = --r-profond. Contrôle de contraste sur blanc : #1E499B = 8,6:1,
+     donc AAA pour le texte courant — aucune régression d'accessibilité. */
+  --n50:#F1F5FC; --n100:#E1EAF8; --n200:#C0D2EE; --n300:#8FAEDF;
+  --n400:#5B84CB; --n500:#3563B4; --n600:#2452A5; --n700:#1E499B;
+  --n800:#153A80; --n900:#0C2A6A; --n950:#08194A;
+
+  /* ── Rampe d'accent — or VÉRITAS (identique dans les deux thèmes) ────── */
+  --o50:#FFFBF0; --o100:#FFF4D6; --o200:#FFE8A8; --o300:#FFD96B;
+  --o400:#FFC93C; --o500:#F0B31E; --o600:#D19708; --o700:#A67608;
+  --o800:#7A5709; --o900:#4D3706;
+}

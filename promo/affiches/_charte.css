@@ -1,0 +1,230 @@
+/* ══════════════════════════════════════════════════════════════════
+   CHARTE DES AFFICHES DE CAMPAGNE — Centre VÉRITAS, Douala
+   ------------------------------------------------------------------
+   Reprend les jetons publics de assets/theme-lws.css (bleu #1E499B,
+   navy #001136, orange d'action #FF6500 / #C24E00) sur un papier crème
+   plutôt que blanc pur : le blanc pur délave l'orange à l'impression.
+
+   Deux familles seulement — Libre Baskerville pour les titres et le
+   chiffre-héros, Poppins pour tout le reste. Georgia et Segoe UI en
+   secours : si le poste d'impression est hors ligne, la maquette tient
+   quand même debout.
+
+   Le motif « 21:00 / exercice 4 » (.mnemo) est le fil rouge de la
+   campagne. Il revient sur chaque pièce, à l'identique. Ne pas le
+   redessiner d'une affiche à l'autre.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --navy:        #001136;   /* tous les titres                       */
+  --bleu:        #1E499B;   /* ossature, filets, sur-titres          */
+  --bleu-profond:#0C2A6A;   /* bandeaux pleins, pied de page         */
+  --texte:       #37405C;   /* corps de texte                        */
+  --texte-clair: #6E7385;   /* mentions, légendes                    */
+
+  --action:      #FF6500;   /* grandes surfaces, chiffres d'accent   */
+  --action-cta:  #C24E00;   /* tout texte de bouton (4,8:1 en blanc) */
+
+  --papier:      #FAF7F1;   /* crème — jamais #fff                   */
+  --papier-2:    #F2EDE3;   /* crème plus soutenu, encarts           */
+  --ligne:       rgba(30, 73, 155, .18);  /* réglure du cahier       */
+
+  --serif: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --sans:  'Poppins', 'Segoe UI', system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--sans);
+  color: var(--texte);
+  background: #8a8f9c;          /* gris de plan de travail, hors impression */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── La feuille ────────────────────────────────────────────────── */
+.feuille {
+  position: relative;
+  overflow: hidden;
+  background: var(--papier);
+  margin: 0 auto;
+  display: flex; flex-direction: column;
+}
+
+/* Réglure de cahier : un dégradé répété, statique — aucun coût de rendu,
+   et il survit à l'impression laser là où une trame fine se bouche. */
+.reglure {
+  position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0, transparent calc(var(--pas) - 1px),
+      var(--ligne) calc(var(--pas) - 1px), var(--ligne) var(--pas)
+    );
+  pointer-events: none;
+}
+/* La marge rouge du cahier d'écolier, en bleu VÉRITAS. Décalée à gauche :
+   c'est elle qui donne l'asymétrie de toute la maquette. */
+.marge {
+  position: absolute; top: 0; bottom: 0;
+  width: 2px;
+  background: rgba(255, 101, 0, .38);
+  pointer-events: none;
+}
+
+.contenu { position: relative; z-index: 2; flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+/* ── Signature de tête ─────────────────────────────────────────── */
+.entete { display: flex; align-items: baseline; gap: .6em; }
+.marque {
+  font-family: var(--serif); font-weight: 700;
+  color: var(--navy); letter-spacing: .02em;
+}
+.marque b { color: var(--action); font-weight: 700; }
+.lieu {
+  font-weight: 500; color: var(--texte-clair);
+  letter-spacing: .16em; text-transform: uppercase;
+}
+
+/* ── Sur-titre ─────────────────────────────────────────────────── */
+.surtitre {
+  font-weight: 700; color: var(--action-cta);
+  letter-spacing: .2em; text-transform: uppercase;
+}
+
+/* ── Le chiffre-héros ──────────────────────────────────────────── */
+.chiffre {
+  font-family: var(--serif); font-weight: 700;
+  color: var(--navy); line-height: .84;
+  letter-spacing: -.03em;
+  /* Débord à gauche : le chiffre sort de la colonne de texte.
+     C'est délibéré — une composition parfaitement alignée fait maquette
+     automatique. */
+  margin-left: -.06em;
+}
+.chiffre .unite {
+  font-family: var(--sans); font-weight: 600;
+  color: var(--action); letter-spacing: 0;
+}
+
+/* ── Titraille ─────────────────────────────────────────────────── */
+.titre {
+  font-family: var(--serif); font-weight: 700;
+  color: var(--navy); line-height: 1.14;
+}
+.filet {
+  width: 96px; height: 4px; border: 0;
+  background: var(--action);
+}
+.chapo { font-weight: 400; color: var(--texte); line-height: 1.58; }
+.chapo strong { color: var(--navy); font-weight: 600; }
+
+/* ── Preuves ───────────────────────────────────────────────────── */
+.preuves { list-style: none; }
+.preuves li {
+  position: relative; padding-left: 1.5em;
+  color: var(--navy); font-weight: 500; line-height: 1.5;
+}
+.preuves li::before {
+  content: ''; position: absolute; left: 0; top: .5em;
+  width: .5em; height: .5em; background: var(--action);
+}
+.preuves li span { color: var(--texte-clair); font-weight: 400; }
+
+/* ── Le mnémonique « 21:00 / exercice 4 » ──────────────────────── */
+.mnemo {
+  position: relative;
+  background: var(--papier-2);
+  
+  transform: rotate(-1.4deg);          /* posé de travers, comme sur une table */
+  box-shadow: 0 12px 28px -14px rgba(0, 17, 54, .45);   /* ombre teintée navy */
+}
+.mnemo .heure {
+  font-family: var(--serif); font-weight: 700;
+  color: var(--navy); letter-spacing: -.02em;
+}
+.mnemo .exo { font-weight: 600; color: var(--texte); position: relative; display: inline-block; }
+/* Le cercle au stylo autour du « 4 » : une ellipse tracée à main levée,
+   pas un border-radius parfait. */
+.mnemo .rond {
+  position: absolute; left: -12%; top: -30%; width: 124%; height: 160%;
+  overflow: visible;
+}
+.mnemo .rond path { fill: none; stroke: var(--action); stroke-width: 3.2; stroke-linecap: round; }
+
+/* ── Pied ──────────────────────────────────────────────────────────
+   Frère de .contenu, pas enfant : le bandeau navy touche ainsi les trois
+   bords de la feuille (pleine largeur, à fond perdu en bas). C'est ce qui
+   l'ancre — un bandeau qui flotte à 15 mm du bord fait maquette bureautique. */
+.pied {
+  position: relative; z-index: 2; flex: none;
+  background: var(--navy); color: var(--papier);
+  display: flex; align-items: center;
+}
+.pied .adresse { font-family: var(--serif); font-weight: 700; color: #fff; }
+.pied .mention { color: rgba(250, 247, 241, .72); font-weight: 400; }
+.pied .qr { background: #fff; flex: none; }
+.pied .qr img { display: block; width: 100%; height: 100%; }
+.pied .scan {
+  color: var(--action); font-weight: 600;
+  letter-spacing: .14em; text-transform: uppercase;
+}
+
+/* ── Pastille de prix ──────────────────────────────────────────── */
+.pastille {
+  display: inline-flex; align-items: baseline; gap: .35em;
+  background: var(--action); color: #fff;
+  font-weight: 700;
+  transform: rotate(-1.2deg);
+  box-shadow: 0 10px 24px -12px rgba(255, 101, 0, .8);
+}
+.pastille small { font-weight: 600; opacity: .92; }
+
+/* ══ Variante fond navy — statuts et carrés WhatsApp ═══════════════
+   Un statut passe entre deux photos de famille : il doit trancher.
+   Le crème perd ce combat, le navy le gagne. Les affiches A4 restent
+   sur papier crème (l'encre coûte cher, et un aplat navy A4 gondole). */
+.sombre { background: var(--navy); color: rgba(250, 247, 241, .88); }
+.sombre .reglure { opacity: .5; }
+.sombre .marge   { background: rgba(255, 101, 0, .5); }
+.sombre .titre,
+.sombre .chiffre,
+.sombre .marque   { color: #fff; }
+.sombre .chapo    { color: rgba(250, 247, 241, .84); }
+.sombre .chapo strong { color: #fff; }
+.sombre .preuves li   { color: rgba(255, 255, 255, .94); }
+.sombre .preuves li span { color: rgba(250, 247, 241, .6); }
+.sombre .lieu     { color: rgba(250, 247, 241, .58); }
+.sombre .surtitre { color: var(--action); }
+.sombre .mnemo    { background: rgba(255, 255, 255, .07);  box-shadow: none; }
+.sombre .mnemo .heure { color: #fff; }
+.sombre .mnemo .exo   { color: rgba(250, 247, 241, .88); }
+/* Sur navy, la réglure du cahier doit s'éclaircir : la même valeur bleutée
+   que sur crème deviendrait invisible. */
+.sombre { --ligne: rgba(255, 255, 255, .07); }
+
+/* ══ Formats WhatsApp ══════════════════════════════════════════════
+   Zones sûres : l'interface de WhatsApp recouvre environ 220 px en haut
+   (nom, heure) et 240 px en bas (barre de réponse). Rien d'important
+   ne doit y entrer — d'où les marges verticales généreuses. */
+.ecran { color: inherit; }
+.ecran .contenu { padding: 260px 90px 260px 110px; }
+.ecran .marque  { font-size: 34px; }
+.ecran .lieu    { font-size: 17px; letter-spacing: .18em; }
+.ecran .surtitre{ font-size: 24px; letter-spacing: .18em; }
+.ecran .titre   { font-size: 78px; }
+.ecran .chapo   { font-size: 30px; }
+.ecran .filet   { width: 130px; height: 6px; }
+.ecran .lien {
+  font-family: var(--serif); font-weight: 700; color: var(--action);
+  font-size: 34px; letter-spacing: -.01em;
+}
+
+/* ── Impression ────────────────────────────────────────────────── */
+@page { size: A4; margin: 0; }
+@media print {
+  body { background: none; }
+  .feuille { margin: 0; box-shadow: none; }
+  /* Sans cette règle, les aplats orange et navy sortent blancs. */
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

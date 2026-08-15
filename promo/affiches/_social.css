@@ -1,0 +1,185 @@
+/* ══════════════════════════════════════════════════════════════════
+   CHARTE « SOCIAL » — visuels WhatsApp de Centre VÉRITAS
+   ------------------------------------------------------------------
+   Registre différent de _charte.css (qui régit les A4 imprimés sur
+   papier crème). Ici : fond nuit, or, cartes de verre, pastilles de
+   contact — le langage visuel que Jacques a désigné en référence, et
+   qui est aussi celui du logo VÉRITAS (navy + or) et des couvertures
+   de la Collection.
+
+   Deux principes qui font la différence avec un visuel « Canva » :
+   1. Aucune photo d'agence. Le produit se montre lui-même, par une
+      VRAIE capture du site dans un téléphone. On démontre, on n'illustre
+      pas — et rien n'y est mis en scène.
+   2. L'or ne sert que trois choses : le chiffre-héros, le filet de
+      séparation, et l'appel à l'action. Jamais un aplat décoratif.
+   ══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --nuit:      #0A1733;
+  --nuit-2:    #142554;   /* le bleu de marque VÉRITAS               */
+  --nuit-3:    #1B3A6B;
+  --or:        #FFC93C;   /* l'or de marque                          */
+  --or-2:      #C8941F;   /* l'or du logo, plus profond              */
+  --or-clair:  #FFE49B;
+  --blanc:     #FFFFFF;
+  --blanc-2:   rgba(255, 255, 255, .80);
+  --blanc-3:   rgba(255, 255, 255, .58);
+
+  --serif: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --sans:  'Poppins', 'Segoe UI', system-ui, sans-serif;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--sans);
+  background: #2a2f3a;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Le cadre ──────────────────────────────────────────────────── */
+.visuel {
+  position: relative; overflow: hidden;
+  margin: 0 auto;
+  color: var(--blanc-2);
+  /* Deux foyers lumineux plutôt qu'un dégradé linéaire : un dégradé
+     linéaire d'angle à angle est LA signature du visuel automatique. */
+  background:
+    radial-gradient(120% 90% at 82% 8%,  #1E4488 0%, transparent 55%),
+    radial-gradient(100% 80% at 12% 96%, #16305F 0%, transparent 60%),
+    linear-gradient(178deg, var(--nuit) 0%, var(--nuit-2) 62%, #0D1B3D 100%);
+}
+
+/* Poussière d'or : une trame SVG de points, pas quarante radial-gradients
+   empilés. Le voile sombre par-dessus l'empêche de bruiter le texte. */
+.poussiere {
+  position: absolute; inset: 0; pointer-events: none;
+  opacity: .55;
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'>\
+<g fill='%23FFC93C'>\
+<circle cx='24'  cy='38'  r='1.6' opacity='.85'/><circle cx='118' cy='16'  r='1'   opacity='.5'/>\
+<circle cx='212' cy='62'  r='2.1' opacity='.7'/><circle cx='288' cy='24'  r='1.2' opacity='.45'/>\
+<circle cx='58'  cy='128' r='1.1' opacity='.55'/><circle cx='166' cy='104' r='1.7' opacity='.8'/>\
+<circle cx='262' cy='146' r='1'   opacity='.4'/><circle cx='14'  cy='198' r='1.9' opacity='.65'/>\
+<circle cx='96'  cy='232' r='1.2' opacity='.5'/><circle cx='190' cy='206' r='1.5' opacity='.75'/>\
+<circle cx='300' cy='252' r='1.1' opacity='.45'/><circle cx='44'  cy='294' r='1.6' opacity='.6'/>\
+<circle cx='140' cy='308' r='1'   opacity='.4'/><circle cx='240' cy='286' r='1.8' opacity='.7'/>\
+</g></svg>");
+}
+
+/* Les deux arcs d'or : ils viennent du coin haut-droit et cadrent le
+   chiffre. Tracés fins, jamais des aplats. */
+.arcs { position: absolute; inset: 0; pointer-events: none; }
+.arcs path { fill: none; }
+
+.corps { position: relative; z-index: 3; display: flex; flex-direction: column; height: 100%; }
+
+/* ── Signature ─────────────────────────────────────────────────── */
+.sig { display: flex; align-items: center; gap: 22px; }
+.sig img { display: block; }
+.sig .nom {
+  font-family: var(--serif); font-weight: 700; color: var(--blanc);
+  letter-spacing: .02em; line-height: 1;
+}
+.sig .nom b { color: var(--or); font-weight: 700; }
+.sig .sous {
+  color: var(--blanc-3); letter-spacing: .2em; text-transform: uppercase;
+  margin-top: 8px; display: block;
+}
+
+/* ── Sur-titre ─────────────────────────────────────────────────── */
+.dessus {
+  color: var(--or); font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase;
+}
+
+/* ── Le chiffre-héros ──────────────────────────────────────────── */
+.nombre {
+  font-family: var(--serif); font-weight: 700; line-height: .86;
+  letter-spacing: -.03em;
+  /* Dégradé d'or dans la lettre : c'est ce qui donne le côté « doré »
+     de la référence sans poser un aplat jaune. */
+  background: linear-gradient(160deg, var(--or-clair) 0%, var(--or) 38%, var(--or-2) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 14px 40px rgba(255, 201, 60, .22));
+}
+.legende { color: var(--blanc); font-weight: 600; }
+.legende em { font-style: normal; color: var(--or); }
+
+/* ── Titraille ─────────────────────────────────────────────────── */
+.titre { font-family: var(--serif); font-weight: 700; color: var(--blanc); line-height: 1.12; }
+.texte { color: var(--blanc-2); line-height: 1.55; }
+.texte strong { color: var(--blanc); font-weight: 600; }
+
+/* Filet d'or à pastille centrale — repris de la référence. */
+.filet-or { display: flex; align-items: center; justify-content: center; gap: 0; }
+.filet-or i { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--or-2)); }
+.filet-or i + i { background: linear-gradient(90deg, var(--or-2), transparent); }
+.filet-or b { width: 9px; height: 9px; border-radius: 50%; background: var(--or); margin: 0 14px; flex: none; }
+
+/* ── Carte de verre ────────────────────────────────────────────── */
+.verre {
+  background: linear-gradient(150deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+  border: 1px solid rgba(255, 201, 60, .32);
+  border-radius: 30px;
+  box-shadow: 0 30px 70px -30px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255,255,255,.12);
+}
+
+/* ── Le téléphone : la preuve ──────────────────────────────────── */
+.tel {
+  position: relative; flex: none;
+  background: #0B1120;
+  border: 3px solid rgba(255, 201, 60, .38);
+  border-radius: 42px; padding: 10px;
+  box-shadow: 0 40px 90px -30px rgba(0,0,0,.85), 0 0 0 1px rgba(255,255,255,.06);
+}
+.tel .ecran { border-radius: 32px; overflow: hidden; background: #fff; display: block; }
+/* height:auto, pas object-fit:cover : la capture fait 430 px de large et
+   « cover » la recadrait sur les côtés, coupant le texte de la page. Ici
+   la largeur entre en entier et c'est le bas qui se coupe — le haut de la
+   page est justement ce qu'on veut montrer. */
+.tel img { display: block; width: 100%; height: auto; }
+/* L'encoche : trois pixels de crédibilité pour un mockup fait maison. */
+.tel::before {
+  content: ''; position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+  width: 34%; height: 16px; border-radius: 0 0 14px 14px; background: #0B1120; z-index: 2;
+}
+
+/* ── Pastilles de contact ──────────────────────────────────────── */
+.contacts { display: flex; gap: 18px; flex-wrap: wrap; }
+.pastille {
+  display: inline-flex; align-items: center; gap: 14px;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 201, 60, .45);
+  border-radius: 999px;
+  color: var(--blanc); font-weight: 600;
+}
+.pastille svg { flex: none; fill: var(--or); }
+/* L'action : la seule surface pleinement dorée du visuel. */
+.pastille.action {
+  background: linear-gradient(150deg, var(--or-clair), var(--or) 45%, var(--or-2));
+  border-color: transparent; color: var(--nuit); font-weight: 700;
+  box-shadow: 0 18px 40px -18px rgba(255, 201, 60, .8);
+}
+.pastille.action svg { fill: var(--nuit); }
+
+/* ── Ruban « conforme » ────────────────────────────────────────── */
+.ruban {
+  display: inline-block;
+  background: linear-gradient(100deg, var(--or-2), var(--or) 50%, var(--or-2));
+  color: var(--nuit); font-weight: 700;
+  transform: rotate(-1.2deg);
+  box-shadow: 0 14px 32px -16px rgba(255, 201, 60, .75);
+}
+
+/* ── Preuves ───────────────────────────────────────────────────── */
+.points { list-style: none; display: grid; }
+.points li { position: relative; padding-left: 1.7em; color: var(--blanc); }
+.points li::before {
+  content: '✓'; position: absolute; left: 0; top: 0;
+  color: var(--or); font-weight: 700;
+}
+.points li span { color: var(--blanc-3); font-weight: 400; }

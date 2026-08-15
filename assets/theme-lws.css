@@ -1621,7 +1621,7 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   margin:32px auto 8px; max-width:var(--lws-w,1170px);
   background:var(--lws-tint-cloud,#F0F4F7);
   border:1px solid var(--lws-line,#E4E7EF);
-  border-left:4px solid var(--lws-orange,#FF6500);
+  
   border-radius:var(--lws-r,10px);
 }
 #VISITOR .vabo-band-in{ padding:26px 28px; max-width:760px; }

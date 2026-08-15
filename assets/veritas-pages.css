@@ -5,10 +5,17 @@
    Palette : bleu nuit #142554 / or #FFC93C — thème clair « éditorial ».
    ============================================================ */
 *{box-sizing:border-box}
+/* ── Noms historiques : ce ne sont plus que des ALIAS ─────────────────────
+   Ces variables portaient leurs propres valeurs — dont --navy:#142554, un
+   SECOND bleu de marque concurrent du #1E499B de la refonte. Les composants de
+   ces 69 pages s'appuient sur ces noms : on les garde donc, mais ils pointent
+   desormais vers la palette canonique (assets/veritas-tokens.css). Changer une
+   couleur de marque ne se fait plus qu'a un seul endroit.                    */
 :root{
-  --navy:#142554;--navy2:#1d3168;--navy3:#0d1a3d;--gold:#FFC93C;--gold2:#e0a800;
-  --ink:#14213d;--gris:#5b6478;--bg:#f6f8fc;--card:#fff;--line:#e3e9f5;
-  --green:#128a6f;--vert-bg:#f2fbf8;--rouge:#c23b52;--violet:#6e46c0;
+  --navy:var(--n700);--navy2:var(--n600);--navy3:var(--n900);
+  --gold:var(--o400);--gold2:var(--o600);
+  --ink:var(--r-encre);--gris:#5b6478;--bg:var(--r-fond);--card:#fff;--line:var(--r-ligne);
+  --green:#128a6f;--vert-bg:#f2fbf8;--rouge:#c23b52;--violet:var(--r-premium);
   --rad:12px;--maxw:960px;
 }
 body{margin:0;font-family:'Segoe UI',Calibri,system-ui,sans-serif;color:var(--ink);
@@ -435,15 +442,10 @@ h2.sec::after{content:"";position:absolute;left:50%;bottom:0;transform:translate
    Règle d'animation du projet : transform / opacity UNIQUEMENT.
    ══════════════════════════════════════════════════════════════════════ */
 :root{
-  /* ── Rampe primaire — bleu nuit VÉRITAS ─────────────────────────── */
-  --n50:#F2F5FC; --n100:#E4EAF7; --n200:#C7D3ED; --n300:#9CAFDD;
-  --n400:#6B83BE; --n500:#42599A; --n600:#2A4079; --n700:#1D3168;
-  --n800:#142554; --n900:#0D1A3D; --n950:#080F26;
-
-  /* ── Rampe d'accent — or VÉRITAS ────────────────────────────────── */
-  --o50:#FFFBF0; --o100:#FFF4D6; --o200:#FFE8A8; --o300:#FFD96B;
-  --o400:#FFC93C; --o500:#F0B31E; --o600:#D19708; --o700:#A67608;
-  --o800:#7A5709; --o900:#4D3706;
+  /* ── Rampes primaire et d'accent : voir assets/veritas-tokens.css ──────
+     Elles etaient definies ici, ancrees sur #142554. Reancrees sur le bleu de
+     la refonte et deplacees dans le fichier de jetons, elles ne sont plus
+     redeclarees ici — c'etait la source exacte des deux bleus concurrents. */
 
   /* ── Accents de rubrique — un triplet par famille, jamais d'à-peu-près :
         surface (fond très clair) / trait (bordure) / signe (icône, texte) */
@@ -1175,7 +1177,7 @@ footer.bot a{color:var(--n700);font-weight:600}
 .vabo-inline{
   display:flex; align-items:center; gap:.9rem; flex-wrap:wrap;
   background:linear-gradient(135deg,rgba(20,37,84,.055),rgba(255,201,60,.07));
-  border:1px solid rgba(20,37,84,.10); border-left:3px solid var(--gold);
+  border:1px solid rgba(20,37,84,.10); 
   border-radius:12px; padding:.85rem 1rem; margin:1.1rem 0;
 }
 .vabo-inline p{ margin:0; flex:1; min-width:230px; font-size:.93rem; color:var(--navy2); }

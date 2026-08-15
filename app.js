@@ -46074,7 +46074,7 @@ window._prtBlocsContenu = function(type){
 
   if(attendu){
     h += '<div class="ct" style="margin:24px 0 10px">Ce que nous attendons de vous</div>'
-      +  '<div style="background:rgba(255,201,60,.10);border-left:4px solid #FFC93C;border-radius:0 12px 12px 0;'
+      +  '<div style="background:rgba(255,201,60,.10);border-radius:0 12px 12px 0;'
       +  'padding:14px 16px;font-size:13.5px;line-height:1.65;color:var(--ink2)">' + _prtSafe(attendu) + '</div>';
   }
 
@@ -46799,7 +46799,7 @@ function mEcheanciers(){
               : '<button class="btn bgr2 xs" onclick="_echMarkPaid(\''+p.id+'\','+v.n+')">✓ Encaisser</button>')
           +'</td></tr>';
       }).join('');
-      return '<div class="card mb12" style="border-left:4px solid '+couleur+'">'
+      return '<div class="card mb12" style="">'
         +'<div class="fl2 fic fsb fw g8 mb10">'
           +'<div><div class="bold">'+_esc(p.enom)+' <span class="bg bgd">'+_esc(p.cls||'—')+'</span></div>'
           +'<div class="xs2 mut">'+_esc(p.motif)+' · '+p.nb+' versements '+((_ECH_RYTHMES[p.rythme]||{}).l||'')+' · depuis le '+_esc(p.debut)+'</div></div>'

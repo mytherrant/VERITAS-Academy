@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Affiche élève — VÉRITAS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="_charte.css">
+<style>
+  .feuille { width: 210mm; height: 297mm; --pas: 8.2mm; }
+  .marge   { left: 20mm; }
+  .contenu { padding: 15mm 15mm 0 26mm; }
+
+  .entete  { font-size: 11.5pt; margin-bottom: 11mm; }
+  .lieu    { font-size: 7.5pt; }
+
+  .surtitre { font-size: 8.5pt; margin-bottom: 4mm; }
+  .chiffre  { font-size: 124pt; }
+  .chiffre .unite { display: block; font-size: 16.5pt; margin-top: 4mm; letter-spacing: .01em; }
+
+  .titre  { font-size: 26pt; margin-top: 9mm; }
+  .filet  { margin: 5.5mm 0; }
+  .chapo  { font-size: 11pt; max-width: 138mm; }
+
+  .preuves { margin-top: 6.5mm; font-size: 10pt; display: grid; gap: 2.4mm; }
+
+  /* margin-top auto : le mnémonique se cale juste au-dessus du bandeau navy,
+     et le blanc de respiration se place après la liste — pas au milieu. */
+  .bloc-bas { display: flex; align-items: flex-end; gap: 8mm; margin: auto 0 12mm; }
+  .mnemo { padding: 6mm 8mm 6mm 7mm; flex: none; }
+  .mnemo .heure { font-size: 29pt; display: block; line-height: 1; }
+  .mnemo .exo   { font-size: 11pt; margin-top: 2.5mm; display: inline-block; }
+  .relance { font-family: var(--serif); font-size: 12.5pt; color: var(--bleu); line-height: 1.45; }
+
+  .pied { padding: 9mm 15mm 9mm 26mm; gap: 8mm; }
+  .pied .adresse { font-size: 15pt; }
+  .pied .mention { font-size: 9pt; margin-top: 2mm; line-height: 1.5; }
+  .pied .qr   { width: 27mm; height: 27mm; padding: 2mm; }
+  .pied .scan { font-size: 7pt; margin-top: 2.5mm; text-align: center; display: block; }
+</style>
+</head>
+<body>
+
+<div class="feuille">
+  <div class="reglure"></div>
+  <div class="marge"></div>
+
+  <div class="contenu">
+
+    <header class="entete">
+      <span class="marque">VÉRI<b>TAS</b></span>
+      <span class="lieu">Centre d'Excellence Scolaire · Douala</span>
+    </header>
+
+    <p class="surtitre">Français · de la 6ᵉ à la Terminale</p>
+
+    <p class="chiffre">3&nbsp;932
+      <span class="unite">exercices corrigés. En accès libre.</span>
+    </p>
+
+    <h1 class="titre">Ton corrigé<br>est déjà en ligne.</h1>
+    <hr class="filet">
+
+    <p class="chapo">
+      Chaque exercice de chaque séquence, corrigé et rédigé — pas résumé.
+      Tu cherches d'abord, tu compares ensuite. <strong>Sans compte à créer,
+      sans mot de passe, sans rien à payer.</strong>
+    </p>
+
+    <ul class="preuves">
+      <li>42 séquences <span>· 6 par niveau, de la 6ᵉ à la Tle — plus l'enseignement technique</span></li>
+      <li>Conforme au programme MINESEC <span>· écrit par un enseignant camerounais</span></li>
+      <li>Fonctionne hors connexion <span>· une fois la page ouverte, elle reste</span></li>
+    </ul>
+
+    <div class="bloc-bas">
+      <div class="mnemo">
+        <span class="heure">21:00</span>
+        <span class="exo">Exercice&nbsp;<span style="position:relative;display:inline-block;padding:0 .18em">4<svg class="rond" viewBox="0 0 60 40" preserveAspectRatio="none"><path d="M30 4C13 3 4 12 5 21c1 10 14 16 27 15 14-1 24-7 23-16C54 11 45 4 30 4c-6 0-13 2-17 6"/></svg></span></span>
+      </div>
+      <p class="relance">
+        Tu bloques depuis vingt minutes.<br>
+        Il te reste dix secondes de recherche.
+      </p>
+    </div>
+
+  </div><!-- /.contenu -->
+
+  <footer class="pied">
+    <div style="flex:1">
+      <p class="adresse">veritas-school.com/corriges</p>
+      <p class="mention">
+        Les corrigés sont et resteront gratuits. Ce qui se paie, c'est l'entraînement :
+        évaluations corrigées, anciens sujets d'examen, suivi des erreurs — 3&nbsp;000 FCFA l'année.
+      </p>
+    </div>
+    <div>
+      <div class="qr"><img src="qr/corriges.svg" alt="QR vers les corrigés VÉRITAS"></div>
+      <span class="scan">Scanne&nbsp;ici</span>
+    </div>
+  </footer>
+
+</div>
+
+</body>
+</html>
