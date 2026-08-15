@@ -339,6 +339,7 @@ jobs:
             api/stats.php \
             api/teacher_access.php \
             api/secure_pdf.php \
+            api/_bot_log.php \
             api/demandes.php; do
             # ⚠️ ÉCHEC BRUYANT, et pas un « [ -f ] && cp » silencieux.
             #    Quatre incidents ont la même cause : un endpoint écrit, ajouté

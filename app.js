@@ -6157,10 +6157,26 @@ var SESSION_TOKEN=null;
 var SESSION_EXPIRY=0;
 var SESSION_DURATION=4*60*60*1000; // 4 heures
 function _createSession(data){
-  SESSION_TOKEN=generateSessionToken();
-  SESSION_EXPIRY=Date.now()+SESSION_DURATION;
+  // v1.19.20 : une session RESTAUREE garde son echeance d'origine. Regenerer
+  // _exp a chaque rechargement rendrait la session eternelle pour qui recharge.
+  var _reprise = data && data._token && data._exp && data._exp > Date.now();
+  SESSION_TOKEN = _reprise ? data._token : generateSessionToken();
+  SESSION_EXPIRY = _reprise ? data._exp : (Date.now()+SESSION_DURATION);
   SES=data;SES._token=SESSION_TOKEN;SES._exp=SESSION_EXPIRY;
-  sessionStorage.setItem('VERITAS_SES',JSON.stringify(SES));
+  try{ sessionStorage.setItem('VERITAS_SES',JSON.stringify(SES)); }catch(e){}
+}
+
+/* Relit la session du sessionStorage et la VALIDE. Retourne null si absente,
+   illisible, sans echeance ou perimee — et purge alors la cle. */
+function _vrtRestoreSession(){
+  var raw=null;
+  try{ raw=sessionStorage.getItem('VERITAS_SES'); }catch(e){ return null; }
+  if(!raw) return null;
+  var s=null;
+  try{ s=JSON.parse(raw); }catch(e){ s=null; }
+  var bon = s && typeof s==='object' && s.type && s._exp && Date.now() < s._exp;
+  if(!bon){ try{ sessionStorage.removeItem('VERITAS_SES'); }catch(e){} return null; }
+  return s;
 }
 function _checkSession(){
   if(!SES||!SES._token||!SES._exp)return false;
@@ -10208,7 +10224,12 @@ window._restaurerComptesAdminGo = function(){
 
 function go2SES(acc){
   try{
-    SES=acc;
+    // v1.19.20 : go2SES est la porte d'entree de l'application (admin,
+    // enseignant, eleve) et elle n'ecrivait RIEN dans sessionStorage.
+    // Consequences : (1) un rechargement deconnectait, (2) save() et _fbFetch
+    // lisent sessionStorage pour autoriser la synchro — elle etait donc
+    // silencieusement desactivee, le voyant au vert et rien d'envoye.
+    _createSession(acc);
     hideAll();
     $("APP").style.display="flex";
     buildNav();topUI();goTo("dashboard");
@@ -25867,11 +25888,36 @@ setTimeout(_addVisitorAccountsToNav,300);
   ['loginLogo','sbLogo','vLogo'].forEach(function(id){var el=$(id);if(el&&logoSrc)el.src=logoSrc;});
   $('lStat1').textContent=DB.students.length;
   $('lStat2').textContent=DB.teachers.length;
+
+  /* ── v1.19.20 : REPRISE DE SESSION ────────────────────────────────────────
+     L'amorcage partait toujours sur le portail visiteur, sans jamais relire la
+     session. Un admin qui rechargeait /app.html etait donc deconnecte — et
+     depuis que l'accueil applicatif a ete supprime, `initVisitor` le renvoyait
+     en plus sur la vitrine : le tableau de bord devenait INATTEIGNABLE.
+     On relit donc la session AVANT de decider de l'ecran. */
+  var _ses = _vrtRestoreSession();
+  if(_ses && (_ses.type==='admin'||_ses.type==='superadmin'||_ses.type==='enseignant'||_ses.type==='eleve')){
+    try{
+      go2SES(_ses);        // pose SES, affiche #APP, construit la nav, va au dashboard
+      return;              // ne pas repartir sur le portail visiteur
+    }catch(e){
+      // Reprise impossible (base incomplete) : on repart proprement en visiteur
+      try{ sessionStorage.removeItem('VERITAS_SES'); }catch(e2){}
+      SES=null;
+    }
+  }
+  // Visiteur inscrit : le portail reste l'ecran, mais la session est reposee
+  // pour que l'en-tete, les droits d'acces et le paywall le reconnaissent.
+  if(_ses && (_ses.type==='visiteur_inscrit'||_ses.type==='visiteur')){
+    SES=_ses; SESSION_TOKEN=_ses._token||null; SESSION_EXPIRY=_ses._exp||0;
+  }
+
   // Show visitor portal by default
   goToVisitor();
   // On load visitor
   initVisitor();
   swLR('visiteur');
+  if(SES&&SES.type==='visiteur_inscrit'){ try{ setTimeout(_updateVisitorHeader,60); }catch(e){} }
   // v1.9 (#7) : deep-link depuis les pages SEO (?epreuve=<id>) → ouvre les épreuves
   try{
     var _ep=new URLSearchParams(location.search).get('epreuve');
@@ -40184,7 +40230,9 @@ window._PARTNER_ROLE_SPEC = {
   }
 };
 window._prtCopyMyCode=function(){
-  var SES=window.SES||null, p=null;
+  // v1.19.20 : ne PAS masquer la globale par window.SES (toujours undefined
+  // puisque SES est declare en `let`) — on lit la session reelle.
+  var p=null;
   if(SES&&(DB.partners||[]).length) p=(DB.partners||[]).find(function(x){return (SES.email&&x.email===SES.email)||(SES.tel&&x.tel===SES.tel);});
   if(p&&p.code&&navigator.clipboard){ navigator.clipboard.writeText(p.code); _prtToast('Code '+p.code+' copié !'); }
   else _prtToast('Code indisponible','warn');
@@ -40213,7 +40261,8 @@ window._prtRoleBlockHtml=function(type, withActions){
 
 function pgPartnerPortal(){
   // Cherche un partenaire correspondant à la session courante (par email ou tel)
-  var SES = (typeof window!=='undefined' && window.SES) ? window.SES : null;
+  // v1.19.20 : idem — window.SES n'existe pas (SES est un `let`). Masquer la
+  // globale ici rendait l'Espace Partenaire inaccessible a tout partenaire.
   var partner = null;
   if(SES && (DB.partners||[]).length){
     partner = (DB.partners||[]).find(function(p){
