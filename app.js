@@ -4110,6 +4110,15 @@ function initVisitor(){
     setTimeout(function(){
       try{
         if(typeof SES !== 'undefined' && SES) return;
+        /* v1.19.20 — Les écrans de FONCTIONS (recherche, calendrier, connexion,
+           compte, inscription) ouvrent une MODALE : ils ne rendent rien dans
+           #vContent, qui reste donc légitimement vide. Le filet les prenait pour
+           un échec et repartait sur la vitrine 1,6 s plus tard — la modale
+           s'ouvrait puis disparaissait. Tout lien profond du type
+           /app.html#recherche rebondissait ainsi vers l'accueil public.
+           Le routeur note l'écran servi dans _vCurrentSec : s'il est posé,
+           quelque chose A répondu, et le filet n'a pas lieu d'être. */
+        if(window._vCurrentSec) return;
         var c = document.getElementById('vContent');
         if(c && c.innerHTML.trim() === '') location.replace('/' + (location.search || ''));
       }catch(e){}
@@ -25918,6 +25927,26 @@ setTimeout(_addVisitorAccountsToNav,300);
   initVisitor();
   swLR('visiteur');
   if(SES&&SES.type==='visiteur_inscrit'){ try{ setTimeout(_updateVisitorHeader,60); }catch(e){} }
+
+  /* ── Rejouer le routage APRES le rendu du portail (v1.19.20) ──────────────
+     Le routeur d'ancres tire a `load` + 60 ms. Mais _initApp est asynchrone :
+     des que le reseau traine, il rend l'espace visiteur APRES coup, par-dessus
+     l'ecran que le routeur venait de servir. Une modale ouverte par #recherche
+     s'affichait donc puis disparaissait sans un mot.
+     On rejoue le routage une fois le portail reellement en place. C'est l'ORDRE
+     qui regle la course, pas un delai : _vCurrentSec est remis a zero, sinon le
+     garde « deja affiche » du routeur ferait echouer la relecture en silence. */
+  try{
+    if((location.hash || '').replace(/^#/,'').split('?')[0].trim()){
+      window._vCurrentSec = null;
+      try{ window.dispatchEvent(new HashChangeEvent('hashchange')); }
+      catch(e){
+        var ev = document.createEvent('Event');
+        ev.initEvent('hashchange', false, false);
+        window.dispatchEvent(ev);
+      }
+    }
+  }catch(e){}
   // v1.9 (#7) : deep-link depuis les pages SEO (?epreuve=<id>) → ouvre les épreuves
   try{
     var _ep=new URLSearchParams(location.search).get('epreuve');
@@ -43030,6 +43059,22 @@ function _cagCreer(eleveId){
       // place, sinon le routeur les rejouerait à chaque hashchange.
       window._vCurrentSec = sec;
       document.querySelectorAll('.vnav-btn').forEach(function(b){ b.classList.remove('on'); });
+      /* #recherche?q=... : la barre de recherche de l'accueil public envoie sa
+         requete par l'ancre, comme #livre?id=... le fait deja. Sans ce passage,
+         mRecherche s'ouvrait VIDE et l'utilisateur devait ressaisir ce qu'il
+         venait de taper. L'argument n'est transmis qu'a la recherche : les
+         autres ecrans de FONCTIONS n'en attendent aucun. */
+      if(sec === 'recherche'){
+        var _q = '';
+        try{
+          ((window.location.hash || '').split('?')[1] || '').split('&').forEach(function(kv){
+            var p = kv.split('=');
+            if(p[0] === 'q') _q = decodeURIComponent((p[1] || '').replace(/\+/g, ' '));
+          });
+        }catch(e){}
+        try{ window[fn](_q); }catch(e){}
+        return;
+      }
       try{ window[fn](); }catch(e){}
       return;
     }

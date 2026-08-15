@@ -904,3 +904,139 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
   else demarrer();
 })();
+
+/* ============================================================================
+ *  BARRE DE RECHERCHE DE L'ACCUEIL  (v1.19.20)
+ *
+ *  L'accueil portait une vraie barre de recherche (v1.17, `acc-rech`, branchée
+ *  sur mRecherche + index de 35 Ko). Elle vivait dans le rendu de l'accueil de
+ *  l'APPLICATION — supprimé en v1.19.16. L'accueil, c'est désormais la vitrine,
+ *  et il n'y restait qu'une loupe dans la barre du haut : une icône que l'on
+ *  découvre au survol, pas un champ où l'on tape.
+ *
+ *  La vitrine est une page statique : elle ne charge pas app.js et n'a donc pas
+ *  accès à mRecherche. Le champ transmet la requête par l'ancre
+ *  (/app.html#recherche?q=…), motif déjà en service pour #livre?id=… ; app.js
+ *  la relit et préremplit la modale au lieu de l'ouvrir vide.
+ *
+ *  Écrit ici, et non dans vitrine.html, parce que ce dernier est REGÉNÉRÉ par
+ *  tools/build_vitrine.js depuis la maquette : une injection au runtime survit
+ *  à toute reconstruction.
+ * ==========================================================================*/
+(function () {
+  'use strict';
+
+  var SUGGESTIONS = ['Ville cruelle', 'BEPC maths', 'Le Cid', 'équations', 'Probatoire français'];
+
+  function lancer(q) {
+    q = String(q || '').trim();
+    // Sans requête, on ouvre quand même la recherche : l'utilisateur veut chercher.
+    location.href = '/app.html#recherche' + (q ? '?q=' + encodeURIComponent(q) : '');
+  }
+
+  function construire() {
+    var accueil = document.querySelector('[data-vp="accueil"]');
+    if (!accueil || accueil.querySelector('.vrt-rech')) return;      // idempotent
+    var h1 = accueil.querySelector('h1');
+    if (!h1) return;
+    var apres = h1.nextElementSibling;                                // le sous-titre
+    if (!apres) return;
+
+    var form = document.createElement('form');
+    form.className = 'vrt-rech';
+    form.setAttribute('role', 'search');
+    form.innerHTML =
+      '<label class="vrt-rech-box">'
+      +   '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6E7385" '
+      +        'stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-search"></use></svg>'
+      +   '<input type="search" id="vrtRechQ" autocomplete="off" '
+      +          'aria-label="Rechercher une ressource sur VÉRITAS" '
+      +          'placeholder="Chercher une œuvre, une matière, un sujet d\'examen…">'
+      + '</label>'
+      + '<button type="submit">Chercher</button>';
+
+    var sug = document.createElement('div');
+    sug.className = 'vrt-rech-sug';
+    sug.innerHTML = '<span>Souvent cherché :</span>';
+    SUGGESTIONS.forEach(function (s) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = s;
+      b.addEventListener('click', function () { lancer(s); });
+      sug.appendChild(b);
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var el = document.getElementById('vrtRechQ');
+      lancer(el ? el.value : '');
+    });
+
+    apres.parentNode.insertBefore(sug, apres.nextSibling);
+    apres.parentNode.insertBefore(form, apres.nextSibling);
+  }
+
+  /* Les deux boutons « Rechercher » de la maquette appelaient VRT.act('rien') —
+     un gestionnaire qui, comme son nom l'indique, ne faisait rien. Un champ qui
+     ne répond pas est pire qu'un champ absent : on croit que le site n'a rien. */
+  function reparerBoutonsMorts() {
+    document.querySelectorAll('[onclick*="VRT.act(\'rien\'"]').forEach(function (btn) {
+      btn.removeAttribute('onclick');
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var bloc = btn.closest('div, section') || document;
+        var champ = bloc.querySelector('input[type="text"], input[type="search"]');
+        lancer(champ ? champ.value : '');
+      });
+    });
+  }
+
+  /* Style injecté ici : la vitrine n'a AUCUNE feuille externe (tout est en
+     ligne dans le document généré). Le poser depuis le script garde le
+     composant d'un seul tenant — markup, comportement et apparence. */
+  function poserStyle() {
+    if (document.getElementById('vrt-rech-css')) return;
+    var st = document.createElement('style');
+    st.id = 'vrt-rech-css';
+    st.textContent = [
+      '.vrt-rech{display:flex;gap:10px;flex-wrap:wrap;max-width:560px;margin:0 0 14px}',
+      '.vrt-rech-box{flex:1;min-width:240px;display:flex;align-items:center;gap:10px;',
+        'background:#fff;border:1px solid #E4E7EF;border-radius:10px;padding:12px 15px;',
+        'transition:border-color .18s,box-shadow .18s}',
+      '.vrt-rech-box:focus-within{border-color:#1E499B;box-shadow:0 0 0 3px rgba(30,73,155,.13)}',
+      '.vrt-rech-box svg{flex:0 0 auto}',
+      '.vrt-rech input{border:0;outline:0;flex:1;min-width:0;background:transparent;',
+        'font:400 15px Poppins,sans-serif;color:#001136}',
+      '.vrt-rech input::-webkit-search-cancel-button{cursor:pointer}',
+      '.vrt-rech button[type=submit]{padding:12px 24px;border:0;border-radius:10px;',
+        'background:#1E499B;color:#fff;font:600 15px Poppins,sans-serif;cursor:pointer;',
+        'transition:background .18s,transform .18s}',
+      '.vrt-rech button[type=submit]:hover{background:#0C2A6A;transform:translateY(-1px)}',
+      '.vrt-rech button[type=submit]:active{transform:translateY(0)}',
+      '.vrt-rech-sug{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 24px;',
+        'font:400 13px Poppins,sans-serif;color:#6E7385}',
+      '.vrt-rech-sug button{border:1px solid #E4E7EF;background:#fff;border-radius:100px;',
+        'padding:5px 13px;font:500 13px Poppins,sans-serif;color:#1E499B;cursor:pointer;',
+        'transition:background .18s,border-color .18s}',
+      '.vrt-rech-sug button:hover{background:#F0F4FB;border-color:#DBE8FE}',
+      /* Confort de lecture sur petit écran : le bouton passe pleine largeur
+         plutôt que de comprimer le champ à quelques caractères. */
+      '@media (max-width:560px){',
+        '.vrt-rech{gap:8px}',
+        '.vrt-rech-box{min-width:100%}',
+        '.vrt-rech button[type=submit]{width:100%}',
+        '.vrt-rech input{font-size:16px}',   /* 16px : évite le zoom auto iOS */
+        '.vrt-rech-sug{margin-bottom:20px}',
+      '}',
+      '@media (prefers-reduced-motion:reduce){',
+        '.vrt-rech *{transition:none!important;transform:none!important}',
+      '}'
+    ].join('');
+    document.head.appendChild(st);
+  }
+
+  function demarrer() { try { poserStyle(); construire(); reparerBoutonsMorts(); } catch (e) {} }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
+  else demarrer();
+})();
