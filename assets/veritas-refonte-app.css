@@ -367,3 +367,82 @@ html[data-vrt-theme="sombre"] #VISITOR#VISITOR :is(.card, .vcard, .vsec, .lws-ca
   #LS#LS .lr { padding: 22px 18px 28px !important; }
   #VISITOR#VISITOR :is(p, li, td) { font-size: 15.5px !important; }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   EN-TÊTE DE L'APPLICATION : LA MÊME MARQUE QUE LA VITRINE   (v1.19.20)
+
+   Constat, capture à l'appui : en passant de la vitrine à /app.html, la
+   marque change. La vitrine pose le VRAI logo VÉRITAS (assets/veritas-logo.png,
+   46 px, sans cadre) ; l'application posait un glyphe « chapeau de diplômé »
+   dans un carré bleu. Deux marques pour un seul site — c'est le décalage
+   visuel ressenti au changement d'écran.
+
+   Et sous ~900 px, `.vnav-brand-tx` rognait le texte par ellipse : c'est le
+   NOM qui sautait en premier (« VÉR… ») pendant que le sous-titre, lui,
+   restait. On inverse la priorité — le nom ne se coupe jamais, le sous-titre
+   s'efface quand la place manque.
+
+   Écrit ici parce que cette feuille est chargée APRÈS app.css et theme-lws.css :
+   la surcharge gagne par l'ordre, sans avoir à empiler des !important.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Le vrai logo, à la place du glyphe ─────────────────────────────────── */
+/* Identifiant DOUBLE : theme-lws.css pose `#VISITOR .vnav-brand-ic{background:
+   var(--lws-blue) !important}`. A !important egal, c'est la specificite qui
+   tranche — une simple classe perdait donc, et le logo ne s'affichait pas.
+   `#VISITOR#VISITOR` passe devant sans ajouter un cran d'!important. */
+#VISITOR#VISITOR .vnav-brand-ic,
+.vnav-brand-ic{
+  background:url('/assets/veritas-logo.png') center/contain no-repeat !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+}
+#VISITOR#VISITOR .vnav-brand-ic svg,
+.vnav-brand-ic svg{ display:none !important; }   /* le chapeau de diplome */
+
+/* ── Le nom de la marque ne se coupe jamais ─────────────────────────────── */
+.vnav-brand-tx{
+  min-width:0;
+  overflow:visible;
+  text-overflow:clip;
+}
+#VISITOR#VISITOR .vnav-brand-tx{
+  overflow:visible;
+  text-overflow:clip;
+}
+/* Le sous-titre cède la place AVANT le nom : c'est lui le détail. */
+@media (max-width:900px){
+  .vnav-brand-tx small{ display:none !important; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   PANNEAUX D'ABONNEMENT : LE PRIX ÉTAIT INVISIBLE   (v1.19.20)
+
+   Mesuré au navigateur sur .vplan-price :
+       -webkit-text-fill-color : rgba(0,0,0,0)   ← remplissage TRANSPARENT
+       background-image        : none            ← et AUCUN dégradé dessous
+   Le prix est écrit en « texte rempli par un dégradé » — sauf qu'il n'y a pas
+   de dégradé. Résultat : « 25 000 XAF » barré, un blanc, puis « / an scolaire ».
+   Le prix réel de l'offre ne s'affichait sur AUCUN panneau d'abonnement.
+
+   `-webkit-text-fill-color` est une propriété HÉRITÉE : il suffit qu'un ancêtre
+   porte un titre en dégradé pour que le prix hérite du remplissage transparent
+   sans hériter du dégradé. On le rétablit explicitement — un prix ne doit jamais
+   dépendre d'un effet décoratif pour être lisible.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR .vplan-price,
+#VISITOR#VISITOR .vplan-price *,
+.vplan-price,
+.vplan-price *{
+  -webkit-text-fill-color: currentColor !important;
+  background-image: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+}
+#VISITOR#VISITOR .vplan-price,
+.vplan-price{
+  color: var(--r-bleu, #1E499B) !important;   /* palette commune au site */
+}
+/* Le suffixe « XAF » reste secondaire, mais lisible (et non plus gris pâle). */
+#VISITOR#VISITOR .vplan-price span,
+.vplan-price span{ color: var(--n500, #3563B4) !important; }
