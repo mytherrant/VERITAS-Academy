@@ -10,8 +10,15 @@ async function gotoOffline(page, collector) {
   // Couper tout réseau externe : API (prod), CDN, analytics.
   await page.route('**/api/**', (r) => r.abort());
   await page.route(/cloudflare|googletagmanager|google-analytics|generativelanguage|anthropic|pollinations|gstatic|googleapis/i, (r) => r.abort());
-  await page.goto('/VERITAS_v1.2.html', { waitUntil: 'load' });
-  await page.waitForTimeout(2500); // laisser le boot + DOMContentLoaded s'exécuter
+  /* On charge la coquille AVEC une ancre (#presentation). Depuis le correctif
+     « un seul accueil », la coquille chargée SANS ancre ni session fait
+     `location.replace('/')` : on veut tester le BOOT DU PORTAIL, pas la
+     redirection vers la vitrine. L'ancre pose une destination nommée que le
+     routeur honore, sans rebond. `waitUntil:'domcontentloaded'` (et non 'load')
+     n'attend pas la fin de TOUTES les sous-ressources — le boot pur suffit, et
+     'load' pouvait traîner sur des ressources lentes en CI. */
+  await page.goto('/VERITAS_v1.2.html#presentation', { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(2500); // laisser le boot + le rendu de section s'exécuter
 }
 
 test.describe('VÉRITAS — démarrage (anti écran blanc)', () => {

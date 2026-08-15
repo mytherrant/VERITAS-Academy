@@ -43055,6 +43055,27 @@ function _cagCreer(eleveId){
     var fn = FONCTIONS[sec];
     if(fn){
       if(typeof window[fn] !== 'function') return;
+      /* v1.19.26 — NE JAMAIS LAISSER UNE PAGE BLANCHE DERRIÈRE UNE MODALE.
+         Cinq ancres de FONCTIONS ouvrent une MODALE et n'écrivent RIEN dans
+         #vContent : recherche, calendrier, connexion, compte, inscription.
+         Arriver dessus par lien profond (la loupe de la vitrine pointe sur
+         /app.html#recherche) laissait donc l'accueil ENTIÈREMENT vide sous la
+         modale — et un écran gris net dès qu'on la ferme, pied de page remonté.
+         C'est le « le bouton recherche ne fonctionne pas » signalé, et c'est la
+         page blanche vue en production. On rend d'abord l'accueil de
+         présentation SOUS la modale (idempotent : seulement si #vContent est
+         vide) — vShowSec('presentation',_,true) : le 3ᵉ argument _boot évite le
+         renvoi vers la vitrine. La modale s'ouvre par-dessus ; la fermer révèle
+         une vraie page, plus jamais un vide. */
+      var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1 };
+      if(_MODALE_FN[sec]){
+        try{
+          var _vcBg = document.getElementById('vContent');
+          if(_vcBg && _vcBg.innerHTML.trim() === '' && typeof window.vShowSec === 'function'){
+            window.vShowSec('presentation', null, true);
+          }
+        }catch(e){}
+      }
       // Ces écrans ne passent pas par vShowSec : on note la section courante à sa
       // place, sinon le routeur les rejouerait à chaque hashchange.
       window._vCurrentSec = sec;
@@ -45226,7 +45247,10 @@ var _PICTO_MAP = {
   '👧':'lc-users','👦':'lc-users','🧒':'lc-users','👪':'lc-users','👣':'lc-users',
   '🎖':'lc-award','🏵':'lc-award','🎗':'lc-award',
   '🏛':'lc-university','💼':'lc-clipboard','👤':'lc-users','🧑‍🏫':'lc-presentation',
-  '🏗':'lc-tool','🛠':'lc-tool','⚖':'lc-clipboard','🗳':'lc-clipboard'
+  '🏗':'lc-tool','🛠':'lc-tool','⚖':'lc-clipboard','🗳':'lc-clipboard',
+  // v1.19.26 — coche littérale ✓ (U+2713) relevée ~8× dans l'espace admin :
+  // ramenée au même pictogramme que ICO('lc-check') pour une seule coche partout.
+  '✓':'lc-check','✔':'lc-check'
 };
 
 /* Les modificateurs de teinte de peau (U+1F3FB…U+1F3FF) suivent un émoji de
@@ -45321,15 +45345,34 @@ window._vtPictos = function(racine){
    de passage obligé de toute navigation, et l'appel est idempotent — les
    pictogrammes déjà posés ne sont plus des nœuds de texte. */
 (function _pictoBrancher(){
-  function passe(){ try{ _vtPictos(); }catch(e){} }
-  if(typeof window.vShowSec === 'function'){
-    var _orig = window.vShowSec;
-    window.vShowSec = function(sec, btn){
-      var r = _orig.apply(this, arguments);
-      setTimeout(passe, 0);
-      return r;
-    };
+  /* v1.19.26 — La conversion émoji→pictogramme ne couvrait QUE #vContent (espace
+     visiteur). L'espace connecté #APP (tableau de bord, gestion, bulletins) et
+     les MODALES (rendues dans .mov/.modal, hors #vContent) gardaient donc leurs
+     émojis : c'est le « il reste des émojis » constaté dans les panneaux admin.
+     On traite désormais TOUT le document.body — _PICTO_IGNORE protège déjà les
+     champs de saisie, et la conversion est idempotente (un émoji converti n'est
+     plus un nœud de texte). */
+  var _passeTimer = null;
+  function passe(){
+    // Anti-rebond : goTo() appelle buildNav/topUI/re en cascade — un seul
+    // parcours suffit pour toute la rafale.
+    if(_passeTimer) return;
+    _passeTimer = setTimeout(function(){ _passeTimer = null; try{ _vtPictos(document.body); }catch(e){} }, 40);
   }
+  // Enrober les points de passage de TOUTE navigation, visiteur ET connectée,
+  // ainsi que l'ouverture de modale, pour une conversion immédiate (sans
+  // attendre le regroupement de 220 ms de l'observateur).
+  ['vShowSec','goTo','M','re','topUI','buildNav'].forEach(function(nom){
+    if(typeof window[nom] === 'function' && !window[nom]._pictoWrapped){
+      var _orig = window[nom];
+      window[nom] = function(){
+        var r = _orig.apply(this, arguments);
+        setTimeout(passe, 0);
+        return r;
+      };
+      window[nom]._pictoWrapped = true;
+    }
+  });
   if(document.readyState === 'complete') setTimeout(passe, 300);
   else window.addEventListener('load', function(){ setTimeout(passe, 300); });
 
@@ -45346,7 +45389,9 @@ window._vtPictos = function(racine){
         minuteur = setTimeout(function(){ minuteur = null; passe(); }, 220);
       });
       var demarrer = function(){
-        var cible = document.getElementById('vContent') || document.body;
+        // v1.19.26 — on observe TOUT le body (et non le seul #vContent) pour
+        // rattraper aussi #APP et les modales injectées hors de #vContent.
+        var cible = document.body || document.getElementById('vContent');
         if(cible) obs.observe(cible, {childList:true, subtree:true});
       };
       if(document.readyState === 'complete') setTimeout(demarrer, 600);

@@ -1111,6 +1111,12 @@ deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
   let faits = 0, laisses = 0;
   corps = corps.replace(/(<h2 style="font:600 2[0-9](?:\.\d)?px[^"]*")>([^<]{6,120})<\/h2>/g,
     (m, ouvre, texte) => {
+      // Un titre déjà écrit en encre CLAIRE (color:#fff) est posé sur un fond
+      // SOMBRE. Le bicolore le repeindrait en #001136 + #1E499B — deux encres
+      // sombres, donc INVISIBLES sur ce fond. Bug vu en production : les
+      // bandeaux « Le compte parent ne coûte rien » et « Chaque semaine sans
+      // réviser… » avaient leur titre effacé. On les laisse en une seule encre.
+      if (/color:\s*#fff(f{3})?\b|color:\s*white\b/i.test(ouvre)) { laisses++; return m; }
       const mots = texte.trim().split(/\s+/);
       if (mots.length < 3) { laisses++; return m; }
       // Coupure au mot dont la position est la plus proche du milieu.

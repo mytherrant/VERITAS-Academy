@@ -20,8 +20,23 @@ const MIME = {
 http.createServer((req, res) => {
   try {
     let p = decodeURIComponent((req.url || '/').split('?')[0]);
-    if (p === '/') p = '/VERITAS_v1.2.html';
-    const fp = path.normalize(path.join(ROOT, p));
+    /* Router À L'IDENTIQUE DE LA PRODUCTION (index.php + deploy.yml) :
+       « / » sert la VITRINE, et la coquille applicative est servie sous
+       « /app.html ». Sans cela, ce serveur servait la coquille sur « / » — or
+       depuis le correctif « un seul accueil », la coquille chargée sans ancre
+       ni session fait `location.replace('/')`. Comme « / » renvoyait ENCORE la
+       coquille, on obtenait une BOUCLE DE REDIRECTION infinie : le smoke test
+       (`page.goto('/VERITAS_v1.2.html', {waitUntil:'load'})`) n'atteignait
+       jamais l'événement `load` → timeout 45 s → CI rouge, déploiement bloqué.
+       Repli volontaire, comme index.php : à défaut de vitrine, la coquille. */
+    if (p === '/') {
+      p = fs.existsSync(path.join(ROOT, 'vitrine.html')) ? '/vitrine.html' : '/VERITAS_v1.2.html';
+    } else if (p === '/app.html') {
+      p = '/VERITAS_v1.2.html';
+    }
+    let fp = path.normalize(path.join(ROOT, p));
+    // DirectoryIndex comme Apache/LiteSpeed : /niveaux/ → /niveaux/index.html
+    try { if (fs.existsSync(fp) && fs.statSync(fp).isDirectory()) fp = path.join(fp, 'index.html'); } catch (e) {}
     if (!fp.startsWith(ROOT) || !fs.existsSync(fp) || fs.statSync(fp).isDirectory()) {
       res.writeHead(404); res.end('404'); return;
     }

@@ -746,22 +746,22 @@ if('MutationObserver' in window){
      pour les couleurs). Feuille normale et non `preload+onload` : les jetons
      doivent etre poses AVANT app.css, et l'echange par onload ne garantit
      aucun ordre. 2,8 Ko — le cout de blocage est negligeable. -->
-<link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
+<link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.27">
 <link rel="preconnect" href="https://em-content.zobj.net" crossorigin>
 <link rel="dns-prefetch" href="https://em-content.zobj.net">
-<link rel="preload" as="script" href="/app.js?v=1.19.25">
+<link rel="preload" as="script" href="/app.js?v=1.19.27">
 <!-- v1.9.1 PERF — app.css en chargement NON BLOQUANT : c'était la SEULE ressource
      render-blocking du <head> (fonts + libs CDN + app.js sont déjà async/defer). Tant
      qu'elle bloquait, MÊME le splash inline ne pouvait pas peindre → écran blanc au 1er
      chargement sur connexion lente. En `preload as=style` (priorité haute) puis bascule
      `rel=stylesheet` à l'arrivée : le splash de marque s'affiche IMMÉDIATEMENT, et le CSS
      (~257 Ko) est prêt bien avant que app.js (~3 Mo) n'ait fini de booter (zéro FOUC). -->
-<link rel="preload" as="style" href="/app.css?v=1.19.25" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/app.css?v=1.19.25"></noscript>
+<link rel="preload" as="style" href="/app.css?v=1.19.27" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/app.css?v=1.19.27"></noscript>
 <!-- Panneaux, onglets flottants et mouvement. Couche autonome, chargée APRÈS
      app.css (elle en reprend quelques surfaces) et sans bloquer le rendu. -->
-<link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.19.25" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/veritas-motion.css?v=1.19.25"></noscript>
+<link rel="preload" as="style" href="/assets/veritas-motion.css?v=1.19.27" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/veritas-motion.css?v=1.19.27"></noscript>
 
 <!-- ════════ THÈME « CORPORATE » — DERNIÈRE COUCHE, ELLE GAGNE ════════
      Refonte visuelle de la vitrine sur le modèle des hébergeurs français
@@ -771,8 +771,8 @@ if('MutationObserver' in window){
      (halos, dégradés de titre, cartes qui décollent).
      ⚠️ ORDRE CRITIQUE : doit rester le DERNIER <link> CSS de la page.
      Chargée en preload+bascule comme les autres → aucun blocage du rendu. -->
-<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.19.25" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.19.25"></noscript>
+<link rel="preload" as="style" href="/assets/theme-lws.css?v=1.19.27" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/theme-lws.css?v=1.19.27"></noscript>
 <!-- ⚠️ DERNIÈRE feuille de la page, et cela compte : elle porte la charte de
      la refonte d'août 2026 dans l'espace visiteur de l'application (tout ce
      qu'ouvre le menu « Plus » de la vitrine) et sur l'écran de connexion.
@@ -780,14 +780,14 @@ if('MutationObserver' in window){
      que la vitrine tenait 15 à 16,5 px — c'est l'écart que l'on décrivait
      comme « l'ancienne page qui revient ». Elle bat app.css et theme-lws.css
      par un identifiant doublé ; la déplacer plus haut la rendrait inopérante. -->
-<link rel="preload" as="style" href="/assets/veritas-refonte-app.css?v=1.19.25" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="/assets/veritas-refonte-app.css?v=1.19.25"></noscript>
+<link rel="preload" as="style" href="/assets/veritas-refonte-app.css?v=1.19.27" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="/assets/veritas-refonte-app.css?v=1.19.27"></noscript>
 <!-- Compagnon indispensable de la feuille ci-dessus : elle éteint TOUS les
      dégradés, y compris ceux que le JS de rendu pose en style en ligne —
      lesquels se retrouveraient alors sans aucun fond (texte blanc sur
      blanc). Ce script relit leur première couleur et la repose en aplat.
      `defer` : rien à faire avant que le DOM existe. -->
-<script src="/assets/theme-lws.js?v=1.19.25" defer></script>
+<script src="/assets/theme-lws.js?v=1.19.27" defer></script>
 
 <!-- ════════ v1.15.9 — THÈME CLAIR / SOMBRE ════════
      Ce script est INLINE et SYNCHRONE, tout en haut : il doit poser
@@ -1539,7 +1539,7 @@ setTimeout(_vAmbassaFab,3000);
 </main>
 <!-- ═══ FOOTER PORTAIL VISITEUR ═══ -->
 <footer role="contentinfo" style="background:#0D1B3E;padding:6px 16px;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;border-top:1px solid rgba(255,201,60,.12)">
-  <span style="font-family:Poppins,sans-serif;font-size:10px;color:#FFC93C;font-weight:600">VÉRITAS v1.17</span>
+  <span style="font-family:Poppins,sans-serif;font-size:10px;color:#FFC93C;font-weight:600">VÉRITAS v1.19</span>
   <span style="font-size:10px;color:rgba(255,255,255,.35)">© Mythe Errant 2026</span>
   <span style="font-size:10px;color:rgba(255,255,255,.25)">Cameroun · MINESEC</span>
 </footer>
@@ -1560,7 +1560,7 @@ setTimeout(_vAmbassaFab,3000);
         <div class="lsi"><div class="lsn" id="lStat1">—</div><div class="lsl">Élèves</div></div>
         <div class="lsi"><div class="lsn" id="lStat2">—</div><div class="lsl">Enseignants</div></div>
       </div>
-      <div class="lyr">© Mythe Errant 2026 · VÉRITAS v1.1</div>
+      <div class="lyr">© Mythe Errant 2026 · VÉRITAS v1.19</div>
     </div>
     <div class="lr">
       <div class="lrt" id="lTitre" onclick="_loginTitleTap()" style="cursor:default;user-select:none">Connexion</div>
@@ -1627,7 +1627,7 @@ setTimeout(_vAmbassaFab,3000);
       <div class="sbu" id="sbu"></div>
     </div>
     <div class="sbnav" id="snav"></div>
-    <div class="sbft">VÉRITAS v1.1<div class="sbfi" id="sbfi"></div><div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:3px;letter-spacing:.5px">© Mythe Errant 2026</div></div>
+    <div class="sbft">VÉRITAS v1.19<div class="sbfi" id="sbfi"></div><div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:3px;letter-spacing:.5px">© Mythe Errant 2026</div></div>
   </div>
   <div class="main">
     <div class="tb">
@@ -1656,7 +1656,7 @@ setTimeout(_vAmbassaFab,3000);
    restaient en cache après déploiement. Repli sur la valeur figée si le
    sélecteur ne trouve rien. */
 window._VRT_ASSET_VER=(function(){try{var e=document.querySelector('link[href*="app.js?v="],script[src*="app.js?v="]');var m=e&&String(e.href||e.src||'').match(/app\.js\?v=([0-9.]+)/);return m?m[1]:'1.15.9';}catch(x){return '1.15.9';}})();</script>
-<script defer src="/app.js?v=1.19.25"></script>
+<script defer src="/app.js?v=1.19.27"></script>
 <!-- Promotion des barres de filtres en onglets flottants. `defer` la place
      après app.js : elle habille un DOM qui existe déjà. Amélioration
      progressive — son absence ne retire aucune fonctionnalité. -->

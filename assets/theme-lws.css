@@ -403,7 +403,17 @@
    d'où la consigne de garder theme-lws.css en dernier.
    ──────────────────────────────────────────────────────────────── */
 @media (min-width:900px){
-  #VISITOR{
+  /* v1.19.26 — CORRECTIF CRITIQUE : ne JAMAIS forcer la VISIBILITÉ du portail.
+     Ce bloc voulait « block au lieu de flex-column » sur desktop, mais
+     `display:block!important` sur le conteneur ÉCRASAIT le `display:none` inline
+     que pose hideAll() pour masquer le portail. Conséquence sur desktop :
+     impossible de cacher #VISITOR pour montrer le login (#LS) ou le tableau de
+     bord (#APP). Le portail restait affiché par-dessus → « double interface »,
+     login et dashboard INATTEIGNABLES. La garde `:not([style*="display: none"])`
+     n'applique la mise en page block QUE lorsque le portail est réellement
+     montré (inline display:flex) ; masqué (inline display:none), la règle ne
+     s'applique pas et le portail se cache pour de bon. */
+  #VISITOR:not([style*="display: none"]):not([style*="display:none"]){
     height:100%!important;          /* inset:0 fixe déjà la boîte      */
     overflow-y:auto!important;      /* ← le défilement revient ICI     */
     overflow-x:hidden!important;
@@ -4010,3 +4020,45 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   #VISITOR#VISITOR .vcard:hover,
   #VISITOR#VISITOR .acc-plan:hover { transform: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v1.19.26 — REFONTE INJECTÉE DANS LES PANNEAUX ADMIN / CONNECTÉS (#APP)
+   ───────────────────────────────────────────────────────────────────────────
+   Constat mesuré : le tableau de bord par défaut est DÉJÀ dans la palette de la
+   refonte (0 usage de #142554). Mais les SOUS-ÉCRANS et MODALES de l'espace
+   connecté (gérés par app.js) peignent encore en ligne l'ancien navy #142554 —
+   ~499 occurrences dispersées. Les re-skins de ce fichier étaient TOUS scopés
+   #VISITOR : l'espace #APP n'était pas touché → « l'ancienne interface revient »
+   dès qu'on ouvre un panneau admin.
+
+   Choix : DÉCALAGE DE TEINTE, pas inversion. On remplace l'ancien navy #142554
+   par le navy DE MARQUE #0C2A6A (exactement celui de la vitrine) et on aligne
+   les dégradés sur le dégradé canonique #1E499B→#0C2A6A. Le sombre reste sombre,
+   donc AUCUN risque de contraste inversé (le texte blanc posé dessus reste
+   lisible). Portée limitée aux styles EN LIGNE : les composants déjà refondus
+   ne portent pas #142554 et ne sont donc pas touchés. Bloc en fin de feuille
+   pour gagner la cascade ; réversible d'un seul retrait.
+   ═══════════════════════════════════════════════════════════════════════════ */
+#APP [style*="background:#142554"],
+#APP [style*="background: #142554"],
+#APP [style*="background-color:#142554"]{
+  background-color:#0C2A6A !important;
+}
+#APP [style*="linear-gradient(135deg,#142554"],
+#APP [style*="linear-gradient(135deg, #142554"],
+#APP [style*="linear-gradient(180deg,#142554"],
+#APP [style*="linear-gradient(160deg,#142554"]{
+  background-image:linear-gradient(135deg,#1E499B,#0C2A6A) !important;
+}
+#APP [style*="color:#142554"]{ color:#0C2A6A !important; }
+#APP [style*="border:1px solid #142554"],
+#APP [style*="border:2px solid #142554"],
+#APP [style*="border-color:#142554"],
+#APP [style*="border-left:3px solid #142554"],
+#APP [style*="border-bottom:2px solid #142554"]{
+  border-color:#0C2A6A !important;
+}
+/* Le navy servait aussi de texte SUR un aplat or (#FFC93C) — il y reste lisible
+   à #0C2A6A (rapport de contraste ≈ 10:1 sur l'or). */
+#APP [style*="background:#FFC93C"][style*="color:#142554"],
+#APP [style*="background:#ffc93c"][style*="color:#142554"]{ color:#0C2A6A !important; }
