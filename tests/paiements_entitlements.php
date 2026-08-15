@@ -228,6 +228,17 @@ foreach ($surfaces as $intent => $s) {
                                : 'octroi refusé : ' . ($res['msg'] ?? 'sans motif'));
 }
 
+/* `inscription` n'est pas une surface « à cible » : elle n'ouvre pas un tiroir
+   d'identifiants mais change l'ÉTAT du compte (statut → actif). Elle a donc sa
+   propre batterie, la SECTION 8 (montant exact, sous-paiement refusé, tarif
+   relevé en base, rejeu idempotent, compte inconnu) — cinq contrôles, plus
+   serrés que le gabarit générique ci-dessus.
+   On l'inscrit ici parce que le contrôle de couverture (c) de la section 7
+   s'exécute AVANT la section 8 : sans cette ligne, une surface pourtant testée
+   serait signalée « sans contrôle d'octroi ». Ce n'est pas une exemption —
+   retirer la section 8 fait retomber le rouge, là où il doit tomber. */
+$intentsTestes[] = 'inscription';
+
 // ════════════════════════════════════════════════════════════════════════════
 // 2. IDEMPOTENCE — un webhook rejoué ne double pas l'octroi
 // ════════════════════════════════════════════════════════════════════════════

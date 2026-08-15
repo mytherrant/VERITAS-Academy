@@ -31276,7 +31276,13 @@ window.VERITAS_MONETISATION = {
   // groupe + compte, ou classe + compte). Déclarés ici pour que la table reste
   // l'inventaire COMPLET des surfaces payantes.
   whatsapp_group: { droit:'waGroupesValides', collection:null,               champAuteur:null,        part:null,               libelle:'Groupe WhatsApp' },
-  classroom:      { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Classe virtuelle' }
+  classroom:      { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Classe virtuelle' },
+  // Frais d'inscription (gate 100 F). Ce n'est pas un tiroir d'identifiants mais
+  // un changement d'ÉTAT du compte (statut → actif + inscriptionPayee), d'où
+  // `droit:null` — même forme qu'`echeance`. Le prix de référence vit en base
+  // (DB.tarifs.inscription) et le serveur le contrôle (vrt_prix_catalogue).
+  // Activation par le cas dédié de _payAutoActivate / vrt_grant_entitlement.
+  inscription:    { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Frais d\'inscription' }
 };
 
 window._monetCfg = function(intent){
