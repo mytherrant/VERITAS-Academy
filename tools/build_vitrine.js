@@ -1386,6 +1386,48 @@ for (const bal of ['ul', 'ol', 'li']) {
   if (orphelines.length) console.log('maquette    : ' + orphelines.length + ' </' + bal + '> orpheline(s) retirée(s)');
 }
 
+/* ── LE PIED DE PAGE N'ÉTAIT PAS EN DERNIER ────────────────────────────────
+   Signalé par Jacques : « quand je clique sur commander un livre, ceci vient
+   s'afficher au début » — un grand vide et les mentions légales, à la place du
+   tunnel. Puis, quand j'ai cru que c'était le défilement : « chez moi ça
+   s'affiche AVANT et non après ». Il avait raison, et c'était la bonne piste.
+
+   Mesuré dans le navigateur : le pied de page est à 289 px, l'écran du tunnel
+   à 1 725 px — `paiementEstAPRESLePied: true`. L'écran s'affichait bien, mais
+   SOUS le pied de page. Rien à voir avec le défilement : un problème d'ordre
+   dans le document, hérité du déséquilibre de <div> de la maquette, qui laisse
+   la dernière section s'échapper du conteneur principal.
+
+   On ne rafistole pas l'imbrication — déjà essayé pour la FAQ, ça déplace les
+   écrans sans rien régler. On DÉPLACE le pied de page à la fin du corps, où il
+   doit être de toute façon. Un seul mouvement, et tous les écrans qui auraient
+   pu s'échapper repassent devant lui. */
+{
+  const d = corps.indexOf('<footer');
+  if (d < 0) {
+    console.warn('⚠ pied de page : <footer> introuvable — placement non vérifié.');
+  } else {
+    const f = corps.indexOf('</footer>', d);
+    if (f < 0) {
+      console.warn('⚠ pied de page : </footer> introuvable — déplacement annulé.');
+    } else {
+      const fin = f + '</footer>'.length;
+      const pied = corps.slice(d, fin);
+      const reste = corps.slice(0, d) + corps.slice(fin);
+      // Y avait-il vraiment quelque chose après lui ? Sinon, ne rien toucher.
+      const apres = corps.slice(fin).trim();
+      if (apres === '') {
+        console.log('pied de page: déjà en dernier — rien à déplacer');
+      } else {
+        corps = reste.replace(/\s*$/, '') + '\n' + pied + '\n';
+        const ecransApres = (apres.match(/<section data-vp="/g) || []).length;
+        console.log('pied de page: déplacé en fin de corps (' + ecransApres
+          + ' écran(s) se trouvai(en)t derrière lui)');
+      }
+    }
+  }
+}
+
 /* ── Contrôle : autant de jeux de cartes que d'onglets ─────────────────────
    Le déséquilibre a déjà coûté un onglet muet en production (« Répétitions »,
    cinq onglets pour quatre jeux extraits). L'extraction est maintenant pilotée
