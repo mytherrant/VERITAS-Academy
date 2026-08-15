@@ -10061,10 +10061,15 @@ async function doLogin(){
       var v2=DB.visitorAccounts[j];
       if(v2.user.toLowerCase()===u.toLowerCase()&&v2.statut!=='suspendu'){var ok2=await verifyPassword(p,v2.pwd,v2.user,v2);if(ok2){va2=v2;break;}}
     }}
-    if(va2){window._vrtPrevLogin=va2.lastLoginISO||va2.lastLogin||null;va2.lastLogin=today();va2.lastLoginISO=new Date().toISOString();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur_inscrit',accountId:va2.id,plans:va2.plans||[]});
+    if(va2){window._vrtPrevLogin=va2.lastLoginISO||va2.lastLogin||null;va2.lastLogin=today();va2.lastLoginISO=new Date().toISOString();save();_recordLoginSuccess(u);_loginAttempts.count=0;_createSession({id:va2.id,nom:va2.nom,pre:va2.pre,mat:va2.user,cls:va2.cls,tel:va2.tel,type:'visiteur_inscrit',accountId:va2.id,plans:va2.plans||[],
+        // v1.19.28 : rôle + rattachement portés par la session → espace personnel dédié.
+        role:va2.role||'eleve', isTeacher:!!va2.isTeacher, isParent:!!va2.isParent, isPartner:!!va2.isPartner, childId:va2.childId||null});
       // v1.4.9 : compte au profil anglophone → interface intégralement en anglais au login
       try{ if(va2.profil&&va2.profil.sys==='en'&&typeof setLang==='function') setLang('en', true); }catch(e){}
-      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);setTimeout(function(){try{if(typeof _welcomeBack==='function')_welcomeBack();}catch(e){}},1200);_studentSyncBg(u,p);return;}
+      hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);setTimeout(function(){try{if(typeof _welcomeBack==='function')_welcomeBack();}catch(e){}},1200);_studentSyncBg(u,p);
+      // v1.19.28 : parent/enseignant/partenaire → leur espace personnel (avec offres ciblées).
+      setTimeout(function(){ try{ var r=va2.role; if((r==='parent'||r==='enseignant'||r==='partenaire'||va2.isPartner)&&typeof _espacePerso==='function') _espacePerso(r||'partenaire'); }catch(e){} },500);
+      return;}
     // S3 (v1.2.x) : appareil neuf — aucun compte en local → tenter le serveur (lecture).
     var _slice=await _studentSyncFetch(u,p);
     if(_slice&&_slice.student&&_slice.student.id){
@@ -24947,23 +24952,31 @@ function _buildRegisterHTML(role){
   var H = ({
     auteur:    {ic:'✍️', t:'Créer mon compte auteur',     s:'Proposez vos ressources MINESEC — vous touchez 70% de chaque vente.', btn:'Créer mon compte auteur'},
     partenaire:{ic:'🤝', t:'Créer mon compte partenaire', s:'Entreprises · ONG · mécènes · établissements — soutenez VÉRITAS, gagnez en visibilité.', btn:'Créer mon compte partenaire'},
-    mecene:    {ic:'💝', t:'Créer mon compte mécène',      s:'Soutenez l\'éducation camerounaise — votre nom mis en avant.', btn:'Créer mon compte mécène'}
+    mecene:    {ic:'💝', t:'Créer mon compte mécène',      s:'Soutenez l\'éducation camerounaise — votre nom mis en avant.', btn:'Créer mon compte mécène'},
+    // v1.19.28 — inscription libre PARENT et ENSEIGNANT (jusqu'ici impossible :
+    // les enseignants étaient créés par le centre, les parents n'avaient aucun compte).
+    parent:    {ic:'👪', t:'Créer mon compte parent',     s:'Suivez la scolarité de votre enfant — notes, absences, paiements. Gratuit, sans abonnement.', btn:'Créer mon compte parent'},
+    enseignant:{ic:'🎓', t:'Créer mon compte enseignant', s:'Épreuves, corrigés et progressions MINESEC prêts. Publiez vos corrigés, encadrez les candidats.', btn:'Créer mon compte enseignant'}
   })[role] || {ic:'🎓', t:'Créer mon compte VÉRITAS', s:'Accès gratuit immédiat · Premium débloqué par abonnement', btn:'Créer mon compte gratuit'};
   var isPro = (role==='partenaire'||role==='mecene'); // ni élève ni parcours scolaire
+  var isParent = (role==='parent'), isEns = (role==='enseignant');
   var banner = (role==='auteur')
     ? "<div style='background:linear-gradient(135deg,#142554,#6C56A6);color:#fff;border-radius:14px;padding:14px;text-align:center;margin-bottom:16px'><div style='font-size:26px;font-weight:900;line-height:1'>70%</div><div style='font-size:11px;opacity:.92'>de chaque vente vous reviennent · versement MoMo/Orange</div></div>"
     : isPro
       ? "<div style='background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;border-radius:14px;padding:14px;text-align:center;margin-bottom:16px'><div style='font-size:14px;font-weight:800'>🤝 Visibilité garantie</div><div style='font-size:11px;opacity:.92'>Votre logo sur la page Partenaires et nos événements</div></div>"
       : "";
-  var roleField = (role==='auteur')
+  var roleField = (role==='auteur' || isEns)
     ? "<div class='fg full'><span class='fl'>Votre discipline / matière *</span><input class='fi' id='rDiscipline' placeholder='Français, Maths, PCT, Anglais, SVT…'></div>"
+    : isParent
+      ? "<div class='fg full'><span class='fl'>Matricule de votre enfant (facultatif — pour le rattacher)</span><input class='fi' id='rChildMat' placeholder='VRT-001' style='text-transform:uppercase'></div>"
     : isPro
       ? "<div class='fg'><span class='fl'>Organisation / structure *</span><input class='fi' id='rOrg' placeholder='Nom de votre entreprise / ONG'></div>"
         +"<div class='fg'><span class='fl'>Type</span><select class='fi' id='rOrgType'><option value='entreprise'>🏢 Entreprise</option><option value='ong'>🤲 ONG / Association</option><option value='mecene'>💝 Mécène / Particulier</option><option value='ecole'>🏫 Établissement</option></select></div>"
       : "";
   // Parcours scolaire : pertinent pour l'élève ET l'auteur (il publie pour un niveau),
-  // masqué pour un partenaire/mécène (structure, pas un élève).
-  var parcours = isPro ? "" : (
+  // masqué pour partenaire/mécène (structure), parent (ce n'est pas lui l'élève)
+  // et enseignant (il choisit sa discipline, pas une classe d'élève).
+  var parcours = (isPro || isParent || isEns) ? "" : (
     "<div class='fg'><span class='fl'>Sous-système *</span><select class='fi' id='rSys' onchange='_regSysChange()'><option value='fr'>🇨🇲 Francophone</option><option value='en'>🇨🇲 Anglophone (GCE)</option></select></div>"
     +"<div class='fg'><span class='fl'>Enseignement *</span><select class='fi' id='rEns' onchange='_regSysChange()'><option value='gen'>🎓 Général</option><option value='tech'>🔧 Technique</option></select></div>"
     +(function(){
@@ -25067,6 +25080,13 @@ function doRegister(){
   acc.role = _role || 'eleve';
   if(_role==='auteur'){ acc.isAuthor=true; acc.discipline=(document.getElementById("rDiscipline")?.value||"").trim(); }
   else if(_role==='partenaire'||_role==='mecene'){ acc.isPartner=true; acc.orgNom=(document.getElementById("rOrg")?.value||"").trim(); acc.orgType=(document.getElementById("rOrgType")?.value||(_role==='mecene'?'mecene':'')); }
+  else if(_role==='enseignant'){ acc.isTeacher=true; acc.discipline=(document.getElementById("rDiscipline")?.value||"").trim(); }
+  else if(_role==='parent'){
+    acc.isParent=true;
+    acc.childMat=(document.getElementById("rChildMat")?.value||"").trim().toUpperCase();
+    // Rattachement immédiat si le matricule saisi correspond à un élève connu.
+    try{ var _st=(DB.students||[]).find(function(s){return String(s.mat||'').toUpperCase()===acc.childMat && acc.childMat;}); if(_st){ acc.childId=_st.id; acc.children=[_st.id]; } }catch(e){}
+  }
   DB.visitorAccounts.push(acc);
   // v1.6 : auto-inscription dans la classe virtuelle correspondant au segment
   try{
@@ -25081,18 +25101,23 @@ function doRegister(){
   // P2 : appliquer parrainage si code présent dans sessionStorage
   try { if(typeof _processReferralOnSignup==='function') _processReferralOnSignup(acc.id); } catch(e){}
   // == Notification admin - nouvelle inscription (rôle en clair) ==
-  var _rLbl=acc.role==='auteur'?'✍️ AUTEUR':(acc.role==='partenaire'?'🤝 PARTENAIRE':(acc.role==='mecene'?'💝 MÉCÈNE':'🆕 Élève/Visiteur'));
+  var _rLbl=acc.role==='auteur'?'✍️ AUTEUR':(acc.role==='partenaire'?'🤝 PARTENAIRE':(acc.role==='mecene'?'💝 MÉCÈNE':(acc.role==='enseignant'?'🎓 ENSEIGNANT':(acc.role==='parent'?'👪 PARENT':'🆕 Élève/Visiteur'))));
   var _rDet=acc.role==='auteur'?('Discipline : '+(acc.discipline||'—')+' | Niveau : '+acc.cls+' | ')
-    :(acc.isPartner?('Organisation : '+(acc.orgNom||'—')+' ('+(acc.orgType||'—')+') | '):('Classe : '+acc.cls+' | '));
+    :(acc.role==='enseignant'?('Discipline : '+(acc.discipline||'—')+' | ')
+    :(acc.role==='parent'?('Enfant (matricule) : '+(acc.childMat||'—')+(acc.childId?' — rattaché ✓':' — à rattacher')+' | ')
+    :(acc.isPartner?('Organisation : '+(acc.orgNom||'—')+' ('+(acc.orgType||'—')+') | '):('Classe : '+acc.cls+' | '))));
   autoNotify(_rLbl+' — nouvelle inscription : '+pre+' '+nom,
     _rDet+'Tél/WA : '+tel+' | Utilisateur : '+user+' | Inscrit le '+acc.dateInscription+'.'
     +(acc.isPartner?' À recontacter pour le partenariat.':acc.role==='auteur'?' À recontacter pour validation des ressources.':' Validez son accès au groupe depuis Gestion → Groupes WhatsApp.'),
     'admin');
   _notifyAdminNewMember(acc);
   SES={id:acc.id,nom:nom,pre:pre,mat:user,cls:acc.cls,tel:tel,
-    type:"visiteur_inscrit",accountId:acc.id,plans:[]};
+    type:"visiteur_inscrit",accountId:acc.id,plans:[],
+    // v1.19.28 : le RÔLE porté par la session → l'espace personnel sait qui il sert.
+    role:acc.role, isTeacher:!!acc.isTeacher, isParent:!!acc.isParent, isPartner:!!acc.isPartner, childId:acc.childId||null};
   hideAll();$("VISITOR").style.display="flex";initVisitor();
   setTimeout(_updateVisitorHeader,120);
+  setTimeout(function(){ try{ if((acc.role==='parent'||acc.role==='enseignant'||acc.isPartner) && typeof _espacePerso==='function') _espacePerso(acc.role); }catch(e){} },450);
   if(acc.role==='auteur'){
     toast("Bienvenue "+pre+" ✍️ Compte auteur créé — soumettez votre 1re ressource !");
     setTimeout(function(){ if(typeof mMarketplaceSubmit==='function') mMarketplaceSubmit(); },500);
@@ -39518,6 +39543,16 @@ function pgPartnerships(){
   var h = '<div class="pgt" style="text-align:center;font-size:24px;font-weight:800;margin:18px 0 8px">🤝 Programme de Partenariat VÉRITAS</div>'
     + '<div style="text-align:center;font-size:14px;color:var(--ink3);font-style:italic;max-width:680px;margin:0 auto 28px;padding:0 20px">'
     + 'Ensemble pour l\'excellence éducative — rejoignez le réseau qui transforme l\'éducation au Cameroun.</div>'
+    // v1.19.28 — CANAL PARTENAIRE branché ICI : créer son compte / ouvrir son espace,
+    // avec le message persuasif. C'est la porte que la carte « Partenaires » de
+    // l'accueil ouvre désormais (via l'ancre #partenaire → _ouvrirCanalPartenaire).
+    + '<div style="max-width:780px;margin:0 auto 26px;padding:0 14px"><div style="background:linear-gradient(135deg,#0C2A6A,#1E499B);color:#fff;border-radius:16px;padding:20px 22px;display:flex;align-items:center;gap:18px;flex-wrap:wrap">'
+    +   '<div style="flex:1 1 300px;min-width:0">'
+    +     '<div style="font-family:Montserrat,sans-serif;font-size:17px;font-weight:900;margin-bottom:4px">Chaque élève que vous amenez vous rapporte, encore et encore.</div>'
+    +     '<div style="font-size:13px;color:#C7D2FE;line-height:1.55">Commission récurrente, vos ressources vendues à 70&nbsp;%, vos formations rémunérées. Créez votre compte et pilotez tout depuis votre espace.</div>'
+    +   '</div>'
+    +   '<button class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 24px;flex:0 0 auto;white-space:nowrap" onclick="_ouvrirCanalPartenaire()"><svg class="vico bico" aria-hidden="true"><use href="#lc-handshake"/></svg>Créer mon compte partenaire</button>'
+    + '</div></div>'
     + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:24px;padding:0 14px">';
   sortedTypes.forEach(function(k){
     var t = types[k];
@@ -43006,6 +43041,9 @@ function _cagCreer(eleveId){
   var FONCTIONS = { evaluations:'showEvaluations', epreuves:'showEpreuves', annales:'showEpreuves',
                     connexion:'_ouvrirConnexionAncre', compte:'_ouvrirConnexionAncre',
                     inscription:'showRegisterForm', recherche:'mRecherche',
+                    // v1.19.28 — CANAL PARTENAIRE : la carte « Partenaires » de l'accueil
+                    // ouvre l'inscription partenaire (ou l'espace si déjà connecté).
+                    partenaire:'_ouvrirCanalPartenaire',
                     // Même cas que la recherche : showCalendrier() a sa propre
                     // fonction de rendu, n'est PAS une section de vShowSec, et
                     // n'était donc atteignable que par une tuile de l'accueil
@@ -43067,7 +43105,7 @@ function _cagCreer(eleveId){
          vide) — vShowSec('presentation',_,true) : le 3ᵉ argument _boot évite le
          renvoi vers la vitrine. La modale s'ouvre par-dessus ; la fermer révèle
          une vraie page, plus jamais un vide. */
-      var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1 };
+      var _MODALE_FN = { recherche:1, calendrier:1, connexion:1, compte:1, inscription:1, partenaire:1 };
       if(_MODALE_FN[sec]){
         try{
           var _vcBg = document.getElementById('vContent');
@@ -44177,7 +44215,8 @@ window.pgPourVous = function(role){
 // Connexion depuis un hub : on court-circuite l'orientation (on SAIT déjà que
 // l'utilisateur veut ce rôle-là), sans repasser par le hub.
 window._portailConnexion = function(role){
-  if(role === 'parent'){ if(typeof showRegisterForm==='function') showRegisterForm(''); return; }
+  // v1.19.28 : parent → son formulaire d'inscription dédié (compte gratuit).
+  if(role === 'parent'){ if(typeof showRegisterForm==='function') showRegisterForm('parent'); return; }
   if(typeof showLogin==='function') showLogin(role);
 };
 
@@ -44357,6 +44396,175 @@ function _pvOffre(role){
   return h;
 }
 window._pvOffre = _pvOffre;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ESPACES PERSONNELS PAR RÔLE (v1.19.28) — parent · enseignant · partenaire
+   ───────────────────────────────────────────────────────────────────────────
+   Chacun crée son compte (doRegister) puis atterrit ICI : un en-tête
+   personnalisé, un BANDEAU PERSUASIF (pousser à l'abonnement / à l'action),
+   ses actions, et les OFFRES CIBLÉES qui le concernent. _pvOffre lit déjà le
+   plan du rôle (_pvPlanPourRole : enseignant→plan3, parent→plan4). Le
+   partenaire a ses propres offres (commission, visibilité, ressources vendues).
+   ══════════════════════════════════════════════════════════════════════════ */
+
+// Bandeau persuasif ciblé — un problème vécu, un chiffre, une issue. Jamais un
+// chiffre inventé : on parle de la valeur, pas d'un taux de réussite maison.
+function _espaceIncitation(role){
+  var msg = ({
+    enseignant:{ t:'Vos soirées valent mieux que vos préparations.',
+      s:'Épreuves, corrigés et progressions conformes au MINESEC, déjà prêts. Et chaque corrigé que vous publiez vous rapporte <b>70&nbsp;%</b> de chaque vente.',
+      cta:'Débloquer toutes mes ressources' },
+    parent:{ t:'Chaque semaine sans suivi, c’est un trimestre qui se joue sans vous.',
+      s:'Les notes de chaque séquence en temps réel, les absences le jour même, et le tuteur IA pour votre enfant — pour <b>moins qu’une seule séance de répétition</b> par mois.',
+      cta:'Suivre mon enfant toute l’année' },
+    partenaire:{ t:'Chaque élève que vous amenez vous rapporte, encore et encore.',
+      s:'Commission récurrente sur chaque abonnement apporté, votre logo sur nos pages, vos ressources vendues et vos formations rémunérées.',
+      cta:'Activer mon espace partenaire' }
+  })[role];
+  if(!msg) return '';
+  var accent = role==='enseignant' ? '#B03A6E' : role==='parent' ? '#0E7C86' : '#C24E00';
+  return '<div style="background:linear-gradient(135deg,#0C2A6A,#1E499B);color:#fff;border-radius:16px;padding:20px 22px;margin-bottom:18px;position:relative;overflow:hidden">'
+    + '<div aria-hidden="true" style="position:absolute;top:-60px;right:-50px;width:180px;height:180px;border-radius:50%;background:radial-gradient(circle,'+_hexA(accent,.28)+',transparent 70%)"></div>'
+    + '<div style="position:relative">'
+    + '<div style="font-family:Montserrat,sans-serif;font-size:17px;font-weight:900;line-height:1.3;margin-bottom:6px">'+msg.t+'</div>'
+    + '<div style="font-size:13px;line-height:1.65;color:#E2E8F0">'+msg.s+'</div>'
+    + '</div></div>';
+}
+// rgba depuis un hex court — utilitaire local (pas de dépendance).
+function _hexA(hex,a){ try{ var n=parseInt(hex.replace('#',''),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }catch(e){ return 'rgba(255,201,60,'+a+')'; } }
+
+window._espacePerso = function(role){
+  role = role || (typeof SES!=='undefined' && SES && SES.role) || 'eleve';
+  var c = document.getElementById('vContent');
+  if(!c) return;
+  var nom = (typeof SES!=='undefined' && SES) ? _esc(((SES.pre||'')+' '+(SES.nom||'')).trim()) || 'Bienvenue' : 'Bienvenue';
+  var badge = role==='enseignant' ? 'Espace Enseignant' : role==='parent' ? 'Espace Parent' : role==='partenaire' ? 'Espace Partenaire' : 'Mon espace';
+  var accent = role==='enseignant' ? '#B03A6E' : role==='parent' ? '#0E7C86' : role==='partenaire' ? '#C24E00' : '#1E499B';
+  window._vCurrentSec = 'espace-'+role;
+
+  var h = '<div class="vsec" style="max-width:940px;margin:22px auto;padding:0 18px">';
+  // En-tête personnalisé
+  h += '<div style="border-left:4px solid '+accent+';padding:2px 0 2px 16px;margin-bottom:18px">'
+    + '<div style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:'+accent+';font-weight:800">'+badge+'</div>'
+    + '<div style="font-family:Montserrat,sans-serif;font-size:24px;font-weight:900;color:var(--r-encre,#16233F);margin-top:2px">Bonjour '+nom+'</div>'
+    + '</div>';
+
+  // Bandeau persuasif
+  h += _espaceIncitation(role);
+
+  // Actions du rôle (destinations guardées à l'exécution)
+  var actions = role==='enseignant' ? [
+      ['lc-doc','Épreuves & annales','if(typeof showEpreuves===\'function\')showEpreuves()'],
+      ['lc-check','Corrigés des cahiers','window.open(\'/corriges/\',\'_blank\',\'noopener\')'],
+      ['lc-upload','Publier un corrigé (70%)','if(typeof mMarketplaceSubmit===\'function\')mMarketplaceSubmit();else toast(\'Bientôt\',\'info\')'],
+      ['lc-university','Classes &amp; Forum','if(typeof showClasseVirtuelle===\'function\')showClasseVirtuelle()']
+    ] : role==='parent' ? [
+      ['lc-chart','Notes &amp; bulletin de mon enfant','_espaceParentEnfant()'],
+      ['lc-wallet','Payer / Cagnotte de scolarité','vShowSec(\'cagnotte\',null)'],
+      ['lc-graduation','Le catalogue e-learning','vShowSec(\'elearning\',null)'],
+      ['lc-shield','Vérifier un certificat','vShowSec(\'verifier-certificat\',null)']
+    ] : role==='partenaire' ? [
+      ['lc-handshake','Mes partenariats','vShowSec(\'mes-partenariats\',null)'],
+      ['lc-wallet','Mon code &amp; mes commissions','if(typeof _prtCopyMyCode===\'function\')_prtCopyMyCode()'],
+      ['lc-shop','Revendre les manuels','vShowSec(\'boutique\',null)'],
+      ['lc-building','Programmes de partenariat','vShowSec(\'partenariat\',null)']
+    ] : [];
+  if(actions.length){
+    h += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:18px">';
+    actions.forEach(function(a){
+      h += '<button type="button" onclick="'+a[2]+'" style="text-align:left;background:#fff;border:1px solid var(--r-ligne,#E4E9F2);border-radius:14px;padding:15px;cursor:pointer;display:flex;gap:11px;align-items:center;transition:transform .15s,box-shadow .15s" onmouseover="this.style.transform=\'translateY(-2px)\';this.style.boxShadow=\'0 10px 22px rgba(12,42,106,.10)\'" onmouseout="this.style.transform=\'\';this.style.boxShadow=\'\'">'
+        + '<span style="color:'+accent+';flex:0 0 auto">'+ICO(a[0])+'</span>'
+        + '<span style="font-weight:700;font-size:13.5px;color:var(--r-encre,#16233F)">'+a[1]+'</span>'
+        + '</button>';
+    });
+    h += '</div>';
+  }
+
+  // Parent : statut de rattachement de l'enfant
+  if(role==='parent'){
+    var linked = (typeof SES!=='undefined'&&SES&&SES.childId&&typeof S==='function') ? S(SES.childId) : null;
+    h += '<div style="background:'+(linked?'#ECFDF5':'#FFF7ED')+';border:1px solid '+(linked?'#A7F3D0':'#FED7AA')+';border-radius:14px;padding:14px 16px;margin-bottom:18px;font-size:13px;color:var(--r-encre,#16233F)">'
+      + (linked ? ICO('lc-check')+' Enfant rattaché : <b>'+_esc(((linked.pre||'')+' '+(linked.nom||'')).trim())+'</b>'+(linked.cls?' ('+_esc(linked.cls)+')':'')+'.'
+        : ICO('lc-alert')+' Aucun enfant rattaché pour l’instant. <button type="button" onclick="_espaceRattacherEnfant()" style="background:none;border:none;color:var(--r-parents,#0E7C86);font-weight:800;cursor:pointer;padding:0">Rattacher mon enfant</button>')
+      + '</div>';
+  }
+
+  // Offres CIBLÉES qui le concernent
+  var offre = '';
+  if(role==='partenaire'){
+    offre = (typeof _pvPartnerOffre==='function') ? _pvPartnerOffre() : '';
+  } else if(typeof _pvOffre==='function'){
+    offre = _pvOffre(role);
+  }
+  if(offre) h += offre; else h += '<div style="font-size:12.5px;color:var(--ink3,#64748B);text-align:center;padding:10px">Les offres seront affichées ici dès que le centre les aura publiées.</div>';
+
+  h += '</div>';
+  c.innerHTML = h;
+  try{ if(typeof _vtPictos==='function') _vtPictos(c); }catch(e){}
+};
+
+// Offre CIBLÉE partenaire — la valeur est le revenu, pas un abonnement à payer.
+function _pvPartnerOffre(){
+  return '<div style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;border-radius:18px;padding:24px 22px">'
+    + '<div style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:900;margin-bottom:12px">Trois façons de gagner avec VÉRITAS</div>'
+    + '<div style="display:grid;gap:12px">'
+    + [['lc-wallet','Commission récurrente','Un pourcentage sur chaque abonnement apporté par votre code — tant que l’élève reste abonné.'],
+       ['lc-book','Vos ressources vendues','Publiez cahiers et corrigés : vous touchez 70&nbsp;% de chaque vente, versés en MoMo / Orange.'],
+       ['lc-presentation','Formations rémunérées','Animez des classes virtuelles : payées à la séance.']]
+      .map(function(x){ return '<div style="display:flex;gap:11px;align-items:flex-start">'
+        + '<span style="color:#FFC93C;flex:0 0 auto">'+ICO(x[0])+'</span>'
+        + '<div><div style="font-weight:800;font-size:14px">'+x[1]+'</div><div style="font-size:12.5px;color:#C7D2FE;line-height:1.55">'+x[2]+'</div></div></div>'; }).join('')
+    + '</div>'
+    + '<button type="button" class="btn" style="background:#FFC93C;color:#142554;font-weight:800;padding:12px 24px;margin-top:16px" onclick="vShowSec(\'partenariat\',null)">Voir les 9 programmes</button>'
+    + '</div>';
+}
+
+// Parent — bulletin de l'enfant rattaché (ou invitation à le rattacher).
+window._espaceParentEnfant = function(){
+  var child = (typeof SES!=='undefined'&&SES&&SES.childId&&typeof S==='function') ? S(SES.childId) : null;
+  if(!child){ _espaceRattacherEnfant(); return; }
+  // On réutilise le bulletin élève si disponible, sinon un récapitulatif simple.
+  if(typeof _bulletinHTML==='function'){
+    try{ M('Bulletin de '+_esc((child.pre||'')+' '+(child.nom||'')), _esc(child.cls||''), _bulletinHTML(child.id), '<button class="btn bo" onclick="cm()">Fermer</button>', true); return; }catch(e){}
+  }
+  var notes = (DB.grades||[]).filter(function(g){return g.eid===child.id;});
+  var abs = (DB.absences||[]).filter(function(a){return a.eid===child.id;});
+  var body = '<div style="font-size:13px;line-height:1.7">'
+    + '<div><b>'+notes.length+'</b> note(s) enregistrée(s) · <b>'+abs.length+'</b> absence(s).</div>'
+    + (notes.length? '<div style="margin-top:8px">'+notes.slice(0,12).map(function(g){return _esc(g.sub||'—')+' : '+_esc(String((g.n1!=null?g.n1:'')+(g.n2!=null?' / '+g.n2:'')))+'</div>';}).join(''):'<div style="color:#64748B;margin-top:8px">Aucune note publiée pour l’instant.</div>')
+    + '</div>';
+  M('Suivi de '+_esc((child.pre||'')+' '+(child.nom||'')), _esc(child.cls||''), body, '<button class="btn bo" onclick="cm()">Fermer</button>');
+};
+
+// Parent — rattacher un enfant par son matricule.
+window._espaceRattacherEnfant = function(){
+  M('Rattacher mon enfant','Saisissez le matricule communiqué par le centre',
+    '<div class="fg"><span class="fl">Matricule de l’élève</span><input class="fi" id="_ratMat" placeholder="VRT-001" style="text-transform:uppercase"></div>'
+    +'<div id="_ratMsg" style="font-size:12.5px;margin-top:8px;color:var(--ink3,#64748B)"></div>',
+    '<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="_espaceRattacherGo()">Rattacher</button>');
+};
+window._espaceRattacherGo = function(){
+  var mat = ((_ge('_ratMat')&&_ge('_ratMat').value)||'').trim().toUpperCase();
+  if(!mat){ _si('_ratMsg','<span style="color:#AE5353">Matricule requis.</span>'); return; }
+  var st = (DB.students||[]).find(function(s){return String(s.mat||'').toUpperCase()===mat;});
+  if(!st){ _si('_ratMsg','<span style="color:#AE5353">Aucun élève avec ce matricule. Vérifiez auprès du centre.</span>'); return; }
+  if(SES){ SES.childId=st.id; }
+  // Persister sur le compte visiteur
+  try{ var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===(SES&&SES.accountId);}); if(acc){ acc.childId=st.id; acc.children=[st.id]; save(); } }catch(e){}
+  cm();
+  toast('✓ Enfant rattaché : '+((st.pre||'')+' '+(st.nom||'')).trim(),'ok');
+  if(typeof _espacePerso==='function') _espacePerso('parent');
+};
+
+// v1.19.28 — PORTE DU CANAL PARTENAIRE (branchée sur l'accueil via #partenaire).
+// Déjà partenaire connecté → son espace ; sinon → création de compte partenaire.
+window._ouvrirCanalPartenaire = function(){
+  try{
+    var estPartenaire = (typeof SES!=='undefined' && SES) && (SES.role==='partenaire' || SES.isPartner);
+    if(estPartenaire && typeof _espacePerso==='function'){ _espacePerso('partenaire'); return; }
+  }catch(e){}
+  if(typeof showRegisterForm==='function') showRegisterForm('partenaire');
+};
 
 
 /* ══════════ L'ESSENTIEL POUR RÉVISER — accueil (v1.14.2) ══════════
