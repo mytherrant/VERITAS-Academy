@@ -1616,25 +1616,42 @@ ${fs.readFileSync(path.join(__dirname, 'vitrine-bloc.css'), 'utf8')}
    fenêtre, deux colonnes en dessous. Sous 1000 px le panneau n'est plus
    affiché du tout — c'est le menu mobile qui prend le relais, et il reçoit
    les mêmes entrées. */
-.vmn{position:absolute;top:100%;left:0;background:#fff;border:1px solid #E4E7EF;
-  border-radius:14px;box-shadow:0 18px 40px rgba(0,17,54,.12);padding:14px;z-index:80;
-  display:grid;grid-template-columns:repeat(3,218px);gap:2px 10px;
-  max-height:min(74vh,600px);overflow-y:auto;overscroll-behavior:contain;
-  animation:vpop .22s cubic-bezier(.22,1,.36,1)}
-@media (max-width:1199.98px){ .vmn{grid-template-columns:repeat(2,214px)} }
+/* MÉGA-MENU PLEINE LARGEUR (v1.19.31). Barre fixée SOUS l'en-tête, fond
+   pleine largeur (technique du padding-inline : le bloc s'étend d'un bord à
+   l'autre, le CONTENU reste centré à 1160 px). Trois colonnes ÉGALES qui
+   s'étalent sur toute la largeur — plus de panneau étroit ancré à gauche, plus
+   de descriptions tronquées.
+
+   Ancrage : #vrtNav porte un backdrop-filter, qui fait de lui le BLOC CONTENANT
+   des descendants position:fixed. « top:100% » = exactement le bas du nav, et
+   s'ajuste tout seul quand le nav se compacte au défilement — aucun JS requis.
+   Repli @supports pour les rares navigateurs sans backdrop-filter (le bloc
+   contenant redevient alors le viewport, où le nav commence à 0 → 76 px). */
+.vmn{position:fixed;left:0;right:0;top:100%;
+  background:#fff;border-top:1px solid #EEF1F7;border-bottom:1px solid #E1E6F0;
+  box-shadow:0 26px 52px rgba(12,28,74,.16);z-index:59;
+  padding:24px max(24px,calc((100vw - 1160px)/2)) 30px;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 56px;
+  max-height:min(80vh,540px);overflow-y:auto;overscroll-behavior:contain;
+  animation:vmnDown .26s cubic-bezier(.22,1,.36,1)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ .vmn{top:76px} }
+@media (max-width:1023.98px){ .vmn{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 30px;padding-left:24px;padding-right:24px} }
+@keyframes vmnDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
 .vmn-col{display:flex;flex-direction:column;gap:1px;min-width:0}
-.vmn-t{margin:10px 0 4px;padding:0 10px;font:600 10.5px Poppins,sans-serif;
-  letter-spacing:.9px;text-transform:uppercase;color:#8A90A2}
-.vmn-i{display:flex;align-items:center;gap:9px;padding:7px 10px;border:0;border-radius:9px;
+.vmn-t{margin:8px 0 6px;padding:0 12px 6px;font:700 11px Poppins,sans-serif;
+  letter-spacing:1px;text-transform:uppercase;color:#5B4FA8;border-bottom:1px solid #F0F2F8}
+.vmn-i{display:flex;align-items:center;gap:11px;padding:9px 12px;border:0;border-radius:11px;
   background:none;cursor:pointer;text-align:left;text-decoration:none;width:100%;
-  font:400 13.5px Poppins,sans-serif;color:#001136;transition:background .18s,color .18s}
-.vmn-i:hover,.vmn-i:focus-visible{background:#F1F5FC;color:#1E499B;outline:none}
+  font:500 14px Poppins,sans-serif;color:#12203F;
+  transition:background .16s ease,color .16s ease,transform .16s ease}
+.vmn-i:hover,.vmn-i:focus-visible{background:#F3F6FC;color:#1E499B;outline:none;transform:translateX(3px)}
 .vmn-i:focus-visible{box-shadow:0 0 0 2px #1E499B inset}
-.vmn-p{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;
-  justify-content:center;flex:0 0 auto}
-.vmn-x{display:flex;flex-direction:column;line-height:1.3;min-width:0}
-.vmn-x small{font:400 11.5px Poppins,sans-serif;color:#6E7385;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vmn-i:hover .vmn-p{transform:scale(1.1) rotate(-3deg)}
+.vmn-p{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;flex:0 0 auto;transition:transform .18s cubic-bezier(.34,1.56,.64,1)}
+.vmn-x{display:flex;flex-direction:column;line-height:1.35;min-width:0}
+.vmn-x small{font:400 12px Poppins,sans-serif;color:#6E7385;margin-top:1px}
+@media (prefers-reduced-motion:reduce){ .vmn{animation:none} .vmn-i,.vmn-p{transition:none} .vmn-i:hover{transform:none} .vmn-i:hover .vmn-p{transform:none} }
 
 /* Version mobile : dans le tiroir, donc en flux, une seule colonne, sans
    ombre ni cadre — le tiroir en porte déjà. */

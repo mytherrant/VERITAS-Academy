@@ -4062,3 +4062,35 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
    à #0C2A6A (rapport de contraste ≈ 10:1 sur l'or). */
 #APP [style*="background:#FFC93C"][style*="color:#142554"],
 #APP [style*="background:#ffc93c"][style*="color:#142554"]{ color:#0C2A6A !important; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v1.19.32 — RENDRE LEURS COULEURS AUX PICTOGRAMMES (correctif « design fade »)
+   ──────────────────────────────────────────────────────────────────────────
+   Le balayage `#VISITOR#VISITOR *{ background-image:none !important }` (l.1298)
+   aplatit volontairement les fonds décoratifs de la vitrine. EFFET DE BORD
+   mesuré au navigateur sur #orientation : les TUILES d'icônes (.vori-ico) sont
+   peintes par un `linear-gradient(var(--o1),var(--o2))` et leur glyphe est en
+   `color:#fff`. Le balayage retire le dégradé → il reste une icône BLANCHE sur
+   fond TRANSPARENT, donc invisible. D'où « aucune icône, aucune couleur ».
+   On ré-affirme UNIQUEMENT les surfaces qui portent un pictogramme : ce sont
+   des éléments de taille fixe, jamais des panneaux de contenu — le reste de
+   l'aplat voulu par la refonte n'est pas touché. Double identifiant + important
+   pour gagner l'arbitrage face au balayage.  */
+#VISITOR#VISITOR .vori-ico{
+  background-image:linear-gradient(135deg, var(--o1,#FFC93C), var(--o2,#B45309)) !important;
+  box-shadow:0 6px 16px rgba(20,37,84,.16), inset 0 1px 0 rgba(255,255,255,.35) !important;
+  color:#fff !important;
+}
+/* Mêmes symptômes, mêmes causes, sur les autres pastilles à pictogramme. */
+#VISITOR#VISITOR .vsec-ico,
+#VISITOR#VISITOR .acc-news-ic,
+#VISITOR#VISITOR .pgt-ico{
+  background-image:linear-gradient(135deg, var(--lws-blue,#1E499B), var(--lws-blue-deep,#0C2A6A)) !important;
+  color:#fff !important;
+}
+/* Le survol des cartes d'orientation redevient perceptible (l'ombre était, elle
+   aussi, balayée par la règle box-shadow:none de la l.1326). */
+#VISITOR#VISITOR .vori-card:hover{
+  box-shadow:0 16px 34px rgba(20,37,84,.13) !important;
+  transform:translateY(-4px);
+}

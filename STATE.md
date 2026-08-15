@@ -1288,3 +1288,187 @@ alternance gras/couleurs · animations sur les autres pages · orbite de
 Mots de passe par défaut encore actifs (`directeur` ET `superadmin` — l'app le
 signale au démarrage) · MTN MoMo en **sandbox** (`MTN_TARGET_ENV='sandbox'`, clés
 `À_REMPLIR_DEPUIS_MOMODEVELOPER`) : aucun paiement MTN réel possible.
+
+## Professeur Ambassa CÂBLÉ sur l'accueil (v1.19.30) — vérifié en live
+
+**Manque comblé (signalé par Jacques : « câble et connecte l'IA Ambassa et mets-le
+sur l'accueil »).** Le widget « Professeur Ambassa · en ligne » de la VITRINE était
+une **maquette morte** : le bouton d'envoi appelait `VRT.act('rien')`, le champ
+n'avait pas d'identifiant, les suggestions n'étaient pas cliquables. Le backend
+(`api/ia_proxy.php`) était pourtant prêt et déjà utilisé par l'application.
+
+**Câblé (assets/vitrine.js + source DC + régénération) :**
+- `ambassaEnvoyer()` : POST `api/ia_proxy.php` `{prompt, plan:'anon', userId:''}` (le
+  MÊME endpoint que l'app ; clé IA jamais exposée). Réponse rendue en `white-space:
+  pre-wrap` via **textContent** (jamais innerHTML → aucune injection depuis le texte IA).
+- États couverts : attente (bulle « … », bouton désactivé), succès, erreur réseau,
+  HTTP 429 (message dédié), hors-ligne/`file://` (apiBase vide → message clair).
+- Quota d'INTERFACE hebdomadaire (`localStorage`, 3/sem, aligné sur la copie) :
+  décrémenté **uniquement sur succès** ; épuisement → bulle mur d'abonnement avec
+  CTA `goTarifs`. L'anti-abus RÉEL reste serveur (rate-limit IP 15/min·300/j + plafond
+  global). Un utilisateur qui vide son localStorage retombe sur les bornes serveur.
+- Entrée = envoyer (écouteur `keydown` délégué au document). Suggestions cliquables
+  (`ambassaSuggestion` → préremplit + envoie). Focus auto à l'ouverture.
+- A11y : `#vrtIAMsgs` role=log + aria-live=polite ; input aria-label + enterkeyhint ;
+  suggestions role=button + tabindex ; bouton envoi aria-label.
+- Source DC (`Refonte site Véritas/Refonte VERITAS.dc.html`) éditée PUIS régénérée par
+  `node tools/build_vitrine.js "Refonte site Véritas/Refonte VERITAS.dc.html" vitrine.html`.
+  Cache-buster auto : `vitrine.js?v=` passé de 1.19.20 → 1.19.29 (dérivé du shell).
+
+**Vérifié EN LIVE (serveur statique local, fetch simulée pour le chemin succès) :**
+- Ouverture → input/send/msgs présents, quota « 3 questions ».
+- Envoi → POST réel vers `/api/ia_proxy.php`, body correct ; succès rendu (sauts de
+  ligne préservés), quota 3→2 ; échec → message gracieux, quota NON consommé, bouton
+  réactivé ; 429 géré ; épuisement → mur d'abonnement + CTA.
+- Entrée déclenche l'envoi ; panneau contenu dans le viewport mobile (326px, 0 débordement).
+- Gates rejoués : `node --check` OK (app.js, sw.js, assets/*.js), versions alignées
+  (1.19.29 shell⇄sw), Playwright smoke 2/2.
+
+**Revérif dashboard (contre-expertise précédente) : CONFIRMÉE.** À 1280px, avant login
+`LS=flex`/`VISITOR=none` (connexion atteignable) ; session admin → `APP=flex` (129 191
+car. rendus), `VISITOR=none`, `LS=none`. Le correctif racine `#VISITOR` (garde
+`:not([style*=display:none])` dans theme-lws.css) tient : plus de double interface.
+
+**NON déployé** : changements locaux sur `deploy/campay-securite`. La prod reste
+inchangée jusqu'à un merge/push sur `master` (déclencheur FTP).
+
+## Méga-menu pleine largeur + routage parent (v1.19.31) — vérifié en live
+
+**Demandes (Jacques, en direct) :** (1) étaler le méga-menu « Plus » sur toute la
+largeur, ouvrir chaque onglet pour vérifier qu'il est branché, harmoniser
+icônes/animations ; (2) « Créer mon compte parent » ne mène pas au compte parent
+— corriger + cas similaires + responsive + confort typographique.
+
+**Audit des 27 liens du méga-menu : TOUS branchés** (vérifié en live).
+- 3 écrans vitrine (elearning, tarifs, boutique) · 10 pages statiques
+  (corriges/, oeuvres/, niveaux/, ressources/, parcours/, outils/, decouvrir/,
+  campus/, manuels.html, constellation.html — index.html présents) · 14 ancres
+  app.html (#epreuves…#partenariat) qui rendent toutes du contenu réel.
+
+**Méga-menu refondu (build_vitrine.js, .vmn) :** barre FIXÉE pleine largeur sous
+#vrtNav (fond pleine largeur via padding-inline, contenu centré 1160px, 3 colonnes
+ÉGALES minmax(0,1fr)). Ancrage `top:100%` — #vrtNav a un backdrop-filter, donc il
+est le bloc contenant du fixed → 100% = bas du nav, auto-ajusté au compactage ;
+repli @supports 76px sans backdrop-filter. Descriptions NON tronquées (fini
+l'ellipsis qui coupait à droite). Icônes = tuiles pastel par entrée (déjà en place),
++ animation d'entrée vmnDown, hover translateX + tuile scale/rotate, focus-visible,
+prefers-reduced-motion. Vérifié 1280px : panneau 0→1265px, collé au nav (gap −1px),
+0 débordement horizontal, 3×9 items.
+
+**« Créer mon compte parent » réparé.** Le bouton pointait vers `#compte-parent`,
+ancre inexistante → mort. Corrigé : `app.html#inscription-parent`. Nouveau routage
+dans app.js `_vtHashRouter` : `inscription-<role>` (parent/enseignant/eleve/auteur/
+partenaire/mecene) → `showRegisterForm(role)`. Vérifié EN LIVE : `#inscription-parent`
+→ `_regRole=parent`, titre « Créer mon compte parent », champ matricule enfant présent.
+
+**Confort typographique / contraste (bandeau parent).** Le titre « coûte rien.
+Jamais. » apparaissait en bleu clair illisible EN PROD (bicolore) : déjà neutralisé
+en local (garde `color:#fff`), et amélioré → « coûte rien. Jamais. » en OR (#FFC93C,
+lisible sur fond sombre), mots-clés (notes/absences/tranches) en gras blanc. Le
+bouton passe en encre navy (#0C2A6A) gras sur fond blanc (contraste AAA).
+
+**Aucun lien mort dans le DOM rendu (`DEAD: []`).** Les placeholders de la SOURCE
+DC (`#mentions`, `#cgv`, `#charte`, `#candidature`, `#bareme`…) sont réécrits au BUILD
+en vraies destinations (legal/mentions-legales.html, legal/cgv.html,
+legal/charte-pedagogique.html, app.html#partenariat, corriges/…). NE PAS conclure à
+un lien mort depuis un grep de la source — mesurer le DOM.
+
+**RESTE — chantier substantiel, NON fait (à cadrer) :** ~14 sections publiques
+(partenariat, epreuves, evaluations, actualites, resultats, photos, orientation,
+contact, inscription, nos-partenaires, verifier-certificat, cagnotte, trophees,
+leaderboard-junior, calendrier) vivent dans app.js et rendent dans le VIEUX shell
+applicatif (nav « E-Learning / Mes matières… » via vShowSec) — c'est « l'ancienne
+interface » signalée. Les harmoniser = reskin du shell visiteur de l'app (37 000
+lignes, déploiement direct en prod) : à faire méthodiquement, pas d'un bloc.
+
+Versions bumpées 1.19.29 → 1.19.31 (shell app.js/app.css ⇄ sw alignés, CI OK).
+node --check OK (app.js, sw.js, vitrine.js). NON déployé (branche deploy/campay-securite).
+
+## Gate d'inscription 100 F (v1.19.32) — cœur câblé + vérifié, SÛR (OFF par défaut)
+
+**Demande Jacques :** toutes les inscriptions payantes à 100 F ; le visiteur non
+inscrit ne voit que les démos de l'accueil + les pages SEO publiques ; l'inscription
+100 F ouvre l'accès aux ressources GRATUITES (le premium reste payant/abonnement) ;
+paiement via CamerPay (tous réseaux). Décisions actées : (a) gate = ressources
+INTERNES seulement (corriges/ oeuvres/ publics restent libres → SEO préservé) ;
+(b) DRAPEAU ADMIN, OFF par défaut ; (c) TOUS les rôles paient, parent inclus.
+
+**Câblé dans app.js (tout défensif, OFF par défaut) :**
+- `_gateActif()` lit `DB.accessGate.actif` (undefined = OFF). `_GATE_SECTIONS` =
+  {elearning, jeux, quiz, labo, labos}. `_estMembreInscrit()` : personnel du centre
+  (admin/enseignant/élève) OU visiteur `inscriptionPayee:true`. `_gateBloque(sec)` =
+  actif ∧ section verrouillée ∧ non-membre.
+- Hook dans `vShowSec` : `if(_gateBloque(sec)){ c.innerHTML=_gateWallHtml(sec); return; }`
+  → mur d'inscription (CTA « Créer mon compte — 100 FCFA », lien connexion).
+- `doRegister` : gate actif → compte `statut:'en_attente_paiement'`,
+  `inscriptionPayee:false`, puis `openPaymentModal({intent:'inscription', montant:_gatePrix(),
+  targetId/customerAccountId:acc.id})` (route CamerPay `_payInitCampay`). Gate OFF →
+  comportement historique (actif + membre tout de suite).
+- `_payAutoActivate` : nouveau `case 'inscription'` → pose `inscriptionPayee:true`,
+  `statut:'actif'` à la confirmation (miroir client de `vrt_grant_entitlement`,
+  api/_auth_lib.php intent 'inscription'). Idempotent.
+- Admin toggle dans `pgPaywall` (Essais & abonnements) : case `gate_actif` (save
+  immédiat) + champ montant `DB.tarifs.inscription` + avertissement « n'activer
+  qu'après un vrai paiement test CamerPay réussi ».
+- Bandeau parent : « ne coûte rien. Jamais. » retiré (contredisait « tous paient
+  100 ») → message neutre « tout au même endroit » (exact quel que soit l'état du gate).
+
+**Vérifié EN LIVE (logique pure `_gateBloque`, SW purgé pour charger l'app.js frais) :**
+OFF+anon→libre ✓ · ON+anon→elearning/jeux BLOQUÉS, contact/boutique LIBRES ✓ ·
+ON+inscrit non payé→bloqué ✓ · ON+inscrit payé→accès ✓ · ON+élève→accès ✓ ·
+mur affiche 100 FCFA ✓ · activation post-paiement présente ✓.
+
+**Deux gates distincts, comme demandé :** inscription 100 F = ouvre l'ACCÈS aux
+sections (niveau gratuit). Le PREMIUM reste derrière le mur d'essais/abonnement `_pw*`.
+
+Versions 1.19.31→1.19.32 (shell⇄sw alignés). node --check OK, smoke 2/2. NON déployé.
+
+### RESTE de la demande (NON fait — chantiers à part, à mener proprement)
+- Classer les entrées du menu PAR RÔLE (élève/parent/enseignant/partenaire) — restructure du MENU.
+- Restaurer l'Ambassa COMPLÈTE (chat + quiz + évals + fiches) sur l'accueil.
+- Aligner l'EN-TÊTE de l'app sur la vitrine + uniformiser/colorer/agrandir tous les contenus.
+- Le flux de paiement 100 F n'est testable qu'avec CamerPay en prod (PHP absent en local).
+
+## Panneau IA réduit + outils Ambassa + « design fade » RÉSOLU (v1.19.32)
+
+### ★ CAUSE RACINE du « design fade, aucune icône, aucune couleur » — TROUVÉE
+Mesuré au navigateur sur `#orientation` : les cartes ONT leurs icônes et leurs
+teintes dans le HTML (`.vori-ico.t-or/.t-bleu/…`, dégradé `var(--o1),var(--o2)`,
+glyphe `color:#fff`). Mais `assets/theme-lws.css:1298` applique
+`#VISITOR#VISITOR *{ background-image:none !important }` — un balayage volontaire
+pour aplatir la vitrine. EFFET DE BORD : le dégradé de la TUILE saute, il reste
+une **icône blanche sur fond transparent → invisible**. Idem pour l'ombre
+(`box-shadow:none`, l.1326) qui supprimait le relief et le survol.
+> **Leçon : « il n'y a pas d'icône » ne veut pas dire qu'elle est absente du HTML.**
+> Ici elle était rendue, peinte en blanc, sur un fond effacé par un balayage à
+> double identifiant. Mesurer le style CALCULÉ, pas le markup.
+
+**Correctif (fin de theme-lws.css, exception ciblée)** : ré-affirmation du dégradé
++ ombre + couleur UNIQUEMENT sur les surfaces qui portent un pictogramme
+(`.vori-ico`, `.vsec-ico`, `.acc-news-ic`, `.pgt-ico`) et du survol de
+`.vori-card`. Ce sont des éléments de taille fixe, jamais des panneaux de contenu :
+l'aplat voulu par la refonte n'est pas touché.
+**Vérifié EN LIVE** : 7/7 tuiles peintes (or/bleu/vert/violet/cyan/rose), icône de
+section peinte, titre centré. Capture avant/après sans appel.
+⚠️ Cache-buster `theme-lws.css?v=` bumpé 1.19.29 → 1.19.32, SINON le correctif
+n'atteint jamais un visiteur de retour (piège déjà consigné).
+
+### Panneau Ambassa réduit + ses fonctionnalités rendues
+- Largeur **326 → `min(290px, 100vw-96px)`**, en-tête compacté (avatar 46→34,
+  titre 15→13.5, paddings resserrés). Vérifié : 290 px, tient dans le viewport.
+- **Barre de 4 OUTILS** (Quiz · Fiche · Corriger · Méthode) : chacun CADRE le
+  prompt (`IA_OUTILS[k].p + question`) — l'élève ne tape que son sujet. Le mode
+  actif est marqué (fond violet, `aria-pressed`), le placeholder change, et une
+  bulle annonce le mode. Même proxy, même quota, aucune clé exposée.
+- Vérifié EN LIVE : les 4 outils présents ; clic « Quiz » → placeholder « Sur quel
+  chapitre… », annonce affichée, fond actif ; envoi → prompt réellement transmis
+  = « Prépare un QUIZ de 5 questions (QCM…) conforme au programme MINESEC sur :
+  Le théorème de Pythagore, 4e ». Cadrage CONFIRMÉ.
+
+Gates : node --check OK (app.js, sw.js, vitrine.js) · versions 1.19.32 alignées ·
+Playwright 2/2 (un premier run rouge = flake de port, vert au re-run).
+
+### RESTE (non fait, cadré pour la suite)
+- Classer les entrées du menu PAR RÔLE (élève/parent/enseignant/partenaire).
+- Câbler l'accueil au panneau ADMIN (ajouter/modifier ressources et infos depuis l'admin).
+- Aligner l'EN-TÊTE de l'app sur la vitrine + uniformiser TOUTES les pages.

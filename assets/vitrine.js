@@ -303,8 +303,11 @@
       S.theme = S.theme === 'clair' ? 'sombre' : 'clair';
       appliquerTheme(S.theme);
     },
-    basculerIA: function () { S.ia = !S.ia; S.trad = false; panneau('vrtIA', S.ia); panneau('vrtTrad', false); },
-    ouvrirIA: function () { S.ia = true; panneau('vrtIA', true); },
+    basculerIA: function () { S.ia = !S.ia; S.trad = false; panneau('vrtIA', S.ia); panneau('vrtTrad', false); if (S.ia) { majIAQuota(); var i = document.getElementById('vrtIAInput'); if (i) try { i.focus(); } catch (e) {} } },
+    ouvrirIA: function () { S.ia = true; panneau('vrtIA', true); majIAQuota(); var i = document.getElementById('vrtIAInput'); if (i) try { i.focus(); } catch (e) {} },
+    ambassaEnvoyer: function () { ambassaEnvoyer(); },
+    ambassaSuggestion: function (el) { ambassaSuggestion(el); },
+    ambassaOutil: function (el) { ambassaOutil(el); },
     nouvelleCitation: function () {
       S.cit = (S.cit + 1) % (D.citations || [{}]).length; S.citOn = true;
       var c = D.citations[S.cit] || {};
@@ -807,6 +810,166 @@
     return Array.prototype.indexOf.call(tous, item);
   }
 
+  /* ══════════════════════════════════════════════════════════════════════
+     PROFESSEUR AMBASSA — le tuteur IA, sur l'accueil (v1.19.30)
+     ──────────────────────────────────────────────────────────────────────
+     Le widget de l'accueil était une MAQUETTE MORTE : le bouton « Envoyer »
+     appelait VRT.act('rien'). On le branche ici sur le VRAI proxy serveur
+     (api/ia_proxy.php) — le même que l'application. La clé IA reste côté
+     serveur ; le client n'envoie qu'un prompt. Le serveur borne déjà les
+     coûts (rate-limit par IP 15/min · 300/jour · plafond global). Ce compteur
+     hebdomadaire local n'est qu'un garde-fou d'INTERFACE pour honorer la
+     promesse « 3 questions offertes / semaine » et inviter à s'abonner ;
+     l'anti-abus réel est côté serveur.
+     ══════════════════════════════════════════════════════════════════════ */
+  var IA_MAX_SEM = 3;          // questions offertes/semaine (aligné sur la copie)
+  var iaEnCours = false;       // anti double-soumission
+
+  function iaSemaineCle() {
+    var d = new Date();
+    var jour1 = new Date(d.getFullYear(), 0, 1);
+    var sem = Math.ceil((((d - jour1) / 86400000) + jour1.getDay() + 1) / 7);
+    return 'vrt_ia_sem_' + d.getFullYear() + '_' + sem;
+  }
+  function iaQuotaRestant() {
+    try { var n = parseInt(localStorage.getItem(iaSemaineCle()) || '0', 10) || 0; return Math.max(0, IA_MAX_SEM - n); }
+    catch (e) { return IA_MAX_SEM; }
+  }
+  function iaQuotaConsommer() {
+    try { var k = iaSemaineCle(); var n = parseInt(localStorage.getItem(k) || '0', 10) || 0; localStorage.setItem(k, String(n + 1)); }
+    catch (e) {}
+  }
+  function majIAQuota() {
+    var el = document.getElementById('vrtIAQuota');
+    if (!el) return;
+    var r = iaQuotaRestant();
+    el.textContent = r > 0
+      ? ('Il te reste ' + r + ' question' + (r > 1 ? 's' : '') + ' cette semaine · 30/jour avec le plan Pro')
+      : 'Questions offertes épuisées pour cette semaine · passe au plan Pro pour 30/jour';
+  }
+  function iaBulle(role, texte) {
+    var msgs = document.getElementById('vrtIAMsgs');
+    if (!msgs) return null;
+    var el = document.createElement('div');
+    if (role === 'user') {
+      el.style.cssText = 'align-self:flex-end;max-width:85%;background:linear-gradient(135deg,#7C6BD6,#5B4FA8);color:#fff;border-radius:12px;border-bottom-right-radius:4px;padding:10px 13px;font:400 13.5px/1.6 Poppins,sans-serif;text-wrap:pretty;white-space:pre-wrap';
+    } else {
+      el.style.cssText = 'align-self:flex-start;max-width:92%;background:#fff;border:1px solid #EFF2F7;color:#4D5163;border-radius:12px;border-top-left-radius:4px;padding:11px 14px;font:400 13.5px/1.65 Poppins,sans-serif;text-wrap:pretty;white-space:pre-wrap';
+    }
+    el.textContent = texte; // JAMAIS innerHTML pour du texte IA → aucune injection possible
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+    return el;
+  }
+  function iaBulleQuota() {
+    // Message de mur d'abonnement — contenu FIXE (aucune donnée utilisateur),
+    // innerHTML sûr : on veut un lien cliquable vers les tarifs.
+    var msgs = document.getElementById('vrtIAMsgs');
+    if (!msgs) return;
+    var el = document.createElement('div');
+    el.style.cssText = 'align-self:stretch;background:linear-gradient(135deg,#FFF7ED,#FEF3E7);border:1px solid #FCD9B6;color:#7A4B1E;border-radius:12px;padding:12px 14px;font:400 13px/1.6 Poppins,sans-serif;text-wrap:pretty';
+    el.innerHTML = 'Tu as utilisé tes <b>3 questions offertes de la semaine</b>. '
+      + 'Le Professeur Ambassa répond sans limite (30/jour) avec un abonnement. '
+      + '<button type="button" onclick="VRT.act(\'goTarifs\',this,event)" style="margin-top:8px;background:#5B4FA8;color:#fff;border:0;border-radius:9px;padding:8px 14px;font:600 12.5px Poppins,sans-serif;cursor:pointer">Voir les abonnements →</button>';
+    msgs.appendChild(el);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+  function ambassaEnvoyer() {
+    var input = document.getElementById('vrtIAInput');
+    if (!input) return;
+    var q = (input.value || '').trim();
+    if (!q || iaEnCours) return;
+    if (q.length > 2000) q = q.slice(0, 2000);
+
+    var base = apiBase();
+    if (!base) { // ouvert en file:// ou hors ligne : pas d'API joignable
+      iaBulle('bot', '⚠️ Le tuteur a besoin d\'une connexion Internet. Ouvre le site en ligne pour discuter avec le Professeur Ambassa.');
+      return;
+    }
+    if (iaQuotaRestant() <= 0) { input.value = ''; iaBulleQuota(); return; }
+
+    input.value = '';
+    iaBulle('user', q);
+    iaEnCours = true;
+    var send = document.getElementById('vrtIASend');
+    if (send) { send.disabled = true; send.style.opacity = '.55'; send.style.cursor = 'default'; }
+    var bot = iaBulle('bot', '…'); // indicateur d'attente
+    if (bot) bot.setAttribute('aria-busy', 'true');
+
+    // Un outil actif (quiz, fiche, correction, méthode) CADRE la question ;
+    // l'élève, lui, ne tape que son sujet.
+    var envoi = (iaOutil && IA_OUTILS[iaOutil]) ? (IA_OUTILS[iaOutil].p + q) : q;
+
+    fetch(base + '/ia_proxy.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: envoi, plan: 'anon', userId: '' })
+    })
+      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, status: r.status, j: j }; }, function () { return { ok: r.ok, status: r.status, j: {} }; }); })
+      .then(function (res) {
+        iaEnCours = false;
+        if (send) { send.disabled = false; send.style.opacity = ''; send.style.cursor = 'pointer'; }
+        var j = res.j || {};
+        if (bot) bot.removeAttribute('aria-busy');
+        if (res.ok && j.text && !/legacy text API|deprecat/i.test(j.text)) {
+          if (bot) bot.textContent = j.text;
+          iaQuotaConsommer();
+          majIAQuota();
+        } else if (res.status === 429) {
+          if (bot) bot.textContent = '⚠️ ' + (j.error || 'Trop de questions d\'un coup — patiente une minute puis réessaie.');
+        } else if (bot) {
+          bot.textContent = j.error
+            ? ('⚠️ ' + j.error)
+            : '⚠️ Le Professeur Ambassa est momentanément indisponible. Réessaie dans un instant.';
+        }
+      })
+      .catch(function () {
+        iaEnCours = false;
+        if (send) { send.disabled = false; send.style.opacity = ''; send.style.cursor = 'pointer'; }
+        if (bot) { bot.removeAttribute('aria-busy'); bot.textContent = '⚠️ Connexion interrompue. Vérifie ta connexion et réessaie.'; }
+      });
+  }
+  function ambassaSuggestion(el) {
+    var input = document.getElementById('vrtIAInput');
+    if (!input || !el) return;
+    input.value = (el.textContent || '').trim();
+    ambassaEnvoyer();
+  }
+
+  /* Les OUTILS d'Ambassa (quiz, fiche, correction, méthode). Le tuteur de
+     l'application sait faire tout cela ; sur l'accueil, on expose les mêmes
+     usages en cadrant le prompt — même proxy, même quota, aucune clé exposée.
+     Le mode reste actif jusqu'à ce qu'on en change : on l'annonce dans le fil
+     pour que l'élève sache à quoi il parle. */
+  var IA_OUTILS = {
+    quiz:     { l: 'Quiz',     ph: 'Sur quel chapitre veux-tu un quiz ?',      an: 'Mode Quiz — dis-moi le chapitre et ta classe, je te prépare 5 questions.',
+                p: 'Prépare un QUIZ de 5 questions (QCM à 4 options, une seule correcte) conforme au programme MINESEC sur : ' },
+    fiche:    { l: 'Fiche',    ph: 'Quelle notion veux-tu réviser ?',          an: 'Mode Fiche — donne-moi la notion, je fais une fiche de révision.',
+                p: 'Rédige une FICHE DE RÉVISION synthétique (définitions, points-clés, méthode, exemple, piège d\'examen) conforme au programme MINESEC sur : ' },
+    corriger: { l: 'Corriger', ph: 'Colle ta réponse ou ta copie…',            an: 'Mode Correction — colle ta réponse, je corrige avec le barème.',
+                p: 'CORRIGE la production suivante selon les grilles harmonisées MINESEC : donne une note indicative, les critères, ce qui est réussi, ce qui doit être repris, puis un conseil de méthode. Production de l\'élève : ' },
+    methode:  { l: 'Méthode',  ph: 'Quel exercice te bloque ?',                an: 'Mode Méthode — dis-moi l\'exercice, je donne la démarche (pas la réponse).',
+                p: 'Explique la MÉTHODE pas à pas (la démarche, pas la réponse toute faite) pour traiter : ' }
+  };
+  var iaOutil = '';
+  function ambassaOutil(el) {
+    var k = el && el.getAttribute ? el.getAttribute('data-outil') : '';
+    var o = IA_OUTILS[k];
+    if (!o) return;
+    iaOutil = k;
+    var input = document.getElementById('vrtIAInput');
+    if (input) { input.placeholder = o.ph; try { input.focus(); } catch (e) {} }
+    // Marquer visuellement l'outil actif.
+    var barre = el.parentNode ? el.parentNode.querySelectorAll('[data-outil]') : [];
+    for (var i = 0; i < barre.length; i++) {
+      var on = barre[i] === el;
+      barre[i].style.background = on ? '#5B4FA8' : '#fff';
+      barre[i].style.color = on ? '#fff' : '#5B4FA8';
+      barre[i].setAttribute('aria-pressed', on ? 'true' : 'false');
+    }
+    iaBulle('bot', o.an);
+  }
+
   window.VRT = {
     act: function (nom, el, ev) {
       if (ev && ev.preventDefault) ev.preventDefault();
@@ -843,6 +1006,16 @@
        démarrage par les champs réels — l'écran est caché à ce moment-là,
        personne ne voit le remplacement. */
     try { majPaiement(); } catch (e) {}
+
+    /* Entrée = envoyer sa question au Professeur Ambassa. Écouteur délégué au
+       document : le champ #vrtIAInput est pré-rendu (panneau simplement caché),
+       mais la délégation reste robuste aux re-rendus éventuels. */
+    document.addEventListener('keydown', function (e) {
+      if (e.target && e.target.id === 'vrtIAInput' && e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        ambassaEnvoyer();
+      }
+    });
 
     /* Frappes du tunnel : un SEUL écouteur, délégué au document. Les champs
        sont détruits et recréés à chaque changement de moyen ou de livraison ;

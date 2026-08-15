@@ -4643,6 +4643,57 @@ function _renvoyerVersVitrine(sec, boot){
   }catch(e){ return false; }
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+// GATE D'INSCRIPTION 100 F (v1.19.32) — accès aux RESSOURCES INTERNES
+// ──────────────────────────────────────────────────────────────────────────
+// Modèle voulu par Jacques : le visiteur NON INSCRIT ne voit que les démos de
+// l'accueil (+ les pages SEO publiques corriges/ oeuvres/, qui sont hors app
+// donc NON gatées ici — on préserve l'acquisition Google). Les RESSOURCES
+// INTERNES (e-learning, jeux, quiz, labos, Ambassa complète) exigent une
+// inscription payée 100 F, tous rôles confondus.
+//
+// ⚠️ DRAPEAU ADMIN, OFF PAR DÉFAUT (DB.accessGate.actif). Tant qu'il est OFF,
+// RIEN ne change : aucun risque de verrouiller les inscrits si le paiement
+// CamerPay n'est pas encore confirmé en prod. À activer depuis Admin → Essais
+// & abonnements une fois un vrai paiement test réussi.
+// Le PREMIUM (au-delà du gratuit) reste géré à part par le mur d'essais (_pw*).
+// ══════════════════════════════════════════════════════════════════════════
+function _gateActif(){ try{ return !!(DB.accessGate && DB.accessGate.actif); }catch(e){ return false; } }
+var _GATE_SECTIONS = { elearning:1, jeux:1, quiz:1, labo:1, labos:1 };
+function _gateSectionVerrouillee(sec){ return !!(sec && Object.prototype.hasOwnProperty.call(_GATE_SECTIONS, sec)); }
+function _gatePrix(){ try{ var p=(DB.tarifs&&DB.tarifs.inscription); return (p&&p>0)?p:100; }catch(e){ return 100; } }
+// Membre autorisé : personnel du centre (admin/enseignant/élève) OU visiteur
+// dont l'inscription 100 F est PAYÉE (acc.inscriptionPayee).
+function _estMembreInscrit(){
+  try{
+    if(typeof SES==='undefined'||!SES) return false;
+    if(SES.type==='admin'||SES.type==='superadmin'||SES.type==='enseignant'||SES.type==='eleve') return true;
+    if(SES.type==='visiteur_inscrit'||SES.type==='visiteur'){
+      if(SES.inscriptionPayee) return true;
+      var acc=(DB.visitorAccounts||[]).find(function(a){return a.id===SES.id;});
+      return !!(acc && acc.inscriptionPayee);
+    }
+  }catch(e){}
+  return false;
+}
+function _gateWallHtml(sec){
+  var prix=_gatePrix();
+  return '<div class="pgt" style="justify-content:center;text-align:center"><span class="pgt-ico"><svg class="vico vico-19" aria-hidden="true"><use href="#lc-lock"/></svg></span>Réservé aux membres inscrits</div>'
+    + '<div class="card" style="max-width:560px;margin:18px auto;text-align:center;padding:30px 24px">'
+    + '<div style="font-size:46px;line-height:1;margin-bottom:12px" aria-hidden="true">🎓</div>'
+    + '<div style="font-size:20px;font-weight:800;color:#1E499B;margin-bottom:10px">Ouvre toutes les ressources</div>'
+    + '<p style="color:#4D5163;font-size:14.5px;line-height:1.65;max-width:450px;margin:0 auto 18px">Le visiteur découvre les démos de l\'accueil. Pour accéder à l\'<b>e-learning</b>, aux <b>jeux</b>, aux <b>quiz</b>, aux <b>labos</b> et au <b>Professeur Ambassa</b> complet, crée ton compte pour <b style="color:#0C2A6A">'+prix+' FCFA</b> — paiement unique, tous réseaux via CamerPay.</p>'
+    + '<button class="btn bi" style="padding:14px 28px;font-size:15px;font-weight:800" onclick="showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Créer mon compte — '+prix+' FCFA</button>'
+    + '<div style="margin-top:14px"><a href="#" onclick="(typeof _ouvrirConnexionAncre===\'function\'?_ouvrirConnexionAncre():(typeof showLogin===\'function\'?showLogin(\'eleve\'):0));return false" style="color:#5B4FA8;font-weight:600;font-size:13px">J\'ai déjà un compte → me connecter</a></div>'
+    + '</div>';
+}
+// Renvoie true si l'accès est BLOQUÉ (mur affiché) — false si autorisé.
+function _gateBloque(sec){
+  if(!_gateActif()) return false;
+  if(!_gateSectionVerrouillee(sec)) return false;
+  return !_estMembreInscrit();
+}
+
 function vShowSec(sec,btn,_boot){
   if(_renvoyerVersVitrine(sec, _boot)) return;
   window._vCurrentSec=sec;
@@ -4670,6 +4721,8 @@ function vShowSec(sec,btn,_boot){
   if(btn)btn.classList.add("on");
   const c=$("vContent");
   if(!c){if(typeof window._pendingVShowSec!=="undefined")return;window._pendingVShowSec={sec:sec,btn:btn};setTimeout(function(){delete window._pendingVShowSec;vShowSec(sec,btn);},200);return;}
+  // ─── GATE 100 F : ressource interne demandée par un non-membre → mur d'inscription ───
+  if(_gateBloque(sec)){ c.innerHTML = _gateWallHtml(sec); return; }
   // ─── PROGRAMME PARTENARIAT v1 — routes visiteur (avant les autres sections) ───
   if(sec==='partenariat' && typeof pgPartnerships==='function'){
     c.innerHTML = pgPartnerships(); return;
@@ -25073,7 +25126,12 @@ function doRegister(){
             ens:(document.getElementById("rEns")?.value||"gen"),
             cls:(document.getElementById("rCls")?.value||CLS[0]),
             serie:_rSerie},
-    plans:[],statut:"actif",
+    plans:[],
+    // GATE 100 F (v1.19.32) : si le drapeau est ACTIF, le compte naît « en attente
+    // de paiement » et n'accède aux ressources qu'après les 100 F (inscriptionPayee).
+    // Drapeau OFF (défaut) → comportement historique : actif et membre tout de suite.
+    statut:(_gateActif()?"en_attente_paiement":"actif"),
+    inscriptionPayee:(_gateActif()?false:true),
     dateInscription:new Date().toLocaleDateString("fr-FR"),lastLogin:today()};
   // v2.x : RÔLE capturé à l'inscription (particularité auteur / partenaire / mécène)
   var _role=(document.getElementById("rRole")?.value||"").trim().toLowerCase();
@@ -25125,6 +25183,21 @@ function doRegister(){
     toast("Bienvenue "+pre+" 🤝 Compte partenaire créé — notre équipe vous recontacte vite !");
   } else {
     toast("Bienvenue "+pre+" \uD83C\uDF89 Compte créé avec succès !");
+  }
+
+  // GATE 100 F ACTIF : l'inscription n'est complète qu'après le paiement (tous
+  // réseaux via CamerPay). Socle serveur (api/_auth_lib.php, intent 'inscription')
+  // vérifie le montant ; _payAutoActivate('inscription') pose inscriptionPayee à la
+  // confirmation. L'inscription ouvre l'accès aux ressources GRATUITES seulement —
+  // le premium reste sous abonnement (_pw*). Drapeau OFF (défaut) → rien de demandé.
+  if(_gateActif() && typeof openPaymentModal==='function'){
+    setTimeout(function(){
+      try{
+        openPaymentModal({ montant:_gatePrix(), label:'🎓 Inscription VÉRITAS — accès aux ressources gratuites',
+          intent:'inscription', targetId:acc.id, customerAccountId:acc.id,
+          customerNom:(pre+' '+nom).trim(), customerTel:tel, refPrefix:'INSC' });
+      }catch(e){}
+    }, 700);
   }
 }
 
@@ -32223,6 +32296,24 @@ function _payAutoActivate(a){
   if(!a || !a.intent) return {msg:'', userMsg:''};
   try {
     switch(a.intent){
+
+      // ── 0. INSCRIPTION 100 F (gate d'accès aux ressources) ──
+      // Miroir client de vrt_grant_entitlement (api/_auth_lib.php, intent
+      // 'inscription') : le paiement confirmé fait passer le compte de
+      // « en_attente_paiement » à ACTIF et pose inscriptionPayee. Idempotent.
+      case 'inscription': {
+        var _accI = a.accountId ? (DB.visitorAccounts||[]).find(function(x){return x.id===a.accountId;}) : null;
+        if(!_accI && a.targetId) _accI = (DB.visitorAccounts||[]).find(function(x){return x.id===a.targetId;});
+        if(_accI){
+          _accI.inscriptionPayee = true;
+          _accI.statut = 'actif';
+          _accI.dateInscriptionPayee = a.datePaid || new Date().toISOString();
+          // Si la session courante est ce compte, refléter le droit tout de suite.
+          try{ if(typeof SES!=='undefined' && SES && SES.id===_accI.id){ SES.inscriptionPayee=true; } }catch(_e){}
+          return {msg:'Inscription activée', userMsg:'Bienvenue ! Ton inscription est confirmée — les ressources gratuites sont maintenant ouvertes.'};
+        }
+        return {msg:'Inscription payée (compte introuvable)', userMsg:'Paiement confirmé. Connecte-toi pour accéder à tes ressources.'};
+      }
 
       // ── 1. Achat d'un livre ──
       case 'book': {
@@ -43060,6 +43151,10 @@ function _cagCreer(eleveId){
     // Programmes de partenariat : « partenariat-parent », « partenariat-sponsor »…
     if(sec.indexOf('partenariat-') === 0) return sec;
     if(sec.indexOf('pour-') === 0) return sec;          // hubs par public (v1.14)
+    // Inscription CIBLÉE par rôle : « inscription-parent », « inscription-enseignant »…
+    // La vitrine renvoyait « Créer mon compte parent » vers #compte-parent, une
+    // ancre inexistante → bouton mort. Ces ancres ouvrent le bon formulaire.
+    if(sec.indexOf('inscription-') === 0) return sec;
     return SECTIONS.indexOf(sec) >= 0 ? sec : '';
   }
 
@@ -43085,6 +43180,21 @@ function _cagCreer(eleveId){
       if(id && typeof _bookOpenFromHash === 'function'){
         window._vCurrentSec = 'livre:' + id;
         _bookOpenFromHash(id);
+      }
+      return;
+    }
+
+    /* Inscription ciblée par rôle : #inscription-parent, #inscription-enseignant,
+       #inscription-eleve, #inscription-partenaire… Ouvre DIRECTEMENT le bon
+       formulaire (showRegisterForm remplace l'écran par #LS, ce n'est pas une
+       modale — pas de page blanche à couvrir). Corrige le bouton « Créer mon
+       compte parent » de la vitrine, jusqu'ici mort (#compte-parent inexistant). */
+    if(sec.indexOf('inscription-') === 0){
+      var _role = sec.slice('inscription-'.length);
+      var _ROLES = { parent:'parent', enseignant:'enseignant', eleve:'', auteur:'auteur', partenaire:'partenaire', mecene:'mecene' };
+      if(Object.prototype.hasOwnProperty.call(_ROLES, _role) && typeof window.showRegisterForm === 'function'){
+        window._vCurrentSec = sec;
+        try{ window.showRegisterForm(_ROLES[_role]); }catch(e){}
       }
       return;
     }
@@ -47974,6 +48084,21 @@ function pgPaywall(){
      + '<input type="checkbox" id="pw_actif" '+(cfg.actif?'checked':'')+' style="width:20px;height:20px;cursor:pointer">'
      + 'Activer les essais et le mur d\'abonnement</label>'
      + '<div class="xs2 mut mt6">Décoché : tout redevient libre d\'accès (utile pour une journée portes ouvertes ou une démonstration).</div></div>';
+
+  // ── Gate d'inscription 100 F (accès aux ressources internes) ──
+  var _gcfg = (DB.accessGate && DB.accessGate.actif);
+  var _gprix = (typeof _gatePrix==='function')?_gatePrix():100;
+  h += '<div class="card mt12" style="border:1.5px solid '+(_gcfg?'#F5B301':'#E0E7F0')+'"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-lock"/></svg></span>Inscription payante ('+_gprix+' FCFA) — accès aux ressources</div>'
+     + '<label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;font-weight:700;color:#142554">'
+     + '<input type="checkbox" id="gate_actif" '+(_gcfg?'checked':'')+' style="width:20px;height:20px;cursor:pointer" '
+     + 'onchange="DB.accessGate=DB.accessGate||{};DB.accessGate.actif=this.checked;save();toast(this.checked?\'🔒 Gate activé — l\\\'inscription '+_gprix+' F est requise\':\'🔓 Gate désactivé — accès libre\',this.checked?\'ok\':\'warn\');re();">'
+     + 'Exiger l\'inscription à '+_gprix+' FCFA pour ouvrir e-learning, jeux, quiz, labos et Ambassa</label>'
+     + '<div class="xs2 mut mt6">Le visiteur non inscrit garde l\'accueil et les pages publiques (corrigés, œuvres — SEO). '
+     + 'L\'inscription ouvre les ressources <b>gratuites</b> ; le premium reste sous abonnement. '
+     + '<b style="color:#B45309">N\'activez qu\'après un vrai paiement test CamerPay réussi</b> — sinon aucun nouvel inscrit ne pourra entrer.</div>'
+     + '<div class="fg mt8" style="max-width:260px"><span class="fl">Montant de l\'inscription (FCFA)</span>'
+     + '<input class="fi" type="number" min="0" id="gate_prix" value="'+_gprix+'" '
+     + 'onchange="DB.tarifs=DB.tarifs||{};DB.tarifs.inscription=Math.max(0,parseInt(this.value,10)||0);save();toast(\'Tarif d\\\'inscription mis à jour\');re();"></div></div>';
 
   // ── Tableau des surfaces ──
   h += '<div class="card mt12"><div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-bookopen"/></svg></span>Essais offerts par espace</div>'
