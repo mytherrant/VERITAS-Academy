@@ -1040,3 +1040,108 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', demarrer);
   else demarrer();
 })();
+
+/* ============================================================================
+ *  TROIS DÉFAUTS DE L'ACCUEIL  (v1.19.20)
+ *
+ *  1. « Découvrir » menait TOUJOURS à la boutique. `rendre()` clone un gabarit
+ *     pris sur la première carte du document — gabarit dont le lien vaut
+ *     `#boutique` en dur. Toutes les cartes de tous les onglets en héritaient :
+ *     « Répétitions au centre — dès 15 000 F/mois » ouvrait les cahiers, qui ne
+ *     disent pas un mot des répétitions. Les données (VRT_DATA) ne portent aucun
+ *     champ de destination : on route donc sur le SENS de la carte.
+ *
+ *  2. Le panneau d'actualités DISPARAISSAIT au premier échec du flux.
+ *     `poserActus([])` fait `bloc.hidden = true` : une coupure réseau d'une
+ *     seconde effaçait la colonne MINESEC pour toute la visite. Le flux est sain
+ *     en production (12 titres au contrôle) — c'est la fragilité qu'on corrige.
+ *
+ *  3. Le prix de chaque carte prenait la teinte de la carte : bleu ici, orange
+ *     là, sur deux cartes voisines de la même famille. Un prix n'est pas un
+ *     accent décoratif — il se lit toujours de la même façon.
+ * ==========================================================================*/
+(function () {
+  'use strict';
+
+  /* ── 1 · Destination réelle de « Découvrir » ─────────────────────────────
+     Table par mot-clé du TITRE de la carte. Une carte non listée garde son
+     lien d'origine : on ne casse jamais ce qui marchait déjà. */
+  var ROUTES = [
+    [/r[ée]p[ée]tition|domicile|rattrapage|pr[ée]paration.*examen|soutien/i, '#parents'],
+    [/certificat|attestation/i,                    '/app.html#verifier-certificat'],
+    [/orientation|s[ée]rie/i,                      '/app.html#orientation'],
+    [/cagnotte/i,                                  '/app.html#cagnotte'],
+    [/troph[ée]e|palmar[èe]s/i,                    '/app.html#trophees'],
+    [/[ée]preuve|annale|bepc|probatoire|\bbac\b/i, '/app.html#epreuves'],
+    [/corrig[ée]/i,                                '/corriges/'],
+    [/cours|s[ée]quence|œuvre|oeuvre|labo|jeu|quiz|e-?learning/i, '#elearning'],
+    [/manuel|cahier|boutique|livre/i,              '#boutique'],
+    [/abonnement|tarif|formule|pack/i,             '#tarifs']
+  ];
+
+  function carteDe(el) {
+    var n = el;
+    for (var i = 0; n && i < 6; i++, n = n.parentElement) {
+      if (n.querySelector && n.querySelector('h3')) return n;
+      if (n.getAttribute && n.getAttribute('data-vrt-item')) return n;
+    }
+    return null;
+  }
+
+  function destination(titre) {
+    for (var i = 0; i < ROUTES.length; i++) if (ROUTES[i][0].test(titre)) return ROUTES[i][1];
+    return null;
+  }
+
+  document.addEventListener('click', function (ev) {
+    var a = ev.target && ev.target.closest ? ev.target.closest('a') : null;
+    if (!a || !/^\s*D[ée]couvrir/i.test(a.textContent || '')) return;
+    var carte = carteDe(a);
+    var h3 = carte ? carte.querySelector('h3') : null;
+    var titre = h3 ? (h3.textContent || '') : (carte ? carte.textContent || '' : '');
+    var cible = destination(titre);
+    if (!cible) return;                       // rien de mieux à proposer : on laisse
+    ev.preventDefault();
+    if (cible.charAt(0) === '#' && window.VRT && typeof window.VRT.act === 'function') {
+      location.hash = cible;                  // écran interne de la vitrine
+      var page = cible.slice(1);
+      var secs = document.querySelectorAll('[data-vp="' + page + '"]');
+      if (secs.length) { try { window.VRT.act('go' + page.charAt(0).toUpperCase() + page.slice(1), a, ev); } catch (e) {} }
+      if (location.hash !== cible) location.hash = cible;
+    } else {
+      location.href = cible;
+    }
+  }, true);
+
+  /* ── 2 · Le panneau d'actualités ne s'efface plus en silence ──────────── */
+  function filetActus() {
+    var bloc = document.getElementById('vrtNews');
+    if (!bloc || !bloc.hidden) return;
+    var liste = document.getElementById('vrtNewsListe');
+    if (!liste) return;
+    bloc.hidden = false;
+    liste.innerHTML =
+      '<li class="vnews-vide" style="font:400 14px/1.6 Poppins,sans-serif;color:#4D5163">'
+      + 'Les actualités officielles ne répondent pas pour l\'instant. '
+      + '<a href="https://www.minesec.gov.cm" target="_blank" rel="noopener nofollow" '
+      + 'style="color:#1E499B;font-weight:600">Consulter le site du MINESEC</a>'
+      + '</li>';
+  }
+  var bloc = document.getElementById('vrtNews');
+  if (bloc && window.MutationObserver) {
+    new MutationObserver(function () { filetActus(); })
+      .observe(bloc, { attributes: true, attributeFilter: ['hidden'] });
+  }
+  setTimeout(filetActus, 4000);   // et un contrôle après le premier chargement
+
+  /* ── 3 · Le prix se lit partout de la même façon ──────────────────────── */
+  (function harmoniserPrix() {
+    var st = document.createElement('style');
+    st.id = 'vrt-prix-css';
+    st.textContent =
+      '[data-vrt-item] [style*="font:600 14px Poppins"],'
+      + '[data-vrt-item] [style*="font:600 14px Poppins,sans-serif"]{'
+      + 'color:#1E499B !important}';
+    document.head.appendChild(st);
+  })();
+})();

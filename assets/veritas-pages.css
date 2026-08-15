@@ -1976,3 +1976,38 @@ h2:nth-of-type(4n+4) { border-bottom-color:rgba(91,79,168,.22) }
   .cfind-in{ padding:12px 42px 12px 40px }
   .cfind-l{ font-size:14.5px }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   PANNEAU SOMBRE : LE TITRE ÉTAIT ILLISIBLE        (v1.19.20)
+
+   Mesuré en production sur .vrtc-in (dégradé #142554 → #1E3A8A) :
+       h2.vrtc-t  →  color rgb(30,73,155) = #1E499B
+   Le bleu de MARQUE posé sur un fond bleu FONCÉ : contraste 1,22:1. Le titre
+   « Vous avez la correction. L'entraînement, lui, se prépare. » — l'argument
+   de vente du panneau — était pratiquement invisible.
+
+   Tous ses voisins étaient déjà corrects (menthe 123,232,194 ; texte pâle
+   211,222,242 ; or 255,201,60) : ce titre était le seul à avoir gardé la
+   couleur d'un fond CLAIR. Il passe en blanc, comme un titre sur fond sombre.
+
+   ⚠️ Le contraste ne se juge pas au `background-color` de l'ancêtre : ce
+   panneau n'a qu'un `background-image`. Un scan qui ne lit que la couleur
+   remonte jusqu'au <body> blanc et déclare « illisible » des textes parfaits.
+   ════════════════════════════════════════════════════════════════════════ */
+.vrtc-in .vrtc-t,
+.vrtc-t{ color:#fff !important; }
+
+/* ── Marges : le texte va jusqu'au bord sur petit écran ─────────────────
+   La gouttière de 20-24 px coûtait un mot par ligne sur un écran de 360 px.
+   Elle tombe à 12 px sous 640 px, et à 10 px sous 400 px. Au-delà, la colonne
+   de lecture garde sa respiration : une ligne trop longue se lit mal. */
+@media (max-width:640px){
+  .wrap, .vrtc-in, .sec, .lg, main > .wrap{
+    padding-left:12px !important; padding-right:12px !important;
+  }
+}
+@media (max-width:400px){
+  .wrap, .vrtc-in, .sec, .lg, main > .wrap{
+    padding-left:10px !important; padding-right:10px !important;
+  }
+}
