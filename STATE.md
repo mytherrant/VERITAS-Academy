@@ -1225,3 +1225,66 @@ Inscription 100 F : **serveur prêt** (prix de référence + octroi idempotent d
 `_auth_lib.php`, inerte tant que le client n'envoie pas `intent:'inscription'`), **client à
 écrire**. Puis : extrait du jour à agrandir et relier à l'IA · panneau Actualités à réduire et
 colorer · habillage du Dashboard et des espaces connectés · `#epreuves` qui rend `pour-eleve`.
+
+## Audit complet (15/08/2026) — v1.19.25, déployé et vérifié en production
+
+**Le tableau de bord était inatteignable, et la synchro serveur muette.** Une seule
+cause : `SES` n'était jamais réhydraté depuis `sessionStorage`, et `go2SES` —
+porte d'entrée admin/enseignant/élève — n'y écrivait rien. Or `save()` et
+`_fbFetch` y lisent le droit de synchroniser : `_fbFetch` court-circuitait
+`/api/db.php` en fabriquant une **fausse réponse 200 {}**. Le voyant passait au
+vert et rien ne partait — notes, paiements et élèves ne vivaient que dans le
+localStorage du navigateur. Corrigé, avec échéance d'origine conservée (recharger
+ne prolonge plus une session de 4 h).
+
+**Les liens profonds rebondissaient.** Le filet de `_plusDAccueilIci` repartait
+sur la vitrine quand `#vContent` était vide 1,6 s après l'amorçage. Or les écrans
+de `FONCTIONS` (recherche, calendrier, connexion, compte, inscription) ouvrent une
+MODALE et ne remplissent jamais `#vContent` : leur succès passait pour un échec.
+Garde ajoutée sur `_vCurrentSec`, et routage rejoué APRÈS le rendu du portail
+(l'ordre, pas une minuterie de plus).
+
+### Trois leçons de méthode, chèrement acquises
+1. **Ne jamais juger un thème sur le premier `:root`.** `veritas-pages.css` porte
+   déjà un remappage LWS en fin de feuille : les 69 pages rendaient DÉJÀ dans le
+   système de la refonte. J'ai annoncé « 133 pages sur l'ancien thème » — chiffre
+   gonflé par `.claude/worktrees/`, non déployé. Voir la mémoire
+   `feedback_veritas_pages_deja_remappe`.
+2. **Le contraste ne se mesure PAS sur le `background-color` des ancêtres.** Un
+   panneau à `background-image` seul fait remonter le scan jusqu'au `<body>` blanc :
+   j'ai annoncé 5-6 textes illisibles, il n'y en avait qu'UN (`h2.vrtc-t`, #1E499B
+   sur dégradé #142554→#1E3A8A = 1,22:1 → blanc, 10,36:1).
+3. **Un « bouton mort » se prouve, il ne se déduit pas d'un grep.** 4 actions
+   annoncées mortes étaient définies plus loin dans le fichier. Bilan réel : zéro
+   handler mort dans app.js (810 vérifiés), 2 `VRT.act('rien')` corrigés.
+
+### Autres correctifs déployés
+- CSP de l'app : jokers `https:` retirés de `script-src`/`connect-src` (ils
+  autorisaient tout script HTTPS et l'exfiltration vers n'importe quel hôte).
+- `assets/veritas-tokens.css` = origine UNIQUE des couleurs, chargée par les 157
+  pages ET par la coquille ; 204 valeurs de l'ancienne charte remappées dans
+  app.css (contrastes AAA revérifiés).
+- Espace Partenaire : `var SES = window.SES||null` masquait la globale (SES est un
+  `let`, donc absent de window) → verrouillé pour tout le monde.
+- `api/_bot_log.php` absent de la liste de déploiement alors qu'app.js lui envoie
+  des beacons : 404 silencieux.
+- Barre de recherche rendue à l'accueil (posée depuis `assets/vitrine.js`, car
+  `vitrine.html` est régénéré) ; `#recherche?q=` prérempli.
+- « Découvrir » menait TOUJOURS à `#boutique` : `rendre()` clone le gabarit de la
+  première carte. Routage par le sens du titre, en délégation de clic.
+- Panneau d'actualités : ne s'efface plus au premier échec (le flux MINESEC est
+  sain — 12 titres au contrôle).
+- Prix des abonnements INVISIBLE : `-webkit-text-fill-color:transparent` hérité
+  sans dégradé dessous.
+
+### Reste à faire
+Justification des textes (⚠️ un commit passé s'intitule « Ma justification cassait
+les colonnes » — mesurer avant de généraliser) · puces et numérotations colorées ·
+alternance gras/couleurs · animations sur les autres pages · orbite de
+`constellation` alignée sur la vitrine (elle a déjà `vtOrbit` 90 s, anneaux dorés)
+· dédoublonnage et cohérence du discours marketing.
+
+### À faire côté Jacques
+Mots de passe par défaut encore actifs (`directeur` ET `superadmin` — l'app le
+signale au démarrage) · MTN MoMo en **sandbox** (`MTN_TARGET_ENV='sandbox'`, clés
+`À_REMPLIR_DEPUIS_MOMODEVELOPER`) : aucun paiement MTN réel possible.
