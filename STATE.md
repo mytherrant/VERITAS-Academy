@@ -1472,3 +1472,76 @@ Playwright 2/2 (un premier run rouge = flake de port, vert au re-run).
 - Classer les entrées du menu PAR RÔLE (élève/parent/enseignant/partenaire).
 - Câbler l'accueil au panneau ADMIN (ajouter/modifier ressources et infos depuis l'admin).
 - Aligner l'EN-TÊTE de l'app sur la vitrine + uniformiser TOUTES les pages.
+
+## DÉPLOYÉ EN PRODUCTION (15/08/2026) — v1.19.33
+
+`master` : 143295d → c0dab4e → **9532361**. Workflow « 🚀 Déployer sur
+veritas-school.com » **success** (1 m 33), « 🧪 Tests E2E » **success**.
+
+### ★ Le garde-fou de l'argent a attrapé MON oubli — et il avait raison
+Premier push : déploiement OK mais tests E2E ROUGES. Un seul échec sur 59 :
+> `✗ tout intent passé au paiement existe dans la table`
+> `intents inconnus de VERITAS_MONETISATION : inscription`
+
+J'avais ouvert le paiement des frais d'inscription (`openPaymentModal({intent:
+'inscription'})` dans `doRegister`) **sans déclarer la surface** dans
+`window.VERITAS_MONETISATION`, qui se présente comme l'inventaire COMPLET de ce
+qui se vend. Le serveur, lui, gérait déjà l'intent (section 8 : 5/5 verts).
+C'était donc bien un trou CLIENT, exactement l'angle mort que ce test existe pour
+fermer. **Ne jamais ajouter un `intent:` à openPaymentModal sans l'inscrire dans
+la table** — le test le verra, mais autant le savoir avant.
+
+**Correctif** : entrée `inscription` avec `droit:null, collection:null` (comme
+`echeance`). Ces deux nuls ne sont pas décoratifs : ils font retourner `null` à
+`_monetBeneficiaire` → **aucune commission calculée sur des frais d'inscription**
+(vérifié en lisant la garde `if(!cfg||!cfg.part||!cfg.collection||!targetId)`).
+
+**Piège du contrôle de couverture (c)** : `$intentsTestes` n'est alimenté que par
+la boucle de la SECTION 1, et le contrôle s'exécute en SECTION 7 — donc AVANT la
+section 8 qui teste réellement l'inscription. Sans `$intentsTestes[]='inscription'`
+(l.240, après la boucle), déclarer la surface aurait fait tomber un AUTRE contrôle.
+Ce n'est pas une exemption : retirer la section 8 fait retomber le rouge.
+
+### Non vérifiable depuis cette machine
+Le réseau sortant est coupé (curl → erreur TLS 35 ; WebFetch → ECONNRESET). Le
+succès du workflow FTP est la preuve du dépôt des fichiers ; le RENDU en prod
+reste à confirmer côté Jacques (Ctrl+Shift+R, puis vérifier : le tuteur de
+l'accueil répond, les icônes d'orientation sont colorées, le menu « Plus » prend
+toute la largeur).
+
+### Rappel — le gate 100 F est DÉSACTIVÉ en production
+`DB.accessGate.actif` est absent ⇒ OFF. Rien n'est verrouillé, aucune inscription
+n'est bloquée. Activation : Admin → Essais & abonnements, APRÈS un vrai paiement
+test CamerPay réussi.
+
+## Menu rangé par rôle (v1.19.34, déployé 16/08 — CI verte)
+
+`tools/build_vitrine.js`, constante `MENU`. Le classement THÉMATIQUE (Apprendre /
+Le centre / Boutique) est remplacé par un classement par DESTINATAIRE :
+
+| Colonne | Sous-titre | Entrées | Cadenas |
+|---|---|---|---|
+| Élève | Apprendre et réviser | 7 | 3 |
+| Parent | Suivre et soutenir | 6 | 0 |
+| Enseignant | Enseigner et publier | 5 | 0 |
+| Partenaire | Diffuser et représenter | 4 | 0 |
+| Le centre | Nous connaître | 5 | 0 |
+
+27 entrées au total — aucune perdue, 0 lien mort (vérifié en live à 1 400 px :
+panneau 1 385 px, aucun débordement, aucun libellé coupé).
+
+- `g:1` sur une entrée = cadenas. **Indication de lisibilité, PAS une sécurité** :
+  le contrôle réel est `_gateActif()` (app.js) + serveur. Les pages SEO publiques
+  (corrigés, œuvres, niveaux, outils, découvrir, manuels, constellation, campus)
+  n'en portent JAMAIS — les murer couperait l'acquisition Google.
+- Paliers : 5 colonnes > 1 240 px · 3 colonnes ≤ 1 239 px · 2 colonnes ≤ 1 023 px.
+
+### Deux pièges rencontrés
+1. **Backticks dans un commentaire CSS** placé à l'intérieur du littéral de gabarit
+   `cssBascule` (l.1585) → `SyntaxError: Unexpected identifier`. Le build s'arrête
+   AVANT d'écrire : vitrine.html reste intact, mais on croit avoir régénéré.
+   **Ne jamais écrire de backtick dans les commentaires de ce fichier.**
+2. **Les colonnes sont rendues à DEUX endroits** (bureau l.745, mobile l.778). Un
+   `sed` sur une seule occurrence fait diverger les deux menus en silence.
+3. Rappel : `stat -c%s` pour la taille — `ls -l | awk '{print $5}'` renvoie le GID,
+   le nom d'utilisateur « Mythe Errant » contenant une espace.
