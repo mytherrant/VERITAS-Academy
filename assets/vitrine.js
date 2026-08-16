@@ -919,6 +919,49 @@
     }
 
     poserBandeau(d.tickerItems || []);
+    poserClassement(d.jeu || null);
+  }
+
+  /* ── Tableau d'honneur du panneau « Apprendre en jouant » ───────────────
+     Le podium de la maquette était FICTIF : « Terminale A4 · Douala — 2 480
+     pts » était écrit en dur. On ne remplace pas un faux classement par un
+     autre : tant qu'aucun score réel n'est enregistré, le bloc est retiré et
+     seule demeure l'invitation à jouer — qui stimule autant, sans rien
+     affirmer. Dès les premiers points, il apparaît de lui-même, sans
+     redéploiement.
+
+     Le classement est agrégé par CLASSE côté serveur, jamais par élève : il
+     est public, et nommer un mineur avec son score n'a pas à l'être. */
+  function poserClassement(jeu) {
+    var hote = document.getElementById('vrtPodium');
+    var liste = (jeu && jeu.classement) ? jeu.classement : [];
+
+    if (!liste.length) { if (hote) hote.hidden = true; return; }
+    if (!hote) return;
+
+    var med = ['#C9A227', '#9AA3B8', '#B0764A'];
+    var html = '';
+    for (var i = 0; i < liste.length; i++) {
+      var l = liste[i];
+      html += '<li class="vpod-l">'
+        + '<span class="vpod-r" style="background:' + (med[i] || '#9AA3B8') + '">' + (l.rang || (i + 1)) + '</span>'
+        + '<span class="vpod-n">' + txt(l.libelle) + '</span>'
+        + '<span class="vpod-p">' + txt(nombre(l.pts)) + ' pts</span></li>';
+    }
+    var ol = hote.querySelector('.vpod-list');
+    if (ol) ol.innerHTML = html;
+    hote.hidden = false;
+  }
+
+  /* Échappement : ces libellés viennent de la base, donc d'une saisie. On ne
+     construit jamais de HTML avec une chaîne non filtrée. */
+  function txt(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+  function nombre(n) {
+    return (parseInt(n, 10) || 0).toLocaleString('fr-FR').replace(/ | /g, ' ');
   }
 
   /* ── Bandeau d'annonces ────────────────────────────────────────────────

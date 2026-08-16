@@ -116,6 +116,53 @@ function vrt_pd_offertes(array $contenus, $paywall) {
     return $out;
 }
 
+/** Classement des classes d'après les scores RÉELLEMENT enregistrés.
+ *
+ *  Rien n'est inventé et rien n'est complété : s'il n'y a aucun score, on rend
+ *  un tableau vide et la vitrine masque le bloc. Le panneau s'allume donc tout
+ *  seul dès les premiers points, sans redéploiement ni intervention.
+ *
+ *  Agrégation par CLASSE, jamais par élève : le classement est public, et
+ *  publier « untel · 2 480 pts » exposerait un mineur nommément.
+ */
+function vrt_pd_classement(array $db): array {
+    $src = [];
+    foreach (['jeuScores', 'gameScores', 'quizScores'] as $k) {
+        if (isset($db[$k]) && is_array($db[$k])) { $src = $db[$k]; break; }
+    }
+    if (!$src) return ['classement' => [], 'joueurs' => 0, 'periode' => ''];
+
+    // Semaine en cours : un « battle de la semaine » qui cumule depuis toujours
+    // n'est plus un défi hebdomadaire, c'est un palmarès historique.
+    $debut = strtotime('monday this week 00:00:00') ?: 0;
+
+    $parClasse = []; $joueurs = [];
+    foreach ($src as $s) {
+        if (!is_array($s)) continue;
+        $ts = isset($s['ts']) ? (int) $s['ts'] : (isset($s['date']) ? (int) strtotime((string) $s['date']) : 0);
+        if ($ts > 0 && $debut > 0 && $ts < $debut) continue;
+        $cls = trim((string) ($s['cls'] ?? $s['classe'] ?? ''));
+        if ($cls === '') continue;
+        $pts = (int) ($s['pts'] ?? $s['points'] ?? $s['score'] ?? 0);
+        if ($pts <= 0) continue;
+        $ville = trim((string) ($s['ville'] ?? ''));
+        $cle = $cls . ($ville !== '' ? ' · ' . $ville : '');
+        $parClasse[$cle] = ($parClasse[$cle] ?? 0) + $pts;
+        $uid = (string) ($s['uid'] ?? $s['eid'] ?? '');
+        if ($uid !== '') $joueurs[$uid] = true;
+    }
+    if (!$parClasse) return ['classement' => [], 'joueurs' => 0, 'periode' => ''];
+
+    arsort($parClasse);
+    $out = []; $rang = 0;
+    foreach ($parClasse as $libelle => $pts) {
+        if (++$rang > 3) break;                      // podium seulement
+        $out[] = ['rang' => $rang, 'libelle' => vrt_pd_coupe($libelle, 60), 'pts' => $pts];
+    }
+    return ['classement' => $out, 'joueurs' => count($joueurs),
+            'periode' => $debut ? date('Y-m-d', $debut) : ''];
+}
+
 /** Troncature sûre : mbstring n'est pas garanti, et une fatale ici viderait
  *  TOUTE la réponse publique (école, ticker, partenaires compris). */
 function vrt_pd_coupe($s, $n) {
@@ -187,6 +234,13 @@ $public = [
     // booléens et des identifiants de fiches. Elle part telle quelle pour que
     // la vitrine obéisse au panneau admin, et non à des valeurs codées en dur.
     'paywall' => $__pd_paywall,
+    /* CLASSEMENT DE JEU — calculé, jamais écrit à la main.
+       Le panneau « Apprendre en jouant » affichait un tableau d'honneur inventé
+       (« Terminale A4 · Douala — 2 480 pts »), codé en dur dans la maquette.
+       Il part d'ici désormais, et il part VIDE tant qu'aucun score n'existe :
+       la vitrine masque alors le tableau et n'affiche que l'invitation à jouer.
+       Un classement fabriqué est la seule chose qu'un enseignant vérifie. */
+    'jeu' => vrt_pd_classement($db),
     'generated_at' => date('c'),
 ];
 

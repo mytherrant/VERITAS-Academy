@@ -935,9 +935,13 @@ if (!defined('VRT_AUTH_LIB')) {
      *  peut la modifier), avec le repli sur les valeurs par défaut du client. */
     function vrt_paliers_partenaires(array $db): array {
         $l = (isset($db['partnerLevels']) && is_array($db['partnerLevels'])) ? $db['partnerLevels'] : [];
+        /* Grille alignée sur celle du navigateur (VERITAS_PALIERS_PARTENAIRE).
+           Elle plafonnait à 12 % : un partenaire à qui l'on promettait 18 %
+           en touchait 12, sans que rien ne le signale — le serveur ramenait
+           silencieusement au taux qu'il connaissait. */
         $defaut = [
-            'bronze'  => ['commission' => 0.05], 'argent'  => ['commission' => 0.08],
-            'or'      => ['commission' => 0.10], 'diamant' => ['commission' => 0.12],
+            'bronze'  => ['commission' => 0.10], 'argent'  => ['commission' => 0.12],
+            'or'      => ['commission' => 0.15], 'diamant' => ['commission' => 0.18],
         ];
         foreach ($defaut as $k => $v) {
             if (!isset($l[$k]) || !is_array($l[$k]) || !isset($l[$k]['commission'])) $l[$k] = $v;
@@ -959,6 +963,49 @@ if (!defined('VRT_AUTH_LIB')) {
      *   6. dix lignes au maximum, et seuls les champs connus sont recopiés.
      * Toute ligne rejetée est journalisée : une tentative doit laisser une trace.
      */
+    /** Taux d'un apporteur d'après le VOLUME qu'il a réellement amené.
+     *
+     *  Miroir serveur de `_palierPartenaire` : 1-5 → 10 %, 6-20 → 12 %,
+     *  21-50 → 15 %, 51+ → 18 %.
+     *
+     *  On ne compte QUE les filleuls dont le compte est actif ET réglé. Compter
+     *  les inscriptions rémunérerait des comptes créés en masse et jamais payés
+     *  — c'est précisément ce que le modèle veut éviter.
+     */
+    function vrt_taux_par_volume(array $db, string $partnerId): float {
+        if ($partnerId === '') return 0.0;
+        $parr = (isset($db['parrainages']) && is_array($db['parrainages'])) ? $db['parrainages'] : [];
+        if (!$parr) return 0.0;
+
+        /* Index des comptes réglés, construit une fois : sans lui, on relit
+           toutes les collections pour chaque filleul (N×M sur des bases qui
+           dépassent le millier de comptes). */
+        $regles = [];
+        foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+            if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
+            foreach ($db[$coll] as $acc) {
+                if (!is_array($acc)) continue;
+                $actif = ((string) ($acc['statut'] ?? '') === 'actif');
+                $paye  = !empty($acc['inscriptionPayee']) || !empty($acc['plans']) || !empty($acc['abonnement']);
+                if ($actif && $paye && isset($acc['id'])) $regles[(string) $acc['id']] = true;
+            }
+        }
+
+        $n = 0;
+        foreach ($parr as $p) {
+            if (!is_array($p) || empty($p['confirmed'])) continue;
+            if ((string) ($p['parrainId'] ?? '') !== $partnerId) continue;
+            $fid = (string) ($p['filleulId'] ?? '');
+            if ($fid !== '' && isset($regles[$fid])) $n++;
+        }
+
+        if ($n < 1)  return 0.0;
+        if ($n <= 5) return 0.10;
+        if ($n <= 20) return 0.12;
+        if ($n <= 50) return 0.15;
+        return 0.18;
+    }
+
     function vrt_commissions_verifiees(array $db, array $state): array {
         $brut = (isset($state['commissions']) && is_array($state['commissions'])) ? $state['commissions'] : [];
         if (!$brut) return [];
@@ -985,9 +1032,15 @@ if (!defined('VRT_AUTH_LIB')) {
                 vrt_pay_log("[COMMISSION_REFUSEE] ref=$ref partenaire=$pid motif=non actif"); continue;
             }
 
+            /* Le taux se calcule sur le VOLUME réellement apporté — abonnés
+               actifs et payés — et non sur un grade posé à la main. Le grade
+               nommé reste un plancher : personne ne voit sa commission baisser
+               parce qu'on a changé de méthode. */
             $niveau = (string) ($partenaire['level'] ?? 'bronze');
-            $taux   = (float) ($paliers[$niveau]['commission'] ?? ($paliers['bronze']['commission'] ?? 0.05));
-            if ($taux <= 0 || $taux > 0.5) $taux = 0.05;              // palier aberrant en base
+            $tauxNiveau = (float) ($paliers[$niveau]['commission'] ?? ($paliers['bronze']['commission'] ?? 0.10));
+            $tauxVolume = vrt_taux_par_volume($db, $pid);
+            $taux = max($tauxNiveau, $tauxVolume);
+            if ($taux <= 0 || $taux > 0.5) $taux = 0.10;              // palier aberrant en base
 
             $assiette = (int) ($c['saleAmount'] ?? 0);
             if ($assiette <= 0 || $assiette > $paye) $assiette = $paye;   // jamais plus que l'encaissé
