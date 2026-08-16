@@ -4094,3 +4094,50 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
   box-shadow:0 16px 34px rgba(20,37,84,.13) !important;
   transform:translateY(-4px);
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   14 — L'EN-TÊTE DE L'APPLICATION S'ALIGNE SUR CELUI DE LA VITRINE
+   ────────────────────────────────────────────────────────────────────────
+   Les deux surfaces se suivent dans un même parcours : on arrive par
+   l'accueil, on clique « Mon compte », on passe dans l'application. Jusqu'ici
+   la barre changeait de hauteur (76 → 70 px) et de matière (translucide et
+   floutée → blanc plein) au moment précis du passage. Rien ne cassait, mais
+   la marche se voyait : deux sites cousus, pas un seul.
+
+   Profil de référence, MESURÉ sur #vrtNav (vitrine) et non deviné :
+     hauteur 76 · sticky top 0 · z-index 60 · fond rgba(255,255,255,.96)
+     backdrop-filter blur(8px) · filet bas 1px #E4E7EF · aucune ombre
+
+   La spécificité est doublée à dessein : le bloc 4.2 plus haut impose
+   `background` et `backdrop-filter:none` en !important. Une règle de même
+   poids ne passerait pas — il faut deux identifiants pour la dépasser.
+   ════════════════════════════════════════════════════════════════════════ */
+/* ⚠️ BUREAU UNIQUEMENT. Sous 900 px, le bloc mobile plus haut fixe
+   `height:60px !important` — une barre compacte obtenue après un vrai
+   incident (« Connexion » et le menu poussés hors de l'écran à 375 px).
+   Or `min-height` l'emporte sur `height` quand il est plus grand : sans cette
+   borne, aligner sur les 76 px de la vitrine RALLONGERAIT la barre mobile à
+   76 px et rouvrirait le problème. Les 76 px sont une mesure de bureau ;
+   le mobile garde son propre dessin, volontairement plus ramassé. */
+@media (min-width:900px){
+  #VISITOR#VISITOR .vnav,
+  #VISITOR#VISITOR .vnav.vnav-slim{
+    min-height:76px !important;
+    background:rgba(255,255,255,.96) !important;
+    -webkit-backdrop-filter:blur(8px) !important;
+    backdrop-filter:blur(8px) !important;
+    border-bottom:1px solid var(--lws-line) !important;
+    box-shadow:none !important;
+  }
+}
+
+/* Le flou n'est pas décoratif : c'est lui qui fait « flotter » la barre
+   au-dessus du contenu qui défile dessous. Là où il n'est pas supporté,
+   la translucidité seule laisserait le texte transparaître à travers la
+   barre — on repasse donc en blanc plein plutôt qu'en illisible. */
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){
+  @media (min-width:900px){
+    #VISITOR#VISITOR .vnav,
+    #VISITOR#VISITOR .vnav.vnav-slim{ background:var(--lws-white) !important; }
+  }
+}
