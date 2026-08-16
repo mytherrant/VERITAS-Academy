@@ -381,8 +381,16 @@ $etat = paiement('book', 'bk1', 5000, ['commissions' => [[
     'id' => 'cm1', 'partnerId' => 'pa1', 'saleAmount' => 5000, 'commissionAmount' => 2000000,
 ]]]);
 $out = vrt_commissions_verifiees(baseDeTest(), $etat);
-ok('commission      → 2 000 000 demandés ramenés au palier bronze (5 %)',
-   count($out) === 1 && (int) $out[0]['commissionAmount'] === 250,
+/* 500 et non plus 250 : la grille est passée de 5-12 % à 10-18 % (le serveur
+   plafonnait à 12 % ce qu'on promettait à 18). Le contrôle, lui, est inchangé
+   dans son esprit — il prouve qu'une demande gonflée est ramenée au taux réel.
+   On vérifie donc AUSSI que le montant retenu n'est pas celui qui a été
+   demandé : sans cette seconde condition, un jour où le plafonnement sauterait,
+   l'égalité stricte pourrait être satisfaite par accident. */
+ok('commission      → 2 000 000 demandés ramenés au palier bronze (10 %)',
+   count($out) === 1
+     && (int) $out[0]['commissionAmount'] === 500
+     && (int) $out[0]['commissionAmount'] !== 2000000,
    'montant retenu : ' . (isset($out[0]) ? $out[0]['commissionAmount'] : 'aucune ligne'));
 
 $etat['commissions'][0]['partnerId'] = 'inconnu';
