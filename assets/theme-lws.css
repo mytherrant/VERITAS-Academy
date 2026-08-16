@@ -4141,3 +4141,62 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
     #VISITOR#VISITOR .vnav.vnav-slim{ background:var(--lws-white) !important; }
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════
+   15 — LES TRAITS S'EN VONT, LES REPÈRES RESTENT
+   ────────────────────────────────────────────────────────────────────────
+   « Enlève les traits de bordure partout. » Pris au pied de la lettre, cela
+   effacerait aussi le contour des champs de saisie — un formulaire dont on ne
+   voit plus les cases — et ferait fondre les cartes en un seul bloc gris.
+   Mesuré sur l'accueil : 907 bordures, dont 13 seulement en pointillé.
+
+   Ce sont ces pointillés, et les filets qui séparent les lignes de liste, que
+   l'œil lit comme des « traits ». On les retire. Les cartes gardent leur
+   contour — c'est lui qui dit où elles commencent — et les champs le leur,
+   sans quoi ils deviennent inutilisables.
+   ════════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR *{ border-style:none !important; }
+/* Rétablir le STYLE ne suffisait pas : l'épaisseur restait à 0, et un
+   `border-style:solid` sur une bordure de 0 px ne dessine rien. Mesuré après
+   la première passe : contour des champs = « none ». On repose donc les trois
+   propriétés — épaisseur, style, couleur. Un champ sans cadre est un champ
+   qu'on ne voit pas. */
+#VISITOR#VISITOR :is(input,select,textarea,.fi){
+  border:1px solid var(--lws-line,#E4E7EF) !important;
+}
+#VISITOR#VISITOR :is(input,select,textarea,.fi):focus{
+  border-color:var(--lws-accent,#1E499B) !important;
+  outline:2px solid rgba(30,73,155,.18) !important; outline-offset:1px;
+}
+/* Séparateurs de liste : l'espacement suffit à séparer deux lignes. */
+#VISITOR#VISITOR :is(li,tr,.vmn-i,.vlist-item){
+  border-top:0 !important; border-bottom:0 !important;
+}
+
+/* ── Puces et numérotations colorées ─────────────────────────────────────
+   Une liste à puces grises se lit comme un bloc. La pastille colorée donne un
+   point d'entrée à chaque ligne et remplace le filet qu'on vient d'enlever :
+   on ne retire pas un repère sans en donner un autre. */
+#VISITOR#VISITOR ul:not(.vmn-col):not(.vpod-list) > li{
+  list-style:none; position:relative; padding-left:22px;
+}
+#VISITOR#VISITOR ul:not(.vmn-col):not(.vpod-list) > li::before{
+  content:''; position:absolute; left:4px; top:.62em;
+  width:8px; height:8px; border-radius:50%;
+  background:var(--lws-accent,#1E499B);
+}
+#VISITOR#VISITOR ul > li:nth-child(3n+2)::before{ background:#C24E00; }
+#VISITOR#VISITOR ul > li:nth-child(3n)::before{   background:#007E11; }
+
+#VISITOR#VISITOR ol:not(.vpod-list){ counter-reset:vrtn; list-style:none; padding-left:0; }
+#VISITOR#VISITOR ol:not(.vpod-list) > li{
+  counter-increment:vrtn; position:relative; padding-left:32px; margin-bottom:6px;
+}
+#VISITOR#VISITOR ol:not(.vpod-list) > li::before{
+  content:counter(vrtn); position:absolute; left:0; top:.05em;
+  width:22px; height:22px; border-radius:50%;
+  background:var(--lws-accent,#1E499B); color:#fff;
+  font:700 12px/22px Poppins,sans-serif; text-align:center;
+}
+#VISITOR#VISITOR ol > li:nth-child(3n+2)::before{ background:#C24E00; }
+#VISITOR#VISITOR ol > li:nth-child(3n)::before{   background:#007E11; }
