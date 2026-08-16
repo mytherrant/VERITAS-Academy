@@ -1752,6 +1752,27 @@ ${fs.readFileSync(path.join(__dirname, 'vitrine-bloc.css'), 'utf8')}
   [style*="grid-template-columns"]{grid-template-columns:minmax(0,1fr)!important}
   [style*="max-width:1170px"]{padding-left:16px!important;padding-right:16px!important}
 }
+
+/* ── Grands écrans : reprendre la place laissée vide ───────────────────────
+   La maquette est calibrée pour 1170 px. Sur un écran de 1 600, cela laisse
+   430 px de blanc — deux bandes de 215 px de part et d'autre, alors que les
+   grilles de cartes, elles, se serrent.
+
+   On relève donc le plafond des COQUILLES DE MISE EN PAGE, et d'elles seules.
+   Les blocs de prose de la maquette (620 à 820 px) ne sont pas touchés, et
+   c'est délibéré : au-delà d'environ 75 caractères par ligne, l'œil perd le
+   début de la ligne suivante. Élargir un paragraphe ne rend pas la lecture
+   plus confortable, il la rend plus pénible. Ce qui gagne à s'étaler, ce sont
+   les grilles ; ce qui gagne à rester étroit, c'est le texte suivi.
+
+   Le seuil est à 1 440 px : au-dessous, 1170 + gouttières occupe déjà
+   l'écran. */
+@media (min-width:1440px){
+  [style*="max-width:1170px"]{max-width:1330px!important}
+}
+@media (min-width:1760px){
+  [style*="max-width:1170px"]{max-width:1440px!important}
+}
 `;
 
 const page = `<!DOCTYPE html>
