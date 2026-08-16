@@ -31326,12 +31326,24 @@ window.VERITAS_COACH_INCLUS = 4;
    c'est ce qui empêche de rémunérer des comptes créés en masse et jamais payés.
    Le serveur recalcule le palier et plafonne ce que le navigateur demande
    (vrt_commissions_verifiees) : ces valeurs servent à AFFICHER une estimation. */
+/* Grille révisée. La première proposition montait à 25 % : à ce taux, sur un
+   pack annuel à 7 000 F, VÉRITAS garde 5 250 F pour porter l'hébergement,
+   l'IA, le support et la production de contenu — que le partenaire, lui, ne
+   supporte pas. On se cale sur l'usage du secteur (10 à 20 %, souvent la
+   première année seulement) en gardant une progression qui récompense
+   réellement le volume. */
 window.VERITAS_PALIERS_PARTENAIRE = [
   { min:1,  max:5,        pct:10 },
-  { min:6,  max:20,       pct:15 },
-  { min:21, max:50,       pct:20 },
-  { min:51, max:Infinity, pct:25 }
+  { min:6,  max:20,       pct:12 },
+  { min:21, max:50,       pct:15 },
+  { min:51, max:Infinity, pct:18 }
 ];
+
+/* Au-delà de 12 mois, la commission est divisée par deux. L'apporteur est payé
+   pour avoir AMENÉ l'abonné, pas pour une rente perpétuelle : à partir de la
+   deuxième année, c'est le produit qui retient le client, pas le parrain. La
+   part résiduelle reconnaît malgré tout son rôle d'entretien. */
+window.VERITAS_COMMISSION_DEGRESSIVE = { apresMois:12, facteur:0.5 };
 
 window._tarifInscription = function(role){
   var t = (DB.tarifs && DB.tarifs.inscriptionRoles) || window.VERITAS_TARIFS.inscription;
@@ -31340,15 +31352,59 @@ window._tarifInscription = function(role){
   return v;
 };
 
-window._palierPartenaire = function(abonnesActifs){
+window._palierPartenaire = function(abonnesActifs, moisAnciennete){
   var n = Math.max(0, parseInt(abonnesActifs,10) || 0);
   if(n < 1) return 0;
-  var L = window.VERITAS_PALIERS_PARTENAIRE;
+  var L = window.VERITAS_PALIERS_PARTENAIRE, pct = 0;
   for(var i=0;i<L.length;i++){
     var p = L[i];
-    if(n >= p.min && n <= p.max) return p.pct;
+    if(n >= p.min && n <= p.max){ pct = p.pct; break; }
   }
-  return 0;
+  var d = window.VERITAS_COMMISSION_DEGRESSIVE;
+  var m = parseInt(moisAnciennete,10);
+  if(pct && d && m > d.apresMois) pct = Math.round(pct * d.facteur * 100) / 100;
+  return pct;
+};
+
+/* ── Commission ÉCHELONNÉE sur les mois réellement encaissés ───────────────
+   Verser d'un coup la commission d'un abonnement annuel revient à payer sur du
+   chiffre qu'on n'a pas encore gardé : si le client se fait rembourser au
+   deuxième mois, la commission, elle, est déjà partie. On répartit donc la
+   part sur la durée couverte, et chaque échéance ne devient exigible qu'au
+   mois qu'elle représente.
+
+   Le reliquat de la division entière est ajouté à la PREMIÈRE échéance : la
+   somme des échéances égale ainsi exactement la part due, au franc près. Payer
+   un partenaire à 11,99 F près chaque mois est une source de litige inutile. */
+window._echelonnerCommission = function(montantPart, mois, debutTs){
+  var n = Math.max(1, parseInt(mois,10) || 1);
+  var total = Math.max(0, Math.round(montantPart) || 0);
+  if(total === 0) return [];
+  var base = Math.floor(total / n), reste = total - (base * n);
+  var t0 = debutTs || Date.now(), out = [];
+  for(var i=0;i<n;i++){
+    var d = new Date(t0);
+    d.setMonth(d.getMonth() + i);
+    out.push({
+      rang: i + 1,
+      montant: base + (i === 0 ? reste : 0),
+      exigibleLe: d.toISOString().slice(0,10),
+      etat: 'a_venir'
+    });
+  }
+  return out;
+};
+
+/* Durée couverte par une surface payante. L'abonnement annuel étale sur 12
+   mois ; tout le reste est acquis immédiatement (un manuel acheté ne se
+   rembourse pas au prorata). */
+window._dureeCommission = function(payAttempt){
+  try{
+    if(!payAttempt || payAttempt.intent !== 'subscription') return 1;
+    var t = window.VERITAS_TARIFS && window.VERITAS_TARIFS.enseignant;
+    if(t && payAttempt.montant >= t.annuel) return 12;
+  }catch(e){}
+  return 1;
 };
 
 window._monetCfg = function(intent){
@@ -31553,9 +31609,17 @@ window._computeSplits = function(payAttempt){
         var pForfait = (typeof pr.forfait === 'number') ? pr.forfait : 0;
         var amount = pForfait + Math.round((payAttempt.montant * pPct) / 100);
         if(amount > 0){
+          /* Étalement sur la durée réellement couverte : un annuel se
+             commissionne mois par mois, pas d'avance. La part totale ne change
+             pas — c'est son EXIGIBILITÉ qui suit l'encaissement. */
+          var _duree = (typeof _dureeCommission==='function') ? _dureeCommission(payAttempt) : 1;
+          var _ech   = (_duree > 1 && typeof _echelonnerCommission==='function')
+                     ? _echelonnerCommission(amount, _duree, Date.now()) : null;
           splits.push({
             id: gid(),
             paymentRef: payAttempt.ref,
+            echeancier: _ech,
+            dureeMois: _duree,
             type: 'parrainage',
             partenaireId: parr.parrainId,
             description: 'Parrainage de '+(payAttempt.customerNom || 'filleul'),
