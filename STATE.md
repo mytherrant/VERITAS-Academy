@@ -1545,3 +1545,43 @@ panneau 1 385 px, aucun débordement, aucun libellé coupé).
    `sed` sur une seule occurrence fait diverger les deux menus en silence.
 3. Rappel : `stat -c%s` pour la taille — `ls -l | awk '{print $5}'` renvoie le GID,
    le nom d'utilisateur « Mythe Errant » contenant une espace.
+
+## Modèle économique + double commission (v1.19.40, déployé 16/08 — CI verte)
+
+### ★ Bug de DOUBLE COMMISSION — trouvé, reproduit, corrigé
+`_computeSplits` (app.js) : la garde d'idempotence s'écrivait
+`if(payAttempt.ref && DB.splits.some(...))`. **Sans référence, elle était sautée.**
+Mesuré : 10 000 F rejoué 3× → solde partenaire 1 000 → 2 000 → 3 000 F.
+Cas réels concernés : encaissement manuel, espèces, reprise après incident.
+**Correctif** : clé de repli `sig:accountId|intent|targetId|montant|jour`, portée
+par chaque part (`s.cleIdem`) ; doublon journalisé + toast admin (plus de retour
+silencieux). Vérifié 4 cas dont 2 de non-régression (2 refs distinctes → 2 parts ;
+2 montants différents → 2 parts).
+
+### Grille de commission révisée (contre-proposition appliquée)
+- Paliers **10/12/15/18 %** (au lieu de 10/15/20/25 proposés). À 25 % sur un annuel
+  à 7 000, VÉRITAS ne gardait que 5 250 pour porter hébergement + IA + support +
+  contenu, que l'apporteur ne supporte pas.
+- **Dégressivité** : `VERITAS_COMMISSION_DEGRESSIVE {apresMois:12, facteur:0.5}` →
+  18 % jusqu'au 12ᵉ mois, 9 % ensuite.
+- **Échelonnement** `_echelonnerCommission(part, mois, debut)` : un annuel se
+  commissionne mois par mois, pas d'avance (sinon on paie sur du CA remboursable).
+  Reliquat sur la PREMIÈRE échéance → somme exacte (1 261 → 106 + 11×105).
+- `_dureeCommission()` : annuel 12 mois, mensuel/manuel 1.
+- Tarifs par rôle : `_tarifInscription()` — enseignant 500, famille 100 ; le rôle
+  est lu SUR LE COMPTE en base (jamais le targetId client, sinon on s'annonce
+  « parent » pour payer 100 au lieu de 500).
+
+### ⚠️ NON FAIT — « Apprendre en jouant » affiche des chiffres INVENTÉS
+`Refonte VERITAS.dc.html` contient en dur : `Terminale A4 · Douala', pts: '2 480 pts'`,
+« Série de 12 jours », « 780/1 000 XP », classement Yaoundé/Bafoussam.
+**C'est de la preuve sociale fabriquée** — contraire à la règle de Jacques
+([[feedback_preuve_sociale_reelle_uniquement]]). Avant de câbler : il faut une
+source de vérité (XP, séries, battles) + un endpoint public, puis le mécanisme de
+recouvrement déjà posé (`chargerPublic` / `appliquerPublic` dans vitrine.js).
+Tant que la donnée n'existe pas : afficher une invitation à jouer, PAS un classement.
+
+### Non fait aussi
+Réinsertion des 2 images sur l'accueil · bascule SERVEUR des paliers (le serveur
+plafonne encore à 12 % — `vrt_paliers_partenaires`, api/_auth_lib.php:906) ·
+grilles de partage par produit (70/20/10 à domicile) · offres B2B établissement.
