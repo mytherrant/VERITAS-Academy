@@ -360,8 +360,41 @@ if (!defined('VRT_AUTH_LIB')) {
            l'administration puisse le changer sans redéploiement, avec 100 comme
            valeur par défaut. */
         if ($intent === 'inscription') {
-            $v = (int) ($db['tarifs']['inscription'] ?? 0);
-            return $v > 0 ? $v : 100;
+            /* TARIF PAR RÔLE (écosystème à trois marchés) : l'enseignant règle
+               500 F pour son espace professionnel, la famille 100 F.
+
+               ⚠️ Le rôle est lu SUR LE COMPTE, en base, et jamais dans le
+               `targetId` envoyé par le navigateur. La distinction est tout
+               sauf théorique : si le prix suivait un paramètre du client, il
+               suffirait d'envoyer « parent » en s'inscrivant comme enseignant
+               pour payer 100 au lieu de 500. `targetId` porte ici l'identifiant
+               du compte — que le serveur retrouve lui-même — et c'est ce compte
+               qui dit son rôle.
+
+               Rôle inconnu ou absent → tarif de base : on ne fabrique jamais un
+               prix à partir d'une valeur qu'on ne reconnaît pas. */
+            $base = (int) ($db['tarifs']['inscription'] ?? 0);
+            $base = $base > 0 ? $base : 100;
+
+            $roles = (isset($db['tarifs']['inscriptionRoles']) && is_array($db['tarifs']['inscriptionRoles']))
+                ? $db['tarifs']['inscriptionRoles'] : [];
+            if (!$roles) return $base;
+
+            $role = '';
+            if ($targetId !== '') {
+                foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+                    if (!isset($db[$coll]) || !is_array($db[$coll])) continue;
+                    foreach ($db[$coll] as $acc) {
+                        if (!is_array($acc) || (string) ($acc['id'] ?? '') !== $targetId) continue;
+                        $role = strtolower((string) ($acc['role'] ?? ''));
+                        break 2;
+                    }
+                }
+            }
+            if ($role !== '' && isset($roles[$role]) && (int) $roles[$role] > 0) {
+                return (int) $roles[$role];
+            }
+            return $base;
         }
 
         // Tranche de scolarité : le montant dû est inscrit versement par

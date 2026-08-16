@@ -31285,6 +31285,72 @@ window.VERITAS_MONETISATION = {
   inscription:    { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Frais d\'inscription' }
 };
 
+/* ══════════════════════════════════════════════════════════════════════════
+   GRILLE TARIFAIRE — écosystème à trois marchés
+   ──────────────────────────────────────────────────────────────────────────
+   Une seule origine pour les prix affichés. Le serveur garde la sienne
+   (vrt_prix_catalogue) et c'est LUI qui tranche : cette table sert à AFFICHER,
+   jamais à autoriser. Un prix modifié ici ne déverrouille rien — le contrôle
+   de sous-paiement se fait en base, et les 59 contrôles de
+   tests/paiements_entitlements.php le vérifient.
+
+   Les montants restent réglables sans redéploiement : DB.tarifs les surcharge.
+   ══════════════════════════════════════════════════════════════════════════ */
+window.VERITAS_TARIFS = {
+  // ── Inscription, par rôle. L'enseignant ouvre un espace professionnel
+  //    (ressources téléchargeables, publication) : 500. La famille : 100.
+  inscription: { eleve:100, parent:100, enseignant:500, partenaire:500 },
+
+  // ── Abonnements enseignant. L'annuel est le cœur du modèle : il rentre
+  //    la trésorerie d'un coup et supprime le désabonnement mensuel.
+  //    7 000 au lieu de 12 × 1 000 = 12 000, soit 5 000 d'économie.
+  enseignant:  { mensuel:1000, annuel:7000, mensuelEquivalentAnnuel:12000 },
+
+  // ── Prestations familles. Ponctuelles, donc à forte marge.
+  prestations: {
+    orientation:      5000,   // diagnostic, filières, entretien, compte rendu
+    reco_etablissement:3000,  // sélection sur critères éducatifs
+    coach:           20000    // 1 mois, nombre de séances DÉFINI (voir ci-dessous)
+  }
+};
+
+/* Le forfait COACH est vendu au mois, avec un nombre de séances borné. Sans
+   cette borne, « suivi personnalisé » est une promesse ouverte : deux familles
+   payant le même prix peuvent demander trois fois ou trente fois le travail, et
+   c'est VÉRITAS qui absorbe l'écart. On affiche donc ce qui est inclus. */
+window.VERITAS_COACH_INCLUS = 4;
+
+/* ── Paliers de commission des partenaires ────────────────────────────────
+   Calculés sur les abonnements RÉELLEMENT PAYÉS ET MAINTENUS — jamais sur les
+   inscriptions. Une inscription ne rapporte rien tant qu'elle n'est pas réglée :
+   c'est ce qui empêche de rémunérer des comptes créés en masse et jamais payés.
+   Le serveur recalcule le palier et plafonne ce que le navigateur demande
+   (vrt_commissions_verifiees) : ces valeurs servent à AFFICHER une estimation. */
+window.VERITAS_PALIERS_PARTENAIRE = [
+  { min:1,  max:5,        pct:10 },
+  { min:6,  max:20,       pct:15 },
+  { min:21, max:50,       pct:20 },
+  { min:51, max:Infinity, pct:25 }
+];
+
+window._tarifInscription = function(role){
+  var t = (DB.tarifs && DB.tarifs.inscriptionRoles) || window.VERITAS_TARIFS.inscription;
+  var v = t[String(role||'eleve').toLowerCase()];
+  if(!(v>0)) v = (DB.tarifs && DB.tarifs.inscription) || 100;
+  return v;
+};
+
+window._palierPartenaire = function(abonnesActifs){
+  var n = Math.max(0, parseInt(abonnesActifs,10) || 0);
+  if(n < 1) return 0;
+  var L = window.VERITAS_PALIERS_PARTENAIRE;
+  for(var i=0;i<L.length;i++){
+    var p = L[i];
+    if(n >= p.min && n <= p.max) return p.pct;
+  }
+  return 0;
+};
+
 window._monetCfg = function(intent){
   if(intent === 'boutique') intent = 'book';           // alias historique
   return (window.VERITAS_MONETISATION||{})[intent] || null;
