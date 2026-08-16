@@ -1686,6 +1686,20 @@ ${fs.readFileSync(path.join(__dirname, 'vitrine-bloc.css'), 'utf8')}
    étiquette qui concurrencerait le nom du rôle. */
 .vmn-t small{display:block;margin-top:3px;font:400 11px Poppins,sans-serif;
   letter-spacing:0;text-transform:none;color:#8A8FA3}
+/* Bandeau d'annonces piloté par l'admin (« Portail visiteur → Bandeau
+   défilant »). Inséré par vitrine.js seulement s'il y a un message : pas de
+   barre vide. Navy plein plutôt qu'un jaune d'alerte — c'est une information
+   du centre, pas un avertissement, et l'accueil est déjà clair. */
+.vann{display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:9px 20px;background:linear-gradient(90deg,#0C2A6A,#1E499B);color:#fff;
+  font:500 13.5px/1.45 Poppins,sans-serif;text-align:center;position:relative;z-index:58}
+.vann-p{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+  width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,.16);color:#FFC93C}
+.vann-x{animation:vannIn .5s cubic-bezier(.22,1,.36,1);min-width:0}
+@keyframes vannIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){ .vann-x{animation:none} }
+@media (max-width:600px){ .vann{font-size:12.5px;padding:8px 14px} }
+
 /* Texte réservé aux lecteurs d'écran : présent dans l'arbre d'accessibilité,
    invisible à l'œil. On masque par clip-path et non par display:none, qui le
    retirerait aussi de l'annonce vocale. */

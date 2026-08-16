@@ -803,6 +803,171 @@
     if (el) el.hidden = !ouvert;
   }
 
+  /* ══════════════════════════════════════════════════════════════════════
+     L'ACCUEIL OBÉIT AU PANNEAU ADMIN
+     ──────────────────────────────────────────────────────────────────────
+     Le panneau « Portail visiteur » édite depuis longtemps le bandeau
+     défilant, le téléphone, l'e-mail, l'adresse, les partenaires. Et
+     api/public_data.php les sert depuis longtemps — son propre commentaire
+     dit « pour que la vitrine obéisse au panneau admin ». Personne ne les
+     lisait : la vitrine est une page STATIQUE dont les données sont figées
+     au build. Jacques modifiait, enregistrait, et l'accueil ne bougeait pas.
+     Ce n'était pas un bug visible — c'était un fil non branché.
+
+     Principe : AMÉLIORATION PROGRESSIVE, jamais destruction. Le HTML pré-rendu
+     reste la source par défaut — la page est complète, juste et indexable sans
+     JavaScript ni API. On ne fait que RECOUVRIR ce que l'admin pilote
+     réellement. Si l'appel échoue, expire ou renvoie du vide, la page garde
+     ses valeurs de build : une coupure réseau ne doit jamais effacer le
+     téléphone du centre.
+
+     On vise des ANCRAGES STRUCTURELS (href="tel:", href="mailto:") plutôt que
+     des chaînes de texte : la maquette est régénérée à chaque build, un
+     sélecteur fondé sur du texte casserait au premier mot changé.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  var CLE_PUB = '_vrtPublic1';
+
+  function chargerPublic() {
+    var base = apiBase();
+    if (!base) return;                    // ouvert en file:// : pas d'API
+
+    /* Cache de session (5 min) : l'accueil est la page la plus visitée du
+       site et ces données changent quelques fois par mois. Inutile de
+       rappeler le serveur à chaque navigation interne. */
+    try {
+      var brut = sessionStorage.getItem(CLE_PUB);
+      if (brut) {
+        var c = JSON.parse(brut);
+        if (c && (Date.now() - c.t) < 300000) { appliquerPublic(c.d); return; }
+      }
+    } catch (e) {}
+
+    fetch(base + '/public_data.php', { credentials: 'omit' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || d.error) return;
+        try { sessionStorage.setItem(CLE_PUB, JSON.stringify({ t: Date.now(), d: d })); } catch (e) {}
+        appliquerPublic(d);
+      })
+      .catch(function () { /* hors ligne : la page garde ses valeurs de build */ });
+  }
+
+  /* Un numéro saisi par l'admin s'écrit « 656 720 476 » ou « +237 6 56 72 04 76 ».
+     Pour un href tel: il faut la forme compacte ; à l'écran on garde la forme
+     lisible telle qu'elle a été saisie. */
+  function telCompact(s) {
+    var n = String(s || '').replace(/[^0-9+]/g, '');
+    if (!n) return '';
+    if (n.charAt(0) !== '+' && n.length === 9) n = '+237' + n;   // national → international
+    return n;
+  }
+
+  function appliquerPublic(d) {
+    var pi = d.publicInfo || {};
+    var ec = d.school || {};
+
+    /* ── Téléphone ─────────────────────────────────────────────────────── */
+    var tel = pi.contact || ec.tel || '';
+    var telC = telCompact((tel.split('/')[0] || '').trim());
+    if (telC) {
+      var liens = document.querySelectorAll('a[href^="tel:"]');
+      for (var i = 0; i < liens.length; i++) {
+        liens[i].setAttribute('href', 'tel:' + telC);
+        /* On ne réécrit le libellé QUE s'il ressemble à un numéro. Certains
+           liens tel: portent un texte (« Appeler le centre ») qu'il serait
+           absurde de remplacer par une suite de chiffres. */
+        var t = (liens[i].textContent || '').trim();
+        if (/^[0-9+()\s.\-]{6,}$/.test(t)) liens[i].textContent = (tel.split('/')[0] || '').trim();
+      }
+    }
+
+    /* ── WhatsApp ──────────────────────────────────────────────────────── */
+    var wa = telCompact(pi.whatsapp || tel).replace(/^\+/, '');
+    if (wa) {
+      var was = document.querySelectorAll('a[href^="https://wa.me/"]');
+      for (var j = 0; j < was.length; j++) {
+        var h = was[j].getAttribute('href') || '';
+        /* wa.me/?text=… est un lien de PARTAGE (« envoyer ce passage à un
+           ami ») : il ne désigne pas le centre, on n'y touche pas. */
+        if (h.indexOf('wa.me/?') === 0 || h.indexOf('/?text=') > 0) continue;
+        was[j].setAttribute('href', 'https://wa.me/' + wa);
+      }
+    }
+
+    /* ── E-mail ────────────────────────────────────────────────────────── */
+    var mail = pi.email || ec.email || '';
+    if (mail) {
+      var ms = document.querySelectorAll('a[href^="mailto:"]');
+      for (var k = 0; k < ms.length; k++) {
+        var hm = ms[k].getAttribute('href') || '';
+        if (hm.indexOf('?subject=') > 0 || hm === 'mailto:') continue;   // lien de partage
+        ms[k].setAttribute('href', 'mailto:' + mail);
+        var tm = (ms[k].textContent || '').trim();
+        if (tm.indexOf('@') > 0) ms[k].textContent = mail;
+      }
+    }
+
+    /* ── Fentes nommées : data-vrt-pub="chemin.dans.la.reponse" ────────────
+       Le moyen le plus simple de brancher un texte de plus : poser
+       l'attribut dans la maquette, sans toucher à ce fichier. */
+    var fentes = document.querySelectorAll('[data-vrt-pub]');
+    for (var m = 0; m < fentes.length; m++) {
+      var chemin = fentes[m].getAttribute('data-vrt-pub');
+      var v = chemin.split('.').reduce(function (o, c) { return (o && o[c] != null) ? o[c] : null; }, d);
+      if (v != null && String(v) !== '') fentes[m].textContent = String(v);
+    }
+
+    poserBandeau(d.tickerItems || []);
+  }
+
+  /* ── Bandeau d'annonces ────────────────────────────────────────────────
+     L'admin gère ces messages depuis « Bandeau défilant » ; ils n'étaient
+     affichés NULLE PART sur l'accueil. On crée la barre à la demande : s'il
+     n'y a aucun message, aucun élément n'est inséré — une barre vide est
+     pire que pas de barre, elle donne l'impression d'un site en panne. */
+  function poserBandeau(items) {
+    var vus = [];
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      var txt = (typeof it === 'string') ? it : (it && (it.texte || it.text || it.msg || it.titre) || '');
+      var actif = (typeof it === 'object' && it && it.actif === false) ? false : true;
+      if (txt && actif) vus.push(String(txt));
+    }
+    var barre = document.getElementById('vrtAnnonce');
+    if (!vus.length) { if (barre) barre.parentNode.removeChild(barre); return; }
+
+    if (!barre) {
+      barre = document.createElement('div');
+      barre.id = 'vrtAnnonce';
+      barre.setAttribute('role', 'status');
+      barre.className = 'vann';
+      var hote = document.querySelector('header') || document.body;
+      if (hote.parentNode && hote.nextSibling) hote.parentNode.insertBefore(barre, hote.nextSibling);
+      else document.body.insertBefore(barre, document.body.firstChild);
+    }
+    barre.innerHTML = '<span class="vann-p" aria-hidden="true">'
+      + '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'
+      + '<path d="M3 11v2a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 9a4 4 0 0 1 0 6"/></svg></span>'
+      + '<span class="vann-x"></span>';
+    var zone = barre.querySelector('.vann-x');
+    var n = 0;
+    var montrer = function () {
+      zone.textContent = vus[n % vus.length];
+      /* Relancer l'animation : retirer puis reposer la classe ne suffit pas,
+         le navigateur regroupe les deux dans le même cycle de style. */
+      zone.style.animation = 'none';
+      void zone.offsetWidth;
+      zone.style.animation = '';
+      n++;
+    };
+    montrer();
+    if (vus.length > 1) {
+      clearInterval(window._vrtAnnInt);
+      window._vrtAnnInt = setInterval(montrer, 5200);
+    }
+  }
+
   function indexDe(el, region) {
     var item = el && el.closest('[data-vrt-item="' + region + '"]');
     if (!item) return -1;
@@ -993,6 +1158,11 @@
        milliseconde l'affichage de la page. L'onglet MINESEC est celui qui
        ouvre — c'est la source officielle. */
     setTimeout(function () { chargerActus('minesec'); }, 400);
+
+    /* Les données du panneau admin arrivent après le premier rendu, pour la
+       même raison que les actualités : rien de ce qui vient du réseau ne doit
+       retarder l'affichage. La page reste juste et complète sans elles. */
+    setTimeout(chargerPublic, 260);
 
     try {
       var t = localStorage.getItem('vrt_theme');
