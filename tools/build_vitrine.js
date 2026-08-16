@@ -869,8 +869,101 @@ supprimerSection('Emplacements réservés',
    annoncés dans « Tout ce dont l'élève a besoin », qui ne prétend rien
    chiffrer. Le jour où un vrai classement sera calculé, la section pourra
    revenir avec ses données. */
-supprimerSection('Série de 12 jours',
-  'panneau de gamification (série, XP et classement inventés)');
+/* La section revient — c'est la condition posée juste au-dessus : « le jour où
+   un vrai classement sera calculé ». Il l'est désormais (api/public_data.php,
+   vrt_pd_classement), agrégé par classe, borné à la semaine, et VIDE tant
+   qu'aucun score n'existe.
+
+   On ne restaure pas les chiffres pour autant : ils étaient faux, ils le
+   restent. La colonne de gauche — titre, promesse, pastilles, appel à l'action
+   — n'affirme aucune donnée et revient telle quelle. Les deux cartes de droite
+   sont neutralisées : la série et les XP d'un visiteur anonyme n'existent pas
+   (il n'a pas de compte), et le podium est vidé puis confié à #vrtPodium, que
+   vitrine.js masque tant que le serveur ne renvoie rien.
+
+   Résultat : le panneau stimule à nouveau, sans rien prétendre. */
+(function restaurerGamification(){
+  const s = sectionUnique('Série de 12 jours', 'panneau de gamification');
+  let bloc = s.html;
+
+  // 1. Progression personnelle : aucun visiteur anonyme n'a de série ni de XP.
+  bloc = bloc.replace('Série de 12 jours', 'Ta série de révision')
+             .replace('Ne casse pas la chaîne', 'Elle démarre à ton premier quiz')
+             .replace('+240 XP', 'À gagner')
+             .replace('Niveau 7 · Grammaire', 'Ta progression')
+             .replace('780 / 1 000 XP', 'dès le 1ᵉʳ quiz');
+
+  // 2. Jauge de progression ramenée à zéro : une barre remplie aux trois
+  //    quarts est une affirmation chiffrée comme une autre.
+  bloc = bloc.replace(/(<div[^>]*style="[^"]*)width:\s*7[0-9](?:\.\d+)?%/i, '$1width:0%');
+
+  // 3. Podium : on retire les trois lignes inventées et on laisse le conteneur,
+  //    que vitrine.js remplira — ou masquera.
+  /*  Les rangs ne sont pas des <li> mais des <div> imbriqués : on remonte donc
+      depuis chaque « N NNN pts » jusqu'au <div> qui ouvre sa ligne, et on
+      retire la ligne entière. Découper au premier <div> venu emporterait la
+      carte complète — d'où le comptage de profondeur. */
+  let garde = 0;
+  while (/\d[\s  ]?\d{3}\s*pts/.test(bloc) && garde++ < 12) {
+    const m = bloc.match(/\d[\s  ]?\d{3}\s*pts/);
+    const pos = m.index;
+    let deb = -1, prof = 0;
+    for (let k = pos; k >= 0; k--) {
+      if (bloc.startsWith('</div>', k)) prof++;
+      else if (bloc.startsWith('<div', k)) { if (prof === 0) { deb = k; break; } prof--; }
+    }
+    if (deb < 0) break;
+    let p = 0, fin = -1;
+    for (let k = bloc.indexOf('>', deb) + 1; k < bloc.length; k++) {
+      if (bloc.startsWith('<div', k)) p++;
+      else if (bloc.startsWith('</div>', k)) { if (p === 0) { fin = k + 6; break; } p--; }
+    }
+    if (fin < 0) break;
+    bloc = bloc.slice(0, deb) + bloc.slice(fin);
+  }
+  if (/\d[\s  ]?\d{3}\s*pts/.test(bloc)) {
+    throw new Error('Podium : un score inventé subsiste après nettoyage — refus de construire.');
+  }
+
+  // Le conteneur porte l'identifiant ET l'attribut hidden : sans JavaScript, ou
+  // si le serveur ne répond pas, rien de faux ne s'affiche.
+  bloc = bloc.replace('Battle de la semaine',
+    'Battle de la semaine</b><small style="display:block;font:400 12px Poppins,sans-serif;color:#6E7385">Le classement s\'affiche dès les premiers points</small><b style="display:none">');
+
+  const cle = 'Battle de la semaine';
+  const iCarte = bloc.indexOf(cle);
+  if (iCarte > 0) {
+    // Remonter jusqu'au <div> ouvrant de la carte pour l'envelopper d'un id.
+    const avant = bloc.lastIndexOf('<div', iCarte);
+    if (avant > 0) {
+      /* On enveloppe EXACTEMENT la carte, en cherchant sa balise fermante par
+         comptage de profondeur. Envelopper « du début de la carte jusqu'à la
+         fin du bloc » paraissait équivalent : ça ne l'est pas. Cette queue
+         contient les fermetures des DIV ancêtres, donc plus de </div> que de
+         <div> — le navigateur refermait #vrtPodium bien avant la fin, et la
+         liste atterrissait DEHORS. Mesuré : olDansPodium=false, podium allumé
+         mais vide.
+
+         La liste est vide à la construction, et c'est voulu : vitrine.js la
+         remplit depuis public_data.php, ou laisse le conteneur masqué. */
+      let prof2 = 0, finCarte = -1;
+      for (let k = bloc.indexOf('>', avant) + 1; k < bloc.length; k++) {
+        if (bloc.startsWith('<div', k)) prof2++;
+        else if (bloc.startsWith('</div>', k)) { if (prof2 === 0) { finCarte = k; break; } prof2--; }
+      }
+      if (finCarte < 0) throw new Error('Podium : carte non refermée — maquette inattendue.');
+      bloc = bloc.slice(0, avant)
+           + '<div id="vrtPodium" hidden>'
+           + bloc.slice(avant, finCarte)
+           + '<ol class="vpod-list"></ol>'
+           + '</div></div>'
+           + bloc.slice(finCarte + '</div>'.length);
+    }
+  }
+
+  corps = corps.slice(0, s.deb) + bloc + corps.slice(s.fin);
+  console.log('accueil     : ↺ panneau « Apprendre en jouant » restauré (chiffres neutralisés, podium branché)');
+})();
 supprimerSection('Palmarès de la semaine',
   'palmarès hebdomadaire (« manuel à la une », « abonnement le plus choisi » : non calculés)');
 
@@ -1690,6 +1783,17 @@ ${fs.readFileSync(path.join(__dirname, 'vitrine-bloc.css'), 'utf8')}
    défilant »). Inséré par vitrine.js seulement s'il y a un message : pas de
    barre vide. Navy plein plutôt qu'un jaune d'alerte — c'est une information
    du centre, pas un avertissement, et l'accueil est déjà clair. */
+/* Podium du panneau « Apprendre en jouant ». Rempli par vitrine.js depuis les
+   scores réels ; le conteneur reste masqué tant qu'il n'y en a aucun. */
+.vpod-list{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+.vpod-l{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:12px;
+  background:#F7F9FD;font:500 14px Poppins,sans-serif;color:#12203F}
+.vpod-l:first-child{background:#FFF8E6}
+.vpod-r{flex:0 0 auto;width:25px;height:25px;border-radius:50%;color:#fff;
+  display:inline-flex;align-items:center;justify-content:center;font:700 12.5px Poppins,sans-serif}
+.vpod-n{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vpod-p{flex:0 0 auto;font:700 13.5px Poppins,sans-serif;color:#C24E00}
+
 .vann{display:flex;align-items:center;justify-content:center;gap:9px;
   padding:9px 20px;background:linear-gradient(90deg,#0C2A6A,#1E499B);color:#fff;
   font:500 13.5px/1.45 Poppins,sans-serif;text-align:center;position:relative;z-index:58}
