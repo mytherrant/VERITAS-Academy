@@ -647,19 +647,58 @@ function blocCalendrier() {
    la retirer d'ailleurs ou repasser à deux colonnes — mais ne pas laisser
    une rangée orpheline.
    ══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   CLASSEMENT PAR INTERFACE DE RÔLE (et non plus par thème)
+   ──────────────────────────────────────────────────────────────────────────
+   Le menu était rangé par thème (Apprendre / Le centre / Boutique). Un parent
+   qui cherchait le suivi de son enfant devait deviner qu'il était sous
+   « Boutique et communauté », à côté des manuels. On range désormais par
+   DESTINATAIRE : chacun trouve sa colonne et n'a plus à lire les autres.
+
+   La cinquième colonne « Le centre » n'est pas un quatrième rôle : elle
+   regroupe ce qui n'appartient à PERSONNE en particulier (qui nous sommes,
+   actualités, contact). La forcer dans un rôle aurait menti sur son public.
+
+   `g:1` = l'entrée exige un compte inscrit quand le mur est ACTIVÉ
+   (DB.accessGate.actif, OFF par défaut). Les pages publiques qui ramènent le
+   trafic de Google — corrigés, œuvres, niveaux, outils, découvrir, manuels,
+   constellation, campus — n'en portent JAMAIS : les murer reviendrait à se
+   couper de l'acquisition. Le cadenas affiché ici est une INDICATION de
+   lisibilité, pas une sécurité : le vrai contrôle est côté application
+   (_gateActif) et côté serveur. Un cadenas absent ne déverrouille rien.
+   ══════════════════════════════════════════════════════════════════════════ */
 const MENU = [
-  { titre: 'Apprendre', entrees: [
-    { t: 'Catalogue e-learning', d: 'Matières, œuvres, séquences', i: 'lc-book',        c: '#1E499B', f: '#DBE8FE', vp: 'elearning' },
+  { titre: 'Élève', sous: 'Apprendre et réviser', entrees: [
+    { t: 'Catalogue e-learning', d: 'Matières, œuvres, séquences', i: 'lc-book',        c: '#1E499B', f: '#DBE8FE', vp: 'elearning', g: 1 },
     { t: 'Corrigés des cahiers', d: 'Accès libre, par séquence',   i: 'lc-checkcircle', c: '#007E11', f: '#E0F5E5', h: 'corriges/' },
-    { t: 'Annales corrigées',    d: 'BEPC, Probatoire, BAC, GCE',  i: 'lc-doc',         c: '#5B4FA8', f: '#EAE7F7', h: APP + '#epreuves' },
-    { t: 'Évaluations en ligne', d: 'Entraînement chronométré',    i: 'lc-clock',       c: '#C24E00', f: '#FFF3E4', h: APP + '#evaluations' },
+    { t: 'Annales corrigées',    d: 'BEPC, Probatoire, BAC, GCE',  i: 'lc-doc',         c: '#5B4FA8', f: '#EAE7F7', h: APP + '#epreuves', g: 1 },
+    { t: 'Évaluations en ligne', d: 'Entraînement chronométré',    i: 'lc-clock',       c: '#C24E00', f: '#FFF3E4', h: APP + '#evaluations', g: 1 },
     { t: 'Œuvres au programme',  d: 'Analyses et fiches',          i: 'lc-bookopen',    c: '#1E499B', f: '#DBE8FE', h: 'oeuvres/' },
     { t: 'Programmes par classe',d: 'De la 6ᵉ à la Terminale',     i: 'lc-graduation',  c: '#0E7C86', f: '#DDF2F4', h: 'niveaux/' },
-    { t: 'Ressources et cours',  d: 'Leçons interactives',         i: 'lc-presentation',c: '#B03A6E', f: '#FBE4EE', h: 'ressources/' },
-    { t: 'Matières et coefficients', d: 'Poids réels, orientation',i: 'lc-scale',       c: '#5B4FA8', f: '#EAE7F7', h: 'parcours/' },
     { t: 'Outils gratuits',      d: 'Calculateurs de moyenne',     i: 'lc-calculator',  c: '#007E11', f: '#E0F5E5', h: 'outils/' }
   ]},
-  { titre: 'Le centre', entrees: [
+  { titre: 'Parent', sous: 'Suivre et soutenir', entrees: [
+    { t: 'Résultats aux examens',d: 'Taux de réussite',            i: 'lc-trending',    c: '#007E11', f: '#E0F5E5', h: APP + '#resultats' },
+    { t: 'Orientation',          d: 'Choisir sa série',            i: 'lc-compass',     c: '#0E7C86', f: '#DDF2F4', h: APP + '#orientation' },
+    { t: 'Matières et coefficients', d: 'Poids réels, orientation',i: 'lc-scale',       c: '#5B4FA8', f: '#EAE7F7', h: 'parcours/' },
+    { t: 'Cagnotte de scolarité',d: 'Faire financer son année',    i: 'lc-gift',        c: '#C24E00', f: '#FFF3E4', h: APP + '#cagnotte' },
+    { t: 'Trophées VÉRITAS',     d: 'Vote gratuit et unique',      i: 'lc-trophy',      c: '#B8860B', f: '#FFF6DA', h: APP + '#trophees' },
+    { t: 'Classement junior',    d: 'Le tableau d’honneur',        i: 'lc-award',       c: '#5B4FA8', f: '#EAE7F7', h: APP + '#leaderboard-junior' }
+  ]},
+  { titre: 'Enseignant', sous: 'Enseigner et publier', entrees: [
+    { t: 'Ressources et cours',  d: 'Leçons interactives',         i: 'lc-presentation',c: '#B03A6E', f: '#FBE4EE', h: 'ressources/' },
+    { t: 'Corrigés du cahier papier', d: 'La page des QR codes',   i: 'lc-qr',          c: '#1E499B', f: '#DBE8FE', h: 'manuels.html' },
+    { t: 'Boutique de manuels',  d: 'Cahiers et études d’œuvres',  i: 'lc-shop',        c: '#C24E00', f: '#FFF3E4', vp: 'boutique' },
+    { t: 'Abonnements',          d: 'Dès 1 000 FCFA / mois',       i: 'lc-wallet',      c: '#5B4FA8', f: '#EAE7F7', vp: 'tarifs' },
+    { t: 'Vérifier un certificat',d: 'Authentifier une distinction',i: 'lc-shield',     c: '#1E499B', f: '#DBE8FE', h: APP + '#verifier-certificat' }
+  ]},
+  { titre: 'Partenaire', sous: 'Diffuser et représenter', entrees: [
+    { t: 'Devenir partenaire',   d: '9 formules, marges revendeur',i: 'lc-users',       c: '#B03A6E', f: '#FBE4EE', h: APP + '#partenariat' },
+    { t: 'Nos partenaires',      d: 'Ceux qui nous accompagnent',  i: 'lc-handshake',   c: '#0E7C86', f: '#DDF2F4', h: APP + '#nos-partenaires' },
+    { t: 'VÉRITAS Campus',       d: 'Pour les établissements',     i: 'lc-university',  c: '#0C2A6A', f: '#E4E9F2', h: 'campus/' },
+    { t: 'Constellation VÉRITAS',d: 'Tout l’écosystème',           i: 'lc-sparkles',    c: '#B03A6E', f: '#FBE4EE', h: 'constellation.html' }
+  ]},
+  { titre: 'Le centre', sous: 'Nous connaître', entrees: [
     /* ⚠️ PAS `app.html#presentation`. Vérifié dans le code (app.js, vShowSec) et
      en production : cette ancre ne rend pas une page « qui nous sommes », elle
      rend L'ACCUEIL DE L'APPLICATION — pastille de marque, promesse, les quatre
@@ -668,26 +707,11 @@ const MENU = [
      elle ne revenait pas par le service de `/`, mais par cette entrée de menu.
      La vitrine EST la présentation désormais ; l'entrée pointe donc sur le hub
      éditorial qui présente réellement le centre. */
-  { t: 'Présentation',         d: 'Qui nous sommes',             i: 'lc-building',    c: '#1E499B', f: '#DBE8FE', h: 'decouvrir/' },
+    { t: 'Présentation',         d: 'Qui nous sommes',             i: 'lc-building',    c: '#1E499B', f: '#DBE8FE', h: 'decouvrir/' },
     { t: 'Actualités',           d: 'Ce qui se passe au centre',   i: 'lc-megaphone',   c: '#C24E00', f: '#FFF3E4', h: APP + '#actualites' },
-    { t: 'Résultats aux examens',d: 'Taux de réussite',            i: 'lc-trending',    c: '#007E11', f: '#E0F5E5', h: APP + '#resultats' },
     { t: 'Photos',               d: 'La vie du centre',            i: 'lc-star',        c: '#B03A6E', f: '#FBE4EE', h: APP + '#photos' },
-    { t: 'Orientation',          d: 'Choisir sa série',            i: 'lc-compass',     c: '#0E7C86', f: '#DDF2F4', h: APP + '#orientation' },
     { t: 'Nous contacter',       d: 'Douala · réponse sous 2 h',   i: 'lc-message',     c: '#1E499B', f: '#DBE8FE', h: APP + '#contact' },
-    { t: 'S’inscrire',           d: 'Créer un compte gratuit',     i: 'lc-user',        c: '#C24E00', f: '#FFF3E4', h: APP + '#inscription' },
-    { t: 'Nos partenaires',      d: 'Ceux qui nous accompagnent',  i: 'lc-handshake',   c: '#0E7C86', f: '#DDF2F4', h: APP + '#nos-partenaires' },
-    { t: 'Vérifier un certificat',d: 'Authentifier une distinction',i: 'lc-shield',     c: '#1E499B', f: '#DBE8FE', h: APP + '#verifier-certificat' }
-  ]},
-  { titre: 'Boutique et communauté', entrees: [
-    { t: 'Abonnements',          d: 'Dès 1 000 FCFA / mois',       i: 'lc-wallet',      c: '#5B4FA8', f: '#EAE7F7', vp: 'tarifs' },
-    { t: 'Boutique de manuels',  d: 'Cahiers et études d’œuvres',  i: 'lc-shop',        c: '#C24E00', f: '#FFF3E4', vp: 'boutique' },
-    { t: 'Corrigés du cahier papier', d: 'La page des QR codes',   i: 'lc-qr',          c: '#1E499B', f: '#DBE8FE', h: 'manuels.html' },
-    { t: 'Cagnotte de scolarité',d: 'Faire financer son année',    i: 'lc-gift',        c: '#C24E00', f: '#FFF3E4', h: APP + '#cagnotte' },
-    { t: 'Trophées VÉRITAS',     d: 'Vote gratuit et unique',      i: 'lc-trophy',      c: '#B8860B', f: '#FFF6DA', h: APP + '#trophees' },
-    { t: 'Classement junior',    d: 'Le tableau d’honneur',        i: 'lc-award',       c: '#5B4FA8', f: '#EAE7F7', h: APP + '#leaderboard-junior' },
-    { t: 'Devenir partenaire',   d: '9 formules, marges revendeur',i: 'lc-users',       c: '#B03A6E', f: '#FBE4EE', h: APP + '#partenariat' },
-    { t: 'Constellation VÉRITAS',d: 'Tout l’écosystème',           i: 'lc-sparkles',    c: '#B03A6E', f: '#FBE4EE', h: 'constellation.html' },
-    { t: 'VÉRITAS Campus',       d: 'Pour les établissements',     i: 'lc-university',  c: '#0C2A6A', f: '#E4E9F2', h: 'campus/' }
+    { t: 'S’inscrire',           d: 'Créer un compte gratuit',     i: 'lc-user',        c: '#C24E00', f: '#FFF3E4', h: APP + '#inscription' }
   ]}
 ];
 
@@ -698,8 +722,19 @@ const ICO_MENU = (id, c) => '<svg width="16" height="16" viewBox="0 0 24 24" fil
    d'écran ici. La distinction n'est pas cosmétique : un <a> se copie, s'ouvre
    dans un onglet et se donne à Google ; un bouton non. */
 function entreeHTML(e) {
+  /* Le cadenas n'apparaît QUE si l'entrée est murée. Il est rendu en dur dans
+     le HTML plutôt que posé par script : la page doit rester lisible et
+     honnête sans JavaScript. `aria-hidden` sur le pictogramme, l'information
+     part dans le title — un lecteur d'écran n'annonce pas « cadenas », il
+     annonce ce que le cadenas veut dire. */
+  const verrou = e.g
+    ? '<span class="vmn-l" title="Réservé aux membres inscrits">'
+      + '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true">'
+      + '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
+      + '<span class="vsr">Réservé aux membres inscrits</span></span>'
+    : '';
   const dedans = '<span class="vmn-p" style="background:' + e.f + '">' + ICO_MENU(e.i, e.c) + '</span>'
-    + '<span class="vmn-x">' + esc(e.t) + '<small>' + esc(e.d) + '</small></span>';
+    + '<span class="vmn-x">' + esc(e.t) + '<small>' + esc(e.d) + '</small></span>' + verrou;
   return e.vp
     ? '<button type="button" class="vmn-i" onclick="VRT.act(\'pl__aller\',this,event)" data-go="' + e.vp + '">' + dedans + '</button>'
     : '<a class="vmn-i" href="' + e.h + '">' + dedans + '</a>';
@@ -707,7 +742,7 @@ function entreeHTML(e) {
 
 {
   const colonnes = MENU.map(g =>
-    '<div class="vmn-col"><p class="vmn-t">' + esc(g.titre) + '</p>'
+    '<div class="vmn-col"><p class="vmn-t">' + esc(g.titre) + (g.sous ? '<small>' + esc(g.sous) + '</small>' : '') + '</p>'
     + g.entrees.map(entreeHTML).join('') + '</div>').join('');
 
   /* On remplace le CONTENU du panneau, pas le panneau : vitrine.js pilote
@@ -740,7 +775,7 @@ function entreeHTML(e) {
   }
   if (finB < 0) throw new Error('Menu mobile #vrtBurger non refermé — maquette inattendue.');
   const suite = '<div class="vmn vmn-mob">' + MENU.map(g =>
-    '<div class="vmn-col"><p class="vmn-t">' + esc(g.titre) + '</p>'
+    '<div class="vmn-col"><p class="vmn-t">' + esc(g.titre) + (g.sous ? '<small>' + esc(g.sous) + '</small>' : '') + '</p>'
     + g.entrees.map(entreeHTML).join('') + '</div>').join('') + '</div>';
   corps = corps.slice(0, finB) + suite + corps.slice(finB);
 
@@ -1631,15 +1666,35 @@ ${fs.readFileSync(path.join(__dirname, 'vitrine-bloc.css'), 'utf8')}
   background:#fff;border-top:1px solid #EEF1F7;border-bottom:1px solid #E1E6F0;
   box-shadow:0 26px 52px rgba(12,28,74,.16);z-index:59;
   padding:24px max(24px,calc((100vw - 1160px)/2)) 30px;
-  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px 56px;
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px 30px;
   max-height:min(80vh,540px);overflow-y:auto;overscroll-behavior:contain;
   animation:vmnDown .26s cubic-bezier(.22,1,.36,1)}
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){ .vmn{top:76px} }
+/* Cinq colonnes de rôle tiennent au-delà de 1240 px. En dessous on passe à
+   trois puis à deux : une colonne de rôle écrasée sous ~200 px coupe les
+   libellés (« Matières et coefficients »), et un menu illisible ne range
+   rien. Le classement par rôle survit à chaque palier — seul le nombre de
+   colonnes change, jamais l'ordre des groupes. */
+@media (max-width:1239.98px){ .vmn{grid-template-columns:repeat(3,minmax(0,1fr))} }
 @media (max-width:1023.98px){ .vmn{grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 30px;padding-left:24px;padding-right:24px} }
 @keyframes vmnDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
 .vmn-col{display:flex;flex-direction:column;gap:1px;min-width:0}
 .vmn-t{margin:8px 0 6px;padding:0 12px 6px;font:700 11px Poppins,sans-serif;
   letter-spacing:1px;text-transform:uppercase;color:#5B4FA8;border-bottom:1px solid #F0F2F8}
+/* Le sous-titre dit à qui la colonne s'adresse, en minuscules et sans
+   interlettrage : il se lit comme une phrase, pas comme une deuxième
+   étiquette qui concurrencerait le nom du rôle. */
+.vmn-t small{display:block;margin-top:3px;font:400 11px Poppins,sans-serif;
+  letter-spacing:0;text-transform:none;color:#8A8FA3}
+/* Texte réservé aux lecteurs d'écran : présent dans l'arbre d'accessibilité,
+   invisible à l'œil. On masque par clip-path et non par display:none, qui le
+   retirerait aussi de l'annonce vocale. */
+.vsr{position:absolute!important;width:1px;height:1px;margin:-1px;padding:0;
+  overflow:hidden;clip-path:inset(50%);white-space:nowrap;border:0}
+.vmn-l{flex:0 0 auto;margin-left:auto;display:inline-flex;align-items:center;
+  justify-content:center;width:19px;height:19px;border-radius:6px;
+  background:#F1F0FA;color:#5B4FA8}
+.vmn-i:hover .vmn-l{background:#E4E1F6}
 .vmn-i{display:flex;align-items:center;gap:11px;padding:9px 12px;border:0;border-radius:11px;
   background:none;cursor:pointer;text-align:left;text-decoration:none;width:100%;
   font:500 14px Poppins,sans-serif;color:#12203F;
