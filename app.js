@@ -31501,7 +31501,39 @@ window._computeSplits = function(payAttempt){
   // Indispensable depuis que les paiements automatiques (CamPay/MTN/Orange)
   // peuvent confirmer par DEUX chemins : le webhook serveur ET le polling client.
   // Sans ce garde-fou, le parrain était crédité en double.
-  if(payAttempt.ref && DB.splits.some(function(s){ return s.paymentRef === payAttempt.ref; })){
+  /* ⚠️ La garde était conditionnée à l'existence d'une référence :
+     `if(payAttempt.ref && …)`. Sans référence, elle était donc entièrement
+     SAUTÉE, et chaque appel recréditait le partenaire. Mesuré : un paiement de
+     10 000 F rejoué trois fois portait le solde à 1 000, puis 2 000, puis
+     3 000 F. Or un paiement sans référence n'a rien d'exotique — encaissement
+     manuel, versement en espèces enregistré à la main, reprise après incident :
+     ce sont précisément les cas saisis deux fois.
+
+     Deux verrous désormais. D'abord une clé de repli quand la référence
+     manque : bénéficiaire + intention + cible + montant + jour. Deux
+     encaissements RÉELLEMENT distincts le même jour, pour le même objet et le
+     même montant, restent possibles — l'admin les saisit alors avec une
+     référence, qui les sépare sans ambiguïté. Mieux vaut refuser un doublon de
+     bonne foi que verser deux fois.
+
+     Ensuite, on ne rend plus la main en silence : un doublon est journalisé, et
+     signalé à l'admin connecté. Un versement dupliqué qui passe inaperçu se
+     découvre au moment du paiement du partenaire, quand il est trop tard. */
+  var _cleDoublon = payAttempt.ref
+    ? ('ref:' + payAttempt.ref)
+    : ('sig:' + [payAttempt.accountId || payAttempt.userId || '', payAttempt.intent || '',
+                 payAttempt.targetId || '', payAttempt.montant || 0,
+                 new Date().toISOString().slice(0,10)].join('|'));
+  var _dejaVu = DB.splits.some(function(s){
+    return s && (payAttempt.ref ? (s.paymentRef === payAttempt.ref) : (s.cleIdem === _cleDoublon));
+  });
+  if(_dejaVu){
+    try{
+      console.warn('VÉRITAS splits: paiement déjà réparti (' + _cleDoublon + ') — aucune commission recréditée.');
+      if(typeof iA==='function' && iA() && typeof toast==='function'){
+        toast('Ce paiement a déjà été réparti — commission non recréditée','warn');
+      }
+    }catch(e){}
     return [];
   }
   var cfg = _getSplitConfig();
@@ -31613,6 +31645,10 @@ window._computeSplits = function(payAttempt){
 
   // Enregistrer les splits
   splits.forEach(function(s){
+    // Clé d'idempotence portée par la part elle-même : c'est elle que relit la
+    // garde de tête au prochain appel. Sans elle, le repli "sans référence"
+    // n'aurait rien à comparer et ne servirait à rien.
+    s.cleIdem = _cleDoublon;
     DB.splits.push(s);
     // Cumuler le solde du partenaire
     DB.partenairesSplit[s.partenaireId] = DB.partenairesSplit[s.partenaireId] || { solde: 0, totalVerse: 0, splits: [] };
