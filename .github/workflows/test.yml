@@ -60,6 +60,14 @@ jobs:
           node-version: '20'
       - name: 📦 Installer les dépendances
         run: npm ci || npm install
+      # ──────────────────────────────────────────────────────────────────
+      # Sans navigateur, donc en quelques secondes, et AVANT Chromium :
+      # une entrée de menu sans route ne lève aucune exception — `render()`
+      # se termine par `P[p]||pgDash` et sert le tableau de bord sous le
+      # titre de la page demandée. Playwright ne verrait qu'un écran rendu.
+      # ──────────────────────────────────────────────────────────────────
+      - name: 🚪 Espaces par rôle (entrées mortes, chiffres inventés)
+        run: node tests/espaces_roles.cjs
       - name: 🌐 Installer Chromium
         run: npx playwright install --with-deps chromium
       - name: 🧪 Lancer les tests

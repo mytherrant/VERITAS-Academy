@@ -2011,3 +2011,197 @@ h2:nth-of-type(4n+4) { border-bottom-color:rgba(91,79,168,.22) }
     padding-left:10px !important; padding-right:10px !important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Lecture : complément de couverture
+   ──────────────────────────────────────────────────────────────────────────
+   La règle d'origine (voir plus haut, « .wrap>p,.card .note,… ») justifie une
+   liste de sélecteurs choisie à la main. Mesuré sur /parcours/ : 52 paragraphes
+   de prose longue justifiés, mais 18 restaient en `start` — ceux qui vivent
+   dans un conteneur qu'elle ne nomme pas.
+   Ce bloc élargit la couverture sans réécrire la règle d'origine : il est
+   APPONDU, donc il ne peut pas écraser un réglage fait ailleurs, et la cascade
+   suffit. Les seuils et les garde-fous sont identiques (césure, repli 600 px)
+   pour que les deux familles se comportent pareil.
+   ══════════════════════════════════════════════════════════════════════════ */
+.wrap p,
+.wrap li,
+.wrap dd,
+.wrap blockquote p {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
+}
+
+/* Ce qui ne se justifie jamais. Les titres centrés par la règle d'origine
+   (h2.sec, h3.sub, .card h3…) gardent leur centrage : `inherit` ne le défait
+   pas, il reprend celui du parent, et ces règles-là sont plus spécifiques. */
+.wrap h1, .wrap h2, .wrap h3, .wrap h4, .wrap h5, .wrap h6,
+.wrap button, .wrap a, .wrap th, .wrap td,
+.wrap label, .wrap small, .wrap caption, .wrap figcaption,
+.wrap code, .wrap pre {
+  hyphens: manual;
+  -webkit-hyphens: manual;
+}
+
+/* Icône au milieu de la ligne, sans changer le `display` du contrôle. */
+.wrap a > svg, .wrap button > svg,
+.wrap label > svg, .wrap summary > svg,
+.wrap a > img, .wrap button > img {
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+.wrap figure > svg, .wrap .ico-bloc {
+  display: block;
+  margin-inline: auto;
+}
+
+@media (max-width: 600px) {
+  .wrap p, .wrap li, .wrap dd, .wrap blockquote p {
+    text-align: start;
+    hyphens: manual;
+    -webkit-hyphens: manual;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Contraste : plus de texte sombre sur panneau sombre
+   ──────────────────────────────────────────────────────────────────────────
+   Mesuré sur /parcours/ : 29 mises en valeur illisibles. Le pire cas était un
+   <strong> en rgb(0,17,54) posé sur linear-gradient(135deg,#001136,#0C2A6A) —
+   exactement la couleur du fond. Le mot mis en valeur était le seul qu'on ne
+   pouvait pas lire.
+
+   Cause : `b` et `strong` reçoivent une couleur de marque (var(--navy),
+   var(--navy3)) pensée pour un fond CLAIR, et rien ne la reprend quand le même
+   composant est posé sur un panneau sombre.
+
+   Correctif par CONTENEUR plutôt que par composant : sur un fond sombre, la
+   mise en valeur reprend la couleur du texte qui l'entoure, ou l'or de la
+   marque quand il faut la distinguer. La graisse porte déjà l'emphase — une
+   couleur n'y ajoute rien si elle coûte la lisibilité.
+   ══════════════════════════════════════════════════════════════════════════ */
+.upsell strong, .upsell b, .upsell em,
+.vabo-inline strong, .vabo-inline b, .vabo-inline em,
+.vabo-sticky strong, .vabo-sticky em,
+header.top strong, header.top b, header.top em,
+.p.cc strong, .p.cc b, .p.ex strong, .p.ex b,
+.vrtc-in strong, .vrtc-in b {
+  color: inherit;
+}
+
+/* Là où la mise en valeur doit rester distincte, c'est l'or qui s'en charge :
+   il porte le contraste sur le navy (ratio ≈ 8,6 sur #001136). */
+.upsell .promesses b,
+.vabo-sticky p b,
+.upsell h2 b, .upsell h3 b {
+  color: var(--gold);
+}
+
+/* Un lien de TEXTE dans un panneau sombre ne peut pas garder la couleur de lien
+   claire. On exclut tout ce qui est un BOUTON : .lien, .btn, .cta, .ghost ont
+   déjà leur fond et leur couleur, réglés au-dessus.
+   Première version de cette règle : `a:not(.btn):not(.cta)`. Trop large — sa
+   spécificité (0,3,1) passait devant `.vabo-inline .lien` (0,2,0) et repeignait
+   les boutons principaux dans la couleur de leur propre fond : label invisible,
+   ratio de contraste 1,0. Un correctif de contraste qui crée un défaut de
+   contraste. Mesuré, donc vu. */
+.upsell a:not([class]),
+.vabo-inline a:not([class]),
+header.top a:not([class]),
+.vrtc-in a:not([class]) {
+  color: var(--gold);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Listes : puces rondes, numéros en pastille, alternance de teinte
+   ──────────────────────────────────────────────────────────────────────────
+   Cette feuille marquait les listes d'un TIRET (9 × 2 px, dégradé or). La
+   feuille voisine — veritas-refonte.css, qui sert les corrigés et les œuvres —
+   utilise depuis longtemps une puce ronde cerclée d'un halo, et une pastille
+   pleine pour les listes ordonnées. Deux familles de pages, deux typographies
+   de liste, une seule marque : on aligne sur la plus soignée des deux.
+
+   L'alternance de teinte du texte est volontairement FAIBLE (--r-encre vers un
+   gris-bleu profond). Assez pour que l'œil suive la ligne dans une liste
+   longue, pas assez pour qu'un élément paraisse désactivé — c'est le piège de
+   l'alternance : trop de contraste et une ligne sur deux a l'air éteinte.
+   ══════════════════════════════════════════════════════════════════════════ */
+.wrap ul:not([class]) > li::before,
+.card ul:not([class]) > li::before,
+article ul:not([class]) > li::before {
+  content: "";
+  position: absolute;
+  left: 2px;
+  top: .58em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--r-bleu, #1E499B);
+  box-shadow: 0 0 0 3.5px rgba(30, 73, 155, .13);
+}
+.wrap ul:not([class]) > li,
+.card ul:not([class]) > li,
+article ul:not([class]) > li {
+  padding-left: 25px;
+}
+
+/* Une liste dans un encadré prend la couleur de son encadré : elle appartient
+   visiblement à son bloc, au lieu de flotter dedans. */
+.retenir-box ul:not([class]) > li::before { background: var(--r-acquis,  #007E11); box-shadow: 0 0 0 3.5px rgba(0,126,17,.13); }
+.obj-box     ul:not([class]) > li::before { background: var(--r-parents, #0E7C86); box-shadow: 0 0 0 3.5px rgba(14,124,134,.13); }
+.corpus-box  ul:not([class]) > li::before { background: var(--r-premium, #5B4FA8); box-shadow: 0 0 0 3.5px rgba(91,79,168,.13); }
+.upsell      ul:not([class]) > li::before,
+.vabo-inline ul:not([class]) > li::before { background: var(--r-or, #FFC93C); box-shadow: 0 0 0 3.5px rgba(255,201,60,.18); }
+
+/* ── Numéros : une pastille pleine, le chiffre centré par flex ──────────────
+   Centré par `flex` et non par un `line-height` réglé à la main : ce dernier
+   décale d'un pixel dès que la police de secours change. */
+.wrap ol:not([class]),
+.card ol:not([class]),
+article ol:not([class]) {
+  list-style: none;
+  counter-reset: vrpas;
+  padding-left: 2px;
+}
+.wrap ol:not([class]) > li,
+.card ol:not([class]) > li,
+article ol:not([class]) > li {
+  counter-increment: vrpas;
+  position: relative;
+  padding-left: 42px;
+  margin: .5rem 0;
+}
+.wrap ol:not([class]) > li::before,
+.card ol:not([class]) > li::before,
+article ol:not([class]) > li::before {
+  content: counter(vrpas);
+  position: absolute;
+  left: 0;
+  top: .05em;
+  width: 27px;
+  height: 27px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--r-bleu, #1E499B);
+  color: #fff;
+  font: 700 .82rem/1 Poppins, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+/* Les étapes se suivent : la teinte du numéro avance avec elles. */
+.wrap ol:not([class]) > li:nth-child(3n+2)::before,
+.card ol:not([class]) > li:nth-child(3n+2)::before { background: var(--r-parents, #0E7C86); }
+.wrap ol:not([class]) > li:nth-child(3n+3)::before,
+.card ol:not([class]) > li:nth-child(3n+3)::before { background: var(--r-premium, #5B4FA8); }
+
+/* ── Alternance de teinte du texte ────────────────────────────────────────── */
+.wrap ul:not([class]) > li:nth-child(even),
+.wrap ol:not([class]) > li:nth-child(even),
+.card ul:not([class]) > li:nth-child(even),
+article ul:not([class]) > li:nth-child(even) {
+  color: var(--r-profond, #0C2A6A);
+}

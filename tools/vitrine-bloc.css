@@ -18,7 +18,7 @@
    plans, retirées le 14/08/2026 : elles se disloquaient sous 420 px et
    répétaient ce que le menu propose déjà. */
 .vcal-grid{display:grid;grid-template-columns:1.35fr .95fr;gap:26px;align-items:start}
-.vcal-box{background:#fff;border:1px solid #E4E7EF;border-radius:16px;padding:18px 20px;
+.vcal-box{background:#FAFBFE;border:1px solid transparent;border-radius:16px;padding:18px 20px;
   box-shadow:0 6px 16px rgba(0,17,54,.05)}
 
 /* ── Dates clés ────────────────────────────────────────────────────────────
@@ -27,9 +27,13 @@
    intitulé / date, séparée par un filet pointillé qui laisse l'œil relier les
    deux sans qu'on ait à aligner des colonnes. */
 .vcles{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
-.vcle{display:flex;align-items:baseline;gap:10px;padding:11px 0 11px 15px;position:relative;
-  border-bottom:1px dashed #E7ECF5}
-.vcle:last-of-type{border-bottom:0}
+/* Le trait pointillé sous chaque ligne a disparu : c'est l'ALTERNANCE de fond
+   qui sépare désormais les entrées. Une ligne sur deux se détache sans qu'aucun
+   filet ne vienne hacher la lecture — et le repère tient même quand la liste
+   s'allonge, ce qu'un trait ne fait pas mieux. */
+.vcle{display:flex;align-items:baseline;gap:10px;padding:11px 12px 11px 15px;position:relative;
+  border-radius:8px}
+.vcle:nth-of-type(odd){background:#F7F9FD}
 .vcle::before{content:"";position:absolute;left:0;top:17px;width:7px;height:7px;
   border-radius:50%;background:#1E499B;transition:transform .2s ease}
 .vcle:hover::before{transform:scale(1.35)}
@@ -67,12 +71,12 @@
    Le conteneur naît masqué. vitrine.js ne le révèle QUE si le flux renvoie au
    moins un titre : une rubrique d'actualités vide vaut moins que pas de
    rubrique du tout. */
-.vnews{background:#fff;border:1px solid #E4E7EF;border-radius:16px;padding:16px 17px;
+.vnews{background:#FAFBFE;border:1px solid transparent;border-radius:16px;padding:16px 17px;
   box-shadow:0 6px 16px rgba(0,17,54,.05);position:sticky;top:88px}
 .vnews[hidden]{display:none}
 .vnews-hd h3{font:600 16px Poppins,sans-serif;color:#0C2A6A;margin:0 0 11px}
 .vnews-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:13px}
-.vnews-tab{border:1px solid #E4E7EF;background:#fff;color:#4D5163;cursor:pointer;
+.vnews-tab{border:1px solid transparent;background:#F4F6FB;background:#fff;color:#4D5163;cursor:pointer;
   padding:6px 11px;border-radius:100px;font:500 12.5px Poppins,sans-serif;
   transition:background .18s ease,color .18s ease,border-color .18s ease}
 .vnews-tab:hover{background:#F2F6FD;border-color:#C7D5EE}
@@ -232,3 +236,82 @@ html{scroll-behavior:smooth}
 [data-vrt-theme="sombre"] .vnews-tab{background:#14244A;border-color:#1E3566;color:#B9C7E2}
 [data-vrt-theme="sombre"] .vnews-tab.on{background:#3B6FD4;border-color:#3B6FD4;color:#fff}
 [data-vrt-theme="sombre"] .vnews-liste li{border-bottom-color:#1B2C52}
+
+
+/* ══ LES DEUX PHOTOS DE L'ACCUEIL ══════════════════════════════════════════
+   Bande de deux photographies posée après « Un centre à Douala ». Les panneaux
+   de texte qui les portaient ont été supprimés (doublon d'offre) ; les images,
+   elles, ne doublonnaient rien — elles sont le seul visage humain de la page.
+   Le zoom lent est celui de la maquette (@keyframes vzoomSlow), et il se coupe
+   dès que le visiteur demande moins d'animation. */
+.vphotos{padding:34px 0 0}
+.vphotos-in{max-width:1170px;margin:0 auto;padding:0 24px;
+  display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.vphoto{position:relative;margin:0;border-radius:18px;overflow:hidden;
+  background:#F2F5FB;aspect-ratio:16/10;box-shadow:0 18px 40px rgba(0,17,54,.12)}
+.vphoto img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  display:block;animation:vzoomSlow 24s ease-in-out infinite alternate}
+.vphoto figcaption{position:absolute;left:0;right:0;bottom:0;padding:46px 22px 18px;
+  background:linear-gradient(to top,rgba(0,17,54,.82),rgba(0,17,54,.42) 46%,rgba(0,17,54,0))}
+.vphoto figcaption span{font:600 17px Poppins,sans-serif;color:#fff;
+  text-shadow:0 1px 12px rgba(0,17,54,.5)}
+@media (max-width:719.98px){
+  .vphotos-in{grid-template-columns:1fr;gap:16px}
+  .vphoto figcaption span{font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){ .vphoto img{animation:none} }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Lecture : prose justifiée, icônes centrées
+   ──────────────────────────────────────────────────────────────────────────
+   Mesuré avant d'écrire (22 paragraphes de prose longue sur l'accueil : 18 en
+   `start`, 1 en `left`, 0 justifié ; 231 icônes, 0 mal centrée).
+
+   Deux garde-fous, parce qu'une justification posée sans eux abîme plus qu'elle
+   n'embellit :
+     · `hyphens:auto` — sans césure, une colonne étroite justifiée creuse des
+       rivières blanches entre les mots ;
+     · sous 640 px on repasse en `start` — sur un téléphone la colonne est trop
+       courte pour que la justification tienne, c'est là qu'elle est la plus laide.
+
+   Les sous-titres de cartes portent `text-align:center` EN LIGNE : un style en
+   ligne bat la feuille, ils restent donc centrés sans exception à écrire ici.
+   ══════════════════════════════════════════════════════════════════════════ */
+[data-vp] p,
+[data-vp] li,
+.vcard p,
+.vsec-sub {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
+}
+
+/* Titres, prix, libellés de bouton et pastilles : jamais justifiés. */
+[data-vp] h1, [data-vp] h2, [data-vp] h3, [data-vp] h4,
+[data-vp] button, [data-vp] a, [data-vp] th, [data-vp] td,
+[data-vp] label, [data-vp] small, [data-vp] figcaption {
+  text-align: inherit;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+}
+
+/* Une icône dans un contrôle s'aligne sur la ligne de base du texte, pas sur
+   son sommet — sans changer le `display` du contrôle, ce qui casserait la mise
+   en page de boutons déjà en flux. */
+[data-vp] a > svg,
+[data-vp] button > svg,
+[data-vp] label > svg,
+[data-vp] summary > svg {
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+
+@media (max-width: 640px) {
+  [data-vp] p, [data-vp] li, .vcard p, .vsec-sub {
+    text-align: start;
+    hyphens: manual;
+    -webkit-hyphens: manual;
+  }
+}

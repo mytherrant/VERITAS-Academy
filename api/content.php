@@ -155,8 +155,27 @@ if ($path === false || $path === null || strpos($path, $uploadsBase) !== 0 || !i
 }
 
 // ── Diffusion (avec support Range pour la vidéo / iOS) ──
-$finfo = new finfo(FILEINFO_MIME_TYPE);
-$mime  = $finfo->file($path) ?: 'application/octet-stream';
+// L'extension fileinfo n'est pas garantie chez l'hébergeur. Sans garde, un
+// `new finfo` sur un serveur qui ne l'a pas est une erreur FATALE : le droit a
+// déjà été vérifié, l'abonné a payé, et il reçoit un 500. On dégrade sur la
+// table des extensions plutôt que de refuser un contenu légitimement acheté.
+$mime = null;
+if (class_exists('finfo')) {
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mime  = $finfo->file($path) ?: null;
+}
+if ($mime === null) {
+    $__ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+    $__map = [
+        'pdf' => 'application/pdf', 'mp4' => 'video/mp4', 'webm' => 'video/webm',
+        'ogg' => 'video/ogg', 'mov' => 'video/quicktime', 'mp3' => 'audio/mpeg',
+        'wav' => 'audio/wav', 'm4a' => 'audio/mp4', 'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp',
+        'gif' => 'image/gif', 'svg' => 'image/svg+xml', 'txt' => 'text/plain',
+        'zip' => 'application/zip',
+    ];
+    $mime = $__map[$__ext] ?? 'application/octet-stream';
+}
 $size  = filesize($path);
 
 // Journaliser l'accès légitime (best-effort).

@@ -62,6 +62,9 @@ if ($file['error'] !== UPLOAD_ERR_OK) {
 }
 
 // ── Taille maximale : 30 Mo (ou 100 Mo pour vidéos) ──
+if (!function_exists('finfo_open')) {
+    jsonResponse(['error' => "Envoi indisponible : le serveur ne peut pas vérifier le type du fichier."], 503);
+}
 $finfo    = finfo_open(FILEINFO_MIME_TYPE);
 $mime     = finfo_file($finfo, $file['tmp_name']);
 finfo_close($finfo);

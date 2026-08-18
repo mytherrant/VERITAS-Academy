@@ -765,3 +765,73 @@ h2:nth-of-type(4n+4) { border-bottom-color:rgba(91,79,168,.22) }
     animation: none !important; opacity:1 !important; transform:none !important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Lecture : prose justifiée, icônes centrées
+   ──────────────────────────────────────────────────────────────────────────
+   Les pages servies par CETTE feuille (corrigés, œuvres, niveaux, découvrir,
+   outils, ressources, cours, legal) n'étaient PAS justifiées : mesuré à 0 sur
+   3 paragraphes de prose longue, quand la famille voisine — servie par
+   veritas-pages.css, où la règle existe depuis longtemps (ligne ~424) — l'était.
+   Deux feuilles, deux traitements, une seule marque. On aligne.
+
+   Sélecteurs calqués sur ceux de veritas-pages.css, restreints à ce qui existe
+   ici : aucune page de ce dépôt n'a de <main>, le conteneur est `.wrap`.
+
+   Garde-fous repris tels quels : `hyphens:auto` (sans césure, une colonne
+   étroite justifiée creuse des rivières blanches) et retour en `start` sous
+   600 px — même seuil que la feuille voisine, pour que les deux familles
+   basculent au même endroit.
+   ══════════════════════════════════════════════════════════════════════════ */
+.wrap > p,
+.card p,
+.card .note,
+.card li,
+.wrap > ul > li,
+.wrap > ol > li,
+blockquote p {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
+}
+
+/* Ce qui ne se justifie jamais : titres, contrôles, cellules, légendes. */
+.wrap h1, .wrap h2, .wrap h3, .wrap h4, .wrap h5, .wrap h6,
+.wrap button, .wrap a, .wrap th, .wrap td,
+.wrap label, .wrap small, .wrap caption, .wrap figcaption,
+.wrap code, .wrap pre, .wrap .badge, .wrap .pill {
+  text-align: inherit;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+}
+
+/* Une icône se cale au milieu de la ligne de texte. On ne touche pas au
+   `display` du contrôle : passer un bouton en flex ici casserait des mises en
+   page déjà réglées ailleurs dans cette feuille. */
+.wrap a > svg,
+.wrap button > svg,
+.wrap label > svg,
+.wrap summary > svg,
+.wrap a > img,
+.wrap button > img {
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+
+/* Icône seule, hors texte : centrée dans son bloc. */
+.wrap figure > svg,
+.wrap .ico-bloc {
+  display: block;
+  margin-inline: auto;
+}
+
+@media (max-width: 600px) {
+  .wrap > p, .card p, .card .note, .card li,
+  .wrap > ul > li, .wrap > ol > li, blockquote p {
+    text-align: start;
+    hyphens: manual;
+    -webkit-hyphens: manual;
+  }
+}

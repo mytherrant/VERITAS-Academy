@@ -58,6 +58,16 @@ $allowed = [
     'video/mp4','video/webm','video/ogg','video/quicktime',
     'audio/mpeg','audio/mp3','audio/wav','audio/ogg','audio/mp4',
 ];
+// Sans fileinfo, le MIME réel est invérifiable : on REFUSE (fail-closed).
+// Un envoi accepté sans contrôle de type, c'est un webshell déposé dans uploads/.
+if (!class_exists('finfo')) {
+    @file_put_contents(__DIR__.'/data/_security_log.txt',
+        date('c')." [UPLOAD_BLOCKED] extension fileinfo absente — envoi refusé
+", FILE_APPEND);
+    http_response_code(503);
+    echo json_encode(['ok'=>false,'error'=>"Envoi indisponible : le serveur ne peut pas vérifier le type du fichier."]);
+    exit;
+}
 $finfo = new finfo(FILEINFO_MIME_TYPE);
 $mime  = $finfo->file($file['tmp_name']);
 if (!in_array($mime, $allowed)) {

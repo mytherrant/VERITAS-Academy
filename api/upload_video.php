@@ -39,6 +39,11 @@ if ($file['size'] > $maxSize) {
 
 // Vérifier le type MIME réel
 $allowedMimes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime', 'video/x-msvideo'];
+if (!function_exists('mime_content_type')) {
+    http_response_code(503);
+    echo json_encode(['ok'=>false,'error'=>"Envoi indisponible : type de fichier invérifiable."]);
+    exit;
+}
 $mime = mime_content_type($file['tmp_name']);
 if (!in_array($mime, $allowedMimes)) {
     jsonResponse(['error' => 'Type non autorisé : ' . $mime . ' — utilisez MP4 ou WebM'], 400);

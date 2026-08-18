@@ -8214,3 +8214,120 @@ body.vmenu-lock{overflow:hidden}
   .pvr-t{ font-size:17px; }
   .pvr-cta,.pvr-sec{ width:100%; }
 }
+
+/* ══ LECTEUR SÉCURISÉ — MODE TEXTE (EPUB), v1.18 ═══════════════════════════
+   La même œuvre, lue autrement : une colonne de 680 px maximum, la police au
+   choix du lecteur, et la palette de thèmes déjà en place pour les pages.
+   Rien ici n'ouvre une porte : le texte arrive déjà assaini du serveur, et la
+   sélection reste coupée par .sread (user-select:none).                     */
+.sread-mode{display:flex;gap:2px;background:rgba(255,255,255,.10);border-radius:99px;padding:2px;flex-shrink:0}
+.sread-mbtn{background:transparent;border:none;color:rgba(255,255,255,.62);font-size:14px;line-height:1;
+  padding:5px 9px;border-radius:99px;cursor:pointer;transition:background .18s ease,color .18s ease}
+.sread-mbtn:hover{color:#fff}
+.sread-mbtn.on{background:rgba(255,201,60,.22);color:#FFC93C}
+.sread-text{width:100%;max-width:680px;margin:0 auto;padding:6px 6px 44px;
+  font-family:'Libre Baskerville',Georgia,serif;font-size:17px;line-height:1.85;
+  color:#E8EDF7;text-align:justify;hyphens:auto;-webkit-hyphens:auto}
+.sread-ch{margin:0 0 30px}
+.sread-chnum{font-family:Montserrat,sans-serif;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  font-size:12.5px;color:#FFC93C;text-align:center;text-indent:0;margin:24px 0 18px;padding-top:22px;
+  border-top:1px solid rgba(255,255,255,.12)}
+.sread-ch:first-child .sread-chnum{border-top:none;padding-top:0;margin-top:6px}
+.sread-text p{margin:0 0 2px;text-indent:1.4em}
+.sread-text p.first,.sread-text p.epi,.sread-text p.ded,.sread-text p.author,
+.sread-text p.sub,.sread-text p.pub,.sread-text p.isbn{text-indent:0}
+.sread-text p.epi{font-style:italic;color:#B9C6E2;text-align:center;margin:0 0 8px}
+.sread-text p.ded{text-align:center;font-style:italic;margin:0 0 10px}
+.sread-text h1{font-family:Montserrat,sans-serif;font-size:19px;letter-spacing:.04em;text-align:center;
+  color:#fff;margin:0 0 12px}
+.sread-text hr{border:none;border-top:1px solid rgba(255,255,255,.18);margin:14px auto;width:84px}
+/* Le numéro de chapitre de la maquette imprimée ferait doublon avec le titre
+   que le lecteur affiche déjà au-dessus du texte. */
+.sread-text .chap-num{display:none}
+.sread-chload{color:rgba(255,255,255,.3);text-align:center;padding:24px 0;font-size:22px;letter-spacing:.3em}
+.sread-cut{text-align:center;text-indent:0;font-family:Montserrat,sans-serif;font-size:12px;letter-spacing:.1em;
+  color:rgba(255,255,255,.5);margin:22px 0 0}
+.sread-sign{text-align:center;text-indent:0;font-family:Montserrat,sans-serif;font-size:10.5px;line-height:1.6;
+  color:rgba(255,255,255,.34);margin:26px 0 0;padding-top:12px;
+  border-top:1px dashed rgba(255,255,255,.14)}
+.sread[data-theme="sepia"] .sread-text{color:#3A2E1C}
+.sread[data-theme="sepia"] .sread-text h1{color:#26200F}
+.sread[data-theme="sepia"] .sread-text p.epi{color:#5E4B2E}
+.sread[data-theme="sepia"] .sread-chnum{color:#7A5A22;border-top-color:rgba(58,46,28,.22)}
+.sread[data-theme="sepia"] .sread-text hr{border-top-color:rgba(58,46,28,.3)}
+.sread[data-theme="sepia"] .sread-cut,
+.sread[data-theme="sepia"] .sread-sign{color:rgba(58,46,28,.62);border-top-color:rgba(58,46,28,.22)}
+.sread[data-theme="doux"] .sread-text{color:#D3DAEA}
+.sread[data-theme="nuit"] .sread-text{color:#AEB8CC}
+.sread[data-theme="nuit"] .sread-chnum{color:#C9A23A}
+@media(max-width:640px){
+  /* Sur téléphone, la justification creuse des rivières dans une colonne
+     étroite : on aligne à gauche, c'est plus lisible. */
+  .sread-text{font-size:16.5px;padding:4px 2px 34px;text-align:left}
+  .sread-mbtn{padding:5px 8px}
+}
+
+/* ── Barre du lecteur sur téléphone ────────────────────────────────────────
+   Mesuré à 390 px : la barre débordait de 137 px et emportait hors écran le
+   bouton « Débloquer » ET la croix de fermeture — on ouvrait le lecteur sans
+   pouvoir le refermer. Elle portait déjà trop d'éléments avant la bascule de
+   mode ; celle-ci a rendu le défaut visible. On retire ce qui ne sert pas sur
+   un téléphone (le plein écran, le titre déjà réduit à zéro, le pourcentage
+   de zoom) et on resserre le reste.                                        */
+@media(max-width:640px){
+  .sread-bar{gap:6px;padding:10px 8px}
+  .sread-title{display:none}
+  .sread-fs{display:none}
+  .sread-zlbl{display:none}
+  .sread-zoom{gap:2px}
+  /* On NE rapetisse PAS les boutons : chacun porte min-width:44px, la cible
+     tactile accessible. On retire ce dont on peut se passer, à la place. */
+  .sread-page{display:none}          /* le titre du chapitre est déjà dans le texte */
+  .sread-unlock-l{display:none}      /* le cadenas suffit ; aria-label porte le sens */
+  .sread-unlock{padding:6px 10px}
+  .sread-mbtn{padding:5px 7px}
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Lecture : prose justifiée, icônes centrées — application
+   ──────────────────────────────────────────────────────────────────────────
+   Ajouté en FIN de fichier, à dessein : appondre ne peut pas écraser une règle
+   écrite plus haut par une autre session, et la cascade fait le reste.
+
+   Deux garde-fous : `hyphens:auto` (sans césure, une colonne étroite justifiée
+   creuse des rivières blanches) et retour en `start` sous 640 px (sur un
+   téléphone la ligne est trop courte pour que la justification tienne).
+   ══════════════════════════════════════════════════════════════════════════ */
+#cnt#cnt p, #cnt#cnt li, #cnt#cnt blockquote, #cnt#cnt dd {
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+  text-wrap: pretty;
+}
+#cnt#cnt h1, #cnt#cnt h2, #cnt#cnt h3, #cnt#cnt h4, #cnt#cnt h5, #cnt#cnt h6,
+#cnt#cnt button, #cnt#cnt a, #cnt#cnt th, #cnt#cnt td,
+#cnt#cnt label, #cnt#cnt small, #cnt#cnt caption, #cnt#cnt figcaption, #cnt#cnt code, #cnt#cnt pre {
+  text-align: inherit;
+  hyphens: manual;
+  -webkit-hyphens: manual;
+}
+/* Une icône se cale au milieu de la ligne de texte, sans toucher au `display`
+   du contrôle : passer un bouton en flex ici casserait des mises en page. */
+#cnt#cnt a > svg, #cnt#cnt button > svg, #cnt#cnt label > svg, #cnt#cnt summary > svg,
+#cnt#cnt a > img, #cnt#cnt button > img {
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+/* Icône seule, hors texte : centrée dans son bloc. */
+#cnt#cnt figure > svg, #cnt#cnt .ico-bloc, #cnt#cnt [data-ico-bloc] {
+  display: block;
+  margin-inline: auto;
+}
+@media (max-width: 640px) {
+  #cnt#cnt p, #cnt#cnt li, #cnt#cnt blockquote, #cnt#cnt dd {
+    text-align: start;
+    hyphens: manual;
+    -webkit-hyphens: manual;
+  }
+}
