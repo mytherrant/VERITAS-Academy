@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Source+Sans+3:wght@400;600;700&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;} html,body{margin:0;padding:0;}
+  body{background:#0f1622;font-family:'Source Sans 3',system-ui,sans-serif;color:#eef2f6;overflow-x:hidden;}
+  .wrap{max-width:960px;margin:0 auto;padding:38px 22px 60px;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+  @keyframes pop{0%{transform:scale(.6);opacity:0;}60%{transform:scale(1.12);}100%{transform:scale(1);opacity:1;}}
+  @keyframes type{from{width:0;}to{width:100%;}}
+  @keyframes blink{50%{border-color:transparent;}}
+  @keyframes draw{from{stroke-dashoffset:220;}to{stroke-dashoffset:0;}}
+  @keyframes check{0%{transform:scale(0) rotate(-20deg);opacity:0;}70%{transform:scale(1.2) rotate(0);}100%{transform:scale(1);opacity:1;}}
+  @keyframes float{0%,100%{transform:translateY(0);}50%{transform:translateY(-9px);}}
+  @keyframes shine{0%{background-position:-200% 0;}100%{background-position:200% 0;}}
+  .card{background:#182233;border:1px solid #263349;border-radius:18px;padding:26px 26px 30px;margin:20px 0;opacity:0;animation:fadeUp .7s ease forwards;}
+  .card:nth-child(2){animation-delay:.15s;} .card:nth-child(3){animation-delay:.3s;} .card:nth-child(4){animation-delay:.45s;} .card:nth-child(5){animation-delay:.6s;} .card:nth-child(6){animation-delay:.75s;}
+  .num{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#004a99,#0a68c9);display:flex;align-items:center;justify-content:center;font-family:'Baloo 2';font-weight:800;font-size:22px;animation:float 3.4s ease-in-out infinite;}
+  .step-h{display:flex;align-items:center;gap:14px;margin-bottom:8px;}
+  .step-t{font-family:'Baloo 2';font-weight:800;font-size:20px;color:#fff;}
+  .step-d{color:#a9b6c6;font-size:14.5px;line-height:1.55;}
+  .demo{margin-top:16px;background:#0f1622;border:1px solid #2a394f;border-radius:12px;padding:16px;}
+  .kbd{display:inline-block;background:#243149;border:1px solid #38496a;border-radius:6px;padding:2px 9px;font-family:'Baloo 2';font-weight:700;color:#8fd0ff;letter-spacing:.1em;}
+  .field{position:relative;height:34px;border-bottom:2px dashed #3a4b66;overflow:hidden;}
+  .field span{position:absolute;left:0;top:2px;white-space:nowrap;overflow:hidden;border-right:2px solid #7fd0ff;width:0;font-family:'Klee One',cursive;font-size:17px;color:#bfe3ff;animation:type 2.6s steps(30) 1s forwards,blink .8s step-end infinite;}
+  .qcm{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:15px;}
+  .box{width:20px;height:20px;border-radius:5px;border:2px solid #4a5f82;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;}
+  .box.on{background:#2b8ac6;border-color:#2b8ac6;animation:check .6s ease 1.4s both;}
+  .relie{position:relative;display:grid;grid-template-columns:1fr 60px 1fr;align-items:center;gap:6px;margin:6px 0;}
+  .dot{width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #9a7bd0;justify-self:center;}
+  .corr{margin-top:12px;background:#12241a;border-left:4px solid #57a52c;border-radius:0 8px 8px 0;padding:9px 13px;color:#bfe6c4;font-size:13.5px;opacity:0;animation:fadeUp .6s ease 1.6s forwards;}
+  .pill{display:inline-block;background:#57a52c;color:#fff;font-family:'Baloo 2';font-weight:700;font-size:11px;padding:3px 12px;border-radius:14px;}
+  h1{font-family:'Baloo 2';font-weight:800;font-size:34px;margin:0 0 4px;background:linear-gradient(90deg,#fff,#f39200,#fff);background-size:200% auto;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;animation:shine 4s linear infinite;}
+  .sub{color:#a9b6c6;font-size:15px;margin-bottom:6px;}
+  .cta{margin-top:26px;text-align:center;background:linear-gradient(135deg,#003d7a,#0a68c9);border-radius:18px;padding:26px;opacity:0;animation:fadeUp .7s ease .9s forwards;}
+  .cta a{display:inline-block;margin-top:12px;background:#f39200;color:#fff;text-decoration:none;font-family:'Baloo 2';font-weight:800;font-size:16px;padding:11px 26px;border-radius:24px;}
+</style>
+</helmet>
+<div class="wrap">
+  <div style="text-align:center;margin-bottom:6px;">
+    <div class="pill" style="background:#f39200;">Centre Véritas · Mode d'emploi</div>
+    <h1>Ton livret, en ligne et interactif</h1>
+    <div class="sub">Quatre gestes simples pour travailler, t'auto-corriger et progresser.</div>
+  </div>
+
+  <div class="card">
+    <div class="step-h"><div class="num">1</div><div class="step-t">Débloque ton livret</div></div>
+    <div class="step-d">Saisis le <b>code d'accès</b> reçu après ton abonnement. Le livret s'ouvre aussitôt, sur ordinateur comme sur téléphone.</div>
+    <div class="demo"><span class="kbd">V E R I T A S 2 0 2 6</span> &nbsp;→&nbsp; 🔓 <b style="color:#7fd0ff;">Livret débloqué</b></div>
+  </div>
+
+  <div class="card">
+    <div class="step-h"><div class="num">2</div><div class="step-t">Réponds directement en ligne</div></div>
+    <div class="step-d">Tape tes réponses dans les lignes, coche les QCM, relie les éléments, remplis les grilles. Tout est <b>enregistré automatiquement</b> sur ton appareil.</div>
+    <div class="demo">
+      <div class="field"><span>Le sujet du verbe est « les élèves ».</span></div>
+      <div class="qcm"><div class="box on">✓</div><div>Phrase déclarative</div></div>
+      <div class="relie"><div style="text-align:right;">l'émetteur</div><svg width="60" height="20"><line x1="4" y1="10" x2="56" y2="10" stroke="#7a5cb0" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="220" style="animation:draw 1.2s ease 1s forwards;"/></svg><div>celui qui parle</div>
+        <div class="dot" style="grid-column:1;justify-self:end;"></div><div class="dot" style="grid-column:3;justify-self:start;"></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="step-h"><div class="num">3</div><div class="step-t">Vérifie avec la correction</div></div>
+    <div class="step-d">Après avoir répondu, appuie sur <span class="pill" style="background:#004a99;">✓ Voir la correction</span> pour comparer avec le <b>corrigé détaillé</b> et comprendre tes erreurs.</div>
+    <div class="demo"><div class="corr"><b style="color:#8fd88f;">CORRIGÉ —</b> « les élèves » est bien le sujet ; la phrase est déclarative car elle énonce un fait.</div></div>
+  </div>
+
+  <div class="card">
+    <div class="step-h"><div class="num">4</div><div class="step-t">Imprime ou garde en PDF</div></div>
+    <div class="step-d">Besoin d'une version papier ? Un bouton <b>Imprimer / PDF</b> te permet d'emporter ton travail partout. Tes réponses restent privées sur ton appareil.</div>
+  </div>
+
+  <div class="cta">
+    <div style="font-family:'Baloo 2';font-weight:800;font-size:22px;">Prêt à commencer ?</div>
+    <div style="opacity:.92;font-size:15px;margin-top:4px;">Abonne-toi et reçois ton code d'accès immédiatement.</div>
+    <a href="https://www.veritas-school.com">S'abonner maintenant →</a>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

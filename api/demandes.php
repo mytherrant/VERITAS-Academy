@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/_json_boot.php'; // display_errors=0 : une demande entrante ne doit jamais renvoyer une trace PHP au visiteur
 // ============================================================
 // VÉRITAS — Demandes entrantes (établissement → Campus, parent → domicile)
 // © 2024-2026 Jacques Miterand TAKOU (Mythe Errant). Tous droits réservés.
@@ -158,6 +159,17 @@ if ($action === 'update') {
 if ($method !== 'POST') {
     jsonResponse(['ok' => false, 'error' => 'Méthode non autorisée.'], 405);
 }
+// ── 🛡️ SENTINELLE (v2.0) ────────────────────────────────────────────────
+// Ce formulaire écrit dans un fichier ET déclenche un courriel : c'est la
+// surface la plus rentable à inonder de tout le site. Le compteur ci-dessous
+// existait déjà, mais il comptait par une IP que l'expéditeur choisissait
+// lui-même — quatre dépôts par minute et par fausse identité, donc sans
+// limite réelle. La sentinelle vient d'abord, avec l'IP véritable.
+// Placée APRÈS les routes admin : un administrateur authentifié n'a pas à
+// passer un défi pour consulter ses propres demandes.
+require_once __DIR__ . '/_sentinel.php';
+vrt_sentinelle('ecriture');
+
 if (vrt_rate_exceeded('demandes', DEM_MAX_PAR_MIN)) {
     jsonResponse(['ok' => false, 'error' => 'Trop de demandes envoyées coup sur coup. Patientez une minute.'], 429);
 }

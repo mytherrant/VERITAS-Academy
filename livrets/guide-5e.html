@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self' https://unpkg.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'none'">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="/livrets/gate.js?v=29598ca7"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<script>VRTLivret.config({classe:'5e',kind:'guide',titre:'Guide enseignant 5ᵉ'});</script>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin:0; padding:0; }
+  body { background:#ece7dc; font-family:'Source Sans 3', system-ui, sans-serif; color:#2b3038; }
+  a { color:#2b8ac6; } a:hover { color:#1d699c; }
+  @media print { [data-ui] { display:none !important; } #sheet { box-shadow:none !important; margin:0 !important; max-width:none !important; } }
+</style>
+</helmet>
+<main id="sheet" style="max-width:900px; margin:22px auto; background:#fff; border-radius:16px; box-shadow:0 10px 40px -12px rgba(31,43,56,.28); padding:40px 46px;">
+  {{ toolbarEl }}
+  {{ overlayEl }}
+  <header style="text-align:center; border-bottom:3px solid #c0453f; padding-bottom:14px; margin-bottom:8px;">
+    <div style="font-family:'Baloo 2'; font-weight:700; font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:#c0453f;">Centre Véritas — Douala, Cameroun</div>
+    <div style="font-family:'Baloo 2'; font-weight:800; font-size:30px; color:#1f2b38; margin:4px 0 0;">Guide pédagogique — 5<sup>e</sup></div>
+    <div style="color:#5c666f; font-size:14px;">Corrigés détaillés &amp; conduite de la classe · réservé à l'enseignant</div>
+  </header>
+  {{ body }}
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props){ super(props); this._built=false; this._el=null;
+    this.LU='veritas-teacher-5e';
+    let u=false; /* le déverrouillage est vérifié par le serveur, pas par le navigateur */
+    this.state={unlocked:u, err:false};
+  }
+  componentDidMount(){
+    var self=this;
+    // Le contenu n'est plus dans la page : il arrive d'api/livret.php après
+    // vérification du code. `resume()` reprend une session encore valide
+    // (rechargement, retour sur la page) ; sinon le calque de saisie reste.
+    VRTLivret.onOuvert=function(){ self.setState({unlocked:true,err:false}); };
+    VRTLivret.resume().then(function(){ self.setState({unlocked:true,err:false}); })
+                      .catch(function(){ self.setState({unlocked:false}); });
+  }
+  tryUnlock(){
+    var self=this, v=(this._code||'').trim();
+    if(!v){ this.setState({err:'Saisis ton code.'}); return; }
+    this.setState({err:false,busy:true});
+    // Le code part au serveur — il n'est comparé à RIEN dans cette page.
+    VRTLivret.unlock(v).then(function(){ self.setState({unlocked:true,err:false,busy:false}); })
+                       .catch(function(e){ self.setState({err:(e&&e.message)||(typeof this.state.err==='string'?this.state.err:'Code incorrect. Réessaie.'),busy:false}); });
+  }
+  toolbarEl(){ const h=React.createElement;
+    return h('div',{'data-ui':'1',style:{position:'sticky',top:0,zIndex:40,display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap',background:'#1f2b38',color:'#fff',padding:'8px 16px',margin:'-40px -46px 20px',borderRadius:'16px 16px 0 0',fontFamily:"'Baloo 2', sans-serif"}},[
+      h('span',{key:'t',style:{fontWeight:800,fontSize:'14px'}},'👩\u200d🏫 Espace enseignant'),
+      h('span',{key:'s',style:{fontSize:'12px',opacity:.85,flex:1,minWidth:'160px'}},'Corrigés et conseils de classe — document confidentiel.'),
+      h('button',{key:'p',onClick:()=>window.print(),style:{border:'none',background:'#2b8ac6',color:'#fff',fontFamily:'inherit',fontWeight:700,fontSize:'12px',padding:'6px 14px',borderRadius:'8px',cursor:'pointer'}},'Imprimer / PDF')
+    ]); }
+  overlayEl(){ const h=React.createElement; if(this.state.unlocked) return null;
+    return h('div',{'data-ui':'1',style:{position:'fixed',inset:0,zIndex:100,background:'rgba(20,26,34,.6)',backdropFilter:'blur(6px)',WebkitBackdropFilter:'blur(6px)',display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}},
+      h('div',{style:{background:'#fff',borderRadius:'18px',maxWidth:'400px',width:'100%',padding:'30px 28px',textAlign:'center',boxShadow:'0 20px 60px -20px rgba(0,0,0,.5)'}},[
+        h('div',{key:'i',style:{fontSize:'40px'}},'🔐'),
+        h('div',{key:'t',style:{fontFamily:"'Baloo 2', sans-serif",fontWeight:800,fontSize:'22px',color:'#1f2b38',margin:'10px 0 4px'}},'Guide réservé aux enseignants'),
+        h('div',{key:'s',style:{fontSize:'14px',color:'#5c666f',lineHeight:1.5}},'Saisis ton code enseignant pour accéder aux corrigés.'),
+        h('input',{key:'in',type:'text',placeholder:'Code enseignant',onChange:(e)=>{this._code=e.target.value;},onKeyDown:(e)=>{if(e.key==='Enter')this.tryUnlock();},style:{width:'100%',boxSizing:'border-box',margin:'16px 0 6px',padding:'11px 14px',border:'2px solid '+(this.state.err?'#c0453f':'#cfd6dd'),borderRadius:'10px',fontSize:'16px',textAlign:'center',letterSpacing:'.08em',textTransform:'uppercase'}}),
+        this.state.err?h('div',{key:'e',style:{color:'#c0453f',fontSize:'12px',marginBottom:'6px'}},'Code incorrect.'):null,
+        h('button',{key:'b',onClick:()=>this.tryUnlock(),style:{width:'100%',border:'none',background:'#c0453f',color:'#fff',fontFamily:"'Baloo 2', sans-serif",fontWeight:800,fontSize:'16px',padding:'12px',borderRadius:'10px',cursor:'pointer',marginTop:'6px'}},'Accéder au guide'),
+        h('div',{key:'h',style:{fontSize:'11.5px',color:'#98a1aa',marginTop:'12px',lineHeight:1.5}},'Le code enseignant est remis avec le spécimen. ',h('a',{href:'https://veritas-school.com/adopter/',target:'_blank',rel:'noopener',style:{color:'#2b8ac6',fontWeight:700}},'Adopter le cahier'))
+      ])); }
+  build(G){ const h=React.createElement, els=[];
+    (G.sequences||[]).forEach((s,si)=>{
+      els.push(h('div',{key:'s'+si,style:{margin:'22px 0 8px',background:'#1f2b38',color:'#fff',borderRadius:'12px',padding:'10px 16px',fontFamily:"'Baloo 2', sans-serif",fontWeight:800,fontSize:'17px'}},s.title));
+      (s.lessons||[]).forEach((l,li)=>{
+        els.push(h('div',{key:'l'+si+'_'+li,style:{margin:'16px 0 4px',fontFamily:"'Baloo 2', sans-serif",fontWeight:700,fontSize:'15px',color:'#c0453f',borderBottom:'2px solid #f0d9d7',paddingBottom:'3px'}},l.title));
+        (l.exercises||[]).forEach((e,ei)=>{
+          els.push(h('div',{key:'e'+si+'_'+li+'_'+ei,style:{margin:'8px 0',breakInside:'avoid'}},[
+            h('div',{key:'q',style:{fontStyle:'italic',color:'#41505c',fontSize:'13.5px',lineHeight:1.4,marginBottom:'3px'}},e.consigne),
+            e.corrige?h('div',{key:'c',style:{background:'#f2f8ea',borderLeft:'4px solid #57a52c',borderRadius:'0 8px 8px 0',padding:'7px 12px',fontSize:'13px',color:'#33512a',lineHeight:1.5}},e.corrige):null
+          ]));
+        });
+        (l.conseils||[]).forEach((c,ci)=>{
+          els.push(h('div',{key:'cs'+si+'_'+li+'_'+ci,style:{margin:'6px 0',background:'#eef4fb',borderLeft:'4px solid #2b8ac6',borderRadius:'0 8px 8px 0',padding:'7px 12px',fontSize:'13px',color:'#294b66',lineHeight:1.5}},[h('span',{key:'l',style:{fontFamily:"'Baloo 2', sans-serif",fontWeight:700,color:'#2b6aa5',fontSize:'10.5px',textTransform:'uppercase',letterSpacing:'.04em',marginRight:'6px'}},'Conseil'),c]));
+        });
+      });
+    });
+    return h('div',null,els);
+  }
+  renderVals(){ if(!this._built&&window.GUIDE_5E){ this._el=this.build(window.GUIDE_5E); this._built=true; } return { body:this._el, overlayEl:this.overlayEl(), toolbarEl:this.toolbarEl() }; }
+}
+</script>
+</body>
+</html>

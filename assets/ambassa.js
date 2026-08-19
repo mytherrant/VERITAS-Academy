@@ -343,6 +343,23 @@
 
   function poserLanceur() {
     if (document.querySelector('.amb-fab')) return;
+
+    /* La page a-t-elle DÉJÀ sa porte vers Ambassa ?
+       La règle « déléguer au tuteur d'origine » ne couvrait que l'APPLICATION
+       (`window.mAgentAmbassa`). Or la VITRINE a, elle aussi, son propre bouton
+       Ambassa — l'avatar de la colonne flottante, qui appelle
+       `VRT.act('basculerIA')`. Sur l'accueil, les deux se posaient au même
+       endroit : la pastille « Besoin d'aide ? » d'ambassa.js (201 × 60, z 9000)
+       recouvrait exactement le FAB de la vitrine (62 × 62). Deux avatars
+       superposés pour un seul tuteur.
+       Une page qui sait déjà ouvrir Ambassa n'a pas besoin d'une seconde
+       porte : on s'efface. `window.__ambassaDelegue` reste vrai pour que
+       `ouvrir()` sache vers quoi router. */
+    var porteExistante = document.querySelector(
+      'button[aria-label="Professeur Ambassa"], [onclick*="basculerIA"], [onclick*="ouvrirIA"]'
+    );
+    if (porteExistante) { window.__ambassaDelegue = 'vitrine'; return; }
+
     var b = document.createElement('button');
     b.type = 'button';
     b.className = 'amb-fab';

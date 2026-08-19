@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console enseignant — Livrets VÉRITAS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap"></noscript>
+<link rel="stylesheet" href="/assets/veritas-tokens.css?v=1.19.25">
+<link rel="stylesheet" href="/assets/veritas-pages.css?v=1.19.25">
+<style>
+  .cs{ max-width:900px; margin:0 auto; }
+  .ong{ display:flex; gap:6px; flex-wrap:wrap; border-bottom:2px solid #e3e8ef; margin:0 0 18px; }
+  .ong button{ border:none; background:none; font:inherit; font-weight:600; font-size:14.5px; color:#6b7684;
+    padding:10px 14px; cursor:pointer; border-bottom:3px solid transparent; margin-bottom:-2px; }
+  .ong button[aria-current="true"]{ color:var(--vp-accent,#1E499B); border-bottom-color:var(--vp-accent,#1E499B); }
+  .tuiles{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:0 0 20px; }
+  .tuile{ border:1px solid #e3e8ef; border-radius:14px; padding:14px 16px; background:#fff; }
+  .tuile b{ display:block; font-size:27px; font-weight:600; color:var(--vp-accent,#1E499B); line-height:1.2; }
+  .tuile span{ font-size:12.5px; color:#6b7684; }
+  .bloc{ border:1px solid #e3e8ef; border-radius:14px; padding:16px 18px; margin:0 0 14px; background:#fff; }
+  .bloc h3{ margin:0 0 10px; font-size:15.5px; font-weight:600; }
+  label{ display:block; font-size:13px; font-weight:600; color:#4a5563; margin:10px 0 4px; }
+  input,select,textarea{ width:100%; box-sizing:border-box; padding:10px 12px; font:inherit; font-size:15px;
+    border:1.5px solid #cfd6dd; border-radius:10px; }
+  textarea{ min-height:70px; resize:vertical; }
+  .b{ border:none; border-radius:10px; padding:10px 17px; font:inherit; font-weight:600; font-size:14px; cursor:pointer; }
+  .b1{ background:var(--vp-accent,#1E499B); color:#fff; } .b2{ background:#fff; color:#334; border:1.5px solid #cfd6dd; }
+  .b3{ background:#d8b24a; color:#3a2f0b; } .b:disabled{ opacity:.55; cursor:default; }
+  .barre{ display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 0; }
+  .lst{ list-style:none; padding:0; margin:0; }
+  .lst li{ border:1px solid #e3e8ef; border-radius:12px; padding:12px 14px; margin:0 0 9px; background:#fff; }
+  .lien{ font-family:ui-monospace,monospace; font-size:12.5px; background:#f4f6f8; border-radius:7px;
+    padding:5px 9px; display:inline-block; word-break:break-all; }
+  .meta{ font-size:12.5px; color:#6b7684; }
+  .msg{ min-height:20px; font-size:13.5px; } .ko{ color:#c0453f; } .ok{ color:#3f7a2c; }
+  .exopick{ max-height:290px; overflow:auto; border:1px solid #e3e8ef; border-radius:10px; padding:8px 10px; }
+  .exopick label{ display:flex; gap:9px; align-items:flex-start; font-weight:400; font-size:13.5px;
+    margin:5px 0; cursor:pointer; }
+  .exopick input{ width:auto; margin-top:3px; flex:none; }
+  .pill{ display:inline-block; background:#eef4fb; color:#2b6aa5; border-radius:20px; padding:2px 10px;
+    font-size:11.5px; font-weight:600; }
+</style>
+</head>
+<body>
+<header class="top">
+  <span class="badge">Centre VÉRITAS · Espace enseignant</span>
+  <h1>Console des devoirs</h1>
+  <p id="sous" class="meta">Créez vos classes, envoyez des devoirs, corrigez les copies.</p>
+</header>
+<div class="wrap cs">
+  <div id="corps"><p class="meta">Chargement…</p></div>
+</div>
+<footer class="bot">© <span id="y"></span> Centre VÉRITAS · Mythe Errant — Douala, Cameroun</footer>
+
+<script src="/livrets/gate.js?v=29598ca7"></script>
+<script src="/livrets/collab.js?v=0c06e8ee"></script>
+<script>
+(function(){
+  'use strict';
+  document.getElementById('y').textContent = new Date().getFullYear();
+  var C = window.VRTCollab, G = window.VRTLivret;
+  var $ = function(id){ return document.getElementById(id); };
+  var S = { token:'', classe:'', onglet:'bord', classes:[], devoirs:[], bord:null, parrain:null };
+
+  function msg(t, ok){ var e=$('msg'); if(e){ e.textContent=t||''; e.className='msg '+(ok?'ok':'ko'); } }
+  function api(o){ o.token = S.token; return C.post(o); }
+
+  // ── Entrée : un code enseignant, le même que celui du Guide en ligne ────────
+  var trouve = C.jetonProf();
+  if(trouve){ S.token = trouve.token; S.classe = trouve.classe; demarrer(); }
+  else rendreConnexion();
+
+  function rendreConnexion(){
+    $('corps').innerHTML = '<div class="bloc" style="max-width:420px;margin:0 auto;text-align:center">'
+      + '<div style="font-size:36px">👩‍🏫</div>'
+      + '<h3>Code enseignant</h3>'
+      + '<p class="meta">Le même que celui de votre Guide pédagogique en ligne. '
+      + 'Il est remis avec le spécimen.</p>'
+      + '<label for="cl">Classe</label>'
+      + '<select id="cl"><option value="6e">6ᵉ</option><option value="5e">5ᵉ</option>'
+      + '<option value="4e">4ᵉ</option><option value="3e">3ᵉ</option></select>'
+      + '<label for="code">Code</label>'
+      + '<input id="code" placeholder="VRT-6E-XXXX-XXXX" style="text-align:center;text-transform:uppercase">'
+      + '<div id="msg" class="msg" style="margin-top:8px"></div>'
+      + '<button class="b b1" id="ok" style="width:100%">Entrer</button>'
+      + '<p class="meta" style="margin-top:12px">Pas encore de code ? '
+      + '<a href="/adopter/">Adopter le cahier</a></p></div>';
+    $('ok').onclick = function(){
+      var b=this, cl=$('cl').value, code=$('code').value;
+      b.disabled=true; b.textContent='Vérification…'; msg('');
+      G.config({ classe: cl, kind:'guide', titre:'Guide '+cl });
+      G.unlock(code).then(function(){
+        S.token = C.jeton(cl,'guide'); S.classe = cl; demarrer();
+      }).catch(function(e){
+        b.disabled=false; b.textContent='Entrer'; msg(e.message||'Code refusé.');
+      });
+    };
+  }
+
+  function demarrer(){
+    // Le contenu du livret sert à composer les devoirs : on le charge une fois.
+    G.config({ classe:S.classe, kind:'guide', titre:'Guide '+S.classe });
+    G.resume().catch(function(){});
+    $('sous').textContent = 'Classe de ' + S.classe + ' · session enseignant';
+    rendre();
+    charger();
+  }
+
+  /* `silencieux` : rafraichit les donnees SANS repeindre l'ecran.
+     Sans cela, publier un devoir detruisait le panneau qui venait d'afficher
+     le lien a partager — l'enseignant ne le voyait jamais (constate au banc).
+     Meme piege a la correction : re-rendre efface le formulaire ouvert. */
+  function charger(silencieux){
+    Promise.all([
+      api({action:'tableau_bord'}).catch(function(){ return null; }),
+      api({action:'classe_lister'}).catch(function(){ return null; }),
+      api({action:'devoir_lister'}).catch(function(){ return null; }),
+      api({action:'parrain_bilan'}).catch(function(){ return null; })
+    ]).then(function(r){
+      if(r[0]){ S.bord = r[0]; }
+      if(r[1]){ S.classes = r[1].classes || []; }
+      if(r[2]){ S.devoirs = r[2].devoirs || []; }
+      if(r[3]){ S.parrain = r[3]; }
+      if(!silencieux) rendre();
+    });
+  }
+
+  function rendre(){
+    var h = '<div class="ong">'
+      + ['bord','Tableau de bord','classes','Mes classes','nouveau','Nouveau devoir','devoirs','Mes devoirs']
+        .reduce(function(a,_,i,t){ if(i%2) return a; return a + '<button data-o="'+t[i]+'" aria-current="'
+          + (S.onglet===t[i]) + '">' + t[i+1] + '</button>'; }, '')
+      + '</div><div id="vue"></div>';
+    $('corps').innerHTML = h;
+    [].forEach.call(document.querySelectorAll('.ong button'), function(b){
+      b.onclick = function(){ S.onglet = b.getAttribute('data-o'); rendre(); };
+    });
+    ({ bord:vueBord, classes:vueClasses, nouveau:vueNouveau, devoirs:vueDevoirs })[S.onglet]();
+  }
+
+  // ── Tableau de bord ─────────────────────────────────────────────────────────
+  function vueBord(){
+    var b = S.bord;
+    if(!b){ $('vue').innerHTML = '<p class="meta">Chargement…</p>'; return; }
+    var t = b.bilan, h = '<div class="tuiles">'
+      + tuile(t.devoirs,'devoirs') + tuile(t.copies,'copies reçues')
+      + tuile(t.aCorriger,'à corriger') + tuile(t.vues,'ouvertures du lien')
+      + tuile(t.parrainage.convertis,'élèves parrainés') + '</div>';
+
+    if((b.recents||[]).length){
+      h += '<div class="bloc"><h3>Devoirs récents</h3><ul class="lst">'
+        + b.recents.map(function(d){
+            return '<li><strong>'+C.esc(d.titre)+'</strong> <span class="pill">'+d.copies+' copie'
+              + (d.copies>1?'s':'')+'</span>'
+              + (d.completion!=null ? ' <span class="meta">'+d.completion+' % de la classe</span>' : '')
+              + '<div class="meta">'+C.dateFr(d.cree)+'</div></li>';
+          }).join('') + '</ul></div>';
+    }
+    if((b.aRelancer||[]).length){
+      h += '<div class="bloc"><h3>Élèves à relancer</h3>'
+        + b.aRelancer.map(function(r){
+            return '<p style="margin:0 0 8px"><strong>'+C.esc(r.devoir)+'</strong> — '
+              + r.total+' élève'+(r.total>1?'s':'')+' sans copie<br>'
+              + '<span class="meta">'+C.esc(r.eleves.join(', '))+'</span></p>';
+          }).join('') + '</div>';
+    }
+    // ── Ce que rapporte le partage ─────────────────────────────────────────
+    // Un barème qu'on ne montre pas n'existe pas : l'enseignant doit voir, à
+    // chaque visite, ce qu'il a gagné et ce qui lui manque pour le prochain code.
+    var P = S.parrain;
+    if(P){
+      var bar = P.bareme || {};
+      h += '<div class="bloc" style="border-color:#d8b24a;background:#fffdf4">'
+        + '<h3>Ce que vous rapporte le partage</h3>'
+        + '<p class="meta" style="margin:0 0 10px">Tous les <strong>'+(bar.seuil||5)+'</strong> élèves '
+        + 'qui prennent leur livret par vos liens, VÉRITAS vous offre <strong>un code élève</strong> '
+        + 'à donner à qui vous voulez — un élève sans moyens, un délégué, un cas difficile.</p>'
+        + '<div class="tuiles">'
+        + tuile(P.invites,'liens ouverts') + tuile(P.convertis,'élèves abonnés')
+        + tuile((P.codesOfferts||[]).length,'codes gagnés')
+        + tuile(bar.reste!=null?bar.reste:'—','avant le prochain')
+        + '</div>';
+      if((P.codesOfferts||[]).length){
+        h += '<p style="margin:6px 0 4px"><strong>Vos codes offerts</strong> '
+          + '<span class="meta">— à remettre en main propre, ils valent 1 500 F pièce</span></p>'
+          + '<ul class="lst">' + P.codesOfferts.map(function(c){
+              return '<li><span class="lien">'+C.esc(c.code)+'</span> '
+                + '<span class="meta">classe de '+C.esc(c.classe)+' · offert le '+C.dateFr(c.cree)+'</span></li>';
+            }).join('') + '</ul>';
+      }
+      h += '<p class="meta" style="margin:8px 0 0">Votre lien de parrainage — il suffit de le partager :</p>'
+        + '<p class="lien">'+C.esc(P.lien||'')+'</p>'
+        + '<div class="barre"><button class="b b3" id="cpp">Copier mon lien</button></div>'
+        + '</div>';
+    }
+
+    if(!b.recents.length && !t.devoirs){
+      h += '<div class="bloc"><h3>Commencez ici</h3><p class="meta">Créez une classe, puis un devoir : '
+        + 'vous obtiendrez un lien à envoyer dans le groupe WhatsApp de vos élèves.</p></div>';
+    }
+    $('vue').innerHTML = h;
+    var cpp = $('cpp');
+    if(cpp) cpp.onclick = function(){
+      try{ navigator.clipboard.writeText((S.parrain||{}).lien||''); this.textContent='Copié ✓'; }catch(e){}
+    };
+  }
+  function tuile(v,l){ return '<div class="tuile"><b>'+(v||0)+'</b><span>'+l+'</span></div>'; }
+
+  // ── Classes ─────────────────────────────────────────────────────────────────
+  function vueClasses(){
+    $('vue').innerHTML = '<div class="bloc"><h3>Créer une classe</h3>'
+      + '<label for="nc">Nom de la classe</label>'
+      + '<input id="nc" placeholder="ex. 6ᵉ M2 — Collège Bilingue de Douala">'
+      + '<div id="msg" class="msg" style="margin-top:8px"></div>'
+      + '<div class="barre"><button class="b b1" id="creer">Créer</button></div></div>'
+      + '<div class="bloc"><h3>Mes classes</h3>'
+      + (S.classes.length
+          ? '<ul class="lst">' + S.classes.map(function(c){
+              return '<li><strong>'+C.esc(c.nom)+'</strong> <span class="pill">'+c.effectif+' élève'
+                + (c.effectif>1?'s':'')+'</span><div class="meta">Niveau '+C.esc(c.niveau)
+                + ' · créée le '+C.dateFr(c.cree)+'</div></li>'; }).join('') + '</ul>'
+          : '<p class="meta">Aucune classe pour l\'instant. Les élèves s\'y inscrivent tout seuls en rendant leur premier devoir.</p>')
+      + '</div>';
+    $('creer').onclick = function(){
+      var b=this, nom=($('nc')||{}).value||'';
+      if(!nom.trim()){ msg('Donnez un nom à la classe.'); return; }
+      b.disabled=true; b.textContent='Création…';
+      api({action:'classe_creer', nom:nom}).then(function(){ charger(); })
+        .catch(function(e){ b.disabled=false; b.textContent='Créer'; msg(e.message||'Échec.'); });
+    };
+  }
+
+  // ── Nouveau devoir ──────────────────────────────────────────────────────────
+  function livre(){
+    return window.BOOKLET || window.BOOKLET_5E || window.BOOKLET_4E || window.BOOKLET_3E || null;
+  }
+
+  function vueNouveau(){
+    var B = livre();
+    var opts = S.classes.map(function(c){ return '<option value="'+C.esc(c.id)+'">'+C.esc(c.nom)+'</option>'; }).join('');
+    $('vue').innerHTML = '<div class="bloc"><h3>Nouveau devoir</h3>'
+      + '<label for="ti">Titre</label><input id="ti" placeholder="ex. Devoir 1 — Les types de phrases">'
+      + '<label for="cg">Consigne générale (facultatif)</label><textarea id="cg" placeholder="Ce que vous dites à la classe avant de commencer."></textarea>'
+      + '<label for="pn">Votre nom, tel qu\'il apparaîtra</label><input id="pn" placeholder="M. Takou">'
+      + '<label for="cid">Classe</label><select id="cid">'
+      + (opts || '<option value="">— créez d\'abord une classe —</option>') + '</select>'
+      + '<label for="du">À rendre le (facultatif)</label><input id="du" type="date">'
+      + '</div>'
+      + '<div class="bloc"><h3>Exercices du livret</h3>'
+      + (B ? '<div style="display:flex;gap:8px"><select id="sq"></select><select id="sm"></select></div>'
+             + '<div class="exopick" id="pick" style="margin-top:10px"></div>'
+           : '<p class="meta">Le livret n\'est pas encore chargé. Réessayez dans un instant, ou composez '
+             + 'le devoir uniquement avec vos propres exercices.</p>')
+      + '</div>'
+      + '<div class="bloc"><h3>Vos propres exercices</h3>'
+      + '<div id="miens"></div>'
+      + '<div class="barre"><button class="b b2" id="addex">+ Ajouter un exercice</button></div></div>'
+      + '<div id="msg" class="msg"></div>'
+      + '<div class="barre"><button class="b b1" id="pub">Créer le devoir et obtenir le lien</button></div>'
+      + '<div id="resultat"></div>';
+
+    if(B) remplirSeq(B);
+    $('addex').onclick = ajouterExo;
+    $('pub').onclick = publier;
+  }
+
+  function remplirSeq(B){
+    var sq = $('sq'), sm = $('sm');
+    sq.innerHTML = (B.sequences||[]).map(function(s,i){
+      return '<option value="'+i+'">Séq. '+(i+1)+' — '+C.esc(s.title||'')+'</option>'; }).join('');
+    function semaines(){
+      var s = B.sequences[+sq.value] || {};
+      sm.innerHTML = (s.weeks||[]).map(function(w,i){
+        return '<option value="'+i+'">Sem. '+(i+1)+' — '+C.esc(String(w.title||'').slice(0,44))+'</option>'; }).join('');
+      exos();
+    }
+    function exos(){
+      var si = +sq.value, wi = +sm.value;
+      var w = ((B.sequences[si]||{}).weeks||[])[wi] || {};
+      var h = [];
+      (w.items||[]).forEach(function(lec, ii){
+        (lec.flow||[]).forEach(function(bl, fi){
+          // Un exercice, c'est bl.t === 'exercise' et son enonce est dans bl.body.
+          // `t` est un MARQUEUR DE TYPE ('exercise' / 'section'), jamais du texte :
+          // s'en servir comme enonce afficherait « exercise » a l'eleve.
+          if(!C.estExercice(bl)) return;
+          var c = String(bl.body||'').trim();
+          var ref = 's'+si+'.w'+wi+'.i'+ii+'.f'+fi;
+          var rep = (lec.label||'') + (lec.disc ? ' · '+lec.disc : '')
+                  + (bl.num ? ' · Exercice '+bl.num : '');
+          h.push('<label><input type="checkbox" data-ref="'+ref+'" data-rep="'+C.esc(rep)+'">'
+            + '<span><strong>'+C.esc(rep)+'</strong> <span class="pill">'+C.esc(bl.cat||'')+'</span><br>'
+            + C.esc(c.slice(0,150))+'</span></label>');
+        });
+      });
+      $('pick').innerHTML = h.length ? h.join('') : '<p class="meta">Aucun exercice dans cette semaine.</p>';
+    }
+    sq.onchange = semaines; sm.onchange = exos;
+    semaines();
+  }
+
+  var nEx = 0;
+  function ajouterExo(){
+    nEx++;
+    var d = document.createElement('div');
+    d.className = 'bloc'; d.style.background = '#fbfcfd';
+    d.innerHTML = '<label>Consigne</label><textarea data-ex="c'+nEx+'" placeholder="Ce que l\'élève doit faire."></textarea>'
+      + '<label>Corrigé (vu par vous seul, puis renvoyé à l\'élève avec sa note)</label>'
+      + '<textarea data-ex="r'+nEx+'"></textarea>';
+    $('miens').appendChild(d);
+  }
+
+  function publier(){
+    var b = $('pub'); msg('');
+    var items = [];
+    [].forEach.call(document.querySelectorAll('#pick input:checked'), function(i){
+      items.push({ src:'livret', ref:i.getAttribute('data-ref'), repere:i.getAttribute('data-rep') });
+    });
+    [].forEach.call(document.querySelectorAll('#miens .bloc'), function(bl){
+      var c = bl.querySelector('[data-ex^="c"]'), r = bl.querySelector('[data-ex^="r"]');
+      if(c && c.value.trim()) items.push({ src:'prof', consigne:c.value, corrige:(r||{}).value||'', type:'long' });
+    });
+    if(!items.length){ msg('Choisissez au moins un exercice.'); return; }
+    if(!($('ti')||{}).value.trim()){ msg('Donnez un titre au devoir.'); return; }
+
+    var du = 0;
+    if(($('du')||{}).value){ du = Math.floor(new Date($('du').value + 'T23:59:00').getTime()/1000); }
+    b.disabled = true; b.textContent = 'Création…';
+    api({ action:'devoir_creer', titre:$('ti').value, consigne:($('cg')||{}).value||'',
+          profNom:($('pn')||{}).value||'', classeId:($('cid')||{}).value||'', du:du, items:items })
+      .then(function(r){
+        b.disabled = false; b.textContent = 'Créer le devoir et obtenir le lien';
+        var lien = r.lien;
+        $('resultat').innerHTML = '<div class="bloc" style="border-color:#57a52c;background:#f7fcf3">'
+          + '<h3>Devoir créé — voici le lien à envoyer</h3>'
+          + '<p class="lien">'+C.esc(lien)+'</p>'
+          + '<div class="barre">'
+          + '<button class="b b1" id="cp">Copier le lien</button>'
+          + '<a class="b b3" target="_blank" rel="noopener" href="https://wa.me/?text='
+          + encodeURIComponent('Devoir de français — ' + $('ti').value + '\n' + lien) + '">Envoyer par WhatsApp</a>'
+          + '<a class="b b2" target="_blank" rel="noopener" href="'+C.esc(lien)+'">Voir comme un élève</a>'
+          + '</div><p class="meta" style="margin-top:10px">Les élèves qui n\'ont pas encore le livret verront '
+          + 'vos propres exercices et un aperçu du reste — c\'est votre lien qui les amène à s\'abonner.</p></div>';
+        $('cp').onclick = function(){ try{ navigator.clipboard.writeText(lien); this.textContent='Copié ✓'; }catch(e){} };
+        charger(true);   // silencieux : ne pas effacer ce qui vient de s'afficher
+      })
+      .catch(function(e){ b.disabled=false; b.textContent='Créer le devoir et obtenir le lien'; msg(e.message||'Échec.'); });
+  }
+
+  // ── Mes devoirs / correction ────────────────────────────────────────────────
+  function vueDevoirs(){
+    if(!S.devoirs.length){
+      $('vue').innerHTML = '<div class="bloc"><p class="meta">Aucun devoir pour l\'instant.</p></div>'; return;
+    }
+    $('vue').innerHTML = '<ul class="lst">' + S.devoirs.map(function(d){
+      return '<li><strong>'+C.esc(d.titre)+'</strong> '
+        + '<span class="pill">'+d.copies+' copie'+(d.copies>1?'s':'')+'</span> '
+        + (d.copies>d.corrigees ? '<span class="pill" style="background:#fff4e5;color:#9a6212">'
+            + (d.copies-d.corrigees)+' à corriger</span> ' : '')
+        + (d.ouvert ? '' : '<span class="pill" style="background:#f3f4f6;color:#6b7280">clos</span>')
+        + '<div class="meta">'+d.items+' exercices · '+C.dateFr(d.cree)
+        + (d.du ? ' · à rendre le '+C.dateFr(d.du) : '') + ' · '+d.vues+' ouvertures</div>'
+        + '<p class="lien">'+C.esc(d.lien)+'</p>'
+        + '<div class="barre"><button class="b b1" data-c="'+C.esc(d.token)+'">Voir les copies</button>'
+        + '<button class="b b2" data-f="'+C.esc(d.token)+'">'+(d.ouvert?'Clore':'Rouvrir')+'</button></div></li>';
+    }).join('') + '</ul><div id="copies"></div>';
+
+    [].forEach.call(document.querySelectorAll('[data-c]'), function(b){
+      b.onclick = function(){ voirCopies(b.getAttribute('data-c')); };
+    });
+    [].forEach.call(document.querySelectorAll('[data-f]'), function(b){
+      b.onclick = function(){ api({action:'devoir_fermer', t:b.getAttribute('data-f')}).then(charger); };
+    });
+  }
+
+  function voirCopies(t){
+    $('copies').innerHTML = '<p class="meta">Chargement des copies…</p>';
+    api({action:'copies', t:t}).then(function(r){
+      if(!r.copies.length){
+        $('copies').innerHTML = '<div class="bloc"><p class="meta">Aucune copie rendue pour l\'instant.</p></div>';
+        return;
+      }
+      $('copies').innerHTML = '<div class="bloc"><h3>Copies — '+C.esc(r.devoir.titre)+'</h3>'
+        + r.copies.map(function(c){
+            return '<div class="bloc" style="background:#fbfcfd" data-eid="'+C.esc(c.eleveId)+'">'
+              + '<strong>'+C.esc(c.nom||'Élève')+'</strong> '
+              + (c.rendue ? '<span class="pill" style="background:#f2f8ea;color:#3f7a2c">corrigée</span>' : '')
+              + '<div class="meta">rendue le '+C.dateFr(c.envoye)+'</div>'
+              + (r.devoir.items||[]).map(function(it){
+                  var rep = (c.reponses||{})['q'+it.n] || '';
+                  return '<div style="margin:10px 0"><div class="meta"><strong>Exercice '+it.n+'</strong> — '
+                    + C.esc(it.src==='prof' ? String(it.consigne||'').slice(0,110)
+                                            : (it.repere || C.refRepere(it.ref, r.devoir.niveau))) + '</div>'
+                    + '<div style="background:#fff;border:1px solid #e3e8ef;border-radius:8px;padding:8px 11px;'
+                    + 'white-space:pre-wrap;font-size:14px;margin:4px 0">'+(rep ? C.esc(rep) : '<em class="meta">sans réponse</em>')+'</div>'
+                    + '<input placeholder="Remarque sur cet exercice" data-cm="'+it.n+'" value="'
+                    + C.esc((c.commentaires||{})[String(it.n)]||'')+'" style="font-size:13.5px"></div>';
+                }).join('')
+              + '<label>Note sur 20</label><input type="number" min="0" max="20" step="0.5" data-note value="'
+              + (c.note==null?'':C.esc(c.note))+'">'
+              + '<label>Appréciation générale</label><textarea data-app>'+C.esc(c.appreciation||'')+'</textarea>'
+              + '<div class="barre"><button class="b b1" data-save>Enregistrer et renvoyer à l\'élève</button>'
+              + '<span class="msg" data-m></span></div></div>';
+          }).join('') + '</div>';
+
+      [].forEach.call(document.querySelectorAll('[data-save]'), function(b){
+        b.onclick = function(){
+          var box = b.closest('[data-eid]'), m = box.querySelector('[data-m]');
+          var com = {};
+          [].forEach.call(box.querySelectorAll('[data-cm]'), function(i){
+            if(i.value.trim()) com[i.getAttribute('data-cm')] = i.value;
+          });
+          b.disabled = true; m.textContent = 'Enregistrement…'; m.className = 'msg';
+          api({ action:'apprecier', t:t, eleveId:box.getAttribute('data-eid'),
+                note: box.querySelector('[data-note]').value,
+                appreciation: box.querySelector('[data-app]').value, commentaires: com })
+            .then(function(){ b.disabled=false; m.textContent='Envoyé à l\'élève ✓'; m.className='msg ok'; charger(true); })
+            .catch(function(e){ b.disabled=false; m.textContent=e.message||'Échec.'; m.className='msg ko'; });
+        };
+      });
+    }).catch(function(e){ $('copies').innerHTML = '<p class="msg ko">'+C.esc(e.message||'Erreur')+'</p>'; });
+  }
+})();
+</script>
+<script src="/assets/ambassa.js?v=1.19.44" defer></script>
+</body>
+</html>

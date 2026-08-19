@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self' https://unpkg.com; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'none'">
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="omelette-owns-print" content="1">
+<script src="/livrets/gate.js?v=29598ca7"></script>
+<script src="./support.js"></script>
+</head>
+<body>
+<script>VRTLivret.config({classe:'6e',kind:'livret',titre:'Livret 6ᵉ'});</script>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Lora:ital,wght@0,500;1,400;1,500&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&family=Dancing+Script:wght@500;600;700&family=Patrick+Hand&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #fff; font-family: 'Source Sans 3', system-ui, sans-serif; color: #2b3038; font-size: 14px; line-height: 1.16; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  a { color: #2b8ac6; }
+  a:hover { color: #1d699c; }
+  p { margin: 2px 0; text-align: justify; -webkit-hyphens: auto; hyphens: auto; line-height: 1.2; }
+  @page {
+    size: A4; margin: 13mm 9mm 14mm;
+    @top-left { content: "CENTRE VÉRITAS"; font-family: 'Baloo 2', sans-serif; font-size: 7.5pt; font-weight: 700; letter-spacing: .14em; color: #c0453f; }
+    @top-right { content: "Livret d'activités de 6e"; font-family: 'Baloo 2', sans-serif; font-size: 8pt; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #2b6aa5; }
+    @top-center { content: ""; }
+    @bottom-left { content: "Jacques Miterand TAKOU  &  Dominique AMBASSA"; font-family: 'Lora', serif; font-style: italic; font-size: 7.5pt; color: #9aa4ae; }
+    @bottom-center { content: "❖"; font-size: 8pt; color: #d9b44a; }
+    @bottom-right { content: "— " counter(page) " —"; font-family: 'Baloo 2', sans-serif; font-size: 11pt; font-weight: 800; color: #2b6aa5; }
+  }
+  @page :first {
+    @top-left { content: ""; }
+    @top-right { content: ""; }
+  }
+  @media print {
+    html, body { background: #fff; }
+    #sheet { width: auto !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; }
+    .flowcols { column-fill: balance !important; }
+    .tocpage::after { content: target-counter(attr(href), page); }
+  }
+  .tocpage::after { content: ""; }
+  @media print { [data-ui] { display: none !important; } }
+
+  /* ===== Version EN LIGNE — lecture confort écran & mobile ===== */
+  @media screen {
+    body { background: #ece7dc; padding: 0; }
+    #sheet {
+      width: 100% !important;
+      max-width: 860px !important;
+      margin: 22px auto !important;
+      padding: 40px 46px !important;
+      border-radius: 16px;
+      box-shadow: 0 10px 40px -12px rgba(31,43,56,.28) !important;
+      font-size: 16px;
+    }
+    /* lecture confortable : une seule colonne, texte aligné à gauche, rythme aéré */
+    #sheet .flowcols { column-count: 1 !important; column-rule: none !important; }
+    #sheet [style*="columns:2"], #sheet [style*="columns: 2"] { columns: 1 !important; }
+    #sheet p { text-align: left !important; line-height: 1.7 !important; hyphens: manual; }
+    #sheet section { break-after: auto !important; break-before: auto !important; }
+    #sheet [style*="min-height:271mm"], #sheet [style*="min-height:255mm"] { min-height: 0 !important; }
+  }
+  @media screen and (max-width: 640px) {
+    #sheet { padding: 22px 16px !important; margin: 0 auto !important; border-radius: 0; }
+    body { background: #fff; }
+  }
+  @media screen { #sheet, #sheet * { -webkit-user-select: none; user-select: none; } #sheet input, #sheet textarea { -webkit-user-select: text !important; user-select: text !important; } }
+  @media screen {
+    /* cibles tactiles agrandies (confort mobile) */
+    #sheet [data-dot]{ width:20px !important; height:20px !important; border-width:2.5px !important; }
+    #sheet [data-ws]{ font-size:17px !important; }
+    #sheet [data-cw] input, #sheet td input{ font-size:16px !important; }
+    #sheet table{ transform-origin:left top; }
+    #sheet [data-relie]{ min-height:44px; }
+    #sheet [data-relie] > div{ min-height:40px !important; }
+    /* confort de lecture */
+    #sheet{ font-size:16.5px; }
+    #sheet p{ line-height:1.75 !important; }
+  }
+</style>
+<script>
+document.addEventListener('contextmenu',function(e){e.preventDefault();});
+document.addEventListener('dragstart',function(e){e.preventDefault();});
+document.addEventListener('copy',function(e){var t=e.target;if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'))return;e.preventDefault();});
+document.addEventListener('keydown',function(e){
+  var k=(e.key||'').toLowerCase();
+  var mod=e.ctrlKey||e.metaKey;
+  if(mod&&(k==='s'||k==='u')){e.preventDefault();}
+  if(mod&&e.shiftKey&&(k==='i'||k==='j'||k==='c')){e.preventDefault();}
+  if(k==='f12'){e.preventDefault();}
+});
+</script>
+</helmet>
+<main id="sheet" style="width:210mm; margin:0 auto; padding:9mm 10mm; background:#fff; box-shadow:none; box-sizing:border-box;">
+  {{ toolbarEl }}
+  {{ overlayEl }}
+
+  <header style="text-align:center; padding:4px 0 12px; border-bottom:2px solid #e3ded4; margin-bottom:6px;">
+    <div style="font-family:'Baloo 2'; font-weight:700; font-size:13px; letter-spacing:.12em; text-transform:uppercase; color:#c0453f;">{{ header.centre }}</div>
+    <div style="font-family:'Baloo 2'; font-weight:800; font-size:30px; color:#1f2b38; line-height:1.1; margin:2px 0;">{{ header.title }}</div>
+    <div style="color:#5c666f; font-size:14px;">{{ header.subtitle }}</div>
+    <div style="color:#98a1aa; font-size:12px; margin-top:3px;">{{ header.program }}</div>
+  </header>
+
+  <section style="break-after:page; padding:14px 4px 0;">
+    <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+      <h2 style="font-family:'Baloo 2'; font-weight:800; font-size:26px; color:#1f2b38; margin:0;">Avant-propos</h2>
+      <div style="flex:1; height:3px; background:#c0453f; border-radius:2px;"></div>
+    </div>
+    <div style="columns:2; column-gap:26px; font-family:'Lora', serif; font-size:13.5px; line-height:2.0; color:#39434d; text-align:justify;">
+      <p style="margin:0 0 9px;">Ce <strong>Livret d'activités de français 6<sup>e</sup></strong> a été conçu pour accompagner, pas à pas, l'élève camerounais dans l'acquisition des compétences du programme officiel du <strong style="color:#2b6aa5;">MINESEC</strong>, selon l'<em style="color:#2b8ac6;">Approche par les compétences</em> (<strong style="color:#2b8ac6;">APC</strong>). Il ne remplace pas le cours du professeur : il en est le prolongement, le lieu où l'élève s'entraîne, manipule la langue et prend confiance.</p>
+      <p style="margin:0 0 9px;">L'ouvrage suit fidèlement les <strong>six modules</strong> du programme, chacun ancré dans une situation de vie familière — la vie quotidienne, la vie socioculturelle, la citoyenneté et l'environnement, la vie économique, le bien-être et la santé, les médias et la communication. Pour chaque leçon, l'élève retrouve un rappel de <em>l'essentiel à retenir</em>, des textes d'auteurs africains et camerounais, puis une série d'exercices gradués : <strong style="color:#b1810c;">je repère</strong>, <strong style="color:#2b8ac6;">je transforme</strong>, <strong style="color:#8a5cc4;">je relie</strong>, <strong style="color:#57a52c;">je m'exerce</strong>, <strong style="color:#c0453f;">je produis</strong>.</p>
+      <p style="margin:0 0 9px;">Des <strong style="color:#8a5cc4;">jeux</strong> (mots croisés, mots mêlés) et des <strong style="color:#2b6aa5;">espaces de production</strong> lignés invitent l'élève à réinvestir ses acquis de façon vivante. À la fin de chaque module, une semaine d'<em>intégration et d'évaluation</em> — situations d'intégration, épreuves au format officiel et bilan personnel — permet de mesurer les progrès accomplis.</p>
+      <p style="margin:0 0 9px;">Chaque tâche s'accompagne de <strong style="color:#57a52c;">critères de réussite</strong> clairs, pour que l'élève apprenne à s'auto-évaluer et à se corriger de manière autonome. Les <strong style="color:#e6942a;">corpus</strong> mettent en évidence, <em>par la couleur</em>, les notions étudiées, afin de rendre visible ce que l'on apprend.</p>
+      <p style="margin:0;">Puisse ce cahier donner à chaque élève le goût du français, la fierté de bien s'exprimer et l'envie de progresser. <strong style="color:#c0453f;">Bon travail à toutes et à tous !</strong></p>
+      <div style="break-inside:avoid; margin:11px 0 4px; border:1.5px solid #2b8ac6; border-radius:12px; overflow:hidden;">
+        <div style="background:#2b8ac6; color:#fff; font-family:'Baloo 2'; font-weight:800; font-size:12px; letter-spacing:.04em; text-transform:uppercase; padding:5px 12px; -webkit-print-color-adjust:exact; print-color-adjust:exact;">Comment se déroulent tes leçons</div>
+        <div style="padding:8px 12px; font-size:12px; line-height:1.45;">
+          <div style="margin:0 0 5px;"><span style="font-family:'Baloo 2'; font-weight:700; color:#b1810c;">① Lecture méthodique</span> — lecture silencieuse puis expressive · observation et <em>hypothèses</em> · choix des axes · analyse (grille à 4 entrées) · confrontation · <strong style="color:#2b6aa5;">synthèse</strong> (traces écrites).</div>
+          <div style="margin:0 0 5px;"><span style="font-family:'Baloo 2'; font-weight:700; color:#57a52c;">② Fiche de lecture suivie</span> — situer l'extrait · lecture guidée · élaboration de la grille (<em>qui ? à qui ? de quoi ?</em>) · confrontation et résumé · bilan noté en traces écrites.</div>
+          <div style="margin:0;"><span style="font-family:'Baloo 2'; font-weight:700; color:#8a5cc4;">③ Leçon de langue</span> — découverte du corpus · manipulation du fait de langue (substitution, transformation…) · confrontation · <strong style="color:#c0453f;">formulation de la règle</strong> (« Je retiens ») · consolidation par des exercices gradués jusqu'au réemploi.</div>
+        </div>
+      </div>
+      <p style="margin:12px 0 0; text-align:right; font-style:italic; color:#7a828b;">L'équipe pédagogique — Centre Véritas, Douala</p>
+    </div>
+  </section>
+
+  <section style="break-after:page; padding:10px 0 0;">
+    <div style="display:flex; align-items:baseline; gap:12px; border-bottom:2px solid #e3ded4; padding-bottom:6px; margin-bottom:12px;">
+      <h2 style="font-family:'Baloo 2'; font-weight:800; font-size:24px; color:#1f2b38; margin:0;">Sommaire</h2>
+      <span style="color:#98a1aa; font-size:12px;">{{ moduleCount }} modules · {{ lessonCount }} leçons</span>
+    </div>
+    <div style="columns:3; column-gap:22px; column-rule:1px solid #e3ded4;">
+      <sc-for list="{{ toc }}" as="m" hint-placeholder-count="6">
+        <div style="break-inside:avoid; margin:0 0 16px; border-left:3px solid {{ m.main }}; padding:3px 4px 7px 11px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:5px;">
+            <span style="flex:none; width:22px; height:22px; border-radius:6px; background:{{ m.main }}; color:#fff; font-family:'Baloo 2'; font-weight:800; font-size:12.5px; display:flex; align-items:center; justify-content:center; -webkit-print-color-adjust:exact; print-color-adjust:exact;">{{ m.num }}</span>
+            <span style="font-family:'Baloo 2'; font-weight:800; font-size:12.5px; color:{{ m.main }}; line-height:1.06; flex:1;">{{ m.title }}</span>
+            <a class="tocpage" href="#mod-{{ m.num }}" style="flex:none; font-family:'Baloo 2'; font-weight:800; font-size:11.5px; color:{{ m.main }}; text-decoration:none;"></a>
+          </div>
+          <sc-for list="{{ m.lessons }}" as="l" hint-placeholder-count="5">
+            <div style="display:flex; gap:6px; padding:2.5px 0 2.5px 2px; font-size:10px; color:#42505c; line-height:1.4;">
+              <span style="color:{{ m.main }}; flex:none; font-weight:800; font-size:11px; line-height:1.15;">◆</span>
+              <span style="text-wrap:pretty;">{{ l.title }}</span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="break-after:page; padding:8px 0 0;">
+    {{ diagEl }}
+  </section>
+
+  <sc-for list="{{ sequences }}" as="seq" hint-placeholder-count="1">
+    <section id="mod-{{ seq.num }}" style="padding:10px 0 2px; break-inside:avoid;">
+      <div style="display:flex; align-items:stretch; gap:18px; border:1.5px solid {{ seq.main }}; background:{{ seq.tint }}; border-radius:14px; padding:13px 20px;">
+        <div style="display:flex; align-items:center; gap:15px; flex:none;">
+          <div style="font-family:'Baloo 2'; font-weight:800; font-size:25px; color:#fff; background:{{ seq.main }}; width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; line-height:1;">{{ seq.num }}</div>
+          <div>
+            <div style="font-family:'Baloo 2'; font-weight:800; letter-spacing:.26em; font-size:15px; color:{{ seq.main }}; text-transform:uppercase; line-height:1;">Module</div>
+            <div style="height:3px; width:50px; background:{{ seq.main }}; border-radius:2px; margin-top:5px;"></div>
+          </div>
+        </div>
+        <div style="width:1.5px; background:{{ seq.main }}; opacity:.32; align-self:stretch;"></div>
+        <div style="flex:1; min-width:0; background:#fff; border-radius:9px; padding:9px 14px;">
+          <div style="font-family:'Baloo 2'; font-weight:800; font-size:18px; color:#1f2b38; line-height:1.12;">{{ seq.title }}</div>
+          <div style="font-size:10px; font-weight:700; letter-spacing:.09em; color:{{ seq.main }}; text-transform:uppercase; margin-top:5px;">Compétence visée</div>
+          <div style="font-family:'Tinos', serif; font-size:14.5px; color:#3a4753; line-height:1.32;">{{ seq.competence }}</div>
+        </div>
+      </div>
+      <p style="margin:7px 4px 0; color:#5a6570; font-size:12.5px; line-height:1.38;">{{ seq.intro }}</p>
+    </section>
+
+    <sc-for list="{{ seq.weeks }}" as="wk" hint-placeholder-count="1">
+      <div style="margin:14px 0 5px; break-after:avoid;">
+        <div style="display:flex; align-items:center; gap:12px; border-bottom:3px solid {{ wk.seqMain }}; padding-bottom:6px;">
+          <span style="background:{{ wk.seqMain }}; color:#fff; font-family:'Baloo 2'; font-weight:700; font-size:13px; padding:4px 14px; border-radius:20px; white-space:nowrap;">Semaine {{ wk.num }}</span>
+          <span style="font-family:'Baloo 2'; font-weight:700; font-size:18px; color:#3a4753;">{{ wk.title }}</span>
+        </div>
+      </div>
+
+      <div class="flowcols" style="column-count:2; column-gap:18px; column-fill:balance; column-rule:1px solid #e6e2d9;">
+      <sc-for list="{{ wk.items }}" as="it" hint-placeholder-count="2">
+
+        <sc-if value="{{ it.showSep }}" hint-placeholder-val="{{ false }}">
+          <div style="border-top:2px dashed #d3cdbe; margin:22px 0 2px; column-span:all;"></div>
+        </sc-if>
+
+        <sc-if value="{{ it.special }}" hint-placeholder-val="{{ true }}">
+          <div style="margin:20px 0 4px; column-span:all;">
+            <div style="background:{{ it.main }}; color:#fff; border-radius:10px 10px 10px 0; padding:9px 18px; font-family:'Baloo 2'; font-weight:700; font-size:17px; display:inline-block;">{{ it.title }}</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ it.isLesson }}" hint-placeholder-val="{{ true }}">
+          <div style="margin:16px 0 4px; break-after:avoid; column-span:all;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:3px;">
+              <span style="background:{{ it.discColor }}; color:#fff; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:3px 10px; border-radius:5px;">{{ it.disc }}</span>
+              <span style="color:#9aa4ae; font-weight:700; font-size:13px;">{{ it.label }}</span>
+            </div>
+            <h3 style="font-family:'Baloo 2'; font-weight:800; font-size:23px; color:#1f2b38; margin:0; line-height:1.15;">{{ it.title }}</h3>
+          </div>
+
+          <sc-for list="{{ it.objectives }}" as="o" hint-placeholder-count="1">
+            <div style="display:flex; gap:8px; align-items:baseline; margin:3px 0; column-span:all;">
+              <span style="flex:none; display:inline-flex; align-items:center; gap:4px; background:#fff3d6; color:#b1810c; font-weight:700; font-size:10px; text-transform:uppercase; padding:2px 8px 2px 6px; border-radius:4px;">{{ o.iconEl }} Objectif</span>
+              <span style="font-style:italic; color:#68727c; font-family:{{ it.methFont }}; font-size:12px;">{{ o.text }}</span>
+            </div>
+          </sc-for>
+
+          <sc-if value="{{ it.hasTexte }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#eef4fb; border-radius:12px; padding:9px 13px; margin:8px 0; column-span:all;">
+              <div style="font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#7a94ad; font-weight:700; margin-bottom:4px;">Corpus</div>
+              <sc-if value="{{ it.texte.notOfficial }}" hint-placeholder-val="{{ true }}">
+                {{ it.texte.markEl }}
+              </sc-if>
+              <sc-if value="{{ it.texte.isOfficial }}" hint-placeholder-val="{{ false }}">
+                {{ it.texte.letterEl }}
+              </sc-if>
+              <div style="text-align:right; color:#7a94ad; font-size:13px; margin-top:6px;">{{ it.texte.authEl }}</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ it.isMethod }}" hint-placeholder-val="{{ false }}">
+            {{ it.methodEl }}
+          </sc-if>
+          <sc-if value="{{ it.hasRetiensStd }}" hint-placeholder-val="{{ false }}">
+            <div style="border:2px solid #bfe0f2; border-radius:14px; background:#f5fbfe; margin:9px 0; column-span:all;">
+              <div style="display:inline-block; background:#2b8ac6; color:#fff; font-family:'Baloo 2'; font-weight:700; font-size:13px; padding:5px 15px; border-radius:12px 12px 12px 0;">L'essentiel à retenir</div>
+              <div style="padding:3px 14px 9px; font-family:{{ it.methFont }}; font-size:{{ it.methSize }};">
+                <sc-for list="{{ it.retiens }}" as="r" hint-placeholder-count="3">
+                  <sc-if value="{{ r.rPln }}" hint-placeholder-val="{{ true }}">
+                    <p style="margin:3px 0; color:#39434d;">{{ r.plnEl }}</p>
+                  </sc-if>
+                  <sc-if value="{{ r.rRule }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex; gap:7px; margin:3px 0;">
+                      <span style="flex:none; width:8px; height:8px; border-radius:2px; background:#2b8ac6; margin-top:6px;"></span>
+                      <div style="flex:1;">
+                        <sc-if value="{{ r.hasLead }}" hint-placeholder-val="{{ true }}"><span style="font-weight:700; color:#1f5f88;">{{ r.lead }}</span> — {{ r.restEl }}</sc-if>
+                        <sc-if value="{{ r.noLead }}" hint-placeholder-val="{{ false }}">{{ r.restEl }}</sc-if>
+                      </div>
+                    </div>
+                  </sc-if>
+                  <sc-if value="{{ r.rAst }}" hint-placeholder-val="{{ false }}">
+                    {{ r.astEl }}
+                  </sc-if>
+                  <sc-if value="{{ r.rEx }}" hint-placeholder-val="{{ false }}">
+                    <div style="background:#eef7e6; border-radius:8px; padding:5px 12px; margin:5px 0;"><span style="font-family:'Baloo 2'; font-weight:700; color:#4a8a24; font-size:11px; text-transform:uppercase; letter-spacing:.04em;">✦ Exemple</span> <span style="color:#3a4a2e; font-style:italic;">{{ r.text }}</span></div>
+                  </sc-if>
+                </sc-for>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ it.flowHasEx }}" hint-placeholder-val="{{ false }}">
+            <div style="margin:10px 0 2px; column-span:all;">
+              <span style="background:#57a52c; color:#fff; font-family:'Baloo 2'; font-weight:800; font-size:15px; padding:4px 15px; border-radius:7px; display:inline-block;">Je m'exerce</span>
+            </div>
+          </sc-if>
+        </sc-if>
+
+          <sc-for list="{{ it.flow }}" as="b" hint-placeholder-count="4">
+
+            <sc-if value="{{ b.isSection }}" hint-placeholder-val="{{ true }}">
+              <div style="margin:9px 0 3px; column-span:{{ b.span }}; break-after:avoid;">
+                <span style="display:inline-flex; align-items:center; gap:6px; background:{{ b.main }}; color:#fff; font-family:'Baloo 2'; font-weight:700; padding:3px 13px 3px 10px; border-radius:20px; font-size:12.5px;">{{ b.iconEl }} {{ b.label }}</span>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ b.isPassage }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:8px 0; break-inside:avoid; column-span:{{ b.span }}; background:#fbf7ef; border:1px solid #ece3d2; border-radius:12px; padding:9px 13px;">
+                <sc-if value="{{ b.hasTitle }}" hint-placeholder-val="{{ true }}">
+                  <div style="font-family:'Baloo 2'; font-weight:700; font-size:16px; color:#8a6d2e; margin-bottom:6px;">{{ b.title }}</div>
+                </sc-if>
+                <sc-if value="{{ b.isPlain }}" hint-placeholder-val="{{ true }}">
+                  {{ b.markEl }}
+                </sc-if>
+                <sc-if value="{{ b.numbered }}" hint-placeholder-val="{{ false }}">
+                  {{ b.passEl }}
+                </sc-if>
+                <sc-if value="{{ b.isPlay }}" hint-placeholder-val="{{ false }}">
+                  {{ b.playEl }}
+                </sc-if>
+                <sc-if value="{{ b.isLetter }}" hint-placeholder-val="{{ false }}">
+                  {{ b.letterEl }}
+                </sc-if>
+                <sc-if value="{{ b.hasSource }}" hint-placeholder-val="{{ true }}">
+                  <div style="text-align:right; font-size:13px; color:#8a7a5e; margin-top:6px;">{{ b.authEl }}</div>
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ b.isSource }}" hint-placeholder-val="{{ false }}">
+              <div style="font-style:italic; font-size:12.5px; color:#6a7480; margin:3px 0 9px; padding-top:3px; border-top:1px dotted #d7d0c2; column-span:{{ b.span }};">{{ b.authEl }}</div>
+            </sc-if>
+
+            <sc-if value="{{ b.isLexique }}" hint-placeholder-val="{{ false }}">
+              <div style="background:#eef4fb; border:1px solid #cfe0f0; border-radius:10px; padding:6px 11px; margin:8px 0; break-inside:avoid;">
+                <div style="display:flex; align-items:center; gap:5px; font-family:'Baloo 2'; color:#3f6d99; font-weight:700; font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px;">{{ b.iconEl }} Lexique</div>
+                <div style="columns:2; column-gap:20px;">
+                <sc-for list="{{ b.entries }}" as="e" hint-placeholder-count="3">
+                  <div style="margin:1.5px 0; color:#42505c; font-size:12px; line-height:1.32; break-inside:avoid;"><span style="font-weight:700; color:#2b6aa5;">{{ e.word }}</span> : {{ e.def }}</div>
+                </sc-for>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ b.isProduction }}" hint-placeholder-val="{{ false }}">
+              <div style="column-span:{{ b.span }}; break-inside:avoid; margin:12px 0 4px;">
+                <div style="display:inline-flex; align-items:center; gap:6px; background:#4256b8; color:#fff; font-family:'Baloo 2'; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.05em; padding:3px 12px; border-radius:13px; margin-bottom:2px;">✎ Espace de production</div>
+                {{ b.writeEl }}
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ b.isConsigne }}" hint-placeholder-val="{{ false }}">
+              <div style="font-style:italic; color:#4a5560; margin:8px 0; column-span:{{ b.span }};">{{ b.text }}</div>
+            </sc-if>
+
+            <sc-if value="{{ b.isCorpus }}" hint-placeholder-val="{{ false }}">
+              <div style="column-span:{{ b.span }}; break-inside:avoid; background:#fff6e6; border:2px solid #f0c980; border-radius:12px; padding:11px 16px; margin:12px 0;">
+                <div style="display:inline-flex; align-items:center; gap:6px; background:#e6942a; color:#fff; font-family:'Baloo 2'; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.05em; padding:3px 12px; border-radius:14px; margin-bottom:6px;">{{ b.iconEl }} Corpus</div>
+                {{ b.markEl }}
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ b.isObj }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex; gap:8px; align-items:baseline; margin:3px 0; column-span:{{ b.span }};">
+                <span style="flex:none; display:inline-flex; align-items:center; gap:4px; background:#fff3d6; color:#b1810c; font-weight:700; font-size:10px; text-transform:uppercase; padding:2px 8px 2px 6px; border-radius:4px;">{{ b.iconEl }} Objectif</span>
+                <span style="font-style:italic; color:#68727c; font-size:12px;">{{ b.text }}</span>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ b.isEx }}" hint-placeholder-val="{{ false }}">
+              <div data-exwrap="1" style="display:flex; gap:9px; margin:7px 0; break-inside:avoid; column-span:{{ b.span }};">
+                <span style="flex:none; width:21px; height:21px; border-radius:50%; background:{{ b.main }}; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Baloo 2'; font-weight:700; font-size:12px; margin-top:1px;">{{ b.numDisp }}</span>
+                <div style="flex:1;">
+                  <div style="color:#2b3038; text-align:justify;"><span style="font-style:italic; color:#41505c;">{{ b.consigne }}</span> <sc-if value="{{ b.hasRest }}" hint-placeholder-val="{{ false }}">{{ b.rest }}</sc-if></div>
+
+                  <sc-if value="{{ b.aOpts }}" hint-placeholder-val="{{ false }}">
+                    <div style="margin-top:4px; columns:2; column-gap:16px;">
+                      <sc-for list="{{ b.options }}" as="opt" hint-placeholder-count="3">
+                        <div style="display:flex; gap:7px; align-items:center; margin:2px 0; break-inside:avoid;">
+                          <span style="flex:none; width:14px; height:14px; border:2px solid #b9c2cc; border-radius:4px;"></span>
+                          <span>{{ opt.text }}</span>
+                        </div>
+                      </sc-for>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ b.isWordbank }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;">
+                      <sc-for list="{{ b.words }}" as="w" hint-placeholder-count="4">
+                        <span style="background:#eef1f4; border:1px solid #d3dae1; border-radius:14px; padding:2px 12px; font-size:14px; color:#3a4753;">{{ w.text }}</span>
+                      </sc-for>
+                    </div>
+                    {{ b.writeEl }}
+                  </sc-if>
+
+                  <sc-if value="{{ b.isRelie }}" hint-placeholder-val="{{ false }}">
+                    {{ b.relieEl }}
+                  </sc-if>
+
+                  <sc-if value="{{ b.isCross }}" hint-placeholder-val="{{ false }}">
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start; margin-top:10px;">
+                      <div style="flex:none;">{{ b.gridEl }}</div>
+                      <div style="flex:1; min-width:180px; font-size:14px;">
+                        <div style="font-family:'Baloo 2'; font-weight:700; color:#8a5cc4; font-size:13px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:2px;">Horizontalement</div>
+                        <sc-for list="{{ b.acrossClues }}" as="c" hint-placeholder-count="3">
+                          <div style="margin:2px 0; color:#3a4753;"><span style="font-weight:700;">{{ c.num }}.</span> {{ c.def }}</div>
+                        </sc-for>
+                        <div style="font-family:'Baloo 2'; font-weight:700; color:#8a5cc4; font-size:13px; text-transform:uppercase; letter-spacing:.04em; margin:8px 0 2px;">Verticalement</div>
+                        <sc-for list="{{ b.downClues }}" as="c" hint-placeholder-count="3">
+                          <div style="margin:2px 0; color:#3a4753;"><span style="font-weight:700;">{{ c.num }}.</span> {{ c.def }}</div>
+                        </sc-for>
+                      </div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ b.isWordsearch }}" hint-placeholder-val="{{ false }}">
+                    {{ b.wsEl }}
+                  </sc-if>
+
+                  <sc-if value="{{ b.aLines }}" hint-placeholder-val="{{ false }}">
+                    {{ b.writeEl }}
+                  </sc-if>
+                  {{ b.corrEl }}
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ b.isSub }}" hint-placeholder-val="{{ false }}">
+              <div style="font-family:'Baloo 2'; font-weight:800; color:#1f5f88; margin:12px 0 6px; font-size:16px; column-span:all; border-left:4px solid #2b8ac6; padding:4px 0 4px 11px; background:linear-gradient(90deg,#e8f3fb,transparent);">{{ b.text }}</div>
+            </sc-if>
+
+            <sc-if value="{{ b.isSit }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:12px 0; break-inside:avoid; column-span:{{ b.span }};">
+                <div style="background:#e2f4f1; border-left:5px solid #12988a; border-radius:0 8px 8px 0; padding:10px 15px;">
+                  <div style="font-family:'Baloo 2'; color:#0e6f62; font-weight:700; font-size:13px; letter-spacing:.02em; margin-bottom:4px;">{{ b.title }}</div>
+                  <div style="color:#2e4a46; text-align:justify;">{{ b.bodyEl }}</div>
+                </div>
+                <sc-if value="{{ b.sitWrite }}" hint-placeholder-val="{{ false }}">
+                  {{ b.writeEl }}
+                </sc-if>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ b.isCri }}" hint-placeholder-val="{{ false }}">
+              {{ b.critEl }}
+            </sc-if>
+
+            <sc-if value="{{ b.isInteg }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:12px 0; break-inside:avoid; column-span:{{ b.span }};">
+                <div style="background:#fff7ec; border:2px dashed #e08a1e; border-radius:12px; padding:12px 16px;">
+                  <div style="font-family:'Baloo 2'; color:#b1740c; font-weight:700; font-size:13px; text-transform:uppercase; letter-spacing:.05em; margin-bottom:3px;">Tâche d'intégration — {{ b.title }}</div>
+                  <div style="color:#54452c; text-align:justify;">{{ b.text }}</div>
+                </div>
+                {{ b.writeEl }}
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ b.isSuj }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:10px 0; break-inside:avoid; column-span:{{ b.span }};">
+                <div style="background:#fdeef3; border-left:5px solid #c94f7c; border-radius:0 8px 8px 0; padding:10px 15px;">
+                  <span style="font-family:'Baloo 2'; color:#b13d68; font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.05em;">Sujet — </span><span style="color:#5c3947;">{{ b.text }}</span>
+                </div>
+                {{ b.writeEl }}
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ b.isPln }}" hint-placeholder-val="{{ false }}">
+              <p style="margin:7px 0; color:#39434d; column-span:{{ b.span }};">{{ b.text }}</p>
+            </sc-if>
+
+          </sc-for>
+
+      </sc-for>
+      </div>
+    </sc-for>
+  </sc-for>
+
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  constructor(props){ super(props); this._built=false; this._model={header:{},sequences:[]}; this._ansN=0;
+    this.LS='veritas-ans-6e'; this.LU='veritas-unlock-6e';
+    try{ this._store=JSON.parse(localStorage.getItem(this.LS)||'{}'); }catch(e){ this._store={}; }
+    let unl=false; /* le déverrouillage est vérifié par le serveur, pas par le navigateur */
+    this.state={unlocked:unl, err:false};
+  }
+  saveAns(key,val){ try{ this._store[key]=val; localStorage.setItem(this.LS, JSON.stringify(this._store)); }catch(e){} }
+  ansBox(H,lineH,padTop){
+    const h=React.createElement, key='a'+(++this._ansN), v=(this._store&&this._store[key])||'';
+    return h('textarea',{key:'ta','data-ans':key,defaultValue:v,spellCheck:false,
+      onChange:(e)=>this.saveAns(key,e.target.value),
+      style:{position:'absolute',left:0,top:0,width:'100%',height:'100%',border:'none',outline:'none',
+        background:'transparent',resize:'none',padding:(padTop||1)+'px 8px 0',margin:0,boxSizing:'border-box',
+        fontFamily:"'Klee One', cursive",fontSize:'15px',lineHeight:lineH+'px',color:'#1c3d6e',overflow:'hidden'}});
+  }
+  tryUnlock(){
+    var self=this, v=(this._code||'').trim();
+    if(!v){ this.setState({err:'Saisis ton code.'}); return; }
+    this.setState({err:false,busy:true});
+    // Le code part au serveur — il n'est comparé à RIEN dans cette page.
+    VRTLivret.unlock(v).then(function(){ self.setState({unlocked:true,err:false,busy:false}); })
+                       .catch(function(e){ self.setState({err:(e&&e.message)||'Code incorrect.',busy:false}); });
+  }
+  resetAns(){ if(!window.confirm('Effacer toutes tes réponses sur cet appareil ?'))return; this._store={}; try{localStorage.removeItem(this.LS);}catch(e){} location.reload(); }
+  toolbarEl(){ const h=React.createElement;
+    return h('div',{'data-ui':'1',style:{position:'sticky',top:0,zIndex:40,display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap',
+      background:'#1f2b38',color:'#fff',padding:'8px 16px',margin:'-40px -46px 22px',borderRadius:'16px 16px 0 0',fontFamily:"'Baloo 2', sans-serif"}},[
+      h('span',{key:'t',style:{fontWeight:800,fontSize:'14px'}},'✎ Mode élève'),
+      h('span',{key:'s',style:{fontSize:'12px',opacity:.85,flex:1,minWidth:'160px'}},'Tes réponses sont enregistrées sur cet appareil.'),
+      h('button',{key:'p',onClick:()=>window.print(),style:{border:'none',background:'#2b8ac6',color:'#fff',fontFamily:'inherit',fontWeight:700,fontSize:'12px',padding:'6px 14px',borderRadius:'8px',cursor:'pointer'}},'Imprimer / PDF'),
+      h('button',{key:'r',onClick:()=>this.resetAns(),style:{border:'1px solid rgba(255,255,255,.4)',background:'transparent',color:'#fff',fontFamily:'inherit',fontWeight:700,fontSize:'12px',padding:'6px 14px',borderRadius:'8px',cursor:'pointer'}},'Effacer mes réponses')
+    ]); }
+  overlayEl(){ const h=React.createElement; if(this.state.unlocked) return null;
+    return h('div',{'data-ui':'1',style:{position:'fixed',inset:0,zIndex:100,background:'rgba(20,26,34,.55)',backdropFilter:'blur(6px)',WebkitBackdropFilter:'blur(6px)',display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}},
+      h('div',{style:{background:'#fff',borderRadius:'18px',maxWidth:'400px',width:'100%',padding:'30px 28px',textAlign:'center',boxShadow:'0 20px 60px -20px rgba(0,0,0,.5)',fontFamily:"'Source Sans 3', sans-serif"}},[
+        h('div',{key:'i',style:{fontSize:'40px',lineHeight:1}},'🔒'),
+        h('div',{key:'t',style:{fontFamily:"'Baloo 2', sans-serif",fontWeight:800,fontSize:'22px',color:'#1f2b38',margin:'10px 0 4px'}},'Livret verrouillé'),
+        h('div',{key:'s',style:{fontSize:'14px',color:'#5c666f',lineHeight:1.5}},'Saisis ton code d’accès pour débloquer le livret et répondre en ligne.'),
+        h('input',{key:'in',type:'text',placeholder:'Code d’accès',onChange:(e)=>{this._code=e.target.value;},onKeyDown:(e)=>{if(e.key==='Enter')this.tryUnlock();},
+          style:{width:'100%',boxSizing:'border-box',margin:'16px 0 6px',padding:'11px 14px',border:'2px solid '+(this.state.err?'#c0453f':'#cfd6dd'),borderRadius:'10px',fontSize:'16px',textAlign:'center',letterSpacing:'.08em',textTransform:'uppercase'}}),
+        this.state.err?h('div',{key:'e',style:{color:'#c0453f',fontSize:'12px',marginBottom:'6px'}},(typeof this.state.err==='string'?this.state.err:'Code incorrect. Réessaie.')):null,
+        h('button',{key:'b',onClick:()=>this.tryUnlock(),style:{width:'100%',border:'none',background:'#c0453f',color:'#fff',fontFamily:"'Baloo 2', sans-serif",fontWeight:800,fontSize:'16px',padding:'12px',borderRadius:'10px',cursor:'pointer',marginTop:'6px'}},'Débloquer'),
+        h('button',{key:'h',onClick:()=>VRTLivret.acheter(),style:{width:'100%',border:'1px solid #cfd6dd',background:'#fff',color:'#1f2b38',fontFamily:"'Baloo 2', sans-serif",fontWeight:700,fontSize:'13.5px',padding:'10px',borderRadius:'10px',cursor:'pointer',marginTop:'10px'}},'Je n\u2019ai pas de code \u2014 obtenir l\u2019acc\u00e8s (1 500 FCFA)'),
+        h('div',{key:'c',style:{fontSize:'12px',color:'#5c666f',marginTop:'10px'}},'Pas encore de code ? ',h('a',{href:'#',onClick:(e)=>{e.preventDefault();VRTLivret.acheter();},style:{color:'#2b8ac6',fontWeight:700}},'Se procurer le livret'))
+      ])); }
+  enhanceBoxes(){ const root=document.getElementById('sheet'); if(!root)return;
+    let idx=0; root.querySelectorAll('span').forEach(sp=>{ if(sp.dataset.box)return; if(sp.hasAttribute('data-dot'))return; const st=sp.getAttribute('style')||'';
+      const isBox=/width:1[3-6]px/.test(st)&&/height:1[3-6]px/.test(st)&&/border:/.test(st)&&!sp.children.length&&!sp.textContent.trim();
+      if(!isBox)return; sp.dataset.box='b'+(idx++); const key='chk-'+sp.dataset.box;
+      const set=(on)=>{ sp.style.background=on?'#2b8ac6':'#fff'; sp.textContent=on?'✓':''; sp.style.color='#fff'; sp.style.display='inline-flex'; sp.style.alignItems='center'; sp.style.justifyContent='center'; sp.style.fontSize='11px'; sp.style.fontWeight='700'; };
+      if(this._store[key])set(true); sp.style.cursor='pointer';
+      sp.addEventListener('click',()=>{ const on=!this._store[key]; this._store[key]=on; this.saveAns(key,on); set(on); });
+    });
+    this._redraws=this._redraws||[];
+    root.querySelectorAll('[data-relie]').forEach(cont=>{ if(cont.dataset.wired)return; cont.dataset.wired='1';
+      const rg=cont.getAttribute('data-relie'), key='relie-'+rg, NS='http://www.w3.org/2000/svg';
+      let map=(this._store[key]&&typeof this._store[key]==='object')?this._store[key]:{};
+      const svg=document.createElementNS(NS,'svg'); Object.assign(svg.style,{position:'absolute',left:0,top:0,width:'100%',height:'100%',pointerEvents:'none',zIndex:1}); cont.appendChild(svg);
+      const dots=cont.querySelectorAll('[data-dot]');
+      const find=(s,i)=>cont.querySelector('[data-dot="'+rg+'-'+s+'-'+i+'"]');
+      const center=(el)=>{ const cb=cont.getBoundingClientRect(), r=el.getBoundingClientRect(); return {x:r.left-cb.left+r.width/2,y:r.top-cb.top+r.height/2}; };
+      let sel=null; const paint=()=>dots.forEach(d=>{ d.style.background=(sel===d)?'#7a5cb0':'#fff'; });
+      const redraw=()=>{ while(svg.firstChild)svg.removeChild(svg.firstChild); Object.keys(map).forEach(li=>{ const a=find('L',li),b=find('R',map[li]); if(!a||!b)return; const p=center(a),q=center(b); const ln=document.createElementNS(NS,'line'); ln.setAttribute('x1',p.x);ln.setAttribute('y1',p.y);ln.setAttribute('x2',q.x);ln.setAttribute('y2',q.y);ln.setAttribute('stroke','#7a5cb0');ln.setAttribute('stroke-width','2.5');ln.setAttribute('stroke-linecap','round'); svg.appendChild(ln); }); };
+      dots.forEach(d=>{ const pr=d.getAttribute('data-dot').split('-'), side=pr[1], i=pr[2];
+        d.addEventListener('click',()=>{ if(side==='L'){ if(map[i]!=null){ delete map[i]; this.saveAns(key,map); sel=null; paint(); redraw(); return; } sel=(sel===d?null:d); paint(); }
+          else { if(!sel)return; const li=sel.getAttribute('data-dot').split('-')[2]; Object.keys(map).forEach(k=>{ if(map[k]===i)delete map[k]; }); map[li]=i; this.saveAns(key,map); sel=null; paint(); redraw(); } });
+      });
+      redraw(); this._redraws.push(redraw);
+    });
+    if(!this._resizeWired){ this._resizeWired=true; window.addEventListener('resize',()=>{ clearTimeout(this._rt); this._rt=setTimeout(()=>{(this._redraws||[]).forEach(f=>f());},150); }); }
+    this._enhanced=true; }
+  componentDidUpdate(){ if(this._built&&!this._enhanced){ this._enhanced=true; setTimeout(()=>this.enhanceBoxes(),40); setTimeout(()=>{(this._redraws||[]).forEach(f=>f());},400); } }
+  componentDidMount(){
+    var self=this;
+    // Le contenu n'est plus dans la page : il arrive d'api/livret.php après
+    // vérification du code. `resume()` reprend une session encore valide
+    // (rechargement, retour sur la page) ; sinon le calque de saisie reste.
+    VRTLivret.onOuvert=function(){ self.setState({unlocked:true,err:false}); };
+    VRTLivret.resume().then(function(){ self.setState({unlocked:true,err:false}); })
+                      .catch(function(){ self.setState({unlocked:false}); });
+  }
+  strip(t,re){ return (t||'').replace(re,''); }
+  icon(name,color,size){
+    const h=React.createElement, s=color||'currentColor';
+    const P={
+      search:[h('circle',{key:1,cx:7,cy:7,r:4.3}),h('line',{key:2,x1:10.3,y1:10.3,x2:14.5,y2:14.5})],
+      swap:[h('path',{key:1,d:'M3.4 6.2A5 5 0 0 1 12.6 6'}),h('polyline',{key:2,points:'3 3.4 3 6.4 6 6.4'}),h('path',{key:3,d:'M12.6 9.8A5 5 0 0 1 3.4 10'}),h('polyline',{key:4,points:'13 12.6 13 9.6 10 9.6'})],
+      check:[h('circle',{key:1,cx:8,cy:8,r:6}),h('polyline',{key:2,points:'5 8.2 7.2 10.4 11 5.8'})],
+      link:[h('path',{key:1,d:'M6.6 9.4a2.4 2.4 0 0 1 0-3.4l1.6-1.6a2.4 2.4 0 0 1 3.4 3.4l-.9.9'}),h('path',{key:2,d:'M9.4 6.6a2.4 2.4 0 0 1 0 3.4l-1.6 1.6a2.4 2.4 0 0 1-3.4-3.4l.9-.9'})],
+      cross:[h('circle',{key:1,cx:8,cy:8,r:6}),h('line',{key:2,x1:5.5,y1:5.5,x2:10.5,y2:10.5}),h('line',{key:3,x1:10.5,y1:5.5,x2:5.5,y2:10.5})],
+      chat:[h('path',{key:1,d:'M2.5 4.2h11a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H7l-3 2.6V11.2H2.5a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1z'})],
+      pencil:[h('path',{key:1,d:'M11 2.4l2.6 2.6-7.7 7.7-3.1.5.5-3.1z'}),h('line',{key:2,x1:9.6,y1:3.8,x2:12.2,y2:6.4})],
+      dice:[h('rect',{key:1,x:2.4,y:2.4,width:11.2,height:11.2,rx:2.6}),h('circle',{key:2,cx:6,cy:6,r:1,fill:s,stroke:'none'}),h('circle',{key:3,cx:10,cy:10,r:1,fill:s,stroke:'none'}),h('circle',{key:4,cx:6,cy:10,r:1,fill:s,stroke:'none'}),h('circle',{key:5,cx:10,cy:6,r:1,fill:s,stroke:'none'})],
+      list:[h('line',{key:1,x1:5.5,y1:4,x2:14,y2:4}),h('line',{key:2,x1:5.5,y1:8,x2:14,y2:8}),h('line',{key:3,x1:5.5,y1:12,x2:14,y2:12}),h('circle',{key:4,cx:2.6,cy:4,r:1,fill:s,stroke:'none'}),h('circle',{key:5,cx:2.6,cy:8,r:1,fill:s,stroke:'none'}),h('circle',{key:6,cx:2.6,cy:12,r:1,fill:s,stroke:'none'})],
+      target:[h('circle',{key:1,cx:8,cy:8,r:5.6}),h('circle',{key:2,cx:8,cy:8,r:2.4})],
+      bulb:[h('path',{key:1,d:'M8 2.2a3.9 3.9 0 0 0-2.4 7c.4.3.6.7.6 1.2v.5h3.6v-.5c0-.5.2-.9.6-1.2A3.9 3.9 0 0 0 8 2.2z'}),h('line',{key:2,x1:6.5,y1:13.4,x2:9.5,y2:13.4})],
+      star:[h('path',{key:1,d:'M8 2.4l1.6 3.3 3.6.5-2.6 2.5.6 3.6L8 11.1 4.8 12.8l.6-3.6L2.8 6.7l3.6-.5z'})],
+      info:[h('circle',{key:1,cx:8,cy:8,r:5.6}),h('line',{key:2,x1:8,y1:7.4,x2:8,y2:11}),h('circle',{key:3,cx:8,cy:5,r:0.9,fill:s,stroke:'none'})],
+      book:[h('path',{key:1,d:'M2.5 3.5h4a2 2 0 0 1 1.5.7A2 2 0 0 1 9.5 3.5h4v9h-4a2 2 0 0 0-1.5.7A2 2 0 0 0 6.5 12.5h-4z'}),h('line',{key:2,x1:8,y1:4.2,x2:8,y2:13})]
+    };
+    return h('svg',{width:size||14,height:size||14,viewBox:'0 0 16 16',fill:'none',stroke:s,strokeWidth:1.8,strokeLinecap:'round',strokeLinejoin:'round',style:{flex:'none',display:'inline-block',verticalAlign:'-2px'}},P[name]||[]);
+  }
+  catIconName(cat){ return {observe:'search',transform:'swap',qcm:'check',link:'link',intrus:'cross',oral:'chat',write:'pencil',game:'dice',mobilise:'list'}[cat]||'search'; }
+
+  writeSeyes(lines){
+    const h=React.createElement, fine=6, main=4, unit=fine*main, n=Math.max(2,lines), H=n*unit;
+    const pca={WebkitPrintColorAdjust:'exact',printColorAdjust:'exact'};
+    const marginX=16, vStep=unit, vCount=30;
+    const kids=[];
+    for(let y=fine;y<=H;y+=fine){ const strong=(y%unit===0); kids.push(h('div',{key:'h'+y,style:Object.assign({position:'absolute',left:0,right:0,top:y+'px',height:strong?'0.8px':'0.5px',background:strong?'#d4b8ea':'#e3eef9'},pca)})); }
+    for(let i=0;i<vCount;i++){ const x=marginX+i*vStep; kids.push(h('div',{key:'v'+i,style:Object.assign({position:'absolute',top:0,bottom:0,left:x+'px',width:'0.8px',background:'#d4b8ea'},pca)})); }
+    kids.push(h('div',{key:'m',style:Object.assign({position:'absolute',top:0,bottom:0,left:marginX+'px',width:'1px',background:'#e28d86'},pca)}));
+    kids.push(this.ansBox(H,unit,3));
+    return h('div',{style:{position:'relative',marginTop:'6px',height:H+'px',border:'1px solid #d5d9de',borderRadius:'6px',background:'#fff',overflow:'hidden'}},kids);
+  }
+
+  writeEl(lines){
+    const h=React.createElement, unit=19, n=Math.max(2,lines);
+    const rules=[]; for(let i=0;i<n;i++) rules.push(h('div',{key:i,style:{borderBottom:'1px dashed #b8c2cd',height:unit+'px',WebkitPrintColorAdjust:'exact',printColorAdjust:'exact'}}));
+    return h('div',{style:{position:'relative',marginTop:'6px',height:(unit*n)+'px'}},[h('div',{key:'r'},rules),this.ansBox(unit*n,unit,0)]);
+  }
+
+  wordSearchEl(ws){
+    const h=React.createElement, sz=22, wg=(++this._wN||(this._wN=1));
+    const grid=(ws.grid||[]).map(r=>Array.isArray(r)?r:r.split(''));
+    const rows=grid.map((row,r)=>h('tr',{key:r}, row.map((ch,ci)=>{
+      const key='ws-'+wg+'-'+r+'-'+ci, on=!!(this._store&&this._store[key]);
+      const base={width:sz,height:sz,minWidth:sz,border:'1px solid #d9dee4',textAlign:'center',verticalAlign:'middle',padding:0,fontFamily:"'Source Sans 3',sans-serif",fontSize:'14px',fontWeight:600,letterSpacing:'.02em',cursor:'pointer',userSelect:'none'};
+      return h('td',{key:ci,'data-ws':key,style:Object.assign({},base,on?{background:'#ffe08a',color:'#8a5a00',borderRadius:'50%'}:{background:'#fff',color:'#3a4753'}),
+        onClick:(e)=>{ const t=e.currentTarget, nv=!(this._store&&this._store[key]); this.saveAns(key,nv);
+          if(nv){t.style.background='#ffe08a';t.style.color='#8a5a00';t.style.borderRadius='50%';}else{t.style.background='#fff';t.style.color='#3a4753';t.style.borderRadius='0';} }}, ch);
+    })));
+    const chips=(ws.words||[]).map((w,i)=>h('span',{key:i,style:{background:'#fbf1cf',border:'1px solid #ecd68f',borderRadius:'13px',padding:'2px 12px',fontSize:'13px',fontWeight:700,letterSpacing:'.06em',color:'#8a6a12'}},w));
+    return h('div',{style:{display:'flex',gap:'22px',flexWrap:'wrap',alignItems:'flex-start',marginTop:'10px'}},[
+      h('table',{key:'g',style:{borderCollapse:'collapse',tableLayout:'fixed',border:'2px solid #b9c1c9'}}, h('tbody',null,rows)),
+      h('div',{key:'w',style:{flex:'1',minWidth:'150px'}},[
+        h('div',{key:'t',style:{fontFamily:"'Baloo 2'",fontWeight:700,color:'#b1810c',fontSize:'12px',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'7px'}},'Mots à retrouver'),
+        h('div',{key:'c',style:{display:'flex',flexWrap:'wrap',gap:'7px'}},chips)
+      ])
+    ]);
+  }
+
+  gridEl(cw){
+    const h=React.createElement, sz=20, gg=(++this._gN||(this._gN=1));
+    const rows=cw.cell.map((row,r)=>h('tr',{key:r}, row.map((c,ci)=>{
+      if(!c) return h('td',{key:ci,style:{width:sz,height:sz,minWidth:sz,background:'rgba(70,86,184,0.07)',border:'1px solid rgba(70,86,184,0.12)',padding:0}});
+      const key='cw-'+gg+'-'+r+'-'+ci, v=(this._store&&this._store[key])||'';
+      return h('td',{key:ci,style:{width:sz,height:sz,minWidth:sz,border:'1.5px solid #8a95a3',background:'#fff',position:'relative',padding:0}},[
+        c.num?h('span',{key:'n',style:{position:'absolute',top:'0px',left:'2px',fontSize:'8px',lineHeight:'9px',color:'#7a5cb0',fontWeight:700,fontFamily:"'Source Sans 3',sans-serif",pointerEvents:'none',zIndex:1}},c.num):null,
+        h('input',{key:'i','data-cw':key,defaultValue:v,maxLength:1,onChange:(e)=>this.saveAns(key,e.target.value),
+          style:{position:'absolute',inset:0,width:'100%',height:'100%',border:'none',background:'transparent',textAlign:'center',textTransform:'uppercase',fontFamily:"'Baloo 2',sans-serif",fontWeight:700,fontSize:'12px',color:'#1c3d6e',padding:0,outline:'none'}})
+      ]);
+    })));
+    return h('table',{style:{borderCollapse:'collapse',tableLayout:'fixed'}}, h('tbody',null,rows));
+  }
+
+  isLetterText(t){ return /monsieur\s|madame\s|mesdames|messieurs|prie d'agréer|veuillez agréer|l'expression de mes|salutations distinguées/i.test(t||''); }
+
+  paperStyle(lh,pad){
+    const fine=(lh/4).toFixed(2);
+    return {position:'relative',padding:pad||'11px 15px 13px 24px',borderRadius:'8px',border:'1px solid #e3ddce',overflow:'hidden',
+      backgroundColor:'#fffdf7',
+      backgroundImage:['repeating-linear-gradient(180deg,#cbdcf0 0,#cbdcf0 1px,transparent 1px,transparent '+fine+'px)','repeating-linear-gradient(180deg,#b7a1dd 0,#b7a1dd 1px,transparent 1px,transparent '+lh+'px)','repeating-linear-gradient(90deg,#e5dbf3 0,#e5dbf3 1px,transparent 1px,transparent '+lh+'px)'].join(','),
+      backgroundPosition:'0 '+(pad?'10px':'11px')};
+  }
+  paperMargin(){ return React.createElement('div',{style:{position:'absolute',top:0,bottom:0,left:'16px',width:'1.5px',background:'#e0736f'}}); }
+
+  letterEl(lines){
+    const h=React.createElement, LH=22;
+    const hw={fontFamily:"'Patrick Hand', cursive", fontStyle:'italic', fontSize:'15px', color:'#33415a', lineHeight:LH+'px'};
+    const dateRe=/^(fait à|à\s.+,?\s*le\s|le\s\d)/i;
+    const saluRe=/^(monsieur|madame|mesdames|messieurs|cher|chère|excellence)/i;
+    const closeRe=/(prie d'agréer|veuillez agréer|salutations|respectueusement|cordialement|l'expression de mes|mes salutations|votre dévoué)/i;
+    const els=[];
+    lines.forEach((ln,i)=>{
+      if(i===0 && dateRe.test(ln)){ els.push(h('div',{key:i,style:{...hw,textAlign:'right',marginBottom:'10px'}},ln)); return; }
+      if(saluRe.test(ln) && ln.length<70){ els.push(h('div',{key:i,style:{...hw,margin:'8px 0 4px'}},ln)); return; }
+      if(closeRe.test(ln)){ els.push(h('div',{key:i,style:{...hw,margin:'12px 0 2px',paddingLeft:'20%',textAlign:'justify'}},ln)); return; }
+      els.push(h('p',{key:i,style:{...hw,textAlign:'justify',margin:'3px 0'}},ln));
+    });
+    els.push(h('div',{key:'sig',style:{...hw,textAlign:'right',marginTop:'8px',color:'#9aa4ae'}},'Signature : ………………………'));
+    return h('div',{style:this.paperStyle(22)}, this.paperMargin(), h('div',{key:'c'},els));
+  }
+
+  officialLetterEl(m){
+    const h=React.createElement;
+    const hw={fontFamily:"'Patrick Hand', cursive", fontStyle:'italic', color:'#33415a'};
+    const els=[];
+    els.push(h('div',{key:'hd',style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',gap:'16px'}},[
+      h('div',{key:'s',style:{...hw,fontSize:'13px',lineHeight:1.3}}, (m.sender||[]).map((l,i)=>h('div',{key:i,style:i===(m.sender.length-1)?{marginTop:'4px'}:null},l))),
+      h('div',{key:'d',style:{...hw,fontSize:'13px',textAlign:'right',whiteSpace:'nowrap'}}, m.date)
+    ]));
+    if(m.objet) els.push(h('div',{key:'ob',style:{...hw,fontSize:'14px',fontWeight:700,margin:'10px 0 4px'}},[h('span',{key:'l',style:{textDecoration:'underline'}},'Objet'),' : '+m.objet]));
+    if(m.recipient) els.push(h('div',{key:'rc',style:{...hw,fontSize:'13px',lineHeight:1.3,textAlign:'right',margin:'5px 0 8px'}}, m.recipient.map((l,i)=>h('div',{key:i},l))));
+    if(m.salutation) els.push(h('div',{key:'sa',style:{...hw,fontSize:'15px',margin:'6px 0 3px'}},m.salutation));
+    (m.body||[]).forEach((p,i)=>els.push(h('p',{key:'b'+i,style:{...hw,fontSize:'14px',lineHeight:1.4,textAlign:'justify',margin:'3px 0'}},p)));
+    if(m.ampliation) els.push(h('div',{key:'am',style:{...hw,fontSize:'12.5px',color:'#6b7480',margin:'7px 0 3px'}},m.ampliation));
+    if(m.closing) els.push(h('div',{key:'cl',style:{...hw,fontSize:'14px',margin:'8px 0 2px',textAlign:'justify',paddingLeft:'22%'}},m.closing));
+    if(m.signature) els.push(h('div',{key:'sg',style:{...hw,fontSize:'16px',fontWeight:700,textAlign:'right',marginTop:'2px'}},m.signature));
+    return h('div',{style:this.paperStyle(28)}, this.paperMargin(), h('div',{key:'c'},els));
+  }
+
+  markStyle(kind){
+    if(kind==='n') return {fontWeight:700,color:'#c0453f'};
+    if(kind==='v') return {fontWeight:700,color:'#2b8ac6'};
+    if(kind==='p') return {fontWeight:700,color:'#8a5cc4'};
+    if(kind==='u') return {textDecoration:'underline',textDecorationColor:'#57a52c',textDecorationThickness:'2px',textUnderlineOffset:'2px',fontWeight:600,color:'#3f7a2c'};
+    if(kind==='k') return {background:'#fff2c2',borderRadius:'3px',padding:'0 3px',fontWeight:700,color:'#7a5a12'};
+    if(kind==='q') return {fontWeight:700,color:'#1f5f88'};
+    return {};
+  }
+  notionRules(title){
+    const t=(title||'').toLowerCase(), R=[], add=(re,kind)=>R.push({re,kind});
+    if(/connecteur|coordination|liaison/.test(t)) add("mais|ou\\b|et\\b|donc|or\\b|ni\\b|car\\b|puis|ensuite|enfin|cependant|toutefois|pourtant|ainsi|d'abord",'n');
+    if(/n[eé]gation/.test(t)){ add("ne\\b|n'|point\\b",'n'); add("pas\\b|plus\\b|jamais|rien\\b|personne|aucun[e]?|nulle?|gu[eè]re",'n'); }
+    if(/communication/.test(t)) add("[eé]metteur|r[eé]cepteur|message|canal|code\\b|r[eé]f[eé]rent|feed-?back",'v');
+    if(/comparatif|superlatif/.test(t)) add("le plus|le moins|la plus|la moins|plus\\b|moins\\b|aussi\\b|meilleur[e]?|pire\\b|autant",'v');
+    if(/spatio|indices/.test(t)) add("hier|aujourd'hui|demain|ici\\b|l[aà]-bas|ensuite|puis\\b|alors|maintenant|autrefois|bient[oô]t",'v');
+    if(/discours (direct|indirect)|dialogue/.test(t)) add("dit\\b|r[eé]pondit|s'[eé]cria|demanda|murmura|ajouta|affirma|s'exclama",'v');
+    if(/lettre|formules? finale/.test(t)){ add("Monsieur|Madame|Excellence",'u'); add("veuillez agr[eé]er|prie d'agr[eé]er|l'expression de mes|salutations distingu[eé]es|Objet",'k'); }
+    return R;
+  }
+  markupText(text, rules, base, opts){
+    const h=React.createElement; opts=opts||{};
+    const matchers=[];
+    (rules||[]).forEach(r=>matchers.push({re:new RegExp(r.re,'gi'), kind:r.kind}));
+    if(opts.dialogue) matchers.push({re:/\b(dit|r[eé]pondit|s'[eé]cria|demanda|murmura|ajouta|cria|reprit|songea|pensa|s'exclama|affirma|d[eé]clara|r[eé]pliqua|soupira|lan[çc]a|interrogea|poursuivit|s'enquit|gronda|questionna)\b/gi, kind:'v'});
+    if(opts.quoted){ matchers.push({re:/«[^»]+»/g, kind:'q'}); matchers.push({re:/\b[A-ZÀ-Ý]{3,}(?:\s[A-ZÀ-Ý]{3,})?\b/g, kind:'q'}); }
+    if(opts.proper){ var __STOP=["il","ils","elle","elles","je","tu","nous","vous","on","le","la","les","un","une","des","du","de","ce","cet","cette","ces","mon","ma","mes","ton","ta","tes","son","sa","ses","notre","nos","votre","vos","leur","leurs","et","ou","mais","donc","or","ni","car","dans","sur","sous","avec","sans","pour","par","chez","vers","avant","apres","après","pendant","depuis","quand","tout","toute","tous","toutes","rien","personne","aucun","quel","quelle","quels","quelles","qui","que","quoi","dont","où","alors","ainsi","puis","ensuite","enfin","cependant","toutefois","pourtant","aussi","très","tres","plus","moins","autant","comme","si","oui","non","peutêtre","chaque","plusieurs","certains","certaines"]; matchers.push({re:/(?<=[a-z\u00e0-\u00ff0-9,'’]\s)[A-Z\u00c0-\u00dd][a-z\u00e0-\u00ff'’-]+(?:\s[A-Z\u00c0-\u00dd][a-z\u00e0-\u00ff'’-]+){0,2}/g, kind:'p', stop:__STOP}); }
+    if(!matchers.length) return opts.inline?[text]:h('div',{style:base},text);
+    const ranges=[];
+    for(const mt of matchers){ let m; mt.re.lastIndex=0; while((m=mt.re.exec(text))){ if(m[0].length===0){mt.re.lastIndex++;continue;} if(mt.stop){ var __w=m[0].split(/\s/)[0].toLowerCase().replace(/[^a-zà-ÿ]/g,''); if(mt.stop.indexOf(__w)>=0) continue; } ranges.push({s:m.index,e:m.index+m[0].length,kind:mt.kind}); } }
+    ranges.sort((a,b)=>a.s-b.s||b.e-a.e);
+    const acc=[]; let lastE=-1;
+    for(const r of ranges){ if(r.s>=lastE){ acc.push(r); lastE=r.e; } }
+    const parts=[]; let last=0,key=0;
+    for(const r of acc){ if(r.s>last) parts.push(text.slice(last,r.s)); parts.push(h('span',{key:key++,style:this.markStyle(r.kind)},text.slice(r.s,r.e))); last=r.e; }
+    if(last<text.length) parts.push(text.slice(last));
+    return opts.inline?parts:h('div',{style:base},parts);
+  }
+
+  sitBody(text){
+    const h=React.createElement;
+    const t=(text||'').replace(/\s+/g,' ').trim();
+    const m=t.match(/^([\s\S]*?)\s*(Produis|Rédige|Raconte|Présente|Écris|Compose|Imagine|Rédiges)\b([\s\S]*)$/i);
+    const els=[];
+    let tache = m? m[1].trim() : t;
+    let consigne = m? (m[2]+m[3]).trim() : '';
+    if(tache) els.push(h('div',{key:'t',style:{marginBottom:'4px'}},[h('span',{key:'l',style:{fontWeight:700,color:'#0e6f62'}},'Tâche : '),h('span',{key:'x'},tache)]));
+    if(consigne){
+      const im=consigne.match(/^([\s\S]*?:)\s*([\s\S]*)$/);
+      const intro=im?im[1]:consigne;
+      const rest=im?im[2]:'';
+      els.push(h('div',{key:'c',style:{fontWeight:700,marginTop:tache?'4px':0}},[h('span',{key:'l'},'Consigne : '),h('span',{key:'x'},intro)]));
+      if(rest){
+        const parts=rest.split(/\s*(?=\d\))/).map(s=>s.trim().replace(/\s*;\s*$/,'')).filter(Boolean);
+        parts.forEach((p,i)=>els.push(h('div',{key:'p'+i,style:{fontWeight:700,paddingLeft:'16px',margin:'2px 0'}},p)));
+      }
+    }
+    return h('div',null,els);
+  }
+
+  diagnosticEl(){
+    const h=React.createElement, NT=this.makeNT();
+    const paras=[
+      "Le chien et le singe vivaient dans le même village. Et tous les deux s'étaient fiancés à des jeunes filles d'un autre village. Une fois par mois, ils se rendaient ensemble dans le village de leur fiancée pour les voir et leur donner des cadeaux. Les deux villages étaient éloignés l'un de l'autre. Et le chien et le singe devaient marcher pendant toute une journée pour atteindre le village de leur fiancée.",
+      "Ce jour-là, il faisait très chaud. Les deux prétendants avaient déjà marché pendant des heures. Ils étaient assoiffés et avaient très chaud. Alors, le chien fit une proposition au singe.",
+      "– Singe, creusons un puits ici. Ainsi, au retour, nous pourrons nous arrêter et nous désaltérer.",
+      "– Moi, si bien habillé, je vais me salir à creuser un puits ?",
+      "Et le singe refusa. Il se reposa à l'ombre d'un arbre pendant que le chien creusait le puits. Celui-ci, après de longs efforts, réussit à creuser le puits."
+    ].join('\n');
+    const rubrics=[
+      {c:'#2b8ac6',t:"I. Compréhension de l'écrit",q:["Qui sont les deux personnages du conte ?","Quel est leur lien avec les jeunes filles d'un autre village ?","Que font-ils chaque mois ? Pourquoi ?","Quelle est la proposition du chien ?","Pourquoi le singe refuse-t-il ?","Qui montre le plus de courage et d'initiative ? Justifie ta réponse.","À ton avis, que veut nous apprendre cette histoire ?"]},
+      {c:'#8a5cc4',t:'II. Grammaire',q:["Souligne le sujet et encadre le verbe : « Le chien fit une proposition au singe. »","Remplace les mots soulignés par des pronoms personnels : « Le singe regarde le chien. »","Donne la nature et la fonction des mots : village ; celui-ci ; assoiffés."]},
+      {c:'#e0562f',t:'III. Orthographe',q:["Dans « leur donner des cadeaux », le mot « leur » est-il bien écrit ? Pourquoi ?","Écris le pluriel : « le jeune garçon » ; « une fiancée fidèle ».","Réécris en corrigeant les fautes : « Le chien et le singe son fatiguer car il on marcher longtemps. »"]},
+      {c:'#d99e0b',t:'IV. Conjugaison',q:["Passé composé : « Hier, ils (marcher) …… toute la journée. »","Imparfait : « Le singe (refuser) …… toujours de travailler. »","Futur simple : « Demain, le chien (creuser) …… un nouveau puits » ; « Les deux amis (se reposer) …… sous l'arbre. »"]},
+      {c:'#57a52c',t:'V. Vocabulaire',q:["Relève 4 mots appartenant au champ lexical de la campagne.","Trouve un synonyme du mot « cadeaux » et emploie-le dans une phrase.","Trouve un mot de la même famille que : marcher ; chaleur."]}
+    ];
+    const chip=(c,t)=>h('div',{style:{margin:'12px 0 5px',columnSpan:'all'}},h('span',{style:{display:'inline-block',background:c,color:'#fff',fontFamily:"'Baloo 2'",fontWeight:700,fontSize:'13px',padding:'4px 15px',borderRadius:'20px'}},t));
+    const qrow=(n,txt,c)=>h('div',{key:n,style:{display:'flex',gap:'8px',margin:'5px 0',breakInside:'avoid'}},[
+      h('span',{key:'n',style:{flex:'none',fontFamily:"'Baloo 2'",fontWeight:800,color:c,fontSize:'13px',minWidth:'16px'}},n+'.'),
+      h('span',{key:'t',style:{color:'#39434d',fontSize:'13px',lineHeight:1.7}},txt)
+    ]);
+    const rubEls=[];
+    rubrics.forEach(r=>{ rubEls.push(chip(r.c,r.t)); r.q.forEach((q,i)=>rubEls.push(qrow(i+1,q,r.c))); rubEls.push(h('div',{key:r.t+'w',style:{marginTop:'4px'}},this.writeEl(Math.max(3,Math.ceil(r.q.length*0.8))))); });
+    const grRows=[
+      "Comprendre l'histoire et ses personnages.",
+      "Retrouver les idées principales.",
+      "Identifier le sujet et le verbe dans une phrase.",
+      "Faire attention aux accords (verbe/sujet, pluriel).",
+      "Conjuguer les verbes aux temps demandés.",
+      "Utiliser du vocabulaire précis.",
+      "Écrire un petit texte clair et structuré."
+    ];
+    const box=()=>h('span',{style:{display:'inline-block',width:'15px',height:'15px',border:'1.5px solid #9aa4ae',borderRadius:'3px'}});
+    const head=h('div',{style:{display:'grid',gridTemplateColumns:'1fr 46px 62px 46px',background:'#eef4fb',fontFamily:"'Baloo 2'",fontWeight:700,fontSize:'11px',color:'#3f6d99'}},[
+      h('div',{key:'a',style:{padding:'5px 9px'}},'Compétence évaluée'),
+      h('div',{key:'b',style:{padding:'5px 4px',textAlign:'center'}},'Oui 👍'),
+      h('div',{key:'c',style:{padding:'5px 4px',textAlign:'center'}},'Moyen 😐'),
+      h('div',{key:'d',style:{padding:'5px 4px',textAlign:'center'}},'Non 👎')
+    ]);
+    const rows=grRows.map((t,i)=>h('div',{key:i,style:{display:'grid',gridTemplateColumns:'1fr 46px 62px 46px',borderTop:'1px solid #dbe6f2',alignItems:'center'}},[
+      h('div',{key:'a',style:{padding:'5px 9px',fontSize:'12px',color:'#42505c',lineHeight:1.3}},(i+1)+'- '+t),
+      h('div',{key:'b',style:{textAlign:'center'}},box()),
+      h('div',{key:'c',style:{textAlign:'center'}},box()),
+      h('div',{key:'d',style:{textAlign:'center'}},box())
+    ]));
+    const grid=h('div',{style:{border:'1.5px solid #cfe0f0',borderRadius:'10px',overflow:'hidden',margin:'6px 0 10px',breakInside:'avoid'}},[head].concat(rows));
+    const field=(lbl)=>h('div',{style:{margin:'8px 0',breakInside:'avoid'}},[h('div',{key:'l',style:{fontFamily:"'Baloo 2'",fontWeight:700,color:'#4256b8',fontSize:'12.5px',marginBottom:'3px'}},lbl),this.writeSeyes(2)]);
+    return h('div',null,[
+      h('div',{key:'hd',style:{columnSpan:'all',display:'flex',alignItems:'stretch',gap:'16px',border:'1.5px solid #5b6b7a',background:'#eef1f4',borderRadius:'14px',padding:'12px 18px',marginBottom:'8px'}},[
+        h('div',{key:'i',style:{flex:'none',width:'44px',height:'44px',borderRadius:'10px',background:'#5b6b7a',color:'#fff',fontFamily:"'Baloo 2'",fontWeight:800,fontSize:'22px',display:'flex',alignItems:'center',justifyContent:'center'}},'0'),
+        h('div',{key:'t'},[
+          h('div',{key:'a',style:{fontFamily:"'Baloo 2'",fontWeight:800,fontSize:'19px',color:'#1f2b38'}},'Évaluation diagnostique'),
+          h('div',{key:'b',style:{fontSize:'12px',color:'#5b6b7a',fontStyle:'italic'}},'🎯 Vérifier et consolider les prérequis')
+        ])
+      ]),
+      h('div',{key:'txt',style:{columnSpan:'all',background:'#fbf7ef',border:'1px solid #ece3d2',borderRadius:'12px',padding:'10px 14px',margin:'6px 0 10px'}},[
+        h('div',{key:'tt',style:{fontFamily:"'Baloo 2'",fontWeight:700,fontSize:'13px',color:'#8a6d2e',marginBottom:'5px'}},'Texte'),
+        h(NT,{key:'nt',text:paras,cols:2},paras),
+        h('div',{key:'src',style:{fontStyle:'italic',fontSize:'12.5px',color:'#6a7480',marginTop:'6px',textAlign:'right'}},'Amadou Koné, Les contes de Korotoumou, 2019')
+      ]),
+      h('div',{key:'rub'},rubEls),
+      chip('#c0453f','VI. Production écrite et orale'),
+      h('div',{key:'s1',style:{margin:'4px 0'}},[h('span',{style:{fontWeight:700,color:'#b13d68'}},'Sujet 1 — '),"Raconte la suite de l'histoire en une dizaine de lignes : que se passe-t-il quand les deux amis reviennent du village des fiancées et trouvent le puits ?"]),
+      this.writeSeyes(10),
+      h('div',{key:'s2',style:{margin:'8px 0 4px'}},[h('span',{style:{fontWeight:700,color:'#b13d68'}},'Sujet 2 — '),"Le chien et le singe vont au village de leurs fiancées. Imagine un dialogue d'une douzaine de lignes entre l'un des prétendants et sa fiancée."]),
+      this.writeSeyes(12),
+      h('div',{key:'rmd',style:{columnSpan:'all',marginTop:'12px'}},[
+        h('div',{key:'b',style:{display:'inline-block',background:'#12988a',color:'#fff',fontFamily:"'Baloo 2'",fontWeight:700,fontSize:'13px',padding:'4px 15px',borderRadius:'20px'}},'Remédiation et consolidation'),
+        h('div',{key:'o',style:{fontSize:'12px',color:'#0e6f62',fontStyle:'italic',margin:'4px 0 8px'}},"🎯 Évaluer ses compétences à l'issue de l'évaluation diagnostique et prendre des résolutions pour l'année.")
+      ]),
+      h('div',{key:'g1',style:{columnSpan:'all',fontFamily:"'Baloo 2'",fontWeight:700,fontSize:'12.5px',color:'#33475b',margin:'2px 0 4px'}},"1. J'ai réussi à… (coche la case qui te correspond)"),
+      grid,
+      field('2. Mes points forts :'),
+      field('3. Ce que je dois améliorer :'),
+      field('4. Je me fixe un objectif pour progresser :')
+    ]);
+  }
+
+  makeNT(){
+    if(this._NT) return this._NT;
+    if(this._NT) return this._NT;
+    const R=React;
+    const NT=function(props){
+      const ref=R.useRef(null);
+      const st=R.useState([]); const marks=st[0], setMarks=st[1];
+      R.useLayoutEffect(function(){
+        const el=ref.current; if(!el) return;
+        const body=el.querySelector('[data-nt-body]'); if(!body) return;
+        const range=document.createRange(); range.selectNodeContents(body);
+        const rects=Array.prototype.slice.call(range.getClientRects()).filter(function(r){return r.width>1&&r.height>4;});
+        const box=el.getBoundingClientRect();
+        const seen={}, kept=[];
+        rects.forEach(function(r){ const col=Math.round((r.left-box.left)/170); const top=Math.round((r.top-box.top)/3); const key=col+':'+top; if(!seen[key]){ seen[key]=1; kept.push({y:r.top-box.top, x:r.left-box.left, col:col, top:top}); } });
+        kept.sort(function(a,b){ return a.col-b.col || a.top-b.top; });
+        const m=[]; for(let i=4;i<kept.length;i+=5){ m.push({n:i+1, y:kept[i].y, x:kept[i].x}); }
+        setMarks(m);
+      },[props.text, props.cols]);
+      const nums=marks.map(function(mk,i){ return R.createElement('span',{key:i,style:{position:'absolute',left:(mk.x-18)+'px',top:mk.y+'px',fontFamily:"'Source Sans 3',sans-serif",fontSize:'9px',fontWeight:700,color:'#b1810c',lineHeight:1}}, mk.n); });
+      const body=R.createElement('div',{'data-nt-body':'1',style:{columns:props.cols||1,columnGap:'24px',fontFamily:"'Lora', serif",fontSize:'13px',lineHeight:1.5,color:'#39434d',textAlign:'justify',whiteSpace:'pre-line'}}, props.children);
+      return R.createElement('div',{ref:ref,style:{position:'relative',paddingLeft:'24px'}}, nums.concat([body]));
+    };
+    this._NT=NT; return NT;
+  }
+
+  theatreEl(lines){
+    const h=React.createElement;
+    const base={fontFamily:"'Lora', serif", fontSize:'15px', color:'#39434d', lineHeight:1.5, margin:'5px 0', textAlign:'justify'};
+    const dial=(txt,kb)=> txt.split(/(\([^)]*\))/g).filter(s=>s!=='').map((p,i)=> /^\(.*\)$/.test(p)? h('em',{key:kb+i,style:{color:'#7f8992'}},p) : h('span',{key:kb+i},p));
+    return h('div',null, lines.map((ln,i)=>{
+      const m=ln.match(/^([^:]{1,50}):\s*([\s\S]*)$/);
+      if(!m) return h('p',{key:i,style:base}, dial(ln,'x'+i));
+      const sm=m[1].trim().match(/^(.*?)(\s*\([^)]*\))?\s*$/);
+      const name=sm?sm[1].trim():m[1].trim(), didas=sm&&sm[2]?sm[2].trim():'';
+      const kids=[h('strong',{key:'n',style:{color:'#33475b'}},name)];
+      if(didas) kids.push(h('em',{key:'d',style:{color:'#7f8992',fontWeight:400}},' '+didas));
+      kids.push(h('span',{key:'s'},' : '));
+      dial(m[2],'c'+i).forEach((el,j)=>kids.push(React.cloneElement(el,{key:'c'+i+j})));
+      return h('p',{key:i,style:base}, kids);
+    }));
+  }
+
+  authEl(a){
+    const h=React.createElement, kids=[h('span',{key:'a',style:{fontWeight:700,color:'#5c666f'}},a.author)];
+    if(a.title) kids.push(h('span',{key:'t'},', '),h('span',{key:'ti',style:{fontStyle:'italic'}},a.title));
+    if(a.rest) kids.push(h('span',{key:'r'},', '+a.rest));
+    return h('span',null,kids);
+  }
+
+  methodEl(retiens, color){
+    const h=React.createElement, cc=color||'#2b8ac6';
+    const pf={fontFamily:"'Patrick Hand', cursive"};
+    const clean=t=>(t||'').replace(/^[^A-Za-zÀ-ÿ0-9]+/,'').trim();
+    const find=(re)=>(retiens||[]).find(x=>re.test(clean(x.text)));
+    const els=[];
+    const planR=find(/plan-type/i);
+    if(planR){
+      const ptext=(planR.text||'').replace(/^[^A-Za-zÀ-ÿ]+/,'');
+      let intro=(ptext.match(/^Plan-type\s*\(([^)]*)\)/i)||[])[1]||'les étapes';
+      let txt=ptext.replace(/^Plan-type\s*\([^)]*\)\s*:\s*/i,'').replace(/^Plan-type\s*:\s*/i,'');
+      const parts=txt.split(/[\u2460-\u2468]/).map(s=>s.trim().replace(/^[;.]\s*/,'').replace(/\s*[;.]\s*$/,'')).filter(s=>s.length>1);
+      const cards=parts.map((p,i)=>h('div',{key:i,style:{display:'flex',gap:'9px',alignItems:'flex-start',background:'#fff',border:'1.5px solid '+cc,borderRadius:'11px',padding:'7px 11px',breakInside:'avoid'}},[
+        h('div',{key:'n',style:{flex:'none',width:'25px',height:'25px',borderRadius:'50%',background:cc,color:'#fff',fontFamily:"'Baloo 2'",fontWeight:800,fontSize:'14px',display:'flex',alignItems:'center',justifyContent:'center',lineHeight:1}},String(i+1)),
+        h('div',{key:'x',style:{...pf,fontSize:'14px',color:'#3a4753',lineHeight:1.28}},p)
+      ]));
+      els.push(h('div',{key:'st',style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'7px',marginBottom:'9px'}},cards));
+    }
+    const outR=find(/^Outils de langue/i);
+    if(outR){ const body=clean(outR.text).replace(/^Outils de langue[^:]*:\s*/i,'');
+      els.push(h('div',{key:'ou',style:{background:'#e7f4f1',border:'1px solid #b6ddd5',borderRadius:'10px',padding:'6px 13px',marginBottom:'9px'}},[
+        h('span',{key:'l',style:{fontFamily:"'Baloo 2'",fontWeight:700,color:'#12988a',fontSize:'10.5px',textTransform:'uppercase',letterSpacing:'.04em'}},'Outils de langue à mobiliser — '),
+        h('span',{key:'b',style:{color:'#33515b',fontSize:'12.5px',lineHeight:1.4}},body)
+      ])); }
+    const grR=find(/^Grille de r/i);
+    if(grR){ let body=clean(grR.text).replace(/^Grille de r[ée]ussite\s*\([^)]*\)\s*:\s*/i,'');
+      const rows=body.split(/\s*·\s*/).map(s=>{ const m=s.match(/^(C\d)\s+(.+?)\s+(\d+)\s*\(([^)]*)\)/); return m?{code:m[1],label:m[2],pts:m[3],desc:m[4]}:null; }).filter(Boolean);
+      const trs=rows.map((r,i)=>h('div',{key:i,style:{display:'grid',gridTemplateColumns:'30px 1fr 30px',alignItems:'baseline',borderTop:i?'1px solid #ecd9a8':'none',padding:'3px 0'}},[
+        h('div',{key:'c',style:{fontFamily:"'Baloo 2'",fontWeight:800,color:'#b8860b',fontSize:'12px'}},r.code),
+        h('div',{key:'l'},[h('span',{key:'a',style:{fontWeight:700,color:'#5c4a24',fontSize:'12.5px'}},r.label),h('span',{key:'b',style:{color:'#8a7a54',fontSize:'11.5px'}},' — '+r.desc)]),
+        h('div',{key:'p',style:{fontFamily:"'Baloo 2'",fontWeight:800,color:'#b8860b',fontSize:'13px',textAlign:'right'}},r.pts)
+      ]));
+      els.push(h('div',{key:'gr',style:{background:'#fdf7e6',border:'1.5px solid #ecd68f',borderRadius:'12px',padding:'6px 13px 7px',marginBottom:'9px'}},[
+        h('div',{key:'h',style:{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'2px'}},[
+          h('span',{key:'t',style:{fontFamily:"'Baloo 2'",fontWeight:700,color:'#b8860b',fontSize:'10.5px',textTransform:'uppercase',letterSpacing:'.04em'}},'Grille de réussite (barème officiel)'),
+          h('span',{key:'b',style:{fontFamily:"'Baloo 2'",fontWeight:800,color:'#b8860b',fontSize:'13px'}},'/20')
+        ])
+      ].concat(trs))); }
+    const exR=find(/^(Exemple|Mod[èe]le annot)/i);
+    if(exR){ let body=clean(exR.text).replace(/^Exemple\s*[—–-]\s*/i,'').replace(/^[^A-Za-zÀ-ÿ0-9«"]+/,'').replace(/^Mod[èe]le annot[ée]\s*[—–-]\s*/i,'');
+      const segs=body.split(/(\[[^\]]*\])/).filter(s=>s!=='').map((p,i)=> /^\[.*\]$/.test(p)
+        ? h('span',{key:i,style:{...pf,fontSize:'12.5px',color:cc,fontWeight:700}},' '+p+' ')
+        : h('span',{key:i},p));
+      els.push(h('div',{key:'ex',style:{background:'#edf6e2',border:'1px solid #cfe6b8',borderRadius:'10px',padding:'7px 13px',marginBottom:'6px'}},[
+        h('div',{key:'l',style:{fontFamily:"'Baloo 2'",fontWeight:700,color:'#4a8a24',fontSize:'10.5px',textTransform:'uppercase',letterSpacing:'.04em',marginBottom:'2px'}},'✦ Modèle annoté'),
+        h('div',{key:'b',style:{...pf,fontStyle:'italic',fontSize:'15.5px',color:'#3a4a2e',lineHeight:1.5}},segs)
+      ])); }
+    const astR=find(/^Astuce/i);
+    if(astR) els.push(this.astuceEl((astR.text||'').replace(/^Astuce\s*[—–-]\s*/i,''),color));
+    const pf2={fontFamily:"'Patrick Hand', cursive"};
+    return h('div',{style:{columnSpan:'all',breakInside:'auto',margin:'12px 0 6px'}},
+      h('div',{key:'box',style:{position:'relative',border:'2px solid '+cc,borderRadius:'14px',padding:'16px 14px 11px'}},
+        [h('div',{key:'hd',style:{position:'absolute',top:0,left:'16px',right:'16px',transform:'translateY(-50%)',display:'flex',alignItems:'center',gap:'10px'}},[
+          h('div',{key:'t',style:{fontFamily:"'Baloo 2'",fontWeight:800,color:'#fff',background:cc,fontSize:'14px',whiteSpace:'nowrap',padding:'3px 13px',borderRadius:'13px'}},'Fiche méthode'),
+          h('div',{key:'l',style:{flex:1,borderTop:'2px dotted '+cc,opacity:.5}}),
+          h('div',{key:'r',style:{...pf2,color:cc,fontSize:'14px',whiteSpace:'nowrap',background:'#fff',padding:'0 6px'}},'→ La démarche étape par étape')
+        ])].concat(els)
+      )
+    );
+  }
+
+  astuceEl(text,color){
+    const h=React.createElement;
+    const amber=color||'#c47a1a';
+    const pf={fontFamily:"'Patrick Hand', cursive"};
+    const rings=[]; for(let i=0;i<3;i++) rings.push(h('div',{key:i,style:{width:'13px',height:'9px',border:'2px solid '+amber,borderRadius:'50%',background:'#fff'}}));
+    return h('div',{style:{position:'relative',columnSpan:'all',breakInside:'avoid',margin:'14px 0 8px',paddingLeft:'2px'}},[
+      h('div',{key:'sp',style:{position:'absolute',left:'2px',top:0,bottom:0,transform:'translateX(-50%)',display:'flex',flexDirection:'column',justifyContent:'center',gap:'9px',zIndex:3}},rings),
+      h('div',{key:'box',style:{position:'relative',border:'2px solid '+amber,borderRadius:'14px',background:'#fff',padding:'16px 16px 10px 22px'}},[
+        h('div',{key:'hd',style:{position:'absolute',top:0,left:'20px',right:'14px',transform:'translateY(-50%)',display:'flex',alignItems:'center',gap:'8px'}},[
+          h('div',{key:'d1',style:{flex:'none',width:'14px',borderTop:'2px solid '+amber}}),
+          h('div',{key:'t',style:{...pf,color:amber,fontSize:'20px',lineHeight:1,whiteSpace:'nowrap',background:'#fff',padding:'0 6px'}},'Astuce'),
+          h('div',{key:'ln',style:{flex:1,borderTop:'2px dotted '+amber,opacity:.55}}),
+          h('div',{key:'sm',style:{display:'flex',gap:'5px',flex:'none',background:'#fff',padding:'0 2px'}},[this.smiley('happy'),this.smiley('meh')])
+        ]),
+        h('div',{key:'txt',style:{...pf,fontSize:'15px',color:'#5a4a2e',lineHeight:1.5,textAlign:'justify'}},text)
+      ])
+    ]);
+  }
+
+  smiley(kind){
+    const h=React.createElement;
+    const c=kind==='happy'?'#6aa62e':kind==='meh'?'#e6912a':'#d1493f';
+    const mouth=kind==='happy'?'M8 15 Q12 19 16 15':kind==='meh'?'M8 16 L16 16':'M8 17 Q12 13 16 17';
+    return h('svg',{width:22,height:22,viewBox:'0 0 24 24',fill:'none',style:{display:'block'}},[
+      h('circle',{key:'c',cx:12,cy:12,r:10,stroke:c,strokeWidth:1.6,fill:kind==='happy'?'#eaf5da':'#fff'}),
+      h('circle',{key:'e1',cx:8.5,cy:10,r:1.3,fill:c}),
+      h('circle',{key:'e2',cx:15.5,cy:10,r:1.3,fill:c}),
+      h('path',{key:'m',d:mouth,stroke:c,strokeWidth:1.6,strokeLinecap:'round',fill:'none'})
+    ]);
+  }
+  critEl(raw,color){
+    const h=React.createElement;
+    const cc=color||'#6aa62e';
+    let txt=(raw||'').replace(/^\s*crit[èe]res?\s+de\s+r[ée]ussite\s*[—:-]\s*/i,'');
+    txt=txt.replace(/(LLS\.FR\/\S+|[A-Z]{2,}\.[A-Z]{2,}\/\S+)/ig,'').replace(/auto[ée]valuez?[- ]vous.*$/i,'').trim();
+    const items=txt.split(/\s*·\s*|\s*;\s*/).map(s=>s.trim().replace(/\.$/,'')).filter(s=>s.length>1);
+    const pf={fontFamily:"'Patrick Hand', cursive"};
+    const rings=[]; for(let i=0;i<3;i++) rings.push(h('div',{key:i,style:{width:'12px',height:'8px',border:'2px solid '+cc,borderRadius:'50%',background:'#fff'}}));
+    const chip=(it,i)=>h('span',{key:i,style:{display:'inline-flex',alignItems:'flex-start',gap:'6px',marginRight:'18px'}},[
+      h('span',{key:'b',style:{flex:'none',width:'14px',height:'14px',border:'2px solid '+cc,borderRadius:'3px',background:'#fff',marginTop:'2px',position:'relative'}},
+        h('span',{style:{position:'absolute',left:'1px',top:'-3px',color:cc,fontSize:'12px',fontWeight:700}},'✓')),
+      h('span',{key:'x',style:{...pf,fontStyle:'italic',fontSize:'15px',color:'#3a4753',lineHeight:1.25}}, it.charAt(0).toUpperCase()+it.slice(1))
+    ]);
+    return h('div',{style:{position:'relative',columnSpan:'all',breakInside:'avoid',margin:'16px 0 6px',paddingLeft:'2px'}},[
+      h('div',{key:'sp',style:{position:'absolute',left:'2px',top:0,bottom:0,transform:'translateX(-50%)',display:'flex',flexDirection:'column',justifyContent:'center',gap:'7px',zIndex:3}},rings),
+      h('div',{key:'box',style:{position:'relative',border:'2px solid '+cc,borderRadius:'16px',background:'#fff',padding:'16px 18px 11px 22px'}},[
+        h('div',{key:'hd',style:{position:'absolute',top:0,left:'20px',right:'16px',transform:'translateY(-50%)',display:'flex',alignItems:'center',gap:'10px'}},[
+          h('div',{key:'d1',style:{flex:'none',width:'14px',borderTop:'2px solid '+cc}}),
+          h('div',{key:'t',style:{...pf,color:cc,fontSize:'19px',lineHeight:1,whiteSpace:'nowrap',background:'#fff',padding:'0 6px'}},'Critères de réussite'),
+          h('div',{key:'av',style:{...pf,color:cc,fontSize:'13px',whiteSpace:'nowrap',background:'#fff',padding:'0 8px'}},[h('span',{key:'a'},'➔ Autoévaluez-vous sur '),h('span',{key:'c',style:{fontWeight:700}},'www.veritas-school.com')]),
+          h('div',{key:'ln',style:{flex:1,borderTop:'2px dotted '+cc,opacity:.5,minWidth:'12px'}}),
+          h('div',{key:'sm',style:{display:'flex',gap:'4px',flex:'none',background:'#fff',padding:'0 2px'}},[this.smiley('happy'),this.smiley('meh'),this.smiley('sad')])
+        ]),
+        h('div',{key:'it',style:{lineHeight:1.7}}, items.map((it,i)=>chip(it,i)))
+      ])
+    ]);
+  }
+
+  relieEl(left,right){
+    const h=React.createElement, n=Math.max(left.length,right.length), rows=[], rg=(++this._rN||(this._rN=1));
+    for(let i=0;i<n;i++){
+      const l=left[i], r=right[i];
+      const dot=(pos)=>h('span',{key:pos,'data-dot':rg+'-'+(pos==='l'?'L':'R')+'-'+i,style:{width:'13px',height:'13px',borderRadius:'50%',background:'#fff',border:'2px solid #9a7bd0',justifySelf:pos==='l'?'end':'start',boxShadow:'0 1px 2px rgba(122,92,176,.25)',cursor:'pointer',zIndex:2}});
+      rows.push(h('div',{key:i,style:{display:'grid',gridTemplateColumns:'1fr 16px 62px 16px 1fr',alignItems:'center',minHeight:'30px'}},[
+        l?h('div',{key:'l',style:{display:'flex',alignItems:'center',gap:'8px',justifyContent:'flex-start'}},[
+          h('span',{key:'t',style:{flex:'none',width:'21px',height:'21px',border:'1.5px solid #c3b2e0',borderRadius:'5px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',color:'#7a5cb0',fontWeight:700}},l.tag),
+          h('span',{key:'x',style:{fontSize:'14px',color:'#39434d'}},l.text)
+        ]):h('div',{key:'l'}),
+        l?dot('l'):h('span',{key:'ld'}),
+        h('span',{key:'lane'}),
+        r?dot('r'):h('span',{key:'rd'}),
+        r?h('div',{key:'r',style:{display:'flex',alignItems:'center',gap:'8px'}},[
+          h('span',{key:'t',style:{flex:'none',width:'21px',height:'21px',border:'1.5px solid #c3b2e0',borderRadius:'5px',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'11px',color:'#7a5cb0',fontWeight:700}},r.tag),
+          h('span',{key:'x',style:{fontSize:'14px',color:'#39434d'}},r.text)
+        ]):h('div',{key:'r'})
+      ]));
+    }
+    return h('div',{'data-relie':rg,style:{position:'relative',marginTop:'8px',display:'flex',flexDirection:'column',gap:'3px'}},rows);
+  }
+
+  parseLex(text){
+    return text.split(/\s+—\s+/).map(seg=>{
+      const ci=seg.indexOf(' : ');
+      let word=ci>=0?seg.slice(0,ci).trim():seg.trim();
+      let def=ci>=0?seg.slice(ci+3).trim():'';
+      def=def.replace(/\s*:\s*$/,'');
+      word=word.charAt(0).toUpperCase()+word.slice(1);
+      return {word,def};
+    }).filter(e=>e.word);
+  }
+
+  build(B){
+    const PAL={observe:['#2b8ac6','#e8f4fb'],transform:['#e08a1e','#fbf0d8'],qcm:['#57a52c','#edf6e2'],link:['#8a5cc4','#f0e9fa'],intrus:['#e0562f','#fbe8e0'],oral:['#12988a','#e2f4f1'],write:['#4256b8','#e9ecfa'],game:['#d99e0b','#fbf1cf'],mobilise:['#5b6b7a','#eef1f4']};
+    const DISC={gram:'#2b8ac6',conj:'#8a5cc4',orth:'#e0562f',voca:'#57a52c',oral:'#12988a',ecri:'#4256b8',lect:'#d99e0b',meth:'#5b6b7a'};
+    const SEQ=[['#c94f7c','#fbedf2'],['#2f8f9d','#e7f4f5'],['#5a9e3f','#eef6e6'],['#d98324','#fcf1e2'],['#7b5ea7','#f0ebf7'],['#c0453f','#fbeae9']];
+    const SPBAND={situations:'#12988a',epreuve:'#e0562f',bilan:'#8a5cc4'};
+    const prodRe=/rédige|produis|écris|raconte|imagine|invente|compose|dialogue|lettre|paragraphe|récit|portrait|décris|présente|développe|rédaction|exprime/i;
+    const out={header:B.header||{},sequences:[]};
+
+    (B.sequences||[]).forEach((s,si)=>{
+      const pal=SEQ[si%6];
+      const seq={num:s.num,title:s.title,competence:s.competence,intro:s.intro,main:pal[0],tint:pal[1],weeks:[]};
+      (s.weeks||[]).forEach(w=>{
+        const wk={num:w.num,title:w.title,seqMain:pal[0],items:[]};
+        (w.items||[]).forEach((it,ii)=>{
+          const item={special:!!it.special,isLesson:!it.special,showSep:ii>0,title:it.title,main:it.special?(SPBAND[it.kind]||'#5b6b7a'):'',flow:[]};
+          if(!it.special){
+            item.disc=it.disc; item.label=it.label; item.discColor=DISC[it.discCls]||'#2b8ac6';
+            const meth=it.discCls==='meth'||it.discCls==='lect';
+            item.methFont=meth?"'Tinos', serif":'inherit'; item.methSize=meth?'16px':'inherit';
+            item.objectives=(it.objectives||[]).map(t=>({text:t,iconEl:this.icon('target','#b1810c',12)}));
+            item.hasTexte=!!it.texte; 
+            if(it.texte){ const lt=this.isLetterText(it.texte.text); const off=!!it.texte.letter; item.texte={text:it.texte.text,isOfficial:off,notOfficial:!off,letterEl:off?this.officialLetterEl(it.texte.letter):'',markEl:this.markupText(it.texte.text,this.notionRules(it.title),{fontFamily:(lt?"'Tinos', serif":"'Lora', serif"),fontStyle:'normal',color:'#324759',fontSize:lt?'15.5px':'13px',lineHeight:1.4,textAlign:'justify'},{proper:true,dialogue:true}),font:lt?"'Tinos', serif":"'Lora', serif",fs:lt?'18px':'16px',authEl:this.authEl(it.texte.auth||{author:it.texte.attr||'',title:'',rest:''})}; }
+            else item.texte={text:'',isOfficial:false,notOfficial:true,letterEl:'',font:"'Lora', serif",fs:'16px',authEl:''};
+            item.hasRetiens=(it.retiens||[]).length>0;
+            item.isMethod=item.hasRetiens && /plan-type/i.test(it.retiens[0].text||'');
+            item.hasRetiensStd=item.hasRetiens && !item.isMethod;
+            if(item.isMethod) item.methodEl=this.methodEl(it.retiens,pal[0]);
+            const nrules0=this.notionRules(it.title);
+            item.retiens=(it.retiens||[]).map(r=>{
+              const o={text:(r.text||'').replace(/^\s*[\u2726\u2794\u26a1\u2022\u25c6\u2605]?\s*(astuce|exemple|ex\.)\s*[\u2014\-:]\s*/i,'')}; o.rPln=r.t==='plain'; o.rRule=r.t==='rule'; o.rAst=r.t==='astuce'; o.rEx=r.t==='example';
+              if(o.rAst) o.astEl=this.astuceEl(o.text,pal[0]);
+              if(o.rAst) o.iconEl=this.icon('bulb','#b1740c',13);
+              if(o.rEx) o.iconEl=this.icon('star','#4a8a24',13);
+              if(o.rRule){ o.hasLead=!!(r.lead&&r.lead.length); o.noLead=!o.hasLead; o.lead=r.lead||''; o.rest=r.rest||r.text; }
+              if(o.rPln) o.plnEl=this.markupText(o.text,nrules0,{color:'#39434d'},{quoted:true});
+              if(o.rRule) o.restEl=this.markupText(o.rest,nrules0,{color:'#39434d',display:'inline'},{quoted:true});
+              return o;
+            });
+          }
+          const nrules=this.notionRules(it.title);
+          item.flow=(it.flow||[]).map(b=>this.flowBlock(b,PAL,prodRe,nrules,pal[0]));
+          item.flowHasEx=item.flow.some(b=>b.isEx);
+          wk.items.push(item);
+        });
+        seq.weeks.push(wk);
+      });
+      out.sequences.push(seq);
+    });
+    out.moduleCount=out.sequences.length;
+    let lc=0;
+    out.toc=(B.sequences||[]).map((s,si)=>{
+      const pal=SEQ[si%6];
+      const lessons=[].concat(...(s.weeks||[]).map(w=>(w.items||[]).map(it=>({title:it.title||'',special:!!it.special}))));
+      lc+=lessons.length;
+      return {num:s.num,title:s.title,main:pal[0],tint:pal[1],lessons};
+    });
+    out.lessonCount=lc;
+    out.diagEl=this.diagnosticEl();
+    return out;
+  }
+
+  flowBlock(b,PAL,prodRe,nrules,seqMain){
+    const o={span:'none',iconEl:'',main:'#2b8ac6'};
+    o.isSection=b.t==='section'; o.isEx=b.t==='exercise'; o.isSub=b.t==='subhead';
+    o.isSit=b.t==='sit'; o.isCri=b.t==='critere'; o.isInteg=b.t==='integration'; o.isSuj=b.t==='sujet';
+    o.isObj=b.t==='objective'; o.isPln=b.t==='plain'; o.isPassage=b.t==='passage'; o.isSource=b.t==='source';
+    o.isLexique=b.t==='lexique'; o.isConsigne=b.t==='consigne'; o.isCorpus=b.t==='corpus'; o.isProduction=b.t==='production';
+    o.text=b.text||''; o.title=b.title||'';
+
+    if(o.isSection){ o.label=b.label; o.main=(PAL[b.cat]||PAL.observe)[0]; o.iconEl=this.icon(this.catIconName(b.cat),'#fff',13); if(b.cat==='game')o.span='all'; }
+    if(o.isCorpus){ o.span='all'; o.iconEl=this.icon('book','#fff',12); const ct=(b.text||'').replace(/([!?.»…])\s+([—–])\s+/g,'$1\n$2 '); o.markEl=this.markupText(ct,nrules,{color:'#5c4a24',fontSize:'13px',lineHeight:1.45,textAlign:'justify',whiteSpace:'pre-line'},{proper:true,dialogue:true}); }
+    if(o.isConsigne){ o.span='none'; }
+    if(o.isCri){ o.span='all'; o.critEl=this.critEl(b.text||'',seqMain); }
+    if(o.isPassage){ o.span='all'; o.hasTitle=!!b.title; o.body=(b.lines||[]).join('\n'); o.hasSource=!!b.source; o.authEl=b.source?this.authEl(b.source):'';
+      const ne=(b.lines||[]).filter(l=>l.trim());
+      const dl=ne.filter(l=>/^[A-ZÀ-Ý0-9][^:]{0,48}:\s/.test(l)).length;
+      o.isPlay = !b.numbered && ne.length>=2 && dl>=Math.ceil(ne.length*0.5);
+      o.isLetter = !b.numbered && !o.isPlay && this.isLetterText(o.body);
+      o.isPlain = !o.isPlay && !o.isLetter && !b.numbered;
+      o.numbered = !!b.numbered;
+      if(o.isPlay) o.playEl=this.theatreEl(b.lines||[]);
+      else if(o.isLetter) o.letterEl=this.letterEl(b.lines||[]);
+      else if(o.numbered){ const NT=this.makeNT(); o.passEl=React.createElement(NT,{text:o.body,cols:2,key:'nt'}, this.markupText(o.body,nrules,null,{proper:true,dialogue:true,inline:true})); }
+      else o.markEl=this.markupText(o.body,nrules,{fontFamily:"'Lora', serif",color:'#39434d',fontSize:'13px',lineHeight:1.42,whiteSpace:'pre-line',textAlign:'justify'},{proper:true,dialogue:true});
+    }
+    if(o.isSource){ o.authEl=this.authEl(b.auth||{author:b.raw||'',title:'',rest:''}); }
+    if(o.isLexique){ o.entries=this.parseLex(b.text||''); o.iconEl=this.icon('book','#3f6d99',12); }
+    if(o.isSit){ const _body=(b.body||b.text||''); const _oral=/\boral(e|ement)?\b|compte[- ]rendu oral|\b[àa] l'oral\b|jeu de r[ôo]le|articulation|expos[ée]\b|prends la parole|pr[ée]sente.{0,40}\bminutes?\b/i.test(_body) && !/r[ée]dige|\b[ée]cris\b|produis une lettre|par [ée]crit|paragraphe|\blignes\b/i.test(_body); o.title=_oral?'Expression orale':'Expression écrite'; o.bodyEl=this.sitBody(_body); o.sitWrite=!_oral; if(o.sitWrite) o.writeEl=this.writeSeyes(10); }
+
+    if(o.isEx){
+      o.num=b.num||''; o.numDisp=b.num||'•'; o.main=(PAL[b.cat]||PAL.observe)[0];
+      let _cons=b.consigne||b.body||'', _rest=b.rest||'';
+      if(!b.consigne){ const qm=_cons.match(/^([\s\S]*?[:.!?])\s+(«[\s\S]+|[A-ZÀ-Ý][^»]*»[\s\S]*)$/); if(qm){ _cons=qm[1]; _rest=(qm[2]+' '+_rest).trim(); } }
+      o.consigne=_cons; o.rest=_rest; o.hasRest=!!_rest;
+      { const full=(b.consigne||b.body||'')+' '+(b.rest||''); let cm=this.corrMap()[this.corrKey(full)]||this.corrMap()[this.corrKey(_cons)]; o.corrEl=cm?this.corrToggle(cm):null; }
+      o.aOpts=false; o.isRelie=false; o.isWordbank=false; o.isCross=false; o.isWordsearch=false; o.aLines=false;
+      if(b.answer==='crossword'&&b.crossword){
+        o.isCross=true; o.span='all'; o.gridEl=this.gridEl(b.crossword);
+        o.acrossClues=b.crossword.clues.A; o.downClues=b.crossword.clues.D;
+      } else if(b.answer==='wordsearch'&&b.wordsearch){ o.isWordsearch=true; o.span='all'; o.wsEl=this.wordSearchEl(b.wordsearch); } else if(b.answer==='options'){ o.aOpts=true; o.options=(b.options||[]).map(x=>({text:x.text||x})); }
+      else if(b.answer==='relier'){ o.isRelie=true; o.span='all'; o.relieEl=this.relieEl(b.relLeft||[],b.relRight||[]); }
+      else if(b.answer==='wordbank'){ o.isWordbank=true; o.words=(b.words||[]).map(t=>({text:t})); o.writeEl=this.writeEl(2); }
+      else { o.aLines=true; const prod=b.cat==='write'||b.cat==='oral'||prodRe.test(o.consigne); o.writeEl=this.writeEl(prod?7:Math.max(3,Math.min(b.lines||3,4))); }
+    }
+    if(o.isInteg){ o.title=b.title||''; o.writeEl=this.writeSeyes(12); }
+    if(o.isSuj){ o.span='none'; o.writeEl=this.writeEl(4); }
+    if(o.isProduction){ o.span='all'; o.title=b.title||"À toi d'écrire"; o.writeEl=this.writeSeyes(7); }
+    return o;
+  }
+
+  hasAnswered(root){ if(!root) return false;
+    var ins=root.querySelectorAll('input,textarea'); for(var i=0;i<ins.length;i++){ if((ins[i].value||'').trim()) return true; }
+    if(root.querySelector('[data-ws][style*="ffe08a"], [data-ws][style*="255, 224, 138"]')) return true;
+    if(root.querySelector('[data-relie] line, [data-relie] svg line')) return true;
+    var sp=root.querySelectorAll('span'); for(var j=0;j<sp.length;j++){ if(sp[j].textContent==='✓') return true; }
+    return false; }
+  corrToggle(text){ const R=React, self=this;
+    const T=function(props){ const s=R.useState(0), st=s[0], set=s[1]; const ref=R.useRef(null);
+      const open=st===2;
+      const onClick=function(){ if(open){ set(0); return; }
+        var wrap=ref.current&&ref.current.closest('[data-exwrap]');
+        if(self.hasAnswered(wrap)) set(2); else { set(1); setTimeout(function(){ set(function(v){return v===1?0:v;}); },2600); } };
+      return R.createElement('div',{ref:ref,style:{margin:'5px 0 2px'}},[
+        R.createElement('button',{key:'b',onClick:onClick,style:{border:'1px solid #57a52c',background:open?'#57a52c':'#edf6e2',color:open?'#fff':'#3f7a2c',fontFamily:"'Baloo 2',sans-serif",fontWeight:700,fontSize:'11px',padding:'3px 12px',borderRadius:'14px',cursor:'pointer'}}, open?'✕ Masquer la correction':'✓ Voir la correction'),
+        st===1?R.createElement('span',{key:'w',style:{marginLeft:'8px',fontSize:'11px',color:'#c0453f',fontStyle:'italic'}},'Réponds d\'abord à la question 🙂'):null,
+        open?R.createElement('div',{key:'c',style:{marginTop:'4px',background:'#f2f8ea',border:'1px solid #cfe6b8',borderLeft:'4px solid #57a52c',borderRadius:'0 8px 8px 0',padding:'7px 12px',fontSize:'12.5px',color:'#33512a',lineHeight:1.45}},[R.createElement('span',{key:'l',style:{fontFamily:"'Baloo 2',sans-serif",fontWeight:700,color:'#4a8a24',fontSize:'10.5px',textTransform:'uppercase',letterSpacing:'.04em',marginRight:'6px'}},'Corrigé'), props.text]):null
+      ]); };
+    return R.createElement(T,{text:text,key:'ct'}); }
+
+  corrKey(s){ return (s||'').replace(/^\s*exercice\s*\d+\s*[\u2014\u2013-]\s*/i,'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'').slice(0,50); }
+  corrMap(){ if(this._corr) return this._corr; this._corr={}; const G=window.GUIDE_6E; if(G){ G.sequences.forEach(s=>s.lessons.forEach(l=>l.exercises.forEach(e=>{ if(e.corrige){ const k=this.corrKey(e.consigne); if(k&&!this._corr[k]) this._corr[k]=e.corrige; } }))); } return this._corr; }
+
+  renderVals(){
+    if(!this._built&&window.BOOKLET){ this._model=this.build(window.BOOKLET); this._built=true; }
+    const m=this._model; m.overlayEl=this.overlayEl(); m.toolbarEl=this.toolbarEl();
+    return m;
+  }
+}
+</script>
+</body>
+</html>
