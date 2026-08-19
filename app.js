@@ -2969,8 +2969,13 @@ function today(){return new Date().toLocaleDateString('fr-FR');}
 function starsHtml(n){var h='';for(var i=1;i<=5;i++)h+=i<=Math.round(n)?'<span class="star">'+ICO('lc-star','i vt-star on')+'</span>':'<span class="star-off">'+ICO('lc-star','i vt-star')+'</span>';return h;}
 function getBookRating(bid){var rvs=(DB.bookReviews||[]).filter(function(r){return r.bid===bid;});if(!rvs.length)return{avg:0,count:0};var avg=rvs.reduce(function(s,r){return s+r.stars;},0)/rvs.length;return{avg:avg,count:rvs.length};}
 
-function fmt(n){return new Intl.NumberFormat('fr-FR').format(n)+' FCFA';}
-function fmtN(n){return new Intl.NumberFormat('fr-FR').format(n);}
+/* Un montant absent n'est pas un montant NUL. Sans garde, fmt(undefined) rendait
+   « NaN FCFA » à l'écran (vu sur l'entête élève : « PAIEMENT undefined NaN FCFA/mois »)
+   et fmt(null) aurait affiché « 0 FCFA » — un chiffre inventé sur une page d'argent.
+   On rend un tiret : l'inconnu se voit, et ne se confond pas avec zéro. */
+function _fmtFini(n){ if(n===null||n===undefined||n==='') return null; var v = typeof n === 'string' ? Number(n.replace(/[\s  ]/g,'').replace(',','.')) : Number(n); return Number.isFinite(v) ? v : null; }
+function fmt(n){ var v=_fmtFini(n); return v===null ? '—' : new Intl.NumberFormat('fr-FR').format(v)+' FCFA'; }
+function fmtN(n){ var v=_fmtFini(n); return v===null ? '—' : new Intl.NumberFormat('fr-FR').format(v); }
 
 // Numéro camerounais présentable. La fiche contact publique affichait
 // « 671469236 » (espace parasite en tête, pas d'indicatif) : illisible et
@@ -3284,7 +3289,7 @@ function viewBookDetail(bid){
   h+='<button class="btn bo sm" onclick="downloadBookCover(\''+bid+'\')" style="width:100%"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Couverture</button></div>';
   // Info
   h+='<div class="book-info"><h2>'+_esc(b.titre)+'</h2>';
-  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="bg bgb">'+_esc(b.cls)+'</span><span class="bg bgd">'+_esc(String(b.pages))+' pages</span><span class="bg '+(b.stock>0?'bgg':'bgr')+'">'+(b.stock>0?b.stock+' en stock':'Rupture')+'</span></div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px"><span class="bg bgb">'+_esc(b.cls)+'</span><span class="bg bgd">'+_esc(String(b.pages))+' pages</span>'+(b.numeriqueSeul?'<span class="bg bgb">Édition numérique</span>':'<span class="bg '+(b.stock>0?'bgg':'bgr')+'">'+(b.stock>0?b.stock+' en stock':'Rupture')+'</span>')+'</div>';
   h+='<div style="font-size:13px;color:var(--ink3)">'+ICO('i-feather')+'<strong>'+_esc(b.auteur)+'</strong> · '+ICO('i-book-open')+' '+(b.chaps?.length||0)+' chapitres</div>';
   if(author)h+='<div class="author-badge mt4">'+ICO('i-check')+'Auteur vérifié — '+author.nom+'</div>';
   // Stars
@@ -3350,7 +3355,7 @@ function viewBookDetail(bid){
     h+='<div style="background:var(--bg);border:var(--br);border-radius:var(--r2);padding:20px;font-family:Libre Baskerville,serif;font-size:13px;line-height:2;color:var(--ink2);white-space:pre-line;max-height:400px;overflow-y:auto;position:relative">';
     h+='<div style="position:absolute;top:8px;right:8px;background:var(--gp);color:var(--gold);padding:2px 10px;border-radius:12px;font-size:13px;font-weight:700;font-family:Outfit,sans-serif">EXTRAIT GRATUIT</div>';
     h+=b.extrait;
-    h+='<div style="margin-top:20px;padding-top:16px;border-top:2px dashed var(--bg3);text-align:center;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink4)"><div style="font-size:24px;margin-bottom:4px">📚</div><strong>Fin de l&#39;extrait</strong><br>Commandez le manuel complet</div></div>';
+    h+='<div style="margin-top:20px;padding-top:16px;border-top:2px dashed var(--bg3);text-align:center;font-family:Outfit,sans-serif;font-size:13px;color:var(--ink4)"><div style="font-size:24px;margin-bottom:4px">📚</div><strong>Fin de l&#39;extrait</strong><br>'+(b.numeriqueSeul?'Lisez la suite en ligne — '+fmtN(b.prixDigital||b.prix||0)+' FCFA':'Commandez le manuel complet')+'</div></div>';
   }else h+='<div class="empty"><div class="empty-ico">📄</div>Aperçu non disponible</div>';
   h+='</div>';
   // Reviews tab
@@ -4151,6 +4156,13 @@ function initVisitor(){
     requestIdleCallback(function(){ try{ _fetchPublicData(); }catch(e){} }, {timeout:3000});
   } else {
     setTimeout(function(){ try{ _fetchPublicData(); }catch(e){} }, 1200);
+  }
+  // Catalogue des livres numériques : même créneau d'inactivité, mêmes raisons
+  // (aucune fiche ne conditionne le premier écran). Échec silencieux.
+  if(typeof requestIdleCallback==='function'){
+    requestIdleCallback(function(){ try{ _catalogueLivresCharger(); }catch(e){} }, {timeout:4000});
+  } else {
+    setTimeout(function(){ try{ _catalogueLivresCharger(); }catch(e){} }, 1600);
   }
   // Ré-attacher les gestes d'accès admin sur le logo (au cas où il a été recréé)
   setTimeout(function(){
@@ -5602,9 +5614,10 @@ function vShowSec(sec,btn,_boot){
       ${DB.books.map(b=>{
         const cc=b.coverColor||'#1a3a8a';
         const hasPreview=b.extrait||(b.previewImages&&b.previewImages.length);
-        const stockCls=b.stock>5?'ok':b.stock>0?'warn':'out';
-        const stockLbl=b.stock>5?'En stock':b.stock>0?b.stock+' restants':'Rupture';
-        const stockIco=b.stock>5?ICO('i-check','i vb-stk'):b.stock>0?ICO('i-warning','i vb-stk'):ICO('i-x-circle','i vb-stk');
+        // Un livre numérique n'a ni pile ni rupture : il est simplement disponible.
+        const stockCls=b.numeriqueSeul?'ok':b.stock>5?'ok':b.stock>0?'warn':'out';
+        const stockLbl=b.numeriqueSeul?'En ligne':b.stock>5?'En stock':b.stock>0?b.stock+' restants':'Rupture';
+        const stockIco=b.numeriqueSeul?ICO('i-book-open','i vb-stk'):b.stock>5?ICO('i-check','i vb-stk'):b.stock>0?ICO('i-warning','i vb-stk'):ICO('i-x-circle','i vb-stk');
         const discount=b.ancienPrix?Math.round((1-b.prix/b.ancienPrix)*100):0;
         const _rt=(typeof getBookRating==='function')?getBookRating(b.id):{avg:0,count:0};
         const _full=Math.max(0,Math.min(5,Math.round(_rt.avg||0)));
@@ -5616,9 +5629,10 @@ function vShowSec(sec,btn,_boot){
           <div class="vbook-cover">
             ${b.coverImg?`<img src="${b.coverImg}" alt="${_esc(b.titre)}" onerror="this.style.display='none'">`:`<span class="vbook-cover-emoji">${b.ico||'📘'}</span>`}
             <div class="vbook-class-badge">${_esc(b.cls)}</div>
-            <div class="vbook-minesec-badge">${ICO('i-award')}MINESEC</div>
+            ${b.genre==='roman'?`<div class="vbook-minesec-badge">${ICO('i-feather')}ROMAN</div>`
+              :`<div class="vbook-minesec-badge">${ICO('i-award')}MINESEC</div>`}
             ${b.id===_bestId&&(b.vendu||0)>0?'<div style="position:absolute;bottom:8px;left:8px;background:linear-gradient(135deg,#AE5353,#D58E8E);color:#fff;font-size:9.5px;font-weight:900;padding:3px 10px;border-radius:10px;letter-spacing:.5px;box-shadow:0 3px 10px rgba(220,38,38,.4);z-index:2">'+ICO("lc-flame")+'BEST-SELLER</div>':''}
-            ${b.stock<=0?'<div class="vbook-stock-out">Rupture</div>':''}
+            ${(b.stock<=0&&!b.numeriqueSeul)?'<div class="vbook-stock-out">Rupture</div>':''}
             ${hasPreview?'<div class="vbook-preview-badge">Aperçu gratuit</div>':''}
             <div class="vbook-pages">${b.pages||0}p · ${(b.chaps||[]).length} chap.</div>
           </div>
@@ -5636,7 +5650,9 @@ function vShowSec(sec,btn,_boot){
             <div class="vbook-actions">
               ${hasPreview?`<button class="vbook-btn btn-extrait" onclick="event.stopPropagation();_showExtrait('${b.id}')">${ICO('i-eye')}Extrait</button>`:''}
               <button class="vbook-btn btn-detail" onclick="event.stopPropagation();viewBookDetail('${b.id}')">${ICO('lc-clipboard')}Détails</button>
-              ${b.stock>0?`<button class="vbook-btn btn-buy" onclick="event.stopPropagation();visitorOrderBook('${b.id}')">${ICO('lc-cart')}Payer maintenant</button>`:'<button class="vbook-btn btn-buy" disabled>Rupture de stock</button>'}
+              ${b.numeriqueSeul?`<button class="vbook-btn btn-buy" onclick="event.stopPropagation();openSecureBook('${b.id}')">${ICO('i-book-open')}Lire en ligne</button>`
+                :b.stock>0?`<button class="vbook-btn btn-buy" onclick="event.stopPropagation();visitorOrderBook('${b.id}')">${ICO('lc-cart')}Payer maintenant</button>`
+                :'<button class="vbook-btn btn-buy" disabled>Rupture de stock</button>'}
             </div>
           </div>
         </div>`;
@@ -10642,7 +10658,7 @@ function render(p){
     settings:pgSettings,mybooks:pgMyBooks,releve_template:pgReleveTemplate,submit_resource:pgSubmitResource,soumissions:pgSoumissions,visitor_accounts:pgVisitorAccounts,authorsmgmt:pgAuthorsMgmt,certscol:pgCertScol,listeclasse:pgListeClasse,presence:pgPresence,
     attesttravail:pgAttestTravail,recubooks:pgRecuBooks,autredep:pgAutreDep,
     // Élève
-    mon_bulletin:pgReleve,mes_absences:pgMesAbsences,
+    mon_bulletin:pgReleve,mes_absences:pgMesAbsences,mes_evaluations:pgMesEvaluations,
     mes_devoirs:pgMesDevoirs,mon_paiement:pgMonPaiement,boutique:pgBoutique,
     // Enseignant
     devoirs_teacher:pgDevoirsTeacher,perf_teacher:pgPerfTeacher,
@@ -10679,7 +10695,19 @@ function render(p){
     // Guide d'utilisation (tous rôles)
     guide:pgGuide,
   };
-  return(P[p]||pgDash)();
+  /* Route inconnue : le repli etait `pgDash`. Or pgDash sert le tableau de bord
+     de l'ADMINISTRATION des que la session n'est ni eleve ni enseignant — donc a
+     un visiteur inscrit, a un parent, a un partenaire. Mesure du 19/08/2026 :
+     goTo('admin'), goTo('stats'), goTo('comptes')... — huit routes inexistantes
+     sur quatorze essayees — servaient a un simple compte gratuit « Eleves
+     inscrits · Recettes · Impayes · Masse salariale ». Les vraies pages
+     d'administration, elles, etaient bien gardees : c'est le REPLI qui ouvrait
+     la porte, en silence, sans qu'aucune exception ne soit levee.
+     Desormais le repli n'existe que pour l'administration ; pour tout autre
+     role, une route inconnue est une page introuvable, pas un tableau de bord. */
+  if(P[p]) return P[p]();
+  if(iA()) return pgDash();
+  return `<div class="empty"><div class="empty-ico">&#128269;</div><div class="semi mb8">Page introuvable</div><div class="s mut">Cette section est introuvable, ou elle ne vous est pas destinee.</div><button class="btn bi sm mt14" onclick="goTo('dashboard')">Retour a mon espace</button></div>`;
 }
 function re(){$("cnt").innerHTML=render(pg);buildNav();}
 
@@ -10789,13 +10817,13 @@ function pgDash(){
       <div class="fl2 fic g12"><img src="${getLogo()}" alt="" style="width:50px;height:50px;border-radius:50%;background:#fff;padding:3px"><div>
         <div style="font-family:Libre Baskerville,serif;font-size:20px;color:#edfaf3">${s.pre} ${s.nom}</div>
         <div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:2px">Matricule: <strong style="color:#fff">${s.mat}</strong> · Classe: <strong style="color:#fff">${s.cls}</strong></div>
-        <div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:2px">Inscrit le ${s.ins} · ${s.stat}</div>
+        <div style="font-size:13px;color:rgba(255,255,255,.4);margin-top:2px">Inscrit le ${s.ins||'—'} · ${s.stat||'—'}</div>
       </div></div>
     </div>
     <div class="sg" style="grid-template-columns:repeat(4,1fr)">
       <div class="sc scgr" onclick="goTo('mon_bulletin')" style="cursor:pointer"><div class="sci">📄</div><div class="scl">Moyenne T1</div><div class="scv vgr">${moy!==null?moy.toFixed(2):'—'}</div><div class="scs">${ap?.lbl||'—'}</div></div>
       <div class="sc scr" onclick="goTo('mes_absences')" style="cursor:pointer"><div class="sci">✅</div><div class="scl">Absences</div><div class="scv vr">${totH}h</div><div class="scs">${njust} non justifiée${njust>1?'s':''}</div></div>
-      <div class="sc ${s.stat==='Payé'?'scgr':'scr'}" onclick="goTo('mon_paiement')" style="cursor:pointer"><div class="sci">💳</div><div class="scl">Paiement</div><div class="scv ${s.stat==='Payé'?'vgr':'vr'}" style="font-size:14px">${s.stat}</div><div class="scs">${fmt(s.frais)}/mois</div></div>
+      <div class="sc ${s.stat==='Payé'?'scgr':'scr'}" onclick="goTo('mon_paiement')" style="cursor:pointer"><div class="sci">💳</div><div class="scl">Paiement</div><div class="scv ${s.stat==='Payé'?'vgr':'vr'}" style="font-size:14px">${s.stat||'—'}</div><div class="scs">${fmt(s.frais)}/mois</div></div>
       <div class="sc scb" onclick="goTo('mes_devoirs')" style="cursor:pointer"><div class="sci">📋</div><div class="scl">Devoirs à rendre</div><div class="scv vb">${dvsPending.length}</div><div class="scs">${dvsE.length} au total</div></div>
     </div>
     ${(function(){
@@ -10871,11 +10899,24 @@ function pgDash(){
   }
 
   // Admin / Super Admin dashboard
-  const paid=DB.payments.filter(p=>p.stat==='Payé').reduce((s,p)=>s+p.mnt,0);
-  const imp=DB.payments.filter(p=>p.stat==='Impayé').reduce((s,p)=>s+p.mnt,0);
-  const bkr=DB.books.reduce((s,b)=>s+b.vendu*b.prix,0);
-  const sal=DB.teachers.reduce((s,t)=>s+t.sal,0);
-  const totDep=DB.depenses.reduce((s,d)=>s+d.mnt,0);
+  /* Garde de role (19/08/2026). Cette branche lit les finances du centre :
+     recettes, impayes, masse salariale, benefice net. Elle etait atteignable
+     par tout role non-eleve/non-enseignant — visiteur inscrit, parent,
+     partenaire — par une route inconnue (cf. le repli de render()). Deux
+     verrous valent mieux qu'un : meme si une route mene un jour ici par
+     erreur, la page refusera d'elle-meme. */
+  if(!iA()) return na();
+  /* Une seule fiche sans montant suffisait a rendre tout le total NaN, et le
+     tableau de bord affichait « Manuels vendus NaN » (constate a l'ecran le
+     19/08/2026). Sur une page d'argent, un total faux est pire qu'un total
+     absent : on additionne donc des NOMBRES, et une valeur manquante compte
+     pour zero au lieu d'empoisonner la somme entiere. */
+  const _n=v=>{const x=typeof v==='number'?v:parseFloat(String(v).replace(/[^0-9.,-]/g,'').replace(',','.'));return Number.isFinite(x)?x:0;};
+  const paid=DB.payments.filter(p=>p.stat==='Payé').reduce((s,p)=>s+_n(p.mnt),0);
+  const imp=DB.payments.filter(p=>p.stat==='Impayé').reduce((s,p)=>s+_n(p.mnt),0);
+  const bkr=DB.books.reduce((s,b)=>s+_n(b.vendu)*_n(b.prix),0);
+  const sal=DB.teachers.reduce((s,t)=>s+_n(t.sal),0);
+  const totDep=DB.depenses.reduce((s,d)=>s+_n(d.mnt),0);
   const bnet=paid+bkr-sal-totDep;
   const cd=CLS.map(c=>({c,n:DB.students.filter(s=>s.cls===c).length})).filter(x=>x.n>0);
   const mx=Math.max(...cd.map(x=>x.n),1);
@@ -10902,7 +10943,7 @@ function pgDash(){
   <div class="sg" style="grid-template-columns:repeat(3,1fr)">
     <div class="sc scvi"><div class="sci">📋</div><div class="scl">Devoirs actifs</div><div class="scv vvi">${DB.devoirs?.length||0}</div><div class="scs">${DB.submissions?.length||0} soumissions</div></div>
     <div class="sc scpu"><div class="sci">✅</div><div class="scl">Absences enreg.</div><div class="scv vpu">${totAbs}</div><div class="scs">cette période</div></div>
-    <div class="sc scg"><div class="sci">📚</div><div class="scl">Manuels vendus</div><div class="scv vg">${DB.books.reduce((s,b)=>s+b.vendu,0)}</div><div class="scs">${fmt(bkr)} de recettes</div></div>
+    <div class="sc scg"><div class="sci">📚</div><div class="scl">Manuels vendus</div><div class="scv vg">${DB.books.reduce((s,b)=>s+_n(b.vendu),0)}</div><div class="scs">${fmt(bkr)} de recettes</div></div>
   </div>
   <div class="g2">
     <div class="card"><div class="ct">Répartition par classe</div>
@@ -24718,51 +24759,68 @@ function _saveEval(){
 }
 
 // ── ÉVALUATION CÔTÉ ÉLÈVE (passer une évaluation) ─────────────────
-function showMesEvaluations(){
+/* Constructeur PARTAGÉ de la liste des évaluations.
+   Il n'existait que `showMesEvaluations()`, qui écrivait dans `_vc()` — la zone
+   de la coquille VISITEUR. L'entrée « Évaluations en ligne » du menu ÉLÈVE
+   (ENAV) pointait donc sur une route ABSENTE de la table `P` : `render()`
+   retombait sur `pgDash`, et l'élève ayant cliqué sur « Évaluations en ligne »
+   voyait son tableau de bord sous ce titre. On sépare la CONSTRUCTION du HTML
+   de son PLACEMENT : la vitrine l'injecte, l'application la retourne.
+   Deux corrections au passage :
+   - titre, matière et classe venaient de la base et étaient injectés BRUTS —
+     désormais échappés ;
+   - l'élève voyait les évaluations de TOUTES les classes ; il ne voit plus que
+     celles de la sienne, plus celles qui ne visent aucune classe. */
+function _evalsEleveHtml(){
   _initEvals();
-  var actives=DB.evaluations.filter(function(ev){return ev.actif;});
+  var e=function(v){ return v==null?'':String(v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;'); };
+  var maClasse=(SES&&SES.cls)?String(SES.cls).trim():'';
+  var actives=(DB.evaluations||[]).filter(function(ev){
+    if(!ev||!ev.actif) return false;
+    var c=(ev.classe==null?'':String(ev.classe).trim());
+    if(c==='' || maClasse==='') return true;      // évaluation tous niveaux
+    return c.toLowerCase()===maClasse.toLowerCase();
+  });
   var h="<div class='vsec'>";
   h+="<div class='vsec-title'><span class='vsec-ico'><svg class='vico vico-21' aria-hidden='true'><use href='#lc-chart'/></svg></span>Évaluations en ligne</div>";
   h+="<div class='vsec-sub'>Passez des évaluations créées par votre établissement — résultats instantanés</div>";
   if(!actives.length){
-    h+="<div class='vcard' style='text-align:center;padding:40px'><div style='font-size:48px;margin-bottom:16px'>📭</div><div style='font-size:15px;color:#6B7A99'>Aucune évaluation disponible pour le moment.<br>Revenez plus tard.</div></div>";
+    h+="<div class='vcard' style='text-align:center;padding:40px'><div style='font-size:48px;margin-bottom:16px'>📭</div><div style='font-size:15px;color:#6B7A99'>Aucune évaluation disponible"+(maClasse?" pour la classe de "+e(maClasse):"")+" pour le moment.<br>Revenez plus tard.</div></div>";
   }else{
     h+="<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px'>";
     actives.forEach(function(ev){
+      var nq=(ev.questions||[]).length;
       var maDeja=(ev.reponses||[]).find(function(r){return SES&&r.eid===SES.id;});
       h+="<div class='vcard' style='--vcol:#142554'>";
-      h+="<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:6px'>"+ev.titre+"</div>";
-      h+="<div style='font-size:12px;color:#6B7A99;margin-bottom:12px'>"+ev.matiere+(ev.classe?" · "+ev.classe:"")+" · "+(ev.questions||[]).length+" questions · "+ev.duree+" min</div>";
+      h+="<div style='font-family:Montserrat,sans-serif;font-size:15px;font-weight:800;color:#142554;margin-bottom:6px'>"+e(ev.titre)+"</div>";
+      h+="<div style='font-size:12px;color:#6B7A99;margin-bottom:12px'>"+e(ev.matiere)+(ev.classe?" · "+e(ev.classe):"")+" · "+nq+" questions · "+e(ev.duree)+" min</div>";
       if(maDeja){
-        var pct=Math.round((maDeja.score/(ev.questions||[]).length)*100);
-        h+="<div style='background:"+(pct>=60?"#D1FAE5":"#FEE2E2")+";border-radius:10px;padding:10px;font-size:13px;font-weight:700;color:"+(pct>=60?"#059669":"#AE5353")+";text-align:center;margin-bottom:10px'>Score: "+maDeja.score+"/"+(ev.questions||[]).length+" ("+pct+"%)</div>";
-        h+="<button class='btn sm' style='background:#F0F4FF;color:#142554;border-radius:10px;font-weight:700;border:none;cursor:pointer' onclick='_passerEval(\""+ev.id+"\",true)'><svg class='vico bico' aria-hidden='true'><use href='#lc-refresh'/></svg>Recommencer</button>";
+        var pct=nq?Math.round((maDeja.score/nq)*100):0;
+        h+="<div style='background:"+(pct>=60?"#D1FAE5":"#FEE2E2")+";border-radius:10px;padding:10px;font-size:13px;font-weight:700;color:"+(pct>=60?"#059669":"#AE5353")+";text-align:center;margin-bottom:10px'>Score: "+maDeja.score+"/"+nq+" ("+pct+"%)</div>";
+        h+="<button class='btn sm' style='background:#F0F4FF;color:#142554;border-radius:10px;font-weight:700;border:none;cursor:pointer' onclick='_passerEval(\""+e(ev.id)+"\",true)'><svg class='vico bico' aria-hidden='true'><use href='#lc-refresh'/></svg>Recommencer</button>";
       }else{
-        h+="<button class='btn bi' onclick='_passerEval(\""+ev.id+"\",false)'>▶ Commencer l'évaluation</button>";
+        h+="<button class='btn bi' onclick='_passerEval(\""+e(ev.id)+"\",false)'>▶ Commencer l'évaluation</button>";
       }
       h+="</div>";
     });
     h+="</div>";
   }
   h+="</div>";
-  _vc(h);
+  return h;
 }
+// Coquille VISITEUR : on injecte.
+function showMesEvaluations(){ _vc(_evalsEleveHtml()); }
+// Coquille APPLICATION : `render()` attend une fonction qui RETOURNE le HTML.
+function pgMesEvaluations(){ return _evalsEleveHtml(); }
 
-// v1.2.2 : "X élèves composent" — présence simulée crédible (varie avec l'heure
-// + petite marche aléatoire), pour la mise en situation réelle. Sans backend.
-window._evalLiveBase = null;
-function _evalLiveCount(){
-  if(_evalLiveBase===null){
-    var h=new Date().getHours();
-    // plus d'activité 7h-21h, creux la nuit
-    var peak=(h>=7&&h<=21)?1:0.3;
-    _evalLiveBase=Math.round((8+Math.random()*30)*peak)+3;
-  } else {
-    _evalLiveBase += Math.round((Math.random()-0.45)*3); // marche aléatoire douce
-    if(_evalLiveBase<4)_evalLiveBase=4; if(_evalLiveBase>60)_evalLiveBase=60;
-  }
-  return _evalLiveBase;
-}
+/* v1.19.45 — L'indicateur « N élèves composent » a été RETIRÉ.
+   Le nombre était fabriqué (8 + random()*30, pondéré jour/nuit, marche aléatoire
+   toutes les 5 s) et s'affichait à un élève EN TRAIN DE COMPOSER : une pression
+   sociale inventée de toutes pièces. Aucune donnée de présence réelle n'existe
+   côté serveur ; à défaut de la mesurer, on n'affiche rien.
+   Règle du projet : on n'invente ni activité ni statistique. */
 function _passerEval(evalId,force){
   _evalLiveBase=null; // réinitialiser la présence pour cette session d'éval
   _initEvals();
@@ -24833,7 +24891,7 @@ function _passerEval(evalId,force){
         +"<div style='background:rgba(255,255,255,.1);border-radius:20px;height:6px;margin-top:10px'><div style='background:"+col+";height:100%;width:"+pctT+"%;border-radius:20px;transition:width .5s'></div></div>"
         +"<div class='fl2 fic fsb' style='margin-top:6px'>"
           +"<div style='font-size:11px;opacity:.6'>Question "+(qi+1)+"/"+ev.questions.length+"</div>"
-          +"<div style='font-size:11px;font-weight:700;color:#86EFAC;display:flex;align-items:center;gap:5px'><span style='width:7px;height:7px;border-radius:50%;background:#3A8F73;display:inline-block;box-shadow:0 0 0 0 rgba(16,185,129,.7);animation:vgzPing 1.6s infinite'></span><span id='evalLiveCount'>"+_evalLiveCount()+"</span> élèves composent</div>"
+          
         +"</div>"
       +"</div>"
       +"<div class='vcard'>"
@@ -24897,7 +24955,6 @@ function _passerEval(evalId,force){
       var bar=document.querySelector("[style*='transition:width']");
       if(bar)bar.style.width=Math.round((elapsed/totalSec)*100)+"%";
       // rafraîchir la présence "élèves qui composent" toutes les 5 s
-      if(elapsed%5===0){ var lc=document.getElementById('evalLiveCount'); if(lc)lc.textContent=_evalLiveCount(); }
     }
   },1000);
   renderQ();
@@ -25079,15 +25136,30 @@ window._regSysChange=function(){
   var e=(document.getElementById('rEns')||{}).value||'gen';
   var cfg=(typeof _AMBASSA_SYS!=='undefined'&&_AMBASSA_SYS[s+'_'+e])||{classes:CLS.slice()};
   var sel=document.getElementById('rCls');
-  if(sel) sel.innerHTML=cfg.classes.map(function(c){return '<option>'+_esc(c)+'</option>';}).join('');
-  // v1.6 : filière contextuelle (Arts/Science vs Commercial/Industriel)
+  if(sel){ sel.innerHTML=cfg.classes.map(function(c){return '<option>'+_esc(c)+'</option>';}).join('');
+    // Changer de classe rouvre (ou referme) la question de la filière.
+    if(!sel.__serieBranche){ sel.__serieBranche=1; sel.addEventListener('change',function(){ window._regSysChange(); }); } }
+  /* La filière vient de _AMBASSA_SYS — la MÊME table que celle qui vient de
+     remplir les classes deux lignes plus haut, et celle que le tuteur IA
+     interroge pour cadrer ses réponses.
+     Avant : la liste était écrite en dur ici, et ne connaissait que le GCE
+     (Arts/Science) et le technique (Commercial/Industriel). Un élève de
+     Terminale FRANCOPHONE GÉNÉRAL — le cas le plus courant — ne pouvait donc
+     pas dire s'il était en A, C ou D. Or le filtrage des contenus repose
+     précisément là-dessus, et _AMBASSA_SYS portait déjà la bonne liste
+     (A1, A4, C, D, E, TI) ainsi que la nomenclature officielle OBC du
+     technique. Deux sources pour une même vérité, dont la plus pauvre gagnait. */
   var wrap=document.getElementById('rSerieWrap'), serSel=document.getElementById('rSerie');
   if(wrap&&serSel){
-    var opts=null;
-    if(s==='en') opts=[['Arts','🎨 Arts'],['Science','🔬 Science']];
-    else if(e==='tech') opts=[['Commercial','💼 Commercial (STT)'],['Industriel','⚙️ Industriel (F)']];
-    if(opts){ serSel.innerHTML=opts.map(function(o){return '<option value="'+o[0]+'">'+o[1]+'</option>';}).join(''); wrap.style.display=''; }
-    else { wrap.style.display='none'; serSel.innerHTML=''; }
+    var series=(cfg.series||[]).filter(function(x){ return x && x!=='—'; });
+    // La filière ne se demande qu'au second cycle : en 6ème, la question n'a pas de sens.
+    var cl=(sel&&sel.value)||'';
+    var secondCycle=/2nde|1[èe]re|Terminale|Lower Sixth|Upper Sixth|Form 5|technique|ITC|ATC|Year 4/i.test(cl);
+    if(series.length && secondCycle){
+      serSel.innerHTML='<option value="">— Choisir —</option>'
+        +series.map(function(x){return '<option value="'+_esc(x)+'">'+_esc(x)+'</option>';}).join('');
+      wrap.style.display='';
+    } else { wrap.style.display='none'; serSel.innerHTML=''; }
   }
 };
 
@@ -25117,6 +25189,18 @@ function doRegister(){
     toast("Cet identifiant est déjà pris, choisissez-en un autre","warn");return;
   }
   var _rSerie=document.getElementById("rSerie")?.value||"";
+  /* L'astérisque de « Filière * » ne promettait rien : aucune validation ne
+     l'imposait. Or c'est ce champ qui décide des contenus servis à l'élève —
+     un second cycle sans filière, c'est un catalogue non filtré, donc faux.
+     On ne l'exige QUE si la question lui a été posée (le champ est visible :
+     second cycle, série existante pour son sous-système). */
+  var _wrapSerie=document.getElementById("rSerieWrap");
+  var _serieDemandee=!!(_wrapSerie && _wrapSerie.style.display!=='none');
+  if(_serieDemandee && !_rSerie){
+    toast("Précisez votre filière — c'est elle qui filtre vos contenus","warn");
+    try{ document.getElementById("rSerie")?.focus(); }catch(e){}
+    return;
+  }
   var acc={id:"va_"+Date.now(),user:user,pwd:pwd,nom:nom,pre:pre,tel:tel,
     email:document.getElementById("rEmail")?.value||"",
     cls:document.getElementById("rCls")?.value||CLS[0],
@@ -26062,6 +26146,90 @@ window._secureApiBase=function(){
 window._secureToken=function(){
   try{ return window._vrtContentToken||sessionStorage.getItem('_vrtCT')||''; }catch(e){ return ''; }
 };
+/* ══════════════════════════════════════════════════════════════════════════
+   CATALOGUE DES LIVRES NUMÉRIQUES (v1.18) — publier sans toucher au code
+   ──────────────────────────────────────────────────────────────────────────
+   Mettre un livre en vente demandait d'écrire sa fiche à la main dans app.js,
+   au milieu de 37 000 lignes : une opération que Jacques ne peut pas faire
+   seul, et qui grandit le fichier à chaque titre. Désormais la fiche vit dans
+   /catalogue_livres.json, produit par tools/publier_livre.py et déployé avec
+   le site ; le client la fusionne dans DB au démarrage.
+
+   Ce fichier ne contient AUCUN contenu — titre, prix, nombre de pages, rien de
+   plus. Le livre lui-même reste dans uploads/protected/, hors du dépôt Git
+   (qui est public) et interdit d'accès HTTP direct.
+
+   Trois règles, dans cet ordre :
+     · IDEMPOTENT   — une fiche déjà là est mise à jour, jamais dupliquée ;
+     · NON DESTRUCTIF — les ventes, le stock et les avis appartiennent au
+       centre, pas au fichier : ils ne sont jamais écrasés ;
+     · RÉVOCABLE    — un livre retiré à la main (DB._livresRetires) ne
+       ressuscite pas au rechargement suivant.
+
+   ⚠️ Le SERVEUR découvre les livres par la synchro (api/db.php), pas par ce
+   fichier : tant qu'un admin n'a pas ouvert l'application une fois, la lecture
+   protégée et le contrôle de prix ignorent le nouveau titre. C'est voulu — le
+   prix de référence doit venir de la base, pas d'un fichier statique qu'on
+   peut déposer sans authentification.
+   ══════════════════════════════════════════════════════════════════════════ */
+window._catalogueFiche = function(f){
+  var id = String(f.id || '');
+  return {
+    id: id,
+    titre: f.titre || '(sans titre)',
+    cls: f.cls || 'Toutes classes',
+    matiere: f.matiere || '',
+    auteur: f.auteur || ((DB.school && DB.school.nom) || 'Centre VÉRITAS'),
+    editeur: f.editeur || '', isbn: f.isbn || '', annee: f.annee || 0,
+    genre: f.genre || '',
+    numeriqueSeul: f.numeriqueSeul !== false,
+    prix: parseInt(f.prix, 10) || 0,
+    prixDigital: parseInt(f.prixDigital || f.prix, 10) || 0,
+    pages: parseInt(f.pages, 10) || 0,
+    ico: f.ico || '📕',
+    coverColor: f.coverColor || '#142554',
+    coverImg: f.coverImg || '',
+    desc: f.desc || '',
+    chaps: Array.isArray(f.chaps) ? f.chaps : [],
+    extrait: f.extrait || '',
+    digital: true,
+    secureId: f.secureId || id,
+    securePages: parseInt(f.securePages || f.pages, 10) || 0,
+    freePages: (f.freePages === 0 ? 0 : (parseInt(f.freePages, 10) || 10)),
+    epub: !!f.epub,
+    dateAjout: f.dateAjout || today()
+  };
+};
+window._catalogueLivresCharger = function(){
+  var v = '';
+  try { v = window._VRT_ASSET_VER || ''; } catch(e){}
+  return fetch('catalogue_livres.json' + (v ? ('?v=' + encodeURIComponent(v)) : ''), { cache: 'no-cache' })
+    .then(function(r){ return r.ok ? r.json() : null; })
+    .then(function(cat){
+      if(!cat || !Array.isArray(cat.livres)) return 0;
+      if(!DB.books) DB.books = [];
+      var retires = DB._livresRetires || [], change = 0;
+      cat.livres.forEach(function(f){
+        if(!f || !f.id || retires.indexOf(f.id) >= 0) return;
+        var fiche = _catalogueFiche(f), i, existant = null;
+        for(i = 0; i < DB.books.length; i++){ if(DB.books[i].id === f.id){ existant = DB.books[i]; break; } }
+        if(!existant){ DB.books.unshift(fiche); change++; return; }
+        // Mise à jour : ce que le catalogue décrit, et rien d'autre.
+        Object.keys(fiche).forEach(function(k){
+          if(k === 'vendu' || k === 'stock') return;          // au centre, pas au fichier
+          if(JSON.stringify(existant[k]) !== JSON.stringify(fiche[k])){ existant[k] = fiche[k]; change++; }
+        });
+      });
+      if(change){
+        try { save(); } catch(e){}
+        // Le serveur ne connaîtra le titre qu'après une synchro : sans elle, le
+        // lecteur protégé répondrait « document introuvable » à l'acheteur.
+        try { if(iA() && typeof _triggerAutoSync === 'function') _triggerAutoSync(); } catch(e){}
+      }
+      return change;
+    })
+    .catch(function(){ return 0; });   // hors ligne, file:// : on garde la base telle quelle
+};
 window.openSecureBook=function(bookId){
   // v1.7 : généralisé — accepte un LIVRE (boutique) OU un CONTENU e-learning
   // (épreuve/cours) marqué « protégé ». Le type pilote le paywall.
@@ -26090,8 +26258,12 @@ window.openSecureBook=function(bookId){
         +'<button role="menuitemradio" data-th="doux"  onclick="_secureTheme(\'doux\')">🌫️ Doux</button>'
       +'</div>'
     +'</div>'
+    +(book.epub?('<div class="sread-mode" role="group" aria-label="Mode de lecture">'
+      +'<button class="sread-mbtn" data-m="pages" onclick="_secureMode(\'pages\')" aria-label="Pages fidèles à l\'édition imprimée" title="Pages fidèles à l\'édition imprimée">📄</button>'
+      +'<button class="sread-mbtn" data-m="texte" onclick="_secureMode(\'texte\')" aria-label="Texte qui se recompose" title="Texte qui se recompose — confort mobile">📱</button>'
+      +'</div>'):'')
     +'<div class="sread-page" id="sreadPageLbl" onclick="_secureJump()" title="Aller à une page" style="cursor:pointer">…</div>'
-    +'<button class="sread-unlock" id="sreadUnlock" style="display:none" onclick="_secureUnlock()">🔓 Débloquer</button>'
+    +'<button class="sread-unlock" id="sreadUnlock" style="display:none" onclick="_secureUnlock()" aria-label="Débloquer la version numérique">🔓<span class="sread-unlock-l">Débloquer</span></button>'
     +'<button class="sread-fs" onclick="_secureFullscreen()" aria-label="Plein écran" title="Plein écran / présentation">⛶</button>'
     +'<button class="sread-x" onclick="closeSecureBook()" aria-label="Fermer">✕</button>'
     +'</div>'
@@ -26102,7 +26274,17 @@ window.openSecureBook=function(bookId){
   document.body.appendChild(ov);
   document.body.style.overflow='hidden';
   var _savedTh=(function(){try{return localStorage.getItem('vrt_sread_theme')||'jour';}catch(_){return 'jour';}})();
-  window._secureState={id:bookId,kind:kind,page:1,pages:0,freePages:10,hasAccess:false,prepared:false,base:base,tok:tok,book:book,zoom:1,theme:_savedTh};
+  /* Mode de lecture : « pages » (images fidèles) ou « texte » (EPUB recomposé).
+     Le choix de l'utilisateur prime ; à défaut, TEXTE sur téléphone — la mise
+     en page A5 d'origine y oblige à zoomer, ce qui décourage la lecture — et
+     PAGES sur grand écran, où elle tient telle quelle. */
+  var _savedMode=(function(){
+    if(!book.epub) return 'pages';
+    var m=''; try{ m=localStorage.getItem('vrt_sread_mode')||''; }catch(_){}
+    if(m==='pages'||m==='texte') return m;
+    return (window.innerWidth||1024)<720?'texte':'pages';
+  })();
+  window._secureState={id:bookId,kind:kind,page:1,pages:0,freePages:10,hasAccess:false,prepared:false,base:base,tok:tok,book:book,zoom:1,theme:_savedTh,epub:!!book.epub,mode:_savedMode,chaps:null};
   if(typeof _secureTheme==='function') _secureTheme(_savedTh); else ov.setAttribute('data-theme',_savedTh);
   _secureInstallGuards();
   if(typeof _secureSetWatermark==='function') _secureSetWatermark();
@@ -26113,7 +26295,14 @@ window.openSecureBook=function(bookId){
       if(!m||!m.ok){ _secureStageMsg('⚠️ Document indisponible pour le moment.'); return; }
       var st=window._secureState; st.pages=m.pages||0; st.freePages=m.freePages||10; st.hasAccess=!!m.hasAccess; st.prepared=!!m.prepared;
       var ub=document.getElementById('sreadUnlock'); if(ub) ub.style.display=st.hasAccess?'none':'inline-flex';
-      if(!m.prepared){ _secureStageMsg('📄 Ce document n\'est pas encore disponible à la lecture en ligne.'); return; }
+      /* Le mode texte a ses propres fichiers : un livre dont les IMAGES de
+         pages ne sont pas encore déposées reste lisible en texte. */
+      if(st.mode==='texte'&&st.epub){ _secureRenderTexte(); return; }
+      if(!m.prepared){
+        if(st.epub){ st.mode='texte'; _secureRenderTexte(); return; }
+        _secureStageMsg('📄 Ce document n\'est pas encore disponible à la lecture en ligne.'); return;
+      }
+      _secureMarkMode();
       _secureRenderScroll();
     })
     .catch(function(){ _secureStageMsg('⚠️ Connexion au lecteur impossible.'); });
@@ -26122,7 +26311,7 @@ window._secureStageMsg=function(html){
   var s=document.getElementById('sreadStage'); if(s) s.innerHTML='<div class="sread-load">'+html+'</div>';
 };
 // Paywall (affichée EN BAS du flux, après les pages gratuites).
-window._securePaywallHtml=function(st){
+window._securePaywallHtml=function(st,mode){
   if(st.kind==='contenu'){
     return '<div class="sread-pay">'
       +'<div style="font-size:46px">🔒</div>'
@@ -26133,9 +26322,12 @@ window._securePaywallHtml=function(st){
       +'</div>';
   }
   var prix=(st.book.prixDigital||st.book.priceDigital||st.book.prix||0);
+  var titreMur=(mode==='texte')
+    ? 'Vous avez lu l\'extrait gratuit'
+    : 'Vous avez lu les '+st.freePages+' pages gratuites';
   return '<div class="sread-pay">'
     +'<div style="font-size:46px">🔓</div>'
-    +'<div class="sread-pay-t">Vous avez lu les '+st.freePages+' pages gratuites</div>'
+    +'<div class="sread-pay-t">'+titreMur+'</div>'
     +'<div class="sread-pay-s">Débloquez l\'intégralité de « '+_esc(st.book.titre||'')+' » — lecture en ligne illimitée, sans téléchargement.</div>'
     +'<div class="sread-pay-price">'+fmtN(prix)+' FCFA</div>'
     +'<button class="sread-pay-btn" onclick="_secureBuy()">💳 Débloquer la version numérique</button>'
@@ -26265,6 +26457,16 @@ window._secureInstallLazy=function(){
 window._secureUpdatePageLbl=function(){
   var st=window._secureState, stage=document.getElementById('sreadStage'), lbl=document.getElementById('sreadPageLbl');
   if(!st||!stage||!lbl) return;
+  if(st.mode==='texte'){
+    var secs=stage.querySelectorAll('.sread-ch'), c=0, m2=stage.scrollTop+stage.clientHeight*0.35;
+    for(var k=0;k<secs.length;k++){ if(secs[k].offsetTop<=m2) c=parseInt(secs[k].getAttribute('data-ch'),10)||c; }
+    /* Le sommaire compte aussi les liminaires (titre, copyright, dédicace) :
+       afficher « Chapitre 4 / 11 » ferait passer la dédicace pour un chapitre.
+       On nomme donc l'endroit où l'on est, ce qui est à la fois juste et utile. */
+    var ch=(st.chaps||[])[c-1];
+    lbl.textContent=(ch&&!ch.liminaire&&ch.titre)?ch.titre:'Texte';
+    return;
+  }
   var imgs=stage.querySelectorAll('.sread-img'), cur=imgs.length?1:0, mid=stage.scrollTop+stage.clientHeight*0.35;
   for(var i=0;i<imgs.length;i++){ if(imgs[i].offsetTop<=mid) cur=parseInt(imgs[i].getAttribute('data-pg'),10)||cur; }
   st.page=cur||1;   // sert de repère à la libération des pages éloignées
@@ -26281,6 +26483,10 @@ window._secureApplyZoom=function(){
   var stage=document.getElementById('sreadStage'); if(!stage) return;
   var w=Math.round(Math.min(900,stage.clientWidth*0.96)*(st.zoom||1))+'px';
   stage.querySelectorAll('.sread-img').forEach(function(img){ img.style.maxWidth='none'; img.style.width=w; });
+  // Mode texte : le zoom agit sur la police, jamais sur la largeur — une
+  // colonne qui s'élargit avec la taille rendrait les lignes illisibles.
+  var txt=stage.querySelector('.sread-text');
+  if(txt) txt.style.fontSize=Math.round(17*(st.zoom||1))+'px';
 };
 // ── CONFORT DE LECTURE : palette de thèmes (Jour/Sépia/Nuit/Doux) ──
 // Filtres CSS sur les images de pages (le filigrane reste incrusté → sécurité intacte).
@@ -26313,8 +26519,130 @@ window._secureFullscreen=function(){
   }catch(e){}
 };
 // ── UX : aller à une page (saisie) ──
+/* ════════════════════════════════════════════════════════════════════════
+   MODE TEXTE (EPUB) — v1.18
+   Le même achat, lu autrement : le texte se recompose à la largeur de l'écran
+   au lieu d'exiger le zoom sur une page A5. Les fragments viennent de
+   api/secure_epub.php, déjà assainis côté serveur (aucun script, aucun
+   attribut actif) et signés au nom du lecteur.
+   Le mur de paiement est le même qu'en mode pages : liminaires + début du
+   premier chapitre, puis l'achat. Ce que le serveur refuse, le client ne
+   l'affiche pas — il ne fait que demander.
+   ════════════════════════════════════════════════════════════════════════ */
+window._secureMode=function(m){
+  var st=window._secureState; if(!st||!st.epub) return;
+  if(m!=='texte') m='pages';
+  if(st.mode===m) return;
+  st.mode=m;
+  try{ localStorage.setItem('vrt_sread_mode',m); }catch(_){}
+  if(st.obs){ try{st.obs.disconnect();}catch(e){} st.obs=null; }
+  _secureMarkMode();
+  if(m==='texte') _secureRenderTexte(); else _secureRenderScroll();
+};
+window._secureMarkMode=function(){
+  var st=window._secureState, ov=document.getElementById('secureReader');
+  if(!st||!ov) return;
+  var bs=ov.querySelectorAll('.sread-mbtn');
+  for(var i=0;i<bs.length;i++){
+    var on=bs[i].getAttribute('data-m')===st.mode;
+    bs[i].classList.toggle('on',on);
+    bs[i].setAttribute('aria-pressed',on?'true':'false');
+  }
+  var f=ov.querySelector('.sread-foot');
+  if(f) f.textContent=(st.mode==='texte')
+    ? '📱 Texte adapté à votre écran — protégé, sans copie ni partage'
+    : '📖 Lecture continue — faites défiler · Protégé, sans copie ni partage';
+};
+window._secureRenderTexte=function(){
+  var st=window._secureState; if(!st) return;
+  var stage=document.getElementById('sreadStage'); if(!stage) return;
+  // Premier passage : on demande le sommaire (titres et droits, aucun texte).
+  if(!st.chaps){
+    _secureStageMsg('📖 Ouverture du texte…');
+    fetch(st.base+'/secure_epub.php?id='+encodeURIComponent(st.id)+'&meta=1'
+          +(st.tok?('&token='+encodeURIComponent(st.tok)):''),{cache:'no-store'})
+      .then(function(r){ return r.json(); })
+      .then(function(m){
+        if(!m||!m.ok||!m.chapitres||!m.chapitres.length) throw new Error((m&&m.error)||'indisponible');
+        st.chaps=m.chapitres;
+        if(m.hasAccess) st.hasAccess=true;
+        _secureRenderTexte();
+      })
+      .catch(function(){
+        // Repli honnête : on ne prétend pas que le livre est indisponible,
+        // seulement que ce mode-ci l'est, et on propose l'autre.
+        _secureStageMsg('📱 Le mode texte n\'est pas disponible pour ce livre.'
+          +'<br><button class="sread-pay-btn" style="margin-top:16px" onclick="_secureMode(\'pages\')">📄 Lire les pages</button>');
+      });
+    return;
+  }
+  var lisibles=[], i;
+  for(i=0;i<st.chaps.length;i++){ if(st.hasAccess||st.chaps[i].libre) lisibles.push(st.chaps[i]); }
+  var html='<div class="sread-text" id="sreadText">';
+  for(i=0;i<lisibles.length;i++){
+    var c=lisibles[i];
+    html+='<section class="sread-ch" data-ch="'+c.i+'">'
+      +(c.liminaire?'':'<div class="sread-chnum">'+_esc(c.titre||('Chapitre '+c.i))+'</div>')
+      +'<div class="sread-chbody"><div class="sread-chload">…</div></div></section>';
+  }
+  html+='</div>';
+  if(!st.hasAccess&&lisibles.length<st.chaps.length) html+=_securePaywallHtml(st,'texte');
+  stage.innerHTML=html;
+  stage.scrollTop=0;
+  _secureApplyZoom();
+  _secureMarkMode();
+  _secureUpdatePageLbl();
+  _secureInstallLazyTexte();
+  if(!stage._vrtScroll){ stage._vrtScroll=1; stage.addEventListener('scroll',_secureUpdatePageLbl,{passive:true}); }
+};
+// Un chapitre n'arrive qu'à l'approche de l'écran : ouvrir le livre ne
+// télécharge pas les 35 000 mots d'un coup, et le quota horaire du serveur ne
+// se consomme que sur ce qu'on lit vraiment.
+window._secureInstallLazyTexte=function(){
+  var st=window._secureState, stage=document.getElementById('sreadStage');
+  if(!st||!stage) return;
+  if(st.obs){ try{st.obs.disconnect();}catch(e){} }
+  var secs=stage.querySelectorAll('.sread-ch'), i;
+  if(!window.IntersectionObserver){
+    for(i=0;i<secs.length;i++) _secureLoadChap(parseInt(secs[i].getAttribute('data-ch'),10));
+    return;
+  }
+  st.obs=new IntersectionObserver(function(ents){
+    ents.forEach(function(en){
+      if(en.isIntersecting) _secureLoadChap(parseInt(en.target.getAttribute('data-ch'),10));
+    });
+  },{root:stage,rootMargin:'800px 0px'});
+  for(i=0;i<secs.length;i++) st.obs.observe(secs[i]);
+};
+window._secureLoadChap=function(n){
+  var st=window._secureState; if(!st||!n) return;
+  st.busy=st.busy||{};
+  if(st.busy['t'+n]) return;
+  var sec=document.querySelector('#secureReader .sread-ch[data-ch="'+n+'"]');
+  if(!sec||sec._done) return;
+  var body=sec.querySelector('.sread-chbody'); if(!body) return;
+  st.busy['t'+n]=1;
+  fetch(st.base+'/secure_epub.php?id='+encodeURIComponent(st.id)+'&chap='+n
+        +(st.tok?('&token='+encodeURIComponent(st.tok)):''),{cache:'no-store'})
+    .then(function(r){ return r.json().catch(function(){ throw new Error('HTTP '+r.status); }); })
+    .then(function(j){
+      if(!j||!j.ok) throw new Error(j&&j.error||'refusé');
+      body.innerHTML=j.html;   // fragment assaini par le serveur
+      sec._done=1;
+      if(j.tronque) body.insertAdjacentHTML('beforeend',
+        '<p class="sread-cut">— fin de l\'extrait gratuit —</p>');
+      _secureUpdatePageLbl();
+    })
+    .catch(function(e){
+      body.innerHTML='<p class="sread-cut">'+_esc(e&&e.message?e.message:'Chapitre indisponible')+'</p>';
+    })
+    .then(function(){ delete st.busy['t'+n]; });
+};
 window._secureJump=function(){
   var st=window._secureState; if(!st) return;
+  // Un texte recomposé n'a pas de pages : le numéro demandé ne voudrait rien
+  // dire. On laisse le défilement et le repère de chapitre faire le travail.
+  if(st.mode==='texte') return;
   var max=st.hasAccess?(st.pages||0):Math.min(st.freePages,(st.pages||st.freePages));
   var v=prompt('Aller à la page (1 – '+(max||st.freePages)+') :',''); if(v===null) return;
   var n=parseInt(v,10); if(!n||n<1){ return; }
@@ -31282,7 +31610,19 @@ window.VERITAS_MONETISATION = {
   // `droit:null` — même forme qu'`echeance`. Le prix de référence vit en base
   // (DB.tarifs.inscription) et le serveur le contrôle (vrt_prix_catalogue).
   // Activation par le cas dédié de _payAutoActivate / vrt_grant_entitlement.
-  inscription:    { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Frais d\'inscription' }
+  inscription:    { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Frais d\'inscription' },
+  // Livret interactif en ligne (« Mon Cahier de français » 6ᵉ→3ᵉ). Le droit
+  // n'est pas un tiroir sur le compte mais un CODE D'ACCÈS émis par le serveur
+  // au paiement confirmé (vrt_grant_entitlement → vrt_livret_emettre), retiré
+  // par l'acheteur via api/livret.php « claim » puis saisi dans le livret.
+  // D'où `droit:null` : rien à cocher sur un compte — l'achat se fait aussi
+  // sans compte, depuis la page publique. Tarif unique en base : DB.tarifs.livret.
+  livret:         { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Livret en ligne' },
+  // Pack établissement : N codes d'un coup, remise de volume (10 % dès 10,
+  // 15 % dès 25, 20 % dès 50). Le serveur recalcule le prix de référence à
+  // partir de la quantité lue dans le targetId — « 6e:livret:25 » — donc on ne
+  // s'achète pas 50 codes au prix d'un.
+  livret_pack:    { droit:null,               collection:null,               champAuteur:null,        part:null,               libelle:'Pack établissement — livrets' }
 };
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -31305,6 +31645,18 @@ window.VERITAS_TARIFS = {
   //    la trésorerie d'un coup et supprime le désabonnement mensuel.
   //    7 000 au lieu de 12 × 1 000 = 12 000, soit 5 000 d'économie.
   enseignant:  { mensuel:1000, annuel:7000, mensuelEquivalentAnnuel:12000 },
+
+  // ── Livrets interactifs en ligne (6ᵉ→3ᵉ), l'année scolaire.
+  //    Deux tarifs, parce que ce n'est pas le même produit : le livret ouvre les
+  //    exercices d'une classe ; le GUIDE ouvre les corrigés complets (463 pour
+  //    la seule 6ᵉ) et la console de devoirs. Au même prix, le guide était bradé
+  //    — et c'était le moyen le moins cher d'obtenir tous les corrigés.
+  //    Le serveur garde sa propre référence (vrt_livret_prix, DB.tarifs.livret /
+  //    livretGuide) et c'est elle qui autorise : changer le chiffre ici
+  //    n'ouvre rien.
+  livret: { eleve:1500, guide:5000 },
+  //    Remise de volume d'un pack établissement, en pourcentage, par palier.
+  livretPack: { 10:10, 25:15, 50:20 },
 
   // ── Prestations familles. Ponctuelles, donc à forte marge.
   prestations: {
@@ -37563,6 +37915,26 @@ window._ambassaTaskForm = function(taskId){
       if(e&&p.ens) e.value=p.ens;
       _ambassaSysChange();
       if(c&&p.cls){ for(var i=0;i<c.options.length;i++){ if(c.options[i].text===p.cls){ c.selectedIndex=i; break; } } }
+      /* La SÉRIE et la MATIÈRE n'étaient pas restaurées : le formulaire retombait
+         sur « — » et sur la première matière de la liste (« Mathématiques » en
+         francophone général), quelle que soit la filière déclarée. Or ce sont
+         justement les deux champs qui cadrent la réponse du tuteur : une même
+         question de Terminale n'appelle pas le même traitement en A4 et en C.
+         La série vient du profil ; la matière, elle, n'y figure pas — on garde
+         donc la dernière choisie, par sous-système, plutôt que d'en imposer une. */
+      var sr=_ge('mvSerie');
+      if(sr&&p.serie){ for(var j=0;j<sr.options.length;j++){ if(sr.options[j].text===p.serie){ sr.selectedIndex=j; break; } } }
+      var mt=_ge('mvMat');
+      if(mt){
+        try{
+          var _cle='_vrtAmbMat_'+((p.sys||'fr')+'_'+(p.ens||'gen'));
+          var _last=localStorage.getItem(_cle);
+          if(_last){ for(var k=0;k<mt.options.length;k++){ if(mt.options[k].text===_last){ mt.selectedIndex=k; break; } } }
+          if(!mt.__memo){ mt.__memo=1; mt.addEventListener('change',function(){
+            try{ localStorage.setItem('_vrtAmbMat_'+((_ge('mvSousSys')||{}).value||'fr')+'_'+((_ge('mvEns')||{}).value||'gen'), mt.options[mt.selectedIndex].text); }catch(_x){}
+          }); }
+        }catch(_m){}
+      }
     }catch(_e){}
   },60);
 };
@@ -47471,8 +47843,14 @@ window._bookBuyPanel = function(b, rt, rvs){
        +   '<span>Restant : <b>' + fmtN(stock) + '</b></span></div>'
        +   '<div class="bkbuy-bar"><i style="width:' + pct + '%"></i></div>'
        + '</div>';
-  } else if(stock !== null && stock <= 0){
+  } else if(stock !== null && stock <= 0 && !b.numeriqueSeul){
     h += '<div class="bkbuy-rupture">' + ICO('i-warning') + 'Rupture de stock — réassort en cours</div>';
+  }
+  /* Un livre vendu SEULEMENT en numérique n'est pas « en rupture » : il n'a
+     jamais eu de pile à écouler. Le dire autrement mentirait sur l'offre. */
+  if(b.numeriqueSeul){
+    h += '<div class="bkbuy-stock"><div class="bkbuy-stock-l"><span>'
+       +   ICO('i-book-open') + 'Édition numérique — lecture en ligne</span></div></div>';
   }
 
   /* — Le prix, et l'économie si elle est réelle — */
@@ -47504,13 +47882,24 @@ window._bookBuyPanel = function(b, rt, rvs){
   h += _bookShare(b);
 
   /* — Ce qui est compris : des faits vérifiables, pas des promesses — */
+  /* Ce qui est compris — DÉPEND de la nature du livre. Un roman n'est pas
+     « conforme au programme MINESEC » et n'a pas de « corrigés gratuits » :
+     l'afficher quand même serait une promesse inventée. */
   h += '<ul class="bkbuy-inclus">'
      +   '<li>' + ICO('i-check') + '<span><b>' + _esc(String(b.pages || '—')) + ' pages</b>'
-     +     ((b.chaps && b.chaps.length) ? ' · ' + b.chaps.length + ' chapitres' : '') + '</span></li>'
-     +   '<li>' + ICO('i-check') + '<span>Conforme au <b>programme MINESEC</b></span></li>'
-     +   '<li>' + ICO('i-check') + '<span>Les <b>corrigés en ligne sont gratuits</b>, à vie</span></li>'
-     +   '<li>' + ICO('i-check') + '<span>Extrait consultable <b>avant l\'achat</b></span></li>'
-     + '</ul>';
+     +     ((b.chaps && b.chaps.length) ? ' · ' + b.chaps.length + ' chapitres' : '') + '</span></li>';
+  if(b.genre === 'roman' || b.numeriqueSeul){
+    h += '<li>' + ICO('i-check') + '<span><b>Lecture en ligne illimitée</b>, sur tous vos appareils</span></li>'
+       + '<li>' + ICO('i-check') + '<span>Deux conforts de lecture : <b>pages fidèles</b> ou <b>texte fluide</b></span></li>'
+       + '<li>' + ICO('i-check') + '<span><b>' + (b.freePages || 10) + ' pages offertes</b> avant de payer</span></li>';
+    if(b.isbn) h += '<li>' + ICO('i-check') + '<span>ISBN <b>' + _esc(b.isbn) + '</b>'
+       + (b.editeur ? ' · ' + _esc(b.editeur) : '') + '</span></li>';
+  } else {
+    h += '<li>' + ICO('i-check') + '<span>Conforme au <b>programme MINESEC</b></span></li>'
+       + '<li>' + ICO('i-check') + '<span>Les <b>corrigés en ligne sont gratuits</b>, à vie</span></li>'
+       + '<li>' + ICO('i-check') + '<span>Extrait consultable <b>avant l\'achat</b></span></li>';
+  }
+  h += '</ul>';
 
   /* — Moyens de paiement réellement acceptés par le centre — */
   h += '<div class="bkbuy-pay"><div class="bkbuy-pay-t">Moyens de paiement</div>'
@@ -47537,20 +47926,36 @@ window._bookBuyPanel = function(b, rt, rvs){
    étape n'est promise si elle n'existe pas : pas de « livraison en 24 h »
    tant que ce délai n'est pas tenu. */
 window._bookCommentRecevoir = function(b){
-  var etapes = [
-    ['Vous payez',          'Cliquez sur « Payer maintenant » et laissez votre nom et votre numéro WhatsApp.'],
+  /* Un livre vendu SEULEMENT en ligne n'a rien à expédier : lui servir le
+     parcours « retrait au centre / expédition en province » promettrait un
+     colis qui n'existe pas. Deux parcours, tous deux vrais. */
+  var numerique = !!(b && b.numeriqueSeul);
+  var etapes = numerique ? [
+    ['Vous lisez l\'aperçu', 'Les ' + ((b && b.freePages) || 10) + ' premières pages s\'ouvrent sans compte ni paiement.'],
+    ['Vous payez ' + fmt((b && (b.prixDigital || b.prix)) || 0),
+                             'MTN MoMo ou Orange Money, depuis le lecteur. La référence porte votre nom.'],
+    ['Le livre s\'ouvre',    'Dès la confirmation du paiement, l\'intégralité se lit en ligne, sur tous vos appareils connectés.']
+  ] : [
+    ['Vous commandez',      'Cliquez sur « Payer maintenant » et laissez votre nom et votre numéro WhatsApp.'],
     ['Vous payez',          'MTN MoMo, Orange Money, ou en espèces au centre. Vous recevez une référence à votre nom.'],
     ['Nous confirmons',     'Un enseignant du centre vous répond sur WhatsApp et confirme la disponibilité.'],
     ['Vous recevez',        'Retrait au centre à Douala, ou expédition en province. La version numérique, elle, s\'ouvre dès la confirmation.']
   ];
-  var h = '<section class="bkrec"><h3 class="bkrec-t">' + ICO('i-steps') + 'Comment recevoir mon exemplaire ?</h3><ol class="bkrec-l">';
+  var h = '<section class="bkrec"><h3 class="bkrec-t">' + ICO('i-steps')
+        + (numerique ? 'Comment lire mon exemplaire ?' : 'Comment recevoir mon exemplaire ?')
+        + '</h3><ol class="bkrec-l">';
   etapes.forEach(function(e, i){
     h += '<li><span class="bkrec-n">' + (i + 1) + '</span><div><b>' + e[0] + '</b><span>' + e[1] + '</span></div></li>';
   });
   h += '</ol>'
      + '<p class="bkrec-note">' + ICO('i-shield')
-     + 'Le manuel se paie ; <b>les corrigés en ligne restent gratuits pour tout le monde</b>, acheteur ou non. '
-     + 'C\'est le cahier qu\'on vend, jamais l\'accès aux corrections.</p>'
+     + (numerique
+        ? 'Aucun fichier n\'est téléchargeable : le livre se lit sur veritas-school.com, '
+          + 'en <b>pages fidèles</b> à l\'édition imprimée ou en <b>texte adapté au téléphone</b>. '
+          + 'Chaque page affichée porte votre nom — c\'est ce qui protège l\'auteur, pas un verrou de plus.'
+        : 'Le manuel se paie ; <b>les corrigés en ligne restent gratuits pour tout le monde</b>, acheteur ou non. '
+          + 'C\'est le cahier qu\'on vend, jamais l\'accès aux corrections.')
+     + '</p>'
      + '</section>';
   return h;
 };
@@ -47611,7 +48016,7 @@ function _shopNorm(s){
 }
 
 function _shopItem(b){
-  var rupture = (b.stock <= 0);
+  var rupture = (b.stock <= 0) && !b.numeriqueSeul;
   var apercu  = !!(b.extrait || (b.previewImages && b.previewImages.length));
   // Texte cherchable porté par la vignette : on filtre ensuite dans le DOM,
   // sans re-rendre la section (le rendu complet de la boutique coûte cher).
@@ -47858,12 +48263,14 @@ function _bookShare(b){
   if (!b || !b.id) return '';
   var url = _bookUrl(b.id);
   var txt = b.titre + (b.cls ? ' (' + b.cls + ')' : '') + ' — ' + fmt(b.prix)
-          + ' chez Centre VÉRITAS. Extrait gratuit et paiement en ligne : ';
+          + (b.numeriqueSeul ? ' chez Centre VÉRITAS. Lecture en ligne, aperçu gratuit : '
+                             : ' chez Centre VÉRITAS. Extrait gratuit et paiement en ligne : ');
   var wa = 'https://wa.me/?text=' + encodeURIComponent(txt + url);
   var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
 
   return '<div class="bkshare">'
-    + '<div class="bkshare-t">' + ICO('i-share') + 'Partager ce manuel</div>'
+    + '<div class="bkshare-t">' + ICO('i-share')
+    +   (b.genre === 'roman' ? 'Partager ce livre' : 'Partager ce manuel') + '</div>'
     + '<div class="bkshare-s">Le lien ouvre cette fiche, prête à payer.</div>'
     + '<div class="bkshare-b">'
     +   '<a class="bkshare-btn wa" href="' + _esc(wa) + '" target="_blank" rel="noopener" '
