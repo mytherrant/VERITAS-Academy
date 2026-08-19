@@ -49,11 +49,14 @@ NIVEAUX = [
     dict(slug="3e",   label="3ᵉ",  long="Classe de 3ᵉ",        cycle="1er", examen="BEPC",
          manuel="Mon Cahier de français 3ᵉ", livret="Livret d'activités 3ᵉ", kw="3eme troisieme BEPC"),
     dict(slug="2nde", label="2ⁿᵈᵉ", long="Classe de 2ⁿᵈᵉ A",   cycle="2nd", examen=None,
-         manuel="Mon Cahier de français 2ⁿᵈᵉ A", kw="seconde 2nde A"),
+         manuel="Mon Cahier de français 2ⁿᵈᵉ A",
+         livret="Livret d'activités 2ⁿᵈᵉ A", kw="seconde 2nde A"),
     dict(slug="1ere", label="1ʳᵉ", long="Classe de 1ʳᵉ A",     cycle="2nd", examen="Probatoire",
-         manuel="Mon Cahier de français 1ʳᵉ A", kw="premiere 1ere A probatoire"),
+         manuel="Mon Cahier de français 1ʳᵉ A",
+         livret="Livret d'activités 1ʳᵉ A", kw="premiere 1ere A probatoire"),
     dict(slug="tle",  label="Tˡᵉ", long="Terminale A",         cycle="2nd", examen="BAC",
-         manuel="Mon Cahier de français Terminale A", kw="terminale Tle A baccalaureat"),
+         manuel="Mon Cahier de français Terminale A",
+         livret="Livret d'activités Terminale A", kw="terminale Tle A baccalaureat"),
 ]
 SRC2ND = {"2nde": "Manuel_2nde_A", "1ere": "Manuel_1ere_A", "tle": "Manuel_Tle_A"}
 # page « niveaux/ » correspondante (maillage interne, pas de doublon d'intention)
@@ -66,6 +69,19 @@ INLINE = re.compile(r"(\*[^*]+\*|__[^_]+__|\|[^|]+\|)")
 
 def esc(s):
     return html.escape(s or "", quote=False)
+
+def iconifier(html):
+    """Aucun émoji ne survit dans la page : les uns deviennent des icônes, les autres partent.
+
+    Appelée en sortie d'`inline()`, donc sur du texte déjà échappé : les balises que
+    nous venons d'écrire ne contiennent aucun émoji, la substitution ne peut pas les
+    abîmer. Les signes typographiques (flèches, chiffres cerclés, ≈, ≠) ne sont pas
+    des émojis et ne sont jamais touchés — ils portent du sens dans les schémas.
+    """
+    html = RE_ICONE.sub(lambda m: ico(ICONES[m.group(1)]), html)
+    html = RE_EMOJI_NU.sub("", html)
+    return re.sub(r"\s{2,}", " ", html).strip()
+
 
 def inline(s):
     """Reproduit add_runs() de render_pack.py : *terme* = mis en avant, __x__ = italique."""
@@ -81,7 +97,7 @@ def inline(s):
             out.append('<span class="hw">%s</span>' % esc(chunk[1:-1]))
         else:
             out.append(esc(chunk))
-    return "".join(out)
+    return iconifier("".join(out))
 
 def strip_prefix(t, *prefixes):
     for p in prefixes:
@@ -123,12 +139,22 @@ def titre_propre(t):
 def num(n):
     return format(n, ',').replace(',', ' ')
 
+MOTS_OUTILS = {"de", "du", "des", "d'", "la", "le", "les", "l'", "un", "une", "et", "ou",
+               "à", "au", "aux", "en", "dans", "sur", "pour", "par", "avec", "son", "sa", "ses"}
+
 def court(t, n=58):
-    """Tronque proprement au mot (pour la balise <title>)."""
+    """Tronque proprement au mot (pour la balise <title>).
+
+    Une troncature qui s'arrête sur « de » ou « la » se lit mal : on retire donc les
+    mots outils restés en fin de coupe avant de poser les points de suspension.
+    """
     t = t.strip()
     if len(t) <= n:
         return t
-    cut = t[:n].rsplit(" ", 1)[0].rstrip(" ,;:—–-")
+    mots = t[:n].rsplit(" ", 1)[0].split(" ")
+    while len(mots) > 1 and mots[-1].lower().strip(",;:—–-") in MOTS_OUTILS:
+        mots.pop()
+    cut = " ".join(mots).rstrip(" ,;:—–-")
     return cut + "…"
 
 def libelle_competence(comp):
@@ -166,8 +192,17 @@ ICONES = {
     "🌡": "i-gauge", "🔀": "i-refresh", "🎮": "i-gamepad", "🔐": "i-lock", "🔑": "i-key",
     "🗓": "i-calendar", "🔭": "i-eye", "📊": "i-chart", "👩": "i-users", "📗": "i-book", "📒": "i-book", "📐": "i-grid",
     "🌺": "i-quote", "🧠": "i-brain", "👉": "i-arrow-right", "🎓": "i-graduation",
+    "🌟": "i-star", "📜": "i-file-text", "🤓": "i-graduation",
+    "🔹": "i-badge", "☐": "i-box", "⏳": "i-clock", "📄": "i-file-text",
 }
 EMOJI = re.compile("[🌀-🫿☀-➿⬀-⯿]")
+# Aucun émoji ne doit atteindre la page : ceux de la table deviennent des icônes
+# vectorielles, les autres sont retirés. On ne touche PAS aux signes typographiques
+# (→, ①②③, ≈, ≠, ↓) : ce sont des symboles de contenu, pas des marqueurs.
+RE_ICONE = re.compile("(" + "|".join(sorted((re.escape(k) for k in ICONES), key=len, reverse=True))
+                      + ")️?")
+RE_EMOJI_NU = re.compile("[🌀-🫿⬀-⯿]️?")
+
 
 def ico(name, cls="i"):
     return ('<svg class="%s" aria-hidden="true" focusable="false">'
@@ -370,11 +405,20 @@ EXTRAIT = os.path.join(ROOT, "_bord_extract")
 SRC_CAHIER = os.path.join(ROOT, "content", "corriges-cahier")
 ROMAINS = {"I": 1, "II": 2, "III": 3, "IV": 4, "V": 5, "VI": 6, "VII": 7, "VIII": 8}
 RE_MODULE = re.compile(r"MODULE\s+([IVX]+|\d+)\s*[:\-—–]?\s*(.*)$", re.I)
+# Le 1er cycle découpe l'année en modules, le 2nd cycle en séquences didactiques :
+# même ossature, deux noms. Le slug suit le mot que l'élève lit sur son cahier.
+RE_SEQ = re.compile(r"S[ÉE]QUENCE\s+(\d+)\s*[:\-—–]?\s*(.*)$", re.I)
 EMOJI_TETE = re.compile(r"^[\W_]*?([🌀-🫿☀-➿⬀-⯿])\s*")
 
 
 def module_page(titre):
     """« MODULE III — CITOYENNETÉ… » → (slug, « Module 3 — Citoyenneté… », rang)."""
+    s = RE_SEQ.search(titre or "")
+    if s:
+        n = int(s.group(1))
+        reste = s.group(2).strip(" :—–-")
+        return ("cahier-sequence-%d" % n,
+                ("Séquence %d — %s" % (n, reste)) if reste else "Séquence %d" % n, n)
     m = RE_MODULE.search(titre or "")
     if not m:
         return "cahier-evaluation-diagnostique", "Évaluation diagnostique de rentrée", 0
@@ -386,8 +430,16 @@ def module_page(titre):
             ("Module %d — %s" % (n, reste)) if reste else "Module %d" % n, n)
 
 
-def repere_cahier(txt, kind):
-    """Le repère que l'élève retrouve dans son cahier : « Exercice 2 », « Question 5 »…"""
+def repere_cahier(txt, kind, num=None):
+    """Le repère que l'élève retrouve dans son cahier : « Exercice 2 », « Question 5 »…
+
+    Les cahiers du 2nd cycle numérotent leurs questions dans la mise en page, pas dans
+    l'énoncé : l'extracteur transporte ce numéro (`num`), et il fait foi — c'est celui
+    que l'élève a sous les yeux.
+    """
+    if num:
+        n = str(num).strip()
+        return n if re.match(r"^(Exercice|Épreuve|Epreuve|Sujet)\b", n, re.I) else "Question %s" % n
     t = EMOJI_TETE.sub("", (txt or "").strip()).lstrip("️ ")
     m = re.match(r"^(?:✍️\s*)?(Exercice|Exo)\s*(\d+)", t, re.I)
     if m:
@@ -466,7 +518,7 @@ def extract_cahier(niv):
                 if not sol:
                     continue          # pas de corrigé rédigé → pas publié
                 lec["items"].append(dict(rub=it["rub"], q=it["txt"], sub=[], sol=sol,
-                                         lab=repere_cahier(it["txt"], it["kind"])))
+                                         lab=repere_cahier(it["txt"], it["kind"], it.get("num"))))
                 stats["corriges"] += 1
             # items ajoutés à la main (épreuves sans énoncé numéroté) : « …-l3-x1 »
             prefixe = "%s-m%d-l%d-x" % (niv["slug"], mod["n"], l["n"])
@@ -572,7 +624,7 @@ SEARCHBAR = (
     '<input id="cq" class="cfind-in" type="search" autocomplete="off" '
     'placeholder="Numéro d\'exercice, mot de la leçon… (ex. « 12 », « accord », « COD »)" '
     'aria-describedby="cfind-say">'
-    '<button type="button" class="cfind-x" hidden aria-label="Effacer la recherche">✕</button>'
+    '<button type="button" class="cfind-x" hidden aria-label="Effacer la recherche">' + ico("i-x-circle") + '</button>'
     '</div>'
     '<p class="cfind-say" id="cfind-say" role="status" aria-live="polite"></p>'
     '</div>'
@@ -644,6 +696,7 @@ def foot(depth=1):
 <a href="%(site)s/#tarifs">Abonnements</a></footer>
 <script src="/assets/veritas-ui.js?v=%(ver)s" defer></script>
 <script src="/assets/veritas-convert.js?v=%(ver)s" defer></script>
+<script src="/assets/ambassa.js?v=%(ver)s" defer></script>
 </body>
 </html>
 """ % dict(site=SITE, ver=VER)
@@ -725,11 +778,12 @@ def render_sequence_page(niv, page, pages, axe="livret"):
     quoi = "cahier de français" if cah else "livret d'activités"
     ton = "ton cahier" if cah else "ton livret"
     exam = (" · préparation au %s" % niv["examen"]) if niv["examen"] else ""
-    title = "Corrigés %s — %s | %s VÉRITAS" % (
-        niv["label"], court(page.titre, 52), "Cahier de français" if cah else "Livret d'activités")
-    desc = ("Corrigés détaillés des %s exercices de « %s » du %s %s "
-            "du Centre VÉRITAS (programme MINESEC, Cameroun%s). Corrigés gratuits ; les énoncés sont dans %s."
-            % (num(n_ex), page.titre, quoi, niv["long"], exam, ton))
+    title = "Corrigés %s %s — %s | VÉRITAS" % (
+        niv["label"], "Cahier" if cah else "Livret", court(page.titre, 34))
+    desc = ("%s exercices corrigés du %s %s — %s. Programme MINESEC%s. "
+            "Les énoncés restent dans %s."
+            % (num(n_ex), "cahier" if cah else "livret", niv["label"], court(page.titre, 52).rstrip("…"),
+               exam.rstrip(".").replace(" Préparation au", ", préparation au"), ton))
     url = "%s/corriges/%s/%s.html" % (SITE, niv["slug"], page.slug)
     crumbs = [("Accueil", SITE), ("Corrigés des manuels", SITE + "/corriges/"),
               (niv["long"], "%s/corriges/%s/" % (SITE, niv["slug"])), (page.titre, url)]
@@ -802,12 +856,13 @@ def render_level_index(niv, pages, cahier=()):
     le livret d'activités (par séquence). Le cahier passe en premier : c'est celui
     que l'élève a sous la main, et celui dont les corrigés n'existaient nulle part."""
     total = sum(p.n_items for p in pages) + sum(p.n_items for p in cahier)
+    # Le 1er cycle découpe son cahier en modules, le 2nd cycle en séquences.
+    decoupe = "module par module" if niv["cycle"] == "1er" else "séquence par séquence"
     exam = (" Préparation au %s." % niv["examen"]) if niv["examen"] else ""
-    title = "Corrigés de français %s — %s exercices corrigés | VÉRITAS" % (niv["long"], num(total))
-    desc = ("Tous les corrigés de français %s du Centre VÉRITAS : %s exercices corrigés — "
-            "le cahier module par module, le livret d'activités séquence par séquence, "
-            "conformes au programme MINESEC du Cameroun.%s"
-            % (niv["long"], num(total), exam))
+    title = "Corrigés de français %s — %s exercices | VÉRITAS" % (niv["long"], num(total))
+    desc = ("%s exercices de français corrigés pour la %s : le cahier %s et le livret "
+            "d'activités, programme MINESEC.%s"
+            % (num(total), niv["long"].replace("Classe de ", ""), decoupe, exam))
     url = "%s/corriges/%s/" % (SITE, niv["slug"])
     crumbs = [("Accueil", SITE), ("Corrigés des manuels", SITE + "/corriges/"), (niv["long"], url)]
     h = head(title, desc, url, depth=2, jsonld=jsonld_page(title, desc, url, niv["long"], crumbs))
@@ -829,9 +884,10 @@ def render_level_index(niv, pages, cahier=()):
             '<p class="crumb"><a href="%s/">Accueil</a> › <a href="../">Corrigés des manuels</a> › %s</p>'
             % (SITE, esc(niv["long"]))]
     if cahier:
-        body += ['<h2 class="sec">' + ico("i-notebook") + 'Le cahier de français, module par module</h2>',
+        body += ['<h2 class="sec">' + ico("i-notebook") + 'Le cahier de français, %s</h2>' % decoupe,
                  '<p class="note">Corrigés de « %s » — le cahier que tu utilises en classe, '
-                 'des lectures méthodiques aux évaluations de fin de module.</p>' % esc(niv["manuel"]),
+                 'des lectures méthodiques aux évaluations de fin de %s.</p>'
+                 % (esc(niv["manuel"]), "module" if niv["cycle"] == "1er" else "séquence"),
                  '<div class="grid">%s</div>' % cartes(cahier)]
     body += ['<h2 class="sec">' + ico("i-book") + 'Le livret d\'activités, séquence par séquence</h2>',
              '<div class="grid">%s</div>' % cartes(pages),
@@ -890,10 +946,9 @@ def maj_manuels_html(levels):
 def render_hub(levels, est):
     total = sum(sum(p.n_items for p in pages) + sum(p.n_items for p in cah)
                 for _, pages, cah in levels)
-    title = "Corrigés des cahiers de français VÉRITAS — 6ᵉ à Terminale | %s exercices corrigés" % num(total)
-    desc = ("Tous les corrigés des cahiers de français du Centre VÉRITAS, de la 6ᵉ à la Terminale : "
-            "%s exercices corrigés, séquence par séquence, programme MINESEC du Cameroun. "
-            "Séries A, scientifiques et techniques." % num(total))
+    title = "Corrigés de français 6ᵉ à Terminale — %s exercices | VÉRITAS" % num(total)
+    desc = ("%s exercices de français corrigés, de la 6ᵉ à la Terminale : cahiers et livrets "
+            "du Centre VÉRITAS, programme MINESEC du Cameroun. Séries A, C, D et techniques." % num(total))
     url = SITE + "/corriges/"
     crumbs = [("Accueil", SITE), ("Corrigés des manuels", url)]
     h = head(title, desc, url, depth=1, jsonld=jsonld_page(title, desc, url, "Secondaire", crumbs))
@@ -902,7 +957,8 @@ def render_hub(levels, est):
         for niv, pages, cah in items:
             tot = sum(p.n_items for p in pages) + sum(p.n_items for p in cah)
             ex = ' <small class="note">(%s)</small>' % niv["examen"] if niv["examen"] else ""
-            detail = ("%d modules du cahier · %d séquences du livret" % (len(cah), len(pages))) if cah \
+            unite = "modules" if niv["cycle"] == "1er" else "séquences"
+            detail = ("%d %s du cahier · %d séquences du livret" % (len(cah), unite, len(pages))) if cah \
                 else ("%d séquences" % len(pages))
             out.append('<div class="card"><h3>%s%s</h3><p class="note">%s exercices corrigés · %s</p>'
                        '<a class="dl" href="%s/"><span>Voir les corrigés</span><span class="pill">%s exos</span></a></div>'
@@ -953,7 +1009,7 @@ def main():
     levels, urls, report = [], [], []
     for niv in NIVEAUX:
         pages, stats = (extract_1er(niv) if niv["cycle"] == "1er" else extract_2nd(niv))
-        cahier, stats_c = (extract_cahier(niv) if niv["cycle"] == "1er" else ([], Counter()))
+        cahier, stats_c = extract_cahier(niv)
         d = os.path.join(OUT, niv["slug"])
         os.makedirs(d, exist_ok=True)
         for p in pages:
