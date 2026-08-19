@@ -1,3 +1,60 @@
+## Audit final avant production (19/08/2026) — v1.19.47
+
+Troisième passage, en revérifiant tout par la mesure plutôt qu'en relisant les
+rapports. Deux affirmations des sessions précédentes se sont révélées fausses.
+
+**Ce qui était annoncé corrigé et l'est vraiment** : le tableau de bord est
+atteignable sur desktop (≥900 px) pour les cinq rôles — `#VISITOR display:block
+!important` a bien disparu ; `#connexion` affiche le formulaire ; le webhook
+CamerPay est fail-closed (401 sans secret, 401 signature forgée) ; les fichiers
+sensibles sont en 403 en production ; Ambassa est bien sur 143/143 pages
+publiques ; `npm audit` est vide ; mobile 375 px sans débordement.
+
+**Ce qui était annoncé corrigé et ne l'était pas** :
+
+1. *« L'expiration d'abonnement s'applique réellement côté serveur. »* Faux.
+   `vrt_account_active_plans` acceptait comme abonnement du compte toute ligne
+   au propriétaire vide — ce qu'écrit `validerAbonnement` hors session visiteur,
+   et toute saisie manuelle. Un seul orphelin actif = expiration inopérante pour
+   TOUS les abonnés du plan. Mesuré : abonné expiré → 200 + les octets du
+   fichier payant. Corrigé, et couvert par la section 9 du test (éprouvée par
+   mutation : le code d'origine fait rougir).
+
+2. *« Les vraies pages d'administration sont gardées. »* Vrai, mais insuffisant.
+   Le repli `P[p]||pgDash` de `render()` servait le tableau de bord de la
+   direction (recettes, impayés, masse salariale) à tout rôle non-élève/
+   non-enseignant sur n'importe quelle route inconnue — 8 routes sur 14
+   essayées avec un compte visiteur gratuit. Corrigé à deux niveaux.
+
+**Autres correctifs** : la barre de filtres de la boutique filtre enfin (elle
+repeignait ses pastilles depuis le début, et 3 catégories sur 7 ne pouvaient
+rien montrer) ; « Manuels vendus NaN » sur le tableau de bord ; le jeton
+d'administration n'est plus accepté en paramètre d'URL ; `data/` (base
+synchronisée, données personnelles réelles) était versionnable sur un dépôt
+PUBLIC ; le test des surfaces payantes vit maintenant DANS le workflow qui
+déploie — il était dans un workflow séparé, rouge, et n'empêchait rien.
+
+**Pièges retenus** :
+- `open(fichier,'w')` tronque AVANT d'écrire : une erreur d'encodage en cours
+  d'écriture a vidé `app.js` (3,4 Mo). Récupéré depuis le cache HTTP du
+  navigateur (`fetch(url,{cache:'force-cache'})` → POST vers le serveur de dev).
+  Toujours écrire dans un `.tmp` puis `os.replace`.
+- Un banc de test mal formé ment dans les deux sens : mon premier banc utilisait
+  `compte` au lieu de `accountId` et « prouvait » une faille inexistante. Lire
+  la forme canonique dans le code AVANT de conclure.
+- Une mutation qui ne fait pas rougir n'a peut-être rien muté : ma première
+  mutation était neutre (deux gardes redondantes). Vérifier que la mutation
+  change vraiment le comportement.
+
+**Laissé hors du déploiement, volontairement** : le chantier « Sentinelle v2.0 »
+(`api/_sentinel.php`, `challenge.php`, `assets/veritas-shield.js`, et les
+inclusions dans `content.php`/`_bot_log.php`/`ia_proxy.php`…). En l'état il
+renvoie 403 « Accès automatisé refusé » à un client envoyant un User-Agent de
+navigateur ordinaire — sur la porte du contenu payant, cela fermerait la
+boutique aux clients qui ont payé. À régler et à éprouver dans sa propre
+session. `api/_imagick_check.php` reste également dehors : sonde de diagnostic
+qui publie sans authentification les versions d'Imagick et Ghostscript.
+
 ## Dernière session (11/07/2026) — 1ère harmonisée + sujets d'examen + GT
 - 1ère alignée sur la Tle : 0 question creuse/théorique, hypothèses+validation études, 35 #SOLM, méthodos uniformisées.
 - Sujets d'examen des compilations : Banque 📗 (Bord, corrigés modèles) ≠ Entraînement 📘 (Livret, vierge), aiguillage dest() + anti-doublon ; contraction 500-700 mots vérifiée au décompte (Djarmaila 2022, Nug 2010) ; Kaufmann 2013 au diagnostic ; nouchi/Bourges/Villemot/Fallé dans les leçons de variations (notes satirico-didactiques).
@@ -1585,3 +1642,304 @@ Tant que la donnée n'existe pas : afficher une invitation à jouer, PAS un clas
 Réinsertion des 2 images sur l'accueil · bascule SERVEUR des paliers (le serveur
 plafonne encore à 12 % — `vrt_paliers_partenaires`, api/_auth_lib.php:906) ·
 grilles de partage par produit (70/20/10 à domicile) · offres B2B établissement.
+
+## Accueil : photos, icônes, extrait du jour branché, boutons audités (17/08)
+
+### ★ L'extrait du jour ne changeait pas — deux causes, pas une
+Constat de Jacques : « depuis que c'est en ligne, rien n'a changé ». Exact, et
+pour deux raisons indépendantes :
+1. la **date** (`{{ dateDuJour }}`) est évaluée par le transpileur : elle se fige
+   au jour du build et ne repart qu'au déploiement suivant ;
+2. le **passage** vient de la maquette — un extrait unique du *Tube Digestif*,
+   écrit en dur, FR et EN.
+
+L'application avait pourtant déjà le moteur : `_pdjLoad` (app.js) sur
+`api/rag.php?src=oeuvres&daily=1`, tirage **déterministe par jour de l'année**
+(le même extrait pour tous). La vitrine ne le lisait pas. Elle y est branchée :
+`chargerPassageDuJour()` dans `assets/vitrine.js`.
+
+- **Amélioration progressive** : le passage de la maquette reste dans le HTML.
+  Testé rag.php coupé → l'encart garde Le Tube Digestif intact. Une panne réseau
+  ne vide pas l'accueil.
+- **Le nettoyage est REPRIS de app.js** (`_pdjCleanExtract`), garde-fou compris :
+  un extrait qui commence en cours de phrase est recadré, mais si le recadrage
+  ampute le texte on garde l'original préfixé de « […] ». Plancher 70 mots.
+- **Ce qui se masque quand le serveur répond**, et pourquoi : la bascule
+  Français/English (le corpus ne sert que du français — le bouton promettrait une
+  traduction inexistante) et le décryptage d'Ambassa (il commente Le Tube
+  Digestif ; l'afficher sous un autre extrait serait une analyse fausse signée
+  d'un enseignant). Le bouton « Demander à Ambassa » reste : analyse à la demande.
+- **La couverture perd sa mention « Étude d'œuvre … VÉRITAS »** quand l'œuvre
+  vient du corpus : le centre publie un cahier pour QUATRE œuvres, pas pour les
+  116 de l'index. Elle affiche « Œuvre au programme ».
+- `copierPassage` et les liens de partage citaient Le Tube Digestif en dur →
+  régénérés depuis le passage réellement affiché.
+
+**Preuve par mutation** (banc local, horloge avancée de 40 jours) : la date
+affichée passe de « 16 août » (valeur du build) à « 25 septembre ». Sans le
+crochet, elle serait restée figée — un test qui reste vert le même jour ne prouve
+rien.
+
+### ★ « Découvrir » : 20 cartes, une seule destination, et la mauvaise
+Les cartes de « Tout ce dont l'élève a besoin » portaient toutes
+`href="#detail"`, traduit globalement en `#boutique`. Mesuré au navigateur :
+
+- les **4 cartes du premier onglet** menaient à la librairie — y compris
+  « Labos virtuels » et « Jeux pédagogiques », qui ne s'y vendent pas ;
+- les **16 autres** gardaient `#detail` **tel quel**, parce qu'elles sont
+  reconstruites au clic **depuis le gabarit**, pas depuis le HTML rendu. Aucun
+  écran ne porte `data-vp="detail"` → le routeur ignore l'ancre, la page ne bouge
+  pas. Seize boutons « Découvrir » qui ne découvraient rien.
+
+> **Leçon à retenir** : corriger le HTML rendu ne corrige que ce qui est visible
+> au CHARGEMENT. Tout ce qu'un gabarit reconstruit au clic doit être corrigé DANS
+> LE GABARIT. D'où les deux passes de `DEST_SERVICES` (build_vitrine.js) : l'une
+> remplit les cartes déjà écrites, l'autre pose `dest` dans les données.
+
+Table indexée par **titre** ; une carte inconnue **arrête la construction**
+(mieux vaut ne pas déployer qu'un lien mort), et deux garde-fous refusent un
+`#detail` résiduel ou un « Découvrir » sans adresse. Vérifié onglet par onglet :
+20/20 destinations distinctes, 0 lien mort.
+
+> **Piège de mesure rencontré** : ma première boucle de vérification donnait les
+> mêmes 4 cartes pour les 5 onglets. Les ONGLETS EUX-MÊMES sont re-rendus au
+> clic : `tabs[i]` capturé avant la boucle pointait sur des nœuds détachés. Il
+> faut re-interroger le DOM à chaque tour.
+
+### Le reste de l'audit des boutons (accueil)
+40 éléments : 26 boutons + 14 liens. Après correctifs : **0 anomalie**.
+- Les 6 « sans handler » détectés au premier passage sont la barre de recherche
+  injectée par vitrine.js (`addEventListener`, pas d'`onclick`) — vivants. Un
+  détecteur qui ne lit que les attributs inline produit des faux positifs.
+- `reparerBoutonsMorts()` neutralise déjà tout `VRT.act('rien')` résiduel.
+- **2 liens sortants sans `target`** (dont « Écrire sur WhatsApp ») : le visiteur
+  quittait le site pour de bon. Passe générique ajoutée au build → `target=_blank`
+  + `rel=noopener` sur tout lien externe qui n'en a pas.
+
+### Les 2 photos, remises sans leurs panneaux
+`assets/photo-classe.webp` et `photo-eleve.webp` étaient déployées mais
+référencées **nulle part** depuis la coupe des « blocs alternés » : un accueil
+sans un seul visage. Demande explicite : « insère les photos et non les anciens
+panneaux supprimés ». Bande `.vphotos` (tools/vitrine-bloc.css) posée juste après
+« Un centre à Douala, une plateforme dans sa poche », dont elles illustrent les
+deux moitiés. Libellés repris de cette section — aucun chiffre, aucun témoignage.
+Mesuré à 1 280 px : deux panneaux de 549 px, 72 → 1 194, zoom lent coupé sous
+`prefers-reduced-motion`.
+
+### Icônes centrées + marges du cadre crème
+- Icônes des 4 cartes de services : `align-self:center` → 111 px de chaque côté
+  (mesuré). Les cartes publics (photo + bandeau coloré) n'ont PAS été touchées :
+  composition différente, non visée par la capture de Jacques.
+- Cadre de la citation : `padding 46/58/40` → `26/30/24`, colonnes de texte
+  33ch/37ch → 56ch/60ch, guillemet ouvrant rapproché. Le texte passe de ~219 px
+  du bord à **85 px**. Les 56ch restants tiennent la longueur de ligne lisible.
+
+### Vérifications
+`node --check` sur vitrine.js et build_vitrine.js · build vert · Playwright 2/2 ·
+audit boutons 0 anomalie · geométrie mesurée à 1 280 px.
+**Non rejouable ici** : `php -l` et `tests/paiements_entitlements.php` (PHP absent
+en local) — aucun fichier PHP ni chemin d'argent touché dans cette session.
+
+### Pas de bump de version nécessaire
+La CI suffixe déjà le `?v=` d'une **empreinte du contenu servi** (deploy.yml,
+« Aligner les cache-busters ») : `assets/vitrine.js` modifié ⇒ URL neuve
+automatiquement. Bumper la coquille à la main était inutile — et le remplacement
+global reste proscrit (cf. 11/08).
+
+### Reste à faire
+Abonnement en tranches / par cagnotte · harmonisation des 64 pages statiques
+(seuls l'accueil et l'écran de connexion ont été mesurés) · bascule SERVEUR des
+paliers de commission (plafond 12 % dans `api/_auth_lib.php`) · grilles de partage
+par produit · offres B2B établissement.
+
+## Ambassa permanent + décryptage écrit par l'IA (17/08, suite)
+
+### ★ Le piège qui m'a eu DEUX FOIS : le service worker sert l'ancien asset
+Deux vérifications locales ont donné un faux « ça ne marche pas » alors que le
+correctif était bon sur le disque : `sw.js` est enregistré sur `localhost:3000`
+et met en cache **par URL**. `assets/vitrine.js?v=1.19.44` et
+`assets/ambassa.js?v=1.19.44` ne changent pas d'URL quand on édite le fichier —
+le navigateur exécutait donc le code de la veille.
+
+Symptômes vus, et ce qu'ils voulaient dire :
+- le décryptage restait masqué alors que `zd.hidden` n'existait plus dans le
+  fichier → **le fichier lu n'était pas le fichier écrit** ;
+- `f.getAttribute('style')` renvoyait `null` après un correctif qui posait un
+  style en ligne → même cause.
+
+**Réflexe à prendre avant toute mesure locale** :
+```js
+navigator.serviceWorker.getRegistrations().then(r => r.forEach(x => x.unregister()));
+caches.keys().then(n => n.forEach(c => caches.delete(c)));
+```
+puis recharger. En production le problème n'existe pas : la CI suffixe le `?v=`
+d'une empreinte du contenu (deploy.yml, « Aligner les cache-busters »).
+**Un test local qui contredit le code source est suspect avant d'être vrai.**
+
+### Le décryptage est écrit par Ambassa, plus masqué
+Première version : je masquais le décryptage quand le passage tournait, pour ne
+pas publier sous le nom d'un enseignant une analyse qui parlait d'une AUTRE
+œuvre. Jacques : « câble à l'IA ». C'est mieux, et c'est possible sans coût :
+
+`chargerDecryptage()` (assets/vitrine.js) appelle `ia_proxy.php` avec la clé
+**`shared:'pdj'`** — reprise telle quelle de `_pdjLoadExpl` (app.js). Le serveur
+génère l'analyse **une fois par jour** et la sert à tout le monde **sans
+décompter le moindre quota**. Sans cette clé, une IA sur page publique = un appel
+payant par visiteur ; avec elle = un appel par jour. Plus : cache localStorage
+par jour + titre, délai maximal 22 s, nœuds re-cherchés dans les callbacks.
+Si l'IA ne répond pas, le bloc se retire — jamais d'analyse hors sujet.
+
+Vérifié dans les deux sens : avec l'IA, le décryptage parle d'*Assèze
+l'Africaine* (le passage affiché) et se met en cache ; sans API, l'encart entier
+reste celui du build (Tube Digestif + son décryptage d'origine), cohérent.
+
+### Marges du cadre crème, deuxième passe
+`padding 26/30/24 → 18/20/16`, et surtout les brides `max-width` retirées
+(56ch/60ch → `none`). Le texte passe de **85 px à 21 px** du bord du cadre.
+Les deux paragraphes font désormais la même largeur (782 px) — avant, le second
+était bridé 120 px plus étroit que le premier, ce qui donnait un bloc bancal.
+> Contrepartie assumée : ~90 caractères par ligne, au-delà des 65-75 confortables.
+> C'est la demande, formulée deux fois.
+
+### Ambassa, présent sur toute surface — `assets/ambassa.js` (NOUVEAU)
+Le tuteur complet (avatar, 8 tâches, historique) vivait dans `mAgentAmbassa`
+(app.js) : il fallait être DANS l'application. La vitrine avait un panneau, sur
+l'accueil seulement, replié. **Les 115 pages statiques — là où Google dépose la
+majorité des visiteurs — n'avaient rien.**
+
+Fichier **autonome** (aucune dépendance à vitrine.js ni app.js, puisqu'aucun des
+deux n'est chargé partout) : lanceur flottant avec l'avatar `ambassa-avatar.png`,
+panneau reprenant les **8 tâches d'`AMBASSA_TACHES`** (mêmes intitulés, mêmes
+couleurs, même ordre), chat, quota d'interface, `ia_proxy.php`.
+
+- **Règle centrale** : si `window.mAgentAmbassa` existe (donc dans l'application),
+  le lanceur ouvre **le tuteur d'origine**, avec son historique et ses
+  formulaires. On ne pose pas un second tuteur plus pauvre par-dessus.
+  Vérifié : `mAgentAmbassa` appelé 1×, aucun panneau de repli créé.
+- Posé sur **115/115 pages statiques** + coquille app + 7 écrans de la vitrine.
+  `build_corriges.py` émet la balise, donc une régénération ne la perd pas.
+- `?v=` obligatoire : la CI **annule le déploiement** pour tout `/assets/*.js` nu.
+
+### ★ Deux pastilles flottantes au même endroit
+`elementsFromPoint` au centre du lanceur renvoyait `A.vrt-wa-fab` : le bouton
+WhatsApp des pages statiques occupe déjà `right:16px; bottom:18px; z-index:9000`
+(et `.vfx-fab` fait pareil dans l'application). Les deux se superposaient
+exactement.
+
+**Ambassa monte d'un cran** plutôt que de déplacer un bouton présent sur 62 pages
+et dans l'app : `ajusterPosition()` mesure la pastille existante et décale.
+Second passage à 700 ms — `veritas-ui.js` injecte la sienne au DOMContentLoaded
+lui aussi, et l'ordre entre deux scripts `defer` n'est pas garanti.
+Mesuré à 375 px : Ambassa à 78 px du bas, WhatsApp à 14 px, 16 px d'écart,
+plus aucun chevauchement. Sur la vitrine (pas de concurrent) il garde le coin.
+
+### Vérifications
+`node --check` sur app.js, sw.js et les 5 `assets/*.js` · build vitrine vert ·
+Playwright 2/2 · lanceur présent sur les 7 écrans de la vitrine (position fixe,
+`aller()` ne touche qu'aux `data-vp`) · outil → prompt cadré → réponse → quota
+3 → 2 · Échap ferme · avatar chargé (naturalWidth 320) · 115/115 pages portent
+la balise avec `?v=`.
+**Non vérifié au navigateur** : le lanceur DANS l'application — `/app.html` sans
+ancre renvoie un visiteur anonyme vers « / » (garde anti-double-accueil). Le
+chemin de délégation est testé isolément, pas en session connectée.
+
+### Point à trancher par Jacques
+Le tuteur est désormais joignable depuis **toutes** les pages publiques, y compris
+par un visiteur anonyme. Les garde-fous serveur (15/min et 300/jour par IP,
+plafond global de dépense dans `ia_proxy.php`) sont inchangés — c'est la surface
+d'appel qui s'élargit, pas la limite. À surveiller sur la première semaine.
+
+## Livrets interactifs en ligne — verrou serveur + code au paiement (17/08)
+
+### ★ Le verrou d'origine n'en était pas un — trois trous, pas un
+Le brief (`DEPLOY_PROMPT.md`) demandait de « remplacer le verrou local ». Mesuré
+sur les sources : il n'y avait rien à remplacer, il fallait tout poser.
+1. `tryUnlock()` comparait la saisie à `'VERITAS2026'` **écrit dans la page**, et
+   l'indice « Démo : tape VERITAS2026 » s'affichait sous le champ.
+2. Le calque « Livret verrouillé » n'était **qu'un calque** : le contenu était
+   déjà rendu derrière. Le supprimer dans l'inspecteur suffisait.
+3. Surtout : `booklet-data-*.js` **et** `guide-data-*.js` (450 + 200 Ko : le
+   livret vendu ET tous les corrigés) partaient en `<script src>` **avant toute
+   vérification**, à une URL stable. Inutile même d'ouvrir la page.
+
+### Ce qui a été posé
+- `api/_livret_lib.php` — registre des codes. Index = **HMAC-SHA256(code, VRT_HMAC_KEY)** :
+  recherche en O(1) (un bcrypt par code obligerait à tester toute la base) et un
+  registre volé sans la clé ne se force pas hors ligne. Le code en clair n'est
+  jamais stocké.
+- `api/livret.php` — la porte. `unlock` / `session` / `content` / `claim` + admin
+  (`admin_gen|list|revoke|reset_devices`, Bearer API_SECRET). Jeton HMAC lié au
+  poste (IP+agent), 12 h élève / 8 h enseignant ; **la classe et la nature sont
+  DANS le jeton** (un jeton de 6ᵉ n'ouvre pas la 3ᵉ) ; quota 3 appareils (2 prof) ;
+  **session unique** (un nouveau déverrouillage évince le précédent) ; plafond de
+  12 livraisons par session ; 5 échecs = 15 min de porte fermée *même avec le bon
+  code* ; révocation à effet immédiat sur les sessions ouvertes ; filigrane
+  traçable (id du code + date) peint à l'écran et à l'impression ; fail-closed.
+- Données déplacées dans `uploads/protected/livrets/` (.htaccess deny + LISEZMOI).
+  **Jamais commitées** : le dépôt GitHub est public. Dépôt FTP.
+
+### Le paiement émet le code, sans intervention humaine
+- `vrt_grant_entitlement` : branche `livret` → `vrt_livret_emettre()`. **Idempotent
+  deux fois** (par `ref` dans `DB.livretVentes` ET dans le registre) — les
+  passerelles mobiles rejouent leur notification jusqu'au 200.
+- Prix de référence SERVEUR : `vrt_prix_catalogue` rend `vrt_livret_prix($db)` =
+  `DB.tarifs.livret` ou **1 500**. Sans cette entrée le contrôle de sous-paiement
+  aurait été *sauté* (comportement de la fonction quand elle ignore un tarif) et
+  on débloquait un manuel à 1 franc.
+- `VERITAS_MONETISATION.livret` déclaré (sinon `tests/paiements_entitlements.php`
+  échoue) ; `VERITAS_TARIFS.livret = 1500` pour l'affichage.
+- **Le code ne transite PAS par `payment_*.php?action=status`** : cette action est
+  non authentifiée et les références y sont énumérables. Il est déposé dans un bon
+  de livraison par référence, réclamé par `claim` avec **ref + 4 derniers chiffres
+  du numéro payeur**. D'où des références à 8 caractères aléatoires (`LV260817-…`).
+
+### ★ « Demo 6e » n'était pas une démo : c'était le produit entier
+Elle chargeait `booklet-data.js` + `guide-data-6e.js` **complets** et ne filtrait
+rien (`this.build(window.BOOKLET)`). Publiée telle quelle, elle offrait la 6ᵉ.
+`tools/prepare_livrets.py` fabrique désormais un extrait réel : séquence 1,
+semaine 1, et **seuls les corrigés de ces exercices-là** (appariement par consigne ;
+sous-inclure est sans danger, sur-inclure serait une fuite). Mesuré :
+**645 Ko → 40 Ko, 4 % des exercices, 5,6 % des corrigés**, 0 conseil enseignant.
+
+### Le verrou est un traitement reproductible, pas une édition à la main
+`tools/prepare_livrets.py` régénère les 9 coquilles depuis
+`Downloads/Mise en page livret activité new/`. Il **échoue** si une source change
+de forme plutôt que de produire une page silencieusement ouverte (7 ancres
+vérifiées + 4 interdits en sortie). Jacques régénère ses livrets : une édition
+manuelle aurait perdu le verrou à la première régénération.
+
+### Preuves (mesurées au navigateur, pas déduites)
+- Page verrouillée : `window.BOOKLET`/`GUIDE_6E` **undefined**, 0 exercice, 0 champ.
+- **Les deux contournements d'origine échouent** : `localStorage['veritas-unlock-6e']='1'`
+  laisse la page fermée au rechargement ; supprimer le calque laisse **0 caractère**
+  à l'écran — il n'y a rien derrière.
+- Réseau : `6e.html`, `gate.js`, `support.js`, `POST api/livret.php`. **Aucune
+  requête vers une donnée de livret.**
+- 3 garde-fous CI ajoutés (code en dur / données embarquées / .js > 120 Ko),
+  **éprouvés par mutation** : 3/3 déclenchent.
+
+### Reste à faire
+- **Page admin dans l'app** pour émettre/révoquer les codes (aujourd'hui : `curl`,
+  documenté dans le LISEZMOI). C'est le manque le plus gênant au quotidien.
+- **Volet collaboratif** du brief actualisé (classes, devoirs partageables `/d/<token>`,
+  soumissions, appréciations, parrainage, tableau de bord) : **non construit**,
+  chantier distinct. Le socle (codes, entitlements, comptes) est en place pour lui.
+- `php -l` et le test end-to-end du paiement : non rejouables en local (PHP absent,
+  CamerPay notifie la prod). La CI est l'autorité.
+
+## Session « Le Tube digestif en vente » (18/08/2026) — v1.18, lecture en ligne PDF + EPUB
+- **Demande** : mettre le roman en ligne à **1 000 FCFA**, en PDF et EPUB, **lecture sur le site uniquement**.
+- **Contenu préparé** (hors dépôt, FTP) : maquette A5 `Pack Le Tube digestif/Livre a imprimer (PDF)` → PDF vectoriel (Playwright, scale 1.0, `preferCSSPageSize`) → **144 pages JPEG 1240 px** dans `uploads/protected/books/tubedigestif/` ; **EPUB → 11 fragments assainis** dans `…/tubedigestif/epub/` + extrait libre de 624 mots ; `tubedigestif.epub` déposé à côté. 28 Mo au total.
+- **Deux corrections d'édition en ligne** (le master imprimé n'est PAS touché) : page 1 remplacée par la **couverture HD seule** (la maquette fait courir son titre courant par-dessus la couverture) ; **page 145 supprimée** (la 4ᵉ de couverture déborde d'une page, bandeau éditeur orphelin). ⚠️ Ces deux défauts existent toujours dans le PDF prêt-au-tirage.
+- **`api/secure_epub.php` (NOUVEAU)** — pendant texte de `secure_pdf.php`. Même auth, même entitlement (`unlockedBooks`), même mur : liminaires + début du chapitre I libres, au-delà **402**. Quota 24 chapitres/h/livre, anti-hotlink, signature de l'exemplaire (nom + id + date) incrustée dans le texte servi. **Aucune dépendance** : ni ZipArchive ni DOM — tout est préparé hors ligne par `tools/prepare_epub_reader.py`. Ajouté à l'allow-list `deploy.yml`.
+- **Lecteur : mode 📄 pages / 📱 texte** (app.js `_secureMode`, `_secureRenderTexte`, `_secureLoadChap`, `_secureInstallLazyTexte` + CSS `.sread-text`). Le mode texte se recompose, garde thèmes/zoom/gardes anti-copie, charge un chapitre à l'approche de l'écran. **Défaut : texte sous 720 px**, pages au-dessus ; choix mémorisé (`vrt_sread_mode`).
+- **Honnêteté** : un texte recomposé est du texte remis au navigateur — récupérable dans l'onglet réseau. Le mode pages reste le plus dur à extraire. Retirer `"epub": true` d'une fiche désactive le mode texte. Dit tel quel dans WORKFLOW_LIVRES.md et l'en-tête de l'endpoint.
+- **Fiche produit honnête** : `genre:'roman'` + `numeriqueSeul:true` retirent « conforme au programme MINESEC », « corrigés gratuits à vie », le badge MINESEC de la grille, « Rupture de stock » (4 surfaces) et le parcours d'expédition — remplacé par « Comment lire mon exemplaire ? » en 3 étapes. Corrigé au passage : les étapes 1 et 2 du parcours papier s'appelaient toutes deux « Vous payez ».
+- **WORKFLOW (demande de Jacques)** : plus une ligne de JS pour publier. `catalogue_livres.json` (fiches seulement, aucun contenu) est déployé et **fusionné dans DB au démarrage** (`_catalogueLivresCharger`, créneau `requestIdleCallback`, idempotent, ne touche ni `vendu` ni `stock`, respecte `DB._livresRetires`). Le seed en dur du roman a été **retiré** : une seule mécanique. Commande unique : `python tools/publier_livre.py --id … --titre … --prix … --pdf/--html --epub --couverture`. Restent **3 gestes non automatisables** : ① FTP du dossier protégé, ② commit du catalogue + vignette, ③ **ouvrir l'admin une fois** (le serveur ne lit un prix de référence que dans la base synchronisée, jamais dans un fichier statique déposable sans authentification).
+- **`.gitignore` — trou bouché** : `uploads/protected/**` n'était couvert que **par hasard** par la règle `*.jpg`. Un `.epub` ou un fragment `.html` serait parti **en clair dans le dépôt PUBLIC**. Désormais tout y est exclu sauf `.htaccess` et `LISEZMOI.txt`.
+- **Vérifié dans Chrome réel** (`tests/livre_serveur_fictif.cjs` + `tests/livre_verification.cjs`, 26 contrôles verts, profil neuf) : fiche sans promesse fausse, catalogue fusionné (144 p / 1 000 F / 8 chapitres / incipit 307 mots **verbatim**), aperçu 10 pages puis mur, extrait texte tronqué + signature, chapitre 6 et page 11 refusés **402**, téléphone en mode texte sans débordement. **Éprouvé par mutation** : mur retiré côté serveur → les 2 contrôles passent au rouge.
+- **Barre du lecteur sur téléphone — régression trouvée et corrigée** : elle débordait de **137 px** à 390 px (croix de fermeture ET bouton Débloquer hors écran ; elle débordait déjà d'environ 30 px avant la bascule de mode). Les commandes portent toutes `min-width:44px` (cible tactile a11y) : on ne les rapetisse pas, on **retire** — titre, plein écran, repère de chapitre, libellé « Débloquer » (aria-label conservé). Remesuré : **0 px de débordement**.
+- **Cache-buster** bumpé `1.19.44 → 1.19.45` (`VERITAS_v1.2.html` ×9, `app.html`, `sw.js` CACHE_VERSION) — app.js et app.css ont changé.
+- **Non commité, non déployé.** Le contenu de `uploads/protected/books/tubedigestif/` (28 Mo) attend un dépôt FTP ; sans lui le lecteur répond « document non préparé ».
+- **Vitrine publique (suite, même session)** : le roman a sa carte au rayon boutique. Le gabarit refusait un livre non scolaire — corrigé en le rendant piloté par les données : **étoiles conditionnées à une note réelle** (elles étaient dessinées 4/5 EN DUR sous les 8 cartes, sans un seul avis derrière — elles disparaissent donc partout, conformément à la règle « preuve sociale réelle uniquement »), **mention sous le prix** portée par `m.mention` (« corrigés en ligne inclus » reste aux cahiers), **bouton `Commander` OU lien `Lire en ligne`** selon `m.papier` / `m.lien`. Ligne de détail (`m.exos`) conditionnée et vidée sur 7 cahiers où elle répétait la ligne `type`. `nbManuels` 8 → 9. Source `Refonte VERITAS.dc.html` éditée puis `node tools/build_vitrine.js` (garde-fous verts : 5 onglets/5 jeux, balises équilibrées). **Vérifié dans Chrome** : 14/14 — carte présente, lien `app.html#livre?id=tubedigestif`, 0 étoile inventée, compteur à 9, pas de débordement à 390 px (carte 358 px). ⚠️ La vitrine annonce toujours « 134 titres au catalogue » (chiffre en dur, non vérifié) et la carte « Le Tube Digestif — étude intégrale » (2 500 F) voisine désormais le roman (1 000 F) : deux produits distincts, à départager dans les intitulés si la confusion se voit.
+- **Reste** : `tools/render_secure_pdf.cjs` reste bloqué sur `page.render()` avec pdf.js sous Node 26 (contourné par PyMuPDF dans `publier_livre.py`) ; dépôt FTP des 28 Mo à faire ; rien n'est commité.
