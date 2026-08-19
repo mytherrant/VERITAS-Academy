@@ -48,12 +48,17 @@ function valsFor(state) {
 // ── Régions dynamiques : listes ré-étendues côté client ────────────────────
 const LISTES_DYN = new Set([
   'onglets', 'services', 'filtres', 'moyensPaiement', 'champsPaiement',
-  'optionsLivraison', 'lignesTotal', 'partages'
+  'optionsLivraison', 'lignesTotal', 'partages',
+  // La grille de la boutique : sans elle, la barre de filtres repeignait ses
+  // pastilles et laissait la meme grille — un filtre qui s'allume sans rien
+  // filtrer est un mensonge d'interface.
+  'manuels'
 ]);
 // Scalaires réévalués côté client (position texte uniquement)
 const SCALAIRES_DYN = new Set([
+  'nbManuels',
   'titreFormulaire', 'noteSecurite', 'libellePayer', 'totalPayer', 'quantite',
-  'passage1', 'passage2', 'decryptage', 'texteBoutonCopie',
+  'passage1', 'passage2', 'decryptage', 'texteBoutonCopie', 'dateDuJour',
   'citationTexte', 'citationAuteur'
 ]);
 const PAGES = ['accueil', 'tarifs', 'boutique', 'parents', 'elearning', 'enseignants', 'paiement'];
@@ -295,7 +300,6 @@ const ANCRES = {
   '#souscrire': '#tarifs',
   '#compte-parent': '#parents',
   '#matiere': '#elearning',
-  '#detail': '#boutique',
   /* ── Ce qui sort LÉGITIMEMENT vers l'application ────────────────────────
      Aucun équivalent dans la vitrine : ces parcours vivent dans l'app. */
   '#partenariat': APP + '#partenariat',
@@ -335,6 +339,88 @@ for (const cible of Object.values(ANCRES)) {
   }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   « DÉCOUVRIR » : VINGT CARTES, UNE SEULE DESTINATION — ET LA MAUVAISE
+   ────────────────────────────────────────────────────────────────────────────
+   Les cartes de « Tout ce dont l'élève a besoin » portaient toutes le même
+   href="#detail" — un jeton de maquette, pas une adresse. Il était traduit
+   globalement en « #boutique ». Deux conséquences, mesurées au navigateur :
+
+     · les 4 cartes du PREMIER onglet menaient à la librairie, y compris
+       « Labos virtuels » et « Jeux pédagogiques », qui ne s'y vendent pas ;
+     · les 16 autres — rendues au clic par le moteur client, depuis le gabarit
+       et non depuis ce HTML — gardaient « #detail » TEL QUEL. Or aucun écran
+       ne porte data-vp="detail" : le routeur ignore l'ancre et la page ne
+       bouge pas. Seize boutons « Découvrir » qui ne découvraient rien.
+
+   Le second cas est le plus instructif : corriger le HTML rendu ne corrige
+   que ce qui est visible au chargement. Tout ce qu'un gabarit reconstruit au
+   clic doit être corrigé DANS LE GABARIT. D'où les deux passes ci-dessous —
+   celle-ci pour les cartes déjà écrites, `dest` (plus bas) pour les autres.
+
+   La table est indexée par TITRE : c'est ce que la maquette peut changer sans
+   prévenir, et une carte inconnue arrête la construction plutôt que de partir
+   avec un lien mort.
+   ══════════════════════════════════════════════════════════════════════════ */
+const DEST_SERVICES = {
+  /* Apprendre */
+  'Cours par séquence':      '#elearning',
+  'Œuvres au programme':     'oeuvres/',
+  'Labos virtuels':          '#elearning',
+  'Jeux pédagogiques':       '#elearning',
+  /* S'entraîner */
+  'Épreuves & annales':      APP + '#epreuves',
+  'Corrigés des cahiers':    'corriges/',
+  'Bulletins blancs':        '#elearning',
+  'Concours blancs':         '#elearning',
+  /* Se faire aider */
+  'Professeur Ambassa':      '#elearning',
+  'Classes virtuelles':      '#elearning',
+  'Orientation':             'parcours/',
+  'Support WhatsApp':        'https://wa.me/237' + TEL.slice(4),
+  /* Vie scolaire */
+  'Espace Parents':          '#parents',
+  'Cagnotte de scolarité':   APP + '#cagnotte',
+  'Boutique de manuels':     '#boutique',
+  'Certificats vérifiables': APP + '#verifier-certificat',
+  /* Répétitions — la carte EST la description (prix compris) ; « Découvrir »
+     ne peut mener qu'à quelqu'un à qui parler, pas à une page de plus. */
+  'Répétitions au centre':   APP + '#contact',
+  'Répétitions à domicile':  APP + '#contact',
+  'Cours de rattrapage':     APP + '#contact',
+  'Préparation examens':     APP + '#contact'
+};
+
+/* Mêmes règles de vérification que pour ANCRES : une destination sur disque
+   doit exister, sinon on promet un 404. */
+for (const cible of Object.values(DEST_SERVICES)) {
+  if (/^(https?:|tel:|mailto:|#)/.test(cible)) continue;
+  let chemin = cible.split('#')[0].split('?')[0];
+  if (chemin === '') continue;
+  if (chemin === 'app.html') chemin = 'VERITAS_v1.2.html';
+  if (chemin.endsWith('/')) chemin += 'index.html';
+  if (!fs.existsSync(path.join(process.cwd(), chemin))) {
+    throw new Error('Carte « Découvrir » branchée sur « ' + cible + ' », absente du dépôt.');
+  }
+}
+
+/* Passe 1 — les cartes de l'onglet ouvert, DÉJÀ écrites dans le corps.
+   `dest` n'existe pas dans les données de la maquette : celle-ci rend donc un
+   href VIDE, qu'on remplit ici. On lit le titre porté par la carte elle-même —
+   sa position dans le fichier ne prouve rien, son titre si. */
+{
+  let posees = 0;
+  corps = corps.replace(
+    /<h3([^>]*)>([^<]+)<\/h3>([\s\S]{0,900}?)href=""/g,
+    (tout, attrs, titre, milieu) => {
+      const cible = DEST_SERVICES[titre.trim()];
+      if (!cible) return tout;                       // pas une carte de service
+      posees++;
+      return '<h3' + attrs + '>' + titre + '</h3>' + milieu + 'href="' + cible + '"';
+    });
+  console.log('découvrir   : ' + posees + ' carte(s) rendue(s) branchée(s) sur leur destination');
+}
+
 for (const [ancre, cible] of Object.entries(ANCRES)) {
   corps = corps.split('href="' + ancre + '"').join('href="' + cible + '"');
 }
@@ -353,15 +439,23 @@ for (const [ancre, cible] of Object.entries(ANCRES)) {
      cinq. On ne se repère donc pas sur le style — qui ne distingue rien —
      mais sur le contenu : seule la grille des plans ouvre sur la colonne
      « Fonctionnalité ». */
-  const AVANT = '<div style="border:1px solid #E4E7EF;border-radius:14px;overflow:hidden">';
+  /* Le repère portait la couleur de bordure en dur. La passe « plus de traits »
+     l'a rendue transparente, et le conteneur n'a plus été trouvé : le tableau
+     comparatif partait sans sa classe .vtab, donc sans défilement sur mobile.
+     Le garde-fou plus bas a fait son travail — il a crié. On ne dépend plus de
+     la couleur : seuls la forme du conteneur et son contenu comptent. */
+  const AVANT_RE = /<div style="border:1px solid (?:#[0-9A-Fa-f]{3,6}|transparent);border-radius:14px;overflow:hidden">/;
   let vus = 0, coiffes = 0;
-  corps = corps.split(AVANT).map((part, i, tous) => {
+  const AVANT_G = new RegExp(AVANT_RE.source, 'g');
+  const morceaux = corps.split(AVANT_G);
+  const ouvertures = corps.match(AVANT_G) || [];
+  corps = morceaux.map((part, i) => {
     if (i === 0) return part;
     vus++;
     // `part` est ce qui SUIT le conteneur : on y cherche l'en-tête.
     const estGrillePlans = part.slice(0, 700).includes('Fonctionnalité');
     if (estGrillePlans) { coiffes++; return '<div class="vtab">' + part; }
-    return AVANT + part;                      // laissé tel quel
+    return ouvertures[i - 1] + part;          // laissé tel quel, couleur d'origine
   }).join('');
   if (coiffes !== 1) {
     console.warn('⚠ tableau comparatif : ' + coiffes + ' grille(s) de plans coiffée(s) sur '
@@ -992,6 +1086,44 @@ supprimerSection('Séquence par séquence, comme au tableau',
    aux mêmes personnes, avec les mêmes destinations. La carte est en haut,
    dans le bloc qui structure la page ; la section est en bas, après tout le
    reste. C'est la carte qui reste. */
+/* ══════════════════════════════════════════════════════════════════════════
+   LES DEUX PHOTOGRAPHIES DE L'ACCUEIL — REMISES, SANS LEURS PANNEAUX
+   ────────────────────────────────────────────────────────────────────────────
+   La coupe de « Séquence par séquence, comme au tableau » (3ᵉ énoncé de l'offre
+   cahiers, voir plus haut) a emporté avec elle la SECTION ENTIÈRE des blocs
+   alternés — donc les deux seules photographies de la page : la séance de cours
+   et l'élève au travail. Les fichiers sont restés déployés
+   (assets/photo-classe.webp, assets/photo-eleve.webp) et n'étaient plus
+   référencés nulle part : une page d'accueil sans un seul visage.
+
+   Demande de Jacques : « insère les photos et non les anciens panneaux
+   supprimés. » Elles reviennent donc SEULES, en bande, juste après « Un centre
+   à Douala, une plateforme dans sa poche » — dont elles illustrent exactement
+   les deux moitiés, et dont les libellés ci-dessous ne font que reprendre les
+   mots. Aucun chiffre, aucun témoignage, rien qui demande à être vérifié : les
+   panneaux supprimés ne reviennent pas par la fenêtre.
+   ══════════════════════════════════════════════════════════════════════════ */
+{
+  const s = sectionUnique('Un centre à Douala', 'photos de l’accueil (ancrage)');
+  const photo = (fichier, alt, libelle, position, duree) =>
+      '<figure class="vphoto">'
+    +   '<img src="assets/' + fichier + '" alt="' + alt + '" loading="lazy" decoding="async"'
+    +        ' style="object-position:' + position + ';animation-duration:' + duree + '">'
+    +   '<figcaption><span>' + libelle + '</span></figcaption>'
+    + '</figure>';
+  const bande = '\n    <!-- LES DEUX PHOTOS -->\n'
+    + '    <section class="vphotos" aria-label="Le centre et la plateforme en images">\n'
+    + '      <div class="vphotos-in">\n'
+    + '        ' + photo('photo-classe.webp', 'Séance de cours au Centre VÉRITAS',
+                        'Au centre, à Douala', '50% 45%', '24s') + '\n'
+    + '        ' + photo('photo-eleve.webp', 'Élève travaillant avec la plateforme VÉRITAS',
+                        'Sur la plateforme, partout', '50% 30%', '28s') + '\n'
+    + '      </div>\n'
+    + '    </section>\n';
+  corps = corps.slice(0, s.fin) + bande + corps.slice(s.fin);
+  console.log('accueil     : + les 2 photos (photo-classe, photo-eleve) après « Un centre à Douala »');
+}
+
 supprimerSection('Neuf programmes de partenariat',
   'section « Travailler avec VÉRITAS » (doublon de la carte Partenaires)');
 deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
@@ -1295,6 +1427,39 @@ corps = corps.replace(/(assets\/(?!veritas-logo)[a-z0-9-]+)\.png/g, '$1.webp');
    vingt-trois « anomalies » à chaque construction, dont zéro vraie — donc un
    rapport que plus personne ne lit. On ne signale que ce qui est réellement
    mort. */
+/* ── Un lien sortant s'ouvre à côté, pas à la place ────────────────────────
+   « Écrire sur WhatsApp » était le seul lien externe de la vitrine sans
+   target : le visiteur quittait le site pour de bon, et son fil de lecture
+   avec. Les trois liens de PARTAGE l'avaient déjà — celui du contact non,
+   parce qu'il ne vient pas du même endroit de la maquette (il est posé par la
+   table ANCRES, qui ne fabrique qu'une adresse).
+   rel="noopener" va avec : sans lui, la page ouverte garde une prise sur la
+   nôtre via window.opener. */
+{
+  let ouverts = 0;
+  corps = corps.replace(/<a\s([^>]*href="https?:\/\/[^"]+"[^>]*)>/g, (tout, attrs) => {
+    if (/target=/.test(attrs)) return tout;
+    if (/href="https?:\/\/(www\.)?veritas-school\.com/.test(attrs)) return tout;  // chez nous
+    ouverts++;
+    return '<a ' + attrs + ' target="_blank" rel="noopener">';
+  });
+  if (ouverts) console.log('liens sortants : ' + ouverts + ' ouvert(s) dans un nouvel onglet (+ rel=noopener)');
+}
+
+/* Garde-fou : « #detail » ne désigne AUCUN écran. S'il en reste un, c'est
+   qu'une carte a échappé à la table — on refuse de livrer le lien mort. */
+if (corps.indexOf('href="#detail"') >= 0) {
+  throw new Error('Un href="#detail" a survécu au branchement des cartes « Découvrir » : '
+    + 'aucun écran ne porte data-vp="detail", le clic ne ferait rien.');
+}
+{
+  const vides = (corps.match(/href=""[^>]*>Découvrir/g) || []).length;
+  if (vides) {
+    throw new Error(vides + ' lien(s) « Découvrir » sans adresse. Un titre de carte a changé '
+      + 'dans la maquette sans entrée correspondante dans DEST_SERVICES.');
+  }
+}
+
 const ancresRestantes = (function () {
   const idsSprite = new Set([...(sprite.match(/<symbol id="([^"]+)"/g) || [])]
     .map(s => s.replace(/.*id="/, '').replace(/"$/, '')));
@@ -1325,7 +1490,7 @@ for (const [nom, f] of Object.entries(fragments)) {
 // ── Variantes de données ───────────────────────────────────────────────────
 // Précalculées depuis la logique d'origine : aucune reformulation à la main,
 // donc aucun risque de dérive entre la maquette et la page livrée.
-const D = { onglets: [], services: [], filtres: [], moyensPaiement: [], champsPaiement: [], optionsLivraison: [], partages: {}, scal: {} };
+const D = { onglets: [], services: [], filtres: [], manuels: [], moyensPaiement: [], champsPaiement: [], optionsLivraison: [], partages: {}, scal: {} };
 const clean = o => JSON.parse(JSON.stringify(o, (k, v) => typeof v === 'function' ? undefined : v));
 
 /* Le NOMBRE d'onglets appartient à la maquette : on le lit, on ne le fige pas.
@@ -1349,9 +1514,41 @@ for (let t = 1; t <= NB_ONGLETS; t++) {
       + ') : aucune carte. Un onglet qui vide la zone au clic ne doit pas partir en production.');
   }
   D.onglets.push(clean(v.onglets));
-  D.services.push(clean(v.services));
+  /* Passe 2 — le GABARIT. Ces cartes-là sont reconstruites au clic sur un
+     onglet : sans destination dans la donnée, elles repartiraient avec le
+     « #detail » de la maquette, c'est-à-dire nulle part. Une carte inconnue
+     de la table arrête la construction : mieux vaut ne pas déployer qu'un
+     bouton « Découvrir » qui ne découvre rien. */
+  D.services.push(clean(v.services).map(c => {
+    const cible = DEST_SERVICES[String(c.titre || '').trim()];
+    if (!cible) {
+      throw new Error('Carte de service « ' + c.titre + ' » sans destination. '
+        + 'Ajouter une entrée dans DEST_SERVICES — sinon son « Découvrir » est mort.');
+    }
+    c.dest = cible;
+    return c;
+  }));
 }
-for (let i = 0; i < 7; i++) D.filtres.push(clean(valsFor({ page: 'boutique', filtre: i }).filtres));
+/* Le nombre de filtres appartient au CATALOGUE, pas a ce fichier : il vaut
+   « toutes les categories reellement portees par un titre, plus Tout le
+   catalogue ». Ecrit en dur (« i < 7 »), il aurait fige sept pastilles pour
+   quatre categories reelles — et l'ajout d'un manuel de mathematiques demain
+   n'aurait rien change a l'ecran. Meme lecon que NB_ONGLETS ci-dessus. */
+const NB_FILTRES = (function () {
+  const n = (valsFor({ page: 'boutique', filtre: 0 }).filtres || []).length;
+  if (!n) throw new Error('Filtres de boutique introuvables — extraction impossible.');
+  return n;
+})();
+for (let i = 0; i < NB_FILTRES; i++) {
+  const v = valsFor({ page: 'boutique', filtre: i });
+  D.filtres.push(clean(v.filtres));
+  D.manuels.push(clean(v.manuels));
+  D.scal['filtre' + i] = { nbManuels: v.nbManuels };
+  if (i > 0 && (!v.manuels || !v.manuels.length)) {
+    throw new Error('Filtre « ' + (v.filtres[i] || {}).nom + ' » : aucun titre. '
+      + 'Une pastille qui ne peut rien montrer ne doit pas partir en production.');
+  }
+}
 for (let m = 0; m < 4; m++) {
   const v = valsFor({ page: 'paiement', moyen: m });
   D.moyensPaiement.push(clean(v.moyensPaiement));
@@ -1911,12 +2108,22 @@ ${styleBlock}
 ${cssBascule}
 ${hoverRules.join('\n')}
 </style>
+<!-- 🛡️ Bouclier anti-robots. CHARGÉ TÔT ET SANS defer, À DESSEIN : il
+     enveloppe window.fetch, et doit donc être en place avant que le moindre
+     script n'appelle l'API. En defer, les premiers appels partiraient sans
+     lui et un défi les ferait échouer au lieu d'être rejoué.
+     Il ne se manifeste JAMAIS lors d'une visite normale : le serveur ne
+     réclame de preuve qu'au-delà d'un débit anormal. -->
+<script src="assets/veritas-shield.js?v=${VERSION_ASSETS}"></script>
 </head>
 <body>
 ${sprite}
 ${corps}
 <script>window.VRT_DATA=${JSON.stringify(D)};window.VRT_TPL=${JSON.stringify(gabarits)};</script>
 <script src="assets/vitrine.js?v=${VERSION_ASSETS}" defer></script>
+<!-- Le tuteur, présent sur les sept écrans : le lanceur est en position fixe,
+     il survit donc au changement d'écran (aller() ne touche qu'aux data-vp). -->
+<script src="assets/ambassa.js?v=${VERSION_ASSETS}" defer></script>
 <!-- Service worker : enregistré par app.html seulement jusqu'ici. Or depuis
      que « / » sert la vitrine, un visiteur peut très bien ne jamais ouvrir
      l'application — il n'avait donc ni mode hors ligne ni proposition

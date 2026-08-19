@@ -179,7 +179,7 @@
   </div>
 
   <!-- BARRE PRINCIPALE -->
-  <nav id="vrtNav" style="position:sticky;top:0;z-index:60;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border-bottom:1px solid #E4E7EF;height:76px;display:flex;align-items:center;transition:box-shadow .18s ease">
+  <nav id="vrtNav" style="position:sticky;top:0;z-index:60;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);height:76px;display:flex;align-items:center;transition:box-shadow .18s ease">
     <div style="max-width:1170px;margin:0 auto;padding:0 24px;display:flex;align-items:center;width:100%;height:100%;gap:8px">
       <button type="button" onClick="{{ goAccueil }}" style="display:flex;align-items:center;gap:11px;background:none;border:0;cursor:pointer;padding:0;margin-right:18px;flex-shrink:0;text-align:left" aria-label="Accueil VÉRITAS">
         <img src="assets/veritas-logo.png" alt="Logo VÉRITAS" style="width:46px;height:46px;object-fit:contain;display:block">
@@ -193,7 +193,7 @@
           <div style="position:relative;height:100%;display:flex;align-items:center">
             <button type="button" onClick="{{ basculerPlus }}" aria-expanded="{{ plusOuvert }}" style="display:inline-flex;align-items:center;gap:6px;height:100%;padding:0 14px;border:0;border-bottom:3px solid transparent;background:none;cursor:pointer;font:500 15px Poppins,sans-serif;color:#001136;white-space:nowrap;transition:color .18s,border-color .18s" style-hover="color:#5B4FA8;border-bottom-color:#5B4FA8">Plus<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(90deg)" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></button>
             <sc-if value="{{ plusOuvert }}" hint-placeholder-val="{{ false }}">
-              <div style="position:absolute;top:100%;left:0;min-width:236px;background:#fff;border:1px solid #E4E7EF;border-radius:12px;box-shadow:0 18px 40px rgba(0,17,54,.12);padding:8px;display:flex;flex-direction:column;gap:2px;z-index:80;animation:vpop .22s cubic-bezier(.22,1,.36,1)">
+              <div style="position:absolute;top:100%;left:0;min-width:236px;background:#FAFBFE;border:1px solid transparent;border-radius:12px;box-shadow:0 18px 40px rgba(0,17,54,.12);padding:8px;display:flex;flex-direction:column;gap:2px;z-index:80;animation:vpop .22s cubic-bezier(.22,1,.36,1)">
                 <sc-for list="{{ plusLiens }}" as="pl" hint-placeholder-count="4">
                   <button type="button" onClick="{{ pl.aller }}" style="display:flex;align-items:center;gap:11px;padding:11px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:400 14.5px Poppins,sans-serif;color:#001136;transition:background .18s,color .18s" style-hover="background:#F4F7FD;color:#1E499B">
                     <span style="width:32px;height:32px;border-radius:10px;background:{{ pl.fond }};color:{{ pl.teinte }};display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ pl.ico }}"></use></svg></span>
@@ -208,13 +208,13 @@
 
       <sc-if value="{{ navCompacte }}" hint-placeholder-val="{{ false }}">
         <div style="position:relative;height:100%;display:flex;align-items:center;margin-left:auto">
-          <button type="button" onClick="{{ basculerBurger }}" aria-label="Menu" aria-expanded="{{ burgerOuvert }}" style="width:50px;height:50px;border-radius:14px;border:1px solid #E4E7EF;background:{{ fondBurger }};color:{{ texteBurger }};cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:background .18s,border-color .18s">
+          <button type="button" onClick="{{ basculerBurger }}" aria-label="Menu" aria-expanded="{{ burgerOuvert }}" style="width:50px;height:50px;border-radius:14px;border:1px solid transparent;background:{{ fondBurger }};color:{{ texteBurger }};cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:background .18s,border-color .18s">
             <span style="width:19px;height:2px;border-radius:2px;background:currentColor;display:block"></span>
             <span style="width:19px;height:2px;border-radius:2px;background:currentColor;display:block"></span>
             <span style="width:19px;height:2px;border-radius:2px;background:currentColor;display:block"></span>
           </button>
           <sc-if value="{{ burgerOuvert }}" hint-placeholder-val="{{ false }}">
-            <div style="position:absolute;top:calc(100% + 10px);right:0;width:290px;background:#fff;border:1px solid #E4E7EF;border-radius:14px;box-shadow:0 18px 40px rgba(0,17,54,.12);padding:10px;display:flex;flex-direction:column;gap:3px;z-index:90;animation:vpop .24s cubic-bezier(.22,1,.36,1)">
+            <div style="position:absolute;top:calc(100% + 10px);right:0;width:290px;background:#FAFBFE;border:1px solid transparent;border-radius:14px;box-shadow:0 18px 40px rgba(0,17,54,.12);padding:10px;display:flex;flex-direction:column;gap:3px;z-index:90;animation:vpop .24s cubic-bezier(.22,1,.36,1)">
               <sc-for list="{{ menuMobile }}" as="mm" hint-placeholder-count="7">
                 <button type="button" onClick="{{ mm.aller }}" style="display:flex;align-items:center;gap:12px;padding:12px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:500 15px Poppins,sans-serif;color:#001136;transition:background .18s" style-hover="background:#F4F7FD">
                   <span style="width:36px;height:36px;border-radius:10px;background:{{ mm.fond }};color:{{ mm.teinte }};display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ mm.ico }}"></use></svg></span>
@@ -247,7 +247,7 @@
   <sc-if value="{{ estAccueil }}" hint-placeholder-val="{{ true }}">
   <div data-screen-label="Accueil">
 
-    <section style="position:relative;background:radial-gradient(1100px 460px at 12% 0%,#EAF1FF 0%,#F4F5F8 55%,#F8F9FC 100%);border-bottom:1px solid #E4E7EF;overflow:hidden">
+    <section style="position:relative;background:radial-gradient(1100px 460px at 12% 0%,#EAF1FF 0%,#F4F5F8 55%,#F8F9FC 100%);overflow:hidden">
       <span aria-hidden="true" style="position:absolute;left:-90px;top:-70px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(30,73,155,.16),rgba(30,73,155,0) 68%);animation:vorb 17s ease-in-out infinite;pointer-events:none"></span>
       <span aria-hidden="true" style="position:absolute;right:8%;bottom:-110px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(14,124,134,.15),rgba(14,124,134,0) 68%);animation:vorb 21s ease-in-out infinite reverse;pointer-events:none"></span>
       <span aria-hidden="true" style="position:absolute;right:34%;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle at 40% 40%,rgba(255,201,60,.20),rgba(255,201,60,0) 68%);animation:vorb 25s ease-in-out infinite;pointer-events:none"></span>
@@ -284,7 +284,7 @@
             <span aria-hidden="true" style="position:absolute;left:0;right:0;bottom:0;height:46%;background:linear-gradient(180deg,rgba(30,73,155,0),rgba(30,73,155,.10))"></span>
             <img src="assets/hero-eleves.png" alt="Élèves et encadreurs du Centre VÉRITAS, Douala" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 34%;animation:vzoomSlow 24s ease-in-out infinite alternate;display:block">
           </div>
-          <div data-parallax="-0.05" style="position:absolute;left:-20px;bottom:-24px;background:#fff;border:1px solid #E4E7EF;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 12px 26px rgba(0,17,54,.09);will-change:transform;animation:vfloat 6.5s ease-in-out infinite">
+          <div data-parallax="-0.05" style="position:absolute;left:-20px;bottom:-24px;background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 12px 26px rgba(0,17,54,.09);will-change:transform;animation:vfloat 6.5s ease-in-out infinite">
             <span style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#7BD99C,#007E11);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"></use></svg></span>
             <span style="line-height:1.3"><b style="display:block;font:600 16px Poppins,sans-serif;color:#001136">56 pages de corrigés</b><small style="font-size:13px;color:#6E7385">accessibles sans compte</small></span>
           </div>
@@ -308,7 +308,7 @@
         </div>
         <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:12px">
           <sc-for list="{{ niveaux }}" as="n" hint-placeholder-count="7">
-            <a href="#niveau" data-reveal style="position:relative;background:#fff;border:1px solid #E4E7EF;border-radius:12px;padding:18px 12px 14px;text-align:center;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#1E499B;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09);text-decoration:none">
+            <a href="#niveau" data-reveal style="position:relative;background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:18px 12px 14px;text-align:center;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#1E499B;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09);text-decoration:none">
               <sc-if value="{{ n.exam }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;font:600 10px Poppins,sans-serif;letter-spacing:.5px;padding:3px 9px;border-radius:100px;white-space:nowrap">{{ n.exam }}</span></sc-if>
               <div style="font:600 19px Poppins,sans-serif;color:#001136">{{ n.cls }}</div>
               <div style="font:600 23px Poppins,sans-serif;color:#1E499B;margin-top:6px">{{ n.nb }}</div>
@@ -319,7 +319,7 @@
       </div>
     </section>
     <!-- RÉASSURANCE -->
-    <div style="background:#fff;border-bottom:1px solid #E9ECF3">
+    <div style="background:#fff">
       <div style="max-width:1170px;margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:center;gap:14px 34px;flex-wrap:wrap">
         <sc-for list="{{ reassurance }}" as="ra" hint-placeholder-count="4">
           <span style="display:inline-flex;align-items:center;gap:9px;font:500 13.5px Poppins,sans-serif;color:#4D5163;white-space:nowrap">
@@ -394,7 +394,7 @@
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch">
           <sc-for list="{{ publics }}" as="u" hint-placeholder-count="3">
-            <div data-reveal style="background:#fff;border:1px solid #E4E7EF;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ u.teinte }}">
+            <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ u.teinte }}">
               <div role="img" aria-label="{{ u.alt }}" style="position:relative;height:172px;overflow:hidden;background-color:#E9EEF7;background-image:url({{ u.photo }});background-size:cover;background-position:{{ u.cadrage }};background-repeat:no-repeat">
                 <span aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,17,54,.12) 0%,{{ u.voile }} 100%)"></span>
               </div>
@@ -412,7 +412,7 @@
                     <li style="display:flex;align-items:flex-start;gap:10px;font-size:14.5px;line-height:1.6;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:{{ u.teinte }};display:inline-flex;align-items:center;justify-content:center;margin-top:1px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span>{{ pt }}</li>
                   </sc-for>
                 </ul>
-                <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:18px;border-top:1px solid #EFF2F7">
+                <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:18px">
                   <span style="font:500 13px Poppins,sans-serif;color:{{ u.teinte }}">{{ u.acces }}</span>
                   <button type="button" onClick="{{ u.aller }}" style="display:inline-flex;align-items:center;gap:7px;padding:11px 20px;border-radius:10px;background:{{ u.teinte }};color:#fff;border:0;font:600 14.5px Poppins,sans-serif;cursor:pointer;transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,17,54,.09)">{{ u.cta }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></button>
                 </div>
@@ -424,14 +424,14 @@
     </section>
 
     <!-- SERVICES À ONGLETS -->
-    <section style="background:#F4F5F8;margin-top:44px;padding:50px 0;border-top:1px solid #E9ECF3;border-bottom:1px solid #E9ECF3">
+    <section style="background:#F4F5F8;margin-top:44px;padding:50px 0">
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
         <div style="max-width:660px;margin:0 auto 26px;text-align:center">
           <h2 style="font:600 30px/40px Poppins,sans-serif;color:#001136;margin:0 0 10px">Tout ce dont l'élève a besoin</h2>
           <p style="margin:0;font-size:16px;color:#4D5163;text-wrap:pretty">Ce qui est gratuit le reste. Ce qui est payant affiche son prix, sans surprise.</p>
         </div>
         <div style="display:flex;justify-content:center;margin-bottom:30px">
-          <div role="tablist" style="display:inline-flex;gap:4px;background:#fff;border:1px solid #E4E7EF;border-radius:14px;padding:6px;box-shadow:0 6px 16px rgba(0,17,54,.06);flex-wrap:wrap;justify-content:center">
+          <div role="tablist" style="display:inline-flex;gap:4px;background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:6px;box-shadow:0 6px 16px rgba(0,17,54,.06);flex-wrap:wrap;justify-content:center">
             <sc-for list="{{ onglets }}" as="o" hint-placeholder-count="5">
               <button type="button" role="tab" onClick="{{ o.aller }}" style="position:relative;display:inline-flex;align-items:center;gap:9px;padding:12px 20px 14px;border-radius:10px;border:0;background:{{ o.fond }};color:{{ o.texte }};font:{{ o.graisse }} 14.5px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" style-hover="background:#F4F6FB;color:#1E499B">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{ o.teinte }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:0 0 auto" aria-hidden="true"><use href="{{ o.ico }}"></use></svg>{{ o.nom }}
@@ -441,14 +441,14 @@
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;animation:vfade .3s ease">
           <sc-for list="{{ services }}" as="s" hint-placeholder-count="4">
-            <div data-reveal style="background:#fff;border:1px solid #E4E7EF;border-radius:12px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#1E499B;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09)">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid {{ s.teinte }};color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px">
+            <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#1E499B;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09)">
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid {{ s.teinte }};color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
                 <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ s.ico }}"></use></svg></span>
-              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px">{{ s.titre }}</h3>
-              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty">{{ s.desc }}</p>
-              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px;border-top:1px solid #EFF2F7">
+              <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">{{ s.titre }}</h3>
+              <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">{{ s.desc }}</p>
+              <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;padding-top:14px">
                 <span style="font:600 14px Poppins,sans-serif;color:{{ s.teinte }}">{{ s.prix }}</span>
-                <a href="#detail" style="display:inline-flex;align-items:center;gap:4px;font:500 13.5px Poppins,sans-serif">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
+                <a href="{{ s.dest }}" style="display:inline-flex;align-items:center;gap:4px;font:600 13.5px Poppins,sans-serif;color:{{ s.teinte }}">Découvrir<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
               </div>
             </div>
           </sc-for>
@@ -531,16 +531,16 @@
               <span style="position:relative;width:158px;height:214px;border-radius:4px 12px 12px 4px;border:1px solid rgba(255,255,255,.22);box-shadow:0 20px 44px rgba(0,0,0,.42);display:flex;flex-direction:column;justify-content:space-between;padding:18px 16px;text-align:left;animation:vbob 9s ease-in-out infinite;background:linear-gradient(160deg,#F8F1E2,#E3D2AC 65%,#D8BE8A);overflow:hidden">
                 <span aria-hidden="true" style="position:absolute;left:0;top:0;bottom:0;width:7px;background:linear-gradient(180deg,#8A6234,#5E4020)"></span>
                 <span aria-hidden="true" style="position:absolute;right:-24px;bottom:-24px;width:96px;height:96px;border-radius:50%;background:rgba(138,98,52,.12)"></span>
-                <span style="position:relative;font:600 8.5px Poppins,sans-serif;color:#8A6234;letter-spacing:1.6px;text-transform:uppercase">Étude d'œuvre</span>
+                <span style="position:relative;font:600 8.5px Poppins,sans-serif;color:#8A6234;letter-spacing:1.6px;text-transform:uppercase" data-vrt-val="couvLabel">Étude d'œuvre</span>
                 <span style="position:relative;display:flex;flex-direction:column;gap:5px">
-                  <b style="font:700 19px/23px Georgia,'Times New Roman',serif;color:#3B2A14">Le Tube Digestif</b>
-                  <span style="font:400 11.5px/1.4 Georgia,serif;font-style:italic;color:#6B5230">Alobwed'Epie</span>
+                  <b style="font:700 19px/23px Georgia,'Times New Roman',serif;color:#3B2A14" data-vrt-val="couvTitre">Le Tube Digestif</b>
+                  <span style="font:400 11.5px/1.4 Georgia,serif;font-style:italic;color:#6B5230" data-vrt-val="couvAuteur">Alobwed'Epie</span>
                 </span>
-                <span style="position:relative;font:600 8.5px Poppins,sans-serif;color:#8A6234;letter-spacing:1.4px">VÉRITAS · 3ᵉ → Tˡᵉ</span>
+                <span style="position:relative;font:600 8.5px Poppins,sans-serif;color:#8A6234;letter-spacing:1.4px" data-vrt-val="couvClasse">VÉRITAS · 3ᵉ → Tˡᵉ</span>
               </span>
               <span style="display:flex;flex-direction:column;gap:2px">
-                <b style="font:600 19px/27px Poppins,sans-serif;color:#fff">Le Tube Digestif</b>
-                <small style="font:400 13px Poppins,sans-serif;color:rgba(255,255,255,.72)">Alobwed'Epie · roman</small>
+                <b style="font:600 19px/27px Poppins,sans-serif;color:#fff" data-vrt-val="couvNom">Le Tube Digestif</b>
+                <small style="font:400 13px Poppins,sans-serif;color:rgba(255,255,255,.72)" data-vrt-val="couvSous">Alobwed'Epie · roman</small>
               </span>
             </div>
 
@@ -557,23 +557,23 @@
           <div style="padding:28px 30px 24px;display:flex;flex-direction:column;background:#fff">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px">
               <span style="display:inline-flex;align-items:center;gap:9px;font:600 11px Poppins,sans-serif;color:#C24E00;letter-spacing:1.2px;text-transform:uppercase"><span style="width:7px;height:7px;border-radius:50%;background:#C24E00;animation:vpulse 2.6s ease-out infinite"></span>Extrait du {{ dateDuJour }}</span>
-              <div style="display:flex;gap:6px;background:#F4F6FB;border-radius:100px;padding:4px">
+              <div data-vrt-zone="langue" style="display:flex;gap:6px;background:#F4F6FB;border-radius:100px;padding:4px">
                 <button type="button" onClick="{{ mettreFr }}" style="padding:7px 16px;border-radius:100px;border:0;cursor:pointer;background:{{ fondFr }};color:{{ texteFr }};font:600 13px Poppins,sans-serif;transition:background .18s,color .18s">Français</button>
                 <button type="button" onClick="{{ mettreEn }}" style="padding:7px 16px;border-radius:100px;border:0;cursor:pointer;background:{{ fondEn }};color:{{ texteEn }};font:600 13px Poppins,sans-serif;transition:background .18s,color .18s">English</button>
               </div>
             </div>
 
-            <div style="position:relative;border-radius:14px;padding:46px 58px 40px;background:linear-gradient(168deg,#FCF7EA 0%,#F7EFDC 46%,#F2E7D0 100%);border:1px solid #E8DBBF;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 12px 26px rgba(120,92,44,.10)">
+            <div style="position:relative;border-radius:14px;padding:18px 20px 16px;background:linear-gradient(168deg,#FCF7EA 0%,#F7EFDC 46%,#F2E7D0 100%);border:1px solid #E8DBBF;display:flex;flex-direction:column;align-items:center;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 12px 26px rgba(120,92,44,.10)">
               <span aria-hidden="true" style="position:absolute;inset:0;border-radius:14px;pointer-events:none;background-image:radial-gradient(280px 200px at 86% 10%,rgba(160,120,62,.10),rgba(0,0,0,0) 70%),radial-gradient(260px 190px at 8% 90%,rgba(160,120,62,.09),rgba(0,0,0,0) 70%)"></span>
-              <span aria-hidden="true" style="position:absolute;left:30px;top:26px;font:700 54px/1 Georgia,serif;color:#D6BE93;pointer-events:none">“</span>
-              <p style="position:relative;margin:24px 0 12px;max-width:33ch;font:400 19px/1.85 Georgia,'Times New Roman',serif;font-style:italic;color:#4A3720;text-wrap:pretty">{{ passage1 }}</p>
-              <p style="position:relative;margin:0 0 6px;max-width:37ch;font:400 15.5px/1.85 Georgia,'Times New Roman',serif;font-style:italic;color:#6B5232;text-wrap:pretty">{{ passage2 }}</p>
+              <span aria-hidden="true" style="position:absolute;left:10px;top:4px;font:700 40px/1 Georgia,serif;color:#D6BE93;pointer-events:none">“</span>
+              <p style="position:relative;margin:6px 0 8px;max-width:none;font:400 19px/1.65 Georgia,'Times New Roman',serif;font-style:italic;color:#4A3720;text-wrap:pretty">{{ passage1 }}</p>
+              <p style="position:relative;margin:0 0 4px;max-width:none;font:400 15.5px/1.65 Georgia,'Times New Roman',serif;font-style:italic;color:#6B5232;text-wrap:pretty">{{ passage2 }}</p>
               <span aria-hidden="true" style="position:relative;width:70px;height:1px;background:linear-gradient(90deg,rgba(160,120,62,0),#C4A879,rgba(160,120,62,0));margin:12px 0 14px"></span>
-              <span style="position:relative;font:400 21px/1.3 Georgia,'Times New Roman',serif;color:#4A3720;letter-spacing:.3px">Alobwed'Epie</span>
-              <span style="position:relative;margin-top:8px;font:500 12.5px Poppins,sans-serif;color:#8A6F45;letter-spacing:.4px">Le Tube Digestif · 3ᵉ → Tˡᵉ</span>
+              <span style="position:relative;font:400 21px/1.3 Georgia,'Times New Roman',serif;color:#4A3720;letter-spacing:.3px" data-vrt-val="passageAuteur">Alobwed'Epie</span>
+              <span style="position:relative;margin-top:8px;font:500 12.5px Poppins,sans-serif;color:#8A6F45;letter-spacing:.4px" data-vrt-val="passageSource">Le Tube Digestif · 3ᵉ → Tˡᵉ</span>
             </div>
 
-            <div style="position:relative;margin-top:16px;background:linear-gradient(120deg,#F6F3FC,#FCFBFE);border:1px solid #E7E1F5;border-radius:14px;padding:18px 20px 18px 18px;display:flex;gap:14px;box-shadow:0 6px 16px rgba(0,17,54,.06)">
+            <div data-vrt-zone="decryptage" style="position:relative;margin-top:16px;background:linear-gradient(120deg,#F6F3FC,#FCFBFE);border:1px solid #E7E1F5;border-radius:14px;padding:14px 16px 14px 14px;display:flex;gap:12px;box-shadow:0 6px 16px rgba(0,17,54,.06)">
               <span style="width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 6px 16px rgba(91,79,168,.22)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"></use></svg></span>
               <span style="flex:1;min-width:0">
                 <b style="display:flex;align-items:center;gap:8px;font:600 13px Poppins,sans-serif;color:#5B4FA8;margin-bottom:5px">Le décryptage du Professeur Ambassa<span style="font:500 10.5px Poppins,sans-serif;color:#8A7BC8;background:#EEE9F8;border-radius:100px;padding:3px 8px;letter-spacing:.4px;text-transform:uppercase">analyse IA</span></b>
@@ -612,7 +612,7 @@
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px">
           <sc-for list="{{ palmares }}" as="pm" hint-placeholder-count="3">
-            <button type="button" data-reveal onClick="{{ pm.aller }}" style="text-align:left;background:#fff;border:1px solid #E4E7EF;border-radius:14px;padding:24px;cursor:pointer;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-5px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ pm.teinte }}">
+            <button type="button" data-reveal onClick="{{ pm.aller }}" style="text-align:left;background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px;cursor:pointer;display:flex;flex-direction:column;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-5px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ pm.teinte }}">
               <span style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px">
                 <span style="position:relative;width:70px;height:70px;border-radius:20px;background:{{ pm.fond }};display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="42" height="42" viewBox="0 0 48 48" style="animation:vfloatY 5.5s ease-in-out infinite" aria-hidden="true"><use href="{{ pm.illu }}"></use></svg></span>
                 <span style="font:600 11px Poppins,sans-serif;color:{{ pm.teinte }};letter-spacing:1.1px;text-transform:uppercase;text-align:right">{{ pm.rubrique }}</span>
@@ -639,7 +639,7 @@
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
           <sc-for list="{{ reussites }}" as="rs" hint-placeholder-count="4">
-            <div data-reveal style="background:#fff;border:1px solid #E4E7EF;border-radius:16px;padding:28px 24px;text-align:center;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-5px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ rs.teinte }}">
+            <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:16px;padding:28px 24px;text-align:center;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-5px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ rs.teinte }}">
               <span style="position:relative;width:132px;height:132px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:{{ rs.anneau }};margin-bottom:18px;animation:vpop .7s cubic-bezier(.22,1,.36,1) both">
                 <span style="width:104px;height:104px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1">
                   <b style="font:600 30px Poppins,sans-serif;color:{{ rs.teinte }}">{{ rs.taux }}</b>
@@ -778,7 +778,7 @@
               <span style="background:#EEE9F8;color:#5B4FA8;font:600 13px Poppins,sans-serif;padding:7px 14px;border-radius:100px">3 questions offertes / semaine</span>
               <span style="background:#F4F5F8;color:#4D5163;font:400 13px Poppins,sans-serif;padding:7px 14px;border-radius:100px">30 / jour avec le plan Pro</span>
             </div>
-            <div style="background:#fff;border:1px solid #E4E7EF;border-left:3px solid #5B4FA8;border-radius:10px;padding:16px 18px;font-size:14.5px;line-height:1.65;color:#4D5163;font-style:italic">« Reprends ta thèse : tu l'annonces en introduction mais tu ne la reformules jamais en conclusion. »</div>
+            <div style="background:#FAFBFE;border:1px solid transparent;border-left:3px solid #5B4FA8;border-radius:10px;padding:16px 18px;font-size:14.5px;line-height:1.65;color:#4D5163;font-style:italic">« Reprends ta thèse : tu l'annonces en introduction mais tu ne la reformules jamais en conclusion. »</div>
           </div>
         </div>
 
@@ -789,7 +789,7 @@
             <p style="margin:0 0 16px;font-size:15.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">MTN MoMo, Orange Money, carte bancaire et PayPal. Chaque paiement déclenche un reçu numéroté imprimable avec QR de vérification. La cagnotte de scolarité permet à un parent installé à l'étranger de régler une tranche directement.</p>
             <div style="display:flex;flex-wrap:wrap;gap:10px;max-width:460px">
               <sc-for list="{{ marquesPaiement }}" as="mq" hint-placeholder-count="6">
-                <span role="img" aria-label="{{ mq.nom }}" title="{{ mq.nom }}" style="display:flex;align-items:center;justify-content:center;height:44px;padding:0 6px;background:#fff;border:1px solid #E9ECF3;border-radius:10px;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,17,54,.09)">
+                <span role="img" aria-label="{{ mq.nom }}" title="{{ mq.nom }}" style="display:flex;align-items:center;justify-content:center;height:44px;padding:0 6px;background:#FAFBFE;border:1px solid transparent;border-radius:10px;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,17,54,.09)">
                   <svg width="72" height="29" viewBox="0 0 80 32" aria-hidden="true"><use href="{{ mq.ico }}"></use></svg></span>
               </sc-for>
             </div>
@@ -843,7 +843,7 @@
           </div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:26px">
             <sc-for list="{{ etapes }}" as="e" hint-placeholder-count="3">
-              <div data-reveal style="background:#fff;border:1px solid #E4E7EF;border-radius:12px;padding:26px 22px;text-align:center">
+              <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:26px 22px;text-align:center">
                 <span style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#1E499B,#0C2A6A);color:#fff;display:inline-flex;align-items:center;justify-content:center;font:600 18px Poppins,sans-serif;margin-bottom:15px">{{ e.n }}</span>
                 <h3 style="font:600 18px/27px Poppins,sans-serif;color:#001136;margin:0 0 8px">{{ e.titre }}</h3>
                 <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">{{ e.desc }}</p>
@@ -912,12 +912,12 @@
           </div>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
             <sc-for list="{{ partenariats }}" as="pa" hint-placeholder-count="4">
-              <div data-reveal style="background:#fff;border:1px solid #E9ECF3;border-radius:16px;padding:36px 26px 30px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-5px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ pa.teinte }}">
+              <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:16px;padding:36px 26px 30px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-5px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ pa.teinte }}">
                 <span style="position:relative;display:flex;align-items:center;justify-content:center;width:96px;height:96px;margin-bottom:18px;border-radius:26px;background:{{ pa.fond }}"><svg width="60" height="60" viewBox="0 0 48 48" style="animation:vfloatY 6s ease-in-out infinite" aria-hidden="true"><use href="{{ pa.illu }}"></use></svg></span>
                 <h3 style="font:600 15px Poppins,sans-serif;color:{{ pa.teinte }};letter-spacing:1.6px;text-transform:uppercase;margin:0 0 12px">{{ pa.nom }}</h3>
                 <p style="margin:0 0 18px;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">{{ pa.desc }}</p>
                 <span style="display:inline-flex;align-items:center;gap:7px;margin-bottom:22px;padding:6px 13px;border-radius:100px;background:{{ pa.fond }};color:{{ pa.teinte }};font:600 12.5px Poppins,sans-serif">{{ pa.gain }}</span>
-                <a href="#partenariat" style="margin-top:auto;display:inline-flex;align-items:center;gap:7px;padding:11px 22px;border-radius:10px;border:1px solid #E4E7EF;color:#4D5163;font:500 14px Poppins,sans-serif;transition:border-color .18s,color .18s,background .18s" style-hover="border-color:{{ pa.teinte }};color:{{ pa.teinte }};background:{{ pa.fond }};text-decoration:none">{{ pa.cta }}<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
+                <a href="#partenariat" style="margin-top:auto;display:inline-flex;align-items:center;gap:7px;padding:11px 22px;border-radius:10px;border:1px solid transparent;color:#4D5163;font:500 14px Poppins,sans-serif;transition:border-color .18s,color .18s,background .18s" style-hover="border-color:{{ pa.teinte }};color:{{ pa.teinte }};background:{{ pa.fond }};text-decoration:none">{{ pa.cta }}<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
               </div>
             </sc-for>
           </div>
@@ -951,7 +951,7 @@
   <!-- ══════ ABONNEMENTS ══════ -->
   <sc-if value="{{ estTarifs }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Abonnements">
-    <section style="background:radial-gradient(900px 380px at 50% 0%,#EAF1FF,#F4F5F8 70%);border-bottom:1px solid #E4E7EF">
+    <section style="background:radial-gradient(900px 380px at 50% 0%,#EAF1FF,#F4F5F8 70%)">
       <div style="max-width:1170px;margin:0 auto;padding:48px 24px;text-align:center">
         <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #DBE8FE;color:#5B4FA8;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-wallet"></use></svg>Abonnements</span>
         <h1 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 auto 13px;max-width:780px;text-wrap:pretty">Le prix d'un taxi-ville, pour toute l'année scolaire</h1>
@@ -1000,13 +1000,6 @@
               </div>
             </div>
           </sc-for>
-              </ul>
-              <a href="#souscrire" style="position:relative;overflow:hidden;margin-top:auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:13px 20px;border-radius:10px;background:{{ p.ctaFond }};color:{{ p.ctaTexte }};border:1.5px solid {{ p.ctaBord }};font:600 15px Poppins,sans-serif;transition:transform .18s,box-shadow .18s,background .18s" style-hover="color:#fff;background:{{ p.teinte }};border-color:{{ p.teinte }};text-decoration:none;transform:translateY(-2px);box-shadow:0 14px 30px rgba(0,17,54,.16)">
-                <span aria-hidden="true" style="position:absolute;top:0;bottom:0;width:44px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.5),rgba(255,255,255,0));animation:vshine 3.4s ease-in-out infinite;animation-delay:{{ p.delai }}"></span>
-                <span style="position:relative">{{ p.cta }}</span></a>
-              </div>
-            </div>
-          </sc-for>
         </div>
         <p style="margin:18px 0 0;font-size:14px;color:#6E7385">Le plan Pro est celui que prennent les élèves en année d'examen (3<sup>e</sup>, 1<sup>re</sup>, T<sup>le</sup>) — 100 F par jour, moins qu'un cahier de brouillon par semaine.</p>
       </div>
@@ -1015,8 +1008,8 @@
     <section style="padding:56px 0 0">
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
         <h2 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:0 0 20px">Ce que chaque plan débloque</h2>
-        <div style="border:1px solid #E4E7EF;border-radius:14px;overflow:hidden">
-          <div style="display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;padding:15px 22px;background:#F4F5F8;border-bottom:1px solid #E4E7EF">
+        <div style="border:1px solid transparent;border-radius:14px;overflow:hidden">
+          <div style="display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;padding:15px 22px;background:#F4F5F8">
             <span style="font:600 12px Poppins,sans-serif;color:#001136;letter-spacing:.7px;text-transform:uppercase">Fonctionnalité</span>
             <span style="font:600 12px Poppins,sans-serif;color:#001136;text-align:center">Découverte</span>
             <span style="font:600 12px Poppins,sans-serif;color:#001136;text-align:center">Starter</span>
@@ -1024,7 +1017,7 @@
             <span style="font:600 12px Poppins,sans-serif;color:#5B4FA8;text-align:center">Élite</span>
           </div>
           <sc-for list="{{ comparatif }}" as="l" hint-placeholder-count="6">
-            <div style="display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;padding:15px 22px;border-bottom:1px solid #EFF2F7;align-items:center;background:#fff">
+            <div style="display:grid;grid-template-columns:2fr repeat(4,1fr);gap:10px;padding:15px 22px;align-items:center;background:#fff">
               <span style="font:500 14.5px Poppins,sans-serif;color:#001136">{{ l.quoi }}</span>
               <span style="font-size:14px;color:#6E7385;text-align:center">{{ l.free }}</span>
               <span style="font-size:14px;color:#4D5163;text-align:center">{{ l.starter }}</span>
@@ -1041,7 +1034,7 @@
         <h2 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:0 0 20px">Questions fréquentes</h2>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:18px">
           <sc-for list="{{ faq }}" as="f" hint-placeholder-count="4">
-            <div data-reveal style="border:1px solid #E4E7EF;border-radius:12px;padding:24px;background:#fff;transition:border-color .18s,box-shadow .18s" style-hover="border-color:#1E499B;box-shadow:0 12px 26px rgba(0,17,54,.09)">
+            <div data-reveal style="border:1px solid transparent;border-radius:12px;padding:24px;background:#FAFBFE;transition:border-color .18s,box-shadow .18s" style-hover="border-color:#1E499B;box-shadow:0 12px 26px rgba(0,17,54,.09)">
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 9px">{{ f.q }}</h3>
               <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">{{ f.r }}</p>
             </div>
@@ -1055,7 +1048,7 @@
   <!-- ══════ BOUTIQUE ══════ -->
   <sc-if value="{{ estBoutique }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Boutique">
-    <section style="background:radial-gradient(900px 400px at 20% 0%,#FFF3E4,#F4F5F8 70%);border-bottom:1px solid #E4E7EF">
+    <section style="background:radial-gradient(900px 400px at 20% 0%,#FFF3E4,#F4F5F8 70%)">
       <div style="max-width:1170px;margin:0 auto;padding:48px 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center">
         <div>
           <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #F5DCB8;color:#C24E00;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-shop"></use></svg>Boutique du centre</span>
@@ -1087,7 +1080,7 @@
 
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
           <sc-for list="{{ manuels }}" as="m" hint-placeholder-count="8">
-            <article data-reveal style="background:#fff;border:1px solid #E4E7EF;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;position:relative;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:{{ m.teinte }};transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,17,54,.12)">
+            <article data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;position:relative;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:{{ m.teinte }};transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,17,54,.12)">
               <sc-if value="{{ m.etiquette }}" hint-placeholder-val="{{ false }}">
                 <span style="position:absolute;top:13px;right:13px;z-index:2;background:{{ m.etiquetteFond }};color:#fff;font:600 11px Poppins,sans-serif;letter-spacing:.7px;text-transform:uppercase;padding:5px 11px;border-radius:100px;box-shadow:0 6px 16px rgba(0,17,54,.06)">{{ m.etiquette }}</span>
               </sc-if>
@@ -1101,19 +1094,35 @@
                 <h3 style="font:600 16px/23px Poppins,sans-serif;color:#001136;margin:0 0 7px">{{ m.titre }}</h3>
                 <p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:#6E7385">{{ m.type }}</p>
                 <div style="display:flex;align-items:center;gap:5px;margin-bottom:16px">
+                  <!-- Les etoiles ne se peignent que si une note REELLE existe.
+                       Elles etaient dessinees en dur, 4 sur 5, sous chaque
+                       carte : une note inventee sur un produit que personne
+                       n'avait encore note. -->
+                  <sc-if value="{{ m.note }}">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFC93C" stroke="none" aria-hidden="true"><use href="#lc-star"></use></svg>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFC93C" stroke="none" aria-hidden="true"><use href="#lc-star"></use></svg>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFC93C" stroke="none" aria-hidden="true"><use href="#lc-star"></use></svg>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFC93C" stroke="none" aria-hidden="true"><use href="#lc-star"></use></svg>
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="#E4E7EF" stroke="none" aria-hidden="true"><use href="#lc-star"></use></svg>
-                  <small style="font:400 12px Poppins,sans-serif;color:#6E7385;margin-left:4px">{{ m.exos }}</small>
+                  </sc-if>
+                  <sc-if value="{{ m.exos }}">
+                  <small style="font:400 12px Poppins,sans-serif;color:#6E7385">{{ m.exos }}</small>
+                  </sc-if>
                 </div>
-                <div style="margin-top:auto;padding-top:15px;border-top:1px solid #EFF2F7;display:flex;align-items:center;justify-content:space-between;gap:10px">
+                <div style="margin-top:auto;padding-top:15px;display:flex;align-items:center;justify-content:space-between;gap:10px">
                   <span style="display:flex;flex-direction:column;line-height:1.25">
                     <b style="font:600 19px Poppins,sans-serif;color:#001136;white-space:nowrap">{{ m.prix }}</b>
-                    <small style="font:400 12px Poppins,sans-serif;color:#6E7385">corrigés en ligne inclus</small>
+                    <small style="font:400 12px Poppins,sans-serif;color:#6E7385">{{ m.mention }}</small>
                   </span>
-                  <button type="button" onClick="{{ m.commander }}" aria-label="Commander {{ m.titre }}" style="display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;border:0;font:600 13.5px Poppins,sans-serif;cursor:pointer;box-shadow:0 6px 16px rgba(242,101,0,.28);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,101,0,.4)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-basket"></use></svg>Commander</button>
+<sc-if value="{{ m.papier }}">
+                                    <button type="button" onClick="{{ m.commander }}" aria-label="Commander {{ m.titre }}" style="display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;border:0;font:600 13.5px Poppins,sans-serif;cursor:pointer;box-shadow:0 6px 16px rgba(242,101,0,.28);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,101,0,.4)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-basket"></use></svg>Commander</button>
+                  </sc-if>
+                  <!-- Un livre vendu en lecture en ligne ne se « commande » pas :
+                       il s'ouvre. Le lien mene a sa fiche dans l'application,
+                       ou l'apercu gratuit commence sans compte. -->
+                  <sc-if value="{{ m.lien }}">
+                  <a href="{{ m.lien }}" aria-label="Lire {{ m.titre }} en ligne" style="display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:linear-gradient(135deg,#1E499B,#0C2A6A);color:#fff;font:600 13.5px Poppins,sans-serif;box-shadow:0 6px 16px rgba(30,73,155,.28);white-space:nowrap;transition:transform .18s,box-shadow .18s" style-hover="color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 10px 22px rgba(30,73,155,.4)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg>Lire en ligne</a>
+                  </sc-if>
                 </div>
               </div>
             </article>
@@ -1165,7 +1174,7 @@
     <section style="padding:56px 0 0">
       <div style="max-width:1170px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
         <sc-for list="{{ livraison }}" as="lv" hint-placeholder-count="4">
-          <div data-reveal style="background:#fff;border:1px solid #E4E7EF;border-radius:14px;padding:24px 22px;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ lv.teinte }}">
+          <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-4px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ lv.teinte }}">
             <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid {{ lv.teinte }};color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ lv.ico }}"></use></svg></span>
             <h3 style="font:600 16.5px/24px Poppins,sans-serif;color:#001136;margin:0 0 7px">{{ lv.titre }}</h3>
             <p style="margin:0;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty">{{ lv.desc }}</p>
@@ -1192,7 +1201,7 @@
   <!-- ══════ PARENTS ══════ -->
   <sc-if value="{{ estParents }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Parents">
-    <section style="background:radial-gradient(900px 400px at 25% 0%,#E2F4F5,#F4F5F8 70%);border-bottom:1px solid #E4E7EF">
+    <section style="background:radial-gradient(900px 400px at 25% 0%,#E2F4F5,#F4F5F8 70%)">
       <div style="max-width:1170px;margin:0 auto;padding:48px 24px">
         <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #CBE7E9;color:#0E7C86;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-users"></use></svg>Espace Parents</span>
         <h1 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;max-width:780px;text-wrap:pretty">Ne découvrez plus ses notes au bulletin du trimestre</h1>
@@ -1202,13 +1211,13 @@
 
     <section style="padding:56px 0 0">
       <div style="max-width:1170px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1.15fr .85fr;gap:34px;align-items:start">
-        <div style="border:1px solid #E4E7EF;border-radius:14px;overflow:hidden">
-          <div style="background:#F4F5F8;padding:15px 22px;display:grid;grid-template-columns:1fr 1.3fr;gap:16px;border-bottom:1px solid #E4E7EF">
+        <div style="border:1px solid transparent;border-radius:14px;overflow:hidden">
+          <div style="background:#F4F5F8;padding:15px 22px;display:grid;grid-template-columns:1fr 1.3fr;gap:16px">
             <span style="font:600 12px Poppins,sans-serif;color:#001136;letter-spacing:.7px;text-transform:uppercase">Votre inquiétude</span>
             <span style="font:600 12px Poppins,sans-serif;color:#0E7C86;letter-spacing:.7px;text-transform:uppercase">Ce que fait VÉRITAS</span>
           </div>
           <sc-for list="{{ parentsLignes }}" as="l" hint-placeholder-count="5">
-            <div style="padding:17px 22px;display:grid;grid-template-columns:1fr 1.3fr;gap:16px;border-bottom:1px solid #EFF2F7;background:#fff">
+            <div style="padding:17px 22px;display:grid;grid-template-columns:1fr 1.3fr;gap:16px;background:#fff">
               <span style="font:500 14.5px Poppins,sans-serif;color:#001136">{{ l.q }}</span>
               <span style="font-size:14.5px;line-height:1.65;color:#4D5163">{{ l.r }}</span>
             </div>
@@ -1224,7 +1233,7 @@
               <li style="display:flex;align-items:flex-start;gap:9px;font-size:14.5px;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:21px;height:21px;border-radius:50%;background:#007E11;display:inline-flex;align-items:center;justify-content:center;margin-top:1px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span>Vérification d'un certificat par code</li>
             </ul>
           </div>
-          <div style="background:#fff;border:1px solid #E4E7EF;border-radius:14px;padding:24px">
+          <div style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px">
             <span style="width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:13px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"></use></svg></span>
             <h3 style="font:600 18px/27px Poppins,sans-serif;color:#001136;margin:0 0 8px">Cagnotte de scolarité</h3>
             <p style="margin:0 0 14px;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Un parent, un oncle ou un parrain installé à l'étranger règle une tranche par carte ou PayPal. Le reçu numéroté part automatiquement aux deux parties.</p>
@@ -1238,7 +1247,7 @@
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
         <div style="background:#F4F5F8;border-radius:16px;padding:38px 32px;display:grid;grid-template-columns:repeat(3,1fr);gap:26px">
           <sc-for list="{{ parentsCartes }}" as="c" hint-placeholder-count="3">
-            <div data-reveal style="background:#fff;border:1px solid #E4E7EF;border-radius:12px;padding:24px">
+            <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px">
               <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid {{ c.teinte }};color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ c.ico }}"></use></svg></span>
               <h3 style="font:600 17px/26px Poppins,sans-serif;color:#001136;margin:0 0 8px">{{ c.titre }}</h3>
               <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">{{ c.desc }}</p>
@@ -1265,13 +1274,13 @@
   <!-- ══════ E-LEARNING ══════ -->
   <sc-if value="{{ estElearning }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="E-Learning">
-    <section style="background:radial-gradient(900px 400px at 30% 0%,#EAF1FF,#F4F5F8 70%);border-bottom:1px solid #E4E7EF">
+    <section style="background:radial-gradient(900px 400px at 30% 0%,#EAF1FF,#F4F5F8 70%)">
       <div style="max-width:1170px;margin:0 auto;padding:48px 24px">
         <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #DBE8FE;color:#1E499B;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-book"></use></svg>Catalogue E-Learning</span>
         <h1 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;max-width:800px;text-wrap:pretty">Tout le programme, séquence par séquence, sans rien chercher ailleurs</h1>
         <p style="margin:0 0 26px;font:400 17px/1.65 Poppins,sans-serif;color:#4D5163;max-width:660px;text-wrap:pretty">Choisissez la classe, puis la matière. Chaque séquence contient la leçon, les exercices, le corrigé et une épreuve d'entraînement.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;max-width:820px">
-          <label style="flex:1;min-width:280px;display:flex;align-items:center;gap:10px;background:#fff;border:1px solid #E4E7EF;border-radius:10px;padding:13px 16px">
+          <label style="flex:1;min-width:280px;display:flex;align-items:center;gap:10px;background:#FAFBFE;border:1px solid transparent;border-radius:10px;padding:13px 16px">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6E7385" stroke-width="2" stroke-linecap="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-search"></use></svg>
             <input type="text" placeholder="Chercher une leçon, une œuvre, une épreuve…" style="border:0;outline:0;flex:1;font:400 15px Poppins,sans-serif;color:#001136;background:transparent">
           </label>
@@ -1288,7 +1297,7 @@
         </div>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
           <sc-for list="{{ matieres }}" as="m" hint-placeholder-count="8">
-            <a href="#matiere" data-reveal style="background:#fff;border:1px solid #E4E7EF;border-radius:12px;padding:22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#1E499B;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09);text-decoration:none">
+            <a href="#matiere" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#1E499B;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09);text-decoration:none">
               <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid {{ m.teinte }};color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ m.ico }}"></use></svg></span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 5px">{{ m.nom }}</h3>
               <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:#4D5163">{{ m.desc }}</p>
@@ -1305,7 +1314,7 @@
         <p style="margin:0 0 22px;font-size:15.5px;color:#4D5163">Étude intégrale : résumé par chapitre, personnages, axes de lecture, contrôles et sujets de dissertation.</p>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
           <sc-for list="{{ oeuvres }}" as="o" hint-placeholder-count="4">
-            <div data-reveal style="border:1px solid #E4E7EF;border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#5B4FA8;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09)">
+            <div data-reveal style="border:1px solid transparent;border-radius:12px;overflow:hidden;background:#FAFBFE;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#5B4FA8;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09)">
               <div style="height:150px;background:{{ o.fond }};position:relative;overflow:hidden">
                 <img src="assets/photo-manuels.png" alt="Étude de l'œuvre {{ o.titre }}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:{{ o.cadrage }};display:block;animation:vzoomSlow 22s ease-in-out infinite alternate">
                 <span aria-hidden="true" style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,17,54,0),rgba(0,17,54,.28))"></span>
@@ -1341,7 +1350,7 @@
   <!-- ══════ ENSEIGNANTS ══════ -->
   <sc-if value="{{ estEnseignants }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Enseignants">
-    <section style="background:radial-gradient(900px 400px at 28% 0%,#FBE9F1,#F4F5F8 70%);border-bottom:1px solid #E4E7EF">
+    <section style="background:radial-gradient(900px 400px at 28% 0%,#FBE9F1,#F4F5F8 70%)">
       <div style="max-width:1170px;margin:0 auto;padding:48px 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center">
         <div>
           <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #F1D3E1;color:#B03A6E;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-presentation"></use></svg>Réseau enseignants</span>
@@ -1362,7 +1371,7 @@
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
           <sc-for list="{{ ensCartes }}" as="c" hint-placeholder-count="4">
-            <div data-reveal style="background:#fff;border:1px solid #E4E7EF;border-radius:12px;padding:24px 22px;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#B03A6E;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09)">
+            <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px 22px;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#B03A6E;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09)">
               <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid {{ c.teinte }};color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ c.ico }}"></use></svg></span>
               <h3 style="font:600 17px/26px Poppins,sans-serif;color:#001136;margin:0 0 8px">{{ c.titre }}</h3>
               <p style="margin:0;font-size:14px;line-height:1.7;color:#4D5163;text-wrap:pretty">{{ c.desc }}</p>
@@ -1391,7 +1400,7 @@
 
     <section style="padding:56px 0 0">
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
-        <div style="border:1px solid #E4E7EF;border-radius:14px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center">
+        <div style="border:1px solid transparent;border-radius:14px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center">
           <div>
             <h2 style="font:600 24px/34px Poppins,sans-serif;color:#001136;margin:0 0 10px">Ce que le centre attend</h2>
             <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px">
@@ -1480,7 +1489,7 @@
   <!-- ══════ PAIEMENT ══════ -->
   <sc-if value="{{ estPaiement }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Paiement">
-    <section style="background:radial-gradient(900px 400px at 50% 0%,#EAF1FF,#F4F5F8 70%);border-bottom:1px solid #E4E7EF">
+    <section style="background:radial-gradient(900px 400px at 50% 0%,#EAF1FF,#F4F5F8 70%)">
       <div style="max-width:1170px;margin:0 auto;padding:40px 24px 34px">
         <button type="button" onClick="{{ goBoutique }}" style="display:inline-flex;align-items:center;gap:7px;background:none;border:0;cursor:pointer;font:500 14px Poppins,sans-serif;color:#1E499B;padding:0;margin-bottom:20px;transition:gap .18s" style-hover="gap:11px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(180deg)" aria-hidden="true"><use href="#lc-arrow-right"></use></svg>Retour à la boutique</button>
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
@@ -1514,7 +1523,7 @@
       <div style="max-width:1170px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:1.35fr .65fr;gap:26px;align-items:start">
 
         <div style="display:flex;flex-direction:column;gap:22px">
-          <div style="background:#fff;border:1px solid #E4E7EF;border-radius:18px;padding:28px 30px">
+          <div style="background:#FAFBFE;border:1px solid transparent;border-radius:18px;padding:28px 30px">
             <h2 style="font:600 20px/29px Poppins,sans-serif;color:#001136;margin:0 0 5px">Choisissez votre moyen de paiement</h2>
             <p style="margin:0 0 22px;font-size:14.5px;line-height:1.65;color:#6E7385">Aucun frais supplémentaire côté famille, quel que soit le canal.</p>
             <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
@@ -1533,7 +1542,7 @@
             </div>
           </div>
 
-          <div style="background:#fff;border:1px solid #E4E7EF;border-radius:18px;padding:28px 30px">
+          <div style="background:#FAFBFE;border:1px solid transparent;border-radius:18px;padding:28px 30px">
             <h2 style="font:600 20px/29px Poppins,sans-serif;color:#001136;margin:0 0 22px">{{ titreFormulaire }}</h2>
             <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
               <sc-for list="{{ champsPaiement }}" as="cp" hint-placeholder-count="4">
@@ -1541,7 +1550,7 @@
                   <span style="font:500 13px Poppins,sans-serif;color:#001136">{{ cp.label }}</span>
                   <span style="position:relative;display:flex;align-items:center">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#9BA6BE" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="position:absolute;left:14px;pointer-events:none" aria-hidden="true"><use href="{{ cp.ico }}"></use></svg>
-                    <input type="text" placeholder="{{ cp.exemple }}" style="width:100%;border:1.5px solid #E4E7EF;border-radius:12px;padding:13px 14px 13px 41px;font:400 14.5px Poppins,sans-serif;color:#001136;outline:0;background:#FAFBFE;transition:border-color .18s,background .18s" style-focus="border-color:#1E499B;background:#fff">
+                    <input type="text" placeholder="{{ cp.exemple }}" style="width:100%;border:1.5px solid transparent;border-radius:12px;padding:13px 14px 13px 41px;font:400 14.5px Poppins,sans-serif;color:#001136;outline:0;background:#FAFBFE;transition:border-color .18s,background .18s" style-focus="border-color:#1E499B;background:#fff">
                   </span>
                 </label>
               </sc-for>
@@ -1552,7 +1561,7 @@
             </div>
           </div>
 
-          <div style="background:#fff;border:1px solid #E4E7EF;border-radius:18px;padding:28px 30px">
+          <div style="background:#FAFBFE;border:1px solid transparent;border-radius:18px;padding:28px 30px">
             <h2 style="font:600 20px/29px Poppins,sans-serif;color:#001136;margin:0 0 5px">Où livrer votre commande ?</h2>
             <p style="margin:0 0 22px;font-size:14.5px;line-height:1.65;color:#6E7385">Livraison à Douala et Yaoundé sous 48 h, retrait gratuit au centre.</p>
             <div style="display:flex;flex-direction:column;gap:12px">
@@ -1573,8 +1582,8 @@
         </div>
 
         <div style="position:sticky;top:88px;display:flex;flex-direction:column;gap:16px">
-          <div style="background:#fff;border:1px solid #E4E7EF;border-radius:18px;overflow:hidden">
-            <div style="background:#F4F6FB;padding:18px 22px;border-bottom:1px solid #E9ECF3">
+          <div style="background:#FAFBFE;border:1px solid transparent;border-radius:18px;overflow:hidden">
+            <div style="background:#F4F6FB;padding:18px 22px">
               <b style="font:600 16.5px Poppins,sans-serif;color:#001136">Récapitulatif</b>
             </div>
             <div style="padding:20px 22px;display:flex;flex-direction:column;gap:16px">
@@ -1586,12 +1595,12 @@
                   <small style="font:500 12.5px Poppins,sans-serif;color:#007E11">Corrigés en ligne inclus</small>
                 </span>
               </div>
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid #EFF2F7;border-bottom:1px solid #EFF2F7">
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0">
                 <span style="font:500 13.5px Poppins,sans-serif;color:#4D5163">Quantité</span>
                 <span style="display:flex;align-items:center;gap:10px">
-                  <button type="button" onClick="{{ retirerArticle }}" aria-label="Retirer" style="width:30px;height:30px;border-radius:10px;border:1px solid #E4E7EF;background:#fff;color:#4D5163;cursor:pointer;font:400 17px Poppins,sans-serif;line-height:1;transition:border-color .18s,color .18s" style-hover="border-color:#1E499B;color:#1E499B">−</button>
+                  <button type="button" onClick="{{ retirerArticle }}" aria-label="Retirer" style="width:30px;height:30px;border-radius:10px;border:1px solid transparent;background:#FAFBFE;color:#4D5163;cursor:pointer;font:400 17px Poppins,sans-serif;line-height:1;transition:border-color .18s,color .18s" style-hover="border-color:#1E499B;color:#1E499B">−</button>
                   <b style="font:600 15px Poppins,sans-serif;color:#001136;min-width:18px;text-align:center">{{ quantite }}</b>
-                  <button type="button" onClick="{{ ajouterArticle }}" aria-label="Ajouter" style="width:30px;height:30px;border-radius:10px;border:1px solid #E4E7EF;background:#fff;color:#4D5163;cursor:pointer;font:400 17px Poppins,sans-serif;line-height:1;transition:border-color .18s,color .18s" style-hover="border-color:#1E499B;color:#1E499B">+</button>
+                  <button type="button" onClick="{{ ajouterArticle }}" aria-label="Ajouter" style="width:30px;height:30px;border-radius:10px;border:1px solid transparent;background:#FAFBFE;color:#4D5163;cursor:pointer;font:400 17px Poppins,sans-serif;line-height:1;transition:border-color .18s,color .18s" style-hover="border-color:#1E499B;color:#1E499B">+</button>
                 </span>
               </div>
               <sc-for list="{{ lignesTotal }}" as="lt" hint-placeholder-count="3">
@@ -1600,7 +1609,7 @@
                   <span style="font:{{ lt.graisse }} 13.5px Poppins,sans-serif;color:{{ lt.couleur }};white-space:nowrap">{{ lt.montant }}</span>
                 </span>
               </sc-for>
-              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-top:14px;border-top:2px solid #EFF2F7">
+              <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-top:14px">
                 <b style="font:600 16px Poppins,sans-serif;color:#001136">Total à payer</b>
                 <b style="font:600 26px Poppins,sans-serif;color:#C24E00;white-space:nowrap">{{ totalPayer }}</b>
               </div>
@@ -1621,7 +1630,7 @@
             </ul>
           </div>
 
-          <a href="#aide" style="display:flex;align-items:center;gap:12px;background:#fff;border:1px solid #E4E7EF;border-radius:16px;padding:17px 19px;transition:border-color .18s,transform .18s" style-hover="border-color:#007E11;text-decoration:none;transform:translateY(-2px)">
+          <a href="#aide" style="display:flex;align-items:center;gap:12px;background:#FAFBFE;border:1px solid transparent;border-radius:16px;padding:17px 19px;transition:border-color .18s,transform .18s" style-hover="border-color:#007E11;text-decoration:none;transform:translateY(-2px)">
             <span style="width:42px;height:42px;border-radius:12px;background:#E7F7EC;color:#007E11;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"></use></svg></span>
             <span style="display:flex;flex-direction:column;line-height:1.4">
               <b style="font:600 14.5px Poppins,sans-serif;color:#001136">Un souci de paiement ?</b>
@@ -1647,7 +1656,7 @@
     </sc-if>
 
     <sc-if value="{{ traducteurOuvert }}" hint-placeholder-val="{{ false }}">
-      <div style="pointer-events:auto;width:288px;background:#fff;border:1px solid #E4E7EF;border-radius:16px;padding:18px;box-shadow:0 18px 40px rgba(0,17,54,.12);animation:vpop .32s cubic-bezier(.22,1,.36,1)">
+      <div style="pointer-events:auto;width:288px;background:#FAFBFE;border:1px solid transparent;border-radius:16px;padding:18px;box-shadow:0 18px 40px rgba(0,17,54,.12);animation:vpop .32s cubic-bezier(.22,1,.36,1)">
         <b style="display:flex;align-items:center;gap:9px;font:600 15px Poppins,sans-serif;color:#001136;margin-bottom:6px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0E7C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-languages"></use></svg>Langue du site</b>
         <small style="display:block;font:400 13px/1.6 Poppins,sans-serif;color:#6E7385;margin-bottom:14px">Sous-système francophone ou anglophone (GCE).</small>
         <div style="display:flex;flex-direction:column;gap:8px">
@@ -1658,7 +1667,7 @@
     </sc-if>
 
     <sc-if value="{{ iaOuverte }}" hint-placeholder-val="{{ false }}">
-      <div style="pointer-events:auto;width:min(290px,calc(100vw - 96px));background:#fff;border:1px solid #E4E7EF;border-radius:16px;overflow:hidden;box-shadow:0 18px 40px rgba(0,17,54,.12);animation:vpop .34s cubic-bezier(.22,1,.36,1)">
+      <div style="pointer-events:auto;width:min(290px,calc(100vw - 96px));background:#FAFBFE;border:1px solid transparent;border-radius:16px;overflow:hidden;box-shadow:0 18px 40px rgba(0,17,54,.12);animation:vpop .34s cubic-bezier(.22,1,.36,1)">
         <div style="background:linear-gradient(135deg,#5B4FA8,#2E2470);padding:11px 13px;display:flex;align-items:center;gap:9px">
           <span style="position:relative;width:34px;height:34px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 4px 12px rgba(0,0,0,.24)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"></use></svg><span aria-hidden="true" style="position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:#7BD99C;border:2px solid #4A3E92"></span></span>
           <span style="display:flex;flex-direction:column;line-height:1.25;flex:1;min-width:0">
@@ -1675,7 +1684,7 @@
         </div>
         <div style="padding:12px 13px;background:#FAFBFE">
           <div id="vrtIAMsgs" role="log" aria-live="polite" aria-label="Conversation avec le Professeur Ambassa" style="display:flex;flex-direction:column;gap:10px;max-height:240px;overflow-y:auto;margin-bottom:14px">
-            <div style="align-self:flex-start;max-width:92%;background:#fff;border:1px solid #EFF2F7;border-radius:12px;border-top-left-radius:4px;padding:13px 15px;font:400 14px/1.65 Poppins,sans-serif;color:#4D5163;text-wrap:pretty">Salut ! Sur quoi tu bloques ? Une méthode, un exercice, une œuvre — je t'explique la démarche, pas la réponse.</div>
+            <div style="align-self:flex-start;max-width:92%;background:#FAFBFE;border:1px solid transparent;border-radius:12px;border-top-left-radius:4px;padding:13px 15px;font:400 14px/1.65 Poppins,sans-serif;color:#4D5163;text-wrap:pretty">Salut ! Sur quoi tu bloques ? Une méthode, un exercice, une œuvre — je t'explique la démarche, pas la réponse.</div>
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px">
             <sc-for list="{{ suggestionsIA }}" as="sg" hint-placeholder-count="3">
@@ -1683,7 +1692,7 @@
             </sc-for>
           </div>
           <div style="display:flex;gap:8px">
-            <input id="vrtIAInput" type="text" enterkeyhint="send" autocomplete="off" placeholder="Pose ta question…" aria-label="Pose ta question au Professeur Ambassa" style="flex:1;min-width:0;border:1px solid #E4E7EF;border-radius:10px;padding:11px 13px;font:400 14px Poppins,sans-serif;color:#001136;outline:0;background:#fff">
+            <input id="vrtIAInput" type="text" enterkeyhint="send" autocomplete="off" placeholder="Pose ta question…" aria-label="Pose ta question au Professeur Ambassa" style="flex:1;min-width:0;border:1px solid transparent;border-radius:10px;padding:11px 13px;font:400 14px Poppins,sans-serif;color:#001136;outline:0;background:#FAFBFE">
             <button id="vrtIASend" type="button" onClick="{{ ambassaEnvoyer }}" aria-label="Envoyer" style="width:44px;border-radius:10px;border:0;background:linear-gradient(135deg,#7C6BD6,#5B4FA8);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .18s" style-hover="transform:translateY(-2px)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></button>
           </div>
           <small id="vrtIAQuota" style="display:block;margin-top:11px;font:400 12px Poppins,sans-serif;color:#6E7385">3 questions offertes par semaine · 30/jour avec le plan Pro</small>
@@ -1692,14 +1701,11 @@
     </sc-if>
 
     <div style="pointer-events:auto;display:flex;flex-direction:column;gap:10px;align-items:flex-end">
-      <button type="button" onClick="{{ basculerTheme }}" aria-label="Thème clair ou sombre" title="Thème clair / sombre" style="width:50px;height:50px;border-radius:16px;border:1px solid #E4E7EF;background:#fff;color:#4D5163;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s,color .18s" style-hover="transform:translateY(-3px) rotate(-8deg);box-shadow:0 12px 26px rgba(0,17,54,.09);color:#C24E00">
+      <button type="button" onClick="{{ basculerTheme }}" aria-label="Thème clair ou sombre" title="Thème clair / sombre" style="width:50px;height:50px;border-radius:16px;border:1px solid transparent;background:#FAFBFE;color:#4D5163;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s,color .18s" style-hover="transform:translateY(-3px) rotate(-8deg);box-shadow:0 12px 26px rgba(0,17,54,.09);color:#C24E00">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ icoTheme }}"></use></svg></button>
 
-      <button type="button" onClick="{{ basculerTraducteur }}" aria-label="Traducteur" title="Français / English" style="width:50px;height:50px;border-radius:16px;border:1px solid #E4E7EF;background:#fff;color:#0E7C86;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px);box-shadow:0 14px 30px rgba(14,124,134,.28)">
+      <button type="button" onClick="{{ basculerTraducteur }}" aria-label="Traducteur" title="Français / English" style="width:50px;height:50px;border-radius:16px;border:1px solid transparent;background:#FAFBFE;color:#0E7C86;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px);box-shadow:0 14px 30px rgba(14,124,134,.28)">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-languages"></use></svg></button>
-
-      <button type="button" onClick="{{ nouvelleCitation }}" aria-label="Citation motivante" title="Une citation pour tenir" style="width:50px;height:50px;border-radius:16px;border:1px solid #E4E7EF;background:#fff;color:#C24E00;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px) scale(1.05);box-shadow:0 14px 30px rgba(194,78,0,.28)">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"></use></svg></button>
 
       <button type="button" onClick="{{ basculerIA }}" aria-label="Professeur Ambassa" title="Professeur Ambassa" style="position:relative;width:62px;height:62px;border-radius:18px;border:0;background:linear-gradient(135deg,#7C6BD6,#5B4FA8);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(91,79,168,.44);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-4px) scale(1.05);box-shadow:0 18px 40px rgba(91,79,168,.55)">
         <span aria-hidden="true" style="position:absolute;inset:-5px;border-radius:18px;border:2px solid rgba(124,107,214,.4);animation:vpulse 2.8s ease-out infinite"></span>
@@ -1724,6 +1730,55 @@ class Component extends DCLogic {
       dec: 'The repetition opens the narrative on waiting, and the grandmother\u2019s proverb tips a private drama into a political one. Track that shift \u2014 it carries the whole satire of the novel.'
     }
   };
+
+  CATALOGUE_MANUELS = [
+    { niv: 'Roman', img: 'uploads/oeuvres/tubedigestif.jpg', cadrage: '50% 50%', teinte: '#C24E00', fondA: '#F3E7D8', fondB: '#FBF6EF', categorie: 'Litt\u00e9rature', etiquette: 'Nouveau', etiquetteFond: '#007E11', exos: '144 pages \u00b7 8 chapitres', lien: 'app.html#livre?id=tubedigestif', mention: 'lecture en ligne, sans t\u00e9l\u00e9chargement', titre: 'Le Tube digestif', type: 'Roman de Mythe Errant \u00b7 10 pages offertes', prix: '1 000 F', fond: 'repeating-linear-gradient(135deg,#F3E7D8 0 10px,#FBF6EF 10px 20px)' },
+    { niv: '6\u1d49', img: 'assets/photo-manuels.png', cadrage: '8% 50%', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 6\u1d49', type: 'Cahier \u00b7 463 exercices corrig\u00e9s', prix: '3 000 F', fond: 'repeating-linear-gradient(135deg,#E4EBF7 0 10px,#F2F5FB 10px 20px)' },
+    { niv: '5\u1d49', img: 'assets/photo-manuels.png', cadrage: '28% 50%', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 5\u1d49', type: 'Cahier \u00b7 443 exercices corrig\u00e9s', prix: '3 000 F', fond: 'repeating-linear-gradient(135deg,#E3F1EE 0 10px,#F1F8F6 10px 20px)' },
+    { niv: '4\u1d49', img: 'assets/photo-manuels.png', cadrage: '50% 50%', teinte: '#5B4FA8', fondA: '#ECE7F7', fondB: '#F6F3FC', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 4\u1d49', type: 'Cahier \u00b7 364 exercices corrig\u00e9s', prix: '3 000 F', fond: 'repeating-linear-gradient(135deg,#EEE9F8 0 10px,#F6F3FC 10px 20px)' },
+    { niv: '3\u1d49', img: 'assets/photo-manuels.png', cadrage: '72% 50%', teinte: '#C24E00', fondA: '#FBEBDB', fondB: '#FDF6EF', categorie: 'Sp\u00e9cial examen', etiquette: 'Best-seller', etiquetteFond: '#5B4FA8', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Sp\u00e9cial BEPC \u2014 Fran\u00e7ais', type: 'Cahier + annales \u00b7 476 exercices', prix: '4 000 F', fond: 'repeating-linear-gradient(135deg,#F3E7D8 0 10px,#FBF6EF 10px 20px)' },
+    { niv: '2\u207f\u1d48\u1d49', img: 'assets/photo-manuels.png', cadrage: '20% 50%', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 2\u207f\u1d48\u1d49', type: 'Cahier \u00b7 709 exercices corrig\u00e9s', prix: '3 500 F', fond: 'repeating-linear-gradient(135deg,#E4EBF7 0 10px,#F2F5FB 10px 20px)' },
+    { niv: '1\u02b3\u1d49', img: 'assets/photo-manuels.png', cadrage: '60% 50%', teinte: '#B03A6E', fondA: '#F7E4EC', fondB: '#FCF3F7', categorie: 'Sp\u00e9cial examen', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Sp\u00e9cial Probatoire \u2014 Fran\u00e7ais', type: 'Cahier + annales \u00b7 664 exercices', prix: '4 500 F', fond: 'repeating-linear-gradient(135deg,#F3E1EA 0 10px,#FBF3F7 10px 20px)' },
+    { niv: 'T\u02e1\u1d49', img: 'assets/photo-manuels.png', cadrage: '92% 50%', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Sp\u00e9cial examen', etiquette: 'Le plus vendu', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Sp\u00e9cial BAC \u2014 Fran\u00e7ais', type: 'Cahier + annales \u00b7 738 exercices', prix: '5 000 F', fond: 'repeating-linear-gradient(135deg,#E3F1EE 0 10px,#F1F8F6 10px 20px)' },
+    { niv: '3\u1d49 \u2192 T\u02e1\u1d49', img: 'assets/photo-manuels.png', cadrage: '50% 50%', teinte: '#5B4FA8', fondA: '#ECE7F7', fondB: '#F6F3FC', categorie: '\u00c9tude d\u2019\u0153uvre', etiquette: 'Nouveau', etiquetteFond: '#007E11', exos: 'Fiches + sujets', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Le Tube Digestif \u2014 \u00e9tude int\u00e9grale', type: '\u00c9tude d\u2019\u0153uvre \u00b7 fiches et sujets', prix: '2 500 F', fond: 'repeating-linear-gradient(135deg,#EEE9F8 0 10px,#F6F3FC 10px 20px)' }
+  ];
+
+  /* ── Boutique : les categories sortent du CATALOGUE, pas d'une liste ──────
+     La barre de filtres etait ecrite a la main (sept pastilles) et ne filtrait
+     rien ; trois de ses categories ne correspondaient a aucun article. Ici,
+     une categorie n'existe que si un titre la porte, et le compteur compte ce
+     qui est reellement affiche. Ajouter un manuel de mathematiques au
+     catalogue fera apparaitre sa pastille tout seul. */
+  get categoriesBoutique() {
+    const ICO = {
+      'Cahier d\u2019exercices': '#lc-book',
+      'Sp\u00e9cial examen': '#lc-clipboard',
+      '\u00c9tude d\u2019\u0153uvre': '#lc-bookopen',
+      'Litt\u00e9rature': '#lc-bookopen',
+      'Guide enseignant': '#lc-presentation'
+    };
+    const LIB = {
+      'Cahier d\u2019exercices': 'Cahiers d\u2019exercices',
+      'Sp\u00e9cial examen': 'Annales d\u2019examen',
+      '\u00c9tude d\u2019\u0153uvre': '\u00c9tudes d\u2019\u0153uvres',
+      'Litt\u00e9rature': 'Litt\u00e9rature',
+      'Guide enseignant': 'Guides enseignants'
+    };
+    const vues = [];
+    for (const m of this.CATALOGUE_MANUELS) {
+      const c = String(m.categorie || '').trim();
+      if (c && vues.indexOf(c) < 0) vues.push(c);
+    }
+    return [{ cle: '', nom: 'Tout le catalogue', ico: '#lc-basket' }].concat(
+      vues.map(c => ({ cle: c, nom: LIB[c] || c, ico: ICO[c] || '#lc-book' })));
+  }
+
+  get manuelsFiltres() {
+    const cats = this.categoriesBoutique;
+    const i = Math.min(Math.max((this.state && this.state.filtre) || 0, 0), cats.length - 1);
+    const cle = cats[i].cle;
+    return cle ? this.CATALOGUE_MANUELS.filter(m => m.categorie === cle) : this.CATALOGUE_MANUELS;
+  }
 
   CITATIONS = [
     { t: 'Le g\u00e9nie, c\u2019est un pour cent d\u2019inspiration et quatre-vingt-dix-neuf pour cent de transpiration.', a: 'Thomas Edison' },
@@ -1769,9 +1824,9 @@ class Component extends DCLogic {
       [style*="color:#0C2A6A"]{color:#DCE6F8!important}
       [style*="color:#4D5163"],[style*="color:#6B5A42"]{color:#B6C2D8!important}
       [style*="color:#6E7385"],[style*="color:#9BA6BE"]{color:#8D9AB4!important}
-      [style*="border:1px solid #E4E7EF"],[style*="border:1px solid #EFF2F7"],[style*="border:1px solid #E9ECF3"]{border-color:#24334F!important}
-      [style*="border-bottom:1px solid #E4E7EF"],[style*="border-bottom:1px solid #EFF2F7"]{border-bottom-color:#24334F!important}
-      [style*="border-top:1px solid #EFF2F7"]{border-top-color:#24334F!important}
+      [style*="border:1px solid transparent"],[style*="border:1px solid transparent"],[style*="border:1px solid transparent"]{border-color:#24334F!important}
+      [style*=""],[style*=""]{border-bottom-color:#24334F!important}
+      [style*=""]{border-top-color:#24334F!important}
       [style*="border-left:4px solid"]{border-left-color:#FFC93C!important}
       input,input::placeholder{color:#C7D2E6!important}
     `;
@@ -1998,18 +2053,17 @@ class Component extends DCLogic {
       ],
 
       // ── Boutique ──
-      nbManuels: '8',
+      /* Le compteur etait ecrit « 9 » a la main pour huit titres, et la barre
+         de filtres ne filtrait rien : cliquer « Mathematiques » repeignait la
+         pastille et laissait la meme grille (mesure du 19/08/2026 : zone
+         identique au caractere pres). Trois des sept categories ne
+         correspondaient d'ailleurs a aucun article du catalogue. On lit donc
+         desormais les CATEGORIES DANS LE CATALOGUE : une categorie sans titre
+         n'apparait pas, et le compteur compte ce qui est vraiment affiche. */
+      nbManuels: String(this.manuelsFiltres.length),
       filtres: (() => {
-        const f = [
-          { nom: 'Tout le catalogue', ico: '#lc-basket' },
-          { nom: 'Cahiers d\u2019exercices', ico: '#lc-book' },
-          { nom: '\u00c9tudes d\u2019\u0153uvres', ico: '#lc-bookopen' },
-          { nom: 'Guides enseignants', ico: '#lc-presentation' },
-          { nom: 'Annales d\u2019examen', ico: '#lc-clipboard' },
-          { nom: 'Math\u00e9matiques', ico: '#lc-calculator' },
-          { nom: 'PCT & SVT', ico: '#lc-atom' }
-        ];
-        const actif = this.state.filtre || 0;
+        const f = this.categoriesBoutique;
+        const actif = Math.min(Math.max(this.state.filtre || 0, 0), f.length - 1);
         return f.map((x, i) => ({
           nom: x.nom, ico: x.ico,
           aller: () => this.setState({ filtre: i }),
@@ -2313,17 +2367,7 @@ class Component extends DCLogic {
         { q: 'Les corrig\u00e9s gratuits vont-ils devenir payants ?', r: 'Non. Les corrig\u00e9s des cahiers imprim\u00e9s restent en acc\u00e8s libre : ils accompagnent un cahier d\u00e9j\u00e0 achet\u00e9.' },
         { q: 'Comment obtenir un re\u00e7u ?', r: 'Chaque paiement g\u00e9n\u00e8re un re\u00e7u num\u00e9rot\u00e9, imprimable, avec un QR de v\u00e9rification. Il arrive aussi par WhatsApp.' }
       ],
-      filtres: ['Tout le catalogue', 'Cahiers d\u2019exercices', '\u00c9tudes d\u2019\u0153uvres', 'Guides enseignants', 'Fran\u00e7ais', 'Math\u00e9matiques', 'PCT & SVT', 'Annales d\u2019examen'],
-      manuels: [
-        { niv: '6\u1d49', img: 'assets/photo-manuels.png', cadrage: '8% 50%', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '463 exercices', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 6\u1d49', type: 'Cahier \u00b7 463 exercices corrig\u00e9s', prix: '3 000 F', fond: 'repeating-linear-gradient(135deg,#E4EBF7 0 10px,#F2F5FB 10px 20px)' },
-        { niv: '5\u1d49', img: 'assets/photo-manuels.png', cadrage: '28% 50%', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '443 exercices', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 5\u1d49', type: 'Cahier \u00b7 443 exercices corrig\u00e9s', prix: '3 000 F', fond: 'repeating-linear-gradient(135deg,#E3F1EE 0 10px,#F1F8F6 10px 20px)' },
-        { niv: '4\u1d49', img: 'assets/photo-manuels.png', cadrage: '50% 50%', teinte: '#5B4FA8', fondA: '#ECE7F7', fondB: '#F6F3FC', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '364 exercices', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 4\u1d49', type: 'Cahier \u00b7 364 exercices corrig\u00e9s', prix: '3 000 F', fond: 'repeating-linear-gradient(135deg,#EEE9F8 0 10px,#F6F3FC 10px 20px)' },
-        { niv: '3\u1d49', img: 'assets/photo-manuels.png', cadrage: '72% 50%', teinte: '#C24E00', fondA: '#FBEBDB', fondB: '#FDF6EF', categorie: 'Sp\u00e9cial examen', etiquette: 'Best-seller', etiquetteFond: '#5B4FA8', exos: '476 exercices', commander: () => this._go('paiement'), titre: 'Sp\u00e9cial BEPC \u2014 Fran\u00e7ais', type: 'Cahier + annales \u00b7 476 exercices', prix: '4 000 F', fond: 'repeating-linear-gradient(135deg,#F3E7D8 0 10px,#FBF6EF 10px 20px)' },
-        { niv: '2\u207f\u1d48\u1d49', img: 'assets/photo-manuels.png', cadrage: '20% 50%', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '709 exercices', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 2\u207f\u1d48\u1d49', type: 'Cahier \u00b7 709 exercices corrig\u00e9s', prix: '3 500 F', fond: 'repeating-linear-gradient(135deg,#E4EBF7 0 10px,#F2F5FB 10px 20px)' },
-        { niv: '1\u02b3\u1d49', img: 'assets/photo-manuels.png', cadrage: '60% 50%', teinte: '#B03A6E', fondA: '#F7E4EC', fondB: '#FCF3F7', categorie: 'Sp\u00e9cial examen', etiquette: '', etiquetteFond: '#C24E00', exos: '664 exercices', commander: () => this._go('paiement'), titre: 'Sp\u00e9cial Probatoire \u2014 Fran\u00e7ais', type: 'Cahier + annales \u00b7 664 exercices', prix: '4 500 F', fond: 'repeating-linear-gradient(135deg,#F3E1EA 0 10px,#FBF3F7 10px 20px)' },
-        { niv: 'T\u02e1\u1d49', img: 'assets/photo-manuels.png', cadrage: '92% 50%', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Sp\u00e9cial examen', etiquette: 'Le plus vendu', etiquetteFond: '#C24E00', exos: '738 exercices', commander: () => this._go('paiement'), titre: 'Sp\u00e9cial BAC \u2014 Fran\u00e7ais', type: 'Cahier + annales \u00b7 738 exercices', prix: '5 000 F', fond: 'repeating-linear-gradient(135deg,#E3F1EE 0 10px,#F1F8F6 10px 20px)' },
-        { niv: '3\u1d49 \u2192 T\u02e1\u1d49', img: 'assets/photo-manuels.png', cadrage: '50% 50%', teinte: '#5B4FA8', fondA: '#ECE7F7', fondB: '#F6F3FC', categorie: '\u00c9tude d\u2019\u0153uvre', etiquette: 'Nouveau', etiquetteFond: '#007E11', exos: 'Fiches + sujets', commander: () => this._go('paiement'), titre: 'Le Tube Digestif \u2014 \u00e9tude int\u00e9grale', type: '\u00c9tude d\u2019\u0153uvre \u00b7 fiches et sujets', prix: '2 500 F', fond: 'repeating-linear-gradient(135deg,#EEE9F8 0 10px,#F6F3FC 10px 20px)' }
-      ],
+      manuels: this.manuelsFiltres,
       parentsLignes: [
         { q: '\u00ab Je ne sais pas ce qu\u2019il fait en classe. \u00bb', r: 'Les notes de chaque s\u00e9quence, mati\u00e8re par mati\u00e8re, avec la moyenne et la position dans la promotion.' },
         { q: '\u00ab Est-il all\u00e9 au cours ce matin ? \u00bb', r: 'Les absences et retards sont enregistr\u00e9s par l\u2019\u00e9tablissement et visibles le jour m\u00eame.' },

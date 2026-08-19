@@ -156,6 +156,10 @@
 
   /* ── Passage du jour : français / anglais ──────────────────────────────── */
   function majLangue() {
+    /* Garde-fou : la bascule est masquée dès qu'un passage du serveur est en
+       place, mais un appel direct à VRT.act('mettreEn') réécraserait le texte
+       affiché par la traduction du Tube Digestif. */
+    if (PDJ) return;
     var sc = D.scal[S.langue] || {};
     poser('passage1', sc.passage1 || '');
     poser('passage2', sc.passage2 || '');
@@ -279,6 +283,12 @@
       if (i < 0) return;
       S.filtre = i;
       rendre('filtres', D.filtres[i]);
+      /* La barre repeignait sa pastille active et s'arretait la : la grille
+         restait identique au caractere pres, compteur compris. On re-rend donc
+         AUSSI le catalogue et son compteur — c'est ce que le clic promet. */
+      if (D.manuels && D.manuels[i]) rendre('manuels', D.manuels[i]);
+      var sc = D.scal && D.scal['filtre' + i];
+      if (sc && sc.nbManuels !== undefined) poser('nbManuels', sc.nbManuels);
     },
     mp__choisir: function (el) {
       var i = indexDe(el, 'moyensPaiement');
@@ -316,8 +326,17 @@
     },
     fermerCitation: function () { S.citOn = false; panneau('vrtCit', false); },
     copierPassage: function () {
-      var sc = D.scal[S.langue] || {};
-      var txt = '« ' + sc.passage1 + ' ' + sc.passage2 + ' »\n— Le Tube Digestif, Alobwed’Epie\nPassage du jour · VÉRITAS';
+      /* Le titre et l'auteur étaient écrits en dur : depuis que l'extrait tourne
+         (voir chargerPassageDuJour), copier renvoyait à une œuvre qui n'était
+         plus celle affichée. On copie ce que le visiteur a sous les yeux. */
+      var txt;
+      if (PDJ) {
+        txt = '« ' + PDJ.texte + ' »\n— ' + PDJ.titre + (PDJ.auteur ? ', ' + PDJ.auteur : '')
+            + '\nPassage du jour · VÉRITAS';
+      } else {
+        var sc = D.scal[S.langue] || {};
+        txt = '« ' + sc.passage1 + ' ' + sc.passage2 + ' »\n— Le Tube Digestif, Alobwed’Epie\nPassage du jour · VÉRITAS';
+      }
       var fini = function () {
         poser('texteBoutonCopie', 'Copié !');
         setTimeout(function () { poser('texteBoutonCopie', 'Copier le passage'); }, 2400);
@@ -1011,6 +1030,254 @@
     }
   }
 
+  /* ══════════════════════════════════════════════════════════════════════
+     L'EXTRAIT DU JOUR CHANGE VRAIMENT DE JOUR
+     ──────────────────────────────────────────────────────────────────────
+     Constat de Jacques : « depuis que c'est en ligne, rien n'a changé ».
+     C'était exact, et pour deux raisons distinctes :
+
+       1. la DATE (« Extrait du 15 août ») est calculée par le transpileur au
+          moment de la construction. Elle se fige donc au jour du déploiement
+          et ne repart qu'au déploiement suivant ;
+       2. le PASSAGE vient de la maquette : un extrait unique du Tube Digestif,
+          écrit en dur, en français et en anglais.
+
+     L'application possède pourtant depuis longtemps un vrai moteur de passage
+     du jour (app.js, _pdjLoad) branché sur api/rag.php?src=oeuvres&daily=1 —
+     l'index des œuvres au programme, tirage DÉTERMINISTE par jour de l'année,
+     donc le même extrait pour tout le monde le même jour. La vitrine ne le
+     lisait pas. On la branche sur cette source-là, pas sur une nouvelle.
+
+     Principe inchangé (voir chargerPublic) : AMÉLIORATION PROGRESSIVE. Le
+     passage de la maquette RESTE dans le HTML — la page est complète, juste et
+     indexable sans JavaScript, et une coupure réseau ne vide pas l'encart. Le
+     serveur ne fait que le recouvrir.
+
+     La bascule Français / English DISPARAÎT quand le serveur répond, et ce
+     n'est pas un oubli : le corpus ne sert que du français, garder le bouton
+     promettrait une traduction qui n'existe pas.
+
+     Le décryptage, lui, est RÉÉCRIT par Ambassa pour le passage du jour (voir
+     chargerDecryptage). C'était le seul choix honnête : celui de la maquette
+     commente Le Tube Digestif, l'afficher sous un autre extrait publierait une
+     analyse fausse sous le nom d'un enseignant. Le masquer laissait un blanc ;
+     le faire écrire par le tuteur rend l'encart entier vivant.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  var PDJ = null;            // passage servi par le serveur ; null = maquette
+
+  function jourDeLAnnee() {
+    var d = new Date();
+    return Math.floor((d - new Date(d.getFullYear(), 0, 1)) / 86400000);
+  }
+
+  function motsDe(t) { return String(t || '').trim().split(/\s+/).filter(Boolean).length; }
+
+  /* Nettoyage repris MOT POUR MOT de app.js (_pdjCleanExtract) : ce n'est pas
+     de la duplication gratuite, c'est la même règle appliquée à la même source.
+     Elle porte une correction née en production — un extrait qui commence en
+     cours de phrase est recadré sur la phrase suivante, MAIS si ce recadrage
+     ampute le texte on garde l'original et on marque l'entrée par « […] ».
+     Sans ce garde-fou, un passage sans point interne se réduisait à son dernier
+     mot. Le texte de l'auteur reste mot pour mot dans tous les cas. */
+  function nettoyerExtrait(txt, maxLen) {
+    txt = String(txt || '').replace(/^[﻿«»"'\s]+|[«»"'\s]+$/g, '').replace(/\s+/g, ' ').trim();
+    if (!txt) return '';
+    if (!/^[A-ZÀ-ÖØ-Þ«—0-9]/.test(txt)) {
+      var origine = txt;
+      var m = txt.match(/[.!?…][»"')\s]*\s([A-ZÀ-ÖØ-Þ«—])/);
+      if (m) txt = txt.slice(txt.indexOf(m[0]) + m[0].length - 1).trim();
+      else { var cm = txt.search(/[A-ZÀ-ÖØ-Þ«—]/); if (cm > 0) txt = txt.slice(cm).trim(); }
+      if (motsDe(txt) < 70 || txt.length < origine.length * 0.6) txt = '[…] ' + origine;
+    }
+    maxLen = maxLen || 620;
+    if (txt.length > maxLen) {
+      var cut = txt.slice(0, maxLen);
+      var e = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('! '), cut.lastIndexOf('? '),
+                       cut.lastIndexOf('… '), cut.lastIndexOf('.»'), cut.lastIndexOf('!»'), cut.lastIndexOf('?»'));
+      txt = (e > maxLen * 0.5) ? txt.slice(0, e + 1).trim() : (cut.trim() + '…');
+    }
+    return txt;
+  }
+
+  /* Le cadre attend DEUX paragraphes (19 px puis 15,5 px). On coupe sur une
+     frontière de phrase proche du milieu ; sans point exploitable, tout part
+     dans le premier et le second reste vide — jamais une phrase tranchée. */
+  function couperEnDeux(txt) {
+    var cible = Math.floor(txt.length * 0.58), meilleur = -1;
+    var re = /[.!?…][»"')]*\s/g, m;
+    while ((m = re.exec(txt)) !== null) {
+      var fin = m.index + m[0].length;
+      if (fin >= txt.length - 20) break;
+      if (meilleur < 0 || Math.abs(fin - cible) < Math.abs(meilleur - cible)) meilleur = fin;
+    }
+    if (meilleur < 40) return [txt, ''];
+    return [txt.slice(0, meilleur).trim(), txt.slice(meilleur).trim()];
+  }
+
+  /* Titres du corpus : ce sont des noms de FICHIERS indexés. Même toilette que
+     dans l'application (_pdjCleanTitle) — extension, mentions de bibliothèque
+     et pseudonymes en @ n'ont rien à faire sous une citation. */
+  function titrePropre(t) {
+    t = String(t || '').replace(/\.(docx|epub|pdf|txt|md|html?)$/i, '');
+    t = t.split(/\s--\s/)[0];
+    t = t.replace(/@\w+/g, '').replace(/\((Z-Library|best)\)/gi, '').replace(/\s*\(\s*\)\s*/g, ' ');
+    return t.replace(/\s{2,}/g, ' ').trim();
+  }
+
+  /* « Œuvre au programme MINESEC » et « Anonyme » sont des étiquettes de
+     l'index, pas des auteurs. On ne les fait pas passer pour une signature. */
+  function auteurPropre(a) {
+    a = String(a || '').trim();
+    if (!a || a === 'Anonyme' || a.indexOf('programme') >= 0) return '';
+    return a;
+  }
+
+  /* Réécrit UN paramètre d'URL sans toucher aux autres. Les liens de partage
+     portent le passage encodé dans text= ou body= : ils doivent désigner
+     l'extrait réellement affiché, sans quoi le destinataire reçoit un texte
+     qu'il ne retrouvera nulle part sur la page. */
+  function remplacerParam(url, cle, valeur) {
+    var re = new RegExp('([?&]' + cle + '=)[^&]*');
+    return re.test(url) ? url.replace(re, '$1' + encodeURIComponent(valeur)) : url;
+  }
+
+  function majPartages(citation) {
+    var liens = document.querySelectorAll('[data-vrt-item="partages"]');
+    for (var i = 0; i < liens.length; i++) {
+      var h = liens[i].getAttribute('href') || '';
+      /* Le partage Facebook ne transporte qu'une URL (u=) : le réseau compose
+         lui-même son aperçu. Rien à réécrire, et surtout pas l'adresse. */
+      if (h.indexOf('facebook.com/sharer') >= 0) continue;
+      h = remplacerParam(h, 'text', citation);
+      h = remplacerParam(h, 'body', citation);
+      liens[i].setAttribute('href', h);
+    }
+  }
+
+  function appliquerPassage(p) {
+    var txt = nettoyerExtrait(p.extrait, 620);
+    var titre = titrePropre(p.titre);
+    var auteur = auteurPropre(p.auteur);
+    /* Plancher identique à celui de l'application : sous 70 mots, ce n'est plus
+       un passage, c'est une bribe. On garde alors celui de la maquette. */
+    if (!titre || motsDe(txt) < 70) return;
+
+    var duo = couperEnDeux(txt);
+    poser('passage1', duo[0]);
+    poser('passage2', duo[1]);
+    poser('passageAuteur', auteur || titre);
+    poser('passageSource', auteur ? titre : 'Œuvre au programme MINESEC');
+
+    /* La couverture perd sa mention « Étude d'œuvre … VÉRITAS » : le centre
+       publie un cahier d'étude pour quatre œuvres, pas pour les cent seize du
+       corpus. Annoncer le contraire vendrait un produit qui n'existe pas. */
+    poser('couvLabel', 'Œuvre au programme');
+    poser('couvTitre', titre);
+    poser('couvAuteur', auteur);
+    poser('couvClasse', 'Programme MINESEC');
+    poser('couvNom', titre);
+    poser('couvSous', auteur ? auteur + ' · œuvre au programme' : 'Œuvre au programme');
+
+    var zl = document.querySelector('[data-vrt-zone="langue"]');
+    if (zl) zl.hidden = true;
+
+    PDJ = { texte: txt, titre: titre, auteur: auteur };
+    majPartages('« ' + txt + ' » — ' + titre + (auteur ? ', ' + auteur : ''));
+    chargerDecryptage(PDJ);
+  }
+
+  /* ── Le décryptage du jour, écrit par Ambassa ───────────────────────────
+     Même appel que l'application (app.js, _pdjLoadExpl) : même prompt, même
+     clé `shared:'pdj'`. Ce dernier point est l'essentiel — le serveur génère
+     l'analyse UNE FOIS PAR JOUR et la sert à tout le monde SANS décompter le
+     moindre quota. Mettre une IA sur une page publique sans cette clé, c'est
+     un appel payant par visiteur ; avec elle, c'est un appel par jour.
+
+     Trois précautions reprises de l'application, chacune née d'une panne :
+       · cache localStorage par JOUR + titre — on ne rappelle pas le serveur à
+         chaque navigation interne ;
+       · délai maximal de 22 s (AbortController) : la chaîne IA peut enchaîner
+         plusieurs moteurs, l'encart ne doit pas rester en attente indéfinie ;
+       · les nœuds sont RE-CHERCHÉS dans les callbacks, jamais capturés avant
+         l'appel — écrire dans un nœud détaché n'affiche rien.
+     Si l'IA ne répond pas, le bloc se retire : mieux vaut pas d'analyse qu'une
+     analyse qui ne parle pas du texte affiché. */
+  function chargerDecryptage(p) {
+    var zone = document.querySelector('[data-vrt-zone="decryptage"]');
+    var cible = document.querySelector('[data-vrt-val="decryptage"]');
+    if (!zone || !cible) return;
+
+    var cle = 'vrt_vit_pdj_' + new Date().toISOString().slice(0, 10) + '_'
+            + String(p.titre || '').replace(/[^a-z0-9]/gi, '').slice(0, 30);
+    try {
+      var garde = localStorage.getItem(cle);
+      if (garde) { cible.textContent = garde; return; }
+    } catch (e) {}
+
+    var base = apiBase();
+    if (!base) { zone.hidden = true; return; }
+
+    cible.textContent = 'Le Professeur Ambassa relit ce passage…';
+
+    var ac = ('AbortController' in window) ? new AbortController() : null;
+    var fini = false;
+    var poserTexte = function (t) {
+      if (fini) return; fini = true;
+      var z = document.querySelector('[data-vrt-zone="decryptage"]');
+      var c = document.querySelector('[data-vrt-val="decryptage"]');
+      if (!z || !c) return;
+      if (t) { c.textContent = t; try { localStorage.setItem(cle, t); } catch (e) {} }
+      else { z.hidden = true; }
+    };
+    var minuteur = setTimeout(function () { try { ac && ac.abort(); } catch (e) {} poserTexte(''); }, 22000);
+
+    fetch(base + '/ia_proxy.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'omit',
+      signal: ac ? ac.signal : undefined,
+      body: JSON.stringify({
+        prompt: 'Passage de l\'œuvre "' + p.titre + '"' + (p.auteur ? ' de ' + p.auteur : '')
+              + ' (programme MINESEC camerounais) :\n« ' + p.texte.substring(0, 700) + ' »\n\n'
+              + 'Écris une MINI-ANALYSE de 2 ou 3 phrases, au ton IRONIQUE, RÉALISTE, COMIQUE et '
+              + 'DIDACTIQUE (un prof drôle, mordant et lucide qui adore son texte et le ramène au réel) : '
+              + 'fais comprendre ce qui se joue, situe brièvement le moment ou la partie dans l\'œuvre '
+              + 'UNIQUEMENT si tu en es sûr (sinon n\'invente AUCUN numéro de chapitre), et TERMINE par '
+              + 'une question taquine qui donne furieusement envie de lire la suite. Aucun spoiler. '
+              + 'Réponds en FRANÇAIS.',
+        sysPrompt: 'Tu es le Professeur Ambassa : prof de français camerounais drôle, ironique, '
+                 + 'cultivé, jamais ennuyeux. Tu réponds TOUJOURS en français.',
+        userId: 'pdj', plan: 'anon', shared: 'pdj'
+      })
+    })
+      .then(function (r) { return r.json(); })
+      .then(function (d) { clearTimeout(minuteur); poserTexte((d && d.text) ? String(d.text).trim() : ''); })
+      .catch(function () { clearTimeout(minuteur); poserTexte(''); });
+  }
+
+  function chargerPassageDuJour() {
+    /* La date ne dépend d'aucun serveur : on la corrige TOUJOURS, y compris
+       hors ligne. À elle seule elle règle le « rien n'a changé » le plus
+       visible — l'encart affichait la date du dernier déploiement. */
+    poser('dateDuJour', new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }));
+
+    var base = apiBase();
+    if (!base) return;                      // ouvert en file:// : pas d'API
+
+    /* Le jour de l'année voyage dans l'URL comme CLÉ DE CACHE : les réponses
+       sont servies avec une longue durée de vie, et sans lui un visiteur de
+       retour relirait celle de la veille. Le serveur, lui, tire sur sa propre
+       date — le paramètre ne décide de rien. */
+    fetch(base + '/rag.php?src=oeuvres&daily=1&j=' + jourDeLAnnee(), { credentials: 'omit' })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.ok || !d.passages || !d.passages.length) return;
+        appliquerPassage(d.passages[0] || {});
+      })
+      .catch(function () { /* hors ligne : l'encart garde le passage du build */ });
+  }
+
   function indexDe(el, region) {
     var item = el && el.closest('[data-vrt-item="' + region + '"]');
     if (!item) return -1;
@@ -1206,6 +1473,10 @@
        même raison que les actualités : rien de ce qui vient du réseau ne doit
        retarder l'affichage. La page reste juste et complète sans elles. */
     setTimeout(chargerPublic, 260);
+
+    /* L'extrait du jour part avec le même retard et pour la même raison : la
+       page est déjà juste sans lui. */
+    setTimeout(chargerPassageDuJour, 300);
 
     try {
       var t = localStorage.getItem('vrt_theme');
