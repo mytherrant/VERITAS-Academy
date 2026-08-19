@@ -36,6 +36,19 @@
 // configuration du serveur qui l'exécute.
 if (!defined('VRT_PRICE_ENFORCE')) define('VRT_PRICE_ENFORCE', 'strict');
 
+/* Les codes de livrets sont idempotents par un FICHIER (api/data/livret_codes.json),
+   pas par la base passee en argument. Ce test emet de vrais codes : sans bac a
+   sable, il ecrirait dans le registre de PRODUCTION — et refuserait de tourner
+   deux fois (« code deja emis pour cette reference »). On l'isole donc dans un
+   dossier temporaire, cree et vide a chaque execution. */
+$__lvDir = sys_get_temp_dir() . '/vrt_livret_test_' . getmypid();
+@mkdir($__lvDir, 0700, true);
+define('VRT_LIVRET_DIR', $__lvDir);
+register_shutdown_function(function () use ($__lvDir) {
+    foreach (glob($__lvDir . '/{,*/}*', GLOB_BRACE) ?: [] as $f) { if (is_file($f)) @unlink($f); }
+    @rmdir($__lvDir . '/livret_ventes'); @rmdir($__lvDir);
+});
+
 require_once __DIR__ . '/../api/_auth_lib.php';
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -99,6 +112,7 @@ function baseDeTest(): array {
         'visitorAccounts' => [['id' => 'acc_test', 'nom' => 'Testeur', 'plans' => []]],
         'promoCodes'      => [],   // vide par défaut : contrôle de prix au plus strict
         'partners'        => [['id' => 'pa1', 'nom' => 'Partenaire', 'status' => 'active', 'level' => 'bronze']],
+        'tarifs'          => ['livret' => 1500, 'livretGuide' => 5000, 'livretJours' => 0],
         'visitorOrders'   => [],
         'payments'        => [],
         'commissions'     => [],
@@ -209,6 +223,30 @@ $surfaces = [
         foreach ($db['payments'] ?? [] as $p) if ((int) ($p['mnt'] ?? 0) === 30000) $recette = true;
         return ($v['stat'] ?? '') === 'Payé' && $recette;
     }, 'attendu' => 'versement 2 soldé + recette créée'],
+
+    /* Livret en ligne — la surface qui manquait, et que le controle de
+       couverture (section 7c) signalait en rouge depuis sa mise en vente.
+       Sa preuve n'est pas « la fonction a renvoye changed » : c'est la VENTE
+       ecrite dans DB.livretVentes avec son code, la ou l'acheteur ira le
+       reclamer par api/livret.php (action « claim »). Un code emis mais non
+       trace, c'est un client qui a paye et qui n'a rien a saisir. */
+    'livret' => ['cible' => '6e:livret', 'prix' => 1500, 'preuve' => function ($db) {
+        $v = $db['livretVentes'][0] ?? null;
+        return $v && ($v['classe'] ?? '') === '6e' && ($v['kind'] ?? '') === 'livret'
+            && (int) ($v['quantite'] ?? 0) === 1 && trim((string) ($v['code'] ?? '')) !== ''
+            && ($v['statut'] ?? '') === 'Payé';
+    }, 'attendu' => 'vente tracee + code emis pour la 6e'],
+
+    /* Le PACK etablissement porte sa quantite DANS la cible (« 6e:livret:25 ») :
+       le serveur ne fait donc pas que verifier un montant, il le RECALCULE a
+       partir du nombre de codes et de la remise de volume. 25 codes a 1 500 F
+       moins 15 % = 31 875 F. Payer le prix d'un seul code ne doit pas en
+       ouvrir vingt-cinq. */
+    'livret_pack' => ['cible' => '6e:livret:25', 'prix' => 31875, 'preuve' => function ($db) {
+        $v = $db['livretVentes'][0] ?? null;
+        return $v && (int) ($v['quantite'] ?? 0) === 25 && ($v['classe'] ?? '') === '6e'
+            && count((array) ($v['codes'] ?? [])) === 25;
+    }, 'attendu' => '25 codes emis et traces'],
 
     'product' => ['cible' => 'prod1', 'prix' => 1000, 'preuve' => function ($db) {
         $o = $db['visitorOrders'][0] ?? null;
@@ -511,6 +549,91 @@ titre('8. Frais d\'inscription');
     ok('compte inconnu → aucun octroi',
        empty($r5['changed']), 'msg=' . ($r5['msg'] ?? ''));
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// 9. LECTURE DU DROIT — payer ouvre, et l'echeance referme
+//
+// Les huit sections precedentes verifient l'OCTROI : un paiement ecrit un
+// droit. Personne ne verifiait la LECTURE — vrt_account_active_plans() et
+// vrt_account_can_access(), les deux fonctions que content.php interroge
+// avant de livrer un octet. Le trou s'est paye : mesure du 19/08/2026, un
+// seul abonnement SANS accountId (ce qu'ecrit validerAbonnement des que la
+// souscription n'est pas faite par un visiteur connecte, et ce que produit
+// toute saisie manuelle a l'administration) suffisait a rendre l'expiration
+// inoperante pour TOUS les abonnes du meme plan : l'abonne expire recevait
+// 200 et les octets du fichier. Un abonnement ne vaut que pour son titulaire.
+// ════════════════════════════════════════════════════════════════════════════
+titre("9. Lecture du droit : l'echeance referme vraiment");
+
+(function () {
+    $now = (int) round(microtime(true) * 1000);
+    $base = function (array $abos) use ($now) {
+        return [
+            'visitorAccounts' => [
+                ['id' => 'accA', 'nom' => 'Abonne',  'plans' => ['pl1']],
+                ['id' => 'accB', 'nom' => 'Sans',    'plans' => []],
+            ],
+            'elearning' => [
+                'plans'       => [['id' => 'pl1', 'nom' => 'Premium', 'planTags' => ['premium']]],
+                'contenus'    => [['id' => 'ct1', 'titre' => 'Epreuve', 'plans' => ['pl1']]],
+                'abonnements' => $abos,
+            ],
+        ];
+    };
+    $abo = function (string $owner, string $statut, int $finMs) {
+        return ['id' => 'ab_' . $owner . $statut, 'accountId' => $owner, 'plan' => 'pl1',
+                'statut' => $statut, 'dateFinTs' => $finMs];
+    };
+    $peut = function (array $db, string $accId) {
+        foreach ($db['visitorAccounts'] as $a) if ($a['id'] === $accId) {
+            return vrt_account_can_access($a, $db['elearning']['contenus'][0], $db);
+        }
+        return false;
+    };
+
+    $dbOk = $base([$abo('accA', 'Active', $now + 30 * 86400000)]);
+    ok('abonnement en cours          → contenu servi', $peut($dbOk, 'accA'));
+
+    $dbExp = $base([$abo('accA', 'Active', $now - 86400000)]);
+    ok('abonnement expire            → contenu REFUSE', !$peut($dbExp, 'accA'));
+
+    $dbAnn = $base([$abo('accA', 'Annule', $now + 30 * 86400000)]);
+    ok('abonnement annule            → contenu REFUSE', !$peut($dbAnn, 'accA'));
+
+    ok('aucun plan sur le compte     → contenu REFUSE', !$peut($dbOk, 'accB'));
+
+    // Le coeur du correctif : un orphelin actif ne ressuscite personne.
+    $dbOrph = $base([
+        $abo('accA', 'Active', $now - 86400000),          // le sien, expire
+        ['id' => 'orph', 'accountId' => '', 'plan' => 'pl1', // celui de personne, actif
+         'statut' => 'Active', 'dateFinTs' => $now + 30 * 86400000],
+    ]);
+    ok('un abonnement SANS titulaire ne prolonge pas un expire',
+       !$peut($dbOrph, 'accA'),
+       "l'expiration est inoperante : un orphelin actif rouvre le contenu payant");
+
+    // …et l'octroi manuel de l'administration (plan pose sur le compte, aucun
+    // abonnement en face) reste servi : le correctif ne coupe personne.
+    $dbManuel = $base([]);
+    ok('octroi manuel admin (aucun abonnement) → contenu servi', $peut($dbManuel, 'accA'));
+
+    // Un contenu payant qui n'exige aucun plan ne s'ouvre pas « par defaut ».
+    $dbSansPlan = $base([$abo('accA', 'Active', $now + 30 * 86400000)]);
+    $dbSansPlan['elearning']['contenus'][0]['plans'] = [];
+    ok('contenu payant sans plan requis → REFUSE (fail-closed)', !$peut($dbSansPlan, 'accA'));
+
+    // Jeton : signature falsifiee, jeton perime, jeton revoque.
+    $accT = ['id' => 'accA', 'user' => 'a@t.cm', 'eid' => 'e1', 'plans' => ['pl1'], 'tokenVer' => 0];
+    $dbT  = $base([$abo('accA', 'Active', $now + 30 * 86400000)]);
+    $dbT['visitorAccounts'][0] = $accT;
+    $tok = vrt_issue_token($accT, 'visiteur');
+    ok('jeton valide                 → compte reconnu',
+       (vrt_verify_token($tok, $dbT)['acc']['id'] ?? '') === 'accA');
+    ok('jeton a la signature modifiee → refuse',
+       vrt_verify_token(substr($tok, 0, -2) . 'aa', $dbT) === null);
+    $dbRev = $dbT; $dbRev['visitorAccounts'][0]['tokenVer'] = 1;
+    ok('jeton revoque (tokenVer++)   → refuse', vrt_verify_token($tok, $dbRev) === null);
+})();
 
 // ════════════════════════════════════════════════════════════════════════════
 // BILAN

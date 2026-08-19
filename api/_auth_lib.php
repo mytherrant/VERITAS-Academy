@@ -68,6 +68,12 @@ if (!defined('VRT_AUTH_LIB')) {
         define('VRT_TOKEN_TTL', 7 * 24 * 3600); // 7 jours
     }
 
+    // Registre des codes de livrets en ligne. Chargé ICI parce que le paiement
+    // confirmé (vrt_grant_entitlement) doit pouvoir ÉMETTRE un code : c'est la
+    // seule fonction traversée par les quatre passerelles. La bibliothèque
+    // n'inclut rien en retour — pas de cycle — et lit VRT_HMAC_KEY à l'appel.
+    require_once __DIR__ . '/_livret_lib.php';
+
     // ── Base de données partagée (même fichier que db.php / student_data.php) ──
     function vrt_db_file(): string {
         return dirname(__DIR__) . '/data/veritas_db.json';
@@ -215,7 +221,17 @@ if (!defined('VRT_AUTH_LIB')) {
                 if (!is_array($a)) continue;
                 if ((string) ($a['plan'] ?? $a['planId'] ?? '') !== $pid) continue;
                 $owner = (string) ($a['accountId'] ?? $a['userId'] ?? '');
-                if ($accId !== '' && $owner !== '' && $owner !== $accId) continue; // abo d'un autre compte
+                /* Un abonnement SANS propriétaire ne parle de personne.
+                   Il en existe : validerAbonnement() écrit accountId:'' dès que la
+                   souscription n'est pas faite par un visiteur connecté, et les
+                   saisies manuelles de l'administration aussi. Tant qu'on les
+                   acceptait comme « l'abonnement de ce compte », UN SEUL
+                   orphelin actif rendait l'expiration inopérante pour TOUS les
+                   abonnés du même plan : l'abonné expiré et l'abonné annulé
+                   recevaient le contenu payant (mesuré : 200 + les octets du
+                   fichier). Un abonnement ne vaut que pour son titulaire. */
+                // L'orphelin (owner vide) tombe dans le meme filet : il n'est le titulaire de personne.
+                if ($accId !== '' && $owner !== $accId) continue;
                 $found = true;
                 $st = strtolower((string) ($a['statut'] ?? ''));
                 $bad = in_array($st, ['expiré', 'expire', 'annulé', 'annule', 'en attente', 'suspendu'], true);
@@ -274,10 +290,18 @@ if (!defined('VRT_AUTH_LIB')) {
     }
 
     // ── Rate-limit IP par fichier plat (réutilisable) ─────────────────────────
+    // 🔐 v2.0 — CETTE FONCTION ÉTAIT LA FAILLE DE FOND.
+    // Elle lisait X-Forwarded-For et CF-Connecting-IP AVANT REMOTE_ADDR. Or
+    // aucun proxy de confiance n'est devant veritas-school.com (LiteSpeed
+    // répond en direct) : ces deux en-têtes sont écrits par le client. Un
+    // robot qui les changeait à chaque appel obtenait un compteur neuf à
+    // chaque appel — TOUS les rate-limits bâtis dessus (livrets, codes
+    // enseignant, dépôts de demandes, quotas IA) étaient contournables par
+    // une ligne. On délègue désormais à vrt_real_ip(), qui ne fait confiance
+    // qu'à REMOTE_ADDR sauf proxy explicitement déclaré.
+    require_once __DIR__ . '/_sentinel.php';
     function vrt_client_ip(): string {
-        $ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-        $ip = explode(',', (string) $ip)[0];
-        return preg_replace('/[^0-9a-fA-F:.]/', '', $ip) ?: 'unknown';
+        return vrt_real_ip();
     }
     /** Renvoie true si la limite est DÉPASSÉE (caller doit alors répondre 429). */
     function vrt_rate_exceeded(string $prefix, int $maxPerMin): bool {
@@ -410,6 +434,33 @@ if (!defined('VRT_AUTH_LIB')) {
                 }
             }
             return null;
+        }
+
+        /* LIVRET EN LIGNE — tarif UNIQUE, et un prix de référence obligatoire.
+           Sans cette entrée, vrt_prix_catalogue rendrait null, le contrôle de
+           prix serait sauté (son comportement quand il ne connaît pas le tarif)
+           et n'importe qui débloquerait un manuel en payant 1 franc. Le montant
+           est réglable en base — DB.tarifs.livret — pour changer de tarif sans
+           redéploiement, avec 1 500 FCFA par défaut.
+           Le tarif ne dépend NI de la classe NI de la nature du document : le
+           `targetId` (« 6e:livret ») ne sert qu'à savoir quel code émettre. */
+        if ($intent === 'livret' || $intent === 'livret_pack') {
+            // targetId = « <classe>:<nature>[:<quantité>] », ex. « 6e:guide » ou
+            // « 6e:livret:25 ». La nature décide du tarif : le guide ouvre les
+            // corrigés complets et la console, il ne se vend pas au prix du livret.
+            $bout = explode(':', $targetId);
+            $slug = strtolower(trim((string) ($bout[0] ?? '')));
+            $kind = strtolower(trim((string) ($bout[1] ?? 'livret')));
+            if (!isset(vrt_livret_kinds()[$kind])) $kind = 'livret';
+            // Ouvrage inconnu du catalogue : on ne fabrique pas un prix pour un
+            // article qui n'existe pas — l'octroi le refusera de toute façon.
+            if (!isset(vrt_livret_classes()[$slug])) return null;
+            if ($intent === 'livret_pack') {
+                $n = (int) ($bout[2] ?? 0);
+                if ($n < 1) return null;   // pack sans quantité : on ne devine pas un prix
+                return vrt_livret_prix_pack($db, $kind, $n, $slug);
+            }
+            return vrt_livret_prix($db, $kind, $slug);
         }
 
         // Collections du catalogue — miroir EXACT de VERITAS_MONETISATION
@@ -662,6 +713,81 @@ if (!defined('VRT_AUTH_LIB')) {
                 unset($acc);
             }
             return ['changed' => false, 'msg' => 'compte introuvable'];
+        }
+
+        /* LIVRET EN LIGNE — le paiement confirmé ÉMET le code d'accès.
+           Aucune intervention humaine : la passerelle confirme, le serveur tire
+           un code neuf, l'inscrit au registre et le dépose pour l'acheteur.
+
+           Idempotent DEUX FOIS : ici par `ref` dans DB.livretVentes, et dans
+           vrt_livret_emettre() par `ref` dans le registre. Les passerelles
+           mobiles rejouent leur notification jusqu'à obtenir un 200 — sans cela,
+           un même paiement émettrait plusieurs codes. */
+        if ($intent === 'livret' || $intent === 'livret_pack') {
+            $bout   = explode(':', $targetId);
+            $classe = strtolower(trim((string) ($bout[0] ?? '')));
+            $kind   = strtolower(trim((string) ($bout[1] ?? 'livret')));
+            // Pack etablissement : N codes d'un coup, pour un proviseur qui
+            // equipe une classe entiere sans nous ecrire.
+            $n      = ($intent === 'livret_pack') ? max(1, min(500, (int) ($bout[2] ?? 0))) : 1;
+            if (!isset(vrt_livret_classes()[$classe])) {
+                return ['changed' => false, 'msg' => 'classe de livret inconnue : ' . $classe];
+            }
+            if (!isset(vrt_livret_kinds()[$kind])) $kind = 'livret';
+
+            if (!isset($db['livretVentes']) || !is_array($db['livretVentes'])) $db['livretVentes'] = [];
+            foreach ($db['livretVentes'] as $v) {
+                if (is_array($v) && (string) ($v['ref'] ?? '') === $ref) {
+                    return ['changed' => false, 'msg' => 'code livret déjà émis'];
+                }
+            }
+
+            $jours = (int) ($db['tarifs']['livretJours'] ?? 0);
+            if ($jours <= 0) $jours = 365;   // une année scolaire
+
+            $em = vrt_livret_emettre([
+                'classe' => $classe, 'kind' => $kind, 'n' => $n, 'jours' => $jours,
+                'label'  => ($n > 1 ? 'Pack ' . $n . ' — ' : 'Achat ') . $ref, 'ref' => $ref,
+            ]);
+            if (!$em['ok']) {
+                vrt_pay_log('[LIVRET_ECHEC] ref=' . $ref . ' motif=' . (string) ($em['erreur'] ?? '?'));
+                return ['changed' => false,
+                        'msg' => 'Émission du code impossible (' . (string) ($em['erreur'] ?? '?') . ')'];
+            }
+            $code = (string) ($em['codes'][0] ?? '');
+            if ($code === '') return ['changed' => false, 'msg' => 'code livret déjà émis pour cette référence'];
+
+            /* Bon de livraison : c'est par lui que le navigateur de l'acheteur
+               récupère son code (api/livret.php, action « claim »), en prouvant
+               qu'il connaît AUSSI les 4 derniers chiffres du numéro payeur.
+               Le renvoyer par `payment_*.php?action=status` serait un trou :
+               cette action est volontairement non authentifiée et les références
+               y sont énumérables. */
+            vrt_livret_vente_ecrire($ref, [
+                'code'   => $code,                       // le premier, pour compatibilite
+                'codes'  => $em['codes'],                // le lot complet (pack etablissement)
+                'classe' => $classe,
+                'kind'   => $kind,
+                'exp'    => (int) ($em['expire'] ?? 0),
+                'tel4'   => vrt_livret_tel4_hash($tel),
+                'cree'   => time(),
+            ]);
+
+            $db['livretVentes'][] = [
+                'id' => 'lv_' . bin2hex(random_bytes(5)), 'ref' => $ref,
+                'classe' => $classe, 'kind' => $kind, 'code' => $code,
+                'quantite' => $n, 'codes' => ($n > 1 ? $em['codes'] : null),
+                'accountId' => $accountId, 'nom' => $nom ?: '?', 'tel' => $tel ?: '?',
+                'montant' => $montant, 'date' => date('d/m/Y'), 'datePaiement' => date('c'),
+                'expire' => (int) ($em['expire'] ?? 0), 'statut' => 'Payé', 'via' => 'webhook_serveur',
+            ];
+            // Le code COMPLET ne va jamais au journal : seuls les 4 derniers
+            // caractères, assez pour rapprocher une vente d'une réclamation.
+            vrt_pay_log('[LIVRET_CODE] ref=' . $ref . ' classe=' . $classe . ' kind=' . $kind
+                . ' code=…' . substr($code, -4));
+            return ['changed' => true,
+                    'msg' => ($n > 1 ? 'Pack de ' . $n . ' codes ' : 'Code livret ')
+                           . strtoupper($classe) . ' ' . $kind . ' émis (…' . substr($code, -4) . ')'];
         }
 
         if ($intent === 'product') {
