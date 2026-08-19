@@ -119,6 +119,43 @@ jobs:
       # rouge (deux surfaces « livret » sans contrôle d'octroi) et le
       # déploiement, lui, restait autorisé. Un garde-fou qui ne garde rien est
       # pire qu'aucun : il rassure.
+      # -- Dependances non suivies : le piege qui revient. Un fichier absent de
+      # git n'est JAMAIS deploye, et rien ne le signale : le require echoue en
+      # fatal chez le visiteur, ou le <script> revient en 404. Le 19/08/2026,
+      # deux fois en une heure : api/_auth_lib.php ouvrait _sentinel.php, la
+      # coquille et la vitrine chargeaient assets/veritas-shield.js -- ni l'un
+      # ni l'autre suivi par git. Tout le backend serait tombe.
+      - name: 🧩 Toute dependance referencee est-elle deployable ?
+        run: |
+          manquants=0
+          SUIVIS=$(git ls-files)
+          connu() { printf '%s' "$SUIVIS" | grep -qxF "$1"; }
+          for f in $(git ls-files 'api/*.php' 'api/campus/*.php'); do
+            d=$(dirname "$f")
+            for rel in $(grep -ohE "(require|include)(_once)?[ (]*__DIR__ *[.] *'[^']+'" "$f" 2>/dev/null | sed -E "s/.*'([^']+)'.*/\1/"); do
+              cible=$(echo "$d$rel" | sed 's#/[.]/#/#g')
+              case "$cible" in api/config.php|api/payment_config.php|api/campus/_config.php) continue ;; esac
+              if [ ! -f "$cible" ]; then
+                echo "::error title=Dependance absente::$f requiert $rel - fichier introuvable."; manquants=1
+              elif ! connu "$cible"; then
+                echo "::error title=Dependance non suivie::$f requiert $rel - present en local, ABSENT de git : il ne partira pas et l endpoint tombera en erreur fatale."; manquants=1
+              fi
+            done
+          done
+          REFS=$(git ls-files '*.html' | xargs grep -ohE '(src|href)="/?(assets|chunks|api)/[^"?#]+' 2>/dev/null | sed -E 's/.*="\/?//' | sort -u)
+          for ref in $REFS; do
+            if [ ! -f "$ref" ]; then
+              echo "::error title=Asset absent::/$ref est reference par une page mais introuvable."; manquants=1
+            elif ! connu "$ref"; then
+              echo "::error title=Asset non suivi::/$ref est reference par une page, present en local, ABSENT de git : 404 en production."; manquants=1
+            fi
+          done
+          if [ "$manquants" != "0" ]; then
+            echo "::error title=Deploiement ANNULE::Des dependances referencees ne partiraient pas avec le deploiement."
+            exit 1
+          fi
+          echo "OK - toutes les dependances referencees sont suivies par git."
+
       - name: 💰 Chaque surface payante débloque-t-elle vraiment ?
         run: |
           if command -v php >/dev/null 2>&1; then
