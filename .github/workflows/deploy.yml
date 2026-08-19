@@ -29,6 +29,8 @@ on:
       - 'niveaux/**'
       - 'outils/**'
       - 'corriges/**'
+      - 'livrets/**'
+      - 'd/**'
       - 'chunks/**'
       - 'assets/**'
       - 'legal/**'
@@ -47,6 +49,7 @@ on:
       - 'sitemap.xml'
       - 'sitemap-index.xml'
       - 'robots.txt'
+      - 'catalogue_livres.json'
       - 'manifest.webmanifest'
       - 'sw.js'
       - 'ai.txt'
@@ -109,6 +112,27 @@ jobs:
           fi
           echo "✅ Version d'assets cohérente ($SHELL_VER) — coquille et service worker alignés."
 
+      # ── 💰 Garde-fou d'argent — bloque le déploiement si une surface payante
+      # n'ouvre plus rien. Ce test existait déjà, mais dans un workflow SÉPARÉ
+      # (test.yml) : rouge, il n'empêchait rien du tout — deploy.yml partait
+      # quand même vers la production. Constaté le 19/08/2026 : la suite était
+      # rouge (deux surfaces « livret » sans contrôle d'octroi) et le
+      # déploiement, lui, restait autorisé. Un garde-fou qui ne garde rien est
+      # pire qu'aucun : il rassure.
+      - name: 💰 Chaque surface payante débloque-t-elle vraiment ?
+        run: |
+          if command -v php >/dev/null 2>&1; then
+            php tests/paiements_entitlements.php
+          else
+            echo "::error title=PHP introuvable::Le garde-fou des surfaces payantes n'a pas pu tourner. Déploiement ANNULÉ."
+            exit 1
+          fi
+
+      # ── 🚪 Espaces par rôle — une entrée de menu sans route ne lève aucune
+      # exception : render() sert le tableau de bord sous le titre demandé.
+      - name: 🚪 Espaces par rôle (entrées mortes, chiffres inventés)
+        run: node tests/espaces_roles.cjs
+
       - name: 📋 Préparer les fichiers
         run: |
           mkdir -p deploy/api \
@@ -121,13 +145,14 @@ jobs:
                    deploy/uploads/cours \
                    deploy/uploads/ressource \
                    deploy/uploads/image \
-                   deploy/uploads/protected/enseignant
+                   deploy/uploads/protected/enseignant \
+                   deploy/uploads/protected/livrets
 
           # ── Verrous des dossiers protégés ───────────────────────
           # Les .htaccess « Require all denied » DOIVENT accompagner les dossiers
           # protégés : sans eux, un Guide déposé par FTP serait téléchargeable par
           # son URL, et la porte api/teacher_access.php ne servirait à rien.
-          for d in uploads/protected uploads/protected/enseignant; do
+          for d in uploads/protected uploads/protected/enseignant uploads/protected/livrets; do
             if [ -f "$d/.htaccess" ]; then
               cp "$d/.htaccess" "deploy/$d/.htaccess"
               echo "  ✓ $d/.htaccess (accès HTTP direct interdit)"
@@ -136,6 +161,7 @@ jobs:
             fi
           done
           [ -f uploads/protected/enseignant/LISEZMOI.txt ] && cp uploads/protected/enseignant/LISEZMOI.txt deploy/uploads/protected/enseignant/
+          [ -f uploads/protected/livrets/LISEZMOI.txt ] && cp uploads/protected/livrets/LISEZMOI.txt deploy/uploads/protected/livrets/
 
           # ── Application principale ──────────────────────────────
           # app.html → servi par index.php (wrapper no-cache LiteSpeed)
@@ -187,6 +213,19 @@ jobs:
           # .htaccess (sécurité + cache + MIME)
           if [ -f .htaccess ]; then cp .htaccess deploy/; fi
 
+          # ── Catalogue des livres numériques (fiches SEULEMENT) ───
+          # Aucun contenu ici : titres, prix, nombre de pages. Le livre
+          # lui-même reste dans uploads/protected/, déposé par FTP, hors
+          # du dépôt (GitHub est public).
+          # Signalé HAUT ET FORT s'il manque : un « [ -f ] && cp » muet a
+          # déjà coûté des heures ici, et sans ce fichier les livres vendus
+          # disparaissent de la boutique sans qu'aucune erreur ne le dise.
+          if [ -f catalogue_livres.json ]; then
+            cp catalogue_livres.json deploy/ && echo "  ✓ catalogue_livres.json"
+          else
+            echo "::warning title=Catalogue des livres absent::catalogue_livres.json introuvable — aucun livre numérique ne sera proposé."
+          fi
+
           # ── SEO + PWA (sitemap, robots, manifest) ───────────────
           for f in sitemap.xml sitemap-index.xml robots.txt manifest.webmanifest sw.js ai.txt; do
             [ -f "$f" ] && cp "$f" deploy/ && echo "  ✓ $f"
@@ -219,6 +258,47 @@ jobs:
           if [ -d corriges ]; then
             cp -r corriges deploy/
             echo "  ✓ corriges/ ($(find corriges -name '*.html' | wc -l) pages)"
+          fi
+
+          # -- livrets/ = livrets interactifs SOUS VERROU SERVEUR --------
+          # Coquilles SEULES : les donnees (booklet-*.js / guide-*.js) ne
+          # sont pas ici et ne doivent JAMAIS l'etre — le depot GitHub est
+          # public. Elles vivent dans uploads/protected/livrets/, deposees
+          # par FTP, et ne sortent que par api/livret.php apres code valide.
+          if [ -d livrets ]; then
+            for f in livrets/*.html; do
+              [ -f "$f" ] || continue
+              case "$f" in livrets/demo-*|livrets/mode-emploi*|livrets/feuilletage-*|livrets/index*) continue ;; esac
+              if grep -qE "VERITAS2026|PROF2026" "$f"; then
+                echo "::error title=Livret non verrouille::$f contient encore un code en dur. Reconstruire avec tools/prepare_livrets.py. Deploiement ANNULE."
+                exit 1
+              fi
+              if grep -qE 'window[.](BOOKLET|GUIDE)[A-Z0-9_]* *=' "$f"; then
+                echo "::error title=Contenu dans la coquille::$f embarque les donnees du livret — le produit partirait en clair. Deploiement ANNULE."
+                exit 1
+              fi
+            done
+            # Les extraits GRATUITS (demo-*.js) sont les seules donnees
+            # publiables. Un fichier complet fait ~450 Ko : au-dela de
+            # 120 Ko, c'est le produit qui part en clair.
+            for f in livrets/*.js; do
+              case "$(basename "$f")" in support.js|gate.js) continue ;; esac
+              t=$(wc -c < "$f")
+              if [ "$t" -gt 122880 ]; then
+                echo "::error title=Donnees completes dans livrets/::$f pese $((t/1024)) Ko — seuls les extraits gratuits (<120 Ko) sont publiables. Deploiement ANNULE."
+                exit 1
+              fi
+            done
+            cp -r livrets deploy/
+            echo "  OK livrets/ ($(find livrets -name '*.html' | wc -l) pages, verrou verifie)"
+          fi
+
+          # -- d/ = pages de devoir partageables (le lien viral) -----------
+          # Coquille seule : le devoir arrive d'api/collab.php, et un visiteur
+          # sans code n'obtient que l'apercu (exercices du professeur + mur).
+          if [ -d d ]; then
+            cp -r d deploy/
+            echo "  OK d/ (page de devoir partageable)"
           fi
 
           # ── Constellation VÉRITAS : écosystème autour du cahier papier ──
@@ -332,6 +412,9 @@ jobs:
             api/student_data.php \
             api/_json_boot.php \
             api/_auth_lib.php \
+            api/_livret_lib.php \
+            api/livret.php \
+            api/collab.php \
             api/content.php \
             api/migrate_protected.php \
             api/db_sql.php \
@@ -339,7 +422,10 @@ jobs:
             api/stats.php \
             api/teacher_access.php \
             api/secure_pdf.php \
+            api/secure_epub.php \
             api/_bot_log.php \
+            api/_sentinel.php \
+            api/challenge.php \
             api/demandes.php; do
             # ⚠️ ÉCHEC BRUYANT, et pas un « [ -f ] && cp » silencieux.
             #    Quatre incidents ont la même cause : un endpoint écrit, ajouté
@@ -399,6 +485,18 @@ jobs:
           if [ -f api/data/.htaccess ]; then
             cp api/data/.htaccess deploy/api/data/
             echo "  ✓ api/data/.htaccess (bloque jeton CamPay + PII paiements)"
+          fi
+
+          # Catalogue des ouvrages : c'est LUI qui dit a api/livret.php quels
+          # ouvrages existent, leurs natures et leurs tarifs. Sans lui, le
+          # serveur retombe sur les cinq classes historiques, et un ouvrage
+          # publie ce matin n'existe pas pour la porte.
+          # On ne copie QUE ce fichier : api/data/ contient les registres
+          # VIVANTS (codes vendus, copies d'eleves, journaux) — ecraser le
+          # dossier entier effacerait les ventes.
+          if [ -f api/data/livrets_catalogue.json ]; then
+            cp api/data/livrets_catalogue.json deploy/api/data/
+            echo "  OK api/data/livrets_catalogue.json (ouvrages en vente)"
           fi
           # ── v1.2.1 : protéger le dossier data/ RACINE où db.php écrit veritas_db.json ──
           #    Sans .htaccess ici, /data/veritas_db.json serait téléchargeable directement (toute la base).

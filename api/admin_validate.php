@@ -40,7 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 // ── 1. AUTHENTIFICATION ADMIN ──────────────────────────────────────────
 @include_once __DIR__ . '/payment_config.php';  // doit définir ADMIN_TOKEN
 $expected = defined('ADMIN_TOKEN') ? ADMIN_TOKEN : '';
-$provided = (string) ($_SERVER['HTTP_X_ADMIN_TOKEN'] ?? ($_GET['token'] ?? ''));
+/* Le jeton d'administration ne se lit QUE dans l'en-tete. Le repli « ?token= »
+   deposait un secret d'administration dans les journaux du serveur, dans
+   l'historique du navigateur et dans l'en-tete Referer de la premiere image
+   externe chargee ensuite. Verifie le 19/08/2026 : le seul client
+   (admin-validation.html) envoie deja X-Admin-Token — ce repli ne servait
+   personne, il ne faisait que fuir. */
+$provided = (string) ($_SERVER['HTTP_X_ADMIN_TOKEN'] ?? '');
 
 // 🔐 BUG FIX #6 : refus si token par défaut non changé (fail-closed) + hash_equals anti timing-oracle.
 if ($expected === '' || $expected === 'CHANGEZ_MOI_token_admin_long_et_aleatoire'

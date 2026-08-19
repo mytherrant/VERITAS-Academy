@@ -46,6 +46,15 @@ api/payment_config.php
 # Identifiants MySQL + jeton d'installation de VÉRITAS Campus. Même règle que
 # ci-dessus : le fichier vit sur le serveur, jamais dans un dépôt public.
 api/campus/_config.php
+
+# La BASE synchronisee du site (data/veritas_db.json + ses sauvegardes).
+# Elle contient des donnees personnelles reelles : noms d'eleves, telephones
+# des parents, paiements, comptes. Le depot GitHub est PUBLIC — un seul
+# « git add -A » suffisait a l'y publier, definitivement (l'historique ne
+# s'efface pas). Rien de ce dossier n'a a etre versionne : le serveur le
+# cree lui-meme au premier demarrage (api/db.php).
+data/
+
 # Contenu de api/data/ ignoré (index RAG .db lourds, logs, PII paiements)…
 api/data/*
 # …SAUF les sentinelles de sécurité, qui DOIVENT être déployées par la CI :
@@ -116,3 +125,15 @@ VERITAS_Guide_*.pdf
 !og-image.jpg
 seo/
 _build/
+
+# ─── CONTENU PAYANT : jamais dans le dépôt (GitHub est PUBLIC) ───────────────
+# uploads/protected/ contient les œuvres vendues : pages du lecteur sécurisé,
+# fragments EPUB, livrets, .pdf/.epub sources. La règle *.jpg couvrait par
+# hasard les pages d'images ; RIEN ne couvrait un .epub ni un fragment .html —
+# un roman entier partait donc en clair au premier « git add . ». Ces fichiers
+# se déposent par FTP, comme le rappelle uploads/protected/livrets/LISEZMOI.txt.
+# Seuls les verrous et les modes d'emploi restent versionnés.
+uploads/protected/**
+!uploads/protected/.htaccess
+!uploads/protected/**/.htaccess
+!uploads/protected/**/LISEZMOI.txt
