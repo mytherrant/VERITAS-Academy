@@ -127,8 +127,8 @@
       '.amb-fab:focus-visible{outline:3px solid #1E499B;outline-offset:4px;border-radius:100px}',
       /* Panneau */
       '.amb-pan{position:fixed;right:calc(18px + env(safe-area-inset-right,0px));',
-      '  bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:9001;width:min(420px,calc(100vw - 36px));',
-      '  max-height:min(640px,calc(100vh - 130px));display:flex;flex-direction:column;background:#fff;',
+      '  bottom:calc(92px + env(safe-area-inset-bottom,0px));z-index:9001;width:min(440px,calc(100vw - 36px));',
+      '  max-height:min(740px,calc(100vh - 118px));display:flex;flex-direction:column;background:#fff;',
       '  border:1px solid #E4E7EF;border-radius:18px;overflow:hidden;box-shadow:0 26px 70px rgba(20,37,84,.3);',
       '  font-family:Poppins,system-ui,sans-serif}',
       '@media (max-width:640px){.amb-pan{right:10px;left:10px;width:auto;bottom:84px;max-height:calc(100vh - 110px)}}',
@@ -139,7 +139,19 @@
       '.amb-hd-av img{width:100%;height:100%;object-fit:cover;display:block}',
       '.amb-hd-x{margin-left:auto;background:rgba(255,255,255,.16);border:0;color:#fff;width:32px;height:32px;',
       '  border-radius:50%;cursor:pointer;font-size:18px;line-height:1;flex:0 0 auto}',
+      /* ── Les huit outils ne mangent plus la réponse ──────────────────────
+         La grille occupait ~260 px en « flex:0 0 auto », soit plus de la
+         moitié du panneau : la réponse du tuteur se retrouvait comprimée dans
+         la bande qui restait, à faire défiler trois lignes à la fois. Elle se
+         replie donc dès le premier échange, et se rouvre par son bandeau. */
+      '.amb-outbar{display:flex;align-items:center;gap:8px;padding:9px 14px 0;flex:0 0 auto}',
+      '.amb-outbar button{display:flex;align-items:center;gap:6px;background:#F7F8FB;border:1px solid #E4E7EF;',
+      '  border-radius:100px;padding:5px 12px;cursor:pointer;font:600 11.5px Poppins,sans-serif;color:#5B4FA8}',
+      '.amb-outbar button:hover{background:#F3F0FB;border-color:#6C56A6}',
+      '.amb-outbar .amb-chev{transition:transform .18s;font-size:9px;line-height:1}',
+      '.amb-outbar button[aria-expanded="false"] .amb-chev{transform:rotate(-90deg)}',
       '.amb-out{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:12px 14px 4px;flex:0 0 auto}',
+      '.amb-out[hidden]{display:none}',
       '.amb-out button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;',
       '  background:#fff;border:1.5px solid #E4E7EF;border-radius:11px;padding:8px 10px;cursor:pointer;',
       '  font:600 12px Poppins,sans-serif;color:#142554;transition:border-color .15s,background .15s}',
@@ -150,9 +162,33 @@
       '.amb-b-u{align-self:flex-end;max-width:86%;background:linear-gradient(135deg,#7C6BD6,#5B4FA8);color:#fff;',
       '  border-radius:12px;border-bottom-right-radius:4px;padding:9px 12px;font:400 13px/1.6 Poppins,sans-serif;',
       '  white-space:pre-wrap}',
-      '.amb-b-a{align-self:flex-start;max-width:94%;background:#fff;border:1px solid #EFF2F7;color:#4D5163;',
-      '  border-radius:12px;border-top-left-radius:4px;padding:10px 13px;font:400 13px/1.65 Poppins,sans-serif;',
-      '  white-space:pre-wrap}',
+      '.amb-b-a{align-self:flex-start;max-width:96%;background:#fff;border:1px solid #EFF2F7;color:#3A3F52;',
+      '  border-radius:12px;border-top-left-radius:4px;padding:12px 14px;font:400 13.5px/1.72 Poppins,sans-serif;',
+      '  white-space:normal}',
+      /* ── Mise en forme des réponses ──────────────────────────────────────
+         Le tuteur répond en markdown (titres, listes, gras) et tout arrivait
+         en un seul pavé gris : les étapes d'une méthode, les exemples et la
+         règle à retenir avaient exactement le même poids. On rend donc la
+         structure — sans jamais passer par innerHTML (voir rendreReponse).
+         La bulle « en cours » garde pre-wrap ; le rendu, lui, fabrique ses
+         propres blocs. */
+      '.amb-b-a.amb-brut{white-space:pre-wrap}',
+      '.amb-b-a p{margin:0 0 9px}',
+      '.amb-b-a p:last-child{margin-bottom:0}',
+      '.amb-b-a .amb-h{display:block;margin:13px 0 6px;font:600 14px/1.45 Poppins,sans-serif;color:#142554}',
+      '.amb-b-a .amb-h:first-child{margin-top:0}',
+      '.amb-b-a .amb-h2{font-size:13.5px;color:#5B4FA8}',
+      '.amb-b-a strong{font-weight:600;color:#142554}',
+      '.amb-b-a ul,.amb-b-a ol{margin:0 0 9px;padding-left:19px}',
+      '.amb-b-a li{margin:0 0 4px}',
+      '.amb-b-a li::marker{color:#5B4FA8;font-weight:700}',
+      '.amb-b-a code{background:#F3F0FB;color:#4B3F8F;border-radius:5px;padding:1px 5px;',
+      '  font:500 12.5px ui-monospace,Menlo,Consolas,monospace}',
+      '.amb-b-a hr{border:0;border-top:1px solid #EAEDF4;margin:11px 0}',
+      /* Le point à retenir : un liseré doré, la couleur que VÉRITAS réserve à
+         ce qui compte. C'est ce que l'élève doit revoir la veille du devoir. */
+      '.amb-b-a .amb-cle{display:block;margin:10px 0;padding:9px 12px;background:#FFFBF0;',
+      '  border-left:3px solid #FFC93C;border-radius:0 8px 8px 0;color:#4A3720}',
       '.amb-bas{flex:0 0 auto;border-top:1px solid #EFF2F7;padding:10px 12px;background:#fff}',
       '.amb-row{display:flex;gap:8px;align-items:flex-end}',
       '.amb-row textarea{flex:1;resize:none;border:1px solid #E4E7EF;border-radius:11px;padding:9px 11px;',
@@ -168,11 +204,130 @@
     document.head.appendChild(s);
   }
 
+  /* Ouvre ou replie la grille des huit outils. Sans argument : bascule. */
+  function basculerOutils(etat) {
+    var g = document.getElementById('amb-out');
+    var b = document.getElementById('amb-outbtn');
+    if (!g || !b) return;
+    var cible = (etat === undefined) ? (b.getAttribute('aria-expanded') !== 'true') : !!etat;
+    g.hidden = !cible;
+    b.setAttribute('aria-expanded', cible ? 'true' : 'false');
+  }
+
+  /* ── Enrichissement d'une ligne : **gras** et `code` ─────────────────────
+     On découpe et on assemble des nœuds de TEXTE : le contenu de l'IA n'est
+     jamais interprété comme du balisage, donc rien à échapper et rien à
+     injecter. C'est la même garantie que l'ancien textContent, en plus lisible. */
+  function enrichir(noeud, texte) {
+    var reste = String(texte || '');
+    var re = /\*\*([^*\n]+)\*\*|`([^`\n]+)`/;
+    var m;
+    while ((m = re.exec(reste)) !== null) {
+      if (m.index > 0) noeud.appendChild(document.createTextNode(reste.slice(0, m.index)));
+      var n;
+      if (m[1] != null) { n = document.createElement('strong'); n.textContent = m[1]; }
+      else { n = document.createElement('code'); n.textContent = m[2]; }
+      noeud.appendChild(n);
+      reste = reste.slice(m.index + m[0].length);
+    }
+    if (reste) noeud.appendChild(document.createTextNode(reste));
+  }
+
+  /* ── Rendu d'une réponse du tuteur ───────────────────────────────────────
+     Ambassa répond en markdown : titres, listes numérotées, gras, séparateurs.
+     Tout cela arrivait en un seul bloc de texte gris de treize pixels — les
+     étapes d'une méthode, l'exemple et la règle à retenir pesaient pareil, et
+     l'élève devait tout relire pour retrouver l'essentiel. On rebâtit donc la
+     structure en DOM.
+     Repli de sûreté : si le texte ne produit aucun bloc (réponse vide, format
+     inattendu), on repose le texte brut plutôt que d'afficher une bulle vide. */
+  function rendreReponse(cible, texte) {
+    if (!cible) return;
+    while (cible.firstChild) { cible.removeChild(cible.firstChild); }
+    cible.className = 'amb-b-a';
+
+    var lignes = String(texte || '').replace(/\r\n?/g, '\n').split('\n');
+    var liste = null, para = [];
+
+    function viderPara() {
+      if (!para.length) return;
+      var txt = para.join(' ');
+      var p = document.createElement('p');
+      /* Le point à retenir mérite d'être vu sans relire : liseré doré. */
+      if (/^(à retenir|a retenir|retiens|l['’]essentiel|en résumé|en resume)\b/i.test(txt)) {
+        p.className = 'amb-cle';
+      }
+      enrichir(p, txt);
+      cible.appendChild(p);
+      para = [];
+    }
+
+    for (var i = 0; i < lignes.length; i++) {
+      var t = lignes[i].trim();
+      if (!t) { viderPara(); liste = null; continue; }
+
+      if (/^(-{3,}|_{3,}|\*{3,})$/.test(t)) {
+        viderPara(); liste = null;
+        cible.appendChild(document.createElement('hr'));
+        continue;
+      }
+
+      var mh = t.match(/^(#{1,6})\s+(.+)$/);
+      if (mh) {
+        viderPara(); liste = null;
+        var h = document.createElement('span');
+        h.className = 'amb-h' + (mh[1].length >= 3 ? ' amb-h2' : '');
+        enrichir(h, mh[2].replace(/\s*#+\s*$/, ''));
+        cible.appendChild(h);
+        continue;
+      }
+
+      /* Une ligne entièrement en gras sert de titre : le modèle écrit souvent
+         « **Étape 1 — la situation d'énonciation** » sans dièse. */
+      var mg = t.match(/^\*\*([^*]+)\*\*:?$/);
+      if (mg) {
+        viderPara(); liste = null;
+        var h2 = document.createElement('span');
+        h2.className = 'amb-h amb-h2';
+        h2.textContent = mg[1];
+        cible.appendChild(h2);
+        continue;
+      }
+
+      var mu = t.match(/^[-*•]\s+(.+)$/);
+      var mo = t.match(/^\d+[.)]\s+(.+)$/);
+      if (mu || mo) {
+        viderPara();
+        var type = mu ? 'ul' : 'ol';
+        if (!liste || liste.tagName.toLowerCase() !== type) {
+          liste = document.createElement(type);
+          cible.appendChild(liste);
+        }
+        var li = document.createElement('li');
+        enrichir(li, mu ? mu[1] : mo[1]);
+        liste.appendChild(li);
+        continue;
+      }
+
+      liste = null;
+      para.push(t);
+    }
+    viderPara();
+
+    if (!cible.firstChild) {
+      cible.className = 'amb-b-a amb-brut';
+      cible.textContent = texte;
+    }
+  }
+
   function bulle(role, texte) {
     var z = document.getElementById('amb-msgs');
     if (!z) return null;
     var b = el('div', '', texte);
-    b.className = (role === 'user') ? 'amb-b-u' : 'amb-b-a';
+    /* Les bulles posées en clair (accueil, avertissements, quota) gardent
+       pre-wrap : leurs retours à la ligne sont voulus. rendreReponse retire
+       « amb-brut » quand il reconstruit une réponse en blocs. */
+    b.className = (role === 'user') ? 'amb-b-u' : 'amb-b-a amb-brut';
     z.appendChild(b);
     z.scrollTop = z.scrollHeight;
     return b;
@@ -203,6 +358,9 @@
     }
 
     champ.value = '';
+    /* Dès qu'une vraie conversation commence, la grille cède la place à la
+       réponse : c'est elle qu'on vient lire. Le bandeau la rouvre en un clic. */
+    basculerOutils(false);
     bulle('user', q);
     enCours = true;
     var bouton = document.getElementById('amb-send');
@@ -234,9 +392,16 @@
         if (b) { b.disabled = false; b.style.opacity = ''; }
         var j = res.j || {};
         /* JAMAIS innerHTML sur du texte d'IA : une réponse n'est pas du balisage
-           de confiance. textContent, et le problème d'injection n'existe pas. */
+           de confiance. rendreReponse met la réponse en forme en fabriquant des
+           nœuds, et le texte du modèle n'entre que par textContent — la mise en
+           forme a donc changé, la garantie non. */
         if (rep) rep.removeAttribute('aria-busy');
-        if (res.ok && j.text) { if (rep) rep.textContent = j.text; quotaConsommer(); majQuota(); }
+        if (res.ok && j.text) {
+          rendreReponse(rep, j.text);
+          var z = document.getElementById('amb-msgs');
+          if (z) z.scrollTop = z.scrollHeight;
+          quotaConsommer(); majQuota();
+        }
         else if (res.status === 429) { if (rep) rep.textContent = '⚠️ ' + (j.error || 'Trop de questions d’un coup — patiente une minute.'); }
         else if (rep) { rep.textContent = j.error ? ('⚠️ ' + j.error) : '⚠️ Le Professeur Ambassa est momentanément indisponible.'; }
       })
@@ -279,7 +444,19 @@
     x.addEventListener('click', fermer);
     hd.appendChild(av); hd.appendChild(tit); hd.appendChild(x);
 
-    var outils = el('div'); outils.className = 'amb-out';
+    /* Bandeau de bascule des outils. Il porte le compte (« 8 outils ») parce
+       qu'une fois la grille repliée, rien ne dirait plus qu'elle existe. */
+    var barre = el('div'); barre.className = 'amb-outbar';
+    var bascule = document.createElement('button');
+    bascule.type = 'button'; bascule.id = 'amb-outbtn';
+    bascule.setAttribute('aria-expanded', 'true');
+    bascule.setAttribute('aria-controls', 'amb-out');
+    bascule.appendChild(el('span', '', '▾')).className = 'amb-chev';
+    bascule.appendChild(document.createTextNode(TACHES.length + ' outils'));
+    bascule.addEventListener('click', function () { basculerOutils(); });
+    barre.appendChild(bascule);
+
+    var outils = el('div'); outils.className = 'amb-out'; outils.id = 'amb-out';
     TACHES.forEach(function (t) {
       var b = document.createElement('button');
       b.type = 'button';
@@ -310,7 +487,8 @@
     var q = el('div', '', ''); q.className = 'amb-q'; q.id = 'amb-quota';
     bas.appendChild(row); bas.appendChild(q);
 
-    p.appendChild(hd); p.appendChild(outils); p.appendChild(msgs); p.appendChild(bas);
+    p.appendChild(hd); p.appendChild(barre); p.appendChild(outils);
+    p.appendChild(msgs); p.appendChild(bas);
     document.body.appendChild(p);
 
     bulle('bot', 'Bonjour ! Je suis le Professeur Ambassa. Choisis un outil ci-dessus, ou pose directement ta question — programme camerounais, de la 6ᵉ à la Terminale.');
