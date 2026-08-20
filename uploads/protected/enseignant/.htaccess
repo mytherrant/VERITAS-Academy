@@ -9,7 +9,11 @@ Deny from all
 </IfModule>
 # Ceinture + bretelles : bloquer aussi toute exécution serveur dans ce dossier.
 Options -Indexes -ExecCGI
-RemoveHandler .php .phtml .phar .cgi .pl .py
+# NE PAS remettre « RemoveHandler » : l'hébergeur le refuse (AllowOverride FileInfo absent)
+# et un .htaccess refusé est rejeté EN ENTIER → 500 sur tout le dossier, donc « Require all
+# denied » ci-dessus ne s'appliquait plus. Constaté le 19/08/2026 : /uploads/protected/**
+# répondait 500, alors que /api/data/ et /uploads/veritas/ (sans RemoveHandler) répondent 403.
+# -ExecCGI + FilesMatch ci-dessous couvrent le même besoin et sont acceptés.
 <FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp|exe|bat)$">
   Require all denied
 </FilesMatch>

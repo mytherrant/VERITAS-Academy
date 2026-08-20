@@ -1,7 +1,8 @@
-# VÉRITAS — Store de contenu PREMIUM (Étape 2, S3 v1.2.x)
-# Aucun accès HTTP DIRECT : ces fichiers ne sont servis que par api/content.php
-# APRÈS vérification d'authentification et de droits (plan d'abonnement).
-# Sans ceci, les médias payants seraient téléchargeables via leur URL.
+# VÉRITAS — Données des LIVRETS EN LIGNE (« Mon Cahier de français »)
+# Aucun accès HTTP DIRECT : ces fichiers ne sont servis que par api/livret.php
+# APRÈS vérification du code d'accès (classe, nature, expiration, quota d'appareils).
+# Sans ceci, booklet-*.js et guide-*.js — c'est-à-dire le produit vendu et ses
+# corrigés — seraient téléchargeables par leur simple URL.
 Require all denied
 <IfModule !mod_authz_core.c>
 Order deny,allow
