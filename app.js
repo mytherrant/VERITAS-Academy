@@ -889,24 +889,58 @@ function defaultDB(){return{
   ],
   elearning:{
     plans:[
-      {id:'plan1',nom:'EXAMEN / AN',cible:'3ème · 1ère · Tle A, C, D',prix:5000,ancien:25000,duree:'Année scolaire',populaire:false,
+      {id:'plan1',public:'eleve',nom:'EXAMEN / AN',cible:'3ème · 1ère · Tle A, C, D',prix:5000,ancien:25000,duree:'Année scolaire',populaire:false,
        planTags:['plan1'],
        avantages:['✅ Épreuves séquentielles + corrigés (meilleurs lycées)','✅ Anciens sujets BEPC & BAC avec corrigés nationaux','✅ Cours détaillés en PDF par matière','✅ Fiches de révision format poche','✅ Cours vidéo explicatifs (Maths, Physique, SVT)','✅ Corpus complets par séquence','✅ Suivi WhatsApp avec nos enseignants','✅ Astuces et planning de révision personnalisé']},
-      {id:'plan2',nom:'INTERMÉDIAIRE',cible:'6ème · 5ème · 4ème · 2nde',prix:3000,ancien:15000,duree:'Année scolaire',populaire:true,
+      {id:'plan2',public:'eleve',nom:'INTERMÉDIAIRE',cible:'6ème · 5ème · 4ème · 2nde',prix:3000,ancien:15000,duree:'Année scolaire',populaire:true,
        planTags:['plan2'],
        avantages:['✅ Épreuves séquentielles + corrigés (collèges et lycées)','✅ Cours détaillés en PDF par matière','✅ Fiches de révision format poche','✅ Astuces et méthodes d\'étude efficaces','✅ Planning de révision personnalisé','🔒 Cours vidéo (Plan Examen uniquement)','🔒 Anciens sujets d\'examen (Plan Examen uniquement)']},
-      {id:'plan3',nom:'ENSEIGNANT',cible:'Professeurs & Formateurs',prix:5000,ancien:25000,duree:'Année scolaire',populaire:false,
+      {id:'plan3',public:'enseignant',nom:'ENSEIGNANT — ANNÉE',cible:'Professeurs & Formateurs',prix:7000,ancien:25000,duree:'Année scolaire',populaire:false,
        planTags:['plan3'],
        avantages:['✅ Épreuves + corrections toutes classes (6ème → Tle)','✅ Cours détaillés en PDF et Vidéos','✅ Anciens sujets BEPC / Probatoire / BAC avec corrigés','✅ Programmes officiels MINESEC & progressions','✅ Projets pédagogiques et fiches de préparation','✅ Corpus complets toutes séquences','✅ Modèles de sujets à personnaliser']},
-      {id:'plan4',nom:'FAMILLE / ÉCOLE',cible:'Familles · Écoles · Centres',prix:25000,ancien:100000,duree:'Année scolaire',populaire:true,
+      {id:'plan4',public:'etablissement',nom:'FAMILLE / ÉCOLE',cible:'Familles · Écoles · Centres',prix:25000,ancien:100000,duree:'Année scolaire',populaire:true,
        planTags:['plan1','plan2','plan3','plan4','plan5','plan6'],
        avantages:['✅ TOUT inclus — toutes classes, toutes matières','✅ Épreuves séquentielles + corrigés (6ème → Tle)','✅ Cours vidéo et PDF illimités','✅ Anciens sujets d\'examen nationaux','✅ Fiches de révision + corpus complets','✅ Accès multi-utilisateurs (toute la famille)','✅ Support WhatsApp prioritaire 7j/7','✅ Mise à jour continue tout au long de l\'année']},
-      {id:'plan5',nom:'TECHNIQUE',cible:'CAP · 2nde Tech · 1ère/Tle STT · F1/F3/F4/IH et toutes filières STI',prix:5000,ancien:25000,duree:'Année scolaire',populaire:false,
+      {id:'plan5',public:'eleve',nom:'TECHNIQUE',cible:'CAP · 2nde Tech · 1ère/Tle STT · F1/F3/F4/IH et toutes filières STI',prix:5000,ancien:25000,duree:'Année scolaire',populaire:false,
        planTags:['plan1','plan3','plan5'],
        avantages:['✅ Cours spécialisés par pôle (STT, Génie Méca, Génie Élec, Génie Civil, Arts & Modes)','✅ Fiches TP et protocoles de laboratoire (soudage, câblage, béton, moteur…)','✅ Épreuves types CAP, Probatoire Technique et BAC Technique avec corrigés','✅ Sujets officiels par filière (F1, F3, F4BA, CG, ACA, IH…)','✅ Ressources Agriculture & Génie Rural (PA, PV)','✅ Maths Techniques, Dessin Technique et Sciences Physiques Appliquées','✅ Suivi WhatsApp avec nos formateurs spécialisés enseignement technique']},
-      {id:'plan6',nom:'GCE O & A LEVEL',cible:'Form 1–5 · Lower Sixth · Upper Sixth',prix:5000,ancien:25000,duree:'Année scolaire',populaire:false,
+      {id:'plan6',public:'eleve',nom:'GCE O & A LEVEL',cible:'Form 1–5 · Lower Sixth · Upper Sixth',prix:5000,ancien:25000,duree:'Année scolaire',populaire:false,
        planTags:['plan1','plan3','plan6'],
-       avantages:['✅ GCE O Level past papers with marking schemes (2018–2024)','✅ GCE A Level past papers with marking schemes (2018–2024)','✅ Detailed course notes — Biology, Chemistry, Physics, Maths, Economics, Literature','✅ GCE practical guides: protocols, specimen answers and examiners\' tips','✅ Revision cards and topic summaries (Form 1 → Upper Sixth)','✅ WhatsApp support from our GCE specialist teachers','✅ Study timetable, exam technique guides and past-paper analysis']}
+       avantages:['✅ GCE O Level past papers with marking schemes (2018–2024)','✅ GCE A Level past papers with marking schemes (2018–2024)','✅ Detailed course notes — Biology, Chemistry, Physics, Maths, Economics, Literature','✅ GCE practical guides: protocols, specimen answers and examiners\' tips','✅ Revision cards and topic summaries (Form 1 → Upper Sixth)','✅ WhatsApp support from our GCE specialist teachers','✅ Study timetable, exam technique guides and past-paper analysis']},
+      // ── Grille arrêtée par Jacques le 20/08/2026 ─────────────────────
+      // Trois publics n'avaient aucune offre chiffrée : l'enseignant ne
+      // pouvait s'abonner qu'à l'année, et ni les parents ni les chefs
+      // d'établissement ne trouvaient nulle part ce que le centre leur vend.
+      // `public` classe l'offre, `fraisCompte` porte le droit d'entrée, et
+      // `surDevis` marque ce qui se chiffre au cas par cas — jamais de prix
+      // inventé pour combler une case.
+      {id:'plan7',public:'enseignant',nom:'ENSEIGNANT — MOIS',cible:'Professeurs & Formateurs',prix:1000,ancien:0,duree:'1 mois',populaire:true,
+       fraisCompte:500,planTags:['plan3'],
+       avantages:["✅ Les leçons, par classe et par séquence","✅ Des exercices spécifiques, prêts à donner","✅ Des sujets avec leurs corrigés","✅ Programmes officiels MINESEC et progressions","✅ Sans engagement — 7 000 FCFA pour l'année complète"]},
+      {id:'plan8',public:'parent',nom:'ORIENTATION SCOLAIRE',cible:'Parents',prix:5000,ancien:0,duree:'Prestation',populaire:false,
+       fraisCompte:100,planTags:[],
+       avantages:["✅ Bilan du profil de l'enfant","✅ Filières et séries adaptées à ses résultats","✅ Entretien de restitution avec un conseiller"]},
+      {id:'plan9',public:'parent',nom:"RECOMMANDATION D'ÉTABLISSEMENTS",cible:'Parents',prix:3000,ancien:0,duree:'Prestation',populaire:false,
+       fraisCompte:100,planTags:[],
+       avantages:["✅ Établissements secondaires et supérieurs","✅ Sélection selon le profil et le budget","✅ Coordonnées et modalités d'inscription"]},
+      {id:'plan10',public:'parent',nom:'SUIVI EN LIGNE PERSONNALISÉ',cible:'Parents',prix:20000,ancien:0,duree:'Année scolaire',populaire:true,
+       fraisCompte:100,planTags:['plan1','plan2'],
+       avantages:["✅ Une charge de travail plus soutenue pour l'enfant","✅ Échanges directs avec les enseignants","✅ Des exercices adaptés à ses difficultés","✅ Progression communiquée aux parents"]},
+      {id:'plan11',public:'parent',nom:'ACCOMPAGNEMENT À DOMICILE',cible:'Parents',prix:0,ancien:0,duree:'Sur mesure',populaire:false,
+       surDevis:true,fraisCompte:100,planTags:[],
+       avantages:["✅ Séances au domicile de l'élève","✅ Rythme et matières définis avec la famille","ℹ️ Tarif établi selon les besoins de l'enfant"]},
+      {id:'plan12',public:'etablissement',nom:'BIBLIOTHÈQUE NUMÉRIQUE',cible:"Responsables d'établissement",prix:0,ancien:0,duree:'Installation',populaire:false,
+       surDevis:true,planTags:[],
+       avantages:["✅ Installation d'une bibliothèque numérique","✅ Fonds adapté aux programmes MINESEC","✅ Formation de l'équipe à son usage"]},
+      {id:'plan13',public:'etablissement',nom:"CARNETS DE NOTES & TABLEAUX D'HONNEUR",cible:"Responsables d'établissement",prix:0,ancien:0,duree:'Prestation',populaire:false,
+       surDevis:true,planTags:[],
+       avantages:["✅ Réalisation des carnets de notes","✅ Tableaux d'honneur par classe et par séquence","✅ Mise en page prête à remettre"]},
+      {id:'plan14',public:'etablissement',nom:'VIE SCOLAIRE & ACTIVITÉS',cible:"Responsables d'établissement",prix:0,ancien:0,duree:'Accompagnement',populaire:false,
+       surDevis:true,planTags:[],
+       avantages:["✅ Activités post et périscolaires","✅ Invitation d'artistes, vie des clubs","✅ Cafés littéraires et ateliers"]},
+      {id:'plan15',public:'etablissement',nom:'PARTENARIAT — SUIVI EN LIGNE',cible:"Responsables d'établissement",prix:0,ancien:0,duree:'Partenariat',populaire:true,
+       surDevis:true,partenariat:true,planTags:[],
+       avantages:["✅ Suivi en ligne des apprenants de l'établissement","✅ Bonus pour les superviseurs désignés","✅ Versés une fois les candidats enrôlés"]}
     ],
     categories:[
       {id:'cat1',nom:'Épreuves séquentielles',ico:'📝',desc:'Évaluations des meilleurs établissements avec corrections détaillées'},
@@ -1087,6 +1121,42 @@ function _migrateDB(){
   // FIX URLs /htdocs/ : toutes les URLs uploadées avant 12/05/2026 sont cassées
   // Réécriture systématique au chargement (idempotent — ne fait rien si pas de /htdocs/)
   _fixHtdocsUrls();
+
+  /* ── GRILLE PAR PUBLIC CIBLE (20/08/2026) ────────────────────────────────
+     Les offres parents et chefs d'établissement, et le forfait enseignant au
+     mois, sont écrits dans defaultDB(). Or une base DÉJÀ CRÉÉE ne rejoue
+     jamais le seed : sans ce passage, la nouvelle grille n'existerait que
+     pour une installation neuve — c'est-à-dire pour personne, la production
+     tournant sur une base vieille de plusieurs mois.
+     Idempotent : un plan déjà présent n'est ni dupliqué ni réécrit. Un prix
+     modifié à la main par l'administration est donc respecté. */
+  try{
+    if(!DB.elearning) DB.elearning={plans:[],categories:[],contenus:[],abonnements:[],commandes:[]};
+    if(!Array.isArray(DB.elearning.plans)) DB.elearning.plans=[];
+    var _pl = DB.elearning.plans;
+    function _aDejaPlan(id){ for(var i=0;i<_pl.length;i++){ if(_pl[i] && _pl[i].id===id) return _pl[i]; } return null; }
+
+    // 1. Classer les plans historiques : sans `public`, ils ne tomberaient dans
+    //    aucun onglet une fois l'affichage rangé par public.
+    var _pub={plan1:'eleve',plan2:'eleve',plan3:'enseignant',plan4:'etablissement',plan5:'eleve',plan6:'eleve'};
+    for(var _k in _pub){ var _p=_aDejaPlan(_k); if(_p && !_p.public) _p.public=_pub[_k]; }
+
+    // 2. Forfait enseignant à l'année : 5 000 → 7 000 FCFA. On ne touche QUE la
+    //    valeur d'origine — un tarif déjà ajusté par l'administration reste.
+    var _p3=_aDejaPlan('plan3');
+    if(_p3 && _p3.prix===5000){ _p3.prix=7000; _p3.nom='ENSEIGNANT — ANNÉE'; }
+
+    // 3. Les offres qui n'existaient pour aucun public : on les prend dans
+    //    defaultDB() plutôt que de les recopier ici — une seule source.
+    if(typeof defaultDB==='function'){
+      var _ref=defaultDB();
+      var _refPlans=(_ref && _ref.elearning && _ref.elearning.plans) ? _ref.elearning.plans : [];
+      for(var _i=0;_i<_refPlans.length;_i++){
+        var _rp=_refPlans[_i];
+        if(_rp && _rp.id && !_aDejaPlan(_rp.id)) _pl.push(_rp);
+      }
+    }
+  }catch(e){ console.warn('[migration grille tarifaire]', e); }
   /* PRODUIT DE TEST À 100 FCFA — pour éprouver l'encaissement en conditions
      réelles (MTN / Orange / CamerPay) sans engager 5 000 F à chaque essai.
      Inséré ici et pas seulement dans defaultDB() : une base déjà créée ne
