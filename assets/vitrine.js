@@ -1272,6 +1272,24 @@
     poserTexte('passage1', duo[0]);
     poserTexte('passage2', duo[1]);
 
+    /* ── Un seul extrait, une seule taille ────────────────────────────────
+       La maquette prévoyait deux paragraphes hiérarchisés : une accroche en
+       19 px, un commentaire en 15,5 px, et deux bruns différents. Le cadre
+       sert désormais UN extrait continu, simplement coupé en deux pour tenir
+       la place — la phrase qui suit le point n'a aucune raison d'être plus
+       petite et plus pâle que celle qui précède. À l'écran, cela se lit comme
+       deux textes différents, dont le second serait une note de bas de page.
+       Le second bloc adopte donc la taille, l'interligne et l'encre du
+       premier. */
+    var a = document.querySelector('[data-vrt-val="passage1"]');
+    var b = document.querySelector('[data-vrt-val="passage2"]');
+    if (a && b && duo[1]) {
+      var sa = getComputedStyle(a);
+      b.style.fontSize = sa.fontSize;
+      b.style.lineHeight = sa.lineHeight;
+      b.style.color = sa.color;
+    }
+
     /* La SIGNATURE d'abord, le titre en dessous. L'index range les 115 œuvres
        sous « Œuvre au programme MINESEC » — une étiquette de collection : la
        ligne d'auteur affichait donc le titre, et un extrait d'Assèze

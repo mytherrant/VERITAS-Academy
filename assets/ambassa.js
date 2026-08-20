@@ -620,6 +620,21 @@
     f.style.bottom = 'calc(' + (18 + h + 12) + 'px + env(safe-area-inset-bottom,0px))';
     var p = document.getElementById('amb-pan');
     if (p) p.style.bottom = 'calc(' + (92 + h + 12) + 'px + env(safe-area-inset-bottom,0px))';
+
+    /* ── Deux pastilles bavardes dans le même coin ────────────────────────
+       Empilées, « Besoin d'aide ? » (199 px) et « Une question ? Réponse
+       sous 2 h » (212 px) forment un bloc de plus de 130 px de haut collé au
+       bord droit, qui recouvre le début des cartes — constaté sur la page des
+       corrigés, où il masquait « Premier cycle ». Deux invitations à écrire
+       côte à côte se concurrencent, en plus, au lieu de s'ajouter.
+       Quand la page porte déjà sa propre pastille à étiquette, Ambassa garde
+       son avatar — rond, reconnaissable, 60 px — et laisse tomber la sienne.
+       L'étiquette revient dès que l'autre disparaît. */
+    var etiq = f.querySelector('.amb-fab-l');
+    if (etiq) {
+      var large = Math.round(autre.getBoundingClientRect().width) > 90;
+      etiq.style.display = large ? 'none' : '';
+    }
   }
 
   function demarrer() {

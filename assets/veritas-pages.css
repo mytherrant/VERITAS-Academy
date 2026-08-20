@@ -645,13 +645,25 @@ h2.sec::after{
 .cta a small{color:var(--o300);font-size:var(--t-xs);line-height:1.45}
 .cta a .i{color:var(--o400)}
 
-/* ══ MÉDAILLONS D'ICÔNE — le nuancier remplace les rgba() à la main ══ */
-.ico{width:46px;height:46px;border-radius:14px;box-shadow:var(--sh-1)}
-.ico.or   {background:var(--ambr-s);color:var(--ambr-f)}
-.ico.vert {background:var(--vert-s);color:var(--vert-f)}
-.ico.violet{background:var(--viol-s);color:var(--viol-f)}
-.ico.rouge{background:var(--roug-s);color:var(--roug-f)}
-.ico.cyan {background:var(--cyan-s);color:var(--cyan-f)}
+/* ══ MÉDAILLONS D'ICÔNE — cercle à liseré, centré ════════════════════
+   Modèle arrêté avec Jacques le 20/08/2026, repris de la vitrine : un
+   disque blanc cerné d'un liseré de 3 px, l'icône au centre, et le disque
+   centré au milieu de son panneau. Il remplace le carré arrondi à fond
+   teinté, qui ne disait pas la même chose d'une page à l'autre.
+   Le liseré porte la couleur ; le fond reste blanc. C'est ce qui permet
+   l'ALTERNANCE d'une carte à l'autre sans que la page vire au bariolé —
+   quatre pastilles pleines côte à côte, c'était quatre aplats qui se
+   disputaient l'œil.
+   `display:flex` et non `inline-flex` : sans lui, les marges automatiques
+   ne centrent rien. */
+.ico{display:flex;width:46px;height:46px;border-radius:50%;
+  background:#fff;border:3px solid var(--navy);color:var(--navy);
+  box-shadow:none;margin-left:auto;margin-right:auto}
+.ico.or   {border-color:var(--ambr-f);color:var(--ambr-f);background:#fff}
+.ico.vert {border-color:var(--vert-f);color:var(--vert-f);background:#fff}
+.ico.violet{border-color:var(--viol-f);color:var(--viol-f);background:#fff}
+.ico.rouge{border-color:var(--roug-f);color:var(--roug-f);background:#fff}
+.ico.cyan {border-color:var(--cyan-f);color:var(--cyan-f);background:#fff}
 
 /* ══ CORRIGÉS : le bloc « voir la solution » ═════════════════════════ */
 details.sol>summary{
@@ -2204,4 +2216,119 @@ article ol:not([class]) > li::before {
 .card ul:not([class]) > li:nth-child(even),
 article ul:not([class]) > li:nth-child(even) {
   color: var(--r-profond, #0C2A6A);
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   RELIEF ET MOUVEMENT — passe du 20/08/2026
+   ──────────────────────────────────────────────────────────────────────
+   Constat de Jacques sur les pages statiques : « sombre, monotone, fade ».
+   Il avait raison, et pour une raison précise : quatre cartes côte à côte
+   portaient exactement le même bleu plein, sans icône, sans réaction au
+   survol. L'œil n'avait aucun point d'accroche, et rien ne disait qu'un
+   bloc était cliquable.
+
+   Trois remèdes, tous GPU-cheap (transform, opacity, box-shadow — jamais
+   de propriété qui force un recalcul de mise en page) :
+     · l'ALTERNANCE, pour qu'une carte se distingue de sa voisine ;
+     · le RELIEF au survol, pour dire ce qui répond au doigt ;
+     · la RÉVÉLATION à l'apparition, pour que la page se déplie au lieu
+       de tomber d'un bloc.
+   Tout est désactivé si le visiteur a demandé moins d'animations.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Alternance : un liseré de couleur par carte ────────────────── */
+.wrap .grid > .card{
+  position:relative;
+  border-top:3px solid var(--navy);
+  transition:transform .34s cubic-bezier(.34,1.4,.64,1),
+             box-shadow .34s ease, border-color .3s ease;
+}
+.wrap .grid > .card:nth-child(4n+2){border-top-color:var(--green,#007E11)}
+.wrap .grid > .card:nth-child(4n+3){border-top-color:var(--ambr-f,#C24E00)}
+.wrap .grid > .card:nth-child(4n+4){border-top-color:var(--violet,#5B4FA8)}
+
+/* ── 2. Relief au survol : la carte se soulève et s'éclaire ────────── */
+.wrap .grid > .card:hover,
+.wrap .grid > .card:focus-within{
+  transform:translateY(-4px);
+  box-shadow:0 18px 40px rgba(20,37,84,.16),0 2px 6px rgba(20,37,84,.08);
+}
+/* Le médaillon suit le mouvement : il grossit d'un souffle et son liseré
+   s'épaissit. C'est le détail qui fait qu'une carte « répond ». */
+.wrap .grid > .card .ico{transition:transform .34s cubic-bezier(.34,1.4,.64,1),border-width .2s}
+.wrap .grid > .card:hover .ico{transform:scale(1.08)}
+
+/* ── 3. Les tuiles pleines de la bande « Continuer » ───────────────── */
+/* Quatre aplats du même bleu : on garde le bleu, mais chaque tuile reçoit
+   un filet de couleur sur son bord gauche et se soulève au survol. */
+.cta a{
+  position:relative;
+  border-left:4px solid rgba(255,255,255,.28);
+  transition:transform .3s cubic-bezier(.34,1.4,.64,1),
+             box-shadow .3s ease, border-left-color .3s ease;
+}
+.cta a:nth-child(4n+1){border-left-color:var(--gold,#FFC93C)}
+.cta a:nth-child(4n+2){border-left-color:#7BD1CE}
+.cta a:nth-child(4n+3){border-left-color:#B3A6E8}
+.cta a:nth-child(4n+4){border-left-color:#8ED18F}
+.cta a:hover,.cta a:focus-visible{
+  transform:translateY(-3px);
+  box-shadow:0 16px 34px rgba(0,0,0,.28);
+}
+
+/* ── 4. La page se déplie au défilement ───────────────────────────── */
+/* `.mv` existe déjà pour cela ; on l'étend aux cartes et aux tuiles sans
+   toucher au JS : l'animation part toute seule et ne se rejoue pas. */
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion: no-preference){
+    @keyframes vrt-monter{
+      from{opacity:0;transform:translateY(16px)}
+      to  {opacity:1;transform:none}
+    }
+    .wrap .grid > .card,.cta a{
+      animation:vrt-monter .5s var(--e-out,ease-out) both;
+      animation-timeline:view();
+      animation-range:entry 0% cover 22%;
+    }
+    /* Au survol, la carte reprend la main : sans cette remise à zéro, la
+       translation de l'animation et celle du survol se contrarient. */
+    .wrap .grid > .card:hover,.cta a:hover{animation-timeline:none}
+  }
+}
+
+@media (prefers-reduced-motion: reduce){
+  .wrap .grid > .card,.wrap .grid > .card .ico,.cta a{transition:none;animation:none}
+  .wrap .grid > .card:hover,.cta a:hover{transform:none}
+}
+
+/* ── 5. Puces et numéros colorés ───────────────────────────────────────
+   Les listes sortaient en puces noires du navigateur : le même petit rond
+   gris pour un axe de lecture, une étape de méthode ou un rappel de cours.
+   Rien n'indiquait où l'on était. Les marqueurs prennent donc les couleurs
+   de la charte, en alternance, et les numéros passent en gras coloré —
+   c'est la demande de Jacques, et c'est aussi ce qui rend une consigne
+   d'exercice lisible d'un coup d'œil.
+   On ne touche qu'aux listes SANS classe : celles qui portent une classe
+   ont déjà leur mise en forme, et la leur reprendre casserait des pages. */
+.wrap ul:not([class]) > li::marker,
+.card ul:not([class]) > li::marker,
+article ul:not([class]) > li::marker{
+  color:var(--navy);
+}
+.wrap ul:not([class]) > li:nth-child(3n+2)::marker,
+.card ul:not([class]) > li:nth-child(3n+2)::marker,
+article ul:not([class]) > li:nth-child(3n+2)::marker{
+  color:var(--green,#007E11);
+}
+.wrap ul:not([class]) > li:nth-child(3n+3)::marker,
+.card ul:not([class]) > li:nth-child(3n+3)::marker,
+article ul:not([class]) > li:nth-child(3n+3)::marker{
+  color:var(--ambr-f,#C24E00);
+}
+/* Les numéros : gras et colorés, pour qu'une étape se compte des yeux. */
+.wrap ol:not([class]) > li::marker,
+.card ol:not([class]) > li::marker,
+article ol:not([class]) > li::marker{
+  color:var(--violet,#5B4FA8);
+  font-weight:700;
 }
