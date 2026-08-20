@@ -2,10 +2,18 @@
 # Aucun accès HTTP DIRECT : ces fichiers ne sont servis que par api/content.php
 # APRÈS vérification d'authentification et de droits (plan d'abonnement).
 # Sans ceci, les médias payants seraient téléchargeables via leur URL.
-Require all denied
+# ⚠️ « Require all denied » DOIT rester enveloppé dans <IfModule>.
+# Posé a nu, LWS rejette le fichier ENTIER (500 sur tout le dossier, donc plus
+# aucune protection). Constaté le 20/08/2026 : ce dossier repondait 500 alors
+# que api/data/.htaccess — meme regle, mais enveloppee — repond bien 403.
+# C'est ce patron-la, verifie en production, qu'on recopie ici.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+# Repli Apache 2.2
 <IfModule !mod_authz_core.c>
-Order deny,allow
-Deny from all
+  Order allow,deny
+  Deny from all
 </IfModule>
 # Ceinture + bretelles : bloquer aussi toute exécution serveur dans ce dossier.
 Options -Indexes -ExecCGI
