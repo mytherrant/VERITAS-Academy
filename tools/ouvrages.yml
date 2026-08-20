@@ -1,0 +1,274 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# ouvrages.yml — LE MANIFESTE DES OUVRAGES EN LIGNE
+# © 2024-2026 Jacques Miterand TAKOU (Mythe Errant).
+#
+# C'est la SEULE chose à modifier pour mettre un ouvrage de plus en ligne.
+# `python tools/publier.py` lit ce fichier et fait le reste : coquille verrouillée,
+# extrait gratuit, charge FTP, catalogue serveur, contrôles anti-fuite.
+#
+# CHAMPS
+#   titre        ce que voit l'acheteur.
+#   niveau       6e | 5e | 4e | 3e | 2nde | 1ere | tle | est   (sert au classement)
+#   mode         interactif  → l'élève répond dans la page (source .dc.html + .js)
+#                lecture     → document feuilleté page par page, filigrané
+#   actif        false = déclaré mais pas publié (la source n'est pas prête).
+#                Le pipeline le saute SANS échouer, et le dit.
+#   prix         FCFA. Omis ou 0 → tarif général (1 500 élève / 5 000 guide).
+#   kinds        livret (élève) et/ou guide (enseignant).
+#   source       où sont les fichiers de travail, hors dépôt.
+#
+# RÈGLE ABSOLUE : aucune donnée d'ouvrage n'entre dans git. Le dépôt GitHub est
+# public — y pousser un booklet-*.js, c'est publier le produit. Le pipeline
+# refuse de produire si un fichier de données atterrit dans le dépôt.
+# ══════════════════════════════════════════════════════════════════════════════
+
+version: 1
+
+# Racines des sources, hors dépôt. Réglables par --racine sur la ligne de commande.
+racines:
+  dc:      "~/Downloads/Mise en page livret activité new"
+  docx1:   "~/Desktop/Manuels/FINAUX_1er_cycle"
+  docx2:   "~/Desktop/Manuels/FINAUX_2nd_cycle"
+  packs:   "~/Desktop/Manuels"
+  oeuvres: "~/Downloads/Claude code"
+
+# Ce que contient l'extrait gratuit, pour tout ouvrage interactif.
+# Assez pour juger du cahier, trop peu pour s'en passer.
+extrait:
+  sequences: 1
+  semaines: 1
+
+ouvrages:
+
+  # ── 1er cycle — livrets interactifs (EN LIGNE) ─────────────────────────────
+  6e:
+    titre: "Mon Cahier de français 6ᵉ"
+    niveau: 6e
+    mode: interactif
+    actif: true
+    kinds: [livret, guide]
+    source:
+      racine: dc
+      page: "Livret 6e En ligne.dc.html"
+      page_guide: "Guide enseignant 6e.dc.html"
+      donnees: "booklet-data.js"
+      donnees_guide: "guide-data-6e.js"
+    extrait_public: "Demo 6e.dc.html"
+    extrait_nom: demo-6e          # nom deja en ligne : ne pas renommer
+
+  5e:
+    titre: "Mon Cahier de français 5ᵉ"
+    niveau: 5e
+    mode: interactif
+    actif: true
+    kinds: [livret, guide]
+    source:
+      racine: dc
+      page: "Livret 5e En ligne.dc.html"
+      page_guide: "Guide enseignant 5e.dc.html"
+      donnees: "booklet-data-5e.js"
+      donnees_guide: "guide-data-5e.js"
+
+  4e:
+    titre: "Mon Cahier de français 4ᵉ"
+    niveau: 4e
+    mode: interactif
+    actif: true
+    kinds: [livret, guide]
+    source:
+      racine: dc
+      page: "Livret 4e En ligne.dc.html"
+      page_guide: "Guide enseignant 4e.dc.html"
+      donnees: "booklet-data-4e.js"
+      donnees_guide: "guide-data-4e.js"
+    extrait_public: "Feuilletage 4e.dc.html"
+    extrait_nom: feuilletage-4e   # nom deja en ligne : ne pas renommer
+
+  3e:
+    titre: "Mon Cahier de français 3ᵉ (BEPC)"
+    niveau: 3e
+    mode: interactif
+    actif: true
+    kinds: [livret, guide]
+    source:
+      racine: dc
+      page: "Livret 3e En ligne.dc.html"
+      page_guide: "Guide enseignant 3e.dc.html"
+      donnees: "booklet-data-3e.js"
+      donnees_guide: "guide-data-3e.js"
+
+  # ── 2nd cycle — le livret 2nde existe en .dc.html mais SANS version « En
+  #    ligne » : sa page imprimable ne porte ni champs de saisie ni verrou.
+  #    Déclaré, inactif, en attente de la version interactive.
+  2nde:
+    titre: "Mon Cahier de français 2ⁿᵈᵉ A"
+    niveau: 2nde
+    mode: interactif
+    actif: false
+    bloque: "pas de « Livret 2nde En ligne.dc.html » — seule la version imprimable existe"
+    kinds: [livret, guide]
+    source:
+      racine: dc
+      page: "Livret 2nde En ligne.dc.html"
+      donnees: "booklet-data-2nde.js"
+
+  # ── Bords (cahiers complets) — mode LECTURE ────────────────────────────────
+  # Le Bord n'est pas un livret à remplir : c'est le cahier complet, leçons et
+  # corrigés modèles compris. Il se feuillette, page par page, filigrané.
+  bord-6e:
+    titre: "Bord — Cahier de français 6ᵉ"
+    niveau: 6e
+    mode: lecture
+    actif: true
+    kinds: [livret]
+    prix: 2000
+    pages_libres: 8
+    # 135 pages rendues a 120 dpi depuis la maquette PDF :
+    #   python tools/rendu_pages.py "<...>/6e_Bord_cahier_de_francais_MAQUETTE.pdf"     #     --slug bord-6e --charge ~/veritas-ftp
+    source: { racine: docx1, document: "6e_Bord_cahier_de_francais_MAQUETTE.pdf" }
+
+  bord-5e:
+    titre: "Bord — Cahier de français 5ᵉ"
+    niveau: 5e
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire depuis le .docx"
+    kinds: [livret]
+    prix: 2000
+    pages_libres: 8
+    source: { racine: docx1, document: "5e_Bord_cahier_de_francais.docx" }
+
+  bord-3e:
+    titre: "Bord — Cahier de français 3ᵉ"
+    niveau: 3e
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire depuis le .docx"
+    kinds: [livret]
+    prix: 2000
+    pages_libres: 8
+    source: { racine: docx1, document: "3e_Bord_cahier_de_francais.docx" }
+
+  bord-1ere:
+    titre: "Bord — Cahier de français 1ʳᵉ A"
+    niveau: 1ere
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire depuis le .docx"
+    kinds: [livret]
+    prix: 2500
+    pages_libres: 8
+    source: { racine: docx2, document: "Bord_1ere_A_CORRIGE.docx" }
+
+  bord-tle:
+    titre: "Bord — Cahier de français Tᵉ A"
+    niveau: tle
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire depuis le .docx"
+    kinds: [livret]
+    prix: 2500
+    pages_libres: 8
+    source: { racine: docx2, document: "Bord_Tle_A_CORRIGE.docx" }
+
+  # ── Livrets 2nd cycle en .docx — mode LECTURE en attendant l'interactif ────
+  livret-1ere:
+    titre: "Livret d'activités 1ʳᵉ A"
+    niveau: 1ere
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire depuis le .docx"
+    kinds: [livret]
+    pages_libres: 6
+    source: { racine: docx2, document: "Livret_activites_1ere_A.docx" }
+
+  livret-tle:
+    titre: "Livret d'activités Tᵉ A"
+    niveau: tle
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire depuis le .docx"
+    kinds: [livret]
+    pages_libres: 6
+    source: { racine: docx2, document: "Livret_activites_Tle_A.docx" }
+
+  # ── Cahiers d'œuvre intégrale ──────────────────────────────────────────────
+  # Quatre œuvres au programme, un cahier chacune. Sources en pack Markdown
+  # (content/*.md + render.js), donc rendables en PDF sans repasser par Word.
+  balafon:
+    titre: "Balafon — étude intégrale"
+    niveau: 1ere
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire (Manuel_Balafon/build.js)"
+    kinds: [livret]
+    prix: 2000
+    pages_libres: 10
+    source: { racine: oeuvres, pack: "Manuel_Balafon" }
+
+  ngum-a-jemea:
+    titre: "Ngum a Jemea — étude intégrale"
+    niveau: tle
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire (Manuel_Ngum/build.js)"
+    kinds: [livret]
+    prix: 2000
+    pages_libres: 10
+    source: { racine: oeuvres, pack: "Manuel_Ngum" }
+
+  vieux-negre:
+    titre: "Le Vieux Nègre et la Médaille — étude intégrale"
+    niveau: tle
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire (Manuel_VieuxNegre/build.js)"
+    kinds: [livret]
+    prix: 2000
+    pages_libres: 10
+    source: { racine: oeuvres, pack: "Manuel_VieuxNegre" }
+
+  stances:
+    titre: "Stances et Poèmes — étude intégrale"
+    niveau: 1ere
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire (Manuel_Stances/build.js)"
+    kinds: [livret]
+    prix: 2000
+    pages_libres: 10
+    source: { racine: oeuvres, pack: "Manuel_Stances" }
+
+  # ── Séries scientifiques et techniques ─────────────────────────────────────
+  est-2nde:
+    titre: "Cahier de français EST — 2ⁿᵈᵉ S&T"
+    niveau: est
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire (Manuel_EST/2nde_ST)"
+    kinds: [livret]
+    prix: 2000
+    pages_libres: 8
+    source: { racine: oeuvres, pack: "Manuel_EST/2nde_ST" }
+
+  est-1ere:
+    titre: "Cahier de français EST — 1ʳᵉ S&T"
+    niveau: est
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire (Manuel_EST/1ere_ST)"
+    kinds: [livret]
+    prix: 2000
+    pages_libres: 8
+    source: { racine: oeuvres, pack: "Manuel_EST/1ere_ST" }
+
+  est-tle:
+    titre: "Cahier de français EST — Tᵉ S&T"
+    niveau: est
+    mode: lecture
+    actif: false
+    bloque: "PDF de pages à produire (Manuel_EST/Tle_ST)"
+    kinds: [livret]
+    prix: 2000
+    pages_libres: 8
+    source: { racine: oeuvres, pack: "Manuel_EST/Tle_ST" }

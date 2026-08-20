@@ -10,5 +10,9 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "^1.0.6",
+    "pdfjs-dist": "^4.10.38"
   }
 }

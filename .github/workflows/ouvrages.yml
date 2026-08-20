@@ -1,0 +1,140 @@
+# ══════════════════════════════════════════════════════════════════════════════
+# Garde-fou des ouvrages en ligne
+#
+# POURQUOI CE WORKFLOW EXISTE
+#   Deux accidents ont déjà coûté de l'argent sur ce dépôt, et aucun des deux
+#   n'était visible à l'œil :
+#     1. la page « démo » chargeait les données COMPLÈTES — 492 exercices et
+#        463 corrigés offerts à une URL publique, sans code ;
+#     2. des fichiers écrits, testés et listés dans deploy.yml n'étaient pas
+#        suivis par git : la CI les sautait EN SILENCE et la prod tournait sans.
+#   Un humain relit mal 13 pages générées. Une machine, jamais moins bien.
+#
+#   Ce workflow ne déploie rien. Il REFUSE de laisser passer ce qui coûterait
+#   une vente. Le déploiement, lui, reste dans deploy.yml.
+# ══════════════════════════════════════════════════════════════════════════════
+name: 🔒 Garde-fou des ouvrages
+
+on:
+  push:
+    paths:
+      - 'livrets/**'
+      - 'd/**'
+      - 'tools/ouvrages.yml'
+      - 'tools/publier.py'
+      - 'tools/prepare_livrets.py'
+      - 'api/livret.php'
+      - 'api/collab.php'
+      - 'api/_livret_lib.php'
+      - 'api/data/livrets_catalogue.json'
+      - '.github/workflows/ouvrages.yml'
+  pull_request:
+    paths:
+      - 'livrets/**'
+      - 'd/**'
+      - 'tools/**'
+      - 'api/livret.php'
+      - 'api/collab.php'
+      - 'api/_livret_lib.php'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  garde:
+    name: Rien du produit ne doit fuir
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 📦 Dépendances
+        run: pip install --quiet pyyaml
+
+      - name: 🧾 Le manifeste est-il lisible ?
+        run: |
+          python - <<'PY'
+          import sys, yaml
+          m = yaml.safe_load(open('tools/ouvrages.yml', encoding='utf-8'))
+          o = m.get('ouvrages') or {}
+          if not o:
+              sys.exit('::error title=Manifeste vide::tools/ouvrages.yml ne déclare aucun ouvrage')
+          actifs = [k for k, v in o.items() if v.get('actif')]
+          # Un ouvrage inactif DOIT dire pourquoi : sans cela, « en attente »
+          # devient « oublié » et personne ne sait ce qui reste à faire.
+          muets = [k for k, v in o.items() if not v.get('actif') and not v.get('bloque')]
+          if muets:
+              sys.exit('::error title=Blocage non expliqué::inactifs sans motif : ' + ', '.join(muets))
+          print(f"{len(o)} ouvrages déclarés, {len(actifs)} actifs : {', '.join(actifs)}")
+          PY
+
+      - name: 🔒 Contrôles anti-fuite
+        run: python tools/publier.py --controle
+
+      - name: 🧪 Syntaxe des scripts clients
+        run: |
+          for f in livrets/gate.js livrets/collab.js; do
+            node --check "$f" && echo "  ✓ $f"
+          done
+          # Les blocs <script> inline des pages écrites à la main comptent aussi :
+          # une virgule en trop dans /d/ et le mur d'abonnement ne s'affiche plus.
+          python - <<'PY'
+          import re, subprocess, tempfile, os, sys, pathlib
+          mauvais = 0
+          for p in [pathlib.Path('d/index.html'), pathlib.Path('livrets/prof.html')]:
+              if not p.is_file():
+                  print(f'::error title=Page absente::{p}'); mauvais += 1; continue
+              blocs = re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>', p.read_text(encoding='utf-8'), re.S)
+              for i, b in enumerate(blocs):
+                  if not b.strip():
+                      continue
+                  f = tempfile.NamedTemporaryFile('w', suffix='.js', delete=False, encoding='utf-8')
+                  f.write(b); f.close()
+                  r = subprocess.run(['node', '--check', f.name], capture_output=True, text=True)
+                  os.unlink(f.name)
+                  if r.returncode:
+                      print(f'::error file={p}::bloc {i} : ' + r.stderr.strip().split(chr(10))[0])
+                      mauvais += 1
+              print(f'  ✓ {p} ({len(blocs)} bloc(s) inline)')
+          sys.exit(1 if mauvais else 0)
+          PY
+
+      - name: 🗂️ Le catalogue décrit-il bien ce qui est publié ?
+        run: |
+          python - <<'PY'
+          import json, sys, pathlib
+          cat = pathlib.Path('api/data/livrets_catalogue.json')
+          if not cat.is_file():
+              print('::warning title=Catalogue absent::le serveur retombera sur les 5 classes historiques')
+              sys.exit(0)
+          d = json.loads(cat.read_text(encoding='utf-8'))
+          manquantes = []
+          for slug, o in (d.get('ouvrages') or {}).items():
+              # Un ouvrage au catalogue sans sa page, c'est un lien mort dans la
+              # boutique : le visiteur clique « acheter » et tombe sur un 404.
+              page = pathlib.Path('livrets') / f'{slug}.html'
+              if not page.is_file():
+                  manquantes.append(f'{slug} → {page} absente')
+              if 'guide' in (o.get('kinds') or []):
+                  g = pathlib.Path('livrets') / f'guide-{slug}.html'
+                  if not g.is_file():
+                      manquantes.append(f'{slug} → {g} absente')
+          if manquantes:
+              for m in manquantes:
+                  print(f'::error title=Ouvrage sans page::{m}')
+              sys.exit(1)
+          print(f"{len(d.get('ouvrages') or {})} ouvrages au catalogue, tous avec leur page.")
+          PY
+
+      - name: ✅ Récapitulatif
+        run: |
+          {
+            echo "### 🔒 Garde-fou des ouvrages — vert"
+            echo
+            echo "Aucun contenu vendu ne part en clair, aucun code de démonstration"
+            echo "ne subsiste, et tout ce que deploy.yml prétend copier est suivi par git."
+          } >> "$GITHUB_STEP_SUMMARY"
