@@ -23,6 +23,16 @@ if (in_array($__np_origin, $__np_allowed, true)) {
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: public, max-age=1800');
 
+// ── 🛡️ SENTINELLE (v2.0) ────────────────────────────────────────────────
+// Placée AVANT tout travail : un moissonneur ne doit pas nous coûter une
+// lecture de base ni un appel réseau pour se voir refuser ensuite.
+// Profil « lecture ». Un débit anormal reçoit un défi (429), pas un bannissement
+// — au Cameroun une classe entière partage une IP, et bannir l'IP fermerait
+// le site à trente élèves pour un seul emballement.
+require_once __DIR__ . '/_sentinel.php';
+vrt_sentinelle('lecture');
+
+
 $feeds = [
     'education'     => 'https://news.google.com/rss/search?q=education+cameroun+scolaire&hl=fr&gl=CM&ceid=CM:fr',
     'minesec'       => 'https://news.google.com/rss/search?q=MINESEC+cameroun+enseignement+secondaire&hl=fr&gl=CM&ceid=CM:fr',

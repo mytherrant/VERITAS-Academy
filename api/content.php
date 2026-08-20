@@ -55,6 +55,16 @@ header('X-Content-Type-Options: nosniff');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
 
+// ── 🛡️ SENTINELLE (v2.0) ────────────────────────────────────────────────
+// Placée AVANT tout travail : un moissonneur ne doit pas nous coûter une
+// lecture de base ni un appel réseau pour se voir refuser ensuite.
+// Profil « telechargement ». Un débit anormal reçoit un défi (429), pas un bannissement
+// — au Cameroun une classe entière partage une IP, et bannir l'IP fermerait
+// le site à trente élèves pour un seul emballement.
+require_once __DIR__ . '/_sentinel.php';
+vrt_sentinelle('telechargement');
+
+
 function content_err(int $code, string $msg): void {
     while (ob_get_level() > 0) { ob_end_clean(); } // jeter tout résidu d'inclusion
     http_response_code($code);

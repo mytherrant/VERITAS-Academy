@@ -44,7 +44,10 @@ header('Vary: Origin');
 // ── Rate limiting par IP (anti credential-stuffing) — fichier plat ──
 $rateDir = __DIR__ . '/data/_rate/';
 if (!is_dir($rateDir)) @mkdir($rateDir, 0750, true);
-$ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+require_once __DIR__ . '/_sentinel.php';
+// v2.0 : plus de X-Forwarded-For — en-tete ecrit par le client, donc
+// compteur remis a zero a volonte tant qu'aucun proxy n'est declare.
+$ip = vrt_real_ip();
 $ip = preg_replace('/[^0-9a-fA-F:.,]/', '', (string)$ip);
 $ipHash = substr(md5($ip), 0, 16);
 $rateFile = $rateDir . 'stud_' . $ipHash . '.txt';

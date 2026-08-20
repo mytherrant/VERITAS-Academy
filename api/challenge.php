@@ -67,7 +67,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'OPTIONS') { http_response_code(20
 // sur une machine louée à l'heure.
 // ─────────────────────────────────────────────────────────────────────
 function ch_difficulte(int $score): int {
-    if (true) { return 6; }   // TEMPORAIRE — capture d'ecran, revert immediat
     if ($score >= 55) { return 5; }
     if ($score >= 30) { return 4; }
     return 4;

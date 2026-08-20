@@ -46,13 +46,29 @@ déploie — il était dans un workflow séparé, rouge, et n'empêchait rien.
   mutation était neutre (deux gardes redondantes). Vérifier que la mutation
   change vraiment le comportement.
 
-**Laissé hors du déploiement, volontairement** : le chantier « Sentinelle v2.0 »
-(`api/_sentinel.php`, `challenge.php`, `assets/veritas-shield.js`, et les
-inclusions dans `content.php`/`_bot_log.php`/`ia_proxy.php`…). En l'état il
-renvoie 403 « Accès automatisé refusé » à un client envoyant un User-Agent de
-navigateur ordinaire — sur la porte du contenu payant, cela fermerait la
-boutique aux clients qui ont payé. À régler et à éprouver dans sa propre
-session. `api/_imagick_check.php` reste également dehors : sonde de diagnostic
+**Sentinelle v2.0 — le blocage est levé (19/08/2026).** Le chantier était
+écarté parce qu'il fermait la porte du contenu payant. **Cause trouvée et
+corrigée** : ce n'était pas le barème de suspicion, mais le profil
+`telechargement` plafonné à 20 appels/minute. Or `secure_pdf.php` sert un
+livret **une image par page** : l'élève était arrêté à la **page 21** d'un
+livret qu'il avait payé. Le plafond passe à **120/min** — exactement ce que
+`secure_pdf.php` s'accorde déjà (`vrt_rate_exceeded('spdf', 120)`) ; sa vraie
+défense y est plus fine (pages DISTINCTES sur une heure glissante).
+Mesuré, pas supposé : `tests/sentinelle.php` épingle le score des **9 formes
+réelles de client** (Chrome, Safari iPhone, Capacitor, Opera Mini, service
+worker, balise `<img>`…). **Aucune n'atteint 70**, le seuil de refus sec —
+pire cas 55 (service worker sans Sec-Fetch ni Accept-Language), tandis que
+`curl` atteint 125. Le 403 n'était donc jamais servi à un navigateur.
+Ajouté depuis : **application serveur du refus des moissonneuses d'IA**
+(`robots.txt` les interdisait déjà, mais rien ne l'appliquait), avec trois
+listes séparées — entraînement / IA à la demande / aspirateurs SEO. La
+deuxième est une **décision commerciale** : la vider rouvre VÉRITAS aux
+réponses de ChatGPT et Perplexity.
+58 contrôles au vert, éprouvés **par mutation** (une mutation restée verte a
+révélé un test qui ne testait rien : l'exclusion `Bingbot(?!-AI)` était
+couverte par accident, elle a désormais son test direct).
+`tests/sentinelle.php` **tourne maintenant dans la CI**, au même titre que les
+surfaces payantes. `api/_imagick_check.php` reste également dehors : sonde de diagnostic
 qui publie sans authentification les versions d'Imagick et Ghostscript.
 
 ## Dernière session (11/07/2026) — 1ère harmonisée + sujets d'examen + GT

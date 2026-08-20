@@ -194,7 +194,68 @@ function vrt_bot_score(): int {
 // ─────────────────────────────────────────────────────────────────────
 function vrt_is_search_engine(): bool {
     $ua = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
-    return (bool) preg_match('~(Googlebot|Bingbot|DuckDuckBot|Slurp|YandexBot|Applebot(?!-Extended))~i', $ua);
+    // ⚠️ Les exclusions comptent : « Bingbot-AI » CONTIENT « Bingbot », et
+    // « Applebot-Extended » contient « Applebot ». Sans ces gardes, les deux
+    // moissonneurs d'entraînement entreraient par la porte réservée au
+    // référencement — celle qui exempte de tout contrôle.
+    return (bool) preg_match(
+        '~(Googlebot(?!-Extended)|Bingbot(?!-AI)|DuckDuckBot|Slurp|YandexBot|Applebot(?!-Extended))~i',
+        $ua
+    );
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// 4bis. LES MOISSONNEUSES D'IA  ← répond directement à « protection contre les IA »
+// ─────────────────────────────────────────────────────────────────────
+// robots.txt interdisait DÉJÀ tous les agents listés ci-dessous. Mais
+// robots.txt est un panneau de courtoisie : il n'a aucun effet sur qui
+// choisit de ne pas le lire, et rien côté serveur ne l'appliquait. Un
+// moissonneur qui ignorait le panneau repartait avec les 4 000 corrigés,
+// les 56 pages d'analyses littéraires et les manuels — c'est-à-dire des
+// années de travail, absorbées dans un modèle sans une ligne de crédit.
+//
+// Ici on applique. Trois listes, séparées à dessein : elles ne relèvent pas
+// de la même décision.
+// ─────────────────────────────────────────────────────────────────────
+
+// (a) ENTRAÎNEMENT DE MODÈLES — aucune contrepartie pour VÉRITAS.
+//     C'est le cœur de la demande : blocage sec, sans discussion.
+const VRT_IA_ENTRAINEMENT =
+    'GPTBot|ClaudeBot|Claude-Web|anthropic-ai|CCBot|Bytespider|Amazonbot|'
+  . 'Meta-ExternalAgent|FacebookBot|PerplexityBot|YouBot|Diffbot|Omgilibot|Omgili|'
+  . 'ImagesiftBot|cohere-ai|cohere-training-data-crawler|Applebot-Extended|'
+  . 'Google-Extended|GoogleOther|Bingbot-AI|msnbot-AI|Timpibot|Webzio';
+
+// (b) IA « À LA DEMANDE » — une PERSONNE RÉELLE a demandé à son assistant
+//     d'ouvrir une page de VÉRITAS. Ce n'est pas de la moisson.
+//     ⚠️ DÉCISION COMMERCIALE, PAS TECHNIQUE. Bloquer, c'est disparaître des
+//     réponses de ChatGPT et de Perplexity — un canal par lequel des parents
+//     cherchent aujourd'hui « corrigés programme camerounais ». Le robots.txt
+//     actuel les interdit déjà : on reste donc cohérent avec ce qui est
+//     annoncé. Pour les accueillir à nouveau, vider cette liste (chaîne vide)
+//     — un seul geste, aucun autre changement nécessaire.
+const VRT_IA_A_LA_DEMANDE =
+    'ChatGPT-User|OAI-SearchBot|Claude-User|MistralAI-User|Perplexity-User';
+
+// (c) ASPIRATEURS SEO COMMERCIAUX — ils revendent l'analyse de votre site et
+//     consomment la bande passante du mutualisé sans rien apporter.
+const VRT_ASPIRATEURS_SEO =
+    'AhrefsBot|SemrushBot|MJ12bot|DotBot|BLEXBot|DataForSeoBot|SerpstatBot|'
+  . 'PetalBot|ZoominfoBot|Barkrowler|SeekportBot';
+
+/**
+ * @return string '' si l'agent n'est pas concerné, sinon la catégorie
+ *                ('entrainement', 'a_la_demande', 'seo') — journalisée pour
+ *                que Jacques voie QUI vient, et non un simple compteur.
+ */
+function vrt_ia_categorie(): string {
+    $ua = (string) ($_SERVER['HTTP_USER_AGENT'] ?? '');
+    if ($ua === '') { return ''; }
+    if (preg_match('~(' . VRT_IA_ENTRAINEMENT . ')~i', $ua))  { return 'entrainement'; }
+    if (VRT_IA_A_LA_DEMANDE !== ''
+        && preg_match('~(' . VRT_IA_A_LA_DEMANDE . ')~i', $ua)) { return 'a_la_demande'; }
+    if (preg_match('~(' . VRT_ASPIRATEURS_SEO . ')~i', $ua))  { return 'seo'; }
+    return '';
 }
 
 // ─────────────────────────────────────────────────────────────────────
@@ -342,7 +403,21 @@ $GLOBALS['VRT_PROFILS'] = [
     'lecture'        => ['ip' => 90, 'bloc' => 600, 'seuil' => 60],  // public_data, contenus
     'ecriture'       => ['ip' => 10, 'bloc' =>  60, 'seuil' => 45],  // demandes, formulaires
     'ia'             => ['ip' => 12, 'bloc' =>  60, 'seuil' => 45],  // ia_proxy — coûte de l'argent
-    'telechargement' => ['ip' => 20, 'bloc' =>  90, 'seuil' => 45],  // PDF/EPUB — le fonds de commerce
+    // ⚠️ 'telechargement' : NE PAS RABAISSER SANS RELIRE CE QUI SUIT.
+    // Ce profil valait 20/min. C'est ce chiffre qui avait fait écarter la
+    // sentinelle du déploiement : secure_pdf.php sert un livret UNE IMAGE PAR
+    // PAGE, donc l'élève qui feuillette 40 pages fait 40 requêtes — il était
+    // arrêté à la page 21, sur un livret qu'il avait payé.
+    // 120 n'est pas un chiffre choisi au hasard : c'est exactement ce que
+    // secure_pdf.php s'accorde déjà (vrt_rate_exceeded('spdf', 120)). Poser
+    // ici un plafond PLUS BAS que celui de l'endpoint ne protégeait rien —
+    // la vraie défense y est plus fine : elle compte les pages DISTINCTES sur
+    // une heure glissante, si bien que relire dix fois la même page est
+    // gratuit et qu'en balayer trois cents coûte.
+    // Le filet de bloc monte en proportion : une classe de trente élèves
+    // derrière l'IP d'un lycée lit légitimement plusieurs centaines de pages
+    // par minute.
+    'telechargement' => ['ip' => 120, 'bloc' => 900, 'seuil' => 45],  // PDF/EPUB — le fonds de commerce
     'identification' => ['ip' =>  8, 'bloc' =>  40, 'seuil' => 40],  // codes, mots de passe
 ];
 
@@ -351,6 +426,20 @@ function vrt_sentinelle(string $profil = 'lecture', bool $repondre = true): arra
 
     $ip     = vrt_real_ip();
     $score  = vrt_bot_score();
+
+    // ── Moissonneuses d'IA : refus sec, AVANT tout le reste ──────────────
+    // Placé en tête à dessein. Ni un laissez-passer, ni l'exemption des
+    // moteurs de recherche ne doivent pouvoir servir de contournement : une
+    // moissonneuse sait exécuter du JavaScript et sait se dire « Googlebot ».
+    // Le refus est le même sur les 4 000 corrigés que sur les manuels.
+    $cat = vrt_ia_categorie();
+    if ($cat !== '') {
+        vrt_sentinel_journal('IA-' . strtoupper($cat), $profil, $score, $ip,
+                             substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 80));
+        if ($repondre) { vrt_sentinel_refuse403(); }
+        return ['verdict' => 'ia', 'categorie' => $cat, 'score' => $score];
+    }
+
     $jeton  = vrt_shield_presente();
     $laisse = $jeton !== '' && vrt_shield_valid($jeton);
 

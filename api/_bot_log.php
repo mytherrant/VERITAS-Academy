@@ -28,6 +28,16 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// 🛡️ v2.0 : un plafond de débit, qui manquait entièrement. Sans lui, cet
+// endpoint public accepte autant d'écritures que l'expéditeur en envoie.
+// On ne défie pas ici (une balise n'a pas d'interface pour résoudre un
+// défi) : au-delà du raisonnable, on répond 204 et on n'écrit rien.
+require_once __DIR__ . '/_sentinel.php';
+if (vrt_sentinel_hits('botlog_' . vrt_real_ip(), 60) > 20) {
+    http_response_code(204);
+    exit;
+}
+
 $raw = file_get_contents('php://input');
 if (strlen($raw) > 4096) {
     // Limite anti-spam
@@ -57,9 +67,18 @@ $logDir = __DIR__ . '/data/';
 if (!is_dir($logDir)) @mkdir($logDir, 0750, true);
 $logFile = $logDir . '_bot_detections.log';
 
-// Rotation si trop gros
+// Rotation si trop gros.
+// ⚠️ v2.0 — CORRECTIF : la version précédente archivait sous un nom
+// horodaté (« _bot_detections.log.20260819-071200.bak »), donc SANS JAMAIS
+// RIEN SUPPRIMER. Chaque mégaoctet reçu laissait une archive de plus :
+// il suffisait d'envoyer des balises en boucle sur cet endpoint public et
+// non limité pour remplir le disque du mutualisé. Le journal des robots
+// était devenu l'arme la plus commode qu'on leur offrait.
+// Désormais : un seul emplacement d'archive, écrasé à chaque rotation —
+// l'espace occupé est borné à 2 Mo quoi qu'il arrive.
 if (file_exists($logFile) && filesize($logFile) > 1024*1024) {
-    @rename($logFile, $logFile . '.' . date('Ymd-His') . '.bak');
+    @unlink($logFile . '.1');
+    @rename($logFile, $logFile . '.1');
 }
 
 @file_put_contents(

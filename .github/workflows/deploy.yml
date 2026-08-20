@@ -165,6 +165,19 @@ jobs:
             exit 1
           fi
 
+      # ── 🛡️ Le bouclier anti-robots garde MAINTENANT toutes les surfaces
+      #    publiques, y compris les payantes. Une régression y est invisible
+      #    dans les deux sens : soit les portes s'ouvrent, soit les élèves
+      #    restent dehors — et personne ne s'en aperçoit avant les plaintes.
+      - name: 🛡️ Le bouclier tient-il (robots, IA, débit, laissez-passer) ?
+        run: |
+          if command -v php >/dev/null 2>&1; then
+            php tests/sentinelle.php
+          else
+            echo "::error title=PHP introuvable::Le garde-fou anti-robots n'a pas pu tourner. Déploiement ANNULÉ."
+            exit 1
+          fi
+
       # ── 🚪 Espaces par rôle — une entrée de menu sans route ne lève aucune
       # exception : render() sert le tableau de bord sous le titre demandé.
       - name: 🚪 Espaces par rôle (entrées mortes, chiffres inventés)

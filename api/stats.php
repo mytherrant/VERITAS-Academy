@@ -37,7 +37,10 @@ header('Cache-Control: no-store');
 $dir = __DIR__ . '/data/_stats';
 if (!is_dir($dir)) @mkdir($dir, 0750, true);
 
-$ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '?';
+require_once __DIR__ . '/_sentinel.php';
+// v2.0 : plus de X-Forwarded-For — en-tete ecrit par le client, donc
+// compteur remis a zero a volonte tant qu'aucun proxy n'est declare.
+$ip = vrt_real_ip();
 $ip = explode(',', (string) $ip)[0];
 $ipHash = substr(md5($ip . date('Ym')), 0, 10); // pseudonymisé, rotation mensuelle
 

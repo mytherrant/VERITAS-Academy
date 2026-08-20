@@ -39,6 +39,16 @@ header('Access-Control-Allow-Headers: Content-Type, Authorization, X-User-Id, X-
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { http_response_code(204); exit; }
+
+// ── 🛡️ SENTINELLE (v2.0) ────────────────────────────────────────────────
+// Placée AVANT tout travail : un moissonneur ne doit pas nous coûter une
+// lecture de base ni un appel réseau pour se voir refuser ensuite.
+// Profil « ia ». Un débit anormal reçoit un défi (429), pas un bannissement
+// — au Cameroun une classe entière partage une IP, et bannir l'IP fermerait
+// le site à trente élèves pour un seul emballement.
+require_once __DIR__ . '/_sentinel.php';
+vrt_sentinelle('ia');
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     echo json_encode(['error' => 'Method not allowed']);
@@ -132,9 +142,10 @@ if ($userId) {
 }
 
 // ── 3bis. 🔐 v1.2.1 RATE LIMIT PAR IP (borne les coûts, indépendant du userId client) ──
-$ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-$ip = explode(',', $ip)[0];
-$ip = preg_replace('/[^0-9a-fA-F:.]/', '', $ip);
+require_once __DIR__ . '/_sentinel.php';
+// v2.0 : plus de X-Forwarded-For — en-tete ecrit par le client, donc
+// compteur remis a zero a volonte tant qu'aucun proxy n'est declare.
+$ip = vrt_real_ip();
 $rateDir = __DIR__ . '/data/_rate/';
 if (!is_dir($rateDir)) @mkdir($rateDir, 0750, true);
 $ipFile = $rateDir . 'ia_' . substr(md5($ip), 0, 16) . '.txt';
