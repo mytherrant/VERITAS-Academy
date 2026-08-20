@@ -1081,7 +1081,21 @@
      Sans ce garde-fou, un passage sans point interne se réduisait à son dernier
      mot. Le texte de l'auteur reste mot pour mot dans tous les cas. */
   function nettoyerExtrait(txt, maxLen) {
-    txt = String(txt || '').replace(/^[﻿«»"'\s]+|[«»"'\s]+$/g, '').replace(/\s+/g, ' ').trim();
+    /* Les SAUTS DE LIGNE sont du texte, pas de la mise en forme : dans un
+       roman comme au théâtre, ils portent les répliques. Un « \s+ → ' ' »
+       appliqué ici recollait tout un dialogue en un seul paragraphe —
+         « Elle a pas pu partir toute seule. - Ça que non ! elle n'a pas de
+           pieds ! - À moins que quelqu'un l'ait chipée ! »
+       alors que Calixthe Beyala a écrit une réplique par ligne. On ne réduit
+       donc que les espaces HORIZONTAUX, et l'affichage rend les retours
+       (white-space:pre-line, posé par poserTexte). */
+    txt = String(txt || '')
+      .replace(/^[﻿«»"'\s]+|[«»"'\s]+$/g, '')
+      .replace(/\r\n?/g, '\n')
+      .replace(/[ \t ]+/g, ' ')
+      .replace(/ *\n */g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
     if (!txt) return '';
     if (!/^[A-ZÀ-ÖØ-Þ«—0-9]/.test(txt)) {
       var origine = txt;
@@ -1155,6 +1169,36 @@
     }
   }
 
+  /* Comme poser(), mais le texte GARDE ses retours à la ligne. Les styles de
+     l'encart sont écrits en ligne dans la page (elle est pré-rendue) : on pose
+     donc white-space ici plutôt que d'ajouter une feuille pour un mot-clé. */
+  function poserTexte(nom, valeur) {
+    var el = document.querySelector('[data-vrt-val="' + nom + '"]');
+    if (!el) return;
+    el.textContent = valeur;
+    el.style.whiteSpace = 'pre-line';
+  }
+
+  /* ── La couverture répétait ce que la citation venait de dire ────────────
+     À droite du passage, le panneau d'œuvre affichait la couverture avec le
+     titre dessus, puis le titre en dessous, puis « Œuvre au programme » — et
+     la citation, elle, portait déjà ce même titre et sa mention. Quatre fois
+     la même information sur un seul écran.
+     On retire la colonne de couverture SEULEMENT. Le badge de niveau, les
+     arguments (« Résumé par chapitre », « Fiches personnages »…) et le bouton
+     d'étude restent : eux ne répètent rien. */
+  function masquerCouverture() {
+    var nom = document.querySelector('[data-vrt-val="couvNom"]');
+    var lab = document.querySelector('[data-vrt-val="couvLabel"]');
+    if (!nom || !lab) return;
+    var e = nom.parentElement;
+    while (e && !e.contains(lab)) { e = e.parentElement; }
+    /* Garde-fou : si la maquette change et que le premier ancêtre commun
+       devient l'encart entier, on ne masque rien plutôt que d'effacer la
+       moitié de l'écran. La couverture tient dans ~300 px de haut. */
+    if (e && e.getBoundingClientRect().height < 420) { e.hidden = true; }
+  }
+
   function appliquerPassage(p) {
     var txt = nettoyerExtrait(p.extrait, 620);
     var titre = titrePropre(p.titre);
@@ -1164,10 +1208,19 @@
     if (!titre || motsDe(txt) < 70) return;
 
     var duo = couperEnDeux(txt);
-    poser('passage1', duo[0]);
-    poser('passage2', duo[1]);
+    poserTexte('passage1', duo[0]);
+    poserTexte('passage2', duo[1]);
+
+    /* La SIGNATURE d'abord, le titre en dessous. L'index range les 115 œuvres
+       sous « Œuvre au programme MINESEC » — une étiquette de collection : la
+       ligne d'auteur affichait donc le titre, et un extrait d'Assèze
+       l'Africaine ne portait le nom de Calixthe Beyala nulle part. Le serveur
+       tient désormais la vraie signature (api/_oeuvres_auteurs.php) ; quand
+       elle n'est pas établie, on retombe sur le titre seul plutôt que
+       d'inventer un nom. */
     poser('passageAuteur', auteur || titre);
     poser('passageSource', auteur ? titre : 'Œuvre au programme MINESEC');
+    masquerCouverture();
 
     /* La couverture perd sa mention « Étude d'œuvre … VÉRITAS » : le centre
        publie un cahier d'étude pour quatre œuvres, pas pour les cent seize du
@@ -1261,6 +1314,11 @@
        hors ligne. À elle seule elle règle le « rien n'a changé » le plus
        visible — l'encart affichait la date du dernier déploiement. */
     poser('dateDuJour', new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }));
+
+    /* Le doublon de couverture part TOUJOURS, serveur joignable ou non : sinon
+       un visiteur hors ligne garderait la couverture figée de la maquette
+       (Le Tube Digestif) à côté d'une citation qui parle d'autre chose. */
+    masquerCouverture();
 
     var base = apiBase();
     if (!base) return;                      // ouvert en file:// : pas d'API

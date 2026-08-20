@@ -91,26 +91,93 @@ if (!file_exists($dbPath)) {
 // ── 2bis. v1.2.3 : PASSAGE DU JOUR (?daily=1) — tirage déterministe par date,
 //    sans requête. Sert le widget « Passage du jour » (œuvres du corpus isolé). ──
 if (isset($_GET['daily'])) {
+    require_once __DIR__ . '/_oeuvres_auteurs.php';
     try {
         $pdo = new PDO('sqlite:' . $dbPath);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->exec("PRAGMA query_only = 1");
         // v1.2.3 : ne tirer que des passages FRANÇAIS (les œuvres en V.O. anglaise,
         // ex. l'epub de Conrad, n'ont pas d'accents français) → heuristique accents.
-        $fr = "(text LIKE '%é%' OR text LIKE '%è%' OR text LIKE '%à%' OR text LIKE '%ç%' OR text LIKE '%ê%')";
+        $fr = "(p.text LIKE '%é%' OR p.text LIKE '%è%' OR p.text LIKE '%à%' OR p.text LIKE '%ç%' OR p.text LIKE '%ê%')";
         // Passage du jour = teaser : on exige des extraits SUBSTANTIELS (≈6 lignes mini)
         // pour vraiment donner envie de lire la suite. Seuil relevé 240 → 450 caractères.
-        $cnt = (int)$pdo->query("SELECT COUNT(*) FROM passages WHERE LENGTH(text) > 450 AND " . $fr)->fetchColumn();
-        if ($cnt < 1) { echo json_encode(['ok' => false, 'passages' => []]); exit; }
-        $off = ((int)date('z') * 7 + (int)date('Y')) % $cnt;
-        $r = $pdo->query("SELECT f.author AS auteur, COALESCE(f.title, f.filename) AS titre, p.text AS extrait
-                          FROM passages p JOIN files f ON p.file_id = f.id
-                          WHERE LENGTH(p.text) > 450 AND (p.text LIKE '%é%' OR p.text LIKE '%è%' OR p.text LIKE '%à%' OR p.text LIKE '%ç%' OR p.text LIKE '%ê%') LIMIT 1 OFFSET " . $off)->fetch(PDO::FETCH_ASSOC);
+
+        /* ── On tire une ŒUVRE, PUIS un passage dedans ────────────────────
+           L'ancien tirage prenait un offset dans les 57 433 passages, toutes
+           œuvres confondues, et n'avançait que de 7 par jour. Or les passages
+           sont rangés par livre, et un roman en compte autour d'un millier :
+           il fallait donc environ CENT QUARANTE JOURS pour sortir du même
+           ouvrage. Vérifié le 20/08/2026 — sept jours d'affilée renvoyaient
+           « Assèze l'Africaine ». Le « passage du jour » ne changeait pas de
+           livre d'un trimestre à l'autre.
+           On énumère donc les œuvres, on en prend une par jour, et l'extrait
+           se choisit à l'intérieur : 101 œuvres = 101 jours avant de revoir
+           la même, et jamais deux fois le même extrait. */
+        $oeuvres = $pdo->query(
+            "SELECT f.id AS id, COALESCE(f.title, f.filename) AS nom, COUNT(*) AS n
+             FROM passages p JOIN files f ON p.file_id = f.id
+             WHERE LENGTH(p.text) > 450 AND " . $fr . "
+             GROUP BY f.id ORDER BY f.id"
+        )->fetchAll(PDO::FETCH_ASSOC);
+
+        // Essais politiques, enquêtes et fichiers au nom illisible ne sont pas
+        // des extraits de lecture : ils restent dans l'index, hors du widget.
+        $choix = [];
+        foreach ($oeuvres as $o) {
+            if (!oa_est_exclu($o['nom'])) { $choix[] = $o; }
+        }
+        if (!$choix) { echo json_encode(['ok' => false, 'passages' => []]); exit; }
+
+        // Compteur de jours continu : il ne repart pas à zéro au 1er janvier.
+        $jour   = (int)date('z') + ((int)date('Y') - 2026) * 366;
+        $oe     = $choix[$jour % count($choix)];
+        $n      = max(1, (int)$oe['n']);
+        $offset = ($jour * 7 + (int)date('Y')) % $n;
+
+        $st = $pdo->prepare(
+            "SELECT p.text AS extrait FROM passages p
+             WHERE p.file_id = :fid AND LENGTH(p.text) > 450 AND " . $fr . "
+             LIMIT 1 OFFSET " . $offset
+        );
+        /* PARAM_INT, et pas le execute([...]) qui semble équivalent : celui-ci
+           lie en CHAÎNE par défaut, et SQLite ne rapproche pas '1' de 1. La
+           requête ne remontait alors aucune ligne — le widget gardait sans
+           bruit le passage figé dans la maquette, en affichant quand même le
+           titre et l'auteur du jour. Un échec strictement invisible. */
+        $st->bindValue(':fid', (int)$oe['id'], PDO::PARAM_INT);
+        $st->execute();
+        $r = $st->fetch(PDO::FETCH_ASSOC);
         if (!$r) { echo json_encode(['ok' => false, 'passages' => []]); exit; }
-        $ex = preg_replace('/\s+/u', ' ', (string)$r['extrait']);
+
+        /* ── Les retours à la ligne SURVIVENT ─────────────────────────────
+           Un « preg_replace('/\s+/', ' ') » écrasait ici tout le blanc, sauts
+           de ligne compris. Conséquence sur la page : un dialogue de théâtre
+           ou de roman arrivait en un seul bloc —
+             « Elle a pas pu partir toute seule. - Ça que non ! elle n'a pas
+               de pieds ! - À moins que quelqu'un l'ait chipée ! »
+           là où l'auteur avait écrit une réplique par ligne. On donnait à lire
+           le contraire de ce qui est imprimé dans le livre. L'index, lui, les
+           avait bien conservés : 33 677 passages en contiennent, dont 11 745
+           avec un tiret de dialogue en tête de ligne.
+           On normalise donc les espaces HORIZONTAUX seulement. */
+        $ex = (string)$r['extrait'];
+        $ex = str_replace(["\r\n", "\r"], "\n", $ex);
+        $ex = preg_replace('/[ \t\x{00A0}]+/u', ' ', $ex);   // espaces et tabulations
+        $ex = preg_replace('/ *\n */u', "\n", $ex);          // bords de ligne
+        $ex = preg_replace('/\n{3,}/u', "\n\n", $ex);        // au plus une ligne vide
+        $ex = trim($ex);
+
+        /* L'index range TOUTES les œuvres sous l'auteur « Œuvre au programme
+           MINESEC » : une étiquette de collection, pas une signature. Le vrai
+           nom vient de la table écrite à la main (api/_oeuvres_auteurs.php),
+           et reste vide tant qu'il n'est pas établi — on ne signe pas un texte
+           au hasard. */
+        $ident = oa_pour($oe['nom']);
+        $titre = $ident['titre'] !== '' ? $ident['titre'] : trim((string)$oe['nom']);
+
         echo json_encode(['ok' => true, 'daily' => true, 'passages' => [[
-            'auteur'  => trim((string)$r['auteur']) ?: 'Anonyme',
-            'titre'   => trim((string)$r['titre']),
+            'auteur'  => $ident['auteur'],
+            'titre'   => $titre,
             'extrait' => function_exists('mb_substr') ? mb_substr($ex, 0, 900) : substr($ex, 0, 900),
         ]]], JSON_UNESCAPED_UNICODE);
     } catch (Throwable $e) {

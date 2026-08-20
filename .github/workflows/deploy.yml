@@ -466,6 +466,7 @@ jobs:
             api/_pay_funds_lib.php \
             api/ia_proxy.php \
             api/rag.php \
+            api/_oeuvres_auteurs.php \
             api/student_data.php \
             api/_json_boot.php \
             api/_auth_lib.php \
