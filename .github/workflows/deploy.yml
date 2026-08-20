@@ -627,7 +627,19 @@ jobs:
           # Suffixe purement NUMÉRIQUE : la coquille lit sa version avec
           # /app\.js\?v=([0-9.]+)/ (window._VRT_ASSET_VER, qui sert aux chunks),
           # un caractère hexadécimal casserait cette lecture en silence.
-          EMPREINTE=$(cat deploy/app.js deploy/app.css 2>/dev/null | sha1sum | tr -dc '0-9' | cut -c1-6)
+          # L'empreinte doit couvrir TOUT ce qui est servi « immutable 1 an »,
+          # pas seulement app.js/app.css. Constaté le 20/08/2026 : un correctif
+          # dans assets/vitrine.js est parti sur le serveur, mais l'empreinte —
+          # calculée sur app.js + app.css, restés identiques — n'a pas bougé.
+          # L'URL demandée par la page est donc restée /assets/vitrine.js?v=…807605,
+          # et .htaccess la sert « immutable » : le serveur détenait la version
+          # neuve (90 289 octets) pendant que chaque visiteur recevait l'ancienne
+          # (87 250). Rien ne plante, rien ne s'affiche en erreur — le correctif
+          # n'existe simplement pour personne. Le glob shell trie, l'empreinte
+          # reste donc stable à contenu égal.
+          EMPREINTE=$(cat deploy/app.js deploy/app.css \
+                          deploy/assets/*.css deploy/assets/*.js \
+                          deploy/chunks/*.js 2>/dev/null | sha1sum | tr -dc '0-9' | cut -c1-6)
           [ -z "$EMPREINTE" ] && EMPREINTE=0
           VER="$BASE.$EMPREINTE"
           echo "   Version de base $BASE + empreinte du contenu → $VER"
