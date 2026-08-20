@@ -184,6 +184,67 @@
        pour écrire de vraies règles sombres. */
     try { document.documentElement.setAttribute('data-vrt-theme', mode); } catch (e) {}
     try { localStorage.setItem('vrt_theme', mode); } catch (e) {}
+    adapterSurfaces(mode === 'sombre');
+  }
+
+  /* ── Le mode sombre effaçait un texte sur trois ───────────────────────────
+     Mesuré sur l'accueil, avant correction : 51 textes sous le seuil de
+     contraste en clair, 125 en sombre. « Élèves » s'affichait en blanc sur un
+     panneau resté blanc — ratio 1,03, c'est-à-dire invisible. Le lecteur ne
+     voit pas un défaut de couleur : il voit une carte vide.
+
+     Pourquoi : la feuille sombre héritée de la maquette reconnaît les surfaces
+     en cherchant une CHAÎNE dans l'attribut style — [style*="background:#fff"].
+     Elle attrape donc « background:#fff » et rate « background:#FAFBFE »,
+     « background: #FFF », ou tout fond posé autrement. Le texte, lui, est
+     éclairci partout. D'où le blanc sur blanc.
+
+     On ne devine plus : on LIT la couleur calculée de chaque surface, et on
+     n'assombrit que celles qui sont réellement claires. Le fond d'origine est
+     mis de côté pour être rendu tel quel au retour en clair — aucun aller-
+     retour ne dégrade la page. Les dégradés sont laissés intacts : ils portent
+     l'identité visuelle, et un dégradé n'a pas de « couleur » unique à juger. */
+  function clarte(couleur) {
+    var m = String(couleur || '').match(/\d+(\.\d+)?/g);
+    if (!m || m.length < 3) return null;
+    if (m.length > 3 && parseFloat(m[3]) < 0.5) return null;   // quasi transparent
+    var v = [0, 1, 2].map(function (i) {
+      var x = parseFloat(m[i]) / 255;
+      return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2];
+  }
+
+  function adapterSurfaces(sombre) {
+    var els = document.querySelectorAll('[style]');
+    for (var i = 0; i < els.length; i++) {
+      var e = els[i];
+      var enLigne = e.getAttribute('style') || '';
+      if (enLigne.indexOf('gradient') >= 0) continue;          // dégradé : on ne touche pas
+
+      if (sombre) {
+        if (e.getAttribute('data-vrt-fond') !== null) continue; // déjà traité
+        var fond = e.style.backgroundColor || '';
+        var lf = clarte(fond);
+        if (lf === null || lf < 0.6) continue;                  // pas une surface claire
+        e.setAttribute('data-vrt-fond', fond);
+        e.style.backgroundColor = '#132241';
+        /* Le texte porté par cette surface doit suivre, sinon on remplace un
+           blanc-sur-blanc par un navy-sur-navy. */
+        var lt = clarte(e.style.color || getComputedStyle(e).color);
+        if (lt !== null && lt < 0.5) {
+          e.setAttribute('data-vrt-encre', e.style.color || '');
+          e.style.color = '#EEF3FC';
+        }
+      } else if (e.getAttribute('data-vrt-fond') !== null) {
+        e.style.backgroundColor = e.getAttribute('data-vrt-fond');
+        e.removeAttribute('data-vrt-fond');
+        if (e.getAttribute('data-vrt-encre') !== null) {
+          e.style.color = e.getAttribute('data-vrt-encre');
+          e.removeAttribute('data-vrt-encre');
+        }
+      }
+    }
   }
 
   /* ── Animations (reprises de la maquette, sans le runtime) ─────────────── */
