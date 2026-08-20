@@ -1402,12 +1402,33 @@ article ul:not([class]){ list-style:none;padding-left:0;margin:.7rem 0 }
 .wrap ul:not([class])>li,
 .card ul:not([class])>li,
 article ul:not([class])>li{ position:relative;padding-left:1.25rem;margin:.4rem 0 }
+/* Pastille ronde à halo, identique à celle des pages en veritas-refonte.css :
+   les deux familles de pages statiques cohabitent sur le site, et rien ne
+   justifiait qu'un même site serve ici un tiret doré, là un point bleu.
+   Le halo remplace l'ombre portée : il pose la puce sans l'alourdir. */
 .wrap ul:not([class])>li::before,
 .card ul:not([class])>li::before,
 article ul:not([class])>li::before{
-  content:"";position:absolute;left:0;top:.62em;
-  width:9px;height:2px;border-radius:2px;
-  background:linear-gradient(90deg,#FFC93C,#E8A413);
+  content:"";position:absolute;left:2px;top:.55em;
+  width:7px;height:7px;border-radius:50%;
+  background:#1E499B;box-shadow:0 0 0 3.5px rgba(30,73,155,.13);
+}
+/* Alternance sur quatre couleurs de la charte — même rotation que l'autre
+   feuille, pour qu'une liste se lise pareil d'un bout à l'autre du site. */
+.wrap ul:not([class])>li:nth-child(4n+2)::before,
+.card ul:not([class])>li:nth-child(4n+2)::before,
+article ul:not([class])>li:nth-child(4n+2)::before{
+  background:#007E11;box-shadow:0 0 0 3.5px rgba(0,126,17,.13);
+}
+.wrap ul:not([class])>li:nth-child(4n+3)::before,
+.card ul:not([class])>li:nth-child(4n+3)::before,
+article ul:not([class])>li:nth-child(4n+3)::before{
+  background:#C24E00;box-shadow:0 0 0 3.5px rgba(194,78,0,.13);
+}
+.wrap ul:not([class])>li:nth-child(4n+4)::before,
+.card ul:not([class])>li:nth-child(4n+4)::before,
+article ul:not([class])>li:nth-child(4n+4)::before{
+  background:#5B4FA8;box-shadow:0 0 0 3.5px rgba(91,79,168,.13);
 }
 .wrap ol:not([class])>li::marker,
 .card ol:not([class])>li::marker,
@@ -1647,17 +1668,30 @@ nav.seqnav a[aria-current]{
 }
 .pill.or{ background:var(--lws-tint-beige) !important; color:#8A6A2B !important; }
 .pill.gris{ background:var(--lws-grey) !important; color:#6E7385 !important; }
+/* ── Médaillon : un ANNEAU, pas une pastille pleine ──────────────────
+   Cette surcharge transformait le rond en carré arrondi à fond plein. Sur
+   une grille de quatre cartes, quatre aplats teintés pèsent autant que le
+   texte et l'écrasent — c'est ce que donnait la page.
+   Le dessin retenu est celui de la maquette : cercle, fond blanc, anneau
+   fin de 2 px, icône de la même couleur que l'anneau. La couleur ne remplit
+   plus, elle cerne : le titre redevient l'élément le plus lourd de la carte.
+   Le style existait déjà plus haut dans cette feuille (§ médaillons) ; il
+   était simplement écrasé ici. On cesse de l'écraser. */
 .ico{
-  border-radius:12px !important;   /* le rond devient carré arrondi */
-  width:44px; height:44px;
-  background:var(--lws-tint-sky) !important; color:var(--lws-blue) !important;
+  border-radius:50% !important;
+  width:46px; height:46px;
+  background:#fff !important;
+  border:2px solid var(--lws-blue) !important;
+  color:var(--lws-blue) !important;
+  box-shadow:none !important;
+  margin-left:auto; margin-right:auto;   /* centré dans la carte */
   transition:transform .18s cubic-bezier(.16,1,.3,1);
 }
 .card:hover .ico, .cta a:hover .ico{ transform:translateY(-2px) scale(1.06); }
-.ico.or    { background:var(--lws-tint-beige) !important; color:#8A6A2B !important; }
-.ico.vert  { background:var(--lws-tint-green) !important; color:var(--green) !important; }
-.ico.violet{ background:#EDEAF8 !important;               color:var(--violet) !important; }
-.ico.rouge { background:#FBEAE8 !important;               color:var(--rouge) !important; }
+.ico.or    { border-color:#C2410C !important; color:#C2410C !important; background:#fff !important; }
+.ico.vert  { border-color:var(--green) !important;  color:var(--green) !important;  background:#fff !important; }
+.ico.violet{ border-color:var(--violet) !important; color:var(--violet) !important; background:#fff !important; }
+.ico.rouge { border-color:var(--rouge) !important;  color:var(--rouge) !important;  background:#fff !important; }
 /* Régularité du jeu d'icônes : même épaisseur, mêmes extrémités. */
 .i{ stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
 
@@ -1788,7 +1822,20 @@ section.lec, .card{ margin-bottom:20px; }
 
 /* Le vert de la réussite : corrigé validé, taux d'admission */
 details.sol>summary{ background:var(--lws-ok-clair) !important; color:var(--lws-ok) !important; }
-.ico.vert{ background:var(--lws-ok-clair) !important; color:var(--lws-ok) !important; }
+/* Le médaillon vert garde le fond BLANC : comme les autres, il cerne, il ne
+   remplit pas. Cette règle-ci lui rendait un aplat teinté — mesuré sur la
+   page des corrigés, la carte « Classe de 5ᵉ » sortait en #E4F4E9 quand ses
+   voisines étaient blanches. Seule la couleur du trait change. */
+.ico.vert{ background:#fff !important; border-color:var(--lws-ok) !important; color:var(--lws-ok) !important; }
+
+/* Le titre de la carte prend la couleur de son médaillon — même règle que sur
+   les tuiles de veritas-refonte.css, pour que les deux moitiés du site se
+   lisent pareil. Sans ça, l'alternance s'arrête à l'anneau et la grille
+   redevient uniforme dès qu'on regarde le texte.
+   Teintes foncées, toutes au-dessus de 4,5:1 sur blanc. */
+.card:has(.ico.vert)   h3, .card:has(.ico.vert)   h2 { color:#007E11; }
+.card:has(.ico.or)     h3, .card:has(.ico.or)     h2 { color:#C24E00; }
+.card:has(.ico.violet) h3, .card:has(.ico.violet) h2 { color:#5B4FA8; }
 .obj .i{ color:var(--lws-ok) !important; }
 
 @media (max-width:820px){
@@ -2310,25 +2357,26 @@ article ul:not([class]) > li:nth-child(even) {
    d'exercice lisible d'un coup d'œil.
    On ne touche qu'aux listes SANS classe : celles qui portent une classe
    ont déjà leur mise en forme, et la leur reprendre casserait des pages. */
-.wrap ul:not([class]) > li::marker,
-.card ul:not([class]) > li::marker,
-article ul:not([class]) > li::marker{
-  color:var(--navy);
-}
-.wrap ul:not([class]) > li:nth-child(3n+2)::marker,
-.card ul:not([class]) > li:nth-child(3n+2)::marker,
-article ul:not([class]) > li:nth-child(3n+2)::marker{
-  color:var(--green,#007E11);
-}
-.wrap ul:not([class]) > li:nth-child(3n+3)::marker,
-.card ul:not([class]) > li:nth-child(3n+3)::marker,
-article ul:not([class]) > li:nth-child(3n+3)::marker{
-  color:var(--ambr-f,#C24E00);
-}
+/* ⚠️ Les règles ::marker qui se trouvaient ici ne s'appliquaient à RIEN.
+   Les listes sans classe reçoivent « list-style:none » plus haut dans cette
+   feuille : sans marqueur, pas de pseudo-élément ::marker à colorer. Trois
+   blocs de couleurs alternées étaient donc écrits, relus, déployés — et
+   invisibles depuis toujours. L'alternance vit désormais sur ::before, le
+   même pseudo-élément qui dessine réellement la puce (voir plus haut).
+   Ne pas les réintroduire tant que list-style vaut none. */
 /* Les numéros : gras et colorés, pour qu'une étape se compte des yeux. */
 .wrap ol:not([class]) > li::marker,
 .card ol:not([class]) > li::marker,
 article ol:not([class]) > li::marker{
   color:var(--violet,#5B4FA8);
   font-weight:700;
+}
+
+/* Médaillon posé sur un bloc à FOND SOMBRE : blanc sur transparent, et le
+   titre garde sa couleur d'origine. Les teintes de charte y seraient
+   illisibles (voir sombre() dans assets/veritas-medaillons.js). */
+.ico.sur-sombre{
+  background:transparent !important;
+  border-color:rgba(255,255,255,.55) !important;
+  color:#fff !important;
 }

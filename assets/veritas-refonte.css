@@ -168,6 +168,37 @@ footer {
    tuile est justement ce qu'on lit pour choisir où aller. */
 .tile span { display: block; color: var(--r-encre2); font-size: 15px; margin-top: 3px; line-height: 1.55; }
 
+/* ── Médaillon d'icône ─────────────────────────────────────────────────────
+   Posé par assets/veritas-medaillons.js, sur les tuiles comme sur les cartes
+   de l'autre moitié du site. Même dessin des deux côtés : cercle, fond blanc,
+   anneau de 2 px, icône de la couleur de l'anneau. La couleur cerne, elle ne
+   remplit pas — le titre reste l'élément le plus lourd du bloc.
+   Centré, et le texte avec lui : une tuile devient une vignette qu'on
+   reconnaît de loin, au lieu d'un pavé de texte parmi quinze autres. */
+.tile:has(.ico) { text-align: center; }
+.tile .ico {
+  display: flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px; border-radius: 50%;
+  background: #fff; border: 2px solid var(--r-bleu); color: var(--r-bleu);
+  margin: 2px auto 10px;
+  transition: transform var(--r-t);
+}
+.tile .ico .i { width: 22px; height: 22px; }
+.tile:hover .ico { transform: translateY(-2px) scale(1.06); }
+.tile .ico.vert   { border-color: var(--r-acquis);  color: var(--r-acquis); }
+.tile .ico.or     { border-color: var(--r-action);  color: var(--r-action); }
+.tile .ico.violet { border-color: var(--r-premium); color: var(--r-premium); }
+
+/* Le TITRE prend la couleur de son médaillon. C'est ce qui fait tenir
+   l'alternance : sans lui, quatre anneaux colorés surmontent quatre titres
+   identiquement bleus, et l'œil lit encore une grille uniforme. Avec lui,
+   chaque tuile forme un ensemble et la page respire.
+   Les quatre teintes sont les versions FONCÉES de la charte, toutes au-dessus
+   de 4,5:1 sur blanc : la couleur ne se paie jamais en lisibilité. */
+.tile:has(.ico.vert)   strong { color: var(--r-acquis); }
+.tile:has(.ico.or)     strong { color: var(--r-action); }
+.tile:has(.ico.violet) strong { color: var(--r-premium); }
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -360,8 +391,27 @@ svg { display: inline-block; vertical-align: middle; flex: none; }
   box-shadow: 0 0 0 3.5px rgba(30, 73, 155, .13);
 }
 
+/* ── Alternance ────────────────────────────────────────────────────────────
+   Une liste de douze items tous marqués du même point bleu se lit comme un
+   mur : l'œil n'a aucun repère pour retrouver sa ligne. Les puces tournent
+   donc sur quatre couleurs de la charte — bleu, vert, ambre, violet — ce qui
+   donne un rythme visible sans rien ajouter au texte.
+   Quatre et non deux : sur trois, un item et son suivant-du-suivant se
+   répondent trop vite et l'alternance cesse de se voir. */
+.wrap ul:not([class]) > li:nth-child(4n+2)::before{
+  background: var(--r-acquis);  box-shadow: 0 0 0 3.5px rgba(0,126,17,.13);
+}
+.wrap ul:not([class]) > li:nth-child(4n+3)::before{
+  background: var(--r-action);  box-shadow: 0 0 0 3.5px rgba(194,78,0,.13);
+}
+.wrap ul:not([class]) > li:nth-child(4n+4)::before{
+  background: var(--r-premium); box-shadow: 0 0 0 3.5px rgba(91,79,168,.13);
+}
+
 /* Dans un encadré, la puce prend la couleur de l'encadré : la liste
-   appartient visiblement à son bloc. */
+   appartient visiblement à son bloc. Ces règles portent une classe de plus
+   que l'alternance ci-dessus : elles gagnent, et c'est voulu — dans un bloc
+   coloré, l'appartenance prime sur le rythme. */
 .retenir-box ul:not([class]) > li::before { background: var(--r-acquis); box-shadow: 0 0 0 3.5px rgba(0,126,17,.13); }
 .obj-box     ul:not([class]) > li::before { background: var(--r-parents); box-shadow: 0 0 0 3.5px rgba(14,124,134,.13); }
 .corpus-box  ul:not([class]) > li::before { background: var(--r-premium); box-shadow: 0 0 0 3.5px rgba(91,79,168,.13); }
@@ -396,6 +446,19 @@ svg { display: inline-block; vertical-align: middle; flex: none; }
   line-height: 1;
   box-shadow: 0 3px 9px rgba(30, 73, 155, .30);
 }
+/* Les pastilles suivent la même rotation que les puces : une méthode en huit
+   étapes cesse d'être un mur de huit ronds identiques, et l'élève retrouve
+   « l'étape orange » sans relire les numéros un par un. */
+.wrap ol:not([class]) > li:nth-child(4n+2)::before{
+  background: var(--r-acquis);  box-shadow: 0 3px 9px rgba(0,126,17,.30);
+}
+.wrap ol:not([class]) > li:nth-child(4n+3)::before{
+  background: var(--r-action);  box-shadow: 0 3px 9px rgba(194,78,0,.30);
+}
+.wrap ol:not([class]) > li:nth-child(4n+4)::before{
+  background: var(--r-premium); box-shadow: 0 3px 9px rgba(91,79,168,.30);
+}
+
 .retenir-box ol:not([class]) > li::before { background: var(--r-acquis); box-shadow: 0 3px 9px rgba(0,126,17,.30); }
 .obj-box     ol:not([class]) > li::before { background: var(--r-parents); box-shadow: 0 3px 9px rgba(14,124,134,.30); }
 .corpus-box  ol:not([class]) > li::before { background: var(--r-premium); box-shadow: 0 3px 9px rgba(91,79,168,.30); }
@@ -834,4 +897,9 @@ blockquote p {
     hyphens: manual;
     -webkit-hyphens: manual;
   }
+}
+
+/* Idem côté tuiles : sur fond sombre, l'anneau passe en blanc translucide. */
+.tile .ico.sur-sombre{
+  background:transparent; border-color:rgba(255,255,255,.55); color:#fff;
 }
