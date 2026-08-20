@@ -23,6 +23,13 @@ on:
       - 'api/**'
       - 'evaluations/**'
       - 'uploads/oeuvres/**'
+      # Les VERROUS des dossiers payants. Absents de cette liste jusqu'au
+      # 20/08/2026 : la CI les COPIE (voir l'etape « Verrous des dossiers
+      # proteges ») mais ne se reveillait jamais quand ils changeaient.
+      # Consequence constatee : le correctif du .htaccess racine est reste
+      # non deploye, et /uploads/protected/** a repondu 500 en production
+      # — les livrets vendus n'etaient gardes que par cette erreur.
+      - 'uploads/protected/**'
       - 'oeuvres/**'
       - 'ressources/**'
       - 'decouvrir/**'
