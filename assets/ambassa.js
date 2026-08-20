@@ -519,6 +519,39 @@
     if (ta) { try { ta.focus(); } catch (e) {} }
   }
 
+  /* La page porte-t-elle déjà un bouton qui ouvre Ambassa ? */
+  function porteDeLaPage() {
+    return document.querySelector(
+      'button[aria-label="Professeur Ambassa"], [onclick*="basculerIA"], [onclick*="ouvrirIA"]'
+    );
+  }
+
+  /* ── Le doublon revenait par la petite porte : le TEMPS ───────────────────
+     La vérification ci-dessous ne se faisait qu'une fois, au démarrage. Or la
+     porte de la vitrine n'est pas dans le HTML : c'est vitrine.js qui la rend.
+     Quand l'accueil met un peu plus longtemps à se construire — machine lente,
+     réseau lent, tout ce qui est la règle et non l'exception à Douala —
+     ambassa.js regarde AVANT qu'elle existe, ne trouve rien, et pose sa propre
+     pastille. Les deux avatars apparaissent alors ensemble, en bas de l'écran,
+     pour un seul et même tuteur. Le défaut est intermittent : invisible sur un
+     poste rapide, permanent sur un autre.
+     On continue donc de surveiller pendant quelques secondes, et on s'efface
+     dès que la vraie porte arrive. */
+  function surveillerPorte() {
+    var essais = 0;
+    var t = setInterval(function () {
+      essais++;
+      if (porteDeLaPage()) {
+        var f = document.querySelector('.amb-fab');
+        if (f && f.parentNode) { f.parentNode.removeChild(f); }
+        window.__ambassaDelegue = 'vitrine';
+        clearInterval(t);
+      } else if (essais >= 16) {          // ~8 s : au-delà, la page n'en a pas
+        clearInterval(t);
+      }
+    }, 500);
+  }
+
   function poserLanceur() {
     if (document.querySelector('.amb-fab')) return;
 
@@ -533,10 +566,7 @@
        Une page qui sait déjà ouvrir Ambassa n'a pas besoin d'une seconde
        porte : on s'efface. `window.__ambassaDelegue` reste vrai pour que
        `ouvrir()` sache vers quoi router. */
-    var porteExistante = document.querySelector(
-      'button[aria-label="Professeur Ambassa"], [onclick*="basculerIA"], [onclick*="ouvrirIA"]'
-    );
-    if (porteExistante) { window.__ambassaDelegue = 'vitrine'; return; }
+    if (porteDeLaPage()) { window.__ambassaDelegue = 'vitrine'; return; }
 
     var b = document.createElement('button');
     b.type = 'button';
@@ -558,6 +588,7 @@
     b.appendChild(lab); b.appendChild(av);
     b.addEventListener('click', ouvrir);
     document.body.appendChild(b);
+    surveillerPorte();
   }
 
   /* Échap ferme le panneau : un dialogue qui ne se ferme qu'à la souris est un
