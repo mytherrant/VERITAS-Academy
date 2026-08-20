@@ -1146,14 +1146,22 @@ function _migrateDB(){
     var _p3=_aDejaPlan('plan3');
     if(_p3 && _p3.prix===5000){ _p3.prix=7000; _p3.nom='ENSEIGNANT — ANNÉE'; }
 
-    // 3. Les offres qui n'existaient pour aucun public : on les prend dans
-    //    defaultDB() plutôt que de les recopier ici — une seule source.
+    /* 3. Ajouter les offres NOUVELLES — et elles seules.
+       On les prend dans defaultDB() plutôt que de les recopier ici : une seule
+       source pour la grille. Mais on n'ajoute que plan7 → plan15.
+       Pourquoi cette liste explicite plutôt qu'un « tout ce qui manque » :
+       la base de production ne porte plus plan5 (TECHNIQUE) ni plan6 (GCE),
+       retirés par l'administration. Un rattrapage aveugle les ferait
+       réapparaître à la prochaine ouverture — une suppression volontaire ne
+       doit pas ressusciter, c'est la règle déjà tenue pour les livres retirés
+       (DB._livresRetires). */
+    var _nouveaux={plan7:1,plan8:1,plan9:1,plan10:1,plan11:1,plan12:1,plan13:1,plan14:1,plan15:1};
     if(typeof defaultDB==='function'){
       var _ref=defaultDB();
       var _refPlans=(_ref && _ref.elearning && _ref.elearning.plans) ? _ref.elearning.plans : [];
       for(var _i=0;_i<_refPlans.length;_i++){
         var _rp=_refPlans[_i];
-        if(_rp && _rp.id && !_aDejaPlan(_rp.id)) _pl.push(_rp);
+        if(_rp && _rp.id && _nouveaux[_rp.id] && !_aDejaPlan(_rp.id)) _pl.push(_rp);
       }
     }
   }catch(e){ console.warn('[migration grille tarifaire]', e); }
