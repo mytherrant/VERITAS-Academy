@@ -308,9 +308,33 @@
   @keyframes vrtIntroSceau{0%{opacity:0;transform:scale(.7) rotate(-8deg)}60%{transform:scale(1.05) rotate(2deg)}100%{opacity:1;transform:none}}
   @keyframes vrtIntroPuce{0%{opacity:0;transform:translateX(-14px)}100%{opacity:1;transform:none}}
   @keyframes vrtIntroTrait{from{width:0}to{width:100%}}
-  .vrt-intro{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:24px;
-    background:linear-gradient(150deg,var(--c14375f,#14375f) 0%,var(--c1a72bb,#1a72bb) 100%);
+  /* Fond CLAIR. Le degrade bleu nuit d'origine occupait tout l'ecran : agressif
+     a la premiere ouverture, et il forcait un texte blanc sur six vignettes
+     identiques. Le blanc laisse la couleur qualifier chaque vignette. */
+  .vrt-intro{position:fixed;inset:0;z-index:120;display:flex;align-items:center;
+    justify-content:center;padding:20px;background:var(--cffffff,#fff);
     animation:vrtIntroFond .3s ease both}
+  /* HAUTEUR BORNEE. Le panneau debordait sous le bas de l'ecran et les boutons
+     « Passer » / « Suivant » devenaient inatteignables — on ne pouvait ni
+     valider ni sortir. Seule la zone des vignettes defile ; l'en-tete et les
+     boutons restent toujours visibles. */
+  .vrt-intro-boite{width:100%;max-width:980px;display:flex;flex-direction:column;
+    max-height:calc(100vh - 40px);max-height:calc(100dvh - 40px)}
+  .vrt-intro-corps{overflow-y:auto;min-height:0;flex:1}
+  /* Vignettes COTE A COTE : quatre colonnes sur grand ecran, deux sur tablette,
+     une sur telephone. Empilees, elles faisaient a elles seules la hauteur de
+     l'ecran. `auto-fit` evite une colonne vide si une etape en compte trois. */
+  .vrt-intro-puces{display:grid;gap:12px;text-align:left;margin:0 0 24px;
+    grid-template-columns:repeat(4,minmax(0,1fr))}
+  @media (max-width:900px){.vrt-intro-puces{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:560px){.vrt-intro-puces{grid-template-columns:1fr}}
+  /* Sur un ecran bas (portable pose, clavier ouvert), on rend la tete plus
+     compacte plutot que de laisser le panneau pousser les boutons dehors. */
+  @media (max-height:680px){
+    .vrt-intro-titre{font-size:24px!important;margin-bottom:6px!important}
+    .vrt-intro-sous{margin-bottom:16px!important}
+    .vrt-intro-sceau{width:56px!important;height:56px!important;margin-bottom:12px!important}
+  }
   .vrt-intro-sceau{animation:vrtIntroSceau .6s cubic-bezier(.22,.9,.36,1) both}
   .vrt-intro-titre{animation:vrtIntroTitre .5s cubic-bezier(.22,.61,.36,1) both;animation-delay:.16s}
   .vrt-intro-sous{animation:vrtIntroTitre .5s cubic-bezier(.22,.61,.36,1) both;animation-delay:.28s}
@@ -319,7 +343,7 @@
   .vrt-intro-puce:nth-child(2){animation-delay:.44s}
   .vrt-intro-puce:nth-child(3){animation-delay:.54s}
   .vrt-intro-puce:nth-child(4){animation-delay:.64s}
-  .vrt-intro-jauge{height:3px;border-radius:2px;background:rgba(255,255,255,.9);animation:vrtIntroTrait 4.2s linear both}
+  .vrt-intro-jauge{height:3px;border-radius:2px;background:var(--c1a72bb,#1a72bb);animation:vrtIntroTrait 4.2s linear both}
   @media (prefers-reduced-motion:reduce){
     .vrt-intro,.vrt-intro-sceau,.vrt-intro-titre,.vrt-intro-sous,.vrt-intro-puce{animation:none!important}
     .vrt-intro-jauge{animation:none!important;width:100%}
@@ -2059,8 +2083,8 @@
         <h2 style="font-family:Poppins;font-size:19px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px;text-align:center">Connexion</h2>
         <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 20px;text-align:center">Avec votre compte VÉRITAS — le même que sur veritas-school.com.</p>
         <div style="display:flex;flex-direction:column;gap:12px">
-          <label style="{{ fieldLbl }}">Adresse électronique<input type="email" value="{{ authMail }}" onChange="{{ setAuthMail }}" onKeyDown="{{ authKey }}" placeholder="nom@etablissement.cm" style="{{ fieldIn }}"></label>
-          <label style="{{ fieldLbl }}">Mot de passe<input type="password" value="{{ authMdp }}" onChange="{{ setAuthMdp }}" onKeyDown="{{ authKey }}" placeholder="••••••••" style="{{ fieldIn }}"></label>
+          <label style="{{ fieldLbl }}">Identifiant<input type="text" autoComplete="username" autoCapitalize="none" spellCheck="false" value="{{ authMail }}" onChange="{{ setAuthMail }}" onKeyDown="{{ authKey }}" placeholder="votre identifiant VÉRITAS" style="{{ fieldIn }}"></label>
+          <label style="{{ fieldLbl }}">Mot de passe<input type="password" autoComplete="current-password" value="{{ authMdp }}" onChange="{{ setAuthMdp }}" onKeyDown="{{ authKey }}" placeholder="••••••••" style="{{ fieldIn }}"></label>
         </div>
         <div style="{{ authErrStyle }}">{{ authErr }}</div>
         <button onClick="{{ authSubmit }}" style="{{ authBtn }}">{{ authLabel }}</button>
@@ -2137,35 +2161,36 @@
 
   <sc-if value="{{ introOuverte }}" hint-placeholder-val="{{ false }}">
   <div data-noprint="1" class="vrt-intro">
-    <div style="width:100%;max-width:560px;text-align:center;color:#fff">
+    <div class="vrt-intro-boite" style="text-align:center;color:var(--c33404f,#33404f)">
 
-      <span class="vrt-intro-sceau" style="display:inline-grid;place-items:center;width:76px;height:76px;border-radius:22px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);margin-bottom:20px">{{ introSceau }}</span>
+      <span class="vrt-intro-sceau" style="{{ introSceauStyle }}">{{ introSceau }}</span>
 
-      <h1 class="vrt-intro-titre" style="font-family:'Poppins';font-size:32px;font-weight:700;margin:0 0 10px;letter-spacing:-.02em;line-height:1.15">{{ introTitre }}</h1>
-      <p class="vrt-intro-sous" style="font-size:15px;line-height:1.65;color:#dbe8f5;margin:0 auto 26px;max-width:44ch">{{ introSous }}</p>
+      <h1 class="vrt-intro-titre" style="font-family:'Poppins';font-size:32px;font-weight:700;margin:0 0 10px;letter-spacing:-.02em;line-height:1.15;color:var(--c14375f,#14375f)">{{ introTitre }}</h1>
+      <p class="vrt-intro-sous" style="font-size:15px;line-height:1.65;color:var(--c5a6678,#5a6678);margin:0 auto 26px;max-width:52ch">{{ introSous }}</p>
 
-      <div style="display:flex;flex-direction:column;gap:11px;text-align:left;margin-bottom:28px">
-        <sc-for list="{{ introPuces }}" as="p" hint-placeholder-count="4">
-          <div class="vrt-intro-puce" style="display:flex;align-items:center;gap:13px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);border-radius:13px;padding:13px 15px">
-            <span style="flex:none">{{ p.icone }}</span>
-            <span style="min-width:0">
-              <span style="display:block;font-family:Poppins;font-size:13.5px;font-weight:700;color:#fff">{{ p.titre }}</span>
-              <span style="display:block;font-size:12.5px;color:#c9dcf0;line-height:1.5;margin-top:2px">{{ p.texte }}</span>
-            </span>
-          </div>
-        </sc-for>
+      <div class="vrt-intro-corps">
+        <div class="vrt-intro-puces">
+          <sc-for list="{{ introPuces }}" as="p" hint-placeholder-count="4">
+            <div class="vrt-intro-puce" style="{{ p.carte }}" style-hover="{{ p.survol }}">
+              <span style="display:flex;justify-content:center;margin-bottom:12px">{{ p.icone }}</span>
+              <span style="display:block;font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f);line-height:1.35">{{ p.titre }}</span>
+              <span style="display:block;font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.55;margin-top:6px">{{ p.texte }}</span>
+            </div>
+          </sc-for>
+        </div>
       </div>
 
-      <div style="display:flex;gap:6px;justify-content:center;margin-bottom:22px">
+      <div style="display:flex;gap:6px;justify-content:center;margin-bottom:18px">
         <sc-for list="{{ introJauges }}" as="j" hint-placeholder-count="4">
           <span style="{{ j.piste }}"><span style="{{ j.barre }}"></span></span>
         </sc-for>
       </div>
 
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-        <button onClick="{{ introPasser }}" style="background:transparent;border:1px solid rgba(255,255,255,.38);color:#dbe8f5;padding:12px 22px;font-size:13.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer" style-hover="border-color:#fff;color:#fff">Passer</button>
-        <button onClick="{{ introSuivant }}" style="background:#fff;border:none;color:var(--c14375f,#14375f);padding:12px 30px;font-size:13.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer" style-hover="background:#eaf1f8">{{ introBouton }}</button>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;align-items:center">
+        <button onClick="{{ introPasser }}" style="background:transparent;border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);padding:12px 22px;font-size:13.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer" style-hover="border-color:var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb)">Passer</button>
+        <button onClick="{{ introSuivant }}" style="background:var(--c1a72bb,#1a72bb);border:none;color:var(--cffffff,#fff);padding:12px 30px;font-size:13.5px;font-weight:700;font-family:Poppins;border-radius:999px;cursor:pointer" style-hover="background:var(--c135a96,#135a96)">{{ introBouton }}</button>
       </div>
+      <p style="margin:12px 0 0;font-size:11.5px;color:var(--c8b97a8,#8b97a8)">{{ introAide }}</p>
 
     </div>
   </div>
@@ -2486,6 +2511,7 @@ class Component extends DCLogic {
     this._reconcilierPaiements();
     this._installerProtection();
     this._installerRetour();
+    this._installerClavierIntro();
     if(!this.state.ready){
       const boot=()=>{/* Les repliques sont retrouvees ICI, une seule fois, et pas a chaque   affichage : les index d'annotation comptent les mots du texte, donc   la fiche, le composeur et l'editeur de cours doivent tous lire   exactement la meme chaine. VRT_TEXTE n'ajoute que des sauts de ligne   (integrite verifiee sur les 1040 textes). */this.base=(window.MINESEC_CORPUS||[]).map(f=>(f&&f.text&&/[—–]/.test(f.text))?{...f,text:VRT_TEXTE.formaterDialogue(f.text)}:f);this.all=this.base.concat(this.custom);this._buildMeta();this.setState({ready:this.base.length>0,currentN:this.all[0]?this.all[0].n:this.state.currentN});};
       if(window.MINESEC_CORPUS){boot();return;}
@@ -2575,9 +2601,20 @@ class Component extends DCLogic {
       sc.onerror=()=>{this.setState({corpusErr:'Corpus indisponible. Verifiez votre connexion ou votre abonnement.'});};
       document.head.appendChild(sc);
     };
-    fetch(this._apiUrl('plateforme.php')+'?action=corpus&mode=index',
-      {headers:this._jeton()?{Authorization:'Bearer '+this._jeton()}:{}})
+    /* DELAI MAXIMUM. Sans lui, une requete que le serveur ne rend jamais
+       laisse l'ecran sur « Chargement du repertoire… » indefiniment : pas de
+       message, pas de bouton, aucune issue — c'est exactement ce qui s'est
+       produit le 21/08/2026, cinq minutes durant. Le `.catch()` ne sert a rien
+       tant que la promesse ne se resout pas ; il faut donc la trancher
+       nous-memes. 45 s : bien au-dela d'un index de 706 Ko sur une connexion
+       lente, bien en deca de la patience de qui attend. */
+    const coupe=(typeof AbortController!=='undefined')?new AbortController():null;
+    const minuteur=setTimeout(()=>{try{coupe&&coupe.abort();}catch(e){}},45000);
+    const opts={headers:this._jeton()?{Authorization:'Bearer '+this._jeton()}:{}};
+    if(coupe)opts.signal=coupe.signal;
+    fetch(this._apiUrl('plateforme.php')+'?action=corpus&mode=index',opts)
       .then(r=>{
+        clearTimeout(minuteur);
         if(r.status===401||r.status===402){
           return r.json().catch(()=>({})).then(j=>Promise.reject(
             Object.assign({_http:r.status},j)));
@@ -2615,6 +2652,14 @@ class Component extends DCLogic {
           },0);});
       })
       .catch(e=>{
+        clearTimeout(minuteur);
+        /* Delai depasse : le serveur n'a jamais rendu la main. On le dit tel
+           quel — « verifiez votre connexion » serait faux, elle fonctionne. */
+        if(e&&e.name==='AbortError'){
+          this.setState({corpusErr:'Le serveur n’a pas répondu dans le temps imparti. '
+            +'Votre connexion et votre abonnement ne sont pas en cause — réessayez.'});
+          return;
+        }
         if(e&&e.error==='Abonnement requis'){
           this.setState({corpusErr:e.message||'Abonnement requis pour acceder au corpus.',
             corpusDroit:{ok:false,motif:e.motif||'refuse'}});
@@ -2945,6 +2990,36 @@ class Component extends DCLogic {
   }
   _panneauOuvert(e){
     return !!(e.panierOpen||e.chatOpen||e.payOpen||e.importOpen||e.notifOpen||e.createOpen);
+  }
+  /* CLAVIER de la presentation. Elle ne repondait a aucune touche : il fallait
+     viser un bouton a la souris, et quand le panneau debordait sous l'ecran ces
+     boutons devenaient inatteignables — on ne pouvait plus ni avancer ni sortir.
+     Un panneau modal doit toujours se fermer a Echap. Le gestionnaire ne fait
+     rien tant que la presentation est fermee : il ne peut donc pas voler une
+     touche au formulaire de connexion qui vit derriere. */
+  _installerClavierIntro(){
+    if(this._clavierIntroInstalle)return;
+    this._clavierIntroInstalle=true;
+    try{
+      window.addEventListener('keydown',(e)=>{
+        if(!this.state.introOuverte)return;
+        const k=e.key;
+        if(k==='Escape'){e.preventDefault();this._save('minesec_intro_vue',true);
+          this.setState({introOuverte:false,introEtape:0});return;}
+        if(k==='Enter'||k===' '||k==='Spacebar'||k==='ArrowRight'||k==='PageDown'){
+          e.preventDefault();
+          const n=this.state.introEtape||0;
+          if(n<(this._introNb||1)-1){this.setState({introEtape:n+1});return;}
+          this._save('minesec_intro_vue',true);
+          this.setState({introOuverte:false,introEtape:0});return;
+        }
+        if(k==='ArrowLeft'||k==='PageUp'){
+          e.preventDefault();
+          const n=this.state.introEtape||0;
+          if(n>0)this.setState({introEtape:n-1});
+        }
+      });
+    }catch(e){}
   }
   _installerRetour(){
     if(this._retourInstalle)return;
@@ -3750,13 +3825,10 @@ class Component extends DCLogic {
          {ic:'search',t:'Garde-fou de conformit\u00e9',d:'Longueurs, bar\u00e8mes et structures contr\u00f4l\u00e9s pendant que vous \u00e9crivez.'},
          {ic:'users',t:'Travail \u00e0 plusieurs',d:'Relecture, validation, biblioth\u00e8que partag\u00e9e du d\u00e9partement.'},
          {ic:'file',t:'Impression et export Word',d:'Votre en-t\u00eate, votre logo, pr\u00eat \u00e0 tirer.'}]},
-      {sceau:'layers',titre:'Le corpus',
-       sous:'Cherchez par cycle, module, type de texte ou longueur. Mettez de c\u00f4t\u00e9 ce qui vous pla\u00eet dans le panier, composez ensuite.',
-       puces:[
-         {ic:'search',t:'Filtres du programme',d:'Premier cycle, second cycle, enseignement technique.'},
-         {ic:'inbox',t:'Panier de textes',d:'Vos trouvailles survivent au rechargement.'},
-         {ic:'highlighter',t:'Annotation mot \u00e0 mot',d:'Surlignez, commentez, partagez avec vos coll\u00e8gues.'},
-         {ic:'upload',t:'Import de vos textes',d:'Compl\u00e9tez la base avec vos propres extraits.'}]},
+      /* L'etape \u00ab Le corpus \u00bb a ete retiree : la premiere annonce deja les
+         1 040 textes \u00ab classes par cycle, module et type \u00bb, et l'etape ne
+         faisait que redire la meme chose en quatre vignettes. Trois etapes
+         valent mieux que quatre dont une repete. */
       {sceau:'search',titre:'Le garde-fou MINESEC',
        sous:'Chaque \u00e9preuve est confront\u00e9e \u00e0 la structure officielle de sa s\u00e9rie, sans que vous ayez \u00e0 le demander.',
        puces:[
@@ -3774,6 +3846,10 @@ class Component extends DCLogic {
     ];
     const iE=Math.max(0,Math.min(INTRO.length-1,st.introEtape||0));
     const introCur=INTRO[iE];
+    /* Le gestionnaire clavier vit hors de renderVals et ne voit pas INTRO :
+       on lui laisse le nombre d'etapes ici, pour qu'ajouter ou retirer une
+       etape n'oblige jamais a corriger un compte ecrit en dur ailleurs. */
+    this._introNb=INTRO.length;
     /* ---- Exercices complementaires ---------------------------------------
        Cinq boutons : trois calculent (instantane, gratuit), deux appellent
        Ambassa. On le dit dans l'infobulle pour que l'enseignant sache ce qui
@@ -4335,16 +4411,35 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       icRefus:this._icon('close','var(--cc0392b,#c0392b)',14),
       /* --- presentation --- */
       introOuverte:st.introOuverte,
-      introSceau:this._icon(introCur.sceau,'#ffffff',34),
+      /* Sceau : anneau a la teinte de l'etape, sur BLANC. La couleur dit ou
+         l'on est ; elle ne remplit rien. */
+      introSceau:this._icoRond(introCur.sceau,this._teinte(iE),64),
+      introSceauStyle:'display:inline-grid;place-items:center;margin-bottom:18px',
       introTitre:introCur.titre,
       introSous:introCur.sous,
-      introPuces:introCur.puces.map(x=>({titre:x.t,texte:x.d,
-        icone:this._icoRond(x.ic,'#ffffff',38)})),
+      /* STYLE LWS, celui de toute l'application : carte BLANCHE, bordure
+         neutre, contenu centre sous l'anneau. La couleur ne vit que dans
+         l'anneau de l'icone, avec la rotation de teintes qui empeche deux
+         vignettes voisines de se ressembler. Au survol c'est la BORDURE qui
+         prend la teinte, jamais le fond.
+         Un aplat pastel par carte a deja ete essaye et refuse : « c'est
+         grossier et pas beau ». La couleur qualifie, elle n'inonde pas. */
+      introPuces:introCur.puces.map((x,i2)=>({titre:x.t,texte:x.d,
+        carte:'text-align:center;background:var(--cffffff,#fff);'
+          +'border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:14px;'
+          +'padding:20px 16px;box-shadow:0 2px 10px rgba(20,55,95,.045);'
+          +'display:flex;flex-direction:column;align-items:center;height:100%',
+        survol:'border-color:'+this._teinte(i2),
+        icone:this._icoRond(x.ic,this._teinte(i2),46)})),
       introJauges:INTRO.map((x,i2)=>({
-        piste:'display:block;width:'+(i2===iE?'34px':'18px')+';height:3px;border-radius:2px;background:rgba(255,255,255,.28);overflow:hidden;transition:width .25s ease',
-        barre:i2<iE?'display:block;height:100%;width:100%;background:#fff'
-             :(i2===iE?'display:block;height:100%;background:#fff;width:100%':'display:none')})),
+        piste:'display:block;width:'+(i2===iE?'34px':'18px')+';height:3px;border-radius:2px;background:var(--cd5e0ec,#d5e0ec);overflow:hidden;transition:width .25s ease',
+        barre:i2<iE?'display:block;height:100%;width:100%;background:var(--c1a72bb,#1a72bb)'
+             :(i2===iE?'display:block;height:100%;background:var(--c1a72bb,#1a72bb);width:100%':'display:none')})),
       introBouton:iE<INTRO.length-1?'Suivant':'Commencer',
+      /* On ANNONCE les touches. Un panneau qui repond au clavier sans le dire
+         n'y repond pas, pour qui ne l'essaie jamais. */
+      introAide:iE>0?'Entree ou → pour continuer · ← pour revenir · Échap pour passer'
+                    :'Entree ou → pour continuer · Échap pour passer',
       introSuivant:()=>{
         if(iE<INTRO.length-1){this.setState({introEtape:iE+1});return;}
         this._save('minesec_intro_vue',true);

@@ -221,13 +221,31 @@ function plat_droit(array $acc, array $db, array $offres): array
  * sauvegarde horodatée. Le mutateur reçoit la base et la renvoie modifiée ;
  * s'il renvoie null, rien n'est écrit.
  */
-function plat_muter(callable $mutateur)
+function plat_muter(callable $mutateur, bool $obligatoire = true)
 {
     global $DB_FILE, $DATA_DIR;
     $fp = fopen($DB_FILE, 'c+');
-    if (!$fp) jsonResponse(['ok' => false, 'error' => 'Ouverture impossible'], 500);
-    if (!flock($fp, LOCK_EX)) {
+    if (!$fp) {
+        if (!$obligatoire) return null;
+        jsonResponse(['ok' => false, 'error' => 'Ouverture impossible'], 500);
+    }
+
+    /* VERROU BORNÉ, jamais bloquant.
+       `flock($fp, LOCK_EX)` sans LOCK_NB attend INDÉFINIMENT que le verrou se
+       libère, et sur Unix cette attente ne compte pas dans max_execution_time :
+       PHP ne l'interrompt donc jamais. Or db.php écrit dans ce même fichier à
+       chaque synchronisation admin. Constaté en production le 21/08/2026 :
+       l'Atelier est resté cinq minutes sur « Chargement du répertoire… », sans
+       message ni bouton, parce que la requête n'a simplement jamais rendu la
+       main. On tente le verrou pendant deux secondes, puis on abandonne. */
+    $obtenu = false;
+    for ($essai = 0; $essai < 20; $essai++) {
+        if (flock($fp, LOCK_EX | LOCK_NB)) { $obtenu = true; break; }
+        usleep(100000); // 100 ms
+    }
+    if (!$obtenu) {
         fclose($fp);
+        if (!$obligatoire) return null;
         jsonResponse(['ok' => false, 'error' => 'Base occupée — réessayez'], 503);
     }
     $brut = stream_get_contents($fp);
@@ -388,13 +406,19 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
     $palier = plat_palier_de($droit);
     $caps   = plat_paliers($db)[$palier] ?? plat_paliers($db)['demo'];
 
-    // Premier accès : on horodate l'ouverture de l'essai, côté serveur.
+    /* Premier accès : on horodate l'ouverture de l'essai, côté serveur.
+       AU MIEUX, jamais au prix de la lecture. Cette écriture n'est qu'un
+       tampon de date ; si la base est occupée par une synchronisation, on
+       sert quand même le répertoire et le tampon se posera à la requête
+       suivante. Faire dépendre l'affichage du corpus de l'obtention d'un
+       verrou d'écriture, c'était accepter que l'enseignant attende que
+       l'administration ait fini de synchroniser — ou pour toujours. */
     if (($droit['motif'] ?? '') === 'essai_ouverture') {
         $accId = (string) ($acc['id'] ?? '');
         plat_muter(function (array $db2) use ($accId) {
             plat_ecrire_compte($db2, $accId, ['platEssaiDebut' => time()]);
             return [$db2, true];
-        });
+        }, false);
     }
 
     $estCitation = ($action === 'citations');
