@@ -1387,8 +1387,16 @@ deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
         if (e < ecart) { ecart = e; coupe = i + 1; }
       }
       const a = mots.slice(0, coupe).join(' '), b = mots.slice(coupe).join(' ');
+      // L'encre d'accent TOURNE d'un titre a l'autre. Toutes les secondes
+      // moities partageaient le meme bleu : sur une page qui aligne une
+      // quinzaine de grands titres, un accent que l'on retrouve partout
+      // n'accentue plus rien. Quatre encres de la charte se succedent, donc
+      // deux titres voisins n'ont jamais la meme. La rotation suit l'ORDRE
+      // D'APPARITION dans le document : elle est donc stable d'un build a
+      // l'autre tant que la maquette ne bouge pas.
+      const encre = 'vt-b' + ((faits % 4) + 1);
       faits++;
-      return ouvre + '><span class="vt-a">' + a + '</span> <span class="vt-b">' + b + '</span></h2>';
+      return ouvre + '><span class="vt-a">' + a + '</span> <span class="vt-b ' + encre + '">' + b + '</span></h2>';
     });
   console.log('titres      : ' + faits + ' bicolores, ' + laisses + ' laissés d\'une seule encre (trop courts)');
 }

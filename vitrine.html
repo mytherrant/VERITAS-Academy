@@ -241,6 +241,21 @@
 [data-vrt-theme="sombre"] .vt-a{color:#EAF0FB}
 [data-vrt-theme="sombre"] .vt-b{color:#7FA8F0}
 
+/* ROTATION D'ENCRE. Toutes les secondes moities partageaient le meme bleu :
+   sur une page qui en aligne une quinzaine, l'accent cessait d'accentuer.
+   Quatre encres de la charte tournent d'un titre a l'autre, si bien que deux
+   titres qui se suivent n'ont jamais la meme. Les valeurs sombres sont
+   eclaircies : les encres de jour, posees sur le fond nuit, deviennent
+   illisibles. */
+.vt-b1{color:#1E499B}   /* bleu de marque */
+.vt-b2{color:#B03A6E}   /* magenta        */
+.vt-b3{color:#C24E00}   /* orange         */
+.vt-b4{color:#0E7C66}   /* vert profond   */
+[data-vrt-theme="sombre"] .vt-b1{color:#7FA8F0}
+[data-vrt-theme="sombre"] .vt-b2{color:#F09BC0}
+[data-vrt-theme="sombre"] .vt-b3{color:#F0A468}
+[data-vrt-theme="sombre"] .vt-b4{color:#5FCDB4}
+
 /* ══ 3. ANIMATIONS ═════════════════════════════════════════════════════════
    Règle unique : tout ce qui bouge s'arrête sous prefers-reduced-motion, et
    rien ne bouge en boucle dans le champ de lecture — une animation qui se
@@ -792,37 +807,37 @@ html{scroll-behavior:smooth}
           <div id="vrtBurger" hidden style="position:absolute;top:calc(100% + 10px);right:0;width:290px;background:#FAFBFE;border:1px solid transparent;border-radius:14px;box-shadow:0 18px 40px rgba(0,17,54,.12);padding:10px;display:flex;flex-direction:column;gap:3px;z-index:90;animation:vpop .24s cubic-bezier(.22,1,.36,1)">
               
                 <button type="button" onclick="VRT.act('mm__aller',this,event)" data-go="elearning" style="display:flex;align-items:center;gap:12px;padding:12px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:500 15px Poppins,sans-serif;color:#001136;transition:background .18s" class="vh7">
-                  <span style="width:36px;height:36px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"></use></svg></span>
+                  <span style="width:36px;height:36px;border-radius:10px;background:#DBE8FE;color:#1E499B;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"></use></svg></span>
                   <span style="display:flex;flex-direction:column;line-height:1.35;flex:1;min-width:0">Élèves<small style="font:400 12px Poppins,sans-serif;color:#6E7385">Cours, corrigés, tuteur IA</small></span>
                 </button>
               
                 <button type="button" onclick="VRT.act('mm__aller',this,event)" data-go="parents" style="display:flex;align-items:center;gap:12px;padding:12px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:500 15px Poppins,sans-serif;color:#001136;transition:background .18s" class="vh7">
-                  <span style="width:36px;height:36px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"></use></svg></span>
+                  <span style="width:36px;height:36px;border-radius:10px;background:#E3F1EE;color:#0E7C86;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"></use></svg></span>
                   <span style="display:flex;flex-direction:column;line-height:1.35;flex:1;min-width:0">Parents<small style="font:400 12px Poppins,sans-serif;color:#6E7385">Notes, absences, scolarité</small></span>
                 </button>
               
                 <button type="button" onclick="VRT.act('mm__aller',this,event)" data-go="enseignants" style="display:flex;align-items:center;gap:12px;padding:12px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:500 15px Poppins,sans-serif;color:#001136;transition:background .18s" class="vh7">
-                  <span style="width:36px;height:36px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg></span>
+                  <span style="width:36px;height:36px;border-radius:10px;background:#FBE9F1;color:#B03A6E;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg></span>
                   <span style="display:flex;flex-direction:column;line-height:1.35;flex:1;min-width:0">Enseignants<small style="font:400 12px Poppins,sans-serif;color:#6E7385">Publier et encadrer</small></span>
                 </button>
               
                 <button type="button" onclick="VRT.act('mm__aller',this,event)" data-go="elearning" style="display:flex;align-items:center;gap:12px;padding:12px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:500 15px Poppins,sans-serif;color:#001136;transition:background .18s" class="vh7">
-                  <span style="width:36px;height:36px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"></use></svg></span>
+                  <span style="width:36px;height:36px;border-radius:10px;background:#DBE8FE;color:#1E499B;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"></use></svg></span>
                   <span style="display:flex;flex-direction:column;line-height:1.35;flex:1;min-width:0">Catalogue E-Learning<small style="font:400 12px Poppins,sans-serif;color:#6E7385">Matières et œuvres</small></span>
                 </button>
               
                 <button type="button" onclick="VRT.act('mm__aller',this,event)" data-go="tarifs" style="display:flex;align-items:center;gap:12px;padding:12px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:500 15px Poppins,sans-serif;color:#001136;transition:background .18s" class="vh7">
-                  <span style="width:36px;height:36px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-wallet"></use></svg></span>
+                  <span style="width:36px;height:36px;border-radius:10px;background:#EEE9F8;color:#5B4FA8;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-wallet"></use></svg></span>
                   <span style="display:flex;flex-direction:column;line-height:1.35;flex:1;min-width:0">Abonnements<small style="font:400 12px Poppins,sans-serif;color:#6E7385">Dès 1 000 FCFA / mois</small></span>
                 </button>
               
                 <button type="button" onclick="VRT.act('mm__aller',this,event)" data-go="boutique" style="display:flex;align-items:center;gap:12px;padding:12px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:500 15px Poppins,sans-serif;color:#001136;transition:background .18s" class="vh7">
-                  <span style="width:36px;height:36px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-basket"></use></svg></span>
+                  <span style="width:36px;height:36px;border-radius:10px;background:#FFF3E4;color:#C24E00;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-basket"></use></svg></span>
                   <span style="display:flex;flex-direction:column;line-height:1.35;flex:1;min-width:0">Boutique de manuels<small style="font:400 12px Poppins,sans-serif;color:#6E7385">Cahiers et études d’œuvres</small></span>
                 </button>
               
                 <button type="button" onclick="VRT.act('mm__aller',this,event)" data-go="accueil" style="display:flex;align-items:center;gap:12px;padding:12px 13px;border:0;border-radius:10px;background:none;cursor:pointer;text-align:left;font:500 15px Poppins,sans-serif;color:#001136;transition:background .18s" class="vh7">
-                  <span style="width:36px;height:36px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-home"></use></svg></span>
+                  <span style="width:36px;height:36px;border-radius:10px;background:#F4F5F8;color:#4D5163;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-home"></use></svg></span>
                   <span style="display:flex;flex-direction:column;line-height:1.35;flex:1;min-width:0">Accueil<small style="font:400 12px Poppins,sans-serif;color:#6E7385">Revenir à la page d’accueil</small></span>
                 </button>
               
@@ -888,7 +903,7 @@ html{scroll-behavior:smooth}
             <img src="assets/hero-eleves.webp" alt="Élèves et encadreurs du Centre VÉRITAS, Douala" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 34%;animation:vzoomSlow 24s ease-in-out infinite alternate;display:block">
           </div>
           <div data-parallax="-0.05" style="position:absolute;left:-20px;bottom:-24px;background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 12px 26px rgba(0,17,54,.09);will-change:transform;animation:vfloat 6.5s ease-in-out infinite">
-            <span style="width:42px;height:42px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"></use></svg></span>
+            <span style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#7BD99C,#007E11);color:#fff;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"></use></svg></span>
             <span style="line-height:1.3"><b style="display:block;font:600 16px Poppins,sans-serif;color:#001136">56 pages de corrigés</b><small style="font-size:13px;color:#6E7385">accessibles sans compte</small></span>
           </div>
           <div data-parallax="0.1" style="position:absolute;right:-14px;top:-18px;background:linear-gradient(135deg,#5B4FA8,#0C2A6A);color:#fff;border-radius:100px;padding:11px 18px;display:flex;align-items:center;gap:10px;box-shadow:0 10px 26px rgba(12,42,106,.34);will-change:transform;animation:vfloatSlow 8s ease-in-out infinite">
@@ -913,7 +928,7 @@ html{scroll-behavior:smooth}
               <div style="background:linear-gradient(135deg,#1E499B,#0C2A6A);padding:24px 26px 22px;color:#fff;position:relative;overflow:hidden">
                 <span aria-hidden="true" style="position:absolute;right:-26px;top:-26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.10);animation:vorb 18s ease-in-out infinite"></span>
                 <span aria-hidden="true" style="position:absolute;top:0;bottom:0;width:56px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.14),rgba(255,255,255,0));animation:vsweep 6.5s ease-in-out infinite;pointer-events:none"></span>
-                <span style="width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;position:relative;margin-bottom:16px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"></use></svg></span>
+                <span style="position:relative;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-graduation"></use></svg></span>
                 <h3 style="position:relative;font:600 23px/32px Poppins,sans-serif;color:#fff;margin:0 0 6px">Élèves</h3>
                 <p style="position:relative;margin:0 0 14px;font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.88);text-wrap:pretty">Le programme de sa classe, les corrigés et un tuteur qui répond à 20 h un dimanche.</p>
                 <span style="position:relative;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);border-radius:100px;padding:7px 14px;font:600 12.5px Poppins,sans-serif;color:#fff"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"></use></svg>Ta moyenne se joue ce soir</span>
@@ -944,7 +959,7 @@ html{scroll-behavior:smooth}
               <div style="background:linear-gradient(135deg,#0E7C86,#0A4E58);padding:24px 26px 22px;color:#fff;position:relative;overflow:hidden">
                 <span aria-hidden="true" style="position:absolute;right:-26px;top:-26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.10);animation:vorb 18s ease-in-out infinite"></span>
                 <span aria-hidden="true" style="position:absolute;top:0;bottom:0;width:56px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.14),rgba(255,255,255,0));animation:vsweep 6.5s ease-in-out infinite;pointer-events:none"></span>
-                <span style="width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;position:relative;margin-bottom:16px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"></use></svg></span>
+                <span style="position:relative;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"></use></svg></span>
                 <h3 style="position:relative;font:600 23px/32px Poppins,sans-serif;color:#fff;margin:0 0 6px">Parents</h3>
                 <p style="position:relative;margin:0 0 14px;font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.88);text-wrap:pretty">Les notes, les absences et les tranches réglées, depuis votre téléphone.</p>
                 <span style="position:relative;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);border-radius:100px;padding:7px 14px;font:600 12.5px Poppins,sans-serif;color:#fff"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"></use></svg>Le suivi, sans quitter la maison</span>
@@ -962,7 +977,7 @@ html{scroll-behavior:smooth}
                   
                 </ul>
                 <div style="margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:18px">
-                  <span style="font:500 13px Poppins,sans-serif;color:#0E7C86">Compte 100 FCFA</span>
+                  <span style="font:500 13px Poppins,sans-serif;color:#0E7C86">Compte gratuit</span>
                   <button type="button" onclick="VRT.act('u__aller',this,event)" data-go="parents" style="display:inline-flex;align-items:center;gap:7px;padding:11px 20px;border-radius:10px;background:#0E7C86;color:#fff;border:0;font:600 14.5px Poppins,sans-serif;cursor:pointer;transition:transform .18s,box-shadow .18s" class="vh19">Espace Parents<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></button>
                 </div>
               </div>
@@ -975,7 +990,7 @@ html{scroll-behavior:smooth}
               <div style="background:linear-gradient(135deg,#C9508B,#8E2B57);padding:24px 26px 22px;color:#fff;position:relative;overflow:hidden">
                 <span aria-hidden="true" style="position:absolute;right:-26px;top:-26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.10);animation:vorb 18s ease-in-out infinite"></span>
                 <span aria-hidden="true" style="position:absolute;top:0;bottom:0;width:56px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.14),rgba(255,255,255,0));animation:vsweep 6.5s ease-in-out infinite;pointer-events:none"></span>
-                <span style="width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;position:relative;margin-bottom:16px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg></span>
+                <span style="position:relative;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg></span>
                 <h3 style="position:relative;font:600 23px/32px Poppins,sans-serif;color:#fff;margin:0 0 6px">Enseignants</h3>
                 <p style="position:relative;margin:0 0 14px;font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.88);text-wrap:pretty">Publiez vos corrigés sous votre nom et encadrez les candidats aux examens.</p>
                 <span style="position:relative;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);border-radius:100px;padding:7px 14px;font:600 12.5px Poppins,sans-serif;color:#fff"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"></use></svg>Votre savoir, signé et payé</span>
@@ -1004,7 +1019,7 @@ html{scroll-behavior:smooth}
               <div style="background:linear-gradient(135deg,#C24E00,#8A3700);padding:24px 26px 22px;color:#fff;position:relative;overflow:hidden">
                 <span aria-hidden="true" style="position:absolute;right:-26px;top:-26px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.10);animation:vorb 18s ease-in-out infinite"></span>
                 <span aria-hidden="true" style="position:absolute;top:0;bottom:0;width:56px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.14),rgba(255,255,255,0));animation:vsweep 6.5s ease-in-out infinite;pointer-events:none"></span>
-                <span style="width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;position:relative;margin-bottom:16px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"></use></svg></span>
+                <span style="position:relative;width:52px;height:52px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"></use></svg></span>
                 <h3 style="position:relative;font:600 23px/32px Poppins,sans-serif;color:#fff;margin:0 0 6px">Partenaires</h3>
                 <p style="position:relative;margin:0 0 14px;font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.88);text-wrap:pretty">Libraires, inspecteurs, influenceurs, établissements : neuf façons de porter VÉRITAS et d’en vivre.</p>
                 <span style="position:relative;display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);border-radius:100px;padding:7px 14px;font:600 12.5px Poppins,sans-serif;color:#fff"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFC93C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-sparkles"></use></svg>Votre réseau, votre revenu</span>
@@ -1033,7 +1048,7 @@ html{scroll-behavior:smooth}
     </section>
 
     <!-- CALENDRIER & ACTUALITÉS -->
-<section style="padding:48px 0 10px" data-reveal><div style="max-width:1170px;margin:0 auto;padding:0 24px"><div style="margin-bottom:20px"><h2 style="font:600 27px/36px Poppins,sans-serif;color:#001136;margin:0 0 6px"><span class="vt-a">L’année scolaire</span> <span class="vt-b">2026-2027</span></h2><p style="margin:0;font-size:15px;color:#4D5163">Les dates à retenir, d’après l’arrêté conjoint MINEDUB/MINESEC — et ce qui bouge en ce moment côté MINESEC, bourses et concours.</p></div><div class="vcal-grid"><div class="vcal-box vcal-box-cles"><ul class="vcles"><li class="vcle vcle-debut" data-jour="2026-09-07"><span class="vcle-q">Rentrée des classes</span><span class="vcle-d">07 Sept 2026</span></li><li class="vcle vcle-pause" data-jour="2026-12-18"><span class="vcle-q">1ʳᵉ interruption</span><span class="vcle-d">18 Déc 2026 → 04 Jan 2027</span></li><li class="vcle vcle-pause" data-jour="2027-03-25"><span class="vcle-q">2ᵉ interruption</span><span class="vcle-d">25 Mars 2027 → 12 Avr 2027</span></li><li class="vcle vcle-pause" data-jour="2027-06-11"><span class="vcle-q">Grandes vacances</span><span class="vcle-d">11 Juin 2027 → Rentrée : 06 Sept 2027</span></li><li class="vcle vcle-exam" data-jour="2027-05-03"><span class="vcle-q">Compositions de fin d’année</span><span class="vcle-d">Lun. 03 au Ven. 21 Mai 2027</span></li><li class="vcle vcle-exam" data-jour="2027-05-13"><span class="vcle-q">Examens officiels · BEPC, Probatoire, BAC, GCE</span><span class="vcle-d">Jeu. 13 Mai au Ven. 30 Juil. 2027</span></li></ul><p class="vcal-note">Les dates précises de chaque examen (BEPC, Probatoire, Baccalauréat, GCE, CAP…) seront fixées par une décision particulière du MINESEC. Cette page sera mise à jour dès sa publication.</p><a class="vcal-lien vlien-anim" href="app.html#calendrier">Voir le calendrier complet<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a></div><aside class="vnews" id="vrtNews" hidden><div class="vnews-hd"><h3>Actualités</h3><div class="vnews-tabs"><button type="button" class="vnews-tab on" data-cat="minesec" onclick="VRT.act('actus',this,event)">MINESEC</button><button type="button" class="vnews-tab" data-cat="bourses" onclick="VRT.act('actus',this,event)">Bourses</button><button type="button" class="vnews-tab" data-cat="education" onclick="VRT.act('actus',this,event)">Éducation</button><button type="button" class="vnews-tab" data-cat="grandes_ecoles" onclick="VRT.act('actus',this,event)">Grandes écoles</button></div></div><ul class="vnews-liste" id="vrtNewsListe"></ul><p class="vnews-src">Fil d’actualité public — VÉRITAS n’en est pas l’auteur.</p></aside></div></div></section>
+<section style="padding:48px 0 10px" data-reveal><div style="max-width:1170px;margin:0 auto;padding:0 24px"><div style="margin-bottom:20px"><h2 style="font:600 27px/36px Poppins,sans-serif;color:#001136;margin:0 0 6px"><span class="vt-a">L’année scolaire</span> <span class="vt-b vt-b1">2026-2027</span></h2><p style="margin:0;font-size:15px;color:#4D5163">Les dates à retenir, d’après l’arrêté conjoint MINEDUB/MINESEC — et ce qui bouge en ce moment côté MINESEC, bourses et concours.</p></div><div class="vcal-grid"><div class="vcal-box vcal-box-cles"><ul class="vcles"><li class="vcle vcle-debut" data-jour="2026-09-07"><span class="vcle-q">Rentrée des classes</span><span class="vcle-d">07 Sept 2026</span></li><li class="vcle vcle-pause" data-jour="2026-12-18"><span class="vcle-q">1ʳᵉ interruption</span><span class="vcle-d">18 Déc 2026 → 04 Jan 2027</span></li><li class="vcle vcle-pause" data-jour="2027-03-25"><span class="vcle-q">2ᵉ interruption</span><span class="vcle-d">25 Mars 2027 → 12 Avr 2027</span></li><li class="vcle vcle-pause" data-jour="2027-06-11"><span class="vcle-q">Grandes vacances</span><span class="vcle-d">11 Juin 2027 → Rentrée : 06 Sept 2027</span></li><li class="vcle vcle-exam" data-jour="2027-05-03"><span class="vcle-q">Compositions de fin d’année</span><span class="vcle-d">Lun. 03 au Ven. 21 Mai 2027</span></li><li class="vcle vcle-exam" data-jour="2027-05-13"><span class="vcle-q">Examens officiels · BEPC, Probatoire, BAC, GCE</span><span class="vcle-d">Jeu. 13 Mai au Ven. 30 Juil. 2027</span></li></ul><p class="vcal-note">Les dates précises de chaque examen (BEPC, Probatoire, Baccalauréat, GCE, CAP…) seront fixées par une décision particulière du MINESEC. Cette page sera mise à jour dès sa publication.</p><a class="vcal-lien vlien-anim" href="app.html#calendrier">Voir le calendrier complet<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a></div><aside class="vnews" id="vrtNews" hidden><div class="vnews-hd"><h3>Actualités</h3><div class="vnews-tabs"><button type="button" class="vnews-tab on" data-cat="minesec" onclick="VRT.act('actus',this,event)">MINESEC</button><button type="button" class="vnews-tab" data-cat="bourses" onclick="VRT.act('actus',this,event)">Bourses</button><button type="button" class="vnews-tab" data-cat="education" onclick="VRT.act('actus',this,event)">Éducation</button><button type="button" class="vnews-tab" data-cat="grandes_ecoles" onclick="VRT.act('actus',this,event)">Grandes écoles</button></div></div><ul class="vnews-liste" id="vrtNewsListe"></ul><p class="vnews-src">Fil d’actualité public — VÉRITAS n’en est pas l’auteur.</p></aside></div></div></section>
     <!-- RÉASSURANCE -->
     <div style="background:#fff">
       <div style="max-width:1170px;margin:0 auto;padding:18px 24px;display:flex;align-items:center;justify-content:center;gap:14px 34px;flex-wrap:wrap">
@@ -1205,7 +1220,7 @@ html{scroll-behavior:smooth}
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;animation:vfade .3s ease">
           
             <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh21">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;align-self:center;margin-bottom:15px">
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
                 <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg></span>
               <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Cours par séquence</h3>
               <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Six séquences par niveau : leçons de langue, groupements de textes, méthodes rédigées comme au tableau.</p>
@@ -1216,7 +1231,7 @@ html{scroll-behavior:smooth}
             </div>
           
             <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh21">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;align-self:center;margin-bottom:15px">
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #5B4FA8;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
                 <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-book"></use></svg></span>
               <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Œuvres au programme</h3>
               <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Étude intégrale : résumé par chapitre, personnages, axes de lecture, sujets de dissertation.</p>
@@ -1227,7 +1242,7 @@ html{scroll-behavior:smooth}
             </div>
           
             <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh21">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;align-self:center;margin-bottom:15px">
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #0E7C86;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
                 <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-atom"></use></svg></span>
               <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Labos virtuels</h3>
               <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Expériences de PCT et SVT simulées, pour les établissements sans laboratoire équipé.</p>
@@ -1238,7 +1253,7 @@ html{scroll-behavior:smooth}
             </div>
           
             <div data-vrt-item="services" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px 22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh21">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;align-self:center;margin-bottom:15px">
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;align-self:center;margin-bottom:15px">
                 <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-game"></use></svg></span>
               <h3 style="font:600 17px/25px Poppins,sans-serif;color:#001136;margin:0 0 7px;text-align:center">Jeux pédagogiques</h3>
               <p style="margin:0 0 16px;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty;text-align:center">Révisions actives : quiz chronométrés, associations, cartes mémoire par matière.</p>
@@ -1287,7 +1302,7 @@ html{scroll-behavior:smooth}
           <div style="background:#fff;border-radius:16px;padding:24px 26px;box-shadow:0 18px 40px rgba(0,17,54,.12)">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px">
               <span style="display:flex;align-items:center;gap:12px">
-                <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;animation:vflame 2.6s ease-in-out infinite"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flame"></use></svg></span>
+                <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #fff;color:#001136;display:flex;align-items:center;justify-content:center;animation:vflame 2.6s ease-in-out infinite"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flame"></use></svg></span>
                 <span style="display:flex;flex-direction:column;line-height:1.3"><b style="font:600 17px Poppins,sans-serif;color:#001136">Ta série de révision</b><small style="font-size:13px;color:#6E7385">Elle démarre à ton premier quiz</small></span>
               </span>
               <span style="font:600 13px Poppins,sans-serif;color:#C24E00;background:#FFF3E4;border-radius:100px;padding:6px 13px">À gagner</span>
@@ -1300,7 +1315,7 @@ html{scroll-behavior:smooth}
 
           <div style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 18px 40px rgba(0,17,54,.12);animation:vfloat 7.5s ease-in-out infinite">
             <div id="vrtPodium" hidden><div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-              <span style="width:42px;height:42px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-swords"></use></svg></span>
+              <span style="width:42px;height:42px;border-radius:12px;background:#FDF0E2;color:#C24E00;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-swords"></use></svg></span>
               <span style="display:flex;flex-direction:column;line-height:1.3"><b style="font:600 16px Poppins,sans-serif;color:#001136">Battle de la semaine</b><small style="display:block;font:400 12px Poppins,sans-serif;color:#6E7385">Le classement s'affiche dès les premiers points</small><b style="display:none"></b><small style="font-size:12.5px;color:#6E7385">10 QCM · abonnement &amp; manuel à gagner</small></span>
             <ol class="vpod-list"></ol></div></div>
             
@@ -1362,7 +1377,7 @@ html{scroll-behavior:smooth}
 
           <div style="padding:28px 30px 24px;display:flex;flex-direction:column;background:#fff">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px">
-              <span style="display:inline-flex;align-items:center;gap:9px;font:600 11px Poppins,sans-serif;color:#C24E00;letter-spacing:1.2px;text-transform:uppercase"><span style="width:7px;height:7px;border-radius:50%;background:#C24E00;animation:vpulse 2.6s ease-out infinite"></span>Extrait du <span data-vrt-val="dateDuJour">19 août</span></span>
+              <span style="display:inline-flex;align-items:center;gap:9px;font:600 11px Poppins,sans-serif;color:#C24E00;letter-spacing:1.2px;text-transform:uppercase"><span style="width:7px;height:7px;border-radius:50%;background:#C24E00;animation:vpulse 2.6s ease-out infinite"></span>Extrait du <span data-vrt-val="dateDuJour">21 août</span></span>
               <div data-vrt-zone="langue" style="display:flex;gap:6px;background:#F4F6FB;border-radius:100px;padding:4px">
                 <button type="button" onclick="VRT.act('mettreFr',this,event)" style="padding:7px 16px;border-radius:100px;border:0;cursor:pointer;background:#1E499B;color:#fff;font:600 13px Poppins,sans-serif;transition:background .18s,color .18s">Français</button>
                 <button type="button" onclick="VRT.act('mettreEn',this,event)" style="padding:7px 16px;border-radius:100px;border:0;cursor:pointer;background:transparent;color:#4D5163;font:600 13px Poppins,sans-serif;transition:background .18s,color .18s">English</button>
@@ -1380,7 +1395,7 @@ html{scroll-behavior:smooth}
             </div>
 
             <div data-vrt-zone="decryptage" style="position:relative;margin-top:16px;background:linear-gradient(120deg,#F6F3FC,#FCFBFE);border:1px solid #E7E1F5;border-radius:14px;padding:14px 16px 14px 14px;display:flex;gap:12px;box-shadow:0 6px 16px rgba(0,17,54,.06)">
-              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;box-shadow:0 6px 16px rgba(91,79,168,.22)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"></use></svg></span>
+              <span style="width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 6px 16px rgba(91,79,168,.22)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"></use></svg></span>
               <span style="flex:1;min-width:0">
                 <b style="display:flex;align-items:center;gap:8px;font:600 13px Poppins,sans-serif;color:#5B4FA8;margin-bottom:5px">Le décryptage du Professeur Ambassa<span style="font:500 10.5px Poppins,sans-serif;color:#8A7BC8;background:#EEE9F8;border-radius:100px;padding:3px 8px;letter-spacing:.4px;text-transform:uppercase">analyse IA</span></b>
                 <span style="display:block;font:400 14px/1.75 Poppins,sans-serif;color:#4D5163;text-wrap:pretty"><span data-vrt-val="decryptage">La répétition ouvre le récit sur l’attente, et le proverbe de la grand-mère fait basculer le drame intime vers le politique. Repère ce glissement : il porte toute la satire du roman.</span></span>
@@ -1592,19 +1607,19 @@ html{scroll-behavior:smooth}
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:30px">
           
             <div data-reveal style="text-align:center;padding:0 10px">
-              <span style="width:66px;height:66px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:16px"><svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-university"></use></svg></span>
+              <span style="width:66px;height:66px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-university"></use></svg></span>
               <h3 style="font:600 18px/27px Poppins,sans-serif;color:#001136;margin:0 0 9px">Le programme officiel, pas un cours importé</h3>
               <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Chaque leçon suit le référentiel MINESEC de la classe : mêmes séquences, mêmes œuvres, mêmes formats d’épreuve qu’au lycée.</p>
             </div>
           
             <div data-reveal style="text-align:center;padding:0 10px">
-              <span style="width:66px;height:66px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:16px"><svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"></use></svg></span>
+              <span style="width:66px;height:66px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-users"></use></svg></span>
               <h3 style="font:600 18px/27px Poppins,sans-serif;color:#001136;margin:0 0 9px">Écrit par des enseignants du secondaire</h3>
               <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Les corrigés sont rédigés puis relus par le comité pédagogique du centre. Chaque ressource porte le nom de son auteur.</p>
             </div>
           
             <div data-reveal style="text-align:center;padding:0 10px">
-              <span style="width:66px;height:66px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:16px"><svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"></use></svg></span>
+              <span style="width:66px;height:66px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:inline-flex;align-items:center;justify-content:center;margin-bottom:16px"><svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"></use></svg></span>
               <h3 style="font:600 18px/27px Poppins,sans-serif;color:#001136;margin:0 0 9px">Pensé pour un téléphone et un forfait modeste</h3>
               <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Pages légères, lecture hors connexion des fiches, paiement Mobile Money : ce que les familles utilisent déjà.</p>
             </div>
@@ -1618,7 +1633,7 @@ html{scroll-behavior:smooth}
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
         <div style="background:#F4F5F8;border-radius:16px;padding:40px 34px">
           <div style="max-width:640px;margin:0 auto 32px;text-align:center">
-            <h2 style="font:600 28px/38px Poppins,sans-serif;color:#001136;margin:0 0 8px"><span class="vt-a">Trois minutes maintenant,</span> <span class="vt-b">une année d'avance ensuite</span></h2>
+            <h2 style="font:600 28px/38px Poppins,sans-serif;color:#001136;margin:0 0 8px"><span class="vt-a">Trois minutes maintenant,</span> <span class="vt-b vt-b2">une année d'avance ensuite</span></h2>
           </div>
           <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:26px">
             
@@ -1656,7 +1671,7 @@ html{scroll-behavior:smooth}
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
         <div style="background:#E5EFF7;border-radius:16px;padding:34px;display:grid;grid-template-columns:1.1fr .9fr;gap:34px;align-items:center">
           <div>
-            <h2 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:0 0 11px"><span class="vt-a">Une question ? Réponse</span> <span class="vt-b">sous 2 h, jours ouvrés</span></h2>
+            <h2 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:0 0 11px"><span class="vt-a">Une question ? Réponse</span> <span class="vt-b vt-b3">sous 2 h, jours ouvrés</span></h2>
             <p style="margin:0 0 20px;font-size:15.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">L'équipe du centre répond sur WhatsApp : inscription, choix du plan, paiement bloqué, accès d'un élève. Pas de robot, pas de numéro surtaxé.</p>
             <div style="display:flex;gap:12px;flex-wrap:wrap">
               <a href="https://wa.me/237697637739" style="display:inline-flex;align-items:center;gap:9px;padding:13px 24px;border-radius:10px;background:linear-gradient(135deg,#25A84E,#007E11);color:#fff;font:600 15.5px Poppins,sans-serif;box-shadow:0 8px 20px rgba(18,140,62,.28);transition:transform .18s" class="vh32" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-message"></use></svg>Écrire sur WhatsApp</a>
@@ -1904,7 +1919,7 @@ html{scroll-behavior:smooth}
           
             <div data-reveal style="border:1px solid transparent;border-radius:12px;padding:24px;background:#FAFBFE;transition:border-color .18s,box-shadow .18s" class="vh40">
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 9px">Un abonnement couvre combien d’enfants ?</h3>
-              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Un abonnement = un élève. Le compte parent, lui, s’ouvre une seule fois pour 100 FCFA et rattache autant d’enfants que nécessaire.</p>
+              <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Un abonnement = un élève. Le compte parent, lui, est gratuit et rattache autant d’enfants que nécessaire.</p>
             </div>
           
             <div data-reveal style="border:1px solid transparent;border-radius:12px;padding:24px;background:#FAFBFE;transition:border-color .18s,box-shadow .18s" class="vh40">
@@ -2362,25 +2377,25 @@ html{scroll-behavior:smooth}
       <div style="max-width:1170px;margin:0 auto;padding:0 24px;display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
         
           <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;transition:transform .18s,box-shadow .18s,border-color .18s" class="vh46">
-            <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-truck"></use></svg></span>
+            <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-truck"></use></svg></span>
             <h3 style="font:600 16.5px/24px Poppins,sans-serif;color:#001136;margin:0 0 7px">Livraison 48 h</h3>
             <p style="margin:0;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty">Douala et Yaoundé, remise en main propre par notre coursier.</p>
           </div>
         
           <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;transition:transform .18s,box-shadow .18s,border-color .18s" class="vh46">
-            <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-building"></use></svg></span>
+            <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #0E7C86;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-building"></use></svg></span>
             <h3 style="font:600 16.5px/24px Poppins,sans-serif;color:#001136;margin:0 0 7px">Retrait au centre</h3>
             <p style="margin:0;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty">Gratuit, du lundi au samedi de 8 h à 19 h, sans rendez-vous.</p>
           </div>
         
           <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;transition:transform .18s,box-shadow .18s,border-color .18s" class="vh46">
-            <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"></use></svg></span>
+            <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-smartphone"></use></svg></span>
             <h3 style="font:600 16.5px/24px Poppins,sans-serif;color:#001136;margin:0 0 7px">Paiement Mobile Money</h3>
             <p style="margin:0;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty">MTN MoMo et Orange Money, ou carte pour les proches à l’étranger.</p>
           </div>
         
           <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px 22px;transition:transform .18s,box-shadow .18s,border-color .18s" class="vh46">
-            <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-qr"></use></svg></span>
+            <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #5B4FA8;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-qr"></use></svg></span>
             <h3 style="font:600 16.5px/24px Poppins,sans-serif;color:#001136;margin:0 0 7px">Corrigés offerts</h3>
             <p style="margin:0;font-size:14px;line-height:1.65;color:#4D5163;text-wrap:pretty">Le QR en préface ouvre la version en ligne, à vie et sans compte.</p>
           </div>
@@ -2391,7 +2406,7 @@ html{scroll-behavior:smooth}
     <section style="padding:56px 0 0">
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
         <div style="background:#E5EFF7;border-radius:14px;padding:30px 32px;display:flex;align-items:center;gap:24px;flex-wrap:wrap">
-          <span style="width:60px;height:60px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><use href="#lc-target"></use></svg></span>
+          <span style="width:60px;height:60px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="29" height="29" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" aria-hidden="true"><use href="#lc-target"></use></svg></span>
           <div style="flex:1;min-width:280px">
             <h3 style="font:600 20px/29px Poppins,sans-serif;color:#001136;margin:0 0 5px">Le cahier acheté ouvre ses corrigés en ligne</h3>
             <p style="margin:0;font-size:15px;line-height:1.65;color:#4D5163;text-wrap:pretty">Le QR imprimé en préface renvoie vers la page de la séquence : énoncé, corrigé masqué, et la possibilité de demander l'explication au tuteur. Rien à installer.</p>
@@ -2459,7 +2474,7 @@ html{scroll-behavior:smooth}
             </ul>
           </div>
           <div style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px">
-            <span style="width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:13px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"></use></svg></span>
+            <span style="width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:13px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"></use></svg></span>
             <h3 style="font:600 18px/27px Poppins,sans-serif;color:#001136;margin:0 0 8px">Cagnotte de scolarité</h3>
             <p style="margin:0 0 14px;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Un parent, un oncle ou un parrain installé à l'étranger règle une tranche par carte ou PayPal. Le reçu numéroté part automatiquement aux deux parties.</p>
             <a href="app.html#cagnotte" style="display:inline-flex;align-items:center;gap:6px;font:500 14.5px Poppins,sans-serif">Comment ça marche<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
@@ -2473,19 +2488,19 @@ html{scroll-behavior:smooth}
         <div style="background:#F4F5F8;border-radius:16px;padding:38px 32px;display:grid;grid-template-columns:repeat(3,1fr);gap:26px">
           
             <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"></use></svg></span>
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chart"></use></svg></span>
               <h3 style="font:600 17px/26px Poppins,sans-serif;color:#001136;margin:0 0 8px">Bulletins et moyennes</h3>
               <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Notes par séquence, moyenne pondérée, évolution sur l’année et bulletin téléchargeable.</p>
             </div>
           
             <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-wallet"></use></svg></span>
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-wallet"></use></svg></span>
               <h3 style="font:600 17px/26px Poppins,sans-serif;color:#001136;margin:0 0 8px">Scolarité et reçus</h3>
               <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Tranches, échéances, historique des paiements et reçus numérotés imprimables.</p>
             </div>
           
             <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"></use></svg></span>
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #0E7C86;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"></use></svg></span>
               <h3 style="font:600 17px/26px Poppins,sans-serif;color:#001136;margin:0 0 8px">Lien avec le centre</h3>
               <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Messages de l’établissement, convocations et rendez-vous, reçus sur WhatsApp.</p>
             </div>
@@ -2535,56 +2550,56 @@ html{scroll-behavior:smooth}
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
           
             <a href="#elearning" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh14">
-              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg></span>
+              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg></span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 5px">Français</h3>
               <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:#4D5163">Leçons de langue, méthodes, groupements de textes, œuvres.</p>
               <span style="margin-top:auto;font:500 13px Poppins,sans-serif;color:#1E499B">6ᵉ → Tˡᵉ</span>
             </a>
           
             <a href="#elearning" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh14">
-              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-calculator"></use></svg></span>
+              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-calculator"></use></svg></span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 5px">Mathématiques</h3>
               <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:#4D5163">Cours, exercices gradués et corrigés détaillés.</p>
               <span style="margin-top:auto;font:500 13px Poppins,sans-serif;color:#007E11">6ᵉ → Tˡᵉ</span>
             </a>
           
             <a href="#elearning" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh14">
-              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-atom"></use></svg></span>
+              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #0E7C86;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-atom"></use></svg></span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 5px">PCT</h3>
               <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:#4D5163">Physique, chimie, technologie — avec labos virtuels.</p>
               <span style="margin-top:auto;font:500 13px Poppins,sans-serif;color:#0E7C86">6ᵉ → Tˡᵉ</span>
             </a>
           
             <a href="#elearning" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh14">
-              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-leaf"></use></svg></span>
+              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #5B4FA8;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-leaf"></use></svg></span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 5px">SVT</h3>
               <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:#4D5163">Sciences de la vie et de la Terre, schémas annotés.</p>
               <span style="margin-top:auto;font:500 13px Poppins,sans-serif;color:#5B4FA8">6ᵉ → Tˡᵉ</span>
             </a>
           
             <a href="#elearning" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh14">
-              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-map"></use></svg></span>
+              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-map"></use></svg></span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 5px">Histoire-Géo</h3>
               <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:#4D5163">Repères, cartes et études de documents.</p>
               <span style="margin-top:auto;font:500 13px Poppins,sans-serif;color:#C24E00">6ᵉ → Tˡᵉ</span>
             </a>
           
             <a href="#elearning" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh14">
-              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-languages"></use></svg></span>
+              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-languages"></use></svg></span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 5px">Anglais</h3>
               <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:#4D5163">Grammar, comprehension, essay writing.</p>
               <span style="margin-top:auto;font:500 13px Poppins,sans-serif;color:#1E499B">6ᵉ → Tˡᵉ</span>
             </a>
           
             <a href="#elearning" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh14">
-              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-scale"></use></svg></span>
+              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #5B4FA8;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-scale"></use></svg></span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 5px">Philosophie</h3>
               <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:#4D5163">Notions, méthode de la dissertation et du commentaire.</p>
               <span style="margin-top:auto;font:500 13px Poppins,sans-serif;color:#5B4FA8">1ʳᵉ → Tˡᵉ</span>
             </a>
           
             <a href="#elearning" data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:22px;display:flex;flex-direction:column;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh14">
-              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-monitor"></use></svg></span>
+              <span style="width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-monitor"></use></svg></span>
               <h3 style="font:600 16.5px/25px Poppins,sans-serif;color:#001136;margin:0 0 5px">ECM &amp; Informatique</h3>
               <p style="margin:0 0 14px;font-size:13.5px;line-height:1.6;color:#4D5163">Éducation à la citoyenneté et bases informatiques.</p>
               <span style="margin-top:auto;font:500 13px Poppins,sans-serif;color:#007E11">6ᵉ → Tˡᵉ</span>
@@ -2596,7 +2611,7 @@ html{scroll-behavior:smooth}
 
     <section style="padding:56px 0 0">
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
-        <h2 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:0 0 8px"><span class="vt-a">Les œuvres</span> <span class="vt-b">au programme</span></h2>
+        <h2 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:0 0 8px"><span class="vt-a">Les œuvres</span> <span class="vt-b vt-b4">au programme</span></h2>
         <p style="margin:0 0 22px;font-size:15.5px;color:#4D5163">Étude intégrale : résumé par chapitre, personnages, axes de lecture, contrôles et sujets de dissertation.</p>
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
           
@@ -2657,21 +2672,21 @@ html{scroll-behavior:smooth}
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
           
             <div data-reveal style="background:linear-gradient(135deg,#5B4FA8,#2E2470);border-radius:14px;padding:28px;color:#fff">
-              <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"></use></svg></span>
+              <span style="width:50px;height:50px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"></use></svg></span>
               <h3 style="font:600 19px/28px Poppins,sans-serif;color:#fff;margin:0 0 8px">Professeur Ambassa</h3>
               <p style="margin:0 0 16px;font-size:14.5px;line-height:1.7;color:rgba(255,255,255,.85);text-wrap:pretty">Le tuteur IA du centre : il questionne, corrige la méthode et cite le programme au lieu de donner la réponse.</p>
               <span style="display:inline-block;background:rgba(255,255,255,.16);border-radius:100px;padding:6px 14px;font:500 13px Poppins,sans-serif">3 questions offertes / semaine</span>
             </div>
           
             <div data-reveal style="background:linear-gradient(135deg,#0E7C86,#0A4E58);border-radius:14px;padding:28px;color:#fff">
-              <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"></use></svg></span>
+              <span style="width:50px;height:50px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flask"></use></svg></span>
               <h3 style="font:600 19px/28px Poppins,sans-serif;color:#fff;margin:0 0 8px">Labos virtuels</h3>
               <p style="margin:0 0 16px;font-size:14.5px;line-height:1.7;color:rgba(255,255,255,.85);text-wrap:pretty">Expériences de PCT et de SVT simulées pas à pas, pour travailler la manipulation sans laboratoire.</p>
               <span style="display:inline-block;background:rgba(255,255,255,.16);border-radius:100px;padding:6px 14px;font:500 13px Poppins,sans-serif">Plan Pro</span>
             </div>
           
             <div data-reveal style="background:linear-gradient(135deg,#1E499B,#0C2A6A);border-radius:14px;padding:28px;color:#fff">
-              <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg></span>
+              <span style="width:50px;height:50px;border-radius:14px;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg></span>
               <h3 style="font:600 19px/28px Poppins,sans-serif;color:#fff;margin:0 0 8px">Classes virtuelles</h3>
               <p style="margin:0 0 16px;font-size:14.5px;line-height:1.7;color:rgba(255,255,255,.85);text-wrap:pretty">Séances en direct en petit groupe avec un enseignant du réseau, le soir et le week-end.</p>
               <span style="display:inline-block;background:rgba(255,255,255,.16);border-radius:100px;padding:6px 14px;font:500 13px Poppins,sans-serif">Plan Élite</span>
@@ -2708,25 +2723,25 @@ html{scroll-behavior:smooth}
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px">
           
             <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px 22px;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh52">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"></use></svg></span>
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #B03A6E;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-doc"></use></svg></span>
               <h3 style="font:600 17px/26px Poppins,sans-serif;color:#001136;margin:0 0 8px">Rédiger des corrigés</h3>
               <p style="margin:0;font-size:14px;line-height:1.7;color:#4D5163;text-wrap:pretty">Vous prenez un cahier de votre matière et rédigez les corrigés ; le comité relit puis publie sous votre nom.</p>
             </div>
           
             <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px 22px;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh52">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg></span>
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-presentation"></use></svg></span>
               <h3 style="font:600 17px/26px Poppins,sans-serif;color:#001136;margin:0 0 8px">Animer des classes virtuelles</h3>
               <p style="margin:0;font-size:14px;line-height:1.7;color:#4D5163;text-wrap:pretty">Séances en direct de 60 minutes, petits groupes, planning que vous choisissez.</p>
             </div>
           
             <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px 22px;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh52">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"></use></svg></span>
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-clipboard"></use></svg></span>
               <h3 style="font:600 17px/26px Poppins,sans-serif;color:#001136;margin:0 0 8px">Composer des épreuves</h3>
               <p style="margin:0;font-size:14px;line-height:1.7;color:#4D5163;text-wrap:pretty">Épreuves blanches BEPC, Probatoire, BAC et GCE, avec barème et corrigé modèle.</p>
             </div>
           
             <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:24px 22px;transition:border-color .18s,transform .18s,box-shadow .18s" class="vh52">
-              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trophy"></use></svg></span>
+              <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:15px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-trophy"></use></svg></span>
               <h3 style="font:600 17px/26px Poppins,sans-serif;color:#001136;margin:0 0 8px">Encadrer les candidats</h3>
               <p style="margin:0;font-size:14px;line-height:1.7;color:#4D5163;text-wrap:pretty">Suivi personnalisé des élèves en année d’examen, du diagnostic à la session.</p>
             </div>
@@ -2738,7 +2753,7 @@ html{scroll-behavior:smooth}
     <section style="padding:56px 0 0">
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
         <div style="background:#F4F5F8;border-radius:16px;padding:38px 34px">
-          <h2 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:0 0 26px;text-align:center"><span class="vt-a">Comment se passe</span> <span class="vt-b">la collaboration</span></h2>
+          <h2 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:0 0 26px;text-align:center"><span class="vt-a">Comment se passe</span> <span class="vt-b vt-b1">la collaboration</span></h2>
           <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
             
               <div data-reveal style="text-align:center">
@@ -2774,7 +2789,7 @@ html{scroll-behavior:smooth}
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">
         <div style="border:1px solid transparent;border-radius:14px;padding:32px;display:grid;grid-template-columns:1fr 1fr;gap:34px;align-items:center">
           <div>
-            <h2 style="font:600 24px/34px Poppins,sans-serif;color:#001136;margin:0 0 10px"><span class="vt-a">Ce que le</span> <span class="vt-b">centre attend</span></h2>
+            <h2 style="font:600 24px/34px Poppins,sans-serif;color:#001136;margin:0 0 10px"><span class="vt-a">Ce que le</span> <span class="vt-b vt-b2">centre attend</span></h2>
             <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:11px">
               <li style="display:flex;align-items:flex-start;gap:10px;font-size:15px;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#B03A6E;display:inline-flex;align-items:center;justify-content:center;margin-top:1px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span>Diplôme et expérience du secondaire camerounais</li>
               <li style="display:flex;align-items:flex-start;gap:10px;font-size:15px;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#B03A6E;display:inline-flex;align-items:center;justify-content:center;margin-top:1px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span>Maîtrise du programme MINESEC de votre matière</li>
@@ -2783,11 +2798,31 @@ html{scroll-behavior:smooth}
             </ul>
           </div>
           <div style="background:#FBE9F1;border-radius:12px;padding:26px">
-            <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;margin-bottom:14px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"></use></svg></span>
+            <span style="width:50px;height:50px;border-radius:50%;background:#fff;border:3px solid #B03A6E;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:14px"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-handshake"></use></svg></span>
             <h3 style="font:600 18px/27px Poppins,sans-serif;color:#001136;margin:0 0 8px">Rémunération à la ressource validée</h3>
-            <p style="margin:0 0 16px;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Chaque corrigé accepté par le comité pédagogique est rémunéré et signé de votre nom. Les classes virtuelles sont payées à la séance.</p>
-            <a href="corriges/" style="display:inline-flex;align-items:center;gap:6px;font:500 14.5px Poppins,sans-serif;color:#B03A6E">Voir le barème<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
+            <p style="margin:0;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Chaque corrigé accepté par le comité pédagogique est rémunéré et signé de votre nom. Les classes virtuelles sont payées à la séance.</p>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Atelier de Français — l'outil de composition, servi depuis /plateforme/ -->
+    <section style="padding:56px 0 8px">
+      <div style="max-width:1170px;margin:0 auto;padding:0 24px">
+        <div data-reveal style="background:#F4F7FC;border:1px solid #E3EAF5;border-radius:14px;padding:34px;display:grid;grid-template-columns:1.15fr 1fr;gap:34px;align-items:center">
+          <div>
+            <span style="display:inline-block;font:600 11px/1 Poppins,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#1E499B;margin-bottom:12px">Outil enseignant</span>
+            <h2 style="font:600 24px/34px Poppins,sans-serif;color:#001136;margin:0 0 10px"><span class="vt-a">Composer vos</span> <span class="vt-b vt-b3">épreuves en ligne</span></h2>
+            <p style="margin:0 0 18px;font-size:15px;line-height:1.75;color:#4D5163;text-wrap:pretty">L'<strong>Atelier de Français</strong> réunit 1&nbsp;040 textes verbatim classés par cycle, module et usage, et 137 citations pour les sujets de dissertation. Vous composez à partir du corpus, un garde-fou vérifie la structure officielle de la série pendant que vous écrivez, et vous exportez en Word avec votre en-tête.</p>
+            <a href="plateforme/" style="display:inline-flex;align-items:center;gap:7px;background:#1E499B;color:#fff;border-radius:9px;padding:12px 22px;font:600 14.5px Poppins,sans-serif;text-decoration:none">Ouvrir l'Atelier de Français<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
+            <p style="margin:12px 0 0;font-size:13px;color:#6B7186">Essai d'une semaine à la première connexion, avec votre compte VÉRITAS.</p>
+          </div>
+          <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px">
+            <li style="display:flex;align-items:flex-start;gap:11px;font-size:14.5px;line-height:1.65;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#1E499B;display:inline-flex;align-items:center;justify-content:center;margin-top:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span><span><strong>1&nbsp;040 textes vérifiés</strong> — 583 auteurs, trois cycles, cinq usages.</span></li>
+            <li style="display:flex;align-items:flex-start;gap:11px;font-size:14.5px;line-height:1.65;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#B03A6E;display:inline-flex;align-items:center;justify-content:center;margin-top:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span><span><strong>23 structures officielles</strong> — BEPC, CAP, Probatoire, BAC, séries techniques.</span></li>
+            <li style="display:flex;align-items:flex-start;gap:11px;font-size:14.5px;line-height:1.65;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#C24E00;display:inline-flex;align-items:center;justify-content:center;margin-top:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span><span><strong>Barème et longueurs contrôlés</strong> — les écarts s'affichent avant l'impression.</span></li>
+            <li style="display:flex;align-items:flex-start;gap:11px;font-size:14.5px;line-height:1.65;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#0E7C66;display:inline-flex;align-items:center;justify-content:center;margin-top:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span><span><strong>Export Word</strong> — un .docx modifiable, prêt pour votre en-tête et votre logo.</span></li>
+          </ul>
         </div>
       </div>
     </section>
@@ -2807,7 +2842,7 @@ html{scroll-behavior:smooth}
       <div style="max-width:1170px;margin:0 auto;padding:40px 24px 34px">
         <button type="button" onclick="VRT.act('goBoutique',this,event)" data-go="boutique" style="display:inline-flex;align-items:center;gap:7px;background:none;border:0;cursor:pointer;font:500 14px Poppins,sans-serif;color:#1E499B;padding:0;margin-bottom:20px;transition:gap .18s" class="vh54"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transform:rotate(180deg)" aria-hidden="true"><use href="#lc-arrow-right"></use></svg>Retour à la boutique</button>
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
-          <span style="width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"></use></svg></span>
+          <span style="width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #fff;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"></use></svg></span>
           <span style="display:flex;flex-direction:column;line-height:1.35">
             <h1 style="font:600 32px/42px Poppins,sans-serif;color:#001136;margin:0">Finaliser la commande</h1>
             <small style="font:400 14.5px Poppins,sans-serif;color:#6E7385">Paiement sécurisé · reçu numéroté envoyé sur WhatsApp</small>
@@ -2856,7 +2891,7 @@ html{scroll-behavior:smooth}
 
         <div style="display:flex;flex-direction:column;gap:22px">
           <div style="background:#FAFBFE;border:1px solid transparent;border-radius:18px;padding:28px 30px">
-            <h2 style="font:600 20px/29px Poppins,sans-serif;color:#001136;margin:0 0 5px"><span class="vt-a">Choisissez votre</span> <span class="vt-b">moyen de paiement</span></h2>
+            <h2 style="font:600 20px/29px Poppins,sans-serif;color:#001136;margin:0 0 5px"><span class="vt-a">Choisissez votre</span> <span class="vt-b vt-b4">moyen de paiement</span></h2>
             <p style="margin:0 0 22px;font-size:14.5px;line-height:1.65;color:#6E7385">Aucun frais supplémentaire côté famille, quel que soit le canal.</p>
             <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px">
               
@@ -2937,7 +2972,7 @@ html{scroll-behavior:smooth}
           </div>
 
           <div style="background:#FAFBFE;border:1px solid transparent;border-radius:18px;padding:28px 30px">
-            <h2 style="font:600 20px/29px Poppins,sans-serif;color:#001136;margin:0 0 5px"><span class="vt-a">Où livrer</span> <span class="vt-b">votre commande ?</span></h2>
+            <h2 style="font:600 20px/29px Poppins,sans-serif;color:#001136;margin:0 0 5px"><span class="vt-a">Où livrer</span> <span class="vt-b vt-b1">votre commande ?</span></h2>
             <p style="margin:0 0 22px;font-size:14.5px;line-height:1.65;color:#6E7385">Livraison à Douala et Yaoundé sous 48 h, retrait gratuit au centre.</p>
             <div style="display:flex;flex-direction:column;gap:12px">
               
@@ -3042,7 +3077,7 @@ html{scroll-behavior:smooth}
           </div>
 
           <a href="app.html#contact" style="display:flex;align-items:center;gap:12px;background:#FAFBFE;border:1px solid transparent;border-radius:16px;padding:17px 19px;transition:border-color .18s,transform .18s" class="vh58">
-            <span style="width:42px;height:42px;border-radius:50%;background:#fff;border:3px solid #1E499B;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"></use></svg></span>
+            <span style="width:42px;height:42px;border-radius:12px;background:#E7F7EC;color:#007E11;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-message"></use></svg></span>
             <span style="display:flex;flex-direction:column;line-height:1.4">
               <b style="font:600 14.5px Poppins,sans-serif;color:#001136">Un souci de paiement ?</b>
               <small style="font:400 12.5px Poppins,sans-serif;color:#6E7385">WhatsApp · réponse sous 2 h</small>
@@ -3075,7 +3110,7 @@ html{scroll-behavior:smooth}
 
     <div id="vrtIA" hidden style="pointer-events:auto;width:min(290px,calc(100vw - 96px));background:#FAFBFE;border:1px solid transparent;border-radius:16px;overflow:hidden;box-shadow:0 18px 40px rgba(0,17,54,.12);animation:vpop .34s cubic-bezier(.22,1,.36,1)">
         <div style="background:linear-gradient(135deg,#5B4FA8,#2E2470);padding:11px 13px;display:flex;align-items:center;gap:9px">
-          <span style="width:34px;height:34px;border-radius:50%;background:#fff;border:3px solid #007E11;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto;margin-left:auto;margin-right:auto;position:relative;box-shadow:0 4px 12px rgba(0,0,0,.24)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"></use></svg><span aria-hidden="true" style="position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:#7BD99C;border:2px solid #4A3E92"></span></span>
+          <span style="position:relative;width:34px;height:34px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 4px 12px rgba(0,0,0,.24)"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"></use></svg><span aria-hidden="true" style="position:absolute;right:-2px;bottom:-2px;width:11px;height:11px;border-radius:50%;background:#7BD99C;border:2px solid #4A3E92"></span></span>
           <span style="display:flex;flex-direction:column;line-height:1.25;flex:1;min-width:0">
             <b style="font:600 13.5px Poppins,sans-serif;color:#fff">Professeur Ambassa</b>
             <small style="display:inline-flex;align-items:center;gap:5px;font:400 11px Poppins,sans-serif;color:rgba(255,255,255,.75)"><span style="width:6px;height:6px;border-radius:50%;background:#7BD99C;animation:vpulse 2.4s ease-out infinite"></span>en ligne</small>

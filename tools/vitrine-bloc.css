@@ -148,6 +148,21 @@
 [data-vrt-theme="sombre"] .vt-a{color:#EAF0FB}
 [data-vrt-theme="sombre"] .vt-b{color:#7FA8F0}
 
+/* ROTATION D'ENCRE. Toutes les secondes moities partageaient le meme bleu :
+   sur une page qui en aligne une quinzaine, l'accent cessait d'accentuer.
+   Quatre encres de la charte tournent d'un titre a l'autre, si bien que deux
+   titres qui se suivent n'ont jamais la meme. Les valeurs sombres sont
+   eclaircies : les encres de jour, posees sur le fond nuit, deviennent
+   illisibles. */
+.vt-b1{color:#1E499B}   /* bleu de marque */
+.vt-b2{color:#B03A6E}   /* magenta        */
+.vt-b3{color:#C24E00}   /* orange         */
+.vt-b4{color:#0E7C66}   /* vert profond   */
+[data-vrt-theme="sombre"] .vt-b1{color:#7FA8F0}
+[data-vrt-theme="sombre"] .vt-b2{color:#F09BC0}
+[data-vrt-theme="sombre"] .vt-b3{color:#F0A468}
+[data-vrt-theme="sombre"] .vt-b4{color:#5FCDB4}
+
 /* ══ 3. ANIMATIONS ═════════════════════════════════════════════════════════
    Règle unique : tout ce qui bouge s'arrête sous prefers-reduced-motion, et
    rien ne bouge en boucle dans le champ de lecture — une animation qui se

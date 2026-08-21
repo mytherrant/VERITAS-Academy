@@ -2062,36 +2062,9 @@
       <div style="width:56px;height:56px;border-radius:15px;background:var(--sb-logo-bg);display:grid;place-items:center;margin:0 auto 18px">{{ loginIcLogo }}</div>
       <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-weight:700;margin-bottom:12px">Atelier de Français · Français MINESEC</div>
       <h1 style="font-family:'Poppins';font-size:31px;font-weight:700;line-height:1.2;margin:0 auto 14px;max-width:20ch;color:var(--c14375f,#14375f);letter-spacing:-.02em">Un espace collaboratif pour vos cours et vos épreuves</h1>
-      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Chaque membre accède aux fonctions correspondant à son rôle. Choisissez votre profil pour découvrir les droits associés.</p>
-
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:14px;margin-bottom:40px">
-        <sc-for list="{{ accessMatrix }}" as="r" hint-placeholder-count="6">
-          <article style="background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:14px;padding:20px 16px;box-shadow:0 2px 10px rgba(20,55,95,.045);display:flex;flex-direction:column;align-items:center;text-align:center">
-            <span style="{{ r.tile }}">{{ r.icon }}</span>
-            <span style="font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c22303f,#22303f);line-height:1.35;margin:11px 0 4px">{{ r.role }}</span>
-            <span style="font-size:11.5px;color:var(--c8b97a8,#8b97a8);line-height:1.5;margin-bottom:12px">{{ r.resume }}</span>
-            <span style="display:flex;flex-direction:column;gap:5px;align-items:center;margin-top:auto;padding-top:12px;border-top:1px solid var(--ceef2f7,#eef2f7);width:100%">
-              <sc-for list="{{ r.perms }}" as="p" hint-placeholder-count="3">
-                <span style="font-size:11.5px;color:var(--c5a6678,#5a6678);line-height:1.45">{{ p.label }}</span>
-              </sc-for>
-            </span>
-          </article>
-        </sc-for>
-      </div>
+      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Composez vos épreuves et vos leçons à partir de 1 040 textes vérifiés, avec un garde-fou qui contrôle la conformité MINESEC pendant que vous écrivez.</p>
 
       <div style="max-width:420px;margin:0 auto 16px;text-align:left;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:16px;padding:26px 24px;box-shadow:0 4px 18px rgba(20,55,95,.06)">
-        <h2 style="font-family:Poppins;font-size:19px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px;text-align:center">Connexion</h2>
-        <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 20px;text-align:center">Avec votre compte VÉRITAS — le même que sur veritas-school.com.</p>
-        <div style="display:flex;flex-direction:column;gap:12px">
-          <label style="{{ fieldLbl }}">Identifiant<input type="text" autoComplete="username" autoCapitalize="none" spellCheck="false" value="{{ authMail }}" onChange="{{ setAuthMail }}" onKeyDown="{{ authKey }}" placeholder="votre identifiant VÉRITAS" style="{{ fieldIn }}"></label>
-          <label style="{{ fieldLbl }}">Mot de passe<input type="password" autoComplete="current-password" value="{{ authMdp }}" onChange="{{ setAuthMdp }}" onKeyDown="{{ authKey }}" placeholder="••••••••" style="{{ fieldIn }}"></label>
-        </div>
-        <div style="{{ authErrStyle }}">{{ authErr }}</div>
-        <button onClick="{{ authSubmit }}" style="{{ authBtn }}">{{ authLabel }}</button>
-        <p style="margin:14px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6;text-align:center">Votre essai de {{ essaiJours }} jours s’ouvre à la première connexion.</p>
-      </div>
-
-      <div style="max-width:420px;margin:0 auto;text-align:left;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:16px;padding:26px 24px;box-shadow:0 4px 18px rgba(20,55,95,.06)">
         <h2 style="font-family:Poppins;font-size:16px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px;text-align:center">Visite guidée</h2>
         <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 20px;text-align:center">Parcourir l’interface avec un profil d’exemple.</p>
         <div style="display:flex;flex-direction:column;gap:9px">
@@ -2104,6 +2077,18 @@
           </sc-for>
         </div>
         <p style="border-top:1px solid var(--ceef2f7,#eef2f7);margin:18px 0 0;padding-top:15px;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6">Ces profils montrent l’interface et les rôles. Le répertoire de textes, lui, n’est servi qu’à un compte VÉRITAS connecté ci-dessus.</p>
+      </div>
+
+      <div style="max-width:420px;margin:0 auto;text-align:left;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:16px;padding:26px 24px;box-shadow:0 4px 18px rgba(20,55,95,.06)">
+        <h2 style="font-family:Poppins;font-size:19px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px;text-align:center">Connexion</h2>
+        <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 20px;text-align:center">Avec votre compte VÉRITAS — le même que sur veritas-school.com.</p>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <label style="{{ authLbl }}">Identifiant<input type="text" autoComplete="username" autoCapitalize="none" spellCheck="false" value="{{ authMail }}" onChange="{{ setAuthMail }}" onKeyDown="{{ authKey }}" placeholder="votre identifiant VÉRITAS" style="{{ authIn }}"></label>
+          <label style="{{ authLbl }}">Mot de passe<input type="password" autoComplete="current-password" value="{{ authMdp }}" onChange="{{ setAuthMdp }}" onKeyDown="{{ authKey }}" placeholder="••••••••" style="{{ authIn }}"></label>
+        </div>
+        <div style="{{ authErrStyle }}">{{ authErr }}</div>
+        <button onClick="{{ authSubmit }}" style="{{ authBtn }}">{{ authLabel }}</button>
+        <p style="margin:14px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6;text-align:center">Votre essai de {{ essaiJours }} jours s’ouvre à la première connexion.</p>
       </div>
 
       <div style="max-width:420px;margin:16px auto 0">
@@ -4252,7 +4237,6 @@ class Component extends DCLogic {
     }:{phases:[],collaborators:[],history:[]};
 
     const roleDotC=r=>'width:10px;height:10px;border-radius:50%;flex:none;background:'+(this.roleColors[r]||'var(--c1a72bb,#1a72bb)');
-    const accessMatrix=this.ROLES.map(r=>({role:r.nom,resume:r.resume,dot:'width:9px;height:9px;border-radius:50%;flex:none;background:'+r.couleur,tile:'width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:'+r.couleur+'1a',icon:this._icon(({enseignant:'pen',chef:'users',inspecteur:'search',relecteur:'check',admin:'lock',eleve:'book'})[r.id]||'user',r.couleur,21),perms:Object.keys(r.droits).filter(k2=>r.droits[k2]).map(k2=>({label:this.DROITS_LABELS[k2]}))}));
     const loginAccounts=st.users.map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,38),role:u.role,select:()=>this.setState({currentUserId:u.id,authed:true,screen:'accueil'},()=>{this._persist();window.scrollTo(0,0);})}));
     const planBg={essai:'var(--cffffff,#fff)',ens:'var(--cffffff,#fff)',etab:'var(--cf5faff,#f5faff)',pro:'var(--cfbf8ff,#fbf8ff)'};
     const planBorder={essai:'var(--ce2eaf3,#e2eaf3)',ens:'var(--ce2eaf3,#e2eaf3)',etab:'var(--cbcd9f2,#bcd9f2)',pro:'var(--cd9c9f0,#d9c9f0)'};
@@ -4307,9 +4291,15 @@ class Component extends DCLogic {
       notReady:!ready&&st.screen!=='login',isAccueil:ready&&st.screen==='accueil',isListe:ready&&st.screen==='liste',isFiche:ready&&st.screen==='fiche',isEpreuves:ready&&st.screen==='epreuves',isComposeur:ready&&st.screen==='composeur',isEquipe:ready&&st.screen==='equipe',isProfil:ready&&st.screen==='profil',isApercu:ready&&st.screen==='apercu',isCours:ready&&st.screen==='cours',isCoursEdit:ready&&st.screen==='coursEdit',
       gabarits:cGabarits,coursView:cCoursView,co:cCo,newCours:()=>this.setState({screen:'cours'},()=>window.scrollTo(0,0)),
       showChrome:ready&&st.screen!=='login',isLogin:st.screen==='login',isAbo:ready&&st.screen==='abo',
-      accessMatrix,loginAccounts,
+      loginAccounts,
       /* --- connexion au compte VERITAS (ecran login) --- */
       authMail:st.authMail,authMdp:st.authMdp,
+      /* Carte de connexion entierement centree : titre, sous-titre et note
+         l'etaient deja, les deux libelles restaient a gauche et cassaient
+         seuls l'alignement. On ne touche pas a fieldLbl/fieldIn, partages
+         par une quarantaine de champs ailleurs dans l'application. */
+      authLbl:fieldLbl+';text-align:center',
+      authIn:fieldIn+';text-align:center',
       setAuthMail:e=>this.setState({authMail:e.target.value,authErr:''}),
       setAuthMdp:e=>this.setState({authMdp:e.target.value,authErr:''}),
       authKey:e=>{if(e.key==='Enter'){e.preventDefault();this._authSubmit();}},
