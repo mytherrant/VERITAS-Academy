@@ -649,6 +649,11 @@
 
     <h1 style="font-family:'Poppins';font-weight:700;font-size:30px;line-height:1.15;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.02em">Bonjour {{ me.first }}</h1>
     <p style="font-size:14px;color:var(--c7a8598,#7a8598);margin:6px 0 24px">{{ team.name }}</p>
+    <!-- Visite guidee : dire pourquoi les compteurs sont a zero. Un profil
+         d'exemple n'ouvre pas de compte, donc pas de repertoire ; sans cette
+         ligne l'interface a l'air cassee alors qu'elle fait ce qu'elle
+         annonce. -->
+    <div style="{{ demoNoteStyle }}">{{ demoNote }}</div>
 
     <!-- ---------- 4 cartes de tête ---------- -->
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:20px">
@@ -2360,7 +2365,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '21/08 · 5';
+const ATELIER_BUILD = '21/08 · 6';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -2515,7 +2520,14 @@ class Component extends DCLogic {
       cours:store&&store.cours?store.cours:seedCours, activeCoursId:store?store.activeCoursId:null,
       epFilter:'all', notifOpen:false, commentDraft:'',
       importOpen:false, importTab:'file', importText:'', importErrorMsg:'', importPreviewMsg:'',
-      customVersion:0, ready:this.base.length>0
+      customVersion:0,
+      /* VISITE GUIDEE. Choisir un profil d'exemple n'ouvre aucun compte : il
+         n'y a donc pas de repertoire, et `ready` reste faux. Or TOUT le rendu
+         etait suspendu a `ready` — cliquer sur son nom menait a l'ecran
+         « Chargement du repertoire… » qui ne pouvait jamais aboutir. La
+         visite guidee montre l'INTERFACE, pas le corpus ; c'est d'ailleurs ce
+         qu'annonce la note sous les profils. Ce drapeau la rend montrable. */
+      demo:false, ready:this.base.length>0
     };
     if(this.state.ready) this._buildMeta();
   }
@@ -3197,7 +3209,7 @@ class Component extends DCLogic {
   _allerConnexion(sup){
     this._histRemplacer=true;
     this.setState(Object.assign({corpusLong:false,corpusEtat:'',corpusErr:'',
-      screen:'login',notifOpen:false},sup||{}));
+      demo:false,screen:'login',notifOpen:false},sup||{}));
     try{window.scrollTo(0,0);}catch(e){}
   }
   /* Un ecran ne se restitue que si l'application peut REELLEMENT l'afficher.
@@ -3210,6 +3222,7 @@ class Component extends DCLogic {
      21/08 : ecran identique, au mot pres, a la capture signalee. */
   _ecranTenable(e){
     if(e==='login')return e;
+    if(this.state.demo)return e;
     if(!this.state.ready&&!this._jeton())return 'login';
     return e;
   }
@@ -3337,12 +3350,14 @@ class Component extends DCLogic {
   _reparerAttente(){
     const s=this.state;
     if(s.ready){this._reparN=0;return;}
+    /* La visite guidee est un choix, pas une panne : on n'y touche pas. */
+    if(s.demo)return;
     if(s.corpusErr||s.screen==='login'||this._enVol||this._reparT)return;
     /* Court delai : on laisse le rendu en cours se terminer, et on evite de
        declencher sur un etat transitoire d'une milliseconde. */
     this._reparT=setTimeout(()=>{this._reparT=null;
       const t=this.state;
-      if(t.ready||t.corpusErr||t.screen==='login'||this._enVol)return;
+      if(t.ready||t.demo||t.corpusErr||t.screen==='login'||this._enVol)return;
       if(!this._jeton()){
         this._tr('réparation → connexion');
         this._allerConnexion();
@@ -3453,7 +3468,7 @@ class Component extends DCLogic {
         const moi=users.findIndex(u=>u.id===st.currentUserId);
         if(moi>=0)users[moi]=Object.assign({},users[moi],{name:nom});
         this.setState({authBusy:false,authErr:'',authMdp:'',authed:true,
-          users:users,corpusDroit:j.droit||null,screen:'accueil'},()=>{
+          demo:false,users:users,corpusDroit:j.droit||null,screen:'accueil'},()=>{
           this._persist();this._rechargerCorpus();
           if(typeof window!=='undefined')window.scrollTo(0,0);
         });
@@ -3770,7 +3785,11 @@ class Component extends DCLogic {
   }
   _clearCustom(){this.custom=[];this._save('minesec_custom',[]);this.all=this.base.concat([]);this._buildMeta();this.setState(st=>({customVersion:st.customVersion+1,importPreviewMsg:'',importErrorMsg:''}));}
   renderVals(){
-    const st=this.state,all=this.all,ready=st.ready;
+    /* « Montrable » et « repertoire charge » ne sont pas la meme chose : la
+       visite guidee montre l'interface sans corpus. `st.ready` reste la
+       verite sur le repertoire (c'est lui que lisent le chargeur et les
+       gardes) ; `ready` ci-dessous ne gouverne que l'AFFICHAGE. */
+    const st=this.state,all=this.all,ready=st.ready||!!st.demo;
     const me=this._me(),perm=this._perm(me.role);
     /* Les interrupteurs d'administration se posent PAR-DESSUS les droits du
        role : couper l'import ferme la fonction a tout le groupe, y compris
@@ -4525,7 +4544,7 @@ class Component extends DCLogic {
     }:{phases:[],collaborators:[],history:[]};
 
     const roleDotC=r=>'width:10px;height:10px;border-radius:50%;flex:none;background:'+(this.roleColors[r]||'var(--c1a72bb,#1a72bb)');
-    const loginAccounts=st.users.map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,38),role:u.role,select:()=>this.setState({currentUserId:u.id,authed:true,screen:'accueil'},()=>{this._persist();window.scrollTo(0,0);})}));
+    const loginAccounts=st.users.map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,38),role:u.role,select:()=>this.setState({currentUserId:u.id,authed:true,demo:true,screen:'accueil'},()=>{this._persist();window.scrollTo(0,0);})}));
     const planBg={essai:'var(--cffffff,#fff)',ens:'var(--cffffff,#fff)',etab:'var(--cf5faff,#f5faff)',pro:'var(--cfbf8ff,#fbf8ff)'};
     const planBorder={essai:'var(--ce2eaf3,#e2eaf3)',ens:'var(--ce2eaf3,#e2eaf3)',etab:'var(--cbcd9f2,#bcd9f2)',pro:'var(--cd9c9f0,#d9c9f0)'};
     const curPlanName=st.team.plan;
@@ -4576,6 +4595,10 @@ class Component extends DCLogic {
         this._save('minesec_convmsgs',par);this._save('minesec_chat',msgs);
         this.setState({msgsByConv:par,chatMsgs:msgs,chatDraft:''});},
       notifDot:acts.length?'position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--cf39200,#f39200);border:1.5px solid var(--cffffff,#fff)':hidden,
+      demoNote:'Profil d’exemple : vous parcourez l’interface et les rôles. Le répertoire de 1 040 textes s’ouvre avec votre compte VÉRITAS — bouton « Revenir à la connexion » dans le menu.',
+      demoNoteStyle:st.demo
+        ?'background:var(--cfff8e6,#fff8e6);border:1px solid var(--cf3e2b8,#f3e2b8);color:var(--c8a6d1f,#8a6d1f);border-radius:12px;padding:11px 15px;font-size:12.5px;line-height:1.6;margin:0 0 22px'
+        :hidden,
       notReady:!ready&&st.screen!=='login',isAccueil:ready&&st.screen==='accueil',isListe:ready&&st.screen==='liste',isFiche:ready&&st.screen==='fiche',isEpreuves:ready&&st.screen==='epreuves',isComposeur:ready&&st.screen==='composeur',isEquipe:ready&&st.screen==='equipe',isProfil:ready&&st.screen==='profil',isApercu:ready&&st.screen==='apercu',isCours:ready&&st.screen==='cours',isCoursEdit:ready&&st.screen==='coursEdit',
       gabarits:cGabarits,coursView:cCoursView,co:cCo,newCours:()=>this.setState({screen:'cours'},()=>window.scrollTo(0,0)),
       showChrome:ready&&st.screen!=='login',isLogin:st.screen==='login',isAbo:ready&&st.screen==='abo',

@@ -160,6 +160,45 @@ async function seConnecter(page) {
     await ctx.close();
   }
 
+  /* --- S6 : la VISITE GUIDEE ------------------------------------------
+     Elle n'ouvre aucun compte, donc aucun repertoire — et tout le rendu etait
+     suspendu a la presence du repertoire. Cliquer sur son nom menait donc a
+     « Chargement du repertoire… » pour toujours (build 3), puis, la garde de
+     coherence installee, a un retour immediat a l'accueil (build 5) : deux
+     facons differentes de ne rien faire. C'est probablement LA panne signalee
+     a l'origine — la liste de profils contient « M. Jacques Takou », et
+     choisir son nom ressemble a une connexion. Ce controle-la manquait. */
+  {
+    await fetch(BASE + '/__mode?m=auth&raz=1');
+    const { ctx, page } = await neuf(nav);
+    const erreurs = [];
+    page.on('pageerror', e => erreurs.push(String((e && e.message) || e).slice(0, 120)));
+    await page.goto(APP, { waitUntil: 'domcontentloaded' });
+    await attendre(page, 'connexion');
+    await page.locator('button:has-text("Mme Nadège Fotso")').first()
+      .click({ timeout: 8000 }).catch(() => {});
+    await dodo(1500);
+    const e = await ecran(page);
+    juger('S6a · un profil d’exemple ouvre l’interface',
+      e.nom === 'application', e.nom + ' — ' + e.t.slice(0, 110));
+    const bandeau = await page.evaluate(
+      () => /Profil d.{0,3}exemple/.test(document.body.innerText));
+    juger('S6b · et dit pourquoi le répertoire est vide', bandeau, 'bandeau absent');
+    /* On parcourt : une interface qui s'ouvre puis casse au premier clic
+       n'est pas une visite guidee. */
+    for (const lbl of ['Ressources', 'Épreuves', 'Cours', 'Accueil']) {
+      await page.locator('button:has-text("' + lbl + '"), a:has-text("' + lbl + '")')
+        .first().click({ timeout: 4000 }).catch(() => {});
+      await dodo(600);
+    }
+    const f = await ecran(page);
+    juger('S6c · la navigation ne retombe pas sur l’accueil public',
+      f.nom !== 'connexion' && f.nom !== 'attente', f.nom + ' — ' + f.t.slice(0, 110));
+    juger('S6d · aucune erreur JS pendant la visite',
+      erreurs.length === 0, erreurs.join(' | '));
+    await ctx.close();
+  }
+
   await nav.close();
   const ko = resultats.filter(r => !r.ok).length;
   console.log('\n' + (resultats.length - ko) + '/' + resultats.length + ' contrôles passés');
