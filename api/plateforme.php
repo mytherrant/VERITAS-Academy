@@ -305,14 +305,29 @@ if (vrt_rate_exceeded('plat', 120)) {
    ───────────────────────────────────────────────────────────────────────── */
 
 if ($action === 'config') {
-    $existe = is_file($CORPUS_FILE);
     $db     = vrt_load_db();
     $offres = is_array($db) ? plat_offres($db) : plat_offres([]);
+
+    /* Les DEUX répertoires sont rapportés, pas seulement le corpus.
+       Ils se déposent à la main par FTP (ils sont hors dépôt : c'est la
+       marchandise et le dépôt est public), donc l'un peut arriver sans
+       l'autre. Tant que cette sonde ne parlait que du corpus, un
+       citations_minesec.json oublié restait invisible jusqu'à ce qu'un
+       abonné ouvre la section des citations et reçoive un 503 — le seul
+       endroit prévu pour vérifier un déploiement ne rendait pas compte de
+       la moitié de ce qu'il fallait vérifier.
+       On lit la taille, pas le contenu : décoder 2,8 Mo à chaque sonde
+       coûterait cher pour ne rien dire de plus. */
+    $etat = static function (string $f): array {
+        $ok = is_file($f);
+        return ['disponible' => $ok, 'octets' => $ok ? (int) filesize($f) : 0];
+    };
     jsonResponse([
         'ok'         => true,
         'service'    => 'plateforme',
-        'version'    => '1.0.0',
-        'corpus'     => ['disponible' => $existe, 'octets' => $existe ? (int) filesize($CORPUS_FILE) : 0],
+        'version'    => '1.0.1',
+        'corpus'     => $etat($CORPUS_FILE),
+        'citations'  => $etat($CITATIONS_FILE),
         'essai'      => ['jours' => $offres['joursEssai'], 'cadeau' => $offres['cadeauBienvenue']],
         'baseLisible' => is_array($db),
     ]);
