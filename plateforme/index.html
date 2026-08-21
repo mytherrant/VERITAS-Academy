@@ -615,6 +615,17 @@
         <div style="font-family:Poppins;font-size:17px;font-weight:700;color:var(--c14375f,#14375f);margin-bottom:8px">{{ corpusTitre }}</div>
         <div style="font-size:13.5px;color:var(--c5a6678,#5a6678);line-height:1.65">{{ corpusMsg }}</div>
         <button onClick="{{ corpusAction }}" style="{{ corpusActionStyle }}">{{ corpusActionLabel }}</button>
+        <!-- SORTIE DE SECOURS. Tant que le chargement n'a pas echoue, cet ecran
+             n'offrait AUCUN bouton : si la reponse tardait, on y restait
+             prisonnier sans rien pouvoir tenter. Au-dela de huit secondes on
+             propose de reessayer ou de repartir de l'ecran de connexion. -->
+        <div style="{{ corpusLongStyle }}">
+          <div style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);line-height:1.6;margin-bottom:12px">Cela prend plus de temps que d’habitude.</div>
+          <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
+            <button onClick="{{ corpusReessayer }}" style="background:var(--c1a72bb,#1a72bb);border:none;color:var(--cffffff,#fff);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">Réessayer</button>
+            <button onClick="{{ corpusDeconnecter }}" style="background:transparent;border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">Revenir à la connexion</button>
+          </div>
+        </div>
       </div>
     </div>
   </sc-if>
@@ -2455,7 +2466,7 @@ class Component extends DCLogic {
       coursTab:'gabarits',cycleFiltre:'',createOpen:false,admTab:'fonctions',
       profTab:'infos',profSaved:'',coCorpusQ:'',coConfOpen:true,
       panier:this._load('minesec_panier',[])||[],panierOpen:false,
-      corpusSource:'',corpusErr:'',corpusDroit:null,corpusPalier:'',corpusPlafonds:null,corpusLibres:0,
+      corpusSource:'',corpusErr:'',corpusLong:false,corpusDroit:null,corpusPalier:'',corpusPlafonds:null,corpusLibres:0,
       exOuvert:false,exType:'',exBusy:false,exErr:'',exResultat:null,
       coConfIA:null,coConfIABusy:false,coConfIAErr:'',
       coObjProp:null,coObjBusy:false,coObjErr:'',
@@ -2595,11 +2606,17 @@ class Component extends DCLogic {
        lente, bien en deca de la patience de qui attend. */
     const coupe=(typeof AbortController!=='undefined')?new AbortController():null;
     const minuteur=setTimeout(()=>{try{coupe&&coupe.abort();}catch(e){}},45000);
+    /* Bien avant le delai maximum, on offre une SORTIE. Huit secondes, c'est
+       deja quatre fois le temps normal : inutile de retenir quelqu'un devant
+       un ecran d'attente sans le moindre bouton. */
+    if(this._longT)clearTimeout(this._longT);
+    this.setState({corpusLong:false});
+    this._longT=setTimeout(()=>{if(!this.state.ready)this.setState({corpusLong:true});},8000);
     const opts={headers:this._jeton()?{Authorization:'Bearer '+this._jeton()}:{}};
     if(coupe)opts.signal=coupe.signal;
     fetch(this._apiUrl('plateforme.php')+'?action=corpus&mode=index',opts)
       .then(r=>{
-        clearTimeout(minuteur);
+        clearTimeout(minuteur);if(this._longT)clearTimeout(this._longT);
         if(r.status===401||r.status===402){
           return r.json().catch(()=>({})).then(j=>Promise.reject(
             Object.assign({_http:r.status},j)));
@@ -2637,7 +2654,7 @@ class Component extends DCLogic {
           },0);});
       })
       .catch(e=>{
-        clearTimeout(minuteur);
+        clearTimeout(minuteur);if(this._longT)clearTimeout(this._longT);
         /* Delai depasse : le serveur n'a jamais rendu la main. On le dit tel
            quel — « verifiez votre connexion » serait faux, elle fonctionne. */
         if(e&&e.name==='AbortError'){
@@ -4528,6 +4545,16 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       corpusActionStyle:st.corpusErr
         ?'margin-top:18px;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:11px 22px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:10px;cursor:pointer'
         :hidden,
+      /* La sortie n'apparait QUE si l'attente dure et qu'aucune erreur n'a
+         encore ete affichee : quand il y a un message, il porte deja son
+         propre bouton. */
+      corpusLongStyle:(st.corpusLong&&!st.corpusErr)
+        ?'margin-top:22px;padding-top:18px;border-top:1px solid var(--ceef2f7,#eef2f7)'
+        :hidden,
+      corpusReessayer:()=>this._rechargerCorpus(),
+      corpusDeconnecter:()=>{this._poserJeton('');
+        this.setState({corpusLong:false,corpusErr:'',authed:false,screen:'login'},
+          ()=>this._persist());},
       corpusAction:()=>{
         if(st.corpusDroit&&st.corpusDroit.ok===false){this._go('abo');return;}
         this.setState({corpusErr:''},()=>this._chargerCorpus(()=>{
