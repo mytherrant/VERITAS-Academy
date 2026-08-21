@@ -628,6 +628,12 @@
                « Réception du répertoire : 245 Ko », « Mise en page… ». C'est ce
                qui distingue une ligne lente d'une ligne morte. -->
           <div style="{{ corpusEtatStyle }}">{{ corpusEtat }}</div>
+          <!-- Journal de bord du demarrage. Il n'infere rien, il enumere : une
+               capture d'ecran doit dire si la requete est partie, ce que le
+               serveur a repondu, et ce que l'application en a fait. C'est ce
+               qui manquait pour distinguer « rien n'est parti » de « 401 sans
+               le dire » — deux pannes qui donnaient le meme ecran muet. -->
+          <div style="{{ corpusTraceStyle }}">{{ corpusTrace }}</div>
           <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
             <button onClick="{{ corpusReessayer }}" style="background:var(--c1a72bb,#1a72bb);border:none;color:var(--cffffff,#fff);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">Réessayer</button>
             <button onClick="{{ corpusDeconnecter }}" style="background:transparent;border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">Revenir à la connexion</button>
@@ -2354,7 +2360,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '21/08 · 3';
+const ATELIER_BUILD = '21/08 · 4';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -2519,6 +2525,7 @@ class Component extends DCLogic {
        l'ecran d'attente restait alors muet pour toujours, sans requete et
        sans minuteur. Aucune de ces sept taches ne vaut qu'on sacrifie le
        demarrage : ce qui echoue est note, le reste continue. */
+    this._tr('montage');
     const sur=(f,nom)=>{try{f();}catch(e){
       this._panneMontage=(this._panneMontage||[]).concat(
         nom+' : '+((e&&e.message)||e));
@@ -2539,14 +2546,26 @@ class Component extends DCLogic {
     this._garde=setTimeout(()=>{
       const s=this.state;
       if(s.ready||s.corpusErr||s.corpusLong)return;
+      /* Sur l'ecran de CONNEXION il n'y a rien a attendre : le repertoire a
+         repondu 401 et l'application a fait ce qu'il fallait. Le chien de
+         garde y ecrivait quand meme « le chargement n'a jamais demarre »,
+         message invisible sur le moment — mais conserve dans l'etat, et qui
+         ressortait plus tard sur l'ecran d'attente pour y decrire une panne
+         qui n'a pas eu lieu. C'est la phrase de la capture du 22/08. */
+      if(s.screen==='login')return;
       const p=(this._panneMontage||[]).join(' · ');
+      /* On n'ECRASE PAS le voyant s'il dit deja quelque chose : la version
+         precedente affirmait « aucune requete n'est partie » alors que la
+         requete etait partie et retombee en 401 — un diagnostic faux vaut
+         moins que pas de diagnostic du tout. La trace, elle, ne suppose
+         rien : elle enumere ce qui s'est reellement produit. */
       this.setState({corpusLong:true,
-        corpusEtat:p?('Le démarrage a échoué — '+p)
-          :'Le chargement n’a jamais démarré : aucune requête n’est partie.'});
+        corpusEtat:s.corpusEtat||(p?('Le démarrage a échoué — '+p)
+          :'Le chargement s’est arrêté sans rien signaler.')});
     },12000);
     if(!this.state.ready){
-      const boot=()=>{/* Formatage des dialogues et construction des filtres : voir _installerBase(). */const n=this._installerBase();this.setState({ready:n>0,currentN:this.all[0]?this.all[0].n:this.state.currentN});};
-      if(window.MINESEC_CORPUS){boot();return;}
+      const boot=()=>{/* Formatage des dialogues et construction des filtres : voir _installerBase(). */const n=this._installerBase();this._tr('installés '+n);this.setState({ready:n>0,currentN:this.all[0]?this.all[0].n:this.state.currentN});};
+      if(window.MINESEC_CORPUS){this._tr('corpus déjà en mémoire');boot();return;}
       /* Le corpus vient du SERVEUR, sous condition de droit. Le fichier en
          clair n'existe qu'en developpement : s'il repond, on l'utilise ; sinon
          on affiche le mur d'abonnement plutot qu'un ecran vide. */
@@ -2625,12 +2644,24 @@ class Component extends DCLogic {
      filtrer. Le texte integral ne descend qu'a l'ouverture d'une fiche : un
      abonne peut toujours tout lire, mais il le fait texte par texte, ce qui
      rend l'aspiration bien plus lente sans gener l'usage normal. */
+  /* Journal de bord du demarrage, affiche sur l'ecran d'attente. Il n'infere
+     rien : il enumere ce qui s'est produit, dans l'ordre. C'est ce qui
+     manquait pour distinguer « la requete n'est jamais partie » de « elle
+     est partie et retombee en 401 sans rien dire » — deux pannes qui
+     donnaient le meme ecran muet. */
+  _tr(x){try{(this._trace=this._trace||[]).push(x);}catch(e){}}
   _chargerCorpus(fini){
+    this._tr('requête');
+    /* Marqueur lu par _reparerAttente() : il repond a la seule question qui
+       distingue une attente normale d'un ecran mort — quelqu'un travaille-t-il
+       encore ? */
+    this._enVol=true;
     const local=()=>{
       const sc=document.createElement('script');
       sc.src='_corpus_source.js';
-      sc.onload=()=>{this.setState({corpusSource:'local'},fini);};
-      sc.onerror=()=>{this.setState({corpusErr:'Corpus indisponible. Verifiez votre connexion ou votre abonnement.'});};
+      sc.onload=()=>{this._enVol=false;this.setState({corpusSource:'local'},fini);};
+      sc.onerror=()=>{this._enVol=false;
+        this.setState({corpusErr:'Corpus indisponible. Verifiez votre connexion ou votre abonnement.'});};
       document.head.appendChild(sc);
     };
     /* SURVEILLANCE DU PROGRES, et non plus delai total.
@@ -2668,14 +2699,14 @@ class Component extends DCLogic {
     if(this._longT)clearTimeout(this._longT);
     this.setState({corpusLong:false,corpusEtat:'Connexion au serveur…'});
     this._longT=setTimeout(()=>{if(!this.state.ready)this.setState({corpusLong:true});},8000);
-    const relacher=()=>{desarmer();
+    const relacher=()=>{desarmer();this._enVol=false;
       if(this._longT){clearTimeout(this._longT);this._longT=null;}};
     const opts={headers:this._jeton()?{Authorization:'Bearer '+this._jeton()}:{}};
     if(coupe)opts.signal=coupe.signal;
     armer(30);
     fetch(this._apiUrl('plateforme.php')+'?action=corpus&mode=index',opts)
       .then(r=>{
-        repondu=true;armer(25);
+        repondu=true;armer(25);this._tr('HTTP '+r.status);
         etat('Réponse du serveur reçue ('+r.status+'), lecture du répertoire…',true);
         if(r.status===401||r.status===402){
           return r.json().catch(()=>({})).then(j=>Promise.reject(
@@ -2737,6 +2768,8 @@ class Component extends DCLogic {
       })
       .catch(e=>{
         relacher();
+        this._tr('rejet '+((e&&(e._http||e.name))||(e&&e._vide&&'vide')
+          ||(e&&e._json&&'illisible')||'inconnu'));
         /* Repertoire vide : le serveur a bien repondu, il n'a rien envoye. */
         if(e&&e._vide){
           this.setState({corpusErr:'Le serveur a répondu, mais le répertoire reçu est vide. '
@@ -2776,7 +2809,18 @@ class Component extends DCLogic {
           /* Pas authentifie : on emmene au formulaire. Rester sur l'ecran
              d'attente avec un seul bouton « Reessayer » enfermait le visiteur
              dans une boucle qui ne pouvait que re-echouer. */
-          if(e._http===401){this.setState({corpusErr:''},()=>this._go('login'));return;}
+          if(e._http===401){
+            this._tr('→ connexion');
+            /* MESURE du 22/08 (banc `atelier-banc`, mode `auth`) : ce chemin
+               marche, le formulaire s'affiche. Une hypothese l'accusait — un
+               rappel de setState qu'un moteur ignorerait quand le changement
+               est nul — elle est FAUSSE : le rappel part bien, verifie deux
+               fois au banc. La panne etait juste apres : l'entree
+               d'historique laissee derriere, sur laquelle « retour »
+               retombait. Voir _allerConnexion() et componentDidUpdate(). */
+            this._allerConnexion();
+            return;
+          }
           const RAISON={
             401:'Connectez-vous pour ouvrir le répertoire.',
             503:'Le répertoire n’est pas encore installé sur ce serveur. Signalez-le au centre — ni votre connexion ni votre abonnement ne sont en cause.'
@@ -3146,6 +3190,29 @@ class Component extends DCLogic {
   _panneauOuvert(e){
     return !!(e.panierOpen||e.chatOpen||e.payOpen||e.importOpen||e.notifOpen||e.createOpen);
   }
+  /* Renvoi a l'ecran de connexion, par une seule porte. L'entree
+     d'historique est REMPLACEE et non empilee : l'ecran d'ou l'on vient n'est
+     plus affichable (pas de repertoire, pas de compte), il ne doit pas rester
+     une marche en arriere ou retomber. */
+  _allerConnexion(sup){
+    this._histRemplacer=true;
+    this.setState(Object.assign({corpusLong:false,corpusEtat:'',corpusErr:'',
+      screen:'login',notifOpen:false},sup||{}));
+    try{window.scrollTo(0,0);}catch(e){}
+  }
+  /* Un ecran ne se restitue que si l'application peut REELLEMENT l'afficher.
+     Sans repertoire et sans compte, tout ecran autre que la connexion se
+     reduit a « Chargement du repertoire… » — sans rien qui charge, puisque le
+     serveur a deja repondu 401 et que personne ne redemandera. C'est
+     exactement ce que produisait un appui sur « retour » depuis l'ecran de
+     connexion : l'entree d'historique empilee au montage porte 'accueil', et
+     on y retournait pour n'y trouver qu'une attente sans fin. Mesure du
+     22/08 : ecran identique, au mot pres, a la capture signalee. */
+  _ecranTenable(e){
+    if(e==='login')return e;
+    if(!this.state.ready&&!this._jeton())return 'login';
+    return e;
+  }
   /* CLAVIER de la presentation. Elle ne repondait a aucune touche : il fallait
      viser un bouton a la souris, et quand le panneau debordait sous l'ecran ces
      boutons devenaient inatteignables — on ne pouvait plus ni avancer ni sortir.
@@ -3208,12 +3275,12 @@ class Component extends DCLogic {
         }
         this._sortiePrete=now;
         try{history.pushState({vrt:'sentinelle'},'','#accueil');}catch(e){}
-        this.setState({screen:'accueil'});
+        this.setState({screen:this._ecranTenable('accueil')});
         if(typeof this._toastRetour==='function')this._toastRetour();
         return;
       }
       /* 3. cas normal : on restitue l'ecran de l'entree precedente */
-      const ecran=String(et).split('|')[0]||'accueil';
+      const ecran=this._ecranTenable(String(et).split('|')[0]||'accueil');
       this.setState({screen:ecran,panierOpen:false,chatOpen:false,payOpen:false,
         importOpen:false,notifOpen:false,createOpen:false});
     });
@@ -3240,12 +3307,58 @@ class Component extends DCLogic {
   /* Le moteur n'appelle componentDidUpdate qu'avec prevProps : il n'y a pas de
      prevState a comparer. On garde donc notre propre instantane. */
   componentDidUpdate(){
+    this._reparerAttente();
+    const remplacer=this._histRemplacer;this._histRemplacer=false;
     const ap=this._cleHist(this.state);
     if(this._histCle===undefined){this._histCle=ap;return;}
     if(this._histCle===ap)return;
     this._histCle=ap;
     if(this._retourEnCours){this._retourEnCours=false;return;}
-    try{history.pushState({vrt:ap},'','#'+(this.state.screen||'accueil'));}catch(e){}
+    /* Le renvoi a la connexion REMPLACE l'entree courante au lieu d'en
+       empiler une : sans cela, le retour arriere depuis la connexion ramene
+       sur l'entree 'accueil' posee au montage — un ecran que l'application ne
+       peut pas afficher tant que le repertoire n'est pas la. Depuis l'ecran
+       de connexion, « retour » doit sortir de la page, pas ressusciter un
+       ecran mort. */
+    try{(remplacer?history.replaceState:history.pushState)
+      .call(history,{vrt:ap},'','#'+(this.state.screen||'accueil'));}catch(e){}
+  }
+  /* ---- GARDE DE COHERENCE DE L'ECRAN D'ATTENTE -------------------------
+     Trois pannes signalees, trois causes differentes (minuteurs desarmes a
+     l'arrivee des en-tetes, tableau vide non detecte, retour arriere qui
+     restitue un ecran impossible) — mais une seule et meme FORME : l'ecran
+     « Chargement du repertoire… » affiche alors que rien n'est en cours et
+     que personne ne relancera. On cesse de courir apres les causes une par
+     une : on traite la forme. Si l'attente est visible, qu'aucune requete
+     n'est en vol et qu'aucun message n'est affiche, l'etat est incoherent.
+     Avec un compte on relance ; sans compte on renvoie a la connexion, seul
+     endroit ou l'utilisateur peut encore agir. Borne a trois relances : une
+     reparation qui boucle martelerait le serveur au lieu de le dire. */
+  _reparerAttente(){
+    const s=this.state;
+    if(s.ready){this._reparN=0;return;}
+    if(s.corpusErr||s.screen==='login'||this._enVol||this._reparT)return;
+    /* Court delai : on laisse le rendu en cours se terminer, et on evite de
+       declencher sur un etat transitoire d'une milliseconde. */
+    this._reparT=setTimeout(()=>{this._reparT=null;
+      const t=this.state;
+      if(t.ready||t.corpusErr||t.screen==='login'||this._enVol)return;
+      if(!this._jeton()){
+        this._tr('réparation → connexion');
+        this._allerConnexion();
+        return;
+      }
+      this._reparN=(this._reparN||0)+1;
+      if(this._reparN>3){
+        this._tr('réparation abandonnée');
+        this.setState({corpusLong:false,
+          corpusErr:'Le répertoire n’a pas pu être chargé après plusieurs tentatives. '
+            +'Réessayez, ou revenez à la connexion.'});
+        return;
+      }
+      this._tr('réparation → relance '+this._reparN);
+      this._rechargerCorpus();
+    },80);
   }
   /* Groupe actif : lu par les creations pour estampiller ce qu'on produit. */
   _groupeActif(){const gs=this.state.groupes||[];
@@ -3299,9 +3412,15 @@ class Component extends DCLogic {
      abonnement). Meme sequence que le bouton « Reessayer » : sans le
      _buildMeta(), les filtres restent construits sur l'ancienne base. */
   _rechargerCorpus(){
-    this.setState({corpusErr:''},()=>this._chargerCorpus(()=>{
+    /* Pas de rappel de setState : on efface le message d'un cote, on lance le
+       chargement de l'autre. Ce n'est PAS un correctif — mesure au banc le
+       22/08, le rappel partait bien, meme quand le changement d'etat etait
+       nul ; l'hypothese inverse a ete ecrite ici puis refutee. C'est un
+       chemin de moins a supposer, rien de plus. */
+    this.setState({corpusErr:''});
+    this._chargerCorpus(()=>{
       const n=this._installerBase();this.setState({ready:n>0});
-    }));
+    });
   }
   /* CONNEXION REELLE au compte VERITAS.
      Le repertoire ne descend qu'a un compte authentifie : sans ce chemin, le
@@ -4713,17 +4832,24 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
          livree. */
       corpusBuild:'Atelier '+ATELIER_BUILD,
       corpusEtat:st.corpusEtat||'',
+      corpusTrace:(this._trace||[]).slice(-8).join(' › '),
+      corpusTraceStyle:(this._trace&&this._trace.length)
+        ?'font-size:10.5px;color:var(--cc3ccd8,#c3ccd8);line-height:1.5;margin-bottom:12px;font-family:Open Sans;word-break:break-word'
+        :hidden,
       corpusEtatStyle:st.corpusEtat
         ?'font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.5;margin-bottom:12px;font-family:Open Sans'
         :hidden,
       corpusReessayer:()=>this._rechargerCorpus(),
       corpusDeconnecter:()=>{this._poserJeton('');
-        this.setState({corpusLong:false,corpusErr:'',authed:false,screen:'login'},
-          ()=>this._persist());},
+        this._allerConnexion({authed:false});
+        this._persist();},
       corpusAction:()=>{
         if(st.corpusDroit&&st.corpusDroit.ok===false){this._go('abo');return;}
-        this.setState({corpusErr:''},()=>this._chargerCorpus(()=>{
-          const n=this._installerBase();this.setState({ready:n>0});}));
+        /* Meme forme que _rechargerCorpus : sans rappel, pour n'avoir rien a
+           supposer du moteur. */
+        this.setState({corpusErr:''});
+        this._chargerCorpus(()=>{
+          const n=this._installerBase();this.setState({ready:n>0});});
       },
       /* --- assistant Ambassa --- */
       assistOuvert:st.assistOuvert,
