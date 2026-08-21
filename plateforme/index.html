@@ -620,7 +620,11 @@
              prisonnier sans rien pouvoir tenter. Au-dela de huit secondes on
              propose de reessayer ou de repartir de l'ecran de connexion. -->
         <div style="{{ corpusLongStyle }}">
-          <div style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);line-height:1.6;margin-bottom:12px">Cela prend plus de temps que d’habitude.</div>
+          <div style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);line-height:1.6;margin-bottom:6px">Cela prend plus de temps que d’habitude.</div>
+          <!-- Ou en est le chargement, en clair : « Connexion au serveur… »,
+               « Réception du répertoire : 245 Ko », « Mise en page… ». C'est ce
+               qui distingue une ligne lente d'une ligne morte. -->
+          <div style="{{ corpusEtatStyle }}">{{ corpusEtat }}</div>
           <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap">
             <button onClick="{{ corpusReessayer }}" style="background:var(--c1a72bb,#1a72bb);border:none;color:var(--cffffff,#fff);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">Réessayer</button>
             <button onClick="{{ corpusDeconnecter }}" style="background:transparent;border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer">Revenir à la connexion</button>
@@ -2466,7 +2470,7 @@ class Component extends DCLogic {
       coursTab:'gabarits',cycleFiltre:'',createOpen:false,admTab:'fonctions',
       profTab:'infos',profSaved:'',coCorpusQ:'',coConfOpen:true,
       panier:this._load('minesec_panier',[])||[],panierOpen:false,
-      corpusSource:'',corpusErr:'',corpusLong:false,corpusDroit:null,corpusPalier:'',corpusPlafonds:null,corpusLibres:0,
+      corpusSource:'',corpusErr:'',corpusLong:false,corpusEtat:'',corpusDroit:null,corpusPalier:'',corpusPlafonds:null,corpusLibres:0,
       exOuvert:false,exType:'',exBusy:false,exErr:'',exResultat:null,
       coConfIA:null,coConfIABusy:false,coConfIAErr:'',
       coObjProp:null,coObjBusy:false,coObjErr:'',
@@ -2509,7 +2513,7 @@ class Component extends DCLogic {
     this._installerRetour();
     this._installerClavierIntro();
     if(!this.state.ready){
-      const boot=()=>{/* Les repliques sont retrouvees ICI, une seule fois, et pas a chaque   affichage : les index d'annotation comptent les mots du texte, donc   la fiche, le composeur et l'editeur de cours doivent tous lire   exactement la meme chaine. VRT_TEXTE n'ajoute que des sauts de ligne   (integrite verifiee sur les 1040 textes). */this.base=(window.MINESEC_CORPUS||[]).map(f=>(f&&f.text&&/[—–]/.test(f.text))?{...f,text:VRT_TEXTE.formaterDialogue(f.text)}:f);this.all=this.base.concat(this.custom);this._buildMeta();this.setState({ready:this.base.length>0,currentN:this.all[0]?this.all[0].n:this.state.currentN});};
+      const boot=()=>{/* Formatage des dialogues et construction des filtres : voir _installerBase(). */const n=this._installerBase();this.setState({ready:n>0,currentN:this.all[0]?this.all[0].n:this.state.currentN});};
       if(window.MINESEC_CORPUS){boot();return;}
       /* Le corpus vient du SERVEUR, sous condition de droit. Le fichier en
          clair n'existe qu'en developpement : s'il repond, on l'utilise ; sinon
@@ -2597,26 +2601,50 @@ class Component extends DCLogic {
       sc.onerror=()=>{this.setState({corpusErr:'Corpus indisponible. Verifiez votre connexion ou votre abonnement.'});};
       document.head.appendChild(sc);
     };
-    /* DELAI MAXIMUM. Sans lui, une requete que le serveur ne rend jamais
-       laisse l'ecran sur « Chargement du repertoire… » indefiniment : pas de
-       message, pas de bouton, aucune issue — c'est exactement ce qui s'est
-       produit le 21/08/2026, cinq minutes durant. Le `.catch()` ne sert a rien
-       tant que la promesse ne se resout pas ; il faut donc la trancher
-       nous-memes. 45 s : bien au-dela d'un index de 706 Ko sur une connexion
-       lente, bien en deca de la patience de qui attend. */
+    /* SURVEILLANCE DU PROGRES, et non plus delai total.
+       Le delai total de 45 s avait deux defauts, et les deux laissaient
+       l'ecran fige sur « Chargement du repertoire… » :
+       1. il etait DESARME des l'arrivee des EN-TETES, alors que le corps
+          (~700 Ko) n'avait pas fini de descendre. Un transfert qui s'arrete
+          au milieu ne produit alors ni octet, ni erreur, ni fin : la promesse
+          reste en suspens pour toujours, et le `.catch()` ne sert a rien ;
+       2. il tranchait aussi bien une connexion MORTE qu'une connexion
+          simplement lente (700 Ko a 15 ko/s font 47 s), et coupait donc un
+          abonne dont tout fonctionnait.
+       On surveille desormais l'IMMOBILITE : chaque morceau recu re-arme le
+       compteur. Tant que des octets arrivent on attend, meme longtemps ; des
+       qu'il n'en arrive plus pendant 25 s, la ligne est morte et on le dit. */
     const coupe=(typeof AbortController!=='undefined')?new AbortController():null;
-    const minuteur=setTimeout(()=>{try{coupe&&coupe.abort();}catch(e){}},45000);
-    /* Bien avant le delai maximum, on offre une SORTIE. Huit secondes, c'est
-       deja quatre fois le temps normal : inutile de retenir quelqu'un devant
-       un ecran d'attente sans le moindre bouton. */
+    let mort=null,repondu=false;
+    const armer=s=>{clearTimeout(mort);
+      mort=setTimeout(()=>{try{coupe&&coupe.abort();}catch(e){}},s*1000);};
+    const desarmer=()=>{clearTimeout(mort);mort=null;};
+    /* Etat lisible du chargement. Un ecran d'attente qui ne dit pas OU il en
+       est oblige a ouvrir une console pour l'apprendre ; ici une capture
+       d'ecran suffit a savoir si l'on attend le serveur, si l'on telecharge,
+       ou si l'on met en page. Rafraichi au plus une fois par 400 ms : un
+       rendu par morceau recu couterait plus cher que le telechargement. */
+    let dernier=0;
+    const etat=(txt,force)=>{const t=Date.now();
+      if(!force&&t-dernier<400)return;dernier=t;this.setState({corpusEtat:txt});};
+    /* Bien avant tout delai, on offre une SORTIE. Huit secondes, c'est deja
+       quatre fois le temps normal : inutile de retenir quelqu'un devant un
+       ecran d'attente sans le moindre bouton. Ce compteur n'est desarme que
+       lorsque le repertoire est REELLEMENT en place — le desarmer a l'arrivee
+       des en-tetes retirait la seule issue au moment precis ou elle allait
+       devenir necessaire. */
     if(this._longT)clearTimeout(this._longT);
-    this.setState({corpusLong:false});
+    this.setState({corpusLong:false,corpusEtat:'Connexion au serveur…'});
     this._longT=setTimeout(()=>{if(!this.state.ready)this.setState({corpusLong:true});},8000);
+    const relacher=()=>{desarmer();
+      if(this._longT){clearTimeout(this._longT);this._longT=null;}};
     const opts={headers:this._jeton()?{Authorization:'Bearer '+this._jeton()}:{}};
     if(coupe)opts.signal=coupe.signal;
+    armer(30);
     fetch(this._apiUrl('plateforme.php')+'?action=corpus&mode=index',opts)
       .then(r=>{
-        clearTimeout(minuteur);if(this._longT)clearTimeout(this._longT);
+        repondu=true;armer(25);
+        etat('Réponse du serveur reçue ('+r.status+'), lecture du répertoire…',true);
         if(r.status===401||r.status===402){
           return r.json().catch(()=>({})).then(j=>Promise.reject(
             Object.assign({_http:r.status},j)));
@@ -2628,10 +2656,17 @@ class Component extends DCLogic {
           return r.json().catch(()=>({})).then(j=>Promise.reject(
             {_http:r.status,error:j&&j.error,message:j&&j.message}));
         }
-        return r.json();
+        return this._lireIndex(r,armer,etat);
       })
       .then(j=>{
-        if(!j||!j.textes)return Promise.reject(new Error('vide'));
+        desarmer();
+        /* Un tableau VIDE passait le controle precedent — `!j.textes` est FAUX
+           pour `[]`. La base restait alors a zero, `ready` ne devenait jamais
+           vrai, et l'ecran d'attente s'installait definitivement : sans
+           erreur, sans bouton, sans rien. Un repertoire vide est une panne,
+           pas un resultat. */
+        if(!j||!Array.isArray(j.textes)||!j.textes.length)
+          return Promise.reject({_vide:true});
         /* L'index n'a pas les textes : on garde `extrait` sous le nom `text`
            pour que les listes s'affichent, et `_partiel` marque ce qui doit
            etre complete a l'ouverture. Un texte OFFERT arrive complet : il ne
@@ -2639,6 +2674,7 @@ class Component extends DCLogic {
            contenu qu'on a deja. */
         window.MINESEC_CORPUS=j.textes.map(t=>Object.assign({},t,
           {text:t.extrait||'',_partiel:true,_libre:t.libre!==false}));
+        etat('Mise en page du répertoire…',true);
         /* `fini` est appele HORS de la chaine : sinon une exception du rendu
            serait prise pour un echec reseau et declencherait le repli local,
            qui masquerait la vraie cause. */
@@ -2648,18 +2684,49 @@ class Component extends DCLogic {
           ()=>{setTimeout(()=>{
             try{fini();}
             catch(err){
+              relacher();
               this.setState({corpusErr:'Le répertoire est arrivé mais l’affichage a échoué : '
                 +(err&&err.message?err.message:'erreur inconnue')});
+              return;
             }
+            /* DERNIER VERROU. Le repertoire est arrive, rien n'a echoue — mais
+               si `ready` n'est pas passe a vrai, l'ecran d'attente reste
+               affiche pour toujours avec aucune erreur a montrer. On refuse ce
+               silence : ou l'application demarre, ou elle dit pourquoi non. */
+            if(!this.state.ready){
+              relacher();
+              this.setState({corpusErr:'Le répertoire est arrivé ('+j.textes.length
+                +' textes) mais aucun n’a pu être installé. Réessayez ; si cela '
+                +'se reproduit, signalez-le au centre.'});
+              return;
+            }
+            relacher();
           },0);});
       })
       .catch(e=>{
-        clearTimeout(minuteur);if(this._longT)clearTimeout(this._longT);
-        /* Delai depasse : le serveur n'a jamais rendu la main. On le dit tel
-           quel — « verifiez votre connexion » serait faux, elle fonctionne. */
+        relacher();
+        /* Repertoire vide : le serveur a bien repondu, il n'a rien envoye. */
+        if(e&&e._vide){
+          this.setState({corpusErr:'Le serveur a répondu, mais le répertoire reçu est vide. '
+            +'Ni votre connexion ni votre abonnement ne sont en cause — signalez-le au centre.'});
+          return;
+        }
+        /* Reponse illisible : c'est du JSON tronque ou abime, pas une panne
+           d'abonnement. Le dire evite d'envoyer quelqu'un verifier sa carte. */
+        if(e&&e._json){
+          this.setState({corpusErr:'La réponse du serveur est arrivée abîmée et n’a pas pu '
+            +'être lue jusqu’au bout. Votre abonnement n’est pas en cause — réessayez.'});
+          return;
+        }
+        /* Immobilite. Deux pannes distinctes, deux phrases distinctes : le
+           serveur qui ne repond pas du tout n'est pas le transfert qui
+           s'arrete au milieu, et l'utilisateur n'a pas a deviner lequel. */
         if(e&&e.name==='AbortError'){
-          this.setState({corpusErr:'Le serveur n’a pas répondu dans le temps imparti. '
-            +'Votre connexion et votre abonnement ne sont pas en cause — réessayez.'});
+          this.setState({corpusErr:repondu
+            ?'Le téléchargement du répertoire s’est interrompu en cours de route. '
+              +'Votre abonnement n’est pas en cause — réessayez, de préférence sur une connexion stable.'
+            :'Le serveur n’a pas répondu dans le temps imparti. '
+              +'Votre connexion et votre abonnement ne sont pas en cause — réessayez.'});
           return;
         }
         if(e&&e.error==='Abonnement requis'){
@@ -2701,6 +2768,60 @@ class Component extends DCLogic {
         }
         local();
       });
+  }
+  /* Lit le corps de la reponse en surveillant sa PROGRESSION.
+     `r.json()` ne rend la main qu'une fois TOUT recu : si le transfert
+     s'interrompt au milieu, il ne produit ni octet, ni erreur, ni fin, et la
+     promesse reste en suspens — c'est ainsi que l'ecran d'attente devenait
+     eternel. En lisant le flux nous-memes, chaque morceau re-arme la
+     surveillance et met le compteur a jour : l'absence de morceau devient
+     mesurable, et « lent » cesse d'etre confondu avec « bloque ».
+     Note : `Content-Length` compte les octets COMPRESSES (LiteSpeed sert en
+     Brotli) tandis que le lecteur rend les octets decompresses — un
+     pourcentage serait donc faux. On affiche des kilo-octets recus. */
+  _lireIndex(r,armer,etat){
+    if(!r.body||typeof r.body.getReader!=='function'||typeof TextDecoder==='undefined')
+      return r.json();
+    const lecteur=r.body.getReader(),morceaux=[];
+    let recu=0;
+    const suite=()=>lecteur.read().then(p=>{
+      if(p.done)return;
+      if(p.value&&p.value.length){
+        const premier=!morceaux.length;
+        recu+=p.value.length;morceaux.push(p.value);
+        armer(25);
+        /* Le tout premier morceau passe OUTRE la limitation de cadence : si la
+           ligne tombe aussitot apres, c'est la seule occasion d'apprendre que
+           le telechargement avait bel et bien commence. */
+        etat('Réception du répertoire : '+Math.round(recu/1024)+' Ko',premier);
+      }
+      return suite();
+    });
+    return suite().then(()=>{
+      const tout=new Uint8Array(recu);let d=0;
+      for(let i=0;i<morceaux.length;i++){tout.set(morceaux[i],d);d+=morceaux[i].length;}
+      etat('Répertoire reçu ('+Math.round(recu/1024)+' Ko), lecture…',true);
+      try{return JSON.parse(new TextDecoder('utf-8').decode(tout));}
+      catch(err){return Promise.reject({_json:true});}
+    });
+  }
+  /* Installe la base recue et la rend consultable.
+     Le formatage des dialogues se fait ICI, une seule fois : les index
+     d'annotation comptent les mots, donc la fiche, le composeur et l'editeur
+     de cours doivent tous lire exactement la MEME chaine. C'est aussi
+     pourquoi les trois chemins de chargement — premier affichage,
+     « Reessayer », connexion — doivent passer par cette meme fonction : le
+     chemin de la connexion sautait le formatage et rendait de nouveau les 88
+     dialogues en un seul bloc. */
+  _installerBase(){
+    const src=window.MINESEC_CORPUS||[];
+    const fmt=(typeof VRT_TEXTE!=='undefined'&&VRT_TEXTE&&VRT_TEXTE.formaterDialogue)
+      ?VRT_TEXTE.formaterDialogue:null;
+    this.base=fmt?src.map(f=>(f&&f.text&&/[—–]/.test(f.text))
+      ?Object.assign({},f,{text:fmt(f.text)}):f):src;
+    this.all=this.base.concat(this.custom);
+    this._buildMeta();
+    return this.base.length;
   }
   /* Poste de developpement : c'est la seule situation ou `_corpus_source.js`
      existe a cote de la page. */
@@ -3147,8 +3268,7 @@ class Component extends DCLogic {
      _buildMeta(), les filtres restent construits sur l'ancienne base. */
   _rechargerCorpus(){
     this.setState({corpusErr:''},()=>this._chargerCorpus(()=>{
-      this.base=window.MINESEC_CORPUS||[];this.all=this.base.concat(this.custom);
-      this._buildMeta();this.setState({ready:this.base.length>0});
+      const n=this._installerBase();this.setState({ready:n>0});
     }));
   }
   /* CONNEXION REELLE au compte VERITAS.
@@ -4551,6 +4671,14 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       corpusLongStyle:(st.corpusLong&&!st.corpusErr)
         ?'margin-top:22px;padding-top:18px;border-top:1px solid var(--ceef2f7,#eef2f7)'
         :hidden,
+      /* Ou en est-on exactement. Sans cette ligne, un ecran bloque se ressemble
+         quelle que soit la cause, et il faut ouvrir une console pour trancher
+         entre « le serveur ne repond pas », « le telechargement s'arrete » et
+         « la mise en page echoue ». Une capture d'ecran doit suffire. */
+      corpusEtat:st.corpusEtat||'',
+      corpusEtatStyle:st.corpusEtat
+        ?'font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.5;margin-bottom:12px;font-family:Open Sans'
+        :hidden,
       corpusReessayer:()=>this._rechargerCorpus(),
       corpusDeconnecter:()=>{this._poserJeton('');
         this.setState({corpusLong:false,corpusErr:'',authed:false,screen:'login'},
@@ -4558,8 +4686,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       corpusAction:()=>{
         if(st.corpusDroit&&st.corpusDroit.ok===false){this._go('abo');return;}
         this.setState({corpusErr:''},()=>this._chargerCorpus(()=>{
-          this.base=window.MINESEC_CORPUS||[];this.all=this.base.concat(this.custom);
-          this._buildMeta();this.setState({ready:this.base.length>0});}));
+          const n=this._installerBase();this.setState({ready:n>0});}));
       },
       /* --- assistant Ambassa --- */
       assistOuvert:st.assistOuvert,
