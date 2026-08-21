@@ -100,6 +100,82 @@ function plat_compte(array $db): array
     return $v;
 }
 
+/**
+ * DATE D'OUVERTURE DE L'ESSAI — dans un fichier à part, pas dans la base.
+ *
+ * Elle vivait sur le compte, dans data/veritas_db.json. Deux ennuis, dont un
+ * qui fait perdre des données :
+ *
+ *  1. Le navigateur de l'administration pousse la base ENTIÈRE en PUT sur
+ *     db.php. Une console ouverte avant que l'essai d'un enseignant ne
+ *     s'ouvre renvoie donc une copie qui ignore `platEssaiDebut`, et l'écrase.
+ *     L'essai repartirait à zéro à chaque synchronisation admin — un abonné
+ *     obtiendrait un essai perpétuel sans jamais payer.
+ *  2. Écrire un seul entier coûtait une relecture, une sauvegarde horodatée
+ *     et une réécriture de toute la base, sous verrou exclusif, sur le chemin
+ *     de LECTURE du répertoire.
+ *
+ * Ce fichier-ci ne contient que des identifiants de compte et des horodatages.
+ * Il est minuscule, il n'entre en concurrence avec personne, et la synchro de
+ * l'administration ne le voit pas.
+ */
+function plat_essais_fichier(): string
+{
+    global $DATA_DIR;
+    return $DATA_DIR . '/_plat_essais.json';
+}
+
+function plat_essais_lire(): array
+{
+    $f = plat_essais_fichier();
+    if (!is_file($f)) return [];
+    $j = json_decode((string) @file_get_contents($f), true);
+    return is_array($j) ? $j : [];
+}
+
+/**
+ * Renvoie la date d'ouverture, en posant celle d'aujourd'hui au premier appel.
+ * Best-effort : si l'écriture échoue, on renvoie quand même une date pour que
+ * l'essai commence — mieux vaut un essai qui s'ouvre qu'un accès refusé sur un
+ * incident d'écriture.
+ */
+function plat_essai_ouvrir(string $accId, int $herite = 0): int
+{
+    if ($accId === '') return $herite > 0 ? $herite : time();
+
+    $f  = plat_essais_fichier();
+    $fp = @fopen($f, 'c+');
+    if (!$fp) return $herite > 0 ? $herite : time();
+
+    $obtenu = false;
+    for ($i = 0; $i < 10; $i++) {           // 1 s au plus : ce fichier n'est pas disputé
+        if (flock($fp, LOCK_EX | LOCK_NB)) { $obtenu = true; break; }
+        usleep(100000);
+    }
+    if (!$obtenu) { fclose($fp); return $herite > 0 ? $herite : time(); }
+
+    $tout = json_decode((string) stream_get_contents($fp), true);
+    if (!is_array($tout)) $tout = [];
+
+    // La valeur héritée de la base gagne : un essai déjà entamé ne doit pas
+    // recommencer parce qu'on a changé de rangement.
+    $deja = (int) ($tout[$accId] ?? 0);
+    $debut = $herite > 0 ? $herite : ($deja > 0 ? $deja : time());
+
+    if ($deja !== $debut) {
+        $tout[$accId] = $debut;
+        // Purge des entrées d'il y a plus de deux ans : le fichier ne doit pas
+        // enfler indéfiniment, et un essai de 2024 ne sert plus à rien.
+        $limite = time() - 730 * 86400;
+        foreach ($tout as $k => $v) { if ((int) $v < $limite) unset($tout[$k]); }
+        $enc = json_encode($tout, JSON_UNESCAPED_UNICODE);
+        if ($enc !== false) { ftruncate($fp, 0); rewind($fp); fwrite($fp, $enc); fflush($fp); }
+    }
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    return $debut;
+}
+
 /** Politique d'essai et de cadeaux, réglée par l'administration. */
 function plat_offres(array $db): array
 {
@@ -196,11 +272,15 @@ function plat_droit(array $acc, array $db, array $offres): array
         }
     }
 
-    // 2. Période d'essai. Le point de départ est celui enregistré en base ;
-    //    s'il n'existe pas encore, l'essai commence maintenant (l'appelant
-    //    l'écrira). Compter depuis le navigateur laisserait relancer l'essai
-    //    en vidant son stockage local.
-    $debut = (int) ($acc['platEssaiDebut'] ?? 0);
+    // 2. Période d'essai. Le point de départ est horodaté CÔTÉ SERVEUR :
+    //    compter depuis le navigateur laisserait relancer l'essai en vidant
+    //    son stockage local. On lit le registre dédié, et à défaut la valeur
+    //    héritée qui vivait sur le compte (essais déjà entamés avant le
+    //    changement de rangement — ils ne doivent pas repartir à zéro).
+    $accId   = (string) ($acc['id'] ?? '');
+    $registre = plat_essais_lire();
+    $debut = (int) ($registre[$accId] ?? 0);
+    if ($debut <= 0) $debut = (int) ($acc['platEssaiDebut'] ?? 0);
     $jours = $offres['joursEssai'] + $offres['cadeauBienvenue'];
     if ($jours <= 0) {
         return ['ok' => false, 'motif' => 'sans_essai', 'resteJours' => 0];
@@ -407,18 +487,11 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
     $caps   = plat_paliers($db)[$palier] ?? plat_paliers($db)['demo'];
 
     /* Premier accès : on horodate l'ouverture de l'essai, côté serveur.
-       AU MIEUX, jamais au prix de la lecture. Cette écriture n'est qu'un
-       tampon de date ; si la base est occupée par une synchronisation, on
-       sert quand même le répertoire et le tampon se posera à la requête
-       suivante. Faire dépendre l'affichage du corpus de l'obtention d'un
-       verrou d'écriture, c'était accepter que l'enseignant attende que
-       l'administration ait fini de synchroniser — ou pour toujours. */
+       Dans le registre DÉDIÉ — un fichier de quelques centaines d'octets —
+       et non plus par une réécriture de toute la base sous verrou exclusif
+       sur le chemin de lecture du répertoire. Voir plat_essai_ouvrir(). */
     if (($droit['motif'] ?? '') === 'essai_ouverture') {
-        $accId = (string) ($acc['id'] ?? '');
-        plat_muter(function (array $db2) use ($accId) {
-            plat_ecrire_compte($db2, $accId, ['platEssaiDebut' => time()]);
-            return [$db2, true];
-        }, false);
+        plat_essai_ouvrir((string) ($acc['id'] ?? ''), (int) ($acc['platEssaiDebut'] ?? 0));
     }
 
     $estCitation = ($action === 'citations');
