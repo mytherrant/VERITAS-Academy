@@ -2360,7 +2360,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '21/08 · 4';
+const ATELIER_BUILD = '21/08 · 5';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -2551,7 +2551,7 @@ class Component extends DCLogic {
          garde y ecrivait quand meme « le chargement n'a jamais demarre »,
          message invisible sur le moment — mais conserve dans l'etat, et qui
          ressortait plus tard sur l'ecran d'attente pour y decrire une panne
-         qui n'a pas eu lieu. C'est la phrase de la capture du 22/08. */
+         qui n'a pas eu lieu. C'est la phrase de la capture du 21/08. */
       if(s.screen==='login')return;
       const p=(this._panneMontage||[]).join(' · ');
       /* On n'ECRASE PAS le voyant s'il dit deja quelque chose : la version
@@ -2811,7 +2811,7 @@ class Component extends DCLogic {
              dans une boucle qui ne pouvait que re-echouer. */
           if(e._http===401){
             this._tr('→ connexion');
-            /* MESURE du 22/08 (banc `atelier-banc`, mode `auth`) : ce chemin
+            /* MESURE du 21/08 (banc `atelier-banc`, mode `auth`) : ce chemin
                marche, le formulaire s'affiche. Une hypothese l'accusait — un
                rappel de setState qu'un moteur ignorerait quand le changement
                est nul — elle est FAUSSE : le rappel part bien, verifie deux
@@ -3207,7 +3207,7 @@ class Component extends DCLogic {
      exactement ce que produisait un appui sur « retour » depuis l'ecran de
      connexion : l'entree d'historique empilee au montage porte 'accueil', et
      on y retournait pour n'y trouver qu'une attente sans fin. Mesure du
-     22/08 : ecran identique, au mot pres, a la capture signalee. */
+     21/08 : ecran identique, au mot pres, a la capture signalee. */
   _ecranTenable(e){
     if(e==='login')return e;
     if(!this.state.ready&&!this._jeton())return 'login';
@@ -3414,7 +3414,7 @@ class Component extends DCLogic {
   _rechargerCorpus(){
     /* Pas de rappel de setState : on efface le message d'un cote, on lance le
        chargement de l'autre. Ce n'est PAS un correctif — mesure au banc le
-       22/08, le rappel partait bien, meme quand le changement d'etat etait
+       21/08, le rappel partait bien, meme quand le changement d'etat etait
        nul ; l'hypothese inverse a ete ecrite ici puis refutee. C'est un
        chemin de moins a supposer, rien de plus. */
     this.setState({corpusErr:''});

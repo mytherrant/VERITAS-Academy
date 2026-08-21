@@ -12,7 +12,7 @@
  * Le mode `auth` rejoue la sequence REELLE de la production : un visiteur non
  * authentifie recoit 401, l'ecran de connexion s'affiche, il se connecte, et
  * le repertoire doit alors descendre. C'est ce parcours-la qui restait bloque
- * sur « Chargement du repertoire… » les 21 et 22/08 ; aucun autre mode ne
+ * sur « Chargement du repertoire… » le 21/08 ; aucun autre mode ne
  * l'exerce, puisque tous les autres repondent des la premiere requete.
  *
  * `/__journal` rend la liste horodatee des requetes vues : c'est ce qui

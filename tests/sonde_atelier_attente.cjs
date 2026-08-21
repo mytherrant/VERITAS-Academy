@@ -4,7 +4,7 @@
  *
  * Elle confronte le fichier TEL QU'IL EST SERVI a quatre scenarios de bout en
  * bout, dans un vrai navigateur. Trois d'entre eux tournent autour d'un seul
- * fait, mesure le 22/08 : l'ecran de connexion est atteint par 401, mais
+ * fait, mesure le 21/08 : l'ecran de connexion est atteint par 401, mais
  * l'entree d'historique posee au montage porte 'accueil' — un appui sur
  * « retour » y ramenait, et l'application ne pouvait alors afficher que
  * « Chargement du répertoire… », sans requete en cours et sans personne pour
