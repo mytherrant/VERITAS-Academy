@@ -614,6 +614,9 @@
         <div style="display:flex;justify-content:center;margin-bottom:16px">{{ corpusSceau }}</div>
         <div style="font-family:Poppins;font-size:17px;font-weight:700;color:var(--c14375f,#14375f);margin-bottom:8px">{{ corpusTitre }}</div>
         <div style="font-size:13.5px;color:var(--c5a6678,#5a6678);line-height:1.65">{{ corpusMsg }}</div>
+        <!-- Cachet de version : une capture de cet ecran doit dire quel code
+             tourne, sans avoir a ouvrir une console. -->
+        <div style="margin-top:10px;font-size:10.5px;letter-spacing:.04em;color:var(--cc3ccd8,#c3ccd8);font-family:Open Sans">{{ corpusBuild }}</div>
         <button onClick="{{ corpusAction }}" style="{{ corpusActionStyle }}">{{ corpusActionLabel }}</button>
         <!-- SORTIE DE SECOURS. Tant que le chargement n'a pas echoue, cet ecran
              n'offrait AUCUN bouton : si la reponse tardait, on y restait
@@ -2346,6 +2349,12 @@
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script>
+/* Cachet de version, affiche sur l'ecran d'attente.
+   Sans lui, on ne peut pas distinguer « le correctif ne marche pas » de
+   « l'onglet execute encore l'ancienne page » — et cette confusion a coute
+   trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
+   trancher. A incrementer a chaque livraison de l'Atelier. */
+const ATELIER_BUILD = '21/08 · 3';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -2505,13 +2514,36 @@ class Component extends DCLogic {
     if(this.state.ready) this._buildMeta();
   }
   componentDidMount(){
-    this._appliquerTheme(this.state.theme);
-    this._sondeCamerpay();
-    this._sondeOffres();
-    this._reconcilierPaiements();
-    this._installerProtection();
-    this._installerRetour();
-    this._installerClavierIntro();
+    /* Chacune de ces mises en place est isolee. Une seule exception ici
+       empechait TOUT ce qui suit — dont le chargement du repertoire — et
+       l'ecran d'attente restait alors muet pour toujours, sans requete et
+       sans minuteur. Aucune de ces sept taches ne vaut qu'on sacrifie le
+       demarrage : ce qui echoue est note, le reste continue. */
+    const sur=(f,nom)=>{try{f();}catch(e){
+      this._panneMontage=(this._panneMontage||[]).concat(
+        nom+' : '+((e&&e.message)||e));
+      try{console.error('[Atelier] '+nom,e);}catch(_){}}};
+    sur(()=>this._appliquerTheme(this.state.theme),'thème');
+    sur(()=>this._sondeCamerpay(),'sonde encaissement');
+    sur(()=>this._sondeOffres(),'sonde offres');
+    sur(()=>this._reconcilierPaiements(),'paiements en attente');
+    sur(()=>this._installerProtection(),'protection du corpus');
+    sur(()=>this._installerRetour(),'touche retour');
+    sur(()=>this._installerClavierIntro(),'clavier de la présentation');
+    /* CHIEN DE GARDE DU DEMARRAGE, independant du chargement lui-meme.
+       Douze secondes apres le montage, si rien n'a abouti ET qu'aucun
+       message ni aucune sortie n'est affiche, c'est que personne n'a pris la
+       main : le chargement n'a jamais ete lance. On l'ecrit, au lieu de
+       laisser tourner un ecran d'attente qui n'attend rien. */
+    if(this._garde)clearTimeout(this._garde);
+    this._garde=setTimeout(()=>{
+      const s=this.state;
+      if(s.ready||s.corpusErr||s.corpusLong)return;
+      const p=(this._panneMontage||[]).join(' · ');
+      this.setState({corpusLong:true,
+        corpusEtat:p?('Le démarrage a échoué — '+p)
+          :'Le chargement n’a jamais démarré : aucune requête n’est partie.'});
+    },12000);
     if(!this.state.ready){
       const boot=()=>{/* Formatage des dialogues et construction des filtres : voir _installerBase(). */const n=this._installerBase();this.setState({ready:n>0,currentN:this.all[0]?this.all[0].n:this.state.currentN});};
       if(window.MINESEC_CORPUS){boot();return;}
@@ -4675,6 +4707,11 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
          quelle que soit la cause, et il faut ouvrir une console pour trancher
          entre « le serveur ne repond pas », « le telechargement s'arrete » et
          « la mise en page echoue ». Une capture d'ecran doit suffire. */
+      /* Cachet de version, TOUJOURS visible sur l'ecran d'attente (pas
+         seulement au bout de 8 s) : c'est ce qui permet de dire, sur une
+         simple capture, si la page executee est bien celle qui a ete
+         livree. */
+      corpusBuild:'Atelier '+ATELIER_BUILD,
       corpusEtat:st.corpusEtat||'',
       corpusEtatStyle:st.corpusEtat
         ?'font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.5;margin-bottom:12px;font-family:Open Sans'
