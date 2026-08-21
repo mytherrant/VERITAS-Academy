@@ -714,13 +714,36 @@ jobs:
           # Ancrage STRICT sur « .css?v= » / « .js?v= ». Un remplacement sur le
           # numéro nu a déjà mangé les paramètres d'un arc SVG (symbole lc-shield,
           # bump 1.17.0 → 1.17.1) : ne jamais élargir ce motif.
+          # deploy/plateforme/ est EXCLU. L'Atelier ne partage pas la version du
+          # site : chacun de ses six modules porte l'empreinte sha1 de son propre
+          # contenu, avec son garde-fou dedie. Or ce sed mange le debut d'une
+          # empreinte hexadecimale quand elle commence par un chiffre —
+          # « ?v=2e38395c » est devenu « ?v=1.19.47.8937 82e38395c » en
+          # production le 21/08/2026. Rien ne cassait : les modules repondaient
+          # 200, mais les six ne se distinguaient plus les uns des autres, et un
+          # module corrige sans bump du site n'aurait invalide aucun cache.
           n=0
           while IFS= read -r f; do
             if grep -qE '\.(css|js)\?v=[0-9.]+' "$f"; then
               sed -i -E "s/\.(css|js)\?v=[0-9.]+/.\1?v=$VER/g" "$f"
               n=$((n+1))
             fi
-          done < <(find deploy -type f \( -name '*.html' -o -name '*.php' \))
+          done < <(find deploy -type f \( -name '*.html' -o -name '*.php' \) -not -path 'deploy/plateforme/*')
+
+          # Verification APRES coup : l'etape « Preparer les fichiers » a deja
+          # controle ces jetons, mais elle passe AVANT ce sed — elle a donc
+          # valide un fichier qu'une etape ulterieure a ensuite reecrit, et la
+          # production est partie fausse avec un job vert. On revalide ici, sur
+          # les octets qui vont reellement etre televerses.
+          for m in support minesec conformite exercices texte docx; do
+            reel=$(tr -d '\r' < "deploy/plateforme/$m.js" | sha1sum | cut -c1-8)
+            html=$(grep -oE "$m\.js\?v=[0-9a-f]+" deploy/plateforme/index.html | head -1 | sed 's/.*v=//')
+            if [ "$reel" != "$html" ]; then
+              echo "::error title=Jeton de l Atelier altere::deploy/plateforme/index.html demande $m.js?v=$html alors que le fichier a pour empreinte $reel. Une etape du deploiement a reecrit ce jeton apres le controle initial."
+              exit 1
+            fi
+          done
+          echo "   Atelier de Francais : six jetons d empreinte intacts (hors version du site)."
           # Le service worker doit suivre : il DÉRIVE ses URLs de préchargement de
           # CACHE_VERSION (ASSET_VER), et purge à l'activation tout cache dont la
           # clé ne commence pas par cette valeur. Le laisser en arrière lui ferait
@@ -751,7 +774,11 @@ jobs:
             exit 1
           fi
           echo "   Aucun asset servi sans ?v= — rien ne restera figé un an."
-          reste=$(grep -rhoE '\.(css|js)\?v=[0-9.]+' deploy --include='*.html' --include='*.php' | grep -v "v=$VER" | sort -u | tr '\n' ' ')
+          # plateforme/ exclu ici aussi : ses jetons sont des empreintes de
+          # contenu, pas la version du site. Les compter comme « residuels »
+          # ferait crier l'etape a chaque deploiement, et une alerte qui crie
+          # toujours ne se lit plus.
+          reste=$(grep -rhoE '\.(css|js)\?v=[0-9.]+' deploy --include='*.html' --include='*.php' --exclude-dir=plateforme | grep -v "v=$VER" | sort -u | tr '\n' ' ')
           if [ -n "$reste" ]; then
             echo "::warning title=Versions résiduelles::$reste"
           else
