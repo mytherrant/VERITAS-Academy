@@ -496,6 +496,22 @@ if (!defined('VRT_AUTH_LIB')) {
             $p = (int) ($o['prix'] ?? 0);
             return $p > 0 ? $p : null;   // 0 = gratuit ou non tarifé → rien à contrôler
         }
+
+        // ── Repli tarifaire de l'Atelier de Français ──────────────────────
+        // Ses trois abonnements sont vendus depuis plateforme/index.html, une
+        // page autonome : rien ne garantit qu'une ligne correspondante existe
+        // dans DB.elearning.plans, que l'administration peuple à la main.
+        // Sans prix de référence, vrt_verifier_prix() renvoie « tarif
+        // indéterminable » et ACCEPTE n'importe quel montant — mesuré : 100 F
+        // encaissés ouvraient l'abonnement annuel à 5 000 F. Même principe que
+        // $microDef plus haut : la table du client a un miroir serveur.
+        // Le catalogue en base reste prioritaire (boucle ci-dessus), un
+        // changement de tarif par l'administration continue donc de gagner.
+        if ($intent === 'subscription') {
+            $atelier = ['ens' => 5000, 'etab' => 30000, 'pro' => 70000];
+            if (isset($atelier[$targetId])) return $atelier[$targetId];
+        }
+
         return null;   // objet absent du catalogue : on ne devine pas
     }
 

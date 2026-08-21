@@ -341,6 +341,36 @@ $res = vrt_grant_entitlement($db, paiement('contenu', 'inconnu_xyz', 100));
 ok('contenu         → cible hors catalogue : accordée, pas refusée',
    !empty($res['changed']), 'un tarif a été inventé pour un objet inconnu');
 
+// ── Atelier de Français : les trois abonnements de plateforme/ ─────────────
+// Ils sont vendus depuis une page autonome, pas depuis le catalogue e-learning
+// que l'administration remplit à la main. baseDeTest() ne contient donc AUCUNE
+// ligne « ens / etab / pro » — et c'est précisément l'état où le serveur n'avait
+// pas de prix de référence : « tarif indéterminable » acceptait 100 FCFA pour un
+// abonnement annuel à 5 000. Ces contrôles échouent si le repli tarifaire de
+// vrt_prix_catalogue() disparaît.
+foreach ([['ens', 5000], ['etab', 30000], ['pro', 70000]] as [$plan, $tarif]) {
+    $db  = baseDeTest();
+    $res = vrt_grant_entitlement($db, paiement('subscription', $plan, 100));
+    ok(sprintf('atelier %-8s → 100 FCFA refusés (tarif %d)', $plan, $tarif),
+       empty($res['changed']) && !empty($res['underpaid']),
+       'ABONNEMENT OUVERT pour 100 FCFA — ' . ($res['msg'] ?? ''));
+
+    // Et le tarif juste doit non seulement passer, mais écrire le droit SOUS LE
+    // NOM que api/plateforme.php interroge : plat_plans_atelier() cherche
+    // exactement 'ens'/'etab'/'pro' dans les plans actifs du compte. Un octroi
+    // qui réussirait sous un autre nom, c'est « il a payé, rien ne s'ouvre ».
+    $db  = baseDeTest();
+    $res = vrt_grant_entitlement($db, paiement('subscription', $plan, $tarif));
+    $acc = null;
+    foreach (($db['visitorAccounts'] ?? []) as $a) {
+        if (($a['id'] ?? '') === 'acc_test') { $acc = $a; break; }
+    }
+    ok(sprintf('atelier %-8s → %d FCFA ouvrent le droit lu par la plateforme', $plan, $tarif),
+       !empty($res['changed']) && $acc !== null
+         && in_array($plan, vrt_account_active_plans($acc, $db), true),
+       'le paiement est passé mais le plan n\'est pas actif sur le compte');
+}
+
 // ════════════════════════════════════════════════════════════════════════════
 // 4. REMISE — un code promo actif en base reste honoré
 // ════════════════════════════════════════════════════════════════════════════
