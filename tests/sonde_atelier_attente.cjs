@@ -194,6 +194,15 @@ async function seConnecter(page) {
     const f = await ecran(page);
     juger('S6c · la navigation ne retombe pas sur l’accueil public',
       f.nom !== 'connexion' && f.nom !== 'attente', f.nom + ' — ' + f.t.slice(0, 110));
+    /* Une liste vide accusait LES FILTRES, quelle que soit la raison. Sur une
+       base absente, ce message envoie chercher au mauvais endroit. */
+    await page.locator('button:has-text("Ressources"), a:has-text("Ressources")')
+      .first().click({ timeout: 4000 }).catch(() => {});
+    await dodo(1200);
+    const liste = await page.evaluate(() => document.body.innerText.replace(/\s+/g, ' '));
+    juger('S6e · la liste vide dit la vraie raison, pas « ces filtres »',
+      /Profil d.{0,3}exemple/.test(liste) && !/ne correspond à ces filtres/.test(liste),
+      liste.slice(0, 160));
     juger('S6d · aucune erreur JS pendant la visite',
       erreurs.length === 0, erreurs.join(' | '));
     await ctx.close();

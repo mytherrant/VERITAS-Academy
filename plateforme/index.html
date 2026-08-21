@@ -843,7 +843,17 @@
           </div>
           <sc-if value="{{ truncated }}" hint-placeholder-val="{{ false }}"><p style="text-align:center;color:var(--c9aa5b5,#9aa5b5);font-size:12.5px;margin-top:22px">150 premiers résultats sur {{ filteredCount }}. Affinez les filtres.</p></sc-if>
         </sc-if>
-        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:60px 20px;color:var(--c7a8598,#7a8598);background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:12px">Aucun texte ne correspond à ces filtres.</div></sc-if>
+        <!-- LA LISTE VIDE DOIT DIRE LAQUELLE DES DEUX RAISONS. « Aucun texte ne
+             correspond a ces filtres » etait affiche meme quand la base etait
+             VIDE : le message accusait les filtres alors que le repertoire
+             n'etait jamais arrive, et envoyait chercher au mauvais endroit.
+             Quand il n'y a rien en memoire, on le dit, on dit ce qui s'est
+             passe, et on propose de recharger. -->
+        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:60px 20px;color:var(--c7a8598,#7a8598);background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:12px">
+          <div style="font-size:13.5px;line-height:1.6">{{ videMsg }}</div>
+          <div style="{{ videDetailStyle }}">{{ videDetail }}</div>
+          <button onClick="{{ videAction }}" style="{{ videBtnStyle }}">{{ videBtnLabel }}</button>
+        </div></sc-if>
       </div>
     </div>
   </main>
@@ -2365,7 +2375,7 @@
    « l'onglet execute encore l'ancienne page » — et cette confusion a coute
    trois passes de correction a l'aveugle. Une capture d'ecran doit suffire a
    trancher. A incrementer a chaque livraison de l'Atelier. */
-const ATELIER_BUILD = '21/08 · 6';
+const ATELIER_BUILD = '21/08 · 7';
 class Component extends DCLogic {
   constructor(props){
     super(props);
@@ -4647,6 +4657,25 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       todos:(()=>{const t=[];st.epreuves.filter(e=>e.status==='relecture').forEach(e=>t.push({dot:'var(--cf39200,#f39200)',textEl:this._mentionEl('À relire : « '+e.title+' » attend une validation'),ago:this._ago(e.updatedAt)}));st.cours.filter(c=>c.status==='relecture').forEach(c=>t.push({dot:'var(--c7b52c7,#7b52c7)',textEl:this._mentionEl('Cours en relecture : « '+(c.title||'sans titre')+' »'),ago:this._ago(c.updatedAt)}));if(!t.length)t.push({dot:'var(--c1f9d55,#1f9d55)',textEl:this._mentionEl('Rien à traiter pour le moment. Tout est à jour.'),ago:''});return t.slice(0,4);})(),
       dashActivity:notifications.slice(0,4),
       newDraft:()=>{this._ensureDraft(id=>this.setState({activeId:id,screen:'composeur'},()=>window.scrollTo(0,0)));},
+      /* Base vide et filtres trop etroits sont deux pannes differentes : le
+         message, le detail et le bouton doivent l'etre aussi. */
+      videMsg:all.length
+        ?'Aucun texte ne correspond à ces filtres.'
+        :(st.demo
+          ?'Profil d’exemple : la visite guidée montre l’interface, pas le répertoire. Les 1 040 textes s’ouvrent avec votre compte VÉRITAS.'
+          :'Le répertoire n’est pas chargé : aucun texte n’est en mémoire.'),
+      videBtnLabel:st.demo?'Aller à la connexion':'Recharger le répertoire',
+      videDetail:(all.length||st.demo)?'':(
+        'reçus : 0 · source : '+(st.corpusSource||'aucune')
+        +' · palier : '+(st.corpusPalier||'—')
+        +' · droit : '+((st.corpusDroit&&(st.corpusDroit.motif||(st.corpusDroit.ok?'ouvert':'refusé')))||'—')
+        +' · journal : '+((this._trace||[]).slice(-8).join(' › ')||'—')),
+      videDetailStyle:(all.length||st.demo)?hidden
+        :'margin-top:10px;font-size:11px;color:var(--cc3ccd8,#c3ccd8);font-family:Open Sans;line-height:1.5;word-break:break-word',
+      videBtnStyle:all.length?hidden
+        :'margin-top:16px;background:var(--c1a72bb,#1a72bb);border:none;color:var(--cffffff,#fff);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer',
+      videAction:()=>{if(this.state.demo){this._allerConnexion();return;}
+        this._rechargerCorpus();},
       filters:st.filters,filteredCount:filtered.length,visibleFiches,hasResults:filtered.length>0,noResults:filtered.length===0,truncated:filtered.length>150,
       cycleOptions,groupOptions,typeOptions:this.types||[],
       setQ:e=>this._setF('q',val(e)),setSource:e=>this._setF('source',val(e)),setCycle:e=>this.setState({filters:{...st.filters,cycle:val(e),group:''}}),setGroup:e=>this._setF('group',val(e)),setType:e=>this._setF('type',val(e)),setSubkind:e=>this._setF('subkind',val(e)),setLength:e=>this._setF('length',val(e)),
