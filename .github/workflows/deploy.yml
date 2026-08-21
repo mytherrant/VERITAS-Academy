@@ -560,8 +560,14 @@ jobs:
           # Le jeton ?v= doit suivre le CONTENU : servis immutable 1 an, un
           # module corrige sous l ancien jeton n atteint jamais un visiteur de
           # retour. On compare le sha1 du fichier a celui inscrit dans le HTML.
+          # FINS DE LIGNE NORMALISEES (tr -d '\r') des deux cotes : une copie de
+          # travail Windows est en CRLF, ce checkout est en LF, et le meme
+          # fichier donnait alors deux empreintes. Le 21/08/2026 cette garde a
+          # refuse un deploiement pour cet ecart-la, alors que les six modules
+          # etaient rigoureusement identiques. git stocke du LF et le serveur
+          # sert du LF : c'est le LF qui fait foi, ici comme dans le versionneur.
           for m in support minesec conformite exercices texte docx; do
-            reel=$(sha1sum "deploy/plateforme/$m.js" | cut -c1-8)
+            reel=$(tr -d '\r' < "deploy/plateforme/$m.js" | sha1sum | cut -c1-8)
             html=$(grep -oE "$m\.js\?v=[0-9a-f]+" deploy/plateforme/index.html | head -1 | sed 's/.*v=//')
             if [ "$reel" != "$html" ]; then
               echo "::error title=Cache-buster perime::$m.js a pour empreinte $reel mais index.html demande ?v=$html — les visiteurs de retour garderaient l ancien module. Relancer le versionneur."
