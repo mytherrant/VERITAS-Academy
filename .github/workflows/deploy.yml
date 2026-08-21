@@ -49,6 +49,13 @@ on:
       - 'adopter/**'
       - 'cours/**'
       - 'campus/**'
+      - 'plateforme/**'
+      # NOTE : les corpus (corpus_minesec.json, citations_minesec.json) ne
+      # figurent PAS ici. Ils sont gitignores — 1040 textes et 137 citations,
+      # c'est la marchandise, et ce depot est PUBLIC. Ils n'arrivent donc
+      # jamais par la CI : ils sont televerses une fois en FTP dans api/data/
+      # (dossier « Require all denied »). dangerous-clean-slate est a false,
+      # ils survivent aux deploiements suivants.
       - 'Logo détouré.png'
       - 'og-image.jpg'
       - 'ambassa-avatar.jpg'
@@ -484,7 +491,8 @@ jobs:
             api/_bot_log.php \
             api/_sentinel.php \
             api/challenge.php \
-            api/demandes.php; do
+            api/demandes.php \
+            api/plateforme.php; do
             # ⚠️ ÉCHEC BRUYANT, et pas un « [ -f ] && cp » silencieux.
             #    Quatre incidents ont la même cause : un endpoint écrit, ajouté
             #    à cette liste, mais jamais « git add » — la CI ne le voit donc
@@ -526,6 +534,42 @@ jobs:
             echo "  ✓ api/campus/ ($(ls deploy/api/campus/*.php | wc -l) fichiers PHP + schema.sql + verrou)"
           fi
 
+          # ── Atelier de Francais (plateforme/) ────────────────────
+          # Page autonome + ses modules. _corpus_source.js n'est PAS deploye :
+          # c'est le corpus en clair, remplace en ligne par api/plateforme.php.
+          # Le deployer reviendrait a rendre la marchandise telechargeable.
+          mkdir -p deploy/plateforme
+          for f in plateforme/*.html plateforme/*.js; do
+            [ -f "$f" ] || continue
+            case "$(basename "$f")" in
+              _corpus_source.js) echo "  - _corpus_source.js ignore (corpus en clair, servi par l API)" ;;
+              *) cp "$f" deploy/plateforme/ ;;
+            esac
+          done
+          # ECHEC BRUYANT sur les modules attendus. Un « [ -f ] || continue »
+          # seul suffirait a deployer une page amputee : index.html sans
+          # minesec.js, c'est un ecran blanc, et le job serait vert.
+          # Quatre incidents passes ont cette meme cause (fichier ecrit,
+          # jamais « git add » — la CI ne le voit pas au checkout).
+          for m in index.html support.js minesec.js conformite.js exercices.js texte.js docx.js; do
+            if [ ! -f "deploy/plateforme/$m" ]; then
+              echo "::error title=Module manquant::plateforme/$m absent du checkout (oubli de git add ?) — deploiement interrompu."
+              exit 1
+            fi
+          done
+          # Le jeton ?v= doit suivre le CONTENU : servis immutable 1 an, un
+          # module corrige sous l ancien jeton n atteint jamais un visiteur de
+          # retour. On compare le sha1 du fichier a celui inscrit dans le HTML.
+          for m in support minesec conformite exercices texte docx; do
+            reel=$(sha1sum "deploy/plateforme/$m.js" | cut -c1-8)
+            html=$(grep -oE "$m\.js\?v=[0-9a-f]+" deploy/plateforme/index.html | head -1 | sed 's/.*v=//')
+            if [ "$reel" != "$html" ]; then
+              echo "::error title=Cache-buster perime::$m.js a pour empreinte $reel mais index.html demande ?v=$html — les visiteurs de retour garderaient l ancien module. Relancer le versionneur."
+              exit 1
+            fi
+          done
+          echo "  OK plateforme/ ($(ls deploy/plateforme/ | wc -l) fichiers, jetons ?v= coherents)"
+
           # ── Page admin de validation des réponses IA (Plan Élite) ─
           if [ -f admin-validation.html ]; then
             cp admin-validation.html deploy/
@@ -556,6 +600,24 @@ jobs:
             cp api/data/livrets_catalogue.json deploy/api/data/
             echo "  OK api/data/livrets_catalogue.json (ouvrages en vente)"
           fi
+
+          # Corpus MINESEC servi par api/plateforme.php. Meme regle que le
+          # catalogue ci-dessus : on copie CES fichiers et pas le dossier.
+          # Cas normal : ABSENTS du checkout — ils sont gitignores (api/data/*)
+          # parce que les 1040 textes et 137 citations sont la MARCHANDISE et
+          # que ce depot est PUBLIC. Ils se televersent une fois en FTP dans
+          # api/data/ et survivent aux deploiements suivants
+          # (dangerous-clean-slate est a false). On copie quand meme s'ils sont
+          # la, et on TRACE bruyamment sinon : un 503 silencieux sur
+          # ?action=corpus serait indiscernable d'une panne serveur.
+          for c in corpus citations; do
+            if [ -f "api/data/${c}_minesec.json" ]; then
+              cp "api/data/${c}_minesec.json" deploy/api/data/
+              echo "  OK api/data/${c}_minesec.json (servi sous droit)"
+            else
+              echo "::notice title=${c}_minesec.json hors CI::Non versionne (marchandise). Doit etre televerse en FTP dans api/data/ ; sinon api/plateforme.php repond 503 sur ?action=${c}."
+            fi
+          done
           # ── v1.2.1 : protéger le dossier data/ RACINE où db.php écrit veritas_db.json ──
           #    Sans .htaccess ici, /data/veritas_db.json serait téléchargeable directement (toute la base).
           if [ -f data/.htaccess ]; then

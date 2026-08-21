@@ -137,3 +137,10 @@ uploads/protected/**
 !uploads/protected/.htaccess
 !uploads/protected/**/.htaccess
 !uploads/protected/**/LISEZMOI.txt
+
+# Corpus en clair de l'Atelier de Francais : les 1040 textes et 137 citations,
+# c'est la MARCHANDISE, et ce depot est PUBLIC. Ce fichier n'est qu'un repli de
+# developpement ; en ligne, api/plateforme.php les sert sous condition de droit
+# depuis api/data/ (dossier « Require all denied »). Le commiter rendrait tout
+# le repertoire telechargeable et viderait l'abonnement de son objet.
+plateforme/_corpus_source.js
