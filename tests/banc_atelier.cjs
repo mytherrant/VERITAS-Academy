@@ -65,21 +65,49 @@ function source() {
   return SOURCE;
 }
 
+/* Decalage des fiches libres, identique a VRT_LIBRE_OFFSET cote serveur :
+   les deux repertoires numerotent a partir de 1, et `n` est la cle du
+   client partout. */
+const LIBRE_OFFSET = 10000;
+
 let INDEX = null;
 function indexCorpus() {
   if (INDEX) return INDEX;
   const items = JSON.parse(fs.readFileSync(path.join(RACINE, 'api/data/corpus_minesec.json'), 'utf8'));
+  /* REPERTOIRE PROTEGE : l'index ne porte qu'une amorce de 180 caracteres,
+     le texte integral se demande ensuite. */
+  const textes = items.map(t => ({
+    n: t.n | 0, src: 'minesec',
+    type: t.type || '', words: t.words | 0, level: t.level || '',
+    cycle: t.cycle || '', group: t.group || '', groupKind: t.groupKind || '',
+    subkind: t.subkind || '', usage: t.usage || '', author: t.author || '',
+    title: t.title || '', reference: t.reference || '', faits: t.faits || '',
+    libre: true, extrait: String(t.text || '').slice(0, 180)
+  }));
+  /* REPERTOIRE LIBRE DE DROITS : domaine public, servi EN ENTIER. Le
+     fichier peut manquer sur un poste qui ne l'a pas encore genere -- le
+     banc continue alors avec le seul repertoire protege, comme le serveur. */
+  let nLibres = 0;
+  const fLibre = path.join(RACINE, 'api/data/corpus_libre.json');
+  if (fs.existsSync(fLibre)) {
+    JSON.parse(fs.readFileSync(fLibre, 'utf8')).forEach(t => {
+      textes.push({
+        n: LIBRE_OFFSET + (t.n | 0), src: 'libre',
+        type: t.type || '', words: t.words | 0, level: t.level || '',
+        cycle: t.cycle || '', group: t.group || '', groupKind: t.groupKind || '',
+        subkind: t.subkind || '', usage: t.usage || '', author: t.author || '',
+        title: t.title || '', reference: t.reference || '', faits: t.faits || '',
+        libre: true, extrait: String(t.text || '')
+      });
+      nLibres++;
+    });
+  }
   INDEX = JSON.stringify({
-    ok: true, total: items.length, libres: 20, palier: 'ens',
+    ok: true, total: textes.length, libres: 20 + nLibres, libresDroit: nLibres,
+    palier: 'ens',
     plafonds: { textes: -1, citations: -1, exports: 30, ia: 30 },
     droit: { ok: true, motif: 'abonnement' },
-    textes: items.map(t => ({
-      n: t.n | 0, type: t.type || '', words: t.words | 0, level: t.level || '',
-      cycle: t.cycle || '', group: t.group || '', groupKind: t.groupKind || '',
-      subkind: t.subkind || '', usage: t.usage || '', author: t.author || '',
-      title: t.title || '', reference: t.reference || '', faits: t.faits || '',
-      libre: true, extrait: String(t.text || '').slice(0, 180)
-    }))
+    textes: textes
   });
   return INDEX;
 }
@@ -150,6 +178,21 @@ const serveur = http.createServer((req, res) => {
           noter('complet n=' + n + ' -> 200 sans texte');
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
           return res.end(JSON.stringify({ ok: true }));
+        }
+        /* Fiche libre : servie en entier, sans condition — c'est tout
+           l'interet du domaine public. */
+        if (n >= LIBRE_OFFSET) {
+          const fl = path.join(RACINE, 'api/data/corpus_libre.json');
+          const lib = fs.existsSync(fl) ? JSON.parse(fs.readFileSync(fl, 'utf8')) : [];
+          const tl = lib.find(x => (x.n | 0) === n - LIBRE_OFFSET);
+          if (!tl) { noter('complet libre n=' + n + ' -> 404');
+            res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+            return res.end(JSON.stringify({ ok: false, error: 'Introuvable' })); }
+          noter('complet libre n=' + n + ' -> OK');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          return res.end(JSON.stringify({ ok: true,
+            texte: Object.assign({}, tl, { n: n, src: 'libre', libre: true }),
+            droit: { ok: true, motif: 'domaine public' }, palier: 'ens' }));
         }
         const t = source().find(x => (x.n | 0) === n);
         if (!t) {

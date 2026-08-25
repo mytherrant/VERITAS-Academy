@@ -323,6 +323,74 @@ suite.push(() => controle(
     };
   }));
 
+/* --- 8. Le domaine public n'est jamais partiel ------------------------ */
+suite.push(() => controle(
+  'Un texte libre de droits arrive entier, sans requête de complétion',
+  async () => {
+    const ctx = contexte();
+    const journal = [];
+    ctx.fetch = u => { journal.push(String(u)); return new Promise(() => {}); };
+    vm.runInContext(sourceComponent(), ctx, { filename: 'index.html#x-dc' });
+    /* Tel que le serveur le sert : `src:'libre'` et le texte COMPLET dans
+       `extrait`. On passe par le vrai chemin d'installation du client. */
+    const t = SOURCE.find(x => (x.n | 0) === N1);
+    ctx.window.MINESEC_CORPUS = null;
+    const C = vm.runInContext('Component', ctx);
+    const a = new C({});
+    a.setState({ ready: false });
+    /* On rejoue la transformation exacte du chargeur d'index. */
+    const brut = { n: 10000 + N1, src: 'libre', words: t.words | 0,
+                   type: t.type, level: t.level, cycle: t.cycle, group: t.group,
+                   author: t.author, title: t.title, reference: t.reference,
+                   libre: true, extrait: String(t.text || '') };
+    ctx.window.MINESEC_CORPUS = [Object.assign({}, brut, {
+      src: 'libre', text: brut.extrait, _partiel: false, _libre: true })];
+    a._installerBase();
+    const f = a.all.find(x => x.n === 10000 + N1);
+    const entier = f && !f._partiel && (f.text || '').length > 300;
+    await new Promise(r => a._completerTexte(10000 + N1, r));
+    await attendre(40);
+    const req = journal.filter(u => /mode=complet/.test(u)).length;
+    return {
+      ok: !!entier && req === 0,
+      dit: !entier ? 'texte libre marqué partiel ou tronqué ('
+            + (f ? (f.text || '').length : 0) + ' car.)'
+        : (req ? req + ' requête(s) de complétion pour un texte déjà entier'
+               : 'entier en mémoire, 0 requête')
+    };
+  }));
+
+/* --- 9. Le domaine public n'est jamais derrière le mur ---------------- */
+suite.push(() => controle(
+  'Un texte libre de droits n’est jamais fermé par l’abonnement',
+  async () => {
+    const ctx = contexte();
+    ctx.fetch = () => new Promise(() => {});
+    vm.runInContext(sourceComponent(), ctx, { filename: 'index.html#x-dc' });
+    const t = SOURCE.find(x => (x.n | 0) === N1);
+    ctx.window.MINESEC_CORPUS = [{
+      n: 10000 + N1, src: 'libre', words: t.words | 0, type: t.type,
+      level: t.level, cycle: t.cycle, group: t.group, author: t.author,
+      title: t.title, reference: t.reference,
+      text: String(t.text || ''), _partiel: false, _libre: true }];
+    const C = vm.runInContext('Component', ctx);
+    const a = new C({});
+    a.state.epreuves = [{ id: 'e1', title: 'T', textIds: [], editorIds: [],
+      ownerId: 'u1', status: 'brouillon', comments: [], activity: [] }];
+    a.state.activeId = 'e1';
+    a._toggleText(10000 + N1);
+    await attendre(60);
+    const ep = a.state.epreuves.find(e => e.id === 'e1');
+    const dedans = ep && ep.textIds.indexOf(10000 + N1) >= 0;
+    const mur = !!a.state.payOpen;
+    return {
+      ok: dedans && !mur,
+      dit: mur ? 'le mur d’abonnement s’est ouvert sur un texte du domaine public'
+        : (dedans ? 'ajouté à l’épreuve sans condition'
+                  : 'refusé alors qu’il est libre de droits')
+    };
+  }));
+
 /* ── 5. Exécution ──────────────────────────────────────────────────────── */
 (async () => {
   for (const s of suite) await s();

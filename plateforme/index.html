@@ -604,6 +604,33 @@
   }
   .vrt-protege::selection{background:transparent}
   .vrt-protege ::selection{background:transparent}
+  /* FILIGRANE TRAÇABLE. Aucune page web ne peut empêcher une capture
+     d'écran — le navigateur n'a pas la main sur la touche Impr.écran, ni
+     sur le téléphone qui photographie l'écran. Ce qu'on peut faire, c'est
+     rendre l'image parlante : elle porte le nom du compte qui lisait. Une
+     capture qui circule désigne alors celui par qui elle est sortie.
+     `pointer-events:none` : le filigrane ne doit jamais gêner la lecture
+     ni l'annotation mot à mot. */
+  /* `overflow:hidden` n'est PAS decoratif : le filigrane est un pseudo
+     absolu tourne de 24 degres, et un pseudo tourne deborde de son parent.
+     Mesure du 25/08 : le document passait a 419 px pour une vue de 390 px,
+     et la page entiere defilait lateralement. Le piege est connu — un
+     pseudo absolu echappe aux scans DOM par style, il ne se voit qu'a la
+     mesure de `scrollWidth`. */
+  .vrt-protege{position:relative;overflow:hidden}
+  .vrt-protege::after{
+    content:attr(data-filigrane);
+    position:absolute;inset:0;pointer-events:none;z-index:1;
+    display:flex;align-items:center;justify-content:center;
+    font-family:Poppins,sans-serif;font-size:15px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;
+    color:rgba(20,55,95,.055);transform:rotate(-24deg);
+    white-space:pre;line-height:2.6;text-align:center}
+  @media print{
+    /* À l'impression le filigrane se voit : c'est une feuille qui sort du
+       centre et qui peut être photocopiée à son tour. */
+    .vrt-protege::after{color:rgba(20,55,95,.13)}
+  }
 
   /* ---------- Couleurs de police, hierarchie unique ----------
      Trois niveaux et pas un de plus, comme sur lws.fr : le titre en bleu
@@ -1045,7 +1072,9 @@
         <button onClick="{{ filtresToggle }}" class="vrt-only-sm" style="{{ filtresToggleStyle }}">{{ filtresToggleLabel }}</button>
         <div class="vrt-repli-corps" style="{{ filtresCorpsStyle }}">
         <label style="{{ filterLbl }}">Source</label>
-        <select value="{{ filters.source }}" onChange="{{ setSource }}" style="{{ fieldIn }};margin-bottom:16px"><option value="">Toutes les sources</option><option value="base">Corpus MINESEC</option><option value="import">Corpus importés</option></select>
+        <!-- « Libres de droits » d'abord : c'est ce qui s'ouvre sans
+             abonnement, et donc la première chose à montrer. -->
+        <select value="{{ filters.source }}" onChange="{{ setSource }}" style="{{ fieldIn }};margin-bottom:16px"><option value="">Toutes les sources</option><option value="libre">Libres de droits — {{ nbLibres }} textes</option><option value="base">Corpus MINESEC — {{ nbMinesec }} textes</option><option value="import">Mes corpus importés</option></select>
         <label style="{{ filterLbl }}">Cycle</label>
         <select value="{{ filters.cycle }}" onChange="{{ setCycle }}" style="{{ fieldIn }};margin-bottom:16px"><option value="">Tous les cycles</option><sc-for list="{{ cycleOptions }}" as="c" hint-placeholder-count="3"><option value="{{ c.value }}">{{ c.label }}</option></sc-for></select>
         <label style="{{ filterLbl }}">Module / séquence</label>
@@ -1166,7 +1195,9 @@
         </div>
         <span style="margin-left:auto;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5)">Cliquez un mot pour l'annoter</span>
       </div>
-      <p style="font-size:17px;line-height:1.9;color:var(--c2c3745,#2c3745);margin:0;text-wrap:pretty"><sc-for list="{{ cur.tokens }}" as="tk" hint-placeholder-count="30"><span onClick="{{ tk.click }}" style="{{ tk.style }}">{{ tk.t }}</span></sc-for></p>
+      <!-- La fiche est l'endroit où l'on LIT : c'est donc là que la
+           protection compte le plus. Elle manquait. -->
+      <p class="vrt-protege" data-filigrane="{{ filigrane }}" style="font-size:17px;line-height:1.9;color:var(--c2c3745,#2c3745);margin:0;text-wrap:pretty"><sc-for list="{{ cur.tokens }}" as="tk" hint-placeholder-count="30"><span onClick="{{ tk.click }}" style="{{ tk.style }}">{{ tk.t }}</span></sc-for></p>
       <p style="font-size:14px;font-style:italic;color:var(--c5a6678,#5a6678);margin:20px 0 0;text-align:right">— {{ cur.reference }}</p>
     </div>
 
@@ -1446,7 +1477,7 @@
                       </div>
                       <span style="{{ f.annBadge }}">{{ f.annCount }} annotation(s)</span>
                     </div>
-                    <div class="vrt-protege" style="font-size:15.5px;line-height:1.92;color:var(--c2c3745,#2c3745);background:var(--cfbfcfe,#fbfcfe);border:1px solid var(--ceef2f7,#eef2f7);border-radius:10px;padding:16px 18px;text-wrap:pretty"><sc-for list="{{ f.paras }}" as="pa" hint-placeholder-count="4"><p style="{{ pa.style }}"><sc-for list="{{ pa.tokens }}" as="tk" hint-placeholder-count="24"><span onClick="{{ tk.click }}" style="{{ tk.style }}">{{ tk.t }}</span></sc-for></p></sc-for></div>
+                    <div class="vrt-protege" data-filigrane="{{ filigrane }}" style="font-size:15.5px;line-height:1.92;color:var(--c2c3745,#2c3745);background:var(--cfbfcfe,#fbfcfe);border:1px solid var(--ceef2f7,#eef2f7);border-radius:10px;padding:16px 18px;text-wrap:pretty"><sc-for list="{{ f.paras }}" as="pa" hint-placeholder-count="4"><p style="{{ pa.style }}"><sc-for list="{{ pa.tokens }}" as="tk" hint-placeholder-count="24"><span onClick="{{ tk.click }}" style="{{ tk.style }}">{{ tk.t }}</span></sc-for></p></sc-for></div>
                     <p style="font-size:12.5px;font-style:italic;color:var(--c7a8598,#7a8598);margin:8px 0 0;text-align:right">— {{ f.reference }}</p>
                   </div>
                   <div style="margin-top:13px;padding-top:13px;border-top:1px dashed var(--ce2eaf3,#e2eaf3)">
@@ -2109,7 +2140,7 @@
                 </sc-for>
                 <button onClick="{{ coAnnotClear }}" style="{{ coAnnotClearStyle }}">Tout effacer</button>
               </div>
-              <div class="vrt-protege" style="font-size:15px;line-height:1.9;color:var(--c22303f,#22303f);background:var(--cfbfcfe,#fbfcfe);border:1px solid var(--ceef2f7,#eef2f7);border-radius:11px;padding:16px 18px;text-wrap:pretty"><sc-for list="{{ coParas }}" as="pa" hint-placeholder-count="5"><p style="{{ pa.style }}"><sc-for list="{{ pa.tokens }}" as="t" hint-placeholder-count="30"><span style="{{ t.style }}" onClick="{{ t.click }}">{{ t.t }}</span></sc-for></p></sc-for></div>
+              <div class="vrt-protege" data-filigrane="{{ filigrane }}" style="font-size:15px;line-height:1.9;color:var(--c22303f,#22303f);background:var(--cfbfcfe,#fbfcfe);border:1px solid var(--ceef2f7,#eef2f7);border-radius:11px;padding:16px 18px;text-wrap:pretty"><sc-for list="{{ coParas }}" as="pa" hint-placeholder-count="5"><p style="{{ pa.style }}"><sc-for list="{{ pa.tokens }}" as="t" hint-placeholder-count="30"><span style="{{ t.style }}" onClick="{{ t.click }}">{{ t.t }}</span></sc-for></p></sc-for></div>
               <div style="font-size:12px;color:var(--c8b97a8,#8b97a8);margin-top:9px;line-height:1.5">Cliquez un mot pour lui appliquer le traitement courant, recliquez pour le retirer.</div>
             </sc-if>
         </section>
@@ -3157,8 +3188,22 @@ class Component extends DCLogic {
            etre complete a l'ouverture. Un texte OFFERT arrive complet : il ne
            doit pas etre marque partiel, sinon on redemanderait au serveur un
            contenu qu'on a deja. */
-        window.MINESEC_CORPUS=j.textes.map(t=>Object.assign({},t,
-          {text:t.extrait||'',_partiel:true,_libre:t.libre!==false}));
+        /* DEUX RÉPERTOIRES, DEUX RÉGIMES.
+           `src:'minesec'` — littérature contemporaine, sous droits : l'index
+           ne porte qu'une amorce de 180 caractères, le texte intégral se
+           demande ensuite et le mur d'abonnement s'y applique.
+           `src:'libre'`  — domaine public strict : le texte ARRIVE ENTIER
+           dans l'index, il n'y a rien à fermer. Le marquer partiel
+           déclencherait 1 014 requêtes de complétion pour aller rechercher
+           un contenu déjà en mémoire — et LWS bannit l'IP à six mauvaises
+           requêtes par minute. */
+        window.MINESEC_CORPUS=j.textes.map(t=>{
+          const libre=(t.src==='libre');
+          return Object.assign({},t,{
+            src:t.src||'minesec',
+            text:t.extrait||'',
+            _partiel:!libre,
+            _libre:libre?true:(t.libre!==false)});});
         etat('Mise en page du répertoire…',true);
         /* `fini` est appele HORS de la chaine : sinon une exception du rendu
            serait prise pour un echec reseau et declencherait le repli local,
@@ -4417,7 +4462,50 @@ class Component extends DCLogic {
   _updateCours(patch,act){this.setState(st=>{const cours=st.cours.map(c=>{if(c.id!==st.activeCoursId)return c;const nc={...c,...patch,updatedAt:Date.now()};if(act){const v=(c.history&&c.history.length?c.history[c.history.length-1].version:1);nc.history=[...(c.history||[]),{userId:st.currentUserId,text:act,ts:Date.now(),version:v}];}return nc;});return{cours};},()=>this._persist());}
   _newCours(gabId){const g=this.gabaritDefs.find(x=>x.id===gabId)||this.gabaritDefs[0];const me=this._me();const id='k'+Date.now();const nc={id,groupeId:this._groupeActif(),gabarit:g.id,title:'',type:g.name,classe:'',sequence:'',competence:'',duree:'',coeff:'',objAgir:'',objContexte:'',objFonction:'',regle:'',intContexte:'',intTache:'',intProduction:'',intConsignes:'',intContraintes:'',phaseContent:{},status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),history:[{userId:me.id,text:'a créé le cours à partir du gabarit « '+g.name+' »',ts:Date.now(),version:1}]};this.setState(st=>({cours:[nc,...st.cours],activeCoursId:id,screen:'coursEdit'}),()=>{this._persist();window.scrollTo(0,0);});}
   _setF(k,v){this.setState({filters:{...this.state.filters,[k]:v}});}
-  _filtered(){const f=this.state.filters;let r=this.all;if(f.source==='base')r=r.filter(x=>!x._custom);else if(f.source==='import')r=r.filter(x=>x._custom);if(f.cycle)r=r.filter(x=>x.cycle===f.cycle);if(f.group)r=r.filter(x=>x.group===f.group);if(f.type)r=r.filter(x=>x.type===f.type);if(f.subkind)r=r.filter(x=>(x.subkind||'corpus')===f.subkind);if(f.length==='court')r=r.filter(x=>x.words<200);else if(f.length==='moyen')r=r.filter(x=>x.words>=200&&x.words<=300);else if(f.length==='long')r=r.filter(x=>x.words>300);if(f.q){const q=f.q.toLowerCase();r=r.filter(x=>((x.author||'')+' '+(x.title||'')+' '+(x.text||'')).toLowerCase().includes(q));}return r;}
+  /* Repli sans accents ni ponctuation, pour comparer deux chaines comme
+     l'oeil les compare. « eluard » doit trouver « Éluard », « theatre »
+     trouver « théâtre » : sur un clavier de téléphone, personne ne compose
+     les accents pour chercher. `normalize('NFD')` sépare la lettre de son
+     accent, le filtre retire les accents restés seuls. */
+  _pliage(s){
+    try{return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .toLowerCase().replace(/[’'`]/g,' ').replace(/[^a-z0-9]+/g,' ').trim();}
+    catch(e){return String(s||'').toLowerCase();}
+  }
+  /* Tout ce sur quoi une recherche doit porter, plié une seule fois et
+     retenu sur la fiche : recalculer ce repli à chaque frappe pour 2 054
+     textes rendait la saisie saccadée. */
+  _indexRecherche(x){
+    if(x._rech!==undefined)return x._rech;
+    x._rech=this._pliage([x.author,x.title,x.reference,x.group,x.cycle,
+      x.faits,x.type,x.level,x.usage,x.text].join(' '));
+    return x._rech;
+  }
+  _filtered(){
+    const f=this.state.filters;let r=this.all;
+    /* La source distingue les deux répertoires — et non plus « importé ou
+       pas ». `libre` est le domaine public, ouvert à tous ; `base` le
+       répertoire MINESEC, dont le texte intégral est sous abonnement. */
+    if(f.source==='libre')r=r.filter(x=>x.src==='libre');
+    else if(f.source==='base')r=r.filter(x=>!x._custom&&x.src!=='libre');
+    else if(f.source==='import')r=r.filter(x=>x._custom);
+    if(f.cycle)r=r.filter(x=>x.cycle===f.cycle);
+    if(f.group)r=r.filter(x=>x.group===f.group);
+    if(f.type)r=r.filter(x=>x.type===f.type);
+    if(f.subkind)r=r.filter(x=>(x.subkind||'corpus')===f.subkind);
+    if(f.length==='court')r=r.filter(x=>x.words<200);
+    else if(f.length==='moyen')r=r.filter(x=>x.words>=200&&x.words<=300);
+    else if(f.length==='long')r=r.filter(x=>x.words>300);
+    if(f.q){
+      /* TOUS les mots, où qu'ils soient. « flaubert bovary » cherché comme
+         un seul bloc ne trouvait rien : les deux mots figurent sur la fiche,
+         mais pas côte à côte dans cet ordre. */
+      const mots=this._pliage(f.q).split(' ').filter(Boolean);
+      if(mots.length)r=r.filter(x=>{const t=this._indexRecherche(x);
+        return mots.every(m=>t.indexOf(m)>=0);});
+    }
+    return r;
+  }
   _countWords(t){return (String(t||'').trim().match(/\S+/g)||[]).length;}
   _parseCSV(txt){
     const lines=txt.split(/\r?\n/).filter(l=>l.trim());if(!lines.length)return[];
@@ -5363,7 +5451,23 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
          rangée sans dire ce qu'elle contient ferait disparaître la donnée
          dont dépend tout le garde-fou. */
       structureCorpsStyle:st.confOpen?'':'display:none',
-      filters:st.filters,filteredCount:filtered.length,visibleFiches,hasResults:filtered.length>0,noResults:filtered.length===0,truncated:filtered.length>150,
+      /* Le filigrane nomme le compte qui lit. Il ne peut pas empêcher une
+         capture d'écran — aucune page web ne le peut — mais il la rend
+         traçable : l'image qui circule désigne celui par qui elle est
+         sortie. Même mécanique que secure_pdf.php pour les livrets vendus. */
+      filigrane:(function(){
+        const u=(st.users||[]).find(x=>x.id===st.currentUserId);
+        const nom=(u&&u.name)||'compte VÉRITAS';
+        /* Deux lignes : le nom, puis la date. `white-space:pre` côté CSS
+           rend le saut de ligne, ce qui évite un filigrane d'une seule
+           ligne trop longue en travers d'un texte étroit. */
+        return 'VÉRITAS \u00b7 '+nom+'\n'+new Date().toLocaleDateString('fr-FR');
+      })(),
+      filters:st.filters,filteredCount:filtered.length,visibleFiches,
+      /* Le filtre annonce ce que chaque source contient : « Libres de droits
+         — 1 014 textes » se choisit sans avoir à essayer pour voir. */
+      nbLibres:all.filter(x=>x.src==="libre").length,
+      nbMinesec:all.filter(x=>!x._custom&&x.src!=="libre").length,hasResults:filtered.length>0,noResults:filtered.length===0,truncated:filtered.length>150,
       cycleOptions,groupOptions,typeOptions:this.types||[],
       setQ:e=>this._setF('q',val(e)),setSource:e=>this._setF('source',val(e)),setCycle:e=>this.setState({filters:{...st.filters,cycle:val(e),group:''}}),setGroup:e=>this._setF('group',val(e)),setType:e=>this._setF('type',val(e)),setSubkind:e=>this._setF('subkind',val(e)),setLength:e=>this._setF('length',val(e)),
       resetFilters:()=>this.setState({filters:{q:'',cycle:'',group:'',type:'',subkind:'',length:'',source:''}}),

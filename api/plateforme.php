@@ -50,6 +50,15 @@ $method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 $DATA_DIR    = __DIR__ . '/data';
 $CORPUS_FILE = $DATA_DIR . '/corpus_minesec.json';
 $CITATIONS_FILE = $DATA_DIR . '/citations_minesec.json';
+/* Second répertoire : domaine public strict (auteur mort avant 1956, écrit
+   en français, aucune traduction). Rien à fermer — il n'y a personne à qui
+   payer une redevance. Servi en entier à tout compte. */
+$LIBRE_FILE = $DATA_DIR . '/corpus_libre.json';
+/* Les deux répertoires numérotent à partir de 1 : servis ensemble, leurs
+   numéros entreraient en collision. `n` est la clé du client partout — une
+   collision mélangerait les textes d'une épreuve. Un numéro >= 10000 est
+   une fiche libre, sans ambiguïté possible. */
+define('VRT_LIBRE_OFFSET', 10000);
 $DB_FILE     = vrt_db_file();
 
 /* ─────────────────────────────────────────────────────────────────────────
@@ -205,7 +214,12 @@ function plat_plans_atelier(): array
 function plat_paliers(array $db): array
 {
     $def = [
-        'demo' => ['textes' => 20,  'citations' => 10,  'exports' => 2,   'ia' => 3],
+        /* MISE EN BOUCHE. Le domaine public (1 014 textes) est ouvert à tout
+           le monde et ne passe pas par ces plafonds : ils ne comptent que le
+           répertoire MINESEC, sous droits. On en laisse goûter cinq, un seul
+           export et deux questions à Ambassa — de quoi juger sur pièce, pas
+           de quoi se passer d'un abonnement. */
+        'demo' => ['textes' => 5,   'citations' => 3,   'exports' => 1,   'ia' => 2],
         'ens'  => ['textes' => -1,  'citations' => -1,  'exports' => 30,  'ia' => 30],
         'etab' => ['textes' => -1,  'citations' => -1,  'exports' => 120, 'ia' => 120],
         'pro'  => ['textes' => -1,  'citations' => -1,  'exports' => 400, 'ia' => 400],
@@ -426,6 +440,9 @@ if ($action === 'config') {
         'version'    => '1.0.1',
         'corpus'     => $etat($CORPUS_FILE),
         'citations'  => $etat($CITATIONS_FILE),
+        /* Il se dépose à la main, comme les deux autres : un fichier oublié
+           doit se voir ici et non au 503 reçu par un abonné. */
+        'libre'      => $etat($LIBRE_FILE),
         'essai'      => ['jours' => $offres['joursEssai'], 'cadeau' => $offres['cadeauBienvenue']],
         'baseLisible' => is_array($db),
     ]);
@@ -513,6 +530,26 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
     /* ---- Contenu intégral : c'est ICI que le droit se vérifie ---- */
     if ($mode === 'complet') {
         $num = (int) ($_GET['n'] ?? 0);
+        /* FICHE LIBRE DE DROITS. Servie en entier, sans condition : les
+           droits patrimoniaux sont éteints, il n'y a personne à qui payer.
+           Le mur d'abonnement ne s'applique qu'au répertoire MINESEC, dont
+           les auteurs sont vivants ou récents. */
+        if (!$estCitation && $num >= VRT_LIBRE_OFFSET) {
+            if (!is_file($GLOBALS['LIBRE_FILE'])) {
+                jsonResponse(['ok' => false, 'error' => 'Répertoire libre absent du serveur'], 503);
+            }
+            $libres = json_decode((string) file_get_contents($GLOBALS['LIBRE_FILE']), true);
+            if (!is_array($libres)) jsonResponse(['ok' => false, 'error' => 'Répertoire libre illisible'], 503);
+            $cible = $num - VRT_LIBRE_OFFSET;
+            foreach ($libres as $t) {
+                if ((int) ($t['n'] ?? 0) !== $cible) continue;
+                $t['n'] = $num;              // le client ne connaît que le numéro décalé
+                $t['src'] = 'libre';
+                $t['libre'] = true;
+                jsonResponse(['ok' => true, 'texte' => $t, 'droit' => $droit, 'palier' => $palier]);
+            }
+            jsonResponse(['ok' => false, 'error' => 'Introuvable'], 404);
+        }
         foreach ($items as $t) {
             if ((int) ($t['n'] ?? 0) !== $num) continue;
             if (!$estLibre($num)) {
@@ -557,6 +594,7 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
         }
         $index[] = [
             'n' => $num,
+            'src'       => 'minesec',
             'type'      => (string) ($t['type'] ?? ''),
             'words'     => (int) ($t['words'] ?? 0),
             'level'     => (string) ($t['level'] ?? ''),
@@ -576,10 +614,50 @@ if (($action === 'corpus' || $action === 'citations') && $method === 'GET') {
         ];
     }
 
+    /* ---- Le répertoire LIBRE DE DROITS, ajouté au même index ----
+       Domaine public strict : servi EN ENTIER à tout compte, essai compris.
+       On l'ajoute ici plutôt que sur un second appel — LWS bannit l'IP à six
+       mauvaises requêtes par minute, et une file d'envoi trop bavarde a déjà
+       fermé le site entier. Deux répertoires, un transfert.
+       `extrait` porte le texte COMPLET : rien à cacher, et cela évite au
+       client d'aller le rechercher fiche par fiche. */
+    $nLibres = 0;
+    if (!$estCitation && is_file($GLOBALS['LIBRE_FILE'])) {
+        $libres = json_decode((string) file_get_contents($GLOBALS['LIBRE_FILE']), true);
+        if (is_array($libres)) {
+            foreach ($libres as $t) {
+                $index[] = [
+                    'n'         => VRT_LIBRE_OFFSET + (int) ($t['n'] ?? 0),
+                    'src'       => 'libre',
+                    'type'      => (string) ($t['type'] ?? ''),
+                    'words'     => (int) ($t['words'] ?? 0),
+                    'level'     => (string) ($t['level'] ?? ''),
+                    'cycle'     => (string) ($t['cycle'] ?? ''),
+                    'group'     => (string) ($t['group'] ?? ''),
+                    'groupKind' => (string) ($t['groupKind'] ?? ''),
+                    'subkind'   => (string) ($t['subkind'] ?? ''),
+                    'usage'     => (string) ($t['usage'] ?? ''),
+                    'author'    => (string) ($t['author'] ?? ''),
+                    'title'     => (string) ($t['title'] ?? ''),
+                    'reference' => (string) ($t['reference'] ?? ''),
+                    'faits'     => (string) ($t['faits'] ?? ''),
+                    'libre'     => true,
+                    'extrait'   => (string) ($t['text'] ?? ''),
+                ];
+                $nLibres++;
+            }
+        }
+    }
+
     jsonResponse([
         'ok'      => true,
         'total'   => count($index),
-        'libres'  => $offerts === null ? count($index) : count($offerts),
+        /* Deux comptes distincts : ce qui est ouvert PAR L'ABONNEMENT
+           (échantillon du répertoire protégé) et ce qui l'est PAR LE DROIT
+           (le domaine public). Les confondre ferait croire à l'abonné qu'il
+           a débloqué 1 014 textes qui n'ont jamais été fermés. */
+        'libres'  => ($offerts === null ? count($index) - $nLibres : count($offerts)) + $nLibres,
+        'libresDroit' => $nLibres,
         'palier'  => $palier,
         'plafonds' => $caps,
         ($estCitation ? 'citations' : 'textes') => $index,

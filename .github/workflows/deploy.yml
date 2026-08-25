@@ -624,6 +624,17 @@ jobs:
               echo "::notice title=${c}_minesec.json hors CI::Non versionne (marchandise). Doit etre televerse en FTP dans api/data/ ; sinon api/plateforme.php repond 503 sur ?action=${c}."
             fi
           done
+          # Repertoire LIBRE DE DROITS (1014 textes du domaine public). Meme
+          # regle : gitignore parce que le depot est PUBLIC. Les TEXTES sont
+          # libres, mais leur classement par module, leur calibrage en mots,
+          # leurs faits de langue et leurs questions sont le travail de
+          # VERITAS -- les publier ici reviendrait a en faire cadeau.
+          if [ -f api/data/corpus_libre.json ]; then
+            cp api/data/corpus_libre.json deploy/api/data/
+            echo "  OK api/data/corpus_libre.json (domaine public, servi a tous)"
+          else
+            echo "::notice title=corpus_libre.json hors CI::Non versionne (travail editorial). Doit etre televerse en FTP dans api/data/ ; sinon l index ne servira que le repertoire MINESEC."
+          fi
           # ── v1.2.1 : protéger le dossier data/ RACINE où db.php écrit veritas_db.json ──
           #    Sans .htaccess ici, /data/veritas_db.json serait téléchargeable directement (toute la base).
           if [ -f data/.htaccess ]; then
