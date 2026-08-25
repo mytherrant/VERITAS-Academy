@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="./support.js?v=2e38395c"></script>
 <script src="./minesec.js?v=570ac91b"></script>
-<script src="./conformite.js?v=de3ff930"></script>
+<script src="./conformite.js?v=69a07e4f"></script>
 <script src="./exercices.js?v=c6d93301"></script>
 <script src="./texte.js?v=43fa1e84"></script>
 <script src="./docx.js?v=2122627c"></script>
@@ -275,6 +275,62 @@
     transition:transform .16s ease, box-shadow .2s ease, border-color .16s ease}
   .vrt-carte:hover, main article:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(20,55,95,.10)}
 
+  /* ── ACCUSÉ DE RÉCEPTION DU GESTE ──────────────────────────────────
+     Tout ce qui se touche répond. Sans ces transitions, un survol ou un
+     appui change l'état d'un coup sec : rien ne dit que le geste a été
+     reçu, et l'interface a l'air d'un document plutôt que d'un outil.
+     `border-color` et `box-shadow` plutôt qu'un changement de fond — la
+     couleur qualifie, elle n'inonde pas. */
+  button, a, input, select, textarea, .vrt-repli-corps > *, label {
+    transition:border-color .17s ease, box-shadow .21s ease,
+               background-color .17s ease, color .17s ease, transform .14s ease}
+  /* L'appui s'enfonce légèrement : c'est le seul retour tactile dont on
+     dispose sur un écran, et il coûte une seule propriété composée. */
+  button:active{transform:scale(.975)}
+  /* Le champ actif se détache par un halo, pas par un fond : on doit
+     continuer à lire ce qu'on écrit. */
+  input:focus, select:focus, textarea:focus{
+    outline:none;box-shadow:0 0 0 3px rgba(26,114,187,.13)}
+
+  /* ── ENTRÉE EN CASCADE DES GRILLES ─────────────────────────────────
+     Les sections entraient déjà l'une après l'autre ; les vignettes d'une
+     grille, elles, apparaissaient toutes ensemble. Un décalage d'un
+     souffle donne l'ordre de lecture sans avoir à le dire. */
+  .vrt-stats > article{animation:vrtEntre .40s cubic-bezier(.22,.61,.36,1) both}
+  .vrt-stats > article:nth-child(1){animation-delay:.03s}
+  .vrt-stats > article:nth-child(2){animation-delay:.09s}
+  .vrt-stats > article:nth-child(3){animation-delay:.15s}
+  .vrt-stats > article:nth-child(4){animation-delay:.21s}
+
+  /* ── VARIÉTÉ DES TEINTES ───────────────────────────────────────────
+     Le filet sous un titre de section était toujours bleu. Il tourne
+     désormais sur la même palette de six que les anneaux d'icônes, si
+     bien que deux titres voisins ne portent jamais la même couleur — le
+     repère devient distinctif au lieu d'être décoratif. */
+  main section:nth-of-type(6n+1) .vrt-titre-file::before{background:var(--c1a72bb,#1a72bb)}
+  main section:nth-of-type(6n+2) .vrt-titre-file::before{background:var(--c1f9d55,#1f9d55)}
+  main section:nth-of-type(6n+3) .vrt-titre-file::before{background:var(--ce07f00,#e07f00)}
+  main section:nth-of-type(6n+4) .vrt-titre-file::before{background:var(--c7b52c7,#7b52c7)}
+  main section:nth-of-type(6n+5) .vrt-titre-file::before{background:var(--c0e8a9c,#0e8a9c)}
+  main section:nth-of-type(6n+6) .vrt-titre-file::before{background:var(--c14375f,#14375f)}
+  /* Le filet s'allonge quand on survole sa section : un mouvement de
+     34 px, assez pour se remarquer, trop court pour distraire. */
+  .vrt-titre-file::before{transition:width .24s cubic-bezier(.22,.61,.36,1)}
+  main section:hover .vrt-titre-file::before{width:52px}
+
+  /* La bordure d'une carte survolée prend la teinte de son rang, au lieu
+     du même bleu pour toutes. C'est la règle des vignettes d'accueil,
+     étendue aux grilles de la planche de travail. */
+  .vrt-stats > article:nth-child(6n+1):hover{border-color:var(--c1a72bb,#1a72bb)}
+  .vrt-stats > article:nth-child(6n+2):hover{border-color:var(--c1f9d55,#1f9d55)}
+  .vrt-stats > article:nth-child(6n+3):hover{border-color:var(--ce07f00,#e07f00)}
+  .vrt-stats > article:nth-child(6n+4):hover{border-color:var(--c7b52c7,#7b52c7)}
+
+  /* Un volet qui s'ouvre déroule son contenu au lieu d'apparaître d'un
+     bloc : on suit des yeux ce qui vient d'être demandé. */
+  .vrt-repli-corps{animation:vrtDeroule .26s cubic-bezier(.22,.61,.36,1) both}
+  @keyframes vrtDeroule{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+
   /* Panneaux colores, facon lws.fr : des bandes alternees plutot qu'un
      aplat blanc continu. La couleur porte la structure, pas la decoration. */
   .vrt-bande{border-radius:18px;padding:22px 24px;margin-bottom:16px}
@@ -344,6 +400,128 @@
   .vrt-intro-puce:nth-child(3){animation-delay:.54s}
   .vrt-intro-puce:nth-child(4){animation-delay:.64s}
   .vrt-intro-jauge{height:3px;border-radius:2px;background:var(--c1a72bb,#1a72bb);animation:vrtIntroTrait 4.2s linear both}
+  /* ═══════════ DÉMONSTRATION ANIMÉE DE L'ÉCRAN D'ACCUEIL ═══════════
+     Voir la note du correctif : elle remplace la « Visite guidée » par
+     profils, qui ne montrait rien et menait à un écran d'attente sans fin.
+     Uniquement `transform` et `opacity` — les deux seules propriétés que le
+     compositeur traite sans refaire la mise en page. */
+  .vrt-demo{position:relative;max-width:660px;margin:0 auto 18px;text-align:left}
+  .vrt-demo-cadre{position:relative;height:290px;border-radius:16px;overflow:hidden;
+    background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);
+    box-shadow:0 6px 26px rgba(20,55,95,.09)}
+  /* Barre de fenêtre : trois pastilles, comme un vrai logiciel. Elle donne
+     l'échelle et fait comprendre d'un coup d'œil que l'on regarde l'outil. */
+  .vrt-demo-barre{height:30px;background:var(--cf4f8fc,#f4f8fc);
+    border-bottom:1px solid var(--ce6ecf3,#e6ecf3);display:flex;align-items:center;
+    gap:6px;padding:0 12px;flex:none}
+  .vrt-demo-barre i{width:9px;height:9px;border-radius:50%;background:var(--cd5e0ec,#d5e0ec)}
+  .vrt-demo-barre span{margin-left:8px;font-size:10.5px;font-weight:700;
+    color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.04em}
+  .vrt-demo-scenes{position:relative;height:260px}
+  .vrt-scene{position:absolute;inset:0;padding:18px 20px;opacity:0;
+    animation:vrtScene 30s infinite both;will-change:opacity,transform}
+  .vrt-scene:nth-child(1){animation-delay:0s}
+  .vrt-scene:nth-child(2){animation-delay:5s}
+  .vrt-scene:nth-child(3){animation-delay:10s}
+  .vrt-scene:nth-child(4){animation-delay:15s}
+  .vrt-scene:nth-child(5){animation-delay:20s}
+  .vrt-scene:nth-child(6){animation-delay:25s}
+  @keyframes vrtScene{
+    0%      {opacity:0;transform:translateY(10px)}
+    2%,14%  {opacity:1;transform:none}
+    16.66%,100%{opacity:0;transform:translateY(-8px)}
+  }
+  /* Titre de scène : le numéro puis ce que l'on fait. */
+  .vrt-scene h4{margin:0 0 3px;font-family:Poppins,sans-serif;font-size:14.5px;
+    font-weight:700;color:var(--c14375f,#14375f);display:flex;align-items:center;gap:8px}
+  .vrt-scene h4 b{width:21px;height:21px;border-radius:50%;background:var(--c1a72bb,#1a72bb);
+    color:#fff;font-size:11px;display:grid;place-items:center;flex:none}
+  .vrt-scene p{margin:0 0 13px;font-size:12px;color:var(--c7a8598,#7a8598);line-height:1.5}
+  /* Pièces réutilisables : lignes de texte, cartes, boutons. */
+  .vrt-l{height:7px;border-radius:4px;background:var(--ceef2f7,#eef2f7);margin-bottom:6px}
+  .vrt-boite{border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:9px 11px;
+    background:var(--cffffff,#fff)}
+  .vrt-bleu{background:var(--c1a72bb,#1a72bb);color:#fff;border-radius:7px;
+    font-size:10.5px;font-weight:700;font-family:Poppins,sans-serif;padding:6px 12px;
+    display:inline-block}
+  .vrt-or{background:var(--cf39200,#f39200);color:#fff}
+  .vrt-vert{background:var(--c1f9d55,#1f9d55);color:#fff}
+  .vrt-av{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
+    font-size:9.5px;font-weight:700;font-family:Poppins,sans-serif;color:#fff;flex:none}
+
+  /* — 1. se connecter : le champ se remplit, puis le bouton s'enfonce — */
+  @keyframes vrtSaisie{0%,3%{width:0}9%,100%{width:82%}}
+  @keyframes vrtAppui{0%,10%{transform:none}11.5%{transform:scale(.93)}13%,100%{transform:none}}
+  .vrt-saisie{height:7px;border-radius:4px;background:var(--cbcd9f2,#bcd9f2);width:0;
+    animation:vrtSaisie 30s infinite both}
+  .vrt-appui{animation:vrtAppui 30s infinite both;will-change:transform}
+
+  /* — 2. la leçon : un texte du corpus glisse dans la fiche de leçon — */
+  @keyframes vrtGlisse{0%,4%{opacity:0;transform:translateX(-26px)}
+    8%,100%{opacity:1;transform:none}}
+  .vrt-glisse{animation:vrtGlisse 30s infinite both;animation-delay:5s;will-change:transform,opacity}
+
+  /* — 3. l'épreuve : les questions apparaissent l'une après l'autre — */
+  @keyframes vrtSurgit{0%,5%{opacity:0;transform:translateY(7px)}9%,100%{opacity:1;transform:none}}
+  .vrt-q{animation:vrtSurgit 30s infinite both;will-change:transform,opacity}
+  .vrt-q:nth-of-type(1){animation-delay:10s}
+  .vrt-q:nth-of-type(2){animation-delay:10.5s}
+  .vrt-q:nth-of-type(3){animation-delay:11s}
+
+  /* — 4. à plusieurs : le curseur d'un collègue, puis son commentaire — */
+  @keyframes vrtCurseur{0%,4%{opacity:0;transform:translate(0,0)}
+    7%{opacity:1}9%{transform:translate(58px,20px)}
+    13%{opacity:1;transform:translate(58px,20px)}16.66%,100%{opacity:0}}
+  .vrt-curseur{position:absolute;animation:vrtCurseur 30s infinite both;
+    animation-delay:15s;will-change:transform,opacity}
+  @keyframes vrtBulle{0%,8%{opacity:0;transform:scale(.9)}11%,100%{opacity:1;transform:none}}
+  .vrt-bulle{animation:vrtBulle 30s infinite both;animation-delay:15s;
+    transform-origin:left center;will-change:transform,opacity}
+
+  /* — 5. valider : le jalon avance, la coche tombe — */
+  @keyframes vrtJalon{0%,6%{background:var(--ceef2f7,#eef2f7);color:var(--c9aa5b5,#9aa5b5)}
+    9%,100%{background:var(--c1f9d55,#1f9d55);color:#fff}}
+  .vrt-jalon{animation:vrtJalon 30s infinite both}
+  .vrt-jalon:nth-of-type(1){animation-delay:20s}
+  .vrt-jalon:nth-of-type(2){animation-delay:20.7s}
+  .vrt-jalon:nth-of-type(3){animation-delay:21.4s}
+
+  /* — 6. exporter : la feuille sort du dossier — */
+  @keyframes vrtSortie{0%,5%{opacity:0;transform:translateY(14px) rotate(-3deg)}
+    10%,100%{opacity:1;transform:none}}
+  .vrt-feuille{animation:vrtSortie 30s infinite both;animation-delay:25s;
+    will-change:transform,opacity}
+
+  /* Rangée de pastilles : où en est la démonstration. */
+  .vrt-demo-puces{display:flex;gap:7px;justify-content:center;margin-top:13px}
+  .vrt-demo-puces i{width:7px;height:7px;border-radius:50%;background:var(--cd5e0ec,#d5e0ec);
+    animation:vrtPuce 30s infinite both;will-change:transform}
+  .vrt-demo-puces i:nth-child(1){animation-delay:0s}
+  .vrt-demo-puces i:nth-child(2){animation-delay:5s}
+  .vrt-demo-puces i:nth-child(3){animation-delay:10s}
+  .vrt-demo-puces i:nth-child(4){animation-delay:15s}
+  .vrt-demo-puces i:nth-child(5){animation-delay:20s}
+  .vrt-demo-puces i:nth-child(6){animation-delay:25s}
+  @keyframes vrtPuce{0%{background:var(--cd5e0ec,#d5e0ec);transform:scale(1)}
+    2%,14%{background:var(--c1a72bb,#1a72bb);transform:scale(1.45)}
+    16.66%,100%{background:var(--cd5e0ec,#d5e0ec);transform:scale(1)}}
+
+  /* Téléphone : la démonstration reste lisible, en plus court. */
+  @media (max-width:820px){
+    .vrt-demo-cadre{height:264px}
+    .vrt-demo-scenes{height:234px}
+    .vrt-scene{padding:14px 15px}
+    .vrt-scene h4{font-size:13.5px}
+  }
+  /* Sans animation : on fige la PREMIÈRE scène plutôt que de les empiler
+     toutes, ce qui donnerait six calques illisibles l'un sur l'autre. */
+  @media (prefers-reduced-motion:reduce){
+    .vrt-scene{opacity:0}
+    .vrt-scene:nth-child(1){opacity:1}
+    .vrt-demo-puces i:nth-child(1){background:var(--c1a72bb,#1a72bb)}
+    .vrt-saisie{width:82%}
+  }
+
   @media (prefers-reduced-motion:reduce){
     .vrt-intro,.vrt-intro-sceau,.vrt-intro-titre,.vrt-intro-sous,.vrt-intro-puce{animation:none!important}
     .vrt-intro-jauge{animation:none!important;width:100%}
@@ -481,6 +659,61 @@
     header[data-noprint] input{font-size:12.5px!important}
     main h1{font-size:22px!important}
   }
+  /* ---------- TÉLÉPHONE : dégager la planche de travail ----------
+     Mesuré sur un gabarit de 390 px AVANT correction : les quatre cartes de
+     tête occupaient 860 px à elles seules (une par ligne), les six filtres du
+     corpus 600 px avant le premier texte, et la barre du haut débordait de
+     25 px — c'est pourquoi l'avatar est coupé sur toutes les captures. Un
+     écran de téléphone n'a pas de place pour ce qu'on ne regarde qu'une fois :
+     ce qui sert rarement se replie, ce qui sert toujours reste. */
+  .vrt-only-sm{display:none!important}
+  @media (min-width:821px){
+    /* Sur grand écran rien ne se replie : le corps d'un volet reste ouvert,
+       quelle que soit la position du repli mobile. */
+    .vrt-repli-corps{display:block!important}
+  }
+  @media (max-width:820px){
+    .vrt-only-sm{display:block!important}
+    /* Boutons de la barre du haut qui ont un autre chemin sur téléphone : le
+       thème est dans « Mon compte », la discussion dans l'onglet Équipe,
+       l'activité sur la carte de l'accueil. Le bouton de menu replie une
+       colonne qui n'existe pas ici. */
+    .vrt-hide-xs{display:none!important}
+
+    /* Cartes de tête : deux colonnes, comme la grille « Ressources » juste
+       en dessous — c'est le modèle demandé. 860 px -> ~250 px. */
+    .vrt-champs{grid-template-columns:1fr 1fr!important}
+    .vrt-stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+    .vrt-stats>article{padding:13px 10px!important;border-radius:12px!important}
+    .vrt-stats>article>span:first-child{margin-bottom:7px!important}
+    .vrt-stats>article>span:first-child>span{width:34px!important;height:34px!important}
+    .vrt-stats>article>span:first-child svg{width:17px!important;height:17px!important}
+    .vrt-stats>article>span:nth-child(2)>span:first-child{font-size:22px!important}
+    .vrt-stats>article button{margin-top:9px!important;padding-top:8px!important}
+
+    /* Un volet REPLIÉ ne paie pas le rembourrage d'un volet ouvert.
+       Mesuré au composeur (375 px) : les trois volets repliés occupaient
+       258 px pour trois boutons de 41 px. Le reste, c'était le
+       `padding:20px` de chaque panneau (40 px en haut et en bas) et le
+       `gap:16px` qui les sépare : des valeurs justes sous un panneau
+       déployé, absurdes sous un simple bouton.
+       La règle ne vise QUE les volets refermés : `:has()` regarde si le
+       corps est masqué. Un navigateur sans `:has()` garde le rembourrage —
+       il perd le gain, rien ne casse. */
+    .vrt-col2 aside:has(> .vrt-repli-corps[style*="none"]){padding:11px!important}
+    .vrt-col2 > div:first-child{gap:10px!important}
+
+    /* Police d'un cran au-dessus. Les tailles sont écrites en ligne dans le
+       gabarit : ces règles sont le seul endroit d'où l'on peut les relever
+       sans réécrire trois mille attributs. */
+    main [style*="font-size:11px"]{font-size:12px!important}
+    main [style*="font-size:11.5px"]{font-size:12.5px!important}
+    main [style*="font-size:12px"]{font-size:13px!important}
+    main [style*="font-size:12.5px"]{font-size:13.5px!important}
+    main [style*="font-size:13px"]{font-size:14px!important}
+    main [style*="font-size:13.5px"]{font-size:14.5px!important}
+    main [style*="font-size:14px"]{font-size:15px!important}
+  }
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}
     .vrt-carte:hover,main article:hover{transform:none}}
   @media print{
@@ -544,7 +777,7 @@
 
   <sc-if value="{{ showChrome }}" hint-placeholder-val="{{ true }}">
   <header data-noprint="1" style="position:sticky;top:0;z-index:30;background:var(--cffffff,#fff);border-bottom:1px solid var(--ce6ecf3,#e6ecf3);min-height:72px;display:flex;align-items:center;gap:14px;padding:12px 26px;flex-wrap:wrap">
-    <button onClick="{{ toggleSidebar }}" title="Replier le menu" style="width:38px;height:38px;border-radius:9px;border:1px solid var(--ce6ecf3,#e6ecf3);background:var(--cffffff,#fff);cursor:pointer;display:grid;place-items:center;flex:none" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ sbIcMenu }}</button>
+    <button onClick="{{ toggleSidebar }}" title="Replier le menu" class="vrt-hide-xs" style="width:38px;height:38px;border-radius:9px;border:1px solid var(--ce6ecf3,#e6ecf3);background:var(--cffffff,#fff);cursor:pointer;display:grid;place-items:center;flex:none" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ sbIcMenu }}</button>
 
     <div style="flex:1;min-width:200px;max-width:640px;position:relative;display:flex;align-items:center">
       <span style="position:absolute;left:14px;display:flex;pointer-events:none">{{ topIcSearch }}</span>
@@ -568,9 +801,9 @@
       <button onClick="{{ retourArriere }}" title="Revenir" class="vrt-retour" style="{{ retourStyle }}">{{ retourIcon }}</button>
       <button onClick="{{ assistToggle }}" title="Demander à Ambassa" style="{{ assistBtnStyle }}">{{ assistIcon }}</button>
       <button onClick="{{ togglePanier }}" title="Mon panier de textes" style="{{ panierBtnStyle }}">{{ panierIcon }}<span style="{{ panierBadge }}">{{ panierN }}</span></button>
-      <button onClick="{{ toggleTheme }}" title="{{ themeTitre }}" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ themeIcon }}</button>
-      <button onClick="{{ goActivite }}" title="Activité" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ bellIcon }}<span style="{{ notifDot }}"></span></button>
-      <button onClick="{{ goCollab }}" title="Discussion d'équipe" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ chatIcon }}<span style="{{ chatDot }}"></span></button>
+      <button onClick="{{ toggleTheme }}" title="{{ themeTitre }}" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ themeIcon }}</button>
+      <button onClick="{{ goActivite }}" title="Activité" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ bellIcon }}<span style="{{ notifDot }}"></span></button>
+      <button onClick="{{ goCollab }}" title="Discussion d'équipe" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ chatIcon }}<span style="{{ chatDot }}"></span></button>
       <button onClick="{{ goProfil }}" title="Mon compte" style="display:flex;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:3px 6px 3px 3px;border-radius:999px" style-hover="background:var(--cf2f6fb,#f2f6fb)">
         <span style="{{ me.avatarLg }}">{{ me.initials }}</span>
         <span class="vrt-hide-sm" style="text-align:left;line-height:1.15;{{ sbLabelShow }}"><span style="display:block;font-size:12.5px;font-weight:700;color:var(--c14375f,#14375f);font-family:'Poppins'">{{ me.name }}</span><span style="display:block;font-size:11px;color:var(--c8b97a8,#8b97a8)">{{ me.role }}</span></span>
@@ -653,10 +886,9 @@
          d'exemple n'ouvre pas de compte, donc pas de repertoire ; sans cette
          ligne l'interface a l'air cassee alors qu'elle fait ce qu'elle
          annonce. -->
-    <div style="{{ demoNoteStyle }}">{{ demoNote }}</div>
 
     <!-- ---------- 4 cartes de tête ---------- -->
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:20px">
+    <div class="vrt-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px;margin-bottom:20px">
       <sc-for list="{{ statCards }}" as="k" hint-placeholder-count="4">
         <article class="vrt-carte" style="{{ k.carte }}">
           <span style="{{ k.tile }}">{{ k.icon }}</span>
@@ -692,7 +924,11 @@
       </section>
 
       <section style="{{ cardStyle }}">
-        <h2 class="vrt-titre-file" style="{{ cardTitle }}">Activité de l'équipe</h2>
+        <h2 class="vrt-titre-file vrt-hide-xs" style="{{ cardTitle }}">Activité de l'équipe</h2>
+        <!-- 399 px sur un téléphone, pour une liste qu'on consulte de temps
+             en temps : elle se replie et laisse la place à ce qui sert. -->
+        <button onClick="{{ activiteToggle }}" class="vrt-only-sm" style="{{ activiteToggleStyle }}">{{ activiteToggleLabel }}</button>
+        <div class="vrt-repli-corps" style="{{ activiteCorpsStyle }}">
         <div style="display:flex;flex-direction:column;gap:13px">
           <sc-for list="{{ dashActivity }}" as="a" hint-placeholder-count="4">
             <div style="display:flex;gap:11px;align-items:flex-start">
@@ -706,6 +942,7 @@
           <div style="{{ activityEmpty }}">Aucune activité pour l'instant.</div>
         </div>
         <button onClick="{{ goActivite }}" style="{{ cardLink }}" style-hover="color:var(--c135a96,#135a96)">Voir toute l'activité <span>›</span></button>
+        </div>
       </section>
 
       <section style="{{ cardStyle }}">
@@ -802,6 +1039,11 @@
       <aside style="position:sticky;top:86px;background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
         <label style="{{ filterLbl }}">Recherche</label>
         <input value="{{ filters.q }}" onChange="{{ setQ }}" placeholder="Auteur, titre, mot…" style="{{ fieldIn }};margin-bottom:18px">
+        <!-- Six listes déroulantes, 600 px sur un téléphone : le premier
+             texte n'apparaissait qu'après les avoir toutes dépassées. La
+             recherche reste ; le reste se déplie à la demande. -->
+        <button onClick="{{ filtresToggle }}" class="vrt-only-sm" style="{{ filtresToggleStyle }}">{{ filtresToggleLabel }}</button>
+        <div class="vrt-repli-corps" style="{{ filtresCorpsStyle }}">
         <label style="{{ filterLbl }}">Source</label>
         <select value="{{ filters.source }}" onChange="{{ setSource }}" style="{{ fieldIn }};margin-bottom:16px"><option value="">Toutes les sources</option><option value="base">Corpus MINESEC</option><option value="import">Corpus importés</option></select>
         <label style="{{ filterLbl }}">Cycle</label>
@@ -814,6 +1056,7 @@
         <select value="{{ filters.subkind }}" onChange="{{ setSubkind }}" style="{{ fieldIn }};margin-bottom:16px"><option value="">Tous</option><option value="corpus">Corpus d'étude</option><option value="evaluation">Texte d'évaluation</option></select>
         <label style="{{ filterLbl }}">Longueur</label>
         <select value="{{ filters.length }}" onChange="{{ setLength }}" style="{{ fieldIn }}"><option value="">Toutes</option><option value="court">Court (&lt; 200 mots)</option><option value="moyen">Moyen (200–300)</option><option value="long">Long (&gt; 300 mots)</option></select>
+        </div>
       </aside>
       <div>
         <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
@@ -1019,15 +1262,32 @@
           <span style="font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">{{ confTitre }}</span>
           <span style="{{ confBaremeStyle }}">Barème {{ confBareme }}</span>
           <button onClick="{{ confToggle }}" style="margin-left:auto;background:var(--cffffff,#fff);border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c5a6678,#5a6678);padding:6px 13px;font-size:12px;cursor:pointer;border-radius:8px;font-weight:600;font-family:Poppins" style-hover="border-color:var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb)">{{ confToggleLabel }}</button>
-          <button onClick="{{ confAmbassa }}" style="{{ confAmbassaStyle }}" style-hover="background:var(--c135a96,#135a96)">{{ confAmbassaLabel }}</button>
+          <!-- Plus de 190 px a lui seul : sur telephone il forcait l'en-tete
+               sur trois lignes. Il reparait dans le depliant, ou l'on
+               examine justement les ecarts. -->
+          <button onClick="{{ confAmbassa }}" class="vrt-hide-xs" style="{{ confAmbassaStyle }}" style-hover="background:var(--c135a96,#135a96)">{{ confAmbassaLabel }}</button>
         </div>
-        <div style="display:flex;align-items:center;gap:9px;margin-top:11px;flex-wrap:wrap">
-          <span style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-family:Poppins">Structure officielle</span>
+        <!-- On choisit la structure de l'épreuve UNE fois, et l'on écrit
+             ensuite pendant une heure. Sur téléphone, son sélecteur
+             (min-width:260px) passait à la ligne en entraînant son bouton.
+             Elle suit désormais « Voir le détail », le dépliant que le
+             garde-fou possédait déjà : lui donner le sien coûtait 41 px de
+             bouton pour en économiser 23 (mesuré). Au-delà de 820 px,
+             `vrt-repli-corps` est rouvert d'office et rien ne change. -->
+        <div class="vrt-repli-corps" style="{{ structureCorpsStyle }};display:flex;align-items:center;gap:9px;margin-top:11px;flex-wrap:wrap">
+          <span class="vrt-hide-xs" style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-family:Poppins">Structure officielle</span>
           <select value="{{ epreuveCode }}" onChange="{{ setEpreuveCode }}" disabled="{{ cannotEdit }}" style="flex:1;min-width:260px;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:8px;padding:8px 10px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff);font-family:'Open Sans'"><option value="">— Aucune : le garde-fou ne peut rien vérifier —</option><sc-for list="{{ epreuveOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select>
           <button onClick="{{ appliquerBareme }}" style="{{ appliquerBaremeStyle }}" style-hover="border-color:var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb)">Appliquer le barème type</button>
         </div>
+        <!-- Ce sous-titre nomme la structure en vigueur (« Contrôle — 3ᵉ ·
+             2 h · coefficient 2… »). Il reste visible quand la rangée de
+             réglage se replie : c'est lui qui empêche l'effet « la donnée a
+             disparu ». -->
         <div style="{{ confSousTitreStyle }}">{{ confSousTitre }}</div>
         <sc-if value="{{ confOpen }}" hint-placeholder-val="{{ true }}">
+          <!-- L'exemplaire du telephone. `vrt-only-sm` et `vrt-hide-xs` sont
+               exclusifs : il n'y a jamais deux boutons a l'ecran. -->
+          <button onClick="{{ confAmbassa }}" class="vrt-only-sm" style="{{ confAmbassaStyleSm }}" style-hover="background:var(--c135a96,#135a96)">{{ confAmbassaLabel }}</button>
           <div style="margin-top:13px;display:flex;flex-direction:column;gap:8px">
             <sc-for list="{{ confEcarts }}" as="e" hint-placeholder-count="3">
               <div style="{{ e.rowStyle }}">
@@ -1047,10 +1307,14 @@
       <!-- ============ EXERCICES COMPLEMENTAIRES ============ -->
       <section data-noprint="1" style="{{ exWrap }}">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="flex:none">{{ exSceau }}</span>
-          <span style="flex:1;min-width:0">
+          <span class="vrt-hide-xs" style="flex:none">{{ exSceau }}</span>
+          <!-- `min-width:0` laissait cette colonne se comprimer sous la
+               largeur de ses mots au lieu de faire passer le badge et le
+               bouton a la ligne : le titre tombait un mot par ligne, et le
+               badge passait par-dessus. Mesure du 21/08, gabarit 390 px. -->
+          <span style="flex:1 1 190px;min-width:170px">
             <span style="display:block;font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">Compléter le devoir</span>
-            <span style="display:block;font-size:12px;color:var(--c8b97a8,#8b97a8);line-height:1.5">{{ exSous }}</span>
+            <span class="vrt-hide-xs" style="display:block;font-size:12px;color:var(--c8b97a8,#8b97a8);line-height:1.5">{{ exSous }}</span>
           </span>
           <span style="{{ exQuotaStyle }}">{{ exQuota }}</span>
           <button onClick="{{ exToggle }}" style="{{ exToggleStyle }}">{{ exToggleLabel }}</button>
@@ -1109,7 +1373,12 @@
       <div class="vrt-col2" style="display:grid;grid-template-columns:320px 1fr;gap:24px;align-items:start">
         <div style="display:flex;flex-direction:column;gap:16px;position:sticky;top:86px">
           <aside style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
-            <h3 style="{{ secHead }}">Renseignements</h3>
+            <h3 style="{{ secHead }}" class="vrt-hide-xs">Renseignements</h3>
+            <!-- Sur téléphone, ce formulaire s'intercale entre les onglets et
+                 la planche de travail : on le replie. Il se remplit une fois,
+                 on écrit l'épreuve pendant une heure. -->
+            <button onClick="{{ renseignementsToggle }}" class="vrt-only-sm" style="{{ renseignementsToggleStyle }}">{{ renseignementsToggleLabel }}</button>
+            <div class="vrt-repli-corps" style="{{ renseignementsCorpsStyle }}">
             <div style="display:flex;flex-direction:column;gap:12px">
               <label style="{{ fieldLbl }}">Établissement<input value="{{ ep.etab }}" onChange="{{ setEtab }}" disabled="{{ cannotEdit }}" placeholder="Lycée de…" style="{{ fieldIn }}"></label>
               <div style="display:flex;gap:10px"><label style="{{ fieldLbl }};flex:1">Classe<select value="{{ ep.classe }}" onChange="{{ setClasse }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"><option value="">— Choisir —</option><sc-for list="{{ classeOptions }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for></select></label><label style="{{ fieldLbl }};flex:1">Série<select value="{{ epSerie }}" onChange="{{ setSerie }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"><option value="">— Toutes —</option><sc-for list="{{ serieOptions }}" as="r" hint-placeholder-count="8"><option value="{{ r }}">{{ r }}</option></sc-for></select></label></div>
@@ -1118,9 +1387,14 @@
               <label style="{{ fieldLbl }}">Consigne<textarea value="{{ ep.consigne }}" onChange="{{ setConsigne }}" disabled="{{ cannotEdit }}" rows="3" style="{{ fieldIn }};resize:vertical;line-height:1.45"></textarea></label>
             </div>
             <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--ceef2f7,#eef2f7);display:flex;justify-content:space-between;font-size:12.5px;color:var(--c5a6678,#5a6678)"><span>{{ selCount }} texte(s)</span><span>{{ totalWords }} mots</span></div>
+            </div>
           </aside>
           <aside style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:20px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
-            <h3 style="{{ secHead }}">Collaboration</h3>
+            <h3 style="{{ secHead }}" class="vrt-hide-xs">Collaboration</h3>
+            <!-- Dernier volet entre les onglets et la planche de travail sur
+                 téléphone : on le replie aussi. -->
+            <button onClick="{{ collabToggle }}" class="vrt-only-sm" style="{{ renseignementsToggleStyle }}">{{ collabToggleLabel }}</button>
+            <div class="vrt-repli-corps" style="{{ collabCorpsStyle }}">
             <div style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);margin-bottom:9px">Co-éditeurs</div>
             <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:16px">
               <sc-for list="{{ activeCollaborators }}" as="c" hint-placeholder-count="2"><span title="{{ c.name }}" style="{{ c.avatar }}">{{ c.initials }}</span></sc-for>
@@ -1143,17 +1417,18 @@
               <sc-if value="{{ canSendBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ sendBack }}" style="background:var(--cffffff,#fff);color:var(--cc0392b,#c0392b);border:1px solid var(--cecc4bf,#ecc4bf);padding:9px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer" style-hover="background:var(--cfdecea,#fdecea)">Renvoyer en brouillon</button></sc-if>
               <sc-if value="{{ canPublish }}" hint-placeholder-val="{{ false }}"><button onClick="{{ togglePublish }}" style="background:var(--cffffff,#fff);color:var(--cc26a12,#c26a12);border:1px solid var(--cf0d9b0,#f0d9b0);padding:9px;font-size:12.5px;font-weight:600;border-radius:9px;cursor:pointer" style-hover="background:var(--cfdefdb,#fdefdb)">{{ publishLabel }}</button></sc-if>
             </div>
+                      </div>
           </aside>
         </div>
         <div>
           <sc-if value="{{ hasSelection }}" hint-placeholder-val="{{ false }}">
             <div style="display:flex;flex-direction:column;gap:11px;margin-bottom:20px">
               <sc-for list="{{ selectedFiches }}" as="f" hint-placeholder-count="3">
-                <article style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:11px;padding:15px 17px;box-shadow:0 2px 8px rgba(20,55,95,.05);animation:popIn .3s ease both">
+                <article id="{{ f.ancre }}" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:11px;padding:15px 17px;box-shadow:0 2px 8px rgba(20,55,95,.05);animation:popIn .3s ease both">
                   <div style="display:flex;gap:14px;align-items:flex-start">
                     <span style="font-family:'Poppins';font-size:20px;font-weight:700;color:var(--c1a72bb,#1a72bb);min-width:26px">{{ f.pos }}</span>
                     <div style="flex:1;min-width:0">
-                      <div style="display:flex;align-items:center;gap:9px;margin-bottom:5px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:{{ f.dot }}"></span><span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--c5a6678,#5a6678);font-weight:700;font-family:'Poppins'">{{ f.type }}</span><span style="font-size:11.5px;color:var(--c7a8598,#7a8598)">· {{ f.words }} mots · niv. {{ f.level }}</span></div>
+                      <div style="display:flex;align-items:center;gap:9px;margin-bottom:5px;flex-wrap:wrap"><span style="width:8px;height:8px;border-radius:50%;background:{{ f.dot }}"></span><span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--c5a6678,#5a6678);font-weight:700;font-family:'Poppins'">{{ f.type }}</span><span style="font-size:11.5px;color:var(--c7a8598,#7a8598)">· {{ f.words }} mots · niv. {{ f.level }}</span><span title="{{ f.syncTitre }}" style="{{ f.syncChip }}">{{ f.syncLabel }}</span></div>
                       <div style="font-size:13.5px;color:var(--c33404f,#33404f);line-height:1.4"><strong style="font-weight:700">{{ f.author }}</strong> <em style="color:var(--c7a8598,#7a8598)">{{ f.title }}</em></div>
                     </div>
                     <div style="{{ f.ctrlWrap }}"><button onClick="{{ f.up }}" style="{{ iconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb)">{{ icHaut }}</button><button onClick="{{ f.down }}" style="{{ iconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb)">{{ icBas }}</button><button onClick="{{ f.remove }}" style="{{ iconBtn }};color:var(--cc0392b,#c0392b)" style-hover="border-color:var(--cc0392b,#c0392b);background:var(--cfdecea,#fdecea)">{{ icClose }}</button></div>
@@ -1209,7 +1484,11 @@
           </sc-if>
           <sc-if value="{{ emptySelection }}" hint-placeholder-val="{{ false }}"><div style="text-align:center;padding:54px 24px;background:var(--cffffff,#fff);border:1px dashed var(--ccdd9e6,#cdd9e6);border-radius:14px;margin-bottom:22px"><p style="font-family:'Poppins';font-size:16px;color:var(--c22303f,#22303f);margin:0 0 6px;font-weight:600">Aucun texte dans cette épreuve</p><p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 18px">Ajoutez des textes depuis le corpus.</p><button onClick="{{ goListe }}" style="background:var(--cf39200,#f39200);color:var(--cffffff,#fff);border:none;padding:12px 22px;font-size:13.5px;cursor:pointer;border-radius:999px;font-weight:700;font-family:Poppins">Parcourir le corpus {{ icSuite }}</button></div></sc-if>
           <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:22px 24px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
-            <h3 style="{{ secHead }}">Commentaires &amp; relecture</h3>
+            <h3 style="{{ secHead }}" class="vrt-hide-xs">Commentaires &amp; relecture</h3>
+            <!-- Dernier bloc sous la planche de travail : replié sur
+                 téléphone, il rend la fin de l'épreuve atteignable. -->
+            <button onClick="{{ commentairesToggle }}" class="vrt-only-sm" style="{{ commentairesToggleStyle }}">{{ commentairesToggleLabel }}</button>
+            <div class="vrt-repli-corps" style="{{ commentairesCorpsStyle }}">
             <sc-if value="{{ hasComments }}" hint-placeholder-val="{{ true }}">
               <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:18px">
                 <sc-for list="{{ activeComments }}" as="c" hint-placeholder-count="2"><div style="display:flex;gap:11px;align-items:flex-start"><span style="{{ c.avatar }}">{{ c.initials }}</span><div style="flex:1;min-width:0"><div style="display:flex;align-items:baseline;gap:8px"><strong style="font-size:13px;color:var(--c22303f,#22303f);font-weight:700">{{ c.name }}</strong><span style="font-size:11px;color:var(--c9aa5b5,#9aa5b5)">{{ c.role }} · {{ c.ago }}</span></div><div style="font-size:13.5px;color:var(--c3a4658,#3a4658);line-height:1.5;margin-top:2px">{{ c.textEl }}</div><div style="display:flex;align-items:center;gap:6px;margin-top:8px"><sc-for list="{{ c.reactions }}" as="r" hint-placeholder-count="2"><button onClick="{{ r.toggle }}" style="{{ r.style }}">{{ r.emoji }} {{ r.count }}</button></sc-for><button onClick="{{ c.addReact }}" style="width:26px;height:26px;border-radius:50%;border:1px dashed var(--ccdd9e6,#cdd9e6);background:var(--cffffff,#fff);color:var(--c9aa5b5,#9aa5b5);font-size:14px;cursor:pointer;display:grid;place-items:center" style-hover="border-color:var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb)">+</button></div></div></div></sc-for>
@@ -1223,6 +1502,7 @@
                 <button onClick="{{ addComment }}" style="background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:10px 16px;font-size:13px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins;flex:none" style-hover="background:var(--c135a96,#135a96)">Publier</button>
               </div>
             </sc-if>
+            </div>
           </section>
         </div>
       </div>
@@ -1741,7 +2021,11 @@
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8)">Titre du cours · cliquez pour modifier</span></div>
     <input value="{{ co.title }}" onChange="{{ setCoTitle }}" disabled="{{ co.locked }}" style="font-family:'Poppins';font-size:23px;font-weight:700;color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;background:var(--cffffff,#fff);width:100%;padding:8px 12px;margin-bottom:18px" style-focus="border-color:var(--c1a72bb,#1a72bb);box-shadow:0 0 0 3px rgba(26,114,187,.12)" placeholder="Ex : Les expansions du nom">
 
-    <div style="display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start">
+    <!-- Cette grille n'avait AUCUNE règle d'écran : sur un téléphone de
+         390 px, la colonne fixe de 320 px laissait ~46 px à la planche de
+         travail du cours. `vrt-col2` la fait passer sur une seule colonne
+         en dessous de 820 px, comme partout ailleurs. -->
+    <div class="vrt-col2" style="display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start">
       <div style="display:flex;flex-direction:column;gap:16px">
         <!-- En-tête officiel -->
         <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:22px 24px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
@@ -1772,7 +2056,7 @@
       </section>
 
           <h3 style="{{ secHead }}">En-tête officiel</h3>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div class="vrt-champs" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
             <label style="{{ fieldLbl }}">Classe<input value="{{ co.classe }}" onChange="{{ setCoField }}" data-k="classe" disabled="{{ co.locked }}" placeholder="6ᵉ" style="{{ fieldIn }}"></label>
             <label style="{{ fieldLbl }}">Séquence<input value="{{ co.sequence }}" onChange="{{ setCoField }}" data-k="sequence" disabled="{{ co.locked }}" placeholder="Séquence 3" style="{{ fieldIn }}"></label>
             <label style="{{ fieldLbl }}">Durée<input value="{{ co.duree }}" onChange="{{ setCoField }}" data-k="duree" disabled="{{ co.locked }}" placeholder="55 min" style="{{ fieldIn }}"></label>
@@ -2103,19 +2387,123 @@
       <h1 style="font-family:'Poppins';font-size:31px;font-weight:700;line-height:1.2;margin:0 auto 14px;max-width:20ch;color:var(--c14375f,#14375f);letter-spacing:-.02em">Un espace collaboratif pour vos cours et vos épreuves</h1>
       <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Composez vos épreuves et vos leçons à partir de 1 040 textes vérifiés, avec un garde-fou qui contrôle la conformité MINESEC pendant que vous écrivez.</p>
 
-      <div style="max-width:420px;margin:0 auto 16px;text-align:left;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:16px;padding:26px 24px;box-shadow:0 4px 18px rgba(20,55,95,.06)">
-        <h2 style="font-family:Poppins;font-size:16px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px;text-align:center">Visite guidée</h2>
-        <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 20px;text-align:center">Parcourir l’interface avec un profil d’exemple.</p>
-        <div style="display:flex;flex-direction:column;gap:9px">
-          <sc-for list="{{ loginAccounts }}" as="u" hint-placeholder-count="4">
-            <button onClick="{{ u.select }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;background:var(--cffffff,#fff);cursor:pointer;text-align:left;width:100%" style-hover="border-color:var(--c1a72bb,#1a72bb);background:var(--cf5faff,#f5faff)">
-              <span style="{{ u.avatar }}">{{ u.initials }}</span>
-              <span style="flex:1;min-width:0"><span style="display:block;font-size:13.5px;font-weight:700;color:var(--c22303f,#22303f)">{{ u.name }}</span><span style="display:block;font-size:11.5px;color:var(--c8b97a8,#8b97a8);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ u.role }}</span></span>
-              <span style="flex:none;display:flex">{{ loginIcGo }}</span>
-            </button>
-          </sc-for>
+      <!-- ═══════════ DÉMONSTRATION ANIMÉE ═══════════
+           Elle remplace la « Visite guidée » par profils d'exemple, qui
+           avait deux défauts : elle ne montrait RIEN du travail (on entrait
+           dans une interface vide, sans corpus), et cliquer son propre nom
+           ressemblait à se connecter — c'est la panne « Chargement du
+           répertoire… » signalée trois fois en août 2026.
+           Ici, aucune liaison {{ }} : du HTML et du CSS, rien d'autre. La
+           démonstration s'affiche donc même sans compte, même si le serveur
+           ne répond pas — c'est précisément la situation de quelqu'un qui
+           découvre la page. -->
+      <div class="vrt-demo">
+        <div class="vrt-demo-cadre">
+          <div class="vrt-demo-barre"><i></i><i></i><i></i><span>ATELIER DE FRANÇAIS</span></div>
+          <div class="vrt-demo-scenes">
+
+            <!-- 1 · se connecter -->
+            <div class="vrt-scene">
+              <h4><b>1</b>Se connecter</h4>
+              <p>Votre compte VÉRITAS ouvre les 1 040 textes du répertoire.</p>
+              <div class="vrt-boite" style="max-width:290px">
+                <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:5px">IDENTIFIANT</div>
+                <div style="height:7px;border-radius:4px;background:var(--ceef2f7,#eef2f7);margin-bottom:11px"><div class="vrt-saisie"></div></div>
+                <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:5px">MOT DE PASSE</div>
+                <div style="height:7px;border-radius:4px;background:var(--ceef2f7,#eef2f7);margin-bottom:13px;width:60%"></div>
+                <span class="vrt-bleu vrt-appui">Se connecter</span>
+              </div>
+            </div>
+
+            <!-- 2 · monter une leçon -->
+            <div class="vrt-scene">
+              <h4><b>2</b>Monter une leçon</h4>
+              <p>Un texte du corpus, le fait de langue, la démarche inductive.</p>
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <div class="vrt-boite" style="width:38%">
+                  <div style="font-size:9.5px;font-weight:700;color:var(--c1a72bb,#1a72bb);font-family:Poppins,sans-serif;margin-bottom:7px">CORPUS · 1 040</div>
+                  <div class="vrt-l" style="width:92%"></div><div class="vrt-l" style="width:78%"></div>
+                  <div class="vrt-l" style="width:85%;background:var(--cbcd9f2,#bcd9f2)"></div>
+                  <div class="vrt-l" style="width:64%"></div>
+                </div>
+                <div class="vrt-boite vrt-glisse" style="flex:1">
+                  <div style="font-size:9.5px;font-weight:700;color:var(--c14375f,#14375f);font-family:Poppins,sans-serif;margin-bottom:7px">LEÇON · L'expansion du nom</div>
+                  <div class="vrt-l" style="width:100%"></div><div class="vrt-l" style="width:94%"></div>
+                  <div class="vrt-l" style="width:88%"></div>
+                  <div style="margin-top:9px;font-size:9.5px;color:var(--c1f9d55,#1f9d55);font-weight:700;font-family:Poppins,sans-serif">✓ corpus conforme</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3 · monter une épreuve -->
+            <div class="vrt-scene">
+              <h4><b>3</b>Monter une épreuve</h4>
+              <p>Le garde-fou vérifie longueurs, barème et structure officielle pendant que vous écrivez.</p>
+              <div class="vrt-boite" style="margin-bottom:9px">
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                  <span style="font-size:10.5px;font-weight:700;color:var(--c14375f,#14375f);font-family:Poppins,sans-serif">Texte support · 312 mots</span>
+                  <span style="font-size:9.5px;font-weight:700;color:var(--c1f9d55,#1f9d55);font-family:Poppins,sans-serif">CONFORME</span>
+                </div>
+              </div>
+              <div class="vrt-boite vrt-q" style="margin-bottom:6px"><div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--c1a72bb,#1a72bb);font-family:Poppins,sans-serif">1</span><div class="vrt-l" style="flex:1;margin:0;width:auto"></div><span style="font-size:9.5px;color:var(--c8b97a8,#8b97a8);font-weight:700">4 pts</span></div></div>
+              <div class="vrt-boite vrt-q" style="margin-bottom:6px"><div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--c7b52c7,#7b52c7);font-family:Poppins,sans-serif">2</span><div class="vrt-l" style="flex:1;margin:0;width:auto"></div><span style="font-size:9.5px;color:var(--c8b97a8,#8b97a8);font-weight:700">6 pts</span></div></div>
+              <div class="vrt-boite vrt-q"><div style="display:flex;gap:8px;align-items:center"><span style="font-size:10px;font-weight:700;color:var(--cf39200,#f39200);font-family:Poppins,sans-serif">3</span><div class="vrt-l" style="flex:1;margin:0;width:auto"></div><span style="font-size:9.5px;color:var(--c8b97a8,#8b97a8);font-weight:700">10 pts</span></div></div>
+            </div>
+
+            <!-- 4 · travailler à plusieurs -->
+            <div class="vrt-scene">
+              <h4><b>4</b>Travailler à plusieurs</h4>
+              <p>Vos collègues annotent, commentent et proposent des corrections.</p>
+              <div style="position:relative">
+                <div class="vrt-boite" style="margin-bottom:11px">
+                  <div class="vrt-l" style="width:96%"></div>
+                  <div class="vrt-l" style="width:71%;background:var(--cfff3a3,#fff3a3)"></div>
+                  <div class="vrt-l" style="width:88%"></div>
+                </div>
+                <span class="vrt-curseur" style="left:0;top:2px"><span class="vrt-av" style="background:var(--c7b52c7,#7b52c7)">PE</span></span>
+                <div class="vrt-bulle" style="display:flex;gap:9px;align-items:flex-start">
+                  <span class="vrt-av" style="background:var(--c1a72bb,#1a72bb)">PE</span>
+                  <div class="vrt-boite" style="flex:1;background:var(--cf7f9fc,#f7f9fc)">
+                    <div style="font-size:10px;font-weight:700;color:var(--c14375f,#14375f);font-family:Poppins,sans-serif;margin-bottom:4px">Paul Etoa</div>
+                    <div class="vrt-l" style="width:90%"></div><div class="vrt-l" style="width:62%;margin:0"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5 · valider -->
+            <div class="vrt-scene">
+              <h4><b>5</b>Valider</h4>
+              <p>Brouillon, relecture, validation : chaque épreuve suit le même circuit.</p>
+              <div style="display:flex;flex-direction:column;gap:9px;max-width:330px">
+                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;font-family:Poppins,sans-serif;flex:none">1</span><span style="font-size:11.5px;font-weight:600;color:var(--c33404f,#33404f)">Brouillon</span></div>
+                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;font-family:Poppins,sans-serif;flex:none">2</span><span style="font-size:11.5px;font-weight:600;color:var(--c33404f,#33404f)">En relecture</span></div>
+                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;font-family:Poppins,sans-serif;flex:none">3</span><span style="font-size:11.5px;font-weight:700;color:var(--c14375f,#14375f)">Validée</span></div>
+              </div>
+            </div>
+
+            <!-- 6 · exporter -->
+            <div class="vrt-scene">
+              <h4><b>6</b>Exporter et tirer</h4>
+              <p>Votre en-tête, votre logo, votre barème — en Word ou en PDF, prêt à photocopier.</p>
+              <div style="display:flex;gap:13px;align-items:center">
+                <div class="vrt-boite vrt-feuille" style="width:96px;height:118px;padding:9px;display:flex;flex-direction:column;gap:4px;box-shadow:0 4px 14px rgba(20,55,95,.13)">
+                  <div class="vrt-l" style="width:60%;background:var(--cbcd9f2,#bcd9f2);margin-bottom:3px"></div>
+                  <div class="vrt-l" style="width:100%"></div><div class="vrt-l" style="width:92%"></div>
+                  <div class="vrt-l" style="width:97%"></div><div class="vrt-l" style="width:73%"></div>
+                  <div class="vrt-l" style="width:88%"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:9px">
+                  <span class="vrt-bleu">Exporter en Word</span>
+                  <span class="vrt-bleu vrt-or">Imprimer en PDF</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
         </div>
-        <p style="border-top:1px solid var(--ceef2f7,#eef2f7);margin:18px 0 0;padding-top:15px;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6">Ces profils montrent l’interface et les rôles. Le répertoire de textes, lui, n’est servi qu’à un compte VÉRITAS connecté ci-dessus.</p>
+        <div class="vrt-demo-puces"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <p style="text-align:center;margin:11px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6">Le répertoire de textes n’est servi qu’à un compte VÉRITAS connecté ci-dessous.</p>
       </div>
 
       <div style="max-width:420px;margin:0 auto;text-align:left;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:16px;padding:26px 24px;box-shadow:0 4px 18px rgba(20,55,95,.06)">
@@ -2136,8 +2524,16 @@
 
       <sc-if value="{{ insOpen }}" hint-placeholder-val="{{ false }}">
       <div style="max-width:420px;margin:16px auto 0;text-align:left;background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:16px;padding:24px;box-shadow:0 4px 18px rgba(20,55,95,.06)">
-        <h2 style="font-family:Poppins;font-size:17px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px;text-align:center">Créer mon compte</h2>
-        <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:0 0 18px;text-align:center;line-height:1.55">Choisissez la fonction que vous exercez : elle détermine ce que vous pourrez faire.</p>
+        <h2 style="font-family:Poppins;font-size:17px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 4px;text-align:center">Mon espace de travail</h2>
+        <!-- Ce panneau ne crée PAS de compte VÉRITAS : il n'y a donc pas de
+             mot de passe à choisir, personne ne le vérifierait. Il règle la
+             fonction exercée et le groupe d'établissement, sur cet appareil.
+             Le dire évite le cul-de-sac où l'on croyait s'être inscrit puis
+             où la connexion réclamait un mot de passe jamais choisi. -->
+        <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:0 0 14px;text-align:center;line-height:1.55">Votre fonction et votre établissement, sur cet appareil. Elle détermine ce que vous pourrez faire.</p>
+        <div style="background:var(--cf4f8fc,#f4f8fc);border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:10px;padding:11px 13px;margin-bottom:16px;font-size:12px;line-height:1.6;color:var(--c5a6678,#5a6678)">
+          Le répertoire de 1 040 textes, lui, s’ouvre avec un <strong style="color:var(--c14375f,#14375f)">compte VÉRITAS</strong> — le même que sur le site. <a href="https://veritas-school.com/#inscription" target="_blank" rel="noopener" style="color:var(--c1a72bb,#1a72bb);font-weight:700;text-decoration:none">Créer un compte VÉRITAS</a>, puis connectez-vous ci-dessus.
+        </div>
         <div style="display:flex;flex-direction:column;gap:12px">
           <label style="{{ fieldLbl }}">Nom complet<input value="{{ insNom }}" onChange="{{ setInsNom }}" placeholder="Mme / M. Prénom Nom" style="{{ fieldIn }}"></label>
           <label style="{{ fieldLbl }}">Fonction<select value="{{ insRole }}" onChange="{{ setInsRole }}" style="{{ fieldIn }}"><sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="6"><option value="{{ r }}">{{ r }}</option></sc-for></select></label>
@@ -2148,7 +2544,7 @@
           <label style="{{ fieldLbl }}">Téléphone<input value="{{ insTel }}" onChange="{{ setInsTel }}" placeholder="+237 6XX XX XX XX" style="{{ fieldIn }}"></label>
         </div>
         <div style="{{ insErrStyle }}">{{ insErr }}</div>
-        <button onClick="{{ insCreer }}" style="{{ insCreerStyle }}">Créer mon compte</button>
+        <button onClick="{{ insCreer }}" style="{{ insCreerStyle }}">Enregistrer mon espace de travail</button>
       </div>
       </sc-if>
 
@@ -2490,7 +2886,11 @@ class Component extends DCLogic {
     this.state={
       sbOpen:true,calOffset:0,
       theme:(function(){try{return localStorage.getItem('minesec_theme')||'clair';}catch(e){return 'clair';}})(),
-      confOpen:true,confIA:null,confIABusy:false,confIAErr:'',
+      /* Repliés d'office sur téléphone : le garde-fou de conformité et le
+         formulaire de renseignements occupaient à eux deux plus d'un écran
+         AVANT la première ligne de l'épreuve. */
+      confOpen:!this._petitEcran(),confIA:null,confIABusy:false,confIAErr:'',
+      filtresOpen:false,renseignementsOpen:false,collabOpen:false,
       screen:'accueil',authed:store?(store.authed!==false):true,currentN:this.all[0]?this.all[0].n:1,
       qEditN:null,authMail:'',authMdp:'',authErr:'',authBusy:false,essaiJours:7,payOpen:false,paySelected:null,payDone:false,payName:'',payCard:'',payExp:'',payCvc:'',payMethod:'momo',
       payProvider:null,payBusy:false,payErr:'',payRef:'',payUrl:'',
@@ -2498,7 +2898,7 @@ class Component extends DCLogic {
       chatOpen:false,chatDraft:'',epTab:'edition',
       actFilter:'toutes',collabTab:'discussions',
       coursTab:'gabarits',cycleFiltre:'',createOpen:false,admTab:'fonctions',
-      profTab:'infos',profSaved:'',coCorpusQ:'',coConfOpen:true,
+      profTab:'infos',profSaved:'',coCorpusQ:'',coConfOpen:!this._petitEcran(),
       panier:this._load('minesec_panier',[])||[],panierOpen:false,
       corpusSource:'',corpusErr:'',corpusLong:false,corpusEtat:'',corpusDroit:null,corpusPalier:'',corpusPlafonds:null,corpusLibres:0,
       exOuvert:false,exType:'',exBusy:false,exErr:'',exResultat:null,
@@ -2921,6 +3321,13 @@ class Component extends DCLogic {
     this._buildMeta();
     return this.base.length;
   }
+  /* Telephone. Sert a decider ce qui s'ouvre REPLIE au demarrage : sur un
+     ecran de 390 px, un volet ouvert d'office repousse la planche de travail
+     hors de vue. Lu une seule fois, a la construction — on ne redispose pas
+     l'ecran sous les doigts de quelqu'un qui tourne son telephone. */
+  _petitEcran(){
+    try{return window.matchMedia('(max-width:820px)').matches;}catch(e){return false;}
+  }
   /* Poste de developpement : c'est la seule situation ou `_corpus_source.js`
      existe a cote de la page. */
   _estDev(){
@@ -2929,25 +3336,153 @@ class Component extends DCLogic {
       return /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
     }catch(e){return false;}
   }
-  /* Complete un texte partiel a l'ouverture d'une fiche. */
+  /* ---- SECOND TRANSFERT DU REPERTOIRE ----------------------------------
+     Le repertoire descend en DEUX temps. `_chargerCorpus` ramene l'index :
+     pour chaque texte ses metadonnees -- dont `words`, le nombre de mots
+     REEL -- et une amorce de 180 caracteres. `_completerTexte` va chercher
+     le texte integral, a l'ouverture d'une fiche ou avant de l'ajouter a
+     une epreuve.
+
+     C'est le SEUL endroit ou le contenu rejoint sa metadonnee. Tant qu'il
+     n'a pas abouti, la fiche annonce `words` mots et n'en porte que trente.
+     Un echec avale ici ne se voit pas a l'ecran : il se voit a
+     l'impression, une fois l'epreuve photocopiee et distribuee. Trois
+     lecteurs faisaient confiance a la metadonnee sans jamais verifier que
+     le contenu avait suivi :
+
+       - le compteur de l'epreuve additionne `f.words` ;
+       - le garde-fou de conformite juge sur `f.words` (conformite.js) ;
+       - l'export Word ecrit `mots:f.words` AU-DESSUS de `texte:f.text`.
+
+     Mesure du 25/08 (tests/sonde_corpus_sync.cjs) : sur une completion
+     refusee, le .docx annoncait 387 mots au-dessus de 33 mots reels.
+
+     Rien n'est donc silencieux ici. `apres(ok)` est appele DANS TOUS LES
+     CAS, avec un booleen qui dit si le texte est desormais integral --
+     l'ancienne version sortait sans rappeler quand la reponse n'avait pas
+     la forme attendue, et l'appelant attendait alors pour toujours. */
   _completerTexte(nn,apres){
+    const fin=ok=>{if(apres)apres(!!ok);};
     const f=this.all.find(x=>x.n===nn);
-    if(!f||!f._partiel){if(apres)apres();return;}
-    /* Le serveur repondrait 402 : inutile de le demander. */
-    if(f._libre===false){if(apres)apres();return;}
+    if(!f){fin(false);return;}
+    if(!f._partiel){fin(true);return;}
+    /* Texte ferme : le serveur repondrait 402. On ne le demande pas -- et
+       surtout on ne pretend pas l'avoir. */
+    if(f._libre===false){this._marquerSync(nn,'abonnement');fin(false);return;}
+    /* UNE SEULE requete par texte. Ouvrir une fiche, l'ajouter a l'epreuve,
+       puis la rouvrir en lancait trois (mesure : 3 requetes pour un texte) :
+       trois fois le transfert, et trois ecritures concurrentes dans la base.
+       Les demandes qui arrivent pendant qu'une requete est en vol attendent
+       son resultat au lieu d'en lancer une autre. */
+    this._sync=this._sync||{};
+    if(this._sync[nn]){this._sync[nn].push(fin);return;}
+    this._sync[nn]=[fin];
+    const tous=ok=>{const l=this._sync[nn]||[];delete this._sync[nn];
+      l.forEach(g=>{try{g(ok);}catch(e){}});};
     fetch(this._apiUrl('plateforme.php')+'?action=corpus&mode=complet&n='+encodeURIComponent(nn),
       {headers:this._jeton()?{Authorization:'Bearer '+this._jeton()}:{}})
-      .then(r=>r.ok?r.json():Promise.reject(new Error('http')))
+      .then(r=>{
+        if(r.status===402){
+          /* Le droit a change depuis le chargement de l'index -- essai
+             expire, palier abaisse. L'index dit encore « libre », le serveur
+             dit non : c'est le serveur qui fait foi. On repose le cadenas
+             sur la fiche, sinon l'interface continuerait a proposer un texte
+             qu'elle ne peut plus ouvrir. */
+          return Promise.reject({_droit:true});
+        }
+        if(!r.ok)return Promise.reject({_http:r.status});
+        return r.json().catch(()=>Promise.reject({_json:true}));
+      })
       .then(j=>{
-        if(!j||!j.texte)return;
-        const t=j.texte;
-        const complet=Object.assign({},f,t,{_partiel:false,
+        /* Le serveur repond sous `texte` pour un texte et sous `citation`
+           pour une citation (api/plateforme.php). Ne lire que `texte`
+           laissait les citations eternellement partielles, sans un mot. */
+        const t=j&&(j.texte||j.citation);
+        if(!t){tous(false);this._marquerSync(nn,'forme');return;}
+        const complet=Object.assign({},f,t,{_partiel:false,_syncKo:null,
           text:(t.text&&/[\u2014\u2013]/.test(t.text))?VRT_TEXTE.formaterDialogue(t.text):(t.text||'')});
         this.base=this.base.map(x=>x.n===nn?complet:x);
         this.all=this.all.map(x=>x.n===nn?complet:x);
-        this.setState({annotVersion:(this.state.annotVersion||0)+1},apres);
+        this.setState({annotVersion:(this.state.annotVersion||0)+1},()=>tous(true));
       })
-      .catch(()=>{if(apres)apres();});
+      .catch(e=>{
+        if(e&&e._droit){
+          const ferme=Object.assign({},f,{_libre:false});
+          this.base=this.base.map(x=>x.n===nn?ferme:x);
+          this.all=this.all.map(x=>x.n===nn?ferme:x);
+          this._marquerSync(nn,'abonnement');
+        }else{
+          this._marquerSync(nn,(e&&e._json)?'illisible':'reseau');
+        }
+        tous(false);
+      });
+  }
+  /* Pose sur la fiche la raison pour laquelle son texte integral manque.
+     Une marque plutot qu'un simple echec : elle survit au rappel, et c'est
+     elle que lisent l'epreuve, l'export et le garde-fou pour refuser de
+     traiter une amorce comme un texte. */
+  _marquerSync(nn,motif){
+    const poser=x=>x.n===nn?Object.assign({},x,{_syncKo:motif}):x;
+    this.base=(this.base||[]).map(poser);
+    this.all=(this.all||[]).map(poser);
+    this.setState({annotVersion:(this.state.annotVersion||0)+1});
+  }
+  /* Fabrique un panneau repliable : rend les quatre cles que le gabarit
+     attend, a partir d'un seul nom.
+
+       ...this._repli('activite', 'Activite de l\u2019equipe', 'Masquer l\u2019activite')
+
+     rend `activiteToggle`, `activiteToggleLabel`, `activiteToggleStyle` et
+     `activiteCorpsStyle`, et lit l'etat dans `st.activiteOpen`.
+
+     Le corps porte la classe `vrt-repli-corps` cote gabarit : au-dela de
+     820 px une regle en !important le rouvre, quelle que soit la position du
+     repli. Un reglage pris sur telephone ne suit pas l'utilisateur sur son
+     ordinateur -- et un grand ecran n'a aucune raison de cacher quoi que ce
+     soit.
+
+     `compte` ajoute un nombre au libelle : replier un panneau qui contient
+     quelque chose sans le dire revient a le faire disparaitre. */
+  _repli(cle,ferme,ouvert,o){
+    o=o||{};
+    const drapeau=cle+'Open';
+    const est=!!this.state[drapeau];
+    const out={};
+    out[cle+'Toggle']=()=>this.setState({[drapeau]:!this.state[drapeau]});
+    out[cle+'ToggleLabel']=(est?ouvert:ferme)+(o.compte?' ('+o.compte+')':'');
+    out[cle+'ToggleStyle']='width:100%;'+(o.marge?'margin-bottom:14px;':'')
+      +'background:var(--cf4f8fc,#f4f8fc);'
+      +'border:1px solid var(--cd5e0ec,#d5e0ec);color:var(--c14375f,#14375f);font-family:Poppins;'
+      +'font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer';
+    out[cle+'CorpsStyle']=est?'':'display:none';
+    return out;
+  }
+  /* Textes d'une epreuve dont le contenu n'a pas suivi la metadonnee. */
+  _textesNonSync(ep){
+    if(!ep)return [];
+    return (ep.textIds||[]).map(n=>this.all.find(x=>x.n===n))
+      .filter(f=>f&&(f._partiel||f._syncKo));
+  }
+  /* Bandeau discret. Meme facture que _toastPaiement, avec le ton en plus :
+     un refus doit se distinguer d'une confirmation sans avoir a le lire. */
+  _avis(msg,ton){
+    try{
+      let t=document.getElementById('vrt-toast-avis');
+      if(!t){
+        t=document.createElement('div');t.id='vrt-toast-avis';
+        t.style.cssText='position:fixed;left:50%;transform:translateX(-50%);top:78px;z-index:95;'
+          +'max-width:min(560px,92vw);text-align:center;color:#fff;font-family:Poppins,sans-serif;'
+          +'font-size:13px;font-weight:700;padding:11px 20px;border-radius:14px;'
+          +'box-shadow:0 8px 24px rgba(0,0,0,.22);opacity:0;transition:opacity .2s ease;'
+          +'pointer-events:none;line-height:1.45';
+        document.body.appendChild(t);
+      }
+      t.style.background=(ton==='ko')?'#c0392b':(ton==='attention')?'#c26a12':'#1f9d55';
+      t.textContent=msg;
+      requestAnimationFrame(()=>{t.style.opacity='1';});
+      clearTimeout(this._avisT);
+      this._avisT=setTimeout(()=>{t.style.opacity='0';},(ton==='ok')?3200:5200);
+    }catch(e){}
   }
   /* ---- Encaissements en attente ----------------------------------------
      Avec Mobile Money, l'enseignant quitte l'onglet pour valider sur son
@@ -3232,7 +3767,6 @@ class Component extends DCLogic {
      21/08 : ecran identique, au mot pres, a la capture signalee. */
   _ecranTenable(e){
     if(e==='login')return e;
-    if(this.state.demo)return e;
     if(!this.state.ready&&!this._jeton())return 'login';
     return e;
   }
@@ -3331,6 +3865,7 @@ class Component extends DCLogic {
      prevState a comparer. On garde donc notre propre instantane. */
   componentDidUpdate(){
     this._reparerAttente();
+    this._syncEpreuveOuverte();
     const remplacer=this._histRemplacer;this._histRemplacer=false;
     const ap=this._cleHist(this.state);
     if(this._histCle===undefined){this._histCle=ap;return;}
@@ -3345,6 +3880,30 @@ class Component extends DCLogic {
        ecran mort. */
     try{(remplacer?history.replaceState:history.pushState)
       .call(history,{vrt:ap},'','#'+(this.state.screen||'accueil'));}catch(e){}
+  }
+  /* Va chercher les textes manquants de l'epreuve affichee.
+
+     Le repertoire descend en deux temps (voir _completerTexte) : une epreuve
+     rouverte ne porte que les amorces de ses textes tant que personne n'a
+     ouvert leurs fiches. Le composeur annoncait alors un nombre de mots que
+     la page ne portait pas, et l'export l'aurait imprime tel quel.
+
+     Une seule tentative par epreuve : `componentDidUpdate` s'execute a
+     chaque rendu, et le rappel de completion provoque lui-meme un rendu --
+     sans ce garde-fou, deux textes manquants suffiraient a lancer une boucle
+     de requetes. Ce qui echoue reste marque et visible sur la fiche ; on ne
+     reessaie pas indefiniment dans le dos de l'utilisateur. */
+  _syncEpreuveOuverte(){
+    const st=this.state;
+    if(st.screen!=='composeur'||!st.ready)return;
+    const ep=this._active();
+    if(!ep||!(ep.textIds||[]).length)return;
+    this._syncFaite=this._syncFaite||{};
+    const manquants=this._textesNonSync(ep)
+      .filter(f=>!f._syncKo&&!this._syncFaite[ep.id+':'+f.n]);
+    if(!manquants.length)return;
+    manquants.forEach(f=>{this._syncFaite[ep.id+':'+f.n]=true;
+      this._completerTexte(f.n);});
   }
   /* ---- GARDE DE COHERENCE DE L'ECRAN D'ATTENTE -------------------------
      Trois pannes signalees, trois causes differentes (minuteurs desarmes a
@@ -3361,13 +3920,12 @@ class Component extends DCLogic {
     const s=this.state;
     if(s.ready){this._reparN=0;return;}
     /* La visite guidee est un choix, pas une panne : on n'y touche pas. */
-    if(s.demo)return;
     if(s.corpusErr||s.screen==='login'||this._enVol||this._reparT)return;
     /* Court delai : on laisse le rendu en cours se terminer, et on evite de
        declencher sur un etat transitoire d'une milliseconde. */
     this._reparT=setTimeout(()=>{this._reparT=null;
       const t=this.state;
-      if(t.ready||t.demo||t.corpusErr||t.screen==='login'||this._enVol)return;
+      if(t.ready||t.corpusErr||t.screen==='login'||this._enVol)return;
       if(!this._jeton()){
         this._tr('réparation → connexion');
         this._allerConnexion();
@@ -3393,6 +3951,43 @@ class Component extends DCLogic {
      et legendee ou deposer l'image de son etablissement. */
   _exporterWord(){
     const a=this._active();if(!a){return;}
+    /* DERNIER VERROU AVANT LE PAPIER.
+       L'export ecrit `mots:f.words` (la metadonnee) au-dessus de
+       `texte:f.text` (le contenu). Quand le second transfert n'a pas abouti,
+       les deux ne parlent plus du meme texte : mesure du 25/08, un .docx
+       annoncait 387 mots au-dessus de 33 mots reels. Une epreuve fausse
+       imprimee est distribuee avant que quiconque s'en apercoive -- c'est le
+       seul endroit de la chaine ou l'erreur devient irrattrapable.
+       On tente donc de completer ce qui manque, et si cela ne vient pas, on
+       refuse en NOMMANT les textes en cause plutot que de produire un
+       document qui ment. */
+    const manquants=this._textesNonSync(a);
+    if(manquants.length){
+      /* Un seul rattrapage, et il est marque. Sans ce drapeau, le second
+         passage retrouverait les memes manquants, relancerait, et l'export
+         tournerait en rond sans jamais rien dire. */
+      if(!this._exportTente){
+        this._exportTente=true;
+        this._avis('T\u00e9l\u00e9chargement des textes manquants\u2026','attention');
+        let reste=manquants.length;
+        manquants.forEach(f=>this._completerTexte(f.n,()=>{
+          if(--reste>0)return;
+          this._exporterWord();   /* second passage : _exportTente est vrai */
+        }));
+        return;
+      }
+      this._exportTente=false;
+      const noms=manquants.map(f=>'\u00ab\u00a0'+(f.title||f.author||('texte '+f.n))+'\u00a0\u00bb').join(', ');
+      const ferme=manquants.some(f=>f._libre===false||f._syncKo==='abonnement');
+      this._avis(ferme
+        ?('Export impossible : '+noms+' n\u2019est pas compris dans votre abonnement. '
+          +'Retirez-le de l\u2019\u00e9preuve ou souscrivez pour l\u2019ouvrir.')
+        :('Export impossible : le texte int\u00e9gral de '+noms+' n\u2019a pas pu \u00eatre '
+          +'t\u00e9l\u00e9charg\u00e9. Le document aurait annonc\u00e9 un texte qu\u2019il ne contient pas. '
+          +'R\u00e9essayez dans un instant.'),'ko');
+      return;
+    }
+    this._exportTente=false;
     const stru=a.epreuveCode?MINESEC.epreuveParCode(a.epreuveCode):null;
     const textes=(a.textIds||[]).map(nn=>this.all.find(x=>x.n===nn)).filter(Boolean).map(f=>({
       mots:f.words,reference:f.reference||'',texte:f.text||'',
@@ -3603,10 +4198,75 @@ class Component extends DCLogic {
   _active(){return this.state.epreuves.find(e=>e.id===this.state.activeId)||null;}
   _updateActive(patch,act){this.setState(st=>{const eps=st.epreuves.map(e=>{if(e.id!==st.activeId)return e;const ne={...e,...patch,updatedAt:Date.now()};if(act)ne.activity=[...(e.activity||[]),{userId:st.currentUserId,text:act,ts:Date.now()}];return ne;});return{epreuves:eps};},()=>this._persist());}
   _ensureDraft(cb){const a=this._active();if(a){cb&&cb(a.id);return;}const me=this._me();const id='e'+Date.now();const ep={id,groupeId:this._groupeActif(),title:'Nouvelle épreuve',etab:'',classe:'',duree:'2 h',coeff:'',date:'',consigne:'Lis attentivement le(s) texte(s) puis réponds aux questions.',textIds:[],status:'brouillon',ownerId:me.id,editorIds:[],inLibrary:false,updatedAt:Date.now(),comments:[],activity:[{userId:me.id,text:'a créé l\u2019épreuve',ts:Date.now()}]};this.setState(st=>({epreuves:[ep,...st.epreuves],activeId:id}),()=>{this._persist();cb&&cb(id);});}
+  /* Ajoute -- ou retire -- un texte de l'epreuve en cours.
+
+     Un texte ajoute a une epreuve doit etre COMPLET : sinon l'impression et
+     l'export Word ne portent que l'amorce de 180 caracteres, sous un
+     en-tete qui annonce le nombre de mots reel. L'ancienne version lancait
+     bien la completion, mais n'en attendait pas le resultat et ne regardait
+     pas s'il avait abouti : le texte entrait dans l'epreuve quoi qu'il
+     arrive, y compris quand il etait VERROUILLE et que la completion
+     n'avait meme pas ete tentee (mesure : l'epreuve portait alors une
+     amorce de 180 car.).
+
+     Le RETRAIT, lui, ne depend de rien : on doit toujours pouvoir enlever
+     un texte, surtout celui qui pose probleme. */
   _toggleText(n){
-    /* Un texte ajoute a une epreuve doit etre complet : sinon l'impression et
-       l'export Word ne contiendraient que l'amorce de 180 caracteres. */
-    this._completerTexte(n);if(!this._perm(this._me().role).edit)return;this._ensureDraft(()=>{const a=this._active();const ids=a.textIds.includes(n)?a.textIds.filter(x=>x!==n):[...a.textIds,n];this._updateActive({textIds:ids});});}
+    if(!this._perm(this._me().role).edit)return;
+    const a0=this._active();
+    const present=!!(a0&&(a0.textIds||[]).includes(n));
+    /* `versComposeur` : on emmene voir le resultat du geste. `_ensureDraft`
+       cree le brouillon s'il n'y en a pas, donc l'epreuve existe forcement
+       quand son rappel s'execute -- c'est le seul moment ou l'on peut
+       naviguer sans risquer d'ouvrir un composeur vide. */
+    const poser=(ids,versComposeur)=>this._ensureDraft(()=>{const a=this._active();
+      const l=(a.textIds||[]).includes(n)?(a.textIds||[]).filter(x=>x!==n):[...(a.textIds||[]),n];
+      this._updateActive({textIds:ids||l});
+      if(!versComposeur)return;
+      this.setState({screen:'composeur',epTab:'edition',notifOpen:false,panierOpen:false},()=>{
+        this._persist();
+        /* On amene le texte ajoute sous les yeux plutot que le haut de page :
+           dans une epreuve qui en compte deja quatre, le nouveau est en bas
+           et un scroll a zero le laisserait hors de vue. */
+        this._versTexte(n);
+      });});
+    if(present){poser();return;}
+    const f=this.all.find(x=>x.n===n);
+    if(f&&f._libre===false){
+      /* Texte ferme. Le glisser dans l'epreuve avec son amorce donnerait une
+         epreuve inutilisable ET une facture morale : mieux vaut proposer
+         l'abonnement, qui est la seule chose qui puisse l'ouvrir. */
+      this.setState({payOpen:true,paySelected:'ens',payDone:false});
+      return;
+    }
+    if(f&&!f._partiel){poser(null,true);return;}
+    /* On attend le texte AVANT de l'inscrire. Sans cela, l'epreuve se
+       composait sur une amorce et personne ne l'apprenait avant le tirage. */
+    this._completerTexte(n,ok=>{
+      if(ok){poser(null,true);return;}
+      const g=this.all.find(x=>x.n===n);
+      if(g&&g._libre===false){
+        this.setState({payOpen:true,paySelected:'ens',payDone:false});return;
+      }
+      this._avis('Ce texte n\u2019a pas pu \u00eatre t\u00e9l\u00e9charg\u00e9 en entier : il n\u2019a pas '
+        +'\u00e9t\u00e9 ajout\u00e9 \u00e0 l\u2019\u00e9preuve. R\u00e9essayez \u2014 votre abonnement n\u2019est pas en cause.','ko');
+    });}
+  /* Amene sous les yeux le texte n du composeur. Le rendu du composeur
+     n'est pas encore pose quand `setState` rend la main -- on laisse une
+     image passer, puis on cherche l'ancre. Si elle n'est pas la (epreuve
+     longue, rendu differe), on remonte simplement en haut : mieux vaut un
+     ecran utile qu'un saut au hasard. */
+  _versTexte(n){
+    try{
+      const chercher=(reste)=>{
+        const el=document.getElementById('vrt-txt-'+n);
+        if(el&&el.scrollIntoView){el.scrollIntoView({behavior:'smooth',block:'center'});return;}
+        if(reste>0){requestAnimationFrame(()=>chercher(reste-1));return;}
+        window.scrollTo(0,0);
+      };
+      requestAnimationFrame(()=>chercher(12));
+    }catch(e){try{window.scrollTo(0,0);}catch(_){}}
+  }
   _moveText(n,dir){const a=this._active();if(!a)return;const ids=a.textIds.slice();const i=ids.indexOf(n),j=i+dir;if(i<0||j<0||j>=ids.length)return;const t=ids[i];ids[i]=ids[j];ids[j]=t;this._updateActive({textIds:ids});}
   /* Barème. Les points vivent sur l'épreuve, pas sur le corpus : deux
      collègues peuvent noter le même texte différemment. */
@@ -3799,7 +4459,7 @@ class Component extends DCLogic {
        visite guidee montre l'interface sans corpus. `st.ready` reste la
        verite sur le repertoire (c'est lui que lisent le chargeur et les
        gardes) ; `ready` ci-dessous ne gouverne que l'AFFICHAGE. */
-    const st=this.state,all=this.all,ready=st.ready||!!st.demo;
+    const st=this.state,all=this.all,ready=st.ready;
     const me=this._me(),perm=this._perm(me.role);
     /* Les interrupteurs d'administration se posent PAR-DESSUS les droits du
        role : couper l'import ferme la fonction a tout le groupe, y compris
@@ -3836,6 +4496,10 @@ class Component extends DCLogic {
         if(f._libre===false){this.setState({payOpen:true,paySelected:'ens',payDone:false});return;}
         this._completerTexte(f.n);this.setState({screen:'fiche',currentN:f.n},()=>window.scrollTo(0,0));},toggle:()=>this._toggleText(f.n)});
     const filtered=this._filtered();
+    /* Combien de filtres sont posés : le bouton de repli doit le dire,
+       sinon on masque un tri actif sans que rien ne l'indique. */
+    const nbFiltresActifs=['source','cycle','group','type','subkind','length']
+      .filter(k=>(st.filters&&st.filters[k])).length;
     const visibleFiches=filtered.slice(0,150).map((f,r)=>decorate(f,r));
 
     const cycleCards=(this.meta||[]).map(c=>({short:this.cShort[c.cycle]||c.cycle,sub:this.cSub[c.cycle]||(c.count+' textes'),count:c.count,open:()=>this.setState({filters:{q:'',cycle:c.cycle,group:'',type:'',subkind:'',length:'',source:''},screen:'liste'},()=>window.scrollTo(0,0))}));
@@ -3926,7 +4590,19 @@ class Component extends DCLogic {
           style:'margin:0 0 '+(rep?'7px':'12px')+';'+(rep?'padding-left:1.4em;text-indent:-1.4em':'')};
       }).filter(x=>x.tokens.some(t=>t.click));};
     const mkTokens=(f)=>mkParas(f).reduce((a,x)=>a.concat(x.tokens),[]);
-    const selectedFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>{const ann=this._wordAnnots(f.n);const annCount=Object.keys(ann).length;return{pos:i+1,type:f.type,words:f.words,level:f.level,author:f.author||'Anonyme',title:f.title||'',reference:f.reference||'',dot:this.dots[f.type]||'var(--c1a72bb,#1a72bb)',ctrlWrap:perm.edit?'display:flex;gap:5px;flex:none':hidden,locked:qLocked,qBtn:qBtnStyle,addQBtn:qLocked?hidden:addQBtnStyle,qEditedComp:hasCustomQ(f,'comp')?editedChip:hidden,qEditedExpl:hasCustomQ(f,'expl')?editedChip:hidden,compItems:mkItems(f,'comp'),explItems:mkItems(f,'expl'),paras:mkParas(f),annBadge:annCount?'display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--c7b52c7,#7b52c7);background:var(--cefe8fa,#efe8fa);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,annCount:annCount,addComp:()=>{if(!qLocked)this._setQ(f,'comp',null,'Nouvelle question')},addExpl:()=>{if(!qLocked)this._setQ(f,'expl',null,'Nouvelle question')},up:()=>this._moveText(f.n,-1),down:()=>this._moveText(f.n,1),remove:()=>this._toggleText(f.n)};});
+    const selectedFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>{const ann=this._wordAnnots(f.n);const annCount=Object.keys(ann).length;const ko=f._partiel||f._syncKo;const koFerme=(f._libre===false||f._syncKo==='abonnement');
+      return{pos:i+1,type:f.type,words:f.words,level:f.level,ancre:'vrt-txt-'+f.n,
+      /* Le nombre de mots ci-contre vient du repertoire ; il ne vaut que si
+         le texte integral a suivi. Quand ce n'est pas le cas, on le dit ICI,
+         a cote du chiffre -- pas dans un journal que personne n'ouvre. */
+      syncChip:ko?('display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;'
+        +'font-family:Poppins;padding:2px 9px;border-radius:999px;'
+        +(koFerme?'color:var(--c8a6410,#8a6410);background:var(--cfdf3d8,#fdf3d8)'
+                 :'color:var(--cc0392b,#c0392b);background:var(--cfdecea,#fdecea)')):hidden,
+      syncLabel:ko?(koFerme?'\u25cf abonnement requis':'\u25cf texte non re\u00e7u'):'',
+      syncTitre:ko?(koFerme
+        ?'Seule l\u2019amorce de ce texte a \u00e9t\u00e9 re\u00e7ue : il n\u2019est pas compris dans votre abonnement.'
+        :'Seule l\u2019amorce de ce texte a \u00e9t\u00e9 re\u00e7ue. Rouvrez sa fiche pour relancer le t\u00e9l\u00e9chargement avant d\u2019imprimer.'):'',author:f.author||'Anonyme',title:f.title||'',reference:f.reference||'',dot:this.dots[f.type]||'var(--c1a72bb,#1a72bb)',ctrlWrap:perm.edit?'display:flex;gap:5px;flex:none':hidden,locked:qLocked,qBtn:qBtnStyle,addQBtn:qLocked?hidden:addQBtnStyle,qEditedComp:hasCustomQ(f,'comp')?editedChip:hidden,qEditedExpl:hasCustomQ(f,'expl')?editedChip:hidden,compItems:mkItems(f,'comp'),explItems:mkItems(f,'expl'),paras:mkParas(f),annBadge:annCount?'display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;color:var(--c7b52c7,#7b52c7);background:var(--cefe8fa,#efe8fa);padding:2px 9px;border-radius:999px;font-family:Poppins':hidden,annCount:annCount,addComp:()=>{if(!qLocked)this._setQ(f,'comp',null,'Nouvelle question')},addExpl:()=>{if(!qLocked)this._setQ(f,'expl',null,'Nouvelle question')},up:()=>this._moveText(f.n,-1),down:()=>this._moveText(f.n,1),remove:()=>this._toggleText(f.n)};});
     const totalWords=active?wordsOf(active):0;
     const collabs=active?[active.ownerId,...active.editorIds].map(id=>st.users.find(u=>u.id===id)).filter(Boolean):[];
     const activeCollaborators=collabs.map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,28)}));
@@ -4554,7 +5230,6 @@ class Component extends DCLogic {
     }:{phases:[],collaborators:[],history:[]};
 
     const roleDotC=r=>'width:10px;height:10px;border-radius:50%;flex:none;background:'+(this.roleColors[r]||'var(--c1a72bb,#1a72bb)');
-    const loginAccounts=st.users.map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,38),role:u.role,select:()=>this.setState({currentUserId:u.id,authed:true,demo:true,screen:'accueil'},()=>{this._persist();window.scrollTo(0,0);})}));
     const planBg={essai:'var(--cffffff,#fff)',ens:'var(--cffffff,#fff)',etab:'var(--cf5faff,#f5faff)',pro:'var(--cfbf8ff,#fbf8ff)'};
     const planBorder={essai:'var(--ce2eaf3,#e2eaf3)',ens:'var(--ce2eaf3,#e2eaf3)',etab:'var(--cbcd9f2,#bcd9f2)',pro:'var(--cd9c9f0,#d9c9f0)'};
     const curPlanName=st.team.plan;
@@ -4605,14 +5280,9 @@ class Component extends DCLogic {
         this._save('minesec_convmsgs',par);this._save('minesec_chat',msgs);
         this.setState({msgsByConv:par,chatMsgs:msgs,chatDraft:''});},
       notifDot:acts.length?'position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--cf39200,#f39200);border:1.5px solid var(--cffffff,#fff)':hidden,
-      demoNote:'Profil d’exemple : vous parcourez l’interface et les rôles. Le répertoire de 1 040 textes s’ouvre avec votre compte VÉRITAS — bouton « Revenir à la connexion » dans le menu.',
-      demoNoteStyle:st.demo
-        ?'background:var(--cfff8e6,#fff8e6);border:1px solid var(--cf3e2b8,#f3e2b8);color:var(--c8a6d1f,#8a6d1f);border-radius:12px;padding:11px 15px;font-size:12.5px;line-height:1.6;margin:0 0 22px'
-        :hidden,
       notReady:!ready&&st.screen!=='login',isAccueil:ready&&st.screen==='accueil',isListe:ready&&st.screen==='liste',isFiche:ready&&st.screen==='fiche',isEpreuves:ready&&st.screen==='epreuves',isComposeur:ready&&st.screen==='composeur',isEquipe:ready&&st.screen==='equipe',isProfil:ready&&st.screen==='profil',isApercu:ready&&st.screen==='apercu',isCours:ready&&st.screen==='cours',isCoursEdit:ready&&st.screen==='coursEdit',
       gabarits:cGabarits,coursView:cCoursView,co:cCo,newCours:()=>this.setState({screen:'cours'},()=>window.scrollTo(0,0)),
       showChrome:ready&&st.screen!=='login',isLogin:st.screen==='login',isAbo:ready&&st.screen==='abo',
-      loginAccounts,
       /* --- connexion au compte VERITAS (ecran login) --- */
       authMail:st.authMail,authMdp:st.authMdp,
       /* Carte de connexion entierement centree : titre, sous-titre et note
@@ -4636,7 +5306,6 @@ class Component extends DCLogic {
         :hidden,
       essaiJours:st.essaiJours,
       loginIcLogo:this._icon('book','var(--sb-logo-fg)',24),
-      loginIcGo:this._icon('send','var(--c1a72bb,#1a72bb)',16),
 plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,screen:'login'},()=>this._persist());},
       payOpen:st.payOpen,payFormShown:!st.payDone,payDoneShown:st.payDone,payPlanName:payPlan.name,payPlanPrice:payPlan.price+(payPlan.period.includes('gratuit')?'':' FCFA'),
       payIsMomo:st.payMethod!=='card',payIsCard:st.payMethod==='card',payMomoTab:payTab(st.payMethod!=='card'),payCardTab:payTab(st.payMethod==='card'),
@@ -4661,21 +5330,39 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
          message, le detail et le bouton doivent l'etre aussi. */
       videMsg:all.length
         ?'Aucun texte ne correspond à ces filtres.'
-        :(st.demo
-          ?'Profil d’exemple : la visite guidée montre l’interface, pas le répertoire. Les 1 040 textes s’ouvrent avec votre compte VÉRITAS.'
-          :'Le répertoire n’est pas chargé : aucun texte n’est en mémoire.'),
-      videBtnLabel:st.demo?'Aller à la connexion':'Recharger le répertoire',
-      videDetail:(all.length||st.demo)?'':(
+        :'Le répertoire n’est pas chargé : aucun texte n’est en mémoire.',
+      videBtnLabel:'Recharger le répertoire',
+      videDetail:all.length?'':(
         'reçus : 0 · source : '+(st.corpusSource||'aucune')
         +' · palier : '+(st.corpusPalier||'—')
         +' · droit : '+((st.corpusDroit&&(st.corpusDroit.motif||(st.corpusDroit.ok?'ouvert':'refusé')))||'—')
         +' · journal : '+((this._trace||[]).slice(-8).join(' › ')||'—')),
-      videDetailStyle:(all.length||st.demo)?hidden
+      videDetailStyle:all.length?hidden
         :'margin-top:10px;font-size:11px;color:var(--cc3ccd8,#c3ccd8);font-family:Open Sans;line-height:1.5;word-break:break-word',
       videBtnStyle:all.length?hidden
         :'margin-top:16px;background:var(--c1a72bb,#1a72bb);border:none;color:var(--cffffff,#fff);padding:10px 20px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:9px;cursor:pointer',
-      videAction:()=>{if(this.state.demo){this._allerConnexion();return;}
+      videAction:()=>{
         this._rechargerCorpus();},
+      /* --- volets repliables du téléphone (voir _repli) --- */
+      ...this._repli('filtres','Affiner la recherche','Masquer les filtres',
+        {marge:true,compte:nbFiltresActifs}),
+      ...this._repli('renseignements','Renseignements de l’épreuve','Masquer les renseignements'),
+      /* Le libellé nomme AUSSI la validation : les boutons « Soumettre à
+         relecture » et « Valider » vivent dans ce volet, et un volet replié
+         dont le nom ne les annonce pas les rend introuvables. */
+      ...this._repli('collab','Collaboration et validation','Masquer la collaboration'),
+      /* Nouveaux volets. Ils ne coûtent plus qu'une ligne chacun : c'est tout
+         l'intérêt du fabricant. Le nombre entre parenthèses évite de faire
+         disparaître un contenu sans le dire. */
+      ...this._repli('activite','Activité de l’équipe','Masquer l’activité',
+        {compte:Math.min((notifications||[]).length,4)}),
+      ...this._repli('commentaires','Commentaires et relecture','Masquer les commentaires',
+        {compte:(activeComments||[]).length}),
+      /* La rangée « Structure officielle » suit le dépliant du garde-fou.
+         Son libellé, lui, nomme la structure en vigueur : replier une
+         rangée sans dire ce qu'elle contient ferait disparaître la donnée
+         dont dépend tout le garde-fou. */
+      structureCorpsStyle:st.confOpen?'':'display:none',
       filters:st.filters,filteredCount:filtered.length,visibleFiches,hasResults:filtered.length>0,noResults:filtered.length===0,truncated:filtered.length>150,
       cycleOptions,groupOptions,typeOptions:this.types||[],
       setQ:e=>this._setF('q',val(e)),setSource:e=>this._setF('source',val(e)),setCycle:e=>this.setState({filters:{...st.filters,cycle:val(e),group:''}}),setGroup:e=>this._setF('group',val(e)),setType:e=>this._setF('type',val(e)),setSubkind:e=>this._setF('subkind',val(e)),setLength:e=>this._setF('length',val(e)),
@@ -5089,7 +5776,11 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       /* --- inscription --- */
       insOpen:st.insOpen,
       insToggle:()=>this.setState({insOpen:!st.insOpen,insErr:''}),
-      insToggleLabel:st.insOpen?'\u2190 Revenir \u00e0 la connexion':'Cr\u00e9er un compte',
+      /* « Créer un compte » était un contresens : ce panneau ne crée aucun
+         compte VÉRITAS, il configure un espace de travail sur cet appareil.
+         Le mot exact évite le cul-de-sac. */
+      insToggleLabel:st.insOpen?'\u2190 Revenir \u00e0 la connexion'
+        :'Configurer mon espace de travail',
       insToggleStyle:'width:100%;background:var(--cffffff,#fff);border:1px solid var(--cbcd9f2,#bcd9f2);color:var(--c1a72bb,#1a72bb);padding:12px;font-size:13px;font-weight:700;font-family:Poppins;border-radius:11px;cursor:pointer',
       insNom:st.insNom,setInsNom:e=>this.setState({insNom:val(e)}),
       insRole:insRoleChoisi,setInsRole:e=>this.setState({insRole:val(e)}),
@@ -5284,7 +5975,10 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       confBareme:confTotal+' / '+confCible,
       confBaremeStyle:'font-size:11.5px;font-weight:700;font-family:Poppins;padding:3px 10px;border-radius:999px;color:'+(Math.abs(confTotal-confCible)<0.001?'var(--c1f9d55,#1f9d55)':'var(--cc26a12,#c26a12)')+';background:'+(Math.abs(confTotal-confCible)<0.001?'var(--ce6f5ec,#e6f5ec)':'var(--cfdefdb,#fdefdb)'),
       confToggle:()=>this.setState({confOpen:!st.confOpen}),
-      confToggleLabel:st.confOpen?'Replier':'Voir le d\u00e9tail ('+confRes.total+')',
+      /* Le dépliant gouverne AUSSI la structure officielle sur téléphone :
+         son libellé doit donc dire ce qu'il cache, sinon on replie le
+         réglage dont dépend tout le verdict sans que rien ne l'indique. */
+      confToggleLabel:st.confOpen?'Replier':('Voir le d\u00e9tail ('+confRes.total+')'),
       confOpen:st.confOpen,
       confSousTitre:confStruct?(confStruct.nom+' \u00b7 '+confStruct.duree+' \u00b7 coefficient '+confStruct.coeff+' \u00b7 '+confStruct.sujetsAuChoix+' sujet(s) au choix \u00b7 source : '+confStruct.source):'',
       confSousTitreStyle:confStruct?'font-size:11.5px;color:var(--c8b97a8,#8b97a8);margin-top:8px;line-height:1.5':hidden,
@@ -5308,6 +6002,13 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       confErr:st.confIAErr,
       confErrStyle:st.confIAErr?'font-size:12.5px;color:var(--cc0392b,#c0392b);font-weight:600':hidden,
       confAmbassa:()=>this._analyserConformite(),
+      /* Pleine largeur : dans le dépliant il n'a plus de voisin à côté de
+         qui s'aligner, et un bouton d'action doit être facile à viser au
+         pouce. */
+      confAmbassaStyleSm:'width:100%;margin-top:13px;background:'
+        +(st.confIABusy?'var(--c8b97a8,#8b97a8)':'var(--c1a72bb,#1a72bb)')
+        +';color:var(--cffffff,#fff);border:none;padding:11px 15px;font-size:13px;cursor:'
+        +(st.confIABusy?'default':'pointer')+';border-radius:9px;font-weight:700;font-family:Poppins',
       confAmbassaLabel:st.confIABusy?'Ambassa analyse\u2026':'Faire relire par Ambassa',
       confAmbassaStyle:'background:'+(st.confIABusy?'var(--c8b97a8,#8b97a8)':'var(--c1a72bb,#1a72bb)')+';color:var(--cffffff,#fff);border:none;padding:7px 15px;font-size:12px;cursor:'+(st.confIABusy?'default':'pointer')+';border-radius:8px;font-weight:700;font-family:Poppins',
       classeOptions,serieOptions,

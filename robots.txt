@@ -132,11 +132,17 @@ User-agent: Bingbot
 Allow: /
 Disallow: /api/
 
+# ⚠️ Un robot ne lit QUE la section qui le nomme : les règles de
+# « User-agent: * » ne s'y ajoutent pas. Tout ce qui doit rester fermé
+# doit donc être répété dans chaque section, sinon elle passe outre.
+# C'était le cas ici : ces deux-là n'avaient aucun Disallow.
 User-agent: DuckDuckBot
 Allow: /
+Disallow: /api/
 
 User-agent: Slurp
 Allow: /
+Disallow: /api/
 
 User-agent: YandexBot
 Allow: /

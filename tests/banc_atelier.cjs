@@ -18,6 +18,20 @@
  * `/__journal` rend la liste horodatee des requetes vues : c'est ce qui
  * permet de trancher « la requete n'est jamais partie » sans supposer.
  *
+ * SECOND COMMUTATEUR, independant du premier : `/__complet?c=...` regle le
+ * sort de `?action=corpus&mode=complet&n=N`, la requete qui va chercher le
+ * TEXTE INTEGRAL quand on ouvre une fiche ou qu'on ajoute un texte a une
+ * epreuve. L'index et la completion sont deux transferts distincts : l'index
+ * peut arriver parfaitement pendant que la completion echoue, et c'est
+ * precisement la panne qui laissait une epreuve se composer sur des amorces
+ * de 180 caracteres. Il faut donc pouvoir casser l'un sans casser l'autre.
+ *
+ *   ok    le texte integral, comme api/plateforme.php  <-- defaut
+ *   ko    500 : le serveur repond, mais en erreur
+ *   402   « Abonnement requis », la reponse du serveur pour un texte ferme
+ *   muet  aucune reponse : la requete reste en vol
+ *   vide  200 mais sans le texte attendu (reponse de forme inattendue)
+ *
  * Il valide le RENDU des ecrans, pas la securite : aucun droit n'est verifie.
  */
 const http = require('http');
@@ -30,6 +44,7 @@ const path = require('path');
 const RACINE = path.resolve(process.argv[3] || process.cwd());
 const PORT = Number(process.argv[2] || process.env.PORT || 3200);
 let MODE = 'ok';
+let COMPLET = 'ok';             // sort de mode=complet, regle par /__complet
 let JETON = '';                 // jeton emis par ?action=session
 const JOURNAL = [];             // horodatage de chaque requete d'API vue
 const T0 = Date.now();
@@ -39,6 +54,16 @@ const noter = (quoi) => { JOURNAL.push({ t: Date.now() - T0, quoi: quoi });
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
   '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8',
   '.svg': 'image/svg+xml', '.png': 'image/png', '.webmanifest': 'application/manifest+json' };
+
+/* La source integrale, lue une fois : `mode=complet` doit rendre le VRAI
+   texte, pas une invention du banc, sinon on validerait un affichage contre
+   des donnees qui n'existent nulle part. */
+let SOURCE = null;
+function source() {
+  if (!SOURCE) SOURCE = JSON.parse(fs.readFileSync(
+    path.join(RACINE, 'api/data/corpus_minesec.json'), 'utf8'));
+  return SOURCE;
+}
 
 let INDEX = null;
 function indexCorpus() {
@@ -68,9 +93,15 @@ const serveur = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     return res.end('mode=' + MODE + (JETON ? ' (jeton emis)' : ' (sans jeton)'));
   }
+  if (u.pathname === '/__complet') {
+    COMPLET = u.searchParams.get('c') || 'ok';
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    return res.end('complet=' + COMPLET);
+  }
   if (u.pathname === '/__journal') {
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-    return res.end(JSON.stringify({ mode: MODE, jeton: !!JETON, journal: JOURNAL }));
+    return res.end(JSON.stringify({ mode: MODE, complet: COMPLET,
+      jeton: !!JETON, journal: JOURNAL }));
   }
 
   if (u.pathname.indexOf('/api/') === 0) {
@@ -93,6 +124,43 @@ const serveur = http.createServer((req, res) => {
         noter('corpus -> 401 (pas de jeton valide)');
         res.writeHead(401, { 'Content-Type': 'application/json; charset=utf-8' });
         return res.end(JSON.stringify({ ok: false, error: 'Authentification requise' }));
+      }
+      /* TEXTE INTEGRAL. Branche AVANT les modes de l'index : les deux
+         transferts sont independants, et c'est tout l'interet du banc de
+         pouvoir casser la completion pendant que l'index arrive bien. */
+      if ((u.searchParams.get('mode') || 'index') === 'complet') {
+        const n = Number(u.searchParams.get('n') || 0);
+        if (COMPLET === 'muet') { noter('complet n=' + n + ' -> MUET'); return; }
+        if (COMPLET === 'ko') {
+          noter('complet n=' + n + ' -> 500');
+          res.writeHead(500, { 'Content-Type': 'application/json; charset=utf-8' });
+          return res.end(JSON.stringify({ ok: false, error: 'Panne serveur' }));
+        }
+        if (COMPLET === '402') {
+          noter('complet n=' + n + ' -> 402');
+          res.writeHead(402, { 'Content-Type': 'application/json; charset=utf-8' });
+          return res.end(JSON.stringify({ ok: false, error: 'Abonnement requis',
+            motif: 'palier', palier: 'demo',
+            message: 'Ce texte fait partie du répertoire complet.' }));
+        }
+        if (COMPLET === 'vide') {
+          /* 200, mais pas la forme attendue : c'est le cas qui passait sans
+             bruit et laissait l'appelant attendre un rappel qui ne venait
+             jamais. */
+          noter('complet n=' + n + ' -> 200 sans texte');
+          res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+          return res.end(JSON.stringify({ ok: true }));
+        }
+        const t = source().find(x => (x.n | 0) === n);
+        if (!t) {
+          noter('complet n=' + n + ' -> 404');
+          res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+          return res.end(JSON.stringify({ ok: false, error: 'Introuvable' }));
+        }
+        noter('complet n=' + n + ' -> OK (' + String(t.text || '').length + ' car.)');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        return res.end(JSON.stringify({ ok: true, texte: t,
+          droit: { ok: true, motif: 'abonnement' }, palier: 'ens' }));
       }
       if (MODE === 'muet') { noter('corpus -> MUET'); return; }
       if (MODE === 'vide') {

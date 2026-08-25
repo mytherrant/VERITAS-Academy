@@ -118,7 +118,32 @@
       return out;
     }
 
-    /* --- 3. Longueur du texte support --- */
+    /* --- 2 bis. Le contenu a-t-il suivi la metadonnee ? ---
+       Le repertoire descend en deux temps : l'index (metadonnees + amorce de
+       180 caracteres) puis le texte integral. Quand le second transfert
+       echoue, `f.words` reste juste pendant que `f.text` n'est qu'une
+       amorce -- et le controle de longueur ci-dessous, qui lit `f.words` en
+       priorite, declare alors conforme un texte que l'epreuve ne contient
+       pas. Il faut le dire AVANT de juger quoi que ce soit d'autre : tous
+       les controles qui suivent portent sur un contenu absent. */
+    textes.forEach(function (f, i) {
+      if (!f || (!f._partiel && !f._syncKo)) return;
+      var ferme = f._libre === false || f._syncKo === 'abonnement';
+      out.push(ecart('bloquant',
+        'Texte ' + (i + 1) + ' non synchronise : le contenu manque',
+        ferme
+          ? 'Ce texte n\u2019est pas compris dans votre abonnement : seule son amorce a ete recue.'
+          : 'Seule l\u2019amorce de ce texte a ete recue ; son contenu integral n\u2019a pas pu etre telecharge.',
+        ferme
+          ? 'Retirez-le de l\u2019epreuve, ou souscrivez pour l\u2019ouvrir.'
+          : 'Rouvrez la fiche du texte pour relancer son telechargement avant d\u2019imprimer.',
+        'texte-' + f.n));
+    });
+
+    /* --- 3. Longueur du texte support ---
+       `f.words` d'abord : c'est le comptage du repertoire, fait sur le texte
+       entier. Il n'est digne de foi que si le contenu a suivi -- d'ou le
+       controle 2 bis juste au-dessus, qui signale le cas contraire. */
     if (struct && struct.texteSupport) {
       var ts = struct.texteSupport;
       textes.forEach(function (f, i) {
