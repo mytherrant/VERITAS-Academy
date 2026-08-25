@@ -497,6 +497,52 @@ if (!defined('VRT_AUTH_LIB')) {
             return $p > 0 ? $p : null;   // 0 = gratuit ou non tarifé → rien à contrôler
         }
 
+        // ── Repli tarifaire du catalogue de livres numériques ─────────────
+        // Un livre entre en vente par catalogue_livres.json, que la CI dépose à
+        // la racine du site. Mais le serveur ne le connaissait QUE par sa base,
+        // et la base n'apprend le titre qu'à la première synchronisation d'un
+        // administrateur. Entre la mise en ligne du catalogue et cette synchro,
+        // vrt_prix_catalogue rendait null, donc vrt_verifier_prix répondait
+        // « tarif indéterminable » et ACCEPTAIT n'importe quel montant : 100 F
+        // ouvraient « Le Tube digestif » vendu 1 000 F.
+        //
+        // Ce n'est pas un cas d'école : le 25/08/2026 la synchronisation était
+        // cassée depuis onze jours (clé refusée), donc la fenêtre n'était pas
+        // de quelques minutes — elle restait ouverte indéfiniment.
+        //
+        // Le fichier déposé par la CI est la même source que celle qui met le
+        // livre en vitrine : s'y référer supprime la dépendance à la synchro.
+        // La base reste PRIORITAIRE (la boucle ci-dessus a déjà rendu la main
+        // si elle connaît l'objet), donc un changement de tarif par
+        // l'administration continue de l'emporter. Même principe que le repli
+        // de l'Atelier juste en dessous.
+        if ($intent === 'book' || $intent === 'digitalbook') {
+            static $catLivres = null;
+            if ($catLivres === null) {
+                $catLivres = [];
+                $f = dirname(__DIR__) . '/catalogue_livres.json';
+                if (is_file($f)) {
+                    $j = json_decode((string) @file_get_contents($f), true);
+                    if (is_array($j) && isset($j['livres']) && is_array($j['livres'])) {
+                        foreach ($j['livres'] as $l) {
+                            if (is_array($l) && isset($l['id'])) {
+                                $catLivres[(string) $l['id']] = $l;
+                            }
+                        }
+                    }
+                }
+            }
+            if (isset($catLivres[$targetId])) {
+                $o    = $catLivres[$targetId];
+                $cles = ($intent === 'digitalbook')
+                      ? ['prixDigital', 'priceDigital', 'prix']   // le numérique a son propre tarif
+                      : ['prix'];
+                foreach ($cles as $k) {
+                    if (isset($o[$k]) && (int) $o[$k] > 0) return (int) $o[$k];
+                }
+            }
+        }
+
         // ── Repli tarifaire de l'Atelier de Français ──────────────────────
         // Ses trois abonnements sont vendus depuis plateforme/index.html, une
         // page autonome : rien ne garantit qu'une ligne correspondante existe

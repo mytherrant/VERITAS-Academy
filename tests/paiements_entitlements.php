@@ -666,6 +666,68 @@ titre("9. Lecture du droit : l'echeance referme vraiment");
 })();
 
 // ════════════════════════════════════════════════════════════════════════════
+// 9. UN LIVRE MIS EN VENTE AVANT LA PREMIÈRE SYNCHRO A QUAND MÊME UN PRIX
+// ────────────────────────────────────────────────────────────────────────────
+// Un livre entre en vente par catalogue_livres.json, déposé à la racine du site
+// par la CI. Mais la BASE du serveur ne l'apprend qu'à la première synchro d'un
+// administrateur — et le 25/08/2026 cette synchro était cassée depuis onze
+// jours. Entre les deux, vrt_prix_catalogue rendait null, vrt_verifier_prix
+// répondait « tarif indéterminable » et acceptait n'importe quel montant.
+// Ces contrôles exigent que le serveur sache lire son propre catalogue.
+// ════════════════════════════════════════════════════════════════════════════
+(function () {
+    titre('9. LIVRE VENDU AVANT SYNCHRO — le prix vient du catalogue déposé');
+
+    $fichier = dirname(__DIR__) . '/catalogue_livres.json';
+    if (!is_file($fichier)) {
+        ok('catalogue_livres.json présent', false, 'absent — aucun livre ne peut être vendu');
+        return;
+    }
+    $cat = json_decode((string) file_get_contents($fichier), true);
+    $livre = null;
+    foreach (($cat['livres'] ?? []) as $l) {
+        if (is_array($l) && !empty($l['id'])) { $livre = $l; break; }
+    }
+    if (!$livre) { ok('au moins un livre au catalogue', false, 'catalogue vide'); return; }
+
+    // Le prix attendu se LIT dans le fichier : republier à un autre tarif ne
+    // doit pas faire rougir ce test pour une mauvaise raison.
+    $id      = (string) $livre['id'];
+    $attendu = 0;
+    foreach (['prixDigital', 'priceDigital', 'prix'] as $k) {
+        if (isset($livre[$k]) && (int) $livre[$k] > 0) { $attendu = (int) $livre[$k]; break; }
+    }
+    ok("le livre « $id » porte un tarif", $attendu > 0, $attendu . ' FCFA');
+
+    // La base du serveur ne connaît PAS ce livre : c'est toute la situation.
+    $dbVierge = ['books' => [], 'elearning' => ['contenus' => [], 'plans' => []]];
+
+    $lu = vrt_prix_catalogue($dbVierge, 'digitalbook', $id);
+    ok('prix trouvé alors que la base ignore le livre', $lu === $attendu,
+       'lu=' . var_export($lu, true) . ' attendu=' . $attendu);
+
+    // LE CONTRÔLE QUI COMPTE : payer 100 F un livre à ce tarif doit être refusé.
+    $v = vrt_verifier_prix($dbVierge, ['intent' => 'digitalbook', 'targetId' => $id, 'montant_paye' => 100]);
+    ok('100 FCFA pour ce livre → REFUSÉ', $v['ok'] === false,
+       'motif=' . $v['motif'] . ' attendu=' . var_export($v['attendu'], true));
+
+    // Le montant juste passe, évidemment — sinon on aurait fermé la vente.
+    $v2 = vrt_verifier_prix($dbVierge, ['intent' => 'digitalbook', 'targetId' => $id, 'montant_paye' => $attendu]);
+    ok('le tarif exact → ACCEPTÉ', $v2['ok'] === true, 'motif=' . $v2['motif']);
+
+    // La base reste prioritaire : l'administration doit pouvoir changer un prix
+    // sans redéployer le catalogue.
+    $dbAvecLivre = ['books' => [['id' => $id, 'prixDigital' => $attendu + 500]],
+                    'elearning' => ['contenus' => [], 'plans' => []]];
+    ok('un tarif en base l\'emporte sur le fichier',
+       vrt_prix_catalogue($dbAvecLivre, 'digitalbook', $id) === $attendu + 500);
+
+    // Un identifiant inconnu ne doit rien inventer.
+    ok('un livre inexistant ne reçoit aucun tarif',
+       vrt_prix_catalogue($dbVierge, 'digitalbook', 'nexistepas_' . bin2hex(random_bytes(4))) === null);
+})();
+
+// ════════════════════════════════════════════════════════════════════════════
 // BILAN
 // ════════════════════════════════════════════════════════════════════════════
 $total = $T['ok'] + $T['ko'];
