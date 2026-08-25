@@ -9,9 +9,30 @@ RewriteCond %{HTTPS} off
 RewriteCond %{HTTP:X-Forwarded-Proto} !=https
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Optionnel : www → non-www
-# RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
-# RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+# ─────────────────────────────────────────────────────────
+# 1ter. www → non-www (ACTIVÉ le 25/08/2026 — ce n'était plus optionnel)
+# ─────────────────────────────────────────────────────────
+# Cette règle dormait en commentaire sous la mention « Optionnel ». Elle ne
+# l'était pas : le site répondait sur DEUX hôtes, et l'application en tirait
+# une configuration différente selon la porte d'entrée. `_migrateDB` (app.js)
+# force en effet DB.cloudConfig.url sur `location.origin + '/api'` — donc
+# ouvrir l'application sur www.veritas-school.com y inscrivait une URL d'API
+# en www, définitivement, jusqu'à la prochaine ouverture sur l'apex.
+#
+# Conséquence mesurée le 25/08/2026 : « Tester la connexion » renvoyait
+# « HTTP 403 » depuis l'hôte www, alors que le MÊME endpoint interrogé sur
+# l'apex répondait un 401 propre (api/files.php, clé volontairement fausse).
+# Le bouclier anti-DDoS de LWS (Anubis) défie l'hôte pour lequel le navigateur
+# n'a pas de laissez-passer, et un appel croisé apex → www échoue dès le
+# préambule CORS, sans en-tête Access-Control-Allow-Origin en retour. Le
+# message « Vérifiez l'URL et la clé API » envoyait donc chercher une panne de
+# clé là où il n'y avait qu'une histoire de nom d'hôte.
+#
+# Aucun risque de référencement : l'apex est DÉJÀ l'hôte canonique déclaré
+# (rel="canonical" de vitrine.html et <loc> du sitemap). La redirection ne fait
+# qu'aligner le serveur sur ce que le site annonce depuis toujours.
+RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
 # ─────────────────────────────────────────────────────────
 # 1bis. Transmettre l'en-tête Authorization à PHP (CORRECTIF SYNCHRO)

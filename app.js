@@ -290,6 +290,23 @@ async function _fbFetch(url, options){
     var resp = await fetch(url, opts);
     clearTimeout(timeoutId);
 
+    /* ── Le mur anti-DDoS de l'hébergeur, reconnu pour ce qu'il est ─────────
+       LWS place une « Protection DDoS » devant TOUT le site, API comprise.
+       Elle délivre un laissez-passer (cookie lwsprotect-challenge-token-auth)
+       à qui exécute son défi JavaScript — ce qui n'arrive que lors d'une
+       NAVIGATION HTML. Or VÉRITAS est une application d'une seule page : une
+       fois ouverte, elle ne navigue plus jamais. Quand le laissez-passer
+       expire, chaque appel d'API reçoit un 403 accompagné d'une page HTML, et
+       plus rien ne le renouvellera jamais.
+       Rien ne rattrapait ce cas : veritas-shield.js ne rejoue que sur un 429,
+       et l'application rapportait « Vérifiez l'URL et la clé API » — envoyant
+       chercher une panne de clé là où un simple rechargement suffit.
+       On le reconnaît au couple 403 + corps HTML : une API qui refuse une clé
+       répond du JSON. */
+    if (resp.status === 403 && (resp.headers.get('content-type') || '').indexOf('text/html') >= 0) {
+      try { _showShieldBanner(); } catch (e) {}
+    }
+
     if (resp.ok) {
       if (window._fbBreaker) window._fbBreaker.recordSuccess();
     } else if (resp.status >= 500) {
@@ -2065,7 +2082,13 @@ function save(){
       // v1.2.x : miroir relationnel MySQL (db_sql.php) — non bloquant, débounce 60s, admin only.
       setTimeout(function(){ if(typeof _mirrorDBToMySQL==='function') _mirrorDBToMySQL(); },0);
     }catch(e){
-      console.warn('[Firebase] save error:',e);
+      /* L'étiquette disait « [Firebase] » alors que Firebase est débranché
+         depuis la v2.9.14 : la sauvegarde parle à api/db.php, sur le serveur
+         LWS. Jacques a passé du temps le 25/08/2026 à chercher pourquoi
+         « Firebase » apparaissait dans sa console — un nom de service qui
+         n'existe plus dans le projet. Un message d'erreur qui désigne le
+         mauvais système coûte plus cher que pas de message du tout. */
+      console.warn('[VÉRITAS sync serveur] échec de sauvegarde :',e);
       // Compteur d'échecs pour éviter de spammer le toast au démarrage
       window._fbSaveFails = (window._fbSaveFails||0) + 1;
       // Ne montrer le toast que si : admin connecté ET 2+ échecs consécutifs
@@ -2200,6 +2223,11 @@ function _saveCloudSecret(){
   _saveCloudConfigCache();
   if(typeof cm==='function')cm();
   if(typeof toast==='function')toast('✓ Clé Cloud enregistrée','ok');
+  // Une clé neuve lève tous les freins posés par les refus précédents :
+  // bannières, frein de la file d'envoi, disjoncteur.
+  try{window._vrtUploadBloque=0;}catch(e){}
+  try{if(window._fbBreaker){window._fbBreaker.failures=[];window._fbBreaker.suspendedUntil=0;}}catch(e){}
+  try{var _afb=document.getElementById('_authFailBanner');if(_afb)_afb.remove();}catch(e){}
   try{var _nsb=document.getElementById('_notSyncBanner');if(_nsb)_nsb.remove();}catch(e){}
   try{if(typeof _triggerAutoSync==='function')_triggerAutoSync();}catch(e){}
 }
@@ -2242,6 +2270,63 @@ function _showNotSyncedBanner(){
     document.body.appendChild(b);
   }catch(e){}
 }
+
+/* ── « Le serveur refuse la clé » — bannière PERSISTANTE ────────────────────
+   Sœur de _showNotSyncedBanner, pour le cas voisin mais distinct : une clé
+   EXISTE sur cet appareil, elle est simplement refusée (401/403). Typiquement
+   après une rotation du secret sur le serveur — l'ordre de rotation impose de
+   ressaisir la clé ici, et cette étape s'oublie.
+
+   Pourquoi une bannière et pas un toast : un toast dure six secondes et
+   disparaît même si personne ne l'a vu. Ici chaque enregistrement suivant
+   reste piégé dans ce seul navigateur ; le message doit survivre à la
+   distraction. Il ne se ferme donc qu'à la main, et il porte les deux seules
+   actions qui règlent vraiment la situation : ressaisir la clé, ou emporter
+   une sauvegarde en attendant.
+
+   La sauvegarde est offerte AVANT la réparation, volontairement : tant que la
+   clé est refusée, l'export local est la seule copie qui existe hors de ce
+   navigateur. */
+function _showAuthFailBanner(status){
+  try{
+    if(typeof iA!=='function'||!iA())return;
+    var b=document.getElementById('_authFailBanner');
+    if(b) return;                                  // déjà à l'écran, ne pas empiler
+    b=document.createElement('div');
+    b.id='_authFailBanner'; b.setAttribute('role','alert');
+    b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:999999;background:#AE5353;color:#fff;padding:11px 44px 11px 16px;font:600 13.5px/1.45 Inter,system-ui,sans-serif;box-shadow:0 -4px 16px rgba(0,0,0,.28);text-align:center';
+    var derniere=(DB&&DB.cloudConfig&&DB.cloudConfig.lastSync)||'jamais';
+    b.innerHTML='🔐 <strong>Synchronisation refusée par le serveur</strong> (HTTP '+(status||401)+' — clé Cloud invalide). '
+      +'Vos modifications restent <strong>sur cet appareil uniquement</strong>. Dernière synchronisation réussie : '+(typeof _esc==='function'?_esc(derniere):derniere)+'.'
+      +'<button type="button" onclick="window._cloudSecretPrompted=false;_ensureCloudSecret()" style="background:#fff;color:#AE5353;border:none;border-radius:8px;padding:5px 12px;font-weight:800;cursor:pointer;margin-left:8px">🔐 Ressaisir la clé</button>'
+      +'<button type="button" onclick="if(typeof exportAllData===\'function\')exportAllData();else toast(\'Export indisponible\',\'err\');" style="background:transparent;color:#fff;border:1.5px solid #fff;border-radius:8px;padding:4px 11px;font-weight:700;cursor:pointer;margin-left:6px">⬇ Exporter une sauvegarde</button>'
+      +'<button type="button" aria-label="Fermer" onclick="this.parentNode.remove()" style="position:absolute;right:8px;top:6px;background:transparent;border:none;color:#fff;font-size:20px;line-height:1;cursor:pointer">×</button>';
+    document.body.appendChild(b);
+  }catch(e){}
+}
+
+/* ── « L'hébergeur nous prend pour un robot » — bannière + issue en un clic ──
+   Sœur des deux précédentes, pour la troisième panne qui portait le même
+   message qu'elles : la protection anti-DDoS de LWS refuse l'appel (403 + page
+   HTML) faute de laissez-passer valide. La seule issue est un rechargement
+   COMPLET de la page : le défi JavaScript de l'hébergeur ne s'exécute que sur
+   une navigation, jamais sur un appel d'API.
+   On ne recharge pas d'office : un admin en train de saisir une fiche perdrait
+   son formulaire en cours. On explique, on propose, il décide. */
+function _showShieldBanner(){
+  try{
+    if(document.getElementById('_shieldBanner'))return;
+    var b=document.createElement('div');
+    b.id='_shieldBanner'; b.setAttribute('role','alert');
+    b.style.cssText='position:fixed;bottom:0;left:0;right:0;z-index:999999;background:#1E3A8A;color:#fff;padding:11px 44px 11px 16px;font:600 13.5px/1.45 Inter,system-ui,sans-serif;box-shadow:0 -4px 16px rgba(0,0,0,.28);text-align:center';
+    b.innerHTML='🛡️ <strong>La protection anti-robots de l\'hébergeur bloque la connexion au serveur</strong> (403). '
+      +'Ce n\'est ni votre clé ni vos données : le laissez-passer du site a expiré et ne se renouvelle qu\'au rechargement de la page.'
+      +'<button type="button" onclick="location.reload()" style="background:#FFC93C;color:#142554;border:none;border-radius:8px;padding:5px 12px;font-weight:800;cursor:pointer;margin-left:8px">↻ Recharger la page</button>'
+      +'<button type="button" aria-label="Fermer" onclick="this.parentNode.remove()" style="position:absolute;right:8px;top:6px;background:transparent;border:none;color:#fff;font-size:20px;line-height:1;cursor:pointer">×</button>';
+    document.body.appendChild(b);
+  }catch(e){}
+}
+
 async function _warnDefaultPasswords(){
   // Ne déranger qu'un admin connecté (pas un visiteur sur une DB fraîchement initialisée)
   if(typeof iA!=='function'||!iA())return;
@@ -2611,6 +2696,19 @@ function _startBgPoll(){
       if(!navigator.onLine)return;
       if(typeof iA!=='function' || !iA())return;
       if(typeof _hasLocalBinaries!=='function')return;
+      /* ── Ne pas rejouer une file qu'on sait refusée ───────────────────────
+         Cette reprise partait toutes les 60 s, sans compteur d'échec ni
+         condition d'arrêt. Tant que la clé est refusée, elle ne faisait que
+         reproduire les mêmes 401 à perpétuité — et LWS ferme le site à l'IP
+         au-delà de 6 mauvaises requêtes par minute. La reprise automatique
+         empêchait donc le bannissement de retomber, indéfiniment.
+         Après un refus franc, on se tait 10 minutes. Ressaisir la clé lève le
+         frein immédiatement (voir _saveCloudSecret) : l'attente ne pénalise
+         jamais quelqu'un qui vient de corriger la cause. */
+      try{
+        var _bloque = window._vrtUploadBloque || 0;
+        if(_bloque && (Date.now() - _bloque) < 600000) return;
+      }catch(_){}
       if(_hasLocalBinaries()){
         if(typeof _cloudAutoUploadBinaries==='function'){
           console.log('[SyncV2] Retry upload binaires locaux...');
@@ -2889,7 +2987,11 @@ function _cloudAutoSyncPush(attempt){
   })
   .then(function(r){
     if(tmt)clearTimeout(tmt);
-    if(!r.ok)throw new Error('HTTP '+r.status+(r.status===413?' (données trop volumineuses)':r.status===401?' (clé API invalide)':''));
+    if(!r.ok){
+      var _err=new Error('HTTP '+r.status+(r.status===413?' (données trop volumineuses)':r.status===401?' (clé API invalide)':''));
+      _err._status=r.status;   // le catch a besoin du code : un 401 ne se retente pas
+      throw _err;
+    }
     // Firebase retourne l'objet PUT en succès — pas besoin de parser
     return {saved_at:new Date().toLocaleString('fr-FR')};
   })
@@ -2908,6 +3010,39 @@ function _cloudAutoSyncPush(attempt){
     var msg=e.message||'Erreur inconnue';
     var isNetwork=msg.indexOf('fetch')<0?false:true;
     console.warn('[VÉRITAS auto-sync] Tentative '+attempt+' échouée :', msg);
+
+    /* ── Un refus d'authentification n'est PAS une panne de réseau ────────────
+       Jusqu'ici, 401 et « wifi coupé » suivaient le même chemin : 3 tentatives,
+       puis un point rouge et un toast de 6 secondes. Or le serveur qui répond
+       « clé API invalide » répondra la même chose dans 8 secondes, dans une
+       heure et dans deux semaines — c'est exactement ce qui s'est produit : la
+       synchronisation est morte le 12/08 et personne ne l'a su avant que la
+       vitrine cesse visiblement d'obéir au panneau admin, treize jours plus
+       tard. Pendant ce temps les saisies (élèves, livres, photos, paiements)
+       n'existaient plus que dans UN navigateur.
+       Un échec permanent doit donc : ne pas se retenter, se nommer, dire quoi
+       faire, et RESTER À L'ÉCRAN jusqu'à ce qu'on s'en occupe. */
+    if(e._status===401||e._status===403){
+      _syncRetryCount=0;
+      _autoSyncDirty=true;                 // rien n'est perdu : on repoussera dès la cause levée
+      if(_syncRetryTimer)clearTimeout(_syncRetryTimer);
+      /* 401 et 403 s'arrêtent tous deux ici — aucun des deux ne guérit par une
+         nouvelle tentative — mais ils ne se DISENT pas pareil, et le banc l'a
+         prouvé en affichant les deux bannières à la fois sur un seul 403.
+         requireAuth() (api/config_sync.php) répond 401 pour une clé refusée et
+         503 pour un secret compromis : jamais 403. Un 403 ne vient donc jamais
+         de la clé — il vient de la couche d'hébergement, et _fbFetch a déjà
+         posé la bannière qui explique le rechargement. Ajouter « votre clé est
+         invalide » par-dessus, c'est renvoyer chercher la panne au mauvais
+         endroit — l'erreur exacte qui a coûté cette session. */
+      if(e._status===401){
+        _setSyncDot('err','Clé Cloud refusée par le serveur');
+        _showAuthFailBanner(401);
+      } else {
+        _setSyncDot('err','Appel bloqué par la protection de l\'hébergeur');
+      }
+      return;
+    }
 
     if(attempt<3){
       // Retry avec backoff exponentiel : 8s, 16s
@@ -6831,6 +6966,16 @@ function saveCloudConfig(){
   DB.cloudConfig.secret=secret;
   save();
   _saveCloudConfigCache(); // persiste la config pour le polling sans login
+  /* Corriger la clé doit RELANCER la machine, pas attendre que les freins
+     expirent. Sans cela, quelqu'un qui vient de saisir la bonne clé reste
+     bloqué jusqu'à 10 minutes par le frein de la file d'envoi et jusqu'à
+     5 minutes par le disjoncteur — et conclut, à raison, que « ça ne marche
+     toujours pas ». On lève donc tout ce que les refus précédents ont posé. */
+  try{window._vrtUploadBloque=0;}catch(e){}
+  try{if(window._fbBreaker){window._fbBreaker.failures=[];window._fbBreaker.suspendedUntil=0;}}catch(e){}
+  try{var _b1=document.getElementById('_authFailBanner');if(_b1)_b1.remove();
+      var _b2=document.getElementById('_shieldBanner');if(_b2)_b2.remove();
+      var _b3=document.getElementById('_notSyncBanner');if(_b3)_b3.remove();}catch(e){}
   _startBgPoll();           // démarrer le polling immédiatement
   toast('✓ Configuration cloud enregistrée');
 }
@@ -6851,8 +6996,48 @@ function cloudTestConnection(){
     toast('✅ Connexion au cloud réussie !');
   })
   .catch(function(e){
-    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>❌</span><span><strong>Échec de connexion :</strong> '+_esc(e.message)+'. Vérifiez l\'URL et la clé API.</span></div>');
-    toast('❌ Connexion échouée : '+e.message,'err');
+    /* ── Nommer la panne, au lieu de renvoyer chercher partout ──────────────
+       Ce message disait « Vérifiez l'URL et la clé API » pour TOUTE erreur.
+       Le 25/08/2026 il a coûté une fouille dans api/payment_config.php alors
+       que la clé n'était pas en cause : l'application était ouverte sur un
+       hôte (www) et interrogeait l'autre, et le bouclier anti-DDoS de LWS
+       répondait 403. Trois pannes distinctes portaient le même mot.
+
+       On les sépare, et on le fait avec ce qu'on sait déjà : le code HTTP, et
+       la comparaison entre l'hôte de l'API et celui de la page. */
+    var msg=e.message||'', diag='', hote='';
+    try{
+      var u=new URL(_cloudUrl('files.php'), location.href);
+      if(u.host!==location.host) hote=u.host;
+    }catch(_){}
+
+    if(hote){
+      diag='L\'application est ouverte sur <strong>'+_esc(location.host)+'</strong> mais interroge <strong>'+_esc(hote)+'</strong>. '
+          +'Ces deux adresses sont traitées comme des sites différents : la protection anti-robots de l\'hébergeur refuse l\'appel croisé. '
+          +'Ouvrez l\'application sur <strong>https://veritas-school.com/app.html</strong> (sans « www »), puis réessayez.';
+    } else if(msg.indexOf('403')>=0){
+      /* Signature vérifiée en production le 25/08/2026 : la protection LWS
+         délivre un cookie « lwsprotect-challenge-token-auth » à qui exécute son
+         défi, ce qui n'arrive qu'à une navigation HTML. Une application d'une
+         seule page ne navigue plus : le laissez-passer expire et rien ne le
+         renouvelle. Le rechargement complet EST le correctif. */
+      var _aPasse=false;
+      try{ _aPasse=document.cookie.indexOf('lwsprotect-challenge-token-auth')>=0; }catch(_){}
+      diag='La protection anti-robots de l\'hébergeur a refusé l\'appel (403) — <strong>ni votre clé ni vos données ne sont en cause</strong>. '
+          +(_aPasse?'Le laissez-passer du site est présent mais n\'est plus accepté. ':'Le laissez-passer du site est absent de ce navigateur. ')
+          +'Il ne se renouvelle qu\'au chargement d\'une page : faites <strong>Ctrl+Shift+R</strong>, puis réessayez.';
+      try{ _showShieldBanner(); }catch(_){}
+    } else if(msg.indexOf('401')>=0){
+      diag='La clé API est refusée (401). Ressaisissez-la ci-dessus : c\'est la valeur du <strong>premier</strong> <code>define(\'API_SECRET\', …)</code> de <code>api/payment_config.php</code> sur le serveur — PHP ignore toute redéfinition suivante du même nom.';
+    } else if(msg.indexOf('429')>=0||msg.indexOf('509')>=0||msg.indexOf('512')>=0){
+      diag='Trop de requêtes en peu de temps : l\'hébergeur limite le débit par adresse IP. Attendez une minute et réessayez.';
+    } else if(/Failed to fetch|NetworkError|load failed/i.test(msg)){
+      diag='Le serveur n\'a pas répondu du tout : coupure réseau, ou appel bloqué avant d\'arriver. Vérifiez la connexion, puis réessayez.';
+    } else {
+      diag='Vérifiez l\'URL et la clé API.';
+    }
+    _si('cloudSyncStatus','<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>❌</span><span><strong>Échec de connexion — '+_esc(msg||'erreur inconnue')+'</strong><br>'+diag+'</span></div>');
+    toast('❌ Connexion échouée : '+msg,'err');
   });
 }
 
@@ -6978,8 +7163,34 @@ function cloudRestoreDB(){
   if(!isSA()){toast('Accès réservé au super-administrateur','warn');return;}
   var secret=DB.cloudConfig?.secret;
   if(!secret){toast('⚠️ Configurez la clé API dans Paramètres → Cloud','warn');return;}
-  if(!confirm('⚠️ ATTENTION : Cela remplacera TOUTES vos données locales par la dernière sauvegarde cloud.\n\nÊtes-vous sûr ?'))return;
-  if(!confirm('Dernière confirmation : les données actuelles seront écrasées. Continuer ?'))return;
+  /* ── Dire CE QU'ON PERD, pas « êtes-vous sûr ? » ──────────────────────────
+     Deux confirmations se succédaient sans jamais nommer l'enjeu. Or ce bouton
+     est précisément celui qu'on cherche quand la synchronisation est en panne
+     — et c'est exactement le moment où il est le plus destructeur : si le
+     serveur n'accepte plus les envois depuis des jours, sa copie est vieille
+     de ces jours-là, et la restaurer efface tout ce qui a été saisi depuis.
+     On confronte donc les deux dates avant de proposer quoi que ce soit. Un
+     avertissement qui ne chiffre pas la perte n'est pas un avertissement. */
+  var _ecartJours=0, _dSrv='inconnue';
+  try{
+    var _ls=(DB.cloudConfig&&DB.cloudConfig.lastSync)||'';
+    var _m=_ls.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+    if(_m){
+      var _t=new Date(+_m[3],+_m[2]-1,+_m[1]).getTime();
+      _dSrv=_m[0];
+      _ecartJours=Math.floor((Date.now()-_t)/86400000);
+    }
+  }catch(e){}
+  var _alerte='⚠️ RESTAURATION — ce que vous allez PERDRE\n\n'
+    +'La copie du serveur date du : '+_dSrv+'\n'
+    +(_ecartJours>1
+      ? 'Soit il y a '+_ecartJours+' jours.\n\nTout ce qui a été saisi sur cet appareil depuis cette date\n(élèves, notes, paiements, livres, photos) sera DÉFINITIVEMENT effacé.\n\n'
+      : '\nLes données actuelles de cet appareil seront remplacées.\n\n')
+    +(_ecartJours>1 ? '👉 Exportez d\'abord une sauvegarde JSON si vous n\'êtes pas certain.\n\n' : '')
+    +'Continuer ?';
+  if(!confirm(_alerte))return;
+  if(_ecartJours>1 && !confirm('Confirmation finale : effacer '+_ecartJours+' jours de saisies locales et revenir à la version du '+_dSrv+' ?'))return;
+  if(_ecartJours<=1 && !confirm('Dernière confirmation : les données actuelles seront écrasées. Continuer ?'))return;
   toast('📥 Récupération des données depuis le cloud...');
   _si('cloudSyncStatus','<div class="ib ibt"><span>⏳</span><span>Restauration en cours...</span></div>');
   // FIX: GET Firebase au lieu de sync.php
@@ -7428,7 +7639,7 @@ function _cloudAutoUploadBinaries(onDone){
     })
     .then(function(r){
       if(tmt)clearTimeout(tmt);
-      if(!r.ok)throw new Error('HTTP '+r.status);
+      if(!r.ok){ var _e=new Error('HTTP '+r.status); _e._status=r.status; throw _e; }
       return r.json();
     })
     .then(function(res){
@@ -7438,6 +7649,22 @@ function _cloudAutoUploadBinaries(onDone){
     .catch(function(e){
       if(tmt)clearTimeout(tmt);
       var msg=e.message||'Erreur réseau';
+      /* ── Ne pas nourrir le pare-feu de l'hébergeur ────────────────────────
+         LWS ferme le site ENTIER à une IP au-delà de « 6 requêtes considérées
+         comme mauvaises par minute, avec une réserve de 20 » (erreur 512 /
+         OL-BADRATE-PER-IP, documentée par LWS). Une réponse 401, 403 ou 429
+         compte comme une mauvaise requête.
+
+         Or chaque fichier était retenté 2 fois puis la file passait au suivant
+         quoi qu'il arrive. Authentification cassée + 11 fichiers en attente =
+         22 mauvaises requêtes d'affilée, donc la réserve dépassée et l'accès à
+         app.html lui-même coupé — constaté le 25/08/2026. L'application se
+         bannissait elle-même, puis rejouait la scène à chaque sauvegarde.
+
+         Une 401 ne devient pas une 200 en trois secondes : on ne retente pas,
+         et on signale l'échec comme FATAL pour que la file s'arrête net. */
+      var _arret=(e._status===401||e._status===403||e._status===429||e._status===509||e._status===512);
+      if(_arret){ onResult(null,msg,true); return; }
       if(attempt<2){
         // Retry automatique après 3s
         setTimeout(function(){_uploadEntry(entry,fname,ftype,file,attempt+1,onResult);},3000);
@@ -7469,9 +7696,32 @@ function _cloudAutoUploadBinaries(onDone){
       var file=_toFile(dataUrl,fname,ftype);
       if(!file||file.size===0){_failLog.push({label:entry.label,reason:'data URL invalide ou vide'});errors++;_next(idx+1);return;}
       if(file.size>50*1024*1024){_failLog.push({label:entry.label,reason:'fichier >50Mo ignoré ('+Math.round(file.size/1048576)+'Mo)'});errors++;_next(idx+1);return;}
-      _uploadEntry(entry,fname,ftype,file,1,function(url,err){
+      _uploadEntry(entry,fname,ftype,file,1,function(url,err,fatal){
         if(url){entry.ok(url);uploaded++;}
         else{_failLog.push({label:entry.label,reason:err||'inconnu'});errors++;}
+        /* Refus d'authentification ou pare-feu : les fichiers suivants
+           subiraient EXACTEMENT le même sort. Continuer ne sauverait rien et
+           coûterait le bannissement de l'IP (voir _uploadEntry). On s'arrête,
+           on le dit, et on garde les fichiers en attente — ils repartiront
+           d'eux-mêmes au prochain save() une fois la cause levée. */
+        if(fatal){
+          /* Le disjoncteur de _fbFetch protège api/db.php ; la file d'envoi lui
+             échappe (elle appelle fetch directement). Résultat constaté le
+             25/08/2026 dans la console de Jacques : « CIRCUIT OUVERT — sync
+             suspendu 5 min » pendant que des POST upload_file.php continuaient
+             à tirer des 401 toutes les 60 s, entretenant le bannissement LWS
+             que la suspension était censée laisser retomber.
+             On pose donc un frein propre à la file. */
+          try{ window._vrtUploadBloque = Date.now(); }catch(_){}
+          if(statusEl)statusEl.innerHTML='<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>⛔</span><span>'
+            +'<strong>Envoi interrompu — '+_esc(err||'refus du serveur')+'</strong><br>'
+            +'Les '+(queue.length-idx)+' fichier(s) restants n\'ont pas été tentés : ils auraient reçu le même refus, et l\'hébergeur ferme le site à votre adresse IP au-delà de quelques requêtes refusées par minute. '
+            +'Rien n\'est perdu — l\'envoi reprendra tout seul une fois la connexion rétablie.</span></div>';
+          try{localStorage.setItem('_vrtUploadErrors',JSON.stringify(_failLog.slice(-20)));}catch(_){}
+          save();
+          if(onDone)onDone(uploaded,errors);
+          return;
+        }
         _next(idx+1);
       });
     });
@@ -15037,6 +15287,51 @@ async function _guideDownloadPDF(){
   }catch(e){console.error(e);toast('Erreur PDF : '+e.message,'err');}
 }
 
+/* ── L'ÂGE DE LA DERNIÈRE SYNCHRONISATION, DIT EN CLAIR ────────────────────
+   L'information existait déjà, en bas du bloc, dans une pastille bleue « 💡 »
+   au milieu de deux phrases d'explication : « Dernière sync : 12/08/2026
+   00:04:51 ». Une date brute ne dit rien — il faut la soustraire de la date du
+   jour pour comprendre que la sauvegarde ne fonctionne plus depuis treize
+   jours. Personne ne fait cette soustraction en passant.
+
+   On affiche donc l'ÉCART, pas l'horodatage, et on le colore : c'est le seul
+   moyen qu'un panneau consulté distraitement dise « quelque chose ne va pas ».
+   Aucune donnée nouvelle n'est nécessaire, seulement la lire pour le lecteur. */
+function _cloudEtatHtml(){
+  var cfg=(DB&&DB.cloudConfig)||{};
+  var brut=cfg.lastSync||'';
+  var jours=null;
+  var m=String(brut).match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m){
+    var t=new Date(+m[3],+m[2]-1,+m[1]).getTime();
+    if(!isNaN(t)) jours=Math.floor((Date.now()-t)/86400000);
+  }
+  var sansCle=!cfg.secret;
+  var ton,ico,titre,detail;
+  if(sansCle){
+    ton='#AE5353'; ico='🔐';
+    titre='Aucune clé de synchronisation sur cet appareil';
+    detail='Tout ce que vous enregistrez reste dans ce navigateur. Saisissez la clé ci-dessus, puis « Tester la connexion ».';
+  } else if(jours===null){
+    ton='#B45309'; ico='⚠️';
+    titre='Jamais synchronisé depuis cet appareil';
+    detail='Lancez « Tester la connexion » pour vérifier que la clé est acceptée par le serveur.';
+  } else if(jours<=1){
+    ton='#0F7B5A'; ico='✓';
+    titre='Synchronisé — '+(jours===0?'aujourd’hui':'hier');
+    detail='Vos enregistrements partent bien vers veritas-school.com.';
+  } else {
+    ton='#AE5353'; ico='⛔';
+    titre='Plus aucune sauvegarde depuis '+jours+' jours';
+    detail='Vos saisies des '+jours+' derniers jours n’existent que dans CE navigateur. Exportez une sauvegarde JSON, puis lancez « Tester la connexion » : une clé refusée (401) se corrige en la ressaisissant ci-dessus.';
+  }
+  return '<div class="mt14" style="border-left:4px solid '+ton+';background:'+ton+'12;border-radius:0 10px 10px 0;padding:11px 14px">'
+    +'<div style="font-weight:800;font-size:13.5px;color:'+ton+'">'+ico+' '+_esc(titre)+'</div>'
+    +'<div style="font-size:12.5px;color:var(--ink3,#5A6785);margin-top:3px;line-height:1.5">'+_esc(detail)+'</div>'
+    +(brut?'<div style="font-size:11.5px;color:var(--ink4,#8A96AE);margin-top:5px">Dernière réussite : '+_esc(brut)+'</div>':'')
+    +'</div>';
+}
+
 function pgSettings(){
   if(!iA())return na();
   // Diagnostic CamPay peuplé APRÈS injection du HTML (l'élément n'existe pas encore ici).
@@ -15088,19 +15383,46 @@ function pgSettings(){
         <div class="fg full"><span class="fl">Clé API (token secret)</span><input class="fi" id="cloud_secret" type="password" value="${DB.cloudConfig?.secret||''}" placeholder="Votre clé secrète API"></div>
       </div>
       <button class="btn bi sm mt10" onclick="saveCloudConfig()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Enregistrer config cloud</button>
+
+      ${_cloudEtatHtml()}
+
+      <!-- ── Onze boutons, onze dégradés, aucune hiérarchie ────────────────
+           Ce bloc alignait « Tester la connexion » et « Restaurer depuis le
+           cloud » côte à côte, dans le même corps et la même taille : l'un est
+           anodin, l'autre remplace toute la base par la copie du serveur. Quand
+           la synchronisation tombe en panne, c'est précisément ici qu'on vient
+           chercher de l'aide — donc au pire moment pour se tromper de bouton,
+           puisque la copie du serveur est alors vieille de la durée de la panne.
+           Trois niveaux désormais : ce qu'on fait souvent, ce qu'on ouvre en cas
+           de doute, ce qui écrase des données. -->
       <div class="fl2 g8 fw mt14 pt14" style="border-top:var(--br)">
-        <button class="btn sm" style="background:linear-gradient(135deg,#AE5353,#C07D4F);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="forceFullSync()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Forcer la sync complète</button>
-        <button class="btn sm" style="background:linear-gradient(135deg,#142554,#1e3a7a);color:#FFC93C;border-radius:10px;font-weight:700" onclick="mStorageDashboard()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Stockage LWS (200 Go)</button>
-        <button class="btn sm" style="background:linear-gradient(135deg,#92400E,#D97706);color:#fff;border-radius:10px;font-weight:700" onclick="mCleanBrokenRefs()"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Nettoyer références cassées</button>
+        <button class="btn bi sm" onclick="cloudTestConnection()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Tester la connexion</button>
         <button class="btn sm" style="background:#059669;color:#fff;border-radius:10px" onclick="cloudSaveDB()"><svg class="vico bico" aria-hidden="true"><use href="#lc-cloud"/></svg>Sauvegarder vers le cloud</button>
-        <button class="btn sm" style="background:#6C56A6;color:#fff;border-radius:10px" onclick="cloudRestoreDB()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Restaurer depuis le cloud</button>
-        <button class="btn sm" style="background:#0891B2;color:#fff;border-radius:10px" onclick="cloudTestConnection()"><svg class="vico bico" aria-hidden="true"><use href="#lc-zap"/></svg>Tester la connexion</button>
-        <button class="btn sm" style="background:linear-gradient(135deg,#AE5353,#F59E0B);color:#fff;border-radius:10px;font-weight:800;box-shadow:0 4px 12px rgba(220,38,38,.3)" onclick="mSyncDiag()"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Diagnostic Sync complet (5 tests)</button>
-        <button class="btn sm" style="background:#D97706;color:#fff;border-radius:10px" onclick="mCloudUploadFile()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Uploader un fichier</button>
-        <button class="btn sm" style="background:#1E3A8A;color:#fff;border-radius:10px" onclick="mCloudFilesList()"><svg class="vico bico" aria-hidden="true"><use href="#lc-package"/></svg>Fichiers en ligne</button><button class="btn sm" style="background:#065F46;color:#fff;border-radius:10px" onclick="cloudSyncBinaries()"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Sync fichiers locaux</button><button class="btn sm" style="background:#6D28D9;color:#fff;border-radius:10px" onclick="cloudForcePull()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Forcer depuis le cloud</button>
+        <button class="btn bo sm" onclick="mCloudUploadFile()"><svg class="vico bico" aria-hidden="true"><use href="#lc-upload"/></svg>Uploader un fichier</button>
       </div>
+
+      <details class="mt12">
+        <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--ink3,#5A6785);padding:6px 0;user-select:none">⚙️ Outils de diagnostic et de maintenance</summary>
+        <div class="fl2 g8 fw mt10">
+          <button class="btn bo sm" onclick="mSyncDiag()"><svg class="vico bico" aria-hidden="true"><use href="#lc-search"/></svg>Diagnostic complet (5 tests)</button>
+          <button class="btn bo sm" onclick="forceFullSync()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>Forcer la sync complète</button>
+          <button class="btn bo sm" onclick="cloudSyncBinaries()"><svg class="vico bico" aria-hidden="true"><use href="#lc-refresh"/></svg>Sync fichiers locaux</button>
+          <button class="btn bo sm" onclick="mCloudFilesList()"><svg class="vico bico" aria-hidden="true"><use href="#lc-package"/></svg>Fichiers en ligne</button>
+          <button class="btn bo sm" onclick="mStorageDashboard()"><svg class="vico bico" aria-hidden="true"><use href="#lc-save"/></svg>Stockage LWS (200 Go)</button>
+          <button class="btn bo sm" onclick="mCleanBrokenRefs()"><svg class="vico bico" aria-hidden="true"><use href="#lc-trash"/></svg>Nettoyer références cassées</button>
+        </div>
+      </details>
+
+      <details class="mt8">
+        <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--re,#AE5353);padding:6px 0;user-select:none">⚠️ Écraser les données de cet appareil</summary>
+        <div class="ib ibt mt10 mb10"><span>🛑</span><span>Ces deux actions <strong>remplacent</strong> les données de cet appareil par la copie du serveur. Tout ce qui a été saisi ici depuis la dernière synchronisation réussie est perdu. <strong>Exportez d\'abord une sauvegarde JSON.</strong></span></div>
+        <div class="fl2 g8 fw">
+          <button class="btn sm" style="background:var(--reb,#FEE2E2);color:var(--re,#AE5353);border:1px solid var(--red,#FCA5A5);border-radius:10px" onclick="cloudRestoreDB()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Restaurer depuis le cloud</button>
+          <button class="btn sm" style="background:var(--reb,#FEE2E2);color:var(--re,#AE5353);border:1px solid var(--red,#FCA5A5);border-radius:10px" onclick="cloudForcePull()"><svg class="vico bico" aria-hidden="true"><use href="#lc-download"/></svg>Forcer depuis le cloud</button>
+        </div>
+      </details>
+
       <div id="cloudSyncStatus" class="mt12"></div>
-      <div class="ib ibi mt14 mb0"><span>💡</span><span><strong>Dernière sync :</strong> ${DB.cloudConfig?.lastSync||'Jamais'} — Les données sont sauvegardées dans la base MySQL de veritas-school.com. Les fichiers uploadés sont accessibles depuis n\'importe quel appareil.</span></div>
     </div>
     <div class="card mt16">
       <div class="ct"><span class="ct-ico"><svg class="vico" aria-hidden="true"><use href="#lc-lock"/></svg></span>Sécurité</div>
