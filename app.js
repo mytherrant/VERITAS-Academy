@@ -213,6 +213,52 @@ async function _ensureFbAuth(){
 // v2.9.14 : CIRCUIT BREAKER générique pour le backend (LWS depuis maintenant)
 // Si le backend échoue 3 fois en moins de 10 secondes, on suspend les appels
 // pendant 5 minutes. Évite le spam d'erreurs réseau et garde l'UX fluide.
+/* ══════════════════════════════════════════════════════════════════════════
+   LE FREIN PARTAGÉ — ne pas se faire bannir par son propre hébergeur
+   ──────────────────────────────────────────────────────────────────────────
+   LWS bloque une adresse IP sur les ports 80 ET 443 (erreur 512
+   OL-BLACKLIST-IP) quand elle dépasse « 6 requêtes considérées comme mauvaises
+   par minute, avec une réserve de 20 ». Une réponse 401, 403 ou 429 compte
+   comme mauvaise.
+
+   Or _startBgPoll interroge api/db.php toutes les 15 secondes : quatre
+   requêtes par minute, les deux tiers du budget, EN PERMANENCE. Tant que la
+   clé est refusée, ces quatre-là sont toutes mauvaises — et le disjoncteur
+   _fbBreaker ne les voyait pas, puisqu'il ne compte que les erreurs 5xx.
+   Ajoutez la synchro et la file d'envoi : le compte est dépassé sans
+   discontinuer, le bannissement ne retombe jamais, et le 25/08/2026 Jacques
+   ne pouvait plus atteindre ni son site ni le panneau de son hébergeur.
+
+   Le frein est donc PARTAGÉ : dès qu'un envoi se fait refuser franchement,
+   tout ce qui parle au serveur en arrière-plan se tait. Corriger la clé le
+   lève immédiatement — attendre ne doit jamais être la punition de celui qui
+   vient de réparer la cause.
+   ══════════════════════════════════════════════════════════════════════════ */
+window._vrtServeurRefuse = 0;          // horodatage du dernier refus franc
+var VRT_FREIN_MS = 600000;             // 10 minutes de silence
+
+function _vrtFreiner(motif){
+  try{
+    window._vrtServeurRefuse = Date.now();
+    console.warn('[VÉRITAS] Frein posé (' + motif + ') — appels de fond suspendus '
+      + (VRT_FREIN_MS / 60000) + ' min pour ne pas faire bannir cette adresse IP.');
+  }catch(e){}
+}
+function _vrtFreine(){
+  try{
+    var t = window._vrtServeurRefuse || 0;
+    return t > 0 && (Date.now() - t) < VRT_FREIN_MS;
+  }catch(e){ return false; }
+}
+function _vrtLeverFrein(){
+  try{
+    window._vrtServeurRefuse = 0;
+    window._vrtUploadBloque = 0;
+    if(window._fbBreaker){ window._fbBreaker.failures = []; window._fbBreaker.suspendedUntil = 0; }
+  }catch(e){}
+}
+window._vrtFreiner = _vrtFreiner; window._vrtFreine = _vrtFreine; window._vrtLeverFrein = _vrtLeverFrein;
+
 window._fbBreaker = {
   failures: [],
   suspendedUntil: 0,
@@ -305,6 +351,15 @@ async function _fbFetch(url, options){
        répond du JSON. */
     if (resp.status === 403 && (resp.headers.get('content-type') || '').indexOf('text/html') >= 0) {
       try { _showShieldBanner(); } catch (e) {}
+    }
+
+    /* Un refus franc arrête TOUT ce qui parle au serveur en arrière-plan.
+       Sans cela, le sondage de 15 s continuait à tirer quatre 401 par minute
+       — sur un budget de six chez LWS — et entretenait le bannissement de
+       l'adresse IP au lieu de le laisser retomber. */
+    if (resp.status === 401 || resp.status === 403 || resp.status === 429 ||
+        resp.status === 509 || resp.status === 512) {
+      try { _vrtFreiner('HTTP ' + resp.status); } catch (e) {}
     }
 
     if (resp.ok) {
@@ -2014,6 +2069,23 @@ function save(){
   } catch(e) {}
   if (!_canSync) return; // visiteur → local only, pas de push serveur
 
+  /* ── LA BOUCLE QUI FAISAIT BANNIR L'ADRESSE IP ────────────────────────────
+     Mesurée au banc, serveur refusant tout : 45,6 requêtes par minute, pour un
+     budget LWS de 6. Le mécanisme : un envoi de fichier échoue → il appelle
+     save() pour ne rien perdre → save() pousse la base ET replanifie un envoi
+     5 s plus tard → qui échoue → qui rappelle save()… Chaque tour produisait
+     deux requêtes refusées de plus, et le bannissement se réalimentait tout
+     seul, indéfiniment.
+
+     La sauvegarde LOCALE, elle, a déjà eu lieu plus haut : rien n'est perdu.
+     On ne coupe que ce qui part sur le réseau, et le drapeau reste posé pour
+     que tout reparte dès le frein levé. */
+  if (typeof _vrtFreine === 'function' && _vrtFreine()) {
+    _autoSyncDirty = true;
+    try { clearTimeout(_autoUploadTimer); } catch(e) {}
+    return;
+  }
+
   clearTimeout(_syncTimeout);
   _syncTimeout=setTimeout(async function(){
     try{
@@ -2225,8 +2297,7 @@ function _saveCloudSecret(){
   if(typeof toast==='function')toast('✓ Clé Cloud enregistrée','ok');
   // Une clé neuve lève tous les freins posés par les refus précédents :
   // bannières, frein de la file d'envoi, disjoncteur.
-  try{window._vrtUploadBloque=0;}catch(e){}
-  try{if(window._fbBreaker){window._fbBreaker.failures=[];window._fbBreaker.suspendedUntil=0;}}catch(e){}
+  try{if(typeof _vrtLeverFrein==='function')_vrtLeverFrein();}catch(e){}
   try{var _afb=document.getElementById('_authFailBanner');if(_afb)_afb.remove();}catch(e){}
   try{var _nsb=document.getElementById('_notSyncBanner');if(_nsb)_nsb.remove();}catch(e){}
   try{if(typeof _triggerAutoSync==='function')_triggerAutoSync();}catch(e){}
@@ -2496,6 +2567,10 @@ function _startBgPoll(){
   // FIX: polling Firebase (plus de dépendance LWS sync.php)
   _bgPollTimer=setInterval(function(){
     if(!navigator.onLine)return;
+    // Le serveur nous a refusés : se taire plutôt que d'user le budget de
+    // requêtes de l'hébergeur (voir _vrtFreiner). Quatre appels par minute
+    // sur un plafond de six suffisaient à faire bannir l'adresse IP.
+    if(typeof _vrtFreine==='function' && _vrtFreine())return;
     // S1 (v1.2.13) : sonder d'abord ?meta=1 (~50 o) ; ne télécharger la base
     // entière (centaines de Ko) que si le serveur a réellement changé. Évite un
     // téléchargement complet toutes les 15 s sur chaque appareil admin.
@@ -2705,6 +2780,7 @@ function _startBgPoll(){
          Après un refus franc, on se tait 10 minutes. Ressaisir la clé lève le
          frein immédiatement (voir _saveCloudSecret) : l'attente ne pénalise
          jamais quelqu'un qui vient de corriger la cause. */
+      if(typeof _vrtFreine==='function' && _vrtFreine()) return;
       try{
         var _bloque = window._vrtUploadBloque || 0;
         if(_bloque && (Date.now() - _bloque) < 600000) return;
@@ -2905,6 +2981,9 @@ function _triggerAutoSync(){
   if(!iA())return; // admins seulement
   var cfg=DB.cloudConfig;
   if(!cfg||!cfg.url||!cfg.secret)return; // pas configuré
+  // Refus franc en cours : inutile de repartir, et coûteux (voir _vrtFreiner).
+  // Le drapeau reste posé, donc la sauvegarde repartira dès le frein levé.
+  if(typeof _vrtFreine==='function' && _vrtFreine()){ _autoSyncDirty=true; _setSyncDot('pending','Envoi suspendu — serveur refusé'); return; }
   _autoSyncDirty=true;
   _setSyncDot('pending');
   if(_autoSyncTimer)clearTimeout(_autoSyncTimer);
@@ -6971,8 +7050,7 @@ function saveCloudConfig(){
      bloqué jusqu'à 10 minutes par le frein de la file d'envoi et jusqu'à
      5 minutes par le disjoncteur — et conclut, à raison, que « ça ne marche
      toujours pas ». On lève donc tout ce que les refus précédents ont posé. */
-  try{window._vrtUploadBloque=0;}catch(e){}
-  try{if(window._fbBreaker){window._fbBreaker.failures=[];window._fbBreaker.suspendedUntil=0;}}catch(e){}
+  try{if(typeof _vrtLeverFrein==='function')_vrtLeverFrein();}catch(e){}
   try{var _b1=document.getElementById('_authFailBanner');if(_b1)_b1.remove();
       var _b2=document.getElementById('_shieldBanner');if(_b2)_b2.remove();
       var _b3=document.getElementById('_notSyncBanner');if(_b3)_b3.remove();}catch(e){}
@@ -7712,7 +7790,8 @@ function _cloudAutoUploadBinaries(onDone){
              à tirer des 401 toutes les 60 s, entretenant le bannissement LWS
              que la suspension était censée laisser retomber.
              On pose donc un frein propre à la file. */
-          try{ window._vrtUploadBloque = Date.now(); }catch(_){}
+          try{ window._vrtUploadBloque = Date.now();
+               if(typeof _vrtFreiner==='function') _vrtFreiner('envoi refusé'); }catch(_){}
           if(statusEl)statusEl.innerHTML='<div class="ib" style="background:#FEE2E2;border:1px solid #FCA5A5;color:#AE5353"><span>⛔</span><span>'
             +'<strong>Envoi interrompu — '+_esc(err||'refus du serveur')+'</strong><br>'
             +'Les '+(queue.length-idx)+' fichier(s) restants n\'ont pas été tentés : ils auraient reçu le même refus, et l\'hébergeur ferme le site à votre adresse IP au-delà de quelques requêtes refusées par minute. '
