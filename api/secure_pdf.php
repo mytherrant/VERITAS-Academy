@@ -184,6 +184,18 @@ if ($item === null) {
         if (is_array($c) && (string) ($c['id'] ?? '') === $id) { $item = $c; $kind = 'contenu'; break; }
     }
 }
+/* ── Repli : le catalogue déposé par la CI ────────────────────────────────
+   Un livre mis en vente par catalogue_livres.json n'entre dans la BASE qu'à la
+   première synchronisation d'un administrateur. Jusque-là, ce lecteur répondait
+   « Document introuvable » sur un livre pourtant annoncé et payable — mesuré en
+   production le 25/08/2026 pour « Le Tube digestif », la synchro étant cassée
+   depuis onze jours. La base reste prioritaire (boucles ci-dessus) : ce repli ne
+   sert que tant qu'elle ignore le livre, et il lit exactement la fiche qui a
+   servi à le mettre en vitrine — mêmes pages offertes, même tarif. */
+if ($item === null && function_exists('vrt_catalogue_livre')) {
+    $fiche = vrt_catalogue_livre($id);
+    if ($fiche !== null) { $item = $fiche; $kind = 'book'; }
+}
 if ($item === null) spdf_err(404, 'Document introuvable');
 $book = $item; // alias rétro-compat (méta, titre…)
 

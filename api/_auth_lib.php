@@ -364,6 +364,50 @@ if (!defined('VRT_AUTH_LIB')) {
        passer — refuser sur une ignorance ferait payer le client pour un trou de
        nos données, exactement le mal qu'on soigne.
        ══════════════════════════════════════════════════════════════════════ */
+    /**
+     * LE CATALOGUE DES LIVRES NUMÉRIQUES, LU UNE SEULE FOIS ET AU MÊME ENDROIT.
+     *
+     * catalogue_livres.json est déposé à la racine du site par la CI : c'est la
+     * source qui met un livre en vitrine. Mais le SERVEUR ne connaissait les
+     * livres que par sa base, laquelle ne les apprend qu'à la première synchro
+     * d'un administrateur. Deux chemins en dépendaient sans le dire :
+     *   · le contrôle de prix (vrt_prix_catalogue) — sans référence, il
+     *     acceptait n'importe quel montant ;
+     *   · le lecteur sécurisé (secure_pdf.php) — il répondait « Document
+     *     introuvable » sur un livre pourtant en vente.
+     * Le 25/08/2026, la synchro était cassée depuis onze jours : la fenêtre ne
+     * se refermait pas d'elle-même.
+     *
+     * Un seul lecteur pour les deux, afin qu'ils ne puissent pas diverger.
+     * La base reste PRIORITAIRE partout : ce catalogue n'est qu'un repli.
+     *
+     * @return array<string,array>  fiches indexées par id
+     */
+    function vrt_catalogue_livres(): array {
+        static $cache = null;
+        if ($cache !== null) return $cache;
+
+        $cache = [];
+        $f = dirname(__DIR__) . '/catalogue_livres.json';
+        if (is_file($f)) {
+            $j = json_decode((string) @file_get_contents($f), true);
+            if (is_array($j) && isset($j['livres']) && is_array($j['livres'])) {
+                foreach ($j['livres'] as $l) {
+                    if (is_array($l) && isset($l['id']) && $l['id'] !== '') {
+                        $cache[(string) $l['id']] = $l;
+                    }
+                }
+            }
+        }
+        return $cache;
+    }
+
+    /** Une fiche du catalogue, ou null si l'identifiant est inconnu. */
+    function vrt_catalogue_livre(string $id): ?array {
+        $c = vrt_catalogue_livres();
+        return isset($c[$id]) ? $c[$id] : null;
+    }
+
     function vrt_prix_catalogue(array $db, string $intent, string $targetId): ?int {
         // Micro-achats à l'unité et crédits IA : le tarif vit dans DB.microPrix,
         // avec le repli sur les valeurs par défaut du client (MICRO_PRIX_DEFAULT).
@@ -517,23 +561,8 @@ if (!defined('VRT_AUTH_LIB')) {
         // l'administration continue de l'emporter. Même principe que le repli
         // de l'Atelier juste en dessous.
         if ($intent === 'book' || $intent === 'digitalbook') {
-            static $catLivres = null;
-            if ($catLivres === null) {
-                $catLivres = [];
-                $f = dirname(__DIR__) . '/catalogue_livres.json';
-                if (is_file($f)) {
-                    $j = json_decode((string) @file_get_contents($f), true);
-                    if (is_array($j) && isset($j['livres']) && is_array($j['livres'])) {
-                        foreach ($j['livres'] as $l) {
-                            if (is_array($l) && isset($l['id'])) {
-                                $catLivres[(string) $l['id']] = $l;
-                            }
-                        }
-                    }
-                }
-            }
-            if (isset($catLivres[$targetId])) {
-                $o    = $catLivres[$targetId];
+            $o = vrt_catalogue_livre($targetId);
+            if ($o !== null) {
                 $cles = ($intent === 'digitalbook')
                       ? ['prixDigital', 'priceDigital', 'prix']   // le numérique a son propre tarif
                       : ['prix'];

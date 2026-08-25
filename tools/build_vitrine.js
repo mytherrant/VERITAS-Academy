@@ -1845,6 +1845,56 @@ for (const bal of ['ul', 'ol', 'li']) {
   console.log('balises     : <a>, <button>, <section> et <ul> équilibrés');
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   FENTES PILOTÉES PAR LE PANNEAU ADMIN — data-vrt-pub
+   ──────────────────────────────────────────────────────────────────────────
+   assets/vitrine.js sait depuis longtemps remplir n'importe quel élément
+   portant data-vrt-pub="chemin.dans.la.reponse" avec la valeur servie par
+   api/public_data.php — et api/public_data.php sert publicInfo EN ENTIER,
+   donc tous les champs du panneau « Portail visiteur ».
+
+   Il n'y avait AUCUNE fente dans la maquette. Compté, pas supposé :
+   `grep -c data-vrt-pub vitrine.html` rendait 0. Le mécanisme était écrit,
+   fonctionnel, et branché sur rien. Jacques modifiait les horaires ou
+   l'adresse dans l'administration, enregistrait, et l'accueil ne bougeait pas
+   — sans erreur, sans message, sans moyen de comprendre.
+
+   On équipe donc les valeurs qui CHANGENT dans la vie d'un centre. Le texte
+   pré-rendu reste la valeur par défaut : sans JavaScript, hors ligne, ou si
+   l'API ne répond pas, la page reste juste et indexable. La fente ne fait que
+   RECOUVRIR quand l'administration a posé quelque chose.
+
+   Chaque ancre est obligatoire : si la maquette change et qu'un motif ne se
+   retrouve plus, la construction ÉCHOUE. Une fente silencieusement perdue
+   ramènerait exactement le bug qu'on corrige ici.
+   ══════════════════════════════════════════════════════════════════════════ */
+{
+  const FENTES = [
+    // [ chemin public_data, texte pré-rendu à équiper, à quoi ça sert ]
+    ['publicInfo.horaires', 'Lundi → samedi, 8 h – 19 h', 'horaires d’ouverture'],
+    ['publicInfo.adresse',  'Centre VÉRITAS, Douala',     'adresse du centre'],
+  ];
+
+  for (const [chemin, texte, quoi] of FENTES) {
+    // On vise le <b> qui PORTE ce texte, pas le texte nu : poser l'attribut sur
+    // un nœud de texte est impossible, et remplacer la chaîne seule casserait
+    // la mise en page.
+    const motif = new RegExp('(<b\\b[^>]*)(>' + texte.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '</b>)');
+    if (!motif.test(corps)) {
+      throw new Error('Fente « ' + chemin + ' » (' + quoi + ') : le texte « ' + texte
+        + ' » est introuvable dans la maquette. Il a changé — mettez à jour ce motif, '
+        + 'sinon l’administration ne pilotera plus ce champ SANS que rien ne le signale.');
+    }
+    corps = corps.replace(motif, '$1 data-vrt-pub="' + chemin + '"$2');
+  }
+
+  const posees = (corps.match(/data-vrt-pub="/g) || []).length;
+  if (posees !== FENTES.length) {
+    throw new Error('Fentes : ' + posees + ' posée(s) pour ' + FENTES.length + ' attendue(s).');
+  }
+  console.log('fentes admin: ' + posees + ' (' + FENTES.map(f => f[0]).join(', ') + ')');
+}
+
 fs.writeFileSync(path.join(__dirname, '_corps.html'), corps);
 fs.writeFileSync(path.join(__dirname, '_gabarits.json'), JSON.stringify(gabarits));
 fs.writeFileSync(path.join(__dirname, '_data.json'), JSON.stringify(D));

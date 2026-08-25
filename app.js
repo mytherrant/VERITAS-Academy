@@ -26608,17 +26608,43 @@ window._catalogueLivresCharger = function(){
     .then(function(cat){
       if(!cat || !Array.isArray(cat.livres)) return 0;
       if(!DB.books) DB.books = [];
+      // Mémoire des valeurs posées par le catalogue : sert à distinguer
+      // « champ jamais touché » de « champ corrigé par l'administration ».
+      if(!DB._catVu) DB._catVu = {};
       var retires = DB._livresRetires || [], change = 0;
       cat.livres.forEach(function(f){
         if(!f || !f.id || retires.indexOf(f.id) >= 0) return;
         var fiche = _catalogueFiche(f), i, existant = null;
         for(i = 0; i < DB.books.length; i++){ if(DB.books[i].id === f.id){ existant = DB.books[i]; break; } }
-        if(!existant){ DB.books.unshift(fiche); change++; return; }
-        // Mise à jour : ce que le catalogue décrit, et rien d'autre.
+        /* ── Le catalogue met à jour, l'administration TRANCHE ────────────────
+           Jusqu'ici cette boucle réimposait la fiche du fichier à chaque
+           chargement. Corriger un prix, un titre ou un résumé depuis le panneau
+           admin ne tenait donc pas : la valeur revenait au rechargement suivant,
+           sans le moindre message. « Modifiable à tout moment » était faux.
+
+           On garde donc trace de ce que le catalogue a posé la dernière fois
+           (DB._catVu). Un champ n'est réécrit que s'il vaut ENCORE cette
+           valeur — c'est-à-dire si personne n'y a touché depuis. Dès que
+           l'administration l'a modifié, le fichier ne le reprend plus, tout en
+           continuant à livrer les champs restés intacts (une republication qui
+           ajoute des chapitres passe, sans écraser le prix corrigé à la main). */
+        if(!existant){
+          DB.books.unshift(fiche); change++;
+          DB._catVu[f.id] = JSON.parse(JSON.stringify(fiche));
+          return;
+        }
+        var vu = DB._catVu[f.id] || null;
         Object.keys(fiche).forEach(function(k){
           if(k === 'vendu' || k === 'stock') return;          // au centre, pas au fichier
-          if(JSON.stringify(existant[k]) !== JSON.stringify(fiche[k])){ existant[k] = fiche[k]; change++; }
+          var courant = JSON.stringify(existant[k]);
+          var neuf    = JSON.stringify(fiche[k]);
+          if(courant === neuf) return;                        // déjà à jour
+          // Première rencontre (pas de trace) : on adopte le catalogue, comme avant.
+          // Sinon on ne réécrit que ce que l'administration n'a pas touché.
+          if(vu && JSON.stringify(vu[k]) !== courant) return;  // édité à la main → on respecte
+          existant[k] = fiche[k]; change++;
         });
+        DB._catVu[f.id] = JSON.parse(JSON.stringify(fiche));
       });
       if(change){
         try { save(); } catch(e){}
