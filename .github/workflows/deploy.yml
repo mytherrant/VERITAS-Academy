@@ -224,6 +224,40 @@ jobs:
       - name: 🚪 Espaces par rôle (entrées mortes, chiffres inventés)
         run: node tests/espaces_roles.cjs
 
+      # ── 📐 ATELIER DE FRANÇAIS — cinq garde-fous, aucun ne tournait ici.
+      #    Jusqu'au 26/08/2026 la CI ne touchait pas l'Atelier : ces sondes
+      #    ne protégeaient que le poste de celui qui pensait à les lancer.
+      #    C'est le défaut « garde écrite, jamais appelée », déjà payé.
+      #    Toutes tournent sans navigateur et sans le corpus (gitignoré,
+      #    donc absent d'une machine de CI) : elles se rabattent sur un
+      #    corpus synthétique, et l'annoncent. Quelques secondes en tout.
+      - name: 📐 Atelier — le bloc applicatif compile-t-il ?
+        run: node tests/verif_syntaxe_atelier.cjs
+
+      # Une liaison {{ }} sans clé dans renderVals() ne lève RIEN : le bouton
+      # est mort, sans erreur ni trace. C'est la panne du formulaire de
+      # connexion-décor du 21/08, restée invisible en production.
+      - name: 🔗 Atelier — chaque bouton du gabarit trouve-t-il sa fonction ?
+        run: node tests/verif_liaisons_atelier.cjs
+
+      # La métadonnée et le contenu descendent séparément. Quand le second
+      # transfert échoue, l'export Word annonce 387 mots au-dessus d'un texte
+      # de 33 — et l'épreuve part en photocopie.
+      - name: 📖 Atelier — le contenu suit-il sa métadonnée ?
+        run: node tests/sonde_corpus_sync.cjs
+
+      # _persist() est appelé à chaque frappe. Sans le différé, un envoi par
+      # appel : LWS bannit l'IP à six mauvaises requêtes par minute, et une
+      # file trop bavarde a déjà fermé le site entier.
+      - name: 📡 Atelier — la synchro reste-t-elle économe en requêtes ?
+        run: node tests/sonde_sync_groupe.cjs
+
+      # Une équipe naissait avec la liste de membres du NAVIGATEUR (des
+      # profils de démonstration) : le premier envoi passait, tous les
+      # suivants tombaient en 403 — pour le créateur du groupe lui-même.
+      - name: 👥 Atelier — le travail d'équipe franchit-il le navigateur ?
+        run: node tests/sonde_collaboratif.cjs
+
       - name: 📋 Préparer les fichiers
         run: |
           mkdir -p deploy/api \

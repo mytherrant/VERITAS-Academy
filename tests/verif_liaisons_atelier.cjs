@@ -124,7 +124,29 @@ function contexte() {
   return ctx;
 }
 
-const SOURCE = JSON.parse(fs.readFileSync(P('api/data/corpus_minesec.json'), 'utf8'));
+/* REPLI DE CI. `api/data/` est entièrement gitignoré — le corpus est la
+   marchandise et ce dépôt est public — si bien qu'une machine de CI ne le
+   voit jamais. Sans ce repli, cette sonde ne pouvait tourner que sur le
+   poste de celui qui pensait à la lancer, et l'Atelier n'était gardé nulle
+   part. Le repli est ANNONCÉ : une sonde qui se rabat en silence ferait
+   croire qu'on mesure le vrai répertoire. */
+function corpusOuRepli(chemin) {
+  if (fs.existsSync(chemin)) return JSON.parse(fs.readFileSync(chemin, 'utf8'));
+  console.log('  (!) corpus_minesec.json absent — corpus SYNTHÉTIQUE. La mécanique\n'
+            + '      est vérifiée, les comptages réels ne le sont pas.');
+  const mot = 'lorem';
+  return Array.from({ length: 60 }, (_, i) => {
+    const n = 120 + (i % 8) * 40;
+    return { n: i + 1, type: 'NARRATIF', words: n, level: '3e',
+      cycle: 'PREMIER CYCLE', group: 'Module 1 — La vie quotidienne',
+      groupKind: 'Module', groupNum: 1, subkind: 'corpus',
+      usage: 'corpus de leçon', text: (mot + ' ').repeat(n).trim(),
+      reference: 'Auteur ' + i + ', Titre ' + i,
+      author: 'Auteur ' + i, title: 'Titre ' + i,
+      faits: 'le passé simple', comprehension: '1) Question ?', exploitation: '1) Question ?' };
+  });
+}
+const SOURCE = corpusOuRepli(P('api/data/corpus_minesec.json'));
 const ctx = contexte();
 vm.runInContext(html.slice(iScript).replace(/^[\s\S]*?>/, '').replace(/<\/script>[\s\S]*$/, ''),
   ctx, { filename: 'index.html#x-dc' });

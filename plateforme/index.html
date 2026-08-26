@@ -1761,7 +1761,18 @@
 
       <sc-if value="{{ tabPropositions }}" hint-placeholder-val="{{ false }}">
       <div>
-        <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 20px;text-align:justify">Modifications proposées par les collaborateurs. Le relecteur accepte, refuse ou commente ; une acceptation s'applique à l'édition.</p>
+        <p style="font-size:13px;color:var(--c7a8598,#7a8598);margin:0 0 18px;text-align:justify">Modifications proposées par les collaborateurs. Le relecteur accepte, refuse ou commente ; une acceptation s'applique à l'édition.</p>
+        <sc-if value="{{ propPeut }}" hint-placeholder-val="{{ true }}">
+        <div style="background:var(--cf7f9fc,#f7f9fc);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:15px 16px;margin-bottom:20px">
+          <div style="font-family:Poppins;font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f);margin-bottom:10px">Proposer une modification</div>
+          <select value="{{ propCible }}" onChange="{{ setPropCible }}" style="width:100%;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:9px;padding:9px 11px;font-size:12.5px;background:var(--cffffff,#fff);color:var(--c22303f,#22303f);font-family:'Open Sans'">
+            <sc-for list="{{ propCibles }}" as="pc" hint-placeholder-count="4"><option value="{{ pc.val }}">{{ pc.label }}</option></sc-for>
+          </select>
+          <textarea value="{{ propTexte }}" onChange="{{ setPropTexte }}" placeholder="Votre formulation…" style="width:100%;margin-top:9px;min-height:74px;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:9px;padding:9px 11px;font-size:12.5px;font-family:'Open Sans';line-height:1.55;resize:vertical;background:var(--cffffff,#fff);color:var(--c22303f,#22303f)"></textarea>
+          <button onClick="{{ propEnvoyer }}" style="margin-top:9px;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:9px 16px;font-size:12.5px;font-weight:700;border-radius:9px;cursor:pointer;font-family:Poppins">Envoyer la proposition</button>
+          <div style="{{ propMsgStyle }}">{{ propMsg }}</div>
+        </div>
+        </sc-if>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;align-items:start">
           <sc-for list="{{ propColumns }}" as="col" hint-placeholder-count="3">
             <div>
@@ -1799,6 +1810,23 @@
          formulaire d'inscription. Rien n'est envoyé par l'application —
          elle ouvre WhatsApp ou le courriel avec le message prêt, et c'est
          l'enseignant qui appuie sur « envoyer ». -->
+    <sc-if value="{{ sansEquipe }}" hint-placeholder-val="{{ false }}">
+    <section class="vrt-carte" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:14px;padding:20px 22px;margin-bottom:20px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
+      <h2 style="font-family:Poppins;font-size:15.5px;font-weight:700;color:var(--c14375f,#14375f);margin:0 0 3px">Créer votre espace de travail</h2>
+      <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:0 0 14px;line-height:1.55">Vos épreuves, vos cours et vos annotations vous suivront d’un appareil à l’autre. Vous pourrez ensuite y inviter vos collègues avec un code.</p>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+        <input value="{{ eqNom }}" onChange="{{ setEqNom }}" placeholder="Nom de votre établissement" style="flex:1 1 220px;min-width:180px;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:9px;padding:9px 11px;font-size:13px;font-family:'Open Sans'">
+        <button onClick="{{ eqCreer }}" style="{{ invBtnBleu }}">{{ eqCreerLabel }}</button>
+      </div>
+      <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--ceef2f7,#eef2f7);display:flex;gap:9px;flex-wrap:wrap;align-items:center">
+        <span style="font-size:12.5px;color:var(--c5a6678,#5a6678);font-weight:600">Un collègue vous a envoyé un code ?</span>
+        <input value="{{ invSaisie }}" onChange="{{ setInvSaisie }}" placeholder="Ex. KBMR-483" style="flex:1 1 150px;min-width:130px;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:9px;padding:9px 11px;font-size:13px;font-family:'Open Sans';letter-spacing:.06em">
+        <button onClick="{{ invRejoindre }}" style="{{ invBtnBleu }}">Rejoindre l’équipe</button>
+      </div>
+      <div style="{{ invMsgStyle }}">{{ invMsg }}</div>
+    </section>
+    </sc-if>
+    <sc-if value="{{ aEquipe }}" hint-placeholder-val="{{ true }}">
     <section class="vrt-carte" style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:14px;padding:20px 22px;margin-bottom:20px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
       <div style="display:flex;align-items:flex-start;gap:13px;flex-wrap:wrap">
         <span style="flex:none">{{ invSceau }}</span>
@@ -1823,7 +1851,12 @@
         <button onClick="{{ invRejoindre }}" style="{{ invBtnBleu }}">Rejoindre l’équipe</button>
       </div>
       <div style="{{ invMsgStyle }}">{{ invMsg }}</div>
+      <div style="margin-top:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--c8b97a8,#8b97a8)">{{ eqPlaces }}</span>
+        <button onClick="{{ eqQuitter }}" style="{{ eqQuitterStyle }}">Quitter l’équipe</button>
+      </div>
     </section>
+    </sc-if>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:26px">
       <div style="background:linear-gradient(135deg,var(--c1a72bb,#1a72bb),var(--c134f88,#134f88));color:var(--cffffff,#fff);border-radius:14px;padding:22px 24px;box-shadow:0 6px 18px rgba(20,55,95,.18)">
@@ -1849,6 +1882,7 @@
             <div style="margin-left:auto;display:flex;align-items:center;gap:16px">
               <span style="font-size:12px;color:var(--c7a8598,#7a8598)">Quota {{ m.quotaLine }}</span>
               <select value="{{ m.role }}" onChange="{{ m.setRole }}" disabled="{{ m.roleDisabled }}" style="{{ m.roleSelStyle }}"><sc-for list="{{ roleOptions }}" as="r" hint-placeholder-count="6"><option value="{{ r }}">{{ r }}</option></sc-for></select>
+              <button onClick="{{ m.retirer }}" style="{{ m.retirerStyle }}">Retirer</button>
             </div>
           </div>
         </sc-for>
@@ -3149,6 +3183,12 @@ class Component extends DCLogic {
       payProvider:null,payBusy:false,payErr:'',payRef:'',payUrl:'',
       annotSel:null,annotVersion:0,annotTool:'surligner',annotColor:'var(--cfff3a3,#fff3a3)',annotComment:'',
       chatOpen:false,chatDraft:'',epTab:'edition',
+      /* Formulaire de proposition. Il n'existait AUCUN moyen d'en creer
+         une : les trois que montrait l'ecran etaient des donnees de
+         demonstration, et le Relecteur -- a qui l'edition directe est
+         fermee -- n'avait donc aucun geste, alors que la table des roles
+         lui promet « Commenter et proposer ». */
+      propCible:'',propTexte:'',propMsg:'',propMsgTon:'',
       actFilter:'toutes',collabTab:'discussions',
       coursTab:'gabarits',cycleFiltre:'',createOpen:false,admTab:'fonctions',
       profTab:'infos',profSaved:'',coCorpusQ:'',coConfOpen:!this._petitEcran(),
@@ -3165,8 +3205,18 @@ class Component extends DCLogic {
       assistMsgs:this._load('minesec_assistant',[])||[],
       introEtape:0,introOuverte:!this._load('minesec_intro_vue',false),
       invSaisie:'',invMsg:'',invMsgTon:'',invCopie:0,
-      groupes:this._load('minesec_groupes',null)||[{id:'g1',nom:'Lycée Bilingue de Yaoundé',type:'ferme',code:'LBY-2026',membres:['u1','u2','u3','u4','u5','u6']}],
-      groupeId:this._load('minesec_groupeid',null)||'g1',
+      /* AUCUNE EQUIPE PAR DEFAUT. Il y en avait une, ecrite en dur :
+         id `g1`, code `LBY-2026`, membres `u1`..`u6`. Trois consequences,
+         toutes mesurees le 26/08 : (1) toutes les installations de la
+         Terre poussaient sur le meme identifiant de groupe ; (2) le
+         serveur creait l'equipe avec ces membres de DEMONSTRATION, ou
+         l'identifiant du compte reel ne figurait pas, et refusait donc
+         tout envoi suivant en 403 ; (3) l'ecran d'equipe affichait un
+         code d'invitation qui n'ouvrait rien. Les equipes viennent
+         desormais du serveur (?action=groupe&op=lister). */
+      groupes:this._load('minesec_groupes',null)||[],
+      groupeId:this._load('minesec_groupeid',null)||'',
+      eqBusy:false,eqNom:'',
       admin:this._load('minesec_admin',null)||{features:{},corpusSource:'minesec',cyclesOff:[],connexion:{comptesDemo:true,message:''},inactifs:[]},
       convs:this._load('minesec_convs',null)||[{id:'team',nom:'Équipe de français'}],
       convId:this._load('minesec_convid',null)||'team',
@@ -4334,14 +4384,37 @@ class Component extends DCLogic {
      Voir la note du correctif : `action=etat` existait et n'avait aucun
      appelant. Tout le travail collectif vivait dans un seul navigateur. */
 
-  /* Ce qui est PARTAGE. Volontairement restreint : les epreuves, les cours
-     et les annotations. Pas `users` -- la liste des comptes appartient a
-     l'etablissement, pas au poste -- ni les preferences, qui sont
-     personnelles. */
+  /* Ce qui est PARTAGE. Volontairement restreint : les epreuves, les cours,
+     les annotations, les DISCUSSIONS et les PROPOSITIONS de modification.
+     Pas `users` -- l'annuaire vient du serveur, seul a savoir qui est qui --
+     ni les preferences, qui sont personnelles.
+
+     ⚠️ Les messages et les propositions n'y figuraient pas. Ils etaient
+     ecrits dans le stockage local et ne franchissaient jamais le navigateur :
+     « envoyer un message » revenait a se parler a soi-meme, et une
+     proposition de correction restait invisible de celui qu'elle concernait.
+     Mesure du 26/08 : `_syncContenu` ne rendait que {epreuves, cours, annot}. */
   _syncContenu(){
     const st=this.state;
     return {epreuves:st.epreuves||[],cours:st.cours||[],
-            annot:this.annot||{},maj:Date.now()};
+            annot:this.annot||{},
+            convs:st.convs||[],
+            msgs:this._msgsPartageables(),
+            props:st.proposals||{},
+            maj:Date.now()};
+  }
+  /* Les messages partent BORNES : une conversation d'annee scolaire ne doit
+     pas gonfler l'instantane jusqu'a buter sur la limite du serveur (2 Mo).
+     Les deux cents derniers de chaque fil suffisent a se comprendre.
+     Le filtre sur `m.id` ecarte au passage les messages de DEMONSTRATION,
+     qui n'en portent pas : ils restent chez celui qui les voit et ne sont
+     jamais presentes a une equipe comme du vrai trafic. */
+  _msgsPartageables(){
+    const par=this.state.msgsByConv||{},out={};
+    Object.keys(par).forEach(k=>{
+      out[k]=(par[k]||[]).filter(m=>m&&m.id).slice(-200);
+    });
+    return out;
   }
   /* Fusion par OBJET, dernier ecrivain gagne sur `updatedAt`.
      Fusionner le blob entier ferait perdre l'epreuve qu'un collegue vient
@@ -4360,11 +4433,79 @@ class Component extends DCLogic {
     return Object.keys(par).map(k=>par[k])
       .sort((x,y)=>(y.updatedAt||0)-(x.updatedAt||0));
   }
+  /* LES MESSAGES NE SE FUSIONNENT PAS COMME LE RESTE.
+     Une epreuve est un brouillon : la version la plus recente remplace la
+     precedente. Un message est un FAIT : deux collegues qui ecrivent dans la
+     meme minute ont dit deux choses, et « le dernier gagne » en effacerait
+     une. On prend donc l'UNION, dedoublonnee par identifiant, remise dans
+     l'ordre du temps. */
+  _fusionnerMsgs(mien,leur){
+    const out=Object.assign({},mien||{});
+    Object.keys(leur||{}).forEach(k=>{
+      const vus={},liste=[];
+      (out[k]||[]).concat(leur[k]||[]).forEach(m=>{
+        if(!m)return;
+        const cle=m.id||((m.userId||'')+'|'+(m.ts||0)+'|'+String(m.text||'').slice(0,40));
+        if(vus[cle])return;
+        vus[cle]=1;liste.push(m);
+      });
+      out[k]=liste.sort((a,b)=>(a.ts||0)-(b.ts||0)).slice(-400);
+    });
+    return out;
+  }
+  /* Les fils de discussion : par identifiant, le plus recemment renomme
+     l'emporte, et l'ordre reste celui de la creation -- une liste qui se
+     reordonne toute seule a chaque synchronisation est illisible. */
+  _fusionnerConvs(mien,leur){
+    const par={};
+    (mien||[]).forEach(c=>{if(c&&c.id)par[c.id]=c;});
+    (leur||[]).forEach(c=>{
+      if(!c||!c.id)return;
+      const a=par[c.id];
+      if(!a||((c.updatedAt||0)>(a.updatedAt||0)))par[c.id]=c;
+    });
+    return Object.keys(par).map(k=>par[k])
+      .sort((x,y)=>(x.cree||0)-(y.cree||0));
+  }
+  /* Les propositions sont rangees par epreuve : on fusionne chaque casier. */
+  _fusionnerProps(mien,leur){
+    const out=Object.assign({},mien||{});
+    Object.keys(leur||{}).forEach(k=>{
+      out[k]=this._fusionner(out[k]||[],leur[k]||[]);
+    });
+    return out;
+  }
+  /* ANNUAIRE — ce que le serveur sait et que le navigateur ignore.
+     Sans lui, le travail d'un collegue redescend signe d'un identifiant de
+     compte que la table locale ne connait pas : le rendu retombait alors sur
+     les profils de demonstration et affichait « Mme Nadege Fotso », ou pire,
+     le nom du lecteur lui-meme, sous la remarque d'un autre.
+     Rend la liste des utilisateurs mise a jour, ou null s'il n'y a rien a
+     changer -- pour ne pas declencher un rendu a chaque relecture. */
+  _appliquerAnnuaire(ann){
+    if(!ann||typeof ann!=='object')return null;
+    const users=(this.state.users||[]).slice();
+    let change=false;
+    Object.keys(ann).forEach(id=>{
+      const nom=String(((ann[id]||{}).nom)||'').trim();
+      if(!id||!nom)return;
+      const i=users.findIndex(u=>u.id===id);
+      if(i<0){
+        users.push({id:id,name:nom,role:'Enseignant',quota:{limit:0,used:0}});
+        change=true;
+      }else if(users[i].name!==nom){
+        users[i]=Object.assign({},users[i],{name:nom});
+        change=true;
+      }
+    });
+    return change?users:null;
+  }
   /* ENVOI. Differe de 4 s apres la derniere modification, et jamais plus
      d'une fois toutes les 8 s. `_persist()` est appele a chaque frappe :
      envoyer a chaque appel produirait la rafale qui a deja ferme le site. */
   _syncPousser(){
     if(!this._jeton())return;                 // pas de compte : rien a partager
+    if(!this._groupeActif())return;           // pas d'equipe : rien a partager
     clearTimeout(this._syncT);
     this._syncT=setTimeout(()=>{
       const t=Date.now();
@@ -4373,14 +4514,19 @@ class Component extends DCLogic {
            partira, pas celui d'il y a huit secondes. */
         this._syncPousser();return;
       }
-      this._syncDernier=t;
       const gid=this._groupeActif();
-      const grp=(this.state.groupes||[]).find(g=>g.id===gid)||null;
+      if(!gid)return;
+      this._syncDernier=t;
       fetch(this._apiUrl('plateforme.php')+'?action=etat&groupe='+encodeURIComponent(gid),{
         method:'POST',
         headers:Object.assign({'Content-Type':'application/json'},
           this._jeton()?{Authorization:'Bearer '+this._jeton()}:{}),
-        body:JSON.stringify({etat:this._syncContenu(),groupe:grp})
+        /* L'objet `groupe` n'est PLUS envoye. Le serveur le recopiait tel
+           quel : n'importe quel membre pouvait s'y declarer seul membre,
+           renommer l'equipe et la passer en « ouvert ». Eprouve sur banc le
+           26/08 -- 200, et l'equipe changeait de main. L'appartenance se
+           regle desormais par ?action=groupe, ou le proprietaire est verifie. */
+        body:JSON.stringify({etat:this._syncContenu()})
       })
         .then(r=>r.ok?r.json():Promise.reject(r.status))
         .then(j=>{if(j&&j.revision!=null)this._syncRev=j.revision;
@@ -4388,22 +4534,59 @@ class Component extends DCLogic {
         /* AUCUNE REPRISE IMMEDIATE. L'envoi suivant portera tout : le
            contenu est un instantane complet, pas un delta. Reessayer
            aussitot est exactement ce qui fabrique une rafale. */
-        .catch(e=>this.setState({syncEtat:(e===403?'refus':'panne')}));
+        .catch(e=>{this._syncIncident(e);});
     },4000);
+  }
+  /* Un refus n'est pas une panne, et les deux ne se traitent pas pareil.
+     403 : on n'est plus dans l'equipe -- inutile de continuer a frapper.
+     404 : l'equipe n'existe plus cote serveur -- on lache la reference
+     perimee, sans quoi le poste interroge un casier disparu toutes les
+     quatre-vingt-dix secondes jusqu'a la fin des temps. */
+  _syncIncident(e){
+    if(e===404){
+      this._oublierGroupe();
+      this.setState({syncEtat:'refus'});
+      return;
+    }
+    this.setState({syncEtat:(e===403?'refus':'panne')});
+  }
+  _oublierGroupe(){
+    const gid=this._groupeActif();
+    if(!gid)return;
+    const gs=(this.state.groupes||[]).filter(g=>g.id!==gid);
+    this._save('minesec_groupes',gs);
+    this._save('minesec_groupeid',gs.length?gs[0].id:'');
+    this.setState({groupes:gs,groupeId:gs.length?gs[0].id:''});
   }
   /* RELECTURE. Une fois au demarrage, puis toutes les 90 s -- et seulement
      si l'onglet est visible : un onglet oublie en arriere-plan n'a aucune
      raison d'interroger le serveur toute la journee. */
   _syncTirer(){
     if(!this._jeton())return;
-    try{if(document.hidden)return;}catch(e){}
     const gid=this._groupeActif();
+    if(!gid)return;
+    try{if(document.hidden)return;}catch(e){}
     fetch(this._apiUrl('plateforme.php')+'?action=etat&groupe='+encodeURIComponent(gid),{
       headers:this._jeton()?{Authorization:'Bearer '+this._jeton()}:{}})
       .then(r=>r.ok?r.json():Promise.reject(r.status))
       .then(j=>{
         const e=j&&j.etat;
-        if(!e||!e.contenu)return;                     // rien encore partage
+        /* L'annuaire et le groupe redescendent MEME si l'etat est vide :
+           une equipe qu'on vient de rejoindre n'a encore rien partage, et
+           c'est pourtant le moment ou l'on a besoin de savoir qui en est. */
+        const users=this._appliquerAnnuaire(j&&j.annuaire);
+        if(j&&j.groupe&&j.groupe.id){
+          const gs=(this.state.groupes||[]).slice();
+          const i=gs.findIndex(g=>g.id===j.groupe.id);
+          if(i<0)gs.push(j.groupe);else gs[i]=j.groupe;
+          this._save('minesec_groupes',gs);
+          this.setState({groupes:gs});
+        }
+        if(users)this.setState({users:users});
+        if(!e||!e.contenu){
+          if(users)this._persistLocal();
+          return;                                     // rien encore partage
+        }
         if(this._syncRev!=null&&e.revision<=this._syncRev)return;  // deja vu
         this._syncRev=e.revision;
         const c=e.contenu;
@@ -4411,32 +4594,110 @@ class Component extends DCLogic {
         const co=this._fusionner(this.state.cours,c.cours);
         /* Les annotations sont un objet indexe par numero de texte : on
            prend les deux cotes, le distant l'emporte sur une meme cle. */
-        if(c.annot&&typeof c.annot==='object'){
+        if(c.annot&&typeof c.annot==='object'&&!Array.isArray(c.annot)){
           this.annot=Object.assign({},this.annot||{},c.annot);
           this._save('minesec_annot',this.annot);
         }
-        if(j.groupe&&j.groupe.id){
-          const gs=(this.state.groupes||[]).map(g=>g.id===j.groupe.id?j.groupe:g);
-          if(!gs.some(g=>g.id===j.groupe.id))gs.push(j.groupe);
-          this._save('minesec_groupes',gs);
-          this.setState({groupes:gs});
-        }
-        this.setState({epreuves:ep,cours:co,syncEtat:'ok',syncLe:Date.now(),
-          annotVersion:(this.state.annotVersion||0)+1},()=>this._save('minesec_v3',
-            {authed:this.state.authed,users:this.state.users,
-             currentUserId:this.state.currentUserId,team:this.state.team,
-             epreuves:ep,activeId:this.state.activeId,cours:co,
-             activeCoursId:this.state.activeCoursId,compteId:this.state.compteId}));
+        const convs=this._fusionnerConvs(this.state.convs,c.convs);
+        const msgs=this._fusionnerMsgs(this.state.msgsByConv,c.msgs);
+        const props=this._fusionnerProps(this.state.proposals,c.props);
+        this._save('minesec_convs',convs);
+        this._save('minesec_convmsgs',msgs);
+        this._save('minesec_props',props);
+        this.setState(Object.assign({epreuves:ep,cours:co,convs:convs,msgsByConv:msgs,
+          proposals:props,syncEtat:'ok',syncLe:Date.now(),
+          annotVersion:(this.state.annotVersion||0)+1},users?{users:users}:{}),
+          ()=>this._persistLocal());
       })
-      .catch(e=>{if(e===403)this.setState({syncEtat:'refus'});});
+      .catch(e=>{this._syncIncident(e);});
+  }
+  /* Enregistrement LOCAL seul : on vient de recevoir du serveur, le lui
+     renvoyer aussitot ne ferait qu'ajouter un aller-retour et un risque de
+     va-et-vient entre deux postes. */
+  _persistLocal(){
+    const st=this.state;
+    this._save('minesec_v3',{authed:st.authed,users:st.users,
+      currentUserId:st.currentUserId,team:st.team,epreuves:st.epreuves,
+      activeId:st.activeId,cours:st.cours,activeCoursId:st.activeCoursId,
+      compteId:st.compteId});
   }
   _installerSync(){
     if(this._syncInstalle)return;
     this._syncInstalle=true;
-    this._syncTirer();
-    /* 90 s : assez pour voir arriver le travail d'un collegue dans la
-       minute, assez peu pour rester tres loin du seuil de LWS. */
-    this._syncPoll=setInterval(()=>this._syncTirer(),90000);
+    /* On demande D'ABORD au serveur a quelles equipes on appartient. Sans
+       cette liste, `_groupeActif()` retombait sur un identifiant ecrit en
+       dur -- `g1` -- que TOUTES les installations partageaient. */
+    this._chargerGroupes(()=>{
+      this._syncTirer();
+      /* 90 s : assez pour voir arriver le travail d'un collegue dans la
+         minute, assez peu pour rester tres loin du seuil de LWS. */
+      this._syncPoll=setInterval(()=>this._syncTirer(),90000);
+    });
+  }
+  /* ---- LES EQUIPES SONT TENUES PAR LE SERVEUR -------------------------
+     Elles vivaient dans le navigateur, avec un identifiant (`g1`) et un code
+     (`LBY-2026`) ecrits en dur et identiques partout, et une liste de membres
+     faite de profils de demonstration. Consequence mesuree sur banc le 26/08 :
+     le premier envoi creait l'equipe cote serveur avec ces faux membres, et
+     tous les suivants tombaient en 403 -- y compris pour son auteur. */
+  _entetesJeton(json){
+    const h=json?{'Content-Type':'application/json'}:{};
+    const t=this._jeton();
+    if(t)h.Authorization='Bearer '+t;
+    return h;
+  }
+  _chargerGroupes(cb){
+    if(!this._jeton()){cb&&cb([]);return;}
+    fetch(this._apiUrl('plateforme.php')+'?action=groupe&op=lister',
+      {headers:this._entetesJeton(false)})
+      .then(r=>r.ok?r.json():Promise.reject(r.status))
+      .then(j=>{
+        const gs=(j&&j.groupes)||[];
+        let gid=this.state.groupeId;
+        if(!gs.some(g=>g.id===gid))gid=gs.length?gs[0].id:'';
+        let users=null;
+        gs.forEach(g=>{const u=this._appliquerAnnuaire(g.annuaire);if(u)users=u;});
+        this._save('minesec_groupes',gs);
+        this._save('minesec_groupeid',gid);
+        this.setState(Object.assign({groupes:gs,groupeId:gid},users?{users:users}:{}),
+          ()=>cb&&cb(gs));
+      })
+      .catch(()=>{cb&&cb(null);});
+  }
+  /* Creer son espace de travail. C'est aussi ce que fait un enseignant seul :
+     son equipe d'une personne lui sert a retrouver ses epreuves d'un appareil
+     a l'autre. Le nombre de places, lui, depend de son abonnement. */
+  _creerEquipe(nom){
+    if(!this._jeton()){
+      this.setState({invMsg:'Connectez-vous pour créer un espace de travail.',invMsgTon:'ko'});
+      return;
+    }
+    if(this.state.eqBusy)return;
+    this.setState({eqBusy:true,invMsg:'',invMsgTon:''});
+    fetch(this._apiUrl('plateforme.php')+'?action=groupe&op=creer',
+      {method:'POST',headers:this._entetesJeton(true),
+       body:JSON.stringify({nom:String(nom||'').trim()})})
+      .then(r=>r.json().catch(()=>({})).then(j=>({http:r.status,j:j})))
+      .then(({http,j})=>{
+        if(http!==200||!j||!j.ok||!j.groupe){
+          this.setState({eqBusy:false,
+            invMsg:(j&&j.error)||('Création impossible (erreur '+http+').'),invMsgTon:'ko'});
+          return;
+        }
+        const gs=(this.state.groupes||[]).concat([j.groupe]);
+        const users=this._appliquerAnnuaire(j.groupe.annuaire);
+        this._save('minesec_groupes',gs);
+        this._save('minesec_groupeid',j.groupe.id);
+        this.setState(Object.assign({groupes:gs,groupeId:j.groupe.id,eqBusy:false,eqNom:'',
+          invMsg:'« '+j.groupe.nom+' » est créé. Code d’équipe : '+j.groupe.code,
+          invMsgTon:'ok'},users?{users:users}:{}),()=>{
+            /* L'instantane part tout de suite : l'equipe naitrait vide, et un
+               collegue invite dans la minute ne verrait rien. */
+            this._syncRev=null;this._persist();
+          });
+      })
+      .catch(()=>this.setState({eqBusy:false,
+        invMsg:'Serveur injoignable. Réessayez.',invMsgTon:'ko'}));
   }
   /* ---- INVITATION D'UN COLLEGUE ---------------------------------------
      Le lien porte le code du groupe dans le hash : celui qui le recoit se
@@ -4449,48 +4710,181 @@ class Component extends DCLogic {
     }catch(e){return 'https://veritas-school.com/plateforme/#rejoindre='+encodeURIComponent(code);}
   }
   _messageInvitation(code,nomGroupe){
-    return 'Bonjour, je vous invite a rejoindre l\u2019equipe \u00ab\u00a0'+(nomGroupe||'notre etablissement')
-      +'\u00a0\u00bb sur l\u2019Atelier de Francais de VERITAS.\n\n'
-      +'Code d\u2019equipe : '+code+'\n'
+    return 'Bonjour, je vous invite a rejoindre l’equipe « '+(nomGroupe||'notre etablissement')
+      +' » sur l’Atelier de Francais de VERITAS.\n\n'
+      +'Code d’equipe : '+code+'\n'
       +this._lienInvitation(code)+'\n\n'
-      +'Connectez-vous avec votre compte VERITAS, le code s\u2019applique tout seul.';
+      +'Connectez-vous avec votre compte VERITAS, le code s’applique tout seul.';
   }
-  /* Rejoindre par code. Le meme chemin sert au lien et a la saisie a la
-     main : une seule regle, un seul message d'erreur. */
+  /* Rejoindre par code. LE SERVEUR SEUL PEUT REPONDRE.
+     Cette fonction cherchait le code dans `this.state.groupes` -- la liste
+     LOCALE. Or l'invite ne connait que le code : son navigateur n'a jamais
+     entendu parler de cette equipe. Le message « Ce code ne correspond a
+     aucune equipe connue » tombait donc sur TOUT LE MONDE, et l'invitation
+     n'a jamais pu fonctionner depuis qu'elle existe. */
   _rejoindreEquipe(code){
     const c=String(code||'').trim().toUpperCase();
-    if(!c){this.setState({invMsg:'Saisissez le code re\u00e7u.',invMsgTon:'ko'});return false;}
-    const gs=(this.state.groupes||[]).slice();
-    const g=gs.find(x=>String(x.code||'').toUpperCase()===c);
-    if(!g){this.setState({invMsg:'Ce code ne correspond \u00e0 aucune \u00e9quipe connue. '
-      +'V\u00e9rifiez-le aupr\u00e8s de la personne qui vous l\u2019a envoy\u00e9.',invMsgTon:'ko'});return false;}
-    const moi=(this._me()||{}).id;
-    if((g.membres||[]).indexOf(moi)>=0){
-      this.setState({invMsg:'Vous faites d\u00e9j\u00e0 partie de \u00ab\u00a0'+g.nom+'\u00a0\u00bb.',
-        invMsgTon:'ok',groupeId:g.id},()=>this._persist());
-      return true;
+    if(!c){this.setState({invMsg:'Saisissez le code reçu.',invMsgTon:'ko'});return false;}
+    if(!this._jeton()){
+      this.setState({invMsg:'Connectez-vous avec votre compte VÉRITAS, puis saisissez le code.',
+        invMsgTon:'ko',invSaisie:c});
+      return false;
     }
-    const maj=gs.map(x=>x.id===g.id?Object.assign({},x,{membres:[...(x.membres||[]),moi]}):x);
-    this._save('minesec_groupes',maj);this._save('minesec_groupeid',g.id);
-    this.setState({groupes:maj,groupeId:g.id,invSaisie:'',
-      invMsg:'Vous avez rejoint \u00ab\u00a0'+g.nom+'\u00a0\u00bb.',invMsgTon:'ok'},()=>this._persist());
+    if(this.state.eqBusy)return false;
+    this.setState({eqBusy:true,invMsg:'Vérification du code…',invMsgTon:''});
+    fetch(this._apiUrl('plateforme.php')+'?action=groupe&op=rejoindre',
+      {method:'POST',headers:this._entetesJeton(true),body:JSON.stringify({code:c})})
+      .then(r=>r.json().catch(()=>({})).then(j=>({http:r.status,j:j})))
+      .then(({http,j})=>{
+        if(http!==200||!j||!j.ok){
+          this.setState({eqBusy:false,
+            invMsg:(j&&j.error)||('Serveur indisponible (erreur '+http+').'),invMsgTon:'ko'});
+          return;
+        }
+        if(!j.rejoint){
+          this.setState({eqBusy:false,invMsg:j.error||'Code refusé.',invMsgTon:'ko'});
+          return;
+        }
+        const g=j.groupe||{};
+        const gs=(this.state.groupes||[]).slice();
+        const i=gs.findIndex(x=>x.id===g.id);
+        if(i<0)gs.push(g);else gs[i]=g;
+        const users=this._appliquerAnnuaire(g.annuaire);
+        this._save('minesec_groupes',gs);
+        this._save('minesec_groupeid',g.id);
+        this.setState(Object.assign({groupes:gs,groupeId:g.id,eqBusy:false,invSaisie:'',
+          invMsg:(j.deja?'Vous faites déjà partie de « ':'Vous avez rejoint « ')
+            +(g.nom||'l’équipe')+' ».',
+          invMsgTon:'ok'},users?{users:users}:{}),()=>{
+            /* On relit AVANT d'ecrire : sans cela le premier envoi de
+               l'arrivant, qui ne porte que son propre travail, ecraserait
+               l'instantane de toute l'equipe. */
+            this._syncRev=null;
+            this._syncTirer();
+          });
+      })
+      .catch(()=>this.setState({eqBusy:false,
+        invMsg:'Serveur injoignable. Vérifiez votre connexion.',invMsgTon:'ko'}));
     return true;
+  }
+  /* Quitter une equipe, ou en retirer quelqu'un quand on la dirige. */
+  _retirerMembre(gid,membre){
+    if(!this._jeton()||!gid)return;
+    fetch(this._apiUrl('plateforme.php')+'?action=groupe&op=retirer',
+      {method:'POST',headers:this._entetesJeton(true),
+       body:JSON.stringify({groupe:gid,membre:membre||undefined})})
+      .then(r=>r.json().catch(()=>({})).then(j=>({http:r.status,j:j})))
+      .then(({http,j})=>{
+        if(http!==200||!j||!j.ok){
+          this.setState({invMsg:(j&&j.error)||'Retrait impossible.',invMsgTon:'ko'});
+          return;
+        }
+        this.setState({invMsg:'Membre retiré.',invMsgTon:'ok'});
+        this._chargerGroupes();
+      })
+      .catch(()=>this.setState({invMsg:'Serveur injoignable.',invMsgTon:'ko'}));
+  }
+  _renommerEquipe(gid,nom){
+    if(!this._jeton()||!gid||!String(nom||'').trim())return;
+    fetch(this._apiUrl('plateforme.php')+'?action=groupe&op=renommer',
+      {method:'POST',headers:this._entetesJeton(true),
+       body:JSON.stringify({groupe:gid,nom:String(nom).trim()})})
+      .then(r=>r.json().catch(()=>({})).then(j=>({http:r.status,j:j})))
+      .then(({http,j})=>{
+        if(http!==200||!j||!j.ok)
+          this.setState({invMsg:(j&&j.error)||'Renommage refusé.',invMsgTon:'ko'});
+      })
+      .catch(()=>{});
+  }
+  _supprimerEquipe(gid){
+    if(!this._jeton()||!gid)return;
+    fetch(this._apiUrl('plateforme.php')+'?action=groupe&op=supprimer',
+      {method:'POST',headers:this._entetesJeton(true),
+       body:JSON.stringify({groupe:gid})})
+      .then(r=>r.json().catch(()=>({})).then(j=>({http:r.status,j:j})))
+      .then(({http,j})=>{
+        if(http!==200||!j||!j.ok){
+          this.setState({invMsg:(j&&j.error)||'Suppression refusée.',invMsgTon:'ko'});
+          return;
+        }
+        this._syncRev=null;
+        this.setState({invMsg:'Équipe supprimée.',invMsgTon:'ok'},
+          ()=>this._chargerGroupes());
+      })
+      .catch(()=>this.setState({invMsg:'Serveur injoignable.',invMsgTon:'ko'}));
   }
   /* Le lien d'invitation, applique au demarrage. On NETTOIE le hash apres
      coup : le laisser ferait rejouer l'adhesion a chaque rechargement, et
-     surtout il resterait dans l'historique du navigateur. */
+     surtout il resterait dans l'historique du navigateur.
+     Le code est MIS DE COTE si l'on n'est pas encore connecte : il faut un
+     compte pour rejoindre une equipe, et l'invite arrive presque toujours
+     sur l'ecran de connexion. Il s'appliquera juste apres. */
   _lireInvitation(){
     try{
       const m=/[#&]rejoindre=([^&]+)/.exec(location.hash||'');
       if(!m)return;
       const code=decodeURIComponent(m[1]);
       history.replaceState(null,'',location.pathname+'#equipe');
-      this.setState({screen:'equipe'},()=>{this._rejoindreEquipe(code);});
+      this._codeEnAttente=code;
+      if(!this._jeton()){
+        this.setState({invSaisie:code,
+          invMsg:'Connectez-vous avec votre compte VÉRITAS : l’invitation s’appliquera aussitôt.',
+          invMsgTon:''});
+        return;
+      }
+      this.setState({screen:'equipe'},()=>{this._appliquerCodeEnAttente();});
     }catch(e){}
   }
-  /* Groupe actif : lu par les creations pour estampiller ce qu'on produit. */
-  _groupeActif(){const gs=this.state.groupes||[];
-    const g=gs.find(x=>x.id===this.state.groupeId)||gs[0];return g?g.id:'g1';}
+  _appliquerCodeEnAttente(){
+    const c=this._codeEnAttente;
+    if(!c)return;
+    this._codeEnAttente='';
+    this._rejoindreEquipe(c);
+  }
+  /* Groupe actif : lu par les creations pour estampiller ce qu'on produit.
+     Rend '' quand on n'appartient a aucune equipe -- et c'est ce '' qui
+     empeche toute requete de synchronisation. Il rendait `g1`, un
+     identifiant ecrit en dur que partageaient toutes les installations. */
+  _groupeActif(){
+    const gs=this.state.groupes||[];
+    const g=gs.find(x=>x.id===this.state.groupeId)||gs[0];
+    return g?g.id:'';
+  }
+  /* IDENTITE. Apres connexion, on est son COMPTE VERITAS, plus le profil de
+     demonstration `u1`. Deux enseignants etaient tous deux `u1` : le travail
+     de l'un redescendait chez l'autre signe de son propre nom. */
+  _adopterIdentite(accId,nom){
+    if(!accId)return;
+    const st=this.state,ancien=String(st.currentUserId||'');
+    const users=(st.users||[]).slice();
+    const modele=users.find(u=>u.id===ancien)||{role:'Enseignant',quota:{limit:0,used:0}};
+    const i=users.findIndex(u=>u.id===accId);
+    if(i<0){
+      users.push({id:accId,name:nom||modele.name||'Moi',
+        role:modele.role||'Enseignant',quota:modele.quota||{limit:0,used:0}});
+    }else if(nom&&users[i].name!==nom){
+      users[i]=Object.assign({},users[i],{name:nom});
+    }
+    /* Re-tamponnage du travail deja fait sur ce poste -- UNIQUEMENT si
+       l'identite quittee etait un profil de demonstration (u1…u6). Si
+       c'etait un autre compte reel (deux enseignants sur le meme
+       ordinateur), son travail doit lui rester attribue. */
+    const demo=/^u\d+$/.test(ancien);
+    let eps=st.epreuves||[],cos=st.cours||[];
+    if(demo&&ancien&&ancien!==accId){
+      const re=id=>(id===ancien?accId:id);
+      eps=eps.map(e=>Object.assign({},e,{
+        ownerId:re(e.ownerId),
+        editorIds:(e.editorIds||[]).map(re),
+        comments:(e.comments||[]).map(c=>Object.assign({},c,{userId:re(c.userId)})),
+        activity:(e.activity||[]).map(a=>Object.assign({},a,{userId:re(a.userId)}))}));
+      cos=cos.map(c=>Object.assign({},c,{
+        ownerId:re(c.ownerId),
+        editorIds:(c.editorIds||[]).map(re),
+        history:(c.history||[]).map(h=>Object.assign({},h,{userId:re(h.userId)}))}));
+    }
+    this.setState({users:users,currentUserId:accId,epreuves:eps,cours:cos});
+  }
   /* Export Word : l'enseignant veut son en-tete et son logo. On lui rend un
      .docx normal plutot qu'un HTML deguise, avec une cellule d'en-tete vide
      et legendee ou deposer l'image de son etablissement. */
@@ -4662,9 +5056,13 @@ class Component extends DCLogic {
            demonstration selectionne ferait signer les epreuves au nom d'un
            personnage d'exemple. */
         const nom=(j.compte&&j.compte.nom)||login;
-        const users=st.users.slice();
-        const moi=users.findIndex(u=>u.id===st.currentUserId);
-        if(moi>=0)users[moi]=Object.assign({},users[moi],{name:nom});
+        const accId=(j.compte&&j.compte.id)||'';
+        /* On DEVIENT son compte VERITAS. Auparavant on gardait
+           `currentUserId:'u1'` en renommant simplement le profil de
+           demonstration : deux enseignants d'une meme equipe portaient
+           donc le meme identifiant, et le travail de l'un redescendait
+           chez l'autre signe du nom du lecteur. */
+        this._adopterIdentite(accId,nom);
         this.setState({authBusy:false,authErr:'',authMdp:'',authed:true,
           /* L'identifiant du compte serveur, retenu POUR LE PAIEMENT.
              `vrt_grant_entitlement` s'en sert pour inscrire le plan dans
@@ -4673,12 +5071,16 @@ class Component extends DCLogic {
              jeton : c'est une etiquette, pas une preuve d'identite — le serveur
              verifie toujours le Bearer de son cote. */
           compteId:(j.compte&&j.compte.id)||'',
-          demo:false,users:users,corpusDroit:j.droit||null,screen:'accueil'},()=>{
+          demo:false,corpusDroit:j.droit||null,screen:'accueil'},()=>{
           this._persist();this._rechargerCorpus();
           /* La synchro ne demarre QU APRES la connexion : sans jeton, chaque
              appel retomberait en 401 et fabriquerait la rafale que LWS
              sanctionne. */
           this._installerSync();
+          /* Le code d'invitation mis de cote par `_lireInvitation` :
+             l'invite arrive presque toujours sur l'ecran de connexion,
+             et il faut un compte pour rejoindre une equipe. */
+          if(this._codeEnAttente)this._appliquerCodeEnAttente();
           if(typeof window!=='undefined')window.scrollTo(0,0);
         });
       })
@@ -5066,7 +5468,64 @@ class Component extends DCLogic {
     database:[React.createElement('ellipse',{key:1,cx:12,cy:6,rx:8,ry:3}),React.createElement('path',{key:2,d:'M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6'}),React.createElement('path',{key:3,d:'M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3'})]
   };const d=paths[name]||paths.file;/* Deux couches du meme trace : une epaisse et tres transparente qui fait   respirer le symbole, une nette par-dessus. A 17-20 px un trait de 2 px   disparait ; le halo lui redonne du poids sans redessiner 40 icones. */const cl=(g,w,o)=>React.createElement('g',{key:g,strokeWidth:w,opacity:o},d.map((e,i)=>React.cloneElement(e,{key:g+i})));return React.createElement('svg',p,[cl('h',5,.15),cl('n',2,1)]);}
   _mentionEl(text){const parts=String(text||'').split(/(@[A-ZÉÀ][\wÀ-ÿ'’-]*(?:\s[A-ZÉÀ][\wÀ-ÿ'’-]*)?)/g);return React.createElement(React.Fragment,null,parts.map((p,i)=>/^@/.test(p)?React.createElement('span',{key:i,style:{color:'var(--c1a72bb,#1a72bb)',fontWeight:700}},p):p));}
-  _setProp(pid,status){const aid=this.state.activeId;this.setState(st=>{const props={...st.proposals};const list=(props[aid]||[]).map(p=>p.id===pid?{...p,status}:p);props[aid]=list;this._save('minesec_props',props);return{proposals:props};});}
+  /* ACCEPTER UNE PROPOSITION L'APPLIQUE VRAIMENT.
+     La carte affichait « Acceptee · appliquee a l'edition » alors que
+     `_setProp` ne touchait qu'au statut : le relecteur croyait avoir
+     corrige l'epreuve, l'epreuve partait a l'impression inchangee.
+     Une proposition porte donc maintenant sa CIBLE : soit la consigne
+     generale, soit une question precise (numero de texte, nature,
+     rang). Celles qui n'en portent pas -- les trois de demonstration --
+     changent de statut sans rien modifier, comme avant. */
+  _appliquerProp(p){
+    const a=this._active();
+    if(!a||!p||!p.cible||p.ins==null)return false;
+    if(p.cible==='consigne'){
+      this._updateActive({consigne:String(p.ins)},'a appliqué une proposition sur la consigne');
+      return true;
+    }
+    if(p.cible==='question'){
+      const f=(this.all||[]).find(x=>x.n===p.n);
+      if(!f)return false;
+      const liste=this._qList(f,p.kind);
+      if(p.idx==null||p.idx<0||p.idx>=liste.length)return false;
+      this._setQ(f,p.kind,p.idx,String(p.ins));
+      return true;
+    }
+    return false;
+  }
+  _setProp(pid,status){
+    const aid=this.state.activeId;
+    const p=((this.state.proposals||{})[aid]||[]).find(x=>x.id===pid);
+    let applique=false;
+    if(status==='accepted'&&p)applique=this._appliquerProp(p);
+    this.setState(st=>{
+      const props={...st.proposals};
+      const list=(props[aid]||[]).map(x=>x.id===pid
+        ?{...x,status:status,applique:applique,updatedAt:Date.now()}:x);
+      props[aid]=list;
+      this._save('minesec_props',props);
+      return{proposals:props};
+    },()=>this._persist());
+  }
+  /* Proposer une modification sans toucher a l'epreuve : c'est le droit
+     « Commenter et proposer » qu'annonce la table des roles, et le seul
+     geste dont dispose un Relecteur, a qui l'edition directe est fermee.
+     Il n'existait aucun moyen d'en creer une : les trois qu'affichait
+     l'ecran etaient des donnees de demonstration. */
+  _proposerModif(cible){
+    const a=this._active();
+    if(!a||!cible)return false;
+    const me=this._me();
+    const p=Object.assign({id:'p'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6),
+      userId:me.id,status:'pending',updatedAt:Date.now()},cible);
+    this.setState(st=>{
+      const props={...(st.proposals||{})};
+      props[a.id]=[p,...(props[a.id]||[])];
+      this._save('minesec_props',props);
+      return{proposals:props};
+    },()=>this._persist());
+    return true;
+  }
   _toggleReact(cid,emoji){const a=this._active();if(!a)return;const me=this.state.currentUserId;this.setState(st=>{const eps=st.epreuves.map(e=>{if(e.id!==a.id)return e;const comments=e.comments.map(c=>{if(c.id!==cid)return c;const r={...(c.reactions||{})};const arr=(r[emoji]||[]).slice();const i=arr.indexOf(me);if(i>=0)arr.splice(i,1);else arr.push(me);if(arr.length)r[emoji]=arr;else delete r[emoji];return{...c,reactions:r};});return{...e,comments};});return{epreuves:eps};},()=>this._persist());}
   _wordAnnots(n){return (this.annot&&this.annot[n])||{};}
   /* Annotation mot à mot. Refuse si l'administration a coupé la fonction :
@@ -5231,8 +5690,18 @@ class Component extends DCLogic {
        garde pour ses membres ; un groupe ouvert la montre aux autres
        membres de la plateforme ; publiee dans la bibliotheque, elle est
        visible de tous. Sans groupe declare, l'epreuve suit le groupe actif. */
-    const groupes=(st.groupes&&st.groupes.length)?st.groupes:[{id:'g1',nom:'Mon \u00e9tablissement',type:'ferme',code:'G-0001',membres:[me.id]}];
+    /* SANS EQUIPE, ON N'EN INVENTE PLUS UNE. Le repli portait un code
+       « G-0001 » que l'ecran presentait comme un vrai code d'invitation :
+       on pouvait le copier, l'envoyer par WhatsApp, et il n'ouvrait
+       rien -- aucune equipe de ce code n'existait cote serveur.
+       Le repli n'a plus ni code ni membres : l'ecran propose alors de
+       CREER son espace de travail. */
+    const sansEquipe=!(st.groupes&&st.groupes.length);
+    const groupes=sansEquipe
+      ?[{id:'',nom:'Votre espace de travail',type:'ferme',code:'',membres:[],places:1}]
+      :st.groupes;
     const grpActif=groupes.find(g=>g.id===st.groupeId)||groupes[0];
+    const jeDirige=!sansEquipe&&String(grpActif.proprietaire||'')===me.id;
     const grpDe=id=>groupes.find(g=>g.id===id)||null;
     /* Trois regles, dans cet ordre :
        1. publiee dans la bibliotheque -> visible de tous, sans condition ;
@@ -5340,9 +5809,27 @@ class Component extends DCLogic {
     const acts=[];st.epreuves.forEach(e=>(e.activity||[]).forEach(a=>acts.push({...a,ep:e.title})));acts.sort((a,b)=>b.ts-a.ts);
     const notifications=acts.slice(0,8).map((a,i)=>{const u=st.users.find(x=>x.id===a.userId)||{name:'?',role:''};return{initials:this._initials(u.name),avatar:this._av(u,30),text:u.name.replace(/^(M\.|Mme|Mlle)\s+/,'')+' '+a.text+' « '+a.ep+' »',ago:this._ago(a.ts),rowBg:i%2?'var(--cf7f9fc,#f7f9fc)':'var(--cffffff,#fff)'};});
 
-    const membersView=st.users.map(u=>{const cnt=st.epreuves.filter(e=>e.ownerId===u.id).length;return{name:u.name,initials:this._initials(u.name),avatarLg:this._av(u,40),youTag:u.id===me.id?'(vous)':'',role:u.role,roleShort:(u.role||'').split(' / ')[0],epLine:cnt+' épreuve(s) créée(s)',quotaLine:(u.quota.limit-u.quota.used)+'/'+u.quota.limit,roleDisabled:!perm.manageTeam,roleSelStyle:perm.manageTeam?'padding:7px 9px;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:8px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)':'padding:7px 9px;border:1px solid var(--ceef2f7,#eef2f7);border-radius:8px;font-size:12.5px;color:var(--c8b97a8,#8b97a8);background:var(--cf7f9fc,#f7f9fc);pointer-events:none',setRole:e=>{const nr=val(e);this.setState(s=>({users:s.users.map(x=>x.id===u.id?{...x,role:nr}:x)}),()=>this._persist());}};});
+    /* ⚠️ Cette liste parcourait `st.users`, c'est-a-dire les SIX PROFILS
+       DE DEMONSTRATION, quelle que soit l'equipe reelle. Un enseignant
+       seul voyait « Mme Nadège Fotso », « M. Paul Etoa »… et pouvait leur
+       changer leur role. On ne montre desormais que les membres que le
+       serveur reconnait -- et soi-meme quand on n'a pas encore d'equipe. */
+    const idsMembres=sansEquipe?[me.id]:(grpActif.membres||[me.id]);
+    const membresReels=idsMembres.map(id=>st.users.find(u=>u.id===id)
+      ||{id:id,name:'Membre',role:'Enseignant',quota:{limit:0,used:0}});
+    const membersView=membresReels.map(u=>{const cnt=st.epreuves.filter(e=>e.ownerId===u.id).length;return{name:u.name,initials:this._initials(u.name),avatarLg:this._av(u,40),youTag:u.id===me.id?'(vous)':'',role:u.role,roleShort:(u.role||'').split(' / ')[0],epLine:cnt+' épreuve(s) créée(s)',quotaLine:(u.quota.limit-u.quota.used)+'/'+u.quota.limit,roleDisabled:!perm.manageTeam,roleSelStyle:perm.manageTeam?'padding:7px 9px;border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:8px;font-size:12.5px;color:var(--c22303f,#22303f);background:var(--cffffff,#fff)':'padding:7px 9px;border:1px solid var(--ceef2f7,#eef2f7);border-radius:8px;font-size:12.5px;color:var(--c8b97a8,#8b97a8);background:var(--cf7f9fc,#f7f9fc);pointer-events:none',setRole:e=>{const nr=val(e);this.setState(s=>({users:s.users.map(x=>x.id===u.id?{...x,role:nr}:x)}),()=>this._persist());},
+      /* Retirer un membre : reserve a qui dirige l'equipe, et jamais sur
+         soi-meme depuis cette liste (on quitte par le bouton dedie). */
+      retirerStyle:(jeDirige&&u.id!==me.id)
+        ?'border:1px solid var(--cecc4bf,#ecc4bf);background:var(--cffffff,#fff);color:var(--cc0392b,#c0392b);font-size:11.5px;font-weight:700;font-family:Poppins;padding:6px 12px;border-radius:8px;cursor:pointer'
+        :'display:none',
+      retirer:()=>this._retirerMembre(grpActif.id,u.id)};});
 
-    const accountSwitch=st.users.map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,36),role:u.role,current:u.id===me.id,currentChip:u.id===me.id?'font-size:11px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:3px 10px;border-radius:999px':hidden,rowStyle:'display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid '+(u.id===me.id?'var(--cbcd9f2,#bcd9f2)':'var(--ceef2f7,#eef2f7)')+';border-radius:11px;background:'+(u.id===me.id?'var(--cf5faff,#f5faff)':'var(--cffffff,#fff)')+';cursor:pointer;text-align:left',select:()=>this.setState({currentUserId:u.id,screen:'accueil'},()=>{this._persist();window.scrollTo(0,0);})}));
+    /* ⚠️ Une fois connecte a un vrai compte, on ne peut plus endosser un
+       profil de demonstration : on signerait le travail d'un autre, et il
+       partirait ainsi a toute l'equipe. Le selecteur ne sert qu'a la
+       visite guidee, avant toute connexion. */
+    const accountSwitch=(st.compteId?[]:st.users).map(u=>({name:u.name,initials:this._initials(u.name),avatar:this._av(u,36),role:u.role,current:u.id===me.id,currentChip:u.id===me.id?'font-size:11px;font-weight:700;color:var(--c1f9d55,#1f9d55);background:var(--ce6f5ec,#e6f5ec);padding:3px 10px;border-radius:999px':hidden,rowStyle:'display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid '+(u.id===me.id?'var(--cbcd9f2,#bcd9f2)':'var(--ceef2f7,#eef2f7)')+';border-radius:11px;background:'+(u.id===me.id?'var(--cf5faff,#f5faff)':'var(--cffffff,#fff)')+';cursor:pointer;text-align:left',select:()=>this.setState({currentUserId:u.id,screen:'accueil'},()=>{this._persist();window.scrollTo(0,0);})}));
 
     const mkPrintQ=(f,kind)=>this._qList(f,kind).map((t,qi)=>{const p=this._qPts(f.n,kind,qi);return{text:t,pts:(p===null?'':'('+p+' pt'+((parseFloat(p)||0)>1?'s':'')+')'),ptsStyle:(p===null?'display:none':'font-weight:700;color:var(--c14375f,#14375f);white-space:nowrap;margin-left:6px')};});
     const printFiches=(active?active.textIds:[]).map(n=>all.find(x=>x.n===n)).filter(Boolean).map((f,i)=>({pos:i+1,type:f.type,words:f.words,text:f.text||'',reference:f.reference||'',compList:this._qList(f,'comp'),explList:this._qList(f,'expl'),compQ:mkPrintQ(f,'comp'),explQ:mkPrintQ(f,'expl')}));
@@ -5609,8 +6096,18 @@ class Component extends DCLogic {
         switchStyle:admSw(on),knobStyle:admKnob(on),
         toggle:()=>majAdmin({cyclesOff:on?[...cyclesOff,c.cycle]:cyclesOff.filter(x=>x!==c.cycle)})};});
 
+    /* ⚠️ CE PANNEAU N'ECRIVAIT QUE DANS LE NAVIGATEUR.
+       Renommer une equipe, la supprimer, y ajouter ou en retirer
+       quelqu'un : tout se faisait dans le stockage local et n'atteignait
+       jamais le serveur. L'ecran affichait donc une equipe que les autres
+       membres ne voyaient pas, et les changements disparaissaient au
+       premier rechargement -- la liste etant relue depuis le serveur.
+       Les membres se cochaient de surcroit dans la table des PROFILS DE
+       DEMONSTRATION : on ajoutait « Mme Nadège Fotso » a une equipe reelle.
+       Il n'y a plus qu'un chemin, et il passe par ?action=groupe. */
     const majGroupes=(gs)=>{this._save('minesec_groupes',gs);this.setState({groupes:gs});};
-    const admGroupes=groupes.map(g=>{
+    const admGroupes=(sansEquipe?[]:groupes).map(g=>{
+      const jeLaDirige=String(g.proprietaire||'')===me.id;
       const nEp=st.epreuves.filter(e=>(e.groupeId||grpActif.id)===g.id).length;
       const nCo=st.cours.filter(c=>(c.groupeId||grpActif.id)===g.id).length;
       const estActif=g.id===grpActif.id;
@@ -5619,19 +6116,39 @@ class Component extends DCLogic {
         tile:'display:flex;flex:none',
         icon:this._icoRond(g.type==='ouvert'?'users':'lock',g.type==='ouvert'?'var(--c1f9d55,#1f9d55)':'var(--c1a72bb,#1a72bb)',38),
         actifChip:estActif?'font-size:10.5px;font-weight:700;font-family:Poppins;color:var(--c1a72bb,#1a72bb);background:var(--ce7f1fb,#e7f1fb);padding:3px 10px;border-radius:999px;flex:none':hidden,
-        typeLabel:g.type==='ouvert'?'Ouvert':'Ferm\u00e9',
-        typeBtn:'flex:none;border:1px solid '+(g.type==='ouvert'?'var(--cb6e2c6,#b6e2c6)':'var(--cd5e0ec,#d5e0ec)')+';background:var(--cffffff,#fff);color:'+(g.type==='ouvert'?'var(--c1f9d55,#1f9d55)':'var(--c5a6678,#5a6678)')+';font-size:12px;font-weight:700;font-family:Poppins;padding:7px 14px;border-radius:8px;cursor:pointer',
-        toggleType:()=>majGroupes(groupes.map(x=>x.id===g.id?{...x,type:x.type==='ouvert'?'ferme':'ouvert'}:x)),
-        setNom:e=>majGroupes(groupes.map(x=>x.id===g.id?{...x,nom:val(e)}:x)),
+        /* Le bouton « Ouvert / Fermé » a disparu : un groupe « ouvert »
+           est lisible par N'IMPORTE QUEL compte de la plateforme, et il
+           n'existe aucun endpoint pour le refermer. Proposer l'ouverture
+           sans pouvoir la reprendre serait une fuite a sens unique.
+           Le libelle reste, pour dire l'etat. */
+        typeLabel:g.type==='ouvert'?'Ouvert':'Fermé',
+        typeBtn:'display:none',
+        toggleType:()=>{},
+        /* Renommer : le serveur verifie que c'est bien le responsable. */
+        setNom:e=>{const v=val(e);
+          majGroupes(groupes.map(x=>x.id===g.id?{...x,nom:v}:x));
+          clearTimeout(this._renT);
+          /* Differe : `onChange` part a chaque frappe, et LWS bannit l'IP
+             a six mauvaises requetes par minute. */
+          this._renT=setTimeout(()=>this._renommerEquipe(g.id,v),1200);},
         activerStyle:(estActif||(g.membres||[]).indexOf(me.id)<0)?hidden:'flex:none;border:none;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);font-size:12px;font-weight:700;font-family:Poppins;padding:7px 14px;border-radius:8px;cursor:pointer',
         activer:()=>{this._save('minesec_groupeid',g.id);this.setState({groupeId:g.id});},
         stats:nEp+' \u00e9preuve(s) \u00b7 '+nCo+' cours \u00b7 '+(g.membres||[]).length+' membre(s)',
-        supprStyle:(groupes.length>1&&!estActif)?'margin-left:auto;border:1px solid var(--cecc4bf,#ecc4bf);background:var(--cffffff,#fff);color:var(--cc0392b,#c0392b);font-size:11.5px;font-weight:700;font-family:Poppins;padding:6px 12px;border-radius:8px;cursor:pointer':hidden,
-        supprimer:()=>majGroupes(groupes.filter(x=>x.id!==g.id)),
-        membres:st.users.map(u=>{const dedans=(g.membres||[]).indexOf(u.id)>=0;
-          return{name:u.name.replace(/^(M\.|Mme|Mlle)\s+/,''),avatar:this._av(u,22),initials:this._initials(u.name),
-            style:'display:flex;align-items:center;gap:7px;border:1px solid '+(dedans?'var(--cbcd9f2,#bcd9f2)':'var(--ce6ecf3,#e6ecf3)')+';background:'+(dedans?'var(--ce7f1fb,#e7f1fb)':'var(--cffffff,#fff)')+';color:'+(dedans?'var(--c135a96,#135a96)':'var(--c8b97a8,#8b97a8)')+';font-size:11.5px;font-weight:600;font-family:Poppins;padding:4px 10px 4px 4px;border-radius:999px;cursor:pointer',
-            toggle:()=>majGroupes(groupes.map(x=>x.id===g.id?{...x,membres:dedans?(x.membres||[]).filter(i3=>i3!==u.id):[...(x.membres||[]),u.id]}:x))};})};});
+        /* Supprimer n'est offert qu'au responsable : le serveur refuse le
+           reste, et un bouton qui repond 403 n'est pas un bouton. */
+        supprStyle:jeLaDirige?'margin-left:auto;border:1px solid var(--cecc4bf,#ecc4bf);background:var(--cffffff,#fff);color:var(--cc0392b,#c0392b);font-size:11.5px;font-weight:700;font-family:Poppins;padding:6px 12px;border-radius:8px;cursor:pointer':hidden,
+        supprimer:()=>this._supprimerEquipe(g.id),
+        /* Les MEMBRES REELS de l'equipe, tels que le serveur les connait.
+           On ne coche plus des profils de demonstration : on invite par
+           code, et on retire ceux qui sont la. */
+        membres:(g.membres||[]).map(id=>{
+          const u=st.users.find(x=>x.id===id)||{id:id,name:'Membre',role:''};
+          const moi=id===me.id;
+          return{name:u.name.replace(/^(M\.|Mme|Mlle)\s+/,'')+(moi?' (vous)':''),
+            avatar:this._av(u,22),initials:this._initials(u.name),
+            style:'display:flex;align-items:center;gap:7px;border:1px solid var(--cbcd9f2,#bcd9f2);background:var(--ce7f1fb,#e7f1fb);color:var(--c135a96,#135a96);font-size:11.5px;font-weight:600;font-family:Poppins;padding:4px 10px 4px 4px;border-radius:999px;'
+              +((jeLaDirige&&!moi)?'cursor:pointer':'cursor:default'),
+            toggle:()=>{if(jeLaDirige&&!moi)this._retirerMembre(g.id,id);}};})};});
 
     const inactifs=ADM.inactifs||[];
     const admProfils=st.users.map((u,i2)=>{const off=inactifs.indexOf(u.id)>=0;
@@ -5787,7 +6304,12 @@ class Component extends DCLogic {
         rowStyle:'display:flex;align-items:center;gap:10px;width:100%;border:1px solid '+(actif?'var(--cbcd9f2,#bcd9f2)':'transparent')+';background:'+(actif?'var(--cf5faff,#f5faff)':'transparent')+';border-radius:11px;padding:9px 10px;cursor:pointer',
         open:()=>{this._save('minesec_convid',c.id);this.setState({convId:c.id});}};});
 
-    const membresEnLigne=st.users.map(u=>{const on=estEnLigne(u.id);
+    /* ⚠️ Cette colonne parcourait `st.users` — les six profils de
+       demonstration — et plusieurs s'affichaient « En ligne » : les
+       messages d'exemple sont horodates a moins d'une heure, et c'est
+       exactement ce que mesure `estEnLigne`. On ne montre plus que les
+       membres que le serveur reconnait. */
+    const membresEnLigne=membresReels.map(u=>{const on=estEnLigne(u.id);
       return{avatar:this._av(u,32),initials:this._initials(u.name),name:u.name.replace(/^(M\.|Mme|Mlle)\s+/,''),
         etat:on?'En ligne':'Hors ligne',
         dot:'position:absolute;bottom:-1px;right:-1px;width:9px;height:9px;border-radius:50%;border:2px solid var(--cffffff,#fff);background:'+(on?'var(--c1f9d55,#1f9d55)':'var(--cc3ccd6,#c3ccd6)')};})
@@ -5864,7 +6386,11 @@ class Component extends DCLogic {
     const sbAccueilOn=sbIs(['accueil']),sbResOn=sbIs(['liste','fiche']),sbEpOn=sbIs(['epreuves','composeur','apercu']),
           sbCoursOn=sbIs(['cours','coursEdit']),sbCollabOn=sbIs(['collab']),sbActOn=sbIs(['activite']),sbProfOn=sbIs(['profil','abo']);
     const sbBadge=v=>v?'margin-left:auto;background:var(--ce0342c,#e0342c);color:var(--cffffff,#fff);font-size:10.5px;font-weight:700;font-family:Poppins;min-width:20px;height:20px;border-radius:99px;display:'+(sbOn?'grid':'none')+';place-items:center;padding:0 6px':hidden;
-    const nbMsg=(st.chatMsgs||[]).filter(m=>m.userId!==me.id).length;
+    /* Comptait `chatMsgs`, c'est-a-dire les messages de DEMONSTRATION :
+       la pastille etait allumee des le premier lancement, avant toute
+       equipe et tout echange. On compte le fil courant, et seulement
+       les messages qui portent un identifiant (donc les vrais). */
+    const nbMsg=(msgsActifs||[]).filter(m=>m&&m.id&&m.userId!==me.id).length;
     const nbNotif=acts.length;
     const creditPct=meLimit>0?Math.max(0,Math.min(100,Math.round((meRemaining/meLimit)*100))):100;
     /* ---- Garde-fou de conformité -------------------------------------
@@ -5983,21 +6509,102 @@ class Component extends DCLogic {
       epHistory:(active?(active.activity||[]).slice().reverse():[]).map(a=>{const u=st.users.find(x=>x.id===a.userId)||{name:'?'};const st2=/valid|soumis|statut|relecture/i.test(a.text)?{c:'var(--cc26a12,#c26a12)',ic:'check'}:/ajout|créé/i.test(a.text)?{c:'var(--c1f9d55,#1f9d55)',ic:'plus'}:/comment/i.test(a.text)?{c:'var(--c7b52c7,#7b52c7)',ic:'chat'}:{c:'var(--c1a72bb,#1a72bb)',ic:'pen'};return{who:u.name.replace(/^(M\.|Mme|Mlle)\s+/,''),initials:this._initials(u.name),avatar:this._av(u,24),text:a.text,ago:this._ago(a.ts),color:st2.c,icon:this._icon(st2.ic,st2.c,11)};}),
       hasDiffs:epProps.length>0,noDiffs:epProps.length===0,
       epDiffs:epProps.map(p=>{const u=st.users.find(x=>x.id===p.userId)||{name:'?'};return{label:p.target,diffEl:this._diffEl(p),who:u.name.replace(/^(M\.|Mme|Mlle)\s+/,''),initials:this._initials(u.name),avatar:this._av(u,22),ago:'proposé'};}),
+      /* CIBLES PROPOSABLES : la consigne generale, et chaque question de
+         chaque texte de l'epreuve. La valeur encode ou appliquer le
+         changement -- sans elle, accepter ne pourrait rien modifier. */
+      propCibles:(function(self){
+        const l=[{val:'',label:'— Choisir ce qui doit changer —',texte:''}];
+        if(!active)return l;
+        l.push({val:'consigne',label:'Consigne générale',texte:active.consigne||''});
+        (active.textIds||[]).forEach(n=>{
+          const f=all.find(x=>x.n===n);
+          if(!f)return;
+          [['comp','Compréhension'],['expl','Production']].forEach(([kind,nom])=>{
+            self._qList(f,kind).forEach((q,i)=>{
+              l.push({val:'q|'+n+'|'+kind+'|'+i,
+                label:'Texte n°'+n+' · '+nom+' — Q'+(i+1),texte:q});
+            });
+          });
+        });
+        return l;
+      })(this),
+      propCible:st.propCible||'',
+      /* Choisir une cible PRE-REMPLIT le champ avec la formulation
+         actuelle : on propose une reecriture, pas un texte a partir de
+         rien, et le relecteur voit alors un vrai avant/apres. */
+      setPropCible:e=>{const v=val(e);
+        let t='';
+        if(v==='consigne')t=(active&&active.consigne)||'';
+        else if(v){const p=v.split('|');const f=all.find(x=>x.n===Number(p[1]));
+          if(f){const li=this._qList(f,p[2]);t=li[Number(p[3])]||'';}}
+        this.setState({propCible:v,propTexte:t,propMsg:''});},
+      propTexte:st.propTexte||'',
+      setPropTexte:e=>this.setState({propTexte:val(e),propMsg:''}),
+      propPeut:!!(active&&perm.comment),
+      propEnvoyer:()=>{
+        if(!active||!perm.comment)return;
+        const v=st.propCible||'',nouveau=String(st.propTexte||'').trim();
+        if(!v){this.setState({propMsg:'Choisissez ce qui doit changer.',propMsgTon:'ko'});return;}
+        if(!nouveau){this.setState({propMsg:'Écrivez votre formulation.',propMsgTon:'ko'});return;}
+        let cible=null;
+        if(v==='consigne'){
+          const ancien=active.consigne||'';
+          if(ancien===nouveau){this.setState({propMsg:'Cette formulation est déjà celle de l’épreuve.',propMsgTon:'ko'});return;}
+          cible={cible:'consigne',target:'Consigne générale',ctx:'',del:ancien,ins:nouveau};
+        }else{
+          const p=v.split('|'),n=Number(p[1]),kind=p[2],idx=Number(p[3]);
+          const f=all.find(x=>x.n===n);
+          if(!f){this.setState({propMsg:'Ce texte n’est plus dans l’épreuve.',propMsgTon:'ko'});return;}
+          const ancien=this._qList(f,kind)[idx]||'';
+          if(ancien===nouveau){this.setState({propMsg:'Cette formulation est déjà celle de la question.',propMsgTon:'ko'});return;}
+          cible={cible:'question',n:n,kind:kind,idx:idx,
+            target:'Texte n°'+n+' · '+(kind==='comp'?'Compréhension':'Production')+' — Q'+(idx+1),
+            ctx:'',del:ancien,ins:nouveau};
+        }
+        this._proposerModif(cible);
+        this.setState({propCible:'',propTexte:'',
+          propMsg:'Proposition transmise à l’équipe.',propMsgTon:'ok'});
+      },
+      propMsgStyle:st.propMsg
+        ?('margin-top:10px;padding:9px 12px;border-radius:9px;font-size:12.5px;font-weight:600;'
+          +(st.propMsgTon==='ko'
+            ?'background:var(--cfdecea,#fdecea);color:var(--cc0392b,#c0392b)'
+            :'background:var(--ce6f5ec,#e6f5ec);color:var(--c155a26,#155a26)'))
+        :hidden,
+      propMsg:st.propMsg||'',
       propColumns:[
         {label:'À traiter',color:'var(--cc26a12,#c26a12)',cards:epProps.filter(p=>p.status==='pending'),count:epProps.filter(p=>p.status==='pending').length},
         {label:'Acceptées',color:'var(--c1f9d55,#1f9d55)',cards:epProps.filter(p=>p.status==='accepted'),count:epProps.filter(p=>p.status==='accepted').length},
         {label:'Refusées',color:'var(--cc0392b,#c0392b)',cards:epProps.filter(p=>p.status==='rejected'),count:epProps.filter(p=>p.status==='rejected').length}
-      ].map(col=>({label:col.label,color:col.color,count:col.count,cards:col.cards.map(p=>{const u=st.users.find(x=>x.id===p.userId)||{name:'?'};return{who:u.name.replace(/^(M\.|Mme|Mlle)\s+/,''),initials:this._initials(u.name),avatar:this._av(u,30),target:p.target,summaryEl:this._diffEl(p),pending:p.status==='pending'&&perm.validate,resolved:p.status!=='pending'||!perm.validate,resolvedNote:p.status==='accepted'?'Acceptée · appliquée à l\u2019édition':p.status==='rejected'?'Refusée par le relecteur':'En attente de relecture',accept:()=>this._setProp(p.id,'accepted'),reject:()=>this._setProp(p.id,'rejected')};})})),
+      ].map(col=>({label:col.label,color:col.color,count:col.count,cards:col.cards.map(p=>{const u=st.users.find(x=>x.id===p.userId)||{name:'?'};return{who:u.name.replace(/^(M\.|Mme|Mlle)\s+/,''),initials:this._initials(u.name),avatar:this._av(u,30),target:p.target,summaryEl:this._diffEl(p),pending:p.status==='pending'&&perm.validate,resolved:p.status!=='pending'||!perm.validate,resolvedNote:p.status==='accepted'
+        ?(p.applique?'Acceptée · appliquée à l\u2019édition'
+          /* Les propositions d'avant ce correctif -- et celles de
+             demonstration -- ne portent aucune cible : rien ne peut etre
+             applique, et le dire vaut mieux que le laisser croire. */
+          :'Acceptée · à reporter à la main')
+        :p.status==='rejected'?'Refusée par le relecteur':'En attente de relecture',accept:()=>this._setProp(p.id,'accepted'),reject:()=>this._setProp(p.id,'rejected')};})})),
       toggleChat:()=>{if(!perm.discuter)return;this.setState({chatOpen:!st.chatOpen,notifOpen:false});},closeChat:()=>this.setState({chatOpen:false}),chatOpen:st.chatOpen&&perm.discuter,
       chatContext:active?ep.title:(this.state.activeCoursId?'Cours':st.team.name),
       chatDraft:st.chatDraft,setChatDraft:e=>this.setState({chatDraft:val(e)}),
       chatMessages:msgsActifs.map(m=>{const u=st.users.find(x=>x.id===m.userId)||{name:'?'};const mine=m.userId===me.id;return{initials:this._initials(u.name),avatar:this._av(u,28),name:mine?'Vous':u.name.replace(/^(M\.|Mme|Mlle)\s+/,''),ago:this._ago(m.ts),textEl:this._mentionEl(m.text),rowStyle:'display:flex;gap:9px;align-items:flex-start'+(mine?';flex-direction:row-reverse':''),headAlign:mine?'flex-direction:row-reverse':'',bubble:'font-size:13px;line-height:1.5;margin-top:4px;padding:8px 12px;border-radius:'+(mine?'12px 2px 12px 12px':'2px 12px 12px 12px')+';'+(mine?'background:var(--ce7f1fb,#e7f1fb);color:var(--c22303f,#22303f)':'background:var(--cf4f6f9,#f4f6f9);color:var(--c3a4658,#3a4658)')};}),
-      chatTyping:true,chatTypingName:(st.users.find(u=>u.id!==me.id)||{name:'Un collègue'}).name.replace(/^(M\.|Mme|Mlle)\s+/,''),chatTypingInit:this._initials((st.users.find(u=>u.id!==me.id)||{name:'?'}).name),chatTypingAv:this._av(st.users.find(u=>u.id!==me.id)||{role:''},22),
+      /* ⚠️ « X est en train d'ecrire… » etait cable sur `true`. Il ne
+         mesurait rien : il s'affichait en permanence, meme seul dans
+         l'equipe, meme sans jamais avoir echange un mot. Un temoin
+         d'activite qui ne temoigne de rien fait croire a une presence
+         qui n'existe pas. Il n'y a pas de canal temps reel ici -- la
+         relecture est toutes les 90 s -- donc rien a afficher. */
+      chatTyping:false,chatTypingName:'',chatTypingInit:'',chatTypingAv:this._av({role:''},22),
+      /* Un message porte desormais un IDENTIFIANT. Sans lui, la fusion
+         de deux postes ne peut pas dedoublonner, et surtout il n'y avait
+         aucune fusion : `_syncContenu` ne partageait pas les messages du
+         tout. Ecrire a son equipe revenait a s'ecrire a soi-meme. */
       sendChat:()=>{const t=(st.chatDraft||'').trim();if(!t)return;
-        const msgs=[...msgsActifs,{userId:me.id,text:t,ts:Date.now()}];
-        const par={...(st.msgsByConv||{}),[st.convId]:msgs};
-        this._save('minesec_convmsgs',par);this._save('minesec_chat',msgs);
-        this.setState({msgsByConv:par,chatMsgs:msgs,chatDraft:''});},
+        const m={id:'m'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7),
+                 userId:me.id,text:t,ts:Date.now()};
+        const msgs=[...msgsActifs,m];
+        const par={...(st.msgsByConv||{}),[convIdAct]:msgs};
+        this._save('minesec_convmsgs',par);
+        this.setState({msgsByConv:par,chatDraft:''},()=>this._persist());},
       notifDot:acts.length?'position:absolute;top:7px;right:8px;width:8px;height:8px;border-radius:50%;background:var(--cf39200,#f39200);border:1.5px solid var(--cffffff,#fff)':hidden,
       notReady:!ready&&st.screen!=='login',isAccueil:ready&&st.screen==='accueil',isListe:ready&&st.screen==='liste',isFiche:ready&&st.screen==='fiche',isEpreuves:ready&&st.screen==='epreuves',isComposeur:ready&&st.screen==='composeur',isEquipe:ready&&st.screen==='equipe',isProfil:ready&&st.screen==='profil',isApercu:ready&&st.screen==='apercu',isCours:ready&&st.screen==='cours',isCoursEdit:ready&&st.screen==='coursEdit',
       gabarits:cGabarits,coursView:cCoursView,co:cCo,newCours:()=>this.setState({screen:'cours'},()=>window.scrollTo(0,0)),
@@ -6161,6 +6768,23 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       /* --- carte d'invitation (écran Équipe) --- */
       invSceau:this._icoRond('users','var(--c1a72bb,#1a72bb)',40),
       invCode:String(grpActif.code||'—'),
+      aEquipe:!sansEquipe,sansEquipe:sansEquipe,
+      eqNom:st.eqNom||'',
+      setEqNom:e=>this.setState({eqNom:val(e)}),
+      eqCreer:()=>this._creerEquipe(st.eqNom||''),
+      eqCreerLabel:st.eqBusy?'Création…':'Créer mon espace',
+      /* Le nombre de places vient du plan du RESPONSABLE, calcule par le
+         serveur. Les cartes d'abonnement l'annoncent depuis toujours
+         (« 1 utilisateur », « jusqu'a 15 enseignants ») sans que rien ne
+         l'applique nulle part. */
+      eqPlaces:sansEquipe?''
+        :((grpActif.membres||[]).length+' membre(s) sur '
+          +(Number(grpActif.places)<0?'un nombre illimité de places'
+            :(grpActif.places+' place(s)'))),
+      eqQuitterStyle:(!sansEquipe&&!jeDirige)
+        ?'border:1px solid var(--cd5e0ec,#d5e0ec);background:var(--cffffff,#fff);color:var(--c5a6678,#5a6678);font-size:12px;font-weight:700;font-family:Poppins;padding:8px 14px;border-radius:9px;cursor:pointer'
+        :'display:none',
+      eqQuitter:()=>this._retirerMembre(grpActif.id,me.id),
       invSaisie:st.invSaisie||'',
       setInvSaisie:e=>this.setState({invSaisie:val(e),invMsg:''}),
       invRejoindre:()=>this._rejoindreEquipe(st.invSaisie),
@@ -6707,14 +7331,21 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       convList,membresEnLigne,
       convNom:convActive.nom||'',
       convSous:msgsActifs.length+' message(s) \u00b7 '+membresEnLigne.filter(u=>u.etat==='En ligne').length+' en ligne',
-      setConvNom:e=>{const v=val(e);const nc=convs.map(c=>c.id===convIdAct?{...c,nom:v}:c);this._save('minesec_convs',nc);this.setState({convs:nc});},
+      setConvNom:e=>{const v=val(e);
+        const nc=convs.map(c=>c.id===convIdAct?{...c,nom:v,updatedAt:Date.now()}:c);
+        this._save('minesec_convs',nc);
+        this.setState({convs:nc},()=>this._persist());},
       chatEmpty:msgsActifs.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8)',
       newConvStyle:'margin-top:14px;background:var(--c1a72bb,#1a72bb);color:var(--cffffff,#fff);border:none;padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:700;font-family:Poppins;cursor:pointer;width:100%',
-      newConv:()=>{const id='c'+Date.now();
-        const nc=[...convs,{id,nom:'Nouvelle discussion'}];
+      newConv:()=>{const id='c'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,6);
+        /* `cree` fixe l'ordre de la liste, `updatedAt` arbitre les
+           renommages concurrents. Sans eux, deux postes qui creent une
+           discussion la meme minute se la volent l'un a l'autre. */
+        const nc=[...convs,{id,nom:'Nouvelle discussion',cree:Date.now(),updatedAt:Date.now()}];
         const par={...(st.msgsByConv||parConv),[id]:[]};
         this._save('minesec_convs',nc);this._save('minesec_convmsgs',par);this._save('minesec_convid',id);
-        this.setState({convs:nc,msgsByConv:par,convId:id,collabTab:'discussions'});},
+        this.setState({convs:nc,msgsByConv:par,convId:id,collabTab:'discussions'},
+          ()=>this._persist());},
       /* --- accueil --- */
       cardStyle,cardTitle,cardLink,statCards,workItems,resCards,homeProps,
       workEmpty:workItems.length?hidden:'font-size:12.5px;color:var(--c8b97a8,#8b97a8)',

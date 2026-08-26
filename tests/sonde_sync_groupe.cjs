@@ -98,6 +98,20 @@ function atelier(repondre) {
   return a;
 }
 
+/* L'APPARTENANCE A UNE EQUIPE EST DESORMAIS UN PREALABLE.
+ * Le groupe `g1` etait ecrit en dur dans l'etat de depart, et toutes les
+ * installations poussaient donc dans le meme casier serveur — qui les
+ * refusait en 403 des le deuxieme envoi (voir tests/sonde_collaboratif.cjs).
+ * Sans equipe, plus aucune requete ne part : ces cas-ci doivent donc en
+ * poser une avant de mesurer quoi que ce soit.
+ */
+function equiper(a) {
+  a.state.groupes = [{ id: 'eq_banc', nom: 'Banc', code: 'AAAA-111', type: 'ferme',
+    proprietaire: 'accA', membres: ['accA'], places: 15 }];
+  a.state.groupeId = 'eq_banc';
+  return a;
+}
+
 const resultats = [];
 const attendre = ms => new Promise(r => setTimeout(r, ms));
 function juger(nom, ok, vu) {
@@ -111,6 +125,7 @@ function juger(nom, ok, vu) {
   /* --- 1. LE DÉBIT. Vingt mutations ne font pas vingt requêtes. --------- */
   {
     const a = atelier(() => ({ status: 200, corps: { ok: true, revision: 1 } }));
+    equiper(a);
     for (let i = 0; i < 20; i++) { a.state.epreuves = [{ id: 'e1', updatedAt: Date.now() + i }]; a._persist(); }
     await attendre(6000);
     const envois = a.__journal.filter(x => /action=etat/.test(x.url) && x.methode === 'POST').length;
@@ -126,6 +141,7 @@ function juger(nom, ok, vu) {
       ? { status: 200, corps: { ok: true, revision: 7,
           etat: { revision: 7, contenu: { epreuves: [sien], cours: [], annot: {} } } } }
       : { status: 200, corps: { ok: true } });
+    equiper(a);
     a.state.epreuves = [mien];
     a._syncTirer();
     await attendre(120);
@@ -142,6 +158,7 @@ function juger(nom, ok, vu) {
       ? { status: 200, corps: { ok: true, revision: 3,
           etat: { revision: 3, contenu: { epreuves: [neuf], cours: [], annot: {} } } } }
       : { status: 200, corps: { ok: true } });
+    equiper(a);
     a.state.epreuves = [vieux];
     a._syncTirer();
     await attendre(120);
@@ -153,6 +170,7 @@ function juger(nom, ok, vu) {
   /* --- 4. Une panne ne perd rien et ne déclenche pas de rafale ---------- */
   {
     const a = atelier(() => ({ status: 500, corps: { ok: false } }));
+    equiper(a);
     a.state.epreuves = [{ id: 'e1', title: 'mon travail', updatedAt: 1 }];
     a._persist();
     await attendre(6000);
@@ -166,6 +184,7 @@ function juger(nom, ok, vu) {
   /* --- 5. Sans compte, on n'appelle pas le serveur ---------------------- */
   {
     const a = atelier(() => ({ status: 200, corps: { ok: true } }));
+    equiper(a);
     a._poserJeton('');
     a.state.epreuves = [{ id: 'e1', updatedAt: 1 }];
     a._persist();

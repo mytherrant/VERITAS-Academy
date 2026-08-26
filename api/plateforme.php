@@ -720,68 +720,494 @@ if ($action === 'etat') {
     $db = vrt_load_db();
     if (!is_array($db)) jsonResponse(['ok' => false, 'error' => 'Base indisponible'], 503);
     $v     = plat_compte($db);
-    $acc   = $v['acc'];
-    $accId = (string) ($acc['id'] ?? '');
-    $gid   = preg_replace('/[^A-Za-z0-9_-]/', '', (string) ($_GET['groupe'] ?? ''));
+    $accId = (string) ($v['acc']['id'] ?? '');
+    $gid   = plat_gid((string) ($_GET['groupe'] ?? ''));
     if ($gid === '') jsonResponse(['ok' => false, 'error' => 'Groupe non précisé'], 400);
 
-    $groupes = $db['plateforme']['groupes'] ?? [];
-    $groupe  = null;
-    foreach ($groupes as $g) {
-        if ((string) ($g['id'] ?? '') === $gid) { $groupe = $g; break; }
+    $groupe = plat_groupe_par_id($db, $gid);
+
+    /* ⚠️ UNE ÉQUIPE NE NAÎT PLUS ICI — mesure du 26/08/2026.
+       Elle naissait à la première écriture, avec la liste de membres que le
+       NAVIGATEUR envoyait. Or cette liste était celle des profils de
+       démonstration (u1…u6) : l'identifiant du compte réel n'y figurait
+       jamais. Séquence observée sur banc, deux comptes distincts :
+
+           POST  ?action=etat&groupe=g1   → 200  {"revision":1}   (l'équipe naît)
+           POST  ?action=etat&groupe=g1   → 403  « Vous n'êtes pas membre »
+           GET   ?action=etat&groupe=g1   → 403  « Ce groupe est fermé »
+
+       Un envoi passait, puis plus jamais rien — pour l'auteur du groupe
+       lui-même. Le navigateur affichait une pastille « refus » et le travail
+       restait dans un seul poste, ce que la synchro était censée corriger.
+
+       La création passe désormais par ?action=groupe&op=creer, qui inscrit le
+       créateur comme membre et propriétaire. */
+    if (!$groupe) {
+        jsonResponse(['ok' => false, 'error' => 'Équipe inconnue.',
+                      'code' => 'groupe_inconnu'], 404);
     }
-    // Un groupe inconnu n'est pas une erreur à la première écriture : il naît ici.
-    $membre = $groupe ? in_array($accId, (array) ($groupe['membres'] ?? []), true) : true;
-    $ouvert = $groupe ? (($groupe['type'] ?? 'ferme') === 'ouvert') : false;
+
+    $membre = plat_est_membre($groupe, $accId);
+    $ouvert = ((string) ($groupe['type'] ?? 'ferme')) === 'ouvert';
 
     if ($method === 'GET') {
         if (!$membre && !$ouvert) {
-            jsonResponse(['ok' => false, 'error' => 'Ce groupe est fermé'], 403);
+            jsonResponse(['ok' => false, 'error' => 'Cette équipe est fermée.',
+                          'code' => 'non_membre'], 403);
         }
+        /* Le groupe est rendu ENRICHI, exactement comme par op=lister.
+           `plat_groupe_public` seul rendait `places` = 1 (la valeur n'est pas
+           stockee sur le groupe, elle se deduit du plan du proprietaire) : le
+           navigateur remplacant son groupe par celui-ci a chaque relecture,
+           une equipe College de quinze places se serait affichee « 4 membres
+           sur 1 place » quatre-vingt-dix secondes apres son ouverture. */
+        $pub = plat_groupe_public($groupe);
+        $pub['places'] = plat_places_de($db, (string) ($groupe['proprietaire'] ?? ''));
         jsonResponse([
-            'ok'    => true,
-            'etat'  => $db['plateforme']['etats'][$gid] ?? null,
-            'groupe'=> $groupe,
+            'ok'       => true,
+            'etat'     => $db['plateforme']['etats'][$gid] ?? null,
+            'groupe'   => $pub,
+            'annuaire' => plat_annuaire($db, $groupe),
         ]);
     }
 
     if ($method === 'PUT' || $method === 'POST') {
-        if (!$membre) jsonResponse(['ok' => false, 'error' => 'Vous n’êtes pas membre de ce groupe'], 403);
+        if (!$membre) {
+            jsonResponse(['ok' => false, 'error' => 'Vous n’êtes pas membre de cette équipe.',
+                          'code' => 'non_membre'], 403);
+        }
         $in = plat_input();
         if (!isset($in['etat']) || !is_array($in['etat'])) {
             jsonResponse(['ok' => false, 'error' => 'État manquant'], 400);
         }
+        /* ⚠️ L'OBJET `groupe` DU CLIENT N'EST PLUS LU.
+           Il était recopié tel quel dans la base. Éprouvé sur banc : un membre
+           quelconque renvoyait `{membres:[lui], type:'ouvert', nom:'…'}` et
+           obtenait 200 — il expulsait les autres, renommait l'équipe, et la
+           rendait lisible par n'importe quel compte de la plateforme. Ce qui
+           touche à l'appartenance passe par ?action=groupe, où le
+           propriétaire est vérifié. */
         $res = plat_muter(function (array $db2) use ($gid, $in, $accId) {
             if (!isset($db2['plateforme']) || !is_array($db2['plateforme'])) $db2['plateforme'] = [];
             if (!isset($db2['plateforme']['etats']) || !is_array($db2['plateforme']['etats'])) {
                 $db2['plateforme']['etats'] = [];
             }
+            /* Deuxième lecture de l'appartenance, SOUS VERROU : entre la
+               vérification ci-dessus et l'écriture ici, le propriétaire a pu
+               retirer ce membre. Sans elle, un exclu de la seconde d'avant
+               écrase encore l'état de toute l'équipe. */
+            $g2 = plat_groupe_par_id($db2, $gid);
+            if (!$g2 || !plat_est_membre($g2, $accId)) return null;
             $db2['plateforme']['etats'][$gid] = [
                 'contenu'  => $in['etat'],
                 'majPar'   => $accId,
                 'majLe'    => time(),
                 'revision' => (int) ($db2['plateforme']['etats'][$gid]['revision'] ?? 0) + 1,
             ];
-            if (isset($in['groupe']) && is_array($in['groupe'])) {
-                if (!isset($db2['plateforme']['groupes']) || !is_array($db2['plateforme']['groupes'])) {
-                    $db2['plateforme']['groupes'] = [];
-                }
-                $vu = false;
-                foreach ($db2['plateforme']['groupes'] as $i => $g) {
-                    if ((string) ($g['id'] ?? '') === $gid) {
-                        $db2['plateforme']['groupes'][$i] = $in['groupe'];
-                        $vu = true;
-                        break;
-                    }
-                }
-                if (!$vu) $db2['plateforme']['groupes'][] = $in['groupe'];
-            }
             return [$db2, ['revision' => $db2['plateforme']['etats'][$gid]['revision']]];
-        });
+        }, false);
+        if ($res === null) {
+            jsonResponse(['ok' => false, 'error' => 'Vous n’êtes plus membre de cette équipe.',
+                          'code' => 'non_membre'], 403);
+        }
         jsonResponse(['ok' => true] + (is_array($res) ? $res : []));
     }
 
     jsonResponse(['ok' => false, 'error' => 'Méthode non permise'], 405);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   4bis. ÉQUIPES — l'appartenance se décide ICI, jamais dans le navigateur
+
+   Trois choses ne peuvent pas vivre côté client, et c'est pour cela que cette
+   section existe :
+
+     • L'IDENTIFIANT D'UNE ÉQUIPE. Il était codé en dur (`g1`) dans le
+       navigateur : toutes les installations de la Terre poussaient donc dans
+       le même casier. Le serveur le tire au sort et le rend.
+     • LE CODE D'INVITATION. Le collègue invité ne connaît que le code ; son
+       navigateur, lui, ne connaît aucune équipe. `_rejoindreEquipe` cherchait
+       le code dans la liste LOCALE — il n'y était jamais, et l'invitation
+       répondait « Ce code ne correspond à aucune équipe connue » à tout le
+       monde. Il fallait un endroit qui sache résoudre code → équipe.
+     • LE NOMBRE DE PLACES. Les cartes d'abonnement promettent « 1 utilisateur »,
+       « jusqu'à 15 enseignants », « illimité ». Un plafond qu'on affiche et
+       qu'on n'applique nulle part n'est pas un plafond.
+
+   ⚠️ CODE INCONNU = HTTP 200 avec ok:false, PAS 404.
+   LWS bannit l'adresse IP à six mauvaises requêtes par minute, et cette
+   sanction ferme le site ENTIER, pas seulement l'Atelier. Or se tromper de
+   code est l'erreur la plus banale qui soit : six fautes de frappe suffiraient.
+   La réponse reste donc un 200 qui dit non.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/**
+ * Texte court venu du navigateur : borné, sans balises ni caractères de
+ * commande. Le nom d'une équipe s'affiche chez tous ses membres — c'est
+ * exactement le genre de champ par lequel on essaie de faire passer autre
+ * chose que du texte.
+ */
+function plat_texte_court($v, int $max = 200): string
+{
+    $s = is_string($v) ? $v : '';
+    $s = strip_tags($s);
+    $s = preg_replace('/[\x00-\x1F\x7F]+/u', ' ', $s);
+    $s = preg_replace('/\s+/u', ' ', (string) $s);
+    $s = trim((string) $s);
+    return function_exists('mb_substr') ? mb_substr($s, 0, $max, 'UTF-8') : substr($s, 0, $max);
+}
+
+/** Identifiant d'équipe assaini : seul l'alphabet que nous émettons passe. */
+function plat_gid($v): string
+{
+    return (string) preg_replace('/[^A-Za-z0-9_-]/', '', substr((string) $v, 0, 64));
+}
+
+function plat_groupe_par_id(array $db, string $gid): ?array
+{
+    foreach (($db['plateforme']['groupes'] ?? []) as $g) {
+        if (is_array($g) && (string) ($g['id'] ?? '') === $gid) return $g;
+    }
+    return null;
+}
+
+function plat_groupe_par_code(array $db, string $code): ?array
+{
+    $c = strtoupper(trim($code));
+    if ($c === '') return null;
+    foreach (($db['plateforme']['groupes'] ?? []) as $g) {
+        if (is_array($g) && strtoupper((string) ($g['code'] ?? '')) === $c) return $g;
+    }
+    return null;
+}
+
+function plat_est_membre(?array $groupe, string $accId): bool
+{
+    if (!$groupe || $accId === '') return false;
+    foreach ((array) ($groupe['membres'] ?? []) as $m) {
+        if ((string) $m === $accId) return true;
+    }
+    return false;
+}
+
+/**
+ * Ce qu'une équipe montre au navigateur. Volontairement pauvre : des
+ * identifiants et un nom. Les adresses et les mots de passe des membres
+ * n'ont rien à faire dans une réponse que lit un collègue.
+ */
+function plat_groupe_public(?array $g): ?array
+{
+    if (!$g) return null;
+    return [
+        'id'           => (string) ($g['id'] ?? ''),
+        'nom'          => (string) ($g['nom'] ?? ''),
+        'code'         => (string) ($g['code'] ?? ''),
+        'type'         => (string) ($g['type'] ?? 'ferme'),
+        'proprietaire' => (string) ($g['proprietaire'] ?? ''),
+        'membres'      => array_values(array_map('strval', (array) ($g['membres'] ?? []))),
+        'cree'         => (int) ($g['cree'] ?? 0),
+        'places'       => (int) ($g['places'] ?? 1),
+    ];
+}
+
+/** Nom affichable d'un compte, sans jamais rendre son adresse de connexion. */
+function plat_nom_compte(array $db, string $accId): string
+{
+    foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+        foreach (($db[$coll] ?? []) as $a) {
+            if (!is_array($a) || (string) ($a['id'] ?? '') !== $accId) continue;
+            $nom = trim((string) ($a['nom'] ?? ''));
+            $pre = trim((string) ($a['pre'] ?? $a['prenom'] ?? ''));
+            $ens = trim($pre . ' ' . $nom);
+            if ($ens !== '') return $ens;
+            /* Dernier recours : la partie gauche de l'adresse. Le domaine est
+               retiré — il désigne l'établissement ou l'opérateur, pas la
+               personne, et n'a aucune raison de circuler. */
+            $u = (string) ($a['user'] ?? '');
+            $p = strpos($u, '@');
+            return $p === false ? $u : substr($u, 0, $p);
+        }
+    }
+    return '';
+}
+
+/**
+ * ANNUAIRE DE L'ÉQUIPE — id de compte → nom.
+ *
+ * Sans lui, le travail d'un collègue redescend signé d'un identifiant que le
+ * navigateur ne sait pas nommer : il le résolvait alors contre sa table de
+ * DÉMONSTRATION et affichait « Mme Nadège Fotso », voire le nom du lecteur
+ * lui-même. Une remarque de relecture attribuée à la mauvaise personne est
+ * pire qu'une remarque anonyme.
+ */
+function plat_annuaire(array $db, ?array $groupe): array
+{
+    $out = [];
+    foreach ((array) (($groupe['membres'] ?? [])) as $m) {
+        $id = (string) $m;
+        if ($id === '') continue;
+        $out[$id] = ['nom' => plat_nom_compte($db, $id)];
+    }
+    return $out;
+}
+
+/**
+ * Places d'une équipe = celles du plan de son PROPRIÉTAIRE.
+ * Miroir des cartes d'abonnement (this.plans, plateforme/index.html) :
+ * Enseignant « 1 utilisateur », Collège « jusqu'à 15 enseignants »,
+ * Bassin « illimité ». Réglable en base sans redéploiement.
+ */
+function plat_places_palier(array $db): array
+{
+    $def = ['demo' => 1, 'essai' => 1, 'ens_mois' => 1, 'ens' => 1, 'etab' => 15, 'pro' => -1];
+    $sur = $db['plateforme']['places'] ?? [];
+    if (is_array($sur)) {
+        foreach ($def as $k => $v) {
+            if (isset($sur[$k]) && is_numeric($sur[$k])) $def[$k] = (int) $sur[$k];
+        }
+    }
+    return $def;
+}
+
+function plat_places_de(array $db, string $proprietaire): int
+{
+    $acc = null;
+    foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+        foreach (($db[$coll] ?? []) as $a) {
+            if (is_array($a) && (string) ($a['id'] ?? '') === $proprietaire) { $acc = $a; break 2; }
+        }
+    }
+    if (!$acc) return 1;
+    $palier = plat_palier_de(plat_droit($acc, $db, plat_offres($db)));
+    $table  = plat_places_palier($db);
+    return isset($table[$palier]) ? (int) $table[$palier] : 1;
+}
+
+/** Code d'équipe lisible à voix haute : ni I/O/0/1, qui se confondent. */
+function plat_code_equipe(array $db): string
+{
+    $L = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+    $C = '23456789';
+    for ($essai = 0; $essai < 500; $essai++) {
+        $c = '';
+        for ($i = 0; $i < 4; $i++) $c .= $L[random_int(0, strlen($L) - 1)];
+        $c .= '-';
+        for ($i = 0; $i < 3; $i++) $c .= $C[random_int(0, strlen($C) - 1)];
+        if (!plat_groupe_par_code($db, $c)) return $c;
+    }
+    return 'EQ-' . strtoupper(bin2hex(random_bytes(4)));
+}
+
+if ($action === 'groupe') {
+    $db = vrt_load_db();
+    if (!is_array($db)) jsonResponse(['ok' => false, 'error' => 'Base indisponible'], 503);
+    $v     = plat_compte($db);
+    $accId = (string) ($v['acc']['id'] ?? '');
+    if ($accId === '') jsonResponse(['ok' => false, 'error' => 'Compte sans identifiant'], 403);
+    $op = strtolower((string) ($_GET['op'] ?? 'lister'));
+
+    /* LISTER — la seule vérité sur « à quelles équipes j'appartiens ».
+       Le navigateur ne s'en souvient plus : il demande. */
+    if ($op === 'lister') {
+        $mes = [];
+        foreach (($db['plateforme']['groupes'] ?? []) as $g) {
+            if (!is_array($g) || !plat_est_membre($g, $accId)) continue;
+            $pub = plat_groupe_public($g);
+            $pub['places']   = plat_places_de($db, (string) ($g['proprietaire'] ?? ''));
+            $pub['annuaire'] = plat_annuaire($db, $g);
+            $mes[] = $pub;
+        }
+        jsonResponse(['ok' => true, 'groupes' => $mes]);
+    }
+
+    if ($method !== 'POST' && $method !== 'PUT') {
+        jsonResponse(['ok' => false, 'error' => 'Méthode non permise'], 405);
+    }
+    $in = plat_input(8192);
+
+    if ($op === 'creer') {
+        $nom = trim(plat_texte_court((string) ($in['nom'] ?? ''), 80));
+        if ($nom === '') $nom = 'Mon établissement';
+        /* Anti-abus discret : nul besoin de cinquante équipes. Le compteur
+           porte sur celles qu'on POSSÈDE, pas sur celles qu'on a rejointes. */
+        $miennes = 0;
+        foreach (($db['plateforme']['groupes'] ?? []) as $g) {
+            if (is_array($g) && (string) ($g['proprietaire'] ?? '') === $accId) $miennes++;
+        }
+        if ($miennes >= 5) {
+            jsonResponse(['ok' => true, 'cree' => false,
+                          'error' => 'Vous avez déjà cinq espaces de travail.',
+                          'code' => 'trop_d_equipes']);
+        }
+        $res = plat_muter(function (array $db2) use ($accId, $nom) {
+            if (!isset($db2['plateforme']) || !is_array($db2['plateforme'])) $db2['plateforme'] = [];
+            if (!isset($db2['plateforme']['groupes']) || !is_array($db2['plateforme']['groupes'])) {
+                $db2['plateforme']['groupes'] = [];
+            }
+            $g = [
+                'id'           => 'eq_' . bin2hex(random_bytes(6)),
+                'nom'          => $nom,
+                'code'         => plat_code_equipe($db2),
+                'type'         => 'ferme',
+                'proprietaire' => $accId,
+                'membres'      => [$accId],
+                'cree'         => time(),
+            ];
+            $db2['plateforme']['groupes'][] = $g;
+            return [$db2, ['groupe' => $g]];
+        });
+        $g = is_array($res) ? ($res['groupe'] ?? null) : null;
+        $pub = plat_groupe_public($g);
+        if ($pub) {
+            $pub['places']   = plat_places_de($db, $accId);
+            $pub['annuaire'] = [$accId => ['nom' => plat_nom_compte($db, $accId)]];
+        }
+        jsonResponse(['ok' => true, 'cree' => true, 'groupe' => $pub]);
+    }
+
+    if ($op === 'rejoindre') {
+        /* Le seul chemin par lequel un inconnu touche à une équipe : on le
+           borne. Huit essais par minute et par adresse, largement au-dessus
+           d'une faute de frappe, très en dessous d'un balayage de codes. */
+        if (vrt_rate_exceeded('plat_join', 8)) {
+            jsonResponse(['ok' => true, 'rejoint' => false,
+                          'error' => 'Trop de tentatives. Patientez une minute.',
+                          'code' => 'trop_de_tentatives']);
+        }
+        $code = strtoupper(trim(plat_texte_court((string) ($in['code'] ?? ''), 32)));
+        if ($code === '') {
+            jsonResponse(['ok' => true, 'rejoint' => false,
+                          'error' => 'Saisissez le code reçu.', 'code' => 'code_vide']);
+        }
+        $g = plat_groupe_par_code($db, $code);
+        if (!$g) {
+            jsonResponse(['ok' => true, 'rejoint' => false,
+                          'error' => 'Ce code ne correspond à aucune équipe. '
+                                   . 'Vérifiez-le auprès de la personne qui vous l’a envoyé.',
+                          'code' => 'code_inconnu']);
+        }
+        $gid = (string) ($g['id'] ?? '');
+        if (plat_est_membre($g, $accId)) {
+            $pub = plat_groupe_public($g);
+            $pub['places']   = plat_places_de($db, (string) ($g['proprietaire'] ?? ''));
+            $pub['annuaire'] = plat_annuaire($db, $g);
+            jsonResponse(['ok' => true, 'rejoint' => true, 'deja' => true, 'groupe' => $pub]);
+        }
+        $places = plat_places_de($db, (string) ($g['proprietaire'] ?? ''));
+        if ($places >= 0 && count((array) ($g['membres'] ?? [])) >= $places) {
+            jsonResponse(['ok' => true, 'rejoint' => false,
+                          'error' => 'Cette équipe a atteint son nombre de places ('
+                                   . $places . '). L’abonnement Collège en ouvre quinze.',
+                          'code' => 'plus_de_place']);
+        }
+        $res = plat_muter(function (array $db2) use ($gid, $accId) {
+            foreach (($db2['plateforme']['groupes'] ?? []) as $i => $g2) {
+                if (!is_array($g2) || (string) ($g2['id'] ?? '') !== $gid) continue;
+                $mem = array_values(array_map('strval', (array) ($g2['membres'] ?? [])));
+                /* Le plafond est REVÉRIFIÉ sous verrou : deux invités qui
+                   cliquent en même temps sur la quinzième place passeraient
+                   tous deux le contrôle d'avant, et l'équipe compterait seize. */
+                $pl = plat_places_de($db2, (string) ($g2['proprietaire'] ?? ''));
+                if ($pl >= 0 && count($mem) >= $pl) return null;
+                if (!in_array($accId, $mem, true)) $mem[] = $accId;
+                $db2['plateforme']['groupes'][$i]['membres'] = $mem;
+                return [$db2, ['groupe' => $db2['plateforme']['groupes'][$i]]];
+            }
+            return null;
+        }, false);
+        if ($res === null) {
+            jsonResponse(['ok' => true, 'rejoint' => false,
+                          'error' => 'Cette équipe n’a plus de place libre.',
+                          'code' => 'plus_de_place']);
+        }
+        $db3 = vrt_load_db() ?: $db;
+        $g3  = plat_groupe_par_id($db3, $gid);
+        $pub = plat_groupe_public($g3);
+        if ($pub) {
+            $pub['places']   = plat_places_de($db3, (string) ($g3['proprietaire'] ?? ''));
+            $pub['annuaire'] = plat_annuaire($db3, $g3);
+        }
+        jsonResponse(['ok' => true, 'rejoint' => true, 'groupe' => $pub]);
+    }
+
+    if ($op === 'renommer') {
+        $gid = plat_gid((string) ($in['groupe'] ?? ''));
+        $nom = trim(plat_texte_court((string) ($in['nom'] ?? ''), 80));
+        $g   = plat_groupe_par_id($db, $gid);
+        if (!$g) jsonResponse(['ok' => false, 'error' => 'Équipe inconnue.', 'code' => 'groupe_inconnu'], 404);
+        if ((string) ($g['proprietaire'] ?? '') !== $accId) {
+            jsonResponse(['ok' => false, 'error' => 'Seul le responsable de l’équipe peut la renommer.',
+                          'code' => 'non_proprietaire'], 403);
+        }
+        if ($nom === '') jsonResponse(['ok' => false, 'error' => 'Nom vide.'], 400);
+        plat_muter(function (array $db2) use ($gid, $nom) {
+            foreach (($db2['plateforme']['groupes'] ?? []) as $i => $g2) {
+                if (is_array($g2) && (string) ($g2['id'] ?? '') === $gid) {
+                    $db2['plateforme']['groupes'][$i]['nom'] = $nom;
+                    return [$db2, ['ok' => true]];
+                }
+            }
+            return null;
+        }, false);
+        jsonResponse(['ok' => true, 'nom' => $nom]);
+    }
+
+    if ($op === 'retirer') {
+        /* Quitter soi-même, ou retirer quelqu'un quand on est responsable.
+           Un seul verbe pour les deux : c'est la même écriture, et deux
+           chemins auraient fini par diverger. */
+        $gid  = plat_gid((string) ($in['groupe'] ?? ''));
+        $cible = (string) ($in['membre'] ?? $accId);
+        $g    = plat_groupe_par_id($db, $gid);
+        if (!$g) jsonResponse(['ok' => false, 'error' => 'Équipe inconnue.', 'code' => 'groupe_inconnu'], 404);
+        $proprio = (string) ($g['proprietaire'] ?? '');
+        if ($cible !== $accId && $proprio !== $accId) {
+            jsonResponse(['ok' => false, 'error' => 'Seul le responsable peut retirer un membre.',
+                          'code' => 'non_proprietaire'], 403);
+        }
+        if ($cible === $proprio) {
+            jsonResponse(['ok' => false, 'error' => 'Le responsable ne peut pas quitter son équipe. '
+                                                  . 'Supprimez-la ou transmettez-la d’abord.',
+                          'code' => 'proprietaire'], 400);
+        }
+        plat_muter(function (array $db2) use ($gid, $cible) {
+            foreach (($db2['plateforme']['groupes'] ?? []) as $i => $g2) {
+                if (!is_array($g2) || (string) ($g2['id'] ?? '') !== $gid) continue;
+                $db2['plateforme']['groupes'][$i]['membres'] = array_values(array_filter(
+                    array_map('strval', (array) ($g2['membres'] ?? [])),
+                    static function ($m) use ($cible) { return $m !== $cible; }
+                ));
+                return [$db2, ['ok' => true]];
+            }
+            return null;
+        }, false);
+        jsonResponse(['ok' => true, 'retire' => $cible]);
+    }
+
+    if ($op === 'supprimer') {
+        $gid = plat_gid((string) ($in['groupe'] ?? ''));
+        $g   = plat_groupe_par_id($db, $gid);
+        if (!$g) jsonResponse(['ok' => false, 'error' => 'Équipe inconnue.', 'code' => 'groupe_inconnu'], 404);
+        if ((string) ($g['proprietaire'] ?? '') !== $accId) {
+            jsonResponse(['ok' => false, 'error' => 'Seul le responsable de l’équipe peut la supprimer.',
+                          'code' => 'non_proprietaire'], 403);
+        }
+        plat_muter(function (array $db2) use ($gid) {
+            $db2['plateforme']['groupes'] = array_values(array_filter(
+                (array) ($db2['plateforme']['groupes'] ?? []),
+                static function ($g2) use ($gid) {
+                    return !(is_array($g2) && (string) ($g2['id'] ?? '') === $gid);
+                }
+            ));
+            /* L'état partagé s'en va avec l'équipe : le garder ferait vivre
+               indéfiniment des épreuves que plus personne ne peut lire. */
+            if (isset($db2['plateforme']['etats'][$gid])) unset($db2['plateforme']['etats'][$gid]);
+            return [$db2, ['ok' => true]];
+        }, false);
+        jsonResponse(['ok' => true, 'supprime' => $gid]);
+    }
+
+    jsonResponse(['ok' => false, 'error' => 'Opération inconnue.', 'code' => 'op'], 400);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────
