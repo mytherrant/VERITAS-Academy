@@ -43,6 +43,7 @@ const path = require('path');
    repartait en 403. */
 const RACINE = path.resolve(process.argv[3] || process.cwd());
 let QUOTA = 'ok';          // ok | plein | panne
+let PALIER = 'abo';        // abo (tout ouvert) | demo (5 textes offerts)
 const JETON_PAY = 'BANC-PUBLIC-INIT';   // miroir de CAMERPAY_PUBLIC_INIT
 let PAYSTATUT = 'pending';             // pending | success | failed
 let DERNIER_INIT = null;               // dernier corps recu par ?action=init
@@ -89,6 +90,29 @@ function indexCorpus() {
     title: t.title || '', reference: t.reference || '', faits: t.faits || '',
     libre: true, extrait: String(t.text || '').slice(0, 180)
   }));
+  /* PALIER DEMO — miroir de plat_offerts() (api/plateforme.php).
+     Le banc marquait TOUT `libre: true` : il ne pouvait donc jamais montrer le
+     cadenas ni le mur d'abonnement, c'est-a-dire precisement ce qui se vend.
+     Le vrai serveur n'offre que N textes, choisis d'un PAS REGULIER pour que
+     l'echantillon tombe dans tous les cycles — prendre les N premiers donnerait
+     N textes du seul Module 1, et le visiteur en conclurait que la base ne
+     couvre que la 6e. On reproduit ce choix, pas une approximation. */
+  if (PALIER === 'demo') {
+    const combien = 5, total = textes.length;
+    const offerts = new Set();
+    if (total > combien) {
+      const pas = total / combien;
+      for (let k = 0; k < combien; k++) {
+        offerts.add(textes[Math.min(total - 1, Math.floor(k * pas))].n);
+      }
+    } else {
+      textes.forEach(t => offerts.add(t.n));
+    }
+    textes.forEach(t => {
+      t.libre = offerts.has(t.n);
+      if (!t.libre) t.faits = '';   // le serveur vide aussi ce champ
+    });
+  }
   /* REPERTOIRE LIBRE DE DROITS : domaine public, servi EN ENTIER. Le
      fichier peut manquer sur un poste qui ne l'a pas encore genere -- le
      banc continue alors avec le seul repertoire protege, comme le serveur. */
@@ -125,6 +149,12 @@ const serveur = http.createServer((req, res) => {
     if (u.searchParams.get('raz')) JETON = '';
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     return res.end('mode=' + MODE + (JETON ? ' (jeton emis)' : ' (sans jeton)'));
+  }
+  if (u.pathname === '/__palier') {
+    PALIER = u.searchParams.get('p') || 'abo';
+    INDEX = null;                       // l'index est mis en cache : le refaire
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+    return res.end('palier=' + PALIER);
   }
   if (u.pathname === '/__pay') {
     PAYSTATUT = u.searchParams.get('s') || 'pending';
@@ -285,6 +315,29 @@ const serveur = http.createServer((req, res) => {
           res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
           return res.end(JSON.stringify({ ok: true }));
         }
+        /* ⚠️ LE MUR D'ABONNEMENT, applique AUSSI au texte integral.
+           Le banc ne l'appliquait qu'a l'index : il servait donc en 200 le
+           contenu d'un texte que le vrai serveur refuse en 402. Un banc qui
+           livre la marchandise ne peut pas prouver qu'elle est protegee — il
+           aurait valide un mur qui n'existe pas. Miroir de api/plateforme.php :
+           un numero hors des offerts, dans le repertoire MINESEC, repond 402
+           SANS le texte. Le repertoire libre de droits n'est pas concerne (voir
+           juste en dessous) : ses auteurs sont morts depuis assez longtemps. */
+        if (PALIER === 'demo' && n < LIBRE_OFFSET) {
+          /* indexCorpus() rend une CHAINE JSON deja serialisee (elle est mise
+             en cache telle quelle) : il faut la relire pour retrouver les
+             fiches. */
+          const offerts = JSON.parse(indexCorpus()).textes
+            .filter(t => t.src === 'minesec' && t.libre).map(t => t.n);
+          if (offerts.indexOf(n) < 0) {
+            noter('complet n=' + n + ' -> 402 (hors palier demo)');
+            res.writeHead(402, { 'Content-Type': 'application/json; charset=utf-8' });
+            return res.end(JSON.stringify({ ok: false, error: 'Abonnement requis',
+              motif: 'palier', palier: 'demo',
+              message: 'Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir les 1040 textes, leurs questions et leurs faits de langue.' }));
+          }
+        }
+
         /* Fiche libre : servie en entier, sans condition — c'est tout
            l'interet du domaine public. */
         if (n >= LIBRE_OFFSET) {

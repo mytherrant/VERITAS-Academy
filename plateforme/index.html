@@ -3541,8 +3541,15 @@ class Component extends DCLogic {
              expire, palier abaisse. L'index dit encore « libre », le serveur
              dit non : c'est le serveur qui fait foi. On repose le cadenas
              sur la fiche, sinon l'interface continuerait a proposer un texte
-             qu'elle ne peut plus ouvrir. */
-          return Promise.reject({_droit:true});
+             qu'elle ne peut plus ouvrir.
+             On RETIENT au passage la phrase du serveur : elle dit combien de
+             textes s'ouvrent et ce que l'abonnement apporte. Elle etait lue
+             puis jetee, et l'ecran se contentait d'ouvrir un formulaire de
+             paiement sans jamais dire POURQUOI. */
+          return r.json().catch(()=>({})).then(j=>{
+            if(j&&j.message)this._msgAbo=String(j.message);
+            return Promise.reject({_droit:true});
+          });
         }
         if(!r.ok)return Promise.reject({_http:r.status});
         return r.json().catch(()=>Promise.reject({_json:true}));
@@ -4335,6 +4342,30 @@ class Component extends DCLogic {
      enumerable laissait donc sonder l'existence et l'etat des transactions
      d'autrui. Le hasard cryptographique quand il existe, `Math.random` sinon :
      un repli faible vaut mieux qu'une exception sur un vieux navigateur. */
+  /* MUR D'ABONNEMENT : on EXPLIQUE avant de demander de payer.
+     Les trois chemins qui butaient sur un texte ferme ouvraient directement le
+     formulaire de paiement — plan impose, montant affiche, et pas un mot sur ce
+     qui venait de se passer. Vu du visiteur, un ecran de carte bancaire surgit
+     parce qu'il a clique sur un texte.
+     Le serveur, lui, formule une phrase utile (« Ce texte fait partie du
+     repertoire complet. Abonnez-vous pour ouvrir les 1040 textes... ») : elle
+     est retenue par _completerTexte au premier 402. Tant qu'on ne l'a pas
+     encore recue — cas frequent, l'index suffit a savoir que la fiche est
+     fermee — on dit la meme chose par defaut. */
+  _murAbonnement(){
+    /* Le chiffre vient du repertoire deja charge, pas d'une requete : le front
+       sait combien de textes existent, et un mur qui annonce ce qu'il ouvre
+       vend mieux qu'un mur muet. On ne redemande pas le texte au serveur — il
+       repondrait 402, et LWS bannit l'adresse a six mauvaises requetes par
+       minute. Le message du serveur (retenu au premier 402 reel) reste
+       prioritaire quand on l'a. */
+    var n=(this.all||[]).filter(function(x){return x&&x.src!=='libre';}).length;
+    this._avis(this._msgAbo
+      || ('Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir '
+         +(n>0?('les '+n.toLocaleString('fr-FR')+' textes'):'tout le répertoire')
+         +', leurs questions et leurs faits de langue.'),'attention');
+    this.setState({payOpen:true,paySelected:'ens',payDone:false});
+  }
   _alea4(){
     const A='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     try{
@@ -4625,7 +4656,7 @@ class Component extends DCLogic {
       /* Texte ferme. Le glisser dans l'epreuve avec son amorce donnerait une
          epreuve inutilisable ET une facture morale : mieux vaut proposer
          l'abonnement, qui est la seule chose qui puisse l'ouvrir. */
-      this.setState({payOpen:true,paySelected:'ens',payDone:false});
+      this._murAbonnement();
       return;
     }
     if(f&&!f._partiel){poser(null,true);return;}
@@ -4635,7 +4666,7 @@ class Component extends DCLogic {
       if(ok){poser(null,true);return;}
       const g=this.all.find(x=>x.n===n);
       if(g&&g._libre===false){
-        this.setState({payOpen:true,paySelected:'ens',payDone:false});return;
+        this._murAbonnement();return;
       }
       this._avis('Ce texte n\u2019a pas pu \u00eatre t\u00e9l\u00e9charg\u00e9 en entier : il n\u2019a pas '
         +'\u00e9t\u00e9 ajout\u00e9 \u00e0 l\u2019\u00e9preuve. R\u00e9essayez \u2014 votre abonnement n\u2019est pas en cause.','ko');
@@ -4940,7 +4971,7 @@ class Component extends DCLogic {
         /* Verrouille : on ouvre les offres au lieu d'afficher une fiche
            tronquee sans explication. Sans cela le clic partait chercher le
            texte, recevait un 402, et l'echec etait avale en silence. */
-        if(f._libre===false){this.setState({payOpen:true,paySelected:'ens',payDone:false});return;}
+        if(f._libre===false){this._murAbonnement();return;}
         this._completerTexte(f.n);this.setState({screen:'fiche',currentN:f.n},()=>window.scrollTo(0,0));},toggle:()=>this._toggleText(f.n)});
     const filtered=this._filtered();
     /* Combien de filtres sont posés : le bouton de repli doit le dire,
