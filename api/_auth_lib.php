@@ -528,8 +528,8 @@ if (!defined('VRT_AUTH_LIB')) {
            ⚠️ En ajouter un quatrième ici NE SUFFIT PAS : il faut aussi
            l'inscrire dans plat_plans_atelier() et plat_paliers(), sinon il se
            paie mais n'ouvre aucun droit. */
-        if ($intent === 'subscription' && isset(['ens' => 1, 'etab' => 1, 'pro' => 1][$targetId])) {
-            $defAtelier = ['ens' => 5000, 'etab' => 30000, 'pro' => 70000];
+        if ($intent === 'subscription' && isset(['ens_mois' => 1, 'ens' => 1, 'etab' => 1, 'pro' => 1][$targetId])) {
+            $defAtelier = ['ens_mois' => 800, 'ens' => 5000, 'etab' => 30000, 'pro' => 70000];
             $regle = (int) ($db['plateforme']['tarifs'][$targetId] ?? 0);
             return $regle > 0 ? $regle : $defAtelier[$targetId];
         }
@@ -779,7 +779,8 @@ if (!defined('VRT_AUTH_LIB')) {
                ⚠️ Tout nouveau plan de l'Atelier doit être inscrit ICI en plus
                de vrt_prix_catalogue(), plat_plans_atelier() et
                plat_paliers(). Quatre endroits, aucun facultatif. */
-            $dureeAtelier = ['ens' => 'annuel', 'etab' => 'annuel', 'pro' => 'annuel'];
+            $dureeAtelier = ['ens_mois' => 'mensuel', 'ens' => 'annuel',
+                             'etab' => 'annuel', 'pro' => 'annuel'];
             $duree = $plan['duree'] ?? '';
             if ($duree === '' && isset($dureeAtelier[$targetId])) $duree = $dureeAtelier[$targetId];
             $finTs = $now + vrt_abo_duree_ms($duree);

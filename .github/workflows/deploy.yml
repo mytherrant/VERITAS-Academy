@@ -179,6 +179,21 @@ jobs:
             exit 1
           fi
 
+      # ── 🎟️ LA PORTE DES CAHIERS — deux règles commerciales, pas du code.
+      #    ① un code n'ouvre QUE son manuel   ② et QUE sa version (élève/prof).
+      #    Le 25/08/2026, le serveur émettait un code « guide » pour un ouvrage
+      #    vendu sans guide : un code encaissé qui n'ouvrait rien. La garde
+      #    existait (vrt_livret_ouvrage_accepte) et n'était appelée nulle part.
+      #    Ce banc lance un vrai serveur PHP et rejoue le parcours HTTP complet.
+      - name: 🎟️ Un code n'ouvre-t-il QUE son manuel et sa version ?
+        run: |
+          if command -v php >/dev/null 2>&1; then
+            node tests/banc_livret_codes.cjs
+          else
+            echo "::error title=PHP introuvable::Le banc de la porte des cahiers n'a pas pu tourner. Déploiement ANNULÉ."
+            exit 1
+          fi
+
       # ── 🛡️ Le bouclier anti-robots garde MAINTENANT toutes les surfaces
       #    publiques, y compris les payantes. Une régression y est invisible
       #    dans les deux sens : soit les portes s'ouvrent, soit les élèves

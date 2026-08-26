@@ -50,6 +50,8 @@ let DERNIER_INIT = null;               // dernier corps recu par ?action=init
 const COMPTEURS = {};      // genre -> nombre consomme
 const PORT = Number(process.argv[2] || process.env.PORT || 3200);
 let MODE = 'ok';
+const ETATS = {};               // etat partage par groupe (action=etat)
+const GROUPES = {};             // fiche de groupe, ecrite au meme appel
 let COMPLET = 'ok';             // sort de mode=complet, regle par /__complet
 let JETON = '';                 // jeton emis par ?action=session
 const JOURNAL = [];             // horodatage de chaque requete d'API vue
@@ -280,6 +282,31 @@ const serveur = http.createServer((req, res) => {
         res.end(JSON.stringify({ ok: true, accorde: true,
           utilise: COMPTEURS[genre], plafond: plafond }));
       });
+    }
+
+    /* ETAT DU GROUPE — le partage entre collegues.
+       Garde en memoire, revision incrementale, comme le vrai serveur. */
+    if (u.pathname.indexOf('plateforme.php') >= 0 && action === 'etat') {
+      const gid = u.searchParams.get('groupe') || '';
+      if (req.method === 'GET') {
+        noter('etat GET ' + gid);
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        return res.end(JSON.stringify({ ok: true,
+          etat: ETATS[gid] || null, groupe: GROUPES[gid] || null }));
+      }
+      let corps = '';
+      req.on('data', c => { corps += c; });
+      req.on('end', () => {
+        noter('etat POST ' + gid);
+        let j = {};
+        try { j = JSON.parse(corps || '{}'); } catch (e) {}
+        const rev = ((ETATS[gid] && ETATS[gid].revision) || 0) + 1;
+        ETATS[gid] = { contenu: j.etat || {}, majPar: 'banc', majLe: Date.now(), revision: rev };
+        if (j.groupe && j.groupe.id) GROUPES[j.groupe.id] = j.groupe;
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ ok: true, revision: rev }));
+      });
+      return;
     }
 
     if (u.pathname.indexOf('plateforme.php') >= 0 && action === 'corpus') {

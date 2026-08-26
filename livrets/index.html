@@ -20,6 +20,13 @@
 <style>
   .prix{ font-weight:600; font-size:15px; }
   .cardlv{ display:flex; flex-direction:column; gap:10px; }
+  /* La couverture est le premier argument de vente : on lui donne sa place
+     entière. `aspect-ratio` réserve le cadre AVANT que l'image n'arrive —
+     sans lui, chaque couverture qui se charge pousse la page vers le bas et
+     l'on clique sur la mauvaise carte. */
+  .cardlv .couv{ display:block; width:100%; aspect-ratio:3/4; object-fit:contain;
+    border-radius:10px; border:1px solid var(--vp-line,#E3E9F2);
+    background:#f4f7fb; margin-bottom:2px; }
   .cardlv .duo{ display:flex; gap:8px; flex-wrap:wrap; }
   .cardlv .duo a{ flex:1 1 auto; }
   .stepl{ counter-reset:e; display:grid; gap:12px; margin:14px 0 0; padding:0; list-style:none; }
@@ -104,6 +111,159 @@
 </div>
 <footer class="bot">© <span id="y"></span> Centre VÉRITAS · Mythe Errant — Douala, Cameroun · <a href="https://veritas-school.com">veritas-school.com</a></footer>
 <script>document.getElementById('y').textContent=new Date().getFullYear();</script>
+<script>
+/* ── LA BOUTIQUE SUIT LE CATALOGUE ────────────────────────────────────────────
+   Les quatre cartes ci-dessus sont écrites à la main : elles portent le
+   référencement et, surtout, la page continue de vendre si le JavaScript ne
+   s'exécute pas. Mais elles ne connaissent que 6ᵉ→3ᵉ.
+
+   Le 25/08/2026, « Bord — Cahier de français 6ᵉ » était ACTIF au catalogue
+   serveur, vendable, tarifé 2 000 F… et n'apparaissait nulle part sur cette
+   page. Un produit publié que personne ne pouvait acheter. Chaque ouvrage
+   ajouté par tools/publier.py aurait connu le même sort, parce qu'il fallait
+   penser à revenir éditer ce fichier à la main.
+
+   On demande donc au serveur ce qui est réellement en vente et on complète.
+   En cas d'échec (serveur muet, hors ligne, réponse illisible) : on ne touche
+   à rien — la page reste telle qu'elle est. Une boutique qui se vide parce
+   qu'une requête a échoué serait pire que le problème qu'on corrige. */
+(function () {
+  var grille = document.querySelector('.grid');
+  if (!grille || !window.fetch) return;
+
+  // Ce qui est DÉJÀ montré, déduit des liens en place : aucune liste à tenir
+  // à jour en double, donc rien à oublier.
+  var deja = {};
+  grille.querySelectorAll('a[href$=".html"]').forEach(function (a) {
+    var f = (a.getAttribute('href') || '').replace(/^.*\//, '').replace(/\.html$/, '');
+    if (f) deja[f.toLowerCase()] = 1;
+  });
+
+  var ico = function (n) {
+    return '<svg class="i" aria-hidden="true" focusable="false"><use href="/assets/veritas-icons.svg#' + n + '"/></svg>';
+  };
+  var prixTexte = function (n) {
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' F';
+  };
+
+  /* Pose la couverture en tête de carte. On sert la VIGNETTE (~62 Ko), jamais
+     la pleine définition : douze cartes à 390 Ko feraient 4,6 Mo de catalogue,
+     et la page visée s'ouvre sur un téléphone au Cameroun. La pleine
+     définition reste à son URL pour qui veut regarder de près.
+     `alt` vide + `aria-hidden` : le titre du cahier est juste en dessous, en
+     texte ; répéter « couverture du cahier de 6ᵉ » n'apprendrait rien à un
+     lecteur d'écran et allongerait sa lecture. */
+  var posees = 0;
+  var poserCouverture = function (carte, o) {
+    if (!carte || !o || !o.couverture || carte.querySelector('.couv')) return;
+    var img = document.createElement('img');
+    img.className = 'couv';
+    img.alt = '';
+    img.setAttribute('aria-hidden', 'true');
+    img.decoding = 'async';
+    /* CHARGEMENT IMMÉDIAT POUR TOUTES — et c'est un choix, pas un oubli.
+       Le report (`loading="lazy"`) est la bonne pratique par défaut, et c'est
+       ce qui était écrit ici d'abord. Mais au banc, deux couvertures sur cinq
+       ne se chargeaient JAMAIS, même après défilement jusqu'en bas de page.
+       C'est probablement un artefact du navigateur piloté (Chrome ne déclenche
+       pas le report dans un onglet qui n'est pas peint) — probablement, donc
+       pas démontré. Or l'enjeu est la seule image d'un produit qu'on demande
+       de payer : une carte sans couverture coûte plus cher que les kilo-octets
+       épargnés. La grille tient en une douzaine de vignettes de ~62 Ko, soit
+       ~750 Ko au pire — le poids d'UNE seule couverture d'origine.
+       Les trois premières passent en priorité haute : ce sont elles qu'on voit.
+       L'attribut se pose AVANT `src` ; après, le navigateur a déjà tranché. */
+    img.setAttribute('loading', 'eager');
+    if (posees < 3) img.setAttribute('fetchpriority', 'high');
+    img.src = o.couverture.replace(/\.jpg$/, '_v.jpg');
+    // Une couverture absente ne doit pas laisser un cadre vide et cassé.
+    img.onerror = function () { img.remove(); };
+    carte.insertBefore(img, carte.firstChild);
+    posees++;
+  };
+
+  /* Les cartes écrites à la main n'ont pas de couverture : elles sont plus
+     anciennes que les images. On les leur pose ici, sinon les quatre cahiers
+     les plus vendus seraient les SEULS sans visuel — précisément l'inverse de
+     ce qu'on veut. Le rapprochement se fait par le lien, déjà indexé plus haut. */
+  var carteDe = function (slug) {
+    var a = grille.querySelector('a[href="' + slug + '.html"]');
+    return a ? a.closest('.card') : null;
+  };
+
+  fetch('/api/livret.php', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: '{"action":"catalogue"}'
+  })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (j) {
+      if (!j || !j.ok || !Array.isArray(j.ouvrages) || !j.ouvrages.length) return;
+      var ajoutes = 0;
+      j.ouvrages.forEach(function (o) {
+        var slug = String(o.slug || '').toLowerCase();
+        if (!slug) return;
+        if (deja[slug]) { poserCouverture(carteDe(slug), o); return; }   // déjà sur la page
+        /* DÉCLARÉ ≠ PUBLIÉ. Le catalogue serveur retombe sur cinq classes
+           d'origine pour ne jamais fermer un accès vendu : « 2nde » y figure
+           sans que sa page existe. Sans ce filtre, la boutique affichait une
+           carte qui menait à un 404 — constaté au navigateur. */
+        if (o.disponible === false) return;
+        var prix = parseInt(o.prix, 10) > 0 ? parseInt(o.prix, 10) : 1500;
+        var lecture = o.mode === 'lecture';
+
+        var d = document.createElement('div');
+        d.className = 'card cardlv';
+        poserCouverture(d, o);
+        // textContent pour le titre : il vient du serveur, on ne l'injecte
+        // jamais comme du HTML.
+        var h3 = document.createElement('h3');
+        h3.textContent = o.titre || slug;
+        d.appendChild(h3);
+
+        var p = document.createElement('p');
+        p.className = 'note';
+        p.textContent = lecture
+          ? 'Le cahier complet, à feuilleter page par page — leçons et corrigés modèles.'
+          : 'Livret interactif : l’élève répond dans la page, la correction suit.';
+        d.appendChild(p);
+
+        var duo = document.createElement('div');
+        duo.className = 'duo';
+        var a = document.createElement('a');
+        a.className = 'dl';
+        a.href = slug + '.html';
+        a.innerHTML = '<span>' + ico(lecture ? 'i-book-open' : 'i-book') + '</span>'
+                    + '<span class="pill prix"></span>';
+        a.querySelector('span').insertAdjacentText('beforeend',
+          lecture ? 'Feuilleter l’ouvrage' : 'Ouvrir le livret');
+        a.querySelector('.prix').textContent = prixTexte(prix);
+        duo.appendChild(a);
+        d.appendChild(duo);
+
+        grille.appendChild(d);
+        ajoutes++;
+      });
+
+      // Le chapeau annonce « 1 500 FCFA par classe ». Dès qu'un ouvrage sort de
+      // ce tarif, la phrase devient fausse : on la nuance plutôt que de la
+      // laisser mentir.
+      if (ajoutes) {
+        var horsTarif = j.ouvrages.some(function (o) {
+          var p = parseInt(o.prix, 10);
+          return o.disponible !== false && p > 0 && p !== 1500
+              && !deja[String(o.slug || '').toLowerCase()];
+        });
+        var chapeau = document.querySelector('h2.sec + p.note');
+        if (horsTarif && chapeau && chapeau.textContent.indexOf('1 500') >= 0) {
+          chapeau.insertAdjacentHTML('beforeend',
+            ' <strong>Certains ouvrages ont leur propre tarif</strong> — il est indiqué sur chaque carte.');
+        }
+      }
+    })
+    .catch(function () { /* serveur muet : la page garde ses cartes */ });
+})();
+</script>
 <script src="/assets/veritas-ui.js?v=1.19.10" defer></script>
 <script src="/assets/ambassa.js?v=1.19.44" defer></script>
 </body>

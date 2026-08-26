@@ -348,7 +348,9 @@ ok('contenu         → cible hors catalogue : accordée, pas refusée',
 // pas de prix de référence : « tarif indéterminable » acceptait 100 FCFA pour un
 // abonnement annuel à 5 000. Ces contrôles échouent si le repli tarifaire de
 // vrt_prix_catalogue() disparaît.
-foreach ([['ens', 5000], ['etab', 30000], ['pro', 70000]] as [$plan, $tarif]) {
+//  (800 F/mois) est entre dans la table le 26/08 : il DOIT figurer
+// aux quatre miroirs, sinon il se vend a n importe quel prix ou n ouvre rien.
+foreach ([['ens_mois', 800], ['ens', 5000], ['etab', 30000], ['pro', 70000]] as [$plan, $tarif]) {
     $db  = baseDeTest();
     $res = vrt_grant_entitlement($db, paiement('subscription', $plan, 100));
     ok(sprintf('atelier %-8s → 100 FCFA refusés (tarif %d)', $plan, $tarif),

@@ -228,6 +228,24 @@ if (!defined('VRT_LIVRET_LIB')) {
         $ref    = substr(trim((string) ($o['ref'] ?? '')), 0, 40);
         if (!isset(vrt_livret_classes()[$classe])) return ['ok' => false, 'codes' => [], 'erreur' => 'classe'];
         if (!isset(vrt_livret_kinds()[$kind]))     return ['ok' => false, 'codes' => [], 'erreur' => 'kind'];
+        /* Un ouvrage n'accepte pas forcément les deux versions : un Bord ou un
+           cahier d'œuvre se vend SANS guide de l'enseignant (`kinds:["livret"]`).
+           Émettre quand même un code « guide » produit un code parfaitement
+           valide — qui n'ouvre RIEN, puisqu'il n'y a pas de guide derrière.
+
+           Ce n'était pas théorique : les DEUX chemins d'émission passaient au
+           travers. `admin_gen` acceptait `bord-6e` + `guide` (200), et surtout
+           un paiement d'intention `livret` avec la cible `bord-6e:guide` était
+           tarifé au prix d'un guide (5 000 F par défaut) puis honoré. Argent
+           encaissé, rien délivré, et aucun message pour le dire.
+
+           `vrt_livret_ouvrage_accepte()` était écrite depuis le début et
+           n'était appelée de NULLE PART — une garde morte. On la branche ici,
+           au seul point de passage commun au webhook et à l'administration :
+           il n'y a donc pas deux règles à tenir en cohérence. */
+        if (!vrt_livret_ouvrage_accepte($classe, $kind)) {
+            return ['ok' => false, 'codes' => [], 'erreur' => 'kind_ouvrage'];
+        }
 
         $reg = vrt_livret_registre_charger();
 

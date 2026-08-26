@@ -919,6 +919,11 @@
       <button onClick="{{ toggleTheme }}" title="{{ themeTitre }}" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ themeIcon }}</button>
       <button onClick="{{ goActivite }}" title="Activité" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ bellIcon }}<span style="{{ notifDot }}"></span></button>
       <button onClick="{{ goCollab }}" title="Discussion d'équipe" class="vrt-hide-xs" style="{{ topIconBtn }}" style-hover="border-color:var(--c1a72bb,#1a72bb)">{{ chatIcon }}<span style="{{ chatDot }}"></span></button>
+      <!-- Voyant de partage. `syncEtat` était calculé et affiché nulle part :
+           l'enseignant pouvait croire partager avec son équipe alors que rien
+           ne partait. Un travail qu'on croit transmis se découvre en réunion,
+           trop tard. -->
+      <span title="{{ syncTitre }}" style="{{ syncStyle }}">{{ syncLabel }}</span>
       <button onClick="{{ goProfil }}" title="Mon compte" style="display:flex;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:3px 6px 3px 3px;border-radius:999px" style-hover="background:var(--cf2f6fb,#f2f6fb)">
         <span style="{{ me.avatarLg }}">{{ me.initials }}</span>
         <span class="vrt-hide-sm" style="text-align:left;line-height:1.15;{{ sbLabelShow }}"><span style="display:block;font-size:12.5px;font-weight:700;color:var(--c14375f,#14375f);font-family:'Poppins'">{{ me.name }}</span><span style="display:block;font-size:11px;color:var(--c8b97a8,#8b97a8)">{{ me.role }}</span></span>
@@ -3021,6 +3026,11 @@ class Component extends DCLogic {
     this.plans=[
       {id:'essai',name:'Essai',price:'0',period:'gratuit',quota:10,seats:'1 utilisateur',
        features:['1 semaine d’essai','10 épreuves / mois','Corpus MINESEC complet','Aperçu & impression PDF']},
+      /* Payer au mois lève le seul obstacle qui compte : sortir 5 000 F
+         d'un coup. Même service, même quota mensuel — et l'annuel reste
+         moins cher sur l'année, ce que la carte dit sans détour. */
+      {id:'ens_mois',name:'Enseignant · au mois',price:'800',period:'FCFA / mois',quota:30,seats:'1 utilisateur',
+       features:['30 épreuves / mois','Corpus MINESEC complet','Import de corpus externe','Relecture par Ambassa','Sans engagement — arrêtez quand vous voulez']},
       {id:'ens',name:'Enseignant',price:'5 000',period:'FCFA / an',quota:30,seats:'1 utilisateur',
        features:['30 épreuves / mois','Import de corpus externe','Historique des versions','Relecture par Ambassa']},
       {id:'etab',name:'Collège',price:'30 000',period:'FCFA / an',quota:120,seats:"Jusqu'à 15 enseignants",
@@ -3152,6 +3162,9 @@ class Component extends DCLogic {
     sur(()=>this._installerProtection(),'protection du corpus');
     sur(()=>this._installerRetour(),'touche retour');
     sur(()=>this._lireInvitation(),'lien d’invitation');
+    /* Jeton deja pose (l utilisateur revient) : la synchro peut demarrer
+       tout de suite. Sinon elle attend la connexion. */
+    sur(()=>{if(this._jeton())this._installerSync();},'synchro du groupe');
     sur(()=>this._installerClavierIntro(),'clavier de la présentation');
     /* CHIEN DE GARDE DU DEMARRAGE, independant du chargement lui-meme.
        Douze secondes apres le montage, si rien n'a abouti ET qu'aucun
@@ -4256,6 +4269,114 @@ class Component extends DCLogic {
       return !!r;
     }catch(e){return false;}
   }
+  /* ═══════════ SYNCHRONISATION DU GROUPE ═══════════
+     Voir la note du correctif : `action=etat` existait et n'avait aucun
+     appelant. Tout le travail collectif vivait dans un seul navigateur. */
+
+  /* Ce qui est PARTAGE. Volontairement restreint : les epreuves, les cours
+     et les annotations. Pas `users` -- la liste des comptes appartient a
+     l'etablissement, pas au poste -- ni les preferences, qui sont
+     personnelles. */
+  _syncContenu(){
+    const st=this.state;
+    return {epreuves:st.epreuves||[],cours:st.cours||[],
+            annot:this.annot||{},maj:Date.now()};
+  }
+  /* Fusion par OBJET, dernier ecrivain gagne sur `updatedAt`.
+     Fusionner le blob entier ferait perdre l'epreuve qu'un collegue vient
+     d'ecrire pendant qu'on lisait la sienne. Un objet absent d'un cote
+     n'est jamais supprime : la suppression franche demanderait un journal
+     de tombstones, et perdre le travail d'autrui coute plus cher qu'un
+     brouillon qui survit trop longtemps. */
+  _fusionner(mien,leur){
+    const par={};
+    (mien||[]).forEach(o=>{if(o&&o.id)par[o.id]=o;});
+    (leur||[]).forEach(o=>{
+      if(!o||!o.id)return;
+      const a=par[o.id];
+      if(!a||((o.updatedAt||0)>(a.updatedAt||0)))par[o.id]=o;
+    });
+    return Object.keys(par).map(k=>par[k])
+      .sort((x,y)=>(y.updatedAt||0)-(x.updatedAt||0));
+  }
+  /* ENVOI. Differe de 4 s apres la derniere modification, et jamais plus
+     d'une fois toutes les 8 s. `_persist()` est appele a chaque frappe :
+     envoyer a chaque appel produirait la rafale qui a deja ferme le site. */
+  _syncPousser(){
+    if(!this._jeton())return;                 // pas de compte : rien a partager
+    clearTimeout(this._syncT);
+    this._syncT=setTimeout(()=>{
+      const t=Date.now();
+      if(this._syncDernier&&t-this._syncDernier<8000){
+        /* Trop tot : on REPROGRAMME au lieu d'envoyer. L'etat courant
+           partira, pas celui d'il y a huit secondes. */
+        this._syncPousser();return;
+      }
+      this._syncDernier=t;
+      const gid=this._groupeActif();
+      const grp=(this.state.groupes||[]).find(g=>g.id===gid)||null;
+      fetch(this._apiUrl('plateforme.php')+'?action=etat&groupe='+encodeURIComponent(gid),{
+        method:'POST',
+        headers:Object.assign({'Content-Type':'application/json'},
+          this._jeton()?{Authorization:'Bearer '+this._jeton()}:{}),
+        body:JSON.stringify({etat:this._syncContenu(),groupe:grp})
+      })
+        .then(r=>r.ok?r.json():Promise.reject(r.status))
+        .then(j=>{if(j&&j.revision!=null)this._syncRev=j.revision;
+          this.setState({syncEtat:'ok',syncLe:Date.now()});})
+        /* AUCUNE REPRISE IMMEDIATE. L'envoi suivant portera tout : le
+           contenu est un instantane complet, pas un delta. Reessayer
+           aussitot est exactement ce qui fabrique une rafale. */
+        .catch(e=>this.setState({syncEtat:(e===403?'refus':'panne')}));
+    },4000);
+  }
+  /* RELECTURE. Une fois au demarrage, puis toutes les 90 s -- et seulement
+     si l'onglet est visible : un onglet oublie en arriere-plan n'a aucune
+     raison d'interroger le serveur toute la journee. */
+  _syncTirer(){
+    if(!this._jeton())return;
+    try{if(document.hidden)return;}catch(e){}
+    const gid=this._groupeActif();
+    fetch(this._apiUrl('plateforme.php')+'?action=etat&groupe='+encodeURIComponent(gid),{
+      headers:this._jeton()?{Authorization:'Bearer '+this._jeton()}:{}})
+      .then(r=>r.ok?r.json():Promise.reject(r.status))
+      .then(j=>{
+        const e=j&&j.etat;
+        if(!e||!e.contenu)return;                     // rien encore partage
+        if(this._syncRev!=null&&e.revision<=this._syncRev)return;  // deja vu
+        this._syncRev=e.revision;
+        const c=e.contenu;
+        const ep=this._fusionner(this.state.epreuves,c.epreuves);
+        const co=this._fusionner(this.state.cours,c.cours);
+        /* Les annotations sont un objet indexe par numero de texte : on
+           prend les deux cotes, le distant l'emporte sur une meme cle. */
+        if(c.annot&&typeof c.annot==='object'){
+          this.annot=Object.assign({},this.annot||{},c.annot);
+          this._save('minesec_annot',this.annot);
+        }
+        if(j.groupe&&j.groupe.id){
+          const gs=(this.state.groupes||[]).map(g=>g.id===j.groupe.id?j.groupe:g);
+          if(!gs.some(g=>g.id===j.groupe.id))gs.push(j.groupe);
+          this._save('minesec_groupes',gs);
+          this.setState({groupes:gs});
+        }
+        this.setState({epreuves:ep,cours:co,syncEtat:'ok',syncLe:Date.now(),
+          annotVersion:(this.state.annotVersion||0)+1},()=>this._save('minesec_v3',
+            {authed:this.state.authed,users:this.state.users,
+             currentUserId:this.state.currentUserId,team:this.state.team,
+             epreuves:ep,activeId:this.state.activeId,cours:co,
+             activeCoursId:this.state.activeCoursId,compteId:this.state.compteId}));
+      })
+      .catch(e=>{if(e===403)this.setState({syncEtat:'refus'});});
+  }
+  _installerSync(){
+    if(this._syncInstalle)return;
+    this._syncInstalle=true;
+    this._syncTirer();
+    /* 90 s : assez pour voir arriver le travail d'un collegue dans la
+       minute, assez peu pour rester tres loin du seuil de LWS. */
+    this._syncPoll=setInterval(()=>this._syncTirer(),90000);
+  }
   /* ---- INVITATION D'UN COLLEGUE ---------------------------------------
      Le lien porte le code du groupe dans le hash : celui qui le recoit se
      connecte avec SON compte VERITAS, et le code s'applique au demarrage.
@@ -4493,6 +4614,10 @@ class Component extends DCLogic {
           compteId:(j.compte&&j.compte.id)||'',
           demo:false,users:users,corpusDroit:j.droit||null,screen:'accueil'},()=>{
           this._persist();this._rechargerCorpus();
+          /* La synchro ne demarre QU APRES la connexion : sans jeton, chaque
+             appel retomberait en 401 et fabriquerait la rafale que LWS
+             sanctionne. */
+          this._installerSync();
           if(typeof window!=='undefined')window.scrollTo(0,0);
         });
       })
@@ -4636,7 +4761,10 @@ class Component extends DCLogic {
       ()=>this._persist());
   }
   _load(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
-  _persist(){const st=this.state;this._save('minesec_v3',{authed:st.authed,users:st.users,currentUserId:st.currentUserId,team:st.team,epreuves:st.epreuves,activeId:st.activeId,cours:st.cours,activeCoursId:st.activeCoursId,compteId:st.compteId});}
+  /* Toute mutation passe par ici. On ecrit en local TOUT DE SUITE -- le
+     travail ne doit jamais dependre du reseau -- et on programme l'envoi au
+     groupe, differe et borne en debit (voir _syncPousser). */
+  _persist(){const st=this.state;this._save('minesec_v3',{authed:st.authed,users:st.users,currentUserId:st.currentUserId,team:st.team,epreuves:st.epreuves,activeId:st.activeId,cours:st.cours,activeCoursId:st.activeCoursId,compteId:st.compteId});this._syncPousser();}
   _save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
   _eom(){const d=new Date();return new Date(d.getFullYear(),d.getMonth()+1,1).getTime();}
   _chkTeam(q){if(Date.now()>q.resetsOn){q.used=0;q.resetsOn=this._eom();}return q;}
@@ -5905,6 +6033,29 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
            ligne trop longue en travers d'un texte étroit. */
         return 'VÉRITAS \u00b7 '+nom+'\n'+new Date().toLocaleDateString('fr-FR');
       })(),
+      /* --- voyant de partage --- */
+      syncLabel:(st.syncEtat==='panne')?'Hors ligne'
+        :(st.syncEtat==='refus')?'Non partagé'
+        :(st.syncEtat==='ok')?'Partagé':'',
+      syncTitre:(st.syncEtat==='panne')
+        ?'Votre travail est enregistré sur cet appareil, mais il n’a pas pu être partagé avec votre équipe. Il repartira tout seul dès que la connexion reviendra.'
+        :(st.syncEtat==='refus')
+        ?'Vous n’êtes pas membre de ce groupe : votre travail reste sur cet appareil. Demandez le code d’équipe à un collègue, depuis l’écran Équipe.'
+        :(st.syncEtat==='ok')
+        ?('Partagé avec votre équipe'+(st.syncLe?(' — '+new Date(st.syncLe).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})):''))
+        :'',
+      /* Rien tant qu'aucune synchro n'a eu lieu : un voyant éteint au
+         démarrage vaut mieux qu'un voyant qui annonce une panne avant
+         d'avoir essayé. */
+      syncStyle:st.syncEtat
+        ?('display:inline-flex;align-items:center;gap:5px;font-family:Poppins;font-size:10.5px;'
+          +'font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;flex:none;'
+          +((st.syncEtat==='ok')
+            ?'color:var(--c188047,#188047);background:var(--ce6f5ec,#e6f5ec)'
+            :(st.syncEtat==='refus')
+            ?'color:var(--c8a6410,#8a6410);background:var(--cfdf3d8,#fdf3d8)'
+            :'color:var(--cc0392b,#c0392b);background:var(--cfdecea,#fdecea)'))
+        :hidden,
       apercuSceau:this._icoRond('layers','var(--c1a72bb,#1a72bb)',40),
       /* --- carte d'invitation (écran Équipe) --- */
       invSceau:this._icoRond('users','var(--c1a72bb,#1a72bb)',40),

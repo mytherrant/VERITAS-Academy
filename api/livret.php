@@ -325,6 +325,7 @@ if (strpos($action, 'admin_') === 0) {
         ]);
         if (!$r['ok']) {
             $m = ['classe' => 'Classe inconnue.', 'kind' => 'Nature inconnue.',
+                  'kind_ouvrage' => 'Cet ouvrage ne se vend pas dans cette version (il n’a pas de guide de l’enseignant).',
                   'io' => 'Écriture du registre impossible.',
                   'cle_absente' => 'Clé de signature absente sur ce serveur.'];
             lv_err(400, $m[$r['erreur'] ?? ''] ?? 'Émission impossible.', (string) ($r['erreur'] ?? 'gen'));
@@ -495,6 +496,64 @@ if ($action === 'unlock') {
         'joursRestants' => vrt_livret_jours_restants(substr($cle, 0, 12)),
         'expireLe'      => (int) ($entry['exp'] ?? 0),
     ]);
+}
+
+/* Catalogue COMPLET des ouvrages en vente — titres, niveaux, natures, tarifs.
+   Volontairement public : c'est exactement ce qu'un client doit voir avant
+   d'acheter, et cela ne révèle aucun contenu.
+
+   Pourquoi cette action existe : la page d'administration qui émet les codes à
+   la main (paiement en espèces au centre) doit proposer la liste des ouvrages.
+   Sans cette action, elle l'aurait codée en dur — et le jour où Jacques publie
+   un cahier de plus par le manifeste, il serait absent du menu alors que le
+   serveur, lui, l'accepterait. Le catalogue reste une DONNÉE, d'un bout à
+   l'autre de la chaîne. */
+if ($action === 'catalogue') {
+    /* `disponible` — DÉCLARÉ n'est pas PUBLIÉ, et confondre les deux fait
+       vendre du vide.
+
+       Le catalogue retombe toujours sur cinq classes d'origine (voir le
+       `$repli` de _livret_lib.php) pour ne jamais fermer un accès déjà vendu.
+       Conséquence : « 2nde » y figure alors que sa coquille `livrets/2nde.html`
+       n'a jamais été produite — le manifeste la déclare `actif: false`, faute
+       de version interactive. Une boutique qui lit ce catalogue tel quel
+       affiche donc une carte « 2ⁿᵈᵉ A » qui mène à un 404. Mesuré au
+       navigateur le 25/08/2026, sur la première version de cette page.
+
+       La seule autorité sur « est-ce publié ? », c'est la présence de la
+       coquille sur le disque du serveur. On la constate, on ne la suppose pas.
+       On ne RETIRE rien pour autant : l'administration doit continuer de voir
+       un ouvrage indisponible (pour comprendre pourquoi il ne se vend pas)
+       et de gérer les codes déjà émis dessus. Chaque surface tranche ensuite :
+       la boutique n'affiche que le disponible, l'administration montre tout. */
+    /* `couverture` — CONSTATÉE, pas déclarée, exactement comme `disponible`.
+
+       On aurait pu inscrire le chemin de l'image dans le catalogue JSON. Mais
+       un chemin écrit à la main survit à la disparition du fichier : la carte
+       afficherait alors une image cassée, ce qui est pire que pas d'image du
+       tout sur la vitrine d'un produit payant. Le nom se déduit du slug
+       (tools/couvertures.py produit `livret_<slug>.jpg`) et on vérifie que le
+       fichier est là. Ajouter une couverture = déposer un fichier. */
+    $racine = dirname(__DIR__) . '/livrets/';
+    $dirCouv = dirname(__DIR__) . '/uploads/oeuvres/';
+    $out = [];
+    foreach (vrt_livret_catalogue() as $slug => $o) {
+        $couv = is_file($dirCouv . 'livret_' . $slug . '.jpg')
+              ? '/uploads/oeuvres/livret_' . $slug . '.jpg' : '';
+        $out[] = [
+            'slug'  => (string) $slug,
+            'titre' => (string) $o['titre'],
+            'niveau' => (string) ($o['niveau'] ?? ''),
+            'mode'  => (string) ($o['mode'] ?? 'interactif'),
+            'kinds' => array_values((array) ($o['kinds'] ?? ['livret'])),
+            'prix'  => (int) ($o['prix'] ?? 0),
+            'prixGuide' => (int) ($o['prixGuide'] ?? 0),
+            'disponible' => is_file($racine . $slug . '.html'),
+            'couverture' => $couv,
+        ];
+    }
+    lv_out(200, ['ok' => true, 'total' => count($out), 'ouvrages' => $out,
+                 'kinds' => vrt_livret_kinds()]);
 }
 
 /* Fiche d'un ouvrage en mode lecture : de quoi que le liseur sache quoi

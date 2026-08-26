@@ -154,6 +154,7 @@ ECRANS.forEach(e => {
 });
 
 /* ── 3. Verdict ────────────────────────────────────────────────────────── */
+let soucis = 0;
 const GLOBALES = new Set(['true', 'false', 'null', 'undefined']);
 const mortes = [], pasFonction = [];
 liaisons.forEach((ctxs, nom) => {
@@ -163,6 +164,60 @@ liaisons.forEach((ctxs, nom) => {
   if (gestionnaire && typeDe.get(nom) !== 'function' && typeDe.get(nom) !== 'undefined')
     pasFonction.push({ nom, type: typeDe.get(nom) });
 });
+
+/* ── 2 bis. Les interrupteurs d'administration agissent-ils ? ──────────
+   Un interrupteur qu'on bascule et qui ne change rien est pire qu'un
+   interrupteur absent : l'administrateur croit avoir fermé la fonction.
+   On bascule chacun à false et on vérifie que la commande disparaît. */
+const INTERRUPTEURS = [
+  ['import',       'importBtnStyle',    'Import de corpus externe'],
+  ['impression',   'exportWordStyle',   'Aperçu et impression'],
+  ['ia',           'confAmbassaStyle',  'Relecture par Ambassa'],
+  /*  n'est que le TEXTE du bouton : il ne bouge pas quand on
+     coupe la fonction. Le vrai verrou est , qui commande le
+     <sc-if> autour du bouton. Choisir la mauvaise observable donnait un
+     faux positif — la fonction était bien branchée. */
+  ['biblio',       'canPublish',        'Publication dans la bibliothèque'],
+  ['propositions', 'epTabPropStyle',    'Propositions de modification'],
+];
+const morts = [];
+INTERRUPTEURS.forEach(function (t) {
+  const cle = t[0], commande = t[1], nom = t[2];
+  let avant, apres;
+  try {
+    /* `canPublish` vaut `perm.publish && statut === valide` : sans épreuve
+       validée sous la main, il est faux dans les DEUX cas et l'on conclurait
+       à tort que l'interrupteur ne fait rien. Le jeu de départ en contient
+       une — `e2`. */
+    app.state = Object.assign({}, app.state,
+      /* Et il faut une FONCTION qui ait le droit de publier : l'enseignant
+         par défaut ne l'a pas, si bien que `perm.publish` reste faux quoi
+         qu'on fasse. `u2` est le chef de département. */
+      { screen: 'composeur', ready: true, authed: true, activeId: 'e2',
+        currentUserId: 'u2',
+        admin: { features: {} } });
+    avant = app.renderVals()[commande];
+    app.state = Object.assign({}, app.state,
+      { currentUserId: 'u2', activeId: 'e2',
+        admin: { features: (function () { var o = {}; o[cle] = false; return o; })() } });
+    apres = app.renderVals()[commande];
+  } catch (e) {
+    morts.push({ nom: nom, pourquoi: 'renderVals a levé : ' + e.message });
+    return;
+  }
+  /* « Éteint » se traduit par un style masqué ou une valeur vidée. On ne
+     regarde pas COMMENT, seulement que quelque chose a changé. */
+  if (String(avant) === String(apres)) {
+    morts.push({ nom: nom, pourquoi: '« ' + commande + ' » ne bouge pas quand on coupe' });
+  }
+});
+if (morts.length) {
+  console.log('\n  [ KO ] ' + morts.length + ' interrupteur(s) d’administration sans effet :');
+  morts.forEach(function (m) { console.log('         · ' + m.nom + ' — ' + m.pourquoi); });
+  soucis += morts.length;
+} else {
+  console.log('\n  [ OK ] les ' + INTERRUPTEURS.length + ' interrupteurs d’administration éteignent bien leur fonction');
+}
 
 console.log('\n  LIAISONS GABARIT <-> LOGIQUE — Atelier de Français\n');
 console.log('  ' + liaisons.size + ' liaisons relevées dans le gabarit');
@@ -181,6 +236,6 @@ if (pasFonction.length) {
 } else {
   console.log('  [ OK ] tout gestionnaire lié vaut bien une fonction');
 }
-const soucis = mortes.length + pasFonction.length + plantages;
+soucis += mortes.length + pasFonction.length + plantages;
 console.log(soucis ? '\n  ' + soucis + ' problème(s) de liaison\n' : '\n  Tout est relié\n');
 process.exit(soucis ? 1 : 0);

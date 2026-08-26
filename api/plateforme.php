@@ -201,7 +201,13 @@ function plat_offres(array $db): array
 /** Identifiants des plans de l'Atelier (miroir de this.plans côté client). */
 function plat_plans_atelier(): array
 {
-    return ['ens', 'etab', 'pro'];
+    /* `ens_mois` : le plan Enseignant paye au MOIS. Même service, même
+       quota mensuel — seul le mode de paiement change.
+       ⚠️ Un plan ne vit qu'inscrit AUX QUATRE ENDROITS : ici,
+       plat_paliers(), vrt_prix_catalogue() et le miroir de durée de
+       vrt_grant_entitlement(). En oublier un ne lève aucune erreur : le
+       plan se vend et n'ouvre rien, ou s'ouvre et ne se facture pas. */
+    return ['ens_mois', 'ens', 'etab', 'pro'];
 }
 
 /**
@@ -246,11 +252,21 @@ function plat_paliers(array $db): array
            qui donnent de quoi travailler tout de suite ; l'échantillon
            protégé, lui, montre ce qu'on achète.
            Réglable en base : DB.plateforme.paliers.essai.textes. */
-        'essai' => ['textes' => 60,  'citations' => 20,  'exports' => 3,   'ia' => 10,  'epreuves' => 12],
+        'essai' => ['textes' => 20,  'citations' => 8,   'exports' => 3,   'ia' => 10,  'epreuves' => 12],
 
-        'ens'  => ['textes' => -1,  'citations' => -1,  'exports' => 30,  'ia' => 30,  'epreuves' => -1],
-        'etab' => ['textes' => -1,  'citations' => -1,  'exports' => 120, 'ia' => 120, 'epreuves' => -1],
-        'pro'  => ['textes' => -1,  'citations' => -1,  'exports' => 400, 'ia' => 400, 'epreuves' => -1],
+        /* `epreuves` valait -1 (illimite) sur les trois paliers payants, alors
+           que les cartes annoncent « 30 / 120 / 400 epreuves par mois ». Un
+           plafond qu on affiche et qu on n applique pas n est pas un plafond :
+           un mois paye ouvrait un nombre d epreuves sans borne. Les valeurs
+           sont desormais celles des cartes, et restent reglables en base. */
+        /* Mensuel : rigoureusement les mêmes plafonds que l'annuel. Les
+           brider davantage ferait payer plus cher au mois pour moins de
+           service — l'inverse de ce qu'on cherche, qui est d'ouvrir la
+           porte à qui ne peut pas sortir 5 000 F d'un coup. */
+        'ens_mois' => ['textes' => -1,  'citations' => -1,  'exports' => 30,  'ia' => 30,  'epreuves' => 30],
+        'ens'  => ['textes' => -1,  'citations' => -1,  'exports' => 30,  'ia' => 30,  'epreuves' => 30],
+        'etab' => ['textes' => -1,  'citations' => -1,  'exports' => 120, 'ia' => 120, 'epreuves' => 120],
+        'pro'  => ['textes' => -1,  'citations' => -1,  'exports' => 400, 'ia' => 400, 'epreuves' => 400],
     ];
     $sur = $db['plateforme']['paliers'] ?? [];
     if (!is_array($sur)) return $def;
