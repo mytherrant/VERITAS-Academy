@@ -189,10 +189,22 @@ jobs:
         run: |
           if command -v php >/dev/null 2>&1; then
             node tests/banc_livret_codes.cjs
+            node tests/banc_cahier.cjs
           else
-            echo "::error title=PHP introuvable::Le banc de la porte des cahiers n'a pas pu tourner. Déploiement ANNULÉ."
+            echo "::error title=PHP introuvable::Les bancs de la porte des cahiers n'ont pas pu tourner. Déploiement ANNULÉ."
             exit 1
           fi
+
+      # ── 🔑 LA CLÉ D'UN EXERCICE survit-elle à une correction du cahier ?
+      #    Si elle bouge, l'élève retrouve ses réponses sous les mauvaises
+      #    questions et l'annotation du professeur désigne un autre exercice.
+      #    Rien ne casse : tout glisse, en silence, à la rentrée suivante.
+      #    Mesuré le 26/08/2026 : avec un compteur d'affichage (le moteur
+      #    d'origine), UN exercice ajoute deplacait les 55 reponses d'un cahier
+      #    de 2nde. Pas de PHP ni de navigateur ici : la regle est une fonction
+      #    pure, elle s'eprouve en une seconde.
+      - name: 🔑 Une reponse reste-t-elle attachee a SA question ?
+        run: node tests/banc_cles_cahier.cjs
 
       # ── 🛡️ Le bouclier anti-robots garde MAINTENANT toutes les surfaces
       #    publiques, y compris les payantes. Une régression y est invisible
@@ -495,6 +507,7 @@ jobs:
             api/_livret_lib.php \
             api/livret.php \
             api/collab.php \
+            api/cahier.php \
             api/content.php \
             api/migrate_protected.php \
             api/db_sql.php \
