@@ -347,6 +347,27 @@ if ($action === 'init' && $method === 'POST') {
     // jour où quelqu'un fabriquera une référence à rallonge.
     if (strlen($ref) > 100) jsonRespCy(['error' => 'ref trop longue (100 caractères maximum)'], 400);
 
+    /* ── ON NE FAIT PAS PAYER UN ARTICLE QU'ON NE POURRA PAS LIVRER ──────────
+       Un cahier peut se vendre SANS guide de l'enseignant (`kinds:["livret"]`
+       au catalogue). Une demande « bord-6e:guide » était pourtant tarifée au
+       prix d'un guide, encaissée, puis l'émission du code échouait à la
+       livraison : argent pris, rien remis, et le client n'apprenait rien.
+
+       On refuse ici, AVANT le moindre débit. La garde vit aussi à l'émission
+       (vrt_livret_emettre) — c'est voulu : celle-ci protège le portefeuille du
+       client, celle-là protège le registre quel que soit le chemin d'entrée. */
+    if ($intent === 'livret' || $intent === 'livret_pack') {
+        $lvB    = explode(':', $targetId);
+        $lvSlug = strtolower(trim((string) ($lvB[0] ?? '')));
+        $lvKind = strtolower(trim((string) ($lvB[1] ?? 'livret')));
+        if ($lvSlug === '' || !isset(vrt_livret_classes()[$lvSlug])) {
+            jsonRespCy(['error' => 'Cet ouvrage n’est pas au catalogue.'], 400);
+        }
+        if (!isset(vrt_livret_kinds()[$lvKind]) || !vrt_livret_ouvrage_accepte($lvSlug, $lvKind)) {
+            jsonRespCy(['error' => 'Cet ouvrage ne se vend pas dans cette version.'], 400);
+        }
+    }
+
     // Le téléphone est FACULTATIF chez CamerPay (le payeur peut régler par
     // carte). S'il est fourni, on le normalise pour préremplir la page.
     $payerNumber = $clientTel !== '' ? camerpayNormalizePhone($clientTel) : '';
@@ -662,18 +683,62 @@ if ($action === 'list' && $method === 'GET') {
     $payments = camerpayCollectStates($stateDir, 'camerpay_cm');
     $reconciles = 0;
 
+    /* ⏳ DÉLAI AU-DELÀ DUQUEL UNE TRANSACTION EN ATTENTE EST CLOSE.
+       Sept jours : bien plus que le temps de payer, assez pour couvrir un
+       week-end prolongé pendant lequel personne n'ouvre le tableau de bord. */
+    $limiteAbandon = defined('CAMERPAY_PENDING_TTL') ? (int) CAMERPAY_PENDING_TTL : 604800;
+    $expires = 0;
+
     foreach ($payments as $i => $p) {
         if (($p['status'] ?? '') !== 'pending') continue;
         $age = time() - strtotime($p['created_at'] ?? 'now');
-        if ($age > 86400 || $age < 60) continue;      // trop vieux ou trop frais
+        if ($age < 60) continue;                      // trop frais : le payeur est encore dessus
+
+        /* ⚠️ CE `continue` PRENAIT L'ARGENT SANS RIEN RENDRE.
+           La ligne disait `if ($age > 86400 ... ) continue;` — passé 24 h, la
+           transaction n'était PLUS JAMAIS examinée. Or CamerPay ne rejoue pas
+           un webhook perdu (voir plus haut) : il suffisait que la notification
+           se perde ET que le client ferme son onglet pour que le paiement
+           reste « pending » à vie. L'argent était bien encaissé chez CamerPay ;
+           l'accès n'était jamais ouvert ; et rien, nulle part, ne le signalait.
+           Le seuil doit DÉCLENCHER un traitement, pas l'interrompre.
+
+           On vérifie donc une dernière fois auprès de CamerPay avant de
+           clore : c'est précisément le cas où un paiement abouti a été oublié.
+           Si le fournisseur ne répond pas, on ne clôt RIEN — mieux vaut une
+           ligne en attente qu'une transaction payée marquée abandonnée. */
         $verified = camerpayVerifyTransaction($p);
-        if ($verified === null) continue;
+
+        if ($verified === null) {
+            if ($age > $limiteAbandon) {
+                camerpayLog($logFile, date('c') . ' [PENDING_INVERIFIABLE] ref=' . ($p['ref'] ?? '')
+                    . ' age=' . $age . "s — laissée en attente, CamerPay injoignable\n");
+            }
+            continue;
+        }
+
         $p = camerpayApplyVerified($p, $verified, $logFile, $p['ref'] ?? '');
         camerpayGrant($p, $logFile, $p['ref'] ?? '');   // pose `granted` — écrire APRÈS
+
+        /* Toujours en attente APRÈS vérification, et trop vieille : le payeur
+           n'a jamais réglé. On la clôt pour qu'elle sorte des « en attente »,
+           en gardant la trace de la raison — un état muet est ce qui avait
+           rendu le problème d'origine invisible. */
+        if (($p['status'] ?? '') === 'pending' && $age > $limiteAbandon) {
+            $p['status']     = 'expired';
+            $p['expired_at'] = date('c');
+            $p['reason']     = 'Abandonnée : aucun paiement constaté après '
+                             . round($limiteAbandon / 86400) . ' jours.';
+            camerpayLog($logFile, date('c') . ' [PENDING_EXPIRE] ref=' . ($p['ref'] ?? '')
+                . ' age=' . $age . "s\n");
+            $expires++;
+        } else {
+            $reconciles++;
+        }
+
         file_put_contents($stateDir . _safeRefCamerpay($p['ref'] ?? '') . '.json',
             json_encode($p, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         $payments[$i] = $p;
-        $reconciles++;
     }
 
     $brut = 0; $net = 0; $frais = 0; $test = 0;
@@ -690,6 +755,9 @@ if ($action === 'list' && $method === 'GET') {
     jsonRespCy([
         'count'      => count($payments),
         'reconciles' => $reconciles,
+        // Rendu explicite : l'administration doit voir qu'on a clos des lignes,
+        // et combien. Un nettoyage silencieux ressemble à une perte de données.
+        'expires'    => $expires,
         'totaux'     => [
             'brut_paye'    => $brut,
             'frais'        => $frais,          // estimation : CamerPay ne renvoie pas la commission par transaction

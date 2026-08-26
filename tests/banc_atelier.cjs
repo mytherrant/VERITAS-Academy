@@ -42,6 +42,11 @@ const path = require('path');
    sinon plus a ce que path.join produit sous Windows, et TOUT le statique
    repartait en 403. */
 const RACINE = path.resolve(process.argv[3] || process.cwd());
+let QUOTA = 'ok';          // ok | plein | panne
+const JETON_PAY = 'BANC-PUBLIC-INIT';   // miroir de CAMERPAY_PUBLIC_INIT
+let PAYSTATUT = 'pending';             // pending | success | failed
+let DERNIER_INIT = null;               // dernier corps recu par ?action=init
+const COMPTEURS = {};      // genre -> nombre consomme
 const PORT = Number(process.argv[2] || process.env.PORT || 3200);
 let MODE = 'ok';
 let COMPLET = 'ok';             // sort de mode=complet, regle par /__complet
@@ -121,6 +126,17 @@ const serveur = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     return res.end('mode=' + MODE + (JETON ? ' (jeton emis)' : ' (sans jeton)'));
   }
+  if (u.pathname === '/__pay') {
+    PAYSTATUT = u.searchParams.get('s') || 'pending';
+    res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+    return res.end(JSON.stringify({ statut: PAYSTATUT, dernierInit: DERNIER_INIT }));
+  }
+  if (u.pathname === '/__quota') {
+    QUOTA = u.searchParams.get('m') || 'ok';
+    if (u.searchParams.get('raz')) { for (const k in COMPTEURS) delete COMPTEURS[k]; }
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
+    return res.end('quota=' + QUOTA + ' compteurs=' + JSON.stringify(COMPTEURS));
+  }
   if (u.pathname === '/__complet') {
     COMPLET = u.searchParams.get('c') || 'ok';
     res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -142,8 +158,98 @@ const serveur = http.createServer((req, res) => {
       JETON = 'BANC-' + Date.now().toString(36);
       res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
       return res.end(JSON.stringify({ ok: true, token: JETON,
-        compte: { nom: 'Enseignant du banc', role: 'ens' },
+        /* `id` EST dans la reponse du vrai serveur (api/plateforme.php:483) et
+           le front s'en sert comme `accountId` au paiement : l'omettre ici
+           ferait passer au banc un parcours qui echoue en production. */
+        compte: { id: 'acc_banc_001', nom: 'Enseignant du banc', role: 'ens' },
         droit: { ok: true, motif: 'abonnement' } }));
+    }
+
+    /* CAMERPAY — miroir du CONTRAT de api/payment_camerpay.php.
+       Ce n'est pas la passerelle qu'on simule (aucun argent ne circule ici),
+       c'est la POIGNEE DE MAIN : le jeton public exige par camerpayInitGuard,
+       et les noms de champs lus par ?action=init. Ce banc applique les memes
+       refus, dans le meme ordre — 401 sans Bearer, 400 sans `ref`. C'est
+       precisement ce qui manquait : le contrat du front avait diverge de celui
+       du serveur sans que rien ne le signale, et le paiement etait impossible.
+       Un banc qui accepterait n'importe quel corps ne prouverait rien. */
+    if (u.pathname.indexOf('payment_camerpay.php') >= 0 && action === 'config') {
+      noter('camerpay config');
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      return res.end(JSON.stringify({ ok: true, provider: 'camerpay',
+        configured: true, canCollect: true, selfService: true, mode: 'sandbox',
+        sandbox: true, publicInitToken: JETON_PAY, flow: 'redirect',
+        reason: 'CamerPay est en mode TEST (sandbox) : aucun argent réel ne circule.' }));
+    }
+    if (u.pathname.indexOf('payment_camerpay.php') >= 0 && action === 'init') {
+      const porte = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+      if (porte !== JETON_PAY) {
+        noter('camerpay init -> 401 (Bearer absent ou faux)');
+        res.writeHead(401, { 'Content-Type': 'application/json; charset=utf-8' });
+        return res.end(JSON.stringify({ error: 'Authentification requise pour initier un paiement' }));
+      }
+      let corps = '';
+      req.on('data', c => { corps += c; });
+      return req.on('end', () => {
+        let b = {};
+        try { b = JSON.parse(corps || '{}'); } catch (e) {}
+        DERNIER_INIT = b;
+        const montant = parseInt(b.montant || 0, 10);
+        const ref = String(b.ref || '').trim();
+        if (montant <= 0 || !ref) {
+          noter('camerpay init -> 400 (montant/ref manquants : contrat non respecte)');
+          res.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
+          return res.end(JSON.stringify({ error: 'montant et ref requis' }));
+        }
+        noter('camerpay init -> 201 ref=' + ref + ' montant=' + montant
+          + ' cible=' + (b.targetId || '?') + ' compte=' + (b.accountId || 'AUCUN'));
+        res.writeHead(201, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ success: true, ref: ref,
+          transaction_uuid: 'BANC-' + ref,
+          pay_url: 'http://localhost:' + PORT + '/__payer?ref=' + encodeURIComponent(ref),
+          status: 'pending', sandbox: true }));
+      });
+    }
+    if (u.pathname.indexOf('payment_camerpay.php') >= 0 && action === 'status') {
+      const ref = u.searchParams.get('ref') || '';
+      noter('camerpay status ref=' + ref + ' -> ' + PAYSTATUT);
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      return res.end(JSON.stringify({ ref: ref, status: PAYSTATUT, sandbox: true,
+        intent: 'subscription' }));
+    }
+
+    /* QUOTA — miroir de api/plateforme.php?action=quota. Sert a eprouver les
+       deux chemins que le front doit savoir traiter : l'accord (200) et le
+       refus (402). Le compteur est en memoire du banc, remis a zero au
+       redemarrage : on valide le PARCOURS, pas la comptabilite.
+       Commutable a chaud : /__quota?m=ok|plein|panne */
+    if (u.pathname.indexOf('plateforme.php') >= 0 && action === 'quota') {
+      const porte = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+      if (!JETON || porte !== JETON) {
+        noter('quota -> 401 (pas de jeton)');
+        res.writeHead(401, { 'Content-Type': 'application/json; charset=utf-8' });
+        return res.end(JSON.stringify({ ok: false, error: 'Authentification requise' }));
+      }
+      if (QUOTA === 'panne') { noter('quota -> MUET (panne simulee)'); return; }
+      let corps = '';
+      req.on('data', c => { corps += c; });
+      return req.on('end', () => {
+        let genre = 'epreuve';
+        try { genre = (JSON.parse(corps || '{}').genre) || 'epreuve'; } catch (e) {}
+        const plafond = (QUOTA === 'plein') ? 0 : 30;
+        COMPTEURS[genre] = (COMPTEURS[genre] || 0);
+        if (plafond >= 0 && COMPTEURS[genre] >= plafond) {
+          noter('quota ' + genre + ' -> 402 (epuise)');
+          res.writeHead(402, { 'Content-Type': 'application/json; charset=utf-8' });
+          return res.end(JSON.stringify({ ok: false, error: 'Quota épuisé',
+            accorde: false, utilise: COMPTEURS[genre], plafond: plafond }));
+        }
+        COMPTEURS[genre]++;
+        noter('quota ' + genre + ' -> 200 (' + COMPTEURS[genre] + '/' + plafond + ')');
+        res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ ok: true, accorde: true,
+          utilise: COMPTEURS[genre], plafond: plafond }));
+      });
     }
 
     if (u.pathname.indexOf('plateforme.php') >= 0 && action === 'corpus') {

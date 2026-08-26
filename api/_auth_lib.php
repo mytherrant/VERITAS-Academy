@@ -507,6 +507,33 @@ if (!defined('VRT_AUTH_LIB')) {
             return vrt_livret_prix($db, $kind, $slug);
         }
 
+        /* ATELIER DE FRANÇAIS — TARIF DE RÉFÉRENCE OBLIGATOIRE.
+
+           Ses trois plans (`ens`, `etab`, `pro`) ne vivent PAS dans
+           `elearning.plans` : ce sont les identifiants qu'attend
+           plat_plans_atelier() (api/plateforme.php), et le catalogue e-learning
+           ne connaît que `plan1`…`plan15`. La boucle ci-dessous ne trouvait donc
+           jamais de correspondance, vrt_prix_catalogue rendait null, et
+           vrt_verifier_prix répondait « tarif indéterminable » — c'est-à-dire
+           ACCEPTAIT n'importe quel montant. 100 FCFA ouvraient le plan Bassin
+           vendu 70 000. Le trou ne se voyait nulle part : le paiement était
+           confirmé, le droit accordé, et rien dans les journaux ne distinguait
+           un abonnement payé d'un abonnement volé.
+
+           Même remède que les frais d'inscription plus haut : un prix par
+           défaut dans le code, surchargeable en base (`DB.plateforme.tarifs`)
+           pour que l'administration change un tarif sans redéploiement. Les
+           valeurs par défaut sont celles affichées par l'Atelier.
+
+           ⚠️ En ajouter un quatrième ici NE SUFFIT PAS : il faut aussi
+           l'inscrire dans plat_plans_atelier() et plat_paliers(), sinon il se
+           paie mais n'ouvre aucun droit. */
+        if ($intent === 'subscription' && isset(['ens' => 1, 'etab' => 1, 'pro' => 1][$targetId])) {
+            $defAtelier = ['ens' => 5000, 'etab' => 30000, 'pro' => 70000];
+            $regle = (int) ($db['plateforme']['tarifs'][$targetId] ?? 0);
+            return $regle > 0 ? $regle : $defAtelier[$targetId];
+        }
+
         // Collections du catalogue — miroir EXACT de VERITAS_MONETISATION
         // (app.js) : même intent, même collection, même champ de prix.
         $coll = [

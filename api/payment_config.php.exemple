@@ -133,6 +133,14 @@ if (!defined('CAMERPAY_INIT_RATE_PER_HOUR')) define('CAMERPAY_INIT_RATE_PER_HOUR
 // un fichier d'état que le tableau de bord relit ensuite en entier. 0 = désactivé.
 if (!defined('CAMERPAY_INIT_MAX_PER_DAY')) define('CAMERPAY_INIT_MAX_PER_DAY', 500);
 
+// ⏳ Durée au bout de laquelle une transaction restée « en attente » est close.
+//    Une notification CamerPay perdue n'est JAMAIS rejouée : sans ce balayage,
+//    un paiement abouti que le client n'a pas suivi restait « pending » à vie,
+//    argent encaissé et accès jamais ouvert. Le tableau de bord vérifie une
+//    dernière fois auprès de CamerPay avant de clore — et ne clôt rien si le
+//    fournisseur est injoignable. 7 jours par défaut.
+if (!defined('CAMERPAY_PENDING_TTL')) define('CAMERPAY_PENDING_TTL', 604800);
+
 // 🔒 Plafonds de sécurité VÉRITAS (indépendants de ceux de CamerPay).
 //    Encaissement en libre-service, versement unitaire, total d'un lot.
 if (!defined('CAMERPAY_COLLECT_MAX')) define('CAMERPAY_COLLECT_MAX', 500000);
