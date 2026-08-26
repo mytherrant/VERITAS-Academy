@@ -121,7 +121,7 @@ ouvrages:
     mode: lecture
     actif: true
     kinds: [livret]
-    prix: 2000
+    prix: 1500
     pages_libres: 8
     # 135 pages rendues a 120 dpi depuis la maquette PDF :
     #   python tools/rendu_pages.py "<...>/6e_Bord_cahier_de_francais_MAQUETTE.pdf"     #     --slug bord-6e --charge ~/veritas-ftp
@@ -134,7 +134,7 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire depuis le .docx"
     kinds: [livret]
-    prix: 2000
+    prix: 1500
     pages_libres: 8
     source: { racine: docx1, document: "5e_Bord_cahier_de_francais.docx" }
 
@@ -145,7 +145,7 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire depuis le .docx"
     kinds: [livret]
-    prix: 2000
+    prix: 1500
     pages_libres: 8
     source: { racine: docx1, document: "3e_Bord_cahier_de_francais.docx" }
 
@@ -156,7 +156,7 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire depuis le .docx"
     kinds: [livret]
-    prix: 2500
+    prix: 1500
     pages_libres: 8
     source: { racine: docx2, document: "Bord_1ere_A_CORRIGE.docx" }
 
@@ -167,7 +167,7 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire depuis le .docx"
     kinds: [livret]
-    prix: 2500
+    prix: 1500
     pages_libres: 8
     source: { racine: docx2, document: "Bord_Tle_A_CORRIGE.docx" }
 
@@ -202,7 +202,7 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire (Manuel_Balafon/build.js)"
     kinds: [livret]
-    prix: 2000
+    prix: 1500
     pages_libres: 10
     source: { racine: oeuvres, pack: "Manuel_Balafon" }
 
@@ -213,7 +213,7 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire (Manuel_Ngum/build.js)"
     kinds: [livret]
-    prix: 2000
+    prix: 1500
     pages_libres: 10
     source: { racine: oeuvres, pack: "Manuel_Ngum" }
 
@@ -224,7 +224,7 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire (Manuel_VieuxNegre/build.js)"
     kinds: [livret]
-    prix: 2000
+    prix: 1500
     pages_libres: 10
     source: { racine: oeuvres, pack: "Manuel_VieuxNegre" }
 
@@ -235,7 +235,7 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire (Manuel_Stances/build.js)"
     kinds: [livret]
-    prix: 2000
+    prix: 1500
     pages_libres: 10
     source: { racine: oeuvres, pack: "Manuel_Stances" }
 
@@ -247,7 +247,7 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire (Manuel_EST/2nde_ST)"
     kinds: [livret]
-    prix: 2000
+    prix: 1500
     pages_libres: 8
     source: { racine: oeuvres, pack: "Manuel_EST/2nde_ST" }
 
@@ -258,7 +258,7 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire (Manuel_EST/1ere_ST)"
     kinds: [livret]
-    prix: 2000
+    prix: 1500
     pages_libres: 8
     source: { racine: oeuvres, pack: "Manuel_EST/1ere_ST" }
 
@@ -269,6 +269,6 @@ ouvrages:
     actif: false
     bloque: "PDF de pages à produire (Manuel_EST/Tle_ST)"
     kinds: [livret]
-    prix: 2000
+    prix: 1500
     pages_libres: 8
     source: { racine: oeuvres, pack: "Manuel_EST/Tle_ST" }

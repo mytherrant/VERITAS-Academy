@@ -408,6 +408,33 @@ if (!defined('VRT_AUTH_LIB')) {
         return isset($c[$id]) ? $c[$id] : null;
     }
 
+    /** Le contenu de ce livre est-il RÉELLEMENT sur le serveur ?
+     *
+     *  Publier une fiche et téléverser les 29 Mo de pages sont deux gestes
+     *  distincts : la fiche part par la CI (catalogue_livres.json), les pages
+     *  par FTP, à la main. Entre les deux, le livre est en vitrine, tarifé,
+     *  achetable — et le lecteur répond « Document non encore préparé ».
+     *
+     *  Ce n'est pas une hypothèse : mesuré en production le 26/08/2026 sur
+     *  « Le Tube digestif », `?meta=1` rendait `prepared:false` pendant que la
+     *  boutique le vendait 1 000 F. Un client aurait payé pour rien.
+     *
+     *  Même règle de lecture que api/secure_pdf.php — on CONSTATE les fichiers,
+     *  on ne se fie pas à un drapeau du catalogue qu'un oubli laisserait à vrai.
+     */
+    function vrt_livre_prepare(string $bookId): bool {
+        $id = preg_replace('/[^a-zA-Z0-9_-]/', '', $bookId);
+        if ($id === '') return false;
+        $base = dirname(__DIR__) . '/uploads/protected/books';
+        $dir  = $base . '/' . $id;
+        if (is_dir($dir) && count(glob($dir . '/p*.jpg') ?: []) > 0) return true;
+        // Repli : un PDF entier rendu à la volée, si Imagick est présent.
+        if (is_file($base . '/' . $id . '.pdf') && class_exists('Imagick')) return true;
+        // Livre en mode texte seul (EPUB préparé hors ligne).
+        if (is_dir($dir . '/epub') && count(glob($dir . '/epub/*') ?: []) > 0) return true;
+        return false;
+    }
+
     function vrt_prix_catalogue(array $db, string $intent, string $targetId): ?int {
         // Micro-achats à l'unité et crédits IA : le tarif vit dans DB.microPrix,
         // avec le repli sur les valeurs par défaut du client (MICRO_PRIX_DEFAULT).

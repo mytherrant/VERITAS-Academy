@@ -368,6 +368,30 @@ if ($action === 'init' && $method === 'POST') {
         }
     }
 
+    /* ── MÊME RÈGLE POUR UN LIVRE NUMÉRIQUE ──────────────────────────────────
+       Publier la fiche et déposer les pages sont deux gestes séparés : la fiche
+       part par la CI, les 29 Mo d'images par FTP, à la main. Entre les deux, le
+       livre est en vitrine et encaissable, mais le lecteur répond « Document non
+       encore préparé ».
+
+       Mesuré en production le 26/08/2026 : « Le Tube digestif » était vendu
+       1 000 F avec `prepared:false`. On refuse donc AVANT le débit, et le
+       message dit quoi faire plutôt que d'accuser l'acheteur.
+
+       Un livre PAPIER n'est pas concerné : il s'expédie, il n'a pas besoin
+       d'images sur le serveur. Seuls le sont l'intention « numérique » et les
+       ouvrages déclarés `numeriqueSeul`. */
+    if ($intent === 'digitalbook' || $intent === 'book') {
+        $liv = function_exists('vrt_catalogue_livre') ? vrt_catalogue_livre($targetId) : null;
+        $numerique = ($intent === 'digitalbook')
+                  || ($liv && !empty($liv['numeriqueSeul']));
+        if ($numerique && function_exists('vrt_livre_prepare') && !vrt_livre_prepare($targetId)) {
+            vrt_pay_log('[LIVRE_NON_PREPARE] refus init id=' . $targetId . ' ref=' . $ref);
+            jsonRespCy(['error' => 'Ce livre n’est pas encore disponible à la lecture en ligne. '
+                                 . 'Réessayez plus tard, ou écrivez à contact@veritas-school.com.'], 409);
+        }
+    }
+
     // Le téléphone est FACULTATIF chez CamerPay (le payeur peut régler par
     // carte). S'il est fourni, on le normalise pour préremplir la page.
     $payerNumber = $clientTel !== '' ? camerpayNormalizePhone($clientTel) : '';
