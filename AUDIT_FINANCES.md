@@ -44,10 +44,11 @@ de plans inconnus du catalogue. Les protections sont en place et l'Atelier passe
 | 5 | Contenu payant présent puis masqué | **Infirmé** — le serveur fait ce qu'il faut | — | rien à faire |
 | 6 | Essai revérifié côté serveur | **Confirmé bon** sur le corpus, absent ailleurs | Majeur | OK couvert par le point 2 |
 | 7 | Tarifs dupliqués | Partiellement infirmé, **cause racine ailleurs** | Majeur | en attente |
-| 8 | Pas d'expiration serveur | **Confirmé** | Majeur | en attente |
+| 8 | Pas d'expiration serveur | **Confirmé** | Majeur | OK **corrigé** |
 
-> Tout ce qui est marqué **corrigé** l’a été **et éprouvé au banc** — voir
-> « Correctifs appliqués » en fin de document. **Rien n’est déployé.**
+> Tout ce qui est marqué **corrigé** l’a été, éprouvé au banc, puis **DÉPLOYÉ en
+> production le 26/08/2026** (run 32923968534). Voir « Correctifs appliqués » et
+> « Déploiement » en fin de document.
 
 ---
 
@@ -599,41 +600,179 @@ l'application se relève et affiche l'accueil.
 
 ---
 
+## Vérification du cadenas et du mur d'abonnement
+
+Demandé après coup : *les textes gardés viennent-ils avec un cadenas et un message
+d'abonnement ?* Vérifié au rendu, palier démo actif (5 textes offerts sur 1 040).
+
+### Ce qui allait déjà
+
+**Le cadenas existe et s'affiche.** Sur 150 fiches rendues, **149 portent la
+pastille** « Abonnement » — la seule qui ne l'a pas est le texte n° 1, réellement
+offert. La pastille contient une icône SVG de cadenas, en ambre `#8a6410` sur crème
+`#fdf3d8` : contraste **4,86:1**, conforme WCAG AA.
+
+**Le contenu payant n'est pas dans la page.** Mesuré sur la réponse réseau elle-même,
+pas déduit du code serveur :
+
+| Fiche fermée (n° 2) | Valeur |
+|---|---|
+| champ `text` dans l'index | **absent** |
+| `extrait` | 180 caractères |
+| `faits` (faits de langue) | **vide** |
+| mots annoncés | 110 (≈ 700 caractères, jamais transmis) |
+| `mode=complet` | **402**, sans le texte |
+
+Le point 5 de l'audit est donc confirmé une seconde fois, cette fois par la mesure
+au rendu.
+
+### Ce qui manquait : la phrase
+
+Cliquer sur un texte fermé ouvrait **directement le formulaire de paiement** — plan
+imposé, montant affiché, et pas un mot sur ce qui venait de se passer. Vu du
+visiteur, un écran de carte bancaire surgit parce qu'il a cliqué sur un texte.
+
+Le serveur formule pourtant la bonne phrase. Elle était lue puis **jetée** :
+`_completerTexte` rejetait le 402 sans regarder le corps de la réponse.
+
+**Corrigé.** Le message du serveur est retenu au premier 402, et les trois chemins
+qui butaient sur un texte fermé passent par `_murAbonnement`, qui explique avant de
+proposer de payer. À défaut du message serveur — cas courant, puisqu'on ne
+**demande pas** un texte qu'on sait fermé (LWS bannit l'adresse à six mauvaises
+requêtes par minute) — le message par défaut annonce le même chiffre, compté sur le
+répertoire déjà chargé :
+
+> Ce texte fait partie du répertoire complet. Abonnez-vous pour ouvrir les 1 040
+> textes, leurs questions et leurs faits de langue.
+
+### Le banc mentait sur ce point précis
+
+Et c'est le plus instructif. `tests/banc_atelier.cjs` marquait **tous** les textes
+`libre: true` et servait le texte intégral en **200** là où le vrai serveur répond
+402. Il ne pouvait donc ni montrer le cadenas, ni prouver le mur — **il aurait
+validé une protection inexistante**.
+
+Il applique désormais le palier démo à l'index **et** au texte intégral, en
+reproduisant `plat_offerts()` — y compris son pas régulier, qui étale l'échantillon
+sur tous les cycles au lieu de donner cinq textes du seul Module 1.
+
+---
+
+## Déploiement — 26 août 2026
+
+**Deux déploiements, tous deux réussis**, par `workflow_dispatch` sur `atelier-francais` :
+
+| Run | Objet | Durée |
+|---|---|---|
+| [32923968534](https://github.com/mytherrant/VERITAS-Academy/actions/runs/32923968534) | les 5 bloquants + mobile + `<head>` | 1 min 48 |
+| [32924959505](https://github.com/mytherrant/VERITAS-Academy/actions/runs/32924959505) | le message du mur d’abonnement | 33 s |
+
+### Périmètre — volontairement restreint
+
+Votre copie de travail contenait beaucoup de chantiers en cours sans rapport avec
+cet audit. Déployer sur un site **sans pré-production** ce qui n'a pas été relu
+aurait été imprudent, donc six fichiers seulement ont été commités :
+
+| Déployé | Laissé de côté |
+|---|---|
+| `plateforme/index.html` | `app.js` (+460 l.), `vitrine.html` (+973 l.) |
+| `api/_auth_lib.php` | `api/livret.php`, `api/_livret_lib.php`, `api/public_data.php` |
+| `api/payment_camerpay.php` | `corriges/`, `livrets/`, `manuels.html`, `tools/` |
+| `api/payment_config.php.exemple` | `.github/workflows/deploy.yml` |
+| `tests/banc_atelier.cjs` *(non déployé, versionné)* | tous les fichiers non suivis |
+| `AUDIT_FINANCES.md` *(non déployé)* | |
+
+Deux vérifications ont précédé ce choix :
+
+- **`deploy.yml` a été écarté à dessein.** Sa modification locale ajoute une étape CI
+  qui lance `tests/banc_livret_codes.cjs` — un fichier **non suivi**. Le commiter
+  seul aurait fait échouer chaque déploiement suivant sur un fichier absent.
+- **`payment_camerpay.php` portait du travail antérieur** (garde sur les livrets
+  appelant `vrt_livret_ouvrage_accepte`). Vérifié : cette fonction et ses deux
+  voisines existent déjà dans la version **commitée** de `_livret_lib.php`, avec une
+  signature identique — aucune erreur fatale introduite.
+
+Contrôlé aussi que déployer depuis `atelier-francais` ne régresse pas la production :
+la branche est en **avance** de 22 commits sur `deploy/campay-securite`, et
+l'exclusion de `_corpus_source.js` comme la présence d'`api/plateforme.php` y sont
+bien acquises.
+
+### Test de fumée en production
+
+| Contrôle | Résultat |
+|---|---|
+| `plateforme/` | **200**, 524 611 octets |
+| les 6 modules JS | **200** chacun, aucun 404 |
+| application montée | oui — React chargé, aucun `{{ }}` résiduel |
+| écran affiché | connexion (`#login`) — attendu, le corpus n'est pas servi en clair |
+| erreurs console | **aucune** (le seul 401 est `action=corpus` sans être connecté : voulu) |
+| `?action=quota` | **401** sans jeton — l'endpoint vit et est protégé |
+| `?action=config` (paiement) | `mode: live`, `canCollect: true`, `webhookSecret: true` |
+
+Et les correctifs, vérifiés dans les octets **réellement servis** — pas dans le
+dépôt : contrat de paiement (`clientTel`), en-tête Bearer, `_consommerQuota`,
+`_fabriquerWord`, `_alea4`, la forme « avec espace » des règles de police,
+l'alternance `#eaf1fa`, `lang="fr"`, le titre, la signature — et `_confirmPayLocal`
+bien **absente**.
+
+Sur mobile (375 px), en production : **0 débordement**, et la règle de police mord
+pour de bon — un élément portant `font-size: 13px` est rendu **15 px**.
+
+### Le jeton de paiement était bien en place
+
+`?action=config` renvoie un `publicInitToken` non vide et `mode: live`. C'était la
+condition sans laquelle le correctif du paiement serait resté sans effet visible —
+elle est remplie, donc **l'encaissement est réellement ouvert**, sur de l'argent réel.
+
+### `CACHE_VERSION` : pourquoi il n'a pas été incrémenté
+
+La CI le rappelle à chaque déploiement. Vérifié dans `sw.js` : les documents HTML
+sont servis en **network-first**, `/api/` n'est jamais intercepté, aucun module de
+l'Atelier n'a changé d'empreinte `?v=`, et `app.js`/`app.css` n'ont pas été
+déployés. Aucun visiteur de retour ne peut donc rester sur l'ancienne version — ce
+que confirme la lecture des octets servis ci-dessus.
+
+---
+
 ## Ce qui reste à faire
 
-**Les quatre bloquants sont levés** (C-0, points 1, 2, 3), plus le point 4 et un
-défaut de robustesse trouvé en chemin. Reste ceci :
+**Les cinq bloquants sont levés et en production** : C-0 et les points 1, 2, 3, 8,
+plus le point 4 et un défaut de robustesse trouvé en chemin. Reste ceci :
 
 | # | Sujet | Pourquoi ce n'est pas fait |
 |---|---|---|
-| 8 | Expiration serveur des paiements `pending` | Touche la réconciliation d'argent réel. `action=list` doit **traiter** les transactions de plus de 24 h au lieu de les sauter : dernière vérification chez CamerPay, octroi si payé, sinon `expired`. À faire avant d'ouvrir l'encaissement en volume. |
-| 7 | Servir les tarifs depuis le serveur | Les prix restent écrits dans `index.html:2967`. Le contrôle serveur les connaît désormais (point 3), donc un écart ne coûte plus d'argent — mais il ferait afficher un prix et en encaisser un autre. À traiter avec le point 8. |
+| 7 | Servir les tarifs depuis le serveur | Les prix restent écrits dans `index.html:2967`. Le contrôle serveur les connaît désormais (point 3), donc un écart ne coûte plus d'argent — mais il ferait afficher un prix et en encaisser un autre. |
 | M-3 | Dépendance unpkg pour React | Décision à prendre : héberger React dans `assets/` (~140 Ko, une entrée CI) ou garder le CDN avec un écran de repli. Aujourd'hui, si unpkg tombe, la page affiche `{{ c.label }}` en clair. |
-| M-4 | Cibles tactiles sous 44 px | 63 % des cibles de l'accueil. Corriger déplace la mise en page : je préfère votre arbitrage. |
+| M-4 | Cibles tactiles sous 44 px | 63 % des cibles de l'accueil. Corriger déplace la mise en page : votre arbitrage est préférable. |
 | M-5 | Contraste du texte secondaire | `#9aa5b5` donne 2,1:1 (AA en demande 4,5:1). `#6b7a8d` corrigerait sans dénaturer la hiérarchie. |
+
+### Deux points de vigilance, maintenant que l'encaissement fonctionne
+
+1. **C'est de l'argent réel.** `?action=config` répond `mode: live`. Le premier
+   paiement réel mérite d'être suivi de bout en bout : débit, webhook, apparition de
+   l'abonnement dans `elearning.abonnements`, ouverture effective du corpus.
+2. **Le balayage des `pending` s'exécute à l'ouverture du tableau de bord**
+   (`?action=list`), pas par une tâche planifiée. Si personne ne l'ouvre pendant des
+   semaines, un webhook perdu attend d'autant. Une visite hebdomadaire suffit ; un
+   `cron` serait plus sûr si le volume augmente.
 
 ## État du dépôt
 
-**Rien n'est déployé.** Fichiers modifiés :
+**Déployé.** Commit `3093629` sur `atelier-francais`, poussé et mis en production.
 
 | Fichier | Nature |
 |---|---|
-| `plateforme/index.html` | paiement, quotas, robustesse du stockage, polices, alternance, `<head>` |
+| `plateforme/index.html` | paiement, quotas, robustesse du stockage, polices, alternance, `<head>`, signature |
 | `api/_auth_lib.php` | tarifs de l'Atelier dans `vrt_prix_catalogue` |
-| `tests/banc_atelier.cjs` | miroir du contrat CamerPay + `action=quota`, commutateurs `/__pay` et `/__quota` |
-| `AUDIT_FINANCES.md` | ce rapport |
+| `api/payment_camerpay.php` | balayage des `pending` (point 8) |
+| `api/payment_config.php.exemple` | `CAMERPAY_PENDING_TTL` documentée |
+| `tests/banc_atelier.cjs` | miroir du contrat CamerPay + `action=quota` *(versionné, non déployé)* |
+| `AUDIT_FINANCES.md` | ce rapport *(non déployé)* |
 
-`tests/` n'est pas déployé ; `plateforme/**` et `api/**` le sont. Les empreintes `?v=`
-des six modules sont inchangées — aucun module n'a été touché, donc le garde-fou CI
-qui compare le sha1 au jeton du HTML passera.
+Les empreintes `?v=` des six modules sont inchangées — aucun module n'a été touché,
+donc le garde-fou CI qui compare le sha1 au jeton du HTML est passé.
 
-**Avant de déployer**, deux choses à savoir :
-
-1. Le déploiement se fait par `workflow_dispatch` sur `deploy/campay-securite`, jamais
-   par un push sur `master`, et il part **directement en production** — il n'y a pas de
-   pré-production.
-2. `CAMERPAY_PUBLIC_INIT` doit être renseigné dans `api/payment_config.php` **sur le
-   serveur** (ce fichier n'est jamais déployé par la CI, il se pose en FTP). Sans lui,
-   `?action=config` renvoie `publicInitToken` vide et l'initiation répond 401 — le
-   correctif C-0 serait alors sans effet visible. `?action=config` le dit explicitement
-   dans son champ `reason`, que le front affiche désormais.
+**Ce qui n'a pas été touché** et reste dans votre copie de travail : `app.js`,
+`vitrine.html`, `api/livret.php`, `api/_livret_lib.php`, `api/public_data.php`,
+`corriges/`, `livrets/`, `manuels.html`, `tools/`, `.github/workflows/deploy.yml`, et
+les fichiers non suivis. Rien de tout cela n'est parti en production.
