@@ -617,9 +617,19 @@ jobs:
           # On ne copie QUE ce fichier : api/data/ contient les registres
           # VIVANTS (codes vendus, copies d'eleves, journaux) — ecraser le
           # dossier entier effacerait les ventes.
+          # La garde etait SILENCIEUSE : le fichier etant ecarte par la regle
+          # `api/data/*` du .gitignore, il n'a jamais ete dans le depot, donc
+          # ce `if` a toujours ete faux et personne ne l'a su. Mesure du
+          # 26/08/2026 en production : catalogue = les cinq classes de repli,
+          # et « bord-6e », publie et tarife, introuvable pour la porte.
+          # Le fichier est desormais suivi (negation dans .gitignore) et son
+          # absence PARLE.
           if [ -f api/data/livrets_catalogue.json ]; then
             cp api/data/livrets_catalogue.json deploy/api/data/
-            echo "  OK api/data/livrets_catalogue.json (ouvrages en vente)"
+            N_OUV=$(grep -o '"[a-z0-9_-]*"[[:space:]]*:[[:space:]]*{' api/data/livrets_catalogue.json | wc -l)
+            echo "  OK api/data/livrets_catalogue.json ($N_OUV ouvrages en vente)"
+          else
+            echo "::warning title=Catalogue des ouvrages absent::api/data/livrets_catalogue.json n'est pas dans le depot. Le serveur retombera sur ses cinq classes historiques et tout ouvrage publie depuis (Bord, cahier d'oeuvre, EST) sera INVISIBLE a la vente. Le produire avec: python tools/publier.py"
           fi
 
           # Corpus MINESEC servi par api/plateforme.php. Meme regle que le

@@ -1,0 +1,69 @@
+{
+  "version": 1,
+  "ouvrages": {
+    "6e": {
+      "titre": "Mon Cahier de français 6ᵉ",
+      "niveau": "6e",
+      "mode": "interactif",
+      "kinds": [
+        "livret",
+        "guide"
+      ],
+      "prix": 0,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
+    },
+    "5e": {
+      "titre": "Mon Cahier de français 5ᵉ",
+      "niveau": "5e",
+      "mode": "interactif",
+      "kinds": [
+        "livret",
+        "guide"
+      ],
+      "prix": 0,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
+    },
+    "4e": {
+      "titre": "Mon Cahier de français 4ᵉ",
+      "niveau": "4e",
+      "mode": "interactif",
+      "kinds": [
+        "livret",
+        "guide"
+      ],
+      "prix": 0,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
+    },
+    "3e": {
+      "titre": "Mon Cahier de français 3ᵉ (BEPC)",
+      "niveau": "3e",
+      "mode": "interactif",
+      "kinds": [
+        "livret",
+        "guide"
+      ],
+      "prix": 0,
+      "prixGuide": 0,
+      "pages": 0,
+      "pagesLibres": 0
+    },
+    "bord-6e": {
+      "titre": "Bord — Cahier de français 6ᵉ",
+      "niveau": "6e",
+      "mode": "lecture",
+      "kinds": [
+        "livret"
+      ],
+      "prix": 2000,
+      "prixGuide": 0,
+      "pages": 135,
+      "pagesLibres": 8
+    }
+  }
+}

@@ -53,13 +53,35 @@ api/campus/_config.php
 # « git add -A » suffisait a l'y publier, definitivement (l'historique ne
 # s'efface pas). Rien de ce dossier n'a a etre versionne : le serveur le
 # cree lui-meme au premier demarrage (api/db.php).
-data/
+#
+# ANCRE A LA RACINE (« /data/ » et non « data/ ») — la difference n'est pas
+# cosmetique. Sans la barre initiale, la regle attrape TOUT dossier nomme
+# « data », a n'importe quelle profondeur : donc aussi api/data/. Or Git ne
+# descend PAS dans un dossier exclu, si bien qu'aucune des negations posees
+# plus bas (« !api/data/index.php », le catalogue des ouvrages) ne pouvait
+# jamais s'appliquer. Constate le 26/08/2026 : le catalogue des cahiers n'est
+# jamais entre dans le depot, la CI le cherchait derriere un « if [ -f ] » qui
+# echouait en silence, et la production ne connaissait que ses cinq classes de
+# repli — un ouvrage publie et tarife restait invisible a la vente.
+# Les vraies exclusions de api/data/ sont juste en dessous, avec leurs
+# exceptions ; elles suffisent, et elles, on peut les nuancer.
+/data/
 
 # Contenu de api/data/ ignoré (index RAG .db lourds, logs, PII paiements)…
 api/data/*
 # …SAUF les sentinelles de sécurité, qui DOIVENT être déployées par la CI :
 !api/data/.htaccess
 !api/data/index.php
+# …et SAUF le catalogue des ouvrages. Ce n'est pas de l'état vivant : c'est un
+# produit de build (tools/publier.py), et c'est lui qui dit à api/livret.php
+# quels cahiers existent, dans quelles versions et à quel tarif. deploy.yml le
+# copiait DÉJÀ — mais derrière un `if [ -f ]` qui sautait en silence, puisque
+# la règle `api/data/*` l'écartait du dépôt. Résultat mesuré en production le
+# 26/08/2026 : le serveur ne connaissait que ses cinq classes de repli, et
+# « Bord — Cahier de français 6ᵉ », publié et tarifé 2 000 F, n'existait pas
+# pour la porte. Il ne contient ni secret ni contenu — rien que ce que
+# l'action publique `catalogue` sert déjà à tout visiteur.
+!api/data/livrets_catalogue.json
 api/data/_security_log.txt
 api/data/_access_log.txt
 api/data/payments/
