@@ -764,7 +764,25 @@ if (!defined('VRT_AUTH_LIB')) {
                 if (is_array($p) && (string) ($p['id'] ?? '') === $targetId) { $plan = $p; break; }
             }
             $now = (int) round(microtime(true) * 1000);
-            $finTs = $now + vrt_abo_duree_ms($plan['duree'] ?? '');
+            /* DURÉE — MIROIR OBLIGATOIRE POUR L'ATELIER.
+               La boucle ci-dessus cherche le plan dans `elearning.plans`. Les
+               plans de l'Atelier (`ens`, `etab`, `pro`…) n'y sont PAS — c'est
+               ce que documente déjà le miroir de PRIX dans
+               vrt_prix_catalogue(). `$plan` vaut donc null, et
+               vrt_abo_duree_ms('') retombe sur son défaut : 365 jours.
+
+               Cela tombait juste par HASARD, les trois plans étant annuels.
+               Un plan mensuel accorderait silencieusement un an pour le prix
+               d'un mois — même forme que le trou de prix : un miroir absent,
+               aucune erreur levée, et l'écart invisible.
+
+               ⚠️ Tout nouveau plan de l'Atelier doit être inscrit ICI en plus
+               de vrt_prix_catalogue(), plat_plans_atelier() et
+               plat_paliers(). Quatre endroits, aucun facultatif. */
+            $dureeAtelier = ['ens' => 'annuel', 'etab' => 'annuel', 'pro' => 'annuel'];
+            $duree = $plan['duree'] ?? '';
+            if ($duree === '' && isset($dureeAtelier[$targetId])) $duree = $dureeAtelier[$targetId];
+            $finTs = $now + vrt_abo_duree_ms($duree);
             $db['elearning']['abonnements'][] = [
                 'id' => 'abo_' . bin2hex(random_bytes(5)), 'ref' => $ref,
                 'accountId' => $accountId, 'plan' => $targetId, 'planId' => $targetId,

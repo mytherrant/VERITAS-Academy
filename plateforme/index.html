@@ -1373,7 +1373,14 @@
       </div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8)">Titre de l'épreuve · cliquez pour modifier</span></div>
       <input value="{{ ep.title }}" onChange="{{ setTitle }}" disabled="{{ cannotEdit }}" style="font-family:'Poppins';font-size:24px;font-weight:700;color:var(--c14375f,#14375f);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;background:var(--cffffff,#fff);width:100%;padding:8px 12px;margin-bottom:6px" style-hover="border-color:var(--cbcd9f2,#bcd9f2)" style-focus="border-color:var(--c1a72bb,#1a72bb);box-shadow:0 0 0 3px rgba(26,114,187,.12)" placeholder="Intitulé de l'épreuve">
+      <!-- Ce rappel dit comment démarrer une épreuve. Il sert la première
+           fois, sur une épreuve encore vide ; il ne sert plus du tout quand
+           on relit son travail, et il coûte alors 54 px — un tiers d'écran
+           de téléphone — avant la première ligne du texte. Un conseil qui se
+           répète indéfiniment cesse d'être un conseil. -->
+      <sc-if value="{{ emptySelection }}" hint-placeholder-val="{{ true }}">
       <div style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin-bottom:18px">Modifiez le titre et les <strong style="color:var(--c1a72bb,#1a72bb);font-weight:700">Renseignements</strong> ci-dessous, puis ajoutez des textes depuis l'onglet <button onClick="{{ goListe }}" style="background:none;border:none;color:var(--c1a72bb,#1a72bb);font-weight:700;cursor:pointer;padding:0;font-size:12.5px;font-family:inherit" style-hover="text-decoration:underline">Corpus {{ icSuite }}</button></div>
+      </sc-if>
       <!-- ============ GARDE-FOU DE CONFORMITÉ MINESEC ============ -->
       <section data-noprint="1" style="{{ confWrap }}">
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">

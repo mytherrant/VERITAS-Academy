@@ -237,7 +237,16 @@ function plat_paliers(array $db): array
            borne ce qui SORT de l'outil : quelques exports, de quoi juger la
            qualité d'une épreuve rendue, pas de quoi équiper un trimestre.
            Réglable en base (DB.plateforme.paliers.essai) sans redéploiement. */
-        'essai' => ['textes' => -1,  'citations' => -1,  'exports' => 3,   'ia' => 10,  'epreuves' => 12],
+        /* ⚠️ `textes` valait -1 : l'essai ouvrait les 1 040 textes SOUS DROITS.
+           Sept jours suffisaient alors à tout parcourir, et il n'y avait qu'à
+           recréer un compte la semaine suivante pour ne jamais payer. L'essai
+           doit convaincre, pas équiper.
+           Les 1 014 textes du DOMAINE PUBLIC ne passent pas par ce plafond :
+           ils restent entiers, pour tout le monde et pour toujours. C'est eux
+           qui donnent de quoi travailler tout de suite ; l'échantillon
+           protégé, lui, montre ce qu'on achète.
+           Réglable en base : DB.plateforme.paliers.essai.textes. */
+        'essai' => ['textes' => 60,  'citations' => 20,  'exports' => 3,   'ia' => 10,  'epreuves' => 12],
 
         'ens'  => ['textes' => -1,  'citations' => -1,  'exports' => 30,  'ia' => 30,  'epreuves' => -1],
         'etab' => ['textes' => -1,  'citations' => -1,  'exports' => 120, 'ia' => 120, 'epreuves' => -1],
