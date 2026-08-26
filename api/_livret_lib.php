@@ -48,7 +48,22 @@ if (!defined('VRT_LIVRET_LIB')) {
             '2nde' => ['titre' => '2ⁿᵈᵉ A',    'niveau' => '2nde', 'mode' => 'interactif', 'kinds' => ['livret', 'guide']],
         ];
 
-        $f = __DIR__ . '/data/livrets_catalogue.json';
+        /* Le chemin est surchargeable, pour la MÊME raison que VRT_LIVRET_DIR
+           l'est pour le registre : api/data/ est l'état vivant du serveur —
+           registre des codes, paiements — volontairement hors dépôt et hors
+           copie CI, pour qu'un déploiement ne l'écrase jamais. Le catalogue s'y
+           dépose par FTP.
+
+           Conséquence pour les bancs : sur une machine d'intégration, ce
+           fichier n'existe PAS et `vrt_livret_catalogue()` retombe sur les cinq
+           classes de repli. Un banc qui affirmait « bord-6e est au catalogue »
+           passait donc en local et échouait en CI — ce qui a bloqué le
+           déploiement du 26/08/2026, à juste titre : le banc testait l'état de
+           la machine au lieu de la règle. Avec cette constante, il fournit son
+           propre catalogue et devient déterministe partout. */
+        $f = defined('VRT_LIVRET_CATALOGUE')
+           ? (string) VRT_LIVRET_CATALOGUE
+           : __DIR__ . '/data/livrets_catalogue.json';
         if (!is_file($f)) { $cache = $repli; return $cache; }
         $d = json_decode((string) @file_get_contents($f), true);
         if (!is_array($d) || !isset($d['ouvrages']) || !is_array($d['ouvrages']) || !$d['ouvrages']) {

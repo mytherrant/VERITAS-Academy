@@ -44,12 +44,40 @@ const dit = (bon, quoi, det) => {
   else { ko++; console.log('  \x1b[31m✗\x1b[0m ' + quoi + (det ? '  → ' + det : '')); }
 };
 
-// ── Coquille de test : registre isolé, secret d'administration connu ─────────
+/* Le CATALOGUE du banc — fourni, pas emprunté.
+   api/data/ est l'état vivant du serveur : hors dépôt, hors copie CI, déposé
+   par FTP. Sur une machine d'intégration il n'existe pas, et le serveur
+   retombe sur cinq classes de repli. La première version de ce banc affirmait
+   « bord-6e est au catalogue » : verte en local, ROUGE en CI, elle a bloqué le
+   déploiement du 26/08/2026 — à raison, mais pour la mauvaise cause. Un banc
+   doit éprouver la RÈGLE, jamais l'état de la machine qui l'exécute.
+   Il apporte donc son catalogue, et les cas qu'il veut : un ouvrage à deux
+   versions, un ouvrage sans guide, et un ouvrage déclaré sans page publiée. */
+const CATALOGUE = {
+  version: 1,
+  ouvrages: {
+    '6e':      { titre: 'Mon Cahier de français 6ᵉ', niveau: '6e', mode: 'interactif',
+                 kinds: ['livret', 'guide'] },
+    '5e':      { titre: 'Mon Cahier de français 5ᵉ', niveau: '5e', mode: 'interactif',
+                 kinds: ['livret', 'guide'] },
+    // Sans guide : c'est LUI qui exerce la règle ③.
+    'bord-6e': { titre: 'Bord — Cahier de français 6ᵉ', niveau: '6e', mode: 'lecture',
+                 kinds: ['livret'], prix: 2000, pagesLibres: 8 },
+    // Déclaré mais sans coquille : exerce « déclaré ≠ publié ».
+    '2nde':    { titre: 'Mon Cahier de français 2ⁿᵈᵉ A', niveau: '2nde', mode: 'interactif',
+                 kinds: ['livret', 'guide'] },
+  },
+};
+
+// ── Coquille de test : registre isolé, catalogue fourni, secret connu ────────
 function preparer() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-livret-'));
   fs.mkdirSync(path.join(dir, 'lvdata'));
+  const cat = path.join(dir, 'catalogue.json');
+  fs.writeFileSync(cat, JSON.stringify(CATALOGUE, null, 1), 'utf8');
   const shim = `<?php
 define('VRT_LIVRET_DIR', __DIR__ . '/lvdata');
+define('VRT_LIVRET_CATALOGUE', ${JSON.stringify(cat)});
 define('API_SECRET', ${JSON.stringify(SECRET)});
 require ${JSON.stringify(path.join(RACINE, 'api', 'livret.php'))};
 `;
