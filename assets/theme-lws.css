@@ -4200,3 +4200,70 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 }
 #VISITOR#VISITOR ol > li:nth-child(3n+2)::before{ background:#C24E00; }
 #VISITOR#VISITOR ol > li:nth-child(3n)::before{   background:#007E11; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v1.20 — LE PACK COLLECTION GARDE SON RELIEF
+   ──────────────────────────────────────────────────────────────────────────
+   Le bloc « Acheter toute la collection » (fiche produit, app.js
+   _bookPackHtml) est écrit en APLATS : le balayage `background-image:none`
+   du §18.a ne peut donc rien lui retirer. Restent deux balayages qui, eux,
+   le toucheraient :
+     · `box-shadow:none` (§18.b) — le bouton d'achat perdrait son relief et
+       ne se distinguerait plus d'une étiquette ;
+     · `font-weight:400` (§18.c) — le prix du lot et l'économie passeraient
+       en graisse normale, c'est-à-dire au même poids que la phrase qui les
+       entoure. Or c'est exactement le chiffre que l'œil doit trouver.
+   Double identifiant + important : voir la note du §18 sur l'arbitrage de
+   spécificité. On ne rallume QUE ces deux propriétés, sur QUE ces éléments.
+   ══════════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR .bkpack-cta{
+  box-shadow:0 6px 18px rgba(91,33,182,.30) !important;
+  font-weight:700 !important;
+}
+#VISITOR#VISITOR .bkpack-cta:hover{ box-shadow:0 12px 26px rgba(91,33,182,.40) !important; }
+#VISITOR#VISITOR .bkpack-v{ box-shadow:0 3px 8px rgba(20,37,84,.20) !important; }
+#VISITOR#VISITOR :is(.bkpack-t, .bkpack-prix b, .bkpack-pct, .bkpack-eco b, .bkpack-plus){
+  font-weight:700 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   v1.20 — LE BOUTON « PAYER » REDEVIENT UN BOUTON
+   ──────────────────────────────────────────────────────────────────────────
+   Le panneau d'achat de la fiche produit (.bkbuy, app.css) a été écrit APRÈS
+   ce thème et n'a jamais été rallumé après ses balayages. Mesuré au navigateur
+   le 26/08/2026, sur /app.html#livre?id=… :
+
+     .bkbuy-cta  (« Payer maintenant »)  background rgba(0,0,0,0) · ombre non
+                                         · font-weight 400 · bordure 0
+     .bkbuy-cta2 (« Lire en ligne »)     idem
+     .bkbuy-net  (le PRIX)               font-weight 400
+
+   Autrement dit : sur la page où l'on achète, le bouton d'achat n'avait plus
+   de fond, plus de relief et plus de graisse — il se lisait comme une ligne
+   de texte parmi les autres. Son dégradé était retiré par §18.a, son ombre
+   par §18.b, sa graisse par §18.c ; aucune des trois exceptions ne le
+   nommait. Et c'est la page vers laquelle pointent les liens partagés, les
+   QR codes des cahiers et « Lire en ligne » de la vitrine.
+
+   On repose des APLATS, pas des dégradés — la refonte veut du plat, et un
+   aplat survit de lui-même au balayage des images de fond.
+   ══════════════════════════════════════════════════════════════════════════ */
+#VISITOR#VISITOR .bkbuy-cta{
+  background:var(--lws-action-cta) !important; color:#fff !important;
+  box-shadow:var(--lws-orange-sh) !important; font-weight:700 !important;
+}
+#VISITOR#VISITOR .bkbuy-cta2{
+  background:var(--lws-blue) !important; color:#fff !important;
+  box-shadow:0 6px 16px rgba(30,73,155,.28) !important; font-weight:700 !important;
+}
+#VISITOR#VISITOR :is(.bkbuy-cta, .bkbuy-cta2) .i{ color:#fff !important; }
+/* Le prix est le chiffre que l'œil cherche : il reprend sa graisse et la
+   couleur d'action du thème, comme les autres prix (§31). */
+#VISITOR#VISITOR .bkbuy-net{
+  font-weight:700 !important; color:var(--lws-action-cta) !important;
+}
+#VISITOR#VISITOR :is(.bkbuy-stock-l b, .bkbuy-eco, .bkbuy-inclus b, .bkbuy-pay-i){
+  font-weight:700 !important;
+}
+/* « Feuilleter un extrait » reste un lien, mais un lien qui se voit. */
+#VISITOR#VISITOR .bkbuy-lien{ font-weight:600 !important; }

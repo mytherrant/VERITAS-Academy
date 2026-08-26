@@ -4586,8 +4586,15 @@ function _fetchPublicData(){
       if(lbl&&DB.school&&DB.school.nom)lbl.textContent=DB.school.nom;
       // Re-rendre la section courante si ses données ont été mises à jour
       var curSec=window._vCurrentSec||'presentation';
+      /* ⚠️ TROISIÈME ARGUMENT : ce re-rendu est un RAFRAÎCHISSEMENT interne, pas
+         une navigation. Sans lui, il passe par _renvoyerVersVitrine et téléporte
+         vers « / » un visiteur qui lisait tranquillement — une seconde après le
+         chargement, sans qu'il ait rien cliqué. Mesuré au banc le 26/08/2026 :
+         c'est ce qui achevait /app.html#livre?id=… après le premier correctif.
+         Le renvoi vers la vitrine reste actif là où il a du sens : quand
+         quelqu'un CLIQUE sur « Boutique ». */
       if(curSec==='partenaires'||curSec==='presentation'||curSec==='elearning'||curSec==='contact'||curSec==='boutique'){
-        try{vShowSec(curSec,document.querySelector('.vnav-btn.on'));}catch(e){}
+        try{vShowSec(curSec,document.querySelector('.vnav-btn.on'),true);}catch(e){}
       }
     }
 
@@ -13782,6 +13789,21 @@ function editBook(id){
       <input class="fi" id="eBkEti" list="vrtEtiq" value="${_esc(b.etiquette||'')}" placeholder="aucune" maxlength="24">
       <datalist id="vrtEtiq"><option>Nouveau</option><option>Best-seller</option><option>Le plus vendu</option></datalist>
     </div>
+    <!-- ── PACK COLLECTION ───────────────────────────────────────────────────
+         Deux manuels portant la MÊME collection forment un pack : la fiche de
+         chacun propose alors d'acheter l'ensemble à prix réduit. Rien ne
+         s'affiche tant qu'une remise n'est pas déclarée — un « pack » sans
+         économie n'est pas une offre, c'est un bouton de plus.
+         La remise se saisit sur CHAQUE manuel de la collection : si deux
+         valeurs divergent, c'est la PLUS FAIBLE qui s'applique. On ne promet
+         jamais plus que ce qui a été accordé partout. -->
+    <div class="fg"><span class="fl">Collection (pack)</span>
+      <input class="fi" id="eBkColl" list="vrtColls" value="${_esc(b.collection||'')}" placeholder="aucune" maxlength="60">
+      <datalist id="vrtColls">${[...new Set((DB.books||[]).map(function(x){return x.collection;}).filter(Boolean))].map(function(c){return '<option>'+_esc(c)+'</option>';}).join('')}</datalist>
+    </div>
+    <div class="fg"><span class="fl">Remise du pack (%)</span>
+      <input class="fi" id="eBkCollR" type="number" min="0" max="60" step="1" value="${b.collectionRemise||0}">
+    </div>
     <div class="fg full"><span class="fl" style="font-weight:700;color:#059669">📖 Lecture gratuite visiteurs</span>
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px;background:#D1FAE5;border-radius:8px;border:1px solid #A7F3D0">
         <input type="checkbox" id="eBkLG"${b.lireGratuit?' checked':''} style="width:18px;height:18px;accent-color:#059669">
@@ -13795,6 +13817,8 @@ function saveEditBk(id){const b=DB.books.find(x=>x.id===id);if(!b)return;b.titre
   b.vitrine=!!(document.getElementById('eBkVit')?.checked);
   b.rayon=(document.getElementById('eBkRay')?.value||'').trim();
   b.etiquette=(document.getElementById('eBkEti')?.value||'').trim();
+  b.collection=(document.getElementById('eBkColl')?.value||'').trim();
+  b.collectionRemise=Math.max(0,Math.min(60,+(document.getElementById('eBkCollR')?.value)||0));
   save();cm();re();
   /* Le message dit ce qui va se passer DEHORS, et surtout ce qui n'est pas
      évident : dès qu'UN manuel est coché, la boutique publique n'affiche plus
@@ -22642,7 +22666,19 @@ var _origVShowSecEl=window.vShowSec;
       if(btn)btn.classList.add("on");
       showLabosVirtuels();return;
     }
-    if(_ov) _ov.call(this,sec,btn);
+    /* ⚠️ `apply(this, arguments)` et NON `call(this, sec, btn)`.
+       vShowSec est enrobée quatre fois (ici, la pile de navigation, l'injecteur
+       d'abonnement, la conversion des pictogrammes) ; les trois autres
+       transmettent leurs arguments, celle-ci les TRONQUAIT à deux. Le troisième,
+       `_boot`, est précisément ce qui autorise l'application à afficher sa
+       boutique sans être renvoyée vers la vitrine.
+       Conséquence mesurée au banc le 26/08/2026 : /app.html#livre?id=… — le lien
+       que la vitrine, les partages WhatsApp et les QR codes distribuent —
+       atterrissait sur /#boutique. L'acheteur devait retrouver le manuel seul,
+       et au Cameroun celui qui paie n'est presque jamais celui qui a choisi le
+       livre. Un enrobage qui perd un argument ne casse rien le jour où il est
+       écrit : il casse le jour où quelqu'un ajoute un paramètre. */
+    if(_ov) _ov.apply(this, arguments);
     // v1.4.6 FIX CRITIQUE : ré-observer les éléments « reveal » créés par CE rendu.
     // L'observer de la coquille (initReveal) ne couvre que le boot → les grilles
     // re-rendues (catégories e-learning, stats…) restaient en opacity:0 = la
@@ -48366,6 +48402,116 @@ function _echStudentHTML(eid){
      — aucune mention d'urgence n'est produite si rien ne l'établit.
    Une base vide ⇒ un panneau sobre, et c'est très bien ainsi.
    ══════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LE PACK COLLECTION — « Économisez X en prenant toute la collection »
+   ──────────────────────────────────────────────────────────────────────────
+   Repris de libryo.fr, qui l'affiche au-dessus du prix : « 4 675 FCFA au lieu
+   de 5 500 — Économisez 825 FCFA en achetant la collection ». C'est le seul
+   endroit de la fiche où l'on peut proposer plus sans rien promettre de faux :
+   les titres existent, les prix existent, la remise est décidée par l'admin.
+
+   Trois conditions, toutes nécessaires — à défaut, RIEN ne s'affiche :
+     · le manuel appartient à une collection nommée ;
+     · au moins un autre manuel porte la même ;
+     · une remise a été déclarée (> 0) sur chacun d'eux.
+
+   La remise retenue est la PLUS FAIBLE des valeurs déclarées. Deux fiches qui
+   divergent (15 % ici, 20 % là) donneraient sinon deux prix différents pour le
+   même panier selon la page d'où l'on part — le genre d'incohérence qu'un
+   parent remarque immédiatement, et qui coûte la vente.
+
+   Un manuel en rupture est EXCLU du pack : vendre un lot dont un exemplaire
+   n'est pas livrable, c'est encaisser une promesse qu'on ne tiendra pas. */
+window._bookCollection = function(b){
+  if(!b || !b.collection) return null;
+  var nom = String(b.collection).trim();
+  if(!nom) return null;
+
+  var membres = (DB.books || []).filter(function(x){
+    if(String(x.collection || '').trim() !== nom) return false;
+    // Disponible : soit numérique (jamais en rupture), soit du stock en pile.
+    return x.numeriqueSeul || (typeof x.stock !== 'number') || x.stock > 0;
+  });
+  if(membres.length < 2) return null;
+
+  // La plus faible remise déclarée. Une seule à zéro annule le pack.
+  var remise = membres.reduce(function(m, x){
+    return Math.min(m, Math.max(0, +x.collectionRemise || 0));
+  }, 100);
+  if(!(remise > 0)) return null;
+
+  var plein = membres.reduce(function(s, x){ return s + (+x.prix || 0); }, 0);
+  if(plein <= 0) return null;
+  // Arrondi à la centaine de francs : au Cameroun, un prix au franc près ne
+  // se rend pas en espèces et ne se saisit pas sur un clavier Mobile Money.
+  var net = Math.round(plein * (100 - remise) / 100 / 100) * 100;
+  if(net >= plein) return null;
+
+  return { nom:nom, membres:membres, remise:remise, plein:plein, net:net, eco:plein - net };
+};
+
+/* Le bloc affiché dans le panneau d'achat. */
+window._bookPackHtml = function(b){
+  var p = _bookCollection(b);
+  if(!p) return '';
+  var vignettes = p.membres.slice(0, 5).map(function(x){
+    var cc = x.coverColor || '#1E499B';
+    return x.coverImg
+      ? '<img class="bkpack-v" src="' + _esc(x.coverImg) + '" alt="" loading="lazy" onerror="this.remove()">'
+      : '<span class="bkpack-v bkpack-v-txt" style="--cc:' + _esc(cc) + '" aria-hidden="true">' + (x.ico || '📘') + '</span>';
+  }).join('');
+  var reste = p.membres.length > 5 ? '<span class="bkpack-v bkpack-plus">+' + (p.membres.length - 5) + '</span>' : '';
+
+  return '<div class="bkpack">'
+    +   '<div class="bkpack-t">' + ICO('i-sparkle') + 'La collection ' + _esc(p.nom) + '</div>'
+    +   '<div class="bkpack-prix">'
+    +     '<b>' + fmt(p.net) + '</b>'
+    +     '<s>' + fmt(p.plein) + '</s>'
+    +     '<span class="bkpack-pct">&minus;' + p.remise + '&nbsp;%</span>'
+    +   '</div>'
+    +   '<div class="bkpack-eco">Vous économisez <b>' + fmt(p.eco) + '</b> en prenant les '
+    +     p.membres.length + ' titres</div>'
+    +   '<div class="bkpack-vs">' + vignettes + reste + '</div>'
+    +   '<button class="bkpack-cta" onclick="commanderCollection(' + JSON.stringify(p.nom).replace(/"/g, '&quot;') + ')">'
+    +     ICO('lc-cart') + 'Acheter toute la collection (' + p.membres.length + ' livres)</button>'
+    + '</div>';
+};
+
+/* Le paiement passe par le PANIER existant (intent « cart »), une ligne par
+   manuel. C'est ce qui permet d'activer chaque titre et de rétribuer chaque
+   auteur — un encaissement global sans détail n'active rien et ne rétribue
+   personne (constaté sur le panier en v1.2.4).
+   La remise est répartie AU PRORATA des prix, et le dernier centime va à la
+   dernière ligne : la somme des lignes est alors exactement le montant
+   encaissé. Sans ce rattrapage, l'arrondi laisse un écart de quelques francs
+   entre ce que le client paie et ce que la comptabilité additionne. */
+window.commanderCollection = function(nom){
+  var faux = { collection: nom };
+  var p = _bookCollection(faux);
+  if(!p){ toast('Cette collection n\'est plus disponible en pack', 'warn'); return; }
+
+  var reparti = 0;
+  var lignes = p.membres.map(function(x, i){
+    var part;
+    if(i === p.membres.length - 1) part = p.net - reparti;          // rattrapage
+    else { part = Math.round((+x.prix || 0) * p.net / p.plein); reparti += part; }
+    return { intent:'book', targetId:x.id, montant:part, label:x.titre };
+  });
+
+  var s = (typeof SES !== 'undefined' && SES) ? SES : null;
+  openPaymentModal({
+    montant: p.net,
+    label: '📚 Collection ' + p.nom + ' (' + p.membres.length + ' livres)',
+    refPrefix: 'PACK',
+    intent: 'cart',
+    lignes: lignes,
+    customerAccountId: s ? (s.accountId || s.id) : null,
+    customerNom: s ? ((s.pre || '') + ' ' + (s.nom || '')).trim() : '',
+    customerTel: s ? s.tel : ''
+  });
+};
+
 window._bookBuyPanel = function(b, rt, rvs){
   var vendu = b.vendu || 0;
   var stock = (typeof b.stock === 'number') ? b.stock : null;
@@ -48390,6 +48536,9 @@ window._bookBuyPanel = function(b, rt, rvs){
        +   ICO('i-book-open') + 'Édition numérique — lecture en ligne</span></div></div>';
   }
 
+  /* — Le pack collection, s'il en existe un et qu'il économise vraiment — */
+  h += _bookPackHtml(b);
+
   /* — Le prix, et l'économie si elle est réelle — */
   h += '<div class="bkbuy-prix">';
   if(b.ancienPrix && b.ancienPrix > b.prix){
@@ -48403,7 +48552,7 @@ window._bookBuyPanel = function(b, rt, rvs){
   /* — L'action principale — */
   if(stock === null || stock > 0){
     h += '<button class="bkbuy-cta" onclick="visitorOrderBook(\'' + b.id + '\')">'
-       +   ICO('i-card') + 'Payer maintenant — ' + fmt(b.prix) + '</button>';
+       +   ICO('i-credit-card') + 'Payer maintenant — ' + fmt(b.prix) + '</button>';
   }
   if(b.secureId || b.securePages || b.digital){
     var fp = b.freePages || 10;
@@ -48806,7 +48955,7 @@ function _bookShare(b){
   var fb = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
 
   return '<div class="bkshare">'
-    + '<div class="bkshare-t">' + ICO('i-share')
+    + '<div class="bkshare-t">' + ICO('lc-link')
     +   (b.genre === 'roman' ? 'Partager ce livre' : 'Partager ce manuel') + '</div>'
     + '<div class="bkshare-s">Le lien ouvre cette fiche, prête à payer.</div>'
     + '<div class="bkshare-b">'
@@ -48868,13 +49017,32 @@ function _bookOpenFromHash(id){
   if (!id) return false;
   var b = (typeof DB !== 'undefined' && DB.books)
         ? DB.books.find(function(x){ return x.id === id; }) : null;
-  try{ if (typeof vShowSec === 'function') vShowSec('boutique', null); }catch(e){}
+  /* ⚠️ TROISIÈME ARGUMENT OBLIGATOIRE, il n'est pas décoratif.
+     `vShowSec('boutique')` passe par _renvoyerVersVitrine, qui envoie tout
+     visiteur non connecté sur « /#boutique » — la boutique de la vitrine.
+     Depuis que ce renvoi existe, ouvrir un lien de manuel faisait donc
+     QUITTER la page avant le setTimeout ci-dessous : le `viewBookDetail`
+     n'était jamais atteint. Mesuré au banc le 26/08/2026 —
+     /app.html#livre?id=b1 arrivait sur /#boutique.
+     C'est le pire endroit où perdre quelqu'un : ces liens sont ceux que la
+     vitrine, les partages WhatsApp (_bookUrl) et les QR codes distribuent,
+     et au Cameroun celui qui paie n'est presque jamais celui qui a choisi le
+     livre — on lui demandait de le retrouver seul.
+     Le drapeau `_boot` est l'échappatoire prévue par le garde-fou : ici on
+     RESTE volontairement dans l'application, on va afficher la fiche. */
+  try{ if (typeof vShowSec === 'function') vShowSec('boutique', null, true); }catch(e){}
   if (!b){
     if (typeof toast === 'function') toast('Ce manuel n\'est plus au catalogue', 'warn');
     return false;
   }
   setTimeout(function(){
     try{ viewBookDetail(id); }catch(e){}
+    /* vShowSec vient d'écrire « boutique » dans _vCurrentSec : à partir d'ici,
+       l'application croit afficher le catalogue alors qu'elle affiche UNE fiche.
+       Tout ce qui re-rend « la section courante » — le rafraîchissement des
+       données publiques, le filet anti-écran-vide — repeindrait donc la boutique
+       PAR-DESSUS le manuel qu'on vient d'ouvrir. On remet le repère juste. */
+    window._vCurrentSec = 'livre:' + id;
     try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){}
   }, 260);
   return true;
