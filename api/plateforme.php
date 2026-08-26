@@ -219,10 +219,29 @@ function plat_paliers(array $db): array
            répertoire MINESEC, sous droits. On en laisse goûter cinq, un seul
            export et deux questions à Ambassa — de quoi juger sur pièce, pas
            de quoi se passer d'un abonnement. */
-        'demo' => ['textes' => 5,   'citations' => 3,   'exports' => 1,   'ia' => 2],
-        'ens'  => ['textes' => -1,  'citations' => -1,  'exports' => 30,  'ia' => 30],
-        'etab' => ['textes' => -1,  'citations' => -1,  'exports' => 120, 'ia' => 120],
-        'pro'  => ['textes' => -1,  'citations' => -1,  'exports' => 400, 'ia' => 400],
+        // `epreuves` de « demo » n'est PAS lu : ce palier garde son réglage
+        // historique, DB.plateforme.offres.quotaEssai (10 par défaut), que
+        // l'administration connaît déjà. La clé est là pour que la table reste
+        // de même forme partout.
+        'demo' => ['textes' => 5,   'citations' => 3,   'exports' => 1,   'ia' => 2,   'epreuves' => 10],
+
+        /* ESSAI — JUGER SUR PIÈCE, PAS SE SERVIR.
+           L'essai empruntait le palier « ens » : textes illimités et
+           **30 exports**. Or 30 épreuves en .docx, c'est une année scolaire
+           entière de travail — un enseignant pouvait faire sa rentrée en sept
+           jours gratuits et ne jamais revenir. Le produit se vend précisément
+           sur ces exports ; les offrir par trentaines, c'est l'offrir tout court.
+
+           On garde la LECTURE large — c'est elle qui donne envie, et un
+           répertoire qu'on ne peut pas parcourir ne convainc personne — mais on
+           borne ce qui SORT de l'outil : quelques exports, de quoi juger la
+           qualité d'une épreuve rendue, pas de quoi équiper un trimestre.
+           Réglable en base (DB.plateforme.paliers.essai) sans redéploiement. */
+        'essai' => ['textes' => -1,  'citations' => -1,  'exports' => 3,   'ia' => 10,  'epreuves' => 12],
+
+        'ens'  => ['textes' => -1,  'citations' => -1,  'exports' => 30,  'ia' => 30,  'epreuves' => -1],
+        'etab' => ['textes' => -1,  'citations' => -1,  'exports' => 120, 'ia' => 120, 'epreuves' => -1],
+        'pro'  => ['textes' => -1,  'citations' => -1,  'exports' => 400, 'ia' => 400, 'epreuves' => -1],
     ];
     $sur = $db['plateforme']['paliers'] ?? [];
     if (!is_array($sur)) return $def;
@@ -241,9 +260,12 @@ function plat_paliers(array $db): array
 function plat_palier_de(array $droit): string
 {
     if (($droit['motif'] ?? '') === 'abonnement') return (string) ($droit['plan'] ?? 'ens');
-    // Pendant l'essai on ouvre le palier Enseignant : c'est l'essai qui doit
-    // convaincre, pas une version amputée.
-    if (in_array($droit['motif'] ?? '', ['essai', 'essai_ouverture'], true)) return 'ens';
+    /* L'essai a désormais SON palier. Il renvoyait « ens » — le plan payant —
+       donc l'essai gratuit et l'abonnement à 5 000 F ouvraient exactement les
+       mêmes droits, exports compris. Il n'y avait littéralement rien à acheter
+       pendant sept jours. La lecture reste large ; seuls les exports et l'IA
+       sont bornés (voir plat_paliers). */
+    if (in_array($droit['motif'] ?? '', ['essai', 'essai_ouverture'], true)) return 'essai';
     return 'demo';
 }
 
@@ -767,9 +789,17 @@ if ($action === 'quota' && $method === 'POST') {
        (« export » contre « exports ») : sans cette table de correspondance,
        le ?? -1 rendait le quota ILLIMITÉ au lieu de 2, en silence. On refuse
        donc explicitement un genre dont on ne connaît pas la clé. */
-    $CLE = ['ia' => 'ia', 'export' => 'exports'];
+    $CLE = ['ia' => 'ia', 'export' => 'exports', 'epreuve' => 'epreuves'];
     if ($genre === 'epreuve') {
-        $plafond = ($palier === 'demo') ? (int) $offres['quotaEssai'] : -1;
+        /* Le palier « demo » garde son réglage historique (DB.plateforme.offres
+           .quotaEssai), que l'administration connaît déjà. Les autres lisent la
+           TABLE — et c'est ce qui manquait : hors « demo », le plafond valait
+           -1, c'est-à-dire ILLIMITÉ. Un compte en essai pouvait donc composer
+           autant d'épreuves qu'il voulait ; seul l'export le freinait, et il ne
+           le freinait pas non plus (30). */
+        $plafond = ($palier === 'demo')
+            ? (int) $offres['quotaEssai']
+            : (array_key_exists('epreuves', $caps) ? (int) $caps['epreuves'] : -1);
     } elseif (isset($CLE[$genre]) && array_key_exists($CLE[$genre], $caps)) {
         $plafond = (int) $caps[$CLE[$genre]];
     } else {
