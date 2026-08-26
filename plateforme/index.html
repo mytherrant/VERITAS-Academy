@@ -923,6 +923,10 @@
            l'enseignant pouvait croire partager avec son équipe alors que rien
            ne partait. Un travail qu'on croit transmis se découvre en réunion,
            trop tard. -->
+      <!-- Rappel de l'essai. `resteJours` arrivait du serveur depuis le
+           premier jour et n'était lu nulle part : l'enseignant découvrait la
+           fin de son essai en butant dessus. Un clic mène aux abonnements. -->
+      <button onClick="{{ goAbo }}" title="{{ essaiTitre }}" style="{{ essaiChip }}">{{ essaiLabel }}</button>
       <span title="{{ syncTitre }}" style="{{ syncStyle }}">{{ syncLabel }}</span>
       <button onClick="{{ goProfil }}" title="Mon compte" style="display:flex;align-items:center;gap:9px;background:none;border:none;cursor:pointer;padding:3px 6px 3px 3px;border-radius:999px" style-hover="background:var(--cf2f6fb,#f2f6fb)">
         <span style="{{ me.avatarLg }}">{{ me.initials }}</span>
@@ -2698,9 +2702,17 @@
              qu'emploie la vitrine elle-même (vitrine.html:2872). -->
         <div style="margin:16px 0 0;padding-top:15px;border-top:1px solid var(--ce6ecf3,#e6ecf3);text-align:center">
           <p style="margin:0 0 9px;font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.6">Vous n’avez pas encore de compte VÉRITAS ?</p>
-          <a href="https://veritas-school.com/app.html#inscription-enseignant" target="_blank" rel="noopener"
+          <!-- Ce que l'inscription donne, dit ICI : de l'autre côté, le
+               formulaire du site ne parle pas de l'Atelier. -->
+          <p style="margin:0 0 12px;font-size:12px;color:var(--c8b97a8,#8b97a8);line-height:1.6">L’inscription est <strong style="color:var(--c188047,#188047);font-weight:700">gratuite</strong>. Votre semaine d’essai s’ouvre à la première connexion, et les <strong style="color:var(--c14375f,#14375f);font-weight:700">1 014 textes libres de droits</strong> vous restent ouverts ensuite, sans abonnement.</p>
+          <a href="https://veritas-school.com/app.html?de=atelier#inscription-enseignant" target="_blank" rel="noopener"
              style="display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:10px;border:1.5px solid var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb);background:var(--cffffff,#fff);font-family:Poppins;font-weight:700;font-size:13.5px;text-decoration:none"
              style-hover="background:var(--cf4f8fc,#f4f8fc)">Créer un compte enseignant</a>
+          <!-- LE RETOUR. L'onglet de l'Atelier reste ouvert derrière — c'est
+               l'intérêt de target="_blank" — mais personne ne le sait. Ce
+               bouton le dit et ramène le curseur dans le champ identifiant :
+               sans lui, l'enseignant revient et cherche où se connecter. -->
+          <button onClick="{{ retourInscription }}" style="{{ retourInscriptionStyle }}">J’ai créé mon compte — me connecter</button>
           <p style="margin:9px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6">L’inscription se fait sur veritas-school.com, puis vous revenez ici avec le même identifiant.</p>
         </div>
       </div>
@@ -6032,6 +6044,47 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
            rend le saut de ligne, ce qui évite un filigrane d'une seule
            ligne trop longue en travers d'un texte étroit. */
         return 'VÉRITAS \u00b7 '+nom+'\n'+new Date().toLocaleDateString('fr-FR');
+      })(),
+      /* Retour depuis l'inscription : on ne recharge rien, l'onglet n'a
+         jamais bougé. On ramène simplement le curseur là où il faut. */
+      retourInscription:()=>{try{
+        const c=document.querySelector('input[autoComplete=\"username\"]');
+        if(c&&c.focus){c.focus();c.scrollIntoView({behavior:'smooth',block:'center'});}
+      }catch(e){}},
+      retourInscriptionStyle:'display:block;margin:11px auto 0;background:none;border:none;'
+        +'color:var(--c1a72bb,#1a72bb);font-family:Poppins;font-size:12.5px;font-weight:700;'
+        +'cursor:pointer;text-decoration:underline;padding:4px',
+      /* --- rappel de l'essai ---
+         Muet pour un abonné : lui rappeler qu'il pourrait s'abonner serait
+         au mieux inutile, au pire vexant. */
+      essaiLabel:(function(){
+        const d=st.corpusDroit||{};
+        if(d.motif==='abonnement')return '';
+        if(d.motif==='essai_termine')return 'Essai terminé · S’abonner';
+        const j=(d.resteJours==null)?null:(d.resteJours|0);
+        if(j==null)return '';
+        return 'Essai · '+j+' jour'+(j>1?'s':'');
+      })(),
+      essaiTitre:(function(){
+        const d=st.corpusDroit||{};
+        if(d.motif==='essai_termine')
+          return 'Votre essai est terminé. Les 1 014 textes libres de droits restent ouverts ; l’abonnement rouvre le répertoire MINESEC et lève les plafonds.';
+        const j=(d.resteJours==null)?null:(d.resteJours|0);
+        return (j==null)?'' :('Il vous reste '+j+' jour'+(j>1?'s':'')+' d’essai. Cliquez pour voir les abonnements — à partir de 800 FCFA par mois.');
+      })(),
+      essaiChip:(function(){
+        const d=st.corpusDroit||{};
+        if(d.motif==='abonnement')return hidden;
+        const fini=(d.motif==='essai_termine');
+        const j=(d.resteJours==null)?null:(d.resteJours|0);
+        if(!fini&&j==null)return hidden;
+        const urgent=fini||j<=3;
+        return 'display:inline-flex;align-items:center;font-family:Poppins;font-size:10.5px;'
+          +'font-weight:700;padding:4px 11px;border-radius:999px;white-space:nowrap;flex:none;'
+          +'cursor:pointer;border:1px solid '
+          +(fini?'var(--cecc4bf,#ecc4bf);background:var(--cfdecea,#fdecea);color:var(--cc0392b,#c0392b)'
+            :urgent?'var(--cf0d9b0,#f0d9b0);background:var(--cfdefdb,#fdefdb);color:var(--cc26a12,#c26a12)'
+                   :'var(--cd5e0ec,#d5e0ec);background:var(--cf4f8fc,#f4f8fc);color:var(--c5a6678,#5a6678)');
       })(),
       /* --- voyant de partage --- */
       syncLabel:(st.syncEtat==='panne')?'Hors ligne'
