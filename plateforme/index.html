@@ -2676,11 +2676,17 @@
              action d'inscription, et l'ancien « Créer mon compte » ne créait
              rien : il posait un profil local sans mot de passe, que l'écran de
              connexion réclamait ensuite. On envoie donc là où le compte se crée
-             VRAIMENT : `#inscription-enseignant` ouvre directement le bon
-             formulaire sur le site (app.js:44238). -->
+             VRAIMENT.
+
+             ⚠️ `app.html`, PAS la racine. Le routeur `#inscription-*` vit dans
+             app.js, et la racine du domaine sert la VITRINE : le lien y menait
+             donc à l'accueil, sans formulaire — un cul-de-sac poli. Vérifié au
+             navigateur : `app.html#inscription-enseignant` ouvre bien les neuf
+             champs de « Créer mon compte enseignant ». C'est aussi la forme
+             qu'emploie la vitrine elle-même (vitrine.html:2872). -->
         <div style="margin:16px 0 0;padding-top:15px;border-top:1px solid var(--ce6ecf3,#e6ecf3);text-align:center">
           <p style="margin:0 0 9px;font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.6">Vous n’avez pas encore de compte VÉRITAS ?</p>
-          <a href="https://veritas-school.com/#inscription-enseignant" target="_blank" rel="noopener"
+          <a href="https://veritas-school.com/app.html#inscription-enseignant" target="_blank" rel="noopener"
              style="display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:10px;border:1.5px solid var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb);background:var(--cffffff,#fff);font-family:Poppins;font-weight:700;font-size:13.5px;text-decoration:none"
              style-hover="background:var(--cf4f8fc,#f4f8fc)">Créer un compte enseignant</a>
           <p style="margin:9px 0 0;font-size:11.5px;color:var(--c9aa5b5,#9aa5b5);line-height:1.6">L’inscription se fait sur veritas-school.com, puis vous revenez ici avec le même identifiant.</p>
