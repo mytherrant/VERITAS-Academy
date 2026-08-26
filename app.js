@@ -10868,77 +10868,71 @@ const ANAV=[
   {s:"⚙️ Système",i:[
     {k:"accounts",i:"⨡",l:"Comptes admin/enseignants"},
     {k:"visitor_accounts",i:"👥",l:"Comptes visiteurs inscrits"},
+    // Émission d'un code de cahier au comptoir (règlement en espèces). Placé
+    // dans ANAV et non dans SA_EN_PLUS : la personne qui encaisse au centre
+    // est un ADMIN ordinaire, pas forcément le super-administrateur. La page
+    // se garde elle-même par iA() — la navigation doit s'y accorder.
+    {k:"livret_codes",i:"🎟️",l:"Codes d'accès des cahiers"},
     {k:"settings",i:"⊙",l:"Paramètres école"},
     {k:"datareset",i:"🗑",l:"Nettoyage données"},
     {k:"guide",i:"📖",l:"Guide d'utilisation"}
   ]}
 ];
-// ─── NAV SUPER ADMIN — Refonte v1.2 : 9 sections (Supervision + 8 ANAV) ────
-const SANAV=[
-  {s:"👑 Supervision",i:[
-    {k:"dashboard",i:"◈",l:"Tableau de bord"},
-    {k:"superoverview",i:"◐",l:"Vue d'ensemble système"},
-    {k:"loginlog",i:"◌",l:"Journal des connexions"},
-    {k:"allaccounts",i:"⊡",l:"Tous les comptes"},
-    {k:"centres_admin",i:"🏢",l:"Centres clients SaaS"}
+/* ─── NAV SUPER ADMIN — DÉRIVÉE d'ANAV, et non plus recopiée ───────────────
+   Les deux menus étaient écrits l'un sous l'autre, en copier-coller. Mesuré
+   le 25/08/2026 : sur les huit sections, CINQ étaient identiques au caractère
+   près (Élèves, Pédagogie, Personnel, Finances, Communication) — environ
+   cent vingt lignes en double — et deux avaient DÉJÀ divergé sans que
+   personne le décide : « Ressources BAC » n'existait que pour le super-admin,
+   par oubli plutôt que par choix.
+
+   C'est le défaut typique d'un doublon : il ne casse rien le jour où on
+   l'écrit, il se met à mentir des mois plus tard. Ajouter une entrée au menu
+   admin demandait de penser à la rajouter ici ; un oubli passait inaperçu,
+   puisque les deux menus ne se regardent jamais.
+
+   Désormais : le super-admin voit TOUT ce que voit l'admin, plus ce qui est
+   déclaré ci-dessous. Une entrée ajoutée à ANAV lui parvient sans rien
+   écrire ici. Ce qui reste écrit ici est ce qui lui est PROPRE — donc une
+   décision, lisible comme telle.
+
+   La copie est profonde (JSON) : les objets d'ANAV ne doivent jamais être
+   partagés entre les deux menus, sinon un `push` d'un côté modifierait
+   l'autre — le doublon reviendrait par la porte des références. */
+const SA_SUPERVISION = {s:"👑 Supervision",i:[
+  {k:"dashboard",i:"◈",l:"Tableau de bord"},
+  {k:"superoverview",i:"◐",l:"Vue d'ensemble système"},
+  {k:"loginlog",i:"◌",l:"Journal des connexions"},
+  {k:"allaccounts",i:"⊡",l:"Tous les comptes"},
+  {k:"centres_admin",i:"🏢",l:"Centres clients SaaS"}
+]};
+/* Ce que le super-admin a EN PLUS de l'admin. `apres` fixe le point
+   d'insertion : la clé après laquelle glisser l'entrée, ou null pour la
+   placer en tête de section. Une section absente d'ANAV est ignorée. */
+const SA_EN_PLUS = [
+  {s:"🛍️ Boutique & E-Learning", apres:"paywall", i:[
+    {k:"resPedago",i:"📄",l:"Ressources BAC"}
   ]},
-  {s:"🎓 Élèves",i:[
-    {k:"students",i:"⊕",l:"Inscriptions"},
-    {k:"listeclasse",i:"📋",l:"Listes par classe"},
-    {k:"certscol",i:"📜",l:"Certificats de scolarité"},
-    {k:"presence",i:"📝",l:"Fiches de présence"},
-    {k:"absences_admin",i:"✅",l:"Absences"}
-  ]},
-  {s:"📚 Pédagogie",i:[
-    {k:"grades",i:"▦",l:"Notes & Bulletins"},
-    {k:"classstats",i:"📊",l:"Statistiques de classe"},
-    {k:"honneur",i:"🏆",l:"Tableau d'honneur"},
-    {k:"devoirs_admin",i:"📋",l:"Devoirs"},
-    {k:"schedule",i:"▣",l:"Emploi du temps"}
-  ]},
-  {s:"👨‍🏫 Personnel",i:[
-    {k:"teachers",i:"◉",l:"Enseignants & Paie"},
-    {k:"attesttravail",i:"📄",l:"Attestations & Paie"}
-  ]},
-  {s:"🛍️ Boutique & E-Learning",i:[
-    {k:"boutiquemgmt",i:"🛒",l:"Boutique articles"},
-    {k:"booksale",i:"📚",l:"Vente manuels"},
-    {k:"books2",i:"▤",l:"Bibliothèque"},
-    {k:"elearningmgmt",i:"🎓",l:"E-Learning"},
-    {k:"paywall",i:"🔓",l:"Essais & abonnements"},
-    {k:"resPedago",i:"📄",l:"Ressources BAC"},
-    {k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},
-    {k:"visitororders",i:"📦",l:"Commandes visiteurs"}
-  ]},
-  {s:"💰 Finances",i:[
-    {k:"payments",i:"💳",l:"Paiements élèves"},
-    {k:"paiements_admin",i:"💰",l:"Tentatives de paiement"},
-    {k:"partenaires_splits",i:"🤝",l:"Partage revenus partenaires"},
-    {k:"stats_business",i:"📊",l:"Stats Business (CA/Conv.)"},
-    {k:"autredep",i:"💸",l:"Autres dépenses"},
-    {k:"finance",i:"△",l:"Bilan financier"}
-  ]},
-  {s:"📢 Communication & Portail",i:[
-    {k:"announce",i:"◆",l:"Annonces"},
-    {k:"send",i:"◎",l:"Centre WhatsApp"},
-    {k:"orientation_admin",i:"🧭",l:"Orientation & Conseil"},
-    {k:"parrainage_admin",i:"🎁",l:"Programme parrainage"},
-    {k:"partenaires_admin",i:"🤝",l:"Programme Partenariat"},
-    {k:"demandes",i:"✉",l:"Demandes & devis"},
-    {k:"forum_admin",i:"💬",l:"Modération Forum"},
-    {k:"marketplace_admin",i:"🛒",l:"Marketplace auteurs"},
-    {k:"cms",i:"🌐",l:"Portail visiteur"},
-    {k:"calendrier_admin",i:"📅",l:"Calendrier scolaire"}
-  ]},
-  {s:"⚙️ Système",i:[
-    {k:"sacontrol",i:"👑",l:"Centre de contrôle SA"},
-    {k:"accounts",i:"⨡",l:"Comptes admin/enseignants"},
-    {k:"visitor_accounts",i:"👥",l:"Comptes visiteurs inscrits"},
-    {k:"settings",i:"⊙",l:"Paramètres école"},
-    {k:"datareset",i:"🗑",l:"Nettoyage données"},
-    {k:"guide",i:"📖",l:"Guide d'utilisation"}
+  {s:"⚙️ Système", apres:null, i:[
+    {k:"sacontrol",i:"👑",l:"Centre de contrôle SA"}
   ]}
 ];
+const SANAV = (function(){
+  // La section « 🏠 Accueil » d'ANAV ne contient que le tableau de bord, que
+  // « 👑 Supervision » reprend en première entrée : on la remplace, on ne
+  // l'empile pas.
+  var base = JSON.parse(JSON.stringify(ANAV)).filter(function(sec){ return sec.s !== "🏠 Accueil"; });
+  SA_EN_PLUS.forEach(function(ajout){
+    var sec = base.filter(function(s){ return s.s === ajout.s; })[0];
+    if(!sec) return;                       // section renommée dans ANAV : on n'invente pas
+    if(ajout.apres === null){ sec.i = ajout.i.concat(sec.i); return; }
+    var at = -1;
+    sec.i.forEach(function(e,n){ if(e.k === ajout.apres) at = n; });
+    // Ancre disparue : on ajoute en fin de section plutôt que de perdre l'entrée.
+    sec.i.splice(at < 0 ? sec.i.length : at + 1, 0, ...ajout.i);
+  });
+  return [SA_SUPERVISION].concat(base);
+})();
 const TNAV=[
   {s:"Mon espace",i:[{k:"dashboard",i:"◈",l:"Tableau de bord"},{k:"grades",i:"▦",l:"Saisie de notes"},{k:"devoirs_teacher",i:"📋",l:"Mes devoirs"},{k:"ambassa",i:"🎓",l:"Ambassa IA (Quiz, Évals, Fiches)"},{k:"perf_teacher",i:"📊",l:"Performances"},{k:"marketplace_teacher",i:"🛒",l:"Marketplace (vendre cours)"},{k:"parrainage_teacher",i:"🎁",l:"Mes filleuls & commissions"},{k:"schedule",i:"▣",l:"Emploi du temps"},{k:"announce",i:"◆",l:"Annonces"}]},
   {s:"Ressources",i:[{k:"books2",i:"▤",l:"Bibliothèque"},{k:"mybooks",i:"✍️",l:"Mes publications"},{k:"releve_template",i:"📋",l:"Relevé vierge"},{k:"submit_resource",i:"📤",l:"Soumettre ressource"}]}
@@ -10994,6 +10988,7 @@ const PT={
   // Super Admin
   superoverview:"Vue d'ensemble système",
   sacontrol:"Centre de contrôle Super Admin",
+  livret_codes:"Codes d'accès des cahiers",
   loginlog:"Journal des connexions",
   allaccounts:"Tous les comptes",
   // Pages enseignant
@@ -11063,14 +11058,14 @@ function render(p){
     schedule:pgSched,announce:pgAnn,books2:pgBooks2,send:pgSend,
     teachers:pgTeachers,accounts:pgAccounts,booksale:pgBooksale,boutiquemgmt:pgBoutiqueMgmt,elearningmgmt:pgElearningMgmt,datareset:pgDataReset,visitororders:pgVisitorOrders,classstats:pgClassStats,honneur:pgHonneur,finance:pgFinance,
     settings:pgSettings,mybooks:pgMyBooks,releve_template:pgReleveTemplate,submit_resource:pgSubmitResource,soumissions:pgSoumissions,visitor_accounts:pgVisitorAccounts,authorsmgmt:pgAuthorsMgmt,certscol:pgCertScol,listeclasse:pgListeClasse,presence:pgPresence,
-    attesttravail:pgAttestTravail,recubooks:pgRecuBooks,autredep:pgAutreDep,
+    attesttravail:pgAttestTravail,autredep:pgAutreDep,
     // Élève
     mon_bulletin:pgReleve,mes_absences:pgMesAbsences,mes_evaluations:pgMesEvaluations,
     mes_devoirs:pgMesDevoirs,mon_paiement:pgMonPaiement,boutique:pgBoutique,
     // Enseignant
     devoirs_teacher:pgDevoirsTeacher,perf_teacher:pgPerfTeacher,
     // Admin
-    statistics:pgClassStats,absences_admin:pgAbsencesAdmin,devoirs_admin:pgDevoirsAdmin,orientation_admin:pgOrientationAdmin,resPedago:pgResPedagoAdmin,paiements_admin:pgPaiementsAdmin,
+    absences_admin:pgAbsencesAdmin,devoirs_admin:pgDevoirsAdmin,orientation_admin:pgOrientationAdmin,resPedago:pgResPedagoAdmin,paiements_admin:pgPaiementsAdmin,
     stats_business:pgStatsBusiness,parrainage_admin:pgParrainageAdmin,paywall:pgPaywall,
     forum_admin:pgForumAdmin,marketplace_admin:pgMarketplaceAdmin,centres_admin:pgCentresAdmin,
     calendrier_admin:pgCalendrierAdmin,
@@ -11099,6 +11094,8 @@ function render(p){
     cagnottes: (typeof pgCagnottesAdmin==='function' ? pgCagnottesAdmin : null),
     // Super Admin
     superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,sacontrol:pgSAControl,
+    // Émission manuelle des codes de cahier (règlement en espèces au centre).
+    livret_codes: (typeof pgLivretCodes==='function' ? pgLivretCodes : null),
     // Guide d'utilisation (tous rôles)
     guide:pgGuide,
   };
@@ -11991,6 +11988,7 @@ function pgSAControl(){
     +'<div class="fl2 fw g8">'
     +'<button class="btn bi" onclick="_saRatesModal()"><svg class="vico bico" aria-hidden="true"><use href="#lc-clipboard"/></svg>Taux globaux (auteur / parrain / promos)</button>'
     +'<button class="btn bo" onclick="if(typeof mPayAttempts===\'function\')mPayAttempts()"><svg class="vico bico" aria-hidden="true"><use href="#lc-card"/></svg>Override des paiements</button>'
+    +'<button class="btn bo" onclick="goTo(\'livret_codes\')"><svg class="vico bico" aria-hidden="true"><use href="#lc-lock"/></svg>Codes d\'accès des cahiers (espèces)</button>'
     +'<button class="btn bo" onclick="_saIntegrity()"><svg class="vico bico" aria-hidden="true"><use href="#lc-flask"/></svg>Vérifier l\'intégrité des données</button>'
     +'<button class="btn bo" onclick="if(typeof mStatsFunnel===\'function\')mStatsFunnel()"><svg class="vico bico" aria-hidden="true"><use href="#lc-trending"/></svg>Tunnel d\'acquisition (30 j)</button>'
     +'</div></div>';
@@ -13762,6 +13760,28 @@ function editBook(id){
     <div class="fg"><span class="fl">Stock</span><input class="fi" id="eBkSt" type="number" value="${b.stock}"></div>
     <div class="fg"><span class="fl">Icône</span><input class="fi" id="eBkI" value="${b.ico||'📚'}" maxlength="2"></div>
     <div class="fg full"><span class="fl">Description</span><textarea class="fi" id="eBkD" rows="2">${b.desc||''}</textarea></div>
+    <!-- ── v1.20 : LA VITRINE OBÉIT À CETTE CASE ─────────────────────────────
+         La boutique publique affichait neuf titres écrits en dur dans la
+         maquette. Ajouter un manuel ici ne changeait rien sur la page publique :
+         deux catalogues, deux vérités. Il n'y en a plus qu'une, et c'est
+         celle-ci — mais seulement pour les manuels EXPLICITEMENT cochés.
+         Décoché par défaut, à dessein : le catalogue contient un article
+         « TEST — Paiement 100 FCFA » et des fiches de démonstration qu'on ne
+         met pas en devanture par accident. -->
+    <div class="fg full"><span class="fl" style="font-weight:700;color:#1E499B">🛍️ Boutique publique (vitrine)</span>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px;background:#EAF1FF;border-radius:8px;border:1px solid #C7D5EE">
+        <input type="checkbox" id="eBkVit"${b.vitrine?' checked':''} style="width:18px;height:18px;accent-color:#1E499B">
+        <span style="font-size:13px;color:#0C2A6A">Afficher ce manuel dans la boutique de la page d'accueil (veritas-school.com)</span>
+      </label>
+    </div>
+    <div class="fg"><span class="fl">Rayon (vitrine)</span>
+      <input class="fi" id="eBkRay" list="vrtRayons" value="${_esc(b.rayon||'')}" placeholder="Cahier d'exercices">
+      <datalist id="vrtRayons"><option>Cahier d'exercices</option><option>Spécial examen</option><option>Étude d'œuvre</option><option>Littérature</option><option>Guide enseignant</option></datalist>
+    </div>
+    <div class="fg"><span class="fl">Étiquette (vitrine)</span>
+      <input class="fi" id="eBkEti" list="vrtEtiq" value="${_esc(b.etiquette||'')}" placeholder="aucune" maxlength="24">
+      <datalist id="vrtEtiq"><option>Nouveau</option><option>Best-seller</option><option>Le plus vendu</option></datalist>
+    </div>
     <div class="fg full"><span class="fl" style="font-weight:700;color:#059669">📖 Lecture gratuite visiteurs</span>
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:8px;background:#D1FAE5;border-radius:8px;border:1px solid #A7F3D0">
         <input type="checkbox" id="eBkLG"${b.lireGratuit?' checked':''} style="width:18px;height:18px;accent-color:#059669">
@@ -13771,7 +13791,20 @@ function editBook(id){
   </div>`,
   `<button class="btn bo" onclick="cm()">Annuler</button><button class="btn bi" onclick="saveEditBk('${id}')"><svg class="vico bico" aria-hidden="true"><use href="#lc-check"/></svg>Enregistrer</button>`);
 }
-function saveEditBk(id){const b=DB.books.find(x=>x.id===id);if(!b)return;b.titre=document.getElementById('eBkT')?.value||b.titre;b.cls=document.getElementById('eBkCl')?.value||b.cls;b.auteur=document.getElementById('eBkA')?.value||b.auteur;b.prix=+document.getElementById('eBkP')?.value||b.prix;b.stock=+document.getElementById('eBkSt')?.value||0;b.ico=document.getElementById('eBkI')?.value||b.ico;b.desc=document.getElementById('eBkD')?.value||b.desc;b.lireGratuit=!!(document.getElementById('eBkLG')?.checked);save();cm();re();toast('✓ Manuel modifié');}
+function saveEditBk(id){const b=DB.books.find(x=>x.id===id);if(!b)return;b.titre=document.getElementById('eBkT')?.value||b.titre;b.cls=document.getElementById('eBkCl')?.value||b.cls;b.auteur=document.getElementById('eBkA')?.value||b.auteur;b.prix=+document.getElementById('eBkP')?.value||b.prix;b.stock=+document.getElementById('eBkSt')?.value||0;b.ico=document.getElementById('eBkI')?.value||b.ico;b.desc=document.getElementById('eBkD')?.value||b.desc;b.lireGratuit=!!(document.getElementById('eBkLG')?.checked);
+  b.vitrine=!!(document.getElementById('eBkVit')?.checked);
+  b.rayon=(document.getElementById('eBkRay')?.value||'').trim();
+  b.etiquette=(document.getElementById('eBkEti')?.value||'').trim();
+  save();cm();re();
+  /* Le message dit ce qui va se passer DEHORS, et surtout ce qui n'est pas
+     évident : dès qu'UN manuel est coché, la boutique publique n'affiche plus
+     QUE les manuels cochés — elle cesse de servir le catalogue de la page
+     d'accueil. Cocher un seul livre remplacerait donc neuf cahiers par un.
+     Sans cet avertissement, on ne s'en aperçoit qu'en visitant le site. */
+  if(b.vitrine){
+    var _n=(DB.books||[]).filter(function(x){return x.vitrine;}).length;
+    toast('✓ Publié — la boutique publique affiche maintenant '+_n+' manuel'+(_n>1?'s':'')+' (uniquement les manuels cochés)');
+  } else toast('✓ Manuel modifié');}
 function delBook(id){if(!confirm('Supprimer ce manuel ?'))return;DB.books=DB.books.filter(b=>b.id!==id);save();re();}
 
 // ── MANUELS : LECTURE PROTÉGÉE (lecteur sécurisé api/secure_pdf.php) ────────
@@ -15011,7 +15044,6 @@ function genAttestTravail(){
   <div style="display:flex;justify-content:space-between;margin-top:24px"><div><div style="font-size:13px;color:#6b5e52">Fait le: ${today()}</div></div><div style="text-align:right"><div style="font-weight:700">${DB.school?.directeur||'Le Directeur'}</div><div style="margin-top:18px;border-top:1px solid #ccc;width:140px;margin-left:auto;font-size:13px;color:#aaa;padding-top:4px">Signature & Cachet</div></div></div></div></div>`,`Attestation travail — ${t.pre} ${t.nom}`,'landscape');
 }
 
-function pgRecuBooks(){return pgBooksale();}
 
 function pgOrientationAdmin(){
   if(!iA())return na();
@@ -49324,3 +49356,334 @@ window._pwAdminPurgeEssais = function(){
   toast('✓ Compteurs d\'essais remis à zéro');
   re();
 };
+
+// ════════════════════════════════════════════════════════════════════════════
+// 🎟️ CODES D'ACCÈS DES CAHIERS — émission MANUELLE (paiement en espèces)
+// ────────────────────────────────────────────────────────────────────────────
+// Un paiement CamerPay émet le code TOUT SEUL : la passerelle confirme, le
+// serveur tire un code neuf et le dépose pour l'acheteur (vrt_grant_entitlement
+// → vrt_livret_emettre). Personne n'a rien à faire.
+//
+// Mais au centre, on paie aussi EN ESPÈCES. Jusqu'ici ce cas n'avait pas
+// d'écran : il fallait ouvrir un terminal et composer une requête curl à la
+// main, avec la clé d'API dedans. Autant dire que la vente au comptoir était
+// impossible sans Jacques devant un clavier.
+//
+// Cette page fait exactement ce que fait le webhook, mais déclenché à la main :
+// même endpoint, même registre, mêmes règles. Il n'y a pas deux chemins
+// d'émission à tenir en cohérence — un seul, avec deux déclencheurs.
+//
+// ⚠️ LES CODES NE SONT LISIBLES QU'UNE FOIS. Le registre n'en garde qu'une
+// empreinte à clé (HMAC) : le serveur lui-même ne peut plus les relire. C'est
+// ce qui fait qu'un registre volé ne donne accès à rien — et c'est pourquoi
+// l'écran insiste autant sur la recopie avant de fermer.
+// ════════════════════════════════════════════════════════════════════════════
+
+var _LVC = { cat:null, kinds:null, codes:null, err:'', busy:false, dernier:null, filtre:'' };
+
+/** Appel admin vers api/livret.php. La clé est celle de la synchronisation
+ *  (API_SECRET côté serveur) : c'est déjà le secret que l'administrateur a
+ *  saisi une fois, on n'en introduit pas un second. */
+function _lvcApi(action, corps){
+  var sec = (DB.cloudConfig && DB.cloudConfig.secret) ? DB.cloudConfig.secret : '';
+  var h = { 'Content-Type':'application/json' };
+  if(sec) h['Authorization'] = 'Bearer ' + sec;
+  var body = corps || {}; body.action = action;
+  return fetch(_VRT_API + '/livret.php', { method:'POST', headers:h, body:JSON.stringify(body) })
+    .then(function(r){
+      return r.json().catch(function(){ return { ok:false, error:'Réponse illisible du serveur (HTTP '+r.status+').' }; })
+        .then(function(j){
+          if(!r.ok || !j || !j.ok){
+            var m = (j && j.error) ? j.error : ('HTTP ' + r.status);
+            if(r.status === 401) m = 'Clé d’administration refusée. Vérifiez Système → Centre de contrôle → Clé de synchronisation Cloud.';
+            throw new Error(m);
+          }
+          return j;
+        });
+    });
+}
+
+function pgLivretCodes(){
+  if(!iA()) return na();
+  // Le catalogue et l'inventaire arrivent du serveur : on rend la coquille
+  // tout de suite, on remplit ensuite (re() re-rend la page courante).
+  if(_LVC.cat === null && !_LVC.busy){ _lvcCharger(); }
+
+  var sec = (DB.cloudConfig && DB.cloudConfig.secret) ? DB.cloudConfig.secret : '';
+  var h = '';
+
+  h += '<div class="card mb16">'
+    +  '<div class="pgt" style="font-size:18px">🎟️ Émettre un code d’accès</div>'
+    +  '<div class="ib ibi mb12"><span>💡</span><span>Un paiement <strong>Orange Money / MTN MoMo / carte</strong> émet le code <strong>automatiquement</strong>. Cet écran sert aux règlements <strong>en espèces au centre</strong>, et aux gestes de commerce (remplacement, geste commercial, spécimen enseignant).</span></div>';
+
+  if(!sec){
+    h += '<div class="ib ibr mb0"><span>🔒</span><span>Aucune clé de synchronisation n’est enregistrée sur ce poste. Ouvrez <strong>Système → Centre de contrôle SA → Clé de synchronisation Cloud</strong>, puis revenez ici.</span></div></div>';
+    return h;
+  }
+
+  // ── Formulaire d'émission ────────────────────────────────────────────────
+  // Un ouvrage DÉCLARÉ au catalogue n'est pas forcément PUBLIÉ (sa coquille
+  // peut ne pas exister encore). On le laisse dans la liste — il faut pouvoir
+  // gérer les codes déjà émis dessus — mais on le dit, sinon on émet un code
+  // qui n'ouvrira rien et personne ne comprend pourquoi.
+  var opts = '', indispo = 0;
+  if(_LVC.cat){
+    _LVC.cat.forEach(function(o){
+      var etiq = o.titre + (o.niveau ? ' (' + o.niveau + ')' : '');
+      if(o.disponible === false){ etiq += '  — ⚠ pas encore publié'; indispo++; }
+      opts += '<option value="'+_esc(o.slug)+'">'+_esc(etiq)+'</option>';
+    });
+  }
+  h += '<div class="fg"><span class="fl">Ouvrage</span>'
+    +  '<select class="fi" id="lvcOuvrage" onchange="_lvcMajNature()">'
+    +  (opts || '<option value="">— chargement du catalogue… —</option>')
+    +  '</select></div>'
+    +  (indispo ? '<div class="ib ibr mb12"><span>⚠️</span><span>'+indispo+' ouvrage(s) sont déclarés au catalogue mais <strong>pas encore publiés</strong> : leur page n’existe pas sur le serveur. Un code émis dessus n’ouvrira rien tant que l’ouvrage n’est pas déposé.</span></div>' : '')
+    +  '<div class="fl2 fw g8">'
+    +    '<div class="fg" style="flex:1 1 180px"><span class="fl">Version</span>'
+    +      '<select class="fi" id="lvcKind">' + _lvcOptionsNature(_LVC.cat && _LVC.cat.length ? _LVC.cat[0].kinds : null) + '</select></div>'
+    +    '<div class="fg" style="flex:1 1 120px"><span class="fl">Quantité</span>'
+    +      '<input class="fi" id="lvcN" type="number" min="1" max="500" value="1"></div>'
+    +    '<div class="fg" style="flex:1 1 140px"><span class="fl">Validité (jours)</span>'
+    +      '<input class="fi" id="lvcJours" type="number" min="1" max="1825" value="365"></div>'
+    +  '</div>'
+    +  '<div class="fg"><span class="fl">Motif / acheteur <span class="mut">(inscrit au registre, sert à retrouver la vente)</span></span>'
+    +    '<input class="fi" id="lvcLabel" placeholder="Espèces — Awa NGO, reçu n° 42"></div>'
+    +  '<button class="btn bi" id="lvcGo" onclick="_lvcGenerer()">✓ Émettre le(s) code(s)</button>'
+    +  '</div>';
+
+  // ── Codes fraîchement émis : la SEULE fois où ils sont lisibles ──────────
+  if(_LVC.dernier && _LVC.dernier.codes && _LVC.dernier.codes.length){
+    var d = _LVC.dernier;
+    h += '<div class="card mb16" style="border:2px solid #16a34a">'
+      +  '<div class="pgt" style="font-size:17px;color:#16a34a">✓ '+d.codes.length+' code'+(d.codes.length>1?'s':'')+' émis — '+_esc(d.titre)+'</div>'
+      +  '<div class="ib ibr mb12"><span>⚠️</span><span><strong>Recopiez-les maintenant.</strong> Le serveur n’en conserve qu’une empreinte : ils ne seront plus jamais affichés, ici ni ailleurs.</span></div>'
+      +  '<div style="font-family:ui-monospace,Menlo,Consolas,monospace;font-size:16px;line-height:2;letter-spacing:.5px;background:#f6f8fa;border:1px solid #e3e9f2;border-radius:10px;padding:12px 14px;word-break:break-all">'
+      +  d.codes.map(function(c){ return _esc(c); }).join('<br>')
+      +  '</div>'
+      +  '<div class="mut" style="margin-top:8px">Valable jusqu’au <strong>'+_esc(_lvcDate(d.expire))+'</strong>'+(d.label?' · '+_esc(d.label):'')+'</div>'
+      +  '<div class="fl2 fw g8" style="margin-top:10px">'
+      +    '<button class="btn bi" onclick="_lvcCopier()">⧉ Copier</button>'
+      +    '<button class="btn bo" onclick="_LVC.dernier=null;re()">J’ai recopié — masquer</button>'
+      +  '</div></div>';
+  }
+
+  // ── Inventaire ───────────────────────────────────────────────────────────
+  h += '<div class="card mb16"><div class="pgt" style="font-size:18px">📋 Codes émis</div>';
+  if(_LVC.err){
+    h += '<div class="ib ibr mb12"><span>✗</span><span>'+_esc(_LVC.err)+'</span></div>'
+      +  '<button class="btn bo" onclick="_lvcCharger()">↻ Réessayer</button></div>';
+    return h;
+  }
+  if(_LVC.codes === null){
+    h += '<div class="mut">⏳ Chargement de l’inventaire…</div></div>';
+    return h;
+  }
+  if(!_LVC.codes.length){
+    h += '<div class="mut">Aucun code émis pour l’instant.</div></div>';
+    return h;
+  }
+
+  var f = (_LVC.filtre || '').toLowerCase();
+  var vus = _LVC.codes.filter(function(c){
+    if(!f) return true;
+    return (c.id+' '+c.classe+' '+c.kind+' '+(c.label||'')+' '+(c.ref||'')+' '+(c.statut||'')).toLowerCase().indexOf(f) >= 0;
+  });
+
+  h += '<div class="fg"><input class="fi" id="lvcFiltre" placeholder="Filtrer (ouvrage, acheteur, référence, statut…)" value="'+_esc(_LVC.filtre)+'" oninput="_LVC.filtre=this.value;_lvcRendreTable()"></div>'
+    +  '<div class="mut mb8" id="lvcCompte">'+vus.length+' code'+(vus.length>1?'s':'')+' sur '+_LVC.codes.length+'</div>'
+    +  '<div class="tw" id="lvcTable">'+_lvcTable(vus)+'</div>'
+    +  '<button class="btn bo" style="margin-top:10px" onclick="_lvcCharger()">↻ Rafraîchir</button>'
+    +  '</div>';
+  return h;
+}
+
+function _lvcDate(ts){
+  ts = parseInt(ts,10) || 0;
+  if(!ts) return '—';
+  try { return new Date(ts*1000).toLocaleDateString('fr-FR'); } catch(e){ return '—'; }
+}
+
+function _lvcTable(rows){
+  var nomOuvrage = function(slug){
+    if(_LVC.cat){
+      for(var i=0;i<_LVC.cat.length;i++){ if(_LVC.cat[i].slug === slug) return _LVC.cat[i].titre; }
+    }
+    return slug;
+  };
+  var libKind = function(k){
+    var lib = _LVC.kinds || {};
+    if(lib[k]) return lib[k];
+    return k === 'guide' ? 'Guide de l’enseignant' : 'Livret de l’élève';
+  };
+  var maintenant = Math.floor(Date.now()/1000);
+  var h = '<table><thead><tr><th>Ouvrage</th><th>Version</th><th>Acheteur / motif</th><th>Statut</th><th>Expire</th><th>Appareils</th><th></th></tr></thead><tbody>';
+  rows.forEach(function(c){
+    var st = String(c.statut||'');
+    var perime = c.expire && c.expire < maintenant;
+    var badge, coul;
+    if(st === 'revoque'){ badge = 'Révoqué'; coul = '#b91c1c'; }
+    else if(perime){ badge = 'Expiré'; coul = '#92400e'; }
+    else if((c.usages||0) > 0){ badge = 'Actif'; coul = '#16a34a'; }
+    else { badge = 'Jamais utilisé'; coul = '#54606f'; }
+    h += '<tr>'
+      +  '<td>'+_esc(nomOuvrage(c.classe))+'</td>'
+      +  '<td>'+_esc(libKind(c.kind))+'</td>'
+      +  '<td>'+_esc(c.label || c.ref || '—')+'</td>'
+      +  '<td><span style="color:'+coul+';font-weight:600">'+badge+'</span></td>'
+      +  '<td>'+_esc(_lvcDate(c.expire))+'</td>'
+      +  '<td>'+(c.appareils||0)+'</td>'
+      +  '<td style="white-space:nowrap">';
+    if(st !== 'revoque'){
+      h += '<button class="btn bo xs" title="L’élève a changé de téléphone" onclick="_lvcResetAppareils(\''+_esc(c.id)+'\')">↺ Appareils</button> '
+        +  '<button class="btn bo xs" onclick="_lvcRevoquer(\''+_esc(c.id)+'\')">⛔ Révoquer</button>';
+    } else {
+      h += '<span class="mut">—</span>';
+    }
+    h += '</td></tr>';
+  });
+  h += '</tbody></table>';
+  return h;
+}
+
+/** Re-rend la seule table, pas la page : sans cela, le champ de filtre perdait
+ *  le focus à chaque lettre tapée. */
+function _lvcRendreTable(){
+  if(!_LVC.codes) return;
+  var f = (_LVC.filtre || '').toLowerCase();
+  var vus = _LVC.codes.filter(function(c){
+    if(!f) return true;
+    return (c.id+' '+c.classe+' '+c.kind+' '+(c.label||'')+' '+(c.ref||'')+' '+(c.statut||'')).toLowerCase().indexOf(f) >= 0;
+  });
+  _si('lvcTable', _lvcTable(vus));
+  _st('lvcCompte', vus.length + ' code' + (vus.length>1?'s':'') + ' sur ' + _LVC.codes.length);
+}
+
+function _lvcCharger(){
+  if(_LVC.busy) return;
+  var sec = (DB.cloudConfig && DB.cloudConfig.secret) ? DB.cloudConfig.secret : '';
+  if(!sec) return;
+  _LVC.busy = true; _LVC.err = '';
+  // Le catalogue est public, l'inventaire non : deux appels, mais un seul
+  // écran ne doit pas rester muet si l'un des deux échoue.
+  _lvcApi('catalogue', {})
+    .then(function(j){
+      _LVC.cat = j.ouvrages || [];
+      _LVC.kinds = j.kinds || null;
+      return _lvcApi('admin_list', {});
+    })
+    .then(function(j){ _LVC.codes = j.codes || []; })
+    .catch(function(e){ _LVC.err = e.message || 'Échec du chargement.'; if(_LVC.cat === null) _LVC.cat = []; })
+    .then(function(){
+      _LVC.busy = false;
+      if(pg === 'livret_codes') re();
+    });
+}
+
+/** Les LIBELLÉS des versions viennent du serveur (`vrt_livret_kinds`), pas
+ *  d'une table recopiée ici. Le jour où une troisième version apparaît
+ *  (parent, surveillant…), elle s'affiche sans qu'on retouche l'application —
+ *  et surtout, on n'affiche jamais une version que le serveur refuserait. */
+function _lvcOptionsNature(kinds){
+  var lib = _LVC.kinds || { livret:'Livret de l’élève', guide:'Guide de l’enseignant' };
+  var liste = (kinds && kinds.length) ? kinds : Object.keys(lib);
+  var o = '';
+  liste.forEach(function(k){ o += '<option value="'+_esc(k)+'">'+_esc(lib[k] || k)+'</option>'; });
+  return o || '<option value="livret">Livret de l’élève</option>';
+}
+
+/** Le catalogue dit quelles versions un ouvrage accepte : un cahier vendu sans
+ *  guide de l'enseignant ne doit pas proposer « Guide » dans le menu, sinon on
+ *  émet un code que le serveur refusera. */
+function _lvcMajNature(){
+  var slug = (_ge('lvcOuvrage') || {}).value || '';
+  var kinds = null;
+  if(_LVC.cat){
+    for(var i=0;i<_LVC.cat.length;i++){
+      if(_LVC.cat[i].slug === slug){ kinds = _LVC.cat[i].kinds || null; break; }
+    }
+  }
+  _si('lvcKind', _lvcOptionsNature(kinds));
+}
+
+function _lvcGenerer(){
+  var slug  = (_ge('lvcOuvrage') || {}).value || '';
+  var kind  = (_ge('lvcKind') || {}).value || 'livret';
+  var n     = parseInt((_ge('lvcN') || {}).value, 10) || 1;
+  var jours = parseInt((_ge('lvcJours') || {}).value, 10) || 365;
+  var label = ((_ge('lvcLabel') || {}).value || '').trim();
+
+  if(!slug){ toast('Choisissez un ouvrage.','warn'); return; }
+  if(n < 1 || n > 500){ toast('Quantité entre 1 et 500.','warn'); return; }
+  if(!label){ toast('Indiquez qui achète (ou le motif) — c’est ce qui permettra de retrouver la vente.','warn'); return; }
+
+  var titre = slug;
+  if(_LVC.cat){ for(var i=0;i<_LVC.cat.length;i++){ if(_LVC.cat[i].slug === slug) titre = _LVC.cat[i].titre; } }
+
+  var b = _ge('lvcGo'); if(b){ b.disabled = true; b.textContent = '⏳ Émission…'; }
+  _lvcApi('admin_gen', { classe:slug, kind:kind, n:n, jours:jours, label:label })
+    .then(function(j){
+      _LVC.dernier = { codes:j.codes || [], expire:j.expire || 0, titre:titre, label:label };
+      // On journalise la vente au comptoir dans la base : le registre serveur
+      // porte le code, la base porte la TRACE COMMERCIALE (qui, quand, combien).
+      // Sans cela, une vente en espèces n'apparaîtrait dans aucun compte.
+      DB.livretVentes = DB.livretVentes || [];
+      DB.livretVentes.push({
+        id:'lv_'+gid(), ref:'ESPECES-'+(j.lot||gid()),
+        classe:slug, kind:kind, quantite:(j.codes||[]).length,
+        nom:label, tel:'—', montant:0,
+        date:today(), datePaiement:new Date().toISOString(),
+        expire:j.expire||0, statut:'Payé (espèces)', via:'admin_manuel'
+      });
+      save();
+      toast('✓ '+((j.codes||[]).length)+' code(s) émis','ok');
+      _lvcCharger();          // rafraîchit l'inventaire (re() suivra)
+      re();
+    })
+    .catch(function(e){
+      toast(e.message || 'Émission impossible','err');
+      var b2 = _ge('lvcGo'); if(b2){ b2.disabled = false; b2.textContent = '✓ Émettre le(s) code(s)'; }
+    });
+}
+
+function _lvcCopier(){
+  if(!_LVC.dernier || !_LVC.dernier.codes) return;
+  var t = _LVC.dernier.codes.join('\n');
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){ toast('✓ Copié','ok'); },
+                                           function(){ _lvcCopieRepli(t); });
+    } else { _lvcCopieRepli(t); }
+  }catch(e){ _lvcCopieRepli(t); }
+}
+function _lvcCopieRepli(t){
+  try{
+    var ta = document.createElement('textarea');
+    ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    toast('✓ Copié','ok');
+  }catch(e){ toast('Copie impossible — recopiez à la main','warn'); }
+}
+
+function _lvcRevoquer(id){
+  if(!confirm('Révoquer ce code ?\n\nEffet immédiat : la session en cours est coupée et le code ne rouvrira plus rien. C’est irréversible.')) return;
+  _lvcApi('admin_revoke', { id:id })
+    .then(function(){ toast('✓ Code révoqué','ok'); _lvcCharger(); })
+    .catch(function(e){ toast(e.message || 'Révocation impossible','err'); });
+}
+
+function _lvcResetAppareils(id){
+  if(!confirm('Libérer les appareils de ce code ?\n\nÀ utiliser quand l’élève a changé de téléphone. Il pourra se reconnecter ailleurs.')) return;
+  _lvcApi('admin_reset_devices', { id:id })
+    .then(function(){ toast('✓ Appareils libérés','ok'); _lvcCharger(); })
+    .catch(function(e){ toast(e.message || 'Opération impossible','err'); });
+}
+
+window.pgLivretCodes    = pgLivretCodes;
+window._lvcCharger      = _lvcCharger;
+window._lvcGenerer      = _lvcGenerer;
+window._lvcRevoquer     = _lvcRevoquer;
+window._lvcResetAppareils = _lvcResetAppareils;
+window._lvcMajNature    = _lvcMajNature;
+window._lvcCopier       = _lvcCopier;
+window._lvcRendreTable  = _lvcRendreTable;

@@ -229,6 +229,179 @@ foreach ($__pd_contenus_src as $c) {
     $__pd_contenus[] = $row;
 }
 
+// ─────────────────────────────────────────────────────────────────────────
+// BOUTIQUE — LA VITRINE OBÉIT AU PANNEAU ADMIN (v1.19.48)
+// ─────────────────────────────────────────────────────────────────────────
+// La boutique de la vitrine était écrite EN DUR dans la maquette : neuf
+// titres figés au build. Jacques pouvait ajouter un manuel dans « Bibliothèque »,
+// en changer le prix, le mettre en rupture — la page publique n'en savait
+// rien. Deux catalogues, deux vérités, et c'est toujours le public qui a
+// tort aux yeux du client.
+//
+// OPT-IN EXPLICITE : seuls les livres portant `vitrine: true` sortent d'ici.
+// Ce n'est pas de la prudence décorative — la base de production contient un
+// produit « TEST — Paiement 100 FCFA » et cinq manuels de démonstration
+// (Mathématiques 3ème, SVT 4ème…) hérités du jeu d'essai. Publier
+// automatiquement tout `DB.books` les aurait mis en devanture le jour du
+// déploiement, à la place des vrais cahiers. Une case à cocher dans la fiche
+// du manuel décide, et rien d'autre.
+//
+// Liste blanche stricte, comme pour l'e-learning : un champ ajouté demain à
+// la fiche d'un livre doit être invisible par défaut, pas exposé par oubli.
+// Ne sortent JAMAIS d'ici : extrait / contenu / htmlContent / fichierData /
+// idbKey (c'est la marchandise), secureId / securePages (ce sont les clés de
+// lecture), blockedFor / unlockedFor (ce sont des identifiants de comptes).
+
+/** Une couverture en data: URL pèse souvent plus que toute la réponse.
+ *  On ne renvoie que les URL servies par le site ; la vitrine compose
+ *  elle-même une couverture pour les autres. */
+function vrt_pd_couverture($v) {
+    $v = trim((string)$v);
+    if ($v === '' || stripos($v, 'data:') === 0) return '';
+    // Pas d'origine tierce : la vitrine porte une CSP qui n'autorise que
+    // ses propres images, un lien externe ne s'afficherait pas.
+    if (preg_match('~^https?://~i', $v)) {
+        $hote = parse_url($v, PHP_URL_HOST);
+        if (!in_array(strtolower((string)$hote), ['veritas-school.com', 'www.veritas-school.com'], true)) return '';
+    }
+    return vrt_pd_coupe($v, 300);
+}
+
+$__pd_livres = [];
+$__pd_books_src = (isset($db['books']) && is_array($db['books'])) ? $db['books'] : [];
+foreach ($__pd_books_src as $b) {
+    if (!is_array($b) || !isset($b['id'])) continue;
+    if (empty($b['vitrine'])) continue;                 // pas publié : rien ne sort
+    if (in_array((string)$b['id'], $__pd_supprimes, true)) continue;
+    if (count($__pd_livres) >= 120) break;              // garde-fou de poids
+
+    $numerique = !empty($b['numeriqueSeul']);
+    $__pd_livres[] = [
+        'id'         => (string)$b['id'],
+        'titre'      => isset($b['titre'])  ? vrt_pd_coupe($b['titre'], 120)  : '',
+        'auteur'     => isset($b['auteur']) ? vrt_pd_coupe($b['auteur'], 80)  : '',
+        'cls'        => isset($b['cls'])    ? vrt_pd_coupe($b['cls'], 40)     : '',
+        'rayon'      => isset($b['rayon'])  ? vrt_pd_coupe($b['rayon'], 40)   : '',
+        'etiquette'  => isset($b['etiquette']) ? vrt_pd_coupe($b['etiquette'], 24) : '',
+        'desc'       => isset($b['desc'])   ? vrt_pd_coupe($b['desc'], 180)   : '',
+        'prix'       => isset($b['prix'])       ? (int)$b['prix']       : 0,
+        'ancienPrix' => isset($b['ancienPrix']) ? (int)$b['ancienPrix'] : 0,
+        'pages'      => isset($b['pages'])      ? (int)$b['pages']      : 0,
+        'chaps'      => (isset($b['chaps']) && is_array($b['chaps'])) ? count($b['chaps']) : 0,
+        'ico'        => isset($b['ico']) ? vrt_pd_coupe($b['ico'], 8) : '',
+        'couleur'    => isset($b['coverColor']) ? vrt_pd_coupe($b['coverColor'], 24) : '',
+        'couv'       => vrt_pd_couverture($b['coverImg'] ?? ''),
+        'numerique'  => $numerique,
+        // Un livre numérique n'a ni pile ni rupture : il est simplement là.
+        'stock'      => $numerique ? null : (isset($b['stock']) ? (int)$b['stock'] : 0),
+        'vendu'      => isset($b['vendu']) ? max(0, (int)$b['vendu']) : 0,
+        // Booléen seulement : l'extrait lui-même reste dans l'application.
+        'apercu'     => !empty($b['extrait']) || (isset($b['previewImages']) && is_array($b['previewImages']) && count($b['previewImages']) > 0),
+    ];
+}
+
+
+/** « Cécile Ngo Bassong » → « Cécile N. ». Nom vide → chaîne vide. */
+function vrt_pd_initiale($nom) {
+    $nom = preg_replace('/\s+/u', ' ', trim((string)$nom));
+    if ($nom === '') return '';
+    $parts = explode(' ', $nom);
+    $prenom = $parts[0];
+    if (count($parts) < 2) return vrt_pd_coupe($prenom, 24);
+    $ini = function_exists('mb_substr') ? mb_substr($parts[1], 0, 1) : substr($parts[1], 0, 1);
+    return vrt_pd_coupe($prenom, 24) . ' ' . strtoupper($ini) . '.';
+}
+
+/** Ventes RÉELLES et récentes, anonymisées — la preuve sociale de la vitrine.
+ *
+ *  Le principe tient en une phrase : on ne fabrique rien. Pas de vente, pas de
+ *  bulle. Un « Cécile F. — Bafoussam vient d'acheter un livre » inventé est la
+ *  première chose qu'un enseignant vérifie, et la seule qu'il ne pardonne pas.
+ *  Base vide aujourd'hui ⇒ tableau vide ⇒ la vitrine n'affiche rien du tout.
+ *
+ *  Anonymisation : prénom + initiale du nom, jamais le nom entier, jamais le
+ *  téléphone. Les acheteurs sont souvent des parents d'élèves mineurs d'un
+ *  même quartier — « Cécile Ngo Bassong, Bonabéri » les désigne.
+ */
+function vrt_pd_activite(array $db): array {
+    $ventes = [];
+
+    // Deux journaux portent des achats : les commandes visiteur et les achats
+    // de manuels des élèves. On lit les deux, on ne garde que ce qui est payé.
+    $sources = [];
+    if (isset($db['visitorOrders']) && is_array($db['visitorOrders'])) $sources[] = $db['visitorOrders'];
+    if (isset($db['bookPurchases']) && is_array($db['bookPurchases'])) $sources[] = $db['bookPurchases'];
+
+    $titres = [];
+    if (isset($db['books']) && is_array($db['books'])) {
+        foreach ($db['books'] as $b) {
+            if (is_array($b) && isset($b['id'])) $titres[(string)$b['id']] = (string)($b['titre'] ?? '');
+        }
+    }
+
+    foreach ($sources as $liste) {
+        foreach ($liste as $o) {
+            if (!is_array($o)) continue;
+            /* Seuls les paiements ABOUTIS comptent. « En attente de paiement »
+               n'est pas une vente, c'est une intention — et c'est le statut par
+               défaut de toute commande créée. Les publier reviendrait à
+               annoncer une vente à chaque clic sur « Payer ». */
+            $st = mb_strtolower((string)($o['statut'] ?? $o['status'] ?? ''), 'UTF-8');
+            $ok = ($st !== '') && (strpos($st, 'pay') !== false || strpos($st, 'confirm') !== false
+                 || strpos($st, 'valid') !== false || strpos($st, 'livr') !== false);
+            if ($ok && strpos($st, 'attente') !== false) $ok = false;   // « en attente de paiement »
+            if (!$ok) continue;
+
+            $ts = 0;
+            foreach (['ts', 'datePaid', 'date'] as $k) {
+                if (empty($o[$k])) continue;
+                $v = $o[$k];
+                if (is_numeric($v)) { $ts = (int)$v; if ($ts > 100000000000) $ts = (int)($ts / 1000); break; }
+                // Dates écrites en fr-FR (jj/mm/aaaa) : strtotime les lit à l'envers.
+                if (preg_match('#^(\d{2})/(\d{2})/(\d{4})$#', (string)$v, $m)) {
+                    $ts = (int)mktime(12, 0, 0, (int)$m[2], (int)$m[1], (int)$m[3]); break;
+                }
+                $t = strtotime((string)$v); if ($t) { $ts = $t; break; }
+            }
+            if ($ts <= 0) continue;
+            if ($ts < time() - 90 * 86400) continue;      // au-delà de 90 j, ce n'est plus « récent »
+
+            $nom = trim((string)($o['nom'] ?? $o['client'] ?? $o['customerNom'] ?? ''));
+            $bid = (string)($o['bid'] ?? $o['bookId'] ?? '');
+            $ventes[] = [
+                'qui'   => vrt_pd_initiale($nom),
+                'ou'    => vrt_pd_coupe(trim((string)($o['ville'] ?? '')), 40),
+                'quoi'  => isset($titres[$bid]) ? vrt_pd_coupe($titres[$bid], 70) : '',
+                'quand' => $ts,
+            ];
+        }
+    }
+
+    usort($ventes, function ($a, $b) { return $b['quand'] - $a['quand']; });
+    return array_slice($ventes, 0, 8);
+}
+
+/** Les chiffres du bandeau de la boutique. Comptés, jamais écrits à la main :
+ *  la maquette annonçait « 134 titres au catalogue » et « 4 000 F prix moyen »
+ *  pour neuf titres à 3 277 F de moyenne. Un chiffre faux sur une page de
+ *  vente coûte plus qu'il ne rapporte. */
+function vrt_pd_chiffres(array $db, array $boutique): array {
+    $n = count($boutique);
+    $somme = 0; $vendus = 0;
+    foreach ($boutique as $b) $somme += (int)$b['prix'];
+    if (isset($db['books']) && is_array($db['books'])) {
+        foreach ($db['books'] as $b) {
+            if (is_array($b) && !empty($b['vitrine'])) $vendus += (int)($b['vendu'] ?? 0);
+        }
+    }
+    return [
+        'titres'    => $n,
+        'prixMoyen' => $n ? (int)round($somme / $n) : 0,
+        'vendus'    => $vendus,      // 0 ⇒ la vitrine masque la statistique
+    ];
+}
+
+
 // Extraire uniquement les données publiques (pas de notes, élèves, paiements, etc.)
 $public = [
     'school'      => $db['school']      ?? null,
@@ -240,6 +413,8 @@ $public = [
     'elearning_categories' => (isset($db['elearning']['categories']) && is_array($db['elearning']['categories']))
         ? $db['elearning']['categories'] : [],
     'elearning_contenus' => $__pd_contenus,
+    // Catalogue de la boutique publié depuis « Bibliothèque » (case « vitrine »).
+    'boutique' => $__pd_livres,
     // Politique d'affichage (essais, ressource offerte) : que des nombres, des
     // booléens et des identifiants de fiches. Elle part telle quelle pour que
     // la vitrine obéisse au panneau admin, et non à des valeurs codées en dur.
@@ -251,6 +426,13 @@ $public = [
        la vitrine masque alors le tableau et n'affiche que l'invitation à jouer.
        Un classement fabriqué est la seule chose qu'un enseignant vérifie. */
     'jeu' => vrt_pd_classement($db),
+    /* Les chiffres du bandeau de la boutique, COMPTÉS. La maquette annonçait
+       « 134 titres au catalogue » et « 4 000 F prix moyen » — deux nombres
+       écrits à la main, faux tous les deux. */
+    'boutiqueChiffres' => vrt_pd_chiffres($db, $__pd_livres),
+    /* PREUVE SOCIALE — ventes réelles, anonymisées, ou rien du tout.
+       Tableau vide ⇒ la vitrine n'affiche aucune bulle. */
+    'activite' => vrt_pd_activite($db),
     'generated_at' => date('c'),
 ];
 

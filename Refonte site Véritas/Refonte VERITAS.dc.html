@@ -1055,9 +1055,9 @@
           <h1 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;text-wrap:pretty">Le cahier qu'il ouvrira vraiment</h1>
           <p style="margin:0 0 22px;font:400 16.5px/1.7 Poppins,sans-serif;color:#4D5163;text-wrap:pretty">Des cahiers écrits pour le programme camerounais, pas adaptés d'ailleurs. Chaque exemplaire imprimé ouvre ses corrigés en ligne par un QR code — à vie, sans compte.</p>
           <div style="display:flex;gap:26px;flex-wrap:wrap">
-            <span style="font-size:14px;color:#4D5163"><b style="display:block;font:600 24px Poppins,sans-serif;color:#001136">134</b>titres au catalogue</span>
+            <span style="font-size:14px;color:#4D5163"><b data-vrt-nb="titres" style="display:block;font:600 24px Poppins,sans-serif;color:#001136">{{ nbTitresCat }}</b>titres au catalogue</span>
             <span style="font-size:14px;color:#4D5163"><b style="display:block;font:600 24px Poppins,sans-serif;color:#001136">6<sup>e</sup> → T<sup>le</sup></b>tous les niveaux</span>
-            <span style="font-size:14px;color:#4D5163"><b style="display:block;font:600 24px Poppins,sans-serif;color:#001136;white-space:nowrap">4 000 F</b>prix moyen</span>
+            <span style="font-size:14px;color:#4D5163"><b data-vrt-nb="prixMoyen" style="display:block;font:600 24px Poppins,sans-serif;color:#001136;white-space:nowrap">{{ prixMoyenCat }}</b>prix moyen</span>
           </div>
         </div>
         <div data-parallax="0.05" style="position:relative;border-radius:18px;overflow:hidden;background:#FBF6EF;aspect-ratio:4/3;box-shadow:0 18px 40px rgba(0,17,54,.12);will-change:transform">
@@ -1078,50 +1078,64 @@
           <span style="font:400 13.5px Poppins,sans-serif;color:#6E7385">{{ nbManuels }} titres affichés</span>
         </div>
 
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px">
+        <div class="vbq-grid">
           <sc-for list="{{ manuels }}" as="m" hint-placeholder-count="8">
-            <article data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;position:relative;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:{{ m.teinte }};transform:translateY(-6px);box-shadow:0 18px 40px rgba(0,17,54,.12)">
-              <sc-if value="{{ m.etiquette }}" hint-placeholder-val="{{ false }}">
-                <span style="position:absolute;top:13px;right:13px;z-index:2;background:{{ m.etiquetteFond }};color:#fff;font:600 11px Poppins,sans-serif;letter-spacing:.7px;text-transform:uppercase;padding:5px 11px;border-radius:100px;box-shadow:0 6px 16px rgba(0,17,54,.06)">{{ m.etiquette }}</span>
-              </sc-if>
-              <div style="height:224px;background:linear-gradient(160deg,{{ m.fondA }},{{ m.fondB }});position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:22px 0 0">
-                <span aria-hidden="true" style="position:absolute;left:-30px;bottom:-40px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.28)"></span>
-                <span role="img" aria-label="Couverture — {{ m.titre }}" style="position:relative;width:132px;height:182px;border-radius:4px 9px 9px 4px;overflow:hidden;box-shadow:-3px 0 0 rgba(0,0,0,.12) inset,0 16px 32px rgba(0,17,54,.28);transition:transform .18s cubic-bezier(.22,1,.36,1);animation:vtilt 7s ease-in-out infinite;background-color:#E9EEF7;background-image:url({{ m.img }});background-size:cover;background-position:{{ m.cadrage }};background-repeat:no-repeat"></span>
-                <span style="position:absolute;top:13px;left:13px;background:{{ m.teinte }};color:#fff;font:600 11px Poppins,sans-serif;padding:4px 11px;border-radius:100px;box-shadow:0 6px 16px rgba(0,17,54,.06)">{{ m.niv }}</span>
-              </div>
-              <div style="padding:18px 18px 20px;display:flex;flex-direction:column;flex:1">
-                <span style="font:600 11px Poppins,sans-serif;color:{{ m.teinte }};letter-spacing:1px;text-transform:uppercase;margin-bottom:7px">{{ m.categorie }}</span>
-                <h3 style="font:600 16px/23px Poppins,sans-serif;color:#001136;margin:0 0 7px">{{ m.titre }}</h3>
-                <p style="margin:0 0 14px;font-size:13px;line-height:1.6;color:#6E7385">{{ m.type }}</p>
-                <div style="display:flex;align-items:center;gap:5px;margin-bottom:16px">
-                  <!-- Les etoiles ne se peignent que si une note REELLE existe.
-                       Elles etaient dessinees en dur, 4 sur 5, sous chaque
-                       carte : une note inventee sur un produit que personne
-                       n'avait encore note. -->
-                  <sc-if value="{{ m.note }}">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFC93C" stroke="none" aria-hidden="true"><use href="#lc-star"></use></svg>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFC93C" stroke="none" aria-hidden="true"><use href="#lc-star"></use></svg>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFC93C" stroke="none" aria-hidden="true"><use href="#lc-star"></use></svg>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#FFC93C" stroke="none" aria-hidden="true"><use href="#lc-star"></use></svg>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#E4E7EF" stroke="none" aria-hidden="true"><use href="#lc-star"></use></svg>
-                  </sc-if>
-                  <sc-if value="{{ m.exos }}">
-                  <small style="font:400 12px Poppins,sans-serif;color:#6E7385">{{ m.exos }}</small>
-                  </sc-if>
-                </div>
-                <div style="margin-top:auto;padding-top:15px;display:flex;align-items:center;justify-content:space-between;gap:10px">
-                  <span style="display:flex;flex-direction:column;line-height:1.25">
-                    <b style="font:600 19px Poppins,sans-serif;color:#001136;white-space:nowrap">{{ m.prix }}</b>
-                    <small style="font:400 12px Poppins,sans-serif;color:#6E7385">{{ m.mention }}</small>
+            <article data-reveal class="vbq-card" style="--vbq-teinte:{{ m.teinte }};--vbq-fondA:{{ m.fondA }};--vbq-fondB:{{ m.fondB }}">
+              <div class="vbq-cover">
+                <!-- Trois façons de montrer un livre, dans cet ordre : la vraie
+                     couverture si elle existe, la composition littéraire pour un
+                     roman, la maquette du cahier sinon. Aucune carte ne peut
+                     donc rester vide — c'est précisément ce qui arrivait au
+                     Tube digestif, dont l'image était un 404. -->
+                <sc-if value="{{ m.couv }}">
+                  <img src="{{ m.couv }}" alt="Couverture — {{ m.titre }}" loading="lazy" decoding="async" width="760" height="1013">
+                </sc-if>
+                <sc-if value="{{ m.couvRoman }}">
+                  <span class="vbq-couv vbq-couv-roman" role="img" aria-label="Couverture — {{ m.titre }}" style="--vbq-teinte:{{ m.couvTeinte }}">
+                    <span class="vbq-couv-filet" aria-hidden="true"></span>
+                    <span class="vbq-couv-rtitre">{{ m.couvRTitre }}</span>
+                    <span class="vbq-couv-raut">{{ m.couvRAut }}</span>
+                    <span class="vbq-couv-rmention">{{ m.couvRMention }}</span>
                   </span>
-<sc-if value="{{ m.papier }}">
-                                    <button type="button" onClick="{{ m.commander }}" aria-label="Commander {{ m.titre }}" style="display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;border:0;font:600 13.5px Poppins,sans-serif;cursor:pointer;box-shadow:0 6px 16px rgba(242,101,0,.28);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,101,0,.4)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-basket"></use></svg>Commander</button>
+                </sc-if>
+                <sc-if value="{{ m.couvCahier }}">
+                  <span class="vbq-couv vbq-couv-cahier" role="img" aria-label="Couverture — {{ m.titre }}" style="--vbq-teinte:{{ m.couvTeinte }}">
+                    <span class="vbq-couv-haut">{{ m.couvHaut }}</span>
+                    <span class="vbq-couv-titre">{{ m.couvTitre }}</span>
+                    <span class="vbq-couv-niv">{{ m.couvNiv }}</span>
+                    <span class="vbq-couv-ruban">{{ m.couvRuban }}</span>
+                    <span class="vbq-couv-marque">Centre VÉRITAS</span>
+                  </span>
+                </sc-if>
+                <span class="vbq-niv">{{ m.niv }}</span>
+                <span class="vbq-badges">
+                  <span class="{{ m.formatCls }}">{{ m.formatNom }}</span>
+                  <sc-if value="{{ m.etiquette }}" hint-placeholder-val="{{ false }}">
+                    <span class="vbq-tag" style="background:{{ m.etiquetteFond }}">{{ m.etiquette }}</span>
+                  </sc-if>
+                </span>
+              </div>
+              <div class="vbq-body">
+                <span class="vbq-cat">{{ m.categorie }}</span>
+                <h3 class="vbq-titre">{{ m.titre }}</h3>
+                <p class="vbq-type">{{ m.type }}</p>
+                <sc-if value="{{ m.exos }}">
+                  <small class="vbq-exos"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-checkcircle"></use></svg>{{ m.exos }}</small>
+                </sc-if>
+                <div class="vbq-prix-row">
+                  <span>
+                    <small class="vbq-prix-lbl">Prix</small>
+                    <b class="vbq-prix">{{ m.prix }}</b>
+                    <small class="vbq-mention">{{ m.mention }}</small>
+                  </span>
+                  <sc-if value="{{ m.papier }}">
+                    <button type="button" class="vbq-cta" onClick="{{ m.commander }}" aria-label="Commander {{ m.titre }}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-basket"></use></svg>Commander</button>
                   </sc-if>
                   <!-- Un livre vendu en lecture en ligne ne se « commande » pas :
-                       il s'ouvre. Le lien mene a sa fiche dans l'application,
-                       ou l'apercu gratuit commence sans compte. -->
+                       il s'ouvre. Le lien mène à sa fiche dans l'application,
+                       où l'aperçu gratuit commence sans compte. -->
                   <sc-if value="{{ m.lien }}">
-                  <a href="{{ m.lien }}" aria-label="Lire {{ m.titre }} en ligne" style="display:inline-flex;align-items:center;gap:6px;padding:10px 16px;border-radius:10px;background:linear-gradient(135deg,#1E499B,#0C2A6A);color:#fff;font:600 13.5px Poppins,sans-serif;box-shadow:0 6px 16px rgba(30,73,155,.28);white-space:nowrap;transition:transform .18s,box-shadow .18s" style-hover="color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 10px 22px rgba(30,73,155,.4)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg>Lire en ligne</a>
+                    <a href="{{ m.lien }}" class="vbq-lire" aria-label="Lire {{ m.titre }} en ligne"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg>Lire en ligne</a>
                   </sc-if>
                 </div>
               </div>
@@ -1751,16 +1765,59 @@ class Component extends DCLogic {
     }
   };
 
+  /* ── Le catalogue de la boutique ──────────────────────────────────────────
+     Chaque titre porte DE QUOI DESSINER SA COUVERTURE. Avant, les neuf cartes
+     recadraient la même photo de groupe (assets/photo-manuels.webp) : la carte
+     du 6ᵉ montrait le 6ᵉ et le 5ᵉ, celle du 5ᵉ le 5ᵉ et le 4ᵉ. Une vignette de
+     135 px le laissait passer ; une couverture de 262 px, non.
+
+     Ordre de préséance, lu par le gabarit :
+       1. `couv`      — une VRAIE image de couverture (une seule existe
+                        aujourd'hui : le cahier de 6ᵉ) ;
+       2. `couvRoman` — composition littéraire (fond profond, titre en serif) ;
+       3. `couvCahier`— composition d'après la maquette imprimée réelle.
+     Poser une image dans `couv` suffit à remplacer la composition.
+
+     `couvTeinte` est la couleur de l'IMPRIMÉ (6ᵉ vert, 5ᵉ bleu, 4ᵉ violet,
+     examens orange/rouge, relevés sur la photo du catalogue) ; `teinte` reste
+     l'accent de la CARTE, choisi pour le rythme de la page. Les deux ne se
+     confondent pas : l'une décrit le produit, l'autre la mise en page. */
   CATALOGUE_MANUELS = [
-    { niv: 'Roman', img: 'uploads/oeuvres/tubedigestif.jpg', cadrage: '50% 50%', teinte: '#C24E00', fondA: '#F3E7D8', fondB: '#FBF6EF', categorie: 'Litt\u00e9rature', etiquette: 'Nouveau', etiquetteFond: '#007E11', exos: '144 pages \u00b7 8 chapitres', lien: 'app.html#livre?id=tubedigestif', mention: 'lecture en ligne, sans t\u00e9l\u00e9chargement', titre: 'Le Tube digestif', type: 'Roman de Mythe Errant \u00b7 10 pages offertes', prix: '1 000 F', fond: 'repeating-linear-gradient(135deg,#F3E7D8 0 10px,#FBF6EF 10px 20px)' },
-    { niv: '6\u1d49', img: 'assets/photo-manuels.png', cadrage: '8% 50%', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 6\u1d49', type: 'Cahier \u00b7 463 exercices corrig\u00e9s', prix: '3 000 F', fond: 'repeating-linear-gradient(135deg,#E4EBF7 0 10px,#F2F5FB 10px 20px)' },
-    { niv: '5\u1d49', img: 'assets/photo-manuels.png', cadrage: '28% 50%', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 5\u1d49', type: 'Cahier \u00b7 443 exercices corrig\u00e9s', prix: '3 000 F', fond: 'repeating-linear-gradient(135deg,#E3F1EE 0 10px,#F1F8F6 10px 20px)' },
-    { niv: '4\u1d49', img: 'assets/photo-manuels.png', cadrage: '50% 50%', teinte: '#5B4FA8', fondA: '#ECE7F7', fondB: '#F6F3FC', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 4\u1d49', type: 'Cahier \u00b7 364 exercices corrig\u00e9s', prix: '3 000 F', fond: 'repeating-linear-gradient(135deg,#EEE9F8 0 10px,#F6F3FC 10px 20px)' },
-    { niv: '3\u1d49', img: 'assets/photo-manuels.png', cadrage: '72% 50%', teinte: '#C24E00', fondA: '#FBEBDB', fondB: '#FDF6EF', categorie: 'Sp\u00e9cial examen', etiquette: 'Best-seller', etiquetteFond: '#5B4FA8', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Sp\u00e9cial BEPC \u2014 Fran\u00e7ais', type: 'Cahier + annales \u00b7 476 exercices', prix: '4 000 F', fond: 'repeating-linear-gradient(135deg,#F3E7D8 0 10px,#FBF6EF 10px 20px)' },
-    { niv: '2\u207f\u1d48\u1d49', img: 'assets/photo-manuels.png', cadrage: '20% 50%', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d\u2019exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d\u2019exercices \u2014 Fran\u00e7ais 2\u207f\u1d48\u1d49', type: 'Cahier \u00b7 709 exercices corrig\u00e9s', prix: '3 500 F', fond: 'repeating-linear-gradient(135deg,#E4EBF7 0 10px,#F2F5FB 10px 20px)' },
-    { niv: '1\u02b3\u1d49', img: 'assets/photo-manuels.png', cadrage: '60% 50%', teinte: '#B03A6E', fondA: '#F7E4EC', fondB: '#FCF3F7', categorie: 'Sp\u00e9cial examen', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Sp\u00e9cial Probatoire \u2014 Fran\u00e7ais', type: 'Cahier + annales \u00b7 664 exercices', prix: '4 500 F', fond: 'repeating-linear-gradient(135deg,#F3E1EA 0 10px,#FBF3F7 10px 20px)' },
-    { niv: 'T\u02e1\u1d49', img: 'assets/photo-manuels.png', cadrage: '92% 50%', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Sp\u00e9cial examen', etiquette: 'Le plus vendu', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Sp\u00e9cial BAC \u2014 Fran\u00e7ais', type: 'Cahier + annales \u00b7 738 exercices', prix: '5 000 F', fond: 'repeating-linear-gradient(135deg,#E3F1EE 0 10px,#F1F8F6 10px 20px)' },
-    { niv: '3\u1d49 \u2192 T\u02e1\u1d49', img: 'assets/photo-manuels.png', cadrage: '50% 50%', teinte: '#5B4FA8', fondA: '#ECE7F7', fondB: '#F6F3FC', categorie: '\u00c9tude d\u2019\u0153uvre', etiquette: 'Nouveau', etiquetteFond: '#007E11', exos: 'Fiches + sujets', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Le Tube Digestif \u2014 \u00e9tude int\u00e9grale', type: '\u00c9tude d\u2019\u0153uvre \u00b7 fiches et sujets', prix: '2 500 F', fond: 'repeating-linear-gradient(135deg,#EEE9F8 0 10px,#F6F3FC 10px 20px)' }
+    { niv: 'Roman', teinte: '#C24E00', fondA: '#F3E7D8', fondB: '#FBF6EF', categorie: 'Littérature', etiquette: 'Nouveau', etiquetteFond: '#007E11', exos: '144 pages · 8 chapitres', lien: 'app.html#livre?id=tubedigestif', mention: 'lecture en ligne, sans téléchargement', titre: 'Le Tube digestif', type: 'Roman de Mythe Errant · 10 pages offertes', prix: '1 000 F',
+      format: 'ebook', formatNom: 'E-book', formatCls: 'vbq-fmt-ebook',
+      couvRoman: true, couvTeinte: '#142554', couvRTitre: 'Le Tube digestif', couvRAut: 'Mythe Errant', couvRMention: 'roman' },
+
+    { niv: '6ᵉ', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 6ᵉ', type: 'Cahier · 463 exercices corrigés', prix: '3 000 F',
+      format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
+      couv: 'assets/cahier-6e.webp' },
+
+    { niv: '5ᵉ', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 5ᵉ', type: 'Cahier · 443 exercices corrigés', prix: '3 000 F',
+      format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
+      couvCahier: true, couvTeinte: '#1B5FAE', couvHaut: 'Mon cahier de', couvTitre: 'Français', couvNiv: '5ᵉ', couvRuban: '100 % conforme au programme' },
+
+    { niv: '4ᵉ', teinte: '#5B4FA8', fondA: '#ECE7F7', fondB: '#F6F3FC', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 4ᵉ', type: 'Cahier · 364 exercices corrigés', prix: '3 000 F',
+      format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
+      couvCahier: true, couvTeinte: '#7A2E86', couvHaut: 'Mon cahier de', couvTitre: 'Français', couvNiv: '4ᵉ', couvRuban: '100 % conforme au programme' },
+
+    { niv: '3ᵉ', teinte: '#C24E00', fondA: '#FBEBDB', fondB: '#FDF6EF', categorie: 'Spécial examen', etiquette: 'Best-seller', etiquetteFond: '#5B4FA8', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Spécial BEPC — Français', type: 'Cahier + annales · 476 exercices', prix: '4 000 F',
+      format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
+      couvCahier: true, couvTeinte: '#C85A18', couvHaut: 'Spécial', couvTitre: 'BEPC', couvNiv: '3ᵉ', couvRuban: 'Cahier + annales corrigées' },
+
+    { niv: '2ⁿᵈᵉ', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 2ⁿᵈᵉ', type: 'Cahier · 709 exercices corrigés', prix: '3 500 F',
+      format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
+      couvCahier: true, couvTeinte: '#0E7C86', couvHaut: 'Mon cahier de', couvTitre: 'Français', couvNiv: '2ⁿᵈᵉ', couvRuban: '100 % conforme au programme' },
+
+    { niv: '1ʳᵉ', teinte: '#B03A6E', fondA: '#F7E4EC', fondB: '#FCF3F7', categorie: 'Spécial examen', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Spécial Probatoire — Français', type: 'Cahier + annales · 664 exercices', prix: '4 500 F',
+      format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
+      couvCahier: true, couvTeinte: '#B03A6E', couvHaut: 'Spécial', couvTitre: 'Probatoire', couvNiv: '1ʳᵉ', couvRuban: 'Cahier + annales corrigées' },
+
+    { niv: 'Tˡᵉ', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Spécial examen', etiquette: 'Le plus vendu', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Spécial BAC — Français', type: 'Cahier + annales · 738 exercices', prix: '5 000 F',
+      format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
+      couvCahier: true, couvTeinte: '#B02A26', couvHaut: 'Spécial', couvTitre: 'BAC', couvNiv: 'Tˡᵉ', couvRuban: 'Cahier + annales corrigées' },
+
+    { niv: '3ᵉ → Tˡᵉ', teinte: '#5B4FA8', fondA: '#ECE7F7', fondB: '#F6F3FC', categorie: 'Étude d’œuvre', etiquette: 'Nouveau', etiquetteFond: '#007E11', exos: 'Fiches + sujets', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Le Tube Digestif — étude intégrale', type: 'Étude d’œuvre · fiches et sujets', prix: '2 500 F',
+      format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
+      couvCahier: true, couvTeinte: '#5B4FA8', couvHaut: 'Étude de l’œuvre', couvTitre: 'Le Tube digestif', couvNiv: '3ᵉ → Tˡᵉ', couvRuban: 'Fiches et sujets corrigés' }
   ];
 
   /* ── Boutique : les categories sortent du CATALOGUE, pas d'une liste ──────
@@ -1789,15 +1846,54 @@ class Component extends DCLogic {
       const c = String(m.categorie || '').trim();
       if (c && vues.indexOf(c) < 0) vues.push(c);
     }
-    return [{ cle: '', nom: 'Tout le catalogue', ico: '#lc-basket' }].concat(
+    const base = [{ cle: '', nom: 'Tout le catalogue', ico: '#lc-basket' }].concat(
       vues.map(c => ({ cle: c, nom: LIB[c] || c, ico: ICO[c] || '#lc-book' })));
+    /* ── Le FORMAT, deuxième dimension de tri ────────────────────────────
+       Le catalogue est mixte : des cahiers qu'on reçoit, des livres qu'on
+       lit en ligne. C'est la première question du visiteur devant la
+       grille, et rien ne permettait d'y répondre — un e-book se distinguait
+       d'un cahier uniquement par le libellé de son bouton, tout en bas de
+       la carte. Ces deux pastilles sont indexées comme les autres : elles
+       passent par le même compteur, le même pré-calcul, le même clic. Le
+       préfixe « @ » les distingue d'une catégorie éditoriale ; une clé de
+       catégorie ne peut pas commencer par là, elle vient du catalogue.
+       Une pastille n'apparaît que si un titre porte ce format : catalogue
+       sans e-book, pas de pastille « Lecture en ligne ». */
+    const formats = [];
+    if (this.CATALOGUE_MANUELS.some(m => m.format === 'papier'))
+      formats.push({ cle: '@papier', nom: 'Livres papier', ico: '#lc-shop' });
+    if (this.CATALOGUE_MANUELS.some(m => m.format === 'ebook'))
+      formats.push({ cle: '@ebook', nom: 'Lecture en ligne', ico: '#lc-bookopen' });
+    return base.concat(formats);
+  }
+
+  /* ── Les chiffres du bandeau, COMPTÉS ──────────────────────────────────
+     La maquette annonçait « 134 titres au catalogue » et « 4 000 F prix
+     moyen » sur une boutique qui en contient neuf, à 3 278 F de moyenne.
+     Le même 134 était recopié dans deux autres bandeaux de chiffres. Sur une
+     page qui encaisse, un nombre inventé est ce qu'un enseignant vérifie en
+     premier — et c'est vérifiable en trois secondes : il compte les cartes.
+     On les calcule donc, ici, à partir du catalogue lui-même. */
+  get nbTitresCat() { return String(this.CATALOGUE_MANUELS.length); }
+
+  get prixMoyenCat() {
+    const p = this.CATALOGUE_MANUELS
+      .map(m => parseInt(String(m.prix).replace(/[^0-9]/g, ''), 10))
+      .filter(n => n > 0);
+    if (!p.length) return '—';
+    const moy = Math.round(p.reduce((a, b) => a + b, 0) / p.length);
+    // Arrondi à la centaine : « 3 278 F » affiche une précision que la
+    // moyenne d'un catalogue de neuf titres n'a pas.
+    return (Math.round(moy / 100) * 100).toLocaleString('fr-FR').replace(/ | /g, ' ') + ' F';
   }
 
   get manuelsFiltres() {
     const cats = this.categoriesBoutique;
     const i = Math.min(Math.max((this.state && this.state.filtre) || 0, 0), cats.length - 1);
     const cle = cats[i].cle;
-    return cle ? this.CATALOGUE_MANUELS.filter(m => m.categorie === cle) : this.CATALOGUE_MANUELS;
+    if (!cle) return this.CATALOGUE_MANUELS;
+    if (cle.charAt(0) === '@') return this.CATALOGUE_MANUELS.filter(m => m.format === cle.slice(1));
+    return this.CATALOGUE_MANUELS.filter(m => m.categorie === cle);
   }
 
   CITATIONS = [
@@ -2081,6 +2177,8 @@ class Component extends DCLogic {
          desormais les CATEGORIES DANS LE CATALOGUE : une categorie sans titre
          n'apparait pas, et le compteur compte ce qui est vraiment affiche. */
       nbManuels: String(this.manuelsFiltres.length),
+      nbTitresCat: this.nbTitresCat,
+      prixMoyenCat: this.prixMoyenCat,
       filtres: (() => {
         const f = this.categoriesBoutique;
         const actif = Math.min(Math.max(this.state.filtre || 0, 0), f.length - 1);
@@ -2237,7 +2335,7 @@ class Component extends DCLogic {
       promoStats: [
         { n: '3854', quoi: 'exercices corrig\u00e9s', ico: '#lc-checkcircle', retard: '.5s' },
         { n: '7', quoi: 'niveaux, 6\u1d49 \u2192 T\u02e1\u1d49', ico: '#lc-graduation', retard: '.62s' },
-        { n: '134', quoi: 'titres au catalogue', ico: '#lc-book', retard: '.74s' },
+        { n: this.nbTitresCat, quoi: 'titres au catalogue', ico: '#lc-book', retard: '.74s' },
         { n: '24', quoi: 'heures sur 24, le tuteur r\u00e9pond', ico: '#lc-brain', retard: '.86s' }
       ],
       reussites: [
@@ -2346,7 +2444,7 @@ class Component extends DCLogic {
       chiffres: [
         { n: '3854', quoi: 'exercices corrig\u00e9s', det: 'cahiers 6\u1d49 \u2192 T\u02e1\u1d49', ico: '#lc-checkcircle' },
         { n: '56', quoi: 'pages en acc\u00e8s libre', det: 'sans cr\u00e9er de compte', ico: '#lc-bookopen' },
-        { n: '134', quoi: 'titres au catalogue', det: 'cahiers, \u00e9tudes, guides', ico: '#lc-book' },
+        { n: this.nbTitresCat, quoi: 'titres au catalogue', det: 'cahiers, \u00e9tudes, guides', ico: '#lc-book' },
         { n: '7', quoi: 'niveaux couverts', det: 'de la 6\u1d49 \u00e0 la Terminale', ico: '#lc-university' }
       ],
       raisons: [

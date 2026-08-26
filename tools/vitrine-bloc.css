@@ -330,3 +330,331 @@ html{scroll-behavior:smooth}
     -webkit-hyphens: manual;
   }
 }
+
+/* ══ 5. BOUTIQUE — LA COUVERTURE D'ABORD ═══════════════════════════════════
+   Référence donnée par Jacques : libryo.fr. Mesuré sur leur catalogue le
+   25/08/2026 — carte 294 px, couverture 292 × 389 en plein cadre, ratio 3/4,
+   quatre colonnes à 1440 px. La boutique VÉRITAS affichait, elle, une
+   couverture de 135 × 184 posée au milieu d'une carte de 304 px : moins d'un
+   sixième de la surface de la carte servait à montrer le produit.
+
+   Trois défauts se tenaient ensemble, et ils ne se corrigent pas séparément :
+
+   1. La « couverture » n'en était pas une. Les neuf cartes recadraient LA MÊME
+      photo de groupe (assets/photo-manuels.webp, 461 px de large pour cinq
+      tranches) : la carte « 6ᵉ » montrait le 6ᵉ ET le 5ᵉ, celle du « 5ᵉ » le
+      5ᵉ et le 4ᵉ. Agrandir ce recadrage n'aurait fait qu'agrandir la
+      confusion — et l'étirer d'un facteur trois, le flou.
+   2. « Le Tube digestif » pointait vers uploads/oeuvres/tubedigestif.jpg, qui
+      n'existe pas : 404, rectangle blanc. Le seul livre numérique du
+      catalogue était donc le seul sans couverture.
+   3. Une seule vraie couverture existe dans le dépôt (assets/cahier-6e.webp).
+
+   D'où le choix : la couverture est COMPOSÉE en CSS d'après la maquette
+   imprimée réelle — fond clair, « Mon cahier de » à l'italique, FRANÇAIS en
+   capitales, le niveau dans un disque, le ruban de conformité, la vague en
+   bas à droite. Elle reste nette à n'importe quelle taille, elle est juste
+   (un titre = une couverture), et le jour où une vraie image arrive, le champ
+   `couv` la remplace sans toucher à cette feuille.
+
+   Les tailles sont exprimées en `cqi` (unités de conteneur) : la couverture
+   se remet à l'échelle avec sa carte, du téléphone au grand écran, sans point
+   de rupture à maintenir. Repli en px pour les navigateurs sans conteneurs. */
+
+.vbq-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(252px,1fr));
+  gap:24px;
+}
+.vbq-card{
+  background:#fff;
+  border:1px solid #E4E7EF;
+  border-radius:16px;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  transition:border-color .18s,transform .18s,box-shadow .18s;
+}
+.vbq-card:hover{
+  border-color:var(--vbq-teinte,#1E499B);
+  transform:translateY(-6px);
+  box-shadow:0 18px 40px rgba(0,17,54,.12);
+}
+
+/* ── La couverture : plein cadre, ratio 3/4, comme un livre posé à plat ── */
+.vbq-cover{
+  position:relative;
+  aspect-ratio:3/4;
+  overflow:hidden;
+  background:linear-gradient(160deg,var(--vbq-fondA,#EEF2FA),var(--vbq-fondB,#F7F9FD));
+  container-type:inline-size;
+  display:block;
+}
+.vbq-cover>img{
+  position:absolute;inset:0;
+  width:100%;height:100%;
+  object-fit:cover;object-position:center top;
+  display:block;
+  transition:transform .5s cubic-bezier(.22,1,.36,1);
+}
+.vbq-card:hover .vbq-cover>img,
+.vbq-card:hover .vbq-couv{ transform:scale(1.04); }
+
+/* ── Couverture composée : tronc commun aux deux familles ── */
+.vbq-couv{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  font-family:Poppins,sans-serif;
+  transition:transform .5s cubic-bezier(.22,1,.36,1);
+  font-size:13px;                        /* repli sans conteneurs */
+}
+@container (min-width:1px){ .vbq-couv{ font-size:6.4cqi; } }
+
+/* ── Famille « cahier » : la maquette imprimée, en clair ── */
+.vbq-couv-cahier{
+  background:#fff;
+  color:var(--vbq-teinte,#1E499B);
+  padding:1.3em 1.05em 2.5em;
+  align-items:center;justify-content:center;text-align:center;
+}
+/* La vague verte du bas de couverture, transposée : un arc qui monte du bas.
+   Premier jet en disque de 105 % posé en coin — il occupait la moitié de la
+   couverture et lisait comme une bulle. Purement décoratif, donc en
+   pseudo-élément : jamais lu par un lecteur d'écran. */
+.vbq-couv-cahier::after{
+  content:"";position:absolute;left:-14%;right:-14%;bottom:-30%;
+  height:62%;border-radius:50% 50% 0 0 / 100% 100% 0 0;
+  background:currentColor;opacity:.11;
+}
+.vbq-couv-haut{
+  font-size:.8em;font-style:italic;font-weight:600;line-height:1.1;
+  margin-bottom:.12em;position:relative;z-index:1;
+}
+.vbq-couv-titre{
+  font-size:1.86em;font-weight:800;line-height:1.02;letter-spacing:-.015em;
+  text-transform:uppercase;text-wrap:balance;position:relative;z-index:1;
+}
+.vbq-couv-niv{
+  margin:.55em 0 .5em;
+  width:2.1em;height:2.1em;border-radius:50%;
+  border:.13em solid currentColor;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.05em;font-weight:800;line-height:1;
+  white-space:nowrap;position:relative;z-index:1;
+}
+/* ⚠️ `background:currentColor` ici donnait du BLANC SUR BLANC : dans une règle
+   qui pose aussi `color:#fff`, `currentColor` vaut la NOUVELLE couleur, pas
+   celle héritée. Le ruban existait dans le DOM et ne se voyait sur aucune des
+   sept couvertures composées. On nomme donc la teinte explicitement. */
+.vbq-couv-ruban{
+  background:var(--vbq-teinte,#1E499B);color:#fff;
+  font-size:.46em;font-weight:700;letter-spacing:.02em;line-height:1.25;
+  padding:.55em 1.05em;border-radius:.45em;
+  position:relative;z-index:1;
+}
+.vbq-couv-marque{
+  position:absolute;left:0;right:0;bottom:1.05em;z-index:1;
+  font-size:.42em;font-weight:700;letter-spacing:.2em;
+  text-transform:uppercase;opacity:.55;
+}
+/* ⚠️ Ces deux lignes viennent de la FICHE du livre, et un livre du panneau
+   admin n'a ni « Mon cahier de » ni ruban de conformité à afficher. Vidées,
+   elles dessinaient quand même une pastille de couleur sous le titre — un
+   confetti sans signification, sur quatre couvertures.
+   Pourquoi en CSS et pas par un `sc-if` dans le gabarit : le micro-moteur de
+   la vitrine (assets/vitrine.js, `litter`) reconnaît `</sc-if>` avec une
+   expression NON GOURMANDE. Une condition imbriquée referme donc la
+   condition PARENTE au premier `</sc-if>` rencontré — essayé, mesuré : les
+   couvertures composées se vidaient entièrement. */
+.vbq-couv-haut:empty, .vbq-couv-ruban:empty{ display:none; }
+
+/* ── Famille « roman » : une couverture littéraire, fond profond ── */
+.vbq-couv-roman{
+  background:linear-gradient(155deg,var(--vbq-teinte,#142554),#05102B 88%);
+  color:#fff;
+  padding:1.6em 1.25em 1.2em;
+  justify-content:center;text-align:center;
+}
+/* Le filet vertical du dos, à gauche : ce qui fait lire un aplat comme un
+   livre plutôt que comme une vignette. */
+.vbq-couv-roman::after{
+  content:"";position:absolute;left:.85em;top:0;
+  width:.09em;height:100%;background:rgba(255,255,255,.18);
+}
+.vbq-couv-filet{
+  width:2.4em;height:.11em;background:#FFC93C;margin:0 auto 1em;
+}
+.vbq-couv-rtitre{
+  font-family:'Libre Baskerville',Georgia,serif;
+  font-size:1.28em;font-weight:700;line-height:1.2;
+  text-wrap:balance;position:relative;z-index:1;
+}
+.vbq-couv-raut{
+  margin-top:1em;font-size:.52em;font-weight:700;
+  letter-spacing:.18em;text-transform:uppercase;color:#FFC93C;
+  position:relative;z-index:1;
+}
+.vbq-couv-rmention{
+  margin-top:.4em;font-size:.46em;font-weight:400;
+  color:rgba(255,255,255,.62);font-style:italic;
+  position:relative;z-index:1;
+}
+
+/* ── Les pastilles posées SUR la couverture ── */
+.vbq-niv{
+  position:absolute;top:13px;left:13px;z-index:2;
+  background:var(--vbq-teinte,#1E499B);color:#fff;
+  font:600 11px Poppins,sans-serif;
+  padding:4px 11px;border-radius:100px;
+  box-shadow:0 6px 16px rgba(0,17,54,.18);
+}
+.vbq-badges{
+  position:absolute;top:13px;right:13px;z-index:2;
+  display:flex;flex-direction:column;align-items:flex-end;gap:6px;
+}
+.vbq-badges>span{
+  display:inline-flex;align-items:center;gap:5px;
+  font:600 11px Poppins,sans-serif;letter-spacing:.4px;
+  padding:5px 10px;border-radius:100px;
+  box-shadow:0 6px 16px rgba(0,17,54,.10);
+  white-space:nowrap;
+}
+/* Le format d'abord : c'est LA question que se pose l'acheteur devant un
+   catalogue mixte (« est-ce que je le reçois, ou est-ce que je le lis ? »).
+   Papier en blanc discret, numérique en bleu — la couleur n'est pas
+   décorative, elle sépare deux parcours d'achat distincts. */
+.vbq-fmt-papier{ background:rgba(255,255,255,.94);color:#4D5163; }
+.vbq-fmt-ebook { background:#1E499B;color:#fff; }
+.vbq-tag{ color:#fff;text-transform:uppercase; }
+
+/* ── Le corps de la carte ── */
+.vbq-body{ padding:17px 18px 19px;display:flex;flex-direction:column;flex:1; }
+.vbq-cat{
+  font:600 11px Poppins,sans-serif;color:var(--vbq-teinte,#1E499B);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;
+}
+.vbq-titre{
+  font:600 16.5px/23px Poppins,sans-serif;color:#001136;margin:0 0 6px;
+  text-wrap:pretty;
+}
+.vbq-type{ margin:0;font-size:13px;line-height:1.6;color:#6E7385; }
+.vbq-exos{
+  margin-top:9px;display:inline-flex;align-items:center;gap:6px;
+  font:500 12px Poppins,sans-serif;color:#4D5163;
+}
+.vbq-prix-row{
+  margin-top:auto;padding-top:16px;
+  display:flex;align-items:flex-end;justify-content:space-between;gap:10px;
+}
+/* Libryo étiquette son prix (« Prix » en 10 px au-dessus du montant). Sur un
+   catalogue mixte papier/numérique, l'étiquette évite de lire 1 000 F comme
+   un prix de livraison ou un acompte. */
+.vbq-prix-lbl{ display:block;font:400 10.5px Poppins,sans-serif;color:#8A8FA3;margin-bottom:1px; }
+.vbq-prix{ display:block;font:600 21px/1.1 Poppins,sans-serif;color:#001136;white-space:nowrap; }
+.vbq-mention{ display:block;margin-top:3px;font:400 11.5px Poppins,sans-serif;color:#6E7385; }
+.vbq-cta,.vbq-lire{
+  display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
+  padding:10px 15px;border-radius:10px;border:0;
+  font:600 13.5px Poppins,sans-serif;cursor:pointer;white-space:nowrap;
+  transition:transform .18s,box-shadow .18s;
+}
+.vbq-cta{
+  background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;
+  box-shadow:0 6px 16px rgba(242,101,0,.28);
+}
+.vbq-cta:hover{ transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,101,0,.4); }
+.vbq-lire{
+  background:linear-gradient(135deg,#1E499B,#0C2A6A);color:#fff;
+  box-shadow:0 6px 16px rgba(30,73,155,.28);text-decoration:none;
+}
+.vbq-lire:hover{ transform:translateY(-2px);box-shadow:0 10px 22px rgba(30,73,155,.4);color:#fff;text-decoration:none; }
+
+/* ── Écrans étroits ────────────────────────────────────────────────────────
+   Libryo garde DEUX colonnes sur téléphone plutôt que de passer à une : une
+   colonne unique donne une couverture énorme et un seul produit par écran —
+   on ne compare plus rien, on fait défiler. On tient donc deux colonnes
+   jusqu'à 380 px, en resserrant l'espacement. */
+@media (max-width:900px){
+  .vbq-grid{ grid-template-columns:repeat(2,1fr);gap:16px; }
+  .vbq-titre{ font-size:15.5px;line-height:22px; }
+  .vbq-prix{ font-size:19px; }
+}
+@media (max-width:620px){
+  .vbq-grid{ gap:12px; }
+  .vbq-body{ padding:13px 13px 15px; }
+  /* La couverture composée centre son bloc de titre ; les pastilles, elles,
+     sont posées en absolu. Sur une couverture de 228 px de haut, les deux se
+     rencontrent : mesuré à 390 px, « BEST-SELLER » se posait exactement sur
+     le mot « Spécial ». On réserve la bande haute en la comptant dans le
+     rembourrage — le centrage se décale d'autant, sans toucher au reste. */
+  .vbq-couv-cahier{ padding:52px 12px 16px; }
+  .vbq-couv-roman { padding:52px 14px 16px; }
+  .vbq-prix-row{ flex-direction:column;align-items:stretch;gap:9px;padding-top:12px; }
+  .vbq-cta,.vbq-lire{ justify-content:center;width:100%; }
+  .vbq-niv,.vbq-badges{ top:9px; }
+  .vbq-niv{ left:9px; }
+  .vbq-badges{ right:9px; }
+}
+@media (max-width:380px){
+  .vbq-grid{ grid-template-columns:1fr; }
+}
+@media (prefers-reduced-motion:reduce){
+  .vbq-card,.vbq-cover>img,.vbq-couv,.vbq-cta,.vbq-lire{ transition:none; }
+  .vbq-card:hover{ transform:none; }
+  .vbq-card:hover .vbq-cover>img,.vbq-card:hover .vbq-couv{ transform:none; }
+}
+
+/* ══ 6. BULLE DE VENTE RÉELLE ═══════════════════════════════════════════════
+   Le motif vient de libryo.fr : une petite carte qui apparaît en bas à gauche
+   (« Cécile F. — Bafoussam vient d'acheter un livre · il y a 1 h »), reste
+   quelques secondes, disparaît.
+
+   Ce que ce bloc NE fait pas : inventer. Le contenu vient de
+   api/public_data.php, qui ne remonte que des commandes au statut payé.
+   Base sans vente ⇒ l'élément n'est même pas créé. C'est la règle appliquée
+   partout ailleurs sur cette page (podium des jeux, taux de réussite) : un
+   chiffre absent se montre absent.
+
+   En bas à GAUCHE, jamais à droite : la colonne de droite porte déjà les trois
+   boutons flottants (thème, langue, Ambassa) et le bouton d'aide. Deux
+   surfaces flottantes qui se recouvrent, c'est la moitié de l'information
+   perdue sur un téléphone. */
+.vrt-vente{
+  position:fixed;left:18px;bottom:18px;z-index:70;
+  max-width:min(330px,calc(100vw - 36px));
+  display:flex;align-items:flex-start;gap:11px;
+  background:#fff;border:1px solid #E4E7EF;border-radius:14px;
+  padding:12px 34px 12px 13px;
+  box-shadow:0 14px 38px rgba(0,17,54,.16);
+  font-family:Poppins,sans-serif;
+  opacity:0;transform:translateY(14px) scale(.97);
+  transition:opacity .32s ease,transform .32s cubic-bezier(.22,1,.36,1);
+  pointer-events:none;
+}
+.vrt-vente.on{ opacity:1;transform:none;pointer-events:auto; }
+.vrt-vente-ic{
+  flex:0 0 auto;width:34px;height:34px;border-radius:50%;
+  background:#FFF3E4;color:#C24E00;
+  display:flex;align-items:center;justify-content:center;
+}
+.vrt-vente-tx{ display:flex;flex-direction:column;gap:2px;min-width:0; }
+.vrt-vente-qui{ font:600 13.5px/1.35 Poppins,sans-serif;color:#001136; }
+.vrt-vente-quoi{ font:400 12.5px/1.45 Poppins,sans-serif;color:#4D5163; }
+.vrt-vente-quoi b{ font-weight:600;color:#001136; }
+.vrt-vente-quand{ font:400 11px Poppins,sans-serif;color:#8A8FA3;margin-top:2px; }
+.vrt-vente-x{
+  position:absolute;top:6px;right:8px;
+  border:0;background:none;cursor:pointer;
+  color:#A8AEBF;font-size:18px;line-height:1;padding:4px 6px;border-radius:8px;
+}
+.vrt-vente-x:hover{ color:#4D5163;background:#F4F6FA; }
+
+/* Sur téléphone, la bulle occupe la largeur mais reste au-dessus du pouce. */
+@media (max-width:620px){
+  .vrt-vente{ left:12px;right:12px;bottom:12px;max-width:none; }
+}
+@media (prefers-reduced-motion:reduce){
+  .vrt-vente{ transition:none;transform:none; }
+}

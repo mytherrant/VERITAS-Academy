@@ -1000,6 +1000,265 @@
 
     poserBandeau(d.tickerItems || []);
     poserClassement(d.jeu || null);
+    poserBoutique(d.boutique || []);
+    poserChiffres(d.boutiqueChiffres || null);
+    poserActivite(d.activite || []);
+  }
+
+
+  /* ══════════════════════════════════════════════════════════════════════
+     LA BOUTIQUE OBÉIT AU PANNEAU ADMIN
+     ──────────────────────────────────────────────────────────────────────
+     Même principe que le téléphone et le bandeau plus haut : le HTML
+     pré-rendu reste la vérité par défaut — nine titres écrits dans la
+     maquette, indexables, lisibles sans JavaScript — et on ne RECOUVRE que
+     si le panneau admin a réellement publié un catalogue.
+
+     « Réellement publié » veut dire : au moins un livre coché « visible sur
+     la vitrine » dans sa fiche. C'est un opt-in, et il est délibéré : la
+     base de production contient un article « TEST — Paiement 100 FCFA » et
+     cinq manuels de démonstration hérités du jeu d'essai. Un défaut à
+     « tout publier » les aurait mis en devanture à la place des vrais
+     cahiers, le jour du déploiement, sans que personne l'ait demandé.
+
+     Rien n'est inventé côté client : les rayons, les étiquettes, les prix,
+     la disponibilité viennent de la fiche du livre. Ce que le serveur ne
+     dit pas, la carte ne l'affiche pas.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /* Une teinte de fond très claire dérivée de la couleur du livre. Sert de
+     fond de couverture pendant le chargement de l'image, et de fond
+     permanent aux couvertures composées. */
+  function paleur(hex, force) {
+    var h = String(hex || '').replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    if (!/^[0-9a-f]{6}$/i.test(h)) return force > .93 ? '#F7F9FD' : '#EEF2FA';
+    var r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+    function m(c) { return Math.round(c + (255 - c) * force); }
+    return 'rgb(' + m(r) + ',' + m(g) + ',' + m(b) + ')';
+  }
+
+  /* Une fiche de livre du panneau admin → une carte de la grille.
+     Les noms de champs sont ceux du gabarit `manuels` (voir la maquette). */
+  function carteDepuisLivre(b) {
+    var num = !!b.numerique;
+    var teinte = b.couleur || (num ? '#142554' : '#1E499B');
+    var rupture = !num && b.stock !== null && b.stock !== undefined && b.stock <= 0;
+
+    var c = {
+      niv: b.cls || '',
+      teinte: teinte,
+      fondA: paleur(teinte, .90),
+      fondB: paleur(teinte, .96),
+      /* Rayon choisi par l'admin. À défaut, on ne devine PAS une catégorie
+         éditoriale : « Littérature » pour un roman, sinon le fourre-tout
+         honnête « Catalogue ». Inventer « Spécial examen » d'après un titre
+         rangerait des livres au mauvais rayon sans que personne le voie. */
+      categorie: b.rayon || (b.genre === 'roman' ? 'Littérature' : 'Catalogue'),
+      etiquette: rupture ? 'Rupture' : (b.etiquette || ''),
+      etiquetteFond: rupture ? '#8C2F39' : '#C24E00',
+      titre: b.titre || '',
+      type: b.desc || (b.auteur ? 'de ' + b.auteur : ''),
+      prix: f(b.prix || 0),
+      exos: b.pages ? (b.pages + ' pages' + (b.chaps ? ' · ' + b.chaps + ' chapitres' : '')) : '',
+      mention: num ? 'lecture en ligne, sans téléchargement'
+                   : (b.apercu ? 'aperçu gratuit avant achat' : ''),
+      format: num ? 'ebook' : 'papier',
+      formatNom: num ? 'E-book' : 'Papier',
+      formatCls: num ? 'vbq-fmt-ebook' : 'vbq-fmt-papier'
+    };
+
+    /* Le bouton. Un livre numérique s'OUVRE (sa fiche porte l'aperçu
+       gratuit) ; un livre papier se COMMANDE ; un livre en rupture n'offre
+       ni l'un ni l'autre — on n'envoie personne vers un tunnel de paiement
+       pour un article qu'on ne peut pas livrer. */
+    if (num) c.lien = 'app.html#livre?id=' + encodeURIComponent(b.id);
+    else if (!rupture) c.papier = true;
+
+    /* La couverture, dans le même ordre de préséance que la maquette. */
+    if (b.couv) {
+      c.couv = b.couv;
+    } else if (num || b.genre === 'roman') {
+      c.couvRoman = true; c.couvTeinte = teinte;
+      c.couvRTitre = b.titre || '';
+      c.couvRAut = b.auteur || '';
+      c.couvRMention = b.genre === 'roman' ? 'roman' : '';
+    } else {
+      c.couvCahier = true; c.couvTeinte = teinte;
+      /* La ligne du haut porte l'auteur — sauf quand l'auteur EST le centre :
+         la couverture signe déjà « Centre VÉRITAS » en bas, et l'afficher
+         deux fois sur 300 px de haut fait lire une erreur, pas une marque. */
+      c.couvHaut = /v[ée]ritas/i.test(b.auteur || '') ? '' : (b.auteur || '');
+      c.couvTitre = b.titre || '';
+      c.couvNiv = b.cls || '';
+      c.couvRuban = '';           // rien à promettre qui ne soit dans la fiche
+    }
+    return c;
+  }
+
+  /* Les pastilles de filtre, reconstruites d'après le catalogue reçu :
+     un rayon sans titre n'apparaît pas, et le format ne s'affiche que si
+     les deux existent. Mêmes règles qu'au build — c'est voulu : deux
+     logiques de filtrage finiraient par diverger. */
+  function filtresDepuisCartes(cartes) {
+    var vus = [], i;
+    for (i = 0; i < cartes.length; i++) {
+      var r = cartes[i].categorie;
+      if (r && vus.indexOf(r) < 0) vus.push(r);
+    }
+    var base = [{ cle: '', nom: 'Tout le catalogue', ico: '#lc-basket' }];
+    for (i = 0; i < vus.length; i++) base.push({ cle: vus[i], nom: vus[i], ico: '#lc-book' });
+    var papier = false, ebook = false;
+    for (i = 0; i < cartes.length; i++) {
+      if (cartes[i].format === 'ebook') ebook = true; else papier = true;
+    }
+    if (papier && ebook) {
+      base.push({ cle: '@papier', nom: 'Livres papier', ico: '#lc-shop' });
+      base.push({ cle: '@ebook', nom: 'Lecture en ligne', ico: '#lc-bookopen' });
+    }
+    return base;
+  }
+
+  function filtrer(cartes, cle) {
+    if (!cle) return cartes;
+    if (cle.charAt(0) === '@') {
+      var fmt = cle.slice(1);
+      return cartes.filter(function (c) { return c.format === fmt; });
+    }
+    return cartes.filter(function (c) { return c.categorie === cle; });
+  }
+
+  function poserBoutique(livres) {
+    if (!livres || !livres.length) return;          // rien de publié : on ne touche à rien
+    if (!G.manuels || !G.filtres) return;           // gabarits absents : idem
+
+    var cartes = livres.map(carteDepuisLivre);
+    var cats = filtresDepuisCartes(cartes);
+
+    /* On réécrit les tableaux pré-calculés au build : le clic sur une
+       pastille (f__aller) continue de fonctionner sans le savoir. */
+    D.manuels = []; D.filtres = []; D.scal = D.scal || {};
+    for (var i = 0; i < cats.length; i++) {
+      var lot = filtrer(cartes, cats[i].cle);
+      D.manuels.push(lot);
+      D.scal['filtre' + i] = { nbManuels: String(lot.length) };
+      D.filtres.push(cats.map(function (x, j) {
+        return {
+          nom: x.nom, ico: x.ico,
+          fond: j === i ? '#FFF3E4' : '#fff',
+          bord: j === i ? '#C24E00' : '#E4E7EF',
+          texte: j === i ? '#C24E00' : '#4D5163',
+          graisse: j === i ? '600' : '400'
+        };
+      }));
+    }
+
+    var actif = Math.min(Math.max(S.filtre || 0, 0), cats.length - 1);
+    S.filtre = actif;
+    rendre('filtres', D.filtres[actif]);
+    rendre('manuels', D.manuels[actif]);
+    poser('nbManuels', String(D.manuels[actif].length));
+  }
+
+  /* Les chiffres du bandeau. Le build en pose déjà de VRAIS (comptés sur le
+     catalogue de la maquette) ; l'admin les remplace dès qu'il publie le
+     sien. Zéro n'écrase jamais : un catalogue vide côté serveur doit laisser
+     la page telle qu'elle est, pas afficher « 0 titres au catalogue ». */
+  function poserChiffres(ch) {
+    if (!ch) return;
+    if (ch.titres > 0) {
+      var t = document.querySelector('[data-vrt-nb="titres"]');
+      if (t) t.textContent = String(ch.titres);
+    }
+    if (ch.prixMoyen > 0) {
+      var p = document.querySelector('[data-vrt-nb="prixMoyen"]');
+      if (p) p.textContent = f(Math.round(ch.prixMoyen / 100) * 100);
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════
+     PREUVE SOCIALE — DES VENTES RÉELLES, OU RIEN
+     ──────────────────────────────────────────────────────────────────────
+     Les bulles « Cécile F. — Bafoussam vient d'acheter un livre, il y a
+     1 h » sont efficaces pour une raison précise : le visiteur les croit.
+     Elles ne valent donc que si elles sont vraies. Celles-ci sont
+     alimentées par api/public_data.php, qui ne remonte que des commandes au
+     statut PAYÉ — jamais une intention d'achat, jamais un exemple.
+
+     Conséquence assumée : tant que la base ne contient aucune vente,
+     AUCUNE bulle ne s'affiche. C'est la même règle que le podium du
+     panneau « Apprendre en jouant » et que les taux de réussite : le trou
+     doit se voir comme un trou.
+
+     Le cycle s'arrête après un passage complet. Une boucle infinie finit
+     par montrer deux fois la même vente au même visiteur — et c'est
+     exactement à ce moment-là qu'il comprend que c'est un décor.
+     ══════════════════════════════════════════════════════════════════════ */
+
+  function ilYA(ts) {
+    var s = Math.max(0, Math.floor(Date.now() / 1000) - (ts || 0));
+    if (s < 90) return "à l'instant";
+    var m = Math.round(s / 60);       if (m < 60) return 'il y a ' + m + ' min';
+    var h = Math.round(s / 3600);     if (h < 24) return 'il y a ' + h + ' h';
+    var j = Math.round(s / 86400);    if (j < 7)  return 'il y a ' + j + ' j';
+    var sem = Math.round(s / 604800);
+    return 'il y a ' + sem + ' semaine' + (sem > 1 ? 's' : '');
+  }
+
+  function poserActivite(liste) {
+    if (!liste || !liste.length) return;            // base vide : rien, jamais
+    if (document.getElementById('vrtVente')) return;
+
+    var boite = document.createElement('div');
+    boite.id = 'vrtVente';
+    boite.className = 'vrt-vente';
+    boite.setAttribute('role', 'status');
+    boite.setAttribute('aria-live', 'polite');
+    boite.hidden = true;
+    document.body.appendChild(boite);
+
+    var i = 0, minuteur = null;
+    var doux = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function echapper(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function fermer() {
+      boite.classList.remove('on');
+      if (minuteur) { clearTimeout(minuteur); minuteur = null; }
+      setTimeout(function () { boite.hidden = true; }, doux ? 0 : 320);
+    }
+
+    function suivante() {
+      if (i >= liste.length) { fermer(); return; }   // un seul passage
+      var v = liste[i++];
+      var qui = v.qui || 'Un parent';
+      var ou = v.ou ? ' — ' + echapper(v.ou) : '';
+      var quoi = v.quoi ? '<b>' + echapper(v.quoi) + '</b>' : 'un ouvrage du catalogue';
+      boite.innerHTML =
+        '<span class="vrt-vente-ic" aria-hidden="true">'
+        + '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#lc-basket"></use></svg>'
+        + '</span>'
+        + '<span class="vrt-vente-tx">'
+        +   '<b class="vrt-vente-qui">' + echapper(qui) + ou + '</b>'
+        +   '<span class="vrt-vente-quoi">vient de commander ' + quoi + '</span>'
+        +   '<small class="vrt-vente-quand">' + echapper(ilYA(v.quand)) + '</small>'
+        + '</span>'
+        + '<button type="button" class="vrt-vente-x" aria-label="Masquer">&times;</button>';
+      boite.querySelector('.vrt-vente-x').onclick = function () { i = liste.length; fermer(); };
+      boite.hidden = false;
+      requestAnimationFrame(function () { boite.classList.add('on'); });
+      minuteur = setTimeout(function () {
+        boite.classList.remove('on');
+        minuteur = setTimeout(suivante, 4200);
+      }, 6500);
+    }
+
+    // Jamais dès l'arrivée : une bulle qui saute à la figure avant que la
+    // page soit lue est perçue comme une publicité, pas comme une preuve.
+    setTimeout(suivante, 9000);
   }
 
   /* ── Tableau d'honneur du panneau « Apprendre en jouant » ───────────────
