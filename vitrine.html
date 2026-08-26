@@ -141,15 +141,32 @@
 .vcle.vcle-next{background:#F5F9FF;border-radius:10px;padding-left:15px;
   box-shadow:inset 3px 0 0 #1E499B}
 .vcle.vcle-next .vcle-q{color:#0C2A6A;font-weight:600}
-/* DEUX marqueurs se superposaient sur le bord gauche de la rangée « prochain
-   événement » : la barre bleue de 3 px posée ci-dessus en `inset`, ET la
-   pastille de 7 px que `.vcle::before` place à `left:0` pour toutes les
-   rangées. La pastille, plus large que la barre, débordait donc de part et
-   d'autre — et comme la rangée porte un rayon de 10 px, elle tombait pile dans
-   la courbe du coin. L'œil lit un crochet « ( » mal dessiné, signalé par
-   Jacques le 25/08/2026. La barre suffit à distinguer la rangée : on retire la
-   pastille, elle seule, et uniquement sur cette rangée-là. */
-.vcle.vcle-next::before{display:none}
+/* ── LE « ( » DEVANT « RENTRÉE DES CLASSES » ───────────────────────────────
+   Signalé par Jacques le 25/08/2026. Deux défauts se cumulaient sur le bord
+   gauche de la rangée « prochain événement », et le second est le vrai :
+
+   1. La pastille de 7 px que `.vcle::before` pose à `left:0` pour TOUTES les
+      rangées se superposait à la barre d'accent — deux marqueurs au même
+      endroit, dont un plus large que l'autre.
+   2. Surtout : la barre d'accent était dessinée par `box-shadow: inset 3px 0 0`.
+      Une ombre INTERNE épouse le `border-radius` de la boîte. Sur une rangée de
+      43 px de haut avec un rayon de 10 px, une bande de 3 px se courbe donc en
+      haut ET en bas — ce qui dessine, très exactement, une parenthèse ouvrante.
+      Ce n'était pas un défaut de rendu : c'est ce que la règle demandait.
+
+   On retire l'ombre interne et on redessine la barre avec le pseudo-élément
+   libéré au point 1 : positionné, droit, retiré de 8 px en haut et en bas pour
+   ne jamais approcher les coins arrondis. Un seul marqueur, une seule forme. */
+.vcle.vcle-next{box-shadow:none}
+.vcle.vcle-next::before{
+  content:"";
+  left:0;
+  top:8px;
+  width:3px;
+  height:calc(100% - 16px);
+  border-radius:0 2px 2px 0;
+  background:#1E499B;
+}
 
 .vcal-note{margin:14px 0 0;font-size:12.5px;line-height:1.6;color:#6B7180;
   padding:11px 13px;background:#F7FAFF;border-left:3px solid #C7D5EE;border-radius:0 8px 8px 0}

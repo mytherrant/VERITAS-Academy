@@ -1895,6 +1895,78 @@ for (const bal of ['ul', 'ol', 'li']) {
   console.log('fentes admin: ' + posees + ' (' + FENTES.map(f => f[0]).join(', ') + ')');
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   LES TROIS BOUTONS FLOTTANTS — une famille, pas trois accidents
+   ──────────────────────────────────────────────────────────────────────────
+   « Les icônes sont grossières et pas esthétiques » (Jacques, 25/08/2026).
+   Ce n'est pas qu'une affaire de goût : trois défauts se mesurent.
+
+   1. DEUX FAMILLES DE FORMES. Les utilitaires font 50 px de côté pour 16 px
+      de rayon (ratio 0,32) ; le bouton Ambassa 62 pour 18 (ratio 0,29). Deux
+      squircles proches mais différents, empilés verticalement : l'œil lit un
+      défaut d'alignement sans savoir le nommer.
+   2. ANNEAU NON CONCENTRIQUE. La pastille pulsée d'Ambassa est posée en
+      `inset:-5px` avec le MÊME rayon que le bouton. Un contour décalé vers
+      l'extérieur doit voir son rayon augmenter d'autant pour rester parallèle :
+      à rayon égal, les quatre coins se pincent. C'est ce pincement qu'on lit
+      comme « grossier ».
+   3. TRAITS TROP ÉPAIS. `stroke-width:2` sur un pictogramme de 22 px donne un
+      rapport trait/taille de 1/11, là où les jeux d'icônes soignés tiennent
+      1/14 à 1/16. D'où des symboles lourds et un peu baveux.
+
+   Correction : le cercle. Il supprime la question du rayon (donc les deux
+   défauts géométriques d'un coup), et c'est la forme attendue d'un groupe
+   d'actions flottantes. On ajoute ce qui manquait pour qu'ils se détachent du
+   contenu au lieu d'y être collés : un filet d'un pixel, une ombre à deux
+   niveaux (contact + portée), et un flou d'arrière-plan. Les couleurs de
+   marque ne bougent pas.
+   ══════════════════════════════════════════════════════════════════════════ */
+{
+  const RETOUCHES = [
+    // [ ce qu'on cherche, ce qu'on pose, à quoi ça sert ]
+    ['width:50px;height:50px;border-radius:16px;border:1px solid transparent;background:#FAFBFE;',
+     'width:46px;height:46px;border-radius:50%;border:1px solid rgba(12,42,106,.10);'
+     + 'background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);',
+     'utilitaires (thème, traducteur) : ronds, filet + flou'],
+
+    ['box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s,color .18s',
+     'box-shadow:0 1px 2px rgba(0,17,54,.07),0 8px 22px rgba(0,17,54,.10);'
+     + 'transition:transform .18s,box-shadow .18s,color .18s',
+     'ombre à deux niveaux (contact + portée)'],
+
+    ['width:62px;height:62px;border-radius:18px;border:0;background:linear-gradient(135deg,#7C6BD6,#5B4FA8);',
+     'width:58px;height:58px;border-radius:50%;border:0;background:linear-gradient(150deg,#8272DD,#5B4FA8);',
+     'Ambassa : rond, dégradé adouci'],
+
+    ['box-shadow:0 12px 30px rgba(91,79,168,.44)',
+     'box-shadow:0 2px 4px rgba(91,79,168,.20),0 12px 28px rgba(91,79,168,.30)',
+     'Ambassa : ombre allégée'],
+
+    ['position:absolute;inset:-5px;border-radius:18px;border:2px solid rgba(124,107,214,.4)',
+     'position:absolute;inset:-5px;border-radius:50%;border:1.5px solid rgba(124,107,214,.38)',
+     'anneau pulsé : enfin concentrique'],
+  ];
+
+  for (const [de, vers, quoi] of RETOUCHES) {
+    if (!corps.includes(de)) {
+      throw new Error('Boutons flottants — « ' + quoi +' » : le style attendu est introuvable. '
+        + 'La maquette a changé : mettez ce motif à jour, sinon la retouche saute en silence '
+        + 'et les boutons repartent tels quels.');
+    }
+    corps = corps.split(de).join(vers);
+  }
+
+  /* Les traits : 2 px, c'était le rapport trait/taille qui alourdissait tout.
+     On ne touche qu'aux pictogrammes DE CES boutons, repérés par leur taille —
+     le reste de la page garde ses réglages. */
+  let traits = 0;
+  corps = corps.replace(/width="(22|27)" height="\1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"/g,
+    (m, t) => { traits++; return m.replace('stroke-width="2"', 'stroke-width="1.7"')
+                            .replace('width="' + t + '" height="' + t + '"',
+                                     t === '22' ? 'width="21" height="21"' : 'width="25" height="25"'); });
+  console.log('boutons flot: ' + RETOUCHES.length + ' retouches · ' + traits + ' pictogramme(s) affiné(s)');
+}
+
 fs.writeFileSync(path.join(__dirname, '_corps.html'), corps);
 fs.writeFileSync(path.join(__dirname, '_gabarits.json'), JSON.stringify(gabarits));
 fs.writeFileSync(path.join(__dirname, '_data.json'), JSON.stringify(D));

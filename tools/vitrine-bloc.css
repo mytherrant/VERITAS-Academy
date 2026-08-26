@@ -48,6 +48,32 @@
 .vcle.vcle-next{background:#F5F9FF;border-radius:10px;padding-left:15px;
   box-shadow:inset 3px 0 0 #1E499B}
 .vcle.vcle-next .vcle-q{color:#0C2A6A;font-weight:600}
+/* ── LE « ( » DEVANT « RENTRÉE DES CLASSES » ───────────────────────────────
+   Signalé par Jacques le 25/08/2026. Deux défauts se cumulaient sur le bord
+   gauche de la rangée « prochain événement », et le second est le vrai :
+
+   1. La pastille de 7 px que `.vcle::before` pose à `left:0` pour TOUTES les
+      rangées se superposait à la barre d'accent — deux marqueurs au même
+      endroit, dont un plus large que l'autre.
+   2. Surtout : la barre d'accent était dessinée par `box-shadow: inset 3px 0 0`.
+      Une ombre INTERNE épouse le `border-radius` de la boîte. Sur une rangée de
+      43 px de haut avec un rayon de 10 px, une bande de 3 px se courbe donc en
+      haut ET en bas — ce qui dessine, très exactement, une parenthèse ouvrante.
+      Ce n'était pas un défaut de rendu : c'est ce que la règle demandait.
+
+   On retire l'ombre interne et on redessine la barre avec le pseudo-élément
+   libéré au point 1 : positionné, droit, retiré de 8 px en haut et en bas pour
+   ne jamais approcher les coins arrondis. Un seul marqueur, une seule forme. */
+.vcle.vcle-next{box-shadow:none}
+.vcle.vcle-next::before{
+  content:"";
+  left:0;
+  top:8px;
+  width:3px;
+  height:calc(100% - 16px);
+  border-radius:0 2px 2px 0;
+  background:#1E499B;
+}
 
 .vcal-note{margin:14px 0 0;font-size:12.5px;line-height:1.6;color:#6B7180;
   padding:11px 13px;background:#F7FAFF;border-left:3px solid #C7D5EE;border-radius:0 8px 8px 0}
@@ -76,11 +102,24 @@
 .vnews[hidden]{display:none}
 .vnews-hd h3{font:600 16px Poppins,sans-serif;color:#0C2A6A;margin:0 0 11px}
 .vnews-tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:13px}
-.vnews-tab{border:1px solid transparent;background:#F4F6FB;background:#fff;color:#4D5163;cursor:pointer;
-  padding:6px 11px;border-radius:100px;font:500 12.5px Poppins,sans-serif;
-  transition:background .18s ease,color .18s ease,border-color .18s ease}
-.vnews-tab:hover{background:#F2F6FD;border-color:#C7D5EE}
-.vnews-tab.on{background:#1E499B;border-color:#1E499B;color:#fff}
+/* ── LES RUBRIQUES DOIVENT SE VOIR (demande Jacques, 25/08/2026) ───────────
+   Elles ne se voyaient pas, et c'est mesurable : l'onglet inactif était
+   `background:#fff` (le fond du panneau) avec `border:1px solid transparent`.
+   Fond blanc sur panneau blanc, sans contour : il ne restait qu'un mot gris
+   #4D5163 flottant. À côté de l'onglet actif — pastille bleu plein — les trois
+   autres se lisaient comme DÉSACTIVÉS, alors que ce sont les trois autres fils
+   qu'on peut consulter. Le panneau perdait ainsi les trois quarts de son offre.
+
+   On leur rend un contour et un fond, on remonte le texte au bleu de la marque
+   plutôt qu'un gris, et on passe en 600. L'actif garde sa pastille pleine —
+   la hiérarchie reste lisible, mais entre « choisi » et « choisissable »,
+   plus entre « choisi » et « éteint ». */
+.vnews-tab{border:1px solid #D7E2F4;background:#F4F7FC;color:#1E499B;cursor:pointer;
+  padding:6px 12px;border-radius:100px;font:600 12.5px Poppins,sans-serif;
+  transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease}
+.vnews-tab:hover{background:#E7EFFC;border-color:#A9C2E8;transform:translateY(-1px)}
+.vnews-tab.on{background:#1E499B;border-color:#1E499B;color:#fff;
+  box-shadow:0 2px 8px rgba(30,73,155,.28)}
 .vnews-liste{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
 .vnews-liste li{border-bottom:1px solid #F1F4FA}
 .vnews-liste li:last-child{border-bottom:0}
@@ -292,8 +331,25 @@ html{scroll-behavior:smooth}
    Les sous-titres de cartes portent `text-align:center` EN LIGNE : un style en
    ligne bat la feuille, ils restent donc centrés sans exception à écrire ici.
    ══════════════════════════════════════════════════════════════════════════ */
+/* ⚠️ `[data-vp] li` A ÉTÉ RETIRÉ DE CETTE LISTE (25/08/2026).
+   Cette règle-ci et celle de la ligne ~118 se contredisaient. La première a été
+   VOLONTAIREMENT resserrée sur la seule note du calendrier, avec ce motif écrit
+   au-dessus d'elle : « un titre justifié sur 330 px se disloque en trous ». Puis
+   celle-ci, plus tardive et plus large, a rejustifié tous les `p` ET tous les
+   `li` de toutes les sections — annulant la correction sans que personne ne le
+   voie, puisque les deux commentaires disent le contraire l'un de l'autre.
+
+   Mesuré sur la page livrée : 42 éléments du seul panneau « année scolaire »
+   calculaient `text-align: justify`, dont les rangées du calendrier — qui sont
+   des `display:flex` (un libellé à gauche, une date à droite) : les justifier
+   n'a aucun sens, et les titres d'actualité de la colonne de 330 px partaient
+   en rivières de blanc. C'est la « mise en forme » signalée par Jacques.
+
+   Un `li` n'est presque jamais de la prose longue ici : ce sont des rangées,
+   des avantages d'offre, des titres d'actualité — tous en colonne étroite,
+   c'est-à-dire le cas où la justification abîme au lieu d'embellir. La prose
+   longue vit dans des `p`, qui restent justifiés. */
 [data-vp] p,
-[data-vp] li,
 .vcard p,
 .vsec-sub {
   text-align: justify;
@@ -301,6 +357,17 @@ html{scroll-behavior:smooth}
   hyphens: auto;
   -webkit-hyphens: auto;
   text-wrap: pretty;
+}
+
+/* Colonnes étroites : jamais justifiées, quelle que soit la règle au-dessus.
+   `start` et non `inherit` — `inherit` reprendrait la justification de
+   l'ancêtre, donc ne corrigerait rien (c'est le piège de la liste
+   « jamais justifiés » plus bas, qui utilise `inherit`). */
+.vnews-t, .vnews-liste li, .vnews-liste a,
+.vcle, .vcle-q, .vcle-d {
+  text-align: start;
+  hyphens: none;
+  -webkit-hyphens: none;
 }
 
 /* Titres, prix, libellés de bouton et pastilles : jamais justifiés. */
