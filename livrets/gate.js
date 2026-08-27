@@ -201,6 +201,15 @@
 
     prix: prix,
     joursRestants: function () { return etat.jours; },
+
+    /* Le jeton de la session ouverte. `livrets/cahier.js` en a besoin pour
+       enregistrer les réponses de l'élève sur api/cahier.php : c'est le MÊME
+       jeton que celui qui a servi à ouvrir le cahier, donc la même identité et
+       la même échéance — un second secret aurait fait un second endroit où se
+       tromper. Rendu vide tant qu'aucune session n'est ouverte, jamais nul :
+       un appelant qui l'oublierait enverrait alors une chaîne vide, que le
+       serveur refuse proprement en 401. */
+    jeton: function () { return jetonLu() || ''; },
     /** opts.n > 1 → pack établissement. */
     acheter: function (opts) { ouvrirAchat(opts); }
   };

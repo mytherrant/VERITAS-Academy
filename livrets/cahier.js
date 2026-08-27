@@ -7,8 +7,8 @@
    peut annoter exercice par exercice.
 
    ── LA CLÉ D'UN EXERCICE, ET POURQUOI ELLE COMPTE ─────────────────────────
-   Chaque champ porte une clé « <ouvrage>/b<bloc>/r<run> », dérivée de la
-   POSITION DU BLOC dans le document.
+   Chaque champ porte une clé « <ouvrage>/s<séquence>/l<leçon>/<empreinte de la
+   consigne>/r<run> » : OÙ l'on est dans le cahier, et CE QUE dit l'exercice.
 
    Le moteur d'origine numérotait les champs dans l'ordre où il les dessinait
    (« a1 », « a2 », « a3 »…). Tant que le document ne bouge pas, cela marche.
@@ -17,6 +17,12 @@
    les mauvaises questions, l'annotation du professeur désigne un autre
    exercice que celui qu'il a lu, et personne ne comprend pourquoi. Un cahier
    scolaire se corrige entre deux rentrées : la clé doit survivre à ça.
+
+   Mesuré sur un vrai cahier de 2ⁿᵈᵉ (55 champs), en ajoutant UN exercice :
+     compteur d'affichage → 55 réponses sur 55 changent d'exercice ;
+     indice de bloc       → 38 changent, 17 disparaissent ;
+     clé ci-dessus        → 55 intactes.
+   Voir tests/banc_cles_cahier.cjs, qui refait ce calcul à chaque déploiement.
 
    ── CE QUI SE PASSE QUAND LA CONNEXION TOMBE ──────────────────────────────
    L'élève travaille depuis un téléphone, au Cameroun. La ligne coupe. Donc :
@@ -320,24 +326,38 @@
     var self = this, h = '', champs = [];
     var cles = calculerCles(this.ouvrage, this.blocs);
 
+    /* COULEUR PAR SÉQUENCE — reprise des cahiers imprimés, où chaque séquence
+       a la sienne. Ce n'est pas de l'ornement : sur un cahier de 200 écrans,
+       la teinte dit « tu es toujours dans la séquence 3 » sans qu'on ait à
+       remonter au titre. On compte les séquences dans l'ORDRE où elles
+       passent, plutôt que de lire leur numéro : un cahier qui commence par une
+       séquence 0 (évaluation diagnostique) ou qui saute un numéro garderait
+       sinon une couleur incohérente. Six teintes, puis on recommence. */
+    var seqRang = 0, seqVue = null;
+
     this.blocs.forEach(function (b, i) {
       if (!b || typeof b !== 'object') return;
       var y = b.y || b.t || '';
       var cleBloc = cles[i];
+      if (y === 'module' || y === 'semaine' || y === 'sem' || y === 'section') {
+        var sig = String(b.no || b.n || b.num || i);
+        if (sig !== seqVue) { seqVue = sig; seqRang = (seqRang % 6) + 1; }
+      }
+      var teinte = seqRang || 1;
       var corps = b.r ? rendreRuns(b.r, cleBloc, champs) : esc(b.txt || '');
 
       if (ETIQUETTES[y]) {
         var no = b.no || b.n || '';
-        h += '<h3 class="ch-titre ch-' + esc(y) + '">'
+        h += '<h3 class="ch-titre ch-' + esc(y) + '" data-seq="' + teinte + '">'
           +  '<span class="ch-etq">' + esc(ETIQUETTES[y]) + (no ? ' ' + esc(no) : '') + '</span> '
           +  esc(b.title || b.titre || '') + (corps ? ' ' + corps : '') + '</h3>';
         return;
       }
       if (y === 'rubriqueH' || y === 'rubrique' || y === 'rubriqueB') {
-        h += '<div class="ch-rubrique">' + corps + '</div>'; return;
+        h += '<div class="ch-rubrique" data-seq="' + teinte + '">' + corps + '</div>'; return;
       }
       if (y === 'texte' || y === 'corpus' || y === 'corps' || y === 'texteT') {
-        h += '<div class="ch-texte">' + corps + '</div>'; return;
+        h += '<div class="ch-texte" data-seq="' + teinte + '">' + corps + '</div>'; return;
       }
       if (y === 'source') { h += '<p class="ch-source">' + corps + '</p>'; return; }
       if (y === 'image')  {
@@ -374,7 +394,7 @@
       if (BLOCS_A_REPONSE[y]) {
         var cleRep = cleBloc + '/rep';
         var dejaChamp = champs.some(function (c) { return c.indexOf(cleBloc + '/r') === 0; });
-        h += '<div class="ch-exo" data-bloc="' + esc(cleBloc) + '">'
+        h += '<div class="ch-exo" data-seq="' + teinte + '" data-bloc="' + esc(cleBloc) + '">'
           +  '<div class="ch-consigne">' + corps + '</div>';
         // Un bloc qui porte déjà ses pointillés n'a pas besoin d'une zone en
         // plus : on ne double pas le champ de réponse.
@@ -382,7 +402,16 @@
           champs.push(cleRep);
           h += '<span class="ch-champ ch-champ-large" data-cle="' + esc(cleRep) + '"></span>';
         }
-        h += '<div class="ch-annot" data-pour="' + esc(dejaChamp ? cleBloc : cleRep) + '"></div>'
+        /* La zone d'annotation vise le BLOC, pas un champ.
+           Elle visait d'abord le champ, et l'élève ne voyait rien : le
+           professeur annote « 2nde/s…/l1/w4vhkr/r2 » (le champ), tandis que la
+           zone cherchait « 2nde/s…/l1/w4vhkr » (le bloc). Deux clés voisines,
+           aucun rapprochement, et un mot du professeur invisible — le genre de
+           défaut dont personne ne se plaint parce que personne ne sait qu'il
+           manque quelque chose. Un exercice peut d'ailleurs porter plusieurs
+           champs : `peupler()` ramasse donc tout ce qui commence par la clé du
+           bloc. */
+        h += '<div class="ch-annot" data-pour="' + esc(cleBloc) + '"></div>'
           +  '</div>';
         return;
       }
@@ -428,12 +457,20 @@
     var zones = this.hote.querySelectorAll('.ch-annot');
     Array.prototype.forEach.call(zones, function (z) {
       var pour = z.getAttribute('data-pour');
-      var a = self.annotations[pour];
-      if (!a) { z.innerHTML = ''; z.className = 'ch-annot'; return; }
+      // Le professeur annote un CHAMP ; l'exercice peut en compter plusieurs.
+      // On ramasse donc la clé du bloc ET toutes celles qui en descendent,
+      // sans quoi son mot resterait invisible (constaté au banc du 26/08).
+      var lot = [];
+      for (var k in self.annotations) {
+        if (k === pour || k.indexOf(pour + '/') === 0) lot.push(self.annotations[k]);
+      }
+      if (!lot.length) { z.innerHTML = ''; z.className = 'ch-annot'; return; }
       z.className = 'ch-annot ch-annot-pleine';
-      z.innerHTML = '<span class="ch-annot-titre">Ton enseignant</span>'
-        + (a.note != null ? '<span class="ch-note">' + esc(a.note) + '/20</span>' : '')
-        + '<p>' + esc(a.texte || '') + '</p>';
+      z.innerHTML = lot.map(function (a) {
+        return '<span class="ch-annot-titre">Ton enseignant</span>'
+          + (a.note != null ? '<span class="ch-note">' + esc(a.note) + '/20</span>' : '')
+          + '<p>' + esc(a.texte || '') + '</p>';
+      }).join('');
     });
   };
 

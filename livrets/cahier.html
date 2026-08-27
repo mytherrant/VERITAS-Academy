@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mon cahier de français — Centre VÉRITAS</title>
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'none'">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Klee+One&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/livrets/cahier.css?v=1.20.0">
+<style>
+  body{ margin:0; background:#F4F7FB; color:#1B2431;
+        font-family:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif; }
+  .bar{ position:sticky; top:0; z-index:50; background:#16284F; color:#fff;
+        display:flex; align-items:center; gap:12px; padding:11px 16px; }
+  .bar h1{ font-size:15px; font-weight:600; margin:0; flex:1;
+           white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar button{ background:transparent; border:1px solid rgba(255,255,255,.35); color:#fff;
+        border-radius:8px; font:inherit; font-size:13px; padding:6px 11px; cursor:pointer; min-height:34px; }
+  .zone{ padding:0 16px; }
+  .porte{ max-width:420px; margin:12vh auto; background:#fff; border:1px solid #E3E9F2;
+          border-radius:16px; padding:26px 24px; text-align:center;
+          box-shadow:0 2px 14px rgba(22,40,79,.07); }
+  .porte h2{ margin:0 0 6px; font-size:19px; color:#16284F; }
+  .porte p{ color:#54606F; font-size:14px; margin:0 0 18px; }
+  .porte input{ width:100%; box-sizing:border-box; font:inherit; font-size:17px;
+        text-align:center; letter-spacing:.14em; text-transform:uppercase;
+        padding:12px; border:1.5px solid #E3E9F2; border-radius:10px; margin-bottom:12px; }
+  .porte input:focus{ outline:none; border-color:#1B63C4; }
+  .pri{ width:100%; background:#F58220; color:#fff; border:none; border-radius:10px;
+        font:inherit; font-weight:600; font-size:15px; padding:12px; cursor:pointer; min-height:44px; }
+  .sec{ width:100%; background:#fff; color:#1B2431; border:1px solid #E3E9F2; border-radius:10px;
+        font:inherit; font-size:14px; padding:11px; cursor:pointer; margin-top:9px; min-height:44px; }
+  .err{ color:#A32626; font-size:13.5px; margin:0 0 10px; min-height:18px; }
+  .attente{ text-align:center; color:#54606F; padding:14vh 20px; font-size:14px; }
+</style>
+</head>
+<body>
+
+<div id="porte" class="porte" hidden>
+  <h2>Mon cahier de français</h2>
+  <p id="porteSous">Saisis le code reçu avec ton cahier.</p>
+  <p class="err" id="porteErr"></p>
+  <input id="code" autocomplete="off" autocapitalize="characters" spellcheck="false"
+         inputmode="text" placeholder="TON CODE" aria-label="Code d’accès">
+  <button class="pri" id="btnOuvrir" type="button">Ouvrir mon cahier</button>
+  <button class="sec" id="btnAcheter" type="button">Je n’ai pas de code — obtenir l’accès</button>
+</div>
+
+<div id="app" hidden>
+  <div class="bar">
+    <h1 id="titre">Mon cahier</h1>
+    <button id="btnFermer" type="button">Fermer</button>
+  </div>
+  <div class="zone"><div id="hote" class="ch-hote"></div></div>
+</div>
+
+<div id="attente" class="attente">Ouverture du cahier…</div>
+<div id="ch-voyant" class="ch-voyant"></div>
+
+<script src="/livrets/gate.js?v=1.20.0"></script>
+<script src="/livrets/cahier.js?v=1.20.0"></script>
+<script>
+/* ── Quel ouvrage ? ────────────────────────────────────────────────────────
+   Il vient de l'URL (`?o=2nde`). Ce n'est PAS un choix de droit : le serveur
+   ne se fie qu'au jeton, qui porte l'ouvrage et la version. Demander « 2nde »
+   avec un code de 6ᵉ ne donne rien — c'est éprouvé par tests/banc_livret_codes.
+   Ici, le paramètre ne sert qu'à savoir quel code réclamer à l'écran. */
+(function () {
+  'use strict';
+  var params  = new URLSearchParams(location.search);
+  var ouvrage = (params.get('o') || '6e').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+  var kind    = params.get('prof') ? 'guide' : 'livret';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var montrer = function (quoi) {
+    ['porte', 'app', 'attente'].forEach(function (i) { $(i).hidden = (i !== quoi); });
+  };
+
+  VRTLivret.config({ classe: ouvrage, kind: kind });
+  if (kind === 'guide') {
+    $('porteSous').textContent = 'Saisis ton code enseignant.';
+    $('btnAcheter').hidden = true;
+  }
+
+  var cahier = null;
+
+  function ouvrirCahier() {
+    /* Le contenu arrive du serveur et s'installe dans une globale. On accepte
+       plusieurs noms parce que les cahiers n'ont pas tous la même origine : les
+       Bords exportent des blocs `{y,r}`, les livrets du 2ⁿᵈ cycle un objet
+       `MANUEL_DATA` avec ses `blocks`. Le moteur, lui, ne voit qu'une liste de
+       blocs — c'est le seul endroit où la différence se règle. */
+    var w = window;
+    var blocs = w.CAHIER_BLOCS
+             || (w.MANUEL_DATA && w.MANUEL_DATA.blocks)
+             || (Array.isArray(w.BOOKLET) ? w.BOOKLET : null)
+             || (w.CONTENT && w.CONTENT.blocks)
+             || (Array.isArray(w.CONTENT) ? w.CONTENT : null);
+
+    if (!blocs || !blocs.length) {
+      /* On le DIT, au lieu d'afficher un cahier vide. Un cahier ouvert mais
+         muet fait croire à l'élève qu'il a payé pour rien, et il n'a aucun
+         moyen de savoir que c'est le dépôt du contenu qui manque. */
+      montrer('attente');
+      $('attente').innerHTML = 'Ton accès est bien ouvert, mais le contenu de ce cahier '
+        + 'n’est pas encore déposé sur le serveur.<br><br>'
+        + 'Écris à <strong>contact@veritas-school.com</strong> en indiquant ton niveau : '
+        + 'ce sera réglé sans que tu aies à repayer.';
+      return;
+    }
+
+    var e = VRTLivret.etat();
+    $('titre').textContent = 'Mon cahier — ' + (e.classe || ouvrage).toUpperCase()
+                           + (kind === 'guide' ? ' · enseignant' : '');
+    cahier = new VRTCahier({
+      ouvrage: e.classe || ouvrage,
+      token:   VRTLivret.jeton(),
+      hote:    $('hote'),
+      blocs:   blocs,
+      // L'enseignant LIT la copie : il n'écrit pas à la place de l'élève.
+      lecture: kind === 'guide'
+    });
+    cahier.demarrer();
+    montrer('app');
+  }
+
+  VRTLivret.onOuvert = ouvrirCahier;
+
+  // Reprise silencieuse d'une session encore valide (rechargement, retour).
+  VRTLivret.resume().then(ouvrirCahier).catch(function () { montrer('porte'); $('code').focus(); });
+
+  $('btnOuvrir').addEventListener('click', function () {
+    var v = ($('code').value || '').trim();
+    $('porteErr').textContent = '';
+    if (!v) { $('porteErr').textContent = 'Saisis ton code.'; return; }
+    $('btnOuvrir').disabled = true;
+    $('btnOuvrir').textContent = 'Vérification…';
+    VRTLivret.unlock(v).then(ouvrirCahier).catch(function (err) {
+      $('porteErr').textContent = (err && err.message) || 'Code incorrect.';
+      $('btnOuvrir').disabled = false;
+      $('btnOuvrir').textContent = 'Ouvrir mon cahier';
+    });
+  });
+  $('code').addEventListener('keydown', function (ev) {
+    if (ev.key === 'Enter') $('btnOuvrir').click();
+  });
+  $('btnAcheter').addEventListener('click', function () { VRTLivret.acheter({}); });
+  $('btnFermer').addEventListener('click', function () { VRTLivret.fermer(); });
+})();
+</script>
+</body>
+</html>

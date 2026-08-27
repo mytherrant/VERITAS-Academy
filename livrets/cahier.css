@@ -113,10 +113,82 @@
 .ch-attente{ background:#FFF7ED; color:#8A5A16; border:1px solid #FCD9AE; }
 .ch-alerte{ background:#FDECEC; color:#A32626; border:1px solid #F5C6C6; }
 
+/* ════════════════════════════════════════════════════════════════════════════
+   COULEUR PAR SÉQUENCE
+   Reprise exacte des cahiers imprimés — l'élève qui a le papier sous les yeux
+   retrouve la même teinte à l'écran. Elle QUALIFIE, elle n'inonde pas : on la
+   met dans le filet de gauche du texte, dans la pastille du titre et dans la
+   rubrique. Jamais en aplat de fond : un aplat pastel derrière un paragraphe
+   fatigue à la lecture longue, et c'est un cahier qu'on lit une heure.
+   ════════════════════════════════════════════════════════════════════════ */
+[data-seq="1"]{ --seq:#0E6B63; }
+[data-seq="2"]{ --seq:#2C4E8F; }
+[data-seq="3"]{ --seq:#456B1E; }
+[data-seq="4"]{ --seq:#9A6413; }
+[data-seq="5"]{ --seq:#7A3070; }
+[data-seq="6"]{ --seq:#A33232; }
+
+.ch-texte[data-seq]{ border-left-color:var(--seq,#1B63C4); }
+.ch-titre[data-seq] .ch-etq{ background:var(--seq,#16284F); }
+.ch-titre[data-seq]{ border-bottom-color:color-mix(in srgb, var(--seq,#1B63C4) 26%, #E3E9F2); }
+.ch-rubrique[data-seq]{ color:var(--seq,#1B63C4); }
+.ch-rubrique[data-seq]::before{
+  content:''; display:inline-block; width:16px; height:3px; border-radius:2px;
+  background:var(--seq,#1B63C4); margin-right:8px; vertical-align:4px; }
+.ch-exo[data-seq]:focus-within{ border-color:var(--seq,#1B63C4); }
+.ch-exo[data-seq] .ch-saisie:focus{ border-bottom-color:var(--seq,#1B63C4); }
+
+/* ── Lecture confortable ─────────────────────────────────────────────────── */
+/* La consigne est justifiée elle aussi quand elle est longue — mais JAMAIS
+   les lignes courtes : justifier trois mots écarte les lettres jusqu'au
+   ridicule. `text-wrap:pretty` évite en plus le mot solitaire en fin de
+   paragraphe, là où le navigateur le sait faire. */
+.ch-consigne, .ch-encadre-c, .ch-corrige > div{
+  text-align:justify; hyphens:auto; -webkit-hyphens:auto; text-wrap:pretty; }
+.ch-texte{ text-wrap:pretty; }
+.ch-texte p{ margin:0 0 .7em; }
+.ch-texte p:last-child{ margin-bottom:0; }
+/* Une réplique de dialogue ne se justifie pas : la ligne est trop courte, et
+   le retrait pendant se lit mieux au fil. */
+.ch-texte .ch-dd, .ch-texte .ch-pc{ text-align:left; }
+
+/* ── Animations ──────────────────────────────────────────────────────────── */
+/* CSS pur, aucune librairie : le budget est de 150 Ko de JS pour toute la page.
+   Seules `opacity` et `transform` sont animées — ce sont les deux propriétés
+   que le navigateur traite sans refaire la mise en page, donc les seules qui
+   restent fluides sur un téléphone d'entrée de gamme. */
+@keyframes vRise{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+@keyframes vPop { from{ opacity:0; transform:scale(.96); }      to{ opacity:1; transform:none; } }
+@keyframes vGrow{ from{ transform:scaleX(0); }                  to{ transform:scaleX(1); } }
+
+.ch-titre, .ch-texte, .ch-exo, .ch-encadre-t, .ch-corrige{
+  animation:vRise .34s cubic-bezier(.22,.61,.36,1) both; }
+/* Un léger décalage de proche en proche : le cahier se pose, il n'apparaît pas
+   d'un bloc. Cinq crans suffisent — au-delà, l'élève attend. */
+.ch-hote > *:nth-child(5n+2){ animation-delay:.03s; }
+.ch-hote > *:nth-child(5n+3){ animation-delay:.06s; }
+.ch-hote > *:nth-child(5n+4){ animation-delay:.09s; }
+.ch-hote > *:nth-child(5n+5){ animation-delay:.12s; }
+
+.ch-annot-pleine{ animation:vPop .3s cubic-bezier(.22,.61,.36,1) both; }
+.ch-rubrique[data-seq]::before{ animation:vGrow .4s .1s ease-out both; transform-origin:left; }
+.ch-voyant:not(:empty){ animation:vPop .22s ease-out both; }
+
+/* Le champ de saisie ne s'anime PAS : il grandit sous la frappe, et une
+   transition de hauteur ferait sautiller le curseur pendant qu'on écrit. */
+
 @media (max-width:640px){
   .ch-hote{ padding:4px 0 72px; }
   .ch-texte{ padding:13px 14px; font-size:15.5px; }
   .ch-exo{ padding:12px 13px; }
   .ch-titre{ font-size:16px; }
 }
-@media (prefers-reduced-motion:reduce){ .ch-voyant{ transition:none; } }
+
+/* Le réglage système l'emporte sur tout ce qui précède : certains élèves ont
+   des vertiges au mouvement, et la page doit rester entièrement lisible. */
+@media (prefers-reduced-motion:reduce){
+  .ch-voyant{ transition:none; }
+  .ch-titre, .ch-texte, .ch-exo, .ch-encadre-t, .ch-corrige,
+  .ch-annot-pleine, .ch-rubrique[data-seq]::before, .ch-voyant:not(:empty){
+    animation:none !important; }
+}
