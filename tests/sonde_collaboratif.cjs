@@ -472,6 +472,18 @@ function serveurEquipes(opts) {
     juger('Sans équipe, la liste des membres ne montre que soi',
       v ? (v.membersView || []).length === 1 : false,
       v ? ((v.membersView || []).length + ' membre(s) affiché(s)') : '—');
+
+    /* Les messages de démonstration sont signés « Paul Etoa », « Jacques
+       Takou ». Ils ne partent jamais au serveur — ils n'ont pas
+       d'identifiant — mais les LIRE dans le fil d'une équipe qui ne compte
+       ni l'un ni l'autre laissait croire à une activité qui n'existait pas. */
+    const b = atelier(serveurEquipes());
+    const avant = b.renderVals ? (b.renderVals().chatMessages || []).length : -1;
+    b.state.compteId = 'accA';
+    const apres = b.renderVals ? (b.renderVals().chatMessages || []).length : -1;
+    juger('Les messages de démonstration disparaissent dès qu’un compte est connecté',
+      avant === 3 && apres === 0,
+      'visite guidée : ' + avant + ' message(s) · compte connecté : ' + apres);
   }
 
   const ok = resultats.filter(r => r.ok).length;

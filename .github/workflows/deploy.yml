@@ -266,6 +266,16 @@ jobs:
       - name: 💡 Atelier — les suggestions sont-elles fondées sur du réel ?
         run: node tests/sonde_gouts_atelier.cjs
 
+      # Les cartes d'abonnement portaient leurs prix et leurs quotas
+      # ECRITS EN DUR. L'administration reglait un plafond, le serveur
+      # l'appliquait, et la carte annoncait toujours l'ancien chiffre :
+      # l'enseignant lisait 30 exports et se voyait refuser le sixieme.
+      # Le serveur peut renommer une cle sans qu'aucune erreur ne se
+      # leve -- le client lit undefined et retombe sur ses valeurs en
+      # dur. Ce controle est le seul qui attrape cette divergence.
+      - name: 💰 Atelier — annonce-t-on le tarif qu'on exige ?
+        run: node tests/sonde_tarifs_atelier.cjs
+
       - name: 📋 Préparer les fichiers
         run: |
           mkdir -p deploy/api \

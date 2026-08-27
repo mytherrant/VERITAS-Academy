@@ -4,6 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Atelier de Français — Centre VÉRITAS</title>
+<!-- Canonique et robots ABSENTS jusqu'au 27/08/2026. La page était par
+     ailleurs inscrite dans AUCUN des neuf sitemaps déclarés au robots.txt :
+     rien ne disait à un moteur que cette URL existait ni laquelle indexer.
+     La barre oblique finale est celle que sert le serveur (/plateforme sans
+     barre redirige vers /plateforme/) : la canonique doit désigner la
+     destination, pas le raccourci. -->
+<link rel="canonical" href="https://veritas-school.com/plateforme/">
+<meta name="robots" content="index,follow">
 <meta name="description" content="Composez des épreuves de français conformes au programme MINESEC : corpus de textes indexés par classe et par module, exercices calibrés, relecture de conformité et export Word.">
 <!-- Le favicon vit à la racine du site (assets/ est copié tel quel par la CI) ;
      le chemin RELATIF fonctionne donc aussi bien en production, sur le banc
@@ -304,7 +312,7 @@
   main > section:nth-of-type(2){animation-delay:.04s}
   main > section:nth-of-type(3){animation-delay:.08s}
   main > section:nth-of-type(4){animation-delay:.12s}
-  main h1{animation:vrtGlisse .34s cubic-bezier(.22,.61,.36,1) both}
+  main h1,main .vrt-th{animation:vrtGlisse .34s cubic-bezier(.22,.61,.36,1) both}
 
   /* Les cartes se soulevent legerement : le relief dit « ceci s'ouvre ». */
   .vrt-carte, main article, main > div > div > button[style*="border-radius:13px"]{
@@ -779,7 +787,7 @@
   }
   @media (max-width:560px){
     header[data-noprint] input{font-size:12.5px!important}
-    main h1{font-size:22px!important}
+    main h1,main .vrt-th{font-size:22px!important}
   }
   /* ---------- TÉLÉPHONE : dégager la planche de travail ----------
      Mesuré sur un gabarit de 390 px AVANT correction : les quatre cartes de
@@ -1082,7 +1090,7 @@
   <sc-if value="{{ isAccueil }}" hint-placeholder-val="{{ true }}">
   <main style="flex:1;padding:28px 30px 40px;max-width:1560px;width:100%;margin:0 auto">
 
-    <h1 style="font-family:'Poppins';font-weight:700;font-size:30px;line-height:1.15;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.02em">Bonjour {{ me.first }}</h1>
+    <h2 style="font-family:'Poppins';font-weight:700;font-size:30px;line-height:1.15;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.02em" class="vrt-th">Bonjour {{ me.first }}</h2>
     <p style="font-size:14px;color:var(--c7a8598,#7a8598);margin:6px 0 24px">{{ team.name }}</p>
     <!-- Visite guidee : dire pourquoi les compteurs sont a zero. Un profil
          d'exemple n'ouvre pas de compte, donc pas de repertoire ; sans cette
@@ -1124,6 +1132,32 @@
         </div>
         <button onClick="{{ goEpreuves }}" style="{{ cardLink }}" style-hover="color:var(--c135a96,#135a96)">Voir tout mon travail <span>›</span></button>
       </section>
+
+      <!-- ============ TEXTES SUGGÉRÉS ============
+           Tirés des gestes RÉELS : ce qu'on a ouvert, mis au panier, ajouté
+           à une épreuve. Sous trois gestes, la section entière disparaît —
+           on n'invente pas un goût, et proposer « les textes que vous
+           aimez » à qui n'a rien ouvert apprend au lecteur que le reste
+           ment aussi. Chaque suggestion DIT sa raison : « du même auteur »
+           se vérifie, donc se croit. -->
+      <sc-if value="{{ aDesSuggestions }}" hint-placeholder-val="{{ true }}">
+      <section style="{{ cardStyle }}">
+        <h2 class="vrt-titre-file" style="{{ cardTitle }}">Textes qui pourraient vous servir</h2>
+        <p style="font-size:12.5px;color:var(--c8b97a8,#8b97a8);margin:0 0 14px;line-height:1.55">D’après les textes que vous avez ouverts et composés.</p>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <sc-for list="{{ suggestions }}" as="sg" hint-placeholder-count="4">
+            <button onClick="{{ sg.ouvrir }}" style="display:flex;gap:11px;align-items:flex-start;background:none;border:1px solid var(--ce6ecf3,#e6ecf3);border-radius:11px;padding:11px 13px;cursor:pointer;text-align:left;width:100%" style-hover="border-color:var(--c1a72bb,#1a72bb);background:var(--cf7f9fc,#f7f9fc)">
+              <span style="flex:none;width:7px;height:7px;border-radius:50%;background:{{ sg.dot }};margin-top:6px"></span>
+              <span style="flex:1;min-width:0;text-align:left">
+                <span style="display:block;font-size:13px;font-weight:700;color:var(--c22303f,#22303f);line-height:1.4">{{ sg.auteur }}</span>
+                <span style="display:block;font-size:12px;color:var(--c7a8598,#7a8598);line-height:1.45">{{ sg.titre }}</span>
+                <span style="display:block;font-size:11px;color:var(--c9aa5b5,#9aa5b5);margin-top:3px">{{ sg.raison }} · {{ sg.mots }} mots · {{ sg.niveau }}</span>
+              </span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+      </sc-if>
 
       <section style="{{ cardStyle }}">
         <h2 class="vrt-titre-file vrt-hide-xs" style="{{ cardTitle }}">Activité de l'équipe</h2>
@@ -1229,7 +1263,7 @@
   <sc-if value="{{ isListe }}" hint-placeholder-val="{{ true }}">
   <main style="flex:1;max-width:1200px;margin:0 auto;padding:30px 28px 72px;width:100%">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap">
-      <h1 style="font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f)">Corpus</h1>
+      <h2 style="font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f)" class="vrt-th">Corpus</h2>
       <span style="font-size:13px;color:var(--c7a8598,#7a8598);font-weight:600">{{ filteredCount }} texte(s)</span>
       <span style="{{ activeEpPill }}">Épreuve active : {{ activeEpTitle }}</span>
       <div style="margin-left:auto;display:flex;gap:12px;align-items:center">
@@ -1416,7 +1450,7 @@
   <sc-if value="{{ isEpreuves }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;max-width:1200px;margin:0 auto;padding:30px 28px 72px;width:100%">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap">
-      <h1 style="font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f)">Épreuves</h1>
+      <h2 style="font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f)" class="vrt-th">Épreuves</h2>
       <div style="display:flex;gap:4px;background:var(--ceaf1f8,#eaf1f8);border-radius:10px;padding:4px;margin-left:6px">
         <button onClick="{{ epFilterAll }}" style="{{ epTabAll }}">Toutes</button>
         <button onClick="{{ epFilterMine }}" style="{{ epTabMine }}">Les miennes</button>
@@ -1802,8 +1836,8 @@
   <!-- ============ ÉQUIPE ============ -->
   <sc-if value="{{ isEquipe }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;max-width:1100px;margin:0 auto;padding:30px 28px 72px;width:100%">
-    <h1 style="font-size:26px;font-weight:700;margin:0 0 4px;color:var(--c14375f,#14375f)">{{ team.name }}</h1>
-    <p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 24px">{{ memberCount }} membres · Abonnement {{ team.plan }}</p>
+    <h2 style="font-size:26px;font-weight:700;margin:0 0 4px;color:var(--c14375f,#14375f)" class="vrt-th">{{ team.name }}</h2>
+    <p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 24px">{{ memberCount }} membre(s) · Abonnement {{ team.plan }}</p>
     <!-- ============ INVITER UN COLLÈGUE ============
          Auditée absente le 25/08 : on ne pouvait inviter que des profils
          déjà présents, et le code du groupe ne se saisissait que dans le
@@ -1927,7 +1961,7 @@
   <sc-if value="{{ isProfil }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;max-width:1100px;margin:0 auto;padding:28px 30px 48px;width:100%">
 
-    <h1 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0 0 18px;color:var(--c14375f,#14375f);letter-spacing:-.015em">Mon compte</h1>
+    <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0 0 18px;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Mon compte</h2>
 
     <div style="display:flex;gap:6px;border-bottom:1px solid var(--ce6ecf3,#e6ecf3);margin-bottom:22px;overflow-x:auto">
       <sc-for list="{{ profTabs }}" as="t" hint-placeholder-count="4">
@@ -2050,7 +2084,7 @@
   <sc-if value="{{ isActivite }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;padding:28px 30px 44px;max-width:1080px;width:100%;margin:0 auto">
     <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:16px">
-      <h1 style="font-family:'Poppins';font-weight:700;font-size:26px;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em">Activité</h1>
+      <h2 style="font-family:'Poppins';font-weight:700;font-size:26px;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Activité</h2>
       <span style="font-size:13px;color:var(--c7a8598,#7a8598)">{{ actTotal }}</span>
     </div>
 
@@ -2167,7 +2201,7 @@
     <div data-print-sheet="1" style="max-width:820px;margin:28px auto;background:var(--cffffff,#fff);box-shadow:0 6px 28px rgba(20,55,95,.14);border-radius:6px;padding:56px 60px 64px">
       <div style="text-align:center;border-bottom:2px solid var(--c14375f,#14375f);padding-bottom:18px;margin-bottom:8px"><div style="font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--c5a6678,#5a6678);font-weight:600">République du Cameroun · MINESEC</div><div style="font-family:'Poppins';font-size:16px;font-weight:600;margin-top:6px;color:var(--c14375f,#14375f)">{{ epView.etab }}</div></div>
       <div style="display:flex;justify-content:space-between;font-size:12.5px;color:var(--c3a4658,#3a4658);margin-bottom:26px;flex-wrap:wrap;gap:6px"><span>Classe : <strong style="font-weight:700">{{ epView.classe }}</strong></span><span>Durée : <strong style="font-weight:700">{{ epView.duree }}</strong></span><span>Coef. : <strong style="font-weight:700">{{ epView.coeff }}</strong></span><span>{{ epView.date }}</span></div>
-      <h1 style="font-family:'Poppins';font-size:23px;font-weight:700;text-align:center;margin:0 0 6px;color:var(--c14375f,#14375f)">{{ epView.title }}</h1>
+      <h2 style="font-family:'Poppins';font-size:23px;font-weight:700;text-align:center;margin:0 0 6px;color:var(--c14375f,#14375f)" class="vrt-th">{{ epView.title }}</h2>
       <p style="text-align:center;font-size:13px;font-style:italic;color:var(--c5a6678,#5a6678);margin:0 0 34px;text-wrap:pretty">{{ epView.consigne }}</p>
       <div style="display:flex;flex-direction:column;gap:34px">
         <sc-for list="{{ printFiches }}" as="f" hint-placeholder-count="2">
@@ -2188,7 +2222,7 @@
   <main style="flex:1;max-width:1560px;margin:0 auto;padding:28px 30px 44px;width:100%">
 
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
-      <h1 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em">Cours &amp; leçons</h1>
+      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Cours &amp; leçons</h2>
       <button onClick="{{ newCoursDirect }}" style="{{ btnPrimaire }}" style-hover="background:var(--c135a96,#135a96)">{{ topIcPlus }}<span>Créer un cours</span></button>
     </div>
     <p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 18px;max-width:78ch">Composez vos leçons à partir de gabarits conformes au programme MINESEC : objectif en agir compétent, phases de la démarche, corpus et activité d'intégration.</p>
@@ -2471,7 +2505,7 @@
   <main style="flex:1;max-width:1360px;margin:0 auto;padding:28px 30px 48px;width:100%">
 
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px;flex-wrap:wrap">
-      <h1 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em">Administration</h1>
+      <h2 style="font-family:'Poppins';font-size:26px;font-weight:700;margin:0;color:var(--c14375f,#14375f);letter-spacing:-.015em" class="vrt-th">Administration</h2>
       <span style="{{ admScopeChip }}">{{ admScope }}</span>
     </div>
     <p style="font-size:13.5px;color:var(--c7a8598,#7a8598);margin:0 0 18px;max-width:80ch">Tout ce qui est réglé ici s'applique immédiatement à votre groupe. Les réglages sont conservés localement tant que le raccordement au serveur VÉRITAS n'est pas fait.</p>
@@ -2664,7 +2698,7 @@
       <div style="width:56px;height:56px;border-radius:15px;background:var(--sb-logo-bg);display:grid;place-items:center;margin:0 auto 18px">{{ loginIcLogo }}</div>
       <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-weight:700;margin-bottom:12px">Atelier de Français · Français MINESEC</div>
       <h1 style="font-family:'Poppins';font-size:31px;font-weight:700;line-height:1.2;margin:0 auto 14px;max-width:20ch;color:var(--c14375f,#14375f);letter-spacing:-.02em">Un espace collaboratif pour vos cours et vos épreuves</h1>
-      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Composez vos épreuves et vos leçons à partir de 1 040 textes vérifiés, avec un garde-fou qui contrôle la conformité MINESEC pendant que vous écrivez.</p>
+      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Composez vos épreuves et vos leçons à partir de 1 040 textes vérifiés — dont 1 014 libres de droits, ouverts sans abonnement — avec un garde-fou qui contrôle la conformité MINESEC pendant que vous écrivez.</p>
 
       <!-- ═══════════ DÉMONSTRATION ANIMÉE ═══════════
            Elle remplace la « Visite guidée » par profils d'exemple, qui
@@ -2684,7 +2718,7 @@
             <!-- 1 · se connecter -->
             <div class="vrt-scene">
               <h4><b>1</b>Se connecter</h4>
-              <p>Votre compte VÉRITAS ouvre les 1 040 textes du répertoire.</p>
+              <p>Votre compte VÉRITAS ouvre les 1 040 textes du répertoire, dont 1 014 libres de droits.</p>
               <div class="vrt-boite" style="max-width:290px">
                 <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:5px">IDENTIFIANT</div>
                 <div style="height:7px;border-radius:4px;background:var(--ceef2f7,#eef2f7);margin-bottom:11px"><div class="vrt-saisie"></div></div>
@@ -2838,7 +2872,7 @@
   <sc-if value="{{ isAbo }}" hint-placeholder-val="{{ false }}">
   <main style="flex:1;max-width:1100px;margin:0 auto;padding:34px 28px 72px;width:100%">
     <button onClick="{{ goEquipe }}" style="background:none;border:none;color:var(--c1a72bb,#1a72bb);font-size:13px;cursor:pointer;padding:0;margin-bottom:16px;font-weight:600" style-hover="color:var(--c135a96,#135a96)">{{ icRetour }} Équipe</button>
-    <h1 style="font-size:27px;font-weight:700;margin:0 0 6px;color:var(--c14375f,#14375f)">Abonnement &amp; quotas</h1>
+    <h2 style="font-size:27px;font-weight:700;margin:0 0 6px;color:var(--c14375f,#14375f)" class="vrt-th">Abonnement &amp; quotas</h2>
     <p style="font-size:14px;color:var(--c5a6678,#5a6678);margin:0 0 26px;max-width:70ch;text-align:justify">Le quota d'épreuves générées est limité par mois selon le plan, afin d'éviter les abus. Le compteur se réinitialise chaque début de mois et s'applique à l'équipe comme à chaque membre.</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px">
       <sc-for list="{{ plansView }}" as="p" hint-placeholder-count="4">
@@ -2867,7 +2901,7 @@
 
       <span class="vrt-intro-sceau" style="{{ introSceauStyle }}">{{ introSceau }}</span>
 
-      <h1 class="vrt-intro-titre" style="font-family:'Poppins';font-size:32px;font-weight:700;margin:0 0 10px;letter-spacing:-.02em;line-height:1.15;color:var(--c14375f,#14375f)">{{ introTitre }}</h1>
+      <h2 class="vrt-intro-titre vrt-th" style="font-family:'Poppins';font-size:32px;font-weight:700;margin:0 0 10px;letter-spacing:-.02em;line-height:1.15;color:var(--c14375f,#14375f)">{{ introTitre }}</h2>
       <p class="vrt-intro-sous" style="font-size:15px;line-height:1.65;color:var(--c5a6678,#5a6678);margin:0 auto 26px;max-width:52ch">{{ introSous }}</p>
 
       <div class="vrt-intro-corps">
@@ -3043,7 +3077,15 @@
   </div>
   </sc-if>
 
-  <footer data-noprint="1" style="margin-top:auto;background:var(--cffffff,#fff);border-top:1px solid var(--ce6ecf3,#e6ecf3);padding:18px 26px;font-size:11.5px;color:var(--c8b97a8,#8b97a8);display:flex;gap:10px 16px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center"><span style="display:flex;gap:16px"><span>CGU</span><span>Confidentialité</span><span>Support</span></span></footer>
+  <!-- ── Ce pied de page ne CLIQUAIT PAS (audit du 27/08/2026) ────────────────
+     « CGU », « Confidentialité » et « Support » étaient trois <span> nus :
+     ni href, ni onclick, `cursor:auto`. Sur une page qui demande un identifiant
+     et un mot de passe, on affichait donc trois mentions légales qui ne menaient
+     nulle part — et l'enseignant n'avait aucun moyen de revenir au site : toute
+     la page ne comptait qu'UN seul <a href>.
+     « CGU » devient « CGV » : c'est le document qui existe réellement.
+     Le lien « Centre VÉRITAS » rétablit le chemin du retour. -->
+<footer data-noprint="1" style="margin-top:auto;background:var(--cffffff,#fff);border-top:1px solid var(--ce6ecf3,#e6ecf3);padding:18px 26px;font-size:11.5px;color:var(--c8b97a8,#8b97a8);display:flex;gap:10px 16px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center"><span style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center"><a href="/" style="color:inherit">Centre VÉRITAS</a><a href="/legal/cgv.html" style="color:inherit">CGV</a><a href="/legal/confidentialite.html" style="color:inherit">Confidentialité</a><a href="/legal/mentions-legales.html" style="color:inherit">Mentions légales</a><a href="https://wa.me/237697637739" target="_blank" rel="noopener" style="color:inherit">Support</a></span></footer>
   </div>
 </div>
 </x-dc>
@@ -3272,7 +3314,26 @@ class Component extends DCLogic {
     sur(()=>this._reconcilierPaiements(),'paiements en attente');
     sur(()=>this._installerProtection(),'protection du corpus');
     sur(()=>this._installerRetour(),'touche retour');
+    /* REPRISE D'IDENTITE. Un poste connecte AVANT ce correctif a garde
+       `currentUserId:'u1'` alors que son compte est bien enregistre :
+       la connexion se contentait alors de RENOMMER le profil de
+       demonstration. Sans cette reprise, il resterait `u1` pour
+       toujours -- donc proprietaire d'aucune equipe, et signant son
+       travail d'un identifiant que le serveur ignore. */
+    sur(()=>{const st=this.state;
+      if(st.compteId&&st.currentUserId!==st.compteId){
+        this._adopterIdentite(st.compteId,(this._me()||{}).name||'');
+        this._persistLocal();
+      }},'reprise d’identite');
     sur(()=>this._lireInvitation(),'lien d’invitation');
+    /* Une première astuce après quelques secondes — le temps que l'écran se
+       pose — puis une toutes les trois minutes. `_montrerAstuce` refuse
+       d'elle-même d'en montrer deux en moins d'une minute, et se tait quand
+       l'onglet est en arrière-plan. */
+    sur(()=>{
+      this._astuceT0=setTimeout(()=>this._montrerAstuce(),6000);
+      this._astucePoll=setInterval(()=>this._montrerAstuce(),180000);
+    },'astuces');
     /* Jeton deja pose (l utilisateur revient) : la synchro peut demarrer
        tout de suite. Sinon elle attend la connexion. */
     sur(()=>{if(this._jeton())this._installerSync();},'synchro du groupe');
@@ -4127,7 +4188,17 @@ class Component extends DCLogic {
   _panierToggle(nn){
     const p=(this.state.panier||[]).slice();
     const i=p.indexOf(nn);
-    if(i>=0)p.splice(i,1);else p.push(nn);
+    if(i>=0)p.splice(i,1);
+    else{
+      p.push(nn);
+      /* Poids 2, entre ouvrir une fiche (1) et l'ajouter a une epreuve (3).
+         Mettre un texte de cote n'engage pas encore de travail, mais c'est
+         deja un choix delibere -- bien plus qu'un coup d'oeil.
+         Ce poids etait DOCUMENTE et n'etait applique nulle part : le geste
+         le plus revelateur du parcours ne pesait rien. On ne compte que
+         l'ajout ; retirer du panier n'est pas un gout, c'est un remords. */
+      this._noterGout(nn,2);
+    }
     this._save('minesec_panier',p);
     this.setState({panier:p});
   }
@@ -4379,6 +4450,180 @@ class Component extends DCLogic {
       document.body.removeChild(z);
       return !!r;
     }catch(e){return false;}
+  }
+  /* ═══════════ GOÛTS, SUGGESTIONS ET ASTUCES ═══════════
+     Règle arrêtée avec Jacques et valable partout : on n'invente ni
+     activité ni statistique. Base vide = rien affiché. Une recommandation
+     fabriquée se remarque immédiatement, et apprend au lecteur que le
+     reste ment aussi. */
+
+  /* Le profil de goûts vit dans le navigateur et n'en sort jamais : il ne
+     contient ni nom, ni identifiant, seulement des compteurs par auteur,
+     type, cycle et module. */
+  _gouts(){
+    if(this._goutsCache)return this._goutsCache;
+    const d=this._load('minesec_gouts',null)||{};
+    this._goutsCache={auteurs:d.auteurs||{},types:d.types||{},
+      cycles:d.cycles||{},groupes:d.groupes||{},vus:d.vus||[],gestes:d.gestes||0};
+    return this._goutsCache;
+  }
+  /* Chaque geste RÉEL pèse. Ouvrir vaut 1, mettre au panier 2, ajouter à
+     une épreuve 3 : c'est l'ajout qui engage un travail, donc lui qui dit
+     le plus sur ce qu'on aime. */
+  _noterGout(n,poids){
+    const f=(this.all||[]).find(x=>x.n===n);
+    if(!f)return;
+    const g=this._gouts();
+    const p=poids||1;
+    const cpt=(o,k)=>{if(k)o[k]=(o[k]||0)+p;};
+    cpt(g.auteurs,f.author);cpt(g.types,f.type);
+    cpt(g.cycles,f.cycle);cpt(g.groupes,f.group);
+    if(g.vus.indexOf(n)<0){g.vus.push(n);if(g.vus.length>400)g.vus.shift();}
+    g.gestes=(g.gestes||0)+1;
+    this._save('minesec_gouts',g);
+  }
+  /* Textes non vus, notés par ce qu'ils partagent avec ce qui a plu.
+     L'AUTEUR domine (5) : c'est le lien qu'un professeur de français suit
+     vraiment — on cherche « encore du Maupassant », pas « encore du
+     narratif ». Module et type suivent (2), le cycle ferme la marche (1).
+
+     Sous TROIS gestes, on ne rend RIEN. Deux clics ne sont pas un goût, et
+     se tromper la première fois coûte la confiance qu'on cherche. */
+  _suggestions(combien){
+    const g=this._gouts();
+    if((g.gestes||0)<3)return [];
+    const vus={};(g.vus||[]).forEach(n=>{vus[n]=1;});
+    const note=f=>{
+      let s=0;
+      s+=(g.auteurs[f.author]||0)*5;
+      s+=(g.groupes[f.group]||0)*2;
+      s+=(g.types[f.type]||0)*2;
+      s+=(g.cycles[f.cycle]||0)*1;
+      return s;
+    };
+    return (this.all||[])
+      .filter(f=>f&&!vus[f.n]&&f.author)
+      .map(f=>({f:f,s:note(f)}))
+      .filter(x=>x.s>0)
+      .sort((a,b)=>b.s-a.s)
+      .slice(0,combien||6)
+      .map(x=>x.f);
+  }
+  /* Pourquoi CE texte est suggéré. Une recommandation qui ne dit pas sa
+     raison ressemble à de la réclame ; dire « du même auteur » la rend
+     vérifiable, donc croyable. */
+  _raisonSuggestion(f){
+    const g=this._gouts();
+    if(g.auteurs[f.author])return 'du même auteur';
+    if(g.groupes[f.group])return 'même module';
+    if(g.types[f.type])return 'même type de texte';
+    return 'même cycle';
+  }
+  /* ---- ASTUCES ÉPHÉMÈRES ----------------------------------------------
+     Toutes sortent du RÉFÉRENTIEL (minesec.js) ou de l'état réel du
+     compte. Le fait que « pourquoi » et « comment » soient absents des
+     3 372 questions officielles est une MESURE, pas un conseil inventé —
+     et c'est ce qui la rend utile. Une astuce inventée se repère, et
+     discrédite les vraies du même coup. */
+  _astuces(){
+    const out=[];
+    const M=(typeof MINESEC!=='undefined')?MINESEC:null;
+    /* 1. Ce que le corpus officiel n'emploie jamais. */
+    try{
+      (M&&M.questionnement&&M.questionnement.aEviter||[]).forEach(a=>{
+        out.push({t:'À éviter dans vos questions',
+          c:'« '+a.motif+' » — '+a.pourquoi});
+      });
+    }catch(e){}
+    /* 2. L'équilibre des niveaux, en proportions mesurées. */
+    try{
+      const e=M&&M.questionnement&&M.questionnement.equilibre;
+      if(e&&e.reperage){
+        out.push({t:'Équilibrer une épreuve',
+          c:'Repérage '+e.reperage[0]+'–'+e.reperage[1]+' % des points, analyse '
+            +e.analyse[0]+'–'+e.analyse[1]+' %, interprétation '+e.interpretation[0]
+            +'–'+e.interpretation[1]+' %, production '+e.production[0]+'–'
+            +e.production[1]+' %. Une épreuve faite de repérage seul ne classe personne.'});
+      }
+    }catch(e){}
+    /* 3. Les formulations bannies des objectifs. */
+    try{
+      (M&&M.formulations&&M.formulations.objectifsBannis||[]).slice(0,4).forEach(o=>{
+        out.push({t:'Formulation à bannir',c:'« '+o.motif+' » — '+o.pourquoi});
+      });
+    }catch(e){}
+    /* 4. L'état RÉEL du compte. Aucun chiffre inventé : ce sont les siens. */
+    try{
+      const st=this.state;
+      const brouillons=(st.epreuves||[]).filter(x=>x.status==='brouillon').length;
+      if(brouillons)out.push({t:'Reprendre où vous en étiez',
+        c:brouillons+' épreuve'+(brouillons>1?'s':'')+' en brouillon vous attend'
+          +(brouillons>1?'ent':'')+'.'});
+      const relire=(st.epreuves||[]).filter(x=>x.status==='relecture').length;
+      if(relire)out.push({t:'En attente de relecture',
+        c:relire+' épreuve'+(relire>1?'s':'')+' attend'+(relire>1?'ent':'')+' un avis.'});
+      const d=st.corpusDroit||{};
+      if(d.motif==='essai'&&d.resteJours!=null)
+        out.push({t:'Votre essai',c:'Il reste '+(d.resteJours|0)+' jour'
+          +((d.resteJours|0)>1?'s':'')+'. L’abonnement mensuel ouvre tout à 800 FCFA.'});
+    }catch(e){}
+    return out;
+  }
+  /* Une astuce paraît quelques secondes puis s'efface. Jamais deux fois la
+     même d'affilée, jamais plus d'une par minute : un conseil qui insiste
+     cesse d'être un conseil et devient une gêne. */
+  _montrerAstuce(){
+    try{
+      if(document.hidden)return;
+      const t=Date.now();
+      if(this._astuceLe&&t-this._astuceLe<60000)return;
+      const l=this._astuces();
+      if(!l.length)return;
+      /* Le titre est ce que le lecteur voit en gras : c'est LUI qui doit
+         changer. Quatre astuces s'appellent « Formulation a bannir » et
+         plusieurs « A eviter dans vos questions » ; decaler d'un seul rang
+         retombait donc sur une voisine au MEME titre, et la bulle paraissait
+         se repeter alors que le conseil differait. On tire desormais parmi
+         celles dont le titre change vraiment, et on ne se rabat sur le reste
+         que si toutes portent le meme -- auquel cas on evite au moins de
+         redonner mot pour mot la meme. */
+      const autreTitre=l.filter(x=>x.t!==this._astuceDerniere);
+      const autreTexte=l.filter(x=>(x.t+'|'+x.c)!==this._astuceSign);
+      const choix=autreTitre.length?autreTitre:(autreTexte.length?autreTexte:l);
+      const a=choix[Math.floor(Math.random()*choix.length)];
+      this._astuceDerniere=a.t;this._astuceSign=a.t+'|'+a.c;this._astuceLe=t;
+      this._bulleAstuce(a.t,a.c);
+    }catch(e){}
+  }
+  /* La bulle. Discrète, en bas, sans bouton : elle s'efface toute seule.
+     `pointer-events:none` — elle ne doit jamais intercepter un clic destiné
+     à ce qu'elle recouvre. */
+  _bulleAstuce(titre,corps){
+    try{
+      let b=document.getElementById('vrt-astuce');
+      if(!b){
+        b=document.createElement('div');b.id='vrt-astuce';
+        b.style.cssText='position:fixed;right:20px;bottom:20px;z-index:90;'
+          +'max-width:min(92vw,340px);background:var(--cffffff,#fff);'
+          +'border:1px solid var(--cd5e0ec,#d5e0ec);border-radius:13px;'
+          +'padding:13px 16px;box-shadow:0 10px 30px rgba(20,55,95,.14);'
+          +'opacity:0;transform:translateY(10px);transition:opacity .28s ease,transform .28s ease;'
+          +'pointer-events:none;font-family:Open Sans,sans-serif';
+        document.body.appendChild(b);
+      }
+      b.innerHTML='';
+      const h=document.createElement('div');
+      h.style.cssText='font-family:Poppins,sans-serif;font-size:12px;font-weight:700;'
+        +'color:var(--c1a72bb,#1a72bb);margin-bottom:4px';
+      h.textContent=titre;
+      const p=document.createElement('div');
+      p.style.cssText='font-size:12.5px;line-height:1.55;color:var(--c5a6678,#5a6678)';
+      p.textContent=corps;
+      b.appendChild(h);b.appendChild(p);
+      requestAnimationFrame(()=>{b.style.opacity='1';b.style.transform='none';});
+      clearTimeout(this._astuceT);
+      this._astuceT=setTimeout(()=>{b.style.opacity='0';b.style.transform='translateY(10px)';},7000);
+    }catch(e){}
   }
   /* ═══════════ SYNCHRONISATION DU GROUPE ═══════════
      Voir la note du correctif : `action=etat` existait et n'avait aucun
@@ -5008,12 +5253,64 @@ class Component extends DCLogic {
   /* Duree d'essai annoncee sur l'ecran de connexion. Elle est reglee par
      l'administration (DB.plateforme.offres) : l'ecrire en dur ici ferait
      mentir la page des qu'elle changerait. */
+  /* Le parametrage vient du SERVEUR, jamais de la page.
+     Les cartes portaient leurs prix, leurs quotas et leur nombre de places
+     ecrits en dur. L'administration reglait un plafond dans le panneau, le
+     serveur l'appliquait, et la carte continuait d'annoncer l'ancien chiffre :
+     l'enseignant lisait « 30 exports par mois » et se voyait refuser le
+     sixieme. On annonce desormais ce qu'on applique.
+     Le HTML pre-rendu reste la valeur par defaut : si la sonde echoue, la
+     carte garde ses chiffres au lieu de s'afficher vide. */
   _sondeOffres(){
     fetch(this._apiUrl('plateforme.php')+'?action=config',{method:'GET'})
       .then(r=>r.ok?r.json():null)
-      .then(j=>{if(j&&j.essai&&j.essai.jours!=null)
-        this.setState({essaiJours:(j.essai.jours|0)+(j.essai.cadeau|0)});})
+      .then(j=>{
+        if(!j) return;
+        const etat={};
+        const jours=(j.essai&&j.essai.jours!=null)?((j.essai.jours|0)+(j.essai.cadeau|0)):null;
+        if(jours!=null) etat.essaiJours=jours;
+        this._appliquerTarifs(j,jours);
+        /* Un setState meme vide est necessaire : les cartes se lisent dans
+           this.plans, que l'on vient de muter — sans nouveau rendu, l'ecran
+           garderait les anciens chiffres jusqu'au prochain clic. */
+        this.setState(etat);
+      })
       .catch(()=>{});
+  }
+
+  _fmtFcfa(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' '); }
+
+  _libellePlaces(n){
+    if(n==null) return null;
+    if(n<0) return 'Utilisateurs illimités';
+    if(n<=1) return '1 utilisateur';
+    return "Jusqu'à "+n+' enseignants';
+  }
+
+  _appliquerTarifs(j,jours){
+    const plans=this.plans||[];
+    for(let i=0;i<plans.length;i++){
+      const p=plans[i];
+      if(j.tarifs&&j.tarifs[p.id]>0) p.price=this._fmtFcfa(j.tarifs[p.id]);
+      const q=(j.paliers&&j.paliers[p.id])||null;
+      if(q&&q.epreuves!=null&&q.epreuves>=0) p.quota=q.epreuves;
+      if(j.places&&j.places[p.id]!=null){
+        const lib=this._libellePlaces(j.places[p.id]);
+        if(lib) p.seats=lib;
+      }
+      /* Les avantages sont des phrases : on ne reecrit que celles qui
+         ENONCENT un chiffre desormais connu du serveur. Reecrire tout le
+         reste reviendrait a effacer l'argumentaire. */
+      if(p.features&&p.features.length){
+        p.features=p.features.map(f=>{
+          if(q&&q.epreuves!=null&&q.epreuves>=0&&/^\d+\s+epreuves?\s*\/\s*mois$/i.test(f.normalize('NFD').replace(/[̀-ͯ]/g,'')))
+            return q.epreuves+' épreuves / mois';
+          if(p.id==='essai'&&jours!=null&&/essai/i.test(f)&&/semaine|jour/i.test(f))
+            return jours+' jour'+(jours>1?'s':'')+' d’essai';
+          return f;
+        });
+      }
+    }
   }
   /* Recharge l'index apres un changement de droit (connexion, deconnexion,
      abonnement). Meme sequence que le bouton « Reessayer » : sans le
@@ -5278,6 +5575,9 @@ class Component extends DCLogic {
      un texte, surtout celui qui pose probleme. */
   _toggleText(n){
     if(!this._perm(this._me().role).edit)return;
+    /* Poids 3 : c'est le seul geste qui engage un vrai travail, donc celui
+       qui dit le plus sur ce qu'on aime. */
+    this._noterGout(n,3);
     const a0=this._active();
     const present=!!(a0&&(a0.textIds||[]).includes(n));
     /* `versComposeur` : on emmene voir le resultat du geste. `_ensureDraft`
@@ -5674,6 +5974,7 @@ class Component extends DCLogic {
            tronquee sans explication. Sans cela le clic partait chercher le
            texte, recevait un 402, et l'echec etait avale en silence. */
         if(f._libre===false){this._murAbonnement();return;}
+        this._noterGout(f.n,1);
         this._completerTexte(f.n);this.setState({screen:'fiche',currentN:f.n},()=>window.scrollTo(0,0));},toggle:()=>this._toggleText(f.n)});
     const filtered=this._filtered();
     /* Combien de filtres sont posés : le bouton de repli doit le dire,
@@ -6005,7 +6306,7 @@ class Component extends DCLogic {
       {sceau:'book',titre:'Atelier de Fran\u00e7ais',
        sous:'Composer des \u00e9preuves et des le\u00e7ons conformes aux programmes MINESEC, \u00e0 partir d\u2019un corpus v\u00e9rifi\u00e9.',
        puces:[
-         {ic:'layers',t:'1 040 textes v\u00e9rifi\u00e9s',d:'Extraits d\u2019auteurs, class\u00e9s par cycle, module et type.'},
+         {ic:'layers',t:'1 040 textes v\u00e9rifi\u00e9s',d:'Extraits d\u2019auteurs class\u00e9s par cycle, module et type \u2014 dont 1 014 libres de droits.'},
          {ic:'search',t:'Garde-fou de conformit\u00e9',d:'Longueurs, bar\u00e8mes et structures contr\u00f4l\u00e9s pendant que vous \u00e9crivez.'},
          {ic:'users',t:'Travail \u00e0 plusieurs',d:'Relecture, validation, biblioth\u00e8que partag\u00e9e du d\u00e9partement.'},
          {ic:'file',t:'Impression et export Word',d:'Votre en-t\u00eate, votre logo, pr\u00eat \u00e0 tirer.'}]},
@@ -6279,7 +6580,15 @@ class Component extends DCLogic {
     const convs=(st.convs&&st.convs.length)?st.convs:[{id:'team',nom:'\u00c9quipe de fran\u00e7ais'}];
     const parConv=st.msgsByConv||{team:st.chatMsgs||[]};
     const convIdAct=convs.some(c=>c.id===st.convId)?st.convId:convs[0].id;
-    const msgsActifs=parConv[convIdAct]||(convIdAct==='team'?(st.chatMsgs||[]):[]);
+    /* LES MESSAGES DE DEMONSTRATION DISPARAISSENT DES QU'ON EST CONNECTE.
+       Trois messages signes « Paul Etoa » et « Jacques Takou » restaient
+       affiches dans le fil d'un enseignant dont l'equipe ne comptait ni
+       l'un ni l'autre. Ils ne partaient pas au serveur -- ils n'ont pas
+       d'identifiant, et `_msgsPartageables` les ecarte -- mais les LIRE
+       laissait croire a une activite d'equipe qui n'existait pas.
+       Ils servent la visite guidee : avant toute connexion, ils restent. */
+    const msgsActifs=(parConv[convIdAct]||(convIdAct==='team'?(st.chatMsgs||[]):[]))
+      .filter(m=>m&&(m.id||!st.compteId));
     const convActive=convs.find(c=>c.id===convIdAct)||convs[0];
 
     const HEURE=3600000,MAINTENANT=Date.now();
@@ -6290,7 +6599,12 @@ class Component extends DCLogic {
     const estEnLigne=id=>id===me.id||((MAINTENANT-(derniereAction[id]||0))<HEURE);
 
     const convList=convs.map(c=>{
-      const msgs=parConv[c.id]||(c.id==='team'?(st.chatMsgs||[]):[]);
+      /* Meme regle que le fil lui-meme : connecte, les messages de
+         demonstration ne comptent plus. La pastille annoncait « 3 non
+         lus » sur des messages d'exemple, et l'apercu citait un collegue
+         qui n'etait pas dans l'equipe. */
+      const msgs=(parConv[c.id]||(c.id==='team'?(st.chatMsgs||[]):[]))
+        .filter(m=>m&&(m.id||!st.compteId));
       const dernier=msgs[msgs.length-1];
       const u=dernier?(st.users.find(x=>x.id===dernier.userId)||{name:'?'}):null;
       const actif=c.id===convIdAct;
@@ -6490,7 +6804,10 @@ class Component extends DCLogic {
       /* Le nom affiche partout est celui du GROUPE ACTIF. st.team ne porte
          plus que le plan et les quotas : garder son ancien nom afficherait
          l'ancien etablissement apres une bascule ou une inscription. */
-      team:{...st.team,name:grpActif.nom},memberCount:st.users.length,
+      /* `st.users.length` comptait la table des PROFILS DE DEMONSTRATION :
+         l'en-tete annoncait « 6 membres » juste au-dessus d'une liste qui
+         n'en montrait qu'un. On compte les membres reels de l'equipe. */
+      team:{...st.team,name:grpActif.nom},memberCount:membresReels.length,
       meRemaining,meLimit,teamRemaining,teamLimit,teamUsed:tq.used,teamReset:new Date(tq.resetsOn).toLocaleDateString('fr-FR',{day:'numeric',month:'long'}),
       quotaNumStyle:'font-weight:700;color:'+(meRemaining<=3?'var(--cf39200,#f39200)':'var(--c14375f,#14375f)'),
       meBar:'height:100%;width:'+Math.min(100,Math.round(me.quota.used/Math.max(1,me.quota.limit)*100))+'%;background:'+(meRemaining<=3?'var(--cf39200,#f39200)':'var(--c1a72bb,#1a72bb)'),
@@ -6710,6 +7027,21 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       retourInscriptionStyle:'display:block;margin:11px auto 0;background:none;border:none;'
         +'color:var(--c1a72bb,#1a72bb);font-family:Poppins;font-size:12.5px;font-weight:700;'
         +'cursor:pointer;text-decoration:underline;padding:4px',
+      /* --- textes suggérés ---
+         Rien tant qu'il n'y a pas trois gestes réels : voir _suggestions(). */
+      ...(function(sug, moi){
+        return {
+          aDesSuggestions:sug.length>0,
+          suggestions:sug.map(f=>({
+            auteur:f.author||'Anonyme', titre:f.title||f.reference||'',
+            mots:f.words|0, niveau:f.level||'—',
+            raison:moi._raisonSuggestion(f),
+            dot:moi.dots[f.type]||'var(--c1a72bb,#1a72bb)',
+            ouvrir:()=>{moi._noterGout(f.n,1);moi._completerTexte(f.n);
+              moi.setState({screen:'fiche',currentN:f.n},()=>window.scrollTo(0,0));}
+          }))
+        };
+      })(this._suggestions(4), this),
       /* --- rappel de l'essai ---
          Muet pour un abonné : lui rappeler qu'il pourrait s'abonner serait
          au mieux inutile, au pire vexant. */
@@ -6920,8 +7252,8 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       introBouton:iE<INTRO.length-1?'Suivant':'Commencer',
       /* On ANNONCE les touches. Un panneau qui repond au clavier sans le dire
          n'y repond pas, pour qui ne l'essaie jamais. */
-      introAide:iE>0?'Entree ou → pour continuer · ← pour revenir · Échap pour passer'
-                    :'Entree ou → pour continuer · Échap pour passer',
+      introAide:iE>0?'Entrée ou → pour continuer · ← pour revenir · Échap pour passer'
+                    :'Entrée ou → pour continuer · Échap pour passer',
       introSuivant:()=>{
         if(iE<INTRO.length-1){this.setState({introEtape:iE+1});return;}
         this._save('minesec_intro_vue',true);

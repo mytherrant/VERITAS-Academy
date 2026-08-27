@@ -286,13 +286,100 @@ const serveur = http.createServer((req, res) => {
 
     /* ETAT DU GROUPE — le partage entre collegues.
        Garde en memoire, revision incrementale, comme le vrai serveur. */
+    /* EQUIPES — creer, lister, rejoindre, retirer, renommer, supprimer.
+       Miroir de api/plateforme.php?action=groupe. Le banc tient la meme regle
+       que le serveur : c'est LUI qui attribue l'identifiant, le code et
+       l'appartenance. Le navigateur ne les propose plus.
+       Sans ces reponses, l'ecran Equipe ne pouvait pas etre exerce ici : on
+       ne voyait ni la creation d'un espace, ni l'arrivee d'un collegue. */
+    if (u.pathname.indexOf('plateforme.php') >= 0 && action === 'groupe') {
+      const op = (u.searchParams.get('op') || 'lister').toLowerCase();
+      const moi = 'acc_banc_001';   // meme identifiant que ?action=session
+      const rendre = o => { res.writeHead(200,
+        { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(o)); };
+      const enrichir = g => Object.assign({}, g, { places: 15,
+        annuaire: (g.membres || []).reduce((a, id) => {
+          a[id] = { nom: id === moi ? 'Enseignant du banc' : 'Collegue ' + id.slice(-2) };
+          return a; }, {}) });
+      if (op === 'lister') {
+        noter('groupe lister');
+        return rendre({ ok: true, groupes: Object.keys(GROUPES)
+          .map(k => GROUPES[k])
+          .filter(g => (g.membres || []).indexOf(moi) >= 0)
+          .map(enrichir) });
+      }
+      let corps = '';
+      req.on('data', c => { corps += c; });
+      req.on('end', () => {
+        let j = {};
+        try { j = JSON.parse(corps || '{}'); } catch (e) {}
+        if (op === 'creer') {
+          const n = Object.keys(GROUPES).length + 1;
+          const g = { id: 'eq_banc' + n, nom: (j.nom || '').trim() || 'Mon etablissement',
+            code: 'BANC-' + (100 + n), type: 'ferme', proprietaire: moi,
+            membres: [moi], cree: Math.floor(Date.now() / 1000) };
+          GROUPES[g.id] = g;
+          noter('groupe creer ' + g.code);
+          return rendre({ ok: true, cree: true, groupe: enrichir(g) });
+        }
+        if (op === 'rejoindre') {
+          const code = String(j.code || '').toUpperCase();
+          const g = Object.keys(GROUPES).map(k => GROUPES[k])
+            .find(x => String(x.code || '').toUpperCase() === code);
+          noter('groupe rejoindre ' + code + (g ? ' ok' : ' inconnu'));
+          if (!g) return rendre({ ok: true, rejoint: false, code: 'code_inconnu',
+            error: 'Ce code ne correspond a aucune equipe.' });
+          if ((g.membres || []).indexOf(moi) < 0) g.membres.push(moi);
+          return rendre({ ok: true, rejoint: true, groupe: enrichir(g) });
+        }
+        if (op === 'renommer') {
+          const g = GROUPES[j.groupe || ''];
+          if (g) g.nom = String(j.nom || g.nom);
+          noter('groupe renommer');
+          return rendre({ ok: !!g, nom: g ? g.nom : '' });
+        }
+        if (op === 'retirer') {
+          const g = GROUPES[j.groupe || ''];
+          if (g) g.membres = (g.membres || []).filter(m => m !== (j.membre || moi));
+          noter('groupe retirer');
+          return rendre({ ok: !!g, retire: j.membre || moi });
+        }
+        if (op === 'supprimer') {
+          delete GROUPES[j.groupe || ''];
+          delete ETATS[j.groupe || ''];
+          noter('groupe supprimer');
+          return rendre({ ok: true, supprime: j.groupe });
+        }
+        rendre({ ok: false, error: 'Operation inconnue.', code: 'op' });
+      });
+      return;
+    }
+
+    /* ETAT DU GROUPE — le partage entre collegues.
+       Garde en memoire, revision incrementale, comme le vrai serveur.
+       L'objet `groupe` envoye par le client n'est PLUS lu : le serveur le
+       recopiait tel quel, et n'importe quel membre pouvait ainsi expulser
+       les autres. Un banc qui l'accepterait encore validerait un contrat
+       que la production a cesse d'honorer. */
     if (u.pathname.indexOf('plateforme.php') >= 0 && action === 'etat') {
       const gid = u.searchParams.get('groupe') || '';
+      const moi = 'acc_banc_001';   // meme identifiant que ?action=session
+      const g0 = GROUPES[gid];
+      const paquet = g => Object.assign({}, g, { places: 15,
+        annuaire: (g.membres || []).reduce((a, id) => {
+          a[id] = { nom: id === moi ? 'Enseignant du banc' : 'Collegue ' + id.slice(-2) };
+          return a; }, {}) });
+      if (!g0) {
+        noter('etat ' + req.method + ' ' + gid + ' -> 404');
+        res.writeHead(404, { 'Content-Type': 'application/json; charset=utf-8' });
+        return res.end(JSON.stringify({ ok: false, code: 'groupe_inconnu',
+          error: 'Equipe inconnue.' }));
+      }
       if (req.method === 'GET') {
         noter('etat GET ' + gid);
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
-        return res.end(JSON.stringify({ ok: true,
-          etat: ETATS[gid] || null, groupe: GROUPES[gid] || null }));
+        return res.end(JSON.stringify({ ok: true, etat: ETATS[gid] || null,
+          groupe: paquet(g0), annuaire: paquet(g0).annuaire }));
       }
       let corps = '';
       req.on('data', c => { corps += c; });
@@ -301,8 +388,7 @@ const serveur = http.createServer((req, res) => {
         let j = {};
         try { j = JSON.parse(corps || '{}'); } catch (e) {}
         const rev = ((ETATS[gid] && ETATS[gid].revision) || 0) + 1;
-        ETATS[gid] = { contenu: j.etat || {}, majPar: 'banc', majLe: Date.now(), revision: rev };
-        if (j.groupe && j.groupe.id) GROUPES[j.groupe.id] = j.groupe;
+        ETATS[gid] = { contenu: j.etat || {}, majPar: moi, majLe: Date.now(), revision: rev };
         res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({ ok: true, revision: rev }));
       });

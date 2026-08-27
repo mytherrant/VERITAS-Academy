@@ -185,6 +185,30 @@ function plat_essai_ouvrir(string $accId, int $herite = 0): int
     return $debut;
 }
 
+/**
+ * Tarif public de chaque plan de l'Atelier.
+ *
+ * ⚠️ On ne recopie PAS la table des prix ici. Le prix qui fait foi est celui
+ * que `vrt_prix_catalogue()` oppose au paiement ; un miroir de plus, c'est un
+ * miroir qui finira par diverger, et l'écart entre le prix AFFICHÉ et le prix
+ * EXIGÉ se paie en abonnements refusés au guichet sans que personne comprenne.
+ * On interroge donc la seule autorité, avec le repli codé en dur pour le seul
+ * cas où la fonction ne serait pas chargée.
+ */
+function plat_tarifs(array $db): array
+{
+    $repli = ['ens_mois' => 800, 'ens' => 5000, 'etab' => 30000, 'pro' => 70000];
+    $out   = [];
+    foreach (plat_plans_atelier() as $id) {
+        $v = null;
+        if (function_exists('vrt_prix_catalogue')) {
+            $v = vrt_prix_catalogue($db, 'subscription', $id);
+        }
+        $out[$id] = ($v !== null && (int) $v > 0) ? (int) $v : $repli[$id];
+    }
+    return $out;
+}
+
 /** Politique d'essai et de cadeaux, réglée par l'administration. */
 function plat_offres(array $db): array
 {
@@ -491,6 +515,20 @@ if ($action === 'config') {
            doit se voir ici et non au 503 reçu par un abonné. */
         'libre'      => $etat($LIBRE_FILE),
         'essai'      => ['jours' => $offres['joursEssai'], 'cadeau' => $offres['cadeauBienvenue']],
+        /* LE PARAMÉTRAGE RÉELLEMENT APPLIQUÉ, rendu en clair.
+           Les cartes d'abonnement de l'Atelier portaient leurs prix et leurs
+           quotas ÉCRITS EN DUR dans la page. L'administration pouvait donc
+           baisser un plafond ou relever un tarif sans que la carte change :
+           l'enseignant lisait « 30 exports » et s'en voyait refuser le
+           sixième, ou payait le montant affiché et se faisait rejeter parce
+           que le prix de référence avait bougé. Ce qu'on applique et ce qu'on
+           annonce partent maintenant du même endroit.
+           Ces valeurs sont publiques par nature : c'est le tarif affiché et
+           le service promis. */
+        'tarifs'     => plat_tarifs($db),
+        'paliers'    => is_array($db) ? plat_paliers($db) : plat_paliers([]),
+        'places'     => is_array($db) ? plat_places_palier($db) : plat_places_palier([]),
+        'offres'     => $offres,
         'baseLisible' => is_array($db),
     ]);
 }
