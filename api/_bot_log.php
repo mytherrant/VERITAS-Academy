@@ -13,7 +13,7 @@ header('Content-Type: application/json; charset=utf-8');
 // v1.2.2 : allowlist au lieu de '*'
 $__bl_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'https://localhost', 'capacitor://localhost',
 ];
 $__bl_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($__bl_origin, $__bl_allowed, true)) {

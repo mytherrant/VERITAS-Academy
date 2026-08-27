@@ -227,26 +227,42 @@ vals.__page = 'accueil';
 
 // ── CORRECTION 1 : taux de réussite réels ──────────────────────────────────
 // Source unique : DB.statsVitrine (app.js, defaultDB). Le GCE n'y figure pas —
-// on laisse donc son anneau vide plutôt que d'inventer un chiffre.
+// sa tuile n'est donc plus construite du tout (voir le filtre ci-dessous).
 // L'angle de l'anneau DOIT suivre le taux : la maquette affichait 300° (83 %)
 // derrière un « __ % ». Un anneau qui contredit son nombre est pire qu'un trou.
-const TAUX_REELS = { 'BEPC': 100, 'Probatoire': 69, 'Baccalauréat': 61 };
+// `effectif` = nombre de candidats présentés. Un taux sans dénominateur ne se
+// vérifie pas : « 100 % de réussite » sur deux candidats et sur quarante ne
+// disent pas la même chose, et c'est la forme d'annonce que le marché associe
+// aux centres qui gonflent leurs chiffres. Laisser `effectif` à null n'invente
+// rien — la tuile s'affiche alors comme avant, sans la mention.
+// ⚠️ À RENSEIGNER PAR LE CENTRE, à partir des procès-verbaux de proclamation.
+const TAUX_REELS = {
+  'BEPC':         { taux: 100, effectif: null },
+  'Probatoire':   { taux: 69,  effectif: null },
+  'Baccalauréat': { taux: 61,  effectif: null }
+};
 let tauxManquants = [];
-vals.reussites = vals.reussites.map(r => {
-  const t = TAUX_REELS[r.examen];
-  if (t === undefined) {
-    tauxManquants.push(r.examen);
-    // Anneau VIDÉ : la maquette le laissait rempli à 279° (77 %) sous un
-    // « __ % ». Un cercle aux trois quarts plein affirme un résultat que
-    // personne n'a mesuré — le trou doit se voir comme un trou.
-    const creux = (r.anneau.match(/,(#[0-9A-Fa-f]{6}) \d+deg/) || [])[1] || '#E7EDF8';
-    return Object.assign({}, r, { anneau: creux });
-  }
+vals.reussites = vals.reussites.filter(r => {
+  // Un examen sans résultat mesuré ne reçoit PLUS de tuile vide.
+  // Jusqu'au 27/08/2026 il en recevait une, portant le gabarit « __ % » de la
+  // maquette sous le mot « DE RÉUSSITE ». Le trou se voyait — mais il se lisait
+  // comme un oubli, et jetait le doute sur les trois taux voisins. Le taux du
+  // GCE n'existe pas encore : la bonne réponse est de ne rien annoncer.
+  if (TAUX_REELS[r.examen] === undefined) { tauxManquants.push(r.examen); return false; }
+  return true;
+}).map(r => {
+  const { taux: t, effectif } = TAUX_REELS[r.examen];
   const deg = Math.round(t / 100 * 360);
   const creux = r.anneau.match(/,(#[0-9A-Fa-f]{6}) \d+deg/);
   const fond = (creux ? creux[1] : '#E7EDF8');
   return Object.assign({}, r, {
     taux: t + ' %',
+    /* Le dénominateur rejoint la ligne de détail dès qu'il est connu :
+       « Séries A, C, D et technique » devient « … · 31 candidats présentés ». */
+    detail: effectif ? r.detail + ' · ' + effectif + ' candidat'
+                       + (effectif > 1 ? 's' : '') + ' présenté'
+                       + (effectif > 1 ? 's' : '')
+                     : r.detail,
     /* L'anneau reste ÉCRIT REMPLI ici — c'est ce que voit un visiteur sans
        JavaScript, et c'est ce que lit un moteur de recherche. Les trois
        variables qui suivent permettent à vitrine.js de le rejouer depuis zéro
@@ -317,6 +333,7 @@ const ANCRES = {
      existent désormais dans legal/. */
   '#mentions': 'legal/mentions-legales.html',
   '#cgv': 'legal/cgv.html',
+  '#confidentialite': 'legal/confidentialite.html',
   '#charte': 'legal/charte-pedagogique.html'
 };
 // Sans destination dans le dépôt : on NE fabrique rien, on laisse et on signale.
@@ -766,7 +783,7 @@ const MENU = [
     { t: 'Catalogue e-learning', d: 'Matières, œuvres, séquences', i: 'lc-book',        c: '#1E499B', f: '#DBE8FE', vp: 'elearning', g: 1 },
     { t: 'Corrigés des cahiers', d: 'Accès libre, par séquence',   i: 'lc-checkcircle', c: '#007E11', f: '#E0F5E5', h: 'corriges/' },
     { t: 'Annales corrigées',    d: 'BEPC, Probatoire, BAC, GCE',  i: 'lc-doc',         c: '#5B4FA8', f: '#EAE7F7', h: APP + '#epreuves', g: 1 },
-    { t: 'Évaluations en ligne', d: 'Entraînement chronométré',    i: 'lc-clock',       c: '#C24E00', f: '#FFF3E4', h: APP + '#evaluations', g: 1 },
+    { t: 'Évaluations en ligne', d: 'Entraînement chronométré',    i: 'lc-clock',       c: '#A84200', f: '#FFF3E4', h: APP + '#evaluations', g: 1 },
     { t: 'Œuvres au programme',  d: 'Analyses et fiches',          i: 'lc-bookopen',    c: '#1E499B', f: '#DBE8FE', h: 'oeuvres/' },
     { t: 'Programmes par classe',d: 'De la 6ᵉ à la Terminale',     i: 'lc-graduation',  c: '#0E7C86', f: '#DDF2F4', h: 'niveaux/' },
     { t: 'Outils gratuits',      d: 'Calculateurs de moyenne',     i: 'lc-calculator',  c: '#007E11', f: '#E0F5E5', h: 'outils/' }
@@ -775,14 +792,14 @@ const MENU = [
     { t: 'Résultats aux examens',d: 'Taux de réussite',            i: 'lc-trending',    c: '#007E11', f: '#E0F5E5', h: APP + '#resultats' },
     { t: 'Orientation',          d: 'Choisir sa série',            i: 'lc-compass',     c: '#0E7C86', f: '#DDF2F4', h: APP + '#orientation' },
     { t: 'Matières et coefficients', d: 'Poids réels, orientation',i: 'lc-scale',       c: '#5B4FA8', f: '#EAE7F7', h: 'parcours/' },
-    { t: 'Cagnotte de scolarité',d: 'Faire financer son année',    i: 'lc-gift',        c: '#C24E00', f: '#FFF3E4', h: APP + '#cagnotte' },
+    { t: 'Cagnotte de scolarité',d: 'Faire financer son année',    i: 'lc-gift',        c: '#A84200', f: '#FFF3E4', h: APP + '#cagnotte' },
     { t: 'Trophées VÉRITAS',     d: 'Vote gratuit et unique',      i: 'lc-trophy',      c: '#B8860B', f: '#FFF6DA', h: APP + '#trophees' },
     { t: 'Classement junior',    d: 'Le tableau d’honneur',        i: 'lc-award',       c: '#5B4FA8', f: '#EAE7F7', h: APP + '#leaderboard-junior' }
   ]},
   { titre: 'Enseignant', sous: 'Enseigner et publier', entrees: [
     { t: 'Ressources et cours',  d: 'Leçons interactives',         i: 'lc-presentation',c: '#B03A6E', f: '#FBE4EE', h: 'ressources/' },
     { t: 'Corrigés du cahier papier', d: 'La page des QR codes',   i: 'lc-qr',          c: '#1E499B', f: '#DBE8FE', h: 'manuels.html' },
-    { t: 'Boutique de manuels',  d: 'Cahiers et études d’œuvres',  i: 'lc-shop',        c: '#C24E00', f: '#FFF3E4', vp: 'boutique' },
+    { t: 'Boutique de manuels',  d: 'Cahiers et études d’œuvres',  i: 'lc-shop',        c: '#A84200', f: '#FFF3E4', vp: 'boutique' },
     { t: 'Abonnements',          d: 'Dès 1 000 FCFA / mois',       i: 'lc-wallet',      c: '#5B4FA8', f: '#EAE7F7', vp: 'tarifs' },
     { t: 'Vérifier un certificat',d: 'Authentifier une distinction',i: 'lc-shield',     c: '#1E499B', f: '#DBE8FE', h: APP + '#verifier-certificat' }
   ]},
@@ -802,10 +819,10 @@ const MENU = [
      La vitrine EST la présentation désormais ; l'entrée pointe donc sur le hub
      éditorial qui présente réellement le centre. */
     { t: 'Présentation',         d: 'Qui nous sommes',             i: 'lc-building',    c: '#1E499B', f: '#DBE8FE', h: 'decouvrir/' },
-    { t: 'Actualités',           d: 'Ce qui se passe au centre',   i: 'lc-megaphone',   c: '#C24E00', f: '#FFF3E4', h: APP + '#actualites' },
+    { t: 'Actualités',           d: 'Ce qui se passe au centre',   i: 'lc-megaphone',   c: '#A84200', f: '#FFF3E4', h: APP + '#actualites' },
     { t: 'Photos',               d: 'La vie du centre',            i: 'lc-star',        c: '#B03A6E', f: '#FBE4EE', h: APP + '#photos' },
     { t: 'Nous contacter',       d: 'Douala · réponse sous 2 h',   i: 'lc-message',     c: '#1E499B', f: '#DBE8FE', h: APP + '#contact' },
-    { t: 'S’inscrire',           d: 'Créer un compte gratuit',     i: 'lc-user',        c: '#C24E00', f: '#FFF3E4', h: APP + '#inscription' }
+    { t: 'S’inscrire',           d: 'Créer un compte gratuit',     i: 'lc-user',        c: '#A84200', f: '#FFF3E4', h: APP + '#inscription' }
   ]}
 ];
 
@@ -1178,9 +1195,9 @@ deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
   carte = carte.replace(/assets\/photo-enseignant\.(png|webp)/g, 'assets/photo-groupe.$1');
   carte = remplacer(carte, 'Enseignant encadrant des élèves', 'Partenaires et libraires du réseau VÉRITAS', 'aria-label');
   carte = remplacer(carte, '#lc-presentation', '#lc-handshake', 'picto');
-  carte = remplacer(carte, '#C9508B', '#C24E00', 'teinte claire');
+  carte = remplacer(carte, '#C9508B', '#A84200', 'teinte claire');
   carte = remplacer(carte, '#8E2B57', '#8A3700', 'teinte sombre');
-  carte = remplacer(carte, '#B03A6E', '#C24E00', 'teinte d’accent');
+  carte = remplacer(carte, '#B03A6E', '#A84200', 'teinte d’accent');
   carte = remplacer(carte, '>Enseignants<', '>Partenaires<', 'titre');
   carte = remplacer(carte, 'Publiez vos corrigés sous votre nom et encadrez les candidats aux examens.',
     'Libraires, inspecteurs, influenceurs, établissements : neuf façons de porter VÉRITAS et d’en vivre.', 'accroche');
@@ -1204,7 +1221,7 @@ deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
 
      Conséquence observée en production : tout ce qui SUIT ce bouton — le
      bandeau des matières, le bloc calendrier, les sections suivantes — se
-     retrouvait AVALÉ par le lien, et héritait de son fond orange #C24E00.
+     retrouvait AVALÉ par le lien, et héritait de son fond orange #A84200.
      Une page où un tiers du contenu est un seul lien géant.
 
      La garde qui suivait ne voyait rien : elle cherchait le texte d'origine
@@ -1427,6 +1444,65 @@ deplacerSectionApres("Trois portes d'entrée", 'Un répétiteur coûte',
 // au trait : ce sont des photos, que le PNG encode très mal. Même définition,
 // même rendu, 598 Ko au total. Le logo reste en PNG : il sert aussi de favicon.
 corps = corps.replace(/(assets\/(?!veritas-logo)[a-z0-9-]+)\.png/g, '$1.webp');
+
+// ── CORRECTION 3 bis : dimensions intrinsèques et chargement différé ───────
+// Mesuré le 27/08/2026 au premier chargement : CLS 0,399 pour un seuil « bon »
+// à 0,10. UNE SEULE image sur quinze portait un couple width/height — le
+// navigateur ne pouvait donc réserver aucune place avant l'arrivée du fichier,
+// et le contenu sautait sous les doigts du lecteur. Au rechargement, tout en
+// cache, le CLS retombe à 0 : c'est donc précisément le PREMIER visiteur,
+// celui qu'on paie pour faire venir, qui encaissait le défaut.
+//
+// Les dimensions sont LUES DANS LES FICHIERS, jamais recopiées à la main :
+// une valeur écrite en dur se désynchronise dès qu'on remplace une photo, et
+// une mauvaise proportion déforme l'image au lieu de la caler.
+// Douze photos sur quinze sont par ailleurs sous la ligne de flottaison et
+// étaient chargées en priorité normale ; seule celle du bandeau ne doit PAS
+// être différée — c'est l'élément LCP.
+{
+  const dimsDe = (fichier) => {
+    const p = path.join(__dirname, '..', fichier);
+    if (!fs.existsSync(p)) return null;
+    const d = fs.readFileSync(p);
+    if (d.length > 24 && d.slice(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])))
+      return { w: d.readUInt32BE(16), h: d.readUInt32BE(20) };          // PNG
+    if (d.length > 30 && d.slice(0, 4).toString() === 'RIFF' && d.slice(8, 12).toString() === 'WEBP') {
+      const t = d.slice(12, 16).toString();
+      if (t === 'VP8 ') return { w: d.readUInt16LE(26) & 0x3fff, h: d.readUInt16LE(28) & 0x3fff };
+      if (t === 'VP8L') { const b = d.readUInt32LE(21); return { w: (b & 0x3fff) + 1, h: ((b >> 14) & 0x3fff) + 1 }; }
+      if (t === 'VP8X') return { w: d.readUIntLE(24, 3) + 1, h: d.readUIntLE(27, 3) + 1 };
+    }
+    return null;
+  };
+
+  let posees = 0, differees = 0, introuvables = [];
+  let rang = 0;
+  corps = corps.replace(/<img\b[^>]*>/g, (tag) => {
+    const src = (tag.match(/src="([^"]+)"/) || [])[1];
+    // Les gabarits ré-étendus côté client ({{ m.couv }}) portent déjà leurs
+    // dimensions, écrites dans la maquette : on ne peut pas les mesurer ici.
+    if (!src || src.includes('{{')) return tag;
+    rang++;
+    let out = tag;
+    if (!/\bwidth=/.test(out) && !/\bheight=/.test(out)) {
+      const d = dimsDe(src);
+      if (d) { out = out.replace(/^<img\b/, `<img width="${d.w}" height="${d.h}"`); posees++; }
+      else introuvables.push(src);
+    }
+    // Le bandeau est le premier <img> du document et l'élément LCP probable :
+    // le différer retarderait exactement ce qu'on cherche à accélérer.
+    if (!/\bloading=/.test(out)) {
+      if (rang <= 2) out = out.replace(/^<img\b/, '<img fetchpriority="high" decoding="async"');
+      else { out = out.replace(/^<img\b/, '<img loading="lazy" decoding="async"'); differees++; }
+    }
+    return out;
+  });
+  if (introuvables.length) {
+    throw new Error('Images introuvables sur le disque, dimensions impossibles à poser : '
+      + [...new Set(introuvables)].join(', ') + '. Une image manquante ici serait aussi une image manquante en production.');
+  }
+  console.log('images      : ' + posees + ' couples width/height posés · ' + differees + ' différées');
+}
 
 /* Ce rapport criait au loup : il comptait comme « sans destination » les
    références au sprite SVG (<use href="#lc-…">, #pay-…, #du-…, #brand-…) et
@@ -2119,7 +2195,7 @@ ${fs.readFileSync(path.join(__dirname, 'vitrine-bloc.css'), 'utf8')}
 .vpod-r{flex:0 0 auto;width:25px;height:25px;border-radius:50%;color:#fff;
   display:inline-flex;align-items:center;justify-content:center;font:700 12.5px Poppins,sans-serif}
 .vpod-n{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.vpod-p{flex:0 0 auto;font:700 13.5px Poppins,sans-serif;color:#C24E00}
+.vpod-p{flex:0 0 auto;font:700 13.5px Poppins,sans-serif;color:#A84200}
 
 .vann{display:flex;align-items:center;justify-content:center;gap:9px;
   padding:9px 20px;background:linear-gradient(90deg,#0C2A6A,#1E499B);color:#fff;
@@ -2275,7 +2351,7 @@ if (OUT) { fs.writeFileSync(OUT, page); console.log('écrit      :', OUT, '—',
 console.log('');
 console.log('── Corrections ──');
 console.log('taux réels  : BEPC 100 % · Probatoire 69 % · BAC 61 % (anneaux recalculés)');
-console.log('taux MANQUANTS (laissés vides) :', tauxManquants.join(', ') || 'aucun');
+console.log('taux MANQUANTS (aucune tuile construite) :', tauxManquants.join(', ') || 'aucun');
 console.log('ancres branchées :', Object.keys(ANCRES).length + 2, 'familles');
 console.log('ancres SANS destination :', ancresRestantes.join(' ') || 'aucune');
 console.log('');

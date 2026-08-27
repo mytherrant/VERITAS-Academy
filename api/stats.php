@@ -21,7 +21,7 @@ if (!defined('API_SECRET')) define('API_SECRET', bin2hex(random_bytes(32))); // 
 
 $__st_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'https://localhost', 'capacitor://localhost',
 ];
 $__st_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($__st_origin, $__st_allowed, true)) {

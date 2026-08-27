@@ -48,7 +48,7 @@ if (!function_exists('vrt_secret_is_compromised')) {
 $__veritas_allowed_origins = [
     'https://veritas-school.com',
     'https://www.veritas-school.com',
-    'http://localhost:8000',   // dev local (python -m http.server)
+    'http://localhost:8000', 'http://localhost:8077',   // dev local (python -m http.server)
     'https://localhost',       // webview mobile éventuelle
     'capacitor://localhost',   // iOS WebView
 ];

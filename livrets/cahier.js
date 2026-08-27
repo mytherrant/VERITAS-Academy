@@ -136,13 +136,28 @@
   /* Blocs de CORRIGÉ. Ils ne sont rendus que si le document les fournit —
      c'est le serveur qui décide de les envoyer ou non, selon la règle de
      déverrouillage. Le client ne les cache pas : ce qui est caché côté client
-     se lit en trois clics dans les outils de développement. */
-  var BLOCS_CORRIGE = { retientC: 1, retC: 1, corrige: 1 };
+     se lit en trois clics dans les outils de développement.
+
+     `retientC` et `retC` figuraient ici : c'était une erreur de lecture des
+     sources. Ces deux-là portent le CONTENU de l'encadré « Je retiens » —
+     209 blocs dans le seul Bord de 1ʳᵉ, 133 dans le cahier de 1ʳᵉ A. Les
+     traiter en corrigés repliait la leçon derrière « Voir la correction » :
+     l'élève achetait un cahier dont la règle à retenir était escamotée. */
+  var BLOCS_CORRIGE = { corrige: 1, reponse: 1 };
 
   var ETIQUETTES = {
-    module: 'Module', semaine: 'Semaine', lecon: 'Leçon', section: 'Section',
-    competence: 'Compétence', objectif: 'Objectif', epreuve: 'Épreuve'
+    module: 'Module', sequence: 'Séquence', semaine: 'Semaine', lecon: 'Leçon',
+    section: 'Section', competence: 'Compétence', objectif: 'Objectif',
+    epreuve: 'Épreuve', part: 'Partie'
   };
+
+  /* Divisions de tête. Elles remettent le compteur de leçon à zéro et font
+     tourner la couleur. Les sources ne s'accordent pas sur le mot : les Bords
+     disent `module`, les cahiers du 2ⁿᵈ cycle `seq` et `part`, le 1er cycle
+     `sequence`. Toutes désignent la même chose, et en oublier une revient à
+     ranger tout un cahier sous une seule séquence. */
+  var DIVISIONS = { module: 1, sequence: 1, seq: 1, part: 1, semaine: 1, sem: 1, section: 1 };
+  var SOUS_DIVISIONS = { lecon: 1, epreuve: 1, disc: 1 };
 
   function Cahier(opts) {
     this.ouvrage = String(opts.ouvrage || '');
@@ -158,6 +173,8 @@
     this._tLocal = null;
     this._tServeur = null;
     this._envoiEnCours = false;
+    this.aCorriges = false;         // le serveur le dira au chargement
+    this.corriges = {};             // ceux déjà ouverts, pour ne pas les redemander
   }
 
   Cahier.prototype.cleLocale = function () { return this.LS; };
@@ -208,6 +225,7 @@
           if (!Object.prototype.hasOwnProperty.call(self.enAttente, k)) self.reponses[k] = s[k];
         }
         self.annotations = j.annotations || {};
+        self.aCorriges = (j.corriges || 0) > 0;
         self.sauverLocal();
         self.peupler();
       })
@@ -298,26 +316,47 @@
      sans DOM, et le rendu ne peut pas diverger puisqu'il consomme ce
      résultat. */
   function calculerCles(ouvrage, blocs) {
-    var ctxSeq = '0', ctxLecon = '0', vus = {}, out = [];
+    /* `vus` compte les consignes identiques DANS un même contexte. Il était
+       remis à zéro à chaque leçon — ce qui suppose que deux leçons ne portent
+       jamais le même repère. Faux sur les Bords : leurs blocs `lecon` n'ont pas
+       toujours de numéro, le contexte retombe alors sur la même chaîne, et le
+       compteur repartait de zéro dans un contexte qu'il avait déjà vu.
+       Mesuré sur le Bord de 3ᵉ : 117 clés en double sur 1 312 — donc 117
+       endroits où deux exercices se partageaient une réponse, le second
+       écrasant le premier.
+       On indexe donc par contexte, et on ne remet plus rien à zéro : le
+       suffixe reste borné au couple (séquence, leçon), comme prévu, mais il ne
+       peut plus se réinitialiser sous lui-même. */
+    var ctxSeq = '0', ctxLecon = '0', vus = {}, out = [], dernierEmp = '';
     (blocs || []).forEach(function (b) {
       if (!b || typeof b !== 'object') { out.push(null); return; }
       var y = b.y || b.t || '';
-      if (y === 'module' || y === 'semaine' || y === 'sem' || y === 'section') {
+      if (DIVISIONS[y]) {
         ctxSeq = String(b.no || b.n || b.num || empreinte(texteDuBloc(b)));
-        ctxLecon = '0'; vus = {};
-      } else if (y === 'lecon' || y === 'epreuve') {
+        ctxLecon = '0';
+      } else if (SOUS_DIVISIONS[y]) {
         ctxLecon = String(b.no || b.n || b.num || empreinte(texteDuBloc(b)));
-        vus = {};
       }
       /* La clé : OÙ l'on est + CE QUE dit l'exercice. Si deux consignes sont
          rigoureusement identiques dans la MÊME leçon (cela arrive :
          « Justifie ta réponse. » deux fois), on suffixe par l'ordre
          d'apparition — la collision reste bornée à ces deux-là, au lieu de
          décaler tout le cahier comme le ferait un compteur. */
-      var emp = empreinte(texteDuBloc(b));
-      vus[emp] = (vus[emp] || 0) + 1;
+      /* Un bloc SANS texte — l'espace d'écriture qui suit une question —
+         n'a rien à quoi accrocher son empreinte. Lui en calculer une sur la
+         chaîne vide les rendrait tous identiques dans la leçon, et le seul
+         élément distinctif serait leur rang : on retomberait exactement sur
+         le compteur d'affichage qu'on a écarté plus haut.
+         Il hérite donc de l'empreinte du bloc précédent, dont il EST la
+         réponse. La clé se lit alors « l'espace d'écriture de la question X »,
+         et elle survit à l'insertion d'un exercice ailleurs. */
+      var brut = texteDuBloc(b);
+      var emp = brut ? empreinte(brut) : (dernierEmp || empreinte(''));
+      if (brut) dernierEmp = emp;
+      var portee = ctxSeq + '|' + ctxLecon + '|' + emp;
+      vus[portee] = (vus[portee] || 0) + 1;
       out.push(ouvrage + '/s' + ctxSeq + '/l' + ctxLecon + '/' + emp
-             + (vus[emp] > 1 ? '_' + vus[emp] : ''));
+             + (vus[portee] > 1 ? '_' + vus[portee] : ''));
     });
     return out;
   }
@@ -339,7 +378,7 @@
       if (!b || typeof b !== 'object') return;
       var y = b.y || b.t || '';
       var cleBloc = cles[i];
-      if (y === 'module' || y === 'semaine' || y === 'sem' || y === 'section') {
+      if (DIVISIONS[y]) {
         var sig = String(b.no || b.n || b.num || i);
         if (sig !== seqVue) { seqVue = sig; seqRang = (seqRang % 6) + 1; }
       }
@@ -347,10 +386,20 @@
       var corps = b.r ? rendreRuns(b.r, cleBloc, champs) : esc(b.txt || '');
 
       if (ETIQUETTES[y]) {
-        var no = b.no || b.n || '';
+        /* « Leçon Leçon 1 » — le repère des sources du 1er cycle est le
+           libellé entier (« Leçon 1 »), pas le seul numéro, et la pastille y
+           ajoutait le sien. On retire donc du repère le mot que la pastille
+           dit déjà. Le faire ici plutôt qu'à la publication répare aussi les
+           cahiers déjà déposés sur le serveur. */
+        var no = String(b.no || b.n || '').trim();
+        var mot = ETIQUETTES[y];
+        if (no.toLowerCase().indexOf(mot.toLowerCase()) === 0) {
+          no = no.slice(mot.length).replace(/^[\s·:.—-]+/, '');
+        }
         h += '<h3 class="ch-titre ch-' + esc(y) + '" data-seq="' + teinte + '">'
-          +  '<span class="ch-etq">' + esc(ETIQUETTES[y]) + (no ? ' ' + esc(no) : '') + '</span> '
-          +  esc(b.title || b.titre || '') + (corps ? ' ' + corps : '') + '</h3>';
+          +  '<span class="ch-etq">' + esc(mot) + (no ? ' ' + esc(no) : '') + '</span>'
+          +  '<span class="ch-titre-t">' + esc(b.title || b.titre || '')
+          +  (corps ? ' ' + corps : '') + '</span></h3>';
         return;
       }
       if (y === 'rubriqueH' || y === 'rubrique' || y === 'rubriqueB') {
@@ -379,6 +428,58 @@
         });
         h += '</table></div>'; return;
       }
+      /* ── L'ESPACE OÙ L'ÉLÈVE ÉCRIT ──────────────────────────────────
+         `{y:'lines', n:5}` = les cinq lignes pointillées du cahier imprimé.
+         C'est le bloc le PLUS fréquent des cahiers du 2ⁿᵈ cycle (361 sur
+         2 385 en 1ʳᵉ, 366 en Tˡᵉ S&T) et le moteur n'en faisait rien : la
+         page s'affichait, la question se lisait, et il n'y avait nulle part
+         où répondre. Un cahier qu'on ne peut pas remplir n'est pas un cahier
+         interactif — c'est un PDF avec des couleurs. */
+      if (y === 'lines' || y === 'ligne') {
+        var nl = Math.max(1, Math.min(40, parseInt(b.n, 10) || 3));
+        champs.push(cleBloc);
+        h += '<span class="ch-champ ch-champ-lignes" data-lignes="' + nl
+          +  '" data-cle="' + esc(cleBloc) + '"></span>';
+        return;
+      }
+
+      /* QCM — les propositions viennent du document, la bonne réponse non.
+         Elle reste dans la charge de l'enseignant : un QCM dont la clé de
+         correction voyage avec les propositions se corrige tout seul dans
+         l'onglet réseau. On enregistre le libellé choisi, pas un indice :
+         réordonner les propositions ne doit pas changer la réponse rendue. */
+      if (y === 'qcm' && b.options && b.options.length) {
+        var nom = 'q' + empreinte(cleBloc);
+        h += '<div class="ch-qcm" data-cle="' + esc(cleBloc) + '">';
+        champs.push(cleBloc);
+        b.options.forEach(function (o) {
+          h += '<label class="ch-opt"><input type="radio" name="' + esc(nom) + '" '
+            +  'value="' + esc(o) + '"><span>' + esc(o) + '</span></label>';
+        });
+        h += '</div>';
+        return;
+      }
+
+      /* Appariement : « relie chaque élément de gauche à celui de droite ».
+         Sur un téléphone on ne trace pas de trait — on choisit. Chaque entrée
+         de gauche porte donc sa liste déroulante des entrées de droite. */
+      if (y === 'appariement' && b.gauche && b.droite) {
+        h += '<div class="ch-rel">';
+        b.gauche.forEach(function (g, gi) {
+          var cle = cleBloc + '/g' + gi;
+          champs.push(cle);
+          h += '<div class="ch-rel-l"><span>' + esc(g) + '</span>'
+            +  '<select class="ch-rel-s" data-cle="' + esc(cle) + '">'
+            +  '<option value="">—</option>';
+          b.droite.forEach(function (d) {
+            h += '<option value="' + esc(d) + '">' + esc(d) + '</option>';
+          });
+          h += '</select></div>';
+        });
+        h += '</div>';
+        return;
+      }
+
       if (BLOCS_CORRIGE[y]) {
         h += '<details class="ch-corrige"><summary>Voir la correction</summary>'
           +  '<div>' + corps + '</div></details>'; return;
@@ -386,7 +487,8 @@
       if (y === 'boxHead' || y === 'taskHead' || y === 'outilT' || y === 'astuce' || y === 'retientT' || y === 'retT') {
         h += '<div class="ch-encadre-t ch-bk-' + esc(b.bk || y) + '">' + corps + '</div>'; return;
       }
-      if (y === 'boxBody' || y === 'outilC' || y === 'def') {
+      if (y === 'boxBody' || y === 'outilC' || y === 'def'
+          || y === 'retientC' || y === 'retC') {
         h += '<div class="ch-encadre-c">' + corps + '</div>'; return;
       }
 
@@ -411,7 +513,8 @@
            manque quelque chose. Un exercice peut d'ailleurs porter plusieurs
            champs : `peupler()` ramasse donc tout ce qui commence par la clé du
            bloc. */
-        h += '<div class="ch-annot" data-pour="' + esc(cleBloc) + '"></div>'
+        h += '<div class="ch-corr" data-pour="' + esc(cleBloc) + '"></div>'
+          +  '<div class="ch-annot" data-pour="' + esc(cleBloc) + '"></div>'
           +  '</div>';
         return;
       }
@@ -437,7 +540,12 @@
         champ = document.createElement('textarea');
         champ.className = 'ch-saisie';
         champ.setAttribute('data-cle', cle);
-        champ.rows = place.classList.contains('ch-champ-large') ? 4 : 2;
+        /* Autant de lignes que le cahier imprimé en offrait. Une question
+           qui laissait douze lignes en attend une réponse développée ; la
+           réduire à deux lignes dit à l'élève d'être bref, ce que l'auteur
+           n'a pas voulu. */
+        champ.rows = parseInt(place.getAttribute('data-lignes'), 10)
+                  || (place.classList.contains('ch-champ-large') ? 4 : 2);
         champ.spellcheck = false;
         champ.setAttribute('aria-label', 'Ta réponse');
         if (self.lecture) champ.readOnly = true;
@@ -451,6 +559,59 @@
       var v = self.reponses[cle] || '';
       // Ne JAMAIS écraser un champ en cours de frappe.
       if (document.activeElement !== champ && champ.value !== v) champ.value = v;
+    });
+
+    /* QCM et appariements. Ils enregistrent par la même porte que le texte
+       (`noter`), donc ils suivent l'élève d'un appareil à l'autre et le
+       professeur les annote comme le reste — sans quoi une moitié du cahier
+       serait sauvegardée et l'autre non, ce que personne ne pourrait deviner. */
+    Array.prototype.forEach.call(this.hote.querySelectorAll('.ch-qcm'), function (g) {
+      var cle = g.getAttribute('data-cle');
+      var choix = self.reponses[cle] || '';
+      Array.prototype.forEach.call(g.querySelectorAll('input[type=radio]'), function (r) {
+        if (r.value === choix) r.checked = true;
+        if (self.lecture) { r.disabled = true; return; }
+        if (r.getAttribute('data-lie')) return;
+        r.setAttribute('data-lie', '1');
+        r.addEventListener('change', function () { if (r.checked) self.noter(cle, r.value); });
+      });
+    });
+    Array.prototype.forEach.call(this.hote.querySelectorAll('.ch-rel-s'), function (sel) {
+      var cle = sel.getAttribute('data-cle');
+      var v = self.reponses[cle] || '';
+      if (document.activeElement !== sel && sel.value !== v) sel.value = v;
+      if (self.lecture) { sel.disabled = true; return; }
+      if (sel.getAttribute('data-lie')) return;
+      sel.setAttribute('data-lie', '1');
+      sel.addEventListener('change', function () { self.noter(cle, sel.value); });
+    });
+
+    /* ── LA CORRECTION, APRÈS AVOIR CHERCHÉ ──────────────────────────────────
+       Le bouton n'apparaît QUE si le serveur a dit que cet ouvrage a des
+       corrections type (`aCorriges`). Les livrets du 2ⁿᵈ cycle n'en portent
+       aucune dans leur source : y afficher un bouton qui répond toujours
+       « aucune correction » se lirait comme une panne du site, pas comme une
+       propriété du cahier.
+       Le bouton n'est pas non plus un verrou : il ne cache rien. Le corrigé
+       n'est PAS dans la page — il faut aller le chercher, et c'est le serveur
+       qui décide de le donner ou non. */
+    Array.prototype.forEach.call(this.hote.querySelectorAll('.ch-corr'), function (z) {
+      if (!self.aCorriges) { z.innerHTML = ''; return; }
+      var pour = z.getAttribute('data-pour');
+      if (self.corriges[pour]) {
+        z.className = 'ch-corr ch-corr-ouvert';
+        z.innerHTML = '<span class="ch-corr-titre">Correction</span><p>'
+                    + esc(self.corriges[pour]) + '</p>';
+        return;
+      }
+      if (z.getAttribute('data-lie')) return;
+      z.setAttribute('data-lie', '1');
+      z.className = 'ch-corr';
+      z.innerHTML = '<button type="button" class="ch-corr-btn">Voir la correction</button>'
+                  + '<span class="ch-corr-msg"></span>';
+      z.querySelector('.ch-corr-btn').addEventListener('click', function () {
+        self.demanderCorrige(pour, z);
+      });
     });
 
     // Annotations du professeur, posées sur l'exercice qu'elles visent.
@@ -472,6 +633,50 @@
           + '<p>' + esc(a.texte || '') + '</p>';
       }).join('');
     });
+  };
+
+  /* ── Demander la correction d'un exercice ─────────────────────────────────
+     Deux refus possibles, et il faut les DIRE différemment, sinon l'élève ne
+     sait pas s'il doit travailler ou s'il n'y a rien à attendre :
+       403 « cherche »  → il n'a pas encore répondu. C'est la règle, pas une
+                          panne : on l'invite à répondre d'abord.
+       404 « aucun »    → cet exercice n'a pas de correction type — une
+                          production écrite n'en a pas, et n'en aura jamais.
+     On vérifie aussi côté client avant d'appeler : demander au serveur de
+     refuser ce qu'on sait déjà refusé, c'est une requête pour rien sur une
+     ligne qui compte chacune des siennes. Le serveur reste seul juge — ce
+     contrôle-ci n'est qu'une politesse. */
+  Cahier.prototype.demanderCorrige = function (item, zone) {
+    var self = this;
+    var msg = zone.querySelector('.ch-corr-msg');
+    var btn = zone.querySelector('.ch-corr-btn');
+    var repondu = false;
+    for (var k in this.reponses) {
+      if (!String(this.reponses[k] || '').trim()) continue;
+      if (k === item || k.indexOf(item + '/') === 0 || item.indexOf(k + '/') === 0) { repondu = true; break; }
+    }
+    if (!repondu) {
+      if (msg) msg.textContent = 'Réponds d’abord — la correction s’ouvre ensuite.';
+      return;
+    }
+    if (btn) { btn.disabled = true; btn.textContent = 'Ouverture…'; }
+    fetch(API, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'corrige', token: this.token, item: item })
+    }).then(function (r) { return r.json().then(function (j) { return { s: r.status, j: j }; }); })
+      .then(function (rep) {
+        if (rep.j && rep.j.ok && rep.j.corrige) {
+          self.corriges[item] = rep.j.corrige;
+          self.peupler();
+          return;
+        }
+        if (btn) { btn.disabled = false; btn.textContent = 'Voir la correction'; }
+        if (msg) msg.textContent = (rep.j && rep.j.error) || 'Correction indisponible.';
+      })
+      .catch(function () {
+        if (btn) { btn.disabled = false; btn.textContent = 'Voir la correction'; }
+        if (msg) msg.textContent = 'Hors ligne — réessaie quand la connexion revient.';
+      });
   };
 
   global.VRTCahier = Cahier;

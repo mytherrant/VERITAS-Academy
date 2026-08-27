@@ -40,7 +40,7 @@ header('Cache-Control: public, max-age=600');  // cache navigateur 10 min
 // v1.2.2 : allowlist réelle (le code reflétait toute origine malgré le commentaire).
 $__rag_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'https://localhost', 'capacitor://localhost',
 ];
 $__rag_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($__rag_origin, $__rag_allowed, true)) {

@@ -35,6 +35,28 @@ RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
 RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
 # ─────────────────────────────────────────────────────────
+# 1quater. Barre oblique finale des répertoires — EN HTTPS (27/08/2026)
+# ─────────────────────────────────────────────────────────
+# Mesuré : « GET https://veritas-school.com/plateforme » répondait
+#   301 Location: http://veritas-school.com/plateforme/
+#                 ^^^^ protocole ABANDONNÉ en cours de redirection.
+#
+# Ce n'était pas la règle 1 qui fautait : c'est mod_dir (DirectorySlash) qui
+# fabrique lui-même la redirection quand l'URI désigne un répertoire sans
+# barre finale — et il la construit à partir du protocole qu'il CROIT servir.
+# Derrière la terminaison TLS de LWS, Apache ne voit que du http : il écrit
+# donc http. Le HSTS avec preload rattrape les navigateurs qui connaissent
+# déjà le domaine, mais l'en-tête reste faux, et un tout premier visiteur sur
+# un réseau hostile fait un aller-retour en clair.
+#
+# On pose la barre oblique NOUS-MÊMES, en https, avant que mod_dir n'ait à le
+# faire. La condition -d limite strictement la règle aux répertoires réels :
+# un fichier, une URL d'API ou une ancre n'y entrent jamais.
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteCond %{REQUEST_URI} !/$
+RewriteRule ^(.+)$ https://%{HTTP_HOST}/$1/ [R=301,L]
+
+# ─────────────────────────────────────────────────────────
 # 1bis. Transmettre l'en-tête Authorization à PHP (CORRECTIF SYNCHRO)
 # Sur LiteSpeed/FastCGI, l'en-tête « Authorization: Bearer … » est retiré avant
 # d'atteindre PHP → requireAuth() reçoit un token vide → 401 → la synchro cloud
@@ -197,7 +219,12 @@ Options -Indexes
 # ─────────────────────────────────────────────────────────
 # 7. SEO — pages d'erreur et MIME types
 # ─────────────────────────────────────────────────────────
-ErrorDocument 404 /index.html
+# 404 → page dédiée LÉGÈRE (≈2 Ko) et non indexée.
+# Avant : /index.html, soit la vitrine ENTIÈRE (471 Ko) servie sous un statut
+# 404. Le visiteur croyait être arrivé sur l'accueil et ne comprenait pas son
+# erreur d'adresse ; et chaque sonde de robot sur une URL morte coûtait un
+# demi-mégaoctet. Même correction que le 403 juste en dessous.
+ErrorDocument 404 /404.html
 # 403 → page dédiée LÉGÈRE (≈1,5 Ko) et non indexée.
 # Avant : /index.html, soit l'application entière (~444 Ko) renvoyée à CHAQUE
 # accès refusé — donc à chaque sonde de robot sur /api/config.php, /data/…

@@ -1,69 +1,189 @@
 {
-  "version": 1,
-  "ouvrages": {
-    "6e": {
-      "titre": "Mon Cahier de français 6ᵉ",
-      "niveau": "6e",
-      "mode": "interactif",
-      "kinds": [
-        "livret",
-        "guide"
-      ],
-      "prix": 0,
-      "prixGuide": 0,
-      "pages": 0,
-      "pagesLibres": 0
-    },
-    "5e": {
-      "titre": "Mon Cahier de français 5ᵉ",
-      "niveau": "5e",
-      "mode": "interactif",
-      "kinds": [
-        "livret",
-        "guide"
-      ],
-      "prix": 0,
-      "prixGuide": 0,
-      "pages": 0,
-      "pagesLibres": 0
-    },
-    "4e": {
-      "titre": "Mon Cahier de français 4ᵉ",
-      "niveau": "4e",
-      "mode": "interactif",
-      "kinds": [
-        "livret",
-        "guide"
-      ],
-      "prix": 0,
-      "prixGuide": 0,
-      "pages": 0,
-      "pagesLibres": 0
-    },
-    "3e": {
-      "titre": "Mon Cahier de français 3ᵉ (BEPC)",
-      "niveau": "3e",
-      "mode": "interactif",
-      "kinds": [
-        "livret",
-        "guide"
-      ],
-      "prix": 0,
-      "prixGuide": 0,
-      "pages": 0,
-      "pagesLibres": 0
-    },
-    "bord-6e": {
-      "titre": "Bord — Cahier de français 6ᵉ",
-      "niveau": "6e",
-      "mode": "lecture",
-      "kinds": [
-        "livret"
-      ],
-      "prix": 1500,
-      "prixGuide": 0,
-      "pages": 135,
-      "pagesLibres": 8
-    }
+ "version": 1,
+ "ouvrages": {
+  "6e": {
+   "titre": "Mon Cahier de français 6ᵉ",
+   "niveau": "6e",
+   "mode": "interactif",
+   "kinds": [
+    "livret",
+    "guide"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "5e": {
+   "titre": "Mon Cahier de français 5ᵉ",
+   "niveau": "5e",
+   "mode": "interactif",
+   "kinds": [
+    "livret",
+    "guide"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "4e": {
+   "titre": "Mon Cahier de français 4ᵉ",
+   "niveau": "4e",
+   "mode": "interactif",
+   "kinds": [
+    "livret",
+    "guide"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "3e": {
+   "titre": "Mon Cahier de français 3ᵉ (BEPC)",
+   "niveau": "3e",
+   "mode": "interactif",
+   "kinds": [
+    "livret",
+    "guide"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "2nde": {
+   "titre": "Mon Cahier de français 2ⁿᵈᵉ",
+   "niveau": "2nde",
+   "mode": "interactif",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "1ere": {
+   "titre": "Mon Cahier de français 1ʳᵉ A",
+   "niveau": "1ere",
+   "mode": "interactif",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "tle": {
+   "titre": "Mon Cahier de français Tˡᵉ A",
+   "niveau": "tle",
+   "mode": "interactif",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "est-tle": {
+   "titre": "Cahier de français Tˡᵉ S&T",
+   "niveau": "tle",
+   "mode": "interactif",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "bord-6e": {
+   "titre": "Bord — Cahier de français 6ᵉ",
+   "niveau": "6e",
+   "mode": "lecture",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 135,
+   "pagesLibres": 8
+  },
+  "bord-5e": {
+   "titre": "Bord — Cahier de français 5ᵉ",
+   "niveau": "5e",
+   "mode": "interactif",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "bord-4e": {
+   "titre": "Bord — Cahier de français 4ᵉ",
+   "niveau": "4e",
+   "mode": "interactif",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "bord-3e": {
+   "titre": "Bord — Cahier de français 3ᵉ",
+   "niveau": "3e",
+   "mode": "interactif",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "bord-2nde": {
+   "titre": "Bord — Cahier de français 2ⁿᵈᵉ",
+   "niveau": "2nde",
+   "mode": "interactif",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "bord-1ere": {
+   "titre": "Bord — Cahier de français 1ʳᵉ",
+   "niveau": "1ere",
+   "mode": "interactif",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
+  },
+  "bord-tle": {
+   "titre": "Bord — Cahier de français Tˡᵉ",
+   "niveau": "tle",
+   "mode": "interactif",
+   "kinds": [
+    "livret"
+   ],
+   "prix": 1500,
+   "prixGuide": 0,
+   "pages": 0,
+   "pagesLibres": 0
   }
+ }
 }

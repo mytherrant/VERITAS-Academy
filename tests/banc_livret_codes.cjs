@@ -63,9 +63,16 @@ const CATALOGUE = {
     // Sans guide : c'est LUI qui exerce la règle ③.
     'bord-6e': { titre: 'Bord — Cahier de français 6ᵉ', niveau: '6e', mode: 'lecture',
                  kinds: ['livret'], prix: 2000, pagesLibres: 8 },
-    // Déclaré mais sans coquille : exerce « déclaré ≠ publié ».
     '2nde':    { titre: 'Mon Cahier de français 2ⁿᵈᵉ A', niveau: '2nde', mode: 'interactif',
                  kinds: ['livret', 'guide'] },
+    /* Déclaré, mais NI coquille NI données : exerce « déclaré ≠ publié ».
+       Le rôle tenait auparavant à « 2nde », dont la coquille manquait sur le
+       poste — donc à l'ÉTAT DE LA MACHINE, pas à la règle. Le jour où les
+       données de 2ⁿᵈᵉ ont été déposées, le banc a rougi sans qu'aucune règle
+       n'ait bougé. Un slug qui n'existera jamais nulle part est déterministe
+       partout : c'est ce qu'on veut d'un banc. */
+    'fantome': { titre: 'Ouvrage jamais publié', niveau: '6e', mode: 'interactif',
+                 kinds: ['livret'] },
   },
 };
 
@@ -132,18 +139,46 @@ async function serveurPret() {
       'le catalogue ne laisse filtrer AUCUN contenu pédagogique');
 
   /* DÉCLARÉ ≠ PUBLIÉ. Le catalogue retombe sur cinq classes d'origine pour ne
-     jamais fermer un accès vendu, si bien que « 2nde » y figure sans que sa
-     coquille existe. La boutique, qui lit ce catalogue, affichait donc une
-     carte menant à un 404 — constaté au navigateur le 25/08/2026. */
+     jamais fermer un accès vendu : un ouvrage peut y figurer sans que rien
+     n'existe derrière. La boutique, qui lit ce catalogue, affichait alors une
+     carte menant à un 404 — constaté au navigateur le 25/08/2026.
+
+     LA RÈGLE A CHANGÉ LE 27/08, et ce contrôle avec elle. « Disponible »
+     voulait dire « la coquille `livrets/<slug>.html` est sur le disque ».
+     Depuis que `livrets/cahier.html` ouvre n'importe quel ouvrage (`?o=`),
+     onze cahiers n'ont plus de coquille du tout : la règle d'avant les aurait
+     déclarés indisponibles à vie, donc invisibles en boutique alors qu'ils se
+     vendent. Elle constate désormais l'une OU l'autre des deux preuves — une
+     coquille, ou les DONNÉES du cahier sur le serveur. La seconde est la plus
+     importante : c'est elle qui manquait le jour où l'on a pu payer 1 000 F un
+     livre dont le contenu n'était pas déposé.
+
+     Ce contrôle-ci éprouve la règle, pas l'état de la machine : il demande au
+     serveur un ouvrage dont il sait qu'il n'a NI l'un NI l'autre. */
   const dispo = ouvrages.filter(o => o.disponible === true).map(o => o.slug);
   const pasDispo = ouvrages.filter(o => o.disponible === false).map(o => o.slug);
   dit(ouvrages.every(o => typeof o.disponible === 'boolean'),
       'chaque ouvrage dit s’il est réellement publié');
   dit(dispo.indexOf('6e') >= 0 && dispo.indexOf('bord-6e') >= 0,
       'les ouvrages dont la coquille existe sont « disponibles » : ' + dispo.join(', '));
-  dit(pasDispo.indexOf('2nde') >= 0,
-      '« 2nde », déclaré mais sans page, est marqué NON disponible',
-      'non disponibles : ' + (pasDispo.join(', ') || 'aucun'));
+
+  /* Le catalogue de ce banc déclare un ouvrage fantôme : aucune coquille,
+     aucune donnée. C'est le seul cas où « non disponible » est la bonne
+     réponse, et il doit rester vrai quoi que Jacques ait téléversé. */
+  const fantome = ouvrages.filter(o => o.slug === 'fantome')[0];
+  dit(!!fantome && fantome.disponible === false,
+      'un ouvrage sans coquille NI données est marqué NON disponible',
+      fantome ? 'disponible=' + fantome.disponible : 'absent du catalogue');
+
+  /* Et le lien suit : la boutique ne peut pas deviner laquelle des deux
+     formes existe, c'est le serveur qui le dit. */
+  const avecCoquille = ouvrages.filter(o => o.slug === '6e')[0];
+  dit(avecCoquille && avecCoquille.lien === '6e.html',
+      'un ouvrage à coquille pointe vers SA page',
+      avecCoquille && avecCoquille.lien);
+  dit(fantome && /^cahier\.html\?o=/.test(fantome.lien || ''),
+      'un ouvrage sans coquille passe par le moteur générique',
+      fantome && fantome.lien);
 
   console.log('\n\x1b[1m2. La porte d’administration est fermée par défaut\x1b[0m');
   dit((await api({ action: 'admin_gen', classe: '6e', kind: 'livret', n: 1 })).status === 401,

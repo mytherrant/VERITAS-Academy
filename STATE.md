@@ -1959,3 +1959,81 @@ manuelle aurait perdu le verrou à la première régénération.
 - **Non commité, non déployé.** Le contenu de `uploads/protected/books/tubedigestif/` (28 Mo) attend un dépôt FTP ; sans lui le lecteur répond « document non préparé ».
 - **Vitrine publique (suite, même session)** : le roman a sa carte au rayon boutique. Le gabarit refusait un livre non scolaire — corrigé en le rendant piloté par les données : **étoiles conditionnées à une note réelle** (elles étaient dessinées 4/5 EN DUR sous les 8 cartes, sans un seul avis derrière — elles disparaissent donc partout, conformément à la règle « preuve sociale réelle uniquement »), **mention sous le prix** portée par `m.mention` (« corrigés en ligne inclus » reste aux cahiers), **bouton `Commander` OU lien `Lire en ligne`** selon `m.papier` / `m.lien`. Ligne de détail (`m.exos`) conditionnée et vidée sur 7 cahiers où elle répétait la ligne `type`. `nbManuels` 8 → 9. Source `Refonte VERITAS.dc.html` éditée puis `node tools/build_vitrine.js` (garde-fous verts : 5 onglets/5 jeux, balises équilibrées). **Vérifié dans Chrome** : 14/14 — carte présente, lien `app.html#livre?id=tubedigestif`, 0 étoile inventée, compteur à 9, pas de débordement à 390 px (carte 358 px). ⚠️ La vitrine annonce toujours « 134 titres au catalogue » (chiffre en dur, non vérifié) et la carte « Le Tube Digestif — étude intégrale » (2 500 F) voisine désormais le roman (1 000 F) : deux produits distincts, à départager dans les intitulés si la confusion se voit.
 - **Reste** : `tools/render_secure_pdf.cjs` reste bloqué sur `page.render()` avec pdf.js sous Node 26 (contourné par PyMuPDF dans `publier_livre.py`) ; dépôt FTP des 28 Mo à faire ; rien n'est commité.
+
+## Les 15 cahiers interactifs 6ᵉ→Tˡᵉ, à 1 500 F (27/08/2026) — NON DÉPLOYÉ
+
+Demande : « finalise la mise en ligne de mes ouvrages… tous les niveaux et tous
+les documents… chaque livre c'est 1 500 frs et le pass ou code est unique…
+un fichier test pour donner un aperçu… l'apprenant peut travailler de manière
+autonome puis voir les corrigés sans avoir besoin de l'enseignant. »
+
+### Ce que la vérification a trouvé — trois trous, pas un
+1. **Le moteur du cahier n'ouvrait AUCUN des cahiers vendus.** `livrets/cahier.js`
+   attendait `CAHIER_BLOCS` ou un `BOOKLET` en tableau ; les sources réelles sont
+   `{header,sequences}` (1er cycle), `MANUEL_DATA{blocks}` (2ⁿᵈ cycle) et
+   `export default [{y,r}]` (Bords, module ES non exécutable en `<script>`).
+2. **`lines` — l'espace d'écriture — n'était pas rendu.** C'est le bloc le PLUS
+   fréquent du 2ⁿᵈ cycle (361 en 1ʳᵉ). La question se lisait, il n'y avait nulle
+   part où répondre : un PDF en couleurs, pas un cahier.
+3. **`retientC`/`retC` étaient pris pour des corrigés** et repliés derrière
+   « Voir la correction » : la règle à retenir était escamotée (209 blocs sur le
+   seul Bord de 1ʳᵉ).
+
+Et un quatrième, silencieux : **les 492 exercices du 1er cycle portent leur
+`answer`**. Servir la source telle quelle livrait le corrigé complet avec le
+cahier vendu.
+
+### Ce qui a été construit
+- `tools/normaliser_cahiers.py` — 4 formats → `window.CAHIER_BLOCS`, + la table
+  `corrige-<slug>.js` séparée, + l'aperçu gratuit, + le catalogue serveur.
+  Garde-fou : il REFUSE d'écrire une charge élève où subsiste un corrigé.
+- `api/cahier.php?action=corrige` — la correction s'ouvre **après avoir cherché**
+  (réponse non vide enregistrée), sans l'enseignant. 403 « cherche » AVANT le
+  404 « aucun » : l'ordre importe, l'inverse donnerait la carte des corrigés.
+- `livrets/apercu.html` — même moteur, sans jeton : **2 leçons non suivies**
+  (1 à 4 % du cahier), un onglet par classe, et l'offre en pied de page.
+- `tools/rendu_couvertures.cjs` — compose les 5 couvertures de Bord qui
+  n'existaient nulle part, depuis le titre/sous-titre/auteurs du document.
+- `disponible` se constate sur le CONTENU (`booklet-<slug>.js` présent), plus
+  sur la coquille ; le serveur rend aussi le `lien` de la carte.
+
+### Mesures
+15 ouvrages · 1 500 F · 30 000 blocs · **13 700 endroits où l'élève écrit** ·
+3 977 corrigés en libre-service (6ᵉ→2ⁿᵈᵉ) · 15/15 couvertures · aperçus 3–13 Ko
+contre 240–650 Ko pour le produit.
+
+**382 contrôles verts**, tous éprouvés par mutation :
+`banc_cahiers_reels` 153 · `paiements_entitlements` 87 · `banc_cahier` 43 ·
+`ouvrages_en_vente` 41 (neuf) · `banc_livret_codes` 29 · `banc_empreintes` 18
+(neuf) · `banc_cles_cahier` 11.
+
+### Deux pièges payés d'avance
+- **L'empreinte Python ≠ JavaScript sur 58 consignes / 40 720** — toutes à
+  emoji : `slice(400)` compte des unités UTF-16, `t[:400]` des points de code.
+  Sans `banc_empreintes.cjs`, aucun corrigé ne se serait retrouvé sur ces
+  exercices, avec le message exact d'un exercice qui n'en a pas.
+- **Le contrôle « ≥ 100 champs » restait VERT** quand on débranchait `lines` :
+  les consignes en fournissaient assez à elles seules. Remplacé par « autant
+  d'espaces rendus que de blocs `lines` » — mutation : 9 rouges.
+
+### Boutique (livrets/index.html)
+Cartes pilotées par le catalogue : 15 couvertures, prix, lien, essai gratuit.
+Corrigé à la demande de Jacques : filets d'or retirés, icônes à la couleur de
+leur titre, **bouton d'achat orange** (il était blanc sur blanc — `var(--vp-cta)`
+existe dans la feuille partagée avec un autre sens, le repli n'a jamais servi),
+comparaison **Bord / Livret**, et le parcours du code en **animation CSS pure**
+(3 écrans, 15 s, `opacity`/`transform` seuls, `prefers-reduced-motion` respecté).
+⚠️ L'animation d'entrée des cartes (`animation-timeline:view()`, feuille
+partagée) laissait les couvertures à `opacity:0` : désactivée sur cette page.
+
+### RESTE — rien n'est en ligne
+1. **FTP** de `~/Desktop/veritas-ftp/uploads/protected/livrets/` (~11 Mo :
+   15 `booklet-*`, 4 `guide-*`, 5 `corrige-*`). Sans lui les 11 ouvrages neufs
+   restent `disponible:false` — **fail-closed voulu : rien ne se vend qui ne
+   s'ouvre**.
+2. `git add` + push + `gh workflow run deploy.yml`.
+3. Paiement réel CamerPay sur un slug neuf : non rejouable en local
+   (`mode:live`, `sandbox:false`, `selfService:true` vérifiés en production).
+4. Une copie des données a été laissée dans `uploads/protected/livrets/` du
+   dépôt de travail pour permettre la vérification locale ; c'est gitignoré
+   (`uploads/protected/**`, vérifié par `git check-ignore`).

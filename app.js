@@ -753,7 +753,7 @@ function defaultDB(){return{
     histoire:'Fondé en 2023 par TAKOU Jacques Miterand (Directeur), AMBASSA et TCHAPDA, le Centre VÉRITAS est né d\'une vision commune : offrir aux élèves camerounais un espace d\'apprentissage où excellence et bienveillance se conjuguent. Partis d\'une salle modeste, nous accompagnons aujourd\'hui de nombreux apprenants avec un taux de réussite aux examens supérieur à 85%.\n\nL\'équipe fondatrice apporte une expérience complémentaire dans l\'éducation, la gestion et la pédagogie, faisant de VÉRITAS un centre de référence à Douala.',
     equipe:'Une équipe de 15 enseignants certifiés dans diverses disciplines',
     horaires:'Lundi–Vendredi: 7h30–17h30 | Samedi: 8h00–13h00',
-    contact:'+237 6 00 00 00 00',email:'contact@veritas-cm.cm',whatsapp:'+237 6 00 00 00 00'
+    contact:'+237 6 00 00 00 00',email:'contact@veritas-school.com',whatsapp:'+237 6 00 00 00 00'
   },
   // v1.2.6 FIX : DB.photos était l'ancienne galerie (icônes + légendes) affichée
   // en repli quand DB.galleryImages est vide — et ses 6 légendes inventaient des
@@ -1290,7 +1290,7 @@ function _migrateDB(){
     if(DB.publicInfo.whatsapp && (DB.publicInfo.whatsapp.indexOf('6 00 00')>=0 || DB.publicInfo.whatsapp === '+237 6 00 00 00 00')){
       DB.publicInfo.whatsapp='';
     }
-    if(DB.publicInfo.email && DB.publicInfo.email==='contact@veritas-cm.cm'){
+    if(DB.publicInfo.email && DB.publicInfo.email==='contact@veritas-school.com'){
       DB.publicInfo.email='';
     }
   }
@@ -3674,6 +3674,9 @@ function viewBookDetail(bid){
   // « Comment recevoir mon exemplaire ? » — le parcours d'achat expliqué,
   // juste après l'argumentaire, là où l'acheteur se demande « et ensuite ? »
   h+=(typeof _bookCommentRecevoir==='function'?_bookCommentRecevoir(b):'');
+  /* « Vous recevez : retrait au centre à Douala » ne disait jamais OÙ. Le bloc
+     ci-dessous le dit, avec ce que le panneau admin contient réellement. */
+  h+=(typeof _bookRetrait==='function'?_bookRetrait(b):'');
   h+='</div>';   // .bkpage-main
   h+='</div>';   // .bkpage
   h+='</div>';   // .vsec
@@ -10849,6 +10852,7 @@ const ANAV=[
     {k:"books2",i:"▤",l:"Bibliothèque"},
     {k:"elearningmgmt",i:"🎓",l:"E-Learning"},
     {k:"paywall",i:"🔓",l:"Essais & abonnements"},
+    {k:"plateforme",i:"🧩",l:"Atelier de Français"},
     {k:"authorsmgmt",i:"✍️",l:"Auteurs & Partage"},
     {k:"visitororders",i:"📦",l:"Commandes visiteurs"}
   ]},
@@ -10870,6 +10874,12 @@ const ANAV=[
     {k:"forum_admin",i:"💬",l:"Modération Forum"},
     {k:"marketplace_admin",i:"🛒",l:"Marketplace auteurs"},
     {k:"cms",i:"🌐",l:"Portail visiteur"},
+    /* La page ci-dessus edite DB.publicInfo ; l'accueil public n'en relit
+       qu'une poignee de champs (telephone, WhatsApp, e-mail, horaires,
+       adresse, bandeau, podium). « Contenu du site » edite tout le reste —
+       titres, chiffres, paragraphes, images — en s'appuyant sur l'inventaire
+       que la vitrine rend d'elle-meme. Les deux sont voisines exprès. */
+    {k:"accueil_cms",i:"✏️",l:"Contenu du site"},
     {k:"calendrier_admin",i:"📅",l:"Calendrier scolaire"}
   ]},
   {s:"⚙️ Système",i:[
@@ -10978,6 +10988,7 @@ const PT={
   books2:"Bibliothèque scolaire",
   elearningmgmt:"E-Learning & Contenus premium",
   paywall:"Essais gratuits & mur d'abonnement",
+  plateforme:"Atelier de Français — abonnements & quotas",
   authorsmgmt:"Auteurs & Partage de droits",
   visitororders:"Commandes visiteurs",
   resPedago:"Ressources pédagogiques (Probatoire/BAC)",
@@ -10987,6 +10998,7 @@ const PT={
   autredep:"Autres dépenses",
   finance:"Bilan financier",
   // Communication & Portail
+  accueil_cms:"Contenu du site public",
   announce:"Annonces & Événements",
   send:"Centre WhatsApp",
   orientation_admin:"Orientation & Conseil",
@@ -11101,6 +11113,12 @@ function render(p){
     cagnottes: (typeof pgCagnottesAdmin==='function' ? pgCagnottesAdmin : null),
     // Super Admin
     superoverview:pgSuperOverview,cms:pgCMS,loginlog:pgLoginLog,allaccounts:pgAllAccounts,sacontrol:pgSAControl,
+    /* Editeur du contenu de la vitrine et reglages de l'Atelier. Declares
+       avec la garde `typeof` comme les autres pages ajoutees apres coup : si
+       le bloc qui les definit venait a manquer d'un deploiement, la route
+       rend « page introuvable » au lieu de casser tout le routeur. */
+    accueil_cms: (typeof pgAccueil==='function' ? pgAccueil : null),
+    plateforme:  (typeof pgPlateforme==='function' ? pgPlateforme : null),
     // Émission manuelle des codes de cahier (règlement en espèces au centre).
     livret_codes: (typeof pgLivretCodes==='function' ? pgLivretCodes : null),
     // Guide d'utilisation (tous rôles)
@@ -17086,7 +17104,7 @@ window._showQuotaExceeded = function(action, tier, used, limit){
         +'<li>500 FCFA de crédit par ami parrainé</li>'
         +'<li>Badges + Genome + Wrapped annuel</li>'
         +'</ul></div>'
-      +'<button class="btn bi" style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:14px 28px;font-size:14px;font-weight:800;width:100%;margin-bottom:6px" onclick="cm();showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>S\'inscrire gratuitement (30 sec)</button>'
+      +'<button class="btn bi" style="background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;padding:14px 28px;font-size:14px;font-weight:800;width:100%;margin-bottom:6px" onclick="cm();showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-rocket"/></svg>S\'inscrire gratuitement (1 min)</button>'
       +'<div style="font-size:11px;color:#94A3B8;margin-top:6px">Pas de carte bancaire · 100% gratuit</div>'
       +'</div>';
   } else if(tier === 'free'){
@@ -17897,7 +17915,7 @@ function vShowPartners(){
   h += '<div style="font-size:13px;color:rgba(255,255,255,.8);max-width:500px;margin:0 auto 20px;line-height:1.7">Rejoignez notre réseau de partenaires et touchez des milliers d\'élèves et de familles au Cameroun. Visibilité, impact social et retour sur investissement.</div>';
   h += '<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">';
   h += '<a href="https://wa.me/237697637739?text=Je+suis+intéressé+par+un+partenariat+VÉRITAS" target="_blank" class="btn" style="background:#25D366;color:#fff;font-weight:700;border-radius:12px;padding:10px 20px;text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-smartphone"/></svg>WhatsApp</a>';
-  h += '<a href="mailto:contact@veritas-cm.cm?subject=Partenariat VÉRITAS" class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 20px;text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Email</a>';
+  h += '<a href="mailto:contact@veritas-school.com?subject=Partenariat VÉRITAS" class="btn" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:12px;padding:10px 20px;text-decoration:none"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Email</a>';
   h += '</div></div>';
   h += '</div>';
   _vc(h);
@@ -24205,7 +24223,7 @@ function _downloadPDFCover(encodedTitre){
   doc.setFontSize(10);doc.setFont(undefined,'italic');doc.setTextColor(180,200,255);
   doc.text('Document protégé — Usage pédagogique uniquement',pw/2,125,{align:'center'});
   doc.text('© '+new Date().getFullYear()+' '+( school.nom||'VÉRITAS Academy')+' · veritas-school.com',pw/2,133,{align:'center'});
-  doc.text('Tél : '+(school.tel||'656 720 476')+' · contact@veritas.cm',pw/2,141,{align:'center'});
+  doc.text('Tél : '+(school.tel||'656 720 476')+' · contact@veritas-school.com',pw/2,141,{align:'center'});
   // Encadré or
   doc.setFillColor(255,201,60);doc.roundedRect(20,ph-75,pw-40,36,4,4,'F');
   doc.setTextColor(20,37,84);doc.setFontSize(10);doc.setFont(undefined,'bold');
@@ -24221,7 +24239,7 @@ function _downloadPDFCover(encodedTitre){
 // ── Télécharger Word avec filigrane (HTML→.doc) ──
 function _downloadWordWithWatermark(dataUrlOrText,ep){
   var school=DB.school||{};
-  var contacts='veritas-school.com · '+(school.tel||'656 720 476')+' · contact@veritas.cm';
+  var contacts='veritas-school.com · '+(school.tel||'656 720 476')+' · contact@veritas-school.com';
   var htmlDoc='<html xmlns:o="urn:schemas-microsoft-com:office:office" '
     +'xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
     +'<head><meta charset="utf-8"><title>'+_esc(ep.titre||'Ressource')+'</title>'
@@ -24440,7 +24458,7 @@ function _downloadExtraitPDF(id){
   var doc=new jsPDFCls({orientation:'portrait',unit:'mm',format:'a4'});
   var pageW=210,pageH=297,margin=15,contentW=pageW-margin*2;
   var school=DB.school||{};
-  var contacts="veritas-school.com · "+(school.tel||'656 720 476')+" · contact@veritas.cm";
+  var contacts="veritas-school.com · "+(school.tel||'656 720 476')+" · contact@veritas-school.com";
 
   // ── En-tête colorée ──
   doc.setFillColor(20,37,84);
@@ -24525,7 +24543,7 @@ function _downloadExtraitWord(id){
   var e=(DB.extraits||[]).find(function(x){return x.id===id;});
   if(!e||!e.texte){toast('Extrait non disponible','warn');return;}
   var school=DB.school||{};
-  var contacts="veritas-school.com · "+(school.tel||'656 720 476')+" · contact@veritas.cm";
+  var contacts="veritas-school.com · "+(school.tel||'656 720 476')+" · contact@veritas-school.com";
   var htmlDoc="<html xmlns:o='urn:schemas-microsoft-com:office:office'"
     +" xmlns:w='urn:schemas-microsoft-com:office:word'"
     +" xmlns='http://www.w3.org/TR/REC-html40'>"
@@ -25599,9 +25617,27 @@ function showRegisterForm(role){
     hideAll();
     $("VISITOR").style.display="flex";
     _vc(_buildRegisterHTML(window._regRole));
+    _regInit();
     return;
   }
   _si('lFormArea',_buildRegisterHTML(window._regRole));
+  _regInit();
+}
+
+/* ── _regSysChange n'était appelée par RIEN au premier rendu ───────────────
+   Elle n'était branchée que sur le `onchange` de « Sous-système » et
+   « Enseignement ». Or c'est ELLE qui pose l'écouteur sur le menu des classes
+   (`sel.__serieBranche`). Conséquence, mesurable et jamais vue parce que le
+   chemin de test passait toujours par un des deux menus : un élève qui
+   choisissait directement sa classe — le geste le plus naturel — ne voyait
+   jamais apparaître le champ « Filière », alors que doRegister() refuse
+   l'inscription sans filière quand elle est requise. Il butait sur le bouton
+   sans savoir ce qui manquait.
+   Un appel à l'ouverture du formulaire pose l'écouteur et met l'écran en
+   accord avec les valeurs par défaut (6ème, francophone, général). */
+function _regInit(){
+  try{ if(typeof window._regSysChange==='function' && document.getElementById('rCls')) window._regSysChange(); }
+  catch(e){}
 }
 
 function _buildRegisterHTML(role){
@@ -25623,30 +25659,30 @@ function _buildRegisterHTML(role){
       ? "<div style='background:linear-gradient(135deg,#142554,#1E3A8A);color:#fff;border-radius:14px;padding:14px;text-align:center;margin-bottom:16px'><div style='font-size:14px;font-weight:800'>🤝 Visibilité garantie</div><div style='font-size:11px;opacity:.92'>Votre logo sur la page Partenaires et nos événements</div></div>"
       : "";
   var roleField = (role==='auteur' || isEns)
-    ? "<div class='fg full'><span class='fl'>Votre discipline / matière *</span><input class='fi' id='rDiscipline' placeholder='Français, Maths, PCT, Anglais, SVT…'></div>"
+    ? "<div class='fg full'><label class='fl' for='rDiscipline'>Votre discipline / matière *</label><input class='fi' id='rDiscipline' placeholder='Français, Maths, PCT, Anglais, SVT…'></div>"
     : isParent
-      ? "<div class='fg full'><span class='fl'>Matricule de votre enfant (facultatif — pour le rattacher)</span><input class='fi' id='rChildMat' placeholder='VRT-001' style='text-transform:uppercase'></div>"
+      ? "<div class='fg full'><label class='fl' for='rChildMat'>Matricule de votre enfant (facultatif — pour le rattacher)</label><input class='fi' id='rChildMat' placeholder='VRT-001' style='text-transform:uppercase'></div>"
     : isPro
-      ? "<div class='fg'><span class='fl'>Organisation / structure *</span><input class='fi' id='rOrg' placeholder='Nom de votre entreprise / ONG'></div>"
-        +"<div class='fg'><span class='fl'>Type</span><select class='fi' id='rOrgType'><option value='entreprise'>🏢 Entreprise</option><option value='ong'>🤲 ONG / Association</option><option value='mecene'>💝 Mécène / Particulier</option><option value='ecole'>🏫 Établissement</option></select></div>"
+      ? "<div class='fg'><label class='fl' for='rOrg'>Organisation / structure *</label><input class='fi' id='rOrg' placeholder='Nom de votre entreprise / ONG'></div>"
+        +"<div class='fg'><label class='fl' for='rOrgType'>Type</label><select class='fi' id='rOrgType'><option value='entreprise'>🏢 Entreprise</option><option value='ong'>🤲 ONG / Association</option><option value='mecene'>💝 Mécène / Particulier</option><option value='ecole'>🏫 Établissement</option></select></div>"
       : "";
   // Parcours scolaire : pertinent pour l'élève ET l'auteur (il publie pour un niveau),
   // masqué pour partenaire/mécène (structure), parent (ce n'est pas lui l'élève)
   // et enseignant (il choisit sa discipline, pas une classe d'élève).
   var parcours = (isPro || isParent || isEns) ? "" : (
-    "<div class='fg'><span class='fl'>Sous-système *</span><select class='fi' id='rSys' onchange='_regSysChange()'><option value='fr'>🇨🇲 Francophone</option><option value='en'>🇨🇲 Anglophone (GCE)</option></select></div>"
-    +"<div class='fg'><span class='fl'>Enseignement *</span><select class='fi' id='rEns' onchange='_regSysChange()'><option value='gen'>🎓 Général</option><option value='tech'>🔧 Technique</option></select></div>"
+    "<div class='fg'><label class='fl' for='rSys'>Sous-système *</label><select class='fi' id='rSys' onchange='_regSysChange()'><option value='fr'>🇨🇲 Francophone</option><option value='en'>🇨🇲 Anglophone (GCE)</option></select></div>"
+    +"<div class='fg'><label class='fl' for='rEns'>Enseignement *</label><select class='fi' id='rEns' onchange='_regSysChange()'><option value='gen'>🎓 Général</option><option value='tech'>🔧 Technique</option></select></div>"
     +(function(){
       var cfg=(typeof _AMBASSA_SYS!=='undefined')?_AMBASSA_SYS.fr_gen:{classes:CLS.slice()};
       var userCls=SES&&SES.cls;
-      return "<div class='fg'><span class='fl'>"+(role==='auteur'?'Niveau ciblé *':'Classe / Niveau *')+"</span><select class='fi' id='rCls'>"
+      return "<div class='fg'><label class='fl' for='rCls'>"+(role==='auteur'?'Niveau ciblé *':'Classe / Niveau *')+"</label><select class='fi' id='rCls'>"
         +cfg.classes.map(function(cl){
           return "<option"+(cl===userCls?' selected':'')+">"+_esc(cl)+"</option>";
         }).join("")+"</select>"
         +"<div style='font-size:11px;color:#059669;margin-top:3px'>✓ "+(role==='auteur'?'Vos ressources seront classées pour ce niveau':'Vos ressources seront personnalisées pour ce parcours')+"</div>"
         +"</div>";
     })()
-    +"<div class='fg' id='rSerieWrap' style='display:none'><span class='fl'>Filière *</span><select class='fi' id='rSerie'></select></div>"
+    +"<div class='fg' id='rSerieWrap' style='display:none'><label class='fl' for='rSerie'>Filière *</label><select class='fi' id='rSerie'></select></div>"
   );
   return "<div style='padding:24px 20px;max-width:460px;margin:0 auto'>"
     +"<input type='hidden' id='rRole' value='"+_esc(role)+"'>"
@@ -25657,20 +25693,38 @@ function _buildRegisterHTML(role){
     +"</div>"
     +banner
     +"<div class='fg2'>"
-    +"<div class='fg'><span class='fl'>Prénom *</span><input class='fi' id='rPre' placeholder='Jean-Pierre'></div>"
-    +"<div class='fg'><span class='fl'>Nom *</span><input class='fi' id='rNom' placeholder='MBALLA'></div>"
-    +"<div class='fg'><span class='fl'>WhatsApp *</span><input class='fi' id='rTel' placeholder='+237 6 00 00 00 00'></div>"
-    +"<div class='fg'><span class='fl'>Email"+(isPro?' *':'')+"</span><input class='fi' type='email' id='rEmail' placeholder='jean@email.cm'></div>"
+    +"<div class='fg'><label class='fl' for='rPre'>Prénom *</label><input class='fi' id='rPre' autocomplete='given-name' required placeholder='Jean-Pierre'></div>"
+    +"<div class='fg'><label class='fl' for='rNom'>Nom *</label><input class='fi' id='rNom' autocomplete='family-name' required placeholder='MBALLA'></div>"
+    +"<div class='fg'><label class='fl' for='rTel'>WhatsApp *</label><input class='fi' id='rTel' autocomplete='tel' inputmode='tel' required placeholder='+237 6 00 00 00 00'></div>"
+    +"<div class='fg'><label class='fl' for='rEmail'>Email"+(isPro?' *':'')+"</label><input class='fi' type='email' id='rEmail' autocomplete='email' placeholder='jean@email.cm'></div>"
     +roleField
-    +"<div class='fg'><span class='fl'>🎁 Code parrainage (optionnel)</span><input class='fi' id='rRef' placeholder='VRT...' value='"+(sessionStorage.getItem('_vrtRef')||'')+"' style='text-transform:uppercase;letter-spacing:1px'></div>"
+    +"<div class='fg'><label class='fl' for='rRef'>🎁 Code parrainage (optionnel)</label><input class='fi' id='rRef' placeholder='VRT...' value='"+(sessionStorage.getItem('_vrtRef')||'')+"' style='text-transform:uppercase;letter-spacing:1px'></div>"
     +parcours
-    +"<div class='fg full'><span class='fl'>Identifiant (sans espaces) *</span>"
-    +"<input class='fi' id='rUser' placeholder='jean.mballa' oninput='_chkUser(this.value)'>"
-    +"<div id='uAvail' style='font-size:11px;margin-top:3px;color:#9CA3AF'>Minimum 3 caractères</div></div>"
-    +"<div class='fg'><span class='fl'>Mot de passe * (min 6)</span><input class='fi' type='password' id='rPwd'></div>"
-    +"<div class='fg'><span class='fl'>Confirmer le mot de passe</span><input class='fi' type='password' id='rPwd2'></div>"
+    +"<div class='fg full'><label class='fl' for='rUser'>Identifiant (sans espaces) *</label>"
+    +"<input class='fi' id='rUser' autocomplete='username' required aria-describedby='uAvail' placeholder='jean.mballa' oninput='_chkUser(this.value)'>"
+    /* aria-live : le verdict de disponibilité est écrit ici par _chkUser. Sans
+       région vivante, un lecteur d'écran ne dit jamais que l'identifiant est
+       déjà pris — l'utilisateur bute sur le bouton sans savoir pourquoi. */
+    +"<div id='uAvail' role='status' aria-live='polite' style='font-size:11px;margin-top:3px;color:#9CA3AF'>Minimum 3 caractères</div></div>"
+    +"<div class='fg'><label class='fl' for='rPwd'>Mot de passe * (min 6)</label><input class='fi' type='password' id='rPwd' autocomplete='new-password' required></div>"
+    +"<div class='fg'><label class='fl' for='rPwd2'>Confirmer le mot de passe</label><input class='fi' type='password' id='rPwd2' autocomplete='new-password'></div>"
     +"</div>"
-    +"<button class='btn bi' style='width:100%;margin-top:18px;font-size:14px;padding:13px;font-family:Montserrat,sans-serif' onclick='doRegister()'><svg class='vico bico' aria-hidden='true'><use href='#lc-sparkles'/></svg>"+H.btn+"</button>"
+    /* ── Information AU POINT DE COLLECTE (27/08/2026) ──────────────────────
+       Ce formulaire demandait onze champs — nom, WhatsApp, e-mail, classe —
+       avec un menu qui commence en 6ᵉ, donc à onze ans, sans afficher un seul
+       lien vers les CGV ni vers une politique de confidentialité (qui, elle,
+       n'existait pas). L'information doit être là où la donnée est saisie :
+       un lien en pied de page, trois écrans plus bas, ne la remplace pas.
+       Pas de case à cocher : la validation vaut acceptation, et une case de
+       plus sur un téléphone coûte des inscriptions sans rien protéger de plus.
+       En revanche la consigne « numéro d'un parent » est affichée pour le
+       premier cycle — c'est elle qui protège réellement l'enfant. */
+    +"<p style='margin:16px 0 0;font-size:11.5px;line-height:1.65;color:#6B7A99;text-align:center'>"
+    +"En créant votre compte, vous acceptez les <a href='/legal/cgv.html' target='_blank' rel='noopener' style='color:#3C8DFF'>conditions générales de vente</a> "
+    +"et la <a href='/legal/confidentialite.html' target='_blank' rel='noopener' style='color:#3C8DFF'>politique de confidentialité</a>.<br>"
+    +"<span id='rMineurAvis' style='display:none;color:#B45309;font-weight:600'>Élève de 6ᵉ à 3ᵉ : indiquez le numéro WhatsApp d’un parent, pas celui de l’enfant.</span>"
+    +"</p>"
+    +"<button class='btn bi' style='width:100%;margin-top:14px;font-size:14px;padding:13px;font-family:Montserrat,sans-serif' onclick='doRegister()'><svg class='vico bico' aria-hidden='true'><use href='#lc-sparkles'/></svg>"+H.btn+"</button>"
     +"<div style='text-align:center;margin-top:14px;font-size:12px;color:#9CA3AF'>Déjà un compte ? "
     +"<button onclick=\"hideAll();$('LS').style.display='flex';swLR('visiteur')\" style='background:none;border:none;color:#3C8DFF;font-weight:700;cursor:pointer;font-size:12px'>Se connecter</button></div>"
     +"</div>";
@@ -25683,7 +25737,20 @@ window._regSysChange=function(){
   var e=(document.getElementById('rEns')||{}).value||'gen';
   var cfg=(typeof _AMBASSA_SYS!=='undefined'&&_AMBASSA_SYS[s+'_'+e])||{classes:CLS.slice()};
   var sel=document.getElementById('rCls');
-  if(sel){ sel.innerHTML=cfg.classes.map(function(c){return '<option>'+_esc(c)+'</option>';}).join('');
+  if(sel){
+    /* ⚠️ Cette fonction est aussi appelée QUAND ON CHANGE DE CLASSE (l'écouteur
+       posé trois lignes plus bas). Elle reconstruisait alors innerHTML sans
+       rien retenir : le navigateur reprenait la première option, et le choix
+       de l'élève était effacé à la seconde même où il le faisait — il
+       sélectionnait « Terminale » et le menu réaffichait « 6ème ».
+       Le défaut ne se voyait pas tant que _regSysChange n'était appelée par
+       rien au premier rendu : sans elle, l'écouteur n'existait pas.
+       On mémorise donc la valeur avant de reconstruire, et on la restitue si
+       la nouvelle liste la contient encore (changer de sous-système peut
+       légitimement faire disparaître une classe). */
+    var choix=sel.value;
+    sel.innerHTML=cfg.classes.map(function(c){return '<option>'+_esc(c)+'</option>';}).join('');
+    if(choix && cfg.classes.indexOf(choix)>=0) sel.value=choix;
     // Changer de classe rouvre (ou referme) la question de la filière.
     if(!sel.__serieBranche){ sel.__serieBranche=1; sel.addEventListener('change',function(){ window._regSysChange(); }); } }
   /* La filière vient de _AMBASSA_SYS — la MÊME table que celle qui vient de
@@ -25707,6 +25774,16 @@ window._regSysChange=function(){
         +series.map(function(x){return '<option value="'+_esc(x)+'">'+_esc(x)+'</option>';}).join('');
       wrap.style.display='';
     } else { wrap.style.display='none'; serSel.innerHTML=''; }
+  }
+  /* Premier cycle = élèves de 11 à 15 ans. On demande alors explicitement le
+     numéro d'un parent. C'est la seule protection qui vaille : un enfant de
+     6ᵉ ne doit pas être le contact d'un compte qui reçoit des reçus et des
+     relances de paiement. L'avis suit la classe choisie, il n'est donc jamais
+     affiché à un élève de Terminale — qui, lui, est majeur ou presque. */
+  var avis=document.getElementById('rMineurAvis');
+  if(avis){
+    var cl2=(document.getElementById('rCls')||{}).value||'';
+    avis.style.display=/6[eè]|5[eè]|4[eè]|3[eè]|Form [1-4]|Year [1-3]/i.test(cl2) ? 'inline' : 'none';
   }
 };
 
@@ -30700,7 +30777,11 @@ window.VERITAS_PAYMENTS = (function(){
     momo: {
       label:'MTN Mobile Money',
       numero:'+237 650 435 106',
-      nomCompte:'TAKOU Jacques Miterand',
+      /* Le payeur voyait un NOM PROPRE et recevait une facture au nom d'une
+         SARL, sans rien qui relie les deux : c'est le doute qui naît à la
+         seconde exacte du paiement. Tant que le compte marchand au nom de la
+         société n'est pas ouvert, on écrit au moins le lien en toutes lettres. */
+      nomCompte:'TAKOU Jacques Miterand (gérant, VERITAS EDUCATION SARL)',
       code:'*126#',
       couleur:'#FFCB05',
       ico:'📱'
@@ -30708,7 +30789,11 @@ window.VERITAS_PAYMENTS = (function(){
     orange: {
       label:'Orange Money',
       numero:'+237 697 637 739',
-      nomCompte:'TAKOU Jacques Miterand',
+      /* Le payeur voyait un NOM PROPRE et recevait une facture au nom d'une
+         SARL, sans rien qui relie les deux : c'est le doute qui naît à la
+         seconde exacte du paiement. Tant que le compte marchand au nom de la
+         société n'est pas ouvert, on écrit au moins le lien en toutes lettres. */
+      nomCompte:'TAKOU Jacques Miterand (gérant, VERITAS EDUCATION SARL)',
       code:'#150*1#',
       couleur:'#FF6600',
       ico:'🟠'
@@ -30716,27 +30801,36 @@ window.VERITAS_PAYMENTS = (function(){
     paypal: {
       label:'PayPal',
       url:'https://paypal.me/JacquesTakou',
-      email:'contact@veritas.cm',
+      email:'contact@veritas-school.com',
       couleur:'#003087',
       ico:'💳'
     },
+    /* ⚠️ 27/08/2026 — les gabarits d'origine sont RETIRÉS, pas seulement
+       masqués. `_payOK()` empêchait déjà d'afficher la tuile, et il fait bien
+       son travail (5 appelants, vérifiés) : le client ne voyait donc pas
+       « https://buy.stripe.com/test_replace_me » ni un IBAN « À configurer ».
+       Mais l'objet reste lisible en console par n'importe qui, et surtout
+       DB.payConfig fusionne PAR CLÉ : un administrateur qui renseignait la
+       banque sans toucher à l'IBAN laissait « À configurer » en place.
+       Une chaîne vide est refusée par `_payOK` au même titre, et n'annonce
+       rien à personne. Remplir ces champs = Admin → Coordonnées d'encaissement. */
     stripe: {
       label:'Carte bancaire',
-      url:'https://buy.stripe.com/test_replace_me',
+      url:'',
       couleur:'#635BFF',
       ico:'💳'
     },
     bank: {
       label:'Virement bancaire',
-      titulaire:'Centre VÉRITAS',
-      banque:'À configurer',
-      iban:'À configurer',
-      swift:'À configurer',
+      titulaire:'VERITAS EDUCATION SARL',
+      banque:'',
+      iban:'',
+      swift:'',
       couleur:'#1E3A8A',
       ico:'🏦'
     },
     whatsapp:'+237 697 637 739',
-    email:'contact@veritas.cm'
+    email:'contact@veritas-school.com'
   };
   // Surcharge depuis DB.payConfig si l'admin l'a édité
   try {
@@ -30882,7 +30976,11 @@ function openPaymentModal(payInfo){
   // Formatage du montant
   var montantFmt = new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
   // Conversion approximative en EUR/USD pour PayPal/Stripe (655 FCFA ≈ 1 EUR fixe zone XAF)
-  var montantEUR = (montant / 655).toFixed(2);
+  // Parité FIXE de la zone CFA : 1 EUR = 655,957 XAF (arrimage, pas un taux
+  // du jour). La valeur 655 utilisée jusqu'ici décalait l'affichage d'un
+  // centime — 1 000 F sortaient à « 1.53 € » au lieu de 1,52 €.
+  // La virgule décimale est la française : cette ligne est en français.
+  var montantEUR = (montant / 655.957).toFixed(2).replace('.', ',');
 
   // Message WhatsApp de confirmation (le client clique → envoie au centre)
   var waMsg = encodeURIComponent(
@@ -30902,7 +31000,7 @@ function openPaymentModal(payInfo){
       + '<div style="font-family:Montserrat,sans-serif;font-size:12px;letter-spacing:2px;opacity:.75;text-transform:uppercase">Paiement pour</div>'
       + '<div style="font-family:Montserrat,sans-serif;font-size:20px;font-weight:800;margin-top:4px">'+_esc(label)+'</div>'
       + '<div style="font-size:32px;font-weight:900;color:#FFC93C;margin-top:10px">'+montantFmt+'</div>'
-      + '<div style="font-size:11px;opacity:.75;margin-top:4px">≈ '+montantEUR+' € / USD (taux indicatif)</div>'
+      + '<div style="font-size:11px;opacity:.75;margin-top:4px">≈ '+montantEUR+' € (parité fixe)</div>'
       + '<div style="margin-top:12px;padding:8px 12px;background:rgba(255,255,255,.1);border-radius:8px;font-family:monospace;font-size:12px">'
         + '<span style="opacity:.7">Référence :</span> <strong style="color:#FFC93C">'+ref+'</strong>'
       + '</div>'
@@ -33796,13 +33894,13 @@ window.mParrainage = function(){
         +'<div style="background:#F3F4F6;padding:14px;border-radius:12px;margin-bottom:12px">'
         +'<div style="font-weight:700;margin-bottom:8px;color:#142554">🚀 Comment ça marche ?</div>'
         +'<ol style="margin:0;padding-left:20px;font-size:13px;color:#374151;line-height:1.7">'
-          +'<li>Inscrivez-vous gratuitement (30 secondes)</li>'
+          +'<li>Inscrivez-vous gratuitement (une minute)</li>'
           +'<li>Récupérez votre code de parrainage unique</li>'
           +'<li>Partagez-le à vos amis (WhatsApp, Facebook)</li>'
           +'<li>Vous recevez <b>'+fmt(PARRAINAGE_BONUS)+'</b> de crédit chacun à leur inscription</li>'
           +'<li>Utilisez le crédit sur la boutique et les abonnements</li>'
         +'</ol></div>'
-        +'<p style="text-align:center;font-size:13px;color:#6B7280">Inscription en 30 secondes, 100% gratuit.</p>'
+        +'<p style="text-align:center;font-size:13px;color:#6B7280">Inscription en une minute, 100% gratuit.</p>'
         +'</div>',
         '<button class="btn bo" onclick="cm()">Fermer</button>'
         +'<button class="btn bi" onclick="cm();(typeof showRegisterForm===\'function\'?showRegisterForm():typeof showLogin===\'function\'?showLogin(\'eleve\'):null);"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>S\'inscrire</button>', true);
@@ -36864,8 +36962,8 @@ window._pdjLoadExpl = function(){
     var _set=function(html){ var bx=document.getElementById('vPdjExpl'); if(bx&&html) bx.innerHTML=html; window._pdjExplBusy=false; };
     var _to=setTimeout(function(){ try{ _ac&&_ac.abort(); }catch(e){} window._pdjExplBusy=false; },22000);
     fetch(base+'/ia_proxy.php',{method:'POST',headers:{'Content-Type':'application/json'},signal:_ac?_ac.signal:undefined,body:JSON.stringify({
-      prompt:'Passage de l\'œuvre "'+p.titre+'"'+(p.auteur?' de '+p.auteur:'')+' (programme MINESEC camerounais) :\n« '+p.passage.substring(0,700)+' »\n\nÉcris une MINI-ANALYSE de 2 ou 3 phrases, au ton IRONIQUE, RÉALISTE, COMIQUE et DIDACTIQUE (un prof drôle, mordant et lucide qui adore son texte et le ramène au réel) : fais comprendre ce qui se joue, situe brièvement le moment ou la partie dans l\'œuvre UNIQUEMENT si tu en es sûr (sinon n\'invente AUCUN numéro de chapitre), et TERMINE par une question taquine qui donne furieusement envie de lire la suite. Aucun spoiler. Réponds en FRANÇAIS.',
-      sysPrompt:'Tu es le Professeur Ambassa : prof de français camerounais drôle, ironique, cultivé, jamais ennuyeux. Tu réponds TOUJOURS en français.',
+      prompt:'Passage de l\'œuvre "'+p.titre+'"'+(p.auteur?' de '+p.auteur:'')+' (programme MINESEC camerounais) :\n« '+p.passage.substring(0,700)+' »\n\nÉcris une MINI-ANALYSE de 2 ou 3 phrases, au ton IRONIQUE, RÉALISTE, COMIQUE et DIDACTIQUE (un prof drôle, mordant et lucide qui adore son texte et le ramène au réel) : fais comprendre ce qui se joue, situe brièvement le moment ou la partie dans l\'œuvre UNIQUEMENT si tu en es sûr (sinon n\'invente AUCUN numéro de chapitre), et TERMINE par une question taquine qui donne furieusement envie de lire la suite. Restreins-toi STRICTEMENT au littéraire : ce que l\'auteur fabrique, les procédés, les personnages, la situation, le style, l\'enjeu du passage. N\'écris RIEN sur l\'actualité, la politique, le gouvernement, l\'administration, la police, la gendarmerie, la justice, la corruption ni sur une personnalité réelle — même si le texte y fait allusion, et même pour plaisanter : commente l\'ÉCRITURE, jamais le pays. Aucun spoiler. Réponds en FRANÇAIS.',
+      sysPrompt:'Tu es le Professeur Ambassa : prof de français camerounais drôle, ironique, cultivé, jamais ennuyeux. Tu parles de LITTÉRATURE et de rien d\'autre : jamais de politique, d\'actualité, d\'institutions ni de personnes réelles. Tu réponds TOUJOURS en français.',
       // `shared` → le serveur génère l'analyse UNE fois par jour et la sert à
       // tous les visiteurs sans décompter le moindre quota. Avant, cette requête
       // passait par la clé de quota commune « pdj » plafonnée à 2/jour : à partir
@@ -39748,7 +39846,11 @@ openPaymentModal = function(payInfo){
   _promoDiscount = 0;
 
   var montantFmt = new Intl.NumberFormat('fr-FR').format(montant) + ' FCFA';
-  var montantEUR = (montant / 655).toFixed(2);
+  // Parité FIXE de la zone CFA : 1 EUR = 655,957 XAF (arrimage, pas un taux
+  // du jour). La valeur 655 utilisée jusqu'ici décalait l'affichage d'un
+  // centime — 1 000 F sortaient à « 1.53 € » au lieu de 1,52 €.
+  // La virgule décimale est la française : cette ligne est en français.
+  var montantEUR = (montant / 655.957).toFixed(2).replace('.', ',');
 
   var waNum = (P.whatsapp||'').replace(/[^0-9+]/g,'').replace(/^\+/,'');
 
@@ -39784,7 +39886,7 @@ openPaymentModal = function(payInfo){
     +'<div style="font-size:11px;letter-spacing:2px;opacity:.7;text-transform:uppercase">Paiement pour</div>'
     +'<div style="font-family:Montserrat,sans-serif;font-size:18px;font-weight:800;margin-top:4px">'+_esc(label)+'</div>'
     +'<div style="font-size:28px;font-weight:900;color:#FFC93C;margin-top:8px" id="payStepTotal">'+montantFmt+'</div>'
-    +'<div style="font-size:11px;opacity:.7;margin-top:2px">≈ '+montantEUR+' € / USD</div>'
+    +'<div style="font-size:11px;opacity:.7;margin-top:2px">≈ '+montantEUR+' € (parité fixe)</div>'
     // v1.14 — TRANSPARENCE DES FRAIS. Un parent qui découvre un écart entre le
     // prix annoncé et la somme débitée ne revient pas payer une seconde fois.
     // On annonce donc les frais opérateur AVANT le paiement, et on dit qu'ils
@@ -42072,7 +42174,7 @@ function mCandidaterAmbassadeurJunior(){
   var ses = (typeof SES!=='undefined' && SES) ? SES : null;
   if(!ses || !ses.id){
     M('🔒 Connexion requise', 'Pour devenir Ambassadeur Junior, créez d\'abord un compte élève.',
-      '<div style="text-align:center;padding:18px">Tu peux t\'inscrire gratuitement en 30 secondes — c\'est la première étape pour devenir Ambassadeur VÉRITAS Junior.</div>',
+      '<div style="text-align:center;padding:18px">Tu peux t\'inscrire gratuitement en une minute — c\'est la première étape pour devenir Ambassadeur VÉRITAS Junior.</div>',
       '<button class="btn bo" onclick="cm()">Annuler</button>'
       +'<button class="btn bi" onclick="cm();if(typeof showRegisterForm===\'function\')showRegisterForm()"><svg class="vico bico" aria-hidden="true"><use href="#lc-sparkles"/></svg>Créer mon compte</button>');
     return;
@@ -48611,6 +48713,73 @@ window._bookBuyPanel = function(b, rt, rvs){
    Le parcours est décrit tel qu'il se passe vraiment au centre. Aucune
    étape n'est promise si elle n'existe pas : pas de « livraison en 24 h »
    tant que ce délai n'est pas tenu. */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   OÙ RETIRER SON EXEMPLAIRE — la question qu'on se pose avant de payer
+   ──────────────────────────────────────────────────────────────────────────
+   Repris de libryo.fr, qui affiche « Lieu de récupération / expédition :
+   ville, adresse » sous le prix. Chez eux le bloc est d'ailleurs rendu DEUX
+   FOIS, l'un sous l'autre — on ne copie pas ce défaut-là.
+
+   La fiche promettait « Retrait au centre à Douala, ou expédition en
+   province » sans jamais dire OÙ. Un parent de Bonabéri qui vient de payer
+   4 000 F n'a aucun moyen de savoir s'il traverse le pont ou pas.
+
+   Tout vient du panneau admin (Portail visiteur) : ville, adresse, horaires,
+   téléphone. Chaque ligne n'apparaît QUE si elle est renseignée — et quand
+   l'adresse manque, on le DIT au lieu de laisser un blanc : le visiteur sait
+   alors qu'il l'obtiendra sur WhatsApp, ce qui est la vérité du terrain.
+   Rien n'est inventé ici : pas de rue plausible, pas d'horaire par défaut.
+   ══════════════════════════════════════════════════════════════════════════ */
+window._bookRetrait = function(b){
+  // Un livre numérique n'a rien à retirer : lui servir une adresse serait
+  // promettre un colis qui n'existe pas.
+  if(!b || b.numeriqueSeul) return '';
+
+  var pi = (typeof DB !== 'undefined' && DB.publicInfo) ? DB.publicInfo : {};
+  var ec = (typeof DB !== 'undefined' && DB.school) ? DB.school : {};
+  var ville   = String(pi.ville || ec.ville || '').trim();
+  var adresse = String(pi.adresse || '').trim();
+  var horaires= String(pi.horaires || '').trim();
+  var tel     = String(pi.contact || ec.tel || '').trim().split('/')[0].trim();
+  var wa      = String(pi.whatsapp || tel).replace(/[^0-9+]/g, '');
+  if(wa && wa.charAt(0) !== '+' && wa.length === 9) wa = '237' + wa;
+  wa = wa.replace(/^\+/, '');
+
+  var lignes = '';
+  function ligne(ico, libelle, valeur){
+    if(!valeur) return;
+    lignes += '<div class="bkret-l"><span class="bkret-i">' + ICO(ico) + '</span>'
+            + '<span><b>' + _esc(libelle) + '</b><span>' + _esc(valeur) + '</span></span></div>';
+  }
+  ligne('i-map', 'Ville',    ville);
+  ligne('lc-building','Adresse',  adresse);
+  ligne('i-clock',   'Horaires', horaires);
+  ligne('i-phone',   'Téléphone', tel);
+
+  if(!lignes) return '';   // rien de renseigné : pas de cadre vide
+
+  var h = '<section class="bkret"><h3 class="bkret-t">' + ICO('i-map')
+        + 'Où retirer votre exemplaire</h3>'
+        + '<div class="bkret-g">' + lignes + '</div>';
+  if(!adresse){
+    /* L'absence est dite, et elle ouvre la conversation — c'est plus utile
+       qu'une ligne « Adresse : — » et infiniment plus honnête qu'une rue
+       inventée. */
+    h += '<p class="bkret-note">' + ICO('i-message')
+       + 'L\'adresse exacte du point de retrait vous est communiquée sur WhatsApp '
+       + 'à la confirmation de la commande'
+       + (wa ? ', ou <a href="https://wa.me/' + _esc(wa) + '?text='
+             + encodeURIComponent('Bonjour VÉRITAS. Où puis-je retirer un manuel commandé ?')
+             + '" target="_blank" rel="noopener">tout de suite si vous préférez</a>' : '')
+       + '.</p>';
+  }
+  h += '<p class="bkret-note">' + ICO('i-box')
+     + 'Hors de la ville : expédition en province, à convenir au moment de la confirmation.</p>'
+     + '</section>';
+  return h;
+};
+
 window._bookCommentRecevoir = function(b){
   /* Un livre vendu SEULEMENT en ligne n'a rien à expédier : lui servir le
      parcours « retrait au centre / expédition en province » promettrait un
@@ -49855,3 +50024,685 @@ window._lvcResetAppareils = _lvcResetAppareils;
 window._lvcMajNature    = _lvcMajNature;
 window._lvcCopier       = _lvcCopier;
 window._lvcRendreTable  = _lvcRendreTable;
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTENU DU SITE — éditeur des textes et des images de la vitrine
+   ──────────────────────────────────────────────────────────────────────────
+   L'accueil public est une page STATIQUE : elle ne charge ni app.js ni DB.
+   Jusqu'ici, deux champs seulement (horaires, adresse) étaient pilotables
+   depuis l'administration, et il fallait poser une « fente » dans le code du
+   build pour en ajouter un troisième. Tout le reste — titres, chiffres,
+   paragraphes, photos — se modifiait en rouvrant la maquette.
+
+   Ici, aucune fente à poser. La vitrine s'inventorie elle-même
+   (assets/vitrine.js, window.VRT_CMS) et rend la liste de tout ce qui est
+   modifiable. Cette page l'affiche, laisse corriger, et enregistre les
+   surcharges dans DB.accueil.slots — qui partent au serveur par la
+   synchronisation habituelle et redescendent par api/public_data.php.
+
+   Deux garanties tenues :
+   · L'aperçu montre la MAQUETTE NUE plus le brouillon en cours. C'est
+     exactement ce que verra le visiteur, jamais une approximation.
+   · Une surcharge n'efface rien : elle recouvre. « Réinitialiser » rend le
+     texte d'origine, et si la maquette a changé sous une surcharge, la ligne
+     le signale au lieu de laisser croire que tout va bien.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var _CMSA = {
+  items: [],          // inventaire renvoyé par la vitrine
+  brouillon: {},      // clé → valeur en cours d'édition (non enregistrée)
+  pret: false,
+  ecran: 'accueil',
+  q: '',
+  filtre: 'tout',     // tout | surcharges | images
+  sel: ''             // clé visée par un clic dans l'aperçu
+};
+
+function _cmsSlots(){
+  if(!DB.accueil || typeof DB.accueil !== 'object') DB.accueil = { slots:{} };
+  if(!DB.accueil.slots || typeof DB.accueil.slots !== 'object') DB.accueil.slots = {};
+  return DB.accueil.slots;
+}
+
+/* Ce que verra le visiteur : l'enregistré, recouvert par le brouillon. */
+function _cmsFusion(){
+  var out = {}, s = _cmsSlots(), k;
+  for(k in s){ if(Object.prototype.hasOwnProperty.call(s,k)) out[k] = s[k]; }
+  for(k in _CMSA.brouillon){
+    if(!Object.prototype.hasOwnProperty.call(_CMSA.brouillon,k)) continue;
+    var v = _CMSA.brouillon[k];
+    if(v === null){ delete out[k]; } else { out[k] = { v:v }; }
+  }
+  return out;
+}
+
+function _cmsUrl(){
+  return (location.protocol === 'file:' ? 'vitrine.html' : '/') + '?vrt-cms=1';
+}
+
+function _cmsFrame(){
+  var f = _ge('cmsFrame');
+  return (f && f.contentWindow) ? f.contentWindow : null;
+}
+
+function _cmsPoster(msg){
+  var w = _cmsFrame();
+  if(!w) return;
+  try{ w.postMessage(msg, location.origin); }catch(e){}
+}
+
+/* Le canal est installé UNE fois pour la session : le panneau se re-rend
+   souvent (recherche, changement d'écran) et brancher l'écoute à chaque
+   rendu empilerait les doublons — chaque inventaire serait alors traité
+   autant de fois que la page a été affichée. */
+function _cmsCanal(){
+  if(window._cmsCanalPose) return;
+  window._cmsCanalPose = true;
+  window.addEventListener('message', function(ev){
+    if(ev.origin !== location.origin || !ev.data) return;
+    var d = ev.data;
+    if(d.type === 'vrt-cms-inventaire'){
+      _CMSA.items = d.items || [];
+      _CMSA.pret = true;
+      _cmsRendreListe();
+      /* L'aperçu part APRÈS l'inventaire : la vitrine en mode édition
+         n'applique pas les surcharges du serveur toute seule, sinon
+         l'inventaire aurait rendu les valeurs déjà recouvertes comme si
+         elles étaient celles de la maquette. */
+      _cmsApercu();
+    }else if(d.type === 'vrt-cms-clic'){
+      _CMSA.sel = d.cle || '';
+      _cmsRendreListe();
+      var ligne = _ge('cmsL_' + _CMSA.sel);
+      if(ligne){
+        try{ ligne.scrollIntoView({block:'center', behavior:'smooth'}); }catch(e){}
+        var ch = ligne.querySelector('textarea,input');
+        if(ch) ch.focus();
+      }else{
+        toast('Cet élément est sur un autre écran ou masqué par le filtre','warn');
+      }
+    }else if(d.type === 'vrt-cms-pret'){
+      _cmsPoster({ type:'vrt-cms-demande' });
+    }
+  });
+}
+
+/* Appelée par l'attribut onload de l'iframe : c'est le seul moment sûr — la
+   page n'a pas de crochet « après rendu », et interroger l'iframe avant son
+   chargement ne renverrait rien. */
+function _cmsFramePrete(){
+  _cmsCanal();
+  setTimeout(function(){ _cmsPoster({ type:'vrt-cms-demande' }); }, 400);
+}
+
+function _cmsApercu(){
+  _cmsPoster({ type:'vrt-cms-apercu', slots:_cmsFusion() });
+}
+
+function _cmsEcrans(){
+  var vus = {}, out = [];
+  for(var i=0;i<_CMSA.items.length;i++){
+    var p = _CMSA.items[i].page || 'commun';
+    if(vus[p]) continue;
+    vus[p] = 1; out.push(p);
+  }
+  if(!out.length) out = ['accueil'];
+  return out;
+}
+
+function _cmsChangerEcran(p){
+  _CMSA.ecran = p; _CMSA.sel = '';
+  if(p !== 'commun') _cmsPoster({ type:'vrt-cms-page', page:p });
+  _cmsRendreListe();
+}
+
+function _cmsChercher(v){ _CMSA.q = (v||'').toLowerCase(); _cmsRendreListe(); }
+function _cmsFiltre(v){ _CMSA.filtre = v; _cmsRendreListe(); }
+
+/* Valeur affichée dans le champ : brouillon > enregistré > défaut. */
+function _cmsValeur(it){
+  if(Object.prototype.hasOwnProperty.call(_CMSA.brouillon, it.cle)){
+    var b = _CMSA.brouillon[it.cle];
+    return b === null ? it.valeur : b;
+  }
+  var s = _cmsSlots()[it.cle];
+  if(s && s.v != null) return String(s.v);
+  return it.valeur;
+}
+
+function _cmsSurcharge(cle){
+  if(Object.prototype.hasOwnProperty.call(_CMSA.brouillon, cle)) return _CMSA.brouillon[cle] !== null;
+  return !!_cmsSlots()[cle];
+}
+
+function _cmsRetenus(){
+  var out = [];
+  for(var i=0;i<_CMSA.items.length;i++){
+    var it = _CMSA.items[i];
+    if((it.page||'commun') !== _CMSA.ecran) continue;
+    if(_CMSA.filtre === 'surcharges' && !_cmsSurcharge(it.cle)) continue;
+    if(_CMSA.filtre === 'images' && it.genre !== 'image') continue;
+    if(_CMSA.q){
+      var foin = ((it.valeur||'') + ' ' + (it.bloc||'') + ' ' + _cmsValeur(it)).toLowerCase();
+      if(foin.indexOf(_CMSA.q) < 0) continue;
+    }
+    out.push(it);
+  }
+  return out;
+}
+
+function _cmsRendreListe(){
+  var hote = _ge('cmsListe');
+  if(!hote) return;
+  if(!_CMSA.pret){
+    hote.innerHTML = '<div class="empty"><div class="empty-ico">⏳</div><div class="semi">Lecture de la page publique…</div>'
+      + '<div class="s mut">L\'aperçu se charge à droite, puis la liste de tout ce qui est modifiable apparaît ici.</div></div>';
+    return;
+  }
+  var liste = _cmsRetenus();
+  var nbSur = 0;
+  for(var z=0;z<_CMSA.items.length;z++) if(_cmsSurcharge(_CMSA.items[z].cle)) nbSur++;
+
+  var h = '<div class="fl2 fic fsb mb10 fw g8">'
+    + '<div class="s"><b>' + liste.length + '</b> élément(s) affiché(s) · <b>' + nbSur + '</b> modification(s) au total</div>'
+    + '<div class="fl2 g8">'
+    + '<button class="btn xs ' + (_CMSA.filtre==='tout'?'bi':'bo') + '" onclick="_cmsFiltre(\'tout\')">Tout</button>'
+    + '<button class="btn xs ' + (_CMSA.filtre==='surcharges'?'bi':'bo') + '" onclick="_cmsFiltre(\'surcharges\')">Modifiés</button>'
+    + '<button class="btn xs ' + (_CMSA.filtre==='images'?'bi':'bo') + '" onclick="_cmsFiltre(\'images\')">Images</button>'
+    + '</div></div>';
+
+  if(!liste.length){
+    h += '<div class="empty"><div class="empty-ico">🔍</div><div class="semi">Rien à afficher</div>'
+      + '<div class="s mut">Changez d\'écran, videz la recherche, ou choisissez le filtre « Tout ».</div></div>';
+    hote.innerHTML = h;
+    return;
+  }
+
+  var blocCourant = null;
+  for(var i=0;i<liste.length;i++){
+    var it = liste[i];
+    if(it.bloc !== blocCourant){
+      blocCourant = it.bloc;
+      h += '<div class="mt14 mb6" style="font:700 12.5px Poppins,sans-serif;color:var(--ink2,#475569);'
+        + 'text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--bg3,#E2E8F0);padding-bottom:4px">'
+        + _esc(blocCourant) + '</div>';
+    }
+    h += _cmsLigne(it);
+  }
+  hote.innerHTML = h;
+}
+
+function _cmsLigne(it){
+  var val = _cmsValeur(it);
+  var modifie = _cmsSurcharge(it.cle);
+  var vise = (_CMSA.sel === it.cle);
+  var s = _cmsSlots()[it.cle];
+  /* La maquette a-t-elle bougé sous la surcharge ? On a gardé le texte
+     d'origine au moment de l'enregistrement ; s'il ne correspond plus, la
+     surcharge recouvre peut-être autre chose que ce qu'on croyait. */
+  var derive = !!(s && s.d != null && String(s.d) !== String(it.valeur));
+
+  var cadre = 'border:1px solid ' + (vise ? '#E8A33D' : (modifie ? 'var(--bl,#1E499B)' : 'var(--bg3,#E2E8F0)'))
+    + ';border-radius:10px;padding:9px 11px;margin-bottom:8px;background:'
+    + (vise ? 'rgba(255,201,60,.14)' : (modifie ? 'rgba(30,73,155,.05)' : 'var(--bg1,#fff)')) + '';
+
+  var h = '<div id="cmsL_' + _esc(it.cle) + '" style="' + cadre + '">';
+  h += '<div class="fl2 fic fsb g8 mb6">'
+    + '<span class="xs2 mut" style="font-family:ui-monospace,monospace">' + _esc(it.balise) + (it.genre==='image'?' · image':'') + '</span>'
+    + '<span class="fl2 g6">'
+    + (modifie ? '<span class="xs2" style="color:var(--bl,#1E499B);font-weight:700">modifié</span>' : '')
+    + '<button class="btn xs bo" title="Montrer dans l\'aperçu" onclick="_cmsViser(\'' + _esc(it.cle) + '\')">👁</button>'
+    + (modifie ? '<button class="btn xs bo" title="Rendre le texte d\'origine" onclick="_cmsReset(\'' + _esc(it.cle) + '\')">↺</button>' : '')
+    + '</span></div>';
+
+  if(derive){
+    h += '<div class="xs2 mb6" style="color:#B45309;background:#FEF3C7;border-radius:6px;padding:5px 7px">'
+      + '⚠ La maquette a changé depuis votre modification. Texte actuel du site : « ' + _esc(String(it.valeur).slice(0,120)) + ' »</div>';
+  }
+
+  if(it.genre === 'image'){
+    h += '<div class="fl2 fic g10">'
+      + '<img src="' + _esc(val) + '" alt="" style="width:78px;height:52px;object-fit:cover;border-radius:6px;border:1px solid var(--bg3,#E2E8F0);background:#F1F5F9" onerror="this.style.opacity=.25">'
+      + '<div style="flex:1;min-width:0">'
+      + '<div class="xs2 mut" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + _esc(val) + '</div>'
+      + '<button class="btn xs bi mt6" onclick="_cmsRemplacerImage(\'' + _esc(it.cle) + '\')">Remplacer l\'image</button>'
+      + '</div></div>';
+  }else{
+    var lignes = val.length > 90 ? 3 : 1;
+    if(lignes > 1){
+      h += '<textarea class="fi" rows="' + lignes + '" style="font-size:13px;line-height:1.5" '
+        + 'oninput="_cmsEdit(\'' + _esc(it.cle) + '\',this.value)">' + _esc(val) + '</textarea>';
+    }else{
+      h += '<input class="fi" style="font-size:13px" value="' + _esc(val) + '" '
+        + 'oninput="_cmsEdit(\'' + _esc(it.cle) + '\',this.value)">';
+    }
+    if(it.forme){
+      h += '<div class="xs2 mut mt4">Ce passage contient de la mise en forme (gras, couleur). La remplacer la transformera en texte simple.</div>';
+    }
+  }
+  return h + '</div>';
+}
+
+/* Saisie : on ne redessine PAS la liste (le champ perdrait le focus et le
+   curseur reviendrait au début à chaque lettre). L'aperçu est différé — une
+   frappe rapide ne doit pas envoyer un message par caractère. */
+function _cmsEdit(cle, v){
+  _CMSA.brouillon[cle] = v;
+  if(window._cmsT) clearTimeout(window._cmsT);
+  window._cmsT = setTimeout(_cmsApercu, 350);
+  var b = _ge('cmsBarreEtat');
+  if(b) b.innerHTML = _cmsEtatHTML();
+}
+
+function _cmsReset(cle){
+  _CMSA.brouillon[cle] = null;
+  _cmsRendreListe(); _cmsApercu();
+  var b = _ge('cmsBarreEtat'); if(b) b.innerHTML = _cmsEtatHTML();
+}
+
+function _cmsViser(cle){
+  _CMSA.sel = cle;
+  _cmsPoster({ type:'vrt-cms-viser', cle:cle });
+  _cmsRendreListe();
+}
+
+function _cmsRemplacerImage(cle){
+  var input = document.createElement('input');
+  input.type = 'file'; input.accept = 'image/*'; input.style.display = 'none';
+  document.body.appendChild(input);
+  input.onchange = function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file){ try{document.body.removeChild(input);}catch(x){} return; }
+    if(file.size > 5000000){ toast('Image trop lourde (5 Mo maximum)','warn'); return; }
+    toast('Envoi de l\'image…');
+    uploadToLWS(file, 'vitrine', function(){}).then(function(res){
+      if(!res || !res.url){ toast('Envoi impossible','err'); return; }
+      _CMSA.brouillon[cle] = res.url;
+      _cmsRendreListe(); _cmsApercu();
+      toast('✓ Image remplacée — pensez à enregistrer');
+    }).catch(function(){
+      toast('Envoi impossible. Vérifiez votre connexion.','err');
+    }).then(function(){ try{document.body.removeChild(input);}catch(x){} });
+  };
+  input.click();
+}
+
+function _cmsNbBrouillon(){
+  var n = 0;
+  for(var k in _CMSA.brouillon){ if(Object.prototype.hasOwnProperty.call(_CMSA.brouillon,k)) n++; }
+  return n;
+}
+
+function _cmsEtatHTML(){
+  var n = _cmsNbBrouillon();
+  if(!n) return '<span class="s mut">Aucune modification en attente.</span>';
+  return '<span class="s" style="color:var(--bl,#1E499B);font-weight:700">' + n
+    + ' modification(s) non enregistrée(s)</span>';
+}
+
+function _cmsEnregistrer(){
+  if(!iA()){ toast('Réservé à l\'administration','warn'); return; }
+  var n = _cmsNbBrouillon();
+  if(!n){ toast('Rien à enregistrer','warn'); return; }
+  var slots = _cmsSlots();
+  /* On retient le texte d'ORIGINE (`d`) à côté de la valeur : c'est lui qui
+     permettra plus tard de dire « la maquette a changé sous cette
+     modification » plutôt que de la laisser recouvrir un autre passage. */
+  var parCle = {};
+  for(var i=0;i<_CMSA.items.length;i++) parCle[_CMSA.items[i].cle] = _CMSA.items[i];
+  for(var k in _CMSA.brouillon){
+    if(!Object.prototype.hasOwnProperty.call(_CMSA.brouillon,k)) continue;
+    var v = _CMSA.brouillon[k];
+    if(v === null || v === ''){ delete slots[k]; continue; }
+    var it = parCle[k];
+    slots[k] = { v:String(v), g:(it && it.genre) || 'texte', d:(it ? it.valeur : ''), maj:new Date().toISOString() };
+  }
+  DB.accueil.maj = new Date().toISOString();
+  _CMSA.brouillon = {};
+  save();
+  _cmsRendreListe();
+  var b = _ge('cmsBarreEtat'); if(b) b.innerHTML = _cmsEtatHTML();
+  toast('✓ Contenu du site enregistré (' + n + ' modification(s))');
+}
+
+function _cmsAnnuler(){
+  if(!_cmsNbBrouillon()){ toast('Rien à annuler','warn'); return; }
+  _CMSA.brouillon = {};
+  _cmsRendreListe(); _cmsApercu();
+  var b = _ge('cmsBarreEtat'); if(b) b.innerHTML = _cmsEtatHTML();
+  toast('Modifications en attente abandonnées');
+}
+
+function _cmsResetTout(){
+  var s = _cmsSlots(), n = 0, k;
+  for(k in s){ if(Object.prototype.hasOwnProperty.call(s,k)) n++; }
+  if(!n){ toast('Le site est déjà dans son état d\'origine','warn'); return; }
+  if(!confirm('Rendre au site TOUS ses textes et images d\'origine ?\n\n'
+    + n + ' modification(s) seront supprimées. La maquette reprend la main.')) return;
+  DB.accueil.slots = {};
+  _CMSA.brouillon = {};
+  save();
+  _cmsRendreListe(); _cmsApercu();
+  toast('✓ Site rendu à son état d\'origine');
+}
+
+function pgAccueil(){
+  if(!iA()) return na();
+  _cmsCanal();
+  _CMSA.pret = false; _CMSA.items = [];
+  var ecrans = ['accueil','tarifs','boutique','parents','elearning','enseignants','paiement','commun'];
+  var opts = ecrans.map(function(p){
+    return '<option value="' + p + '"' + (p===_CMSA.ecran?' selected':'') + '>' + p.charAt(0).toUpperCase() + p.slice(1) + '</option>';
+  }).join('');
+
+  return '<div class="vrt-cfg">'
+  + '<div class="pgt">Contenu du site public</div>'
+  + '<div class="ib ibg mb16"><span>✏️</span><span>Cliquez un texte ou une image dans l\'aperçu, corrigez-le à droite, puis <strong>Enregistrer</strong>. '
+  + 'Ce que vous voyez dans l\'aperçu est exactement ce que verra le visiteur. Rien n\'est écrasé : « ↺ » rend toujours le texte d\'origine.</span></div>'
+
+  + '<div class="card mb12"><div class="fl2 fic fsb fw g10">'
+  + '<div class="fl2 fic g8 fw">'
+  + '<select class="fi" style="max-width:170px" onchange="_cmsChangerEcran(this.value)">' + opts + '</select>'
+  + '<input class="fi" style="max-width:230px" placeholder="Chercher un texte…" oninput="_cmsChercher(this.value)">'
+  + '<span id="cmsBarreEtat">' + _cmsEtatHTML() + '</span>'
+  + '</div>'
+  + '<div class="fl2 g8">'
+  + '<button class="btn sm bo" onclick="_cmsAnnuler()">Annuler</button>'
+  + '<button class="btn sm bi" onclick="_cmsEnregistrer()">✓ Enregistrer</button>'
+  + '<button class="btn sm bo" style="color:var(--re,#DC2626);border-color:var(--red,#FCA5A5)" onclick="_cmsResetTout()">Tout réinitialiser</button>'
+  + '</div></div></div>'
+
+  + '<div style="display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:14px;align-items:start" class="cms-grille">'
+  + '<div class="card" style="padding:8px">'
+  + '<div class="xs2 mut mb6">Aperçu — cliquez un élément pour le retrouver dans la liste</div>'
+  + '<iframe id="cmsFrame" src="' + _cmsUrl() + '" onload="_cmsFramePrete()" '
+  + 'style="width:100%;height:70vh;min-height:420px;border:1px solid var(--bg3,#E2E8F0);border-radius:8px;background:#fff"></iframe>'
+  + '</div>'
+  + '<div class="card" style="max-height:calc(70vh + 34px);overflow:auto">'
+  + '<div id="cmsListe"></div>'
+  + '</div>'
+  + '</div>'
+  + '</div>'
+  + '<style>.vrt-cfg .mt4{margin-top:4px}.vrt-cfg .mt6{margin-top:6px}.vrt-cfg .mt10{margin-top:10px}.vrt-cfg .mt12{margin-top:12px}.vrt-cfg .mb6{margin-bottom:6px}.vrt-cfg .mb10{margin-bottom:10px}.vrt-cfg .g14{gap:14px}@media(max-width:900px){.vrt-cfg .cms-grille{grid-template-columns:1fr !important}}</style>';
+}
+
+window.pgAccueil          = pgAccueil;
+window._cmsFramePrete     = _cmsFramePrete;
+window._cmsChangerEcran   = _cmsChangerEcran;
+window._cmsChercher       = _cmsChercher;
+window._cmsFiltre         = _cmsFiltre;
+window._cmsEdit           = _cmsEdit;
+window._cmsReset          = _cmsReset;
+window._cmsViser          = _cmsViser;
+window._cmsRemplacerImage = _cmsRemplacerImage;
+window._cmsEnregistrer    = _cmsEnregistrer;
+window._cmsAnnuler        = _cmsAnnuler;
+window._cmsResetTout      = _cmsResetTout;
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ATELIER DE FRANÇAIS — essai, plafonds, tarifs et places
+   ──────────────────────────────────────────────────────────────────────────
+   L'Atelier (/plateforme/) est une page autonome : elle ne charge pas app.js.
+   Son serveur, lui, lit la MÊME base que le panneau admin — api/plateforme.php
+   appelle vrt_load_db(), c'est-à-dire data/veritas_db.json, exactement le
+   fichier que la synchronisation écrit. Trois réglages y étaient déjà prévus
+   et surchargeables (`DB.plateforme.offres`, `.paliers`, `.tarifs`, `.places`)
+   mais AUCUN écran ne les écrivait : il fallait une requête HTTP à la main.
+   Cette page est cet écran.
+
+   Ce qu'il faut savoir avant de changer un chiffre :
+   · Les plafonds sont appliqués par le SERVEUR (plat_paliers). Ce ne sont pas
+     des mentions d'affichage : baisser « exports » de 30 à 5 refuse
+     réellement le sixième export du mois.
+   · Le tarif est le PRIX DE RÉFÉRENCE contrôlé à l'encaissement
+     (vrt_prix_catalogue). Le baisser ici baisse ce qu'on accepte de recevoir :
+     c'est le garde-fou qui a empêché qu'on paie 100 F un abonnement à 5 000.
+   · Rien n'est en vigueur tant que la synchronisation n'a pas poussé la base.
+     Le bouton « Vérifier côté serveur » interroge l'Atelier et rapporte ce
+     que LUI voit — c'est la seule preuve qui compte.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+var _PLAT_PALIERS = ['demo','essai','ens_mois','ens','etab','pro'];
+var _PLAT_NOMS = {
+  demo:'Démo (sans abonnement)', essai:'Essai gratuit', ens_mois:'Enseignant · au mois',
+  ens:'Enseignant · à l\'année', etab:'Collège', pro:'Bassin'
+};
+var _PLAT_QUOTAS = [
+  ['textes',   'Textes MINESEC'],
+  ['citations','Citations'],
+  ['exports',  'Exports Word / mois'],
+  ['ia',       'Questions à Ambassa / mois'],
+  ['epreuves', 'Épreuves / mois']
+];
+var _PLAT_DEF = {
+  paliers:{
+    demo:     {textes:5,  citations:3,  exports:1,   ia:2,   epreuves:10},
+    essai:    {textes:20, citations:8,  exports:3,   ia:10,  epreuves:12},
+    ens_mois: {textes:-1, citations:-1, exports:30,  ia:30,  epreuves:30},
+    ens:      {textes:-1, citations:-1, exports:30,  ia:30,  epreuves:30},
+    etab:     {textes:-1, citations:-1, exports:120, ia:120, epreuves:120},
+    pro:      {textes:-1, citations:-1, exports:400, ia:400, epreuves:400}
+  },
+  places:{ demo:1, essai:1, ens_mois:1, ens:1, etab:15, pro:-1 },
+  tarifs:{ ens_mois:800, ens:5000, etab:30000, pro:70000 },
+  offres:{ joursEssai:7, cadeauBienvenue:0, bonusReabo:0, quotaEssai:10, message:'' }
+};
+
+function _platCfg(){
+  if(!DB.plateforme || typeof DB.plateforme !== 'object') DB.plateforme = {};
+  var p = DB.plateforme;
+  if(!p.offres  || typeof p.offres  !== 'object') p.offres  = {};
+  if(!p.paliers || typeof p.paliers !== 'object') p.paliers = {};
+  if(!p.tarifs  || typeof p.tarifs  !== 'object') p.tarifs  = {};
+  if(!p.places  || typeof p.places  !== 'object') p.places  = {};
+  return p;
+}
+
+/* Valeur en vigueur = ce qui est en base, sinon le défaut du serveur. Les
+   deux tables sont écrites côte à côte : afficher un champ vide laisserait
+   croire qu'aucun plafond ne s'applique, alors qu'il s'en applique un. */
+function _platVal(section, cle, sous){
+  var p = _platCfg();
+  var v = (sous == null) ? p[section][cle] : ((p[section][cle]||{})[sous]);
+  if(v == null || v === '' || isNaN(parseInt(v,10))){
+    var d = (sous == null) ? _PLAT_DEF[section][cle] : _PLAT_DEF[section][cle][sous];
+    return d;
+  }
+  return parseInt(v,10);
+}
+
+function _platEstDefaut(section, cle, sous){
+  var p = _platCfg();
+  var v = (sous == null) ? p[section][cle] : ((p[section][cle]||{})[sous]);
+  return (v == null || v === '');
+}
+
+function _platChamp(id, valeur, defaut, largeur){
+  var perso = (valeur !== defaut);
+  return '<input class="fi" id="' + id + '" type="number" value="' + valeur + '" '
+    + 'style="width:' + (largeur||78) + 'px;padding:4px 7px;font-size:12.5px'
+    + (perso ? ';border-color:var(--bl,#1E499B);font-weight:700' : '') + '" '
+    + 'title="Valeur par défaut : ' + defaut + ' — laisser cette valeur revient à ne rien imposer">';
+}
+
+function pgPlateforme(){
+  if(!iA()) return na();
+  var o = _platCfg().offres;
+  var vO = function(k){ return _platVal('offres', k); };
+
+  var h = '<div class="vrt-cfg">'
+  + '<div class="pgt">Atelier de Français — abonnements et quotas</div>'
+  + '<div class="ib ibg mb16"><span>🧩</span><span>Ces réglages sont appliqués par le <strong>serveur</strong> de l\'Atelier '
+  + '(<code>/plateforme/</code>) : ce ne sont pas des mentions d\'affichage. Un plafond baissé refuse réellement l\'action, '
+  + 'un tarif baissé abaisse le montant qu\'on accepte à l\'encaissement.</span></div>';
+
+  /* ── ESSAI ─────────────────────────────────────────────────────────── */
+  h += '<div class="card mb16"><div class="ct"><span class="ct-ico">🎁</span>Essai gratuit et cadeaux</div>'
+  + '<div class="g2">'
+  + '<div class="fg mb10"><span class="fl">Durée de l\'essai (jours)</span>'
+  + '<input class="fi" id="plat_joursEssai" type="number" min="0" max="365" value="' + vO('joursEssai') + '"></div>'
+  + '<div class="fg mb10"><span class="fl">Cadeau de bienvenue (jours en plus)</span>'
+  + '<input class="fi" id="plat_cadeauBienvenue" type="number" min="0" max="365" value="' + vO('cadeauBienvenue') + '"></div>'
+  + '<div class="fg mb10"><span class="fl">Bonus de réabonnement (jours)</span>'
+  + '<input class="fi" id="plat_bonusReabo" type="number" min="0" max="365" value="' + vO('bonusReabo') + '"></div>'
+  + '<div class="fg mb10"><span class="fl">Épreuves offertes au palier « démo »</span>'
+  + '<input class="fi" id="plat_quotaEssai" type="number" min="0" max="9999" value="' + vO('quotaEssai') + '"></div>'
+  + '</div>'
+  + '<div class="fg mb10"><span class="fl">Message affiché aux enseignants (facultatif)</span>'
+  + '<textarea class="fi" id="plat_message" rows="2" maxlength="400" placeholder="Ex. : Rentrée 2026 — deux semaines offertes à tout enseignant du bassin de Douala.">'
+  + _esc(o.message || '') + '</textarea></div>'
+  + '<div class="xs2 mut">L\'Atelier annonce « ' + (vO('joursEssai') + vO('cadeauBienvenue')) + ' jours d\'essai » : c\'est la durée plus le cadeau.</div>'
+  + '</div>';
+
+  /* ── TARIFS ────────────────────────────────────────────────────────── */
+  h += '<div class="card mb16"><div class="ct"><span class="ct-ico">💰</span>Tarifs des abonnements</div>'
+  + '<div class="ib ibi mb12"><span>🔒</span><span>Ce montant est le <strong>prix de référence vérifié au paiement</strong>. '
+  + 'Un versement inférieur (hors code promo actif) est refusé.</span></div>'
+  + '<div class="fl2 g14 fw">';
+  ['ens_mois','ens','etab','pro'].forEach(function(k){
+    var v = _platVal('tarifs', k);
+    h += '<div class="fg" style="min-width:170px"><span class="fl">' + _PLAT_NOMS[k] + '</span>'
+      + '<div class="fl2 fic g6"><input class="fi" id="plat_tarif_' + k + '" type="number" min="0" step="100" value="' + v + '" style="max-width:120px">'
+      + '<span class="xs2 mut">FCFA</span></div>'
+      + '<span class="xs2 mut">défaut : ' + fmtN(_PLAT_DEF.tarifs[k]) + '</span></div>';
+  });
+  h += '</div></div>';
+
+  /* ── PLAFONDS ──────────────────────────────────────────────────────── */
+  h += '<div class="card mb16"><div class="ct"><span class="ct-ico">📊</span>Plafonds par palier</div>'
+  + '<div class="ib ibi mb12"><span>∞</span><span>Saisissez <strong>-1</strong> pour « sans limite ». '
+  + 'Les valeurs en bleu diffèrent du réglage d\'origine. Les 1 014 textes libres de droits ne passent jamais par ces plafonds.</span></div>'
+  + '<div style="overflow-x:auto"><table class="tb" style="min-width:640px"><thead><tr><th style="text-align:left">Palier</th>';
+  _PLAT_QUOTAS.forEach(function(q){ h += '<th>' + q[1] + '</th>'; });
+  h += '<th>Places</th></tr></thead><tbody>';
+  _PLAT_PALIERS.forEach(function(p){
+    h += '<tr><td style="text-align:left"><b>' + _PLAT_NOMS[p] + '</b>'
+      + '<div class="xs2 mut" style="font-family:ui-monospace,monospace">' + p + '</div></td>';
+    _PLAT_QUOTAS.forEach(function(q){
+      var v = _platVal('paliers', p, q[0]);
+      var d = _PLAT_DEF.paliers[p][q[0]];
+      h += '<td>' + _platChamp('plat_q_' + p + '_' + q[0], v, d) + '</td>';
+    });
+    h += '<td>' + _platChamp('plat_places_' + p, _platVal('places', p), _PLAT_DEF.places[p]) + '</td></tr>';
+  });
+  h += '</tbody></table></div>'
+  + '<div class="xs2 mut mt8">Le nombre d\'épreuves du palier « démo » est piloté par le champ « Épreuves offertes » plus haut ; '
+  + 'la colonne est là pour que la table reste lisible.</div>'
+  + '</div>';
+
+  /* ── ENREGISTRER + PREUVE ──────────────────────────────────────────── */
+  h += '<div class="card mb16"><div class="fl2 g8 fw fic">'
+  + '<button class="btn bi" onclick="_platEnregistrer()">✓ Enregistrer les réglages</button>'
+  + '<button class="btn bo" onclick="_platSonder()">🔎 Vérifier côté serveur</button>'
+  + '<button class="btn bo" onclick="_platDefauts()">↺ Revenir aux valeurs d\'origine</button>'
+  + '<a class="btn bo" href="/plateforme/" target="_blank" rel="noopener">Ouvrir l\'Atelier</a>'
+  + '</div>'
+  + '<div id="platSonde" class="mt12"></div>'
+  + '<div class="xs2 mut mt10">Un enregistrement n\'atteint l\'Atelier qu\'une fois la base synchronisée. '
+  + '« Vérifier côté serveur » interroge <code>api/plateforme.php?action=config</code> et rapporte ce que le serveur applique réellement.</div>'
+  + '</div>';
+
+  return h + '</div>' + '<style>.vrt-cfg .mt4{margin-top:4px}.vrt-cfg .mt6{margin-top:6px}.vrt-cfg .mt10{margin-top:10px}.vrt-cfg .mt12{margin-top:12px}.vrt-cfg .mb6{margin-bottom:6px}.vrt-cfg .mb10{margin-bottom:10px}.vrt-cfg .g14{gap:14px}@media(max-width:900px){.vrt-cfg .cms-grille{grid-template-columns:1fr !important}}</style>';
+}
+
+function _platLireNb(id, defaut){
+  var el = _ge(id);
+  if(!el) return defaut;
+  var t = String(el.value).trim();
+  if(t === '') return defaut;
+  var n = parseInt(t, 10);
+  return isNaN(n) ? defaut : n;
+}
+
+function _platEnregistrer(){
+  if(!iA()){ toast('Réservé à l\'administration','warn'); return; }
+  var p = _platCfg();
+
+  p.offres = {
+    joursEssai:      Math.max(0, Math.min(365,  _platLireNb('plat_joursEssai',      7))),
+    cadeauBienvenue: Math.max(0, Math.min(365,  _platLireNb('plat_cadeauBienvenue', 0))),
+    bonusReabo:      Math.max(0, Math.min(365,  _platLireNb('plat_bonusReabo',      0))),
+    quotaEssai:      Math.max(0, Math.min(9999, _platLireNb('plat_quotaEssai',     10))),
+    message:         (_ge('plat_message') ? _ge('plat_message').value : '').slice(0,400)
+  };
+
+  ['ens_mois','ens','etab','pro'].forEach(function(k){
+    var v = _platLireNb('plat_tarif_' + k, _PLAT_DEF.tarifs[k]);
+    /* Un tarif à zéro ou négatif rendrait le contrôle de prix inopérant :
+       le serveur retomberait sur son défaut codé en dur et l'administration
+       croirait avoir bradé, ou pire, ouvert gratuitement. On refuse. */
+    p.tarifs[k] = (v > 0) ? v : _PLAT_DEF.tarifs[k];
+  });
+
+  _PLAT_PALIERS.forEach(function(pal){
+    if(!p.paliers[pal] || typeof p.paliers[pal] !== 'object') p.paliers[pal] = {};
+    _PLAT_QUOTAS.forEach(function(q){
+      var v = _platLireNb('plat_q_' + pal + '_' + q[0], _PLAT_DEF.paliers[pal][q[0]]);
+      p.paliers[pal][q[0]] = (v < -1) ? -1 : v;
+    });
+    var pl = _platLireNb('plat_places_' + pal, _PLAT_DEF.places[pal]);
+    p.places[pal] = (pl < -1) ? -1 : pl;
+  });
+
+  DB.plateforme.maj = new Date().toISOString();
+  save();
+  re();
+  toast('✓ Réglages de l\'Atelier enregistrés — vérifiez côté serveur');
+}
+
+function _platDefauts(){
+  if(!confirm('Rendre à l\'Atelier tous ses réglages d\'origine ?\n\n'
+    + 'Essai 7 jours, plafonds et tarifs standards. Les abonnements déjà vendus ne sont pas touchés.')) return;
+  DB.plateforme = DB.plateforme || {};
+  DB.plateforme.offres = {}; DB.plateforme.paliers = {};
+  DB.plateforme.tarifs = {}; DB.plateforme.places = {};
+  DB.plateforme.maj = new Date().toISOString();
+  save(); re();
+  toast('✓ Réglages d\'origine rétablis');
+}
+
+/* La seule preuve qui vaille : ce que le serveur de l'Atelier RÉPOND. Un
+   réglage enregistré en local mais non synchronisé n'existe pour personne. */
+function _platSonder(){
+  var hote = _ge('platSonde');
+  if(hote) hote.innerHTML = '<div class="s mut">Interrogation du serveur…</div>';
+  /* Meme origine et meme prefixe que la synchronisation : un chemin
+     ecrit en dur casserait le banc local comme l'application mobile. */
+  var url = LWS_API.db.replace(/db\.php.*$/, 'plateforme.php') + '?action=config';
+  fetch(url, { method:'GET' })
+    .then(function(r){ return r.json().then(function(j){ return {http:r.status, j:j}; }); })
+    .then(function(res){
+      var j = res.j || {};
+      var att = _platVal('offres','joursEssai') + _platVal('offres','cadeauBienvenue');
+      var srv = (j.essai && j.essai.jours != null) ? ((j.essai.jours|0) + (j.essai.cadeau|0)) : null;
+      var accord = (srv !== null && srv === att);
+      var ok = function(b){ return b ? '<span style="color:var(--gr,#16A34A);font-weight:700">✓</span>'
+                                     : '<span style="color:var(--re,#DC2626);font-weight:700">✗</span>'; };
+      var h = '<div class="card" style="background:var(--bg2,#F8FAFC)">'
+        + '<div class="semi mb8">Réponse du serveur (' + res.http + ')</div>'
+        + '<div class="s">' + ok(!!j.baseLisible) + ' Base lisible par l\'Atelier</div>'
+        + '<div class="s">' + ok(!!(j.corpus && j.corpus.disponible)) + ' Répertoire MINESEC déposé'
+          + (j.corpus && j.corpus.octets ? ' <span class="mut">(' + fmtN(j.corpus.octets) + ' o)</span>' : '') + '</div>'
+        + '<div class="s">' + ok(!!(j.citations && j.citations.disponible)) + ' Répertoire des citations déposé</div>'
+        + '<div class="s">' + ok(!!(j.libre && j.libre.disponible)) + ' Répertoire libre de droits déposé</div>'
+        + '<div class="s mt8">' + ok(accord) + ' Essai annoncé par le serveur : <b>'
+          + (srv === null ? 'inconnu' : srv + ' jour(s)') + '</b> — attendu <b>' + att + '</b></div>';
+      if(!accord){
+        h += '<div class="ib ibr mt8"><span>⚠️</span><span>Le serveur n\'applique pas encore vos réglages. '
+          + 'Lancez une synchronisation de la base, puis re-vérifiez.</span></div>';
+      }
+      h += '</div>';
+      var hh = _ge('platSonde'); if(hh) hh.innerHTML = h;
+    })
+    .catch(function(){
+      var hh = _ge('platSonde');
+      if(hh) hh.innerHTML = '<div class="ib ibr"><span>⚠️</span><span>Serveur injoignable. '
+        + 'Les réglages restent enregistrés en local et partiront à la prochaine synchronisation.</span></div>';
+    });
+}
+
+window.pgPlateforme    = pgPlateforme;
+window._platEnregistrer = _platEnregistrer;
+window._platDefauts     = _platDefauts;
+window._platSonder      = _platSonder;

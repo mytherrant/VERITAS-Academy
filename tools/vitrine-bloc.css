@@ -38,11 +38,11 @@
   border-radius:50%;background:#1E499B;transition:transform .2s ease}
 .vcle:hover::before{transform:scale(1.35)}
 .vcle-pause::before{background:#0E7C86}
-.vcle-exam::before{background:#C24E00}
+.vcle-exam::before{background:#A84200}
 .vcle-q{font:500 14.5px/1.45 Poppins,sans-serif;color:#16233F;flex:1 1 auto}
 .vcle-d{font:600 13.5px Poppins,sans-serif;color:#0C2A6A;flex:0 0 auto;text-align:right;
   white-space:nowrap}
-.vcle-exam .vcle-d{color:#C24E00}
+.vcle-exam .vcle-d{color:#A84200}
 .vcle-pause .vcle-d{color:#0E7C86}
 /* La date la plus proche à venir, mise en avant par vitrine.js. */
 .vcle.vcle-next{background:#F5F9FF;border-radius:10px;padding-left:15px;
@@ -136,6 +136,29 @@
   .vnews{position:static}
 }
 
+/* ── Débordement horizontal mesuré à 375 px (audit du 27/08/2026) ──────────
+   `scrollWidth` valait 413 px pour un `clientWidth` de 375 : la page glissait
+   latéralement sous le pouce. Les deux coupables sont ces blocs, mesurés à
+   397 px de large — et la cause n'est pas une largeur écrite quelque part,
+   c'est le `min-width:auto` implicite des enfants de grille.
+
+   Un enfant de grille refuse par défaut de descendre sous sa largeur de
+   contenu minimale. Or `.vcle-d` porte `white-space:nowrap` et contient
+   « 18 Déc 2026 → 04 Jan 2027 » : cette date INSÉCABLE devient le plancher de
+   toute la colonne, et la colonne pousse la grille, qui pousse la page.
+
+   Deux corrections, l'une sans l'autre ne suffit pas :
+   · `min-width:0` autorise la piste à se contracter ;
+   · sous 560 px la paire intitulé / date passe en colonne et la date perd son
+     `nowrap` — sinon on aurait juste déplacé le débordement dans le bloc. */
+.vcal-grid > *{min-width:0}
+.vcal-box, .vnews{max-width:100%}
+@media (max-width:560px){
+  .vcle{flex-direction:column;align-items:flex-start;gap:2px}
+  .vcle-d{text-align:left;white-space:normal}
+  .vnews-t, .vnews-m{overflow-wrap:anywhere}
+}
+
 /* ══ 1 bis. LISIBILITÉ DU CORPS DE TEXTE ═══════════════════════════════════
    Justification demandée. Elle ne s'applique QU'AU TEXTE QUI COULE — jamais
    aux libellés, boutons, cellules ni pastilles : justifier trois mots dans un
@@ -195,7 +218,7 @@
    illisibles. */
 .vt-b1{color:#1E499B}   /* bleu de marque */
 .vt-b2{color:#B03A6E}   /* magenta        */
-.vt-b3{color:#C24E00}   /* orange         */
+.vt-b3{color:#A84200}   /* orange         */
 .vt-b4{color:#0E7C66}   /* vert profond   */
 [data-vrt-theme="sombre"] .vt-b1{color:#7FA8F0}
 [data-vrt-theme="sombre"] .vt-b2{color:#F09BC0}
@@ -628,7 +651,7 @@ html{scroll-behavior:smooth}
   transition:transform .18s,box-shadow .18s;
 }
 .vbq-cta{
-  background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;
+  background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;
   box-shadow:0 6px 16px rgba(242,101,0,.28);
 }
 .vbq-cta:hover{ transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,101,0,.4); }
@@ -703,7 +726,7 @@ html{scroll-behavior:smooth}
 .vrt-vente.on{ opacity:1;transform:none;pointer-events:auto; }
 .vrt-vente-ic{
   flex:0 0 auto;width:34px;height:34px;border-radius:50%;
-  background:#FFF3E4;color:#C24E00;
+  background:#FFF3E4;color:#A84200;
   display:flex;align-items:center;justify-content:center;
 }
 .vrt-vente-tx{ display:flex;flex-direction:column;gap:2px;min-width:0; }
@@ -725,3 +748,62 @@ html{scroll-behavior:smooth}
 @media (prefers-reduced-motion:reduce){
   .vrt-vente{ transition:none;transform:none; }
 }
+
+/* ══ 7. CE QUI EST DANS UN PANNEAU SE CENTRE ═══════════════════════════════
+   Demande de Jacques, capture à l'appui : « centre l'écriture au milieu du
+   panneau ainsi que les icônes ».
+
+   ── 7.a Le libellé d'un bouton ──────────────────────────────────────────
+   Un `<button>` centre son libellé par défaut (règle du navigateur). La liste
+   « jamais justifiés » du §1 bis le passait à `text-align:inherit` — il
+   reprenait donc l'alignement de son parent, c'est-à-dire la gauche. Mesuré
+   au banc à 390 px : « Chercher », bouton de 358 px de large, libellé à
+   119 px du centre. Le même défaut avait déjà été corrigé une fois sur
+   « Se connecter », au cas par cas ; c'est la RÈGLE qu'il fallait reprendre,
+   sinon chaque nouveau bouton naît de travers.
+   `inherit` reste juste pour les titres et les liens : dans une section
+   centrée, un h2 doit suivre sa section. */
+[data-vp] button,
+[data-vp] [role="button"]{ text-align:center; }
+
+/* ── 7.b Le contenu d'un panneau « icône + titre + texte » ───────────────
+   28 panneaux partagent cette forme sur cinq écrans (recensés au banc) :
+   accueil, boutique, e-learning, parents, enseignants. L'icône était collée
+   à gauche — jusqu'à 204 px du centre de son panneau sur les cartes larges.
+   On vise la STRUCTURE et non une classe : la maquette sort en styles en
+   ligne, il n'y a aucune classe à cibler, et marquer 28 blocs à la main
+   laisserait le 29ᵉ derrière. `:has()` est ignoré par les navigateurs qui ne
+   le connaissent pas — le panneau reste alors tel qu'il était aujourd'hui,
+   jamais cassé. */
+[data-vp] [data-reveal]:has(> span:first-child):has(> h3):has(> p){
+  text-align:center;
+}
+/* ⚠️ Il faut viser les ENFANTS, pas seulement le panneau. La justification du
+   §1 bis porte sur le paragraphe LUI-MÊME (.vjust p) : une règle posée sur le
+   parent ne fait qu'hériter, et l'héritage perd toujours contre une règle qui
+   nomme l'élément. Mesuré au rendu : le panneau passait au centre pendant que
+   son paragraphe restait justifié — et gardait hyphens:auto, qui coupait
+   « 60 mi-nutes » et « diag-nostic » dans une colonne de 220 px. Une césure
+   n'a de sens que dans un texte justifié assez large ; ici, elle abîme. */
+[data-vp] [data-reveal]:has(> span:first-child):has(> h3):has(> p) :is(h2,h3,h4,p,span,small,b,li){
+  text-align:center;
+  hyphens:manual;
+  -webkit-hyphens:manual;
+}
+[data-vp] [data-reveal]:has(> span:first-child):has(> h3):has(> p) > span:first-child{
+  margin-left:auto;
+  margin-right:auto;
+}
+
+/* ── 7.c Les boutons en flexbox ─────────────────────────────────────────
+   `text-align` ne décide de rien dans une boîte flex : c'est
+   `justify-content` qui place le contenu. Les boutons de la maquette sont en
+   `inline-flex` (icône + libellé) sans réglage — donc `normal`, c'est-à-dire
+   au début. Tant que le bouton épouse son contenu, cela ne se voit pas ; dès
+   qu'il s'étire (pleine largeur sur téléphone), le libellé reste collé à
+   gauche. Mesuré : « Créer mon compte parent », bouton de 290 px à 390 px de
+   large, libellé à 40 px du centre.
+   L'icône suit le libellé : c'est le GROUPE icône + texte qui se centre, ce
+   que demande la capture. */
+[data-vp] button,
+[data-vp] [role="button"]{ justify-content:center; }

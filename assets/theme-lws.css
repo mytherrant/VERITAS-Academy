@@ -4267,3 +4267,7 @@ body, #APP, #LS, #MC{ font-family:var(--lws-font); }
 }
 /* « Feuilleter un extrait » reste un lien, mais un lien qui se voit. */
 #VISITOR#VISITOR .bkbuy-lien{ font-weight:600 !important; }
+
+/* Le bloc « Où retirer votre exemplaire » : aplats, donc rien à rallumer côté
+   fond ; seules les graisses tombent sous le balayage du §18.c. */
+#VISITOR#VISITOR :is(.bkret-t, .bkret-l b, .bkret-note a){ font-weight:700 !important; }

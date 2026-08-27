@@ -16,6 +16,7 @@ on:
       - 'admin-validation.html'
       - 'manuels.html'
       - '403.html'
+      - '404.html'
       - 'index.php'
       - 'app.css'
       - 'app.js'
@@ -205,6 +206,34 @@ jobs:
       #    pure, elle s'eprouve en une seconde.
       - name: 🔑 Une reponse reste-t-elle attachee a SA question ?
         run: node tests/banc_cles_cahier.cjs
+
+      # ── 🧭 Le corrigé attend sur le serveur, rangé sous l'EMPREINTE de sa
+      #    consigne. Deux programmes calculent cette empreinte — le producteur
+      #    en Python, le cahier en JavaScript. Si elles divergent d'un
+      #    caractère, aucun corrigé ne se retrouve, et l'élève lit « pas de
+      #    correction pour cet exercice » : le message exact d'un exercice qui
+      #    n'en a pas. Rien ne distinguerait la panne du cas normal.
+      #    Trouvé par ce banc le 27/08 : 58 consignes sur 40 720 divergeaient,
+      #    toutes marquées d'un pictogramme — un emoji vaut DEUX unités UTF-16
+      #    et un seul point de code, la coupe à 400 ne tombait pas au même
+      #    endroit des deux côtés.
+      - name: 🧭 Les deux empreintes concordent-elles ?
+        run: node tests/banc_empreintes.cjs
+
+      # ── 💰 Quinze ouvrages en vente depuis le 27/08, contre cinq avant.
+      #    `vrt_verifier_prix()` laisse passer N'IMPORTE QUEL montant quand le
+      #    tarif de référence est indéterminable — c'est le trou par lequel
+      #    100 FCFA ouvraient un abonnement à 5 000 sur l'Atelier. Dix produits
+      #    neufs, dix occasions de le rouvrir, et la panne est muette des deux
+      #    côtés : l'acheteur est content, le vendeur voit un paiement de plus.
+      - name: 💰 Chaque ouvrage du catalogue a-t-il un prix et une porte ?
+        run: |
+          if command -v php >/dev/null 2>&1; then
+            php tests/ouvrages_en_vente.php
+          else
+            echo "::error title=PHP introuvable::Le banc des tarifs n'a pas pu tourner. Déploiement ANNULÉ."
+            exit 1
+          fi
 
       # ── 🛡️ Le bouclier anti-robots garde MAINTENANT toutes les surfaces
       #    publiques, y compris les payantes. Une régression y est invisible
@@ -432,8 +461,33 @@ jobs:
                 exit 1
               fi
             done
+
+            # -- Les APERCUS gratuits (extrait-*.js) ---------------------
+            # Ce sont les seuls fichiers de contenu que le depot public
+            # heberge, et ils partent sur le site sans aucun code. Deux
+            # regles arretees par Jacques le 27/08/2026, verifiees ICI parce
+            # qu'un producteur peut etre relance avec de mauvaises options,
+            # et que le depot, lui, garde ce qu'on y pousse :
+            #   (1) aucun corrige — un apercu qui donne les reponses vend le
+            #       cahier a personne ;
+            #   (2) DEUX lecons au plus — au-dela, ce n'est plus un apercu,
+            #       c'est une partie du produit qu'on offre.
+            for f in livrets/extrait-*.js; do
+              [ -f "$f" ] || continue
+              if grep -qE '"y":"corrige"|"answer"|Corrige [-]{2}|Corrig.{1,2} —' "$f"; then
+                echo "::error title=Corrige dans un apercu gratuit::$f contient une correction. Regenerer avec: python tools/normaliser_cahiers.py --charge <dossier>. Deploiement ANNULE."
+                exit 1
+              fi
+              n=$(grep -o '"y":"lecon"' "$f" | wc -l)
+              if [ "$n" -gt 2 ]; then
+                echo "::error title=Apercu trop long::$f contient $n lecons (2 au plus). Deploiement ANNULE."
+                exit 1
+              fi
+            done
+
             cp -r livrets deploy/
-            echo "  OK livrets/ ($(find livrets -name '*.html' | wc -l) pages, verrou verifie)"
+            echo "  OK livrets/ ($(find livrets -name '*.html' | wc -l) pages, verrou verifie,"
+            echo "     $(ls livrets/extrait-*.js 2>/dev/null | wc -l) apercus gratuits sans corrige)"
           fi
 
           # -- d/ = pages de devoir partageables (le lien viral) -----------
@@ -474,12 +528,26 @@ jobs:
               [ -f "$f" ] || continue
               cp "$f" deploy/legal/
             done
+            # Le plancher est passé de 3 à 4 le 27/08/2026 : le site collecte
+            # nom, WhatsApp et classe dès la 6ᵉ et n'avait AUCUNE politique de
+            # confidentialité (les deux URL attendues rendaient 404). La page
+            # existe désormais, le pied de page de la vitrine et celui de
+            # l'Atelier y renvoient — l'oublier ici rejouerait exactement le
+            # défaut qu'on vient de corriger.
             n=$(ls deploy/legal/*.html 2>/dev/null | wc -l)
-            if [ "$n" -lt 3 ]; then
-              echo "::error title=Pages légales incomplètes::$n page(s) dans legal/ au lieu de 3 (mentions, CGV, charte). Déploiement ANNULÉ."
+            if [ "$n" -lt 4 ]; then
+              echo "::error title=Pages légales incomplètes::$n page(s) dans legal/ au lieu de 4 (mentions, CGV, charte, confidentialité). Déploiement ANNULÉ."
               exit 1
             fi
-            echo "  ✓ legal/ ($n pages : mentions, CGV, charte)"
+            # Chaque page CITÉE par un pied de page doit être présente, nommément :
+            # un compte de 4 ne dit pas LESQUELLES sont là.
+            for p in mentions-legales cgv charte-pedagogique confidentialite; do
+              if [ ! -f "deploy/legal/$p.html" ]; then
+                echo "::error title=Page légale manquante::legal/$p.html est absente alors que le site y renvoie. Déploiement ANNULÉ."
+                exit 1
+              fi
+            done
+            echo "  ✓ legal/ ($n pages : mentions, CGV, charte, confidentialité)"
           else
             echo "::error title=Pages légales absentes::legal/ est introuvable alors que la vitrine y renvoie. Déploiement ANNULÉ."
             exit 1
@@ -509,10 +577,20 @@ jobs:
             echo "  ✓ VERITAS_Promo_Video.html"
           fi
 
-          # ── Page d'erreur 403 dédiée (cible de ErrorDocument) ───
-          # Sans elle, .htaccess pointerait vers un fichier absent et Apache
+          # ── Pages d'erreur dédiées (cibles de ErrorDocument) ────
+          # Sans elles, .htaccess pointerait vers un fichier absent et Apache
           # retomberait sur sa page par défaut.
-          if [ -f 403.html ]; then cp 403.html deploy/; echo "  ✓ 403.html"; fi
+          # ⚠️ ÉCHEC BRUYANT, et non « if [ -f ] » silencieux : .htaccess
+          # NOMME ces deux fichiers. Une garde qui saute sans rien dire
+          # laisserait ErrorDocument désigner le vide — et c'est précisément la
+          # forme de panne qu'on ne voit jamais en déployant.
+          for e in 403 404; do
+            if [ ! -f "$e.html" ]; then
+              echo "::error title=Page d'erreur manquante::$e.html est absente alors que .htaccess la désigne (ErrorDocument $e). Déploiement ANNULÉ."
+              exit 1
+            fi
+            cp "$e.html" deploy/; echo "  ✓ $e.html"
+          done
 
           # ── Page des corrigés des manuels (manuels.html) ────────
           # ⚠️ Les QR codes IMPRIMÉS dans les manuels 1er cycle pointent ici.

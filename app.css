@@ -847,8 +847,15 @@ input,select,textarea,button{font-family:'Inter',sans-serif;font-size:15px}
 .lbtn{width:100%;padding:13px;border-radius:var(--r);border:none;background:#1a3a8a;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all .18s;margin-top:4px}
 .lbtn:hover{background:var(--gold);box-shadow:0 4px 16px rgba(154,114,40,.28)}
 #lerr{display:none;padding:12px 16px;background:#fef2f2;border:2px solid #AE5353;border-radius:var(--r);font-size:13px;font-weight:600;color:#b91c1c;margin-bottom:12px;text-align:center}
-.lback{width:100%;padding:10px;border-radius:var(--r);border:1.5px solid var(--bg3);background:transparent;color:var(--ink3);font-size:13px;font-weight:600;cursor:pointer;margin-top:8px}
-.lback:hover{border-color:var(--bl);color:var(--bl)}
+/* Le retour au portail public N'EST PAS une action secondaire : c'est la
+   sortie de secours de quelqu'un qui s'est trompé d'écran. En contour gris sur
+   fond blanc, au bas d'une colonne de cartes désormais colorées, il disparaissait.
+   Fond bleu de marque, texte blanc : il se voit, sans disputer la vedette aux
+   quatre rôles — ceux-ci sont clairs, lui est plein. */
+.lback{width:100%;padding:11px;border-radius:var(--r);border:0;
+  background:var(--bl,#1E499B);color:#fff;font-size:13px;font-weight:600;
+  cursor:pointer;margin-top:8px;transition:background .15s,box-shadow .15s}
+.lback:hover{background:var(--bld,#163A7D);box-shadow:0 4px 12px rgba(30,73,155,.28)}
 
 /* ===== APP SHELL ===== */
 #APP{height:100vh;overflow:hidden}
@@ -8135,18 +8142,70 @@ body.vmenu-lock{overflow:hidden}
   text-align:center; margin-bottom:10px;
 }
 #LS .l-rejoindre-b{ display:grid; gap:7px; }
+/* ── Les quatre portes d'entrée ────────────────────────────────────────────
+   Elles étaient quatre rectangles blancs identiques, alignés à gauche : rien
+   ne distinguait « Parent » de « Partenaire » avant d'avoir lu les deux mots.
+   Chaque rôle reçoit donc SA couleur, portée par deux variables posées sur la
+   carte — le pictogramme, le titre et le liseré la partagent, ce qui fait une
+   seule décision par rôle au lieu de quatre règles.
+
+   Les paires teinte/fond ne sont pas inventées : ce sont EXACTEMENT celles que
+   la maquette de la vitrine emploie déjà pour ces mêmes publics (bleu marque,
+   sarcelle, violet, orange). Aucun cinquième système de couleurs n'entre ici.
+
+   Contraste vérifié sur le fond réel de la carte, texte de 13 px :
+     #1E499B 8,9:1 · #0E7C86 4,9:1 · #5B4FA8 6,7:1 · #A84200 6,1:1 — tous ≥ 4,5. */
 #LS .l-rj{
-  display:block; width:100%; text-align:left; cursor:pointer;
-  padding:10px 13px; border-radius:var(--r,10px);
-  background:var(--sur,#fff); border:1px solid var(--bg3,#D9DEEA);
-  font-family:inherit; transition:border-color .15s,background .15s;
+  --rj-t:#1E499B; --rj-f:#DBE8FE;
+  display:block; width:100%; text-align:center; cursor:pointer;
+  padding:13px; border-radius:var(--r,10px);
+  /* Aucun trait : ni contour, ni liseré. La carte se détache par son FOND,
+     teinté de la couleur du rôle et fortement éclairci — assez pour se lire
+     comme une surface cliquable, assez peu pour que la pastille, qui porte la
+     teinte pleine, reste le point d'accroche de l'œil. */
+  background:color-mix(in srgb, var(--rj-f) 32%, #fff);
+  border:0;
+  font-family:inherit;
+  transition:background .15s, transform .15s, box-shadow .15s;
 }
-#LS .l-rj:hover{ border-color:var(--bl,#1E499B); background:var(--blb,#EEF3FC); }
+#LS .l-rj--eleve     { --rj-t:#1E499B; --rj-f:#DBE8FE; }
+#LS .l-rj--parent    { --rj-t:#0E7C86; --rj-f:#E3F1EE; }
+#LS .l-rj--enseignant{ --rj-t:#5B4FA8; --rj-f:#EEE9F8; }
+#LS .l-rj--partenaire{ --rj-t:#A84200; --rj-f:#FFF3E4; }
+
+/* Au survol, la carte prend le ton de son rôle et se soulève d'un pixel :
+   le relief dit « ceci s'ouvre », la couleur dit « celle-ci, pas une autre ». */
+#LS .l-rj:hover{
+  background:var(--rj-f);
+  transform:translateY(-1px);
+  box-shadow:0 4px 12px rgba(0,17,54,.10);
+}
+@media (prefers-reduced-motion:reduce){ #LS .l-rj{transition:none} #LS .l-rj:hover{transform:none} }
+
+/* Pastille RONDE, comme tous les porte-pictogrammes du site (.vfx-proof-ic,
+   .rmq-ic, .acc-foot-ic…) : un rond parmi des carrés se lit comme un autre
+   composant. Le fond porte la teinte du rôle, le trait du pictogramme aussi.
+   Le blanc sous la pastille la détache du fond déjà teinté de la carte. */
+#LS .l-rj-p{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:34px; height:34px; border-radius:50%; flex:0 0 auto;
+  background:var(--rj-f); color:var(--rj-t);
+  box-shadow:0 0 0 3px rgba(255,255,255,.85);
+  margin-bottom:7px;
+}
+#LS .l-rj-i{
+  width:16px; height:16px; flex:0 0 auto;
+  fill:none; stroke:currentColor; stroke-width:2;
+  stroke-linecap:round; stroke-linejoin:round;
+}
 #LS .l-rj b{
-  display:block; font-size:13px; font-weight:700; color:var(--ink1,#1E499B);
+  display:block; font-size:13.5px; font-weight:700; color:var(--rj-t);
 }
+/* Couleur ÉCRITE, pas héritée d'un jeton : le fond de la carte est désormais
+   teinté, et `--ink3` y tombait à 4,3:1 — sous le seuil AA. Mesuré sur les
+   quatre fonds réels après ce changement : 4,9 à 5,1:1. */
 #LS .l-rj small{
-  display:block; font-size:11.5px; color:var(--ink4,#7A8299); margin-top:1px;
+  display:block; font-size:11.5px; color:#4B5567; margin-top:2px;
 }
 
 
@@ -8400,3 +8459,36 @@ body.vmenu-lock{overflow:hidden}
   .bkpack-cta{transition:none}
   .bkpack-cta:hover{transform:none}
 }
+
+/* ══ OÙ RETIRER SON EXEMPLAIRE (fiche produit) ═════════════════════════════
+   Écrit en APLATS : le thème LWS balaie les images de fond sur #VISITOR, un
+   dégradé ici ne survivrait pas. Seules les graisses sont rallumées dans
+   assets/theme-lws.css. */
+.bkret{
+  margin-top:18px;padding:16px 16px 14px;
+  border:1px solid var(--n100,#E4E7EF);border-radius:var(--r-lg,14px);
+  background:var(--n25,#F8FAFD);
+}
+.bkret-t{
+  display:flex;align-items:center;gap:8px;margin:0 0 12px;
+  font-size:15px;font-weight:800;color:var(--n800,#001136);
+}
+.bkret-t .i{width:17px;height:17px;margin:0;flex:none;color:var(--o600,#C24E00)}
+.bkret-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.bkret-l{display:flex;align-items:flex-start;gap:9px}
+.bkret-i{
+  flex:none;width:30px;height:30px;border-radius:9px;
+  background:#EAF1FF;color:#1E499B;
+  display:flex;align-items:center;justify-content:center;
+}
+.bkret-i .i{width:15px;height:15px;margin:0}
+.bkret-l > span:last-child{display:flex;flex-direction:column;min-width:0}
+.bkret-l b{font-size:11.5px;font-weight:800;color:var(--n500,#64748B);
+  text-transform:uppercase;letter-spacing:.04em}
+.bkret-l b + span{font-size:13.5px;line-height:1.45;color:var(--n800,#001136)}
+.bkret-note{
+  display:flex;align-items:flex-start;gap:8px;
+  margin:12px 0 0;font-size:12.5px;line-height:1.55;color:var(--n600,#4D5163);
+}
+.bkret-note .i{width:14px;height:14px;margin:0;flex:none;margin-top:2px;color:var(--n400,#8A8FA3)}
+.bkret-note a{color:#1E499B;font-weight:700}

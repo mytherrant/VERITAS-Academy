@@ -46,7 +46,7 @@ require_once __DIR__ . '/_livret_lib.php';
 // ── CORS (même allowlist que livret.php) ──────────────────────────────────────
 $co_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'http://localhost:3000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'http://localhost:3000', 'https://localhost', 'capacitor://localhost',
 ];
 $co_origin = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
 if (in_array($co_origin, $co_allowed, true)) {

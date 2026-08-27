@@ -35,7 +35,7 @@ require_once __DIR__ . '/_sentinel.php';
 // ── CORS : même allowlist que le reste de l'API ──
 $__ch_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'https://localhost', 'capacitor://localhost',
 ];
 $__ch_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($__ch_origin, $__ch_allowed, true)) {

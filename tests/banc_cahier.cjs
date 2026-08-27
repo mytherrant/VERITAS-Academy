@@ -46,12 +46,24 @@ const CATALOGUE = {
 function preparer() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-cahier-'));
   fs.mkdirSync(path.join(dir, 'lvdata'));
+  /* Le dossier des données VENDUES — cahiers et tables de corrigés. Isolé au
+     même titre que le registre : sans cette constante, le banc irait lire
+     uploads/protected/livrets/ et son verdict dépendrait de ce que Jacques a
+     téléversé ce jour-là, au lieu de la règle. */
+  const donnees = path.join(dir, 'contenu');
+  fs.mkdirSync(donnees);
+  fs.writeFileSync(path.join(donnees, 'corrige-6e.js'),
+    'window.CAHIER_CORRIGES=' + JSON.stringify({
+      b12: 'Le narrateur est interne : il dit « je » et ne sait que ce qu’il voit.',
+      b30: 'Le champ lexical de la peur : « trembler », « ombre », « frisson ».',
+    }) + ';', 'utf8');
   const cat = path.join(dir, 'catalogue.json');
   fs.writeFileSync(cat, JSON.stringify(CATALOGUE), 'utf8');
   const entete = `<?php
 define('VRT_LIVRET_DIR', ${JSON.stringify(path.join(dir, 'lvdata'))});
 define('VRT_LIVRET_CATALOGUE', ${JSON.stringify(cat)});
 define('API_SECRET', ${JSON.stringify(SECRET)});
+define('VRT_LIVRET_DONNEES', ${JSON.stringify(donnees)});
 `;
   fs.writeFileSync(path.join(dir, 'livret_test.php'),
     entete + `require ${JSON.stringify(path.join(RACINE, 'api', 'livret.php'))};\n`, 'utf8');
@@ -222,6 +234,65 @@ async function serveurPret() {
   const profEcrit = await ca({ action: 'enregistrer', token: tProf, reponses: { '6e/x/y/z': 'a' } });
   dit(profEcrit.status === 403, 'un enseignant n’écrit pas dans le cahier à la place de l’élève',
       'reçu ' + profEcrit.status);
+
+  /* ── ⑥ Le corrigé s'ouvre TOUT SEUL, mais seulement après avoir cherché ──
+     C'est la règle arrêtée par Jacques le 27/08 : l'apprenant travaille en
+     autonomie puis voit la correction, sans attendre son enseignant. Elle ne
+     vaut que si elle est tenue par le SERVEUR — un verrou côté client se lève
+     en changeant une variable dans la console, et un corrigé déjà présent
+     dans la page se lit sans même cliquer. */
+  console.log('\n\x1b[1m7. ⑥ La correction s’ouvre après avoir cherché, pas avant\x1b[0m');
+
+  const dispo = await ca({ action: 'charger', token: tAwa });
+  dit((dispo.j.corriges || 0) === 2, 'le cahier annonce ses 2 corrections type',
+      'reçu ' + (dispo.j && dispo.j.corriges));
+
+  // Awa a répondu sous b12 et b30 (section 2), jamais sous b77.
+  const ouvert = await ca({ action: 'corrige', token: tAwa, item: '6e/seq1/lecon1/b12/r0' });
+  dit(ouvert.status === 200 && /narrateur est interne/.test(ouvert.j.corrige || ''),
+      'exercice traité → la correction s’ouvre', 'reçu ' + ouvert.status);
+
+  const cBlanc = await gen('6e', 'livret', 'Nkolo');
+  const tBlanc = await ouvre(cBlanc, '6e', 'livret');
+  const refuse = await ca({ action: 'corrige', token: tBlanc, item: '6e/seq1/lecon1/b12/r0' });
+  dit(refuse.status === 403 && refuse.j.code === 'cherche',
+      'élève qui n’a rien écrit → REFUSÉ (403 « cherche »)', 'reçu ' + refuse.status);
+  dit(!/narrateur est interne/.test(JSON.stringify(refuse.j || {})),
+      'et le refus ne laisse pas fuiter le texte de la correction');
+
+  /* Une réponse blanche ne compte pas. Sans ce contrôle, la règle se
+     contournerait d'un clic : ouvrir le champ, taper une espace, tout lire. */
+  await ca({ action: 'enregistrer', token: tBlanc, reponses: { '6e/seq1/lecon1/b12/r0': '   ' } });
+  const blanc2 = await ca({ action: 'corrige', token: tBlanc, item: '6e/seq1/lecon1/b12/r0' });
+  dit(blanc2.status === 403, 'une réponse blanche ne déverrouille rien', 'reçu ' + blanc2.status);
+
+  await ca({ action: 'enregistrer', token: tBlanc, reponses: { '6e/seq1/lecon1/b12/r0': 'Il dit « je ».' } });
+  const blanc3 = await ca({ action: 'corrige', token: tBlanc, item: '6e/seq1/lecon1/b12/r0' });
+  dit(blanc3.status === 200, 'dès qu’il répond vraiment, elle s’ouvre', 'reçu ' + blanc3.status);
+
+  const parProf = await ca({ action: 'corrige', token: tProf, item: '6e/seq1/lecon1/b12/r0' });
+  dit(parProf.status === 200, 'l’enseignant y accède sans condition — il prépare son cours');
+
+  /* L'ordre des deux refus compte, et il est celui-ci : « as-tu cherché ? »
+     AVANT « existe-t-il une correction ? ». L'inverse dirait à qui n'a rien
+     écrit quels exercices en ont une — une carte du corrigé, donnée sans
+     avoir rien fait. On répond donc 403 tant que la règle n'est pas remplie,
+     et 404 seulement ensuite. */
+  const nonCherche = await ca({ action: 'corrige', token: tAwa, item: '6e/seq1/lecon1/b77/r0' });
+  dit(nonCherche.status === 403,
+      'sans réponse, on ne sait même pas si une correction existe (403 d’abord)',
+      'reçu ' + nonCherche.status);
+
+  await ca({ action: 'enregistrer', token: tAwa, reponses: { '6e/seq1/lecon1/b77/r0': 'Ma production.' } });
+  const nulle = await ca({ action: 'corrige', token: tAwa, item: '6e/seq1/lecon1/b77/r0' });
+  dit(nulle.status === 404 && nulle.j.code === 'aucun',
+      'une fois traité, un exercice sans correction type le DIT (404)',
+      'reçu ' + nulle.status);
+
+  const autreCahier = await ca({ action: 'corrige', token: tProf5, item: '6e/seq1/lecon1/b12/r0' });
+  dit(autreCahier.status === 404,
+      'le prof de 5ᵉ ne tire pas les corrections de la 6ᵉ avec une clé de 6ᵉ',
+      'reçu ' + autreCahier.status);
 
   console.log('\n' + '─'.repeat(68));
   const total = ok + ko;

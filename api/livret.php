@@ -66,7 +66,7 @@ require_once __DIR__ . '/_livret_lib.php'; // registre des codes (partagé avec 
 // ── CORS (allowlist stricte, identique à teacher_access.php / content.php) ────
 $lv_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'http://localhost:3000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'http://localhost:3000', 'https://localhost', 'capacitor://localhost',
 ];
 $lv_origin = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
 if (in_array($lv_origin, $lv_allowed, true)) {
@@ -98,7 +98,19 @@ function lv_err(int $code, string $msg, string $tag = ''): void {
 }
 function lv_log(string $l): void { vrt_livret_log($l); }
 
-function lv_dir(): string { return dirname(__DIR__) . '/uploads/protected/livrets'; }
+/* Où vivent les données vendues. Surchargeable pour la MÊME raison que
+   VRT_LIVRET_DIR (le registre) et VRT_LIVRET_CATALOGUE : sans cela, la
+   livraison du contenu — le maillon qui décide si l'acheteur reçoit ce qu'il a
+   payé — n'était éprouvable par AUCUN banc, puisqu'elle lit un dossier hors
+   dépôt, déposé à la main par FTP. Un banc peut désormais y placer un fichier
+   d'essai et vérifier le parcours entier, sans jamais toucher aux données
+   réelles. En production, aucune constante n'est définie : le chemin ne bouge
+   pas d'un pouce. */
+function lv_dir(): string {
+    return defined('VRT_LIVRET_DONNEES')
+         ? (string) VRT_LIVRET_DONNEES
+         : dirname(__DIR__) . '/uploads/protected/livrets';
+}
 
 // ── Réglages (surchargeables dans api/payment_config.php) ─────────────────────
 // Durée de vie d'une session. Courte : le jeton est lié au poste, mais un poste
@@ -540,6 +552,21 @@ if ($action === 'catalogue') {
     foreach (vrt_livret_catalogue() as $slug => $o) {
         $couv = is_file($dirCouv . 'livret_' . $slug . '.jpg')
               ? '/uploads/oeuvres/livret_' . $slug . '.jpg' : '';
+
+        /* ── « DISPONIBLE » : deux façons d'exister, une seule preuve ────────
+           Historiquement, un ouvrage n'était publié que s'il avait SA page :
+           `livrets/6e.html`. Depuis que `livrets/cahier.html` sait ouvrir
+           n'importe quel ouvrage (`?o=<slug>`), la coquille n'est plus
+           obligatoire — mais la condition, elle, l'était restée. Résultat :
+           les onze cahiers servis par le moteur générique se seraient vendus
+           sans jamais apparaître en boutique.
+           On constate donc la disponibilité là où elle se décide vraiment :
+           soit une coquille dédiée est sur le disque, soit les DONNÉES du
+           cahier y sont. C'est cette seconde condition qui compte le plus —
+           elle est exactement ce qui manquait le jour où l'on a pu payer
+           1 000 F un livre dont le contenu n'était pas sur le serveur. */
+        $coquille = is_file($racine . $slug . '.html');
+        $donnees  = is_file(lv_dir() . '/booklet-' . $slug . '.js');
         $out[] = [
             'slug'  => (string) $slug,
             'titre' => (string) $o['titre'],
@@ -548,7 +575,10 @@ if ($action === 'catalogue') {
             'kinds' => array_values((array) ($o['kinds'] ?? ['livret'])),
             'prix'  => (int) ($o['prix'] ?? 0),
             'prixGuide' => (int) ($o['prixGuide'] ?? 0),
-            'disponible' => is_file($racine . $slug . '.html'),
+            'disponible' => $coquille || $donnees,
+            // Où mène la carte de la boutique. Le serveur le dit, parce que
+            // lui seul sait laquelle des deux formes existe.
+            'lien' => $coquille ? ($slug . '.html') : ('cahier.html?o=' . rawurlencode((string) $slug)),
             'couverture' => $couv,
         ];
     }

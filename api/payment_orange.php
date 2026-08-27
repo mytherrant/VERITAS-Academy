@@ -22,7 +22,7 @@ require_once __DIR__ . '/_auth_lib.php'; // Étape 1 : octroi d'accès côté se
 // ── CORS (allowlist stricte — BUG FIX #2 : plus délégué à payment_config.php) ──
 $__op_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'https://localhost', 'capacitor://localhost',
 ];
 $__op_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($__op_origin, $__op_allowed, true)) {

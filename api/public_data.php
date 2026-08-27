@@ -17,7 +17,7 @@ require_once __DIR__ . '/_json_boot.php'; // display_errors=0 + purge des parasi
 // que des sites tiers consomment l'endpoint depuis le navigateur des visiteurs).
 $__pd_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'https://localhost', 'capacitor://localhost',
 ];
 $__pd_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($__pd_origin, $__pd_allowed, true)) {
@@ -433,6 +433,13 @@ $public = [
     /* PREUVE SOCIALE — ventes réelles, anonymisées, ou rien du tout.
        Tableau vide ⇒ la vitrine n'affiche aucune bulle. */
     'activite' => vrt_pd_activite($db),
+    /* SURCHARGES DE CONTENU — posees depuis « Contenu du site » (panneau
+       admin). Chaque cle designe une feuille de texte ou une image de la
+       maquette ; assets/vitrine.js les applique par-dessus le HTML pre-rendu.
+       On ne sert que la table des valeurs : ni horodatage d'edition, ni
+       identifiant d'auteur, qui ne regardent pas le visiteur. */
+    'accueil' => (isset($db['accueil']['slots']) && is_array($db['accueil']['slots']))
+        ? ['slots' => $db['accueil']['slots']] : null,
     'generated_at' => date('c'),
 ];
 

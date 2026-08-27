@@ -171,6 +171,30 @@ if (iSys < 0 || iReg < 0) {
   ['rSys', 'rEns', 'rCls', 'rSerie', 'rSerieWrap'].forEach((id) => {
     n[id] = { value: '', innerHTML: '', style: { display: '' }, addEventListener() {} };
   });
+
+  /* ── Le bouchon de « rCls » doit se comporter comme un VRAI <select> ──────
+     Il ne le faisait pas, et c'est ce qui a laissé passer un bug pendant des
+     mois : sur un objet nu, écrire `innerHTML` ne touche pas `value`. Dans un
+     navigateur, réécrire les <option> remet SystÉMATIQUEMENT la sélection sur
+     la première. _regSysChange reconstruisait la liste à chaque appel — donc
+     aussi quand l'élève changeait de classe, puisqu'elle est son propre
+     écouteur — et effaçait le choix à la seconde où il était fait.
+     Le test restait vert parce que le bouchon, lui, retenait la valeur.
+     On lui donne la sémantique du navigateur : c'est la seule façon que ce
+     fichier ait une chance de rougir sur ce défaut. */
+  {
+    let html = '', val = '';
+    const options = () => (html.match(/<option[^>]*>([^<]*)<\/option>/g) || [])
+      .map((o) => o.replace(/<[^>]+>/g, ''));
+    Object.defineProperty(n.rCls, 'innerHTML', {
+      get: () => html,
+      set: (v) => { html = v; const o = options(); val = o.length ? o[0] : ''; },
+    });
+    Object.defineProperty(n.rCls, 'value', {
+      get: () => val,
+      set: (v) => { val = options().indexOf(v) >= 0 ? v : ''; },
+    });
+  }
   const bac = {
     document: { getElementById: (id) => n[id] || null },
     _esc: (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;'),
@@ -202,9 +226,37 @@ if (iSys < 0 || iReg < 0) {
   t(r.visible && /F2 \(Électronique\)/.test(r.html), 'technique : nomenclature officielle OBC');
   t(/<option value="">/.test(r.html),
     'la liste s’ouvre sur « — Choisir — » : aucune valeur par défaut trompeuse');
+
+  /* ── La classe choisie doit SURVIVRE au rendu qu'elle déclenche ──────────
+     _regSysChange est l'écouteur `change` du menu des classes ET la fonction
+     qui reconstruit ce menu. Sans mémorisation de la valeur, choisir
+     « Terminale » rappelait la fonction, qui réécrivait les <option> et
+     ramenait « 6ème » — le choix de l'élève s'annulait de lui-même, et la
+     filière restait fermée alors que doRegister() l'exige. */
+  n.rSys.value = 'fr'; n.rEns.value = 'gen';
+  globalThis.__reg();
+  n.rCls.value = 'Terminale';
+  globalThis.__reg();                       // ce que fait l'écouteur `change`
+  t(n.rCls.value === 'Terminale',
+    'la classe choisie survit au re-rendu qu’elle déclenche (pas de retour à la 1re option)');
+  t(n.rSerieWrap.style.display !== 'none',
+    '… et la filière s’ouvre bien pour cette classe');
+
+  /* Une classe qui n'existe plus dans le nouveau sous-système ne doit PAS être
+     conservée de force : changer pour l'anglophone doit repartir proprement. */
+  n.rSys.value = 'en'; globalThis.__reg();
+  t(bac.CLS.concat(Object.values(_AMBASSA_SYS).flatMap((c) => c.classes || []))
+      .indexOf(n.rCls.value) >= 0,
+    'changer de sous-système retombe sur une classe réellement proposée');
 }
 t(/_serieDemandee\s*&&\s*!_rSerie/.test(src),
   'doRegister() refuse une inscription sans filière quand elle est demandée');
+
+/* _regSysChange n'était appelée par RIEN au premier rendu : l'écouteur du menu
+   des classes n'existait donc pas tant qu'on n'avait pas touché à l'un des
+   deux autres menus. Le formulaire doit l'amorcer à son ouverture. */
+t(/function _regInit\(\)/.test(src) && (src.match(/_regInit\(\);/g) || []).length >= 2,
+  'showRegisterForm() amorce la cascade (_regInit) sur ses deux chemins de rendu');
 
 /* ── Verdict ─────────────────────────────────────────────────────────────── */
 console.log('\n' + '─'.repeat(68));

@@ -90,6 +90,11 @@ COUVERTURES: dict[str, dict] = {
     "4e":          {"src": "Livret_activites_Francais_4e.png"},
     "3e":          {"src": "Livret_activites_Francais_3e.png"},
     "2nde":        {"src": "Livret_activites_Francais_2nde.png"},
+    # Les slugs du catalogue sont « 1ere » et « tle » depuis le 27/08 : c'est
+    # sous ce nom que api/livret.php cherche `livret_<slug>.jpg`. Les deux
+    # anciens noms restent produits — des pages déjà en ligne les référencent.
+    "1ere":        {"src": "Livret_activites_Francais_1ere.png"},
+    "tle":         {"src": "Livret_activites_Francais_Tle.png"},
     "livret-1ere": {"src": "Livret_activites_Francais_1ere.png"},
     "livret-tle":  {"src": "Livret_activites_Francais_Tle.png"},
     "bord-6e":     {"src": "6e.png"},

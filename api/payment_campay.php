@@ -52,7 +52,7 @@ require_once __DIR__ . '/_auth_lib.php';
 // ── CORS (allowlist stricte, identique aux autres endpoints de paiement) ──
 $__cp_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'https://localhost', 'capacitor://localhost',
 ];
 $__cp_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($__cp_origin, $__cp_allowed, true)) {

@@ -41,7 +41,7 @@ require_once __DIR__ . '/_auth_lib.php';
 // ── CORS (allowlist stricte, comme content.php / secure_pdf.php) ──
 $__t_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'http://localhost:3000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'http://localhost:3000', 'https://localhost', 'capacitor://localhost',
 ];
 $__t_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($__t_origin, $__t_allowed, true)) {

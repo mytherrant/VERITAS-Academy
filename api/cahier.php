@@ -62,7 +62,7 @@ require_once __DIR__ . '/_livret_lib.php';
 // ── CORS (même allowlist que livret.php / collab.php) ────────────────────────
 $ch_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'http://localhost:3000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'http://localhost:3000', 'https://localhost', 'capacitor://localhost',
 ];
 $ch_origin = (string) ($_SERVER['HTTP_ORIGIN'] ?? '');
 if (in_array($ch_origin, $ch_allowed, true)) {
@@ -201,6 +201,12 @@ if ($action === 'charger') {
         'annotations' => (object) $d['annotations'],
         'maj'         => (int) ($d['maj'] ?? 0),
         'total'       => count($d['reponses']),
+        /* Combien de corrections type existent pour CET ouvrage. Le cahier ne
+           pose son bouton « Voir la correction » que si ce nombre est non nul :
+           tous les cahiers n'en ont pas (les livrets du 2ⁿᵈ cycle n'en portent
+           aucune dans leur source), et un bouton qui répond toujours « aucune
+           correction » se lit comme une panne. */
+        'corriges'    => count(ch_corriges($ouvrage)),
     ]);
 }
 
@@ -240,6 +246,94 @@ if ($action === 'enregistrer') {
     ch_out(200, ['ok' => true, 'ecrits' => $ecrits, 'total' => count($d['reponses']),
                  'maj' => $d['maj'],
                  'tronquees' => $refuses ? array_values(array_slice($refuses, 0, 5)) : []]);
+}
+
+/* ═══ LE CORRIGÉ, APRÈS AVOIR CHERCHÉ ════════════════════════════════════════
+   « L'apprenant peut travailler de manière autonome puis voir les corrigés
+   sans avoir besoin de l'enseignant. » — c'est le premier des trois modes de
+   déverrouillage prévus au cahier des charges : à la complétion, exercice par
+   exercice, sans intervention humaine.
+
+   TROIS CHOSES QUE CETTE ACTION REFUSE DE FAIRE
+   ① Elle n'envoie pas le corrigé d'avance. Le cahier que l'élève télécharge
+      n'en contient aucun (`tests/banc_cahiers_reels.cjs` le vérifie sur les
+      15 ouvrages) : ils vivent dans `corrige-<ouvrage>.js`, dans le dossier
+      protégé, et ne sortent d'ici qu'un par un. Masquer un corrigé en CSS
+      aurait suffi à l'afficher — trois clics dans l'inspecteur.
+   ② Elle n'en donne pas un que l'élève n'a pas cherché. La règle est vérifiée
+      ICI, sur ce que le serveur a enregistré : une réponse non vide sous cette
+      clé. Un contrôle côté client se contourne en changeant une variable.
+   ③ Elle ne rend pas la table. Une action qui répondrait « voici tous les
+      corrigés » économiserait des requêtes et supprimerait la règle.
+
+   L'enseignant, lui, y accède sans condition : c'est son métier de préparer
+   son cours avant que quiconque ait répondu.
+*/
+if ($action === 'corrige') {
+    $item = (string) ($in['item'] ?? '');
+    if (!ch_cle_valide($item)) ch_err(400, 'Exercice non précisé.', 'item');
+
+    /* A-t-il cherché ? On accepte la clé exacte OU l'une de ses descendantes :
+       un exercice peut porter plusieurs champs (plusieurs pointillés, un
+       tableau), et avoir rempli l'un d'eux, c'est s'y être mis. */
+    if ($kind !== 'guide') {
+        $d = ch_lire(ch_fichier($ouvrage, $moi));
+        $repondu = false;
+        foreach ($d['reponses'] as $k => $v) {
+            if (trim((string) $v) === '') continue;
+            if ($k === $item || strpos((string) $k, $item . '/') === 0
+                || strpos($item, (string) $k . '/') === 0) { $repondu = true; break; }
+        }
+        if (!$repondu) {
+            ch_err(403, 'Réponds d’abord à cet exercice — la correction s’ouvre ensuite.', 'cherche');
+        }
+    }
+
+    /* L'empreinte de la consigne est le 4ᵉ segment de la clé, suffixe d'ordre
+       retiré. On ne dérive PAS le corrigé du rang de l'exercice : renuméroter
+       un cahier déplacerait alors toutes les corrections d'un cran. */
+    $bouts = explode('/', $item);
+    $emp = isset($bouts[3]) ? (string) $bouts[3] : '';
+    $emp = preg_replace('/_\d+$/', '', $emp);
+    if ($emp === '' || !preg_match('/^[a-z0-9]{1,12}$/', $emp)) {
+        ch_err(400, 'Exercice non précisé.', 'item');
+    }
+
+    $table = ch_corriges($ouvrage);
+    if (!isset($table[$emp])) {
+        // Dit tel quel : tous les cahiers n'ont pas de corrigé pour chaque
+        // exercice, et une production écrite n'en a pas du tout.
+        ch_err(404, 'Cet exercice n’a pas de correction type.', 'aucun');
+    }
+    ch_out(200, ['ok' => true, 'item' => $item, 'corrige' => (string) $table[$emp]]);
+}
+
+/** La table des corrigés d'un ouvrage — `empreinte de la consigne => corrigé`.
+ *
+ *  Elle est lue depuis le MÊME dossier protégé que le cahier vendu, jamais
+ *  depuis le dépôt : le dépôt GitHub est public, y pousser cette table
+ *  reviendrait à publier les corrigés de tous les cahiers en vente.
+ *  Le fichier peut être absent — un ouvrage sans corrigé type est un cas
+ *  normal, pas une panne : on rend une table vide et l'action répond 404.
+ */
+function ch_corriges(string $ouvrage): array {
+    static $cache = [];
+    if (isset($cache[$ouvrage])) return $cache[$ouvrage];
+    $base = defined('VRT_LIVRET_DONNEES')
+          ? (string) VRT_LIVRET_DONNEES
+          : dirname(__DIR__) . '/uploads/protected/livrets';
+    $f = $base . '/corrige-' . $ouvrage . '.js';
+    $t = [];
+    if (is_file($f)) {
+        $js = (string) @file_get_contents($f);
+        $i = strpos($js, '=');
+        if ($i !== false) {
+            $j = json_decode(rtrim(trim(substr($js, $i + 1)), ';'), true);
+            if (is_array($j)) $t = $j;
+        }
+    }
+    $cache[$ouvrage] = $t;
+    return $t;
 }
 
 // ═══ ENSEIGNANT (jeton `guide` du MÊME ouvrage) ═════════════════════════════

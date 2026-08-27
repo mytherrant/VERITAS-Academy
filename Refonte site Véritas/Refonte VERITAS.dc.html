@@ -31,6 +31,13 @@
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"EducationalOrganization","name":"Centre VÉRITAS","legalName":"VERITAS EDUCATION SARL","alternateName":"VÉRITAS School","url":"https://www.veritas-school.com/","logo":"https://www.veritas-school.com/assets/veritas-logo.png","description":"Centre d'Excellence Scolaire : cours, corrigés, annales et tuteur IA conformes au programme MINESEC, de la 6ᵉ à la Terminale.","address":{"@type":"PostalAddress","addressLocality":"Douala","addressCountry":"CM"},"areaServed":"CM","email":"jacquesmytheerrant@gmail.com","telephone":"+237697637739","sameAs":[],"offers":{"@type":"AggregateOffer","priceCurrency":"XAF","lowPrice":"0","highPrice":"7500","offerCount":"4"}}
 </script>
+<!-- La préconnexion était posée au MAUVAIS BOUT de la chaîne. Le fichier de
+     police vient bien de gstatic — mais son adresse n'est connue qu'APRÈS le
+     téléchargement de la feuille depuis googleapis, qui n'était pas
+     préconnecté. Mesuré : 243 ms pour cette seule requête, pendant lesquels
+     le texte s'affiche dans la police de repli puis saute (CLS 0,399 au
+     premier chargement). Les deux hôtes sont désormais préconnectés. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -208,7 +215,11 @@
 
       <sc-if value="{{ navCompacte }}" hint-placeholder-val="{{ false }}">
         <div style="position:relative;height:100%;display:flex;align-items:center;margin-left:auto">
-          <button type="button" onClick="{{ basculerBurger }}" aria-label="Menu" aria-expanded="{{ burgerOuvert }}" style="width:50px;height:50px;border-radius:14px;border:1px solid transparent;background:{{ fondBurger }};color:{{ texteBurger }};cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:background .18s,border-color .18s">
+          <!-- aria-controls écrit ICI, et pas seulement posé par vitrine.js au
+               premier basculement : un lecteur d'écran lit la barre AVANT que
+               l'utilisateur ne touche quoi que ce soit. Le lien bouton →
+               panneau doit exister dès le premier octet. -->
+          <button type="button" onClick="{{ basculerBurger }}" aria-label="Menu" aria-expanded="{{ burgerOuvert }}" aria-controls="vrtBurger" style="width:50px;height:50px;border-radius:14px;border:1px solid transparent;background:{{ fondBurger }};color:{{ texteBurger }};cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transition:background .18s,border-color .18s">
             <span style="width:19px;height:2px;border-radius:2px;background:currentColor;display:block"></span>
             <span style="width:19px;height:2px;border-radius:2px;background:currentColor;display:block"></span>
             <span style="width:19px;height:2px;border-radius:2px;background:currentColor;display:block"></span>
@@ -221,7 +232,7 @@
                   <span style="display:flex;flex-direction:column;line-height:1.35;flex:1;min-width:0">{{ mm.nom }}<small style="font:400 12px Poppins,sans-serif;color:#6E7385">{{ mm.desc }}</small></span>
                 </button>
               </sc-for>
-              <a href="#connexion" style="margin-top:6px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;font:600 15px Poppins,sans-serif;box-shadow:0 8px 18px rgba(242,101,0,.3)" style-hover="color:#fff;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-user"></use></svg>Connexion</a>
+              <a href="#connexion" style="margin-top:6px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;font:600 15px Poppins,sans-serif;box-shadow:0 8px 18px rgba(242,101,0,.3)" style-hover="color:#fff;text-decoration:none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-user"></use></svg>Connexion</a>
             </div>
           </sc-if>
         </div>
@@ -229,7 +240,7 @@
 
       <sc-if value="{{ navLarge }}" hint-placeholder-val="{{ true }}"><div style="display:flex;align-items:center;gap:10px;flex-shrink:0;margin-left:auto">
         <a href="#recherche" aria-label="Rechercher" style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#4D5163;border:1px solid transparent;transition:background .18s,border-color .18s,color .18s" style-hover="background:#F0F4FB;border-color:#DBE8FE;color:#1E499B;text-decoration:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-search"></use></svg></a>
-        <a href="#connexion" style="display:inline-flex;align-items:center;gap:7px;padding:11px 22px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;font:600 15px Poppins,sans-serif;box-shadow:0 6px 16px rgba(242,101,0,.34);transition:transform .18s,box-shadow .18s" style-hover="color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,101,0,.42)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-user"></use></svg>Connexion</a>
+        <a href="#connexion" style="display:inline-flex;align-items:center;gap:7px;padding:11px 22px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;font:600 15px Poppins,sans-serif;box-shadow:0 6px 16px rgba(242,101,0,.34);transition:transform .18s,box-shadow .18s" style-hover="color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 10px 22px rgba(242,101,0,.42)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-user"></use></svg>Connexion</a>
       </div></sc-if>
     </div>
   </nav>
@@ -262,7 +273,7 @@
           <ul style="list-style:none;margin:0 0 26px;padding:0;display:flex;flex-direction:column;gap:12px">
             <li style="display:flex;align-items:flex-start;gap:11px;font-size:16px;color:#4D5163"><span style="flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7BD99C,#007E11);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><use href="#lc-check"></use></svg></span><span><b style="font-weight:600;color:#001136">3 854 exercices corrigés</b> — les cahiers du centre, en ligne</span></li>
             <li style="display:flex;align-items:flex-start;gap:11px;font-size:16px;color:#4D5163"><span style="flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#7C6BD6,#5B4FA8);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><use href="#lc-check"></use></svg></span><span><b style="font-weight:600;color:#001136">Professeur Ambassa</b>, le tuteur IA formé sur le programme</span></li>
-            <li style="display:flex;align-items:flex-start;gap:11px;font-size:16px;color:#4D5163"><span style="flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#C24E00,#C24E00);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><use href="#lc-check"></use></svg></span><span>Paiement <b style="font-weight:600;color:#001136">MTN MoMo &amp; Orange Money</b>, reçu automatique</span></li>
+            <li style="display:flex;align-items:flex-start;gap:11px;font-size:16px;color:#4D5163"><span style="flex:0 0 auto;width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,#A84200,#A84200);color:#fff;display:flex;align-items:center;justify-content:center;margin-top:1px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" aria-hidden="true"><use href="#lc-check"></use></svg></span><span>Paiement <b style="font-weight:600;color:#001136">MTN MoMo &amp; Orange Money</b>, reçu automatique</span></li>
           </ul>
           <div style="display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap;margin-bottom:24px">
             <div>
@@ -275,7 +286,7 @@
             <span style="display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:100px;background:#E0F5E5;color:#007E11;font:600 13px Poppins,sans-serif"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-gift"></use></svg>Essai offert · aucune carte demandée</span>
           </div>
           <div style="display:flex;gap:12px;flex-wrap:wrap">
-            <a href="#creer-compte" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;font:600 16px Poppins,sans-serif;box-shadow:0 8px 20px rgba(242,101,0,.34);transition:transform .18s,box-shadow .18s" style-hover="color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 12px 26px rgba(242,101,0,.42)">Commencer maintenant<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
+            <a href="#creer-compte" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;font:600 16px Poppins,sans-serif;box-shadow:0 8px 20px rgba(242,101,0,.34);transition:transform .18s,box-shadow .18s" style-hover="color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 12px 26px rgba(242,101,0,.42)">Commencer maintenant<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
             <button type="button" onClick="{{ goTarifs }}" style="display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:10px;background:#fff;color:#1E499B;border:2px solid #1E499B;font:600 16px Poppins,sans-serif;cursor:pointer;transition:background .18s,color .18s" style-hover="background:#1E499B;color:#fff">Voir les abonnements</button>
           </div>
         </div>
@@ -309,7 +320,7 @@
         <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:12px">
           <sc-for list="{{ niveaux }}" as="n" hint-placeholder-count="7">
             <a href="#niveau" data-reveal style="position:relative;background:#FAFBFE;border:1px solid transparent;border-radius:12px;padding:18px 12px 14px;text-align:center;transition:border-color .18s,transform .18s,box-shadow .18s" style-hover="border-color:#1E499B;transform:translateY(-4px);box-shadow:0 12px 26px rgba(0,17,54,.09);text-decoration:none">
-              <sc-if value="{{ n.exam }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;font:600 10px Poppins,sans-serif;letter-spacing:.5px;padding:3px 9px;border-radius:100px;white-space:nowrap">{{ n.exam }}</span></sc-if>
+              <sc-if value="{{ n.exam }}" hint-placeholder-val="{{ true }}"><span style="position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;font:600 10px Poppins,sans-serif;letter-spacing:.5px;padding:3px 9px;border-radius:100px;white-space:nowrap">{{ n.exam }}</span></sc-if>
               <div style="font:600 19px Poppins,sans-serif;color:#001136">{{ n.cls }}</div>
               <div style="font:600 23px Poppins,sans-serif;color:#1E499B;margin-top:6px">{{ n.nb }}</div>
               <div style="font-size:12px;color:#6E7385">corrigés</div>
@@ -354,7 +365,7 @@
         <p style="margin:0 auto 34px;max-width:660px;font:400 17px/1.75 Poppins,sans-serif;color:rgba(255,255,255,.78);text-wrap:pretty;animation:vkine .75s cubic-bezier(.22,1,.36,1) .32s both">Le programme officiel, les corrigés de tous les cahiers et un tuteur disponible à toute heure. Pour le prix de deux beignets par jour.</p>
 
         <div style="display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:44px;animation:vkine .75s cubic-bezier(.22,1,.36,1) .44s both">
-          <button type="button" onClick="{{ goTarifs }}" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:9px;padding:16px 34px;border-radius:12px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;border:0;font:600 17px Poppins,sans-serif;cursor:pointer;box-shadow:0 12px 32px rgba(242,101,0,.44);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px);box-shadow:0 18px 42px rgba(242,101,0,.55)">
+          <button type="button" onClick="{{ goTarifs }}" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:9px;padding:16px 34px;border-radius:12px;background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;border:0;font:600 17px Poppins,sans-serif;cursor:pointer;box-shadow:0 12px 32px rgba(242,101,0,.44);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px);box-shadow:0 18px 42px rgba(242,101,0,.55)">
             <span aria-hidden="true" style="position:absolute;top:0;bottom:0;width:42px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.45),rgba(255,255,255,0));animation:vsweep 3.4s ease-in-out infinite"></span>
             <span style="position:relative;display:inline-flex;align-items:center;gap:9px">Commencer pour 1 000 FCFA<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></span>
           </button>
@@ -390,7 +401,7 @@
         <div style="max-width:680px;margin:0 auto 34px;text-align:center">
           <span style="display:inline-block;font:600 12px Poppins,sans-serif;color:#1E499B;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:10px">Trois portes d'entrée</span>
           <h2 style="font:600 31px/41px Poppins,sans-serif;color:#001136;margin:0 0 11px;text-wrap:pretty">Trois raisons de s'y mettre ce soir plutôt que la veille de l'examen</h2>
-          <p style="margin:0;font-size:16px;line-height:1.7;color:#4D5163;text-wrap:pretty">Chacun a son espace et ses outils. Le compte parent s’ouvre pour 100 FCFA et relie toute la famille.</p>
+          <p style="margin:0;font-size:16px;line-height:1.7;color:#4D5163;text-wrap:pretty">Chacun a son espace et ses outils. Le compte parent est gratuit et relie toute la famille.</p>
         </div>
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;align-items:stretch">
           <sc-for list="{{ publics }}" as="u" hint-placeholder-count="3">
@@ -472,7 +483,7 @@
               </span>
             </sc-for>
           </div>
-          <button type="button" onClick="{{ goElearning }}" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;border:0;font:600 16px Poppins,sans-serif;cursor:pointer;box-shadow:0 8px 22px rgba(242,101,0,.4);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 14px 30px rgba(242,101,0,.5)">Lancer un quiz<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></button>
+          <button type="button" onClick="{{ goElearning }}" style="display:inline-flex;align-items:center;gap:9px;padding:14px 28px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;border:0;font:600 16px Poppins,sans-serif;cursor:pointer;box-shadow:0 8px 22px rgba(242,101,0,.4);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 14px 30px rgba(242,101,0,.5)">Lancer un quiz<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></button>
         </div>
 
         <div style="position:relative;display:flex;flex-direction:column;gap:14px">
@@ -482,7 +493,7 @@
                 <span style="width:46px;height:46px;border-radius:50%;background:#fff;border:3px solid #fff;color:#001136;display:flex;align-items:center;justify-content:center;animation:vflame 2.6s ease-in-out infinite"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-flame"></use></svg></span>
                 <span style="display:flex;flex-direction:column;line-height:1.3"><b style="font:600 17px Poppins,sans-serif;color:#001136">Série de 12 jours</b><small style="font-size:13px;color:#6E7385">Ne casse pas la chaîne</small></span>
               </span>
-              <span style="font:600 13px Poppins,sans-serif;color:#C24E00;background:#FFF3E4;border-radius:100px;padding:6px 13px">+240 XP</span>
+              <span style="font:600 13px Poppins,sans-serif;color:#A84200;background:#FFF3E4;border-radius:100px;padding:6px 13px">+240 XP</span>
             </div>
             <div style="display:flex;align-items:center;justify-content:space-between;font:500 13px Poppins,sans-serif;color:#4D5163;margin-bottom:8px"><span>Niveau 7 · Grammaire</span><span style="color:#6E7385">780 / 1 000 XP</span></div>
             <div style="height:12px;border-radius:100px;background:#EFF2F7;overflow:hidden">
@@ -492,7 +503,7 @@
 
           <div style="background:#fff;border-radius:16px;padding:22px 24px;box-shadow:0 18px 40px rgba(0,17,54,.12);animation:vfloat 7.5s ease-in-out infinite">
             <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-              <span style="width:42px;height:42px;border-radius:12px;background:#FDF0E2;color:#C24E00;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-swords"></use></svg></span>
+              <span style="width:42px;height:42px;border-radius:12px;background:#FDF0E2;color:#A84200;display:flex;align-items:center;justify-content:center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-swords"></use></svg></span>
               <span style="display:flex;flex-direction:column;line-height:1.3"><b style="font:600 16px Poppins,sans-serif;color:#001136">Battle de la semaine</b><small style="font-size:12.5px;color:#6E7385">10 QCM · abonnement &amp; manuel à gagner</small></span>
             </div>
             <div style="display:flex;flex-direction:column;gap:9px">
@@ -516,7 +527,7 @@
 
       <div style="position:relative;max-width:1170px;margin:0 auto;padding:0 24px">
         <div style="text-align:center;max-width:660px;margin:0 auto 38px">
-          <span style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid #EADFC8;color:#C24E00;border-radius:100px;padding:8px 20px 8px 10px;font:600 12px Poppins,sans-serif;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,17,54,.06)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg>Passage du jour</span>
+          <span style="display:inline-flex;align-items:center;gap:9px;background:#fff;border:1px solid #EADFC8;color:#A84200;border-radius:100px;padding:8px 20px 8px 10px;font:600 12px Poppins,sans-serif;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:16px;box-shadow:0 6px 16px rgba(0,17,54,.06)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-bookopen"></use></svg>Passage du jour</span>
           <h2 style="font:600 34px/44px Poppins,sans-serif;color:#001136;margin:0 0 10px;text-wrap:pretty">Chaque matin, une œuvre au programme s'ouvre</h2>
           <p style="margin:0;font:400 16.5px/1.7 Poppins,sans-serif;color:#6B5A42;text-wrap:pretty">Un extrait, son décryptage par le Professeur Ambassa, et de quoi le garder : copier, partager, traduire.</p>
         </div>
@@ -556,7 +567,7 @@
 
           <div style="padding:28px 30px 24px;display:flex;flex-direction:column;background:#fff">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px">
-              <span style="display:inline-flex;align-items:center;gap:9px;font:600 11px Poppins,sans-serif;color:#C24E00;letter-spacing:1.2px;text-transform:uppercase"><span style="width:7px;height:7px;border-radius:50%;background:#C24E00;animation:vpulse 2.6s ease-out infinite"></span>Extrait du {{ dateDuJour }}</span>
+              <span style="display:inline-flex;align-items:center;gap:9px;font:600 11px Poppins,sans-serif;color:#A84200;letter-spacing:1.2px;text-transform:uppercase"><span style="width:7px;height:7px;border-radius:50%;background:#A84200;animation:vpulse 2.6s ease-out infinite"></span>Extrait du {{ dateDuJour }}</span>
               <div data-vrt-zone="langue" style="display:flex;gap:6px;background:#F4F6FB;border-radius:100px;padding:4px">
                 <button type="button" onClick="{{ mettreFr }}" style="padding:7px 16px;border-radius:100px;border:0;cursor:pointer;background:{{ fondFr }};color:{{ texteFr }};font:600 13px Poppins,sans-serif;transition:background .18s,color .18s">Français</button>
                 <button type="button" onClick="{{ mettreEn }}" style="padding:7px 16px;border-radius:100px;border:0;cursor:pointer;background:{{ fondEn }};color:{{ texteEn }};font:600 13px Poppins,sans-serif;transition:background .18s,color .18s">English</button>
@@ -576,7 +587,7 @@
             <div data-vrt-zone="decryptage" style="position:relative;margin-top:16px;background:linear-gradient(120deg,#F6F3FC,#FCFBFE);border:1px solid #E7E1F5;border-radius:14px;padding:14px 16px 14px 14px;display:flex;gap:12px;box-shadow:0 6px 16px rgba(0,17,54,.06)">
               <span style="width:44px;height:44px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 6px 16px rgba(91,79,168,.22)"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-brain"></use></svg></span>
               <span style="flex:1;min-width:0">
-                <b style="display:flex;align-items:center;gap:8px;font:600 13px Poppins,sans-serif;color:#5B4FA8;margin-bottom:5px">Le décryptage du Professeur Ambassa<span style="font:500 10.5px Poppins,sans-serif;color:#8A7BC8;background:#EEE9F8;border-radius:100px;padding:3px 8px;letter-spacing:.4px;text-transform:uppercase">analyse IA</span></b>
+                <b style="display:flex;align-items:center;gap:8px;font:600 13px Poppins,sans-serif;color:#5B4FA8;margin-bottom:5px">Le décryptage du Professeur Ambassa<span style="font:600 11.5px Poppins,sans-serif;color:#5B4FA8;background:#EEE9F8;border-radius:100px;padding:3px 8px;letter-spacing:.4px;text-transform:uppercase">analyse IA</span></b>
                 <span style="display:block;font:400 14px/1.75 Poppins,sans-serif;color:#4D5163;text-wrap:pretty">{{ decryptage }}</span>
               </span>
             </div>
@@ -635,9 +646,14 @@
             <h2 style="font:600 31px/41px Poppins,sans-serif;color:#001136;margin:0 0 10px;text-wrap:pretty">Les taux de réussite de nos candidats</h2>
             <p style="margin:0;font-size:16px;line-height:1.7;color:#4D5163;text-wrap:pretty">Résultats officiels des élèves accompagnés par le centre, examen par examen. Chiffres publiés après proclamation, jamais avant.</p>
           </div>
-          <span style="display:inline-flex;align-items:center;gap:9px;background:#FFF3E4;border:1px solid #F5DCB8;color:#C24E00;border-radius:10px;padding:11px 16px;font:500 13px Poppins,sans-serif"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-shield"></use></svg>Taux à renseigner par le centre</span>
+          <!-- Une étiquette de rédaction interne s'affichait ici, à côté des
+               chiffres qu'elle réclamait. Retirée le 27/08/2026. -->
         </div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+        <!-- `auto-fit` et non `repeat(4,1fr)` : le nombre de tuiles suit le
+             nombre de taux RÉELS (build_vitrine.js écarte les examens sans
+             résultat mesuré). Une grille figée à quatre colonnes réservait un
+             emplacement pour un chiffre qui n'existe pas encore. -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:20px">
           <sc-for list="{{ reussites }}" as="rs" hint-placeholder-count="4">
             <div data-reveal style="background:#FAFBFE;border:1px solid transparent;border-radius:16px;padding:28px 24px;text-align:center;transition:transform .18s,box-shadow .18s,border-color .18s" style-hover="transform:translateY(-5px);box-shadow:0 18px 40px rgba(0,17,54,.12);border-color:{{ rs.teinte }}">
               <span style="position:relative;width:132px;height:132px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:{{ rs.anneau }};margin-bottom:18px;animation:vpop .7s cubic-bezier(.22,1,.36,1) both">
@@ -784,7 +800,7 @@
 
         <div data-reveal style="display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center">
           <div>
-            <span style="font:600 12px Poppins,sans-serif;color:#C24E00;letter-spacing:1.1px;text-transform:uppercase">Paiement</span>
+            <span style="font:600 12px Poppins,sans-serif;color:#A84200;letter-spacing:1.1px;text-transform:uppercase">Paiement</span>
             <h3 style="font:600 27px/37px Poppins,sans-serif;color:#001136;margin:9px 0 13px">Payer d'ici, ou depuis l'étranger</h3>
             <p style="margin:0 0 16px;font-size:15.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">MTN MoMo, Orange Money, carte bancaire et PayPal. Chaque paiement déclenche un reçu numéroté imprimable avec QR de vérification. La cagnotte de scolarité permet à un parent installé à l'étranger de régler une tranche directement.</p>
             <div style="display:flex;flex-wrap:wrap;gap:10px;max-width:460px">
@@ -810,7 +826,7 @@
             <h3 style="font:600 20px/29px Poppins,sans-serif;color:#001136;margin:0 0 5px">Prenez une ressource, gratuitement, maintenant</h3>
             <p style="margin:0;font-size:15px;line-height:1.65;color:#6B5A42;text-wrap:pretty">Un cours entier, une épreuve corrigée ou une analyse d'œuvre — offerts, sans carte bancaire, sans compte à créer. Jugez sur pièce : si ça ne vaut pas 1 000 F par mois, vous ne payez rien.</p>
           </div>
-          <a href="#offert" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;background:#C24E00;color:#fff;font:600 15px Poppins,sans-serif;box-shadow:0 8px 20px rgba(194,78,0,.26);transition:transform .18s,box-shadow .18s" style-hover="color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 12px 26px rgba(194,78,0,.34)">Prendre ma ressource offerte<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
+          <a href="#offert" style="display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:10px;background:#A84200;color:#fff;font:600 15px Poppins,sans-serif;box-shadow:0 8px 20px rgba(194,78,0,.26);transition:transform .18s,box-shadow .18s" style-hover="color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 12px 26px rgba(194,78,0,.34)">Prendre ma ressource offerte<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
         </div>
       </div>
     </section>
@@ -896,7 +912,7 @@
           <div style="display:flex;flex-direction:column;gap:12px">
             <div style="background:#fff;border-radius:12px;padding:17px 19px;display:flex;gap:13px;align-items:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#1E499B" stroke-width="2" stroke-linecap="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-clock"></use></svg><span style="font-size:14.5px;line-height:1.5"><b style="font-weight:600;color:#001136">Lundi → samedi, 8 h – 19 h</b><br><span style="color:#6E7385;font-size:13.5px">Heure de Douala (GMT+1)</span></span></div>
             <div style="background:#fff;border-radius:12px;padding:17px 19px;display:flex;gap:13px;align-items:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#007E11" stroke-width="2" stroke-linecap="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-shield"></use></svg><span style="font-size:14.5px;line-height:1.5"><b style="font-weight:600;color:#001136">Certificats vérifiables</b><br><span style="color:#6E7385;font-size:13.5px">Chaque attestation porte un code de contrôle</span></span></div>
-            <div style="background:#fff;border-radius:12px;padding:17px 19px;display:flex;gap:13px;align-items:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#C24E00" stroke-width="2" stroke-linecap="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-mappin"></use></svg><span style="font-size:14.5px;line-height:1.5"><b style="font-weight:600;color:#001136">Centre VÉRITAS, Douala</b><br><span style="color:#6E7385;font-size:13.5px">Cours en présentiel et en ligne</span></span></div>
+            <div style="background:#fff;border-radius:12px;padding:17px 19px;display:flex;gap:13px;align-items:center"><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="#A84200" stroke-width="2" stroke-linecap="round" style="flex:0 0 auto" aria-hidden="true"><use href="#lc-mappin"></use></svg><span style="font-size:14.5px;line-height:1.5"><b style="font-weight:600;color:#001136">Centre VÉRITAS, Douala</b><br><span style="color:#6E7385;font-size:13.5px">Cours en présentiel et en ligne</span></span></div>
           </div>
         </div>
       </div>
@@ -940,7 +956,7 @@
             <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;justify-content:flex-end;color:#fff"><span style="font:600 44px/1 Poppins,sans-serif;white-space:nowrap;flex:0 0 auto">1 000</span><span style="font:400 16px Poppins,sans-serif;white-space:nowrap">FCFA / mois</span></div>
             <div style="font-size:13px;color:rgba(255,255,255,.7)">plan Starter · élève</div>
           </div>
-          <button type="button" onClick="{{ goTarifs }}" style="position:relative;overflow:hidden;padding:15px 32px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;border:0;font:600 17px Poppins,sans-serif;cursor:pointer;box-shadow:0 8px 22px rgba(242,101,0,.4);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 12px 28px rgba(242,101,0,.5)">
+          <button type="button" onClick="{{ goTarifs }}" style="position:relative;overflow:hidden;padding:15px 32px;border-radius:10px;background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;border:0;font:600 17px Poppins,sans-serif;cursor:pointer;box-shadow:0 8px 22px rgba(242,101,0,.4);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 12px 28px rgba(242,101,0,.5)">
             <span aria-hidden="true" style="position:absolute;top:0;bottom:0;width:40px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.42),rgba(255,255,255,0));animation:vsweep 3.8s ease-in-out infinite"></span>
             <span style="position:relative">Voir les abonnements</span></button>
         </div>
@@ -954,7 +970,7 @@
     <section style="background:radial-gradient(900px 380px at 50% 0%,#EAF1FF,#F4F5F8 70%)">
       <div style="max-width:1170px;margin:0 auto;padding:48px 24px;text-align:center">
         <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #DBE8FE;color:#5B4FA8;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-wallet"></use></svg>Abonnements</span>
-        <h1 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 auto 13px;max-width:780px;text-wrap:pretty">Le prix d'un taxi-ville, pour toute l'année scolaire</h1>
+        <h2 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 auto 13px;max-width:780px;text-wrap:pretty">Le prix d'un taxi-ville, pour toute l'année scolaire</h2>
         <p style="margin:0 auto;font:400 17px/1.65 Poppins,sans-serif;color:#4D5163;max-width:640px;text-wrap:pretty">Tous les plans ouvrent le programme de la classe. Ce qui change : le nombre de questions au tuteur et les contenus d'examen débloqués. Aucun engagement de durée, jamais.</p>
       </div>
     </section>
@@ -1051,8 +1067,8 @@
     <section style="background:radial-gradient(900px 400px at 20% 0%,#FFF3E4,#F4F5F8 70%)">
       <div style="max-width:1170px;margin:0 auto;padding:48px 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center">
         <div>
-          <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #F5DCB8;color:#C24E00;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-shop"></use></svg>Boutique du centre</span>
-          <h1 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;text-wrap:pretty">Le cahier qu'il ouvrira vraiment</h1>
+          <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #F5DCB8;color:#A84200;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-shop"></use></svg>Boutique du centre</span>
+          <h2 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;text-wrap:pretty">Le cahier qu'il ouvrira vraiment</h2>
           <p style="margin:0 0 22px;font:400 16.5px/1.7 Poppins,sans-serif;color:#4D5163;text-wrap:pretty">Des cahiers écrits pour le programme camerounais, pas adaptés d'ailleurs. Chaque exemplaire imprimé ouvre ses corrigés en ligne par un QR code — à vie, sans compte.</p>
           <div style="display:flex;gap:26px;flex-wrap:wrap">
             <span style="font-size:14px;color:#4D5163"><b data-vrt-nb="titres" style="display:block;font:600 24px Poppins,sans-serif;color:#001136">{{ nbTitresCat }}</b>titres au catalogue</span>
@@ -1071,7 +1087,7 @@
         <div style="display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:22px">
           <div style="display:flex;gap:9px;flex-wrap:wrap">
             <sc-for list="{{ filtres }}" as="f" hint-placeholder-count="8">
-              <button type="button" onClick="{{ f.aller }}" style="display:inline-flex;align-items:center;gap:8px;border:1.5px solid {{ f.bord }};background:{{ f.fond }};color:{{ f.texte }};border-radius:100px;padding:9px 17px;font:{{ f.graisse }} 14px Poppins,sans-serif;cursor:pointer;transition:border-color .18s,color .18s,background .18s,transform .18s" style-hover="border-color:#C24E00;color:#C24E00;transform:translateY(-2px)">
+              <button type="button" onClick="{{ f.aller }}" style="display:inline-flex;align-items:center;gap:8px;border:1.5px solid {{ f.bord }};background:{{ f.fond }};color:{{ f.texte }};border-radius:100px;padding:9px 17px;font:{{ f.graisse }} 14px Poppins,sans-serif;cursor:pointer;transition:border-color .18s,color .18s,background .18s,transform .18s" style-hover="border-color:#A84200;color:#A84200;transform:translateY(-2px)">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ f.ico }}"></use></svg>{{ f.nom }}</button>
             </sc-for>
           </div>
@@ -1174,7 +1190,7 @@
                 <s style="font:400 17px Poppins,sans-serif;color:rgba(255,255,255,.5);white-space:nowrap">6 500 F</s>
                 <span style="background:#FFC93C;color:#0C2A6A;font:600 12.5px Poppins,sans-serif;padding:5px 11px;border-radius:100px;white-space:nowrap">−23 %</span>
               </span>
-              <button type="button" onClick="{{ commanderVedette }}" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:9px;padding:15px 30px;border-radius:12px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;border:0;font:600 16px Poppins,sans-serif;cursor:pointer;box-shadow:0 12px 30px rgba(242,101,0,.42);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px);box-shadow:0 18px 40px rgba(242,101,0,.54)">
+              <button type="button" onClick="{{ commanderVedette }}" style="position:relative;overflow:hidden;display:inline-flex;align-items:center;gap:9px;padding:15px 30px;border-radius:12px;background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;border:0;font:600 16px Poppins,sans-serif;cursor:pointer;box-shadow:0 12px 30px rgba(242,101,0,.42);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px);box-shadow:0 18px 40px rgba(242,101,0,.54)">
                 <span aria-hidden="true" style="position:absolute;top:0;bottom:0;width:40px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.42),rgba(255,255,255,0));animation:vsweep 3.6s ease-in-out infinite"></span>
                 <span style="position:relative;display:inline-flex;align-items:center;gap:9px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-basket"></use></svg>Commander maintenant</span>
               </button>
@@ -1218,7 +1234,7 @@
     <section style="background:radial-gradient(900px 400px at 25% 0%,#E2F4F5,#F4F5F8 70%)">
       <div style="max-width:1170px;margin:0 auto;padding:48px 24px">
         <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #CBE7E9;color:#0E7C86;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-users"></use></svg>Espace Parents</span>
-        <h1 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;max-width:780px;text-wrap:pretty">Ne découvrez plus ses notes au bulletin du trimestre</h1>
+        <h2 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;max-width:780px;text-wrap:pretty">Ne découvrez plus ses notes au bulletin du trimestre</h2>
         <p style="margin:0;font:400 17px/1.65 Poppins,sans-serif;color:#4D5163;max-width:660px;text-wrap:pretty">Notes, absences, tranches réglées et restantes : tout sur votre téléphone, le jour même. Que vous soyez à Bonabéri ou à Paris.</p>
       </div>
     </section>
@@ -1248,7 +1264,7 @@
             </ul>
           </div>
           <div style="background:#FAFBFE;border:1px solid transparent;border-radius:14px;padding:24px">
-            <span style="width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid #C24E00;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:13px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"></use></svg></span>
+            <span style="width:48px;height:48px;border-radius:50%;background:#fff;border:3px solid #A84200;color:#001136;display:flex;align-items:center;justify-content:center;margin-bottom:13px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-globe"></use></svg></span>
             <h3 style="font:600 18px/27px Poppins,sans-serif;color:#001136;margin:0 0 8px">Cagnotte de scolarité</h3>
             <p style="margin:0 0 14px;font-size:14.5px;line-height:1.7;color:#4D5163;text-wrap:pretty">Un parent, un oncle ou un parrain installé à l'étranger règle une tranche par carte ou PayPal. Le reçu numéroté part automatiquement aux deux parties.</p>
             <a href="#cagnotte" style="display:inline-flex;align-items:center;gap:6px;font:500 14.5px Poppins,sans-serif">Comment ça marche<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-chevron-right"></use></svg></a>
@@ -1278,7 +1294,7 @@
             <h2 style="font:600 26px/36px Poppins,sans-serif;color:#fff;margin:0 0 9px">Le compte parent, <span style="color:#FFC93C;font-weight:700">tout au même endroit.</span></h2>
             <p style="margin:0;font-size:15.5px;color:rgba(255,255,255,.9);text-wrap:pretty">Rattachez vos enfants et suivez leurs <b style="color:#fff;font-weight:600">notes</b>, leurs <b style="color:#fff;font-weight:600">absences</b> et leurs <b style="color:#fff;font-weight:600">paiements</b> — depuis un seul compte, sur votre téléphone.</p>
           </div>
-          <a href="app.html#inscription-parent" style="display:inline-flex;align-items:center;gap:8px;padding:14px 28px;border-radius:10px;background:#fff;color:#0C2A6A;font:700 16px Poppins,sans-serif;transition:transform .18s,box-shadow .18s" style-hover="color:#0C2A6A;text-decoration:none;transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.24)">Créer mon compte parent<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
+          <a href="app.html#inscription-parent" style="display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:10px;background:#fff;color:#0C2A6A;font:700 16px Poppins,sans-serif;transition:transform .18s,box-shadow .18s" style-hover="color:#0C2A6A;text-decoration:none;transform:translateY(-2px);box-shadow:0 12px 26px rgba(0,0,0,.24)">Créer mon compte parent<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
         </div>
       </div>
     </section>
@@ -1291,7 +1307,7 @@
     <section style="background:radial-gradient(900px 400px at 30% 0%,#EAF1FF,#F4F5F8 70%)">
       <div style="max-width:1170px;margin:0 auto;padding:48px 24px">
         <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #DBE8FE;color:#1E499B;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-book"></use></svg>Catalogue E-Learning</span>
-        <h1 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;max-width:800px;text-wrap:pretty">Tout le programme, séquence par séquence, sans rien chercher ailleurs</h1>
+        <h2 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;max-width:800px;text-wrap:pretty">Tout le programme, séquence par séquence, sans rien chercher ailleurs</h2>
         <p style="margin:0 0 26px;font:400 17px/1.65 Poppins,sans-serif;color:#4D5163;max-width:660px;text-wrap:pretty">Choisissez la classe, puis la matière. Chaque séquence contient la leçon, les exercices, le corrigé et une épreuve d'entraînement.</p>
         <div style="display:flex;gap:10px;flex-wrap:wrap;max-width:820px">
           <label style="flex:1;min-width:280px;display:flex;align-items:center;gap:10px;background:#FAFBFE;border:1px solid transparent;border-radius:10px;padding:13px 16px">
@@ -1368,7 +1384,7 @@
       <div style="max-width:1170px;margin:0 auto;padding:48px 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center">
         <div>
           <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #F1D3E1;color:#B03A6E;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-presentation"></use></svg>Réseau enseignants</span>
-          <h1 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;text-wrap:pretty">Votre travail de correction mérite mieux qu'un tiroir</h1>
+          <h2 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;text-wrap:pretty">Votre travail de correction mérite mieux qu'un tiroir</h2>
           <p style="margin:0 0 22px;font:400 16.5px/1.7 Poppins,sans-serif;color:#4D5163;text-wrap:pretty">Vos corrigés servent une classe, puis dorment. Chez VÉRITAS, ils servent des milliers d'élèves, portent votre nom, et sont rémunérés à chaque ressource validée.</p>
           <div style="display:flex;gap:12px;flex-wrap:wrap">
             <a href="#candidature" style="display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:10px;background:linear-gradient(135deg,#C9508B,#8E2B57);color:#fff;font:600 16px Poppins,sans-serif;box-shadow:0 8px 20px rgba(142,43,87,.28);transition:transform .18s,box-shadow .18s" style-hover="color:#fff;text-decoration:none;transform:translateY(-2px);box-shadow:0 12px 26px rgba(142,43,87,.36)">Déposer ma candidature<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-arrow-right"></use></svg></a>
@@ -1447,7 +1463,7 @@
           <ul style="list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px">
             <li style="display:flex;align-items:flex-start;gap:11px;font-size:14.5px;line-height:1.65;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#1E499B;display:inline-flex;align-items:center;justify-content:center;margin-top:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span><span><strong>1&nbsp;040 textes vérifiés</strong> — 583 auteurs, trois cycles, cinq usages.</span></li>
             <li style="display:flex;align-items:flex-start;gap:11px;font-size:14.5px;line-height:1.65;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#B03A6E;display:inline-flex;align-items:center;justify-content:center;margin-top:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span><span><strong>23 structures officielles</strong> — BEPC, CAP, Probatoire, BAC, séries techniques.</span></li>
-            <li style="display:flex;align-items:flex-start;gap:11px;font-size:14.5px;line-height:1.65;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#C24E00;display:inline-flex;align-items:center;justify-content:center;margin-top:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span><span><strong>Barème et longueurs contrôlés</strong> — les écarts s'affichent avant l'impression.</span></li>
+            <li style="display:flex;align-items:flex-start;gap:11px;font-size:14.5px;line-height:1.65;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#A84200;display:inline-flex;align-items:center;justify-content:center;margin-top:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span><span><strong>Barème et longueurs contrôlés</strong> — les écarts s'affichent avant l'impression.</span></li>
             <li style="display:flex;align-items:flex-start;gap:11px;font-size:14.5px;line-height:1.65;color:#4D5163"><span aria-hidden="true" style="flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:#0E7C66;display:inline-flex;align-items:center;justify-content:center;margin-top:2px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12.5 9.5 18 20 6.5"></polyline></svg></span><span><strong>Export Word</strong> — un .docx modifiable, prêt pour votre en-tête et votre logo.</span></li>
           </ul>
         </div>
@@ -1467,7 +1483,7 @@
         <p style="font-size:14px;line-height:1.7;margin:0 0 16px;max-width:300px">Centre d'Excellence Scolaire — Douala, Cameroun. Cours, corrigés et accompagnement conformes au programme MINESEC.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border-radius:100px;padding:6px 12px;font:500 12px Poppins,sans-serif;color:#FFC93C"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-smartphone"></use></svg>MTN MoMo</span>
-          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border-radius:100px;padding:6px 12px;font:500 12px Poppins,sans-serif;color:#C24E00"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-coins"></use></svg>Orange Money</span>
+          <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border-radius:100px;padding:6px 12px;font:500 12px Poppins,sans-serif;color:#A84200"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-coins"></use></svg>Orange Money</span>
           <span style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border-radius:100px;padding:6px 12px;font:500 12px Poppins,sans-serif;color:#7BD99C"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-shield"></use></svg>Reçu automatique</span>
         </div>
       </div>
@@ -1486,7 +1502,7 @@
       <div style="max-width:1170px;margin:0 auto;padding:26px 24px;display:grid;grid-template-columns:1.4fr 1fr;gap:28px;align-items:start">
         <div>
           <div style="font:600 12px Poppins,sans-serif;color:#fff;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Mentions légales</div>
-          <p style="margin:0 0 10px;font:400 13px/1.85 Poppins,sans-serif;color:rgba(255,255,255,.72);text-wrap:pretty"><b style="color:#fff">VERITAS EDUCATION SARL</b> — SARL pluripersonnelle au capital de 999 000 FCFA. Siège social : Douala, Ndogpassi 3<sup>e</sup>, carrefour Mbouda, Cameroun.</p>
+          <p style="margin:0 0 10px;font:400 13px/1.85 Poppins,sans-serif;color:rgba(255,255,255,.72);text-wrap:pretty"><b style="color:#fff">VERITAS EDUCATION SARL</b> — SARL pluripersonnelle au capital de 999 000 FCFA. Siège social : Douala, Ndogpassi 14<sup>e</sup>, lieu-dit Carrefour Mbouda, Cameroun.</p>
           <div style="display:flex;flex-wrap:wrap;gap:8px">
             <sc-for list="{{ legal }}" as="lg" hint-placeholder-count="4">
               <span style="display:inline-flex;align-items:baseline;gap:6px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 11px;font:400 12px Poppins,sans-serif;color:rgba(255,255,255,.72)"><b style="font:600 12px Poppins,sans-serif;color:#FFC93C">{{ lg.cle }}</b>{{ lg.val }}</span>
@@ -1510,6 +1526,11 @@
         <span style="display:flex;gap:18px">
           <a href="#mentions" style="color:rgba(255,255,255,.72)" style-hover="color:#fff">Mentions légales</a>
           <a href="#cgv" style="color:rgba(255,255,255,.72)" style-hover="color:#fff">CGV</a>
+          <!-- Le site n'avait AUCUNE politique de confidentialité (les deux URL
+               attendues rendaient 404) alors qu'il collecte nom, WhatsApp et
+               classe, dès la 6ᵉ. La page existe depuis le 27/08/2026 ; ce lien
+               est le seul chemin public qui y mène. -->
+          <a href="#confidentialite" style="color:rgba(255,255,255,.72)" style-hover="color:#fff">Confidentialité</a>
           <a href="#contact" style="color:rgba(255,255,255,.72)" style-hover="color:#fff">Contact</a>
         </span>
       </div>
@@ -1529,7 +1550,7 @@
         <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
           <span style="width:52px;height:52px;border-radius:50%;background:#fff;border:3px solid #fff;color:#001136;display:flex;align-items:center;justify-content:center;flex:0 0 auto"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"></use></svg></span>
           <span style="display:flex;flex-direction:column;line-height:1.35">
-            <h1 style="font:600 32px/42px Poppins,sans-serif;color:#001136;margin:0">Finaliser la commande</h1>
+            <h2 style="font:600 32px/42px Poppins,sans-serif;color:#001136;margin:0">Finaliser la commande</h2>
             <small style="font:400 14.5px Poppins,sans-serif;color:#6E7385">Paiement sécurisé · reçu numéroté envoyé sur WhatsApp</small>
           </span>
         </div>
@@ -1645,9 +1666,9 @@
               </sc-for>
               <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding-top:14px">
                 <b style="font:600 16px Poppins,sans-serif;color:#001136">Total à payer</b>
-                <b style="font:600 26px Poppins,sans-serif;color:#C24E00;white-space:nowrap">{{ totalPayer }}</b>
+                <b style="font:600 26px Poppins,sans-serif;color:#A84200;white-space:nowrap">{{ totalPayer }}</b>
               </div>
-              <button type="button" onClick="{{ payer }}" style="position:relative;overflow:hidden;width:100%;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:12px;background:linear-gradient(135deg,#FF7A18,#C24E00);color:#fff;border:0;font:600 16px Poppins,sans-serif;cursor:pointer;box-shadow:0 10px 26px rgba(242,101,0,.36);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 16px 34px rgba(242,101,0,.48)">
+              <button type="button" onClick="{{ payer }}" style="position:relative;overflow:hidden;width:100%;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:15px;border-radius:12px;background:linear-gradient(135deg,#FF7A18,#A84200);color:#fff;border:0;font:600 16px Poppins,sans-serif;cursor:pointer;box-shadow:0 10px 26px rgba(242,101,0,.36);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-2px);box-shadow:0 16px 34px rgba(242,101,0,.48)">
                 <span aria-hidden="true" style="position:absolute;top:0;bottom:0;width:40px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.4),rgba(255,255,255,0));animation:vsweep 3.6s ease-in-out infinite"></span>
                 <span style="position:relative;display:inline-flex;align-items:center;gap:9px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="#lc-lock"></use></svg>{{ libellePayer }}</span>
               </button>
@@ -1735,7 +1756,7 @@
     </sc-if>
 
     <div style="pointer-events:auto;display:flex;flex-direction:column;gap:10px;align-items:flex-end">
-      <button type="button" onClick="{{ basculerTheme }}" aria-label="Thème clair ou sombre" title="Thème clair / sombre" style="width:50px;height:50px;border-radius:16px;border:1px solid transparent;background:#FAFBFE;color:#4D5163;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s,color .18s" style-hover="transform:translateY(-3px) rotate(-8deg);box-shadow:0 12px 26px rgba(0,17,54,.09);color:#C24E00">
+      <button type="button" onClick="{{ basculerTheme }}" aria-label="Thème clair ou sombre" title="Thème clair / sombre" style="width:50px;height:50px;border-radius:16px;border:1px solid transparent;background:#FAFBFE;color:#4D5163;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s,color .18s" style-hover="transform:translateY(-3px) rotate(-8deg);box-shadow:0 12px 26px rgba(0,17,54,.09);color:#A84200">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><use href="{{ icoTheme }}"></use></svg></button>
 
       <button type="button" onClick="{{ basculerTraducteur }}" aria-label="Traducteur" title="Français / English" style="width:50px;height:50px;border-radius:16px;border:1px solid transparent;background:#FAFBFE;color:#0E7C86;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,17,54,.06);transition:transform .18s,box-shadow .18s" style-hover="transform:translateY(-3px);box-shadow:0 14px 30px rgba(14,124,134,.28)">
@@ -1783,35 +1804,35 @@ class Component extends DCLogic {
      l'accent de la CARTE, choisi pour le rythme de la page. Les deux ne se
      confondent pas : l'une décrit le produit, l'autre la mise en page. */
   CATALOGUE_MANUELS = [
-    { niv: 'Roman', teinte: '#C24E00', fondA: '#F3E7D8', fondB: '#FBF6EF', categorie: 'Littérature', etiquette: 'Nouveau', etiquetteFond: '#007E11', exos: '144 pages · 8 chapitres', lien: 'app.html#livre?id=tubedigestif', mention: 'lecture en ligne, sans téléchargement', titre: 'Le Tube digestif', type: 'Roman de Mythe Errant · 10 pages offertes', prix: '1 000 F',
+    { niv: 'Roman', teinte: '#A84200', fondA: '#F3E7D8', fondB: '#FBF6EF', categorie: 'Littérature', etiquette: 'Nouveau', etiquetteFond: '#007E11', exos: '144 pages · 8 chapitres', lien: 'app.html#livre?id=tubedigestif', mention: 'lecture en ligne, sans téléchargement', titre: 'Le Tube digestif', type: 'Roman de Mythe Errant · 10 pages offertes', prix: '1 000 F',
       format: 'ebook', formatNom: 'E-book', formatCls: 'vbq-fmt-ebook',
       couvRoman: true, couvTeinte: '#142554', couvRTitre: 'Le Tube digestif', couvRAut: 'Mythe Errant', couvRMention: 'roman' },
 
-    { niv: '6ᵉ', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 6ᵉ', type: 'Cahier · 463 exercices corrigés', prix: '3 000 F',
+    { niv: '6ᵉ', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#A84200', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 6ᵉ', type: 'Cahier · 463 exercices corrigés', prix: '3 000 F',
       format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
       couv: 'assets/cahier-6e.webp' },
 
-    { niv: '5ᵉ', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 5ᵉ', type: 'Cahier · 443 exercices corrigés', prix: '3 000 F',
+    { niv: '5ᵉ', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#A84200', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 5ᵉ', type: 'Cahier · 443 exercices corrigés', prix: '3 000 F',
       format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
       couvCahier: true, couvTeinte: '#1B5FAE', couvHaut: 'Mon cahier de', couvTitre: 'Français', couvNiv: '5ᵉ', couvRuban: '100 % conforme au programme' },
 
-    { niv: '4ᵉ', teinte: '#5B4FA8', fondA: '#ECE7F7', fondB: '#F6F3FC', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 4ᵉ', type: 'Cahier · 364 exercices corrigés', prix: '3 000 F',
+    { niv: '4ᵉ', teinte: '#5B4FA8', fondA: '#ECE7F7', fondB: '#F6F3FC', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#A84200', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 4ᵉ', type: 'Cahier · 364 exercices corrigés', prix: '3 000 F',
       format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
       couvCahier: true, couvTeinte: '#7A2E86', couvHaut: 'Mon cahier de', couvTitre: 'Français', couvNiv: '4ᵉ', couvRuban: '100 % conforme au programme' },
 
-    { niv: '3ᵉ', teinte: '#C24E00', fondA: '#FBEBDB', fondB: '#FDF6EF', categorie: 'Spécial examen', etiquette: 'Best-seller', etiquetteFond: '#5B4FA8', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Spécial BEPC — Français', type: 'Cahier + annales · 476 exercices', prix: '4 000 F',
+    { niv: '3ᵉ', teinte: '#A84200', fondA: '#FBEBDB', fondB: '#FDF6EF', categorie: 'Spécial examen', etiquette: 'Best-seller', etiquetteFond: '#5B4FA8', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Spécial BEPC — Français', type: 'Cahier + annales · 476 exercices', prix: '4 000 F',
       format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
       couvCahier: true, couvTeinte: '#C85A18', couvHaut: 'Spécial', couvTitre: 'BEPC', couvNiv: '3ᵉ', couvRuban: 'Cahier + annales corrigées' },
 
-    { niv: '2ⁿᵈᵉ', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 2ⁿᵈᵉ', type: 'Cahier · 709 exercices corrigés', prix: '3 500 F',
+    { niv: '2ⁿᵈᵉ', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#A84200', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 2ⁿᵈᵉ', type: 'Cahier · 709 exercices corrigés', prix: '3 500 F',
       format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
       couvCahier: true, couvTeinte: '#0E7C86', couvHaut: 'Mon cahier de', couvTitre: 'Français', couvNiv: '2ⁿᵈᵉ', couvRuban: '100 % conforme au programme' },
 
-    { niv: '1ʳᵉ', teinte: '#B03A6E', fondA: '#F7E4EC', fondB: '#FCF3F7', categorie: 'Spécial examen', etiquette: '', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Spécial Probatoire — Français', type: 'Cahier + annales · 664 exercices', prix: '4 500 F',
+    { niv: '1ʳᵉ', teinte: '#B03A6E', fondA: '#F7E4EC', fondB: '#FCF3F7', categorie: 'Spécial examen', etiquette: '', etiquetteFond: '#A84200', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Spécial Probatoire — Français', type: 'Cahier + annales · 664 exercices', prix: '4 500 F',
       format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
       couvCahier: true, couvTeinte: '#B03A6E', couvHaut: 'Spécial', couvTitre: 'Probatoire', couvNiv: '1ʳᵉ', couvRuban: 'Cahier + annales corrigées' },
 
-    { niv: 'Tˡᵉ', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Spécial examen', etiquette: 'Le plus vendu', etiquetteFond: '#C24E00', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Spécial BAC — Français', type: 'Cahier + annales · 738 exercices', prix: '5 000 F',
+    { niv: 'Tˡᵉ', teinte: '#0E7C86', fondA: '#E1EFEE', fondB: '#F1F8F6', categorie: 'Spécial examen', etiquette: 'Le plus vendu', etiquetteFond: '#A84200', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Spécial BAC — Français', type: 'Cahier + annales · 738 exercices', prix: '5 000 F',
       format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
       couvCahier: true, couvTeinte: '#B02A26', couvHaut: 'Spécial', couvTitre: 'BAC', couvNiv: 'Tˡᵉ', couvRuban: 'Cahier + annales corrigées' },
 
@@ -2055,7 +2076,7 @@ class Component extends DCLogic {
       2: [
         { ico: '#lc-clipboard', titre: '\u00c9preuves & annales', desc: 'BEPC, Probatoire, BAC et GCE avec corrig\u00e9s mod\u00e8les et bar\u00e8me d\u00e9taill\u00e9.', prix: 'Gratuit', fond: '#DBE8FE', teinte: '#1E499B' },
         { ico: '#lc-checkcircle', titre: 'Corrig\u00e9s des cahiers', desc: '3 854 exercices corrig\u00e9s, ceux des cahiers imprim\u00e9s du centre, consultables sans compte.', prix: 'Gratuit', fond: '#E0F5E5', teinte: '#007E11' },
-        { ico: '#lc-clipboard', titre: 'Bulletins blancs', desc: 'Devoirs surveill\u00e9s comme en classe, not\u00e9s, avec position dans la promotion.', prix: 'Plan Pro', fond: '#FFF3E4', teinte: '#C24E00' },
+        { ico: '#lc-clipboard', titre: 'Bulletins blancs', desc: 'Devoirs surveill\u00e9s comme en classe, not\u00e9s, avec position dans la promotion.', prix: 'Plan Pro', fond: '#FFF3E4', teinte: '#A84200' },
         { ico: '#lc-trophy', illu: '#du-trophy', titre: 'Concours blancs', desc: 'Sessions d\u2019entra\u00eenement chronom\u00e9tr\u00e9es en conditions d\u2019examen, corrig\u00e9es sous 48 h.', prix: 'Plan \u00c9lite', fond: '#EEE9F8', teinte: '#5B4FA8' }
       ],
       3: [
@@ -2066,13 +2087,13 @@ class Component extends DCLogic {
       ],
       4: [
         { ico: '#lc-users', titre: 'Espace Parents', desc: 'Notes, absences, tranches r\u00e9gl\u00e9es et restantes, visibles depuis le t\u00e9l\u00e9phone.', prix: 'Gratuit', fond: '#E3F1EE', teinte: '#0E7C86' },
-        { ico: '#lc-card', titre: 'Cagnotte de scolarit\u00e9', desc: 'Un proche \u00e0 l\u2019\u00e9tranger r\u00e8gle une tranche par carte ou PayPal ; re\u00e7u envoy\u00e9 aux deux parties.', prix: 'Sans frais c\u00f4t\u00e9 famille', fond: '#FFF3E4', teinte: '#C24E00' },
+        { ico: '#lc-card', titre: 'Cagnotte de scolarit\u00e9', desc: 'Un proche \u00e0 l\u2019\u00e9tranger r\u00e8gle une tranche par carte ou PayPal ; re\u00e7u envoy\u00e9 aux deux parties.', prix: 'Sans frais c\u00f4t\u00e9 famille', fond: '#FFF3E4', teinte: '#A84200' },
         { ico: '#lc-basket', titre: 'Boutique de manuels', desc: 'Cahiers d\u2019exercices et guides du centre, livr\u00e9s \u00e0 Douala et Yaound\u00e9.', prix: 'D\u00e8s 2 500 F', fond: '#DBE8FE', teinte: '#1E499B' },
         { ico: '#lc-shield', titre: 'Certificats v\u00e9rifiables', desc: 'Chaque attestation porte un code de contr\u00f4le consultable en ligne par l\u2019employeur ou l\u2019\u00e9cole.', prix: 'Inclus', fond: '#E0F5E5', teinte: '#007E11' }
       ],
       5: [
         { ico: '#lc-users', titre: 'R\u00e9p\u00e9titions au centre', desc: 'Petits groupes de six \u00e9l\u00e8ves maximum, au centre \u00e0 Douala, apr\u00e8s les cours et le samedi matin.', prix: 'D\u00e8s 15 000 F / mois', fond: '#DBE8FE', teinte: '#1E499B' },
-        { ico: '#lc-home', titre: 'R\u00e9p\u00e9titions \u00e0 domicile', desc: 'Un enseignant du r\u00e9seau se d\u00e9place chez vous, deux \u00e0 quatre s\u00e9ances par semaine.', prix: 'D\u00e8s 25 000 F / mois', fond: '#FFF3E4', teinte: '#C24E00' },
+        { ico: '#lc-home', titre: 'R\u00e9p\u00e9titions \u00e0 domicile', desc: 'Un enseignant du r\u00e9seau se d\u00e9place chez vous, deux \u00e0 quatre s\u00e9ances par semaine.', prix: 'D\u00e8s 25 000 F / mois', fond: '#FFF3E4', teinte: '#A84200' },
         { ico: '#lc-presentation', titre: 'Cours de rattrapage', desc: 'Remise \u00e0 niveau cibl\u00e9e sur une mati\u00e8re, pendant les vacances ou avant un examen.', prix: 'Stage d\u00e8s 20 000 F', fond: '#E3F1EE', teinte: '#0E7C86' },
         { ico: '#lc-trophy', illu: '#du-trophy', titre: 'Pr\u00e9paration examens', desc: 'Programme intensif BEPC, Probatoire, BAC et GCE : m\u00e9thode, annales, concours blancs.', prix: 'Sur devis', fond: '#EEE9F8', teinte: '#5B4FA8' }
       ]
@@ -2137,7 +2158,7 @@ class Component extends DCLogic {
           { nom: 'WhatsApp', ico: '#brand-whatsapp', fond: '#E7F7EC', teinte: '#007E11', url: 'https://wa.me/?text=' + txt },
           { nom: 'Facebook', ico: '#brand-facebook', fond: '#E7EFFC', teinte: '#1E499B', url: 'https://www.facebook.com/sharer/sharer.php?u=' + url },
           { nom: 'X', ico: '#brand-x', fond: '#ECEEF3', teinte: '#001136', url: 'https://twitter.com/intent/tweet?text=' + txt },
-          { nom: 'E-mail', ico: '#lc-mail', fond: '#FDF0E2', teinte: '#C24E00', url: 'mailto:?subject=Passage%20du%20jour%20V%C3%89RITAS&body=' + txt }
+          { nom: 'E-mail', ico: '#lc-mail', fond: '#FDF0E2', teinte: '#A84200', url: 'mailto:?subject=Passage%20du%20jour%20V%C3%89RITAS&body=' + txt }
         ];
       })(),
 
@@ -2161,7 +2182,7 @@ class Component extends DCLogic {
       nouvelleCitation: () => this.setState(s => ({ cit: (s.cit + 1) % this.CITATIONS.length, citOn: true })),
       session: String(new Date().getFullYear()),
       reassurance: [
-        { txt: 'Essai offert, sans carte bancaire', ico: '#lc-gift', teinte: '#C24E00' },
+        { txt: 'Essai offert, sans carte bancaire', ico: '#lc-gift', teinte: '#A84200' },
         { txt: 'R\u00e9siliable en un message', ico: '#lc-checkcircle', teinte: '#007E11' },
         { txt: 'MTN MoMo & Orange Money', ico: '#lc-smartphone', teinte: '#1E499B' },
         { txt: 'Programme MINESEC officiel', ico: '#lc-shield', teinte: '#5B4FA8' },
@@ -2186,8 +2207,8 @@ class Component extends DCLogic {
           nom: x.nom, ico: x.ico,
           aller: () => this.setState({ filtre: i }),
           fond: i === actif ? '#FFF3E4' : '#fff',
-          bord: i === actif ? '#C24E00' : '#E4E7EF',
-          texte: i === actif ? '#C24E00' : '#4D5163',
+          bord: i === actif ? '#A84200' : '#E4E7EF',
+          texte: i === actif ? '#A84200' : '#4D5163',
           graisse: i === actif ? '600' : '400'
         }));
       })(),
@@ -2199,7 +2220,7 @@ class Component extends DCLogic {
       livraison: [
         { titre: 'Livraison 48 h', desc: 'Douala et Yaound\u00e9, remise en main propre par notre coursier.', ico: '#lc-truck', fond: '#DBE8FE', teinte: '#1E499B' },
         { titre: 'Retrait au centre', desc: 'Gratuit, du lundi au samedi de 8 h \u00e0 19 h, sans rendez-vous.', ico: '#lc-building', fond: '#E3F1EE', teinte: '#0E7C86' },
-        { titre: 'Paiement Mobile Money', desc: 'MTN MoMo et Orange Money, ou carte pour les proches \u00e0 l\u2019\u00e9tranger.', ico: '#lc-smartphone', fond: '#FFF3E4', teinte: '#C24E00' },
+        { titre: 'Paiement Mobile Money', desc: 'MTN MoMo et Orange Money, ou carte pour les proches \u00e0 l\u2019\u00e9tranger.', ico: '#lc-smartphone', fond: '#FFF3E4', teinte: '#A84200' },
         { titre: 'Corrig\u00e9s offerts', desc: 'Le QR en pr\u00e9face ouvre la version en ligne, \u00e0 vie et sans compte.', ico: '#lc-qr', fond: '#EEE9F8', teinte: '#5B4FA8' }
       ],
 
@@ -2244,7 +2265,7 @@ class Component extends DCLogic {
       ],
       moyensPaiement: (() => {
         const m = [
-          { nom: 'MTN Mobile Money', desc: 'Le plus utilis\u00e9 \u00b7 confirmation imm\u00e9diate', ico: '#lc-smartphone', marque: '#pay-mtn', teinte: '#C24E00', pastille: '#FFF3E4' },
+          { nom: 'MTN Mobile Money', desc: 'Le plus utilis\u00e9 \u00b7 confirmation imm\u00e9diate', ico: '#lc-smartphone', marque: '#pay-mtn', teinte: '#A84200', pastille: '#FFF3E4' },
           { nom: 'Orange Money', desc: 'Confirmation par SMS en 30 secondes', ico: '#lc-coins', marque: '#pay-orange', teinte: '#FF7900', pastille: '#FDF0E2' },
           { nom: 'Carte bancaire', desc: 'Visa et Mastercard \u00b7 depuis l\u2019\u00e9tranger', ico: '#lc-card', marque: '#pay-visa', teinte: '#1A1F71', pastille: '#DBE8FE' },
           { nom: 'PayPal', desc: 'Pour la diaspora \u00b7 conversion automatique', ico: '#lc-globe', marque: '#pay-paypal', teinte: '#003087', pastille: '#EEE9F8' }
@@ -2341,7 +2362,7 @@ class Component extends DCLogic {
       reussites: [
         { examen: 'BEPC', taux: '__ %', detail: 'Candidats de 3\u1d49 accompagn\u00e9s par le centre', teinte: '#1E499B', anneau: 'conic-gradient(#1E499B 0deg 300deg,#E7EDF8 300deg 360deg)' },
         { examen: 'Probatoire', taux: '__ %', detail: 'S\u00e9ries A, C, D et technique', teinte: '#0E7C86', anneau: 'conic-gradient(#0E7C86 0deg 288deg,#E1EFEE 288deg 360deg)' },
-        { examen: 'Baccalaur\u00e9at', taux: '__ %', detail: 'G\u00e9n\u00e9ral et enseignement technique', teinte: '#C24E00', anneau: 'conic-gradient(#C24E00 0deg 306deg,#FBEBDB 306deg 360deg)' },
+        { examen: 'Baccalaur\u00e9at', taux: '__ %', detail: 'G\u00e9n\u00e9ral et enseignement technique', teinte: '#A84200', anneau: 'conic-gradient(#A84200 0deg 306deg,#FBEBDB 306deg 360deg)' },
         { examen: 'GCE O/A Level', taux: '__ %', detail: 'Sous-syst\u00e8me anglophone', teinte: '#5B4FA8', anneau: 'conic-gradient(#5B4FA8 0deg 279deg,#ECE7F7 279deg 360deg)' }
       ],
       videos: [
@@ -2367,19 +2388,19 @@ class Component extends DCLogic {
         { txt: 'Battles entre classes', ico: '#lc-swords' }
       ],
       classement: [
-        { rang: '1', qui: 'Terminale A4 \u00b7 Douala', pts: '2 480 pts', fond: '#FFF8E6', teinte: '#C24E00' },
+        { rang: '1', qui: 'Terminale A4 \u00b7 Douala', pts: '2 480 pts', fond: '#FFF8E6', teinte: '#A84200' },
         { rang: '2', qui: '1\u02b3\u1d49 C \u00b7 Yaound\u00e9', pts: '2 315 pts', fond: '#F4F6FB', teinte: '#1E499B' },
         { rang: '3', qui: '3\u1d49 Bilingue \u00b7 Bafoussam', pts: '2 190 pts', fond: '#F2F8F4', teinte: '#007E11' }
       ],
       palmares: [
-        { rubrique: 'Manuel \u00e0 la une', titre: 'Math\u00e9matiques 3\u1d49', detail: 'Cahier d\u2019exercices \u00b7 sp\u00e9cial BEPC', illu: '#du-book', ico: '#lc-book', illu: '#du-book', fond: '#EAF1FF', teinte: '#C24E00', aller: () => this._go('boutique') },
-        { rubrique: 'Battle de la semaine', titre: '10 QCM \u00b7 Gagne ton prix !', detail: 'G\u00e9n\u00e9ral, technique & anglophone \u2014 abonnement & manuel \u00e0 gagner', ico: '#lc-swords', illu: '#du-swords', fond: '#FFF6E2', teinte: '#C24E00', aller: () => this._go('elearning') },
+        { rubrique: 'Manuel \u00e0 la une', titre: 'Math\u00e9matiques 3\u1d49', detail: 'Cahier d\u2019exercices \u00b7 sp\u00e9cial BEPC', illu: '#du-book', ico: '#lc-book', illu: '#du-book', fond: '#EAF1FF', teinte: '#A84200', aller: () => this._go('boutique') },
+        { rubrique: 'Battle de la semaine', titre: '10 QCM \u00b7 Gagne ton prix !', detail: 'G\u00e9n\u00e9ral, technique & anglophone \u2014 abonnement & manuel \u00e0 gagner', ico: '#lc-swords', illu: '#du-swords', fond: '#FFF6E2', teinte: '#A84200', aller: () => this._go('elearning') },
         { rubrique: 'Abonnement le plus choisi', titre: 'Pro \u00b7 3 000 FCFA', detail: 'D\u00e8s 3 000 FCFA \u2014 d\u00e9bloquez tout le contenu', ico: '#lc-rocket', illu: '#du-rocket', fond: '#EEE9F8', teinte: '#5B4FA8', aller: () => this._go('tarifs') }
       ],
       partenariats: [
         { num: '01', nom: 'Inspecteur', desc: 'Comit\u00e9s de validation, formations r\u00e9mun\u00e9r\u00e9es et co-r\u00e9daction des manuels du centre.', gain: 'Formations r\u00e9mun\u00e9r\u00e9es', ico: '#lc-clipboard', illu: '#du-clipboard', teinte: '#1E499B', fond: '#EAF1FF', cta: 'Devenir partenaire' },
         { num: '02', nom: 'Influenceur', desc: 'Code promo personnel, commission sur chaque vente et acc\u00e8s anticip\u00e9 aux nouveaut\u00e9s.', gain: 'Commission sur ventes', ico: '#lc-megaphone', illu: '#du-megaphone', teinte: '#B03A6E', fond: '#FBE9F1', cta: 'Devenir partenaire' },
-        { num: '03', nom: 'Librairie', desc: 'Marges attractives sur le catalogue, supports publicitaires et accompagnement marketing.', gain: 'Marges revendeur', ico: '#lc-basket', illu: '#du-basket', teinte: '#C24E00', fond: '#FFF3E4', cta: 'Devenir partenaire' },
+        { num: '03', nom: 'Librairie', desc: 'Marges attractives sur le catalogue, supports publicitaires et accompagnement marketing.', gain: 'Marges revendeur', ico: '#lc-basket', illu: '#du-basket', teinte: '#A84200', fond: '#FFF3E4', cta: 'Devenir partenaire' },
         { num: '04', nom: 'Partenaire', desc: 'Universit\u00e9, sponsor, chef d\u2019\u00e9tablissement : neuf formules de collaboration au choix.', gain: '9 formules', ico: '#lc-handshake', illu: '#du-handshake', teinte: '#0E7C86', fond: '#E3F1EE', cta: 'Voir le partenariat' }
       ],
       navLarge: !this.state.compact,
@@ -2394,7 +2415,7 @@ class Component extends DCLogic {
         { nom: 'Enseignants', desc: 'Publier et encadrer', ico: '#lc-presentation', fond: '#FBE9F1', teinte: '#B03A6E', aller: () => this._go('enseignants') },
         { nom: 'Catalogue E-Learning', desc: 'Mati\u00e8res et \u0153uvres', ico: '#lc-book', fond: '#DBE8FE', teinte: '#1E499B', aller: () => this._go('elearning') },
         { nom: 'Abonnements', desc: 'D\u00e8s 1 000 FCFA / mois', ico: '#lc-wallet', fond: '#EEE9F8', teinte: '#5B4FA8', aller: () => this._go('tarifs') },
-        { nom: 'Boutique de manuels', desc: 'Cahiers et \u00e9tudes d\u2019\u0153uvres', ico: '#lc-basket', fond: '#FFF3E4', teinte: '#C24E00', aller: () => this._go('boutique') },
+        { nom: 'Boutique de manuels', desc: 'Cahiers et \u00e9tudes d\u2019\u0153uvres', ico: '#lc-basket', fond: '#FFF3E4', teinte: '#A84200', aller: () => this._go('boutique') },
         { nom: 'Accueil', desc: 'Revenir \u00e0 la page d\u2019accueil', ico: '#lc-home', fond: '#F4F5F8', teinte: '#4D5163', aller: () => this._go('accueil') }
       ],
       plusOuvert: this.state.plus,
@@ -2403,7 +2424,7 @@ class Component extends DCLogic {
         { nom: 'Catalogue E-Learning', desc: 'Mati\u00e8res, \u0153uvres, s\u00e9quences', ico: '#lc-book', fond: '#DBE8FE', teinte: '#1E499B', aller: () => this._go('elearning') },
         { nom: 'Corrig\u00e9s des cahiers', desc: '3 854 exercices, acc\u00e8s libre', ico: '#lc-checkcircle', fond: '#E0F5E5', teinte: '#007E11', aller: () => this._go('elearning') },
         { nom: 'Abonnements', desc: 'D\u00e8s 1 000 FCFA / mois', ico: '#lc-wallet', fond: '#EEE9F8', teinte: '#5B4FA8', aller: () => this._go('tarifs') },
-        { nom: 'Boutique de manuels', desc: 'Cahiers et \u00e9tudes d\u2019\u0153uvres', ico: '#lc-shop', fond: '#FFF3E4', teinte: '#C24E00', aller: () => this._go('boutique') }
+        { nom: 'Boutique de manuels', desc: 'Cahiers et \u00e9tudes d\u2019\u0153uvres', ico: '#lc-shop', fond: '#FFF3E4', teinte: '#A84200', aller: () => this._go('boutique') }
       ],
       publics: [
         {
@@ -2450,10 +2471,13 @@ class Component extends DCLogic {
       raisons: [
         { ico: '#lc-university', titre: 'Le programme officiel, pas un cours import\u00e9', desc: 'Chaque le\u00e7on suit le r\u00e9f\u00e9rentiel MINESEC de la classe : m\u00eames s\u00e9quences, m\u00eames \u0153uvres, m\u00eames formats d\u2019\u00e9preuve qu\u2019au lyc\u00e9e.', fond: '#DBE8FE', teinte: '#1E499B' },
         { ico: '#lc-users', titre: '\u00c9crit par des enseignants du secondaire', desc: 'Les corrig\u00e9s sont r\u00e9dig\u00e9s puis relus par le comit\u00e9 p\u00e9dagogique du centre. Chaque ressource porte le nom de son auteur.', fond: '#E0F5E5', teinte: '#007E11' },
-        { ico: '#lc-smartphone', titre: 'Pens\u00e9 pour un t\u00e9l\u00e9phone et un forfait modeste', desc: 'Pages l\u00e9g\u00e8res, lecture hors connexion des fiches, paiement Mobile Money : ce que les familles utilisent d\u00e9j\u00e0.', fond: '#FFF3E4', teinte: '#C24E00' }
+        { ico: '#lc-smartphone', titre: 'Pens\u00e9 pour un t\u00e9l\u00e9phone et un forfait modeste', desc: 'Pages l\u00e9g\u00e8res, lecture hors connexion des fiches, paiement Mobile Money : ce que les familles utilisent d\u00e9j\u00e0.', fond: '#FFF3E4', teinte: '#A84200' }
       ],
       etapes: [
-        { n: '1', titre: 'Cr\u00e9ez le compte', desc: 'Nom, classe, num\u00e9ro de t\u00e9l\u00e9phone. Trente secondes, aucune carte demand\u00e9e.' },
+        /* \u00ab Nom, classe, num\u00e9ro de t\u00e9l\u00e9phone. Trente secondes \u00bb \u00e9tait faux :
+           le formulaire en demande onze, mot de passe compris. Une promesse
+           d\u00e9mentie par l\u2019\u00e9cran suivant co\u00fbte plus qu\u2019une minute annonc\u00e9e. */
+        { n: '1', titre: 'Cr\u00e9ez le compte', desc: 'Nom, classe, num\u00e9ro WhatsApp et un mot de passe. Une minute, aucune carte demand\u00e9e.' },
         { n: '2', titre: 'Prenez la ressource offerte', desc: 'Un cours entier, une \u00e9preuve corrig\u00e9e ou une \u00e9tude d\u2019\u0153uvre \u2014 l\u2019\u00e9l\u00e8ve choisit.' },
         { n: '3', titre: 'Abonnez-vous seulement si c\u2019est convaincant', desc: 'MTN MoMo ou Orange Money. 1 000 F par mois, r\u00e9siliable en un message, sans frais.' }
       ],
@@ -2465,7 +2489,7 @@ class Component extends DCLogic {
       plans: [
         { pour: 'D\u00e9couverte', nom: 'Gratuit', prix: '0', unite: 'sans engagement', ia: '3 questions au tuteur / semaine', ancrage: 'Pour juger sur pi\u00e8ce, sans rien avancer', ancrageFond: '#F4F5F8', teinte2: '#AEB4C2', delai: '0s', ruban: '', teinte: '#6E7385', bordure: '1px solid #E4E7EF', ombre: 'none', ctaFond: '#fff', ctaTexte: '#1E499B', ctaBord: '#1E499B', cta: 'Cr\u00e9er un compte', av: ['3 854 corrig\u00e9s consultables', '56 pages en acc\u00e8s libre', 'Jeux p\u00e9dagogiques', '1 ressource offerte'] , sans: ['Annales corrig\u00e9es', 'Classes virtuelles'] },
         { pour: '\u00c9l\u00e8ve', nom: 'Starter', prix: '1 000', unite: 'par mois', ia: '5 questions au tuteur / jour', ancrage: '33 F par jour \u2014 25\u00d7 moins qu\u2019un r\u00e9p\u00e9titeur', ancrageFond: '#E3F1EE', teinte2: '#7BD1CE', delai: '.5s', ruban: '', teinte: '#0E7C86', bordure: '1px solid #E4E7EF', ombre: 'none', ctaFond: '#0E7C86', ctaTexte: '#fff', ctaBord: '#0E7C86', cta: 'Choisir Starter', av: ['Tous les cours de la classe', '\u0152uvres au programme', '\u00c9preuves et annales corrig\u00e9es', 'Suivi des r\u00e9sultats'] , sans: ['Classes virtuelles'] },
-        { pour: 'Ann\u00e9e d\u2019examen', nom: 'Pro', prix: '3 000', unite: 'par mois', ia: '30 questions au tuteur / jour', ancrage: '100 F par jour, l\u2019ann\u00e9e o\u00f9 tout se joue', ancrageFond: '#DBE8FE', teinte2: '#FFC93C', delai: '1s', ruban: 'Le plus choisi', teinte: '#1E499B', bordure: '2px solid #1E499B', ombre: '0 22px 50px rgba(30,73,155,.22)', ctaFond: 'linear-gradient(135deg,#FF7A18,#C24E00)', ctaTexte: '#fff', ctaBord: 'transparent', cta: 'Choisir Pro', av: ['Tout Starter', 'Labos virtuels PCT & SVT', 'Bulletins blancs not\u00e9s', 'Fiches de r\u00e9vision imprimables'] , sans: [] },
+        { pour: 'Ann\u00e9e d\u2019examen', nom: 'Pro', prix: '3 000', unite: 'par mois', ia: '30 questions au tuteur / jour', ancrage: '100 F par jour, l\u2019ann\u00e9e o\u00f9 tout se joue', ancrageFond: '#DBE8FE', teinte2: '#FFC93C', delai: '1s', ruban: 'Le plus choisi', teinte: '#1E499B', bordure: '2px solid #1E499B', ombre: '0 22px 50px rgba(30,73,155,.22)', ctaFond: 'linear-gradient(135deg,#FF7A18,#A84200)', ctaTexte: '#fff', ctaBord: 'transparent', cta: 'Choisir Pro', av: ['Tout Starter', 'Labos virtuels PCT & SVT', 'Bulletins blancs not\u00e9s', 'Fiches de r\u00e9vision imprimables'] , sans: [] },
         { pour: 'Accompagnement', nom: '\u00c9lite', prix: '7 500', unite: 'par mois', ia: 'Tuteur IA sans limite', ancrage: 'Le prix d\u2019une seule heure de cours priv\u00e9', ancrageFond: '#EEE9F8', teinte2: '#B03A6E', delai: '1.5s', ruban: '', teinte: '#5B4FA8', bordure: '1px solid #E4E7EF', ombre: 'none', ctaFond: '#5B4FA8', ctaTexte: '#fff', ctaBord: '#5B4FA8', cta: 'Choisir \u00c9lite', av: ['Tout Pro', 'Classes virtuelles en direct', 'Concours blancs corrig\u00e9s', 'Entretien d\u2019orientation'] , sans: [] }
       ],
       comparatif: [
@@ -2503,7 +2527,7 @@ class Component extends DCLogic {
         { nom: 'Math\u00e9matiques', desc: 'Cours, exercices gradu\u00e9s et corrig\u00e9s d\u00e9taill\u00e9s.', compte: '6\u1d49 \u2192 T\u02e1\u1d49', ico: '#lc-calculator', fond: '#E0F5E5', teinte: '#007E11' },
         { nom: 'PCT', desc: 'Physique, chimie, technologie \u2014 avec labos virtuels.', compte: '6\u1d49 \u2192 T\u02e1\u1d49', ico: '#lc-atom', fond: '#E3F1EE', teinte: '#0E7C86' },
         { nom: 'SVT', desc: 'Sciences de la vie et de la Terre, sch\u00e9mas annot\u00e9s.', compte: '6\u1d49 \u2192 T\u02e1\u1d49', ico: '#lc-leaf', fond: '#EEE9F8', teinte: '#5B4FA8' },
-        { nom: 'Histoire-G\u00e9o', desc: 'Rep\u00e8res, cartes et \u00e9tudes de documents.', compte: '6\u1d49 \u2192 T\u02e1\u1d49', ico: '#lc-map', fond: '#FFF3E4', teinte: '#C24E00' },
+        { nom: 'Histoire-G\u00e9o', desc: 'Rep\u00e8res, cartes et \u00e9tudes de documents.', compte: '6\u1d49 \u2192 T\u02e1\u1d49', ico: '#lc-map', fond: '#FFF3E4', teinte: '#A84200' },
         { nom: 'Anglais', desc: 'Grammar, comprehension, essay writing.', compte: '6\u1d49 \u2192 T\u02e1\u1d49', ico: '#lc-languages', fond: '#DBE8FE', teinte: '#1E499B' },
         { nom: 'Philosophie', desc: 'Notions, m\u00e9thode de la dissertation et du commentaire.', compte: '1\u02b3\u1d49 \u2192 T\u02e1\u1d49', ico: '#lc-scale', fond: '#EEE9F8', teinte: '#5B4FA8' },
         { nom: 'ECM & Informatique', desc: '\u00c9ducation \u00e0 la citoyennet\u00e9 et bases informatiques.', compte: '6\u1d49 \u2192 T\u02e1\u1d49', ico: '#lc-monitor', fond: '#E0F5E5', teinte: '#007E11' }
@@ -2523,7 +2547,7 @@ class Component extends DCLogic {
         { ico: '#lc-doc', titre: 'R\u00e9diger des corrig\u00e9s', desc: 'Vous prenez un cahier de votre mati\u00e8re et r\u00e9digez les corrig\u00e9s ; le comit\u00e9 relit puis publie sous votre nom.', fond: '#FBE9F1', teinte: '#B03A6E' },
         { ico: '#lc-presentation', titre: 'Animer des classes virtuelles', desc: 'S\u00e9ances en direct de 60 minutes, petits groupes, planning que vous choisissez.', fond: '#DBE8FE', teinte: '#1E499B' },
         { ico: '#lc-clipboard', titre: 'Composer des \u00e9preuves', desc: '\u00c9preuves blanches BEPC, Probatoire, BAC et GCE, avec bar\u00e8me et corrig\u00e9 mod\u00e8le.', fond: '#E0F5E5', teinte: '#007E11' },
-        { ico: '#lc-trophy', illu: '#du-trophy', titre: 'Encadrer les candidats', desc: 'Suivi personnalis\u00e9 des \u00e9l\u00e8ves en ann\u00e9e d\u2019examen, du diagnostic \u00e0 la session.', fond: '#FFF3E4', teinte: '#C24E00' }
+        { ico: '#lc-trophy', illu: '#du-trophy', titre: 'Encadrer les candidats', desc: 'Suivi personnalis\u00e9 des \u00e9l\u00e8ves en ann\u00e9e d\u2019examen, du diagnostic \u00e0 la session.', fond: '#FFF3E4', teinte: '#A84200' }
       ],
       ensEtapes: [
         { n: '1', titre: 'Candidature', desc: 'Dipl\u00f4mes, mati\u00e8re, niveaux enseign\u00e9s et un \u00e9chantillon de corrig\u00e9.' },

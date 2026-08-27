@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Page introuvable — Centre VÉRITAS</title>
+<meta name="robots" content="noindex,nofollow">
+<style>
+  :root{ --navy:#142554; --navy-deep:#0D1B3E; --gold:#FFC93C; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+    padding:24px calc(24px + env(safe-area-inset-right)) 24px calc(24px + env(safe-area-inset-left));
+    background:linear-gradient(135deg,var(--navy-deep),var(--navy));
+    color:#fff; font-family:'Segoe UI',system-ui,-apple-system,sans-serif; text-align:center;
+  }
+  .box{max-width:480px}
+  .code{font-size:64px;font-weight:800;color:var(--gold);line-height:1;letter-spacing:-2px}
+  h1{font-size:20px;margin:14px 0 10px;font-weight:700}
+  p{font-size:14.5px;line-height:1.6;color:rgba(255,255,255,.82)}
+  .liens{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:22px}
+  .liens a{
+    display:inline-block;padding:11px 18px;border-radius:11px;min-height:44px;line-height:1.7;
+    background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.22);
+    color:#fff;text-decoration:none;font-weight:600;font-size:13.5px;
+  }
+  a.btn{
+    display:inline-block;margin-top:22px;padding:13px 26px;border-radius:12px;
+    background:var(--gold);color:var(--navy);text-decoration:none;font-weight:800;font-size:14px;
+    min-height:44px;line-height:1.4;
+  }
+  .rule{width:46px;height:3px;background:var(--gold);border-radius:99px;margin:22px auto 0}
+</style>
+</head>
+<body>
+  <!-- ── Pourquoi cette page existe (27/08/2026) ──────────────────────────
+       « ErrorDocument 404 /index.html » renvoyait la page d'accueil ENTIÈRE,
+       471 Ko, sous un statut 404. Deux dégâts : le visiteur croyait être
+       arrivé sur l'accueil et ne comprenait pas qu'il s'était trompé
+       d'adresse ; et chaque lien mort venant de l'extérieur coûtait un demi-
+       mégaoctet de bande passante sur un hébergement mutualisé.
+       Même remède que pour le 403, déjà traité : une page légère qui DIT ce
+       qui s'est passé et rouvre les quatre portes les plus demandées. -->
+  <div class="box">
+    <div class="code">404</div>
+    <h1>Cette page n'existe pas</h1>
+    <p>L'adresse demandée est introuvable — un lien périmé, une faute de frappe,
+       ou une page déplacée. Voici les entrées les plus utilisées :</p>
+    <div class="liens">
+      <a href="/corriges/">Corrigés des cahiers</a>
+      <a href="/oeuvres/">Œuvres au programme</a>
+      <a href="/niveaux/">Programmes par classe</a>
+      <a href="/outils/">Outils gratuits</a>
+    </div>
+    <a class="btn" href="/">Retour à l'accueil</a>
+    <div class="rule"></div>
+  </div>
+</body>
+</html>

@@ -1,4 +1,4 @@
-# VÉRITAS Academy — robots.txt
+# Centre VÉRITAS — robots.txt
 # https://veritas-school.com/
 # © 2026 Mythe Errant — Tous droits réservés
 # Ce site et son contenu sont protégés. Reproduction interdite sans autorisation écrite.

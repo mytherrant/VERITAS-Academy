@@ -104,11 +104,25 @@
     if (window.veritasTrack) window.veritasTrack('vitrine_page', { page: page });
   }
 
+  /* Le bouton doit ANNONCER l'état qu'il vient de produire. `aria-expanded`
+     est écrit une fois par le build (donc « false ») et n'était jamais
+     retouché : un lecteur d'écran annonçait « réduit » y compris menu
+     déployé sous les doigts. On synchronise ici, au seul endroit où les
+     deux panneaux changent d'état, plutôt que dans chaque action. */
+  function annoncer(sel, panneau, ouvert) {
+    var btn = document.querySelector('[onclick*="' + sel + '"]');
+    if (!btn) return;
+    btn.setAttribute('aria-expanded', ouvert ? 'true' : 'false');
+    if (!btn.getAttribute('aria-controls')) btn.setAttribute('aria-controls', panneau);
+  }
+
   function fermerMenus() {
     var d = document.getElementById('vrtPlus');
     if (d) d.hidden = !S.plus;
     var b = document.getElementById('vrtBurger');
     if (b) b.hidden = !S.burger;
+    annoncer('basculerPlus', 'vrtPlus', S.plus);
+    annoncer('basculerBurger', 'vrtBurger', S.burger);
   }
 
   /* ── Tunnel de paiement ──────────────────────────────────────────────────
@@ -843,7 +857,7 @@
           if (++essais > 24) {
             panneauSuivi(ref, 'Vérification en cours côté opérateur',
               'Votre paiement est en cours de confirmation. Notez la référence ci-dessous : si rien n’arrive d’ici une heure, envoyez-la nous sur WhatsApp au +237 697 637 739.',
-              '#C24E00');
+              '#A84200');
             return;
           }
           suiviTimer = setTimeout(tour, 5000);
@@ -1003,6 +1017,13 @@
     poserBoutique(d.boutique || []);
     poserChiffres(d.boutiqueChiffres || null);
     poserActivite(d.activite || []);
+
+    /* Surcharges de contenu posees depuis le panneau admin. En DERNIER :
+       les fonctions ci-dessus reconstruisent leurs propres regions, et une
+       surcharge appliquee avant elles aurait ete effacee sans bruit. */
+    if (window.VRT_CMS && d.accueil && !window.VRT_CMS.edition) {
+      try { window.VRT_CMS.appliquer(d.accueil); } catch (e) {}
+    }
   }
 
 
@@ -1056,7 +1077,7 @@
          rangerait des livres au mauvais rayon sans que personne le voie. */
       categorie: b.rayon || (b.genre === 'roman' ? 'Littérature' : 'Catalogue'),
       etiquette: rupture ? 'Rupture' : (b.etiquette || ''),
-      etiquetteFond: rupture ? '#8C2F39' : '#C24E00',
+      etiquetteFond: rupture ? '#8C2F39' : '#A84200',
       titre: b.titre || '',
       type: b.desc || (b.auteur ? 'de ' + b.auteur : ''),
       prix: f(b.prix || 0),
@@ -1146,8 +1167,8 @@
         return {
           nom: x.nom, ico: x.ico,
           fond: j === i ? '#FFF3E4' : '#fff',
-          bord: j === i ? '#C24E00' : '#E4E7EF',
-          texte: j === i ? '#C24E00' : '#4D5163',
+          bord: j === i ? '#A84200' : '#E4E7EF',
+          texte: j === i ? '#A84200' : '#4D5163',
           graisse: j === i ? '600' : '400'
         };
       }));
@@ -1635,10 +1656,35 @@
               + 'DIDACTIQUE (un prof drôle, mordant et lucide qui adore son texte et le ramène au réel) : '
               + 'fais comprendre ce qui se joue, situe brièvement le moment ou la partie dans l\'œuvre '
               + 'UNIQUEMENT si tu en es sûr (sinon n\'invente AUCUN numéro de chapitre), et TERMINE par '
-              + 'une question taquine qui donne furieusement envie de lire la suite. Aucun spoiler. '
+              + 'une question taquine qui donne furieusement envie de lire la suite. '
+              /* ── Le décryptage reste LITTÉRAIRE (27/08/2026) ──────────────
+                 Sur un extrait du « Rêve du pêcheur » de Hemley Boum, l'analyse
+                 publiée en page d'accueil commentait « l'art subtil de la
+                 "vérité officielle" à la camerounaise », un commandant de
+                 gendarmerie « d'une délicatesse de bulldozer », une justice qui
+                 « a pris la tangente », et mettait « bonne gouvernance » entre
+                 guillemets ironiques.
+                 Ce n'est pas un dérapage du moteur : c'est ce que la consigne
+                 juste au-dessus DEMANDE — « mordant et lucide qui […] le ramène
+                 au réel ». Or ce texte change chaque matin, personne ne le relit
+                 avant publication, et un centre scolaire qui dépend d'agréments
+                 publiait ainsi, sans le savoir, un commentaire sur les forces de
+                 l'ordre de son propre pays.
+                 On garde le ton — c'est lui qui fait lire l'encart — et on borne
+                 le SUJET. Les deux copies du prompt (ici et app.js,
+                 _pdjLoadExpl) portent la même garde : n'en corriger qu'une
+                 laisserait la page d'accueil exposée. */
+              + 'Restreins-toi STRICTEMENT au littéraire : ce que l\'auteur fabrique, les procédés, '
+              + 'les personnages, la situation, le style, l\'enjeu du passage. N\'écris RIEN sur '
+              + 'l\'actualité, la politique, le gouvernement, l\'administration, la police, la '
+              + 'gendarmerie, la justice, la corruption ni sur une personnalité réelle — même si le '
+              + 'texte y fait allusion, et même pour plaisanter : commente l\'ÉCRITURE, jamais le pays. '
+              + 'Aucun spoiler. '
               + 'Réponds en FRANÇAIS.',
         sysPrompt: 'Tu es le Professeur Ambassa : prof de français camerounais drôle, ironique, '
-                 + 'cultivé, jamais ennuyeux. Tu réponds TOUJOURS en français.',
+                 + 'cultivé, jamais ennuyeux. Tu parles de LITTÉRATURE et de rien d\'autre : jamais '
+                 + 'de politique, d\'actualité, d\'institutions ni de personnes réelles. '
+                 + 'Tu réponds TOUJOURS en français.',
         userId: 'pdj', plan: 'anon', shared: 'pdj'
       })
     })
@@ -2196,5 +2242,297 @@
       + '[data-vrt-item] [style*="font:600 14px Poppins,sans-serif"]{'
       + 'color:#1E499B !important}';
     document.head.appendChild(st);
+  })();
+})();
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CONTENU DE LA VITRINE PILOTÉ PAR LE PANNEAU ADMIN — fentes automatiques
+   ──────────────────────────────────────────────────────────────────────────
+   Le mécanisme `data-vrt-pub` demandait qu'on POSE une fente dans la maquette,
+   au build, pour chaque champ à rendre modifiable. Deux fentes existaient ;
+   tout le reste de l'accueil — titres, chiffres, images, paragraphes — était
+   figé, et Jacques ne pouvait rien y changer sans rouvrir le code.
+
+   Ici, aucune fente à poser : la page s'inventorie elle-même. Chaque feuille
+   de texte et chaque image reçoit une CLÉ dérivée de sa position dans l'arbre
+   (pas de son contenu : changer le texte ne change pas la clé), et le panneau
+   admin n'a qu'à écrire `DB.accueil.slots[clé]` pour recouvrir la valeur.
+
+   Trois propriétés tenues :
+   1. AMÉLIORATION PROGRESSIVE. Le HTML pré-rendu reste la valeur par défaut.
+      Sans JavaScript, hors ligne, ou si l'API ne répond pas, la page reste
+      juste et indexable. Une surcharge ne fait que RECOUVRIR.
+   2. CLÉS STABLES. Le chemin ignore les régions dynamiques (`data-vrt-item`,
+      bandeau, podium) : que la boutique serve 3 ou 30 cartes, les clés des
+      éléments qui suivent ne bougent pas. Sans cela, publier un manuel aurait
+      déplacé silencieusement toutes les surcharges du bas de page.
+   3. UN SEUL PARCOURS. L'inventaire (ce que l'admin voit) et l'application
+      (ce que le visiteur voit) appellent la MÊME fonction. Ils ne peuvent pas
+      diverger — c'est la seule façon d'éviter qu'une clé listée dans le
+      panneau ne corresponde à rien sur la page.
+
+   Le mode édition (`?vrt-cms=1` dans une iframe de même origine) n'écrit
+   jamais : il inventorie, il prévisualise, et il signale les clics. Toute
+   écriture passe par le panneau admin et la synchronisation habituelle.
+   ══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* Balises de mise en forme : leur présence n'empêche pas le parent d'être
+     une fente. Un <p>Bonjour <b>Jacques</b></p> est UNE fente de texte, pas
+     deux — sinon « Bonjour » resterait inéditable. */
+  var ENLIGNE = { B: 1, I: 1, EM: 1, STRONG: 1, SPAN: 1, U: 1, SMALL: 1, BR: 1,
+                  SUP: 1, SUB: 1, MARK: 1, ABBR: 1, CODE: 1, S: 1, WBR: 1 };
+  var HORS = { SCRIPT: 1, STYLE: 1, NOSCRIPT: 1, IFRAME: 1, CANVAS: 1, TEMPLATE: 1,
+               SVG: 1, USE: 1, PATH: 1, DEFS: 1, SYMBOL: 1, CIRCLE: 1, RECT: 1,
+               LINE: 1, POLYGON: 1, POLYLINE: 1, G: 1, TITLE: 1, OPTION: 1 };
+  /* Identifiants des blocs remplis par le code : leur contenu est calculé
+     (classement, annonces, actualités), le recouvrir n'aurait pas de sens et
+     la surcharge serait effacée au premier rafraîchissement. */
+  var IDS_HORS = { vrtAnnonce: 1, vrtPodium: 1, vrtNewsListe: 1, vrtNews: 1 };
+
+  function exclu(el) {
+    if (!el || el.nodeType !== 1) return true;
+    if (HORS[el.tagName]) return true;
+    if (el.id && IDS_HORS[el.id]) return true;
+    if (!el.hasAttribute) return true;
+    return el.hasAttribute('data-vrt-item')      // région rendue par rendre()
+        || el.hasAttribute('data-vrt-val')       // valeur posée par poser()
+        || el.hasAttribute('data-vrt-pub')       // fente nommée, déjà pilotée
+        || el.hasAttribute('data-vrt-nb')        // chiffre compté par le serveur
+        || el.hasAttribute('data-vrt-cms-off');  // exclusion explicite
+  }
+
+  /* FNV-1a 32 bits — court, stable, sans dépendance. On ne cherche pas une
+     empreinte cryptographique : juste une clé compacte et reproductible. */
+  function empreinte(s) {
+    var h = 0x811c9dc5;
+    for (var i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
+    return h.toString(36);
+  }
+
+  /* Chemin d'un élément : suite de « BALISE + rang parmi les frères de même
+     balise », en IGNORANT les frères exclus. C'est ce dernier point qui rend
+     la clé insensible au nombre d'articles publiés dans la boutique. */
+  function chemin(el) {
+    var bouts = [], n = el;
+    while (n && n.nodeType === 1 && n !== document.body && n.parentNode) {
+      var freres = n.parentNode.children, rang = 0;
+      for (var k = 0; k < freres.length; k++) {
+        if (freres[k] === n) break;
+        if (freres[k].tagName === n.tagName && !exclu(freres[k])) rang++;
+      }
+      bouts.push(n.tagName + rang);
+      n = n.parentNode;
+    }
+    return bouts.reverse().join('>');
+  }
+
+  /* Une feuille de texte : elle porte du texte et ne contient que de la mise
+     en forme. Sa surcharge remplace le texte ENTIER (la mise en forme
+     intérieure est perdue) — le panneau admin le dit à qui édite. */
+  function feuilleTexte(el) {
+    var t = (el.textContent || '').replace(/\s+/g, ' ').trim();
+    if (!t || t.length > 900) return false;
+    for (var i = 0; i < el.children.length; i++) {
+      if (!ENLIGNE[el.children[i].tagName]) return false;
+    }
+    return true;
+  }
+
+  function genre(el) {
+    if (exclu(el)) return null;
+    if (el.tagName === 'IMG') return 'image';
+    if (feuilleTexte(el)) return 'texte';
+    return null;
+  }
+
+  /* LE parcours — un seul, partagé par l'inventaire et l'application. */
+  function parcourir(fn) {
+    var pile = [document.body];
+    while (pile.length) {
+      var n = pile.pop();
+      if (!n || n.nodeType !== 1) continue;
+      if (exclu(n)) continue;
+      var g = genre(n);
+      if (g) { fn(n, g); continue; }   // une fente ne se subdivise pas
+      for (var i = n.children.length - 1; i >= 0; i--) pile.push(n.children[i]);
+    }
+  }
+
+  /* Index complet : élément → clé. Les collisions d'empreinte (rarissimes,
+     mais possibles) sont levées par un suffixe d'ordre de parcours, qui est
+     déterministe. On ne laisse jamais deux fentes partager une clé : l'une
+     recouvrirait l'autre sans que personne comprenne pourquoi. */
+  function indexer() {
+    var liste = [], vus = {};
+    parcourir(function (el, g) {
+      var c = empreinte(chemin(el));
+      if (vus[c] == null) { vus[c] = 0; } else { vus[c]++; c = c + '_' + vus[c]; }
+      liste.push({ el: el, genre: g, cle: c });
+    });
+    return liste;
+  }
+
+  /* Libellé de section : le premier titre au-dessus de la fente. Sert à
+     regrouper mille fentes en une trentaine de blocs lisibles. */
+  function bloc(el) {
+    var n = el;
+    while (n && n !== document.body) {
+      if (n.tagName === 'SECTION' || n.tagName === 'HEADER' || n.tagName === 'FOOTER'
+          || (n.hasAttribute && n.hasAttribute('data-vp'))) {
+        var t = n.querySelector('h1,h2,h3');
+        var lib = t ? (t.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60) : '';
+        if (lib) return lib;
+        if (n.hasAttribute && n.hasAttribute('data-vp')) return 'Écran ' + n.getAttribute('data-vp');
+      }
+      n = n.parentNode;
+    }
+    return 'Page';
+  }
+
+  function page(el) {
+    var n = el;
+    while (n && n !== document.body) {
+      if (n.hasAttribute && n.hasAttribute('data-vp')) return n.getAttribute('data-vp');
+      n = n.parentNode;
+    }
+    return 'commun';
+  }
+
+  function valeurDe(el, g) {
+    return g === 'image' ? (el.getAttribute('src') || '')
+                         : (el.textContent || '').replace(/\s+/g, ' ').trim();
+  }
+
+  /* Table des surcharges → application. Accepte `{cle:'texte'}` comme
+     `{cle:{v:'texte'}}` : le panneau écrit la forme longue, une reprise à la
+     main reste possible en forme courte. */
+  function lireSurcharge(s) {
+    if (s == null) return null;
+    if (typeof s === 'string') return s;
+    if (typeof s === 'object' && s.v != null) return String(s.v);
+    return null;
+  }
+
+  var derniereApplication = null;   // ce qu'on a réellement posé, pour l'aperçu
+
+  function appliquer(acc) {
+    var slots = (acc && acc.slots) || null;
+    if (!slots) return 0;
+    var n = 0;
+    var idx = indexer();
+    for (var i = 0; i < idx.length; i++) {
+      var v = lireSurcharge(slots[idx[i].cle]);
+      if (v == null || v === '') continue;
+      var el = idx[i].el;
+      if (idx[i].genre === 'image') {
+        if (el.getAttribute('src') === v) continue;
+        el.setAttribute('src', v);
+        el.removeAttribute('srcset');
+      } else {
+        if (el.textContent === v) continue;
+        el.textContent = v;
+      }
+      n++;
+    }
+    derniereApplication = slots;
+    return n;
+  }
+
+  window.VRT_CMS = {
+    /* En mode edition, la page reste la MAQUETTE NUE : le panneau admin
+       envoie lui-meme le brouillon a previsualiser. Sans cela l'inventaire
+       renverrait les valeurs deja surchargees comme si elles etaient celles
+       d'origine, et il n'y aurait plus aucun moyen de revenir en arriere. */
+    edition: false,
+    appliquer: appliquer,
+    inventaire: function () {
+      var idx = indexer(), out = [];
+      for (var i = 0; i < idx.length; i++) {
+        var el = idx[i].el;
+        out.push({
+          cle: idx[i].cle,
+          genre: idx[i].genre,
+          page: page(el),
+          bloc: bloc(el),
+          balise: el.tagName.toLowerCase(),
+          /* `defaut` est ce qui est ÉCRIT DANS LA MAQUETTE. Si une surcharge
+             est déjà posée, le texte affiché n'est plus le défaut — on rend
+             donc les deux, et le panneau sait dire « la maquette a changé
+             sous votre surcharge ». */
+          valeur: valeurDe(el, idx[i].genre).slice(0, 900),
+          forme: idx[i].genre === 'texte' && el.children.length > 0
+        });
+      }
+      return out;
+    }
+  };
+
+  /* ── MODE ÉDITION — inventaire et aperçu pour le panneau admin ──────────
+     Actif seulement dans une iframe de MÊME ORIGINE, avec `?vrt-cms=1`. Il
+     ne modifie jamais la base : il répond à des questions et signale les
+     clics. L'écriture reste au panneau admin, qui est déjà authentifié. */
+  (function modeEdition() {
+    if (location.search.indexOf('vrt-cms=1') < 0) return;
+    var encadre = false;
+    try { encadre = window.parent && window.parent !== window && window.parent.location.origin === location.origin; }
+    catch (e) { encadre = false; }   // origine différente : on ne fait rien
+    if (!encadre) return;
+    window.VRT_CMS.edition = true;
+
+    var st = document.createElement('style');
+    st.textContent =
+      '[data-cms-actif]{outline:2px dashed rgba(30,73,155,.55) !important;outline-offset:2px;cursor:pointer !important}'
+      + '[data-cms-actif]:hover{outline:2px solid #1E499B !important;background:rgba(255,201,60,.22) !important}'
+      + '[data-cms-vise]{outline:3px solid #E8A33D !important;background:rgba(255,201,60,.34) !important}';
+    document.head.appendChild(st);
+
+    var index = [];
+    function marquer() {
+      for (var i = 0; i < index.length; i++) index[i].el.removeAttribute('data-cms-actif');
+      index = indexer();
+      for (var j = 0; j < index.length; j++) index[j].el.setAttribute('data-cms-actif', index[j].cle);
+    }
+
+    function versParent(msg) {
+      try { window.parent.postMessage(msg, location.origin); } catch (e) {}
+    }
+
+    document.addEventListener('click', function (ev) {
+      var n = ev.target;
+      while (n && n !== document.body && !(n.hasAttribute && n.hasAttribute('data-cms-actif'))) n = n.parentNode;
+      if (!n || n === document.body) return;
+      ev.preventDefault(); ev.stopPropagation();
+      for (var i = 0; i < index.length; i++) index[i].el.removeAttribute('data-cms-vise');
+      n.setAttribute('data-cms-vise', '1');
+      versParent({ type: 'vrt-cms-clic', cle: n.getAttribute('data-cms-actif') });
+    }, true);
+
+    window.addEventListener('message', function (ev) {
+      if (ev.origin !== location.origin || !ev.data) return;
+      var d = ev.data;
+      if (d.type === 'vrt-cms-demande') {
+        marquer();
+        versParent({ type: 'vrt-cms-inventaire', items: window.VRT_CMS.inventaire() });
+      } else if (d.type === 'vrt-cms-apercu') {
+        appliquer({ slots: d.slots || {} });
+        marquer();
+      } else if (d.type === 'vrt-cms-viser') {
+        for (var i = 0; i < index.length; i++) {
+          if (index[i].cle !== d.cle) { index[i].el.removeAttribute('data-cms-vise'); continue; }
+          index[i].el.setAttribute('data-cms-vise', '1');
+          try { index[i].el.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (e) {}
+        }
+      } else if (d.type === 'vrt-cms-page') {
+        try { window.VRT.act('go' + d.page.charAt(0).toUpperCase() + d.page.slice(1)); } catch (e) {}
+        setTimeout(marquer, 60);
+      }
+    });
+
+    /* Le panneau peut demander l'inventaire avant que la page ait fini de se
+       remplir ; on annonce donc qu'on est prêt, et on répond aussi aux
+       demandes ultérieures. */
+    setTimeout(function () { marquer(); versParent({ type: 'vrt-cms-pret' }); }, 700);
   })();
 })();

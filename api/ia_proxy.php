@@ -28,7 +28,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
 // empêche un site tiers de bruler votre quota IA depuis le navigateur d'un visiteur).
 $__ia_allowed = [
     'https://veritas-school.com', 'https://www.veritas-school.com',
-    'http://localhost:8000', 'https://localhost', 'capacitor://localhost',
+    'http://localhost:8000', 'http://localhost:8077', 'https://localhost', 'capacitor://localhost',
 ];
 $__ia_origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (in_array($__ia_origin, $__ia_allowed, true)) {
