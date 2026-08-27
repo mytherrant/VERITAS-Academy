@@ -79,8 +79,38 @@ t(absents.length === 0,
     ? 'aucun script appelé n’est introuvable'
     : `${absents.length} script(s) appelé(s) et introuvable(s) : ${absents.join(', ')}`);
 
-if (nonSuivis.length) {
-  console.log('\n  \x1b[33mRemède :\x1b[0m  git add ' + nonSuivis.join(' '));
+/* ── Et ce que ces scripts IMPORTENT, à leur tour ? ───────────────────────
+   Indexer le banc ne suffit pas : `tests/banc_empreintes.cjs` compare une
+   empreinte JavaScript à une empreinte Python et fait donc, en cours de
+   route, `import normaliser_cahiers`. Ce module vit dans tools/ et n'était pas
+   suivi non plus — la CI est repartie et s'est arrêtée dix lignes plus loin,
+   sur un ModuleNotFoundError cette fois. Un contrôle qui s'arrête au premier
+   maillon laisse le second casser le déploiement suivant. */
+const dependances = [];
+for (const f of uniques) {
+  // On ne s'inspecte pas soi-même : ce fichier CITE des noms de modules dans
+  // ses commentaires, ce qui les ferait remonter comme de fausses dépendances.
+  if (f === 'tests/ci_scripts_suivis.cjs') continue;
+  const p = path.join(RACINE, f);
+  if (!fs.existsSync(p)) continue;
+  const code = fs.readFileSync(p, 'utf8');
+  for (const m of code.matchAll(/\bimport\s+([a-z_][a-z0-9_]*)/g)) {
+    const mod = 'tools/' + m[1] + '.py';
+    if (fs.existsSync(path.join(RACINE, mod)) && !suivis.has(mod)) dependances.push(mod + '  (importé par ' + f + ')');
+  }
+  for (const m of code.matchAll(/['"`]((?:tools|tests)\/[A-Za-z0-9_.\/-]+\.(?:py|cjs|js|json))['"`]/g)) {
+    if (fs.existsSync(path.join(RACINE, m[1])) && !suivis.has(m[1])) dependances.push(m[1] + '  (lu par ' + f + ')');
+  }
+}
+const depUniq = [...new Set(dependances)];
+t(depUniq.length === 0,
+  depUniq.length === 0
+    ? 'aucune dépendance de ces bancs n’est restée hors de l’index'
+    : `${depUniq.length} dépendance(s) hors du dépôt : ${depUniq.join(' · ')}`);
+
+if (nonSuivis.length || depUniq.length) {
+  const aAjouter = nonSuivis.concat(depUniq.map((d) => d.split('  ')[0]));
+  console.log('\n  \x1b[33mRemède :\x1b[0m  git add ' + [...new Set(aAjouter)].join(' '));
   console.log('  Sans cela, la CI part d’un checkout qui ne les contient pas.');
 }
 
