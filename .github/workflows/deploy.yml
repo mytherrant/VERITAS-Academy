@@ -85,6 +85,17 @@ jobs:
         env:
           FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+      # ── 🧭 EN PREMIER : ce que la CI exécute existe-t-il seulement ? ──────────
+      # Trois fois ce dépôt a appelé un banc absent du checkout. Deux formes :
+      # le script manque et l'exécution s'arrête (rouge, réparable) ; ou il manque
+      # derrière un « [ -f … ] && » et le contrôle SAUTE SANS UN MOT — le
+      # déploiement passe au vert en ayant vérifié une chose de moins.
+      # Ce pas lit deploy.yml, relève tout ce qu'il lance depuis tests/ et tools/,
+      # et exige que git le connaisse. Il vient AVANT les autres : un garde-fou
+      # qu'on croit avoir n'est pas un garde-fou.
+      - name: 🧭 Chaque banc appelé est-il bien dans le dépôt ?
+        run: node tests/ci_scripts_suivis.cjs
+
       # ── 🧪 Garde-fou syntaxe — bloque le déploiement si PHP ou JS est invalide ──
       # Ajouté après l'incident HTTP 500 (directive .htaccess incompatible déployée
       # sans vérification) : aucune erreur de syntaxe ne doit plus atteindre la prod.

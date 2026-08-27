@@ -140,7 +140,35 @@
   .deux-c li b{ color:var(--t); }
   .deux-fin{ margin-top:4px; }
 
-  /* ══ ⑥ LE PARCOURS DU CODE, EN CSS PUR ═══════════════════════════════════
+  /* ══ ⑥ PLUS AUCUN FILET, ET DU BLEU QUI ALTERNE ════════════════════════
+     Deux reproches de Jacques, liés : les cadres portaient des traits de
+     bordure (liseré de tête sur les deux colonnes, filet à gauche de chaque
+     puce, liseré à gauche des tuiles) ET les tuiles étaient toutes du même
+     bleu nuit. Empilés, ces traits deviennent un quadrillage, et un mur de
+     onze rectangles identiques ne se lit plus : l'œil n'a aucun repère pour
+     retrouver celui qu'il cherche.
+
+     On retire les traits, et on rend la teinte au SEUL endroit où elle
+     qualifie : le fond de la tuile, qui tourne sur les six couleurs de
+     séquence des cahiers. Deux tuiles voisines ne portent jamais la même. */
+  .deux-c{ border-top:none; padding-top:16px; }
+  .deux-c li{ border-left:none; padding-left:0; }
+  .wrap .cta a{ border-left:none; }
+
+  .wrap .cta a:nth-child(6n+1){ background:#0E6B63; }
+  .wrap .cta a:nth-child(6n+2){ background:#2C4E8F; }
+  .wrap .cta a:nth-child(6n+3){ background:#456B1E; }
+  .wrap .cta a:nth-child(6n+4){ background:#9A6413; }
+  .wrap .cta a:nth-child(6n+5){ background:#7A3070; }
+  .wrap .cta a:nth-child(6n+6){ background:#A33232; }
+  .wrap .cta a:hover{ filter:brightness(1.12); background-image:none; }
+  /* Le sous-titre était en or et l'icône en orange : lisibles sur du bleu
+     nuit, illisibles sur l'ocre et le rouge. Un blanc voilé tient sur les
+     six teintes — c'est la condition pour qu'elles puissent tourner. */
+  .wrap .cta a small{ color:rgba(255,255,255,.82); }
+  .wrap .cta a .i{ color:rgba(255,255,255,.9); }
+
+  /* ══ ⑦ LE PARCOURS DU CODE, EN CSS PUR ═══════════════════════════════════
      Une boucle de 15 s, trois écrans de 5 s. Tout est fait en `opacity` et
      `transform` — les deux seules propriétés que le navigateur anime sans
      recalculer la mise en page. Sur le téléphone visé (Cameroun, appareil
