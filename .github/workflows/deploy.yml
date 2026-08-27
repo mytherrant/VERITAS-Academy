@@ -258,6 +258,14 @@ jobs:
       - name: 👥 Atelier — le travail d'équipe franchit-il le navigateur ?
         run: node tests/sonde_collaboratif.cjs
 
+      # Une recommandation fabriquee coute plus cher que pas de
+      # recommandation : proposer « les textes que vous aimez » a qui n a rien
+      # ouvert apprend au lecteur que le reste ment peut-etre aussi. Ce
+      # controle defend la regle « base vide = rien affiche », et verifie que
+      # les astuces citent le REFERENTIEL au lieu d etre inventees.
+      - name: 💡 Atelier — les suggestions sont-elles fondées sur du réel ?
+        run: node tests/sonde_gouts_atelier.cjs
+
       - name: 📋 Préparer les fichiers
         run: |
           mkdir -p deploy/api \
@@ -788,8 +796,18 @@ jobs:
           # (87 250). Rien ne plante, rien ne s'affiche en erreur — le correctif
           # n'existe simplement pour personne. Le glob shell trie, l'empreinte
           # reste donc stable à contenu égal.
+          # livrets/ EST DANS LA LISTE, et ce n'est pas un detail : ses fichiers
+          # sont servis « immutable, max-age=31536000 » comme les autres, mais
+          # ils n'entraient pas dans l'empreinte. Verifie en production le
+          # 27/08/2026 sur livrets/cahier.css et cahier.js. Consequence : une
+          # correction du moteur du cahier — celui ou l'eleve ECRIT — serait
+          # partie sur le serveur sans jamais atteindre un eleve deja venu, et
+          # pendant un an. Rien n'aurait plante : le correctif n'aurait
+          # simplement existe pour personne.
+          # REGLE : tout ce que .htaccess sert en immutable doit entrer ici.
           EMPREINTE=$(cat deploy/app.js deploy/app.css \
                           deploy/assets/*.css deploy/assets/*.js \
+                          deploy/livrets/*.css deploy/livrets/*.js \
                           deploy/chunks/*.js 2>/dev/null | sha1sum | tr -dc '0-9' | cut -c1-6)
           [ -z "$EMPREINTE" ] && EMPREINTE=0
           VER="$BASE.$EMPREINTE"

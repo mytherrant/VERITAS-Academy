@@ -31,7 +31,7 @@
 /* Serif, justifié, AVEC césure : sans `hyphens`, une colonne justifiée en
    français se lézarde de grandes coulées blanches. */
 .ch-texte{ font-family:Georgia,'Times New Roman',serif; font-size:16px;
-  background:#fff; border:1px solid var(--ch-ligne); border-left:4px solid var(--ch-action);
+  background:#fff; border:1px solid var(--ch-ligne);
   border-radius:10px; padding:16px 18px; margin:14px 0;
   text-align:justify; hyphens:auto; -webkit-hyphens:auto; }
 .ch-source{ font-size:13px; color:var(--ch-second); font-style:italic; margin:-6px 0 18px; text-align:right; }
@@ -116,10 +116,14 @@
 /* ════════════════════════════════════════════════════════════════════════════
    COULEUR PAR SÉQUENCE
    Reprise exacte des cahiers imprimés — l'élève qui a le papier sous les yeux
-   retrouve la même teinte à l'écran. Elle QUALIFIE, elle n'inonde pas : on la
-   met dans le filet de gauche du texte, dans la pastille du titre et dans la
-   rubrique. Jamais en aplat de fond : un aplat pastel derrière un paragraphe
-   fatigue à la lecture longue, et c'est un cahier qu'on lit une heure.
+   retrouve la même teinte à l'écran. Elle QUALIFIE, elle n'inonde pas : elle
+   vit dans la pastille du titre et dans la rubrique, jamais en aplat de fond
+   (un aplat pastel derrière un paragraphe fatigue à la lecture longue, et
+   c'est un cahier qu'on lit une heure).
+
+   Il y avait au départ un filet vertical coloré à gauche de chaque texte.
+   Retiré le 27/08 : aligné avec les autres cartes de la page, il faisait une
+   série de barres qui découpaient la colonne au lieu de l'accompagner.
    ════════════════════════════════════════════════════════════════════════ */
 [data-seq="1"]{ --seq:#0E6B63; }
 [data-seq="2"]{ --seq:#2C4E8F; }
@@ -128,7 +132,9 @@
 [data-seq="5"]{ --seq:#7A3070; }
 [data-seq="6"]{ --seq:#A33232; }
 
-.ch-texte[data-seq]{ border-left-color:var(--seq,#1B63C4); }
+/* Plus de filet vertical a gauche des textes (demande du 27/08) : la couleur
+   de sequence continue de vivre dans la pastille du titre et la rubrique,
+   ou elle situe sans barrer la page. */
 .ch-titre[data-seq] .ch-etq{ background:var(--seq,#16284F); }
 .ch-titre[data-seq]{ border-bottom-color:color-mix(in srgb, var(--seq,#1B63C4) 26%, #E3E9F2); }
 .ch-rubrique[data-seq]{ color:var(--seq,#1B63C4); }
