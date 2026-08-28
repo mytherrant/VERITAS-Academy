@@ -22352,6 +22352,25 @@ function showEpreuves(){
   var grp=window._epGrp||"";
   var pool=grp?allEpreuves.filter(function(e){return _classifySection(e.classe||'')===grp;}):allEpreuves;
 
+  /* ── L'enseignant voit d'abord SES matières ───────────────────────────
+     Un professeur de français ouvrait cette page sur les épreuves de SVT, de
+     génie civil et de comptabilité mêlées aux siennes, et refiltrait à la
+     main à chaque visite. Le filtre existait, personne ne le pré-remplissait.
+     Même motif que la section juste au-dessus : on pose le filtre, et on
+     laisse tout revoir d'un clic — `window._epMesMat=false`.
+     Deux garde-fous : un filtre explicite de l'utilisateur (`mat`) a toujours
+     le dernier mot, et une restriction qui ne laisserait RIEN n'est pas
+     appliquée — une page vide serait pire que le désordre qu'on corrige. */
+  var _mesMat=(typeof _matieresEnseignant==='function')?_matieresEnseignant():[];
+  var _filtreMesMat=false;
+  if(_mesMat.length && window._epMesMat!==false && !mat){
+    var _restreint=pool.filter(function(e){
+      var em=e.matiere||'';
+      return _mesMat.some(function(m){ return _matConcorde(m,em); });
+    });
+    if(_restreint.length){ pool=_restreint; _filtreMesMat=true; }
+  }
+
   // Filtres
   var list=pool.filter(function(e){
     return (!mat||e.matiere===mat)&&(!classe||e.classe===classe)&&(!seq||e.seq===seq);
@@ -22384,6 +22403,19 @@ function showEpreuves(){
   var h="<div class='vsec'>";
   h+="<div class='vsec-title vsec-title-hero'>📝 Épreuves & Annales</div><div class='vsec-sub'>BEPC, Probatoire, BAC — sujets corrigés et fascicules officiels</div>";
   h+="<div class='vsec-sub'>Épreuves séquentielles, corpus, anciens sujets BEPC/Probatoire/BAC — tous niveaux</div>";
+
+  /* Un filtre qui s'applique sans le dire est un filtre qui ment : on annonce
+     ce qui est masqué, et les deux sorties (tout voir / modifier la liste). */
+  if(_filtreMesMat){
+    h+="<div style='background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:12.5px;color:#3730A3;display:flex;gap:10px;align-items:center;flex-wrap:wrap'>"
+      +"<span>Filtré sur vos matières : <b>"+_esc(_mesMat.join(', '))+"</b></span>"
+      +"<button onclick=\"window._epMesMat=false;showEpreuves()\" style='background:#fff;border:1px solid #C7D2FE;border-radius:8px;padding:4px 10px;font-size:11.5px;font-weight:700;color:#3730A3;cursor:pointer'>Tout voir</button>"
+      +"<button onclick=\"mMesMatieres()\" style='background:none;border:none;color:#3730A3;font-size:11.5px;font-weight:700;cursor:pointer;text-decoration:underline'>Modifier mes matières</button>"
+      +"</div>";
+  } else if(_mesMat.length && window._epMesMat===false){
+    h+="<div style='font-size:12px;color:var(--ink3,#64748B);margin-bottom:12px'>Toutes les matières affichées · "
+      +"<button onclick=\"window._epMesMat=undefined;window._epMat='';showEpreuves()\" style='background:none;border:none;color:#3730A3;font-weight:700;cursor:pointer;text-decoration:underline;font-size:12px'>revenir à mes matières</button></div>";
+  }
 
   // Bouton réinitialiser les filtres si au moins un filtre actif
   if(mat||classe||seq){
@@ -26139,6 +26171,11 @@ async function doRegister(){
     setTimeout(function(){ if(typeof mMarketplaceSubmit==='function') mMarketplaceSubmit(); },500);
   } else if(acc.isPartner){
     toast("Bienvenue "+pre+" 🤝 Compte partenaire créé — notre équipe vous recontacte vite !");
+  } else if(acc.role==='enseignant'){
+    /* On lui a vendu l'Atelier à l'inscription : on lui dit où il est, tout de
+       suite. Son espace s'ouvre juste après (450 ms), et la première carte y
+       mène en un clic, identifiant déjà rempli. */
+    toast("Bienvenue "+pre+" 🎓 Votre Atelier de Français vous attend — première carte de votre espace.");
   } else {
     toast("Bienvenue "+pre+" \uD83C\uDF89 Compte créé avec succès !");
   }
@@ -46023,6 +46060,121 @@ function _espaceIncitation(role){
 // rgba depuis un hex court — utilitaire local (pas de dépendance).
 function _hexA(hex,a){ try{ var n=parseInt(hex.replace('#',''),16); return 'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')'; }catch(e){ return 'rgba(255,201,60,'+a+')'; } }
 
+/* ═══ L'ATELIER DE FRANÇAIS N'AVAIT AUCUNE PORTE ═══════════════════════════
+   Le parcours réel, chronométré : on s'inscrit sur veritas-school.com, on lit
+   « revenez sur la plateforme », on QUITTE la page, on retape l'adresse à la
+   main, puis on ressaisit l'identifiant qu'on vient de choisir. Quatre gestes
+   pour une promesse faite deux écrans plus tôt.
+   L'identifiant part en FRAGMENT (#u=) : l'Atelier remplit le champ, il ne
+   reste que le mot de passe. Un fragment ne voyage ni dans les journaux du
+   serveur ni dans l'en-tête Referer — et le mot de passe, lui, ne voyage
+   jamais. Voir `_lireIdentifiantPropose()` côté Atelier. */
+window._ouvrirAtelier = function(){
+  var u='';
+  try{ u=(typeof SES!=='undefined'&&SES)?String(SES.mat||''):''; }catch(e){}
+  var url='/plateforme/'+(u?('#u='+encodeURIComponent(u)):'');
+  try{ window.open(url,'_blank','noopener'); }catch(e){ location.href=url; }
+};
+
+/* ── LES MATIÈRES DE L'ENSEIGNANT ──────────────────────────────────────────
+   Un professeur de français à qui l'on présente les épreuves de SVT, de génie
+   civil et de comptabilité doit filtrer à la main à chaque visite. Le filtre
+   « Matière » existait déjà ; personne ne le pré-remplissait.
+   On ne fabrique PAS un quatrième réglage : on suit le motif déjà en place
+   pour la section (`_epGrp`), qui s'initialise sur le parcours de la personne
+   et se laisse élargir d'un clic. */
+
+/* Abréviations d'usage au Cameroun. Sans elles, « Maths » ne rencontrerait
+   jamais « Mathématiques » : ce n'en est pas un préfixe. */
+var _MAT_ALIAS = {
+  'math':'mathematiques', 'maths':'mathematiques', 'mathematique':'mathematiques',
+  'philo':'philosophie', 'info':'informatique', 'infos':'informatique',
+  'physique':'physique chimie', 'chimie':'physique chimie', 'pc':'physique chimie',
+  'hist':'histoire', 'geo':'geographie',
+  'eco':'economie', 'lettres':'francais', 'fr':'francais', 'angl':'anglais'
+};
+function _matCle(s){
+  var n = (typeof _rechNorm==='function') ? _rechNorm(s) : String(s||'').toLowerCase().trim();
+  return _MAT_ALIAS[n] || n;
+}
+/* Concordance tolérante : « Français » doit retrouver « Français (Littérature) »
+   et l'inverse. Le seuil de 3 caractères évite qu'un fragment trop court
+   n'attrape la moitié du catalogue. */
+function _matConcorde(a, b){
+  var x=_matCle(a), y=_matCle(b);
+  if(!x || !y) return false;
+  if(x === y) return true;
+  if(x.length < 3 || y.length < 3) return false;
+  return x.indexOf(y) >= 0 || y.indexOf(x) >= 0;
+}
+/* Le compte enseignant réellement connecté, ou null. */
+function _compteEnseignantCourant(){
+  try{
+    if(typeof SES==='undefined' || !SES) return null;
+    if(!(SES.isTeacher || SES.role==='enseignant')) return null;
+    return (DB.visitorAccounts||[]).find(function(a){ return a.id===SES.accountId; }) || null;
+  }catch(e){ return null; }
+}
+function _matieresEnseignant(){
+  var acc = _compteEnseignantCourant();
+  if(!acc) return [];
+  if(Array.isArray(acc.matieres) && acc.matieres.length) return acc.matieres.slice();
+  /* Repli sur la discipline saisie à l'inscription — un champ libre, où l'on
+     écrit volontiers « Français, Littérature » ou « Maths et PCT ». */
+  var d = String(acc.discipline||'').trim();
+  if(!d) return [];
+  return d.split(/[,;\/]+|\bet\b/i).map(function(x){ return x.trim(); }).filter(Boolean);
+}
+
+/* Choix des matières — cases à cocher tirées de la nomenclature officielle
+   déjà présente (`_AMBASSA_SYS`), selon le sous-système et l'enseignement du
+   compte : un professeur du technique ne doit pas cocher dans la liste du
+   général. */
+window.mMesMatieres = function(){
+  var acc = _compteEnseignantCourant();
+  if(!acc){ toast("Connectez-vous avec votre compte enseignant","warn"); return; }
+  var sys = (acc.profil && acc.profil.sys) || 'fr';
+  var ens = (acc.profil && acc.profil.ens) || 'gen';
+  var cle = (sys==='en') ? 'en_gen' : (ens==='tech' ? 'fr_tech' : 'fr_gen');
+  var src = (window._AMBASSA_SYS && (window._AMBASSA_SYS[cle] || window._AMBASSA_SYS.fr_gen)) || {mats:[]};
+  var liste = (src.mats||[]).slice();
+  var choisies = _matieresEnseignant();
+  /* Une discipline saisie à la main peut ne figurer dans aucune liste
+     officielle : on l'ajoute plutôt que de la perdre au premier passage. */
+  choisies.forEach(function(m){
+    if(!liste.some(function(x){ return _matConcorde(x,m); })) liste.push(m);
+  });
+  var body = '<div style="font-size:12.5px;color:var(--ink3,#64748B);margin-bottom:10px">'
+    + 'Cochez ce que vous enseignez. Les épreuves et annales s’ouvriront dessus — vous pourrez toujours tout revoir d’un clic.</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px;max-height:46vh;overflow:auto">'
+    + liste.map(function(m){
+        var coche = choisies.some(function(c){ return _matConcorde(c,m); });
+        return '<label style="display:flex;gap:8px;align-items:center;font-size:13px;padding:6px 8px;border-radius:8px;background:#F8FAFF;cursor:pointer">'
+          + '<input type="checkbox" data-mmat="'+_esc(m)+'"'+(coche?' checked':'')+'>'
+          + '<span>'+_esc(m)+'</span></label>';
+      }).join('')
+    + '</div>';
+  M('Mes matières','Ce que vous enseignez', body,
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="_mesMatieresSave()">✓ Enregistrer</button>', true);
+};
+window._mesMatieresSave = function(){
+  var acc = _compteEnseignantCourant();
+  if(!acc){ cm(); return; }
+  var boxes = document.querySelectorAll('input[data-mmat]:checked');
+  var l = [];
+  for(var i=0;i<boxes.length;i++) l.push(boxes[i].getAttribute('data-mmat'));
+  acc.matieres = l;
+  save();
+  cm();
+  /* Les deux réglages du filtre repartent de zéro : garder l'ancien choix
+     afficherait une sélection qui ne correspond plus aux cases cochées. */
+  window._epMat = '';
+  window._epMesMat = undefined;
+  toast(l.length ? ('✓ '+l.length+' matière(s) enregistrée(s)') : 'Filtre retiré — toutes les matières', 'ok');
+  if(typeof _espacePerso==='function') _espacePerso('enseignant');
+};
+
 window._espacePerso = function(role){
   role = role || (typeof SES!=='undefined' && SES && SES.role) || 'eleve';
   var c = document.getElementById('vContent');
@@ -46044,10 +46196,15 @@ window._espacePerso = function(role){
 
   // Actions du rôle (destinations guardées à l'exécution)
   var actions = role==='enseignant' ? [
+      /* EN PREMIER, et pas par courtoisie : c'est le produit qu'on lui a vendu
+         deux écrans plus tôt, et le seul qu'il ne pouvait atteindre qu'en
+         retapant une adresse de mémoire. */
+      ['lc-bookopen','Atelier de Français','_ouvrirAtelier()'],
       ['lc-doc','Épreuves & annales','if(typeof showEpreuves===\'function\')showEpreuves()'],
       ['lc-check','Corrigés des cahiers','window.open(\'/corriges/\',\'_blank\',\'noopener\')'],
       ['lc-upload','Publier un corrigé (70%)','if(typeof mMarketplaceSubmit===\'function\')mMarketplaceSubmit();else toast(\'Bientôt\',\'info\')'],
-      ['lc-university','Classes &amp; Forum','if(typeof showClasseVirtuelle===\'function\')showClasseVirtuelle()']
+      ['lc-university','Classes &amp; Forum','if(typeof showClasseVirtuelle===\'function\')showClasseVirtuelle()'],
+      ['lc-sliders','Mes matières','mMesMatieres()']
     ] : role==='parent' ? [
       ['lc-chart','Notes &amp; bulletin de mon enfant','_espaceParentEnfant()'],
       ['lc-wallet','Payer / Cagnotte de scolarité','vShowSec(\'cagnotte\',null)'],

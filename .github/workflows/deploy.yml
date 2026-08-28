@@ -296,6 +296,21 @@ jobs:
       - name: 🪪 Le compte créé sur le site atteint-il le serveur ?
         run: node tests/banc_compte_serveur.cjs
 
+      # ── 🎓 L'ENSEIGNANT ATTEINT-IL SON ATELIER, ET NE VOIT-IL QUE SES
+      #    MATIÈRES ? Deux frictions signalées le 28/08/2026. D'abord un
+      #    produit vendu à l'inscription puis introuvable : il fallait quitter
+      #    la page, retaper l'adresse de mémoire et ressaisir l'identifiant
+      #    qu'on venait de choisir. Le lien le transporte maintenant en
+      #    fragment (#u=) — deux programmes sans appel commun tiennent cette
+      #    promesse, exactement la configuration qui a produit le bug d'auth
+      #    du même jour, donc on mesure les DEUX bouts. Ensuite un professeur
+      #    de français devant les épreuves de génie civil : le filtre existait,
+      #    rien ne le pré-remplissait. Le contrôle qui compte le plus est
+      #    celui de la page vide — une restriction appliquée aveuglément
+      #    ferait conclure que le catalogue est vide.
+      - name: 🎓 L'enseignant atteint-il son Atelier ?
+        run: node tests/banc_atelier_enseignant.cjs
+
       # ── 📕 LA BOUTIQUE NE VEND-ELLE QUE CE QUI EXISTE ? ────────────────────
       #    Cinq manuels inventés étaient semés dans defaultDB() avec un PRIX et
       #    un bouton d'achat : « Mathématiques 3ème » chez « MINESEC Éditions »,
