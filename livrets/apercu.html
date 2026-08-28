@@ -150,5 +150,18 @@
   }
 })();
 </script>
+
+<script>
+/* Le service worker garde la coquille pour les jours sans réseau. Il est
+   ENREGISTRÉ EN DERNIER et sans bloquer : sur un navigateur qui n'en veut pas
+   (navigation privée, vieux WebView), la page doit s'ouvrir exactement comme
+   avant — le hors ligne est un confort, pas une condition. */
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/livrets/sw-cahier.js', { scope: '/livrets/' })
+      .catch(function () { /* pas de hors ligne, et c'est tout */ });
+  });
+}
+</script>
 </body>
 </html>

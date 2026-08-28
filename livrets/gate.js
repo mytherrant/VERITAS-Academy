@@ -27,7 +27,7 @@
   var WA    = '237697637739';             // WhatsApp du centre (support)
 
   var cfg   = { classe: '', kind: 'livret', titre: '' };
-  var etat  = { ouvert: false, exp: 0, wm: null, jours: null };
+  var etat  = { ouvert: false, exp: 0, wm: null, jours: null, horsLigne: false };
 
   function prix(kind, n) {
     var u = PRIX[kind || cfg.kind] || PRIX.livret;
@@ -111,6 +111,103 @@
     document.body.appendChild(p);
   }
 
+  /* ══ LIRE SON CAHIER SANS RÉSEAU ═══════════════════════════════════════════
+     « La connexion internet reste chère au Cameroun et pas toujours accessible
+     à tout moment. » — Jacques, 28/08/2026.
+
+     Jusqu'ici, ouvrir son cahier exigeait le réseau DEUX fois : pour valider la
+     session, puis pour recevoir le contenu. Sans barres, un élève qui avait
+     payé voyait la porte à code — et pire, `resume()` effaçait son jeton au
+     passage, si bien qu'il devait ressaisir un code qu'il n'a pas sur lui.
+     Le cahier devenait inutilisable exactement là où il sert le plus : dans un
+     taxi, en zone blanche, ou le jour où l'on n'a plus de crédit.
+
+     On garde donc une copie du contenu sur l'appareil, dans IndexedDB —
+     pas dans `localStorage` : un cahier pèse de 240 à 650 Ko, le quota y est
+     de 5 Mo pour TOUTE l'origine et l'écriture y est synchrone (elle gèlerait
+     l'écran d'un téléphone d'entrée de gamme pendant la copie).
+
+     ── CE QUE ÇA COÛTE, ET IL FAUT LE DIRE ────────────────────────────────
+     Une copie hors ligne, c'est le produit sur l'appareil. Trois garde-fous,
+     et un renoncement assumé :
+       · la copie ne vit que le temps du BAIL ci-dessous, puis exige une
+         reconnexion — sans quoi un code révoqué continuerait d'ouvrir ;
+       · elle est effacée dès que le serveur refuse la session (code révoqué,
+         expiré, évincé par un autre appareil) ;
+       · le filigrane nominatif est gardé AVEC elle : une capture reste
+         traçable hors ligne comme en ligne.
+     Le renoncement : la révocation n'est plus instantanée. Elle prend effet au
+     prochain contact avec le serveur, et au plus tard au bout du bail. C'est le
+     prix de la lecture hors ligne, et il n'y a pas de version de cette
+     fonctionnalité qui ne le paie pas.
+
+     BAIL de 7 jours : assez pour une semaine sans crédit, assez court pour
+     qu'un code révoqué cesse d'ouvrir dans la semaine. C'est un réglage, pas
+     une loi — le descendre resserre la révocation, le monter soulage l'élève. */
+  var BAIL_HORS_LIGNE = 7 * 24 * 3600 * 1000;
+  var IDB_BASE = 'vrt-livrets', IDB_MAG = 'contenu';
+
+  function idb() {
+    return new Promise(function (ok, ko) {
+      // `window`, pas `global` : cette IIFE ne prend aucun paramètre (à la
+      // différence de cahier.js). Un `global.indexedDB` y aurait levé une
+      // ReferenceError au PREMIER appel — c'est-à-dire à la première lecture
+      // hors ligne, la seule fois où personne n'est là pour lire la console.
+      if (!window.indexedDB) { ko(new Error('indexedDB absent')); return; }
+      var r = window.indexedDB.open(IDB_BASE, 1);
+      r.onupgradeneeded = function () {
+        if (!r.result.objectStoreNames.contains(IDB_MAG)) r.result.createObjectStore(IDB_MAG);
+      };
+      r.onsuccess = function () { ok(r.result); };
+      r.onerror = function () { ko(r.error || new Error('indexedDB refusée')); };
+    });
+  }
+  function idbFaire(mode, faire) {
+    return idb().then(function (db) {
+      return new Promise(function (ok, ko) {
+        var tx = db.transaction(IDB_MAG, mode), rq = faire(tx.objectStore(IDB_MAG));
+        tx.oncomplete = function () { ok(rq && rq.result); };
+        tx.onerror = function () { ko(tx.error); };
+      });
+    });
+  }
+  // Une clé par ouvrage ET par nature : le guide de l'enseignant et le livret
+  // de l'élève ne doivent pas se remplacer l'un l'autre sur un poste partagé.
+  function cleCache() { return cfg.classe + '|' + cfg.kind; }
+
+  function cacheEcrire(r) {
+    return idbFaire('readwrite', function (m) {
+      return m.put({ js: r.js || {}, wm: r.wm || null, jours: etat.jours,
+                     exp: etat.exp || 0, maj: Date.now() }, cleCache());
+    }).catch(function () { /* stockage refusé (navigation privée) : tant pis */ });
+  }
+  function cacheLire() {
+    return idbFaire('readonly', function (m) { return m.get(cleCache()); })
+      .catch(function () { return null; });
+  }
+  function cacheEfface() {
+    return idbFaire('readwrite', function (m) { return m.delete(cleCache()); })
+      .catch(function () {});
+  }
+
+  /* Le bandeau hors ligne. Il DIT ce qui se passe : sans lui, l'élève croit
+     que son travail part au serveur alors qu'il attend dans la file, et il
+     efface son navigateur en pensant faire le ménage. */
+  function bandeauHorsLigne(jusqu) {
+    var v = document.getElementById('vrt-horsligne');
+    if (v && v.parentNode) v.parentNode.removeChild(v);
+    var reste = Math.max(0, Math.ceil((jusqu - Date.now()) / 86400000));
+    var d = document.createElement('div');
+    d.id = 'vrt-horsligne';
+    d.setAttribute('data-ui', '1');
+    d.style.cssText = 'position:sticky;top:0;z-index:60;background:#1B2431;color:#fff;'
+      + 'font:600 13px/1.45 Poppins,system-ui,sans-serif;padding:9px 14px;text-align:center';
+    d.textContent = 'Hors ligne — tu lis la copie enregistrée sur cet appareil. '
+      + 'Ce que tu écris est gardé et partira au retour du réseau'
+      + (reste ? ' (reconnecte-toi sous ' + reste + ' jour' + (reste > 1 ? 's' : '') + ').' : '.');
+    document.body.insertBefore(d, document.body.firstChild);
+  }
+
   // ── Installation du contenu reçu ─────────────────────────────────────────
   // Les fichiers de données sont du JavaScript de la forme « window.X = {…}; ».
   // On les exécute tels quels : aucune hypothèse sur leur structure, donc une
@@ -154,6 +251,10 @@
   function charger(token) {
     return post(API, { action: 'content', token: token }).then(function (r) {
       installer(r);
+      // On garde la copie APRÈS l'avoir installée : ce qu'on met de côté est
+      // exactement ce qui vient de fonctionner, jamais une supposition.
+      cacheEcrire(r);
+      etat.horsLigne = false;
       return r;
     });
   }
@@ -184,7 +285,8 @@
       return VRT;
     },
 
-    etat: function () { return { ouvert: etat.ouvert, exp: etat.exp, classe: cfg.classe, kind: cfg.kind }; },
+    etat: function () { return { ouvert: etat.ouvert, exp: etat.exp, classe: cfg.classe,
+                                 kind: cfg.kind, horsLigne: etat.horsLigne }; },
 
     /** Reprise silencieuse d'une session encore valide (rechargement de page). */
     resume: function () {
@@ -193,7 +295,36 @@
       return post(API, { action: 'session', token: t })
         .then(function (s) { etat.exp = s.exp; etat.jours = s.joursRestants; return charger(t); })
         .then(function () { etat.ouvert = true; return true; })
-        .catch(function (e) { jetonEfface(); throw e; });
+        .catch(function (e) {
+          /* ── DEUX ÉCHECS QU'IL NE FAUT SURTOUT PAS CONFONDRE ────────────
+             Le serveur a REFUSÉ (code révoqué, expiré, évincé) → on efface
+             tout, jeton et copie : c'est une décision, elle doit s'appliquer.
+             Le serveur est INJOIGNABLE (pas de réseau, plus de crédit, coupure)
+             → on ne décide rien. L'ancien code effaçait le jeton dans les deux
+             cas : perdre sa session parce qu'on est passé sous un tunnel, et
+             devoir ressaisir un code qu'on n'a pas sur soi. */
+          if (e && e.code === 'net') {
+            return cacheLire().then(function (c) {
+              if (!c || !c.js) throw e;
+              var perime = Date.now() - (c.maj || 0) > BAIL_HORS_LIGNE;
+              var expire = c.exp && (c.exp * 1000) < Date.now();
+              if (perime || expire) {
+                throw ErrPorte(perime
+                  ? 'Ta copie hors ligne a passé une semaine sans contact. '
+                    + 'Connecte-toi une fois pour la renouveler.'
+                  : 'Ton accès a expiré.', 'bail');
+              }
+              etat.exp = c.exp; etat.jours = c.jours;
+              installer({ js: c.js, wm: c.wm });
+              etat.ouvert = true; etat.horsLigne = true;
+              bandeauHorsLigne((c.maj || 0) + BAIL_HORS_LIGNE);
+              return true;
+            });
+          }
+          jetonEfface();
+          cacheEfface();
+          throw e;
+        });
     },
 
     /** Déverrouillage par code. Le contenu n'arrive qu'après. */
@@ -209,7 +340,15 @@
       }).then(function () { etat.ouvert = true; return true; });
     },
 
-    fermer: function () { jetonEfface(); etat.ouvert = false; location.reload(); },
+    /* Fermer, c'est ne plus rien laisser de soi sur l'appareil — le poste
+       est peut-être celui d'un cybercafé. La copie hors ligne part avec le
+       jeton, sinon le suivant rouvrirait le cahier sans code. */
+    fermer: function () {
+      jetonEfface();
+      etat.ouvert = false;
+      cacheEfface().then(function () { location.reload(); },
+                         function () { location.reload(); });
+    },
 
     /** Retrait du code après paiement (référence + 4 derniers chiffres payeur). */
     reclamer: function (ref, tel) {
