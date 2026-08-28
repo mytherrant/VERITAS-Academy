@@ -10677,6 +10677,13 @@ async function doLogin(){
       // v1.4.9 : compte au profil anglophone → interface intégralement en anglais au login
       try{ if(va2.profil&&va2.profil.sys==='en'&&typeof setLang==='function') setLang('en', true); }catch(e){}
       hideAll();$('VISITOR').style.display='flex';initVisitor();setTimeout(_updateVisitorHeader,120);setTimeout(function(){try{if(typeof _welcomeBack==='function')_welcomeBack();}catch(e){}},1200);_studentSyncBg(u,p);
+      /* RATTRAPAGE des comptes nés avant api/compte.php — ils n'existent que
+         dans ce navigateur. La connexion est le seul instant où l'on tient le
+         mot de passe en clair, donc le seul où l'on peut prouver au serveur
+         que ce compte est bien le sien. Sans ce rappel, tout inscrit d'avant
+         le 28/08/2026 resterait à jamais inconnu de l'Atelier. Idempotent :
+         `srvSync` posé, on ne repasse plus. */
+      try{ _compteRemonter(va2,p); }catch(e){}
       // v1.19.28 : parent/enseignant/partenaire → leur espace personnel (avec offres ciblées).
       setTimeout(function(){ try{ var r=va2.role; if((r==='parent'||r==='enseignant'||r==='partenaire'||va2.isPartner)&&typeof _espacePerso==='function') _espacePerso(r||'partenaire'); }catch(e){} },500);
       return;}
@@ -25938,6 +25945,67 @@ function _chkUser(u){
    `hashPassword` est asynchrone (crypto.subtle) : la fonction devient `async`.
    Elle est appelée depuis un `onclick`, qui accepte une promesse sans rien
    changer d'autre. Le sel est l'identifiant, comme partout ailleurs. */
+/* ═══ UN COMPTE QUI N'EXISTE QUE DANS CE NAVIGATEUR N'EXISTE PAS ═══════════
+   L'inscription écrivait dans `DB.visitorAccounts` puis appelait `save()`,
+   qui range le tout dans localStorage. Et c'était fini : `_fbFetch`
+   court-circuite api/db.php pour quiconque n'est ni admin ni enseignant
+   (v2.9.17), donc AUCUNE requête ne partait. Le compte naissait et mourait
+   sur un seul appareil.
+   L'Atelier de Français, lui, demande à `plateforme.php?action=session` de
+   vérifier les identifiants dans la base du SERVEUR. Il ne trouvait rien, et
+   répondait « Identifiants invalides » à un inscrit qui tapait pourtant le
+   bon mot de passe — la phrase « inscrivez-vous sur veritas-school.com puis
+   revenez ici » ne pouvait être tenue par personne. Même effet en changeant
+   de téléphone, ou en vidant le cache : le compte disparaissait.
+   On envoie donc le compte à api/compte.php AVANT de l'inscrire localement.
+   Le mot de passe part en clair sur TLS — comme à chaque connexion — et le
+   serveur le range en bcrypt ; la copie locale, elle, reste en S256.
+   Retour : {ok} créé (ou déjà sien), {conflit} identifiant pris par un
+   autre, {hors} serveur injoignable → on n'abandonne pas l'inscription,
+   on la marque `srvSync:false` et la prochaine connexion la rejouera. */
+async function _compteServeurEnregistrer(acc, pwdClair){
+  try{
+    var r = await fetch(_VRT_API + '/compte.php?action=inscription', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        user:acc.user, motDePasse:pwdClair,
+        nom:acc.nom||'', pre:acc.pre||'', tel:acc.tel||'', email:acc.email||'',
+        cls:acc.cls||'', serie:acc.serie||'', profil:acc.profil||{},
+        role:acc.role||'eleve', discipline:acc.discipline||'',
+        orgNom:acc.orgNom||'', orgType:acc.orgType||'', childMat:acc.childMat||''
+      })
+    });
+    var j={}; try{ j=await r.json(); }catch(e){}
+    if(r.status===409) return {conflit:true,msg:(j&&j.error)||"Cet identifiant est déjà pris"};
+    if(r.ok&&j&&j.ok) return {ok:true,id:j.id||"",existe:!!j.existe};
+    /* 400/500 : le serveur a répondu et refuse. Ce n'est pas une panne de
+       réseau — le dire tel quel plutôt que de créer un compte local que
+       l'Atelier ne reconnaîtra jamais. */
+    return {ok:false,hors:false,msg:(j&&j.error)||("Erreur serveur "+r.status)};
+  }catch(e){
+    return {ok:false,hors:true,msg:"Serveur injoignable"};
+  }
+}
+
+/* Rejoue l'enregistrement serveur d'un compte né avant ce correctif (ou créé
+   pendant une coupure). Appelée après une connexion RÉUSSIE sur le site : à
+   ce moment seulement, on tient le mot de passe en clair, seul moyen de
+   prouver au serveur que ce compte est bien celui de la personne devant
+   l'écran. Silencieuse : elle ne doit rien casser si le réseau manque. */
+async function _compteRemonter(acc, pwdClair){
+  if(!acc||acc.srvSync) return;
+  try{
+    var res = await _compteServeurEnregistrer(acc, pwdClair);
+    if(res.ok){
+      acc.srvSync = true;
+      save();
+      if(!res.existe) toast("☁️ Compte enregistré sur le serveur","ok");
+    }
+    /* Conflit ou panne : on ne touche à rien. Le compte local continue de
+       servir sur cet appareil, et la tentative repartira au prochain login. */
+  }catch(e){}
+}
+
 async function doRegister(){
   var pre=(document.getElementById("rPre")?.value||"").trim();
   var nom=(document.getElementById("rNom")?.value||"").trim();
@@ -25946,7 +26014,12 @@ async function doRegister(){
   var pwd=document.getElementById("rPwd")?.value||"";
   var pwd2=document.getElementById("rPwd2")?.value||"";
   if(!pre||!nom||!tel||!user||!pwd){toast("Remplissez tous les champs obligatoires (*)","warn");return;}
-  if(user.length<3){toast("Identifiant trop court (min 3 car.)","warn");return;}
+  /* Même règle que api/compte.php, mot pour mot. Elle n'est pas cosmétique :
+     l'identifiant est désormais enregistré côté serveur, et un contrôle plus
+     permissif ici afficherait « compte créé » avant un refus serveur. */
+  if(!/^[A-Za-z0-9._-]{3,32}$/.test(user)){
+    toast("Identifiant : 3 à 32 caractères — lettres, chiffres, point, tiret ou souligné","warn");return;
+  }
   if(pwd.length<6){toast("Mot de passe trop court (min 6 car.)","warn");return;}
   if(pwd!==pwd2){toast("Les mots de passe ne correspondent pas","warn");return;}
   if(!DB.visitorAccounts)DB.visitorAccounts=[];
@@ -25995,6 +26068,40 @@ async function doRegister(){
     acc.childMat=(document.getElementById("rChildMat")?.value||"").trim().toUpperCase();
     // Rattachement immédiat si le matricule saisi correspond à un élève connu.
     try{ var _st=(DB.students||[]).find(function(s){return String(s.mat||'').toUpperCase()===acc.childMat && acc.childMat;}); if(_st){ acc.childId=_st.id; acc.children=[_st.id]; } }catch(e){}
+  }
+  /* ── Le serveur d'abord, le localStorage ensuite ────────────────────────
+     L'ordre compte. Enregistrer localement puis prévenir le serveur
+     laisserait, en cas de refus, un compte fantôme dans ce navigateur : il
+     ouvrirait le site ici et nulle part ailleurs. On demande donc d'abord,
+     et on n'inscrit que ce que le serveur a accepté.
+     Le contrôle d'unicité au-dessus ne regarde que CE navigateur ; celui-ci
+     regarde tous les inscrits — c'est lui qui empêche deux personnes de
+     porter le même identifiant depuis deux téléphones. */
+  /* Verrou de double soumission. Avant ce correctif, l'inscription était
+     instantanée : elle écrivait en localStorage et rendait la main. Elle
+     attend maintenant le serveur — une seconde ou trois sur une 4G de Douala.
+     Deux clics pendant cette attente lançaient deux inscriptions : la
+     première créait le compte, la seconde se voyait répondre « identifiant
+     déjà pris ». L'utilisateur lisait un refus pour un compte qui venait
+     d'être créé, et repartait en croire l'inscription échouée. */
+  if(window._vrtInscriptionEnCours){ toast("Inscription en cours, un instant…","info"); return; }
+  window._vrtInscriptionEnCours = true;
+  var _srv;
+  try{ _srv = await _compteServeurEnregistrer(acc, pwd); }
+  finally{ window._vrtInscriptionEnCours = false; }
+  if(_srv.conflit){ toast(_srv.msg||"Cet identifiant est déjà pris, choisissez-en un autre","warn"); return; }
+  if(_srv.ok){
+    if(_srv.id) acc.id=_srv.id;   // l'identifiant interne fait foi côté serveur
+    acc.srvSync=true;
+  } else {
+    /* Panne réseau, ou serveur qui refuse. On ne perd pas l'inscription —
+       elle vaut pour cet appareil — mais on ne ment pas non plus : tant
+       qu'elle n'est pas remontée, l'Atelier ne connaîtra pas ce compte.
+       `_compteRemonter` rejouera l'envoi à la prochaine connexion. */
+    acc.srvSync=false;
+    toast(_srv.hors
+      ? "⚠️ Compte créé sur cet appareil — le serveur est injoignable, reconnectez-vous plus tard pour l'activer partout"
+      : ("⚠️ "+(_srv.msg||"Enregistrement serveur refusé")+" — compte valable sur cet appareil seulement"),"warn");
   }
   DB.visitorAccounts.push(acc);
   // v1.6 : auto-inscription dans la classe virtuelle correspondant au segment

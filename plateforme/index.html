@@ -3379,6 +3379,7 @@ class Component extends DCLogic {
         this._persistLocal();
       }},'reprise d’identite');
     sur(()=>this._lireInvitation(),'lien d’invitation');
+    sur(()=>this._lireIdentifiantPropose(),'identifiant transmis par le site');
     /* Une première astuce après quelques secondes — le temps que l'écran se
        pose — puis une toutes les trois minutes. `_montrerAstuce` refuse
        d'elle-même d'en montrer deux en moins d'une minute, et se tait quand
@@ -5131,6 +5132,28 @@ class Component extends DCLogic {
         return;
       }
       this.setState({screen:'equipe'},()=>{this._appliquerCodeEnAttente();});
+    }catch(e){}
+  }
+  /* L'identifiant transmis par veritas-school.com (#u=…).
+     Le parcours reel etait le suivant : on s'inscrit sur le site, on lit
+     « revenez sur la plateforme », on QUITTE la page, on retape l'adresse a
+     la main, puis on ressaisit l'identifiant qu'on vient tout juste de
+     choisir. Trois gestes pour rien. Le site ouvre desormais l'Atelier avec
+     l'identifiant en fragment : le champ arrive rempli, il ne reste que le
+     mot de passe.
+     En FRAGMENT (#) et jamais en parametre de requete : un fragment ne part
+     pas dans les journaux du serveur ni dans l'en-tete Referer. Et jamais le
+     mot de passe, evidemment -- seul l'identifiant voyage.
+     L'adresse est nettoyee aussitot lue, pour qu'un rechargement ou un
+     partage de lien ne trimballe plus l'identifiant de quelqu'un. */
+  _lireIdentifiantPropose(){
+    try{
+      const m=/[#&]u=([^&]+)/.exec(location.hash||'');
+      if(!m)return;
+      const u=decodeURIComponent(m[1]).trim().slice(0,64);
+      history.replaceState(null,'',location.pathname);
+      if(!u||this._jeton())return;          // deja connecte : ne rien ecraser
+      this.setState({authMail:u,authErr:''});
     }catch(e){}
   }
   _appliquerCodeEnAttente(){

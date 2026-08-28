@@ -150,6 +150,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || $_SERVER['REQUEST_METHOD'] === 'PUT
         exit;
     }
 
+    /* ── 🛟 PRÉSERVER LES COMPTES NÉS CÔTÉ SERVEUR ───────────────────────────
+       Cet endpoint remplace la base ENTIÈRE par la copie que l'administrateur
+       a dans son navigateur. Tant que les comptes ne naissaient que dans des
+       navigateurs, cela ne se voyait pas. Depuis api/compte.php, un visiteur
+       peut s'inscrire directement sur le serveur — et la première synchro
+       admin qui suivait effaçait son compte sans un mot, rouvrant le bug
+       qu'on venait de fermer (« Identifiants invalides » à l'Atelier).
+
+       Règle de conservation, volontairement étroite : on ne rattrape QUE les
+       comptes marqués `srvCreated` que la copie poussée ne contient pas, et
+       seulement s'ils sont nés APRÈS le `lastModified` de cette copie —
+       autrement dit ceux que l'administrateur ne pouvait pas connaître quand
+       il a chargé sa page. Un compte plus ancien absent de la copie, lui, a
+       été VOLONTAIREMENT supprimé depuis l'administration : le ressusciter
+       rendrait toute suppression impossible.
+       Sans `lastModified` exploitable, on conserve (perdre un inscrit est
+       plus grave que garder un compte supprimé une synchro de trop). */
+    $preserves = [];
+    if (is_file($DB_FILE) && isset($data['visitorAccounts']) && is_array($data['visitorAccounts'])) {
+        $srvDb = json_decode((string) @file_get_contents($DB_FILE), true);
+        if (is_array($srvDb) && !empty($srvDb['visitorAccounts']) && is_array($srvDb['visitorAccounts'])) {
+            $connus = [];
+            foreach ($data['visitorAccounts'] as $a) {
+                if (is_array($a) && isset($a['user'])) $connus[strtolower((string) $a['user'])] = true;
+            }
+            $refLm = (int) ($data['lastModified'] ?? 0);
+            foreach ($srvDb['visitorAccounts'] as $a) {
+                if (!is_array($a) || !isset($a['user'])) continue;
+                if (isset($connus[strtolower((string) $a['user'])])) continue; // déjà dans la copie poussée
+                if (empty($a['srvCreated'])) continue;                          // compte ordinaire → absence = suppression
+                $ne = (int) ($a['srvAt'] ?? 0);
+                if ($refLm > 0 && $ne > 0 && $ne < $refLm) continue;            // l'admin le connaissait, il l'a retiré
+                $preserves[] = $a;
+            }
+        }
+    }
+    if ($preserves) {
+        $data['visitorAccounts'] = array_merge($data['visitorAccounts'], $preserves);
+        $reEnc = json_encode($data, JSON_UNESCAPED_UNICODE);
+        // Si le ré-encodage échoue, on écrit le payload d'origine : mieux vaut
+        // perdre la préservation qu'écrire un JSON tronqué sur la base.
+        if ($reEnc !== false) {
+            $raw = $reEnc;
+            @file_put_contents(__DIR__ . '/data/_access_log.txt',
+                date('c') . ' MERGE_KEEP ' . count($preserves)
+                . ' compte(s) serveur preserve(s) ip=' . $ip . "\n", FILE_APPEND);
+        }
+    }
+
     // ── 💾 v1.2.3 Sauvegarde horodatée AVANT écrasement (rétention 30) ───────
     // La synchro est en « dernière écriture gagne » (le verrou optimiste côté
     // client est inopérant). Cette copie convertit une perte SILENCIEUSE en perte

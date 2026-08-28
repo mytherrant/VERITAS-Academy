@@ -520,10 +520,35 @@
   }
 
   /* La page porte-t-elle déjà un bouton qui ouvre Ambassa ? */
+  /* ⚠️ 28/08/2026 — cette garde ne voyait PAS la porte de l'application.
+     Elle cherchait un aria-label ÉGAL à « Professeur Ambassa ». Or le bouton
+     posé par app.html (`#vAmbassaFab`, dans #VISITOR, coin bas-GAUCHE) porte
+     « Poser une question au Professeur Ambassa, l'assistant IA », et n'a pas
+     d'`onclick` inline — il écoute au JavaScript. Aucun des trois sélecteurs
+     ne le trouvait : ambassa.js se croyait seul et posait sa pastille
+     « Besoin d'aide ? » à droite. Deux avatars du même tuteur à l'écran, un
+     dans chaque coin — visible sur l'espace enseignant.
+     On reconnaît désormais la porte par son identifiant, par un aria-label
+     qui MENTIONNE Ambassa, ou par l'appel à `mAgentAmbassa`.
+     `:not(.amb-fab)` est indispensable : sans lui, la pastille d'ambassa.js
+     se reconnaîtrait elle-même — son propre aria-label dit « Ouvrir le
+     Professeur Ambassa » — et `surveillerPorte()` la supprimerait aussitôt
+     après l'avoir posée, sur les pages qui n'ont aucune autre porte. */
   function porteDeLaPage() {
-    return document.querySelector(
-      'button[aria-label="Professeur Ambassa"], [onclick*="basculerIA"], [onclick*="ouvrirIA"]'
+    var candidats = document.querySelectorAll(
+      '#vAmbassaFab, button[aria-label*="Ambassa"]:not(.amb-fab),'
+      + ' [onclick*="basculerIA"], [onclick*="ouvrirIA"], [onclick*="mAgentAmbassa"]'
     );
+    /* Une porte MASQUÉE n'est pas une porte. `#vAmbassaFab` vit dans #VISITOR,
+       que l'application cache sur l'écran de connexion : s'en remettre à sa
+       seule présence dans le DOM priverait cet écran de tout accès au tuteur.
+       On mesure donc la boîte plutôt que de supposer — `offsetParent` ne
+       conviendrait pas, il vaut null pour tout élément en position fixe. */
+    for (var i = 0; i < candidats.length; i++) {
+      var r = candidats[i].getBoundingClientRect();
+      if (r.width > 0 && r.height > 0) return candidats[i];
+    }
+    return null;
   }
 
   /* ── Le doublon revenait par la petite porte : le TEMPS ───────────────────

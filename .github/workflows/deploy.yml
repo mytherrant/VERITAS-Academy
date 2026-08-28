@@ -148,7 +148,19 @@ jobs:
           # restée invisible pour eux, y compris le propriétaire du site.
           # On contrôle désormais app.html, et on refuse un app.js modifié dont
           # la version n'a pas bougé.
-          SHELL_VER=$(grep -o 'app\.js?v=[0-9.]*' app.html | head -1 | sed 's/.*v=//')
+          # ⚠️ 28/08/2026 (second passage) — ce contrôle lisait `app.html`, qui
+          # n'est PAS suivi par git : sur un runner fraîchement cloné, le
+          # fichier n'existe pas, SHELL_VER sort vide, et les deux gardes
+          # ci-dessous sautent EN SILENCE depuis leur écriture. Elles n'ont
+          # donc jamais rien vérifié. La coquille réellement déployée est
+          # VERITAS_v1.2.html (copiée en deploy/app.html plus bas) : c'est elle
+          # qu'on lit. Et son absence est désormais une ERREUR, pas un saut
+          # discret — une garde qui ne peut pas s'exécuter doit le dire.
+          if [ ! -f VERITAS_v1.2.html ]; then
+            echo "::error title=Coquille introuvable::VERITAS_v1.2.html est absent : le contrôle de version des assets ne peut pas s'exécuter. Déploiement ANNULÉ plutôt que de partir sans garde."
+            exit 1
+          fi
+          SHELL_VER=$(grep -o 'app\.js?v=[0-9.]*' VERITAS_v1.2.html | head -1 | sed 's/.*v=//')
           SW_VER=$(grep -o "CACHE_VERSION = 'veritas-v[0-9.]*'" sw.js | head -1 | sed "s/.*veritas-v//;s/'//")
           if [ -n "$SHELL_VER" ] && [ -n "$SW_VER" ] && [ "$SHELL_VER" != "$SW_VER" ]; then
             echo "::error title=Versions d'assets divergentes::VERITAS_v1.2.html demande app.js?v=$SHELL_VER mais sw.js précharge la version $SW_VER. Alignez les deux (et bumpez-les à chaque modification d'app.js)."
@@ -159,8 +171,8 @@ jobs:
           # Un app.js modifie sans bump de version ne parvient pas aux visiteurs
           # de retour. On compare au dernier commit qui a touche la version.
           if git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -qx 'app.js'; then
-            if ! git diff HEAD~1 HEAD -- app.html | grep -q '?v='; then
-              echo "::error title=app.js modifie sans bump de version::app.js a change mais app.html demande toujours ?v=$SHELL_VER. Servi immutable un an, le fichier ne sera PAS retelecharge par les visiteurs deja venus. Bumpez la version dans app.html ET sw.js."
+            if ! git diff HEAD~1 HEAD -- VERITAS_v1.2.html | grep -q '?v='; then
+              echo "::error title=app.js modifie sans bump de version::app.js a change mais VERITAS_v1.2.html demande toujours ?v=$SHELL_VER. Bumpez la version dans VERITAS_v1.2.html ET sw.js (CACHE_VERSION)."
               exit 1
             fi
           fi
@@ -269,6 +281,20 @@ jobs:
       #    que le serveur rejette explicitement. Corrigé le 28/08/2026.
       - name: 🔑 Le mot de passe du site ouvre-t-il l'Atelier ?
         run: node tests/banc_mdp_inter_sites.cjs
+
+      # ── 🪪 LE COMPTE CRÉÉ SUR LE SITE EXISTE-T-IL AILLEURS QUE DANS CE
+      #    NAVIGATEUR ? Le banc ci-dessus vérifiait la FORME du mot de passe et
+      #    passait au vert pendant tout l'incident du 28/08/2026 : les
+      #    empreintes étaient justes, mais dans une base que le serveur ne voit
+      #    pas. `doRegister()` écrivait le compte dans localStorage et rien de
+      #    plus — `_fbFetch` court-circuite api/db.php pour les non-admins —
+      #    tandis que `plateforme.php?action=session` lit la base du SERVEUR.
+      #    Résultat : « Identifiants invalides » pour TOUT nouvel inscrit, et
+      #    un compte perdu au moindre changement d'appareil. Celui-ci mesure
+      #    l'autre moitié du contrat : le compte ARRIVE (api/compte.php) et il
+      #    SURVIT à une synchronisation administrateur (api/db.php).
+      - name: 🪪 Le compte créé sur le site atteint-il le serveur ?
+        run: node tests/banc_compte_serveur.cjs
 
       # ── 📕 LA BOUTIQUE NE VEND-ELLE QUE CE QUI EXISTE ? ────────────────────
       #    Cinq manuels inventés étaient semés dans defaultDB() avec un PRIX et
@@ -757,7 +783,8 @@ jobs:
             api/_sentinel.php \
             api/challenge.php \
             api/demandes.php \
-            api/plateforme.php; do
+            api/plateforme.php \
+            api/compte.php; do
             # ⚠️ ÉCHEC BRUYANT, et pas un « [ -f ] && cp » silencieux.
             #    Quatre incidents ont la même cause : un endpoint écrit, ajouté
             #    à cette liste, mais jamais « git add » — la CI ne le voit donc
