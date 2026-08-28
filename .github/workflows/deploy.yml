@@ -325,6 +325,20 @@ jobs:
       - name: 🧹 Le nouvel inscrit trouve-t-il une page vierge ?
         run: node tests/banc_atelier_demo.cjs
 
+      # ── 📱 LA PLANCHE DE TRAVAIL TIENT-ELLE SUR UN TÉLÉPHONE ? Mesuré au
+      #    navigateur sur 375 px le 28/08/2026 : 842 px défilaient AVANT la
+      #    première ligne du texte — un écran entier rien que pour y arriver.
+      #    La rangée « Structure officielle » ne s'était JAMAIS repliée (son
+      #    style s'écrivait `{{ var }};display:flex`, la seconde déclaration
+      #    annulant la première), la zone de saisie d'une question faisait
+      #    184 px de large pour 36 de haut quand son contenu en demandait 121,
+      #    et le texte restait justifié avec césure sur 250 px de colonne.
+      #    Après correction : 563 px avant le contenu. Ce banc verrouille les
+      #    règles qui produisent ces mesures — un ordre de déclaration réécrit
+      #    ou un `!important` retiré, et le gain repart en silence.
+      - name: 📱 La planche de travail tient-elle sur un téléphone ?
+        run: node tests/banc_atelier_mobile.cjs
+
       # ── 📕 LA BOUTIQUE NE VEND-ELLE QUE CE QUI EXISTE ? ────────────────────
       #    Cinq manuels inventés étaient semés dans defaultDB() avec un PRIX et
       #    un bouton d'achat : « Mathématiques 3ème » chez « MINESEC Éditions »,
