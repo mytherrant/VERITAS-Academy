@@ -496,17 +496,31 @@
     animation:vrtDemoEntre .5s cubic-bezier(.22,.61,.36,1) both}
   @keyframes vrtDemoEntre{from{opacity:0;transform:translateY(16px) scale(.985)}
     to{opacity:1;transform:none}}
+  /* ══ LE BLEU FONCÉ TIENT LE CADRE ════════════════════════════════════════
+     Le cadre était blanc sur blanc, cerné d'un gris à peine visible et posé
+     sur un fond clair : l'œil ne savait pas où commençait la démonstration.
+     Le bleu institutionnel (#14375f) l'entoure désormais — une bordure franche
+     et une ombre de la même famille, plus dense. C'est la couleur de la marque
+     qui fait l'emphase, pas une teinte de plus. */
   .vrt-demo-cadre{position:relative;height:348px;border-radius:18px;overflow:hidden;
-    background:var(--cffffff,#fff);border:1px solid var(--ce6ecf3,#e6ecf3);
-    box-shadow:0 6px 26px rgba(20,55,95,.09)}
+    background:var(--cffffff,#fff);border:1px solid var(--c14375f,#14375f);
+    box-shadow:0 14px 38px rgba(20,55,95,.24), 0 2px 8px rgba(20,55,95,.14)}
   /* Barre de fenêtre : trois pastilles, comme un vrai logiciel. Elle donne
      l'échelle et fait comprendre d'un coup d'œil que l'on regarde l'outil. */
-  .vrt-demo-barre{height:30px;background:var(--cf4f8fc,#f4f8fc);
-    border-bottom:1px solid var(--ce6ecf3,#e6ecf3);display:flex;align-items:center;
-    gap:6px;padding:0 12px;flex:none}
-  .vrt-demo-barre i{width:9px;height:9px;border-radius:50%;background:var(--cd5e0ec,#d5e0ec)}
-  .vrt-demo-barre span{margin-left:8px;font-size:11.5px;font-weight:700;
-    color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.04em}
+  /* La barre passe en bleu foncé : c'est elle qu'on voit en premier, et elle
+     porte le nom de l'outil. En gris pâle sur blanc, ce nom se lisait comme
+     une légende oubliée. */
+  .vrt-demo-barre{height:34px;background:var(--c14375f,#14375f);
+    border-bottom:none;display:flex;align-items:center;
+    gap:6px;padding:0 13px;flex:none}
+  /* Les trois pastilles reprennent les couleurs de la marque plutôt qu'un gris
+     unique — elles cessent d'être un ornement de fenêtre pour devenir un signe. */
+  .vrt-demo-barre i{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.32)}
+  .vrt-demo-barre i:nth-child(1){background:#f39200}
+  .vrt-demo-barre i:nth-child(2){background:#1f9d55}
+  .vrt-demo-barre i:nth-child(3){background:#5fa8e8}
+  .vrt-demo-barre span{margin-left:9px;font-size:11.5px;font-weight:700;
+    color:#fff;font-family:Poppins,sans-serif;letter-spacing:.07em}
   .vrt-demo-scenes{position:relative;height:318px}
   .vrt-scene{position:absolute;inset:0;padding:18px 20px;opacity:0;
     animation:vrtScene 30s infinite both;will-change:opacity,transform}
@@ -599,11 +613,20 @@
       transform:scale(.86)}
     9%{transform:scale(1.14)}
     12%,100%{background:var(--cj,#1f9d55);color:#fff;transform:none}}
+  /* Chaque jalon porte sa couleur et son décalage EN LIGNE, sur l'élément.
+     `nth-of-type` comptait parmi les frères de même balise — or chaque jalon
+     est le seul SPAN de sa ligne : les trois étaient donc « nth-of-type(1) »,
+     avec la même couleur et surtout le MÊME DÉLAI. Le circuit s'allumait d'un
+     bloc au lieu de progresser, et le défaut passait inaperçu parce que les
+     trois pastilles étaient de la même couleur.
+
+     (Le mot « div » ne s'écrit pas ici entre chevrons : le garde-fou
+     `verif_syntaxe_atelier` compte les balises TEXTUELLEMENT, commentaires
+     compris, et une balise citée en prose déséquilibre son décompte. Il a
+     raison de rester aussi bête — c'est ce qui lui permet d'attraper une vraie
+     balise oubliée.) */
   .vrt-jalon{animation:vrtJalon 30s infinite both}
-  .vrt-jalon:nth-of-type(1){animation-delay:20s;--cj:#8b97a8}    /* brouillon   */
-  .vrt-jalon:nth-of-type(2){animation-delay:20.7s;--cj:#f39200}  /* en relecture */
-  .vrt-jalon:nth-of-type(3){animation-delay:21.4s;--cj:#1f9d55;  /* validée     */
-    box-shadow:0 0 0 4px #e8f6ee}
+  .vrt-jalon-3{box-shadow:0 0 0 4px #e8f6ee}
 
   /* — 6. exporter : la feuille sort du dossier — */
   @keyframes vrtSortie{0%,5%{opacity:0;transform:translateY(14px) rotate(-3deg)}
@@ -632,7 +655,10 @@
     .vrt-demo-cadre{height:300px}
     .vrt-demo-scenes{height:270px}
     .vrt-scene{padding:14px 15px}
-    .vrt-scene h4{font-size:13.5px}
+    /* 13,5 px pour un TITRE sur un écran tenu à bout de bras, c'est la taille
+       d'un texte courant : le panneau n'avait plus de hiérarchie. */
+    .vrt-scene h4{font-size:15px}
+    .vrt-scene p{font-size:12.5px}
   }
   /* Sans animation : on fige la PREMIÈRE scène plutôt que de les empiler
      toutes, ce qui donnerait six calques illisibles l'un sur l'autre. */
@@ -2725,7 +2751,7 @@
       <div style="width:56px;height:56px;border-radius:15px;background:var(--sb-logo-bg);display:grid;place-items:center;margin:0 auto 18px">{{ loginIcLogo }}</div>
       <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-weight:700;margin-bottom:12px">Atelier de Français · Français MINESEC</div>
       <h1 style="font-family:'Poppins';font-size:31px;font-weight:700;line-height:1.2;margin:0 auto 14px;max-width:20ch;color:var(--c14375f,#14375f);letter-spacing:-.02em">Un espace collaboratif pour vos cours et vos épreuves</h1>
-      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Composez vos épreuves et vos leçons à partir de 1 040 textes vérifiés — dont 1 014 ouverts sans abonnement — avec un garde-fou qui contrôle la conformité MINESEC pendant que vous écrivez.</p>
+      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Composez vos épreuves et vos leçons à partir de 2 054 textes vérifiés — dont 1 014 ouverts sans abonnement — avec un garde-fou qui contrôle la conformité MINESEC pendant que vous écrivez.</p>
 
       <!-- ═══════════ DÉMONSTRATION ANIMÉE ═══════════
            Elle remplace la « Visite guidée » par profils d'exemple, qui
@@ -2745,7 +2771,7 @@
             <!-- 1 · se connecter -->
             <div class="vrt-scene">
               <h4><b>1</b>Se connecter</h4>
-              <p>Votre compte VÉRITAS ouvre les 1 040 textes du répertoire, dont 1 014 sans abonnement.</p>
+              <p>Votre compte VÉRITAS ouvre les 2 054 textes du répertoire, dont 1 014 sans abonnement.</p>
               <div class="vrt-boite" style="max-width:290px">
                 <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:5px">IDENTIFIANT</div>
                 <div style="height:7px;border-radius:4px;background:var(--ceef2f7,#eef2f7);margin-bottom:11px"><div class="vrt-saisie"></div></div>
@@ -2816,9 +2842,9 @@
               <h4><b>5</b>Valider</h4>
               <p>Brouillon, relecture, validation : chaque épreuve suit le même circuit.</p>
               <div style="display:flex;flex-direction:column;gap:9px;max-width:330px">
-                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;font-family:Poppins,sans-serif;flex:none">1</span><span style="font-size:13.5px;font-weight:600;color:var(--c33404f,#33404f)">Brouillon</span></div>
-                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;font-family:Poppins,sans-serif;flex:none">2</span><span style="font-size:13.5px;font-weight:600;color:var(--c33404f,#33404f)">En relecture</span></div>
-                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;font-family:Poppins,sans-serif;flex:none">3</span><span style="font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">Validée</span></div>
+                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon vrt-jalon-1" style="width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;font-family:Poppins,sans-serif;flex:none;--cj:#8b97a8;animation-delay:20s">1</span><span style="font-size:13.5px;font-weight:600;color:var(--c33404f,#33404f)">Brouillon</span></div>
+                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon vrt-jalon-2" style="width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;font-family:Poppins,sans-serif;flex:none;--cj:#f39200;animation-delay:20.7s">2</span><span style="font-size:13.5px;font-weight:600;color:var(--c33404f,#33404f)">En relecture</span></div>
+                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon vrt-jalon-3" style="width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;font-family:Poppins,sans-serif;flex:none;--cj:#1f9d55;animation-delay:21.4s">3</span><span style="font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">Validée</span></div>
               </div>
             </div>
 
@@ -6333,7 +6359,7 @@ class Component extends DCLogic {
       {sceau:'book',titre:'Atelier de Fran\u00e7ais',
        sous:'Composer des \u00e9preuves et des le\u00e7ons conformes aux programmes MINESEC, \u00e0 partir d\u2019un corpus v\u00e9rifi\u00e9.',
        puces:[
-         {ic:'layers',t:'1 040 textes v\u00e9rifi\u00e9s',d:'Extraits d\u2019auteurs class\u00e9s par cycle, module et type \u2014 dont 1 014 sans abonnement.'},
+         {ic:'layers',t:'2 054 textes v\u00e9rifi\u00e9s',d:'Extraits d\u2019auteurs class\u00e9s par cycle, module et type \u2014 dont 1 014 sans abonnement.'},
          {ic:'search',t:'Garde-fou de conformit\u00e9',d:'Longueurs, bar\u00e8mes et structures contr\u00f4l\u00e9s pendant que vous \u00e9crivez.'},
          {ic:'users',t:'Travail \u00e0 plusieurs',d:'Relecture, validation, biblioth\u00e8que partag\u00e9e du d\u00e9partement.'},
          {ic:'file',t:'Impression et export Word',d:'Votre en-t\u00eate, votre logo, pr\u00eat \u00e0 tirer.'}]},
