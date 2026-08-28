@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aperçu gratuit — Mon Cahier de français · Centre VÉRITAS</title>
+<meta name="description" content="Essayez le cahier avant d'acheter : deux leçons entières, prises à deux endroits du programme, avec les vrais exercices. Vous écrivez dans la page.">
+<link rel="canonical" href="https://veritas-school.com/livrets/apercu.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Klee+One&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="/livrets/cahier.css?v=1.20.4">
+<style>
+  body{ margin:0; background:#F4F7FB; color:#1B2431;
+        font-family:'Poppins',system-ui,-apple-system,'Segoe UI',sans-serif; }
+  .bar{ position:sticky; top:0; z-index:50; background:#16284F; color:#fff;
+        display:flex; align-items:center; gap:12px; padding:11px 16px; }
+  .bar h1{ font-size:15px; font-weight:600; margin:0; flex:1;
+           white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .bar a{ background:#F58220; color:#fff; text-decoration:none; border-radius:8px;
+          font-size:13px; font-weight:600; padding:8px 13px; min-height:36px;
+          display:inline-flex; align-items:center; }
+  .zone{ padding:0 16px; max-width:860px; margin:0 auto; }
+
+  /* ── Le bandeau qui dit ce que c'est ─────────────────────────────────────
+     Un aperçu qui ne se présente pas laisse croire que le cahier est gratuit,
+     puis déçoit à la première page verrouillée. On annonce la couleur en
+     haut : voilà ce que vous avez, voilà ce qui manque, voilà le prix. */
+  .quoi{ max-width:860px; margin:16px auto 0; background:#fff; border:1px solid #E3E9F2;
+         border-radius:14px; padding:18px 20px; }
+  .quoi h2{ margin:0 0 6px; font-size:18px; color:#16284F; }
+  .quoi p{ margin:0; color:#54606F; font-size:14.5px; line-height:1.6; }
+  .etapes{ display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
+  .etape{ flex:1 1 210px; background:#F4F7FB; border:1px solid #E3E9F2;
+          border-radius:11px; padding:13px 15px; }
+  .etape b{ display:block; font-size:13.5px; color:#1B63C4; margin-bottom:3px; }
+  .etape span{ font-size:13.5px; color:#54606F; line-height:1.55; }
+  .choix{ max-width:860px; margin:16px auto 0; display:flex; gap:8px; flex-wrap:wrap; }
+  .choix a{ text-decoration:none; font-size:13.5px; font-weight:600; color:#16284F;
+            background:#fff; border:1px solid #E3E9F2; border-radius:999px;
+            padding:8px 15px; min-height:38px; display:inline-flex; align-items:center; }
+  .choix a[aria-current]{ background:#16284F; color:#fff; border-color:#16284F; }
+  .choix a:hover{ border-color:#1B63C4; }
+
+  /* Le pied de l'aperçu : là où l'on décide. Il arrive APRÈS avoir travaillé
+     deux leçons — c'est le seul moment où l'offre a du sens. */
+  .fin{ max-width:860px; margin:24px auto 40px; background:#16284F; color:#fff;
+        border-radius:16px; padding:26px 24px; text-align:center; }
+  .fin h2{ margin:0 0 8px; font-size:20px; }
+  .fin p{ margin:0 0 16px; color:#C7D3E8; font-size:14.5px; line-height:1.6; }
+  .fin a{ display:inline-flex; align-items:center; justify-content:center;
+          background:#F58220; color:#fff; text-decoration:none; font-weight:700;
+          font-size:15px; border-radius:11px; padding:13px 26px; min-height:46px; }
+  .fin small{ display:block; margin-top:12px; color:#9FB2D0; font-size:12.5px; }
+  .attente{ text-align:center; color:#54606F; padding:12vh 20px; font-size:14px; }
+  @media (max-width:560px){ .quoi,.fin{ margin-left:12px; margin-right:12px; } }
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <h1 id="titre">Aperçu gratuit</h1>
+  <a id="btnAchat" href="/livrets/">Obtenir le cahier</a>
+</div>
+
+<section class="quoi">
+  <h2 id="quoiT">Vous lisez un aperçu gratuit</h2>
+  <p id="quoiP">Deux leçons entières, prises à deux endroits du programme, avec
+     leurs vrais textes et leurs vrais exercices. Écrivez dedans : c'est fait pour ça.</p>
+  <div class="etapes">
+    <div class="etape"><b>1 · Vous écrivez</b><span>Chaque pointillé du cahier
+      papier est ici un endroit où répondre, au clavier.</span></div>
+    <div class="etape"><b>2 · C'est gardé</b><span>Votre travail reste sur
+      l'appareil. Avec le cahier complet, il vous suit d'un téléphone à l'autre.</span></div>
+    <div class="etape"><b>3 · La correction s'ouvre</b><span>Dès que vous avez
+      répondu — sans attendre personne. Réservée au cahier complet.</span></div>
+  </div>
+</section>
+
+<nav class="choix" id="choix" aria-label="Choisir une classe"></nav>
+
+<div class="zone"><div id="hote" class="ch-hote"></div></div>
+
+<section class="fin">
+  <h2>La suite du cahier</h2>
+  <p id="finP">Vous venez d'en faire deux leçons. L'année en compte des dizaines —
+     et dans le cahier complet, la correction s'ouvre dès que vous avez cherché.</p>
+  <a href="/livrets/">Obtenir mon code — 1 500 FCFA</a>
+  <small>Un code par cahier, envoyé dès le paiement. Mobile Money, Orange Money ou carte.</small>
+</section>
+
+<div id="attente" class="attente">Chargement de l'aperçu…</div>
+<div id="ch-voyant" class="ch-voyant"></div>
+
+<script src="/livrets/cahier.js?v=1.20.4"></script>
+<script>
+/* ── L'APERÇU GRATUIT ────────────────────────────────────────────────────────
+   Il fait tourner EXACTEMENT le même moteur que le cahier vendu, sur un
+   extrait produit par tools/normaliser_cahiers.py. Deux moteurs auraient
+   donné deux comportements, et l'aperçu aurait fini par promettre autre chose
+   que le produit.
+
+   Sans jeton, `VRTCahier` n'appelle pas le serveur : les réponses restent sur
+   l'appareil et aucune correction ne s'ouvre. Ce n'est pas un verrou posé
+   ici — c'est ce que fait le moteur quand personne ne l'a authentifié. */
+(function () {
+  'use strict';
+  var CLASSES = [
+    ['6e', '6ᵉ'], ['5e', '5ᵉ'], ['4e', '4ᵉ'], ['3e', '3ᵉ'],
+    ['2nde', '2ⁿᵈᵉ'], ['1ere', '1ʳᵉ'], ['tle', 'Tˡᵉ']
+  ];
+  var $ = function (id) { return document.getElementById(id); };
+  var params = new URLSearchParams(location.search);
+  var slug = (params.get('o') || '6e').toLowerCase().replace(/[^a-z0-9_-]/g, '');
+
+  // Les onglets de classe. Un aperçu d'une seule classe fait partir les six
+  // autres : le visiteur ne cherche pas « un cahier », il cherche LE sien.
+  var nav = $('choix');
+  CLASSES.forEach(function (c) {
+    var a = document.createElement('a');
+    a.href = 'apercu.html?o=' + encodeURIComponent(c[0]);
+    a.textContent = c[1];
+    if (c[0] === slug) a.setAttribute('aria-current', 'page');
+    nav.appendChild(a);
+  });
+
+  var nom = (CLASSES.filter(function (c) { return c[0] === slug; })[0] || [slug, slug])[1];
+  $('titre').textContent = 'Aperçu gratuit — cahier de ' + nom;
+  $('btnAchat').href = '/livrets/#' + slug;
+
+  var s = document.createElement('script');
+  s.src = 'extrait-' + slug + '.js?v=1.20.4';
+  s.onload = function () {
+    var blocs = window.CAHIER_BLOCS;
+    if (!blocs || !blocs.length) { echec(); return; }
+    $('attente').hidden = true;
+    new VRTCahier({ ouvrage: 'apercu-' + slug, token: '', hote: $('hote'), blocs: blocs })
+      .demarrer();
+  };
+  /* On le DIT plutôt que d'afficher une page blanche. Un aperçu muet se lit
+     comme un site cassé, et personne n'achète sur un site cassé. */
+  s.onerror = echec;
+  document.body.appendChild(s);
+
+  function echec() {
+    $('attente').hidden = false;
+    $('attente').innerHTML = 'L’aperçu de cette classe n’est pas encore en ligne.<br><br>'
+      + 'Essayez une autre classe ci-dessus, ou écrivez-nous à '
+      + '<strong>contact@veritas-school.com</strong>.';
+  }
+})();
+</script>
+</body>
+</html>
