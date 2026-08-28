@@ -399,7 +399,12 @@
       poser('citationTexte', c.t || ''); poser('citationAuteur', '— ' + (c.a || ''));
       panneau('vrtCit', true);
     },
-    fermerCitation: function () { S.citOn = false; panneau('vrtCit', false); },
+    fermerCitation: function () {
+      S.citOn = false; panneau('vrtCit', false);
+      /* Le refus vaut pour la session : sans cela, la citation revenait sur
+         chaque écran de la vitrine et le geste de fermeture ne servait à rien. */
+      try { sessionStorage.setItem('vrt_cit_fermee', '1'); } catch (e) {}
+    },
     copierPassage: function () {
       /* Le titre et l'auteur étaient écrits en dur : depuis que l'extrait tourne
          (voir chargerPassageDuJour), copier renvoyait à une œuvre qui n'était
@@ -1998,6 +2003,26 @@
       if (n === S.page) return;                                   // déjà là : ne pas re-rendre
       if (document.querySelector('[data-vp="' + n + '"]')) aller(n);
     });
+
+    /* ── La citation doit se montrer TOUTE SEULE ──────────────────────────
+       Le panneau #vrtCit naît `hidden` et n'était ouvert que par le bouton
+       « nouvelle citation ». Or personne ne clique un bouton pour demander à
+       être motivé : la rotation tournait donc dans le vide, sur un panneau que
+       le visiteur ne voyait jamais.
+       On l'ouvre au bout de quelques secondes — le temps que la page se pose
+       et que la lecture commence — puis la rotation prend le relais.
+       Le refus est respecté : `fermerCitation` met citOn à false, et on retient
+       ce choix pour la session afin de ne pas revenir à chaque écran. */
+    var CLE_CIT = 'vrt_cit_fermee';
+    try { if (sessionStorage.getItem(CLE_CIT)) S.citOn = false; } catch (e) {}
+    if (S.citOn && (D.citations || []).length) {
+      setTimeout(function () {
+        if (!S.citOn) return;                       // fermée entre-temps
+        var c = D.citations[S.cit] || {};
+        poser('citationTexte', c.t || ''); poser('citationAuteur', '— ' + (c.a || ''));
+        panneau('vrtCit', true);
+      }, 6000);
+    }
 
     // Rotation des citations, comme dans la maquette : toutes les 45 s.
     setInterval(function () {
