@@ -2542,6 +2542,15 @@
         <section style="background:var(--cffffff,#fff);border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:12px;padding:22px 24px;box-shadow:0 2px 10px rgba(20,55,95,.05)">
             <h3 style="{{ secHead }}">Corpus de la leçon</h3>
             <p style="font-size:12.5px;color:var(--c7a8598,#7a8598);margin:-6px 0 13px;line-height:1.55">{{ coCorpusAide }}</p>
+            <!-- Ce que la lecon commande au repertoire. Les fiches qui portent
+                 le bon niveau, le bon type de texte, le bon module ou les faits
+                 de langue annonces remontent en tete du selecteur, marquees
+                 d'une etoile et de leur raison. On ne masque rien par defaut :
+                 c'est un classement, pas un filtre. -->
+            <div style="{{ coConseilStyle }}">
+              <span style="flex:1;min-width:150px"><strong>{{ coConseilTexte }}</strong></span>
+              <button onClick="{{ coConseilToggle }}" style="{{ coConseilBtnStyle }}">{{ coConseilLabel }}</button>
+            </div>
             <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:flex-end;margin-bottom:13px">
               <label style="{{ fieldLbl }};flex:1;min-width:170px">Rechercher<input value="{{ coCorpusQ }}" onChange="{{ setCoCorpusQ }}" placeholder="auteur, titre, mot du texte…" style="{{ fieldIn }}"></label>
               <label style="{{ fieldLbl }};flex:1.4;min-width:210px">Texte support<select value="{{ coCorpusN }}" onChange="{{ setCoCorpusN }}" disabled="{{ co.locked }}" style="{{ fieldIn }}"><option value="">— Aucun texte rattaché —</option><sc-for list="{{ coCorpusOptions }}" as="o" hint-placeholder-count="6"><option value="{{ o.value }}">{{ o.label }}</option></sc-for></select></label>
@@ -3390,7 +3399,7 @@ class Component extends DCLogic {
       propCible:'',propTexte:'',propMsg:'',propMsgTon:'',
       actFilter:'toutes',collabTab:'discussions',
       coursTab:'gabarits',cycleFiltre:'',createOpen:false,admTab:'fonctions',
-      profTab:'infos',profSaved:'',coCorpusQ:'',coConfOpen:!this._petitEcran(),
+      profTab:'infos',profSaved:'',coCorpusQ:'',coCorpusConseilles:false,coConfOpen:!this._petitEcran(),
       panier:this._load('minesec_panier',[])||[],panierOpen:false,
       corpusSource:'',corpusErr:'',corpusLong:false,corpusEtat:'',corpusDroit:null,corpusPalier:'',corpusPlafonds:null,corpusLibres:0,
       /* Repris du stockage : sans cela, un rechargement de page perdait
@@ -3876,6 +3885,103 @@ class Component extends DCLogic {
      ecran de 390 px, un volet ouvert d'office repousse la planche de travail
      hors de vue. Lu une seule fois, a la construction — on ne redispose pas
      l'ecran sous les doigts de quelqu'un qui tourne son telephone. */
+  /* ═══ LE CORPUS QUI CORRESPOND A LA LECON ═══════════════════════════════
+     Le selecteur de texte support ne cherchait que dans l'auteur, le titre et
+     le corps du texte. Rien ne le reliait a la lecon en cours : pour une
+     « Lecon de langue — les expansions du nom, 6e, sequence 3 », il proposait
+     les 2 054 fiches du repertoire dans l'ordre du fichier, et l'enseignant
+     lisait des extraits jusqu'a en trouver un qui serve.
+     Or chaque fiche porte deja ce qu'il faut pour repondre : son NIVEAU, son
+     TYPE (descriptif, narratif, dialogue...), son MODULE, et surtout ses
+     `faits` — les faits de langue qu'elle permet d'observer.
+     On ne FILTRE pas, on CLASSE : masquer, c'est risquer de cacher le texte
+     qu'il cherchait. Les fiches qui repondent a la lecon montent en tete avec
+     la raison affichee, le reste suit. Une bascule permet de ne garder que les
+     conseillees quand la liste est longue. */
+  _scoreCorpus(f, co){
+    if(!f || !co) return {score:0, raisons:[]};
+    const norm = s => String(s||'').toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g,'')
+      .replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+    /* « 6e », « 6ᵉ », « 6eme » designent la meme classe ; « Tle » et
+       « Terminale » aussi. On compare le chiffre, ou le mot-cle a defaut. */
+    const niveau = s => {
+      const n = norm(s);
+      if(/(tle|terminale)/.test(n)) return 'tle';
+      const m = n.match(/\d+/);
+      return m ? m[0] : n.slice(0,4);
+    };
+    const raisons = [];
+    let score = 0;
+
+    const nivL = niveau(co.classe), nivF = niveau(f.level);
+    if(nivL && nivF && nivL === nivF){ score += 3; raisons.push(String(f.level||'').trim()); }
+
+    /* Le TYPE de texte : une lecon qui annonce « decrire » veut un descriptif.
+       On lit l'intention partout ou elle peut etre ecrite — titre, objectif,
+       competence, regle, type de lecon — parce qu'aucun de ces champs n'est
+       obligatoire et que l'enseignant la pose ou il veut. */
+    const TYPES = ['descriptif','narratif','argumentatif','explicatif','injonctif','dialogue','poetique'];
+    const INTENTIONS = {descriptif:['decrire','description','portrait','cadre'],
+      narratif:['raconter','recit','narration','histoire'],
+      argumentatif:['argumenter','convaincre','persuader','defendre','these'],
+      explicatif:['expliquer','explication','informer'],
+      injonctif:['consigne','ordre','recette','mode d emploi','injonction'],
+      dialogue:['dialogue','replique','theatre','conversation'],
+      poetique:['poeme','poesie','vers','strophe','versification']};
+    const champ = norm([co.title, co.objAgir, co.objContexte, co.objFonction,
+      co.competence, co.regle, co.type].join(' '));
+    const tf = norm(f.type);
+    TYPES.forEach(function(t){
+      if(tf.indexOf(t) < 0) return;
+      const mots = [t].concat(INTENTIONS[t] || []);
+      if(mots.some(function(m){ return champ.indexOf(m) >= 0; })){
+        score += 4; raisons.push(String(f.type||'').toLowerCase());
+      }
+    });
+
+    /* Les FAITS DE LANGUE. C'est l'appariement qui vaut le plus : une lecon
+       « les expansions du nom » doit retrouver les fiches dont les faits
+       portent « expansions du nom ». On ne retient que les mots de plus de
+       quatre lettres et hors liste vide, sinon « les », « dans » et « pour »
+       feraient remonter tout le repertoire. */
+    const VIDES = ['leurs','leur','elles','cette','cettes','celui','celle','ceux',
+      'dans','pour','avec','sans','entre','apres','avant','selon','chez','depuis',
+      'etre','avoir','faire','texte','textes','eleve','eleves','lecon','lecons',
+      'seance','sequence','module','francais','partir','ainsi','plus','moins',
+      'identifier','employer','reconnaitre','utiliser','produire'];
+    const motsLecon = norm([co.title, co.objAgir, co.regle].join(' '))
+      .split(' ').filter(function(w){ return w.length > 4 && VIDES.indexOf(w) < 0; });
+    const faits = norm((f.faits||'') + ' ' + (f.comprehension||''));
+    let touches = 0;
+    const vus = {};
+    motsLecon.forEach(function(w){
+      if(vus[w] || faits.indexOf(w) < 0) return;
+      vus[w] = 1; touches++; score += 3;
+    });
+    if(touches) raisons.push(touches + (touches > 1 ? ' faits de langue' : ' fait de langue'));
+
+    /* Le MODULE : « Sequence 3 » et « Module 3 — ... » se repondent. */
+    const mL = (String(co.sequence||'').match(/\d+/) || [])[0];
+    const mF = String(f.groupNum || '');
+    if(mL && mF && mL === mF){ score += 2; raisons.push('module ' + mF); }
+
+    return {score:score, raisons:raisons};
+  }
+  /* Le score est recalcule pour 2 054 fiches : on le garde tant que la lecon
+     n'a pas change sur les champs qui le determinent. */
+  _scoresCorpus(all, co){
+    if(!co) return null;
+    const cle = [co.id, co.title, co.objAgir, co.objContexte, co.objFonction,
+      co.competence, co.regle, co.type, co.classe, co.sequence].join('|');
+    if(this._coScoreCle === cle && this._coScoreMap) return this._coScoreMap;
+    const m = {};
+    const self = this;
+    (all||[]).forEach(function(f){ m[f.n] = self._scoreCorpus(f, co); });
+    this._coScoreCle = cle; this._coScoreMap = m;
+    return m;
+  }
+
   _petitEcran(){
     try{return window.matchMedia('(max-width:820px)').matches;}catch(e){return false;}
   }
@@ -7055,8 +7161,49 @@ class Component extends DCLogic {
       ? all.filter(f=>((f.author||'')+' '+(f.title||'')+' '+(f.text||''))
           .replace(/\s+/g,' ').toLowerCase().indexOf(coQ)>=0)
       : all;
-    const coCorpusOptions=coFiltre.slice(0,60).map(f=>({value:String(f.n),
-      label:'n\u00b0'+f.n+' \u2014 '+(f.author||'Anonyme')+(f.title?', '+f.title:'')+' ('+f.words+' mots)'}));
+    /* Classement par pertinence pour la lecon ouverte (voir _scoreCorpus).
+       La recherche libre reste prioritaire : quand l'enseignant tape un nom
+       d'auteur, il sait ce qu'il veut, et on ne le reordonne pas sous ses
+       doigts \u2014 on se contente d'annoter ce qui correspond a sa lecon. */
+    const coScores=this._scoresCorpus(all,cActive);
+    /* SEUIL DE RECOMMANDATION. Un seul critere ne suffit pas a conseiller un
+       texte : mesure sur les 1 014 fiches du repertoire libre, pour une lecon
+       \u00ab les expansions du nom, 6e, sequence 1 \u00bb, 647 fiches obtenaient au
+       moins un point \u2014 la moitie du repertoire, ce qui ne conseille rien.
+       La distribution est nette : 313 fiches a 3 points (un seul critere,
+       le niveau OU un fait isole), puis un creux. A partir de 6, il faut deux
+       criteres qui se croisent (niveau+type, niveau+fait, type+fait) et il
+       reste 156 fiches, soit 15 % \u2014 une recommandation qui discrimine.
+       Le TRI, lui, tient compte de tous les scores : un texte a 3 points reste
+       devant un texte a 0. Seuls l'etoile, le compteur et la bascule
+       s'arretent au seuil. */
+    const CO_SEUIL=6;
+    const coRaison=f=>{
+      const s=coScores&&coScores[f.n];
+      return (s&&s.score>=CO_SEUIL)?s.raisons.join(' \u00b7 '):'';
+    };
+    let coClasse=coFiltre;
+    if(coScores && !coQ){
+      coClasse=coFiltre.slice().sort(function(a,b){
+        const sa=(coScores[a.n]||{score:0}).score, sb=(coScores[b.n]||{score:0}).score;
+        return sb-sa || a.n-b.n;
+      });
+    }
+    const coNbConseilles=coScores
+      ? coFiltre.filter(function(f){ return (coScores[f.n]||{score:0}).score>=CO_SEUIL; }).length : 0;
+    /* La bascule ne peut jamais vider la liste : sans aucun texte conseille,
+       elle est sans objet et l'on montre tout. Meme regle que le filtre par
+       matieres des epreuves \u2014 une liste vide ferait croire au repertoire vide. */
+    const coSeulsConseilles=!!st.coCorpusConseilles && coNbConseilles>0;
+    if(coSeulsConseilles){
+      coClasse=coClasse.filter(function(f){ return (coScores[f.n]||{score:0}).score>=CO_SEUIL; });
+    }
+    const coCorpusOptions=coClasse.slice(0,60).map(f=>{
+      const r=coRaison(f);
+      return {value:String(f.n),
+        label:(r?'\u2605 ':'')+'n\u00b0'+f.n+' \u2014 '+(f.author||'Anonyme')
+          +(f.title?', '+f.title:'')+' ('+f.words+' mots)'+(r?' \u00b7 '+r:'')};
+    });
     const coTexte=cActive&&cActive.corpusN?all.find(x=>String(x.n)===String(cActive.corpusN)):null;
     const coEcarts=cActive?CONFORMITE.verifierCours(cActive,coTexte?coTexte.text:''):[];
     const coEcartsTous=coEcarts.concat((st.coConfIA&&st.coConfIA.ecarts)||[]);
@@ -7797,6 +7944,18 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
         :'Rattachez le texte sur lequel la le\u00e7on s\u2019appuie : il sert d\u2019appui \u00e0 l\u2019observation et au contr\u00f4le de conformit\u00e9.',
       coCorpusQ:st.coCorpusQ,
       setCoCorpusQ:e=>this.setState({coCorpusQ:val(e)}),
+      /* Le bandeau ne s'affiche que s'il a quelque chose a dire : sans lecon
+         ouverte, ou sans aucune fiche qui reponde, il disparait plutot que
+         d'annoncer « 0 texte conseille » — ce qui ferait douter du repertoire
+         alors que c'est la lecon qui n'est pas encore renseignee. */
+      coConseilVisible:coNbConseilles>0,
+      coConseilStyle:coNbConseilles>0
+        ?'display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:var(--cf5faff,#f5faff);border:1px solid var(--cbcd9f2,#bcd9f2);border-radius:10px;padding:9px 12px;margin-bottom:11px;font-size:12.5px;color:var(--c14375f,#14375f)'
+        :'display:none',
+      coConseilTexte:coNbConseilles+(coNbConseilles>1?' textes correspondent':' texte correspond')+' à cette leçon',
+      coConseilLabel:coSeulsConseilles?'Voir tout le répertoire':'Ne montrer que ceux-là',
+      coConseilBtnStyle:'background:var(--cffffff,#fff);border:1px solid var(--cbcd9f2,#bcd9f2);border-radius:8px;padding:5px 11px;font-size:11.5px;font-weight:700;color:var(--c1a72bb,#1a72bb);cursor:pointer;font-family:Poppins',
+      coConseilToggle:()=>this.setState({coCorpusConseilles:!st.coCorpusConseilles}),
       coCorpusN:cActive&&cActive.corpusN?String(cActive.corpusN):'',
       setCoCorpusN:e=>this._updateCours({corpusN:val(e)||null},'a rattach\u00e9 un texte du corpus'),
       coCorpusOptions,

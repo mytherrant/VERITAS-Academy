@@ -339,6 +339,18 @@ jobs:
       - name: 📱 La planche de travail tient-elle sur un téléphone ?
         run: node tests/banc_atelier_mobile.cjs
 
+      # ── 📚 LA LEÇON TROUVE-T-ELLE SON CORPUS ? Le sélecteur de texte support
+      #    ne cherchait que dans l'auteur, le titre et le corps du texte : pour
+      #    une « Leçon de langue — les expansions du nom, 6ᵉ », il proposait les
+      #    2 054 fiches dans l'ordre du fichier. Chaque fiche porte pourtant son
+      #    niveau, son type, son module et ses `faits` de langue. On CLASSE
+      #    désormais (on ne filtre pas : masquer, c'est risquer de cacher le
+      #    texte cherché), et le contrôle qui compte est celui du SEUIL — sans
+      #    lui, 647 fiches sur 1 014 étaient « conseillées », ce qui ne
+      #    conseille rien. À 6 points il en reste 156, soit 15 %.
+      - name: 📚 La leçon trouve-t-elle son corpus ?
+        run: node tests/banc_corpus_lecon.cjs
+
       # ── 📕 LA BOUTIQUE NE VEND-ELLE QUE CE QUI EXISTE ? ────────────────────
       #    Cinq manuels inventés étaient semés dans defaultDB() avec un PRIX et
       #    un bouton d'achat : « Mathématiques 3ème » chez « MINESEC Éditions »,
