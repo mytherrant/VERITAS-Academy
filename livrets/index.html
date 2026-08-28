@@ -107,6 +107,31 @@
     white-space:nowrap;
   }
 
+  /* « Bientôt en vente » : la même forme que le bouton d'achat pour que la
+     grille reste régulière, mais NEUTRE et non cliquable — un aplat orange
+     qui ne mène nulle part se clique quand même, puis déçoit. Le prix y
+     figure : c'est ce que le visiteur est venu chercher, et il ne changera
+     pas d'ici la mise en vente. */
+  .card.cardlv .dl-attente{
+    display:flex; justify-content:space-between; align-items:center; gap:.5rem;
+    background:#F4F7FB; border:1px dashed #C3D0E0; color:#54606F;
+    border-radius:12px; padding:.72rem 1rem; min-height:48px;
+    font-weight:600; font-size:.95rem; box-shadow:none; cursor:default;
+  }
+  /* Sur une carte de ~294 px, « Bientôt en vente » + la pastille de prix
+     passaient à la ligne : la tuile faisait 74 px contre 55 pour un bouton
+     d'achat, et la grille se déréglait ligne après ligne. On empêche le
+     retour et on rend la police d'un demi-point — la régularité de la grille
+     est ce qui permet de comparer quinze cartes d'un coup d'œil. */
+  .card.cardlv .dl-attente > span:first-child{
+    display:inline-flex; align-items:center; white-space:nowrap; }
+  .card.cardlv .dl-attente{ font-size:.9rem; }
+  .card.cardlv .dl-attente .i{ color:#8B97A8; margin-right:.5rem; flex:none; }
+  .card.cardlv .dl-attente .prix{
+    background:#E3E9F2; color:#54606F; border:none; border-radius:999px;
+    padding:.22rem .72rem; font-weight:700; font-size:.9rem; white-space:nowrap;
+  }
+
   /* L'essai gratuit est SECONDAIRE : bleu d'action, pas orange. Deux boutons
      orange côte à côte, et l'œil ne sait plus lequel est l'achat.
      `text-align:left` explicite : la feuille partagée justifie le corps de
@@ -507,11 +532,20 @@
         var slug = String(o.slug || '').toLowerCase();
         if (!slug) return;
         if (deja[slug]) { poserCouverture(carteDe(slug), o); return; }   // déjà sur la page
-        /* DÉCLARÉ ≠ PUBLIÉ. Le catalogue serveur retombe sur cinq classes
-           d'origine pour ne jamais fermer un accès vendu : « 2nde » y figure
-           sans que sa page existe. Sans ce filtre, la boutique affichait une
-           carte qui menait à un 404 — constaté au navigateur. */
-        if (o.disponible === false) return;
+        /* DÉCLARÉ ≠ PUBLIÉ — mais « pas encore en vente » ≠ « invisible ».
+           Ce filtre renvoyait purement et simplement les ouvrages dont le
+           contenu n'est pas encore déposé sur le serveur. Il évitait bien le
+           défaut d'origine (une carte « Acheter » qui menait à un 404), mais
+           il en créait un autre, mesuré le 28/08 : dix classes sur quinze
+           avaient déjà leur APERÇU GRATUIT en ligne — 8 à 11 Ko, servis en
+           200 — et aucune carte n'y menait. Un parent qui cherchait la 1ʳᵉ ne
+           trouvait rien du tout, et repartait en croyant qu'elle n'existe pas.
+
+           On affiche donc les deux états, en les distinguant franchement :
+             disponible     → couverture, prix, bouton d'achat, essai gratuit ;
+             pas encore     → couverture, essai gratuit, et « bientôt » — jamais
+                              un bouton d'achat, puisqu'il n'ouvrirait rien. */
+        var pret = o.disponible !== false;
         var prix = parseInt(o.prix, 10) > 0 ? parseInt(o.prix, 10) : 1500;
         var lecture = o.mode === 'lecture';
 
@@ -533,19 +567,33 @@
 
         var duo = document.createElement('div');
         duo.className = 'duo';
-        var a = document.createElement('a');
-        a.className = 'dl';
-        /* Le lien vient du SERVEUR : lui seul sait si cet ouvrage a sa propre
-           coquille (`3e.html`) ou s'il passe par le moteur générique
-           (`cahier.html?o=…`). Le déduire ici renverrait vers un 404 pour les
-           onze cahiers qui n'ont pas de page dédiée. */
-        a.href = o.lien || (slug + '.html');
-        a.innerHTML = '<span>' + ico(lecture ? 'i-book-open' : 'i-key') + '</span>'
-                    + '<span class="pill prix"></span>';
-        a.querySelector('span').insertAdjacentText('beforeend',
-          lecture ? 'Feuilleter l’ouvrage' : 'Ouvrir le livret');
-        a.querySelector('.prix').textContent = prixTexte(prix);
-        duo.appendChild(a);
+        if (pret) {
+          var a = document.createElement('a');
+          a.className = 'dl';
+          /* Le lien vient du SERVEUR : lui seul sait si cet ouvrage a sa propre
+             coquille (`3e.html`) ou s'il passe par le moteur générique
+             (`cahier.html?o=…`). Le déduire ici renverrait vers un 404 pour les
+             onze cahiers qui n'ont pas de page dédiée. */
+          a.href = o.lien || (slug + '.html');
+          a.innerHTML = '<span>' + ico(lecture ? 'i-book-open' : 'i-key') + '</span>'
+                      + '<span class="pill prix"></span>';
+          a.querySelector('span').insertAdjacentText('beforeend',
+            lecture ? 'Feuilleter l’ouvrage' : 'Ouvrir le livret');
+          a.querySelector('.prix').textContent = prixTexte(prix);
+          duo.appendChild(a);
+        } else {
+          /* Pas de bouton d'achat tant que le contenu n'est pas sur le
+             serveur : il encaisserait pour un cahier qui ne s'ouvre pas.
+             On annonce le prix quand même — c'est l'information que le
+             visiteur cherche, et elle ne change pas d'ici la mise en vente. */
+          var att = document.createElement('span');
+          att.className = 'dl dl-attente';
+          att.innerHTML = '<span>' + ico('i-clock') + '</span>'
+                        + '<span class="pill prix"></span>';
+          att.querySelector('span').insertAdjacentText('beforeend', 'Bientôt en vente');
+          att.querySelector('.prix').textContent = prixTexte(prix);
+          duo.appendChild(att);
+        }
         d.appendChild(duo);
 
         /* L'ESSAI GRATUIT, sur chaque carte. Les quatre cartes historiques ont
