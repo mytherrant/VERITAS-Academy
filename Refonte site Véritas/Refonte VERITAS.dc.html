@@ -1094,23 +1094,17 @@
   <!-- ══════ BOUTIQUE ══════ -->
   <sc-if value="{{ estBoutique }}" hint-placeholder-val="{{ false }}">
   <div data-screen-label="Boutique">
-    <section style="background:radial-gradient(900px 400px at 20% 0%,#FFF3E4,#F4F5F8 70%)">
-      <div style="max-width:1170px;margin:0 auto;padding:48px 24px;display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:center">
-        <div>
-          <span style="display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid #F5DCB8;color:#A84200;border-radius:100px;padding:7px 15px;font:500 13px Poppins,sans-serif;margin-bottom:16px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><use href="#lc-shop"></use></svg>Boutique du centre</span>
-          <h2 style="font:600 38px/48px Poppins,sans-serif;color:#001136;margin:0 0 13px;text-wrap:pretty">Le cahier qu'il ouvrira vraiment</h2>
-          <p style="margin:0 0 22px;font:400 16.5px/1.7 Poppins,sans-serif;color:#4D5163;text-wrap:pretty">Des cahiers écrits pour le programme camerounais, pas adaptés d'ailleurs. Chaque exemplaire imprimé ouvre ses corrigés en ligne par un QR code — à vie, sans compte.</p>
-          <div style="display:flex;gap:26px;flex-wrap:wrap">
-            <span style="font-size:14px;color:#4D5163"><b data-vrt-nb="titres" style="display:block;font:600 24px Poppins,sans-serif;color:#001136">{{ nbTitresCat }}</b>titres au catalogue</span>
-            <span style="font-size:14px;color:#4D5163"><b style="display:block;font:600 24px Poppins,sans-serif;color:#001136">6<sup>e</sup> → T<sup>le</sup></b>tous les niveaux</span>
-            <span style="font-size:14px;color:#4D5163"><b data-vrt-nb="prixMoyen" style="display:block;font:600 24px Poppins,sans-serif;color:#001136;white-space:nowrap">{{ prixMoyenCat }}</b>prix moyen</span>
-          </div>
-        </div>
-        <div data-parallax="0.05" style="position:relative;border-radius:18px;overflow:hidden;background:#FBF6EF;aspect-ratio:4/3;box-shadow:0 18px 40px rgba(0,17,54,.12);will-change:transform">
-          <img src="assets/photo-manuels.png" alt="Collection Mon cahier de français, 6ᵉ à Terminale" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;animation:vzoomSlow 24s ease-in-out infinite alternate;display:block">
-        </div>
-      </div>
-    </section>
+    <!-- BANDEAU DE BOUTIQUE RETIRÉ (28/08/2026) — ne pas le remettre sans données.
+     Il annonçait « 9 titres au catalogue » et « 3 300 F prix moyen » au-dessus
+     d'une pile de cahiers en image de synthèse. Les chiffres étaient calculés
+     par le serveur, donc justes — mais ils comptaient CINQ MANUELS DE
+     DÉMONSTRATION qui n'ont jamais existé (« Mathématiques 3ème » chez
+     « MINESEC Éditions », etc., semés dans defaultDB avec content:{} vide).
+     Un visiteur pouvait donc payer un livre inexistant. Les cinq faux livres
+     sont retirés du seed ET des bases déjà créées ; ce bandeau part avec eux,
+     parce qu'un chiffre-héros sur un catalogue de un ou deux titres se retourne
+     contre le vendeur. À reconstruire le jour où le catalogue le mérite — avec
+     des titres réels, et rien d'autre. -->
 
     <section style="padding:56px 0 0">
       <div style="max-width:1170px;margin:0 auto;padding:0 24px">

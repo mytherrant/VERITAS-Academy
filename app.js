@@ -886,12 +886,20 @@ function defaultDB(){return{
     {id:'gv41',eid:'s25',enom:'OWONO David',mat:'VRT-025',cls:'3ème',sub:'Histoire-Géographie',n1:12,n2:13,coef:2,tri:'1er Trimestre',ens:'Paul NDONGO'},
     {id:'gv42',eid:'s25',enom:'OWONO David',mat:'VRT-025',cls:'3ème',sub:'Anglais',n1:16,n2:15,coef:2,tri:'1er Trimestre',ens:'Grace EFFA'},
   ],
+  /* ── LA BOUTIQUE N'OUVRE PLUS SUR CINQ LIVRES QUI N'EXISTENT PAS ─────────
+     Cinq manuels étaient semés ici : « Mathématiques 3ème » chez « MINESEC
+     Éditions », « Français Tle A » chez « Éditions Clé », etc. Aucun n'a
+     jamais existé — `content:{}` vide, un `extrait` de trois lignes écrit pour
+     la démonstration, des avis inventés. Ils remplissaient la vitrine d'un
+     catalogue que le centre n'a pas, et un visiteur qui cliquait dessus
+     tombait sur un livre sans contenu, après avoir vu un prix.
+
+     Le catalogue réel arrive de `catalogue_livres.json`, fusionné au
+     démarrage : publier un livre, c'est déposer sa fiche là-bas, pas éditer
+     ce fichier. Le tableau reste donc vide — c'est l'état correct d'un centre
+     qui n'a pas encore publié. »Aucun livre« se corrige en en publiant un ;
+     cinq faux livres ne se corrigent pas du tout. */
   books:[
-    {id:'b1',titre:'Mathématiques 3ème',cls:'3ème',auteur:'MINESEC Éditions',prix:5000,stock:20,vendu:5,pages:280,ico:'📐',digital:true,secureId:'b1',securePages:280,freePages:10,prixDigital:3000,desc:'Manuel officiel conforme au programme MINESEC. Couvre l\'ensemble du programme de mathématiques de 3ème avec exercices corrigés, QCM et préparation au BEPC.',chaps:['Algèbre','Géométrie','Statistiques','Probabilités'],content:{},coverColor:'#1a5276',extrait:'Chapitre 1 — ALGÈBRE\n\n1.1 Les équations du premier degré\nUne équation du premier degré à une inconnue est une expression de la forme ax + b = 0, où a ≠ 0.\n\nExemple : Résoudre 3x + 7 = 22\n3x = 22 - 7 = 15\nx = 15/3 = 5\n\nExercice 1: Résoudre les équations suivantes...'},
-    {id:'b2',titre:'Français Tle A',cls:'Tle A',auteur:'Éditions Clé',prix:6000,stock:15,vendu:8,pages:320,ico:'📖',desc:'Manuel complet de littérature et expression écrite pour la Terminale A. Inclut des analyses de textes africains et européens, des méthodologies de dissertation et commentaire.',chaps:['Textes narratifs','Théâtre','Poésie','Rédaction'],content:{},coverColor:'#7d3c98',extrait:'Chapitre 2 — LE THÉÂTRE\n\n2.1 Le théâtre africain contemporain\nLe théâtre africain puise ses racines dans les traditions orales du continent. Les griots, conteurs traditionnels, sont les premiers dramaturges d\'Afrique.\n\nŒuvre étudiée : « Le Mandat » de Sembène Ousmane\nThèmes principaux : la corruption, la bureaucratie post-coloniale...'},
-    {id:'b3',titre:'Physique-Chimie 2nde',cls:'2nde',auteur:'MINESEC Éditions',prix:5500,stock:12,vendu:3,pages:260,ico:'⚗️',desc:'Manuel officiel de sciences physiques avec travaux pratiques guidés, schémas détaillés et exercices de difficulté progressive.',chaps:['Mécanique','Thermodynamique','Chimie organique'],content:{},coverColor:'#1e8449',extrait:'Chapitre 1 — MÉCANIQUE\n\n1.1 Le mouvement rectiligne uniforme\nUn corps est en mouvement rectiligne uniforme (MRU) lorsqu\'il se déplace en ligne droite à vitesse constante.\n\nFormule fondamentale :\nd = v × t\n\noù d = distance (m), v = vitesse (m/s), t = temps (s)\n\nTP n°1 : Étude du mouvement d\'une bille sur un plan incliné...'},
-    {id:'b4',titre:'SVT 4ème',cls:'4ème',auteur:'Bio-Sciences',prix:4500,stock:18,vendu:6,pages:240,ico:'🌿',desc:'Sciences de la Vie et de la Terre avec illustrations couleur, schémas anatomiques et exercices d\'observation. Conforme au programme officiel.',chaps:['Biologie cellulaire','Écologie','Géologie'],content:{},coverColor:'#196f3d',extrait:'Chapitre 1 — BIOLOGIE CELLULAIRE\n\n1.1 La cellule, unité du vivant\nTous les êtres vivants sont constitués de cellules. La cellule est la plus petite unité capable de manifester les propriétés du vivant.\n\nObservation au microscope :\n• Membrane cellulaire\n• Cytoplasme\n• Noyau\n\nActivité : Observer des cellules d\'oignon au microscope...'},
-    {id:'b5',titre:'Histoire-Géographie 3ème',cls:'3ème',auteur:'MINESEC',prix:4000,stock:25,vendu:10,pages:200,ico:'🌍',desc:'Cours complet d\'histoire et géographie avec cartes, chronologies et documents d\'archive. Préparation au BEPC incluse.',chaps:['Afrique contemporaine','Géographie du Cameroun','Mondialisation'],content:{},coverColor:'#b7950b',extrait:'Chapitre 3 — LA MONDIALISATION\n\n3.1 Définition et origines\nLa mondialisation désigne l\'intensification des échanges économiques, culturels et politiques à l\'échelle planétaire.\n\nLe Cameroun dans la mondialisation :\n• Exportations : pétrole, cacao, café, bois\n• Port de Douala : principal hub commercial\n• Enjeux : développement durable et souveraineté...'},
   ],
   promoCodes:[
     {id:'pc1',code:'ELEVE10',reduction:10,type:'percent',desc:'Réduction élèves inscrits',actif:true,usage:0},
@@ -1193,6 +1201,55 @@ function _migrateDB(){
   // FIX URLs /htdocs/ : toutes les URLs uploadées avant 12/05/2026 sont cassées
   // Réécriture systématique au chargement (idempotent — ne fait rien si pas de /htdocs/)
   _fixHtdocsUrls();
+
+  /* ── LES CINQ FAUX LIVRES SORTENT AUSSI DES BASES DÉJÀ CRÉÉES (28/08/2026) ──
+     Les retirer de `defaultDB()` ne suffit pas : une base existante ne rejoue
+     jamais le seed, et les cinq manuels inventés — « Mathématiques 3ème » chez
+     « MINESEC Éditions », « Français Tle A » chez « Éditions Clé »… — restent
+     en vitrine avec un prix. Un visiteur peut donc PAYER un livre qui n'a
+     jamais existé ; c'est une rupture de confiance qu'aucune excuse ne
+     rattrape, et elle se produirait sans que personne au centre le sache.
+
+     ON NE SUPPRIME PAS À L'AVEUGLE. Trois conditions cumulatives, parce qu'un
+     identifiant aussi court que « b1 » peut très bien avoir été réattribué à
+     un vrai livre par l'administration :
+       · le titre ET l'éditeur sont encore ceux du seed — un livre renommé est
+         un livre que quelqu'un s'est approprié, on n'y touche pas ;
+       · il n'a AUCUN contenu (ni fichier, ni pages protégées, ni chapitres) ;
+       · personne ne l'a acheté — sinon la fiche doit survivre à l'achat, ou
+         l'acheteur perdrait la trace de ce qu'il a payé.
+     Ce qui ne passe pas ces trois filtres est laissé en place et signalé en
+     console : mieux vaut un faux livre de trop qu'un vrai livre effacé. */
+  (function _retirerFauxLivres(){
+    var SEED = {
+      b1: ['Mathématiques 3ème', 'MINESEC Éditions'],
+      b2: ['Français Tle A', 'Éditions Clé'],
+      b3: ['Physique-Chimie 2nde', 'MINESEC Éditions'],
+      b4: ['SVT 4ème', 'Bio-Sciences'],
+      b5: ['Histoire-Géographie 3ème', 'MINESEC']
+    };
+    if (!Array.isArray(DB.books) || !DB.books.length) return;
+    var achats = DB.bookPurchases || [];
+    var retires = [], gardes = [];
+    DB.books = DB.books.filter(function (b) {
+      var s = b && SEED[b.id];
+      if (!s) return true;
+      var memeFiche = (b.titre === s[0] && b.auteur === s[1]);
+      var sansContenu = !b.fichierUrl && !b.fichierData && !b.previewPdfUrl
+        && !(b.previewImages || []).length && !(b.chaps || []).length;
+      var jamaisVendu = !achats.some(function (a) { return a && a.bid === b.id; });
+      if (memeFiche && sansContenu && jamaisVendu) { retires.push(b.id); return false; }
+      gardes.push(b.id);
+      return true;
+    });
+    if (!retires.length && !gardes.length) return;
+    /* On les inscrit au registre des retraits : sans cela, une base plus
+       ancienne qui se resynchronise les ferait revenir. */
+    DB._livresRetires = (DB._livresRetires || []).concat(
+      retires.filter(function (id) { return (DB._livresRetires || []).indexOf(id) < 0; }));
+    if (retires.length) console.info('[boutique] ' + retires.length + ' livre(s) de démonstration retiré(s) : ' + retires.join(', '));
+    if (gardes.length) console.warn('[boutique] livre(s) du seed CONSERVÉ(S) (modifié, vendu ou pourvu de contenu) : ' + gardes.join(', '));
+  })();
 
   /* ── GRILLE PAR PUBLIC CIBLE (20/08/2026) ────────────────────────────────
      Les offres parents et chefs d'établissement, et le forfait enseignant au

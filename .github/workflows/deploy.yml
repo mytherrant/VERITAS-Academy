@@ -270,6 +270,17 @@ jobs:
       - name: 🔑 Le mot de passe du site ouvre-t-il l'Atelier ?
         run: node tests/banc_mdp_inter_sites.cjs
 
+      # ── 📕 LA BOUTIQUE NE VEND-ELLE QUE CE QUI EXISTE ? ────────────────────
+      #    Cinq manuels inventés étaient semés dans defaultDB() avec un PRIX et
+      #    un bouton d'achat : « Mathématiques 3ème » chez « MINESEC Éditions »,
+      #    etc., content:{} vide. Un visiteur pouvait payer un livre qui n'a
+      #    jamais existé — la panne dont on ne se relève pas commercialement,
+      #    et que personne au centre n'aurait vue passer. Retirés le 28/08/2026
+      #    du seed ET des bases déjà créées, sans toucher à ce qui a été
+      #    renommé, pourvu de contenu ou acheté.
+      - name: 📕 La boutique ne vend-elle que ce qui existe ?
+        run: node tests/banc_faux_livres.cjs
+
       # ── 💰 Quinze ouvrages en vente depuis le 27/08, contre cinq avant.
       #    `vrt_verifier_prix()` laisse passer N'IMPORTE QUEL montant quand le
       #    tarif de référence est indéterminable — c'est le trou par lequel
