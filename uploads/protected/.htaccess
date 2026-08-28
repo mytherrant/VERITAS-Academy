@@ -5,26 +5,23 @@
 # corrige-*.js — le cahier, ses corrigés et la table des corrections — seraient
 # téléchargeables par leur simple URL, dont le nom est prévisible.
 #
-# ⚠️ CE FICHIER A DÉJÀ ÉTÉ REJETÉ EN BLOC PAR L'HÉBERGEUR — DEUX FOIS.
+# ⚠️ CE FICHIER A DÉJÀ ÉTÉ REJETÉ EN BLOC PAR L'HÉBERGEUR — TROIS FOIS.
 # Un .htaccess que LWS refuse n'est pas « partiellement appliqué » : il est
 # ignoré EN ENTIER, et le serveur répond 500. Le dossier paraît alors protégé
 # alors qu'il ne l'est plus par aucune règle — il ne l'est que par l'erreur.
-# Le jour où l'hébergeur choisirait d'ignorer un .htaccess invalide au lieu
-# d'échouer, tout le catalogue deviendrait téléchargeable en clair.
 #
 #   19/08/2026 — « RemoveHandler » (demande AllowOverride FileInfo) → 500.
-#   28/08/2026 — mesuré : /uploads/protected/** répondait ENCORE 500, alors que
-#                /api/data/ et /uploads/veritas/ répondaient 403. Le coupable :
-#                le « Require all denied » du bloc <FilesMatch> ci-dessous était
-#                posé À NU — précisément ce que l'avertissement trois lignes
-#                plus haut interdisait. Le fichier documentait la règle et
-#                l'enfreignait quatre lignes plus bas.
+#   28/08/2026 — « Require all denied » posé À NU dans un <FilesMatch> → 500.
+#   28/08/2026 — « Options -ExecCGI » (demande AllowOverride Options) → 500.
 #
-# RÈGLE : ne rien ajouter ici qui ne soit déjà VÉRIFIÉ en production sur un
-# dossier voisin. Les deux patrons éprouvés, tous deux à 403 :
-#   api/data/.htaccess      → <IfModule> + Require all denied, puis Options -Indexes
-#   uploads/veritas/.htaccess → Options -ExecCGI seul
-# C'est leur union, et rien d'autre, qui est recopiée ci-dessous.
+# ⚠️ ET UNE FAUSSE PREUVE, qui a coûté un déploiement pour rien.
+# On a cru valider le patron parce que /uploads/veritas/ répondait 403 avec
+# « Options -ExecCGI ». Mesuré ensuite : /uploads/oeuvres/, qui n'a AUCUN
+# .htaccess, répond 403 lui aussi. Un 403 sur un RÉPERTOIRE ne prouve rien —
+# c'est la réponse normale d'Apache quand le listing est désactivé.
+# La seule preuve qui vaille est un 403 sur un FICHIER EXISTANT.
+# Témoin vérifié : /api/data/livrets_catalogue.json → 403, avec le fichier
+# ci-dessous et rien de plus.
 
 # Apache 2.4+ / LiteSpeed
 <IfModule mod_authz_core.c>
@@ -38,7 +35,3 @@
 
 # Pas de listing (au cas où le Deny serait ignoré)
 Options -Indexes
-
-# Aucune exécution serveur dans ce dossier. Sur une ligne à part : c'est sous
-# cette forme que l'hébergeur l'accepte (uploads/veritas/, vérifié à 403).
-Options -ExecCGI

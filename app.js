@@ -6180,11 +6180,15 @@ function vShowSec(sec,btn,_boot){
     niv.forEach(function(n){h+='<option>'+n+'</option>';});
     h+='</select></div>';
     h+='<div class="fg"><span class="fl">Type de service *</span><select class="fi" id="orType"><option value="">-- Choisir --</option>'+
+       '<option>🏫 Répétitions au centre</option><option>🏠 Répétitions à domicile</option>'+
+       '<option>💻 Classes virtuelles (à distance)</option><option>📚 Stage de rattrapage</option>'+
        '<option>🎯 Orientation scolaire</option><option>📅 Emploi du temps</option>'+
        '<option>📝 Astuces examens</option><option>🧠 Psychologie scolaire</option>'+
        '<option>🏥 Bien-être scolaire</option><option>👨‍👩‍👧 Conseil aux parents</option></select></div>';
     h+='<div class="fg" style="grid-column:1/-1"><span class="fl">Message</span><textarea class="fi" id="orMsg" rows="3" placeholder="Décrivez brièvement votre situation..."></textarea></div>';
-    h+='<div class="fg" style="grid-column:1/-1"><span class="fl">Disponibilité</span><input class="fi" id="orDispo" placeholder="Ex: Lundi matin, Mercredi après-midi..."></div>';
+    h+='<div class="fg"><label class="fl" for="orQuartier">Quartier / domicile</label><input class="fi" id="orQuartier" autocomplete="address-level2" placeholder="Ex: Ndogpassi, Bonabéri, Makepe..."></div>';
+    h+='<div class="fg"><label class="fl" for="orMatieres">Matière(s) concernée(s)</label><input class="fi" id="orMatieres" placeholder="Ex: Maths et Français"></div>';
+    h+='<div class="fg" style="grid-column:1/-1"><label class="fl" for="orDispo">Jours et heures qui vous arrangent</label><input class="fi" id="orDispo" placeholder="Ex: Lundi matin, Mercredi après-midi..."></div>';
     h+='</div>';
     h+='<button class="btn bgr2 mt14" style="width:100%;justify-content:center" onclick="submitOrientation()"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Envoyer ma demande</button>';
     h+='</div>';
@@ -6197,7 +6201,16 @@ function vShowSec(sec,btn,_boot){
          '<div style="font-size:13px;color:var(--ink3);line-height:1.7">'+f[1]+'</div></div>';
     });
     h+='</div></div>';
-    c.innerHTML=_buildOrientationSection();
+    /* ⚠️ Cette ligne écrivait `_buildOrientationSection()` SEUL, et jetait `h`.
+       Or `h` venait d'être construit sur une centaine de lignes : les deux
+       cartes IA, les six cartes de conseil, les témoignages, le formulaire de
+       demande (nom, téléphone, niveau, formule, quartier, matières, jours) et
+       la FAQ. Tout cela était calculé à chaque affichage, puis remplacé.
+       Le formulaire que les parents utilisaient « avant » n'avait pas été
+       retiré : il était devenu invisible, sans que rien ne le signale.
+       On rend les deux — le panneau d'orientation de carrière d'abord, parce
+       qu'il répond à la question la plus fréquente, puis l'accompagnement. */
+    c.innerHTML = _buildOrientationSection() + h;
   } else if(sec==="actualites"){
     showActualites(c);
     return;
@@ -6256,7 +6269,38 @@ function vShowSec(sec,btn,_boot){
     </div>`;
   }
 }
-function submitOrientation(){
+/* ══ DEVIS D'ACCOMPAGNEMENT ════════════════════════════════════════════════
+   Ce que demande un parent qui veut un répétiteur : où il habite, la classe de
+   l'enfant, la matière, et quand il est disponible. Sans ces quatre-là, aucun
+   devis ne se chiffre — et c'est précisément ce que WhatsApp ne recueillait pas.
+   Les demandes rejoignent DB.orientationDemandes, que l'administration relit
+   déjà ; le champ `type` dit s'il s'agit du centre, du domicile ou du distanciel.
+   ══════════════════════════════════════════════════════════════════════════ */
+window.mDevisAccompagnement = function(){
+  var niv = (typeof CLS!=='undefined' && CLS.length) ? CLS.slice()
+          : ['6ème','5ème','4ème','3ème','2nde','1ère','Terminale'];
+  var opt = function(l){ return '<option>'+_esc(l)+'</option>'; };
+  M('Demander un devis',
+    'Répétitions au centre, à domicile ou en classe virtuelle. Réponse sous 2 h ouvrées.',
+      '<div class="fg"><label class="fl" for="orNom">Nom et prénom *</label><input class="fi" id="orNom" autocomplete="name" placeholder="Ex : MBALLA Jean-Pierre"></div>'
+    + '<div class="fg"><label class="fl" for="orTel">Téléphone / WhatsApp *</label><input class="fi" id="orTel" autocomplete="tel" inputmode="tel" placeholder="Ex : 697 637 739"></div>'
+    + '<div class="fg"><label class="fl" for="orType">Formule souhaitée *</label><select class="fi" id="orType">'
+    +   '<option value="">— Choisir —</option>'
+    +   opt('🏫 Répétitions au centre') + opt('🏠 Répétitions à domicile')
+    +   opt('💻 Classes virtuelles (à distance)') + opt('📚 Stage de rattrapage')
+    + '</select></div>'
+    + '<div class="fg"><label class="fl" for="orNiveau">Classe de l’enfant</label><select class="fi" id="orNiveau"><option value="">— Choisir —</option>'
+    +   niv.map(opt).join('') + '</select></div>'
+    + '<div class="fg"><label class="fl" for="orQuartier">Quartier / domicile</label><input class="fi" id="orQuartier" autocomplete="address-level2" placeholder="Ex : Ndogpassi, Bonabéri, Makepe…"></div>'
+    + '<div class="fg"><label class="fl" for="orMatieres">Matière(s) concernée(s)</label><input class="fi" id="orMatieres" placeholder="Ex : Maths et Français"></div>'
+    + '<div class="fg"><label class="fl" for="orDispo">Jours et heures qui vous arrangent</label><input class="fi" id="orDispo" placeholder="Ex : lundi matin, mercredi après-midi"></div>'
+    + '<div class="fg"><label class="fl" for="orMsg">Précisions</label><textarea class="fi" id="orMsg" rows="3" placeholder="Ce qui bloque, les objectifs, une contrainte d’horaire…"></textarea></div>'
+    + '<p style="margin:10px 0 0;font-size:11.5px;line-height:1.6;color:#6B7A99">Vos coordonnées servent uniquement à vous rappeler. Voir la <a href="/legal/confidentialite.html" target="_blank" rel="noopener" style="color:#3C8DFF">politique de confidentialité</a>.</p>',
+    '<button class="btn bo" onclick="cm()">Annuler</button>'
+    + '<button class="btn bi" onclick="submitOrientation(true)"><svg class="vico bico" aria-hidden="true"><use href="#lc-mail"/></svg>Envoyer ma demande</button>');
+};
+
+function submitOrientation(depuisModale){
   const nom=(document.getElementById('orNom')?.value||'').trim();
   const tel=(document.getElementById('orTel')?.value||'').trim();
   const type=document.getElementById('orType')?.value||'';
@@ -6269,12 +6313,15 @@ function submitOrientation(){
     type,
     msg:document.getElementById('orMsg')?.value||'',
     dispo:document.getElementById('orDispo')?.value||'',
+    quartier:document.getElementById('orQuartier')?.value||'',
+    matieres:document.getElementById('orMatieres')?.value||'',
     date:today(),
     statut:'En attente'
   });
   save();
   toast('✓ Demande envoyée ! Nous vous contacterons au '+tel);
-  ['orNom','orTel','orNiveau','orType','orMsg','orDispo'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  if(depuisModale && typeof cm==='function'){ cm(); return; }
+  ['orNom','orTel','orNiveau','orType','orMsg','orDispo','orQuartier','orMatieres'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
 }
 function hideAll(){[$("LS"),$("APP"),$("VISITOR")].forEach(el=>{if(el)el.style.display="none";});
   // v1.13 : le FAB WhatsApp et le flux d'activité sont attachés à <body>, donc
@@ -44371,6 +44418,14 @@ function _cagCreer(eleveId){
   var FONCTIONS = { evaluations:'showEvaluations', epreuves:'showEpreuves', annales:'showEpreuves',
                     connexion:'_ouvrirConnexionAncre', compte:'_ouvrirConnexionAncre',
                     inscription:'showRegisterForm', recherche:'mRecherche',
+                    // « Demander un devis » depuis la section accompagnement de
+                    // l'accueil. Le formulaire existait dans la branche
+                    // vShowSec('orientation') — mais cette branche est MORTE :
+                    // un second rendu de la même section (ligne ~19058) la
+                    // masque depuis longtemps, et personne ne pouvait plus
+                    // l'atteindre. On lui donne sa propre porte plutôt que de
+                    // démêler le doublon dans l'urgence.
+                    devis:'mDevisAccompagnement',
                     // v1.19.28 — CANAL PARTENAIRE : la carte « Partenaires » de l'accueil
                     // ouvre l'inscription partenaire (ou l'espace si déjà connecté).
                     partenaire:'_ouvrirCanalPartenaire',
