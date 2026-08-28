@@ -1851,7 +1851,14 @@ class Component extends DCLogic {
   CATALOGUE_MANUELS = [
     { niv: 'Roman', teinte: '#A84200', fondA: '#F3E7D8', fondB: '#FBF6EF', categorie: 'Littérature', etiquette: 'Nouveau', etiquetteFond: '#007E11', exos: '144 pages · 8 chapitres', lien: 'app.html#livre?id=tubedigestif', mention: 'lecture en ligne, sans téléchargement', titre: 'Le Tube digestif', type: 'Roman de Mythe Errant · 10 pages offertes', prix: '1 000 F',
       format: 'ebook', formatNom: 'E-book', formatCls: 'vbq-fmt-ebook',
-      couvRoman: true, couvTeinte: '#142554', couvRTitre: 'Le Tube digestif', couvRAut: 'Mythe Errant', couvRMention: 'roman' },
+      /* La VRAIE couverture, depuis le 28/08/2026. `couvRoman` — la
+         composition typographique navy — etait un pis-aller ne du jour ou
+         l'image manquait et rendait un 404. Il est RETIRE, pas garde en
+         repli : le gabarit enchaine deux `sc-if` independants, sans
+         « sinon », si bien que les deux se dessinaient l'une sous l'autre.
+         Mesure avant correction : 1 image + 1 composition sur la meme
+         carte. Un repli qui s'affiche EN PLUS n'est pas un repli. */
+      couv: 'uploads/oeuvres/tubedigestif.jpg' },
 
     { niv: '6ᵉ', teinte: '#1E499B', fondA: '#E4EBF7', fondB: '#F2F5FB', categorie: 'Cahier d’exercices', etiquette: '', etiquetteFond: '#A84200', exos: '', papier: true, mention: 'corrigés en ligne inclus', commander: () => this._go('paiement'), titre: 'Cahier d’exercices — Français 6ᵉ', type: 'Cahier · 463 exercices corrigés', prix: '3 000 F',
       format: 'papier', formatNom: 'Papier', formatCls: 'vbq-fmt-papier',
