@@ -395,13 +395,27 @@ function serveurEquipes(opts) {
     juger('Avant connexion, l’identité est un profil de démonstration',
       /^u\d+$/.test(a.state.currentUserId), 'currentUserId = ' + a.state.currentUserId);
 
-    a.state.epreuves = [{ id: 'e1', title: 'mon travail', ownerId: 'u1', editorIds: [],
-      comments: [{ id: 'c1', userId: 'u1', text: 'ma remarque', ts: 1 }],
-      activity: [{ userId: 'u1', text: 'a créé', ts: 1 }], updatedAt: 1 }];
+    /* ⚠️ L'identifiant compte. Ce test écrivait `id:'e1'` par commodité —
+       or `e1` est une épreuve du DÉCOR de démonstration, et depuis le
+       28/08/2026 la connexion à un vrai compte jette le décor au lieu de le
+       re-tamponner (un nouvel inscrit ouvrait son espace sur trois épreuves
+       qu'il n'avait pas écrites). Un travail réel porte 'e'+Date.now() :
+       c'est celui-là qu'on doit retrouver, et le test le dit maintenant. */
+    a.state.epreuves = [
+      { id: 'e1756000000000', title: 'mon travail', ownerId: 'u1', editorIds: [],
+        comments: [{ id: 'c1', userId: 'u1', text: 'ma remarque', ts: 1 }],
+        activity: [{ userId: 'u1', text: 'a créé', ts: 1 }], updatedAt: 1 },
+      { id: 'e1', title: 'Devoir de démonstration', ownerId: 'u1', editorIds: [],
+        comments: [], activity: [], updatedAt: 1, demo: true },
+    ];
     a._adopterIdentite('accA', 'Alice Fotso');
     juger('Après connexion, on EST son compte VÉRITAS',
       a.state.currentUserId === 'accA' && a._me().name === 'Alice Fotso',
       'currentUserId = ' + a.state.currentUserId + ' (' + a._me().name + ')');
+
+    juger('Le décor de démonstration ne devient pas le travail du nouvel inscrit',
+      a.state.epreuves.length === 1 && a.state.epreuves[0].id === 'e1756000000000',
+      'épreuves restantes : ' + a.state.epreuves.map(e => e.id).join(', '));
 
     const ep = a.state.epreuves[0];
     juger('Le travail déjà fait sur ce poste est ré-attribué au compte',

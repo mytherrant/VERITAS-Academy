@@ -1683,7 +1683,8 @@
               <label style="{{ fieldLbl }}">Établissement<input value="{{ ep.etab }}" onChange="{{ setEtab }}" disabled="{{ cannotEdit }}" placeholder="Lycée de…" style="{{ fieldIn }}"></label>
               <div style="display:flex;gap:10px"><label style="{{ fieldLbl }};flex:1">Classe<select value="{{ ep.classe }}" onChange="{{ setClasse }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"><option value="">— Choisir —</option><sc-for list="{{ classeOptions }}" as="c" hint-placeholder-count="8"><option value="{{ c }}">{{ c }}</option></sc-for></select></label><label style="{{ fieldLbl }};flex:1">Série<select value="{{ epSerie }}" onChange="{{ setSerie }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"><option value="">— Toutes —</option><sc-for list="{{ serieOptions }}" as="r" hint-placeholder-count="8"><option value="{{ r }}">{{ r }}</option></sc-for></select></label></div>
               <div style="display:flex;gap:10px"><label style="{{ fieldLbl }};flex:1">Durée<input value="{{ ep.duree }}" onChange="{{ setDuree }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"></label><label style="{{ fieldLbl }};flex:1">Période<input value="{{ ep.date }}" onChange="{{ setDate }}" disabled="{{ cannotEdit }}" placeholder="Trimestre 1" style="{{ fieldIn }}"></label></div>
-              <div style="display:flex;gap:10px"><label style="{{ fieldLbl }};flex:1">Coefficient<input value="{{ ep.coeff }}" onChange="{{ setCoeff }}" disabled="{{ cannotEdit }}" placeholder="2" style="{{ fieldIn }}"></label><label style="{{ fieldLbl }};flex:1">Période<input value="{{ ep.date }}" onChange="{{ setDate }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"></label></div>
+              <div style="display:flex;gap:10px"><label style="{{ fieldLbl }};flex:1">Coefficient<input value="{{ ep.coeff }}" onChange="{{ setCoeff }}" disabled="{{ cannotEdit }}" placeholder="2" style="{{ fieldIn }}"></label></div>
+              <label style="{{ fieldLbl }}">Nature de l’épreuve<select value="{{ ep.epreuveCode }}" onChange="{{ setEpreuveType }}" disabled="{{ cannotEdit }}" style="{{ fieldIn }}"><option value="">— Choisir la nature (durée et coefficient officiels) —</option><sc-for list="{{ natureOptions }}" as="n" hint-placeholder-count="10"><option value="{{ n.code }}">{{ n.label }}</option></sc-for></select></label>
               <label style="{{ fieldLbl }}">Consigne<textarea value="{{ ep.consigne }}" onChange="{{ setConsigne }}" disabled="{{ cannotEdit }}" rows="3" style="{{ fieldIn }};resize:vertical;line-height:1.45"></textarea></label>
             </div>
             <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--ceef2f7,#eef2f7);display:flex;justify-content:space-between;font-size:12.5px;color:var(--c5a6678,#5a6678)"><span>{{ selCount }} texte(s)</span><span>{{ totalWords }} mots</span></div>
@@ -6221,6 +6222,31 @@ class Component extends DCLogic {
       MINESEC.epreuves.forEach(e=>(e.classes||[]).forEach(c=>{if(!v[c]){v[c]=1;o.push(c);}}));
       return o;})();
     const serieOptions=MINESEC.series();
+    /* NATURE DE L'ÉPREUVE — le champ qui manquait.
+       Le panneau demandait l'établissement, la classe, la série, la durée, le
+       coefficient… mais jamais DE QUELLE ÉPREUVE il s'agit. Or c'est elle qui
+       commande tout le reste : le Draft EST du MINESEC fixe, pour chaque
+       nature, sa durée, son coefficient et sa structure de parties. Sans ce
+       champ, l'enseignant retapait à la main une durée et un coefficient que
+       le référentiel connaît déjà — et le garde-fou de conformité n'avait
+       aucune structure officielle à laquelle se référer.
+       La liste se restreint à la classe choisie : proposer l'épreuve de
+       Terminale à une 4ᵉ n'aide personne. Sans classe, on montre tout.
+       (Le champ remplace un second « Période » qui doublonnait le premier —
+       deux entrées côte à côte écrivaient la MÊME donnée `ep.date`.) */
+    const natureOptions=(function(){
+      const cl=(active&&active.classe)||'';
+      return (MINESEC.epreuves||[])
+        .filter(function(e){
+          const cs=e.classes||[];
+          return !cl || !cs.length || cs.indexOf(cl)>=0;
+        })
+        .map(function(e){
+          const d=e.duree?(' — '+e.duree):'';
+          const c=(e.coeff&&e.coeff!=='—')?(' · coef '+e.coeff):'';
+          return {code:e.code, label:e.nom+d+c};
+        });
+    })();
     /* Niveau cognitif de chaque question : sert la pastille coloree et le
        controle d'equilibre. */
     const nivDe=q=>MINESEC.niveauQuestion(q);
@@ -7346,8 +7372,27 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       hasAnnots:annList.length>0,annotCount:annList.length,annotList:annList.map((a,i)=>({...a,rowBg:i%2?'var(--cf7f9fc,#f7f9fc)':'var(--cffffff,#fff)',commentStyle:a.comment?'display:block;font-size:13px;color:var(--c3a4658,#3a4658);line-height:1.45;margin-top:3px':hidden})),      hasEpreuves:epreuvesView.length>0,noEpreuves:epreuvesView.length===0,epreuvesView,
       epFilterAll:()=>this.setState({epFilter:'all'}),epFilterMine:()=>this.setState({epFilter:'mine'}),epFilterReview:()=>this.setState({epFilter:'review'}),epFilterLib:()=>this.setState({epFilter:'lib'}),
       epTabAll:tab('all'),epTabMine:tab('mine'),epTabReview:tab('review'),epTabLib:tab('lib'),
-      hasActive:!!active,noActive:!active,ep:{title:ep.title,etab:ep.etab,classe:ep.classe,duree:ep.duree,coeff:ep.coeff,date:ep.date,consigne:ep.consigne},
+      hasActive:!!active,noActive:!active,ep:{title:ep.title,etab:ep.etab,classe:ep.classe,duree:ep.duree,coeff:ep.coeff,date:ep.date,consigne:ep.consigne,epreuveCode:(active&&active.epreuveCode)||''},
       setTitle:setField('title'),setEtab:setField('etab'),setClasse:setField('classe'),setDuree:setField('duree'),setCoeff:setField('coeff'),setDate:setField('date'),setConsigne:setField('consigne'),
+      natureOptions,
+      /* Choisir la nature APPELLE son gabarit : durée et coefficient
+         descendent du référentiel MINESEC au lieu d'être retapés. On
+         n'écrase toutefois pas une valeur déjà saisie par l'enseignant —
+         un établissement peut allouer 3 h là où le Draft en prévoit 2, et
+         reprendre sa main serait pire que de ne rien proposer. */
+      setEpreuveType:e=>{
+        if(!perm.edit)return;
+        const code=val(e);
+        const def=(MINESEC.epreuves||[]).find(function(x){return x.code===code;});
+        const maj={epreuveCode:code};
+        if(def){
+          const a=this._active()||{};
+          if(!String(a.duree||'').trim() && def.duree) maj.duree=def.duree;
+          if(!String(a.coeff||'').trim() && def.coeff && def.coeff!=='—') maj.coeff=String(def.coeff);
+          if(!String(a.title||'').trim() || a.title==='Nouvelle épreuve') maj.title=def.nom;
+        }
+        this._updateActive(maj);
+      },
       fieldLbl,iconBtn,selCount:active?active.textIds.length:0,totalWords,
       hasSelection:active&&active.textIds.length>0,emptySelection:active&&active.textIds.length===0,selectedFiches,
       activeStatusChip:this._statusChip(ep.status),activeStatusLabel:this._statusMeta(ep.status).label,
