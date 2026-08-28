@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=1920,initial-scale=1">
-<title>VÉRITAS Academy — Vidéo promotionnelle</title>
+<title>Centre VÉRITAS — Vidéo promotionnelle</title>
 <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Montserrat:wght@400;600;700;800;900&family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif}
@@ -547,7 +547,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;background:#000;color:#fff}
 <body>
 
 <div class="start-screen" id="startScreen">
-  <h1>VÉRITAS Academy</h1>
+  <h1>Centre VÉRITAS</h1>
   <p>Découvrez en 3 minutes pourquoi VÉRITAS est <strong style="color:#FFC93C">le centre de référence</strong> à Douala — et comment l'utiliser au quotidien.</p>
   <button class="start-btn" onclick="startVideo()">▶ Lancer la présentation</button>
   <div class="hint">🔊 Avec musique · 22 scènes · 3:06 min · <kbd style="background:rgba(255,201,60,.15);padding:2px 8px;border-radius:4px;border:1px solid rgba(255,201,60,.3);color:#FFC93C;font-family:JetBrains Mono,monospace;font-size:11px">F11</kbd> plein écran · <kbd style="background:rgba(255,201,60,.15);padding:2px 8px;border-radius:4px;border:1px solid rgba(255,201,60,.3);color:#FFC93C;font-family:JetBrains Mono,monospace;font-size:11px">?</kbd> raccourcis</div>
@@ -934,7 +934,7 @@ html,body{width:100vw;height:100vh;overflow:hidden;background:#000;color:#fff}
       </div>
     </div>
     <div class="url">veritas-school.com</div>
-    <div class="copyright">© 2026 Mythe Errant · VÉRITAS Academy · Tous droits réservés</div>
+    <div class="copyright">© 2026 Mythe Errant · Centre VÉRITAS · Tous droits réservés</div>
   </div>
 
 </div>
@@ -1034,7 +1034,7 @@ var DURATIONS = [
 // ── v2 FINALISATION : NARRATION (sous-titres scène par scène) ──
 // Texte court, percutant, optimisé lecture en 1-2 secondes
 var CAPTIONS = [
-  "VÉRITAS Academy — L'excellence scolaire à Douala.",                                          // 1
+  "Centre VÉRITAS — L'excellence scolaire à Douala.",                                          // 1
   "Préparez le BEPC et le BAC avec les meilleurs outils.",                                       // 2
   "95% de réussite · 500+ élèves · 8 ans d'expérience.",                                         // 3
   "E-Learning premium : cours, vidéos, IA tuteur 24/7.",                                         // 4
@@ -1396,9 +1396,9 @@ document.getElementById('shortcutsOverlay')?.addEventListener('click', function(
 
 function shareVideo(){
   var url = 'https://veritas-school.com/VERITAS_Promo_Video.html';
-  var text = 'Découvrez VÉRITAS Academy — l\'excellence scolaire à Douala en 3 minutes !';
+  var text = 'Découvrez Centre VÉRITAS — l\'excellence scolaire à Douala en 3 minutes !';
   if(navigator.share){
-    navigator.share({title:'VÉRITAS Academy', text:text, url:url}).catch(function(){});
+    navigator.share({title:'Centre VÉRITAS', text:text, url:url}).catch(function(){});
   } else if(navigator.clipboard){
     navigator.clipboard.writeText(url+' — '+text).then(function(){
       alert('Lien copié dans le presse-papier ✓');

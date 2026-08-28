@@ -4972,7 +4972,27 @@ function _renvoyerVersVitrine(sec, boot){
 // & abonnements une fois un vrai paiement test réussi.
 // Le PREMIUM (au-delà du gratuit) reste géré à part par le mur d'essais (_pw*).
 // ══════════════════════════════════════════════════════════════════════════
-function _gateActif(){ try{ return !!(DB.accessGate && DB.accessGate.actif); }catch(e){ return false; } }
+/* ══ INTERRUPTEUR GÉNÉRAL DU PÉAGE D'INSCRIPTION ═══════════════════════════
+   Demande de Jacques, 28/08/2026 : le péage de 100 F reste FERMÉ pendant la
+   semaine d'essai. Les paiements seront activés ensuite, une fois le parcours
+   éprouvé de bout en bout.
+
+   Le drapeau ci-dessous l'emporte sur TOUT — y compris sur DB.accessGate.actif
+   posé depuis l'administration, et y compris sur une base serveur qui aurait
+   déjà l'interrupteur à « vrai ». C'est précisément ce qu'on veut : tant que
+   cette constante vaut false, aucune inscription ne peut réclamer un franc,
+   quel que soit l'état des données.
+
+   POUR RÉACTIVER : passer _GATE_AUTORISE à true. Le réglage fin (activer /
+   désactiver, changer le prix) redevient alors celui de l'administration,
+   Admin → Essais & abonnements. Ne pas retirer la constante : c'est le seul
+   endroit où l'on peut couper le péage sans toucher aux données de production.
+   ══════════════════════════════════════════════════════════════════════════ */
+var _GATE_AUTORISE = false;
+function _gateActif(){
+  if(!_GATE_AUTORISE) return false;
+  try{ return !!(DB.accessGate && DB.accessGate.actif); }catch(e){ return false; }
+}
 var _GATE_SECTIONS = { elearning:1, jeux:1, quiz:1, labo:1, labos:1 };
 function _gateSectionVerrouillee(sec){ return !!(sec && Object.prototype.hasOwnProperty.call(_GATE_SECTIONS, sec)); }
 function _gatePrix(){ try{ var p=(DB.tarifs&&DB.tarifs.inscription); return (p&&p>0)?p:100; }catch(e){ return 100; } }

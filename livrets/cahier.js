@@ -197,6 +197,7 @@
       }
     } catch (e) { /* stockage refusé : on continue, en mémoire */ }
 
+    this.protegerContenu();
     this.rendre();
     this.charger().then(function () { self.pousser(); });
     // Un dernier envoi quand la page se ferme : le différé de 2,5 s ne doit
@@ -204,6 +205,62 @@
     global.addEventListener('pagehide', function () { self.pousser(true); });
     global.addEventListener('visibilitychange', function () {
       if (document.visibilityState === 'hidden') self.pousser(true);
+    });
+  };
+
+  /* ── DISSUASION DE COPIE ──────────────────────────────────────────────────
+     `livrets/liseur.js` — le feuilletage page par page — porte ces gardes
+     depuis toujours. Le moteur du cahier, lui, n'en avait AUCUNE : ni clic
+     droit, ni sélection, ni Ctrl+S/P/U. Or c'est lui qui sert désormais
+     quatorze des quinze ouvrages vendus. Le produit le plus large du
+     catalogue était le moins gardé, et rien ne le disait.
+
+     CE QUE ÇA VAUT, ET IL FAUT LE DIRE À L'ACHETEUR COMME À L'AUTEUR :
+     rien de tout cela ne résiste à une photo de l'écran avec un second
+     téléphone, ni à un navigateur en mode développeur. Ces gardes dissuadent
+     le partage OPPORTUNISTE — le camarade qui fait Ctrl+A / Ctrl+C — et rien
+     de plus. Ce qui protège réellement est ailleurs, et existe déjà : le
+     contenu n'est servi qu'après un code valide (`api/livret.php`), le jeton
+     est lié au poste, le quota d'appareils est de trois, la révocation est
+     immédiate, et le FILIGRANE NOMINATIF rend traçable toute capture qui
+     circule. Une protection annoncée comme infaillible se retourne contre
+     celui qui l'annonce.
+
+     JAMAIS SUR LES CHAMPS DE RÉPONSE. C'est la règle explicite du cahier des
+     charges, et elle est de bon sens : un élève doit pouvoir sélectionner,
+     couper, coller et corriger CE QU'IL ÉCRIT. Bloquer le clic droit dans son
+     propre brouillon, c'est lui retirer le correcteur orthographique et le
+     presse-papier de son téléphone pour protéger un texte qui est le sien. */
+  Cahier.prototype.protegerContenu = function () {
+    var hote = this.hote;
+    if (!hote || hote.getAttribute('data-garde')) return;
+    hote.setAttribute('data-garde', '1');
+
+    var saisie = function (t) {
+      if (!t || !t.closest) return false;
+      return !!t.closest('textarea, input, select, [contenteditable="true"]');
+    };
+
+    hote.addEventListener('contextmenu', function (e) {
+      if (!saisie(e.target)) e.preventDefault();
+    });
+    hote.addEventListener('copy', function (e) {
+      if (!saisie(e.target)) e.preventDefault();
+    });
+    hote.addEventListener('dragstart', function (e) {
+      if (!saisie(e.target)) e.preventDefault();
+    });
+
+    /* Ctrl/Cmd + S, P, U. On l'écoute sur le DOCUMENT — un raccourci clavier
+       ne vise pas un élément, il vise la page — mais on laisse passer quand le
+       curseur est dans un champ : Ctrl+P y sert encore à imprimer sa copie,
+       ce qui est un droit de l'élève sur son propre travail. */
+    document.addEventListener('keydown', function (e) {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      var k = String(e.key || '').toLowerCase();
+      if (k !== 's' && k !== 'p' && k !== 'u') return;
+      if (saisie(document.activeElement)) return;
+      e.preventDefault();
     });
   };
 

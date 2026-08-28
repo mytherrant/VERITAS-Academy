@@ -1,13 +1,32 @@
-# VÉRITAS — Données des LIVRETS EN LIGNE (« Mon Cahier de français »)
-# Aucun accès HTTP DIRECT : ces fichiers ne sont servis que par api/livret.php
-# APRÈS vérification du code d'accès (classe, nature, expiration, quota d'appareils).
-# Sans ceci, booklet-*.js et guide-*.js — c'est-à-dire le produit vendu et ses
-# corrigés — seraient téléchargeables par leur simple URL.
-# ⚠️ « Require all denied » DOIT rester enveloppé dans <IfModule>.
-# Posé a nu, LWS rejette le fichier ENTIER (500 sur tout le dossier, donc plus
-# aucune protection). Constaté le 20/08/2026 : ce dossier repondait 500 alors
-# que api/data/.htaccess — meme regle, mais enveloppee — repond bien 403.
-# C'est ce patron-la, verifie en production, qu'on recopie ici.
+# ═══ VÉRITAS — AUCUN accès HTTP direct ═══
+# Ces fichiers sont le PRODUIT VENDU. Ils ne sont servis que par api/livret.php
+# (ou api/content.php) APRÈS vérification du code d'accès : classe, nature,
+# expiration, quota d'appareils. Sans ce blocage, booklet-*.js, guide-*.js et
+# corrige-*.js — le cahier, ses corrigés et la table des corrections — seraient
+# téléchargeables par leur simple URL, dont le nom est prévisible.
+#
+# ⚠️ CE FICHIER A DÉJÀ ÉTÉ REJETÉ EN BLOC PAR L'HÉBERGEUR — DEUX FOIS.
+# Un .htaccess que LWS refuse n'est pas « partiellement appliqué » : il est
+# ignoré EN ENTIER, et le serveur répond 500. Le dossier paraît alors protégé
+# alors qu'il ne l'est plus par aucune règle — il ne l'est que par l'erreur.
+# Le jour où l'hébergeur choisirait d'ignorer un .htaccess invalide au lieu
+# d'échouer, tout le catalogue deviendrait téléchargeable en clair.
+#
+#   19/08/2026 — « RemoveHandler » (demande AllowOverride FileInfo) → 500.
+#   28/08/2026 — mesuré : /uploads/protected/** répondait ENCORE 500, alors que
+#                /api/data/ et /uploads/veritas/ répondaient 403. Le coupable :
+#                le « Require all denied » du bloc <FilesMatch> ci-dessous était
+#                posé À NU — précisément ce que l'avertissement trois lignes
+#                plus haut interdisait. Le fichier documentait la règle et
+#                l'enfreignait quatre lignes plus bas.
+#
+# RÈGLE : ne rien ajouter ici qui ne soit déjà VÉRIFIÉ en production sur un
+# dossier voisin. Les deux patrons éprouvés, tous deux à 403 :
+#   api/data/.htaccess      → <IfModule> + Require all denied, puis Options -Indexes
+#   uploads/veritas/.htaccess → Options -ExecCGI seul
+# C'est leur union, et rien d'autre, qui est recopiée ci-dessous.
+
+# Apache 2.4+ / LiteSpeed
 <IfModule mod_authz_core.c>
   Require all denied
 </IfModule>
@@ -16,13 +35,10 @@
   Order allow,deny
   Deny from all
 </IfModule>
-# Ceinture + bretelles : bloquer aussi toute exécution serveur dans ce dossier.
-Options -Indexes -ExecCGI
-# NE PAS remettre « RemoveHandler » : l'hébergeur le refuse (AllowOverride FileInfo absent)
-# et un .htaccess refusé est rejeté EN ENTIER → 500 sur tout le dossier, donc « Require all
-# denied » ci-dessus ne s'appliquait plus. Constaté le 19/08/2026 : /uploads/protected/**
-# répondait 500, alors que /api/data/ et /uploads/veritas/ (sans RemoveHandler) répondent 403.
-# -ExecCGI + FilesMatch ci-dessous couvrent le même besoin et sont acceptés.
-<FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp|exe|bat)$">
-  Require all denied
-</FilesMatch>
+
+# Pas de listing (au cas où le Deny serait ignoré)
+Options -Indexes
+
+# Aucune exécution serveur dans ce dossier. Sur une ligne à part : c'est sous
+# cette forme que l'hébergeur l'accepte (uploads/veritas/, vérifié à 403).
+Options -ExecCGI

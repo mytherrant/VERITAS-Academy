@@ -109,6 +109,18 @@
   background:#fff; color:var(--ch-texte); }
 .ch-rel-s:focus{ outline:none; border-color:var(--ch-action); }
 
+/* ── Dissuasion de copie ─────────────────────────────────────────────────── */
+/* La sélection est coupée sur le CONTENU, jamais dans les champs : l'élève
+   doit pouvoir relire, couper et coller ce qu'il écrit lui-même. Le pendant
+   JavaScript (clic droit, Ctrl+S/P/U) vit dans cahier.js, et sa portée y est
+   expliquée : cela dissuade le partage opportuniste, rien de plus. */
+.ch-hote{ -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; }
+.ch-hote textarea, .ch-hote input, .ch-hote select,
+.ch-hote [contenteditable="true"]{
+  -webkit-user-select:text; user-select:text; -webkit-touch-callout:default;
+}
+.ch-hote img, .ch-hote figure{ -webkit-user-drag:none; user-drag:none; pointer-events:none; }
+
 /* ── La correction, une fois l'exercice cherché ──────────────────────────── */
 /* Le bouton est discret : il ne doit pas attirer l'œil AVANT qu'on ait
    travaillé. Une fois ouverte, la correction prend le vert du juste — jamais

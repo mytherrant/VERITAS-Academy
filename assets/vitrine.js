@@ -951,7 +951,16 @@
      Pour un href tel: il faut la forme compacte ; à l'écran on garde la forme
      lisible telle qu'elle a été saisie. */
   function telCompact(s) {
-    var n = String(s || '').replace(/[^0-9+]/g, '');
+    /* Le champ « téléphone » de l'administration contient souvent DEUX numéros
+       (« 656 720 476 / 650 435 106 ») : c'est naturel à écrire, et l'affichage
+       les rend très bien. Mais ne garder que les chiffres les COLLE en un seul
+       nombre de dix-huit chiffres — et c'est lui qui partait dans les liens
+       wa.me. Tous les boutons WhatsApp de la vitrine désignaient donc un numéro
+       qui n'existe pas, sur le canal principal du centre.
+       On ne retient que le PREMIER numéro : « / », « ou », une virgule ou un
+       point médian séparent deux lignes, jamais un seul indicatif. */
+    var brut = String(s || '').split(/\s*(?:\/|,|;|·|\bou\b)\s*/i)[0];
+    var n = brut.replace(/[^0-9+]/g, '');
     if (!n) return '';
     if (n.charAt(0) !== '+' && n.length === 9) n = '+237' + n;   // national → international
     return n;
@@ -982,10 +991,19 @@
       var was = document.querySelectorAll('a[href^="https://wa.me/"]');
       for (var j = 0; j < was.length; j++) {
         var h = was[j].getAttribute('href') || '';
-        /* wa.me/?text=… est un lien de PARTAGE (« envoyer ce passage à un
-           ami ») : il ne désigne pas le centre, on n'y touche pas. */
-        if (h.indexOf('wa.me/?') === 0 || h.indexOf('/?text=') > 0) continue;
-        was[j].setAttribute('href', 'https://wa.me/' + wa);
+        /* wa.me/?text=… sans numéro est un lien de PARTAGE (« envoyer ce
+           passage à un ami ») : il ne désigne pas le centre, on n'y touche pas.
+           ⚠️ Le test « indexOf('wa.me/?') === 0 » ne pouvait JAMAIS être vrai :
+           l'attribut commence par « https:// ». Il était mort depuis toujours ;
+           seule la seconde condition travaillait. */
+        if (h.indexOf('wa.me/?') > 0) continue;
+        /* Un message PRÉ-REMPLI doit survivre au remplacement du numéro.
+           « Demander un devis » ouvrait WhatsApp avec la classe, la formule et
+           le quartier déjà écrits ; la réécriture jetait toute la requête et
+           le parent tombait sur une conversation vide, à tout retaper.
+           On ne remplace donc que la partie NUMÉRO, et on garde la suite. */
+        var q = h.indexOf('?');
+        was[j].setAttribute('href', 'https://wa.me/' + wa + (q > 0 ? h.slice(q) : ''));
       }
     }
 

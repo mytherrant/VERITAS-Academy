@@ -96,6 +96,15 @@ jobs:
       - name: 🧭 Chaque banc appelé est-il bien dans le dépôt ?
         run: node tests/ci_scripts_suivis.cjs
 
+      # ── 🔢 « On n'invente ni activité ni statistique » ────────────────────
+      # Le 28/08/2026 la vitrine annonçait « 3 854 exercices corrigés » à onze
+      # endroits, méta-description comprise, et une répartition par classe dont
+      # une seule des sept valeurs correspondait à quelque chose. Ce pas
+      # RECOMPTE depuis les pages de corriges/ que la CI déploie, et refuse un
+      # chiffre que le contenu ne porte pas.
+      - name: 🔢 Les chiffres annoncés se recomptent-ils ?
+        run: node tests/chiffres_annonces.cjs
+
       # ── 🧪 Garde-fou syntaxe — bloque le déploiement si PHP ou JS est invalide ──
       # Ajouté après l'incident HTTP 500 (directive .htaccess incompatible déployée
       # sans vérification) : aucune erreur de syntaxe ne doit plus atteindre la prod.
@@ -237,6 +246,52 @@ jobs:
       #    100 FCFA ouvraient un abonnement à 5 000 sur l'Atelier. Dix produits
       #    neufs, dix occasions de le rouvrir, et la panne est muette des deux
       #    côtés : l'acheteur est content, le vendeur voit un paiement de plus.
+      # ── 🔒 LES VERROUS DES DOSSIERS PAYANTS SONT-ILS ACCEPTABLES ?
+      #    Un .htaccess que l'hébergeur refuse n'est pas « à moitié appliqué » :
+      #    il est ignoré EN ENTIER et le dossier répond 500. Il paraît alors
+      #    protégé — il ne l'est plus que par l'erreur. Le jour où LWS
+      #    choisirait d'ignorer un fichier invalide plutôt que d'échouer, tout
+      #    le catalogue vendu deviendrait téléchargeable en clair.
+      #    Deux directives ont déjà provoqué ce rejet, à neuf jours d'écart :
+      #    « RemoveHandler » (19/08) puis un « Require all denied » posé À NU
+      #    dans un <FilesMatch> (mesuré le 28/08 — /uploads/protected/**
+      #    répondait 500 quand /api/data/ répondait 403).
+      #    On refuse donc de déployer un verrou qui ne suit pas le patron
+      #    éprouvé en production.
+      - name: 🔒 Les verrous des dossiers payants sont-ils du bon patron ?
+        run: |
+          faute=0
+          for f in $(git ls-files 'uploads/protected/**/.htaccess' 'uploads/protected/.htaccess'); do
+            [ -f "$f" ] || continue
+            if grep -qE '^[[:space:]]*RemoveHandler' "$f"; then
+              echo "::error title=Verrou rejete par l'hebergeur::$f contient RemoveHandler (demande AllowOverride FileInfo, refuse par LWS). Le fichier serait rejete EN ENTIER et le dossier ne serait plus protege. Deploiement ANNULE."
+              faute=1
+            fi
+            # « Require » hors de tout <IfModule> : c'est ce qui a fait tomber
+            # le dossier a 500. On SUIT l'imbrication plutot que de compter :
+            # une premiere version comparait le nombre de Require au nombre de
+            # <IfModule>, et laissait donc passer le cas reel — un <FilesMatch>
+            # ajoute apres deux <IfModule> equilibrait le compte. Un garde-fou
+            # qui ne rougit pas sur la panne qu'il vise ne sert a rien.
+            nu=$(awk '
+              /^[[:space:]]*<IfModule/    { d++; next }
+              /^[[:space:]]*<\/IfModule>/ { if (d>0) d--; next }
+              /^[[:space:]]*Require /     { if (d==0) print NR": "$0 }
+            ' "$f")
+            if [ -n "$nu" ]; then
+              echo "::error title=Require pose a nu::$f contient une directive Require hors de tout <IfModule> :"
+              echo "$nu"
+              echo "::error::Un Require a nu fait rejeter TOUT le fichier chez LWS (500 sur le dossier, donc plus aucune protection). Deploiement ANNULE."
+              faute=1
+            fi
+            if ! grep -qE '^[[:space:]]*Require all denied' "$f"; then
+              echo "::error title=Dossier payant non ferme::$f ne contient aucun « Require all denied ». Deploiement ANNULE."
+              faute=1
+            fi
+          done
+          [ "$faute" = "0" ] || exit 1
+          echo "✅ Verrous des dossiers payants conformes au patron verifie en production."
+
       - name: 💰 Chaque ouvrage du catalogue a-t-il un prix et une porte ?
         run: |
           if command -v php >/dev/null 2>&1; then
