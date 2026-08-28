@@ -2015,12 +2015,24 @@
        ce choix pour la session afin de ne pas revenir à chaque écran. */
     var CLE_CIT = 'vrt_cit_fermee';
     try { if (sessionStorage.getItem(CLE_CIT)) S.citOn = false; } catch (e) {}
+    /* Un instant, pas un panneau permanent : il paraît, se lit, s'efface.
+       Douze secondes suffisent aux plus longues des citations (celle d'Edison
+       fait 92 caractères) et laissent le temps de la relire une fois. Passé ce
+       délai il disparaît de lui-même — le bouton « nouvelle citation » reste là
+       pour qui en veut une autre. */
+    var DUREE_CIT = 12000;
     if (S.citOn && (D.citations || []).length) {
       setTimeout(function () {
         if (!S.citOn) return;                       // fermée entre-temps
         var c = D.citations[S.cit] || {};
         poser('citationTexte', c.t || ''); poser('citationAuteur', '— ' + (c.a || ''));
         panneau('vrtCit', true);
+        setTimeout(function () {
+          /* On ne touche PAS à citOn : le visiteur n'a rien refusé, la
+             citation a simplement fini son temps. Mettre citOn à false
+             empêcherait le bouton de la rouvrir. */
+          panneau('vrtCit', false);
+        }, DUREE_CIT);
       }, 6000);
     }
 

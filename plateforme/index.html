@@ -505,7 +505,7 @@
     border-bottom:1px solid var(--ce6ecf3,#e6ecf3);display:flex;align-items:center;
     gap:6px;padding:0 12px;flex:none}
   .vrt-demo-barre i{width:9px;height:9px;border-radius:50%;background:var(--cd5e0ec,#d5e0ec)}
-  .vrt-demo-barre span{margin-left:8px;font-size:10.5px;font-weight:700;
+  .vrt-demo-barre span{margin-left:8px;font-size:11.5px;font-weight:700;
     color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.04em}
   .vrt-demo-scenes{position:relative;height:318px}
   .vrt-scene{position:absolute;inset:0;padding:18px 20px;opacity:0;
@@ -523,23 +523,43 @@
     2%,14%  {opacity:1;transform:none}
     16.66%,100%{opacity:0;transform:translateX(-28px)}
   }
-  /* Titre de scène : le numéro puis ce que l'on fait. */
-  .vrt-scene h4{margin:0 0 3px;font-family:Poppins,sans-serif;font-size:14.5px;
-    font-weight:700;color:var(--c14375f,#14375f);display:flex;align-items:center;gap:8px}
-  .vrt-scene h4 b{width:21px;height:21px;border-radius:50%;background:var(--c1a72bb,#1a72bb);
-    color:#fff;font-size:11px;display:grid;place-items:center;flex:none}
-  .vrt-scene p{margin:0 0 13px;font-size:12px;color:var(--c7a8598,#7a8598);line-height:1.5}
+  /* ══ TITRE DE SCÈNE — et la couleur de l'étape ═════════════════════════════
+     Les six panneaux étaient tous bleus sur blanc, en corps 12 : de loin, la
+     démonstration ressemblait à six fois la même image délavée, et l'on ne
+     voyait pas qu'elle AVANÇAIT. Chaque étape porte donc sa teinte, et le
+     texte a grossi d'un point et demi — c'est une démonstration qu'on regarde
+     à un mètre d'un téléphone, pas une notice qu'on lit à la loupe. */
+  .vrt-scene{--sc:#1a72bb;--scf:#eaf3fb}
+  .vrt-scene:nth-child(1){--sc:#1a72bb;--scf:#e9f2fb}   /* se connecter — bleu   */
+  .vrt-scene:nth-child(2){--sc:#7b52c7;--scf:#f1ecfa}   /* composer    — violet */
+  .vrt-scene:nth-child(3){--sc:#0e8a7d;--scf:#e6f5f3}   /* vérifier    — vert d'eau */
+  .vrt-scene:nth-child(4){--sc:#f39200;--scf:#fdf1e0}   /* partager    — orange */
+  .vrt-scene:nth-child(5){--sc:#1f9d55;--scf:#e8f6ee}   /* valider     — vert   */
+  .vrt-scene:nth-child(6){--sc:#c0453f;--scf:#fbecec}   /* exporter    — rouge  */
+
+  .vrt-scene h4{margin:0 0 5px;font-family:Poppins,sans-serif;font-size:16.5px;
+    font-weight:700;color:var(--c14375f,#14375f);display:flex;align-items:center;gap:10px}
+  .vrt-scene h4 b{width:26px;height:26px;border-radius:50%;background:var(--sc);
+    color:#fff;font-size:13px;display:grid;place-items:center;flex:none;
+    box-shadow:0 0 0 5px var(--scf);animation:vrtPastille .55s .1s cubic-bezier(.2,.9,.3,1.4) both}
+  /* La pastille arrive en se posant : c'est ce mouvement, minuscule, qui dit
+     « nouvelle étape » sans qu'on ait à lire le numéro. */
+  @keyframes vrtPastille{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+  .vrt-scene p{margin:0 0 14px;font-size:13.5px;color:var(--c5a6678,#5a6678);line-height:1.6}
+  /* Un filet de la couleur de l'étape, sous le titre : il occupe la place
+     laissée vide et donne au panneau un point d'appui coloré. */
+  .vrt-scene h4::after{content:'';flex:1;height:3px;border-radius:2px;background:var(--scf)}
   /* Pièces réutilisables : lignes de texte, cartes, boutons. */
   .vrt-l{height:7px;border-radius:4px;background:var(--ceef2f7,#eef2f7);margin-bottom:6px}
   .vrt-boite{border:1px solid var(--ce2eaf3,#e2eaf3);border-radius:9px;padding:9px 11px;
     background:var(--cffffff,#fff)}
   .vrt-bleu{background:var(--c1a72bb,#1a72bb);color:#fff;border-radius:7px;
-    font-size:10.5px;font-weight:700;font-family:Poppins,sans-serif;padding:6px 12px;
+    font-size:12px;font-weight:700;font-family:Poppins,sans-serif;padding:6px 12px;
     display:inline-block}
   .vrt-or{background:var(--cf39200,#f39200);color:#fff}
   .vrt-vert{background:var(--c1f9d55,#1f9d55);color:#fff}
-  .vrt-av{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;
-    font-size:9.5px;font-weight:700;font-family:Poppins,sans-serif;color:#fff;flex:none}
+  .vrt-av{width:25px;height:25px;border-radius:50%;display:grid;place-items:center;
+    font-size:10.5px;font-weight:700;font-family:Poppins,sans-serif;color:#fff;flex:none}
 
   /* — 1. se connecter : le champ se remplit, puis le bouton s'enfonce — */
   @keyframes vrtSaisie{0%,3%{width:0}9%,100%{width:82%}}
@@ -571,12 +591,19 @@
     transform-origin:left center;will-change:transform,opacity}
 
   /* — 5. valider : le jalon avance, la coche tombe — */
-  @keyframes vrtJalon{0%,6%{background:var(--ceef2f7,#eef2f7);color:var(--c9aa5b5,#9aa5b5)}
-    9%,100%{background:var(--c1f9d55,#1f9d55);color:#fff}}
+  /* Les trois jalons passaient tous au MÊME vert : le circuit avait l'air de
+     s'allumer d'un coup, alors qu'il raconte une progression. Chacun prend
+     donc la couleur de son état — brouillon, relecture, validée — et le
+     dernier reçoit un halo, parce que c'est lui l'aboutissement. */
+  @keyframes vrtJalon{0%,6%{background:var(--ceef2f7,#eef2f7);color:var(--c9aa5b5,#9aa5b5);
+      transform:scale(.86)}
+    9%{transform:scale(1.14)}
+    12%,100%{background:var(--cj,#1f9d55);color:#fff;transform:none}}
   .vrt-jalon{animation:vrtJalon 30s infinite both}
-  .vrt-jalon:nth-of-type(1){animation-delay:20s}
-  .vrt-jalon:nth-of-type(2){animation-delay:20.7s}
-  .vrt-jalon:nth-of-type(3){animation-delay:21.4s}
+  .vrt-jalon:nth-of-type(1){animation-delay:20s;--cj:#8b97a8}    /* brouillon   */
+  .vrt-jalon:nth-of-type(2){animation-delay:20.7s;--cj:#f39200}  /* en relecture */
+  .vrt-jalon:nth-of-type(3){animation-delay:21.4s;--cj:#1f9d55;  /* validée     */
+    box-shadow:0 0 0 4px #e8f6ee}
 
   /* — 6. exporter : la feuille sort du dossier — */
   @keyframes vrtSortie{0%,5%{opacity:0;transform:translateY(14px) rotate(-3deg)}
@@ -2698,7 +2725,7 @@
       <div style="width:56px;height:56px;border-radius:15px;background:var(--sb-logo-bg);display:grid;place-items:center;margin:0 auto 18px">{{ loginIcLogo }}</div>
       <div style="font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--c8b97a8,#8b97a8);font-weight:700;margin-bottom:12px">Atelier de Français · Français MINESEC</div>
       <h1 style="font-family:'Poppins';font-size:31px;font-weight:700;line-height:1.2;margin:0 auto 14px;max-width:20ch;color:var(--c14375f,#14375f);letter-spacing:-.02em">Un espace collaboratif pour vos cours et vos épreuves</h1>
-      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Composez vos épreuves et vos leçons à partir de 1 040 textes vérifiés — dont 1 014 libres de droits, ouverts sans abonnement — avec un garde-fou qui contrôle la conformité MINESEC pendant que vous écrivez.</p>
+      <p style="font-size:14.5px;line-height:1.7;color:var(--c5a6678,#5a6678);max-width:62ch;margin:0 auto 34px">Composez vos épreuves et vos leçons à partir de 1 040 textes vérifiés — dont 1 014 ouverts sans abonnement — avec un garde-fou qui contrôle la conformité MINESEC pendant que vous écrivez.</p>
 
       <!-- ═══════════ DÉMONSTRATION ANIMÉE ═══════════
            Elle remplace la « Visite guidée » par profils d'exemple, qui
@@ -2718,7 +2745,7 @@
             <!-- 1 · se connecter -->
             <div class="vrt-scene">
               <h4><b>1</b>Se connecter</h4>
-              <p>Votre compte VÉRITAS ouvre les 1 040 textes du répertoire, dont 1 014 libres de droits.</p>
+              <p>Votre compte VÉRITAS ouvre les 1 040 textes du répertoire, dont 1 014 sans abonnement.</p>
               <div class="vrt-boite" style="max-width:290px">
                 <div style="font-size:9.5px;font-weight:700;color:var(--c8b97a8,#8b97a8);font-family:Poppins,sans-serif;letter-spacing:.06em;margin-bottom:5px">IDENTIFIANT</div>
                 <div style="height:7px;border-radius:4px;background:var(--ceef2f7,#eef2f7);margin-bottom:11px"><div class="vrt-saisie"></div></div>
@@ -2789,9 +2816,9 @@
               <h4><b>5</b>Valider</h4>
               <p>Brouillon, relecture, validation : chaque épreuve suit le même circuit.</p>
               <div style="display:flex;flex-direction:column;gap:9px;max-width:330px">
-                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;font-family:Poppins,sans-serif;flex:none">1</span><span style="font-size:11.5px;font-weight:600;color:var(--c33404f,#33404f)">Brouillon</span></div>
-                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;font-family:Poppins,sans-serif;flex:none">2</span><span style="font-size:11.5px;font-weight:600;color:var(--c33404f,#33404f)">En relecture</span></div>
-                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:23px;height:23px;border-radius:50%;display:grid;place-items:center;font-size:11px;font-weight:700;font-family:Poppins,sans-serif;flex:none">3</span><span style="font-size:11.5px;font-weight:700;color:var(--c14375f,#14375f)">Validée</span></div>
+                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;font-family:Poppins,sans-serif;flex:none">1</span><span style="font-size:13.5px;font-weight:600;color:var(--c33404f,#33404f)">Brouillon</span></div>
+                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;font-family:Poppins,sans-serif;flex:none">2</span><span style="font-size:13.5px;font-weight:600;color:var(--c33404f,#33404f)">En relecture</span></div>
+                <div style="display:flex;align-items:center;gap:10px"><span class="vrt-jalon" style="width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:700;font-family:Poppins,sans-serif;flex:none">3</span><span style="font-size:13.5px;font-weight:700;color:var(--c14375f,#14375f)">Validée</span></div>
               </div>
             </div>
 
@@ -2850,7 +2877,7 @@
           <p style="margin:0 0 9px;font-size:12.5px;color:var(--c5a6678,#5a6678);line-height:1.6">Vous n’avez pas encore de compte VÉRITAS ?</p>
           <!-- Ce que l'inscription donne, dit ICI : de l'autre côté, le
                formulaire du site ne parle pas de l'Atelier. -->
-          <p style="margin:0 0 12px;font-size:12px;color:var(--c8b97a8,#8b97a8);line-height:1.6">L’inscription est <strong style="color:var(--c188047,#188047);font-weight:700">gratuite</strong>. Votre semaine d’essai s’ouvre à la première connexion, et les <strong style="color:var(--c14375f,#14375f);font-weight:700">1 014 textes libres de droits</strong> vous restent ouverts ensuite, sans abonnement.</p>
+          <p style="margin:0 0 12px;font-size:13.5px;color:var(--c6a7889,#6a7889);line-height:1.65">L’inscription est <strong style="color:var(--c188047,#188047);font-weight:700">gratuite</strong>. Votre semaine d’essai s’ouvre à la première connexion, et <strong style="color:var(--c14375f,#14375f);font-weight:700">1 014 textes</strong> vous restent ouverts ensuite, sans abonnement.</p>
           <a href="https://veritas-school.com/app.html?de=atelier#inscription-enseignant" target="_blank" rel="noopener"
              style="display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:10px;border:1.5px solid var(--c1a72bb,#1a72bb);color:var(--c1a72bb,#1a72bb);background:var(--cffffff,#fff);font-family:Poppins;font-weight:700;font-size:13.5px;text-decoration:none"
              style-hover="background:var(--cf4f8fc,#f4f8fc)">Créer un compte enseignant</a>
@@ -6306,7 +6333,7 @@ class Component extends DCLogic {
       {sceau:'book',titre:'Atelier de Fran\u00e7ais',
        sous:'Composer des \u00e9preuves et des le\u00e7ons conformes aux programmes MINESEC, \u00e0 partir d\u2019un corpus v\u00e9rifi\u00e9.',
        puces:[
-         {ic:'layers',t:'1 040 textes v\u00e9rifi\u00e9s',d:'Extraits d\u2019auteurs class\u00e9s par cycle, module et type \u2014 dont 1 014 libres de droits.'},
+         {ic:'layers',t:'1 040 textes v\u00e9rifi\u00e9s',d:'Extraits d\u2019auteurs class\u00e9s par cycle, module et type \u2014 dont 1 014 sans abonnement.'},
          {ic:'search',t:'Garde-fou de conformit\u00e9',d:'Longueurs, bar\u00e8mes et structures contr\u00f4l\u00e9s pendant que vous \u00e9crivez.'},
          {ic:'users',t:'Travail \u00e0 plusieurs',d:'Relecture, validation, biblioth\u00e8que partag\u00e9e du d\u00e9partement.'},
          {ic:'file',t:'Impression et export Word',d:'Votre en-t\u00eate, votre logo, pr\u00eat \u00e0 tirer.'}]},
@@ -7056,7 +7083,7 @@ plansView,goAbo:()=>this._go('abo'),goLogin:()=>{this.setState({authed:false,scr
       essaiTitre:(function(){
         const d=st.corpusDroit||{};
         if(d.motif==='essai_termine')
-          return 'Votre essai est terminé. Les 1 014 textes libres de droits restent ouverts ; l’abonnement rouvre le répertoire MINESEC et lève les plafonds.';
+          return 'Votre essai est terminé. Les 1 014 textes gratuits restent ouverts ; l’abonnement rouvre le répertoire MINESEC et lève les plafonds.';
         const j=(d.resteJours==null)?null:(d.resteJours|0);
         return (j==null)?'' :('Il vous reste '+j+' jour'+(j>1?'s':'')+' d’essai. Cliquez pour voir les abonnements — à partir de 800 FCFA par mois.');
       })(),
