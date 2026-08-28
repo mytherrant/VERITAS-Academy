@@ -164,6 +164,23 @@
       cfg.classe = (o && o.classe) || '';
       cfg.kind   = (o && o.kind) || 'livret';
       cfg.titre  = (o && o.titre) || '';
+      /* Les coquilles d'origine passaient leur titre en dur
+         (`titre:'Livret 6ᵉ'`). Le moteur générique, lui, ne connaît que le
+         slug de l'URL : l'écran de paiement annonçait donc « Livret 1ere » —
+         le slug brut — à quelqu'un qui vient de cliquer sur « Mon Cahier de
+         français 1ʳᵉ A ». Sur un écran où l'on sort 1 500 F, le doute sur ce
+         qu'on achète suffit à faire renoncer.
+         On demande donc son titre au serveur, qui l'a déjà : `action=ouvrage`
+         est publique et ne livre aucun contenu. Si l'appel échoue, on garde le
+         repli — un titre approximatif vaut mieux qu'une porte qui ne s'ouvre
+         pas parce que le réseau a toussé. */
+      if (!cfg.titre && cfg.classe) {
+        post(API, { action: 'ouvrage', o: cfg.classe })
+          .then(function (r) {
+            if (r && r.ouvrage && r.ouvrage.titre) cfg.titre = r.ouvrage.titre;
+          })
+          .catch(function () { /* repli : « Livret <classe> » */ });
+      }
       return VRT;
     },
 
