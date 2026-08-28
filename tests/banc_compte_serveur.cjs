@@ -53,7 +53,8 @@ const BAC = fs.mkdtempSync(path.join(os.tmpdir(), 'vrt-banc-compte-'));
    donner au banc un secret de synchronisation connu (le vrai est gitignoré,
    et absent de la CI). */
 const FICHIERS = ['compte.php', 'db.php', '_json_boot.php', 'config_sync.php',
-  '_auth_lib.php', '_livret_lib.php', '_sentinel.php', '_bot_log.php'];
+  '_auth_lib.php', '_livret_lib.php', '_sentinel.php', '_bot_log.php',
+  'student_data.php'];
 
 function monterBac() {
   fs.mkdirSync(path.join(BAC, 'api'), { recursive: true });
@@ -243,6 +244,85 @@ async function synchroAdmin(payload) {
     dire(sync2.http === 200, 'la seconde synchro passe', 'HTTP ' + sync2.http);
     dire(!(lireBase().visitorAccounts || []).find(a => a.user === 'ens_test'),
       'un compte que l’admin a sciemment retiré ne ressuscite pas');
+
+    // ── ⑪ᵇ Le profil suit le compte, pas l'appareil ────────────────────────
+    console.log(`\n${G}⑪ᵇ Les matières enseignées suivent le compte${R}`);
+    /* Les matières ne vivaient qu'en localStorage : cochées sur l'ordinateur,
+       inconnues du téléphone. On vérifie l'aller (écriture authentifiée) ET le
+       retour (student_data les renvoie) — sans le retour, l'aller ne sert à
+       rien, et c'est le genre de moitié manquante qui passe inaperçu. */
+    function jetonDe(user) {
+      const src = `require ${JSON.stringify(path.join(BAC, 'api', '_auth_lib.php'))};
+$db = json_decode(file_get_contents(${JSON.stringify(path.join(BAC, 'data', 'veritas_db.json'))}), true);
+$t = vrt_find_account($db, ${php64(user)});
+echo $t ? vrt_issue_token($t['acc'], (string)$t['type']) : '';`;
+      return execFileSync('php', ['-r', src], { encoding: 'utf8' }).trim();
+    }
+    async function poserMatieres(jeton, matieres, extra) {
+      const h = { 'Content-Type': 'application/json' };
+      if (jeton) h['Authorization'] = 'Bearer ' + jeton;
+      const corps = Object.assign({ matieres: matieres }, extra || {});
+      const r = await fetch(BASE + '/api/compte.php?action=profil',
+        { method: 'POST', headers: h, body: JSON.stringify(corps) });
+      let j = {}; try { j = await r.json(); } catch (e) {}
+      return { http: r.status, j };
+    }
+
+    /* Deux comptes NEUFS : le bloc ⑩ vient de vérifier qu'une suppression
+       administrateur est bien appliquée, et il a donc vidé la base des comptes
+       précédents. Un bloc de banc qui dépend de l'état laissé par le
+       précédent rougit pour la mauvaise raison. */
+    await inscrire({ user: 'prof_a', motDePasse: 'MotDePasseA1', nom: 'A', pre: 'Prof', role: 'enseignant' });
+    await inscrire({ user: 'prof_b', motDePasse: 'MotDePasseB1', nom: 'B', pre: 'Prof', role: 'enseignant' });
+
+    const sansJeton = await poserMatieres('', ['Français']);
+    dire(sansJeton.http === 401, 'sans jeton, aucune écriture de profil', 'HTTP ' + sansJeton.http);
+    const faux = await poserMatieres('nimportequoi.signature', ['Français']);
+    dire(faux.http === 401, 'un jeton forgé est refusé', 'HTTP ' + faux.http);
+
+    const jt = jetonDe('prof_a');
+    dire(jt.length > 20, 'un jeton de compte est émissible pour le test');
+    const pose = await poserMatieres(jt, ['Français', 'Littérature', '  ']);
+    dire(pose.http === 200 && pose.j.ok === true, 'le profil s’enregistre (200)',
+      'HTTP ' + pose.http + ' ' + JSON.stringify(pose.j));
+    const apresProfil = (lireBase().visitorAccounts || []).find(a => a.user === 'prof_a');
+    dire(!!apresProfil && Array.isArray(apresProfil.matieres)
+      && apresProfil.matieres.length === 2,
+      'les matières sont écrites dans la base, entrées vides retirées',
+      apresProfil ? JSON.stringify(apresProfil.matieres) : 'compte absent');
+
+    /* Anti-usurpation : le propriétaire vient du JETON, jamais du corps. Le
+       jeton de « prof_b » ne doit pas pouvoir toucher au profil de « prof_a ». */
+    const jtB = jetonDe('prof_b');
+    await poserMatieres(jtB, ['SVT']);
+    const cible = (lireBase().visitorAccounts || []).find(a => a.user === 'prof_a');
+    const autre = (lireBase().visitorAccounts || []).find(a => a.user === 'prof_b');
+    dire(!!cible && cible.matieres.length === 2 && cible.matieres[0] === 'Français',
+      'le jeton d’un autre compte n’écrit pas sur le mien',
+      cible ? JSON.stringify(cible.matieres) : 'absent');
+    dire(!!autre && Array.isArray(autre.matieres) && autre.matieres[0] === 'SVT',
+      'il écrit bien sur le sien');
+
+    /* La tentative franche : le jeton de prof_b, mais le CORPS désigne prof_a.
+       Un serveur qui lirait le propriétaire dans le message plutôt que dans le
+       jeton laisserait n'importe qui réécrire le profil de n'importe qui. */
+    await poserMatieres(jtB, ['Comptabilité'], { user: 'prof_a', id: 'va_prof_a' });
+    const cible2 = (lireBase().visitorAccounts || []).find(a => a.user === 'prof_a');
+    dire(!!cible2 && cible2.matieres[0] === 'Français',
+      'un `user` glissé dans le corps ne détourne pas l’écriture',
+      cible2 ? JSON.stringify(cible2.matieres) : 'absent');
+
+    /* Le RETOUR : student_data.php doit renvoyer les matières, sinon l'appareil
+       suivant ne les verra jamais. */
+    const sd = fs.readFileSync(path.join(RACINE, 'api', 'student_data.php'), 'utf8');
+    dire(/'matieres'\s*=>/.test(sd),
+      'student_data.php renvoie les matières dans `account`');
+    dire(/_compteAppliquerProfil\(j\.account\)/.test(appjs),
+      'app.js les applique à la connexion (l’aller-retour est complet)');
+    dire(/compte\.php\?action=profil/.test(appjs),
+      'app.js poste bien sur l’action `profil`');
+    dire(/Authorization':'Bearer '\+tok/.test(appjs),
+      'et s’authentifie avec le jeton de compte, pas un identifiant en clair');
 
     // ── ⑪ Le contrat client → serveur ───────────────────────────────────────
     console.log(`\n${G}⑪ Le navigateur appelle vraiment cet endpoint${R}`);

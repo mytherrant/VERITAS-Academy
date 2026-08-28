@@ -10573,6 +10573,10 @@ async function _studentSyncFetch(login,password){
     // S3 v1.2.x (Étape 3) : mémoriser le token par compte émis par le serveur
     // → permet à content.php d'authentifier sans renvoyer le mot de passe.
     if(j&&j.token){try{window._vrtContentToken=j.token;sessionStorage.setItem('_vrtCT',j.token);}catch(e){}}
+    // Le profil du compte (matières enseignées) redescend ici : c'est ce qui
+    // rend le réglage valable sur TOUS les appareils, et pas seulement sur
+    // celui où l'on a coché.
+    if(j&&j.ok&&j.account){try{_compteAppliquerProfil(j.account);}catch(e){}}
     // S3 v1.2.x (Étape 2) : injecter les contenus PROTÉGÉS autorisés (métadonnées)
     // pour que l'abonné les VOIE sur n'importe quel appareil (lecture via content.php).
     if(j&&j.ok&&j.contenusAutorises){try{_studentApplyContenus(j.contenusAutorises);}catch(e){}}
@@ -46158,7 +46162,51 @@ window.mMesMatieres = function(){
     '<button class="btn bo" onclick="cm()">Annuler</button>'
     + '<button class="btn bi" onclick="_mesMatieresSave()">✓ Enregistrer</button>', true);
 };
-window._mesMatieresSave = function(){
+/* Le profil suit le COMPTE, pas l'appareil. Cochées sur l'ordinateur, les
+   matières étaient inconnues du téléphone : l'enseignant y retrouvait les
+   épreuves de génie civil mêlées aux siennes, et devait tout recocher. Un
+   réglage qu'il faut refaire sur chaque appareil n'en est pas un.
+   L'envoi s'authentifie avec le jeton de compte déjà émis par student_data.php
+   à la connexion (`sessionStorage._vrtCT`) — jamais avec un identifiant dans
+   le corps du message, sinon on réécrirait le profil de n'importe qui.
+   Silencieux et non bloquant : hors ligne, la coche vaut pour cet appareil et
+   la prochaine connexion la reprendra. */
+async function _profilServeurEnvoyer(matieres){
+  var tok='';
+  try{ tok = window._vrtContentToken || sessionStorage.getItem('_vrtCT') || ''; }catch(e){}
+  if(!tok) return {ok:false, hors:true};
+  try{
+    var r = await fetch(_VRT_API + '/compte.php?action=profil', {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+tok },
+      body: JSON.stringify({ matieres: matieres })
+    });
+    var j={}; try{ j=await r.json(); }catch(e){}
+    return (r.ok && j && j.ok) ? {ok:true} : {ok:false, hors:false, msg:(j&&j.error)||('Erreur '+r.status)};
+  }catch(e){ return {ok:false, hors:true}; }
+}
+
+/* Applique le profil renvoyé par le serveur à la connexion. Sans cela,
+   l'aller-retour serait à sens unique : on enverrait les matières sans
+   jamais les recevoir sur l'appareil suivant. */
+function _compteAppliquerProfil(account){
+  try{
+    if(!account || !Array.isArray(account.matieres)) return;
+    var acc=(DB.visitorAccounts||[]).find(function(a){
+      return String(a.user||'').toLowerCase()===String(account.user||'').toLowerCase();
+    });
+    if(!acc) return;
+    var avant = JSON.stringify(acc.matieres||[]);
+    if(avant === JSON.stringify(account.matieres)) return;   // rien de neuf
+    acc.matieres = account.matieres.slice();
+    save();
+    /* Le filtre des épreuves repart de zéro : garder l'ancien afficherait une
+       sélection qui ne correspond plus au compte. */
+    window._epMat=''; window._epMesMat=undefined;
+  }catch(e){}
+}
+
+window._mesMatieresSave = async function(){
   var acc = _compteEnseignantCourant();
   if(!acc){ cm(); return; }
   var boxes = document.querySelectorAll('input[data-mmat]:checked');
@@ -46167,6 +46215,12 @@ window._mesMatieresSave = function(){
   acc.matieres = l;
   save();
   cm();
+  var _r = await _profilServeurEnvoyer(l);
+  if(!_r.ok){
+    toast(_r.hors
+      ? "⚠️ Matières enregistrées sur cet appareil — reconnectez-vous pour les retrouver ailleurs"
+      : ("⚠️ "+(_r.msg||"Enregistrement serveur refusé")+" — valables sur cet appareil"), "warn");
+  }
   /* Les deux réglages du filtre repartent de zéro : garder l'ancien choix
      afficherait une sélection qui ne correspond plus aux cases cochées. */
   window._epMat = '';

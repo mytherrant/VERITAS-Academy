@@ -219,6 +219,14 @@ if ($action === 'fetch') {
             'nom'   => $acc['nom'] ?? ($student['nom'] ?? ''),
             'pre'   => $acc['pre'] ?? ($student['pre'] ?? ''),
             'cls'   => $acc['cls'] ?? ($student['cls'] ?? ''),
+            /* Les matières enseignées suivent le COMPTE, pas l'appareil.
+               Elles ne vivaient que dans le localStorage : l'enseignant qui
+               les cochait sur son ordinateur retrouvait, sur son téléphone,
+               les épreuves de génie civil mêlées aux siennes — et devait
+               tout recocher. Écrites par api/compte.php?action=profil,
+               relues ici à chaque connexion. */
+            'matieres'   => array_values(array_filter((array) ($acc['matieres'] ?? []), 'is_string')),
+            'discipline' => (string) ($acc['discipline'] ?? ''),
         ],
         'student'           => $student,
         'grades'            => _by_owner($db['grades'] ?? [], $eid),

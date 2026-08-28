@@ -73,6 +73,90 @@ function cpt_out(array $payload, int $code = 200): void {
 $action = (string) ($_GET['action'] ?? '');
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
+/* ─────────────────────────────────────────────────────────────────────────
+   PROFIL — ce que le compte porte d'un appareil à l'autre
+   ─────────────────────────────────────────────────────────────────────────
+   Les matières enseignées ne vivaient qu'en localStorage : cochées sur
+   l'ordinateur, elles étaient inconnues du téléphone, où l'enseignant
+   retrouvait les épreuves de génie civil mêlées aux siennes. Un réglage qu'il
+   faut refaire sur chaque appareil n'est pas un réglage.
+
+   AUTHENTIFICATION par le jeton de compte (Bearer) déjà émis par
+   student_data.php à la connexion — jamais par un identifiant passé dans la
+   requête : sinon n'importe qui réécrirait le profil de n'importe qui. Le
+   serveur lit le propriétaire DANS le jeton, jamais dans le corps du message.
+   ───────────────────────────────────────────────────────────────────────── */
+if ($action === 'profil' && $method === 'POST') {
+    if (vrt_rate_exceeded('compte_profil', 20)) {
+        cpt_out(['ok' => false, 'error' => 'Trop de requêtes — patientez'], 429);
+    }
+    $hdr = '';
+    if (function_exists('getallheaders')) {
+        foreach (getallheaders() as $k => $v) { if (strtolower($k) === 'authorization') { $hdr = (string) $v; break; } }
+    }
+    if ($hdr === '') $hdr = (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
+    $jeton = trim(str_ireplace('bearer', '', $hdr));
+    if ($jeton === '') cpt_out(['ok' => false, 'error' => 'Authentification requise'], 401);
+
+    $dbp = vrt_load_db();
+    if (!is_array($dbp)) cpt_out(['ok' => false, 'error' => 'Base indisponible'], 503);
+    $ident = vrt_verify_token($jeton, $dbp);
+    if (!$ident) cpt_out(['ok' => false, 'error' => 'Session expirée — reconnectez-vous'], 401);
+
+    $rawp = (string) file_get_contents('php://input');
+    if ($rawp === '' || strlen($rawp) > 8192) cpt_out(['ok' => false, 'error' => 'Requête invalide'], 400);
+    $inp = json_decode($rawp, true);
+    if (!is_array($inp)) cpt_out(['ok' => false, 'error' => 'JSON invalide'], 400);
+    if (!array_key_exists('matieres', $inp)) {
+        cpt_out(['ok' => false, 'error' => 'Rien à enregistrer'], 400);
+    }
+    /* Liste bornée et assainie. Une matière est un libellé court : 40 caractères
+       suffisent au plus long de la nomenclature officielle, et 40 entrées
+       dépassent déjà ce que quiconque enseigne. */
+    $mats = [];
+    foreach ((array) $inp['matieres'] as $m) {
+        if (!is_string($m)) continue;
+        $m = trim($m);
+        if ($m === '') continue;
+        $mats[] = mb_substr($m, 0, 40);
+        if (count($mats) >= 40) break;
+    }
+
+    /* Le propriétaire vient du JETON. `vrt_verify_token` rend l'identifiant du
+       compte : on écrit sur celui-là et sur aucun autre. */
+    $cible = strtolower((string) ($ident['acc']['user'] ?? ''));
+    if ($cible === '') cpt_out(['ok' => false, 'error' => 'Compte introuvable'], 401);
+
+    $fpp = @fopen($DB_FILE, 'c+');
+    if (!$fpp) cpt_out(['ok' => false, 'error' => 'Base indisponible'], 503);
+    if (!flock($fpp, LOCK_EX)) { fclose($fpp); cpt_out(['ok' => false, 'error' => 'Base occupée — réessayez'], 503); }
+    $curp = stream_get_contents($fpp);
+    $cdbp = json_decode((string) $curp, true);
+    if (!is_array($cdbp)) { flock($fpp, LOCK_UN); fclose($fpp); cpt_out(['ok' => false, 'error' => 'Base illisible'], 503); }
+
+    $touche = false;
+    foreach (['visitorAccounts', 'studentAccounts'] as $coll) {
+        if (!isset($cdbp[$coll]) || !is_array($cdbp[$coll])) continue;
+        foreach ($cdbp[$coll] as &$a) {
+            if (is_array($a) && strtolower((string) ($a['user'] ?? '')) === $cible) {
+                $a['matieres'] = $mats;
+                $touche = true;
+                break 2;
+            }
+        }
+        unset($a);
+    }
+    if (!$touche) { flock($fpp, LOCK_UN); fclose($fpp); cpt_out(['ok' => false, 'error' => 'Compte introuvable'], 404); }
+
+    $cdbp['lastModified'] = (int) round(microtime(true) * 1000);
+    $encp = json_encode($cdbp, JSON_UNESCAPED_UNICODE);
+    if ($encp === false) { flock($fpp, LOCK_UN); fclose($fpp); cpt_out(['ok' => false, 'error' => 'Encodage échoué'], 500); }
+    ftruncate($fpp, 0); rewind($fpp); fwrite($fpp, $encp); fflush($fpp);
+    flock($fpp, LOCK_UN); fclose($fpp);
+
+    cpt_out(['ok' => true, 'matieres' => $mats]);
+}
+
 if ($action !== 'inscription' || $method !== 'POST') {
     cpt_out(['ok' => false, 'error' => 'Action inconnue'], 400);
 }
