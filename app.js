@@ -25863,7 +25863,25 @@ function _chkUser(u){
     :"<span style='color:#059669'>Disponible</span>");
 }
 
-function doRegister(){
+/* ── LE MOT DE PASSE EST HACHÉ AVANT D'ÊTRE RANGÉ ─────────────────────────
+   Il partait en CLAIR dans `DB.visitorAccounts`. Deux conséquences, dont la
+   seconde n'était visible de personne :
+
+   ① la base synchronisée (data/veritas_db.json) contenait les mots de passe
+      lisibles de tous les inscrits ;
+   ② surtout — l'Atelier de Français REFUSAIT ces comptes. `vrt_verify_password`
+      n'accepte que bcrypt ou `S256$`, et rejette explicitement le clair. La
+      phrase « L'inscription se fait sur veritas-school.com, puis vous revenez
+      ici avec le même identifiant » était donc fausse pour tout compte neuf :
+      l'inscrit se voyait refuser, sans explication, avec le bon mot de passe.
+      Cela ne se mettait à marcher qu'après le passage de `_migratePasswords()`
+      dans le navigateur d'un administrateur, puis une synchro — c'est-à-dire
+      un jour plus tard, ou jamais.
+
+   `hashPassword` est asynchrone (crypto.subtle) : la fonction devient `async`.
+   Elle est appelée depuis un `onclick`, qui accepte une promesse sans rien
+   changer d'autre. Le sel est l'identifiant, comme partout ailleurs. */
+async function doRegister(){
   var pre=(document.getElementById("rPre")?.value||"").trim();
   var nom=(document.getElementById("rNom")?.value||"").trim();
   var tel=(document.getElementById("rTel")?.value||"").trim();
@@ -25892,7 +25910,8 @@ function doRegister(){
     try{ document.getElementById("rSerie")?.focus(); }catch(e){}
     return;
   }
-  var acc={id:"va_"+Date.now(),user:user,pwd:pwd,nom:nom,pre:pre,tel:tel,
+  var _pwdHash = (typeof hashPassword==="function") ? await hashPassword(pwd,user) : pwd;
+  var acc={id:"va_"+Date.now(),user:user,pwd:_pwdHash,nom:nom,pre:pre,tel:tel,
     email:document.getElementById("rEmail")?.value||"",
     cls:document.getElementById("rCls")?.value||CLS[0],
     serie:_rSerie, // v1.6 : filière (Arts/Science · Commercial/Industriel)
@@ -26219,7 +26238,9 @@ function _mgrNewAccount(){
     +"<button class='btn bi' onclick='_mgrCreate()'>Créer le compte</button>",true);
 }
 
-function _mgrCreate(){
+/* Même correctif que `doRegister` : un compte créé depuis l'administration
+   partait aussi en clair, et l'Atelier le refusait pareillement. */
+async function _mgrCreate(){
   var pre=(document.getElementById("maP")?.value||"").trim();
   var nom=(document.getElementById("maN")?.value||"").trim();
   var tel=(document.getElementById("maT")?.value||"").trim();
@@ -26230,7 +26251,8 @@ function _mgrCreate(){
   if(!DB.visitorAccounts)DB.visitorAccounts=[];
   if(DB.visitorAccounts.find(function(a){return a.user.toLowerCase()===user.toLowerCase();})){toast("Identifiant déjà pris","warn");return;}
   var _newId = "va_"+Date.now();
-  DB.visitorAccounts.push({id:_newId,user:user,pwd:pwd,nom:nom,pre:pre,tel:tel,
+  var _pwdHash = (typeof hashPassword==="function") ? await hashPassword(pwd,user) : pwd;
+  DB.visitorAccounts.push({id:_newId,user:user,pwd:_pwdHash,nom:nom,pre:pre,tel:tel,
     email:document.getElementById("maE")?.value||"",
     cls:document.getElementById("maC")?.value||CLS[0],
     plans:[],statut:"actif",

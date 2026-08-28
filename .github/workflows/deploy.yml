@@ -258,6 +258,18 @@ jobs:
       - name: 🧭 Les deux empreintes concordent-elles ?
         run: node tests/banc_empreintes.cjs
 
+      # ── 🔑 LE COMPTE DU SITE OUVRE-T-IL L'ATELIER ? ────────────────────────
+      #    L'Atelier promet : « L'inscription se fait sur veritas-school.com,
+      #    puis vous revenez ici avec le même identifiant. » Deux programmes
+      #    qui ne se parlent pas tiennent cette phrase — app.js fabrique le mot
+      #    de passe dans le navigateur, api/plateforme.php le vérifie sur le
+      #    serveur — et rien ne signale leur désaccord : l'inscrit saisit le BON
+      #    mot de passe et se voit refuser, sans explication.
+      #    C'est arrivé : `doRegister()` rangeait le mot de passe EN CLAIR,
+      #    que le serveur rejette explicitement. Corrigé le 28/08/2026.
+      - name: 🔑 Le mot de passe du site ouvre-t-il l'Atelier ?
+        run: node tests/banc_mdp_inter_sites.cjs
+
       # ── 💰 Quinze ouvrages en vente depuis le 27/08, contre cinq avant.
       #    `vrt_verifier_prix()` laisse passer N'IMPORTE QUEL montant quand le
       #    tarif de référence est indéterminable — c'est le trou par lequel
